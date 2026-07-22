@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { createAdminApi } from "./app.js";
+import type { CreateAdminApiOptions } from "./app.js";
 import type {
   AdminAuthenticator,
   AdminIdentity,
@@ -11,7 +12,7 @@ import { AdminAuthError } from "./types.js";
 const identity: AdminIdentity = {
   email: "nguyentuanson27@gmail.com",
   role: "OWNER",
-  pageScope: "ALL",
+  pageScope: ["1198992073286645"],
   subject: "authentik-user-1",
 };
 
@@ -123,7 +124,7 @@ class FakeStore implements AdminStore {
   async close() {}
 }
 
-function create() {
+function create(overrides: Partial<CreateAdminApiOptions> = {}) {
   return createAdminApi({
     authenticator: new FakeAuthenticator(),
     store: new FakeStore(),
@@ -133,6 +134,7 @@ function create() {
     controlPageIds: ["1198992073286645"],
     policyControlEnabled: true,
     policyPageIds: ["1198992073286645"],
+    ...overrides,
   });
 }
 
@@ -248,13 +250,18 @@ describe("Admin API", () => {
       user: {
         email: identity.email,
         role: "OWNER",
-        page_scope: "ALL",
+        page_scope: ["1198992073286645"],
         capabilities: {
           conversation_control: true,
           history: true,
           control_page_ids: ["1198992073286645"],
           policy_control: true,
           policy_page_ids: ["1198992073286645"],
+          policy_lifecycle: {
+            canary_shadow: true,
+            canary_live: false,
+            publish: false,
+          },
         },
       },
     });
@@ -323,9 +330,128 @@ describe("Admin API", () => {
       read_only: false,
       control_plane: true,
       policy_control: true,
+      policy_lifecycle: {
+        canary_shadow: true,
+        canary_live: false,
+        publish: false,
+      },
     });
     assert.equal(response.headers["cache-control"], "no-store");
     assert.equal(response.headers["x-frame-options"], "DENY");
+
+    const identityResponse = await app.inject({
+      method: "GET",
+      url: "/admin/v1/me",
+      headers: { "x-lana-admin-assertion": "valid" },
+    });
+    assert.deepEqual(identityResponse.json().user.capabilities.policy_lifecycle, {
+      canary_shadow: true,
+      canary_live: false,
+      publish: false,
+    });
+    await app.close();
+  });
+
+  it("allows shadow canary but rejects live canary and publish by default", async () => {
+    const app = create();
+    const headers = {
+      "x-lana-admin-assertion": "valid",
+      origin: "https://admin.lanadesign.vn",
+    };
+    const versionId = "018f1b72-0000-7000-8000-000000000010";
+    const transition = (payload: Record<string, unknown>) => app.inject({
+      method: "POST",
+      url: `/admin/v1/policy/artifacts/${versionId}/transitions`,
+      headers,
+      payload: { expected_revision: 2, page_id: "1198992073286645", ...payload },
+    });
+
+    const shadow = await transition({ action: "START_CANARY", canary_mode: "SHADOW" });
+    assert.equal(shadow.statusCode, 200);
+
+    const live = await transition({ action: "START_CANARY", canary_mode: "LIVE_OUTBOUND" });
+    assert.equal(live.statusCode, 403);
+    assert.equal(live.json().code, "ADMIN_POLICY_CANARY_LIVE_DISABLED");
+
+    const publish = await transition({ action: "PUBLISH", canary_mode: null });
+    assert.equal(publish.statusCode, 403);
+    assert.equal(publish.json().code, "ADMIN_POLICY_PUBLISH_DISABLED");
+
+    const retire = await transition({ action: "RETIRE", page_id: null, canary_mode: null });
+    assert.equal(retire.statusCode, 200);
+
+    const rollback = await app.inject({
+      method: "POST",
+      url: "/admin/v1/policy/pointers/rollback",
+      headers,
+      payload: {
+        artifact_key: "lana.shopwide.offers",
+        artifact_kind: "OFFER_POLICY",
+        page_id: "1198992073286645",
+        channel: "PUBLISHED",
+        target_version_id: "018f1b72-0000-7000-8000-000000000009",
+        expected_pointer_revision: 4,
+      },
+    });
+    assert.equal(rollback.statusCode, 200);
+
+    const shadowRollback = await app.inject({
+      method: "POST",
+      url: "/admin/v1/policy/pointers/rollback",
+      headers,
+      payload: {
+        artifact_key: "lana.shopwide.offers",
+        artifact_kind: "OFFER_POLICY",
+        page_id: "1198992073286645",
+        channel: "CANARY_SHADOW",
+        target_version_id: "018f1b72-0000-7000-8000-000000000008",
+        expected_pointer_revision: 2,
+      },
+    });
+    assert.equal(shadowRollback.statusCode, 200);
+
+    const otherPage = await app.inject({
+      method: "POST",
+      url: `/admin/v1/policy/artifacts/${versionId}/transitions`,
+      headers,
+      payload: {
+        expected_revision: 2,
+        action: "START_CANARY",
+        page_id: "other-page",
+        canary_mode: "SHADOW",
+      },
+    });
+    assert.equal(otherPage.statusCode, 403);
+    assert.equal(otherPage.json().code, "ADMIN_PAGE_NOT_ALLOWED");
+    await app.close();
+  });
+
+  it("allows live canary and publish only when each safety flag is explicit", async () => {
+    const app = create({
+      policyCanaryLiveEnabled: true,
+      policyPublishEnabled: true,
+    });
+    const headers = {
+      "x-lana-admin-assertion": "valid",
+      origin: "https://admin.lanadesign.vn",
+    };
+    const url = "/admin/v1/policy/artifacts/018f1b72-0000-7000-8000-000000000010/transitions";
+    const live = await app.inject({
+      method: "POST", url, headers,
+      payload: { expected_revision: 2, action: "START_CANARY", page_id: "1198992073286645", canary_mode: "LIVE_OUTBOUND" },
+    });
+    const publish = await app.inject({
+      method: "POST", url, headers,
+      payload: { expected_revision: 3, action: "PUBLISH", page_id: "1198992073286645", canary_mode: null },
+    });
+    assert.equal(live.statusCode, 200);
+    assert.equal(publish.statusCode, 200);
+    const readiness = await app.inject({ method: "GET", url: "/health/ready" });
+    assert.deepEqual(readiness.json().policy_lifecycle, {
+      canary_shadow: true,
+      canary_live: true,
+      publish: true,
+    });
     await app.close();
   });
 

@@ -18,6 +18,8 @@ export interface AdminApiConfig {
   readonly controlPageIds: "ALL" | readonly string[];
   readonly policyControlEnabled: boolean;
   readonly policyPageIds: "ALL" | readonly string[];
+  readonly policyCanaryLiveEnabled: boolean;
+  readonly policyPublishEnabled: boolean;
   readonly port: number;
 }
 
@@ -50,7 +52,7 @@ export function adminConfigFromEnvironment(
   const editorEmails = emailSet("ADMIN_EDITOR_EMAILS");
   const approverEmails = emailSet("ADMIN_APPROVER_EMAILS");
   const viewerEmails = emailSet("ADMIN_VIEWER_EMAILS");
-  const rawScope = (environment.ADMIN_PAGE_IDS ?? "ALL").trim();
+  const rawScope = (environment.ADMIN_PAGE_IDS ?? "1198992073286645").trim();
   const pageScope = rawScope.toUpperCase() === "ALL"
     ? "ALL"
     : rawScope.split(",").map((value) => value.trim()).filter(Boolean);
@@ -100,6 +102,8 @@ export function adminConfigFromEnvironment(
     controlPageIds,
     policyControlEnabled: environment.ADMIN_POLICY_CONTROL_ENABLED?.trim().toLowerCase() === "true",
     policyPageIds,
+    policyCanaryLiveEnabled: environment.ADMIN_POLICY_CANARY_LIVE_ENABLED?.trim().toLowerCase() === "true",
+    policyPublishEnabled: environment.ADMIN_POLICY_PUBLISH_ENABLED?.trim().toLowerCase() === "true",
     port,
   };
 }

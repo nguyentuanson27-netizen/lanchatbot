@@ -30,6 +30,7 @@ export class ApiError extends Error {
     message: string,
     public readonly status: number,
     public readonly requestId?: string,
+    public readonly code?: string,
   ) {
     super(message);
   }
@@ -92,13 +93,25 @@ async function request<T>(
   const response = await fetch(`${API_BASE}${path}`, init);
   const payload = (await response.json().catch(() => ({}))) as JsonRecord;
   if (!response.ok) {
+    const code = stringValue(payload.code);
     throw new ApiError(
-      stringValue(payload.message, "Không thể tải dữ liệu quản trị."),
+      stringValue(payload.message, policyErrorMessage(code)),
       response.status,
       stringValue(payload.request_id) || response.headers.get("x-request-id") || undefined,
+      code || undefined,
     );
   }
   return payload as T;
+}
+
+function policyErrorMessage(code: string): string {
+  if (code === "ADMIN_POLICY_CANARY_LIVE_DISABLED") {
+    return "Canary gửi thật đang bị khóa bởi cổng an toàn.";
+  }
+  if (code === "ADMIN_POLICY_PUBLISH_DISABLED") {
+    return "Phát hành đang bị khóa bởi cổng an toàn.";
+  }
+  return "Không thể tải dữ liệu quản trị.";
 }
 
 function normalizeMetrics(source: unknown): Overview["metrics"] {
@@ -186,6 +199,7 @@ export async function getIdentity(signal?: AbortSignal): Promise<Identity> {
   const payload = await request<JsonRecord>("/me", signal);
   const user = record(payload.user ?? payload);
   const capabilities = record(user.capabilities);
+  const policyLifecycle = record(capabilities.policy_lifecycle);
   const email = stringValue(user.email, "Tài khoản được bảo vệ");
   return {
     email,
@@ -206,6 +220,9 @@ export async function getIdentity(signal?: AbortSignal): Promise<Identity> {
       typeof capabilities.policy_page_ids === "string"
         ? [capabilities.policy_page_ids]
         : arrayValue(capabilities.policy_page_ids).map(String),
+    policyCanaryShadowEnabled: policyLifecycle.canary_shadow === true,
+    policyCanaryLiveEnabled: policyLifecycle.canary_live === true,
+    policyPublishEnabled: policyLifecycle.publish === true,
   };
 }
 

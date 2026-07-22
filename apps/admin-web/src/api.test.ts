@@ -1,14 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  ApiError,
   createConversationCommand,
   getConversation,
   getConversationCommands,
   getConversationMessages,
   getHandoff,
   getHandoffs,
+  getIdentity,
   getOperations,
   getOutreach,
   getProductData,
+  transitionPolicyArtifact,
 } from "./api.js";
 
 afterEach(() => {
@@ -16,6 +19,57 @@ afterEach(() => {
 });
 
 describe("admin control-plane API", () => {
+  it("preserves structured lifecycle gate errors for operator feedback", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      code: "ADMIN_POLICY_CANARY_LIVE_DISABLED",
+      request_id: "request-1",
+    }), { status: 403, headers: { "content-type": "application/json" } })));
+    const request = transitionPolicyArtifact({
+      id: "version-1",
+      key: "lana.policy.test",
+      kind: "SHOP_POLICY",
+      version: 1,
+      lifecycle: "APPROVED",
+      revision: 2,
+      contentHash: "sha256:test",
+      content: {},
+      updatedBy: "owner",
+      updatedAt: "2026-07-22T08:00:00.000Z",
+    }, "START_CANARY", "1198992073286645", "LIVE_OUTBOUND");
+    await expect(request).rejects.toMatchObject({
+      status: 403,
+      code: "ADMIN_POLICY_CANARY_LIVE_DISABLED",
+      requestId: "request-1",
+      message: "Canary gửi thật đang bị khóa bởi cổng an toàn.",
+    } satisfies Partial<ApiError>);
+  });
+
+  it("reads lifecycle safety visibility from the authenticated capability response", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      user: {
+        email: "owner@example.com",
+        role: "OWNER",
+        page_scope: ["1198992073286645"],
+        capabilities: {
+          policy_control: true,
+          policy_page_ids: ["1198992073286645"],
+          policy_lifecycle: {
+            canary_shadow: true,
+            canary_live: false,
+            publish: false,
+          },
+        },
+      },
+    })));
+    const result = await getIdentity();
+    expect(result).toMatchObject({
+      policyCanaryShadowEnabled: true,
+      policyCanaryLiveEnabled: false,
+      policyPublishEnabled: false,
+      policyPageIds: ["1198992073286645"],
+    });
+  });
+
   it("normalizes the oldest-first employee handoff queue and redacted source message", async () => {
     vi.stubGlobal("fetch", vi.fn().mockImplementation((url: string) => {
       if (url.includes("/handoffs/summary")) {

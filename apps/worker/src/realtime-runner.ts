@@ -16,6 +16,16 @@ import type {
   BusinessFactEnvelopeV1,
   InboundMessageV1,
 } from "@lana/contracts";
+import type {
+  RuntimePolicyChannel,
+  RuntimePolicyResolution,
+  RuntimePolicyResolverPort,
+} from "@lana/chat-runtime";
+import {
+  decideRuntimeMultiItemOffer,
+  outboundRuntimePolicy,
+  runtimePolicyAuditReference,
+} from "@lana/chat-runtime";
 import {
   applyInboundEvent,
   applySilentHandoff,
@@ -237,9 +247,10 @@ function compactMaterial(product: StableProductDocument): string {
   return materials.length > 0 ? naturalList(materials) : "đang cập nhật";
 }
 
-function multiProductReply(
+export function multiProductReply(
   products: readonly StableProductDocument[],
   facts: readonly BusinessFactEnvelopeV1[],
+  policyResolution: RuntimePolicyResolution | null = null,
 ): string | null {
   const lines: string[] = [];
   for (let index = 0; index < products.length; index += 1) {
@@ -252,6 +263,11 @@ function multiProductReply(
       `Set ${index + 1} - ${product.productId} - giá ${shortPrice(price)} - chất ${compactMaterial(product)}`,
     );
   }
+  const policy = outboundRuntimePolicy(policyResolution);
+  const offer = policy
+    ? decideRuntimeMultiItemOffer(policy, products.length)
+    : null;
+  if (offer) lines.push(offer.message);
   lines.push(
     "C thích set nào và cho em xin chiều cao, cân nặng hoặc số đo để tư vấn size nha.",
   );
@@ -522,6 +538,7 @@ export interface CanonicalChatHistoryPort {
     occurredAt: Date;
     receivedAt: Date;
     adsContext?: InboundMessageV1["adsContext"];
+    policyVersion?: string | null;
   }): Promise<{ readonly messagePk: string }>;
   recordOutboundHumanMessage(input: {
     pageId: string;
@@ -532,6 +549,7 @@ export interface CanonicalChatHistoryPort {
     attachmentCount: number;
     occurredAt: Date;
     receivedAt: Date;
+    policyVersion?: string | null;
   }): Promise<unknown>;
   recordMessageAnalysis?(input: {
     messagePk: string;
@@ -655,6 +673,7 @@ export interface RealtimeRunnerOptions {
   readonly postSaleTagId?: string;
   readonly promptVersion?: string;
   readonly metaAppId?: string;
+  readonly policyChannel?: RuntimePolicyChannel;
 }
 
 export class RealtimeRunner {
@@ -672,6 +691,7 @@ export class RealtimeRunner {
     private readonly history?: ChatHistoryPort,
     private readonly canonicalHistory?: CanonicalChatHistoryPort,
     private readonly videoFrames?: RealtimeVideoFrameExtractorPort,
+    private readonly policyResolver?: RuntimePolicyResolverPort,
   ) {
     if (options.mode === "DRY_RUN" && options.sendEnabled) {
       throw new Error("REALTIME_DRY_RUN_SEND_FORBIDDEN");
@@ -686,6 +706,7 @@ export class RealtimeRunner {
       postSaleTagId: options.postSaleTagId ?? "",
       promptVersion: options.promptVersion ?? "lana-realtime-v1",
       metaAppId: options.metaAppId ?? "",
+      policyChannel: options.policyChannel ?? "CANARY_SHADOW",
     };
   }
 
@@ -903,6 +924,27 @@ export class RealtimeRunner {
       throw new Error("REALTIME_STATE_INVALID");
     }
 
+    // Policy content is never fed to the model. CANARY_SHADOW is audit-only;
+    // only a LIVE_OUTBOUND result can reach deterministic business helpers.
+    const policyResolution = await this.policyResolver?.resolve({
+      pageId: claim.pageId,
+      channel: this.options.policyChannel,
+      // Realtime currently has a conversation-scoped sales episode. The
+      // cart runtime uses its own CART pin when a durable cart is opened.
+      ...(this.options.policyChannel === "CANARY_SHADOW"
+        ? {}
+        : {
+            pin: {
+              scopeType: "SALES_EPISODE" as const,
+              scopeId: `${record.conversationId}:${this.options.policyChannel}`,
+            },
+          }),
+      now,
+    }) ?? null;
+    const policyAuditRef = policyResolution?.bundle
+      ? runtimePolicyAuditReference(policyResolution.bundle)
+      : null;
+
     let triggerMessagePk: string | null = null;
     for (const item of claims) {
       const original = item.envelope.message;
@@ -917,6 +959,7 @@ export class RealtimeRunner {
           occurredAt: new Date(original.occurredAt),
           receivedAt: item.receivedAt,
           adsContext: original.adsContext,
+          policyVersion: policyAuditRef,
         });
         triggerMessagePk = recorded.messagePk;
       } else if (original.isEcho && this.canonicalHistory) {
@@ -929,6 +972,7 @@ export class RealtimeRunner {
           attachmentCount: original.attachments.length,
           occurredAt: new Date(original.occurredAt),
           receivedAt: item.receivedAt,
+          policyVersion: policyAuditRef,
         });
       }
     }
@@ -1115,7 +1159,11 @@ export class RealtimeRunner {
           })
         ));
         businessFacts = allFacts[0] ?? null;
-        const reply = multiProductReply(resolution.products, allFacts);
+        const reply = multiProductReply(
+          resolution.products,
+          allFacts,
+          policyResolution,
+        );
         if (!reply) {
           handoffGuardReasonCodes = ["MULTI_PRODUCT_FACT_UNAVAILABLE"];
           const transitioned = applySilentHandoff(

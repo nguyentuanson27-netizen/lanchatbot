@@ -16,6 +16,7 @@ import {
 } from "@lana/conversation-engine";
 
 export * from "./sales-cycle-runtime.js";
+export * from "./runtime-policy-resolver.js";
 
 export interface Phase2RuntimeInput {
   readonly pageId: string;

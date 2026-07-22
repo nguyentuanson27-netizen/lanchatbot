@@ -90,3 +90,11 @@ export {
   type CatalogSnapshotInput,
   type CatalogSnapshotKey,
 } from "./batch-status.js";
+export {
+  PostgresRuntimePolicyStore,
+  type RuntimePolicyDatabaseAuditEvent,
+  type RuntimePolicyDatabaseChannel,
+  type RuntimePolicyDatabasePin,
+  type RuntimePolicyDatabasePinScope,
+  type RuntimePolicyDatabasePointerRecord,
+} from "./runtime-policy.js";

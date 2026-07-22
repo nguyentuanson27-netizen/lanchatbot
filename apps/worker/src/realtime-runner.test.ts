@@ -5,6 +5,7 @@ import {
   explicitCustomerImageIntent,
   FailClosedTagObservationProvider,
   modelHandoffPermitted,
+  multiProductReply,
   pancakeConversationId,
   productCodeOnly,
   RealtimeRunner,
@@ -17,6 +18,7 @@ import {
   type RealtimeRuntimePort,
 } from "./realtime-runner.js";
 import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
+import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 
 describe("RealtimeRunner", () => {
   it("ignores an echo that matches the app outbox instead of assigning HUMAN ownership", async () => {
@@ -768,6 +770,30 @@ describe("RealtimeRunner", () => {
         text: "Set 1 - SV921 - giá 699k - chất ren gấm\nSet 2 - CB182 - giá 759k - chất lụa mềm\nC thích set nào và cho em xin chiều cao, cân nặng hoặc số đo để tư vấn size nha.",
       }] }),
     }), expect.any(Date));
+
+    const resolvedFacts = [
+      await facts.resolve({ productId: "SV921" }),
+      await facts.resolve({ productId: "CB182" }),
+    ] as BusinessFactEnvelopeV1[];
+    const livePolicy = {
+      status: "RESOLVED",
+      mayAffectOutbound: true,
+      bundle: {
+        sideEffects: "LIVE_OUTBOUND",
+        policy: { multiItemOffer: { minimumProductCount: 2, discountBps: 500 } },
+      },
+    } as unknown as RuntimePolicyResolution;
+    const shadowPolicy = {
+      ...livePolicy,
+      mayAffectOutbound: false,
+      bundle: { ...livePolicy.bundle, sideEffects: "DISABLED" },
+    } as unknown as RuntimePolicyResolution;
+    expect(multiProductReply([sv921, cb182], resolvedFacts, shadowPolicy)).toBe(
+      multiProductReply([sv921, cb182], resolvedFacts),
+    );
+    expect(multiProductReply([sv921, cb182], resolvedFacts, livePolicy)).toContain(
+      "Ưu đãi từ 2 sản phẩm: giảm 5%",
+    );
   });
 
   it("silently hands off a customer text URL before search or model generation", async () => {

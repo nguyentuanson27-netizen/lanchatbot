@@ -56,6 +56,19 @@ importers:
         specifier: ^8.15.5
         version: 8.20.0
 
+  apps/admin-simulation-worker:
+    dependencies:
+      '@lana/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      pg:
+        specifier: ^8.16.3
+        version: 8.22.0
+    devDependencies:
+      '@types/pg':
+        specifier: ^8.15.5
+        version: 8.20.0
+
   apps/admin-web:
     devDependencies:
       typescript:
@@ -94,6 +107,9 @@ importers:
       '@lana/business-tools':
         specifier: workspace:*
         version: link:../../packages/business-tools
+      '@lana/chat-runtime':
+        specifier: workspace:*
+        version: link:../../packages/chat-runtime
       '@lana/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts

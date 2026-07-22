@@ -38,6 +38,8 @@ export interface CreateAdminApiOptions {
   readonly controlPageIds?: "ALL" | readonly string[];
   readonly policyControlEnabled?: boolean;
   readonly policyPageIds?: "ALL" | readonly string[];
+  readonly policyCanaryLiveEnabled?: boolean;
+  readonly policyPublishEnabled?: boolean;
 }
 
 interface ListQuerystring {
@@ -173,7 +175,10 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
 
   app.setErrorHandler((error, request, reply) => {
     if (error instanceof AdminQueryError) {
-      const status = error.code === "ADMIN_PAGE_NOT_ALLOWED" || error.code === "ADMIN_POLICY_FORBIDDEN"
+      const status = error.code === "ADMIN_PAGE_NOT_ALLOWED" ||
+          error.code === "ADMIN_POLICY_FORBIDDEN" ||
+          error.code === "ADMIN_POLICY_CANARY_LIVE_DISABLED" ||
+          error.code === "ADMIN_POLICY_PUBLISH_DISABLED"
         ? 403
         : error.code === "ADMIN_IDEMPOTENCY_CONFLICT" || error.code === "ADMIN_ARTIFACT_VERSION_CONFLICT"
           ? 409
@@ -223,6 +228,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
         read_only: !options.controlEnabled,
         control_plane: Boolean(options.controlEnabled),
         policy_control: Boolean(options.policyControlEnabled),
+        policy_lifecycle: policyLifecycleFeatures(options),
       });
     }
     return {
@@ -232,6 +238,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
       read_only: !options.controlEnabled,
       control_plane: Boolean(options.controlEnabled),
       policy_control: Boolean(options.policyControlEnabled),
+      policy_lifecycle: policyLifecycleFeatures(options),
     };
   });
 
@@ -248,6 +255,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
           control_page_ids: options.controlPageIds ?? [],
           policy_control: Boolean(options.policyControlEnabled),
           policy_page_ids: options.policyPageIds ?? [],
+          policy_lifecycle: policyLifecycleFeatures(options),
         },
       },
     };
@@ -587,6 +595,8 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
       if (pageId && !controlPageAllowed(options.policyPageIds ?? [], pageId)) {
         return reply.code(403).send(errorBody("ADMIN_PAGE_NOT_ALLOWED", request.id));
       }
+      const canaryMode = nullableCanaryMode(request.body?.canary_mode);
+      requirePolicyLifecycleFeature(options, action.data, canaryMode);
       const result = await options.store.transitionArtifactVersion(
         requireIdentity(request),
         requiredUuid(request.params.id),
@@ -594,7 +604,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
           expectedRevision: requiredRevision(request.body?.expected_revision),
           action: action.data,
           pageId,
-          canaryMode: nullableCanaryMode(request.body?.canary_mode),
+          canaryMode,
           correlationId: randomUUID(),
         },
       );
@@ -808,6 +818,32 @@ function registerOperation(
 function requirePolicyControl(options: CreateAdminApiOptions): void {
   if (!options.policyControlEnabled) {
     throw new AdminQueryError("ADMIN_POLICY_CONTROL_UNAVAILABLE");
+  }
+}
+
+function policyLifecycleFeatures(options: CreateAdminApiOptions) {
+  const policyControl = Boolean(options.policyControlEnabled);
+  return {
+    canary_shadow: policyControl,
+    canary_live: policyControl && Boolean(options.policyCanaryLiveEnabled),
+    publish: policyControl && Boolean(options.policyPublishEnabled),
+  };
+}
+
+function requirePolicyLifecycleFeature(
+  options: CreateAdminApiOptions,
+  action: "VALIDATE" | "APPROVE" | "START_CANARY" | "PUBLISH" | "RETIRE",
+  canaryMode: "SHADOW" | "LIVE_OUTBOUND" | null,
+): void {
+  if (
+    action === "START_CANARY" &&
+    canaryMode === "LIVE_OUTBOUND" &&
+    !options.policyCanaryLiveEnabled
+  ) {
+    throw new AdminQueryError("ADMIN_POLICY_CANARY_LIVE_DISABLED");
+  }
+  if (action === "PUBLISH" && !options.policyPublishEnabled) {
+    throw new AdminQueryError("ADMIN_POLICY_PUBLISH_DISABLED");
   }
 }
 
