@@ -310,3 +310,7 @@ export const PancakeTagObservationV1Schema = z.object({
   customerName: z.string().trim().min(1).max(160).nullable().optional(),
 });
 export type PancakeTagObservationV1 = z.infer<typeof PancakeTagObservationV1Schema>;
+
+// Phase 1 additive contracts. V1 runtime contracts above remain exported so
+// existing workers can migrate one adapter at a time without a flag day.
+export * from "./v2/index.js";
