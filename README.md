@@ -12,6 +12,8 @@
 
 Không sửa source trực tiếp trong `/opt/lana-chatbot/current`. Mọi thay đổi phải đi qua branch, kiểm thử, review, tag release và thư mục release mới trên VPS.
 
+Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/lana-chatbot/repository`. Agent phải đọc `AGENTS.md` trước khi thao tác; deploy key trên VPS chỉ có quyền đọc và working tree này không phải runtime production.
+
 ## Trạng thái production ngày 2026-07-22
 
 - API và realtime worker chạy image `lana-chatbot-app:inbound-debounce-r1`.
@@ -103,4 +105,3 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 - [Admin runbook](docs/admin/04_CONTROL_PLANE_RUNBOOK.md)
 
 Các tài liệu `docs/phase*` là hồ sơ thiết kế/lịch sử. Khi mâu thuẫn, README, production baseline và release manifest mới nhất có hiệu lực cao hơn.
-
