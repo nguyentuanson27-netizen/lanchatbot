@@ -5,14 +5,16 @@ Tài liệu này được tạo bằng kiểm kê chỉ đọc. Không container
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260722-inbound-debounce-r1`.
-- Compose SHA-256: `c4b51a0c0cb85907d19a6f862e863baaf9d8aa0b7a2976d24bc221e7dc18020d`.
+- Current release: `/opt/lana-chatbot/releases/20260722-admin-policy-control-r3`.
+- Compose SHA-256: `38253f99033136f33c8fd8633a9fa224c16f38c11aecb0078f9f31a9e1537011`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
-- Migration mới nhất: `0013_inbound_debounce`.
+- Migration mới nhất: `0014_admin_policy_control`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
 Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời điểm kiểm kê. Danh sách image digest đầy đủ nằm trong release manifest.
+
+Admin API và Admin Web đang chạy image `lana-chatbot-app:admin-policy-control-r3` (`sha256:9b94403c7746802326d93b46f4e57088ea62f5c5aad9e03143f11dffd6bccd3b`). Policy Control được bật riêng cho page canary `1198992073286645`; runtime chatbot vẫn chạy image `lana-chatbot-app:inbound-debounce-r1` và n8n không bị restart trong release này.
 
 ## Ownership hiện hành
 
@@ -57,4 +59,3 @@ Các workflow active khác trên cùng n8n phục vụ page/brand hoặc automat
 - Không commit secret hoặc workflow có token hard-code.
 - Không dùng symlink `current` như bằng chứng duy nhất; phải đối chiếu service image digest.
 - Không gọi trạng thái khách xác nhận là đơn POS đã tạo nếu chưa có `ORDER_CREATED` từ POS.
-

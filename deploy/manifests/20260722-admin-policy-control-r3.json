@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-22T15:43:00+07:00",
+  "environment": "production",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "releaseTag": "20260722-admin-policy-control-r3",
+  "commit": "f7515c22afd4ede368996bc43a8786d38056b035",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260722-admin-policy-control-r3",
+  "pageAllowlist": ["1198992073286645"],
+  "archiveSha256": "39f810d44cead205147e7ac14fed353e9745335bda31c1d45b9904ce6c3e476b",
+  "composeSha256": "38253f99033136f33c8fd8633a9fa224c16f38c11aecb0078f9f31a9e1537011",
+  "servicesChanged": {
+    "admin-api": {
+      "image": "lana-chatbot-app:admin-policy-control-r3",
+      "digest": "sha256:9b94403c7746802326d93b46f4e57088ea62f5c5aad9e03143f11dffd6bccd3b"
+    },
+    "admin-web": {
+      "image": "lana-chatbot-app:admin-policy-control-r3",
+      "digest": "sha256:9b94403c7746802326d93b46f4e57088ea62f5c5aad9e03143f11dffd6bccd3b"
+    }
+  },
+  "servicesVerifiedUnchanged": ["api", "realtime-worker", "n8n"],
+  "migration": {
+    "name": "0014_admin_policy_control",
+    "sha256": "856cf1e0d617c5738e4a518cc0158aa5602f31872450eac62c3f9aff3741164c",
+    "backup": "/opt/lana-chatbot/backups/admin-policy-control-r2/lana_chatbot_pre_0014_20260722T082908Z.dump",
+    "backupSha256": "db695e062758d16ee29d4e3ec31af5f59160233f0747aaf7d689dddcb4f3e7d0",
+    "restoreTest": "PASS"
+  },
+  "verification": {
+    "fullCheck": "PASS",
+    "adminReady": "PASS",
+    "policyControl": true,
+    "policyPageIds": ["1198992073286645"],
+    "authenticatedReadSmoke": "PASS",
+    "n8nUnchanged": true,
+    "chatbotRuntimeUnchanged": true,
+    "outboxCountUnchanged": true,
+    "publicAuthRedirect": 302
+  }
+}
