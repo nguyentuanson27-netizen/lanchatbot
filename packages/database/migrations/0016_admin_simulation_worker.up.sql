@@ -47,7 +47,10 @@ ALTER TABLE admin_simulation_results
   ADD COLUMN IF NOT EXISTS evaluation_status text NOT NULL DEFAULT 'EVALUATED'
     CHECK (evaluation_status IN ('EVALUATED', 'INSUFFICIENT_EVIDENCE'));
 
-CREATE OR REPLACE VIEW admin_simulation_runs_v AS
+-- PostgreSQL cannot insert/rename columns in-place through CREATE OR REPLACE
+-- VIEW. Recreate the read view atomically inside this migration transaction.
+DROP VIEW IF EXISTS admin_simulation_runs_v;
+CREATE VIEW admin_simulation_runs_v AS
 SELECT simulation_id, page_id, version_ids, baseline_version_ids, baseline_source,
        lookback_days, max_conversations, side_effects, status,
        created_by_subject, attempt_count, next_attempt_at, claimed_at,
