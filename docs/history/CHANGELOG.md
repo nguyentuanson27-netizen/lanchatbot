@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-22 — shared sales contracts
+
+- Thêm additive contract `ProductFactsV2`, `PolicyBundleV1`, `CustomerProfileV1`, `SizeRecommendationV1`, `CartV1`, `HandoffDecisionV2`, `MediaSelectionV2`, `SalesEpisodeV1` và `FunnelEventV1`.
+- Khóa POS là nguồn duy nhất cho BOM/giá/tồn; giá thiếu là `null` và chặn báo giá/chốt cart.
+- Bổ sung staging/verification cho size chart trích xuất từ ảnh.
+- Chỉ tag Pancake `Đã chốt đơn` đã xác minh mới được tính conversion.
+- Đây là thay đổi contract-only; runtime production chưa sử dụng V2.
+
 ## 2026-07-22 — inbound debounce r1
 
 - Gom tin nhắn sau 5 giây yên lặng, không có thời gian chờ tối đa.
@@ -39,4 +47,3 @@
 
 - Phase 0–4 thiết kế kiến trúc, database, shadow evaluation và business-fact guard.
 - Các tài liệu chi tiết được giữ trong `docs/phase0` đến `docs/phase4`.
-

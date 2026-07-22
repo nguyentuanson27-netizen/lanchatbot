@@ -101,6 +101,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 - [Quy trình GitHub và triển khai](docs/current/REPOSITORY_AND_DEPLOYMENT.md)
 - [Changelog](docs/history/CHANGELOG.md)
 - [Kiến trúc nền](docs/phase0/02_architecture_contracts.md)
+- [Shared sales contracts — Giai đoạn 1](docs/phase1/01_shared_contracts_v2.md)
 - [Bảo mật và dữ liệu](docs/phase0/03_security_data_architecture.md)
 - [Admin runbook](docs/admin/04_CONTROL_PLANE_RUNBOOK.md)
 
