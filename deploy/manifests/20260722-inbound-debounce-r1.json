@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-22T10:03:16.6194472+07:00",
+  "environment": "production",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "baselineTag": "20260722-inbound-debounce-r1",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260722-inbound-debounce-r1",
+  "pageAllowlist": ["1198992073286645"],
+  "composeSha256": "c4b51a0c0cb85907d19a6f862e863baaf9d8aa0b7a2976d24bc221e7dc18020d",
+  "services": {
+    "api": { "image": "lana-chatbot-app:inbound-debounce-r1", "digest": "sha256:35fe3fb8457062aa67cff56a019c50c395524e293cc114e8f86180a80af3f5d1" },
+    "realtime-worker": { "image": "lana-chatbot-app:inbound-debounce-r1", "digest": "sha256:35fe3fb8457062aa67cff56a019c50c395524e293cc114e8f86180a80af3f5d1" },
+    "shadow-worker": { "image": "lana-chatbot-app:realtime-p1", "digest": "sha256:9512b984b8e1590826b62cce4b0b5a73178f5683c0f7c9d06c628c74204d3f64" },
+    "delivery-worker": { "image": "lana-chatbot-app:realtime-p1", "digest": "sha256:36f5d9450e9a90e9dc280b9d0f09a845b400294dbf86230d1d2e3c4f03a9c748" },
+    "media-worker": { "image": "lana-chatbot-app:media-v1", "digest": "sha256:bf55f367f3ef872e262d63fc19d50795420c1ca680e4501939deaf83e2cfe691" },
+    "admin-api": { "image": "lana-chatbot-app:admin-mvp", "digest": "sha256:91a51d23c23ec1cf70d84cab6aaffeff8d215a13c3eeff94fd2be277eb8d5077" },
+    "admin-web": { "image": "lana-chatbot-app:admin-mvp", "digest": "sha256:91a51d23c23ec1cf70d84cab6aaffeff8d215a13c3eeff94fd2be277eb8d5077" },
+    "admin-control-worker": { "image": "lana-chatbot-app:admin-control", "digest": "sha256:475d85d291aebaa38d15a7940e7244218d5c894bf7a6fd5a90e96f841d51c39d" },
+    "pos-snapshot-worker": { "image": "lana-chatbot-app:pos-snapshot-v1", "digest": "sha256:d0edc2b75ae305d50e695c576b126928d27e3df7d7fe6535cc8de91f70c46b38" },
+    "p23a-registry-sync": { "image": "lana-chatbot-app:p23a-v1", "digest": "sha256:50f5a965b4aeaf5e3d701b75dc51eca9f2fbc2bb6987b6ea6f17397819990ce5" },
+    "p23b-metadata-staging": { "image": "lana-chatbot-app:p23b-v1", "digest": "sha256:46661d994286b683dec8291274ad03640df343cf674dd040103c8a8f28367f07" },
+    "p23c-publisher": { "image": "lana-chatbot-app:p23c-v1", "digest": "sha256:77645908764654d1a6abb6c986c60368e6a481f97da512dcc8d77a915665770e" }
+  },
+  "migrations": {
+    "0001_core": "da29d432c0241332b48e6b8ef602d94c87398dfbdc358a3c1555ebdbcd45c2b3",
+    "0002_retention": "6455afaf2dceaa15218dc68585762d7a8db34ad7a95c80a489b93834ab428f3d",
+    "0003_shadow_evaluation": "0ddb80bf285c30aa589d302c7ed0f4c5adc113bdebe463c978a0766a282c0f55",
+    "0004_business_fact_audit": "1706f9c9f670b889322277b3565955f1e70b1cf04ed57755eec7f742ba1487d9",
+    "0005_realtime_runtime": "cea0a00ff08e69c005eea2734c9ab805b66e96160ca07764cc2df5d274c5cf28",
+    "0006_admin_read_models": "5944f96e1c85de4b303f4783b4bef6839a74178c5f1e0f36caaaf6dbcb13b433",
+    "0007_admin_control_plane": "0180ed45f5df512d0c993663ddcf46b4cffca912e77aa5d6b7e00d810667166d",
+    "0008_admin_conversation_identity": "83a4a935ad0a76470e00dbf3241c34ad1e8904cb316dcec60adb5a4241cfed30",
+    "0009_chat_history_outreach": "1714c573a58e247451a053ee5f920d16cc0e0cc5c37f2a9026169c1829e78108",
+    "0010_handoff_history": "a5a0672b1476e2e08a8c28d023d1c635586272e9676228cbf55e790c04aabdfb",
+    "0011_ads_media_analytics": "76c06813f4b8f843f1cc7e982b44459f5f9c705467b38a9db82d844495314d65",
+    "0012_batch_worker_catalog_status": "366ddb85c70d70937cab73677ed9dae9d409ee4fbfcb652ae139c6f21b19b6d0",
+    "0013_inbound_debounce": "888c1b841178efa010f595b61f71b5e0ee9216896e7025310c7d22be5e5477fe"
+  },
+  "ownership": {
+    "realtimePage1198992073286645": "APP",
+    "posSnapshot": "APP_NATIVE_WORKER",
+    "p23Registry": "APP_NATIVE_WORKER",
+    "p23MetadataStaging": "APP_NATIVE_WORKER",
+    "p23QdrantPublisher": "APP_NATIVE_WORKER"
+  },
+  "n8n": {
+    "version": "2.28.6",
+    "legacyChatbotWorkflowId": "C4Qn7aNuUNCHJJ9c",
+    "p22WorkflowActive": false,
+    "p23WorkflowActive": false,
+    "p23DailyTimer": "disabled/inactive"
+  }
+}

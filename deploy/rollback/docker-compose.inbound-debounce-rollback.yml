@@ -1,0 +1,5 @@
+services:
+  api:
+    image: lana-chatbot-app:pre-inbound-api
+  realtime-worker:
+    image: lana-chatbot-app:pre-inbound-worker

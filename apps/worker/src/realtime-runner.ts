@@ -1,0 +1,1646 @@
+import { createHash } from "node:crypto";
+import {
+  normalizeProductCode,
+  ProductSearchService,
+  guardAgentProposal,
+  selectImages,
+  verifiedImageUrls,
+  type CatalogFactQuery,
+  type CustomerImageIntent,
+  type ImageSelectionPurpose,
+  type MediaProductSearchResult,
+  type StableProductDocument,
+} from "@lana/business-tools";
+import type {
+  AgentProposalV1,
+  BusinessFactEnvelopeV1,
+  InboundMessageV1,
+} from "@lana/contracts";
+import {
+  applyInboundEvent,
+  applySilentHandoff,
+  createConversationState,
+  type ConversationState,
+  type HandoffReason,
+  type InboundConversationEvent,
+  type ObjectionType,
+  type PancakeTagObservation,
+  type SalesStage,
+} from "@lana/conversation-engine";
+import type {
+  ClaimedInbound,
+  ClaimedInboundBatch,
+  InboxBatchLease,
+  RealtimeCommitInput,
+  RealtimeCommitResult,
+  RealtimeInboxBatchGuard,
+  RealtimeMetaMessageUnit,
+  ShadowContextMessage,
+} from "@lana/database";
+import { redactAnalyticsMessage } from "@lana/database";
+import type { InboundEnvelopeV1 } from "@lana/meta-webhook";
+import type { PancakeHandoffAdapter } from "@lana/pancake-handoff";
+import type { BusinessFactsReader } from "./redis-business-facts.js";
+import type { RealtimeGenerationQuota } from "./realtime-quota.js";
+import type { VertexShadowModel } from "./vertex.js";
+import type { ChatHistoryPort } from "./redis-chat-history.js";
+import {
+  aggregateMedia,
+  aggregateVideoFrames,
+  containsCustomerUrl,
+  extractAdProductCodes,
+  mediaItemFromSearch,
+  selectedProductId,
+  type MediaAggregation,
+  type MediaAnalysisItem,
+} from "./media-resolution.js";
+import type { VideoFrameExtraction } from "./video-frame-extractor.js";
+
+export interface RealtimeInboxPort {
+  claimNext(
+    workerId: string,
+    leaseMs: number,
+  ): Promise<ClaimedInbound<InboundEnvelopeV1> | null>;
+  complete(inboxId: string, leaseToken: string): Promise<boolean>;
+  retry(
+    inboxId: string,
+    leaseToken: string,
+    errorCode: string,
+    delaySeconds: number,
+  ): Promise<boolean>;
+  failPermanent(
+    inboxId: string,
+    leaseToken: string,
+    errorCode: string,
+  ): Promise<boolean>;
+  claimNextBatch?(
+    workerId: string,
+    leaseMs: number,
+  ): Promise<ClaimedInboundBatch<InboundEnvelopeV1> | null>;
+  completeBatch?(
+    batch: InboxBatchLease,
+    requireCurrentGeneration?: boolean,
+  ): Promise<boolean>;
+  isBatchCurrent?(batch: InboxBatchLease): Promise<boolean>;
+  retryBatch?(
+    batch: InboxBatchLease,
+    errorCode: string,
+    delaySeconds: number,
+  ): Promise<boolean>;
+  failBatchPermanent?(
+    batch: InboxBatchLease,
+    errorCode: string,
+  ): Promise<boolean>;
+}
+
+interface RunnerInboundBatch extends ClaimedInboundBatch<InboundEnvelopeV1> {
+  readonly nativeBatch: boolean;
+}
+
+type BatchCommitStatus =
+  | "COMMITTED"
+  | "SUPERSEDED"
+  | "NOT_REQUESTED"
+  | "INBOX_ONLY";
+
+function deterministicUuid(input: string): string {
+  const hash = createHash("sha256").update(input).digest("hex");
+  return [
+    hash.slice(0, 8),
+    hash.slice(8, 12),
+    `5${hash.slice(13, 16)}`,
+    `8${hash.slice(17, 20)}`,
+    hash.slice(20, 32),
+  ].join("-");
+}
+
+function batchCommitStatus(result: RealtimeCommitResult): BatchCommitStatus {
+  return result.inboxBatchStatus ?? "NOT_REQUESTED";
+}
+
+function contextFingerprint(message: ShadowContextMessage): string {
+  return JSON.stringify([
+    message.direction,
+    message.senderType,
+    message.messageType,
+    message.text,
+    message.attachmentCount,
+    message.occurredAt,
+  ]);
+}
+
+export type ExplicitCustomerBusinessIntent = "PRICE" | "STOCK" | "SIZE" | "ETA";
+
+export function productCodeOnly(value: string): string | null {
+  const stripped = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[\u0111\u0110]/gu, "d")
+    .trim()
+    .replace(/^(?:(?:ma|mau|sp|san\s*pham)\s*){1,2}[:#._-]?\s*/iu, "")
+    .trim();
+  if (!/^[A-Za-z]{1,6}\s*[-_.]?\s*\d{1,8}[A-Za-z0-9]*$/u.test(stripped)) {
+    return null;
+  }
+  const normalized = normalizeProductCode(stripped);
+  return /^[A-Z]{1,6}\d{1,8}[A-Z0-9]*$/u.test(normalized)
+    ? normalized
+    : null;
+}
+
+export function explicitCustomerBusinessIntent(
+  value: string,
+): ExplicitCustomerBusinessIntent | null {
+  const text = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[\u0111\u0110]/gu, "d")
+    .toLowerCase();
+  if (/\b(size|sz|kich co|co nao|mac co)\b/u.test(text)) return "SIZE";
+  if (/\b(bao lau|khi nao|may ngay|ngay nao|giao den|nhan hang|eta)\b/u.test(text)) {
+    return "ETA";
+  }
+  if (/\b(gia|bao nhieu|bn|nhieu tien|price)\b/u.test(text)) return "PRICE";
+  if (/\b(con|het|ton|co hang|san hang|available)\b/u.test(text)) return "STOCK";
+  // A bare product code means the customer wants the standard product-info
+  // card. That card starts with the verified price, so it is a PRICE lookup.
+  if (productCodeOnly(value) !== null) return "PRICE";
+  return null;
+}
+
+function asciiFold(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/gu, "")
+    .replace(/[đĐ]/gu, "d")
+    .toLowerCase();
+}
+
+/**
+ * Khách có đang chủ động xin ảnh không, và xin loại nào.
+ *
+ * Nói rõ loại ảnh thì chỉ cần nhắc tới ảnh là đủ ("ảnh mặt sau"); không nói loại
+ * nào thì phải có thêm động từ xin/xem, để câu như "ảnh này đẹp quá" không bị
+ * hiểu thành yêu cầu gửi ảnh. Thứ tự kiểm tra đi từ loại cụ thể tới chung, vì
+ * "cho xin ảnh feedback" khớp nhiều nhánh.
+ */
+export function explicitCustomerImageIntent(value: string): CustomerImageIntent | null {
+  const text = asciiFold(value);
+  const mentionsImage = /\b(anh|hinh|pic|picture|photo|image)\b/u.test(text);
+  const asksFor = /\b(xin|cho|gui|xem|coi|coa|co the cho|show)\b/u.test(text);
+  const feedback = /\b(feedback|fb|phan hoi|khach mac|nguoi mac|khach dat|review|danh gia|thuc te)\b/u.test(text);
+
+  // Hai loại này tự nó đã hàm ý xin ảnh nên không đòi từ "ảnh": khách hay nhắn
+  // cộc lốc "có feedback k" hoặc "cho xem bảng size".
+  if (feedback && (mentionsImage || /\b(feedback|fb|review)\b/u.test(text))) return "FEEDBACK";
+  if (/\b(bang size|size chart|bang so do|so do size)\b/u.test(text)) return "SIZE_GUIDE";
+  if (!mentionsImage) return null;
+
+  // Nói rõ loại ảnh thì không cần thêm động từ xin/cho: khách hay nhắn gọn
+  // "ảnh chất liệu" hoặc "ảnh mặt sau".
+  if (/\b(mat sau|phia sau|dang sau|sau lung|behind|back)\b/u.test(text)) return "BACK";
+  if (/\b(chat lieu|chat vai|can canh|cat can|chi tiet|detail|vai|texture)\b/u.test(text)) return "DETAIL";
+  if (/\b(khong nguoi mau|khong co nguoi mau|san pham that|anh that|nguyen ban|flatlay)\b/u.test(text)) {
+    return "PRODUCT_ONLY";
+  }
+  // Không nói loại nào thì phải có động từ xin/xem, để câu kiểu "ảnh này đẹp quá"
+  // không bị hiểu thành yêu cầu gửi ảnh.
+  return asksFor ? "GENERIC" : null;
+}
+
+export function isResolvedProductCodeOnly(
+  value: string,
+  product: StableProductDocument,
+): boolean {
+  const code = productCodeOnly(value);
+  if (code === null) return false;
+  return [product.productId, product.canonicalCode, ...product.aliases]
+    .some((candidate) => normalizeProductCode(candidate) === code);
+}
+
+function shortPrice(value: number): string {
+  return value % 1_000 === 0
+    ? `${value / 1_000}k`
+    : `${new Intl.NumberFormat("vi-VN").format(value)}đ`;
+}
+
+function naturalList(values: readonly string[]): string {
+  if (values.length <= 1) return values[0] ?? "";
+  return `${values.slice(0, -1).join(", ")} và ${values.at(-1)}`;
+}
+
+function compactMaterial(product: StableProductDocument): string {
+  const materials = product.materials
+    .map((value) => value.trim().toLocaleLowerCase("vi"))
+    .filter(Boolean)
+    .slice(0, 2);
+  return materials.length > 0 ? naturalList(materials) : "đang cập nhật";
+}
+
+function multiProductReply(
+  products: readonly StableProductDocument[],
+  facts: readonly BusinessFactEnvelopeV1[],
+): string | null {
+  const lines: string[] = [];
+  for (let index = 0; index < products.length; index += 1) {
+    const product = products[index];
+    const fact = facts[index];
+    if (!product || fact?.status !== "OK" || !fact.facts) return null;
+    const price = fact.facts.salePriceVnd ?? fact.facts.listPriceVnd;
+    if (price === null) return null;
+    lines.push(
+      `Set ${index + 1} - ${product.productId} - giá ${shortPrice(price)} - chất ${compactMaterial(product)}`,
+    );
+  }
+  lines.push(
+    "C thích set nào và cho em xin chiều cao, cân nặng hoặc số đo để tư vấn size nha.",
+  );
+  return lines.join("\n");
+}
+
+function hasBodyProfile(context: readonly ShadowContextMessage[]): boolean {
+  const text = context
+    .filter((message) => message.senderType === "CUSTOMER")
+    .map((message) => message.text)
+    .join(" ")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[\u0111\u0110]/gu, "d")
+    .toLowerCase();
+  const hasHeight = /\b(?:chieu\s*cao|cao)\s*[:=]?\s*(?:1[45-8]\d|1[.,][45-8]\d|[45-8]\d)\b/u.test(text);
+  const hasWeight = /\b(?:can\s*nang|nang)\s*[:=]?\s*(?:3\d|4\d|5\d|6\d|7\d|8\d|9\d)\b/u.test(text);
+  return hasHeight && hasWeight;
+}
+
+export function verifiedProductInfoProposal(
+  product: StableProductDocument,
+  facts: BusinessFactEnvelopeV1,
+  context: readonly ShadowContextMessage[],
+): AgentProposalV1 | null {
+  if (facts.status !== "OK" || facts.facts === null) return null;
+  const price = facts.facts.salePriceVnd ?? facts.facts.listPriceVnd;
+  if (price === null) return null;
+  const silhouette = product.silhouettes[0]?.trim().toLocaleLowerCase("vi");
+  const materials = product.materials
+    .map((value) => value.trim().toLocaleLowerCase("vi"))
+    .filter(Boolean)
+    .slice(0, 2);
+  const designLine = materials.length > 0
+    ? `Thiết kế ${silhouette ? `dáng ${silhouette} ` : ""}chuẩn form trên nền chất liệu ${naturalList(materials)}, mặc lên thanh lịch và tôn dáng.`
+    : `Thiết kế ${silhouette ? `dáng ${silhouette} ` : ""}chuẩn form, mặc lên thanh lịch và tôn dáng.`;
+  const sizeLine = facts.facts.sizes.length > 0
+    ? `Size ${facts.facts.sizes.join(", ")}`
+    : "Size đang cập nhật";
+  const followUp = hasBodyProfile(context)
+    ? "Chị gửi thêm số đo 3 vòng để em chốt size chuẩn form cho mình nha."
+    : "Chị cho em xin chiều cao cân nặng hoặc số đo 3 vòng em tư vấn size cho mình nha.";
+  return {
+    schemaVersion: 1,
+    intent: "product_info",
+    conversationStage: "PRODUCT_MATCHED",
+    productId: product.productId,
+    action: "REPLY",
+    reply: [
+      `Dạ mẫu ${product.productId} giá ${shortPrice(price)} ạ`,
+      designLine,
+      sizeLine,
+      followUp,
+    ].join("\n"),
+    attachments: selectImages(product, "PRICE_CARD").images.map((image) => image.url),
+    handoffReason: null,
+    businessFactQuery: {
+      intent: "PRICE",
+      offerType: null,
+      color: null,
+      size: null,
+      deliveryRegion: null,
+    },
+  };
+}
+
+const IMAGE_INTENT_REPLIES: Readonly<Record<CustomerImageIntent, string>> = {
+  FEEDBACK: "Dạ em gửi chị ảnh khách đã mặc mẫu này ạ",
+  DETAIL: "Dạ em gửi chị ảnh cận chất liệu ạ",
+  BACK: "Dạ em gửi chị ảnh mặt sau ạ",
+  SIZE_GUIDE: "Dạ em gửi chị bảng size ạ",
+  PRODUCT_ONLY: "Dạ em gửi chị ảnh sản phẩm ạ",
+  GENERIC: "Dạ em gửi chị thêm ảnh mẫu này ạ",
+};
+
+/**
+ * Lượt trả lời chỉ để gửi ảnh khách vừa xin.
+ *
+ * Câu chữ cố định và không nhắc giá/tồn/size, nên guard không phải đối chiếu số
+ * liệu nào; phần cần kiểm là URL đính kèm, vốn đã được `resolveFacts` giới hạn
+ * đúng bằng tập ảnh này.
+ */
+function requestedImagesProposal(
+  product: StableProductDocument,
+  imageUrls: readonly string[],
+  intent: CustomerImageIntent,
+): AgentProposalV1 {
+  return {
+    schemaVersion: 1,
+    intent: "product_info",
+    conversationStage: "PRODUCT_MATCHED",
+    productId: product.productId,
+    action: "REPLY",
+    reply: IMAGE_INTENT_REPLIES[intent],
+    attachments: [...imageUrls],
+    handoffReason: null,
+    businessFactQuery: {
+      // Phải là `PRICE` chứ không phải `NONE`: `resolveFacts` bỏ qua truy vấn
+      // `NONE`, mà không có facts thì guard coi mọi URL đính kèm là chưa xác
+      // minh và chặn cả lượt gửi ảnh.
+      intent: "PRICE",
+      offerType: null,
+      color: null,
+      size: null,
+      deliveryRegion: null,
+    },
+  };
+}
+
+function productInfoLookupProposal(product: StableProductDocument): AgentProposalV1 {
+  return {
+    schemaVersion: 1,
+    intent: "product_info",
+    conversationStage: "PRODUCT_MATCHED",
+    productId: product.productId,
+    action: "REPLY",
+    reply: `Dạ em đang kiểm tra mẫu ${product.productId} ạ`,
+    attachments: [],
+    handoffReason: null,
+    businessFactQuery: {
+      intent: "PRICE",
+      offerType: null,
+      color: null,
+      size: null,
+      deliveryRegion: null,
+    },
+  };
+}
+
+export function staleFactsRequireHandoff(
+  customerText: string,
+  facts: BusinessFactEnvelopeV1 | null,
+): boolean {
+  return (
+    facts?.status === "STALE" &&
+    explicitCustomerBusinessIntent(customerText) !== null &&
+    facts.policyContext?.fulfillmentPolicy === "READY_STOCK" &&
+    facts.policyContext.canOrderWhenZero === false
+  );
+}
+
+export function modelHandoffPermitted(
+  customerText: string,
+  facts: BusinessFactEnvelopeV1 | null,
+): boolean {
+  return (
+    staleFactsRequireHandoff(customerText, facts) ||
+    unavailableFactsRequireHandoff(facts)
+  );
+}
+
+/**
+ * A product was verified in the stable catalog, but the business authority
+ * cannot safely provide price/stock/size/ETA. Handoff must be silent so the
+ * customer never sees an interim "checking" reply as the final answer.
+ */
+export function unavailableFactsRequireHandoff(
+  facts: BusinessFactEnvelopeV1 | null,
+): boolean {
+  return (
+    facts !== null &&
+    (facts.status === "NOT_FOUND" || facts.status === "ERROR") &&
+    facts.reasonCode !== "DELIVERY_REGION_REQUIRED"
+  );
+}
+
+function safeStaleProposal(
+  proposal: AgentProposalV1,
+  explicitIntent: ExplicitCustomerBusinessIntent | null,
+): AgentProposalV1 {
+  const productId = proposal.productId ?? "mẫu này";
+  const detail = explicitIntent === "STOCK"
+    ? "Tồn kho hiện đang được cập nhật nên em chưa báo số lượng cụ thể để tránh sai ạ."
+    : explicitIntent === "SIZE"
+      ? "Tình trạng từng size hiện đang được cập nhật nên em chưa báo size cụ thể để tránh sai ạ."
+      : explicitIntent === "PRICE"
+        ? "Thông tin giá hiện đang được cập nhật nên em chưa báo con số cụ thể để tránh sai ạ."
+        : explicitIntent === "ETA"
+          ? "Thời gian giao dự kiến hiện đang được cập nhật nên em chưa báo mốc cụ thể để tránh sai ạ."
+          : "Chị muốn xem thêm thông tin kiểu dáng hay màu sắc của mẫu không ạ?";
+  return {
+    ...proposal,
+    action: "REPLY",
+    reply: `Dạ em đã tìm thấy mẫu ${productId} ạ. ${detail}`,
+    attachments: [],
+    handoffReason: null,
+  };
+}
+
+function safeModelHandoffFallback(
+  proposal: AgentProposalV1,
+  productId: string | null,
+): AgentProposalV1 {
+  const reply = productId
+    ? `Dạ em đã tìm thấy mẫu ${productId} ạ. Chị muốn xem giá, size, tình trạng hàng hay thời gian giao dự kiến ạ?`
+    : "Dạ chị gửi giúp em mã sản phẩm hoặc ảnh mẫu chị đang quan tâm để em kiểm tra chính xác ạ.";
+  return {
+    ...proposal,
+    productId,
+    action: "REPLY",
+    reply,
+    attachments: [],
+    handoffReason: null,
+    businessFactQuery: {
+      intent: "NONE",
+      offerType: null,
+      color: null,
+      size: null,
+      deliveryRegion: null,
+    },
+  };
+}
+
+export interface RealtimeRuntimePort {
+  isOwnMetaMessage?(
+    pageId: string,
+    providerMessageId: string,
+  ): Promise<boolean>;
+  loadOrCreate(
+    pageId: string,
+    customerHash: string,
+    routingOwner: "N8N" | "APP",
+    createState: (conversationId: string) => ConversationState,
+    now?: Date,
+  ): Promise<{
+    conversationId: string;
+    pageId: string;
+    customerHash: string;
+    stateVersion: number;
+    state: ConversationState;
+    routingOwner: "N8N" | "APP";
+    appSendEnabled: boolean;
+    killSwitch: boolean;
+  }>;
+  commit(
+    input: RealtimeCommitInput<ConversationState>,
+    now?: Date,
+  ): Promise<RealtimeCommitResult>;
+  linkProviderConversation(
+    pageId: string,
+    conversationId: string,
+    provider: "META" | "PANCAKE",
+    externalId: string,
+    verifiedAt: Date,
+    expiresAt: Date,
+  ): Promise<void>;
+  persistObservedCustomerIdentity?(
+    pageId: string,
+    conversationId: string,
+    customerName: string,
+    observedAt: Date,
+  ): Promise<boolean>;
+}
+
+export interface RealtimeModelPort {
+  generate: VertexShadowModel["generate"];
+  groundWithFacts: VertexShadowModel["groundWithFacts"];
+}
+
+export interface CanonicalChatHistoryPort {
+  recordInboundCustomerMessage(input: {
+    pageId: string;
+    conversationId: string;
+    customerHash: string;
+    providerMessageId: string;
+    text: string | null;
+    attachmentCount: number;
+    occurredAt: Date;
+    receivedAt: Date;
+    adsContext?: InboundMessageV1["adsContext"];
+  }): Promise<{ readonly messagePk: string }>;
+  recordOutboundHumanMessage(input: {
+    pageId: string;
+    conversationId: string;
+    customerHash: string;
+    providerMessageId: string;
+    text: string | null;
+    attachmentCount: number;
+    occurredAt: Date;
+    receivedAt: Date;
+  }): Promise<unknown>;
+  recordMessageAnalysis?(input: {
+    messagePk: string;
+    occurredAt: Date;
+    extractedAdProductId?: string | null;
+    media: readonly {
+      ordinal: number;
+      mediaType: "IMAGE" | "VIDEO";
+      status: "MATCHED" | "AMBIGUOUS" | "NOT_FOUND" | "ERROR";
+      productId: string | null;
+      score: number | null;
+      gap: number | null;
+      reasonCode: string | null;
+      frameCount: number;
+    }[];
+  }): Promise<void>;
+}
+
+export interface RealtimeProductSearchPort {
+  searchText: ProductSearchService["searchText"];
+  searchImage: ProductSearchService["searchImage"];
+  searchImages?: ProductSearchService["searchImages"];
+  searchImageBytes?: ProductSearchService["searchImageBytes"];
+}
+
+export interface RealtimeVideoFrameExtractorPort {
+  extract(videoUrl: string): Promise<VideoFrameExtraction>;
+}
+
+interface ProductResolution {
+  readonly primary: StableProductDocument | null;
+  readonly products: readonly StableProductDocument[];
+  readonly media: MediaAggregation;
+  readonly origin: "NONE" | "TEXT_CODE" | "TEXT_SEMANTIC" | "ADS" | "MEDIA" | "SELECTION";
+  readonly extractedAdProductId: string | null;
+}
+
+export interface RealtimeTagObservationProvider {
+  observe(input: {
+    pageId: string;
+    conversationId: string;
+    customerHash: string;
+    senderId: string;
+    now: Date;
+  }): Promise<PancakeTagObservation>;
+}
+
+export function pancakeConversationId(pageId: string, senderId: string): string {
+  const page = pageId.trim();
+  const sender = senderId.trim();
+  if (!page) throw new Error("PANCAKE_PAGE_ID_REQUIRED");
+  if (!sender) throw new Error("PANCAKE_SENDER_ID_REQUIRED");
+  return `${page}_${sender}`;
+}
+
+export class PancakeRealtimeTagObservationProvider
+  implements RealtimeTagObservationProvider
+{
+  constructor(private readonly pancake: PancakeHandoffAdapter) {}
+
+  observe(input: {
+    pageId: string;
+    senderId: string;
+  }): Promise<PancakeTagObservation> {
+    return this.pancake.observeBlockingTags(
+      input.pageId,
+      pancakeConversationId(input.pageId, input.senderId),
+    );
+  }
+}
+
+/** Represents an unavailable Pancake observation. The conversation engine
+ * applies the current fail-open policy while retaining the reason for logs.
+ */
+export class FailClosedTagObservationProvider
+  implements RealtimeTagObservationProvider
+{
+  async observe(input: {
+    now: Date;
+  }): Promise<PancakeTagObservation> {
+    return {
+      schemaVersion: 1,
+      verified: false,
+      blockingTag: null,
+      observedTagIds: [],
+      observedAt: input.now.toISOString(),
+      reasonCode: "PANCAKE_CONVERSATION_LINK_UNAVAILABLE",
+    };
+  }
+}
+
+/** Test/canary-only provider; construction is refused outside DRY_RUN. */
+export class DryRunClearTagObservationProvider
+  implements RealtimeTagObservationProvider
+{
+  constructor(mode: "DRY_RUN" | "LIVE") {
+    if (mode !== "DRY_RUN") throw new Error("DRY_RUN_TAG_GATE_LIVE_FORBIDDEN");
+  }
+
+  async observe(input: {
+    now: Date;
+  }): Promise<PancakeTagObservation> {
+    return {
+      schemaVersion: 1,
+      verified: true,
+      blockingTag: null,
+      observedTagIds: [],
+      observedAt: input.now.toISOString(),
+      reasonCode: null,
+    };
+  }
+}
+
+export interface RealtimeRunnerOptions {
+  readonly workerId: string;
+  readonly mode: "DRY_RUN" | "LIVE";
+  readonly sendEnabled: boolean;
+  readonly inboxLeaseMs?: number;
+  readonly shopAlias?: string;
+  readonly employeeTagId?: string;
+  readonly postSaleTagId?: string;
+  readonly promptVersion?: string;
+  readonly metaAppId?: string;
+}
+
+export class RealtimeRunner {
+  private readonly options: Required<RealtimeRunnerOptions>;
+
+  constructor(
+    private readonly inbox: RealtimeInboxPort,
+    private readonly runtime: RealtimeRuntimePort,
+    private readonly model: RealtimeModelPort,
+    private readonly factsReader: BusinessFactsReader,
+    private readonly productSearch: RealtimeProductSearchPort,
+    private readonly tags: RealtimeTagObservationProvider,
+    options: RealtimeRunnerOptions,
+    private readonly quota?: RealtimeGenerationQuota,
+    private readonly history?: ChatHistoryPort,
+    private readonly canonicalHistory?: CanonicalChatHistoryPort,
+    private readonly videoFrames?: RealtimeVideoFrameExtractorPort,
+  ) {
+    if (options.mode === "DRY_RUN" && options.sendEnabled) {
+      throw new Error("REALTIME_DRY_RUN_SEND_FORBIDDEN");
+    }
+    this.options = {
+      workerId: options.workerId,
+      mode: options.mode,
+      sendEnabled: options.sendEnabled,
+      inboxLeaseMs: options.inboxLeaseMs ?? 90_000,
+      shopAlias: options.shopAlias ?? "LANA",
+      employeeTagId: options.employeeTagId ?? "",
+      postSaleTagId: options.postSaleTagId ?? "",
+      promptVersion: options.promptVersion ?? "lana-realtime-v1",
+      metaAppId: options.metaAppId ?? "",
+    };
+  }
+
+  async processOne(): Promise<boolean> {
+    const batch = await this.claimNextWork();
+    if (!batch) return false;
+    try {
+      // This is only a cost-saving hint. A newer message can still arrive
+      // after this check, so every real customer/page-echo commit below also
+      // carries the transactional inboxBatchGuard.
+      const knownSuperseded =
+        batch.nativeBatch &&
+        batch.generation !== null &&
+        this.inbox.isBatchCurrent
+          ? !(await this.inbox.isBatchCurrent(this.batchLease(batch)))
+          : false;
+      const status = await this.processBatch(batch, knownSuperseded);
+      if (status === "COMMITTED" || status === "SUPERSEDED") return true;
+      await this.completeWork(batch, status === "INBOX_ONLY");
+      return true;
+    } catch (error) {
+      const code =
+        error instanceof Error && error.message
+          ? error.message.slice(0, 128)
+          : "REALTIME_PROCESSING_FAILED";
+      const delaySeconds = Math.min(300, 2 ** batch.attemptCount);
+      if (batch.nativeBatch) {
+        if (batch.attemptCount >= 5) {
+          if (!this.inbox.failBatchPermanent) {
+            throw new Error("REALTIME_FAIL_BATCH_PORT_REQUIRED");
+          }
+          await this.inbox.failBatchPermanent(this.batchLease(batch), code);
+        } else {
+          if (!this.inbox.retryBatch) {
+            throw new Error("REALTIME_RETRY_BATCH_PORT_REQUIRED");
+          }
+          await this.inbox.retryBatch(
+            this.batchLease(batch),
+            code,
+            delaySeconds,
+          );
+        }
+      } else {
+        const claim = batch.items[0];
+        if (!claim) throw new Error("REALTIME_SINGLETON_BATCH_EMPTY");
+        if (claim.attemptCount >= 5) {
+          await this.inbox.failPermanent(claim.inboxId, claim.leaseToken, code);
+        } else {
+          await this.inbox.retry(
+            claim.inboxId,
+            claim.leaseToken,
+            code,
+            delaySeconds,
+          );
+        }
+      }
+      return true;
+    }
+  }
+
+  private async claimNextWork(): Promise<RunnerInboundBatch | null> {
+    if (this.inbox.claimNextBatch) {
+      const batch = await this.inbox.claimNextBatch(
+        this.options.workerId,
+        this.options.inboxLeaseMs,
+      );
+      return batch ? { ...batch, nativeBatch: true } : null;
+    }
+    const claim = await this.inbox.claimNext(
+      this.options.workerId,
+      this.options.inboxLeaseMs,
+    );
+    if (!claim) return null;
+    const eventKind = claim.eventKind ??
+      (claim.envelope.message.isEcho ? "PAGE_ECHO" : "CUSTOMER");
+    return {
+      nativeBatch: false,
+      pageId: claim.pageId,
+      conversationHash: claim.conversationHash,
+      generation: null,
+      leaseToken: claim.leaseToken,
+      inboxIds: [claim.inboxId],
+      evaluationGroupId: claim.inboxId,
+      eventKind,
+      firstReceiveSequence: claim.receiveSequence,
+      lastReceiveSequence: claim.receiveSequence,
+      attemptCount: claim.attemptCount,
+      items: [claim],
+    };
+  }
+
+  private batchLease(batch: RunnerInboundBatch): InboxBatchLease {
+    return {
+      pageId: batch.pageId,
+      conversationHash: batch.conversationHash,
+      generation: batch.generation,
+      leaseToken: batch.leaseToken,
+      inboxIds: batch.inboxIds,
+    };
+  }
+
+  private batchGuard(batch: RunnerInboundBatch): RealtimeInboxBatchGuard | undefined {
+    return batch.nativeBatch && batch.eventKind !== "APP_ECHO" &&
+        batch.generation !== null
+      ? {
+          generation: batch.generation,
+          leaseToken: batch.leaseToken,
+          inboxIds: batch.inboxIds,
+        }
+      : undefined;
+  }
+
+  private async completeWork(
+    batch: RunnerInboundBatch,
+    requireCurrentGeneration = false,
+  ): Promise<void> {
+    if (batch.nativeBatch) {
+      if (!this.inbox.completeBatch) {
+        throw new Error("REALTIME_COMPLETE_BATCH_PORT_REQUIRED");
+      }
+      const completed = await this.inbox.completeBatch(
+        this.batchLease(batch),
+        requireCurrentGeneration,
+      );
+      // A guarded inbox-only completion returns false when a newer generation
+      // won the race; the store has already released those rows for regrouping.
+      if (!completed && !requireCurrentGeneration) {
+        throw new Error("INBOX_BATCH_LEASE_LOST");
+      }
+      return;
+    }
+    const claim = batch.items[0];
+    if (!claim || !(await this.inbox.complete(claim.inboxId, claim.leaseToken))) {
+      throw new Error("INBOX_LEASE_LOST");
+    }
+  }
+
+  private async processBatch(
+    batch: RunnerInboundBatch,
+    knownSuperseded: boolean,
+  ): Promise<BatchCommitStatus> {
+    if (batch.items.length === 0) throw new Error("REALTIME_BATCH_EMPTY");
+    const claims = [...batch.items].sort((left, right) =>
+      left.receiveSequence - right.receiveSequence
+    );
+    const claim = claims.at(-1)!;
+    const envelope = claim.envelope;
+    for (const item of claims) {
+      if (
+        item.pageId !== batch.pageId ||
+        item.conversationHash !== batch.conversationHash ||
+        item.envelope.schemaVersion !== 1 ||
+        item.envelope.message.pageId !== item.pageId
+      ) {
+        throw new Error("REALTIME_ENVELOPE_INVALID");
+      }
+    }
+    const sourceMessages = claims.map((item) => item.envelope.message);
+    const texts = sourceMessages
+      .map((item) => item.text?.trim() ?? "")
+      .filter(Boolean);
+    const message: InboundMessageV1 = {
+      ...envelope.message,
+      text: texts.length > 0 ? texts.join("\n") : null,
+      attachments: sourceMessages.flatMap((item) => item.attachments),
+      adsContext: [...sourceMessages]
+        .reverse()
+        .find((item) => item.adsContext)?.adsContext ?? null,
+    };
+    const now = new Date();
+    const inboxBatchGuard = this.batchGuard(batch);
+    if (message.isEcho) {
+      const matchesOutbox =
+        message.messageId !== null && this.runtime.isOwnMetaMessage
+          ? await this.runtime.isOwnMetaMessage(claim.pageId, message.messageId)
+          : false;
+      const matchesCurrentApp =
+        this.options.metaAppId !== "" &&
+        message.appId !== null &&
+        message.appId === this.options.metaAppId;
+
+      // Meta echoes every page-sent message back to the webhook. An echo that
+      // matches our accepted outbox is delivery evidence, not a human reply.
+      // app_id is intentionally only a fallback for echoes whose mid cannot be
+      // reconciled (for example, a delayed or incomplete Meta callback).
+      if (matchesOutbox || matchesCurrentApp) return "NOT_REQUESTED";
+    }
+    const record = await this.runtime.loadOrCreate(
+      claim.pageId,
+      claim.conversationHash,
+      envelope.routing.routingOwner,
+      (conversationId) =>
+        createConversationState({
+          conversationId,
+          routingOwner: envelope.routing.routingOwner,
+          now,
+        }),
+      now,
+    );
+    const pancakeId = pancakeConversationId(claim.pageId, message.senderId);
+    await this.runtime.linkProviderConversation(
+      claim.pageId,
+      record.conversationId,
+      "PANCAKE",
+      pancakeId,
+      now,
+      new Date(now.getTime() + 30 * 24 * 60 * 60 * 1_000),
+    );
+    const state = record.state;
+    if (
+      state.schemaVersion !== 1 ||
+      state.conversationId !== record.conversationId ||
+      state.revision !== record.stateVersion
+    ) {
+      throw new Error("REALTIME_STATE_INVALID");
+    }
+
+    let triggerMessagePk: string | null = null;
+    for (const item of claims) {
+      const original = item.envelope.message;
+      if (!original.isEcho && this.canonicalHistory) {
+        const recorded = await this.canonicalHistory.recordInboundCustomerMessage({
+          pageId: item.pageId,
+          conversationId: record.conversationId,
+          customerHash: item.conversationHash,
+          providerMessageId: original.messageId ?? `event:${original.eventKey}`,
+          text: original.text,
+          attachmentCount: original.attachments.length,
+          occurredAt: new Date(original.occurredAt),
+          receivedAt: item.receivedAt,
+          adsContext: original.adsContext,
+        });
+        triggerMessagePk = recorded.messagePk;
+      } else if (original.isEcho && this.canonicalHistory) {
+        await this.canonicalHistory.recordOutboundHumanMessage({
+          pageId: item.pageId,
+          conversationId: record.conversationId,
+          customerHash: item.conversationHash,
+          providerMessageId: original.messageId ?? `event:${original.eventKey}`,
+          text: original.text,
+          attachmentCount: original.attachments.length,
+          occurredAt: new Date(original.occurredAt),
+          receivedAt: item.receivedAt,
+        });
+      }
+    }
+
+    const currentContexts: ShadowContextMessage[] = sourceMessages.map((original) => ({
+      direction: original.isEcho ? ("OUTBOUND" as const) : ("INBOUND" as const),
+      senderType: original.isEcho ? ("HUMAN" as const) : ("CUSTOMER" as const),
+      messageType:
+        original.attachments.length > 0
+          ? original.text
+            ? ("MIXED" as const)
+            : ("IMAGE" as const)
+          : ("TEXT" as const),
+      text: redactAnalyticsMessage(original.text ?? "").text,
+      attachmentCount: original.attachments.length,
+      occurredAt: original.occurredAt,
+    }));
+    let context: ShadowContextMessage[] = currentContexts;
+    if (this.history) {
+      const currentFingerprints = new Set(currentContexts.map(contextFingerprint));
+      const priorContext = [...await this.history.load(record.conversationId, 30)
+        .catch(() => [])]
+        .filter((entry) => !currentFingerprints.has(contextFingerprint(entry)));
+      for (let index = 0; index < currentContexts.length; index += 1) {
+        const currentContext = currentContexts[index];
+        const original = sourceMessages[index];
+        if (!currentContext || !original) continue;
+        await this.history.append(record.conversationId, {
+          ...currentContext,
+          identityKey: original.eventKey,
+        }).catch(() => false);
+      }
+      context = [...priorContext, ...currentContexts];
+    }
+    const modelContext: ShadowContextMessage[] = [
+      {
+        direction: "INBOUND",
+        senderType: "SYSTEM",
+        messageType: "EVENT",
+        text: JSON.stringify({
+          type: "CONVERSATION_STATE",
+          currentProductId: state.currentProductId,
+          consideredVariant: state.consideredVariant,
+          salesStage: state.salesStage,
+          objectionType: state.objectionType,
+        }),
+        attachmentCount: 0,
+        occurredAt: now.toISOString(),
+      },
+      ...context,
+    ];
+
+    const observation = await this.tags.observe({
+      pageId: claim.pageId,
+      conversationId: record.conversationId,
+      customerHash: claim.conversationHash,
+      senderId: message.senderId,
+      now,
+    });
+    const observedName = observation.customerName
+      ?.trim()
+      .replace(/\s+/gu, " ")
+      .slice(0, 160);
+    if (
+      observation.verified &&
+      observedName &&
+      this.runtime.persistObservedCustomerIdentity
+    ) {
+      // Admin identity enrichment is optional. It must never block customer
+      // message processing if its short-lived encrypted projection is down.
+      await this.runtime.persistObservedCustomerIdentity(
+        claim.pageId,
+        record.conversationId,
+        observedName,
+        new Date(observation.observedAt),
+      ).catch(() => false);
+    }
+    if (knownSuperseded && inboxBatchGuard) {
+      const event = this.conversationEvent(
+        message,
+        batch.lastReceiveSequence,
+        null,
+      );
+      const applied = applyInboundEvent({
+        state,
+        expectedRevision: state.revision,
+        fence: Math.max(state.lastFence + 1, batch.lastReceiveSequence),
+        event,
+        tagObservation: observation,
+        now,
+      });
+      if (applied.status !== "APPLIED") return "INBOX_ONLY";
+      const result = await this.runtime.commit(
+        {
+          pageId: batch.pageId,
+          customerHash: batch.conversationHash,
+          conversationId: record.conversationId,
+          expectedStateVersion: record.stateVersion,
+          state: applied.state,
+          inboxBatchGuard,
+        },
+        now,
+      );
+      return batchCommitStatus(result);
+    }
+    const hasCustomerUrl = !message.isEcho && containsCustomerUrl(message.text ?? "");
+    const resolution = message.isEcho || hasCustomerUrl
+      ? this.emptyResolution()
+      : await this.resolveProducts(message, state);
+    const resolvedProduct = resolution.primary;
+    if (
+      triggerMessagePk &&
+      this.canonicalHistory?.recordMessageAnalysis &&
+      (message.adsContext || resolution.media.totalCount > 0)
+    ) {
+      await this.canonicalHistory.recordMessageAnalysis({
+        messagePk: triggerMessagePk,
+        occurredAt: new Date(message.occurredAt),
+        extractedAdProductId: resolution.extractedAdProductId,
+        media: resolution.media.items.map((item) => ({
+          ordinal: item.ordinal,
+          mediaType: item.mediaType,
+          status: item.status,
+          productId: item.product?.productId ?? null,
+          score: item.score,
+          gap: item.gap,
+          reasonCode: item.reasonCode,
+          frameCount: item.frameCount,
+        })),
+      }).catch(() => undefined);
+    }
+    const event = this.conversationEvent(
+      message,
+      batch.lastReceiveSequence,
+      resolvedProduct?.productId ?? null,
+    );
+    const applied = applyInboundEvent({
+      state,
+      expectedRevision: state.revision,
+      fence: Math.max(state.lastFence + 1, batch.lastReceiveSequence),
+      event,
+      tagObservation: observation,
+      now,
+    });
+    if (applied.status !== "APPLIED") return "INBOX_ONLY";
+
+    let nextState = applied.state;
+    let metaMessages: RealtimeMetaMessageUnit[] = [];
+    let proposal: AgentProposalV1 | null = null;
+    let handoff = applied.handoff;
+    let businessFacts: BusinessFactEnvelopeV1 | null = null;
+    let handoffGuardReasonCodes: readonly string[] = [];
+    const imageIntent = message.isEcho
+      ? null
+      : explicitCustomerImageIntent(message.text ?? "");
+    const imageRequest = imageIntent !== null && resolution.primary !== null
+      ? { intent: imageIntent, selection: selectImages(resolution.primary, imageIntent) }
+      : null;
+    if (applied.status === "APPLIED" && applied.authorization.allowEvaluate) {
+      if (resolution.media.requiresHandoff) {
+        handoffGuardReasonCodes = [
+          "MEDIA_UNCERTAIN_RATIO_EXCEEDED",
+          `MEDIA_UNCERTAIN_${resolution.media.uncertainCount}_OF_${resolution.media.totalCount}`,
+        ];
+        const transitioned = applySilentHandoff(
+          nextState,
+          "PRODUCT_AMBIGUOUS",
+          nextState.revision,
+          nextState.lastFence,
+          now,
+        );
+        nextState = transitioned.state;
+        handoff = transitioned.handoff;
+      } else if (resolution.products.length > 1) {
+        const allFacts = await Promise.all(resolution.products.map((product) =>
+          this.factsReader.resolve({
+            shopAlias: this.options.shopAlias,
+            productId: product.productId,
+            intent: "PRICE",
+            offerType: null,
+            color: null,
+            size: null,
+            deliveryRegion: null,
+          })
+        ));
+        businessFacts = allFacts[0] ?? null;
+        const reply = multiProductReply(resolution.products, allFacts);
+        if (!reply) {
+          handoffGuardReasonCodes = ["MULTI_PRODUCT_FACT_UNAVAILABLE"];
+          const transitioned = applySilentHandoff(
+            nextState,
+            "PRODUCT_TOOL_ERROR",
+            nextState.revision,
+            nextState.lastFence,
+            now,
+          );
+          nextState = transitioned.state;
+          handoff = transitioned.handoff;
+        } else {
+          nextState = {
+            ...nextState,
+            productSelections: resolution.products.map((product, index) => ({
+              label: `SET_${index + 1}`,
+              productId: product.productId,
+            })),
+          };
+          if (this.options.mode === "LIVE" && this.options.sendEnabled) {
+            metaMessages = [{ kind: "TEXT", text: reply }];
+          }
+        }
+      } else if (imageRequest && imageRequest.selection.images.length === 0) {
+        // Khách xin ảnh mà không có ảnh đúng loại thì chuyển nhân viên im lặng,
+        // tuyệt đối không gửi ảnh loại khác thế chỗ. Riêng ảnh feedback hiện
+        // chưa có nguồn nạp nên nhánh này luôn chuyển người cho tới khi có.
+        // Không được thoát sớm ở đây: phần commit chung mới là chỗ gắn tag
+        // Pancake và ghi sự kiện handoff.
+        handoffGuardReasonCodes = [
+          `IMAGE_REQUEST_${imageRequest.intent}`,
+          imageRequest.selection.reasonCode,
+        ];
+        const transitioned = applySilentHandoff(
+          nextState,
+          "PRODUCT_TOOL_ERROR",
+          nextState.revision,
+          nextState.lastFence,
+          now,
+        );
+        nextState = transitioned.state;
+        handoff = transitioned.handoff;
+      } else {
+        const directProductInfo = resolvedProduct !== null && imageRequest === null && (
+          isResolvedProductCodeOnly(message.text ?? "", resolvedProduct) ||
+          resolution.origin === "ADS" || resolution.origin === "MEDIA" ||
+          resolution.origin === "SELECTION" || resolution.origin === "TEXT_CODE"
+        );
+        // Lượt gửi ảnh và thẻ báo giá đều dựng bằng dữ liệu đã xác minh, không
+        // gọi model, nên không được trừ hạn ngạch sinh nội dung.
+        const skipsModel = directProductInfo || imageRequest !== null;
+        if (
+          !skipsModel &&
+          this.quota &&
+          !(await this.quota.reserve(claim.pageId, now))
+        ) {
+          const result = await this.runtime.commit(
+            {
+              pageId: claim.pageId,
+              customerHash: claim.conversationHash,
+              conversationId: record.conversationId,
+              expectedStateVersion: record.stateVersion,
+              state: nextState,
+              ...(inboxBatchGuard ? { inboxBatchGuard } : {}),
+            },
+            now,
+          );
+          return batchCommitStatus(result);
+        }
+        if (imageRequest && resolvedProduct) {
+          proposal = requestedImagesProposal(
+            resolvedProduct,
+            imageRequest.selection.images.map((image) => image.url),
+            imageRequest.intent,
+          );
+        } else if (directProductInfo && resolvedProduct) {
+          proposal = productInfoLookupProposal(resolvedProduct);
+        } else {
+          const initial = await this.model.generate(
+            modelContext,
+            this.options.promptVersion,
+          );
+          proposal = {
+            ...initial.proposal,
+            productId:
+              resolvedProduct?.productId ?? initial.proposal.productId,
+          };
+        }
+        const facts = await this.resolveFacts(
+          proposal,
+          resolvedProduct,
+          imageRequest ? imageRequest.intent : "PRICE_CARD",
+        );
+        businessFacts = facts;
+        const explicitIntent = explicitCustomerBusinessIntent(message.text ?? "");
+        if (facts?.status === "STALE") {
+          proposal = staleFactsRequireHandoff(message.text ?? "", facts)
+            ? {
+                ...proposal,
+                action: "HANDOFF",
+                reply: "",
+                attachments: [],
+                handoffReason: "BUSINESS_FACT_UNAVAILABLE",
+              }
+            : safeStaleProposal(proposal, explicitIntent);
+        } else if (unavailableFactsRequireHandoff(facts)) {
+          proposal = {
+            ...proposal,
+            action: "HANDOFF",
+            reply: "",
+            attachments: [],
+            handoffReason: "BUSINESS_FACT_UNAVAILABLE",
+          };
+        } else if (
+          facts &&
+          (facts.status === "OK" ||
+            facts.reasonCode === "DELIVERY_REGION_REQUIRED")
+        ) {
+          const deterministicProductInfo = imageRequest
+            ? proposal
+            : directProductInfo && resolvedProduct
+              ? verifiedProductInfoProposal(resolvedProduct, facts, modelContext)
+              : null;
+          proposal = deterministicProductInfo ?? (
+            await this.model.groundWithFacts(
+              modelContext,
+              proposal,
+              facts,
+              this.options.promptVersion,
+            )
+          ).proposal;
+        }
+        const verifiedProductIds = new Set<string>();
+        if (resolvedProduct) verifiedProductIds.add(resolvedProduct.productId);
+        if (facts?.status === "OK") verifiedProductIds.add(facts.productId);
+        let guarded = guardAgentProposal({
+          proposal,
+          facts,
+          verifiedProductIds,
+          now,
+        });
+        if (
+          guarded.action === "HANDOFF" &&
+          !modelHandoffPermitted(message.text ?? "", facts)
+        ) {
+          proposal = safeModelHandoffFallback(
+            proposal,
+            resolvedProduct?.productId ?? null,
+          );
+          guarded = guardAgentProposal({
+            proposal,
+            facts: null,
+            verifiedProductIds,
+            now,
+          });
+        }
+        if (guarded.action === "HANDOFF") {
+          handoffGuardReasonCodes = guarded.blockedReasonCodes;
+          const transitioned = applySilentHandoff(
+            nextState,
+            this.handoffReason(proposal, guarded.blockedReasonCodes),
+            nextState.revision,
+            nextState.lastFence,
+            now,
+          );
+          nextState = transitioned.state;
+          handoff = transitioned.handoff;
+        } else if (
+          this.options.mode === "LIVE" &&
+          this.options.sendEnabled &&
+          (guarded.action === "REPLY" ||
+            guarded.action === "ASK_PRODUCT_SELECTION")
+        ) {
+          metaMessages = [
+            ...guarded.imageUrls.map(
+              (imageUrl): RealtimeMetaMessageUnit => ({
+                kind: "IMAGE",
+                imageUrl,
+              }),
+            ),
+            ...guarded.textUnits.map(
+              (text): RealtimeMetaMessageUnit => ({ kind: "TEXT", text }),
+            ),
+          ];
+        }
+      }
+    }
+
+    const planSeed = [
+      "lana:realtime-reply:v1",
+      batch.pageId,
+      batch.conversationHash,
+      batch.generation ?? 0,
+      batch.lastReceiveSequence,
+    ].join(":");
+    const replyPlanId = deterministicUuid(`${planSeed}:plan`);
+    const responseGroupId = deterministicUuid(`${planSeed}:response`);
+    const tagId =
+      handoff?.desiredTag === "VAN_DON"
+        ? this.options.postSaleTagId
+        : this.options.employeeTagId;
+    const result = await this.runtime.commit(
+      {
+        pageId: claim.pageId,
+        customerHash: claim.conversationHash,
+        conversationId: record.conversationId,
+        expectedStateVersion: record.stateVersion,
+        state: nextState,
+        ...(metaMessages.length > 0
+          ? {
+              metaPlan: {
+                replyPlanId,
+                responseGroupId,
+                recipientId: message.senderId,
+                messages: metaMessages,
+              },
+            }
+          : {}),
+        ...(handoff && tagId
+          ? {
+              pancakeTagPlan: {
+                desiredTag: handoff.desiredTag,
+                tagId,
+                handoffGeneration: nextState.revision,
+              },
+            }
+          : {}),
+        ...(handoff && state.conversationOwner === "BOT" &&
+            nextState.conversationOwner === "HUMAN"
+          ? {
+              handoffEventPlan: {
+                source:
+                  handoff.reason === "CUSTOMER_REQUESTED_HUMAN"
+                    ? ("CUSTOMER_REQUEST" as const)
+                    : handoff.category === "POST_SALE"
+                      ? ("POST_SALE" as const)
+                      : ("BOT_POLICY" as const),
+                reasonCode:
+                  businessFacts?.reasonCode ?? handoff.reason,
+                reasonDetailSafe: {
+                  directive_reason: handoff.reason,
+                  guard_reason_codes: [...handoffGuardReasonCodes],
+                },
+                productId:
+                  businessFacts?.productId ??
+                  resolvedProduct?.productId ??
+                  nextState.currentProductId,
+                factsStatus: businessFacts?.status ?? null,
+                factsReasonCode: businessFacts?.reasonCode ?? null,
+                desiredTag: handoff.desiredTag,
+                handoffGeneration: nextState.revision,
+                triggerEventKey: message.eventKey,
+                triggerMessagePk,
+                occurredAt: new Date(message.occurredAt),
+              },
+            }
+          : {}),
+        ...(message.isEcho
+          ? {
+              handoffAcknowledgementPlan: {
+                actorRef: message.senderId,
+                occurredAt: new Date(message.occurredAt),
+              },
+            }
+          : {}),
+        ...(inboxBatchGuard ? { inboxBatchGuard } : {}),
+      },
+      now,
+    );
+    return batchCommitStatus(result);
+  }
+
+  private emptyResolution(): ProductResolution {
+    return {
+      primary: null,
+      products: [],
+      media: aggregateMedia([]),
+      origin: "NONE",
+      extractedAdProductId: null,
+    };
+  }
+
+  private singleResolution(
+    product: StableProductDocument,
+    origin: ProductResolution["origin"],
+    extractedAdProductId: string | null = null,
+  ): ProductResolution {
+    return {
+      primary: product,
+      products: [product],
+      media: aggregateMedia([]),
+      origin,
+      extractedAdProductId,
+    };
+  }
+
+  private async exactProduct(value: string): Promise<StableProductDocument | null> {
+    const result = await this.productSearch.searchText(value);
+    return result.status === "MATCHED" &&
+        (result.matchKind === "EXACT_CODE" || result.matchKind === "ALIAS")
+      ? result.product
+      : null;
+  }
+
+  private async searchImages(
+    urls: readonly string[],
+  ): Promise<readonly MediaProductSearchResult[]> {
+    if (this.productSearch.searchImages) {
+      return this.productSearch.searchImages(urls, 3);
+    }
+    return Promise.all(urls.map(async (url): Promise<MediaProductSearchResult> => {
+      try {
+        return await this.productSearch.searchImage(url);
+      } catch (error) {
+        return {
+          status: "ERROR",
+          reasonCode: error instanceof Error ? error.message.slice(0, 128) : "IMAGE_SEARCH_FAILED",
+        };
+      }
+    }));
+  }
+
+  private async searchImageBytes(
+    frame: Uint8Array,
+  ): Promise<MediaProductSearchResult> {
+    if (!this.productSearch.searchImageBytes) {
+      return { status: "ERROR", reasonCode: "IMAGE_BYTES_UNSUPPORTED" };
+    }
+    return this.productSearch.searchImageBytes(frame);
+  }
+
+  private async resolveProducts(
+    message: InboundMessageV1,
+    state: ConversationState,
+  ): Promise<ProductResolution> {
+    const text = message.text?.trim() ?? "";
+    const selected = selectedProductId(text, state.productSelections ?? []);
+    if (selected) {
+      const product = await this.exactProduct(selected);
+      if (product) return this.singleResolution(product, "SELECTION");
+    }
+
+    const explicitCode = productCodeOnly(text);
+    if (explicitCode) {
+      const product = await this.exactProduct(explicitCode);
+      if (product) return this.singleResolution(product, "TEXT_CODE");
+    }
+    for (const code of extractAdProductCodes(text)) {
+      const product = await this.exactProduct(code);
+      if (product) return this.singleResolution(product, "TEXT_CODE");
+    }
+
+    for (const code of extractAdProductCodes(message.adsContext?.adTitle ?? "")) {
+      const product = await this.exactProduct(code);
+      if (product) return this.singleResolution(product, "ADS", product.productId);
+    }
+
+    const mediaItems: MediaAnalysisItem[] = [];
+    const imageAttachments = message.attachments
+      .map((attachment, ordinal) => ({ attachment, ordinal }))
+      .filter((item): item is { attachment: typeof item.attachment & { url: string }; ordinal: number } =>
+        item.attachment.type.toLowerCase() === "image" && Boolean(item.attachment.url)
+      );
+    if (imageAttachments.length > 0) {
+      const results = await this.searchImages(
+        imageAttachments.map((item) => item.attachment.url),
+      );
+      imageAttachments.forEach((item, index) => {
+        const result = results[index] ?? {
+          status: "ERROR" as const,
+          reasonCode: "IMAGE_SEARCH_RESULT_MISSING",
+        };
+        mediaItems.push(mediaItemFromSearch(item.ordinal, "IMAGE", result));
+      });
+    }
+
+    const videos = message.attachments
+      .map((attachment, ordinal) => ({ attachment, ordinal }))
+      .filter((item): item is { attachment: typeof item.attachment & { url: string }; ordinal: number } =>
+        item.attachment.type.toLowerCase() === "video" && Boolean(item.attachment.url)
+      );
+    for (const item of videos) {
+      if (!this.videoFrames) {
+        mediaItems.push(mediaItemFromSearch(item.ordinal, "VIDEO", {
+          status: "ERROR",
+          reasonCode: "VIDEO_FRAME_EXTRACTOR_UNAVAILABLE",
+        }));
+        continue;
+      }
+      try {
+        const extraction = await this.videoFrames.extract(item.attachment.url);
+        const frames: MediaProductSearchResult[] = await Promise.all(
+          extraction.frames.map((frame) => this.searchImageBytes(frame)),
+        );
+        mediaItems.push(aggregateVideoFrames(item.ordinal, frames));
+      } catch (error) {
+        mediaItems.push(mediaItemFromSearch(item.ordinal, "VIDEO", {
+          status: "ERROR",
+          reasonCode: error instanceof Error ? error.message.slice(0, 128) : "VIDEO_PROCESSING_FAILED",
+        }));
+      }
+    }
+
+    if (mediaItems.length > 0) {
+      const media = aggregateMedia(mediaItems);
+      return {
+        primary: media.products[0] ?? null,
+        products: media.products,
+        media,
+        origin: "MEDIA",
+        extractedAdProductId: null,
+      };
+    }
+
+    if (text) {
+      const result = await this.productSearch.searchText(text);
+      if (result.status === "MATCHED") {
+        return this.singleResolution(result.product, "TEXT_SEMANTIC");
+      }
+    }
+    return this.emptyResolution();
+  }
+
+  private async resolveFacts(
+    proposal: AgentProposalV1,
+    product: StableProductDocument | null,
+    purpose: ImageSelectionPurpose = "PRICE_CARD",
+  ): Promise<BusinessFactEnvelopeV1 | null> {
+    if (
+      proposal.productId === null ||
+      proposal.businessFactQuery.intent === "NONE"
+    ) {
+      return null;
+    }
+    const query: CatalogFactQuery = {
+      shopAlias: this.options.shopAlias,
+      productId: proposal.productId,
+      intent: proposal.businessFactQuery.intent,
+      offerType: proposal.businessFactQuery.offerType,
+      color: proposal.businessFactQuery.color,
+      size: proposal.businessFactQuery.size,
+      deliveryRegion: proposal.businessFactQuery.deliveryRegion,
+    };
+    const facts = await this.factsReader.resolve(query);
+    if (
+      product &&
+      facts.status === "OK" &&
+      facts.facts &&
+      facts.productId === product.productId
+    ) {
+      // Chỉ những ảnh sắp gửi mới được coi là đã xác minh. Gán cả danh sách ảnh
+      // của sản phẩm vào đây làm gói facts vượt trần 6 phần tử của
+      // `ProductFactsV1`, khiến guard trượt schema và chặn luôn câu báo giá.
+      return {
+        ...facts,
+        facts: { ...facts.facts, imageUrls: verifiedImageUrls(product, purpose) },
+      };
+    }
+    return facts;
+  }
+
+  private conversationEvent(
+    message: InboundMessageV1,
+    receiveSequence: number,
+    productId: string | null,
+  ): InboundConversationEvent {
+    const text = (message.text ?? "").toLocaleLowerCase("vi");
+    const postSale = /(đơn|vận đơn|giao hàng|đổi trả|hoàn tiền|bảo hành|hủy đơn)/iu.test(
+      text,
+    );
+    const humanRequest = /(nhân viên|người tư vấn|gặp shop|gọi cho)/iu.test(text);
+    return {
+      eventKey: message.eventKey,
+      messageId: message.messageId,
+      occurredAt: message.occurredAt,
+      receiveSequence,
+      actor: message.isEcho ? "HUMAN" : "CUSTOMER",
+      journey: postSale ? "POST_SALE" : "PRE_SALE",
+      requestedHandoffReason: postSale
+        ? "POST_SALE"
+        : containsCustomerUrl(message.text ?? "")
+          ? "SENSITIVE_CASE"
+        : humanRequest
+          ? "CUSTOMER_REQUESTED_HUMAN"
+          : null,
+      requestedSalesStage: this.salesStage(text, productId),
+      salesStageTrigger: "NORMAL",
+      productId,
+      objectionType: this.objectionType(text),
+    };
+  }
+
+  private salesStage(
+    text: string,
+    productId: string | null,
+  ): SalesStage | null {
+    if (/(chốt|lấy|đặt|mua|ok lấy)/iu.test(text)) return "READY_TO_BUY";
+    if (/(size|sz|eo|ngực|mông|cao|nặng)/iu.test(text)) {
+      return "FIT_CONSULTING";
+    }
+    if (/(đắt|giá cao|phân vân|so sánh)/iu.test(text)) {
+      return "OBJECTION_HANDLING";
+    }
+    return productId ? "PRODUCT_MATCHED" : null;
+  }
+
+  private objectionType(text: string): ObjectionType {
+    if (/(đắt|giá cao)/iu.test(text)) return "PRICE";
+    if (/(size|sz|vừa|chật|rộng)/iu.test(text)) return "SIZE_FIT";
+    if (/(bao lâu|khi nào|giao)/iu.test(text)) return "DELIVERY";
+    if (/(chất|vải)/iu.test(text)) return "MATERIAL";
+    if (/(màu)/iu.test(text)) return "COLOR";
+    return "NONE";
+  }
+
+  private handoffReason(
+    proposal: AgentProposalV1,
+    blockedReasonCodes: readonly string[],
+  ): HandoffReason {
+    if (blockedReasonCodes.includes("UNVERIFIED_PRODUCT")) {
+      return "UNVERIFIED_PRODUCT_ID";
+    }
+    if (blockedReasonCodes.length > 0) return "UNVERIFIED_BUSINESS_FACT";
+    return proposal.handoffReason === "CUSTOMER_REQUESTED_HUMAN"
+      ? "CUSTOMER_REQUESTED_HUMAN"
+      : "AGENT_REQUEST";
+  }
+}

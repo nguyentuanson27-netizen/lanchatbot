@@ -1,0 +1,459 @@
+[
+  {
+    "updatedAt": "2026-07-15T10:49:44.293Z",
+    "createdAt": "2026-07-15T10:49:44.293Z",
+    "id": "P2POSV3LANA0001",
+    "name": "P2.2 - POS Snapshot + Telegram Alerts",
+    "description": null,
+    "active": false,
+    "isArchived": false,
+    "nodes": [
+      {
+        "parameters": {},
+        "id": "0b2e063a-a875-40eb-ae2f-3dd24a3bde82",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          -1200,
+          120
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 10
+              }
+            ]
+          }
+        },
+        "id": "4c0bc790-46c9-4d48-a6eb-b63ef71d63e1",
+        "name": "Schedule Every 10 Minutes",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -1200,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "return [{json:{sheet_id:$env.DATA_INGESTION_V2_SHEET_ID,pos_base_url:$env.PANCAKE_POS_BASE_URL||'https://pos.pages.fm/api/v1',page_size:100,size_order:['S','M','L','XL'],snapshot_ttl_seconds:Number($env.CATALOG_REDIS_TTL_SECONDS||7200)}}];"
+        },
+        "id": "84614127-5e9a-433f-bd39-03ae99664a54",
+        "name": "Load Config",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -980,
+          210
+        ],
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const {createClient}=require('redis');\nconst cfg=$('Load Config').first().json;\nconst sheetData=$input.first().json||{};\nconst rows=(name)=>Array.isArray(sheetData?.tabs?.[name])?sheetData.tabs[name]:[];\nconst normHead=(v)=>String(v||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toUpperCase().replace(/[^A-Z0-9]+/g,'_').replace(/^_|_$/g,'');\nconst normRow=(r)=>Object.fromEntries(Object.entries(r||{}).map(([k,v])=>[normHead(k),v]));\nconst txt=(v)=>String(v??'').trim();\nconst norm=(v)=>txt(v).normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toUpperCase().replace(/[_.\\s]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');\nconst bool=(v,d=true)=>txt(v)===''?d:!['FALSE','0','NO','OFF','KHONG'].includes(norm(v));\nconst num=(v)=>{const raw=txt(v);if(!raw)return null;const n=Number(raw.replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:null};\nconst field=(fields,names)=>{const wanted=new Set(names.map(norm));for(const f of Array.isArray(fields)?fields:[])if(wanted.has(norm(f?.name)))return txt(f?.value??f?.keyValue);return ''};\nconst secretMap=JSON.parse($env.PANCAKE_POS_SHOPS_JSON||'{}');\nconst shopConfigs=new Map();\nfor(const raw of rows('Read config_shop_id')){const r=normRow(raw);if(!bool(r.ENABLED,true))continue;const alias=norm(r.SHOP_ALIAS||r.SHOP);const s=secretMap[alias]||secretMap[txt(r.API_KEY_REF)]||{};if(alias)shopConfigs.set(alias,{alias,shopId:txt(s.shop_id||s.shopId||r.SHOP_ID),apiKey:txt(s.api_key||s.apiKey),warehouseIds:txt(r.WAREHOUSE_IDS).split('|').map(x=>x.trim()).filter(Boolean)});}\nconst products=[];for(const raw of rows('Read product_registry')){const r=normRow(raw);const ma=norm(r.MA_SP);if(ma&&bool(r.ACTIVE,true))products.push({ma_sp:ma,shop_alias:norm(r.SHOP_ALIAS||r.SHOP||'LANA'),brand:txt(r.BRAND||'lanadesign'),rule_type:norm(r.RULE_TYPE||ma.slice(0,2))});}\nconst mapsByProduct=new Map();for(const raw of rows('Read component_mapping')){const r=normRow(raw);if(!bool(r.ENABLED,true))continue;const ma=norm(r.MA_SP);if(!ma)continue;if(!mapsByProduct.has(ma))mapsByProduct.set(ma,[]);mapsByProduct.get(ma).push({offer_type:norm(r.OFFER_TYPE),price_sku:norm(r.PRICE_SKU),inventory_mode:norm(r.INVENTORY_MODE||'AUTO_BOM'),c1:norm(r.COMPONENT_1_SKU),c2:norm(r.COMPONENT_2_SKU)});}\nconst policies=new Map();for(const raw of rows('Read fulfillment_policy')){const r=normRow(raw);const ma=norm(r.MA_SP);if(!ma||!bool(r.ENABLED,true))continue;policies.set(ma,{tinh_trang:norm(r.TINH_TRANG),can_order_when_zero:bool(r.CAN_ORDER_WHEN_ZERO,false),prep_min_days:num(r.PREP_MIN_DAYS),prep_max_days:num(r.PREP_MAX_DAYS),zero_stock_policy:norm(r.ZERO_STOCK_POLICY),zero_stock_prep_min_days:num(r.ZERO_STOCK_PREP_MIN_DAYS),zero_stock_prep_max_days:num(r.ZERO_STOCK_PREP_MAX_DAYS),eta_updated_at:txt(r.ETA_UPDATED_AT),eta_valid_until:txt(r.ETA_VALID_UNTIL)});}\nconst shipping={};for(const raw of rows('Read shipping_eta')){const r=normRow(raw);const region=norm(r.REGION);if(region&&bool(r.ENABLED,true))shipping[region]={transit_min_days:num(r.TRANSIT_MIN_DAYS),transit_max_days:num(r.TRANSIT_MAX_DAYS)};}\nconst hasPositivePrice=(idx,sku)=>{const m=idx.get(sku);if(!m)return false;for(const e of m.values())for(const p of e.prices)if(Number(p)>0)return true;return false;};\nconst bomComponentSkus=(bomIdx,sku)=>{const out=[];const m=bomIdx.get(sku);if(!m)return out;for(const e of m.values())for(const c of e.components||[]){const s=norm(c.product_sku||c.variation_sku||'');if(s&&!out.includes(s))out.push(s)}return out;};\nconst defaults=(p,bomIdx,idx)=>{const c=p.ma_sp,components=bomComponentSkus(bomIdx,c),isCB=p.rule_type==='CB'||c.startsWith('CB'),isSQ=p.rule_type==='SQ'||c.startsWith('SQ'),isSV=p.rule_type==='SV'||c.startsWith('SV');if(components.length){const ao=components.find(x=>/-AO$/.test(x))||'',cv=components.find(x=>/-CV$/.test(x))||'',quan=components.find(x=>/-QUAN$/.test(x))||'';let setType='COMPOSITE';if(isCB)setType=cv&&quan?'COMBO_3':quan?'SET_QUAN':cv?'SET_CV':'COMPOSITE';else if(isSQ)setType='SET_QUAN';else if(isSV)setType='SET_VAY';const out=[{offer_type:setType,price_sku:c,c1:ao||components[0]||'',c2:(cv||quan||components[1]||''),inventory_mode:'AUTO_BOM'}];const add=(type,sku)=>{if(sku&&hasPositivePrice(idx,sku))out.push({offer_type:type,price_sku:sku,c1:sku,c2:'',inventory_mode:'DIRECT'})};add('AO',ao);add('CV',cv);add('QUAN',quan);return out}if(idx.has(c))return[{offer_type:'DIRECT',price_sku:c,c1:c,c2:'',inventory_mode:'DIRECT'}];return[];};\nasync function req(options,tries=3){let e;for(let i=1;i<=tries;i++){try{return await this.helpers.httpRequest(options)}catch(err){e=err;const s=Number(err.statusCode||err.response?.status||0);if(i===tries||(s&&s<429))throw err;await new Promise(r=>setTimeout(r,1000*i));}}throw e;}\nasync function fetchShop(shop){const all=[];let page=1,total=1;do{const r=await req.call(this,{method:'GET',url:cfg.pos_base_url+'/shops/'+encodeURIComponent(shop.shopId)+'/products/variations',qs:{api_key:shop.apiKey,page_number:page,page_size:cfg.page_size,product_status:'not_locked',included_composite:true},json:true,timeout:120000});all.push(...(Array.isArray(r?.data)?r.data:[]));total=Math.max(1,Number(r?.total_pages||1));page++;if(page>500)throw new Error('pagination_limit')}while(page<=total);return all;}\nfunction buildIndex(vars,shop){\n const idx=new Map(),bomIdx=new Map();\n for(const v of vars){\n  const sku=norm(v?.product?.display_id||v?.product?.custom_id||v?.product_display_id||'');if(!sku)continue;\n  const color=norm(field(v?.fields,['màu','mau','color','colour']))||'__NO_COLOR__';\n  const size=norm(field(v?.fields,['size','kích cỡ','kich co']))||'*';\n  const wh=Array.isArray(v?.variations_warehouses)?v.variations_warehouses:[];\n  const selected=shop.warehouseIds.length?wh.filter(x=>shop.warehouseIds.includes(txt(x.warehouse_id))):wh;\n  const hidden=selected.some(x=>x.not_permission_view_quantity===true);\n  const qty=hidden?null:(selected.length?selected.reduce((s,x)=>s+Math.max(0,Number(x.available_quantity??x.remain_quantity??0)),0):(shop.warehouseIds.length?null:Math.max(0,Number(v?.remain_quantity||0))));\n  const price=num(v.retail_price),key=color+'|'+size;\n  if(!idx.has(sku))idx.set(sku,new Map());\n  const old=idx.get(sku).get(key)||{color,size,qty:0,prices:new Set(),updated_at:'',hidden:false};\n  old.hidden=old.hidden||hidden;old.qty=old.hidden?null:Number(old.qty||0)+Number(qty||0);if(price!=null&&price>0)old.prices.add(price);old.updated_at=txt(v.updated_at)||old.updated_at;idx.get(sku).set(key,old);\n  const rawComponents=Array.isArray(v?.composite_products)?v.composite_products:[];\n  if(v?.is_composite===true&&rawComponents.length){\n   const components=rawComponents.map(x=>{const c=x?.component||{};return{component_id:txt(x?.component_id||c?.id),quantity:Math.max(1,Number(x?.quantity||1)),product_sku:norm(c?.product?.display_id||c?.product?.custom_id||''),variation_sku:norm(c?.display_id||''),color:norm(field(c?.fields,['màu','mau','color','colour']))||'',size:norm(field(c?.fields,['size','kích cỡ','kich co']))||''}});\n   if(!bomIdx.has(sku))bomIdx.set(sku,new Map());\n   const be=bomIdx.get(sku).get(key)||{color,size,qty:0,prices:new Set(),updated_at:'',hidden:false,components:[],parent_variation_ids:new Set(),parent_variation_skus:new Set()};\n   be.hidden=be.hidden||hidden;be.qty=be.hidden?null:Number(be.qty||0)+Number(qty||0);if(price!=null&&price>0)be.prices.add(price);be.updated_at=txt(v.updated_at)||be.updated_at;\n   for(const c of components)if(!be.components.some(x=>x.component_id===c.component_id&&x.quantity===c.quantity))be.components.push(c);\n   if(v?.id)be.parent_variation_ids.add(txt(v.id));if(v?.display_id)be.parent_variation_skus.add(norm(v.display_id));bomIdx.get(sku).set(key,be);\n  }\n }\n return{idx,bomIdx};\n}\nconst priceAt=(idx,sku,color,size)=>{const m=idx.get(sku);if(!m)return{value:null,status:'PRICE_NOT_FOUND'};const order=[color+'|'+size,color+'|*','__NO_COLOR__|'+size,'__NO_COLOR__|*'];for(const k of order){const e=m.get(k);if(e&&e.prices.size===1)return{value:[...e.prices][0],status:'OK'}}const all=new Set();for(const e of m.values())for(const p of e.prices)all.add(p);return all.size===1?{value:[...all][0],status:'OK'}:{value:null,status:all.size?'PRICE_AMBIGUOUS':'PRICE_NOT_FOUND'};};\nconst matrix=(idx,sku)=>idx.get(sku)||new Map();\nconst mergeKeys=(a,b)=>new Set([...(a?.keys?.()||[]),...(b?.keys?.()||[])]);\nconst redis=createClient({url:$env.REDIS_URL||'redis://redis:6379'});await redis.connect();let release={};try{release=JSON.parse(await redis.get('lana:release:active')||'{}')}catch(_){}const lockKey='lock:pos_snapshot:v2',lockToken=String($execution.id)+':'+Date.now();const got=await redis.set(lockKey,lockToken,{NX:true,PX:1200000});if(got!=='OK'){await redis.quit();return[{json:{SNAPSHOT_KEY:'RUN_LOCKED',SYNC_STATUS:'RUN_LOCKED',SYNCED_AT:new Date().toISOString()}}]}\nconst output=[];const now=new Date().toISOString();try{await redis.set('catalog:shipping_eta',JSON.stringify({schema_version:1,synced_at:now,regions:shipping}),{EX:cfg.snapshot_ttl_seconds});const byShop=new Map(products.map(p=>[p.shop_alias,true]));for(const shopAlias of byShop.keys()){const shop=shopConfigs.get(shopAlias);if(!shop?.shopId||!shop?.apiKey){for(const p of products.filter(x=>x.shop_alias===shopAlias))output.push({json:{SNAPSHOT_KEY:shopAlias+'|'+p.ma_sp+'|CONFIG',SHOP_ALIAS:shopAlias,PRODUCT_ID:p.ma_sp,SYNC_STATUS:'CONFIG_NOT_FOUND',SYNCED_AT:now}});continue}let vars;try{vars=await fetchShop.call(this,shop)}catch(e){for(const p of products.filter(x=>x.shop_alias===shopAlias))output.push({json:{SNAPSHOT_KEY:shopAlias+'|'+p.ma_sp+'|SHOP_ERROR',SHOP_ALIAS:shopAlias,PRODUCT_ID:p.ma_sp,SYNC_STATUS:'SHOP_ERROR',SYNC_ERROR:String(e.message||e).slice(0,300),SYNCED_AT:now}});continue}const {idx,bomIdx}=buildIndex(vars,shop);for(const p of products.filter(x=>x.shop_alias===shopAlias)){const explicitMappings=mapsByProduct.get(p.ma_sp);const mappings=explicitMappings?.length?explicitMappings:defaults(p,bomIdx,idx);const policy=policies.get(p.ma_sp)||null;const catalog={schema_version:3,release_id:release.release_id||'p2-default',catalog_version:release.catalog_version||'catalog-v2',policy_version:release.policy_version||'policy-v1',shop_alias:shopAlias,brand:p.brand,product_id:p.ma_sp,synced_at:now,data_status:'OK',fulfillment_policy:policy,shipping_eta:shipping,offers:{}};if(!mappings.length){catalog.data_status='PRODUCT_NOT_FOUND';output.push({json:{SNAPSHOT_KEY:[shopAlias,p.ma_sp,'PRODUCT_NOT_FOUND'].join('|'),SHOP_ALIAS:shopAlias,PRODUCT_ID:p.ma_sp,OFFER_TYPE:'',PRICE_SKU:'',COMPONENT_1_SKU:'',COMPONENT_2_SKU:'',COLOR:'__NO_COLOR__',SIZE:'*',STOCK_QUANTITY:0,LIST_PRICE:null,SALE_PRICE:null,STOCK_STATUS:'PRODUCT_NOT_FOUND',INVENTORY_SOURCE:'PANCAKE_POS',BOM_STATUS:'PRODUCT_NOT_FOUND',PARENT_VARIATION_ID:'',PARENT_VARIATION_SKU:'',BOM_COMPONENTS:'',COMPONENT_COUNT:0,TINH_TRANG:policy?.tinh_trang||'',CAN_ORDER_WHEN_ZERO:false,PREP_MIN_DAYS:policy?.prep_min_days??null,PREP_MAX_DAYS:policy?.prep_max_days??null,POS_UPDATED_AT:'',SYNCED_AT:now,SYNC_STATUS:'PRODUCT_NOT_FOUND',SYNC_ERROR:'Product code is active in product_registry but absent from Pancake POS'}});await redis.set('catalog:offer:'+shopAlias+':'+p.ma_sp,JSON.stringify(catalog),{EX:cfg.snapshot_ttl_seconds});continue}for(const mp of mappings){\n const mode=mp.inventory_mode||((mp.c2||/^SET|COMPOSITE/.test(mp.offer_type))?'AUTO_BOM':'DIRECT'),bom=mp.price_sku?matrix(bomIdx,mp.price_sku):new Map(),useBom=!['DIRECT','FALLBACK_SKU_RULE'].includes(mode)&&bom.size>0,bomRequiredMissing=mode==='BOM_ONLY'&&!useBom;\n const a=useBom?bom:matrix(idx,mp.c1),b=useBom?null:(mp.c2?matrix(idx,mp.c2):null);\n const keys=useBom?new Set(a.keys()):mergeKeys(a,b),offerRows=[];if(!keys.size)keys.add('__NO_COLOR__|*');\n for(const key of keys){\n  const [color,size]=key.split('|'),ea=a.get(key),eb=b?.get(key);let qty,stockStatus='OK';\n  if(bomRequiredMissing){qty=0;stockStatus='BOM_REQUIRED_MISSING'}else if(!ea||(!useBom&&mp.c2&&!eb)){qty=0;stockStatus='COMPONENT_MISSING'}else if(ea.hidden||eb?.hidden){qty=null;stockStatus='QUANTITY_HIDDEN'}else qty=useBom?Number(ea.qty||0):(mp.c2?Math.min(Number(ea.qty||0),Number(eb.qty||0)):Number(ea.qty||0));\n  const components=useBom?(ea?.components||[]):[];\n  const effectiveC1=useBom?norm(components[0]?.product_sku||components[0]?.variation_sku||''):mp.c1,effectiveC2=useBom?norm(components[1]?.product_sku||components[1]?.variation_sku||''):mp.c2;\n  const inventorySource=useBom?'PANCAKE_BOM':(bomRequiredMissing?'BOM_REQUIRED_MISSING':(mp.c2?'FALLBACK_SKU_RULE':'PANCAKE_DIRECT'));\n  const bomStatus=useBom?'OK':(bomRequiredMissing?'BOM_REQUIRED_MISSING':(mp.c2?'BOM_MISSING_FALLBACK':'NOT_APPLICABLE'));\n  const pr=mp.price_sku?priceAt(idx,mp.price_sku,color,size):{value:null,status:'PRICE_NOT_FOUND'},status=stockStatus!=='OK'?stockStatus:pr.status;\n  const parentVariationId=useBom?[...(ea?.parent_variation_ids||[])].join('|'):'',parentVariationSku=useBom?[...(ea?.parent_variation_skus||[])].join('|'):'';\n  const bomComponents=useBom?components.map(c=>(c.product_sku||c.variation_sku||c.component_id)+' x'+c.quantity).join(' | '):'';\n  const row={offer_type:mp.offer_type,price_sku:mp.price_sku,component_1_sku:effectiveC1,component_2_sku:effectiveC2,color,size,stock_quantity:qty,list_price:null,sale_price:pr.value,stock_status:status,pos_updated_at:ea?.updated_at||eb?.updated_at||'',inventory_source:inventorySource,bom_status:bomStatus,parent_variation_id:parentVariationId,parent_variation_sku:parentVariationSku,bom_components:bomComponents,component_count:components.length,components};\n  offerRows.push(row);\n  output.push({json:{SNAPSHOT_KEY:[shopAlias,p.ma_sp,mp.offer_type,color,size].join('|'),SHOP_ALIAS:shopAlias,PRODUCT_ID:p.ma_sp,OFFER_TYPE:mp.offer_type,PRICE_SKU:mp.price_sku,COMPONENT_1_SKU:effectiveC1,COMPONENT_2_SKU:effectiveC2,COLOR:color,SIZE:size,STOCK_QUANTITY:qty,LIST_PRICE:null,SALE_PRICE:pr.value,STOCK_STATUS:status,INVENTORY_SOURCE:inventorySource,BOM_STATUS:bomStatus,PARENT_VARIATION_ID:parentVariationId,PARENT_VARIATION_SKU:parentVariationSku,BOM_COMPONENTS:bomComponents,COMPONENT_COUNT:components.length,TINH_TRANG:policy?.tinh_trang||'',CAN_ORDER_WHEN_ZERO:policy?.can_order_when_zero??false,PREP_MIN_DAYS:policy?.prep_min_days??null,PREP_MAX_DAYS:policy?.prep_max_days??null,ZERO_STOCK_POLICY:policy?.zero_stock_policy||'',ZERO_STOCK_PREP_MIN_DAYS:policy?.zero_stock_prep_min_days??null,ZERO_STOCK_PREP_MAX_DAYS:policy?.zero_stock_prep_max_days??null,POS_UPDATED_AT:row.pos_updated_at,SYNCED_AT:now,SYNC_STATUS:status,SYNC_ERROR:''}})\n }\n const prices=[...new Set(offerRows.map(x=>x.sale_price).filter(x=>x!=null))];catalog.offers[mp.offer_type]={list_price:null,sale_price:prices.length===1?prices[0]:null,price_status:prices.length===1?'OK':prices.length?'PRICE_AMBIGUOUS':'PRICE_NOT_FOUND',inventory_source:useBom?'PANCAKE_BOM':(bomRequiredMissing?'BOM_REQUIRED_MISSING':(mp.c2?'FALLBACK_SKU_RULE':'PANCAKE_DIRECT')),rows:offerRows};\n}if(!policy)catalog.data_status='FULFILLMENT_POLICY_NOT_FOUND';await redis.set('catalog:offer:'+shopAlias+':'+p.ma_sp,JSON.stringify(catalog),{EX:cfg.snapshot_ttl_seconds});}}\n}finally{await redis.eval(\"if redis.call('get',KEYS[1])==ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end\",{keys:[lockKey],arguments:[lockToken]});await redis.quit();}\nfor(const item of output){item.json.CONFIG_SOURCE=sheetData.sheet_source||'UNKNOWN';item.json.CONFIG_SYNCED_AT=sheetData.sheet_synced_at||'';item.json.PREVIOUS_INVENTORY_ROWS=Number(sheetData.previous_inventory_rows||1);}\nreturn output.length?output:[{json:{SNAPSHOT_KEY:'NO_PRODUCTS',SYNC_STATUS:'NO_PRODUCTS',SYNCED_AT:now,CONFIG_SOURCE:sheetData.sheet_source||'UNKNOWN',CONFIG_SYNCED_AT:sheetData.sheet_synced_at||''}}];"
+        },
+        "id": "0a736875-6f66-4d9a-8632-829773a0b0ed",
+        "name": "Build POS Snapshot and Redis",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          260,
+          80
+        ],
+        "retryOnFail": false,
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "width": 950,
+          "height": 360,
+          "content": "## P2.2 BOM-first POS snapshot\nPancake remains the source of truth. Composite offers use `is_composite`, `composite_products` and the parent variation `remain_quantity`.\n\nPriority: `PANCAKE_BOM` → `PANCAKE_DIRECT` → `FALLBACK_SKU_RULE`. Suffix rules are used only when Pancake has no BOM, and the row is marked `BOM_MISSING_FALLBACK`.\n\nFor composite offers, `PRICE_SKU` must be the exact parent composite SKU in Pancake. Warehouse selection is applied to the parent composite variation.\n\nWorkflow remains inactive until manual verification."
+        },
+        "id": "5b4bfe0f-3e94-462f-9e4e-a65438765dab",
+        "name": "README",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -1200,
+          -360
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const items=$input.all(),bad=items.map(x=>x.json||{}).filter(x=>['SHOP_ERROR','CONFIG_NOT_FOUND','RUN_LOCKED','PRODUCT_NOT_FOUND'].includes(String(x.SYNC_STATUS||''))||String(x.BOM_STATUS||'').startsWith('BOM_'));if(!bad.length)return items;const groups={};for(const x of bad){const k=String(x.SYNC_STATUS||'UNKNOWN');groups[k]=(groups[k]||0)+1}const alertText=['🚨 LANA / POS SNAPSHOT ERROR','Workflow: POS → Sheet + Redis','Errors: '+JSON.stringify(groups),'Examples: '+bad.slice(0,5).map(x=>[x.SHOP_ALIAS,x.PRODUCT_ID,x.SYNC_STATUS].filter(Boolean).join('/')).join(', '),'Time: '+new Date().toISOString()].join('\\n');const token=String($env.TELEGRAM_BOT_TOKEN||''),chatId=String($env.TELEGRAM_ALERT_CHAT_ID||'');let telegram_alert_sent=false,telegram_alert_error='';if(token&&chatId){try{await this.helpers.httpRequest({method:'POST',url:'https://api.telegram.org/bot'+token+'/sendMessage',body:{chat_id:chatId,text:alertText,disable_web_page_preview:true},json:true,timeout:15000});telegram_alert_sent=true}catch(e){telegram_alert_error=String(e.message||e).slice(0,200)}}else telegram_alert_error='TELEGRAM_ENV_MISSING';return items.map(x=>({json:{...x.json,telegram_alert_sent,telegram_alert_error}}));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1220,
+          280
+        ],
+        "id": "p2-1-0002-4000-8000-000000000021",
+        "name": "P2.1 Telegram POS Alert"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const e=$input.first().json||{};const alertText=['🚨 LANA / POS SNAPSHOT FATAL ERROR','Error: '+String(e.error?.message||e.message||e.description||'UNKNOWN').slice(0,500),'Execution: '+String($execution.id||''),'Time: '+new Date().toISOString()].join('\\n');const token=String($env.TELEGRAM_BOT_TOKEN||''),chatId=String($env.TELEGRAM_ALERT_CHAT_ID||'');let telegram_alert_sent=false,telegram_alert_error='';if(token&&chatId){try{await this.helpers.httpRequest({method:'POST',url:'https://api.telegram.org/bot'+token+'/sendMessage',body:{chat_id:chatId,text:alertText,disable_web_page_preview:true},json:true,timeout:15000});telegram_alert_sent=true}catch(e){telegram_alert_error=String(e.message||e).slice(0,200)}}else telegram_alert_error='TELEGRAM_ENV_MISSING';return[];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1160,
+          600
+        ],
+        "id": "p2-1-0021-4000-8000-000000000021",
+        "name": "P2.1 Telegram POS Fatal Alert"
+      },
+      {
+        "parameters": {
+          "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $env.DATA_INGESTION_V2_SHEET_ID + '/values:batchGet?ranges=config_shop_id%21A%3AAZ&ranges=product_registry%21A%3AAZ&ranges=component_mapping%21A%3AAZ&ranges=fulfillment_policy%21A%3AAZ&ranges=shipping_eta%21A%3AAZ&ranges=inventory_current%21A%3AAA&majorDimension=ROWS' }}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleSheetsOAuth2Api",
+          "options": {
+            "timeout": 120000,
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          }
+        },
+        "id": "9f892597-d7a6-4fd3-949d-821f2edc5c87",
+        "name": "Read Sheets Batch",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          -720,
+          80
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "U1qa3eW2qKm2vHWg",
+            "name": "nguyentuanson27"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 65000,
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const raw=$input.first().json||{};\nconst body=raw.body&&typeof raw.body==='object'?raw.body:raw;\nconst ranges=Array.isArray(body.valueRanges)?body.valueRanges:[];\nconst requested=['Read config_shop_id','Read product_registry','Read component_mapping','Read fulfillment_policy','Read shipping_eta','inventory_current'];\nif(ranges.length<requested.length)throw new Error('GOOGLE_SHEETS_BATCH_INCOMPLETE:'+ranges.length);\nconst table=(vr)=>{const values=Array.isArray(vr?.values)?vr.values:[];if(!values.length)return[];const headers=(values[0]||[]).map(x=>String(x||'').trim());return values.slice(1).filter(row=>row.some(v=>String(v??'').trim()!=='')).map(row=>Object.fromEntries(headers.map((h,i)=>[h,row[i]??'']).filter(([h])=>h)));};\nconst tabs={};for(let i=0;i<5;i++)tabs[requested[i]]=table(ranges[i]);\nconst inventoryValues=Array.isArray(ranges[5]?.values)?ranges[5].values:[];\nreturn[{json:{tabs,previous_inventory_rows:Math.max(1,inventoryValues.length),sheet_source:'GOOGLE_SHEETS_BATCH',sheet_synced_at:new Date().toISOString()}}];"
+        },
+        "id": "3c823704-ad1b-4b11-896d-0e7689391726",
+        "name": "Parse Sheets Batch",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -500,
+          20
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const {createClient}=require('redis');\nconst data=$input.first().json||{};\nconst redis=createClient({url:$env.REDIS_URL||'redis://redis:6379'});\nawait redis.connect();\ntry{await redis.set('config:pos_sheet_batch',JSON.stringify(data),{EX:86400});}finally{await redis.quit();}\nreturn[{json:data}];"
+        },
+        "id": "b34e676c-f45b-4ac8-ba70-7f6b5dfbd211",
+        "name": "Cache Sheets Config",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -260,
+          20
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const {createClient}=require('redis');\nconst redis=createClient({url:$env.REDIS_URL||'redis://redis:6379'});\nawait redis.connect();let raw='';try{raw=await redis.get('config:pos_sheet_batch')||'';}finally{await redis.quit();}\nif(!raw)throw new Error('GOOGLE_SHEETS_BATCH_FAILED_AND_CACHE_EMPTY');\nconst data=JSON.parse(raw);data.sheet_source='REDIS_CACHE';data.sheet_cache_fallback_at=new Date().toISOString();\nreturn[{json:data}];"
+        },
+        "id": "e6f140bb-1de8-44cb-a4f7-1defc7808976",
+        "name": "Load Sheets Cache",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -500,
+          180
+        ],
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const items=$input.all().map(x=>x.json||{});\nconst headers=[\"SNAPSHOT_KEY\",\"SHOP_ALIAS\",\"PRODUCT_ID\",\"OFFER_TYPE\",\"PRICE_SKU\",\"COMPONENT_1_SKU\",\"COMPONENT_2_SKU\",\"COLOR\",\"SIZE\",\"STOCK_QUANTITY\",\"LIST_PRICE\",\"SALE_PRICE\",\"STOCK_STATUS\",\"INVENTORY_SOURCE\",\"BOM_STATUS\",\"PARENT_VARIATION_ID\",\"PARENT_VARIATION_SKU\",\"BOM_COMPONENTS\",\"COMPONENT_COUNT\",\"TINH_TRANG\",\"CAN_ORDER_WHEN_ZERO\",\"PREP_MIN_DAYS\",\"PREP_MAX_DAYS\",\"ZERO_STOCK_POLICY\",\"ZERO_STOCK_PREP_MIN_DAYS\",\"ZERO_STOCK_PREP_MAX_DAYS\",\"POS_UPDATED_AT\",\"SYNCED_AT\",\"SYNC_STATUS\",\"SYNC_ERROR\"];\nconst clean=v=>v===null||v===undefined?'':(typeof v==='object'?JSON.stringify(v):v);\nconst matrix=[headers,...items.map(row=>headers.map(h=>clean(row[h])))];\nconst previous=Math.max(1,Number(items[0]?.PREVIOUS_INVENTORY_ROWS||1));\nconst target=Math.max(previous,matrix.length);\nwhile(matrix.length<target)matrix.push(headers.map(()=>''));\nconst counts={};for(const row of items){const k=String(row.SYNC_STATUS||'UNKNOWN');counts[k]=(counts[k]||0)+1;}\nreturn[{json:{request_body:{valueInputOption:'RAW',includeValuesInResponse:false,data:[{range:'inventory_current!A1:AD'+target,majorDimension:'ROWS',values:matrix}]},row_count:items.length,target_rows:target,sync_status_counts:counts,config_source:String(items[0]?.CONFIG_SOURCE||'UNKNOWN')}}];"
+        },
+        "id": "a27d0d34-e4c9-43b1-ad0f-a464b9e72e84",
+        "name": "Prepare inventory batch update",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          760,
+          80
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/' + $env.DATA_INGESTION_V2_SHEET_ID + '/values:batchUpdate' }}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleSheetsOAuth2Api",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.request_body) }}",
+          "options": {
+            "timeout": 120000,
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          }
+        },
+        "id": "1db4733d-44d5-4145-a18e-fc3261a68b5a",
+        "name": "Batch Write inventory_current",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1000,
+          80
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "U1qa3eW2qKm2vHWg",
+            "name": "nguyentuanson27"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 65000,
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const p=$('Prepare inventory batch update').first().json||{};\nreturn[{json:{SNAPSHOT_KEY:'RUN_SUMMARY',SYNC_STATUS:'OK',ROWS_WRITTEN:p.row_count||0,TARGET_ROWS:p.target_rows||0,CONFIG_SOURCE:p.config_source||'UNKNOWN',SYNC_STATUS_COUNTS:p.sync_status_counts||{},SYNCED_AT:new Date().toISOString()}}];"
+        },
+        "id": "4131f260-3eb0-4eba-8525-1fa802a0de61",
+        "name": "POS Sync Result",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1240,
+          80
+        ]
+      }
+    ],
+    "connections": {
+      "Manual Trigger": {
+        "main": [
+          [
+            {
+              "node": "Load Config",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule Every 10 Minutes": {
+        "main": [
+          [
+            {
+              "node": "Load Config",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Load Config": {
+        "main": [
+          [
+            {
+              "node": "Read Sheets Batch",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "P2.1 Telegram POS Fatal Alert",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build POS Snapshot and Redis": {
+        "main": [
+          [
+            {
+              "node": "P2.1 Telegram POS Alert",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "P2.1 Telegram POS Fatal Alert",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "P2.1 Telegram POS Alert": {
+        "main": [
+          [
+            {
+              "node": "Prepare inventory batch update",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Sheets Batch": {
+        "main": [
+          [
+            {
+              "node": "Parse Sheets Batch",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Load Sheets Cache",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Sheets Batch": {
+        "main": [
+          [
+            {
+              "node": "Cache Sheets Config",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cache Sheets Config": {
+        "main": [
+          [
+            {
+              "node": "Build POS Snapshot and Redis",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Load Sheets Cache": {
+        "main": [
+          [
+            {
+              "node": "Build POS Snapshot and Redis",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "P2.1 Telegram POS Fatal Alert",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare inventory batch update": {
+        "main": [
+          [
+            {
+              "node": "Batch Write inventory_current",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Batch Write inventory_current": {
+        "main": [
+          [
+            {
+              "node": "POS Sync Result",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "P2.1 Telegram POS Fatal Alert",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "saveDataSuccessExecution": "none",
+      "saveDataErrorExecution": "all",
+      "executionTimeout": 900
+    },
+    "staticData": null,
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "nodeGroups": [],
+    "pinData": {},
+    "versionId": "a565513d-11c8-4385-9f2e-e2e515d16594",
+    "activeVersionId": null,
+    "versionCounter": 6,
+    "triggerCount": 0,
+    "sourceWorkflowId": null,
+    "tags": [],
+    "shared": [
+      {
+        "updatedAt": "2026-07-15T10:49:44.297Z",
+        "createdAt": "2026-07-15T10:49:44.297Z",
+        "role": "workflow:owner",
+        "workflowId": "P2POSV3LANA0001",
+        "projectId": "wMRPVd5qh2K6WsuR",
+        "project": {
+          "updatedAt": "2026-04-21T03:29:32.379Z",
+          "createdAt": "2026-04-21T03:23:23.082Z",
+          "id": "wMRPVd5qh2K6WsuR",
+          "name": "lana design <la.nadesignsince2022@gmail.com>",
+          "type": "personal",
+          "icon": null,
+          "description": null,
+          "customTelemetryTags": [],
+          "creatorId": "95ace515-505e-4fcd-b73a-963b6fad2571"
+        }
+      }
+    ],
+    "versionMetadata": {
+      "name": null,
+      "description": null
+    }
+  }
+]

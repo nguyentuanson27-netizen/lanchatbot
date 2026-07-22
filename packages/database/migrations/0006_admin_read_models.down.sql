@@ -1,0 +1,10 @@
+DROP VIEW IF EXISTS admin_audit_v;
+DROP VIEW IF EXISTS admin_pancake_outbox_v;
+DROP VIEW IF EXISTS admin_meta_outbox_v;
+DROP VIEW IF EXISTS admin_inbox_v;
+DROP VIEW IF EXISTS admin_worker_status_v;
+DROP VIEW IF EXISTS admin_evaluations_v;
+DROP VIEW IF EXISTS admin_conversation_events_v;
+DROP VIEW IF EXISTS admin_messages_v;
+DROP VIEW IF EXISTS admin_conversations_v;
+DROP VIEW IF EXISTS admin_pages_v;

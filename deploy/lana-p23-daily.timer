@@ -1,0 +1,11 @@
+[Unit]
+Description=Run La.na catalog ingestion daily at 01:00 Asia/Ho_Chi_Minh
+
+[Timer]
+OnCalendar=*-*-* 01:00:00 Asia/Ho_Chi_Minh
+Persistent=true
+AccuracySec=1min
+Unit=lana-p23-daily.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,1762 @@
+{
+  "id": "P23QDRANTLANA001",
+  "name": "P2.3B - Stable Qdrant Ingestion + Image Metadata",
+  "description": "Sharded, resumable image/vector ingestion into Qdrant with Gemini-generated image metadata. Does not update product_registry.",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1b597adb-8757-405c-982b-1e59bf20489a",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1320,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "183f2463-9b14-45fc-be32-cd2334da9307",
+      "name": "Schedule Every 1 Day",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const { createClient } = require('redis');\nconst client = createClient({ url: $env.REDIS_URL || 'redis://redis:6379' });\nawait client.connect();\nconst parsedCount = Number.parseInt($env.INGEST_SHARD_COUNT || '1', 10);\nconst shardCount = Number.isInteger(parsedCount) ? Math.min(32, Math.max(1, parsedCount)) : 1;\nconst parsedIndex = Number.parseInt($env.INGEST_SHARD_INDEX || '0', 10);\nconst shardIndex = Number.isInteger(parsedIndex) ? Math.min(shardCount - 1, Math.max(0, parsedIndex)) : 0;\nconst lockKey = `lock:ingest:lana_multimodal_data_v2:shard:${shardIndex}:of:${shardCount}`;\nconst lockToken = String($execution.id) + ':' + Date.now();\nlet acquired = false;\ntry {\n  acquired = (await client.set(lockKey, lockToken, { NX: true, PX: 14400000 })) === 'OK';\n} finally {\n  await client.quit();\n}\nreturn [{ json: {\n  lock_acquired: acquired,\n  lock_key: lockKey,\n  lock_token: lockToken,\n  run_id: String($execution.id),\n  run_group: String($env.INGEST_RUN_GROUP || $execution.id),\n  started_at: new Date().toISOString(),\n  shard_count: shardCount,\n  shard_index: shardIndex,\n  shard_label: `${shardIndex + 1}/${shardCount}`\n} }];"
+      },
+      "id": "ff04eb64-ab42-4870-9ff9-2d6bdae1484d",
+      "name": "Acquire Ingestion Lock",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1080,
+        210
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8dd54b33-f3f9-4b9c-b6b4-db6c828d4f49",
+              "leftValue": "={{ $json.lock_acquired }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7f03c075-21e3-455b-ab2c-4e47125d9de4",
+      "name": "If Lock Acquired",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -860,
+        210
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DATA_INGESTION_V2_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "product_registry",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "cd21f38f-d427-403c-95b3-cab636c3f5c9",
+      "name": "Read product_registry",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -640,
+        120
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "U1qa3eW2qKm2vHWg",
+          "name": "nguyentuanson27"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true,
+      "notes": "Một dòng cho mỗi MA_SP cha. Không chứa giá hoặc tồn kho.",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const normalizeHeader = (value) => String(value || '')\n  .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/đ/g, 'd').replace(/Đ/g, 'D')\n  .trim().replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '').toUpperCase();\nconst row = (value) => Object.fromEntries(Object.entries(value || {}).map(([k,v]) => [normalizeHeader(k), v]));\nconst enabled = (v) => !['false','0','no','off','khong','không'].includes(String(v ?? 'true').trim().toLowerCase());\nconst tags = (v) => [...new Set(String(v || '').split(/[|,;\\n]+/).map(x => x.trim().toUpperCase()).filter(Boolean))];\nconst registry = {};\nconst errors = [];\nfor (const [index, item] of $input.all().entries()) {\n  const r = row(item.json);\n  const maSp = String(r.MA_SP || '').trim().toUpperCase();\n  if (!maSp) continue;\n  if (registry[maSp]) errors.push('DUPLICATE_MA_SP:' + maSp);\n  registry[maSp] = {\n    ma_sp: maSp,\n    sheet_row: Number(r.ROW_NUMBER || index + 2),\n    xml_group_id: String(r.XML_GROUP_ID || maSp).trim().toUpperCase(),\n    shop_alias: String(r.SHOP_ALIAS || r.SHOP || 'LANA').trim().toUpperCase(),\n    brand: String(r.BRAND || 'lanadesign').trim(),\n    rule_type: String(r.RULE_TYPE || '').trim().toUpperCase(),\n    category: String(r.CATEGORY || r.DANH_MUC || '').trim().toUpperCase(),\n    material_override: String(r.MATERIAL_OVERRIDE || '').trim(),\n    description_override: String(r.DESCRIPTION_OVERRIDE || '').trim(),\n    color_override: tags(r.COLOR_OVERRIDE),\n    style_override: tags(r.STYLE_OVERRIDE),\n    material_components_override: String(r.MATERIAL_COMPONENTS_OVERRIDE || '').trim(),\n    active: enabled(r.ACTIVE),\n    aliases: tags(r.ALIASES || r.ALIAS),\n    search_colors: tags(r.SEARCH_COLORS || r.MAU),\n    search_styles: tags(r.SEARCH_STYLES || r.KIEU_DANG),\n    search_materials: tags(r.SEARCH_MATERIALS),\n    search_silhouettes: tags(r.SEARCH_SILHOUETTES || r.DANG),\n    search_occasions: tags(r.SEARCH_OCCASIONS || r.DIP_MAC),\n    source_updated_at: String(r.SOURCE_UPDATED_AT || '').trim(),\n    xml_title: String(r.XML_TITLE || '').trim(),\n    description_xml: String(r.DESCRIPTION_XML || '').trim(),\n    material_xml: String(r.MATERIAL_XML || '').trim(),\n    xml_link: String(r.XML_LINK || '').trim(),\n    xml_image_urls: tags(r.XML_IMAGE_URLS),\n    auto_confidence: Number(r.AUTO_CONFIDENCE || 0),\n    review_status: String(r.REVIEW_STATUS || '').trim().toUpperCase(),\n    source_hash: String(r.SOURCE_HASH || '').trim(),\n    xml_updated_at: String(r.XML_UPDATED_AT || '').trim()\n  };\n}\nreturn [{ json: { registry, registry_count: Object.keys(registry).length, registry_errors: errors } }];"
+      },
+      "id": "8f4f8d1d-2418-400a-b8c6-6eeb0bbff9ac",
+      "name": "Build Registry Map",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.LANA_PRODUCT_FEED_URL || 'https://www.lanadesign.vn/partner_feeds/danh-muc-lanadesign-vn.xml' }}",
+        "options": {
+          "timeout": 45000,
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "0d08476d-0721-467c-82fe-97b281ada786",
+      "name": "Fetch Webstore XML",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -200,
+        120
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst source = $input.first().json || {};\nconst profiles = Array.isArray(source.profiles) ? source.profiles : [];\nconst run = $('Acquire Ingestion Lock').first().json;\nconst normalizeText = value => String(value || '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').trim().toLowerCase();\nconst normalizeImageUrl = value => {\n  const raw = String(value || '').trim();\n  if (!raw) return '';\n  try {\n    const url = new URL(raw);\n    url.hash = '';\n    url.protocol = url.protocol.toLowerCase();\n    url.hostname = url.hostname.toLowerCase();\n    for (const key of [...url.searchParams.keys()]) {\n      if (/^(utm_|fbclid$|gclid$|_ga$)/i.test(key)) url.searchParams.delete(key);\n    }\n    url.searchParams.sort();\n    return url.toString();\n  } catch (_) {\n    return raw;\n  }\n};\nconst uuid = seed => {\n  const chars = crypto.createHash('sha256').update(seed).digest('hex').slice(0, 32).split('');\n  chars[12] = '5';\n  chars[16] = (parseInt(chars[16], 16) & 3 | 8).toString(16);\n  const value = chars.join('');\n  return [value.slice(0,8), value.slice(8,12), value.slice(12,16), value.slice(16,20), value.slice(20)].join('-');\n};\nconst jobs = [];\nfor (const profile of profiles) {\n  const reg = profile.reg || {};\n  const description = reg.description_override || profile.description_xml;\n  const material = profile.material_xml || (reg.material_override || []).join(' | ');\n  const brand = reg.brand || profile.brand_xml || 'lanadesign';\n  const seen = new Set();\n  for (let index = 0; index < (profile.images || []).length; index++) {\n    const imageUrl = String(profile.images[index] || '').trim();\n    const normalizedImageUrl = normalizeImageUrl(imageUrl);\n    if (!normalizedImageUrl || seen.has(normalizedImageUrl)) continue;\n    seen.add(normalizedImageUrl);\n    const pointId = uuid([normalizeText(brand), reg.ma_sp, normalizedImageUrl].join('|'));\n    const payload = {\n      product_id: reg.ma_sp, ma_sp: reg.ma_sp, aliases: profile.aliases, xml_group_id: profile.group_id,\n      shop_alias: reg.shop_alias, brand, rule_type: profile.rule_type, category: profile.category,\n      title: profile.title, description, material, material_components: profile.material_components || {},\n      color_primary: profile.color_primary || [], color_detail: profile.color_detail || [],\n      style_primary: profile.style_primary || '', style_secondary: profile.style_secondary || '',\n      style_scores: profile.style_scores || {}, extraction_warnings: profile.extraction_warnings || [],\n      extraction_version: source.extraction_version || profile.extraction_version || '',\n      product_link: profile.product_link, image_url: imageUrl, normalized_image_url: normalizedImageUrl,\n      image_role: (profile.primary_images || []).includes(imageUrl) ? 'PRIMARY' : 'ADDITIONAL', image_sort_order: index + 1,\n      images_array: (profile.images || []).slice(0, 8), size_options: profile.sizes, classifications: profile.classifications,\n      search_colors: profile.search_colors, search_styles: profile.search_styles, search_materials: profile.search_materials,\n      search_silhouettes: profile.search_silhouettes, search_occasions: profile.search_occasions,\n      active: reg.active, source: 'WEBSTORE_XML', source_updated_at: profile.xml_updated_at,\n      auto_confidence: profile.auto_confidence, review_status: profile.review_status\n    };\n    const componentText = Object.entries(profile.material_components || {})\n      .map(([component, values]) => component + ': ' + (values || []).join(', ')).join('. ');\n    const contextual = [\n      profile.title, profile.category, ...(profile.color_detail || []), ...(profile.search_colors || []),\n      profile.style_primary, profile.style_secondary, componentText, material,\n      ...(profile.search_materials || []), ...(profile.search_silhouettes || []), ...(profile.search_occasions || []), description\n    ].filter(Boolean).join('. ').slice(0, 1200);\n    const sourceHash = crypto.createHash('sha256').update(JSON.stringify({payload, contextual, xml_source_hash: profile.source_hash})).digest('hex');\n    jobs.push({json:{\n      run_id: run.run_id, started_at: run.started_at, point_id: pointId, source_hash: sourceHash,\n      payload, contextual_text: contextual, image_url: imageUrl, normalized_image_url: normalizedImageUrl,\n      job_valid: true, validation_error: '', delete_requested: reg.active === false,\n      shard_count: Number(run.shard_count || 1), shard_index: Number(run.shard_index || 0), shard_label: run.shard_label\n    }});\n  }\n}\nif (!jobs.length) return [{json:{\n  run_id: run.run_id, started_at: run.started_at, point_id: '', source_hash: '', payload: {}, image_url: '',\n  normalized_image_url: '', job_valid: false, validation_error: 'no_matching_xml_products_or_images',\n  delete_requested: false, shard_count: Number(run.shard_count || 1), shard_index: Number(run.shard_index || 0), shard_label: run.shard_label\n}}];\nreturn jobs;"
+      },
+      "id": "4ab8d60e-1c76-44c6-a0f8-3f728f271b5c",
+      "name": "Prepare Ingestion Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        620,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "374c43fd-aa7c-42d5-942d-b5d32b2236a1",
+      "name": "Loop Over Images",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        840,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e7a05f57-3de3-4ca5-9060-a0d2c0ed8f4d",
+              "leftValue": "={{ $json.job_valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c7b4ef13-3783-4a4e-8e3e-800793f655f6",
+      "name": "If Job Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1060,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f427cd8a-3bc9-4b13-9c7b-7b75ada1899d",
+              "leftValue": "={{ $json.delete_requested }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e71d8292-fcbd-4ea1-b7f5-ebfbd8c9f6cc",
+      "name": "If Delete Requested",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ ($env.QDRANT_BASE_URL || 'https://355c0b3c-1e7f-4fa5-9235-72559195dd72.eu-central-1-0.aws.cloud.qdrant.io') + '/collections/' + ($env.QDRANT_COLLECTION_INGEST_V2 || 'lana_multimodal_data_v2') + '/points/delete?wait=true' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api-key",
+              "value": "={{ $env.QDRANT_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ points: [$json.point_id] }) }}",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "5ae35eff-ec38-4fa0-8d36-d1e37460c190",
+      "name": "Delete Qdrant Point",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1500,
+        -40
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const job = $('Loop Over Images').item.json;\nreturn [{ json: { status: 'DELETED', point_id: job.point_id, ma_sp: job.payload?.ma_sp || '', image_url: job.image_url, error: '' } }];"
+      },
+      "id": "6c5ac8d4-e7bf-4432-baa7-952b15262702",
+      "name": "Mark Deleted",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1720,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "47240d32-7ecc-4896-8601-7f4d5c1a7ce9",
+              "leftValue": "={{ $json.should_process }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "39f8666b-825a-4c83-9ee1-8cc4f9f9a1ff",
+      "name": "If Needs Processing",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1940,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { status: 'SKIPPED', point_id: $json.point_id, ma_sp: $json.payload?.ma_sp || '', image_url: $json.image_url, error: '' } }];"
+      },
+      "id": "365d646a-b7ac-4204-acb8-0b65c6e02950",
+      "name": "Mark Skipped",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.image_url }}",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "8bc8e0e4-9cd5-4f63-a7ff-30e517b8efd4",
+      "name": "Download Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2160,
+        80
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const job = $('Loop Over Images').item.json;\nconst binary = $input.item.binary?.data;\nif (!binary) throw new Error('download_returned_no_binary_image');\nconst buffer = await this.helpers.getBinaryDataBuffer(0, 'data');\nconst maxBytes = Number($env.INGEST_IMAGE_MAX_BYTES || 12582912);\nif (buffer.length > maxBytes) throw new Error('image_exceeds_max_bytes');\nconst mime = String(binary.mimeType || '').toLowerCase();\nconst allowed = ['image/jpeg', 'image/png', 'image/webp'];\nif (mime && !allowed.includes(mime)) throw new Error('unsupported_image_mime:' + mime);\nreturn [{ json: job, binary: $input.item.binary }];"
+      },
+      "id": "ba9de29d-ac47-4b81-8d24-1949d25be13b",
+      "name": "Validate Image",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2380,
+        80
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "resize",
+        "width": 800,
+        "height": null,
+        "resizeOption": "onlyIfLarger",
+        "options": {}
+      },
+      "id": "8efed801-63f3-4ab4-9f56-f1255d1a2c70",
+      "name": "Resize Image",
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        2600,
+        80
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const buffer = await this.helpers.getBinaryDataBuffer(0, 'data');\nreturn [{ json: { ...$json, raw_base64: buffer.toString('base64') }, binary: $input.item.binary }];"
+      },
+      "id": "faea51f6-72a5-470f-a304-f208cb992ca3",
+      "name": "Build Raw Base64",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2820,
+        80
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://139.162.18.93:7000/api/remove",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "={{ $env.REMBG_MODEL || 'u2netp' }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000,
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $env.REMBG_AUTH_HEADER || '' }}"
+            }
+          ]
+        },
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth"
+      },
+      "id": "4bc48cb2-32ea-43f0-aef9-8b218f8076a3",
+      "name": "Remove Background",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3700,
+        80
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "ttEC4fR3e7K7d4Pv",
+          "name": "REMBG VPS 139.162.18.93"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const before = $('Build Raw Base64').item.json;\nconst buffer = await this.helpers.getBinaryDataBuffer(0, 'data');\nreturn [{ json: { ...before, cutout_base64: buffer.toString('base64') } }];"
+      },
+      "id": "f50b2041-1dde-4324-8525-975eeb1a0d0a",
+      "name": "Build Cutout Base64",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3920,
+        80
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://us-central1-aiplatform.googleapis.com/v1/projects/project-d44e0453-82e8-4ea2-a9d/locations/us-central1/publishers/google/models/multimodalembedding@001:predict",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ instances: [{ image: { bytesBase64Encoded: $json.raw_base64 }, text: $json.contextual_text }], parameters: { dimension: 1408 } }) }}",
+        "options": {
+          "timeout": 60000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "5f6b8a93-8d68-4619-8c7c-873465ef322f",
+      "name": "Vertex Raw and Text",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4140,
+        80
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "kN9aNmjQQuAZEimD",
+          "name": "la-clothing-vertex"
+        }
+      },
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $('Build Cutout Base64').item.json;\nconst prediction = $json.predictions?.[0] || {};\nif (!Array.isArray(prediction.imageEmbedding) || prediction.imageEmbedding.length !== 1408) throw new Error('invalid_raw_image_embedding');\nif (!Array.isArray(prediction.textEmbedding) || prediction.textEmbedding.length !== 1408) throw new Error('invalid_product_text_embedding');\nconst { raw_base64, ...safe } = source;\nreturn [{ json: { ...safe, vector_image_raw: prediction.imageEmbedding, vector_product_text: prediction.textEmbedding } }];"
+      },
+      "id": "ae1ff1bb-ac5e-4280-92e4-b7e8b54c8d4d",
+      "name": "Extract Raw Vectors",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4360,
+        80
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://us-central1-aiplatform.googleapis.com/v1/projects/project-d44e0453-82e8-4ea2-a9d/locations/us-central1/publishers/google/models/multimodalembedding@001:predict",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ instances: [{ image: { bytesBase64Encoded: $json.cutout_base64 } }], parameters: { dimension: 1408 } }) }}",
+        "options": {
+          "timeout": 60000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "4f8df2bc-730e-4d48-b35d-c352f833bbfe",
+      "name": "Vertex Cutout",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4580,
+        80
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "kN9aNmjQQuAZEimD",
+          "name": "la-clothing-vertex"
+        }
+      },
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $('Extract Raw Vectors').item.json;\nconst cutout = $json.predictions?.[0]?.imageEmbedding;\nif (!Array.isArray(cutout) || cutout.length !== 1408) throw new Error('invalid_cutout_embedding');\nconst { cutout_base64, vector_image_raw, vector_product_text, ...job } = source;\nreturn [{ json: { ...job, qdrant_point: {\n  id: job.point_id,\n  vector: { image_raw: vector_image_raw, image_cutout: cutout, product_text: vector_product_text },\n  payload: { ...job.payload, catalog_version: $env.CATALOG_BUILD_VERSION || 'catalog-v2', content_hash: job.source_hash, embedding_model: 'multimodalembedding@001', embedding_dimension: 1408, ingestion_owner: 'P2.3_XML_REGISTRY', ingestion_version: '4.3.0-p2.3-structured-extraction', content_ingested_at: new Date().toISOString() }\n} } }];"
+      },
+      "id": "a8336355-c8fa-4cd1-81b7-7d64d3c03581",
+      "name": "Build Qdrant Point",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4800,
+        80
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ ($env.QDRANT_BASE_URL || 'https://355c0b3c-1e7f-4fa5-9235-72559195dd72.eu-central-1-0.aws.cloud.qdrant.io') + '/collections/' + ($env.QDRANT_COLLECTION_INGEST_V2 || 'lana_multimodal_data_v2') + '/points?wait=true' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api-key",
+              "value": "={{ $env.QDRANT_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ points: [$json.qdrant_point] }) }}",
+        "options": {
+          "timeout": 60000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "6c00626d-760f-404d-8a9c-7020095306b0",
+      "name": "Upsert Qdrant Point",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        5240,
+        80
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const job = $('Build Qdrant Point').item.json;\nreturn [{ json: { status: 'SUCCESS', point_id: job.point_id, ma_sp: job.payload?.ma_sp || '', image_url: job.image_url, error: '' } }];"
+      },
+      "id": "d7009bff-2f69-42f3-aa60-deec325f63f1",
+      "name": "Mark Success",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5460,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let job = {};\ntry { job = $('Loop Over Images').item.json || {}; } catch (_) {}\nconst input = $input.first().json || {};\nconst message = String(job.validation_error || input.error?.message || input.message || input.description || 'unknown_ingestion_error').slice(0, 1000);\nreturn [{ json: { status: 'FAILED', point_id: job.point_id || '', ma_sp: job.payload?.ma_sp || '', image_url: job.image_url || '', error: message } }];"
+      },
+      "id": "b6adbf47-f820-44f5-b677-64fc23912a25",
+      "name": "Mark Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1720,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst inputItems = $input.all();\nconst batchContext = $('Select Pending Point Batch').first().json || {};\nconst failedInBatch = inputItems.filter(item => String(item?.json?.status || '') === 'FAILED').length;\nif (Number(batchContext.remaining_point_count || 0) > 0 || failedInBatch > 0) {\n  const rows = inputItems.length ? inputItems : [{json:{status:'SKIPPED',error:''}}];\n  const reason = failedInBatch > 0 ? 'SKIPPED_BATCH_FAILED' : 'SKIPPED_MORE_PENDING';\n  return rows.map((item,index) => index === 0 ? {...item,json:{...(item.json || {}),orphan_cleanup_status:reason,orphan_scanned:0,orphan_owned_scanned:0,orphan_shard_owned_scanned:0,orphan_candidates:0,orphan_deleted:0,orphan_dry_run:true,orphan_cleanup_error:''}} : item);\n}\nconst manifest = $('Prepare Ingestion Jobs').all().map(item => item.json || {});\nconst run = $('Acquire Ingestion Lock').first().json || {};\nconst expected = new Set(manifest.filter(job => job.job_valid && !job.delete_requested && job.point_id).map(job => String(job.point_id)));\nconst shardCount = Math.max(1, Number(run.shard_count || 1));\nconst shardIndex = Math.max(0, Number(run.shard_index || 0));\nconst baseUrl = String($env.QDRANT_BASE_URL || 'https://355c0b3c-1e7f-4fa5-9235-72559195dd72.eu-central-1-0.aws.cloud.qdrant.io').replace(/\\/$/, '');\nconst collection = String($env.QDRANT_COLLECTION_INGEST_V2 || 'lana_multimodal_data_v2');\nconst apiKey = String($env.QDRANT_API_KEY || '');\nconst enabled = !['false','0','no','off'].includes(String($env.ORPHAN_CLEANUP_ENABLED || 'true').trim().toLowerCase());\nconst dryRun = ['true','1','yes','on'].includes(String($env.ORPHAN_CLEANUP_DRY_RUN || 'false').trim().toLowerCase());\nconst pageLimit = Math.min(1000, Math.max(32, Number($env.ORPHAN_SCROLL_PAGE_SIZE || 256)));\nconst maxPages = Math.min(10000, Math.max(1, Number($env.ORPHAN_SCROLL_MAX_PAGES || 1000)));\nconst maxDelete = Math.min(10000, Math.max(1, Number($env.ORPHAN_DELETE_MAX || 1000)));\nconst maxRatio = Math.min(1, Math.max(0.01, Number($env.ORPHAN_DELETE_MAX_RATIO || 0.35)));\nlet scanned = 0, ownedScanned = 0, shardOwnedScanned = 0, deleted = 0, pages = 0;\nlet orphanIds = [];\nconst request = async (options) => {\n  let lastError;\n  for (let attempt = 1; attempt <= 3; attempt++) {\n    try { return await this.helpers.httpRequest(options); }\n    catch (error) { lastError = error; if (attempt < 3) await new Promise(resolve => setTimeout(resolve, attempt * 1000)); }\n  }\n  throw lastError;\n};\nconst finish = (status, error = '') => {\n  const meta = { orphan_cleanup_status: status, orphan_scanned: scanned, orphan_owned_scanned: ownedScanned, orphan_shard_owned_scanned: shardOwnedScanned, orphan_candidates: orphanIds.length, orphan_deleted: deleted, orphan_dry_run: dryRun, orphan_cleanup_error: error };\n  const rows = inputItems.length ? inputItems : [{ json: { status: 'SKIPPED', error: '' } }];\n  return rows.map((item, index) => index === 0 ? { ...item, json: { ...(item.json || {}), ...meta } } : item);\n};\ntry {\n  if (!enabled) return finish('DISABLED');\n  if (!apiKey) throw new Error('ORPHAN_QDRANT_API_KEY_REQUIRED');\n  if (expected.size === 0) throw new Error('ORPHAN_EMPTY_MANIFEST_DELETE_BLOCKED');\n  let offset;\n  while (true) {\n    if (pages >= maxPages) throw new Error('ORPHAN_SCROLL_PAGE_LIMIT_EXCEEDED');\n    const body = { limit: pageLimit, with_payload: true, with_vector: false };\n    if (offset !== undefined && offset !== null) body.offset = offset;\n    const response = await request({ method: 'POST', url: baseUrl + '/collections/' + encodeURIComponent(collection) + '/points/scroll', headers: { 'api-key': apiKey, 'content-type': 'application/json' }, body, json: true, timeout: 30000 });\n    const result = response?.result || {};\n    const points = Array.isArray(result.points) ? result.points : null;\n    if (!points) throw new Error('ORPHAN_SCROLL_RESPONSE_INVALID');\n    pages++;\n    for (const point of points) {\n      scanned++;\n      const id = String(point?.id ?? '');\n      const payload = point?.payload || {};\n      const owned = payload.source === 'WEBSTORE_XML' && (payload.ingestion_owner === 'P2.3_XML_REGISTRY' || payload.ingestion_version === '4.0.0-p2' || payload.ingestion_version === '4.1.0-p2.3' || payload.ingestion_version === '4.2.0-p2.3-orphan-cleanup');\n      if (!id || !owned) continue;\n      ownedScanned++;\n      const belongsToShard = crypto.createHash('sha256').update(id).digest().readUInt32BE(0) % shardCount === shardIndex;\n      if (!belongsToShard) continue;\n      shardOwnedScanned++;\n      if (!expected.has(id)) orphanIds.push(id);\n    }\n    const next = result.next_page_offset;\n    if (next === undefined || next === null) break;\n    offset = next;\n  }\n  orphanIds = [...new Set(orphanIds)];\n  if (orphanIds.length > maxDelete) throw new Error('ORPHAN_DELETE_MAX_EXCEEDED:' + orphanIds.length + '>' + maxDelete);\n  const ratio = shardOwnedScanned > 0 ? orphanIds.length / shardOwnedScanned : 0;\n  if (orphanIds.length > 20 && ratio > maxRatio) throw new Error('ORPHAN_DELETE_RATIO_EXCEEDED:' + ratio.toFixed(4) + '>' + maxRatio);\n  if (!dryRun) {\n    for (let index = 0; index < orphanIds.length; index += 128) {\n      const points = orphanIds.slice(index, index + 128);\n      await request({ method: 'POST', url: baseUrl + '/collections/' + encodeURIComponent(collection) + '/points/delete?wait=true', headers: { 'api-key': apiKey, 'content-type': 'application/json' }, body: { points }, json: true, timeout: 60000 });\n      deleted += points.length;\n    }\n  }\n  return finish(dryRun ? 'DRY_RUN' : 'SUCCESS');\n} catch (error) {\n  const message = String(error?.message || error || 'ORPHAN_CLEANUP_FAILED').slice(0, 1000);\n  const rows = finish('FAILED', message);\n  rows.push({ json: { status: 'FAILED', point_id: '', ma_sp: 'ORPHAN_CLEANUP', image_url: '', error: message, orphan_cleanup_status: 'FAILED', orphan_candidates: orphanIds.length, orphan_deleted: deleted } });\n  return rows;\n}"
+      },
+      "id": "8cf3b3d9-69e8-4ff5-a58a-cdd2b3ba4e43",
+      "name": "Reconcile Orphan Qdrant Points",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1060,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const run = $('Acquire Ingestion Lock').first().json;\nconst batch = $('Select Pending Point Batch').first().json || {};\nconst rows = $input.all().map(item => item.json || {});\nconst count = status => rows.filter(item => item.status === status).length;\nconst failures = rows.filter(item => item.status === 'FAILED');\nconst retryablePattern = /too many requests|\\b429\\b|timeout|timed out|econnreset|socket hang up|\\b500\\b|\\b502\\b|\\b503\\b|\\b504\\b/i;\nconst retryableFailed = failures.filter(item => retryablePattern.test(String(item.error || ''))).length;\nconst fatalFailed = failures.length - retryableFailed;\nconst errors = failures.slice(0, 10).map(item => [item.ma_sp, item.image_url, item.error].filter(Boolean).join(' | '));\nconst cleanup = rows.find(item => item.orphan_cleanup_status) || {};\nconst progress = {\n  run_group: String(run.run_group || run.run_id || ''), run_id: String(run.run_id || ''),\n  shard_index: Number(run.shard_index || 0), shard_count: Number(run.shard_count || 1),\n  pending_before: Number(batch.pending_point_count || 0), selected: Number(batch.batch_selected_point_count || 0),\n  remaining: Number(batch.remaining_point_count || 0) + failures.length,\n  success: count('SUCCESS'), skipped: count('SKIPPED'),\n  deleted: count('DELETED') + Number(cleanup.orphan_deleted || 0), failed: failures.length,\n  retryable_failed: retryableFailed, fatal_failed: fatalFailed,\n  cleanup_status: String(cleanup.orphan_cleanup_status || 'UNKNOWN'), finished_at: new Date().toISOString()\n};\nconst {createClient} = require('redis');\nconst client = createClient({url:$env.REDIS_URL || 'redis://redis:6379'});\nawait client.connect();\ntry {\n  const key = 'ingest:progress:lana_multimodal_data_v2:shard:' + progress.shard_index + ':of:' + progress.shard_count;\n  await client.set(key, JSON.stringify(progress), {EX:604800});\n} finally { await client.quit(); }\nconst progressNote = ['SHARD=' + (progress.shard_index + 1) + '/' + progress.shard_count, 'GROUP=' + progress.run_group, 'PENDING=' + progress.pending_before, 'SELECTED=' + progress.selected, 'REMAINING=' + progress.remaining, 'RETRYABLE=' + retryableFailed, 'FATAL=' + fatalFailed].join(' | ');\nconst cleanupNote = ['ORPHAN', progress.cleanup_status, 'scanned=' + Number(cleanup.orphan_scanned || 0), 'owned=' + Number(cleanup.orphan_owned_scanned || 0), 'candidates=' + Number(cleanup.orphan_candidates || 0), 'deleted=' + Number(cleanup.orphan_deleted || 0)].join(' | ');\nreturn [{json:{\n  RUN_ID: run.run_id, STARTED_AT: run.started_at, FINISHED_AT: progress.finished_at,\n  TOTAL: rows.length, SUCCESS: progress.success, SKIPPED: progress.skipped,\n  DELETED: progress.deleted, FAILED: failures.length,\n  ERROR_SAMPLE: [progressNote, cleanupNote, ...errors].join(' || ').slice(0, 45000)\n}}];"
+      },
+      "id": "acf6a6ca-cbf5-4fe9-b633-d4993c90b36c",
+      "name": "Build Run Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        -180
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.DATA_INGESTION_V2_SHEET_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "INGEST_LOG",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a50870d9-ec89-439e-8575-7705d454d311",
+      "name": "Append INGEST_LOG",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1280,
+        -180
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "U1qa3eW2qKm2vHWg",
+          "name": "nguyentuanson27"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const { createClient } = require('redis');\nconst lock = $('Acquire Ingestion Lock').first().json;\nconst client = createClient({ url: $env.REDIS_URL || 'redis://redis:6379' });\nawait client.connect();\nlet released = 0;\ntry {\n  released = await client.eval(\"if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end\", { keys: [lock.lock_key], arguments: [lock.lock_token] });\n} finally { await client.quit(); }\nreturn [{ json: { ...$input.first().json, lock_released: released === 1 } }];"
+      },
+      "id": "d14b2a36-8c9d-4042-a42d-7206fb47f357",
+      "name": "Release Ingestion Lock",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1500,
+        -180
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "id": "cd4cff9f-a6a0-4e1a-87a5-76c69b7b04da",
+      "name": "Already Running",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "width": 780,
+        "height": 420,
+        "content": "## P2.3B - Stable point-batch Qdrant ingestion\n\nReads Registry + XML once per execution, builds a complete deterministic point manifest, then processes only missing or stale points owned by the current shard.\n\n- Run P2.3A first when Registry fields need refreshing.\n- Point ownership: SHA-256(point_id) modulo shard count. Shards never overlap.\n- Change detection compares expected source hash with Qdrant payload `content_hash`.\n- `INGEST_POINT_BATCH_SIZE` is per shard; start with 6 and three shards.\n- Keep inactive. Launch only through the managed batch helper.\n- Orphan cleanup runs only on the final successful batch for each shard.\n- Vertex calls use a Redis global rate slot. `VERTEX_MIN_INTERVAL_MS` defaults to 4000 ms."
+      },
+      "id": "870c2c9c-48e5-4022-8b3c-522890d59738",
+      "name": "README - Required setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1320,
+        -360
+      ]
+    },
+    {
+      "parameters": {
+        "width": 620,
+        "height": 260,
+        "content": "## INGEST_LOG header\n\nPaste into A1:\n\n`RUN_ID\tSTARTED_AT\tFINISHED_AT\tTOTAL\tSUCCESS\tSKIPPED\tDELETED\tFAILED\tERROR_SAMPLE`\n\nSuccessful execution data is not retained by n8n; the summary is written here to avoid SQLite growth."
+      },
+      "id": "9e887322-5f2c-4cae-9765-57bfea054e79",
+      "name": "README - INGEST_LOG columns",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        620,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "width": 700,
+        "height": 280,
+        "content": "## Stable identity and safe cleanup\n\nPoint ID: normalized brand + MA_SP + normalized image URL. Tracking parameters and URL fragments are removed before hashing.\n\nThe full manifest is built before point selection. Orphan cleanup is shard-aware and runs only when that shard has no remaining pending point and the current batch has no failure."
+      },
+      "id": "075840a1-35de-4ff6-b787-de5f2276f12a",
+      "name": "README - Deletion and IDs",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "41a48c5d-cd1a-4c2f-9b34-1bce3741d36f",
+      "name": "XML to JSON",
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        120
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const input=$input.first().json||{},failed=Number(input.FAILED||0);if(failed<=0)return[{json:input}];const alertText=['🚨 LANA / INGESTION ERROR','Workflow: Catalog ingestion','Run: '+String(input.RUN_ID||''),'Failed: '+failed+'/'+String(input.TOTAL||0),'Sample: '+String(input.ERROR_SAMPLE||'').slice(0,500),'Time: '+new Date().toISOString()].join('\\n');const token=String($env.TELEGRAM_BOT_TOKEN||''),chatId=String($env.TELEGRAM_ALERT_CHAT_ID||'');let telegram_alert_sent=false,telegram_alert_error='';if(token&&chatId){try{await this.helpers.httpRequest({method:'POST',url:'https://api.telegram.org/bot'+token+'/sendMessage',body:{chat_id:chatId,text:alertText,disable_web_page_preview:true},json:true,timeout:15000});telegram_alert_sent=true}catch(e){telegram_alert_error=String(e.message||e).slice(0,200)}}else telegram_alert_error='TELEGRAM_ENV_MISSING';return[{json:{...input,telegram_alert_sent,telegram_alert_error}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2780,
+        160
+      ],
+      "id": "p2-1-0001-4000-8000-000000000021",
+      "name": "P2.1 Telegram Ingestion Alert"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const errorInput = $input.first().json || {};\nlet lockReleased = false;\ntry {\n  const lock = $('Acquire Ingestion Lock').first().json || {};\n  if (lock.lock_key && lock.lock_token) {\n    const {createClient} = require('redis');\n    const client = createClient({url: $env.REDIS_URL || 'redis://redis:6379'});\n    await client.connect();\n    try {\n      const released = await client.eval(\"if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end\", {keys:[lock.lock_key], arguments:[lock.lock_token]});\n      lockReleased = released === 1;\n    } finally { await client.quit(); }\n  }\n} catch (_) {}\nconst alertText = ['🚨 LANA / INGESTION FATAL ERROR', 'Error: ' + String(errorInput.error?.message || errorInput.message || errorInput.description || 'UNKNOWN').slice(0, 500), 'Execution: ' + String($execution.id || ''), 'Lock released: ' + String(lockReleased), 'Time: ' + new Date().toISOString()].join('\\n');\nconst token = String($env.TELEGRAM_BOT_TOKEN || ''), chatId = String($env.TELEGRAM_ALERT_CHAT_ID || '');\nif (token && chatId) {\n  try { await this.helpers.httpRequest({method:'POST', url:'https://api.telegram.org/bot' + token + '/sendMessage', body:{chat_id:chatId,text:alertText,disable_web_page_preview:true}, json:true, timeout:15000}); } catch (_) {}\n}\nreturn [];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1880,
+        700
+      ],
+      "id": "p2-1-0020-4000-8000-000000000021",
+      "name": "P2.1 Telegram Ingestion Fatal Alert"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "61b5a2b1-754a-48d4-b8f1-7c9cc5583153",
+      "name": "Merge Registry and XML",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        180,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst input = $input.first().json || {};\nconst registry = input.registry || {};\nconst run = $('Acquire Ingestion Lock').first().json || {};\nconst EXTRACTION_VERSION = '2.0.0-structured-vi';\n\nconst unwrap = (v) => Array.isArray(v) ? v[0] : v;\nconst text = (v) => {\n  v = unwrap(v);\n  if (v && typeof v === 'object') return String(v._ ?? v['#text'] ?? '').trim();\n  return String(v ?? '').trim();\n};\nconst list = (v) => v == null ? [] : (Array.isArray(v) ? v : [v]);\nconst unicodeText = (v) => String(v || '')\n  .normalize('NFC')\n  .replace(/<br\\s*\\/?>/gi, '\\n')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;/gi, ' ')\n  .replace(/\\r/g, '')\n  .replace(/[ \\t]+/g, ' ')\n  .trim();\nconst lowerVi = (v) => unicodeText(v).toLocaleLowerCase('vi-VN');\nconst ascii = (v) => lowerVi(v).normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/đ/g, 'd');\nconst unique = (values) => [...new Set((values || []).map(v => String(v || '').trim().toUpperCase()).filter(Boolean))];\nconst merge = (...sets) => unique(sets.flat());\nconst matchLabels = (haystack, rules) => rules.filter(rule => rule.pattern.test(haystack)).map(rule => rule.label);\nconst escapeRegex = (v) => String(v || '').replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\nconst normalizeUrl = (raw) => {\n  let value = String(raw || '').trim().replace(/\\.$/, '');\n  if (!/^https:\\/\\//i.test(value)) throw new Error('url_must_use_https');\n  const hash = value.indexOf('#'); if (hash >= 0) value = value.slice(0, hash);\n  const q = value.indexOf('?'); if (q < 0) return value;\n  const base = value.slice(0, q);\n  const query = value.slice(q + 1).split('&').filter(Boolean).filter(part => {\n    const key = part.split('=')[0].toLowerCase();\n    return !key.startsWith('utm_') && key !== 'fbclid' && key !== 'gclid';\n  }).sort();\n  return query.length ? base + '?' + query.join('&') : base;\n};\n\nconst root = input;\nconst channel = unwrap(unwrap(root.rss)?.channel) || unwrap(root.channel) || {};\nconst xmlItems = list(channel.item);\nconst groups = new Map();\nfor (const item of xmlItems) {\n  const groupId = text(item['g:item_group_id'] ?? item.item_group_id).toUpperCase();\n  if (!groupId) continue;\n  if (!groups.has(groupId)) groups.set(groupId, { items: [], images: new Set(), primaryImages: new Set(), attrs: [] });\n  const group = groups.get(groupId);\n  group.items.push(item);\n  const primary = text(item['g:image_link'] ?? item.image_link);\n  if (primary) { group.images.add(primary); group.primaryImages.add(primary); }\n  for (const image of list(item.additional_image_link)) { const value = text(image); if (value) group.images.add(value); }\n  for (const attr of list(item.additional_variant_attribute)) group.attrs.push({ label: text(attr.label), value: text(attr.value) });\n}\n\nconst colorDefinitions = [\n  { primary: 'TRẮNG', details: ['trắng ngọc trai','trắng kem','trắng sữa','trắng tinh','trắng'] },\n  { primary: 'ĐEN', details: ['đen tuyền','đen'] },\n  { primary: 'KEM', details: ['kem be','kem sữa','kem','beige','màu be'] },\n  { primary: 'NÂU', details: ['nâu nude','nâu tây','nâu be','nâu đất','nâu'] },\n  { primary: 'ĐỎ', details: ['đỏ đô','đỏ rượu','đỏ mận','đỏ tươi','đỏ'] },\n  { primary: 'HỒNG', details: ['hồng nude','hồng phấn','hồng pastel','hồng sen','hồng'] },\n  { primary: 'XANH DƯƠNG', details: ['xanh navy','xanh coban','xanh dương','xanh biển','xanh denim'] },\n  { primary: 'XANH LÁ', details: ['xanh rêu','xanh olive','xanh lá','xanh cốm'] },\n  { primary: 'VÀNG', details: ['vàng kem','vàng mơ','vàng đồng','vàng'] },\n  { primary: 'TÍM', details: ['tím than','tím pastel','tím'] },\n  { primary: 'CAM', details: ['cam đất','cam'] },\n  { primary: 'GHI', details: ['ghi xám','xám ghi','ghi','xám'] },\n  { primary: 'XANH NGỌC', details: ['xanh ngọc'] }\n];\nconst colorContexts = (description, attrs, title) => {\n  const contexts = [];\n  for (const attr of attrs || []) {\n    if (/(^|\\s)(màu|màu sắc|color|colour)(\\s|$)/i.test(lowerVi(attr.label))) contexts.push(unicodeText(attr.value));\n  }\n  const lines = unicodeText(description).split(/\\n|(?<=[.!?;])\\s+/).map(v => v.trim()).filter(Boolean);\n  for (const line of lines) {\n    if (/(^|\\W)(màu sắc|màu chủ đạo|gam màu|tông màu|tone màu|phối màu|màu)(\\W|$)/i.test(lowerVi(line))) contexts.push(line);\n  }\n  const titleText = unicodeText(title);\n  if (/(?:\\s[-–—|]\\s|\\()\\s*(trắng|đen|kem|nâu|đỏ|hồng|xanh|vàng|tím|cam|ghi|xám)/i.test(lowerVi(titleText))) contexts.push(titleText);\n  return contexts;\n};\nconst parseColors = (description, attrs, title, override) => {\n  const overrideValues = unique(override || []);\n  const contexts = overrideValues.length ? overrideValues : colorContexts(description, attrs, title);\n  const haystack = lowerVi(contexts.join(' | '));\n  const primary = [];\n  const detail = [];\n  for (const definition of colorDefinitions) {\n    for (const phrase of definition.details) {\n      const pattern = new RegExp('(^|[^\\\\p{L}])' + escapeRegex(phrase) + '([^\\\\p{L}]|$)', 'iu');\n      if (!pattern.test(haystack)) continue;\n      primary.push(definition.primary);\n      detail.push(phrase.toUpperCase());\n      break;\n    }\n  }\n  if (overrideValues.length && !primary.length) return { primary: overrideValues, detail: overrideValues, contexts };\n  return { primary: unique(primary), detail: unique(detail), contexts };\n};\n\nconst materialDefinitions = [\n  { label: 'THÔ KHẮC LASER', pattern: /thô[^.;\\n]{0,24}khắc\\s*laser/iu, family: 'THÔ' },\n  { label: 'REN THÊU 3D', pattern: /ren[^.;\\n]{0,20}thêu\\s*3d|ren\\s*3d/iu, family: 'REN' },\n  { label: 'TƠ KÍNH THÊU', pattern: /tơ\\s*kính[^.;\\n]{0,20}thêu/iu, family: 'TƠ' },\n  { label: 'TƠ KÍNH', pattern: /tơ\\s*kính/iu, family: 'TƠ' },\n  { label: 'TƠ GƯƠNG', pattern: /tơ\\s*gương/iu, family: 'TƠ' },\n  { label: 'TƠ HOA', pattern: /tơ\\s*hoa/iu, family: 'TƠ' },\n  { label: 'TƠ ỐNG', pattern: /tơ\\s*ống/iu, family: 'TƠ' },\n  { label: 'TƠ NHŨ', pattern: /tơ\\s*nhũ/iu, family: 'TƠ' },\n  { label: 'TƠ MỀM', pattern: /tơ\\s*mềm/iu, family: 'TƠ' },\n  { label: 'LỤA NGỌC TRAI', pattern: /lụa[^.;\\n]{0,16}ngọc\\s*trai/iu, family: 'LỤA' },\n  { label: 'LỤA SATIN', pattern: /lụa\\s*satin|satin/iu, family: 'LỤA' },\n  { label: 'LỤA GẤM', pattern: /lụa\\s*gấm/iu, family: 'LỤA' },\n  { label: 'THÔ LỤA', pattern: /thô\\s*lụa/iu, family: 'THÔ' },\n  { label: 'THÔ BOY', pattern: /thô\\s*boy/iu, family: 'THÔ' },\n  { label: 'VẢI LÓT MỀM', pattern: /(?:vải|lớp)\\s*lót[^.;\\n]{0,20}mềm|lót\\s*mềm/iu, family: 'LÓT' },\n  { label: 'TƠ', pattern: /(^|[^\\p{L}])tơ([^\\p{L}]|$)/iu, family: 'TƠ', generic: true },\n  { label: 'LỤA', pattern: /(^|[^\\p{L}])lụa([^\\p{L}]|$)|silk/iu, family: 'LỤA', generic: true },\n  { label: 'THÔ', pattern: /(^|[^\\p{L}])thô([^\\p{L}]|$)/iu, family: 'THÔ', generic: true },\n  { label: 'REN', pattern: /(^|[^\\p{L}])ren([^\\p{L}]|$)|lace/iu, family: 'REN', generic: true },\n  { label: 'GẤM', pattern: /(^|[^\\p{L}])gấm([^\\p{L}]|$)/iu, family: 'GẤM' },\n  { label: 'VOAN', pattern: /(^|[^\\p{L}])voan([^\\p{L}]|$)|chiffon/iu, family: 'VOAN' },\n  { label: 'LINEN', pattern: /(^|[^\\p{L}])linen([^\\p{L}]|$)/iu, family: 'LINEN' },\n  { label: 'COTTON', pattern: /(^|[^\\p{L}])cotton([^\\p{L}]|$)/iu, family: 'COTTON' },\n  { label: 'TUYTSI', pattern: /tuytsi|tuy\\s*si/iu, family: 'TUYTSI' },\n  { label: 'TWEED', pattern: /(^|[^\\p{L}])tweed([^\\p{L}]|$)/iu, family: 'TWEED' },\n  { label: 'ĐŨI', pattern: /(^|[^\\p{L}])đũi([^\\p{L}]|$)/iu, family: 'ĐŨI' },\n  { label: 'KAKI', pattern: /(^|[^\\p{L}])kaki([^\\p{L}]|$)/iu, family: 'KAKI' },\n  { label: 'DENIM', pattern: /(^|[^\\p{L}])denim([^\\p{L}]|$)/iu, family: 'DENIM' },\n  { label: 'UMI', pattern: /(^|[^\\p{L}])umi([^\\p{L}]|$)/iu, family: 'UMI' },\n  { label: 'TAFTA', pattern: /tafta|taffeta/iu, family: 'TAFTA' },\n  { label: 'ORGANZA', pattern: /organza/iu, family: 'ORGANZA' },\n  { label: 'NHUNG', pattern: /(^|[^\\p{L}])nhung([^\\p{L}]|$)|velvet/iu, family: 'NHUNG' },\n  { label: 'GOL HÀN', pattern: /gol\\s*hàn/iu, family: 'GOL HÀN' },\n  { label: 'VẢI TẰM', pattern: /vải\\s*tằm/iu, family: 'VẢI TẰM' },\n  { label: 'XỐP THÊU', pattern: /xốp[^.;\\n]{0,16}thêu/iu, family: 'XỐP' },\n  { label: 'XỐP', pattern: /(^|[^\\p{L}])xốp([^\\p{L}]|$)/iu, family: 'XỐP', generic: true }\n];\nconst findMaterials = (value) => {\n  const haystack = lowerVi(value);\n  const matches = materialDefinitions.filter(def => def.pattern.test(haystack));\n  const specificFamilies = new Set(matches.filter(def => !def.generic).map(def => def.family));\n  return unique(matches.filter(def => !def.generic || !specificFamilies.has(def.family)).map(def => def.label));\n};\nconst componentLabels = {\n  SHARED: 'CHUNG', AO: 'ÁO', AO_DAI: 'ÁO DÀI', QUAN: 'QUẦN', CHAN_VAY: 'CHÂN VÁY', VAY: 'VÁY',\n  PHU_KIEN: 'PHỤ KIỆN', LOT: 'LÓT'\n};\nconst primaryComponents = (category) => {\n  if (category === 'SET_QUAN') return ['AO','QUAN'];\n  if (category === 'SET_VAY') return ['AO','CHAN_VAY'];\n  if (category === 'COMBO_3_MON') return ['AO','CHAN_VAY','QUAN'];\n  if (category === 'AO_DAI') return ['AO_DAI','QUAN'];\n  if (category === 'CHAN_VAY') return ['CHAN_VAY'];\n  if (category === 'VAY') return ['VAY'];\n  if (category === 'AO') return ['AO'];\n  if (category === 'QUAN') return ['QUAN'];\n  return ['SHARED'];\n};\nconst componentsInClause = (value) => {\n  const v = lowerVi(value);\n  const found = [];\n  if (/áo\\s*dài/iu.test(v)) found.push('AO_DAI');\n  if (/chân\\s*váy/iu.test(v)) found.push('CHAN_VAY');\n  if (/(^|\\W)phụ\\s*kiện(\\W|$)/iu.test(v)) found.push('PHU_KIEN');\n  if (/(^|\\W)(lớp\\s*lót|vải\\s*lót|lót\\s*trong)(\\W|$)/iu.test(v)) found.push('LOT');\n  if (!found.includes('AO_DAI') && /(^|\\W)áo(\\W|$)/iu.test(v)) found.push('AO');\n  if (/(^|\\W)quần(\\W|$)/iu.test(v)) found.push('QUAN');\n  if (!found.includes('CHAN_VAY') && /(^|\\W)váy(\\W|$)/iu.test(v)) found.push('VAY');\n  if (!found.length && /(^|\\W)(set|bộ|toàn bộ|chất liệu)(\\W|$)/iu.test(v)) found.push('SHARED');\n  return [...new Set(found)];\n};\nconst parseMaterialOverride = (raw) => {\n  const result = {};\n  const keyMap = {\n    'CHUNG':'SHARED','SET':'SHARED','ÁO':'AO','AO':'AO','ÁO DÀI':'AO_DAI','AO DAI':'AO_DAI',\n    'QUẦN':'QUAN','QUAN':'QUAN','CHÂN VÁY':'CHAN_VAY','CHAN VAY':'CHAN_VAY','CV':'CHAN_VAY',\n    'VÁY':'VAY','VAY':'VAY','PHỤ KIỆN':'PHU_KIEN','PHU KIEN':'PHU_KIEN','LÓT':'LOT','LOT':'LOT'\n  };\n  for (const part of String(raw || '').split(';')) {\n    const index = part.indexOf(':');\n    if (index < 0) continue;\n    const key = keyMap[part.slice(0, index).trim().toUpperCase()];\n    if (!key) continue;\n    result[key] = unique(part.slice(index + 1).split(/[|,]/));\n  }\n  return result;\n};\nconst extractMaterialComponents = (description, category, globalOverride, componentOverride) => {\n  const warnings = [];\n  const components = {};\n  const add = (key, values) => { if (values.length) components[key] = merge(components[key] || [], values); };\n  const overrideMap = parseMaterialOverride(componentOverride);\n  if (Object.keys(overrideMap).length) {\n    for (const [key, values] of Object.entries(overrideMap)) add(key, values);\n  } else if ((globalOverride || []).length) {\n    for (const key of primaryComponents(category)) add(key, globalOverride);\n  } else {\n    const cleaned = unicodeText(description);\n    const materialStart = cleaned.search(/chất\\s*liệu\\s*:/iu);\n    const materialEndMatch = materialStart >= 0 ? cleaned.slice(materialStart).search(/\\n?\\s*(ứng\\s*dụng|hướng\\s*dẫn|bảo\\s*quản)\\s*:/iu) : -1;\n    const section = materialStart >= 0\n      ? cleaned.slice(materialStart, materialEndMatch > 0 ? materialStart + materialEndMatch : undefined)\n      : cleaned;\n    const clauses = section.split(/\\n|(?<=[.;])\\s+/).map(v => v.trim()).filter(Boolean);\n    for (const clause of clauses) {\n      const materials = findMaterials(clause);\n      if (!materials.length) continue;\n      const keys = componentsInClause(clause);\n      for (const key of (keys.length ? keys : ['SHARED'])) add(key, materials);\n    }\n    const allSectionMaterials = findMaterials(section);\n    if (!Object.keys(components).length && allSectionMaterials.length) add('SHARED', allSectionMaterials);\n    const shared = components.SHARED || [];\n    const primary = primaryComponents(category);\n    for (const key of primary) {\n      if (key === 'SHARED') continue;\n      if (shared.length) components[key] = merge(shared, components[key] || []);\n    }\n    if (primary.length > 1 && shared.length > 1 && !primary.some(key => (components[key] || []).some(v => !shared.includes(v)))) {\n      warnings.push('MATERIAL_COMPONENT_AMBIGUOUS');\n    }\n  }\n  delete components.SHARED;\n  const orderedKeys = ['AO_DAI','AO','CHAN_VAY','QUAN','VAY','PHU_KIEN','LOT'];\n  const ordered = {};\n  for (const key of orderedKeys) if ((components[key] || []).length) ordered[key] = unique(components[key]);\n  for (const [key, values] of Object.entries(components)) if (!ordered[key] && values.length) ordered[key] = unique(values);\n  const flat = unique(Object.values(ordered).flat());\n  const summary = Object.entries(ordered).map(([key, values]) => `${componentLabels[key] || key}: ${values.join(' | ')}`).join('; ');\n  if (!flat.length) warnings.push('MATERIAL_NOT_FOUND');\n  return { components: ordered, flat, summary, warnings };\n};\n\nconst styleDefinitions = [\n  { label: 'NỮ TÍNH', explicit: [/nữ\\s*tính/iu,/dịu\\s*dàng/iu,/mềm\\s*mại/iu,/duyên\\s*dáng/iu], evidence: [/ren/iu,/voan/iu,/nơ/iu,/bèo/iu,/hoa\\s*nổi/iu,/xòe/iu] },\n  { label: 'THANH LỊCH', explicit: [/thanh\\s*lịch/iu,/tinh\\s*tế/iu,/trang\\s*nhã/iu], evidence: [/cổ\\s*vest/iu,/đi\\s*làm/iu,/công\\s*sở/iu,/dáng\\s*suông/iu] },\n  { label: 'HIỆN ĐẠI', explicit: [/hiện\\s*đại/iu,/đương\\s*đại/iu], evidence: [/bất\\s*đối\\s*xứng/iu,/cut[ -]?out/iu,/phối\\s*layer/iu] },\n  { label: 'TỐI GIẢN', explicit: [/tối\\s*giản/iu,/minimal/iu], evidence: [/đường\\s*nét\\s*gọn/iu,/ít\\s*chi\\s*tiết/iu] },\n  { label: 'SANG TRỌNG', explicit: [/sang\\s*trọng/iu,/quý\\s*phái/iu], evidence: [/đính\\s*đá/iu,/gấm/iu,/tweed/iu,/nhung(?!\\p{M})/iu] },\n  { label: 'TRẺ TRUNG', explicit: [/trẻ\\s*trung/iu,/năng\\s*động/iu], evidence: [/croptop/iu,/chân\\s*váy\\s*ngắn/iu] },\n  { label: 'CỔ ĐIỂN', explicit: [/cổ\\s*điển/iu,/vintage/iu,/retro/iu], evidence: [/tay\\s*bồng/iu,/cổ\\s*đức/iu] },\n  { label: 'QUYẾN RŨ', explicit: [/quyến\\s*rũ/iu,/gợi\\s*cảm/iu,/cuốn\\s*hút/iu], evidence: [/trễ\\s*vai/iu,/xẻ\\s*đùi/iu,/ôm\\s*body/iu] }\n];\nconst extractStyles = (description, override) => {\n  const overrideValues = unique(override || []).slice(0, 2);\n  if (overrideValues.length) return { styles: overrideValues, scores: Object.fromEntries(overrideValues.map(v => [v, 99])), warning: null };\n  const haystack = lowerVi(description);\n  const scored = styleDefinitions.map((definition, order) => {\n    const explicit = definition.explicit.reduce((sum, pattern) => sum + (pattern.test(haystack) ? 1 : 0), 0);\n    const evidence = definition.evidence.reduce((sum, pattern) => sum + (pattern.test(haystack) ? 1 : 0), 0);\n    return { label: definition.label, score: explicit * 3 + Math.min(evidence, 3) * 0.75, explicit, order };\n  }).filter(item => item.score >= 1.5)\n    .sort((a, b) => b.score - a.score || b.explicit - a.explicit || a.order - b.order);\n  const selected = scored.slice(0, 2);\n  return {\n    styles: selected.map(item => item.label),\n    scores: Object.fromEntries(scored.map(item => [item.label, Number(item.score.toFixed(2))])),\n    warning: selected.length ? null : 'STYLE_LOW_CONFIDENCE'\n  };\n};\n\nconst silhouetteRules = [\n  {label:'SUÔNG',pattern:/\\bsuong\\b/}, {label:'ỐNG RỘNG',pattern:/ong rong/}, {label:'XÒE',pattern:/\\bxoe\\b/},\n  {label:'ÔM',pattern:/\\bom\\b|om nhe|om dang/}, {label:'CHIẾT EO',pattern:/chiet eo|nhan eo|ton eo/},\n  {label:'PEPLUM',pattern:/peplum/}, {label:'CỔ YẾM',pattern:/co yem/}, {label:'CỔ VEST',pattern:/co vest/},\n  {label:'CHỮ A',pattern:/chu a|a-line/}, {label:'MAXI',pattern:/maxi/}\n];\nconst occasionRules = [\n  {label:'ĐI LÀM',pattern:/di lam|cong so/}, {label:'ĐI TIỆC',pattern:/di tiec|du tiec|tiec nhe/},\n  {label:'ĐI CHƠI',pattern:/di choi/}, {label:'DU LỊCH',pattern:/du lich/}, {label:'GẶP GỠ',pattern:/gap go/},\n  {label:'CƯỚI HỎI',pattern:/cuoi hoi|dam cuoi|dam hoi/}, {label:'CHỤP ẢNH',pattern:/chup anh/}, {label:'HÀNG NGÀY',pattern:/hang ngay/}\n];\n\nconst now = new Date().toISOString();\nconst profiles = [];\nfor (const reg of Object.values(registry)) {\n  const candidateIds = unique([reg.xml_group_id, reg.ma_sp]);\n  const groupId = candidateIds.find(id => groups.has(id));\n  if (!groupId) continue;\n  const group = groups.get(groupId);\n  const first = group.items[0] || {};\n  const rawTitle = text(first['g:title'] ?? first.title);\n  const title = rawTitle.replace(/\\s+-\\s+(S|M|L|XL|XXL)$/i, '').trim();\n  const descriptionXml = unicodeText(text(first['g:description'] ?? first.description));\n  const link = text(first['g:link'] ?? first.link);\n  const brandXml = text(first['g:brand'] ?? first.brand);\n  const searchable = ascii([title, descriptionXml, ...group.attrs.map(attr => attr.value)].join(' '));\n  let categoryAuto = 'OTHER';\n  if (/ao dai/.test(searchable)) categoryAuto = 'AO_DAI';\n  else if (/combo.*3|ba mon/.test(searchable) || reg.ma_sp.startsWith('CB')) categoryAuto = 'COMBO_3_MON';\n  else if (/set quan/.test(searchable) || reg.ma_sp.startsWith('SQ')) categoryAuto = 'SET_QUAN';\n  else if (/set vay/.test(searchable) || reg.ma_sp.startsWith('SV')) categoryAuto = 'SET_VAY';\n  else if (/chan vay/.test(searchable)) categoryAuto = 'CHAN_VAY';\n  else if (/\\bvay\\b|\\bdam\\b/.test(searchable)) categoryAuto = 'VAY';\n  else if (/\\bao\\b/.test(searchable)) categoryAuto = 'AO';\n  else if (/\\bquan\\b/.test(searchable)) categoryAuto = 'QUAN';\n  const ruleAuto = categoryAuto === 'COMBO_3_MON' ? 'CB' : categoryAuto === 'SET_QUAN' ? 'SQ' : categoryAuto === 'SET_VAY' ? 'SV' : 'DIRECT';\n  const ruleType = reg.rule_type || ruleAuto;\n  const category = reg.category || categoryAuto;\n\n  const colorResult = parseColors(descriptionXml, group.attrs, title, reg.color_override);\n  const materialResult = extractMaterialComponents(descriptionXml, category, reg.material_override, reg.material_components_override);\n  const styleResult = extractStyles(descriptionXml, reg.style_override);\n  const silhouettesAuto = unique(matchLabels(searchable, silhouetteRules));\n  const occasionsAuto = unique(matchLabels(searchable, occasionRules));\n  const warnings = unique([\n    ...(colorResult.primary.length ? [] : ['COLOR_NOT_FOUND']),\n    ...materialResult.warnings,\n    ...(styleResult.warning ? [styleResult.warning] : [])\n  ]);\n  const aliases = merge(reg.aliases, [title, groupId]);\n  const searchColors = colorResult.primary;\n  const searchStyles = styleResult.styles;\n  const searchMaterials = materialResult.flat;\n  const searchSilhouettes = merge(reg.search_silhouettes, silhouettesAuto);\n  const searchOccasions = merge(reg.search_occasions, occasionsAuto);\n\n  const urls = [];\n  for (const raw of group.images) { try { urls.push(normalizeUrl(raw)); } catch (_) {} }\n  const images = [...new Set(urls)].sort();\n  const primaryImages = new Set([...group.primaryImages].map(raw => { try { return normalizeUrl(raw); } catch (_) { return ''; } }).filter(Boolean));\n  const sizes = unique(group.attrs.filter(attr => ascii(attr.label).trim() === 'size').map(attr => attr.value));\n  const classifications = unique(group.attrs.filter(attr => ascii(attr.label).includes('phan loai')).map(attr => attr.value));\n  let confidence = 0;\n  if (categoryAuto !== 'OTHER') confidence += 0.25;\n  if (materialResult.flat.length) confidence += 0.30;\n  if (styleResult.styles.length) confidence += 0.15;\n  if (silhouettesAuto.length) confidence += 0.10;\n  if (occasionsAuto.length) confidence += 0.10;\n  if (colorResult.primary.length) confidence += 0.10;\n  confidence = Number(confidence.toFixed(2));\n  const hardWarnings = warnings.filter(value => value === 'MATERIAL_NOT_FOUND' || value === 'MATERIAL_COMPONENT_AMBIGUOUS');\n  const reviewStatus = categoryAuto === 'OTHER' || hardWarnings.length || confidence < 0.55 ? 'NEED_REVIEW' : 'AUTO_OK';\n  const materialXml = materialResult.summary;\n  const sourceHash = crypto.createHash('sha256').update(JSON.stringify({\n    extraction_version: EXTRACTION_VERSION, groupId, title, descriptionXml, link, images,\n    color_primary: colorResult.primary, color_detail: colorResult.detail,\n    material_components: materialResult.components, styles: styleResult.styles\n  })).digest('hex');\n  const xmlUpdatedAt = reg.source_hash === sourceHash && reg.xml_updated_at ? reg.xml_updated_at : now;\n  profiles.push({\n    reg, group_id: groupId, title, description_xml: descriptionXml, material_xml: materialXml,\n    material_components: materialResult.components, color_primary: colorResult.primary,\n    color_detail: colorResult.detail, style_primary: styleResult.styles[0] || '',\n    style_secondary: styleResult.styles[1] || '', style_scores: styleResult.scores,\n    extraction_warnings: warnings, extraction_version: EXTRACTION_VERSION,\n    product_link: link, brand_xml: brandXml, images, primary_images: [...primaryImages], sizes, classifications,\n    rule_type: ruleType, category, aliases, search_colors: searchColors, search_styles: searchStyles,\n    search_materials: searchMaterials, search_silhouettes: searchSilhouettes, search_occasions: searchOccasions,\n    auto_confidence: confidence, review_status: reviewStatus, source_hash: sourceHash, xml_updated_at: xmlUpdatedAt\n  });\n}\n\nreturn [{json:{\n  ...input,\n  profiles,\n  extraction_version: EXTRACTION_VERSION,\n  profile_count: profiles.length,\n  review_count: profiles.filter(profile => profile.review_status === 'NEED_REVIEW').length\n}}];"
+      },
+      "id": "6dd28b1a-3bd6-4e97-b1a5-d2ebed810001",
+      "name": "Build XML Profiles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        120
+      ],
+      "notes": "Nhóm XML theo item_group_id, sinh descriptor có kiểm soát, giữ override và chuẩn bị một batch Google Sheets."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst source = $input.first().json || {};\nconst labels = {AO_DAI:'ÁO DÀI',AO:'ÁO',CHAN_VAY:'CHÂN VÁY',QUAN:'QUẦN',VAY:'VÁY',PHU_KIEN:'PHỤ KIỆN',LOT:'LÓT'};\nconst primary = category => category === 'SET_QUAN' ? ['AO','QUAN'] : category === 'SET_VAY' ? ['AO','CHAN_VAY'] : category === 'COMBO_3_MON' ? ['AO','CHAN_VAY','QUAN'] : category === 'AO_DAI' ? ['AO_DAI','QUAN'] : category === 'CHAN_VAY' ? ['CHAN_VAY'] : category === 'VAY' ? ['VAY'] : category === 'AO' ? ['AO'] : category === 'QUAN' ? ['QUAN'] : [];\nconst unique = values => [...new Set((values || []).map(value => String(value || '').trim().toUpperCase()).filter(Boolean))];\nconst profiles = (source.profiles || []).map(profile => {\n  const components = JSON.parse(JSON.stringify(profile.material_components || {}));\n  const lining = unique(components.LOT || []);\n  const misplacedMain = lining.filter(value => !value.includes('LÓT'));\n  if (misplacedMain.length) {\n    components.LOT = lining.filter(value => value.includes('LÓT'));\n    for (const key of primary(profile.category)) components[key] = unique([...(components[key] || []), ...misplacedMain]);\n    if (!components.LOT.length) delete components.LOT;\n  }\n  const ordered = {};\n  for (const key of ['AO_DAI','AO','CHAN_VAY','QUAN','VAY','PHU_KIEN','LOT']) if ((components[key] || []).length) ordered[key] = unique(components[key]);\n  const flat = unique(Object.values(ordered).flat());\n  const summary = Object.entries(ordered).map(([key,values]) => (labels[key] || key) + ': ' + values.join(' | ')).join('; ');\n  const warnings = unique((profile.extraction_warnings || []).filter(value => value !== 'MATERIAL_COMPONENT_AMBIGUOUS' || !flat.length));\n  const hardWarnings = warnings.filter(value => value === 'MATERIAL_NOT_FOUND' || value === 'MATERIAL_COMPONENT_AMBIGUOUS');\n  const reviewStatus = profile.category === 'OTHER' || hardWarnings.length || Number(profile.auto_confidence || 0) < 0.55 ? 'NEED_REVIEW' : 'AUTO_OK';\n  const sourceHash = crypto.createHash('sha256').update(JSON.stringify({base:profile.source_hash,material_components:ordered,normalizer:'2.0.1'})).digest('hex');\n  return {...profile,material_components:ordered,search_materials:flat,material_xml:summary,extraction_warnings:warnings,review_status:reviewStatus,source_hash:sourceHash};\n});\nreturn [{json:{\n  ...source,\n  profiles,\n  extraction_version:'2.0.1-structured-vi',\n  review_count:profiles.filter(profile => profile.review_status === 'NEED_REVIEW').length\n}}];"
+      },
+      "id": "7ea9d43b-8028-4a84-b5a7-45b4c395d201",
+      "name": "Normalize Structured Extraction",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        510,
+        280
+      ],
+      "notes": "Tách chất liệu chính khỏi lớp lót, chuẩn hóa lại component payload và đồng bộ các ô batch tương ứng."
+    },
+    {
+      "id": "24587ad3-364f-41cb-b4f4-e8720c94728c",
+      "name": "Select Pending Point Batch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        565,
+        120
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst jobs = $input.all().map(item => item.json || {});\nconst run = $('Acquire Ingestion Lock').first().json || {};\nconst parsedSize = Number.parseInt($env.INGEST_POINT_BATCH_SIZE || $env.INGEST_PRODUCT_BATCH_SIZE || '6', 10);\nconst batchSize = Number.isInteger(parsedSize) ? Math.min(50, Math.max(1, parsedSize)) : 6;\nconst shardCount = Math.max(1, Number(run.shard_count || 1));\nconst shardIndex = Math.max(0, Math.min(shardCount - 1, Number(run.shard_index || 0)));\nconst baseUrl = String($env.QDRANT_BASE_URL || 'https://355c0b3c-1e7f-4fa5-9235-72559195dd72.eu-central-1-0.aws.cloud.qdrant.io').replace(/[/]$/, '');\nconst collection = String($env.QDRANT_COLLECTION_INGEST_V2 || 'lana_multimodal_data_v2');\nconst apiKey = String($env.QDRANT_API_KEY || '');\nif (!apiKey) throw new Error('QDRANT_API_KEY_REQUIRED_FOR_BATCH_SELECTION');\nconst existing = new Map();\nlet offset;\nlet pages = 0;\ndo {\n  if (pages >= 1000) throw new Error('QDRANT_BATCH_SCROLL_LIMIT_EXCEEDED');\n  const body = {limit: 1000, with_payload: true, with_vector: false};\n  if (offset !== undefined && offset !== null) body.offset = offset;\n  const response = await this.helpers.httpRequest({\n    method: 'POST', url: baseUrl + '/collections/' + encodeURIComponent(collection) + '/points/scroll',\n    headers: {'api-key': apiKey, 'content-type': 'application/json'}, body, json: true, timeout: 30000\n  });\n  const result = response?.result || {};\n  if (!Array.isArray(result.points)) throw new Error('QDRANT_BATCH_SCROLL_RESPONSE_INVALID');\n  for (const point of result.points) {\n    if (point?.id === undefined || point?.id === null) continue;\n    const payload = point.payload || {};\n    existing.set(String(point.id), String(payload.content_hash || payload.source_hash || ''));\n  }\n  offset = result.next_page_offset;\n  pages++;\n} while (offset !== undefined && offset !== null);\nconst belongsToShard = pointId => crypto.createHash('sha256').update(String(pointId || '')).digest().readUInt32BE(0) % shardCount === shardIndex;\nconst owned = jobs.filter(job => job.job_valid && job.point_id && belongsToShard(job.point_id));\nconst pending = owned.filter(job => job.delete_requested ? existing.has(String(job.point_id)) : existing.get(String(job.point_id)) !== String(job.source_hash || ''))\n  .sort((left, right) => String(left.payload?.ma_sp || '').localeCompare(String(right.payload?.ma_sp || '')) || Number(left.payload?.image_sort_order || 0) - Number(right.payload?.image_sort_order || 0) || String(left.point_id).localeCompare(String(right.point_id)));\nconst selected = pending.slice(0, batchSize);\nconst meta = {\n  batch_mode: true, point_batch_size: batchSize, pending_point_count: pending.length,\n  batch_selected_point_count: selected.length, remaining_point_count: Math.max(0, pending.length - selected.length),\n  qdrant_existing_point_count: existing.size, qdrant_scroll_pages: pages,\n  shard_count: shardCount, shard_index: shardIndex, shard_label: run.shard_label\n};\nif (!selected.length) return [{json:{\n  ...meta, run_id: run.run_id, started_at: run.started_at, point_id: '', source_hash: '', payload: {}, image_url: '',\n  normalized_image_url: '', job_valid: true, validation_error: '', delete_requested: false,\n  should_process: false, no_pending_work: true\n}}];\nreturn selected.map(job => ({json:{\n  ...job, ...meta, existing_content_hash: existing.get(String(job.point_id)) || '', should_process: !job.delete_requested\n}}));"
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const {createClient} = require('redis');\nconst client = createClient({url:$env.REDIS_URL || 'redis://redis:6379'});\nawait client.connect();\nconst interval = Math.min(30000, Math.max(1000, Number($env.VERTEX_MIN_INTERVAL_MS || 4000)));\nconst key = String($env.VERTEX_RATE_LIMIT_KEY || 'rate:vertex:multimodalembedding:global');\nlet waitMs = 0;\ntry {\n  waitMs = Number(await client.eval(\n    \"local current=tonumber(redis.call('get',KEYS[1]) or '0'); local now=tonumber(ARGV[1]); local gap=tonumber(ARGV[2]); local slot=math.max(current,now); redis.call('set',KEYS[1],slot+gap,'PX',math.max(gap*10,60000)); return slot-now\",\n    {keys:[key],arguments:[String(Date.now()),String(interval)]}\n  ));\n} finally { await client.quit(); }\nif (waitMs > 0) await new Promise(resolve => setTimeout(resolve, waitMs));\nreturn {json:$json};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4030,
+        80
+      ],
+      "id": "f2a6d94e-7554-48e0-a66c-17cb8cfbb001",
+      "name": "Acquire Vertex Rate Slot Raw",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const {createClient} = require('redis');\nconst client = createClient({url:$env.REDIS_URL || 'redis://redis:6379'});\nawait client.connect();\nconst interval = Math.min(30000, Math.max(1000, Number($env.VERTEX_MIN_INTERVAL_MS || 4000)));\nconst key = String($env.VERTEX_RATE_LIMIT_KEY || 'rate:vertex:multimodalembedding:global');\nlet waitMs = 0;\ntry {\n  waitMs = Number(await client.eval(\n    \"local current=tonumber(redis.call('get',KEYS[1]) or '0'); local now=tonumber(ARGV[1]); local gap=tonumber(ARGV[2]); local slot=math.max(current,now); redis.call('set',KEYS[1],slot+gap,'PX',math.max(gap*10,60000)); return slot-now\",\n    {keys:[key],arguments:[String(Date.now()),String(interval)]}\n  ));\n} finally { await client.quit(); }\nif (waitMs > 0) await new Promise(resolve => setTimeout(resolve, waitMs));\nreturn {json:$json};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4470,
+        80
+      ],
+      "id": "f2a6d94e-7554-48e0-a66c-17cb8cfbb002",
+      "name": "Acquire Vertex Rate Slot Cutout",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const crypto = require('crypto');\nconst version = String($env.IMAGE_METADATA_VERSION || 'image-meta-v1.0.0');\nconst model = String($env.IMAGE_METADATA_MODEL || $env.VERTEX_MODEL_NAME || 'gemini-3.1-flash-lite');\nconst location = String($env.IMAGE_METADATA_LOCATION || 'global');\nreturn $input.all().map(item => {\n  const job = item.json || {};\n  const payload = { ...(job.payload || {}), image_metadata_version: version, image_metadata_model_requested: model };\n  const sourceHash = crypto.createHash('sha256').update(JSON.stringify({ base_content_hash: String(job.source_hash || ''), image_metadata_version: version, image_metadata_model: model, image_metadata_location: location })).digest('hex');\n  return { json: { ...job, payload, source_hash: sourceHash } };\n});"
+      },
+      "id": "36a73e38-c894-40c8-9f33-9aa4d7be1001",
+      "name": "Apply Image Metadata Schema",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const {createClient} = require('redis');\nconst client = createClient({url:$env.REDIS_URL || 'redis://redis:6379'});\nawait client.connect();\nconst interval = Math.min(30000, Math.max(1000, Number($env.VERTEX_METADATA_MIN_INTERVAL_MS || $env.VERTEX_MIN_INTERVAL_MS || 4000)));\nconst key = String($env.VERTEX_METADATA_RATE_LIMIT_KEY || 'rate:vertex:gemini-image-metadata:global');\nlet waitMs = 0;\ntry {\n  waitMs = Number(await client.eval(\n    \"local current=tonumber(redis.call('get',KEYS[1]) or '0'); local now=tonumber(ARGV[1]); local gap=tonumber(ARGV[2]); local slot=math.max(current,now); redis.call('set',KEYS[1],slot+gap,'PX',math.max(gap*10,60000)); return slot-now\",\n    {keys:[key],arguments:[String(Date.now()),String(interval)]}\n  ));\n} finally { await client.quit(); }\nif (waitMs > 0) await new Promise(resolve => setTimeout(resolve, waitMs));\nreturn {json:$json};"
+      },
+      "id": "36a73e38-c894-40c8-9f33-9aa4d7be1002",
+      "name": "Acquire Vertex Rate Slot Metadata",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3040,
+        80
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://' + (($env.IMAGE_METADATA_LOCATION || 'global') === 'global' ? 'aiplatform.googleapis.com' : ($env.IMAGE_METADATA_LOCATION || 'global') + '-aiplatform.googleapis.com') + '/v1/projects/' + ($env.VERTEX_PROJECT_ID || 'project-d44e0453-82e8-4ea2-a9d') + '/locations/' + ($env.IMAGE_METADATA_LOCATION || 'global') + '/publishers/google/models/' + ($env.IMAGE_METADATA_MODEL || $env.VERTEX_MODEL_NAME || 'gemini-3.1-flash-lite') + ':generateContent' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Analyze only what is visibly present in this Vietnamese fashion product image. Do not infer customer feedback, authenticity, stock, price, size, material composition, or product claims. Return the strict schema. Product context is reference only: ' + String($json.contextual_text || '').slice(0, 1200) }, { inlineData: { mimeType: 'image/jpeg', data: $json.raw_base64 } }] }], generationConfig: { temperature: 0, maxOutputTokens: 512, responseMimeType: 'application/json', responseSchema: { type: 'OBJECT', properties: { image_type: { type: 'STRING', enum: ['MODEL','PRODUCT_ONLY','DETAIL','FLATLAY','LIFESTYLE','COLLAGE','SIZE_GUIDE','OTHER'] }, image_intents: { type: 'ARRAY', items: { type: 'STRING', enum: ['LOOKBOOK','PRODUCT_OVERVIEW','MATERIAL_CLOSEUP','DETAIL','FIT_REFERENCE','STYLE_REFERENCE','SIZE_GUIDE'] } }, angle: { type: 'STRING', enum: ['FRONT','BACK','SIDE','CLOSEUP','MULTI','UNKNOWN'] }, detail_type: { type: 'STRING', enum: ['FULL_LOOK','FABRIC','TEXTURE','STITCHING','BUTTON','ZIPPER','PATTERN','EMBELLISHMENT','OTHER','NONE'] }, garment_parts_visible: { type: 'ARRAY', items: { type: 'STRING', enum: ['FULL_SET','AO','QUAN','CHAN_VAY','VAY','PHU_KIEN','UNKNOWN'] } }, visual_colors: { type: 'ARRAY', items: { type: 'STRING' } }, visual_materials: { type: 'ARRAY', items: { type: 'STRING' } }, background_type: { type: 'STRING', enum: ['STUDIO','INDOOR','OUTDOOR','TRANSPARENT','OTHER'] }, has_model: { type: 'BOOLEAN' }, has_text_overlay: { type: 'BOOLEAN' }, quality_score: { type: 'NUMBER' }, confidence: { type: 'NUMBER' } }, required: ['image_type','image_intents','angle','detail_type','garment_parts_visible','visual_colors','visual_materials','background_type','has_model','has_text_overlay','quality_score','confidence'], propertyOrdering: ['image_type','image_intents','angle','detail_type','garment_parts_visible','visual_colors','visual_materials','background_type','has_model','has_text_overlay','quality_score','confidence'] } } }) }}",
+        "options": {
+          "timeout": 60000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "36a73e38-c894-40c8-9f33-9aa4d7be1003",
+      "name": "Vertex Image Metadata",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3260,
+        80
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "kN9aNmjQQuAZEimD",
+          "name": "la-clothing-vertex"
+        }
+      },
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const source = $('Acquire Vertex Rate Slot Metadata').item.json || {};\nconst parts = $json.candidates?.[0]?.content?.parts || [];\nconst raw = parts.map(part => String(part?.text || '')).join('').trim().replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/, '');\nif (!raw) throw new Error('image_metadata_empty_response');\nlet parsed;\ntry { parsed = JSON.parse(raw); } catch (_) { throw new Error('image_metadata_invalid_json'); }\nconst pick = (value, allowed, fallback) => allowed.includes(String(value || '').toUpperCase()) ? String(value).toUpperCase() : fallback;\nconst list = (value, allowed = null, limit = 8) => [...new Set((Array.isArray(value) ? value : []).map(item => String(item || '').trim().toUpperCase()).filter(Boolean).filter(item => !allowed || allowed.includes(item)))].slice(0, limit);\nconst clamp = value => Math.max(0, Math.min(1, Number(value) || 0));\nconst version = String($env.IMAGE_METADATA_VERSION || 'image-meta-v1.0.0');\nconst model = String($env.IMAGE_METADATA_MODEL || $env.VERTEX_MODEL_NAME || 'gemini-3.1-flash-lite');\nconst imageType = pick(parsed.image_type, ['MODEL','PRODUCT_ONLY','DETAIL','FLATLAY','LIFESTYLE','COLLAGE','SIZE_GUIDE','OTHER'], 'OTHER');\nconst intents = list(parsed.image_intents, ['LOOKBOOK','PRODUCT_OVERVIEW','MATERIAL_CLOSEUP','DETAIL','FIT_REFERENCE','STYLE_REFERENCE','SIZE_GUIDE']);\nconst angle = pick(parsed.angle, ['FRONT','BACK','SIDE','CLOSEUP','MULTI','UNKNOWN'], 'UNKNOWN');\nconst detailType = pick(parsed.detail_type, ['FULL_LOOK','FABRIC','TEXTURE','STITCHING','BUTTON','ZIPPER','PATTERN','EMBELLISHMENT','OTHER','NONE'], 'NONE');\nconst partsVisible = list(parsed.garment_parts_visible, ['FULL_SET','AO','QUAN','CHAN_VAY','VAY','PHU_KIEN','UNKNOWN']);\nconst confidence = clamp(parsed.confidence);\nconst payload = {\n  image_type: imageType, image_intents: intents.length ? intents : ['PRODUCT_OVERVIEW'], image_angle: angle,\n  image_detail_type: detailType, image_parts_visible: partsVisible.length ? partsVisible : ['UNKNOWN'],\n  image_visual_colors: list(parsed.visual_colors, null, 6), image_visual_materials: list(parsed.visual_materials, null, 6),\n  image_background_type: pick(parsed.background_type, ['STUDIO','INDOOR','OUTDOOR','TRANSPARENT','OTHER'], 'OTHER'),\n  image_has_model: Boolean(parsed.has_model), image_has_text_overlay: Boolean(parsed.has_text_overlay),\n  image_quality_score: clamp(parsed.quality_score), image_metadata_confidence: confidence,\n  image_metadata_review_status: confidence >= 0.8 ? 'AUTO_OK' : 'NEED_REVIEW',\n  image_metadata_version: version, image_metadata_model: model, image_metadata_source: 'AI_VERTEX',\n  image_metadata_updated_at: new Date().toISOString(), source_context: 'WEBSTORE_XML', feedback_verified: false\n};\nreturn { json: { ...source, image_metadata_payload: payload }, binary: $('Build Raw Base64').item.binary };"
+      },
+      "id": "36a73e38-c894-40c8-9f33-9aa4d7be1004",
+      "name": "Parse Image Metadata",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3480,
+        80
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const source = $json || {};\nconst metadata = $('Parse Image Metadata').item.json.image_metadata_payload || {};\nif (!source.qdrant_point?.payload) throw new Error('qdrant_point_missing_before_metadata_attach');\nreturn { json: { ...source, qdrant_point: { ...source.qdrant_point, payload: { ...source.qdrant_point.payload, ...metadata, ingestion_version: '4.4.0-p2.3-image-metadata' } } } };"
+      },
+      "id": "36a73e38-c894-40c8-9f33-9aa4d7be1005",
+      "name": "Attach Metadata to Qdrant Point",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5020,
+        80
+      ],
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Acquire Ingestion Lock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Acquire Ingestion Lock": {
+      "main": [
+        [
+          {
+            "node": "If Lock Acquired",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "P2.1 Telegram Ingestion Fatal Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Lock Acquired": {
+      "main": [
+        [
+          {
+            "node": "Read product_registry",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Already Running",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Ingestion Jobs": {
+      "main": [
+        [
+          {
+            "node": "Apply Image Metadata Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Images": {
+      "main": [
+        [
+          {
+            "node": "Reconcile Orphan Qdrant Points",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Job Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reconcile Orphan Qdrant Points": {
+      "main": [
+        [
+          {
+            "node": "Build Run Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Job Valid": {
+      "main": [
+        [
+          {
+            "node": "If Delete Requested",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Delete Requested": {
+      "main": [
+        [
+          {
+            "node": "Delete Qdrant Point",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Needs Processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Qdrant Point": {
+      "main": [
+        [
+          {
+            "node": "Mark Deleted",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Deleted": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Needs Processing": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Skipped",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Skipped": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Validate Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Image": {
+      "main": [
+        [
+          {
+            "node": "Resize Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resize Image": {
+      "main": [
+        [
+          {
+            "node": "Build Raw Base64",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Raw Base64": {
+      "main": [
+        [
+          {
+            "node": "Acquire Vertex Rate Slot Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Background": {
+      "main": [
+        [
+          {
+            "node": "Build Cutout Base64",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Cutout Base64": {
+      "main": [
+        [
+          {
+            "node": "Acquire Vertex Rate Slot Raw",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vertex Raw and Text": {
+      "main": [
+        [
+          {
+            "node": "Extract Raw Vectors",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Raw Vectors": {
+      "main": [
+        [
+          {
+            "node": "Acquire Vertex Rate Slot Cutout",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vertex Cutout": {
+      "main": [
+        [
+          {
+            "node": "Build Qdrant Point",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Qdrant Point": {
+      "main": [
+        [
+          {
+            "node": "Attach Metadata to Qdrant Point",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Qdrant Point": {
+      "main": [
+        [
+          {
+            "node": "Mark Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Success": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Error": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Run Summary": {
+      "main": [
+        [
+          {
+            "node": "P2.1 Telegram Ingestion Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "P2.1 Telegram Ingestion Fatal Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append INGEST_LOG": {
+      "main": [
+        [
+          {
+            "node": "Release Ingestion Lock",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "P2.1 Telegram Ingestion Fatal Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Every 1 Day": {
+      "main": [
+        [
+          {
+            "node": "Acquire Ingestion Lock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read product_registry": {
+      "main": [
+        [
+          {
+            "node": "Build Registry Map",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "P2.1 Telegram Ingestion Fatal Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Registry Map": {
+      "main": [
+        [
+          {
+            "node": "Fetch Webstore XML",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Registry and XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Webstore XML": {
+      "main": [
+        [
+          {
+            "node": "XML to JSON",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "P2.1 Telegram Ingestion Fatal Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XML to JSON": {
+      "main": [
+        [
+          {
+            "node": "Merge Registry and XML",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "P2.1 Telegram Ingestion Fatal Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "P2.1 Telegram Ingestion Alert": {
+      "main": [
+        [
+          {
+            "node": "Append INGEST_LOG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Release Ingestion Lock": {
+      "main": [
+        [],
+        [
+          {
+            "node": "P2.1 Telegram Ingestion Fatal Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Registry and XML": {
+      "main": [
+        [
+          {
+            "node": "Build XML Profiles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build XML Profiles": {
+      "main": [
+        [
+          {
+            "node": "Normalize Structured Extraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Structured Extraction": {
+      "main": [
+        [
+          {
+            "node": "Prepare Ingestion Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply Image Metadata Schema": {
+      "main": [
+        [
+          {
+            "node": "Select Pending Point Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Pending Point Batch": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Acquire Vertex Rate Slot Raw": {
+      "main": [
+        [
+          {
+            "node": "Vertex Raw and Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Acquire Vertex Rate Slot Cutout": {
+      "main": [
+        [
+          {
+            "node": "Vertex Cutout",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Acquire Vertex Rate Slot Metadata": {
+      "main": [
+        [
+          {
+            "node": "Vertex Image Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vertex Image Metadata": {
+      "main": [
+        [
+          {
+            "node": "Parse Image Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Image Metadata": {
+      "main": [
+        [
+          {
+            "node": "Remove Background",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Metadata to Qdrant Point": {
+      "main": [
+        [
+          {
+            "node": "Upsert Qdrant Point",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": true,
+    "executionTimeout": 7200,
+    "timezone": "Asia/Ho_Chi_Minh"
+  },
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "parentFolderId": "OicKfISYLK8Qx8xt"
+}

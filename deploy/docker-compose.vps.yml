@@ -1,0 +1,694 @@
+name: lana-chatbot
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: lana-chatbot-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in deploy/.env.infrastructure}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in deploy/.env.infrastructure}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/.env.infrastructure}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
+    expose:
+      - "5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    shm_size: 256mb
+    stop_grace_period: 1m
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: lana-chatbot-redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in deploy/.env.infrastructure}
+    command:
+      - sh
+      - -c
+      - >-
+        exec redis-server
+        --appendonly yes
+        --appendfsync everysec
+        --save 900 1
+        --save 300 10
+        --maxmemory 1gb
+        --maxmemory-policy noeviction
+        --requirepass "$${REDIS_PASSWORD}"
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=$${REDIS_PASSWORD} redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: lana-chatbot-app:inbound-debounce-r1
+    container_name: lana-chatbot-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "8080"
+      APP_SEND_ENABLED: "true"
+      GATEWAY_ROUTING_MODE: APP
+      REALTIME_MIRROR_ENABLED: "false"
+      UPSALE_SUPPRESSION_ENABLED: "true"
+      META_APP_ID: "921453707665419"
+      META_ALLOWED_PAGE_IDS: "1198992073286645"
+      META_APP_SECRET_FILE: /run/secrets/meta_app_secret
+      META_VERIFY_TOKEN_FILE: /run/secrets/meta_verify_token
+      ANALYTICS_HASH_SALT_FILE: /run/secrets/analytics_hash_salt
+      SHADOW_MIRROR_KEY_FILE: /run/secrets/shadow_mirror_key
+      SHADOW_EVALUATION_READ_KEY_FILE: /run/secrets/shadow_evaluation_read_key
+      CATALOG_MIRROR_KEY_FILE: /run/secrets/catalog_mirror_key
+      BUSINESS_FACT_READ_KEY_FILE: /run/secrets/business_fact_read_key
+      REALTIME_DATA_KEY_FILE: /run/secrets/realtime_data_key
+      REALTIME_DATA_KEY_REF: local-kek-v1
+      REALTIME_INBOUND_DEBOUNCE_MS: "5000"
+      META_SIGNATURE_KEY_VERSION: meta-app-secret-v1
+      BUSINESS_FACT_MAX_AGE_SECONDS: "7200"
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+    expose:
+      - "8080"
+    secrets:
+      - meta_app_secret
+      - meta_verify_token
+      - analytics_hash_salt
+      - shadow_mirror_key
+      - shadow_evaluation_read_key
+      - catalog_mirror_key
+      - business_fact_read_key
+      - realtime_data_key
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+      - n8n
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:8080/health/phase5-ready')
+          .then(r=>{if(!r.ok)process.exit(1)})
+          .catch(()=>process.exit(1))
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  shadow-worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: lana-chatbot-app:realtime-p1
+    container_name: lana-chatbot-shadow-worker
+    restart: unless-stopped
+    command: ["node", "apps/worker/dist/phase4-server.js"]
+    environment:
+      NODE_ENV: production
+      APP_SEND_ENABLED: "false"
+      CHATBOT_SEND_ENABLED: "false"
+      SHADOW_DATABASE_URL_FILE: /run/secrets/shadow_database_url
+      VERTEX_CREDENTIAL_FILE: /run/secrets/vertex_google_api
+      VERTEX_PROJECT_ID: project-d44e0453-82e8-4ea2-a9d
+      VERTEX_MODEL_NAME: gemini-3.1-flash-lite
+      VERTEX_TIMEOUT_MS: "30000"
+      SHADOW_POLL_MS: "5000"
+      SHADOW_MIN_SOURCE_AGE_SECONDS: "30"
+      SHADOW_DAILY_GENERATION_LIMIT: "50"
+      SHADOW_HOURLY_GENERATION_LIMIT: "10"
+      SHADOW_WORKER_ID: phase4-shadow-worker-1
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      BUSINESS_FACT_MAX_AGE_SECONDS: "7200"
+      CATALOG_DEFAULT_SHOP_ALIAS: LANA
+      QDRANT_BASE_URL: https://355c0b3c-1e7f-4fa5-9235-72559195dd72.eu-central-1-0.aws.cloud.qdrant.io
+      QDRANT_COLLECTION: lana_multimodal_data_v2
+      QDRANT_API_KEY_FILE: /run/secrets/qdrant_api_key
+      QDRANT_TIMEOUT_MS: "15000"
+      VERTEX_EMBEDDING_LOCATION: us-central1
+      VERTEX_EMBEDDING_MODEL: multimodalembedding@001
+      VERTEX_EMBEDDING_DIMENSION: "1408"
+      PRODUCT_SEARCH_TEXT_MIN_SCORE: "0.72"
+      PRODUCT_SEARCH_IMAGE_MIN_SCORE: "0.78"
+      PRODUCT_SEARCH_MIN_TOP_GAP: "0.04"
+      PRODUCT_SEARCH_MAX_CANDIDATES: "3"
+      PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS: lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com
+    secrets:
+      - shadow_database_url
+      - vertex_google_api
+      - qdrant_api_key
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "try{process.kill(1,0)}catch{process.exit(1)}"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  realtime-worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: lana-chatbot-app:inbound-debounce-r1
+    container_name: lana-chatbot-realtime-worker
+    restart: unless-stopped
+    command: ["node", "apps/worker/dist/realtime-server.js"]
+    environment:
+      NODE_ENV: production
+      META_APP_ID: "921453707665419"
+      REALTIME_MODE: LIVE
+      APP_SEND_ENABLED: "true"
+      CHATBOT_SEND_ENABLED: "true"
+      REALTIME_DRY_RUN_ASSUME_TAGS_CLEAR: "false"
+      META_PAGE_ID: "1198992073286645"
+      PANCAKE_ACCESS_TOKEN_FILE: /run/secrets/pancake_access_token
+      PANCAKE_EMPLOYEE_TAG_ID: "25"
+      PANCAKE_POST_SALE_TAG_ID: "6"
+      PANCAKE_CLOSED_ORDER_TAG_ID: "11"
+      PANCAKE_NO_UPSALE_TAG_ID: "13"
+      PANCAKE_TIMEOUT_MS: "15000"
+      REALTIME_WORKER_ID: realtime-worker-1
+      REALTIME_POLL_MS: "1000"
+      REALTIME_INBOX_LEASE_MS: "90000"
+      REALTIME_HOURLY_GENERATION_LIMIT: "10"
+      REALTIME_DAILY_GENERATION_LIMIT: "50"
+      REALTIME_PROMPT_VERSION: lana-sales-genz-v3-product-info-r2
+      REALTIME_DATA_KEY_FILE: /run/secrets/realtime_data_key
+      REALTIME_DATA_KEY_REF: local-kek-v1
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      CHAT_HISTORY_TTL_SECONDS: "1728000"
+      CHAT_HISTORY_MAX_MESSAGES: "150"
+      HISTORY_CONTEXT_ENABLED: "true"
+      HISTORY_WRITE_ENABLED: "true"
+      ANALYTICS_HASH_SALT_FILE: /run/secrets/analytics_hash_salt
+      VERTEX_CREDENTIAL_FILE: /run/secrets/vertex_google_api
+      VERTEX_PROJECT_ID: project-d44e0453-82e8-4ea2-a9d
+      VERTEX_MODEL_NAME: gemini-3.1-flash-lite
+      VERTEX_TIMEOUT_MS: "30000"
+      BUSINESS_FACT_MAX_AGE_SECONDS: "7200"
+      BUSINESS_NON_VOLATILE_MAX_AGE_SECONDS: "172800"
+      CATALOG_DEFAULT_SHOP_ALIAS: LANA
+      QDRANT_BASE_URL: https://355c0b3c-1e7f-4fa5-9235-72559195dd72.eu-central-1-0.aws.cloud.qdrant.io
+      QDRANT_COLLECTION: lana_multimodal_data_v2
+      QDRANT_API_KEY_FILE: /run/secrets/qdrant_api_key
+      QDRANT_TIMEOUT_MS: "15000"
+      VERTEX_EMBEDDING_LOCATION: us-central1
+      VERTEX_EMBEDDING_MODEL: multimodalembedding@001
+      VERTEX_EMBEDDING_DIMENSION: "1408"
+      PRODUCT_SEARCH_TEXT_MIN_SCORE: "0.72"
+      PRODUCT_SEARCH_IMAGE_MIN_SCORE: "0.78"
+      PRODUCT_SEARCH_MIN_TOP_GAP: "0.04"
+      PRODUCT_SEARCH_MAX_CANDIDATES: "3"
+      PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS: lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com
+      MEDIA_SEARCH_CACHE_TTL_SECONDS: "604800"
+      VIDEO_MAX_DURATION_SECONDS: "60"
+      VIDEO_MAX_BYTES: "25165824"
+      VIDEO_PROCESSING_TIMEOUT_MS: "45000"
+      MEDIA_WORKER_URL: http://media-worker:8090
+      MEDIA_WORKER_KEY_FILE: /run/secrets/media_worker_key
+    secrets:
+      - realtime_data_key
+      - analytics_hash_salt
+      - vertex_google_api
+      - qdrant_api_key
+      - pancake_access_token
+      - media_worker_key
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      media-worker:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "try{process.kill(1,0)}catch{process.exit(1)}"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  media-worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: lana-chatbot-app:media-v1
+    container_name: lana-chatbot-media-worker
+    restart: unless-stopped
+    command: ["node", "apps/worker/dist/media-server.js"]
+    environment:
+      NODE_ENV: production
+      PORT: "8090"
+      MEDIA_WORKER_KEY_FILE: /run/secrets/media_worker_key
+      PRODUCT_SEARCH_ALLOWED_IMAGE_HOSTS: lanadesign.vn,content.pancake.vn,fbcdn.net,fbsbx.com
+      VIDEO_MAX_DURATION_SECONDS: "60"
+      VIDEO_MAX_BYTES: "25165824"
+      VIDEO_PROCESSING_TIMEOUT_MS: "45000"
+    expose:
+      - "8090"
+    secrets:
+      - media_worker_key
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:8090/health')
+          .then(r=>{if(!r.ok)process.exit(1)})
+          .catch(()=>process.exit(1))
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+    stop_grace_period: 20s
+    mem_limit: 384m
+    cpus: 1.0
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  delivery-worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: lana-chatbot-app:realtime-p1
+    container_name: lana-chatbot-delivery-worker
+    restart: unless-stopped
+    command: ["node", "apps/worker/dist/delivery-server.js"]
+    environment:
+      NODE_ENV: production
+      REALTIME_MODE: LIVE
+      APP_SEND_ENABLED: "true"
+      CHATBOT_SEND_ENABLED: "true"
+      META_DELIVERY_ENABLED: "true"
+      META_PAGE_ID: "1198992073286645"
+      META_PAGE_ACCESS_TOKEN_FILE: /run/secrets/meta_page_access_token
+      META_GRAPH_API_VERSION: v23.0
+      META_SEND_TIMEOUT_MS: "15000"
+      META_OUTBOX_WORKER_ID: meta-outbox-worker-page-test-1
+      META_OUTBOX_LEASE_MS: "30000"
+      PANCAKE_ACCESS_TOKEN_FILE: /run/secrets/pancake_access_token
+      PANCAKE_EMPLOYEE_TAG_ID: "25"
+      PANCAKE_POST_SALE_TAG_ID: "6"
+      PANCAKE_CLOSED_ORDER_TAG_ID: "11"
+      PANCAKE_NO_UPSALE_TAG_ID: "13"
+      PANCAKE_TIMEOUT_MS: "15000"
+      PANCAKE_TAG_WORKER_ID: pancake-tag-worker-page-test-1
+      PANCAKE_TAG_LEASE_MS: "30000"
+      DELIVERY_POLL_MS: "500"
+      REALTIME_DATA_KEY_FILE: /run/secrets/realtime_data_key
+      REALTIME_DATA_KEY_REF: local-kek-v1
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      CHAT_HISTORY_TTL_SECONDS: "1728000"
+      CHAT_HISTORY_MAX_MESSAGES: "150"
+      HISTORY_CONTEXT_ENABLED: "true"
+      HISTORY_WRITE_ENABLED: "true"
+      ANALYTICS_HASH_SALT_FILE: /run/secrets/analytics_hash_salt
+    secrets:
+      - meta_page_access_token
+      - meta_verify_token
+      - pancake_access_token
+      - realtime_data_key
+      - analytics_hash_salt
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "try{process.kill(1,0)}catch{process.exit(1)}"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  retention-worker:
+    image: postgres:17-alpine
+    container_name: lana-chatbot-retention-worker
+    restart: unless-stopped
+    command:
+      - sh
+      - -ec
+      - 'while true; do PGPASSWORD="$${POSTGRES_PASSWORD}" psql --host postgres --username "$${POSTGRES_USER}" --dbname "$${POSTGRES_DB}" --set ON_ERROR_STOP=1 --command "SELECT * FROM lana_apply_retention(); SELECT * FROM lana_apply_shadow_retention();"; sleep 86400; done'
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    stop_grace_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  admin-api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: lana-chatbot-app:admin-mvp
+    container_name: lana-chatbot-admin-api
+    restart: unless-stopped
+    user: "0:0"
+    command:
+      - sh
+      - -ec
+      - >-
+        export ADMIN_DATABASE_URL="$$(cat /run/secrets/admin_database_url)";
+        export ADMIN_CONTROL_DATABASE_URL="$$(cat /run/secrets/admin_control_database_url)";
+        export ADMIN_INTERNAL_AUTH_SECRET="$$(cat /run/secrets/admin_internal_auth_secret)";
+        exec su-exec node node apps/admin-api/dist/server.js
+    environment:
+      NODE_ENV: production
+      PORT: "8081"
+      ADMIN_DATABASE_URL_FILE: /run/secrets/admin_database_url
+      ADMIN_ALLOWED_ORIGIN: https://admin.lanadesign.vn
+      ADMIN_OWNER_EMAILS: nguyentuanson27@gmail.com
+      ADMIN_PAGE_IDS: ALL
+      ADMIN_CONTROL_ENABLED: "true"
+      ADMIN_HISTORY_ENABLED: "true"
+      ADMIN_CONTROL_PAGE_IDS: "1198992073286645"
+      ADMIN_CONTROL_DATABASE_URL_FILE: /run/secrets/admin_control_database_url
+      ADMIN_ASSERTION_ISSUER: lana-admin-web
+      ADMIN_INTERNAL_AUTH_SECRET_FILE: /run/secrets/admin_internal_auth_secret
+      REALTIME_DATA_KEY_FILE: /run/secrets/realtime_data_key
+      REALTIME_DATA_KEY_REF: local-kek-v1
+    expose:
+      - "8081"
+    secrets:
+      - admin_database_url
+      - admin_control_database_url
+      - admin_internal_auth_secret
+      - realtime_data_key
+    depends_on:
+      postgres:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:8081/health/ready')
+          .then(r=>{if(!r.ok)process.exit(1)})
+          .catch(()=>process.exit(1))
+      interval: 15s
+      timeout: 6s
+      retries: 8
+      start_period: 20s
+    stop_grace_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  admin-control-worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: lana-chatbot-app:admin-control
+    container_name: lana-chatbot-admin-control-worker
+    restart: unless-stopped
+    user: "0:0"
+    command:
+      - sh
+      - -ec
+      - >-
+        export ADMIN_CONTROL_DATABASE_URL="$$(cat /run/secrets/admin_control_worker_database_url)";
+        exec su-exec node node apps/admin-control-worker/dist/server.js
+    environment:
+      NODE_ENV: production
+      ADMIN_CONTROL_ENABLED: "true"
+      ADMIN_CONTROL_PAGE_IDS: "1198992073286645"
+      ADMIN_CONTROL_DATABASE_URL_FILE: /run/secrets/admin_control_worker_database_url
+      ADMIN_CONTROL_WORKER_ID: admin-control-worker-page-test-1
+      ADMIN_CONTROL_POLL_MS: "1000"
+      ADMIN_CONTROL_LEASE_MS: "60000"
+      META_PAGE_ID: "1198992073286645"
+      REALTIME_DATA_KEY_FILE: /run/secrets/realtime_data_key
+      REALTIME_DATA_KEY_REF: local-kek-v1
+      PANCAKE_ACCESS_TOKEN_FILE: /run/secrets/pancake_access_token
+      PANCAKE_EMPLOYEE_TAG_ID: "25"
+      PANCAKE_POST_SALE_TAG_ID: "6"
+      PANCAKE_CLOSED_ORDER_TAG_ID: "11"
+      PANCAKE_NO_UPSALE_TAG_ID: "13"
+      PANCAKE_TIMEOUT_MS: "15000"
+    secrets:
+      - admin_control_worker_database_url
+      - realtime_data_key
+      - pancake_access_token
+    depends_on:
+      postgres:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "try{process.kill(1,0)}catch{process.exit(1)}"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 15s
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  admin-web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: lana-chatbot-app:admin-mvp
+    container_name: lana-chatbot-admin-web
+    restart: unless-stopped
+    user: "0:0"
+    command:
+      - sh
+      - -ec
+      - >-
+        export ADMIN_INTERNAL_AUTH_SECRET="$$(cat /run/secrets/admin_internal_auth_secret)";
+        exec su-exec node node apps/admin-web/server.mjs
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOST: 0.0.0.0
+      ADMIN_API_ORIGIN: http://admin-api:8081
+      ADMIN_ASSERTION_ISSUER: lana-admin-web
+      ADMIN_INTERNAL_AUTH_SECRET_FILE: /run/secrets/admin_internal_auth_secret
+      ADMIN_OWNER_EMAILS: nguyentuanson27@gmail.com
+    expose:
+      - "3000"
+    secrets:
+      - admin_internal_auth_secret
+    depends_on:
+      admin-api:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:3000/health')
+          .then(r=>{if(!r.ok)process.exit(1)})
+          .catch(()=>process.exit(1))
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 15s
+    stop_grace_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+networks:
+  backend:
+    name: lana-chatbot-backend
+  n8n:
+    external: true
+    name: n8n-docker_n8n-network
+
+volumes:
+  postgres_data:
+    name: lana-chatbot-postgres-data
+  redis_data:
+    name: lana-chatbot-redis-data
+
+secrets:
+  meta_app_secret:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/meta_app_secret
+  meta_verify_token:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/meta_verify_token
+  analytics_hash_salt:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/analytics_hash_salt
+  shadow_mirror_key:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/shadow_mirror_key
+  shadow_evaluation_read_key:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/shadow_evaluation_read_key
+  catalog_mirror_key:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/catalog_mirror_key
+  business_fact_read_key:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/business_fact_read_key
+  shadow_database_url:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/shadow_database_url
+  vertex_google_api:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/vertex_google_api
+  qdrant_api_key:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/qdrant_api_key
+  realtime_data_key:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/realtime_data_key
+  meta_page_access_token:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/meta_page_access_token
+  pancake_access_token:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/pancake_access_token
+  admin_database_url:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/admin_database_url
+  admin_control_database_url:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/admin_control_database_url
+  admin_control_worker_database_url:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/admin_control_worker_database_url
+  admin_internal_auth_secret:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/admin_internal_auth_secret
+  media_worker_key:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/media_worker_key

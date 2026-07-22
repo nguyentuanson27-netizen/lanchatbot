@@ -1,0 +1,14 @@
+# Optional template for a locally-managed tunnel.
+# For a remotely-managed tunnel created in the dashboard, configure the Public
+# Hostname there and run cloudflared with a token mounted as a secret.
+
+tunnel: REPLACE_TUNNEL_UUID
+credentials-file: /run/secrets/cloudflared_credentials.json
+
+ingress:
+  - hostname: admin.lanadesign.vn
+    service: http://admin-web:3000
+    originRequest:
+      connectTimeout: 10s
+  - service: http_status:404
+

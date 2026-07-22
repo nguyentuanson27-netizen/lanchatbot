@@ -1,0 +1,34 @@
+{
+  "_note": "Reference only. Do not apply without reviewing current Cloudflare API schema.",
+  "application": {
+    "name": "Lana Admin MVP",
+    "type": "self_hosted",
+    "hostname": "admin.lanadesign.vn",
+    "session_duration": "8h",
+    "allowed_identity_provider": "Google",
+    "independent_mfa": {
+      "required": true,
+      "session_duration": "8h"
+    }
+  },
+  "policy": {
+    "name": "Allow Lana Owner",
+    "action": "allow",
+    "include": [
+      {
+        "email": "nguyentuanson27@gmail.com"
+      }
+    ],
+    "require": [
+      {
+        "login_method": "Google"
+      }
+    ],
+    "forbidden_patterns": [
+      "everyone",
+      "all_valid_emails",
+      "email_domain:gmail.com",
+      "bypass"
+    ]
+  }
+}

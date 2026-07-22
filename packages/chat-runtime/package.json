@@ -1,0 +1,27 @@
+{
+  "name": "@lana/chat-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "pretypecheck": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pretest": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@lana/business-tools": "workspace:*",
+    "@lana/contracts": "workspace:*",
+    "@lana/conversation-engine": "workspace:*"
+  }
+}

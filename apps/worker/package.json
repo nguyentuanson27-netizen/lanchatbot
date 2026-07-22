@@ -1,0 +1,29 @@
+{
+  "name": "@lana/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prebuild": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build && pnpm --filter @lana/meta-webhook build && pnpm --filter @lana/meta-delivery build && pnpm --filter @lana/pancake-handoff build && pnpm --filter @lana/database build",
+    "build": "tsc -p tsconfig.json",
+    "pretypecheck": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build && pnpm --filter @lana/meta-webhook build && pnpm --filter @lana/meta-delivery build && pnpm --filter @lana/pancake-handoff build && pnpm --filter @lana/database build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pretest": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build && pnpm --filter @lana/meta-webhook build && pnpm --filter @lana/meta-delivery build && pnpm --filter @lana/pancake-handoff build && pnpm --filter @lana/database build",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@lana/business-tools": "workspace:*",
+    "@lana/contracts": "workspace:*",
+    "@lana/conversation-engine": "workspace:*",
+    "@lana/database": "workspace:*",
+    "@lana/durable-messaging": "workspace:*",
+    "@lana/meta-delivery": "workspace:*",
+    "@lana/meta-webhook": "workspace:*",
+    "@lana/pancake-handoff": "workspace:*",
+    "fast-xml-parser": "^5.10.1",
+    "redis": "^5.8.2"
+  }
+}

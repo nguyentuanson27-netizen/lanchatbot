@@ -1,0 +1,172 @@
+import { readdir, readFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+
+const directory = resolve(import.meta.dirname, "../migrations");
+
+describe("database migrations", () => {
+  it("has an up/down pair for every migration", async () => {
+    const files = await readdir(directory);
+    const ups = files.filter((name) => name.endsWith(".up.sql")).map((name) => name.replace(".up.sql", ""));
+    const downs = files.filter((name) => name.endsWith(".down.sql")).map((name) => name.replace(".down.sql", ""));
+    expect(ups.sort()).toEqual(downs.sort());
+  });
+
+  it("contains all durable phase-zero tables", async () => {
+    const sql = await readFile(resolve(directory, "0001_core.up.sql"), "utf8");
+    for (const table of [
+      "pages",
+      "webhook_inbox",
+      "conversations",
+      "messages",
+      "conversation_events",
+      "meta_outbox",
+      "pancake_tag_outbox",
+      "secret_versions",
+      "audit_log",
+    ]) {
+      expect(sql).toContain(`CREATE TABLE IF NOT EXISTS ${table}`);
+    }
+    expect(sql).toContain("PARTITION BY RANGE (occurred_at)");
+    expect(sql).toContain("UNIQUE (page_id, event_key)");
+  });
+
+  it("creates the durable Phase 4 shadow evaluation queue", async () => {
+    const sql = await readFile(resolve(directory, "0003_shadow_evaluation.up.sql"), "utf8");
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS shadow_evaluations");
+    expect(sql).toContain("shadow_evaluations_claim_idx");
+    expect(sql).toContain("ON CONFLICT (source_identity_key) DO NOTHING");
+    expect(sql).toContain("status IN ('PENDING', 'PROCESSING', 'AWAITING_ACTUAL', 'COMPLETED'");
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS shadow_worker_status");
+    expect(sql).toContain("lana_apply_shadow_retention");
+  });
+
+  it("audits the source and freshness of business facts used by shadow replies", async () => {
+    const sql = await readFile(resolve(directory, "0004_business_fact_audit.up.sql"), "utf8");
+    for (const column of [
+      "business_fact_status",
+      "business_fact_source",
+      "business_fact_observed_at",
+      "business_fact_expires_at",
+      "business_fact_product_id",
+      "business_fact_reason_code",
+    ]) {
+      expect(sql).toContain(column);
+    }
+    expect(sql).toContain("shadow_evaluations_fact_status_idx");
+  });
+
+  it("creates PII-safe read models for the read-only admin MVP", async () => {
+    const sql = await readFile(
+      resolve(directory, "0006_admin_read_models.up.sql"),
+      "utf8",
+    );
+    for (const view of [
+      "admin_pages_v",
+      "admin_conversations_v",
+      "admin_messages_v",
+      "admin_conversation_events_v",
+      "admin_evaluations_v",
+      "admin_worker_status_v",
+      "admin_inbox_v",
+      "admin_meta_outbox_v",
+      "admin_pancake_outbox_v",
+      "admin_audit_v",
+    ]) {
+      expect(sql).toContain(`VIEW ${view}`);
+    }
+    expect(sql).toContain("WHERE dlp_status = 'PASSED'");
+    expect(sql).not.toContain("recipient_ciphertext");
+    expect(sql).not.toContain("payload_ciphertext");
+  });
+
+  it("creates a constrained, auditable admin command control plane", async () => {
+    const sql = await readFile(
+      resolve(directory, "0007_admin_control_plane.up.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS admin_commands");
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS admin_command_events");
+    expect(sql).toContain("admin_commands_actor_idempotency_uk");
+    expect(sql).toContain("admin_commands_one_active_version_idx");
+    expect(sql).toContain("admin_command_events is append-only");
+    expect(sql).toContain("VIEW admin_commands_v");
+    expect(sql).toContain("'DA_CHOT_DON', 'KHONG_UP_SALE'");
+    expect(sql).not.toContain("payload_ciphertext");
+  });
+
+  it("stores the OWNER-only customer identity projection encrypted at rest", async () => {
+    const sql = await readFile(
+      resolve(directory, "0008_admin_conversation_identity.up.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS admin_conversation_identities");
+    expect(sql).toContain("customer_name_ciphertext bytea NOT NULL");
+    expect(sql).toContain("customer_name_nonce bytea NOT NULL");
+    expect(sql).toContain("customer_name_auth_tag bytea NOT NULL");
+    expect(sql).not.toMatch(/customer_name\s+text/i);
+    expect(sql).not.toContain("VIEW admin_conversation_identities");
+  });
+
+  it("stores canonical history outreach analytics without raw campaign text", async () => {
+    const sql = await readFile(
+      resolve(directory, "0009_chat_history_outreach.up.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS outreach_messages");
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS outreach_responses");
+    expect(sql).toContain("source_event_key_hash text NOT NULL");
+    expect(sql).toContain("provider_message_id_hash text");
+    expect(sql).toContain("content_hash text NOT NULL");
+    expect(sql).not.toMatch(/(?:raw_text|message_text|content_text|full_text)\s+text/iu);
+    expect(sql).toContain("VIEW admin_outreach_messages_v");
+    expect(sql).toContain("VIEW admin_outreach_metrics_v");
+    expect(sql).toContain("sent_at < p_now - interval '6 months'");
+    expect(sql).toContain("response_status = 'RESPONDED_24H'");
+  });
+
+  it("stores immutable PII-free handoff history with a mutable queue projection", async () => {
+    const sql = await readFile(
+      resolve(directory, "0010_handoff_history.up.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS handoff_events");
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS handoff_cases");
+    expect(sql).toContain("admin_handoff_queue_v");
+    expect(sql).toContain("admin_handoff_history_v");
+    expect(sql).toContain("handoff_events is append-only");
+    expect(sql).toContain("'BOT_POLICY', 'CUSTOMER_REQUEST', 'POST_SALE', 'ADMIN'");
+    expect(sql).toContain("trigger_message_pk uuid");
+    expect(sql).not.toContain("trigger_message_pk uuid REFERENCES");
+    expect(sql).toContain("message.dlp_status = 'PASSED'");
+    expect(sql).not.toMatch(/(?:raw_text|customer_id|provider_message_id)\s+/iu);
+  });
+
+  it("stores Ads attribution and media outcomes without persisting media URLs", async () => {
+    const sql = await readFile(
+      resolve(directory, "0011_ads_media_analytics.up.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS message_ad_contexts");
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS message_media_analysis");
+    expect(sql).toContain("ad_title text");
+    expect(sql).toContain("post_id text");
+    expect(sql).toContain("ad_id text");
+    expect(sql).toContain("extracted_product_id text");
+    expect(sql).not.toMatch(/(?:media_url|image_url|video_url)\s+text/iu);
+  });
+
+  it("creates a durable per-conversation sliding debounce without merging inbox audit rows", async () => {
+    const sql = await readFile(
+      resolve(directory, "0013_inbound_debounce.up.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS conversation_ingress_heads");
+    expect(sql).toContain("generation bigint NOT NULL");
+    expect(sql).toContain("last_customer_receive_sequence bigint");
+    expect(sql).toContain("quiet_until timestamptz");
+    expect(sql).toContain("'CUSTOMER', 'APP_ECHO', 'PAGE_ECHO'");
+    expect(sql).toContain("evaluation_group_id uuid");
+    expect(sql).not.toContain("max_wait");
+  });
+});

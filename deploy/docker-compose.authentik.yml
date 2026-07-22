@@ -1,0 +1,127 @@
+name: lana-authentik
+
+x-authentik-environment: &authentik_environment
+  AUTHENTIK_POSTGRESQL__HOST: authentik-postgresql
+  AUTHENTIK_POSTGRESQL__NAME: authentik
+  AUTHENTIK_POSTGRESQL__USER: authentik
+  AUTHENTIK_POSTGRESQL__PASSWORD: file:///run/secrets/authentik_postgres_password
+  AUTHENTIK_POSTGRESQL__SSLMODE: disable
+  AUTHENTIK_SECRET_KEY: file:///run/secrets/authentik_secret_key
+  AUTHENTIK_ERROR_REPORTING__ENABLED: "false"
+  AUTHENTIK_LOG_LEVEL: info
+
+services:
+  authentik-postgresql:
+    image: postgres:17-alpine
+    container_name: lana-authentik-postgresql
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: authentik
+      POSTGRES_USER: authentik
+      POSTGRES_PASSWORD_FILE: /run/secrets/authentik_postgres_password
+    secrets:
+      - authentik_postgres_password
+    volumes:
+      - authentik_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d authentik -U authentik"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - authentik-internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  authentik-server:
+    image: ghcr.io/goauthentik/server:2026.5.5
+    container_name: lana-authentik-server
+    restart: unless-stopped
+    command: server
+    environment: *authentik_environment
+    secrets:
+      - authentik_postgres_password
+      - authentik_secret_key
+    volumes:
+      - authentik_media:/data
+    expose:
+      - "9000"
+      - "9443"
+    depends_on:
+      authentik-postgresql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "ak", "healthcheck"]
+      interval: 20s
+      timeout: 10s
+      retries: 15
+      start_period: 90s
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - authentik-internal
+      - chatbot-backend
+      - reverse-proxy
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
+
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:2026.5.5
+    container_name: lana-authentik-worker
+    restart: unless-stopped
+    command: worker
+    environment: *authentik_environment
+    secrets:
+      - authentik_postgres_password
+      - authentik_secret_key
+    volumes:
+      - authentik_media:/data
+    depends_on:
+      authentik-postgresql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "ak", "healthcheck"]
+      interval: 20s
+      timeout: 10s
+      retries: 15
+      start_period: 90s
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - authentik-internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "30m"
+        max-file: "5"
+
+networks:
+  authentik-internal:
+    name: lana-authentik-internal
+  chatbot-backend:
+    external: true
+    name: lana-chatbot-backend
+  reverse-proxy:
+    external: true
+    name: n8n-docker_n8n-network
+
+volumes:
+  authentik_postgres_data:
+    name: lana-authentik-postgres-data
+  authentik_media:
+    name: lana-authentik-media
+
+secrets:
+  authentik_postgres_password:
+    file: ${AUTHENTIK_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/authentik_postgres_password
+  authentik_secret_key:
+    file: ${AUTHENTIK_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/authentik_secret_key

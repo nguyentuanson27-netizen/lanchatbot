@@ -1,0 +1,70 @@
+{
+  "id": "P2APPBRIDGELANA1",
+  "name": "P2.2A - Catalog Snapshot App Bridge (INACTIVE)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "17d95c1f-4071-4384-b5d2-0beecf416507",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-540, 40]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "minutes", "minutesInterval": 5 }]
+        }
+      },
+      "id": "ea9dbad7-b8aa-4e25-8326-7878e59bedf9",
+      "name": "Every 5 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-540, 180]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { createClient } = require('redis');\nconst redisUrl = String($env.REDIS_URL || '').trim();\nconst targetUrl = String($env.LANA_CATALOG_MIRROR_URL || 'http://lana-chatbot-api:8080/internal/catalog/snapshots').trim();\nconst mirrorKey = String($env.LANA_CATALOG_MIRROR_KEY || '').trim();\nconst ttlSeconds = Math.max(300, Math.min(172800, Number($env.CATALOG_REDIS_TTL_SECONDS || 7200)));\nif (!redisUrl) throw new Error('REDIS_URL_REQUIRED');\nif (mirrorKey.length < 32) throw new Error('LANA_CATALOG_MIRROR_KEY_REQUIRED');\nconst client = createClient({ url: redisUrl });\nclient.on('error', () => undefined);\nlet scanned = 0;\nlet mirrored = 0;\nlet rejected = 0;\nconst errors = {};\nconst addError = (code) => { errors[code] = (errors[code] || 0) + 1; };\ntry {\n  await client.connect();\n  for await (const batchOrKey of client.scanIterator({ MATCH: 'catalog:offer:*', COUNT: 100 })) {\n    const keys = Array.isArray(batchOrKey) ? batchOrKey : [batchOrKey];\n    for (const redisKey of keys) {\n      scanned += 1;\n      const raw = await client.get(redisKey);\n      if (!raw) { rejected += 1; addError('SNAPSHOT_MISSING'); continue; }\n      let snapshot;\n      try { snapshot = JSON.parse(raw); } catch { rejected += 1; addError('SNAPSHOT_JSON_INVALID'); continue; }\n      if (!snapshot || snapshot.schema_version !== 3) { rejected += 1; addError('SNAPSHOT_SCHEMA_INVALID'); continue; }\n      const body = { schema_version: 1, source: 'N8N_POS_SNAPSHOT', ttl_seconds: ttlSeconds, snapshot };\n      let delivered = false;\n      let lastCode = 'APP_BRIDGE_FAILED';\n      for (let attempt = 1; attempt <= 3 && !delivered; attempt += 1) {\n        try {\n          const response = await this.helpers.httpRequest({\n            method: 'POST',\n            url: targetUrl,\n            headers: { 'x-lana-internal-key': mirrorKey, 'content-type': 'application/json' },\n            body,\n            json: true,\n            timeout: 15000,\n            returnFullResponse: true,\n          });\n          const status = Number(response.statusCode || 0);\n          delivered = status >= 200 && status < 300;\n          if (!delivered) lastCode = 'APP_HTTP_' + status;\n        } catch (error) {\n          lastCode = 'APP_REQUEST_FAILED';\n          if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 250 * attempt));\n        }\n      }\n      if (delivered) mirrored += 1; else { rejected += 1; addError(lastCode); }\n    }\n  }\n} finally {\n  if (client.isOpen) await client.quit().catch(() => client.disconnect());\n}\nreturn [{ json: { schema_version: 1, source: 'CATALOG_APP_BRIDGE', scanned, mirrored, rejected, errors, completed_at: new Date().toISOString(), send: false } }];"
+      },
+      "id": "ef734e75-8527-4e58-8125-e4dac4170b5a",
+      "name": "Mirror Canonical Snapshots",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-260, 100]
+    },
+    {
+      "parameters": {
+        "content": "## Cầu nối snapshot → app\n\n- Chỉ đọc `catalog:offer:*` từ Redis n8n và đẩy snapshot chuẩn sang app.\n- Không gửi Facebook/Meta, không thay đổi workflow chatbot đang chạy.\n- Giữ workflow **inactive** đến khi POS snapshot có dữ liệu thật và đã cấu hình secret.\n- Biến bắt buộc: `REDIS_URL`, `LANA_CATALOG_MIRROR_KEY`.\n- URL mặc định: `http://lana-chatbot-api:8080/internal/catalog/snapshots`.",
+        "height": 280,
+        "width": 420
+      },
+      "id": "bbfa2659-03ca-40b1-9874-8f10cf09ea40",
+      "name": "README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [40, -20]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{ "node": "Mirror Canonical Snapshots", "type": "main", "index": 0 }]]
+    },
+    "Every 5 Minutes": {
+      "main": [[{ "node": "Mirror Canonical Snapshots", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "all",
+    "executionTimeout": 600
+  },
+  "versionId": "9d012c52-fbae-4b05-adb0-861dcc19c9b3",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

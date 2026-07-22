@@ -1,0 +1,16 @@
+DROP TRIGGER IF EXISTS audit_log_chain_insert ON audit_log;
+DROP TRIGGER IF EXISTS audit_log_no_update ON audit_log;
+DROP FUNCTION IF EXISTS chain_audit_insert();
+DROP FUNCTION IF EXISTS prevent_audit_mutation();
+DROP TABLE IF EXISTS audit_log;
+DROP FUNCTION IF EXISTS lana_create_history_partitions(date);
+DROP TABLE IF EXISTS conversation_events CASCADE;
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS message_identities;
+DROP TABLE IF EXISTS pancake_tag_outbox;
+DROP TABLE IF EXISTS meta_outbox;
+DROP TABLE IF EXISTS conversations;
+DROP TABLE IF EXISTS webhook_inbox;
+ALTER TABLE IF EXISTS secret_versions DROP CONSTRAINT IF EXISTS secret_versions_page_fk;
+DROP TABLE IF EXISTS pages;
+DROP TABLE IF EXISTS secret_versions;
