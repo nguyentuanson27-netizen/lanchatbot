@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-22T21:06:00+07:00",
+  "environment": "production",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "releaseTag": "20260722-runtime-policy-published-r4",
+  "commit": "8bd682d707dbed5e1ab191a24ceb79cc092a371b",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260722-runtime-policy-published-r4",
+  "pageAllowlist": ["1198992073286645"],
+  "composeSha256": "4a4b66ef0f19d6873ed1cfcd48cc479c6a56f077f7b9d86f020c245186b81072",
+  "image": {
+    "name": "lana-chatbot-app:runtime-policy-published-r4",
+    "digest": "sha256:9c723249f012925177dee8627b9400deb1b645660e7f373660843462939d40aa"
+  },
+  "servicesChanged": [
+    "admin-api",
+    "admin-web",
+    "admin-simulation-worker",
+    "realtime-worker"
+  ],
+  "servicesVerifiedUnchanged": ["api", "delivery-worker", "n8n"],
+  "migrations": [],
+  "configurationBackup": "/opt/lana-chatbot/shared/.env.infrastructure.pre-20260722-runtime-policy-published-r4",
+  "policy": {
+    "channel": "PUBLISHED",
+    "activePointers": 3,
+    "publishedPointers": 3,
+    "adminPublishEnabled": true,
+    "runtimePublishedEnabled": true,
+    "pageHardGate": "1198992073286645",
+    "publishedOutsidePageResult": "PUBLISHED_PAGE_FORBIDDEN",
+    "ownerOverrideInsufficientEvidence": true
+  },
+  "simulation": {
+    "worker": "HEALTHY",
+    "sideEffects": "DISABLED",
+    "prePublishBaselineSource": "HISTORICAL_ACTUAL",
+    "prePublishStatus": "INSUFFICIENT_EVIDENCE",
+    "evaluatedConversations": 0
+  },
+  "verification": {
+    "cleanDockerBuild": "PASS",
+    "chatRuntimeTests": "31_PASS",
+    "chatRuntimeTypecheck": "PASS",
+    "publishedResolverPageTest": "RESOLVED_LIVE_OUTBOUND",
+    "publishedResolverOtherPage": "REJECTED",
+    "allChangedServicesHealthy": true,
+    "allChangedServicesRestartCount": 0,
+    "n8nUnchanged": true,
+    "diskUsagePercent": 41
+  }
+}

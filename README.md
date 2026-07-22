@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260722-runtime-policy-canary-r3`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260722-runtime-policy-published-r4`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -17,10 +17,10 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 ## Trạng thái production ngày 2026-07-22
 
 - API webhook tiếp tục chạy image `lana-chatbot-app:inbound-debounce-r1`.
-- Admin API, Admin Web, Simulation Worker và realtime worker chạy image `lana-chatbot-app:runtime-policy-canary-r3`.
-- Runtime Policy Resolver đang `CANARY_LIVE` chỉ cho page `1198992073286645`; `PUBLISHED` bị khóa cả ở Admin lẫn runtime.
-- Ba policy lõi (shop, offer, closing) đang trỏ tới các version `CANARY` bất biến; không có pointer `PUBLISHED`.
-- Simulation Worker chạy side-effect-free. Baseline đầu tiên là `HISTORICAL_ACTUAL`; lần chạy hiện tại là `INSUFFICIENT_EVIDENCE`, nên chưa đủ điều kiện publish.
+- Admin API, Admin Web, Simulation Worker và realtime worker chạy image `lana-chatbot-app:runtime-policy-published-r4`.
+- Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
+- Ba policy lõi (shop, offer, closing) đang trỏ tới các version `PUBLISHED` bất biến; mọi lần chuyển trạng thái đều có audit.
+- Simulation Worker chạy side-effect-free. Baseline trước publish là `HISTORICAL_ACTUAL` và kết quả `INSUFFICIENT_EVIDENCE`; owner đã chủ động override điều kiện này khi phát hành r4.
 - Tin nhắn khách được gom sau 5 giây yên lặng; webhook trùng không kéo dài cửa sổ chờ.
 - Durable Inbox, Meta Outbox, Pancake Tag Outbox và generation guard đang hoạt động.
 - Lịch sử tư vấn được chiếu sang Redis 20 ngày và lưu bản ẩn danh trong PostgreSQL 6 tháng.
@@ -31,7 +31,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - PostgreSQL đã áp dụng migration đến `0016_admin_simulation_worker`.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest bất biến mới nhất nằm tại [release manifest](deploy/manifests/20260722-runtime-policy-canary-r3.json).
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest bất biến mới nhất nằm tại [release manifest](deploy/manifests/20260722-runtime-policy-published-r4.json).
 
 ## Kiến trúc dữ liệu
 
