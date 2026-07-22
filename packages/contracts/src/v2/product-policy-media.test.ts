@@ -82,6 +82,10 @@ const validProductFacts = {
       { componentProductId: "CB182-CV", sku: "CB182-CV", role: "SKIRT", quantity: 1, required: true },
       { componentProductId: "CB182-QUAN", sku: "CB182-QUAN", role: "PANTS", quantity: 1, required: true },
     ],
+    offerCompositions: [
+      { offerKind: "SET", posOfferKey: "SET", componentProductIds: ["CB182-AO", "CB182-CV"] },
+      { offerKind: "COMBO_3", posOfferKey: "COMBO_3", componentProductIds: ["CB182-AO", "CB182-CV", "CB182-QUAN"] },
+    ],
     metadata: posBomMetadata,
   },
   pricing: {
@@ -99,7 +103,9 @@ const validProductFacts = {
       {
         variantId: "cb182-ao-be-s",
         sku: "CB182-AO-BE-S",
-        componentProductId: "CB182-AO",
+        offerKind: "SET",
+        posOfferKey: "SET",
+        componentProductId: null,
         color: "BE",
         size: "S",
         remainQuantity: 5,
@@ -164,6 +170,14 @@ describe("ProductFactsV2", () => {
     const facts = ProductFactsV2Schema.parse(validProductFacts);
     expect(facts.pricing.componentPrices[1]?.price).toBeNull();
     expect(facts.sellingRules).toMatchObject({ allowMixedSizes: true, allowComponentSale: false });
+  });
+
+  it("keeps two-piece SET and three-piece COMBO_3 compositions separate", () => {
+    const facts = ProductFactsV2Schema.parse(validProductFacts);
+    expect(facts.bom.offerCompositions).toEqual([
+      expect.objectContaining({ offerKind: "SET", componentProductIds: ["CB182-AO", "CB182-CV"] }),
+      expect.objectContaining({ offerKind: "COMBO_3", componentProductIds: ["CB182-AO", "CB182-CV", "CB182-QUAN"] }),
+    ]);
   });
 
   it("rejects any non-POS authority for price facts", () => {
@@ -250,12 +264,19 @@ describe("PolicyBundleV1", () => {
     multiItemOffer: {
       minimumProductCount: 2,
       discountBps: 500,
+      countingUnit: "PARENT_PRODUCT_UNIT",
+      setAndComboCountAsOne: true,
       scope: "SHOP_WIDE",
       metadata: policyMetadata,
     },
     negotiation: {
       secondConcession: { freeShipping: true, fixedDiscountVnd: 0 },
       finalConcession: { freeShipping: true, fixedDiscountVnd: 20_000 },
+      stacking: {
+        multiItemDiscountWithSecondConcession: true,
+        multiItemDiscountWithFinalConcession: true,
+        deduplicateFreeShipping: true,
+      },
       scope: "SHOP_WIDE",
       metadata: policyMetadata,
     },
@@ -281,6 +302,12 @@ describe("PolicyBundleV1", () => {
     const candidate = structuredClone(policy) as Record<string, any>;
     candidate.closing.allowUnlistedOffers = true;
     expect(PolicyBundleV1Schema.safeParse(candidate).success).toBe(false);
+  });
+
+  it("locks the approved final concession to stack with the five-percent offer", () => {
+    const parsed = PolicyBundleV1Schema.parse(policy);
+    expect(parsed.negotiation.stacking.multiItemDiscountWithFinalConcession).toBe(true);
+    expect(parsed.multiItemOffer.setAndComboCountAsOne).toBe(true);
   });
 });
 

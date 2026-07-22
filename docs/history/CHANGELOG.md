@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-22 — sales runtime engines (Giai đoạn 2)
+
+- Thêm POS adapter và resolver `ProductFactsV2`; Redis projection tách stable/BOM/price-inventory với retention khác freshness.
+- Khóa BOM/tồn theo từng offer POS và publish Redis bằng immutable generation + manifest CAS để tránh trộn snapshot.
+- Thêm policy engine shop-wide: giảm 5% từ hai sản phẩm, freeship và giảm cuối 20.000đ được phép cộng dồn.
+- Thêm merge hồ sơ theo từng trường có revision/CAS, size-chart staging/verification có kiểm tra scope và size recommendation deterministic.
+- Thêm media selector theo sản phẩm/thành phần/mục đích; thiếu đúng loại ảnh thì không gửi ảnh thay thế sai.
+- Thêm baseline analytics ba tháng, outreach cohort riêng, golden conversations và deterministic replay.
+- Đây là engine-layer release trên source; chưa nối vào realtime production hoặc deploy VPS.
+
 ## 2026-07-22 — shared sales contracts
 
 - Thêm additive contract `ProductFactsV2`, `PolicyBundleV1`, `CustomerProfileV1`, `SizeRecommendationV1`, `CartV1`, `HandoffDecisionV2`, `MediaSelectionV2`, `SalesEpisodeV1` và `FunnelEventV1`.

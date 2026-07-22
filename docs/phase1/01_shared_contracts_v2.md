@@ -42,6 +42,7 @@ Giá thiếu phải là `null`; cart không được tính tổng hoặc chuyể
 ## Giá và cấu trúc sản phẩm
 
 - `setPrice`: giá set/offer chính.
+- `offerCompositions`: ánh xạ BOM riêng cho từng offer POS; cho phép cùng một sản phẩm có set hai món và combo ba món mà không gộp sai thành phần.
 - `componentPrices`: một slot cho từng thành phần BOM; thiếu giá vẫn phải giữ slot với `price: null`.
 - `comboThreePiecePrice`: chỉ hợp lệ với BOM ba thành phần và offer `COMBO_3`.
 - `allowMixedSizes`: cho phép các thành phần cùng set dùng size khác nhau.
@@ -60,8 +61,9 @@ Giá thiếu phải là `null`; cart không được tính tổng hoặc chuyể
 
 - Ship mặc định: `30.000đ`.
 - Từ hai sản phẩm: giảm `5%` (`500` basis points).
+- Mỗi set/combo được tính là một sản phẩm cha; số lượng trong giỏ là đơn vị đếm.
 - Nhượng bộ lần hai: freeship.
-- Nhượng bộ cuối: giảm `20.000đ` và freeship.
+- Nhượng bộ cuối: giảm `20.000đ` và freeship; vẫn cộng cùng ưu đãi giảm `5%` khi giỏ đủ điều kiện.
 - Closing hỗ trợ `READY`, `HESITANT`, `CAUTIOUS`.
 - Chỉ policy engine deterministic được chọn ưu đãi; model không được tạo offer ngoài bundle.
 - Mỗi adjustment trong cart phải mang `policyAuthorization` để audit.
