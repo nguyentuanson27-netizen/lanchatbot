@@ -5,16 +5,28 @@ Tài liệu này được tạo bằng kiểm kê chỉ đọc. Không container
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260722-admin-policy-control-r3`.
-- Compose SHA-256: `38253f99033136f33c8fd8633a9fa224c16f38c11aecb0078f9f31a9e1537011`.
+- Current release: `/opt/lana-chatbot/releases/20260722-runtime-policy-canary-r3`.
+- Compose SHA-256: `a6e935c65f5cb7c0094ae38f069251d234340ce888b7cb90d3234854267dc6b9`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
-- Migration mới nhất: `0014_admin_policy_control`.
+- Migration mới nhất: `0016_admin_simulation_worker`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
 Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời điểm kiểm kê. Danh sách image digest đầy đủ nằm trong release manifest.
 
-Admin API và Admin Web đang chạy image `lana-chatbot-app:admin-policy-control-r3` (`sha256:9b94403c7746802326d93b46f4e57088ea62f5c5aad9e03143f11dffd6bccd3b`). Policy Control được bật riêng cho page canary `1198992073286645`; runtime chatbot vẫn chạy image `lana-chatbot-app:inbound-debounce-r1` và n8n không bị restart trong release này.
+Admin API, Admin Web, Admin Simulation Worker và realtime worker đang chạy image `lana-chatbot-app:runtime-policy-canary-r3` (`sha256:ef8db3fd7879f12d09631c06e9f2492f86e57907f7eb4723677619c2efeeaf75`). API webhook và delivery worker không đổi; n8n không bị restart trong release này.
+
+## Runtime Policy canary
+
+- Ba policy lõi `SHOP_POLICY`, `OFFER_POLICY`, `CLOSING_STRATEGY` đã qua `DRAFT → VALIDATED → APPROVED → CANARY_SHADOW → CANARY_LIVE` bằng Admin API có audit.
+- Kênh live chỉ áp dụng cho page `1198992073286645`; runtime còn có hard gate theo đúng page này.
+- `CANARY_SHADOW` đã được xác nhận không ảnh hưởng outbound. `CANARY_LIVE` chỉ đi vào helper deterministic; policy không được đưa vào prompt/model.
+- Rollback pointer và roll-forward đã pass; last-known-good pass khi giả lập nguồn PostgreSQL lỗi.
+- Có `3` pointer `CANARY_LIVE`, `0` pointer `PUBLISHED`.
+- Admin và runtime đều giữ cờ publish ở `false`. Không được mở publish khi simulation chưa đủ bằng chứng.
+- Simulation hiện dùng baseline `HISTORICAL_ACTUAL` và trả `INSUFFICIENT_EVIDENCE` với `0` cuộc hội thoại đánh giá được; đây là release blocker có chủ đích.
+- Backup trước migration: `/opt/lana-chatbot/backups/20260722-runtime-policy-canary-r3/lana_chatbot_pre_0015_0016.dump`, SHA-256 `13717540cfa2a85b19ab0127133a5f34d62dafc1bad1251e991b4d8cc3363fdd`.
+- Restore test đã chạy đủ chu kỳ `up 0015/0016 → down 0016/0015 → up 0015/0016` trên database tạm.
 
 ## Ownership hiện hành
 

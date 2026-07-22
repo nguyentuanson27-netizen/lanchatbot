@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-22 — runtime policy canary r3
+
+- Cài deploy key GitHub read-only riêng cho repository trên VPS; private key chỉ tồn tại dưới user `lana-deploy`.
+- Giới hạn vòng đời Admin ở `DRAFT/VALIDATED/APPROVED/CANARY_SHADOW/CANARY_LIVE`; `PUBLISHED` vẫn bị khóa ở cả Admin và runtime.
+- Thêm Runtime Policy Resolver với kiểm tra schema/hash/version, cache, immutable pin, append-only audit và last-known-good có giới hạn.
+- Chạy `CANARY_SHADOW`, kiểm tra không ảnh hưởng outbound, sau đó mở `CANARY_LIVE` chỉ cho page `1198992073286645`.
+- Thêm Simulation Worker side-effect-free, lease/fencing/retry và baseline `HISTORICAL_ACTUAL`; kết quả hiện là `INSUFFICIENT_EVIDENCE`, nên chưa đủ điều kiện publish.
+- Kiểm thử rollback/roll-forward pointer, last-known-good và chu kỳ migration `up → down → up` thành công.
+- Áp dụng migration `0015_runtime_policy_resolution` và `0016_admin_simulation_worker`; n8n, API webhook và delivery worker không đổi.
+
 ## 2026-07-22 — sales cycle engines (Giai đoạn 3)
 
 - Thêm cart/order-intent 48 giờ, optimistic concurrency theo `cart_id + cart_version` và preview binding.

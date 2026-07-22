@@ -5,19 +5,22 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260722-admin-policy-control-r3`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260722-runtime-policy-canary-r3`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
 
 Không sửa source trực tiếp trong `/opt/lana-chatbot/current`. Mọi thay đổi phải đi qua branch, kiểm thử, review, tag release và thư mục release mới trên VPS.
 
-Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/lana-chatbot/repository`. Agent phải đọc `AGENTS.md` trước khi thao tác; working tree này không phải runtime production. Hiện user `lana-deploy` chưa có private deploy key trên VPS, vì vậy không được giả định `git fetch` sẽ hoạt động; release được chuyển bằng archive từ GitHub tag kèm SHA-256 cho đến khi deploy key read-only được cài.
+Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/lana-chatbot/repository`. Agent phải đọc `AGENTS.md` trước khi thao tác; working tree này không phải runtime production. User `lana-deploy` có deploy key GitHub read-only chỉ cho repository này; được phép `fetch` tag/commit nhưng không được push.
 
 ## Trạng thái production ngày 2026-07-22
 
-- API và realtime worker chạy image `lana-chatbot-app:inbound-debounce-r1`.
-- Admin API và Admin Web chạy image `lana-chatbot-app:admin-policy-control-r3`; Policy Control chỉ cho page `1198992073286645`.
+- API webhook tiếp tục chạy image `lana-chatbot-app:inbound-debounce-r1`.
+- Admin API, Admin Web, Simulation Worker và realtime worker chạy image `lana-chatbot-app:runtime-policy-canary-r3`.
+- Runtime Policy Resolver đang `CANARY_LIVE` chỉ cho page `1198992073286645`; `PUBLISHED` bị khóa cả ở Admin lẫn runtime.
+- Ba policy lõi (shop, offer, closing) đang trỏ tới các version `CANARY` bất biến; không có pointer `PUBLISHED`.
+- Simulation Worker chạy side-effect-free. Baseline đầu tiên là `HISTORICAL_ACTUAL`; lần chạy hiện tại là `INSUFFICIENT_EVIDENCE`, nên chưa đủ điều kiện publish.
 - Tin nhắn khách được gom sau 5 giây yên lặng; webhook trùng không kéo dài cửa sổ chờ.
 - Durable Inbox, Meta Outbox, Pancake Tag Outbox và generation guard đang hoạt động.
 - Lịch sử tư vấn được chiếu sang Redis 20 ngày và lưu bản ẩn danh trong PostgreSQL 6 tháng.
@@ -25,10 +28,10 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - App-native workers đang sở hữu POS snapshot và P2.3A/B/C.
 - Các workflow n8n P2.2/P2.3 tương ứng đang inactive; không được kích hoạt đồng thời với app-native worker.
 - Timer `lana-p23-daily.timer` đang `disabled/inactive`.
-- PostgreSQL đã áp dụng migration đến `0014_admin_policy_control`.
+- PostgreSQL đã áp dụng migration đến `0016_admin_simulation_worker`.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest bất biến mới nhất nằm tại [release manifest](deploy/manifests/20260722-admin-policy-control-r3.json).
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest bất biến mới nhất nằm tại [release manifest](deploy/manifests/20260722-runtime-policy-canary-r3.json).
 
 ## Kiến trúc dữ liệu
 
@@ -53,6 +56,7 @@ apps/worker                 Realtime, delivery, media, POS và P2.3 workers
 apps/admin-api              API quản trị
 apps/admin-web              Giao diện quản trị
 apps/admin-control-worker   Lệnh quản trị và đồng bộ tag
+apps/admin-simulation-worker Replay policy side-effect-free trên lịch sử ẩn danh
 packages/contracts          Schema dùng chung
 packages/database           Migration và repository PostgreSQL
 packages/business-tools     Facts và policy guard
