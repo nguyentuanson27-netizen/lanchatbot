@@ -6,16 +6,17 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "prebuild": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build && pnpm --filter @lana/meta-webhook build && pnpm --filter @lana/meta-delivery build && pnpm --filter @lana/pancake-handoff build && pnpm --filter @lana/database build",
+    "prebuild": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build && pnpm --filter @lana/chat-runtime build && pnpm --filter @lana/meta-webhook build && pnpm --filter @lana/meta-delivery build && pnpm --filter @lana/pancake-handoff build && pnpm --filter @lana/database build",
     "build": "tsc -p tsconfig.json",
-    "pretypecheck": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build && pnpm --filter @lana/meta-webhook build && pnpm --filter @lana/meta-delivery build && pnpm --filter @lana/pancake-handoff build && pnpm --filter @lana/database build",
+    "pretypecheck": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build && pnpm --filter @lana/chat-runtime build && pnpm --filter @lana/meta-webhook build && pnpm --filter @lana/meta-delivery build && pnpm --filter @lana/pancake-handoff build && pnpm --filter @lana/database build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "pretest": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build && pnpm --filter @lana/meta-webhook build && pnpm --filter @lana/meta-delivery build && pnpm --filter @lana/pancake-handoff build && pnpm --filter @lana/database build",
+    "pretest": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build && pnpm --filter @lana/chat-runtime build && pnpm --filter @lana/meta-webhook build && pnpm --filter @lana/meta-delivery build && pnpm --filter @lana/pancake-handoff build && pnpm --filter @lana/database build",
     "test": "vitest run",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@lana/business-tools": "workspace:*",
+    "@lana/chat-runtime": "workspace:*",
     "@lana/contracts": "workspace:*",
     "@lana/conversation-engine": "workspace:*",
     "@lana/database": "workspace:*",

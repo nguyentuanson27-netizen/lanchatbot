@@ -10,6 +10,9 @@ export interface Identity {
   controlPageIds: string[];
   policyControl: boolean;
   policyPageIds: string[];
+  policyCanaryShadowEnabled: boolean;
+  policyCanaryLiveEnabled: boolean;
+  policyPublishEnabled: boolean;
 }
 
 export type PolicyArtifactKind =

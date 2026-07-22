@@ -191,4 +191,39 @@ describe("database migrations", () => {
     expect(sql).toContain("UNIQUE NULLS NOT DISTINCT");
     expect(sql).not.toMatch(/(?:secret|token|password)_value/iu);
   });
+
+  it("pins runtime policy bundles and appends PII-free resolution audit", async () => {
+    const sql = await readFile(
+      resolve(directory, "0015_runtime_policy_resolution.up.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS runtime_policy_pins");
+    expect(sql).toContain("runtime_policy_pins are immutable");
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS runtime_policy_resolution_audit");
+    expect(sql).toContain("runtime_policy_resolution_audit is append-only");
+    expect(sql).toContain("'CANARY_SHADOW', 'CANARY_LIVE', 'PUBLISHED'");
+    expect(sql).not.toMatch(/(?:customer_name|phone|address|message_text)\s+/iu);
+  });
+
+  it("adds crash-safe leases and explicit evidence status to policy simulations", async () => {
+    const sql = await readFile(
+      resolve(directory, "0016_admin_simulation_worker.up.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("baseline_version_ids uuid[]");
+    expect(sql).toContain("baseline_source text");
+    expect(sql).toContain("lease_token uuid");
+    expect(sql).toContain("lease_until timestamptz");
+    expect(sql).toContain("attempt_count integer");
+    expect(sql).toContain("INSUFFICIENT_EVIDENCE");
+    expect(sql).toContain("evaluation_status");
+    expect(sql).toContain("side_effects");
+    expect(sql).toContain("MIGRATION_RECOVERED_UNLEASED_PROCESSING");
+    const down = await readFile(
+      resolve(directory, "0016_admin_simulation_worker.down.sql"),
+      "utf8",
+    );
+    expect(down).toContain("WHERE status = 'INSUFFICIENT_EVIDENCE'");
+    expect(down).toContain("SET status = 'FAILED'");
+  });
 });

@@ -1,0 +1,26 @@
+{
+  "name": "@lana/admin-simulation-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prebuild": "pnpm --filter @lana/contracts build",
+    "build": "tsc -p tsconfig.json",
+    "pretypecheck": "pnpm --filter @lana/contracts build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pretest": "pnpm --filter @lana/contracts build",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@lana/contracts": "workspace:*",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.5"
+  }
+}
+

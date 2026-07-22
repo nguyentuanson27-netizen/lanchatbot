@@ -239,6 +239,12 @@ services:
       REALTIME_HOURLY_GENERATION_LIMIT: "10"
       REALTIME_DAILY_GENERATION_LIMIT: "50"
       REALTIME_PROMPT_VERSION: lana-sales-genz-v3-product-info-r2
+      RUNTIME_POLICY_ENABLED: "true"
+      RUNTIME_POLICY_CHANNEL: "${RUNTIME_POLICY_CHANNEL:-CANARY_SHADOW}"
+      RUNTIME_POLICY_CANARY_LIVE_ENABLED: "${RUNTIME_POLICY_CANARY_LIVE_ENABLED:-false}"
+      RUNTIME_POLICY_PUBLISHED_ENABLED: "false"
+      RUNTIME_POLICY_CACHE_TTL_MS: "5000"
+      RUNTIME_POLICY_LKG_TTL_MS: "300000"
       REALTIME_DATA_KEY_FILE: /run/secrets/realtime_data_key
       REALTIME_DATA_KEY_REF: local-kek-v1
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
@@ -491,6 +497,8 @@ services:
       ADMIN_CONTROL_PAGE_IDS: "1198992073286645"
       ADMIN_POLICY_CONTROL_ENABLED: "${ADMIN_POLICY_CONTROL_ENABLED:-false}"
       ADMIN_POLICY_PAGE_IDS: "${ADMIN_POLICY_PAGE_IDS:-1198992073286645}"
+      ADMIN_POLICY_CANARY_LIVE_ENABLED: "${ADMIN_POLICY_CANARY_LIVE_ENABLED:-false}"
+      ADMIN_POLICY_PUBLISH_ENABLED: "false"
       ADMIN_CONTROL_DATABASE_URL_FILE: /run/secrets/admin_control_database_url
       ADMIN_ASSERTION_ISSUER: lana-admin-web
       ADMIN_INTERNAL_AUTH_SECRET_FILE: /run/secrets/admin_internal_auth_secret
@@ -568,6 +576,54 @@ services:
       - admin_control_worker_database_url
       - realtime_data_key
       - pancake_access_token
+    depends_on:
+      postgres:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "try{process.kill(1,0)}catch{process.exit(1)}"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 15s
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  admin-simulation-worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: ${ADMIN_IMAGE:-lana-chatbot-app:admin-mvp}
+    container_name: lana-chatbot-admin-simulation-worker
+    restart: unless-stopped
+    user: "0:0"
+    command:
+      - sh
+      - -ec
+      - >-
+        export ADMIN_SIMULATION_DATABASE_URL="$$(cat /run/secrets/admin_simulation_worker_database_url)";
+        exec su-exec node node apps/admin-simulation-worker/dist/server.js
+    environment:
+      NODE_ENV: production
+      ADMIN_SIMULATION_ENABLED: "true"
+      ADMIN_SIMULATION_DATABASE_URL_FILE: /run/secrets/admin_simulation_worker_database_url
+      ADMIN_SIMULATION_WORKER_ID: admin-simulation-worker-page-test-1
+      ADMIN_SIMULATION_POLL_MS: "1000"
+      ADMIN_SIMULATION_LEASE_MS: "120000"
+      ADMIN_SIMULATION_MAX_ATTEMPTS: "3"
+      ADMIN_SIMULATION_POOL_SIZE: "3"
+    secrets:
+      - admin_simulation_worker_database_url
     depends_on:
       postgres:
         condition: service_healthy
@@ -696,6 +752,8 @@ secrets:
     file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/admin_control_database_url
   admin_control_worker_database_url:
     file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/admin_control_worker_database_url
+  admin_simulation_worker_database_url:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/admin_simulation_worker_database_url
   admin_internal_auth_secret:
     file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/admin_internal_auth_secret
   media_worker_key:

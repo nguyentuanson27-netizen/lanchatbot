@@ -26,19 +26,30 @@ ADMIN_OWNER_EMAILS=nguyentuanson27@gmail.com
 ADMIN_EDITOR_EMAILS=
 ADMIN_APPROVER_EMAILS=
 ADMIN_VIEWER_EMAILS=
-ADMIN_PAGE_IDS=ALL
+ADMIN_PAGE_IDS=1198992073286645
 ADMIN_INTERNAL_AUTH_SECRET_FILE=/run/secrets/admin_internal_auth_secret
 ADMIN_ASSERTION_ISSUER=lana-admin-web
 ADMIN_CONTROL_ENABLED=false
 ADMIN_CONTROL_PAGE_IDS=1198992073286645
 ADMIN_POLICY_CONTROL_ENABLED=false
 ADMIN_POLICY_PAGE_IDS=1198992073286645
+ADMIN_POLICY_CANARY_LIVE_ENABLED=false
+ADMIN_POLICY_PUBLISH_ENABLED=false
 ```
 
 `ADMIN_POLICY_CONTROL_ENABLED` is independent from conversation control and
 defaults to `false`. It requires migration `0014_admin_policy_control`.
 PostgreSQL is the only mutable source of truth; Google Sheets may only import
 a structured DRAFT or be used for staging/reporting.
+
+`ADMIN_POLICY_CANARY_LIVE_ENABLED` and `ADMIN_POLICY_PUBLISH_ENABLED` are
+independent safety gates and default to `false`. With both gates off, Admin can
+advance only through DRAFT, VALIDATED, APPROVED and CANARY_SHADOW. Existing
+retire and rollback operations remain available as guarded recovery actions.
+When live canary is explicitly enabled, the same immutable CANARY version may
+advance from its active shadow pointer to a live pointer with an optimistic
+revision check and an append-only audit event. Canary rollback targets must
+remain in CANARY; published rollback targets must remain in PUBLISHED.
 
 The mutation endpoint accepts only `HANDOFF_NHAN_VIEN`, `HANDOFF_VAN_DON`,
 `PAUSE_BOT`, `RESUME_BOT`, `ADD_TAG`, `REMOVE_TAG` and

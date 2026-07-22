@@ -12,12 +12,15 @@ test -f "$COMPOSE_FILE"
 ADMIN_DB_USER=${ADMIN_DB_USER:-lana_admin_readonly}
 ADMIN_CONTROL_API_DB_USER=${ADMIN_CONTROL_API_DB_USER:-lana_admin_control_api}
 ADMIN_CONTROL_WORKER_DB_USER=${ADMIN_CONTROL_WORKER_DB_USER:-lana_admin_control_worker}
+ADMIN_SIMULATION_WORKER_DB_USER=${ADMIN_SIMULATION_WORKER_DB_USER:-lana_admin_simulation_worker}
 ADMIN_DB_PASSWORD_FILE="$SECRETS_DIR/admin_database_password"
 ADMIN_DB_URL_FILE="$SECRETS_DIR/admin_database_url"
 ADMIN_CONTROL_DB_PASSWORD_FILE="$SECRETS_DIR/admin_control_database_password"
 ADMIN_CONTROL_DB_URL_FILE="$SECRETS_DIR/admin_control_database_url"
 ADMIN_CONTROL_WORKER_DB_PASSWORD_FILE="$SECRETS_DIR/admin_control_worker_database_password"
 ADMIN_CONTROL_WORKER_DB_URL_FILE="$SECRETS_DIR/admin_control_worker_database_url"
+ADMIN_SIMULATION_WORKER_DB_PASSWORD_FILE="$SECRETS_DIR/admin_simulation_worker_database_password"
+ADMIN_SIMULATION_WORKER_DB_URL_FILE="$SECRETS_DIR/admin_simulation_worker_database_url"
 ADMIN_INTERNAL_AUTH_SECRET_FILE="$SECRETS_DIR/admin_internal_auth_secret"
 
 install -d -m 0750 "$SECRETS_DIR"
@@ -33,7 +36,8 @@ fi
 chmod 640 "$ADMIN_INTERNAL_AUTH_SECRET_FILE"
 for password_file in \
   "$ADMIN_CONTROL_DB_PASSWORD_FILE" \
-  "$ADMIN_CONTROL_WORKER_DB_PASSWORD_FILE"
+  "$ADMIN_CONTROL_WORKER_DB_PASSWORD_FILE" \
+  "$ADMIN_SIMULATION_WORKER_DB_PASSWORD_FILE"
 do
   if [ ! -s "$password_file" ]; then
     umask 077
@@ -49,6 +53,7 @@ set +a
 ADMIN_DB_PASSWORD=$(cat "$ADMIN_DB_PASSWORD_FILE")
 ADMIN_CONTROL_DB_PASSWORD=$(cat "$ADMIN_CONTROL_DB_PASSWORD_FILE")
 ADMIN_CONTROL_WORKER_DB_PASSWORD=$(cat "$ADMIN_CONTROL_WORKER_DB_PASSWORD_FILE")
+ADMIN_SIMULATION_WORKER_DB_PASSWORD=$(cat "$ADMIN_SIMULATION_WORKER_DB_PASSWORD_FILE")
 
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T \
   -e PGPASSWORD="$POSTGRES_PASSWORD" postgres \
@@ -60,7 +65,9 @@ docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T \
   --set=control_api_user="$ADMIN_CONTROL_API_DB_USER" \
   --set=control_api_password="$ADMIN_CONTROL_DB_PASSWORD" \
   --set=control_worker_user="$ADMIN_CONTROL_WORKER_DB_USER" \
-  --set=control_worker_password="$ADMIN_CONTROL_WORKER_DB_PASSWORD" <<'SQL'
+  --set=control_worker_password="$ADMIN_CONTROL_WORKER_DB_PASSWORD" \
+  --set=simulation_worker_user="$ADMIN_SIMULATION_WORKER_DB_USER" \
+  --set=simulation_worker_password="$ADMIN_SIMULATION_WORKER_DB_PASSWORD" <<'SQL'
 SELECT format('CREATE ROLE %I LOGIN PASSWORD %L', :'admin_user', :'admin_password')
 WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'admin_user')\gexec
 
@@ -127,6 +134,20 @@ SELECT format('GRANT SELECT ON provider_conversation_links TO %I', :'control_wor
 SELECT format('GRANT SELECT, INSERT, UPDATE ON admin_conversation_identities TO %I', :'control_worker_user')\gexec
 SELECT format('GRANT SELECT, INSERT ON pancake_tag_outbox TO %I', :'control_worker_user')\gexec
 SELECT format('ALTER ROLE %I SET default_transaction_read_only = off', :'control_worker_user')\gexec
+
+SELECT format('CREATE ROLE %I LOGIN PASSWORD %L', :'simulation_worker_user', :'simulation_worker_password')
+WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'simulation_worker_user')\gexec
+SELECT format('ALTER ROLE %I PASSWORD %L', :'simulation_worker_user', :'simulation_worker_password')\gexec
+SELECT format('GRANT CONNECT ON DATABASE %I TO %I', current_database(), :'simulation_worker_user')\gexec
+SELECT format('GRANT USAGE ON SCHEMA public TO %I', :'simulation_worker_user')\gexec
+SELECT format('REVOKE ALL ON ALL TABLES IN SCHEMA public FROM %I', :'simulation_worker_user')\gexec
+SELECT format('GRANT SELECT, UPDATE ON admin_simulation_runs TO %I', :'simulation_worker_user')\gexec
+SELECT format('GRANT SELECT, INSERT, UPDATE ON admin_simulation_results TO %I', :'simulation_worker_user')\gexec
+SELECT format('GRANT SELECT ON admin_artifact_versions TO %I', :'simulation_worker_user')\gexec
+SELECT format('GRANT SELECT ON admin_active_pointers TO %I', :'simulation_worker_user')\gexec
+SELECT format('GRANT SELECT ON messages TO %I', :'simulation_worker_user')\gexec
+SELECT format('GRANT SELECT ON conversation_events TO %I', :'simulation_worker_user')\gexec
+SELECT format('ALTER ROLE %I SET default_transaction_read_only = off', :'simulation_worker_user')\gexec
 SQL
 
 umask 077
@@ -136,15 +157,19 @@ printf 'postgresql://%s:%s@postgres:5432/%s\n' \
   "$ADMIN_CONTROL_API_DB_USER" "$ADMIN_CONTROL_DB_PASSWORD" "$POSTGRES_DB" > "$ADMIN_CONTROL_DB_URL_FILE"
 printf 'postgresql://%s:%s@postgres:5432/%s\n' \
   "$ADMIN_CONTROL_WORKER_DB_USER" "$ADMIN_CONTROL_WORKER_DB_PASSWORD" "$POSTGRES_DB" > "$ADMIN_CONTROL_WORKER_DB_URL_FILE"
+printf 'postgresql://%s:%s@postgres:5432/%s\n' \
+  "$ADMIN_SIMULATION_WORKER_DB_USER" "$ADMIN_SIMULATION_WORKER_DB_PASSWORD" "$POSTGRES_DB" > "$ADMIN_SIMULATION_WORKER_DB_URL_FILE"
 chown root:root \
   "$ADMIN_DB_URL_FILE" \
   "$ADMIN_CONTROL_DB_URL_FILE" \
   "$ADMIN_CONTROL_WORKER_DB_URL_FILE" \
+  "$ADMIN_SIMULATION_WORKER_DB_URL_FILE" \
   "$ADMIN_INTERNAL_AUTH_SECRET_FILE"
 chmod 400 \
   "$ADMIN_DB_URL_FILE" \
   "$ADMIN_CONTROL_DB_URL_FILE" \
   "$ADMIN_CONTROL_WORKER_DB_URL_FILE" \
+  "$ADMIN_SIMULATION_WORKER_DB_URL_FILE" \
   "$ADMIN_INTERNAL_AUTH_SECRET_FILE"
 
 echo "Admin read-only, command API and control worker database roles prepared."

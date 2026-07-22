@@ -40,8 +40,9 @@ export function renderPolicyControl(data: PolicyControlData, identity: Identity 
   );
   const cards = data.artifacts.map((artifact) => {
     const pointer = data.pointers.find((item) => item.versionId === artifact.id);
+    const rollbackLifecycle = pointer?.channel === "PUBLISHED" ? "PUBLISHED" : "CANARY";
     const rollbackTarget = data.artifacts
-      .filter((item) => item.key === artifact.key && item.kind === artifact.kind && item.lifecycle === "PUBLISHED" && item.id !== artifact.id)
+      .filter((item) => item.key === artifact.key && item.kind === artifact.kind && item.lifecycle === rollbackLifecycle && item.id !== artifact.id)
       .sort((a, b) => b.version - a.version)[0];
     const previousVersion = data.artifacts
       .filter((item) => item.key === artifact.key && item.kind === artifact.kind && item.version < artifact.version)
@@ -52,14 +53,15 @@ export function renderPolicyControl(data: PolicyControlData, identity: Identity 
       <dl><div><dt>Phiên bản</dt><dd>v${artifact.version}</dd></div><div><dt>Lần sửa</dt><dd>${artifact.revision}</dd></div>
         <div><dt>Cập nhật</dt><dd>${escapeHtml(formatDateTime(artifact.updatedAt))}</dd></div>
         <div><dt>Đang dùng</dt><dd>${pointer ? escapeHtml(pointer.channel.replaceAll("_", " ")) : "Không"}</dd></div></dl>
-      <div class="policy-actions">${renderActions(artifact, pointer !== undefined, rollbackTarget)}</div>
+      <div class="policy-actions">${renderActions(artifact, pointer, rollbackTarget, identity)}</div>
       <details><summary>Xem cấu hình đã khóa</summary>${renderContent(artifact.content)}</details>
       ${previousVersion ? `<details><summary>So sánh với v${previousVersion.version}</summary>${renderDiff(previousVersion.content, artifact.content)}</details>` : ""}
     </article>`;
   }).join("");
   const pointers = data.pointers.map((pointer) => `<tr><td>${escapeHtml(kindLabels[pointer.kind])}</td><td>${escapeHtml(pointer.key)}</td><td>${escapeHtml(pointer.channel)}</td><td>v${pointer.version}</td><td>${escapeHtml(pointer.pageId ?? "Toàn shop")}</td></tr>`).join("");
   const simulations = data.simulations.map((run) => `<tr><td>${escapeHtml(formatDateTime(run.createdAt))}</td><td>${escapeHtml(run.status)}</td><td>${run.versionIds.length}</td><td>${run.maxConversations}</td></tr>`).join("");
-  return `<section class="policy-summary">
+  return `<section class="policy-safety" role="status"><strong>Chế độ an toàn tạm thời</strong><span>Shadow canary: bật · Canary gửi thật: ${identity.policyCanaryLiveEnabled ? "bật" : "khóa"} · Phát hành: ${identity.policyPublishEnabled ? "bật" : "khóa"}</span></section>
+    <section class="policy-summary">
       <article><small>Bản nháp</small><strong>${counts.DRAFT}</strong></article>
       <article><small>Chờ duyệt</small><strong>${counts.VALIDATED}</strong></article>
       <article><small>Canary</small><strong>${counts.CANARY}</strong></article>
@@ -72,13 +74,26 @@ export function renderPolicyControl(data: PolicyControlData, identity: Identity 
     <section class="panel policy-table"><header><h2>Lịch sử mô phỏng</h2><small>Luôn tắt gửi tin và gắn tag</small></header><table><thead><tr><th>Thời gian</th><th>Trạng thái</th><th>Số cấu hình</th><th>Hội thoại tối đa</th></tr></thead><tbody>${simulations || "<tr><td colspan=4>Chưa chạy mô phỏng.</td></tr>"}</tbody></table></section>`;
 }
 
-function renderActions(artifact: PolicyArtifact, active: boolean, previous?: PolicyArtifact): string {
+function renderActions(
+  artifact: PolicyArtifact,
+  pointer: PolicyControlData["pointers"][number] | undefined,
+  previous: PolicyArtifact | undefined,
+  identity: Identity,
+): string {
   switch (artifact.lifecycle) {
     case "DRAFT": return `<button class="secondary-button" data-policy-edit>Chỉnh sửa</button><button data-policy-action="VALIDATE">Kiểm tra cấu hình</button>`;
     case "VALIDATED": return `<button data-policy-action="APPROVE">Duyệt phiên bản</button>`;
-    case "APPROVED": return `<button data-policy-action="START_CANARY" data-canary-mode="SHADOW">Thử nghiệm shadow</button><button class="secondary-button" data-policy-action="START_CANARY" data-canary-mode="LIVE_OUTBOUND">Thử nghiệm gửi thật</button>`;
-    case "CANARY": return `<button data-policy-action="PUBLISH">Phát hành cho page test</button>`;
-    case "PUBLISHED": return `${previous && active ? `<button class="secondary-button" data-policy-rollback="${escapeHtml(previous.id)}">Quay lại v${previous.version}</button>` : ""}${active ? "" : `<button class="secondary-button" data-policy-action="RETIRE">Ngừng phiên bản</button>`}`;
+    case "APPROVED": return `<button data-policy-action="START_CANARY" data-canary-mode="SHADOW">Thử nghiệm shadow</button>${identity.policyCanaryLiveEnabled
+      ? `<button class="secondary-button" data-policy-action="START_CANARY" data-canary-mode="LIVE_OUTBOUND">Thử nghiệm gửi thật</button>`
+      : `<button class="secondary-button" data-policy-feature-disabled="CANARY_LIVE" disabled aria-disabled="true" title="Cần bật cổng an toàn Canary Live trên máy chủ">Thử nghiệm gửi thật · đang khóa</button>`}`;
+    case "CANARY": return `${pointer?.channel === "CANARY_SHADOW"
+      ? identity.policyCanaryLiveEnabled
+        ? `<button class="secondary-button" data-policy-action="START_CANARY" data-canary-mode="LIVE_OUTBOUND">Chuyển sang canary gửi thật</button>`
+        : `<button class="secondary-button" data-policy-feature-disabled="CANARY_LIVE" disabled aria-disabled="true" title="Cần bật cổng an toàn Canary Live trên máy chủ">Chuyển sang canary gửi thật · đang khóa</button>`
+      : ""}${identity.policyPublishEnabled
+      ? `<button data-policy-action="PUBLISH">Phát hành cho page test</button>`
+      : `<button data-policy-feature-disabled="PUBLISHED" disabled aria-disabled="true" title="Cần bật cổng an toàn Publish trên máy chủ">Phát hành cho page test · đang khóa</button>`}${previous && pointer ? `<button class="secondary-button" data-policy-rollback="${escapeHtml(previous.id)}">Quay lại canary v${previous.version}</button>` : ""}`;
+    case "PUBLISHED": return `${previous && pointer ? `<button class="secondary-button" data-policy-rollback="${escapeHtml(previous.id)}">Quay lại v${previous.version}</button>` : ""}${pointer ? "" : `<button class="secondary-button" data-policy-action="RETIRE">Ngừng phiên bản</button>`}`;
     case "RETIRED": return `<span>Chỉ đọc</span>`;
   }
 }
@@ -154,8 +169,8 @@ export function bindPolicyControl(
     button.addEventListener("click", async () => {
       const card = button.closest<HTMLElement>("[data-policy-id]");
       const current = data.artifacts.find((item) => item.id === card?.dataset.policyId);
-      const pointer = data.pointers.find((item) => item.versionId === current?.id && item.channel === "PUBLISHED");
-      if (!pointer || !button.dataset.policyRollback || !window.confirm("Quay lại phiên bản đã phát hành trước?")) return;
+      const pointer = data.pointers.find((item) => item.versionId === current?.id);
+      if (!pointer || !button.dataset.policyRollback || !window.confirm("Quay lại phiên bản tương thích trước?")) return;
       await rollbackPolicyPointer(pointer, button.dataset.policyRollback);
       notify("Đã rollback bằng cách đổi con trỏ đang dùng.");
       await reload();

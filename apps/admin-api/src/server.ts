@@ -44,6 +44,8 @@ const app = createAdminApi({
   controlPageIds: config.controlPageIds,
   policyControlEnabled: config.policyControlEnabled,
   policyPageIds: config.policyPageIds,
+  policyCanaryLiveEnabled: config.policyCanaryLiveEnabled,
+  policyPublishEnabled: config.policyPublishEnabled,
 });
 
 await app.listen({ host: "0.0.0.0", port: config.port });

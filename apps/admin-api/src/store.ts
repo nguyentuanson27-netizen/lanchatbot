@@ -1252,13 +1252,26 @@ export class PostgresAdminStore implements AdminStore {
       if (Number(current.revision) !== input.expectedRevision) {
         throw new AdminQueryError("ADMIN_ARTIFACT_VERSION_CONFLICT");
       }
-      const target = transitionTarget(String(current.lifecycle), input.action);
+      const target = transitionTarget(String(current.lifecycle), input.action, input.canaryMode);
       if (!target) throw new AdminQueryError("ADMIN_ARTIFACT_TRANSITION_INVALID");
       if ((input.action === "START_CANARY" || input.action === "PUBLISH") && !input.pageId) {
         throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
       }
       if (input.action === "START_CANARY" && !input.canaryMode) {
         throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+      }
+      if (isShadowToLivePromotion(String(current.lifecycle), input.action, input.canaryMode)) {
+        const shadowPointer = await client.query(
+          `SELECT pointer_id
+           FROM admin_active_pointers
+           WHERE artifact_key = $1 AND artifact_kind = $2 AND page_id = $3
+             AND channel = 'CANARY_SHADOW' AND version_id = $4 AND active
+           FOR UPDATE`,
+          [current.artifact_key, current.artifact_kind, input.pageId, versionId],
+        );
+        if (!shadowPointer.rowCount) {
+          throw new AdminQueryError("ADMIN_ARTIFACT_TRANSITION_INVALID");
+        }
       }
       if (input.action === "RETIRE") {
         const pointer = await client.query(
@@ -1327,8 +1340,9 @@ export class PostgresAdminStore implements AdminStore {
       );
       const row = target.rows[0];
       if (!row || row.artifact_key !== input.artifactKey ||
-          row.artifact_kind !== input.artifactKind || row.lifecycle !== "PUBLISHED") {
-        throw new AdminQueryError("ADMIN_ARTIFACT_TRANSITION_INVALID");
+          row.artifact_kind !== input.artifactKind ||
+          !isRollbackTargetLifecycleCompatible(input.channel, String(row.lifecycle))) {
+        throw new AdminQueryError("ADMIN_ARTIFACT_ROLLBACK_TARGET_INVALID");
       }
       const pointer = await client.query(
         `UPDATE admin_active_pointers
@@ -1343,7 +1357,9 @@ export class PostgresAdminStore implements AdminStore {
       if (!pointer.rowCount) throw new AdminQueryError("ADMIN_ARTIFACT_VERSION_CONFLICT");
       await insertArtifactEvent(client, {
         versionId: input.targetVersionId, artifactKey: input.artifactKey,
-        action: "ROLLBACK", fromLifecycle: "PUBLISHED", toLifecycle: "PUBLISHED",
+        action: "ROLLBACK",
+        fromLifecycle: input.channel === "PUBLISHED" ? "PUBLISHED" : "CANARY",
+        toLifecycle: input.channel === "PUBLISHED" ? "PUBLISHED" : "CANARY",
         identity, correlationId: input.correlationId, pageId: input.pageId,
         channel: input.channel,
       });
@@ -1526,13 +1542,15 @@ function assertTransitionRole(
   assertPolicyRole(identity, allowed[action]);
 }
 
-function transitionTarget(
+export function transitionTarget(
   current: string,
   action: TransitionArtifactInput["action"],
+  canaryMode: TransitionArtifactInput["canaryMode"] = null,
 ): string | null {
   if (action === "RETIRE") {
     return ["APPROVED", "CANARY", "PUBLISHED"].includes(current) ? "RETIRED" : null;
   }
+  if (isShadowToLivePromotion(current, action, canaryMode)) return "CANARY";
   const transitions: Record<TransitionArtifactInput["action"], readonly [string, string]> = {
     VALIDATE: ["DRAFT", "VALIDATED"],
     APPROVE: ["VALIDATED", "APPROVED"],
@@ -1542,6 +1560,25 @@ function transitionTarget(
   };
   const [from, to] = transitions[action];
   return current === from ? to : null;
+}
+
+export function isShadowToLivePromotion(
+  current: string,
+  action: TransitionArtifactInput["action"],
+  canaryMode: TransitionArtifactInput["canaryMode"],
+): boolean {
+  return current === "CANARY" &&
+    action === "START_CANARY" &&
+    canaryMode === "LIVE_OUTBOUND";
+}
+
+export function isRollbackTargetLifecycleCompatible(
+  channel: RollbackArtifactInput["channel"],
+  lifecycle: string,
+): boolean {
+  return channel === "PUBLISHED"
+    ? lifecycle === "PUBLISHED"
+    : lifecycle === "CANARY";
 }
 
 function transitionActorColumn(action: TransitionArtifactInput["action"]): string {

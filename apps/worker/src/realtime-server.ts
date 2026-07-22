@@ -8,7 +8,14 @@ import {
   PostgresChatHistoryStore,
   PostgresRealtimeInboxStore,
   PostgresRealtimeRuntimeStore,
+  PostgresRuntimePolicyStore,
 } from "@lana/database";
+import {
+  RuntimePolicyResolver,
+  type RuntimePolicyAuditPort,
+  type RuntimePolicyChannel,
+  type RuntimePolicyPinPort,
+} from "@lana/chat-runtime";
 import {
   FetchPancakeHttpTransport,
   InMemoryPancakePageRegistry,
@@ -144,6 +151,35 @@ const cipher = new LocalEnvelopeCipher(
 );
 const inbox = new PostgresRealtimeInboxStore(databaseUrl, cipher);
 const runtime = new PostgresRealtimeRuntimeStore(databaseUrl, cipher);
+const runtimePolicyEnabled = process.env.RUNTIME_POLICY_ENABLED === "true";
+const runtimePolicyChannelRaw =
+  process.env.RUNTIME_POLICY_CHANNEL?.trim().toUpperCase() || "CANARY_SHADOW";
+if (!["CANARY_SHADOW", "CANARY_LIVE", "PUBLISHED"].includes(runtimePolicyChannelRaw)) {
+  throw new Error("RUNTIME_POLICY_CHANNEL_INVALID");
+}
+const runtimePolicyChannel = runtimePolicyChannelRaw as RuntimePolicyChannel;
+const runtimePolicyStore = runtimePolicyEnabled
+  ? new PostgresRuntimePolicyStore(databaseUrl)
+  : undefined;
+const runtimePolicyResolver = runtimePolicyStore
+  ? new RuntimePolicyResolver(
+      runtimePolicyStore,
+      {
+        enabled: true,
+        canaryLiveEnabled: process.env.RUNTIME_POLICY_CANARY_LIVE_ENABLED === "true",
+        publishedEnabled: process.env.RUNTIME_POLICY_PUBLISHED_ENABLED === "true",
+        cacheTtlMs: boundedInteger("RUNTIME_POLICY_CACHE_TTL_MS", 5_000, 100, 300_000),
+        lastKnownGoodTtlMs: boundedInteger(
+          "RUNTIME_POLICY_LKG_TTL_MS",
+          300_000,
+          5_000,
+          86_400_000,
+        ),
+      },
+      runtimePolicyStore as unknown as RuntimePolicyPinPort,
+      runtimePolicyStore as unknown as RuntimePolicyAuditPort,
+    )
+  : undefined;
 const canonicalHistory = process.env.HISTORY_WRITE_ENABLED === "true"
   ? new PostgresChatHistoryStore(databaseUrl, {
       analyticsHashSalt: secretOrEnvironment(
@@ -379,11 +415,13 @@ const runner = new RealtimeRunner(
     promptVersion:
       process.env.REALTIME_PROMPT_VERSION?.trim() || "lana-realtime-v1",
     metaAppId: required("META_APP_ID"),
+    policyChannel: runtimePolicyChannel,
   },
   quota,
   history,
   canonicalHistory,
   videoFrames,
+  runtimePolicyResolver,
 );
 const pollMs = boundedInteger(
   "REALTIME_POLL_MS",
@@ -441,3 +479,4 @@ await productSearch.close();
 await quota.close();
 await history?.close();
 await canonicalHistory?.close();
+await runtimePolicyStore?.close();
