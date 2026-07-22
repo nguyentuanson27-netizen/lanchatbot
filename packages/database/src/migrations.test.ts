@@ -169,4 +169,26 @@ describe("database migrations", () => {
     expect(sql).toContain("evaluation_group_id uuid");
     expect(sql).not.toContain("max_wait");
   });
+
+  it("creates an immutable, versioned Admin Policy Control Plane", async () => {
+    const sql = await readFile(
+      resolve(directory, "0014_admin_policy_control.up.sql"),
+      "utf8",
+    );
+    for (const table of [
+      "admin_artifact_versions",
+      "admin_artifact_events",
+      "admin_active_pointers",
+      "admin_simulation_runs",
+      "admin_simulation_results",
+    ]) {
+      expect(sql).toContain(`CREATE TABLE IF NOT EXISTS ${table}`);
+    }
+    expect(sql).toContain("DRAFT', 'VALIDATED', 'APPROVED', 'CANARY', 'PUBLISHED', 'RETIRED");
+    expect(sql).toContain("non-draft admin artifact content is immutable");
+    expect(sql).toContain("admin_artifact_events is append-only");
+    expect(sql).toContain("side_effects = 'DISABLED'");
+    expect(sql).toContain("UNIQUE NULLS NOT DISTINCT");
+    expect(sql).not.toMatch(/(?:secret|token|password)_value/iu);
+  });
 });

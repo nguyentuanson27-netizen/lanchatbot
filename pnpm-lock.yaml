@@ -20,6 +20,9 @@ importers:
 
   apps/admin-api:
     dependencies:
+      '@lana/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@lana/database':
         specifier: workspace:*
         version: link:../../packages/database

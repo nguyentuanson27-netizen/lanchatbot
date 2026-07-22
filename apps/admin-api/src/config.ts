@@ -8,11 +8,16 @@ export interface AdminApiConfig {
   readonly realtimeDataKeyRef: string;
   readonly assertionIssuer: string;
   readonly ownerEmails: ReadonlySet<string>;
+  readonly editorEmails: ReadonlySet<string>;
+  readonly approverEmails: ReadonlySet<string>;
+  readonly viewerEmails: ReadonlySet<string>;
   readonly pageScope: "ALL" | readonly string[];
   readonly allowedOrigin: string;
   readonly controlEnabled: boolean;
   readonly historyEnabled: boolean;
   readonly controlPageIds: "ALL" | readonly string[];
+  readonly policyControlEnabled: boolean;
+  readonly policyPageIds: "ALL" | readonly string[];
   readonly port: number;
 }
 
@@ -36,6 +41,15 @@ export function adminConfigFromEnvironment(
       .map((value) => value.trim().toLowerCase())
       .filter(Boolean),
   );
+  const emailSet = (name: string) => new Set(
+    (environment[name] ?? "")
+      .split(",")
+      .map((value) => value.trim().toLowerCase())
+      .filter(Boolean),
+  );
+  const editorEmails = emailSet("ADMIN_EDITOR_EMAILS");
+  const approverEmails = emailSet("ADMIN_APPROVER_EMAILS");
+  const viewerEmails = emailSet("ADMIN_VIEWER_EMAILS");
   const rawScope = (environment.ADMIN_PAGE_IDS ?? "ALL").trim();
   const pageScope = rawScope.toUpperCase() === "ALL"
     ? "ALL"
@@ -44,6 +58,10 @@ export function adminConfigFromEnvironment(
   const controlPageIds = rawControlScope.toUpperCase() === "ALL"
     ? "ALL" as const
     : rawControlScope.split(",").map((value) => value.trim()).filter(Boolean);
+  const rawPolicyScope = (environment.ADMIN_POLICY_PAGE_IDS ?? "1198992073286645").trim();
+  const policyPageIds = rawPolicyScope.toUpperCase() === "ALL"
+    ? "ALL" as const
+    : rawPolicyScope.split(",").map((value) => value.trim()).filter(Boolean);
   const port = Number(environment.PORT ?? "8081");
   if (!Number.isInteger(port) || port < 1 || port > 65_535) {
     throw new Error("ADMIN_PORT_INVALID");
@@ -72,11 +90,16 @@ export function adminConfigFromEnvironment(
     realtimeDataKeyRef: environment.REALTIME_DATA_KEY_REF?.trim() || "local-kek-v1",
     assertionIssuer: environment.ADMIN_ASSERTION_ISSUER?.trim() || "lana-admin-web",
     ownerEmails,
+    editorEmails,
+    approverEmails,
+    viewerEmails,
     pageScope,
     allowedOrigin: environment.ADMIN_ALLOWED_ORIGIN?.trim() ?? "",
     controlEnabled: environment.ADMIN_CONTROL_ENABLED?.trim().toLowerCase() === "true",
     historyEnabled: environment.ADMIN_HISTORY_ENABLED?.trim().toLowerCase() === "true",
     controlPageIds,
+    policyControlEnabled: environment.ADMIN_POLICY_CONTROL_ENABLED?.trim().toLowerCase() === "true",
+    policyPageIds,
     port,
   };
 }

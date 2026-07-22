@@ -29,6 +29,9 @@ const authenticator = new InternalAssertionAuthenticator(
     secret: config.internalAuthSecret,
     issuer: config.assertionIssuer,
     ownerEmails: config.ownerEmails,
+    editorEmails: config.editorEmails,
+    approverEmails: config.approverEmails,
+    viewerEmails: config.viewerEmails,
     pageScope: config.pageScope,
   },
 );
@@ -39,6 +42,8 @@ const app = createAdminApi({
   controlEnabled: config.controlEnabled,
   historyEnabled: config.historyEnabled,
   controlPageIds: config.controlPageIds,
+  policyControlEnabled: config.policyControlEnabled,
+  policyPageIds: config.policyPageIds,
 });
 
 await app.listen({ host: "0.0.0.0", port: config.port });

@@ -41,4 +41,20 @@ describe("Authentik to admin API bridge", () => {
       ADMIN_OWNER_EMAILS: owner,
     }), /ADMIN_WEB_AUTH_CONFIGURATION_INCOMPLETE/);
   });
+
+  it("passes configured editor, approver and viewer identities to the API", () => {
+    const config = loadAdminAuthConfig({
+      ADMIN_INTERNAL_AUTH_SECRET: secret,
+      ADMIN_OWNER_EMAILS: owner,
+      ADMIN_EDITOR_EMAILS: "editor@example.com",
+      ADMIN_APPROVER_EMAILS: "approver@example.com",
+      ADMIN_VIEWER_EMAILS: "viewer@example.com",
+    });
+    for (const email of ["editor@example.com", "approver@example.com", "viewer@example.com"]) {
+      assert.equal(identityFromAuthentikHeaders({
+        "x-authentik-email": email,
+        "x-authentik-uid": `uid-${email}`,
+      }, config.allowedEmails)?.email, email);
+    }
+  });
 });

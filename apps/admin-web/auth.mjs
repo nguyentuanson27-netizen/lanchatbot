@@ -11,11 +11,16 @@ export function loadAdminAuthConfig(environment = process.env) {
       .map((value) => value.trim().toLowerCase())
       .filter(Boolean),
   );
+  const roleEmails = ["ADMIN_EDITOR_EMAILS", "ADMIN_APPROVER_EMAILS", "ADMIN_VIEWER_EMAILS"]
+    .flatMap((name) => (environment[name] ?? "").split(","))
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean);
+  const allowedEmails = new Set([...ownerEmails, ...roleEmails]);
   const issuer = environment.ADMIN_ASSERTION_ISSUER?.trim() || "lana-admin-web";
   if (Buffer.byteLength(secret, "utf8") < 32 || ownerEmails.size === 0 || !issuer) {
     throw new Error("ADMIN_WEB_AUTH_CONFIGURATION_INCOMPLETE");
   }
-  return { issuer, ownerEmails, secret };
+  return { issuer, ownerEmails, allowedEmails, secret };
 }
 
 export function identityFromAuthentikHeaders(headers, ownerEmails) {

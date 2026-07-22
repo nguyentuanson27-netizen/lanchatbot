@@ -8,6 +8,66 @@ export interface Identity {
   canControl: boolean;
   historyEnabled: boolean;
   controlPageIds: string[];
+  policyControl: boolean;
+  policyPageIds: string[];
+}
+
+export type PolicyArtifactKind =
+  | "SHOP_POLICY"
+  | "OFFER_POLICY"
+  | "CLOSING_STRATEGY"
+  | "SIZE_CHART"
+  | "HANDOFF_MATRIX"
+  | "PAYMENT_POLICY";
+
+export type PolicyLifecycle =
+  | "DRAFT"
+  | "VALIDATED"
+  | "APPROVED"
+  | "CANARY"
+  | "PUBLISHED"
+  | "RETIRED";
+
+export interface PolicyArtifact {
+  id: string;
+  key: string;
+  kind: PolicyArtifactKind;
+  version: number;
+  lifecycle: PolicyLifecycle;
+  revision: number;
+  contentHash: string;
+  content: Record<string, unknown>;
+  updatedBy: string;
+  updatedAt: string;
+}
+
+export interface PolicyPointer {
+  id: string;
+  key: string;
+  kind: PolicyArtifactKind;
+  pageId: string | null;
+  channel: "CANARY_SHADOW" | "CANARY_LIVE" | "PUBLISHED";
+  versionId: string;
+  version: number;
+  revision: number;
+  updatedAt: string;
+}
+
+export interface PolicySimulation {
+  id: string;
+  pageId: string;
+  versionIds: string[];
+  status: string;
+  lookbackDays: number;
+  maxConversations: number;
+  metrics: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface PolicyControlData {
+  artifacts: PolicyArtifact[];
+  pointers: PolicyPointer[];
+  simulations: PolicySimulation[];
 }
 
 export interface Metric {
