@@ -464,7 +464,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: lana-chatbot-app:admin-mvp
+    image: ${ADMIN_IMAGE:-lana-chatbot-app:admin-mvp}
     container_name: lana-chatbot-admin-api
     restart: unless-stopped
     user: "0:0"
@@ -595,7 +595,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: lana-chatbot-app:admin-mvp
+    image: ${ADMIN_IMAGE:-lana-chatbot-app:admin-mvp}
     container_name: lana-chatbot-admin-web
     restart: unless-stopped
     user: "0:0"
