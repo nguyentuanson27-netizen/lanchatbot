@@ -215,7 +215,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: lana-chatbot-app:inbound-debounce-r1
+    image: ${REALTIME_IMAGE:-lana-chatbot-app:inbound-debounce-r1}
     container_name: lana-chatbot-realtime-worker
     restart: unless-stopped
     command: ["node", "apps/worker/dist/realtime-server.js"]
