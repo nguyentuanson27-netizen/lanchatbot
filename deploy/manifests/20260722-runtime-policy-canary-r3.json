@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-22T20:38:00+07:00",
+  "environment": "production",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "releaseTag": "20260722-runtime-policy-canary-r3",
+  "commit": "ba042da60c907d63f8cac1ae32b948ef1ffeef84",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260722-runtime-policy-canary-r3",
+  "pageAllowlist": ["1198992073286645"],
+  "composeSha256": "a6e935c65f5cb7c0094ae38f069251d234340ce888b7cb90d3234854267dc6b9",
+  "servicesChanged": {
+    "admin-api": { "image": "lana-chatbot-app:runtime-policy-canary-r3", "digest": "sha256:ef8db3fd7879f12d09631c06e9f2492f86e57907f7eb4723677619c2efeeaf75" },
+    "admin-web": { "image": "lana-chatbot-app:runtime-policy-canary-r3", "digest": "sha256:ef8db3fd7879f12d09631c06e9f2492f86e57907f7eb4723677619c2efeeaf75" },
+    "admin-simulation-worker": { "image": "lana-chatbot-app:runtime-policy-canary-r3", "digest": "sha256:ef8db3fd7879f12d09631c06e9f2492f86e57907f7eb4723677619c2efeeaf75" },
+    "realtime-worker": { "image": "lana-chatbot-app:runtime-policy-canary-r3", "digest": "sha256:ef8db3fd7879f12d09631c06e9f2492f86e57907f7eb4723677619c2efeeaf75" }
+  },
+  "servicesVerifiedUnchanged": ["api", "delivery-worker", "n8n"],
+  "migrations": [
+    { "name": "0015_runtime_policy_resolution", "sha256": "8eec83d827939d523841971945e3a3050adcdd74b9a15f7465cf277df08e423a" },
+    { "name": "0016_admin_simulation_worker", "sha256": "ed60e9158d53ae02ec20a681d7f49f7a9f8295ca93f50b8012d6fc6ede097849" }
+  ],
+  "backup": {
+    "path": "/opt/lana-chatbot/backups/20260722-runtime-policy-canary-r3/lana_chatbot_pre_0015_0016.dump",
+    "sha256": "13717540cfa2a85b19ab0127133a5f34d62dafc1bad1251e991b4d8cc3363fdd",
+    "restoreUpDownUpTest": "PASS"
+  },
+  "policy": {
+    "channel": "CANARY_LIVE",
+    "activePointers": 3,
+    "publishedPointers": 0,
+    "adminPublishEnabled": false,
+    "runtimePublishedEnabled": false,
+    "rollbackTest": "PASS",
+    "lastKnownGoodTest": "PASS"
+  },
+  "simulation": {
+    "worker": "HEALTHY",
+    "sideEffects": "DISABLED",
+    "baselineSource": "HISTORICAL_ACTUAL",
+    "status": "INSUFFICIENT_EVIDENCE",
+    "evaluatedConversations": 0
+  },
+  "verification": {
+    "cleanDockerBuild": "PASS",
+    "fullMonorepoTests": "PASS",
+    "fullTypecheck": "PASS",
+    "composeValidation": "PASS",
+    "allChangedServicesHealthy": true,
+    "n8nUnchanged": true,
+    "diskUsagePercent": 41
+  }
+}
