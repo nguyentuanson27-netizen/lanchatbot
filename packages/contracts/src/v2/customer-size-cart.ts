@@ -397,7 +397,10 @@ export type SizeRecommendationV1 = z.infer<typeof SizeRecommendationV1Schema>;
 export const PosPriceAuthorityV1Schema = z
   .object({
     priceFactRef: z.string().trim().min(1).max(256),
-    offerPriceKind: z.enum(["SET", "COMPONENT", "COMBO_3"]),
+    shopId: z.string().trim().min(1).max(128),
+    parentProductId: z.string().trim().min(1).max(128),
+    offerId: z.string().trim().min(1).max(128),
+    offerPriceKind: z.enum(["DIRECT", "SET", "COMPONENT", "COMBO_3"]),
     componentProductId: z.string().trim().min(1).max(128).nullable(),
     metadata: PosPriceInventoryMetadataV1Schema,
   })
@@ -440,7 +443,7 @@ export const CartLineV1Schema = z
     lineId: z.string().uuid(),
     parentProductId: z.string().trim().min(1).max(128),
     offerId: z.string().trim().min(1).max(128),
-    offerKind: z.enum(["SET", "COMPONENT", "COMBO_3"]),
+    offerKind: z.enum(["DIRECT", "SET", "COMPONENT", "COMBO_3"]),
     quantity: z.number().int().positive().max(20),
     components: z.array(CartComponentSelectionV1Schema).min(1).max(4),
     allowMixedSizes: z.boolean(),
@@ -466,6 +469,13 @@ export const CartLineV1Schema = z
           message: "component sale is not allowed for this product",
         });
       }
+    }
+    if (line.offerKind === "DIRECT" && line.components.length !== 1) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["components"],
+        message: "DIRECT offer must contain exactly one product component",
+      });
     }
     if (line.offerKind === "SET" && line.components.length < 2) {
       context.addIssue({
@@ -520,6 +530,27 @@ export const CartLineV1Schema = z
         code: z.ZodIssueCode.custom,
         path: ["priceAuthority", "offerPriceKind"],
         message: "POS price kind must match the cart offer kind",
+      });
+    }
+    if (line.priceAuthority !== null && (
+      line.priceAuthority.parentProductId !== line.parentProductId ||
+      line.priceAuthority.offerId !== line.offerId
+    )) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["priceAuthority"],
+        message: "POS price authority identity must match the cart line",
+      });
+    }
+    if (
+      line.offerKind === "COMPONENT" &&
+      line.priceAuthority !== null &&
+      line.priceAuthority.componentProductId !== line.components[0]?.componentProductId
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["priceAuthority", "componentProductId"],
+        message: "component price authority must match the selected component",
       });
     }
     if (!hasPrice && line.lineTotalVnd !== null) {

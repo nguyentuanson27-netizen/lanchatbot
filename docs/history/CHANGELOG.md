@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-07-22 — sales cycle engines (Giai đoạn 3)
+
+- Thêm cart/order-intent 48 giờ, optimistic concurrency theo `cart_id + cart_version` và preview binding.
+- Thêm negotiation deterministic `READY/HESITANT/CAUTIOUS`, chống retry nâng ưu đãi và tính lại giảm 5% khi khách bớt món.
+- Thêm handoff/fallback theo reason code; revalidation thay đổi trước xác nhận và bill chuyển khoản đều chuyển nhân viên.
+- Thêm payment policy COD/chuyển khoản, QR có version và trạng thái `PURCHASE_CONFIRMED` không giả thành đơn POS.
+- Thêm canonical CartV1: mọi tổng tiền/ưu đãi được tính lại từ giá POS và policy; sửa/bớt món tự hủy preview và tính lại điều kiện giảm 5%.
+- Khóa trusted boundary bằng content-addressed reference/resolver; giá POS bind đúng shop/sản phẩm/offer, đổi biến thể cập nhật SKU-size-màu atomically và final revalidation không còn đi từ command.
+- Bind negotiation, xác nhận mua và bill vào inbound Meta CUSTOMER đúng page/hội thoại/thời điểm; ID xác nhận và idempotency key được runtime tự sinh.
+- Thêm sales-cycle runtime với state CAS, negotiation tích hợp, confirmation idempotency và kiểm tra lại giá/tồn/size/ETA.
+- Thêm cổng transaction CAS cho persistence; hai lệnh đồng thời chỉ một lệnh được ghi và chỉ lệnh thắng được phát effect intent.
+- Đây là engine-layer release trên source; chưa có adapter PostgreSQL/outbox production hoặc deploy VPS.
+
 ## 2026-07-22 — sales runtime engines (Giai đoạn 2)
 
 - Thêm POS adapter và resolver `ProductFactsV2`; Redis projection tách stable/BOM/price-inventory với retention khác freshness.

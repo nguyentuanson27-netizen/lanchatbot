@@ -37,6 +37,9 @@ const chartRef = {
 
 const priceAuthority = {
   priceFactRef: "pos:shop-4741464:offer-cb182",
+  shopId: "LANA_DESIGN",
+  parentProductId: "CB182",
+  offerId: "CB182-COMBO3",
   offerPriceKind: "COMBO_3" as const,
   componentProductId: null,
   metadata: {
@@ -357,7 +360,7 @@ describe("CartV1", () => {
       allowMixedSizes: false,
       allowComponentSale: false,
       posUnitPriceVnd: 699_000,
-      priceAuthority: { ...priceAuthority, offerPriceKind: "SET" as const },
+      priceAuthority: { ...priceAuthority, offerId: "CB182-SET", offerPriceKind: "SET" as const },
       lineTotalVnd: 699_000,
     };
     const cartBase = {
@@ -397,6 +400,53 @@ describe("CartV1", () => {
         ],
       }).success,
     ).toBe(false);
+
+    const wrongComponentPrice = {
+      ...mixedSet,
+      offerId: "CB182-AO",
+      offerKind: "COMPONENT" as const,
+      components: components.slice(0, 1),
+      allowMixedSizes: true,
+      allowComponentSale: true,
+      priceAuthority: { ...priceAuthority, offerId: "CB182-AO", offerPriceKind: "COMPONENT" as const, componentProductId: "CB182-CV" },
+    };
+    expect(CartV1Schema.safeParse({ ...cartBase, lines: [wrongComponentPrice] }).success).toBe(false);
+  });
+
+  it("supports a directly sold one-piece product", () => {
+    const direct = {
+      lineId: "0b884806-7c77-4410-bc47-a3d2bb51c936",
+      parentProductId: "V123",
+      offerId: "V123-DIRECT",
+      offerKind: "DIRECT" as const,
+      quantity: 1,
+      components: [{ ...components[0], componentProductId: "V123", componentSku: "V123-M" }],
+      allowMixedSizes: false,
+      allowComponentSale: false,
+      posUnitPriceVnd: 599_000,
+      priceAuthority: { ...priceAuthority, parentProductId: "V123", offerId: "V123-DIRECT", offerPriceKind: "DIRECT" as const },
+      lineTotalVnd: 599_000,
+    };
+    const candidate = {
+      schemaVersion: 1,
+      cartId: "15f9b215-2085-44f2-8d21-af4244577f5e",
+      salesEpisodeId: "7cb56372-6328-4a0b-9b6e-91a894f7d5e8",
+      customerProfileId: "30709206-8f96-4a1b-9311-6f03ef4dd8b2",
+      revision: 1,
+      currency: "VND",
+      status: "READY_FOR_CONFIRMATION",
+      checkoutEligibility: "ELIGIBLE",
+      lines: [direct],
+      adjustments: [],
+      shippingFeeVnd: 30_000,
+      subtotalVnd: 599_000,
+      discountTotalVnd: 0,
+      grandTotalVnd: 629_000,
+      createdAt: "2026-07-22T02:13:00.000Z",
+      updatedAt: "2026-07-22T02:15:00.000Z",
+    };
+    expect(CartV1Schema.safeParse(candidate).success).toBe(true);
+    expect(CartV1Schema.safeParse({ ...candidate, lines: [{ ...direct, components }] }).success).toBe(false);
   });
 
   it("requires policy authorization and integer VND adjustments", () => {

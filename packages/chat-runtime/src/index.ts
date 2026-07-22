@@ -15,6 +15,8 @@ import {
   type PancakeTagObservation,
 } from "@lana/conversation-engine";
 
+export * from "./sales-cycle-runtime.js";
+
 export interface Phase2RuntimeInput {
   readonly pageId: string;
   readonly state: ConversationState;
