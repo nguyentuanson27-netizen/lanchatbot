@@ -219,6 +219,9 @@ describe("database migrations", () => {
     expect(sql).toContain("evaluation_status");
     expect(sql).toContain("side_effects");
     expect(sql).toContain("MIGRATION_RECOVERED_UNLEASED_PROCESSING");
+    expect(sql.indexOf("DROP VIEW IF EXISTS admin_simulation_runs_v")).toBeLessThan(
+      sql.indexOf("CREATE VIEW admin_simulation_runs_v"),
+    );
     const down = await readFile(
       resolve(directory, "0016_admin_simulation_worker.down.sql"),
       "utf8",
