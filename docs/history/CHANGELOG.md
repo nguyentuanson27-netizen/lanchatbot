@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-22 — runtime policy published r4
+
+- Owner chủ động phát hành dù simulation trước đó là `INSUFFICIENT_EVIDENCE`; quyết định override được ghi trong baseline và manifest.
+- Thêm hard gate để `PUBLISHED` chỉ được runtime sử dụng cho page `1198992073286645`; mọi page khác trả `PUBLISHED_PAGE_FORBIDDEN` trước khi đọc policy.
+- Publish ba policy lõi qua Admin API có audit và chuyển realtime worker từ `CANARY_LIVE` sang `PUBLISHED`.
+- Clean build, 31 test của chat-runtime, typecheck và smoke resolver đều đạt; bốn service r4 healthy với restart count bằng 0.
+- API webhook, delivery worker và n8n không đổi.
+
 ## 2026-07-22 — runtime policy canary r3
 
 - Cài deploy key GitHub read-only riêng cho repository trên VPS; private key chỉ tồn tại dưới user `lana-deploy`.

@@ -5,8 +5,8 @@ Tài liệu này được tạo bằng kiểm kê chỉ đọc. Không container
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260722-runtime-policy-canary-r3`.
-- Compose SHA-256: `a6e935c65f5cb7c0094ae38f069251d234340ce888b7cb90d3234854267dc6b9`.
+- Current release: `/opt/lana-chatbot/releases/20260722-runtime-policy-published-r4`.
+- Compose SHA-256: `4a4b66ef0f19d6873ed1cfcd48cc479c6a56f077f7b9d86f020c245186b81072`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất: `0016_admin_simulation_worker`.
@@ -14,17 +14,17 @@ Tài liệu này được tạo bằng kiểm kê chỉ đọc. Không container
 
 Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời điểm kiểm kê. Danh sách image digest đầy đủ nằm trong release manifest.
 
-Admin API, Admin Web, Admin Simulation Worker và realtime worker đang chạy image `lana-chatbot-app:runtime-policy-canary-r3` (`sha256:ef8db3fd7879f12d09631c06e9f2492f86e57907f7eb4723677619c2efeeaf75`). API webhook và delivery worker không đổi; n8n không bị restart trong release này.
+Admin API, Admin Web, Admin Simulation Worker và realtime worker đang chạy image `lana-chatbot-app:runtime-policy-published-r4` (`sha256:9c723249f012925177dee8627b9400deb1b645660e7f373660843462939d40aa`). API webhook và delivery worker không đổi; n8n không bị restart trong release này.
 
 ## Runtime Policy canary
 
-- Ba policy lõi `SHOP_POLICY`, `OFFER_POLICY`, `CLOSING_STRATEGY` đã qua `DRAFT → VALIDATED → APPROVED → CANARY_SHADOW → CANARY_LIVE` bằng Admin API có audit.
-- Kênh live chỉ áp dụng cho page `1198992073286645`; runtime còn có hard gate theo đúng page này.
+- Ba policy lõi `SHOP_POLICY`, `OFFER_POLICY`, `CLOSING_STRATEGY` đã qua `DRAFT → VALIDATED → APPROVED → CANARY_SHADOW → CANARY_LIVE → PUBLISHED` bằng Admin API có audit.
+- Kênh `PUBLISHED` chỉ áp dụng cho page `1198992073286645`; runtime hard-gate cả `CANARY_LIVE` và `PUBLISHED` theo đúng page này.
 - `CANARY_SHADOW` đã được xác nhận không ảnh hưởng outbound. `CANARY_LIVE` chỉ đi vào helper deterministic; policy không được đưa vào prompt/model.
 - Rollback pointer và roll-forward đã pass; last-known-good pass khi giả lập nguồn PostgreSQL lỗi.
-- Có `3` pointer `CANARY_LIVE`, `0` pointer `PUBLISHED`.
-- Admin và runtime đều giữ cờ publish ở `false`. Không được mở publish khi simulation chưa đủ bằng chứng.
-- Simulation hiện dùng baseline `HISTORICAL_ACTUAL` và trả `INSUFFICIENT_EVIDENCE` với `0` cuộc hội thoại đánh giá được; đây là release blocker có chủ đích.
+- Có `3` pointer active `PUBLISHED`; các pointer `CANARY_LIVE` cũ đã được thay thế.
+- Admin và runtime đều bật cờ publish. Smoke test resolver trả `LIVE_OUTBOUND` cho page test và `PUBLISHED_PAGE_FORBIDDEN` cho page khác.
+- Simulation trước publish dùng baseline `HISTORICAL_ACTUAL` và trả `INSUFFICIENT_EVIDENCE` với `0` cuộc hội thoại đánh giá được. Owner đã chủ động override blocker này trong release r4; kết quả được giữ lại để audit.
 - Backup trước migration: `/opt/lana-chatbot/backups/20260722-runtime-policy-canary-r3/lana_chatbot_pre_0015_0016.dump`, SHA-256 `13717540cfa2a85b19ab0127133a5f34d62dafc1bad1251e991b4d8cc3363fdd`.
 - Restore test đã chạy đủ chu kỳ `up 0015/0016 → down 0016/0015 → up 0015/0016` trên database tạm.
 
