@@ -96,6 +96,11 @@ SELECT format('GRANT SELECT, INSERT, UPDATE ON handoff_cases TO %I', :'control_a
 SELECT format('GRANT SELECT ON conversations TO %I', :'control_api_user')\gexec
 SELECT format('GRANT SELECT ON provider_conversation_links TO %I', :'control_api_user')\gexec
 SELECT format('GRANT SELECT ON admin_conversation_identities TO %I', :'control_api_user')\gexec
+SELECT format('GRANT SELECT, INSERT, UPDATE ON admin_artifact_versions TO %I', :'control_api_user')\gexec
+SELECT format('GRANT SELECT, INSERT ON admin_artifact_events TO %I', :'control_api_user')\gexec
+SELECT format('GRANT SELECT, INSERT, UPDATE ON admin_active_pointers TO %I', :'control_api_user')\gexec
+SELECT format('GRANT SELECT, INSERT, UPDATE ON admin_simulation_runs TO %I', :'control_api_user')\gexec
+SELECT format('GRANT SELECT ON admin_simulation_results TO %I', :'control_api_user')\gexec
 SELECT format(
   'GRANT UPDATE (conversation_owner, owner_lease_until, state_version, state_snapshot, updated_at, expires_at) ON conversations TO %I',
   :'control_api_user'
