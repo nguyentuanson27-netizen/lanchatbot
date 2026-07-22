@@ -365,8 +365,13 @@ export class RuntimePolicyResolver {
         return { status: "DISABLED", reason: "CANARY_LIVE_DISABLED" };
       }
     }
-    if (channel === "PUBLISHED" && !this.publishedEnabled) {
-      return { status: "DISABLED", reason: "PUBLISHED_CONSUMPTION_DISABLED" };
+    if (channel === "PUBLISHED") {
+      if (pageId !== RUNTIME_POLICY_CANARY_PAGE_ID) {
+        return { status: "REJECTED", reason: "PUBLISHED_PAGE_FORBIDDEN" };
+      }
+      if (!this.publishedEnabled) {
+        return { status: "DISABLED", reason: "PUBLISHED_CONSUMPTION_DISABLED" };
+      }
     }
     return null;
   }

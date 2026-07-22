@@ -197,6 +197,11 @@ describe("RuntimePolicyResolver", () => {
     });
     expect(await resolver.resolve({ pageId: "other-page", channel: "CANARY_LIVE" }))
       .toMatchObject({ status: "REJECTED", reasonCodes: ["CANARY_LIVE_PAGE_FORBIDDEN"] });
+    expect(await new RuntimePolicyResolver(source, {
+      enabled: true,
+      publishedEnabled: true,
+    }).resolve({ pageId: "other-page", channel: "PUBLISHED" }))
+      .toMatchObject({ status: "REJECTED", reasonCodes: ["PUBLISHED_PAGE_FORBIDDEN"] });
     expect(await resolver.resolve({ pageId, channel: "PUBLISHED" }))
       .toMatchObject({ status: "DISABLED", reasonCodes: ["PUBLISHED_CONSUMPTION_DISABLED"] });
     expect(source.calls).toBe(0);
