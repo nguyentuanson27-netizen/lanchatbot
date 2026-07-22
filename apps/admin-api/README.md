@@ -23,12 +23,22 @@ ADMIN_DATABASE_URL_FILE=/run/secrets/admin_database_url
 ADMIN_CONTROL_DATABASE_URL_FILE=/run/secrets/admin_control_database_url
 ADMIN_ALLOWED_ORIGIN=https://admin.lanadesign.vn
 ADMIN_OWNER_EMAILS=nguyentuanson27@gmail.com
+ADMIN_EDITOR_EMAILS=
+ADMIN_APPROVER_EMAILS=
+ADMIN_VIEWER_EMAILS=
 ADMIN_PAGE_IDS=ALL
 ADMIN_INTERNAL_AUTH_SECRET_FILE=/run/secrets/admin_internal_auth_secret
 ADMIN_ASSERTION_ISSUER=lana-admin-web
 ADMIN_CONTROL_ENABLED=false
 ADMIN_CONTROL_PAGE_IDS=1198992073286645
+ADMIN_POLICY_CONTROL_ENABLED=false
+ADMIN_POLICY_PAGE_IDS=1198992073286645
 ```
+
+`ADMIN_POLICY_CONTROL_ENABLED` is independent from conversation control and
+defaults to `false`. It requires migration `0014_admin_policy_control`.
+PostgreSQL is the only mutable source of truth; Google Sheets may only import
+a structured DRAFT or be used for staging/reporting.
 
 The mutation endpoint accepts only `HANDOFF_NHAN_VIEN`, `HANDOFF_VAN_DON`,
 `PAUSE_BOT`, `RESUME_BOT`, `ADD_TAG`, `REMOVE_TAG` and

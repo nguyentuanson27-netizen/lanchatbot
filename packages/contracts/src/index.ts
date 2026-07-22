@@ -315,3 +315,4 @@ export type PancakeTagObservationV1 = z.infer<typeof PancakeTagObservationV1Sche
 // existing workers can migrate one adapter at a time without a flag day.
 export * from "./v2/index.js";
 export * from "./v3/index.js";
+export * from "./v4/index.js";

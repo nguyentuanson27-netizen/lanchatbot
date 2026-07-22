@@ -5,6 +5,14 @@ import Fastify, {
   type FastifyRequest,
 } from "fastify";
 import {
+  AdminArtifactContentV1Schema,
+  AdminArtifactKindV1Schema,
+  AdminArtifactLifecycleV1Schema,
+  AdminArtifactTransitionActionV1Schema,
+  AdminCanaryModeV1Schema,
+  AdminSimulationRequestV1Schema,
+} from "@lana/contracts";
+import {
   AdminAuthError,
   AdminQueryError,
   type AdminAuthenticator,
@@ -28,6 +36,8 @@ export interface CreateAdminApiOptions {
   readonly controlEnabled?: boolean;
   readonly historyEnabled?: boolean;
   readonly controlPageIds?: "ALL" | readonly string[];
+  readonly policyControlEnabled?: boolean;
+  readonly policyPageIds?: "ALL" | readonly string[];
 }
 
 interface ListQuerystring {
@@ -81,10 +91,42 @@ interface CommandBody {
   readonly reason?: unknown;
 }
 
+interface ArtifactQuerystring extends ListQuerystring {
+  readonly artifact_kind?: string;
+  readonly lifecycle?: string;
+  readonly artifact_key?: string;
+}
+
+interface CreateArtifactBody {
+  readonly artifact_key?: unknown;
+  readonly content?: unknown;
+}
+
+interface UpdateArtifactBody {
+  readonly expected_revision?: unknown;
+  readonly content?: unknown;
+}
+
+interface TransitionArtifactBody {
+  readonly expected_revision?: unknown;
+  readonly action?: unknown;
+  readonly page_id?: unknown;
+  readonly canary_mode?: unknown;
+}
+
+interface RollbackArtifactBody {
+  readonly artifact_key?: unknown;
+  readonly artifact_kind?: unknown;
+  readonly page_id?: unknown;
+  readonly channel?: unknown;
+  readonly target_version_id?: unknown;
+  readonly expected_pointer_revision?: unknown;
+}
+
 export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance {
   const app = Fastify({
     logger: false,
-    bodyLimit: 16_384,
+    bodyLimit: 65_536,
     requestIdHeader: "x-request-id",
     genReqId: () => randomUUID(),
   });
@@ -131,11 +173,11 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
 
   app.setErrorHandler((error, request, reply) => {
     if (error instanceof AdminQueryError) {
-      const status = error.code === "ADMIN_PAGE_NOT_ALLOWED"
+      const status = error.code === "ADMIN_PAGE_NOT_ALLOWED" || error.code === "ADMIN_POLICY_FORBIDDEN"
         ? 403
-        : error.code === "ADMIN_IDEMPOTENCY_CONFLICT"
+        : error.code === "ADMIN_IDEMPOTENCY_CONFLICT" || error.code === "ADMIN_ARTIFACT_VERSION_CONFLICT"
           ? 409
-          : error.code === "ADMIN_CONTROL_UNAVAILABLE"
+          : error.code === "ADMIN_CONTROL_UNAVAILABLE" || error.code === "ADMIN_POLICY_CONTROL_UNAVAILABLE"
             ? 503
           : 400;
       return reply.code(status).send(errorBody(error.code, request.id));
@@ -163,20 +205,24 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
 
   app.get("/health/live", async () => ({ status: "ok" }));
   app.get("/health/ready", async (_request, reply) => {
-    const [authReady, storeReady, controlReady] = await Promise.all([
+    const [authReady, storeReady, controlReady, policyControlReady] = await Promise.all([
       options.authenticator.ready().catch(() => false),
       options.store.ready().catch(() => false),
       options.controlEnabled
         ? options.store.controlReady().catch(() => false)
         : Promise.resolve(true),
+      options.policyControlEnabled
+        ? options.store.policyControlReady().catch(() => false)
+        : Promise.resolve(true),
     ]);
-    if (!authReady || !storeReady || !controlReady) {
+    if (!authReady || !storeReady || !controlReady || !policyControlReady) {
       return reply.code(503).send({
         status: "not_ready",
         auth: authReady,
         database: storeReady && controlReady,
         read_only: !options.controlEnabled,
         control_plane: Boolean(options.controlEnabled),
+        policy_control: Boolean(options.policyControlEnabled),
       });
     }
     return {
@@ -185,6 +231,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
       database: true,
       read_only: !options.controlEnabled,
       control_plane: Boolean(options.controlEnabled),
+      policy_control: Boolean(options.policyControlEnabled),
     };
   });
 
@@ -199,6 +246,8 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
           conversation_control: Boolean(options.controlEnabled),
           history: Boolean(options.historyEnabled),
           control_page_ids: options.controlPageIds ?? [],
+          policy_control: Boolean(options.policyControlEnabled),
+          policy_page_ids: options.policyPageIds ?? [],
         },
       },
     };
@@ -461,6 +510,158 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
     },
   );
 
+  app.get<{ Querystring: ArtifactQuerystring }>(
+    "/admin/v1/policy/artifacts",
+    async (request) => {
+      requirePolicyControl(options);
+      return envelope(await options.store.listArtifactVersions(
+        requireIdentity(request),
+        parseArtifactQuery(request.query),
+      ));
+    },
+  );
+
+  app.post<{ Body: CreateArtifactBody }>(
+    "/admin/v1/policy/artifacts",
+    async (request, reply) => {
+      requirePolicyControl(options);
+      const created = await options.store.createArtifactVersion(requireIdentity(request), {
+        artifactKey: requiredArtifactKey(request.body?.artifact_key),
+        content: parseArtifactContent(request.body?.content),
+        correlationId: randomUUID(),
+      });
+      return reply.code(201).send({ artifact: created });
+    },
+  );
+
+  app.get<{ Params: { id: string } }>(
+    "/admin/v1/policy/artifacts/:id",
+    async (request, reply) => {
+      requirePolicyControl(options);
+      const result = await options.store.getArtifactVersion(
+        requireIdentity(request),
+        requiredUuid(request.params.id),
+      );
+      return result ? { artifact: result } : notFound(reply, request.id);
+    },
+  );
+
+  app.get<{ Params: { id: string } }>(
+    "/admin/v1/policy/artifacts/:id/events",
+    async (request) => {
+      requirePolicyControl(options);
+      return {
+        items: await options.store.listArtifactEvents(
+          requireIdentity(request),
+          requiredUuid(request.params.id),
+        ),
+        next_cursor: null,
+      };
+    },
+  );
+
+  app.put<{ Params: { id: string }; Body: UpdateArtifactBody }>(
+    "/admin/v1/policy/artifacts/:id/draft",
+    async (request, reply) => {
+      requirePolicyControl(options);
+      const result = await options.store.updateArtifactDraft(
+        requireIdentity(request),
+        requiredUuid(request.params.id),
+        {
+          expectedRevision: requiredRevision(request.body?.expected_revision),
+          content: parseArtifactContent(request.body?.content),
+          correlationId: randomUUID(),
+        },
+      );
+      return result ? { artifact: result } : notFound(reply, request.id);
+    },
+  );
+
+  app.post<{ Params: { id: string }; Body: TransitionArtifactBody }>(
+    "/admin/v1/policy/artifacts/:id/transitions",
+    async (request, reply) => {
+      requirePolicyControl(options);
+      const action = AdminArtifactTransitionActionV1Schema.safeParse(request.body?.action);
+      if (!action.success) throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+      const pageId = nullablePageId(request.body?.page_id);
+      if (pageId && !controlPageAllowed(options.policyPageIds ?? [], pageId)) {
+        return reply.code(403).send(errorBody("ADMIN_PAGE_NOT_ALLOWED", request.id));
+      }
+      const result = await options.store.transitionArtifactVersion(
+        requireIdentity(request),
+        requiredUuid(request.params.id),
+        {
+          expectedRevision: requiredRevision(request.body?.expected_revision),
+          action: action.data,
+          pageId,
+          canaryMode: nullableCanaryMode(request.body?.canary_mode),
+          correlationId: randomUUID(),
+        },
+      );
+      return result ? { artifact: result } : notFound(reply, request.id);
+    },
+  );
+
+  app.get("/admin/v1/policy/pointers", async (request) => {
+    requirePolicyControl(options);
+    return {
+      items: await options.store.listActivePointers(requireIdentity(request)),
+      next_cursor: null,
+    };
+  });
+
+  app.post<{ Body: RollbackArtifactBody }>(
+    "/admin/v1/policy/pointers/rollback",
+    async (request, reply) => {
+      requirePolicyControl(options);
+      const parsedKind = AdminArtifactKindV1Schema.safeParse(request.body?.artifact_kind);
+      const pageId = requiredPageId(request.body?.page_id);
+      if (!parsedKind.success) throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+      if (!controlPageAllowed(options.policyPageIds ?? [], pageId)) {
+        return reply.code(403).send(errorBody("ADMIN_PAGE_NOT_ALLOWED", request.id));
+      }
+      return {
+        pointer: await options.store.rollbackArtifactPointer(requireIdentity(request), {
+          artifactKey: requiredArtifactKey(request.body?.artifact_key),
+          artifactKind: parsedKind.data,
+          pageId,
+          channel: requiredEnum(request.body?.channel, ["CANARY_SHADOW", "CANARY_LIVE", "PUBLISHED"] as const),
+          targetVersionId: requiredUuid(String(request.body?.target_version_id ?? "")),
+          expectedPointerRevision: requiredRevision(request.body?.expected_pointer_revision),
+          correlationId: randomUUID(),
+        }),
+      };
+    },
+  );
+
+  app.post<{ Body: unknown }>(
+    "/admin/v1/policy/simulations",
+    async (request, reply) => {
+      requirePolicyControl(options);
+      const parsed = AdminSimulationRequestV1Schema.safeParse(request.body);
+      if (!parsed.success) throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+      if (!controlPageAllowed(options.policyPageIds ?? [], parsed.data.pageId)) {
+        return reply.code(403).send(errorBody("ADMIN_PAGE_NOT_ALLOWED", request.id));
+      }
+      const simulation = await options.store.createSimulation(requireIdentity(request), {
+        ...parsed.data,
+        correlationId: randomUUID(),
+      });
+      return reply.code(202).send({ simulation });
+    },
+  );
+
+  app.get<{ Querystring: ListQuerystring }>(
+    "/admin/v1/policy/simulations",
+    async (request) => {
+      requirePolicyControl(options);
+      return envelope(await options.store.listSimulations(
+        requireIdentity(request),
+        parseCommonQuery(request.query),
+      ));
+    },
+  );
+
   return app;
 }
 
@@ -602,6 +803,68 @@ function registerOperation(
         parseOperationQuery(request.query),
       ),
     ));
+}
+
+function requirePolicyControl(options: CreateAdminApiOptions): void {
+  if (!options.policyControlEnabled) {
+    throw new AdminQueryError("ADMIN_POLICY_CONTROL_UNAVAILABLE");
+  }
+}
+
+function parseArtifactQuery(query: ArtifactQuerystring) {
+  const kind = query.artifact_kind === undefined
+    ? undefined
+    : AdminArtifactKindV1Schema.safeParse(query.artifact_kind);
+  const lifecycle = query.lifecycle === undefined
+    ? undefined
+    : AdminArtifactLifecycleV1Schema.safeParse(query.lifecycle);
+  if (kind && !kind.success || lifecycle && !lifecycle.success) {
+    throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  }
+  return {
+    ...parseCommonQuery(query),
+    artifactKind: kind?.data,
+    lifecycle: lifecycle?.data,
+    artifactKey: optionalToken(query.artifact_key, 128),
+  };
+}
+
+function parseArtifactContent(value: unknown) {
+  const parsed = AdminArtifactContentV1Schema.safeParse(value);
+  if (!parsed.success) throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+  return parsed.data;
+}
+
+function requiredArtifactKey(value: unknown): string {
+  if (typeof value !== "string" || !/^[A-Za-z0-9._:-]{1,128}$/.test(value)) {
+    throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+  }
+  return value;
+}
+
+function requiredRevision(value: unknown): number {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
+    throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+  }
+  return value;
+}
+
+function requiredPageId(value: unknown): string {
+  if (typeof value !== "string" || !/^[A-Za-z0-9._:-]{1,64}$/.test(value)) {
+    throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+  }
+  return value;
+}
+
+function nullablePageId(value: unknown): string | null {
+  return value === null || value === undefined ? null : requiredPageId(value);
+}
+
+function nullableCanaryMode(value: unknown) {
+  if (value === null || value === undefined) return null;
+  const parsed = AdminCanaryModeV1Schema.safeParse(value);
+  if (!parsed.success) throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+  return parsed.data;
 }
 
 function requireIdentity(request: FastifyRequest): AdminIdentity {

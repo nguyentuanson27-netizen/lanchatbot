@@ -53,6 +53,21 @@ describe("internal admin assertion authentication", () => {
     );
   });
 
+  it("assigns the bounded editor, approver and viewer roles", async () => {
+    const roleAuth = new InternalAssertionAuthenticator({
+      secret,
+      issuer,
+      ownerEmails: new Set([owner]),
+      editorEmails: new Set(["editor@example.com"]),
+      approverEmails: new Set(["approver@example.com"]),
+      viewerEmails: new Set(["viewer@example.com"]),
+      pageScope: "ALL",
+    }, () => now);
+    assert.equal((await roleAuth.authenticate(assertion({ email: "editor@example.com" }))).role, "EDITOR");
+    assert.equal((await roleAuth.authenticate(assertion({ email: "approver@example.com" }))).role, "APPROVER");
+    assert.equal((await roleAuth.authenticate(assertion({ email: "viewer@example.com" }))).role, "VIEWER");
+  });
+
   it("rejects expired, overlong, wrong-issuer and tampered assertions", async () => {
     const invalid = (error: unknown) => error instanceof Error && "code" in error && error.code === "ADMIN_TOKEN_INVALID";
     await assert.rejects(() => authenticator().authenticate(assertion({ exp: nowSeconds - 60 })), invalid);

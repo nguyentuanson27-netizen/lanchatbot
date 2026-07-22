@@ -13,7 +13,7 @@ const host = process.env.HOST ?? "0.0.0.0";
 const adminApiOrigin = new URL(process.env.ADMIN_API_ORIGIN ?? "http://admin-api:8081");
 const adminAuth = loadAdminAuthConfig();
 const distDirectory = resolve(new URL("./dist", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"));
-const maxAdminJsonBodyBytes = 16 * 1024;
+const maxAdminJsonBodyBytes = 64 * 1024;
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -64,7 +64,7 @@ async function readJsonBody(request) {
 }
 
 async function proxyAdminRequest(request, response, requestUrl) {
-  const identity = identityFromAuthentikHeaders(request.headers, adminAuth.ownerEmails);
+  const identity = identityFromAuthentikHeaders(request.headers, adminAuth.allowedEmails);
   if (!identity) {
     response.statusCode = 401;
     response.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -90,8 +90,8 @@ async function proxyAdminRequest(request, response, requestUrl) {
 
   const method = request.method ?? "GET";
   const isReadMethod = method === "GET" || method === "HEAD" || method === "OPTIONS";
-  const isAdminPost = method === "POST" && requestUrl.pathname.startsWith("/admin/v1/");
-  if (!isReadMethod && !isAdminPost) {
+  const isAdminMutation = (method === "POST" || method === "PUT") && requestUrl.pathname.startsWith("/admin/v1/");
+  if (!isReadMethod && !isAdminMutation) {
     response.statusCode = 405;
     response.setHeader("Content-Type", "application/json; charset=utf-8");
     response.end(JSON.stringify({
@@ -102,7 +102,7 @@ async function proxyAdminRequest(request, response, requestUrl) {
   }
 
   let body;
-  if (isAdminPost) {
+  if (isAdminMutation) {
     const contentType = String(request.headers["content-type"] ?? "").toLowerCase();
     if (!contentType.startsWith("application/json")) {
       response.statusCode = 415;
@@ -121,7 +121,7 @@ async function proxyAdminRequest(request, response, requestUrl) {
       response.end(JSON.stringify({
         code: error?.statusCode === 413 ? "ADMIN_BODY_TOO_LARGE" : "ADMIN_JSON_INVALID",
         message: error?.statusCode === 413
-          ? "Nội dung lệnh quản trị vượt quá 16 KB."
+          ? "Nội dung lệnh quản trị vượt quá 64 KB."
           : "Nội dung JSON không hợp lệ.",
       }));
       return;

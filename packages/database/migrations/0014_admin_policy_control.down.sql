@@ -1,0 +1,12 @@
+DROP VIEW IF EXISTS admin_simulation_runs_v;
+DROP VIEW IF EXISTS admin_active_pointers_v;
+DROP VIEW IF EXISTS admin_artifact_versions_v;
+DROP TABLE IF EXISTS admin_simulation_results;
+DROP TABLE IF EXISTS admin_simulation_runs;
+DROP TABLE IF EXISTS admin_active_pointers;
+DROP TRIGGER IF EXISTS admin_artifact_events_no_mutation ON admin_artifact_events;
+DROP FUNCTION IF EXISTS prevent_admin_artifact_event_mutation();
+DROP TABLE IF EXISTS admin_artifact_events;
+DROP TRIGGER IF EXISTS admin_artifact_versions_update_guard ON admin_artifact_versions;
+DROP FUNCTION IF EXISTS guard_admin_artifact_version_update();
+DROP TABLE IF EXISTS admin_artifact_versions;

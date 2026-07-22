@@ -1,4 +1,12 @@
-export type AdminRole = "OWNER";
+import type {
+  AdminArtifactContentV1,
+  AdminArtifactKindV1,
+  AdminArtifactLifecycleV1,
+  AdminCanaryModeV1,
+  AdminSimulationRequestV1,
+} from "@lana/contracts";
+
+export type AdminRole = "OWNER" | "EDITOR" | "APPROVER" | "VIEWER";
 
 export interface AdminIdentity {
   readonly email: string;
@@ -68,6 +76,42 @@ export interface HandoffQuery extends PageCursorQuery {
 export interface AuditQuery extends PageCursorQuery {
   readonly action?: string | undefined;
   readonly resourceType?: string | undefined;
+}
+
+export interface ArtifactVersionQuery extends PageCursorQuery {
+  readonly artifactKind?: AdminArtifactKindV1 | undefined;
+  readonly lifecycle?: AdminArtifactLifecycleV1 | undefined;
+  readonly artifactKey?: string | undefined;
+}
+
+export interface CreateArtifactVersionInput {
+  readonly artifactKey: string;
+  readonly content: AdminArtifactContentV1;
+  readonly correlationId: string;
+}
+
+export interface UpdateArtifactDraftInput {
+  readonly expectedRevision: number;
+  readonly content: AdminArtifactContentV1;
+  readonly correlationId: string;
+}
+
+export interface TransitionArtifactInput {
+  readonly expectedRevision: number;
+  readonly action: "VALIDATE" | "APPROVE" | "START_CANARY" | "PUBLISH" | "RETIRE";
+  readonly pageId: string | null;
+  readonly canaryMode: AdminCanaryModeV1 | null;
+  readonly correlationId: string;
+}
+
+export interface RollbackArtifactInput {
+  readonly artifactKey: string;
+  readonly artifactKind: AdminArtifactKindV1;
+  readonly pageId: string;
+  readonly channel: "CANARY_SHADOW" | "CANARY_LIVE" | "PUBLISHED";
+  readonly targetVersionId: string;
+  readonly expectedPointerRevision: number;
+  readonly correlationId: string;
 }
 
 export type AdminCommandType =
@@ -183,6 +227,46 @@ export interface AdminStore {
     identity: AdminIdentity,
     query: AuditQuery,
   ): Promise<{ items: readonly Record<string, unknown>[]; nextCursor: string | null }>;
+  policyControlReady(): Promise<boolean>;
+  listArtifactVersions(
+    identity: AdminIdentity,
+    query: ArtifactVersionQuery,
+  ): Promise<{ items: readonly Record<string, unknown>[]; nextCursor: string | null }>;
+  getArtifactVersion(
+    identity: AdminIdentity,
+    versionId: string,
+  ): Promise<Record<string, unknown> | null>;
+  listArtifactEvents(
+    identity: AdminIdentity,
+    versionId: string,
+  ): Promise<readonly Record<string, unknown>[]>;
+  createArtifactVersion(
+    identity: AdminIdentity,
+    input: CreateArtifactVersionInput,
+  ): Promise<Record<string, unknown>>;
+  updateArtifactDraft(
+    identity: AdminIdentity,
+    versionId: string,
+    input: UpdateArtifactDraftInput,
+  ): Promise<Record<string, unknown> | null>;
+  transitionArtifactVersion(
+    identity: AdminIdentity,
+    versionId: string,
+    input: TransitionArtifactInput,
+  ): Promise<Record<string, unknown> | null>;
+  listActivePointers(identity: AdminIdentity): Promise<readonly Record<string, unknown>[]>;
+  rollbackArtifactPointer(
+    identity: AdminIdentity,
+    input: RollbackArtifactInput,
+  ): Promise<Record<string, unknown>>;
+  createSimulation(
+    identity: AdminIdentity,
+    input: AdminSimulationRequestV1 & { readonly correlationId: string },
+  ): Promise<Record<string, unknown>>;
+  listSimulations(
+    identity: AdminIdentity,
+    query: PageCursorQuery,
+  ): Promise<{ items: readonly Record<string, unknown>[]; nextCursor: string | null }>;
   createConversationCommand(
     identity: AdminIdentity,
     conversationId: string,
@@ -218,7 +302,12 @@ export class AdminQueryError extends Error {
     | "ADMIN_PAGE_NOT_ALLOWED"
     | "ADMIN_COMMAND_INVALID"
     | "ADMIN_IDEMPOTENCY_CONFLICT"
-    | "ADMIN_CONTROL_UNAVAILABLE") {
+    | "ADMIN_CONTROL_UNAVAILABLE"
+    | "ADMIN_POLICY_CONTROL_UNAVAILABLE"
+    | "ADMIN_POLICY_FORBIDDEN"
+    | "ADMIN_ARTIFACT_INVALID"
+    | "ADMIN_ARTIFACT_VERSION_CONFLICT"
+    | "ADMIN_ARTIFACT_TRANSITION_INVALID") {
     super(code);
   }
 }

@@ -6,6 +6,8 @@ import {
   type AdminIdentity,
   type AdminStore,
   type AuditQuery,
+  type ArtifactVersionQuery,
+  type CreateArtifactVersionInput,
   type CreateAdminCommandInput,
   type ConversationQuery,
   type EvaluationQuery,
@@ -14,6 +16,9 @@ import {
   type OutreachMetricsQuery,
   type OutreachQuery,
   type TimelineQuery,
+  type RollbackArtifactInput,
+  type TransitionArtifactInput,
+  type UpdateArtifactDraftInput,
 } from "./types.js";
 
 const { Pool } = pg;
@@ -134,6 +139,18 @@ const COMMANDS: ListSpec = {
     completed_at`,
 };
 
+const ARTIFACT_VERSIONS: ListSpec = {
+  view: "admin_artifact_versions_v",
+  idColumn: "version_id",
+  timeColumn: "updated_at",
+  columns: `version_id, artifact_key, artifact_kind, version_number,
+    schema_version, lifecycle, revision, content, content_hash,
+    created_by_subject, updated_by_subject, validated_by_subject,
+    approved_by_subject, canary_by_subject, published_by_subject,
+    retired_by_subject, validated_at, approved_at, canary_at,
+    published_at, retired_at, created_at, updated_at`,
+};
+
 const HANDOFF_COLUMNS = `h.handoff_id, h.conversation_id, h.page_id,
   h.handoff_generation, h.source, h.reason_code,
   h.reason_detail_safe, h.product_id, h.facts_status, h.facts_reason_code,
@@ -181,6 +198,20 @@ export class PostgresAdminStore implements AdminStore {
         `SELECT 1 FROM information_schema.tables
          WHERE table_schema = current_schema()
            AND table_name = 'admin_commands'`,
+      );
+      return result.rowCount === 1;
+    } catch {
+      return false;
+    }
+  }
+
+  async policyControlReady(): Promise<boolean> {
+    if (!this.commandPool) return false;
+    try {
+      const result = await this.commandPool.query(
+        `SELECT 1 FROM information_schema.tables
+         WHERE table_schema = current_schema()
+           AND table_name = 'admin_artifact_versions'`,
       );
       return result.rowCount === 1;
     } catch {
@@ -1062,11 +1093,306 @@ export class PostgresAdminStore implements AdminStore {
     return this.list(COMMANDS, filters, values, query.limit, query.cursor);
   }
 
+  async listArtifactVersions(_identity: AdminIdentity, query: ArtifactVersionQuery) {
+    const filters: string[] = [];
+    const values: unknown[] = [];
+    if (query.artifactKind) addFilter(filters, values, "artifact_kind", query.artifactKind);
+    if (query.lifecycle) addFilter(filters, values, "lifecycle", query.lifecycle);
+    if (query.artifactKey) addFilter(filters, values, "artifact_key", query.artifactKey);
+    if (query.cursor) {
+      const cursor = decodeCursor(query.cursor);
+      values.push(cursor.time, cursor.id);
+      filters.push(`(updated_at, version_id::text) < ($${values.length - 1}::timestamptz, $${values.length})`);
+    }
+    values.push(query.limit + 1);
+    const result = await this.pool.query(
+      `SELECT ${ARTIFACT_VERSIONS.columns}
+       FROM admin_artifact_versions_v
+       ${filters.length ? `WHERE ${filters.join(" AND ")}` : ""}
+       ORDER BY updated_at DESC, version_id DESC
+       LIMIT $${values.length}`,
+      values,
+    );
+    const hasMore = result.rows.length > query.limit;
+    const rows = result.rows.slice(0, query.limit);
+    const last = rows.at(-1);
+    return {
+      items: rows.map(policySafeRow),
+      nextCursor: hasMore && last
+        ? encodeCursor({ time: toIso(last.updated_at), id: String(last.version_id) })
+        : null,
+    };
+  }
+
+  async getArtifactVersion(_identity: AdminIdentity, versionId: string) {
+    const result = await this.pool.query(
+      `SELECT ${ARTIFACT_VERSIONS.columns}
+       FROM admin_artifact_versions_v WHERE version_id = $1 LIMIT 1`,
+      [versionId],
+    );
+    return result.rows[0] ? policySafeRow(result.rows[0]) : null;
+  }
+
+  async listArtifactEvents(_identity: AdminIdentity, versionId: string) {
+    const result = await this.pool.query(
+      `SELECT event_id, version_id, artifact_key, action, from_lifecycle,
+              to_lifecycle, actor_subject, actor_role, page_id, channel,
+              correlation_id, metadata_safe, occurred_at
+       FROM admin_artifact_events
+       WHERE version_id = $1
+       ORDER BY occurred_at DESC, event_id DESC
+       LIMIT 500`,
+      [versionId],
+    );
+    return result.rows.map(policySafeRow);
+  }
+
+  async createArtifactVersion(identity: AdminIdentity, input: CreateArtifactVersionInput) {
+    assertPolicyRole(identity, ["OWNER", "EDITOR"]);
+    const pool = this.requirePolicyPool();
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`lana.admin-artifact:${input.artifactKey}`]);
+      const next = await client.query<{ version_number: number }>(
+        `SELECT coalesce(max(version_number), 0)::int + 1 AS version_number
+         FROM admin_artifact_versions WHERE artifact_key = $1`,
+        [input.artifactKey],
+      );
+      const versionNumber = next.rows[0]?.version_number ?? 1;
+      const contentHash = hashStructuredContent(input.content);
+      const inserted = await client.query(
+        `INSERT INTO admin_artifact_versions (
+           artifact_key, artifact_kind, version_number, content, content_hash,
+           created_by_subject, updated_by_subject
+         ) VALUES ($1,$2,$3,$4::jsonb,$5,$6,$6)
+         RETURNING ${ARTIFACT_VERSIONS.columns}`,
+        [input.artifactKey, input.content.kind, versionNumber, JSON.stringify(input.content), contentHash, identity.subject],
+      );
+      const row = inserted.rows[0];
+      await insertArtifactEvent(client, {
+        versionId: String(row.version_id), artifactKey: input.artifactKey,
+        action: "CREATED", fromLifecycle: null, toLifecycle: "DRAFT",
+        identity, correlationId: input.correlationId,
+      });
+      await client.query("COMMIT");
+      return policySafeRow(row);
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateArtifactDraft(
+    identity: AdminIdentity,
+    versionId: string,
+    input: UpdateArtifactDraftInput,
+  ) {
+    assertPolicyRole(identity, ["OWNER", "EDITOR"]);
+    const pool = this.requirePolicyPool();
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const currentResult = await client.query(
+        `SELECT version_id, artifact_key, artifact_kind, lifecycle, revision
+         FROM admin_artifact_versions WHERE version_id = $1 FOR UPDATE`,
+        [versionId],
+      );
+      const current = currentResult.rows[0];
+      if (!current) { await client.query("ROLLBACK"); return null; }
+      if (current.lifecycle !== "DRAFT" || Number(current.revision) !== input.expectedRevision) {
+        throw new AdminQueryError("ADMIN_ARTIFACT_VERSION_CONFLICT");
+      }
+      if (current.artifact_kind !== input.content.kind) {
+        throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+      }
+      const updated = await client.query(
+        `UPDATE admin_artifact_versions
+         SET content = $2::jsonb, content_hash = $3, revision = revision + 1,
+             updated_by_subject = $4
+         WHERE version_id = $1
+         RETURNING ${ARTIFACT_VERSIONS.columns}`,
+        [versionId, JSON.stringify(input.content), hashStructuredContent(input.content), identity.subject],
+      );
+      await insertArtifactEvent(client, {
+        versionId, artifactKey: String(current.artifact_key), action: "UPDATED",
+        fromLifecycle: "DRAFT", toLifecycle: "DRAFT", identity,
+        correlationId: input.correlationId,
+      });
+      await client.query("COMMIT");
+      return policySafeRow(updated.rows[0]);
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async transitionArtifactVersion(
+    identity: AdminIdentity,
+    versionId: string,
+    input: TransitionArtifactInput,
+  ) {
+    assertTransitionRole(identity, input.action);
+    if (input.pageId) assertPageAllowed(identity, input.pageId);
+    const pool = this.requirePolicyPool();
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const selected = await client.query(
+        `SELECT version_id, artifact_key, artifact_kind, lifecycle, revision, content
+         FROM admin_artifact_versions WHERE version_id = $1 FOR UPDATE`,
+        [versionId],
+      );
+      const current = selected.rows[0];
+      if (!current) { await client.query("ROLLBACK"); return null; }
+      if (Number(current.revision) !== input.expectedRevision) {
+        throw new AdminQueryError("ADMIN_ARTIFACT_VERSION_CONFLICT");
+      }
+      const target = transitionTarget(String(current.lifecycle), input.action);
+      if (!target) throw new AdminQueryError("ADMIN_ARTIFACT_TRANSITION_INVALID");
+      if ((input.action === "START_CANARY" || input.action === "PUBLISH") && !input.pageId) {
+        throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+      }
+      if (input.action === "START_CANARY" && !input.canaryMode) {
+        throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+      }
+      if (input.action === "RETIRE") {
+        const pointer = await client.query(
+          "SELECT 1 FROM admin_active_pointers WHERE version_id = $1 AND active LIMIT 1",
+          [versionId],
+        );
+        if (pointer.rowCount) throw new AdminQueryError("ADMIN_ARTIFACT_TRANSITION_INVALID");
+      }
+      const actorColumn = transitionActorColumn(input.action);
+      const timeColumn = transitionTimeColumn(input.action);
+      const updated = await client.query(
+        `UPDATE admin_artifact_versions
+         SET lifecycle = $2, revision = revision + 1, updated_by_subject = $3,
+             ${actorColumn} = $3, ${timeColumn} = now()
+         WHERE version_id = $1
+         RETURNING ${ARTIFACT_VERSIONS.columns}`,
+        [versionId, target, identity.subject],
+      );
+      let channel: string | null = null;
+      if (input.action === "START_CANARY") {
+        channel = input.canaryMode === "LIVE_OUTBOUND" ? "CANARY_LIVE" : "CANARY_SHADOW";
+        await upsertArtifactPointer(client, current, input.pageId!, channel, versionId, identity.subject);
+      } else if (input.action === "PUBLISH") {
+        channel = "PUBLISHED";
+        await upsertArtifactPointer(client, current, input.pageId!, channel, versionId, identity.subject);
+      }
+      await insertArtifactEvent(client, {
+        versionId, artifactKey: String(current.artifact_key),
+        action: transitionEventAction(input.action),
+        fromLifecycle: String(current.lifecycle), toLifecycle: target,
+        identity, correlationId: input.correlationId, pageId: input.pageId,
+        channel,
+      });
+      await client.query("COMMIT");
+      return policySafeRow(updated.rows[0]);
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async listActivePointers(_identity: AdminIdentity) {
+    const result = await this.pool.query(
+      `SELECT pointer_id, artifact_key, artifact_kind, page_id, channel,
+              version_id, revision, updated_by_subject, updated_at,
+              version_number, lifecycle, content_hash
+       FROM admin_active_pointers_v
+       ORDER BY artifact_kind, artifact_key, page_id NULLS FIRST, channel`,
+    );
+    return result.rows.map(policySafeRow);
+  }
+
+  async rollbackArtifactPointer(identity: AdminIdentity, input: RollbackArtifactInput) {
+    assertPolicyRole(identity, ["OWNER"]);
+    assertPageAllowed(identity, input.pageId);
+    const pool = this.requirePolicyPool();
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const target = await client.query(
+        `SELECT version_id, artifact_key, artifact_kind, lifecycle
+         FROM admin_artifact_versions WHERE version_id = $1 FOR UPDATE`,
+        [input.targetVersionId],
+      );
+      const row = target.rows[0];
+      if (!row || row.artifact_key !== input.artifactKey ||
+          row.artifact_kind !== input.artifactKind || row.lifecycle !== "PUBLISHED") {
+        throw new AdminQueryError("ADMIN_ARTIFACT_TRANSITION_INVALID");
+      }
+      const pointer = await client.query(
+        `UPDATE admin_active_pointers
+         SET version_id = $6, revision = revision + 1,
+             updated_by_subject = $7, updated_at = now()
+         WHERE artifact_key = $1 AND artifact_kind = $2 AND page_id = $3
+           AND channel = $4 AND revision = $5 AND active
+         RETURNING *`,
+        [input.artifactKey, input.artifactKind, input.pageId, input.channel,
+          input.expectedPointerRevision, input.targetVersionId, identity.subject],
+      );
+      if (!pointer.rowCount) throw new AdminQueryError("ADMIN_ARTIFACT_VERSION_CONFLICT");
+      await insertArtifactEvent(client, {
+        versionId: input.targetVersionId, artifactKey: input.artifactKey,
+        action: "ROLLBACK", fromLifecycle: "PUBLISHED", toLifecycle: "PUBLISHED",
+        identity, correlationId: input.correlationId, pageId: input.pageId,
+        channel: input.channel,
+      });
+      await client.query("COMMIT");
+      return policySafeRow(pointer.rows[0]);
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async createSimulation(
+    identity: AdminIdentity,
+    input: import("@lana/contracts").AdminSimulationRequestV1 & { readonly correlationId: string },
+  ) {
+    assertPolicyRole(identity, ["OWNER", "EDITOR", "APPROVER"]);
+    assertPageAllowed(identity, input.pageId);
+    const pool = this.requirePolicyPool();
+    const inserted = await pool.query(
+      `INSERT INTO admin_simulation_runs (
+         page_id, version_ids, lookback_days, max_conversations,
+         side_effects, created_by_subject
+       ) VALUES ($1,$2::uuid[],$3,$4,'DISABLED',$5)
+       RETURNING *`,
+      [input.pageId, input.versionIds, input.lookbackDays, input.maxConversations, identity.subject],
+    );
+    return policySafeRow(inserted.rows[0]);
+  }
+
+  async listSimulations(_identity: AdminIdentity, query: { limit: number; cursor?: string }) {
+    const spec: ListSpec = {
+      view: "admin_simulation_runs_v", idColumn: "simulation_id", timeColumn: "created_at",
+      columns: "simulation_id, page_id, version_ids, lookback_days, max_conversations, side_effects, status, created_by_subject, claimed_at, completed_at, error_code, aggregate_metrics, created_at, updated_at",
+    };
+    return this.list(spec, [], [], query.limit, query.cursor);
+  }
+
   async close(): Promise<void> {
     await Promise.all([
       this.pool.end(),
       this.commandPool?.end() ?? Promise.resolve(),
     ]);
+  }
+
+  private requirePolicyPool(): pg.Pool {
+    if (!this.commandPool) throw new AdminQueryError("ADMIN_POLICY_CONTROL_UNAVAILABLE");
+    return this.commandPool;
   }
 
   private async timeline(
@@ -1178,6 +1504,167 @@ function blocksBotImmediately(command: CreateAdminCommandInput["command"]): bool
     command === "HANDOFF_VAN_DON" ||
     command === "PAUSE_BOT" ||
     command === "ADD_TAG";
+}
+
+function assertPolicyRole(identity: AdminIdentity, allowed: readonly AdminIdentity["role"][]): void {
+  if (!allowed.includes(identity.role)) {
+    throw new AdminQueryError("ADMIN_POLICY_FORBIDDEN");
+  }
+}
+
+function assertTransitionRole(
+  identity: AdminIdentity,
+  action: TransitionArtifactInput["action"],
+): void {
+  const allowed: Record<TransitionArtifactInput["action"], readonly AdminIdentity["role"][]> = {
+    VALIDATE: ["OWNER", "EDITOR"],
+    APPROVE: ["OWNER", "APPROVER"],
+    START_CANARY: ["OWNER"],
+    PUBLISH: ["OWNER"],
+    RETIRE: ["OWNER"],
+  };
+  assertPolicyRole(identity, allowed[action]);
+}
+
+function transitionTarget(
+  current: string,
+  action: TransitionArtifactInput["action"],
+): string | null {
+  if (action === "RETIRE") {
+    return ["APPROVED", "CANARY", "PUBLISHED"].includes(current) ? "RETIRED" : null;
+  }
+  const transitions: Record<TransitionArtifactInput["action"], readonly [string, string]> = {
+    VALIDATE: ["DRAFT", "VALIDATED"],
+    APPROVE: ["VALIDATED", "APPROVED"],
+    START_CANARY: ["APPROVED", "CANARY"],
+    PUBLISH: ["CANARY", "PUBLISHED"],
+    RETIRE: ["PUBLISHED", "RETIRED"],
+  };
+  const [from, to] = transitions[action];
+  return current === from ? to : null;
+}
+
+function transitionActorColumn(action: TransitionArtifactInput["action"]): string {
+  return ({
+    VALIDATE: "validated_by_subject",
+    APPROVE: "approved_by_subject",
+    START_CANARY: "canary_by_subject",
+    PUBLISH: "published_by_subject",
+    RETIRE: "retired_by_subject",
+  } satisfies Record<TransitionArtifactInput["action"], string>)[action];
+}
+
+function transitionTimeColumn(action: TransitionArtifactInput["action"]): string {
+  return ({
+    VALIDATE: "validated_at",
+    APPROVE: "approved_at",
+    START_CANARY: "canary_at",
+    PUBLISH: "published_at",
+    RETIRE: "retired_at",
+  } satisfies Record<TransitionArtifactInput["action"], string>)[action];
+}
+
+function transitionEventAction(action: TransitionArtifactInput["action"]): string {
+  return ({
+    VALIDATE: "VALIDATED",
+    APPROVE: "APPROVED",
+    START_CANARY: "CANARY_STARTED",
+    PUBLISH: "PUBLISHED",
+    RETIRE: "RETIRED",
+  } satisfies Record<TransitionArtifactInput["action"], string>)[action];
+}
+
+interface ArtifactEventInput {
+  readonly versionId: string;
+  readonly artifactKey: string;
+  readonly action: string;
+  readonly fromLifecycle: string | null;
+  readonly toLifecycle: string | null;
+  readonly identity: AdminIdentity;
+  readonly correlationId: string;
+  readonly pageId?: string | null;
+  readonly channel?: string | null;
+}
+
+async function insertArtifactEvent(client: pg.PoolClient, input: ArtifactEventInput): Promise<void> {
+  await client.query(
+    `INSERT INTO admin_artifact_events (
+       version_id, artifact_key, action, from_lifecycle, to_lifecycle,
+       actor_subject, actor_role, page_id, channel, correlation_id
+     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+    [input.versionId, input.artifactKey, input.action, input.fromLifecycle,
+      input.toLifecycle, input.identity.subject, input.identity.role,
+      input.pageId ?? null, input.channel ?? null, input.correlationId],
+  );
+}
+
+async function upsertArtifactPointer(
+  client: pg.PoolClient,
+  version: Record<string, unknown>,
+  pageId: string,
+  channel: string,
+  versionId: string,
+  actorSubject: string,
+): Promise<void> {
+  if (channel === "PUBLISHED") {
+    await client.query(
+      `UPDATE admin_active_pointers
+       SET active = false, revision = revision + 1,
+           updated_by_subject = $4, updated_at = now()
+       WHERE artifact_key = $1 AND artifact_kind = $2 AND page_id = $3
+         AND channel IN ('CANARY_SHADOW', 'CANARY_LIVE') AND active`,
+      [version.artifact_key, version.artifact_kind, pageId, actorSubject],
+    );
+  } else {
+    await client.query(
+      `UPDATE admin_active_pointers
+       SET active = false, revision = revision + 1,
+           updated_by_subject = $4, updated_at = now()
+       WHERE artifact_key = $1 AND artifact_kind = $2 AND page_id = $3
+         AND channel IN ('CANARY_SHADOW', 'CANARY_LIVE')
+         AND channel <> $5 AND active`,
+      [version.artifact_key, version.artifact_kind, pageId, actorSubject, channel],
+    );
+  }
+  await client.query(
+    `INSERT INTO admin_active_pointers (
+       artifact_key, artifact_kind, page_id, channel, version_id,
+       updated_by_subject
+     ) VALUES ($1,$2,$3,$4,$5,$6)
+     ON CONFLICT (artifact_key, artifact_kind, page_id, channel)
+     DO UPDATE SET version_id = EXCLUDED.version_id,
+                   active = true,
+                   revision = admin_active_pointers.revision + 1,
+                   updated_by_subject = EXCLUDED.updated_by_subject,
+                   updated_at = now()`,
+    [version.artifact_key, version.artifact_kind, pageId, channel, versionId, actorSubject],
+  );
+}
+
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, item]) => [key, canonicalize(item)]),
+    );
+  }
+  return value;
+}
+
+function hashStructuredContent(content: unknown): string {
+  const digest = createHash("sha256")
+    .update(JSON.stringify(canonicalize(content)))
+    .digest("hex");
+  return `sha256:${digest}`;
+}
+
+function policySafeRow(row: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(row).map(([key, value]) => [
+    key,
+    value instanceof Date ? value.toISOString() : value,
+  ]));
 }
 
 function commandFingerprint(

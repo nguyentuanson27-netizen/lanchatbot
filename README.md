@@ -104,6 +104,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 - [Shared sales contracts — Giai đoạn 1](docs/phase1/01_shared_contracts_v2.md)
 - [Sales runtime engines — Giai đoạn 2](docs/phase2/01_sales_runtime_engines.md)
 - [Chu trình bán hàng — Giai đoạn 3](docs/phase3/01_sales_cycle.md)
+- [Admin Policy Control Plane — Giai đoạn 4](docs/phase4/01_admin_policy_control_plane.md)
 - [Bảo mật và dữ liệu](docs/phase0/03_security_data_architecture.md)
 - [Admin runbook](docs/admin/04_CONTROL_PLANE_RUNBOOK.md)
 

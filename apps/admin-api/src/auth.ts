@@ -17,6 +17,9 @@ export interface InternalAssertionConfig {
   readonly secret: string;
   readonly issuer: string;
   readonly ownerEmails: ReadonlySet<string>;
+  readonly editorEmails?: ReadonlySet<string>;
+  readonly approverEmails?: ReadonlySet<string>;
+  readonly viewerEmails?: ReadonlySet<string>;
   readonly pageScope: "ALL" | readonly string[];
   readonly clockToleranceSeconds?: number;
   readonly maximumLifetimeSeconds?: number;
@@ -71,12 +74,21 @@ export class InternalAssertionAuthenticator implements AdminAuthenticator {
     }
 
     const email = claims.email.trim().toLowerCase();
-    if (!this.config.ownerEmails.has(email)) {
+    const role = this.config.ownerEmails.has(email)
+      ? "OWNER" as const
+      : this.config.approverEmails?.has(email)
+        ? "APPROVER" as const
+        : this.config.editorEmails?.has(email)
+          ? "EDITOR" as const
+          : this.config.viewerEmails?.has(email)
+            ? "VIEWER" as const
+            : null;
+    if (!role) {
       throw new AdminAuthError("ADMIN_ACCESS_DENIED");
     }
     return {
       email,
-      role: "OWNER",
+      role,
       pageScope: this.config.pageScope,
       subject: claims.sub,
     };

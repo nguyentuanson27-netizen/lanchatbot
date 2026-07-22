@@ -16,6 +16,10 @@ import type {
   OutreachSummary,
   PancakeTag,
   ProductDataSummary,
+  PolicyArtifact,
+  PolicyArtifactKind,
+  PolicyControlData,
+  PolicyLifecycle,
   QualitySummary,
 } from "./types.js";
 
@@ -72,7 +76,7 @@ function pancakeTagValue(value: unknown): ConversationDetail["observedTags"][num
 async function request<T>(
   path: string,
   signal?: AbortSignal,
-  options: { method?: "GET" | "POST"; body?: unknown; headers?: Record<string, string> } = {},
+  options: { method?: "GET" | "POST" | "PUT"; body?: unknown; headers?: Record<string, string> } = {},
 ): Promise<T> {
   const init: RequestInit = {
     method: options.method ?? "GET",
@@ -197,7 +201,151 @@ export async function getIdentity(signal?: AbortSignal): Promise<Identity> {
       typeof capabilities.control_page_ids === "string"
         ? [capabilities.control_page_ids]
         : arrayValue(capabilities.control_page_ids).map(String),
+    policyControl: capabilities.policy_control === true,
+    policyPageIds:
+      typeof capabilities.policy_page_ids === "string"
+        ? [capabilities.policy_page_ids]
+        : arrayValue(capabilities.policy_page_ids).map(String),
   };
+}
+
+const POLICY_KINDS = new Set<PolicyArtifactKind>([
+  "SHOP_POLICY", "OFFER_POLICY", "CLOSING_STRATEGY", "SIZE_CHART",
+  "HANDOFF_MATRIX", "PAYMENT_POLICY",
+]);
+const POLICY_LIFECYCLES = new Set<PolicyLifecycle>([
+  "DRAFT", "VALIDATED", "APPROVED", "CANARY", "PUBLISHED", "RETIRED",
+]);
+
+function normalizePolicyArtifact(value: unknown): PolicyArtifact {
+  const item = record(value);
+  const kind = stringValue(item.artifact_kind) as PolicyArtifactKind;
+  const lifecycle = stringValue(item.lifecycle) as PolicyLifecycle;
+  if (!POLICY_KINDS.has(kind) || !POLICY_LIFECYCLES.has(lifecycle)) {
+    throw new ApiError("Phiên bản cấu hình không hợp lệ.", 500);
+  }
+  return {
+    id: stringValue(item.version_id),
+    key: stringValue(item.artifact_key),
+    kind,
+    version: numberValue(item.version_number),
+    lifecycle,
+    revision: numberValue(item.revision),
+    contentHash: stringValue(item.content_hash),
+    content: record(item.content),
+    updatedBy: stringValue(item.updated_by_subject),
+    updatedAt: stringValue(item.updated_at),
+  };
+}
+
+export async function getPolicyControl(signal?: AbortSignal): Promise<PolicyControlData> {
+  const [artifacts, pointers, simulations] = await Promise.all([
+    request<JsonRecord>("/policy/artifacts?limit=100", signal),
+    request<JsonRecord>("/policy/pointers", signal),
+    request<JsonRecord>("/policy/simulations?limit=30", signal),
+  ]);
+  return {
+    artifacts: arrayValue(artifacts.items).map(normalizePolicyArtifact),
+    pointers: arrayValue(pointers.items).map((entry) => {
+      const item = record(entry);
+      return {
+        id: stringValue(item.pointer_id),
+        key: stringValue(item.artifact_key),
+        kind: stringValue(item.artifact_kind) as PolicyArtifactKind,
+        pageId: typeof item.page_id === "string" ? item.page_id : null,
+        channel: stringValue(item.channel) as "CANARY_SHADOW" | "CANARY_LIVE" | "PUBLISHED",
+        versionId: stringValue(item.version_id),
+        version: numberValue(item.version_number),
+        revision: numberValue(item.revision),
+        updatedAt: stringValue(item.updated_at),
+      };
+    }),
+    simulations: arrayValue(simulations.items).map((entry) => {
+      const item = record(entry);
+      return {
+        id: stringValue(item.simulation_id),
+        pageId: stringValue(item.page_id),
+        versionIds: arrayValue(item.version_ids).map(String),
+        status: stringValue(item.status),
+        lookbackDays: numberValue(item.lookback_days),
+        maxConversations: numberValue(item.max_conversations),
+        metrics: record(item.aggregate_metrics),
+        createdAt: stringValue(item.created_at),
+      };
+    }),
+  };
+}
+
+export async function createPolicyArtifact(
+  artifactKey: string,
+  content: Record<string, unknown>,
+): Promise<PolicyArtifact> {
+  const payload = await request<JsonRecord>("/policy/artifacts", undefined, {
+    method: "POST",
+    body: { artifact_key: artifactKey, content },
+  });
+  return normalizePolicyArtifact(record(payload.artifact));
+}
+
+export async function transitionPolicyArtifact(
+  artifact: PolicyArtifact,
+  action: "VALIDATE" | "APPROVE" | "START_CANARY" | "PUBLISH" | "RETIRE",
+  pageId: string | null,
+  canaryMode: "SHADOW" | "LIVE_OUTBOUND" | null,
+): Promise<PolicyArtifact> {
+  const payload = await request<JsonRecord>(`/policy/artifacts/${encodeURIComponent(artifact.id)}/transitions`, undefined, {
+    method: "POST",
+    body: {
+      expected_revision: artifact.revision,
+      action,
+      page_id: pageId,
+      canary_mode: canaryMode,
+    },
+  });
+  return normalizePolicyArtifact(record(payload.artifact));
+}
+
+export async function updatePolicyArtifactDraft(
+  artifact: PolicyArtifact,
+  content: Record<string, unknown>,
+): Promise<PolicyArtifact> {
+  const payload = await request<JsonRecord>(`/policy/artifacts/${encodeURIComponent(artifact.id)}/draft`, undefined, {
+    method: "PUT",
+    body: { expected_revision: artifact.revision, content },
+  });
+  return normalizePolicyArtifact(record(payload.artifact));
+}
+
+export async function startPolicySimulation(versionIds: string[], pageId: string): Promise<void> {
+  await request<JsonRecord>("/policy/simulations", undefined, {
+    method: "POST",
+    body: {
+      schemaVersion: 1,
+      versionIds,
+      pageId,
+      lookbackDays: 180,
+      maxConversations: 500,
+      sideEffects: "DISABLED",
+    },
+  });
+}
+
+export async function rollbackPolicyPointer(
+  pointer: PolicyControlData["pointers"][number],
+  targetVersionId: string,
+): Promise<void> {
+  if (!pointer.pageId) throw new ApiError("Con trỏ chưa gắn với page.", 400);
+  await request<JsonRecord>("/policy/pointers/rollback", undefined, {
+    method: "POST",
+    body: {
+      artifact_key: pointer.key,
+      artifact_kind: pointer.kind,
+      page_id: pointer.pageId,
+      channel: pointer.channel,
+      target_version_id: targetVersionId,
+      expected_pointer_revision: pointer.revision,
+    },
+  });
 }
 
 export async function getOverview(signal?: AbortSignal): Promise<Overview> {

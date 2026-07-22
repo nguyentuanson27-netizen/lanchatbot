@@ -15,9 +15,11 @@ import {
   getOperations,
   getOverview,
   getOutreach,
+  getPolicyControl,
   getProductData,
   getQuality,
 } from "./api.js";
+import { bindPolicyControl, renderPolicyControl } from "./policy-control-ui.js";
 import {
   escapeHtml,
   formatDateTime,
@@ -38,6 +40,7 @@ import type {
   OperationsSummary,
   Overview,
   OutreachSummary,
+  PolicyControlData,
   ProductDataSummary,
   QualitySummary,
   ServiceHealth,
@@ -45,7 +48,7 @@ import type {
   PancakeTag,
 } from "./types.js";
 
-type RouteName = "overview" | "conversations" | "handoffs" | "outreach" | "quality" | "products" | "operations" | "audit";
+type RouteName = "overview" | "conversations" | "handoffs" | "outreach" | "quality" | "products" | "policy" | "operations" | "audit";
 
 interface NavigationItem {
   id: RouteName;
@@ -61,6 +64,7 @@ const navigation: NavigationItem[] = [
   { id: "outreach", label: "Hiệu quả upsale", description: "Phản hồi và chuyển đổi", icon: "spark" },
   { id: "quality", label: "Chất lượng AI", description: "Đánh giá câu trả lời", icon: "spark" },
   { id: "products", label: "Dữ liệu sản phẩm", description: "Giá, tồn, size, ETA", icon: "bag" },
+  { id: "policy", label: "Chính sách bán hàng", description: "Phiên bản, duyệt và rollback", icon: "shield" },
   { id: "operations", label: "Vận hành", description: "Worker và hàng đợi", icon: "pulse" },
   { id: "audit", label: "Nhật ký", description: "Hoạt động hệ thống", icon: "clock" },
 ];
@@ -90,6 +94,10 @@ const routeTitles: Record<RouteName, { title: string; subtitle: string }> = {
     title: "Dữ liệu sản phẩm",
     subtitle: "Độ sẵn sàng của giá, tồn kho, size và thời gian giao.",
   },
+  policy: {
+    title: "Chính sách bán hàng",
+    subtitle: "Quản lý phiên bản, chạy thử trên page test và rollback an toàn.",
+  },
   operations: {
     title: "Vận hành",
     subtitle: "Tình trạng xử lý tin nhắn và các dịch vụ nền.",
@@ -118,6 +126,7 @@ let handoffOpenCount = 0;
 let handoffStatus = "OPEN";
 let handoffReason = "";
 let handoffSource = "";
+let policyControlData: PolicyControlData | null = null;
 
 interface ControlAction {
   command: AdminCommandName;
@@ -924,6 +933,12 @@ async function loadCurrentPage(silent = true): Promise<void> {
       case "products":
         html = renderProducts(await getProductData(activeController.signal));
         break;
+      case "policy":
+        policyControlData = identity?.policyControl
+          ? await getPolicyControl(activeController.signal)
+          : { artifacts: [], pointers: [], simulations: [] };
+        html = renderPolicyControl(policyControlData, identity);
+        break;
       case "operations":
         html = renderOperations(await getOperations(activeController.signal));
         break;
@@ -935,6 +950,14 @@ async function loadCurrentPage(silent = true): Promise<void> {
     lastUpdatedAt = new Date().toISOString();
     updateRefreshTime();
     bindPageEvents();
+    if (currentRoute === "policy" && policyControlData) {
+      bindPolicyControl(
+        policyControlData,
+        identity,
+        () => loadCurrentPage(false),
+        (message) => showToast(message),
+      );
+    }
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") return;
     content.innerHTML = renderError(error);

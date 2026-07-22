@@ -26,6 +26,7 @@ class FakeAuthenticator implements AdminAuthenticator {
 class FakeStore implements AdminStore {
   async ready() { return true; }
   async controlReady() { return true; }
+  async policyControlReady() { return true; }
   async dashboard() { return { conversations: { total: 3 } }; }
   async listPages() { return [{ page_id: "1198992073286645" }]; }
   async pageHealth(_identity: AdminIdentity, pageId: string) {
@@ -82,6 +83,20 @@ class FakeStore implements AdminStore {
       : null;
   }
   async listAudit() { return { items: [], nextCursor: null }; }
+  async listArtifactVersions() { return { items: [], nextCursor: null }; }
+  async getArtifactVersion() { return null; }
+  async listArtifactEvents() { return []; }
+  async createArtifactVersion() { return { version_id: "018f1b72-0000-7000-8000-000000000010" }; }
+  async updateArtifactDraft(_identity: AdminIdentity, id: string, input: Parameters<AdminStore["updateArtifactDraft"]>[2]) {
+    return { version_id: id, revision: input.expectedRevision + 1, lifecycle: "DRAFT" };
+  }
+  async transitionArtifactVersion(_identity: AdminIdentity, id: string, input: Parameters<AdminStore["transitionArtifactVersion"]>[2]) {
+    return { version_id: id, revision: input.expectedRevision + 1, lifecycle: input.action };
+  }
+  async listActivePointers() { return []; }
+  async rollbackArtifactPointer() { return { pointer_id: "018f1b72-0000-7000-8000-000000000011" }; }
+  async createSimulation() { return { simulation_id: "018f1b72-0000-7000-8000-000000000012" }; }
+  async listSimulations() { return { items: [], nextCursor: null }; }
   async createConversationCommand(
     _identity: AdminIdentity,
     conversationId: string,
@@ -116,6 +131,8 @@ function create() {
     controlEnabled: true,
     historyEnabled: true,
     controlPageIds: ["1198992073286645"],
+    policyControlEnabled: true,
+    policyPageIds: ["1198992073286645"],
   });
 }
 
@@ -236,6 +253,8 @@ describe("Admin API", () => {
           conversation_control: true,
           history: true,
           control_page_ids: ["1198992073286645"],
+          policy_control: true,
+          policy_page_ids: ["1198992073286645"],
         },
       },
     });
@@ -303,6 +322,7 @@ describe("Admin API", () => {
       database: true,
       read_only: false,
       control_plane: true,
+      policy_control: true,
     });
     assert.equal(response.headers["cache-control"], "no-store");
     assert.equal(response.headers["x-frame-options"], "DENY");
@@ -362,6 +382,73 @@ describe("Admin API", () => {
       },
     });
     assert.equal(missingKey.statusCode, 400);
+    await app.close();
+  });
+
+  it("accepts only structured policy drafts and side-effect-free simulations", async () => {
+    const app = create();
+    const headers = {
+      "x-lana-admin-assertion": "valid",
+      origin: "https://admin.lanadesign.vn",
+    };
+    const sourceMetadata = {
+      source: "ADMIN",
+      sourceReference: null,
+      sourceVersion: "2026-07-22.1",
+      observedAt: "2026-07-22T08:00:00.000Z",
+    };
+    const content = {
+      schemaVersion: 1,
+      kind: "OFFER_POLICY",
+      scope: "SHOP_WIDE",
+      multiItem: {
+        minimumParentProductUnits: 2,
+        discountBps: 500,
+        setAndComboCountAsOne: true,
+      },
+      concessions: {
+        second: { freeShipping: true, fixedDiscountVnd: 0 },
+        final: { freeShipping: true, fixedDiscountVnd: 20_000 },
+        stackMultiItemWithSecond: true,
+        stackMultiItemWithFinal: true,
+        deduplicateFreeShipping: true,
+      },
+      sourceMetadata,
+    };
+    const created = await app.inject({
+      method: "POST",
+      url: "/admin/v1/policy/artifacts",
+      headers,
+      payload: { artifact_key: "lana.shopwide.offers", content },
+    });
+    assert.equal(created.statusCode, 201);
+
+    const arbitrary = await app.inject({
+      method: "POST",
+      url: "/admin/v1/policy/artifacts",
+      headers,
+      payload: {
+        artifact_key: "lana.unsafe",
+        content: { ...content, arbitrary_json: { code: "return true" } },
+      },
+    });
+    assert.equal(arbitrary.statusCode, 400);
+    assert.equal(arbitrary.json().code, "ADMIN_ARTIFACT_INVALID");
+
+    const simulation = await app.inject({
+      method: "POST",
+      url: "/admin/v1/policy/simulations",
+      headers,
+      payload: {
+        schemaVersion: 1,
+        versionIds: ["018f1b72-0000-7000-8000-000000000010"],
+        pageId: "1198992073286645",
+        lookbackDays: 180,
+        maxConversations: 500,
+        sideEffects: "DISABLED",
+      },
+    });
+    assert.equal(simulation.statusCode, 202);
     await app.close();
   });
 });
