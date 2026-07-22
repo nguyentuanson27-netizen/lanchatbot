@@ -175,6 +175,9 @@ export const ProductComponentRoleSchema = z.enum([
 ]);
 export type ProductComponentRole = z.infer<typeof ProductComponentRoleSchema>;
 
+export const ProductOfferKindV2Schema = z.enum(["DIRECT", "SET", "COMPONENT", "COMBO_3"]);
+export type ProductOfferKindV2 = z.infer<typeof ProductOfferKindV2Schema>;
+
 export const ProductIdentityV2Schema = z
   .object({
     parentProductId: z.string().trim().min(1).max(128),
@@ -182,7 +185,7 @@ export const ProductIdentityV2Schema = z
     brand: z.string().trim().min(1).max(128),
     active: z.boolean(),
     availableOfferKinds: z
-      .array(z.enum(["DIRECT", "SET", "COMPONENT", "COMBO_3"]))
+      .array(ProductOfferKindV2Schema)
       .min(1)
       .max(4),
     metadata: ProductIdentityMetadataV1Schema,
@@ -217,9 +220,43 @@ export const BomComponentV1Schema = z
   })
   .strict();
 
+export const ProductOfferCompositionV1Schema = z
+  .object({
+    offerKind: z.enum(["DIRECT", "SET", "COMBO_3"]),
+    /** Exact POS offer key used to build this composition. */
+    posOfferKey: z.string().trim().min(1).max(128),
+    componentProductIds: z.array(z.string().trim().min(1).max(128)).min(1).max(16),
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (new Set(value.componentProductIds).size !== value.componentProductIds.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["componentProductIds"],
+        message: "offer component IDs must be unique",
+      });
+    }
+    if (value.offerKind === "DIRECT" && value.componentProductIds.length !== 1) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["componentProductIds"],
+        message: "DIRECT requires exactly one component",
+      });
+    }
+    if (value.offerKind === "COMBO_3" && value.componentProductIds.length !== 3) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["componentProductIds"],
+        message: "COMBO_3 requires exactly three components",
+      });
+    }
+  });
+
 export const ProductBomV1Schema = z
   .object({
     components: z.array(BomComponentV1Schema).min(1).max(16),
+    /** Composition is offer-specific: a two-piece SET may coexist with a three-piece COMBO_3. */
+    offerCompositions: z.array(ProductOfferCompositionV1Schema).min(1).max(3),
     metadata: PosBomMetadataV1Schema,
   })
   .strict()
@@ -232,6 +269,24 @@ export const ProductBomV1Schema = z
         message: "BOM componentProductId values must be unique",
       });
     }
+    const compositionKinds = value.offerCompositions.map(({ offerKind }) => offerKind);
+    if (new Set(compositionKinds).size !== compositionKinds.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["offerCompositions"],
+        message: "offer composition kinds must be unique",
+      });
+    }
+    const componentIds = new Set(ids);
+    value.offerCompositions.forEach((composition, index) => {
+      if (composition.componentProductIds.some((id) => !componentIds.has(id))) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["offerCompositions", index, "componentProductIds"],
+          message: "offer composition may only reference BOM components",
+        });
+      }
+    });
   });
 
 export const VndPriceV1Schema = z
@@ -301,6 +356,9 @@ export const ProductVariantInventoryV2Schema = z
   .object({
     variantId: z.string().trim().min(1).max(128),
     sku: z.string().trim().min(1).max(128),
+    offerKind: ProductOfferKindV2Schema,
+    /** Exact POS offer key that produced the row; never inferred from display text. */
+    posOfferKey: z.string().trim().min(1).max(128),
     componentProductId: z.string().trim().min(1).max(128).nullable(),
     color: z.string().trim().min(1).max(64).nullable(),
     size: z.string().trim().min(1).max(32).nullable(),
@@ -469,19 +527,15 @@ export const ProductFactsV2Schema = z
     }
 
     const offerKinds = new Set(value.identity.availableOfferKinds);
-    if (offerKinds.has("COMBO_3") && value.bom.components.length !== 3) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["identity", "availableOfferKinds"],
-        message: "COMBO_3 requires a three-component BOM",
-      });
-    }
-    if (offerKinds.has("DIRECT") && value.bom.components.length !== 1) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["identity", "availableOfferKinds"],
-        message: "DIRECT requires a one-component BOM",
-      });
+    const compositionKinds = new Set(value.bom.offerCompositions.map(({ offerKind }) => offerKind));
+    for (const offerKind of ["DIRECT", "SET", "COMBO_3"] as const) {
+      if (offerKinds.has(offerKind) !== compositionKinds.has(offerKind)) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["bom", "offerCompositions"],
+          message: `${offerKind} availability and offer composition must agree`,
+        });
+      }
     }
     if (value.pricing.comboThreePiecePrice !== null && !offerKinds.has("COMBO_3")) {
       context.addIssue({
@@ -511,20 +565,26 @@ export const ProductFactsV2Schema = z
         message: "componentPrices must contain every BOM component exactly once; unavailable prices use null",
       });
     }
-    if (value.pricing.comboThreePiecePrice !== null && value.bom.components.length !== 3) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["pricing", "comboThreePiecePrice"],
-        message: "comboThreePiecePrice is only valid for a three-component BOM",
-      });
-    }
-
     value.inventory.variants.forEach((variant, index) => {
       if (variant.componentProductId !== null && !bomIds.has(variant.componentProductId)) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["inventory", "variants", index, "componentProductId"],
           message: "inventory component must exist in the BOM",
+        });
+      }
+      if (variant.offerKind === "COMPONENT" && variant.componentProductId === null) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["inventory", "variants", index, "componentProductId"],
+          message: "component inventory must identify its exact BOM component",
+        });
+      }
+      if (variant.offerKind !== "COMPONENT" && variant.componentProductId !== null) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["inventory", "variants", index, "componentProductId"],
+          message: "non-component inventory is scoped by offer composition, not a component",
         });
       }
     });
@@ -595,6 +655,8 @@ export const MultiItemOfferPolicyV1Schema = z
   .object({
     minimumProductCount: z.number().int().min(2).max(100),
     discountBps: z.number().int().min(1).max(10_000),
+    countingUnit: z.literal("PARENT_PRODUCT_UNIT"),
+    setAndComboCountAsOne: z.literal(true),
     scope: z.literal("SHOP_WIDE"),
     metadata: PolicyMetadataV1Schema,
   })
@@ -612,6 +674,13 @@ export const NegotiationPolicyV1Schema = z
       .object({
         freeShipping: z.literal(true),
         fixedDiscountVnd: z.number().int().positive(),
+      })
+      .strict(),
+    stacking: z
+      .object({
+        multiItemDiscountWithSecondConcession: z.literal(true),
+        multiItemDiscountWithFinalConcession: z.literal(true),
+        deduplicateFreeShipping: z.literal(true),
       })
       .strict(),
     scope: z.literal("SHOP_WIDE"),
