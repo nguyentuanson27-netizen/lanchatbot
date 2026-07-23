@@ -198,3 +198,12 @@ Các workflow active khác trên cùng n8n phục vụ page/brand hoặc automat
 - Không commit secret hoặc workflow có token hard-code.
 - Không dùng symlink `current` như bằng chứng duy nhất; phải đối chiếu service image digest.
 - Không gọi trạng thái khách xác nhận là đơn POS đã tạo nếu chưa có `ORDER_CREATED` từ POS.
+
+## Admin manual image intake r14
+
+- Release live: `/opt/lana-chatbot/releases/20260724-admin-manual-image-intake-r14`, source commit `8ee39ac936b3d2262c6ebbed8d73f5f062900a13`.
+- Admin API, Admin Web và P2.3B dùng image digest `sha256:889e3c88d0e7fc66db3079072b6cc2a7e083a56ed0c72d622437aeab6b429275`; cả ba healthy và restart count 0 sau cutover.
+- File upload được lưu tại volume Nginx Proxy Manager `public-assets/products` và chỉ public trên host `admin.lanadesign.vn` qua `/lana-public/products/`.
+- `manual_image_intake` là hàng đợi staging. Upload không đi thẳng Qdrant; P2.3B ghi `image_registry`, quản trị viên duyệt, rồi P2.3C mới publish.
+- Meta token được xác minh qua Graph API đúng page `1198992073286645`. Bộ đếm canary 100 inbound thật bắt đầu lúc `2026-07-23T19:14:08Z`; phạm vi page không đổi.
+- Rollback ứng dụng về r13.4 không yêu cầu xóa file, Redis hoặc PostgreSQL; giữ lại intake/audit để phân tích.

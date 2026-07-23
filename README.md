@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260723-realtime-wave23-canary-r12`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260724-admin-manual-image-intake-r14`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -14,7 +14,7 @@ Không sửa source trực tiếp trong `/opt/lana-chatbot/current`. Mọi thay 
 
 Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/lana-chatbot/repository`. Agent phải đọc `AGENTS.md` trước khi thao tác; working tree này không phải runtime production. User `lana-deploy` có deploy key GitHub read-only chỉ cho repository này; được phép `fetch` tag/commit nhưng không được push.
 
-## Trạng thái production ngày 2026-07-23
+## Trạng thái production ngày 2026-07-24
 
 - API webhook tiếp tục chạy image `lana-chatbot-app:inbound-debounce-r1`.
 - Realtime page test giữ r13.1 với ProductFactsV2, Media Selector V2, profile/variant/multi-fact; Size Chart scheduler ở candidate r13.3 với pre-check idempotent. Hard gate vẫn chỉ cho page `1198992073286645`.
@@ -42,12 +42,14 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - Lịch sử tư vấn được chiếu sang Redis 20 ngày và lưu bản ẩn danh trong PostgreSQL 6 tháng.
 - Admin dùng Authentik, Google account và MFA.
 - App-native workers đang sở hữu POS snapshot và P2.3A/B/C.
+- Admin có mục `Ảnh sản phẩm`: upload JPG/PNG/WebP tối đa 8 MB lên VPS, ghi idempotent vào tab `manual_image_intake`, sau đó P2.3B đưa metadata vào `image_registry` ở trạng thái chờ duyệt. P2.3C chỉ publish các hàng `APPROVED + ACTIVE` sang Qdrant.
+- Canary Messenger 100 inbound thật bắt đầu lúc `2026-07-23T19:14:08Z` (`2026-07-24 02:14:08 +07:00`) cho duy nhất page `1198992073286645`; không tạo inbound giả.
 - Các workflow n8n P2.2/P2.3 tương ứng đang inactive; không được kích hoạt đồng thời với app-native worker.
 - Timer `lana-p23-daily.timer` đang `disabled/inactive`.
 - PostgreSQL đã áp dụng migration đến `0019_customer_profile_wave2`; migration 0019 bổ sung projection hồ sơ số đo 48 giờ theo pseudonymous customer key và tương thích ngược.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Admin funnel read grant r13.4](deploy/manifests/20260724-admin-funnel-read-grant-r13.4.json); r13.3 là release gần nhất để rollback.
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Admin manual image intake r14](deploy/manifests/20260724-admin-manual-image-intake-r14.json); r13.4 là release gần nhất để rollback.
 
 ## Kiến trúc dữ liệu
 

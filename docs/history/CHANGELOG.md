@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-24 — Admin manual image intake r14
+
+- Thêm mục `Ảnh sản phẩm` trong Admin để upload JPG/PNG/WebP tối đa 8 MB trực tiếp lên vùng lưu trữ VPS.
+- Kiểm tra MA_SP phải tồn tại trong `product_registry`, kiểm tra MIME/magic bytes, đặt tên theo SHA-256 và chống ghi trùng bằng `INTAKE_ID`.
+- Tự tạo/ghi tab `manual_image_intake`; P2.3B đọc ảnh manual, bổ sung ngữ cảnh sản phẩm và ghi sang `image_registry` ở trạng thái chờ duyệt.
+- Giữ approval gate: chỉ `APPROVED + ACTIVE` mới được P2.3C publish sang Qdrant.
+- Public URL ảnh dùng đường dẫn host-guarded `/lana-public/products/`; giao diện Admin vẫn nằm sau Authentik.
+- Build Node 22 đạt; Admin API `26/26`, Admin Web `23/23`, worker `244/244` test và toàn bộ typecheck liên quan đều đạt.
+- Meta Page Access Token mới đã được xác minh đúng page `1198992073286645`. Canary 100 inbound thật bắt đầu lúc `2026-07-23T19:14:08Z`.
+
 ## 2026-07-24 — Admin funnel read grant r13.4
 
 - Cấp riêng SELECT trên ledger ẩn danh `sales_cycle_events` cho `lana_admin_readonly` để dashboard đọc funnel.

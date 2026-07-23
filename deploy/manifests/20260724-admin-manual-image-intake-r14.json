@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-24T02:14:08+07:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "8ee39ac936b3d2262c6ebbed8d73f5f062900a13",
+  "releaseTag": "20260724-admin-manual-image-intake-r14",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260724-admin-manual-image-intake-r14",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260724-admin-funnel-read-grant-r13.4",
+  "pageAllowlist": ["1198992073286645"],
+  "images": {
+    "adminApi": "lana-chatbot-app:admin-manual-image-intake-r14@sha256:889e3c88d0e7fc66db3079072b6cc2a7e083a56ed0c72d622437aeab6b429275",
+    "adminWeb": "lana-chatbot-app:admin-manual-image-intake-r14@sha256:889e3c88d0e7fc66db3079072b6cc2a7e083a56ed0c72d622437aeab6b429275",
+    "p23b": "lana-chatbot-app:admin-manual-image-intake-r14@sha256:889e3c88d0e7fc66db3079072b6cc2a7e083a56ed0c72d622437aeab6b429275"
+  },
+  "composeSha256": "f814cd8bef7372053a0f629564f8eb04c6c44e1c708f45176eeb64466d5c9ea7",
+  "manualImageIntake": {
+    "sheet": "manual_image_intake",
+    "storage": "/var/lib/docker/volumes/n8n-docker_npm_data/_data/public-assets/products",
+    "publicPath": "https://admin.lanadesign.vn/lana-public/products/",
+    "maxBytes": 8388608,
+    "qdrantApprovalGate": "APPROVED_AND_ACTIVE"
+  },
+  "verification": {
+    "build": "PASS",
+    "adminApiTests": "26_OF_26_PASS",
+    "adminWebTests": "23_OF_23_PASS",
+    "workerTests": "244_OF_244_PASS",
+    "serviceHealth": "3_OF_3_HEALTHY",
+    "metaPageToken": "VERIFIED_PAGE_1198992073286645",
+    "canaryInboundTarget": 100,
+    "canaryStartedAt": "2026-07-23T19:14:08Z",
+    "canaryStatus": "RUNNING_REAL_INBOUND"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260724-admin-funnel-read-grant-r13.4",
+    "deleteIntakeData": false,
+    "deleteProductFiles": false,
+    "dataDeletionRequired": false
+  }
+}
