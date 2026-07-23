@@ -935,10 +935,10 @@ Agent chỉ đổi trạng thái sau khi có bằng chứng. Giá trị hợp l�
 
 | Hạng mục | Trạng thái | Branch/PR | Commit/tag | Test evidence | Deploy evidence | Ghi chú |
 |---|---|---|---|---|---|---|
-| 0.1 NO_REPLY buying signal | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | Chưa commit | buying-signal 18; sales-cycle 6; golden 3; worker suite 197 pass | Chưa deploy; `REALTIME_BUYING_SIGNAL_GUARD_V1=false` | P0 |
-| 0.2 Vertex 401/single-flight/jitter | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | Chưa commit | Vertex 16 pass; 3/10/100 concurrent; 401/429/503/jitter | Chưa deploy | P0 |
-| 0.3 Golden transcripts | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | Chưa commit | runtime 38 + golden fixture IDs 3; toàn repo 696 test pass | Chưa deploy | P0 |
-| 0.4 Funnel/operational telemetry | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | Chưa commit | contract 3; DB atomic/idempotent 7; worker golden 3 | Chưa deploy; `REALTIME_DECISION_TELEMETRY_ENABLED=false` | P0/P1 |
+| 0.1 NO_REPLY buying signal | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | `bb56cae` | buying-signal 18; sales-cycle 6; golden 3; worker suite 197 pass | Chưa deploy; `REALTIME_BUYING_SIGNAL_GUARD_V1=false` | P0 |
+| 0.2 Vertex 401/single-flight/jitter | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | `bb56cae` | Vertex 16 pass; 3/10/100 concurrent; 401/429/503/jitter | Chưa deploy | P0 |
+| 0.3 Golden transcripts | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | `bb56cae` | runtime 38 + golden fixture IDs 3; toàn repo 696 test pass | Chưa deploy | P0 |
+| 0.4 Funnel/operational telemetry | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | `bb56cae` | contract 3; DB atomic/idempotent 7; worker golden 3 | Chưa deploy; `REALTIME_DECISION_TELEMETRY_ENABLED=false` | P0/P1 |
 | 1.1 GroundedReplyDraftV1 | NOT_STARTED | — | — | — | — |  |
 | 1.2 Verified fact assembler | NOT_STARTED | — | — | — | — |  |
 | 1.3 Business guard | NOT_STARTED | — | — | — | — |  |
