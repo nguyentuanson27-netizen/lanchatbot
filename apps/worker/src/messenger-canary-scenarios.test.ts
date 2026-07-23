@@ -141,7 +141,9 @@ describe("30 deterministic Messenger canary scenarios", () => {
       requestedFacts,
     }))).toEqual([
       { raw: "CB182", requestedFacts: ["PRICE"] },
-      { raw: "SV695", requestedFacts: ["SIZE"] },
+      // "còn size nào" asks both whether a sellable variant exists and which
+      // size it is, so both facts must remain scoped to SV695.
+      { raw: "SV695", requestedFacts: ["STOCK", "SIZE"] },
     ]);
   });
 

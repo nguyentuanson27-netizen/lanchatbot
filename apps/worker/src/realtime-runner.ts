@@ -871,14 +871,14 @@ export function extractVariantMentions(
   const sizeOnly = normalized.trim().match(
     /^(XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|\d{2,3})$/iu,
   );
-  const colorMatch = normalized.match(
-    /(?:\bmau|\bcolor)\s*[:=]?\s*([a-z][a-z\s-]{0,30}?)(?=\s+(?:size|sz|co)\b|[,.!?;\n]|$)/iu,
+  const colorMatch = text.normalize("NFC").match(
+    /(?:\bmàu|\bcolor)\s*[:=]?\s*([\p{L}][\p{L}\s-]{0,30}?)(?=\s+(?:size|sz|cỡ)\b|[,.!?;\n]|$)/iu,
   );
   return {
     // The customer's text is the only source of variant evidence. Model
     // output may guide intent handling but can never invent a size or colour.
-    size: labelledSize?.[1]?.trim() ?? sizeOnly?.[1]?.trim() ?? null,
-    color: colorMatch?.[1]?.trim() ?? null,
+    size: (labelledSize?.[1]?.trim() ?? sizeOnly?.[1]?.trim() ?? null)?.toUpperCase() ?? null,
+    color: colorMatch?.[1]?.trim().toLocaleLowerCase("vi-VN") ?? null,
   };
 }
 
