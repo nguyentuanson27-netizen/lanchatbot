@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260723-product-copy-text-first-r7`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260723-sheets-media-policy-routing-r9-1`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -17,7 +17,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 ## Trạng thái production ngày 2026-07-23
 
 - API webhook tiếp tục chạy image `lana-chatbot-app:inbound-debounce-r1`.
-- Admin API, Admin Web và Simulation Worker chạy image `lana-chatbot-app:runtime-policy-published-r4`; realtime chạy image `lana-chatbot-app:product-copy-text-first-r7`; POS snapshot worker giữ image `lana-chatbot-app:sales-cycle-production-r6`.
+- Admin Web, realtime và P2.3B metadata staging chạy image `lana-chatbot-app:sheets-media-policy-routing-r9`; Admin API và Simulation Worker giữ image `lana-chatbot-app:runtime-policy-published-r4`; POS snapshot worker giữ image `lana-chatbot-app:sales-cycle-production-r6`.
 - Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
 - Bốn policy runtime (shop, offer, closing, payment) đang trỏ tới các version `PUBLISHED` bất biến; mọi lần chuyển trạng thái đều có audit.
 - Chu trình bán hàng production đã nối cart 48 giờ, thương lượng deterministic, giảm 5% từ hai sản phẩm, freeship/giảm cuối theo policy, thu thông tin nhận hàng, order preview và `PURCHASE_CONFIRMED`.
@@ -28,6 +28,10 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - Hậu mãi ngắt sớm trước product search/model, gửi đúng một câu giữ chân qua Meta Outbox rồi handoff/gắn tag Vận Đơn. Handoff khác vẫn im lặng.
 - Tin nhắn khách được gom sau 5 giây yên lặng; webhook trùng không kéo dài cửa sổ chờ.
 - Báo giá dùng tên sản phẩm từ Qdrant; `DESCRIPTION_XML` chỉ làm ngữ cảnh cho câu mô tả form/chất liệu. Text được gửi trước, ảnh đủ điều kiện gửi sau 0,5 giây và vẫn bị chặn bởi thứ tự Outbox.
+- Ý định “ảnh cận chất/cận vải” được định tuyến rõ sang nhóm `DETAIL`, không còn rơi về ảnh `GENERIC`.
+- P2.3B retry Google Sheets tối đa ba lần với khoảng chờ 2–5–15 giây. Nếu cả chuỗi vẫn lỗi, worker chạy lại sau 5 phút; thành công mới trở về lịch 24 giờ.
+- Admin phân biệt lỗi gần nhất (`degraded`) với mất heartbeat quá 26 giờ (`down`); P2.3B đã bật status reporting vào PostgreSQL.
+- Câu hỏi chính sách trước mua được tách khỏi hậu mãi. Khi chưa có policy đổi/trả đã duyệt, app fail-closed sang Nhân viên; yêu cầu sau mua vẫn gửi câu giữ chân và gắn tag Vận Đơn.
 - Durable Inbox, Meta Outbox, Pancake Tag Outbox và generation guard đang hoạt động.
 - Lịch sử tư vấn được chiếu sang Redis 20 ngày và lưu bản ẩn danh trong PostgreSQL 6 tháng.
 - Admin dùng Authentik, Google account và MFA.
@@ -37,7 +41,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - PostgreSQL đã áp dụng migration đến `0017_sales_cycle_runtime`.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest bất biến mới nhất nằm tại [release manifest](deploy/manifests/20260723-image-delay-500ms-r8.json).
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest bất biến mới nhất nằm tại [release manifest](deploy/manifests/20260723-sheets-media-policy-routing-r9.json).
 
 ## Kiến trúc dữ liệu
 

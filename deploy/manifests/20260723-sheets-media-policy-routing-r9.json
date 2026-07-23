@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-23T12:44:22+07:00",
+  "environment": "production",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceCommit": "e336cf9",
+  "releaseTag": "20260723-sheets-media-policy-routing-r9",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260723-sheets-media-policy-routing-r9-1",
+  "pageAllowlist": ["1198992073286645"],
+  "image": {
+    "name": "lana-chatbot-app:sheets-media-policy-routing-r9",
+    "digest": "sha256:b1876ac7aabcc043b1a99d3b85cf508743cbc615b140573da5a57fcd9133e727"
+  },
+  "composeSha256": "5d7f8055be081631de1954aa33f867c5d84d94271b52d7d758354bcfd3765d12",
+  "servicesChanged": [
+    "realtime-worker",
+    "admin-web",
+    "p23b-metadata-staging"
+  ],
+  "configuration": {
+    "googleSheetsRetryDelaysMs": [2000, 5000, 15000],
+    "p23bErrorRetryMs": 300000,
+    "p23bNormalIntervalMs": 86400000,
+    "workerDisconnectThresholdHours": 26,
+    "detailIntentTerms": ["cận chất", "cận vải"],
+    "preSalePolicySeparatedFromPostSale": true
+  },
+  "verification": {
+    "monorepoCheck": "PASS",
+    "workerTests": "163_PASS",
+    "p23bCycle": {
+      "staged": 37,
+      "failed": 0,
+      "remaining": 0,
+      "imageRegistryRows": 954
+    },
+    "p23bStatusReporting": true,
+    "realtimeHealth": "PASS",
+    "adminWebHealth": "PASS",
+    "p23bHealth": "PASS",
+    "n8nRestarted": false,
+    "posSnapshotRestarted": false,
+    "adminApiRestarted": false
+  },
+  "migrations": [],
+  "rollback": {
+    "previousRelease": "/opt/lana-chatbot/releases/20260723-product-copy-text-first-r7",
+    "dataDeletionRequired": false
+  }
+}

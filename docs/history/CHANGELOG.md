@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-23 — Sheets, media intent và policy routing r9
+
+- Retry Google Sheets ba lần với backoff 2–5–15 giây; cycle P2.3B thất bại được chạy lại sau 5 phút thay vì chờ 24 giờ.
+- Admin tách “Lỗi gần nhất” khỏi “Mất kết nối”; P2.3B ghi heartbeat/trạng thái vào PostgreSQL.
+- Sửa “ảnh cận chất/cận vải” thành intent `DETAIL`; nguyên nhân ảnh sai là classifier rơi về `GENERIC`, không phải phân loại trong `image_registry`.
+- Tách câu hỏi chính sách trước mua khỏi yêu cầu hậu mãi thực tế; chỉ hậu mãi mới dùng holding reply và tag Vận Đơn.
+- Production cycle P2.3B xử lý thành công 37 ảnh, 0 lỗi, không còn pending. Realtime, Admin Web và P2.3B healthy; n8n, POS snapshot và Admin API không bị restart.
+- Toàn bộ monorepo check và `163/163` worker test đạt; không có migration.
+
 ## 2026-07-23 — image delay 500 ms config r8
 
 - Giảm khoảng nghỉ giữa text và ảnh từ 1,5 giây xuống 0,5 giây.

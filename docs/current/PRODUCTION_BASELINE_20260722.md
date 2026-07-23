@@ -5,8 +5,8 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260723-product-copy-text-first-r7`.
-- Compose SHA-256: `a743e3070d8f910e99542ba671018c06dd17ba10d4a1bde4646da02897643c42`.
+- Current release: `/opt/lana-chatbot/releases/20260723-sheets-media-policy-routing-r9-1`.
+- Compose SHA-256: `5d7f8055be081631de1954aa33f867c5d84d94271b52d7d758354bcfd3765d12`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất: `0017_sales_cycle_runtime`.
@@ -14,7 +14,17 @@
 
 Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời điểm kiểm kê. Danh sách image digest đầy đủ nằm trong release manifest.
 
-Admin API, Admin Web và Admin Simulation Worker đang chạy image `lana-chatbot-app:runtime-policy-published-r4`. Realtime chạy image `lana-chatbot-app:product-copy-text-first-r7` (`sha256:f8c26c5bb0e87e0bc49da55ea9caf4e6174a3e5108f315d49907f5668a206c44`); POS snapshot worker giữ image `lana-chatbot-app:sales-cycle-production-r6`. API webhook, delivery worker và n8n không đổi.
+Admin Web, realtime và P2.3B metadata staging đang chạy image `lana-chatbot-app:sheets-media-policy-routing-r9` (`sha256:b1876ac7aabcc043b1a99d3b85cf508743cbc615b140573da5a57fcd9133e727`). Admin API và Admin Simulation Worker giữ image `lana-chatbot-app:runtime-policy-published-r4`; POS snapshot worker giữ image `lana-chatbot-app:sales-cycle-production-r6`. API webhook, delivery worker và n8n không đổi.
+
+## Sheets, media intent và policy routing r9
+
+- Google Sheets client retry các request đọc/batch-update an toàn tối đa ba lần, chờ lần lượt 2, 5 và 15 giây. Append và tạo tab không blind-retry để tránh ghi trùng.
+- P2.3B dùng chu kỳ lỗi 5 phút; chỉ sau một cycle thành công mới trở lại lịch thường 24 giờ.
+- Lượt xác minh production hoàn tất `37/37`, lỗi `0`, `remaining=0`, `image_registry_rows=954`, sau đó cycle kế tiếp trả `NO_PENDING_WORK`.
+- P2.3B bật heartbeat PostgreSQL. Admin hiển thị lỗi gần nhất là `degraded`; chỉ coi là mất kết nối khi trạng thái `down` hoặc không có heartbeat quá 26 giờ.
+- Cụm “ảnh cận chất/cận vải” được nhận là `DETAIL`. Kiểm tra Qdrant cho SD398 xác nhận có hai ảnh `DETAIL/MATERIAL_CLOSEUP`; lỗi trước đây nằm ở intent classifier chứ không nằm ở `image_registry`.
+- Câu hỏi policy trước mua không còn bị gắn Vận Đơn. Yêu cầu có bằng chứng sau mua hoặc hành động trên đơn mới vào hậu mãi; policy trước mua chưa có nội dung đổi/trả đã duyệt sẽ fail-closed sang Nhân viên.
+- Toàn bộ monorepo check đạt; worker có `163/163` test pass. Không có migration mới.
 
 ## Product copy và thứ tự gửi r7
 
