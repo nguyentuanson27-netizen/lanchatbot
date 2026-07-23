@@ -720,7 +720,7 @@ services:
     command: ["node", "apps/worker/dist/size-chart-server.js"]
     environment:
       NODE_ENV: production
-      DATABASE_URL_FILE: /run/secrets/batch_status_database_url
+      DATABASE_URL_FILE: /run/secrets/size_chart_database_url
       DATA_INGESTION_V2_SHEET_ID: 1VGNU55l9wcDh5RFV07f6JdiV7__FM9uGaVCDThUUgS0
       GOOGLE_SHEETS_CREDENTIAL_FILE: /run/secrets/vertex_google_api
       VERTEX_PROJECT_ID: project-d44e0453-82e8-4ea2-a9d
@@ -736,7 +736,7 @@ services:
       SIZE_CHART_IMAGE_MAX_WIDTH: "1600"
     secrets:
       - vertex_google_api
-      - batch_status_database_url
+      - size_chart_database_url
     depends_on:
       postgres:
         condition: service_healthy
@@ -1054,3 +1054,5 @@ secrets:
     file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/pancake_pos_shops
   rembg_auth_header:
     file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/rembg_auth_header
+  size_chart_database_url:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/size_chart_database_url
