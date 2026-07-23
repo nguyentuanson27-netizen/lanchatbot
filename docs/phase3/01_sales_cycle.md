@@ -1,6 +1,6 @@
 # Giai đoạn 3 — Chu trình bán hàng
 
-Trạng thái: contract, canonical CartV1, negotiation/handoff engine, state machine và cổng persistence CAS đã được triển khai và kiểm thử. Chưa có adapter PostgreSQL/outbox production và chưa deploy VPS.
+Trạng thái: đã nối production trên page test `1198992073286645`. PostgreSQL adapter, atomic inbox/outbox commit, POS/Redis catalog adapter, payment policy và realtime orchestration đều đang chạy trong release `20260723-sales-cycle-production-r6`.
 
 ## Luồng chuẩn
 
@@ -62,9 +62,11 @@ Hỏi giá
 - Payment policy production đã được chủ shop chốt: MB Bank, số tài khoản `118619999`, chủ tài khoản `CÔNG TY TNHH QUỐC TẾ THƯƠNG MẠI LAS`; ảnh QR phải được upload thành asset nội bộ có URL/version trước khi nối adapter production.
 - Sau `PURCHASE_CONFIRMED`, nếu khách chọn chuyển khoản, runtime trả text có cấu trúc và QR; sau đó chuyển quyền cho nhân viên.
 
-## Điểm nối production tiếp theo
+## Trạng thái production
 
-1. Adapter PostgreSQL additive cho cart/order-preview/confirmation/negotiation theo `SalesCycleStateRepositoryV1`, CAS và TTL.
-2. Hiện thực transaction ghi state + funnel event + Pancake tag outbox atomically theo cổng đã khóa.
-3. Adapter đưa ProductFactsV2, SizeRecommendation và payment policy thật vào runtime.
-4. Shadow replay lịch sử, sau đó canary page test trước khi mở Meta Outbox cho chu trình mới.
+1. `sales_cycle_states` lưu encrypted envelope, revision/CAS và TTL 48 giờ; `sales_cycle_events` là append-only.
+2. Conversation state, sales state, funnel event, Meta Outbox và Pancake tag intent được commit atomically.
+3. POS snapshot thật cấp BOM/giá/tồn/size/fulfillment qua Redis; Qdrant không được dùng làm nguồn giá hoặc tồn.
+4. Runtime Policy Resolver đang đọc 4 artifact `PUBLISHED`, gồm `PAYMENT_POLICY`.
+5. Realtime và POS snapshot worker đang chạy image `lana-chatbot-app:sales-cycle-production-r6`, chỉ page test được phép outbound.
+6. Smoke test Docker production đạt 71/71; n8n không bị restart hoặc thay ownership trong release này.

@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260723-realtime-context-handoff-r5`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260723-sales-cycle-production-r6`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -17,9 +17,12 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 ## Trạng thái production ngày 2026-07-23
 
 - API webhook tiếp tục chạy image `lana-chatbot-app:inbound-debounce-r1`.
-- Admin API, Admin Web và Simulation Worker chạy image `lana-chatbot-app:runtime-policy-published-r4`; realtime worker chạy image `lana-chatbot-app:realtime-context-handoff-r5`.
+- Admin API, Admin Web và Simulation Worker chạy image `lana-chatbot-app:runtime-policy-published-r4`; realtime và POS snapshot worker chạy image `lana-chatbot-app:sales-cycle-production-r6`.
 - Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
-- Ba policy lõi (shop, offer, closing) đang trỏ tới các version `PUBLISHED` bất biến; mọi lần chuyển trạng thái đều có audit.
+- Bốn policy runtime (shop, offer, closing, payment) đang trỏ tới các version `PUBLISHED` bất biến; mọi lần chuyển trạng thái đều có audit.
+- Chu trình bán hàng production đã nối cart 48 giờ, thương lượng deterministic, giảm 5% từ hai sản phẩm, freeship/giảm cuối theo policy, thu thông tin nhận hàng, order preview và `PURCHASE_CONFIRMED`.
+- COD và chuyển khoản MB Bank được đọc từ `PAYMENT_POLICY`; app không hard-code tài khoản. Ảnh bill luôn chuyển nhân viên kiểm tra.
+- Sales-cycle state được mã hóa trong PostgreSQL; event là append-only. Giá/tồn/size/ETA được kiểm tra lại trước preview và xác nhận.
 - Simulation Worker chạy side-effect-free. Baseline trước publish là `HISTORICAL_ACTUAL` và kết quả `INSUFFICIENT_EVIDENCE`; owner đã chủ động override điều kiện này khi phát hành r4.
 - Câu hỏi tiếp nối về ảnh/giá/tồn/size/ETA dùng `state.currentProductId` đã xác minh khi khách không nêu mã mới; mã mới không tìm thấy không được lùi về sản phẩm cũ.
 - Hậu mãi ngắt sớm trước product search/model, gửi đúng một câu giữ chân qua Meta Outbox rồi handoff/gắn tag Vận Đơn. Handoff khác vẫn im lặng.
@@ -30,10 +33,10 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - App-native workers đang sở hữu POS snapshot và P2.3A/B/C.
 - Các workflow n8n P2.2/P2.3 tương ứng đang inactive; không được kích hoạt đồng thời với app-native worker.
 - Timer `lana-p23-daily.timer` đang `disabled/inactive`.
-- PostgreSQL đã áp dụng migration đến `0016_admin_simulation_worker`.
+- PostgreSQL đã áp dụng migration đến `0017_sales_cycle_runtime`.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest bất biến mới nhất nằm tại [release manifest](deploy/manifests/20260723-realtime-context-handoff-r5.json).
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest bất biến mới nhất nằm tại [release manifest](deploy/manifests/20260723-sales-cycle-production-r6.json).
 
 ## Kiến trúc dữ liệu
 

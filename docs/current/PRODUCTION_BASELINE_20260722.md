@@ -5,28 +5,42 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260723-realtime-context-handoff-r5`.
-- Compose SHA-256: `4a4b66ef0f19d6873ed1cfcd48cc479c6a56f077f7b9d86f020c245186b81072`.
+- Current release: `/opt/lana-chatbot/releases/20260723-sales-cycle-production-r6`.
+- Compose SHA-256: `da3da8e9f22d8207f414d42dae0f5ff9918f743d6470fa4c8dbc5360a9dde650`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
-- Migration mới nhất: `0016_admin_simulation_worker`.
+- Migration mới nhất: `0017_sales_cycle_runtime`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
 Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời điểm kiểm kê. Danh sách image digest đầy đủ nằm trong release manifest.
 
-Admin API, Admin Web và Admin Simulation Worker đang chạy image `lana-chatbot-app:runtime-policy-published-r4`. Realtime worker chạy image `lana-chatbot-app:realtime-context-handoff-r5` (`sha256:965bc95a3c703e1ab96fb521db0c961bcf639e99776bb340792f191abb2d95f3`). API webhook và delivery worker không đổi; n8n không bị restart trong release này.
+Admin API, Admin Web và Admin Simulation Worker đang chạy image `lana-chatbot-app:runtime-policy-published-r4`. Realtime và POS snapshot worker chạy image `lana-chatbot-app:sales-cycle-production-r6` (`sha256:cae918d5dc9d505ccdd88b670abdc5b337b169cabe36cd33220fd6c475a054d2`). API webhook và delivery worker không đổi; n8n không bị restart trong release này.
 
 ## Runtime Policy published
 
-- Ba policy lõi `SHOP_POLICY`, `OFFER_POLICY`, `CLOSING_STRATEGY` đã qua `DRAFT → VALIDATED → APPROVED → CANARY_SHADOW → CANARY_LIVE → PUBLISHED` bằng Admin API có audit.
+- Bốn policy runtime `SHOP_POLICY`, `OFFER_POLICY`, `CLOSING_STRATEGY`, `PAYMENT_POLICY` đã qua `DRAFT → VALIDATED → APPROVED → CANARY_SHADOW → CANARY_LIVE → PUBLISHED` bằng Admin API có audit.
 - Kênh `PUBLISHED` chỉ áp dụng cho page `1198992073286645`; runtime hard-gate cả `CANARY_LIVE` và `PUBLISHED` theo đúng page này.
 - `CANARY_SHADOW` đã được xác nhận không ảnh hưởng outbound. `CANARY_LIVE` chỉ đi vào helper deterministic; policy không được đưa vào prompt/model.
 - Rollback pointer và roll-forward đã pass; last-known-good pass khi giả lập nguồn PostgreSQL lỗi.
-- Có `3` pointer active `PUBLISHED`; các pointer `CANARY_LIVE` cũ đã được thay thế.
+- Có `4` pointer active `PUBLISHED`; các pointer canary cũ đã được thay thế.
 - Admin và runtime đều bật cờ publish. Smoke test resolver trả `LIVE_OUTBOUND` cho page test và `PUBLISHED_PAGE_FORBIDDEN` cho page khác.
 - Simulation trước publish dùng baseline `HISTORICAL_ACTUAL` và trả `INSUFFICIENT_EVIDENCE` với `0` cuộc hội thoại đánh giá được. Owner đã chủ động override blocker này trong release r4; kết quả được giữ lại để audit.
 - Backup trước migration: `/opt/lana-chatbot/backups/20260722-runtime-policy-canary-r3/lana_chatbot_pre_0015_0016.dump`, SHA-256 `13717540cfa2a85b19ab0127133a5f34d62dafc1bad1251e991b4d8cc3363fdd`.
 - Restore test đã chạy đủ chu kỳ `up 0015/0016 → down 0016/0015 → up 0015/0016` trên database tạm.
+
+## Sales cycle production r6
+
+- Realtime đã nối canonical cart, negotiation và checkout vào atomic conversation commit; cart có TTL 48 giờ.
+- Giá/BOM/tồn lấy từ POS snapshot. POS worker được đưa vào compose chính thức, chạy 30 phút/lần, Redis TTL 48 giờ và không ghi ngược Google Sheets.
+- Mỗi lần mở/sửa cart đều tính lại ưu đãi shop-wide. Giảm 5% từ hai sản phẩm được phép cộng với freeship và giảm cuối 20.000đ; retry cùng bằng chứng không nâng mức nhượng bộ.
+- Trước order preview và trước xác nhận, runtime kiểm tra lại giá, tồn, size và ETA. Thay đổi hoặc thiếu dữ liệu sẽ handoff, không tự chốt.
+- “Ok” chỉ xác nhận khi hội thoại đang ở `ORDER_PREVIEW`; kết quả là `PURCHASE_CONFIRMED`, chưa được gọi là `ORDER_CREATED`.
+- `PAYMENT_POLICY` hỗ trợ COD và chuyển khoản; QR được phục vụ tại URL versioned trên `admin.lanadesign.vn`. Ảnh bill luôn chuyển nhân viên.
+- State/PII 48 giờ được mã hóa; sales-cycle event là append-only. Migration `0017_sales_cycle_runtime` đã áp dụng.
+- POS smoke thực tế: 112 sản phẩm, 1.202 biến thể, 112 snapshot, 0 cảnh báo. Runtime resolver đọc đủ 4 policy `PUBLISHED`.
+- Smoke test trên đúng image production đạt `71/71`.
+- Backup trước migration: `/opt/lana-chatbot/backups/20260723-sales-cycle-production-r6/lana_chatbot_pre_0017_20260723T032748Z.dump`, SHA-256 `9a350ef69690597227f9e74e9cbe66e6f749bdd87a5b0d242771c4bf17812fd3`.
+- Restore test migration `0017` đã chạy chu kỳ `up → down → up` thành công trên database tạm.
 
 ## Realtime fixes r5
 

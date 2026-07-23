@@ -229,4 +229,18 @@ describe("database migrations", () => {
     expect(down).toContain("WHERE status = 'INSUFFICIENT_EVIDENCE'");
     expect(down).toContain("SET status = 'FAILED'");
   });
+
+  it("stores encrypted 48-hour sales state with an append-only PII-free command ledger", async () => {
+    const sql = await readFile(
+      resolve(directory, "0017_sales_cycle_runtime.up.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS sales_cycle_states");
+    expect(sql).toContain("state_ciphertext bytea NOT NULL");
+    expect(sql).toContain("state_encrypted_dek bytea NOT NULL");
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS sales_cycle_events");
+    expect(sql).toContain("sales_cycle_events is append-only");
+    expect(sql).toContain("UNIQUE (conversation_id, command_id_hash)");
+    expect(sql).not.toMatch(/(?:full_name|phone|address|recipient)\s+(?:text|jsonb)/iu);
+  });
 });

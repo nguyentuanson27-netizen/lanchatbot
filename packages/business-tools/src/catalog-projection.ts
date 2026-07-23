@@ -37,6 +37,12 @@ const ShippingRegionSchema = z.object({
   transit_max_days: z.number().int().nonnegative().nullable(),
 }).passthrough();
 
+const SellingRulesSchema = z.object({
+  allow_mixed_sizes: z.boolean(),
+  allow_component_sale: z.boolean(),
+  source_version: z.string().min(1).max(128),
+}).strict();
+
 export const CatalogSnapshotV3Schema = z.object({
   schema_version: z.literal(3),
   release_id: z.string().min(1).max(128),
@@ -48,6 +54,11 @@ export const CatalogSnapshotV3Schema = z.object({
   synced_at: z.string().datetime(),
   data_status: z.string().min(1).max(128),
   fulfillment_policy: FulfillmentPolicySchema.nullable(),
+  selling_rules: SellingRulesSchema.optional().default({
+    allow_mixed_sizes: false,
+    allow_component_sale: false,
+    source_version: "legacy-default-v1",
+  }),
   shipping_eta: z.record(z.string().max(64), ShippingRegionSchema),
   offers: z.record(z.string().max(64), CatalogOfferSchema),
 }).strict();

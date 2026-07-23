@@ -21,6 +21,7 @@ import type {
   RuntimePolicyChannel,
   RuntimePolicyResolution,
   RuntimePolicyResolverPort,
+  SalesCycleRuntimeState,
 } from "@lana/chat-runtime";
 import {
   decideRuntimeMultiItemOffer,
@@ -48,6 +49,7 @@ import type {
   RealtimeCommitResult,
   RealtimeInboxBatchGuard,
   RealtimeMetaMessageUnit,
+  RealtimeSalesCyclePlan,
   ShadowContextMessage,
 } from "@lana/database";
 import { redactAnalyticsMessage } from "@lana/database";
@@ -68,6 +70,10 @@ import {
   type MediaAnalysisItem,
 } from "./media-resolution.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
+import {
+  createRealtimeSalesState,
+  evaluateRealtimeSalesCycle,
+} from "./realtime-sales-cycle.js";
 
 export interface RealtimeInboxPort {
   claimNext(
@@ -583,8 +589,21 @@ export interface RealtimeRuntimePort {
     appSendEnabled: boolean;
     killSwitch: boolean;
   }>;
+  loadOrCreateSalesCycle?<TState>(
+    pageId: string,
+    conversationId: string,
+    createState: () => TState,
+    now?: Date,
+  ): Promise<{
+    conversationId: string;
+    pageId: string;
+    stateRevision: number;
+    state: TState;
+    cartExpiresAt: Date | null;
+    expiresAt: Date;
+  }>;
   commit(
-    input: RealtimeCommitInput<ConversationState>,
+    input: RealtimeCommitInput<ConversationState, SalesCycleRuntimeState>,
     now?: Date,
   ): Promise<RealtimeCommitResult>;
   linkProviderConversation(
@@ -752,6 +771,8 @@ export interface RealtimeRunnerOptions {
   readonly shopAlias?: string;
   readonly employeeTagId?: string;
   readonly postSaleTagId?: string;
+  readonly closedOrderTagId?: string;
+  readonly salesCycleEnabled?: boolean;
   readonly promptVersion?: string;
   readonly metaAppId?: string;
   readonly policyChannel?: RuntimePolicyChannel;
@@ -785,6 +806,8 @@ export class RealtimeRunner {
       shopAlias: options.shopAlias ?? "LANA",
       employeeTagId: options.employeeTagId ?? "",
       postSaleTagId: options.postSaleTagId ?? "",
+      closedOrderTagId: options.closedOrderTagId ?? "",
+      salesCycleEnabled: options.salesCycleEnabled ?? false,
       promptVersion: options.promptVersion ?? "lana-realtime-v1",
       metaAppId: options.metaAppId ?? "",
       policyChannel: options.policyChannel ?? "CANARY_SHADOW",
@@ -1004,6 +1027,18 @@ export class RealtimeRunner {
     ) {
       throw new Error("REALTIME_STATE_INVALID");
     }
+    const salesCycleRecord = this.options.salesCycleEnabled
+      ? this.runtime.loadOrCreateSalesCycle
+        ? await this.runtime.loadOrCreateSalesCycle<SalesCycleRuntimeState>(
+            claim.pageId,
+            record.conversationId,
+            () => createRealtimeSalesState(record.conversationId, claim.pageId, now),
+            now,
+          )
+        : (() => {
+            throw new Error("SALES_CYCLE_RUNTIME_PORT_REQUIRED");
+          })()
+      : null;
 
     // Policy content is never fed to the model. CANARY_SHADOW is audit-only;
     // only a LIVE_OUTBOUND result can reach deterministic business helpers.
@@ -1207,6 +1242,9 @@ export class RealtimeRunner {
     let handoff = applied.handoff;
     let businessFacts: BusinessFactEnvelopeV1 | null = null;
     let handoffGuardReasonCodes: readonly string[] = [];
+    let salesCyclePlan: RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null = null;
+    let salesDesiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null = null;
+    let salesHandoffReasonCode: string | null = null;
     const imageIntent = message.isEcho
       ? null
       : explicitCustomerImageIntent(message.text ?? "");
@@ -1439,6 +1477,67 @@ export class RealtimeRunner {
     }
 
     if (
+      salesCycleRecord &&
+      !message.isEcho &&
+      handoff === null
+    ) {
+      const sales = await evaluateRealtimeSalesCycle({
+        pageId: claim.pageId,
+        conversationId: record.conversationId,
+        customerHash: claim.conversationHash,
+        state: salesCycleRecord.state,
+        stateRevision: salesCycleRecord.stateRevision,
+        text: message.text ?? "",
+        messageId: message.messageId ?? message.eventKey,
+        eventKey: message.eventKey,
+        senderId: message.senderId,
+        occurredAt: message.occurredAt,
+        attachmentIds: message.attachments.map((attachment, index) =>
+          attachment.providerId ??
+          deterministicUuid(`${message.eventKey}:attachment:${index}`)
+        ),
+        productId:
+          businessFacts?.productId ??
+          resolvedProduct?.productId ??
+          nextState.currentProductId,
+        offerType:
+          businessFacts?.facts?.offerType ??
+          proposal?.businessFactQuery.offerType ??
+          nextState.consideredVariant.offerType,
+        size:
+          proposal?.businessFactQuery.size ??
+          nextState.consideredVariant.size,
+        color:
+          proposal?.businessFactQuery.color ??
+          nextState.consideredVariant.color,
+        shopAlias: this.options.shopAlias,
+        policyResolution,
+        facts: this.factsReader,
+        now,
+      });
+      salesCyclePlan = sales.plan;
+      if (sales.handled) {
+        metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled
+          ? [...sales.messages]
+          : [];
+      }
+      if (sales.transferToHuman) {
+        salesDesiredTag = sales.desiredTag;
+        salesHandoffReasonCode = sales.reasonCode;
+        handoffGuardReasonCodes = sales.reasonCode ? [sales.reasonCode] : [];
+        const transitioned = applySilentHandoff(
+          nextState,
+          "AGENT_REQUEST",
+          nextState.revision,
+          nextState.lastFence,
+          now,
+        );
+        nextState = transitioned.state;
+        handoff = transitioned.handoff;
+      }
+    }
+
+    if (
       metaMessages.length === 0 &&
       this.options.mode === "LIVE" &&
       this.options.sendEnabled
@@ -1455,10 +1554,13 @@ export class RealtimeRunner {
     ].join(":");
     const replyPlanId = deterministicUuid(`${planSeed}:plan`);
     const responseGroupId = deterministicUuid(`${planSeed}:response`);
+    const desiredTag = salesDesiredTag ?? handoff?.desiredTag ?? null;
     const tagId =
-      handoff?.desiredTag === "VAN_DON"
-        ? this.options.postSaleTagId
-        : this.options.employeeTagId;
+      desiredTag === "DA_CHOT_DON"
+        ? this.options.closedOrderTagId
+        : desiredTag === "VAN_DON"
+          ? this.options.postSaleTagId
+          : this.options.employeeTagId;
     const result = await this.runtime.commit(
       {
         pageId: claim.pageId,
@@ -1476,10 +1578,10 @@ export class RealtimeRunner {
               },
             }
           : {}),
-        ...(handoff && tagId
+        ...(desiredTag && tagId
           ? {
               pancakeTagPlan: {
-                desiredTag: handoff.desiredTag,
+                desiredTag,
                 tagId,
                 handoffGeneration: nextState.revision,
               },
@@ -1496,7 +1598,9 @@ export class RealtimeRunner {
                       ? ("POST_SALE" as const)
                       : ("BOT_POLICY" as const),
                 reasonCode:
-                  businessFacts?.reasonCode ?? handoff.reason,
+                  salesHandoffReasonCode ??
+                  businessFacts?.reasonCode ??
+                  handoff.reason,
                 reasonDetailSafe: {
                   directive_reason: handoff.reason,
                   guard_reason_codes: [...handoffGuardReasonCodes],
@@ -1523,6 +1627,7 @@ export class RealtimeRunner {
               },
             }
           : {}),
+        ...(salesCyclePlan ? { salesCyclePlan } : {}),
         ...(inboxBatchGuard ? { inboxBatchGuard } : {}),
       },
       now,

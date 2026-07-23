@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-07-23 — sales cycle production r6
+
+- Nối cart, negotiation và checkout thật vào realtime production; state/outbox/tag intent được commit atomically với CAS.
+- Thêm migration `0017_sales_cycle_runtime`: state mã hóa, TTL 48 giờ và event append-only.
+- POS snapshot trở thành service được quản lý trong compose, chạy 30 phút/lần, Redis TTL 48 giờ và không ghi ngược Sheet.
+- Nối giá/BOM/tồn/size/ETA từ snapshot thật; revalidate trước preview và trước xác nhận.
+- Bật ưu đãi deterministic: giảm 5% từ hai sản phẩm, HESITANT freeship, CAUTIOUS freeship + 20.000đ; retry không nâng concession.
+- Thu đủ tên/số điện thoại/địa chỉ/phương thức thanh toán trước preview; “ok” chỉ xác nhận ở `ORDER_PREVIEW`.
+- Publish `PAYMENT_POLICY` cho COD/chuyển khoản MB Bank và QR versioned; ảnh bill luôn chuyển nhân viên kiểm tra.
+- Trạng thái cuối là `PURCHASE_CONFIRMED` + tag Đã chốt đơn, không giả là đơn POS đã được tạo.
+- Image production đạt 71/71 smoke test; realtime/POS healthy, API/delivery/n8n không đổi.
+
 ## 2026-07-23 — realtime context and after-sales handoff r5
 
 - Giữ sản phẩm đang xem qua các generation bằng exact lookup từ `state.currentProductId` cho câu hỏi tiếp nối; chặn fallback về sản phẩm cũ khi khách nhập mã mới không hợp lệ.

@@ -213,4 +213,78 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     expect(acknowledgement?.values[2]).toMatch(/^[0-9a-f]{64}$/u);
     expect(calls.some((call) => call.sql.includes("INSERT INTO handoff_events"))).toBe(false);
   });
+
+  it("commits encrypted sales-cycle state and its PII-free ledger in the conversation transaction", async () => {
+    const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
+    const client = {
+      async query(sql: string, values: readonly unknown[] = []) {
+        calls.push({ sql, values });
+        if (sql.includes("SELECT routing_owner")) {
+          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }] };
+        }
+        if (sql.includes("SELECT conversation_owner")) {
+          return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+        }
+        if (sql.includes("SELECT state_revision")) {
+          return { rowCount: 1, rows: [{ state_revision: "0" }] };
+        }
+        if (sql.includes("UPDATE sales_cycle_states")) return { rowCount: 1, rows: [] };
+        if (sql.includes("INSERT INTO sales_cycle_events")) return { rowCount: 1, rows: [] };
+        if (sql.includes("UPDATE conversations")) return { rowCount: 1, rows: [] };
+        return { rowCount: 0, rows: [] };
+      },
+      release() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = { async connect() { return client; } };
+    const now = new Date("2026-07-23T03:00:00.000Z");
+    const expiresAt = new Date("2026-07-25T03:00:00.000Z");
+
+    await store.commit({
+      pageId: "page-1",
+      customerHash: "hash",
+      conversationId: "33333333-3333-4333-8333-333333333333",
+      expectedStateVersion: 4,
+      state: { revision: 5, routingOwner: "APP", conversationOwner: "BOT" },
+      salesCyclePlan: {
+        expectedRevision: 0,
+        state: {
+          revision: 2,
+          stage: "CART_OPEN",
+          checkoutDraft: {
+            fullName: "Nguyen Van A",
+            phone: "0984997797",
+            address: "Tan Chau, Tay Ninh",
+          },
+        },
+        cartExpiresAt: expiresAt,
+        expiresAt,
+        events: [{
+          commandId: "sales:event-1:cart-open",
+          commandKind: "CART_OPENED",
+          outcome: "APPLIED",
+          stateRevisionBefore: 0,
+          stateRevisionAfter: 2,
+          stageBefore: "DISCOVERY",
+          stageAfter: "CART_OPEN",
+          cartId: "10000000-0000-4000-8000-000000000001",
+          cartVersion: 1,
+          reasonCode: null,
+          occurredAt: now,
+        }],
+      },
+    }, now);
+
+    const salesUpdate = calls.find((call) => call.sql.includes("UPDATE sales_cycle_states"));
+    expect(Buffer.isBuffer(salesUpdate?.values[3])).toBe(true);
+    expect(String(salesUpdate?.values[3])).not.toContain("0984997797");
+    const ledgerInsert = calls.find((call) => call.sql.includes("INSERT INTO sales_cycle_events"));
+    expect(ledgerInsert?.values.join("|")).not.toContain("0984997797");
+    expect(calls.findIndex((call) => call.sql.includes("UPDATE sales_cycle_states")))
+      .toBeLessThan(calls.findIndex((call) => call.sql.includes("UPDATE conversations")));
+    expect(calls.at(-1)?.sql.trim()).toBe("COMMIT");
+  });
 });

@@ -23,6 +23,11 @@ const snapshot = (tinhTrang: string, canOrderWhenZero: boolean): CatalogSnapshot
     eta_valid_until: "",
   },
   shipping_eta: {},
+  selling_rules: {
+    allow_mixed_sizes: false,
+    allow_component_sale: false,
+    source_version: "product-registry:SV695",
+  },
   offers: {},
 });
 
