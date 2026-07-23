@@ -5,8 +5,8 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release candidate: `/opt/lana-chatbot/releases/20260724-sizechart-idempotent-retry-r13.3`.
-- Previous release: `/opt/lana-chatbot/releases/20260724-sizechart-productfacts-v2-canary-r13.1`.
+- Current release candidate: `/opt/lana-chatbot/releases/20260724-admin-funnel-read-grant-r13.4`.
+- Previous release: `/opt/lana-chatbot/releases/20260724-sizechart-idempotent-retry-r13.3`.
 - Compose SHA-256: `35194b9505378ea32d787c411d7cce8f7f949838ac0515c5b064b4ae79842570`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
@@ -16,6 +16,12 @@
 Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời điểm kiểm kê. Danh sách image digest đầy đủ nằm trong release manifest.
 
 Realtime page test chạy image `lana-chatbot-app:realtime-wave23-b29725d` (`sha256:b732a4310b1f13662648d57f585259413e053191bc01bb496d12691d8abdbf03`) từ commit `b29725d1071bb202b0d43095f1d6d52c8331cfc6`. Shadow worker giữ image Wave 1; Admin Web, Admin API và Admin Simulation Worker giữ image `lana-chatbot-app:customer-care-policy-r10`; P2.3B giữ image r9 và POS snapshot giữ image r6. API webhook, delivery worker và n8n không đổi.
+
+## Admin funnel read grant r13.4
+
+- `lana_admin_readonly` có SELECT riêng trên ledger ẩn danh `sales_cycle_events`; không có thêm quyền với PII, secret, giá hoặc tồn.
+- Tám nguồn dashboard kiểm tra đạt 8/8; sau grant không còn log ACL `42501` trong nhịp tự làm mới.
+- Không restart container và không thay image; release chỉ ghi nhận source-of-truth và trạng thái quyền production.
 
 ## Size Chart idempotent retry hotfix r13.3
 

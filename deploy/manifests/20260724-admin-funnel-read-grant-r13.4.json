@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-24T01:30:00+07:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "fix/admin-funnel-read-grant",
+  "sourceCommit": "3d20438",
+  "releaseTag": "20260724-admin-funnel-read-grant-r13.4",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260724-admin-funnel-read-grant-r13.4",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260724-sizechart-idempotent-retry-r13.3",
+  "pageAllowlist": ["1198992073286645"],
+  "images": {
+    "realtime": "lana-chatbot-app:sizechart-facts-v2-vertex-hotfix-8f2de6f",
+    "admin": "lana-chatbot-app:sizechart-facts-v2-vertex-hotfix-8f2de6f",
+    "sizeChartExtractor": "lana-chatbot-app:sizechart-idempotent-retry-5e4ec2b"
+  },
+  "composeSha256": "35194b9505378ea32d787c411d7cce8f7f949838ac0515c5b064b4ae79842570",
+  "databaseGrant": {
+    "role": "lana_admin_readonly",
+    "relation": "sales_cycle_events",
+    "privilege": "SELECT",
+    "containsDirectCustomerIdentity": false
+  },
+  "verification": {
+    "adminDashboardRelations": "8_OF_8_PASS",
+    "dashboardAclErrorsAfterGrant": 0,
+    "inboxDuplicateKeys": 0,
+    "outboxDuplicateSequences": 0,
+    "liveCutover": "PENDING_RELEASE_POINTER",
+    "liveCanary": "BLOCKED_META_TOKEN_190"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260724-sizechart-idempotent-retry-r13.3",
+    "command": "REVOKE SELECT ON sales_cycle_events FROM lana_admin_readonly",
+    "dataDeletionRequired": false
+  }
+}
