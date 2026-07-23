@@ -1,10 +1,13 @@
 import { createHash } from "node:crypto";
 import {
   detectBuyingSignal,
+  extractCustomerMeasurements,
   assembleReply,
   buildVerifiedFactBlocks,
+  mergeCustomerProfile,
   normalizeProductCode,
   ProductSearchService,
+  recommendSize,
   guardAgentProposal,
   selectImages,
   verifiedImageUrls,
@@ -13,12 +16,20 @@ import {
   type ImageSelectionPurpose,
   type MediaProductSearchResult,
   type StableProductDocument,
+  type CustomerProfileFieldEvidence,
+  type ScopedSizeChart,
 } from "@lana/business-tools";
-import type {
-  AgentProposalV1,
-  BusinessFactEnvelopeV1,
-  HandoffReasonV2,
-  InboundMessageV1,
+import {
+  BusinessFactQueriesV2Schema,
+  type AgentProposalV1,
+  type BusinessFactQueriesV2,
+  type BusinessFactEnvelopeV1,
+  type CustomerProfileV1,
+  type HandoffReasonV2,
+  type InboundMessageV1,
+  type MeasurementKind,
+  type ProductComponentRole,
+  type RequestedBusinessFactV2,
 } from "@lana/contracts";
 import type {
   RuntimePolicyChannel,
@@ -60,6 +71,7 @@ import { redactAnalyticsMessage } from "@lana/database";
 import type { InboundEnvelopeV1 } from "@lana/meta-webhook";
 import type { PancakeHandoffAdapter } from "@lana/pancake-handoff";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
+import type { VerifiedVariantResult } from "./realtime-sales-catalog.js";
 import type { RealtimeGenerationQuota } from "./realtime-quota.js";
 import type { VertexShadowModel } from "./vertex.js";
 import type { ChatHistoryPort } from "./redis-chat-history.js";
@@ -204,6 +216,27 @@ export function explicitCustomerBusinessIntent(
   // card. That card starts with the verified price, so it is a PRICE lookup.
   if (productCodeOnly(value) !== null) return "PRICE";
   return null;
+}
+
+export function explicitCustomerBusinessIntents(
+  value: string,
+): readonly RequestedBusinessFactV2[] {
+  const text = asciiFold(value);
+  const intents: RequestedBusinessFactV2[] = [];
+  const add = (intent: RequestedBusinessFactV2): void => {
+    if (!intents.includes(intent)) intents.push(intent);
+  };
+  if (/\b(gia|bao nhieu|bn|nhieu tien|price)\b/u.test(text)) add("PRICE");
+  if (/\b(con|het|ton|co hang|san hang|available)\b/u.test(text)) add("STOCK");
+  if (/\b(size|sz|kich co|co nao|mac co)\b/u.test(text)) add("SIZE");
+  if (/\b(bao lau|khi nao|may ngay|ngay nao|giao den|nhan hang|eta)\b/u.test(text)) {
+    add("ETA");
+  }
+  if (
+    intents.length === 0 &&
+    (productCodeOnly(value) !== null || extractAdProductCodes(value).length > 0)
+  ) add("PRICE");
+  return intents;
 }
 
 function asciiFold(value: string): string {
@@ -549,6 +582,7 @@ export function verifiedProductInfoProposal(
   product: StableProductDocument,
   facts: BusinessFactEnvelopeV1,
   context: readonly ShadowContextMessage[],
+  profile: CustomerProfileV1 | null = null,
 ): AgentProposalV1 | null {
   if (facts.status !== "OK" || facts.facts === null) return null;
   const price = facts.facts.salePriceVnd ?? facts.facts.listPriceVnd;
@@ -558,7 +592,9 @@ export function verifiedProductInfoProposal(
   const sizeLine = facts.facts.sizes.length > 0
     ? `Size ${facts.facts.sizes.join(", ")}`
     : "Size đang cập nhật";
-  const followUp = hasBodyProfile(context)
+  const followUp = (profile !== null
+    ? profileHasBodyMeasurements(profile)
+    : hasBodyProfile(context))
     ? "Chị gửi thêm số đo 3 vòng để em chốt size chuẩn form cho mình nha."
     : "Chị cho em xin chiều cao cân nặng hoặc số đo 3 vòng em tư vấn size cho mình nha.";
   return {
@@ -740,6 +776,361 @@ export function continuationProductId(
   return resolvedProductId ?? proposalProductId ?? currentProductId;
 }
 
+type CustomerProfileEvidenceMap = Readonly<
+  Record<string, CustomerProfileFieldEvidence>
+>;
+
+function profileDigest(customerHash: string): string {
+  const normalized = customerHash.trim().toLocaleLowerCase("en-US");
+  return /^[a-f0-9]{64}$/u.test(normalized)
+    ? normalized
+    : createHash("sha256").update(customerHash).digest("hex");
+}
+
+function newCustomerProfile(
+  pageId: string,
+  customerHash: string,
+  now: Date,
+): CustomerProfileV1 {
+  const timestamp = now.toISOString();
+  return {
+    schemaVersion: 1,
+    profileId: deterministicUuid(`lana:customer-profile:v1:${pageId}:${customerHash}`),
+    customerKey: {
+      namespace: `META_PAGE:${pageId}`.slice(0, 64),
+      algorithm: "HMAC_SHA256",
+      digest: profileDigest(customerHash),
+    },
+    revision: 1,
+    measurements: [],
+    fitPreference: null,
+    preferences: { colors: [], styles: [], materials: [] },
+    sizeHistory: [],
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+}
+
+function customerProfileSummary(profile: CustomerProfileV1 | null): {
+  readonly profileRevision: number | null;
+  readonly measurements: Readonly<Record<string, number>>;
+  readonly fitPreference: CustomerProfileV1["fitPreference"] | null;
+} {
+  return {
+    profileRevision: profile?.revision ?? null,
+    measurements: Object.fromEntries(
+      (profile?.measurements ?? []).map(({ kind, value }) => [kind, value]),
+    ),
+    fitPreference: profile?.fitPreference ?? null,
+  };
+}
+
+function profileHasBodyMeasurements(profile: CustomerProfileV1 | null): boolean {
+  if (!profile) return false;
+  const kinds = new Set(profile.measurements.map(({ kind }) => kind));
+  return kinds.has("HEIGHT_CM") && kinds.has("WEIGHT_KG");
+}
+
+function extractVariantMentions(
+  text: string,
+  proposal: AgentProposalV1,
+): { readonly size: string | null; readonly color: string | null } {
+  const sizeFromModel = proposal.businessFactQuery.size?.trim() || null;
+  const colorFromModel = proposal.businessFactQuery.color?.trim() || null;
+  const sizeMatch = text.match(
+    /(?:\bsize|\bsz|kích\s*cỡ|cỡ)\s*[:=]?\s*(XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|\d{2,3})\b/iu,
+  );
+  const colorMatch = text.match(
+    /(?:\bmàu|\bcolor)\s*[:=]?\s*([\p{L}][\p{L}\s-]{0,30}?)(?=\s+(?:size|sz|cỡ)\b|[,.!?;\n]|$)/iu,
+  );
+  return {
+    size: sizeFromModel ?? sizeMatch?.[1]?.trim() ?? null,
+    color: colorFromModel ?? colorMatch?.[1]?.trim() ?? null,
+  };
+}
+
+function verifiedVariantState(
+  result: VerifiedVariantResult,
+): NonNullable<ConversationState["verifiedVariant"]> {
+  return {
+    schemaVersion: 2,
+    parentProductId: result.parentProductId,
+    selectedVariantId: result.selectedVariantId,
+    selectedColorId: result.selectedColorId,
+    selectedColorLabel: result.selectedColorLabel,
+    selectedSizeCode: result.selectedSizeCode,
+    selectedOfferType: result.selectedOfferType,
+    selectedComponentProductId: result.selectedComponentProductId,
+    mentionedColorText: result.mentionedColorText,
+    mentionedSizeText: result.mentionedSizeText,
+    resolution: result.resolution,
+    sourceVersion: result.sourceVersion,
+    verifiedAt: result.verifiedAt,
+  };
+}
+
+function productComponentRole(product: StableProductDocument): ProductComponentRole {
+  const value = normalizedVietnamese(`${product.title} ${product.canonicalCode}`);
+  if (/\b(?:chan\s*vay|cv)\b/u.test(value)) return "SKIRT";
+  if (/\bquan\b/u.test(value)) return "PANTS";
+  if (/\b(?:vay|dam|ao\s*dai)\b/u.test(value)) return "DRESS";
+  if (/\b(?:ao\s*khoac|jacket)\b/u.test(value)) return "JACKET";
+  if (/\bao\b/u.test(value)) return "TOP";
+  return "OTHER";
+}
+
+function productCategory(product: StableProductDocument): string {
+  const value = normalizedVietnamese(product.title);
+  if (/\bao\s*dai\b/u.test(value)) return "AO_DAI";
+  if (/\bchan\s*vay\b/u.test(value)) return "CHAN_VAY";
+  if (/\bquan\b/u.test(value)) return "QUAN";
+  if (/\b(?:vay|dam)\b/u.test(value)) return "VAY";
+  if (/\bset\b/u.test(value)) return "SET";
+  if (/\bao\b/u.test(value)) return "AO";
+  return "ALL";
+}
+
+interface MultiFactResolution {
+  readonly queryId: string;
+  readonly product: StableProductDocument;
+  readonly facts: readonly {
+    readonly requestedFact: RequestedBusinessFactV2;
+    readonly envelope: BusinessFactEnvelopeV1;
+  }[];
+}
+
+function buildBusinessFactQueries(
+  eventKey: string,
+  text: string,
+  products: readonly StableProductDocument[],
+): BusinessFactQueriesV2 | null {
+  const requestedFacts = explicitCustomerBusinessIntents(text);
+  if (requestedFacts.length === 0 || products.length === 0) return null;
+  const size = text.match(
+    /(?:\bsize|\bsz|kích\s*cỡ|cỡ)\s*[:=]?\s*(XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|\d{2,3})\b/iu,
+  )?.[1]?.trim() ?? null;
+  const color = text.match(
+    /(?:\bmàu|\bcolor)\s*[:=]?\s*([\p{L}][\p{L}\s-]{0,30}?)(?=\s+(?:size|sz|cỡ)\b|[,.!?;\n]|$)/iu,
+  )?.[1]?.trim() ?? null;
+  return BusinessFactQueriesV2Schema.parse({
+    schemaVersion: 2,
+    queries: products.slice(0, 3).map((product, index) => ({
+      schemaVersion: 2,
+      queryId: deterministicUuid(`${eventKey}:business-fact-query:v2:${index}`),
+      productRef: {
+        raw: product.productId,
+        productId: product.productId,
+        resolution: "RESOLVED",
+      },
+      requestedFacts,
+      qualifiers: {
+        offerType: null,
+        color,
+        size,
+        deliveryRegion: null,
+      },
+    })),
+  });
+}
+
+function multiFactReply(
+  resolutions: readonly MultiFactResolution[],
+): string | null {
+  const lines: string[] = [];
+  for (const resolution of resolutions) {
+    const details: string[] = [];
+    for (const { requestedFact, envelope } of resolution.facts) {
+      if (envelope.status !== "OK" || envelope.facts === null) {
+        details.push(
+          {
+            PRICE: "giá đang cập nhật",
+            STOCK: "tồn đang cập nhật",
+            SIZE: "size đang cập nhật",
+            ETA: "ETA đang cập nhật",
+          }[requestedFact],
+        );
+        continue;
+      }
+      const facts = envelope.facts;
+      if (requestedFact === "PRICE") {
+        const price = facts.salePriceVnd ?? facts.listPriceVnd;
+        details.push(price === null ? "giá đang cập nhật" : `giá ${shortPrice(price)}`);
+      } else if (requestedFact === "STOCK") {
+        details.push(
+          facts.stockStatus === "OUT_OF_STOCK"
+            ? "hiện hết hàng"
+            : facts.stockQuantity === null
+              ? `tình trạng ${facts.stockStatus}`
+              : `còn ${facts.stockQuantity} sản phẩm`,
+        );
+      } else if (requestedFact === "SIZE") {
+        details.push(
+          facts.sizes.length > 0
+            ? `size ${facts.sizes.join(", ")}`
+            : "size đang cập nhật",
+        );
+      } else {
+        details.push(
+          facts.deliveryEta
+            ? `giao dự kiến ${facts.deliveryEta.minDays}-${facts.deliveryEta.maxDays} ngày`
+            : "ETA đang cập nhật",
+        );
+      }
+    }
+    lines.push(
+      `${productDisplayName(resolution.product)}: ${details.join(", ")}.`,
+    );
+  }
+  if (lines.length === 0) return null;
+  lines.push("C chọn mẫu và size muốn lấy để em kiểm tra đúng biến thể nha.");
+  return lines.join("\n");
+}
+
+type CatalogAdvisoryIntent =
+  | "COLORS"
+  | "MATERIALS"
+  | "SILHOUETTES"
+  | "OCCASIONS";
+
+export function catalogAdvisoryIntent(value: string): CatalogAdvisoryIntent | null {
+  const text = asciiFold(value);
+  if (/\b(mau gi|mau nao|mau sac|co mau)\b/u.test(text)) return "COLORS";
+  if (/\b(chat lieu|chat vai|vai gi)\b/u.test(text)) return "MATERIALS";
+  if (/\b(form|dang|kieu dang)\b/u.test(text)) return "SILHOUETTES";
+  if (/\b(mac di dau|dip nao|di lam|di tiec|su kien)\b/u.test(text)) {
+    return "OCCASIONS";
+  }
+  return null;
+}
+
+function explicitXmlAdvisory(
+  product: StableProductDocument,
+  intent: CatalogAdvisoryIntent,
+): string | null {
+  const description = compactXmlDescription(product.descriptionXml);
+  const pattern = {
+    COLORS: /(?:màu|màu sắc)\s*[:\-]?\s*([^.!?]{2,80})/iu,
+    MATERIALS: /(?:chất liệu|được may từ|may từ)\s*[:\-]?\s*([^.!?]{2,100})/iu,
+    SILHOUETTES: /(?:form|dáng|kiểu dáng)\s*[:\-]?\s*([^.!?]{2,100})/iu,
+    OCCASIONS: /(?:phù hợp|thích hợp)\s+(?:cho|để)?\s*([^.!?]{2,100})/iu,
+  }[intent];
+  return description.match(pattern)?.[1]?.trim().slice(0, 100) ?? null;
+}
+
+export function catalogAdvisoryReply(
+  product: StableProductDocument,
+  intent: CatalogAdvisoryIntent,
+): string {
+  const structured = {
+    COLORS: product.colors,
+    MATERIALS: product.materials,
+    SILHOUETTES: product.silhouettes,
+    OCCASIONS: product.occasions,
+  }[intent].map((value) => value.trim()).filter(Boolean);
+  const fallback = structured.length === 0
+    ? explicitXmlAdvisory(product, intent)
+    : null;
+  const label = {
+    COLORS: "Màu",
+    MATERIALS: "Chất liệu",
+    SILHOUETTES: "Form dáng",
+    OCCASIONS: "Dịp mặc",
+  }[intent];
+  const answer = structured.length > 0
+    ? structured.join(", ")
+    : fallback ?? "đang được cập nhật";
+  return `${label} của ${productDisplayName(product)}: ${answer}. C cần em kiểm tra thêm giá hay size nha.`;
+}
+
+const MEASUREMENT_LABELS: Readonly<Record<MeasurementKind, string>> = {
+  HEIGHT_CM: "chiều cao",
+  WEIGHT_KG: "cân nặng",
+  BUST_CM: "vòng ngực",
+  WAIST_CM: "vòng eo",
+  HIPS_CM: "vòng mông",
+};
+
+function sizeEngineProposal(
+  proposal: AgentProposalV1,
+  product: StableProductDocument,
+  profile: CustomerProfileV1,
+  policyResolution: RuntimePolicyResolution | null,
+  now: Date,
+): AgentProposalV1 {
+  const chartArtifacts = Object.values(
+    policyResolution?.bundle?.artifacts.sizeCharts ?? {},
+  );
+  const charts: ScopedSizeChart[] = chartArtifacts.map(({ chart }) => ({
+    chart,
+    scope: {
+      level:
+        chart.category.trim().toLocaleUpperCase("vi-VN") === "ALL"
+          ? "GLOBAL"
+          : chart.componentRole === null
+            ? "CATEGORY"
+            : "COMPONENT",
+      categories: [chart.category],
+      ...(chart.componentRole === null
+        ? {}
+        : { componentRole: chart.componentRole }),
+    },
+  }));
+  const role = productComponentRole(product);
+  const decision = recommendSize({
+    profile,
+    target: {
+      brand: "LANA",
+      parentProductId: product.productId,
+      componentProductId: product.productId,
+      componentRole: role,
+      category: productCategory(product),
+      form: product.silhouettes[0] ?? null,
+      material: product.materials[0] ?? null,
+    },
+    charts,
+    generatedAt: now.toISOString(),
+    recommendationId: deterministicUuid(
+      `lana:size:v1:${product.productId}:${profile.profileId}:${profile.revision}`,
+    ),
+  });
+  if (decision.action === "HANDOFF") {
+    return {
+      ...proposal,
+      action: "HANDOFF",
+      reply: "",
+      attachments: [],
+      handoffReason: "BUSINESS_FACT_UNAVAILABLE",
+    };
+  }
+  if (decision.action === "ASK_MORE") {
+    const fields = decision.missingInputs
+      .map((value) =>
+        value === "FIT_PREFERENCE" ? "dáng mặc chị thích" : MEASUREMENT_LABELS[value]
+      )
+      .join(", ");
+    return {
+      ...proposal,
+      action: "REPLY",
+      reply: `Chị cho em xin thêm ${fields} để em chốt size chuẩn form nha.`,
+      attachments: [],
+      handoffReason: null,
+    };
+  }
+  const sizes = decision.recommendation.recommendedSizes
+    .map(({ componentRole, size }) => `${componentRole}: ${size}`)
+    .join(", ");
+  const alternatives = decision.alternativeSizes.length > 0
+    ? `; có thể cân nhắc ${decision.alternativeSizes.join(", ")}`
+    : "";
+  return {
+    ...proposal,
+    action: "REPLY",
+    reply: `Số đo của chị hợp ${sizes}${alternatives}, em giữ size này cho mình nha.`,
+    attachments: [],
+    handoffReason: null,
+  };
+}
+
 export interface RealtimeRuntimePort {
   isOwnMetaMessage?(
     pageId: string,
@@ -791,6 +1182,34 @@ export interface RealtimeRuntimePort {
     conversationId: string,
     customerName: string,
     observedAt: Date,
+  ): Promise<boolean>;
+  loadOrCreateCustomerProfile?<TProfile, TEvidence>(
+    pageId: string,
+    customerHash: string,
+    create: () => {
+      readonly profile: TProfile;
+      readonly fieldEvidence: TEvidence;
+      readonly revision: number;
+    },
+    now?: Date,
+  ): Promise<{
+    readonly pageId: string;
+    readonly customerHash: string;
+    readonly revision: number;
+    readonly profile: TProfile;
+    readonly fieldEvidence: TEvidence;
+    readonly expiresAt: Date;
+  }>;
+  compareAndSwapCustomerProfile?<TProfile, TEvidence>(
+    pageId: string,
+    customerHash: string,
+    expectedRevision: number,
+    next: {
+      readonly revision: number;
+      readonly profile: TProfile;
+      readonly fieldEvidence: TEvidence;
+    },
+    now?: Date,
   ): Promise<boolean>;
 }
 
@@ -955,6 +1374,12 @@ export interface RealtimeRunnerOptions {
   readonly buyingSignalGuardEnabled?: boolean;
   readonly groundedDraftEnabled?: boolean;
   readonly verifiedFactAssemblerEnabled?: boolean;
+  readonly customerProfileEnabled?: boolean;
+  readonly verifiedVariantEnabled?: boolean;
+  readonly contextHistoryLimit?: number;
+  readonly multiFactQueryEnabled?: boolean;
+  readonly catalogAdvisoryEnabled?: boolean;
+  readonly decisionAuditV2Enabled?: boolean;
 }
 
 export class RealtimeRunner {
@@ -1000,7 +1425,115 @@ export class RealtimeRunner {
       groundedDraftEnabled: options.groundedDraftEnabled ?? false,
       verifiedFactAssemblerEnabled:
         options.verifiedFactAssemblerEnabled ?? false,
+      customerProfileEnabled: options.customerProfileEnabled ?? false,
+      verifiedVariantEnabled: options.verifiedVariantEnabled ?? false,
+      contextHistoryLimit: Math.max(
+        1,
+        Math.min(30, Math.trunc(options.contextHistoryLimit ?? 30)),
+      ),
+      multiFactQueryEnabled: options.multiFactQueryEnabled ?? false,
+      catalogAdvisoryEnabled: options.catalogAdvisoryEnabled ?? false,
+      decisionAuditV2Enabled: options.decisionAuditV2Enabled ?? false,
     };
+  }
+
+  private async loadAndMergeCustomerProfile(
+    pageId: string,
+    customerHash: string,
+    messages: readonly InboundMessageV1[],
+    now: Date,
+  ): Promise<CustomerProfileV1> {
+    if (
+      !this.runtime.loadOrCreateCustomerProfile ||
+      !this.runtime.compareAndSwapCustomerProfile
+    ) {
+      throw new Error("CUSTOMER_PROFILE_RUNTIME_PORT_REQUIRED");
+    }
+    const measurements = messages
+      .filter((message) => !message.isEcho && Boolean(message.text?.trim()))
+      .flatMap((message) =>
+        extractCustomerMeasurements({
+          text: message.text ?? "",
+          observedAt: message.occurredAt,
+          sourceEventHash: createHash("sha256")
+            .update(message.eventKey)
+            .digest("hex"),
+        })
+      );
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const record = await this.runtime.loadOrCreateCustomerProfile<
+        CustomerProfileV1,
+        CustomerProfileEvidenceMap
+      >(
+        pageId,
+        customerHash,
+        () => ({
+          profile: newCustomerProfile(pageId, customerHash, now),
+          fieldEvidence: {},
+          revision: 1,
+        }),
+        now,
+      );
+      if (measurements.length === 0) return record.profile;
+      const merged = mergeCustomerProfile(
+        {
+          profile: record.profile,
+          fieldEvidence: record.fieldEvidence,
+        },
+        {
+          profileId: record.profile.profileId,
+          expectedRevision: record.profile.revision,
+          measurements,
+        },
+      );
+      if (merged.cas.nextRevision === merged.cas.expectedRevision) {
+        return merged.profile;
+      }
+      const stored = await this.runtime.compareAndSwapCustomerProfile(
+        pageId,
+        customerHash,
+        record.revision,
+        {
+          revision: merged.profile.revision,
+          profile: merged.profile,
+          fieldEvidence: merged.fieldEvidence,
+        },
+        now,
+      );
+      if (stored) return merged.profile;
+    }
+    throw new Error("CUSTOMER_PROFILE_REVISION_CONFLICT");
+  }
+
+  private async resolveBusinessFactQueries(
+    queries: BusinessFactQueriesV2,
+    products: readonly StableProductDocument[],
+  ): Promise<readonly MultiFactResolution[]> {
+    const byId = new Map(products.map((product) => [product.productId, product]));
+    // At most three query tasks are active. Facts inside one product query stay
+    // ordered and execute sequentially, preventing a 3x4 fan-out burst.
+    return Promise.all(queries.queries.map(async (query) => {
+      const productId = query.productRef.productId;
+      const product = productId ? byId.get(productId) : undefined;
+      if (!productId || !product) {
+        throw new Error("MULTI_FACT_PRODUCT_RESOLUTION_INVALID");
+      }
+      const facts: MultiFactResolution["facts"][number][] = [];
+      for (const requestedFact of query.requestedFacts) {
+        const envelope = await this.factsReader.resolve({
+          shopAlias: this.options.shopAlias,
+          productId,
+          intent: requestedFact,
+          offerType: query.qualifiers.offerType,
+          color: query.qualifiers.color,
+          size: query.qualifiers.size,
+          deliveryRegion: query.qualifiers.deliveryRegion,
+        });
+        facts.push({ requestedFact, envelope });
+      }
+      return { queryId: query.queryId, product, facts };
+    }));
   }
 
   async processOne(): Promise<boolean> {
@@ -1145,6 +1678,7 @@ export class RealtimeRunner {
     batch: RunnerInboundBatch,
     knownSuperseded: boolean,
   ): Promise<BatchCommitStatus> {
+    const processingStartedAt = Date.now();
     if (batch.items.length === 0) throw new Error("REALTIME_BATCH_EMPTY");
     const claims = [...batch.items].sort((left, right) =>
       left.receiveSequence - right.receiveSequence
@@ -1256,6 +1790,15 @@ export class RealtimeRunner {
     const policyAuditRef = policyResolution?.bundle
       ? runtimePolicyAuditReference(policyResolution.bundle)
       : null;
+    const customerProfile =
+      this.options.customerProfileEnabled && !knownSuperseded && !message.isEcho
+        ? await this.loadAndMergeCustomerProfile(
+            claim.pageId,
+            claim.conversationHash,
+            sourceMessages,
+            now,
+          )
+        : null;
 
     let triggerMessagePk: string | null = null;
     for (const item of claims) {
@@ -1305,7 +1848,10 @@ export class RealtimeRunner {
     let context: ShadowContextMessage[] = currentContexts;
     if (this.history) {
       const currentFingerprints = new Set(currentContexts.map(contextFingerprint));
-      const priorContext = [...await this.history.load(record.conversationId, 30)
+      const priorContext = [...await this.history.load(
+        record.conversationId,
+        this.options.contextHistoryLimit,
+      )
         .catch(() => [])]
         .filter((entry) => !currentFingerprints.has(contextFingerprint(entry)));
       for (let index = 0; index < currentContexts.length; index += 1) {
@@ -1328,6 +1874,14 @@ export class RealtimeRunner {
           type: "CONVERSATION_STATE",
           currentProductId: state.currentProductId,
           consideredVariant: state.consideredVariant,
+          verifiedVariant:
+            this.options.verifiedVariantEnabled
+              ? state.verifiedVariant ?? null
+              : null,
+          customerProfile:
+            this.options.customerProfileEnabled
+              ? customerProfileSummary(customerProfile)
+              : null,
           salesStage: state.salesStage,
           objectionType: state.objectionType,
         }),
@@ -1451,6 +2005,10 @@ export class RealtimeRunner {
     let modelTotalTokens = 0;
     let hasModelTokenUsage = false;
     let salesHandled = false;
+    let guardedPlanHash: string | null = null;
+    let multiFactAudit: NonNullable<
+      RealtimeDecisionEventPlan["details"]["factQueryResults"]
+    > = [];
     const buyingSignal = message.isEcho
       ? { isBuyingSignal: false as const, reasons: [] as const }
       : detectBuyingSignal(message.text ?? "", {
@@ -1464,6 +2022,22 @@ export class RealtimeRunner {
     const imageRequest = imageIntent !== null && resolution.primary !== null
       ? { intent: imageIntent, selection: selectImages(resolution.primary, imageIntent) }
       : null;
+    const advisoryIntent =
+      this.options.catalogAdvisoryEnabled && !message.isEcho
+        ? catalogAdvisoryIntent(message.text ?? "")
+        : null;
+    const multiFactQueries =
+      this.options.multiFactQueryEnabled && !message.isEcho
+        ? buildBusinessFactQueries(
+            message.eventKey,
+            message.text ?? "",
+            resolution.products,
+          )
+        : null;
+    const shouldUseMultiFacts = multiFactQueries !== null && (
+      multiFactQueries.queries.length > 1 ||
+      (multiFactQueries.queries[0]?.requestedFacts.length ?? 0) > 1
+    );
     if (applied.status === "APPLIED" && applied.authorization.allowEvaluate) {
       if (preSalePolicyIntent !== null) {
         const reply = renderPreSalePolicyReply(
@@ -1503,6 +2077,140 @@ export class RealtimeRunner {
         );
         nextState = transitioned.state;
         handoff = transitioned.handoff;
+      } else if (advisoryIntent !== null && resolvedProduct !== null) {
+        proposal = {
+          schemaVersion: 1,
+          intent: `catalog_advisory_${advisoryIntent.toLocaleLowerCase("en-US")}`,
+          conversationStage: nextState.salesStage,
+          productId: resolvedProduct.productId,
+          action: "REPLY",
+          reply: catalogAdvisoryReply(resolvedProduct, advisoryIntent),
+          attachments: [],
+          handoffReason: null,
+          businessFactQuery: {
+            intent: "NONE",
+            offerType: null,
+            color: null,
+            size: null,
+            deliveryRegion: null,
+          },
+        };
+        if (this.options.mode === "LIVE" && this.options.sendEnabled) {
+          metaMessages = [{ kind: "TEXT", text: proposal.reply }];
+        }
+      } else if (shouldUseMultiFacts && multiFactQueries !== null) {
+        const resolutions = await this.resolveBusinessFactQueries(
+          multiFactQueries,
+          resolution.products,
+        );
+        const flattened = resolutions.flatMap(({ facts }) => facts);
+        multiFactAudit = resolutions.flatMap((resolution) =>
+          resolution.facts.map(({ requestedFact, envelope }) => ({
+            queryId: resolution.queryId,
+            productId: resolution.product.productId,
+            requestedFact,
+            status: envelope.status,
+            reasonCode: envelope.reasonCode,
+            source: envelope.source,
+            observedAt: envelope.observedAt,
+          }))
+        );
+        businessFacts = flattened[0]?.envelope ?? null;
+        const unsafe = flattened.some(({ envelope }) =>
+          staleFactsRequireHandoff(message.text ?? "", envelope) ||
+          unavailableFactsRequireHandoff(envelope)
+        );
+        const reply = unsafe ? null : multiFactReply(resolutions);
+        if (!reply) {
+          handoffGuardReasonCodes = unsafe
+            ? ["MULTI_FACT_UNAVAILABLE_REQUIRES_HANDOFF"]
+            : ["MULTI_FACT_REPLY_EMPTY"];
+          const transitioned = applySilentHandoff(
+            nextState,
+            "PRODUCT_TOOL_ERROR",
+            nextState.revision,
+            nextState.lastFence,
+            now,
+          );
+          nextState = transitioned.state;
+          handoff = transitioned.handoff;
+        } else {
+          const first = multiFactQueries.queries[0]!;
+          proposal = {
+            schemaVersion: 1,
+            intent: "multi_business_fact",
+            conversationStage: nextState.salesStage,
+            productId: first.productRef.productId,
+            action: "REPLY",
+            reply,
+            attachments: [],
+            handoffReason: null,
+            businessFactQuery: {
+              intent: first.requestedFacts[0] ?? "NONE",
+              offerType: first.qualifiers.offerType,
+              color: first.qualifiers.color,
+              size: first.qualifiers.size,
+              deliveryRegion: first.qualifiers.deliveryRegion,
+            },
+          };
+          if (
+            this.options.customerProfileEnabled &&
+            customerProfile &&
+            resolutions.length === 1 &&
+            first.requestedFacts.includes("SIZE")
+          ) {
+            const sizeProposal = sizeEngineProposal(
+              {
+                ...proposal,
+                businessFactQuery: {
+                  ...proposal.businessFactQuery,
+                  intent: "SIZE",
+                },
+              },
+              resolutions[0]!.product,
+              customerProfile,
+              policyResolution,
+              now,
+            );
+            if (sizeProposal.action === "HANDOFF") {
+              handoffGuardReasonCodes = [
+                ...new Set([
+                  ...handoffGuardReasonCodes,
+                  "VERIFIED_SIZE_CHART_UNAVAILABLE",
+                ]),
+              ];
+              const transitioned = applySilentHandoff(
+                nextState,
+                "PRODUCT_TOOL_ERROR",
+                nextState.revision,
+                nextState.lastFence,
+                now,
+              );
+              nextState = transitioned.state;
+              handoff = transitioned.handoff;
+              proposal = sizeProposal;
+            } else {
+              proposal = {
+                ...proposal,
+                reply: [reply, sizeProposal.reply].filter(Boolean).join("\n"),
+              };
+            }
+          }
+          nextState = {
+            ...nextState,
+            productSelections: resolution.products.map((product, index) => ({
+              label: `SET_${index + 1}`,
+              productId: product.productId,
+            })),
+          };
+          if (
+            handoff === null &&
+            this.options.mode === "LIVE" &&
+            this.options.sendEnabled
+          ) {
+            metaMessages = [{ kind: "TEXT", text: proposal.reply }];
+          }
+        }
       } else if (resolution.products.length > 1) {
         const allFacts = await Promise.all(resolution.products.map((product) =>
           this.factsReader.resolve({
@@ -1675,7 +2383,12 @@ export class RealtimeRunner {
           const deterministicProductInfo = imageRequest
             ? proposal
             : directProductInfo && resolvedProduct
-              ? verifiedProductInfoProposal(resolvedProduct, facts, modelContext)
+              ? verifiedProductInfoProposal(
+                  resolvedProduct,
+                  facts,
+                  modelContext,
+                  this.options.customerProfileEnabled ? customerProfile : null,
+                )
               : null;
           if (deterministicProductInfo) {
             proposal = deterministicProductInfo;
@@ -1773,6 +2486,52 @@ export class RealtimeRunner {
             proposal = grounded.proposal;
           }
         }
+        if (
+          this.options.customerProfileEnabled &&
+          customerProfile &&
+          resolvedProduct &&
+          proposal.businessFactQuery.intent === "SIZE"
+        ) {
+          proposal = sizeEngineProposal(
+            proposal,
+            resolvedProduct,
+            customerProfile,
+            policyResolution,
+            now,
+          );
+        }
+        if (
+          this.options.verifiedVariantEnabled &&
+          this.factsReader.resolveVerifiedVariant
+        ) {
+          const variantProductId = continuationProductId(
+            resolvedProduct?.productId ?? null,
+            proposal.productId,
+            nextState.currentProductId,
+          );
+          const mentions = extractVariantMentions(message.text ?? "", proposal);
+          if (variantProductId && (mentions.size !== null || mentions.color !== null)) {
+            const verified = await this.factsReader.resolveVerifiedVariant(
+              {
+                shopAlias: this.options.shopAlias,
+                productId: variantProductId,
+                offerType: proposal.businessFactQuery.offerType,
+                mentionedSize: mentions.size,
+                mentionedColor: mentions.color,
+              },
+              now,
+            );
+            nextState = {
+              ...nextState,
+              verifiedVariant: verifiedVariantState(verified),
+              consideredVariant: {
+                offerType: verified.selectedOfferType,
+                color: verified.selectedColorLabel,
+                size: verified.selectedSizeCode,
+              },
+            };
+          }
+        }
         const verifiedProductIds = new Set<string>();
         if (resolvedProduct) verifiedProductIds.add(resolvedProduct.productId);
         if (facts?.status === "OK") verifiedProductIds.add(facts.productId);
@@ -1783,6 +2542,16 @@ export class RealtimeRunner {
           buyingSignal: buyingSignal.isBuyingSignal,
           now,
         });
+        guardedPlanHash = createHash("sha256").update(JSON.stringify({
+          action: guarded.action,
+          productId: guarded.productId,
+          handoffReason: guarded.handoffReason,
+          blockedReasonCodes: guarded.blockedReasonCodes,
+          textUnitHashes: guarded.textUnits.map((text) =>
+            createHash("sha256").update(text).digest("hex")
+          ),
+          imageCount: guarded.imageUrls.length,
+        })).digest("hex");
         handoffGuardReasonCodes = [
           ...new Set([
             ...handoffGuardReasonCodes,
@@ -1808,6 +2577,16 @@ export class RealtimeRunner {
             buyingSignal: buyingSignal.isBuyingSignal,
             now,
           });
+          guardedPlanHash = createHash("sha256").update(JSON.stringify({
+            action: guarded.action,
+            productId: guarded.productId,
+            handoffReason: guarded.handoffReason,
+            blockedReasonCodes: guarded.blockedReasonCodes,
+            textUnitHashes: guarded.textUnits.map((text) =>
+              createHash("sha256").update(text).digest("hex")
+            ),
+            imageCount: guarded.imageUrls.length,
+          })).digest("hex");
         }
         if (guarded.action === "HANDOFF") {
           handoffGuardReasonCodes = [
@@ -1950,7 +2729,11 @@ export class RealtimeRunner {
       reasonCodes: readonly string[] = [],
     ): void => {
       decisionEvents.push({
-        eventId: deterministicUuid(`${message.eventKey}:decision:${eventType}:v1`),
+        eventId: deterministicUuid(
+          `${message.eventKey}:decision:${eventType}:v${
+            this.options.decisionAuditV2Enabled ? 2 : 1
+          }`,
+        ),
         eventKeyHash,
         eventType,
         origin: resolution.origin,
@@ -1976,6 +2759,67 @@ export class RealtimeRunner {
         action: finalAction,
         occurredAt,
         details: {
+          auditSchemaVersion: this.options.decisionAuditV2Enabled ? 2 : 1,
+          stateRevisionBefore: state.revision,
+          stateRevisionAfter: nextState.revision,
+          conversationHash: this.options.decisionAuditV2Enabled
+            ? claim.conversationHash
+            : null,
+          proposalHash:
+            this.options.decisionAuditV2Enabled && proposal
+              ? createHash("sha256").update(JSON.stringify({
+                  schemaVersion: proposal.schemaVersion,
+                  intent: proposal.intent,
+                  conversationStage: proposal.conversationStage,
+                  productId: proposal.productId,
+                  action: proposal.action,
+                  replyHash: createHash("sha256")
+                    .update(proposal.reply)
+                    .digest("hex"),
+                  attachmentCount: proposal.attachments.length,
+                  handoffReason: proposal.handoffReason,
+                  businessFactQuery: proposal.businessFactQuery,
+                })).digest("hex")
+              : null,
+          guardedPlanHash:
+            this.options.decisionAuditV2Enabled ? guardedPlanHash : null,
+          renderedReplyHash:
+            this.options.decisionAuditV2Enabled && metaMessages.length > 0
+              ? createHash("sha256")
+                  .update(JSON.stringify(metaMessages.map((unit) =>
+                    unit.kind === "TEXT"
+                      ? {
+                          kind: unit.kind,
+                          valueHash: createHash("sha256")
+                            .update(unit.text)
+                            .digest("hex"),
+                        }
+                      : {
+                          kind: unit.kind,
+                          valueHash: createHash("sha256")
+                            .update(unit.imageUrl)
+                            .digest("hex"),
+                        }
+                  )))
+                  .digest("hex")
+              : null,
+          factsSourceVersion:
+            this.options.decisionAuditV2Enabled && businessFacts
+              ? `${businessFacts.source}:${businessFacts.observedAt}`
+              : null,
+          guardOutcome:
+            guardedPlanHash === null
+              ? "NOT_APPLICABLE"
+              : handoffGuardReasonCodes.length > 0 || handoff !== null
+                ? "BLOCKED"
+                : "ALLOWED",
+          processingLatencyMs:
+            this.options.decisionAuditV2Enabled
+              ? Math.max(0, Date.now() - processingStartedAt)
+              : null,
+          ...(this.options.decisionAuditV2Enabled
+            ? { factQueryResults: multiFactAudit }
+            : {}),
           productResolutionOrigin: resolution.origin,
           buyingSignalReasons: buyingSignal.reasons,
           guardReasonCodes: handoffGuardReasonCodes,
@@ -2187,6 +3031,25 @@ export class RealtimeRunner {
     if (selected) {
       const product = await this.exactProduct(selected);
       if (product) return this.singleResolution(product, "SELECTION");
+    }
+
+    const textCodes = [...new Set([
+      ...(productCodeOnly(text) ? [productCodeOnly(text)!] : []),
+      ...extractAdProductCodes(text),
+    ])].slice(0, 3);
+    if (this.options.multiFactQueryEnabled && textCodes.length > 1) {
+      const products = (await Promise.all(
+        textCodes.map((code) => this.exactProduct(code)),
+      )).filter((product): product is StableProductDocument => product !== null);
+      if (products.length > 1) {
+        return {
+          primary: products[0] ?? null,
+          products,
+          media: aggregateMedia([]),
+          origin: "TEXT_CODE",
+          extractedAdProductId: null,
+        };
+      }
     }
 
     const explicitCode = productCodeOnly(text);

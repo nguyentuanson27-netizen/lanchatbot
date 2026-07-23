@@ -444,6 +444,22 @@ const runner = new RealtimeRunner(
       process.env.REALTIME_GROUNDED_DRAFT_V1 === "true",
     verifiedFactAssemblerEnabled:
       process.env.REALTIME_VERIFIED_FACT_ASSEMBLER_V1 === "true",
+    customerProfileEnabled:
+      process.env.REALTIME_CUSTOMER_PROFILE_V1 === "true",
+    verifiedVariantEnabled:
+      process.env.REALTIME_VERIFIED_VARIANT_V2 === "true",
+    contextHistoryLimit: boundedInteger(
+      "REALTIME_CONTEXT_HISTORY_LIMIT",
+      30,
+      1,
+      30,
+    ),
+    multiFactQueryEnabled:
+      process.env.REALTIME_MULTI_FACT_QUERY_V2 === "true",
+    catalogAdvisoryEnabled:
+      process.env.REALTIME_CATALOG_ADVISORY_V1 === "true",
+    decisionAuditV2Enabled:
+      process.env.REALTIME_DECISION_AUDIT_V2 === "true",
   },
   quota,
   history,

@@ -4,9 +4,12 @@ import {
   createConversationState,
 } from "@lana/conversation-engine";
 import {
+  catalogAdvisoryIntent,
+  catalogAdvisoryReply,
   continuationProductId,
   currentProductContinuationId,
   explicitCustomerBusinessIntent,
+  explicitCustomerBusinessIntents,
   explicitCustomerImageIntent,
   isPostSaleRequest,
   isPreSalePolicyQuestion,
@@ -231,6 +234,34 @@ describe("RealtimeRunner", () => {
     expect(explicitCustomerBusinessIntent("sv695 còn size M không")).toBe("SIZE");
     expect(explicitCustomerBusinessIntent("mẫu này còn hàng không")).toBe("STOCK");
     expect(explicitCustomerBusinessIntent("bao lâu thì nhận hàng")).toBe("ETA");
+  });
+
+  it("extracts all requested business facts in stable order", () => {
+    expect(explicitCustomerBusinessIntents(
+      "CB182 giá bao nhiêu, còn size M không và bao lâu nhận hàng?",
+    )).toEqual(["PRICE", "STOCK", "SIZE", "ETA"]);
+  });
+
+  it("answers catalog advisory only from structured fields or an explicit XML clause", () => {
+    const product = {
+      productId: "CB182",
+      parentProductId: "CB182",
+      canonicalCode: "CB182",
+      aliases: [],
+      title: "Set Quỳnh Dao",
+      descriptionXml: "Chất liệu: lụa mềm. Thiết kế thanh lịch.",
+      colors: ["BE"],
+      materials: [],
+      silhouettes: ["SUÔNG"],
+      occasions: [],
+      imageUrls: [],
+      images: [],
+      catalogVersion: "catalog-v2",
+    };
+    expect(catalogAdvisoryIntent("mẫu này chất vải gì")).toBe("MATERIALS");
+    expect(catalogAdvisoryReply(product, "MATERIALS")).toContain("lụa mềm");
+    expect(catalogAdvisoryReply(product, "COLORS")).toContain("BE");
+    expect(catalogAdvisoryReply(product, "OCCASIONS")).toContain("đang được cập nhật");
   });
 
   it("builds the mandatory verified product-info form without calling the model", () => {

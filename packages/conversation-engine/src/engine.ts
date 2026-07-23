@@ -168,6 +168,7 @@ export function createConversationState(input: CreateConversationStateInput): Co
     currentProductId: null,
     productSelections: [],
     consideredVariant: { offerType: null, color: null, size: null },
+    verifiedVariant: null,
     orderDraft: null,
     salesStage: "DISCOVERY",
     objectionType: "NONE",
@@ -252,6 +253,7 @@ export function applyInboundEvent(input: ApplyInboundInput): ApplyInboundResult 
       ...(productChanged
         ? {
             consideredVariant: { offerType: null, color: null, size: null },
+            verifiedVariant: null,
             orderDraft: null,
           }
         : {}),

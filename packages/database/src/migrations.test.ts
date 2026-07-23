@@ -252,4 +252,18 @@ describe("database migrations", () => {
     expect(sql).toContain("UNIQUE (conversation_id, command_id_hash)");
     expect(sql).not.toMatch(/(?:full_name|phone|address|recipient)\s+(?:text|jsonb)/iu);
   });
+
+  it("stores only pseudonymous short-lived customer profile data for Wave 2", async () => {
+    const sql = await readFile(
+      resolve(directory, "0019_customer_profile_wave2.up.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS realtime_customer_profiles");
+    expect(sql).toContain("profile_snapshot jsonb NOT NULL");
+    expect(sql).toContain("field_evidence jsonb NOT NULL");
+    expect(sql).toContain("expires_at timestamptz NOT NULL");
+    expect(sql).not.toMatch(
+      /(?:full_name|phone_number|delivery_address|recipient_name)\s+(?:text|jsonb)/iu,
+    );
+  });
 });

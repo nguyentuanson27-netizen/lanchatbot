@@ -65,6 +65,27 @@ export interface ConsideredVariant {
   readonly size: string | null;
 }
 
+/**
+ * POS/catalog-verified variant projection. Customer/model text remains in the
+ * mentioned fields and cannot become an authoritative variant identifier until
+ * a deterministic resolver supplies the selected fields.
+ */
+export interface VerifiedVariantV2 {
+  readonly schemaVersion: 2;
+  readonly parentProductId: string;
+  readonly selectedVariantId: string | null;
+  readonly selectedColorId: string | null;
+  readonly selectedColorLabel: string | null;
+  readonly selectedSizeCode: string | null;
+  readonly selectedOfferType: string | null;
+  readonly selectedComponentProductId: string | null;
+  readonly mentionedColorText: string | null;
+  readonly mentionedSizeText: string | null;
+  readonly resolution: "VERIFIED" | "PARTIAL" | "AMBIGUOUS" | "NOT_FOUND";
+  readonly sourceVersion: string | null;
+  readonly verifiedAt: string;
+}
+
 export interface OrderDraft {
   readonly productId: string;
   readonly offerType: string | null;
@@ -93,6 +114,8 @@ export interface ConversationState {
     readonly productId: string;
   }[];
   readonly consideredVariant: ConsideredVariant;
+  /** Additive Wave-2 state; absent snapshots remain valid while the flag is off. */
+  readonly verifiedVariant?: VerifiedVariantV2 | null;
   readonly orderDraft: OrderDraft | null;
   readonly salesStage: SalesStage;
   readonly objectionType: ObjectionType;

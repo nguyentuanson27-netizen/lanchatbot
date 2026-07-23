@@ -36,6 +36,8 @@ interface RawOfferRow {
   readonly list_price?: unknown;
   readonly stock_status?: unknown;
   readonly components?: unknown;
+  readonly parent_variation_id?: unknown;
+  readonly parent_variation_sku?: unknown;
 }
 
 export interface CartSelectionQuery {
@@ -79,6 +81,31 @@ export type CartSelectionResult =
       readonly availableSizes: readonly string[];
       readonly availableColors: readonly string[];
     };
+
+export interface VerifiedVariantQuery {
+  readonly shopAlias: string;
+  readonly productId: string;
+  readonly offerType: string | null;
+  readonly mentionedSize: string | null;
+  readonly mentionedColor: string | null;
+}
+
+export interface VerifiedVariantResult {
+  readonly resolution: "VERIFIED" | "PARTIAL" | "AMBIGUOUS" | "NOT_FOUND";
+  readonly parentProductId: string;
+  readonly selectedVariantId: string | null;
+  readonly selectedColorId: string | null;
+  readonly selectedColorLabel: string | null;
+  readonly selectedSizeCode: string | null;
+  readonly selectedOfferType: string | null;
+  readonly selectedComponentProductId: string | null;
+  readonly mentionedColorText: string | null;
+  readonly mentionedSizeText: string | null;
+  readonly availableColors: readonly string[];
+  readonly availableSizes: readonly string[];
+  readonly sourceVersion: string | null;
+  readonly verifiedAt: string;
+}
 
 function canonicalJson(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
@@ -161,6 +188,153 @@ function failed(
     reasonCode,
     availableSizes: availableValues(rows, "size"),
     availableColors: availableValues(rows, "color"),
+  };
+}
+
+/**
+ * Maps customer mentions to exact values present in the POS snapshot. Missing
+ * qualifiers remain PARTIAL; multiple matching POS rows are never silently
+ * collapsed into one variant.
+ */
+export function verifiedVariantFromSnapshot(
+  rawSnapshot: unknown,
+  query: VerifiedVariantQuery,
+  now = new Date(),
+): VerifiedVariantResult {
+  const base = {
+    parentProductId: normalizeCatalogToken(query.productId),
+    selectedVariantId: null,
+    selectedColorId: null,
+    selectedColorLabel: null,
+    selectedSizeCode: null,
+    selectedOfferType: null,
+    selectedComponentProductId: null,
+    mentionedColorText: query.mentionedColor?.trim() || null,
+    mentionedSizeText: query.mentionedSize?.trim() || null,
+    availableColors: [] as readonly string[],
+    availableSizes: [] as readonly string[],
+    sourceVersion: null,
+    verifiedAt: now.toISOString(),
+  };
+  const parsed = CatalogSnapshotV3Schema.safeParse(rawSnapshot);
+  if (!parsed.success) return { ...base, resolution: "NOT_FOUND" };
+  const snapshot = parsed.data;
+  if (
+    normalizeCatalogToken(snapshot.shop_alias) !== normalizeCatalogToken(query.shopAlias) ||
+    normalizeCatalogToken(snapshot.product_id) !== normalizeCatalogToken(query.productId)
+  ) return { ...base, resolution: "NOT_FOUND" };
+
+  const selectedOffer = resolveOffer(snapshot, query.offerType);
+  if (!selectedOffer) {
+    return {
+      ...base,
+      resolution: "NOT_FOUND",
+      sourceVersion: snapshot.release_id,
+    };
+  }
+  const [offerName, offer] = selectedOffer;
+  const rows = offer.rows as readonly RawOfferRow[];
+  const wantedSize = query.mentionedSize
+    ? normalizeCatalogToken(query.mentionedSize)
+    : null;
+  const wantedColor = query.mentionedColor
+    ? normalizeCatalogToken(query.mentionedColor)
+    : null;
+  let matching = [...rows];
+  if (wantedSize) {
+    matching = matching.filter((row) =>
+      normalizeCatalogToken(text(row.size)) === wantedSize
+    );
+  }
+  if (wantedColor) {
+    matching = matching.filter((row) =>
+      normalizeCatalogToken(text(row.color)) === wantedColor
+    );
+  }
+  const availableColors = availableValues(rows, "color");
+  const availableSizes = availableValues(rows, "size");
+  if (matching.length === 0) {
+    return {
+      ...base,
+      resolution: "NOT_FOUND",
+      selectedOfferType: normalizeCatalogToken(offerName),
+      availableColors,
+      availableSizes,
+      sourceVersion: snapshot.release_id,
+    };
+  }
+  const selectedColors = availableValues(matching, "color");
+  const selectedSizes = availableValues(matching, "size");
+  const exact = wantedSize !== null && wantedColor !== null &&
+    selectedColors.length <= 1 && selectedSizes.length <= 1;
+  if (!exact) {
+    return {
+      ...base,
+      resolution:
+        (wantedSize !== null || wantedColor !== null) &&
+          (selectedColors.length > 1 || selectedSizes.length > 1)
+          ? "PARTIAL"
+          : "PARTIAL",
+      // The current POS projection exposes the canonical color label, not a
+      // durable POS color identifier. Keep the identifier empty rather than
+      // presenting a label as an authoritative ID.
+      selectedColorId: null,
+      selectedColorLabel: selectedColors.length === 1 ? text(matching[0]?.color) : null,
+      selectedSizeCode: selectedSizes.length === 1 ? selectedSizes[0]! : null,
+      selectedOfferType: normalizeCatalogToken(offerName),
+      availableColors,
+      availableSizes,
+      sourceVersion: snapshot.release_id,
+    };
+  }
+
+  const identities = new Set(matching.map((row) =>
+    text(row.parent_variation_id) ||
+    text(row.parent_variation_sku) ||
+    canonicalJson({
+      priceSku: row.price_sku,
+      color: row.color,
+      size: row.size,
+      components: row.components,
+    })
+  ));
+  if (identities.size !== 1) {
+    return {
+      ...base,
+      resolution: "AMBIGUOUS",
+      selectedOfferType: normalizeCatalogToken(offerName),
+      availableColors,
+      availableSizes,
+      sourceVersion: snapshot.release_id,
+    };
+  }
+  const row = matching[0]!;
+  const componentIds = Array.isArray(row.components)
+    ? [...new Set((row.components as RawBomComponent[])
+      .map((component) =>
+        normalizeCatalogToken(
+          text(component.product_sku) ||
+          text(component.variation_sku) ||
+          text(component.component_id),
+        )
+      )
+      .filter(Boolean))]
+    : [];
+  return {
+    ...base,
+    resolution: "VERIFIED",
+    selectedVariantId:
+      text(row.parent_variation_id) || text(row.parent_variation_sku) || null,
+    selectedColorId: null,
+    selectedColorLabel: text(row.color) || null,
+    selectedSizeCode: wantedSize,
+    selectedOfferType: normalizeCatalogToken(offerName),
+    selectedComponentProductId: componentIds.length === 1
+      ? componentIds[0]!
+      : null,
+    availableColors,
+    availableSizes,
+    sourceVersion: snapshot.release_id,
   };
 }
 

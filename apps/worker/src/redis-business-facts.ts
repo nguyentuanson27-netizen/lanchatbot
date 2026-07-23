@@ -16,6 +16,9 @@ import {
   cartSelectionFromSnapshot,
   type CartSelectionQuery,
   type CartSelectionResult,
+  type VerifiedVariantQuery,
+  type VerifiedVariantResult,
+  verifiedVariantFromSnapshot,
 } from "./realtime-sales-catalog.js";
 
 export interface BusinessFactsReader {
@@ -25,6 +28,10 @@ export interface BusinessFactsReader {
     query: CartSelectionQuery,
     now?: Date,
   ): Promise<CartSelectionResult>;
+  resolveVerifiedVariant?(
+    query: VerifiedVariantQuery,
+    now?: Date,
+  ): Promise<VerifiedVariantResult>;
   close(): Promise<void>;
 }
 
@@ -128,6 +135,35 @@ export class RedisBusinessFactsReader implements BusinessFactsReader {
         availableColors: [],
       };
     }
+  }
+
+  async resolveVerifiedVariant(
+    query: VerifiedVariantQuery,
+    now = new Date(),
+  ): Promise<VerifiedVariantResult> {
+    await this.connected();
+    const raw = await this.client.get(
+      catalogSnapshotKey(query.shopAlias, query.productId),
+    );
+    if (!raw) {
+      return {
+        resolution: "NOT_FOUND",
+        parentProductId: normalizeCatalogToken(query.productId),
+        selectedVariantId: null,
+        selectedColorId: null,
+        selectedColorLabel: null,
+        selectedSizeCode: null,
+        selectedOfferType: null,
+        selectedComponentProductId: null,
+        mentionedColorText: query.mentionedColor?.trim() || null,
+        mentionedSizeText: query.mentionedSize?.trim() || null,
+        availableColors: [],
+        availableSizes: [],
+        sourceVersion: null,
+        verifiedAt: now.toISOString(),
+      };
+    }
+    return verifiedVariantFromSnapshot(JSON.parse(raw) as unknown, query, now);
   }
 
   async close(): Promise<void> {

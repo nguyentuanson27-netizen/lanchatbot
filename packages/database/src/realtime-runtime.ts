@@ -18,6 +18,15 @@ export interface RealtimeConversationRecord<TState> {
   readonly killSwitch: boolean;
 }
 
+export interface RealtimeCustomerProfileRecord<TProfile, TEvidence = unknown> {
+  readonly pageId: string;
+  readonly customerHash: string;
+  readonly revision: number;
+  readonly profile: TProfile;
+  readonly fieldEvidence: TEvidence;
+  readonly expiresAt: Date;
+}
+
 export type RealtimeMetaMessageUnit =
   | { readonly kind: "TEXT"; readonly text: string }
   | { readonly kind: "IMAGE"; readonly imageUrl: string };
@@ -141,6 +150,25 @@ export interface RealtimeDecisionEventPlan {
   readonly action: string | null;
   readonly occurredAt: Date;
   readonly details: Readonly<{
+    auditSchemaVersion?: 1 | 2;
+    stateRevisionBefore?: number;
+    stateRevisionAfter?: number;
+    conversationHash?: string | null;
+    proposalHash?: string | null;
+    guardedPlanHash?: string | null;
+    renderedReplyHash?: string | null;
+    factsSourceVersion?: string | null;
+    guardOutcome?: "ALLOWED" | "BLOCKED" | "NOT_APPLICABLE";
+    processingLatencyMs?: number | null;
+    factQueryResults?: readonly {
+      readonly queryId: string;
+      readonly productId: string;
+      readonly requestedFact: "PRICE" | "STOCK" | "SIZE" | "ETA";
+      readonly status: "OK" | "STALE" | "AMBIGUOUS" | "NOT_FOUND" | "ERROR";
+      readonly reasonCode: string | null;
+      readonly source: string;
+      readonly observedAt: string;
+    }[];
     productResolutionOrigin: string | null;
     buyingSignalReasons: readonly string[];
     guardReasonCodes: readonly string[];
@@ -384,6 +412,130 @@ export class PostgresRealtimeRuntimeStore {
       }
       return inserted;
     });
+  }
+
+  async loadOrCreateCustomerProfile<TProfile, TEvidence = Record<string, unknown>>(
+    pageId: string,
+    customerHash: string,
+    create: () => {
+      readonly profile: TProfile;
+      readonly fieldEvidence: TEvidence;
+      readonly revision: number;
+    },
+    now = new Date(),
+  ): Promise<RealtimeCustomerProfileRecord<TProfile, TEvidence>> {
+    if (!pageId.trim() || !customerHash.trim() || Number.isNaN(now.getTime())) {
+      throw new Error("CUSTOMER_PROFILE_IDENTITY_INVALID");
+    }
+    return withTransaction(this.pool, async (client) => {
+      const selected = await client.query<{
+        revision: string;
+        profile_snapshot: TProfile;
+        field_evidence: TEvidence;
+        expires_at: Date;
+      }>(
+        `SELECT revision, profile_snapshot, field_evidence, expires_at
+         FROM realtime_customer_profiles
+         WHERE page_id = $1 AND customer_hash = $2
+         FOR UPDATE`,
+        [pageId, customerHash],
+      );
+      const existing = selected.rows[0];
+      if (existing && existing.expires_at.getTime() > now.getTime()) {
+        return {
+          pageId,
+          customerHash,
+          revision: Number(existing.revision),
+          profile: existing.profile_snapshot,
+          fieldEvidence: existing.field_evidence,
+          expiresAt: existing.expires_at,
+        };
+      }
+
+      const initial = create();
+      if (!Number.isInteger(initial.revision) || initial.revision < 1) {
+        throw new Error("CUSTOMER_PROFILE_INITIAL_REVISION_INVALID");
+      }
+      const expiresAt = new Date(now.getTime() + 48 * 60 * 60 * 1_000);
+      await client.query(
+        `INSERT INTO realtime_customer_profiles (
+           page_id, customer_hash, revision, profile_snapshot, field_evidence,
+           expires_at, created_at, updated_at
+         ) VALUES ($1,$2,$3,$4::jsonb,$5::jsonb,$6,$7,$7)
+         ON CONFLICT (page_id, customer_hash) DO UPDATE SET
+           revision = EXCLUDED.revision,
+           profile_snapshot = EXCLUDED.profile_snapshot,
+           field_evidence = EXCLUDED.field_evidence,
+           expires_at = EXCLUDED.expires_at,
+           updated_at = EXCLUDED.updated_at
+         WHERE realtime_customer_profiles.expires_at <= $7`,
+        [
+          pageId,
+          customerHash,
+          initial.revision,
+          JSON.stringify(initial.profile),
+          JSON.stringify(initial.fieldEvidence),
+          expiresAt,
+          now,
+        ],
+      );
+      return {
+        pageId,
+        customerHash,
+        revision: initial.revision,
+        profile: initial.profile,
+        fieldEvidence: initial.fieldEvidence,
+        expiresAt,
+      };
+    });
+  }
+
+  async compareAndSwapCustomerProfile<TProfile, TEvidence>(
+    pageId: string,
+    customerHash: string,
+    expectedRevision: number,
+    next: {
+      readonly revision: number;
+      readonly profile: TProfile;
+      readonly fieldEvidence: TEvidence;
+    },
+    now = new Date(),
+  ): Promise<boolean> {
+    if (
+      !pageId.trim() ||
+      !customerHash.trim() ||
+      !Number.isInteger(expectedRevision) ||
+      expectedRevision < 1 ||
+      !Number.isInteger(next.revision) ||
+      next.revision !== expectedRevision + 1 ||
+      Number.isNaN(now.getTime())
+    ) {
+      throw new Error("CUSTOMER_PROFILE_CAS_INPUT_INVALID");
+    }
+    const expiresAt = new Date(now.getTime() + 48 * 60 * 60 * 1_000);
+    const result = await this.pool.query(
+      `UPDATE realtime_customer_profiles
+       SET revision = $4,
+           profile_snapshot = $5::jsonb,
+           field_evidence = $6::jsonb,
+           expires_at = $7,
+           updated_at = $8
+       WHERE page_id = $1
+         AND customer_hash = $2
+         AND revision = $3
+         AND expires_at > $8`,
+      [
+        pageId,
+        customerHash,
+        expectedRevision,
+        next.revision,
+        JSON.stringify(next.profile),
+        JSON.stringify(next.fieldEvidence),
+        expiresAt,
+        now,
+      ],
+    );
+    return result.rowCount === 1;
   }
 
   async loadOrCreateSalesCycle<TState>(

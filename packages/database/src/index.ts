@@ -50,6 +50,7 @@ export {
   type RealtimeCommitInput,
   type RealtimeCommitResult,
   type RealtimeConversationRecord,
+  type RealtimeCustomerProfileRecord,
   type RealtimeDecisionEventPlan,
   type RealtimeHandoffEventPlan,
   type RealtimeHandoffAcknowledgementPlan,

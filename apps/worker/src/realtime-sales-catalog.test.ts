@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { cartSelectionFromSnapshot } from "./realtime-sales-catalog.js";
+import {
+  cartSelectionFromSnapshot,
+  verifiedVariantFromSnapshot,
+} from "./realtime-sales-catalog.js";
 
 const observedAt = "2026-07-23T02:00:00.000Z";
 const now = new Date("2026-07-23T03:00:00.000Z");
@@ -137,5 +140,56 @@ describe("realtime sales catalog", () => {
       lineId: "13000000-0000-4000-8000-000000000001",
     }, new Date("2026-07-25T02:00:00.001Z")))
       .toMatchObject({ status: "STALE", reasonCode: "CATALOG_PRICE_STALE" });
+  });
+
+  it("projects a variant only from exact POS color and size values", () => {
+    const value = snapshot();
+    value.offers.SET.rows[0] = {
+      ...value.offers.SET.rows[0]!,
+      parent_variation_id: "pos-variation-182",
+    } as typeof value.offers.SET.rows[number];
+    expect(verifiedVariantFromSnapshot(value, {
+      shopAlias: "LANA",
+      productId: "CB182",
+      offerType: "SET",
+      mentionedSize: "m",
+      mentionedColor: "be",
+    }, now)).toMatchObject({
+      resolution: "VERIFIED",
+      parentProductId: "CB182",
+      selectedVariantId: "pos-variation-182",
+      selectedColorId: null,
+      selectedColorLabel: "BE",
+      selectedSizeCode: "M",
+      selectedOfferType: "SET",
+      selectedComponentProductId: null,
+      sourceVersion: "pos-release-1",
+    });
+  });
+
+  it("keeps incomplete and unknown mentions non-authoritative", () => {
+    expect(verifiedVariantFromSnapshot(snapshot(), {
+      shopAlias: "LANA",
+      productId: "CB182",
+      offerType: "SET",
+      mentionedSize: "M",
+      mentionedColor: null,
+    }, now)).toMatchObject({
+      resolution: "PARTIAL",
+      selectedSizeCode: "M",
+      selectedVariantId: null,
+    });
+    expect(verifiedVariantFromSnapshot(snapshot(), {
+      shopAlias: "LANA",
+      productId: "CB182",
+      offerType: "SET",
+      mentionedSize: "XXL",
+      mentionedColor: "ĐỎ",
+    }, now)).toMatchObject({
+      resolution: "NOT_FOUND",
+      selectedVariantId: null,
+      selectedSizeCode: null,
+      selectedColorId: null,
+    });
   });
 });
