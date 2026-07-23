@@ -44,6 +44,34 @@ const contents = {
     requirePhoneNumber: true,
     requireDeliveryAddress: true,
     allowedPaymentMethods: ["COD", "BANK_TRANSFER"],
+    customerCare: {
+      exchange: {
+        windowDaysFromReceipt: 15,
+        maxExchangesPerOrder: 1,
+        supportedActions: ["SIZE", "COLOR", "MODEL"],
+        saleRestriction: { discountThresholdBps: 3_000, allowedActions: ["SIZE", "COLOR"] },
+        requiredConditions: { originalTags: true, unused: true, unwashed: true, clean: true, undamaged: true },
+        totalTwoWayShippingFeeVnd: 30_000,
+        modelExchangePricing: "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+        customerPaysPositivePriceDifference: true,
+        fulfillmentMethod: "COURIER_SWAP",
+      },
+      returns: {
+        eligibleReasons: ["MANUFACTURING_FABRIC_DEFECT", "MANUFACTURING_SEAM_DEFECT", "WRONG_PRODUCT_SENT"],
+        reportingWindowDaysFromReceipt: 5,
+        shopShippingCoveragePercent: 100,
+        refundBusinessDaysMin: 1,
+        refundBusinessDaysMax: 3,
+        refundStartsAfter: "SHOP_CONFIRMS_ELIGIBLE_ERROR",
+      },
+      inspection: { tryOnMode: "HOLD_UP_ONLY", refusedParcelShippingFeeVnd: 30_000 },
+      marketplacePricing: { shopeePriceMatch: false, reason: "PLATFORM_SUBSIDY_AND_VOUCHERS" },
+      customerFaq: {
+        discloseLightingAndDisplayColorVariance: true,
+        handWashPreferred: true,
+        machineWashAllowedWithLaundryBagAndGentleCycle: true,
+      },
+    },
     sourceMetadata,
   },
   OFFER_POLICY: {
@@ -176,6 +204,14 @@ describe("RuntimePolicyResolver", () => {
           shipping: { defaultFeeVnd: 30_000 },
           multiItemOffer: { discountBps: 500 },
           commerceAuthority: { priceAuthority: "PANCAKE_POS", allowAdminPriceOverride: false },
+        },
+        artifacts: {
+          shopPolicy: {
+            customerCare: {
+              exchange: { windowDaysFromReceipt: 15, totalTwoWayShippingFeeVnd: 30_000 },
+              returns: { reportingWindowDaysFromReceipt: 5 },
+            },
+          },
         },
       },
     });

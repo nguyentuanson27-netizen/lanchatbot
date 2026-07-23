@@ -3,6 +3,7 @@ import {
   AdminArtifactContentV1Schema,
   AdminArtifactVersionV1Schema,
   AdminSimulationRequestV1Schema,
+  CustomerCarePolicyAdminContentV1Schema,
   HandoffMatrixAdminContentV1Schema,
   OfferPolicyAdminContentV1Schema,
 } from "./admin-policy-control.js";
@@ -15,6 +16,65 @@ const metadata = {
 };
 
 describe("Admin Policy Control Plane contracts", () => {
+  it("accepts the approved customer-care policy and rejects inconsistent refund windows", () => {
+    const policy = {
+      exchange: {
+        windowDaysFromReceipt: 15,
+        maxExchangesPerOrder: 1,
+        supportedActions: ["SIZE", "COLOR", "MODEL"],
+        saleRestriction: {
+          discountThresholdBps: 3_000,
+          allowedActions: ["SIZE", "COLOR"],
+        },
+        requiredConditions: {
+          originalTags: true,
+          unused: true,
+          unwashed: true,
+          clean: true,
+          undamaged: true,
+        },
+        totalTwoWayShippingFeeVnd: 30_000,
+        modelExchangePricing: "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+        customerPaysPositivePriceDifference: true,
+        fulfillmentMethod: "COURIER_SWAP",
+      },
+      returns: {
+        eligibleReasons: [
+          "MANUFACTURING_FABRIC_DEFECT",
+          "MANUFACTURING_SEAM_DEFECT",
+          "WRONG_PRODUCT_SENT",
+        ],
+        reportingWindowDaysFromReceipt: 5,
+        shopShippingCoveragePercent: 100,
+        refundBusinessDaysMin: 1,
+        refundBusinessDaysMax: 3,
+        refundStartsAfter: "SHOP_CONFIRMS_ELIGIBLE_ERROR",
+      },
+      inspection: {
+        tryOnMode: "HOLD_UP_ONLY",
+        refusedParcelShippingFeeVnd: 30_000,
+      },
+      marketplacePricing: {
+        shopeePriceMatch: false,
+        reason: "PLATFORM_SUBSIDY_AND_VOUCHERS",
+      },
+      customerFaq: {
+        discloseLightingAndDisplayColorVariance: true,
+        handWashPreferred: true,
+        machineWashAllowedWithLaundryBagAndGentleCycle: true,
+      },
+    } as const;
+    expect(CustomerCarePolicyAdminContentV1Schema.safeParse(policy).success).toBe(true);
+    expect(CustomerCarePolicyAdminContentV1Schema.safeParse({
+      ...policy,
+      returns: {
+        ...policy.returns,
+        refundBusinessDaysMin: 3,
+        refundBusinessDaysMax: 1,
+      },
+    }).success).toBe(false);
+  });
+
   it("accepts the approved shop-wide stacking policy", () => {
     const parsed = OfferPolicyAdminContentV1Schema.parse({
       schemaVersion: 1,

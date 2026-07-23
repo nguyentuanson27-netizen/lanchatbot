@@ -38,6 +38,89 @@ const SourceMetadataSchema = z.object({
   observedAt: z.string().datetime(),
 }).strict();
 
+export const CustomerCarePolicyAdminContentV1Schema = z.object({
+  exchange: z.object({
+    windowDaysFromReceipt: z.number().int().min(1).max(365),
+    maxExchangesPerOrder: z.number().int().min(1).max(10),
+    supportedActions: z.array(z.enum(["SIZE", "COLOR", "MODEL"]))
+      .min(1).max(3),
+    saleRestriction: z.object({
+      discountThresholdBps: z.number().int().min(1).max(10_000),
+      allowedActions: z.array(z.enum(["SIZE", "COLOR", "MODEL"]))
+        .min(1).max(3),
+    }).strict(),
+    requiredConditions: z.object({
+      originalTags: z.boolean(),
+      unused: z.boolean(),
+      unwashed: z.boolean(),
+      clean: z.boolean(),
+      undamaged: z.boolean(),
+    }).strict(),
+    totalTwoWayShippingFeeVnd: z.number().int().nonnegative().max(1_000_000),
+    modelExchangePricing: z.literal("NEW_PRODUCT_LIST_PRICE_NO_SALE"),
+    customerPaysPositivePriceDifference: z.boolean(),
+    fulfillmentMethod: z.literal("COURIER_SWAP"),
+  }).strict(),
+  returns: z.object({
+    eligibleReasons: z.array(z.enum([
+      "MANUFACTURING_FABRIC_DEFECT",
+      "MANUFACTURING_SEAM_DEFECT",
+      "WRONG_PRODUCT_SENT",
+    ])).min(1).max(3),
+    reportingWindowDaysFromReceipt: z.number().int().min(1).max(365),
+    shopShippingCoveragePercent: z.number().int().min(0).max(100),
+    refundBusinessDaysMin: z.number().int().min(1).max(30),
+    refundBusinessDaysMax: z.number().int().min(1).max(30),
+    refundStartsAfter: z.literal("SHOP_CONFIRMS_ELIGIBLE_ERROR"),
+  }).strict(),
+  inspection: z.object({
+    tryOnMode: z.literal("HOLD_UP_ONLY"),
+    refusedParcelShippingFeeVnd: z.number().int().nonnegative().max(1_000_000),
+  }).strict(),
+  marketplacePricing: z.object({
+    shopeePriceMatch: z.literal(false),
+    reason: z.literal("PLATFORM_SUBSIDY_AND_VOUCHERS"),
+  }).strict(),
+  customerFaq: z.object({
+    discloseLightingAndDisplayColorVariance: z.boolean(),
+    handWashPreferred: z.boolean(),
+    machineWashAllowedWithLaundryBagAndGentleCycle: z.boolean(),
+  }).strict(),
+}).strict().superRefine((value, context) => {
+  if (new Set(value.exchange.supportedActions).size !== value.exchange.supportedActions.length) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["exchange", "supportedActions"],
+      message: "exchange supported actions must be unique",
+    });
+  }
+  if (new Set(value.exchange.saleRestriction.allowedActions).size !==
+      value.exchange.saleRestriction.allowedActions.length) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["exchange", "saleRestriction", "allowedActions"],
+      message: "sale restriction actions must be unique",
+    });
+  }
+  if (new Set(value.returns.eligibleReasons).size !== value.returns.eligibleReasons.length) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["returns", "eligibleReasons"],
+      message: "return reasons must be unique",
+    });
+  }
+  if (value.returns.refundBusinessDaysMax < value.returns.refundBusinessDaysMin) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["returns", "refundBusinessDaysMax"],
+      message: "refund maximum days must be greater than or equal to minimum days",
+    });
+  }
+});
+export type CustomerCarePolicyAdminContentV1 = z.infer<
+  typeof CustomerCarePolicyAdminContentV1Schema
+>;
+
 export const ShopPolicyAdminContentV1Schema = z.object({
   schemaVersion: z.literal(1),
   kind: z.literal("SHOP_POLICY"),
@@ -48,6 +131,7 @@ export const ShopPolicyAdminContentV1Schema = z.object({
   requirePhoneNumber: z.literal(true),
   requireDeliveryAddress: z.literal(true),
   allowedPaymentMethods: z.array(z.enum(["COD", "BANK_TRANSFER"])).min(1).max(2),
+  customerCare: CustomerCarePolicyAdminContentV1Schema.optional(),
   sourceMetadata: SourceMetadataSchema,
 }).strict();
 

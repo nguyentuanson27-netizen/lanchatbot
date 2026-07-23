@@ -74,6 +74,10 @@ import {
   createRealtimeSalesState,
   evaluateRealtimeSalesCycle,
 } from "./realtime-sales-cycle.js";
+import {
+  classifyPreSalePolicyIntent,
+  renderPreSalePolicyReply,
+} from "./pre-sale-policy.js";
 
 export interface RealtimeInboxPort {
   claimNext(
@@ -271,12 +275,7 @@ function postSaleHandoffReason(value: string): HandoffReason {
 }
 
 export function isPreSalePolicyQuestion(value: string): boolean {
-  const text = asciiFold(value);
-  const existingOrderEvidence =
-    /\b(van don|ma van don|tracking|don (?:hang )?(?:cua|nay|do)|da dat|da chot|da mua|da nhan|moi nhan|nhan hang roi|chua giao|dang giao|giao nham|giao sai|shipper)\b/u.test(text);
-  const asksPolicy =
-    /\b(chinh sach|co duoc|co ho tro|dieu kien|doi tra the nao|doi tra ra sao|bao hanh bao lau|kiem hang|dong kiem|phi ship|phi van chuyen|giao hang bao lau)\b/u.test(text);
-  return asksPolicy && !existingOrderEvidence;
+  return classifyPreSalePolicyIntent(value) !== null;
 }
 
 export function isPostSaleRequest(value: string): boolean {
@@ -284,6 +283,7 @@ export function isPostSaleRequest(value: string): boolean {
   if (isPreSalePolicyQuestion(value)) return false;
   return (
     /\b(van don|ma van don|tracking|don (?:hang )?(?:cua|nay|do)|da dat|da chot|da mua|da nhan|moi nhan|nhan hang roi|chua giao|dang giao|giao nham|giao sai|shipper)\b/u.test(text) ||
+    /\b(hang bi loi|san pham bi loi|loi vai|loi duong may)\b/u.test(text) ||
     /\b(doi dia chi|doi sdt|doi so dien thoai|sua dia chi|huy don|hoan tien|refund)\b/u.test(text) ||
     /\b(cho (?:chi|em|minh) doi|(?:chi|em|minh) (?:muon|can) doi|doi (?:size|mau|hang) (?:cho|cua) (?:chi|em|minh))\b/u.test(text)
   );
@@ -1201,6 +1201,9 @@ export class RealtimeRunner {
             throw new Error("SALES_CYCLE_RUNTIME_PORT_REQUIRED");
           })()
       : null;
+    const preSalePolicyIntent = message.isEcho
+      ? null
+      : classifyPreSalePolicyIntent(message.text ?? "");
 
     // Policy content is never fed to the model. CANARY_SHADOW is audit-only;
     // only a LIVE_OUTBOUND result can reach deterministic business helpers.
@@ -1209,7 +1212,7 @@ export class RealtimeRunner {
       channel: this.options.policyChannel,
       // Realtime currently has a conversation-scoped sales episode. The
       // cart runtime uses its own CART pin when a durable cart is opened.
-      ...(this.options.policyChannel === "CANARY_SHADOW"
+      ...(this.options.policyChannel === "CANARY_SHADOW" || preSalePolicyIntent !== null
         ? {}
         : {
             pin: {
@@ -1359,7 +1362,7 @@ export class RealtimeRunner {
     const hasCustomerUrl = !message.isEcho && containsCustomerUrl(message.text ?? "");
     const resolution = message.isEcho || hasCustomerUrl ||
         isPostSaleRequest(message.text ?? "") ||
-        isPreSalePolicyQuestion(message.text ?? "")
+        preSalePolicyIntent !== null
       ? this.emptyResolution()
       : await this.resolveProducts(message, state);
     const resolvedProduct = resolution.primary;
@@ -1415,7 +1418,31 @@ export class RealtimeRunner {
       ? { intent: imageIntent, selection: selectImages(resolution.primary, imageIntent) }
       : null;
     if (applied.status === "APPLIED" && applied.authorization.allowEvaluate) {
-      if (resolution.media.requiresHandoff) {
+      if (preSalePolicyIntent !== null) {
+        const reply = renderPreSalePolicyReply(
+          preSalePolicyIntent,
+          outboundRuntimePolicy(policyResolution),
+        );
+        if (reply) {
+          if (this.options.mode === "LIVE" && this.options.sendEnabled) {
+            metaMessages = [{ kind: "TEXT", text: reply }];
+          }
+        } else {
+          handoffGuardReasonCodes = [
+            "PRE_SALE_POLICY_UNAVAILABLE",
+            `PRE_SALE_POLICY_${preSalePolicyIntent}`,
+          ];
+          const transitioned = applySilentHandoff(
+            nextState,
+            "POLICY_TOOL_ERROR",
+            nextState.revision,
+            nextState.lastFence,
+            now,
+          );
+          nextState = transitioned.state;
+          handoff = transitioned.handoff;
+        }
+      } else if (resolution.media.requiresHandoff) {
         handoffGuardReasonCodes = [
           "MEDIA_UNCERTAIN_RATIO_EXCEEDED",
           `MEDIA_UNCERTAIN_${resolution.media.uncertainCount}_OF_${resolution.media.totalCount}`,
@@ -1642,6 +1669,7 @@ export class RealtimeRunner {
     if (
       salesCycleRecord &&
       !message.isEcho &&
+      preSalePolicyIntent === null &&
       handoff === null
     ) {
       const sales = await evaluateRealtimeSalesCycle({
@@ -2001,7 +2029,6 @@ export class RealtimeRunner {
   ): InboundConversationEvent {
     const text = (message.text ?? "").toLocaleLowerCase("vi");
     const postSale = isPostSaleRequest(message.text ?? "");
-    const preSalePolicy = isPreSalePolicyQuestion(message.text ?? "");
     const humanRequest = /(nhân viên|người tư vấn|gặp shop|gọi cho)/iu.test(text);
     return {
       eventKey: message.eventKey,
@@ -2012,8 +2039,6 @@ export class RealtimeRunner {
       journey: postSale ? "POST_SALE" : "PRE_SALE",
       requestedHandoffReason: postSale
         ? postSaleHandoffReason(message.text ?? "")
-        : preSalePolicy
-          ? "POLICY_TOOL_ERROR"
         : containsCustomerUrl(message.text ?? "")
           ? "SENSITIVE_CASE"
         : humanRequest

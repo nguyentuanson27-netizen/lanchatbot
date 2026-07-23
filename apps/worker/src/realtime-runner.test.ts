@@ -730,6 +730,106 @@ describe("RealtimeRunner", () => {
     }), expect.any(Date));
   });
 
+  it("answers a pre-sale return-policy question without model, product search or handoff", async () => {
+    const occurredAt = "2026-07-23T02:05:00.000Z";
+    const state = createConversationState({
+      conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
+      routingOwner: "APP",
+      now: new Date(occurredAt),
+    });
+    const claim = {
+      inboxId: "2a9afc47-978a-4b74-9653-3c89e75a89a0", pageId: "1198992073286645",
+      eventKey: "meta:1198992073286645:message:m-policy", conversationHash: "meta:v1:customer-hash",
+      occurredAt: new Date(occurredAt), receivedAt: new Date(occurredAt), receiveSequence: 32,
+      attemptCount: 1, leaseToken: "68c52ee9-9348-481d-a366-a6178618da3c",
+      envelope: {
+        schemaVersion: 1 as const, customerSendEnabled: false as const,
+        routing: { mode: "APP" as const, routingOwner: "APP" as const, evaluationOnly: false, reason: "APP_OWNS" as const },
+        message: {
+          schemaVersion: 1 as const, traceId: "3021af34-c98c-4086-a33c-3ecb2ad8f8f2",
+          eventKey: "meta:1198992073286645:message:m-policy", pageId: "1198992073286645",
+          messageId: "m-policy", senderId: "customer-1", conversationId: "meta:v1:customer-hash",
+          occurredAt, isEcho: false, appId: null, text: "có được đổi trả không", attachments: [],
+        },
+      },
+    };
+    const commit = vi.fn(async () => ({
+      stateCommitted: true, metaOutboxCreated: 1, pancakeTagOutboxCreated: false,
+      handoffEventCreated: false, sendAuthorized: true, reasonCodes: [],
+    }));
+    const search: RealtimeProductSearchPort = { searchText: vi.fn(), searchImage: vi.fn() };
+    const model: RealtimeModelPort = { generate: vi.fn(), groundWithFacts: vi.fn() };
+    const policyResolver = { resolve: vi.fn(async () => ({
+      status: "RESOLVED", source: "DATABASE", mayAffectOutbound: true,
+      reasonCodes: [], audit: {}, auditWrite: "RECORDED",
+      bundle: {
+        sideEffects: "LIVE_OUTBOUND",
+        bundleHash: `sha256:${"a".repeat(64)}`,
+        policy: { policyVersion: "customer-care-v1" },
+        artifacts: { shopPolicy: {
+          defaultShippingFeeVnd: 30_000,
+          deliveryPromiseText: "3-7 hôm hàng tới",
+          customerCare: {
+            exchange: {
+              windowDaysFromReceipt: 15, maxExchangesPerOrder: 1,
+              supportedActions: ["SIZE", "COLOR", "MODEL"],
+              saleRestriction: { discountThresholdBps: 3_000, allowedActions: ["SIZE", "COLOR"] },
+              requiredConditions: { originalTags: true, unused: true, unwashed: true, clean: true, undamaged: true },
+              totalTwoWayShippingFeeVnd: 30_000,
+              modelExchangePricing: "NEW_PRODUCT_LIST_PRICE_NO_SALE",
+              customerPaysPositivePriceDifference: true,
+              fulfillmentMethod: "COURIER_SWAP",
+            },
+            returns: {
+              eligibleReasons: ["MANUFACTURING_FABRIC_DEFECT", "MANUFACTURING_SEAM_DEFECT", "WRONG_PRODUCT_SENT"],
+              reportingWindowDaysFromReceipt: 5, shopShippingCoveragePercent: 100,
+              refundBusinessDaysMin: 1, refundBusinessDaysMax: 3,
+              refundStartsAfter: "SHOP_CONFIRMS_ELIGIBLE_ERROR",
+            },
+            inspection: { tryOnMode: "HOLD_UP_ONLY", refusedParcelShippingFeeVnd: 30_000 },
+            marketplacePricing: { shopeePriceMatch: false, reason: "PLATFORM_SUBSIDY_AND_VOUCHERS" },
+            customerFaq: {
+              discloseLightingAndDisplayColorVariance: true, handWashPreferred: true,
+              machineWashAllowedWithLaundryBagAndGentleCycle: true,
+            },
+          },
+        } },
+      },
+    } as unknown as RuntimePolicyResolution)) };
+    const facts = { ready: vi.fn(), resolve: vi.fn(), close: vi.fn() };
+    const runner = new RealtimeRunner(
+      { claimNext: vi.fn(async () => claim), complete: vi.fn(async () => true), retry: vi.fn(), failPermanent: vi.fn() },
+      {
+        loadOrCreate: vi.fn(async () => ({
+          conversationId: state.conversationId, pageId: claim.pageId,
+          customerHash: claim.conversationHash, stateVersion: 0, state,
+          routingOwner: "APP" as const, appSendEnabled: true, killSwitch: false,
+        })),
+        commit, linkProviderConversation: vi.fn(async () => undefined),
+      },
+      model, facts, search, new FailClosedTagObservationProvider(),
+      { workerId: "worker-1", mode: "LIVE", sendEnabled: true, policyChannel: "PUBLISHED" },
+      undefined, undefined, undefined, undefined, policyResolver,
+    );
+
+    expect(await runner.processOne()).toBe(true);
+    expect(search.searchText).not.toHaveBeenCalled();
+    expect(model.generate).not.toHaveBeenCalled();
+    expect(facts.resolve).not.toHaveBeenCalled();
+    expect(policyResolver.resolve).toHaveBeenCalledWith(expect.not.objectContaining({ pin: expect.anything() }));
+    expect(commit).toHaveBeenCalledWith(expect.objectContaining({
+      state: expect.objectContaining({ conversationOwner: "BOT" }),
+      metaPlan: expect.objectContaining({ messages: [{
+        kind: "TEXT",
+        text: expect.stringMatching(/15 ngày.*30\.000đ.*5 ngày/su),
+      }] }),
+    }), expect.any(Date));
+    expect(commit).toHaveBeenCalledWith(expect.not.objectContaining({
+      pancakeTagPlan: expect.anything(),
+      handoffEventPlan: expect.anything(),
+    }), expect.any(Date));
+  });
+
   it("handoffs stale explicit facts only for strict ready-stock products", () => {
     const stale = (fulfillmentPolicy: string, canOrderWhenZero: boolean): BusinessFactEnvelopeV1 => ({
       schemaVersion: 1,
