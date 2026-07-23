@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-23T11:32:00+07:00",
+  "environment": "production",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "releaseTag": "20260723-product-copy-text-first-r7",
+  "sourceCodeCommit": "e833e25925952910abc323ba035d58a08f343a59",
+  "documentationIncludedInReleaseTag": true,
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260723-product-copy-text-first-r7",
+  "pageAllowlist": ["1198992073286645"],
+  "composeSha256": "a743e3070d8f910e99542ba671018c06dd17ba10d4a1bde4646da02897643c42",
+  "image": {
+    "name": "lana-chatbot-app:product-copy-text-first-r7",
+    "digest": "sha256:f8c26c5bb0e87e0bc49da55ea9caf4e6174a3e5108f315d49907f5668a206c44",
+    "sizeBytes": 126583547
+  },
+  "servicesChanged": ["realtime-worker"],
+  "servicesVerifiedUnchanged": [
+    "api",
+    "delivery-worker",
+    "pos-snapshot-worker",
+    "admin-api",
+    "admin-web",
+    "admin-simulation-worker",
+    "n8n"
+  ],
+  "behavior": {
+    "productNameSource": "QDRANT_TITLE_WITH_CODE_FALLBACK",
+    "copyContextSource": "DESCRIPTION_XML",
+    "businessFactsSource": "VERIFIED_BUSINESS_NODES_ONLY",
+    "metaOrder": ["TEXT", "IMAGE"],
+    "imageDelayMs": 1500,
+    "outboxSequenceGuard": true
+  },
+  "verification": {
+    "fullMonorepoCheck": "PASS",
+    "targetedTests": "44_PASS",
+    "workerTests": "152_PASS",
+    "realtimeHealth": "PASS",
+    "posSnapshotHealth": "PASS",
+    "n8nRestarted": false
+  },
+  "migrations": [],
+  "rollback": {
+    "previousRelease": "/opt/lana-chatbot/releases/20260723-sales-cycle-production-r6",
+    "previousRealtimeImage": "lana-chatbot-app:sales-cycle-production-r6",
+    "dataDeletionRequired": false
+  }
+}
