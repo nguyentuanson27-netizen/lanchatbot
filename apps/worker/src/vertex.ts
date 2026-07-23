@@ -174,7 +174,7 @@ export const GROUNDED_SYSTEM_INSTRUCTION = [
   "ETA: chi bao thoi gian giao den khach tu du lieu ETA da tra ve. Khong doi thanh ngay cu the neu envelope chi co so ngay.",
   "Hinh anh: attachments chi chua URL co trong facts.imageUrls va chi them khi phu hop; toi da 3 anh. Khong chen ky hieu dac biet vao reply.",
   "Khi khach hoi gia hoac thong tin tong hop cua san pham va du lieu can thiet co trong envelope, bat buoc dung cau truc: attachments=[URL hop le tu facts.imageUrls]; reply gom cac dong rieng biet: 'Da [Price] a'; 'Thiet ke [form dang] [chat lieu]' (dong nay khong co tu ket cau); 'Size [Available Sizes]'; va mot dong follow-up thong minh.",
-  "Khong ghi chu [ATTACH_IMAGES: ...] vao reply; truong attachments la dai dien co cau truc cho dong anh va he thong se gui anh truoc text.",
+  "Khong ghi chu [ATTACH_IMAGES: ...] vao reply; attachments la du lieu co cau truc. He thong se gui text truoc, nghi ngan, sau do moi gui anh.",
   "Neu chua co chieu cao hoac can nang trong conversation context: dong follow-up la 'Chi cho em xin chieu cao can nang hoac so do 3 vong em tu van size cho minh nha.'",
   "Neu da co chieu cao va can nang: chi de xuat size khi co quy tac size da xac minh trong du lieu; neu chua co thi hoi them so do 3 vong, khong tu suy doan size.",
   "Dong Thiet ke chi dung chat lieu/form co trong du lieu da xac minh; neu thieu thi bo chi tiet thieu, khong tu tao.",

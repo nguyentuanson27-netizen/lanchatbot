@@ -14,6 +14,8 @@ import {
   multiProductReply,
   pancakeConversationId,
   productCodeOnly,
+  productDescriptionLine,
+  productDisplayName,
   RealtimeRunner,
   staleFactsRequireHandoff,
   unavailableFactsRequireHandoff,
@@ -221,16 +223,17 @@ describe("RealtimeRunner", () => {
   it("builds the mandatory verified product-info form without calling the model", () => {
     const proposal = verifiedProductInfoProposal(
       {
-        productId: "SV695",
-        parentProductId: "SV695",
-        canonicalCode: "SV695",
+        productId: "SD398",
+        parentProductId: "SD398",
+        canonicalCode: "SD398",
         aliases: [],
-        title: "Set váy Quỳnh Dao",
+        title: "Áo dài Dao Phụng",
+        descriptionXml: "Thiết kế nữ tính với chất liệu ren họa tiết hoa chìm phối tơ ống mềm mịn, mang lại cảm giác nhẹ nhàng. Áo dài được thiết kế form suông rộng, tạo độ thoải mái. Thiết kế áo dài 6 tà giúp tổng thể uyển chuyển khi mặc.",
         colors: ["ĐEN"],
-        materials: ["LỤA"],
-        silhouettes: ["CHIẾT EO"],
+        materials: ["REN", "TƠ ỐNG"],
+        silhouettes: ["SUÔNG", "ỐNG RỘNG"],
         occasions: [],
-        imageUrls: ["https://cdn.example/sv695.jpg"],
+        imageUrls: ["https://cdn.example/sd398.jpg"],
         images: [],
         catalogVersion: "catalog-v2",
       },
@@ -240,20 +243,20 @@ describe("RealtimeRunner", () => {
         source: "POS_SNAPSHOT",
         observedAt: "2026-07-18T00:00:00.000Z",
         expiresAt: "2026-07-20T00:00:00.000Z",
-        productId: "SV695",
+        productId: "SD398",
         facts: {
           schemaVersion: 1,
-          productId: "SV695",
-          parentProductId: "SV695",
-          offerType: "SET_VAY",
+          productId: "SD398",
+          parentProductId: "SD398",
+          offerType: "AO_DAI",
           listPriceVnd: null,
-          salePriceVnd: 770000,
+          salePriceVnd: 1199000,
           sizes: ["M", "L", "XL"],
           stockStatus: "IN_STOCK",
           stockQuantity: 3,
           deliveryEta: null,
           fulfillmentPolicy: "PRE_ORDER",
-          imageUrls: ["https://cdn.example/sv695.jpg"],
+          imageUrls: ["https://cdn.example/sd398.jpg"],
         },
         reasonCode: null,
       },
@@ -261,16 +264,38 @@ describe("RealtimeRunner", () => {
     );
     expect(proposal).toMatchObject({
       action: "REPLY",
-      productId: "SV695",
-      attachments: ["https://cdn.example/sv695.jpg"],
+      productId: "SD398",
+      attachments: ["https://cdn.example/sd398.jpg"],
       businessFactQuery: { intent: "PRICE" },
     });
     expect(proposal?.reply).toBe([
-      "Dạ mẫu SV695 giá 770k ạ",
-      "Thiết kế dáng chiết eo chuẩn form trên nền chất liệu lụa, mặc lên thanh lịch và tôn dáng.",
+      "Dạ áo dài Dao Phụng có giá 1199k ạ",
+      "Ren họa tiết hoa chìm phối tơ ống tạo bề mặt tinh tế, có độ rủ mềm. Form suông rộng giúp tà áo bay nhẹ khi di chuyển.",
       "Size M, L, XL",
       "Chị cho em xin chiều cao cân nặng hoặc số đo 3 vòng em tư vấn size cho mình nha.",
     ].join("\n"));
+  });
+
+  it("falls back to the product code when XML title has no actual product name", () => {
+    const product = {
+      productId: "SV695",
+      parentProductId: "SV695",
+      canonicalCode: "SV695",
+      aliases: [],
+      title: "SET VÁY SV695",
+      descriptionXml: "Thiết kế được may từ lưới cotton thêu 3D tinh xảo. Set có form suông nhẹ.",
+      colors: [],
+      materials: ["COTTON"],
+      silhouettes: ["SUÔNG"],
+      occasions: [],
+      imageUrls: [],
+      images: [],
+      catalogVersion: "catalog-v2",
+    };
+    expect(productDisplayName(product)).toBe("mẫu SV695");
+    expect(productDescriptionLine(product)).toBe(
+      "Lưới cotton tạo bề mặt thêu nổi tinh xảo. Form suông nhẹ giúp tổng thể mềm mại, thanh thoát.",
+    );
   });
 
   it("routes a bare product code through verified facts and emits image plus fixed form", async () => {
@@ -377,6 +402,7 @@ describe("RealtimeRunner", () => {
           canonicalCode: "SV695",
           aliases: [],
           title: "Set váy Quỳnh Dao",
+          descriptionXml: "Thiết kế được may từ lụa mềm. Set có form chiết eo giúp tổng thể thanh thoát.",
           colors: [],
           materials: ["LỤA"],
           silhouettes: ["CHIẾT EO"],
@@ -405,9 +431,10 @@ describe("RealtimeRunner", () => {
     expect(commit).toHaveBeenCalledWith(expect.objectContaining({
       metaPlan: expect.objectContaining({
         messages: [
+          { kind: "TEXT", text: expect.stringContaining("Dạ set váy Quỳnh Dao có giá 770k ạ") },
           { kind: "IMAGE", imageUrl },
-          { kind: "TEXT", text: expect.stringContaining("Dạ mẫu SV695 giá 770k ạ") },
         ],
+        imageDelayMs: 1_500,
       }),
     }), expect.any(Date));
     expect(complete).toHaveBeenCalledOnce();
@@ -638,8 +665,8 @@ describe("RealtimeRunner", () => {
     expect(commit).toHaveBeenCalledWith(expect.objectContaining({
       state: expect.objectContaining({ currentProductId: "SV695" }),
       metaPlan: expect.objectContaining({ messages: [
-        { kind: "IMAGE", imageUrl: detailUrl },
         { kind: "TEXT", text: expect.any(String) },
+        { kind: "IMAGE", imageUrl: detailUrl },
       ] }),
     }), expect.any(Date));
   });

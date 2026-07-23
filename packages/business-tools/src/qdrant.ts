@@ -121,6 +121,9 @@ export function stableProductDocumentFromQdrantPayload(value: unknown): StablePr
     canonicalCode,
     aliases: strings(payload.aliases),
     title: text(payload.title) || canonicalCode,
+    descriptionXml:
+      text(payload.description_xml) ||
+      text(payload.description),
     colors: strings(payload.search_colors ?? payload.colors),
     materials: strings(payload.search_materials ?? payload.material ?? payload.materials),
     silhouettes: strings(payload.search_silhouettes ?? payload.silhouettes),

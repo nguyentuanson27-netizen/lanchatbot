@@ -367,6 +367,156 @@ function hasBodyProfile(context: readonly ShadowContextMessage[]): boolean {
   return hasHeight && hasWeight;
 }
 
+function compactXmlDescription(value: string | undefined): string {
+  return (value ?? "")
+    .replace(/<[^>]*>/gu, " ")
+    .replace(/&nbsp;|&#160;/giu, " ")
+    .replace(/&amp;/giu, "&")
+    .replace(/&quot;|&#34;/giu, "\"")
+    .replace(/&#39;|&apos;/giu, "'")
+    .replace(/\s+/gu, " ")
+    .trim()
+    .slice(0, 10_000);
+}
+
+function normalizedVietnamese(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[\u0111\u0110]/gu, "d")
+    .toLowerCase();
+}
+
+function sentenceCase(value: string): string {
+  if (!value) return value;
+  return `${value.charAt(0).toLocaleUpperCase("vi")}${value.slice(1)}`;
+}
+
+function productTypeLowercase(value: string): string {
+  return value.replace(
+    /^(Áo dài|Áo|Đầm|Váy|Set|Combo|Quần|Chân váy)\b/u,
+    (prefix) => prefix.toLocaleLowerCase("vi"),
+  );
+}
+
+export function productDisplayName(product: StableProductDocument): string {
+  const title = product.title
+    .replace(/<[^>]*>/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim()
+    .replace(/[\s·|–—:;,.]+$/gu, "");
+  if (!title) return `mẫu ${product.productId}`;
+  const code = normalizedVietnamese(product.productId)
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/gu, "");
+  const residual = normalizedVietnamese(title)
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/gu, "")
+    .replace(code, "")
+    .replace(
+      /(?:SANPHAM|CHANVAY|AODAI|CROPTOP|JUMPSUIT|COMBO|MAU|SET|AO|VAY|DAM|QUAN)/gu,
+      "",
+    );
+  return residual.length >= 2
+    ? productTypeLowercase(title)
+    : `mẫu ${product.productId}`;
+}
+
+function xmlMaterialPhrase(
+  product: StableProductDocument,
+  description: string,
+): string {
+  const match = description.match(
+    /(?:chất liệu|được may từ|may từ)\s+([^.!?]{3,120})/iu,
+  );
+  const extracted = (match?.[1] ?? "")
+    .split(/,\s*(?:mang|tạo|giúp|cho|đem|vừa)\b/iu)[0]
+    ?.trim()
+    .replace(/\s+thêu\s+3d(?:\s+tinh xảo)?$/iu, "")
+    .replace(/\s+(?:mềm mịn|tinh xảo)$/iu, "")
+    .slice(0, 90) ?? "";
+  if (extracted) return extracted.toLocaleLowerCase("vi");
+  const materials = product.materials
+    .map((value) => value.trim().toLocaleLowerCase("vi"))
+    .filter(Boolean)
+    .slice(0, 2);
+  return materials.length > 0 ? naturalList(materials) : "";
+}
+
+function xmlFormPhrase(
+  product: StableProductDocument,
+  description: string,
+): string {
+  const candidates = [
+    ...description.matchAll(
+      /(?:được thiết kế|áo có|váy có|set có)\s+form\s+([^,.!?]{2,50})/giu,
+    ),
+  ];
+  const extracted = candidates
+    .map((match) => match[1]?.trim() ?? "")
+    .find((value) => value !== "" && !/^(?:đẹp|tốt)\b/iu.test(value));
+  if (extracted) {
+    return extracted
+      .split(/\s+(?:với|giúp|tạo)\b/iu)[0]
+      ?.trim()
+      .toLocaleLowerCase("vi")
+      .slice(0, 50) ?? "";
+  }
+  return product.silhouettes
+    .map((value) => value.trim().toLocaleLowerCase("vi"))
+    .filter(Boolean)
+    .slice(0, 2)
+    .join(" ");
+}
+
+export function productDescriptionLine(
+  product: StableProductDocument,
+): string {
+  const description = compactXmlDescription(product.descriptionXml);
+  const normalized = normalizedVietnamese(description);
+  const material = xmlMaterialPhrase(product, description);
+  const form = xmlFormPhrase(product, description);
+  let materialEffect = "tạo bề mặt mềm mại, tinh tế";
+  if (/\btheu\s*3d\b/u.test(normalized)) {
+    materialEffect = "tạo bề mặt thêu nổi tinh xảo";
+  } else if (/\bhoa\s*chim\b/u.test(normalized)) {
+    materialEffect = "tạo bề mặt tinh tế, có độ rủ mềm";
+  } else if (/\bdan\s*soi\b/u.test(normalized)) {
+    materialEffect = "giữ form nhẹ mà vẫn thoáng";
+  } else if (/\bdung\s*form\b/u.test(normalized)) {
+    materialEffect = "giữ dáng nhẹ mà vẫn mềm mại";
+  } else if (/\bthoang\s*mat\b/u.test(normalized)) {
+    materialEffect = "mang lại cảm giác nhẹ và thoáng";
+  }
+  const materialSentence = material
+    ? `${sentenceCase(material)} ${materialEffect}.`
+    : "";
+
+  let designSentence = "";
+  if (
+    /\bao\s*dai\b/u.test(normalized) &&
+    (/\b6\s*ta\b/u.test(normalized) || /\bta\s*xoe\b/u.test(normalized))
+  ) {
+    designSentence = `Form ${form || "suông"} giúp tà áo bay nhẹ khi di chuyển.`;
+  } else if (
+    /\bao\s*khoac\b/u.test(normalized) &&
+    /\bao\s*quay\b/u.test(normalized) &&
+    /\bchan\s*vay\b/u.test(normalized)
+  ) {
+    designSentence = "Thiết kế ba món dễ mặc, dễ phối.";
+  } else if (form) {
+    designSentence = `Form ${form} giúp tổng thể mềm mại, thanh thoát.`;
+  } else if (/\bde\s*mac\b/u.test(normalized)) {
+    designSentence = "Thiết kế nhẹ nhàng, dễ mặc và phối linh hoạt.";
+  }
+
+  const contextual = [materialSentence, designSentence]
+    .filter(Boolean)
+    .join(" ");
+  if (contextual) return contextual;
+  return "Thiết kế giữ form mềm mại, thanh lịch và dễ mặc.";
+}
+
 export function verifiedProductInfoProposal(
   product: StableProductDocument,
   facts: BusinessFactEnvelopeV1,
@@ -375,14 +525,8 @@ export function verifiedProductInfoProposal(
   if (facts.status !== "OK" || facts.facts === null) return null;
   const price = facts.facts.salePriceVnd ?? facts.facts.listPriceVnd;
   if (price === null) return null;
-  const silhouette = product.silhouettes[0]?.trim().toLocaleLowerCase("vi");
-  const materials = product.materials
-    .map((value) => value.trim().toLocaleLowerCase("vi"))
-    .filter(Boolean)
-    .slice(0, 2);
-  const designLine = materials.length > 0
-    ? `Thiết kế ${silhouette ? `dáng ${silhouette} ` : ""}chuẩn form trên nền chất liệu ${naturalList(materials)}, mặc lên thanh lịch và tôn dáng.`
-    : `Thiết kế ${silhouette ? `dáng ${silhouette} ` : ""}chuẩn form, mặc lên thanh lịch và tôn dáng.`;
+  const displayName = productDisplayName(product);
+  const designLine = productDescriptionLine(product);
   const sizeLine = facts.facts.sizes.length > 0
     ? `Size ${facts.facts.sizes.join(", ")}`
     : "Size đang cập nhật";
@@ -396,7 +540,7 @@ export function verifiedProductInfoProposal(
     productId: product.productId,
     action: "REPLY",
     reply: [
-      `Dạ mẫu ${product.productId} giá ${shortPrice(price)} ạ`,
+      `Dạ ${displayName} có giá ${shortPrice(price)} ạ`,
       designLine,
       sizeLine,
       followUp,
@@ -773,6 +917,7 @@ export interface RealtimeRunnerOptions {
   readonly postSaleTagId?: string;
   readonly closedOrderTagId?: string;
   readonly salesCycleEnabled?: boolean;
+  readonly imageDelayMs?: number;
   readonly promptVersion?: string;
   readonly metaAppId?: string;
   readonly policyChannel?: RuntimePolicyChannel;
@@ -808,6 +953,10 @@ export class RealtimeRunner {
       postSaleTagId: options.postSaleTagId ?? "",
       closedOrderTagId: options.closedOrderTagId ?? "",
       salesCycleEnabled: options.salesCycleEnabled ?? false,
+      imageDelayMs: Math.max(
+        0,
+        Math.min(5_000, Math.trunc(options.imageDelayMs ?? 1_500)),
+      ),
       promptVersion: options.promptVersion ?? "lana-realtime-v1",
       metaAppId: options.metaAppId ?? "",
       policyChannel: options.policyChannel ?? "CANARY_SHADOW",
@@ -1462,14 +1611,14 @@ export class RealtimeRunner {
             guarded.action === "ASK_PRODUCT_SELECTION")
         ) {
           metaMessages = [
+            ...guarded.textUnits.map(
+              (text): RealtimeMetaMessageUnit => ({ kind: "TEXT", text }),
+            ),
             ...guarded.imageUrls.map(
               (imageUrl): RealtimeMetaMessageUnit => ({
                 kind: "IMAGE",
                 imageUrl,
               }),
-            ),
-            ...guarded.textUnits.map(
-              (text): RealtimeMetaMessageUnit => ({ kind: "TEXT", text }),
             ),
           ];
         }
@@ -1575,6 +1724,7 @@ export class RealtimeRunner {
                 responseGroupId,
                 recipientId: message.senderId,
                 messages: metaMessages,
+                imageDelayMs: this.options.imageDelayMs,
               },
             }
           : {}),

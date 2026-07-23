@@ -27,6 +27,8 @@ export interface RealtimeMetaPlan {
   readonly responseGroupId: string;
   readonly recipientId: string;
   readonly messages: readonly RealtimeMetaMessageUnit[];
+  /** Ảnh chỉ đủ điều kiện gửi sau text và sau khoảng nghỉ này tính từ lúc commit. */
+  readonly imageDelayMs?: number;
 }
 
 export interface RealtimePancakeTagPlan {
@@ -1178,6 +1180,9 @@ export class PostgresRealtimeRuntimeStore {
         this.metaPayloadAad(input.pageId, outboxId),
         new Date(now.getTime() + 20 * 86_400_000),
       );
+      const imageDelayMs = message.kind === "IMAGE"
+        ? Math.max(0, Math.min(5_000, Math.trunc(plan.imageDelayMs ?? 0)))
+        : 0;
       const result = await client.query(
         `INSERT INTO meta_outbox (
            outbox_id, idempotency_key, reply_plan_id, response_group_id,
@@ -1185,9 +1190,9 @@ export class PostgresRealtimeRuntimeStore {
            recipient_ciphertext, recipient_nonce, recipient_auth_tag,
            payload_ciphertext, payload_nonce, payload_auth_tag,
            payload_encrypted_dek, payload_key_ref, payload_expires_at,
-           payload_fingerprint, sequence_no
+           payload_fingerprint, sequence_no, next_attempt_at
          ) VALUES (
-           $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18
+           $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19
          )
          ON CONFLICT (idempotency_key) DO NOTHING`,
         [
@@ -1209,6 +1214,7 @@ export class PostgresRealtimeRuntimeStore {
           payload.expiresAt,
           this.cipher.fingerprint(JSON.stringify(message), "meta-payload:v2"),
           sequence,
+          new Date(now.getTime() + imageDelayMs),
         ],
       );
       created += result.rowCount ?? 0;

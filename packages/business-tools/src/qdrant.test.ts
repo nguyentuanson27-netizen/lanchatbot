@@ -7,6 +7,7 @@ const payload = {
   ma_sp: "SQ149",
   aliases: ["SET-SQ149"],
   title: "Set SQ149",
+  description: "Lụa mềm với form suông nhẹ, phù hợp đi làm.",
   search_colors: ["DEN"],
   search_materials: ["LUA"],
   search_silhouettes: ["CONG SO"],
@@ -41,6 +42,7 @@ describe("Qdrant stable catalog adapter", () => {
     await expect(adapter.findByExactCode("sq149")).resolves.toMatchObject({
       productId: "SQ149",
       canonicalCode: "SQ149",
+      descriptionXml: "Lụa mềm với form suông nhẹ, phù hợp đi làm.",
       colors: ["DEN"],
       imageUrls: ["https://cdn.example/sq149.jpg", "https://cdn.example/sq149-2.jpg"],
     });

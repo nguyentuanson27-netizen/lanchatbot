@@ -17,6 +17,7 @@ const StableProductDocumentSchema = z
     canonicalCode: z.string().min(1).max(128),
     aliases: z.array(z.string().max(128)).max(100),
     title: z.string().min(1).max(500),
+    descriptionXml: z.string().max(10_000).optional().default(""),
     colors: z.array(z.string().max(100)).max(100),
     materials: z.array(z.string().max(100)).max(100),
     silhouettes: z.array(z.string().max(100)).max(100),
