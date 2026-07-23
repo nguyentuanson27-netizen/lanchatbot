@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-23T23:35:53+07:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "feat/sizechart-productfacts-media-v2",
+  "sourceCommit": "5d401b26792c1705ab6c76f452484f2c7a2d4232",
+  "releaseTag": "20260723-sizechart-productfacts-v2-canary-r13",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260723-sizechart-productfacts-v2-canary-r13",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260723-realtime-wave23-canary-r12",
+  "pageAllowlist": [
+    "1198992073286645"
+  ],
+  "images": {
+    "realtime": {
+      "name": "lana-chatbot-app:sizechart-facts-v2-5d401b2",
+      "digest": "sha256:2cbc3fcc7d14e321730531e9af92ce6cca4ab5b64057796f1ea09035c8e464f4"
+    },
+    "admin": {
+      "name": "lana-chatbot-app:sizechart-facts-v2-5d401b2",
+      "digest": "sha256:2cbc3fcc7d14e321730531e9af92ce6cca4ab5b64057796f1ea09035c8e464f4"
+    },
+    "sizeChartExtractor": {
+      "name": "lana-chatbot-app:sizechart-facts-v2-5d401b2",
+      "digest": "sha256:2cbc3fcc7d14e321730531e9af92ce6cca4ab5b64057796f1ea09035c8e464f4"
+    }
+  },
+  "composeSha256": "2c260b0f02679923a52842a9a0654e920c0f5d18adc82a938f5cbde5d612436c",
+  "migrations": {
+    "0020_size_chart_extraction": "56812a92dd64b0bbc114edc351b387b595652f7d38bdb94e46af73e9ecef87e4"
+  },
+  "verification": {
+    "monorepoBuild": "PASS",
+    "monorepoTypecheck": "PASS",
+    "tests": "744_PASS",
+    "messengerScenarios": "30_PASS",
+    "targetedRealtimeTests": "78_PASS",
+    "migrationRestoreCycle": "PASS_UP_DOWN_UP",
+    "composeValidation": "PASS",
+    "liveCutover": "PENDING",
+    "liveCanary": "PENDING_100_INBOUND_OR_48_HOURS"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260723-realtime-wave23-canary-r12",
+    "databaseBackupPath": "/opt/lana-chatbot/backups/20260723-sizechart-productfacts-v2-canary-r13/lana_chatbot_pre_0020_20260723T163507Z.dump",
+    "databaseBackupSha256": "5fb8c606aeab172687a5cb63faf507c54adbdcc747c5879aeecc6f2caa9d707d",
+    "dataDeletionRequired": false
+  },
+  "promotionGate": {
+    "status": "CUTOVER_READY",
+    "scope": "PAGE_TEST_ONLY",
+    "liveEvidenceRequired": true,
+    "publishedBeyondPageTest": false
+  }
+}
