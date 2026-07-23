@@ -114,6 +114,52 @@ export interface RealtimeInboxBatchGuard {
   readonly inboxIds: readonly string[];
 }
 
+export interface RealtimeDecisionEventPlan {
+  readonly eventId: string;
+  readonly eventKeyHash: string;
+  readonly eventType:
+    | "PRODUCT_RESOLVED"
+    | "PRICE_CARD_SENT"
+    | "SIZE_CONSULT_STARTED"
+    | "BUYING_SIGNAL_DETECTED"
+    | "ORDER_INFO_REQUESTED"
+    | "ORDER_INTENT_CREATED"
+    | "HANDOFF"
+    | "GUARD_BLOCKED"
+    | "NO_REPLY";
+  readonly origin: string | null;
+  readonly reasonCodes: readonly string[];
+  readonly releaseId: string;
+  readonly promptVersion: string;
+  readonly modelVersion: string | null;
+  readonly policyVersion: string | null;
+  readonly catalogVersion: string | null;
+  readonly mode: "DRY_RUN" | "LIVE";
+  readonly productId: string | null;
+  readonly intent: string | null;
+  readonly stage: string | null;
+  readonly action: string | null;
+  readonly occurredAt: Date;
+  readonly details: Readonly<{
+    productResolutionOrigin: string | null;
+    buyingSignalReasons: readonly string[];
+    guardReasonCodes: readonly string[];
+    factsStatus: "OK" | "STALE" | "AMBIGUOUS" | "NOT_FOUND" | "ERROR" | null;
+    factsReasonCode: string | null;
+    salesCycleStageBefore: string | null;
+    salesCycleStageAfter: string | null;
+    outboundMessageCount: number;
+    modelCalled: boolean;
+    modelLatencyMs: number | null;
+    modelTokenUsage: Readonly<{
+      prompt: number | null;
+      output: number | null;
+      total: number | null;
+    }>;
+    buyingSignalOverride: boolean;
+  }>;
+}
+
 export interface RealtimeCommitInput<TState, TSalesState = unknown> {
   readonly pageId: string;
   readonly customerHash: string;
@@ -125,6 +171,7 @@ export interface RealtimeCommitInput<TState, TSalesState = unknown> {
   readonly handoffEventPlan?: RealtimeHandoffEventPlan;
   readonly handoffAcknowledgementPlan?: RealtimeHandoffAcknowledgementPlan;
   readonly salesCyclePlan?: RealtimeSalesCyclePlan<TSalesState>;
+  readonly decisionEvents?: readonly RealtimeDecisionEventPlan[];
   /**
    * When present, state/outbox and all source inbox rows share one transaction.
    * A newer committed inbound changes the generation and makes this decision a
@@ -138,6 +185,7 @@ export interface RealtimeCommitResult {
   readonly metaOutboxCreated: number;
   readonly pancakeTagOutboxCreated: boolean;
   readonly handoffEventCreated: boolean;
+  readonly decisionEventsCreated?: number;
   readonly sendAuthorized: boolean;
   readonly reasonCodes: readonly string[];
   readonly inboxBatchStatus?: "NOT_REQUESTED" | "COMMITTED" | "SUPERSEDED";
@@ -623,6 +671,10 @@ export class PostgresRealtimeRuntimeStore {
         );
       }
 
+      const decisionEventsCreated = input.decisionEvents
+        ? await this.insertDecisionEvents(client, input, input.decisionEvents)
+        : 0;
+
       if (input.inboxBatchGuard) {
         await this.completeInboxBatch(
           client,
@@ -637,6 +689,7 @@ export class PostgresRealtimeRuntimeStore {
         metaOutboxCreated,
         pancakeTagOutboxCreated,
         handoffEventCreated,
+        decisionEventsCreated,
         sendAuthorized,
         reasonCodes,
         inboxBatchStatus: input.inboxBatchGuard
@@ -1127,6 +1180,58 @@ export class PostgresRealtimeRuntimeStore {
     if (released.rowCount !== 1) {
       throw new Error("INBOX_BATCH_LEASE_LOST");
     }
+  }
+
+  private async insertDecisionEvents<TState>(
+    client: PoolClient,
+    input: RealtimeCommitInput<TState>,
+    events: readonly RealtimeDecisionEventPlan[],
+  ): Promise<number> {
+    let created = 0;
+    for (const event of events) {
+      const result = await client.query(
+        `INSERT INTO conversation_events (
+           event_id, conversation_id, page_id, customer_hash, event_type,
+           intent, stage, action, handoff_reason, owner, product_id,
+           prompt_version, model_version, policy_version, catalog_version,
+           event_metadata, occurred_at
+         ) VALUES (
+           $1::uuid, $2::uuid, $3, $4, $5,
+           $6, $7, $8, $9, $10, $11,
+           $12, $13, $14, $15, $16::jsonb, $17
+         )
+         ON CONFLICT (event_id, occurred_at) DO NOTHING`,
+        [
+          event.eventId,
+          input.conversationId,
+          input.pageId,
+          input.customerHash,
+          event.eventType,
+          event.intent,
+          event.stage,
+          event.action,
+          event.eventType === "HANDOFF" ? event.reasonCodes[0] ?? null : null,
+          this.stateString(input.state, "conversationOwner", "BOT"),
+          event.productId,
+          event.promptVersion,
+          event.modelVersion,
+          event.policyVersion,
+          event.catalogVersion,
+          JSON.stringify({
+            schemaVersion: 1,
+            eventKeyHash: event.eventKeyHash,
+            origin: event.origin,
+            reasonCodes: event.reasonCodes,
+            releaseId: event.releaseId,
+            mode: event.mode,
+            ...event.details,
+          }),
+          event.occurredAt,
+        ],
+      );
+      created += result.rowCount ?? 0;
+    }
+    return created;
   }
 
   private async selectConversation<TState>(

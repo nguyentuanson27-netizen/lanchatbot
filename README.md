@@ -113,6 +113,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 ## Tài liệu
 
 - [Production baseline và ownership](docs/current/PRODUCTION_BASELINE_20260722.md)
+- [Kế hoạch nâng cấp Realtime Sales Agent](docs/current/REALTIME_AGENT_UPGRADE_PLAN.md)
 - [Quy trình GitHub và triển khai](docs/current/REPOSITORY_AND_DEPLOYMENT.md)
 - [Changelog](docs/history/CHANGELOG.md)
 - [Kiến trúc nền](docs/phase0/02_architecture_contracts.md)

@@ -3,6 +3,82 @@ import { LocalEnvelopeCipher } from "./envelope-cipher.js";
 import { PostgresRealtimeRuntimeStore } from "./realtime-runtime.js";
 
 describe("PostgresRealtimeRuntimeStore handoff commit", () => {
+  it("persists idempotent PII-free decision events in the state transaction", async () => {
+    const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
+    const client = {
+      async query(sql: string, values: readonly unknown[] = []) {
+        calls.push({ sql, values });
+        if (sql.includes("SELECT routing_owner")) {
+          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }] };
+        }
+        if (sql.includes("SELECT conversation_owner")) {
+          return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+        }
+        if (sql.includes("UPDATE conversations")) return { rowCount: 1, rows: [] };
+        if (sql.includes("INSERT INTO conversation_events")) return { rowCount: 1, rows: [] };
+        return { rowCount: 0, rows: [] };
+      },
+      release() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = {
+      async connect() { return client; },
+      async end() {},
+    };
+    const occurredAt = new Date("2026-07-23T05:00:00.000Z");
+
+    const result = await store.commit({
+      pageId: "page-1",
+      customerHash: "a".repeat(64),
+      conversationId: "33333333-3333-4333-8333-333333333333",
+      expectedStateVersion: 0,
+      state: { revision: 1, routingOwner: "APP", conversationOwner: "BOT" },
+      decisionEvents: [{
+        eventId: "10000000-0000-4000-8000-000000000003",
+        eventKeyHash: "b".repeat(64),
+        eventType: "BUYING_SIGNAL_DETECTED",
+        origin: "EXACT_CODE",
+        reasonCodes: ["DIRECT_PURCHASE_VERB"],
+        releaseId: "wave0-local",
+        promptVersion: "prompt-v1",
+        modelVersion: "gemini-test",
+        policyVersion: null,
+        catalogVersion: "catalog-v2",
+        mode: "LIVE",
+        productId: "CB182",
+        intent: "buy",
+        stage: "consulting",
+        action: "REPLY",
+        occurredAt,
+        details: {
+          productResolutionOrigin: "EXACT_CODE",
+          buyingSignalReasons: ["DIRECT_PURCHASE_VERB"],
+          guardReasonCodes: [],
+          factsStatus: "OK",
+          factsReasonCode: null,
+          salesCycleStageBefore: "DISCOVERY",
+          salesCycleStageAfter: "CART_OPEN",
+          outboundMessageCount: 1,
+          modelCalled: false,
+          modelLatencyMs: null,
+          modelTokenUsage: { prompt: null, output: null, total: null },
+          buyingSignalOverride: false,
+        },
+      }],
+    }, occurredAt);
+
+    expect(result.decisionEventsCreated).toBe(1);
+    const insert = calls.find((call) => call.sql.includes("INSERT INTO conversation_events"));
+    expect(insert?.sql).toContain("ON CONFLICT (event_id, occurred_at) DO NOTHING");
+    const serialized = JSON.stringify(insert?.values ?? []);
+    expect(serialized).not.toContain("0900000000");
+    expect(serialized).not.toContain("rawText");
+    expect(calls.at(-1)?.sql).toContain("COMMIT");
+  });
+
   it("schedules text immediately and delays image rows in the same ordered plan", async () => {
     const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
     const client = {

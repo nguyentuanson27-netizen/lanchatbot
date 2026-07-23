@@ -6,9 +6,10 @@ Tài liệu này áp dụng cho toàn bộ repository La.na Chatbot.
 
 1. Đọc `README.md`.
 2. Đọc `docs/current/PRODUCTION_BASELINE_20260722.md`.
-3. Đọc manifest mới nhất trong `deploy/manifests/`.
-4. Kiểm tra `git status`, branch hiện tại và thay đổi chưa commit trước khi sửa file.
-5. Nếu đang ở VPS, chỉ làm việc trong `/opt/lana-chatbot/repository`.
+3. Đọc `docs/current/REALTIME_AGENT_UPGRADE_PLAN.md` nếu công việc liên quan realtime agent, prompt, sales flow, model, profile, variant, facts, audit hoặc funnel.
+4. Đọc manifest mới nhất trong `deploy/manifests/`.
+5. Kiểm tra `git status`, branch hiện tại và thay đổi chưa commit trước khi sửa file.
+6. Nếu đang ở VPS, chỉ làm việc trong `/opt/lana-chatbot/repository`.
 
 ## Nguồn chuẩn và phạm vi VPS
 
@@ -55,4 +56,3 @@ Tài liệu này áp dụng cho toàn bộ repository La.na Chatbot.
 2. `AGENTS.md` và `README.md` trên branch hiện tại.
 3. `docs/current/PRODUCTION_BASELINE_20260722.md` và manifest release mới nhất.
 4. Tài liệu lịch sử trong `docs/phase*` và `docs/history/`.
-

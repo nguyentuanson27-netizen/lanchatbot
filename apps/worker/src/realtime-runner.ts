@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import {
+  detectBuyingSignal,
   normalizeProductCode,
   ProductSearchService,
   guardAgentProposal,
@@ -47,6 +48,7 @@ import type {
   InboxBatchLease,
   RealtimeCommitInput,
   RealtimeCommitResult,
+  RealtimeDecisionEventPlan,
   RealtimeInboxBatchGuard,
   RealtimeMetaMessageUnit,
   RealtimeSalesCyclePlan,
@@ -135,6 +137,17 @@ function deterministicUuid(input: string): string {
     `8${hash.slice(17, 20)}`,
     hash.slice(20, 32),
   ].join("-");
+}
+
+export function inboxRetryDelaySeconds(attemptCount: number, seed: string): number {
+  const boundedAttempt = Math.max(0, Math.min(30, Math.floor(attemptCount)));
+  const baseSeconds = Math.min(300, 2 ** boundedAttempt);
+  const sample = Number.parseInt(
+    createHash("sha256").update(seed).digest("hex").slice(0, 8),
+    16,
+  ) / 0xffff_ffff;
+  const jittered = Math.round(baseSeconds * (0.8 + sample * 0.4));
+  return Math.max(1, Math.min(300, jittered));
 }
 
 function batchCommitStatus(result: RealtimeCommitResult): BatchCommitStatus {
@@ -934,6 +947,9 @@ export interface RealtimeRunnerOptions {
   readonly promptVersion?: string;
   readonly metaAppId?: string;
   readonly policyChannel?: RuntimePolicyChannel;
+  readonly releaseId?: string;
+  readonly decisionTelemetryEnabled?: boolean;
+  readonly buyingSignalGuardEnabled?: boolean;
 }
 
 export class RealtimeRunner {
@@ -973,6 +989,9 @@ export class RealtimeRunner {
       promptVersion: options.promptVersion ?? "lana-realtime-v1",
       metaAppId: options.metaAppId ?? "",
       policyChannel: options.policyChannel ?? "CANARY_SHADOW",
+      releaseId: options.releaseId ?? "unversioned",
+      decisionTelemetryEnabled: options.decisionTelemetryEnabled ?? false,
+      buyingSignalGuardEnabled: options.buyingSignalGuardEnabled ?? false,
     };
   }
 
@@ -998,7 +1017,11 @@ export class RealtimeRunner {
         error instanceof Error && error.message
           ? error.message.slice(0, 128)
           : "REALTIME_PROCESSING_FAILED";
-      const delaySeconds = Math.min(300, 2 ** batch.attemptCount);
+      const retrySeed = batch.items.at(-1)?.eventKey ?? batch.conversationHash;
+      const delaySeconds = inboxRetryDelaySeconds(
+        batch.attemptCount,
+        `${retrySeed}:${batch.attemptCount}`,
+      );
       if (batch.nativeBatch) {
         if (batch.attemptCount >= 5) {
           if (!this.inbox.failBatchPermanent) {
@@ -1411,6 +1434,22 @@ export class RealtimeRunner {
     let salesCyclePlan: RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null = null;
     let salesDesiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null = null;
     let salesHandoffReasonCode: string | null = null;
+    let buyingSignalOverride = false;
+    let modelCalled = false;
+    let modelVersion: string | null = null;
+    let modelLatencyMs = 0;
+    let modelPromptTokens = 0;
+    let modelOutputTokens = 0;
+    let modelTotalTokens = 0;
+    let hasModelTokenUsage = false;
+    let salesHandled = false;
+    const buyingSignal = message.isEcho
+      ? { isBuyingSignal: false as const, reasons: [] as const }
+      : detectBuyingSignal(message.text ?? "", {
+          hasProductContext: Boolean(
+            resolvedProduct?.productId ?? nextState.currentProductId,
+          ),
+        });
     const imageIntent = message.isEcho
       ? null
       : explicitCustomerImageIntent(message.text ?? "");
@@ -1552,15 +1591,48 @@ export class RealtimeRunner {
         } else if (directProductInfo && resolvedProduct) {
           proposal = productInfoLookupProposal(resolvedProduct);
         } else {
+          modelCalled = true;
           const initial = await this.model.generate(
             modelContext,
             this.options.promptVersion,
           );
+          modelVersion = initial.modelVersion;
+          modelLatencyMs += initial.latencyMs;
+          modelPromptTokens += initial.tokenUsage.promptTokenCount ?? 0;
+          modelOutputTokens += initial.tokenUsage.candidatesTokenCount ?? 0;
+          modelTotalTokens += initial.tokenUsage.totalTokenCount ?? 0;
+          hasModelTokenUsage ||= Object.keys(initial.tokenUsage).length > 0;
           proposal = {
             ...initial.proposal,
             productId:
               resolvedProduct?.productId ?? initial.proposal.productId,
           };
+        }
+        if (
+          this.options.buyingSignalGuardEnabled &&
+          proposal.action === "NO_REPLY" &&
+          buyingSignal.isBuyingSignal
+        ) {
+          buyingSignalOverride = true;
+          proposal = resolvedProduct
+            ? {
+                ...proposal,
+                productId: resolvedProduct.productId,
+                action: "REPLY",
+                reply:
+                  "Em ghi nhận mình chốt mẫu này, c gửi em size/màu muốn lấy nha.",
+                attachments: [],
+                handoffReason: null,
+              }
+            : {
+                ...proposal,
+                productId: null,
+                action: "ASK_PRODUCT_SELECTION",
+                reply:
+                  "C chốt mẫu nào gửi em mã hoặc ảnh mẫu đó giúp em nha.",
+                attachments: [],
+                handoffReason: null,
+              };
         }
         const facts = await this.resolveFacts(
           proposal,
@@ -1597,14 +1669,24 @@ export class RealtimeRunner {
             : directProductInfo && resolvedProduct
               ? verifiedProductInfoProposal(resolvedProduct, facts, modelContext)
               : null;
-          proposal = deterministicProductInfo ?? (
-            await this.model.groundWithFacts(
+          if (deterministicProductInfo) {
+            proposal = deterministicProductInfo;
+          } else {
+            modelCalled = true;
+            const grounded = await this.model.groundWithFacts(
               modelContext,
               proposal,
               facts,
               this.options.promptVersion,
-            )
-          ).proposal;
+            );
+            modelVersion = grounded.modelVersion;
+            modelLatencyMs += grounded.latencyMs;
+            modelPromptTokens += grounded.tokenUsage.promptTokenCount ?? 0;
+            modelOutputTokens += grounded.tokenUsage.candidatesTokenCount ?? 0;
+            modelTotalTokens += grounded.tokenUsage.totalTokenCount ?? 0;
+            hasModelTokenUsage ||= Object.keys(grounded.tokenUsage).length > 0;
+            proposal = grounded.proposal;
+          }
         }
         const verifiedProductIds = new Set<string>();
         if (resolvedProduct) verifiedProductIds.add(resolvedProduct.productId);
@@ -1707,6 +1789,7 @@ export class RealtimeRunner {
         now,
       });
       salesCyclePlan = sales.plan;
+      salesHandled = sales.handled;
       if (sales.handled) {
         metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled
           ? [...sales.messages]
@@ -1752,6 +1835,114 @@ export class RealtimeRunner {
         : desiredTag === "VAN_DON"
           ? this.options.postSaleTagId
           : this.options.employeeTagId;
+    const finalAction = handoff
+      ? "HANDOFF"
+      : metaMessages.length > 0
+        ? "REPLY"
+        : proposal?.action ?? "NO_REPLY";
+    const decisionEvents: RealtimeDecisionEventPlan[] = [];
+    const occurredAt = new Date(message.occurredAt);
+    const eventKeyHash = createHash("sha256")
+      .update(message.eventKey)
+      .digest("hex");
+    const salesStageBefore = salesCycleRecord?.state.stage ?? null;
+    const salesStageAfter = salesCyclePlan?.state.stage ?? salesStageBefore;
+    const pushDecisionEvent = (
+      eventType: RealtimeDecisionEventPlan["eventType"],
+      reasonCodes: readonly string[] = [],
+    ): void => {
+      decisionEvents.push({
+        eventId: deterministicUuid(`${message.eventKey}:decision:${eventType}:v1`),
+        eventKeyHash,
+        eventType,
+        origin: resolution.origin,
+        reasonCodes,
+        releaseId: this.options.releaseId,
+        promptVersion: this.options.promptVersion,
+        modelVersion,
+        policyVersion: policyAuditRef,
+        catalogVersion: resolvedProduct?.catalogVersion ?? null,
+        mode: this.options.mode,
+        productId:
+          businessFacts?.productId ??
+          resolvedProduct?.productId ??
+          nextState.currentProductId,
+        intent:
+          explicitCustomerBusinessIntent(message.text ?? "") ??
+          (buyingSignal.isBuyingSignal
+            ? "BUYING_SIGNAL"
+            : preSalePolicyIntent !== null
+              ? `PRE_SALE_${preSalePolicyIntent}`
+              : null),
+        stage: salesStageAfter ?? nextState.salesStage,
+        action: finalAction,
+        occurredAt,
+        details: {
+          productResolutionOrigin: resolution.origin,
+          buyingSignalReasons: buyingSignal.reasons,
+          guardReasonCodes: handoffGuardReasonCodes,
+          factsStatus: businessFacts?.status ?? null,
+          factsReasonCode: businessFacts?.reasonCode ?? null,
+          salesCycleStageBefore: salesStageBefore,
+          salesCycleStageAfter: salesStageAfter,
+          outboundMessageCount: metaMessages.length,
+          modelCalled,
+          modelLatencyMs: modelCalled ? modelLatencyMs : null,
+          modelTokenUsage: {
+            prompt: hasModelTokenUsage ? modelPromptTokens : null,
+            output: hasModelTokenUsage ? modelOutputTokens : null,
+            total: hasModelTokenUsage ? modelTotalTokens : null,
+          },
+          buyingSignalOverride,
+        },
+      });
+    };
+    if (resolvedProduct) pushDecisionEvent("PRODUCT_RESOLVED");
+    if (
+      metaMessages.length > 0 &&
+      businessFacts?.status === "OK" &&
+      (explicitCustomerBusinessIntent(message.text ?? "") === "PRICE" ||
+        productCodeOnly(message.text ?? "") !== null)
+    ) {
+      pushDecisionEvent("PRICE_CARD_SENT");
+    }
+    if (
+      explicitCustomerBusinessIntent(message.text ?? "") === "SIZE" ||
+      salesStageAfter === "MEASUREMENTS_REQUIRED" ||
+      salesStageAfter === "SIZE_RECOMMENDED"
+    ) {
+      pushDecisionEvent("SIZE_CONSULT_STARTED");
+    }
+    if (buyingSignal.isBuyingSignal) {
+      pushDecisionEvent("BUYING_SIGNAL_DETECTED", [
+        ...(buyingSignalOverride ? ["NO_REPLY_OVERRIDE_BUYING_SIGNAL"] : []),
+        ...buyingSignal.reasons,
+      ]);
+    }
+    if (
+      salesCyclePlan?.events.some((event) => event.commandKind === "CART_OPENED")
+    ) {
+      pushDecisionEvent("ORDER_INFO_REQUESTED");
+      pushDecisionEvent("ORDER_INTENT_CREATED");
+    }
+    if (handoff) {
+      pushDecisionEvent("HANDOFF", [
+        salesHandoffReasonCode ?? businessFacts?.reasonCode ?? handoff.reason,
+        ...handoffGuardReasonCodes,
+      ]);
+    }
+    if (handoffGuardReasonCodes.length > 0) {
+      pushDecisionEvent("GUARD_BLOCKED", handoffGuardReasonCodes);
+    }
+    if (
+      !message.isEcho &&
+      !handoff &&
+      metaMessages.length === 0 &&
+      !salesHandled &&
+      proposal?.action === "NO_REPLY"
+    ) {
+      pushDecisionEvent("NO_REPLY");
+    }
     const result = await this.runtime.commit(
       {
         pageId: claim.pageId,
@@ -1820,6 +2011,9 @@ export class RealtimeRunner {
             }
           : {}),
         ...(salesCyclePlan ? { salesCyclePlan } : {}),
+        ...(this.options.decisionTelemetryEnabled && decisionEvents.length > 0
+          ? { decisionEvents }
+          : {}),
         ...(inboxBatchGuard ? { inboxBatchGuard } : {}),
       },
       now,

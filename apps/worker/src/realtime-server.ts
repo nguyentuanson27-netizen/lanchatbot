@@ -224,6 +224,14 @@ const model = new VertexShadowModel({
     20 * 1024 * 1024,
   ),
   allowedImageHostSuffixes: allowedMediaHostSuffixes,
+  logFailure: (event) => {
+    process.stderr.write(`${JSON.stringify({
+      level: "error",
+      component: "vertex",
+      event: "VERTEX_REQUEST_FAILURE",
+      ...event,
+    })}\n`);
+  },
 });
 const baseProductSearch = new ProductSearchService(
   new QdrantStableCatalogSearchAdapter({
@@ -426,6 +434,12 @@ const runner = new RealtimeRunner(
       process.env.REALTIME_PROMPT_VERSION?.trim() || "lana-realtime-v1",
     metaAppId: required("META_APP_ID"),
     policyChannel: runtimePolicyChannel,
+    releaseId:
+      process.env.REALTIME_RELEASE_ID?.trim() || "unversioned",
+    decisionTelemetryEnabled:
+      process.env.REALTIME_DECISION_TELEMETRY_ENABLED === "true",
+    buyingSignalGuardEnabled:
+      process.env.REALTIME_BUYING_SIGNAL_GUARD_V1 === "true",
   },
   quota,
   history,

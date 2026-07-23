@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { containsBuyingSignal } from "@lana/business-tools";
 import {
   CheckoutRevalidationV1Schema,
   OrderPreviewV1Schema,
@@ -132,8 +133,8 @@ function explicitQuantity(text: string): number {
   return explicitQuantityValue(text) ?? 1;
 }
 
-function purchaseReady(text: string): boolean {
-  return /(?:^|\s)(?:chốt|chot|lấy|lay|đặt|dat|mua)(?:\s|$)/iu.test(text);
+function purchaseReady(text: string, hasProductContext: boolean): boolean {
+  return containsBuyingSignal(text, { hasProductContext });
 }
 
 function confirmation(text: string): boolean {
@@ -675,7 +676,7 @@ export async function evaluateRealtimeSalesCycle(
     }
 
     if (
-      purchaseReady(input.text) &&
+      purchaseReady(input.text, Boolean(input.productId || state.cart)) &&
       input.productId &&
       state.cart.value.lines.some(({ parentProductId }) => parentProductId === input.productId) &&
       explicitQuantityValue(input.text) !== null
@@ -744,7 +745,7 @@ export async function evaluateRealtimeSalesCycle(
     }
 
     if (
-      purchaseReady(input.text) &&
+      purchaseReady(input.text, Boolean(input.productId || state.cart)) &&
       input.productId &&
       !state.cart.value.lines.some(({ parentProductId }) => parentProductId === input.productId)
     ) {
@@ -797,7 +798,10 @@ export async function evaluateRealtimeSalesCycle(
     }
   }
 
-  if (purchaseReady(input.text) && input.productId) {
+  if (
+    purchaseReady(input.text, Boolean(input.productId || state.cart)) &&
+    input.productId
+  ) {
     const selected = await input.facts.resolveCartSelection({
       shopAlias: input.shopAlias,
       productId: input.productId,

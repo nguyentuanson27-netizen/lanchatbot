@@ -8,6 +8,8 @@ import {
   vertexGenerateEndpoint,
   vertexPredictEndpoint,
   VertexShadowModel,
+  type VertexFailureEvent,
+  type VertexShadowModelOptions,
 } from "./vertex.js";
 
 const privateKey = generateKeyPairSync("rsa", {
@@ -25,7 +27,10 @@ const context = [{
   occurredAt: "2026-07-15T00:00:00.000Z",
 }];
 
-function modelWith(fetchImpl: typeof fetch): VertexShadowModel {
+function modelWith(
+  fetchImpl: typeof fetch,
+  overrides: Partial<VertexShadowModelOptions> = {},
+): VertexShadowModel {
   return new VertexShadowModel({
     projectId: "test-project",
     location: "us-central1",
@@ -33,7 +38,53 @@ function modelWith(fetchImpl: typeof fetch): VertexShadowModel {
     serviceAccount: { email: "test@example.iam.gserviceaccount.com", privateKey },
     fetchImpl,
     timeoutMs: 5_000,
+    ...overrides,
   });
+}
+
+function generatedProposalResponse(): Response {
+  return new Response(JSON.stringify({
+    modelVersion: "gemini-test-001",
+    candidates: [{ content: { parts: [{ text: JSON.stringify({
+      schemaVersion: 1,
+      intent: "greeting",
+      conversationStage: "discovery",
+      productId: null,
+      action: "REPLY",
+      reply: "Em chao chi a",
+      attachments: [],
+      handoffReason: null,
+      businessFactQuery: {
+        intent: "NONE",
+        offerType: null,
+        color: null,
+        size: null,
+        deliveryRegion: null,
+      },
+    }) }] } }],
+  }), { status: 200 });
+}
+
+function rubricResponse(): Response {
+  return new Response(JSON.stringify({
+    candidates: [{ content: { parts: [{ text: JSON.stringify({
+      schemaVersion: 1,
+      intent: "buy",
+      conversationStage: "closing",
+      scores: {
+        relevance: 5,
+        questionResolution: 5,
+        nextStepQuality: 5,
+        naturalness: 5,
+        concision: 5,
+        overall: 5,
+      },
+      strengths: [],
+      weaknesses: [],
+      improvedReply: "",
+      recommendationAction: "KEEP",
+    }) }] } }],
+  }), { status: 200 });
 }
 
 describe("Vertex shadow client", () => {
@@ -41,6 +92,8 @@ describe("Vertex shadow client", () => {
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Neu khach chi gui ma san pham: businessFactQuery.intent=PRICE");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("khong hoi nguoc khach muon xem thong tin gi");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Khong chuyen HANDOFF chi vi khach hoi gia");
+    expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Tuyet doi khong NO_REPLY");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Khong dung NO_REPLY neu tin moi co tin hieu mua");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Khi HANDOFF: reply rong");
     expect(SHADOW_SYSTEM_INSTRUCTION).not.toContain("[SILENT]");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("BUSINESS_FACT_ENVELOPE la nguon duy nhat");
@@ -86,6 +139,30 @@ describe("Vertex shadow client", () => {
     }) as unknown as typeof fetch;
     const vector = await modelWith(fetchMock).embedText("set cong so mau den");
     expect(vector).toHaveLength(1_408);
+  });
+
+  it("refreshes once and preserves the embedding result after a 401", async () => {
+    let authCalls = 0;
+    let predictCalls = 0;
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        authCalls += 1;
+        return new Response(JSON.stringify({ access_token: `token-${authCalls}`, expires_in: 3_600 }), { status: 200 });
+      }
+      predictCalls += 1;
+      return predictCalls === 1
+        ? new Response("{}", { status: 401 })
+        : new Response(JSON.stringify({
+            predictions: [{ textEmbedding: Array.from({ length: 1_408 }, () => 0.02) }],
+          }), { status: 200 });
+    }) as unknown as typeof fetch;
+
+    const vector = await modelWith(fetchMock).embedText("set cong so mau den");
+
+    expect(vector).toHaveLength(1_408);
+    expect(vector[0]).toBe(0.02);
+    expect(authCalls).toBe(2);
+    expect(predictCalls).toBe(2);
   });
 
   it("blocks private image URLs before downloading them", async () => {
@@ -152,5 +229,108 @@ describe("Vertex shadow client", () => {
     const result = await modelWith(fetchMock).judgeSalesReply(context, "Set co gia 699k a");
     expect(result.scores.overall).toBe(4);
     expect(result.recommendationAction).toBe("REWRITE");
+  });
+
+  it("refreshes once and retries generation after a 401", async () => {
+    let authCalls = 0;
+    let generateCalls = 0;
+    const failures: VertexFailureEvent[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        authCalls += 1;
+        return new Response(JSON.stringify({ access_token: `token-${authCalls}`, expires_in: 3_600 }), { status: 200 });
+      }
+      generateCalls += 1;
+      return generateCalls === 1
+        ? new Response("{}", { status: 401 })
+        : generatedProposalResponse();
+    }) as unknown as typeof fetch;
+
+    const result = await modelWith(fetchMock, { logFailure: (event) => failures.push(event) })
+      .generate(context, "prompt-v1");
+
+    expect(result.proposal.action).toBe("REPLY");
+    expect(authCalls).toBe(2);
+    expect(generateCalls).toBe(2);
+    expect(failures).toEqual([{
+      endpoint: "GENERATE",
+      status: 401,
+      attempt: 1,
+      retryable: true,
+      errorCode: "VERTEX_GENERATE_UNAUTHORIZED",
+    }]);
+    expect(JSON.stringify(failures)).not.toContain("token-");
+    expect(JSON.stringify(failures)).not.toContain(context[0]?.text);
+  });
+
+  it.each([3, 10, 100])("coalesces %i concurrent callers into one OAuth request", async (callerCount) => {
+    let authCalls = 0;
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        authCalls += 1;
+        await Promise.resolve();
+        return new Response(JSON.stringify({ access_token: "shared-token", expires_in: 3_600 }), { status: 200 });
+      }
+      return generatedProposalResponse();
+    }) as unknown as typeof fetch;
+    const model = modelWith(fetchMock);
+
+    await Promise.all(Array.from({ length: callerCount }, () => model.generate(context, "prompt-v1")));
+
+    expect(authCalls).toBe(1);
+  });
+
+  it("does not loop when generation remains unauthorized", async () => {
+    let authCalls = 0;
+    let generateCalls = 0;
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        authCalls += 1;
+        return new Response(JSON.stringify({ access_token: `token-${authCalls}`, expires_in: 3_600 }), { status: 200 });
+      }
+      generateCalls += 1;
+      return new Response("{}", { status: 401 });
+    }) as unknown as typeof fetch;
+
+    await expect(modelWith(fetchMock).generate(context, "prompt-v1"))
+      .rejects.toThrow("VERTEX_GENERATE_FAILED");
+    expect(authCalls).toBe(2);
+    expect(generateCalls).toBe(2);
+  });
+
+  it("refreshes once and retries the rubric judge after a 401", async () => {
+    let authCalls = 0;
+    let judgeCalls = 0;
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        authCalls += 1;
+        return new Response(JSON.stringify({ access_token: `token-${authCalls}`, expires_in: 3_600 }), { status: 200 });
+      }
+      judgeCalls += 1;
+      return judgeCalls === 1
+        ? new Response("{}", { status: 401 })
+        : rubricResponse();
+    }) as unknown as typeof fetch;
+
+    const result = await modelWith(fetchMock).judgeSalesReply(context, "Chốt mẫu này");
+
+    expect(result.recommendationAction).toBe("KEEP");
+    expect(authCalls).toBe(2);
+    expect(judgeCalls).toBe(2);
+  });
+
+  it.each([429, 503])("returns status %i to the Inbox retry layer without an inner loop", async (status) => {
+    let generateCalls = 0;
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      generateCalls += 1;
+      return new Response("{}", { status });
+    }) as unknown as typeof fetch;
+
+    await expect(modelWith(fetchMock).generate(context, "prompt-v1"))
+      .rejects.toMatchObject({ code: "VERTEX_GENERATE_RETRYABLE", retryable: true });
+    expect(generateCalls).toBe(1);
   });
 });

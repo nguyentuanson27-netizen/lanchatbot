@@ -15,3 +15,4 @@ export * from "./size-engine.js";
 export * from "./media-selector-v2.js";
 export * from "./canonical-cart-engine.js";
 export * from "./negotiation-engine-v2.js";
+export * from "./buying-signal.js";

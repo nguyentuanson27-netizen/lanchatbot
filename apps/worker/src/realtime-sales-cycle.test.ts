@@ -195,6 +195,25 @@ function input(
 }
 
 describe("realtime Phase 3 sales cycle", () => {
+  it.each([
+    "Được, size M nhé",
+    "ship cho chị mẫu trên",
+    "ok lấy màu be",
+  ])("moves a contextual buying signal forward instead of staying silent: %s", async (text) => {
+    const state = createRealtimeSalesState(conversationId, pageId, now);
+    const output = await evaluateRealtimeSalesCycle(input(
+      state,
+      text,
+      `event-buying-${text.length}`,
+    ));
+    expect(output).toMatchObject({
+      handled: true,
+      transferToHuman: false,
+      plan: { state: { stage: "CART_OPEN" } },
+    });
+    expect(output.messages).not.toHaveLength(0);
+  });
+
   it("goes from purchase intent to preview and PURCHASE_CONFIRMED exactly once", async () => {
     let state = createRealtimeSalesState(conversationId, pageId, now);
     const opened = await evaluateRealtimeSalesCycle(input(

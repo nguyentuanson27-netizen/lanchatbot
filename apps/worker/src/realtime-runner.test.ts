@@ -12,6 +12,7 @@ import {
   isPreSalePolicyQuestion,
   FailClosedTagObservationProvider,
   holdingMessagesForHandoff,
+  inboxRetryDelaySeconds,
   modelHandoffPermitted,
   multiProductReply,
   pancakeConversationId,
@@ -31,6 +32,16 @@ import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 
 describe("RealtimeRunner", () => {
+  it("uses deterministic bounded jitter for inbox retries", () => {
+    expect(inboxRetryDelaySeconds(3, "event-a")).toBe(
+      inboxRetryDelaySeconds(3, "event-a"),
+    );
+    expect(inboxRetryDelaySeconds(3, "event-a")).toBeGreaterThanOrEqual(6);
+    expect(inboxRetryDelaySeconds(3, "event-a")).toBeLessThanOrEqual(10);
+    expect(inboxRetryDelaySeconds(30, "event-a")).toBeLessThanOrEqual(300);
+    expect(inboxRetryDelaySeconds(-4, "event-a")).toBeGreaterThanOrEqual(1);
+  });
+
   it("reuses only verified current-product context for genuine follow-up messages", () => {
     expect(currentProductContinuationId("xin ảnh cận chất", "SV695")).toBe("SV695");
     expect(currentProductContinuationId("mẫu này còn size M không", "SV695")).toBe("SV695");
