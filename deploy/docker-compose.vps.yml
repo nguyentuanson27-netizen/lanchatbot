@@ -525,6 +525,7 @@ services:
     environment:
       NODE_ENV: production
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      BATCH_STATUS_DATABASE_URL_FILE: /run/secrets/batch_status_database_url
       DATA_INGESTION_V2_SHEET_ID: 1VGNU55l9wcDh5RFV07f6JdiV7__FM9uGaVCDThUUgS0
       GOOGLE_SHEETS_CREDENTIAL_FILE: /run/secrets/vertex_google_api
       LANA_PRODUCT_FEED_URL: https://www.lanadesign.vn/partner_feeds/danh-muc-lanadesign-vn.xml
@@ -553,6 +554,7 @@ services:
       P23B_RUN_ID: p23b-app-shard0
     secrets:
       - vertex_google_api
+      - batch_status_database_url
     depends_on:
       redis:
         condition: service_healthy
