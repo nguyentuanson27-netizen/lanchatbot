@@ -80,10 +80,14 @@ export interface ProductImage {
   angle: ProductImageAngle;
   imageType: ProductImageType;
   intents: readonly string[];
+  /** Reviewed garment parts from image_registry (AO, CHAN_VAY, QUAN...). */
+  partsVisible?: readonly string[];
   sortOrder: number;
   qualityScore: number | null;
   /** true khi ảnh là feedback thật của khách đã được người duyệt xác nhận. */
   feedback: boolean;
+  /** Stable metadata observation time from the Qdrant payload when available. */
+  observedAt?: string | null;
 }
 
 export interface StableProductDocument {
@@ -104,6 +108,7 @@ export interface StableProductDocument {
    *  ảnh tự lùi về thứ tự của `imageUrls`. */
   images: readonly ProductImage[];
   catalogVersion: string;
+  observedAt?: string | null;
 }
 
 export interface ScoredStableProduct {

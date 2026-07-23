@@ -373,9 +373,9 @@ export async function getOverview(signal?: AbortSignal): Promise<Overview> {
   const pages = arrayValue(pagesPayload.items);
   const firstPage = record(pages[0]);
   const conversations = record(payload.conversations);
-  const evaluations = record(payload.evaluations);
   const queues = record(payload.queues);
   const facts = record(payload.business_facts);
+  const funnel = record(payload.sales_funnel);
   const control = record(payload.admin_control);
   const workers = arrayValue(payload.workers);
   const failedQueues = Object.values(queues).reduce<number>((total, value) => {
@@ -411,10 +411,31 @@ export async function getOverview(signal?: AbortSignal): Promise<Overview> {
       : `Tất cả ${pages.length} page`,
     mode: control.enabled === true ? "CONTROLLED" : "READ_ONLY",
     metrics: [
-      { label: "Hội thoại", value: numberValue(conversations.total) },
-      { label: "Hoạt động 24 giờ", value: numberValue(conversations.active_24h) },
-      { label: "Nhân viên đang giữ", value: numberValue(conversations.human) },
-      { label: "Đánh giá hoàn tất", value: numberValue(evaluations.completed) },
+      {
+        label: "Hỏi giá",
+        value: numberValue(funnel.price_asked),
+        hint: `Cửa sổ ${numberValue(funnel.lookback_hours, 48)} giờ`,
+      },
+      {
+        label: "Tư vấn size",
+        value: numberValue(funnel.size_consulted),
+        hint: `${numberValue(funnel.price_to_size_pct)}% từ hỏi giá`,
+      },
+      {
+        label: "Mở giỏ",
+        value: numberValue(funnel.cart_opened),
+        hint: `${numberValue(funnel.size_to_cart_pct)}% từ tư vấn size`,
+      },
+      {
+        label: "Xem trước",
+        value: numberValue(funnel.order_preview),
+        hint: `${numberValue(funnel.cart_to_preview_pct)}% từ mở giỏ`,
+      },
+      {
+        label: "Đã xác nhận mua",
+        value: numberValue(funnel.purchase_confirmed),
+        hint: `${numberValue(funnel.end_to_end_pct)}% từ hỏi giá`,
+      },
     ],
     services: normalizeServices(workers),
     alerts,

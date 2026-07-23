@@ -33,12 +33,15 @@ const StableProductDocumentSchema = z
           "LIFESTYLE", "COLLAGE", "SIZE_GUIDE", "OTHER",
         ]),
         intents: z.array(z.string().max(64)).max(16),
+        partsVisible: z.array(z.string().max(64)).max(16).optional().default([]),
         sortOrder: z.number().int(),
         qualityScore: z.number().nullable(),
         feedback: z.boolean(),
+        observedAt: z.string().datetime().nullable().optional().default(null),
       }).strict(),
     ).max(40).default([]),
     catalogVersion: z.string().min(1).max(128),
+    observedAt: z.string().datetime().nullable().optional().default(null),
   })
   .strict();
 

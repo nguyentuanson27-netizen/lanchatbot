@@ -193,6 +193,21 @@ export const SizeChartAdminContentV1Schema = z.object({
   schemaVersion: z.literal(1),
   kind: z.literal("SIZE_CHART"),
   chart: SizeChartV1Schema,
+  scope: z.object({
+    level: z.enum(["COMPONENT", "CATEGORY", "GLOBAL"]),
+    parentProductIds: z.array(z.string().trim().min(1).max(128)).max(500).default([]),
+    categories: z.array(z.string().trim().min(1).max(128)).max(100).default([]),
+    componentRole: z.enum([
+      "TOP", "SKIRT", "PANTS", "DRESS", "JACKET", "ACCESSORY", "OTHER",
+    ]).nullable().default(null),
+    forms: z.array(z.string().trim().min(1).max(128)).max(100).default([]),
+    materials: z.array(z.string().trim().min(1).max(128)).max(100).default([]),
+  }).strict().optional(),
+  extraction: z.object({
+    measurementBasis: z.enum(["BODY", "GARMENT", "UNKNOWN"]),
+    confidence: z.number().min(0).max(1),
+    extractorVersion: z.string().trim().min(1).max(128),
+  }).strict().optional(),
   sourceMetadata: SourceMetadataSchema,
 }).strict();
 

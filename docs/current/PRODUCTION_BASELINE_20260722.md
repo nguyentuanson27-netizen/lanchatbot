@@ -5,16 +5,29 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260723-realtime-wave23-canary-r12`.
-- Compose SHA-256: `2ab106df1684f4695c889e746e2e27e5e67de9f76ddc2c127ae680cff49cbbdf`.
+- Current release candidate: `/opt/lana-chatbot/releases/20260723-sizechart-productfacts-v2-canary-r13`.
+- Previous release: `/opt/lana-chatbot/releases/20260723-realtime-wave23-canary-r12`.
+- Compose SHA-256: `2c260b0f02679923a52842a9a0654e920c0f5d18adc82a938f5cbde5d612436c`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
-- Migration mới nhất: `0019_customer_profile_wave2`.
+- Migration mới nhất trong candidate: `0020_size_chart_extraction`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
 Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời điểm kiểm kê. Danh sách image digest đầy đủ nằm trong release manifest.
 
 Realtime page test chạy image `lana-chatbot-app:realtime-wave23-b29725d` (`sha256:b732a4310b1f13662648d57f585259413e053191bc01bb496d12691d8abdbf03`) từ commit `b29725d1071bb202b0d43095f1d6d52c8331cfc6`. Shadow worker giữ image Wave 1; Admin Web, Admin API và Admin Simulation Worker giữ image `lana-chatbot-app:customer-care-policy-r10`; P2.3B giữ image r9 và POS snapshot giữ image r6. API webhook, delivery worker và n8n không đổi.
+
+## Size Chart + ProductFactsV2 candidate r13
+
+- Source code: `5d401b26792c1705ab6c76f452484f2c7a2d4232`; image Node 22 `lana-chatbot-app:sizechart-facts-v2-5d401b2`, digest `sha256:2cbc3fcc7d14e321730531e9af92ce6cca4ab5b64057796f1ea09035c8e464f4`.
+- Size Chart chạy app-native: đọc ảnh `SIZE_GUIDE/SIZE_CHART/BANG_SIZE` từ `image_registry`, resize trong app, trích xuất có schema bằng Vertex, chỉ staging bảng số đo cơ thể đủ confidence thành `DRAFT`. Runtime chỉ dùng chart đã được Admin duyệt và đánh dấu `VERIFIED`.
+- Realtime đã nối ProductFactsV2 từ POS snapshot + Qdrant stable + policy đã duyệt. POS vẫn là nguồn chuẩn BOM/giá/tồn; Media Selector V2 chọn đúng mục đích và thành phần, không lấy ảnh loại khác thay khi thiếu.
+- Đã sửa profile tiếng Việt có/không dấu, bằng chứng variant chỉ từ chữ khách nhập và phân tách fact theo từng mã trong tin nhiều sản phẩm.
+- Admin có funnel 48 giờ: hỏi giá → tư vấn size → mở giỏ → xem trước → `PURCHASE_CONFIRMED`.
+- Full monorepo đạt `744/744` test; bộ mục tiêu đạt `30/30` kịch bản Messenger và `78/78` test realtime liên quan. Docker build Node 22 đạt.
+- Backup trước migration: `/opt/lana-chatbot/backups/20260723-sizechart-productfacts-v2-canary-r13/lana_chatbot_pre_0020_20260723T163507Z.dump`, SHA-256 `5fb8c606aeab172687a5cb63faf507c54adbdcc747c5879aeecc6f2caa9d707d`. Restore-test `up → down → up` đạt trên database tạm.
+- Compose đã khôi phục khai báo P2.3A/P2.3C app-native đang chạy để tránh orphan ownership; không bật lại workflow n8n tương ứng.
+- Sau cutover chỉ page `1198992073286645` được phép outbound. Canary kết thúc khi đạt 100 inbound xử lý hoặc đủ 48 giờ, điều kiện nào đến trước; 30 replay không được tính vào bằng chứng live.
 
 ## Realtime Wave 2/3 CANARY_LIVE
 

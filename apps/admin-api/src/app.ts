@@ -426,6 +426,19 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
     }),
   );
 
+  app.get<{ Querystring: { page_id?: string; lookback_hours?: string } }>(
+    "/admin/v1/sales-funnel/summary",
+    async (request) => ({
+      summary: await options.store.salesFunnelSummary(
+        requireIdentity(request),
+        optionalToken(request.query.page_id, 64),
+        request.query.lookback_hours
+          ? Math.max(1, Math.min(720, Number.parseInt(request.query.lookback_hours, 10) || 48))
+          : 48,
+      ),
+    }),
+  );
+
   app.get<{ Querystring: ListQuerystring }>(
     "/admin/v1/evaluations",
     async (request) => {

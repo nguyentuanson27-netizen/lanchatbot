@@ -189,6 +189,11 @@ export interface AdminStore {
     identity: AdminIdentity,
     pageId?: string,
   ): Promise<Record<string, unknown>>;
+  salesFunnelSummary(
+    identity: AdminIdentity,
+    pageId?: string,
+    lookbackHours?: number,
+  ): Promise<Record<string, unknown>>;
   listEvaluations(
     identity: AdminIdentity,
     query: EvaluationQuery,

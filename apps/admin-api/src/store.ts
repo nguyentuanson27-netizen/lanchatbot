@@ -236,7 +236,7 @@ export class PostgresAdminStore implements AdminStore {
   async dashboard(identity: AdminIdentity): Promise<Record<string, unknown>> {
     const scope = scopeClause(identity, "page_id", 1);
     const values = scope.values;
-    const [pages, conversations, inbox, metaOutbox, pancakeOutbox, evaluations, workers, facts] =
+    const [pages, conversations, inbox, metaOutbox, pancakeOutbox, evaluations, funnel, workers, facts] =
       await Promise.all([
         this.pool.query(
           `SELECT count(*)::int AS total,
@@ -258,6 +258,7 @@ export class PostgresAdminStore implements AdminStore {
         this.statusCounts("admin_meta_outbox_v", identity),
         this.statusCounts("admin_pancake_outbox_v", identity),
         this.evaluationSummary(identity),
+        this.salesFunnelSummary(identity),
         this.listWorkers(identity),
         this.businessFactSummary(identity),
       ]);
@@ -270,6 +271,7 @@ export class PostgresAdminStore implements AdminStore {
         pancake_outbox: pancakeOutbox,
       },
       evaluations,
+      sales_funnel: funnel,
       workers,
       business_facts: facts,
       generated_at: new Date().toISOString(),
@@ -563,6 +565,53 @@ export class PostgresAdminStore implements AdminStore {
               max(source_occurred_at) AS latest_source_at,
               max(updated_at) AS latest_updated_at
        FROM admin_evaluations_v ${where}`,
+      values,
+    );
+    return sanitize(result.rows[0] ?? {}) as Record<string, unknown>;
+  }
+
+  async salesFunnelSummary(
+    identity: AdminIdentity,
+    pageId?: string,
+    lookbackHours = 48,
+  ) {
+    const filters = ["occurred_at >= now() - ($1::int * interval '1 hour')"];
+    const values: unknown[] = [
+      Math.max(1, Math.min(24 * 30, Math.trunc(lookbackHours))),
+    ];
+    addScope(filters, values, identity, "page_id");
+    if (pageId) {
+      assertPageAllowed(identity, pageId);
+      addFilter(filters, values, "page_id", pageId);
+    }
+    const result = await this.pool.query(
+      `WITH milestones AS (
+         SELECT conversation_id,
+           bool_or(command_kind = 'FACTS_PRESENTED' AND outcome = 'APPLIED') AS price_asked,
+           bool_or(command_kind = 'SIZE_RECOMMENDED' AND outcome = 'APPLIED') AS size_consulted,
+           bool_or(command_kind = 'CART_OPENED' AND outcome = 'APPLIED') AS cart_opened,
+           bool_or(command_kind = 'PREVIEW_CREATED' AND outcome = 'APPLIED') AS order_preview,
+           bool_or(command_kind = 'CONFIRM_PURCHASE' AND outcome = 'APPLIED') AS purchase_confirmed
+         FROM sales_cycle_events
+         WHERE ${filters.join(" AND ")}
+         GROUP BY conversation_id
+       ), totals AS (
+         SELECT
+           count(*) FILTER (WHERE price_asked)::int AS price_asked,
+           count(*) FILTER (WHERE size_consulted)::int AS size_consulted,
+           count(*) FILTER (WHERE cart_opened)::int AS cart_opened,
+           count(*) FILTER (WHERE order_preview)::int AS order_preview,
+           count(*) FILTER (WHERE purchase_confirmed)::int AS purchase_confirmed
+         FROM milestones
+       )
+       SELECT *,
+         round(100.0 * size_consulted / NULLIF(price_asked, 0), 2) AS price_to_size_pct,
+         round(100.0 * cart_opened / NULLIF(size_consulted, 0), 2) AS size_to_cart_pct,
+         round(100.0 * order_preview / NULLIF(cart_opened, 0), 2) AS cart_to_preview_pct,
+         round(100.0 * purchase_confirmed / NULLIF(order_preview, 0), 2) AS preview_to_confirmed_pct,
+         round(100.0 * purchase_confirmed / NULLIF(price_asked, 0), 2) AS end_to_end_pct,
+         $1::int AS lookback_hours
+       FROM totals`,
       values,
     );
     return sanitize(result.rows[0] ?? {}) as Record<string, unknown>;
@@ -1282,13 +1331,25 @@ export class PostgresAdminStore implements AdminStore {
       }
       const actorColumn = transitionActorColumn(input.action);
       const timeColumn = transitionTimeColumn(input.action);
+      const transitionAt = new Date().toISOString();
+      const approvedContent =
+        input.action === "APPROVE" && String(current.artifact_kind) === "SIZE_CHART"
+          ? verifySizeChartContent(current.content, identity.subject, transitionAt)
+          : current.content;
       const updated = await client.query(
         `UPDATE admin_artifact_versions
          SET lifecycle = $2, revision = revision + 1, updated_by_subject = $3,
-             ${actorColumn} = $3, ${timeColumn} = now()
+             ${actorColumn} = $3, ${timeColumn} = now(),
+             content = $4::jsonb, content_hash = $5
          WHERE version_id = $1
          RETURNING ${ARTIFACT_VERSIONS.columns}`,
-        [versionId, target, identity.subject],
+        [
+          versionId,
+          target,
+          identity.subject,
+          JSON.stringify(approvedContent),
+          hashStructuredContent(approvedContent),
+        ],
       );
       let channel: string | null = null;
       if (input.action === "START_CANARY") {
@@ -1695,6 +1756,31 @@ function hashStructuredContent(content: unknown): string {
     .update(JSON.stringify(canonicalize(content)))
     .digest("hex");
   return `sha256:${digest}`;
+}
+
+function verifySizeChartContent(
+  content: unknown,
+  subject: string,
+  verifiedAt: string,
+): unknown {
+  if (!content || typeof content !== "object") {
+    throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+  }
+  const value = structuredClone(content as Record<string, unknown>);
+  if (value.kind !== "SIZE_CHART" || !value.chart || typeof value.chart !== "object") {
+    throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+  }
+  const chart = value.chart as Record<string, unknown>;
+  if (!chart.reference || typeof chart.reference !== "object") {
+    throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+  }
+  chart.reference = {
+    ...(chart.reference as Record<string, unknown>),
+    verificationStatus: "VERIFIED",
+    verifiedByRef: subject,
+    verifiedAt,
+  };
+  return value;
 }
 
 function policySafeRow(row: Record<string, unknown>): Record<string, unknown> {

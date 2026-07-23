@@ -536,6 +536,114 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  p23a-registry-sync:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: lana-chatbot-app:p23a-v1
+    container_name: lana-chatbot-p23a-registry-sync
+    restart: unless-stopped
+    command: ["node", "apps/worker/dist/p23a-server.js"]
+    environment:
+      NODE_ENV: production
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      DATA_INGESTION_V2_SHEET_ID: 1VGNU55l9wcDh5RFV07f6JdiV7__FM9uGaVCDThUUgS0
+      GOOGLE_SHEETS_CREDENTIAL_FILE: /run/secrets/vertex_google_api
+      LANA_PRODUCT_FEED_URL: https://www.lanadesign.vn/partner_feeds/danh-muc-lanadesign-vn.xml
+      P23A_INTERVAL_MS: "86400000"
+      P23A_WRITE_ENABLED: "true"
+      P23A_RUN_ID: p23a-app
+    secrets:
+      - vertex_google_api
+    depends_on:
+      redis:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "try{process.kill(1,0)}catch{process.exit(1)}"]
+      interval: 30s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+    stop_grace_period: 30s
+    mem_limit: 512m
+    cpus: 1.0
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  p23c-publisher:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: lana-chatbot-app:p23c-v1
+    container_name: lana-chatbot-p23c-publisher
+    restart: unless-stopped
+    command: ["node", "apps/worker/dist/p23c-server.js"]
+    environment:
+      NODE_ENV: production
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      DATA_INGESTION_V2_SHEET_ID: 1VGNU55l9wcDh5RFV07f6JdiV7__FM9uGaVCDThUUgS0
+      GOOGLE_SHEETS_CREDENTIAL_FILE: /run/secrets/vertex_google_api
+      LANA_PRODUCT_FEED_URL: https://www.lanadesign.vn/partner_feeds/danh-muc-lanadesign-vn.xml
+      QDRANT_BASE_URL: https://355c0b3c-1e7f-4fa5-9235-72559195dd72.eu-central-1-0.aws.cloud.qdrant.io
+      QDRANT_COLLECTION_INGEST_V2: lana_multimodal_data_v2
+      QDRANT_API_KEY_FILE: /run/secrets/qdrant_api_key
+      VERTEX_PROJECT_ID: project-d44e0453-82e8-4ea2-a9d
+      VERTEX_EMBEDDING_LOCATION: us-central1
+      VERTEX_EMBEDDING_MODEL: multimodalembedding@001
+      VERTEX_MIN_INTERVAL_MS: "4000"
+      VERTEX_RATE_LIMIT_KEY: rate:vertex:multimodalembedding:global
+      REMBG_URL: http://139.162.18.93:7000/api/remove
+      REMBG_MODEL: u2netp
+      REMBG_AUTH_HEADER_FILE: /run/secrets/rembg_auth_header
+      INGEST_SHARD_COUNT: "1"
+      INGEST_SHARD_INDEX: "0"
+      INGEST_POINT_BATCH_SIZE: "50"
+      INGEST_IMAGE_MAX_BYTES: "12582912"
+      INGEST_IMAGE_MAX_WIDTH: "800"
+      CATALOG_BUILD_VERSION: catalog-v2
+      P23C_INTERVAL_MS: "86400000"
+      P23C_DRY_RUN: "false"
+      P23C_SHEETS_ACK_ENABLED: "true"
+      P23C_RUN_ID: p23c-app-shard0
+    secrets:
+      - vertex_google_api
+      - qdrant_api_key
+      - rembg_auth_header
+    depends_on:
+      redis:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "try{process.kill(1,0)}catch{process.exit(1)}"]
+      interval: 30s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+    stop_grace_period: 30s
+    mem_limit: 768m
+    cpus: 1.0
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   p23b-metadata-staging:
     build:
       context: ..
@@ -596,6 +704,51 @@ services:
     stop_grace_period: 30s
     mem_limit: 768m
     cpus: 1.0
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  size-chart-extractor:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: ${SIZE_CHART_IMAGE:-lana-chatbot-app:size-chart-v1}
+    container_name: lana-chatbot-size-chart-extractor
+    restart: unless-stopped
+    command: ["node", "apps/worker/dist/size-chart-server.js"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL_FILE: /run/secrets/batch_status_database_url
+      DATA_INGESTION_V2_SHEET_ID: 1VGNU55l9wcDh5RFV07f6JdiV7__FM9uGaVCDThUUgS0
+      GOOGLE_SHEETS_CREDENTIAL_FILE: /run/secrets/vertex_google_api
+      VERTEX_PROJECT_ID: project-d44e0453-82e8-4ea2-a9d
+      SIZE_CHART_MODEL: gemini-3.1-flash-lite
+      SIZE_CHART_MODEL_LOCATION: global
+      SIZE_CHART_EXTRACTION_VERSION: size-chart-v1.0.0
+      SIZE_CHART_MIN_CONFIDENCE: "0.75"
+      SIZE_CHART_CONCURRENCY: "1"
+      SIZE_CHART_INTERVAL_MS: "86400000"
+      SIZE_CHART_ERROR_RETRY_MS: "300000"
+      SIZE_CHART_IMAGE_MAX_BYTES: "12582912"
+      SIZE_CHART_IMAGE_MAX_WIDTH: "1600"
+    secrets:
+      - vertex_google_api
+      - batch_status_database_url
+    depends_on:
+      postgres:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    stop_grace_period: 30s
+    mem_limit: 768m
+    cpus: 0.75
     logging:
       driver: json-file
       options:
@@ -898,3 +1051,5 @@ secrets:
     file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/batch_status_database_url
   pancake_pos_shops:
     file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/pancake_pos_shops
+  rembg_auth_header:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/rembg_auth_header
