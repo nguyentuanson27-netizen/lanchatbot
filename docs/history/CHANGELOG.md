@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-23 — realtime Wave 1 shadow
+
+- Triển khai riêng GroundedReplyDraftV1, verified fact assembler, business guard và Judge v2 lên shadow worker từ commit `f27de9c`; realtime live r10.1 chưa bật các feature flag mới.
+- Tách biến cấu hình và image của shadow khỏi realtime live để không thể bật nhầm candidate trên outbound worker.
+- Áp dụng migration additive `0018_shadow_verified_fact_payload` sau khi backup và restore-test `up → down → up`.
+- Shadow giữ `APP_SEND_ENABLED=false`, `CHATBOT_SEND_ENABLED=false`, Judge `DRY_RUN` và role DB không có quyền ghi Meta Outbox.
+- Rollback/roll-forward riêng shadow đạt; realtime live, API, delivery, POS snapshot, P2.3 và n8n không restart.
+- Full build, full typecheck và `727/727` test đạt. Shadow đang healthy/IDLE nhưng chưa có mirror evaluation mới để đánh giá chất lượng thực tế.
+
 ## 2026-07-23 — customer care policy r10.1
 
 - Mở rộng `SHOP_POLICY` bằng policy chăm sóc khách hàng có cấu trúc, version/audit/publish qua Admin; không nhúng nội dung FAQ vào prompt.

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-23T20:03:00+07:00",
+  "environment": "production-shadow",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "feat/realtime-wave1-grounded-facts",
+  "sourceCommit": "f27de9c9c7ad7dee7758dfc8c3487604bb782048",
+  "releaseId": "20260723-realtime-wave1-shadow-f27de9c",
+  "shadowReleasePath": "/opt/lana-chatbot/releases/20260723-realtime-wave1-shadow-f27de9c",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260723-customer-care-policy-r10-1",
+  "pageAllowlist": [
+    "1198992073286645"
+  ],
+  "images": {
+    "shadowWorker": {
+      "name": "lana-chatbot-app:realtime-wave1-shadow-f27de9c",
+      "digest": "sha256:dbcab3412fdcc2343b6c8d23616250f8ab9ce53078e43665b5f79b0be3249d16"
+    },
+    "realtimeLive": {
+      "name": "lana-chatbot-app:customer-care-policy-r10-1",
+      "digest": "sha256:0efa1bed32e62ba6a32cfb8b3e8a61fbfe3b7427c30cef014adab53f90bfbe13"
+    }
+  },
+  "composeSha256": "26bc319f13544f8caa3526948ade624b17c432c922e4c0df2b74b07416e4a18b",
+  "featureFlags": {
+    "shadow": {
+      "REALTIME_GROUNDED_DRAFT_V1": true,
+      "REALTIME_VERIFIED_FACT_ASSEMBLER_V1": true,
+      "REALTIME_JUDGE_V2_ENABLED": true,
+      "REALTIME_JUDGE_MODE": "DRY_RUN",
+      "REALTIME_JUDGE_LIVE_SAMPLE_RATE": 0.1
+    },
+    "realtimeLiveWave1Enabled": false
+  },
+  "migrations": {
+    "0018_shadow_verified_fact_payload": "067535fa55bdc3767bf3c6928b93ddbff532387c003ec97d5199a45b1f696ad0"
+  },
+  "backup": {
+    "path": "/opt/lana-chatbot/backups/20260723-realtime-wave1-shadow-f27de9c/lana_chatbot_pre_0018.dump",
+    "sha256": "c488cd2f924a42e6430cca43d34bdaa857207c2c44353466531110cb095f9c7e",
+    "restoreTest": "PASS_UP_DOWN_UP"
+  },
+  "verification": {
+    "monorepoBuild": "PASS",
+    "monorepoTypecheck": "PASS",
+    "tests": "727_PASS",
+    "shadowHealth": "PASS",
+    "shadowSendDisabled": true,
+    "shadowCanInsertMetaOutbox": false,
+    "shadowHeartbeat": "IDLE_NO_ERROR",
+    "newVerifiedFactPayloadCountAtCapture": 0,
+    "shadowRollbackRollforward": "PASS",
+    "realtimeLiveRestarted": false,
+    "realtimeLiveHealth": "PASS",
+    "currentSymlinkChanged": false,
+    "n8nRestarted": false,
+    "apiRestarted": false,
+    "deliveryWorkerRestarted": false
+  },
+  "rollback": {
+    "shadowImage": "lana-chatbot-app:realtime-p1",
+    "liveLastKnownGood": "/opt/lana-chatbot/releases/20260723-customer-care-policy-r10-1",
+    "dataDeletionRequired": false
+  },
+  "promotionGate": {
+    "status": "INSUFFICIENT_EVIDENCE",
+    "reason": "No new mirror evaluation has produced business_fact_payload after deployment.",
+    "canaryLiveAllowed": false
+  }
+}

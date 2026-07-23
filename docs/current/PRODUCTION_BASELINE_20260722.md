@@ -9,12 +9,25 @@
 - Compose SHA-256: `5d7f8055be081631de1954aa33f867c5d84d94271b52d7d758354bcfd3765d12`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
-- Migration mới nhất: `0017_sales_cycle_runtime`.
+- Migration mới nhất: `0018_shadow_verified_fact_payload`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
 Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời điểm kiểm kê. Danh sách image digest đầy đủ nằm trong release manifest.
 
 Realtime đang chạy image `lana-chatbot-app:customer-care-policy-r10-1` (`sha256:0efa1bed32e62ba6a32cfb8b3e8a61fbfe3b7427c30cef014adab53f90bfbe13`). Admin Web, Admin API và Admin Simulation Worker chạy image `lana-chatbot-app:customer-care-policy-r10`; P2.3B giữ image r9 và POS snapshot giữ image r6. API webhook, delivery worker và n8n không đổi.
+
+Shadow worker đang chạy candidate `lana-chatbot-app:realtime-wave1-shadow-f27de9c` (`sha256:dbcab3412fdcc2343b6c8d23616250f8ab9ce53078e43665b5f79b0be3249d16`) từ commit `f27de9c9c7ad7dee7758dfc8c3487604bb782048`. Candidate này không thay symlink `current`, không restart realtime live và không có quyền gửi tin.
+
+## Realtime Wave 1 shadow candidate
+
+- Release directory: `/opt/lana-chatbot/releases/20260723-realtime-wave1-shadow-f27de9c`.
+- GroundedReplyDraftV1, verified fact assembler và Judge v2 được bật riêng trong shadow; Judge chạy `DRY_RUN`, sample setting `0.1` chỉ áp dụng khi chuyển sang LIVE mode.
+- `APP_SEND_ENABLED=false`, `CHATBOT_SEND_ENABLED=false`; role `lana_shadow_worker` không có quyền `INSERT` vào `meta_outbox`.
+- Các feature flag mới trên realtime live vẫn OFF/không được inject; realtime r10.1 giữ nguyên image, started-at và restart count 0 trong suốt deploy/rollback test.
+- Migration `0018_shadow_verified_fact_payload` đã restore-test theo chu kỳ `up → down → up`, sau đó áp dụng production. Runtime r10.1 vẫn healthy sau migration.
+- Backup trước migration: `/opt/lana-chatbot/backups/20260723-realtime-wave1-shadow-f27de9c/lana_chatbot_pre_0018.dump`, SHA-256 `c488cd2f924a42e6430cca43d34bdaa857207c2c44353466531110cb095f9c7e`.
+- Rollback/roll-forward riêng shadow `realtime-p1 → realtime-wave1-shadow-f27de9c` đã đạt; realtime live không restart.
+- Shadow worker hiện `IDLE`, heartbeat không lỗi. Chưa có mirror evaluation mới sau deploy nên số `business_fact_payload` thực tế vẫn là 0; đây là bằng chứng chưa đủ để mở CANARY_LIVE.
 
 ## Customer care policy r10.1
 
