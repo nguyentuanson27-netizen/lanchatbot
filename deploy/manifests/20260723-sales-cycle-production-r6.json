@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-23T10:47:11+07:00",
+  "environment": "production",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "releaseTag": "20260723-sales-cycle-production-r6",
+  "sourceCodeCommit": "b5052a8ab2bb1795b15ae9dba2a5d764331d8f5c",
+  "documentationIncludedInReleaseTag": true,
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260723-sales-cycle-production-r6",
+  "pageAllowlist": ["1198992073286645"],
+  "composeSha256": "da3da8e9f22d8207f414d42dae0f5ff9918f743d6470fa4c8dbc5360a9dde650",
+  "image": {
+    "name": "lana-chatbot-app:sales-cycle-production-r6",
+    "digest": "sha256:cae918d5dc9d505ccdd88b670abdc5b337b169cabe36cd33220fd6c475a054d2",
+    "sizeBytes": 126576878
+  },
+  "servicesChanged": ["realtime-worker", "pos-snapshot-worker"],
+  "servicesVerifiedUnchanged": [
+    "api",
+    "delivery-worker",
+    "admin-api",
+    "admin-web",
+    "admin-simulation-worker",
+    "n8n"
+  ],
+  "migrations": [
+    {
+      "name": "0017_sales_cycle_runtime",
+      "checksumSha256": "485ee26d11263025ae596adf436aa661680a66d6c4245ddac280ff7169cfcbf2"
+    }
+  ],
+  "runtimePolicy": {
+    "channel": "PUBLISHED",
+    "activePointers": 4,
+    "pageHardGate": "1198992073286645",
+    "paymentMethods": ["COD", "BANK_TRANSFER"]
+  },
+  "salesCycle": {
+    "cartTtlSeconds": 172800,
+    "negotiation": "DETERMINISTIC_POLICY_ONLY",
+    "confirmationState": "PURCHASE_CONFIRMED",
+    "posOrderCreation": false,
+    "stateEncryption": true,
+    "eventLedger": "APPEND_ONLY"
+  },
+  "posSnapshot": {
+    "intervalMs": 1800000,
+    "redisTtlSeconds": 172800,
+    "sheetsWriteback": false,
+    "lastSmokeProducts": 112,
+    "lastSmokeVariations": 1202,
+    "lastSmokeSnapshotWrites": 112,
+    "lastSmokeAlerts": 0
+  },
+  "verification": {
+    "fullMonorepoCheck": "PASS",
+    "migrationRestoreCycle": "PASS",
+    "productionImageSmokeTests": "71_PASS",
+    "runtimePolicyResolution": "4_PUBLISHED_PASS",
+    "realtimeHealth": "PASS",
+    "posSnapshotHealth": "PASS",
+    "n8nRestarted": false
+  },
+  "backup": {
+    "path": "/opt/lana-chatbot/backups/20260723-sales-cycle-production-r6/lana_chatbot_pre_0017_20260723T032748Z.dump",
+    "sha256": "9a350ef69690597227f9e74e9cbe66e6f749bdd87a5b0d242771c4bf17812fd3"
+  },
+  "rollback": {
+    "previousRelease": "/opt/lana-chatbot/releases/20260723-realtime-context-handoff-r5",
+    "previousRealtimeImage": "lana-chatbot-app:realtime-context-handoff-r5",
+    "disableFlag": "SALES_CYCLE_ENABLED=false",
+    "dataDeletionRequired": false
+  }
+}
