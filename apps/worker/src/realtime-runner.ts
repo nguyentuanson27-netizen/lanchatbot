@@ -264,6 +264,12 @@ function postSaleHandoffReason(value: string): HandoffReason {
   return "POST_SALE";
 }
 
+export function isPostSaleRequest(value: string): boolean {
+  return /\b(don|van don|giao hang|doi tra|hoan tien|bao hanh|huy don)\b/u.test(
+    asciiFold(value),
+  );
+}
+
 /** Only after-sales receives one holding reply; every other handoff stays silent. */
 export function holdingMessagesForHandoff(
   message: Pick<InboundMessageV1, "eventKey" | "occurredAt">,
@@ -1154,7 +1160,8 @@ export class RealtimeRunner {
       return batchCommitStatus(result);
     }
     const hasCustomerUrl = !message.isEcho && containsCustomerUrl(message.text ?? "");
-    const resolution = message.isEcho || hasCustomerUrl
+    const resolution = message.isEcho || hasCustomerUrl ||
+        isPostSaleRequest(message.text ?? "")
       ? this.emptyResolution()
       : await this.resolveProducts(message, state);
     const resolvedProduct = resolution.primary;
@@ -1724,9 +1731,7 @@ export class RealtimeRunner {
     productId: string | null,
   ): InboundConversationEvent {
     const text = (message.text ?? "").toLocaleLowerCase("vi");
-    const postSale = /(đơn|vận đơn|giao hàng|đổi trả|hoàn tiền|bảo hành|hủy đơn)/iu.test(
-      text,
-    );
+    const postSale = isPostSaleRequest(message.text ?? "");
     const humanRequest = /(nhân viên|người tư vấn|gặp shop|gọi cho)/iu.test(text);
     return {
       eventKey: message.eventKey,

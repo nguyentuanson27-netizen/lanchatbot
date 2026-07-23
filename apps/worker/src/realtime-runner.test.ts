@@ -581,7 +581,7 @@ describe("RealtimeRunner", () => {
     const runtime: RealtimeRuntimePort = {
       loadOrCreate: vi.fn(async () => ({
         conversationId: state.conversationId, pageId: claim.pageId,
-        customerHash: claim.conversationHash, stateVersion: 7, state,
+        customerHash: claim.conversationHash, stateVersion: state.revision, state,
         routingOwner: "APP" as const, appSendEnabled: true, killSwitch: false,
       })),
       commit,
