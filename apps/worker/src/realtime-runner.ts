@@ -955,7 +955,7 @@ export class RealtimeRunner {
       salesCycleEnabled: options.salesCycleEnabled ?? false,
       imageDelayMs: Math.max(
         0,
-        Math.min(5_000, Math.trunc(options.imageDelayMs ?? 1_500)),
+        Math.min(5_000, Math.trunc(options.imageDelayMs ?? 500)),
       ),
       promptVersion: options.promptVersion ?? "lana-realtime-v1",
       metaAppId: options.metaAppId ?? "",

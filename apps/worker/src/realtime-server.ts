@@ -418,7 +418,7 @@ const runner = new RealtimeRunner(
       process.env.SALES_CYCLE_ENABLED === "true",
     imageDelayMs: boundedInteger(
       "REALTIME_IMAGE_DELAY_MS",
-      1_500,
+      500,
       0,
       5_000,
     ),

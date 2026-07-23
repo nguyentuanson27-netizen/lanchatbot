@@ -434,7 +434,7 @@ describe("RealtimeRunner", () => {
           { kind: "TEXT", text: expect.stringContaining("Dạ set váy Quỳnh Dao có giá 770k ạ") },
           { kind: "IMAGE", imageUrl },
         ],
-        imageDelayMs: 1_500,
+        imageDelayMs: 500,
       }),
     }), expect.any(Date));
     expect(complete).toHaveBeenCalledOnce();

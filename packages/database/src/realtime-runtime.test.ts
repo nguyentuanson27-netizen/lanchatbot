@@ -50,7 +50,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         replyPlanId: "10000000-0000-4000-8000-000000000001",
         responseGroupId: "10000000-0000-4000-8000-000000000002",
         recipientId: "customer-1",
-        imageDelayMs: 1_500,
+        imageDelayMs: 500,
         messages: [
           { kind: "TEXT", text: "Nội dung báo giá" },
           { kind: "IMAGE", imageUrl: "https://cdn.example/product.jpg" },
@@ -65,7 +65,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     expect(inserts[0]?.values[18]).toEqual(now);
     expect(inserts[1]?.values[17]).toBe(1);
     expect(inserts[1]?.values[18]).toEqual(
-      new Date("2026-07-23T05:00:01.500Z"),
+      new Date("2026-07-23T05:00:00.500Z"),
     );
   });
 
