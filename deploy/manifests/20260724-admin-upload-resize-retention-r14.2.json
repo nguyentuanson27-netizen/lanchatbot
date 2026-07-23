@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-24T06:36:01+07:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "737568e5c64a6481eb6c14ab9eb65700f1dcb4bf",
+  "releaseTag": "20260724-admin-upload-resize-retention-r14.2",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260724-admin-upload-resize-retention-r14.2",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260724-admin-manual-image-intake-r14",
+  "pageAllowlist": ["1198992073286645"],
+  "images": {
+    "adminApi": "lana-chatbot-app:admin-upload-resize-retention-r14.2@sha256:279a937ccc2c2187552bcfe5df45d2a813bd400742e6d294026939682c5cc4d5",
+    "adminWeb": "lana-chatbot-app:admin-upload-resize-retention-r14.2@sha256:279a937ccc2c2187552bcfe5df45d2a813bd400742e6d294026939682c5cc4d5"
+  },
+  "composeSha256": "d843ac6568c26c2803ca9b86319c0469a96e1e7488abaa0b6f240691e02f03c8",
+  "manualImageResize": {
+    "maxInputBytes": 8388608,
+    "maxDimensionPx": 1600,
+    "preserveAspectRatio": true,
+    "upscaleSmallImages": false,
+    "acceptedMimeTypes": ["image/jpeg", "image/png", "image/webp"],
+    "publicDirectory": "/var/lib/docker/volumes/n8n-docker_npm_data/_data/public-assets/products",
+    "privateOriginalDirectory": "/var/lib/lana-chatbot/product-media-originals",
+    "originalRetentionMs": 86400000,
+    "cleanupIntervalMs": 3600000,
+    "sheetUrlFieldUses": "RESIZED_IMAGE_ONLY"
+  },
+  "verification": {
+    "build": "PASS",
+    "adminApiTests": "27_OF_27_PASS",
+    "adminWebTests": "23_OF_23_PASS",
+    "jpegSmoke": "1067x1600_PASS",
+    "pngSmoke": "1067x1600_PASS",
+    "webpSmoke": "1067x1600_PASS",
+    "adminApiHealth": "HEALTHY",
+    "adminWebHealth": "HEALTHY",
+    "adminApiRestartCount": 0,
+    "adminWebRestartCount": 0,
+    "realtimeHealth": "HEALTHY_UNCHANGED",
+    "deliveryHealth": "HEALTHY_UNCHANGED"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260724-admin-manual-image-intake-r14",
+    "restoreEnvironmentBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-r14.2",
+    "deleteOriginals": false,
+    "deleteResizedImages": false,
+    "dataDeletionRequired": false
+  }
+}

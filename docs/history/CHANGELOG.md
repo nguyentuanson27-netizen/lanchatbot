@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-24 — Admin upload resize retention r14.2
+
+- Resize JPG/PNG/WebP ngay trong Admin API bằng FFmpeg, giữ đúng tỉ lệ, không phóng ảnh nhỏ và giới hạn cạnh dài 1.600 px.
+- Chỉ URL bản resize được ghi vào `manual_image_intake`; ảnh gốc không public và không được P2.3B/Qdrant sử dụng.
+- Ảnh gốc lưu ở volume private riêng, TTL 24 giờ; cleanup chạy mỗi giờ và chạy bù khi Admin API khởi động.
+- Bản resize dùng tên deterministic theo SHA-256, được ghi atomically và giữ lâu dài để URL đã đưa vào Sheet không bị hỏng.
+- Admin API `27/27`, Admin Web `23/23`, typecheck đạt. Smoke FFmpeg thật đạt cho JPG/PNG/WebP ở đầu ra `1067x1600`.
+- Chỉ Admin API/Admin Web được recreate; realtime, delivery, P2.3 và n8n không restart.
+
 ## 2026-07-24 — Admin manual image intake r14
 
 - Thêm mục `Ảnh sản phẩm` trong Admin để upload JPG/PNG/WebP tối đa 8 MB trực tiếp lên vùng lưu trữ VPS.

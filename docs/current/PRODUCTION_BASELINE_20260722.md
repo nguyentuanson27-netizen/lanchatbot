@@ -207,3 +207,13 @@ Các workflow active khác trên cùng n8n phục vụ page/brand hoặc automat
 - `manual_image_intake` là hàng đợi staging. Upload không đi thẳng Qdrant; P2.3B ghi `image_registry`, quản trị viên duyệt, rồi P2.3C mới publish.
 - Meta token được xác minh qua Graph API đúng page `1198992073286645`. Bộ đếm canary 100 inbound thật bắt đầu lúc `2026-07-23T19:14:08Z`; phạm vi page không đổi.
 - Rollback ứng dụng về r13.4 không yêu cầu xóa file, Redis hoặc PostgreSQL; giữ lại intake/audit để phân tích.
+
+## Admin upload resize retention r14.2
+
+- Release live: `/opt/lana-chatbot/releases/20260724-admin-upload-resize-retention-r14.2`, source commit `737568e5c64a6481eb6c14ab9eb65700f1dcb4bf`.
+- Admin API/Admin Web dùng image digest `sha256:279a937ccc2c2187552bcfe5df45d2a813bd400742e6d294026939682c5cc4d5`; cả hai healthy và restart count 0 sau cutover.
+- Ảnh manual được resize bằng FFmpeg, giữ đúng tỉ lệ, không upscale và giới hạn cạnh dài 1.600 px. Smoke thật đạt JPG/PNG/WebP ở `1067x1600`.
+- URL ghi vào `manual_image_intake` luôn trỏ tới bản resize trong vùng public. Ảnh gốc nằm tại `/var/lib/lana-chatbot/product-media-originals`, không public.
+- Cleanup chạy mỗi giờ và xóa ảnh gốc quá 24 giờ; khi Admin API khởi động sẽ dọn bù. Bản resize không bị xóa theo TTL ảnh gốc.
+- Chỉ Admin API/Admin Web được recreate. Realtime, delivery, P2.3 và n8n giữ nguyên, đều không restart trong release này.
+- Rollback về r14 không cần xóa file hay dữ liệu Sheet; giữ nguyên bản resize để các URL đã phát hành không hỏng.
