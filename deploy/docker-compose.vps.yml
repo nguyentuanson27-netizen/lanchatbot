@@ -149,7 +149,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: lana-chatbot-app:realtime-p1
+    image: ${SHADOW_IMAGE:-lana-chatbot-app:realtime-p1}
     container_name: lana-chatbot-shadow-worker
     restart: unless-stopped
     command: ["node", "apps/worker/dist/phase4-server.js"]
