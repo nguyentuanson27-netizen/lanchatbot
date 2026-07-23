@@ -939,10 +939,10 @@ Agent chỉ đổi trạng thái sau khi có bằng chứng. Giá trị hợp l�
 | 0.2 Vertex 401/single-flight/jitter | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | `bb56cae` | Vertex 16 pass; 3/10/100 concurrent; 401/429/503/jitter | Chưa deploy | P0 |
 | 0.3 Golden transcripts | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | `bb56cae` | runtime 38 + golden fixture IDs 3; toàn repo 696 test pass | Chưa deploy | P0 |
 | 0.4 Funnel/operational telemetry | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | `bb56cae` | contract 3; DB atomic/idempotent 7; worker golden 3 | Chưa deploy; `REALTIME_DECISION_TELEMETRY_ENABLED=false` | P0/P1 |
-| 1.1 GroundedReplyDraftV1 | NOT_STARTED | — | — | — | — |  |
-| 1.2 Verified fact assembler | NOT_STARTED | — | — | — | — |  |
-| 1.3 Business guard | NOT_STARTED | — | — | — | — |  |
-| 1.4 Judge v2 | NOT_STARTED | — | — | — | — |  |
+| 1.1 GroundedReplyDraftV1 | CODE_COMPLETE | feat/realtime-wave1-grounded-facts | `8e65013` | contract 7; Vertex 19; golden 6; toàn repo 727 test pass | Chưa deploy; `REALTIME_GROUNDED_DRAFT_V1=false` | Schema strict không có action/product/query/fact |
+| 1.2 Verified fact assembler | CODE_COMPLETE | feat/realtime-wave1-grounded-facts | `8e65013` | assembler 12; exact price/cross-product/image index/schema fallback golden | Chưa deploy; `REALTIME_VERIFIED_FACT_ASSEMBLER_V1=false` | Facts và URL chỉ lấy từ envelope/catalog đã xác minh |
+| 1.3 Business guard | CODE_COMPLETE | feat/realtime-wave1-grounded-facts | `8e65013` | guard 17; buying signal 19; golden 6; full typecheck/build | Chưa deploy | Chặn NO_REPLY khi có buying signal, xin PII sớm và ghi reason code kể cả khi fallback |
+| 1.4 Judge v2 | CODE_COMPLETE | feat/realtime-wave1-grounded-facts | `8e65013` | Judge/Vertex 19; shadow 6; migration suite 16; toàn repo 727 test pass | Chưa deploy; `REALTIME_JUDGE_V2_ENABLED=false` | Persist verified envelope; DRY_RUN 100%, LIVE mặc định 10%; output không nối outbound |
 | 2.1 Unified reducer | DEFERRED | — | — | — | — | Làm sau |
 | 2.2 Profile/measurements | NOT_STARTED | — | — | — | — |  |
 | 2.3 Verified variant | NOT_STARTED | — | — | — | — |  |
