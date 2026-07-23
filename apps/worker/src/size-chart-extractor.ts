@@ -238,10 +238,15 @@ export class SizeChartExtractionRunner {
     extractionVersion: string;
     minimumConfidence?: number;
     concurrency?: number;
+    maximumRows?: number | null;
   }) {}
 
   async run(): Promise<SizeChartExtractionSummary> {
-    const rows = (await this.options.rows()).filter(isSizeChartRegistryRow);
+    const selectedRows = (await this.options.rows()).filter(isSizeChartRegistryRow);
+    const maximumRows = this.options.maximumRows && this.options.maximumRows > 0
+      ? Math.trunc(this.options.maximumRows)
+      : null;
+    const rows = maximumRows ? selectedRows.slice(0, maximumRows) : selectedRows;
     const minimumConfidence = this.options.minimumConfidence ?? 0.75;
     const concurrency = Math.max(1, Math.min(4, this.options.concurrency ?? 1));
     let cursor = 0;
