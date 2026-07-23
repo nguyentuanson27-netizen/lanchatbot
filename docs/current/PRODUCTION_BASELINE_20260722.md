@@ -21,9 +21,15 @@ Admin API, Admin Web và Admin Simulation Worker đang chạy image `lana-chatbo
 - Qdrant adapter giữ `title` và `DESCRIPTION_XML`; giá/tồn/size/ETA vẫn chỉ đến từ facts nghiệp vụ đã xác minh.
 - Báo giá ưu tiên tên sản phẩm, chỉ dùng `mẫu <mã>` khi title không có tên thực.
 - Câu form/chất liệu được dựng có kiểm soát từ `DESCRIPTION_XML`, có fallback an toàn khi metadata thiếu.
-- Meta Outbox ghi text trước ảnh. Ảnh có `next_attempt_at` trễ 1,5 giây và sequence guard bảo đảm không vượt text.
+- Meta Outbox ghi text trước ảnh. Ảnh có `next_attempt_at` trễ 0,5 giây và sequence guard bảo đảm không vượt text.
 - Realtime worker healthy trên page duy nhất `1198992073286645`; POS snapshot và n8n không bị restart.
 - Toàn bộ monorepo check đạt; 44 test mục tiêu và 152 test worker đều pass. Không có migration mới.
+
+### Runtime config hotfix r8
+
+- `REALTIME_IMAGE_DELAY_MS` giảm từ `1500` xuống `500`.
+- Realtime worker được recreate riêng và trở lại `healthy`; image r7 không đổi.
+- POS snapshot, API, delivery và n8n không bị restart.
 
 ## Runtime Policy published
 

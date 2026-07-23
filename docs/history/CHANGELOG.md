@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-23 — image delay 500 ms config r8
+
+- Giảm khoảng nghỉ giữa text và ảnh từ 1,5 giây xuống 0,5 giây.
+- Giữ nguyên sequence guard: ảnh vẫn không được gửi trước text.
+- Recreate riêng realtime worker; image r7, POS snapshot và n8n không đổi.
+- 33 test mục tiêu và typecheck database/worker đạt.
+
 ## 2026-07-23 — product copy và text-first delivery r7
 
 - Báo giá dùng tên sản phẩm thay cho mã khi Qdrant có title hợp lệ.

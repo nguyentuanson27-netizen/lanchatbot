@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-23T11:43:30+07:00",
+  "environment": "production",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "releaseTag": "20260723-image-delay-500ms-r8",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260723-product-copy-text-first-r7",
+  "pageAllowlist": ["1198992073286645"],
+  "image": {
+    "name": "lana-chatbot-app:product-copy-text-first-r7",
+    "digest": "sha256:f8c26c5bb0e87e0bc49da55ea9caf4e6174a3e5108f315d49907f5668a206c44"
+  },
+  "servicesChanged": ["realtime-worker"],
+  "configuration": {
+    "REALTIME_IMAGE_DELAY_MS": 500,
+    "metaOrder": ["TEXT", "IMAGE"],
+    "outboxSequenceGuard": true
+  },
+  "verification": {
+    "targetedTests": "33_PASS",
+    "databaseTypecheck": "PASS",
+    "workerTypecheck": "PASS",
+    "realtimeHealth": "PASS",
+    "n8nRestarted": false
+  },
+  "migrations": [],
+  "rollback": {
+    "previousValueMs": 1500,
+    "dataDeletionRequired": false
+  }
+}
