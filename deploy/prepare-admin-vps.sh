@@ -81,6 +81,7 @@ FROM pg_views
 WHERE schemaname = 'public' AND viewname LIKE 'admin\_%\_v' ESCAPE '\'
 ORDER BY viewname
 \gexec
+SELECT format('GRANT SELECT ON sales_cycle_events TO %I', :'admin_user')\gexec
 
 SELECT format('ALTER ROLE %I SET default_transaction_read_only = on', :'admin_user')\gexec
 

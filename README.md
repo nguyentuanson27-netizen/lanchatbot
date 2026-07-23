@@ -47,7 +47,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - PostgreSQL đã áp dụng migration đến `0019_customer_profile_wave2`; migration 0019 bổ sung projection hồ sơ số đo 48 giờ theo pseudonymous customer key và tương thích ngược.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Size Chart idempotent retry r13.3](deploy/manifests/20260724-sizechart-idempotent-retry-r13.3.json); r13.1 là release gần nhất để rollback.
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Admin funnel read grant r13.4](deploy/manifests/20260724-admin-funnel-read-grant-r13.4.json); r13.3 là release gần nhất để rollback.
 
 ## Kiến trúc dữ liệu
 

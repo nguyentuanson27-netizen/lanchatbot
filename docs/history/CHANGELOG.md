@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-07-24 — Admin funnel read grant r13.4
+
+- Cấp riêng SELECT trên ledger ẩn danh `sales_cycle_events` cho `lana_admin_readonly` để dashboard đọc funnel.
+- Không mở quyền đọc hồ sơ định danh, secret hoặc bảng giá/tồn.
+
 ## 2026-07-24 — Size Chart idempotent retry hotfix r13.3
 
 - Kiểm tra `parent_product_id + image_sha256 + extractor_version` trước khi tải ảnh và gọi Vertex.
