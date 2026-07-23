@@ -557,7 +557,7 @@ Thiết kế:
 
 1. Extractor deterministic đọc chiều cao, cân nặng, vòng ngực, eo và mông từ tin khách.
 2. Mỗi field có value, source, observedAt, confidence và sourceEventHash.
-3. Merge theo field; null không ghi đè; conflict không tự chọn.
+3. Merge theo field; null không ghi đè; khi hai giá trị xung đột thì ưu tiên giá trị có `observedAt` mới nhất theo quyết định D-007.
 4. Dùng revision/CAS để hai tin gần nhau không mất dữ liệu.
 5. Persist projection số đo có cấu trúc theo pseudonymous customer key với retention ban đầu tối đa 48 giờ hoặc retention ngắn hạn đã được duyệt.
 6. Không đưa tên, SĐT, địa chỉ vào CustomerProfileV1.
@@ -580,7 +580,7 @@ Test:
 
 - 1m60, 160cm, 50kg, 50 ký, ba vòng, không dấu.
 - Tin đến lệch thứ tự và concurrent merge.
-- Conflict tạo trạng thái cần xác nhận.
+- Số đo mới hơn ghi đè số đo cũ; số đo cũ đến trễ không được ghi đè ngược.
 - Đổi sản phẩm giữ measurements.
 - Thiếu chart không đề xuất size.
 - Boundary chart đúng policy.
@@ -944,7 +944,7 @@ Agent chỉ đổi trạng thái sau khi có bằng chứng. Giá trị hợp l�
 | 1.3 Business guard | CANARY_LIVE | feat/realtime-wave1-grounded-facts | `f27de9c` | guard 17; buying signal 19; golden 6; full typecheck/build | Flag ON; ambiguous 0, duplicate sequence 0 | Chặn NO_REPLY khi có buying signal, xin PII sớm và ghi reason code kể cả khi fallback |
 | 1.4 Judge v2 | SHADOW | feat/realtime-wave1-grounded-facts | `f27de9c` | Judge/Vertex 19; shadow 6; migration suite 16; toàn repo 727 test pass | Shadow `DRY_RUN`, send disabled, role không ghi Meta Outbox | Persist verified envelope; chưa đủ evidence để CANARY_LIVE |
 | 2.1 Unified reducer | DEFERRED | — | — | — | — | Làm sau |
-| 2.2 Profile/measurements | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | extractor 4; profile merge 8; size engine 15; database 36; toàn repo 739 pass | Migration 0019; flag ON chỉ page test; profile TTL 48h | CAS và PII gate đạt; luồng xác nhận khi số đo mới xung đột vẫn cần bổ sung trước promotion rộng |
+| 2.2 Profile/measurements | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | release: profile merge 8; regression D-007 trên main: profile merge 9/9 | Migration 0019; flag ON chỉ page test; profile TTL 48h | CAS và PII gate đạt; số đo có `observedAt` mới nhất thắng theo D-007 |
 | 2.3 Verified variant | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | verified snapshot 5; worker 209; toàn repo 739 pass | Flag ON chỉ page test; rollback/roll-forward đạt | Mention chỉ map qua POS snapshot; không giả nhãn màu thành POS color ID |
 | 2.4 Context trim | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | worker 209; full build/typecheck | Context limit 10 chỉ page test | Redis/PostgreSQL retention không đổi |
 | 3.1 Multi-fact/multi-product | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | contract 3; worker 209; toàn repo 739 pass | Flag ON chỉ page test; max 3 product query | Facts cùng product chạy có thứ tự; tối đa 3 product chạy song song |
@@ -962,6 +962,7 @@ Agent chỉ đổi trạng thái sau khi có bằng chứng. Giá trị hợp l�
 | 2026-07-23 | D-004 | Guard số theo typed business facts, không cấm mọi số | Tránh chặn mô tả hợp lệ như 3D/2 lớp/6 tà |
 | 2026-07-23 | D-005 | Mọi thay đổi hành vi qua feature flag | Canary và rollback độc lập |
 | 2026-07-23 | D-006 | Judge chỉ đánh giá | Không cho mô hình đánh giá điều khiển outbound |
+| 2026-07-23 | D-007 | Số đo mới nhất được ưu tiên khi xung đột | Chủ dự án muốn dữ liệu khách vừa cung cấp thay thế giá trị cũ, không cần bước xác nhận |
 
 Mọi quyết định mới làm đổi phạm vi, source-of-truth, retention, handoff hoặc safety gate phải ghi thêm một dòng trước khi code.
 

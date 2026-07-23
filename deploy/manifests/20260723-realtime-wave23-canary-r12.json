@@ -53,7 +53,6 @@
     "directMessengerConversationTest": "PENDING_OWNER_TEST"
   },
   "knownCanaryFollowUps": [
-    "Persisted confirmation flow for conflicting customer measurements is not yet enabled.",
     "Promotion beyond the single page test remains forbidden."
   ],
   "rollback": {

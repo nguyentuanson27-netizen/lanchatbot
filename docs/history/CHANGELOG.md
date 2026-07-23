@@ -9,7 +9,8 @@
 - Áp dụng migration additive `0019_customer_profile_wave2` sau backup và restore-test `up → down → up`.
 - Full build/typecheck và `739/739` test đạt; realtime LIVE/IDLE, restart count 0, ambiguous 0 và duplicate reply-plan sequence 0.
 - Rollback/roll-forward sáu feature flag đạt trong 15 giây. Chỉ realtime worker được recreate; API, delivery, shadow, POS, P2.3 và n8n không restart.
-- Page allowlist giữ duy nhất `1198992073286645`; test Messenger trực tiếp và luồng xác nhận số đo xung đột vẫn là gate trước khi promotion rộng.
+- Page allowlist giữ duy nhất `1198992073286645`; test Messenger trực tiếp vẫn là gate trước khi promotion rộng.
+- Theo quyết định D-007, số đo có `observedAt` mới nhất được ưu tiên khi xung đột; không yêu cầu khách xác nhận lại.
 
 ## 2026-07-23 — realtime Wave 1 CANARY_LIVE r11
 

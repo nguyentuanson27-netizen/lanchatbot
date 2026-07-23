@@ -95,6 +95,24 @@ describe("mergeCustomerProfile", () => {
     expect(result.ignoredFields).toContain("measurements.WEIGHT_KG");
   });
 
+  it("uses the latest explicit customer measurement when values conflict", () => {
+    const result = mergeCustomerProfile(baseState(), {
+      profileId,
+      expectedRevision: 1,
+      measurements: [
+        {
+          kind: "WEIGHT_KG",
+          value: 50,
+          provenance: evidence("2026-07-22T02:00:00.000Z"),
+        },
+      ],
+    });
+
+    expect(result.profile.measurements.find(({ kind }) => kind === "WEIGHT_KG")?.value)
+      .toBe(50);
+    expect(result.changedFields).toContain("measurements.WEIGHT_KG");
+  });
+
   it("uses confidence and then source authority to break timestamp ties", () => {
     const afterConfidence = mergeCustomerProfile(baseState(), {
       profileId,

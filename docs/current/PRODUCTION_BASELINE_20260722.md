@@ -25,7 +25,7 @@ Realtime page test chạy image `lana-chatbot-app:realtime-wave23-b29725d` (`sha
 - Migration `0019_customer_profile_wave2` đã backup, restore-test `up → down → up` và áp dụng production. Backup: `/opt/lana-chatbot/backups/20260723-realtime-wave23-canary-r12/lana_chatbot_pre_0019.dump`, SHA-256 `4e163ffbf6bbc4239035c3086d7bf51ba37b6067bf2f70c268e995d529b0ab76`.
 - Full build/typecheck và `739/739` test đạt. Sau cutover worker `LIVE/IDLE`, heartbeat fresh, restart count 0, `ambiguous_recent=0`, duplicate `reply_plan_id + sequence_no=0`.
 - Rollback/roll-forward sáu feature flag đạt trong 15 giây; migration additive và profile đã ghi được giữ nguyên khi rollback.
-- Test hội thoại Messenger trực tiếp và luồng xác nhận bền vững khi số đo mới xung đột vẫn là gate bắt buộc trước promotion rộng.
+- Khi số đo xung đột, runtime ưu tiên giá trị có `observedAt` mới nhất; bản ghi cũ đến trễ không được ghi đè ngược. Test hội thoại Messenger trực tiếp vẫn là gate trước promotion rộng.
 
 ## Realtime Wave 1 CANARY_LIVE
 
