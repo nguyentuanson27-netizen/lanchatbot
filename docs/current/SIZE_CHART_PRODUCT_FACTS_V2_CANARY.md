@@ -62,8 +62,8 @@ Endpoint: `GET /admin/v1/sales-funnel/summary?page_id=...&lookback_hours=48`.
 3. Bộ `30 deterministic Messenger canary scenarios` phải đạt đủ 30/30.
 4. Smoke đọc Redis/POS, Qdrant, Runtime Policy và Meta token phải đạt.
 5. Chỉ recreate các service thay đổi; không restart n8n hoặc service ngoài phạm vi.
-6. Sau cutover theo dõi tối thiểu `100` inbound đã xử lý hoặc `48 giờ`, điều kiện
-   nào đến sau theo quyết định vận hành. Không dùng replay để thay bằng chứng live.
+6. Sau cutover theo dõi đến khi đạt `100` inbound đã xử lý hoặc đủ `48 giờ`, điều kiện
+   nào đến trước. Không dùng replay để thay bằng chứng live.
 7. Trong canary không được có gửi ảnh sai loại, báo size từ chart chưa VERIFIED,
    duplicate Inbox/Outbox hoặc mở outbound ngoài page test.
 
