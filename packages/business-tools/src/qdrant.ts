@@ -98,11 +98,13 @@ function productImageFromPayload(payload: Record<string, unknown>): ProductImage
     angle: enumeration(payload.image_angle, IMAGE_ANGLES, "UNKNOWN"),
     imageType: enumeration(payload.image_type, IMAGE_TYPES, "OTHER"),
     intents: strings(payload.image_intents).map((item) => item.toUpperCase()),
+    partsVisible: strings(payload.image_parts_visible).map((item) => item.toUpperCase()),
     sortOrder: Number.isFinite(Number(payload.image_sort_order))
       ? Math.trunc(Number(payload.image_sort_order))
       : 0,
     qualityScore: Number.isFinite(quality) ? quality : null,
     feedback: payload.feedback_verified === true,
+    observedAt: text(payload.published_at) || text(payload.ai_updated_at) || null,
   };
 }
 
@@ -130,6 +132,7 @@ export function stableProductDocumentFromQdrantPayload(value: unknown): StablePr
     occasions: strings(payload.search_occasions ?? payload.occasions),
     imageUrls: [...new Set([...primaryImage, ...images])].slice(0, 20),
     catalogVersion: text(payload.catalog_version) || text(payload.ingestion_version) || "catalog-v2",
+    observedAt: text(payload.published_at) || text(payload.ai_updated_at) || null,
   };
 }
 

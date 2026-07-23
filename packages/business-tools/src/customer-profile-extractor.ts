@@ -30,10 +30,15 @@ const measurement = (
 const decimal = (value: string): number =>
   Number.parseFloat(value.replace(",", "."));
 
-function normalizeHeight(value: string, meters: string | undefined): number {
-  const parsed = decimal(value);
-  if (meters !== undefined || parsed < 3) return Math.round(parsed * 100);
-  return Math.round(parsed);
+const foldVietnamese = (value: string): string =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/đ/gu, "d")
+    .toLocaleLowerCase("vi-VN");
+
+function normalizeHeight(value: number): number {
+  return value < 3 ? Math.round(value * 100) : Math.round(value);
 }
 
 function inRange(kind: MeasurementKind, value: number): boolean {
@@ -42,13 +47,12 @@ function inRange(kind: MeasurementKind, value: number): boolean {
   return value >= 45 && value <= 180;
 }
 
-function latestMatch(
+function lastCaptured(
   text: string,
   patterns: readonly RegExp[],
 ): { value: number; confidence: number } | null {
   for (const pattern of patterns) {
-    const matches = [...text.matchAll(pattern)];
-    const match = matches.at(-1);
+    const match = [...text.matchAll(pattern)].at(-1);
     if (!match?.[1]) continue;
     return { value: decimal(match[1]), confidence: 0.99 };
   }
@@ -56,17 +60,18 @@ function latestMatch(
 }
 
 /**
- * Extracts only explicit body measurements. Bare numbers are deliberately
- * ignored so phone numbers, prices and order codes cannot enter the profile.
+ * Extracts only explicitly labelled body measurements. Input is folded to
+ * ASCII Vietnamese so accented and unaccented customer messages behave alike.
+ * Bare numbers stay ignored to protect phone numbers, prices and order IDs.
  */
 export function extractCustomerMeasurements(
   input: CustomerMeasurementExtractionInput,
 ): readonly BodyMeasurementV1[] {
-  const text = input.text.normalize("NFC").toLocaleLowerCase("vi-VN");
+  const text = foldVietnamese(input.text);
   const found = new Map<MeasurementKind, BodyMeasurementV1>();
 
   const threeRounds = [...text.matchAll(
-    /(?:số\s*đo\s*)?(?:3|ba)\s*vòng\s*[:=]?\s*(\d{2,3}(?:[.,]\d+)?)\s*[-/x×]\s*(\d{2,3}(?:[.,]\d+)?)\s*[-/x×]\s*(\d{2,3}(?:[.,]\d+)?)/giu,
+    /(?:so\s*do\s*)?(?:3|ba)\s*vong\s*[:=]?\s*(\d{2,3}(?:[.,]\d+)?)\s*[-/x]\s*(\d{2,3}(?:[.,]\d+)?)\s*[-/x]\s*(\d{2,3}(?:[.,]\d+)?)/giu,
   )].at(-1);
   if (threeRounds) {
     const values: readonly [MeasurementKind, string | undefined][] = [
@@ -84,7 +89,7 @@ export function extractCustomerMeasurements(
   }
 
   const meterCentimeters = [...text.matchAll(
-    /(?:(?:chiều\s*cao|cao)\s*[:=]?\s*)?([12])\s*m\s*(\d{1,2})\b/giu,
+    /(?:(?:chieu\s*cao|cao)\s*[:=]?\s*)?([12])\s*m\s*(\d{1,2})\b/giu,
   )].at(-1);
   if (meterCentimeters?.[1] && meterCentimeters[2]) {
     const value = Number(meterCentimeters[1]) * 100 +
@@ -94,50 +99,41 @@ export function extractCustomerMeasurements(
     }
   }
 
-  const heightPatterns = [
-    /(?:chiều\s*cao|cao)\s*[:=]?\s*(\d(?:[.,]\d{1,2}))\s*(m(?:ét)?)?\b/giu,
-    /(?:chiều\s*cao|cao)\s*[:=]?\s*(1[3-9]\d|20\d|210)\s*(?:cm)?\b/giu,
-    /\b(\d(?:[.,]\d{1,2}))\s*m(?:ét)?\b/giu,
-  ] as const;
-  for (const pattern of heightPatterns) {
-    if (found.has("HEIGHT_CM")) break;
-    const matches = [...text.matchAll(pattern)];
-    const match = matches.at(-1);
-    if (!match?.[1]) continue;
-    const value = normalizeHeight(match[1], match[2]);
-    if (inRange("HEIGHT_CM", value)) {
-      found.set("HEIGHT_CM", measurement("HEIGHT_CM", value, input, 0.99));
-      break;
+  if (!found.has("HEIGHT_CM")) {
+    const height = lastCaptured(text, [
+      /(?:chieu\s*cao|cao)\s*[:=]?\s*(\d(?:[.,]\d{1,2}))\s*(?:m|met)?\b/giu,
+      /(?:chieu\s*cao|cao)\s*[:=]?\s*(1[3-9]\d|20\d|210)\s*(?:cm)?\b/giu,
+      /\b(\d(?:[.,]\d{1,2}))\s*(?:m|met)\b/giu,
+    ]);
+    if (height) {
+      const value = normalizeHeight(height.value);
+      if (inRange("HEIGHT_CM", value)) {
+        found.set("HEIGHT_CM", measurement("HEIGHT_CM", value, input, height.confidence));
+      }
     }
   }
 
-  const weight = latestMatch(text, [
-    /(?:cân\s*nặng|nặng)\s*[:=]?\s*(\d{2,3}(?:[.,]\d+)?)\s*(?:kg|ký|kí|cân)?\b/giu,
-    /\b(\d{2,3}(?:[.,]\d+)?)\s*(?:kg|ký|kí)\b/giu,
+  const weight = lastCaptured(text, [
+    /(?:can\s*nang|nang)\s*[:=]?\s*(\d{2,3}(?:[.,]\d+)?)\s*(?:kg|ky|ki|can)?\b/giu,
+    /\b(\d{2,3}(?:[.,]\d+)?)\s*(?:kg|ky|ki)\b/giu,
   ]);
   if (weight && inRange("WEIGHT_KG", weight.value)) {
-    found.set(
-      "WEIGHT_KG",
-      measurement("WEIGHT_KG", weight.value, input, weight.confidence),
-    );
+    found.set("WEIGHT_KG", measurement("WEIGHT_KG", weight.value, input, weight.confidence));
   }
 
-  const explicit: readonly [
-    MeasurementKind,
-    readonly RegExp[],
-  ][] = [
+  const explicit: readonly [MeasurementKind, readonly RegExp[]][] = [
     ["BUST_CM", [
-      /(?:vòng\s*ngực|ngực|vòng\s*1|v1)\s*[:=]?\s*(\d{2,3}(?:[.,]\d+)?)\s*(?:cm)?\b/giu,
+      /(?:vong\s*nguc|nguc|vong\s*1|v1)\s*[:=]?\s*(\d{2,3}(?:[.,]\d+)?)\s*(?:cm)?\b/giu,
     ]],
     ["WAIST_CM", [
-      /(?:vòng\s*eo|eo|vòng\s*2|v2)\s*[:=]?\s*(\d{2,3}(?:[.,]\d+)?)\s*(?:cm)?\b/giu,
+      /(?:vong\s*eo|eo|vong\s*2|v2)\s*[:=]?\s*(\d{2,3}(?:[.,]\d+)?)\s*(?:cm)?\b/giu,
     ]],
     ["HIPS_CM", [
-      /(?:vòng\s*mông|mông|vòng\s*3|v3)\s*[:=]?\s*(\d{2,3}(?:[.,]\d+)?)\s*(?:cm)?\b/giu,
+      /(?:vong\s*mong|mong|vong\s*3|v3)\s*[:=]?\s*(\d{2,3}(?:[.,]\d+)?)\s*(?:cm)?\b/giu,
     ]],
   ];
   for (const [kind, patterns] of explicit) {
-    const candidate = latestMatch(text, patterns);
+    const candidate = lastCaptured(text, patterns);
     if (candidate && inRange(kind, candidate.value)) {
       found.set(kind, measurement(kind, candidate.value, input, candidate.confidence));
     }

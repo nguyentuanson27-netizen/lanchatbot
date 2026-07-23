@@ -33,6 +33,19 @@ describe("extractCustomerMeasurements", () => {
     });
   });
 
+  it("accepts unaccented Vietnamese and common weight abbreviations", () => {
+    const values = extractCustomerMeasurements(input(
+      "chieu cao 1m58, can nang 50 ky, so do 3 vong 86-68-92",
+    ));
+    expect(Object.fromEntries(values.map((item) => [item.kind, item.value]))).toEqual({
+      BUST_CM: 86,
+      WAIST_CM: 68,
+      HIPS_CM: 92,
+      HEIGHT_CM: 158,
+      WEIGHT_KG: 50,
+    });
+  });
+
   it("does not treat phone numbers, prices or unlabelled values as measurements", () => {
     expect(extractCustomerMeasurements(input(
       "SĐT 0984997797, mẫu này 699k, mã 118619999",

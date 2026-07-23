@@ -51,6 +51,15 @@ class FakeStore implements AdminStore {
   }
   async outreachMetrics() { return { sent: 10, responded_24h: 3 }; }
   async evaluationSummary() { return { total: 2 }; }
+  async salesFunnelSummary() {
+    return {
+      price_asked: 10,
+      size_consulted: 8,
+      cart_opened: 5,
+      order_preview: 3,
+      purchase_confirmed: 2,
+    };
+  }
   async listEvaluations() { return { items: [], nextCursor: null }; }
   async businessFactSummary() { return { total: 1, ok: 1 }; }
   async listWorkers() { return [{ worker_id: "worker-1" }]; }

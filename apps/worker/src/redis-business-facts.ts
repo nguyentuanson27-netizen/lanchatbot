@@ -32,6 +32,10 @@ export interface BusinessFactsReader {
     query: VerifiedVariantQuery,
     now?: Date,
   ): Promise<VerifiedVariantResult>;
+  readCatalogSnapshot?(
+    shopAlias: string,
+    productId: string,
+  ): Promise<CatalogSnapshotV3 | null>;
   close(): Promise<void>;
 }
 
@@ -164,6 +168,17 @@ export class RedisBusinessFactsReader implements BusinessFactsReader {
       };
     }
     return verifiedVariantFromSnapshot(JSON.parse(raw) as unknown, query, now);
+  }
+
+  async readCatalogSnapshot(
+    shopAlias: string,
+    productId: string,
+  ): Promise<CatalogSnapshotV3 | null> {
+    await this.connected();
+    const raw = await this.client.get(catalogSnapshotKey(shopAlias, productId));
+    if (!raw) return null;
+    const parsed = CatalogSnapshotV3Schema.safeParse(JSON.parse(raw) as unknown);
+    return parsed.success ? parsed.data : null;
   }
 
   async close(): Promise<void> {

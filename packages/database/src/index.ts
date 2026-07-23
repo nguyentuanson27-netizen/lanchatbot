@@ -103,3 +103,8 @@ export {
   type RuntimePolicyDatabasePinScope,
   type RuntimePolicyDatabasePointerRecord,
 } from "./runtime-policy.js";
+export {
+  PostgresSizeChartExtractionStore,
+  type StageSizeChartArtifactInput,
+  type StageSizeChartArtifactResult,
+} from "./size-chart-extraction.js";

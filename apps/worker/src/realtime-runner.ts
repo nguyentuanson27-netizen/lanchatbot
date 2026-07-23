@@ -8,6 +8,7 @@ import {
   normalizeProductCode,
   ProductSearchService,
   recommendSize,
+  selectProductMediaV2,
   guardAgentProposal,
   selectImages,
   verifiedImageUrls,
@@ -29,6 +30,7 @@ import {
   type InboundMessageV1,
   type MeasurementKind,
   type ProductComponentRole,
+  type ProductFactsV2,
   type RequestedBusinessFactV2,
 } from "@lana/contracts";
 import type {
@@ -85,6 +87,7 @@ import {
   type MediaAggregation,
   type MediaAnalysisItem,
 } from "./media-resolution.js";
+import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
 import {
   createRealtimeSalesState,
@@ -583,6 +586,8 @@ export function verifiedProductInfoProposal(
   facts: BusinessFactEnvelopeV1,
   context: readonly ShadowContextMessage[],
   profile: CustomerProfileV1 | null = null,
+  productFactsV2: ProductFactsV2 | null = null,
+  now = new Date(),
 ): AgentProposalV1 | null {
   if (facts.status !== "OK" || facts.facts === null) return null;
   const price = facts.facts.salePriceVnd ?? facts.facts.listPriceVnd;
@@ -597,6 +602,24 @@ export function verifiedProductInfoProposal(
     : hasBodyProfile(context))
     ? "Chị gửi thêm số đo 3 vòng để em chốt size chuẩn form cho mình nha."
     : "Chị cho em xin chiều cao cân nặng hoặc số đo 3 vòng em tư vấn size cho mình nha.";
+  const v2Overview = productFactsV2
+    ? selectProductMediaV2({
+        product: productFactsV2,
+        kind: "FULL_LOOK",
+        maxAssets: 3,
+        now,
+        unavailableFallback: {
+          verifiedFact: {
+            answer: `${displayName} vẫn có thể tư vấn size`,
+            source: "PRODUCT_FACTS_V2",
+            freshnessState: "FRESH",
+            sourceVersion: productFactsV2.content.metadata.sourceVersion,
+            observedAt: productFactsV2.content.metadata.observedAt,
+          },
+          nextStep: "ASK_SIZE_PROFILE",
+        },
+      })
+    : null;
   return {
     schemaVersion: 1,
     intent: "product_info",
@@ -609,7 +632,9 @@ export function verifiedProductInfoProposal(
       sizeLine,
       followUp,
     ].join("\n"),
-    attachments: selectImages(product, "PRICE_CARD").images.map((image) => image.url),
+    attachments: v2Overview
+      ? v2Overview.selection.selected.map(({ url }) => url)
+      : selectImages(product, "PRICE_CARD").images.map((image) => image.url),
     handoffReason: null,
     businessFactQuery: {
       intent: "PRICE",
@@ -828,24 +853,32 @@ function customerProfileSummary(profile: CustomerProfileV1 | null): {
 function profileHasBodyMeasurements(profile: CustomerProfileV1 | null): boolean {
   if (!profile) return false;
   const kinds = new Set(profile.measurements.map(({ kind }) => kind));
-  return kinds.has("HEIGHT_CM") && kinds.has("WEIGHT_KG");
+  return (
+    kinds.has("HEIGHT_CM") && kinds.has("WEIGHT_KG")
+  ) || (
+    kinds.has("BUST_CM") && kinds.has("WAIST_CM") && kinds.has("HIPS_CM")
+  );
 }
 
-function extractVariantMentions(
+export function extractVariantMentions(
   text: string,
-  proposal: AgentProposalV1,
+  _proposal: AgentProposalV1,
 ): { readonly size: string | null; readonly color: string | null } {
-  const sizeFromModel = proposal.businessFactQuery.size?.trim() || null;
-  const colorFromModel = proposal.businessFactQuery.color?.trim() || null;
-  const sizeMatch = text.match(
-    /(?:\bsize|\bsz|kích\s*cỡ|cỡ)\s*[:=]?\s*(XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|\d{2,3})\b/iu,
+  const normalized = normalizedVietnamese(text);
+  const labelledSize = normalized.match(
+    /(?:\bsize|\bsz|\bkich\s*co|\bco)\s*[:=]?\s*(XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|\d{2,3})\b/iu,
   );
-  const colorMatch = text.match(
-    /(?:\bmàu|\bcolor)\s*[:=]?\s*([\p{L}][\p{L}\s-]{0,30}?)(?=\s+(?:size|sz|cỡ)\b|[,.!?;\n]|$)/iu,
+  const sizeOnly = normalized.trim().match(
+    /^(XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|\d{2,3})$/iu,
+  );
+  const colorMatch = normalized.match(
+    /(?:\bmau|\bcolor)\s*[:=]?\s*([a-z][a-z\s-]{0,30}?)(?=\s+(?:size|sz|co)\b|[,.!?;\n]|$)/iu,
   );
   return {
-    size: sizeFromModel ?? sizeMatch?.[1]?.trim() ?? null,
-    color: colorFromModel ?? colorMatch?.[1]?.trim() ?? null,
+    // The customer's text is the only source of variant evidence. Model
+    // output may guide intent handling but can never invent a size or colour.
+    size: labelledSize?.[1]?.trim() ?? sizeOnly?.[1]?.trim() ?? null,
+    color: colorMatch?.[1]?.trim() ?? null,
   };
 }
 
@@ -892,20 +925,41 @@ function productCategory(product: StableProductDocument): string {
 
 interface MultiFactResolution {
   readonly queryId: string;
-  readonly product: StableProductDocument;
+  readonly rawProductRef: string;
+  readonly product: StableProductDocument | null;
+  readonly resolution: "RESOLVED" | "AMBIGUOUS" | "NOT_FOUND";
   readonly facts: readonly {
     readonly requestedFact: RequestedBusinessFactV2;
     readonly envelope: BusinessFactEnvelopeV1;
   }[];
 }
 
-function buildBusinessFactQueries(
+export interface ResolvedProductReference {
+  readonly raw: string;
+  readonly product: StableProductDocument | null;
+  readonly resolution: "RESOLVED" | "AMBIGUOUS" | "NOT_FOUND";
+}
+
+function factsForProductClause(
+  text: string,
+  rawProductRef: string,
+  fallback: readonly RequestedBusinessFactV2[],
+): readonly RequestedBusinessFactV2[] {
+  const clauses = text.split(/[,;.!?\n]|\s+(?:và|với|and)\s+/iu);
+  const containing = clauses.find((clause) =>
+    clause.toLocaleUpperCase("vi-VN").includes(rawProductRef.toLocaleUpperCase("vi-VN"))
+  );
+  const scoped = containing ? explicitCustomerBusinessIntents(containing) : [];
+  return scoped.length > 0 ? scoped : fallback;
+}
+
+export function buildBusinessFactQueries(
   eventKey: string,
   text: string,
-  products: readonly StableProductDocument[],
+  references: readonly ResolvedProductReference[],
 ): BusinessFactQueriesV2 | null {
   const requestedFacts = explicitCustomerBusinessIntents(text);
-  if (requestedFacts.length === 0 || products.length === 0) return null;
+  if (requestedFacts.length === 0 || references.length === 0) return null;
   const size = text.match(
     /(?:\bsize|\bsz|kích\s*cỡ|cỡ)\s*[:=]?\s*(XXXS|XXS|XS|S|M|L|XL|XXL|XXXL|\d{2,3})\b/iu,
   )?.[1]?.trim() ?? null;
@@ -914,15 +968,15 @@ function buildBusinessFactQueries(
   )?.[1]?.trim() ?? null;
   return BusinessFactQueriesV2Schema.parse({
     schemaVersion: 2,
-    queries: products.slice(0, 3).map((product, index) => ({
+    queries: references.slice(0, 3).map((reference, index) => ({
       schemaVersion: 2,
       queryId: deterministicUuid(`${eventKey}:business-fact-query:v2:${index}`),
       productRef: {
-        raw: product.productId,
-        productId: product.productId,
-        resolution: "RESOLVED",
+        raw: reference.raw,
+        productId: reference.product?.productId ?? null,
+        resolution: reference.resolution,
       },
-      requestedFacts,
+      requestedFacts: factsForProductClause(text, reference.raw, requestedFacts),
       qualifiers: {
         offerType: null,
         color,
@@ -938,6 +992,10 @@ function multiFactReply(
 ): string | null {
   const lines: string[] = [];
   for (const resolution of resolutions) {
+    if (resolution.resolution !== "RESOLVED" || resolution.product === null) {
+      lines.push(`Em chưa tìm thấy mã ${resolution.rawProductRef}.`);
+      continue;
+    }
     const details: string[] = [];
     for (const { requestedFact, envelope } of resolution.facts) {
       if (envelope.status !== "OK" || envelope.facts === null) {
@@ -1060,9 +1118,18 @@ function sizeEngineProposal(
   const chartArtifacts = Object.values(
     policyResolution?.bundle?.artifacts.sizeCharts ?? {},
   );
-  const charts: ScopedSizeChart[] = chartArtifacts.map(({ chart }) => ({
+  const charts: ScopedSizeChart[] = chartArtifacts.map(({ chart, scope }) => ({
     chart,
-    scope: {
+    scope: scope ? {
+      level: scope.level,
+      ...(scope.parentProductIds.length > 0
+        ? { parentProductIds: scope.parentProductIds }
+        : {}),
+      ...(scope.categories.length > 0 ? { categories: scope.categories } : {}),
+      ...(scope.componentRole === null ? {} : { componentRole: scope.componentRole }),
+      ...(scope.forms.length > 0 ? { forms: scope.forms } : {}),
+      ...(scope.materials.length > 0 ? { materials: scope.materials } : {}),
+    } : {
       level:
         chart.category.trim().toLocaleUpperCase("vi-VN") === "ALL"
           ? "GLOBAL"
@@ -1274,9 +1341,10 @@ export interface RealtimeVideoFrameExtractorPort {
 interface ProductResolution {
   readonly primary: StableProductDocument | null;
   readonly products: readonly StableProductDocument[];
+  readonly references: readonly ResolvedProductReference[];
   readonly media: MediaAggregation;
   readonly origin: "NONE" | "TEXT_CODE" | "TEXT_SEMANTIC" | "ADS" | "MEDIA" | "SELECTION" | "STATE";
-  readonly extractedAdProductId: string | null;
+      readonly extractedAdProductId: string | null;
 }
 
 export interface RealtimeTagObservationProvider {
@@ -1517,7 +1585,13 @@ export class RealtimeRunner {
       const productId = query.productRef.productId;
       const product = productId ? byId.get(productId) : undefined;
       if (!productId || !product) {
-        throw new Error("MULTI_FACT_PRODUCT_RESOLUTION_INVALID");
+        return {
+          queryId: query.queryId,
+          rawProductRef: query.productRef.raw,
+          product: null,
+          resolution: query.productRef.resolution,
+          facts: [],
+        };
       }
       const facts: MultiFactResolution["facts"][number][] = [];
       for (const requestedFact of query.requestedFacts) {
@@ -1532,7 +1606,13 @@ export class RealtimeRunner {
         });
         facts.push({ requestedFact, envelope });
       }
-      return { queryId: query.queryId, product, facts };
+      return {
+        queryId: query.queryId,
+        rawProductRef: query.productRef.raw,
+        product,
+        resolution: query.productRef.resolution,
+        facts,
+      };
     }));
   }
 
@@ -2019,8 +2099,64 @@ export class RealtimeRunner {
     const imageIntent = message.isEcho
       ? null
       : explicitCustomerImageIntent(message.text ?? "");
+    const catalogSnapshot =
+      resolvedProduct && this.factsReader.readCatalogSnapshot
+        ? await this.factsReader.readCatalogSnapshot(
+            this.options.shopAlias,
+            resolvedProduct.productId,
+          )
+        : null;
+    const productFactsV2 =
+      resolvedProduct && catalogSnapshot
+        ? buildRealtimeProductFactsV2({
+            snapshot: catalogSnapshot,
+            product: resolvedProduct,
+            policy: policyResolution,
+            now,
+          })
+        : null;
+    const mediaKindV2 = imageIntent === "DETAIL"
+      ? "DETAIL_FABRIC" as const
+      : imageIntent === "FEEDBACK" || imageIntent === "SIZE_GUIDE"
+        ? imageIntent
+        : imageIntent === "GENERIC" || imageIntent === "PRODUCT_ONLY"
+          ? "FULL_LOOK" as const
+          : null;
+    const mediaV2 = mediaKindV2 && productFactsV2
+      ? selectProductMediaV2({
+          product: productFactsV2,
+          kind: mediaKindV2,
+          maxAssets: 3,
+          now,
+          unavailableFallback: {
+            verifiedFact: {
+              answer: `${productFactsV2.content.productName} vẫn có thể kiểm tra giá và size`,
+              source: "PRODUCT_FACTS_V2",
+              freshnessState: "FRESH",
+              sourceVersion: productFactsV2.content.metadata.sourceVersion,
+              observedAt: productFactsV2.content.metadata.observedAt,
+            },
+            nextStep: "ASK_SIZE_PROFILE",
+          },
+        })
+      : null;
     const imageRequest = imageIntent !== null && resolution.primary !== null
-      ? { intent: imageIntent, selection: selectImages(resolution.primary, imageIntent) }
+      ? mediaV2
+        ? {
+            intent: imageIntent,
+            images: mediaV2.selection.selected.map(({ url }) => url),
+            reasonCode: mediaV2.unavailableReason ?? "OK",
+            customerTextUnits: mediaV2.customerTextUnits,
+          }
+        : (() => {
+            const selection = selectImages(resolvedProduct!, imageIntent);
+            return {
+              intent: imageIntent,
+              images: selection.images.map(({ url }) => url),
+              reasonCode: selection.reasonCode,
+              customerTextUnits: [] as readonly string[],
+            };
+          })()
       : null;
     const advisoryIntent =
       this.options.catalogAdvisoryEnabled && !message.isEcho
@@ -2031,7 +2167,7 @@ export class RealtimeRunner {
         ? buildBusinessFactQueries(
             message.eventKey,
             message.text ?? "",
-            resolution.products,
+            resolution.references,
           )
         : null;
     const shouldUseMultiFacts = multiFactQueries !== null && (
@@ -2107,7 +2243,7 @@ export class RealtimeRunner {
         multiFactAudit = resolutions.flatMap((resolution) =>
           resolution.facts.map(({ requestedFact, envelope }) => ({
             queryId: resolution.queryId,
-            productId: resolution.product.productId,
+            productId: resolution.product!.productId,
             requestedFact,
             status: envelope.status,
             reasonCode: envelope.reasonCode,
@@ -2154,9 +2290,35 @@ export class RealtimeRunner {
             },
           };
           if (
+            this.options.verifiedVariantEnabled &&
+            this.factsReader.resolveVerifiedVariant &&
+            resolution.primary
+          ) {
+            const mentions = extractVariantMentions(message.text ?? "", proposal);
+            if (mentions.size !== null || mentions.color !== null) {
+              const verified = await this.factsReader.resolveVerifiedVariant({
+                shopAlias: this.options.shopAlias,
+                productId: resolution.primary.productId,
+                offerType: proposal.businessFactQuery.offerType,
+                mentionedSize: mentions.size,
+                mentionedColor: mentions.color,
+              }, now);
+              nextState = {
+                ...nextState,
+                verifiedVariant: verifiedVariantState(verified),
+                consideredVariant: {
+                  offerType: verified.selectedOfferType,
+                  color: verified.selectedColorLabel,
+                  size: verified.selectedSizeCode,
+                },
+              };
+            }
+          }
+          if (
             this.options.customerProfileEnabled &&
             customerProfile &&
             resolutions.length === 1 &&
+            resolutions[0]!.product !== null &&
             first.requestedFacts.includes("SIZE")
           ) {
             const sizeProposal = sizeEngineProposal(
@@ -2167,7 +2329,7 @@ export class RealtimeRunner {
                   intent: "SIZE",
                 },
               },
-              resolutions[0]!.product,
+              resolutions[0]!.product!,
               customerProfile,
               policyResolution,
               now,
@@ -2252,25 +2414,44 @@ export class RealtimeRunner {
             metaMessages = [{ kind: "TEXT", text: reply }];
           }
         }
-      } else if (imageRequest && imageRequest.selection.images.length === 0) {
-        // Khách xin ảnh mà không có ảnh đúng loại thì chuyển nhân viên im lặng,
-        // tuyệt đối không gửi ảnh loại khác thế chỗ. Riêng ảnh feedback hiện
-        // chưa có nguồn nạp nên nhánh này luôn chuyển người cho tới khi có.
-        // Không được thoát sớm ở đây: phần commit chung mới là chỗ gắn tag
-        // Pancake và ghi sự kiện handoff.
-        handoffGuardReasonCodes = [
-          `IMAGE_REQUEST_${imageRequest.intent}`,
-          imageRequest.selection.reasonCode,
-        ];
-        const transitioned = applySilentHandoff(
-          nextState,
-          "PRODUCT_TOOL_ERROR",
-          nextState.revision,
-          nextState.lastFence,
-          now,
-        );
-        nextState = transitioned.state;
-        handoff = transitioned.handoff;
+      } else if (imageRequest && imageRequest.images.length === 0) {
+        // Media Selector V2 never substitutes the wrong image type. When the
+        // exact media is unavailable it answers explicitly and advances the
+        // sale using a verified ProductFactsV2 fact.
+        if (imageRequest.customerTextUnits.length === 0) {
+          handoffGuardReasonCodes = [
+            `IMAGE_REQUEST_${imageRequest.intent}`,
+            imageRequest.reasonCode,
+          ];
+          const transitioned = applySilentHandoff(
+            nextState,
+            "PRODUCT_TOOL_ERROR",
+            nextState.revision,
+            nextState.lastFence,
+            now,
+          );
+          nextState = transitioned.state;
+          handoff = transitioned.handoff;
+        } else proposal = {
+          schemaVersion: 1,
+          intent: "product_media_unavailable",
+          conversationStage: nextState.salesStage,
+          productId: resolvedProduct?.productId ?? null,
+          action: "REPLY",
+          reply: imageRequest.customerTextUnits.join("\n"),
+          attachments: [],
+          handoffReason: null,
+          businessFactQuery: {
+            intent: "NONE",
+            offerType: null,
+            color: null,
+            size: null,
+            deliveryRegion: null,
+          },
+        };
+        if (proposal && this.options.mode === "LIVE" && this.options.sendEnabled) {
+          metaMessages = [{ kind: "TEXT", text: proposal.reply }];
+        }
       } else {
         const directProductInfo = resolvedProduct !== null && imageRequest === null && (
           isResolvedProductCodeOnly(message.text ?? "", resolvedProduct) ||
@@ -2301,7 +2482,7 @@ export class RealtimeRunner {
         if (imageRequest && resolvedProduct) {
           proposal = requestedImagesProposal(
             resolvedProduct,
-            imageRequest.selection.images.map((image) => image.url),
+            imageRequest.images,
             imageRequest.intent,
           );
         } else if (directProductInfo && resolvedProduct) {
@@ -2388,6 +2569,8 @@ export class RealtimeRunner {
                   facts,
                   modelContext,
                   this.options.customerProfileEnabled ? customerProfile : null,
+                  productFactsV2,
+                  now,
                 )
               : null;
           if (deterministicProductInfo) {
@@ -2967,6 +3150,7 @@ export class RealtimeRunner {
     return {
       primary: null,
       products: [],
+      references: [],
       media: aggregateMedia([]),
       origin: "NONE",
       extractedAdProductId: null,
@@ -2981,6 +3165,7 @@ export class RealtimeRunner {
     return {
       primary: product,
       products: [product],
+      references: [{ raw: product.productId, product, resolution: "RESOLVED" }],
       media: aggregateMedia([]),
       origin,
       extractedAdProductId,
@@ -3038,18 +3223,25 @@ export class RealtimeRunner {
       ...extractAdProductCodes(text),
     ])].slice(0, 3);
     if (this.options.multiFactQueryEnabled && textCodes.length > 1) {
-      const products = (await Promise.all(
-        textCodes.map((code) => this.exactProduct(code)),
-      )).filter((product): product is StableProductDocument => product !== null);
-      if (products.length > 1) {
+      const references = await Promise.all(textCodes.map(async (code) => {
+        const product = await this.exactProduct(code);
         return {
-          primary: products[0] ?? null,
-          products,
-          media: aggregateMedia([]),
-          origin: "TEXT_CODE",
-          extractedAdProductId: null,
+          raw: code,
+          product,
+          resolution: product === null ? "NOT_FOUND" as const : "RESOLVED" as const,
         };
-      }
+      }));
+      const products = references
+        .map(({ product }) => product)
+        .filter((product): product is StableProductDocument => product !== null);
+      return {
+        primary: products[0] ?? null,
+        products,
+        references,
+        media: aggregateMedia([]),
+        origin: "TEXT_CODE",
+        extractedAdProductId: null,
+      };
     }
 
     const explicitCode = productCodeOnly(text);
@@ -3118,6 +3310,11 @@ export class RealtimeRunner {
       return {
         primary: media.products[0] ?? null,
         products: media.products,
+        references: media.products.map((product) => ({
+          raw: product.productId,
+          product,
+          resolution: "RESOLVED" as const,
+        })),
         media,
         origin: "MEDIA",
         extractedAdProductId: null,
