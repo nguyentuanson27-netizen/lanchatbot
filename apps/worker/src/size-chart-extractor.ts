@@ -23,21 +23,17 @@ const RESPONSE_SCHEMA = {
     },
     boundary_policy: {
       type: "STRING",
-      enum: ["ASK_CUSTOMER", "PREFER_SMALLER_SIZE", "PREFER_LARGER_SIZE"],
+      enum: ["REQUIRE_HUMAN_REVIEW", "PREFER_SMALLER_SIZE", "PREFER_LARGER_SIZE"],
     },
-    confidence: { type: "NUMBER", minimum: 0, maximum: 1 },
+    confidence: { type: "NUMBER" },
     bands: {
       type: "ARRAY",
-      minItems: 1,
-      maxItems: 20,
       items: {
         type: "OBJECT",
         properties: {
           size: { type: "STRING" },
           ranges: {
             type: "ARRAY",
-            minItems: 1,
-            maxItems: 5,
             items: {
               type: "OBJECT",
               properties: {
@@ -49,14 +45,20 @@ const RESPONSE_SCHEMA = {
                 max_inclusive: { type: "NUMBER", nullable: true },
               },
               required: ["kind", "min_inclusive", "max_inclusive"],
+              propertyOrdering: ["kind", "min_inclusive", "max_inclusive"],
             },
           },
         },
         required: ["size", "ranges"],
+        propertyOrdering: ["size", "ranges"],
       },
     },
   },
   required: [
+    "measurement_basis", "brand", "category", "component_role",
+    "boundary_policy", "confidence", "bands",
+  ],
+  propertyOrdering: [
     "measurement_basis", "brand", "category", "component_role",
     "boundary_policy", "confidence", "bands",
   ],
@@ -67,6 +69,7 @@ Chỉ chép lại số liệu nhìn thấy rõ trong ảnh, không suy diễn v�
 measurement_basis=BODY khi số đo là cơ thể khách; GARMENT khi là số đo thành phẩm; UNKNOWN nếu không chắc.
 Đơn vị mọi số đo là cm, cân nặng là kg. Ô không có giới hạn dưới/trên dùng null.
 Nếu ảnh mờ, thiếu nhãn cột hoặc không thể xác định đúng thứ tự size, giảm confidence.
+Nếu ảnh không ghi rõ cách xử lý khách nằm sát biên size, dùng boundary_policy=REQUIRE_HUMAN_REVIEW.
 category và component_role phải phản ánh đúng nội dung bảng, không suy từ mã sản phẩm.
 Trả JSON đúng schema.`;
 
@@ -124,7 +127,21 @@ export class VertexSizeChartVisionClient implements SizeChartVisionClient {
       }),
       signal: AbortSignal.timeout(this.timeoutMs),
     });
-    if (!response.ok) throw new Error(`VERTEX_SIZE_CHART_HTTP_${response.status}`);
+    if (!response.ok) {
+      const failure = (await response.json().catch(() => null)) as {
+        error?: { status?: unknown; message?: unknown };
+      } | null;
+      const status = String(failure?.error?.status ?? "UNKNOWN")
+        .replace(/[^A-Z0-9_]/giu, "_")
+        .slice(0, 64);
+      const message = String(failure?.error?.message ?? "")
+        .replace(/[\r\n]+/gu, " ")
+        .replace(/[^\p{L}\p{N}\s_.:/-]/gu, "")
+        .slice(0, 240);
+      throw new Error(
+        `VERTEX_SIZE_CHART_HTTP_${response.status}:${status}${message ? `:${message}` : ""}`,
+      );
+    }
     const body = (await response.json()) as {
       candidates?: { content?: { parts?: { text?: string }[] } }[];
     };
@@ -222,10 +239,15 @@ export class SizeChartExtractionRunner {
     extractionVersion: string;
     minimumConfidence?: number;
     concurrency?: number;
+    maximumRows?: number | null;
   }) {}
 
   async run(): Promise<SizeChartExtractionSummary> {
-    const rows = (await this.options.rows()).filter(isSizeChartRegistryRow);
+    const selectedRows = (await this.options.rows()).filter(isSizeChartRegistryRow);
+    const maximumRows = this.options.maximumRows && this.options.maximumRows > 0
+      ? Math.trunc(this.options.maximumRows)
+      : null;
+    const rows = maximumRows ? selectedRows.slice(0, maximumRows) : selectedRows;
     const minimumConfidence = this.options.minimumConfidence ?? 0.75;
     const concurrency = Math.max(1, Math.min(4, this.options.concurrency ?? 1));
     let cursor = 0;
@@ -246,7 +268,7 @@ export class SizeChartExtractionRunner {
             ),
             this.options.extractionVersion,
           );
-          if (extracted.measurementBasis !== "BODY" || extracted.confidence < minimumConfidence) {
+          if (extracted.measurementBasis === "UNKNOWN" || extracted.confidence < minimumConfidence) {
             failed += 1;
             errors.push(`${row.MA_SP}:SIZE_CHART_REVIEW_REQUIRED`);
             continue;

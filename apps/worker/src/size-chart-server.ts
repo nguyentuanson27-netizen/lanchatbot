@@ -96,6 +96,7 @@ async function main(): Promise<void> {
   const model = process.env.SIZE_CHART_MODEL?.trim() || "gemini-3.1-flash-lite";
   const extractionVersion =
     process.env.SIZE_CHART_EXTRACTION_VERSION?.trim() || "size-chart-v1.0.0";
+  const maximumRows = boundedInt("SIZE_CHART_MAX_ROWS", 0, 0, 10_000);
   const runner = new SizeChartExtractionRunner({
     rows: async () => {
       const range = `${IMAGE_REGISTRY_SHEET}!A:AP`;
@@ -125,6 +126,7 @@ async function main(): Promise<void> {
     extractionVersion,
     minimumConfidence: Number(process.env.SIZE_CHART_MIN_CONFIDENCE ?? 0.75),
     concurrency: boundedInt("SIZE_CHART_CONCURRENCY", 1, 1, 4),
+    maximumRows: maximumRows === 0 ? null : maximumRows,
   });
 
   const intervalMs = boundedInt("SIZE_CHART_INTERVAL_MS", 86_400_000, 300_000, 86_400_000);

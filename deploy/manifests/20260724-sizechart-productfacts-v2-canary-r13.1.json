@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-24T00:45:00+07:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "fix/sizechart-vertex-response-schema",
+  "sourceCommit": "8f2de6f75295edbee31d4e7a4f6e4cf70a78228c",
+  "releaseTag": "20260724-sizechart-productfacts-v2-canary-r13.1",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260724-sizechart-productfacts-v2-canary-r13.1",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260723-sizechart-productfacts-v2-canary-r13",
+  "pageAllowlist": [
+    "1198992073286645"
+  ],
+  "images": {
+    "realtime": {
+      "name": "lana-chatbot-app:sizechart-facts-v2-vertex-hotfix-8f2de6f",
+      "digest": "sha256:e1cd443cd407fbfba9828743959a184eb320610b25ec532711aeaf8dc8f3e6aa"
+    },
+    "admin": {
+      "name": "lana-chatbot-app:sizechart-facts-v2-vertex-hotfix-8f2de6f",
+      "digest": "sha256:e1cd443cd407fbfba9828743959a184eb320610b25ec532711aeaf8dc8f3e6aa"
+    },
+    "sizeChartExtractor": {
+      "name": "lana-chatbot-app:sizechart-facts-v2-vertex-hotfix-8f2de6f",
+      "digest": "sha256:e1cd443cd407fbfba9828743959a184eb320610b25ec532711aeaf8dc8f3e6aa"
+    }
+  },
+  "composeSha256": "35194b9505378ea32d787c411d7cce8f7f949838ac0515c5b064b4ae79842570",
+  "migrations": {
+    "0020_size_chart_extraction": "56812a92dd64b0bbc114edc351b387b595652f7d38bdb94e46af73e9ecef87e4"
+  },
+  "verification": {
+    "monorepoBuild": "PASS",
+    "monorepoTypecheck": "PASS",
+    "tests": "744_PASS",
+    "workerTests": "241_PASS",
+    "messengerScenarios": "30_PASS",
+    "sizeChartVertexSmoke": "PASS_1_DRAFT_FROM_10_MAX",
+    "garmentApprovalGuard": "PASS",
+    "dedicatedDatabaseRole": "PASS_LEAST_PRIVILEGE",
+    "liveCutover": "PENDING",
+    "liveCanary": "PENDING_100_INBOUND_OR_48_HOURS"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260723-sizechart-productfacts-v2-canary-r13",
+    "dataDeletionRequired": false
+  },
+  "promotionGate": {
+    "status": "CUTOVER_READY",
+    "scope": "PAGE_TEST_ONLY",
+    "liveEvidenceRequired": true,
+    "publishedBeyondPageTest": false
+  }
+}

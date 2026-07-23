@@ -17,7 +17,7 @@ image_registry
 → lọc SIZE_GUIDE/SIZE_CHART
 → tải và resize ảnh trong app worker
 → Vertex trích xuất JSON có schema
-→ chỉ nhận measurement_basis=BODY và confidence đạt ngưỡng
+→ confidence đạt ngưỡng: BODY hoặc GARMENT được tạo DRAFT
 → tạo SIZE_CHART DRAFT trong PostgreSQL
 → admin VALIDATE → APPROVE
 → APPROVE gắn bằng chứng VERIFIED
@@ -25,9 +25,10 @@ image_registry
 → Size Engine
 ```
 
-Các ảnh đo thành phẩm (`GARMENT`), ảnh không rõ (`UNKNOWN`) hoặc confidence thấp
-không được đưa vào runtime. Cùng `MA_SP + IMAGE_HASH + extractor version` chỉ tạo
-một extraction; chạy lại không tạo bản trùng.
+Ảnh `GARMENT` được giữ ở DRAFT để quản trị viên xem số đo gốc nhưng bị chặn APPROVE
+cho tới khi chuyển thành dải số đo cơ thể `BODY` đã kiểm tra. Ảnh không rõ (`UNKNOWN`)
+hoặc confidence thấp không được đưa vào runtime. Cùng `MA_SP + IMAGE_HASH + extractor
+version` chỉ tạo một extraction; chạy lại không tạo bản trùng.
 
 ## Sửa lỗi runtime
 

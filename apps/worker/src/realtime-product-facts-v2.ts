@@ -52,6 +52,7 @@ function verifiedSizeChart(
   const artifacts = Object.values(policy?.bundle?.artifacts.sizeCharts ?? {});
   const selected = artifacts.find((content) => {
     if (content.chart.reference.verificationStatus !== "VERIFIED") return false;
+    if (content.extraction && content.extraction.measurementBasis !== "BODY") return false;
     const scope = content.scope;
     return !scope || scope.parentProductIds.length === 0 ||
       scope.parentProductIds.some((value) =>
