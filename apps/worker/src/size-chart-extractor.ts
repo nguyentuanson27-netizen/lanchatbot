@@ -25,19 +25,15 @@ const RESPONSE_SCHEMA = {
       type: "STRING",
       enum: ["ASK_CUSTOMER", "PREFER_SMALLER_SIZE", "PREFER_LARGER_SIZE"],
     },
-    confidence: { type: "NUMBER", minimum: 0, maximum: 1 },
+    confidence: { type: "NUMBER" },
     bands: {
       type: "ARRAY",
-      minItems: 1,
-      maxItems: 20,
       items: {
         type: "OBJECT",
         properties: {
           size: { type: "STRING" },
           ranges: {
             type: "ARRAY",
-            minItems: 1,
-            maxItems: 5,
             items: {
               type: "OBJECT",
               properties: {
@@ -49,14 +45,20 @@ const RESPONSE_SCHEMA = {
                 max_inclusive: { type: "NUMBER", nullable: true },
               },
               required: ["kind", "min_inclusive", "max_inclusive"],
+              propertyOrdering: ["kind", "min_inclusive", "max_inclusive"],
             },
           },
         },
         required: ["size", "ranges"],
+        propertyOrdering: ["size", "ranges"],
       },
     },
   },
   required: [
+    "measurement_basis", "brand", "category", "component_role",
+    "boundary_policy", "confidence", "bands",
+  ],
+  propertyOrdering: [
     "measurement_basis", "brand", "category", "component_role",
     "boundary_policy", "confidence", "bands",
   ],
@@ -124,7 +126,21 @@ export class VertexSizeChartVisionClient implements SizeChartVisionClient {
       }),
       signal: AbortSignal.timeout(this.timeoutMs),
     });
-    if (!response.ok) throw new Error(`VERTEX_SIZE_CHART_HTTP_${response.status}`);
+    if (!response.ok) {
+      const failure = (await response.json().catch(() => null)) as {
+        error?: { status?: unknown; message?: unknown };
+      } | null;
+      const status = String(failure?.error?.status ?? "UNKNOWN")
+        .replace(/[^A-Z0-9_]/giu, "_")
+        .slice(0, 64);
+      const message = String(failure?.error?.message ?? "")
+        .replace(/[\r\n]+/gu, " ")
+        .replace(/[^\p{L}\p{N}\s_.:/-]/gu, "")
+        .slice(0, 240);
+      throw new Error(
+        `VERTEX_SIZE_CHART_HTTP_${response.status}:${status}${message ? `:${message}` : ""}`,
+      );
+    }
     const body = (await response.json()) as {
       candidates?: { content?: { parts?: { text?: string }[] } }[];
     };
