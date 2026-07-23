@@ -935,13 +935,13 @@ Agent chỉ đổi trạng thái sau khi có bằng chứng. Giá trị hợp l�
 
 | Hạng mục | Trạng thái | Branch/PR | Commit/tag | Test evidence | Deploy evidence | Ghi chú |
 |---|---|---|---|---|---|---|
-| 0.1 NO_REPLY buying signal | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | `bb56cae` | buying-signal 18; sales-cycle 6; golden 3; worker suite 197 pass | Chưa deploy; `REALTIME_BUYING_SIGNAL_GUARD_V1=false` | P0 |
-| 0.2 Vertex 401/single-flight/jitter | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | `bb56cae` | Vertex 16 pass; 3/10/100 concurrent; 401/429/503/jitter | Chưa deploy | P0 |
-| 0.3 Golden transcripts | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | `bb56cae` | runtime 38 + golden fixture IDs 3; toàn repo 696 test pass | Chưa deploy | P0 |
-| 0.4 Funnel/operational telemetry | CODE_COMPLETE | feat/realtime-wave0-safety-telemetry | `bb56cae` | contract 3; DB atomic/idempotent 7; worker golden 3 | Chưa deploy; `REALTIME_DECISION_TELEMETRY_ENABLED=false` | P0/P1 |
-| 1.1 GroundedReplyDraftV1 | SHADOW | feat/realtime-wave1-grounded-facts | `f27de9c` | contract 7; Vertex 19; golden 6; toàn repo 727 test pass | Shadow image `dbcab341…`, healthy; realtime live OFF | Schema strict không có action/product/query/fact |
-| 1.2 Verified fact assembler | SHADOW | feat/realtime-wave1-grounded-facts | `f27de9c` | assembler 12; exact price/cross-product/image index/schema fallback golden | Shadow flag ON; migration 0018 applied; payload thực tế 0 do chưa có job mới | Facts và URL chỉ lấy từ envelope/catalog đã xác minh |
-| 1.3 Business guard | SHADOW | feat/realtime-wave1-grounded-facts | `f27de9c` | guard 17; buying signal 19; golden 6; full typecheck/build | Có trong shadow candidate; không điều khiển live outbound | Chặn NO_REPLY khi có buying signal, xin PII sớm và ghi reason code kể cả khi fallback |
+| 0.1 NO_REPLY buying signal | CANARY_LIVE | feat/realtime-wave0-safety-telemetry | `f27de9c` | buying-signal 19; sales-cycle 6; golden 6; toàn repo 727 pass | Flag ON chỉ page test; health/rollback đạt | P0 |
+| 0.2 Vertex 401/single-flight/jitter | CANARY_LIVE | feat/realtime-wave0-safety-telemetry | `f27de9c` | Vertex 19; concurrent 3/10/100; 401/429/503/jitter | Có trong image realtime CANARY_LIVE | P0 |
+| 0.3 Golden transcripts | CANARY_LIVE | feat/realtime-wave0-safety-telemetry | `f27de9c` | runtime 38 + golden 6; toàn repo 727 test pass | Candidate image đã build/deploy đúng commit | P0 |
+| 0.4 Funnel/operational telemetry | CANARY_LIVE | feat/realtime-wave0-safety-telemetry | `f27de9c` | contract 3; DB atomic/idempotent 7; worker golden 6 | Decision telemetry ON; duplicate sequence 0 | P0/P1 |
+| 1.1 GroundedReplyDraftV1 | CANARY_LIVE | feat/realtime-wave1-grounded-facts | `f27de9c` | contract 7; Vertex 19; golden 6; toàn repo 727 test pass | Flag ON chỉ page test; rollback đạt | Schema strict không có action/product/query/fact |
+| 1.2 Verified fact assembler | CANARY_LIVE | feat/realtime-wave1-grounded-facts | `f27de9c` | assembler 12; exact price/cross-product/image index/schema fallback golden | Flag ON; migration 0018; direct Messenger test pending | Facts và URL chỉ lấy từ envelope/catalog đã xác minh |
+| 1.3 Business guard | CANARY_LIVE | feat/realtime-wave1-grounded-facts | `f27de9c` | guard 17; buying signal 19; golden 6; full typecheck/build | Flag ON; ambiguous 0, duplicate sequence 0 | Chặn NO_REPLY khi có buying signal, xin PII sớm và ghi reason code kể cả khi fallback |
 | 1.4 Judge v2 | SHADOW | feat/realtime-wave1-grounded-facts | `f27de9c` | Judge/Vertex 19; shadow 6; migration suite 16; toàn repo 727 test pass | Shadow `DRY_RUN`, send disabled, role không ghi Meta Outbox | Persist verified envelope; chưa đủ evidence để CANARY_LIVE |
 | 2.1 Unified reducer | DEFERRED | — | — | — | — | Làm sau |
 | 2.2 Profile/measurements | NOT_STARTED | — | — | — | — |  |

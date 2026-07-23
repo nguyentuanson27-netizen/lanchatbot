@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-23T20:18:00+07:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceCommit": "f27de9c9c7ad7dee7758dfc8c3487604bb782048",
+  "releaseTag": "20260723-realtime-wave1-canary-live-r11",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260723-realtime-wave1-canary-live-r11",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260723-customer-care-policy-r10-1",
+  "pageAllowlist": [
+    "1198992073286645"
+  ],
+  "images": {
+    "realtime": {
+      "name": "lana-chatbot-app:realtime-wave1-shadow-f27de9c",
+      "digest": "sha256:dbcab3412fdcc2343b6c8d23616250f8ab9ce53078e43665b5f79b0be3249d16"
+    },
+    "shadow": {
+      "name": "lana-chatbot-app:realtime-wave1-shadow-f27de9c",
+      "digest": "sha256:dbcab3412fdcc2343b6c8d23616250f8ab9ce53078e43665b5f79b0be3249d16"
+    }
+  },
+  "composeSha256": "26bc319f13544f8caa3526948ade624b17c432c922e4c0df2b74b07416e4a18b",
+  "featureFlags": {
+    "REALTIME_BUYING_SIGNAL_GUARD_V1": true,
+    "REALTIME_DECISION_TELEMETRY_ENABLED": true,
+    "REALTIME_GROUNDED_DRAFT_V1": true,
+    "REALTIME_VERIFIED_FACT_ASSEMBLER_V1": true,
+    "shadowJudgeV2Enabled": true,
+    "shadowJudgeMode": "DRY_RUN"
+  },
+  "migrations": {
+    "0018_shadow_verified_fact_payload": "067535fa55bdc3767bf3c6928b93ddbff532387c003ec97d5199a45b1f696ad0"
+  },
+  "dependencyEvidence": {
+    "metaPageId": "1198992073286645",
+    "qdrantPoints": 917,
+    "redisCatalogSnapshots": 112,
+    "sv695SnapshotTtlSecondsAtCheck": 172553,
+    "pancakeTagCount": 19,
+    "requiredPancakeTagsPresent": [
+      "Nhân viên",
+      "Vận Đơn",
+      "Đã chốt đơn",
+      "KHÔNG UP SALE"
+    ]
+  },
+  "verification": {
+    "monorepoBuild": "PASS",
+    "monorepoTypecheck": "PASS",
+    "tests": "727_PASS",
+    "realtimeHealth": "PASS",
+    "shadowHealth": "PASS",
+    "realtimeRestartCount": 0,
+    "shadowRestartCount": 0,
+    "ambiguousRecent": 0,
+    "duplicateReplyPlanSequence": 0,
+    "realtimeRollbackRollforward": "PASS",
+    "nonRealtimeServicesRestarted": false,
+    "currentSymlinkUpdated": true,
+    "directMessengerConversationTest": "PENDING_OWNER_TEST"
+  },
+  "rollback": {
+    "image": "lana-chatbot-app:customer-care-policy-r10-1",
+    "releasePath": "/opt/lana-chatbot/releases/20260723-customer-care-policy-r10-1",
+    "envBackupPath": "/opt/lana-chatbot/backups/20260723-realtime-wave1-canary-live-r11/env.infrastructure.before",
+    "databaseBackupPath": "/opt/lana-chatbot/backups/20260723-realtime-wave1-shadow-f27de9c/lana_chatbot_pre_0018.dump",
+    "dataDeletionRequired": false
+  },
+  "promotionGate": {
+    "status": "CANARY_LIVE_TEST_READY",
+    "scope": "PAGE_TEST_ONLY",
+    "directMessengerEvidenceRequired": true,
+    "publishedBeyondPageTest": false
+  }
+}

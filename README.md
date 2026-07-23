@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260723-customer-care-policy-r10-1`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260723-realtime-wave1-canary-live-r11`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -17,9 +17,9 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 ## Trạng thái production ngày 2026-07-23
 
 - API webhook tiếp tục chạy image `lana-chatbot-app:inbound-debounce-r1`.
-- Realtime chạy image `lana-chatbot-app:customer-care-policy-r10-1`; Admin Web, Admin API và Simulation Worker chạy image `lana-chatbot-app:customer-care-policy-r10`. P2.3B giữ image r9 và POS snapshot giữ image r6.
-- Wave 1 đang chạy riêng trên `shadow-worker` bằng image `lana-chatbot-app:realtime-wave1-shadow-f27de9c`. Shadow bật grounded draft, verified fact assembler và Judge v2 ở `DRY_RUN`; `APP_SEND_ENABLED=false`, `CHATBOT_SEND_ENABLED=false` và role DB không có quyền ghi Meta Outbox.
-- Realtime live chưa bật các feature flag Wave 0/Wave 1 và vẫn giữ nguyên image/digest r10.1.
+- Realtime page test chạy CANARY_LIVE bằng image `lana-chatbot-app:realtime-wave1-shadow-f27de9c`; grounded draft, verified fact assembler, buying-signal guard và decision telemetry đều bật. Hard gate vẫn chỉ cho page `1198992073286645`.
+- Shadow worker chạy cùng image, bật Judge v2 ở `DRY_RUN`; `APP_SEND_ENABLED=false`, `CHATBOT_SEND_ENABLED=false` và role DB không có quyền ghi Meta Outbox.
+- Admin Web, Admin API và Simulation Worker giữ image `lana-chatbot-app:customer-care-policy-r10`; P2.3B giữ image r9 và POS snapshot giữ image r6.
 - Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
 - Bốn policy runtime (shop, offer, closing, payment) đang trỏ tới các version `PUBLISHED` bất biến; `SHOP_POLICY` v2 chứa chính sách chăm sóc khách hàng có cấu trúc và mọi lần chuyển trạng thái đều có audit.
 - Chu trình bán hàng production đã nối cart 48 giờ, thương lượng deterministic, giảm 5% từ hai sản phẩm, freeship/giảm cuối theo policy, thu thông tin nhận hàng, order preview và `PURCHASE_CONFIRMED`.
@@ -43,7 +43,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - PostgreSQL đã áp dụng migration đến `0018_shadow_verified_fact_payload`; migration 0018 chỉ bổ sung payload facts đã xác minh cho shadow evaluation và tương thích ngược với runtime r10.1.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest production live nằm tại [r10.1](deploy/manifests/20260723-customer-care-policy-r10-1.json); manifest shadow Wave 1 nằm tại [Wave 1 shadow](deploy/manifests/20260723-realtime-wave1-shadow-f27de9c.json).
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest CANARY_LIVE mới nhất nằm tại [Wave 1 canary live](deploy/manifests/20260723-realtime-wave1-canary-live-r11.json); r10.1 tiếp tục là last-known-good để rollback.
 
 ## Kiến trúc dữ liệu
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-23 — realtime Wave 1 CANARY_LIVE r11
+
+- Bật grounded draft, verified fact assembler, buying-signal guard và decision telemetry trên realtime cho duy nhất page test `1198992073286645`.
+- Giữ Judge v2 ở shadow `DRY_RUN`; Judge không điều khiển reply hoặc outbound.
+- Xác minh Meta đúng page, Qdrant 917 points, Redis 112 snapshots, POS snapshot SV695 còn gần 48 giờ TTL và đủ bốn tag Pancake bắt buộc.
+- Cutover/recreate riêng realtime worker; API, delivery, shadow, POS, P2.3 và n8n không restart.
+- Queue sau cutover không có ambiguous mới hoặc duplicate reply-plan sequence.
+- Rollback/roll-forward thật riêng realtime đạt; hệ thống kết thúc ở Wave 1 healthy, restart count 0.
+- Chuyển symlink `current` sang `/opt/lana-chatbot/releases/20260723-realtime-wave1-canary-live-r11`.
+
 ## 2026-07-23 — realtime Wave 1 shadow
 
 - Triển khai riêng GroundedReplyDraftV1, verified fact assembler, business guard và Judge v2 lên shadow worker từ commit `f27de9c`; realtime live r10.1 chưa bật các feature flag mới.
