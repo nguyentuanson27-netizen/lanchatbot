@@ -23,7 +23,7 @@ const RESPONSE_SCHEMA = {
     },
     boundary_policy: {
       type: "STRING",
-      enum: ["ASK_CUSTOMER", "PREFER_SMALLER_SIZE", "PREFER_LARGER_SIZE"],
+      enum: ["REQUIRE_HUMAN_REVIEW", "PREFER_SMALLER_SIZE", "PREFER_LARGER_SIZE"],
     },
     confidence: { type: "NUMBER" },
     bands: {
@@ -69,6 +69,7 @@ Chỉ chép lại số liệu nhìn thấy rõ trong ảnh, không suy diễn v�
 measurement_basis=BODY khi số đo là cơ thể khách; GARMENT khi là số đo thành phẩm; UNKNOWN nếu không chắc.
 Đơn vị mọi số đo là cm, cân nặng là kg. Ô không có giới hạn dưới/trên dùng null.
 Nếu ảnh mờ, thiếu nhãn cột hoặc không thể xác định đúng thứ tự size, giảm confidence.
+Nếu ảnh không ghi rõ cách xử lý khách nằm sát biên size, dùng boundary_policy=REQUIRE_HUMAN_REVIEW.
 category và component_role phải phản ánh đúng nội dung bảng, không suy từ mã sản phẩm.
 Trả JSON đúng schema.`;
 

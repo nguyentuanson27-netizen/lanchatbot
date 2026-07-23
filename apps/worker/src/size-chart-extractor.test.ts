@@ -24,7 +24,7 @@ describe("app-native size chart extraction", () => {
       brand: "LANA",
       category: "SET",
       component_role: "NONE",
-      boundary_policy: "ASK_CUSTOMER",
+      boundary_policy: "REQUIRE_HUMAN_REVIEW",
       confidence: 0.96,
       bands: [
         {
