@@ -70,7 +70,6 @@ describe("app-native size chart extraction", () => {
       } as never,
       vision: {
         extract: async () => { throw new Error("VERTEX_MUST_NOT_RUN"); },
-        version: () => "size-chart-v1:test",
       },
       store: {
         exists: async () => true,
