@@ -9,6 +9,10 @@ describe("Admin API lifecycle safety configuration", () => {
     assert.deepEqual(config.policyPageIds, ["1198992073286645"]);
     assert.equal(config.policyCanaryLiveEnabled, false);
     assert.equal(config.policyPublishEnabled, false);
+    assert.equal(config.productMediaResizeMaxDimension, 1_600);
+    assert.equal(config.productMediaOriginalTtlMs, 86_400_000);
+    assert.equal(config.productMediaCleanupIntervalMs, 3_600_000);
+    assert.equal(config.productMediaOriginalDirectory, "/var/lib/lana/product-media-originals");
   });
 
   it("requires an explicit true value for each activation gate", () => {

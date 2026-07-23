@@ -22,8 +22,12 @@ export interface AdminApiConfig {
   readonly policyPublishEnabled: boolean;
   readonly productMediaEnabled: boolean;
   readonly productMediaDirectory: string;
+  readonly productMediaOriginalDirectory: string;
   readonly productMediaPublicBaseUrl: string;
   readonly productMediaMaxBytes: number;
+  readonly productMediaResizeMaxDimension: number;
+  readonly productMediaOriginalTtlMs: number;
+  readonly productMediaCleanupIntervalMs: number;
   readonly productMediaSheetId: string;
   readonly googleSheetsCredential: string;
   readonly port: number;
@@ -78,6 +82,18 @@ export function adminConfigFromEnvironment(
   if (!Number.isInteger(productMediaMaxBytes) || productMediaMaxBytes < 1_048_576 || productMediaMaxBytes > 20_971_520) {
     throw new Error("ADMIN_PRODUCT_MEDIA_MAX_BYTES_INVALID");
   }
+  const productMediaResizeMaxDimension = Number(environment.ADMIN_PRODUCT_MEDIA_RESIZE_MAX_DIMENSION ?? "1600");
+  if (!Number.isInteger(productMediaResizeMaxDimension) || productMediaResizeMaxDimension < 320 || productMediaResizeMaxDimension > 4096) {
+    throw new Error("ADMIN_PRODUCT_MEDIA_RESIZE_MAX_DIMENSION_INVALID");
+  }
+  const productMediaOriginalTtlMs = Number(environment.ADMIN_PRODUCT_MEDIA_ORIGINAL_TTL_MS ?? "86400000");
+  if (!Number.isInteger(productMediaOriginalTtlMs) || productMediaOriginalTtlMs < 3_600_000) {
+    throw new Error("ADMIN_PRODUCT_MEDIA_ORIGINAL_TTL_MS_INVALID");
+  }
+  const productMediaCleanupIntervalMs = Number(environment.ADMIN_PRODUCT_MEDIA_CLEANUP_INTERVAL_MS ?? "3600000");
+  if (!Number.isInteger(productMediaCleanupIntervalMs) || productMediaCleanupIntervalMs < 60_000) {
+    throw new Error("ADMIN_PRODUCT_MEDIA_CLEANUP_INTERVAL_MS_INVALID");
+  }
   return {
     databaseUrl: valueOrFile(
       environment,
@@ -116,9 +132,13 @@ export function adminConfigFromEnvironment(
     policyPublishEnabled: environment.ADMIN_POLICY_PUBLISH_ENABLED?.trim().toLowerCase() === "true",
     productMediaEnabled: environment.ADMIN_PRODUCT_MEDIA_ENABLED?.trim().toLowerCase() === "true",
     productMediaDirectory: environment.ADMIN_PRODUCT_MEDIA_DIR?.trim() || "/var/lib/lana/product-media",
+    productMediaOriginalDirectory: environment.ADMIN_PRODUCT_MEDIA_ORIGINAL_DIR?.trim() || "/var/lib/lana/product-media-originals",
     productMediaPublicBaseUrl: environment.ADMIN_PRODUCT_MEDIA_PUBLIC_BASE_URL?.trim()
       || "https://admin.lanadesign.vn/lana-public/products",
     productMediaMaxBytes,
+    productMediaResizeMaxDimension,
+    productMediaOriginalTtlMs,
+    productMediaCleanupIntervalMs,
     productMediaSheetId: environment.DATA_INGESTION_V2_SHEET_ID?.trim() || "",
     googleSheetsCredential: valueOrFile(
       environment,

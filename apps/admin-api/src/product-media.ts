@@ -1,5 +1,6 @@
-import { createHash, createSign } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { createHash, createSign, randomUUID } from "node:crypto";
+import { spawn } from "node:child_process";
+import { mkdir, readdir, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { AdminIdentity } from "./types.js";
 
@@ -64,14 +65,19 @@ interface ServiceAccountCredential {
   readonly privateKey: string;
 }
 
-interface ProductMediaServiceOptions {
+export interface ProductMediaServiceOptions {
   readonly directory: string;
+  readonly originalDirectory: string;
   readonly publicBaseUrl: string;
   readonly maxBytes: number;
+  readonly resizeMaxDimension: number;
+  readonly originalTtlMs: number;
+  readonly cleanupIntervalMs: number;
   readonly spreadsheetId: string;
   readonly serviceAccount: ServiceAccountCredential;
   readonly fetchImpl?: typeof fetch;
   readonly now?: () => Date;
+  readonly resizeImpl?: (input: Buffer, mimeType: string, maxDimension: number) => Promise<Buffer>;
 }
 
 const INTENTS: Readonly<Record<ManualMediaPurpose, readonly string[]>> = {
@@ -88,6 +94,12 @@ const MIME_EXTENSIONS: Readonly<Record<string, string>> = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
+};
+
+const OUTPUT_CODEC: Readonly<Record<string, { codec: string; options: readonly string[] }>> = {
+  "image/jpeg": { codec: "mjpeg", options: ["-q:v", "3"] },
+  "image/png": { codec: "png", options: ["-compression_level", "7"] },
+  "image/webp": { codec: "libwebp", options: ["-q:v", "85"] },
 };
 
 const base64Url = (value: string | Buffer): string => Buffer.from(value).toString("base64url");
@@ -107,6 +119,55 @@ function validImageSignature(buffer: Buffer, mimeType: string): boolean {
   return false;
 }
 
+export function resizeProductImage(input: Buffer, mimeType: string, maxDimension: number): Promise<Buffer> {
+  const output = OUTPUT_CODEC[mimeType];
+  if (!output) return Promise.reject(new Error("PRODUCT_MEDIA_MIME_INVALID"));
+  const boundedDimension = Math.max(320, Math.min(4_096, Math.trunc(maxDimension)));
+  const args = [
+    "-hide_banner", "-loglevel", "error",
+    "-i", "pipe:0",
+    "-vf", `scale=w='min(${boundedDimension},iw)':h='min(${boundedDimension},ih)':force_original_aspect_ratio=decrease:flags=lanczos`,
+    "-frames:v", "1",
+    ...output.options,
+    "-f", "image2pipe", "-vcodec", output.codec,
+    "pipe:1",
+  ];
+  return new Promise((resolve, reject) => {
+    const child = spawn("ffmpeg", args, { stdio: ["pipe", "pipe", "pipe"] });
+    const chunks: Buffer[] = [];
+    const errors: Buffer[] = [];
+    let settled = false;
+    const fail = (error: Error) => {
+      if (settled) return;
+      settled = true;
+      reject(error);
+    };
+    const timer = setTimeout(() => {
+      child.kill("SIGKILL");
+      fail(new Error("PRODUCT_MEDIA_RESIZE_TIMEOUT"));
+    }, 45_000);
+    child.stdout.on("data", (chunk: Buffer) => chunks.push(chunk));
+    child.stderr.on("data", (chunk: Buffer) => errors.push(chunk));
+    child.on("error", (error) => {
+      clearTimeout(timer);
+      fail(error);
+    });
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      if (settled) return;
+      const resized = Buffer.concat(chunks);
+      if (code !== 0 || !resized.length) {
+        fail(new Error(`PRODUCT_MEDIA_RESIZE_FAILED:${Buffer.concat(errors).toString().slice(0, 160)}`));
+        return;
+      }
+      settled = true;
+      resolve(resized);
+    });
+    child.stdin.on("error", () => undefined);
+    child.stdin.end(input);
+  });
+}
+
 function sheetRows(values: unknown[][]): Record<string, string>[] {
   const headers = (values[0] ?? []).map((value) => String(value ?? "").trim().toUpperCase());
   return values.slice(1).map((row) => Object.fromEntries(
@@ -117,16 +178,24 @@ function sheetRows(values: unknown[][]): Record<string, string>[] {
 export class GoogleSheetsManualImageIntake implements ProductMediaService {
   private readonly fetchImpl: typeof fetch;
   private readonly now: () => Date;
+  private readonly resizeImpl: (input: Buffer, mimeType: string, maxDimension: number) => Promise<Buffer>;
   private accessToken: { value: string; expiresAt: number } | null = null;
 
   constructor(private readonly options: ProductMediaServiceOptions) {
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.now = options.now ?? (() => new Date());
+    this.resizeImpl = options.resizeImpl ?? resizeProductImage;
+    void this.cleanupExpiredOriginals().catch(() => undefined);
+    const cleanupTimer = setInterval(() => {
+      void this.cleanupExpiredOriginals().catch(() => undefined);
+    }, options.cleanupIntervalMs);
+    cleanupTimer.unref();
   }
 
   async ready(): Promise<boolean> {
     return Boolean(
       this.options.directory
+      && this.options.originalDirectory
       && this.options.publicBaseUrl.startsWith("https://")
       && this.options.spreadsheetId
       && this.options.serviceAccount.email.includes("@")
@@ -176,11 +245,24 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
     }
 
     await mkdir(this.options.directory, { recursive: true, mode: 0o750 });
+    await mkdir(this.options.originalDirectory, { recursive: true, mode: 0o750 });
+    const originalPath = join(
+      this.options.originalDirectory,
+      `${intakeId}-${this.now().getTime()}-${randomUUID()}.${extension}`,
+    );
+    await writeFile(originalPath, image, { flag: "wx", mode: 0o600 });
+
+    const resized = await this.resizeImpl(image, input.mimeType, this.options.resizeMaxDimension);
+    if (!resized.length || resized.length > this.options.maxBytes) throw new Error("PRODUCT_MEDIA_RESIZED_SIZE_INVALID");
+    if (!validImageSignature(resized, input.mimeType)) throw new Error("PRODUCT_MEDIA_RESIZED_SIGNATURE_INVALID");
+    const finalPath = join(this.options.directory, fileName);
+    const temporaryPath = `${finalPath}.${randomUUID()}.tmp`;
     try {
-      await writeFile(join(this.options.directory, fileName), image, { flag: "wx", mode: 0o640 });
+      await writeFile(temporaryPath, resized, { flag: "wx", mode: 0o640 });
+      await rename(temporaryPath, finalPath);
     } catch (error) {
-      const code = (error as NodeJS.ErrnoException).code;
-      if (code !== "EEXIST") throw error;
+      await unlink(temporaryPath).catch(() => undefined);
+      throw error;
     }
 
     await this.appendValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:O`, [[
@@ -201,6 +283,22 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
       "",
     ]]);
     return { intakeId, maSp, imageUrl, mediaPurpose: input.mediaPurpose, imageIntents, status: "PENDING", uploadedAt, duplicate: false };
+  }
+
+  async cleanupExpiredOriginals(): Promise<number> {
+    await mkdir(this.options.originalDirectory, { recursive: true, mode: 0o750 });
+    const cutoff = this.now().getTime() - this.options.originalTtlMs;
+    const entries = await readdir(this.options.originalDirectory, { withFileTypes: true });
+    let removed = 0;
+    await Promise.all(entries.map(async (entry) => {
+      if (!entry.isFile()) return;
+      const path = join(this.options.originalDirectory, entry.name);
+      const fileStat = await stat(path).catch(() => null);
+      if (!fileStat || fileStat.mtimeMs > cutoff) return;
+      await unlink(path).catch(() => undefined);
+      removed += 1;
+    }));
+    return removed;
   }
 
   private async token(): Promise<string> {

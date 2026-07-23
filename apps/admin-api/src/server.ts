@@ -39,8 +39,12 @@ const authenticator = new InternalAssertionAuthenticator(
 const productMedia = config.productMediaEnabled
   ? createProductMediaService({
       directory: config.productMediaDirectory,
+      originalDirectory: config.productMediaOriginalDirectory,
       publicBaseUrl: config.productMediaPublicBaseUrl,
       maxBytes: config.productMediaMaxBytes,
+      resizeMaxDimension: config.productMediaResizeMaxDimension,
+      originalTtlMs: config.productMediaOriginalTtlMs,
+      cleanupIntervalMs: config.productMediaCleanupIntervalMs,
       spreadsheetId: config.productMediaSheetId,
       credentialJson: config.googleSheetsCredential,
     })

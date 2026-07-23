@@ -677,6 +677,7 @@ function renderProductMedia(): string {
       <div class="panel__header"><div><h2>Tải ảnh bổ sung</h2><p>Ảnh được lưu trên VPS và ghi vào tab manual_image_intake ở trạng thái chờ duyệt.</p></div></div>
       <div class="product-media-safety">${icon("shield", 18)}<span>Ảnh chưa tự động vào Qdrant. P2.3B sẽ gắn metadata, sau đó cần duyệt APPROVED trước khi P2.3C xuất bản.</span></div>
       <form id="product-media-form" class="product-media-form">
+        <p class="product-media-form__wide">Ảnh được tự động resize theo đúng tỉ lệ, cạnh dài tối đa 1.600 px. Ảnh gốc được giữ riêng và tự xóa sau 24 giờ.</p>
         <label><span>Mã sản phẩm</span><input name="ma_sp" autocomplete="off" maxlength="40" placeholder="Ví dụ: CB182" required></label>
         <label><span>Loại ảnh</span><select name="media_purpose" required>${purposeOptions.map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}</select></label>
         <label class="product-media-form__wide"><span>Chọn ảnh</span><input name="image" type="file" accept="image/jpeg,image/png,image/webp" required><small>JPG, PNG hoặc WebP · tối đa 8 MB.</small></label>
