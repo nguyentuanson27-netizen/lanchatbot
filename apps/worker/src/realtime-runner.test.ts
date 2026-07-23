@@ -1,9 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
-import { createConversationState } from "@lana/conversation-engine";
 import {
+  AFTER_SALES_HOLDING_REPLY_V2,
+  createConversationState,
+} from "@lana/conversation-engine";
+import {
+  continuationProductId,
+  currentProductContinuationId,
   explicitCustomerBusinessIntent,
   explicitCustomerImageIntent,
   FailClosedTagObservationProvider,
+  holdingMessagesForHandoff,
   modelHandoffPermitted,
   multiProductReply,
   pancakeConversationId,
@@ -21,6 +27,34 @@ import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 
 describe("RealtimeRunner", () => {
+  it("reuses only verified current-product context for genuine follow-up messages", () => {
+    expect(currentProductContinuationId("xin ảnh cận chất", "SV695")).toBe("SV695");
+    expect(currentProductContinuationId("mẫu này còn size M không", "SV695")).toBe("SV695");
+    expect(currentProductContinuationId("CB182", "SV695")).toBeNull();
+    expect(currentProductContinuationId("shop ở đâu", "SV695")).toBeNull();
+    expect(continuationProductId(null, "CB182", "SV695")).toBe("CB182");
+    expect(continuationProductId(null, null, "SV695")).toBe("SV695");
+  });
+
+  it("sends one holding reply only for after-sales handoff", () => {
+    const message = {
+      eventKey: "meta:1198992073286645:message:m-after-sales",
+      occurredAt: "2026-07-23T01:00:00.000Z",
+    };
+    expect(holdingMessagesForHandoff(message, {
+      reason: "ORDER_STATUS",
+      category: "POST_SALE",
+      desiredTag: "VAN_DON",
+      silent: true,
+    })).toEqual([{ kind: "TEXT", text: AFTER_SALES_HOLDING_REPLY_V2 }]);
+    expect(holdingMessagesForHandoff(message, {
+      reason: "PRODUCT_TOOL_ERROR",
+      category: "GENERAL",
+      desiredTag: "NHAN_VIEN",
+      silent: true,
+    })).toEqual([]);
+  });
+
   it("ignores an echo that matches the app outbox instead of assigning HUMAN ownership", async () => {
     const now = "2026-07-18T16:51:04.328Z";
     const claim = {
@@ -512,6 +546,159 @@ describe("RealtimeRunner", () => {
       expect.any(Date),
     );
     expect(complete).toHaveBeenCalledOnce();
+  });
+
+  it("uses state.currentProductId for an image follow-up in a later generation", async () => {
+    const occurredAt = "2026-07-23T01:02:00.000Z";
+    const baseState = createConversationState({
+      conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
+      routingOwner: "APP",
+      now: new Date("2026-07-23T01:00:00.000Z"),
+    });
+    const state = { ...baseState, currentProductId: "SV695" };
+    const claim = {
+      inboxId: "2a9afc47-978a-4b74-9653-3c89e75a89a0",
+      pageId: "1198992073286645",
+      eventKey: "meta:1198992073286645:message:m-detail-follow-up",
+      conversationHash: "meta:v1:customer-hash",
+      occurredAt: new Date(occurredAt), receivedAt: new Date(occurredAt), receiveSequence: 30,
+      attemptCount: 1, leaseToken: "68c52ee9-9348-481d-a366-a6178618da3c",
+      envelope: {
+        schemaVersion: 1 as const, customerSendEnabled: false as const,
+        routing: { mode: "APP" as const, routingOwner: "APP" as const, evaluationOnly: false, reason: "APP_OWNS" as const },
+        message: {
+          schemaVersion: 1 as const, traceId: "3021af34-c98c-4086-a33c-3ecb2ad8f8f2",
+          eventKey: "meta:1198992073286645:message:m-detail-follow-up", pageId: "1198992073286645",
+          messageId: "m-detail-follow-up", senderId: "customer-1", conversationId: "meta:v1:customer-hash",
+          occurredAt, isEcho: false, appId: null, text: "xin ảnh cận chất", attachments: [],
+        },
+      },
+    };
+    const commit = vi.fn(async () => ({
+      stateCommitted: true, metaOutboxCreated: 1, pancakeTagOutboxCreated: false,
+      handoffEventCreated: false, sendAuthorized: true, reasonCodes: [],
+    }));
+    const runtime: RealtimeRuntimePort = {
+      loadOrCreate: vi.fn(async () => ({
+        conversationId: state.conversationId, pageId: claim.pageId,
+        customerHash: claim.conversationHash, stateVersion: state.revision, state,
+        routingOwner: "APP" as const, appSendEnabled: true, killSwitch: false,
+      })),
+      commit,
+      linkProviderConversation: vi.fn(async () => undefined),
+    };
+    const detailUrl = "https://cdn.example/sv695-detail.jpg";
+    const product = {
+      productId: "SV695", parentProductId: "SV695", canonicalCode: "SV695", aliases: [],
+      title: "SV695", colors: [], materials: ["REN"], silhouettes: [], occasions: [],
+      imageUrls: [detailUrl],
+      images: [{
+        url: detailUrl, role: "ADDITIONAL" as const, angle: "CLOSEUP" as const,
+        imageType: "DETAIL" as const, intents: [], sortOrder: 1,
+        qualityScore: null, feedback: false,
+      }],
+      catalogVersion: "catalog-v2",
+    };
+    const searchText = vi.fn(async (value: string) => {
+      if (value !== "SV695") return { status: "NOT_FOUND" as const, reasonCode: "NO_CANDIDATES" as const };
+      return {
+        status: "MATCHED" as const, matchKind: "EXACT_CODE" as const,
+        score: 1, gap: null, product,
+      };
+    });
+    const facts = {
+      ready: vi.fn(async () => true),
+      resolve: vi.fn(async () => ({
+        schemaVersion: 1 as const, status: "OK" as const, source: "POS_SNAPSHOT" as const,
+        observedAt: occurredAt, expiresAt: "2099-01-01T00:00:00.000Z", productId: "SV695",
+        facts: {
+          schemaVersion: 1 as const, productId: "SV695", parentProductId: "SV695",
+          offerType: "SET", listPriceVnd: null, salePriceVnd: 770000,
+          sizes: ["S", "M", "L"], stockStatus: "IN_STOCK" as const, stockQuantity: 3,
+          deliveryEta: null, fulfillmentPolicy: "READY_STOCK", imageUrls: [],
+        },
+        reasonCode: null,
+      })),
+      close: vi.fn(async () => undefined),
+    };
+    const model: RealtimeModelPort = { generate: vi.fn(), groundWithFacts: vi.fn() };
+    const runner = new RealtimeRunner(
+      { claimNext: vi.fn(async () => claim), complete: vi.fn(async () => true), retry: vi.fn(), failPermanent: vi.fn() },
+      runtime, model, facts,
+      { searchText, searchImage: vi.fn() },
+      new FailClosedTagObservationProvider(),
+      { workerId: "worker-1", mode: "LIVE", sendEnabled: true },
+    );
+
+    expect(await runner.processOne()).toBe(true);
+    expect(searchText).toHaveBeenCalledTimes(1);
+    expect(searchText).toHaveBeenCalledWith("SV695");
+    expect(model.generate).not.toHaveBeenCalled();
+    expect(facts.resolve).toHaveBeenCalledWith(expect.objectContaining({ productId: "SV695" }));
+    expect(commit).toHaveBeenCalledWith(expect.objectContaining({
+      state: expect.objectContaining({ currentProductId: "SV695" }),
+      metaPlan: expect.objectContaining({ messages: [
+        { kind: "IMAGE", imageUrl: detailUrl },
+        { kind: "TEXT", text: expect.any(String) },
+      ] }),
+    }), expect.any(Date));
+  });
+
+  it("sends one holding reply and Vận Đơn tag for after-sales handoff", async () => {
+    const occurredAt = "2026-07-23T02:00:00.000Z";
+    const state = createConversationState({
+      conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
+      routingOwner: "APP",
+      now: new Date(occurredAt),
+    });
+    const claim = {
+      inboxId: "2a9afc47-978a-4b74-9653-3c89e75a89a0", pageId: "1198992073286645",
+      eventKey: "meta:1198992073286645:message:m-order-status", conversationHash: "meta:v1:customer-hash",
+      occurredAt: new Date(occurredAt), receivedAt: new Date(occurredAt), receiveSequence: 31,
+      attemptCount: 1, leaseToken: "68c52ee9-9348-481d-a366-a6178618da3c",
+      envelope: {
+        schemaVersion: 1 as const, customerSendEnabled: false as const,
+        routing: { mode: "APP" as const, routingOwner: "APP" as const, evaluationOnly: false, reason: "APP_OWNS" as const },
+        message: {
+          schemaVersion: 1 as const, traceId: "3021af34-c98c-4086-a33c-3ecb2ad8f8f2",
+          eventKey: "meta:1198992073286645:message:m-order-status", pageId: "1198992073286645",
+          messageId: "m-order-status", senderId: "customer-1", conversationId: "meta:v1:customer-hash",
+          occurredAt, isEcho: false, appId: null, text: "vận đơn của chị đang ở đâu", attachments: [],
+        },
+      },
+    };
+    const commit = vi.fn(async () => ({
+      stateCommitted: true, metaOutboxCreated: 1, pancakeTagOutboxCreated: true,
+      handoffEventCreated: true, sendAuthorized: true, reasonCodes: [],
+    }));
+    const search: RealtimeProductSearchPort = { searchText: vi.fn(), searchImage: vi.fn() };
+    const model: RealtimeModelPort = { generate: vi.fn(), groundWithFacts: vi.fn() };
+    const runner = new RealtimeRunner(
+      { claimNext: vi.fn(async () => claim), complete: vi.fn(async () => true), retry: vi.fn(), failPermanent: vi.fn() },
+      {
+        loadOrCreate: vi.fn(async () => ({
+          conversationId: state.conversationId, pageId: claim.pageId,
+          customerHash: claim.conversationHash, stateVersion: 0, state,
+          routingOwner: "APP" as const, appSendEnabled: true, killSwitch: false,
+        })),
+        commit, linkProviderConversation: vi.fn(async () => undefined),
+      },
+      model, { ready: vi.fn(), resolve: vi.fn(), close: vi.fn() }, search,
+      new FailClosedTagObservationProvider(),
+      { workerId: "worker-1", mode: "LIVE", sendEnabled: true, postSaleTagId: "6" },
+    );
+
+    expect(await runner.processOne()).toBe(true);
+    expect(search.searchText).not.toHaveBeenCalled();
+    expect(model.generate).not.toHaveBeenCalled();
+    expect(commit).toHaveBeenCalledWith(expect.objectContaining({
+      state: expect.objectContaining({ conversationOwner: "HUMAN", ownerReason: "POST_SALE" }),
+      metaPlan: expect.objectContaining({ messages: [
+        { kind: "TEXT", text: AFTER_SALES_HOLDING_REPLY_V2 },
+      ] }),
+      pancakeTagPlan: expect.objectContaining({ desiredTag: "VAN_DON", tagId: "6" }),
+      handoffEventPlan: expect.objectContaining({ source: "POST_SALE", desiredTag: "VAN_DON" }),
+    }), expect.any(Date));
   });
 
   it("handoffs stale explicit facts only for strict ready-stock products", () => {

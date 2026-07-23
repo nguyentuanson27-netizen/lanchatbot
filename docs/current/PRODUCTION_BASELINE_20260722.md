@@ -1,11 +1,11 @@
-# Production baseline — 2026-07-22
+# Production baseline — 2026-07-23
 
-Tài liệu này được tạo bằng kiểm kê chỉ đọc. Không container, workflow hoặc timer nào bị thay đổi trong quá trình thu thập.
+Đây là baseline sống của production. Mỗi release phải cập nhật tài liệu này trước khi tạo tag để bản trong release directory không lệch GitHub `main`.
 
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260722-runtime-policy-published-r4`.
+- Current release: `/opt/lana-chatbot/releases/20260723-realtime-context-handoff-r5`.
 - Compose SHA-256: `4a4b66ef0f19d6873ed1cfcd48cc479c6a56f077f7b9d86f020c245186b81072`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
@@ -14,9 +14,9 @@ Tài liệu này được tạo bằng kiểm kê chỉ đọc. Không container
 
 Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời điểm kiểm kê. Danh sách image digest đầy đủ nằm trong release manifest.
 
-Admin API, Admin Web, Admin Simulation Worker và realtime worker đang chạy image `lana-chatbot-app:runtime-policy-published-r4` (`sha256:9c723249f012925177dee8627b9400deb1b645660e7f373660843462939d40aa`). API webhook và delivery worker không đổi; n8n không bị restart trong release này.
+Admin API, Admin Web và Admin Simulation Worker đang chạy image `lana-chatbot-app:runtime-policy-published-r4`. Realtime worker chạy image `lana-chatbot-app:realtime-context-handoff-r5` (`sha256:965bc95a3c703e1ab96fb521db0c961bcf639e99776bb340792f191abb2d95f3`). API webhook và delivery worker không đổi; n8n không bị restart trong release này.
 
-## Runtime Policy canary
+## Runtime Policy published
 
 - Ba policy lõi `SHOP_POLICY`, `OFFER_POLICY`, `CLOSING_STRATEGY` đã qua `DRAFT → VALIDATED → APPROVED → CANARY_SHADOW → CANARY_LIVE → PUBLISHED` bằng Admin API có audit.
 - Kênh `PUBLISHED` chỉ áp dụng cho page `1198992073286645`; runtime hard-gate cả `CANARY_LIVE` và `PUBLISHED` theo đúng page này.
@@ -27,6 +27,14 @@ Admin API, Admin Web, Admin Simulation Worker và realtime worker đang chạy i
 - Simulation trước publish dùng baseline `HISTORICAL_ACTUAL` và trả `INSUFFICIENT_EVIDENCE` với `0` cuộc hội thoại đánh giá được. Owner đã chủ động override blocker này trong release r4; kết quả được giữ lại để audit.
 - Backup trước migration: `/opt/lana-chatbot/backups/20260722-runtime-policy-canary-r3/lana_chatbot_pre_0015_0016.dump`, SHA-256 `13717540cfa2a85b19ab0127133a5f34d62dafc1bad1251e991b4d8cc3363fdd`.
 - Restore test đã chạy đủ chu kỳ `up 0015/0016 → down 0016/0015 → up 0015/0016` trên database tạm.
+
+## Realtime fixes r5
+
+- Resolver sản phẩm ưu tiên mã/selection/ads/media của tin mới. Khi không có mã xung đột và khách đang hỏi tiếp về ảnh, giá, tồn, size, ETA hoặc đặc điểm mẫu, runtime xác minh lại `state.currentProductId` bằng exact lookup rồi mới dùng.
+- `proposal.productId` đã xác minh không còn bị bỏ mất trong fallback; thứ tự là `resolved product → proposal product → state.currentProductId`.
+- Tin hậu mãi ngắt sớm trước Qdrant/model, tạo đúng một holding reply qua Meta Outbox trong cùng atomic commit với state handoff và Pancake tag Vận Đơn.
+- Handoff không thuộc hậu mãi tiếp tục `SILENT_HANDOFF`, không tạo `metaPlan`.
+- Clean build, toàn bộ `145` worker test và worker typecheck đều pass. Không có migration mới.
 
 ## Ownership hiện hành
 
