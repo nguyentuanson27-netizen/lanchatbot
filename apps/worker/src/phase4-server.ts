@@ -44,6 +44,14 @@ function boundedNumber(name: string, fallback: number, minimum: number, maximum:
   return value;
 }
 
+function judgeMode(): "DRY_RUN" | "LIVE" {
+  const value = (process.env.REALTIME_JUDGE_MODE ?? "DRY_RUN").trim().toUpperCase();
+  if (value !== "DRY_RUN" && value !== "LIVE") {
+    throw new Error("REALTIME_JUDGE_MODE_INVALID");
+  }
+  return value;
+}
+
 function readCredential(path: string): { serviceAccount: VertexServiceAccount; region: string } {
   const value = JSON.parse(readFileSync(path, "utf8")) as N8nVertexCredential;
   if (typeof value.email !== "string" || typeof value.privateKey !== "string") {
@@ -108,7 +116,24 @@ if (!await businessFactsReader.ready()) throw new Error("BUSINESS_FACT_REDIS_NOT
 const runner = new Phase4ShadowRunner(
   store,
   model,
-  { modelName, maxAttempts: 3, shopAlias: process.env.CATALOG_DEFAULT_SHOP_ALIAS?.trim() || "LANA" },
+  {
+    modelName,
+    maxAttempts: 3,
+    shopAlias: process.env.CATALOG_DEFAULT_SHOP_ALIAS?.trim() || "LANA",
+    groundedDraftEnabled:
+      (process.env.REALTIME_GROUNDED_DRAFT_V1 ?? "false").toLowerCase() === "true",
+    verifiedFactAssemblerEnabled:
+      (process.env.REALTIME_VERIFIED_FACT_ASSEMBLER_V1 ?? "false").toLowerCase() === "true",
+    judgeV2Enabled:
+      (process.env.REALTIME_JUDGE_V2_ENABLED ?? "false").toLowerCase() === "true",
+    judgeV2SampleRate: boundedNumber(
+      "REALTIME_JUDGE_LIVE_SAMPLE_RATE",
+      0.1,
+      0,
+      1,
+    ),
+    judgeMode: judgeMode(),
+  },
   businessFactsReader,
   productSearch,
 );

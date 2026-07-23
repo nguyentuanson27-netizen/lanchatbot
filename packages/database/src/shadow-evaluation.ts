@@ -34,6 +34,9 @@ export interface ShadowComparisonJob {
   readonly actualOutboundText: string;
   readonly actualOutboundCount: number;
   readonly context: readonly ShadowContextMessage[];
+  readonly proposalSummary: unknown;
+  readonly guardOutcome: unknown;
+  readonly businessFactEnvelope: unknown;
 }
 
 export interface ShadowEvaluationCompletion {
@@ -57,6 +60,7 @@ export interface ShadowEvaluationCompletion {
     readonly productId: string;
     readonly reasonCode: string | null;
   } | null;
+  readonly businessFactEnvelope: unknown;
 }
 
 export interface ShadowEvaluationSummary {
@@ -309,6 +313,7 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
       const picked = await client.query<{
         evaluation_id: string; claim_token: string; conversation_id: string;
         source_occurred_at: Date; proposal_reply: string | null;
+        proposal: unknown; guarded_plan: unknown; business_fact_payload: unknown;
       }>(
         `WITH candidate AS (
            SELECT evaluation_id
@@ -324,7 +329,9 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
          WHERE evaluation.evaluation_id = candidate.evaluation_id
          RETURNING evaluation.evaluation_id, evaluation.claim_token,
            evaluation.conversation_id, evaluation.source_occurred_at,
-           evaluation.proposal->>'reply' AS proposal_reply`,
+           evaluation.proposal->>'reply' AS proposal_reply,
+           evaluation.proposal, evaluation.guarded_plan,
+           evaluation.business_fact_payload`,
       );
       const row = picked.rows[0];
       if (!row) return null;
@@ -358,6 +365,9 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
         proposalReply: row.proposal_reply ?? "",
         actualOutboundText: actual.text,
         actualOutboundCount: actual.count,
+        proposalSummary: row.proposal,
+        guardOutcome: row.guarded_plan,
+        businessFactEnvelope: row.business_fact_payload,
         context: contextResult.rows.reverse().map((message) => ({
           direction: message.direction,
           senderType: message.sender_type,
@@ -388,9 +398,10 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
            business_fact_status = $14, business_fact_source = $15,
            business_fact_observed_at = $16, business_fact_expires_at = $17,
            business_fact_product_id = $18, business_fact_reason_code = $19,
+           business_fact_payload = $20::jsonb,
            claim_token = NULL,
            error_code = NULL, updated_at = now()
-       WHERE evaluation_id = $1 AND status = 'PROCESSING' AND claim_token = $20`,
+       WHERE evaluation_id = $1 AND status = 'PROCESSING' AND claim_token = $21`,
       [
         evaluationId,
         completion.modelProvider,
@@ -411,6 +422,9 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
         completion.businessFactAudit?.expiresAt ?? null,
         completion.businessFactAudit?.productId ?? null,
         completion.businessFactAudit?.reasonCode ?? null,
+        completion.businessFactEnvelope === null
+          ? null
+          : JSON.stringify(completion.businessFactEnvelope),
         claimToken,
       ],
     );

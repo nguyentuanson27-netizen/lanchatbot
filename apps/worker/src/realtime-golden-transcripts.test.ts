@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
 import type { AgentProposalV1 } from "@lana/contracts";
+import type { GroundedReplyDraftV1 } from "@lana/contracts";
 import type { RealtimeCommitInput } from "@lana/database";
 import {
   FailClosedTagObservationProvider,
@@ -50,13 +51,19 @@ async function replayGolden(input: {
   text: string;
   productMatched: boolean;
   modelProposal?: AgentProposalV1;
+  currentProductId?: string;
+  groundedDraft?: GroundedReplyDraftV1;
+  groundedDraftError?: boolean;
 }) {
   const conversationId = "43820fd4-daa7-4917-9835-a38cb55120e5";
-  const state = createConversationState({
+  const initialState = createConversationState({
     conversationId,
     routingOwner: "APP",
     now: new Date(occurredAt),
   });
+  const state = input.currentProductId
+    ? { ...initialState, currentProductId: input.currentProductId }
+    : initialState;
   const eventKey = `golden:${input.fixtureId}`;
   const claim = {
     inboxId: "2a9afc47-978a-4b74-9653-3c89e75a89a0",
@@ -126,6 +133,22 @@ async function replayGolden(input: {
       tokenUsage: {},
     })),
     groundWithFacts: vi.fn(),
+    groundDraftWithFacts: vi.fn(async () => {
+      if (input.groundedDraftError) throw new Error("GROUNDED_SCHEMA_INVALID");
+      return {
+        draft: input.groundedDraft ?? {
+          schemaVersion: 1,
+          advisoryText: "",
+          objectionResponse: "",
+          suggestedQuestion: "",
+          suggestedNextStep: "",
+          attachmentImageIndices: [],
+        },
+        modelVersion: "gemini-grounded-golden",
+        latencyMs: 1,
+        tokenUsage: {},
+      };
+    }),
   };
   const search: RealtimeProductSearchPort = {
     searchText: vi.fn(async () => input.productMatched
@@ -179,6 +202,10 @@ async function replayGolden(input: {
       releaseId: "wave0-golden",
       decisionTelemetryEnabled: true,
       buyingSignalGuardEnabled: true,
+      groundedDraftEnabled:
+        input.groundedDraft !== undefined || input.groundedDraftError === true,
+      verifiedFactAssemblerEnabled:
+        input.groundedDraft !== undefined || input.groundedDraftError === true,
     },
   );
 
@@ -238,5 +265,131 @@ describe("realtime golden transcripts", () => {
 
     expect(committed?.metaPlan).toBeUndefined();
     expect(committed?.decisionEvents?.map((event) => event.eventType)).toEqual(["NO_REPLY"]);
+  });
+
+  it("GOLDEN-PREMATURE-PII-001 replaces an early order-info request with a safe next step", async () => {
+    const { committed } = await replayGolden({
+      fixtureId: "GOLDEN-PREMATURE-PII-001",
+      text: "Mẫu này mặc đi làm được không?",
+      productMatched: true,
+      modelProposal: {
+        schemaVersion: 1,
+        intent: "tu_van",
+        conversationStage: "consulting",
+        productId: "CB182",
+        action: "REPLY",
+        reply: "Chị gửi em họ tên, số điện thoại và địa chỉ nhận hàng nha.",
+        attachments: [],
+        handoffReason: null,
+        businessFactQuery: {
+          intent: "NONE",
+          offerType: null,
+          color: null,
+          size: null,
+          deliveryRegion: null,
+        },
+      },
+    });
+
+    expect(committed?.metaPlan?.messages).toEqual([{
+      kind: "TEXT",
+      text: "Dạ em đã tìm thấy mẫu CB182 ạ. Chị muốn xem giá, size, tình trạng hàng hay thời gian giao dự kiến ạ?",
+    }]);
+    expect(committed?.pancakeTagPlan).toBeUndefined();
+    expect(committed?.decisionEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        eventType: "GUARD_BLOCKED",
+        reasonCodes: ["PREMATURE_ORDER_INFO_REQUEST"],
+      }),
+    ]));
+  });
+
+  it("GOLDEN-GROUNDED-FACTS-001 keeps decisions in the proposal and facts in the assembler", async () => {
+    const proposal: AgentProposalV1 = {
+      schemaVersion: 1,
+      intent: "hoi_gia",
+      conversationStage: "consulting",
+      productId: "CB182",
+      action: "REPLY",
+      reply: "Model không được dùng câu này 500k",
+      attachments: [],
+      handoffReason: null,
+      businessFactQuery: {
+        intent: "PRICE",
+        offerType: null,
+        color: null,
+        size: null,
+        deliveryRegion: null,
+      },
+    };
+    const { committed, model } = await replayGolden({
+      fixtureId: "GOLDEN-GROUNDED-FACTS-001",
+      text: "Mẫu này giá bao nhiêu, mặc có tôn dáng không?",
+      productMatched: true,
+      currentProductId: "CB182",
+      modelProposal: proposal,
+      groundedDraft: {
+        schemaVersion: 1,
+        advisoryText: "Form suông thanh lịch, dễ mặc đi làm.",
+        objectionResponse: "",
+        suggestedQuestion: "Chị thích màu be hay đen hơn ạ?",
+        suggestedNextStep: "",
+        attachmentImageIndices: [0],
+      },
+    });
+
+    expect(model.groundDraftWithFacts).toHaveBeenCalledOnce();
+    expect(model.groundWithFacts).not.toHaveBeenCalled();
+    expect(committed?.metaPlan?.messages).toEqual([
+      {
+        kind: "TEXT",
+        text: [
+          "Dạ Set váy CB182 có giá 699k ạ",
+          "Form suông thanh lịch, dễ mặc đi làm.",
+          "Chị thích màu be hay đen hơn ạ?",
+        ].join("\n"),
+      },
+      { kind: "IMAGE", imageUrl: "https://cdn.example/cb182.jpg" },
+    ]);
+    expect(JSON.stringify(committed?.metaPlan)).not.toContain("500k");
+  });
+
+  it("GOLDEN-GROUNDED-SCHEMA-001 falls back to the verified fact block without customer-visible failure", async () => {
+    const { committed } = await replayGolden({
+      fixtureId: "GOLDEN-GROUNDED-SCHEMA-001",
+      text: "Mẫu này giá bao nhiêu?",
+      productMatched: true,
+      currentProductId: "CB182",
+      groundedDraftError: true,
+      modelProposal: {
+        schemaVersion: 1,
+        intent: "hoi_gia",
+        conversationStage: "consulting",
+        productId: "CB182",
+        action: "REPLY",
+        reply: "Model đoán 500k",
+        attachments: [],
+        handoffReason: null,
+        businessFactQuery: {
+          intent: "PRICE",
+          offerType: null,
+          color: null,
+          size: null,
+          deliveryRegion: null,
+        },
+      },
+    });
+
+    expect(committed?.metaPlan?.messages).toEqual([{
+      kind: "TEXT",
+      text: "Dạ Set váy CB182 có giá 699k ạ",
+    }]);
+    expect(committed?.pancakeTagPlan).toBeUndefined();
+    expect(committed?.decisionEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        eventType: "GUARD_BLOCKED",
+        reasonCodes: ["GROUNDED_SCHEMA_INVALID"],
+      }),
+    ]));
   });
 });

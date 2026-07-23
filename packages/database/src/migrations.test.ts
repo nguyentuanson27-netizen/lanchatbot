@@ -56,6 +56,15 @@ describe("database migrations", () => {
     expect(sql).toContain("shadow_evaluations_fact_status_idx");
   });
 
+  it("persists the verified fact envelope for Judge v2", async () => {
+    const sql = await readFile(
+      resolve(directory, "0018_shadow_verified_fact_payload.up.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("business_fact_payload jsonb");
+    expect(sql).toContain("Verified business-fact envelope");
+  });
+
   it("creates PII-safe read models for the read-only admin MVP", async () => {
     const sql = await readFile(
       resolve(directory, "0006_admin_read_models.up.sql"),

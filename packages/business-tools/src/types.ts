@@ -223,6 +223,7 @@ export interface GuardInput {
   proposal: unknown;
   facts: BusinessFactEnvelopeV1 | null;
   verifiedProductIds: ReadonlySet<string>;
+  buyingSignal?: boolean;
   promotion?: PromotionAuthorization;
   shipping?: ShippingAuthorization;
   now: Date;

@@ -4,6 +4,8 @@ import {
   buildShadowPrompt,
   createServiceAccountAssertion,
   GROUNDED_SYSTEM_INSTRUCTION,
+  GROUNDED_DRAFT_SYSTEM_INSTRUCTION,
+  SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
   SHADOW_SYSTEM_INSTRUCTION,
   vertexGenerateEndpoint,
   vertexPredictEndpoint,
@@ -106,6 +108,8 @@ describe("Vertex shadow client", () => {
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Chi cho em xin chieu cao can nang");
     expect(GROUNDED_SYSTEM_INSTRUCTION).not.toContain("699");
     expect(GROUNDED_SYSTEM_INSTRUCTION).not.toContain("freeship 20");
+    expect(GROUNDED_DRAFT_SYSTEM_INSTRUCTION).toContain("Khong duoc quyet dinh action");
+    expect(GROUNDED_DRAFT_SYSTEM_INSTRUCTION).toContain("Khong viet gia, ton");
   });
 
   it("normalizes literal newline escapes in an n8n private key", () => {
@@ -231,6 +235,79 @@ describe("Vertex shadow client", () => {
     expect(result.recommendationAction).toBe("REWRITE");
   });
 
+  it("judges v2 with verified facts isolated from untrusted conversation data", async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      bodies.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
+      return new Response(JSON.stringify({
+        candidates: [{ content: { parts: [{ text: JSON.stringify({
+          schemaVersion: 2,
+          intent: "hoi_gia",
+          conversationStage: "consulting",
+          scores: {
+            relevance: 5,
+            questionResolution: 5,
+            nextStepQuality: 4,
+            naturalness: 4,
+            concision: 5,
+            factGrounding: 5,
+            objectionResolution: 3,
+            salesProgression: 4,
+            ctaStageFit: 4,
+            overall: 4.5,
+          },
+          strengths: ["Báo đúng giá đã xác minh"],
+          weaknesses: [],
+          improvedReply: "Dạ mẫu này có giá 699k ạ",
+          recommendationAction: "KEEP",
+        }) }] } }],
+      }), { status: 200 });
+    }) as unknown as typeof fetch;
+    const verifiedFacts = {
+      schemaVersion: 1 as const,
+      status: "OK" as const,
+      source: "POS_SNAPSHOT" as const,
+      observedAt: "2026-07-23T00:00:00.000Z",
+      expiresAt: "2099-07-23T00:00:00.000Z",
+      productId: "CB182",
+      facts: {
+        schemaVersion: 1 as const,
+        productId: "CB182",
+        parentProductId: "CB182",
+        offerType: "SET",
+        listPriceVnd: 799_000,
+        salePriceVnd: 699_000,
+        sizes: ["S", "M"],
+        stockStatus: "IN_STOCK" as const,
+        stockQuantity: 3,
+        deliveryEta: null,
+        fulfillmentPolicy: "READY_STOCK",
+        imageUrls: [],
+      },
+      reasonCode: null,
+    };
+
+    const result = await modelWith(fetchMock).judgeSalesReplyV2(
+      context,
+      "Dạ mẫu này có giá 699k ạ",
+      verifiedFacts,
+      { action: "REPLY", productId: "CB182" },
+      { sendAuthorized: false, blockedReasonCodes: [] },
+    );
+
+    expect(result.schemaVersion).toBe(2);
+    expect(result.scores.factGrounding).toBe(5);
+    const bodyText = JSON.stringify(bodies[0]);
+    expect(SALES_RUBRIC_V2_SYSTEM_INSTRUCTION).toContain("Chi VERIFIED_FACTS_JSON");
+    expect(bodyText).toContain("<VERIFIED_FACTS_JSON>");
+    expect(bodyText).toContain("<UNTRUSTED_ACTUAL_REPLY>");
+    expect(bodyText).toContain("salePriceVnd\\\":699000");
+    expect(bodyText).toContain("\"enum\":[2]");
+  });
+
   it("refreshes once and retries generation after a 401", async () => {
     let authCalls = 0;
     let generateCalls = 0;
@@ -332,5 +409,120 @@ describe("Vertex shadow client", () => {
     await expect(modelWith(fetchMock).generate(context, "prompt-v1"))
       .rejects.toMatchObject({ code: "VERTEX_GENERATE_RETRYABLE", retryable: true });
     expect(generateCalls).toBe(1);
+  });
+
+  it("returns a strict advisory-only grounded draft", async () => {
+    const bodies: unknown[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      bodies.push(init?.body ? JSON.parse(String(init.body)) : null);
+      return new Response(JSON.stringify({
+        modelVersion: "gemini-test-grounded",
+        candidates: [{ content: { parts: [{ text: JSON.stringify({
+          schemaVersion: 1,
+          advisoryText: "Thiết kế thanh lịch, chuẩn form công sở.",
+          objectionResponse: "",
+          suggestedQuestion: "Chị thích màu be hay đen hơn ạ?",
+          suggestedNextStep: "",
+          attachmentImageIndices: [0],
+        }) }] } }],
+      }), { status: 200 });
+    }) as unknown as typeof fetch;
+    const proposal = {
+      schemaVersion: 1 as const,
+      intent: "hoi_gia",
+      conversationStage: "consulting",
+      productId: "CB182",
+      action: "REPLY" as const,
+      reply: "",
+      attachments: [],
+      handoffReason: null,
+      businessFactQuery: { intent: "PRICE" as const, offerType: null, color: null, size: null, deliveryRegion: null },
+    };
+    const facts = {
+      schemaVersion: 1 as const,
+      status: "OK" as const,
+      source: "POS_SNAPSHOT" as const,
+      observedAt: "2026-07-23T00:00:00.000Z",
+      expiresAt: "2099-07-23T00:00:00.000Z",
+      productId: "CB182",
+      facts: {
+        schemaVersion: 1 as const,
+        productId: "CB182",
+        parentProductId: "CB182",
+        offerType: "SET_VAY",
+        listPriceVnd: null,
+        salePriceVnd: 699_000,
+        sizes: ["S", "M"],
+        stockStatus: "IN_STOCK" as const,
+        stockQuantity: 2,
+        deliveryEta: null,
+        fulfillmentPolicy: "READY_STOCK",
+        imageUrls: ["https://cdn.example/cb182.jpg"],
+      },
+      reasonCode: null,
+    };
+
+    const result = await modelWith(fetchMock).groundDraftWithFacts(
+      context,
+      proposal,
+      facts,
+      { productId: "CB182", materials: ["gấm"] },
+      "prompt-v2",
+    );
+
+    expect(result.draft.attachmentImageIndices).toEqual([0]);
+    expect(JSON.stringify(bodies[0])).toContain("VERIFIED_PRODUCT_METADATA_JSON");
+    expect(JSON.stringify(bodies[0])).not.toContain('"action":{"type"');
+  });
+
+  it("rejects a grounded draft that tries to return decision fields", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      return new Response(JSON.stringify({
+        candidates: [{ content: { parts: [{ text: JSON.stringify({
+          schemaVersion: 1,
+          advisoryText: "",
+          objectionResponse: "",
+          suggestedQuestion: "",
+          suggestedNextStep: "",
+          attachmentImageIndices: [],
+          action: "HANDOFF",
+        }) }] } }],
+      }), { status: 200 });
+    }) as unknown as typeof fetch;
+    const proposal = {
+      schemaVersion: 1 as const,
+      intent: "hoi_gia",
+      conversationStage: "consulting",
+      productId: "CB182",
+      action: "REPLY" as const,
+      reply: "",
+      attachments: [],
+      handoffReason: null,
+      businessFactQuery: { intent: "PRICE" as const, offerType: null, color: null, size: null, deliveryRegion: null },
+    };
+    const facts = {
+      schemaVersion: 1 as const,
+      status: "NOT_FOUND" as const,
+      source: "POS_SNAPSHOT" as const,
+      observedAt: "2026-07-23T00:00:00.000Z",
+      expiresAt: null,
+      productId: "CB182",
+      facts: null,
+      reasonCode: "NOT_FOUND",
+    };
+
+    await expect(modelWith(fetchMock).groundDraftWithFacts(
+      context,
+      proposal,
+      facts,
+      { productId: "CB182" },
+      "prompt-v2",
+    )).rejects.toThrow("GROUNDED_SCHEMA_INVALID");
   });
 });

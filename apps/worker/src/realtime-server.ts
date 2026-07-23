@@ -440,6 +440,10 @@ const runner = new RealtimeRunner(
       process.env.REALTIME_DECISION_TELEMETRY_ENABLED === "true",
     buyingSignalGuardEnabled:
       process.env.REALTIME_BUYING_SIGNAL_GUARD_V1 === "true",
+    groundedDraftEnabled:
+      process.env.REALTIME_GROUNDED_DRAFT_V1 === "true",
+    verifiedFactAssemblerEnabled:
+      process.env.REALTIME_VERIFIED_FACT_ASSEMBLER_V1 === "true",
   },
   quota,
   history,

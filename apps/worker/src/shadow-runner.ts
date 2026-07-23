@@ -1,4 +1,8 @@
+import { createHash } from "node:crypto";
 import {
+  assembleReply,
+  buildVerifiedFactBlocks,
+  containsBuyingSignal,
   ProductSearchService,
   guardAgentProposal,
   verifiedImageUrls,
@@ -35,6 +39,26 @@ export interface Phase4ShadowRunnerOptions {
   readonly modelProvider?: string;
   readonly modelName: string;
   readonly shopAlias?: string;
+  readonly groundedDraftEnabled?: boolean;
+  readonly verifiedFactAssemblerEnabled?: boolean;
+  readonly judgeV2Enabled?: boolean;
+  readonly judgeV2SampleRate?: number;
+  readonly judgeMode?: "DRY_RUN" | "LIVE";
+}
+
+export function shouldJudgeV2(
+  evaluationId: string,
+  mode: "DRY_RUN" | "LIVE",
+  liveSampleRate: number,
+): boolean {
+  if (mode === "DRY_RUN") return true;
+  if (liveSampleRate <= 0) return false;
+  if (liveSampleRate >= 1) return true;
+  const bucket = Number.parseInt(
+    createHash("sha256").update(evaluationId).digest("hex").slice(0, 8),
+    16,
+  ) / 0xffffffff;
+  return bucket < liveSampleRate;
 }
 
 export class Phase4ShadowRunner {
@@ -51,6 +75,14 @@ export class Phase4ShadowRunner {
     businessFactsReader?: BusinessFactsReader,
     productSearch?: ProductSearchService,
   ) {
+    const judgeV2SampleRate = options.judgeV2SampleRate ?? 0.1;
+    if (
+      !Number.isFinite(judgeV2SampleRate) ||
+      judgeV2SampleRate < 0 ||
+      judgeV2SampleRate > 1
+    ) {
+      throw new Error("JUDGE_V2_SAMPLE_RATE_INVALID");
+    }
     this.store = store;
     this.model = model;
     this.options = {
@@ -58,6 +90,11 @@ export class Phase4ShadowRunner {
       modelProvider: options.modelProvider ?? "VERTEX_AI",
       modelName: options.modelName,
       shopAlias: options.shopAlias ?? "LANA",
+      groundedDraftEnabled: options.groundedDraftEnabled ?? false,
+      verifiedFactAssemblerEnabled: options.verifiedFactAssemblerEnabled ?? false,
+      judgeV2Enabled: options.judgeV2Enabled ?? false,
+      judgeV2SampleRate,
+      judgeMode: options.judgeMode ?? "DRY_RUN",
     };
     this.businessFactsReader = businessFactsReader ?? null;
     this.productSearch = productSearch ?? null;
@@ -145,21 +182,62 @@ export class Phase4ShadowRunner {
           resolvedProduct,
         );
         if (facts.status === "OK" || facts.reasonCode === "DELIVERY_REGION_REQUIRED") {
-          const grounded = await this.model.groundWithFacts(
-            job.context,
-            initialProposal,
-            facts,
-            job.promptVersion,
-          );
+          const grounded = facts.status === "OK" &&
+              resolvedProduct !== null &&
+              this.options.groundedDraftEnabled &&
+              this.options.verifiedFactAssemblerEnabled
+            ? await this.model.groundDraftWithFacts(
+                job.context,
+                initialProposal,
+                facts,
+                {
+                  productId: resolvedProduct.productId,
+                  title: resolvedProduct.title,
+                  descriptionXml: resolvedProduct.descriptionXml ?? "",
+                  materials: resolvedProduct.materials,
+                  silhouettes: resolvedProduct.silhouettes,
+                  occasions: resolvedProduct.occasions,
+                },
+                job.promptVersion,
+              )
+            : null;
+          const legacyGrounded = grounded === null
+            ? await this.model.groundWithFacts(
+                job.context,
+                initialProposal,
+                facts,
+                job.promptVersion,
+              )
+            : null;
           const tokenUsage: Record<string, number> = {};
-          for (const key of new Set([...Object.keys(initial.tokenUsage), ...Object.keys(grounded.tokenUsage)])) {
-            tokenUsage[key] = (initial.tokenUsage[key] ?? 0) + (grounded.tokenUsage[key] ?? 0);
+          const secondUsage = grounded?.tokenUsage ?? legacyGrounded?.tokenUsage ?? {};
+          for (const key of new Set([...Object.keys(initial.tokenUsage), ...Object.keys(secondUsage)])) {
+            tokenUsage[key] = (initial.tokenUsage[key] ?? 0) + (secondUsage[key] ?? 0);
           }
-          generated = {
-            ...grounded,
-            latencyMs: initial.latencyMs + grounded.latencyMs,
-            tokenUsage,
-          };
+          if (grounded !== null && resolvedProduct !== null) {
+            const factBlocks = buildVerifiedFactBlocks(
+              facts,
+              initialProposal.businessFactQuery.intent,
+              resolvedProduct,
+            );
+            const assembled = assembleReply(factBlocks, grounded.draft, facts, resolvedProduct);
+            generated = {
+              proposal: {
+                ...initialProposal,
+                reply: assembled.text || initialProposal.reply,
+                attachments: [...assembled.imageUrls],
+              },
+              modelVersion: grounded.modelVersion,
+              latencyMs: initial.latencyMs + grounded.latencyMs,
+              tokenUsage,
+            };
+          } else if (legacyGrounded !== null) {
+            generated = {
+              ...legacyGrounded,
+              latencyMs: initial.latencyMs + legacyGrounded.latencyMs,
+              tokenUsage,
+            };
+          }
         }
       }
       const proposal = {
@@ -176,6 +254,9 @@ export class Phase4ShadowRunner {
         proposal,
         facts,
         verifiedProductIds,
+        buyingSignal: containsBuyingSignal(this.latestCustomerText(job.context), {
+          hasProductContext: proposal.productId !== null,
+        }),
         now: new Date(),
       });
       const similarity = job.actualOutboundText === null
@@ -202,6 +283,7 @@ export class Phase4ShadowRunner {
           productId: facts.productId,
           reasonCode: facts.reasonCode,
         },
+        businessFactEnvelope: facts,
       });
       return true;
     } catch (error) {
@@ -217,12 +299,82 @@ export class Phase4ShadowRunner {
     if (!job) return false;
     const similarity = textSimilarity(job.proposalReply, job.actualOutboundText);
     try {
-      const assessment = await this.model.judgeSalesReply(job.context, job.actualOutboundText);
+      if (
+        this.options.judgeV2Enabled &&
+        !shouldJudgeV2(
+          job.evaluationId,
+          this.options.judgeMode,
+          this.options.judgeV2SampleRate,
+        )
+      ) {
+        await this.store.completeComparison(job, similarity, {
+          schemaVersion: 2,
+          status: "NOT_SAMPLED",
+          sampleMode: this.options.judgeMode,
+          sampleRate: this.options.judgeV2SampleRate,
+        });
+        return true;
+      }
+      const parsedFacts = BusinessFactEnvelopeV1Schema.safeParse(
+        job.businessFactEnvelope,
+      );
+      const assessment = this.options.judgeV2Enabled
+        ? await this.model.judgeSalesReplyV2(
+            job.context,
+            job.actualOutboundText,
+            parsedFacts.success ? parsedFacts.data : null,
+            job.proposalSummary,
+            job.guardOutcome,
+          )
+        : await this.model.judgeSalesReply(
+            job.context,
+            job.actualOutboundText,
+          );
+      const improvedReplyGuard = assessment.schemaVersion === 2
+        ? guardAgentProposal({
+            proposal: {
+              schemaVersion: 1,
+              intent: assessment.intent,
+              conversationStage: assessment.conversationStage,
+              productId: parsedFacts.success ? parsedFacts.data.productId : null,
+              action: "REPLY",
+              reply: assessment.improvedReply || "Không có đề xuất.",
+              attachments: [],
+              handoffReason: null,
+              businessFactQuery: {
+                intent: "NONE",
+                offerType: null,
+                color: null,
+                size: null,
+                deliveryRegion: null,
+              },
+            },
+            facts: parsedFacts.success ? parsedFacts.data : null,
+            verifiedProductIds: new Set(
+              parsedFacts.success ? [parsedFacts.data.productId] : [],
+            ),
+            now: parsedFacts.success
+              ? new Date(parsedFacts.data.observedAt)
+              : new Date(),
+          })
+        : null;
+      const improvedReplySafe =
+        improvedReplyGuard === null ||
+          improvedReplyGuard.blockedReasonCodes.length === 0
+          ? assessment.improvedReply
+          : "";
       const safeAssessment = {
         ...assessment,
         strengths: assessment.strengths.map((value) => redactAnalyticsMessage(value).text),
-        weaknesses: assessment.weaknesses.map((value) => redactAnalyticsMessage(value).text),
-        improvedReply: redactAnalyticsMessage(assessment.improvedReply).text,
+        weaknesses: [
+          ...assessment.weaknesses.map((value) =>
+            redactAnalyticsMessage(value).text
+          ),
+          ...(improvedReplyGuard?.blockedReasonCodes.length
+            ? ["IMPROVED_REPLY_UNVERIFIED_FACT"]
+            : []),
+        ].slice(0, 10),
+        improvedReply: redactAnalyticsMessage(improvedReplySafe).text,
       };
       await this.store.completeComparison(job, similarity, safeAssessment);
     } catch (error) {

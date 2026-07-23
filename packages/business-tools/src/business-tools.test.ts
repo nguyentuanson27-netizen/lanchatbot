@@ -308,4 +308,29 @@ describe("facts and deterministic policy guard", () => {
       "UNVERIFIED_PRODUCT",
     ]));
   });
+
+  it("blocks NO_REPLY when the deterministic layer found a buying signal", () => {
+    const result = guardAgentProposal({
+      proposal: {
+        ...proposal(""),
+        action: "NO_REPLY",
+      },
+      facts: null,
+      verifiedProductIds: new Set(["SD396"]),
+      buyingSignal: true,
+      now,
+    });
+    expect(result.blockedReasonCodes).toContain("NO_REPLY_OVERRIDE_BUYING_SIGNAL");
+  });
+
+  it("blocks collecting order PII before a buying signal", () => {
+    const result = guardAgentProposal({
+      proposal: proposal("Chị gửi em họ tên, số điện thoại và địa chỉ nhận hàng nha."),
+      facts: null,
+      verifiedProductIds: new Set(["SD396"]),
+      buyingSignal: false,
+      now,
+    });
+    expect(result.blockedReasonCodes).toContain("PREMATURE_ORDER_INFO_REQUEST");
+  });
 });

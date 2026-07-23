@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import {
   detectBuyingSignal,
+  assembleReply,
+  buildVerifiedFactBlocks,
   normalizeProductCode,
   ProductSearchService,
   guardAgentProposal,
@@ -795,6 +797,7 @@ export interface RealtimeRuntimePort {
 export interface RealtimeModelPort {
   generate: VertexShadowModel["generate"];
   groundWithFacts: VertexShadowModel["groundWithFacts"];
+  groundDraftWithFacts?: VertexShadowModel["groundDraftWithFacts"];
 }
 
 export interface CanonicalChatHistoryPort {
@@ -950,6 +953,8 @@ export interface RealtimeRunnerOptions {
   readonly releaseId?: string;
   readonly decisionTelemetryEnabled?: boolean;
   readonly buyingSignalGuardEnabled?: boolean;
+  readonly groundedDraftEnabled?: boolean;
+  readonly verifiedFactAssemblerEnabled?: boolean;
 }
 
 export class RealtimeRunner {
@@ -992,6 +997,9 @@ export class RealtimeRunner {
       releaseId: options.releaseId ?? "unversioned",
       decisionTelemetryEnabled: options.decisionTelemetryEnabled ?? false,
       buyingSignalGuardEnabled: options.buyingSignalGuardEnabled ?? false,
+      groundedDraftEnabled: options.groundedDraftEnabled ?? false,
+      verifiedFactAssemblerEnabled:
+        options.verifiedFactAssemblerEnabled ?? false,
     };
   }
 
@@ -1671,6 +1679,83 @@ export class RealtimeRunner {
               : null;
           if (deterministicProductInfo) {
             proposal = deterministicProductInfo;
+          } else if (
+            facts.status === "OK" &&
+            resolvedProduct &&
+            this.options.groundedDraftEnabled &&
+            this.options.verifiedFactAssemblerEnabled &&
+            this.model.groundDraftWithFacts
+          ) {
+            const factBlocks = buildVerifiedFactBlocks(
+              facts,
+              proposal.businessFactQuery.intent,
+              resolvedProduct,
+            );
+            try {
+              modelCalled = true;
+              const grounded = await this.model.groundDraftWithFacts(
+                modelContext,
+                proposal,
+                facts,
+                {
+                  productId: resolvedProduct.productId,
+                  title: resolvedProduct.title,
+                  descriptionXml: resolvedProduct.descriptionXml ?? "",
+                  materials: resolvedProduct.materials,
+                  silhouettes: resolvedProduct.silhouettes,
+                  occasions: resolvedProduct.occasions,
+                },
+                this.options.promptVersion,
+              );
+              modelVersion = grounded.modelVersion;
+              modelLatencyMs += grounded.latencyMs;
+              modelPromptTokens += grounded.tokenUsage.promptTokenCount ?? 0;
+              modelOutputTokens += grounded.tokenUsage.candidatesTokenCount ?? 0;
+              modelTotalTokens += grounded.tokenUsage.totalTokenCount ?? 0;
+              hasModelTokenUsage ||= Object.keys(grounded.tokenUsage).length > 0;
+              const assembled = assembleReply(
+                factBlocks,
+                grounded.draft,
+                facts,
+                resolvedProduct,
+              );
+              handoffGuardReasonCodes = [
+                ...new Set([
+                  ...handoffGuardReasonCodes,
+                  ...assembled.reasonCodes,
+                ]),
+              ];
+              proposal = {
+                ...proposal,
+                reply: assembled.text || proposal.reply,
+                attachments: [...assembled.imageUrls],
+              };
+            } catch (error) {
+              if (!(error instanceof Error) || error.message !== "GROUNDED_SCHEMA_INVALID") {
+                throw error;
+              }
+              handoffGuardReasonCodes = [
+                ...new Set([...handoffGuardReasonCodes, "GROUNDED_SCHEMA_INVALID"]),
+              ];
+              const assembled = assembleReply(
+                factBlocks,
+                {
+                  schemaVersion: 1,
+                  advisoryText: "",
+                  objectionResponse: "",
+                  suggestedQuestion: "",
+                  suggestedNextStep: "",
+                  attachmentImageIndices: [],
+                },
+                facts,
+                resolvedProduct,
+              );
+              proposal = {
+                ...proposal,
+                reply: assembled.text || proposal.reply,
+                attachments: [],
+              };
+            }
           } else {
             modelCalled = true;
             const grounded = await this.model.groundWithFacts(
@@ -1695,8 +1780,15 @@ export class RealtimeRunner {
           proposal,
           facts,
           verifiedProductIds,
+          buyingSignal: buyingSignal.isBuyingSignal,
           now,
         });
+        handoffGuardReasonCodes = [
+          ...new Set([
+            ...handoffGuardReasonCodes,
+            ...guarded.blockedReasonCodes,
+          ]),
+        ];
         if (
           guarded.action === "HANDOFF" &&
           !modelHandoffPermitted(message.text ?? "", facts)
@@ -1713,11 +1805,17 @@ export class RealtimeRunner {
             proposal,
             facts: null,
             verifiedProductIds,
+            buyingSignal: buyingSignal.isBuyingSignal,
             now,
           });
         }
         if (guarded.action === "HANDOFF") {
-          handoffGuardReasonCodes = guarded.blockedReasonCodes;
+          handoffGuardReasonCodes = [
+            ...new Set([
+              ...handoffGuardReasonCodes,
+              ...guarded.blockedReasonCodes,
+            ]),
+          ];
           const transitioned = applySilentHandoff(
             nextState,
             this.handoffReason(proposal, guarded.blockedReasonCodes),

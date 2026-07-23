@@ -16,3 +16,4 @@ export * from "./media-selector-v2.js";
 export * from "./canonical-cart-engine.js";
 export * from "./negotiation-engine-v2.js";
 export * from "./buying-signal.js";
+export * from "./reply-assembler.js";

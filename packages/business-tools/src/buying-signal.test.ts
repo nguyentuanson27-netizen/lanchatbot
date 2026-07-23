@@ -31,6 +31,7 @@ describe("buying-signal detection", () => {
     "lấy ảnh cận chất",
     "phí ship bao nhiêu",
     "còn size M không",
+    "Mẫu này mặc đi làm được không?",
   ])("does not turn a non-purchase message into a buying signal: %s", (text) => {
     expect(containsBuyingSignal(text, { hasProductContext: true })).toBe(false);
   });

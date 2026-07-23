@@ -62,7 +62,9 @@ export function detectBuyingSignal(
   }
 
   if (context.hasProductContext) {
-    const confirmation = /(?:^|\s)(?:ok|oke|duoc|dong\s+y|lay|chot)(?:\s|$)/u.test(text);
+    const confirmation =
+      /(?:^|\s)(?:ok|oke|duoc|dong\s+y|lay|chot)(?:\s|$)/u.test(text) &&
+      !/(?:^|\s)(?:duoc|ok|oke)\s+(?:khong|ko|k)(?:\s|$)/u.test(text);
     const closingParticle = /(?:\s|^)(?:nhe|nha|a)$/u.test(text);
     if (
       /(?:^|\s)(?:size|sz)\s*(?:s|m|l|xl)(?:\s|$)/u.test(text) &&
@@ -71,7 +73,7 @@ export function detectBuyingSignal(
       reasons.add("CONFIRMED_SIZE");
     }
     if (
-      /(?:^|\s)mau\s+[a-z0-9]{2,}(?:\s|$)/u.test(text) &&
+      /(?:^|\s)mau\s+(?!(?:nay|do|kia|nao)(?:\s|$))[a-z0-9]{2,}(?:\s|$)/u.test(text) &&
       (confirmation || closingParticle)
     ) {
       reasons.add("CONFIRMED_COLOR");
