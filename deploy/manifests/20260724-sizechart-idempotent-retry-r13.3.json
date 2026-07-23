@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-24T01:25:00+07:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "fix/sizechart-idempotent-retry",
+  "sourceCommit": "5e4ec2b23d33cb6aeb4aaacb1c96fe7ce27727ba",
+  "releaseTag": "20260724-sizechart-idempotent-retry-r13.3",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260724-sizechart-idempotent-retry-r13.3",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260724-sizechart-productfacts-v2-canary-r13.1",
+  "pageAllowlist": ["1198992073286645"],
+  "images": {
+    "realtime": {
+      "name": "lana-chatbot-app:sizechart-facts-v2-vertex-hotfix-8f2de6f",
+      "digest": "sha256:e1cd443cd407fbfba9828743959a184eb320610b25ec532711aeaf8dc8f3e6aa"
+    },
+    "admin": {
+      "name": "lana-chatbot-app:sizechart-facts-v2-vertex-hotfix-8f2de6f",
+      "digest": "sha256:e1cd443cd407fbfba9828743959a184eb320610b25ec532711aeaf8dc8f3e6aa"
+    },
+    "sizeChartExtractor": {
+      "name": "lana-chatbot-app:sizechart-idempotent-retry-5e4ec2b",
+      "digest": "sha256:0d4378bb84c389ab385e868f92f53bc54f462f332a413af05679a7540e526a36"
+    }
+  },
+  "composeSha256": "35194b9505378ea32d787c411d7cce8f7f949838ac0515c5b064b4ae79842570",
+  "verification": {
+    "monorepoBuild": "PASS",
+    "monorepoTypecheck": "PASS",
+    "tests": "746_PASS",
+    "workerTests": "243_PASS",
+    "messengerScenarios": "30_PASS",
+    "existingExtractionPrecheck": "PASS_NO_IMAGE_OR_VERTEX_CALL",
+    "temporaryFailureClassifier": "PASS",
+    "liveCutover": "PENDING",
+    "liveCanary": "PENDING_100_INBOUND_OR_48_HOURS"
+  },
+  "retryPolicy": {
+    "identity": "parent_product_id+image_sha256+extractor_version",
+    "existingRowsCallVertex": false,
+    "temporaryFailureDelaySeconds": 300,
+    "normalIntervalSeconds": 86400,
+    "reviewRequiredTriggersEarlyRetry": false
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260724-sizechart-productfacts-v2-canary-r13.1",
+    "dataDeletionRequired": false
+  }
+}

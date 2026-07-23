@@ -5,7 +5,7 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release candidate: `/opt/lana-chatbot/releases/20260724-sizechart-retry-hotfix-r13.2`.
+- Current release candidate: `/opt/lana-chatbot/releases/20260724-sizechart-idempotent-retry-r13.3`.
 - Previous release: `/opt/lana-chatbot/releases/20260724-sizechart-productfacts-v2-canary-r13.1`.
 - Compose SHA-256: `35194b9505378ea32d787c411d7cce8f7f949838ac0515c5b064b4ae79842570`.
 - Page app LIVE: `1198992073286645`.
@@ -17,7 +17,13 @@ Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời 
 
 Realtime page test chạy image `lana-chatbot-app:realtime-wave23-b29725d` (`sha256:b732a4310b1f13662648d57f585259413e053191bc01bb496d12691d8abdbf03`) từ commit `b29725d1071bb202b0d43095f1d6d52c8331cfc6`. Shadow worker giữ image Wave 1; Admin Web, Admin API và Admin Simulation Worker giữ image `lana-chatbot-app:customer-care-policy-r10`; P2.3B giữ image r9 và POS snapshot giữ image r6. API webhook, delivery worker và n8n không đổi.
 
-## Size Chart retry hotfix r13.2
+## Size Chart idempotent retry hotfix r13.3
+
+- Source `5e4ec2b23d33cb6aeb4aaacb1c96fe7ce27727ba`; image `lana-chatbot-app:sizechart-idempotent-retry-5e4ec2b`, digest `sha256:0d4378bb84c389ab385e868f92f53bc54f462f332a413af05679a7540e526a36`.
+- Pre-check identity `parent_product_id + image_sha256 + extractor_version` chạy trước download/Vertex; snapshot đã có không phát sinh chi phí AI.
+- Full repo `746/746`; worker `243/243`. r13.2 không deploy; chỉ `size-chart-extractor` được thay từ r13.1 sang r13.3.
+
+## Size Chart retry hotfix r13.2 (không deploy)
 
 - Source `5794dde5369eb3e924b64708465270b2a03c7bec`; image `lana-chatbot-app:sizechart-retry-hotfix-5794dde`, digest `sha256:664586d227307d3f92fcb103119d5e17c2dee804eddc46912a32af026a1cc632`.
 - Lỗi tạm thời 408/425/429/5xx và lỗi mạng được retry sau 5 phút; ảnh cần duyệt giữ lịch 24 giờ để tránh tốn phí.

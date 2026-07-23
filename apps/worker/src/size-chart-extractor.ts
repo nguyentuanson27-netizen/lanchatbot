@@ -266,6 +266,16 @@ export class SizeChartExtractionRunner {
       while (cursor < rows.length) {
         const row = rows[cursor++]!;
         try {
+          const productId = row.MA_SP.trim().toLocaleUpperCase("en-US");
+          const imageSha256 = row.IMAGE_HASH.toLocaleLowerCase("en-US");
+          if (await this.options.store.exists({
+            parentProductId: productId,
+            imageSha256,
+            extractorVersion: this.options.extractionVersion,
+          })) {
+            existed += 1;
+            continue;
+          }
           const image = await this.options.images.prepare(row.IMAGE_URL);
           const extracted = parseExtractedSizeChart(
             await this.options.vision.extract(
@@ -285,7 +295,6 @@ export class SizeChartExtractionRunner {
             errors.push(`${row.MA_SP}:${staged.reasonCodes.join(",")}`);
             continue;
           }
-          const productId = row.MA_SP.trim().toLocaleUpperCase("en-US");
           const content = AdminArtifactContentV1Schema.parse({
             schemaVersion: 1,
             kind: "SIZE_CHART",
@@ -314,7 +323,7 @@ export class SizeChartExtractionRunner {
             imageId: row.IMAGE_ID,
             parentProductId: productId,
             imageUrl: row.IMAGE_URL,
-            imageSha256: row.IMAGE_HASH.toLocaleLowerCase("en-US"),
+            imageSha256,
             extractorVersion: this.options.extractionVersion,
             measurementBasis: extracted.measurementBasis,
             confidence: extracted.confidence,
