@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-24 — Size Chart Vertex hotfix r13.1
+
+- Sửa response schema để tương thích Vertex và đồng bộ enum boundary policy với contract runtime.
+- Cho phép bảng đo quần áo `GARMENT` vào DRAFT để quản trị viên kiểm tra, nhưng chặn APPROVE và runtime; chỉ chart `BODY` đã xác minh mới được tư vấn size.
+- Tách tài khoản PostgreSQL riêng cho worker Size Chart với quyền tối thiểu trên ba bảng staging/audit.
+- Full build/typecheck/test đạt `744/744`; worker đạt `241/241`, gồm `30/30` kịch bản Messenger.
+- Smoke Vertex thật tạo 1 DRAFT `GARMENT` từ tối đa 10 ảnh; kiểm tra xác nhận chưa có chart GARMENT nào được VERIFIED.
+- Chỉ page test `1198992073286645` được phép xử lý; bằng chứng canary Messenger thật vẫn cần 100 inbound hoặc 48 giờ.
+
 ## 2026-07-23 — realtime Wave 2/3 CANARY_LIVE r12
 
 - Nối CustomerProfileV1 vào runtime bằng extractor số đo deterministic, profile pseudonymous TTL 48 giờ và revision/CAS; size engine chỉ dùng chart đã xác minh.

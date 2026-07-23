@@ -5,9 +5,9 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release candidate: `/opt/lana-chatbot/releases/20260723-sizechart-productfacts-v2-canary-r13`.
-- Previous release: `/opt/lana-chatbot/releases/20260723-realtime-wave23-canary-r12`.
-- Compose SHA-256: `2c260b0f02679923a52842a9a0654e920c0f5d18adc82a938f5cbde5d612436c`.
+- Current release candidate: `/opt/lana-chatbot/releases/20260724-sizechart-productfacts-v2-canary-r13.1`.
+- Previous release: `/opt/lana-chatbot/releases/20260723-sizechart-productfacts-v2-canary-r13`.
+- Compose SHA-256: `35194b9505378ea32d787c411d7cce8f7f949838ac0515c5b064b4ae79842570`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất trong candidate: `0020_size_chart_extraction`.
@@ -17,7 +17,12 @@ Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời 
 
 Realtime page test chạy image `lana-chatbot-app:realtime-wave23-b29725d` (`sha256:b732a4310b1f13662648d57f585259413e053191bc01bb496d12691d8abdbf03`) từ commit `b29725d1071bb202b0d43095f1d6d52c8331cfc6`. Shadow worker giữ image Wave 1; Admin Web, Admin API và Admin Simulation Worker giữ image `lana-chatbot-app:customer-care-policy-r10`; P2.3B giữ image r9 và POS snapshot giữ image r6. API webhook, delivery worker và n8n không đổi.
 
-## Size Chart + ProductFactsV2 candidate r13
+## Size Chart + ProductFactsV2 candidate r13.1
+
+- Hotfix source: `8f2de6f75295edbee31d4e7a4f6e4cf70a78228c`; image Node 22 `lana-chatbot-app:sizechart-facts-v2-vertex-hotfix-8f2de6f`, digest `sha256:e1cd443cd407fbfba9828743959a184eb320610b25ec532711aeaf8dc8f3e6aa`.
+- Vertex response schema đã tương thích API thật. Smoke tối đa 10 ảnh tạo 1 DRAFT `GARMENT` với confidence 0.9; chart GARMENT bị chặn APPROVE/runtime, chỉ chart BODY đã VERIFIED được tư vấn size.
+- Worker Size Chart dùng role PostgreSQL riêng `lana_size_chart_worker`, chỉ có SELECT/INSERT trên extraction, artifact version và artifact event.
+- Full repo đạt `744/744`; worker `241/241`, gồm `30/30` kịch bản Messenger. Canary Messenger thật vẫn chưa được tính.
 
 - Source code: `5d401b26792c1705ab6c76f452484f2c7a2d4232`; image Node 22 `lana-chatbot-app:sizechart-facts-v2-5d401b2`, digest `sha256:2cbc3fcc7d14e321730531e9af92ce6cca4ab5b64057796f1ea09035c8e464f4`.
 - Size Chart chạy app-native: đọc ảnh `SIZE_GUIDE/SIZE_CHART/BANG_SIZE` từ `image_registry`, resize trong app, trích xuất có schema bằng Vertex, chỉ staging bảng số đo cơ thể đủ confidence thành `DRAFT`. Runtime chỉ dùng chart đã được Admin duyệt và đánh dấu `VERIFIED`.
