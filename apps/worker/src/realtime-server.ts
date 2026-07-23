@@ -412,6 +412,10 @@ const runner = new RealtimeRunner(
     employeeTagId: process.env.PANCAKE_EMPLOYEE_TAG_ID?.trim() || "",
     postSaleTagId:
       process.env.PANCAKE_POST_SALE_TAG_ID?.trim() || "",
+    closedOrderTagId:
+      process.env.PANCAKE_CLOSED_ORDER_TAG_ID?.trim() || "",
+    salesCycleEnabled:
+      process.env.SALES_CYCLE_ENABLED === "true",
     promptVersion:
       process.env.REALTIME_PROMPT_VERSION?.trim() || "lana-realtime-v1",
     metaAppId: required("META_APP_ID"),

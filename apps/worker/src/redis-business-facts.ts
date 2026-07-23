@@ -12,10 +12,19 @@ import {
   type CatalogSnapshotV3,
 } from "@lana/business-tools";
 import { createClient } from "redis";
+import {
+  cartSelectionFromSnapshot,
+  type CartSelectionQuery,
+  type CartSelectionResult,
+} from "./realtime-sales-catalog.js";
 
 export interface BusinessFactsReader {
   ready(): Promise<boolean>;
   resolve(query: CatalogFactQuery, now?: Date): Promise<BusinessFactEnvelopeV1>;
+  resolveCartSelection?(
+    query: CartSelectionQuery,
+    now?: Date,
+  ): Promise<CartSelectionResult>;
   close(): Promise<void>;
 }
 
@@ -90,6 +99,34 @@ export class RedisBusinessFactsReader implements BusinessFactsReader {
         facts: null,
         reasonCode: "CATALOG_SNAPSHOT_INVALID",
       });
+    }
+  }
+
+  async resolveCartSelection(
+    query: CartSelectionQuery,
+    now = new Date(),
+  ): Promise<CartSelectionResult> {
+    await this.connected();
+    const raw = await this.client.get(
+      catalogSnapshotKey(query.shopAlias, query.productId),
+    );
+    if (!raw) {
+      return {
+        status: "NOT_FOUND",
+        reasonCode: "CATALOG_SNAPSHOT_NOT_FOUND",
+        availableSizes: [],
+        availableColors: [],
+      };
+    }
+    try {
+      return cartSelectionFromSnapshot(JSON.parse(raw) as unknown, query, now);
+    } catch {
+      return {
+        status: "INVALID",
+        reasonCode: "CART_SELECTION_FAILED",
+        availableSizes: [],
+        availableColors: [],
+      };
     }
   }
 

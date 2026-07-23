@@ -30,9 +30,55 @@ export interface RealtimeMetaPlan {
 }
 
 export interface RealtimePancakeTagPlan {
-  readonly desiredTag: "NHAN_VIEN" | "VAN_DON";
+  readonly desiredTag:
+    | "NHAN_VIEN"
+    | "VAN_DON"
+    | "DA_CHOT_DON"
+    | "KHONG_UP_SALE";
   readonly tagId: string;
   readonly handoffGeneration: number;
+}
+
+export interface RealtimeSalesCycleRecord<TState> {
+  readonly conversationId: string;
+  readonly pageId: string;
+  readonly stateRevision: number;
+  readonly state: TState;
+  readonly cartExpiresAt: Date | null;
+  readonly expiresAt: Date;
+}
+
+export interface RealtimeSalesCycleEventPlan {
+  readonly commandId: string;
+  readonly commandKind:
+    | "FACTS_PRESENTED"
+    | "MEASUREMENTS_REQUIRED"
+    | "SIZE_RECOMMENDED"
+    | "CART_OPENED"
+    | "CART_MUTATED"
+    | "NEGOTIATION_EVENT"
+    | "CART_READY"
+    | "CHECKOUT_DETAILS_CAPTURED"
+    | "PREVIEW_CREATED"
+    | "CONFIRM_PURCHASE"
+    | "PAYMENT_RECEIPT_RECEIVED";
+  readonly outcome: "APPLIED" | "HANDOFF";
+  readonly stateRevisionBefore: number;
+  readonly stateRevisionAfter: number;
+  readonly stageBefore: string;
+  readonly stageAfter: string;
+  readonly cartId: string | null;
+  readonly cartVersion: number | null;
+  readonly reasonCode: string | null;
+  readonly occurredAt: Date;
+}
+
+export interface RealtimeSalesCyclePlan<TState> {
+  readonly expectedRevision: number;
+  readonly state: TState;
+  readonly cartExpiresAt: Date | null;
+  readonly expiresAt: Date;
+  readonly events: readonly RealtimeSalesCycleEventPlan[];
 }
 
 export interface RealtimeHandoffEventPlan {
@@ -66,7 +112,7 @@ export interface RealtimeInboxBatchGuard {
   readonly inboxIds: readonly string[];
 }
 
-export interface RealtimeCommitInput<TState> {
+export interface RealtimeCommitInput<TState, TSalesState = unknown> {
   readonly pageId: string;
   readonly customerHash: string;
   readonly conversationId: string;
@@ -76,6 +122,7 @@ export interface RealtimeCommitInput<TState> {
   readonly pancakeTagPlan?: RealtimePancakeTagPlan;
   readonly handoffEventPlan?: RealtimeHandoffEventPlan;
   readonly handoffAcknowledgementPlan?: RealtimeHandoffAcknowledgementPlan;
+  readonly salesCyclePlan?: RealtimeSalesCyclePlan<TSalesState>;
   /**
    * When present, state/outbox and all source inbox rows share one transaction.
    * A newer committed inbound changes the generation and makes this decision a
@@ -168,6 +215,19 @@ interface PancakeTagOutboxRow {
   pancake_conversation_ciphertext: Buffer;
   pancake_conversation_nonce: Buffer;
   pancake_conversation_auth_tag: Buffer;
+}
+
+interface SalesCycleRow {
+  conversation_id: string;
+  page_id: string;
+  state_revision: string;
+  state_ciphertext: Buffer;
+  state_nonce: Buffer;
+  state_auth_tag: Buffer;
+  state_encrypted_dek: Buffer;
+  state_key_ref: string;
+  cart_expires_at: Date | null;
+  expires_at: Date;
 }
 
 export class PostgresRealtimeRuntimeStore {
@@ -276,6 +336,77 @@ export class PostgresRealtimeRuntimeStore {
     });
   }
 
+  async loadOrCreateSalesCycle<TState>(
+    pageId: string,
+    conversationId: string,
+    createState: () => TState,
+    now = new Date(),
+  ): Promise<RealtimeSalesCycleRecord<TState>> {
+    if (!pageId.trim() || !conversationId.trim() || Number.isNaN(now.getTime())) {
+      throw new Error("SALES_CYCLE_IDENTITY_INVALID");
+    }
+    return withTransaction(this.pool, async (client) => {
+      const selected = await client.query<SalesCycleRow>(
+        `SELECT conversation_id, page_id, state_revision, state_ciphertext,
+                state_nonce, state_auth_tag, state_encrypted_dek,
+                state_key_ref, cart_expires_at, expires_at
+         FROM sales_cycle_states
+         WHERE conversation_id = $1 AND page_id = $2
+         FOR UPDATE`,
+        [conversationId, pageId],
+      );
+      const existing = selected.rows[0];
+      if (existing && existing.expires_at.getTime() > now.getTime()) {
+        return this.salesCycleRecord<TState>(existing);
+      }
+
+      const state = createState();
+      const expiresAt = new Date(now.getTime() + 48 * 60 * 60 * 1_000);
+      const encrypted = this.cipher.encryptJson(
+        state,
+        this.salesCycleAad(pageId, conversationId),
+        expiresAt,
+      );
+      await client.query(
+        `INSERT INTO sales_cycle_states (
+           conversation_id, page_id, state_revision, state_ciphertext,
+           state_nonce, state_auth_tag, state_encrypted_dek, state_key_ref,
+           cart_expires_at, expires_at, created_at, updated_at
+         ) VALUES ($1,$2,0,$3,$4,$5,$6,$7,NULL,$8,$9,$9)
+         ON CONFLICT (conversation_id) DO UPDATE SET
+           page_id = EXCLUDED.page_id,
+           state_revision = 0,
+           state_ciphertext = EXCLUDED.state_ciphertext,
+           state_nonce = EXCLUDED.state_nonce,
+           state_auth_tag = EXCLUDED.state_auth_tag,
+           state_encrypted_dek = EXCLUDED.state_encrypted_dek,
+           state_key_ref = EXCLUDED.state_key_ref,
+           cart_expires_at = NULL,
+           expires_at = EXCLUDED.expires_at,
+           updated_at = EXCLUDED.updated_at`,
+        [
+          conversationId,
+          pageId,
+          encrypted.ciphertext,
+          encrypted.nonce,
+          encrypted.authTag,
+          encrypted.encryptedDek,
+          encrypted.keyRef,
+          expiresAt,
+          now,
+        ],
+      );
+      return {
+        conversationId,
+        pageId,
+        stateRevision: 0,
+        state,
+        cartExpiresAt: null,
+        expiresAt,
+      };
+    });
+  }
+
   async persistObservedCustomerIdentity(
     pageId: string,
     conversationId: string,
@@ -318,8 +449,8 @@ export class PostgresRealtimeRuntimeStore {
     return result.rowCount === 1;
   }
 
-  async commit<TState>(
-    input: RealtimeCommitInput<TState>,
+  async commit<TState, TSalesState = unknown>(
+    input: RealtimeCommitInput<TState, TSalesState>,
     now = new Date(),
   ): Promise<RealtimeCommitResult> {
     return withTransaction(this.pool, async (client) => {
@@ -379,6 +510,15 @@ export class PostgresRealtimeRuntimeStore {
       );
       const ownerBefore = before.rows[0]?.conversation_owner;
       if (!ownerBefore) throw new Error("STATE_REVISION_CONFLICT");
+      if (input.salesCyclePlan) {
+        await this.commitSalesCyclePlan(
+          client,
+          input.pageId,
+          input.conversationId,
+          input.salesCyclePlan,
+          now,
+        );
+      }
       const stateRevision = this.stateNumber(
         input.state,
         "revision",
@@ -1118,6 +1258,111 @@ export class PostgresRealtimeRuntimeStore {
     return result.rowCount === 1;
   }
 
+  private async commitSalesCyclePlan<TState>(
+    client: PoolClient,
+    pageId: string,
+    conversationId: string,
+    plan: RealtimeSalesCyclePlan<TState>,
+    now: Date,
+  ): Promise<void> {
+    if (
+      Number.isNaN(plan.expiresAt.getTime()) ||
+      plan.expiresAt.getTime() <= now.getTime() ||
+      plan.expiresAt.getTime() > now.getTime() + 48 * 60 * 60 * 1_000 ||
+      (plan.cartExpiresAt !== null &&
+        (Number.isNaN(plan.cartExpiresAt.getTime()) ||
+          plan.cartExpiresAt.getTime() > plan.expiresAt.getTime()))
+    ) {
+      throw new Error("SALES_CYCLE_EXPIRY_INVALID");
+    }
+    const locked = await client.query<{ state_revision: string }>(
+      `SELECT state_revision
+       FROM sales_cycle_states
+       WHERE conversation_id = $1 AND page_id = $2
+       FOR UPDATE`,
+      [conversationId, pageId],
+    );
+    const storedRevision = Number(locked.rows[0]?.state_revision ?? -1);
+    if (storedRevision !== plan.expectedRevision) {
+      throw new Error("SALES_CYCLE_STATE_REVISION_CONFLICT");
+    }
+    const nextRevision = this.stateNumber(
+      plan.state,
+      "revision",
+      plan.expectedRevision + 1,
+    );
+    if (nextRevision <= plan.expectedRevision) {
+      throw new Error("SALES_CYCLE_REVISION_INCREMENT_REQUIRED");
+    }
+    const encrypted = this.cipher.encryptJson(
+      plan.state,
+      this.salesCycleAad(pageId, conversationId),
+      plan.expiresAt,
+    );
+    const updated = await client.query(
+      `UPDATE sales_cycle_states
+       SET state_revision = $3,
+           state_ciphertext = $4,
+           state_nonce = $5,
+           state_auth_tag = $6,
+           state_encrypted_dek = $7,
+           state_key_ref = $8,
+           cart_expires_at = $9,
+           expires_at = $10,
+           updated_at = $11
+       WHERE conversation_id = $1 AND page_id = $2 AND state_revision = $12`,
+      [
+        conversationId,
+        pageId,
+        nextRevision,
+        encrypted.ciphertext,
+        encrypted.nonce,
+        encrypted.authTag,
+        encrypted.encryptedDek,
+        encrypted.keyRef,
+        plan.cartExpiresAt,
+        plan.expiresAt,
+        now,
+        plan.expectedRevision,
+      ],
+    );
+    if (updated.rowCount !== 1) {
+      throw new Error("SALES_CYCLE_STATE_REVISION_CONFLICT");
+    }
+    for (const event of plan.events) {
+      if (
+        event.stateRevisionAfter <= event.stateRevisionBefore ||
+        event.stateRevisionBefore < plan.expectedRevision ||
+        event.stateRevisionAfter > nextRevision
+      ) {
+        throw new Error("SALES_CYCLE_EVENT_REVISION_INVALID");
+      }
+      await client.query(
+        `INSERT INTO sales_cycle_events (
+           event_id, conversation_id, page_id, command_id_hash, command_kind,
+           outcome, state_revision_before, state_revision_after, stage_before,
+           stage_after, cart_id, cart_version, reason_code, occurred_at
+         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+        [
+          randomUUID(),
+          conversationId,
+          pageId,
+          this.cipher.fingerprint(event.commandId, "sales-cycle-command:v1"),
+          event.commandKind,
+          event.outcome,
+          event.stateRevisionBefore,
+          event.stateRevisionAfter,
+          event.stageBefore,
+          event.stageAfter,
+          event.cartId,
+          event.cartVersion,
+          event.reasonCode,
+          event.occurredAt,
+        ],
+      );
+    }
+  }
+
   private async insertHandoffEvent<TState>(
     client: PoolClient,
     input: RealtimeCommitInput<TState>,
@@ -1202,6 +1447,34 @@ export class PostgresRealtimeRuntimeStore {
       encryptedDek: row.payload_encrypted_dek,
       keyRef: row.payload_key_ref,
       expiresAt: row.payload_expires_at,
+    };
+  }
+
+  private salesCycleAad(pageId: string, conversationId: string): string {
+    return `lana:sales-cycle:v1:${pageId}:${conversationId}`;
+  }
+
+  private salesCycleRecord<TState>(
+    row: SalesCycleRow,
+  ): RealtimeSalesCycleRecord<TState> {
+    const state = this.cipher.decryptJson<TState>(
+      {
+        ciphertext: row.state_ciphertext,
+        nonce: row.state_nonce,
+        authTag: row.state_auth_tag,
+        encryptedDek: row.state_encrypted_dek,
+        keyRef: row.state_key_ref,
+        expiresAt: row.expires_at,
+      },
+      this.salesCycleAad(row.page_id, row.conversation_id),
+    );
+    return {
+      conversationId: row.conversation_id,
+      pageId: row.page_id,
+      stateRevision: Number(row.state_revision),
+      state,
+      cartExpiresAt: row.cart_expires_at,
+      expiresAt: row.expires_at,
     };
   }
 

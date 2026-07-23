@@ -140,12 +140,42 @@ function addCart(state = createSalesCycleRuntimeState("conversation-hash", routi
     trustedPorts: trustedPorts(),
   });
   if (opened.status !== "APPLIED") throw new Error(opened.status);
-  const ready = applySalesCycleCommand({ state: opened.state, expectedRevision: opened.state.revision, command: { kind: "CART_READY", commandId: "cart-ready", expectedCartVersion: 1 }, now, trustedPorts: trustedPorts() });
+  const captured = applySalesCycleCommand({
+    state: opened.state,
+    expectedRevision: opened.state.revision,
+    command: {
+      kind: "CHECKOUT_DETAILS_CAPTURED",
+      commandId: "checkout-details",
+      details: {
+        fullName: recipient.fullName,
+        phone: recipient.phone,
+        address: recipient.address,
+        paymentMethod: "COD",
+      },
+    },
+    now,
+  });
+  if (captured.status !== "APPLIED") throw new Error(captured.status);
+  const ready = applySalesCycleCommand({ state: captured.state, expectedRevision: captured.state.revision, command: { kind: "CART_READY", commandId: "cart-ready", expectedCartVersion: 1 }, now, trustedPorts: trustedPorts() });
   if (ready.status !== "APPLIED") throw new Error(ready.status);
   return ready.state;
 }
 
 function addPreview(state: SalesCycleRuntimeState, payment: "COD" | "BANK_TRANSFER" = "COD") {
+  if (state.checkoutDraft?.paymentMethod !== payment) {
+    const captured = applySalesCycleCommand({
+      state,
+      expectedRevision: state.revision,
+      command: {
+        kind: "CHECKOUT_DETAILS_CAPTURED",
+        commandId: `checkout-payment-${payment}`,
+        details: { paymentMethod: payment },
+      },
+      now,
+    });
+    if (captured.status !== "APPLIED") throw new Error(captured.status);
+    state = captured.state;
+  }
   const result = applySalesCycleCommand({ state, expectedRevision: state.revision, command: { kind: "PREVIEW_CREATED", commandId: "preview-1", preview: preview(payment) }, now });
   if (result.status !== "APPLIED") throw new Error(result.status);
   return result.state;

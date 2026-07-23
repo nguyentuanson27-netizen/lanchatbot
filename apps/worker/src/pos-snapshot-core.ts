@@ -26,6 +26,8 @@ export interface PosProduct {
   readonly shop_alias: string;
   readonly brand: string;
   readonly rule_type: string;
+  readonly allow_mixed_sizes?: boolean;
+  readonly allow_component_sale?: boolean;
 }
 
 export interface PosComponentMapping {
@@ -126,6 +128,11 @@ export interface PosCatalogSnapshot {
   synced_at: string;
   data_status: string;
   fulfillment_policy: PosFulfillmentPolicy | null;
+  selling_rules: {
+    allow_mixed_sizes: boolean;
+    allow_component_sale: boolean;
+    source_version: string;
+  };
   shipping_eta: Readonly<Record<string, PosShippingRegion>>;
   offers: Record<string, {
     list_price: number | null;
@@ -274,6 +281,8 @@ export function buildSheetConfig(tabs: PosSheetTabs, secretMap: PosShopsSecretMa
         shop_alias: posNorm(row.SHOP_ALIAS || row.SHOP || "LANA"),
         brand: txt(row.BRAND || "lanadesign"),
         rule_type: posNorm(row.RULE_TYPE || maSp.slice(0, 2)),
+        allow_mixed_sizes: posBool(row.ALLOW_MIXED_SIZES, false),
+        allow_component_sale: posBool(row.ALLOW_COMPONENT_SALE, false),
       });
     }
   }
@@ -529,6 +538,11 @@ export function buildProductSnapshot(
     synced_at: now,
     data_status: "OK",
     fulfillment_policy: policy,
+    selling_rules: {
+      allow_mixed_sizes: product.allow_mixed_sizes ?? false,
+      allow_component_sale: product.allow_component_sale ?? false,
+      source_version: release.catalog_version || "catalog-v2",
+    },
     shipping_eta: shipping,
     offers: {},
   };

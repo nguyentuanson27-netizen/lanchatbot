@@ -47,6 +47,14 @@ export interface SalesCycleRuntimeState {
   readonly cart: { readonly value: CartV1; readonly expiresAt: string } | null;
   readonly commerceContext: { readonly shopId: string; readonly policyRef: VersionedBusinessReferenceV1 } | null;
   readonly negotiation: NegotiationStateV2 | null;
+  /** Encrypted at rest by the production adapter; never copied to analytics. */
+  readonly checkoutDraft: {
+    readonly fullName: string | null;
+    readonly phone: string | null;
+    readonly address: string | null;
+    readonly paymentMethod: "COD" | "BANK_TRANSFER" | null;
+    readonly updatedAt: string;
+  } | null;
   readonly preview: OrderPreviewV1 | null;
   readonly confirmation: PurchaseConfirmationV1 | null;
   readonly processedCommandIds: readonly string[];
@@ -69,6 +77,16 @@ export type SalesCycleCommand =
       readonly expectedCartVersion: number;
       readonly mutationRef: VersionedBusinessReferenceV1;
       readonly mutationReasonCode: Extract<NegotiationEvidenceV2, { intent: "CART_MUTATED" }>["mutationReasonCode"];
+    }
+  | {
+      readonly kind: "CHECKOUT_DETAILS_CAPTURED";
+      readonly commandId: string;
+      readonly details: {
+        readonly fullName?: string;
+        readonly phone?: string;
+        readonly address?: string;
+        readonly paymentMethod?: "COD" | "BANK_TRANSFER";
+      };
     }
   | {
       readonly kind: "NEGOTIATION_EVENT";
@@ -268,6 +286,7 @@ export function createSalesCycleRuntimeState(conversationKey: string, routing: {
     cart: null,
     commerceContext: null,
     negotiation: null,
+    checkoutDraft: null,
     preview: null,
     confirmation: null,
     processedCommandIds: [],
@@ -453,7 +472,42 @@ export function applySalesCycleCommand(input: {
       now,
     });
     if (negotiation.status === "BLOCKED") return { status: "REJECTED", state, reasonCode: `NEGOTIATION_${negotiation.reasonCode}` };
-    const next = withCommand(state, command.commandId, now, { stage: "CART_OPEN", cart: { value: creation.cart, expiresAt: command.expiresAt }, commerceContext: { shopId: draft.shopId, policyRef: draft.policyRef }, negotiation: negotiation.state, preview: null });
+    const next = withCommand(state, command.commandId, now, { stage: "CART_OPEN", cart: { value: creation.cart, expiresAt: command.expiresAt }, commerceContext: { shopId: draft.shopId, policyRef: draft.policyRef }, negotiation: negotiation.state, checkoutDraft: null, preview: null });
+    return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
+  }
+
+  if (command.kind === "CHECKOUT_DETAILS_CAPTURED") {
+    if (state.stage !== "CART_OPEN" && state.stage !== "ORDER_PREVIEW") {
+      return { status: "REJECTED", state, reasonCode: "SALES_STAGE_TRANSITION_INVALID" };
+    }
+    if (!cartAlive(state, now)) {
+      return { status: "REJECTED", state, reasonCode: "CART_EXPIRED_OR_MISSING" };
+    }
+    const details = command.details;
+    const fullName = details.fullName?.trim().replace(/\s+/gu, " ") ?? null;
+    const phone = details.phone?.trim().replace(/\s+/gu, " ") ?? null;
+    const address = details.address?.trim().replace(/\s+/gu, " ") ?? null;
+    if (
+      (fullName !== null && (fullName.length < 2 || fullName.length > 160)) ||
+      (phone !== null && !/^[0-9+][0-9 .()-]{7,24}$/u.test(phone)) ||
+      (address !== null && (address.length < 8 || address.length > 1_000)) ||
+      (fullName === null && phone === null && address === null && details.paymentMethod === undefined)
+    ) {
+      return { status: "REJECTED", state, reasonCode: "CHECKOUT_DETAILS_INVALID" };
+    }
+    const previous = state.checkoutDraft;
+    const checkoutDraft = {
+      fullName: fullName ?? previous?.fullName ?? null,
+      phone: phone ?? previous?.phone ?? null,
+      address: address ?? previous?.address ?? null,
+      paymentMethod: details.paymentMethod ?? previous?.paymentMethod ?? null,
+      updatedAt: now.toISOString(),
+    };
+    const next = withCommand(state, command.commandId, now, {
+      stage: "CART_OPEN",
+      checkoutDraft,
+      preview: null,
+    });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
@@ -533,7 +587,12 @@ export function applySalesCycleCommand(input: {
     const { previewHash: _providedHash, ...hashPayload } = preview.data;
     if (
       preview.data.previewHash !== computeOrderPreviewHash(hashPayload) ||
-      Date.parse(preview.data.expiresAt) > Date.parse(state.cart.expiresAt)
+      Date.parse(preview.data.expiresAt) > Date.parse(state.cart.expiresAt) ||
+      state.checkoutDraft === null ||
+      state.checkoutDraft.fullName !== preview.data.recipient.fullName ||
+      state.checkoutDraft.phone !== preview.data.recipient.phone ||
+      state.checkoutDraft.address !== preview.data.recipient.address ||
+      state.checkoutDraft.paymentMethod !== preview.data.payment.method
     ) {
       return { status: "REJECTED", state, reasonCode: "PREVIEW_INTEGRITY_INVALID" };
     }
