@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-23T07:40:00+07:00",
+  "environment": "production",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "releaseTag": "20260723-realtime-context-handoff-r5",
+  "sourceCodeCommit": "d42c672",
+  "documentationIncludedInReleaseTag": true,
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260723-realtime-context-handoff-r5",
+  "pageAllowlist": ["1198992073286645"],
+  "composeSha256": "4a4b66ef0f19d6873ed1cfcd48cc479c6a56f077f7b9d86f020c245186b81072",
+  "image": {
+    "name": "lana-chatbot-app:realtime-context-handoff-r5",
+    "digest": "sha256:965bc95a3c703e1ab96fb521db0c961bcf639e99776bb340792f191abb2d95f3"
+  },
+  "servicesChanged": ["realtime-worker"],
+  "servicesVerifiedUnchanged": [
+    "api",
+    "delivery-worker",
+    "admin-api",
+    "admin-web",
+    "admin-simulation-worker",
+    "n8n"
+  ],
+  "migrations": [],
+  "runtimePolicy": {
+    "channel": "PUBLISHED",
+    "activePointers": 3,
+    "pageHardGate": "1198992073286645"
+  },
+  "fixes": {
+    "followUpProductContext": "STATE_EXACT_LOOKUP_WITH_NEW_CODE_CONFLICT_GUARD",
+    "safeFallbackPrecedence": "RESOLVED_THEN_PROPOSAL_THEN_STATE",
+    "afterSales": "ONE_HOLDING_REPLY_THEN_VAN_DON_HANDOFF",
+    "otherHandoffs": "SILENT_HANDOFF",
+    "afterSalesProductSearch": "SHORT_CIRCUITED"
+  },
+  "verification": {
+    "cleanDockerBuild": "PASS",
+    "workerTests": "145_PASS",
+    "workerTypecheck": "PASS",
+    "followUpGenerationRegression": "PASS",
+    "afterSalesHoldingReplyRegression": "PASS",
+    "generalSilentHandoffRegression": "PASS"
+  },
+  "rollback": {
+    "previousRelease": "/opt/lana-chatbot/releases/20260722-runtime-policy-published-r4",
+    "previousRealtimeImage": "lana-chatbot-app:runtime-policy-published-r4",
+    "dataDeletionRequired": false
+  }
+}

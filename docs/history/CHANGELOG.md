@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-23 — realtime context and after-sales handoff r5
+
+- Giữ sản phẩm đang xem qua các generation bằng exact lookup từ `state.currentProductId` cho câu hỏi tiếp nối; chặn fallback về sản phẩm cũ khi khách nhập mã mới không hợp lệ.
+- Giữ `proposal.productId` trong safe fallback thay vì ép về `null`.
+- Nối `handoff-fallback-v2` vào realtime: chỉ hậu mãi nhận một câu giữ chân, các handoff khác vẫn im lặng.
+- Hậu mãi ngắt trước product search/model; holding reply, handoff state và tag Vận Đơn cùng đi qua atomic commit/outbox có generation guard.
+- Clean build, `145/145` worker test và worker typecheck đạt; không có migration.
+
 ## 2026-07-22 — runtime policy published r4
 
 - Owner chủ động phát hành dù simulation trước đó là `INSUFFICIENT_EVIDENCE`; quyết định override được ghi trong baseline và manifest.
