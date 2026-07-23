@@ -3,6 +3,72 @@ import { LocalEnvelopeCipher } from "./envelope-cipher.js";
 import { PostgresRealtimeRuntimeStore } from "./realtime-runtime.js";
 
 describe("PostgresRealtimeRuntimeStore handoff commit", () => {
+  it("schedules text immediately and delays image rows in the same ordered plan", async () => {
+    const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
+    const client = {
+      async query(sql: string, values: readonly unknown[] = []) {
+        calls.push({ sql, values });
+        if (sql.includes("SELECT routing_owner")) {
+          return {
+            rowCount: 1,
+            rows: [{
+              routing_owner: "APP",
+              app_send_enabled: true,
+              kill_switch: false,
+            }],
+          };
+        }
+        if (sql.includes("SELECT conversation_owner")) {
+          return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+        }
+        if (sql.includes("UPDATE conversations")) {
+          return { rowCount: 1, rows: [] };
+        }
+        if (sql.includes("INSERT INTO meta_outbox")) {
+          return { rowCount: 1, rows: [] };
+        }
+        return { rowCount: 0, rows: [] };
+      },
+      release() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = {
+      async connect() { return client; },
+      async end() {},
+    };
+    const now = new Date("2026-07-23T05:00:00.000Z");
+    const result = await store.commit({
+      pageId: "page-1",
+      customerHash: "hash",
+      conversationId: "33333333-3333-4333-8333-333333333333",
+      expectedStateVersion: 0,
+      state: { revision: 1, routingOwner: "APP", conversationOwner: "BOT" },
+      metaPlan: {
+        replyPlanId: "10000000-0000-4000-8000-000000000001",
+        responseGroupId: "10000000-0000-4000-8000-000000000002",
+        recipientId: "customer-1",
+        imageDelayMs: 1_500,
+        messages: [
+          { kind: "TEXT", text: "Nội dung báo giá" },
+          { kind: "IMAGE", imageUrl: "https://cdn.example/product.jpg" },
+        ],
+      },
+    }, now);
+
+    expect(result.metaOutboxCreated).toBe(2);
+    const inserts = calls.filter((call) => call.sql.includes("INSERT INTO meta_outbox"));
+    expect(inserts).toHaveLength(2);
+    expect(inserts[0]?.values[17]).toBe(0);
+    expect(inserts[0]?.values[18]).toEqual(now);
+    expect(inserts[1]?.values[17]).toBe(1);
+    expect(inserts[1]?.values[18]).toEqual(
+      new Date("2026-07-23T05:00:01.500Z"),
+    );
+  });
+
   it("drops a stale decision before state or outbox commit when a newer inbound advanced the generation", async () => {
     const calls: string[] = [];
     const client = {

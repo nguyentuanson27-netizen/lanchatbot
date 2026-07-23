@@ -5,8 +5,8 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260723-sales-cycle-production-r6`.
-- Compose SHA-256: `da3da8e9f22d8207f414d42dae0f5ff9918f743d6470fa4c8dbc5360a9dde650`.
+- Current release: `/opt/lana-chatbot/releases/20260723-product-copy-text-first-r7`.
+- Compose SHA-256: `a743e3070d8f910e99542ba671018c06dd17ba10d4a1bde4646da02897643c42`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất: `0017_sales_cycle_runtime`.
@@ -14,7 +14,16 @@
 
 Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời điểm kiểm kê. Danh sách image digest đầy đủ nằm trong release manifest.
 
-Admin API, Admin Web và Admin Simulation Worker đang chạy image `lana-chatbot-app:runtime-policy-published-r4`. Realtime và POS snapshot worker chạy image `lana-chatbot-app:sales-cycle-production-r6` (`sha256:cae918d5dc9d505ccdd88b670abdc5b337b169cabe36cd33220fd6c475a054d2`). API webhook và delivery worker không đổi; n8n không bị restart trong release này.
+Admin API, Admin Web và Admin Simulation Worker đang chạy image `lana-chatbot-app:runtime-policy-published-r4`. Realtime chạy image `lana-chatbot-app:product-copy-text-first-r7` (`sha256:f8c26c5bb0e87e0bc49da55ea9caf4e6174a3e5108f315d49907f5668a206c44`); POS snapshot worker giữ image `lana-chatbot-app:sales-cycle-production-r6`. API webhook, delivery worker và n8n không đổi.
+
+## Product copy và thứ tự gửi r7
+
+- Qdrant adapter giữ `title` và `DESCRIPTION_XML`; giá/tồn/size/ETA vẫn chỉ đến từ facts nghiệp vụ đã xác minh.
+- Báo giá ưu tiên tên sản phẩm, chỉ dùng `mẫu <mã>` khi title không có tên thực.
+- Câu form/chất liệu được dựng có kiểm soát từ `DESCRIPTION_XML`, có fallback an toàn khi metadata thiếu.
+- Meta Outbox ghi text trước ảnh. Ảnh có `next_attempt_at` trễ 1,5 giây và sequence guard bảo đảm không vượt text.
+- Realtime worker healthy trên page duy nhất `1198992073286645`; POS snapshot và n8n không bị restart.
+- Toàn bộ monorepo check đạt; 44 test mục tiêu và 152 test worker đều pass. Không có migration mới.
 
 ## Runtime Policy published
 

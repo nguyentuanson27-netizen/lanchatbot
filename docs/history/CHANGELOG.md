@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-23 — product copy và text-first delivery r7
+
+- Báo giá dùng tên sản phẩm thay cho mã khi Qdrant có title hợp lệ.
+- Đưa `DESCRIPTION_XML` vào stable product document để viết câu form/chất liệu tự nhiên hơn; không dùng XML làm nguồn giá/tồn/size/ETA.
+- Đổi thứ tự Meta Outbox thành text trước ảnh; ảnh được lập lịch sau 1,5 giây và vẫn tuân theo sequence guard.
+- Realtime worker chuyển sang image r7 và healthy; POS snapshot giữ r6, API/delivery/n8n không đổi.
+- Toàn bộ monorepo check, 44 test mục tiêu và 152 test worker đạt; không có migration.
+
 ## 2026-07-23 — sales cycle production r6
 
 - Nối cart, negotiation và checkout thật vào realtime production; state/outbox/tag intent được commit atomically với CAS.

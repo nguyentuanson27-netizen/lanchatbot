@@ -416,6 +416,12 @@ const runner = new RealtimeRunner(
       process.env.PANCAKE_CLOSED_ORDER_TAG_ID?.trim() || "",
     salesCycleEnabled:
       process.env.SALES_CYCLE_ENABLED === "true",
+    imageDelayMs: boundedInteger(
+      "REALTIME_IMAGE_DELAY_MS",
+      1_500,
+      0,
+      5_000,
+    ),
     promptVersion:
       process.env.REALTIME_PROMPT_VERSION?.trim() || "lana-realtime-v1",
     metaAppId: required("META_APP_ID"),

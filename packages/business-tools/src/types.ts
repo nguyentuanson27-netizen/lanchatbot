@@ -92,6 +92,9 @@ export interface StableProductDocument {
   canonicalCode: string;
   aliases: readonly string[];
   title: string;
+  /** Mô tả webstore đã làm sạch ở bước ingestion; chỉ dùng làm ngữ cảnh diễn đạt,
+   * không phải nguồn giá, tồn, size hoặc chính sách. */
+  descriptionXml?: string;
   colors: readonly string[];
   materials: readonly string[];
   silhouettes: readonly string[];

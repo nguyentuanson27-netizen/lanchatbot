@@ -48,6 +48,8 @@ describe("Vertex shadow client", () => {
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Toi da 2 cau ngan");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("ben em bao chuan form");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Khong ghi chu [ATTACH_IMAGES:");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("gui text truoc");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("sau do moi gui anh");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Chi cho em xin chieu cao can nang");
     expect(GROUNDED_SYSTEM_INSTRUCTION).not.toContain("699");
     expect(GROUNDED_SYSTEM_INSTRUCTION).not.toContain("freeship 20");
