@@ -51,6 +51,8 @@ describe("pre-sale customer-care policy", () => {
     ["shop có hỗ trợ đổi size không", "EXCHANGE_SIZE"],
     ["có được đổi mẫu khác không", "EXCHANGE_MODEL"],
     ["có được đổi màu không", "EXCHANGE_COLOR"],
+    ["đổi sang mẫu khác được không", "EXCHANGE_MODEL"],
+    ["đổi màu khác được không", "EXCHANGE_COLOR"],
     ["có được mặc thử không", "TRY_ON"],
     ["không nhận hàng có mất phí ship không", "REFUSED_PARCEL_FEE"],
     ["giá có giống shopee không", "SHOPEE_PRICE"],

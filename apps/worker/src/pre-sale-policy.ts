@@ -47,12 +47,12 @@ export function classifyPreSalePolicyIntent(value: string): PreSalePolicyIntent 
   if (/\b(phi ship|phi van chuyen|ship bao nhieu|tien ship)\b/u.test(text)) return "SHIPPING_FEE";
   if (/\b(giao hang bao lau|bao lau nhan|may ngay nhan|khi nao nhan|thoi gian giao)\b/u.test(text)) return "DELIVERY_TIME";
 
-  const asksTerms = /\b(chinh sach|quy dinh|dieu kien|co duoc|co ho tro|the nao|ra sao|bao lau)\b/u.test(text);
+  const asksTerms = /\b(chinh sach|quy dinh|dieu kien|co duoc|duoc khong|duoc ko|duoc k|co ho tro|the nao|ra sao|bao lau)\b/u.test(text);
   if (/\b(doi tra)\b/u.test(text) && asksTerms) return "EXCHANGE_AND_RETURN";
   if (/\b(tra hang|hoan tien)\b/u.test(text) && asksTerms) return "RETURN_AND_REFUND";
   if (/\b(doi size|doi kich co|mac khong vua)\b/u.test(text) && asksTerms) return "EXCHANGE_SIZE";
-  if (/đổi\s+mẫu|đổi\s+sản phẩm\s+khác|đổi\s+ngang\s+giá/iu.test(vietnamese) && asksTerms) return "EXCHANGE_MODEL";
-  if (/đổi\s+màu/iu.test(vietnamese) && asksTerms) return "EXCHANGE_COLOR";
+  if (/đổi\s+(?:sang\s+)?mẫu|đổi\s+sản phẩm\s+khác|đổi\s+ngang\s+giá/iu.test(vietnamese) && asksTerms) return "EXCHANGE_MODEL";
+  if (/đổi\s+(?:sang\s+)?màu/iu.test(vietnamese) && asksTerms) return "EXCHANGE_COLOR";
   if (/\b(doi hang)\b/u.test(text) && asksTerms) return "EXCHANGE_MODEL";
   if (/\b(bao hanh|chinh sach|quy dinh)\b/u.test(text)) return "UNSUPPORTED_POLICY";
   return null;
