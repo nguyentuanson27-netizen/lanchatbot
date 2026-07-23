@@ -14,6 +14,7 @@ import {
 import type {
   AgentProposalV1,
   BusinessFactEnvelopeV1,
+  HandoffReasonV2,
   InboundMessageV1,
 } from "@lana/contracts";
 import type {
@@ -30,7 +31,9 @@ import {
   applyInboundEvent,
   applySilentHandoff,
   createConversationState,
+  decideHandoffFallbackV2,
   type ConversationState,
+  type HandoffDirective,
   type HandoffReason,
   type InboundConversationEvent,
   type ObjectionType,
@@ -216,6 +219,70 @@ export function explicitCustomerImageIntent(value: string): CustomerImageIntent 
   // Không nói loại nào thì phải có động từ xin/xem, để câu kiểu "ảnh này đẹp quá"
   // không bị hiểu thành yêu cầu gửi ảnh.
   return asksFor ? "GENERIC" : null;
+}
+
+/**
+ * Reuses the verified product already stored in conversation state only for a
+ * genuine product follow-up. An explicit/new product code always wins and an
+ * unknown new code must never silently fall back to the old product.
+ */
+export function currentProductContinuationId(
+  value: string,
+  currentProductId: string | null,
+): string | null {
+  if (!currentProductId) return null;
+  if (productCodeOnly(value) !== null || extractAdProductCodes(value).length > 0) {
+    return null;
+  }
+  const text = asciiFold(value);
+  const refersToCurrentProduct =
+    explicitCustomerImageIntent(value) !== null ||
+    explicitCustomerBusinessIntent(value) !== null ||
+    /\b(mau nay|sp nay|san pham nay|set nay|ao nay|vay nay|quan nay|cai nay|em nay|mau do|sp do)\b/u.test(text) ||
+    /\b(form|dang|chat|vai|mau sac|mac len|phoi do|co dep|co hop)\b/u.test(text);
+  return refersToCurrentProduct ? normalizeProductCode(currentProductId) : null;
+}
+
+function afterSalesReasonV2(reason: HandoffReason): HandoffReasonV2 {
+  return reason === "POST_SALE" ? "AFTER_SALES_REQUEST" : reason as HandoffReasonV2;
+}
+
+function postSaleHandoffReason(value: string): HandoffReason {
+  const text = asciiFold(value);
+  if (/\b(doi dia chi|doi sdt|doi so dien thoai|sua dia chi|thay doi thong tin giao)\b/u.test(text)) return "CHANGE_DELIVERY_INFO";
+  if (/\b(huy don|khong lay don)\b/u.test(text)) return "CANCEL_ORDER";
+  if (/\b(hoan tien|refund)\b/u.test(text)) return "REFUND";
+  if (/\b(doi hang|doi size|doi mau)\b/u.test(text)) return "EXCHANGE";
+  if (/\b(tra hang|return)\b/u.test(text)) return "RETURN";
+  if (/\b(loi|rach|bung chi|hong|lem|defect)\b/u.test(text)) return "DEFECT";
+  if (/\b(bao hanh|warranty)\b/u.test(text)) return "WARRANTY";
+  if (/\b(sai hang|thieu hang|thieu mon|giao nham)\b/u.test(text)) return "WRONG_OR_MISSING_ITEM";
+  if (/\b(cham giao|tre giao|qua ngay|chua giao)\b/u.test(text)) return "DELIVERY_DELAY";
+  if (/\b(van don|ma van don|tracking|theo doi don)\b/u.test(text)) return "DELIVERY_TRACKING";
+  if (/\b(chuyen khoan|thanh toan|ck)\b/u.test(text)) return "PAYMENT_AFTER_ORDER";
+  if (/\b(don dau|don hang dau|trang thai don|don cua chi)\b/u.test(text)) return "ORDER_STATUS";
+  return "POST_SALE";
+}
+
+/** Only after-sales receives one holding reply; every other handoff stays silent. */
+export function holdingMessagesForHandoff(
+  message: Pick<InboundMessageV1, "eventKey" | "occurredAt">,
+  handoff: HandoffDirective | null,
+): readonly RealtimeMetaMessageUnit[] {
+  if (handoff?.category !== "POST_SALE") return [];
+  const observedAt = new Date(message.occurredAt).toISOString();
+  const decision = decideHandoffFallbackV2({
+    schemaVersion: 2,
+    commandId: `realtime:${message.eventKey}:after-sales`,
+    decidedAt: observedAt,
+    trigger: { kind: "REASON_CODE", reason: afterSalesReasonV2(handoff.reason) },
+    evidence: [{
+      source: "INBOUND_MESSAGE",
+      reference: message.eventKey,
+      observedAt,
+    }],
+  });
+  return decision.customerMessages.map((text) => ({ kind: "TEXT", text }));
 }
 
 export function isResolvedProductCodeOnly(
@@ -481,6 +548,14 @@ function safeModelHandoffFallback(
   };
 }
 
+export function continuationProductId(
+  resolvedProductId: string | null,
+  proposalProductId: string | null,
+  currentProductId: string | null,
+): string | null {
+  return resolvedProductId ?? proposalProductId ?? currentProductId;
+}
+
 export interface RealtimeRuntimePort {
   isOwnMetaMessage?(
     pageId: string,
@@ -583,7 +658,7 @@ interface ProductResolution {
   readonly primary: StableProductDocument | null;
   readonly products: readonly StableProductDocument[];
   readonly media: MediaAggregation;
-  readonly origin: "NONE" | "TEXT_CODE" | "TEXT_SEMANTIC" | "ADS" | "MEDIA" | "SELECTION";
+  readonly origin: "NONE" | "TEXT_CODE" | "TEXT_SEMANTIC" | "ADS" | "MEDIA" | "SELECTION" | "STATE";
   readonly extractedAdProductId: string | null;
 }
 
@@ -1311,7 +1386,11 @@ export class RealtimeRunner {
         ) {
           proposal = safeModelHandoffFallback(
             proposal,
-            resolvedProduct?.productId ?? null,
+            continuationProductId(
+              resolvedProduct?.productId ?? null,
+              proposal.productId,
+              nextState.currentProductId,
+            ),
           );
           guarded = guardAgentProposal({
             proposal,
@@ -1350,6 +1429,14 @@ export class RealtimeRunner {
           ];
         }
       }
+    }
+
+    if (
+      metaMessages.length === 0 &&
+      this.options.mode === "LIVE" &&
+      this.options.sendEnabled
+    ) {
+      metaMessages = [...holdingMessagesForHandoff(message, handoff)];
     }
 
     const planSeed = [
@@ -1578,6 +1665,12 @@ export class RealtimeRunner {
       };
     }
 
+    const stateProductId = currentProductContinuationId(text, state.currentProductId);
+    if (stateProductId) {
+      const product = await this.exactProduct(stateProductId);
+      if (product) return this.singleResolution(product, "STATE");
+    }
+
     if (text) {
       const result = await this.productSearch.searchText(text);
       if (result.status === "MATCHED") {
@@ -1643,7 +1736,7 @@ export class RealtimeRunner {
       actor: message.isEcho ? "HUMAN" : "CUSTOMER",
       journey: postSale ? "POST_SALE" : "PRE_SALE",
       requestedHandoffReason: postSale
-        ? "POST_SALE"
+        ? postSaleHandoffReason(message.text ?? "")
         : containsCustomerUrl(message.text ?? "")
           ? "SENSITIVE_CASE"
         : humanRequest
