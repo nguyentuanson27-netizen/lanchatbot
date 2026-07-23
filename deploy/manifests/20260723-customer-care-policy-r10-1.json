@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-23T14:52:00+07:00",
+  "environment": "production",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceCommit": "e43f89c",
+  "releaseTag": "20260723-customer-care-policy-r10-1",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260723-customer-care-policy-r10-1",
+  "pageAllowlist": ["1198992073286645"],
+  "images": {
+    "realtime": {
+      "name": "lana-chatbot-app:customer-care-policy-r10-1",
+      "digest": "sha256:0efa1bed32e62ba6a32cfb8b3e8a61fbfe3b7427c30cef014adab53f90bfbe13"
+    },
+    "admin": {
+      "name": "lana-chatbot-app:customer-care-policy-r10"
+    }
+  },
+  "composeSha256": "5d7f8055be081631de1954aa33f867c5d84d94271b52d7d758354bcfd3765d12",
+  "servicesChanged": [
+    "realtime-worker",
+    "admin-api",
+    "admin-simulation-worker",
+    "admin-web"
+  ],
+  "policy": {
+    "artifactKey": "lana.shop-policy",
+    "versionId": "24400b36-6d12-4e3c-b0ca-cf41014ed0d8",
+    "versionNumber": 2,
+    "lifecycle": "PUBLISHED",
+    "sourceVersion": "shop-policy-customer-care-v2",
+    "channel": "PUBLISHED"
+  },
+  "verification": {
+    "monorepoCheck": "PASS",
+    "workerTestsHotfix": "181_PASS",
+    "workerTypecheck": "PASS",
+    "runtimePolicyResolution": "PASS",
+    "preSaleFaqSmoke": "PASS",
+    "afterSalesRoutingPreserved": true,
+    "realtimeHealth": "PASS",
+    "adminHealth": "PASS",
+    "n8nRestarted": false,
+    "webhookApiRestarted": false,
+    "posSnapshotRestarted": false,
+    "p23WorkersRestarted": false
+  },
+  "migrations": [],
+  "rollback": {
+    "previousRelease": "/opt/lana-chatbot/releases/20260723-customer-care-policy-r10",
+    "previousShopPolicyVersionId": "7736032c-901f-4208-9016-4087e1d16aed",
+    "dataDeletionRequired": false
+  }
+}

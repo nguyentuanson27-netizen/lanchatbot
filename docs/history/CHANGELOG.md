@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-23 — customer care policy r10.1
+
+- Mở rộng `SHOP_POLICY` bằng policy chăm sóc khách hàng có cấu trúc, version/audit/publish qua Admin; không nhúng nội dung FAQ vào prompt.
+- Thêm câu trả lời deterministic cho chính sách đổi/trả, phí đổi, mặc thử, từ chối nhận, giá Shopee, độ giống ảnh và hướng dẫn giặt.
+- Phân loại trước mua trước product search/model; hậu mãi thật vẫn dùng holding reply, handoff và tag Vận Đơn.
+- Sửa hotfix nhận đúng cách hỏi tự nhiên “đổi sang mẫu khác được không” và “đổi màu khác được không”.
+- `SHOP_POLICY` v2 được publish cho page test; smoke resolver live đạt, runtime r10.1 và ba dịch vụ Admin r10 healthy, restart count 0.
+- Full monorepo check đạt; hotfix đạt `181/181` worker tests và typecheck. n8n, API webhook, POS snapshot và P2.3 không bị restart.
+
 ## 2026-07-23 — Sheets, media intent và policy routing r9
 
 - Retry Google Sheets ba lần với backoff 2–5–15 giây; cycle P2.3B thất bại được chạy lại sau 5 phút thay vì chờ 24 giờ.

@@ -5,7 +5,7 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260723-sheets-media-policy-routing-r9-1`.
+- Current release: `/opt/lana-chatbot/releases/20260723-customer-care-policy-r10-1`.
 - Compose SHA-256: `5d7f8055be081631de1954aa33f867c5d84d94271b52d7d758354bcfd3765d12`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
@@ -14,7 +14,19 @@
 
 Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời điểm kiểm kê. Danh sách image digest đầy đủ nằm trong release manifest.
 
-Admin Web, realtime và P2.3B metadata staging đang chạy image `lana-chatbot-app:sheets-media-policy-routing-r9` (`sha256:b1876ac7aabcc043b1a99d3b85cf508743cbc615b140573da5a57fcd9133e727`). Admin API và Admin Simulation Worker giữ image `lana-chatbot-app:runtime-policy-published-r4`; POS snapshot worker giữ image `lana-chatbot-app:sales-cycle-production-r6`. API webhook, delivery worker và n8n không đổi.
+Realtime đang chạy image `lana-chatbot-app:customer-care-policy-r10-1` (`sha256:0efa1bed32e62ba6a32cfb8b3e8a61fbfe3b7427c30cef014adab53f90bfbe13`). Admin Web, Admin API và Admin Simulation Worker chạy image `lana-chatbot-app:customer-care-policy-r10`; P2.3B giữ image r9 và POS snapshot giữ image r6. API webhook, delivery worker và n8n không đổi.
+
+## Customer care policy r10.1
+
+- `SHOP_POLICY` version 2 (`24400b36-6d12-4e3c-b0ca-cf41014ed0d8`) đã `PUBLISHED` cho page `1198992073286645`; source version là `shop-policy-customer-care-v2`.
+- Policy cấu trúc hóa đổi size/màu/mẫu trong 15 ngày từ lúc nhận, một lần mỗi đơn, phí hai chiều tổng 30.000đ; hàng giảm từ 30% chỉ đổi size/màu.
+- Đổi mẫu dùng giá niêm yết sản phẩm mới, không dùng sale hiện hành và khách bù chênh lệch dương. Đổi qua hình thức giao mẫu mới rồi nhận lại mẫu cũ.
+- Trả hàng chỉ áp dụng lỗi vải, lỗi đường may do sản xuất hoặc giao sai; báo trong 5 ngày, shop chịu 100% phí ship và hoàn tiền sau 1–3 ngày làm việc kể từ khi xác nhận lỗi hợp lệ.
+- FAQ có cấu trúc gồm ướm hàng khi nhận nhưng không mặc thử, phí từ chối nhận 30.000đ, chênh giá Shopee do trợ giá/voucher, sai khác màu do ánh sáng/màn hình và hướng dẫn giặt.
+- Câu hỏi quy định trước mua ngắt trước product search/model và được renderer deterministic trả lời từ policy `LIVE_OUTBOUND`. Thiếu policy tin cậy thì fail-closed sang Nhân viên, không tự suy đoán.
+- Yêu cầu có bằng chứng sau mua vẫn đi nhánh hậu mãi: một câu giữ chân, handoff và tag Vận Đơn. Các handoff còn lại giữ hành vi im lặng hiện hành.
+- Smoke live đã xác minh “đổi trả”, “đổi size”, “đổi sang mẫu khác”, “đổi màu khác”, “mặc thử”, giá Shopee và giặt máy. Hai mẫu sau mua được xác nhận không bị classifier policy giữ lại.
+- Full monorepo check của r10 đạt; hotfix r10.1 đạt `181/181` worker tests và worker typecheck. Không có migration mới.
 
 ## Sheets, media intent và policy routing r9
 
