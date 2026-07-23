@@ -314,6 +314,52 @@ services:
         max-size: "20m"
         max-file: "5"
 
+  pos-snapshot-worker:
+    image: ${POS_SNAPSHOT_IMAGE:-lana-chatbot-app:pos-snapshot-v1}
+    container_name: lana-chatbot-pos-snapshot-worker
+    restart: unless-stopped
+    command: ["node", "apps/worker/dist/pos-snapshot-server.js"]
+    environment:
+      NODE_ENV: production
+      POS_WORKER_ID: pos-snapshot-worker-1
+      POS_SYNC_INTERVAL_MS: "${POS_SYNC_INTERVAL_MS:-1800000}"
+      DATA_INGESTION_V2_SHEET_ID: "${DATA_INGESTION_V2_SHEET_ID:-1VGNU55l9wcDh5RFV07f6JdiV7__FM9uGaVCDThUUgS0}"
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      CATALOG_REDIS_TTL_SECONDS: "${CATALOG_REDIS_TTL_SECONDS:-172800}"
+      PANCAKE_POS_SHOPS_JSON_FILE: /run/secrets/pancake_pos_shops
+      POS_SHEETS_WRITEBACK_ENABLED: "false"
+      GOOGLE_SHEETS_CREDENTIAL_FILE: /run/secrets/vertex_google_api
+      PANCAKE_POS_BASE_URL: https://pos.pages.fm/api/v1
+      BATCH_STATUS_DATABASE_URL_FILE: /run/secrets/batch_status_database_url
+    secrets:
+      - batch_status_database_url
+      - pancake_pos_shops
+      - vertex_google_api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "try{process.kill(1,0)}catch{process.exit(1)}"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
   media-worker:
     build:
       context: ..
@@ -759,3 +805,7 @@ secrets:
     file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/admin_internal_auth_secret
   media_worker_key:
     file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/media_worker_key
+  batch_status_database_url:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/batch_status_database_url
+  pancake_pos_shops:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/pancake_pos_shops
