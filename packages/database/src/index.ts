@@ -105,6 +105,7 @@ export {
 } from "./runtime-policy.js";
 export {
   PostgresSizeChartExtractionStore,
+  type SizeChartExtractionLookupInput,
   type StageSizeChartArtifactInput,
   type StageSizeChartArtifactResult,
 } from "./size-chart-extraction.js";

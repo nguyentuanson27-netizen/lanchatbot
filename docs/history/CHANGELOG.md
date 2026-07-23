@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-07-24 — Size Chart idempotent retry hotfix r13.3
+
+- Kiểm tra `parent_product_id + image_sha256 + extractor_version` trước khi tải ảnh và gọi Vertex.
+- Chu kỳ retry bỏ qua extraction đã tồn tại, chỉ gọi lại đúng các ảnh lỗi tạm thời.
+- r13.2 không được deploy; r13.3 thay thế để tránh gọi Vertex lặp và chạm quota.
+
 ## 2026-07-24 — Size Chart retry hotfix r13.2
 
 - Scheduler retry sau 5 phút khi còn lỗi tạm thời như Vertex 429/5xx hoặc lỗi mạng.

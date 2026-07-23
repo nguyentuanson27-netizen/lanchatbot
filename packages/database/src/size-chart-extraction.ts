@@ -20,6 +20,12 @@ export interface StageSizeChartArtifactResult {
   readonly versionId: string | null;
 }
 
+export interface SizeChartExtractionLookupInput {
+  readonly parentProductId: string;
+  readonly imageSha256: string;
+  readonly extractorVersion: string;
+}
+
 const canonicalize = (value: unknown): unknown => {
   if (Array.isArray(value)) return value.map(canonicalize);
   if (value && typeof value === "object") {
@@ -43,6 +49,17 @@ export class PostgresSizeChartExtractionStore {
   constructor(connectionString: string) {
     if (!connectionString.trim()) throw new Error("SIZE_CHART_DATABASE_URL_REQUIRED");
     this.pool = new Pool({ connectionString, max: 2, idleTimeoutMillis: 30_000 });
+  }
+
+  async exists(input: SizeChartExtractionLookupInput): Promise<boolean> {
+    const result = await this.pool.query(
+      `SELECT 1
+       FROM size_chart_extractions
+       WHERE parent_product_id = $1 AND image_sha256 = $2 AND extractor_version = $3
+       LIMIT 1`,
+      [input.parentProductId, input.imageSha256, input.extractorVersion],
+    );
+    return Boolean(result.rowCount);
   }
 
   async stage(input: StageSizeChartArtifactInput): Promise<StageSizeChartArtifactResult> {

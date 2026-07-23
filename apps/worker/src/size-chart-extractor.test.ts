@@ -3,6 +3,7 @@ import {
   isSizeChartRegistryRow,
   isRetryableSizeChartError,
   parseExtractedSizeChart,
+  SizeChartExtractionRunner,
 } from "./size-chart-extractor.js";
 
 describe("app-native size chart extraction", () => {
@@ -51,5 +52,38 @@ describe("app-native size chart extraction", () => {
     expect(isRetryableSizeChartError("UND_ERR_CONNECT_TIMEOUT")).toBe(true);
     expect(isRetryableSizeChartError("SIZE_CHART_REVIEW_REQUIRED")).toBe(false);
     expect(isRetryableSizeChartError("ADMIN_SIZE_CHART_BODY_BASIS_REQUIRED")).toBe(false);
+  });
+
+  it("skips image download and Vertex when the immutable extraction already exists", async () => {
+    const runner = new SizeChartExtractionRunner({
+      rows: async () => [{
+        IMAGE_ID: "image-1",
+        MA_SP: "CB182",
+        IMAGE_URL: "https://cdn.example.com/size.jpg",
+        IMAGE_HASH: "a".repeat(64),
+        AI_IMAGE_TYPE: "SIZE_GUIDE",
+        AI_UPDATED_AT: "2026-07-23T00:00:00.000Z",
+        ACTIVE: "TRUE",
+      }],
+      images: {
+        prepare: async () => { throw new Error("IMAGE_PIPELINE_MUST_NOT_RUN"); },
+      } as never,
+      vision: {
+        extract: async () => { throw new Error("VERTEX_MUST_NOT_RUN"); },
+        version: () => "size-chart-v1:test",
+      },
+      store: {
+        exists: async () => true,
+      } as never,
+      extractionVersion: "size-chart-v1:test",
+    });
+
+    await expect(runner.run()).resolves.toMatchObject({
+      selected: 1,
+      created: 0,
+      existed: 1,
+      failed: 0,
+      retryableFailures: 0,
+    });
   });
 });
