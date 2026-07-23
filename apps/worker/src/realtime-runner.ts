@@ -218,7 +218,7 @@ export function explicitCustomerImageIntent(value: string): CustomerImageIntent 
   // Nói rõ loại ảnh thì không cần thêm động từ xin/cho: khách hay nhắn gọn
   // "ảnh chất liệu" hoặc "ảnh mặt sau".
   if (/\b(mat sau|phia sau|dang sau|sau lung|behind|back)\b/u.test(text)) return "BACK";
-  if (/\b(chat lieu|chat vai|can canh|cat can|chi tiet|detail|vai|texture)\b/u.test(text)) return "DETAIL";
+  if (/\b(chat lieu|chat vai|can chat|can vai|can canh|cat can|chi tiet|detail|vai|texture)\b/u.test(text)) return "DETAIL";
   if (/\b(khong nguoi mau|khong co nguoi mau|san pham that|anh that|nguyen ban|flatlay)\b/u.test(text)) {
     return "PRODUCT_ONLY";
   }
@@ -270,9 +270,22 @@ function postSaleHandoffReason(value: string): HandoffReason {
   return "POST_SALE";
 }
 
+export function isPreSalePolicyQuestion(value: string): boolean {
+  const text = asciiFold(value);
+  const existingOrderEvidence =
+    /\b(van don|ma van don|tracking|don (?:hang )?(?:cua|nay|do)|da dat|da chot|da mua|da nhan|moi nhan|nhan hang roi|chua giao|dang giao|giao nham|giao sai|shipper)\b/u.test(text);
+  const asksPolicy =
+    /\b(chinh sach|co duoc|co ho tro|dieu kien|doi tra the nao|doi tra ra sao|bao hanh bao lau|kiem hang|dong kiem|phi ship|phi van chuyen|giao hang bao lau)\b/u.test(text);
+  return asksPolicy && !existingOrderEvidence;
+}
+
 export function isPostSaleRequest(value: string): boolean {
-  return /\b(don|van don|giao hang|doi tra|hoan tien|bao hanh|huy don)\b/u.test(
-    asciiFold(value),
+  const text = asciiFold(value);
+  if (isPreSalePolicyQuestion(value)) return false;
+  return (
+    /\b(van don|ma van don|tracking|don (?:hang )?(?:cua|nay|do)|da dat|da chot|da mua|da nhan|moi nhan|nhan hang roi|chua giao|dang giao|giao nham|giao sai|shipper)\b/u.test(text) ||
+    /\b(doi dia chi|doi sdt|doi so dien thoai|sua dia chi|huy don|hoan tien|refund)\b/u.test(text) ||
+    /\b(cho (?:chi|em|minh) doi|(?:chi|em|minh) (?:muon|can) doi|doi (?:size|mau|hang) (?:cho|cua) (?:chi|em|minh))\b/u.test(text)
   );
 }
 
@@ -1345,7 +1358,8 @@ export class RealtimeRunner {
     }
     const hasCustomerUrl = !message.isEcho && containsCustomerUrl(message.text ?? "");
     const resolution = message.isEcho || hasCustomerUrl ||
-        isPostSaleRequest(message.text ?? "")
+        isPostSaleRequest(message.text ?? "") ||
+        isPreSalePolicyQuestion(message.text ?? "")
       ? this.emptyResolution()
       : await this.resolveProducts(message, state);
     const resolvedProduct = resolution.primary;
@@ -1987,6 +2001,7 @@ export class RealtimeRunner {
   ): InboundConversationEvent {
     const text = (message.text ?? "").toLocaleLowerCase("vi");
     const postSale = isPostSaleRequest(message.text ?? "");
+    const preSalePolicy = isPreSalePolicyQuestion(message.text ?? "");
     const humanRequest = /(nhân viên|người tư vấn|gặp shop|gọi cho)/iu.test(text);
     return {
       eventKey: message.eventKey,
@@ -1997,6 +2012,8 @@ export class RealtimeRunner {
       journey: postSale ? "POST_SALE" : "PRE_SALE",
       requestedHandoffReason: postSale
         ? postSaleHandoffReason(message.text ?? "")
+        : preSalePolicy
+          ? "POLICY_TOOL_ERROR"
         : containsCustomerUrl(message.text ?? "")
           ? "SENSITIVE_CASE"
         : humanRequest

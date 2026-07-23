@@ -380,8 +380,9 @@ describe("catalog and batch worker views", () => {
             {
               worker_type: "P23B_METADATA_STAGING",
               worker_id: "p23b-app-shard0",
-              status: "IDLE",
+              status: "ERROR",
               mode: "WRITE_NEW_ONLY",
+              last_error_code: "SHEETS_HTTP_500",
               last_seen_at: new Date(Date.now() - 3_600_000).toISOString(),
             },
             {
@@ -396,11 +397,12 @@ describe("catalog and batch worker views", () => {
       return Promise.resolve(jsonResponse({ items: [] }));
     }));
     const result = await getOperations();
-    expect(result.services[0]).toMatchObject({ name: "Gắn nhãn ảnh", status: "healthy" });
+    expect(result.services[0]).toMatchObject({ name: "Gắn nhãn ảnh", status: "degraded" });
     expect(result.services[0]?.detail).toContain("WRITE_NEW_ONLY");
+    expect(result.services[0]?.detail).toContain("Lỗi gần nhất: SHEETS_HTTP_500");
     // Im lặng quá một chu kỳ đầy đủ là dấu hiệu worker đã chết, dù trạng thái
     // cuối cùng ghi lại vẫn là IDLE.
-    expect(result.services[1]).toMatchObject({ name: "Đồng bộ giá và tồn", status: "degraded" });
-    expect(result.services[1]?.detail).toContain("Chưa báo cáo quá 26 giờ");
+    expect(result.services[1]).toMatchObject({ name: "Đồng bộ giá và tồn", status: "down" });
+    expect(result.services[1]?.detail).toContain("Không nhận heartbeat quá 26 giờ");
   });
 });

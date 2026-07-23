@@ -11,6 +11,8 @@ export interface GoogleSheetsClientOptions {
   readonly timeoutMs?: number;
   readonly fetchImpl?: typeof fetch;
   readonly now?: () => number;
+  readonly retryDelaysMs?: readonly number[];
+  readonly sleepImpl?: (milliseconds: number) => Promise<void>;
 }
 
 export class GoogleSheetsError extends Error {
@@ -58,6 +60,8 @@ export class GoogleSheetsClient {
     timeoutMs: number;
     fetchImpl: typeof fetch;
     now: () => number;
+    retryDelaysMs: readonly number[];
+    sleepImpl: (milliseconds: number) => Promise<void>;
   };
 
   private accessToken: { value: string; expiresAt: number } | null = null;
@@ -71,6 +75,11 @@ export class GoogleSheetsClient {
       timeoutMs: Math.max(5_000, Math.min(180_000, options.timeoutMs ?? 120_000)),
       fetchImpl: options.fetchImpl ?? fetch,
       now: options.now ?? (() => Date.now()),
+      retryDelaysMs: (options.retryDelaysMs ?? [2_000, 5_000, 15_000])
+        .map((value) => Math.max(0, Math.min(60_000, Math.trunc(value))))
+        .slice(0, 3),
+      sleepImpl: options.sleepImpl ?? ((milliseconds) =>
+        new Promise((resolve) => setTimeout(resolve, milliseconds))),
     };
   }
 
@@ -104,21 +113,45 @@ export class GoogleSheetsClient {
     return body.access_token;
   }
 
-  private async request(url: string, init: RequestInit): Promise<unknown> {
-    const token = await this.token();
-    const response = await this.options.fetchImpl(url, {
-      ...init,
-      headers: {
-        ...(init.headers as Record<string, string> | undefined),
-        authorization: `Bearer ${token}`,
-      },
-      signal: AbortSignal.timeout(this.options.timeoutMs),
-    });
-    if (!response.ok) {
-      const retryable = response.status === 429 || response.status >= 500;
-      throw new GoogleSheetsError(`SHEETS_HTTP_${response.status}`, retryable);
+  private async request(
+    url: string,
+    init: RequestInit,
+    retrySafe = true,
+  ): Promise<unknown> {
+    let retryIndex = 0;
+    while (true) {
+      try {
+        const token = await this.token();
+        const response = await this.options.fetchImpl(url, {
+          ...init,
+          headers: {
+            ...(init.headers as Record<string, string> | undefined),
+            authorization: `Bearer ${token}`,
+          },
+          signal: AbortSignal.timeout(this.options.timeoutMs),
+        });
+        if (!response.ok) {
+          const retryable = response.status === 429 || response.status >= 500;
+          throw new GoogleSheetsError(`SHEETS_HTTP_${response.status}`, retryable);
+        }
+        return response.json();
+      } catch (error) {
+        const normalized = error instanceof GoogleSheetsError
+          ? error
+          : new GoogleSheetsError(
+              error instanceof Error && error.name === "TimeoutError"
+                ? "SHEETS_TIMEOUT"
+                : "SHEETS_NETWORK_ERROR",
+              true,
+            );
+        const delay = retrySafe
+          ? this.options.retryDelaysMs[retryIndex]
+          : undefined;
+        if (!normalized.retryable || delay === undefined) throw normalized;
+        retryIndex += 1;
+        await this.options.sleepImpl(delay);
+      }
     }
-    return response.json();
   }
 
   /**
@@ -165,7 +198,7 @@ export class GoogleSheetsClient {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ majorDimension: "ROWS", values }),
-    });
+    }, false);
   }
 
   /** Tạo tab và ghi header nếu chưa có. Trả về true khi vừa tạo mới. */
@@ -195,7 +228,7 @@ export class GoogleSheetsClient {
             },
           }],
         }),
-      });
+      }, false);
     }
     const lastColumn = columnLetters(headers.length);
     await this.batchUpdateValues(spreadsheetId, [

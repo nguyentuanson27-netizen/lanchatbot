@@ -8,6 +8,8 @@ import {
   currentProductContinuationId,
   explicitCustomerBusinessIntent,
   explicitCustomerImageIntent,
+  isPostSaleRequest,
+  isPreSalePolicyQuestion,
   FailClosedTagObservationProvider,
   holdingMessagesForHandoff,
   modelHandoffPermitted,
@@ -1441,6 +1443,8 @@ describe("explicitCustomerImageIntent", () => {
     expect(explicitCustomerImageIntent("cho xem bảng size với")).toBe("SIZE_GUIDE");
     expect(explicitCustomerImageIntent("cho xin ảnh mặt sau")).toBe("BACK");
     expect(explicitCustomerImageIntent("cho xem ảnh chất liệu")).toBe("DETAIL");
+    expect(explicitCustomerImageIntent("cho xin ảnh cận chất")).toBe("DETAIL");
+    expect(explicitCustomerImageIntent("xin ảnh cận vải")).toBe("DETAIL");
     expect(explicitCustomerImageIntent("cho xin ảnh không người mẫu")).toBe("PRODUCT_ONLY");
   });
 
@@ -1462,5 +1466,28 @@ describe("explicitCustomerImageIntent", () => {
     for (const text of ["sd396", "giá bao nhiêu", "áo này size nào", "còn hàng không"]) {
       expect(explicitCustomerImageIntent(text)).toBeNull();
     }
+  });
+});
+
+describe("policy question versus after-sales routing", () => {
+  it.each([
+    "có được đổi trả không",
+    "shop có hỗ trợ đổi size không",
+    "chính sách đổi trả thế nào",
+    "phí ship bao nhiêu",
+    "giao hàng bao lâu",
+  ])("keeps a pre-sale policy question out of Vận Đơn: %s", (text) => {
+    expect(isPreSalePolicyQuestion(text)).toBe(true);
+    expect(isPostSaleRequest(text)).toBe(false);
+  });
+
+  it.each([
+    "cho chị đổi size",
+    "chị đã nhận hàng và muốn đổi size",
+    "vận đơn của chị đang ở đâu",
+    "đơn hàng của chị chưa giao",
+  ])("routes an actual after-sales request to Vận Đơn: %s", (text) => {
+    expect(isPreSalePolicyQuestion(text)).toBe(false);
+    expect(isPostSaleRequest(text)).toBe(true);
   });
 });

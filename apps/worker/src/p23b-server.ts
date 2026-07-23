@@ -97,6 +97,7 @@ async function main(): Promise<void> {
   const shardCount = boundedInt("INGEST_SHARD_COUNT", 1, 1, 32);
   const shardIndex = Math.min(shardCount - 1, boundedInt("INGEST_SHARD_INDEX", 0, 0, 31));
   const intervalMs = boundedInt("P23B_INTERVAL_MS", 86_400_000, 60_000, 86_400_000);
+  const errorRetryMs = boundedInt("P23B_ERROR_RETRY_MS", 300_000, 60_000, 3_600_000);
   const writeEnabled = process.env.P23B_WRITE_ENABLED === "true";
   // Mặc định chỉ phân tích ảnh chưa có nhãn: giữ nguyên phê duyệt và vector Qdrant hiện có.
   const onlyNewImages = process.env.P23B_ONLY_NEW_IMAGES !== "false";
@@ -192,11 +193,13 @@ async function main(): Promise<void> {
 
   let stopping = false;
   let running = false;
+  let nextRun: ReturnType<typeof setTimeout> | null = null;
   await reporter.heartbeat("STARTING");
 
-  const runOnce = async (): Promise<void> => {
-    if (running || stopping) return;
+  const runOnce = async (): Promise<boolean> => {
+    if (running || stopping) return false;
     running = true;
+    let succeeded = false;
     const startedAt = Date.now();
     await reporter.heartbeat("RUNNING");
     try {
@@ -220,6 +223,7 @@ async function main(): Promise<void> {
         },
       });
       if (summary.status === "OK" || summary.status === "NO_PENDING_WORK") {
+        succeeded = true;
         await reporter.snapshot({
           snapshotKey: "IMAGE_REGISTRY",
           source: "image_registry (Google Sheets)",
@@ -255,6 +259,7 @@ async function main(): Promise<void> {
     } finally {
       running = false;
     }
+    return succeeded;
   };
 
   if (process.env.P23B_RUN_ONCE === "true") {
@@ -264,15 +269,21 @@ async function main(): Promise<void> {
     return;
   }
 
-  const interval = setInterval(() => {
-    void runOnce();
-  }, intervalMs);
+  const scheduleNext = (delayMs: number): void => {
+    if (stopping) return;
+    if (nextRun) clearTimeout(nextRun);
+    nextRun = setTimeout(() => {
+      void runOnce().then((succeeded) => {
+        scheduleNext(succeeded ? intervalMs : errorRetryMs);
+      });
+    }, delayMs);
+  };
 
   const shutdown = async (signal: string): Promise<void> => {
     if (stopping) return;
     stopping = true;
     log("info", { signal }, "shutting down");
-    clearInterval(interval);
+    if (nextRun) clearTimeout(nextRun);
     const waitStart = Date.now();
     while (running && Date.now() - waitStart < 25_000) {
       await new Promise((resolve) => setTimeout(resolve, 250));
@@ -295,13 +306,15 @@ async function main(): Promise<void> {
     drainEnabled,
     maxRounds: boundedInt("P23B_MAX_ROUNDS", 40, 1, 200),
     intervalMs,
+    errorRetryMs,
     writeEnabled,
     staleOnlyWhenDraftChanges,
     statusReporting: reporter.enabled,
     schema,
   }, "p23b metadata staging started");
 
-  await runOnce();
+  const initialSucceeded = await runOnce();
+  scheduleNext(initialSucceeded ? intervalMs : errorRetryMs);
 }
 
 main().catch((error) => {

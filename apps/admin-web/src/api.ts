@@ -165,9 +165,9 @@ function normalizeServices(source: unknown): Overview["services"] {
     const silent = lastSeenAt
       ? Date.now() - new Date(lastSeenAt).getTime() > WORKER_SILENCE_LIMIT_MS
       : false;
-    const status = DOWN_WORKER_STATUSES.has(rawStatus)
+    const status = rawStatus === "down" || silent
       ? "down"
-      : silent
+      : DOWN_WORKER_STATUSES.has(rawStatus)
         ? "degraded"
         : HEALTHY_WORKER_STATUSES.has(rawStatus)
           ? "healthy"
@@ -184,7 +184,7 @@ function normalizeServices(source: unknown): Overview["services"] {
       stringValue(item.worker_id),
       stringValue(item.mode),
       item.last_error_code ? `Lỗi gần nhất: ${stringValue(item.last_error_code)}` : "",
-      silent ? "Chưa báo cáo quá 26 giờ" : "",
+      silent ? "Không nhận heartbeat quá 26 giờ" : "",
     ].filter(Boolean).join(" · ");
     return {
       name,
