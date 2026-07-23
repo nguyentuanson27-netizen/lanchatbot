@@ -7,6 +7,7 @@
 - Tách tài khoản PostgreSQL riêng cho worker Size Chart với quyền tối thiểu trên ba bảng staging/audit.
 - Full build/typecheck/test đạt `744/744`; worker đạt `241/241`, gồm `30/30` kịch bản Messenger.
 - Smoke Vertex thật tạo 1 DRAFT `GARMENT` từ tối đa 10 ảnh; kiểm tra xác nhận chưa có chart GARMENT nào được VERIFIED.
+- Scheduler retry sau 5 phút khi còn lỗi tạm thời như Vertex 429/5xx hoặc lỗi mạng; ảnh cần duyệt không kích hoạt vòng retry tốn phí.
 - Chỉ page test `1198992073286645` được phép xử lý; bằng chứng canary Messenger thật vẫn cần 100 inbound hoặc 48 giờ.
 
 ## 2026-07-23 — realtime Wave 2/3 CANARY_LIVE r12

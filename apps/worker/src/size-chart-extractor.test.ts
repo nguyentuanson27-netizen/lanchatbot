@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isSizeChartRegistryRow,
+  isRetryableSizeChartError,
   parseExtractedSizeChart,
 } from "./size-chart-extractor.js";
 
@@ -42,5 +43,13 @@ describe("app-native size chart extraction", () => {
       extractionVersion: "size-chart-v1.0.0",
       bands: [{ size: "S", note: null }],
     });
+  });
+
+  it("retries only temporary provider and network failures", () => {
+    expect(isRetryableSizeChartError("VERTEX_SIZE_CHART_HTTP_429:RESOURCE_EXHAUSTED")).toBe(true);
+    expect(isRetryableSizeChartError("VERTEX_SIZE_CHART_HTTP_503:UNAVAILABLE")).toBe(true);
+    expect(isRetryableSizeChartError("UND_ERR_CONNECT_TIMEOUT")).toBe(true);
+    expect(isRetryableSizeChartError("SIZE_CHART_REVIEW_REQUIRED")).toBe(false);
+    expect(isRetryableSizeChartError("ADMIN_SIZE_CHART_BODY_BASIS_REQUIRED")).toBe(false);
   });
 });

@@ -170,8 +170,13 @@ export interface SizeChartExtractionSummary {
   readonly created: number;
   readonly existed: number;
   readonly failed: number;
+  readonly retryableFailures: number;
   readonly errors: readonly string[];
 }
+
+export const isRetryableSizeChartError = (message: string): boolean =>
+  /(?:HTTP_(?:408|425|429|5\d\d)|ETIMEDOUT|ECONNRESET|ECONNREFUSED|EAI_AGAIN|ENOTFOUND|UND_ERR_CONNECT_TIMEOUT)/iu
+    .test(message);
 
 type ParsedVision = ExtractedSizeChartData & {
   readonly measurementBasis: "BODY" | "GARMENT" | "UNKNOWN";
@@ -254,6 +259,7 @@ export class SizeChartExtractionRunner {
     let created = 0;
     let existed = 0;
     let failed = 0;
+    let retryableFailures = 0;
     const errors: string[] = [];
 
     const consume = async (): Promise<void> => {
@@ -320,11 +326,20 @@ export class SizeChartExtractionRunner {
           else existed += 1;
         } catch (error) {
           failed += 1;
-          errors.push(`${row.MA_SP}:${error instanceof Error ? error.message : "UNKNOWN_ERROR"}`);
+          const message = error instanceof Error ? error.message : "UNKNOWN_ERROR";
+          if (isRetryableSizeChartError(message)) retryableFailures += 1;
+          errors.push(`${row.MA_SP}:${message}`);
         }
       }
     };
     await Promise.all(Array.from({ length: concurrency }, consume));
-    return { selected: rows.length, created, existed, failed, errors: errors.slice(0, 100) };
+    return {
+      selected: rows.length,
+      created,
+      existed,
+      failed,
+      retryableFailures,
+      errors: errors.slice(0, 100),
+    };
   }
 }
