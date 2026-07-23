@@ -1,0 +1,315 @@
+import { createHash, createSign } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import type { AdminIdentity } from "./types.js";
+
+export const MANUAL_IMAGE_INTAKE_SHEET = "manual_image_intake";
+export const MANUAL_IMAGE_INTAKE_HEADERS = [
+  "INTAKE_ID",
+  "MA_SP",
+  "IMAGE_URL",
+  "MEDIA_PURPOSE",
+  "IMAGE_INTENTS",
+  "NOTES",
+  "ACTIVE",
+  "STATUS",
+  "UPLOADED_BY",
+  "UPLOADED_AT",
+  "IMAGE_HASH",
+  "ORIGINAL_FILE_NAME",
+  "IMAGE_ID",
+  "PROCESSED_AT",
+  "ERROR",
+] as const;
+
+export const MANUAL_MEDIA_PURPOSES = [
+  "FULL_LOOK",
+  "AO",
+  "CHAN_VAY",
+  "QUAN",
+  "DETAIL_FABRIC",
+  "FEEDBACK",
+  "SIZE_GUIDE",
+] as const;
+
+export type ManualMediaPurpose = (typeof MANUAL_MEDIA_PURPOSES)[number];
+
+export interface ProductMediaUploadInput {
+  readonly maSp: string;
+  readonly mediaPurpose: ManualMediaPurpose;
+  readonly notes: string;
+  readonly originalFileName: string;
+  readonly mimeType: string;
+  readonly contentBase64: string;
+}
+
+export interface ProductMediaUploadResult {
+  readonly intakeId: string;
+  readonly maSp: string;
+  readonly imageUrl: string;
+  readonly mediaPurpose: ManualMediaPurpose;
+  readonly imageIntents: readonly string[];
+  readonly status: "PENDING";
+  readonly uploadedAt: string;
+  readonly duplicate: boolean;
+}
+
+export interface ProductMediaService {
+  ready(): Promise<boolean>;
+  upload(identity: AdminIdentity, input: ProductMediaUploadInput): Promise<ProductMediaUploadResult>;
+}
+
+interface ServiceAccountCredential {
+  readonly email: string;
+  readonly privateKey: string;
+}
+
+interface ProductMediaServiceOptions {
+  readonly directory: string;
+  readonly publicBaseUrl: string;
+  readonly maxBytes: number;
+  readonly spreadsheetId: string;
+  readonly serviceAccount: ServiceAccountCredential;
+  readonly fetchImpl?: typeof fetch;
+  readonly now?: () => Date;
+}
+
+const INTENTS: Readonly<Record<ManualMediaPurpose, readonly string[]>> = {
+  FULL_LOOK: ["PRODUCT_OVERVIEW", "LOOKBOOK"],
+  AO: ["PRODUCT_OVERVIEW", "DETAIL"],
+  CHAN_VAY: ["PRODUCT_OVERVIEW", "DETAIL"],
+  QUAN: ["PRODUCT_OVERVIEW", "DETAIL"],
+  DETAIL_FABRIC: ["MATERIAL_CLOSEUP", "DETAIL"],
+  FEEDBACK: ["FEEDBACK"],
+  SIZE_GUIDE: ["SIZE_GUIDE"],
+};
+
+const MIME_EXTENSIONS: Readonly<Record<string, string>> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+const base64Url = (value: string | Buffer): string => Buffer.from(value).toString("base64url");
+
+function normalizePrivateKey(value: string): string {
+  return value.trim().replace(/^=+/u, "").replace(/\\n/gu, "\n");
+}
+
+function validImageSignature(buffer: Buffer, mimeType: string): boolean {
+  if (mimeType === "image/jpeg") return buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  if (mimeType === "image/png") return buffer.length >= 8 && buffer.subarray(0, 8).equals(Buffer.from("89504e470d0a1a0a", "hex"));
+  if (mimeType === "image/webp") {
+    return buffer.length >= 12
+      && buffer.subarray(0, 4).toString("ascii") === "RIFF"
+      && buffer.subarray(8, 12).toString("ascii") === "WEBP";
+  }
+  return false;
+}
+
+function sheetRows(values: unknown[][]): Record<string, string>[] {
+  const headers = (values[0] ?? []).map((value) => String(value ?? "").trim().toUpperCase());
+  return values.slice(1).map((row) => Object.fromEntries(
+    headers.map((header, index) => [header, String(row[index] ?? "").trim()]),
+  ));
+}
+
+export class GoogleSheetsManualImageIntake implements ProductMediaService {
+  private readonly fetchImpl: typeof fetch;
+  private readonly now: () => Date;
+  private accessToken: { value: string; expiresAt: number } | null = null;
+
+  constructor(private readonly options: ProductMediaServiceOptions) {
+    this.fetchImpl = options.fetchImpl ?? fetch;
+    this.now = options.now ?? (() => new Date());
+  }
+
+  async ready(): Promise<boolean> {
+    return Boolean(
+      this.options.directory
+      && this.options.publicBaseUrl.startsWith("https://")
+      && this.options.spreadsheetId
+      && this.options.serviceAccount.email.includes("@")
+      && this.options.serviceAccount.privateKey.includes("PRIVATE KEY"),
+    );
+  }
+
+  async upload(identity: AdminIdentity, input: ProductMediaUploadInput): Promise<ProductMediaUploadResult> {
+    const maSp = input.maSp.trim().toUpperCase();
+    if (!/^[A-Z0-9][A-Z0-9._-]{1,39}$/u.test(maSp)) throw new Error("PRODUCT_MEDIA_CODE_INVALID");
+    if (!MANUAL_MEDIA_PURPOSES.includes(input.mediaPurpose)) throw new Error("PRODUCT_MEDIA_PURPOSE_INVALID");
+    if (!(input.mimeType in MIME_EXTENSIONS)) throw new Error("PRODUCT_MEDIA_MIME_INVALID");
+    if (input.notes.length > 500 || input.originalFileName.length > 180) throw new Error("PRODUCT_MEDIA_TEXT_INVALID");
+    if (!/^[A-Za-z0-9+/]+={0,2}$/u.test(input.contentBase64)) throw new Error("PRODUCT_MEDIA_BASE64_INVALID");
+
+    const image = Buffer.from(input.contentBase64, "base64");
+    if (!image.length || image.length > this.options.maxBytes) throw new Error("PRODUCT_MEDIA_SIZE_INVALID");
+    if (!validImageSignature(image, input.mimeType)) throw new Error("PRODUCT_MEDIA_SIGNATURE_INVALID");
+
+    const existingProducts = await this.getValues("product_registry!A:A");
+    const productExists = sheetRows(existingProducts).some((row) => String(row.MA_SP ?? "").toUpperCase() === maSp);
+    if (!productExists) throw new Error("PRODUCT_MEDIA_PRODUCT_NOT_FOUND");
+
+    const hash = createHash("sha256").update(image).digest("hex");
+    const intakeId = createHash("sha256").update(`${maSp}|${hash}`).digest("hex").slice(0, 32);
+    const extension = MIME_EXTENSIONS[input.mimeType];
+    if (!extension) throw new Error("PRODUCT_MEDIA_MIME_INVALID");
+    const fileName = `${maSp.toLowerCase()}-${hash.slice(0, 24)}.${extension}`;
+    const imageUrl = `${this.options.publicBaseUrl.replace(/\/$/u, "")}/${fileName}`;
+    const uploadedAt = this.now().toISOString();
+    const imageIntents = INTENTS[input.mediaPurpose];
+
+    await this.ensureSheet();
+    const existing = sheetRows(await this.getValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:O`))
+      .find((row) => row.INTAKE_ID === intakeId);
+    if (existing) {
+      return {
+        intakeId,
+        maSp,
+        imageUrl: existing.IMAGE_URL || imageUrl,
+        mediaPurpose: input.mediaPurpose,
+        imageIntents,
+        status: "PENDING",
+        uploadedAt: existing.UPLOADED_AT || uploadedAt,
+        duplicate: true,
+      };
+    }
+
+    await mkdir(this.options.directory, { recursive: true, mode: 0o750 });
+    try {
+      await writeFile(join(this.options.directory, fileName), image, { flag: "wx", mode: 0o640 });
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== "EEXIST") throw error;
+    }
+
+    await this.appendValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:O`, [[
+      intakeId,
+      maSp,
+      imageUrl,
+      input.mediaPurpose,
+      imageIntents.join(" | "),
+      input.notes.trim(),
+      true,
+      "PENDING",
+      identity.email,
+      uploadedAt,
+      hash,
+      input.originalFileName,
+      "",
+      "",
+      "",
+    ]]);
+    return { intakeId, maSp, imageUrl, mediaPurpose: input.mediaPurpose, imageIntents, status: "PENDING", uploadedAt, duplicate: false };
+  }
+
+  private async token(): Promise<string> {
+    const now = Date.now();
+    if (this.accessToken && this.accessToken.expiresAt - 60_000 > now) return this.accessToken.value;
+    const issuedAt = Math.floor(now / 1_000);
+    const header = base64Url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+    const payload = base64Url(JSON.stringify({
+      iss: this.options.serviceAccount.email,
+      scope: "https://www.googleapis.com/auth/spreadsheets",
+      aud: "https://oauth2.googleapis.com/token",
+      iat: issuedAt,
+      exp: issuedAt + 3_600,
+    }));
+    const unsigned = `${header}.${payload}`;
+    const signature = createSign("RSA-SHA256").update(unsigned).end()
+      .sign(normalizePrivateKey(this.options.serviceAccount.privateKey));
+    const response = await this.fetchImpl("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+        assertion: `${unsigned}.${base64Url(signature)}`,
+      }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    const body = await response.json().catch(() => null) as { access_token?: string; expires_in?: number } | null;
+    if (!response.ok || typeof body?.access_token !== "string") throw new Error("PRODUCT_MEDIA_SHEETS_AUTH_FAILED");
+    this.accessToken = { value: body.access_token, expiresAt: now + Math.max(60, Number(body.expires_in ?? 3_600)) * 1_000 };
+    return body.access_token;
+  }
+
+  private async sheetsRequest(url: string, init: RequestInit): Promise<unknown> {
+    const token = await this.token();
+    const response = await this.fetchImpl(url, {
+      ...init,
+      headers: { ...(init.headers as Record<string, string> | undefined), authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!response.ok) throw new Error(`PRODUCT_MEDIA_SHEETS_HTTP_${response.status}`);
+    return response.json();
+  }
+
+  private async getValues(range: string): Promise<unknown[][]> {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(this.options.spreadsheetId)}`
+      + `/values/${encodeURIComponent(range)}?majorDimension=ROWS&valueRenderOption=UNFORMATTED_VALUE`;
+    const body = await this.sheetsRequest(url, { method: "GET" }) as { values?: unknown[][] };
+    return Array.isArray(body.values) ? body.values : [];
+  }
+
+  private async ensureSheet(): Promise<void> {
+    const metaUrl = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(this.options.spreadsheetId)}`
+      + "?fields=sheets.properties.title";
+    const meta = await this.sheetsRequest(metaUrl, { method: "GET" }) as { sheets?: { properties?: { title?: string } }[] };
+    const exists = (meta.sheets ?? []).some((sheet) => sheet.properties?.title === MANUAL_IMAGE_INTAKE_SHEET);
+    if (!exists) {
+      await this.sheetsRequest(
+        `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(this.options.spreadsheetId)}:batchUpdate`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ requests: [{ addSheet: { properties: { title: MANUAL_IMAGE_INTAKE_SHEET, gridProperties: { rowCount: 2_000, columnCount: 15, frozenRowCount: 1 } } } }] }),
+        },
+      );
+    }
+    await this.sheetsRequest(
+      `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(this.options.spreadsheetId)}/values/${encodeURIComponent(`${MANUAL_IMAGE_INTAKE_SHEET}!A1:O1`)}?valueInputOption=RAW`,
+      {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ majorDimension: "ROWS", values: [[...MANUAL_IMAGE_INTAKE_HEADERS]] }),
+      },
+    );
+  }
+
+  private async appendValues(range: string, values: readonly (readonly (string | boolean)[])[]): Promise<void> {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(this.options.spreadsheetId)}`
+      + `/values/${encodeURIComponent(range)}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+    await this.sheetsRequest(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ majorDimension: "ROWS", values }),
+    });
+  }
+}
+
+export function createProductMediaService(options: Omit<ProductMediaServiceOptions, "serviceAccount"> & { credentialJson: string }): ProductMediaService {
+  const parsed = JSON.parse(options.credentialJson) as { email?: unknown; privateKey?: unknown };
+  if (typeof parsed.email !== "string" || typeof parsed.privateKey !== "string") {
+    throw new Error("PRODUCT_MEDIA_GOOGLE_CREDENTIAL_INVALID");
+  }
+  return new GoogleSheetsManualImageIntake({
+    ...options,
+    serviceAccount: { email: parsed.email, privateKey: parsed.privateKey },
+  });
+}
+
+export function parseProductMediaUploadBody(value: unknown): ProductMediaUploadInput {
+  const body = value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
+  const purpose = String(body.media_purpose ?? "").trim().toUpperCase();
+  if (!MANUAL_MEDIA_PURPOSES.includes(purpose as ManualMediaPurpose)) throw new Error("PRODUCT_MEDIA_PURPOSE_INVALID");
+  return {
+    maSp: String(body.ma_sp ?? ""),
+    mediaPurpose: purpose as ManualMediaPurpose,
+    notes: String(body.notes ?? ""),
+    originalFileName: String(body.file_name ?? ""),
+    mimeType: String(body.mime_type ?? "").trim().toLowerCase(),
+    contentBase64: String(body.content_base64 ?? "").trim(),
+  };
+}

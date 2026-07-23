@@ -271,6 +271,7 @@ describe("Admin API", () => {
             canary_live: false,
             publish: false,
           },
+          product_media_upload: false,
         },
       },
     });
@@ -288,6 +289,46 @@ describe("Admin API", () => {
       url: "/admin/v1/conversations",
       headers,
     })).statusCode, 404);
+    await app.close();
+  });
+
+  it("accepts an authenticated product media upload and keeps it pending for review", async () => {
+    const app = create({
+      productMedia: {
+        async ready() { return true; },
+        async upload(_identity, input) {
+          return {
+            intakeId: "intake-1",
+            maSp: input.maSp.toUpperCase(),
+            imageUrl: "https://admin.lanadesign.vn/lana-public/products/cb182-a.jpg",
+            mediaPurpose: input.mediaPurpose,
+            imageIntents: ["MATERIAL_CLOSEUP", "DETAIL"],
+            status: "PENDING" as const,
+            uploadedAt: "2026-07-24T00:00:00.000Z",
+            duplicate: false,
+          };
+        },
+      },
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/admin/v1/product-media/uploads",
+      headers: {
+        "x-lana-admin-assertion": "valid",
+        origin: "https://admin.lanadesign.vn",
+      },
+      payload: {
+        ma_sp: "CB182",
+        media_purpose: "DETAIL_FABRIC",
+        notes: "Ảnh cận chất",
+        file_name: "cb182.jpg",
+        mime_type: "image/jpeg",
+        content_base64: "/9j/2Q==",
+      },
+    });
+    assert.equal(response.statusCode, 201);
+    assert.equal(response.json().upload.status, "PENDING");
+    assert.equal(response.json().upload.maSp, "CB182");
     await app.close();
   });
 
@@ -344,6 +385,7 @@ describe("Admin API", () => {
         canary_live: false,
         publish: false,
       },
+      product_media: false,
     });
     assert.equal(response.headers["cache-control"], "no-store");
     assert.equal(response.headers["x-frame-options"], "DENY");

@@ -3,6 +3,7 @@ import { InternalAssertionAuthenticator } from "./auth.js";
 import { adminConfigFromEnvironment } from "./config.js";
 import { PostgresAdminStore } from "./store.js";
 import { LocalEnvelopeCipher } from "@lana/database";
+import { createProductMediaService } from "./product-media.js";
 
 const config = adminConfigFromEnvironment();
 if (
@@ -35,6 +36,15 @@ const authenticator = new InternalAssertionAuthenticator(
     pageScope: config.pageScope,
   },
 );
+const productMedia = config.productMediaEnabled
+  ? createProductMediaService({
+      directory: config.productMediaDirectory,
+      publicBaseUrl: config.productMediaPublicBaseUrl,
+      maxBytes: config.productMediaMaxBytes,
+      spreadsheetId: config.productMediaSheetId,
+      credentialJson: config.googleSheetsCredential,
+    })
+  : undefined;
 const app = createAdminApi({
   store,
   authenticator,
@@ -46,6 +56,7 @@ const app = createAdminApi({
   policyPageIds: config.policyPageIds,
   policyCanaryLiveEnabled: config.policyCanaryLiveEnabled,
   policyPublishEnabled: config.policyPublishEnabled,
+  ...(productMedia ? { productMedia } : {}),
 });
 
 await app.listen({ host: "0.0.0.0", port: config.port });

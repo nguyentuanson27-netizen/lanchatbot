@@ -13,7 +13,7 @@ const host = process.env.HOST ?? "0.0.0.0";
 const adminApiOrigin = new URL(process.env.ADMIN_API_ORIGIN ?? "http://admin-api:8081");
 const adminAuth = loadAdminAuthConfig();
 const distDirectory = resolve(new URL("./dist", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"));
-const maxAdminJsonBodyBytes = 64 * 1024;
+const maxAdminJsonBodyBytes = 12 * 1024 * 1024;
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -121,7 +121,7 @@ async function proxyAdminRequest(request, response, requestUrl) {
       response.end(JSON.stringify({
         code: error?.statusCode === 413 ? "ADMIN_BODY_TOO_LARGE" : "ADMIN_JSON_INVALID",
         message: error?.statusCode === 413
-          ? "Nội dung lệnh quản trị vượt quá 64 KB."
+          ? "Ảnh hoặc nội dung tải lên vượt quá giới hạn cho phép."
           : "Nội dung JSON không hợp lệ.",
       }));
       return;

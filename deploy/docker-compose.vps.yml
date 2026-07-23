@@ -789,6 +789,12 @@ services:
       ADMIN_POLICY_PAGE_IDS: "${ADMIN_POLICY_PAGE_IDS:-1198992073286645}"
       ADMIN_POLICY_CANARY_LIVE_ENABLED: "${ADMIN_POLICY_CANARY_LIVE_ENABLED:-false}"
       ADMIN_POLICY_PUBLISH_ENABLED: "${ADMIN_POLICY_PUBLISH_ENABLED:-false}"
+      ADMIN_PRODUCT_MEDIA_ENABLED: "true"
+      ADMIN_PRODUCT_MEDIA_DIR: /var/lib/lana/product-media
+      ADMIN_PRODUCT_MEDIA_PUBLIC_BASE_URL: https://admin.lanadesign.vn/lana-public/products
+      ADMIN_PRODUCT_MEDIA_MAX_BYTES: "8388608"
+      DATA_INGESTION_V2_SHEET_ID: 1VGNU55l9wcDh5RFV07f6JdiV7__FM9uGaVCDThUUgS0
+      GOOGLE_SHEETS_CREDENTIAL_FILE: /run/secrets/vertex_google_api
       ADMIN_CONTROL_DATABASE_URL_FILE: /run/secrets/admin_control_database_url
       ADMIN_ASSERTION_ISSUER: lana-admin-web
       ADMIN_INTERNAL_AUTH_SECRET_FILE: /run/secrets/admin_internal_auth_secret
@@ -801,6 +807,9 @@ services:
       - admin_control_database_url
       - admin_internal_auth_secret
       - realtime_data_key
+      - vertex_google_api
+    volumes:
+      - /var/lib/docker/volumes/n8n-docker_npm_data/_data/public-assets/products:/var/lib/lana/product-media
     depends_on:
       postgres:
         condition: service_healthy

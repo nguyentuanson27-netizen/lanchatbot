@@ -13,6 +13,27 @@ export interface Identity {
   policyCanaryShadowEnabled: boolean;
   policyCanaryLiveEnabled: boolean;
   policyPublishEnabled: boolean;
+  productMediaUpload: boolean;
+}
+
+export type ManualMediaPurpose =
+  | "FULL_LOOK"
+  | "AO"
+  | "CHAN_VAY"
+  | "QUAN"
+  | "DETAIL_FABRIC"
+  | "FEEDBACK"
+  | "SIZE_GUIDE";
+
+export interface ProductMediaUpload {
+  intakeId: string;
+  maSp: string;
+  imageUrl: string;
+  mediaPurpose: ManualMediaPurpose;
+  imageIntents: string[];
+  status: "PENDING";
+  uploadedAt: string;
+  duplicate: boolean;
 }
 
 export type PolicyArtifactKind =

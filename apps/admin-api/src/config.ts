@@ -20,6 +20,12 @@ export interface AdminApiConfig {
   readonly policyPageIds: "ALL" | readonly string[];
   readonly policyCanaryLiveEnabled: boolean;
   readonly policyPublishEnabled: boolean;
+  readonly productMediaEnabled: boolean;
+  readonly productMediaDirectory: string;
+  readonly productMediaPublicBaseUrl: string;
+  readonly productMediaMaxBytes: number;
+  readonly productMediaSheetId: string;
+  readonly googleSheetsCredential: string;
   readonly port: number;
 }
 
@@ -68,6 +74,10 @@ export function adminConfigFromEnvironment(
   if (!Number.isInteger(port) || port < 1 || port > 65_535) {
     throw new Error("ADMIN_PORT_INVALID");
   }
+  const productMediaMaxBytes = Number(environment.ADMIN_PRODUCT_MEDIA_MAX_BYTES ?? "8388608");
+  if (!Number.isInteger(productMediaMaxBytes) || productMediaMaxBytes < 1_048_576 || productMediaMaxBytes > 20_971_520) {
+    throw new Error("ADMIN_PRODUCT_MEDIA_MAX_BYTES_INVALID");
+  }
   return {
     databaseUrl: valueOrFile(
       environment,
@@ -104,6 +114,17 @@ export function adminConfigFromEnvironment(
     policyPageIds,
     policyCanaryLiveEnabled: environment.ADMIN_POLICY_CANARY_LIVE_ENABLED?.trim().toLowerCase() === "true",
     policyPublishEnabled: environment.ADMIN_POLICY_PUBLISH_ENABLED?.trim().toLowerCase() === "true",
+    productMediaEnabled: environment.ADMIN_PRODUCT_MEDIA_ENABLED?.trim().toLowerCase() === "true",
+    productMediaDirectory: environment.ADMIN_PRODUCT_MEDIA_DIR?.trim() || "/var/lib/lana/product-media",
+    productMediaPublicBaseUrl: environment.ADMIN_PRODUCT_MEDIA_PUBLIC_BASE_URL?.trim()
+      || "https://admin.lanadesign.vn/lana-public/products",
+    productMediaMaxBytes,
+    productMediaSheetId: environment.DATA_INGESTION_V2_SHEET_ID?.trim() || "",
+    googleSheetsCredential: valueOrFile(
+      environment,
+      "GOOGLE_SHEETS_CREDENTIAL",
+      "GOOGLE_SHEETS_CREDENTIAL_FILE",
+    ),
     port,
   };
 }

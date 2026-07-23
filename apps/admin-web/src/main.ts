@@ -17,6 +17,7 @@ import {
   getOutreach,
   getPolicyControl,
   getProductData,
+  uploadProductMedia,
   getQuality,
 } from "./api.js";
 import { bindPolicyControl, renderPolicyControl } from "./policy-control-ui.js";
@@ -46,9 +47,10 @@ import type {
   ServiceHealth,
   Tone,
   PancakeTag,
+  ManualMediaPurpose,
 } from "./types.js";
 
-type RouteName = "overview" | "conversations" | "handoffs" | "outreach" | "quality" | "products" | "policy" | "operations" | "audit";
+type RouteName = "overview" | "conversations" | "handoffs" | "outreach" | "quality" | "products" | "media" | "policy" | "operations" | "audit";
 
 interface NavigationItem {
   id: RouteName;
@@ -64,6 +66,7 @@ const navigation: NavigationItem[] = [
   { id: "outreach", label: "Hiệu quả upsale", description: "Phản hồi và chuyển đổi", icon: "spark" },
   { id: "quality", label: "Chất lượng AI", description: "Đánh giá câu trả lời", icon: "spark" },
   { id: "products", label: "Dữ liệu sản phẩm", description: "Giá, tồn, size, ETA", icon: "bag" },
+  { id: "media", label: "Ảnh sản phẩm", description: "Tải ảnh bổ sung", icon: "image" },
   { id: "policy", label: "Chính sách bán hàng", description: "Phiên bản, duyệt và rollback", icon: "shield" },
   { id: "operations", label: "Vận hành", description: "Worker và hàng đợi", icon: "pulse" },
   { id: "audit", label: "Nhật ký", description: "Hoạt động hệ thống", icon: "clock" },
@@ -93,6 +96,10 @@ const routeTitles: Record<RouteName, { title: string; subtitle: string }> = {
   products: {
     title: "Dữ liệu sản phẩm",
     subtitle: "Độ sẵn sàng của giá, tồn kho, size và thời gian giao.",
+  },
+  media: {
+    title: "Ảnh sản phẩm",
+    subtitle: "Tải ảnh ngoài XML vào hàng chờ phân loại và duyệt.",
   },
   policy: {
     title: "Chính sách bán hàng",
@@ -183,6 +190,7 @@ function icon(name: string, size = 20): string {
     alert: '<path d="M12 3 2 21h20L12 3z"/><path d="M12 9v5M12 18h.01"/>',
     check: '<path d="m5 12 4 4L19 6"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 15-5-5L5 20"/>',
   };
   return `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] ?? paths.grid}</svg>`;
 }
@@ -651,6 +659,36 @@ function renderProducts(data: ProductDataSummary): string {
     </div>`;
 }
 
+function renderProductMedia(): string {
+  if (!identity?.productMediaUpload) {
+    return renderEmpty("Tính năng đang khóa", "Chỉ OWNER hoặc EDITOR được tải ảnh sản phẩm bổ sung.");
+  }
+  const purposeOptions: Array<[ManualMediaPurpose, string]> = [
+    ["FULL_LOOK", "Toàn bộ thiết kế"],
+    ["AO", "Riêng phần áo"],
+    ["CHAN_VAY", "Riêng chân váy"],
+    ["QUAN", "Riêng phần quần"],
+    ["DETAIL_FABRIC", "Cận chất liệu"],
+    ["FEEDBACK", "Ảnh feedback"],
+    ["SIZE_GUIDE", "Bảng size"],
+  ];
+  return `
+    <section class="panel product-media-panel">
+      <div class="panel__header"><div><h2>Tải ảnh bổ sung</h2><p>Ảnh được lưu trên VPS và ghi vào tab manual_image_intake ở trạng thái chờ duyệt.</p></div></div>
+      <div class="product-media-safety">${icon("shield", 18)}<span>Ảnh chưa tự động vào Qdrant. P2.3B sẽ gắn metadata, sau đó cần duyệt APPROVED trước khi P2.3C xuất bản.</span></div>
+      <form id="product-media-form" class="product-media-form">
+        <label><span>Mã sản phẩm</span><input name="ma_sp" autocomplete="off" maxlength="40" placeholder="Ví dụ: CB182" required></label>
+        <label><span>Loại ảnh</span><select name="media_purpose" required>${purposeOptions.map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}</select></label>
+        <label class="product-media-form__wide"><span>Chọn ảnh</span><input name="image" type="file" accept="image/jpeg,image/png,image/webp" required><small>JPG, PNG hoặc WebP · tối đa 8 MB.</small></label>
+        <label class="product-media-form__wide"><span>Ghi chú</span><textarea name="notes" maxlength="500" rows="3" placeholder="Không bắt buộc"></textarea></label>
+        <div class="product-media-preview product-media-form__wide" id="product-media-preview" hidden></div>
+        <p class="form-error product-media-form__wide" id="product-media-error" role="alert"></p>
+        <div class="product-media-form__actions product-media-form__wide"><button class="button button--primary" type="submit">Tải ảnh lên</button></div>
+      </form>
+      <div id="product-media-result"></div>
+    </section>`;
+}
+
 function renderOperations(data: OperationsSummary): string {
   return `
     ${renderMetrics(data.metrics)}
@@ -933,6 +971,9 @@ async function loadCurrentPage(silent = true): Promise<void> {
       case "products":
         html = renderProducts(await getProductData(activeController.signal));
         break;
+      case "media":
+        html = renderProductMedia();
+        break;
       case "policy":
         policyControlData = identity?.policyControl
           ? await getPolicyControl(activeController.signal)
@@ -973,6 +1014,7 @@ function updateRefreshTime(): void {
 }
 
 function bindPageEvents(): void {
+  bindProductMediaForm();
   document.querySelectorAll<HTMLElement>("[data-handoff-id]").forEach((element) => {
     element.addEventListener("click", () => {
       const handoffId = element.dataset.handoffId;
@@ -1060,6 +1102,76 @@ function bindPageEvents(): void {
       showToast(error instanceof Error ? error.message : "Không thể tải thêm dữ liệu upsale.", "danger");
     }
   });
+}
+
+function bindProductMediaForm(): void {
+  const form = document.querySelector<HTMLFormElement>("#product-media-form");
+  if (!form) return;
+  const fileInput = form.elements.namedItem("image") as HTMLInputElement | null;
+  const preview = document.querySelector<HTMLDivElement>("#product-media-preview");
+  fileInput?.addEventListener("change", () => {
+    const file = fileInput.files?.[0];
+    if (!preview) return;
+    if (!file) {
+      preview.hidden = true;
+      preview.innerHTML = "";
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    preview.hidden = false;
+    preview.innerHTML = `<img src="${escapeHtml(url)}" alt="Ảnh chờ tải"><span><strong>${escapeHtml(file.name)}</strong><small>${formatNumber(Math.ceil(file.size / 1024))} KB</small></span>`;
+    preview.querySelector("img")?.addEventListener("load", () => URL.revokeObjectURL(url), { once: true });
+  });
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const errorTarget = document.querySelector<HTMLElement>("#product-media-error");
+    const resultTarget = document.querySelector<HTMLElement>("#product-media-result");
+    const data = new FormData(form);
+    const file = fileInput?.files?.[0];
+    if (!file || file.size > 8 * 1024 * 1024) {
+      if (errorTarget) errorTarget.textContent = "Ảnh phải nhỏ hơn 8 MB.";
+      return;
+    }
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = "Đang tải lên…";
+    }
+    if (errorTarget) errorTarget.textContent = "";
+    try {
+      const uploaded = await uploadProductMedia({
+        maSp: String(data.get("ma_sp") ?? "").trim().toUpperCase(),
+        mediaPurpose: String(data.get("media_purpose") ?? "FULL_LOOK") as ManualMediaPurpose,
+        notes: String(data.get("notes") ?? ""),
+        fileName: file.name,
+        mimeType: file.type,
+        contentBase64: await fileToBase64(file),
+      });
+      if (resultTarget) resultTarget.innerHTML = `<div class="success-state success-state--roomy">${icon("check", 24)}<span><strong>${uploaded.duplicate ? "Ảnh này đã có trong hàng chờ" : "Đã tải ảnh thành công"}</strong><small>Mã ${escapeHtml(uploaded.maSp)} · ${escapeHtml(uploaded.mediaPurpose)} · đang chờ gắn metadata và duyệt.</small><a href="${escapeHtml(uploaded.imageUrl)}" target="_blank" rel="noopener">Mở ảnh đã lưu</a></span></div>`;
+      form.reset();
+      if (preview) {
+        preview.hidden = true;
+        preview.innerHTML = "";
+      }
+      showToast(uploaded.duplicate ? "Ảnh đã tồn tại, không tạo dòng trùng." : "Đã ghi vào manual_image_intake.", "good");
+    } catch (error) {
+      if (errorTarget) errorTarget.textContent = error instanceof Error ? error.message : "Không thể tải ảnh lên.";
+    } finally {
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = "Tải ảnh lên";
+      }
+    }
+  });
+}
+
+async function fileToBase64(file: File): Promise<string> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const chunks: string[] = [];
+  for (let offset = 0; offset < bytes.length; offset += 32_768) {
+    chunks.push(String.fromCharCode(...bytes.subarray(offset, offset + 32_768)));
+  }
+  return btoa(chunks.join(""));
 }
 
 async function openHandoff(id: string): Promise<void> {
@@ -1359,7 +1471,7 @@ function showToast(message: string, tone: "good" | "warning" | "danger" = "good"
 function startPolling(): void {
   window.clearInterval(refreshTimer);
   refreshTimer = window.setInterval(() => {
-    if (document.visibilityState === "visible" && !document.querySelector(".detail-drawer")) {
+    if (document.visibilityState === "visible" && currentRoute !== "media" && !document.querySelector(".detail-drawer")) {
       void loadCurrentPage(true);
     }
     updateRefreshTime();

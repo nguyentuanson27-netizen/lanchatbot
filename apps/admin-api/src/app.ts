@@ -22,6 +22,10 @@ import {
   type AdminIdentity,
   type AdminStore,
 } from "./types.js";
+import {
+  parseProductMediaUploadBody,
+  type ProductMediaService,
+} from "./product-media.js";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -40,6 +44,7 @@ export interface CreateAdminApiOptions {
   readonly policyPageIds?: "ALL" | readonly string[];
   readonly policyCanaryLiveEnabled?: boolean;
   readonly policyPublishEnabled?: boolean;
+  readonly productMedia?: ProductMediaService;
 }
 
 interface ListQuerystring {
@@ -128,7 +133,7 @@ interface RollbackArtifactBody {
 export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance {
   const app = Fastify({
     logger: false,
-    bodyLimit: 65_536,
+    bodyLimit: 12_582_912,
     requestIdHeader: "x-request-id",
     genReqId: () => randomUUID(),
   });
@@ -210,7 +215,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
 
   app.get("/health/live", async () => ({ status: "ok" }));
   app.get("/health/ready", async (_request, reply) => {
-    const [authReady, storeReady, controlReady, policyControlReady] = await Promise.all([
+    const [authReady, storeReady, controlReady, policyControlReady, productMediaReady] = await Promise.all([
       options.authenticator.ready().catch(() => false),
       options.store.ready().catch(() => false),
       options.controlEnabled
@@ -219,8 +224,11 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
       options.policyControlEnabled
         ? options.store.policyControlReady().catch(() => false)
         : Promise.resolve(true),
+      options.productMedia
+        ? options.productMedia.ready().catch(() => false)
+        : Promise.resolve(true),
     ]);
-    if (!authReady || !storeReady || !controlReady || !policyControlReady) {
+    if (!authReady || !storeReady || !controlReady || !policyControlReady || !productMediaReady) {
       return reply.code(503).send({
         status: "not_ready",
         auth: authReady,
@@ -229,6 +237,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
         control_plane: Boolean(options.controlEnabled),
         policy_control: Boolean(options.policyControlEnabled),
         policy_lifecycle: policyLifecycleFeatures(options),
+        product_media: productMediaReady,
       });
     }
     return {
@@ -239,6 +248,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
       control_plane: Boolean(options.controlEnabled),
       policy_control: Boolean(options.policyControlEnabled),
       policy_lifecycle: policyLifecycleFeatures(options),
+      product_media: Boolean(options.productMedia),
     };
   });
 
@@ -256,6 +266,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
           policy_control: Boolean(options.policyControlEnabled),
           policy_page_ids: options.policyPageIds ?? [],
           policy_lifecycle: policyLifecycleFeatures(options),
+          product_media_upload: Boolean(options.productMedia),
         },
       },
     };
@@ -469,6 +480,30 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
   app.get("/admin/v1/catalog/summary", async (request) => ({
     summary: await options.store.catalogSummary(requireIdentity(request)),
   }));
+
+  app.post<{ Body: unknown }>(
+    "/admin/v1/product-media/uploads",
+    async (request, reply) => {
+      const identity = requireIdentity(request);
+      if (!options.productMedia) {
+        return reply.code(503).send(errorBody("ADMIN_PRODUCT_MEDIA_DISABLED", request.id));
+      }
+      if (identity.role !== "OWNER" && identity.role !== "EDITOR") {
+        return reply.code(403).send(errorBody("ADMIN_PRODUCT_MEDIA_FORBIDDEN", request.id));
+      }
+      try {
+        const uploaded = await options.productMedia.upload(identity, parseProductMediaUploadBody(request.body));
+        return reply.code(uploaded.duplicate ? 200 : 201).send({ upload: uploaded });
+      } catch (error) {
+        const code = error instanceof Error ? error.message : "PRODUCT_MEDIA_UPLOAD_FAILED";
+        const status = code === "PRODUCT_MEDIA_PRODUCT_NOT_FOUND" ? 404
+          : code.startsWith("PRODUCT_MEDIA_SHEETS_") ? 503
+            : code.startsWith("PRODUCT_MEDIA_") ? 400
+              : 500;
+        return reply.code(status).send(errorBody(code, request.id));
+      }
+    },
+  );
 
   app.get<{ Querystring: { page_id?: string } }>(
     "/admin/v1/handoffs/summary",

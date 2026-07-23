@@ -66,6 +66,7 @@ describe("admin control-plane API", () => {
       policyCanaryShadowEnabled: true,
       policyCanaryLiveEnabled: false,
       policyPublishEnabled: false,
+      productMediaUpload: false,
       policyPageIds: ["1198992073286645"],
     });
   });

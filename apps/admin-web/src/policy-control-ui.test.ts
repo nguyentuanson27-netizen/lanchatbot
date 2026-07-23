@@ -15,6 +15,7 @@ const identity: Identity = {
   policyCanaryShadowEnabled: true,
   policyCanaryLiveEnabled: false,
   policyPublishEnabled: false,
+  productMediaUpload: false,
 };
 
 function artifact(lifecycle: PolicyArtifact["lifecycle"], version: number): PolicyArtifact {

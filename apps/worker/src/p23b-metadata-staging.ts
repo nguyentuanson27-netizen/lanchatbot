@@ -16,6 +16,11 @@ import { normalizeHeader, normalizePayloadUrl, deterministicPointId } from "./p2
 
 export const IMAGE_METADATA_LOCK_PREFIX = "lock:ingest:lana_multimodal_data_v2:shard:";
 export const IMAGE_REGISTRY_SHEET = "image_registry";
+export const MANUAL_IMAGE_INTAKE_HEADERS = [
+  "INTAKE_ID", "MA_SP", "IMAGE_URL", "MEDIA_PURPOSE", "IMAGE_INTENTS", "NOTES",
+  "ACTIVE", "STATUS", "UPLOADED_BY", "UPLOADED_AT", "IMAGE_HASH", "ORIGINAL_FILE_NAME",
+  "IMAGE_ID", "PROCESSED_AT", "ERROR",
+] as const;
 
 /** 42 cột A:AP. A:V là vùng app ghi (AI_*), W:AP là vùng người duyệt — app không đụng. */
 export const IMAGE_REGISTRY_HEADERS = [
@@ -54,6 +59,21 @@ export interface MetadataRunContext {
   readonly shard_count: number;
   readonly shard_index: number;
   readonly shard_label: string;
+}
+
+export interface ManualImageIntakeRow {
+  readonly INTAKE_ID?: unknown;
+  readonly MA_SP?: unknown;
+  readonly IMAGE_URL?: unknown;
+  readonly MEDIA_PURPOSE?: unknown;
+  readonly IMAGE_INTENTS?: unknown;
+  readonly NOTES?: unknown;
+  readonly ACTIVE?: unknown;
+  readonly STATUS?: unknown;
+  readonly UPLOADED_AT?: unknown;
+  readonly IMAGE_HASH?: unknown;
+  readonly ROW_NUMBER?: unknown;
+  readonly row_number?: unknown;
 }
 
 const normalizeText = (value: unknown): string =>
@@ -146,6 +166,70 @@ export function buildMetadataJobs(
         delete_requested: reg.active === false,
       });
     }
+  }
+  return jobs;
+}
+
+const truthy = (value: unknown, fallback = true): boolean => {
+  const normalized = String(value ?? "").trim().toUpperCase();
+  if (!normalized) return fallback;
+  return ["TRUE", "1", "YES", "Y"].includes(normalized);
+};
+
+/** Ảnh do Admin upload vẫn dùng hồ sơ cha từ XML/product_registry, chỉ thay nguồn ảnh. */
+export function buildManualMetadataJobs(
+  profiles: readonly XmlProfile[],
+  intakeRows: readonly ManualImageIntakeRow[],
+  run: MetadataRunContext,
+  schema: MetadataSchemaConfig,
+): MetadataJob[] {
+  const profileByCode = new Map(
+    profiles.map((profile) => [String(profile.reg.ma_sp || "").trim().toUpperCase(), profile]),
+  );
+  const jobs: MetadataJob[] = [];
+  for (const row of intakeRows) {
+    const maSp = String(row.MA_SP || "").trim().toUpperCase();
+    const imageUrl = String(row.IMAGE_URL || "").trim();
+    const status = String(row.STATUS || "PENDING").trim().toUpperCase();
+    if (!maSp || !imageUrl || !truthy(row.ACTIVE, true) || ["REJECTED", "DISABLED"].includes(status)) continue;
+    const profile = profileByCode.get(maSp);
+    if (!profile) continue;
+    const base = buildMetadataJobs([{ ...profile, images: [imageUrl], primary_images: [] }], run, schema)[0];
+    if (!base) continue;
+    const purpose = String(row.MEDIA_PURPOSE || "FULL_LOOK").trim().toUpperCase();
+    const intents = String(row.IMAGE_INTENTS || "").trim();
+    const notes = String(row.NOTES || "").trim().slice(0, 500);
+    const uploadedAt = String(row.UPLOADED_AT || run.started_at).trim();
+    const imageHash = String(row.IMAGE_HASH || "").trim().toLowerCase();
+    const contextualText = [
+      base.contextual_text,
+      `Manual media purpose: ${purpose}`,
+      intents ? `Requested intents: ${intents}` : "",
+      notes ? `Operator note: ${notes}` : "",
+    ].filter(Boolean).join(". ").slice(0, 1_200);
+    const payload = {
+      ...base.payload,
+      source: "MANUAL_UPLOAD",
+      source_updated_at: uploadedAt,
+      manual_intake_id: String(row.INTAKE_ID || ""),
+      manual_media_purpose: purpose,
+      manual_image_intents: intents,
+      manual_notes: notes,
+      manual_image_hash: imageHash,
+      manual_sheet_row: Number(row.ROW_NUMBER || row.row_number || 0),
+      image_role: "ADDITIONAL",
+    };
+    const sourceHash = createHash("sha256").update(JSON.stringify({
+      point_id: base.point_id,
+      image_url: base.normalized_image_url,
+      image_hash: imageHash,
+      contextual_text: contextualText,
+      image_metadata_version: schema.version,
+      image_metadata_model: schema.model,
+      image_metadata_location: schema.location,
+      source: "MANUAL_UPLOAD",
+    })).digest("hex");
+    jobs.push({ ...base, payload, contextual_text: contextualText, source_hash: sourceHash });
   }
   return jobs;
 }
@@ -363,6 +447,7 @@ export interface StagedRow {
   readonly ma_sp: string;
   readonly image_url: string;
   readonly metadata_sheet_row: number;
+  readonly manual_intake_row: number;
   readonly existing_row: boolean;
   readonly source_changed: boolean;
   readonly review_status_update: string;
@@ -413,9 +498,10 @@ export function buildImageRegistryRow(
   // CDN có thể mã hóa lại ảnh không đổi, nên IMAGE_HASH chỉ dùng để đối soát;
   // trạng thái duyệt chỉ đổi khi vân tay nguồn ổn định thay đổi.
   const sourceChanged = !existing || String(existing.SOURCE_HASH || "") !== String(job.source_hash || "");
+  const sourceContext = String(job.payload?.source || "WEBSTORE_XML").trim().toUpperCase();
   const aiValues: (string | number | boolean)[] = [
     job.point_id, String(job.payload?.ma_sp || ""), job.image_url, job.normalized_image_url,
-    imageHash, "WEBSTORE_XML",
+    imageHash, sourceContext,
     meta.image_type, joinList(meta.image_intents), meta.image_angle, meta.image_detail_type,
     joinList(meta.image_parts_visible), joinList(meta.image_visual_colors),
     joinList(meta.image_visual_materials), meta.image_background_type,
@@ -430,18 +516,43 @@ export function buildImageRegistryRow(
     && draftMatchesExisting(existing as Record<string, unknown>, aiValues);
   const markStale = sourceChanged && !draftUnchanged;
 
+  const fullValues = [...aiValues, ...REVIEWER_DEFAULTS];
+  if (sourceContext === "MANUAL_UPLOAD") {
+    const purpose = String(job.payload?.manual_media_purpose || "FULL_LOOK").trim().toUpperCase();
+    const set = (column: typeof IMAGE_REGISTRY_HEADERS[number], value: string | boolean): void => {
+      const index = IMAGE_REGISTRY_HEADERS.indexOf(column);
+      if (index >= 0) fullValues[index] = value;
+    };
+    const mappings: Record<string, { imageType?: string; intents: string; detail?: string; parts?: string }> = {
+      FULL_LOOK: { intents: "PRODUCT_OVERVIEW | LOOKBOOK", parts: "FULL_SET" },
+      AO: { intents: "PRODUCT_OVERVIEW | DETAIL", parts: "AO" },
+      CHAN_VAY: { intents: "PRODUCT_OVERVIEW | DETAIL", parts: "CHAN_VAY" },
+      QUAN: { intents: "PRODUCT_OVERVIEW | DETAIL", parts: "QUAN" },
+      DETAIL_FABRIC: { imageType: "DETAIL", intents: "MATERIAL_CLOSEUP | DETAIL", detail: "FABRIC" },
+      FEEDBACK: { imageType: "FEEDBACK", intents: "FEEDBACK" },
+      SIZE_GUIDE: { imageType: "SIZE_GUIDE", intents: "SIZE_GUIDE" },
+    };
+    const mapping = mappings[purpose] ?? mappings.FULL_LOOK!;
+    if (mapping.imageType) set("IMAGE_TYPE", mapping.imageType);
+    set("IMAGE_INTENTS", mapping.intents);
+    if (mapping.detail) set("DETAIL_TYPE", mapping.detail);
+    if (mapping.parts) set("PARTS_VISIBLE", mapping.parts);
+    set("MANUAL_OVERRIDE", true);
+  }
+
   return {
     status: "STAGED",
     point_id: job.point_id,
     ma_sp: String(job.payload?.ma_sp || ""),
     image_url: job.image_url,
     metadata_sheet_row: Number(job.metadata_sheet_row),
+    manual_intake_row: Number(job.payload?.manual_sheet_row || 0),
     existing_row: Boolean(existing),
     source_changed: sourceChanged,
     review_status_update: markStale ? "STALE" : "",
     source_hash: job.source_hash,
     ai_values: aiValues,
-    full_values: [...aiValues, ...REVIEWER_DEFAULTS],
+    full_values: fullValues,
     error: "",
   };
 }

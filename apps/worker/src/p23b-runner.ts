@@ -12,10 +12,12 @@ import {
   buildImageRegistryMap,
   buildImageRegistryRow,
   buildMetadataJobs,
+  buildManualMetadataJobs,
   buildSheetBatchRequest,
   parseImageMetadata,
   selectPendingMetadataBatch,
   IMAGE_REGISTRY_HEADERS,
+  MANUAL_IMAGE_INTAKE_HEADERS,
   type ImageClassifier,
   type MetadataRunContext,
   type MetadataSchemaConfig,
@@ -165,6 +167,7 @@ export class P23bMetadataStaging {
         ma_sp: String(job.payload?.ma_sp || ""),
         image_url: job.image_url,
         metadata_sheet_row: Number(job.metadata_sheet_row || 0),
+        manual_intake_row: Number(job.payload?.manual_sheet_row || 0),
         existing_row: Boolean(job.existing_image_registry),
         source_changed: false,
         review_status_update: "",
@@ -251,6 +254,31 @@ export class P23bMetadataStaging {
     return { results, updated, appended, writeOk };
   }
 
+  /** Đồng bộ trạng thái intake sau khi checkpoint image_registry đã ghi thành công. */
+  private async updateManualIntake(rows: readonly StagedRow[]): Promise<void> {
+    if (!this.options.writeEnabled) return;
+    const processedAt = this.now().toISOString();
+    const data = rows.flatMap((row) => {
+      const number = Number(row.manual_intake_row || 0);
+      if (number < 2) return [];
+      return [
+        {
+          range: `manual_image_intake!H${number}`,
+          values: [[row.status === "STAGED" ? "STAGED" : "ERROR"]],
+        },
+        {
+          range: `manual_image_intake!M${number}:O${number}`,
+          values: [[
+            row.point_id,
+            processedAt,
+            row.status === "FAILED" ? row.error.slice(0, 500) : "",
+          ]],
+        },
+      ];
+    });
+    if (data.length) await this.options.sheets.batchUpdateValues(this.options.sheetId, data);
+  }
+
   async run(): Promise<P23bRunSummary> {
     const redis = this.options.redis;
     const runStartMs = this.now().getTime();
@@ -280,6 +308,13 @@ export class P23bMetadataStaging {
       const createdSheet = this.options.writeEnabled
         ? await this.options.sheets.ensureSheet(this.options.sheetId, "image_registry", IMAGE_REGISTRY_HEADERS)
         : false;
+      if (this.options.writeEnabled) {
+        await this.options.sheets.ensureSheet(
+          this.options.sheetId,
+          "manual_image_intake",
+          MANUAL_IMAGE_INTAKE_HEADERS,
+        );
+      }
 
       // XML và hồ sơ sản phẩm không đổi trong một lần chạy nên chỉ tải một lần;
       // riêng image_registry phải đọc lại mỗi vòng vì các vòng trước đã thêm dòng.
@@ -324,14 +359,24 @@ export class P23bMetadataStaging {
 
         const ranges = await this.options.sheets.batchGetValues(
           this.options.sheetId,
-          ["product_registry!A:AZ", "image_registry!A:AP"],
+          ["product_registry!A:AZ", "image_registry!A:AP", "manual_image_intake!A:O"],
           "UNFORMATTED_VALUE",
         );
         const registryResult = buildRegistryMap(sheetRowsFromValues(ranges[0]?.values));
         const profiles: XmlProfile[] = normalizeStructuredExtraction(
           buildXmlProfiles(registryResult.registry, groupXmlItems(channelItems), this.now().toISOString()),
         );
-        const jobs = buildMetadataJobs(profiles, run, this.options.schema);
+        const xmlJobs = buildMetadataJobs(profiles, run, this.options.schema);
+        const manualJobs = buildManualMetadataJobs(
+          profiles,
+          sheetRowsFromValues(ranges[2]?.values),
+          run,
+          this.options.schema,
+        );
+        // URL thủ công trùng XML dùng cùng point ID; nguồn thủ công đứng sau và thắng để giữ nhãn người vận hành.
+        const jobs = [...new Map(
+          [...xmlJobs, ...manualJobs].map((job) => [job.point_id, job]),
+        ).values()];
         const registry = buildImageRegistryMap(sheetRowsFromValues(ranges[1]?.values));
         const batch = selectPendingMetadataBatch(jobs, registry, run, policy, this.now().getTime());
 
@@ -344,6 +389,7 @@ export class P23bMetadataStaging {
             round: round + 1,
             profiles: profiles.length,
             jobs: jobs.length,
+            manualJobs: manualJobs.length,
             registryRows: registry.rows.length,
             pending: batch.meta.pending_metadata_count,
             selected: batch.meta.selected_metadata_count,
@@ -366,6 +412,7 @@ export class P23bMetadataStaging {
         totalUpdated += outcome.updated;
         totalAppended += outcome.appended;
         if (!outcome.writeOk) writeOk = false;
+        if (outcome.writeOk) await this.updateManualIntake(outcome.results);
 
         // Không ghi được thì vòng sau vẫn thấy đúng danh sách cũ -> lặp vô hạn.
         if (!outcome.writeOk && this.options.writeEnabled) {

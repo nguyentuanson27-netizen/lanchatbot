@@ -16,6 +16,8 @@ import type {
   OutreachSummary,
   PancakeTag,
   ProductDataSummary,
+  ProductMediaUpload,
+  ManualMediaPurpose,
   PolicyArtifact,
   PolicyArtifactKind,
   PolicyControlData,
@@ -105,6 +107,13 @@ async function request<T>(
 }
 
 function policyErrorMessage(code: string): string {
+  if (code === "PRODUCT_MEDIA_PRODUCT_NOT_FOUND") return "Mã sản phẩm chưa có trong product_registry.";
+  if (code === "PRODUCT_MEDIA_SIZE_INVALID") return "Ảnh phải nhỏ hơn 8 MB.";
+  if (code === "PRODUCT_MEDIA_MIME_INVALID" || code === "PRODUCT_MEDIA_SIGNATURE_INVALID") {
+    return "Chỉ nhận ảnh JPG, PNG hoặc WebP hợp lệ.";
+  }
+  if (code.startsWith("PRODUCT_MEDIA_SHEETS_")) return "Google Sheets đang tạm thời không phản hồi.";
+  if (code.startsWith("PRODUCT_MEDIA_")) return "Không thể tải ảnh lên. Vui lòng kiểm tra lại dữ liệu.";
   if (code === "ADMIN_POLICY_CANARY_LIVE_DISABLED") {
     return "Canary gửi thật đang bị khóa bởi cổng an toàn.";
   }
@@ -223,6 +232,39 @@ export async function getIdentity(signal?: AbortSignal): Promise<Identity> {
     policyCanaryShadowEnabled: policyLifecycle.canary_shadow === true,
     policyCanaryLiveEnabled: policyLifecycle.canary_live === true,
     policyPublishEnabled: policyLifecycle.publish === true,
+    productMediaUpload: capabilities.product_media_upload === true,
+  };
+}
+
+export async function uploadProductMedia(input: {
+  maSp: string;
+  mediaPurpose: ManualMediaPurpose;
+  notes: string;
+  fileName: string;
+  mimeType: string;
+  contentBase64: string;
+}): Promise<ProductMediaUpload> {
+  const payload = await request<JsonRecord>("/product-media/uploads", undefined, {
+    method: "POST",
+    body: {
+      ma_sp: input.maSp,
+      media_purpose: input.mediaPurpose,
+      notes: input.notes,
+      file_name: input.fileName,
+      mime_type: input.mimeType,
+      content_base64: input.contentBase64,
+    },
+  });
+  const item = record(payload.upload);
+  return {
+    intakeId: stringValue(item.intakeId),
+    maSp: stringValue(item.maSp),
+    imageUrl: stringValue(item.imageUrl),
+    mediaPurpose: stringValue(item.mediaPurpose) as ManualMediaPurpose,
+    imageIntents: arrayValue(item.imageIntents).map(String),
+    status: "PENDING",
+    uploadedAt: stringValue(item.uploadedAt),
+    duplicate: item.duplicate === true,
   };
 }
 

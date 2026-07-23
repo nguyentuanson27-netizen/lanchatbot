@@ -5,6 +5,7 @@ import {
   buildImageRegistryMap,
   buildImageRegistryRow,
   buildMetadataJobs,
+  buildManualMetadataJobs,
   buildSheetBatchRequest,
   parseImageMetadata,
   selectPendingMetadataBatch,
@@ -89,6 +90,23 @@ describe("P2.3B dựng job phân tích", () => {
       ],
     }));
     expect(buildMetadataJobs(profiles, run, schema)).toHaveLength(1);
+  });
+
+  it("ảnh Admin upload dùng hồ sơ cha nhưng giữ nguồn MANUAL_UPLOAD", () => {
+    const jobs = buildManualMetadataJobs(profilesFor(), [{
+      INTAKE_ID: "intake-1",
+      MA_SP: "SV695",
+      IMAGE_URL: "https://admin.lanadesign.vn/lana-public/products/sv695-detail.jpg",
+      MEDIA_PURPOSE: "DETAIL_FABRIC",
+      IMAGE_INTENTS: "MATERIAL_CLOSEUP | DETAIL",
+      ACTIVE: true,
+      STATUS: "PENDING",
+      IMAGE_HASH: "abc",
+    }], run, schema);
+    expect(jobs).toHaveLength(1);
+    expect(jobs[0]?.payload.source).toBe("MANUAL_UPLOAD");
+    expect(jobs[0]?.payload.manual_media_purpose).toBe("DETAIL_FABRIC");
+    expect(jobs[0]?.contextual_text).toContain("Manual media purpose: DETAIL_FABRIC");
   });
 });
 
