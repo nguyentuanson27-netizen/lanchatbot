@@ -944,13 +944,13 @@ Agent chỉ đổi trạng thái sau khi có bằng chứng. Giá trị hợp l�
 | 1.3 Business guard | CANARY_LIVE | feat/realtime-wave1-grounded-facts | `f27de9c` | guard 17; buying signal 19; golden 6; full typecheck/build | Flag ON; ambiguous 0, duplicate sequence 0 | Chặn NO_REPLY khi có buying signal, xin PII sớm và ghi reason code kể cả khi fallback |
 | 1.4 Judge v2 | SHADOW | feat/realtime-wave1-grounded-facts | `f27de9c` | Judge/Vertex 19; shadow 6; migration suite 16; toàn repo 727 test pass | Shadow `DRY_RUN`, send disabled, role không ghi Meta Outbox | Persist verified envelope; chưa đủ evidence để CANARY_LIVE |
 | 2.1 Unified reducer | DEFERRED | — | — | — | — | Làm sau |
-| 2.2 Profile/measurements | NOT_STARTED | — | — | — | — |  |
-| 2.3 Verified variant | NOT_STARTED | — | — | — | — |  |
-| 2.4 Context trim | NOT_STARTED | — | — | — | — | Sau 2.2/2.3 |
-| 3.1 Multi-fact/multi-product | NOT_STARTED | — | — | — | — |  |
-| 3.2 Catalog advisory | NOT_STARTED | — | — | — | — |  |
+| 2.2 Profile/measurements | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | extractor 4; profile merge 8; size engine 15; database 36; toàn repo 739 pass | Migration 0019; flag ON chỉ page test; profile TTL 48h | CAS và PII gate đạt; luồng xác nhận khi số đo mới xung đột vẫn cần bổ sung trước promotion rộng |
+| 2.3 Verified variant | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | verified snapshot 5; worker 209; toàn repo 739 pass | Flag ON chỉ page test; rollback/roll-forward đạt | Mention chỉ map qua POS snapshot; không giả nhãn màu thành POS color ID |
+| 2.4 Context trim | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | worker 209; full build/typecheck | Context limit 10 chỉ page test | Redis/PostgreSQL retention không đổi |
+| 3.1 Multi-fact/multi-product | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | contract 3; worker 209; toàn repo 739 pass | Flag ON chỉ page test; max 3 product query | Facts cùng product chạy có thứ tự; tối đa 3 product chạy song song |
+| 3.2 Catalog advisory | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | structured advisory fixtures trong worker 209 | Flag ON chỉ page test | Qdrant fields trước; DESCRIPTION_XML chỉ fallback được kiểm soát |
 | 3.3 One-question A/B | DEFERRED | — | — | — | — | Làm sau |
-| 3.4 Audit/order intent | NOT_STARTED | — | — | — | — |  |
+| 3.4 Audit/order intent | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | DB atomic/idempotent 7; contracts 71; toàn repo 739 pass | Decision audit v2 ON; duplicate plan sequence 0 | Không lưu raw model body, PII hay secret; order intent giữ idempotency hiện có |
 
 ## 18. Decision log
 

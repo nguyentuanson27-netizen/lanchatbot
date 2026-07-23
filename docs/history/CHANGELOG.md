@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-07-23 — realtime Wave 2/3 CANARY_LIVE r12
+
+- Nối CustomerProfileV1 vào runtime bằng extractor số đo deterministic, profile pseudonymous TTL 48 giờ và revision/CAS; size engine chỉ dùng chart đã xác minh.
+- Thêm verified variant dựa trên POS snapshot; unknown/ambiguous không map ngầm và nhãn màu không được giả làm POS color ID.
+- Giảm model context trên page test từ 30 xuống 10 tin, không thay retention lịch sử Redis/PostgreSQL.
+- Thêm BusinessFactQueriesV2 tối đa ba sản phẩm, catalog advisory có cấu trúc và decision audit v2 không chứa raw model body/PII/secret.
+- Áp dụng migration additive `0019_customer_profile_wave2` sau backup và restore-test `up → down → up`.
+- Full build/typecheck và `739/739` test đạt; realtime LIVE/IDLE, restart count 0, ambiguous 0 và duplicate reply-plan sequence 0.
+- Rollback/roll-forward sáu feature flag đạt trong 15 giây. Chỉ realtime worker được recreate; API, delivery, shadow, POS, P2.3 và n8n không restart.
+- Page allowlist giữ duy nhất `1198992073286645`; test Messenger trực tiếp và luồng xác nhận số đo xung đột vẫn là gate trước khi promotion rộng.
+
 ## 2026-07-23 — realtime Wave 1 CANARY_LIVE r11
 
 - Bật grounded draft, verified fact assembler, buying-signal guard và decision telemetry trên realtime cho duy nhất page test `1198992073286645`.

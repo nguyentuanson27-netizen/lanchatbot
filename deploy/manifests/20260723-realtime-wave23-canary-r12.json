@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-23T21:35:13+07:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "feat/realtime-wave2-profile-variant-context",
+  "sourceCommit": "b29725d1071bb202b0d43095f1d6d52c8331cfc6",
+  "releaseTag": "20260723-realtime-wave23-canary-r12",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260723-realtime-wave23-canary-r12",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260723-realtime-wave1-canary-live-r11",
+  "pageAllowlist": [
+    "1198992073286645"
+  ],
+  "images": {
+    "realtime": {
+      "name": "lana-chatbot-app:realtime-wave23-b29725d",
+      "digest": "sha256:b732a4310b1f13662648d57f585259413e053191bc01bb496d12691d8abdbf03"
+    },
+    "shadow": {
+      "name": "lana-chatbot-app:realtime-wave1-shadow-f27de9c",
+      "changed": false
+    }
+  },
+  "composeSha256": "2ab106df1684f4695c889e746e2e27e5e67de9f76ddc2c127ae680cff49cbbdf",
+  "featureFlags": {
+    "REALTIME_CUSTOMER_PROFILE_V1": true,
+    "REALTIME_VERIFIED_VARIANT_V2": true,
+    "REALTIME_CONTEXT_HISTORY_LIMIT": 10,
+    "REALTIME_MULTI_FACT_QUERY_V2": true,
+    "REALTIME_CATALOG_ADVISORY_V1": true,
+    "REALTIME_DECISION_AUDIT_V2": true
+  },
+  "migrations": {
+    "0019_customer_profile_wave2": "e0e631742176ad3ccba8ab403f68f0a58a620658355ed4257d76f035fd6a8d94"
+  },
+  "verification": {
+    "monorepoBuild": "PASS",
+    "monorepoTypecheck": "PASS",
+    "tests": "739_PASS",
+    "migrationRestoreCycle": "PASS_UP_DOWN_UP",
+    "realtimeHealth": "PASS",
+    "realtimeRestartCount": 0,
+    "workerHeartbeat": "LIVE_IDLE_FRESH",
+    "redis": "PASS",
+    "appEnabledPages": 1,
+    "appEnabledPageId": "1198992073286645",
+    "ambiguousRecent": 0,
+    "duplicateReplyPlanSequence": 0,
+    "featureFlagRollbackRollforward": "PASS_15_SECONDS",
+    "nonRealtimeServicesRestarted": false,
+    "currentSymlinkUpdated": true,
+    "directMessengerConversationTest": "PENDING_OWNER_TEST"
+  },
+  "knownCanaryFollowUps": [
+    "Persisted confirmation flow for conflicting customer measurements is not yet enabled.",
+    "Promotion beyond the single page test remains forbidden."
+  ],
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260723-realtime-wave1-canary-live-r11",
+    "envBackupPath": "/opt/lana-chatbot/backups/20260723-realtime-wave23-canary-r12/env.infrastructure.before",
+    "databaseBackupPath": "/opt/lana-chatbot/backups/20260723-realtime-wave23-canary-r12/lana_chatbot_pre_0019.dump",
+    "databaseBackupSha256": "4e163ffbf6bbc4239035c3086d7bf51ba37b6067bf2f70c268e995d529b0ab76",
+    "dataDeletionRequired": false
+  },
+  "promotionGate": {
+    "status": "CANARY_LIVE_TEST_READY",
+    "scope": "PAGE_TEST_ONLY",
+    "directMessengerEvidenceRequired": true,
+    "publishedBeyondPageTest": false
+  }
+}

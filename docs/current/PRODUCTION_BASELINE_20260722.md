@@ -5,16 +5,27 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260723-realtime-wave1-canary-live-r11`.
-- Compose SHA-256: `26bc319f13544f8caa3526948ade624b17c432c922e4c0df2b74b07416e4a18b`.
+- Current release: `/opt/lana-chatbot/releases/20260723-realtime-wave23-canary-r12`.
+- Compose SHA-256: `2ab106df1684f4695c889e746e2e27e5e67de9f76ddc2c127ae680cff49cbbdf`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
-- Migration mới nhất: `0018_shadow_verified_fact_payload`.
+- Migration mới nhất: `0019_customer_profile_wave2`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
 Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời điểm kiểm kê. Danh sách image digest đầy đủ nằm trong release manifest.
 
-Realtime page test và shadow worker đang chạy image `lana-chatbot-app:realtime-wave1-shadow-f27de9c` (`sha256:dbcab3412fdcc2343b6c8d23616250f8ab9ce53078e43665b5f79b0be3249d16`) từ commit `f27de9c9c7ad7dee7758dfc8c3487604bb782048`. Admin Web, Admin API và Admin Simulation Worker giữ image `lana-chatbot-app:customer-care-policy-r10`; P2.3B giữ image r9 và POS snapshot giữ image r6. API webhook, delivery worker và n8n không đổi.
+Realtime page test chạy image `lana-chatbot-app:realtime-wave23-b29725d` (`sha256:b732a4310b1f13662648d57f585259413e053191bc01bb496d12691d8abdbf03`) từ commit `b29725d1071bb202b0d43095f1d6d52c8331cfc6`. Shadow worker giữ image Wave 1; Admin Web, Admin API và Admin Simulation Worker giữ image `lana-chatbot-app:customer-care-policy-r10`; P2.3B giữ image r9 và POS snapshot giữ image r6. API webhook, delivery worker và n8n không đổi.
+
+## Realtime Wave 2/3 CANARY_LIVE
+
+- Chỉ page `1198992073286645` có `routing_owner=APP`, `app_send_enabled=true`, `kill_switch=false`; không mở thêm page.
+- Wave 2 bật Customer Profile số đo pseudonymous TTL 48 giờ, merge theo field bằng revision/CAS, verified variant qua POS snapshot và model context 10 tin. Retention Redis 20 ngày/PostgreSQL 6 tháng không đổi.
+- Size engine chỉ dùng size chart đã xác minh. Thiếu chart/dữ liệu thì hỏi thêm hoặc handoff; không đoán size. Tên, số điện thoại và địa chỉ không vào profile này.
+- Wave 3 bật BusinessFactQueriesV2 tối đa ba product query, catalog advisory từ metadata có cấu trúc và decision audit v2 bằng hash/source version/reason code, không lưu raw model body/PII/secret.
+- Migration `0019_customer_profile_wave2` đã backup, restore-test `up → down → up` và áp dụng production. Backup: `/opt/lana-chatbot/backups/20260723-realtime-wave23-canary-r12/lana_chatbot_pre_0019.dump`, SHA-256 `4e163ffbf6bbc4239035c3086d7bf51ba37b6067bf2f70c268e995d529b0ab76`.
+- Full build/typecheck và `739/739` test đạt. Sau cutover worker `LIVE/IDLE`, heartbeat fresh, restart count 0, `ambiguous_recent=0`, duplicate `reply_plan_id + sequence_no=0`.
+- Rollback/roll-forward sáu feature flag đạt trong 15 giây; migration additive và profile đã ghi được giữ nguyên khi rollback.
+- Test hội thoại Messenger trực tiếp và luồng xác nhận bền vững khi số đo mới xung đột vẫn là gate bắt buộc trước promotion rộng.
 
 ## Realtime Wave 1 CANARY_LIVE
 

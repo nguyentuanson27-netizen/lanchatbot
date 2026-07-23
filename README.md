@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260723-realtime-wave1-canary-live-r11`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260723-realtime-wave23-canary-r12`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -17,7 +17,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 ## Trạng thái production ngày 2026-07-23
 
 - API webhook tiếp tục chạy image `lana-chatbot-app:inbound-debounce-r1`.
-- Realtime page test chạy CANARY_LIVE bằng image `lana-chatbot-app:realtime-wave1-shadow-f27de9c`; grounded draft, verified fact assembler, buying-signal guard và decision telemetry đều bật. Hard gate vẫn chỉ cho page `1198992073286645`.
+- Realtime page test chạy CANARY_LIVE bằng image `lana-chatbot-app:realtime-wave23-b29725d`; Wave 1, Customer Profile/Size, verified variant, context 10, multi-fact, catalog advisory và decision audit v2 đều bật. Hard gate vẫn chỉ cho page `1198992073286645`.
 - Shadow worker chạy cùng image, bật Judge v2 ở `DRY_RUN`; `APP_SEND_ENABLED=false`, `CHATBOT_SEND_ENABLED=false` và role DB không có quyền ghi Meta Outbox.
 - Admin Web, Admin API và Simulation Worker giữ image `lana-chatbot-app:customer-care-policy-r10`; P2.3B giữ image r9 và POS snapshot giữ image r6.
 - Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
@@ -27,6 +27,10 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - Sales-cycle state được mã hóa trong PostgreSQL; event là append-only. Giá/tồn/size/ETA được kiểm tra lại trước preview và xác nhận.
 - Simulation Worker chạy side-effect-free. Baseline trước publish là `HISTORICAL_ACTUAL` và kết quả `INSUFFICIENT_EVIDENCE`; owner đã chủ động override điều kiện này khi phát hành r4.
 - Câu hỏi tiếp nối về ảnh/giá/tồn/size/ETA dùng `state.currentProductId` đã xác minh khi khách không nêu mã mới; mã mới không tìm thấy không được lùi về sản phẩm cũ.
+- Customer Profile số đo dùng khóa khách đã băm, merge theo field bằng revision/CAS và tự hết hạn sau 48 giờ; không chứa tên, số điện thoại hoặc địa chỉ. Size engine chỉ dùng size chart đã xác minh, thiếu dữ liệu thì hỏi tiếp hoặc handoff, không đoán.
+- Mention màu/size được map qua POS snapshot; nhãn màu không bị ghi giả thành POS color ID. Context gửi model giảm từ 30 xuống 10 tin nhưng retention Redis 20 ngày và PostgreSQL 6 tháng không đổi.
+- Một lượt có thể hỏi tối đa ba sản phẩm và nhiều facts giá/tồn/size/ETA; mỗi fact vẫn lấy từ typed business adapter. Catalog advisory ưu tiên metadata có cấu trúc, chỉ dùng `DESCRIPTION_XML` làm fallback được kiểm soát.
+- Decision audit v2 lưu hash của proposal/guard/reply, source version, latency và kết quả từng fact query; không lưu raw model body, secret hay dữ liệu định danh.
 - Hậu mãi ngắt sớm trước product search/model, gửi đúng một câu giữ chân qua Meta Outbox rồi handoff/gắn tag Vận Đơn. Handoff khác vẫn im lặng.
 - Tin nhắn khách được gom sau 5 giây yên lặng; webhook trùng không kéo dài cửa sổ chờ.
 - Báo giá dùng tên sản phẩm từ Qdrant; `DESCRIPTION_XML` chỉ làm ngữ cảnh cho câu mô tả form/chất liệu. Text được gửi trước, ảnh đủ điều kiện gửi sau 0,5 giây và vẫn bị chặn bởi thứ tự Outbox.
@@ -40,10 +44,10 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - App-native workers đang sở hữu POS snapshot và P2.3A/B/C.
 - Các workflow n8n P2.2/P2.3 tương ứng đang inactive; không được kích hoạt đồng thời với app-native worker.
 - Timer `lana-p23-daily.timer` đang `disabled/inactive`.
-- PostgreSQL đã áp dụng migration đến `0018_shadow_verified_fact_payload`; migration 0018 chỉ bổ sung payload facts đã xác minh cho shadow evaluation và tương thích ngược với runtime r10.1.
+- PostgreSQL đã áp dụng migration đến `0019_customer_profile_wave2`; migration 0019 bổ sung projection hồ sơ số đo 48 giờ theo pseudonymous customer key và tương thích ngược.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest CANARY_LIVE mới nhất nằm tại [Wave 1 canary live](deploy/manifests/20260723-realtime-wave1-canary-live-r11.json); r10.1 tiếp tục là last-known-good để rollback.
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest CANARY_LIVE mới nhất nằm tại [Wave 2/3 canary](deploy/manifests/20260723-realtime-wave23-canary-r12.json); r11 là release gần nhất để rollback.
 
 ## Kiến trúc dữ liệu
 
