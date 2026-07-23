@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-24T01:05:00+07:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "fix/sizechart-retry-temporary-failures",
+  "sourceCommit": "5794dde5369eb3e924b64708465270b2a03c7bec",
+  "releaseTag": "20260724-sizechart-retry-hotfix-r13.2",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260724-sizechart-retry-hotfix-r13.2",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260724-sizechart-productfacts-v2-canary-r13.1",
+  "pageAllowlist": ["1198992073286645"],
+  "images": {
+    "realtime": {
+      "name": "lana-chatbot-app:sizechart-facts-v2-vertex-hotfix-8f2de6f",
+      "digest": "sha256:e1cd443cd407fbfba9828743959a184eb320610b25ec532711aeaf8dc8f3e6aa"
+    },
+    "admin": {
+      "name": "lana-chatbot-app:sizechart-facts-v2-vertex-hotfix-8f2de6f",
+      "digest": "sha256:e1cd443cd407fbfba9828743959a184eb320610b25ec532711aeaf8dc8f3e6aa"
+    },
+    "sizeChartExtractor": {
+      "name": "lana-chatbot-app:sizechart-retry-hotfix-5794dde",
+      "digest": "sha256:664586d227307d3f92fcb103119d5e17c2dee804eddc46912a32af026a1cc632"
+    }
+  },
+  "composeSha256": "35194b9505378ea32d787c411d7cce8f7f949838ac0515c5b064b4ae79842570",
+  "verification": {
+    "monorepoBuild": "PASS",
+    "monorepoTypecheck": "PASS",
+    "tests": "745_PASS",
+    "workerTests": "242_PASS",
+    "messengerScenarios": "30_PASS",
+    "temporaryFailureClassifier": "PASS",
+    "liveCutover": "PENDING",
+    "liveCanary": "PENDING_100_INBOUND_OR_48_HOURS"
+  },
+  "retryPolicy": {
+    "temporaryFailureDelaySeconds": 300,
+    "normalIntervalSeconds": 86400,
+    "temporaryFailures": ["HTTP_408", "HTTP_425", "HTTP_429", "HTTP_5XX", "NETWORK_TIMEOUT"],
+    "reviewRequiredTriggersEarlyRetry": false
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260724-sizechart-productfacts-v2-canary-r13.1",
+    "dataDeletionRequired": false
+  }
+}

@@ -17,7 +17,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 ## Trạng thái production ngày 2026-07-23
 
 - API webhook tiếp tục chạy image `lana-chatbot-app:inbound-debounce-r1`.
-- Realtime page test đang ở candidate r13.1 với ProductFactsV2, Media Selector V2, profile/variant/multi-fact và Size Chart app-native. Hard gate vẫn chỉ cho page `1198992073286645`.
+- Realtime page test giữ r13.1 với ProductFactsV2, Media Selector V2, profile/variant/multi-fact; Size Chart scheduler ở candidate r13.2. Hard gate vẫn chỉ cho page `1198992073286645`.
 - Shadow worker chạy cùng image, bật Judge v2 ở `DRY_RUN`; `APP_SEND_ENABLED=false`, `CHATBOT_SEND_ENABLED=false` và role DB không có quyền ghi Meta Outbox.
 - Admin Web, Admin API và Simulation Worker giữ image `lana-chatbot-app:customer-care-policy-r10`; P2.3B giữ image r9 và POS snapshot giữ image r6.
 - Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
@@ -47,7 +47,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - PostgreSQL đã áp dụng migration đến `0019_customer_profile_wave2`; migration 0019 bổ sung projection hồ sơ số đo 48 giờ theo pseudonymous customer key và tương thích ngược.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest candidate mới nhất là [Size Chart r13.1](deploy/manifests/20260724-sizechart-productfacts-v2-canary-r13.1.json); r13 là release gần nhất để rollback.
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Size Chart retry r13.2](deploy/manifests/20260724-sizechart-retry-hotfix-r13.2.json); r13.1 là release gần nhất để rollback.
 
 ## Kiến trúc dữ liệu
 
