@@ -138,6 +138,7 @@ async function main(): Promise<void> {
     let delay = intervalMs;
     try {
       const summary = await runner.run();
+      if (summary.retryableFailures > 0) delay = retryMs;
       log("info", { summary }, "size chart extraction cycle finished");
     } catch (error) {
       delay = retryMs;

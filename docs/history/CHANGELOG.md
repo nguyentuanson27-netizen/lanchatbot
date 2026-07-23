@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-24 — Size Chart retry hotfix r13.2
+
+- Scheduler retry sau 5 phút khi còn lỗi tạm thời như Vertex 429/5xx hoặc lỗi mạng.
+- Ảnh cần duyệt không kích hoạt vòng retry sớm, tránh gọi Vertex lặp lại và tốn chi phí.
+- Full build/typecheck/test đạt `745/745`; worker đạt `242/242`, gồm `30/30` kịch bản Messenger.
+- Phạm vi deploy chỉ là `size-chart-extractor`; realtime và Admin giữ nguyên image r13.1.
+
 ## 2026-07-24 — Size Chart Vertex hotfix r13.1
 
 - Sửa response schema để tương thích Vertex và đồng bộ enum boundary policy với contract runtime.
