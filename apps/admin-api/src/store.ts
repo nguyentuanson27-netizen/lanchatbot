@@ -1770,6 +1770,13 @@ function verifySizeChartContent(
   if (value.kind !== "SIZE_CHART" || !value.chart || typeof value.chart !== "object") {
     throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
   }
+  if (
+    value.extraction &&
+    typeof value.extraction === "object" &&
+    (value.extraction as Record<string, unknown>).measurementBasis !== "BODY"
+  ) {
+    throw new AdminQueryError("ADMIN_SIZE_CHART_BODY_BASIS_REQUIRED");
+  }
   const chart = value.chart as Record<string, unknown>;
   if (!chart.reference || typeof chart.reference !== "object") {
     throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");

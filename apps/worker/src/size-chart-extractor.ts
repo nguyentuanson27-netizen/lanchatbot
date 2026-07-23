@@ -267,7 +267,7 @@ export class SizeChartExtractionRunner {
             ),
             this.options.extractionVersion,
           );
-          if (extracted.measurementBasis !== "BODY" || extracted.confidence < minimumConfidence) {
+          if (extracted.measurementBasis === "UNKNOWN" || extracted.confidence < minimumConfidence) {
             failed += 1;
             errors.push(`${row.MA_SP}:SIZE_CHART_REVIEW_REQUIRED`);
             continue;
