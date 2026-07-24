@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-07-24 — Admin batch image intake + AI classification r16
+
+- Giao diện Admin cho phép chọn tối đa 20 ảnh trong một lần cho cùng `BRAND + MA_SP`; bỏ hoàn toàn trường loại ảnh và ghi chú vận hành.
+- UI kiểm tra mã theo catalog `product_registry` trước khi tải; Admin API kiểm tra lại cặp brand + mã và trạng thái `ACTIVE`, nên không thể ghi ảnh cho mã sai brand hoặc sản phẩm đã tắt.
+- Mỗi ảnh vẫn đi qua request riêng, tối đa hai request song song, tránh vượt body limit 12 MB và cô lập lỗi từng ảnh; SHA-256 giữ idempotency khi retry/trùng.
+- `manual_image_intake` thêm cột `BRAND` ở cuối để không lệch dữ liệu cũ; ảnh mới dùng `MEDIA_PURPOSE=AI_AUTO`, `STATUS=PENDING_AI`.
+- P2.3B dùng Vertex gắn nhãn AI, không còn ghi `MANUAL_OVERRIDE` cho ảnh AI_AUTO. FEEDBACK/UGC chỉ là nhãn nháp và bắt buộc con người duyệt.
+- Cổng xuất bản không đổi: chỉ `APPROVED + ACTIVE` mới được P2.3C đưa sang Qdrant; ảnh gốc vẫn tự xóa sau 24 giờ.
+
+
+
 
 ## 2026-07-24 — Admin dashboard least-privilege hotfix r15.1
 

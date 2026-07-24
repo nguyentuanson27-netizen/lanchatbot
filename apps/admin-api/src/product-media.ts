@@ -21,24 +21,12 @@ export const MANUAL_IMAGE_INTAKE_HEADERS = [
   "IMAGE_ID",
   "PROCESSED_AT",
   "ERROR",
+  "BRAND",
 ] as const;
-
-export const MANUAL_MEDIA_PURPOSES = [
-  "FULL_LOOK",
-  "AO",
-  "CHAN_VAY",
-  "QUAN",
-  "DETAIL_FABRIC",
-  "FEEDBACK",
-  "SIZE_GUIDE",
-] as const;
-
-export type ManualMediaPurpose = (typeof MANUAL_MEDIA_PURPOSES)[number];
 
 export interface ProductMediaUploadInput {
   readonly maSp: string;
-  readonly mediaPurpose: ManualMediaPurpose;
-  readonly notes: string;
+  readonly brand: string;
   readonly originalFileName: string;
   readonly mimeType: string;
   readonly contentBase64: string;
@@ -47,16 +35,26 @@ export interface ProductMediaUploadInput {
 export interface ProductMediaUploadResult {
   readonly intakeId: string;
   readonly maSp: string;
+  readonly brand: string;
   readonly imageUrl: string;
-  readonly mediaPurpose: ManualMediaPurpose;
-  readonly imageIntents: readonly string[];
-  readonly status: "PENDING";
+  readonly classificationStatus: "PENDING_AI";
+  readonly status: "PENDING_AI";
   readonly uploadedAt: string;
   readonly duplicate: boolean;
 }
 
+export interface ProductMediaCatalog {
+  readonly brands: readonly string[];
+  readonly products: readonly {
+    readonly maSp: string;
+    readonly brand: string;
+    readonly active: boolean;
+  }[];
+}
+
 export interface ProductMediaService {
   ready(): Promise<boolean>;
+  catalog(): Promise<ProductMediaCatalog>;
   upload(identity: AdminIdentity, input: ProductMediaUploadInput): Promise<ProductMediaUploadResult>;
 }
 
@@ -73,22 +71,13 @@ export interface ProductMediaServiceOptions {
   readonly resizeMaxDimension: number;
   readonly originalTtlMs: number;
   readonly cleanupIntervalMs: number;
+  readonly registryCacheMs?: number;
   readonly spreadsheetId: string;
   readonly serviceAccount: ServiceAccountCredential;
   readonly fetchImpl?: typeof fetch;
   readonly now?: () => Date;
   readonly resizeImpl?: (input: Buffer, mimeType: string, maxDimension: number) => Promise<Buffer>;
 }
-
-const INTENTS: Readonly<Record<ManualMediaPurpose, readonly string[]>> = {
-  FULL_LOOK: ["PRODUCT_OVERVIEW", "LOOKBOOK"],
-  AO: ["PRODUCT_OVERVIEW", "DETAIL"],
-  CHAN_VAY: ["PRODUCT_OVERVIEW", "DETAIL"],
-  QUAN: ["PRODUCT_OVERVIEW", "DETAIL"],
-  DETAIL_FABRIC: ["MATERIAL_CLOSEUP", "DETAIL"],
-  FEEDBACK: ["FEEDBACK"],
-  SIZE_GUIDE: ["SIZE_GUIDE"],
-};
 
 const MIME_EXTENSIONS: Readonly<Record<string, string>> = {
   "image/jpeg": "jpg",
@@ -176,12 +165,26 @@ function sheetRows(values: unknown[][]): Record<string, string>[] {
   ));
 }
 
+const normalizeLookupValue = (value: unknown): string =>
+  String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[^a-z0-9]/giu, "")
+    .toLowerCase();
+
+interface RegistryProduct {
+  readonly maSp: string;
+  readonly brand: string;
+  readonly active: boolean;
+}
+
 export class GoogleSheetsManualImageIntake implements ProductMediaService {
   private readonly fetchImpl: typeof fetch;
   private readonly now: () => Date;
   private readonly resizeImpl: (input: Buffer, mimeType: string, maxDimension: number) => Promise<Buffer>;
   private readonly intakeLocks = new Map<string, Promise<void>>();
   private accessToken: { value: string; expiresAt: number } | null = null;
+  private registryCache: { expiresAt: number; products: readonly RegistryProduct[] } | null = null;
 
   constructor(private readonly options: ProductMediaServiceOptions) {
     this.fetchImpl = options.fetchImpl ?? fetch;
@@ -205,43 +208,66 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
     );
   }
 
+  async catalog(): Promise<ProductMediaCatalog> {
+    const products = await this.products();
+    return {
+      brands: [...new Set(products.filter((product) => product.active).map((product) => product.brand))]
+        .filter(Boolean)
+        .sort((left, right) => left.localeCompare(right, "vi")),
+      products,
+    };
+  }
+
   async upload(identity: AdminIdentity, input: ProductMediaUploadInput): Promise<ProductMediaUploadResult> {
     const maSp = input.maSp.trim().toUpperCase();
+    const brand = input.brand.trim();
     if (!/^[A-Z0-9][A-Z0-9._-]{1,39}$/u.test(maSp)) throw new Error("PRODUCT_MEDIA_CODE_INVALID");
-    if (!MANUAL_MEDIA_PURPOSES.includes(input.mediaPurpose)) throw new Error("PRODUCT_MEDIA_PURPOSE_INVALID");
+    if (!brand || brand.length > 80 || !normalizeLookupValue(brand)) throw new Error("PRODUCT_MEDIA_BRAND_INVALID");
     if (!(input.mimeType in MIME_EXTENSIONS)) throw new Error("PRODUCT_MEDIA_MIME_INVALID");
-    if (input.notes.length > 500 || input.originalFileName.length > 180) throw new Error("PRODUCT_MEDIA_TEXT_INVALID");
+    if (input.originalFileName.length > 180) throw new Error("PRODUCT_MEDIA_TEXT_INVALID");
     if (!/^[A-Za-z0-9+/]+={0,2}$/u.test(input.contentBase64)) throw new Error("PRODUCT_MEDIA_BASE64_INVALID");
 
     const image = Buffer.from(input.contentBase64, "base64");
     if (!image.length || image.length > this.options.maxBytes) throw new Error("PRODUCT_MEDIA_SIZE_INVALID");
     if (!validImageSignature(image, input.mimeType)) throw new Error("PRODUCT_MEDIA_SIGNATURE_INVALID");
 
-    const existingProducts = await this.getValues("product_registry!A:A");
-    const productExists = sheetRows(existingProducts).some((row) => String(row.MA_SP ?? "").toUpperCase() === maSp);
-    if (!productExists) throw new Error("PRODUCT_MEDIA_PRODUCT_NOT_FOUND");
+    const matchedProduct = (await this.products()).find((product) =>
+      product.maSp === maSp && normalizeLookupValue(product.brand) === normalizeLookupValue(brand)
+    );
+    if (!matchedProduct) throw new Error("PRODUCT_MEDIA_PRODUCT_NOT_FOUND");
+    if (!matchedProduct.active) throw new Error("PRODUCT_MEDIA_PRODUCT_INACTIVE");
 
     const hash = createHash("sha256").update(image).digest("hex");
-    const intakeId = createHash("sha256").update(`${maSp}|${hash}`).digest("hex").slice(0, 32);
+    const canonicalBrand = matchedProduct.brand;
+    const intakeId = createHash("sha256")
+      .update(`${normalizeLookupValue(canonicalBrand)}|${maSp}|${hash}`)
+      .digest("hex")
+      .slice(0, 32);
     const extension = MIME_EXTENSIONS[input.mimeType];
     if (!extension) throw new Error("PRODUCT_MEDIA_MIME_INVALID");
     const fileName = `${maSp.toLowerCase()}-${hash.slice(0, 24)}.${extension}`;
     const imageUrl = `${this.options.publicBaseUrl.replace(/\/$/u, "")}/${fileName}`;
     const uploadedAt = this.now().toISOString();
-    const imageIntents = INTENTS[input.mediaPurpose];
 
     return this.withIntakeLock(intakeId, async () => {
       await this.ensureSheet();
-      const existing = sheetRows(await this.getValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:O`))
-        .find((row) => row.INTAKE_ID === intakeId);
+      const existing = sheetRows(await this.getValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:P`))
+        .find((row) =>
+          row.INTAKE_ID === intakeId
+          || (
+            String(row.MA_SP ?? "").toUpperCase() === maSp
+            && String(row.IMAGE_HASH ?? "").toLowerCase() === hash
+            && (!row.BRAND || normalizeLookupValue(row.BRAND) === normalizeLookupValue(canonicalBrand))
+          )
+        );
       if (existing) {
         return {
           intakeId,
           maSp,
+          brand: existing.BRAND || canonicalBrand,
           imageUrl: existing.IMAGE_URL || imageUrl,
-          mediaPurpose: input.mediaPurpose,
-          imageIntents,
-          status: "PENDING",
+          classificationStatus: "PENDING_AI",
+          status: "PENDING_AI",
           uploadedAt: existing.UPLOADED_AT || uploadedAt,
           duplicate: true,
         };
@@ -292,15 +318,15 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
         throw error;
       }
 
-      await this.appendValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:O`, [[
+      await this.appendValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:P`, [[
         intakeId,
         maSp,
         imageUrl,
-        input.mediaPurpose,
-        imageIntents.join(" | "),
-        input.notes.trim(),
+        "AI_AUTO",
+        "",
+        "",
         true,
-        "PENDING",
+        "PENDING_AI",
         identity.email,
         uploadedAt,
         hash,
@@ -308,10 +334,38 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
         "",
         "",
         "",
+        canonicalBrand,
       ]]);
       await unlink(pendingMarkerPath).catch(() => undefined);
-      return { intakeId, maSp, imageUrl, mediaPurpose: input.mediaPurpose, imageIntents, status: "PENDING", uploadedAt, duplicate: false };
+      return {
+        intakeId,
+        maSp,
+        brand: canonicalBrand,
+        imageUrl,
+        classificationStatus: "PENDING_AI",
+        status: "PENDING_AI",
+        uploadedAt,
+        duplicate: false,
+      };
     });
+  }
+
+  private async products(): Promise<readonly RegistryProduct[]> {
+    const now = Date.now();
+    if (this.registryCache && this.registryCache.expiresAt > now) return this.registryCache.products;
+    const rows = sheetRows(await this.getValues("product_registry!A:AZ"));
+    const products = rows
+      .map((row) => ({
+        maSp: String(row.MA_SP ?? "").trim().toUpperCase(),
+        brand: String(row.BRAND ?? "").trim(),
+        active: !["FALSE", "0", "NO", "N"].includes(String(row.ACTIVE ?? "TRUE").trim().toUpperCase()),
+      }))
+      .filter((product) => product.maSp && product.brand);
+    this.registryCache = {
+      expiresAt: now + Math.max(30_000, this.options.registryCacheMs ?? 300_000),
+      products,
+    };
+    return products;
   }
 
   async cleanupExpiredOriginals(): Promise<number> {
@@ -357,7 +411,7 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
     }
     if (eligible.length === 0) return 0;
 
-    const values = await this.getValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:O`)
+    const values = await this.getValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:P`)
       .catch(() => null);
     if (values === null) return 0;
     const recorded = new Set(sheetRows(values).map((row) => row.INTAKE_ID).filter(Boolean));
@@ -448,12 +502,12 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
         {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ requests: [{ addSheet: { properties: { title: MANUAL_IMAGE_INTAKE_SHEET, gridProperties: { rowCount: 2_000, columnCount: 15, frozenRowCount: 1 } } } }] }),
+          body: JSON.stringify({ requests: [{ addSheet: { properties: { title: MANUAL_IMAGE_INTAKE_SHEET, gridProperties: { rowCount: 2_000, columnCount: 16, frozenRowCount: 1 } } } }] }),
         },
       );
     }
     await this.sheetsRequest(
-      `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(this.options.spreadsheetId)}/values/${encodeURIComponent(`${MANUAL_IMAGE_INTAKE_SHEET}!A1:O1`)}?valueInputOption=RAW`,
+      `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(this.options.spreadsheetId)}/values/${encodeURIComponent(`${MANUAL_IMAGE_INTAKE_SHEET}!A1:P1`)}?valueInputOption=RAW`,
       {
         method: "PUT",
         headers: { "content-type": "application/json" },
@@ -488,12 +542,9 @@ export function parseProductMediaUploadBody(value: unknown): ProductMediaUploadI
   const body = value && typeof value === "object" && !Array.isArray(value)
     ? value as Record<string, unknown>
     : {};
-  const purpose = String(body.media_purpose ?? "").trim().toUpperCase();
-  if (!MANUAL_MEDIA_PURPOSES.includes(purpose as ManualMediaPurpose)) throw new Error("PRODUCT_MEDIA_PURPOSE_INVALID");
   return {
     maSp: String(body.ma_sp ?? ""),
-    mediaPurpose: purpose as ManualMediaPurpose,
-    notes: String(body.notes ?? ""),
+    brand: String(body.brand ?? ""),
     originalFileName: String(body.file_name ?? ""),
     mimeType: String(body.mime_type ?? "").trim().toLowerCase(),
     contentBase64: String(body.content_base64 ?? "").trim(),

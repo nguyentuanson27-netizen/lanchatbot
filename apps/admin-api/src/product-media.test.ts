@@ -25,8 +25,8 @@ test("manual product image upload stores only the resized URL and removes origin
     if (url === "https://oauth2.googleapis.com/token") {
       return Response.json({ access_token: "test-token", expires_in: 3600 });
     }
-    if (decodedUrl.includes("product_registry!A:A")) {
-      return Response.json({ values: [["MA_SP"], ["CB182"]] });
+    if (decodedUrl.includes("product_registry!A:AZ")) {
+      return Response.json({ values: [["MA_SP", "BRAND", "ACTIVE"], ["CB182", "La.na Design", true]] });
     }
     if (url.includes("fields=sheets.properties.title")) {
       return Response.json({ sheets: [{ properties: { title: "manual_image_intake" } }] });
@@ -69,8 +69,7 @@ test("manual product image upload stores only the resized URL and removes origin
       { email: "owner@example.com", role: "OWNER", pageScope: "ALL", subject: "owner-1" },
       {
         maSp: "cb182",
-        mediaPurpose: "DETAIL_FABRIC",
-        notes: "Ảnh cận chất",
+        brand: "La.na Design",
         originalFileName: "cb182-original.jpg",
         mimeType: "image/jpeg",
         contentBase64: original.toString("base64"),
@@ -89,6 +88,9 @@ test("manual product image upload stores only the resized URL and removes origin
       assert.equal((await stat(join(originalDirectory, originalFiles[0]!))).mode & 0o777, 0o600);
     }
     assert.equal(appendedValues[0]?.[2], result.imageUrl);
+    assert.equal(appendedValues[0]?.[3], "AI_AUTO");
+    assert.equal(appendedValues[0]?.[7], "PENDING_AI");
+    assert.equal(appendedValues[0]?.[15], "La.na Design");
     assert.notEqual(appendedValues[0]?.[2], join(originalDirectory, originalFiles[0]!));
 
     clock = new Date("2026-07-25T01:00:00.000Z");

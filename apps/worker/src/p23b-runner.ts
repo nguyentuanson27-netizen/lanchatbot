@@ -359,7 +359,7 @@ export class P23bMetadataStaging {
 
         const ranges = await this.options.sheets.batchGetValues(
           this.options.sheetId,
-          ["product_registry!A:AZ", "image_registry!A:AP", "manual_image_intake!A:O"],
+          ["product_registry!A:AZ", "image_registry!A:AP", "manual_image_intake!A:P"],
           "UNFORMATTED_VALUE",
         );
         const registryResult = buildRegistryMap(sheetRowsFromValues(ranges[0]?.values));

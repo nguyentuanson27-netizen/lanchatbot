@@ -19,7 +19,7 @@ export const IMAGE_REGISTRY_SHEET = "image_registry";
 export const MANUAL_IMAGE_INTAKE_HEADERS = [
   "INTAKE_ID", "MA_SP", "IMAGE_URL", "MEDIA_PURPOSE", "IMAGE_INTENTS", "NOTES",
   "ACTIVE", "STATUS", "UPLOADED_BY", "UPLOADED_AT", "IMAGE_HASH", "ORIGINAL_FILE_NAME",
-  "IMAGE_ID", "PROCESSED_AT", "ERROR",
+  "IMAGE_ID", "PROCESSED_AT", "ERROR", "BRAND",
 ] as const;
 
 /** 42 cột A:AP. A:V là vùng app ghi (AI_*), W:AP là vùng người duyệt — app không đụng. */
@@ -72,6 +72,7 @@ export interface ManualImageIntakeRow {
   readonly STATUS?: unknown;
   readonly UPLOADED_AT?: unknown;
   readonly IMAGE_HASH?: unknown;
+  readonly BRAND?: unknown;
   readonly ROW_NUMBER?: unknown;
   readonly row_number?: unknown;
 }
@@ -196,15 +197,16 @@ export function buildManualMetadataJobs(
     if (!profile) continue;
     const base = buildMetadataJobs([{ ...profile, images: [imageUrl], primary_images: [] }], run, schema)[0];
     if (!base) continue;
-    const purpose = String(row.MEDIA_PURPOSE || "FULL_LOOK").trim().toUpperCase();
+    const purpose = String(row.MEDIA_PURPOSE || "AI_AUTO").trim().toUpperCase();
     const intents = String(row.IMAGE_INTENTS || "").trim();
     const notes = String(row.NOTES || "").trim().slice(0, 500);
+    const intakeBrand = String(row.BRAND || profile.reg.brand || profile.brand_xml || "").trim();
     const uploadedAt = String(row.UPLOADED_AT || run.started_at).trim();
     const imageHash = String(row.IMAGE_HASH || "").trim().toLowerCase();
     const contextualText = [
       base.contextual_text,
-      `Manual media purpose: ${purpose}`,
-      intents ? `Requested intents: ${intents}` : "",
+      purpose !== "AI_AUTO" ? `Legacy operator media purpose: ${purpose}` : "",
+      intents ? `Legacy requested intents: ${intents}` : "",
       notes ? `Operator note: ${notes}` : "",
     ].filter(Boolean).join(". ").slice(0, 1_200);
     const payload = {
@@ -216,6 +218,7 @@ export function buildManualMetadataJobs(
       manual_image_intents: intents,
       manual_notes: notes,
       manual_image_hash: imageHash,
+      manual_brand: intakeBrand,
       manual_sheet_row: Number(row.ROW_NUMBER || row.row_number || 0),
       image_role: "ADDITIONAL",
     };
@@ -377,8 +380,8 @@ export interface ImageMetadata {
   feedback_verified: boolean;
 }
 
-const IMAGE_TYPES = ["MODEL", "PRODUCT_ONLY", "DETAIL", "FLATLAY", "LIFESTYLE", "COLLAGE", "SIZE_GUIDE", "OTHER"];
-const IMAGE_INTENTS = ["LOOKBOOK", "PRODUCT_OVERVIEW", "MATERIAL_CLOSEUP", "DETAIL", "FIT_REFERENCE", "STYLE_REFERENCE", "SIZE_GUIDE"];
+const IMAGE_TYPES = ["MODEL", "PRODUCT_ONLY", "DETAIL", "FLATLAY", "LIFESTYLE", "COLLAGE", "FEEDBACK", "SIZE_GUIDE", "OTHER"];
+const IMAGE_INTENTS = ["LOOKBOOK", "PRODUCT_OVERVIEW", "MATERIAL_CLOSEUP", "DETAIL", "FIT_REFERENCE", "STYLE_REFERENCE", "FEEDBACK", "SIZE_GUIDE"];
 const ANGLES = ["FRONT", "BACK", "SIDE", "CLOSEUP", "MULTI", "UNKNOWN"];
 const DETAIL_TYPES = ["FULL_LOOK", "FABRIC", "TEXTURE", "STITCHING", "BUTTON", "ZIPPER", "PATTERN", "EMBELLISHMENT", "OTHER", "NONE"];
 const PARTS = ["FULL_SET", "AO", "QUAN", "CHAN_VAY", "VAY", "PHU_KIEN", "UNKNOWN"];
@@ -518,7 +521,7 @@ export function buildImageRegistryRow(
 
   const fullValues = [...aiValues, ...REVIEWER_DEFAULTS];
   if (sourceContext === "MANUAL_UPLOAD") {
-    const purpose = String(job.payload?.manual_media_purpose || "FULL_LOOK").trim().toUpperCase();
+    const purpose = String(job.payload?.manual_media_purpose || "AI_AUTO").trim().toUpperCase();
     const set = (column: typeof IMAGE_REGISTRY_HEADERS[number], value: string | boolean): void => {
       const index = IMAGE_REGISTRY_HEADERS.indexOf(column);
       if (index >= 0) fullValues[index] = value;
@@ -532,12 +535,14 @@ export function buildImageRegistryRow(
       FEEDBACK: { imageType: "FEEDBACK", intents: "FEEDBACK" },
       SIZE_GUIDE: { imageType: "SIZE_GUIDE", intents: "SIZE_GUIDE" },
     };
-    const mapping = mappings[purpose] ?? mappings.FULL_LOOK!;
-    if (mapping.imageType) set("IMAGE_TYPE", mapping.imageType);
-    set("IMAGE_INTENTS", mapping.intents);
-    if (mapping.detail) set("DETAIL_TYPE", mapping.detail);
-    if (mapping.parts) set("PARTS_VISIBLE", mapping.parts);
-    set("MANUAL_OVERRIDE", true);
+    const mapping = mappings[purpose];
+    if (mapping) {
+      if (mapping.imageType) set("IMAGE_TYPE", mapping.imageType);
+      set("IMAGE_INTENTS", mapping.intents);
+      if (mapping.detail) set("DETAIL_TYPE", mapping.detail);
+      if (mapping.parts) set("PARTS_VISIBLE", mapping.parts);
+      set("MANUAL_OVERRIDE", true);
+    }
   }
 
   return {
@@ -594,8 +599,10 @@ export function buildSheetBatchRequest(rows: readonly StagedRow[]): SheetBatchRe
 
 export const IMAGE_METADATA_PROMPT =
   "Analyze only what is visibly present in this Vietnamese fashion product image. "
-  + "Do not infer customer feedback, authenticity, stock, price, size, material composition, "
-  + "or product claims. Return the strict schema. Product context is reference only: ";
+  + "Classify garment part, full look, fabric/detail, size guide, product-only, or likely customer feedback/UGC. "
+  + "FEEDBACK is only a draft label and always requires human verification. "
+  + "Do not infer authenticity, stock, price, size, material composition, or product claims. "
+  + "Return the strict schema. Product context is reference only: ";
 
 export const IMAGE_METADATA_RESPONSE_SCHEMA = {
   type: "OBJECT",

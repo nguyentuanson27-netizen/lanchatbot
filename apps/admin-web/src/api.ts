@@ -17,7 +17,7 @@ import type {
   PancakeTag,
   ProductDataSummary,
   ProductMediaUpload,
-  ManualMediaPurpose,
+  ProductMediaCatalog,
   PolicyArtifact,
   PolicyArtifactKind,
   PolicyControlData,
@@ -107,7 +107,9 @@ async function request<T>(
 }
 
 function policyErrorMessage(code: string): string {
-  if (code === "PRODUCT_MEDIA_PRODUCT_NOT_FOUND") return "Mã sản phẩm chưa có trong product_registry.";
+  if (code === "PRODUCT_MEDIA_PRODUCT_NOT_FOUND") return "Mã sản phẩm chưa có trong product_registry của brand đã chọn.";
+  if (code === "PRODUCT_MEDIA_PRODUCT_INACTIVE") return "Sản phẩm đang tắt ACTIVE trong product_registry.";
+  if (code === "PRODUCT_MEDIA_BRAND_INVALID") return "Brand không hợp lệ.";
   if (code === "PRODUCT_MEDIA_SIZE_INVALID") return "Ảnh phải nhỏ hơn 8 MB.";
   if (code === "PRODUCT_MEDIA_MIME_INVALID" || code === "PRODUCT_MEDIA_SIGNATURE_INVALID") {
     return "Chỉ nhận ảnh JPG, PNG hoặc WebP hợp lệ.";
@@ -236,10 +238,25 @@ export async function getIdentity(signal?: AbortSignal): Promise<Identity> {
   };
 }
 
+export async function getProductMediaCatalog(signal?: AbortSignal): Promise<ProductMediaCatalog> {
+  const payload = await request<JsonRecord>("/product-media/catalog", signal);
+  const catalog = record(payload.catalog);
+  return {
+    brands: arrayValue(catalog.brands).map(String),
+    products: arrayValue(catalog.products).map((value) => {
+      const item = record(value);
+      return {
+        maSp: stringValue(item.maSp),
+        brand: stringValue(item.brand),
+        active: item.active === true,
+      };
+    }),
+  };
+}
+
 export async function uploadProductMedia(input: {
   maSp: string;
-  mediaPurpose: ManualMediaPurpose;
-  notes: string;
+  brand: string;
   fileName: string;
   mimeType: string;
   contentBase64: string;
@@ -248,8 +265,7 @@ export async function uploadProductMedia(input: {
     method: "POST",
     body: {
       ma_sp: input.maSp,
-      media_purpose: input.mediaPurpose,
-      notes: input.notes,
+      brand: input.brand,
       file_name: input.fileName,
       mime_type: input.mimeType,
       content_base64: input.contentBase64,
@@ -259,10 +275,10 @@ export async function uploadProductMedia(input: {
   return {
     intakeId: stringValue(item.intakeId),
     maSp: stringValue(item.maSp),
+    brand: stringValue(item.brand),
     imageUrl: stringValue(item.imageUrl),
-    mediaPurpose: stringValue(item.mediaPurpose) as ManualMediaPurpose,
-    imageIntents: arrayValue(item.imageIntents).map(String),
-    status: "PENDING",
+    classificationStatus: "PENDING_AI",
+    status: "PENDING_AI",
     uploadedAt: stringValue(item.uploadedAt),
     duplicate: item.duplicate === true,
   };

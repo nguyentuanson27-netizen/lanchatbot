@@ -19,6 +19,14 @@ Realtime Worker, Admin API, Admin Web và P2.3C healthy, restart count 0. Không
 
 Admin API chạy image `lana-chatbot-app:admin-dashboard-view-hotfix-r15.1` (`sha256:198a77471346ada84d3d1bd79cb28a038b59c386d4412710fc6f09327c459ac8`). Realtime Worker, Admin Web và P2.3C tiếp tục dùng image r15 (`sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c`); các service khác giữ nguyên.
 
+## Admin batch image intake + AI classification r16
+
+- Admin nhận tối đa 20 ảnh/lần cho một cặp `BRAND + MA_SP`; request thực tế đi từng ảnh với concurrency 2 để giữ giới hạn 8 MB/ảnh và body limit hiện hành.
+- Catalog brand/mã đọc từ `product_registry` và cache 5 phút. Server vẫn kiểm tra authoritative trước mỗi upload; mã sai brand trả 404, sản phẩm inactive trả 409.
+- Tab `manual_image_intake` mở rộng additive bằng cột `BRAND` ở P; dữ liệu cũ A:O không dịch cột. Ảnh mới ghi `AI_AUTO/PENDING_AI`.
+- P2.3B coi ảnh AI_AUTO là AI-only: không đưa loại ảnh do operator chọn vào context và không ghi vùng reviewer/`MANUAL_OVERRIDE`.
+- Approval gate, URL public 0644, original private 0600/TTL 24 giờ và P2.3C `APPROVED + ACTIVE` giữ nguyên.
+
 ## Admin dashboard least-privilege hotfix r15.1
 
 - Sửa `/admin/v1/dashboard` bị PostgreSQL từ chối `42501`: metric checkout mới đã đọc nhầm bảng gốc `conversation_events`.

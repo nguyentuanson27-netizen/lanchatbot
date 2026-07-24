@@ -481,6 +481,26 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
     summary: await options.store.catalogSummary(requireIdentity(request)),
   }));
 
+  app.get(
+    "/admin/v1/product-media/catalog",
+    async (request, reply) => {
+      const identity = requireIdentity(request);
+      if (!options.productMedia) {
+        return reply.code(503).send(errorBody("ADMIN_PRODUCT_MEDIA_DISABLED", request.id));
+      }
+      if (identity.role !== "OWNER" && identity.role !== "EDITOR") {
+        return reply.code(403).send(errorBody("ADMIN_PRODUCT_MEDIA_FORBIDDEN", request.id));
+      }
+      try {
+        return { catalog: await options.productMedia.catalog() };
+      } catch (error) {
+        const code = error instanceof Error ? error.message : "PRODUCT_MEDIA_CATALOG_FAILED";
+        return reply.code(code.startsWith("PRODUCT_MEDIA_SHEETS_") ? 503 : 500)
+          .send(errorBody(code, request.id));
+      }
+    },
+  );
+
   app.post<{ Body: unknown }>(
     "/admin/v1/product-media/uploads",
     async (request, reply) => {
@@ -497,7 +517,8 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
       } catch (error) {
         const code = error instanceof Error ? error.message : "PRODUCT_MEDIA_UPLOAD_FAILED";
         const status = code === "PRODUCT_MEDIA_PRODUCT_NOT_FOUND" ? 404
-          : code.startsWith("PRODUCT_MEDIA_SHEETS_") ? 503
+          : code === "PRODUCT_MEDIA_PRODUCT_INACTIVE" ? 409
+            : code.startsWith("PRODUCT_MEDIA_SHEETS_") ? 503
             : code.startsWith("PRODUCT_MEDIA_") ? 400
               : 500;
         return reply.code(status).send(errorBody(code, request.id));

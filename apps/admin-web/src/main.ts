@@ -17,6 +17,7 @@ import {
   getOutreach,
   getPolicyControl,
   getProductData,
+  getProductMediaCatalog,
   uploadProductMedia,
   getQuality,
 } from "./api.js";
@@ -47,7 +48,8 @@ import type {
   ServiceHealth,
   Tone,
   PancakeTag,
-  ManualMediaPurpose,
+  ProductMediaCatalog,
+  ProductMediaUpload,
 } from "./types.js";
 
 type RouteName = "overview" | "conversations" | "handoffs" | "outreach" | "quality" | "products" | "media" | "policy" | "operations" | "audit";
@@ -121,6 +123,7 @@ const root: HTMLDivElement = rootCandidate;
 
 let currentRoute = routeFromHash();
 let identity: Identity | null = null;
+let productMediaCatalog: ProductMediaCatalog | null = null;
 let refreshTimer: number | undefined;
 let activeController: AbortController | null = null;
 let lastUpdatedAt: string | null = null;
@@ -659,29 +662,22 @@ function renderProducts(data: ProductDataSummary): string {
     </div>`;
 }
 
-function renderProductMedia(): string {
+function renderProductMedia(catalog: ProductMediaCatalog): string {
   if (!identity?.productMediaUpload) {
     return renderEmpty("Tính năng đang khóa", "Chỉ OWNER hoặc EDITOR được tải ảnh sản phẩm bổ sung.");
   }
-  const purposeOptions: Array<[ManualMediaPurpose, string]> = [
-    ["FULL_LOOK", "Toàn bộ thiết kế"],
-    ["AO", "Riêng phần áo"],
-    ["CHAN_VAY", "Riêng chân váy"],
-    ["QUAN", "Riêng phần quần"],
-    ["DETAIL_FABRIC", "Cận chất liệu"],
-    ["FEEDBACK", "Ảnh feedback"],
-    ["SIZE_GUIDE", "Bảng size"],
-  ];
+  const brandOptions = catalog.brands
+    .map((brand) => `<option value="${escapeHtml(brand)}">${escapeHtml(brand)}</option>`)
+    .join("");
   return `
     <section class="panel product-media-panel">
-      <div class="panel__header"><div><h2>Tải ảnh bổ sung</h2><p>Ảnh được lưu trên VPS và ghi vào tab manual_image_intake ở trạng thái chờ duyệt.</p></div></div>
-      <div class="product-media-safety">${icon("shield", 18)}<span>Ảnh chưa tự động vào Qdrant. P2.3B sẽ gắn metadata, sau đó cần duyệt APPROVED trước khi P2.3C xuất bản.</span></div>
+      <div class="panel__header"><div><h2>Tải ảnh bổ sung</h2><p>Chọn nhiều ảnh cho cùng một sản phẩm. AI sẽ tự phân loại từng ảnh.</p></div></div>
+      <div class="product-media-safety">${icon("shield", 18)}<span>Ảnh được ghi vào manual_image_intake ở trạng thái chờ AI. Sau khi AI gắn metadata, vẫn phải duyệt APPROVED trước khi P2.3C xuất bản lên Qdrant.</span></div>
       <form id="product-media-form" class="product-media-form">
-        <p class="product-media-form__wide">Ảnh được tự động resize theo đúng tỉ lệ, cạnh dài tối đa 1.600 px. Ảnh gốc được giữ riêng và tự xóa sau 24 giờ.</p>
+        <p class="product-media-form__wide">Mỗi lần tối đa 20 ảnh, mỗi ảnh tối đa 8 MB. Ảnh được resize đúng tỉ lệ, cạnh dài tối đa 1.600 px; ảnh gốc tự xóa sau 24 giờ.</p>
+        <label><span>Brand</span><select name="brand" required><option value="">Chọn brand</option>${brandOptions}</select></label>
         <label><span>Mã sản phẩm</span><input name="ma_sp" autocomplete="off" maxlength="40" placeholder="Ví dụ: CB182" required></label>
-        <label><span>Loại ảnh</span><select name="media_purpose" required>${purposeOptions.map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}</select></label>
-        <label class="product-media-form__wide"><span>Chọn ảnh</span><input name="image" type="file" accept="image/jpeg,image/png,image/webp" required><small>JPG, PNG hoặc WebP · tối đa 8 MB.</small></label>
-        <label class="product-media-form__wide"><span>Ghi chú</span><textarea name="notes" maxlength="500" rows="3" placeholder="Không bắt buộc"></textarea></label>
+        <label class="product-media-form__wide"><span>Chọn ảnh</span><input name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple required><small>JPG, PNG hoặc WebP · tối đa 20 ảnh, 8 MB/ảnh.</small></label>
         <div class="product-media-preview product-media-form__wide" id="product-media-preview" hidden></div>
         <p class="form-error product-media-form__wide" id="product-media-error" role="alert"></p>
         <div class="product-media-form__actions product-media-form__wide"><button class="button button--primary" type="submit">Tải ảnh lên</button></div>
@@ -973,7 +969,8 @@ async function loadCurrentPage(silent = true): Promise<void> {
         html = renderProducts(await getProductData(activeController.signal));
         break;
       case "media":
-        html = renderProductMedia();
+        productMediaCatalog = await getProductMediaCatalog(activeController.signal);
+        html = renderProductMedia(productMediaCatalog);
         break;
       case "policy":
         policyControlData = identity?.policyControl
@@ -1108,60 +1105,137 @@ function bindPageEvents(): void {
 function bindProductMediaForm(): void {
   const form = document.querySelector<HTMLFormElement>("#product-media-form");
   if (!form) return;
-  const fileInput = form.elements.namedItem("image") as HTMLInputElement | null;
+  const fileInput = form.elements.namedItem("images") as HTMLInputElement | null;
   const preview = document.querySelector<HTMLDivElement>("#product-media-preview");
-  fileInput?.addEventListener("change", () => {
-    const file = fileInput.files?.[0];
+  const renderPreview = (): void => {
     if (!preview) return;
-    if (!file) {
+    const files = [...(fileInput?.files ?? [])];
+    if (!files.length) {
       preview.hidden = true;
       preview.innerHTML = "";
       return;
     }
-    const url = URL.createObjectURL(file);
     preview.hidden = false;
-    preview.innerHTML = `<img src="${escapeHtml(url)}" alt="Ảnh chờ tải"><span><strong>${escapeHtml(file.name)}</strong><small>${formatNumber(Math.ceil(file.size / 1024))} KB</small></span>`;
-    preview.querySelector("img")?.addEventListener("load", () => URL.revokeObjectURL(url), { once: true });
-  });
+    preview.innerHTML = files.map((file) => {
+      const url = URL.createObjectURL(file);
+      return `<article><img src="${escapeHtml(url)}" alt="Ảnh chờ tải"><span><strong>${escapeHtml(file.name)}</strong><small>${formatNumber(Math.ceil(file.size / 1024))} KB</small></span></article>`;
+    }).join("");
+    preview.querySelectorAll<HTMLImageElement>("img").forEach((image) => {
+      image.addEventListener("load", () => URL.revokeObjectURL(image.src), { once: true });
+    });
+  };
+  fileInput?.addEventListener("change", renderPreview);
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
     const errorTarget = document.querySelector<HTMLElement>("#product-media-error");
     const resultTarget = document.querySelector<HTMLElement>("#product-media-result");
     const data = new FormData(form);
-    const file = fileInput?.files?.[0];
-    if (!file || file.size > 8 * 1024 * 1024) {
-      if (errorTarget) errorTarget.textContent = "Ảnh phải nhỏ hơn 8 MB.";
+    const files = [...(fileInput?.files ?? [])];
+    const maSp = String(data.get("ma_sp") ?? "").trim().toUpperCase();
+    const brand = String(data.get("brand") ?? "").trim();
+    const product = productMediaCatalog?.products.find((entry) =>
+      entry.maSp.toUpperCase() === maSp && entry.brand === brand
+    );
+
+    if (!brand || !maSp) {
+      if (errorTarget) errorTarget.textContent = "Vui lòng chọn brand và nhập mã sản phẩm.";
       return;
     }
+    if (!product) {
+      if (errorTarget) errorTarget.textContent = "Mã sản phẩm chưa có trong product_registry của brand đã chọn.";
+      return;
+    }
+    if (!product.active) {
+      if (errorTarget) errorTarget.textContent = "Sản phẩm đang tắt ACTIVE trong product_registry.";
+      return;
+    }
+    if (!files.length || files.length > 20) {
+      if (errorTarget) errorTarget.textContent = "Mỗi lần chọn từ 1 đến 20 ảnh.";
+      return;
+    }
+    const invalid = files.find((file) =>
+      file.size > 8 * 1024 * 1024
+      || !["image/jpeg", "image/png", "image/webp"].includes(file.type)
+    );
+    if (invalid) {
+      if (errorTarget) errorTarget.textContent = `${invalid.name}: chỉ nhận JPG, PNG, WebP và tối đa 8 MB/ảnh.`;
+      return;
+    }
+
     if (submit) {
       submit.disabled = true;
-      submit.textContent = "Đang tải lên…";
+      submit.textContent = `Đang tải 0/${files.length}…`;
     }
     if (errorTarget) errorTarget.textContent = "";
-    try {
-      const uploaded = await uploadProductMedia({
-        maSp: String(data.get("ma_sp") ?? "").trim().toUpperCase(),
-        mediaPurpose: String(data.get("media_purpose") ?? "FULL_LOOK") as ManualMediaPurpose,
-        notes: String(data.get("notes") ?? ""),
-        fileName: file.name,
-        mimeType: file.type,
-        contentBase64: await fileToBase64(file),
-      });
-      if (resultTarget) resultTarget.innerHTML = `<div class="success-state success-state--roomy">${icon("check", 24)}<span><strong>${uploaded.duplicate ? "Ảnh này đã có trong hàng chờ" : "Đã tải ảnh thành công"}</strong><small>Mã ${escapeHtml(uploaded.maSp)} · ${escapeHtml(uploaded.mediaPurpose)} · đang chờ gắn metadata và duyệt.</small><a href="${escapeHtml(uploaded.imageUrl)}" target="_blank" rel="noopener">Mở ảnh đã lưu</a></span></div>`;
+    if (resultTarget) resultTarget.innerHTML = "";
+
+    const outcomes: Array<{ file: File; upload?: ProductMediaUpload; error?: string }> = new Array(files.length);
+    let nextIndex = 0;
+    let completed = 0;
+    const worker = async (): Promise<void> => {
+      while (nextIndex < files.length) {
+        const index = nextIndex++;
+        const file = files[index]!;
+        try {
+          outcomes[index] = {
+            file,
+            upload: await uploadProductMedia({
+              maSp,
+              brand,
+              fileName: file.name,
+              mimeType: file.type,
+              contentBase64: await fileToBase64(file),
+            }),
+          };
+        } catch (error) {
+          outcomes[index] = {
+            file,
+            error: error instanceof Error ? error.message : "Không thể tải ảnh lên.",
+          };
+        } finally {
+          completed += 1;
+          if (submit) submit.textContent = `Đang tải ${completed}/${files.length}…`;
+        }
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(2, files.length) }, () => worker()));
+
+    const success = outcomes.filter((outcome) => outcome.upload);
+    const failed = outcomes.filter((outcome) => outcome.error);
+    const duplicates = success.filter((outcome) => outcome.upload?.duplicate).length;
+    if (resultTarget) {
+      resultTarget.innerHTML = `
+        <div class="product-media-batch-summary">
+          <strong>Hoàn tất ${success.length}/${files.length} ảnh</strong>
+          <small>${duplicates ? `${duplicates} ảnh đã tồn tại · ` : ""}${failed.length ? `${failed.length} ảnh lỗi · ` : ""}Ảnh mới đang chờ AI phân loại và duyệt.</small>
+        </div>
+        <div class="product-media-upload-results">
+          ${outcomes.map((outcome) => `
+            <article class="${outcome.upload ? "is-success" : "is-error"}">
+              ${outcome.upload ? icon("check", 17) : icon("warning", 17)}
+              <span><strong>${escapeHtml(outcome.file.name)}</strong><small>${outcome.upload
+                ? `${outcome.upload.duplicate ? "Đã tồn tại" : "Đã lưu"} · chờ AI phân loại`
+                : escapeHtml(outcome.error ?? "Không thể tải")}</small></span>
+              ${outcome.upload ? `<a href="${escapeHtml(outcome.upload.imageUrl)}" target="_blank" rel="noopener">Mở ảnh</a>` : ""}
+            </article>`).join("")}
+        </div>`;
+    }
+    if (!failed.length) {
       form.reset();
       if (preview) {
         preview.hidden = true;
         preview.innerHTML = "";
       }
-      showToast(uploaded.duplicate ? "Ảnh đã tồn tại, không tạo dòng trùng." : "Đã ghi vào manual_image_intake.", "good");
-    } catch (error) {
-      if (errorTarget) errorTarget.textContent = error instanceof Error ? error.message : "Không thể tải ảnh lên.";
-    } finally {
-      if (submit) {
-        submit.disabled = false;
-        submit.textContent = "Tải ảnh lên";
-      }
+    }
+    showToast(
+      failed.length ? `Đã tải ${success.length}/${files.length} ảnh; kiểm tra các ảnh lỗi.` : `Đã ghi ${success.length} ảnh vào manual_image_intake.`,
+      failed.length ? "warning" : "good",
+    );
+    if (submit) {
+      submit.disabled = false;
+      submit.textContent = "Tải ảnh lên";
     }
   });
 }

@@ -18,8 +18,7 @@ const resizedJpeg = Buffer.from([0xff, 0xd8, 0xff, 0x10, 0x20]);
 function uploadInput(overrides: Partial<ProductMediaUploadInput> = {}): ProductMediaUploadInput {
   return {
     maSp: "CB182",
-    mediaPurpose: "DETAIL_FABRIC",
-    notes: "",
+    brand: "La.na Design",
     originalFileName: "cb182.jpg",
     mimeType: "image/jpeg",
     contentBase64: validJpeg.toString("base64"),
@@ -29,6 +28,8 @@ function uploadInput(overrides: Partial<ProductMediaUploadInput> = {}): ProductM
 
 async function createHarness(options: {
   productExists?: boolean;
+  productActive?: boolean;
+  productBrand?: string;
   existingRows?: unknown[][];
   maxBytes?: number;
   resizeImpl?: (input: Buffer, mimeType: string, maxDimension: number) => Promise<Buffer>;
@@ -48,13 +49,21 @@ async function createHarness(options: {
     if (url === "https://oauth2.googleapis.com/token") {
       return Response.json({ access_token: "test-token", expires_in: 3_600 });
     }
-    if (decodedUrl.includes("product_registry!A:A")) {
-      return Response.json({ values: options.productExists === false ? [["MA_SP"]] : [["MA_SP"], ["CB182"]] });
+    if (decodedUrl.includes("product_registry!A:AZ")) {
+      return Response.json({
+        values: options.productExists === false
+          ? [["MA_SP", "BRAND", "ACTIVE"]]
+          : [["MA_SP", "BRAND", "ACTIVE"], [
+              "CB182",
+              options.productBrand ?? "La.na Design",
+              options.productActive ?? true,
+            ]],
+      });
     }
     if (url.includes("fields=sheets.properties.title")) {
       return Response.json({ sheets: [{ properties: { title: "manual_image_intake" } }] });
     }
-    if (decodedUrl.includes("manual_image_intake!A:O") && init?.method === "GET") {
+    if (decodedUrl.includes("manual_image_intake!A:P") && init?.method === "GET") {
       return Response.json({ values: rows });
     }
     if (url.includes(":append")) {
@@ -137,9 +146,35 @@ test("rejects unknown product codes", async () => {
   }
 });
 
+test("rejects a product code that belongs to another brand", async () => {
+  const harness = await createHarness({ productBrand: "Brand khác" });
+  try {
+    await assert.rejects(
+      harness.service.upload(identity, uploadInput()),
+      /PRODUCT_MEDIA_PRODUCT_NOT_FOUND/u,
+    );
+    assert.equal(harness.appendCount(), 0);
+  } finally {
+    await rm(harness.root, { recursive: true, force: true });
+  }
+});
+
+test("rejects an inactive registry product", async () => {
+  const harness = await createHarness({ productActive: false });
+  try {
+    await assert.rejects(
+      harness.service.upload(identity, uploadInput()),
+      /PRODUCT_MEDIA_PRODUCT_INACTIVE/u,
+    );
+    assert.equal(harness.appendCount(), 0);
+  } finally {
+    await rm(harness.root, { recursive: true, force: true });
+  }
+});
+
 test("returns an existing intake without resizing or appending", async () => {
   const imageHash = createHash("sha256").update(validJpeg).digest("hex");
-  const intakeId = createHash("sha256").update(`CB182|${imageHash}`).digest("hex").slice(0, 32);
+  const intakeId = createHash("sha256").update(`lanadesign|CB182|${imageHash}`).digest("hex").slice(0, 32);
   const existing = [
     [...MANUAL_IMAGE_INTAKE_HEADERS],
     [intakeId, "CB182", "https://cdn.example/existing.jpg", "DETAIL_FABRIC", "", "", true, "PENDING", "", "2026-07-24T00:00:00.000Z"],

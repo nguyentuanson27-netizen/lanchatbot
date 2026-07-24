@@ -2198,13 +2198,23 @@ select:focus-visible {
 }
 .product-media-form__wide { grid-column: 1 / -1; }
 .product-media-form__actions { display: flex; justify-content: flex-end; }
-.product-media-preview { align-items: center; background: #f5f8f6; border-radius: 14px; display: flex; gap: 14px; padding: 12px; }
+.product-media-preview { background: #f5f8f6; border-radius: 14px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); padding: 12px; }
 .product-media-preview[hidden] { display: none; }
-.product-media-preview img { border-radius: 10px; height: 96px; object-fit: cover; width: 76px; }
-.product-media-preview span { display: grid; gap: 5px; }
+.product-media-preview article { align-items: center; display: flex; gap: 10px; min-width: 0; }
+.product-media-preview img { border-radius: 10px; height: 76px; object-fit: cover; width: 62px; }
+.product-media-preview span { display: grid; gap: 5px; min-width: 0; }
+.product-media-preview strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .product-media-preview small { color: var(--muted, #64736b); }
 #product-media-result { margin-top: 18px; }
-#product-media-result a { color: #1f6652; font-size: .86rem; font-weight: 700; margin-top: 6px; }
+#product-media-result a { color: #1f6652; font-size: .82rem; font-weight: 700; margin-left: auto; }
+.product-media-batch-summary { background: #edf6f1; border-radius: 12px; display: grid; gap: 4px; padding: 12px 14px; }
+.product-media-batch-summary small { color: var(--muted, #64736b); }
+.product-media-upload-results { display: grid; gap: 8px; margin-top: 10px; }
+.product-media-upload-results article { align-items: center; border: 1px solid var(--border, #dfe7e2); border-radius: 12px; display: flex; gap: 10px; padding: 10px 12px; }
+.product-media-upload-results article.is-error { background: #fff2f2; border-color: #efcaca; color: #9d3f45; }
+.product-media-upload-results article.is-success { background: #f8fbf9; color: #245f4e; }
+.product-media-upload-results span { display: grid; gap: 3px; min-width: 0; }
+.product-media-upload-results small { color: inherit; opacity: .78; }
 
 @media (max-width: 700px) {
   .product-media-form { grid-template-columns: 1fr; }

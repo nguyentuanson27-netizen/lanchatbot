@@ -16,22 +16,18 @@ export interface Identity {
   productMediaUpload: boolean;
 }
 
-export type ManualMediaPurpose =
-  | "FULL_LOOK"
-  | "AO"
-  | "CHAN_VAY"
-  | "QUAN"
-  | "DETAIL_FABRIC"
-  | "FEEDBACK"
-  | "SIZE_GUIDE";
+export interface ProductMediaCatalog {
+  brands: string[];
+  products: Array<{ maSp: string; brand: string; active: boolean }>;
+}
 
 export interface ProductMediaUpload {
   intakeId: string;
   maSp: string;
+  brand: string;
   imageUrl: string;
-  mediaPurpose: ManualMediaPurpose;
-  imageIntents: string[];
-  status: "PENDING";
+  classificationStatus: "PENDING_AI";
+  status: "PENDING_AI";
   uploadedAt: string;
   duplicate: boolean;
 }

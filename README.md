@@ -52,7 +52,8 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - Lịch sử tư vấn được chiếu sang Redis 20 ngày và lưu bản ẩn danh trong PostgreSQL 6 tháng.
 - Admin dùng Authentik, Google account và MFA.
 - App-native workers đang sở hữu POS snapshot và P2.3A/B/C.
-- Admin có mục `Ảnh sản phẩm`: upload JPG/PNG/WebP tối đa 8 MB lên VPS, ghi idempotent vào tab `manual_image_intake`, sau đó P2.3B đưa metadata vào `image_registry` ở trạng thái chờ duyệt. P2.3C chỉ publish các hàng `APPROVED + ACTIVE` sang Qdrant.
+- Admin có mục `Ảnh sản phẩm`: chọn tối đa 20 ảnh cho cùng `BRAND + MA_SP`; UI và API cùng kiểm tra mã trong `product_registry`, tải tối đa hai ảnh song song và ghi idempotent vào `manual_image_intake`.
+- Người vận hành không chọn loại ảnh. Ảnh mới có `MEDIA_PURPOSE=AI_AUTO`, `STATUS=PENDING_AI`; P2.3B gắn metadata AI vào `image_registry` nhưng không ghi `MANUAL_OVERRIDE`. P2.3C chỉ publish hàng `APPROVED + ACTIVE` sang Qdrant.
 - Ảnh upload manual được giữ đúng tỉ lệ và thu cạnh dài về tối đa 1.600 px trước khi tạo URL/ghi Sheet. Ảnh gốc nằm ở vùng private, tự dọn sau 24 giờ; bản resize không bị dọn theo TTL này.
 - Canary Messenger 100 inbound thật bắt đầu lúc `2026-07-23T19:14:08Z` (`2026-07-24 02:14:08 +07:00`) cho duy nhất page `1198992073286645`; không tạo inbound giả.
 - Các workflow n8n P2.2/P2.3 tương ứng đang inactive; không được kích hoạt đồng thời với app-native worker.

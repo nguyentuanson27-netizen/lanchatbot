@@ -97,16 +97,17 @@ describe("P2.3B dựng job phân tích", () => {
       INTAKE_ID: "intake-1",
       MA_SP: "SV695",
       IMAGE_URL: "https://admin.lanadesign.vn/lana-public/products/sv695-detail.jpg",
-      MEDIA_PURPOSE: "DETAIL_FABRIC",
-      IMAGE_INTENTS: "MATERIAL_CLOSEUP | DETAIL",
+      MEDIA_PURPOSE: "AI_AUTO",
+      BRAND: "lanadesign",
       ACTIVE: true,
       STATUS: "PENDING",
       IMAGE_HASH: "abc",
     }], run, schema);
     expect(jobs).toHaveLength(1);
     expect(jobs[0]?.payload.source).toBe("MANUAL_UPLOAD");
-    expect(jobs[0]?.payload.manual_media_purpose).toBe("DETAIL_FABRIC");
-    expect(jobs[0]?.contextual_text).toContain("Manual media purpose: DETAIL_FABRIC");
+    expect(jobs[0]?.payload.manual_media_purpose).toBe("AI_AUTO");
+    expect(jobs[0]?.payload.manual_brand).toBe("lanadesign");
+    expect(jobs[0]?.contextual_text).not.toContain("media purpose");
   });
 });
 
@@ -240,6 +241,27 @@ describe("P2.3B dựng dòng image_registry", () => {
     ...(jobs[0] as SelectedMetadataJob),
     existing_image_registry: existing,
     metadata_sheet_row: existing ? Number(existing.ROW_NUMBER) : 2,
+  });
+
+  it("ảnh AI_AUTO giữ vùng reviewer trống và không bật MANUAL_OVERRIDE", () => {
+    const manual = buildManualMetadataJobs(profilesFor(), [{
+      INTAKE_ID: "intake-ai-auto",
+      MA_SP: "SV695",
+      BRAND: "lanadesign",
+      IMAGE_URL: "https://admin.lanadesign.vn/lana-public/products/sv695-ai.jpg",
+      MEDIA_PURPOSE: "AI_AUTO",
+      ACTIVE: true,
+      STATUS: "PENDING_AI",
+      IMAGE_HASH: "abc",
+    }], run, schema)[0] as SelectedMetadataJob;
+    const row = buildImageRegistryRow(
+      { ...manual, existing_image_registry: null, metadata_sheet_row: 2 },
+      meta,
+      Buffer.from("img"),
+    );
+    expect(row.full_values[IMAGE_REGISTRY_HEADERS.indexOf("MANUAL_OVERRIDE")]).toBe(false);
+    expect(row.full_values[IMAGE_REGISTRY_HEADERS.indexOf("IMAGE_TYPE")]).toBe("");
+    expect(row.full_values[IMAGE_REGISTRY_HEADERS.indexOf("REVIEW_STATUS")]).toBe("PENDING");
   });
 
   it("chỉ ghi 22 cột A:V, phần người duyệt giữ mặc định PENDING", () => {
