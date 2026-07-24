@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-24T07:19:52+00:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "c68138fda627d51fd817553a8a56c70272ec7e89",
+  "releaseTag": "20260724-admin-batch-ai-image-intake-r16",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260724-admin-batch-ai-image-intake-r16",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260724-admin-dashboard-view-hotfix-r15.1",
+  "pageAllowlist": [
+    "1198992073286645"
+  ],
+  "images": {
+    "adminApi": "lana-chatbot-app:admin-batch-ai-image-intake-r16@sha256:e35b49693d57680fea8e5ebd9f39b138010fa49428e24c386be797815d4cb831",
+    "adminWeb": "lana-chatbot-app:admin-batch-ai-image-intake-r16@sha256:e35b49693d57680fea8e5ebd9f39b138010fa49428e24c386be797815d4cb831",
+    "p23bMetadataStaging": "lana-chatbot-app:admin-batch-ai-image-intake-r16@sha256:e35b49693d57680fea8e5ebd9f39b138010fa49428e24c386be797815d4cb831",
+    "realtimeWorker": "lana-chatbot-app:checkout-natural-confirmation-r15@sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c",
+    "p23cPublisher": "lana-chatbot-app:checkout-natural-confirmation-r15@sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c"
+  },
+  "sourceArchiveSha256": "535b464444d00e37e5c980e76ddedd043f7c0abd84c517d13327c527d36c6126",
+  "composeSha256": "3315a96cfd6a121550e566c1bf393c23b70af4ad3ad28ece3cf9bad7dbe9c9c5",
+  "verification": {
+    "adminApiTests": "42_OF_42_PASS",
+    "adminWebTests": "19_OF_19_PASS",
+    "workerTests": "260_OF_260_PASS",
+    "pnpmCheckInsideImage": "PASS",
+    "adminApiHealth": "HEALTHY",
+    "adminWebHealth": "HEALTHY",
+    "p23bHealth": "HEALTHY",
+    "adminApiRestartCount": 0,
+    "adminWebRestartCount": 0,
+    "p23bRestartCount": 0,
+    "catalogSmoke": "HTTP_200_1_BRAND_113_PRODUCTS",
+    "publicAdminRoute": "HTTP_302_AUTHENTIK",
+    "realtimeHealth": "HEALTHY",
+    "realtimeRestarted": false,
+    "p23cHealth": "HEALTHY",
+    "p23cRestarted": false,
+    "n8nRestarted": false,
+    "authenticatedBatchUpload": "PENDING_USER_CANARY"
+  },
+  "behavior": {
+    "batchLimit": 20,
+    "uploadConcurrency": 2,
+    "perFileMaximumBytes": 8388608,
+    "catalogCacheSeconds": 300,
+    "manualImagePurpose": "AI_AUTO",
+    "manualImageStatus": "PENDING_AI",
+    "p23bNormalIntervalMs": 86400000,
+    "p23bErrorRetryMs": 300000,
+    "p23cApprovalGate": "APPROVED_AND_ACTIVE"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260724-admin-dashboard-view-hotfix-r15.1",
+    "restoreEnvironmentBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-r16",
+    "services": [
+      "admin-api",
+      "admin-web",
+      "p23b-metadata-staging"
+    ],
+    "dataDeletionRequired": false
+  }
+}

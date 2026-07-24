@@ -5,19 +5,19 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260724-admin-dashboard-view-hotfix-r15.1`.
-- Previous release: `/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15`.
-- Source commit: `26322eb2f180d646134f00a91efcf667bf8cb848`.
-- Source archive SHA-256: `1e78817f21e4b835ca8c68262df974488d8d5fd0f7f256c6f8e1b7208f5846da`.
+- Current release: `/opt/lana-chatbot/releases/20260724-admin-batch-ai-image-intake-r16`.
+- Previous release: `/opt/lana-chatbot/releases/20260724-admin-dashboard-view-hotfix-r15.1`.
+- Source commit: `c68138fda627d51fd817553a8a56c70272ec7e89`.
+- Source archive SHA-256: `535b464444d00e37e5c980e76ddedd043f7c0abd84c517d13327c527d36c6126`.
 - Compose SHA-256: `3315a96cfd6a121550e566c1bf393c23b70af4ad3ad28ece3cf9bad7dbe9c9c5`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất trong candidate: `0020_size_chart_extraction`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-Realtime Worker, Admin API, Admin Web và P2.3C healthy, restart count 0. Không có migration mới và không thay đổi webhook, delivery, POS, n8n hoặc page allowlist.
+Realtime Worker, Admin API, Admin Web, P2.3B và P2.3C healthy, restart count 0. Không có migration mới và không thay đổi webhook, delivery, POS, n8n hoặc page allowlist.
 
-Admin API chạy image `lana-chatbot-app:admin-dashboard-view-hotfix-r15.1` (`sha256:198a77471346ada84d3d1bd79cb28a038b59c386d4412710fc6f09327c459ac8`). Realtime Worker, Admin Web và P2.3C tiếp tục dùng image r15 (`sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c`); các service khác giữ nguyên.
+Admin API, Admin Web và P2.3B chạy image `lana-chatbot-app:admin-batch-ai-image-intake-r16` (`sha256:e35b49693d57680fea8e5ebd9f39b138010fa49428e24c386be797815d4cb831`). Realtime Worker và P2.3C tiếp tục dùng image r15 (`sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c`); các service khác giữ nguyên.
 
 ## Admin batch image intake + AI classification r16
 
@@ -26,6 +26,8 @@ Admin API chạy image `lana-chatbot-app:admin-dashboard-view-hotfix-r15.1` (`sh
 - Tab `manual_image_intake` mở rộng additive bằng cột `BRAND` ở P; dữ liệu cũ A:O không dịch cột. Ảnh mới ghi `AI_AUTO/PENDING_AI`.
 - P2.3B coi ảnh AI_AUTO là AI-only: không đưa loại ảnh do operator chọn vào context và không ghi vùng reviewer/`MANUAL_OVERRIDE`.
 - Approval gate, URL public 0644, original private 0600/TTL 24 giờ và P2.3C `APPROVED + ACTIVE` giữ nguyên.
+- Smoke production đọc thành công `1` brand và `113` sản phẩm active/known từ `product_registry`. Ba container r16 healthy, restart count 0; Realtime Worker và P2.3C không restart.
+- P2.3B giữ lịch bình thường 24 giờ và retry lỗi sau 5 phút. Ảnh tải lên sau một cycle sẽ được AI phân loại ở cycle kế tiếp; có thể chủ động chạy worker khi cần duyệt ngay.
 
 ## Admin dashboard least-privilege hotfix r15.1
 

@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260724-admin-dashboard-view-hotfix-r15.1`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260724-admin-batch-ai-image-intake-r16`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -16,7 +16,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 
 ## Trạng thái production ngày 2026-07-24
 
-- Admin API đang chạy image `lana-chatbot-app:admin-dashboard-view-hotfix-r15.1`; Realtime Worker, Admin Web và P2.3C giữ image r15. Page allowlist vẫn chỉ có `1198992073286645`.
+- Admin API, Admin Web và P2.3B đang chạy image `lana-chatbot-app:admin-batch-ai-image-intake-r16`; Realtime Worker và P2.3C giữ image r15. Page allowlist vẫn chỉ có `1198992073286645`.
 - Dashboard đọc checkout drop-off qua view ẩn danh `admin_conversation_events_v`; không mở quyền bảng hội thoại gốc cho tài khoản Admin.
 - Checkout tự nhiên dùng structured extraction có evidence/confidence và deterministic guard; app không đưa PII vào decision telemetry.
 - Xác nhận mua hiểu thêm các cách nói tự nhiên nhưng vẫn chặn câu hỏi, phủ định, do dự và yêu cầu ảnh. `OK` chỉ xác nhận khi cart đang ở đúng bước order preview.
@@ -29,7 +29,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - API webhook tiếp tục chạy image `lana-chatbot-app:inbound-debounce-r1`.
 - Realtime page test chạy r15 với ProductFactsV2, Media Selector V2, profile/variant/multi-fact và hard gate chỉ cho page `1198992073286645`; Size Chart scheduler vẫn giữ pre-check idempotent.
 - Shadow worker chạy cùng image, bật Judge v2 ở `DRY_RUN`; `APP_SEND_ENABLED=false`, `CHATBOT_SEND_ENABLED=false` và role DB không có quyền ghi Meta Outbox.
-- Admin API/Admin Web chạy r15; Simulation Worker giữ `sizechart-facts-v2-5d401b2`, P2.3B giữ `admin-manual-image-intake-r14` và POS snapshot giữ `sales-cycle-production-r6`.
+- Admin API/Admin Web/P2.3B chạy r16; Simulation Worker giữ `sizechart-facts-v2-5d401b2` và POS snapshot giữ `sales-cycle-production-r6`.
 - Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
 - Bốn policy runtime (shop, offer, closing, payment) đang trỏ tới các version `PUBLISHED` bất biến; `SHOP_POLICY` v2 chứa chính sách chăm sóc khách hàng có cấu trúc và mọi lần chuyển trạng thái đều có audit.
 - Chu trình bán hàng production đã nối cart 48 giờ, thương lượng deterministic, giảm 5% từ hai sản phẩm, freeship/giảm cuối theo policy, thu thông tin nhận hàng, order preview và `PURCHASE_CONFIRMED`.
@@ -61,7 +61,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - PostgreSQL đã áp dụng migration đến `0019_customer_profile_wave2`; migration 0019 bổ sung projection hồ sơ số đo 48 giờ theo pseudonymous customer key và tương thích ngược.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Admin dashboard hotfix r15.1](deploy/manifests/20260724-admin-dashboard-view-hotfix-r15.1.json); r15 là release gần nhất để rollback.
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Admin batch image intake r16](deploy/manifests/20260724-admin-batch-ai-image-intake-r16.json); r15.1 là release gần nhất để rollback.
 
 ## Kiến trúc dữ liệu
 
