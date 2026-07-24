@@ -584,7 +584,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: lana-chatbot-app:p23c-v1
+    image: ${P23C_IMAGE:-lana-chatbot-app:p23c-v1}
     container_name: lana-chatbot-p23c-publisher
     restart: unless-stopped
     command: ["node", "apps/worker/dist/p23c-server.js"]
