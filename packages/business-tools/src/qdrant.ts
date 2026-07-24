@@ -105,6 +105,13 @@ function productImageFromPayload(payload: Record<string, unknown>): ProductImage
     qualityScore: Number.isFinite(quality) ? quality : null,
     feedback: payload.feedback_verified === true,
     observedAt: text(payload.published_at) || text(payload.ai_updated_at) || null,
+    sourceContentSha256: /^[a-f0-9]{64}$/u.test(text(payload.image_content_sha256).toLowerCase())
+      ? text(payload.image_content_sha256).toLowerCase()
+      : null,
+    reviewStatus: text(payload.image_metadata_review_status).toUpperCase() === "APPROVED"
+      ? "APPROVED"
+      : null,
+    metadataVerified: payload.metadata_verified === true,
   };
 }
 

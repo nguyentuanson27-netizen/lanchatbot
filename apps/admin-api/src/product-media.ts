@@ -1,6 +1,6 @@
 import { createHash, createSign, randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
-import { mkdir, readdir, rename, stat, unlink, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readFile, readdir, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { AdminIdentity } from "./types.js";
 
@@ -102,6 +102,7 @@ const OUTPUT_CODEC: Readonly<Record<string, { codec: string; options: readonly s
   "image/webp": { codec: "libwebp", options: ["-q:v", "85"] },
 };
 
+const PENDING_PUBLIC_PREFIX = ".pending-public-";
 const base64Url = (value: string | Buffer): string => Buffer.from(value).toString("base64url");
 
 function normalizePrivateKey(value: string): string {
@@ -179,6 +180,7 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
   private readonly fetchImpl: typeof fetch;
   private readonly now: () => Date;
   private readonly resizeImpl: (input: Buffer, mimeType: string, maxDimension: number) => Promise<Buffer>;
+  private readonly intakeLocks = new Map<string, Promise<void>>();
   private accessToken: { value: string; expiresAt: number } | null = null;
 
   constructor(private readonly options: ProductMediaServiceOptions) {
@@ -228,61 +230,88 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
     const uploadedAt = this.now().toISOString();
     const imageIntents = INTENTS[input.mediaPurpose];
 
-    await this.ensureSheet();
-    const existing = sheetRows(await this.getValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:O`))
-      .find((row) => row.INTAKE_ID === intakeId);
-    if (existing) {
-      return {
+    return this.withIntakeLock(intakeId, async () => {
+      await this.ensureSheet();
+      const existing = sheetRows(await this.getValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:O`))
+        .find((row) => row.INTAKE_ID === intakeId);
+      if (existing) {
+        return {
+          intakeId,
+          maSp,
+          imageUrl: existing.IMAGE_URL || imageUrl,
+          mediaPurpose: input.mediaPurpose,
+          imageIntents,
+          status: "PENDING",
+          uploadedAt: existing.UPLOADED_AT || uploadedAt,
+          duplicate: true,
+        };
+      }
+
+      await mkdir(this.options.directory, { recursive: true, mode: 0o755 });
+      await chmod(this.options.directory, 0o755);
+      await mkdir(this.options.originalDirectory, { recursive: true, mode: 0o750 });
+      const originalPath = join(
+        this.options.originalDirectory,
+        `${intakeId}-${this.now().getTime()}-${randomUUID()}.${extension}`,
+      );
+      await writeFile(originalPath, image, { flag: "wx", mode: 0o600 });
+
+      const resized = await this.resizeImpl(image, input.mimeType, this.options.resizeMaxDimension)
+        .catch(async (error: unknown) => {
+          await unlink(originalPath).catch(() => undefined);
+          throw error;
+        });
+      if (!resized.length || resized.length > this.options.maxBytes) {
+        await unlink(originalPath).catch(() => undefined);
+        throw new Error("PRODUCT_MEDIA_RESIZED_SIZE_INVALID");
+      }
+      if (!validImageSignature(resized, input.mimeType)) {
+        await unlink(originalPath).catch(() => undefined);
+        throw new Error("PRODUCT_MEDIA_RESIZED_SIGNATURE_INVALID");
+      }
+      const finalPath = join(this.options.directory, fileName);
+      const temporaryPath = `${finalPath}.${randomUUID()}.tmp`;
+      const pendingMarkerPath = join(
+        this.options.originalDirectory,
+        `${PENDING_PUBLIC_PREFIX}${intakeId}.json`,
+      );
+      try {
+        await writeFile(
+          pendingMarkerPath,
+          JSON.stringify({ intakeId, fileName, createdAt: uploadedAt }),
+          { flag: "w", mode: 0o600 },
+        );
+        await writeFile(temporaryPath, resized, { flag: "wx", mode: 0o644 });
+        await rename(temporaryPath, finalPath);
+        await chmod(finalPath, 0o644);
+      } catch (error) {
+        await unlink(temporaryPath).catch(() => undefined);
+        await unlink(finalPath).catch(() => undefined);
+        await unlink(pendingMarkerPath).catch(() => undefined);
+        await unlink(originalPath).catch(() => undefined);
+        throw error;
+      }
+
+      await this.appendValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:O`, [[
         intakeId,
         maSp,
-        imageUrl: existing.IMAGE_URL || imageUrl,
-        mediaPurpose: input.mediaPurpose,
-        imageIntents,
-        status: "PENDING",
-        uploadedAt: existing.UPLOADED_AT || uploadedAt,
-        duplicate: true,
-      };
-    }
-
-    await mkdir(this.options.directory, { recursive: true, mode: 0o750 });
-    await mkdir(this.options.originalDirectory, { recursive: true, mode: 0o750 });
-    const originalPath = join(
-      this.options.originalDirectory,
-      `${intakeId}-${this.now().getTime()}-${randomUUID()}.${extension}`,
-    );
-    await writeFile(originalPath, image, { flag: "wx", mode: 0o600 });
-
-    const resized = await this.resizeImpl(image, input.mimeType, this.options.resizeMaxDimension);
-    if (!resized.length || resized.length > this.options.maxBytes) throw new Error("PRODUCT_MEDIA_RESIZED_SIZE_INVALID");
-    if (!validImageSignature(resized, input.mimeType)) throw new Error("PRODUCT_MEDIA_RESIZED_SIGNATURE_INVALID");
-    const finalPath = join(this.options.directory, fileName);
-    const temporaryPath = `${finalPath}.${randomUUID()}.tmp`;
-    try {
-      await writeFile(temporaryPath, resized, { flag: "wx", mode: 0o640 });
-      await rename(temporaryPath, finalPath);
-    } catch (error) {
-      await unlink(temporaryPath).catch(() => undefined);
-      throw error;
-    }
-
-    await this.appendValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:O`, [[
-      intakeId,
-      maSp,
-      imageUrl,
-      input.mediaPurpose,
-      imageIntents.join(" | "),
-      input.notes.trim(),
-      true,
-      "PENDING",
-      identity.email,
-      uploadedAt,
-      hash,
-      input.originalFileName,
-      "",
-      "",
-      "",
-    ]]);
-    return { intakeId, maSp, imageUrl, mediaPurpose: input.mediaPurpose, imageIntents, status: "PENDING", uploadedAt, duplicate: false };
+        imageUrl,
+        input.mediaPurpose,
+        imageIntents.join(" | "),
+        input.notes.trim(),
+        true,
+        "PENDING",
+        identity.email,
+        uploadedAt,
+        hash,
+        input.originalFileName,
+        "",
+        "",
+        "",
+      ]]);
+      await unlink(pendingMarkerPath).catch(() => undefined);
+      return { intakeId, maSp, imageUrl, mediaPurpose: input.mediaPurpose, imageIntents, status: "PENDING", uploadedAt, duplicate: false };
+    });
   }
 
   async cleanupExpiredOriginals(): Promise<number> {
@@ -291,14 +320,73 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
     const entries = await readdir(this.options.originalDirectory, { withFileTypes: true });
     let removed = 0;
     await Promise.all(entries.map(async (entry) => {
-      if (!entry.isFile()) return;
+      if (!entry.isFile() || entry.name.startsWith(PENDING_PUBLIC_PREFIX)) return;
       const path = join(this.options.originalDirectory, entry.name);
       const fileStat = await stat(path).catch(() => null);
       if (!fileStat || fileStat.mtimeMs > cutoff) return;
       await unlink(path).catch(() => undefined);
       removed += 1;
     }));
+    removed += await this.reconcilePendingPublicFiles(entries, cutoff);
     return removed;
+  }
+
+  private async reconcilePendingPublicFiles(
+    entries: readonly { isFile(): boolean; name: string }[],
+    cutoff: number,
+  ): Promise<number> {
+    const pending = entries.filter((entry) =>
+      entry.isFile() && entry.name.startsWith(PENDING_PUBLIC_PREFIX)
+    );
+    if (pending.length === 0) return 0;
+    const eligible: { markerPath: string; intakeId: string; fileName: string }[] = [];
+    for (const entry of pending) {
+      const markerPath = join(this.options.originalDirectory, entry.name);
+      const fileStat = await stat(markerPath).catch(() => null);
+      if (!fileStat || fileStat.mtimeMs > cutoff) continue;
+      const marker = await readFile(markerPath, "utf8")
+        .then((value) => JSON.parse(value) as { intakeId?: unknown; fileName?: unknown })
+        .catch(() => null);
+      const intakeId = typeof marker?.intakeId === "string" ? marker.intakeId : "";
+      const fileName = typeof marker?.fileName === "string" ? marker.fileName : "";
+      if (!/^[a-f0-9]{32}$/u.test(intakeId) || !/^[a-z0-9._-]{3,200}$/u.test(fileName)) {
+        await unlink(markerPath).catch(() => undefined);
+        continue;
+      }
+      eligible.push({ markerPath, intakeId, fileName });
+    }
+    if (eligible.length === 0) return 0;
+
+    const values = await this.getValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:O`)
+      .catch(() => null);
+    if (values === null) return 0;
+    const recorded = new Set(sheetRows(values).map((row) => row.INTAKE_ID).filter(Boolean));
+    let removed = 0;
+    for (const item of eligible) {
+      if (!recorded.has(item.intakeId)) {
+        await unlink(join(this.options.directory, item.fileName)).catch(() => undefined);
+        removed += 1;
+      }
+      await unlink(item.markerPath).catch(() => undefined);
+    }
+    return removed;
+  }
+
+  private async withIntakeLock<T>(intakeId: string, operation: () => Promise<T>): Promise<T> {
+    const predecessor = this.intakeLocks.get(intakeId) ?? Promise.resolve();
+    let release: (() => void) | undefined;
+    const current = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const queued = predecessor.then(() => current);
+    this.intakeLocks.set(intakeId, queued);
+    await predecessor;
+    try {
+      return await operation();
+    } finally {
+      release?.();
+      if (this.intakeLocks.get(intakeId) === queued) this.intakeLocks.delete(intakeId);
+    }
   }
 
   private async token(): Promise<string> {

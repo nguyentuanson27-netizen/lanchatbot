@@ -14,6 +14,9 @@ const payload = {
   search_occasions: ["DI LAM"],
   image_url: "https://cdn.example/sq149.jpg",
   images_array: ["https://cdn.example/sq149-2.jpg"],
+  image_content_sha256: "a".repeat(64),
+  image_metadata_review_status: "APPROVED",
+  metadata_verified: true,
   catalog_version: "catalog-v2",
   active: true,
 };
@@ -45,6 +48,13 @@ describe("Qdrant stable catalog adapter", () => {
       descriptionXml: "Lụa mềm với form suông nhẹ, phù hợp đi làm.",
       colors: ["DEN"],
       imageUrls: ["https://cdn.example/sq149.jpg", "https://cdn.example/sq149-2.jpg"],
+    });
+    await expect(adapter.findByExactCode("sq149")).resolves.toMatchObject({
+      images: [{
+        sourceContentSha256: "a".repeat(64),
+        reviewStatus: "APPROVED",
+        metadataVerified: true,
+      }],
     });
     const request = JSON.parse(String(requests[0]?.body)) as Record<string, unknown>;
     expect(request).toMatchObject({ with_payload: true, with_vector: false });

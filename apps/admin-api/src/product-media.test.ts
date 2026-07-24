@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { generateKeyPairSync } from "node:crypto";
-import { mkdtemp, readFile, readdir, rm, utimes } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm, stat, utimes } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -83,6 +83,11 @@ test("manual product image upload stores only the resized URL and removes origin
     assert.equal(originalFiles.length, 1);
     assert.deepEqual(await readFile(join(publicDirectory, publicFiles[0]!)), resized);
     assert.equal(result.imageUrl, `https://admin.lanadesign.vn/lana-public/products/${publicFiles[0]}`);
+    if (process.platform !== "win32") {
+      assert.equal((await stat(publicDirectory)).mode & 0o777, 0o755);
+      assert.equal((await stat(join(publicDirectory, publicFiles[0]!))).mode & 0o777, 0o644);
+      assert.equal((await stat(join(originalDirectory, originalFiles[0]!))).mode & 0o777, 0o600);
+    }
     assert.equal(appendedValues[0]?.[2], result.imageUrl);
     assert.notEqual(appendedValues[0]?.[2], join(originalDirectory, originalFiles[0]!));
 

@@ -1108,13 +1108,55 @@ const MEASUREMENT_LABELS: Readonly<Record<MeasurementKind, string>> = {
   HIPS_CM: "vòng mông",
 };
 
+export function verifiedSizeGuideAttachments(
+  productFactsV2: ProductFactsV2 | null,
+  chartHash: string | null,
+  chartSourceUrl: string | null,
+  now: Date,
+): string[] {
+  if (!productFactsV2 || !chartHash || !chartSourceUrl) return [];
+  const media = productFactsV2.media;
+  if (media.metadata.freshnessState !== "FRESH") return [];
+  if (
+    media.metadata.expiresAt !== null &&
+    Date.parse(media.metadata.expiresAt) <= now.getTime()
+  ) return [];
+  return media.assets
+    .filter((asset) =>
+      asset.verified &&
+      asset.reviewStatus === "APPROVED" &&
+      asset.purposes.includes("SIZE_CHART") &&
+      asset.sourceContentSha256 === chartHash &&
+      asset.url === chartSourceUrl
+    )
+    .sort((left, right) => left.sortOrder - right.sortOrder)
+    .slice(0, 1)
+    .map(({ url }) => url);
+}
+
+export function proactiveSizeEvidencePrefix(reasonCodes: readonly string[]): string {
+  return reasonCodes.some((code) => code.startsWith("PAST_SIZE_"))
+    ? "Theo size chị đã mua và xác nhận trước đây"
+    : "Theo số đo mới nhất";
+}
+
 function sizeEngineProposal(
   proposal: AgentProposalV1,
   product: StableProductDocument,
   profile: CustomerProfileV1,
   policyResolution: RuntimePolicyResolution | null,
+  productFactsV2: ProductFactsV2 | null,
   now: Date,
 ): AgentProposalV1 {
+  const componentLabels: Readonly<Record<ProductComponentRole, string>> = {
+    TOP: "áo",
+    SKIRT: "chân váy",
+    PANTS: "quần",
+    DRESS: "váy",
+    JACKET: "áo khoác",
+    ACCESSORY: "phụ kiện",
+    OTHER: "sản phẩm",
+  };
   const chartArtifacts = Object.values(
     policyResolution?.bundle?.artifacts.sizeCharts ?? {},
   );
@@ -1183,17 +1225,34 @@ function sizeEngineProposal(
       handoffReason: null,
     };
   }
+  const chartHash = decision.recommendation.chartRef?.sourceContentSha256 ?? null;
+  const chartArtifact = chartHash === null
+    ? null
+    : chartArtifacts.find(({ chart }) =>
+        chart.reference.sourceContentSha256 === chartHash
+      ) ?? null;
+  const chartSourceUrl = chartArtifact?.sourceMetadata.sourceReference ?? null;
+  const sizeGuideUrls = verifiedSizeGuideAttachments(
+    productFactsV2, chartHash, chartSourceUrl, now,
+  );
   const sizes = decision.recommendation.recommendedSizes
-    .map(({ componentRole, size }) => `${componentRole}: ${size}`)
+    .map(({ componentRole, size }) => `${componentLabels[componentRole]} size ${size}`)
     .join(", ");
   const alternatives = decision.alternativeSizes.length > 0
-    ? `; có thể cân nhắc ${decision.alternativeSizes.join(", ")}`
+    ? `; nếu thích mặc thoải mái có thể cân nhắc size ${decision.alternativeSizes.join(", ")}`
     : "";
+  const confidence = decision.recommendation.confidence === null
+    ? ""
+    : ` Độ tin cậy ${Math.round(decision.recommendation.confidence * 100)}% theo bảng size đã xác minh.`;
+  const evidencePrefix = proactiveSizeEvidencePrefix(decision.recommendation.reasonCodes);
   return {
     ...proposal,
     action: "REPLY",
-    reply: `Số đo của chị hợp ${sizes}${alternatives}, em giữ size này cho mình nha.`,
-    attachments: [],
+    reply: [
+      `${evidencePrefix}, chị hợp ${sizes}${alternatives}.${confidence}`,
+      "Em giữ size này cho mình nha.",
+    ].join(" "),
+    attachments: sizeGuideUrls,
     handoffReason: null,
   };
 }
@@ -2332,6 +2391,7 @@ export class RealtimeRunner {
               resolutions[0]!.product!,
               customerProfile,
               policyResolution,
+              productFactsV2,
               now,
             );
             if (sizeProposal.action === "HANDOFF") {
@@ -2355,6 +2415,7 @@ export class RealtimeRunner {
               proposal = {
                 ...proposal,
                 reply: [reply, sizeProposal.reply].filter(Boolean).join("\n"),
+                attachments: sizeProposal.attachments,
               };
             }
           }
@@ -2680,6 +2741,7 @@ export class RealtimeRunner {
             resolvedProduct,
             customerProfile,
             policyResolution,
+            productFactsV2,
             now,
           );
         }

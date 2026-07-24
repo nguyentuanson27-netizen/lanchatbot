@@ -128,7 +128,9 @@ function mediaAssets(
       purposes: imagePurpose(image),
       view: imageView(image),
       sortOrder: image.sortOrder,
-      verified: true,
+      verified: image.metadataVerified === true && image.reviewStatus === "APPROVED",
+      sourceContentSha256: image.sourceContentSha256 ?? null,
+      reviewStatus: image.reviewStatus ?? null,
     };
   });
 }

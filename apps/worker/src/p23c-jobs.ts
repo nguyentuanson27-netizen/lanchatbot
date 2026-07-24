@@ -285,6 +285,9 @@ export function buildApprovedQdrantJobs(
     const visualMaterials = listValue(choose(row.VISUAL_MATERIALS, row.AI_VISUAL_MATERIALS, ""));
     const verified = boolValue(row.VERIFIED, false);
     const feedbackVerified = verified && (imageType === "FEEDBACK" || intents.includes("FEEDBACK"));
+    const imageContentSha256 = /^[a-f0-9]{64}$/u.test(String(row.IMAGE_HASH || "").trim().toLowerCase())
+      ? String(row.IMAGE_HASH || "").trim().toLowerCase()
+      : "";
     const description = reg?.description_override || profile?.description_xml || "";
     const material = profile?.material_xml || "";
     const profileImages = Array.isArray(profile?.images) ? profile.images : [];
@@ -348,6 +351,7 @@ export function buildApprovedQdrantJobs(
       image_metadata_version: String(row.AI_METADATA_VERSION || "image-meta-v1.0.0"),
       source_context: String(row.SOURCE_CONTEXT || "WEBSTORE_XML"),
       feedback_verified: feedbackVerified,
+      image_content_sha256: imageContentSha256,
       metadata_verified: verified,
     };
 

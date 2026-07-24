@@ -88,6 +88,12 @@ export interface ProductImage {
   feedback: boolean;
   /** Stable metadata observation time from the Qdrant payload when available. */
   observedAt?: string | null;
+  /** SHA-256 of the reviewed source image from image_registry. */
+  sourceContentSha256?: string | null;
+  /** Only APPROVED rows may be used as verified customer-facing media. */
+  reviewStatus?: "APPROVED" | null;
+  /** Human verification flag copied from image_registry. */
+  metadataVerified?: boolean;
 }
 
 export interface StableProductDocument {

@@ -22,7 +22,9 @@ import {
   productCodeOnly,
   productDescriptionLine,
   productDisplayName,
+  proactiveSizeEvidencePrefix,
   RealtimeRunner,
+  verifiedSizeGuideAttachments,
   staleFactsRequireHandoff,
   unavailableFactsRequireHandoff,
   verifiedProductInfoProposal,
@@ -31,7 +33,7 @@ import {
   type RealtimeProductSearchPort,
   type RealtimeRuntimePort,
 } from "./realtime-runner.js";
-import type { BusinessFactEnvelopeV1 } from "@lana/contracts";
+import type { BusinessFactEnvelopeV1, ProductFactsV2 } from "@lana/contracts";
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 
 describe("RealtimeRunner", () => {
@@ -52,6 +54,83 @@ describe("RealtimeRunner", () => {
     expect(currentProductContinuationId("shop ở đâu", "SV695")).toBeNull();
     expect(continuationProductId(null, "CB182", "SV695")).toBe("CB182");
     expect(continuationProductId(null, null, "SV695")).toBe("SV695");
+  });
+
+  it("attaches only the exact fresh approved size chart used by the recommendation", () => {
+    const hash = "a".repeat(64);
+    const exactUrl = "https://cdn.example/cb182-size.jpg";
+    const facts = {
+      media: {
+        metadata: {
+          freshnessState: "FRESH",
+          expiresAt: "2026-07-25T00:00:00.000Z",
+        },
+        assets: [
+          {
+            url: "https://cdn.example/wrong-size.jpg",
+            purposes: ["SIZE_CHART"],
+            verified: true,
+            reviewStatus: "APPROVED",
+            sourceContentSha256: "b".repeat(64),
+            sortOrder: 0,
+          },
+          {
+            url: exactUrl,
+            purposes: ["SIZE_CHART"],
+            verified: true,
+            reviewStatus: "APPROVED",
+            sourceContentSha256: hash,
+            sortOrder: 1,
+          },
+        ],
+      },
+    } as ProductFactsV2;
+    expect(verifiedSizeGuideAttachments(
+      facts,
+      hash,
+      exactUrl,
+      new Date("2026-07-24T00:00:00.000Z"),
+    )).toEqual([exactUrl]);
+    expect(verifiedSizeGuideAttachments(
+      facts,
+      "c".repeat(64),
+      exactUrl,
+      new Date("2026-07-24T00:00:00.000Z"),
+    )).toEqual([]);
+  });
+
+  it("does not attach stale, expired or unapproved size charts", () => {
+    const hash = "a".repeat(64);
+    const url = "https://cdn.example/cb182-size.jpg";
+    const facts = {
+      media: {
+        metadata: {
+          freshnessState: "FRESH",
+          expiresAt: "2026-07-24T00:00:00.000Z",
+        },
+        assets: [{
+          url,
+          purposes: ["SIZE_CHART"],
+          verified: false,
+          reviewStatus: null,
+          sourceContentSha256: hash,
+          sortOrder: 0,
+        }],
+      },
+    } as ProductFactsV2;
+    expect(verifiedSizeGuideAttachments(
+      facts,
+      hash,
+      url,
+      new Date("2026-07-24T00:00:00.000Z"),
+    )).toEqual([]);
+  });
+
+  it("uses customer history wording only when the size engine used a past size", () => {
+    expect(proactiveSizeEvidencePrefix(["PAST_SIZE_MATCHES_VERIFIED_CHART"]))
+      .toBe("Theo size chị đã mua và xác nhận trước đây");
+    expect(proactiveSizeEvidencePrefix(["MEASUREMENTS_MATCHES_VERIFIED_CHART"]))
+      .toBe("Theo số đo mới nhất");
   });
 
   it("sends one holding reply only for after-sales handoff", () => {

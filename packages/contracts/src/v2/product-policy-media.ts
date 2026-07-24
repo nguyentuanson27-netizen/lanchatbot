@@ -464,6 +464,8 @@ export const ProductMediaAssetV2Schema = z
     view: ProductMediaViewV2Schema,
     sortOrder: z.number().int().nonnegative().max(10_000),
     verified: z.boolean(),
+    sourceContentSha256: z.string().regex(/^[a-f0-9]{64}$/).nullable().optional(),
+    reviewStatus: z.literal("APPROVED").nullable().optional(),
   })
   .strict()
   .superRefine((value, context) => {
