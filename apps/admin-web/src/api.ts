@@ -478,6 +478,18 @@ export async function getOverview(signal?: AbortSignal): Promise<Overview> {
         value: numberValue(funnel.purchase_confirmed),
         hint: `${numberValue(funnel.end_to_end_pct)}% từ hỏi giá`,
       },
+      {
+        label: "Thiếu thông tin nhận hàng",
+        value: numberValue(funnel.checkout_missing_events),
+        hint: `${numberValue(funnel.checkout_missing_conversations)} hội thoại trong kỳ`,
+        tone: numberValue(funnel.checkout_missing_events) > 0 ? "warning" : "good",
+      },
+      {
+        label: "Preview chưa chốt",
+        value: numberValue(funnel.preview_not_confirmed),
+        hint: "Đã xem trước đơn nhưng chưa xác nhận mua",
+        tone: numberValue(funnel.preview_not_confirmed) > 0 ? "warning" : "good",
+      },
     ],
     services: normalizeServices(workers),
     alerts,

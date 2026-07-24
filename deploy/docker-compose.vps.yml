@@ -600,7 +600,7 @@ services:
       VERTEX_PROJECT_ID: project-d44e0453-82e8-4ea2-a9d
       VERTEX_EMBEDDING_LOCATION: us-central1
       VERTEX_EMBEDDING_MODEL: multimodalembedding@001
-      VERTEX_MIN_INTERVAL_MS: "4000"
+      VERTEX_MIN_INTERVAL_MS: "6000"
       VERTEX_RATE_LIMIT_KEY: rate:vertex:multimodalembedding:global
       REMBG_URL: http://139.162.18.93:7000/api/remove
       REMBG_MODEL: u2netp

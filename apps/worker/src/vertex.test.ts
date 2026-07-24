@@ -95,6 +95,9 @@ describe("Vertex shadow client", () => {
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("khong hoi nguoc khach muon xem thong tin gi");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Khong chuyen HANDOFF chi vi khach hoi gia");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Tuyet doi khong NO_REPLY");
+    expect(SHADOW_SYSTEM_INSTRUCTION).toContain("salesSignals chi trich");
+    expect(SHADOW_SYSTEM_INSTRUCTION).toContain("evidenceText");
+    expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Khong dua ten, so dien thoai hay dia chi");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Khong dung NO_REPLY neu tin moi co tin hieu mua");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Khi HANDOFF: reply rong");
     expect(SHADOW_SYSTEM_INSTRUCTION).not.toContain("[SILENT]");

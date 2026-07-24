@@ -132,6 +132,12 @@ export interface RealtimeDecisionEventPlan {
     | "SIZE_CONSULT_STARTED"
     | "BUYING_SIGNAL_DETECTED"
     | "ORDER_INFO_REQUESTED"
+    | "CHECKOUT_DETAILS_MISSING"
+    | "CHECKOUT_COMPLETED"
+    | "ORDER_PREVIEW_CREATED"
+    | "PURCHASE_CONFIRMATION_DETECTED"
+    | "PURCHASE_CONFIRMATION_REJECTED"
+    | "PURCHASE_CONFIRMED"
     | "ORDER_INTENT_CREATED"
     | "HANDOFF"
     | "GUARD_BLOCKED"
@@ -185,6 +191,13 @@ export interface RealtimeDecisionEventPlan {
       total: number | null;
     }>;
     buyingSignalOverride: boolean;
+    checkoutCapturedFields?: readonly string[];
+    checkoutMissingFields?: readonly string[];
+    checkoutCompleted?: boolean;
+    orderPreviewCreated?: boolean;
+    confirmationAttempted?: boolean;
+    confirmationConfirmed?: boolean;
+    confirmationSource?: string | null;
   }>;
 }
 

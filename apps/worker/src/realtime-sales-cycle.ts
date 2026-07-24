@@ -3,6 +3,7 @@ import { containsBuyingSignal } from "@lana/business-tools";
 import {
   CheckoutRevalidationV1Schema,
   OrderPreviewV1Schema,
+  type AgentSalesSignalsV1,
   type CartV1,
   type BankTransferPolicyV1,
   type CheckoutRevalidationV1,
@@ -56,6 +57,7 @@ export interface RealtimeSalesCycleInput {
   readonly offerType: string | null;
   readonly size: string | null;
   readonly color: string | null;
+  readonly salesSignals?: AgentSalesSignalsV1 | null;
   readonly shopAlias: string;
   readonly policyResolution: RuntimePolicyResolution | null;
   readonly facts: BusinessFactsReader;
@@ -72,6 +74,27 @@ export interface RealtimeSalesCycleOutput {
   readonly transferToHuman: boolean;
   readonly desiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null;
   readonly reasonCode: string | null;
+  readonly telemetry?: RealtimeSalesCycleTelemetry;
+}
+
+export type CheckoutFieldKey =
+  | "FULL_NAME"
+  | "PHONE"
+  | "ADDRESS"
+  | "PAYMENT_METHOD";
+
+export interface RealtimeSalesCycleTelemetry {
+  readonly checkoutCapturedFields?: readonly CheckoutFieldKey[];
+  readonly checkoutMissingFields?: readonly CheckoutFieldKey[];
+  readonly checkoutCompleted?: boolean;
+  readonly orderPreviewCreated?: boolean;
+  readonly confirmationAttempted?: boolean;
+  readonly confirmationConfirmed?: boolean;
+  readonly confirmationSource?:
+    | "DETERMINISTIC_CLASSIFIER"
+    | "MODEL_STRUCTURED_OUTPUT"
+    | null;
+  readonly confirmationReasonCode?: string | null;
 }
 
 interface CheckoutDetails {
@@ -79,6 +102,16 @@ interface CheckoutDetails {
   readonly phone?: string;
   readonly address?: string;
   readonly paymentMethod?: "COD" | "BANK_TRANSFER";
+}
+
+interface ConfirmationDecision {
+  readonly decision: "CONFIRM" | "REJECT" | "UNCLEAR";
+  readonly attempted: boolean;
+  readonly source:
+    | "DETERMINISTIC_CLASSIFIER"
+    | "MODEL_STRUCTURED_OUTPUT"
+    | null;
+  readonly reasonCode: string | null;
 }
 
 interface RevalidationBuild {
@@ -89,7 +122,7 @@ interface RevalidationBuild {
 function asciiFold(value: string): string {
   return value
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/\p{M}/gu, "")
     .replace(/đ/giu, "d")
     .toLowerCase();
 }
@@ -137,8 +170,80 @@ function purchaseReady(text: string, hasProductContext: boolean): boolean {
   return containsBuyingSignal(text, { hasProductContext });
 }
 
-function confirmation(text: string): boolean {
-  return /^(?:dạ\s+)?(?:ok|oke|đồng ý|dong y|xác nhận|xac nhan|chốt|chot|lấy|lay)(?:\s|$)/iu.test(text.trim());
+function exactEvidence(text: string, evidenceText: string | null): boolean {
+  if (!evidenceText) return false;
+  return text.normalize("NFC").includes(evidenceText.normalize("NFC"));
+}
+
+function deterministicConfirmation(text: string): ConfirmationDecision {
+  const folded = asciiFold(text)
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+  const hasConfirmationVocabulary =
+    /\b(?:ok|oke|okay|dong y|xac nhan|chot|len don|lay)\b/u.test(folded);
+  if (!hasConfirmationVocabulary) {
+    return { decision: "UNCLEAR", attempted: false, source: null, reasonCode: null };
+  }
+  if (
+    /\b(?:khong|ko|k|chua|dung|huy)\s+(?:lay|chot|xac nhan|len don)\b/u.test(folded) ||
+    /\b(?:de|doi)\s+(?:chi|c|em|e)?\s*(?:suy nghi|can nhac|xem lai)\b/u.test(folded) ||
+    /\b(?:lay|xin|gui|xem)\s+(?:them\s+)?anh\b/u.test(folded) ||
+    /\b(?:chot|lay|len don).*(?:duoc khong|khong em|chua em)\b/u.test(folded) ||
+    text.includes("?")
+  ) {
+    return {
+      decision: "REJECT",
+      attempted: true,
+      source: "DETERMINISTIC_CLASSIFIER",
+      reasonCode: "CONFIRMATION_NEGATED_OR_HESITANT",
+    };
+  }
+  if (
+    /\b(?:ok|oke|okay|dong y|xac nhan)\b/u.test(folded) ||
+    /\b(?:cho|giup)\s+(?:chi|c|em|e)?\s*(?:lay|chot|len don)\b/u.test(folded) ||
+    /\b(?:chot|len don)\b/u.test(folded) ||
+    /\b(?:lay)\s+(?:di|nha|nhe|a)?\s*$/u.test(folded)
+  ) {
+    return {
+      decision: "CONFIRM",
+      attempted: true,
+      source: "DETERMINISTIC_CLASSIFIER",
+      reasonCode: "CONFIRMATION_DETERMINISTIC_MATCH",
+    };
+  }
+  return {
+    decision: "UNCLEAR",
+    attempted: true,
+    source: "DETERMINISTIC_CLASSIFIER",
+    reasonCode: "CONFIRMATION_AMBIGUOUS",
+  };
+}
+
+function confirmation(
+  text: string,
+  salesSignals: AgentSalesSignalsV1 | null | undefined,
+): ConfirmationDecision {
+  const deterministic = deterministicConfirmation(text);
+  if (deterministic.decision !== "UNCLEAR" || deterministic.attempted) {
+    return deterministic;
+  }
+  const signal = salesSignals?.purchaseConfirmation;
+  if (
+    !signal ||
+    signal.confidence < 0.85 ||
+    !exactEvidence(text, signal.evidenceText)
+  ) return deterministic;
+  return {
+    decision: signal.decision,
+    attempted: signal.decision !== "UNCLEAR",
+    source: "MODEL_STRUCTURED_OUTPUT",
+    reasonCode: signal.decision === "CONFIRM"
+      ? "CONFIRMATION_MODEL_MATCH"
+      : signal.decision === "REJECT"
+        ? "CONFIRMATION_MODEL_REJECTED"
+        : null,
+  };
 }
 
 function priceObjection(text: string): boolean {
@@ -155,16 +260,69 @@ function labeledValue(text: string, labels: readonly string[]): string | undefin
   return value || undefined;
 }
 
-function checkoutDetails(text: string): CheckoutDetails {
+function modelCheckoutValue(
+  text: string,
+  field: {
+    readonly value: string | null;
+    readonly evidenceText: string | null;
+    readonly confidence: number;
+  } | undefined,
+  kind: "FULL_NAME" | "PHONE" | "ADDRESS",
+): string | undefined {
+  if (
+    !field ||
+    field.confidence < 0.85 ||
+    !field.value ||
+    !exactEvidence(text, field.evidenceText)
+  ) return undefined;
+  const value = field.value.trim();
+  if (
+    kind === "FULL_NAME" &&
+    (value.length < 2 || value.length > 160 || /\d/u.test(value))
+  ) return undefined;
+  if (
+    kind === "PHONE" &&
+    !/^(?:\+?84|0)\d{8,10}$/u.test(value)
+  ) return undefined;
+  if (
+    kind === "ADDRESS" &&
+    (value.length < 8 || value.length > 1_000)
+  ) return undefined;
+  return value;
+}
+
+function modelPaymentMethod(
+  text: string,
+  field: AgentSalesSignalsV1["checkoutExtraction"]["paymentMethod"] | undefined,
+): "COD" | "BANK_TRANSFER" | undefined {
+  if (
+    !field ||
+    field.confidence < 0.85 ||
+    !field.value ||
+    !exactEvidence(text, field.evidenceText)
+  ) return undefined;
+  return field.value;
+}
+
+function checkoutDetails(
+  text: string,
+  salesSignals: AgentSalesSignalsV1 | null | undefined,
+): CheckoutDetails {
+  const extracted = salesSignals?.checkoutExtraction;
   const phone = labeledValue(text, ["sđt", "sdt", "điện thoại", "dien thoai", "phone"]) ??
-    text.match(/(?:^|[^\d])((?:\+?84|0)\d{8,10})(?:[^\d]|$)/u)?.[1];
+    text.match(/(?:^|[^\d])((?:\+?84|0)\d{8,10})(?:[^\d]|$)/u)?.[1] ??
+    modelCheckoutValue(text, extracted?.phone, "PHONE");
   const paymentMethod = /(chuyển khoản|chuyen khoan|\bck\b|bank)/iu.test(text)
     ? "BANK_TRANSFER" as const
     : /(?:^|\s)(?:cod|tiền mặt|tien mat|nhận hàng trả|nhan hang tra)(?:\s|$)/iu.test(text)
       ? "COD" as const
-      : undefined;
-  const fullName = labeledValue(text, ["tên", "ten", "họ tên", "ho ten", "người nhận", "nguoi nhan"]);
-  const address = labeledValue(text, ["địa chỉ", "dia chi", "đ/c", "dc"]);
+      : modelPaymentMethod(text, extracted?.paymentMethod);
+  const fullName =
+    labeledValue(text, ["tên", "ten", "họ tên", "ho ten", "người nhận", "nguoi nhan"]) ??
+    modelCheckoutValue(text, extracted?.fullName, "FULL_NAME");
+  const address =
+    labeledValue(text, ["địa chỉ", "dia chi", "đ/c", "dc"]) ??
+    modelCheckoutValue(text, extracted?.address, "ADDRESS");
   return {
     ...(fullName ? { fullName } : {}),
     ...(phone ? { phone } : {}),
@@ -173,16 +331,49 @@ function checkoutDetails(text: string): CheckoutDetails {
   };
 }
 
+const CHECKOUT_FIELD_LABELS: Readonly<Record<CheckoutFieldKey, string>> = {
+  FULL_NAME: "tên người nhận",
+  PHONE: "số điện thoại",
+  ADDRESS: "địa chỉ",
+  PAYMENT_METHOD: "COD hoặc chuyển khoản",
+};
+
 function missingCheckout(
   state: SalesCycleRuntimeState,
-): readonly string[] {
+): readonly CheckoutFieldKey[] {
   const draft = state.checkoutDraft;
   return [
-    ...(draft?.fullName ? [] : ["tên người nhận"]),
-    ...(draft?.phone ? [] : ["số điện thoại"]),
-    ...(draft?.address ? [] : ["địa chỉ"]),
-    ...(draft?.paymentMethod ? [] : ["COD hoặc chuyển khoản"]),
+    ...(draft?.fullName ? [] : ["FULL_NAME" as const]),
+    ...(draft?.phone ? [] : ["PHONE" as const]),
+    ...(draft?.address ? [] : ["ADDRESS" as const]),
+    ...(draft?.paymentMethod ? [] : ["PAYMENT_METHOD" as const]),
   ];
+}
+
+function checkoutCapturedFields(details: CheckoutDetails): readonly CheckoutFieldKey[] {
+  return [
+    ...(details.fullName ? ["FULL_NAME" as const] : []),
+    ...(details.phone ? ["PHONE" as const] : []),
+    ...(details.address ? ["ADDRESS" as const] : []),
+    ...(details.paymentMethod ? ["PAYMENT_METHOD" as const] : []),
+  ];
+}
+
+function negotiationOfferText(cart: CartV1, customerState: "READY" | "HESITANT" | "CAUTIOUS"): string {
+  const parts = cart.adjustments.map((adjustment) => {
+    if (adjustment.kind === "PERCENT_DISCOUNT" && adjustment.percentageBps) {
+      return `giảm ${adjustment.percentageBps / 100}%`;
+    }
+    if (adjustment.kind === "FIXED_DISCOUNT" && adjustment.amountVnd > 0) {
+      return `giảm thêm ${money(adjustment.amountVnd)}`;
+    }
+    if (adjustment.kind === "FREE_SHIPPING") return "freeship";
+    return null;
+  }).filter((value): value is string => value !== null);
+  const offer = parts.length > 0 ? parts.join(", ").replace(/, ([^,]*)$/u, " và $1") : "ưu đãi hiện tại";
+  return customerState === "CAUTIOUS"
+    ? `Mức cuối em hỗ trợ ${offer} cho giỏ này.`
+    : `Em hỗ trợ ${offer} cho giỏ này.`;
 }
 
 function cartSummary(cart: CartV1): string {
@@ -467,7 +658,8 @@ export async function evaluateRealtimeSalesCycle(
       : { handled: false, messages: [], plan: plan(), transferToHuman: false, desiredTag: null, reasonCode: null };
   }
 
-  if (state.stage === "ORDER_PREVIEW" && confirmation(input.text)) {
+  const confirmationDecision = confirmation(input.text, input.salesSignals);
+  if (state.stage === "ORDER_PREVIEW" && confirmationDecision.decision === "CONFIRM") {
     if (!state.cart || !state.preview || !state.checkoutDraft?.address) {
       return failedOutput("ORDER_PREVIEW_STATE_INVALID", plan());
     }
@@ -482,7 +674,7 @@ export async function evaluateRealtimeSalesCycle(
       kind: "CONFIRM_PURCHASE",
       commandId: commandId("confirm"),
       intent: {
-        source: "MODEL_STRUCTURED_OUTPUT",
+        source: confirmationDecision.source ?? "DETERMINISTIC_CLASSIFIER",
         intent: "PURCHASE_CONFIRMATION",
         sourceMessageId: input.messageId,
       },
@@ -510,6 +702,12 @@ export async function evaluateRealtimeSalesCycle(
       transferToHuman: true,
       desiredTag: "DA_CHOT_DON",
       reasonCode: "PURCHASE_CONFIRMED",
+      telemetry: {
+        confirmationAttempted: true,
+        confirmationConfirmed: true,
+        confirmationSource: confirmationDecision.source,
+        confirmationReasonCode: confirmationDecision.reasonCode,
+      },
     };
   }
 
@@ -579,9 +777,7 @@ export async function evaluateRealtimeSalesCycle(
       if (result.status !== "APPLIED" || !state.cart || !state.negotiation) {
         return failedOutput("NEGOTIATION_FAILED", plan());
       }
-      const intro = state.negotiation.customerState === "HESITANT"
-        ? "Em hỗ trợ freeship cho giỏ này."
-        : "Mức cuối em hỗ trợ thêm 20k và freeship.";
+      const intro = negotiationOfferText(state.cart.value, state.negotiation.customerState);
       return {
         handled: true,
         messages: [{ kind: "TEXT", text: `${intro}\n${cartSummary(state.cart.value)}` }],
@@ -592,7 +788,7 @@ export async function evaluateRealtimeSalesCycle(
       };
     }
 
-    const details = checkoutDetails(input.text);
+    const details = checkoutDetails(input.text, input.salesSignals);
     const hasDetails = Object.keys(details).length > 0;
     if (hasDetails) {
       const captured = apply({
@@ -601,15 +797,24 @@ export async function evaluateRealtimeSalesCycle(
         details,
       });
       if (captured.status !== "APPLIED") return failedOutput("CHECKOUT_DETAILS_REJECTED", plan());
+      const capturedFields = checkoutCapturedFields(details);
       const missing = missingCheckout(state);
       if (missing.length > 0) {
         return {
           handled: true,
-          messages: [{ kind: "TEXT", text: `C gửi thêm ${missing.join(", ")} giúp em nha.` }],
+          messages: [{
+            kind: "TEXT",
+            text: `C gửi thêm ${missing.map((field) => CHECKOUT_FIELD_LABELS[field]).join(", ")} giúp em nha.`,
+          }],
           plan: plan(),
           transferToHuman: false,
           desiredTag: null,
           reasonCode: null,
+          telemetry: {
+            checkoutCapturedFields: capturedFields,
+            checkoutMissingFields: missing,
+            checkoutCompleted: false,
+          },
         };
       }
       if (!state.cart || !state.checkoutDraft?.fullName || !state.checkoutDraft.phone ||
@@ -672,6 +877,12 @@ export async function evaluateRealtimeSalesCycle(
         transferToHuman: false,
         desiredTag: null,
         reasonCode: null,
+        telemetry: {
+          checkoutCapturedFields: capturedFields,
+          checkoutMissingFields: [],
+          checkoutCompleted: true,
+          orderPreviewCreated: true,
+        },
       };
     }
 
@@ -890,5 +1101,15 @@ export async function evaluateRealtimeSalesCycle(
     transferToHuman: false,
     desiredTag: null,
     reasonCode: null,
+    ...(state.stage === "ORDER_PREVIEW" && confirmationDecision.attempted
+      ? {
+          telemetry: {
+            confirmationAttempted: true,
+            confirmationConfirmed: false,
+            confirmationSource: confirmationDecision.source,
+            confirmationReasonCode: confirmationDecision.reasonCode,
+          },
+        }
+      : {}),
   };
 }

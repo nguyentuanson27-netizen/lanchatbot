@@ -144,7 +144,7 @@ export type OrderPreviewV1 = z.infer<typeof OrderPreviewV1Schema>;
 
 export const SalesIntentV1Schema = z
   .object({
-    source: z.literal("MODEL_STRUCTURED_OUTPUT"),
+    source: z.enum(["MODEL_STRUCTURED_OUTPUT", "DETERMINISTIC_CLASSIFIER"]),
     intent: z.enum(["ACKNOWLEDGEMENT", "PURCHASE_CONFIRMATION", "CART_CHANGE", "PRICE_OBJECTION", "OTHER"]),
     sourceMessageId: z.string().trim().min(1).max(256),
   })

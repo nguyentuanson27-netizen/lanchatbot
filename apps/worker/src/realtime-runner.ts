@@ -92,6 +92,7 @@ import type { VideoFrameExtraction } from "./video-frame-extractor.js";
 import {
   createRealtimeSalesState,
   evaluateRealtimeSalesCycle,
+  type RealtimeSalesCycleTelemetry,
 } from "./realtime-sales-cycle.js";
 import {
   classifyPreSalePolicyIntent,
@@ -2135,6 +2136,7 @@ export class RealtimeRunner {
     let salesCyclePlan: RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null = null;
     let salesDesiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null = null;
     let salesHandoffReasonCode: string | null = null;
+    let salesTelemetry: RealtimeSalesCycleTelemetry | null = null;
     let buyingSignalOverride = false;
     let modelCalled = false;
     let modelVersion: string | null = null;
@@ -2727,7 +2729,10 @@ export class RealtimeRunner {
             modelOutputTokens += grounded.tokenUsage.candidatesTokenCount ?? 0;
             modelTotalTokens += grounded.tokenUsage.totalTokenCount ?? 0;
             hasModelTokenUsage ||= Object.keys(grounded.tokenUsage).length > 0;
-            proposal = grounded.proposal;
+            proposal = {
+              ...grounded.proposal,
+              salesSignals: proposal.salesSignals ?? grounded.proposal.salesSignals,
+            };
           }
         }
         if (
@@ -2905,6 +2910,7 @@ export class RealtimeRunner {
         color:
           proposal?.businessFactQuery.color ??
           nextState.consideredVariant.color,
+        salesSignals: proposal?.salesSignals ?? null,
         shopAlias: this.options.shopAlias,
         policyResolution,
         facts: this.factsReader,
@@ -2912,6 +2918,7 @@ export class RealtimeRunner {
       });
       salesCyclePlan = sales.plan;
       salesHandled = sales.handled;
+      salesTelemetry = sales.telemetry ?? null;
       if (sales.handled) {
         metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled
           ? [...sales.messages]
@@ -3081,6 +3088,13 @@ export class RealtimeRunner {
             total: hasModelTokenUsage ? modelTotalTokens : null,
           },
           buyingSignalOverride,
+          checkoutCapturedFields: salesTelemetry?.checkoutCapturedFields ?? [],
+          checkoutMissingFields: salesTelemetry?.checkoutMissingFields ?? [],
+          checkoutCompleted: salesTelemetry?.checkoutCompleted ?? false,
+          orderPreviewCreated: salesTelemetry?.orderPreviewCreated ?? false,
+          confirmationAttempted: salesTelemetry?.confirmationAttempted ?? false,
+          confirmationConfirmed: salesTelemetry?.confirmationConfirmed ?? false,
+          confirmationSource: salesTelemetry?.confirmationSource ?? null,
         },
       });
     };
@@ -3111,6 +3125,31 @@ export class RealtimeRunner {
     ) {
       pushDecisionEvent("ORDER_INFO_REQUESTED");
       pushDecisionEvent("ORDER_INTENT_CREATED");
+    }
+    if ((salesTelemetry?.checkoutMissingFields?.length ?? 0) > 0) {
+      pushDecisionEvent(
+        "CHECKOUT_DETAILS_MISSING",
+        salesTelemetry!.checkoutMissingFields!.map((field) => `MISSING_${field}`),
+      );
+    }
+    if (salesTelemetry?.checkoutCompleted) {
+      pushDecisionEvent("CHECKOUT_COMPLETED");
+    }
+    if (salesTelemetry?.orderPreviewCreated) {
+      pushDecisionEvent("ORDER_PREVIEW_CREATED");
+    }
+    if (salesTelemetry?.confirmationAttempted) {
+      if (salesTelemetry.confirmationConfirmed) {
+        pushDecisionEvent("PURCHASE_CONFIRMATION_DETECTED", [
+          salesTelemetry.confirmationSource ?? "CONFIRMATION_SOURCE_UNKNOWN",
+        ]);
+        pushDecisionEvent("PURCHASE_CONFIRMED");
+      } else {
+        pushDecisionEvent("PURCHASE_CONFIRMATION_REJECTED", [
+          salesTelemetry.confirmationReasonCode ?? "CONFIRMATION_NOT_ACCEPTED",
+          salesTelemetry.confirmationSource ?? "CONFIRMATION_SOURCE_UNKNOWN",
+        ]);
+      }
     }
     if (handoff) {
       pushDecisionEvent("HANDOFF", [

@@ -226,6 +226,49 @@ export const AgentBusinessFactQueryV1Schema = z.object({
 });
 export type AgentBusinessFactQueryV1 = z.infer<typeof AgentBusinessFactQueryV1Schema>;
 
+export const AgentExtractedTextFieldV1Schema = z.object({
+  value: z.string().trim().min(1).max(1_000).nullable(),
+  evidenceText: z.string().trim().min(1).max(1_000).nullable(),
+  confidence: z.number().min(0).max(1),
+}).strict().superRefine((field, context) => {
+  if ((field.value === null) !== (field.evidenceText === null)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "value and evidenceText must both be null or both be present",
+    });
+  }
+});
+export type AgentExtractedTextFieldV1 = z.infer<typeof AgentExtractedTextFieldV1Schema>;
+
+export const AgentExtractedPaymentFieldV1Schema = z.object({
+  value: z.enum(["COD", "BANK_TRANSFER"]).nullable(),
+  evidenceText: z.string().trim().min(1).max(256).nullable(),
+  confidence: z.number().min(0).max(1),
+}).strict().superRefine((field, context) => {
+  if ((field.value === null) !== (field.evidenceText === null)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "value and evidenceText must both be null or both be present",
+    });
+  }
+});
+export type AgentExtractedPaymentFieldV1 = z.infer<typeof AgentExtractedPaymentFieldV1Schema>;
+
+export const AgentSalesSignalsV1Schema = z.object({
+  checkoutExtraction: z.object({
+    fullName: AgentExtractedTextFieldV1Schema,
+    phone: AgentExtractedTextFieldV1Schema,
+    address: AgentExtractedTextFieldV1Schema,
+    paymentMethod: AgentExtractedPaymentFieldV1Schema,
+  }).strict(),
+  purchaseConfirmation: z.object({
+    decision: z.enum(["CONFIRM", "REJECT", "UNCLEAR"]),
+    evidenceText: z.string().trim().min(1).max(1_000).nullable(),
+    confidence: z.number().min(0).max(1),
+  }).strict(),
+}).strict();
+export type AgentSalesSignalsV1 = z.infer<typeof AgentSalesSignalsV1Schema>;
+
 export const AgentProposalV1Schema = z.object({
   schemaVersion: z.literal(1),
   intent: z.string().min(1).max(64),
@@ -242,6 +285,7 @@ export const AgentProposalV1Schema = z.object({
     size: null,
     deliveryRegion: null,
   }),
+  salesSignals: AgentSalesSignalsV1Schema.optional(),
 }).superRefine((value, context) => {
   if (value.action === "HANDOFF") {
     if (value.handoffReason === null) {

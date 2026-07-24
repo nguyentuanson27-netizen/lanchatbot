@@ -601,17 +601,28 @@ export class PostgresAdminStore implements AdminStore {
            count(*) FILTER (WHERE size_consulted)::int AS size_consulted,
            count(*) FILTER (WHERE cart_opened)::int AS cart_opened,
            count(*) FILTER (WHERE order_preview)::int AS order_preview,
-           count(*) FILTER (WHERE purchase_confirmed)::int AS purchase_confirmed
+           count(*) FILTER (WHERE purchase_confirmed)::int AS purchase_confirmed,
+           count(*) FILTER (WHERE order_preview AND NOT purchase_confirmed)::int AS preview_not_confirmed
          FROM milestones
+       ), checkout_dropoffs AS (
+         SELECT
+           count(*) FILTER (
+             WHERE event_type = 'CHECKOUT_DETAILS_MISSING'
+           )::int AS checkout_missing_events,
+           count(DISTINCT conversation_id) FILTER (
+             WHERE event_type = 'CHECKOUT_DETAILS_MISSING'
+           )::int AS checkout_missing_conversations
+         FROM conversation_events
+         WHERE ${filters.join(" AND ")}
        )
-       SELECT *,
+       SELECT totals.*, checkout_dropoffs.*,
          round(100.0 * size_consulted / NULLIF(price_asked, 0), 2) AS price_to_size_pct,
          round(100.0 * cart_opened / NULLIF(size_consulted, 0), 2) AS size_to_cart_pct,
          round(100.0 * order_preview / NULLIF(cart_opened, 0), 2) AS cart_to_preview_pct,
          round(100.0 * purchase_confirmed / NULLIF(order_preview, 0), 2) AS preview_to_confirmed_pct,
          round(100.0 * purchase_confirmed / NULLIF(price_asked, 0), 2) AS end_to_end_pct,
          $1::int AS lookback_hours
-       FROM totals`,
+       FROM totals CROSS JOIN checkout_dropoffs`,
       values,
     );
     return sanitize(result.rows[0] ?? {}) as Record<string, unknown>;

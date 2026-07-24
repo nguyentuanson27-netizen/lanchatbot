@@ -3,6 +3,7 @@ import {
   InboundMessageV1Schema,
   BusinessFactEnvelopeV1Schema,
   GuardedReplyPlanV1Schema,
+  AgentSalesSignalsV1Schema,
   MetaOutboxStatusSchema,
   RoutingOwnerSchema,
 } from "./index.js";
@@ -61,5 +62,22 @@ describe("phase 1 contracts", () => {
         },
       }).facts?.productId,
     ).toBe("SQ149");
+  });
+
+  it("requires extracted checkout values to carry matching evidence fields", () => {
+    const result = AgentSalesSignalsV1Schema.safeParse({
+      checkoutExtraction: {
+        fullName: { value: "Lan", evidenceText: null, confidence: 0.99 },
+        phone: { value: null, evidenceText: null, confidence: 0 },
+        address: { value: null, evidenceText: null, confidence: 0 },
+        paymentMethod: { value: null, evidenceText: null, confidence: 0 },
+      },
+      purchaseConfirmation: {
+        decision: "UNCLEAR",
+        evidenceText: null,
+        confidence: 0,
+      },
+    });
+    expect(result.success).toBe(false);
   });
 });

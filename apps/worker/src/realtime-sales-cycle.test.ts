@@ -1,4 +1,8 @@
-import { PolicyBundleV1Schema, type CartLineV1 } from "@lana/contracts";
+import {
+  PolicyBundleV1Schema,
+  type AgentSalesSignalsV1,
+  type CartLineV1,
+} from "@lana/contracts";
 import {
   computeBusinessContentHash,
   type RuntimePolicyResolution,
@@ -194,6 +198,68 @@ function input(
   } as const;
 }
 
+function signals(input: {
+  fullName?: { value: string; evidenceText?: string; confidence?: number };
+  phone?: { value: string; evidenceText?: string; confidence?: number };
+  address?: { value: string; evidenceText?: string; confidence?: number };
+  paymentMethod?: {
+    value: "COD" | "BANK_TRANSFER";
+    evidenceText?: string;
+    confidence?: number;
+  };
+  confirmation?: {
+    decision: "CONFIRM" | "REJECT" | "UNCLEAR";
+    evidenceText: string | null;
+    confidence?: number;
+  };
+} = {}): AgentSalesSignalsV1 {
+  const textField = (
+    field: { value: string; evidenceText?: string; confidence?: number } | undefined,
+  ) => field
+    ? {
+        value: field.value,
+        evidenceText: field.evidenceText ?? field.value,
+        confidence: field.confidence ?? 0.99,
+      }
+    : { value: null, evidenceText: null, confidence: 0 };
+  return {
+    checkoutExtraction: {
+      fullName: textField(input.fullName),
+      phone: textField(input.phone),
+      address: textField(input.address),
+      paymentMethod: input.paymentMethod
+        ? {
+            value: input.paymentMethod.value,
+            evidenceText: input.paymentMethod.evidenceText ?? input.paymentMethod.value,
+            confidence: input.paymentMethod.confidence ?? 0.99,
+          }
+        : { value: null, evidenceText: null, confidence: 0 },
+    },
+    purchaseConfirmation: input.confirmation
+      ? {
+          decision: input.confirmation.decision,
+          evidenceText: input.confirmation.evidenceText,
+          confidence: input.confirmation.confidence ?? 0.99,
+        }
+      : {
+          decision: "UNCLEAR",
+          evidenceText: null,
+          confidence: 0,
+        },
+  };
+}
+
+async function previewState(eventPrefix: string) {
+  const state = createRealtimeSalesState(conversationId, pageId, now);
+  const opened = await evaluateRealtimeSalesCycle(input(state, "chốt CB182 size M", `${eventPrefix}-open`));
+  const previewed = await evaluateRealtimeSalesCycle(input(
+    opened.plan!.state,
+    "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh\nCOD",
+    `${eventPrefix}-details`,
+  ));
+  return previewed.plan!.state;
+}
+
 describe("realtime Phase 3 sales cycle", () => {
   it.each([
     "Được, size M nhé",
@@ -277,6 +343,7 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(state.negotiation?.customerState).toBe("HESITANT");
     expect(state.cart?.value.adjustments.some(({ kind }) => kind === "FREE_SHIPPING")).toBe(true);
     expect(state.cart?.value.discountTotalVnd).toBe(99_900);
+    expect(hesitant.messages[0]).toMatchObject({ text: expect.stringContaining("giảm 5% và freeship") });
 
     const retry = await evaluateRealtimeSalesCycle({
       ...input(state, "đắt quá bớt đi", "event-objection-retry"),
@@ -297,6 +364,150 @@ describe("realtime Phase 3 sales cycle", () => {
     state = cautious.plan!.state;
     expect(state.negotiation?.customerState).toBe("CAUTIOUS");
     expect(state.cart?.value.discountTotalVnd).toBe(119_900);
+    expect(cautious.messages[0]).toMatchObject({ text: expect.stringContaining("giảm thêm 20.000đ") });
+    expect(cautious.messages[0]).not.toMatchObject({ text: expect.stringContaining("20k") });
+  });
+
+  it("extracts label-less checkout details from model evidence and keeps deterministic guards", async () => {
+    const state = createRealtimeSalesState(conversationId, pageId, now);
+    const opened = await evaluateRealtimeSalesCycle(input(
+      state,
+      "chốt CB182 size M",
+      "event-natural-open",
+    ));
+    const text = "Lan 0987654321 123 Lê Lợi P.Bến Nghé Q1 HCM ship cod";
+    const previewed = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, text, "event-natural-details"),
+      salesSignals: signals({
+        fullName: { value: "Lan" },
+        address: { value: "123 Lê Lợi P.Bến Nghé Q1 HCM" },
+      }),
+    });
+    expect(previewed).toMatchObject({
+      handled: true,
+      transferToHuman: false,
+      telemetry: {
+        checkoutCompleted: true,
+        orderPreviewCreated: true,
+        checkoutMissingFields: [],
+      },
+      plan: {
+        state: {
+          stage: "ORDER_PREVIEW",
+          checkoutDraft: {
+            fullName: "Lan",
+            phone: "0987654321",
+            address: "123 Lê Lợi P.Bến Nghé Q1 HCM",
+            paymentMethod: "COD",
+          },
+        },
+      },
+    });
+  });
+
+  it("rejects model checkout values whose evidence is absent from the latest message", async () => {
+    const state = createRealtimeSalesState(conversationId, pageId, now);
+    const opened = await evaluateRealtimeSalesCycle(input(
+      state,
+      "chốt CB182 size M",
+      "event-evidence-open",
+    ));
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, "0987654321 COD", "event-evidence-details"),
+      salesSignals: signals({
+        fullName: {
+          value: "Lan",
+          evidenceText: "Lan không có trong tin nhắn",
+        },
+        address: {
+          value: "123 Lê Lợi, Quận 1",
+          evidenceText: "Địa chỉ không có trong tin nhắn",
+        },
+      }),
+    });
+    expect(output.plan?.state.stage).toBe("CART_OPEN");
+    expect(output.telemetry).toMatchObject({
+      checkoutCompleted: false,
+      checkoutCapturedFields: ["PHONE", "PAYMENT_METHOD"],
+      checkoutMissingFields: ["FULL_NAME", "ADDRESS"],
+    });
+  });
+
+  it.each([
+    "cho chị lấy nha",
+    "vâng em chốt đơn",
+    "uh oke lấy đi",
+    "lên đơn giúp chị",
+  ])("confirms natural Vietnamese only while the cart is in ORDER_PREVIEW: %s", async (text) => {
+    const state = await previewState(`event-natural-confirm-${text.length}`);
+    const output = await evaluateRealtimeSalesCycle(input(
+      state,
+      text,
+      `event-natural-confirm-${Buffer.byteLength(text)}`,
+    ));
+    expect(output).toMatchObject({
+      desiredTag: "DA_CHOT_DON",
+      reasonCode: "PURCHASE_CONFIRMED",
+      telemetry: {
+        confirmationAttempted: true,
+        confirmationConfirmed: true,
+        confirmationSource: "DETERMINISTIC_CLASSIFIER",
+      },
+      plan: { state: { stage: "PURCHASE_CONFIRMED" } },
+    });
+  });
+
+  it.each([
+    "ok để chị suy nghĩ",
+    "lấy ảnh cận chất",
+    "không chốt",
+  ])("does not confirm negated, hesitant, question or media language: %s", async (text) => {
+    const state = await previewState(`event-reject-confirm-${text.length}`);
+    const output = await evaluateRealtimeSalesCycle(input(
+      state,
+      text,
+      `event-reject-confirm-${Buffer.byteLength(text)}`,
+    ));
+    expect(output.plan?.state.confirmation ?? null).toBeNull();
+    expect(output.telemetry).toMatchObject({
+      confirmationAttempted: true,
+      confirmationConfirmed: false,
+      confirmationSource: "DETERMINISTIC_CLASSIFIER",
+    });
+  });
+
+  it("never treats a question about confirmation as purchase confirmation", async () => {
+    const state = await previewState("event-confirmation-question");
+    const output = await evaluateRealtimeSalesCycle(input(
+      state,
+      "chốt chưa em?",
+      "event-confirmation-question-message",
+    ));
+    expect(output.plan?.state.confirmation ?? null).toBeNull();
+  });
+
+  it("uses a high-confidence model confirmation only with exact latest-message evidence", async () => {
+    const state = await previewState("event-model-confirm");
+    const text = "triển khai giúp chị";
+    const confirmed = await evaluateRealtimeSalesCycle({
+      ...input(state, text, "event-model-confirm-accepted"),
+      salesSignals: signals({
+        confirmation: { decision: "CONFIRM", evidenceText: text },
+      }),
+    });
+    expect(confirmed.telemetry).toMatchObject({
+      confirmationConfirmed: true,
+      confirmationSource: "MODEL_STRUCTURED_OUTPUT",
+    });
+    expect(confirmed.plan?.state.stage).toBe("PURCHASE_CONFIRMED");
+
+    const rejected = await evaluateRealtimeSalesCycle({
+      ...input(state, text, "event-model-confirm-hallucinated"),
+      salesSignals: signals({
+        confirmation: { decision: "CONFIRM", evidenceText: "không có trong tin mới" },
+      }),
+    });
+    expect(rejected.plan?.state.confirmation ?? null).toBeNull();
   });
 
   it("does not interpret ok as purchase confirmation outside preview", async () => {
