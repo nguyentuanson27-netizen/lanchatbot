@@ -67,6 +67,9 @@ const MESSAGES: ListSpec = {
     product_id, sales_stage, intent, outcome, prompt_version, model_version,
     policy_version, catalog_version, occurred_at`,
 };
+export const ADMIN_CONVERSATION_EVENTS_SOURCE =
+  "admin_conversation_events_v";
+
 const EVENTS: ListSpec = {
   view: "admin_conversation_events_v",
   idColumn: "event_id",
@@ -612,7 +615,7 @@ export class PostgresAdminStore implements AdminStore {
            count(DISTINCT conversation_id) FILTER (
              WHERE event_type = 'CHECKOUT_DETAILS_MISSING'
            )::int AS checkout_missing_conversations
-         FROM conversation_events
+         FROM ${ADMIN_CONVERSATION_EVENTS_SOURCE}
          WHERE ${filters.join(" AND ")}
        )
        SELECT totals.*, checkout_dropoffs.*,

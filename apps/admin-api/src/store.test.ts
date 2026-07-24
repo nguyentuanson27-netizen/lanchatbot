@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  ADMIN_CONVERSATION_EVENTS_SOURCE,
   decodeCursor,
   encodeCursor,
   isRollbackTargetLifecycleCompatible,
@@ -22,6 +23,13 @@ describe("Admin cursor", () => {
   });
 });
 
+describe("Admin funnel data boundary", () => {
+  it("reads checkout drop-offs only through the anonymized admin view", () => {
+    assert.equal(ADMIN_CONVERSATION_EVENTS_SOURCE, "admin_conversation_events_v");
+    assert.notEqual(ADMIN_CONVERSATION_EVENTS_SOURCE, "conversation_events");
+  });
+
+});
 describe("Admin policy rollback compatibility", () => {
   it("keeps pre-publish rollback inside the CANARY lifecycle", () => {
     assert.equal(isRollbackTargetLifecycleCompatible("CANARY_SHADOW", "CANARY"), true);
