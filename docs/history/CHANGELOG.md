@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-24 — Realtime measurement continuation r17
+
+- Sửa lỗi khách trả lời số đo thuần như `90-60-90` bị mất ngữ cảnh sản phẩm và handoff `UNVERIFIED_PRODUCT_ID`.
+- Parser lưu bare three-round tuple có guard chặt; ngày tháng, giá, số điện thoại, order ID và chuỗi có nhãn mã không bị nhận nhầm.
+- Tiếp nối size nhận thêm chiều cao/cân nặng, size ngắn và màu ngắn. Sản phẩm trong state luôn exact-match; AI chỉ gợi đúng mã hiện tại và không vượt guard mã mới.
+- Full monorepo `pnpm check`, Business Tools `159/159`, Worker `260/260` và image smoke đều đạt.
+- Chỉ recreate Realtime Worker. Container r17 healthy/restart 0; Admin, API, delivery, POS, P2.3, shadow và n8n không restart.
+
 ## 2026-07-24 — Admin batch image intake + AI classification r16
 
 - Giao diện Admin cho phép chọn tối đa 20 ảnh trong một lần cho cùng `BRAND + MA_SP`; bỏ hoàn toàn trường loại ảnh và ghi chú vận hành.

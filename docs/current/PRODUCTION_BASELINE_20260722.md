@@ -5,10 +5,10 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260724-admin-batch-ai-image-intake-r16`.
-- Previous release: `/opt/lana-chatbot/releases/20260724-admin-dashboard-view-hotfix-r15.1`.
-- Source commit: `c68138fda627d51fd817553a8a56c70272ec7e89`.
-- Source archive SHA-256: `535b464444d00e37e5c980e76ddedd043f7c0abd84c517d13327c527d36c6126`.
+- Current release: `/opt/lana-chatbot/releases/20260724-realtime-measurement-continuation-r17`.
+- Previous release: `/opt/lana-chatbot/releases/20260724-admin-batch-ai-image-intake-r16`.
+- Source commit: `9862889698aae7e236c2270b68ac4fea7c3c377f`.
+- Source archive SHA-256: `c8bb2aa93ed35dbb21aa9918c85ca06b88f52a2b0f57431108f86bee9f8aba8b`.
 - Compose SHA-256: `3315a96cfd6a121550e566c1bf393c23b70af4ad3ad28ece3cf9bad7dbe9c9c5`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
@@ -17,7 +17,16 @@
 
 Realtime Worker, Admin API, Admin Web, P2.3B và P2.3C healthy, restart count 0. Không có migration mới và không thay đổi webhook, delivery, POS, n8n hoặc page allowlist.
 
-Admin API, Admin Web và P2.3B chạy image `lana-chatbot-app:admin-batch-ai-image-intake-r16` (`sha256:e35b49693d57680fea8e5ebd9f39b138010fa49428e24c386be797815d4cb831`). Realtime Worker và P2.3C tiếp tục dùng image r15 (`sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c`); các service khác giữ nguyên.
+Realtime Worker chạy image `lana-chatbot-app:realtime-measurement-continuation-r17` (`sha256:d9bb19fa99d10ac5c853f60d3408379fe1145e3b6acf00f9c0d944e81b8a3703`). Admin API/Admin Web/P2.3B giữ image r16; P2.3C giữ image r15 (`sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c`); các service khác giữ nguyên.
+
+## Realtime measurement continuation r17
+
+- Tin trả lời số đo ba vòng thuần như `90-60-90` được lưu thành `BUST_CM/WAIST_CM/HIPS_CM` và định tuyến thành intent `SIZE`. Dạng chiều cao/cân nặng thuần như `1m60 52kg`, size ngắn và màu ngắn cũng tiếp tục đúng sản phẩm đang xem.
+- Runtime ưu tiên `state.currentProductId` nhưng luôn exact-match lại bằng stable product index. Nếu deterministic resolver chưa đủ, AI chỉ được gợi lại đúng mã đang có trong state; mã đó tiếp tục phải exact-match và vẫn đi qua business-fact guard.
+- Tin có mã sản phẩm mới, kể cả kèm số đo, không được phép lùi về sản phẩm cũ. Bare tuple chỉ được nhận khi chiếm toàn bộ tin nhắn, nên ngày tháng, số điện thoại, giá, order ID hoặc chuỗi có nhãn `mã` không bị lưu nhầm thành hồ sơ.
+- Full monorepo `pnpm check` đạt; Business Tools `159/159`, Worker `260/260`. Smoke trong image đạt cho parser, SIZE intent, state context, AI reference guard và new-code guard.
+- Cutover chỉ recreate `realtime-worker`; container healthy, restart count 0, `META_PAGE_ID=1198992073286645`, outbound vẫn bật và mọi container còn lại giữ nguyên thời điểm khởi động.
+- Không có migration. Rollback chỉ cần phục hồi `/opt/lana-chatbot/shared/.env.infrastructure.backup-r17`, recreate riêng realtime bằng image r15 và chuyển symlink về r16; không xóa Inbox/Outbox, Redis hoặc PostgreSQL.
 
 ## Admin batch image intake + AI classification r16
 

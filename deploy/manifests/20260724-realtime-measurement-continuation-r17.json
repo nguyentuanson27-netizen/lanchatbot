@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-24T08:31:00+00:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "9862889698aae7e236c2270b68ac4fea7c3c377f",
+  "releaseTag": "20260724-realtime-measurement-continuation-r17",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260724-realtime-measurement-continuation-r17",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260724-admin-batch-ai-image-intake-r16",
+  "pageAllowlist": [
+    "1198992073286645"
+  ],
+  "images": {
+    "realtimeWorker": "lana-chatbot-app:realtime-measurement-continuation-r17@sha256:d9bb19fa99d10ac5c853f60d3408379fe1145e3b6acf00f9c0d944e81b8a3703",
+    "adminApi": "lana-chatbot-app:admin-batch-ai-image-intake-r16@sha256:e35b49693d57680fea8e5ebd9f39b138010fa49428e24c386be797815d4cb831",
+    "adminWeb": "lana-chatbot-app:admin-batch-ai-image-intake-r16@sha256:e35b49693d57680fea8e5ebd9f39b138010fa49428e24c386be797815d4cb831",
+    "p23bMetadataStaging": "lana-chatbot-app:admin-batch-ai-image-intake-r16@sha256:e35b49693d57680fea8e5ebd9f39b138010fa49428e24c386be797815d4cb831",
+    "p23cPublisher": "lana-chatbot-app:checkout-natural-confirmation-r15@sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c"
+  },
+  "sourceArchiveSha256": "c8bb2aa93ed35dbb21aa9918c85ca06b88f52a2b0f57431108f86bee9f8aba8b",
+  "composeSha256": "3315a96cfd6a121550e566c1bf393c23b70af4ad3ad28ece3cf9bad7dbe9c9c5",
+  "verification": {
+    "localPnpmCheck": "PASS",
+    "pnpmCheckInsideImage": "PASS",
+    "businessToolsTests": "159_OF_159_PASS",
+    "workerTests": "260_OF_260_PASS",
+    "imageSmoke": "R17_SMOKE_OK",
+    "realtimeHealth": "HEALTHY",
+    "realtimeRestartCount": 0,
+    "realtimeReleaseId": "20260724-realtime-measurement-continuation-r17",
+    "pageAllowlist": "1198992073286645_ONLY",
+    "outbound": "APP_AND_CHATBOT_SEND_ENABLED",
+    "otherContainersRestarted": false,
+    "n8nRestarted": false
+  },
+  "behavior": {
+    "bareThreeRoundTuple": "WHOLE_MESSAGE_ONLY",
+    "measurementIntent": "SIZE",
+    "currentProductResolution": "STATE_THEN_EXACT_STABLE_INDEX",
+    "aiContinuationFallback": "MODEL_AND_STATE_MUST_AGREE_THEN_EXACT_MATCH",
+    "explicitNewProductCode": "NEVER_FALL_BACK_TO_OLD_PRODUCT",
+    "handoffRegression": "UNVERIFIED_PRODUCT_ID_AVOIDED_FOR_VERIFIED_MEASUREMENT_FOLLOWUP"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260724-admin-batch-ai-image-intake-r16",
+    "restoreEnvironmentBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-r17",
+    "realtimeImage": "lana-chatbot-app:checkout-natural-confirmation-r15",
+    "services": [
+      "realtime-worker"
+    ],
+    "dataDeletionRequired": false
+  }
+}
