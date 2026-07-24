@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-24T12:56:14+07:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "26322eb2f180d646134f00a91efcf667bf8cb848",
+  "releaseTag": "20260724-admin-dashboard-view-hotfix-r15.1",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260724-admin-dashboard-view-hotfix-r15.1",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15",
+  "pageAllowlist": ["1198992073286645"],
+  "images": {
+    "adminApi": "lana-chatbot-app:admin-dashboard-view-hotfix-r15.1@sha256:198a77471346ada84d3d1bd79cb28a038b59c386d4412710fc6f09327c459ac8",
+    "adminWeb": "lana-chatbot-app:checkout-natural-confirmation-r15@sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c",
+    "realtimeWorker": "lana-chatbot-app:checkout-natural-confirmation-r15@sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c",
+    "p23cPublisher": "lana-chatbot-app:checkout-natural-confirmation-r15@sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c"
+  },
+  "sourceArchiveSha256": "1e78817f21e4b835ca8c68262df974488d8d5fd0f7f256c6f8e1b7208f5846da",
+  "composeSha256": "3315a96cfd6a121550e566c1bf393c23b70af4ad3ad28ece3cf9bad7dbe9c9c5",
+  "incident": {
+    "route": "/admin/v1/dashboard",
+    "databaseCode": "42501",
+    "cause": "checkout drop-off metric queried conversation_events directly",
+    "resolution": "query admin_conversation_events_v only",
+    "additionalGrantRequired": false,
+    "databaseMigration": false
+  },
+  "verification": {
+    "adminApiTests": "40_OF_40_PASS",
+    "adminApiTypecheck": "PASS",
+    "adminApiBuild": "PASS",
+    "pnpmCheckInsideImage": "PASS",
+    "adminApiHealth": "HEALTHY",
+    "adminApiRestartCount": 0,
+    "newDatabase42501AfterCutover": 0,
+    "realtimeHealth": "HEALTHY",
+    "realtimeRestarted": false,
+    "adminWebHealth": "HEALTHY",
+    "adminWebRestarted": false,
+    "p23cHealth": "HEALTHY",
+    "p23cRestarted": false,
+    "n8nRestarted": false,
+    "authenticatedDashboardRefresh": "PENDING_USER_RETRY"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15",
+    "restoreEnvironmentBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-r15.1",
+    "dataDeletionRequired": false
+  }
+}

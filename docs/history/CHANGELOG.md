@@ -1,6 +1,14 @@
 # Changelog
 
 
+## 2026-07-24 — Admin dashboard least-privilege hotfix r15.1
+
+- Sửa dashboard lỗi `42501` do metric checkout đọc trực tiếp `conversation_events`.
+- Chuyển nguồn sang view ẩn danh `admin_conversation_events_v`; không cấp thêm quyền và không migration.
+- Thêm regression test khóa data boundary; Admin API đạt `40/40` test và Docker full check đạt.
+- Chỉ recreate Admin API; realtime, Admin Web, P2.3C và n8n không restart.
+
+
 ## 2026-07-24 — Natural checkout + purchase confirmation r15
 
 - Thêm structured extraction cho tên, số điện thoại, địa chỉ và phương thức thanh toán từ tin nhắn tự nhiên; chỉ nhận giá trị có evidence nguyên văn, confidence đủ cao và qua deterministic validation.

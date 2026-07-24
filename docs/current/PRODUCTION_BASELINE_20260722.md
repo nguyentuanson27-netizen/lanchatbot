@@ -5,10 +5,10 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15`.
-- Previous release: `/opt/lana-chatbot/releases/20260724-admin-media-size-provenance-r14.3.1`.
-- Source commit: `caa086deee371b23b2a7cebb5325133c24ac2b3f`.
-- Source archive SHA-256: `defde14a9d3af33f8038f8c0e731e9eedda3611f8ad7fdbd8e4748ce9f9a9731`.
+- Current release: `/opt/lana-chatbot/releases/20260724-admin-dashboard-view-hotfix-r15.1`.
+- Previous release: `/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15`.
+- Source commit: `26322eb2f180d646134f00a91efcf667bf8cb848`.
+- Source archive SHA-256: `1e78817f21e4b835ca8c68262df974488d8d5fd0f7f256c6f8e1b7208f5846da`.
 - Compose SHA-256: `3315a96cfd6a121550e566c1bf393c23b70af4ad3ad28ece3cf9bad7dbe9c9c5`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
@@ -17,7 +17,14 @@
 
 Realtime Worker, Admin API, Admin Web và P2.3C healthy, restart count 0. Không có migration mới và không thay đổi webhook, delivery, POS, n8n hoặc page allowlist.
 
-Realtime Worker, Admin API, Admin Web và P2.3C chạy image `lana-chatbot-app:checkout-natural-confirmation-r15` (`sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c`). Các service khác giữ nguyên image trước release.
+Admin API chạy image `lana-chatbot-app:admin-dashboard-view-hotfix-r15.1` (`sha256:198a77471346ada84d3d1bd79cb28a038b59c386d4412710fc6f09327c459ac8`). Realtime Worker, Admin Web và P2.3C tiếp tục dùng image r15 (`sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c`); các service khác giữ nguyên.
+
+## Admin dashboard least-privilege hotfix r15.1
+
+- Sửa `/admin/v1/dashboard` bị PostgreSQL từ chối `42501`: metric checkout mới đã đọc nhầm bảng gốc `conversation_events`.
+- Truy vấn hiện chỉ đọc `admin_conversation_events_v`, giữ nguyên ranh giới dữ liệu ẩn danh; không cấp thêm quyền cho tài khoản Admin và không có migration.
+- Admin API đạt `40/40` test, typecheck/build và toàn bộ Docker `pnpm check`; container healthy, restart count 0, không còn log `42501` mới sau cutover.
+- Chỉ Admin API được recreate. Realtime Worker, Admin Web, P2.3C, Meta delivery và n8n không restart.
 
 ## Natural checkout + purchase confirmation r15
 

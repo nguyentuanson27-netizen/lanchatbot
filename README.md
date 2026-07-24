@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260724-admin-dashboard-view-hotfix-r15.1`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -16,7 +16,8 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 
 ## Trạng thái production ngày 2026-07-24
 
-- Realtime Worker, Admin API, Admin Web và P2.3C đang chạy image `lana-chatbot-app:checkout-natural-confirmation-r15`; page allowlist vẫn chỉ có `1198992073286645`.
+- Admin API đang chạy image `lana-chatbot-app:admin-dashboard-view-hotfix-r15.1`; Realtime Worker, Admin Web và P2.3C giữ image r15. Page allowlist vẫn chỉ có `1198992073286645`.
+- Dashboard đọc checkout drop-off qua view ẩn danh `admin_conversation_events_v`; không mở quyền bảng hội thoại gốc cho tài khoản Admin.
 - Checkout tự nhiên dùng structured extraction có evidence/confidence và deterministic guard; app không đưa PII vào decision telemetry.
 - Xác nhận mua hiểu thêm các cách nói tự nhiên nhưng vẫn chặn câu hỏi, phủ định, do dự và yêu cầu ảnh. `OK` chỉ xác nhận khi cart đang ở đúng bước order preview.
 - Nội dung thương lượng lấy trực tiếp từ adjustment thật của cart/policy; dashboard có thêm chỉ số thiếu thông tin nhận hàng và preview chưa chốt.
@@ -59,7 +60,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - PostgreSQL đã áp dụng migration đến `0019_customer_profile_wave2`; migration 0019 bổ sung projection hồ sơ số đo 48 giờ theo pseudonymous customer key và tương thích ngược.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Natural checkout + confirmation r15](deploy/manifests/20260724-checkout-natural-confirmation-r15.json); r14.3.1 là release gần nhất để rollback.
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Admin dashboard hotfix r15.1](deploy/manifests/20260724-admin-dashboard-view-hotfix-r15.1.json); r15 là release gần nhất để rollback.
 
 ## Kiến trúc dữ liệu
 
