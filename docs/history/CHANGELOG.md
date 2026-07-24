@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-24 — Admin media + verified size guidance r14.3.1
+
+- Sửa quyền public media thành `0755/0644`, giữ ảnh gốc private `0750/0600` và xác minh URL thật trả `200 image/jpeg`.
+- Thêm lock chống upload trùng trong một Admin API process, test validation đầy đủ và đối soát orphan sau 24 giờ.
+- Docker build chạy toàn bộ `pnpm check`; thêm test FFmpeg thật cho JPG/PNG/WebP và các nhánh MIME/signature/oversize/missing product/duplicate.
+- Tư vấn size ưu tiên số đo mới nhất, trả confidence và giữ ảnh chart trong nhánh multi-fact.
+- Chỉ gửi size guide khi Qdrant hash khớp chính xác chart artifact đã VERIFIED. Backfill payload-only đạt `73/73` point `SIZE_GUIDE` đã duyệt.
+- Admin API và Realtime Worker healthy, restart count 0. P2.3C đã dùng image mới nhưng tạm dừng vì endpoint rembg `139.162.18.93:7000` timeout.
+- Cross-sell được tách khỏi release này và lên kế hoạch riêng cho r15.
+
 ## 2026-07-24 — Admin upload resize retention r14.2
 
 - Resize JPG/PNG/WebP ngay trong Admin API bằng FFmpeg, giữ đúng tỉ lệ, không phóng ảnh nhỏ và giới hạn cạnh dài 1.600 px.

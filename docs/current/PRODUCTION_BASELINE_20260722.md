@@ -1,21 +1,34 @@
-# Production baseline — 2026-07-23
+# Production baseline — 2026-07-24
 
 Đây là baseline sống của production. Mỗi release phải cập nhật tài liệu này trước khi tạo tag để bản trong release directory không lệch GitHub `main`.
 
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release candidate: `/opt/lana-chatbot/releases/20260724-admin-funnel-read-grant-r13.4`.
-- Previous release: `/opt/lana-chatbot/releases/20260724-sizechart-idempotent-retry-r13.3`.
-- Compose SHA-256: `35194b9505378ea32d787c411d7cce8f7f949838ac0515c5b064b4ae79842570`.
+- Current release: `/opt/lana-chatbot/releases/20260724-admin-media-size-provenance-r14.3.1`.
+- Previous release: `/opt/lana-chatbot/releases/20260724-admin-upload-resize-retention-r14.2-docs`.
+- Source commit: `195623bb35aee1ae3692ca4a8f68fdd6324b8331`.
+- Source archive SHA-256: `d543caf3fa495b14e12a88309061c599bc13aadb51573a04f36aa21d7de2665f`.
+- Compose SHA-256: `f3e5726d30094a7dee2178aa0e9e9b1383195a28c02920ce13d731dd9620d508`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất trong candidate: `0020_size_chart_extraction`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-Mọi container `lana-chatbot-*` được quan sát đều healthy tại thời điểm kiểm kê. Danh sách image digest đầy đủ nằm trong release manifest.
+Admin API và Realtime Worker healthy, restart count 0. P2.3C đã cắt sang image mới nhưng được dừng có chủ đích sau khi xác nhận dịch vụ tách nền ngoài VPS timeout; không có thay đổi đối với webhook, delivery, POS, n8n hoặc page allowlist.
 
-Realtime page test chạy image `lana-chatbot-app:realtime-wave23-b29725d` (`sha256:b732a4310b1f13662648d57f585259413e053191bc01bb496d12691d8abdbf03`) từ commit `b29725d1071bb202b0d43095f1d6d52c8331cfc6`. Shadow worker giữ image Wave 1; Admin Web, Admin API và Admin Simulation Worker giữ image `lana-chatbot-app:customer-care-policy-r10`; P2.3B giữ image r9 và POS snapshot giữ image r6. API webhook, delivery worker và n8n không đổi.
+Admin API và Realtime Worker chạy image `lana-chatbot-app:admin-media-size-provenance-r14.3.1` (`sha256:9d7c24bf59764a4785c0d4540c6a22fb99be5654ad27a4a6822c66cedae90d34`). P2.3C dùng cùng image nhưng hiện stopped do external dependency; các service khác giữ nguyên image trước release.
+
+## Admin media + verified size guidance r14.3.1
+
+- Public product media dùng mode thư mục/file `0755/0644`; private originals dùng `0750/0600`. Smoke thật qua `https://admin.lanadesign.vn/lana-public/products/...` trả `200 image/jpeg`.
+- Upload có lock theo intake trong một process, xác thực MIME/magic bytes, giới hạn input/output và đối soát marker orphan sau 24 giờ. Đây chưa phải distributed lock cho nhiều replica Admin API.
+- Docker build chạy `pnpm check`; Admin API đạt `39/39`, Worker `248/248`, Business Tools `158/158`, Contracts `71/71`. Test resize thật dùng FFmpeg cho JPG/PNG/WebP.
+- Size guidance ưu tiên số đo mới nhất hoặc size từng xác nhận/mua trước đây, trả confidence và dùng nhãn thành phần dễ đọc.
+- Ảnh size guide chỉ được gửi khi asset `APPROVED`, metadata verified, còn fresh, URL khớp artifact Admin và SHA-256 Qdrant khớp `sourceContentSha256` của chart đã xác minh.
+- `image_registry` có 76 dòng `SIZE_GUIDE`; 73 dòng `APPROVED + ACTIVE` có point Qdrant tương ứng. Backfill payload-only đã cập nhật và verify đủ `73/73`, không tái tạo vector.
+- P2.3C tự chạy batch sau recreate nhưng download ảnh Pancake vẫn đạt `200`; lỗi nằm ở kết nối tới `http://139.162.18.93:7000/api/remove` (`Connect Timeout`). Worker được dừng để tránh lặp 50 job lỗi.
+- Cross-sell không nằm trong release này. r15 sẽ dùng catalog quan hệ phối đồ được duyệt trong PostgreSQL/Admin, exact product/POS validation và analytics riêng.
 
 ## Admin funnel read grant r13.4
 

@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-24T10:15:00+07:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "195623bb35aee1ae3692ca4a8f68fdd6324b8331",
+  "releaseTag": "20260724-admin-media-size-provenance-r14.3.1",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260724-admin-media-size-provenance-r14.3.1",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260724-admin-upload-resize-retention-r14.2-docs",
+  "pageAllowlist": ["1198992073286645"],
+  "images": {
+    "adminApi": "lana-chatbot-app:admin-media-size-provenance-r14.3.1@sha256:9d7c24bf59764a4785c0d4540c6a22fb99be5654ad27a4a6822c66cedae90d34",
+    "realtimeWorker": "lana-chatbot-app:admin-media-size-provenance-r14.3.1@sha256:9d7c24bf59764a4785c0d4540c6a22fb99be5654ad27a4a6822c66cedae90d34",
+    "p23cPublisher": "lana-chatbot-app:admin-media-size-provenance-r14.3.1@sha256:9d7c24bf59764a4785c0d4540c6a22fb99be5654ad27a4a6822c66cedae90d34"
+  },
+  "sourceArchiveSha256": "d543caf3fa495b14e12a88309061c599bc13aadb51573a04f36aa21d7de2665f",
+  "composeSha256": "f3e5726d30094a7dee2178aa0e9e9b1383195a28c02920ce13d731dd9620d508",
+  "mediaHardening": {
+    "publicDirectoryMode": "0755",
+    "publicFileMode": "0644",
+    "privateDirectoryMode": "0750",
+    "privateOriginalMode": "0600",
+    "sameProcessDedupeLock": true,
+    "orphanReconciliationAfterHours": 24,
+    "distributedDedupeLock": false
+  },
+  "sizeGuidance": {
+    "latestMeasurementsPreferred": true,
+    "confidenceIncluded": true,
+    "verifiedChartAttachmentRequiresExactContentHash": true,
+    "qdrantApprovedSizeGuideHashBackfill": {
+      "eligible": 73,
+      "updated": 73,
+      "verified": 73
+    }
+  },
+  "verification": {
+    "dockerBuild": "PASS",
+    "pnpmCheckInsideImage": "PASS",
+    "adminApiTests": "39_OF_39_PASS",
+    "workerTests": "248_OF_248_PASS",
+    "businessToolsTests": "158_OF_158_PASS",
+    "contractsTests": "71_OF_71_PASS",
+    "realFfmpegJpegPngWebp": "PASS",
+    "publicImageHttpStatus": 200,
+    "publicImageContentType": "image/jpeg",
+    "adminApiHealth": "HEALTHY",
+    "adminApiRestartCount": 0,
+    "realtimeHealth": "HEALTHY",
+    "realtimeRestartCount": 0,
+    "p23cImageCutover": "PASS",
+    "p23cRuntime": "STOPPED_EXTERNAL_REMBG_TIMEOUT"
+  },
+  "externalBlocker": {
+    "service": "http://139.162.18.93:7000/api/remove",
+    "status": "CONNECT_TIMEOUT",
+    "mitigation": "P2.3C stopped; 73 approved size-guide hashes were backfilled payload-only without regenerating vectors"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260724-admin-upload-resize-retention-r14.2-docs",
+    "restoreEnvironmentBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-r14.3.1",
+    "dataDeletionRequired": false
+  }
+}
