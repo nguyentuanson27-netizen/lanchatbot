@@ -1,5 +1,15 @@
 # Changelog
 
+
+## 2026-07-24 — Natural checkout + purchase confirmation r15
+
+- Thêm structured extraction cho tên, số điện thoại, địa chỉ và phương thức thanh toán từ tin nhắn tự nhiên; chỉ nhận giá trị có evidence nguyên văn, confidence đủ cao và qua deterministic validation.
+- Mở rộng xác nhận mua tự nhiên bằng classifier deterministic + model fallback có evidence; phủ định, do dự, câu hỏi và yêu cầu ảnh không thể kích hoạt `PURCHASE_CONFIRMED`.
+- Dựng lời thương lượng từ adjustment thực tế của cart/policy, không hard-code số tiền.
+- Thêm funnel events/metrics cho thiếu thông tin nhận hàng, hoàn tất checkout, tạo preview, xác nhận bị từ chối và preview chưa chốt; telemetry không chứa PII.
+- P2.3C dùng endpoint tách nền `139.162.18.93:7000`, tăng nhịp Vertex lên 6 giây; cycle đầu đạt 48/50, còn 2 lỗi Vertex 429 retryable, không có lỗi fatal.
+- Docker image đạt toàn bộ `806/806` test; Realtime Worker, Admin API, Admin Web và P2.3C healthy, restart count 0. Không có migration mới.
+
 ## 2026-07-24 — Admin media + verified size guidance r14.3.1
 
 - Sửa quyền public media thành `0755/0644`, giữ ảnh gốc private `0750/0600` và xác minh URL thật trả `200 image/jpeg`.

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-24T12:08:00+07:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "caa086deee371b23b2a7cebb5325133c24ac2b3f",
+  "releaseTag": "20260724-checkout-natural-confirmation-r15",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260724-admin-media-size-provenance-r14.3.1",
+  "pageAllowlist": ["1198992073286645"],
+  "images": {
+    "adminApi": "lana-chatbot-app:checkout-natural-confirmation-r15@sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c",
+    "adminWeb": "lana-chatbot-app:checkout-natural-confirmation-r15@sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c",
+    "realtimeWorker": "lana-chatbot-app:checkout-natural-confirmation-r15@sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c",
+    "p23cPublisher": "lana-chatbot-app:checkout-natural-confirmation-r15@sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c"
+  },
+  "sourceArchiveSha256": "defde14a9d3af33f8038f8c0e731e9eedda3611f8ad7fdbd8e4748ce9f9a9731",
+  "composeSha256": "3315a96cfd6a121550e566c1bf393c23b70af4ad3ad28ece3cf9bad7dbe9c9c5",
+  "scope": {
+    "structuredCheckoutExtraction": true,
+    "evidenceAndConfidenceGuard": true,
+    "naturalPurchaseConfirmation": true,
+    "dynamicNegotiationCopy": true,
+    "checkoutFunnelTelemetry": true,
+    "databaseMigration": false
+  },
+  "p23c": {
+    "rembgUrl": "http://139.162.18.93:7000/api/remove",
+    "vertexMinIntervalMs": 6000,
+    "retryableFailuresRetained": true,
+    "latestCycle": {
+      "total": 50,
+      "success": 48,
+      "failed": 2,
+      "retryableFailed": 2,
+      "fatalFailed": 0,
+      "remaining": 839,
+      "lockReleased": true
+    }
+  },
+  "verification": {
+    "dockerBuild": "PASS",
+    "pnpmCheckInsideImage": "PASS",
+    "totalTests": "806_OF_806_PASS",
+    "adminApiTests": "39_OF_39_PASS",
+    "adminWebTests": "23_OF_23_PASS",
+    "workerTests": "259_OF_259_PASS",
+    "contractsTests": "72_OF_72_PASS",
+    "databaseTests": "36_OF_36_PASS",
+    "adminPublicHttpStatus": 200,
+    "adminApiHealth": "HEALTHY",
+    "adminApiRestartCount": 0,
+    "adminWebHealth": "HEALTHY",
+    "adminWebRestartCount": 0,
+    "realtimeHealth": "HEALTHY",
+    "realtimeRestartCount": 0,
+    "p23cHealth": "HEALTHY",
+    "p23cRestartCount": 0
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260724-admin-media-size-provenance-r14.3.1",
+    "restoreEnvironmentBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-r15",
+    "dataDeletionRequired": false
+  }
+}

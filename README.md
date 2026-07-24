@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260724-admin-media-size-provenance-r14.3.1`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -16,16 +16,19 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 
 ## Trạng thái production ngày 2026-07-24
 
-- Admin API và Realtime Worker đang chạy image `lana-chatbot-app:admin-media-size-provenance-r14.3.1`; page allowlist vẫn chỉ có `1198992073286645`.
+- Realtime Worker, Admin API, Admin Web và P2.3C đang chạy image `lana-chatbot-app:checkout-natural-confirmation-r15`; page allowlist vẫn chỉ có `1198992073286645`.
+- Checkout tự nhiên dùng structured extraction có evidence/confidence và deterministic guard; app không đưa PII vào decision telemetry.
+- Xác nhận mua hiểu thêm các cách nói tự nhiên nhưng vẫn chặn câu hỏi, phủ định, do dự và yêu cầu ảnh. `OK` chỉ xác nhận khi cart đang ở đúng bước order preview.
+- Nội dung thương lượng lấy trực tiếp từ adjustment thật của cart/policy; dashboard có thêm chỉ số thiếu thông tin nhận hàng và preview chưa chốt.
 - Ảnh upload thủ công dùng quyền public `0755/0644`, private `0750/0600`; có khóa chống ghi trùng trong một process và cơ chế đối soát orphan sau 24 giờ.
 - Tư vấn size ưu tiên số đo mới nhất, trả độ tin cậy và chỉ đính kèm ảnh size guide khi URL cùng SHA-256 với size-chart artifact đã xác minh.
 - 73/73 point `SIZE_GUIDE` đã duyệt được backfill hash provenance trong Qdrant mà không tạo lại embedding.
-- P2.3C đã nhận image r14.3.1 nhưng đang tạm dừng vì dịch vụ tách nền `139.162.18.93:7000` timeout; realtime/Admin không bị ảnh hưởng.
-- Cross-sell được tách sang r15, dùng quan hệ phối đồ được duyệt trong PostgreSQL/Admin; không dùng similarity để tự gợi ý.
+- P2.3C đang chạy với endpoint tách nền `139.162.18.93:7000`, khoảng cách gọi Vertex 6 giây và giữ nguyên lỗi retryable cho chu kỳ sau.
+- Cross-sell được để cho bản sau r15, dùng quan hệ phối đồ được duyệt trong PostgreSQL/Admin; không dùng similarity để tự gợi ý.
 - API webhook tiếp tục chạy image `lana-chatbot-app:inbound-debounce-r1`.
-- Realtime page test chạy r14.3.1 với ProductFactsV2, Media Selector V2, profile/variant/multi-fact và hard gate chỉ cho page `1198992073286645`; Size Chart scheduler vẫn giữ pre-check idempotent.
+- Realtime page test chạy r15 với ProductFactsV2, Media Selector V2, profile/variant/multi-fact và hard gate chỉ cho page `1198992073286645`; Size Chart scheduler vẫn giữ pre-check idempotent.
 - Shadow worker chạy cùng image, bật Judge v2 ở `DRY_RUN`; `APP_SEND_ENABLED=false`, `CHATBOT_SEND_ENABLED=false` và role DB không có quyền ghi Meta Outbox.
-- Admin API chạy r14.3.1; Admin Web giữ r14.2, Simulation Worker giữ `sizechart-facts-v2-5d401b2`, P2.3B giữ `admin-manual-image-intake-r14` và POS snapshot giữ `sales-cycle-production-r6`.
+- Admin API/Admin Web chạy r15; Simulation Worker giữ `sizechart-facts-v2-5d401b2`, P2.3B giữ `admin-manual-image-intake-r14` và POS snapshot giữ `sales-cycle-production-r6`.
 - Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
 - Bốn policy runtime (shop, offer, closing, payment) đang trỏ tới các version `PUBLISHED` bất biến; `SHOP_POLICY` v2 chứa chính sách chăm sóc khách hàng có cấu trúc và mọi lần chuyển trạng thái đều có audit.
 - Chu trình bán hàng production đã nối cart 48 giờ, thương lượng deterministic, giảm 5% từ hai sản phẩm, freeship/giảm cuối theo policy, thu thông tin nhận hàng, order preview và `PURCHASE_CONFIRMED`.
@@ -56,7 +59,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - PostgreSQL đã áp dụng migration đến `0019_customer_profile_wave2`; migration 0019 bổ sung projection hồ sơ số đo 48 giờ theo pseudonymous customer key và tương thích ngược.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Admin upload resize retention r14.2](deploy/manifests/20260724-admin-upload-resize-retention-r14.2.json); r14 là release gần nhất để rollback.
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Natural checkout + confirmation r15](deploy/manifests/20260724-checkout-natural-confirmation-r15.json); r14.3.1 là release gần nhất để rollback.
 
 ## Kiến trúc dữ liệu
 

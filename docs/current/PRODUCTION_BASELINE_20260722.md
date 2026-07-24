@@ -5,19 +5,32 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260724-admin-media-size-provenance-r14.3.1`.
-- Previous release: `/opt/lana-chatbot/releases/20260724-admin-upload-resize-retention-r14.2-docs`.
-- Source commit: `195623bb35aee1ae3692ca4a8f68fdd6324b8331`.
-- Source archive SHA-256: `d543caf3fa495b14e12a88309061c599bc13aadb51573a04f36aa21d7de2665f`.
-- Compose SHA-256: `f3e5726d30094a7dee2178aa0e9e9b1383195a28c02920ce13d731dd9620d508`.
+- Current release: `/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15`.
+- Previous release: `/opt/lana-chatbot/releases/20260724-admin-media-size-provenance-r14.3.1`.
+- Source commit: `caa086deee371b23b2a7cebb5325133c24ac2b3f`.
+- Source archive SHA-256: `defde14a9d3af33f8038f8c0e731e9eedda3611f8ad7fdbd8e4748ce9f9a9731`.
+- Compose SHA-256: `3315a96cfd6a121550e566c1bf393c23b70af4ad3ad28ece3cf9bad7dbe9c9c5`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất trong candidate: `0020_size_chart_extraction`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-Admin API và Realtime Worker healthy, restart count 0. P2.3C đã cắt sang image mới nhưng được dừng có chủ đích sau khi xác nhận dịch vụ tách nền ngoài VPS timeout; không có thay đổi đối với webhook, delivery, POS, n8n hoặc page allowlist.
+Realtime Worker, Admin API, Admin Web và P2.3C healthy, restart count 0. Không có migration mới và không thay đổi webhook, delivery, POS, n8n hoặc page allowlist.
 
-Admin API và Realtime Worker chạy image `lana-chatbot-app:admin-media-size-provenance-r14.3.1` (`sha256:9d7c24bf59764a4785c0d4540c6a22fb99be5654ad27a4a6822c66cedae90d34`). P2.3C dùng cùng image nhưng hiện stopped do external dependency; các service khác giữ nguyên image trước release.
+Realtime Worker, Admin API, Admin Web và P2.3C chạy image `lana-chatbot-app:checkout-natural-confirmation-r15` (`sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c`). Các service khác giữ nguyên image trước release.
+
+## Natural checkout + purchase confirmation r15
+
+- Model trả `salesSignals` có cấu trúc cho thông tin nhận hàng và xác nhận mua; runtime chỉ nhận dữ liệu có bằng chứng nguyên văn trong inbound mới nhất, confidence tối thiểu 0,85 và vẫn chạy validation deterministic.
+- Tin nhắn nhận hàng không nhãn như `Lan 098... 123 Lê Lợi ... ship COD` có thể đi tới order preview; số điện thoại và phương thức thanh toán vẫn ưu tiên parser deterministic.
+- Cổng xác nhận mua nhận thêm các cách nói tự nhiên như “cho chị lấy”, “vâng em chốt đơn”, “lên đơn giúp chị”; câu hỏi, phủ định, do dự và yêu cầu ảnh không được coi là xác nhận.
+- Nguồn intent được ghi đúng là `MODEL_STRUCTURED_OUTPUT` hoặc `DETERMINISTIC_CLASSIFIER`, không còn gắn nhãn model cho kết quả regex.
+- Câu thương lượng được dựng từ chính adjustment thực tế trong cart/policy; không hard-code “20k” khi con số trong giỏ khác.
+- Funnel Admin bổ sung `CHECKOUT_DETAILS_MISSING`, số hội thoại thiếu thông tin nhận hàng và số order preview chưa được xác nhận. Event chỉ chứa reason/source/field enum, không ghi PII.
+- P2.3C dùng `http://139.162.18.93:7000/api/remove`; smoke thật trả ảnh PNG. Khoảng cách gọi Vertex tăng từ 4 lên 6 giây để giảm 429; lỗi retryable vẫn giữ lại cho chu kỳ sau.
+- Cycle r15 đầu tiên xử lý 50 point trong khoảng 10 phút: thành công 48, lỗi retryable Vertex 429 là 2, lỗi fatal 0, lock được giải phóng và còn 839 point pending.
+- Docker build chạy toàn bộ `pnpm check`: `806/806` test đạt, trong đó Worker `259/259`, Admin API `39/39`, Admin Web `23/23`, Contracts `72/72`, Database `36/36`.
+- Rollback chỉ cần trả ba biến image và symlink về r14.3.1; không xóa Inbox, Outbox, Redis hoặc PostgreSQL.
 
 ## Admin media + verified size guidance r14.3.1
 
@@ -28,7 +41,7 @@ Admin API và Realtime Worker chạy image `lana-chatbot-app:admin-media-size-pr
 - Ảnh size guide chỉ được gửi khi asset `APPROVED`, metadata verified, còn fresh, URL khớp artifact Admin và SHA-256 Qdrant khớp `sourceContentSha256` của chart đã xác minh.
 - `image_registry` có 76 dòng `SIZE_GUIDE`; 73 dòng `APPROVED + ACTIVE` có point Qdrant tương ứng. Backfill payload-only đã cập nhật và verify đủ `73/73`, không tái tạo vector.
 - P2.3C tự chạy batch sau recreate nhưng download ảnh Pancake vẫn đạt `200`; lỗi nằm ở kết nối tới `http://139.162.18.93:7000/api/remove` (`Connect Timeout`). Worker được dừng để tránh lặp 50 job lỗi.
-- Cross-sell không nằm trong release này. r15 sẽ dùng catalog quan hệ phối đồ được duyệt trong PostgreSQL/Admin, exact product/POS validation và analytics riêng.
+- Cross-sell không nằm trong release này. Bản sau r15 sẽ dùng catalog quan hệ phối đồ được duyệt trong PostgreSQL/Admin, exact product/POS validation và analytics riêng.
 
 ## Admin funnel read grant r13.4
 
