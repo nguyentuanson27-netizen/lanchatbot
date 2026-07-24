@@ -70,9 +70,17 @@ export function extractCustomerMeasurements(
   const text = foldVietnamese(input.text);
   const found = new Map<MeasurementKind, BodyMeasurementV1>();
 
-  const threeRounds = [...text.matchAll(
+  const labelledThreeRounds = [...text.matchAll(
     /(?:so\s*do\s*)?(?:3|ba)\s*vong\s*[:=]?\s*(\d{2,3}(?:[.,]\d+)?)\s*[-/x]\s*(\d{2,3}(?:[.,]\d+)?)\s*[-/x]\s*(\d{2,3}(?:[.,]\d+)?)/giu,
   )].at(-1);
+  // Messenger customers frequently answer the shop's explicit request for
+  // three measurements with only "90-60-90". Accept that compact shape only
+  // when it is the entire message; phone numbers, prices, dates and order IDs
+  // remain excluded by the anchored three-value pattern and range checks.
+  const bareThreeRounds = text.trim().match(
+    /^(\d{2,3}(?:[.,]\d+)?)\s*[-/x]\s*(\d{2,3}(?:[.,]\d+)?)\s*[-/x]\s*(\d{2,3}(?:[.,]\d+)?)\s*(?:cm)?$/iu,
+  );
+  const threeRounds = labelledThreeRounds ?? bareThreeRounds;
   if (threeRounds) {
     const values: readonly [MeasurementKind, string | undefined][] = [
       ["BUST_CM", threeRounds[1]],
@@ -83,7 +91,10 @@ export function extractCustomerMeasurements(
       if (!raw) continue;
       const value = decimal(raw);
       if (inRange(kind, value)) {
-        found.set(kind, measurement(kind, value, input, 0.98));
+        found.set(
+          kind,
+          measurement(kind, value, input, labelledThreeRounds ? 0.98 : 0.94),
+        );
       }
     }
   }

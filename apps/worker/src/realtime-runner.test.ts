@@ -4,6 +4,7 @@ import {
   createConversationState,
 } from "@lana/conversation-engine";
 import {
+  aiContinuationProductId,
   catalogAdvisoryIntent,
   catalogAdvisoryReply,
   continuationProductId,
@@ -14,6 +15,7 @@ import {
   isPostSaleRequest,
   isPreSalePolicyQuestion,
   FailClosedTagObservationProvider,
+  hasCustomerMeasurementSignal,
   holdingMessagesForHandoff,
   inboxRetryDelaySeconds,
   modelHandoffPermitted,
@@ -50,8 +52,22 @@ describe("RealtimeRunner", () => {
   it("reuses only verified current-product context for genuine follow-up messages", () => {
     expect(currentProductContinuationId("xin ảnh cận chất", "SV695")).toBe("SV695");
     expect(currentProductContinuationId("mẫu này còn size M không", "SV695")).toBe("SV695");
+    expect(currentProductContinuationId("90-60-90", "SV695")).toBe("SV695");
+    expect(currentProductContinuationId("1m60 52kg", "SV695")).toBe("SV695");
+    expect(currentProductContinuationId("CB182 cao 1m60 52kg", "SV695")).toBeNull();
+    expect(currentProductContinuationId("M nhé", "SV695")).toBe("SV695");
+    expect(currentProductContinuationId("màu trắng", "SV695")).toBe("SV695");
     expect(currentProductContinuationId("CB182", "SV695")).toBeNull();
     expect(currentProductContinuationId("shop ở đâu", "SV695")).toBeNull();
+    expect(hasCustomerMeasurementSignal("90-60-90")).toBe(true);
+    expect(hasCustomerMeasurementSignal("1m60 52kg")).toBe(true);
+    expect(explicitCustomerBusinessIntent("90-60-90")).toBe("SIZE");
+    expect(explicitCustomerBusinessIntents("90-60-90")).toEqual(["SIZE"]);
+    expect(aiContinuationProductId("90-60-90", "sd396", "SD396")).toBe("SD396");
+    expect(aiContinuationProductId("1m60 52kg", "sd396", "SD396")).toBe("SD396");
+    expect(aiContinuationProductId("CB182 cao 1m60 52kg", "SD396", "SD396")).toBeNull();
+    expect(aiContinuationProductId("CB182", "SD396", "SD396")).toBeNull();
+    expect(aiContinuationProductId("90-60-90", "CB182", "SD396")).toBeNull();
     expect(continuationProductId(null, "CB182", "SV695")).toBe("CB182");
     expect(continuationProductId(null, null, "SV695")).toBe("SV695");
   });

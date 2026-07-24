@@ -210,7 +210,11 @@ export function explicitCustomerBusinessIntent(
     .replace(/[\u0300-\u036f]/gu, "")
     .replace(/[\u0111\u0110]/gu, "d")
     .toLowerCase();
-  if (/\b(size|sz|kich co|co nao|mac co)\b/u.test(text)) return "SIZE";
+  if (
+    hasCustomerMeasurementSignal(value) ||
+    hasSizeOnlyContinuationSignal(value) ||
+    /\b(size|sz|kich co|co nao|mac co)\b/u.test(text)
+  ) return "SIZE";
   if (/\b(bao lau|khi nao|may ngay|ngay nao|giao den|nhan hang|eta)\b/u.test(text)) {
     return "ETA";
   }
@@ -232,7 +236,11 @@ export function explicitCustomerBusinessIntents(
   };
   if (/\b(gia|bao nhieu|bn|nhieu tien|price)\b/u.test(text)) add("PRICE");
   if (/\b(con|het|ton|co hang|san hang|available)\b/u.test(text)) add("STOCK");
-  if (/\b(size|sz|kich co|co nao|mac co)\b/u.test(text)) add("SIZE");
+  if (
+    hasCustomerMeasurementSignal(value) ||
+    hasSizeOnlyContinuationSignal(value) ||
+    /\b(size|sz|kich co|co nao|mac co)\b/u.test(text)
+  ) add("SIZE");
   if (/\b(bao lau|khi nao|may ngay|ngay nao|giao den|nhan hang|eta)\b/u.test(text)) {
     add("ETA");
   }
@@ -249,6 +257,67 @@ function asciiFold(value: string): string {
     .replace(/[̀-ͯ]/gu, "")
     .replace(/[đĐ]/gu, "d")
     .toLowerCase();
+}
+
+const MEASUREMENT_SIGNAL_TIME = "2000-01-01T00:00:00.000Z";
+const MEASUREMENT_SIGNAL_HASH = "0".repeat(64);
+
+export function hasCustomerMeasurementSignal(value: string): boolean {
+  return extractCustomerMeasurements({
+    text: value,
+    observedAt: MEASUREMENT_SIGNAL_TIME,
+    sourceEventHash: MEASUREMENT_SIGNAL_HASH,
+  }).length > 0;
+}
+
+function textWithoutMeasurementTokens(value: string): string {
+  return value
+    .replace(/\b[12]\s*m\s*\d{1,2}\b/giu, " ")
+    .replace(/\b\d{2,3}(?:[.,]\d+)?\s*(?:kg|ky|ki)\b/giu, " ")
+    .replace(/\b\d{2,3}(?:[.,]\d+)?\s*[-/x]\s*\d{2,3}(?:[.,]\d+)?\s*[-/x]\s*\d{2,3}(?:[.,]\d+)?\b/giu, " ");
+}
+
+function hasExplicitProductReference(value: string): boolean {
+  if (productCodeOnly(value) !== null) return true;
+  const searchText = hasCustomerMeasurementSignal(value)
+    ? textWithoutMeasurementTokens(value)
+    : value;
+  return extractAdProductCodes(searchText).length > 0;
+}
+
+function hasSizeOnlyContinuationSignal(value: string): boolean {
+  const text = asciiFold(value)
+    .trim()
+    .replace(/[.!?]+$/gu, "")
+    .trim();
+  return /^(?:(?:size|sz|co)\s*)?(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)(?:\s+(?:nha|nhe|a|em|chi))?$/iu
+    .test(text);
+}
+
+function hasColorContinuationSignal(value: string): boolean {
+  const text = asciiFold(value)
+    .trim()
+    .replace(/[.!?]+$/gu, "")
+    .trim();
+  return /^mau\s+[a-z][a-z\s-]{0,30}(?:\s+(?:nha|nhe|a|em|chi))?$/u.test(text);
+}
+
+/**
+ * AI may infer that a terse message still refers to the product in state.
+ * This helper only returns that reference when the model and state agree and
+ * the customer did not type a different product code. The caller must still
+ * exact-match the returned ID against the stable product index.
+ */
+export function aiContinuationProductId(
+  customerText: string,
+  proposalProductId: string | null,
+  currentProductId: string | null,
+): string | null {
+  if (!proposalProductId || !currentProductId) return null;
+  if (hasExplicitProductReference(customerText)) return null;
+  const proposal = normalizeProductCode(proposalProductId);
+  const current = normalizeProductCode(currentProductId);
+  return proposal === current ? current : null;
 }
 
 /**
@@ -293,11 +362,12 @@ export function currentProductContinuationId(
   currentProductId: string | null,
 ): string | null {
   if (!currentProductId) return null;
-  if (productCodeOnly(value) !== null || extractAdProductCodes(value).length > 0) {
-    return null;
-  }
+  if (hasExplicitProductReference(value)) return null;
   const text = asciiFold(value);
   const refersToCurrentProduct =
+    hasCustomerMeasurementSignal(value) ||
+    hasSizeOnlyContinuationSignal(value) ||
+    hasColorContinuationSignal(value) ||
     explicitCustomerImageIntent(value) !== null ||
     explicitCustomerBusinessIntent(value) !== null ||
     /\b(mau nay|sp nay|san pham nay|set nay|ao nay|vay nay|quan nay|cai nay|em nay|mau do|sp do)\b/u.test(text) ||
@@ -2090,7 +2160,8 @@ export class RealtimeRunner {
         preSalePolicyIntent !== null
       ? this.emptyResolution()
       : await this.resolveProducts(message, state);
-    const resolvedProduct = resolution.primary;
+    let resolvedProduct = resolution.primary;
+    let productResolutionOrigin: ProductResolution["origin"] = resolution.origin;
     if (
       triggerMessagePk &&
       this.canonicalHistory?.recordMessageAnalysis &&
@@ -2567,6 +2638,24 @@ export class RealtimeRunner {
             productId:
               resolvedProduct?.productId ?? initial.proposal.productId,
           };
+          const inferredCurrentProductId = aiContinuationProductId(
+            message.text ?? "",
+            proposal.productId,
+            nextState.currentProductId,
+          );
+          if (!resolvedProduct && inferredCurrentProductId) {
+            const verifiedCurrentProduct = await this.exactProduct(
+              inferredCurrentProductId,
+            );
+            if (verifiedCurrentProduct) {
+              resolvedProduct = verifiedCurrentProduct;
+              productResolutionOrigin = "STATE";
+              proposal = {
+                ...proposal,
+                productId: verifiedCurrentProduct.productId,
+              };
+            }
+          }
         }
         if (
           this.options.buyingSignalGuardEnabled &&
@@ -2988,7 +3077,7 @@ export class RealtimeRunner {
         ),
         eventKeyHash,
         eventType,
-        origin: resolution.origin,
+        origin: productResolutionOrigin,
         reasonCodes,
         releaseId: this.options.releaseId,
         promptVersion: this.options.promptVersion,
@@ -3072,7 +3161,7 @@ export class RealtimeRunner {
           ...(this.options.decisionAuditV2Enabled
             ? { factQueryResults: multiFactAudit }
             : {}),
-          productResolutionOrigin: resolution.origin,
+          productResolutionOrigin,
           buyingSignalReasons: buyingSignal.reasons,
           guardReasonCodes: handoffGuardReasonCodes,
           factsStatus: businessFacts?.status ?? null,
@@ -3509,7 +3598,11 @@ export class RealtimeRunner {
     productId: string | null,
   ): SalesStage | null {
     if (/(chốt|lấy|đặt|mua|ok lấy)/iu.test(text)) return "READY_TO_BUY";
-    if (/(size|sz|eo|ngực|mông|cao|nặng)/iu.test(text)) {
+    if (
+      hasCustomerMeasurementSignal(text) ||
+      hasSizeOnlyContinuationSignal(text) ||
+      /(size|sz|eo|ngực|mông|cao|nặng)/iu.test(text)
+    ) {
       return "FIT_CONSULTING";
     }
     if (/(đắt|giá cao|phân vân|so sánh)/iu.test(text)) {

@@ -33,6 +33,18 @@ describe("extractCustomerMeasurements", () => {
     });
   });
 
+  it("accepts a bare three-round reply only when the whole message is the measurement tuple", () => {
+    const values = extractCustomerMeasurements(input("90-60-90"));
+    expect(Object.fromEntries(values.map((item) => [item.kind, item.value]))).toEqual({
+      BUST_CM: 90,
+      WAIST_CM: 60,
+      HIPS_CM: 90,
+    });
+    expect(values.every(({ provenance }) => provenance.confidence === 0.94)).toBe(true);
+    expect(extractCustomerMeasurements(input("ngày 24-07-2026"))).toEqual([]);
+    expect(extractCustomerMeasurements(input("mã 90-60-90"))).toEqual([]);
+  });
+
   it("accepts unaccented Vietnamese and common weight abbreviations", () => {
     const values = extractCustomerMeasurements(input(
       "chieu cao 1m58, can nang 50 ky, so do 3 vong 86-68-92",
