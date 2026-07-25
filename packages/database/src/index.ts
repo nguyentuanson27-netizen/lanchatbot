@@ -109,3 +109,12 @@ export {
   type StageSizeChartArtifactInput,
   type StageSizeChartArtifactResult,
 } from "./size-chart-extraction.js";
+export {
+  PostgresDatasetReviewStore,
+  type CreateDatasetInput,
+  type CreateDatasetResult,
+  type DatasetReviewStoreOptions,
+  type ImportRecord,
+  type ImportRecordOutcome,
+  type ImportRecordsResult,
+} from "./dataset-review-store.js";

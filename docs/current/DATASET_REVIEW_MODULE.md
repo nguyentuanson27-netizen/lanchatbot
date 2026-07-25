@@ -1,7 +1,8 @@
 # AI Evaluation & Dataset Review — Module Design & Ops
 
-Status: **Batch 1 (foundation) implemented**. Not deployed. This document is
-additive and does not modify the production baseline or changelog.
+Status: **Batches 1 + 2b implemented** (foundation + database store & import
+pipeline). Not deployed. This document is additive and does not modify the
+production baseline or changelog.
 
 ## Goal
 
@@ -64,12 +65,35 @@ Concurrency: `dataset_project_items.lease_owner/lease_until/revision`.
 `AnnotationEvidenceV1`, strict AI output `PrelabelResponseV1` +
 `PRELABEL_RESPONSE_SCHEMA` (Vertex dialect), all enums, `ADMIN_ROLE_TO_DATASET_ROLE`.
 
+## `@lana/database` store & import pipeline (Batch 2b)
+
+- `computeConversationImport` / `buildImportReport` (in `@lana/dataset-review`) —
+  pure per-record parse → redact → flag → dedup → checksum, plus the aggregate
+  import report (counts only, no raw content).
+- `PostgresDatasetReviewStore` — thin, encrypting persistence: `createDataset`
+  (idempotent by `source_checksum`), `importRecords` (per-record transaction,
+  partial-failure tolerant, DUPLICATE no-op on repeated source key, raw
+  payload + raw message text envelope-encrypted, reviewer projections redacted),
+  `finalizeDataset`, and redacted-only read queries.
+- `dataset-import.ts` CLI — streams a `{key,ttl,value}[]` export in chunks.
+
+### Import command
+
+```
+DATABASE_URL=... REALTIME_DATA_KEY=<32-byte hex/base64> REALTIME_DATA_KEY_REF=<ref> \
+DATASET_IMPORT_ACTOR=<subject> \
+node packages/database/dist/dataset-import.js history_export_2000_curated.json
+```
+
+Idempotent: re-running the same file returns the same dataset (created=false) and
+re-imported records are DUPLICATE no-ops. Output is aggregate counts only.
+
 ## Tests (run here, green)
 
 ```
-pnpm --filter @lana/contracts test        # 80 passed (8 new v5)
-pnpm --filter @lana/dataset-review test    # 38 passed
-pnpm --filter @lana/database test          # 41 passed (5 new migration)
+pnpm --filter @lana/contracts test        # 80 passed (8 v5)
+pnpm --filter @lana/dataset-review test    # 42 passed (import pipeline incl.)
+pnpm --filter @lana/database test          # 46 passed (migration + store)
 ```
 
 Covers: parser/multiline/start-truncated/counts, redaction + stable map +
@@ -85,8 +109,6 @@ validation, seed-schema integrity, migration structure.
 
 ## Remaining batches (not started)
 
-- **2b** `@lana/database` store repo (import + parse/normalise/redact/dedup/flags
-  persistence, envelope encryption wiring) + streaming import command.
 - **3** projects/schemas/splits store + audit event writes.
 - **4** `apps/worker` Vertex pre-label runner (batch/retry/idempotent; redacted
   input only; PROPOSED-only writes; evidence validation).

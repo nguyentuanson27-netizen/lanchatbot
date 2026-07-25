@@ -27,6 +27,14 @@ export {
   messageChecksum,
 } from "./dedup.js";
 export {
+  buildImportReport,
+  computeConversationImport,
+  sha256Hex,
+  type ConversationImport,
+  type ImportReport,
+  type MessageImport,
+} from "./import-pipeline.js";
+export {
   findLabel,
   findMutualExclusionConflicts,
   locateEvidence,
