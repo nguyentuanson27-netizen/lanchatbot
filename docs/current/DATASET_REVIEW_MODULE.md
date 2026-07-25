@@ -1,10 +1,11 @@
 # AI Evaluation & Dataset Review — Module Design & Ops
 
-Status: **Batches 1 + 2b + 3 + 4 implemented** (foundation + import pipeline +
-annotation core + AI pre-label runner). Not deployed. This document is additive
-and does not modify the production baseline or changelog. Real PostgreSQL and
-Vertex integration is only for an authorized dev environment; no migration,
-import, or production credential/database is used here.
+Status: **Batches 1 + 2b + 3 + 4 + 5 implemented** (foundation + import pipeline +
+annotation core + AI pre-label runner + Review Queue UI module). Not deployed.
+This document is additive and does not modify the production baseline or
+changelog. Real PostgreSQL and Vertex integration is only for an authorized dev
+environment; no migration, import, or production credential/database is used
+here.
 
 ## Goal
 
@@ -137,6 +138,33 @@ Requirement mapping: redacted input only ✓ · strict output ✓ · evidence ex
 schema/checksum/run id stored ✓ · idempotency + bounded retry + partial-failure
 isolation ✓.
 
+## Review Queue UI (Batch 5)
+
+`apps/admin-web` vanilla-TS module, matching the repo's `render*(data, identity)
+=> HTML string` convention (no framework). Renders redacted text only.
+
+- `dataset-review-types.ts` — view-model types (redacted projections the admin-api
+  will serve in Batch 6).
+- `dataset-review-ui.ts`:
+  - `highlightEvidence(text, spans)` — escapes text and wraps evidence offsets in
+    `<mark>`; clamps/merges spans so overlaps never break markup.
+  - `resolveShortcut(ctx)` — A/R/E/N/P/S and Shift+A; suppressed inside
+    input/textarea/select/contentEditable and with ctrl/meta/alt.
+  - `visibleAnnotations(...)` — blind / double-blind hide AI + heuristic proposals
+    until the reviewer's pass is revealed; the reviewer's own labels always show.
+  - `isLeaseHeldByOther(...)` — optimistic-lease concurrency: another active holder
+    → read-only.
+  - `renderReviewQueue(data, identity)` — two-column transcript + labels, quality
+    flags, progress, evidence highlight + jump, accept/reject/edit/delete per
+    annotation, footer (previous / accept-all / skip / needs-adjudication /
+    save-next), blind note and a lock banner that disables actions.
+  - `bindReviewQueue(root, handlers)` — event delegation for mounting (Batch 6).
+- `styles.css` — review-queue styles using existing design tokens.
+
+Not yet wired into `main.ts` routing and not backed by endpoints — that is Batch 6
+(admin-api `/admin/v1/datasets…` + RBAC + tab). The module is unit-tested in
+isolation.
+
 ## Tests (run here, green)
 
 ```
@@ -144,6 +172,7 @@ pnpm --filter @lana/contracts test        # 80 passed (8 v5)
 pnpm --filter @lana/dataset-review test    # 42 passed (import pipeline incl.)
 pnpm --filter @lana/database test          # 63 passed (migration + 3 stores)
 pnpm --filter @lana/worker test            # 270 passed (incl. 10 pre-label)
+pnpm --filter @lana/admin-web test         # 32 vitest + 4 auth (13 new review UI)
 ```
 
 All store tests use an injected fake pool; the pre-label runner uses a mocked
@@ -164,10 +193,10 @@ validation, seed-schema integrity, migration structure.
 
 ## Remaining batches (not started)
 
-- **5** `apps/admin-web` Review Queue UI (evidence highlight, shortcuts, blind
-  review, lease-based concurrency) + Datasets/Projects/Exports screens.
-- **6** JSONL export endpoint, RBAC role mapping in admin-api, holdout locking,
-  integration + E2E tests, feature flags, seed insertion.
+- **6** admin-api `/admin/v1/datasets…` endpoints (AdminStore + routes) wiring the
+  stores/runner, RBAC role mapping, holdout locking, JSONL export endpoint,
+  mounting the Review Queue module into `main.ts` + Datasets/Projects/Exports
+  screens, feature flags, seed insertion, integration + E2E tests.
 
 ## Rollback
 
