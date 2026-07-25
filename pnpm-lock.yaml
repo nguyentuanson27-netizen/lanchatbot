@@ -119,6 +119,9 @@ importers:
       '@lana/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@lana/dataset-review':
+        specifier: workspace:*
+        version: link:../../packages/dataset-review
       '@lana/durable-messaging':
         specifier: workspace:*
         version: link:../../packages/durable-messaging

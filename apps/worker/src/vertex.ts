@@ -2,9 +2,12 @@ import { createSign } from "node:crypto";
 import {
   AgentProposalV1Schema,
   GroundedReplyDraftV1Schema,
+  PRELABEL_RESPONSE_SCHEMA,
+  PrelabelResponseV1Schema,
   type AgentProposalV1,
   type BusinessFactEnvelopeV1,
   type GroundedReplyDraftV1,
+  type PrelabelResponseV1,
   type SalesRubricAssessmentV2,
   SalesRubricAssessmentV2Schema,
 } from "@lana/contracts";
@@ -49,6 +52,13 @@ export interface VertexShadowResult {
 
 export interface VertexGroundedDraftResult {
   readonly draft: GroundedReplyDraftV1;
+  readonly modelVersion: string;
+  readonly latencyMs: number;
+  readonly tokenUsage: Readonly<Record<string, number>>;
+}
+
+export interface VertexPrelabelResult {
+  readonly response: PrelabelResponseV1;
   readonly modelVersion: string;
   readonly latencyMs: number;
   readonly tokenUsage: Readonly<Record<string, number>>;
@@ -1137,6 +1147,75 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
     throw new VertexShadowError("VERTEX_JUDGE_V2_FAILED", false);
   }
 
+
+  // Dataset-review AI pre-labelling. Reuses the same OAuth/token, retry and
+  // timeout infrastructure as the sales gateway — no separate AI client. The
+  // caller supplies a provider-agnostic system instruction + user prompt built
+  // from REDACTED transcript only; output is the strict PrelabelResponseV1.
+  async prelabel(
+    systemInstruction: string,
+    userPrompt: string,
+  ): Promise<VertexPrelabelResult> {
+    const started = this.now();
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const token = await this.token();
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), this.options.timeoutMs ?? 30_000);
+      try {
+        const response = await this.fetchImpl(
+          vertexGenerateEndpoint(this.options.projectId, this.options.location, this.options.modelName),
+          {
+            method: "POST",
+            headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: systemInstruction }] },
+              contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+              generationConfig: {
+                temperature: 0.1,
+                maxOutputTokens: 2_048,
+                responseMimeType: "application/json",
+                responseSchema: PRELABEL_RESPONSE_SCHEMA,
+              },
+            }),
+            signal: controller.signal,
+          },
+        );
+        const body = await response.json().catch(() => null);
+        if (response.status === 401 && attempt === 0) {
+          this.recordFailure({ endpoint: "GENERATE", status: 401, attempt: 1, retryable: true, errorCode: "VERTEX_PRELABEL_UNAUTHORIZED" });
+          this.invalidateToken(token);
+          continue;
+        }
+        if (!response.ok) {
+          const retryable = response.status === 429 || response.status >= 500;
+          const errorCode = retryable ? "VERTEX_PRELABEL_RETRYABLE" : "VERTEX_PRELABEL_FAILED";
+          this.recordFailure({ endpoint: "GENERATE", status: response.status, attempt: attempt + 1, retryable, errorCode });
+          throw new VertexShadowError(errorCode, retryable);
+        }
+        const candidate = parseCandidateText(body);
+        const parsed = PrelabelResponseV1Schema.safeParse(safeJson(candidate.text));
+        if (!parsed.success) {
+          this.recordFailure({ endpoint: "GENERATE", status: response.status, attempt: attempt + 1, retryable: false, errorCode: "VERTEX_PRELABEL_SCHEMA_INVALID" });
+          throw new VertexShadowError("VERTEX_PRELABEL_SCHEMA_INVALID", false);
+        }
+        return {
+          response: parsed.data,
+          modelVersion: candidate.modelVersion,
+          latencyMs: Math.max(0, this.now() - started),
+          tokenUsage: candidate.tokenUsage,
+        };
+      } catch (error) {
+        if (error instanceof VertexShadowError) throw error;
+        if (error instanceof Error && error.name === "AbortError") {
+          throw new VertexShadowError("VERTEX_PRELABEL_TIMEOUT", true);
+        }
+        throw new VertexShadowError("VERTEX_PRELABEL_NETWORK_ERROR", true);
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+    throw new VertexShadowError("VERTEX_PRELABEL_FAILED", false);
+  }
 
   async embedImageBytes(imageBytes: Uint8Array): Promise<readonly number[]> {
     const maxBytes = this.options.maxImageBytes ?? 10 * 1024 * 1024;

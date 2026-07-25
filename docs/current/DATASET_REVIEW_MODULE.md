@@ -1,10 +1,10 @@
 # AI Evaluation & Dataset Review — Module Design & Ops
 
-Status: **Batches 1 + 2b + 3 implemented** (foundation + import pipeline +
-annotation core: schemas, projects, splits, annotations, audit). Not deployed.
-This document is additive and does not modify the production baseline or
-changelog. Real PostgreSQL integration is only for an authorized dev
-environment; no migration or import runs against production.
+Status: **Batches 1 + 2b + 3 + 4 implemented** (foundation + import pipeline +
+annotation core + AI pre-label runner). Not deployed. This document is additive
+and does not modify the production baseline or changelog. Real PostgreSQL and
+Vertex integration is only for an authorized dev environment; no migration,
+import, or production credential/database is used here.
 
 ## Goal
 
@@ -106,17 +106,50 @@ re-imported records are DUPLICATE no-ops. Output is aggregate counts only.
   append-only `dataset_review_events` row with before/after snapshots (redacted
   columns only — no raw PII), `listAnnotations` / `listReviewEvents`.
 
+## AI pre-label runner (Batch 4)
+
+Reuses the existing Vertex gateway — no parallel AI client. Added an additive
+`VertexShadowModel.prelabel(systemInstruction, userPrompt)` that shares the same
+OAuth/token, retry and timeout infra and returns the strict `PrelabelResponseV1`.
+
+- `apps/worker/src/dataset-prelabel-prompt.ts` — provider-agnostic system
+  instruction (lists schema labels + scope, demands JSON-only, wraps transcript
+  as untrusted) and `computePrelabelInputChecksum` (idempotency key over
+  model/versions/schema/redacted input).
+- `apps/worker/src/dataset-prelabel-runner.ts` — `DatasetPrelabelRunner` over a
+  `PrelabelModelPort` (mockable) and `PrelabelStorePort`. Per item: load redacted
+  messages, reserve by input checksum (skip if already done), call the model with
+  bounded retry, validate each annotation (`validatePrelabelAnnotation`: label in
+  schema, role/scope, evidence exact-match → offsets), persist only valid ones as
+  PROPOSED, route items with invalid annotations to review, record outcome.
+  `runBatch` isolates per-item failure.
+- `apps/worker/src/dataset-prelabel-wiring.ts` — thin adapters: Vertex → port,
+  `PostgresDatasetPrelabelStore` → port.
+- `packages/database/src/dataset-prelabel-store.ts` — `PostgresDatasetPrelabelStore`:
+  `createRun` (stores model, model version, prompt version, schema version, run id),
+  `reserveRunItem` (idempotent by `(run, item, input_checksum)`; SUCCEEDED/
+  VALIDATION_FAILED = done, FAILED/PENDING re-runnable), `persistProposals`
+  (writes `source='AI' status='PROPOSED'` only, no audit event), `recordItemOutcome`,
+  `finalizeRun`. `loadItemMessages` selects redacted projections only.
+
+Requirement mapping: redacted input only ✓ · strict output ✓ · evidence exact-match
++ role ✓ · invalid never persisted ✓ · PROPOSED-only ✓ · model/version/prompt/
+schema/checksum/run id stored ✓ · idempotency + bounded retry + partial-failure
+isolation ✓.
+
 ## Tests (run here, green)
 
 ```
 pnpm --filter @lana/contracts test        # 80 passed (8 v5)
 pnpm --filter @lana/dataset-review test    # 42 passed (import pipeline incl.)
-pnpm --filter @lana/database test          # 56 passed (migration + 2 stores)
+pnpm --filter @lana/database test          # 63 passed (migration + 3 stores)
+pnpm --filter @lana/worker test            # 270 passed (incl. 10 pre-label)
 ```
 
-All store tests use an injected fake pool. No live PostgreSQL is touched here; real
-DB integration (apply `0017`, run the import CLI, exercise the stores end-to-end)
-is deferred to an authorized dev environment.
+All store tests use an injected fake pool; the pre-label runner uses a mocked
+provider port. No live PostgreSQL and no Vertex credentials are touched here; real
+DB/Vertex integration (apply `0017`, run the import CLI, exercise the stores and a
+real pre-label run) is deferred to an authorized dev environment.
 
 Covers: parser/multiline/start-truncated/counts, redaction + stable map +
 synthetic, dedup fingerprint, length bin, quality flags, evidence exact-match,
@@ -131,8 +164,6 @@ validation, seed-schema integrity, migration structure.
 
 ## Remaining batches (not started)
 
-- **4** `apps/worker` Vertex pre-label runner (batch/retry/idempotent; redacted
-  input only; PROPOSED-only writes; evidence validation).
 - **5** `apps/admin-web` Review Queue UI (evidence highlight, shortcuts, blind
   review, lease-based concurrency) + Datasets/Projects/Exports screens.
 - **6** JSONL export endpoint, RBAC role mapping in admin-api, holdout locking,

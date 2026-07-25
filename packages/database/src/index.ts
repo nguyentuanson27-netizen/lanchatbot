@@ -129,3 +129,10 @@ export {
   type ReviewAction,
   type ReviewAnnotationInput,
 } from "./dataset-annotation-store.js";
+export {
+  PostgresDatasetPrelabelStore,
+  type CreatePrelabelRunInput,
+  type PersistPrelabelProposalsInput,
+  type PrelabelProposalRow,
+  type RecordPrelabelItemInput,
+} from "./dataset-prelabel-store.js";
