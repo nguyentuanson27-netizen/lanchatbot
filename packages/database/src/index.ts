@@ -118,3 +118,14 @@ export {
   type ImportRecordOutcome,
   type ImportRecordsResult,
 } from "./dataset-review-store.js";
+export {
+  PostgresDatasetAnnotationStore,
+  type AddAnnotationInput,
+  type CreateLabelSchemaInput,
+  type CreateLabelSchemaResult,
+  type CreateProjectInput,
+  type CreateSplitInput,
+  type CreateSplitResult,
+  type ReviewAction,
+  type ReviewAnnotationInput,
+} from "./dataset-annotation-store.js";

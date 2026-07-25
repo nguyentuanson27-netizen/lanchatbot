@@ -1,8 +1,10 @@
 # AI Evaluation & Dataset Review — Module Design & Ops
 
-Status: **Batches 1 + 2b implemented** (foundation + database store & import
-pipeline). Not deployed. This document is additive and does not modify the
-production baseline or changelog.
+Status: **Batches 1 + 2b + 3 implemented** (foundation + import pipeline +
+annotation core: schemas, projects, splits, annotations, audit). Not deployed.
+This document is additive and does not modify the production baseline or
+changelog. Real PostgreSQL integration is only for an authorized dev
+environment; no migration or import runs against production.
 
 ## Goal
 
@@ -88,13 +90,33 @@ node packages/database/dist/dataset-import.js history_export_2000_curated.json
 Idempotent: re-running the same file returns the same dataset (created=false) and
 re-imported records are DUPLICATE no-ops. Output is aggregate counts only.
 
+## `@lana/database` annotation core (Batch 3)
+
+`PostgresDatasetAnnotationStore`:
+- **Label schemas** — `createLabelSchema` validates against `LabelSchemaV1Schema`
+  before write (rejects invalid schema without a DB round-trip); idempotent by
+  `(name, version)`; `getLabelSchema` / `listLabelSchemas` / `setLabelSchemaStatus`.
+- **Projects** — `createProject` / `getProject` / `listProjects` / `setProjectStatus`.
+- **Splits** — `createSplit` runs the deterministic group-aware `assignSplits`,
+  inserts `dataset_project_items` (idempotent `ON CONFLICT`), guarantees a
+  duplicate group never straddles splits; `splitSummary` for counts.
+- **Annotations + audit** — `addAnnotation` (human/adjudicator ADD is audited; an
+  AI/heuristic PROPOSED insert is not a reviewer action and is not audited),
+  `reviewAnnotation` (ACCEPT/REJECT/EDIT/REMOVE) writes the new status and an
+  append-only `dataset_review_events` row with before/after snapshots (redacted
+  columns only — no raw PII), `listAnnotations` / `listReviewEvents`.
+
 ## Tests (run here, green)
 
 ```
 pnpm --filter @lana/contracts test        # 80 passed (8 v5)
 pnpm --filter @lana/dataset-review test    # 42 passed (import pipeline incl.)
-pnpm --filter @lana/database test          # 46 passed (migration + store)
+pnpm --filter @lana/database test          # 56 passed (migration + 2 stores)
 ```
+
+All store tests use an injected fake pool. No live PostgreSQL is touched here; real
+DB integration (apply `0017`, run the import CLI, exercise the stores end-to-end)
+is deferred to an authorized dev environment.
 
 Covers: parser/multiline/start-truncated/counts, redaction + stable map +
 synthetic, dedup fingerprint, length bin, quality flags, evidence exact-match,
@@ -109,7 +131,6 @@ validation, seed-schema integrity, migration structure.
 
 ## Remaining batches (not started)
 
-- **3** projects/schemas/splits store + audit event writes.
 - **4** `apps/worker` Vertex pre-label runner (batch/retry/idempotent; redacted
   input only; PROPOSED-only writes; evidence validation).
 - **5** `apps/admin-web` Review Queue UI (evidence highlight, shortcuts, blind
