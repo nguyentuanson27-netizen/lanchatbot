@@ -499,6 +499,36 @@ export class PostgresDatasetAnnotationStore {
     return result.rows[0] ?? null;
   }
 
+  async previousReviewedItem(
+    projectId: string,
+    reviewerSubject: string,
+    split: SplitV1,
+    beforeProjectItemId?: string,
+  ): Promise<Record<string, unknown> | null> {
+    const result = await this.pool.query(
+      `SELECT pi.project_item_id, pi.project_id, pi.conversation_id, pi.split,
+              pi.assignment_status, pi.queue_reason, pi.lease_owner, pi.lease_until,
+              pi.revision, pi.updated_at, c.quality_flags
+       FROM dataset_project_items pi
+       JOIN dataset_conversations c ON c.conversation_id = pi.conversation_id
+       WHERE pi.project_id = $1
+         AND pi.split = $3
+         AND pi.assignment_status = 'REVIEWED'
+         AND pi.assigned_reviewer_id = $2
+         AND (
+           $4::uuid IS NULL
+           OR (pi.updated_at, pi.project_item_id) < (
+             SELECT cursor.updated_at, cursor.project_item_id
+             FROM dataset_project_items cursor
+             WHERE cursor.project_item_id = $4::uuid
+           )
+         )
+       ORDER BY pi.updated_at DESC, pi.project_item_id DESC
+       LIMIT 1`,
+      [projectId, reviewerSubject, split, beforeProjectItemId ?? null],
+    );
+    return result.rows[0] ?? null;
+  }
   // The next reviewable item: prefer one this reviewer already leases, otherwise
   // the highest-priority item whose lease is free or expired. Locked/reviewed
   // items and items actively leased by another reviewer are skipped so two
