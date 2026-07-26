@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-26T06:20:00+00:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "14d325dfcdfe91dc43ca3c94ff45c2bfa706cf9f",
+  "releaseTag": "20260726-dataset-review-admin-r18",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260726-dataset-review-admin-r18",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260724-realtime-measurement-continuation-r17",
+  "pageAllowlist": [
+    "1198992073286645"
+  ],
+  "images": {
+    "adminApi": "lana-chatbot-app:dataset-review-admin-r18@sha256:95f17ac35bc42965c6de88e3bde2bf07bec19c958bc0db3169e229b4224d8504",
+    "adminWeb": "lana-chatbot-app:dataset-review-admin-r18@sha256:95f17ac35bc42965c6de88e3bde2bf07bec19c958bc0db3169e229b4224d8504",
+    "realtimeWorkerUnchanged": "lana-chatbot-app:realtime-measurement-continuation-r17"
+  },
+  "sourceArchiveSha256": "1c0461af9af1fa7124384ab1bd6a9458a84fbfa99ad108d13fc7a7ee611c58d2",
+  "composeSha256": "5b1c7899f556287501e9bfc2effef723b5e61feddebbf713eb4062a3d58b223b",
+  "database": {
+    "backupPath": "/opt/lana-chatbot/backups/20260726-dataset-review-admin-r18/lana_chatbot_pre_0021.dump",
+    "backupSha256": "ecbe041f19338ec125c30101a0ec5dbce0c78009ea1f2c6d14368c5ceaf646e5",
+    "restoreTest": "PASS_67_PUBLIC_TABLES",
+    "migration": "0021_dataset_review",
+    "migrationSha256": "27734796d4d8f17072cd36fc31f5447b58a0ef89e9d5a32e6cf48dedfc394bf3",
+    "datasetTablesCreated": 13,
+    "datasetRowsImported": 0
+  },
+  "featureFlags": {
+    "ADMIN_DATASET_REVIEW_V1": true,
+    "DATASET_AI_PRELABEL_V1": false,
+    "DATASET_BLIND_REVIEW_V1": false,
+    "DATASET_EXPORT_V1": false
+  },
+  "verification": {
+    "pnpmCheckInsideImage": "PASS",
+    "adminApiHealth": "HEALTHY",
+    "adminWebHealth": "HEALTHY",
+    "adminApiRestartCount": 0,
+    "adminWebRestartCount": 0,
+    "adminApiReadyDatasetReview": true,
+    "publicAuthentikRedirect": "HTTP_302",
+    "recentAdminErrorLines": 0,
+    "realtimeWorkerRestarted": false,
+    "n8nRestarted": false
+  },
+  "scope": {
+    "deployedServices": [
+      "admin-api",
+      "admin-web"
+    ],
+    "unchangedServices": [
+      "realtime-worker",
+      "api",
+      "n8n"
+    ],
+    "datasetImported": false
+  },
+  "knownLimits": [
+    "Review queue does not yet provide a dedicated mark-reviewed or release-lease endpoint.",
+    "Adjudication remains a placeholder.",
+    "No production dataset has been imported.",
+    "AI pre-label, blind review and export remain disabled."
+  ],
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260724-realtime-measurement-continuation-r17",
+    "restoreEnvironmentBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260726-dataset-review-admin-r18",
+    "adminImage": "lana-chatbot-app:admin-batch-ai-image-intake-r16@sha256:e35b49693d57680fea8e5ebd9f39b138010fa49428e24c386be797815d4cb831",
+    "services": [
+      "admin-api",
+      "admin-web"
+    ],
+    "dataDeletionRequired": false
+  }
+}
