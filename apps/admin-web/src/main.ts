@@ -1132,7 +1132,8 @@ function bindDatasetReviewQueue(content: HTMLElement): void {
           showToast("Đã mở lại hội thoại để sửa.");
         });
         return;
-      }      if (action === "PREVIOUS") {
+      }
+      if (action === "PREVIOUS") {
         void runDatasetAction(async () => {
           const previous = await getPreviousReviewQueue(
             queue.projectId,
