@@ -4,6 +4,7 @@ import { adminConfigFromEnvironment } from "./config.js";
 import { PostgresAdminStore } from "./store.js";
 import { LocalEnvelopeCipher } from "@lana/database";
 import { createProductMediaService } from "./product-media.js";
+import { createDatasetReviewService } from "./dataset-review-service.js";
 
 const config = adminConfigFromEnvironment();
 if (
@@ -49,6 +50,16 @@ const productMedia = config.productMediaEnabled
       credentialJson: config.googleSheetsCredential,
     })
   : undefined;
+// Dataset-review module is off unless flagged on AND an envelope cipher exists
+// (its stores require one to construct, even though this read path never
+// decrypts). Migration/import into any database is out of scope here.
+const datasetReview = config.datasetReviewEnabled && identityCipher
+  ? createDatasetReviewService({
+      databaseUrl: config.databaseUrl,
+      cipher: identityCipher,
+      blindReviewEnabled: config.datasetBlindReviewEnabled,
+    })
+  : undefined;
 const app = createAdminApi({
   store,
   authenticator,
@@ -60,7 +71,11 @@ const app = createAdminApi({
   policyPageIds: config.policyPageIds,
   policyCanaryLiveEnabled: config.policyCanaryLiveEnabled,
   policyPublishEnabled: config.policyPublishEnabled,
+  datasetAiPrelabelEnabled: config.datasetAiPrelabelEnabled,
+  datasetBlindReviewEnabled: config.datasetBlindReviewEnabled,
+  datasetExportEnabled: config.datasetExportEnabled,
   ...(productMedia ? { productMedia } : {}),
+  ...(datasetReview ? { datasetReview } : {}),
 });
 
 await app.listen({ host: "0.0.0.0", port: config.port });
@@ -70,6 +85,7 @@ for (const signal of ["SIGTERM", "SIGINT"] as const) {
     void (async () => {
       await app.close();
       await store.close();
+      if (datasetReview) await datasetReview.close();
       process.exit(0);
     })();
   });

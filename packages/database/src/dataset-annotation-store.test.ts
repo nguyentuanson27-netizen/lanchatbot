@@ -199,3 +199,96 @@ describe("annotations and audit", () => {
     expect(result).toBeNull();
   });
 });
+
+describe("reviewProgress", () => {
+  it("counts reviewed and total, optionally scoped to a split", async () => {
+    const { store, calls } = storeWith(() => ({
+      rowCount: 1,
+      rows: [{ reviewed: "4", total: "10" }],
+    }));
+    const result = await store.reviewProgress("p-1", "DEVELOPMENT");
+    expect(result).toEqual({ reviewed: 4, total: 10 });
+    expect(calls[0]?.values).toEqual(["p-1", "DEVELOPMENT"]);
+  });
+});
+
+describe("nextReviewItem", () => {
+  it("skips locked/reviewed items and items leased by others", async () => {
+    const { store, calls } = storeWith(() => ({
+      rowCount: 1,
+      rows: [{ project_item_id: "pi-9", conversation_id: "c-9", split: "DEVELOPMENT", revision: 2 }],
+    }));
+    const row = await store.nextReviewItem("p-1", { reviewerSubject: "rev-1", split: "DEVELOPMENT" });
+    expect(row).toMatchObject({ project_item_id: "pi-9" });
+    const sql = calls[0]?.sql ?? "";
+    expect(sql).toContain("assignment_status NOT IN ('REVIEWED', 'LOCKED')");
+    expect(sql).toContain("lease_owner IS NULL OR pi.lease_owner = $2 OR pi.lease_until < now()");
+    expect(calls[0]?.values).toEqual(["p-1", "rev-1", "DEVELOPMENT"]);
+  });
+
+  it("returns null when nothing is reviewable", async () => {
+    const { store } = storeWith(() => ({ rowCount: 0, rows: [] }));
+    expect(await store.nextReviewItem("p-1", { reviewerSubject: "rev-1" })).toBeNull();
+  });
+});
+
+describe("acquireReviewLease", () => {
+  it("clamps the lease window and only takes a free/own/expired lease", async () => {
+    const { store, calls } = storeWith(() => ({
+      rowCount: 1,
+      rows: [{ project_item_id: "pi-1", lease_owner: "rev-1", revision: 3, assignment_status: "IN_REVIEW" }],
+    }));
+    const leased = await store.acquireReviewLease("pi-1", "rev-1", 5);
+    expect(leased).toMatchObject({ lease_owner: "rev-1", assignment_status: "IN_REVIEW" });
+    // 5s is clamped up to the 60s floor.
+    expect(calls[0]?.values).toEqual(["pi-1", "rev-1", "60"]);
+    expect(calls[0]?.sql).toContain("assignment_status <> 'LOCKED'");
+  });
+
+  it("returns null when another reviewer already holds an active lease", async () => {
+    const { store } = storeWith(() => ({ rowCount: 0, rows: [] }));
+    expect(await store.acquireReviewLease("pi-1", "rev-2")).toBeNull();
+  });
+});
+
+describe("lockHoldoutSplit", () => {
+  it("locks holdout items and writes one LOCK audit event", async () => {
+    const { store, calls } = storeWith((sql) =>
+      sql.includes("UPDATE dataset_project_items")
+        ? { rowCount: 3, rows: [{ project_item_id: "pi-1" }, { project_item_id: "pi-2" }, { project_item_id: "pi-3" }] }
+        : { rowCount: 1, rows: [] },
+    );
+    const locked = await store.lockHoldoutSplit("p-1", "admin-1");
+    expect(locked).toBe(3);
+    const update = calls.find((call) => call.sql.includes("UPDATE dataset_project_items"));
+    expect(update?.sql).toContain("split = 'HOLDOUT'");
+    const event = calls.find((call) => call.sql.includes("INSERT INTO dataset_review_events"));
+    expect(event?.values).toContain("LOCK");
+  });
+
+  it("is a no-op when there is nothing to lock", async () => {
+    const { store, calls } = storeWith(() => ({ rowCount: 0, rows: [] }));
+    expect(await store.lockHoldoutSplit("p-1", "admin-1")).toBe(0);
+    expect(calls.some((call) => call.sql.includes("INSERT INTO dataset_review_events"))).toBe(false);
+  });
+});
+
+describe("exportAnnotations", () => {
+  it("returns only human-confirmed labels for the requested splits", async () => {
+    const { store, calls } = storeWith(() => ({
+      rowCount: 1,
+      rows: [{ project_item_id: "pi-1", conversation_id: "c-1", split: "DEVELOPMENT", label_code: "BUYING_COMMITTED", status: "ACCEPTED" }],
+    }));
+    const rows = await store.exportAnnotations("p-1", ["DEVELOPMENT", "VALIDATION"]);
+    expect(rows).toHaveLength(1);
+    const sql = calls[0]?.sql ?? "";
+    expect(sql).toContain("a.status IN ('ACCEPTED', 'EDITED', 'ADJUDICATED')");
+    expect(calls[0]?.values).toEqual(["p-1", ["DEVELOPMENT", "VALIDATION"]]);
+  });
+
+  it("short-circuits with no query when splits is empty", async () => {
+    const { store, calls } = storeWith(() => ({ rowCount: 0, rows: [] }));
+    expect(await store.exportAnnotations("p-1", [])).toEqual([]);
+    expect(calls).toHaveLength(0);
+  });
+});

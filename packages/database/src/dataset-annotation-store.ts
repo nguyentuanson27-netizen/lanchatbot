@@ -461,6 +461,143 @@ export class PostgresDatasetAnnotationStore {
     return result.rows;
   }
 
+  // --- Review queue: project items, leases, holdout lock, export -------------
+
+  async reviewProgress(
+    projectId: string,
+    split?: SplitV1,
+  ): Promise<{ reviewed: number; total: number }> {
+    const clause = split ? " AND split = $2" : "";
+    const values: unknown[] = split ? [projectId, split] : [projectId];
+    const result = await this.pool.query<{ reviewed: string; total: string }>(
+      `SELECT
+         count(*) FILTER (WHERE assignment_status IN ('REVIEWED', 'LOCKED'))::text AS reviewed,
+         count(*)::text AS total
+       FROM dataset_project_items
+       WHERE project_id = $1${clause}`,
+      values,
+    );
+    const row = result.rows[0];
+    return { reviewed: Number(row?.reviewed ?? 0), total: Number(row?.total ?? 0) };
+  }
+
+  async getProjectItem(projectItemId: string): Promise<Record<string, unknown> | null> {
+    const result = await this.pool.query(
+      `SELECT pi.project_item_id, pi.project_id, pi.conversation_id, pi.split,
+              pi.assignment_status, pi.assigned_reviewer_id, pi.queue_reason,
+              pi.lease_owner, pi.lease_until, pi.revision, c.quality_flags
+       FROM dataset_project_items pi
+       JOIN dataset_conversations c ON c.conversation_id = pi.conversation_id
+       WHERE pi.project_item_id = $1`,
+      [projectItemId],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  // The next reviewable item: prefer one this reviewer already leases, otherwise
+  // the highest-priority item whose lease is free or expired. Locked/reviewed
+  // items and items actively leased by another reviewer are skipped so two
+  // reviewers never collide.
+  async nextReviewItem(
+    projectId: string,
+    options: { split?: SplitV1; reviewerSubject: string },
+  ): Promise<Record<string, unknown> | null> {
+    const splitClause = options.split ? " AND pi.split = $3" : "";
+    const values: unknown[] = [projectId, options.reviewerSubject];
+    if (options.split) values.push(options.split);
+    const result = await this.pool.query(
+      `SELECT pi.project_item_id, pi.project_id, pi.conversation_id, pi.split,
+              pi.assignment_status, pi.queue_reason, pi.lease_owner, pi.lease_until,
+              pi.revision, c.quality_flags
+       FROM dataset_project_items pi
+       JOIN dataset_conversations c ON c.conversation_id = pi.conversation_id
+       WHERE pi.project_id = $1
+         AND pi.assignment_status NOT IN ('REVIEWED', 'LOCKED')
+         AND (pi.lease_owner IS NULL OR pi.lease_owner = $2 OR pi.lease_until < now())${splitClause}
+       ORDER BY (pi.lease_owner = $2) DESC NULLS LAST,
+                pi.priority DESC, pi.created_at ASC, pi.project_item_id ASC
+       LIMIT 1`,
+      values,
+    );
+    return result.rows[0] ?? null;
+  }
+
+  // Optimistic lease acquisition: succeeds only when the item is unlocked and the
+  // lease is free, already ours, or expired. Returns null on contention.
+  async acquireReviewLease(
+    projectItemId: string,
+    ownerSubject: string,
+    leaseSeconds = 900,
+  ): Promise<Record<string, unknown> | null> {
+    const seconds = String(Math.max(60, Math.min(3600, Math.trunc(leaseSeconds))));
+    const result = await this.pool.query(
+      `UPDATE dataset_project_items
+       SET lease_owner = $2,
+           lease_until = now() + ($3 || ' seconds')::interval,
+           assignment_status = CASE WHEN assignment_status IN ('REVIEWED', 'LOCKED')
+                                    THEN assignment_status ELSE 'IN_REVIEW' END,
+           revision = revision + 1,
+           updated_at = now()
+       WHERE project_item_id = $1
+         AND assignment_status <> 'LOCKED'
+         AND (lease_owner IS NULL OR lease_owner = $2 OR lease_until < now())
+       RETURNING project_item_id, lease_owner, lease_until, revision, assignment_status`,
+      [projectItemId, ownerSubject, seconds],
+    );
+    return result.rows[0] ?? null;
+  }
+
+  // Holdout locking: freeze every HOLDOUT item so it can neither be reviewed nor
+  // leased, protecting the benchmark from contamination. Idempotent and audited.
+  async lockHoldoutSplit(projectId: string, actorSubject: string): Promise<number> {
+    return withTransaction(this.pool, async (client) => {
+      const updated = await client.query<{ project_item_id: string }>(
+        `UPDATE dataset_project_items
+         SET assignment_status = 'LOCKED', lease_owner = NULL, lease_until = NULL,
+             updated_at = now()
+         WHERE project_id = $1 AND split = 'HOLDOUT' AND assignment_status <> 'LOCKED'
+         RETURNING project_item_id`,
+        [projectId],
+      );
+      const count = updated.rowCount ?? 0;
+      const first = updated.rows[0];
+      if (count > 0 && first) {
+        await this.writeEvent(client, {
+          projectItemId: first.project_item_id,
+          annotationId: null,
+          actorSubject,
+          action: "LOCK",
+          before: null,
+          after: { locked_holdout_items: count },
+        });
+      }
+      return count;
+    });
+  }
+
+  // Benchmark rows: only human-confirmed labels (accepted/edited/adjudicated) for
+  // the requested splits. Evidence is the redacted projection, never raw PII.
+  async exportAnnotations(
+    projectId: string,
+    splits: readonly SplitV1[],
+  ): Promise<readonly Record<string, unknown>[]> {
+    if (splits.length === 0) return [];
+    const result = await this.pool.query(
+      `SELECT pi.project_item_id, pi.conversation_id, pi.split,
+              a.label_code, a.scope, a.turn_index, a.second_turn_index,
+              a.evidence_text, a.evidence_start, a.evidence_end,
+              a.confidence, a.source, a.status
+       FROM dataset_project_items pi
+       JOIN dataset_annotations a ON a.project_item_id = pi.project_item_id
+       WHERE pi.project_id = $1
+         AND pi.split = ANY($2::text[])
+         AND a.status IN ('ACCEPTED', 'EDITED', 'ADJUDICATED')
+       ORDER BY pi.project_item_id ASC, a.created_at ASC, a.annotation_id ASC`,
+      [projectId, [...splits]],
+    );
+    return result.rows;
+  }
+
   private async writeEvent(
     client: PoolClient,
     input: {

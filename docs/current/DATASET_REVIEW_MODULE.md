@@ -161,9 +161,46 @@ isolation ✓.
   - `bindReviewQueue(root, handlers)` — event delegation for mounting (Batch 6).
 - `styles.css` — review-queue styles using existing design tokens.
 
-Not yet wired into `main.ts` routing and not backed by endpoints — that is Batch 6
-(admin-api `/admin/v1/datasets…` + RBAC + tab). The module is unit-tested in
-isolation.
+Batch 6a wires the backing endpoints (below). Mounting the module into `main.ts`
+routing is Batch 6b.
+
+## admin-api endpoints (Batch 6a)
+
+Optional injected `DatasetReviewService` (`apps/admin-api/src/dataset-review-service.ts`),
+mirroring how `ProductMediaService` is wired: present only when
+`ADMIN_DATASET_REVIEW_V1=true` **and** an envelope cipher is configured. It
+composes `PostgresDatasetReviewStore` + `PostgresDatasetAnnotationStore` and serves
+**redacted projections only** — no ciphertext column is ever selected on this path.
+
+RBAC (`dataset-review-rbac.ts`) maps admin roles onto dataset roles via
+`ADMIN_ROLE_TO_DATASET_ROLE` (OWNER→DATASET_ADMIN, APPROVER→ADJUDICATOR,
+EDITOR→ANNOTATOR, VIEWER→BENCHMARK_VIEWER) as a monotone ladder.
+
+| Method + path | Min dataset role |
+| --- | --- |
+| `GET /admin/v1/datasets` · `/datasets/:id` · `/datasets/:id/projects` | BENCHMARK_VIEWER |
+| `GET /admin/v1/dataset-projects/:id` · `/dataset-label-schemas` | BENCHMARK_VIEWER |
+| `GET /admin/v1/dataset-projects/:id/queue` | BENCHMARK_VIEWER (lease taken only for ANNOTATOR+) |
+| `POST /admin/v1/datasets/:id/projects` · `/dataset-projects/:id/splits` · `/lock-holdout` · `/dataset-label-schemas` | DATASET_ADMIN |
+| `POST /admin/v1/dataset-items/:id/annotations` | ANNOTATOR |
+| `POST /admin/v1/dataset-annotations/:id/review` (ACCEPT/REJECT/EDIT) | ANNOTATOR |
+| `POST /admin/v1/dataset-annotations/:id/review` (REMOVE) | ADJUDICATOR |
+| `GET /admin/v1/dataset-projects/:id/export` | flag `DATASET_EXPORT_V1`; HOLDOUT split → DATASET_ADMIN |
+
+- Queue lease acquisition is optimistic (`acquireReviewLease`): an item held by
+  another reviewer surfaces read-only so the UI locks the actions.
+- Holdout locking (`lockHoldoutSplit`) freezes every HOLDOUT item (idempotent,
+  audited) so the benchmark cannot be contaminated.
+- Export streams JSONL (`application/x-ndjson`), one line per conversation item,
+  containing only human-confirmed labels (ACCEPTED/EDITED/ADJUDICATED).
+- `GET /admin/v1/me` now reports a `dataset_review` capability block; `/health/ready`
+  reports `dataset_review`.
+- Blind review degrades to AI-assisted reveal when `DATASET_BLIND_REVIEW_V1` is off.
+
+Constraint honored: no migration and no import against any database; the service is
+constructed against `ADMIN_DATABASE_URL` only when the flag is on, and this batch
+was tested entirely with a fake service (routes/RBAC) and injected-fake-pool store
+tests (new queue/lease/holdout/export SQL). No production DB or Vertex touched.
 
 ## Tests (run here, green)
 
@@ -173,6 +210,7 @@ pnpm --filter @lana/dataset-review test    # 42 passed (import pipeline incl.)
 pnpm --filter @lana/database test          # 63 passed (migration + 3 stores)
 pnpm --filter @lana/worker test            # 270 passed (incl. 10 pre-label)
 pnpm --filter @lana/admin-web test         # 32 vitest + 4 auth (13 new review UI)
+pnpm --filter @lana/admin-api test         # 52 node:test (dataset routes + RBAC)
 ```
 
 All store tests use an injected fake pool; the pre-label runner uses a mocked
@@ -186,17 +224,19 @@ role/scope hard-negatives (shop size list, shop asks measurements), mutually
 exclusive labels, deterministic group-aware split integrity, model-output
 validation, seed-schema integrity, migration structure.
 
-## Feature flags (to add in admin-api config, Batch 6)
+## Feature flags (admin-api config, Batch 6a)
 
 `ADMIN_DATASET_REVIEW_V1`, `DATASET_AI_PRELABEL_V1`, `DATASET_BLIND_REVIEW_V1`,
-`DATASET_EXPORT_V1`. Default off; internal Admin only; no realtime/outbound impact.
+`DATASET_EXPORT_V1` (all in `apps/admin-api/src/config.ts`). Default off; internal
+Admin only; no realtime/outbound impact. The service also requires an envelope
+cipher (`REALTIME_DATA_KEY`) to construct.
 
-## Remaining batches (not started)
+## Remaining work
 
-- **6** admin-api `/admin/v1/datasets…` endpoints (AdminStore + routes) wiring the
-  stores/runner, RBAC role mapping, holdout locking, JSONL export endpoint,
-  mounting the Review Queue module into `main.ts` + Datasets/Projects/Exports
-  screens, feature flags, seed insertion, integration + E2E tests.
+- **6b** Mount the Review Queue module into `apps/admin-web` (`api.ts` client +
+  `main.ts` Datasets/Review/Exports screens). Seed Wave 1 schema insertion and a
+  dev-environment integration/E2E pass remain deferred to an authorized dev
+  environment (no production migration/import from the VPS).
 
 ## Rollback
 
