@@ -582,6 +582,40 @@ export class PostgresDatasetAnnotationStore {
     return result.rows[0] ?? null;
   }
 
+  async reopenReviewItem(
+    projectItemId: string,
+    actorSubject: string,
+    leaseSeconds = 900,
+  ): Promise<Record<string, unknown> | null> {
+    const seconds = String(Math.max(60, Math.min(3600, Math.trunc(leaseSeconds))));
+    return withTransaction(this.pool, async (client) => {
+      const updated = await client.query(
+        `UPDATE dataset_project_items
+         SET assignment_status = 'IN_REVIEW',
+             lease_owner = $2,
+             lease_until = now() + ($3 || ' seconds')::interval,
+             revision = revision + 1,
+             updated_at = now()
+         WHERE project_item_id = $1
+           AND assignment_status = 'REVIEWED'
+           AND assigned_reviewer_id = $2
+         RETURNING project_item_id, assignment_status, assigned_reviewer_id,
+                   lease_owner, lease_until, revision, updated_at`,
+        [projectItemId, actorSubject, seconds],
+      );
+      const row = updated.rows[0];
+      if (!row) return null;
+      await this.writeEvent(client, {
+        projectItemId,
+        annotationId: null,
+        actorSubject,
+        action: "REOPEN",
+        before: { assignment_status: "REVIEWED" },
+        after: row,
+      });
+      return row as Record<string, unknown>;
+    });
+  }
   async completeReviewItem(
     projectItemId: string,
     actorSubject: string,

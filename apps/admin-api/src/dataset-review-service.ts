@@ -97,6 +97,7 @@ export interface DatasetReviewService {
   ): Promise<JsonRecord | null>;
   addAnnotation(input: AddAnnotationServiceInput): Promise<JsonRecord>;
   reviewAnnotation(annotationId: string, input: ReviewAnnotationServiceInput): Promise<JsonRecord | null>;
+  reopenReviewItem?(projectItemId: string, actorSubject: string): Promise<JsonRecord | null>;
   completeReviewItem(
     projectItemId: string,
     actorSubject: string,
@@ -297,6 +298,9 @@ class PostgresDatasetReviewService implements DatasetReviewService {
     });
   }
 
+  reopenReviewItem(projectItemId: string, actorSubject: string): Promise<JsonRecord | null> {
+    return this.annotation.reopenReviewItem(projectItemId, actorSubject, this.leaseSeconds);
+  }
   completeReviewItem(
     projectItemId: string,
     actorSubject: string,
