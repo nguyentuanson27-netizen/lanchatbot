@@ -824,6 +824,27 @@ describe("Dataset review routes", () => {
     await viewerApp.close();
   });
 
+  it("keeps HOLDOUT review queue restricted to dataset admins", async () => {
+    const approverApp = datasetApp({ role: "APPROVER" });
+    const forbidden = await approverApp.inject({
+      method: "GET",
+      url: "/admin/v1/dataset-projects/018f1b72-0000-7000-8000-000000000020/queue?split=HOLDOUT",
+      headers: datasetHeaders,
+    });
+    assert.equal(forbidden.statusCode, 403);
+    assert.equal(forbidden.json().code, "ADMIN_DATASET_FORBIDDEN");
+    await approverApp.close();
+
+    const ownerApp = datasetApp({ role: "OWNER" });
+    const allowed = await ownerApp.inject({
+      method: "GET",
+      url: "/admin/v1/dataset-projects/018f1b72-0000-7000-8000-000000000020/queue?split=HOLDOUT",
+      headers: datasetHeaders,
+    });
+    assert.equal(allowed.statusCode, 200);
+    await ownerApp.close();
+  });
+
   it("requires adjudicator rights to REMOVE an annotation", async () => {
     const annotatorApp = datasetApp({ role: "EDITOR" });
     const remove = await annotatorApp.inject({

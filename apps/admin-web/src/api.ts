@@ -1277,6 +1277,7 @@ function mapQueueItem(item: JsonRecord): NonNullable<ReviewQueueData["item"]> {
     revision: numberValue(item.revision),
     lease: {
       ownerSubject: nullableString(lease.owner_subject),
+      ownedByCurrent: Boolean(lease.owned_by_current),
       until: nullableString(lease.until),
     },
     messages: arrayValue(item.messages).map((value): ReviewMessage => {

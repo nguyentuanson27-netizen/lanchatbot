@@ -491,7 +491,7 @@ describe("dataset review API", () => {
     expect(queue.projectName).toBe("Wave 1");
     expect(queue.progress).toEqual({ reviewed: 2, total: 5 });
     expect(queue.labels[0]).toMatchObject({ code: "BUYING_COMMITTED", evidenceRequired: true, mutuallyExclusiveGroup: null });
-    expect(queue.item?.lease).toEqual({ ownerSubject: "rev-1", until: "2026-07-26T02:00:00.000Z" });
+    expect(queue.item?.lease).toEqual({ ownerSubject: "rev-1", ownedByCurrent: false, until: "2026-07-26T02:00:00.000Z" });
     expect(queue.item?.messages[0]).toEqual({ turnIndex: 0, role: "CUSTOMER", redactedText: "chị lấy mẫu này" });
     expect(queue.item?.annotations[0]).toMatchObject({ id: "a-1", source: "AI", evidenceStart: 4, evidenceEnd: 15 });
   });

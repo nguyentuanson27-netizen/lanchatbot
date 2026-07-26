@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import type { MessageRoleV1 } from "@lana/contracts";
 import { parseTranscript } from "./parse.js";
 import { NORMALIZATION_VERSION, lengthBin } from "./normalize.js";
-import { ConversationRedactor, REDACTION_VERSION, type PiiType } from "./redact.js";
+import { ConversationRedactor, REDACTION_VERSION, hasResidualPii, type PiiType } from "./redact.js";
 import { computeQualityFlags, type QualityFlag } from "./quality-flags.js";
 import { customerSequenceFingerprint, messageChecksum } from "./dedup.js";
 
@@ -48,6 +48,9 @@ export function computeConversationImport(
 
   const messages: MessageImport[] = parsed.messages.map((message) => {
     const redactedText = redactor.redact(message.text);
+    if (hasResidualPii(redactedText)) {
+      throw new Error("REDACTION_RESIDUAL_PII");
+    }
     return {
       turnIndex: message.turnIndex,
       role: message.role,

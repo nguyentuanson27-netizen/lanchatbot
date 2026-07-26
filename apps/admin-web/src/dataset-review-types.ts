@@ -51,6 +51,7 @@ export interface LabelOption {
 
 export interface ReviewLease {
   ownerSubject: string | null;
+  ownedByCurrent?: boolean;
   until: string | null;
 }
 

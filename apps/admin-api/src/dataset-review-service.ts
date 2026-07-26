@@ -187,12 +187,13 @@ class PostgresDatasetReviewService implements DatasetReviewService {
       this.blindReviewEnabled ? declaredMode : "AI_ASSISTED";
     const revealed = effectiveMode === "AI_ASSISTED";
 
+    const split = request.split ?? "DEVELOPMENT";
     const labels = await this.labelOptions(project.label_schema_id);
-    const progress = await this.annotation.reviewProgress(projectId, request.split);
+    const progress = await this.annotation.reviewProgress(projectId, split);
 
     let itemRow = await this.annotation.nextReviewItem(projectId, {
       reviewerSubject: request.reviewerSubject,
-      ...(request.split ? { split: request.split } : {}),
+      split,
     });
 
     if (itemRow && request.acquireLease) {
@@ -206,13 +207,13 @@ class PostgresDatasetReviewService implements DatasetReviewService {
       if (leased) itemRow = { ...itemRow, ...leased };
     }
 
-    const item = itemRow ? await this.buildItem(itemRow) : null;
+    const item = itemRow ? await this.buildItem(itemRow, request.reviewerSubject) : null;
 
     return {
       project_id: projectId,
       project_name: project.name ?? null,
       review_mode: effectiveMode,
-      split: request.split ?? null,
+      split,
       revealed,
       progress: { reviewed: progress.reviewed, total: progress.total },
       labels,
@@ -300,7 +301,7 @@ class PostgresDatasetReviewService implements DatasetReviewService {
     };
   }
 
-  private async buildItem(itemRow: JsonRecord): Promise<JsonRecord> {
+  private async buildItem(itemRow: JsonRecord, reviewerSubject: string): Promise<JsonRecord> {
     const projectItemId = String(itemRow.project_item_id);
     const conversationId = String(itemRow.conversation_id);
     const [messages, annotations] = await Promise.all([
@@ -316,6 +317,7 @@ class PostgresDatasetReviewService implements DatasetReviewService {
       revision: typeof itemRow.revision === "number" ? itemRow.revision : 0,
       lease: {
         owner_subject: itemRow.lease_owner ?? null,
+        owned_by_current: itemRow.lease_owner === reviewerSubject,
         until: itemRow.lease_until ?? null,
       },
       messages: messages.map((message) => ({

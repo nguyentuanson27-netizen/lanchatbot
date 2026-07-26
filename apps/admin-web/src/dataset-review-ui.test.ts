@@ -28,6 +28,16 @@ const identity: Identity = {
   policyCanaryLiveEnabled: false,
   policyPublishEnabled: false,
   productMediaUpload: false,
+  datasetReview: {
+    enabled: true,
+    role: "ANNOTATOR",
+    canAnnotate: true,
+    canAdjudicate: false,
+    canAdmin: false,
+    aiPrelabel: true,
+    blindReview: true,
+    export: false,
+  },
 };
 
 function aiAnnotation(overrides: Partial<ReviewAnnotation> = {}): ReviewAnnotation {
@@ -130,9 +140,10 @@ describe("isLeaseHeldByOther", () => {
   const future = new Date(Date.now() + 60_000).toISOString();
   const past = new Date(Date.now() - 60_000).toISOString();
 
-  it("is false for self or no owner", () => {
+  it("is false for self, an explicit backend-owned lease, or no owner", () => {
     expect(isLeaseHeldByOther({ ownerSubject: null, until: future }, "me")).toBe(false);
     expect(isLeaseHeldByOther({ ownerSubject: "me", until: future }, "me")).toBe(false);
+    expect(isLeaseHeldByOther({ ownerSubject: "opaque-subject", ownedByCurrent: true, until: future }, "me")).toBe(false);
   });
 
   it("is true for another active holder and false once expired", () => {
@@ -148,6 +159,7 @@ describe("renderReviewQueue", () => {
     expect(html).toContain('id="review-turn-1"');
     expect(html).toContain("<mark");
     expect(html).toContain('data-annotation-action="ACCEPT"');
+    expect(html).not.toContain('data-annotation-action="DELETE"');
     expect(html).toContain('data-review-action="SAVE_NEXT"');
     expect(html).toContain('data-progress="1/3"');
     expect(html).toContain("CONTAINS_PHONE");
@@ -163,6 +175,33 @@ describe("renderReviewQueue", () => {
     expect(html).toContain("data-review-blind");
     expect(html).not.toContain('data-annotation-id="ann-1"');
     expect(html).not.toContain("<mark");
+  });
+
+  it("disables mutation actions for a benchmark viewer", () => {
+    const viewer: Identity = {
+      ...identity,
+      datasetReview: {
+        ...identity.datasetReview!,
+        role: "BENCHMARK_VIEWER",
+        canAnnotate: false,
+      },
+    };
+    const html = renderReviewQueue(data(), viewer);
+    expect(html).toContain('data-review-action="SAVE_NEXT" disabled');
+    expect(html).toContain('data-annotation-action="ACCEPT" data-annotation-id="ann-1" disabled');
+  });
+
+  it("shows delete only to an adjudicator", () => {
+    const adjudicator: Identity = {
+      ...identity,
+      datasetReview: {
+        ...identity.datasetReview!,
+        role: "ADJUDICATOR",
+        canAdjudicate: true,
+      },
+    };
+    const html = renderReviewQueue(data(), adjudicator);
+    expect(html).toContain('data-annotation-action="DELETE"');
   });
 
   it("locks the item and disables actions when another reviewer holds the lease", () => {

@@ -192,7 +192,7 @@ export class PostgresDatasetReviewStore {
         [
           rawItemId,
           datasetId,
-          record.sourceKey,
+          sourceKeyHash,
           sourceKeyHash,
           record.sourceTtl ?? null,
           rawChecksum,
@@ -270,7 +270,7 @@ export class PostgresDatasetReviewStore {
        ) VALUES ($1,$2,$3,$4,$5,'FAILED',$6)
        ON CONFLICT (dataset_id, source_key_hash)
        DO UPDATE SET import_status = 'FAILED', import_error = EXCLUDED.import_error`,
-      [randomUUID(), datasetId, sourceKey, sourceKeyHash, sha256Hex(sourceKey), error],
+      [randomUUID(), datasetId, sourceKeyHash, sourceKeyHash, sha256Hex(sourceKey), error],
     );
   }
 

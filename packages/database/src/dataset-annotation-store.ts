@@ -332,6 +332,10 @@ export class PostgresDatasetAnnotationStore {
 
   async addAnnotation(input: AddAnnotationInput): Promise<Record<string, unknown>> {
     return withTransaction(this.pool, async (client) => {
+      if (input.source === "HUMAN" || input.source === "ADJUDICATOR") {
+        if (!input.reviewerId) throw new Error("DATASET_REVIEW_REVIEWER_REQUIRED");
+        await this.assertActiveLease(client, input.projectItemId, input.reviewerId);
+      }
       const annotationId = randomUUID();
       const result = await client.query<AnnotationRow>(
         `INSERT INTO dataset_annotations (
@@ -388,6 +392,7 @@ export class PostgresDatasetAnnotationStore {
       );
       const before = current.rows[0];
       if (!before) return null;
+      await this.assertActiveLease(client, before.project_item_id, input.actorSubject);
 
       const patch = input.patch ?? {};
       const next: AnnotationRow = {
@@ -596,6 +601,24 @@ export class PostgresDatasetAnnotationStore {
       [projectId, [...splits]],
     );
     return result.rows;
+  }
+
+  private async assertActiveLease(
+    client: PoolClient,
+    projectItemId: string,
+    actorSubject: string,
+  ): Promise<void> {
+    const result = await client.query<{ project_item_id: string }>(
+      `SELECT project_item_id
+       FROM dataset_project_items
+       WHERE project_item_id = $1
+         AND lease_owner = $2
+         AND lease_until > now()
+         AND assignment_status NOT IN ('REVIEWED', 'LOCKED')
+       FOR UPDATE`,
+      [projectItemId, actorSubject],
+    );
+    if (!result.rows[0]) throw new Error("DATASET_REVIEW_LEASE_CONFLICT");
   }
 
   private async writeEvent(

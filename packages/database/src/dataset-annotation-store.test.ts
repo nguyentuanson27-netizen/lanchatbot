@@ -136,9 +136,11 @@ describe("createSplit", () => {
 describe("annotations and audit", () => {
   it("audits a human ADD with a review event", async () => {
     const { store, calls } = storeWith((sql) =>
-      sql.includes("INSERT INTO dataset_annotations")
-        ? { rowCount: 1, rows: [{ annotation_id: "a-1", project_item_id: "pi-1", label_code: "BUYING_COMMITTED", status: "ACCEPTED" }] }
-        : { rowCount: 1, rows: [] },
+      sql.includes("FROM dataset_project_items") && sql.includes("FOR UPDATE")
+        ? { rowCount: 1, rows: [{ project_item_id: "pi-1" }] }
+        : sql.includes("INSERT INTO dataset_annotations")
+          ? { rowCount: 1, rows: [{ annotation_id: "a-1", project_item_id: "pi-1", label_code: "BUYING_COMMITTED", status: "ACCEPTED" }] }
+          : { rowCount: 1, rows: [] },
     );
     await store.addAnnotation({
       projectItemId: "pi-1",
@@ -154,6 +156,19 @@ describe("annotations and audit", () => {
     const event = calls.find((call) => call.sql.includes("INSERT INTO dataset_review_events"));
     expect(event).toBeDefined();
     expect(event?.values).toContain("ADD");
+  });
+
+  it("rejects a human annotation without an active lease", async () => {
+    const { store } = storeWith(() => ({ rowCount: 0, rows: [] }));
+    await expect(store.addAnnotation({
+      projectItemId: "pi-1",
+      labelCode: "BUYING_COMMITTED",
+      scope: "CUSTOMER_MESSAGE",
+      confidence: "HIGH",
+      source: "HUMAN",
+      status: "ACCEPTED",
+      reviewerId: "reviewer-1",
+    })).rejects.toThrow("DATASET_REVIEW_LEASE_CONFLICT");
   });
 
   it("does not audit an AI PROPOSED insert", async () => {
@@ -181,6 +196,9 @@ describe("annotations and audit", () => {
     const { store, calls } = storeWith((sql) => {
       if (sql.includes("FROM dataset_annotations") && sql.includes("FOR UPDATE")) {
         return { rowCount: 1, rows: [before] };
+      }
+      if (sql.includes("FROM dataset_project_items") && sql.includes("FOR UPDATE")) {
+        return { rowCount: 1, rows: [{ project_item_id: "pi-1" }] };
       }
       if (sql.includes("UPDATE dataset_annotations")) {
         return { rowCount: 1, rows: [{ ...before, status: "ACCEPTED", reviewer_id: "rev-1" }] };

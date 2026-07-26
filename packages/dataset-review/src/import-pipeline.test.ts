@@ -46,6 +46,11 @@ describe("computeConversationImport", () => {
     expect(result.startTruncated).toBe(true);
     expect(result.messages[0]?.role).toBe("UNKNOWN");
   });
+
+  it("fails closed when residual PII survives redaction", () => {
+    expect(() => computeConversationImport("[Khách hàng]: số tham chiếu 123456789", "key-risk"))
+      .toThrow("REDACTION_RESIDUAL_PII");
+  });
 });
 
 describe("buildImportReport", () => {

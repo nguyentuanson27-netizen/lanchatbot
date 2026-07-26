@@ -27,7 +27,7 @@ labelling projects (Wave 1 now, Wave 2 and later evaluations next).
 | Frontend | `apps/admin-web` vanilla TS + Vite. |
 | Contracts | `@lana/contracts` zod, new `v5`. |
 
-## Data model (migration `0017_dataset_review`)
+## Data model (migration `0021_dataset_review`)
 
 Isolated `dataset_*` domain, never references production chat tables. Raw
 transcript text is **immutable and envelope-encrypted**; reviewers read only the
@@ -237,7 +237,7 @@ pnpm --filter @lana/admin-api test         # 52 node:test (dataset routes + RBAC
 
 All store tests use an injected fake pool; the pre-label runner uses a mocked
 provider port. No live PostgreSQL and no Vertex credentials are touched here; real
-DB/Vertex integration (apply `0017`, run the import CLI, exercise the stores and a
+DB/Vertex integration (apply `0021`, run the import CLI, exercise the stores and a
 real pre-label run) is deferred to an authorized dev environment.
 
 Covers: parser/multiline/start-truncated/counts, redaction + stable map +
@@ -255,7 +255,7 @@ cipher (`REALTIME_DATA_KEY`) to construct.
 
 ## Remaining work (deferred to an authorized dev environment)
 
-- Apply migration `0017`, run the `dataset-import` CLI, seed the Wave 1 label
+- Apply migration `0021`, run the `dataset-import` CLI, seed the Wave 1 label
   schema, and run a real end-to-end pass (real PostgreSQL; a real Vertex pre-label
   run for the worker). None of this is run against production or from the VPS.
 - Backend increment: a per-item "mark reviewed / release lease" transition and a

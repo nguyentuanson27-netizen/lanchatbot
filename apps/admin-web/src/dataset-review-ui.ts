@@ -122,7 +122,7 @@ export function isLeaseHeldByOther(
   currentReviewer: string,
   nowMs: number = Date.now(),
 ): boolean {
-  if (!lease.ownerSubject || lease.ownerSubject === currentReviewer) return false;
+  if (lease.ownedByCurrent || !lease.ownerSubject || lease.ownerSubject === currentReviewer) return false;
   if (!lease.until) return true;
   const until = new Date(lease.until).getTime();
   return Number.isFinite(until) && until > nowMs;
@@ -151,6 +151,7 @@ function confidenceBadge(confidence: ReviewAnnotation["confidence"]): string {
 function renderAnnotationCard(
   annotation: ReviewAnnotation,
   locked: boolean,
+  canRemove: boolean,
 ): string {
   const disabled = locked ? " disabled" : "";
   const evidence = annotation.evidenceText
@@ -164,7 +165,7 @@ function renderAnnotationCard(
       <button type="button" data-annotation-action="ACCEPT" data-annotation-id="${escapeHtml(annotation.id)}"${disabled}>Chấp nhận</button>
       <button type="button" data-annotation-action="REJECT" data-annotation-id="${escapeHtml(annotation.id)}"${disabled}>Từ chối</button>
       <button type="button" data-annotation-action="EDIT" data-annotation-id="${escapeHtml(annotation.id)}"${disabled}>Sửa</button>
-      <button type="button" data-annotation-action="DELETE" data-annotation-id="${escapeHtml(annotation.id)}"${disabled}>Xóa</button>
+      ${canRemove ? `<button type="button" data-annotation-action="DELETE" data-annotation-id="${escapeHtml(annotation.id)}"${disabled}>Xóa</button>` : ""}
     </div>
   </article>`;
 }
@@ -176,7 +177,9 @@ export function renderReviewQueue(data: ReviewQueueData, identity: Identity | nu
     return `<section class="empty-state"><h3>Hết mục để review</h3><p>Không còn hội thoại nào trong hàng đợi ${escapeHtml(data.split)}.</p></section>`;
   }
 
-  const locked = isLeaseHeldByOther(item.lease, currentReviewer);
+  const canAnnotate = identity?.datasetReview?.canAnnotate === true;
+  const canRemove = identity?.datasetReview?.canAdjudicate === true;
+  const locked = !canAnnotate || isLeaseHeldByOther(item.lease, currentReviewer);
   const revealed = data.revealed ?? false;
   const annotations = visibleAnnotations(item.annotations, data.reviewMode, revealed);
 
@@ -202,7 +205,7 @@ export function renderReviewQueue(data: ReviewQueueData, identity: Identity | nu
 
   const proposals = data.reviewMode !== "AI_ASSISTED" && !revealed && annotations.length === 0
     ? `<p class="empty-state">Chưa có nhãn nào. Thêm nhãn của bạn.</p>`
-    : annotations.map((annotation) => renderAnnotationCard(annotation, locked)).join("")
+    : annotations.map((annotation) => renderAnnotationCard(annotation, locked, canRemove)).join("")
       || `<p class="empty-state">Chưa có nhãn đề xuất.</p>`;
 
   const disabled = locked ? " disabled" : "";

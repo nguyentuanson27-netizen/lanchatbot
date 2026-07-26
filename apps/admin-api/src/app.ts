@@ -193,6 +193,9 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
   });
 
   app.setErrorHandler((error, request, reply) => {
+    if (error instanceof Error && error.message === "DATASET_REVIEW_LEASE_CONFLICT") {
+      return reply.code(409).send(errorBody(error.message, request.id));
+    }
     if (error instanceof AdminQueryError) {
       const status = error.code === "ADMIN_PAGE_NOT_ALLOWED" ||
           error.code === "ADMIN_POLICY_FORBIDDEN" ||
@@ -889,6 +892,11 @@ function registerDatasetReviewRoutes(
       const split = request.query.split
         ? datasetEnum(SplitV1Schema, request.query.split)
         : undefined;
+      // HOLDOUT is a privileged benchmark. Lower roles must not inspect its
+      // conversations through the review queue.
+      if (split === "HOLDOUT" && !datasetRoleAtLeast(identity, "DATASET_ADMIN")) {
+        return reply.code(403).send(errorBody("ADMIN_DATASET_FORBIDDEN", request.id));
+      }
       // Only reviewers (ANNOTATOR+) take a lease; viewers see the queue read-only.
       const acquireLease = datasetRoleAtLeast(identity, "ANNOTATOR");
       const queue = await service.reviewQueue(requiredUuid(request.params.id), {

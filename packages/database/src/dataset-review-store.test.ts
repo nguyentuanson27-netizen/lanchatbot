@@ -103,6 +103,9 @@ describe("importRecords", () => {
     );
     expect(flat).toContain("[PHONE_1]");
     expect(flat).not.toContain("0912345678");
+    // Redis/provider source keys can contain stable customer identifiers. Store
+    // only their SHA-256 projection, never the plaintext key.
+    expect(flat).not.toContain("history_1");
   });
 
   it("treats a re-imported source key as a DUPLICATE no-op", async () => {
