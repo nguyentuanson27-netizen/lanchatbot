@@ -799,6 +799,10 @@ interface DatasetReviewBody {
   readonly patch?: unknown;
 }
 
+interface DatasetCompleteBody {
+  readonly revision?: unknown;
+}
+
 // Every dataset-review route is gated first on the feature flag (service present)
 // and then on the caller's mapped dataset role. Reads require BENCHMARK_VIEWER;
 // annotating requires ANNOTATOR; removal/adjudication ADJUDICATOR; schema/project/
@@ -1010,6 +1014,23 @@ function registerDatasetReviewRoutes(
     },
   );
 
+  app.post<{ Params: { id: string }; Body: DatasetCompleteBody }>(
+    "/admin/v1/dataset-items/:id/complete",
+    async (request, reply) => {
+      const service = requireService(request, reply, "ANNOTATOR");
+      if (!service) return reply;
+      const completed = await service.completeReviewItem(
+        requiredUuid(request.params.id),
+        requireIdentity(request).subject,
+        datasetRevision(request.body?.revision),
+      );
+      if (!completed) {
+        return reply.code(409).send(errorBody("ADMIN_DATASET_REVIEW_CONFLICT", request.id));
+      }
+      return { item: completed };
+    },
+  );
+
   app.post<{ Params: { id: string }; Body: DatasetReviewBody }>(
     "/admin/v1/dataset-annotations/:id/review",
     async (request, reply) => {
@@ -1119,6 +1140,12 @@ function datasetOptionalIndex(value: unknown): number | null {
     throw new AdminQueryError("ADMIN_QUERY_INVALID");
   }
   return value;
+}
+
+function datasetRevision(value: unknown): number {
+  const revision = datasetOptionalIndex(value);
+  if (revision === null) throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  return revision;
 }
 
 function datasetOptionalEvidence(value: unknown): string | null {

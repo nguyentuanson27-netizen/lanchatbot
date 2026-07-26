@@ -191,6 +191,10 @@ class FakeDatasetReviewService implements DatasetService {
   async reviewAnnotation(id: string, input: Parameters<DatasetService["reviewAnnotation"]>[1]) {
     return { annotation_id: id, status: input.action === "ACCEPT" ? "ACCEPTED" : "REJECTED" };
   }
+  async completeReviewItem(id: string, subject: string, revision: number) {
+    this.calls.push(`completeReviewItem:${id}:${subject}:${revision}`);
+    return { project_item_id: id, assignment_status: "REVIEWED", revision: revision + 1 };
+  }
   async lockHoldout() { this.calls.push("lockHoldout"); return { locked: 5 }; }
   async exportProject(_projectId: string, splits: readonly string[]) {
     return {
@@ -864,6 +868,31 @@ describe("Dataset review routes", () => {
     });
     assert.equal(accept.statusCode, 200);
     assert.equal(accept.json().annotation.status, "ACCEPTED");
+  });
+
+  it("completes the leased review item before loading the next one", async () => {
+    const service = new FakeDatasetReviewService();
+    const app = datasetApp({ role: "EDITOR", service });
+    const response = await app.inject({
+      method: "POST",
+      url: "/admin/v1/dataset-items/018f1b72-0000-7000-8000-000000000040/complete",
+      headers: datasetHeaders,
+      payload: { revision: 7 },
+    });
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.json().item.assignment_status, "REVIEWED");
+    assert.ok(service.calls.some((call) => call.endsWith(":sub-EDITOR:7")));
+    await app.close();
+  });
+
+  it("rejects completion without a valid revision", async () => {
+    const response = await datasetApp({ role: "EDITOR" }).inject({
+      method: "POST",
+      url: "/admin/v1/dataset-items/018f1b72-0000-7000-8000-000000000040/complete",
+      headers: datasetHeaders,
+      payload: {},
+    });
+    assert.equal(response.statusCode, 400);
   });
 
   it("streams a JSONL export only when the export flag is on", async () => {
