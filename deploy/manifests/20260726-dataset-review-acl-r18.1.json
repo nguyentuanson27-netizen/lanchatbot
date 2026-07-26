@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-26T06:59:00+00:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "953fd58e17411fa30b22c0cf4113177475e98340",
+  "releaseTag": "20260726-dataset-review-acl-r18.1",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260726-dataset-review-acl-r18.1",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260726-dataset-review-admin-r18",
+  "pageAllowlist": [
+    "1198992073286645"
+  ],
+  "images": {
+    "adminApi": "lana-chatbot-app:dataset-review-acl-r18.1@sha256:3daebd9698ecbc90ee1e2f594562e520f1ff950fddd2cc66b1542012691f6c48",
+    "adminWebUnchanged": "lana-chatbot-app:dataset-review-admin-r18",
+    "realtimeWorkerUnchanged": "lana-chatbot-app:realtime-measurement-continuation-r17"
+  },
+  "sourceArchiveSha256": "ea9bc195907b5c8d3aa333daa9a2ffae04bb525f261029a2d4ef9b524de34d7b",
+  "composeSha256": "5b1c7899f556287501e9bfc2effef723b5e61feddebbf713eb4062a3d58b223b",
+  "database": {
+    "backupPath": "/opt/lana-chatbot/backups/20260726-dataset-review-acl-r18.1/lana_chatbot_pre_0022.dump",
+    "backupSha256": "fa226eed1536ade14960529a2918021185f18ebc5b66906b88716bad0df2ea47",
+    "restoreTest": "PASS_80_PUBLIC_TABLES",
+    "migration": "0022_dataset_review_acl",
+    "migrationSha256": "4179140ac4dbe85ffe39c07c6fa3a4a87ebf0fdf4d05bddb13e689d32ec9dcfc"
+  },
+  "aclVerification": {
+    "readonlyCanSelectRedactedDatasets": true,
+    "readonlyCanInsertDatasets": false,
+    "readonlyCanSelectRawEncryptedIntake": false,
+    "controlApiCanReadWriteAnnotations": true,
+    "controlApiCanSelectRawEncryptedIntake": false
+  },
+  "verification": {
+    "fullPnpmCheck": "PASS",
+    "databaseTests": "76_OF_76_PASS",
+    "adminApiTests": "53_OF_53_PASS",
+    "workerTests": "270_OF_270_PASS",
+    "datasetsEndpoint": "HTTP_200_EMPTY_LIST",
+    "adminApiHealth": "HEALTHY",
+    "adminApiRestartCount": 0,
+    "recentAdminApiErrorLines": 0,
+    "publicAuthentikRedirect": "HTTP_302",
+    "adminWebRestarted": false,
+    "realtimeWorkerRestarted": false,
+    "n8nRestarted": false
+  },
+  "scope": {
+    "deployedServices": [
+      "admin-api"
+    ],
+    "unchangedServices": [
+      "admin-web",
+      "realtime-worker",
+      "api",
+      "n8n"
+    ]
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260726-dataset-review-admin-r18",
+    "adminImage": "lana-chatbot-app:dataset-review-admin-r18@sha256:95f17ac35bc42965c6de88e3bde2bf07bec19c958bc0db3169e229b4224d8504",
+    "services": [
+      "admin-api"
+    ],
+    "dataDeletionRequired": false,
+    "note": "Migration 0022 is ACL-only and may remain applied when rolling back application code."
+  }
+}
