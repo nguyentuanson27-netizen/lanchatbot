@@ -552,6 +552,37 @@ export class PostgresDatasetAnnotationStore {
     return result.rows[0] ?? null;
   }
 
+  async completeReviewItem(
+    projectItemId: string,
+    actorSubject: string,
+    expectedRevision: number,
+  ): Promise<Record<string, unknown> | null> {
+    const result = await this.pool.query(
+      `UPDATE dataset_project_items pi
+       SET assignment_status = 'REVIEWED',
+           assigned_reviewer_id = $2,
+           lease_owner = NULL,
+           lease_until = NULL,
+           revision = revision + 1,
+           updated_at = now()
+       WHERE pi.project_item_id = $1
+         AND pi.lease_owner = $2
+         AND pi.lease_until > now()
+         AND pi.revision = $3
+         AND pi.assignment_status NOT IN ('REVIEWED', 'LOCKED')
+         AND EXISTS (
+           SELECT 1
+           FROM dataset_annotations a
+           WHERE a.project_item_id = pi.project_item_id
+             AND a.status IN ('ACCEPTED', 'EDITED', 'ADJUDICATED')
+         )
+       RETURNING project_item_id, assignment_status, assigned_reviewer_id,
+                 lease_owner, lease_until, revision, updated_at`,
+      [projectItemId, actorSubject, expectedRevision],
+    );
+    return result.rows[0] ?? null;
+  }
+
   // Holdout locking: freeze every HOLDOUT item so it can neither be reviewed nor
   // leased, protecting the benchmark from contamination. Idempotent and audited.
   async lockHoldoutSplit(projectId: string, actorSubject: string): Promise<number> {

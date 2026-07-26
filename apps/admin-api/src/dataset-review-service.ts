@@ -92,6 +92,11 @@ export interface DatasetReviewService {
   reviewQueue(projectId: string, request: ReviewQueueRequest): Promise<JsonRecord | null>;
   addAnnotation(input: AddAnnotationServiceInput): Promise<JsonRecord>;
   reviewAnnotation(annotationId: string, input: ReviewAnnotationServiceInput): Promise<JsonRecord | null>;
+  completeReviewItem(
+    projectItemId: string,
+    actorSubject: string,
+    expectedRevision: number,
+  ): Promise<JsonRecord | null>;
   lockHoldout(projectId: string, actorSubject: string): Promise<{ locked: number }>;
   exportProject(projectId: string, splits: readonly SplitV1[]): Promise<ExportResult>;
 }
@@ -254,6 +259,18 @@ class PostgresDatasetReviewService implements DatasetReviewService {
       actorSubject: input.actorSubject,
       ...(input.patch ? { patch: input.patch } : {}),
     });
+  }
+
+  completeReviewItem(
+    projectItemId: string,
+    actorSubject: string,
+    expectedRevision: number,
+  ): Promise<JsonRecord | null> {
+    return this.annotation.completeReviewItem(
+      projectItemId,
+      actorSubject,
+      expectedRevision,
+    );
   }
 
   async lockHoldout(projectId: string, actorSubject: string): Promise<{ locked: number }> {

@@ -269,6 +269,27 @@ describe("acquireReviewLease", () => {
   });
 });
 
+describe("completeReviewItem", () => {
+  it("marks only the current leased revision reviewed and clears the lease", async () => {
+    const { store, calls } = storeWith(() => ({
+      rowCount: 1,
+      rows: [{ project_item_id: "pi-1", assignment_status: "REVIEWED", revision: 4 }],
+    }));
+    const completed = await store.completeReviewItem("pi-1", "rev-1", 3);
+    expect(completed).toMatchObject({ assignment_status: "REVIEWED", revision: 4 });
+    expect(calls[0]?.values).toEqual(["pi-1", "rev-1", 3]);
+    expect(calls[0]?.sql).toContain("pi.lease_owner = $2");
+    expect(calls[0]?.sql).toContain("pi.revision = $3");
+    expect(calls[0]?.sql).toContain("assignment_status = 'REVIEWED'");
+    expect(calls[0]?.sql).toContain("a.status IN ('ACCEPTED', 'EDITED', 'ADJUDICATED')");
+  });
+
+  it("returns null on stale revision, expired lease, or missing accepted labels", async () => {
+    const { store } = storeWith(() => ({ rowCount: 0, rows: [] }));
+    expect(await store.completeReviewItem("pi-1", "rev-1", 2)).toBeNull();
+  });
+});
+
 describe("lockHoldoutSplit", () => {
   it("locks holdout items and writes one LOCK audit event", async () => {
     const { store, calls } = storeWith((sql) =>

@@ -1346,6 +1346,16 @@ export async function addDatasetAnnotation(
   });
 }
 
+export async function completeDatasetReviewItem(
+  projectItemId: string,
+  revision: number,
+): Promise<void> {
+  await request<JsonRecord>(`/dataset-items/${encodeURIComponent(projectItemId)}/complete`, undefined, {
+    method: "POST",
+    body: { revision },
+  });
+}
+
 export async function lockDatasetHoldout(projectId: string): Promise<number> {
   const payload = await request<JsonRecord>(
     `/dataset-projects/${encodeURIComponent(projectId)}/lock-holdout`,

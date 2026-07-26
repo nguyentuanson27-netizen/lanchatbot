@@ -24,6 +24,7 @@ import {
   getReviewQueue,
   reviewDatasetAnnotation,
   addDatasetAnnotation,
+  completeDatasetReviewItem,
   lockDatasetHoldout,
   type DatasetReviewVerb,
 } from "./api.js";
@@ -1126,9 +1127,10 @@ function bindDatasetReviewQueue(content: HTMLElement): void {
         window.location.hash = "#/datasets";
         return;
       }
-      // SAVE_NEXT: labels are already persisted per action; refetch the queue's
-      // highest-priority reviewable item.
-      void loadCurrentPage(false);
+      void runDatasetAction(async () => {
+        await completeDatasetReviewItem(item.projectItemId, item.revision);
+        await loadCurrentPage(false);
+      });
     },
     onJumpToTurn: (turnIndex) => {
       content.querySelector(`#review-turn-${turnIndex}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
