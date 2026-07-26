@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ApiError,
   createConversationCommand,
+  datasetExportPath,
   getConversation,
   getConversationCommands,
   getConversationMessages,
@@ -11,6 +12,8 @@ import {
   getOperations,
   getOutreach,
   getProductData,
+  getReviewQueue,
+  reviewDatasetAnnotation,
   transitionPolicyArtifact,
 } from "./api.js";
 
@@ -405,5 +408,113 @@ describe("catalog and batch worker views", () => {
     // cuối cùng ghi lại vẫn là IDLE.
     expect(result.services[1]).toMatchObject({ name: "Đồng bộ giá và tồn", status: "down" });
     expect(result.services[1]?.detail).toContain("Không nhận heartbeat quá 26 giờ");
+  });
+});
+
+describe("dataset review API", () => {
+  it("maps the identity dataset_review capability block to camelCase", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      user: {
+        email: "editor@example.com",
+        role: "EDITOR",
+        capabilities: {
+          dataset_review: {
+            enabled: true,
+            role: "ANNOTATOR",
+            can_annotate: true,
+            can_adjudicate: false,
+            can_admin: false,
+            ai_prelabel: true,
+            blind_review: false,
+            export: false,
+          },
+        },
+      },
+    })));
+    const identity = await getIdentity();
+    expect(identity.datasetReview).toEqual({
+      enabled: true,
+      role: "ANNOTATOR",
+      canAnnotate: true,
+      canAdjudicate: false,
+      canAdmin: false,
+      aiPrelabel: true,
+      blindReview: false,
+      export: false,
+    });
+  });
+
+  it("omits the capability when the server does not report it", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      user: { email: "viewer@example.com", role: "VIEWER", capabilities: {} },
+    })));
+    const identity = await getIdentity();
+    expect(identity.datasetReview).toBeUndefined();
+  });
+
+  it("maps a redacted review-queue payload into the view model", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      queue: {
+        project_id: "p-1",
+        project_name: "Wave 1",
+        review_mode: "AI_ASSISTED",
+        split: "DEVELOPMENT",
+        revealed: true,
+        progress: { reviewed: 2, total: 5 },
+        labels: [{ code: "BUYING_COMMITTED", name: "Chốt đơn", scope: "CUSTOMER_MESSAGE", evidence_required: true, is_safety_critical: false }],
+        item: {
+          project_item_id: "pi-1",
+          conversation_id: "c-1",
+          split: "DEVELOPMENT",
+          assignment_status: "IN_REVIEW",
+          quality_flags: ["CONTAINS_PHONE"],
+          revision: 3,
+          lease: { owner_subject: "rev-1", until: "2026-07-26T02:00:00.000Z" },
+          messages: [{ turn_index: 0, role: "CUSTOMER", redacted_text: "chị lấy mẫu này" }],
+          annotations: [{
+            annotation_id: "a-1",
+            label_code: "BUYING_COMMITTED",
+            scope: "CUSTOMER_MESSAGE",
+            turn_index: 0,
+            second_turn_index: null,
+            evidence_text: "lấy mẫu này",
+            evidence_start: 4,
+            evidence_end: 15,
+            confidence: "HIGH",
+            source: "AI",
+            status: "PROPOSED",
+          }],
+        },
+      },
+    })));
+    const queue = await getReviewQueue("p-1", "DEVELOPMENT");
+    expect(queue.projectName).toBe("Wave 1");
+    expect(queue.progress).toEqual({ reviewed: 2, total: 5 });
+    expect(queue.labels[0]).toMatchObject({ code: "BUYING_COMMITTED", evidenceRequired: true, mutuallyExclusiveGroup: null });
+    expect(queue.item?.lease).toEqual({ ownerSubject: "rev-1", until: "2026-07-26T02:00:00.000Z" });
+    expect(queue.item?.messages[0]).toEqual({ turnIndex: 0, role: "CUSTOMER", redactedText: "chị lấy mẫu này" });
+    expect(queue.item?.annotations[0]).toMatchObject({ id: "a-1", source: "AI", evidenceStart: 4, evidenceEnd: 15 });
+  });
+
+  it("returns a null item for an exhausted queue", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      queue: { project_id: "p-1", review_mode: "AI_ASSISTED", progress: { reviewed: 5, total: 5 }, labels: [], item: null },
+    })));
+    const queue = await getReviewQueue("p-1", null);
+    expect(queue.item).toBeNull();
+  });
+
+  it("posts the server review verb (DELETE→REMOVE handled by the caller)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ annotation: { annotation_id: "a-1", status: "REJECTED" } }));
+    vi.stubGlobal("fetch", fetchMock);
+    await reviewDatasetAnnotation("a-1", "REMOVE");
+    const [, init] = fetchMock.mock.calls[0]!;
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(init.body as string)).toEqual({ action: "REMOVE" });
+  });
+
+  it("builds an export path with an optional split filter", () => {
+    expect(datasetExportPath("p-1")).toContain("/dataset-projects/p-1/export");
+    expect(datasetExportPath("p-1", ["DEVELOPMENT", "HOLDOUT"])).toContain("splits=DEVELOPMENT%2CHOLDOUT");
   });
 });

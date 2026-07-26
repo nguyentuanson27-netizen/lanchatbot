@@ -14,6 +14,18 @@ export interface Identity {
   policyCanaryLiveEnabled: boolean;
   policyPublishEnabled: boolean;
   productMediaUpload: boolean;
+  datasetReview?: DatasetReviewCapability;
+}
+
+export interface DatasetReviewCapability {
+  enabled: boolean;
+  role: string;
+  canAnnotate: boolean;
+  canAdjudicate: boolean;
+  canAdmin: boolean;
+  aiPrelabel: boolean;
+  blindReview: boolean;
+  export: boolean;
 }
 
 export interface ProductMediaCatalog {

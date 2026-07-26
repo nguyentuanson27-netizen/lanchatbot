@@ -161,8 +161,8 @@ isolation ✓.
   - `bindReviewQueue(root, handlers)` — event delegation for mounting (Batch 6).
 - `styles.css` — review-queue styles using existing design tokens.
 
-Batch 6a wires the backing endpoints (below). Mounting the module into `main.ts`
-routing is Batch 6b.
+Batch 6a wires the backing endpoints (below); Batch 6b mounts the module into
+`main.ts` as the "Đánh giá dữ liệu" route (see "admin-web wiring" section).
 
 ## admin-api endpoints (Batch 6a)
 
@@ -202,6 +202,28 @@ constructed against `ADMIN_DATABASE_URL` only when the flag is on, and this batc
 was tested entirely with a fake service (routes/RBAC) and injected-fake-pool store
 tests (new queue/lease/holdout/export SQL). No production DB or Vertex touched.
 
+## admin-web wiring (Batch 6b)
+
+The Review Queue module is now mounted. A capability-gated "Đánh giá dữ liệu" nav
+route appears only when `/me` reports `dataset_review.enabled`.
+
+- `api.ts` client + snake→camel mappers: `getDatasets`/`getDatasetProjects`/
+  `getDatasetIndex`, `getReviewQueue` (→ the Batch 5 `ReviewQueueData` view model),
+  `reviewDatasetAnnotation` (ACCEPT/REJECT/EDIT/REMOVE), `addDatasetAnnotation`,
+  `lockDatasetHoldout`, `datasetExportPath`. `getIdentity` maps the new
+  `dataset_review` capability block. Every mapper defaults unknown enum values —
+  no raw PII is ever expected or rendered.
+- `dataset-review-screen.ts` — landing index of datasets → projects, with an export
+  link (export capability) and a "Khóa holdout" button (dataset admin).
+- `main.ts` — `datasets` route: the index, or `#/datasets/<projectId>` mounts
+  `renderReviewQueue` + `bindReviewQueue`. Handlers call the API and reload:
+  accept/reject/edit/delete per annotation, accept-all, add, jump-to-turn; a busy
+  guard blocks double-submits.
+
+Limitation: there is no per-item "mark reviewed / release lease" endpoint yet, so
+"Lưu & tiếp" reloads the current queue item rather than advancing, and "Cần phân
+xử" is a placeholder toast. Those transitions are the next backend increment.
+
 ## Tests (run here, green)
 
 ```
@@ -209,7 +231,7 @@ pnpm --filter @lana/contracts test        # 80 passed (8 v5)
 pnpm --filter @lana/dataset-review test    # 42 passed (import pipeline incl.)
 pnpm --filter @lana/database test          # 63 passed (migration + 3 stores)
 pnpm --filter @lana/worker test            # 270 passed (incl. 10 pre-label)
-pnpm --filter @lana/admin-web test         # 32 vitest + 4 auth (13 new review UI)
+pnpm --filter @lana/admin-web test         # 38 vitest + 4 auth (13 UI + 6 API)
 pnpm --filter @lana/admin-api test         # 52 node:test (dataset routes + RBAC)
 ```
 
@@ -231,12 +253,13 @@ validation, seed-schema integrity, migration structure.
 Admin only; no realtime/outbound impact. The service also requires an envelope
 cipher (`REALTIME_DATA_KEY`) to construct.
 
-## Remaining work
+## Remaining work (deferred to an authorized dev environment)
 
-- **6b** Mount the Review Queue module into `apps/admin-web` (`api.ts` client +
-  `main.ts` Datasets/Review/Exports screens). Seed Wave 1 schema insertion and a
-  dev-environment integration/E2E pass remain deferred to an authorized dev
-  environment (no production migration/import from the VPS).
+- Apply migration `0017`, run the `dataset-import` CLI, seed the Wave 1 label
+  schema, and run a real end-to-end pass (real PostgreSQL; a real Vertex pre-label
+  run for the worker). None of this is run against production or from the VPS.
+- Backend increment: a per-item "mark reviewed / release lease" transition and a
+  "needs adjudication" endpoint, to make queue advancement real in the UI.
 
 ## Rollback
 

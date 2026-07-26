@@ -71,6 +71,29 @@ export interface ReviewQueueProgress {
   total: number;
 }
 
+export interface DatasetSummary {
+  datasetId: string;
+  name: string;
+  sourceType: string;
+  status: string;
+  totalItems: number;
+  importedItems: number;
+  failedItems: number;
+}
+
+export interface DatasetProjectSummary {
+  projectId: string;
+  name: string;
+  status: string;
+  reviewMode: string;
+  annotationMode: string;
+}
+
+export interface DatasetIndexEntry {
+  dataset: DatasetSummary;
+  projects: DatasetProjectSummary[];
+}
+
 export interface ReviewQueueData {
   projectId: string;
   projectName: string;
