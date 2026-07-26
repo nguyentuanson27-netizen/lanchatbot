@@ -147,6 +147,80 @@ function create(overrides: Partial<CreateAdminApiOptions> = {}) {
   });
 }
 
+class RoleAuthenticator implements AdminAuthenticator {
+  constructor(private readonly role: AdminIdentity["role"]) {}
+  async authenticate(assertion: string | undefined) {
+    if (assertion !== "valid") throw new AdminAuthError("ADMIN_AUTH_REQUIRED");
+    return { ...identity, role: this.role, subject: `sub-${this.role}` };
+  }
+  async ready() { return true; }
+}
+
+type DatasetService = NonNullable<CreateAdminApiOptions["datasetReview"]>;
+
+class FakeDatasetReviewService implements DatasetService {
+  calls: string[] = [];
+  async ready() { return true; }
+  async close() {}
+  async listDatasets() { this.calls.push("listDatasets"); return [{ dataset_id: "ds-1" }]; }
+  async getDataset(id: string) { return id === "018f1b72-0000-7000-8000-000000000001" ? { dataset_id: id } : null; }
+  async listProjects() { return [{ project_id: "018f1b72-0000-7000-8000-000000000020" }]; }
+  async getProject(id: string) { return { project_id: id, split_summary: { DEVELOPMENT: 2 } }; }
+  async createProject(input: Parameters<DatasetService["createProject"]>[0]) {
+    this.calls.push("createProject");
+    return { project_id: "018f1b72-0000-7000-8000-000000000021", name: input.name, created_by_subject: input.createdBySubject };
+  }
+  async listLabelSchemas() { return [{ label_schema_id: "018f1b72-0000-7000-8000-000000000030" }]; }
+  async createLabelSchema(_schema: unknown, subject: string) {
+    if (subject === "throw") throw new Error("bad schema");
+    return { labelSchemaId: "018f1b72-0000-7000-8000-000000000031", created: true, name: "wave1", version: "1.0.0" };
+  }
+  async createSplit() { return { assigned: 4, alreadyAssigned: 0, perSplit: { DEVELOPMENT: 2, VALIDATION: 1, HOLDOUT: 1, RARE_SAFETY: 0 } }; }
+  async reviewQueue(projectId: string, request: Parameters<DatasetService["reviewQueue"]>[1]) {
+    this.calls.push(`reviewQueue:${request.acquireLease}`);
+    return {
+      project_id: projectId,
+      review_mode: "AI_ASSISTED",
+      progress: { reviewed: 1, total: 3 },
+      item: { project_item_id: "018f1b72-0000-7000-8000-000000000040", messages: [], annotations: [] },
+    };
+  }
+  async addAnnotation(input: Parameters<DatasetService["addAnnotation"]>[0]) {
+    return { annotation_id: "018f1b72-0000-7000-8000-000000000050", label_code: input.labelCode, source: "HUMAN" };
+  }
+  async reviewAnnotation(id: string, input: Parameters<DatasetService["reviewAnnotation"]>[1]) {
+    return { annotation_id: id, status: input.action === "ACCEPT" ? "ACCEPTED" : "REJECTED" };
+  }
+  async lockHoldout() { this.calls.push("lockHoldout"); return { locked: 5 }; }
+  async exportProject(_projectId: string, splits: readonly string[]) {
+    return {
+      filename: "benchmark.jsonl",
+      jsonl: `${JSON.stringify({ split: splits[0] })}\n`,
+      rowCount: 1,
+      itemCount: 1,
+    };
+  }
+}
+
+function datasetApp(options: {
+  role?: AdminIdentity["role"];
+  service?: DatasetService | null;
+  exportEnabled?: boolean;
+} = {}) {
+  const service = options.service === undefined ? new FakeDatasetReviewService() : options.service;
+  return createAdminApi({
+    authenticator: new RoleAuthenticator(options.role ?? "OWNER"),
+    store: new FakeStore(),
+    allowedOrigin: "https://admin.lanadesign.vn",
+    ...(service ? { datasetReview: service } : {}),
+    datasetExportEnabled: options.exportEnabled ?? false,
+    datasetAiPrelabelEnabled: true,
+    datasetBlindReviewEnabled: true,
+  });
+}
+
+const datasetHeaders = { "x-lana-admin-assertion": "valid", origin: "https://admin.lanadesign.vn" };
+
 describe("Admin API", () => {
   it("serves catalog freshness from the batch snapshot, not chat traffic", async () => {
     const app = create();
@@ -272,6 +346,16 @@ describe("Admin API", () => {
             publish: false,
           },
           product_media_upload: false,
+          dataset_review: {
+            enabled: false,
+            role: "DATASET_ADMIN",
+            can_annotate: false,
+            can_adjudicate: false,
+            can_admin: false,
+            ai_prelabel: false,
+            blind_review: false,
+            export: false,
+          },
         },
       },
     });
@@ -407,6 +491,7 @@ describe("Admin API", () => {
         publish: false,
       },
       product_media: false,
+      dataset_review: false,
     });
     assert.equal(response.headers["cache-control"], "no-store");
     assert.equal(response.headers["x-frame-options"], "DENY");
@@ -647,6 +732,187 @@ describe("Admin API", () => {
       },
     });
     assert.equal(simulation.statusCode, 202);
+    await app.close();
+  });
+});
+
+describe("Dataset review routes", () => {
+  it("returns 503 for every dataset route when the module is disabled", async () => {
+    const app = datasetApp({ service: null });
+    for (const url of ["/admin/v1/datasets", "/admin/v1/dataset-label-schemas"]) {
+      const response = await app.inject({ method: "GET", url, headers: datasetHeaders });
+      assert.equal(response.statusCode, 503);
+      assert.equal(response.json().code, "ADMIN_DATASET_REVIEW_DISABLED");
+    }
+    await app.close();
+  });
+
+  it("lists datasets for a benchmark viewer and reports capabilities", async () => {
+    const app = datasetApp({ role: "VIEWER" });
+    const list = await app.inject({ method: "GET", url: "/admin/v1/datasets", headers: datasetHeaders });
+    assert.equal(list.statusCode, 200);
+    assert.deepEqual(list.json(), { items: [{ dataset_id: "ds-1" }], next_cursor: null });
+    const me = await app.inject({ method: "GET", url: "/admin/v1/me", headers: datasetHeaders });
+    assert.deepEqual(me.json().user.capabilities.dataset_review, {
+      enabled: true,
+      role: "BENCHMARK_VIEWER",
+      can_annotate: false,
+      can_adjudicate: false,
+      can_admin: false,
+      ai_prelabel: true,
+      blind_review: true,
+      export: false,
+    });
+    await app.close();
+  });
+
+  it("forbids a benchmark viewer from creating a project but allows the dataset admin", async () => {
+    const viewerApp = datasetApp({ role: "VIEWER" });
+    const forbidden = await viewerApp.inject({
+      method: "POST",
+      url: "/admin/v1/datasets/018f1b72-0000-7000-8000-000000000001/projects",
+      headers: datasetHeaders,
+      payload: { label_schema_id: "018f1b72-0000-7000-8000-000000000031", name: "Wave 1", annotation_mode: "MESSAGE", review_mode: "AI_ASSISTED" },
+    });
+    assert.equal(forbidden.statusCode, 403);
+    assert.equal(forbidden.json().code, "ADMIN_DATASET_FORBIDDEN");
+    await viewerApp.close();
+
+    const adminApp = datasetApp({ role: "OWNER" });
+    const created = await adminApp.inject({
+      method: "POST",
+      url: "/admin/v1/datasets/018f1b72-0000-7000-8000-000000000001/projects",
+      headers: datasetHeaders,
+      payload: { label_schema_id: "018f1b72-0000-7000-8000-000000000031", name: "Wave 1", annotation_mode: "MESSAGE", review_mode: "AI_ASSISTED" },
+    });
+    assert.equal(created.statusCode, 201);
+    assert.equal(created.json().project.created_by_subject, "sub-OWNER");
+    await adminApp.close();
+  });
+
+  it("acquires a lease for a reviewer but keeps the queue read-only for a viewer", async () => {
+    const reviewerService = new FakeDatasetReviewService();
+    const reviewerApp = createAdminApi({
+      authenticator: new RoleAuthenticator("EDITOR"),
+      store: new FakeStore(),
+      allowedOrigin: "https://admin.lanadesign.vn",
+      datasetReview: reviewerService,
+    });
+    const reviewerQueue = await reviewerApp.inject({
+      method: "GET",
+      url: "/admin/v1/dataset-projects/018f1b72-0000-7000-8000-000000000020/queue?split=DEVELOPMENT",
+      headers: datasetHeaders,
+    });
+    assert.equal(reviewerQueue.statusCode, 200);
+    assert.ok(reviewerService.calls.includes("reviewQueue:true"));
+    await reviewerApp.close();
+
+    const viewerService = new FakeDatasetReviewService();
+    const viewerApp = createAdminApi({
+      authenticator: new RoleAuthenticator("VIEWER"),
+      store: new FakeStore(),
+      allowedOrigin: "https://admin.lanadesign.vn",
+      datasetReview: viewerService,
+    });
+    const viewerQueue = await viewerApp.inject({
+      method: "GET",
+      url: "/admin/v1/dataset-projects/018f1b72-0000-7000-8000-000000000020/queue",
+      headers: datasetHeaders,
+    });
+    assert.equal(viewerQueue.statusCode, 200);
+    assert.ok(viewerService.calls.includes("reviewQueue:false"));
+    await viewerApp.close();
+  });
+
+  it("keeps HOLDOUT review queue restricted to dataset admins", async () => {
+    const approverApp = datasetApp({ role: "APPROVER" });
+    const forbidden = await approverApp.inject({
+      method: "GET",
+      url: "/admin/v1/dataset-projects/018f1b72-0000-7000-8000-000000000020/queue?split=HOLDOUT",
+      headers: datasetHeaders,
+    });
+    assert.equal(forbidden.statusCode, 403);
+    assert.equal(forbidden.json().code, "ADMIN_DATASET_FORBIDDEN");
+    await approverApp.close();
+
+    const ownerApp = datasetApp({ role: "OWNER" });
+    const allowed = await ownerApp.inject({
+      method: "GET",
+      url: "/admin/v1/dataset-projects/018f1b72-0000-7000-8000-000000000020/queue?split=HOLDOUT",
+      headers: datasetHeaders,
+    });
+    assert.equal(allowed.statusCode, 200);
+    await ownerApp.close();
+  });
+
+  it("requires adjudicator rights to REMOVE an annotation", async () => {
+    const annotatorApp = datasetApp({ role: "EDITOR" });
+    const remove = await annotatorApp.inject({
+      method: "POST",
+      url: "/admin/v1/dataset-annotations/018f1b72-0000-7000-8000-000000000050/review",
+      headers: datasetHeaders,
+      payload: { action: "REMOVE" },
+    });
+    assert.equal(remove.statusCode, 403);
+    await annotatorApp.close();
+
+    const accept = await datasetApp({ role: "EDITOR" }).inject({
+      method: "POST",
+      url: "/admin/v1/dataset-annotations/018f1b72-0000-7000-8000-000000000050/review",
+      headers: datasetHeaders,
+      payload: { action: "ACCEPT" },
+    });
+    assert.equal(accept.statusCode, 200);
+    assert.equal(accept.json().annotation.status, "ACCEPTED");
+  });
+
+  it("streams a JSONL export only when the export flag is on", async () => {
+    const disabled = await datasetApp({ role: "OWNER", exportEnabled: false }).inject({
+      method: "GET",
+      url: "/admin/v1/dataset-projects/018f1b72-0000-7000-8000-000000000020/export",
+      headers: datasetHeaders,
+    });
+    assert.equal(disabled.statusCode, 503);
+    assert.equal(disabled.json().code, "ADMIN_DATASET_EXPORT_DISABLED");
+
+    const enabled = await datasetApp({ role: "OWNER", exportEnabled: true }).inject({
+      method: "GET",
+      url: "/admin/v1/dataset-projects/018f1b72-0000-7000-8000-000000000020/export",
+      headers: datasetHeaders,
+    });
+    assert.equal(enabled.statusCode, 200);
+    assert.match(enabled.headers["content-type"] as string, /x-ndjson/u);
+    assert.equal(enabled.headers["x-dataset-export-items"], "1");
+    assert.match(enabled.body, /"split":"DEVELOPMENT"/u);
+  });
+
+  it("blocks holdout export for anyone below dataset admin", async () => {
+    const app = datasetApp({ role: "APPROVER", exportEnabled: true });
+    const response = await app.inject({
+      method: "GET",
+      url: "/admin/v1/dataset-projects/018f1b72-0000-7000-8000-000000000020/export?splits=HOLDOUT",
+      headers: datasetHeaders,
+    });
+    assert.equal(response.statusCode, 403);
+    await app.close();
+  });
+
+  it("locks the holdout split for the dataset admin", async () => {
+    const service = new FakeDatasetReviewService();
+    const app = createAdminApi({
+      authenticator: new RoleAuthenticator("OWNER"),
+      store: new FakeStore(),
+      allowedOrigin: "https://admin.lanadesign.vn",
+      datasetReview: service,
+    });
+    const response = await app.inject({
+      method: "POST",
+      url: "/admin/v1/dataset-projects/018f1b72-0000-7000-8000-000000000020/lock-holdout",
+      headers: datasetHeaders,
+    });
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.json().holdout, { locked: 5 });
+    assert.ok(service.calls.includes("lockHoldout"));
     await app.close();
   });
 });

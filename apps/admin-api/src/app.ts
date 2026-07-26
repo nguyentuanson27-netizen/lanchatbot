@@ -26,6 +26,16 @@ import {
   parseProductMediaUploadBody,
   type ProductMediaService,
 } from "./product-media.js";
+import type { DatasetReviewService } from "./dataset-review-service.js";
+import { datasetRoleAtLeast, datasetRoleFor } from "./dataset-review-rbac.js";
+import {
+  AnnotationConfidenceV1Schema,
+  AnnotationModeV1Schema,
+  AnnotationScopeV1Schema,
+  ReviewModeV1Schema,
+  SplitV1Schema,
+  type DatasetRoleV1,
+} from "@lana/contracts";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -45,6 +55,10 @@ export interface CreateAdminApiOptions {
   readonly policyCanaryLiveEnabled?: boolean;
   readonly policyPublishEnabled?: boolean;
   readonly productMedia?: ProductMediaService;
+  readonly datasetReview?: DatasetReviewService;
+  readonly datasetExportEnabled?: boolean;
+  readonly datasetAiPrelabelEnabled?: boolean;
+  readonly datasetBlindReviewEnabled?: boolean;
 }
 
 interface ListQuerystring {
@@ -179,6 +193,9 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
   });
 
   app.setErrorHandler((error, request, reply) => {
+    if (error instanceof Error && error.message === "DATASET_REVIEW_LEASE_CONFLICT") {
+      return reply.code(409).send(errorBody(error.message, request.id));
+    }
     if (error instanceof AdminQueryError) {
       const status = error.code === "ADMIN_PAGE_NOT_ALLOWED" ||
           error.code === "ADMIN_POLICY_FORBIDDEN" ||
@@ -215,7 +232,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
 
   app.get("/health/live", async () => ({ status: "ok" }));
   app.get("/health/ready", async (_request, reply) => {
-    const [authReady, storeReady, controlReady, policyControlReady, productMediaReady] = await Promise.all([
+    const [authReady, storeReady, controlReady, policyControlReady, productMediaReady, datasetReviewReady] = await Promise.all([
       options.authenticator.ready().catch(() => false),
       options.store.ready().catch(() => false),
       options.controlEnabled
@@ -227,8 +244,11 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
       options.productMedia
         ? options.productMedia.ready().catch(() => false)
         : Promise.resolve(true),
+      options.datasetReview
+        ? options.datasetReview.ready().catch(() => false)
+        : Promise.resolve(true),
     ]);
-    if (!authReady || !storeReady || !controlReady || !policyControlReady || !productMediaReady) {
+    if (!authReady || !storeReady || !controlReady || !policyControlReady || !productMediaReady || !datasetReviewReady) {
       return reply.code(503).send({
         status: "not_ready",
         auth: authReady,
@@ -238,6 +258,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
         policy_control: Boolean(options.policyControlEnabled),
         policy_lifecycle: policyLifecycleFeatures(options),
         product_media: productMediaReady,
+        dataset_review: datasetReviewReady,
       });
     }
     return {
@@ -249,6 +270,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
       policy_control: Boolean(options.policyControlEnabled),
       policy_lifecycle: policyLifecycleFeatures(options),
       product_media: Boolean(options.productMedia),
+      dataset_review: Boolean(options.datasetReview),
     };
   });
 
@@ -267,6 +289,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
           policy_page_ids: options.policyPageIds ?? [],
           policy_lifecycle: policyLifecycleFeatures(options),
           product_media_upload: Boolean(options.productMedia),
+          dataset_review: datasetReviewCapabilities(options, identity.role),
         },
       },
     };
@@ -741,7 +764,403 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
     },
   );
 
+  registerDatasetReviewRoutes(app, options);
+
   return app;
+}
+
+interface DatasetProjectBody {
+  readonly label_schema_id?: unknown;
+  readonly name?: unknown;
+  readonly description?: unknown;
+  readonly annotation_mode?: unknown;
+  readonly review_mode?: unknown;
+  readonly split_seed?: unknown;
+}
+
+interface DatasetSplitBody {
+  readonly seed?: unknown;
+  readonly targets?: unknown;
+}
+
+interface DatasetAnnotationBody {
+  readonly label_code?: unknown;
+  readonly scope?: unknown;
+  readonly turn_index?: unknown;
+  readonly second_turn_index?: unknown;
+  readonly evidence_text?: unknown;
+  readonly evidence_start?: unknown;
+  readonly evidence_end?: unknown;
+  readonly confidence?: unknown;
+}
+
+interface DatasetReviewBody {
+  readonly action?: unknown;
+  readonly patch?: unknown;
+}
+
+// Every dataset-review route is gated first on the feature flag (service present)
+// and then on the caller's mapped dataset role. Reads require BENCHMARK_VIEWER;
+// annotating requires ANNOTATOR; removal/adjudication ADJUDICATOR; schema/project/
+// split/holdout-lock DATASET_ADMIN. Only redacted projections leave the service.
+function registerDatasetReviewRoutes(
+  app: FastifyInstance,
+  options: CreateAdminApiOptions,
+): void {
+  const requireService = (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    minimum: DatasetRoleV1,
+  ): DatasetReviewService | null => {
+    if (!options.datasetReview) {
+      reply.code(503).send(errorBody("ADMIN_DATASET_REVIEW_DISABLED", request.id));
+      return null;
+    }
+    const identity = requireIdentity(request);
+    if (!datasetRoleAtLeast(identity, minimum)) {
+      reply.code(403).send(errorBody("ADMIN_DATASET_FORBIDDEN", request.id));
+      return null;
+    }
+    return options.datasetReview;
+  };
+
+  app.get("/admin/v1/datasets", async (request, reply) => {
+    const service = requireService(request, reply, "BENCHMARK_VIEWER");
+    if (!service) return reply;
+    return { items: await service.listDatasets(), next_cursor: null };
+  });
+
+  app.get<{ Params: { id: string } }>(
+    "/admin/v1/datasets/:id",
+    async (request, reply) => {
+      const service = requireService(request, reply, "BENCHMARK_VIEWER");
+      if (!service) return reply;
+      const dataset = await service.getDataset(requiredUuid(request.params.id));
+      return dataset ? { dataset } : notFound(reply, request.id);
+    },
+  );
+
+  app.get<{ Params: { id: string } }>(
+    "/admin/v1/datasets/:id/projects",
+    async (request, reply) => {
+      const service = requireService(request, reply, "BENCHMARK_VIEWER");
+      if (!service) return reply;
+      return {
+        items: await service.listProjects(requiredUuid(request.params.id)),
+        next_cursor: null,
+      };
+    },
+  );
+
+  app.post<{ Params: { id: string }; Body: DatasetProjectBody }>(
+    "/admin/v1/datasets/:id/projects",
+    async (request, reply) => {
+      const service = requireService(request, reply, "DATASET_ADMIN");
+      if (!service) return reply;
+      const datasetId = requiredUuid(request.params.id);
+      const body = request.body ?? {};
+      const created = await service.createProject({
+        datasetId,
+        labelSchemaId: requiredUuid(String(body.label_schema_id ?? "")),
+        name: datasetName(body.name),
+        description: datasetOptionalText(body.description),
+        annotationMode: datasetEnum(AnnotationModeV1Schema, body.annotation_mode),
+        reviewMode: datasetEnum(ReviewModeV1Schema, body.review_mode),
+        splitSeed: datasetOptionalText(body.split_seed),
+        createdBySubject: requireIdentity(request).subject,
+      });
+      return reply.code(201).send({ project: created });
+    },
+  );
+
+  app.get<{ Params: { id: string } }>(
+    "/admin/v1/dataset-projects/:id",
+    async (request, reply) => {
+      const service = requireService(request, reply, "BENCHMARK_VIEWER");
+      if (!service) return reply;
+      const project = await service.getProject(requiredUuid(request.params.id));
+      return project ? { project } : notFound(reply, request.id);
+    },
+  );
+
+  app.get<{ Params: { id: string }; Querystring: { split?: string } }>(
+    "/admin/v1/dataset-projects/:id/queue",
+    async (request, reply) => {
+      const service = requireService(request, reply, "BENCHMARK_VIEWER");
+      if (!service) return reply;
+      const identity = requireIdentity(request);
+      const split = request.query.split
+        ? datasetEnum(SplitV1Schema, request.query.split)
+        : undefined;
+      // HOLDOUT is a privileged benchmark. Lower roles must not inspect its
+      // conversations through the review queue.
+      if (split === "HOLDOUT" && !datasetRoleAtLeast(identity, "DATASET_ADMIN")) {
+        return reply.code(403).send(errorBody("ADMIN_DATASET_FORBIDDEN", request.id));
+      }
+      // Only reviewers (ANNOTATOR+) take a lease; viewers see the queue read-only.
+      const acquireLease = datasetRoleAtLeast(identity, "ANNOTATOR");
+      const queue = await service.reviewQueue(requiredUuid(request.params.id), {
+        reviewerSubject: identity.subject,
+        acquireLease,
+        ...(split ? { split } : {}),
+      });
+      return queue ? { queue } : notFound(reply, request.id);
+    },
+  );
+
+  app.post<{ Params: { id: string }; Body: DatasetSplitBody }>(
+    "/admin/v1/dataset-projects/:id/splits",
+    async (request, reply) => {
+      const service = requireService(request, reply, "DATASET_ADMIN");
+      if (!service) return reply;
+      const body = request.body ?? {};
+      const result = await service.createSplit(requiredUuid(request.params.id), {
+        seed: datasetSeed(body.seed),
+        targets: datasetSplitTargets(body.targets),
+      });
+      return { split: result };
+    },
+  );
+
+  app.post<{ Params: { id: string } }>(
+    "/admin/v1/dataset-projects/:id/lock-holdout",
+    async (request, reply) => {
+      const service = requireService(request, reply, "DATASET_ADMIN");
+      if (!service) return reply;
+      const result = await service.lockHoldout(
+        requiredUuid(request.params.id),
+        requireIdentity(request).subject,
+      );
+      return { holdout: result };
+    },
+  );
+
+  app.get<{ Params: { id: string }; Querystring: { splits?: string } }>(
+    "/admin/v1/dataset-projects/:id/export",
+    async (request, reply) => {
+      if (!options.datasetReview) {
+        return reply.code(503).send(errorBody("ADMIN_DATASET_REVIEW_DISABLED", request.id));
+      }
+      if (!options.datasetExportEnabled) {
+        return reply.code(503).send(errorBody("ADMIN_DATASET_EXPORT_DISABLED", request.id));
+      }
+      const identity = requireIdentity(request);
+      if (!datasetRoleAtLeast(identity, "BENCHMARK_VIEWER")) {
+        return reply.code(403).send(errorBody("ADMIN_DATASET_FORBIDDEN", request.id));
+      }
+      const splits = datasetExportSplits(request.query.splits);
+      // The holdout benchmark is privileged — only DATASET_ADMIN may export it.
+      if (splits.includes("HOLDOUT") && !datasetRoleAtLeast(identity, "DATASET_ADMIN")) {
+        return reply.code(403).send(errorBody("ADMIN_DATASET_FORBIDDEN", request.id));
+      }
+      const result = await options.datasetReview.exportProject(
+        requiredUuid(request.params.id),
+        splits,
+      );
+      reply.header("content-type", "application/x-ndjson; charset=utf-8");
+      reply.header("content-disposition", `attachment; filename="${result.filename}"`);
+      reply.header("x-dataset-export-items", String(result.itemCount));
+      reply.header("x-dataset-export-rows", String(result.rowCount));
+      return reply.send(result.jsonl);
+    },
+  );
+
+  app.get("/admin/v1/dataset-label-schemas", async (request, reply) => {
+    const service = requireService(request, reply, "BENCHMARK_VIEWER");
+    if (!service) return reply;
+    return { items: await service.listLabelSchemas(), next_cursor: null };
+  });
+
+  app.post<{ Body: unknown }>(
+    "/admin/v1/dataset-label-schemas",
+    async (request, reply) => {
+      const service = requireService(request, reply, "DATASET_ADMIN");
+      if (!service) return reply;
+      try {
+        const created = await service.createLabelSchema(
+          request.body,
+          requireIdentity(request).subject,
+        );
+        return reply.code(created.created ? 201 : 200).send({ label_schema: created });
+      } catch {
+        return reply.code(400).send(errorBody("ADMIN_DATASET_INVALID", request.id));
+      }
+    },
+  );
+
+  app.post<{ Params: { id: string }; Body: DatasetAnnotationBody }>(
+    "/admin/v1/dataset-items/:id/annotations",
+    async (request, reply) => {
+      const service = requireService(request, reply, "ANNOTATOR");
+      if (!service) return reply;
+      const body = request.body ?? {};
+      const created = await service.addAnnotation({
+        projectItemId: requiredUuid(request.params.id),
+        labelCode: datasetLabelCode(body.label_code),
+        scope: datasetEnum(AnnotationScopeV1Schema, body.scope),
+        turnIndex: datasetOptionalIndex(body.turn_index),
+        secondTurnIndex: datasetOptionalIndex(body.second_turn_index),
+        evidenceText: datasetOptionalEvidence(body.evidence_text),
+        evidenceStart: datasetOptionalIndex(body.evidence_start),
+        evidenceEnd: datasetOptionalIndex(body.evidence_end),
+        confidence: datasetEnum(AnnotationConfidenceV1Schema, body.confidence),
+        reviewerSubject: requireIdentity(request).subject,
+      });
+      return reply.code(201).send({ annotation: created });
+    },
+  );
+
+  app.post<{ Params: { id: string }; Body: DatasetReviewBody }>(
+    "/admin/v1/dataset-annotations/:id/review",
+    async (request, reply) => {
+      // REMOVE is an adjudication-grade action; ACCEPT/REJECT/EDIT need ANNOTATOR.
+      const action = datasetReviewAction(request.body?.action);
+      const minimum: DatasetRoleV1 = action === "REMOVE" ? "ADJUDICATOR" : "ANNOTATOR";
+      const service = requireService(request, reply, minimum);
+      if (!service) return reply;
+      const updated = await service.reviewAnnotation(requiredUuid(request.params.id), {
+        action,
+        actorSubject: requireIdentity(request).subject,
+        ...(datasetReviewPatch(request.body?.patch) ?? {}),
+      });
+      return updated ? { annotation: updated } : notFound(reply, request.id);
+    },
+  );
+}
+
+function datasetReviewCapabilities(
+  options: CreateAdminApiOptions,
+  role: "OWNER" | "EDITOR" | "APPROVER" | "VIEWER",
+) {
+  const enabled = Boolean(options.datasetReview);
+  const identity = { role } as AdminIdentity;
+  return {
+    enabled,
+    role: datasetRoleFor(identity),
+    can_annotate: enabled && datasetRoleAtLeast(identity, "ANNOTATOR"),
+    can_adjudicate: enabled && datasetRoleAtLeast(identity, "ADJUDICATOR"),
+    can_admin: enabled && datasetRoleAtLeast(identity, "DATASET_ADMIN"),
+    ai_prelabel: enabled && Boolean(options.datasetAiPrelabelEnabled),
+    blind_review: enabled && Boolean(options.datasetBlindReviewEnabled),
+    export: enabled && Boolean(options.datasetExportEnabled),
+  };
+}
+
+function datasetEnum<T extends string>(
+  schema: { safeParse(value: unknown): { success: true; data: T } | { success: false } },
+  value: unknown,
+): T {
+  const parsed = schema.safeParse(value);
+  if (!parsed.success) throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  return parsed.data;
+}
+
+function datasetName(value: unknown): string {
+  if (typeof value !== "string" || value.trim().length < 1 || value.trim().length > 200) {
+    throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  }
+  return value.trim();
+}
+
+function datasetOptionalText(value: unknown): string | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== "string" || value.length > 2000) {
+    throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  }
+  return value;
+}
+
+function datasetSeed(value: unknown): string {
+  if (typeof value !== "string" || !/^[A-Za-z0-9_.:-]{1,128}$/.test(value)) {
+    throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  }
+  return value;
+}
+
+function datasetSplitTargets(value: unknown): Record<string, number> {
+  if (typeof value !== "object" || value === null) {
+    throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  }
+  const targets: Record<string, number> = {};
+  for (const key of ["DEVELOPMENT", "VALIDATION", "HOLDOUT", "RARE_SAFETY"] as const) {
+    const raw = (value as Record<string, unknown>)[key];
+    if (raw === undefined) continue;
+    if (typeof raw !== "number" || !Number.isFinite(raw) || raw < 0 || raw > 1_000_000) {
+      throw new AdminQueryError("ADMIN_QUERY_INVALID");
+    }
+    targets[key] = raw;
+  }
+  return targets;
+}
+
+function datasetExportSplits(value: string | undefined): ("DEVELOPMENT" | "VALIDATION" | "HOLDOUT" | "RARE_SAFETY")[] {
+  if (!value) return ["DEVELOPMENT", "VALIDATION"];
+  const parts = value.split(",").map((part) => part.trim()).filter(Boolean);
+  const allowed = ["DEVELOPMENT", "VALIDATION", "HOLDOUT", "RARE_SAFETY"] as const;
+  const result = parts.map((part) => {
+    if (!allowed.includes(part as (typeof allowed)[number])) {
+      throw new AdminQueryError("ADMIN_QUERY_INVALID");
+    }
+    return part as (typeof allowed)[number];
+  });
+  return result.length > 0 ? [...new Set(result)] : ["DEVELOPMENT", "VALIDATION"];
+}
+
+function datasetLabelCode(value: unknown): string {
+  if (typeof value !== "string" || !/^[A-Z0-9_]{1,64}$/.test(value)) {
+    throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  }
+  return value;
+}
+
+function datasetOptionalIndex(value: unknown): number | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
+    throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  }
+  return value;
+}
+
+function datasetOptionalEvidence(value: unknown): string | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== "string" || value.length > 2000) {
+    throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  }
+  return value;
+}
+
+function datasetReviewAction(value: unknown): "ACCEPT" | "REJECT" | "EDIT" | "REMOVE" {
+  if (value !== "ACCEPT" && value !== "REJECT" && value !== "EDIT" && value !== "REMOVE") {
+    throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  }
+  return value;
+}
+
+interface DatasetReviewPatch {
+  labelCode?: string;
+  confidence?: "HIGH" | "MEDIUM" | "LOW";
+  evidenceText?: string | null;
+  evidenceStart?: number | null;
+  evidenceEnd?: number | null;
+  turnIndex?: number | null;
+  secondTurnIndex?: number | null;
+}
+
+function datasetReviewPatch(value: unknown): { patch: DatasetReviewPatch } | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== "object") throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  const source = value as Record<string, unknown>;
+  const patch: DatasetReviewPatch = {};
+  if (source.label_code !== undefined) patch.labelCode = datasetLabelCode(source.label_code);
+  if (source.confidence !== undefined) {
+    patch.confidence = datasetEnum(AnnotationConfidenceV1Schema, source.confidence);
+  }
+  if (source.evidence_text !== undefined) patch.evidenceText = datasetOptionalEvidence(source.evidence_text);
+  if (source.evidence_start !== undefined) patch.evidenceStart = datasetOptionalIndex(source.evidence_start);
+  if (source.evidence_end !== undefined) patch.evidenceEnd = datasetOptionalIndex(source.evidence_end);
+  if (source.turn_index !== undefined) patch.turnIndex = datasetOptionalIndex(source.turn_index);
+  if (source.second_turn_index !== undefined) patch.secondTurnIndex = datasetOptionalIndex(source.second_turn_index);
+  return { patch };
 }
 
 const COMMANDS = [

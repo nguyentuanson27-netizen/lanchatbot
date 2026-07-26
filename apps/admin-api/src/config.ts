@@ -30,6 +30,10 @@ export interface AdminApiConfig {
   readonly productMediaCleanupIntervalMs: number;
   readonly productMediaSheetId: string;
   readonly googleSheetsCredential: string;
+  readonly datasetReviewEnabled: boolean;
+  readonly datasetAiPrelabelEnabled: boolean;
+  readonly datasetBlindReviewEnabled: boolean;
+  readonly datasetExportEnabled: boolean;
   readonly port: number;
 }
 
@@ -145,6 +149,10 @@ export function adminConfigFromEnvironment(
       "GOOGLE_SHEETS_CREDENTIAL",
       "GOOGLE_SHEETS_CREDENTIAL_FILE",
     ),
+    datasetReviewEnabled: environment.ADMIN_DATASET_REVIEW_V1?.trim().toLowerCase() === "true",
+    datasetAiPrelabelEnabled: environment.DATASET_AI_PRELABEL_V1?.trim().toLowerCase() === "true",
+    datasetBlindReviewEnabled: environment.DATASET_BLIND_REVIEW_V1?.trim().toLowerCase() === "true",
+    datasetExportEnabled: environment.DATASET_EXPORT_V1?.trim().toLowerCase() === "true",
     port,
   };
 }

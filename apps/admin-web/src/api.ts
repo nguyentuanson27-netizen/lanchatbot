@@ -23,7 +23,24 @@ import type {
   PolicyControlData,
   PolicyLifecycle,
   QualitySummary,
+  DatasetReviewCapability,
 } from "./types.js";
+import type {
+  AnnotationScope,
+  Confidence,
+  DatasetIndexEntry,
+  DatasetProjectSummary,
+  DatasetSummary,
+  ReviewAnnotation,
+  ReviewMode,
+  ReviewMessage,
+  ReviewQueueData,
+  Split,
+} from "./dataset-review-types.js";
+
+// Server-side annotation-review verbs (distinct from the queue UI's ReviewAction,
+// which includes navigation like SAVE_NEXT and excludes REMOVE).
+export type DatasetReviewVerb = "ACCEPT" | "REJECT" | "EDIT" | "REMOVE";
 
 const API_BASE = (import.meta.env.VITE_ADMIN_API_BASE_URL as string | undefined) ?? "/admin/v1";
 
@@ -235,6 +252,24 @@ export async function getIdentity(signal?: AbortSignal): Promise<Identity> {
     policyCanaryLiveEnabled: policyLifecycle.canary_live === true,
     policyPublishEnabled: policyLifecycle.publish === true,
     productMediaUpload: capabilities.product_media_upload === true,
+    ...(mapDatasetReviewCapability(capabilities.dataset_review)
+      ? { datasetReview: mapDatasetReviewCapability(capabilities.dataset_review)! }
+      : {}),
+  };
+}
+
+function mapDatasetReviewCapability(value: unknown): DatasetReviewCapability | null {
+  if (typeof value !== "object" || value === null) return null;
+  const source = record(value);
+  return {
+    enabled: source.enabled === true,
+    role: stringValue(source.role, "BENCHMARK_VIEWER"),
+    canAnnotate: source.can_annotate === true,
+    canAdjudicate: source.can_adjudicate === true,
+    canAdmin: source.can_admin === true,
+    aiPrelabel: source.ai_prelabel === true,
+    blindReview: source.blind_review === true,
+    export: source.export === true,
   };
 }
 
@@ -1116,4 +1151,211 @@ export async function getAuditLogs(signal?: AbortSignal): Promise<ListResponse<A
     total: numberValue(payload.total, items.length),
     nextCursor: typeof payload.next_cursor === "string" ? payload.next_cursor : null,
   };
+}
+
+// --- Dataset review (AI Evaluation & Dataset Review, Batch 6b) ---------------
+
+const REVIEW_MODES = new Set<ReviewMode>(["AI_ASSISTED", "BLIND", "DOUBLE_BLIND"]);
+const SPLITS = new Set<Split>(["DEVELOPMENT", "VALIDATION", "HOLDOUT", "RARE_SAFETY"]);
+const MESSAGE_ROLES = new Set<ReviewMessage["role"]>(["CUSTOMER", "SHOP", "UNKNOWN"]);
+const SCOPES = new Set<AnnotationScope>(["CUSTOMER_MESSAGE", "SHOP_MESSAGE", "CONVERSATION", "SEQUENCE"]);
+const CONFIDENCES = new Set<Confidence>(["HIGH", "MEDIUM", "LOW"]);
+const SOURCES = new Set<ReviewAnnotation["source"]>(["HEURISTIC", "AI", "HUMAN", "ADJUDICATOR"]);
+const STATUSES = new Set<ReviewAnnotation["status"]>(["PROPOSED", "ACCEPTED", "REJECTED", "EDITED", "ADJUDICATED"]);
+
+function memberOr<T extends string>(set: ReadonlySet<T>, value: unknown, fallback: T): T {
+  const candidate = stringValue(value, fallback);
+  return set.has(candidate as T) ? (candidate as T) : fallback;
+}
+
+function nullableNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function nullableString(value: unknown): string | null {
+  return typeof value === "string" ? value : null;
+}
+
+function mapDatasetSummary(value: unknown): DatasetSummary {
+  const item = record(value);
+  return {
+    datasetId: stringValue(item.dataset_id),
+    name: stringValue(item.name, "Bộ dữ liệu"),
+    sourceType: stringValue(item.source_type, "UNKNOWN"),
+    status: stringValue(item.status, "UNKNOWN"),
+    totalItems: numberValue(item.total_items),
+    importedItems: numberValue(item.imported_items),
+    failedItems: numberValue(item.failed_items),
+  };
+}
+
+function mapProjectSummary(value: unknown): DatasetProjectSummary {
+  const item = record(value);
+  return {
+    projectId: stringValue(item.project_id),
+    name: stringValue(item.name, "Dự án gán nhãn"),
+    status: stringValue(item.status, "DRAFT"),
+    reviewMode: stringValue(item.review_mode, "AI_ASSISTED"),
+    annotationMode: stringValue(item.annotation_mode, "MESSAGE"),
+  };
+}
+
+export async function getDatasets(signal?: AbortSignal): Promise<DatasetSummary[]> {
+  const payload = await request<JsonRecord>("/datasets", signal);
+  return arrayValue(payload.items).map(mapDatasetSummary);
+}
+
+export async function getDatasetProjects(
+  datasetId: string,
+  signal?: AbortSignal,
+): Promise<DatasetProjectSummary[]> {
+  const payload = await request<JsonRecord>(`/datasets/${encodeURIComponent(datasetId)}/projects`, signal);
+  return arrayValue(payload.items).map(mapProjectSummary);
+}
+
+export async function getDatasetIndex(signal?: AbortSignal): Promise<DatasetIndexEntry[]> {
+  const datasets = await getDatasets(signal);
+  return Promise.all(
+    datasets.map(async (dataset) => ({
+      dataset,
+      projects: await getDatasetProjects(dataset.datasetId, signal),
+    })),
+  );
+}
+
+export async function getReviewQueue(
+  projectId: string,
+  split: Split | null,
+  signal?: AbortSignal,
+): Promise<ReviewQueueData> {
+  const query = split ? `?split=${encodeURIComponent(split)}` : "";
+  const payload = await request<JsonRecord>(
+    `/dataset-projects/${encodeURIComponent(projectId)}/queue${query}`,
+    signal,
+  );
+  const queue = record(payload.queue);
+  const progress = record(queue.progress);
+  const itemRaw = queue.item;
+  const item = itemRaw === null || itemRaw === undefined ? null : record(itemRaw);
+  return {
+    projectId: stringValue(queue.project_id, projectId),
+    projectName: stringValue(queue.project_name, "Dự án gán nhãn"),
+    reviewMode: memberOr(REVIEW_MODES, queue.review_mode, "AI_ASSISTED"),
+    split: split ?? splitFromValue(queue.split),
+    revealed: queue.revealed === true,
+    progress: { reviewed: numberValue(progress.reviewed), total: numberValue(progress.total) },
+    labels: arrayValue(queue.labels).map(mapLabelOption),
+    item: item ? mapQueueItem(item) : null,
+  };
+}
+
+function splitFromValue(value: unknown): Split {
+  return memberOr(SPLITS, value, "DEVELOPMENT");
+}
+
+function mapLabelOption(value: unknown): ReviewQueueData["labels"][number] {
+  const item = record(value);
+  return {
+    code: stringValue(item.code),
+    name: stringValue(item.name, stringValue(item.code)),
+    scope: memberOr(SCOPES, item.scope, "CONVERSATION"),
+    evidenceRequired: item.evidence_required === true,
+    confidenceRequired: item.confidence_required === true,
+    mutuallyExclusiveGroup: nullableString(item.mutually_exclusive_group),
+    isSafetyCritical: item.is_safety_critical === true,
+  };
+}
+
+function mapQueueItem(item: JsonRecord): NonNullable<ReviewQueueData["item"]> {
+  const lease = record(item.lease);
+  return {
+    projectItemId: stringValue(item.project_item_id),
+    conversationId: stringValue(item.conversation_id),
+    split: splitFromValue(item.split),
+    assignmentStatus: stringValue(item.assignment_status, "IN_REVIEW"),
+    qualityFlags: arrayValue(item.quality_flags).map(String),
+    revision: numberValue(item.revision),
+    lease: {
+      ownerSubject: nullableString(lease.owner_subject),
+      ownedByCurrent: Boolean(lease.owned_by_current),
+      until: nullableString(lease.until),
+    },
+    messages: arrayValue(item.messages).map((value): ReviewMessage => {
+      const message = record(value);
+      return {
+        turnIndex: numberValue(message.turn_index),
+        role: memberOr(MESSAGE_ROLES, message.role, "UNKNOWN"),
+        redactedText: stringValue(message.redacted_text),
+      };
+    }),
+    annotations: arrayValue(item.annotations).map((value): ReviewAnnotation => {
+      const annotation = record(value);
+      return {
+        id: stringValue(annotation.annotation_id),
+        labelCode: stringValue(annotation.label_code),
+        scope: memberOr(SCOPES, annotation.scope, "CONVERSATION"),
+        turnIndex: nullableNumber(annotation.turn_index),
+        secondTurnIndex: nullableNumber(annotation.second_turn_index),
+        evidenceText: nullableString(annotation.evidence_text),
+        evidenceStart: nullableNumber(annotation.evidence_start),
+        evidenceEnd: nullableNumber(annotation.evidence_end),
+        confidence: memberOr(CONFIDENCES, annotation.confidence, "MEDIUM"),
+        source: memberOr(SOURCES, annotation.source, "AI"),
+        status: memberOr(STATUSES, annotation.status, "PROPOSED"),
+      };
+    }),
+  };
+}
+
+export async function reviewDatasetAnnotation(
+  annotationId: string,
+  action: DatasetReviewVerb,
+  patch?: Record<string, unknown>,
+): Promise<void> {
+  await request<JsonRecord>(`/dataset-annotations/${encodeURIComponent(annotationId)}/review`, undefined, {
+    method: "POST",
+    body: { action, ...(patch ? { patch } : {}) },
+  });
+}
+
+export async function addDatasetAnnotation(
+  projectItemId: string,
+  input: {
+    labelCode: string;
+    scope: AnnotationScope;
+    confidence: Confidence;
+    turnIndex?: number | null;
+    secondTurnIndex?: number | null;
+    evidenceText?: string | null;
+    evidenceStart?: number | null;
+    evidenceEnd?: number | null;
+  },
+): Promise<void> {
+  await request<JsonRecord>(`/dataset-items/${encodeURIComponent(projectItemId)}/annotations`, undefined, {
+    method: "POST",
+    body: {
+      label_code: input.labelCode,
+      scope: input.scope,
+      confidence: input.confidence,
+      ...(input.turnIndex != null ? { turn_index: input.turnIndex } : {}),
+      ...(input.secondTurnIndex != null ? { second_turn_index: input.secondTurnIndex } : {}),
+      ...(input.evidenceText != null ? { evidence_text: input.evidenceText } : {}),
+      ...(input.evidenceStart != null ? { evidence_start: input.evidenceStart } : {}),
+      ...(input.evidenceEnd != null ? { evidence_end: input.evidenceEnd } : {}),
+    },
+  });
+}
+
+export async function lockDatasetHoldout(projectId: string): Promise<number> {
+  const payload = await request<JsonRecord>(
+    `/dataset-projects/${encodeURIComponent(projectId)}/lock-holdout`,
+    undefined,
+    { method: "POST" },
+  );
+  return numberValue(record(payload.holdout).locked);
+}
+
+export function datasetExportPath(projectId: string, splits?: readonly Split[]): string {
+  const query = splits && splits.length > 0 ? `?splits=${encodeURIComponent(splits.join(","))}` : "";
+  return `${API_BASE}/dataset-projects/${encodeURIComponent(projectId)}/export${query}`;
 }

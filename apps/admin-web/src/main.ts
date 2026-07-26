@@ -20,8 +20,17 @@ import {
   getProductMediaCatalog,
   uploadProductMedia,
   getQuality,
+  getDatasetIndex,
+  getReviewQueue,
+  reviewDatasetAnnotation,
+  addDatasetAnnotation,
+  lockDatasetHoldout,
+  type DatasetReviewVerb,
 } from "./api.js";
 import { bindPolicyControl, renderPolicyControl } from "./policy-control-ui.js";
+import { renderDatasetIndex } from "./dataset-review-screen.js";
+import { bindReviewQueue, renderReviewQueue } from "./dataset-review-ui.js";
+import type { ReviewQueueData } from "./dataset-review-types.js";
 import {
   escapeHtml,
   formatDateTime,
@@ -52,7 +61,7 @@ import type {
   ProductMediaUpload,
 } from "./types.js";
 
-type RouteName = "overview" | "conversations" | "handoffs" | "outreach" | "quality" | "products" | "media" | "policy" | "operations" | "audit";
+type RouteName = "overview" | "conversations" | "handoffs" | "outreach" | "quality" | "products" | "media" | "policy" | "datasets" | "operations" | "audit";
 
 interface NavigationItem {
   id: RouteName;
@@ -70,6 +79,7 @@ const navigation: NavigationItem[] = [
   { id: "products", label: "Dữ liệu sản phẩm", description: "Giá, tồn, size, ETA", icon: "bag" },
   { id: "media", label: "Ảnh sản phẩm", description: "Tải ảnh bổ sung", icon: "image" },
   { id: "policy", label: "Chính sách bán hàng", description: "Phiên bản, duyệt và rollback", icon: "shield" },
+  { id: "datasets", label: "Đánh giá dữ liệu", description: "Review nhãn và benchmark", icon: "clipboard" },
   { id: "operations", label: "Vận hành", description: "Worker và hàng đợi", icon: "pulse" },
   { id: "audit", label: "Nhật ký", description: "Hoạt động hệ thống", icon: "clock" },
 ];
@@ -107,6 +117,10 @@ const routeTitles: Record<RouteName, { title: string; subtitle: string }> = {
     title: "Chính sách bán hàng",
     subtitle: "Quản lý phiên bản, chạy thử trên page test và rollback an toàn.",
   },
+  datasets: {
+    title: "Đánh giá dữ liệu",
+    subtitle: "Review nhãn AI, khóa holdout và xuất benchmark. Chỉ hiển thị dữ liệu đã ẩn danh.",
+  },
   operations: {
     title: "Vận hành",
     subtitle: "Tình trạng xử lý tin nhắn và các dịch vụ nền.",
@@ -137,6 +151,8 @@ let handoffStatus = "OPEN";
 let handoffReason = "";
 let handoffSource = "";
 let policyControlData: PolicyControlData | null = null;
+let datasetQueue: ReviewQueueData | null = null;
+let datasetActionBusy = false;
 
 interface ControlAction {
   command: AdminCommandName;
@@ -194,6 +210,7 @@ function icon(name: string, size = 20): string {
     check: '<path d="m5 12 4 4L19 6"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 15-5-5L5 20"/>',
+    clipboard: '<rect x="8" y="3" width="8" height="4" rx="1"/><path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><path d="M9 12h6M9 16h4"/>',
   };
   return `<svg class="icon" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] ?? paths.grid}</svg>`;
 }
@@ -201,6 +218,12 @@ function icon(name: string, size = 20): string {
 function routeFromHash(): RouteName {
   const candidate = window.location.hash.replace(/^#\/?/, "").split("/")[0];
   return navigation.some((item) => item.id === candidate) ? (candidate as RouteName) : "overview";
+}
+
+// The datasets route carries an optional project id sub-segment: #/datasets/<id>.
+function datasetProjectFromHash(): string | null {
+  const parts = window.location.hash.replace(/^#\/?/, "").split("/");
+  return parts[0] === "datasets" && parts[1] ? decodeURIComponent(parts[1]) : null;
 }
 
 function toneForStatus(status?: string | null): Tone {
@@ -273,6 +296,7 @@ function badge(label: string, tone: Tone = "neutral"): string {
 function renderShell(): void {
   const nav = navigation
     .filter((item) => item.id !== "outreach" || identity?.historyEnabled === true)
+    .filter((item) => item.id !== "datasets" || identity?.datasetReview?.enabled === true)
     .map(
       (item) => `
         <a class="nav-item ${item.id === currentRoute ? "is-active" : ""}" href="#/${item.id}" data-route="${item.id}">
@@ -978,6 +1002,25 @@ async function loadCurrentPage(silent = true): Promise<void> {
           : { artifacts: [], pointers: [], simulations: [] };
         html = renderPolicyControl(policyControlData, identity);
         break;
+      case "datasets": {
+        if (identity?.datasetReview?.enabled !== true) {
+          currentRoute = "overview";
+          html = renderOverview(await getOverview(activeController.signal));
+          break;
+        }
+        const projectId = datasetProjectFromHash();
+        if (projectId) {
+          datasetQueue = await getReviewQueue(projectId, null, activeController.signal);
+          html = renderReviewQueue(datasetQueue, identity);
+        } else {
+          datasetQueue = null;
+          html = renderDatasetIndex(
+            await getDatasetIndex(activeController.signal),
+            identity,
+          );
+        }
+        break;
+      }
       case "operations":
         html = renderOperations(await getOperations(activeController.signal));
         break;
@@ -997,6 +1040,10 @@ async function loadCurrentPage(silent = true): Promise<void> {
         (message) => showToast(message),
       );
     }
+    if (currentRoute === "datasets") {
+      if (datasetQueue?.item) bindDatasetReviewQueue(content);
+      else bindDatasetIndex();
+    }
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") return;
     content.innerHTML = renderError(error);
@@ -1009,6 +1056,97 @@ async function loadCurrentPage(silent = true): Promise<void> {
 function updateRefreshTime(): void {
   const target = document.querySelector("#updated-at");
   if (target) target.textContent = lastUpdatedAt ? `Cập nhật ${formatRelativeTime(lastUpdatedAt)}` : "Chưa cập nhật";
+}
+
+async function runDatasetAction(work: () => Promise<void>): Promise<void> {
+  if (datasetActionBusy) return;
+  datasetActionBusy = true;
+  try {
+    await work();
+  } catch (error) {
+    showToast(error instanceof ApiError ? error.message : "Không thể lưu thao tác review.");
+  } finally {
+    datasetActionBusy = false;
+  }
+}
+
+function bindDatasetReviewQueue(content: HTMLElement): void {
+  const queue = datasetQueue;
+  const item = queue?.item;
+  if (!queue || !item) return;
+
+  // Index-level lock button lives on the landing page, but the queue view has no
+  // lock control; per-annotation and footer actions are wired here.
+  bindReviewQueue(content, {
+    onAnnotationAction: (action, annotationId) => {
+      void runDatasetAction(async () => {
+        if (action === "EDIT") {
+          const current = item.annotations.find((entry) => entry.id === annotationId);
+          const nextLabel = window.prompt("Mã nhãn mới", current?.labelCode ?? "");
+          if (!nextLabel) return;
+          await reviewDatasetAnnotation(annotationId, "EDIT", { label_code: nextLabel.trim() });
+        } else {
+          const mapped: DatasetReviewVerb = action === "DELETE" ? "REMOVE" : action;
+          await reviewDatasetAnnotation(annotationId, mapped);
+        }
+        await loadCurrentPage(false);
+      });
+    },
+    onAction: (action) => {
+      if (action === "ADD") {
+        void runDatasetAction(async () => {
+          const label = window.prompt("Mã nhãn cần thêm (VD: BUYING_COMMITTED)");
+          if (!label) return;
+          await addDatasetAnnotation(item.projectItemId, {
+            labelCode: label.trim(),
+            scope: "CONVERSATION",
+            confidence: "HIGH",
+          });
+          await loadCurrentPage(false);
+        });
+        return;
+      }
+      if (action === "ACCEPT_ALL") {
+        void runDatasetAction(async () => {
+          const proposed = item.annotations.filter((entry) => entry.status === "PROPOSED");
+          for (const annotation of proposed) {
+            await reviewDatasetAnnotation(annotation.id, "ACCEPT");
+          }
+          await loadCurrentPage(false);
+        });
+        return;
+      }
+      if (action === "NEEDS_ADJUDICATION") {
+        showToast("Chuyển sang phân xử sẽ được bổ sung trong bản sau.");
+        return;
+      }
+      if (action === "PREVIOUS" || action === "SKIP") {
+        window.location.hash = "#/datasets";
+        return;
+      }
+      // SAVE_NEXT: labels are already persisted per action; refetch the queue's
+      // highest-priority reviewable item.
+      void loadCurrentPage(false);
+    },
+    onJumpToTurn: (turnIndex) => {
+      content.querySelector(`#review-turn-${turnIndex}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    },
+  });
+}
+
+function bindDatasetIndex(): void {
+  document.querySelectorAll<HTMLElement>("[data-dataset-lock]").forEach((element) => {
+    element.addEventListener("click", () => {
+      const projectId = element.dataset.datasetLock;
+      if (!projectId) return;
+      if (!window.confirm("Khóa toàn bộ mục holdout của dự án này? Sau khi khóa, holdout không thể review tiếp.")) return;
+      void runDatasetAction(async () => {
+        const locked = await lockDatasetHoldout(projectId);
+        showToast(`Đã khóa ${locked} mục holdout.`);
+        await loadCurrentPage(false);
+      });
+    });
+  });
 }
 
 function bindPageEvents(): void {
@@ -1555,7 +1693,13 @@ function startPolling(): void {
 
 window.addEventListener("hashchange", () => {
   const nextRoute = routeFromHash();
-  if (nextRoute === currentRoute) return;
+  // Within the datasets route the project sub-segment changes without changing
+  // the route name; detect that so the queue view loads/unloads.
+  const datasetSubpathChanged =
+    nextRoute === "datasets" &&
+    currentRoute === "datasets" &&
+    datasetProjectFromHash() !== (datasetQueue?.item ? datasetQueue.projectId : null);
+  if (nextRoute === currentRoute && !datasetSubpathChanged) return;
   currentRoute = nextRoute;
   activeController?.abort();
   renderShell();

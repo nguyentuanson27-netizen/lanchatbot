@@ -1,0 +1,21 @@
+import { createHash } from "node:crypto";
+import { normalizeForFingerprint } from "./normalize.js";
+
+// Duplicate grouping fingerprint (§7.4). Built from the normalized, already
+// PII-redacted CUSTOMER message sequence only. This catches near-duplicate
+// conversations that share the same customer script even when shop replies
+// differ, rather than only exact full-transcript duplicates. Teencode and emoji
+// are preserved by normalizeForFingerprint.
+export function customerSequenceFingerprint(
+  redactedCustomerMessages: readonly string[],
+): string {
+  const canonical = redactedCustomerMessages
+    .map((message) => normalizeForFingerprint(message))
+    .filter((message) => message.length > 0)
+    .join("\u0001");
+  return createHash("sha256").update(canonical, "utf8").digest("hex");
+}
+
+export function messageChecksum(role: string, text: string): string {
+  return createHash("sha256").update(role, "utf8").update("\u0000").update(text, "utf8").digest("hex");
+}
