@@ -154,7 +154,17 @@ describe("isLeaseHeldByOther", () => {
 
 describe("renderReviewQueue", () => {
   it("renders transcript, highlighted evidence, actions and progress", () => {
-    const html = renderReviewQueue(data(), identity);
+    const html = renderReviewQueue(data({
+      labels: [{
+        code: "BUYING_COMMITTED",
+        name: "Buying committed",
+        scope: "CUSTOMER_MESSAGE",
+        evidenceRequired: true,
+        confidenceRequired: true,
+        mutuallyExclusiveGroup: "BUYING_STATE",
+        isSafetyCritical: true,
+      }],
+    }), identity);
     expect(html).toContain('id="review-turn-0"');
     expect(html).toContain('id="review-turn-1"');
     expect(html).toContain("<mark");
@@ -163,6 +173,9 @@ describe("renderReviewQueue", () => {
     expect(html).toContain('data-review-action="SAVE_NEXT"');
     expect(html).toContain('data-progress="1/3"');
     expect(html).toContain("CONTAINS_PHONE");
+    expect(html).toContain("data-annotation-add");
+    expect(html).toContain('<option value="BUYING_COMMITTED">Buying committed (BUYING_COMMITTED)</option>');
+    expect(html).not.toContain('data-review-action="ADD"');
   });
 
   it("shows an empty state when there is no item", () => {
@@ -189,6 +202,7 @@ describe("renderReviewQueue", () => {
     const html = renderReviewQueue(data(), viewer);
     expect(html).toContain('data-review-action="SAVE_NEXT" disabled');
     expect(html).toContain('data-annotation-action="ACCEPT" data-annotation-id="ann-1" disabled');
+    expect(html).toContain('data-annotation-add aria-label="Th\u00eam nh\u00e3n" disabled');
   });
 
   it("shows delete only to an adjudicator", () => {

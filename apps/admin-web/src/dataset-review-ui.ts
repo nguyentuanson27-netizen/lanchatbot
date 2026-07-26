@@ -4,6 +4,7 @@ import type {
 } from "./types.js";
 import type {
   ReviewAction,
+  LabelOption,
   ReviewAnnotation,
   ReviewLease,
   ReviewMessage,
@@ -148,6 +149,20 @@ function confidenceBadge(confidence: ReviewAnnotation["confidence"]): string {
   return `<span class="review-conf review-conf--${confidence.toLowerCase()}">${confidence}</span>`;
 }
 
+function renderLabelSelect(labels: readonly LabelOption[], disabled: boolean): string {
+  const options = labels
+    .map((label) =>
+      `<option value="${escapeHtml(label.code)}">${escapeHtml(label.name)} (${escapeHtml(label.code)})</option>`,
+    )
+    .join("");
+  const disabledAttribute = disabled || labels.length === 0 ? " disabled" : "";
+  const placeholder = labels.length === 0 ? "Kh\u00f4ng c\u00f3 nh\u00e3n kh\u1ea3 d\u1ee5ng" : "Ch\u1ecdn nh\u00e3n \u0111\u1ec3 th\u00eam\u2026";
+  return `<select class="review-label-select" data-annotation-add aria-label="Th\u00eam nh\u00e3n"${disabledAttribute}>
+    <option value="">${placeholder}</option>
+    ${options}
+  </select>`;
+}
+
 function renderAnnotationCard(
   annotation: ReviewAnnotation,
   locked: boolean,
@@ -226,7 +241,7 @@ export function renderReviewQueue(data: ReviewQueueData, identity: Identity | nu
     <div class="review-body">
       <div class="review-transcript" aria-label="Hội thoại">${flags}${renderTranscript(item.messages, spansByTurn)}</div>
       <div class="review-labels" aria-label="Nhãn">${proposals}
-        <button type="button" class="secondary-button" data-review-action="ADD" data-annotation-add${disabled}>Thêm nhãn</button>
+        ${renderLabelSelect(data.labels, locked)}
       </div>
     </div>
     <footer class="review-footer">
@@ -242,7 +257,8 @@ export function renderReviewQueue(data: ReviewQueueData, identity: Identity | nu
 // --- Optional event binding (used when mounted into main.ts, Batch 6) --------
 
 export interface ReviewQueueHandlers {
-  onAction(action: ReviewAction | "NEEDS_ADJUDICATION" | "ADD"): void;
+  onAction(action: ReviewAction | "NEEDS_ADJUDICATION"): void;
+  onAddLabel(labelCode: string): void;
   onAnnotationAction(action: "ACCEPT" | "REJECT" | "EDIT" | "DELETE", annotationId: string): void;
   onJumpToTurn(turnIndex: number): void;
 }
@@ -261,7 +277,10 @@ export function bindReviewQueue(root: ParentNode, handlers: ReviewQueueHandlers)
       if (action) handlers.onAction(action);
     });
   });
-  root.querySelector<HTMLElement>("[data-annotation-add]")?.addEventListener("click", () => handlers.onAction("ADD"));
+  root.querySelector<HTMLSelectElement>("[data-annotation-add]")?.addEventListener("change", (event) => {
+    const select = event.currentTarget as HTMLSelectElement;
+    if (select.value) handlers.onAddLabel(select.value);
+  });
   root.querySelectorAll<HTMLElement>("[data-jump-turn]").forEach((element) => {
     element.addEventListener("click", () => {
       const turn = Number(element.dataset.jumpTurn);

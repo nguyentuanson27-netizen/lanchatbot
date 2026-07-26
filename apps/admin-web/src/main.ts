@@ -1092,20 +1092,22 @@ function bindDatasetReviewQueue(content: HTMLElement): void {
         await loadCurrentPage(false);
       });
     },
-    onAction: (action) => {
-      if (action === "ADD") {
-        void runDatasetAction(async () => {
-          const label = window.prompt("Mã nhãn cần thêm (VD: BUYING_COMMITTED)");
-          if (!label) return;
-          await addDatasetAnnotation(item.projectItemId, {
-            labelCode: label.trim(),
-            scope: "CONVERSATION",
-            confidence: "HIGH",
-          });
-          await loadCurrentPage(false);
-        });
+    onAddLabel: (labelCode) => {
+      const label = queue.labels.find((entry) => entry.code === labelCode);
+      if (!label) {
+        showToast("Nh\u00e3n kh\u00f4ng h\u1ee3p l\u1ec7.", "danger");
         return;
       }
+      void runDatasetAction(async () => {
+        await addDatasetAnnotation(item.projectItemId, {
+          labelCode: label.code,
+          scope: label.scope,
+          confidence: "HIGH",
+        });
+        await loadCurrentPage(false);
+      });
+    },
+    onAction: (action) => {
       if (action === "ACCEPT_ALL") {
         void runDatasetAction(async () => {
           const proposed = item.annotations.filter((entry) => entry.status === "PROPOSED");
