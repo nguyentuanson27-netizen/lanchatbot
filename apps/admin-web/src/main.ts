@@ -154,6 +154,7 @@ let handoffSource = "";
 let policyControlData: PolicyControlData | null = null;
 let datasetQueue: ReviewQueueData | null = null;
 let datasetActionBusy = false;
+let datasetReviewHistory: ReviewQueueData[] = [];
 
 interface ControlAction {
   command: AdminCommandName;
@@ -1123,12 +1124,27 @@ function bindDatasetReviewQueue(content: HTMLElement): void {
         showToast("Chuyển sang phân xử sẽ được bổ sung trong bản sau.");
         return;
       }
-      if (action === "PREVIOUS" || action === "SKIP") {
+      if (action === "PREVIOUS") {
+        const previous = datasetReviewHistory.pop();
+        if (!previous) {
+          showToast("Chưa có hội thoại trước trong phiên review này.", "warning");
+          return;
+        }
+        datasetQueue = previous;
+        content.innerHTML = renderReviewQueue(previous, identity);
+        content.querySelectorAll<HTMLButtonElement>("[data-annotation-action], [data-annotation-add], [data-review-action]:not([data-review-action=PREVIOUS])").forEach((control) => {
+          control.disabled = true;
+        });
+        bindDatasetReviewQueue(content);
+        return;
+      }
+      if (action === "SKIP") {
         window.location.hash = "#/datasets";
         return;
       }
       void runDatasetAction(async () => {
         await completeDatasetReviewItem(item.projectItemId, item.revision);
+        datasetReviewHistory.push(queue);
         await loadCurrentPage(false);
       });
     },
@@ -1688,7 +1704,7 @@ function showToast(message: string, tone: "good" | "warning" | "danger" = "good"
 function startPolling(): void {
   window.clearInterval(refreshTimer);
   refreshTimer = window.setInterval(() => {
-    if (document.visibilityState === "visible" && currentRoute !== "media" && !document.querySelector(".detail-drawer")) {
+    if (document.visibilityState === "visible" && currentRoute !== "media" && !(currentRoute === "datasets" && datasetProjectFromHash()) && !document.querySelector(".detail-drawer")) {
       void loadCurrentPage(true);
     }
     updateRefreshTime();
@@ -1712,6 +1728,10 @@ window.addEventListener("hashchange", () => {
 });
 
 document.addEventListener("keydown", (event) => {
+  if (currentRoute === "datasets" && event.key.toLowerCase() === "p" && !event.ctrlKey && !event.metaKey && !event.altKey && !(event.target instanceof HTMLInputElement) && !(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLSelectElement)) {
+    document.querySelector<HTMLButtonElement>("[data-review-action=PREVIOUS]")?.click();
+    return;
+  }
   if (event.key === "Escape") {
     const modalLayer = document.querySelector("#command-modal-layer");
     if (modalLayer?.hasChildNodes()) {
