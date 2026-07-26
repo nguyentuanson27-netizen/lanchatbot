@@ -26,6 +26,7 @@ import {
   reviewDatasetAnnotation,
   addDatasetAnnotation,
   completeDatasetReviewItem,
+  reopenDatasetReviewItem,
   lockDatasetHoldout,
   type DatasetReviewVerb,
 } from "./api.js";
@@ -1124,7 +1125,14 @@ function bindDatasetReviewQueue(content: HTMLElement): void {
         showToast("Chuyển sang phân xử sẽ được bổ sung trong bản sau.");
         return;
       }
-      if (action === "PREVIOUS") {
+      if (action === "REOPEN") {
+        void runDatasetAction(async () => {
+          await reopenDatasetReviewItem(item.projectItemId);
+          await loadCurrentPage(false);
+          showToast("Đã mở lại hội thoại để sửa.");
+        });
+        return;
+      }      if (action === "PREVIOUS") {
         void runDatasetAction(async () => {
           const previous = await getPreviousReviewQueue(
             queue.projectId,
@@ -1137,7 +1145,7 @@ function bindDatasetReviewQueue(content: HTMLElement): void {
           }
           datasetQueue = previous;
           content.innerHTML = renderReviewQueue(previous, identity);
-          content.querySelectorAll<HTMLButtonElement>("[data-annotation-action], [data-annotation-add], [data-review-action]:not([data-review-action=PREVIOUS])").forEach((control) => {
+          content.querySelectorAll<HTMLButtonElement>("[data-annotation-action], [data-annotation-add], [data-review-action]:not([data-review-action=PREVIOUS]):not([data-review-action=REOPEN])").forEach((control) => {
             control.disabled = true;
           });
           bindDatasetReviewQueue(content);

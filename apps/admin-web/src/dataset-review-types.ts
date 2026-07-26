@@ -16,6 +16,7 @@ export type ReviewAction =
   | "EDIT"
   | "SAVE_NEXT"
   | "PREVIOUS"
+  | "REOPEN"
   | "ACCEPT_ALL"
   | "SKIP";
 

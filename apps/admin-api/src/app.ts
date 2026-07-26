@@ -1040,6 +1040,24 @@ function registerDatasetReviewRoutes(
     },
   );
 
+  app.post<{ Params: { id: string } }>(
+    "/admin/v1/dataset-items/:id/reopen",
+    async (request, reply) => {
+      const service = requireService(request, reply, "ANNOTATOR");
+      if (!service) return reply;
+      if (!service.reopenReviewItem) {
+        return reply.code(501).send(errorBody("ADMIN_DATASET_REOPEN_UNAVAILABLE", request.id));
+      }
+      const reopened = await service.reopenReviewItem(
+        requiredUuid(request.params.id),
+        requireIdentity(request).subject,
+      );
+      if (!reopened) {
+        return reply.code(409).send(errorBody("ADMIN_DATASET_REOPEN_CONFLICT", request.id));
+      }
+      return { item: reopened };
+    },
+  );
   app.post<{ Params: { id: string }; Body: DatasetCompleteBody }>(
     "/admin/v1/dataset-items/:id/complete",
     async (request, reply) => {

@@ -194,7 +194,8 @@ export function renderReviewQueue(data: ReviewQueueData, identity: Identity | nu
 
   const canAnnotate = identity?.datasetReview?.canAnnotate === true;
   const canRemove = identity?.datasetReview?.canAdjudicate === true;
-  const locked = !canAnnotate || isLeaseHeldByOther(item.lease, currentReviewer);
+  const historical = data.historical === true;
+  const locked = historical || !canAnnotate || isLeaseHeldByOther(item.lease, currentReviewer);
   const revealed = data.revealed ?? false;
   const annotations = visibleAnnotations(item.annotations, data.reviewMode, revealed);
 
@@ -245,7 +246,8 @@ export function renderReviewQueue(data: ReviewQueueData, identity: Identity | nu
       </div>
     </div>
     <footer class="review-footer">
-      <button type="button" data-review-action="PREVIOUS"${disabled}>Trước (P)</button>
+      <button type="button" data-review-action="PREVIOUS">Trước (P)</button>
+      ${historical ? `<button type="button" class="primary-button" data-review-action="REOPEN">Sửa lại</button>` : ""}
       <button type="button" data-review-action="ACCEPT_ALL"${disabled}>Chấp nhận tất cả (Shift+A)</button>
       <button type="button" data-review-action="SKIP"${disabled}>Bỏ qua (S)</button>
       <button type="button" data-review-action="NEEDS_ADJUDICATION"${disabled}>Cần phân xử</button>
