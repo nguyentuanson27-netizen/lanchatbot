@@ -1376,6 +1376,7 @@ export async function addDatasetAnnotation(
 export async function reopenDatasetReviewItem(projectItemId: string): Promise<void> {
   await request<JsonRecord>(`/dataset-items/${encodeURIComponent(projectItemId)}/reopen`, undefined, {
     method: "POST",
+    body: {},
   });
 }
 export async function completeDatasetReviewItem(
