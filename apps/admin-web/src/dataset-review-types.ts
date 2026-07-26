@@ -106,4 +106,5 @@ export interface ReviewQueueData {
   // Blind review: AI proposals stay hidden until the reviewer submits their own
   // pass and the server reveals them.
   revealed?: boolean;
+  historical?: boolean;
 }

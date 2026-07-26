@@ -1249,6 +1249,33 @@ export async function getReviewQueue(
   };
 }
 
+export async function getPreviousReviewQueue(
+  projectId: string,
+  split: Split,
+  beforeProjectItemId?: string,
+): Promise<ReviewQueueData> {
+  const params = new URLSearchParams({ split });
+  if (beforeProjectItemId) params.set("before", beforeProjectItemId);
+  const payload = await request<JsonRecord>(
+    `/dataset-projects/${encodeURIComponent(projectId)}/previous?${params.toString()}`,
+  );
+  const queue = record(payload.queue);
+  const progress = record(queue.progress);
+  const itemRaw = queue.item;
+  const item = itemRaw === null || itemRaw === undefined ? null : record(itemRaw);
+  return {
+    projectId: stringValue(queue.project_id, projectId),
+    projectName: stringValue(queue.project_name, "Dự án gán nhãn"),
+    reviewMode: memberOr(REVIEW_MODES, queue.review_mode, "AI_ASSISTED"),
+    split: splitFromValue(queue.split),
+    revealed: true,
+    historical: true,
+    progress: { reviewed: numberValue(progress.reviewed), total: numberValue(progress.total) },
+    labels: arrayValue(queue.labels).map(mapLabelOption),
+    item: item ? mapQueueItem(item) : null,
+  };
+}
+
 function splitFromValue(value: unknown): Split {
   return memberOr(SPLITS, value, "DEVELOPMENT");
 }

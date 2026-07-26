@@ -22,6 +22,7 @@ import {
   getQuality,
   getDatasetIndex,
   getReviewQueue,
+  getPreviousReviewQueue,
   reviewDatasetAnnotation,
   addDatasetAnnotation,
   completeDatasetReviewItem,
@@ -154,7 +155,6 @@ let handoffSource = "";
 let policyControlData: PolicyControlData | null = null;
 let datasetQueue: ReviewQueueData | null = null;
 let datasetActionBusy = false;
-let datasetReviewHistory: ReviewQueueData[] = [];
 
 interface ControlAction {
   command: AdminCommandName;
@@ -1125,17 +1125,23 @@ function bindDatasetReviewQueue(content: HTMLElement): void {
         return;
       }
       if (action === "PREVIOUS") {
-        const previous = datasetReviewHistory.pop();
-        if (!previous) {
-          showToast("Chưa có hội thoại trước trong phiên review này.", "warning");
-          return;
-        }
-        datasetQueue = previous;
-        content.innerHTML = renderReviewQueue(previous, identity);
-        content.querySelectorAll<HTMLButtonElement>("[data-annotation-action], [data-annotation-add], [data-review-action]:not([data-review-action=PREVIOUS])").forEach((control) => {
-          control.disabled = true;
+        void runDatasetAction(async () => {
+          const previous = await getPreviousReviewQueue(
+            queue.projectId,
+            queue.split,
+            queue.historical ? item.projectItemId : undefined,
+          );
+          if (!previous.item) {
+            showToast("Đã đến hội thoại đầu tiên bạn từng duyệt.", "warning");
+            return;
+          }
+          datasetQueue = previous;
+          content.innerHTML = renderReviewQueue(previous, identity);
+          content.querySelectorAll<HTMLButtonElement>("[data-annotation-action], [data-annotation-add], [data-review-action]:not([data-review-action=PREVIOUS])").forEach((control) => {
+            control.disabled = true;
+          });
+          bindDatasetReviewQueue(content);
         });
-        bindDatasetReviewQueue(content);
         return;
       }
       if (action === "SKIP") {
@@ -1144,7 +1150,6 @@ function bindDatasetReviewQueue(content: HTMLElement): void {
       }
       void runDatasetAction(async () => {
         await completeDatasetReviewItem(item.projectItemId, item.revision);
-        datasetReviewHistory.push(queue);
         await loadCurrentPage(false);
       });
     },
@@ -1728,7 +1733,7 @@ window.addEventListener("hashchange", () => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (currentRoute === "datasets" && event.key.toLowerCase() === "p" && !event.ctrlKey && !event.metaKey && !event.altKey && !(event.target instanceof HTMLInputElement) && !(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLSelectElement)) {
+  if (currentRoute === "datasets" && !event.repeat && event.key.toLowerCase() === "p" && !event.ctrlKey && !event.metaKey && !event.altKey && !(event.target instanceof HTMLInputElement) && !(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLSelectElement)) {
     document.querySelector<HTMLButtonElement>("[data-review-action=PREVIOUS]")?.click();
     return;
   }

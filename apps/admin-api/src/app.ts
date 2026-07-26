@@ -912,6 +912,32 @@ function registerDatasetReviewRoutes(
     },
   );
 
+  app.get<{ Params: { id: string }; Querystring: { split?: string; before?: string } }>(
+    "/admin/v1/dataset-projects/:id/previous",
+    async (request, reply) => {
+      const service = requireService(request, reply, "BENCHMARK_VIEWER");
+      if (!service) return reply;
+      if (!service.previousReviewQueue) {
+        return reply.code(501).send(errorBody("ADMIN_DATASET_PREVIOUS_UNAVAILABLE", request.id));
+      }
+      const identity = requireIdentity(request);
+      const split = request.query.split
+        ? datasetEnum(SplitV1Schema, request.query.split)
+        : "DEVELOPMENT";
+      if (split === "HOLDOUT" && !datasetRoleAtLeast(identity, "DATASET_ADMIN")) {
+        return reply.code(403).send(errorBody("ADMIN_DATASET_FORBIDDEN", request.id));
+      }
+      const before = request.query.before
+        ? requiredUuid(request.query.before)
+        : undefined;
+      const queue = await service.previousReviewQueue(
+        requiredUuid(request.params.id),
+        { reviewerSubject: identity.subject, split, acquireLease: false },
+        before,
+      );
+      return queue ? { queue } : notFound(reply, request.id);
+    },
+  );
   app.post<{ Params: { id: string }; Body: DatasetSplitBody }>(
     "/admin/v1/dataset-projects/:id/splits",
     async (request, reply) => {

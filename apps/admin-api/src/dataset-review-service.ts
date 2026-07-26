@@ -90,6 +90,11 @@ export interface DatasetReviewService {
   createLabelSchema(schema: unknown, subject: string): Promise<CreateLabelSchemaResult>;
   createSplit(projectId: string, input: CreateSplitServiceInput): Promise<CreateSplitResult>;
   reviewQueue(projectId: string, request: ReviewQueueRequest): Promise<JsonRecord | null>;
+  previousReviewQueue?(
+    projectId: string,
+    request: ReviewQueueRequest,
+    beforeProjectItemId?: string,
+  ): Promise<JsonRecord | null>;
   addAnnotation(input: AddAnnotationServiceInput): Promise<JsonRecord>;
   reviewAnnotation(annotationId: string, input: ReviewAnnotationServiceInput): Promise<JsonRecord | null>;
   completeReviewItem(
@@ -228,6 +233,37 @@ class PostgresDatasetReviewService implements DatasetReviewService {
       progress: { reviewed: progress.reviewed, total: progress.total },
       labels,
       item,
+    };
+  }
+
+  async previousReviewQueue(
+    projectId: string,
+    request: ReviewQueueRequest,
+    beforeProjectItemId?: string,
+  ): Promise<JsonRecord | null> {
+    const project = await this.annotation.getProject(projectId);
+    if (!project) return null;
+    const split = request.split ?? "DEVELOPMENT";
+    const itemRow = await this.annotation.previousReviewedItem(
+      projectId,
+      request.reviewerSubject,
+      split,
+      beforeProjectItemId,
+    );
+    const [labels, progress] = await Promise.all([
+      this.labelOptions(project.label_schema_id),
+      this.annotation.reviewProgress(projectId, split),
+    ]);
+    return {
+      project_id: projectId,
+      project_name: project.name ?? null,
+      review_mode: "AI_ASSISTED",
+      split,
+      revealed: true,
+      historical: true,
+      progress: { reviewed: progress.reviewed, total: progress.total },
+      labels,
+      item: itemRow ? await this.buildItem(itemRow, request.reviewerSubject) : null,
     };
   }
 
