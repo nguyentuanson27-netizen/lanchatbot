@@ -82,6 +82,10 @@ WHERE schemaname = 'public' AND viewname LIKE 'admin\_%\_v' ESCAPE '\'
 ORDER BY viewname
 \gexec
 SELECT format('GRANT SELECT ON sales_cycle_events TO %I', :'admin_user')\gexec
+SELECT format(
+  'GRANT SELECT ON dataset_review_datasets, dataset_conversations, dataset_messages TO %I',
+  :'admin_user'
+)\gexec
 
 SELECT format('ALTER ROLE %I SET default_transaction_read_only = on', :'admin_user')\gexec
 
@@ -109,6 +113,18 @@ SELECT format('GRANT SELECT, INSERT ON admin_artifact_events TO %I', :'control_a
 SELECT format('GRANT SELECT, INSERT, UPDATE ON admin_active_pointers TO %I', :'control_api_user')\gexec
 SELECT format('GRANT SELECT, INSERT, UPDATE ON admin_simulation_runs TO %I', :'control_api_user')\gexec
 SELECT format('GRANT SELECT ON admin_simulation_results TO %I', :'control_api_user')\gexec
+SELECT format(
+  'GRANT SELECT ON dataset_label_schemas, dataset_annotation_projects, dataset_conversations, dataset_messages, dataset_project_items, dataset_annotations, dataset_review_events TO %I',
+  :'control_api_user'
+)\gexec
+SELECT format(
+  'GRANT INSERT, UPDATE ON dataset_label_schemas, dataset_annotation_projects, dataset_project_items, dataset_annotations TO %I',
+  :'control_api_user'
+)\gexec
+SELECT format(
+  'GRANT INSERT ON dataset_review_events TO %I',
+  :'control_api_user'
+)\gexec
 SELECT format(
   'GRANT UPDATE (conversation_owner, owner_lease_until, state_version, state_snapshot, updated_at, expires_at) ON conversations TO %I',
   :'control_api_user'

@@ -98,6 +98,9 @@ export interface DatasetReviewService {
 
 export interface DatasetReviewServiceOptions {
   readonly databaseUrl: string;
+  // Mutating review operations use the scoped control-plane role. Keeping this
+  // separate prevents the read-only Admin connection from gaining writes.
+  readonly writeDatabaseUrl?: string;
   // Only redacted columns are read here, but the review store's constructor
   // requires a cipher; it is never used to decrypt on this read path.
   readonly cipher: LocalEnvelopeCipher;
@@ -119,7 +122,9 @@ class PostgresDatasetReviewService implements DatasetReviewService {
 
   constructor(options: DatasetReviewServiceOptions) {
     this.review = new PostgresDatasetReviewStore(options.databaseUrl, options.cipher);
-    this.annotation = new PostgresDatasetAnnotationStore(options.databaseUrl);
+    this.annotation = new PostgresDatasetAnnotationStore(
+      options.writeDatabaseUrl ?? options.databaseUrl,
+    );
     this.blindReviewEnabled = options.blindReviewEnabled;
     this.leaseSeconds = options.leaseSeconds ?? 900;
   }

@@ -56,6 +56,7 @@ const productMedia = config.productMediaEnabled
 const datasetReview = config.datasetReviewEnabled && identityCipher
   ? createDatasetReviewService({
       databaseUrl: config.databaseUrl,
+      writeDatabaseUrl: config.controlDatabaseUrl,
       cipher: identityCipher,
       blindReviewEnabled: config.datasetBlindReviewEnabled,
     })
