@@ -2243,6 +2243,17 @@ select:focus-visible {
 .review-msg__text { margin: 0; white-space: pre-wrap; word-break: break-word; }
 .review-msg mark.evidence { background: #fde68a; border-radius: 3px; padding: 0 1px; }
 .review-labels { display: flex; flex-direction: column; gap: 10px; }
+.review-label-select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 34px 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+}
+.review-label-select:focus { border-color: var(--green-700); }
+.review-label-select:disabled { cursor: not-allowed; opacity: .6; }
 .review-ann { border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: var(--paper); }
 .review-ann--accepted { border-color: #86b39b; }
 .review-ann--rejected { opacity: .6; }
