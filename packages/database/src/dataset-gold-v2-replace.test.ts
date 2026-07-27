@@ -49,6 +49,22 @@ describe("gold-v2 replacement", () => {
       evidenceEnd: 11,
     });
   });
+  it("shifts audited turn indexes after a start-truncated unknown turn", () => {
+    const parsed = parseGoldV2({
+      ...gold,
+      conversations: [{ ...gold.conversations[0], startTruncated: true }],
+    });
+    const keyHash = "8f56dcbf069ad40b5dab7941748734f23301712ecf867acf34736d1eb5d36311";
+    const plan = buildReplacementPlan(parsed, [{
+      conversation_id: "conversation-1",
+      source_key_hash: keyHash,
+      messages: new Map([
+        [0, { role: "UNKNOWN", text: "truncated" }],
+        [1, { role: "CUSTOMER", text: "shop ơi giá bao nhiêu ạ" }],
+      ]),
+    }]);
+    expect(plan.conversations[0]?.annotations[0]).toMatchObject({ turnIndex: 1 });
+  });
   it("rejects duplicate source keys", () => {
     expect(() => parseGoldV2({
       ...gold,
