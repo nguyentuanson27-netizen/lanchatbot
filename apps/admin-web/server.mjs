@@ -1,12 +1,13 @@
-import { createReadStream, existsSync, statSync } from "node:fs";
+import { createReadStream } from "node:fs";
 import { createServer } from "node:http";
-import { extname, join, normalize, resolve } from "node:path";
+import { extname, resolve } from "node:path";
 import { Readable } from "node:stream";
 import {
   createInternalAssertion,
   identityFromAuthentikHeaders,
   loadAdminAuthConfig,
 } from "./auth.mjs";
+import { assertReadableFrontendBundle, resolveStaticFile } from "./static-assets.mjs";
 
 const port = Number(process.env.PORT ?? 3000);
 const host = process.env.HOST ?? "0.0.0.0";
@@ -159,16 +160,13 @@ async function proxyAdminRequest(request, response, requestUrl) {
 }
 
 function serveStatic(response, pathname) {
-  const rawPath = pathname === "/" ? "/index.html" : pathname;
-  const safePath = normalize(decodeURIComponent(rawPath)).replace(/^(\.\.[/\\])+/, "");
-  let filePath = join(distDirectory, safePath);
-  if (!filePath.startsWith(distDirectory)) {
+  const filePath = resolveStaticFile(distDirectory, pathname);
+  if (!filePath) {
     response.statusCode = 404;
+    response.setHeader("Content-Type", "text/plain; charset=utf-8");
+    response.setHeader("Cache-Control", "no-store");
     response.end("Not found");
     return;
-  }
-  if (!existsSync(filePath) || !statSync(filePath).isFile()) {
-    filePath = join(distDirectory, "index.html");
   }
   const extension = extname(filePath);
   response.statusCode = 200;
@@ -208,6 +206,7 @@ const server = createServer(async (request, response) => {
   serveStatic(response, requestUrl.pathname);
 });
 
+assertReadableFrontendBundle(distDirectory);
 server.listen(port, host, () => {
   console.log(`admin-web listening on ${host}:${port}`);
 });

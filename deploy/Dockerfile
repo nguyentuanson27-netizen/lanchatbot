@@ -17,6 +17,7 @@ ENV NODE_ENV=production
 WORKDIR /app
 RUN apk add --no-cache ffmpeg su-exec
 COPY --from=build --chown=node:node /app /app
+RUN chmod -R a+rX /app/apps/admin-web/dist
 
 USER node
 EXPOSE 8080
