@@ -160,7 +160,7 @@ export function buildReplacementPlan(
       const redacted = exact ? undefined : preferredTurns
         .map((turn) => [turn, databaseConversation.messages.get(turn)] as const)
         .find(([, message]) =>
-          message?.role === requiredRole && /\[[A-Z]+_\d+\]/.test(message.text)
+          message?.role === requiredRole && /\[[A-Z_]+_\d+\]/.test(message.text)
         );
       const resolved = exact ?? redacted;
       if (!resolved) throw new Error(`GOLD_V2_EVIDENCE_NOT_FOUND:${source.n}:${annotation.t}`);
