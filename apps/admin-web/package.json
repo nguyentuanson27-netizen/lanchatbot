@@ -10,7 +10,7 @@
     "start": "node server.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run src && node --test auth.test.mjs"
+    "test": "vitest run src && node --test auth.test.mjs static-assets.test.mjs"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
