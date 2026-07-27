@@ -149,8 +149,9 @@ export function buildReplacementPlan(
         throw new Error(`GOLD_V2_MESSAGE_LABEL_SCOPE_INVALID:${annotation.l}`);
       }
       const requiredRole = scopeRole(scope);
+      const normalizedEvidence = annotation.ev.replace(/\r\n/g, "\n");
       const exactCandidates = [...databaseConversation.messages.entries()].filter(([, message]) =>
-        message.role === requiredRole && message.text.includes(annotation.ev)
+        message.role === requiredRole && message.text.includes(normalizedEvidence)
       );
       const preferredTurns = source.startTruncated ? [annotation.t, annotation.t + 1] : [annotation.t];
       const exact = exactCandidates.length === 1
@@ -165,8 +166,8 @@ export function buildReplacementPlan(
       if (!resolved) throw new Error(`GOLD_V2_EVIDENCE_NOT_FOUND:${source.n}:${annotation.t}`);
       const [resolvedTurn, message] = resolved;
       if (!message) throw new Error(`GOLD_V2_TURN_NOT_FOUND:${source.n}:${resolvedTurn}`);
-      const exactStart = message.text.indexOf(annotation.ev);
-      const evidenceText = exactStart >= 0 ? annotation.ev : message.text;
+      const exactStart = message.text.indexOf(normalizedEvidence);
+      const evidenceText = exactStart >= 0 ? normalizedEvidence : message.text;
       const evidenceStart = exactStart >= 0 ? exactStart : 0;
       annotations.push({
         labelCode: annotation.l,
