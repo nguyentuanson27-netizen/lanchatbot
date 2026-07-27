@@ -35,6 +35,20 @@ describe("gold-v2 replacement", () => {
     ]);
   });
 
+  it("uses only the redacted turn when raw evidence was replaced by a placeholder", () => {
+    const parsed = parseGoldV2(gold);
+    const keyHash = "8f56dcbf069ad40b5dab7941748734f23301712ecf867acf34736d1eb5d36311";
+    const plan = buildReplacementPlan(parsed, [{
+      conversation_id: "conversation-1",
+      source_key_hash: keyHash,
+      messages: new Map([[0, { role: "CUSTOMER", text: "[ADDRESS_1]" }]]),
+    }]);
+    expect(plan.conversations[0]?.annotations[0]).toMatchObject({
+      evidenceText: "[ADDRESS_1]",
+      evidenceStart: 0,
+      evidenceEnd: 11,
+    });
+  });
   it("rejects duplicate source keys", () => {
     expect(() => parseGoldV2({
       ...gold,
