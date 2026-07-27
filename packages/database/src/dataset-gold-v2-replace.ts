@@ -148,16 +148,24 @@ export function buildReplacementPlan(
       if (!scope || scope === "CONVERSATION" || scope === "SEQUENCE") {
         throw new Error(`GOLD_V2_MESSAGE_LABEL_SCOPE_INVALID:${annotation.l}`);
       }
-      const resolvedTurn = annotation.t + (source.startTruncated ? 1 : 0);
-      const message = databaseConversation.messages.get(resolvedTurn);
-      if (!message) throw new Error(`GOLD_V2_TURN_NOT_FOUND:${source.n}:${resolvedTurn}`);
       const requiredRole = scopeRole(scope);
-      if (requiredRole !== message.role) throw new Error(`GOLD_V2_ROLE_MISMATCH:${source.n}:${resolvedTurn}`);
+      const exactCandidates = [...databaseConversation.messages.entries()].filter(([, message]) =>
+        message.role === requiredRole && message.text.includes(annotation.ev)
+      );
+      const preferredTurns = source.startTruncated ? [annotation.t, annotation.t + 1] : [annotation.t];
+      const exact = exactCandidates.length === 1
+        ? exactCandidates[0]
+        : exactCandidates.find(([turn]) => preferredTurns.includes(turn));
+      const redacted = exact ? undefined : preferredTurns
+        .map((turn) => [turn, databaseConversation.messages.get(turn)] as const)
+        .find(([, message]) =>
+          message?.role === requiredRole && /\[[A-Z]+_\d+\]/.test(message.text)
+        );
+      const resolved = exact ?? redacted;
+      if (!resolved) throw new Error(`GOLD_V2_EVIDENCE_NOT_FOUND:${source.n}:${annotation.t}`);
+      const [resolvedTurn, message] = resolved;
+      if (!message) throw new Error(`GOLD_V2_TURN_NOT_FOUND:${source.n}:${resolvedTurn}`);
       const exactStart = message.text.indexOf(annotation.ev);
-      const hasRedactionPlaceholder = /\[[A-Z]+_\d+\]/.test(message.text);
-      if (exactStart < 0 && !hasRedactionPlaceholder) {
-        throw new Error(`GOLD_V2_EVIDENCE_NOT_FOUND:${source.n}:${resolvedTurn}`);
-      }
       const evidenceText = exactStart >= 0 ? annotation.ev : message.text;
       const evidenceStart = exactStart >= 0 ? exactStart : 0;
       annotations.push({
