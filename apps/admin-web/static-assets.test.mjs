@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { chmodSync, mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
@@ -26,7 +26,7 @@ describe("admin web static bundle", () => {
   it("validates the files referenced by index.html", () => {
     const directory = createBundle();
     assert.doesNotThrow(() => assertReadableFrontendBundle(directory));
-    chmodSync(join(directory, "assets", "app.js"), 0o000);
-    if (process.platform !== "win32") assert.throws(() => assertReadableFrontendBundle(directory));
+    unlinkSync(join(directory, "assets", "app.js"));
+    assert.throws(() => assertReadableFrontendBundle(directory));
   });
 });
