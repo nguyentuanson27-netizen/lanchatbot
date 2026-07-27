@@ -152,15 +152,20 @@ export function buildReplacementPlan(
       if (!message) throw new Error(`GOLD_V2_TURN_NOT_FOUND:${source.n}:${annotation.t}`);
       const requiredRole = scopeRole(scope);
       if (requiredRole !== message.role) throw new Error(`GOLD_V2_ROLE_MISMATCH:${source.n}:${annotation.t}`);
-      const evidenceStart = message.text.indexOf(annotation.ev);
-      if (evidenceStart < 0) throw new Error(`GOLD_V2_EVIDENCE_NOT_FOUND:${source.n}:${annotation.t}`);
+      const exactStart = message.text.indexOf(annotation.ev);
+      const hasRedactionPlaceholder = /\[[A-Z]+_\d+\]/.test(message.text);
+      if (exactStart < 0 && !hasRedactionPlaceholder) {
+        throw new Error(`GOLD_V2_EVIDENCE_NOT_FOUND:${source.n}:${annotation.t}`);
+      }
+      const evidenceText = exactStart >= 0 ? annotation.ev : message.text;
+      const evidenceStart = exactStart >= 0 ? exactStart : 0;
       annotations.push({
         labelCode: annotation.l,
         scope,
         turnIndex: annotation.t,
-        evidenceText: annotation.ev,
+        evidenceText,
         evidenceStart,
-        evidenceEnd: evidenceStart + annotation.ev.length,
+        evidenceEnd: evidenceStart + evidenceText.length,
       });
     }
     for (const annotation of source.conv) {
