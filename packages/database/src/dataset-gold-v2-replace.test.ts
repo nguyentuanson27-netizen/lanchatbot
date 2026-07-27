@@ -22,7 +22,7 @@ describe("gold-v2 replacement", () => {
       conversation_id: "conversation-1",
       source_key_hash: keyHash,
       messages: new Map([[0, { role: "CUSTOMER", text: "shop ơi giá bao nhiêu ạ" }]]),
-    }], new Set([keyHash]));
+    }]);
     expect(plan).toMatchObject({
       goldConversations: 1,
       importedConversations: 1,
