@@ -134,13 +134,9 @@ function scopeRole(scope: string): string | null {
 export function buildReplacementPlan(
   gold: GoldV2,
   databaseConversations: readonly DatabaseConversation[],
-  rawSourceHashes: ReadonlySet<string>,
 ): ReplacementPlan {
   const labelScopes = new Map(WAVE1_LABEL_SCHEMA.labels.map((label) => [label.code, label.scope]));
   const byHash = new Map(gold.conversations.map((conversation) => [sha256(conversation.key), conversation]));
-  for (const hash of byHash.keys()) {
-    if (!rawSourceHashes.has(hash)) throw new Error("GOLD_V2_SOURCE_KEY_NOT_FOUND");
-  }
   const conversations: PlannedConversation[] = [];
   let annotationCount = 0;
   for (const databaseConversation of databaseConversations) {
@@ -194,11 +190,7 @@ export function buildReplacementPlan(
 async function loadDatabaseConversations(
   client: PoolClient,
   datasetId: string,
-): Promise<{ conversations: DatabaseConversation[]; rawSourceHashes: Set<string> }> {
-  const raw = await client.query<{ source_key_hash: string }>(
-    "SELECT source_key_hash FROM dataset_raw_items WHERE dataset_id = $1",
-    [datasetId],
-  );
+): Promise<DatabaseConversation[]> {
   const rows = await client.query<{
     conversation_id: string;
     source_key_hash: string;
@@ -206,9 +198,9 @@ async function loadDatabaseConversations(
     role: string;
     redacted_text: string;
   }>(
-    `SELECT c.conversation_id, r.source_key_hash, m.turn_index, m.role, m.redacted_text
+    `SELECT c.conversation_id, c.conversation_key_hash AS source_key_hash,
+            m.turn_index, m.role, m.redacted_text
        FROM dataset_conversations c
-       JOIN dataset_raw_items r ON r.raw_item_id = c.raw_item_id
        JOIN dataset_messages m ON m.conversation_id = c.conversation_id
       WHERE c.dataset_id = $1
       ORDER BY c.conversation_id, m.turn_index`,
@@ -224,10 +216,7 @@ async function loadDatabaseConversations(
     conversation.messages.set(row.turn_index, { role: row.role, text: row.redacted_text });
     mapped.set(row.conversation_id, conversation);
   }
-  return {
-    conversations: [...mapped.values()],
-    rawSourceHashes: new Set(raw.rows.map((row) => row.source_key_hash)),
-  };
+  return [...mapped.values()];
 }
 
 async function replace(client: PoolClient, fileChecksum: string, plan: ReplacementPlan): Promise<string> {
@@ -358,7 +347,7 @@ async function main(): Promise<void> {
     const datasetId = retained.rows[0]?.dataset_id;
     if (!datasetId || retained.rowCount !== 1) throw new Error("RETAIN_DATASET_NOT_FOUND");
     const database = await loadDatabaseConversations(client, datasetId);
-    const plan = buildReplacementPlan(gold, database.conversations, database.rawSourceHashes);
+    const plan = buildReplacementPlan(gold, database);
     const summary: Record<string, unknown> = {
       mode: apply ? "apply" : "dry-run",
       fileChecksum: createHash("sha256").update(bytes).digest("hex"),
