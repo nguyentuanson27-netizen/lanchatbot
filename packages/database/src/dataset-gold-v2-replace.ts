@@ -148,21 +148,22 @@ export function buildReplacementPlan(
       if (!scope || scope === "CONVERSATION" || scope === "SEQUENCE") {
         throw new Error(`GOLD_V2_MESSAGE_LABEL_SCOPE_INVALID:${annotation.l}`);
       }
-      const message = databaseConversation.messages.get(annotation.t);
-      if (!message) throw new Error(`GOLD_V2_TURN_NOT_FOUND:${source.n}:${annotation.t}`);
+      const resolvedTurn = annotation.t + (source.startTruncated ? 1 : 0);
+      const message = databaseConversation.messages.get(resolvedTurn);
+      if (!message) throw new Error(`GOLD_V2_TURN_NOT_FOUND:${source.n}:${resolvedTurn}`);
       const requiredRole = scopeRole(scope);
-      if (requiredRole !== message.role) throw new Error(`GOLD_V2_ROLE_MISMATCH:${source.n}:${annotation.t}`);
+      if (requiredRole !== message.role) throw new Error(`GOLD_V2_ROLE_MISMATCH:${source.n}:${resolvedTurn}`);
       const exactStart = message.text.indexOf(annotation.ev);
       const hasRedactionPlaceholder = /\[[A-Z]+_\d+\]/.test(message.text);
       if (exactStart < 0 && !hasRedactionPlaceholder) {
-        throw new Error(`GOLD_V2_EVIDENCE_NOT_FOUND:${source.n}:${annotation.t}`);
+        throw new Error(`GOLD_V2_EVIDENCE_NOT_FOUND:${source.n}:${resolvedTurn}`);
       }
       const evidenceText = exactStart >= 0 ? annotation.ev : message.text;
       const evidenceStart = exactStart >= 0 ? exactStart : 0;
       annotations.push({
         labelCode: annotation.l,
         scope,
-        turnIndex: annotation.t,
+        turnIndex: resolvedTurn,
         evidenceText,
         evidenceStart,
         evidenceEnd: evidenceStart + evidenceText.length,
