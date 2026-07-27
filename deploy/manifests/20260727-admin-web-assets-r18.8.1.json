@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-27T23:27:43+07:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "4cba82093b9c12cd6c1312fc6d1d4f030cf9f370",
+  "releaseTag": "20260727-admin-web-assets-r18.8.1",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260727-admin-web-assets-r18.8.1",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260727-dataset-reopen-json-r18.7",
+  "images": {
+    "adminWeb": "lana-chatbot-app:admin-web-assets-r18.8.1@sha256:c161b3f71132654d37914dd85ba55d89327c7747771857d8d3049741b5e26e66",
+    "adminApiUnchanged": "lana-chatbot-app:dataset-reopen-r18.6"
+  },
+  "incident": {
+    "symptom": "The authenticated admin page could not load its frontend application.",
+    "rootCause": "The r18.7 dist/assets directory was mode 0700 and unreadable by the node runtime user, so JS and CSS requests fell through to index.html.",
+    "fix": "Make the built frontend bundle readable, validate referenced assets at startup, and return 404 instead of index.html for missing static assets."
+  },
+  "verification": {
+    "dockerPnpmCheck": "PASS",
+    "adminWebUnitTests": "46_OF_46_PASS",
+    "adminWebHealth": "HEALTHY",
+    "adminWebRestartCount": 0,
+    "javascript": "200_TEXT_JAVASCRIPT_103307_BYTES",
+    "stylesheet": "200_TEXT_CSS_35766_BYTES",
+    "missingAsset": "404",
+    "publicAuthenticationRedirect": "302_AUTHENTIK",
+    "adminApi": "HEALTHY_UNCHANGED",
+    "otherServicesRestarted": false
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260727-dataset-reopen-json-r18.7",
+    "adminWebImage": "lana-chatbot-app:dataset-reopen-json-r18.7",
+    "dataDeletionRequired": false
+  }
+}
