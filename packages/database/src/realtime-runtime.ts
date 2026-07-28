@@ -70,6 +70,8 @@ export interface RealtimeSalesCycleEventPlan {
     | "NEGOTIATION_EVENT"
     | "CART_READY"
     | "CHECKOUT_DETAILS_CAPTURED"
+    | "CLARIFICATION_REQUESTED"
+    | "CLARIFICATION_RESOLVED"
     | "PREVIEW_CREATED"
     | "CONFIRM_PURCHASE"
     | "PAYMENT_RECEIPT_RECEIVED";
@@ -133,6 +135,7 @@ export interface RealtimeDecisionEventPlan {
     | "BUYING_SIGNAL_DETECTED"
     | "ORDER_INFO_REQUESTED"
     | "CHECKOUT_DETAILS_MISSING"
+    | "CLARIFICATION_REQUESTED"
     | "CHECKOUT_COMPLETED"
     | "ORDER_PREVIEW_CREATED"
     | "PURCHASE_CONFIRMATION_DETECTED"
@@ -194,6 +197,11 @@ export interface RealtimeDecisionEventPlan {
     checkoutCapturedFields?: readonly string[];
     checkoutMissingFields?: readonly string[];
     checkoutCompleted?: boolean;
+    clarificationReasonCode?: string | null;
+    clarificationAttemptCount?: number;
+    clarificationMaxAttempts?: number;
+    clarificationBudgetExhausted?: boolean;
+    clarificationCase?: boolean;
     orderPreviewCreated?: boolean;
     confirmationAttempted?: boolean;
     confirmationConfirmed?: boolean;

@@ -12,14 +12,18 @@
     }
   },
   "scripts": {
+    "prebuild": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build",
     "build": "tsc -p tsconfig.json",
-    "pretypecheck": "pnpm --filter @lana/contracts build",
+    "benchmark:wave1": "node dist/wave1-benchmark-cli.js",
+    "benchmark:wave1:baseline": "node dist/wave1-current-baseline-cli.js",
+    "pretypecheck": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "pretest": "pnpm --filter @lana/contracts build",
+    "pretest": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build",
     "test": "vitest run",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@lana/business-tools": "workspace:*",
     "@lana/contracts": "workspace:*",
     "zod": "^3.25.67"
   }

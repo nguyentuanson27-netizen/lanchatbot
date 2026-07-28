@@ -40,6 +40,7 @@ import type {
 
 const CART_TTL_MS = 48 * 60 * 60 * 1_000;
 const PREVIEW_TTL_MS = 30 * 60 * 1_000;
+const MAX_CHECKOUT_CLARIFICATION_ATTEMPTS = 3;
 
 export interface RealtimeSalesCycleInput {
   readonly pageId: string;
@@ -87,6 +88,11 @@ export interface RealtimeSalesCycleTelemetry {
   readonly checkoutCapturedFields?: readonly CheckoutFieldKey[];
   readonly checkoutMissingFields?: readonly CheckoutFieldKey[];
   readonly checkoutCompleted?: boolean;
+  readonly clarificationReasonCode?: "CHECKOUT_DETAILS_MISSING";
+  readonly clarificationAttemptCount?: number;
+  readonly clarificationMaxAttempts?: number;
+  readonly clarificationBudgetExhausted?: boolean;
+  readonly clarificationCase?: boolean;
   readonly orderPreviewCreated?: boolean;
   readonly confirmationAttempted?: boolean;
   readonly confirmationConfirmed?: boolean;
@@ -357,6 +363,34 @@ function checkoutCapturedFields(details: CheckoutDetails): readonly CheckoutFiel
     ...(details.address ? ["ADDRESS" as const] : []),
     ...(details.paymentMethod ? ["PAYMENT_METHOD" as const] : []),
   ];
+}
+
+function clarificationMessage(
+  missing: readonly CheckoutFieldKey[],
+  attemptCount: number,
+): string {
+  const labels = missing.map((field) => CHECKOUT_FIELD_LABELS[field]);
+  if (attemptCount === 1) {
+    return `C gửi thêm ${labels.join(", ")} giúp em nha.`;
+  }
+  if (attemptCount === 2) {
+    return `Em chưa nhận được ${labels[0]}. C bổ sung riêng mục này giúp em nhé.`;
+  }
+  return `Để tiếp tục lên đơn, c cho em xin ${labels.join(", ")} ạ.`;
+}
+
+function clarificationFingerprint(message: string): string {
+  return createHash("sha256").update(message.normalize("NFC"), "utf8").digest("hex");
+}
+
+function sameMissingFields(
+  left: readonly string[],
+  right: readonly string[],
+): boolean {
+  const normalizedLeft = [...left].sort();
+  const normalizedRight = [...right].sort();
+  return normalizedLeft.length === normalizedRight.length &&
+    normalizedLeft.every((field, index) => field === normalizedRight[index]);
 }
 
 function negotiationOfferText(cart: CartV1, customerState: "READY" | "HESITANT" | "CAUTIOUS"): string {
@@ -643,6 +677,66 @@ export async function evaluateRealtimeSalesCycle(
     };
   };
 
+  const requestCheckoutClarification = (
+    missing: readonly CheckoutFieldKey[],
+    capturedFields: readonly CheckoutFieldKey[] = [],
+  ): RealtimeSalesCycleOutput => {
+    const productId = input.productId ?? state.cart?.value.lines.at(-1)?.parentProductId ?? null;
+    const previous = state.clarification ?? null;
+    const sameRequest = previous?.reasonCode === "CHECKOUT_DETAILS_MISSING" &&
+      previous.productId === productId &&
+      sameMissingFields(previous.missingFields, missing);
+    const attemptCount = sameRequest ? previous.attemptCount + 1 : 1;
+    if (attemptCount > MAX_CHECKOUT_CLARIFICATION_ATTEMPTS) {
+      return {
+        ...failedOutput("CLARIFICATION_RETRY_EXHAUSTED", plan()),
+        telemetry: {
+          checkoutCapturedFields: capturedFields,
+          checkoutMissingFields: missing,
+          checkoutCompleted: false,
+          clarificationReasonCode: "CHECKOUT_DETAILS_MISSING",
+          clarificationAttemptCount: previous?.attemptCount ?? MAX_CHECKOUT_CLARIFICATION_ATTEMPTS,
+          clarificationMaxAttempts: MAX_CHECKOUT_CLARIFICATION_ATTEMPTS,
+          clarificationBudgetExhausted: true,
+          clarificationCase: true,
+        },
+      };
+    }
+    const message = clarificationMessage(missing, attemptCount);
+    const requested = apply({
+      kind: "CLARIFICATION_REQUESTED",
+      commandId: commandId(`clarification-${attemptCount}`),
+      reasonCode: "CHECKOUT_DETAILS_MISSING",
+      missingFields: missing,
+      productId,
+      questionFingerprint: clarificationFingerprint(message),
+      maxAttempts: MAX_CHECKOUT_CLARIFICATION_ATTEMPTS,
+    });
+    if (requested.status !== "APPLIED") {
+      return failedOutput(requested.status === "REJECTED"
+        ? requested.reasonCode
+        : "CLARIFICATION_REQUEST_REJECTED", plan());
+    }
+    return {
+      handled: true,
+      messages: [{ kind: "TEXT", text: message }],
+      plan: plan(),
+      transferToHuman: false,
+      desiredTag: null,
+      reasonCode: "CHECKOUT_DETAILS_MISSING",
+      telemetry: {
+        checkoutCapturedFields: capturedFields,
+        checkoutMissingFields: missing,
+        checkoutCompleted: false,
+        clarificationReasonCode: "CHECKOUT_DETAILS_MISSING",
+        clarificationAttemptCount: attemptCount,
+        clarificationMaxAttempts: MAX_CHECKOUT_CLARIFICATION_ATTEMPTS,
+        clarificationBudgetExhausted: false,
+        clarificationCase: true,
+      },
+    };
+  };
+
   if (
     state.stage === "PURCHASE_CONFIRMED" &&
     input.attachmentIds.length > 0
@@ -800,22 +894,16 @@ export async function evaluateRealtimeSalesCycle(
       const capturedFields = checkoutCapturedFields(details);
       const missing = missingCheckout(state);
       if (missing.length > 0) {
-        return {
-          handled: true,
-          messages: [{
-            kind: "TEXT",
-            text: `C gửi thêm ${missing.map((field) => CHECKOUT_FIELD_LABELS[field]).join(", ")} giúp em nha.`,
-          }],
-          plan: plan(),
-          transferToHuman: false,
-          desiredTag: null,
-          reasonCode: null,
-          telemetry: {
-            checkoutCapturedFields: capturedFields,
-            checkoutMissingFields: missing,
-            checkoutCompleted: false,
-          },
-        };
+        return requestCheckoutClarification(missing, capturedFields);
+      }
+      if (state.clarification) {
+        const resolved = apply({
+          kind: "CLARIFICATION_RESOLVED",
+          commandId: commandId("clarification-resolved"),
+        });
+        if (resolved.status !== "APPLIED") {
+          return failedOutput("CLARIFICATION_RESOLVE_REJECTED", plan());
+        }
       }
       if (!state.cart || !state.checkoutDraft?.fullName || !state.checkoutDraft.phone ||
           !state.checkoutDraft.address || !state.checkoutDraft.paymentMethod) {
@@ -1006,6 +1094,21 @@ export async function evaluateRealtimeSalesCycle(
         desiredTag: null,
         reasonCode: null,
       };
+    }
+
+    if (state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING") {
+      const missing = missingCheckout(state);
+      if (missing.length === 0) {
+        const resolved = apply({
+          kind: "CLARIFICATION_RESOLVED",
+          commandId: commandId("clarification-resolved"),
+        });
+        if (resolved.status !== "APPLIED") {
+          return failedOutput("CLARIFICATION_RESOLVE_REJECTED", plan());
+        }
+      } else {
+        return requestCheckoutClarification(missing);
+      }
     }
   }
 

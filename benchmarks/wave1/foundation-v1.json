@@ -1,0 +1,362 @@
+{
+  "schemaVersion": 1,
+  "bundle": {
+    "schemaVersion": 1,
+    "manifestSha256": "83c8d187c6e71e93d9d06b14ca0328d6d63423dc905b7daa34b3a6102bebd91d",
+    "goldSha256": "97f0812554e2eab1bfc9551bc8968c9f480f584a67f8acae7ddaa635aa349a49",
+    "historySha256": "e9eed98b7bd50e9bb0cfe50e236044d7bcf1de309a3c3adf9258afa312472851",
+    "boundCount": 2000,
+    "includedCount": 1955,
+    "excludedCount": 45,
+    "annotationCount": 13887,
+    "bindingMismatchCount": 0
+  },
+  "split": {
+    "seed": "lana-wave1-gold-v2-split-v1",
+    "checksum": "485db42764e18583a02937b68dcdd6fd04e9b6bab867b11d4b041e55e573985e",
+    "counts": {
+      "DEVELOPMENT": 1173,
+      "VALIDATION": 391,
+      "HOLDOUT": 391
+    },
+    "leakageGroupCount": 0,
+    "rareSafetyCount": 915,
+    "labelSupport": {
+      "BUYING_CANDIDATE": {
+        "total": 283,
+        "development": 171,
+        "validation": 55,
+        "holdout": 57,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "BUYING_COMMITTED": {
+        "total": 524,
+        "development": 281,
+        "validation": 93,
+        "holdout": 150,
+        "minimumRequired": 50,
+        "status": "ELIGIBLE"
+      },
+      "BUYING_NEGATED": {
+        "total": 204,
+        "development": 102,
+        "validation": 37,
+        "holdout": 65,
+        "minimumRequired": 50,
+        "status": "ELIGIBLE"
+      },
+      "BUYING_RETRACTED": {
+        "total": 74,
+        "development": 14,
+        "validation": 8,
+        "holdout": 52,
+        "minimumRequired": 50,
+        "status": "ELIGIBLE"
+      },
+      "CHECKOUT_DETAILS_PROVIDED": {
+        "total": 482,
+        "development": 256,
+        "validation": 87,
+        "holdout": 139,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "CHOICE_OVERLOAD": {
+        "total": 3,
+        "development": 1,
+        "validation": 1,
+        "holdout": 1,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "CONTINUATION": {
+        "total": 272,
+        "development": 149,
+        "validation": 53,
+        "holdout": 70,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "DELIVERY_DELAY_COMPLAINT": {
+        "total": 102,
+        "development": 39,
+        "validation": 17,
+        "holdout": 46,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "DELIVERY_OBJECTION": {
+        "total": 157,
+        "development": 76,
+        "validation": 31,
+        "holdout": 50,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "EXCHANGE_REQUEST": {
+        "total": 34,
+        "development": 15,
+        "validation": 6,
+        "holdout": 13,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "EXPLICIT_DELIVERED_MESSAGE": {
+        "total": 462,
+        "development": 258,
+        "validation": 80,
+        "holdout": 124,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "FIT_OBJECTION": {
+        "total": 114,
+        "development": 56,
+        "validation": 20,
+        "holdout": 38,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "FOLLOW_UP_SPAM": {
+        "total": 101,
+        "development": 63,
+        "validation": 29,
+        "holdout": 9,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "IMAGE_REQUEST": {
+        "total": 189,
+        "development": 106,
+        "validation": 48,
+        "holdout": 35,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "IRRELEVANT_SHOP_REPLY": {
+        "total": 176,
+        "development": 83,
+        "validation": 46,
+        "holdout": 47,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "MATERIAL_OBJECTION": {
+        "total": 26,
+        "development": 14,
+        "validation": 5,
+        "holdout": 7,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "MEASUREMENTS_PROVIDED": {
+        "total": 523,
+        "development": 313,
+        "validation": 96,
+        "holdout": 114,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "MULTI_PRODUCT_COMPARISON": {
+        "total": 209,
+        "development": 127,
+        "validation": 34,
+        "holdout": 48,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "NO_EXPLICIT_CHECKOUT_OBSERVED": {
+        "total": 1386,
+        "development": 875,
+        "validation": 285,
+        "holdout": 226,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "ORDER_CANCELLATION": {
+        "total": 88,
+        "development": 36,
+        "validation": 17,
+        "holdout": 35,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "ORDER_CONFIRMATION_TEXT_OBSERVED": {
+        "total": 447,
+        "development": 230,
+        "validation": 86,
+        "holdout": 131,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "ORDER_TRACKING_QUESTION": {
+        "total": 168,
+        "development": 78,
+        "validation": 28,
+        "holdout": 62,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "POSSIBLE_HANDOFF_LANGUAGE": {
+        "total": 73,
+        "development": 13,
+        "validation": 4,
+        "holdout": 56,
+        "minimumRequired": 50,
+        "status": "ELIGIBLE"
+      },
+      "POST_EXCHANGE_CONFIRMATION": {
+        "total": 3,
+        "development": 3,
+        "validation": 0,
+        "holdout": 0,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "PREMATURE_PII_REQUEST": {
+        "total": 282,
+        "development": 153,
+        "validation": 45,
+        "holdout": 84,
+        "minimumRequired": 50,
+        "status": "ELIGIBLE"
+      },
+      "PRE_SALE_RETURN_POLICY_QUESTION": {
+        "total": 141,
+        "development": 52,
+        "validation": 22,
+        "holdout": 67,
+        "minimumRequired": 50,
+        "status": "ELIGIBLE"
+      },
+      "PRICE_OBJECTION": {
+        "total": 161,
+        "development": 94,
+        "validation": 25,
+        "holdout": 42,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "PRICE_QUESTION": {
+        "total": 1173,
+        "development": 709,
+        "validation": 235,
+        "holdout": 229,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "PRODUCT_COMPLAINT": {
+        "total": 66,
+        "development": 26,
+        "validation": 13,
+        "holdout": 27,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "PRODUCT_CONTEXT_LOST": {
+        "total": 226,
+        "development": 132,
+        "validation": 51,
+        "holdout": 43,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "PRODUCT_INFO_QUESTION": {
+        "total": 592,
+        "development": 323,
+        "validation": 114,
+        "holdout": 155,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "REPEATED_SHOP_MESSAGE": {
+        "total": 407,
+        "development": 227,
+        "validation": 95,
+        "holdout": 85,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "REPEATED_SHOP_QUESTION": {
+        "total": 592,
+        "development": 335,
+        "validation": 127,
+        "holdout": 130,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "RETURN_REQUEST": {
+        "total": 10,
+        "development": 2,
+        "validation": 1,
+        "holdout": 7,
+        "minimumRequired": 50,
+        "status": "INSUFFICIENT_TOTAL"
+      },
+      "SIZE_QUESTION": {
+        "total": 371,
+        "development": 229,
+        "validation": 80,
+        "holdout": 62,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "SIZE_RECOMMENDATION_CONFLICT": {
+        "total": 21,
+        "development": 12,
+        "validation": 6,
+        "holdout": 3,
+        "minimumRequired": 50,
+        "status": "INSUFFICIENT_TOTAL"
+      },
+      "STYLE_OBJECTION": {
+        "total": 95,
+        "development": 43,
+        "validation": 19,
+        "holdout": 33,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "TRUST_OBJECTION": {
+        "total": 115,
+        "development": 58,
+        "validation": 19,
+        "holdout": 38,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      },
+      "VARIANT_SELECTION": {
+        "total": 508,
+        "development": 279,
+        "validation": 93,
+        "holdout": 136,
+        "minimumRequired": null,
+        "status": "NOT_GATED"
+      }
+    }
+  },
+  "runManifest": {
+    "schemaVersion": 1,
+    "benchmarkVersion": "wave1-benchmark-v1",
+    "dataset": {
+      "manifestSha256": "83c8d187c6e71e93d9d06b14ca0328d6d63423dc905b7daa34b3a6102bebd91d",
+      "goldSha256": "97f0812554e2eab1bfc9551bc8968c9f480f584a67f8acae7ddaa635aa349a49",
+      "historySha256": "e9eed98b7bd50e9bb0cfe50e236044d7bcf1de309a3c3adf9258afa312472851",
+      "includedCount": 1955,
+      "excludedCount": 45,
+      "splitChecksum": "485db42764e18583a02937b68dcdd6fd04e9b6bab867b11d4b041e55e573985e"
+    },
+    "versions": {
+      "parser": "redis-transcript-v1",
+      "normalization": "norm-v1",
+      "redaction": "redact-v1",
+      "labelSchema": "wave1-conversation-recovery-v1",
+      "semanticScorer": "wave1-semantic-scorer-v1",
+      "runtimePolicyScorer": "wave1-runtime-policy-scorer-v1",
+      "replyQualityScorer": "wave1-reply-quality-scorer-v1"
+    },
+    "splitSeed": "lana-wave1-gold-v2-split-v1",
+    "runFingerprint": "87d1985455a7f06582947682a0dde3a7312b5921510b264af3c7b8415f3b3bab"
+  }
+}
