@@ -130,9 +130,13 @@ export interface RealtimeDecisionEventPlan {
   readonly eventKeyHash: string;
   readonly eventType:
     | "PRODUCT_RESOLVED"
+    | "PRODUCT_MATCHED"
     | "PRICE_CARD_SENT"
     | "SIZE_CONSULT_STARTED"
     | "BUYING_SIGNAL_DETECTED"
+    | "BUYING_SIGNAL_COMMITTED"
+    | "BUYING_SIGNAL_RETRACTED"
+    | "READY_TO_BUY"
     | "ORDER_INFO_REQUESTED"
     | "CHECKOUT_DETAILS_MISSING"
     | "CLARIFICATION_REQUESTED"
@@ -143,8 +147,10 @@ export interface RealtimeDecisionEventPlan {
     | "PURCHASE_CONFIRMED"
     | "ORDER_INTENT_CREATED"
     | "HANDOFF"
+    | "HANDOFF_REQUESTED"
     | "GUARD_BLOCKED"
-    | "NO_REPLY";
+    | "NO_REPLY"
+    | "NO_REPLY_SELECTED";
   readonly origin: string | null;
   readonly reasonCodes: readonly string[];
   readonly releaseId: string;

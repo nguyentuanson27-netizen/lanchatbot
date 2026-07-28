@@ -16,6 +16,8 @@
     "build": "tsc -p tsconfig.json",
     "benchmark:wave1": "node dist/wave1-benchmark-cli.js",
     "benchmark:wave1:baseline": "node dist/wave1-current-baseline-cli.js",
+    "benchmark:wave1:replay": "node dist/wave1-replay-cli.js",
+    "benchmark:wave1:candidate": "node dist/wave1-candidate-baseline-cli.js",
     "pretypecheck": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "pretest": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build",

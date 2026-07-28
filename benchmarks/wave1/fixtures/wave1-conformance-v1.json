@@ -1,0 +1,559 @@
+{
+  "schemaVersion": "wave1-replay-fixtures-v1",
+  "fixtureSetId": "wave1-synthetic-conformance-v1",
+  "fixtureSourcePolicy": "Synthetic fixed envelopes only. No historical transcript, customer identifier, production secret, or locked-holdout content is present.",
+  "fixtures": [
+    {
+      "fixtureId": "committed-ready-price-stock",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PRE_SALE",
+      "semantic": {
+        "oracle": ["BUYING_COMMITTED"],
+        "model": ["BUYING_COMMITTED"]
+      },
+      "prerequisitesSatisfied": true,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": {
+        "envelopeId": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "productId": "FIXTURE-PRODUCT-001",
+        "priceVnd": 399000,
+        "stockStatus": "IN_STOCK"
+      },
+      "replyFactKinds": ["PRICE", "STOCK"],
+      "expectation": {
+        "allowedActions": ["REPLY"],
+        "allowedNextStages": ["READY_TO_BUY"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": ["bản xem trước", "sẵn sàng"],
+        "mustNotInclude": ["không lên đơn", "nhân viên"],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "committed-missing-variant",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PRE_SALE",
+      "semantic": {
+        "oracle": ["BUYING_COMMITTED"],
+        "model": ["BUYING_COMMITTED"]
+      },
+      "prerequisitesSatisfied": false,
+      "missingFields": ["VARIANT"],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": {
+        "envelopeId": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "productId": "FIXTURE-PRODUCT-002",
+        "stockStatus": "IN_STOCK"
+      },
+      "replyFactKinds": ["STOCK"],
+      "expectation": {
+        "allowedActions": ["REPLY"],
+        "allowedNextStages": ["CHECKOUT"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": ["màu", "size"],
+        "mustNotInclude": ["số điện thoại", "địa chỉ"],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "committed-missing-delivery-address",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "CHECKOUT",
+      "semantic": {
+        "oracle": ["BUYING_COMMITTED"],
+        "model": ["BUYING_COMMITTED"]
+      },
+      "prerequisitesSatisfied": false,
+      "missingFields": ["DELIVERY_ADDRESS"],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": null,
+      "replyFactKinds": [],
+      "expectation": {
+        "allowedActions": ["REPLY"],
+        "allowedNextStages": ["CHECKOUT"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": ["thông tin nhận hàng"],
+        "mustNotInclude": ["nhân viên", "không lên đơn"],
+        "piiRequestAllowed": true,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "buying-negated",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PRE_SALE",
+      "semantic": {
+        "oracle": ["BUYING_NEGATED"],
+        "model": ["BUYING_NEGATED"]
+      },
+      "prerequisitesSatisfied": false,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": null,
+      "replyFactKinds": [],
+      "expectation": {
+        "allowedActions": ["REPLY", "NO_REPLY"],
+        "allowedNextStages": ["PRE_SALE"],
+        "forbidPii": true,
+        "forbidCheckout": true,
+        "forbidOrderIntent": true
+      },
+      "replyExpectation": {
+        "mustIncludeAny": ["không lên đơn"],
+        "mustNotInclude": ["số điện thoại", "địa chỉ", "bản xem trước"],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "buying-retracted",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "CHECKOUT",
+      "semantic": {
+        "oracle": ["BUYING_RETRACTED"],
+        "model": ["BUYING_RETRACTED"]
+      },
+      "prerequisitesSatisfied": false,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": null,
+      "replyFactKinds": [],
+      "expectation": {
+        "allowedActions": ["REPLY", "NO_REPLY"],
+        "allowedNextStages": ["PRE_SALE"],
+        "forbidPii": true,
+        "forbidCheckout": true,
+        "forbidOrderIntent": true
+      },
+      "replyExpectation": {
+        "mustIncludeAny": ["không lên đơn"],
+        "mustNotInclude": ["số điện thoại", "địa chỉ", "bản xem trước"],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "pre-sale-return-policy",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PRE_SALE",
+      "semantic": {
+        "oracle": ["PRE_SALE_RETURN_POLICY_QUESTION"],
+        "model": ["PRE_SALE_RETURN_POLICY_QUESTION"]
+      },
+      "prerequisitesSatisfied": false,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": null,
+      "replyFactKinds": [],
+      "expectation": {
+        "allowedActions": ["REPLY"],
+        "allowedNextStages": ["PRE_SALE"],
+        "forbidPii": true,
+        "forbidCheckout": true,
+        "forbidOrderIntent": true
+      },
+      "replyExpectation": {
+        "mustIncludeAny": ["chính sách đổi trả", "điều kiện"],
+        "mustNotInclude": ["cho em xin số điện thoại", "cho em xin địa chỉ", "lên đơn", "vận đơn"],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "order-tracking",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PRE_SALE",
+      "semantic": {
+        "oracle": ["ORDER_TRACKING_QUESTION"],
+        "model": ["ORDER_TRACKING_QUESTION"]
+      },
+      "prerequisitesSatisfied": false,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": null,
+      "replyFactKinds": [],
+      "expectation": {
+        "allowedActions": ["HANDOFF"],
+        "allowedNextStages": ["POST_SALE"],
+        "forbidCheckout": true,
+        "forbidOrderIntent": true,
+        "allowedHandoffReasons": ["ORDER_TRACKING"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": ["vận đơn", "trạng thái đơn"],
+        "mustNotInclude": ["bản xem trước", "chọn màu", "chọn size"],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "exchange-request",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PRE_SALE",
+      "semantic": {
+        "oracle": ["EXCHANGE_REQUEST"],
+        "model": ["EXCHANGE_REQUEST"]
+      },
+      "prerequisitesSatisfied": false,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": null,
+      "replyFactKinds": [],
+      "expectation": {
+        "allowedActions": ["HANDOFF"],
+        "allowedNextStages": ["POST_SALE"],
+        "forbidCheckout": true,
+        "forbidOrderIntent": true,
+        "allowedHandoffReasons": ["EXCHANGE"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": ["đổi hàng", "kiểm tra đơn"],
+        "mustNotInclude": ["bản xem trước", "thông tin nhận hàng"],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "return-request",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PRE_SALE",
+      "semantic": {
+        "oracle": ["RETURN_REQUEST"],
+        "model": ["RETURN_REQUEST"]
+      },
+      "prerequisitesSatisfied": false,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": null,
+      "replyFactKinds": [],
+      "expectation": {
+        "allowedActions": ["HANDOFF"],
+        "allowedNextStages": ["POST_SALE"],
+        "forbidCheckout": true,
+        "forbidOrderIntent": true,
+        "allowedHandoffReasons": ["RETURN"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": ["trả hàng", "kiểm tra điều kiện"],
+        "mustNotInclude": ["bản xem trước", "thông tin nhận hàng"],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "product-complaint",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PRE_SALE",
+      "semantic": {
+        "oracle": ["PRODUCT_COMPLAINT"],
+        "model": ["PRODUCT_COMPLAINT"]
+      },
+      "prerequisitesSatisfied": false,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": null,
+      "replyFactKinds": [],
+      "expectation": {
+        "allowedActions": ["HANDOFF"],
+        "allowedNextStages": ["POST_SALE"],
+        "forbidCheckout": true,
+        "forbidOrderIntent": true,
+        "allowedHandoffReasons": ["PRODUCT_COMPLAINT"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": ["rất tiếc", "hỗ trợ"],
+        "mustNotInclude": ["bản xem trước", "thông tin nhận hàng"],
+        "piiRequestAllowed": false,
+        "objectionPresent": true,
+        "objectionResolvedByAny": ["kiểm tra", "hỗ trợ"]
+      }
+    },
+    {
+      "fixtureId": "delivery-delay",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PRE_SALE",
+      "semantic": {
+        "oracle": ["DELIVERY_DELAY_COMPLAINT"],
+        "model": ["DELIVERY_DELAY_COMPLAINT"]
+      },
+      "prerequisitesSatisfied": false,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": null,
+      "replyFactKinds": [],
+      "expectation": {
+        "allowedActions": ["HANDOFF"],
+        "allowedNextStages": ["POST_SALE"],
+        "forbidCheckout": true,
+        "forbidOrderIntent": true,
+        "allowedHandoffReasons": ["DELIVERY_DELAY"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": ["rất tiếc", "kiểm tra"],
+        "mustNotInclude": ["bản xem trước", "thông tin nhận hàng"],
+        "piiRequestAllowed": false,
+        "objectionPresent": true,
+        "objectionResolvedByAny": ["kiểm tra", "hỗ trợ"]
+      }
+    },
+    {
+      "fixtureId": "committed-verified-size",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PRE_SALE",
+      "semantic": {
+        "oracle": ["BUYING_COMMITTED", "VARIANT_SELECTION"],
+        "model": ["BUYING_COMMITTED", "VARIANT_SELECTION"]
+      },
+      "prerequisitesSatisfied": true,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": {
+        "envelopeId": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "productId": "FIXTURE-PRODUCT-003",
+        "recommendedSize": "M"
+      },
+      "replyFactKinds": ["SIZE"],
+      "expectation": {
+        "allowedActions": ["REPLY"],
+        "allowedNextStages": ["READY_TO_BUY"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": ["size phù hợp", "bản xem trước"],
+        "mustNotInclude": ["đoán", "nhân viên"],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "committed-verified-shipping-offer",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PRE_SALE",
+      "semantic": {
+        "oracle": ["BUYING_COMMITTED"],
+        "model": ["BUYING_COMMITTED"]
+      },
+      "prerequisitesSatisfied": true,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": {
+        "envelopeId": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "productId": "FIXTURE-PRODUCT-004",
+        "shippingFeeVnd": 30000,
+        "offerText": "giảm theo chính sách fixture"
+      },
+      "replyFactKinds": ["SHIPPING", "OFFER"],
+      "expectation": {
+        "allowedActions": ["REPLY"],
+        "allowedNextStages": ["READY_TO_BUY"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": ["phí ship", "chính sách fixture"],
+        "mustNotInclude": ["miễn phí", "tặng thêm"],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "ownership-blocks-outbound",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PRE_SALE",
+      "semantic": {
+        "oracle": ["BUYING_COMMITTED"],
+        "model": ["BUYING_COMMITTED"]
+      },
+      "prerequisitesSatisfied": true,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": false,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": null,
+      "replyFactKinds": [],
+      "expectation": {
+        "allowedActions": ["NO_REPLY"],
+        "allowedNextStages": ["PRE_SALE"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": [],
+        "mustNotInclude": [],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "page-allowlist-blocks-outbound",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PRE_SALE",
+      "semantic": {
+        "oracle": ["BUYING_COMMITTED"],
+        "model": ["BUYING_COMMITTED"]
+      },
+      "prerequisitesSatisfied": true,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": false,
+        "terminal": false,
+        "duplicateEvent": false
+      },
+      "factEnvelope": null,
+      "replyFactKinds": [],
+      "expectation": {
+        "allowedActions": ["NO_REPLY"],
+        "allowedNextStages": ["PRE_SALE"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": [],
+        "mustNotInclude": [],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "terminal-blocks-outbound",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "PURCHASE_CONFIRMED",
+      "semantic": {
+        "oracle": ["BUYING_COMMITTED"],
+        "model": ["BUYING_COMMITTED"]
+      },
+      "prerequisitesSatisfied": true,
+      "missingFields": [],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": true,
+        "duplicateEvent": false
+      },
+      "factEnvelope": null,
+      "replyFactKinds": [],
+      "expectation": {
+        "allowedActions": ["NO_REPLY"],
+        "allowedNextStages": ["PURCHASE_CONFIRMED"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": [],
+        "mustNotInclude": [],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    },
+    {
+      "fixtureId": "duplicate-event-blocks-outbound",
+      "source": "SYNTHETIC_FIXED",
+      "priorStage": "CHECKOUT",
+      "semantic": {
+        "oracle": ["BUYING_COMMITTED"],
+        "model": ["BUYING_COMMITTED"]
+      },
+      "prerequisitesSatisfied": false,
+      "missingFields": ["DELIVERY_ADDRESS"],
+      "authorization": {
+        "ownershipAuthorized": true,
+        "pageAllowed": true,
+        "terminal": false,
+        "duplicateEvent": true
+      },
+      "factEnvelope": null,
+      "replyFactKinds": [],
+      "expectation": {
+        "allowedActions": ["NO_REPLY"],
+        "allowedNextStages": ["CHECKOUT"]
+      },
+      "replyExpectation": {
+        "mustIncludeAny": [],
+        "mustNotInclude": [],
+        "piiRequestAllowed": false,
+        "objectionPresent": false,
+        "objectionResolvedByAny": []
+      }
+    }
+  ]
+}

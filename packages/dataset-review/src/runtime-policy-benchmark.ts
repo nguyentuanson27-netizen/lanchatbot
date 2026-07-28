@@ -10,6 +10,8 @@ export interface RuntimeFactClaim {
 
 export interface RuntimePolicyObservation {
   readonly action: RuntimeAction;
+  /** False when ownership, allowlist, terminal, or dedupe fences suppress action. */
+  readonly decisionEligible?: boolean;
   readonly nextStage: string | null;
   readonly requestedPii: boolean;
   readonly checkoutStarted: boolean;
@@ -98,12 +100,17 @@ function evaluateFixture(fixture: RuntimePolicyFixture): readonly RuntimeViolati
   const observation = fixture.observation;
   const expectation = fixture.expectation;
 
-  if (labels.has("BUYING_COMMITTED") && observation.action === "NO_REPLY") {
+  if (
+    labels.has("BUYING_COMMITTED") &&
+    observation.action === "NO_REPLY" &&
+    (observation.decisionEligible ?? true)
+  ) {
     add(violations, fixture, "BUYING_COMMITTED_NO_REPLY", "HARD_SAFETY");
   }
   if (
     labels.has("BUYING_COMMITTED") &&
     fixture.prerequisitesSatisfied &&
+    (observation.decisionEligible ?? true) &&
     observation.nextStage !== "READY_TO_BUY" &&
     observation.nextStage !== "CHECKOUT"
   ) {

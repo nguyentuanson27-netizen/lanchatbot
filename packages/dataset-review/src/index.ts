@@ -131,3 +131,25 @@ export {
   buildWave1CurrentBaseline,
   type Wave1CurrentBaselineReport,
 } from "./current-deterministic-baseline.js";
+export {
+  WAVE1_REPLAY_ADAPTER_VERSION,
+  WAVE1_REPLAY_SCHEMA_VERSION,
+  WAVE1_REPLY_RENDERER_VERSION,
+  buildWave1ReplayReport,
+  parseWave1ReplayFixtureSet,
+  renderWave1SafeReply,
+  replayWave1ReplyFixture,
+  replayWave1RuntimeFixture,
+  wave1ReplayFixtureSetSha256,
+  type Wave1ReplayFixtureSetV1,
+  type Wave1ReplayFixtureV1,
+  type Wave1ReplayReportV1,
+} from "./wave1-replay.js";
+export {
+  WAVE1_SEMANTIC_CANDIDATE_VERSION,
+  predictWave1SemanticCandidate,
+} from "./wave1-semantic-candidate.js";
+export {
+  buildWave1CandidateBaseline,
+  type Wave1CandidateBaselineReport,
+} from "./wave1-candidate-baseline.js";

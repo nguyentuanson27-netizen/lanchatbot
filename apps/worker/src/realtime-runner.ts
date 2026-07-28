@@ -3192,7 +3192,10 @@ export class RealtimeRunner {
         },
       });
     };
-    if (resolvedProduct) pushDecisionEvent("PRODUCT_RESOLVED");
+    if (resolvedProduct) {
+      pushDecisionEvent("PRODUCT_RESOLVED");
+      pushDecisionEvent("PRODUCT_MATCHED");
+    }
     if (
       metaMessages.length > 0 &&
       businessFacts?.status === "OK" &&
@@ -3209,10 +3212,18 @@ export class RealtimeRunner {
       pushDecisionEvent("SIZE_CONSULT_STARTED");
     }
     if (buyingSignal.isBuyingSignal) {
-      pushDecisionEvent("BUYING_SIGNAL_DETECTED", [
+      const committedReasons = [
         ...(buyingSignalOverride ? ["NO_REPLY_OVERRIDE_BUYING_SIGNAL"] : []),
         ...buyingSignal.reasons,
-      ]);
+      ];
+      pushDecisionEvent("BUYING_SIGNAL_DETECTED", committedReasons);
+      pushDecisionEvent("BUYING_SIGNAL_COMMITTED", committedReasons);
+      if (
+        salesStageAfter === "CART_OPEN" ||
+        nextState.salesStage === "READY_TO_BUY"
+      ) {
+        pushDecisionEvent("READY_TO_BUY");
+      }
     }
     if (
       salesCyclePlan?.events.some((event) => event.commandKind === "CART_OPENED")
@@ -3251,17 +3262,20 @@ export class RealtimeRunner {
         ]);
         pushDecisionEvent("PURCHASE_CONFIRMED");
       } else {
-        pushDecisionEvent("PURCHASE_CONFIRMATION_REJECTED", [
+        const rejectedReasons = [
           salesTelemetry.confirmationReasonCode ?? "CONFIRMATION_NOT_ACCEPTED",
           salesTelemetry.confirmationSource ?? "CONFIRMATION_SOURCE_UNKNOWN",
-        ]);
+        ];
+        pushDecisionEvent("PURCHASE_CONFIRMATION_REJECTED", rejectedReasons);
       }
     }
     if (handoff) {
-      pushDecisionEvent("HANDOFF", [
+      const handoffReasons = [
         salesHandoffReasonCode ?? businessFacts?.reasonCode ?? handoff.reason,
         ...handoffGuardReasonCodes,
-      ]);
+      ];
+      pushDecisionEvent("HANDOFF", handoffReasons);
+      pushDecisionEvent("HANDOFF_REQUESTED", handoffReasons);
     }
     if (handoffGuardReasonCodes.length > 0) {
       pushDecisionEvent("GUARD_BLOCKED", handoffGuardReasonCodes);
@@ -3274,6 +3288,7 @@ export class RealtimeRunner {
       proposal?.action === "NO_REPLY"
     ) {
       pushDecisionEvent("NO_REPLY");
+      pushDecisionEvent("NO_REPLY_SELECTED");
     }
     const result = await this.runtime.commit(
       {

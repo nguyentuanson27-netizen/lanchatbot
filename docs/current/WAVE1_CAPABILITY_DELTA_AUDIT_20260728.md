@@ -84,3 +84,18 @@ Test evidence:
 - Chat Runtime: 32/32 test pass.
 - Worker: 272/272 test pass.
 - Root `pnpm check`: typecheck, test và build toàn workspace đều pass.
+
+## Batch r20 evidence
+
+- Semantic candidate v1 đã chạy development/validation, giữ nguyên detector production
+  cho `BUYING_COMMITTED`, không mở holdout và mang `NOT_PROMOTED`.
+- Synthetic runtime-policy conformance đạt 17/17 ở cả oracle/model mode; reply
+  conformance đạt 13/13; hard-safety violation bằng 0; side effect disabled.
+- Kết quả trên không phải production baseline. VPS hiện có 0 recorded business/tool
+  snapshot đủ điều kiện; production replay vẫn `PENDING_RECORDED_FIXTURES`.
+- Realtime chỉ bổ sung telemetry alias additive; không đổi matcher, state transition,
+  ownership, fence, dedupe hoặc outbound.
+- `ORDER_CREATED` tiếp tục thiếu acknowledgement từ POS/order source-of-truth và
+  không được suy ra từ `PURCHASE_CONFIRMED`.
+
+Chi tiết: `docs/current/WAVE1_BATCH_R20_STATUS_20260728.md`.

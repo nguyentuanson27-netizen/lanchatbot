@@ -225,6 +225,7 @@ describe("realtime golden transcripts", () => {
     expect(committed?.metaPlan?.messages.map((message) => message.kind)).toEqual(["TEXT", "IMAGE"]);
     expect(committed?.decisionEvents?.map((event) => event.eventType)).toEqual([
       "PRODUCT_RESOLVED",
+      "PRODUCT_MATCHED",
       "PRICE_CARD_SENT",
     ]);
     const replay = await replayGolden({
@@ -264,7 +265,10 @@ describe("realtime golden transcripts", () => {
     });
 
     expect(committed?.metaPlan).toBeUndefined();
-    expect(committed?.decisionEvents?.map((event) => event.eventType)).toEqual(["NO_REPLY"]);
+    expect(committed?.decisionEvents?.map((event) => event.eventType)).toEqual([
+      "NO_REPLY",
+      "NO_REPLY_SELECTED",
+    ]);
   });
 
   it("GOLDEN-PREMATURE-PII-001 replaces an early order-info request with a safe next step", async () => {
