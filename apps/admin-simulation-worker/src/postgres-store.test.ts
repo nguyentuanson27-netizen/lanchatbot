@@ -145,5 +145,15 @@ describe("PostgresSimulationStore safety", () => {
     expect(calls[0]).not.toContain("text_redacted");
     expect(calls[0]).not.toContain("meta_outbox");
     expect(calls[0]).not.toContain("pancake_tag_outbox");
+    expect(calls[0]).toContain("FROM shadow_evaluations AS evaluation");
+    expect(calls[0]).toContain("evaluation.status = 'COMPLETED'");
+    expect(calls[0]).toContain("evaluation.actual_outbound_count > 0");
+    expect(calls[0]).toContain("digest(evaluation.business_fact_payload::text");
+    expect(calls[0]).toContain("digest(evaluation.proposal::text");
+    expect(calls[0]).toContain("digest(evaluation.guarded_plan::text");
+    expect(calls[0]).toContain(
+      "COALESCE(event_snapshot.data, shadow_snapshot.data)",
+    );
+    expect(calls[0]).not.toContain("actual_outbound_text_redacted");
   });
 });

@@ -269,7 +269,43 @@ export class PostgresSimulationStore implements SimulationStore {
            )) = 'object'
          ORDER BY event.occurred_at DESC, event.created_at DESC
          LIMIT 1
-       ) AS snapshot ON true
+       ) AS event_snapshot ON true
+       LEFT JOIN LATERAL (
+         SELECT jsonb_build_object(
+           'schemaVersion', 1,
+           'closingState', NULL,
+           'parentProductUnits', NULL,
+           'concessionStage', NULL,
+           'paymentMethod', NULL,
+           'recipientNamePresent', NULL,
+           'phoneNumberPresent', NULL,
+           'deliveryAddressPresent', NULL,
+           'handoffReason', NULL,
+           'measurements', '{}'::jsonb,
+           'businessFactsSnapshotId',
+             'sha256:' || encode(digest(evaluation.business_fact_payload::text, 'sha256'), 'hex'),
+           'toolSnapshotIds', jsonb_build_array(
+             'sha256:' || encode(digest(evaluation.proposal::text, 'sha256'), 'hex'),
+             'sha256:' || encode(digest(evaluation.guarded_plan::text, 'sha256'), 'hex')
+           ),
+           'actualOutcome', 'REPLY',
+           'funnelStage', evaluation.proposal->>'conversationStage'
+         ) AS data
+         FROM shadow_evaluations AS evaluation
+         WHERE evaluation.conversation_id = eligible.conversation_id
+           AND evaluation.page_id = $1
+           AND evaluation.source_occurred_at >= now() - make_interval(days => $2)
+           AND evaluation.status = 'COMPLETED'
+           AND evaluation.actual_outbound_count > 0
+           AND jsonb_typeof(evaluation.business_fact_payload) = 'object'
+           AND jsonb_typeof(evaluation.proposal) = 'object'
+           AND jsonb_typeof(evaluation.guarded_plan) = 'object'
+         ORDER BY evaluation.source_occurred_at DESC, evaluation.evaluation_id DESC
+         LIMIT 1
+       ) AS shadow_snapshot ON true
+       CROSS JOIN LATERAL (
+         SELECT COALESCE(event_snapshot.data, shadow_snapshot.data) AS data
+       ) AS snapshot
        ORDER BY eligible.last_occurred_at DESC, eligible.conversation_id`,
       [run.pageId, run.lookbackDays, run.maxConversations],
     );
