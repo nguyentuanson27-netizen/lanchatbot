@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-28 — Wave 1 recorded replay evidence r21
+
+- Realtime app-native ghi một shadow evaluation cho inbound cuối mỗi debounce batch, page-scoped, DLP-passed, fail-open và idempotent khi retry.
+- Admin Simulation dùng completed shadow evaluation có actual reply làm historical snapshot fallback; chỉ lưu hash business facts/proposal/guard, không đọc raw text.
+- Simulation được cấp SELECT tối thiểu trên `shadow_evaluations`; Simulation/Shadow vẫn không có quyền ghi Meta Outbox và Shadow vẫn bị tắt outbound.
+- Database 86/86, Worker 272/272, Admin Simulation 10/10, full build/typecheck, Docker full check và artifact smoke đều đạt.
+- Realtime, Shadow, Admin API, Admin Simulation và Admin Web cùng chạy image r21; tất cả healthy/restart 0, FE index/asset 200 và public route 302 Authentik.
+- Rollback tự động r21 → r20 đã được thực thi và xác minh khi probe đầu lỗi quoting; attempt 2 thành công. Recorded evidence hiện chờ traffic đủ điều kiện, holdout vẫn khóa và semantic candidate chưa promote.
+
+
 ## 2026-07-28 — Wave 1 synthetic replay + telemetry r20
 
 - Thêm bộ 17 fixture synthetic không PII cho runtime oracle/model và reply-quality conformance; đạt 17/17, 17/17 và 13/13 với hard-safety violation 0, nhưng không được coi là production baseline.

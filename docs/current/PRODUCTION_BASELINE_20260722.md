@@ -5,19 +5,32 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260728-wave1-replay-telemetry-r20`.
-- Previous release: `/opt/lana-chatbot/releases/20260728-wave1-foundation-r19`.
-- Source commit: `0cdd8ba06fcc2580ee6aee376803e0d2a5a6ec32`.
-- Source materialization: Git worktree khóa tại tag `20260728-wave1-replay-telemetry-r20`; không dùng source archive.
-- Compose SHA-256: `5b1c7899f556287501e9bfc2effef723b5e61feddebbf713eb4062a3d58b223b`.
+- Current release: `/opt/lana-chatbot/releases/20260728-wave1-recorded-replay-r21`.
+- Previous release: `/opt/lana-chatbot/releases/20260728-wave1-replay-telemetry-r20`.
+- Source commit: `5f817bbcf0cc83d39c1c0d87d76ab98a1f027606`.
+- Source materialization: Git worktree khóa tại tag `20260728-wave1-recorded-replay-r21`; không dùng source archive.
+- Compose SHA-256: `a7be98af713b50b8c8c1ba26a4349cc177593819723b327d9313b3fdb49fea58`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất trong production: `0022_dataset_review_acl`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-Realtime Worker r20 healthy, restart count 0. Admin API, Admin Web, P2.3B, P2.3C và các service khác giữ nguyên container. Không có migration mới và không thay đổi webhook, delivery, POS, n8n hoặc page allowlist.
+Realtime, Shadow, Admin API, Admin Simulation và Admin Web cùng chạy image `lana-chatbot-app:wave1-recorded-replay-r21` (`sha256:0a9ade489e02e700694a6f78ba4e9866eb474755ffed6d331a167815c6df1434`). Cả năm healthy, restart count 0; các service khác giữ nguyên.
 
-Realtime Worker chạy image `lana-chatbot-app:wave1-replay-telemetry-r20` (`sha256:d7e68a1095136a875b9dab505c2f88c355317c61c17f9b01c779aefb8b90ff0d`). Admin Web giữ r18.8.1, Admin API giữ r18.6; P2.3 và các service khác giữ nguyên.
+Không có migration mới và không thay đổi webhook, delivery, POS, n8n hoặc page allowlist. Realtime capture bằng chứng replay đã ẩn danh cho page canary; Shadow vẫn `APP_SEND_ENABLED=false`.
+
+
+## Wave 1 recorded replay evidence r21
+
+- App-native Realtime enqueue đúng tin inbound cuối mỗi debounce batch, chỉ cho page canary và DLP `PASSED`; insert phụ dùng savepoint fail-open và idempotent retry repair.
+- Admin Simulation ưu tiên explicit event snapshot, sau đó mới dùng completed shadow evaluation có actual reply. Snapshot chỉ mang hash business facts/proposal/guard; không đọc raw message hoặc outbound text.
+- Simulation Worker có SELECT trên `shadow_evaluations`; Simulation và Shadow đều không có INSERT trên `meta_outbox`.
+- Local: Database 86/86, Worker 272/272, Admin Simulation 10/10, full build/typecheck pass. Docker full check và artifact smoke pass.
+- Cutover đầu đạt health nhưng probe quyền lỗi quoting, nên guard tự rollback về r20. Rollback smoke xác nhận đúng image/env/symlink/ACL và toàn bộ service healthy. Attempt 2 sau đó thành công.
+- Hậu kiểm: năm service r21 healthy/restart 0, error/warn mới 0, unhealthy 0; Admin API ready 200, Admin FE index/asset 200 và public route 302 Authentik.
+- Recorded snapshot đủ điều kiện ngay sau deploy bằng 0, nên trạng thái là `WAITING_FOR_ELIGIBLE_TRAFFIC`. Không tạo traffic giả, không mở holdout và không promote semantic candidate.
+- Rollback dùng backup `.env.infrastructure.backup-20260728-wave1-recorded-replay-r21-attempt2`, năm image r20/trước r21 và release r20; không xóa dữ liệu.
+
 
 ## Wave 1 synthetic replay + telemetry evidence r20
 

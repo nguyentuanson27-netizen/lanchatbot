@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-28T08:28:00+00:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "5f817bbcf0cc83d39c1c0d87d76ab98a1f027606",
+  "pullRequest": 40,
+  "releaseTag": "20260728-wave1-recorded-replay-r21",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260728-wave1-recorded-replay-r21",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260728-wave1-replay-telemetry-r20",
+  "composeSha256": "a7be98af713b50b8c8c1ba26a4349cc177593819723b327d9313b3fdb49fea58",
+  "buildLogSha256": "a989a722c9104752e57b5848eb3366005fddab8ce5779fab3cbb258385decff4",
+  "firstCutoverLogSha256": "0f5f9dd2dd7783d4c6e4a1021d4d68f86bdd1d076202e6d0f6dd9d2089bcdb73",
+  "successfulCutoverLogSha256": "307e1ff2107e4022ad633515bab5f4edb8568f50914086a37a0f56fe7a9e6e65",
+  "images": {
+    "application": "lana-chatbot-app:wave1-recorded-replay-r21@sha256:0a9ade489e02e700694a6f78ba4e9866eb474755ffed6d331a167815c6df1434",
+    "recreatedServices": [
+      "realtime-worker",
+      "shadow-worker",
+      "admin-api",
+      "admin-simulation-worker",
+      "admin-web"
+    ]
+  },
+  "benchmark": {
+    "officialIncluded": 1955,
+    "officialExcluded": 45,
+    "annotationCount": 13887,
+    "split": {
+      "development": 1173,
+      "validation": 391,
+      "holdout": 391,
+      "leakageGroupCount": 0,
+      "checksum": "485db42764e18583a02937b68dcdd6fd04e9b6bab867b11d4b041e55e573985e"
+    },
+    "semanticCandidateStatus": "NOT_PROMOTED",
+    "semanticCandidateValidationMacroF1": 0.24129915563733526,
+    "buyingCommittedValidationPrecision": 0.4240506329113924,
+    "buyingCommittedValidationRecall": 0.5726495726495726,
+    "runtimeOracleSyntheticConformance": "17_OF_17_PASS",
+    "runtimeModelSyntheticConformance": "17_OF_17_PASS",
+    "replySyntheticConformance": "13_OF_13_PASS",
+    "syntheticHardSafetyViolationCount": 0,
+    "productionReplayStatus": "WAITING_FOR_ELIGIBLE_TRAFFIC",
+    "recordedSnapshotEligibleCountAtVerification": 0,
+    "lockedHoldoutOpened": false
+  },
+  "runtime": {
+    "recordedReplayCaptureEnabled": true,
+    "capturePageId": "1198992073286645",
+    "captureSelection": "FINAL_INBOUND_PER_DEBOUNCE_BATCH",
+    "captureDlpRequirement": "PASSED",
+    "captureFailureMode": "FAIL_OPEN_SAVEPOINT",
+    "captureRetryMode": "IDEMPOTENT_REPAIR",
+    "adminSimulationSnapshotPriority": [
+      "EXPLICIT_ADMIN_SIMULATION_EVENT",
+      "COMPLETED_SHADOW_EVALUATION_WITH_ACTUAL_REPLY"
+    ],
+    "adminSimulationReadsRawMessageText": false,
+    "adminSimulationReadsActualOutboundText": false,
+    "adminSimulationHashesBusinessFactProposalAndGuard": true,
+    "semanticMatcherChanged": false,
+    "semanticCandidateConnectedToProduction": false,
+    "policyChanged": false,
+    "stateSchemaChanged": false,
+    "migrationRequired": false,
+    "n8nOwnershipChanged": false,
+    "orderCreatedStatus": "PENDING_AUTHORITATIVE_POS_ACKNOWLEDGEMENT"
+  },
+  "permissions": {
+    "simulationShadowEvaluationSelect": true,
+    "simulationMetaOutboxInsert": false,
+    "shadowMetaOutboxInsert": false,
+    "shadowAppSendEnabled": false
+  },
+  "verification": {
+    "localFullBuildAndTypecheck": "PASS",
+    "databaseTests": "86_OF_86_PASS",
+    "workerTests": "272_OF_272_PASS",
+    "adminSimulationWorkerTests": "10_OF_10_PASS",
+    "dockerFullCheck": "PASS",
+    "artifactSmoke": "PASS",
+    "realtimeWorkerHealth": "HEALTHY",
+    "shadowWorkerHealth": "HEALTHY",
+    "adminApiHealth": "HEALTHY",
+    "adminSimulationWorkerHealth": "HEALTHY",
+    "adminWebHealth": "HEALTHY",
+    "recreatedServiceRestartCounts": 0,
+    "newErrorLogCount": 0,
+    "newWarningLogCount": 0,
+    "unhealthyContainerCount": 0,
+    "adminApiInternalReady": 200,
+    "adminWebInternalHealth": 200,
+    "adminWebIndex": 200,
+    "adminWebStaticAsset": 200,
+    "adminPublicAuthenticationRedirect": "302_AUTHENTIK",
+    "rollbackSmoke": "PASS_R21_TO_R20_AFTER_PROBE_FAILURE",
+    "rollbackRestoredEnvironment": true,
+    "rollbackRestoredLeastPrivilege": true
+  },
+  "rollout": {
+    "mode": "RECORDED_EVIDENCE_CAPTURE",
+    "canaryEvidenceStatus": "INSUFFICIENT_EVIDENCE",
+    "trafficStatus": "WAITING_FOR_ELIGIBLE_TRAFFIC",
+    "semanticPromotion": "DISABLED",
+    "syntheticLiveCustomerTrafficCreated": false,
+    "sideEffectAuthorizationChanged": false
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260728-wave1-replay-telemetry-r20",
+    "realtimeImage": "lana-chatbot-app:wave1-replay-telemetry-r20",
+    "shadowImage": "lana-chatbot-app:realtime-wave1-shadow-f27de9c",
+    "adminApiImage": "lana-chatbot-app:dataset-reopen-r18.6",
+    "adminSimulationImage": "lana-chatbot-app:sizechart-facts-v2-5d401b2",
+    "adminWebImage": "lana-chatbot-app:admin-web-assets-r18.8.1",
+    "environmentBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260728-wave1-recorded-replay-r21-attempt2",
+    "migrationRollbackRequired": false,
+    "dataDeletionRequired": false
+  }
+}
