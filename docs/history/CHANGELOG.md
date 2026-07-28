@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-07-28 — Cutout-first + AI reranker r22
+
+- Realtime nhận diện ảnh bằng `image_cutout` trước, dùng `image_raw` làm fallback và
+  bằng chứng bất đồng; ngưỡng cutout được tách khỏi ngưỡng raw.
+- Gemini `gemini-3.1-flash-lite` chỉ rerank tối đa ba candidate Qdrant và không thể
+  tạo/chọn mã ngoài danh sách.
+- Ảnh mới ngưng product context cũ; clarification nhận “mẫu 1/2/3”, exact candidate
+  code và “không phải mẫu nào”, tối đa ba lượt trước handoff.
+- Cache version mới, deadline toàn luồng 12 giây và telemetry không lưu URL/base64/PII.
+- Full local/Docker check pass; Business Tools 160/160, Worker 286/286.
+- Chỉ recreate Realtime Worker cho page test `1198992073286645`; healthy/restart 0,
+  log lỗi 0, Inbox/Outbox active 0. API, delivery, Shadow, Admin, POS, P2.3 và n8n
+  không đổi container.
+
 ## 2026-07-28 — Wave 1 recorded replay evidence r21
 
 - Realtime app-native ghi một shadow evaluation cho inbound cuối mỗi debounce batch, page-scoped, DLP-passed, fail-open và idempotent khi retry.
