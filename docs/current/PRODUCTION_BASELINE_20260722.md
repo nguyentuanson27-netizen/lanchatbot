@@ -5,19 +5,40 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260728-wave1-recorded-replay-r21`.
-- Previous release: `/opt/lana-chatbot/releases/20260728-wave1-replay-telemetry-r20`.
-- Source commit: `5f817bbcf0cc83d39c1c0d87d76ab98a1f027606`.
-- Source materialization: Git worktree khóa tại tag `20260728-wave1-recorded-replay-r21`; không dùng source archive.
-- Compose SHA-256: `a7be98af713b50b8c8c1ba26a4349cc177593819723b327d9313b3fdb49fea58`.
+- Current release: `/opt/lana-chatbot/releases/20260728-media-cutout-ai-r22`.
+- Previous release: `/opt/lana-chatbot/releases/20260728-wave1-recorded-replay-r21`.
+- Source commit: `078dae266a39e5172eb8ea96cbb1367821a8ea91`.
+- Source materialization: Git bundle đầy đủ đã xác minh từ annotated tag `20260728-media-cutout-ai-r22`; release checkout sạch và không sửa source trực tiếp trên VPS.
+- Compose SHA-256: `d3ee298b72ed8991eba035d0af21716dccd3fb817bb7cecace51b2070d65372c`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất trong production: `0022_dataset_review_acl`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-Realtime, Shadow, Admin API, Admin Simulation và Admin Web cùng chạy image `lana-chatbot-app:wave1-recorded-replay-r21` (`sha256:0a9ade489e02e700694a6f78ba4e9866eb474755ffed6d331a167815c6df1434`). Cả năm healthy, restart count 0; các service khác giữ nguyên.
+Realtime chạy image `lana-chatbot-app:media-cutout-ai-r22`
+(`sha256:fd9810c6acb196f96329bc5ac57d446d1a901fd3b48c63b4b7379eb8cff37184`).
+Shadow, Admin API, Admin Simulation và Admin Web vẫn giữ image r21. Realtime healthy, restart count 0; ID/image của mọi container khác không đổi trong cutover.
 
-Không có migration mới và không thay đổi webhook, delivery, POS, n8n hoặc page allowlist. Realtime capture bằng chứng replay đã ẩn danh cho page canary; Shadow vẫn `APP_SEND_ENABLED=false`.
+Không có migration mới và không thay đổi webhook, delivery, POS, P2.3, n8n hoặc page allowlist. Realtime capture bằng chứng replay đã ẩn danh cho page test; Shadow vẫn `APP_SEND_ENABLED=false`.
+
+## Cutout-first + AI reranker r22
+
+- Cutout là kênh chính; raw chạy song song để fallback/bằng chứng phụ. Qdrant vẫn green
+  với 917 points và ba named vector `image_cutout`, `image_raw`, `product_text`.
+- Gemini `gemini-3.1-flash-lite` chỉ chạy cho ca khó và chỉ được trả candidate trong
+  top 3, `none` hoặc `ambiguous`. Tổng deadline 12 giây; timeout Gemini tối đa 8 giây
+  nhưng bị giới hạn bởi thời gian còn lại.
+- Ảnh mới xóa/ngưng product context cũ. Clarification hiểu số thứ tự, exact candidate
+  code và “không phải mẫu nào”; tối đa ba lượt trước handoff.
+- Flag LIVE chỉ áp dụng page `1198992073286645`; không dùng shadow percentage canary
+  hoặc sender allowlist trên page test riêng.
+- Docker full check pass; Business Tools 160/160 và Worker 286/286.
+- Hậu kiểm: realtime healthy/restart 0, log lỗi mới 0, Inbox/Outbox active 0, duplicate
+  outbox sequence group 0, worker `LIVE/IDLE`, page `ACTIVE/APP`.
+- Chưa có ảnh Messenger mới sau cutover. Human test SD395/SD443 và các ca
+  crop/screenshot/out-of-catalog vẫn là gate trước khi mở sang page thật.
+- Rollback theo flag từ AI → clarification → cutout; lỗi code thì recreate riêng
+  realtime bằng image/release r21. Không xóa cache hoặc dữ liệu.
 
 
 ## Wave 1 recorded replay evidence r21
