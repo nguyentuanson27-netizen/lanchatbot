@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260724-realtime-measurement-continuation-r17`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260728-wave1-foundation-r19`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -14,9 +14,14 @@ Không sửa source trực tiếp trong `/opt/lana-chatbot/current`. Mọi thay 
 
 Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/lana-chatbot/repository`. Agent phải đọc `AGENTS.md` trước khi thao tác; working tree này không phải runtime production. User `lana-deploy` có deploy key GitHub read-only chỉ cho repository này; được phép `fetch` tag/commit nhưng không được push.
 
-## Trạng thái production ngày 2026-07-24
+## Trạng thái production ngày 2026-07-28
 
-- Realtime Worker đang chạy image `lana-chatbot-app:realtime-measurement-continuation-r17`; Admin API/Admin Web/P2.3B giữ image r16 và P2.3C giữ image r15. Page allowlist vẫn chỉ có `1198992073286645`.
+- Wave 1 foundation r19 chạy từ merge commit `8df272b6`: official benchmark khóa 1.955 hội thoại hợp lệ, split 1.173/391/391, leakage 0; holdout chưa mở.
+- Realtime Worker dùng image `lana-chatbot-app:wave1-foundation-r19`, healthy/restart 0. Clarification state là field additive của schema v2, tối đa ba câu hỏi khác nhau rồi handoff an toàn.
+- Semantic matcher chưa thay đổi vì deterministic validation baseline mới đạt precision `42,41%`, recall `57,26%`; runtime-policy/reply-quality baseline chờ fixed replay fixtures.
+- Admin Web vẫn dùng image r18.8.1 và public route trả `302` sang Authentik; Admin API cùng các worker khác không restart.
+
+- Page allowlist vẫn chỉ có `1198992073286645`; webhook, delivery, POS và n8n không thay đổi trong release r19.
 - Dashboard đọc checkout drop-off qua view ẩn danh `admin_conversation_events_v`; không mở quyền bảng hội thoại gốc cho tài khoản Admin.
 - Checkout tự nhiên dùng structured extraction có evidence/confidence và deterministic guard; app không đưa PII vào decision telemetry.
 - Xác nhận mua hiểu thêm các cách nói tự nhiên nhưng vẫn chặn câu hỏi, phủ định, do dự và yêu cầu ảnh. `OK` chỉ xác nhận khi cart đang ở đúng bước order preview.
@@ -27,9 +32,9 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - P2.3C đang chạy với endpoint tách nền `139.162.18.93:7000`, khoảng cách gọi Vertex 6 giây và giữ nguyên lỗi retryable cho chu kỳ sau.
 - Cross-sell được để cho bản sau r15, dùng quan hệ phối đồ được duyệt trong PostgreSQL/Admin; không dùng similarity để tự gợi ý.
 - API webhook tiếp tục chạy image `lana-chatbot-app:inbound-debounce-r1`.
-- Realtime page test chạy r17 với ProductFactsV2, Media Selector V2, profile/variant/multi-fact và hard gate chỉ cho page `1198992073286645`; Size Chart scheduler vẫn giữ pre-check idempotent.
+- Realtime page test chạy r19 với ProductFactsV2, Media Selector V2, profile/variant/multi-fact và hard gate chỉ cho page `1198992073286645`; Size Chart scheduler vẫn giữ pre-check idempotent.
 - Shadow worker chạy cùng image, bật Judge v2 ở `DRY_RUN`; `APP_SEND_ENABLED=false`, `CHATBOT_SEND_ENABLED=false` và role DB không có quyền ghi Meta Outbox.
-- Admin API/Admin Web/P2.3B chạy r16; Simulation Worker giữ `sizechart-facts-v2-5d401b2` và POS snapshot giữ `sales-cycle-production-r6`.
+- Admin Web chạy r18.8.1, Admin API chạy r18.6; Simulation Worker giữ `sizechart-facts-v2-5d401b2` và POS snapshot giữ `sales-cycle-production-r6`.
 - Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
 - Bốn policy runtime (shop, offer, closing, payment) đang trỏ tới các version `PUBLISHED` bất biến; `SHOP_POLICY` v2 chứa chính sách chăm sóc khách hàng có cấu trúc và mọi lần chuyển trạng thái đều có audit.
 - Chu trình bán hàng production đã nối cart 48 giờ, thương lượng deterministic, giảm 5% từ hai sản phẩm, freeship/giảm cuối theo policy, thu thông tin nhận hàng, order preview và `PURCHASE_CONFIRMED`.
@@ -59,10 +64,10 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - Canary Messenger 100 inbound thật bắt đầu lúc `2026-07-23T19:14:08Z` (`2026-07-24 02:14:08 +07:00`) cho duy nhất page `1198992073286645`; không tạo inbound giả.
 - Các workflow n8n P2.2/P2.3 tương ứng đang inactive; không được kích hoạt đồng thời với app-native worker.
 - Timer `lana-p23-daily.timer` đang `disabled/inactive`.
-- PostgreSQL đã áp dụng migration đến `0019_customer_profile_wave2`; migration 0019 bổ sung projection hồ sơ số đo 48 giờ theo pseudonymous customer key và tương thích ngược.
+- PostgreSQL đã áp dụng migration đến `0022_dataset_review_acl`; các migration trước đó, gồm projection hồ sơ số đo 48 giờ theo pseudonymous customer key, vẫn tương thích ngược.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Realtime measurement continuation r17](deploy/manifests/20260724-realtime-measurement-continuation-r17.json). Rollback realtime dùng image r15 và release source gần nhất là r16.
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Wave 1 foundation r19](deploy/manifests/20260728-wave1-foundation-r19.json). Rollback realtime dùng image r17 và symlink release trước là r18.8.1.
 
 ## Kiến trúc dữ liệu
 
