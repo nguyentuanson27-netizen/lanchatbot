@@ -5,19 +5,30 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260728-wave1-foundation-r19`.
-- Previous release: `/opt/lana-chatbot/releases/20260727-admin-web-assets-r18.8.1`.
-- Source commit: `8df272b6ec97e9214154c3c61ec1878dd62bd629`.
-- Source materialization: Git worktree khóa tại tag `20260728-wave1-foundation-r19`; không dùng source archive.
+- Current release: `/opt/lana-chatbot/releases/20260728-wave1-replay-telemetry-r20`.
+- Previous release: `/opt/lana-chatbot/releases/20260728-wave1-foundation-r19`.
+- Source commit: `0cdd8ba06fcc2580ee6aee376803e0d2a5a6ec32`.
+- Source materialization: Git worktree khóa tại tag `20260728-wave1-replay-telemetry-r20`; không dùng source archive.
 - Compose SHA-256: `5b1c7899f556287501e9bfc2effef723b5e61feddebbf713eb4062a3d58b223b`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất trong production: `0022_dataset_review_acl`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-Realtime Worker r19 healthy, restart count 0. Admin API, Admin Web, P2.3B, P2.3C và các service khác giữ nguyên container. Không có migration mới và không thay đổi webhook, delivery, POS, n8n hoặc page allowlist.
+Realtime Worker r20 healthy, restart count 0. Admin API, Admin Web, P2.3B, P2.3C và các service khác giữ nguyên container. Không có migration mới và không thay đổi webhook, delivery, POS, n8n hoặc page allowlist.
 
-Realtime Worker chạy image `lana-chatbot-app:wave1-foundation-r19` (`sha256:33f49b6728f9a4fd30558b49d4df2684e3a25d9561fe76ec7676795d6fcbabc0`). Admin Web giữ r18.8.1, Admin API giữ r18.6; P2.3 và các service khác giữ nguyên.
+Realtime Worker chạy image `lana-chatbot-app:wave1-replay-telemetry-r20` (`sha256:d7e68a1095136a875b9dab505c2f88c355317c61c17f9b01c779aefb8b90ff0d`). Admin Web giữ r18.8.1, Admin API giữ r18.6; P2.3 và các service khác giữ nguyên.
+
+## Wave 1 synthetic replay + telemetry evidence r20
+
+- Synthetic reference conformance dùng 17 fixture cố định không PII: runtime oracle 17/17, runtime model 17/17 và reply quality 13/13; hard-safety violation bằng 0 và side effect disabled.
+- Báo cáo tự khai `notProductionBaseline=true`. VPS có 0 recorded business/tool snapshot đủ điều kiện; production replay tiếp tục `PENDING_RECORDED_FIXTURES`.
+- Semantic candidate chỉ chạy development/validation, giữ nguyên production detector cho `BUYING_COMMITTED`, không mở holdout và mang `NOT_PROMOTED`. Validation macro-F1 `24,13%`; `BUYING_COMMITTED` precision `42,41%`, recall `57,26%`.
+- Runtime chỉ phát thêm alias `PRODUCT_MATCHED`, `BUYING_SIGNAL_COMMITTED`, `READY_TO_BUY`, `HANDOFF_REQUESTED` và `NO_REPLY_SELECTED`. Event cũ được giữ; matcher, policy, state, ownership, dedupe và outbound không đổi.
+- `BUYING_SIGNAL_RETRACTED` mới chỉ được contract chấp nhận, chưa phát live vì chưa có source event đủ chính xác. `ORDER_CREATED` vẫn chờ acknowledgement từ POS/order source-of-truth.
+- Local và Docker `pnpm check` pass; Dataset Review 58/58, Contracts 81/81, Database 82/82, Worker 272/272.
+- Cutover chỉ recreate `realtime-worker`. Sau deploy image r20 healthy/restart 0, error/warn mới 0, không có container unhealthy; API/Admin API liveness nội bộ pass và Admin public route trả `302` sang Authentik.
+- Rollback: phục hồi `.env.infrastructure.backup-20260728-wave1-replay-telemetry-r20`, recreate riêng realtime bằng image r19 và đổi symlink về release r19; không xóa dữ liệu.
 
 ## Wave 1 benchmark foundation + clarification recovery r19
 

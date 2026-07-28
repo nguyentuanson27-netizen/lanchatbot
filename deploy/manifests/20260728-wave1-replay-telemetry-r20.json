@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-28T06:46:40+00:00",
+  "environment": "production-canary-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "0cdd8ba06fcc2580ee6aee376803e0d2a5a6ec32",
+  "pullRequest": 38,
+  "releaseTag": "20260728-wave1-replay-telemetry-r20",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260728-wave1-replay-telemetry-r20",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260728-wave1-foundation-r19",
+  "composeSha256": "5b1c7899f556287501e9bfc2effef723b5e61feddebbf713eb4062a3d58b223b",
+  "buildLogSha256": "d46e868e3a25c2aface1067b5546ec1b50a1875baa45a162730df1a1e3d84f51",
+  "images": {
+    "realtimeWorker": "lana-chatbot-app:wave1-replay-telemetry-r20@sha256:d7e68a1095136a875b9dab505c2f88c355317c61c17f9b01c779aefb8b90ff0d",
+    "adminWebUnchanged": "lana-chatbot-app:admin-web-assets-r18.8.1",
+    "adminApiUnchanged": "lana-chatbot-app:dataset-reopen-r18.6"
+  },
+  "benchmark": {
+    "officialIncluded": 1955,
+    "officialExcluded": 45,
+    "annotationCount": 13887,
+    "split": {
+      "development": 1173,
+      "validation": 391,
+      "holdout": 391,
+      "leakageGroupCount": 0,
+      "checksum": "485db42764e18583a02937b68dcdd6fd04e9b6bab867b11d4b041e55e573985e"
+    },
+    "foundationReportSha256": "113a2b5707d13b64e26b0b9008bafae15444fe6593abf17fe76484380363375c",
+    "deterministicBaselineReportSha256": "7e42ea12c4dfe87b1d236c9bfd5eba45fcb3026f3099bba9618d80109d3ff5f2",
+    "semanticCandidateReportSha256": "b369a571064b84283c8c26746de2f76f685a41f2f990dc171923ec03903b6872",
+    "syntheticConformanceReportSha256": "9f063e6a67515d30bb08a9ff97876471e6d9e973ed4267e898fa20a75d1c4a5a",
+    "syntheticFixtureSha256": "4456fa867f07e65b9b14b84cf6dedffbb3eada277ab9a8f30d1b252ce92f6878",
+    "semanticCandidateStatus": "NOT_PROMOTED",
+    "semanticCandidateValidationMacroF1": 0.24129915563733526,
+    "buyingCommittedValidationPrecision": 0.4240506329113924,
+    "buyingCommittedValidationRecall": 0.5726495726495726,
+    "runtimeOracleSyntheticConformance": "17_OF_17_PASS",
+    "runtimeModelSyntheticConformance": "17_OF_17_PASS",
+    "replySyntheticConformance": "13_OF_13_PASS",
+    "syntheticHardSafetyViolationCount": 0,
+    "productionReplayStatus": "PENDING_RECORDED_FIXTURES",
+    "recordedSnapshotEligibleCount": 0,
+    "lockedHoldoutOpened": false
+  },
+  "runtime": {
+    "semanticMatcherChanged": false,
+    "semanticCandidateConnectedToProduction": false,
+    "policyChanged": false,
+    "stateSchemaChanged": false,
+    "migrationRequired": false,
+    "emittedTelemetryAliases": [
+      "PRODUCT_MATCHED",
+      "BUYING_SIGNAL_COMMITTED",
+      "READY_TO_BUY",
+      "HANDOFF_REQUESTED",
+      "NO_REPLY_SELECTED"
+    ],
+    "declaredButNotEmittedWithoutAuthoritativeSource": [
+      "BUYING_SIGNAL_RETRACTED"
+    ],
+    "orderCreatedStatus": "PENDING_AUTHORITATIVE_POS_ACKNOWLEDGEMENT"
+  },
+  "verification": {
+    "localPnpmCheck": "PASS",
+    "dockerPnpmCheck": "PASS",
+    "datasetReviewTests": "58_OF_58_PASS",
+    "contractTests": "81_OF_81_PASS",
+    "databaseTests": "82_OF_82_PASS",
+    "workerTests": "272_OF_272_PASS",
+    "realtimeWorkerHealth": "HEALTHY",
+    "realtimeWorkerRestartCount": 0,
+    "newErrorLogCount": 0,
+    "newWarningLogCount": 0,
+    "unhealthyContainerCount": 0,
+    "apiInternalLiveness": "PASS",
+    "adminApiInternalLiveness": "PASS",
+    "adminPublicAuthenticationRedirect": "302_AUTHENTIK",
+    "publicApiPort8000Probe": "TIMEOUT_FROM_CODEX_NETWORK",
+    "otherServicesRestarted": false,
+    "buildCommandCompatibilityRetry": "PASS_AFTER_REMOVING_UNSUPPORTED_PROGRESS_FLAG"
+  },
+  "rollout": {
+    "mode": "ADDITIVE_TELEMETRY_ONLY",
+    "canaryEvidenceStatus": "INSUFFICIENT_EVIDENCE",
+    "semanticPromotion": "DISABLED",
+    "sideEffectAuthorizationChanged": false
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260728-wave1-foundation-r19",
+    "realtimeImage": "lana-chatbot-app:wave1-foundation-r19",
+    "environmentBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260728-wave1-replay-telemetry-r20",
+    "migrationRollbackRequired": false,
+    "dataDeletionRequired": false
+  }
+}

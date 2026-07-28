@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-28 — Wave 1 synthetic replay + telemetry r20
+
+- Thêm bộ 17 fixture synthetic không PII cho runtime oracle/model và reply-quality conformance; đạt 17/17, 17/17 và 13/13 với hard-safety violation 0, nhưng không được coi là production baseline.
+- Semantic candidate chỉ chạy development/validation, không mở holdout và không nối production; trạng thái `NOT_PROMOTED`.
+- Bổ sung telemetry alias additive cho product match, buying commitment, ready-to-buy, handoff request và no-reply selection; giữ event cũ để tương thích.
+- Không phát `BUYING_SIGNAL_RETRACTED` từ purchase-confirmation rejection vì nguồn này còn gộp negation, hesitation và câu hỏi. `ORDER_CREATED` vẫn chờ POS acknowledgement.
+- Local/Docker `pnpm check` pass; Dataset Review 58/58, Contracts 81/81, Database 82/82, Worker 272/272.
+- Chỉ recreate Realtime Worker. Image r20 healthy/restart 0, error/warn mới 0; API/Admin API liveness nội bộ pass và Admin public route vẫn trả 302 Authentik.
+
 ## 2026-07-28 — Wave 1 benchmark foundation + clarification recovery r19
 
 - Khóa official bundle 2.000 record, dùng 1.955 record hợp lệ và bỏ 45 parser-failed; split 1.173/391/391 theo duplicate group, leakage 0, rare/safety giữ dạng overlay.

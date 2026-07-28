@@ -98,3 +98,16 @@ Wave 1 chưa hoàn thành. Còn cần:
    minimum slice.
 6. Smoke rollback và xác nhận incorrect handoff/false-positive post-sale không
    regression trên canary.
+
+## Post-deploy evidence
+
+- PR `#38` merge commit: `0cdd8ba06fcc2580ee6aee376803e0d2a5a6ec32`.
+- Tag/release: `20260728-wave1-replay-telemetry-r20`.
+- Realtime image: `sha256:d7e68a1095136a875b9dab505c2f88c355317c61c17f9b01c779aefb8b90ff0d`.
+- Chỉ `realtime-worker` được recreate; semantic candidate không được bật.
+- Realtime healthy, restart `0`, error/warning mới `0`; không có container unhealthy.
+- API và Admin API liveness nội bộ pass; Admin public route trả `302` sang Authentik.
+- Probe `http://156.67.214.197:8000/health` từ mạng Codex timeout; không dùng kết quả này để phủ định liveness nội bộ/container health.
+- Rollback target là release/image r19; env backup đã được tạo và không có migration.
+
+Manifest: `deploy/manifests/20260728-wave1-replay-telemetry-r20.json`.
