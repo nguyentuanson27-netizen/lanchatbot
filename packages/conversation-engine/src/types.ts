@@ -94,6 +94,18 @@ export interface OrderDraft {
   readonly quantity: number;
 }
 
+export interface MediaClarificationState {
+  readonly status: "ACTIVE";
+  readonly candidates: readonly {
+    readonly label: string;
+    readonly productId: string;
+  }[];
+  readonly attemptCount: number;
+  readonly maxAttempts: number;
+  readonly reasonCode: string;
+  readonly openedAt: string;
+}
+
 export interface ConversationState {
   readonly schemaVersion: 1;
   readonly conversationId: string;
@@ -113,6 +125,8 @@ export interface ConversationState {
     readonly label: string;
     readonly productId: string;
   }[];
+  /** Bounded state for resolving an uncertain customer image without immediate handoff. */
+  readonly mediaClarification?: MediaClarificationState | null;
   readonly consideredVariant: ConsideredVariant;
   /** Additive Wave-2 state; absent snapshots remain valid while the flag is off. */
   readonly verifiedVariant?: VerifiedVariantV2 | null;

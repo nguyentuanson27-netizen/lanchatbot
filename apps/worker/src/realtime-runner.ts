@@ -87,6 +87,10 @@ import {
   type MediaAggregation,
   type MediaAnalysisItem,
 } from "./media-resolution.js";
+import type {
+  RealtimeMediaRecognition,
+  RealtimeMediaRecognitionService,
+} from "./realtime-media-recognition.js";
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
 import {
@@ -1472,6 +1476,18 @@ export interface RealtimeVideoFrameExtractorPort {
   extract(videoUrl: string): Promise<VideoFrameExtraction>;
 }
 
+export interface RealtimeMediaRecognitionPort {
+  recognize: RealtimeMediaRecognitionService["recognize"];
+}
+
+interface MediaClarificationDecision {
+  readonly action: "OPEN" | "RETRY" | "REJECTED" | "EXHAUSTED" | "CLEAR";
+  readonly candidates: readonly StableProductDocument[];
+  readonly attemptCount: number;
+  readonly maxAttempts: number;
+  readonly reasonCode: string;
+}
+
 interface ProductResolution {
   readonly primary: StableProductDocument | null;
   readonly products: readonly StableProductDocument[];
@@ -1479,6 +1495,7 @@ interface ProductResolution {
   readonly media: MediaAggregation;
   readonly origin: "NONE" | "TEXT_CODE" | "TEXT_SEMANTIC" | "ADS" | "MEDIA" | "SELECTION" | "STATE";
       readonly extractedAdProductId: string | null;
+  readonly clarification: MediaClarificationDecision | null;
 }
 
 export interface RealtimeTagObservationProvider {
@@ -1584,6 +1601,9 @@ export interface RealtimeRunnerOptions {
   readonly decisionAuditV2Enabled?: boolean;
   readonly recordedReplayCaptureEnabled?: boolean;
   readonly recordedReplayPageId?: string;
+  readonly mediaRecognitionEnabled?: boolean;
+  readonly mediaClarificationEnabled?: boolean;
+  readonly mediaRecognitionPageIds?: readonly string[];
 }
 
 export class RealtimeRunner {
@@ -1602,6 +1622,7 @@ export class RealtimeRunner {
     private readonly canonicalHistory?: CanonicalChatHistoryPort,
     private readonly videoFrames?: RealtimeVideoFrameExtractorPort,
     private readonly policyResolver?: RuntimePolicyResolverPort,
+    private readonly mediaRecognition?: RealtimeMediaRecognitionPort,
   ) {
     if (options.mode === "DRY_RUN" && options.sendEnabled) {
       throw new Error("REALTIME_DRY_RUN_SEND_FORBIDDEN");
@@ -1641,6 +1662,11 @@ export class RealtimeRunner {
       recordedReplayCaptureEnabled:
         options.recordedReplayCaptureEnabled ?? false,
       recordedReplayPageId: options.recordedReplayPageId ?? "",
+      mediaRecognitionEnabled: options.mediaRecognitionEnabled ?? false,
+      mediaClarificationEnabled: options.mediaClarificationEnabled ?? false,
+      mediaRecognitionPageIds: [
+        ...(options.mediaRecognitionPageIds ?? []),
+      ],
     };
   }
 
@@ -2191,7 +2217,7 @@ export class RealtimeRunner {
         isPostSaleRequest(message.text ?? "") ||
         preSalePolicyIntent !== null
       ? this.emptyResolution()
-      : await this.resolveProducts(message, state);
+      : await this.resolveProducts(message, state, claim.pageId);
     let resolvedProduct = resolution.primary;
     let productResolutionOrigin: ProductResolution["origin"] = resolution.origin;
     if (
@@ -2231,6 +2257,60 @@ export class RealtimeRunner {
     if (applied.status !== "APPLIED") return "INBOX_ONLY";
 
     let nextState = applied.state;
+    const hasNewCustomerImage = !message.isEcho &&
+      message.attachments.some((attachment) =>
+        attachment.type.toLowerCase() === "image" && Boolean(attachment.url)
+      );
+    const mediaRecognitionActive = this.mediaRecognitionEnabledForPage(claim.pageId);
+    if (mediaRecognitionActive && hasNewCustomerImage) {
+      nextState = {
+        ...nextState,
+        currentProductId: resolvedProduct?.productId ?? null,
+        mediaClarification: null,
+        ...(resolvedProduct ? {} : { productSelections: [] }),
+      };
+    }
+    let mediaClarificationHandled = false;
+    if (resolution.clarification) {
+      const clarification = resolution.clarification;
+      if (clarification.action === "OPEN") {
+        const selections = clarification.candidates.map((product, index) => ({
+          label: `MAU_${index + 1}`,
+          productId: product.productId,
+        }));
+        nextState = {
+          ...nextState,
+          currentProductId: null,
+          productSelections: selections,
+          mediaClarification: {
+            status: "ACTIVE",
+            candidates: selections,
+            attemptCount: clarification.attemptCount,
+            maxAttempts: clarification.maxAttempts,
+            reasonCode: clarification.reasonCode,
+            openedAt: now.toISOString(),
+          },
+        };
+      } else if (clarification.action === "RETRY" && nextState.mediaClarification) {
+        nextState = {
+          ...nextState,
+          currentProductId: null,
+          mediaClarification: {
+            ...nextState.mediaClarification,
+            attemptCount: clarification.attemptCount,
+          },
+        };
+      } else {
+        nextState = {
+          ...nextState,
+          mediaClarification: null,
+          productSelections: [],
+          ...(clarification.action === "CLEAR" && resolvedProduct
+            ? { currentProductId: resolvedProduct.productId }
+            : { currentProductId: null }),
+        };
+      }
+    }
     let metaMessages: RealtimeMetaMessageUnit[] = [];
     let proposal: AgentProposalV1 | null = null;
     let handoff = applied.handoff;
@@ -2362,6 +2442,33 @@ export class RealtimeRunner {
           );
           nextState = transitioned.state;
           handoff = transitioned.handoff;
+        }
+      } else if (
+        resolution.clarification &&
+        resolution.clarification.action !== "CLEAR"
+      ) {
+        mediaClarificationHandled = true;
+        if (resolution.clarification.action === "EXHAUSTED") {
+          handoffGuardReasonCodes = [
+            "MEDIA_CLARIFICATION_EXHAUSTED",
+            resolution.clarification.reasonCode,
+          ];
+          const transitioned = applySilentHandoff(
+            nextState,
+            "PRODUCT_AMBIGUOUS",
+            nextState.revision,
+            nextState.lastFence,
+            now,
+          );
+          nextState = transitioned.state;
+          handoff = transitioned.handoff;
+        } else if (this.options.mode === "LIVE" && this.options.sendEnabled) {
+          metaMessages = this.mediaClarificationMessages(
+            resolution.clarification.action,
+            resolution.clarification.candidates,
+            resolution.clarification.attemptCount,
+            resolution.clarification.maxAttempts,
+          );
         }
       } else if (resolution.media.requiresHandoff) {
         handoffGuardReasonCodes = [
@@ -3000,6 +3107,7 @@ export class RealtimeRunner {
       salesCycleRecord &&
       !message.isEcho &&
       preSalePolicyIntent === null &&
+      !mediaClarificationHandled &&
       handoff === null
     ) {
       const sales = await evaluateRealtimeSalesCycle({
@@ -3408,6 +3516,7 @@ export class RealtimeRunner {
       media: aggregateMedia([]),
       origin: "NONE",
       extractedAdProductId: null,
+      clarification: null,
     };
   }
 
@@ -3423,7 +3532,55 @@ export class RealtimeRunner {
       media: aggregateMedia([]),
       origin,
       extractedAdProductId,
+      clarification: null,
     };
+  }
+
+  private mediaRecognitionEnabledForPage(pageId: string): boolean {
+    return Boolean(
+      this.options.mediaRecognitionEnabled &&
+      this.mediaRecognition &&
+      this.options.mediaRecognitionPageIds.includes(pageId),
+    );
+  }
+
+  private mediaClarificationMessages(
+    action: MediaClarificationDecision["action"],
+    candidates: readonly StableProductDocument[],
+    attemptCount: number,
+    maxAttempts: number,
+  ): RealtimeMetaMessageUnit[] {
+    if (action === "REJECTED") {
+      return [{
+        kind: "TEXT",
+        text: "Em đã bỏ các mẫu vừa gợi ý. Chị gửi ảnh khác rõ hơn hoặc mã sản phẩm giúp em nhé.",
+      }];
+    }
+    if (action === "RETRY") {
+      return [{
+        kind: "TEXT",
+        text: `Chị chọn giúp em “mẫu 1/2/3” hoặc gửi đúng mã trong danh sách nhé (${attemptCount}/${maxAttempts}).`,
+      }];
+    }
+    if (candidates.length === 0) {
+      return [{
+        kind: "TEXT",
+        text: "Em chưa đối chiếu chắc mẫu này. Chị gửi thêm ảnh rõ toàn bộ trang phục hoặc mã sản phẩm giúp em nhé.",
+      }];
+    }
+    const units: RealtimeMetaMessageUnit[] = [{
+      kind: "TEXT",
+      text: "Em thấy các mẫu gần nhất dưới đây, chị chọn “mẫu 1/2/3” hoặc gửi mã giúp em nhé.",
+    }];
+    candidates.slice(0, 3).forEach((product, index) => {
+      units.push({
+        kind: "TEXT",
+        text: `Mẫu ${index + 1} — ${product.productId}`,
+      });
+      const imageUrl = verifiedImageUrls(product, "PRICE_CARD")[0];
+      if (imageUrl) units.push({ kind: "IMAGE", imageUrl });
+    });
+    return units;
   }
 
   private async exactProduct(value: string): Promise<StableProductDocument | null> {
@@ -3464,8 +3621,75 @@ export class RealtimeRunner {
   private async resolveProducts(
     message: InboundMessageV1,
     state: ConversationState,
+    pageId: string,
   ): Promise<ProductResolution> {
     const text = message.text?.trim() ?? "";
+    const imageAttachments = message.attachments
+      .map((attachment, ordinal) => ({ attachment, ordinal }))
+      .filter((item): item is {
+        attachment: typeof item.attachment & { url: string };
+        ordinal: number;
+      } =>
+        item.attachment.type.toLowerCase() === "image" &&
+        Boolean(item.attachment.url)
+      );
+    const activeClarification = state.mediaClarification;
+    if (activeClarification?.status === "ACTIVE" && imageAttachments.length === 0) {
+      const selectedByLabel = selectedProductId(text, activeClarification.candidates);
+      const code = productCodeOnly(text);
+      const selectedByCode = code
+        ? activeClarification.candidates.find((candidate) =>
+            normalizeProductCode(candidate.productId) === code
+          )?.productId ?? null
+        : null;
+      const selected = selectedByLabel ?? selectedByCode;
+      if (selected) {
+        const product = await this.exactProduct(selected);
+        if (product) {
+          return {
+            ...this.singleResolution(product, "SELECTION"),
+            clarification: {
+              action: "CLEAR",
+              candidates: [],
+              attemptCount: activeClarification.attemptCount,
+              maxAttempts: activeClarification.maxAttempts,
+              reasonCode: "MEDIA_CLARIFICATION_SELECTED",
+            },
+          };
+        }
+      }
+      const normalizedText = text
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/gu, "")
+        .toLocaleLowerCase("vi");
+      const rejected = /(khong phai|khong co mau nao|sai het|khong dung)/iu
+        .test(normalizedText);
+      if (rejected) {
+        return {
+          ...this.emptyResolution(),
+          clarification: {
+            action: "REJECTED",
+            candidates: [],
+            attemptCount: activeClarification.attemptCount,
+            maxAttempts: activeClarification.maxAttempts,
+            reasonCode: "MEDIA_CLARIFICATION_REJECTED",
+          },
+        };
+      }
+      const attemptCount = activeClarification.attemptCount + 1;
+      return {
+        ...this.emptyResolution(),
+        clarification: {
+          action: attemptCount >= activeClarification.maxAttempts
+            ? "EXHAUSTED"
+            : "RETRY",
+          candidates: [],
+          attemptCount,
+          maxAttempts: activeClarification.maxAttempts,
+          reasonCode: "MEDIA_CLARIFICATION_UNRESOLVED",
+        },
+      };
+    }
     const selected = selectedProductId(text, state.productSelections ?? []);
     if (selected) {
       const product = await this.exactProduct(selected);
@@ -3495,6 +3719,7 @@ export class RealtimeRunner {
         media: aggregateMedia([]),
         origin: "TEXT_CODE",
         extractedAdProductId: null,
+        clarification: null,
       };
     }
 
@@ -3514,21 +3739,67 @@ export class RealtimeRunner {
     }
 
     const mediaItems: MediaAnalysisItem[] = [];
-    const imageAttachments = message.attachments
-      .map((attachment, ordinal) => ({ attachment, ordinal }))
-      .filter((item): item is { attachment: typeof item.attachment & { url: string }; ordinal: number } =>
-        item.attachment.type.toLowerCase() === "image" && Boolean(item.attachment.url)
-      );
+    let mediaClarification: MediaClarificationDecision | null = null;
     if (imageAttachments.length > 0) {
-      const results = await this.searchImages(
-        imageAttachments.map((item) => item.attachment.url),
-      );
+      const useRecognition = this.mediaRecognitionEnabledForPage(pageId);
+      const results = useRecognition
+        ? await Promise.all(imageAttachments.map((item) =>
+            this.mediaRecognition!.recognize(item.attachment.url)
+          ))
+        : await this.searchImages(
+            imageAttachments.map((item) => item.attachment.url),
+          );
       imageAttachments.forEach((item, index) => {
         const result = results[index] ?? {
           status: "ERROR" as const,
           reasonCode: "IMAGE_SEARCH_RESULT_MISSING",
         };
-        mediaItems.push(mediaItemFromSearch(item.ordinal, "IMAGE", result));
+        if (useRecognition) {
+          const recognition = result as RealtimeMediaRecognition;
+          if (recognition.status === "MATCHED") {
+            mediaItems.push(mediaItemFromSearch(
+              item.ordinal,
+              "IMAGE",
+              {
+                status: "MATCHED",
+                matchKind: "SEMANTIC",
+                product: recognition.product,
+                score: recognition.score,
+                gap: recognition.gap,
+              },
+            ));
+          } else {
+            mediaItems.push({
+              ordinal: item.ordinal,
+              mediaType: "IMAGE",
+              status: recognition.status,
+              product: null,
+              score: null,
+              gap: null,
+              reasonCode: recognition.reasonCode,
+              frameCount: 1,
+            });
+          }
+          if (
+            recognition.status !== "MATCHED" &&
+            this.options.mediaClarificationEnabled &&
+            mediaClarification === null
+          ) {
+            mediaClarification = {
+              action: "OPEN",
+              candidates: recognition.candidates.map(({ product }) => product),
+              attemptCount: 0,
+              maxAttempts: 3,
+              reasonCode: recognition.reasonCode,
+            };
+          }
+        } else {
+          mediaItems.push(mediaItemFromSearch(
+            item.ordinal,
+            "IMAGE",
+            result as MediaProductSearchResult,
+          ));
+        }
       });
     }
 
@@ -3572,6 +3843,7 @@ export class RealtimeRunner {
         media,
         origin: "MEDIA",
         extractedAdProductId: null,
+        clarification: mediaClarification,
       };
     }
 

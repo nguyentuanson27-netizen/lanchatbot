@@ -137,8 +137,11 @@ export function selectedProductId(
   customerText: string,
   selections: readonly { readonly label: string; readonly productId: string }[],
 ): string | null {
-  const match = customerText.match(/\bset\s*([1-9]|10)\b/iu);
+  const match = customerText
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .match(/\b(set|mau)\s*([1-9]|10)\b/iu);
   if (!match) return null;
-  const label = `SET_${match[1]}`;
+  const label = `${match[1]?.toLocaleUpperCase("en-US")}_${match[2]}`;
   return selections.find((item) => item.label === label)?.productId ?? null;
 }

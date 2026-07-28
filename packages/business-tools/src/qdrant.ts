@@ -2,6 +2,7 @@ import { normalizeProductCode } from "./inventory.js";
 import type {
   MultimodalEmbeddingPort,
   BatchStableImageSearchResult,
+  ImageVectorChannel,
   ProductImage,
   ProductImageAngle,
   ProductImageType,
@@ -296,7 +297,11 @@ export class QdrantStableCatalogSearchAdapter implements StableCatalogSearchPort
     return [...vector];
   }
 
-  private async queryVector(vector: readonly number[], using: "product_text" | "image_raw", limit: number): Promise<ScoredStableProduct[]> {
+  private async queryVector(
+    vector: readonly number[],
+    using: "product_text" | ImageVectorChannel,
+    limit: number,
+  ): Promise<ScoredStableProduct[]> {
     const body = await this.request(
       `/collections/${encodeURIComponent(this.collection)}/points/query`,
       {
@@ -411,6 +416,21 @@ export class QdrantStableCatalogSearchAdapter implements StableCatalogSearchPort
     return this.queryVector(
       await this.embedding.embedImageBytes(imageBytes),
       "image_raw",
+      limit,
+    );
+  }
+
+  async searchStableImageBytesByChannel(
+    imageBytes: Uint8Array,
+    channel: ImageVectorChannel,
+    limit: number,
+  ): Promise<readonly ScoredStableProduct[]> {
+    if (!this.embedding.embedImageBytes) {
+      throw new QdrantSearchError("IMAGE_BYTES_UNSUPPORTED", false);
+    }
+    return this.queryVector(
+      await this.embedding.embedImageBytes(imageBytes),
+      channel,
       limit,
     );
   }

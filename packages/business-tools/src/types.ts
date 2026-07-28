@@ -122,6 +122,8 @@ export interface ScoredStableProduct {
   score: number;
 }
 
+export type ImageVectorChannel = "image_raw" | "image_cutout";
+
 export interface StableCatalogSearchPort {
   findByExactCode(normalizedCode: string): Promise<StableProductDocument | null>;
   findByAlias(normalizedAlias: string): Promise<readonly StableProductDocument[]>;
@@ -134,6 +136,11 @@ export interface StableCatalogSearchPort {
   ): Promise<readonly BatchStableImageSearchResult[]>;
   searchStableImageBytes?(
     imageBytes: Uint8Array,
+    limit: number,
+  ): Promise<readonly ScoredStableProduct[]>;
+  searchStableImageBytesByChannel?(
+    imageBytes: Uint8Array,
+    channel: ImageVectorChannel,
     limit: number,
   ): Promise<readonly ScoredStableProduct[]>;
 }
