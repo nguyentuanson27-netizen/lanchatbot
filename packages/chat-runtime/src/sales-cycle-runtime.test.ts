@@ -362,4 +362,77 @@ describe("Phase 3 sales-cycle runtime", () => {
     expect(repository.state.revision).toBe(1);
     expect(repository.effects).toHaveLength(1);
   });
+  it("persists bounded clarification state and rejects repeated questions", () => {
+    let state = addCart();
+    const first = applySalesCycleCommand({
+      state,
+      expectedRevision: state.revision,
+      command: {
+        kind: "CLARIFICATION_REQUESTED",
+        commandId: "clarification-1",
+        reasonCode: "CHECKOUT_DETAILS_MISSING",
+        missingFields: ["PHONE", "ADDRESS"],
+        productId: "CB182",
+        questionFingerprint: "a".repeat(64),
+        maxAttempts: 3,
+      },
+      now,
+    });
+    expect(first).toMatchObject({
+      status: "APPLIED",
+      state: {
+        clarification: {
+          reasonCode: "CHECKOUT_DETAILS_MISSING",
+          missingFields: ["ADDRESS", "PHONE"],
+          productId: "CB182",
+          attemptCount: 1,
+          maxAttempts: 3,
+        },
+      },
+    });
+    if (first.status !== "APPLIED") throw new Error(first.status);
+    state = first.state;
+
+    expect(applySalesCycleCommand({
+      state,
+      expectedRevision: state.revision,
+      command: {
+        kind: "CLARIFICATION_REQUESTED",
+        commandId: "clarification-repeat",
+        reasonCode: "CHECKOUT_DETAILS_MISSING",
+        missingFields: ["ADDRESS", "PHONE"],
+        productId: "CB182",
+        questionFingerprint: "a".repeat(64),
+        maxAttempts: 3,
+      },
+      now,
+    })).toMatchObject({ status: "REJECTED", reasonCode: "CLARIFICATION_RETRY_INVALID" });
+
+    const progressed = applySalesCycleCommand({
+      state,
+      expectedRevision: state.revision,
+      command: {
+        kind: "CLARIFICATION_REQUESTED",
+        commandId: "clarification-progress",
+        reasonCode: "CHECKOUT_DETAILS_MISSING",
+        missingFields: ["ADDRESS"],
+        productId: "CB182",
+        questionFingerprint: "b".repeat(64),
+        maxAttempts: 3,
+      },
+      now,
+    });
+    expect(progressed).toMatchObject({
+      status: "APPLIED",
+      state: { clarification: { missingFields: ["ADDRESS"], attemptCount: 1 } },
+    });
+    if (progressed.status !== "APPLIED") throw new Error(progressed.status);
+    const resolved = applySalesCycleCommand({
+      state: progressed.state,
+      expectedRevision: progressed.state.revision,
+      command: { kind: "CLARIFICATION_RESOLVED", commandId: "clarification-resolved" },
+      now,
+    });
+    expect(resolved).toMatchObject({ status: "APPLIED", state: { clarification: null } });
+  });
 });

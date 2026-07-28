@@ -519,4 +519,100 @@ describe("realtime Phase 3 sales cycle", () => {
     });
     expect(output.plan?.state.confirmation ?? null).toBeNull();
   });
+  it("asks distinct clarification questions and hands off only after the retry budget", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "clarification-open",
+    ));
+    const first = await evaluateRealtimeSalesCycle(input(
+      opened.plan!.state,
+      "0987654321 COD",
+      "clarification-first",
+    ));
+    expect(first).toMatchObject({
+      transferToHuman: false,
+      telemetry: {
+        clarificationCase: true,
+        clarificationAttemptCount: 1,
+        clarificationMaxAttempts: 3,
+        clarificationBudgetExhausted: false,
+        checkoutMissingFields: ["FULL_NAME", "ADDRESS"],
+      },
+      plan: { state: { clarification: { attemptCount: 1 } } },
+    });
+
+    const second = await evaluateRealtimeSalesCycle(input(
+      first.plan!.state,
+      "dạ",
+      "clarification-second",
+    ));
+    const third = await evaluateRealtimeSalesCycle(input(
+      second.plan!.state,
+      "vâng",
+      "clarification-third",
+    ));
+    expect(second.telemetry?.clarificationAttemptCount).toBe(2);
+    expect(third.telemetry?.clarificationAttemptCount).toBe(3);
+    expect(first.messages[0]).not.toEqual(second.messages[0]);
+    expect(second.messages[0]).not.toEqual(third.messages[0]);
+
+    const exhausted = await evaluateRealtimeSalesCycle(input(
+      third.plan!.state,
+      "ok",
+      "clarification-exhausted",
+    ));
+    expect(exhausted).toMatchObject({
+      handled: true,
+      transferToHuman: true,
+      desiredTag: "NHAN_VIEN",
+      reasonCode: "CLARIFICATION_RETRY_EXHAUSTED",
+      telemetry: {
+        clarificationAttemptCount: 3,
+        clarificationMaxAttempts: 3,
+        clarificationBudgetExhausted: true,
+        clarificationCase: true,
+      },
+    });
+  });
+
+  it("resets clarification attempts on progress and resumes checkout", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "clarification-progress-open",
+    ));
+    const first = await evaluateRealtimeSalesCycle(input(
+      opened.plan!.state,
+      "0987654321 COD",
+      "clarification-progress-first",
+    ));
+    const named = await evaluateRealtimeSalesCycle(input(
+      first.plan!.state,
+      "Tên: Lan",
+      "clarification-progress-name",
+    ));
+    expect(named).toMatchObject({
+      transferToHuman: false,
+      telemetry: {
+        clarificationAttemptCount: 1,
+        checkoutMissingFields: ["ADDRESS"],
+      },
+      plan: {
+        state: {
+          clarification: { missingFields: ["ADDRESS"], attemptCount: 1 },
+        },
+      },
+    });
+    const completed = await evaluateRealtimeSalesCycle(input(
+      named.plan!.state,
+      "Địa chỉ: 123 Lê Lợi, Quận 1, TP HCM",
+      "clarification-progress-address",
+    ));
+    expect(completed).toMatchObject({
+      transferToHuman: false,
+      telemetry: { checkoutCompleted: true, checkoutMissingFields: [] },
+      plan: { state: { stage: "ORDER_PREVIEW", clarification: null } },
+    });
+  });
 });

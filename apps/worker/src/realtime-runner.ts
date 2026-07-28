@@ -3180,6 +3180,11 @@ export class RealtimeRunner {
           checkoutCapturedFields: salesTelemetry?.checkoutCapturedFields ?? [],
           checkoutMissingFields: salesTelemetry?.checkoutMissingFields ?? [],
           checkoutCompleted: salesTelemetry?.checkoutCompleted ?? false,
+          clarificationReasonCode: salesTelemetry?.clarificationReasonCode ?? null,
+          clarificationAttemptCount: salesTelemetry?.clarificationAttemptCount ?? 0,
+          clarificationMaxAttempts: salesTelemetry?.clarificationMaxAttempts ?? 0,
+          clarificationBudgetExhausted: salesTelemetry?.clarificationBudgetExhausted ?? false,
+          clarificationCase: salesTelemetry?.clarificationCase ?? false,
           orderPreviewCreated: salesTelemetry?.orderPreviewCreated ?? false,
           confirmationAttempted: salesTelemetry?.confirmationAttempted ?? false,
           confirmationConfirmed: salesTelemetry?.confirmationConfirmed ?? false,
@@ -3216,10 +3221,22 @@ export class RealtimeRunner {
       pushDecisionEvent("ORDER_INTENT_CREATED");
     }
     if ((salesTelemetry?.checkoutMissingFields?.length ?? 0) > 0) {
-      pushDecisionEvent(
-        "CHECKOUT_DETAILS_MISSING",
-        salesTelemetry!.checkoutMissingFields!.map((field) => `MISSING_${field}`),
-      );
+      const clarificationReasons = [
+        ...salesTelemetry!.checkoutMissingFields!.map((field) => `MISSING_${field}`),
+        ...(salesTelemetry?.clarificationAttemptCount
+          ? [`ATTEMPT_${salesTelemetry.clarificationAttemptCount}`]
+          : []),
+        ...(salesTelemetry?.clarificationBudgetExhausted
+          ? ["CLARIFICATION_RETRY_EXHAUSTED"]
+          : []),
+      ];
+      pushDecisionEvent("CHECKOUT_DETAILS_MISSING", clarificationReasons);
+      if (
+        salesTelemetry?.clarificationReasonCode &&
+        !salesTelemetry.clarificationBudgetExhausted
+      ) {
+        pushDecisionEvent("CLARIFICATION_REQUESTED", clarificationReasons);
+      }
     }
     if (salesTelemetry?.checkoutCompleted) {
       pushDecisionEvent("CHECKOUT_COMPLETED");

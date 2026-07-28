@@ -38,6 +38,18 @@ const CART_TTL_MS = 48 * 60 * 60 * 1_000;
 const MAX_REVALIDATION_AGE_MS = 60 * 1_000;
 const MAX_FUTURE_CLOCK_SKEW_MS = 5 * 60 * 1_000;
 
+export type SalesCycleClarificationReasonV1 = "CHECKOUT_DETAILS_MISSING";
+
+export interface SalesCycleClarificationStateV1 {
+  readonly reasonCode: SalesCycleClarificationReasonV1;
+  readonly missingFields: readonly string[];
+  readonly productId: string | null;
+  readonly attemptCount: number;
+  readonly maxAttempts: number;
+  readonly askedQuestionFingerprints: readonly string[];
+  readonly lastRequestedAt: string;
+}
+
 export interface SalesCycleRuntimeState {
   readonly schemaVersion: 2;
   readonly conversationKey: string;
@@ -55,6 +67,11 @@ export interface SalesCycleRuntimeState {
     readonly paymentMethod: "COD" | "BANK_TRANSFER" | null;
     readonly updatedAt: string;
   } | null;
+  /**
+   * Additive Wave 1 state. Old persisted schema-v2 records may omit this
+   * property; readers must treat an absent value as null.
+   */
+  readonly clarification?: SalesCycleClarificationStateV1 | null;
   readonly preview: OrderPreviewV1 | null;
   readonly confirmation: PurchaseConfirmationV1 | null;
   readonly processedCommandIds: readonly string[];
@@ -87,6 +104,19 @@ export type SalesCycleCommand =
         readonly address?: string;
         readonly paymentMethod?: "COD" | "BANK_TRANSFER";
       };
+    }
+  | {
+      readonly kind: "CLARIFICATION_REQUESTED";
+      readonly commandId: string;
+      readonly reasonCode: SalesCycleClarificationReasonV1;
+      readonly missingFields: readonly string[];
+      readonly productId: string | null;
+      readonly questionFingerprint: string;
+      readonly maxAttempts: number;
+    }
+  | {
+      readonly kind: "CLARIFICATION_RESOLVED";
+      readonly commandId: string;
     }
   | {
       readonly kind: "NEGOTIATION_EVENT";
@@ -508,6 +538,62 @@ export function applySalesCycleCommand(input: {
       checkoutDraft,
       preview: null,
     });
+    return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
+  }
+
+  if (command.kind === "CLARIFICATION_REQUESTED") {
+    if (state.stage !== "CART_OPEN" && state.stage !== "ORDER_PREVIEW") {
+      return { status: "REJECTED", state, reasonCode: "SALES_STAGE_TRANSITION_INVALID" };
+    }
+    const missingFields = [...new Set(command.missingFields.map((field) => field.trim()))]
+      .filter(Boolean)
+      .sort();
+    const questionFingerprint = command.questionFingerprint.trim();
+    if (
+      missingFields.length === 0 ||
+      missingFields.some((field) => field.length > 80) ||
+      !Number.isSafeInteger(command.maxAttempts) ||
+      command.maxAttempts < 1 ||
+      command.maxAttempts > 10 ||
+      !/^[a-f0-9]{64}$/u.test(questionFingerprint)
+    ) {
+      return { status: "REJECTED", state, reasonCode: "CLARIFICATION_REQUEST_INVALID" };
+    }
+    const previous = state.clarification ?? null;
+    const sameQuestion =
+      previous?.reasonCode === command.reasonCode &&
+      previous.productId === command.productId &&
+      previous.missingFields.length === missingFields.length &&
+      previous.missingFields.every((field, index) => field === missingFields[index]);
+    const attemptCount = sameQuestion ? previous.attemptCount + 1 : 1;
+    const askedQuestionFingerprints = sameQuestion
+      ? [...previous.askedQuestionFingerprints, questionFingerprint]
+      : [questionFingerprint];
+    if (
+      attemptCount > command.maxAttempts ||
+      (sameQuestion && previous.askedQuestionFingerprints.includes(questionFingerprint))
+    ) {
+      return { status: "REJECTED", state, reasonCode: "CLARIFICATION_RETRY_INVALID" };
+    }
+    const next = withCommand(state, command.commandId, now, {
+      clarification: {
+        reasonCode: command.reasonCode,
+        missingFields,
+        productId: command.productId,
+        attemptCount,
+        maxAttempts: command.maxAttempts,
+        askedQuestionFingerprints,
+        lastRequestedAt: now.toISOString(),
+      },
+    });
+    return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
+  }
+
+  if (command.kind === "CLARIFICATION_RESOLVED") {
+    if (state.clarification === null || state.clarification === undefined) {
+      return { status: "REJECTED", state, reasonCode: "CLARIFICATION_NOT_ACTIVE" };
+    }
+    const next = withCommand(state, command.commandId, now, { clarification: null });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
