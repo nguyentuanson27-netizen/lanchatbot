@@ -1,23 +1,35 @@
-# Production baseline — 2026-07-24
+# Production baseline — 2026-07-28
 
 Đây là baseline sống của production. Mỗi release phải cập nhật tài liệu này trước khi tạo tag để bản trong release directory không lệch GitHub `main`.
 
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260724-realtime-measurement-continuation-r17`.
-- Previous release: `/opt/lana-chatbot/releases/20260724-admin-batch-ai-image-intake-r16`.
-- Source commit: `9862889698aae7e236c2270b68ac4fea7c3c377f`.
-- Source archive SHA-256: `c8bb2aa93ed35dbb21aa9918c85ca06b88f52a2b0f57431108f86bee9f8aba8b`.
-- Compose SHA-256: `3315a96cfd6a121550e566c1bf393c23b70af4ad3ad28ece3cf9bad7dbe9c9c5`.
+- Current release: `/opt/lana-chatbot/releases/20260728-wave1-foundation-r19`.
+- Previous release: `/opt/lana-chatbot/releases/20260727-admin-web-assets-r18.8.1`.
+- Source commit: `8df272b6ec97e9214154c3c61ec1878dd62bd629`.
+- Source materialization: Git worktree khóa tại tag `20260728-wave1-foundation-r19`; không dùng source archive.
+- Compose SHA-256: `5b1c7899f556287501e9bfc2effef723b5e61feddebbf713eb4062a3d58b223b`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
-- Migration mới nhất trong candidate: `0020_size_chart_extraction`.
+- Migration mới nhất trong production: `0022_dataset_review_acl`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-Realtime Worker, Admin API, Admin Web, P2.3B và P2.3C healthy, restart count 0. Không có migration mới và không thay đổi webhook, delivery, POS, n8n hoặc page allowlist.
+Realtime Worker r19 healthy, restart count 0. Admin API, Admin Web, P2.3B, P2.3C và các service khác giữ nguyên container. Không có migration mới và không thay đổi webhook, delivery, POS, n8n hoặc page allowlist.
 
-Realtime Worker chạy image `lana-chatbot-app:realtime-measurement-continuation-r17` (`sha256:d9bb19fa99d10ac5c853f60d3408379fe1145e3b6acf00f9c0d944e81b8a3703`). Admin API/Admin Web/P2.3B giữ image r16; P2.3C giữ image r15 (`sha256:2598cb86c2e78873626644d40fc67de996e8bbaac413a8ad16a8dda21ea6ad4c`); các service khác giữ nguyên.
+Realtime Worker chạy image `lana-chatbot-app:wave1-foundation-r19` (`sha256:33f49b6728f9a4fd30558b49d4df2684e3a25d9561fe76ec7676795d6fcbabc0`). Admin Web giữ r18.8.1, Admin API giữ r18.6; P2.3 và các service khác giữ nguyên.
+
+## Wave 1 benchmark foundation + clarification recovery r19
+
+- Official gold/history/manifest bundle được validate read-only: 2.000 binding, 1.955 included, 45 parser-failed excluded và 13.887 annotation.
+- Split deterministic theo duplicate group đạt 1.173 development / 391 validation / 391 locked holdout; rare/safety là overlay, leakage bằng 0. Holdout chưa được mở để tuning.
+- Ba scorer tách riêng semantic, runtime policy (oracle/model) và reply quality. Current deterministic baseline chỉ chạy development/validation; validation `BUYING_COMMITTED` precision `42,41%`, recall `57,26%`, nên không promote matcher mới.
+- `SalesCycleRuntimeState` giữ schema v2 và thêm field clarification optional: reason, missing fields, verified product context, attempt count, max attempts, question fingerprint và timestamp.
+- Checkout hỏi tối đa ba câu khác nhau. Khi người dùng bổ sung được field, budget reset theo missing set mới; đủ dữ liệu thì resolve và tiếp tục order preview; lượt thứ tư không tiến triển handoff `CLARIFICATION_RETRY_EXHAUSTED`.
+- Decision telemetry chỉ ghi enum/count, không ghi PII/raw reply. Không có migration; state cũ không có field mới vẫn đọc bình thường.
+- Local và Docker `pnpm check` pass; Dataset Review `51/51`, Chat Runtime `32/32`, Worker `272/272`. Post-cutover realtime healthy/restart 0, error/warn mới 0, toàn VPS không có container unhealthy.
+- Chỉ recreate `realtime-worker`. Admin public route vẫn trả `302` sang Authentik; Admin và các worker khác không restart.
+- Rollback: phục hồi `.env.infrastructure.backup-20260728-wave1-foundation-r19`, recreate riêng realtime bằng image r17 và đổi symlink về r18.8.1; không xóa state, Inbox/Outbox, Redis hoặc PostgreSQL.
 
 ## Realtime measurement continuation r17
 

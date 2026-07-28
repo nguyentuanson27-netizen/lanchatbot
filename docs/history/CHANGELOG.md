@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-28 — Wave 1 benchmark foundation + clarification recovery r19
+
+- Khóa official bundle 2.000 record, dùng 1.955 record hợp lệ và bỏ 45 parser-failed; split 1.173/391/391 theo duplicate group, leakage 0, rare/safety giữ dạng overlay.
+- Tách semantic, runtime-policy và reply-quality scorer. Deterministic baseline chỉ chấm development/validation; locked holdout chưa mở.
+- Validation `BUYING_COMMITTED` hiện precision 42,41% và recall 57,26%; chưa thay matcher production vì chưa đạt promotion gate.
+- Bổ sung clarification state additive/optional trên Sales Cycle schema v2: lưu reason/missing/product context, tối đa ba câu hỏi không lặp, reset khi có tiến triển và handoff an toàn khi cạn budget.
+- Local/Docker `pnpm check` pass; Dataset Review 51/51, Chat Runtime 32/32, Worker 272/272.
+- Chỉ recreate Realtime Worker. Image r19 healthy, restart 0, không có error/warn mới; Admin public route vẫn trả 302 Authentik và service khác không restart.
+
 ## 2026-07-24 — Realtime measurement continuation r17
 
 - Sửa lỗi khách trả lời số đo thuần như `90-60-90` bị mất ngữ cảnh sản phẩm và handoff `UNVERIFIED_PRODUCT_ID`.
