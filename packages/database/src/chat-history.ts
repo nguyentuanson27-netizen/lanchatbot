@@ -24,6 +24,7 @@ export interface InboundCustomerMessageInput extends ChatHistoryMetadata {
   readonly attachmentCount?: number;
   readonly occurredAt: Date;
   readonly receivedAt: Date;
+  readonly enqueueShadowEvaluation?: boolean;
   readonly adsContext?: {
     readonly source: string | null;
     readonly adTitle: string | null;
@@ -74,6 +75,7 @@ export interface ChatHistoryRecordResult {
   readonly identityKey: string;
   readonly messagePk: string;
   readonly occurredAt: Date;
+  readonly shadowEvaluationEnqueued?: boolean;
 }
 
 export interface ChatHistoryItem {
@@ -219,7 +221,26 @@ export class PostgresChatHistoryStore {
         messagePk,
         occurredAt: input.occurredAt,
       });
-      if (!reserved.inserted) return reserved.result;
+      if (!reserved.inserted) {
+        const shadowEvaluationEnqueued =
+          input.enqueueShadowEvaluation === true &&
+          redaction.dlpStatus === "PASSED"
+            ? await this.tryEnqueueShadowEvaluation(client, {
+                identityKey: reserved.result.identityKey,
+                messagePk: reserved.result.messagePk,
+                occurredAt: reserved.result.occurredAt,
+                conversationId: input.conversationId,
+                pageId,
+                customerHash: input.customerHash,
+              })
+            : undefined;
+        return {
+          ...reserved.result,
+          ...(shadowEvaluationEnqueued === undefined
+            ? {}
+            : { shadowEvaluationEnqueued }),
+        };
+      }
 
       await client.query(
         `INSERT INTO messages (
@@ -283,7 +304,27 @@ export class PostgresChatHistoryStore {
         responseMessageIdHash: providerMessageIdHash,
         respondedAt: input.occurredAt,
       });
-      return { inserted: true, identityKey, messagePk, occurredAt: input.occurredAt };
+      const shadowEvaluationEnqueued =
+        input.enqueueShadowEvaluation === true &&
+        redaction.dlpStatus === "PASSED"
+          ? await this.tryEnqueueShadowEvaluation(client, {
+              identityKey,
+              messagePk,
+              occurredAt: input.occurredAt,
+              conversationId: input.conversationId,
+              pageId,
+              customerHash: input.customerHash,
+            })
+          : undefined;
+      return {
+        inserted: true,
+        identityKey,
+        messagePk,
+        occurredAt: input.occurredAt,
+        ...(shadowEvaluationEnqueued === undefined
+          ? {}
+          : { shadowEvaluationEnqueued }),
+      };
     });
   }
 
@@ -547,6 +588,51 @@ export class PostgresChatHistoryStore {
       [conversationId, pageId, customerHash],
     );
     if (result.rowCount !== 1) throw new Error("CHAT_HISTORY_CONVERSATION_SCOPE_MISMATCH");
+  }
+
+  /**
+   * Evaluation capture is observational and must never block the customer path.
+   * A savepoint keeps the canonical message transaction usable if the optional
+   * shadow table or its permission is temporarily unavailable.
+   */
+  private async tryEnqueueShadowEvaluation(
+    client: PoolClient,
+    input: {
+      readonly identityKey: string;
+      readonly messagePk: string;
+      readonly occurredAt: Date;
+      readonly conversationId: string;
+      readonly pageId: string;
+      readonly customerHash: string;
+    },
+  ): Promise<boolean> {
+    const savepoint = "chat_history_shadow_evaluation";
+    await client.query(`SAVEPOINT ${savepoint}`);
+    try {
+      const result = await client.query(
+        `INSERT INTO shadow_evaluations (
+           source_identity_key, source_message_pk, source_occurred_at,
+           conversation_id, page_id, customer_hash
+         ) VALUES ($1,$2,$3,$4,$5,$6)
+         ON CONFLICT (source_identity_key) DO NOTHING
+         RETURNING evaluation_id`,
+        [
+          input.identityKey,
+          input.messagePk,
+          input.occurredAt,
+          input.conversationId,
+          input.pageId,
+          input.customerHash,
+        ],
+      );
+      await client.query(`RELEASE SAVEPOINT ${savepoint}`);
+      // INSERT or an existing source_identity_key both mean durable capture exists.
+      return result.rowCount === 1 || result.rowCount === 0;
+    } catch {
+      await client.query(`ROLLBACK TO SAVEPOINT ${savepoint}`);
+      await client.query(`RELEASE SAVEPOINT ${savepoint}`);
+      return false;
+    }
   }
 
   private async reserveIdentity(

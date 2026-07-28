@@ -164,6 +164,7 @@ SELECT format('GRANT SELECT ON admin_artifact_versions TO %I', :'simulation_work
 SELECT format('GRANT SELECT ON admin_active_pointers TO %I', :'simulation_worker_user')\gexec
 SELECT format('GRANT SELECT ON messages TO %I', :'simulation_worker_user')\gexec
 SELECT format('GRANT SELECT ON conversation_events TO %I', :'simulation_worker_user')\gexec
+SELECT format('GRANT SELECT ON shadow_evaluations TO %I', :'simulation_worker_user')\gexec
 SELECT format('ALTER ROLE %I SET default_transaction_read_only = off', :'simulation_worker_user')\gexec
 SQL
 

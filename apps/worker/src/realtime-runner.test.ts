@@ -1451,7 +1451,7 @@ describe("RealtimeRunner inbound batching", () => {
       })),
       searchImage: vi.fn(),
     };
-    const recordInboundCustomerMessage = vi.fn(async (input: { providerMessageId: string }) => ({
+    const recordInboundCustomerMessage = vi.fn(async (input: { providerMessageId: string; enqueueShadowEvaluation?: boolean }) => ({
       messagePk: `pk-${input.providerMessageId}`,
     }));
     const retryProjection = items.map((entry) => ({
@@ -1475,7 +1475,13 @@ describe("RealtimeRunner inbound batching", () => {
       { ready: vi.fn(), resolve: vi.fn(), close: vi.fn() },
       search,
       clearTagObservation(),
-      { workerId: "worker-1", mode: "LIVE", sendEnabled: true },
+      {
+        workerId: "worker-1",
+        mode: "LIVE",
+        sendEnabled: true,
+        recordedReplayCaptureEnabled: true,
+        recordedReplayPageId: pageId,
+      },
       undefined,
       history,
       {
@@ -1495,6 +1501,11 @@ describe("RealtimeRunner inbound batching", () => {
     expect(recordInboundCustomerMessage).toHaveBeenCalledWith(expect.objectContaining({
       providerMessageId: `event:${middle.envelope.message.eventKey}`,
     }));
+    expect(
+      recordInboundCustomerMessage.mock.calls.map(
+        ([input]) => input.enqueueShadowEvaluation,
+      ),
+    ).toEqual([false, false, true]);
     expect(history.append).toHaveBeenCalledTimes(3);
     expect(commit).toHaveBeenCalledOnce();
     const commitInput = commit.mock.calls[0]![0] as {

@@ -1426,9 +1426,13 @@ export interface CanonicalChatHistoryPort {
     attachmentCount: number;
     occurredAt: Date;
     receivedAt: Date;
+    enqueueShadowEvaluation?: boolean;
     adsContext?: InboundMessageV1["adsContext"];
     policyVersion?: string | null;
-  }): Promise<{ readonly messagePk: string }>;
+  }): Promise<{
+    readonly messagePk: string;
+    readonly shadowEvaluationEnqueued?: boolean;
+  }>;
   recordOutboundHumanMessage(input: {
     pageId: string;
     conversationId: string;
@@ -1578,6 +1582,8 @@ export interface RealtimeRunnerOptions {
   readonly multiFactQueryEnabled?: boolean;
   readonly catalogAdvisoryEnabled?: boolean;
   readonly decisionAuditV2Enabled?: boolean;
+  readonly recordedReplayCaptureEnabled?: boolean;
+  readonly recordedReplayPageId?: string;
 }
 
 export class RealtimeRunner {
@@ -1632,6 +1638,9 @@ export class RealtimeRunner {
       multiFactQueryEnabled: options.multiFactQueryEnabled ?? false,
       catalogAdvisoryEnabled: options.catalogAdvisoryEnabled ?? false,
       decisionAuditV2Enabled: options.decisionAuditV2Enabled ?? false,
+      recordedReplayCaptureEnabled:
+        options.recordedReplayCaptureEnabled ?? false,
+      recordedReplayPageId: options.recordedReplayPageId ?? "",
     };
   }
 
@@ -2011,9 +2020,19 @@ export class RealtimeRunner {
         : null;
 
     let triggerMessagePk: string | null = null;
-    for (const item of claims) {
+    let lastInboundIndex = -1;
+    for (let index = 0; index < claims.length; index += 1) {
+      if (!claims[index]?.envelope.message.isEcho) lastInboundIndex = index;
+    }
+    for (let index = 0; index < claims.length; index += 1) {
+      const item = claims[index];
+      if (!item) continue;
       const original = item.envelope.message;
       if (!original.isEcho && this.canonicalHistory) {
+        const enqueueShadowEvaluation =
+          this.options.recordedReplayCaptureEnabled &&
+          item.pageId === this.options.recordedReplayPageId &&
+          index === lastInboundIndex;
         const recorded = await this.canonicalHistory.recordInboundCustomerMessage({
           pageId: item.pageId,
           conversationId: record.conversationId,
@@ -2023,9 +2042,22 @@ export class RealtimeRunner {
           attachmentCount: original.attachments.length,
           occurredAt: new Date(original.occurredAt),
           receivedAt: item.receivedAt,
+          enqueueShadowEvaluation,
           adsContext: original.adsContext,
           policyVersion: policyAuditRef,
         });
+        if (
+          enqueueShadowEvaluation &&
+          recorded.shadowEvaluationEnqueued === false
+        ) {
+          process.stderr.write(
+            `${JSON.stringify({
+              level: "warn",
+              code: "REALTIME_SHADOW_EVALUATION_ENQUEUE_SKIPPED",
+              pageId: item.pageId,
+            })}\n`,
+          );
+        }
         triggerMessagePk = recorded.messagePk;
       } else if (original.isEcho && this.canonicalHistory) {
         await this.canonicalHistory.recordOutboundHumanMessage({

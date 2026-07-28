@@ -460,6 +460,9 @@ const runner = new RealtimeRunner(
       process.env.REALTIME_CATALOG_ADVISORY_V1 === "true",
     decisionAuditV2Enabled:
       process.env.REALTIME_DECISION_AUDIT_V2 === "true",
+    recordedReplayCaptureEnabled:
+      process.env.REALTIME_RECORDED_REPLAY_CAPTURE_ENABLED === "true",
+    recordedReplayPageId: required("META_PAGE_ID"),
   },
   quota,
   history,
