@@ -41,6 +41,30 @@ describe("RealtimeDecisionEventV1Schema", () => {
     expect(RealtimeDecisionEventV1Schema.parse(validEvent)).toEqual(validEvent);
   });
 
+  it("accepts the additive Wave 1 event taxonomy", () => {
+    const eventTypes = [
+      "PRODUCT_MATCHED",
+      "BUYING_SIGNAL_COMMITTED",
+      "BUYING_SIGNAL_RETRACTED",
+      "READY_TO_BUY",
+      "CHECKOUT_DETAILS_MISSING",
+      "CLARIFICATION_REQUESTED",
+      "CHECKOUT_COMPLETED",
+      "ORDER_PREVIEW_CREATED",
+      "PURCHASE_CONFIRMATION_DETECTED",
+      "PURCHASE_CONFIRMATION_REJECTED",
+      "PURCHASE_CONFIRMED",
+      "HANDOFF_REQUESTED",
+      "NO_REPLY_SELECTED",
+    ] as const;
+    for (const eventType of eventTypes) {
+      expect(
+        RealtimeDecisionEventV1Schema.parse({ ...validEvent, eventType })
+          .eventType,
+      ).toBe(eventType);
+    }
+  });
+
   it("rejects raw transcript fields", () => {
     expect(() => RealtimeDecisionEventV1Schema.parse({
       ...validEvent,

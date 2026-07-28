@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "scope": "SYNTHETIC_REFERENCE_CONFORMANCE",
+  "productionReplayStatus": "PENDING_RECORDED_FIXTURES",
+  "notProductionBaseline": true,
+  "fixtureSetId": "wave1-synthetic-conformance-v1",
+  "fixtureSetSha256": "3641bbcb436b93fc0d38548a4d6bb9c0faf40c79d82b8db6a2013db7f6689385",
+  "replayAdapterVersion": "wave1-policy-replay-v1",
+  "replyRendererVersion": "wave1-safe-reply-v1",
+  "sourceCounts": {
+    "SYNTHETIC_FIXED": 17,
+    "RECORDED_REDACTED": 0
+  },
+  "runtimePolicy": {
+    "oracle": {
+      "schemaVersion": 1,
+      "mode": "ORACLE_SEMANTICS",
+      "evaluatedCases": 17,
+      "passedCases": 17,
+      "hardSafetyViolationCount": 0,
+      "policyViolationCount": 0,
+      "incorrectHandoffCases": 0,
+      "handoffCases": 5,
+      "incorrectHandoffRate": 0,
+      "falsePositivePostSaleCases": 0,
+      "preSalePolicyCases": 1,
+      "falsePositivePostSaleRate": 0,
+      "violations": []
+    },
+    "model": {
+      "schemaVersion": 1,
+      "mode": "MODEL_SEMANTICS",
+      "evaluatedCases": 17,
+      "passedCases": 17,
+      "hardSafetyViolationCount": 0,
+      "policyViolationCount": 0,
+      "incorrectHandoffCases": 0,
+      "handoffCases": 5,
+      "incorrectHandoffRate": 0,
+      "falsePositivePostSaleCases": 0,
+      "preSalePolicyCases": 1,
+      "falsePositivePostSaleRate": 0,
+      "violations": []
+    }
+  },
+  "replyQuality": {
+    "schemaVersion": 1,
+    "evaluatedCases": 13,
+    "passedCases": 13,
+    "hardSafetyViolationCount": 0,
+    "qualityViolationCount": 0,
+    "answeredQuestionRate": 1,
+    "nonRepetitionRate": 1,
+    "ctaAppropriateRate": 1,
+    "objectionResolutionRate": 1,
+    "rubricAverage": 2,
+    "violations": []
+  },
+  "holdoutOpened": false,
+  "sideEffects": "DISABLED"
+}

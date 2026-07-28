@@ -69,3 +69,24 @@ node packages/dataset-review/dist/wave1-current-baseline-cli.js \
   --manifest /protected/path/transcript-manifest.json \
   --output benchmarks/wave1/current-deterministic-baseline-v1.json
 ```
+
+## Synthetic policy/reply conformance v1
+
+Bộ 17 fixture cố định chỉ dùng để kiểm tra reference policy/renderer, không chứa
+transcript hoặc PII và không phải production baseline. Báo cáo tự khai báo
+`scope=SYNTHETIC_REFERENCE_CONFORMANCE`, `notProductionBaseline=true` và
+`productionReplayStatus=PENDING_RECORDED_FIXTURES`.
+
+- Runtime oracle: 17/17 pass, hard-safety violation 0.
+- Runtime model: 17/17 pass, hard-safety violation 0.
+- Reply quality: 13/13 pass, hard-safety violation 0.
+- Side effect disabled; locked holdout không mở.
+
+Fixture: `fixtures/wave1-conformance-v1.json`.
+Report: `synthetic-policy-reply-conformance-v1.json`.
+
+## Semantic candidate v1
+
+Candidate deterministic chạy development/validation để đo delta, không nối vào
+production và không mở locked holdout. Trạng thái hiện tại là `NOT_PROMOTED`; xem
+`semantic-candidate-v1.json` để biết metric và gate violation.

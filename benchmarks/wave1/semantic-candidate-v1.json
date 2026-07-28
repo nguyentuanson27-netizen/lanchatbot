@@ -1,0 +1,2390 @@
+{
+  "schemaVersion": 1,
+  "candidateVersion": "wave1-semantic-rules-candidate-v1",
+  "runManifest": {
+    "schemaVersion": 1,
+    "benchmarkVersion": "wave1-benchmark-v1",
+    "dataset": {
+      "manifestSha256": "83c8d187c6e71e93d9d06b14ca0328d6d63423dc905b7daa34b3a6102bebd91d",
+      "goldSha256": "97f0812554e2eab1bfc9551bc8968c9f480f584a67f8acae7ddaa635aa349a49",
+      "historySha256": "e9eed98b7bd50e9bb0cfe50e236044d7bcf1de309a3c3adf9258afa312472851",
+      "includedCount": 1955,
+      "excludedCount": 45,
+      "splitChecksum": "485db42764e18583a02937b68dcdd6fd04e9b6bab867b11d4b041e55e573985e"
+    },
+    "versions": {
+      "parser": "redis-transcript-v1",
+      "normalization": "norm-v1",
+      "redaction": "redact-v1",
+      "labelSchema": "wave1-conversation-recovery-v1",
+      "semanticScorer": "wave1-semantic-scorer-v1",
+      "runtimePolicyScorer": "wave1-runtime-policy-scorer-v1",
+      "replyQualityScorer": "wave1-reply-quality-scorer-v1"
+    },
+    "splitSeed": "lana-wave1-gold-v2-split-v1",
+    "runFingerprint": "87d1985455a7f06582947682a0dde3a7312b5921510b264af3c7b8415f3b3bab"
+  },
+  "tuningPolicy": {
+    "developmentUsedForRules": true,
+    "validationUsedForReportingOnly": true,
+    "lockedHoldoutOpened": false
+  },
+  "semantic": {
+    "development": {
+      "schemaVersion": 1,
+      "conversationCount": 1173,
+      "goldAnnotationCount": 7581,
+      "predictionCount": 6160,
+      "duplicatePredictionCount": 0,
+      "invalidEvidenceCount": 0,
+      "evidenceEvaluatedCount": 6160,
+      "evidenceValidityRate": 1,
+      "micro": {
+        "precision": 0.4022727272727273,
+        "recall": 0.3268698060941828,
+        "f1": 0.3606724401426388
+      },
+      "macroF1": 0.23438951956110032,
+      "labels": {
+        "BUYING_CANDIDATE": {
+          "labelCode": "BUYING_CANDIDATE",
+          "support": 193,
+          "predicted": 121,
+          "truePositive": 51,
+          "falsePositive": 70,
+          "falseNegative": 142,
+          "precision": {
+            "value": 0.4214876033057851,
+            "lower95": 0.3372499540821435,
+            "upper95": 0.5105570150170473
+          },
+          "recall": {
+            "value": 0.26424870466321243,
+            "lower95": 0.20708061532463234,
+            "upper95": 0.3306184012077879
+          },
+          "f1": 0.3248407643312102
+        },
+        "BUYING_COMMITTED": {
+          "labelCode": "BUYING_COMMITTED",
+          "support": 371,
+          "predicted": 452,
+          "truePositive": 218,
+          "falsePositive": 234,
+          "falseNegative": 153,
+          "precision": {
+            "value": 0.4823008849557522,
+            "lower95": 0.4365787208285963,
+            "upper95": 0.5283213564013389
+          },
+          "recall": {
+            "value": 0.5876010781671159,
+            "lower95": 0.5368613991739589,
+            "upper95": 0.6365452464102822
+          },
+          "f1": 0.5297691373025516
+        },
+        "BUYING_NEGATED": {
+          "labelCode": "BUYING_NEGATED",
+          "support": 108,
+          "predicted": 260,
+          "truePositive": 41,
+          "falsePositive": 219,
+          "falseNegative": 67,
+          "precision": {
+            "value": 0.1576923076923077,
+            "lower95": 0.11841854590018724,
+            "upper95": 0.20693388053189865
+          },
+          "recall": {
+            "value": 0.37962962962962965,
+            "lower95": 0.2937291883118688,
+            "upper95": 0.47379887977526525
+          },
+          "f1": 0.22282608695652176
+        },
+        "BUYING_RETRACTED": {
+          "labelCode": "BUYING_RETRACTED",
+          "support": 15,
+          "predicted": 83,
+          "truePositive": 7,
+          "falsePositive": 76,
+          "falseNegative": 8,
+          "precision": {
+            "value": 0.08433734939759036,
+            "lower95": 0.04145333632101998,
+            "upper95": 0.16399529458616308
+          },
+          "recall": {
+            "value": 0.4666666666666667,
+            "lower95": 0.24809535365737387,
+            "upper95": 0.698830199745016
+          },
+          "f1": 0.14285714285714285
+        },
+        "CHECKOUT_DETAILS_PROVIDED": {
+          "labelCode": "CHECKOUT_DETAILS_PROVIDED",
+          "support": 361,
+          "predicted": 3,
+          "truePositive": 1,
+          "falsePositive": 2,
+          "falseNegative": 360,
+          "precision": {
+            "value": 0.3333333333333333,
+            "lower95": 0.06149194472039621,
+            "upper95": 0.7923403991979522
+          },
+          "recall": {
+            "value": 0.002770083102493075,
+            "lower95": 0.0004891551609277458,
+            "upper95": 0.015521796115212677
+          },
+          "f1": 0.005494505494505495
+        },
+        "CHOICE_OVERLOAD": {
+          "labelCode": "CHOICE_OVERLOAD",
+          "support": 1,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 1,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.7934506856227626
+          },
+          "f1": 0
+        },
+        "CONTINUATION": {
+          "labelCode": "CONTINUATION",
+          "support": 195,
+          "predicted": 820,
+          "truePositive": 35,
+          "falsePositive": 785,
+          "falseNegative": 160,
+          "precision": {
+            "value": 0.042682926829268296,
+            "lower95": 0.030848343771769312,
+            "upper95": 0.05878232245665296
+          },
+          "recall": {
+            "value": 0.1794871794871795,
+            "lower95": 0.1319809047971314,
+            "upper95": 0.2393775596732026
+          },
+          "f1": 0.06896551724137931
+        },
+        "DELIVERY_DELAY_COMPLAINT": {
+          "labelCode": "DELIVERY_DELAY_COMPLAINT",
+          "support": 71,
+          "predicted": 23,
+          "truePositive": 20,
+          "falsePositive": 3,
+          "falseNegative": 51,
+          "precision": {
+            "value": 0.8695652173913043,
+            "lower95": 0.6787251772990404,
+            "upper95": 0.9546234090636876
+          },
+          "recall": {
+            "value": 0.28169014084507044,
+            "lower95": 0.19037090703170384,
+            "upper95": 0.3954201706880652
+          },
+          "f1": 0.425531914893617
+        },
+        "DELIVERY_OBJECTION": {
+          "labelCode": "DELIVERY_OBJECTION",
+          "support": 109,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 109,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.034042973751325124
+          },
+          "f1": 0
+        },
+        "EXCHANGE_REQUEST": {
+          "labelCode": "EXCHANGE_REQUEST",
+          "support": 20,
+          "predicted": 6,
+          "truePositive": 4,
+          "falsePositive": 2,
+          "falseNegative": 16,
+          "precision": {
+            "value": 0.6666666666666666,
+            "lower95": 0.299993315138392,
+            "upper95": 0.9032285888942195
+          },
+          "recall": {
+            "value": 0.2,
+            "lower95": 0.08065766257979806,
+            "upper95": 0.41601743225189364
+          },
+          "f1": 0.30769230769230765
+        },
+        "EXPLICIT_DELIVERED_MESSAGE": {
+          "labelCode": "EXPLICIT_DELIVERED_MESSAGE",
+          "support": 279,
+          "predicted": 286,
+          "truePositive": 279,
+          "falsePositive": 7,
+          "falseNegative": 0,
+          "precision": {
+            "value": 0.9755244755244755,
+            "lower95": 0.9503495376984921,
+            "upper95": 0.988094538268806
+          },
+          "recall": {
+            "value": 1,
+            "lower95": 0.9864183318926757,
+            "upper95": 1
+          },
+          "f1": 0.9876106194690266
+        },
+        "FIT_OBJECTION": {
+          "labelCode": "FIT_OBJECTION",
+          "support": 70,
+          "predicted": 72,
+          "truePositive": 7,
+          "falsePositive": 65,
+          "falseNegative": 63,
+          "precision": {
+            "value": 0.09722222222222222,
+            "lower95": 0.047896319973655774,
+            "upper95": 0.1873504579512686
+          },
+          "recall": {
+            "value": 0.1,
+            "lower95": 0.04928930144253951,
+            "upper95": 0.192329148485674
+          },
+          "f1": 0.09859154929577464
+        },
+        "FOLLOW_UP_SPAM": {
+          "labelCode": "FOLLOW_UP_SPAM",
+          "support": 138,
+          "predicted": 271,
+          "truePositive": 18,
+          "falsePositive": 253,
+          "falseNegative": 120,
+          "precision": {
+            "value": 0.06642066420664207,
+            "lower95": 0.04242378230938411,
+            "upper95": 0.10253782207027605
+          },
+          "recall": {
+            "value": 0.13043478260869565,
+            "lower95": 0.0841235969692246,
+            "upper95": 0.19676366372272058
+          },
+          "f1": 0.08801955990220048
+        },
+        "IMAGE_REQUEST": {
+          "labelCode": "IMAGE_REQUEST",
+          "support": 123,
+          "predicted": 95,
+          "truePositive": 59,
+          "falsePositive": 36,
+          "falseNegative": 64,
+          "precision": {
+            "value": 0.6210526315789474,
+            "lower95": 0.5205939201961683,
+            "upper95": 0.7121019573679593
+          },
+          "recall": {
+            "value": 0.4796747967479675,
+            "lower95": 0.39334643076101994,
+            "upper95": 0.5672342812042366
+          },
+          "f1": 0.5412844036697249
+        },
+        "IRRELEVANT_SHOP_REPLY": {
+          "labelCode": "IRRELEVANT_SHOP_REPLY",
+          "support": 102,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 102,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.03629446214646319
+          },
+          "f1": 0
+        },
+        "MATERIAL_OBJECTION": {
+          "labelCode": "MATERIAL_OBJECTION",
+          "support": 19,
+          "predicted": 164,
+          "truePositive": 1,
+          "falsePositive": 163,
+          "falseNegative": 18,
+          "precision": {
+            "value": 0.006097560975609756,
+            "lower95": 0.0010771813904626622,
+            "upper95": 0.03372625073970362
+          },
+          "recall": {
+            "value": 0.05263157894736842,
+            "lower95": 0.009351994062300362,
+            "upper95": 0.24638731166898786
+          },
+          "f1": 0.01092896174863388
+        },
+        "MEASUREMENTS_PROVIDED": {
+          "labelCode": "MEASUREMENTS_PROVIDED",
+          "support": 380,
+          "predicted": 194,
+          "truePositive": 194,
+          "falsePositive": 0,
+          "falseNegative": 186,
+          "precision": {
+            "value": 1,
+            "lower95": 0.9805831454964365,
+            "upper95": 0.9999999999999999
+          },
+          "recall": {
+            "value": 0.5105263157894737,
+            "lower95": 0.4604121206637268,
+            "upper95": 0.5604298176317846
+          },
+          "f1": 0.6759581881533101
+        },
+        "MULTI_PRODUCT_COMPARISON": {
+          "labelCode": "MULTI_PRODUCT_COMPARISON",
+          "support": 153,
+          "predicted": 45,
+          "truePositive": 32,
+          "falsePositive": 13,
+          "falseNegative": 121,
+          "precision": {
+            "value": 0.7111111111111111,
+            "lower95": 0.5663145942523844,
+            "upper95": 0.8226991751715074
+          },
+          "recall": {
+            "value": 0.20915032679738563,
+            "lower95": 0.15222725721157238,
+            "upper95": 0.28032073954133035
+          },
+          "f1": 0.3232323232323232
+        },
+        "NO_EXPLICIT_CHECKOUT_OBSERVED": {
+          "labelCode": "NO_EXPLICIT_CHECKOUT_OBSERVED",
+          "support": 875,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 875,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.004371048705245345
+          },
+          "f1": 0
+        },
+        "ORDER_CANCELLATION": {
+          "labelCode": "ORDER_CANCELLATION",
+          "support": 44,
+          "predicted": 203,
+          "truePositive": 25,
+          "falsePositive": 178,
+          "falseNegative": 19,
+          "precision": {
+            "value": 0.12315270935960591,
+            "lower95": 0.08482491097052705,
+            "upper95": 0.1754781207701647
+          },
+          "recall": {
+            "value": 0.5681818181818182,
+            "lower95": 0.4222414699362943,
+            "upper95": 0.703172765914822
+          },
+          "f1": 0.2024291497975709
+        },
+        "ORDER_CONFIRMATION_TEXT_OBSERVED": {
+          "labelCode": "ORDER_CONFIRMATION_TEXT_OBSERVED",
+          "support": 257,
+          "predicted": 15,
+          "truePositive": 2,
+          "falsePositive": 13,
+          "falseNegative": 255,
+          "precision": {
+            "value": 0.13333333333333333,
+            "lower95": 0.03736125910306537,
+            "upper95": 0.37881982832322364
+          },
+          "recall": {
+            "value": 0.007782101167315175,
+            "lower95": 0.00213673352769031,
+            "upper95": 0.02792543088492497
+          },
+          "f1": 0.014705882352941176
+        },
+        "ORDER_TRACKING_QUESTION": {
+          "labelCode": "ORDER_TRACKING_QUESTION",
+          "support": 138,
+          "predicted": 7,
+          "truePositive": 5,
+          "falsePositive": 2,
+          "falseNegative": 133,
+          "precision": {
+            "value": 0.7142857142857143,
+            "lower95": 0.35893445183261935,
+            "upper95": 0.9177810759959433
+          },
+          "recall": {
+            "value": 0.036231884057971016,
+            "lower95": 0.015573587425422891,
+            "upper95": 0.08201042599192016
+          },
+          "f1": 0.06896551724137931
+        },
+        "POSSIBLE_HANDOFF_LANGUAGE": {
+          "labelCode": "POSSIBLE_HANDOFF_LANGUAGE",
+          "support": 15,
+          "predicted": 1,
+          "truePositive": 1,
+          "falsePositive": 0,
+          "falseNegative": 14,
+          "precision": {
+            "value": 1,
+            "lower95": 0.20654931437723745,
+            "upper95": 1
+          },
+          "recall": {
+            "value": 0.06666666666666667,
+            "lower95": 0.011866895493268553,
+            "upper95": 0.2981652987378003
+          },
+          "f1": 0.125
+        },
+        "POST_EXCHANGE_CONFIRMATION": {
+          "labelCode": "POST_EXCHANGE_CONFIRMATION",
+          "support": 4,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 4,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.4898908364545973
+          },
+          "f1": 0
+        },
+        "PREMATURE_PII_REQUEST": {
+          "labelCode": "PREMATURE_PII_REQUEST",
+          "support": 202,
+          "predicted": 9,
+          "truePositive": 0,
+          "falsePositive": 9,
+          "falseNegative": 202,
+          "precision": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.2991450484195441
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.01866222112252115
+          },
+          "f1": 0
+        },
+        "PRE_SALE_RETURN_POLICY_QUESTION": {
+          "labelCode": "PRE_SALE_RETURN_POLICY_QUESTION",
+          "support": 63,
+          "predicted": 38,
+          "truePositive": 31,
+          "falsePositive": 7,
+          "falseNegative": 32,
+          "precision": {
+            "value": 0.8157894736842105,
+            "lower95": 0.665811419288686,
+            "upper95": 0.9077823481477872
+          },
+          "recall": {
+            "value": 0.49206349206349204,
+            "lower95": 0.37266808813984664,
+            "upper95": 0.6123711372504527
+          },
+          "f1": 0.6138613861386139
+        },
+        "PRICE_OBJECTION": {
+          "labelCode": "PRICE_OBJECTION",
+          "support": 116,
+          "predicted": 70,
+          "truePositive": 53,
+          "falsePositive": 17,
+          "falseNegative": 63,
+          "precision": {
+            "value": 0.7571428571428571,
+            "lower95": 0.6450496077036256,
+            "upper95": 0.8424813887710942
+          },
+          "recall": {
+            "value": 0.45689655172413796,
+            "lower95": 0.36908190378048705,
+            "upper95": 0.5474745191936198
+          },
+          "f1": 0.5698924731182796
+        },
+        "PRICE_QUESTION": {
+          "labelCode": "PRICE_QUESTION",
+          "support": 908,
+          "predicted": 742,
+          "truePositive": 646,
+          "falsePositive": 96,
+          "falseNegative": 262,
+          "precision": {
+            "value": 0.8706199460916442,
+            "lower95": 0.8445490945420093,
+            "upper95": 0.8928730392042781
+          },
+          "recall": {
+            "value": 0.711453744493392,
+            "lower95": 0.6811411604671727,
+            "upper95": 0.7399846792118392
+          },
+          "f1": 0.7830303030303031
+        },
+        "PRODUCT_COMPLAINT": {
+          "labelCode": "PRODUCT_COMPLAINT",
+          "support": 47,
+          "predicted": 579,
+          "truePositive": 14,
+          "falsePositive": 565,
+          "falseNegative": 33,
+          "precision": {
+            "value": 0.024179620034542316,
+            "lower95": 0.014456960064896211,
+            "upper95": 0.04017446386489987
+          },
+          "recall": {
+            "value": 0.2978723404255319,
+            "lower95": 0.18651250504604835,
+            "upper95": 0.4397767391904607
+          },
+          "f1": 0.04472843450479233
+        },
+        "PRODUCT_CONTEXT_LOST": {
+          "labelCode": "PRODUCT_CONTEXT_LOST",
+          "support": 132,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 132,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.02827898679860847
+          },
+          "f1": 0
+        },
+        "PRODUCT_INFO_QUESTION": {
+          "labelCode": "PRODUCT_INFO_QUESTION",
+          "support": 487,
+          "predicted": 159,
+          "truePositive": 78,
+          "falsePositive": 81,
+          "falseNegative": 409,
+          "precision": {
+            "value": 0.49056603773584906,
+            "lower95": 0.41400646472092706,
+            "upper95": 0.5675707084281828
+          },
+          "recall": {
+            "value": 0.1601642710472279,
+            "lower95": 0.1302693681673555,
+            "upper95": 0.19537846770358444
+          },
+          "f1": 0.24148606811145512
+        },
+        "REPEATED_SHOP_MESSAGE": {
+          "labelCode": "REPEATED_SHOP_MESSAGE",
+          "support": 320,
+          "predicted": 411,
+          "truePositive": 308,
+          "falsePositive": 103,
+          "falseNegative": 12,
+          "precision": {
+            "value": 0.7493917274939172,
+            "lower95": 0.7053162295261268,
+            "upper95": 0.7888484583109359
+          },
+          "recall": {
+            "value": 0.9625,
+            "lower95": 0.9356070068679461,
+            "upper95": 0.9784204962130925
+          },
+          "f1": 0.8426812585499317
+        },
+        "REPEATED_SHOP_QUESTION": {
+          "labelCode": "REPEATED_SHOP_QUESTION",
+          "support": 465,
+          "predicted": 85,
+          "truePositive": 1,
+          "falsePositive": 84,
+          "falseNegative": 464,
+          "precision": {
+            "value": 0.011764705882352941,
+            "lower95": 0.002079787134664092,
+            "upper95": 0.06367170882493911
+          },
+          "recall": {
+            "value": 0.002150537634408602,
+            "lower95": 0.00037972362142459515,
+            "upper95": 0.012079624225899973
+          },
+          "f1": 0.003636363636363636
+        },
+        "RETURN_REQUEST": {
+          "labelCode": "RETURN_REQUEST",
+          "support": 2,
+          "predicted": 7,
+          "truePositive": 0,
+          "falsePositive": 7,
+          "falseNegative": 2,
+          "precision": {
+            "value": 0,
+            "lower95": 5.551115123125783e-17,
+            "upper95": 0.35433043506668743
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.6576197724933469
+          },
+          "f1": 0
+        },
+        "SIZE_QUESTION": {
+          "labelCode": "SIZE_QUESTION",
+          "support": 262,
+          "predicted": 610,
+          "truePositive": 175,
+          "falsePositive": 435,
+          "falseNegative": 87,
+          "precision": {
+            "value": 0.28688524590163933,
+            "lower95": 0.2524129753878047,
+            "upper95": 0.32402488773810834
+          },
+          "recall": {
+            "value": 0.6679389312977099,
+            "lower95": 0.6088474643965398,
+            "upper95": 0.7221769002393561
+          },
+          "f1": 0.4013761467889908
+        },
+        "SIZE_RECOMMENDATION_CONFLICT": {
+          "labelCode": "SIZE_RECOMMENDATION_CONFLICT",
+          "support": 13,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 13,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.22809537235419838
+          },
+          "f1": 0
+        },
+        "STYLE_OBJECTION": {
+          "labelCode": "STYLE_OBJECTION",
+          "support": 55,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 55,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.06528490111708637
+          },
+          "f1": 0
+        },
+        "TRUST_OBJECTION": {
+          "labelCode": "TRUST_OBJECTION",
+          "support": 74,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 74,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.04934977939638607
+          },
+          "f1": 0
+        },
+        "VARIANT_SELECTION": {
+          "labelCode": "VARIANT_SELECTION",
+          "support": 394,
+          "predicted": 329,
+          "truePositive": 172,
+          "falsePositive": 157,
+          "falseNegative": 222,
+          "precision": {
+            "value": 0.5227963525835866,
+            "lower95": 0.46887299281024175,
+            "upper95": 0.5761935083796856
+          },
+          "recall": {
+            "value": 0.4365482233502538,
+            "lower95": 0.38842242965613344,
+            "upper95": 0.4858993663974677
+          },
+          "f1": 0.47579529737206083
+        }
+      },
+      "confusion": {
+        "PRODUCT_INFO_QUESTION": {
+          "PRODUCT_COMPLAINT": 68,
+          "SIZE_QUESTION": 171,
+          "FIT_OBJECTION": 24,
+          "CONTINUATION": 68,
+          "VARIANT_SELECTION": 45,
+          "__MISSED__": 114,
+          "BUYING_NEGATED": 36,
+          "ORDER_CANCELLATION": 32,
+          "BUYING_RETRACTED": 10,
+          "BUYING_COMMITTED": 20,
+          "PRICE_QUESTION": 2,
+          "MATERIAL_OBJECTION": 21,
+          "PRE_SALE_RETURN_POLICY_QUESTION": 3,
+          "BUYING_CANDIDATE": 1,
+          "IMAGE_REQUEST": 2,
+          "MULTI_PRODUCT_COMPARISON": 2,
+          "ORDER_TRACKING_QUESTION": 2,
+          "CHECKOUT_DETAILS_PROVIDED": 1
+        },
+        "IRRELEVANT_SHOP_REPLY": {
+          "__MISSED__": 96,
+          "REPEATED_SHOP_MESSAGE": 1,
+          "REPEATED_SHOP_QUESTION": 2,
+          "FOLLOW_UP_SPAM": 2,
+          "PREMATURE_PII_REQUEST": 1
+        },
+        "REPEATED_SHOP_QUESTION": {
+          "__MISSED__": 446,
+          "REPEATED_SHOP_MESSAGE": 13,
+          "FOLLOW_UP_SPAM": 2,
+          "PREMATURE_PII_REQUEST": 3
+        },
+        "CONTINUATION": {
+          "__MISSED__": 90,
+          "PRICE_QUESTION": 11,
+          "FIT_OBJECTION": 5,
+          "SIZE_QUESTION": 24,
+          "PRODUCT_COMPLAINT": 31,
+          "BUYING_RETRACTED": 7,
+          "PRODUCT_INFO_QUESTION": 5,
+          "ORDER_CANCELLATION": 3,
+          "BUYING_COMMITTED": 10,
+          "MATERIAL_OBJECTION": 5,
+          "BUYING_NEGATED": 4,
+          "BUYING_CANDIDATE": 3,
+          "IMAGE_REQUEST": 1,
+          "VARIANT_SELECTION": 1
+        },
+        "PRE_SALE_RETURN_POLICY_QUESTION": {
+          "CONTINUATION": 6,
+          "PRODUCT_COMPLAINT": 11,
+          "SIZE_QUESTION": 10,
+          "__MISSED__": 6,
+          "BUYING_COMMITTED": 3,
+          "MATERIAL_OBJECTION": 6,
+          "RETURN_REQUEST": 6,
+          "BUYING_CANDIDATE": 8,
+          "BUYING_NEGATED": 1,
+          "BUYING_RETRACTED": 1,
+          "IMAGE_REQUEST": 1,
+          "PRODUCT_INFO_QUESTION": 1
+        },
+        "__NONE__": {
+          "REPEATED_SHOP_QUESTION": 37,
+          "CONTINUATION": 508,
+          "SIZE_QUESTION": 101,
+          "PRODUCT_COMPLAINT": 151,
+          "PRICE_QUESTION": 41,
+          "MATERIAL_OBJECTION": 56,
+          "PRODUCT_INFO_QUESTION": 23,
+          "BUYING_COMMITTED": 60,
+          "VARIANT_SELECTION": 52,
+          "BUYING_NEGATED": 91,
+          "ORDER_CANCELLATION": 65,
+          "BUYING_CANDIDATE": 13,
+          "BUYING_RETRACTED": 16,
+          "PRICE_OBJECTION": 12,
+          "REPEATED_SHOP_MESSAGE": 90,
+          "FOLLOW_UP_SPAM": 249,
+          "IMAGE_REQUEST": 14,
+          "FIT_OBJECTION": 10,
+          "DELIVERY_DELAY_COMPLAINT": 2,
+          "ORDER_CONFIRMATION_TEXT_OBSERVED": 13,
+          "PREMATURE_PII_REQUEST": 3,
+          "EXPLICIT_DELIVERED_MESSAGE": 7,
+          "MULTI_PRODUCT_COMPARISON": 2,
+          "EXCHANGE_REQUEST": 1,
+          "PRE_SALE_RETURN_POLICY_QUESTION": 1
+        },
+        "PRODUCT_CONTEXT_LOST": {
+          "__MISSED__": 132
+        },
+        "NO_EXPLICIT_CHECKOUT_OBSERVED": {
+          "__MISSED__": 875
+        },
+        "BUYING_CANDIDATE": {
+          "SIZE_QUESTION": 19,
+          "__MISSED__": 63,
+          "BUYING_COMMITTED": 47,
+          "PRODUCT_COMPLAINT": 15,
+          "PRODUCT_INFO_QUESTION": 4,
+          "BUYING_NEGATED": 9,
+          "PRICE_QUESTION": 5,
+          "CONTINUATION": 10,
+          "VARIANT_SELECTION": 4,
+          "PRICE_OBJECTION": 1,
+          "MATERIAL_OBJECTION": 7,
+          "FIT_OBJECTION": 1,
+          "PRE_SALE_RETURN_POLICY_QUESTION": 1,
+          "MULTI_PRODUCT_COMPARISON": 4,
+          "EXCHANGE_REQUEST": 1,
+          "ORDER_CANCELLATION": 3,
+          "BUYING_RETRACTED": 2
+        },
+        "MULTI_PRODUCT_COMPARISON": {
+          "__MISSED__": 67,
+          "BUYING_COMMITTED": 13,
+          "PRODUCT_COMPLAINT": 13,
+          "BUYING_NEGATED": 11,
+          "ORDER_CANCELLATION": 17,
+          "SIZE_QUESTION": 9,
+          "PRICE_QUESTION": 2,
+          "CONTINUATION": 7,
+          "VARIANT_SELECTION": 5,
+          "BUYING_RETRACTED": 7,
+          "PRICE_OBJECTION": 2,
+          "FIT_OBJECTION": 1,
+          "BUYING_CANDIDATE": 1,
+          "IMAGE_REQUEST": 1,
+          "MATERIAL_OBJECTION": 1
+        },
+        "VARIANT_SELECTION": {
+          "__MISSED__": 157,
+          "BUYING_NEGATED": 16,
+          "ORDER_CANCELLATION": 18,
+          "SIZE_QUESTION": 6,
+          "CONTINUATION": 17,
+          "BUYING_COMMITTED": 9,
+          "BUYING_RETRACTED": 9,
+          "PRODUCT_COMPLAINT": 12,
+          "FIT_OBJECTION": 2,
+          "BUYING_CANDIDATE": 1,
+          "PRICE_QUESTION": 1,
+          "PRODUCT_INFO_QUESTION": 1,
+          "MATERIAL_OBJECTION": 2
+        },
+        "BUYING_COMMITTED": {
+          "__MISSED__": 72,
+          "PRICE_QUESTION": 1,
+          "PRODUCT_COMPLAINT": 6,
+          "BUYING_NEGATED": 14,
+          "CONTINUATION": 54,
+          "ORDER_CANCELLATION": 10,
+          "BUYING_RETRACTED": 6,
+          "SIZE_QUESTION": 4,
+          "MATERIAL_OBJECTION": 3
+        },
+        "CHECKOUT_DETAILS_PROVIDED": {
+          "__MISSED__": 275,
+          "PRICE_QUESTION": 2,
+          "PRODUCT_COMPLAINT": 69,
+          "IMAGE_REQUEST": 7,
+          "BUYING_NEGATED": 2,
+          "ORDER_CANCELLATION": 4,
+          "BUYING_COMMITTED": 2,
+          "CONTINUATION": 7,
+          "MATERIAL_OBJECTION": 4,
+          "BUYING_RETRACTED": 2,
+          "FIT_OBJECTION": 1,
+          "SIZE_QUESTION": 1
+        },
+        "ORDER_CONFIRMATION_TEXT_OBSERVED": {
+          "__MISSED__": 252,
+          "PREMATURE_PII_REQUEST": 3
+        },
+        "FIT_OBJECTION": {
+          "__MISSED__": 29,
+          "BUYING_RETRACTED": 1,
+          "PRODUCT_COMPLAINT": 13,
+          "PRODUCT_INFO_QUESTION": 14,
+          "SIZE_QUESTION": 12,
+          "BUYING_CANDIDATE": 5,
+          "BUYING_COMMITTED": 6,
+          "BUYING_NEGATED": 6,
+          "CONTINUATION": 3,
+          "VARIANT_SELECTION": 4,
+          "ORDER_CANCELLATION": 3,
+          "MULTI_PRODUCT_COMPARISON": 1,
+          "MATERIAL_OBJECTION": 1
+        },
+        "STYLE_OBJECTION": {
+          "__MISSED__": 10,
+          "FIT_OBJECTION": 3,
+          "PRODUCT_COMPLAINT": 19,
+          "PRODUCT_INFO_QUESTION": 9,
+          "BUYING_CANDIDATE": 21,
+          "CONTINUATION": 12,
+          "VARIANT_SELECTION": 8,
+          "SIZE_QUESTION": 5,
+          "BUYING_NEGATED": 4,
+          "ORDER_CANCELLATION": 2,
+          "BUYING_COMMITTED": 3,
+          "PRICE_QUESTION": 2,
+          "MULTI_PRODUCT_COMPARISON": 1,
+          "IMAGE_REQUEST": 2,
+          "MATERIAL_OBJECTION": 2
+        },
+        "PRICE_QUESTION": {
+          "__MISSED__": 164,
+          "MULTI_PRODUCT_COMPARISON": 1,
+          "PRODUCT_COMPLAINT": 31,
+          "SIZE_QUESTION": 37,
+          "CONTINUATION": 27,
+          "BUYING_COMMITTED": 17,
+          "PRODUCT_INFO_QUESTION": 10,
+          "VARIANT_SELECTION": 1,
+          "BUYING_RETRACTED": 3,
+          "ORDER_CANCELLATION": 21,
+          "BUYING_NEGATED": 19,
+          "FIT_OBJECTION": 1
+        },
+        "MEASUREMENTS_PROVIDED": {
+          "__MISSED__": 140,
+          "PRODUCT_COMPLAINT": 14,
+          "CONTINUATION": 22,
+          "SIZE_QUESTION": 10,
+          "VARIANT_SELECTION": 20,
+          "BUYING_COMMITTED": 7,
+          "PRODUCT_INFO_QUESTION": 3,
+          "BUYING_NEGATED": 4,
+          "BUYING_RETRACTED": 1,
+          "ORDER_CANCELLATION": 1
+        },
+        "SIZE_QUESTION": {
+          "__MISSED__": 58,
+          "CONTINUATION": 13,
+          "VARIANT_SELECTION": 12,
+          "BUYING_NEGATED": 5,
+          "ORDER_CANCELLATION": 5,
+          "BUYING_COMMITTED": 4,
+          "PRICE_QUESTION": 2,
+          "PRODUCT_COMPLAINT": 2,
+          "MATERIAL_OBJECTION": 1
+        },
+        "EXCHANGE_REQUEST": {
+          "BUYING_COMMITTED": 3,
+          "MATERIAL_OBJECTION": 2,
+          "PRODUCT_COMPLAINT": 1,
+          "VARIANT_SELECTION": 2,
+          "BUYING_NEGATED": 2,
+          "ORDER_CANCELLATION": 3,
+          "__MISSED__": 5,
+          "PRE_SALE_RETURN_POLICY_QUESTION": 1,
+          "SIZE_QUESTION": 2,
+          "CONTINUATION": 3,
+          "BUYING_RETRACTED": 2
+        },
+        "PRODUCT_COMPLAINT": {
+          "BUYING_CANDIDATE": 3,
+          "PRICE_OBJECTION": 1,
+          "PRODUCT_INFO_QUESTION": 3,
+          "__MISSED__": 13,
+          "SIZE_QUESTION": 8,
+          "MATERIAL_OBJECTION": 3,
+          "BUYING_NEGATED": 3,
+          "BUYING_COMMITTED": 2,
+          "CONTINUATION": 5,
+          "VARIANT_SELECTION": 4,
+          "ORDER_CANCELLATION": 1
+        },
+        "POST_EXCHANGE_CONFIRMATION": {
+          "__MISSED__": 1,
+          "BUYING_COMMITTED": 1,
+          "MATERIAL_OBJECTION": 1,
+          "BUYING_NEGATED": 1,
+          "ORDER_CANCELLATION": 1
+        },
+        "FOLLOW_UP_SPAM": {
+          "__MISSED__": 75,
+          "REPEATED_SHOP_QUESTION": 45
+        },
+        "PREMATURE_PII_REQUEST": {
+          "__MISSED__": 202
+        },
+        "DELIVERY_OBJECTION": {
+          "MATERIAL_OBJECTION": 22,
+          "__MISSED__": 46,
+          "FIT_OBJECTION": 14,
+          "SIZE_QUESTION": 13,
+          "PRODUCT_COMPLAINT": 26,
+          "BUYING_NEGATED": 2,
+          "BUYING_COMMITTED": 14,
+          "CONTINUATION": 6,
+          "BUYING_RETRACTED": 3,
+          "DELIVERY_DELAY_COMPLAINT": 1,
+          "PRODUCT_INFO_QUESTION": 1,
+          "BUYING_CANDIDATE": 1
+        },
+        "ORDER_TRACKING_QUESTION": {
+          "__MISSED__": 27,
+          "PRODUCT_COMPLAINT": 86,
+          "FIT_OBJECTION": 8,
+          "MATERIAL_OBJECTION": 27,
+          "SIZE_QUESTION": 24,
+          "BUYING_COMMITTED": 19,
+          "CONTINUATION": 8,
+          "BUYING_RETRACTED": 3,
+          "RETURN_REQUEST": 1,
+          "BUYING_NEGATED": 2,
+          "PRICE_QUESTION": 1,
+          "PRODUCT_INFO_QUESTION": 2,
+          "ORDER_CANCELLATION": 2,
+          "CHECKOUT_DETAILS_PROVIDED": 1
+        },
+        "TRUST_OBJECTION": {
+          "__MISSED__": 26,
+          "BUYING_COMMITTED": 6,
+          "IMAGE_REQUEST": 10,
+          "MATERIAL_OBJECTION": 8,
+          "PRODUCT_COMPLAINT": 19,
+          "BUYING_RETRACTED": 3,
+          "MULTI_PRODUCT_COMPARISON": 2,
+          "BUYING_NEGATED": 4,
+          "ORDER_CANCELLATION": 3,
+          "SIZE_QUESTION": 12,
+          "CONTINUATION": 12,
+          "VARIANT_SELECTION": 4,
+          "PRE_SALE_RETURN_POLICY_QUESTION": 1,
+          "PRODUCT_INFO_QUESTION": 7,
+          "PRICE_QUESTION": 5,
+          "BUYING_CANDIDATE": 1
+        },
+        "DELIVERY_DELAY_COMPLAINT": {
+          "BUYING_NEGATED": 4,
+          "PRODUCT_COMPLAINT": 21,
+          "CONTINUATION": 4,
+          "FIT_OBJECTION": 9,
+          "MATERIAL_OBJECTION": 6,
+          "VARIANT_SELECTION": 1,
+          "SIZE_QUESTION": 13,
+          "BUYING_COMMITTED": 16,
+          "__MISSED__": 13,
+          "BUYING_RETRACTED": 2,
+          "PRODUCT_INFO_QUESTION": 3,
+          "ORDER_CANCELLATION": 1
+        },
+        "IMAGE_REQUEST": {
+          "BUYING_CANDIDATE": 4,
+          "__MISSED__": 36,
+          "CONTINUATION": 5,
+          "PRODUCT_INFO_QUESTION": 3,
+          "BUYING_NEGATED": 3,
+          "ORDER_CANCELLATION": 4,
+          "SIZE_QUESTION": 13,
+          "BUYING_RETRACTED": 1,
+          "BUYING_COMMITTED": 2,
+          "PRODUCT_COMPLAINT": 8,
+          "MULTI_PRODUCT_COMPARISON": 3,
+          "VARIANT_SELECTION": 1,
+          "PRICE_OBJECTION": 1
+        },
+        "PRICE_OBJECTION": {
+          "ORDER_CANCELLATION": 2,
+          "PRICE_QUESTION": 25,
+          "BUYING_COMMITTED": 12,
+          "CONTINUATION": 2,
+          "BUYING_CANDIDATE": 3,
+          "MATERIAL_OBJECTION": 2,
+          "SIZE_QUESTION": 5,
+          "PRODUCT_COMPLAINT": 13,
+          "__MISSED__": 21,
+          "BUYING_NEGATED": 2,
+          "PRODUCT_INFO_QUESTION": 2
+        },
+        "BUYING_NEGATED": {
+          "BUYING_COMMITTED": 16,
+          "PRODUCT_COMPLAINT": 23,
+          "SIZE_QUESTION": 10,
+          "MATERIAL_OBJECTION": 2,
+          "PRODUCT_INFO_QUESTION": 6,
+          "BUYING_CANDIDATE": 16,
+          "PRICE_QUESTION": 10,
+          "BUYING_RETRACTED": 12,
+          "ORDER_CANCELLATION": 2,
+          "__MISSED__": 6,
+          "VARIANT_SELECTION": 4,
+          "CONTINUATION": 8
+        },
+        "SIZE_RECOMMENDATION_CONFLICT": {
+          "__MISSED__": 13
+        },
+        "ORDER_CANCELLATION": {
+          "BUYING_RETRACTED": 3,
+          "MULTI_PRODUCT_COMPARISON": 1,
+          "BUYING_NEGATED": 2,
+          "MATERIAL_OBJECTION": 5,
+          "FIT_OBJECTION": 2,
+          "BUYING_CANDIDATE": 1,
+          "DELIVERY_DELAY_COMPLAINT": 1,
+          "PRODUCT_COMPLAINT": 3,
+          "__MISSED__": 5,
+          "CONTINUATION": 1,
+          "VARIANT_SELECTION": 1,
+          "BUYING_COMMITTED": 2
+        },
+        "POSSIBLE_HANDOFF_LANGUAGE": {
+          "__MISSED__": 14
+        },
+        "MATERIAL_OBJECTION": {
+          "__MISSED__": 6,
+          "BUYING_CANDIDATE": 5,
+          "PRICE_QUESTION": 1,
+          "PRODUCT_INFO_QUESTION": 4,
+          "SIZE_QUESTION": 2,
+          "CONTINUATION": 2,
+          "VARIANT_SELECTION": 1,
+          "PRODUCT_COMPLAINT": 2,
+          "FIT_OBJECTION": 1
+        },
+        "REPEATED_SHOP_MESSAGE": {
+          "__MISSED__": 12
+        },
+        "BUYING_RETRACTED": {
+          "PRODUCT_COMPLAINT": 3,
+          "BUYING_NEGATED": 3,
+          "MULTI_PRODUCT_COMPARISON": 1,
+          "PRODUCT_INFO_QUESTION": 1,
+          "SIZE_QUESTION": 1,
+          "BUYING_COMMITTED": 1
+        },
+        "RETURN_REQUEST": {
+          "__MISSED__": 1,
+          "MATERIAL_OBJECTION": 1,
+          "PRODUCT_INFO_QUESTION": 1
+        },
+        "CHOICE_OVERLOAD": {
+          "__MISSED__": 1
+        }
+      }
+    },
+    "validation": {
+      "schemaVersion": 1,
+      "conversationCount": 391,
+      "goldAnnotationCount": 2672,
+      "predictionCount": 2212,
+      "duplicatePredictionCount": 0,
+      "invalidEvidenceCount": 0,
+      "evidenceEvaluatedCount": 2212,
+      "evidenceValidityRate": 1,
+      "micro": {
+        "precision": 0.38788426763110306,
+        "recall": 0.32110778443113774,
+        "f1": 0.35135135135135137
+      },
+      "macroF1": 0.24129915563733526,
+      "labels": {
+        "BUYING_CANDIDATE": {
+          "labelCode": "BUYING_CANDIDATE",
+          "support": 59,
+          "predicted": 38,
+          "truePositive": 11,
+          "falsePositive": 27,
+          "falseNegative": 48,
+          "precision": {
+            "value": 0.2894736842105263,
+            "lower95": 0.17003277828483065,
+            "upper95": 0.44757137675752057
+          },
+          "recall": {
+            "value": 0.1864406779661017,
+            "lower95": 0.1074272194200533,
+            "upper95": 0.3037895044696276
+          },
+          "f1": 0.22680412371134023
+        },
+        "BUYING_COMMITTED": {
+          "labelCode": "BUYING_COMMITTED",
+          "support": 117,
+          "predicted": 158,
+          "truePositive": 67,
+          "falsePositive": 91,
+          "falseNegative": 50,
+          "precision": {
+            "value": 0.4240506329113924,
+            "lower95": 0.34969354256287793,
+            "upper95": 0.5020131821856313
+          },
+          "recall": {
+            "value": 0.5726495726495726,
+            "lower95": 0.4821082285158197,
+            "upper95": 0.6585719665588258
+          },
+          "f1": 0.48727272727272725
+        },
+        "BUYING_NEGATED": {
+          "labelCode": "BUYING_NEGATED",
+          "support": 40,
+          "predicted": 110,
+          "truePositive": 16,
+          "falsePositive": 94,
+          "falseNegative": 24,
+          "precision": {
+            "value": 0.14545454545454545,
+            "lower95": 0.09155921975527695,
+            "upper95": 0.22327738891069396
+          },
+          "recall": {
+            "value": 0.4,
+            "lower95": 0.2634832568429192,
+            "upper95": 0.5540410633965381
+          },
+          "f1": 0.21333333333333335
+        },
+        "BUYING_RETRACTED": {
+          "labelCode": "BUYING_RETRACTED",
+          "support": 9,
+          "predicted": 27,
+          "truePositive": 2,
+          "falsePositive": 25,
+          "falseNegative": 7,
+          "precision": {
+            "value": 0.07407407407407407,
+            "lower95": 0.020554654060988622,
+            "upper95": 0.23369592683023144
+          },
+          "recall": {
+            "value": 0.2222222222222222,
+            "lower95": 0.06322510711784671,
+            "upper95": 0.5474110308930111
+          },
+          "f1": 0.1111111111111111
+        },
+        "CHECKOUT_DETAILS_PROVIDED": {
+          "labelCode": "CHECKOUT_DETAILS_PROVIDED",
+          "support": 119,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 119,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.031271680241939506
+          },
+          "f1": 0
+        },
+        "CHOICE_OVERLOAD": {
+          "labelCode": "CHOICE_OVERLOAD",
+          "support": 1,
+          "predicted": 1,
+          "truePositive": 1,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "precision": {
+            "value": 1,
+            "lower95": 0.20654931437723745,
+            "upper95": 1
+          },
+          "recall": {
+            "value": 1,
+            "lower95": 0.20654931437723745,
+            "upper95": 1
+          },
+          "f1": 1
+        },
+        "CONTINUATION": {
+          "labelCode": "CONTINUATION",
+          "support": 63,
+          "predicted": 276,
+          "truePositive": 14,
+          "falsePositive": 262,
+          "falseNegative": 49,
+          "precision": {
+            "value": 0.050724637681159424,
+            "lower95": 0.030452852126468997,
+            "upper95": 0.08333107022327921
+          },
+          "recall": {
+            "value": 0.2222222222222222,
+            "lower95": 0.13725007752613644,
+            "upper95": 0.3391228111343367
+          },
+          "f1": 0.08259587020648967
+        },
+        "DELIVERY_DELAY_COMPLAINT": {
+          "labelCode": "DELIVERY_DELAY_COMPLAINT",
+          "support": 27,
+          "predicted": 2,
+          "truePositive": 1,
+          "falsePositive": 1,
+          "falseNegative": 26,
+          "precision": {
+            "value": 0.5,
+            "lower95": 0.09453120573423074,
+            "upper95": 0.9054687942657693
+          },
+          "recall": {
+            "value": 0.037037037037037035,
+            "lower95": 0.006568145980785103,
+            "upper95": 0.18283465933575843
+          },
+          "f1": 0.06896551724137931
+        },
+        "DELIVERY_OBJECTION": {
+          "labelCode": "DELIVERY_OBJECTION",
+          "support": 53,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 53,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.06758198857654187
+          },
+          "f1": 0
+        },
+        "EXCHANGE_REQUEST": {
+          "labelCode": "EXCHANGE_REQUEST",
+          "support": 11,
+          "predicted": 7,
+          "truePositive": 1,
+          "falsePositive": 6,
+          "falseNegative": 10,
+          "precision": {
+            "value": 0.14285714285714285,
+            "lower95": 0.02567962434474355,
+            "upper95": 0.5131278292743189
+          },
+          "recall": {
+            "value": 0.09090909090909091,
+            "lower95": 0.016232172885884855,
+            "upper95": 0.37735843645159567
+          },
+          "f1": 0.1111111111111111
+        },
+        "EXPLICIT_DELIVERED_MESSAGE": {
+          "labelCode": "EXPLICIT_DELIVERED_MESSAGE",
+          "support": 82,
+          "predicted": 82,
+          "truePositive": 82,
+          "falsePositive": 0,
+          "falseNegative": 0,
+          "precision": {
+            "value": 1,
+            "lower95": 0.9552493763098998,
+            "upper95": 1
+          },
+          "recall": {
+            "value": 1,
+            "lower95": 0.9552493763098998,
+            "upper95": 1
+          },
+          "f1": 1
+        },
+        "FIT_OBJECTION": {
+          "labelCode": "FIT_OBJECTION",
+          "support": 22,
+          "predicted": 27,
+          "truePositive": 1,
+          "falsePositive": 26,
+          "falseNegative": 21,
+          "precision": {
+            "value": 0.037037037037037035,
+            "lower95": 0.006568145980785103,
+            "upper95": 0.18283465933575843
+          },
+          "recall": {
+            "value": 0.045454545454545456,
+            "lower95": 0.00806942762126385,
+            "upper95": 0.21798045838657332
+          },
+          "f1": 0.04081632653061224
+        },
+        "FOLLOW_UP_SPAM": {
+          "labelCode": "FOLLOW_UP_SPAM",
+          "support": 58,
+          "predicted": 93,
+          "truePositive": 1,
+          "falsePositive": 92,
+          "falseNegative": 57,
+          "precision": {
+            "value": 0.010752688172043012,
+            "lower95": 0.0019006420286555546,
+            "upper95": 0.058419172354870236
+          },
+          "recall": {
+            "value": 0.017241379310344827,
+            "lower95": 0.0030500384460675004,
+            "upper95": 0.09140858093468013
+          },
+          "f1": 0.013245033112582783
+        },
+        "IMAGE_REQUEST": {
+          "labelCode": "IMAGE_REQUEST",
+          "support": 64,
+          "predicted": 44,
+          "truePositive": 28,
+          "falsePositive": 16,
+          "falseNegative": 36,
+          "precision": {
+            "value": 0.6363636363636364,
+            "lower95": 0.4886637687904344,
+            "upper95": 0.762164702911798
+          },
+          "recall": {
+            "value": 0.4375,
+            "lower95": 0.3229400970440308,
+            "upper95": 0.5591379104300699
+          },
+          "f1": 0.5185185185185185
+        },
+        "IRRELEVANT_SHOP_REPLY": {
+          "labelCode": "IRRELEVANT_SHOP_REPLY",
+          "support": 50,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 50,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 6.938893903907228e-18,
+            "upper95": 0.07134759913335872
+          },
+          "f1": 0
+        },
+        "MATERIAL_OBJECTION": {
+          "labelCode": "MATERIAL_OBJECTION",
+          "support": 7,
+          "predicted": 64,
+          "truePositive": 0,
+          "falsePositive": 64,
+          "falseNegative": 7,
+          "precision": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.05662405979280534
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 5.551115123125783e-17,
+            "upper95": 0.35433043506668743
+          },
+          "f1": 0
+        },
+        "MEASUREMENTS_PROVIDED": {
+          "labelCode": "MEASUREMENTS_PROVIDED",
+          "support": 117,
+          "predicted": 56,
+          "truePositive": 56,
+          "falsePositive": 0,
+          "falseNegative": 61,
+          "precision": {
+            "value": 1,
+            "lower95": 0.9358060632812366,
+            "upper95": 1
+          },
+          "recall": {
+            "value": 0.47863247863247865,
+            "lower95": 0.39024289320810457,
+            "upper95": 0.5683805788287645
+          },
+          "f1": 0.6473988439306358
+        },
+        "MULTI_PRODUCT_COMPARISON": {
+          "labelCode": "MULTI_PRODUCT_COMPARISON",
+          "support": 45,
+          "predicted": 13,
+          "truePositive": 9,
+          "falsePositive": 4,
+          "falseNegative": 36,
+          "precision": {
+            "value": 0.6923076923076923,
+            "lower95": 0.42369343180549035,
+            "upper95": 0.8731929634428948
+          },
+          "recall": {
+            "value": 0.2,
+            "lower95": 0.1089612680783129,
+            "upper95": 0.3382296911614202
+          },
+          "f1": 0.31034482758620696
+        },
+        "NO_EXPLICIT_CHECKOUT_OBSERVED": {
+          "labelCode": "NO_EXPLICIT_CHECKOUT_OBSERVED",
+          "support": 285,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 285,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.01329954098825824
+          },
+          "f1": 0
+        },
+        "ORDER_CANCELLATION": {
+          "labelCode": "ORDER_CANCELLATION",
+          "support": 21,
+          "predicted": 86,
+          "truePositive": 8,
+          "falsePositive": 78,
+          "falseNegative": 13,
+          "precision": {
+            "value": 0.09302325581395349,
+            "lower95": 0.04789228421527053,
+            "upper95": 0.1729574112498685
+          },
+          "recall": {
+            "value": 0.38095238095238093,
+            "lower95": 0.20751011368564493,
+            "upper95": 0.5912134622488425
+          },
+          "f1": 0.14953271028037382
+        },
+        "ORDER_CONFIRMATION_TEXT_OBSERVED": {
+          "labelCode": "ORDER_CONFIRMATION_TEXT_OBSERVED",
+          "support": 93,
+          "predicted": 5,
+          "truePositive": 1,
+          "falsePositive": 4,
+          "falseNegative": 92,
+          "precision": {
+            "value": 0.2,
+            "lower95": 0.03622410863243014,
+            "upper95": 0.6244653702374747
+          },
+          "recall": {
+            "value": 0.010752688172043012,
+            "lower95": 0.0019006420286555546,
+            "upper95": 0.058419172354870236
+          },
+          "f1": 0.020408163265306128
+        },
+        "ORDER_TRACKING_QUESTION": {
+          "labelCode": "ORDER_TRACKING_QUESTION",
+          "support": 41,
+          "predicted": 3,
+          "truePositive": 3,
+          "falsePositive": 0,
+          "falseNegative": 38,
+          "precision": {
+            "value": 1,
+            "lower95": 0.4385029682449546,
+            "upper95": 1
+          },
+          "recall": {
+            "value": 0.07317073170731707,
+            "lower95": 0.02519783063390993,
+            "upper95": 0.19427448537719041
+          },
+          "f1": 0.13636363636363635
+        },
+        "POSSIBLE_HANDOFF_LANGUAGE": {
+          "labelCode": "POSSIBLE_HANDOFF_LANGUAGE",
+          "support": 4,
+          "predicted": 1,
+          "truePositive": 0,
+          "falsePositive": 1,
+          "falseNegative": 4,
+          "precision": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.7934506856227626
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.4898908364545973
+          },
+          "f1": 0
+        },
+        "PREMATURE_PII_REQUEST": {
+          "labelCode": "PREMATURE_PII_REQUEST",
+          "support": 64,
+          "predicted": 1,
+          "truePositive": 0,
+          "falsePositive": 1,
+          "falseNegative": 64,
+          "precision": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.7934506856227626
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.05662405979280534
+          },
+          "f1": 0
+        },
+        "PRE_SALE_RETURN_POLICY_QUESTION": {
+          "labelCode": "PRE_SALE_RETURN_POLICY_QUESTION",
+          "support": 25,
+          "predicted": 22,
+          "truePositive": 13,
+          "falsePositive": 9,
+          "falseNegative": 12,
+          "precision": {
+            "value": 0.5909090909090909,
+            "lower95": 0.3873481847631513,
+            "upper95": 0.7674418380352814
+          },
+          "recall": {
+            "value": 0.52,
+            "lower95": 0.3349851695035678,
+            "upper95": 0.6996871404588704
+          },
+          "f1": 0.5531914893617023
+        },
+        "PRICE_OBJECTION": {
+          "labelCode": "PRICE_OBJECTION",
+          "support": 30,
+          "predicted": 23,
+          "truePositive": 16,
+          "falsePositive": 7,
+          "falseNegative": 14,
+          "precision": {
+            "value": 0.6956521739130435,
+            "lower95": 0.49134243731240795,
+            "upper95": 0.8439597554678597
+          },
+          "recall": {
+            "value": 0.5333333333333333,
+            "lower95": 0.36142299619873297,
+            "upper95": 0.6976761109230025
+          },
+          "f1": 0.6037735849056605
+        },
+        "PRICE_QUESTION": {
+          "labelCode": "PRICE_QUESTION",
+          "support": 326,
+          "predicted": 278,
+          "truePositive": 243,
+          "falsePositive": 35,
+          "falseNegative": 83,
+          "precision": {
+            "value": 0.8741007194244604,
+            "lower95": 0.8299384137905238,
+            "upper95": 0.9080651463327168
+          },
+          "recall": {
+            "value": 0.745398773006135,
+            "lower95": 0.6954407485556284,
+            "upper95": 0.7896407829536594
+          },
+          "f1": 0.8046357615894041
+        },
+        "PRODUCT_COMPLAINT": {
+          "labelCode": "PRODUCT_COMPLAINT",
+          "support": 24,
+          "predicted": 203,
+          "truePositive": 10,
+          "falsePositive": 193,
+          "falseNegative": 14,
+          "precision": {
+            "value": 0.04926108374384237,
+            "lower95": 0.026974669033235726,
+            "upper95": 0.08828974148014067
+          },
+          "recall": {
+            "value": 0.4166666666666667,
+            "lower95": 0.24467602609811764,
+            "upper95": 0.6116533413477124
+          },
+          "f1": 0.0881057268722467
+        },
+        "PRODUCT_CONTEXT_LOST": {
+          "labelCode": "PRODUCT_CONTEXT_LOST",
+          "support": 51,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 51,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.07004661989853143
+          },
+          "f1": 0
+        },
+        "PRODUCT_INFO_QUESTION": {
+          "labelCode": "PRODUCT_INFO_QUESTION",
+          "support": 168,
+          "predicted": 61,
+          "truePositive": 27,
+          "falsePositive": 34,
+          "falseNegative": 141,
+          "precision": {
+            "value": 0.4426229508196721,
+            "lower95": 0.3250780552148288,
+            "upper95": 0.5669663230685612
+          },
+          "recall": {
+            "value": 0.16071428571428573,
+            "lower95": 0.11286569816157058,
+            "upper95": 0.2237321125044114
+          },
+          "f1": 0.23580786026200876
+        },
+        "REPEATED_SHOP_MESSAGE": {
+          "labelCode": "REPEATED_SHOP_MESSAGE",
+          "support": 129,
+          "predicted": 166,
+          "truePositive": 126,
+          "falsePositive": 40,
+          "falseNegative": 3,
+          "precision": {
+            "value": 0.7590361445783133,
+            "lower95": 0.688592861758141,
+            "upper95": 0.817761715016852
+          },
+          "recall": {
+            "value": 0.9767441860465116,
+            "lower95": 0.9338558951481141,
+            "upper95": 0.9920598625674205
+          },
+          "f1": 0.8542372881355932
+        },
+        "REPEATED_SHOP_QUESTION": {
+          "labelCode": "REPEATED_SHOP_QUESTION",
+          "support": 192,
+          "predicted": 34,
+          "truePositive": 1,
+          "falsePositive": 33,
+          "falseNegative": 191,
+          "precision": {
+            "value": 0.029411764705882353,
+            "lower95": 0.0052109062762689395,
+            "upper95": 0.1491557329268593
+          },
+          "recall": {
+            "value": 0.005208333333333333,
+            "lower95": 0.0009199911384848523,
+            "upper95": 0.02890749715674057
+          },
+          "f1": 0.008849557522123894
+        },
+        "RETURN_REQUEST": {
+          "labelCode": "RETURN_REQUEST",
+          "support": 2,
+          "predicted": 1,
+          "truePositive": 0,
+          "falsePositive": 1,
+          "falseNegative": 2,
+          "precision": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.7934506856227626
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 0,
+            "upper95": 0.6576197724933469
+          },
+          "f1": 0
+        },
+        "SIZE_QUESTION": {
+          "labelCode": "SIZE_QUESTION",
+          "support": 96,
+          "predicted": 223,
+          "truePositive": 67,
+          "falsePositive": 156,
+          "falseNegative": 29,
+          "precision": {
+            "value": 0.3004484304932735,
+            "lower95": 0.24407232738946227,
+            "upper95": 0.3635831670572135
+          },
+          "recall": {
+            "value": 0.6979166666666666,
+            "lower95": 0.5999149981303159,
+            "upper95": 0.7806884150093544
+          },
+          "f1": 0.42006269592476486
+        },
+        "SIZE_RECOMMENDATION_CONFLICT": {
+          "labelCode": "SIZE_RECOMMENDATION_CONFLICT",
+          "support": 6,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 6,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 2.7755575615628914e-17,
+            "upper95": 0.3903342879021653
+          },
+          "f1": 0
+        },
+        "STYLE_OBJECTION": {
+          "labelCode": "STYLE_OBJECTION",
+          "support": 25,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 25,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 1.3877787807814457e-17,
+            "upper95": 0.13319225093904846
+          },
+          "f1": 0
+        },
+        "TRUST_OBJECTION": {
+          "labelCode": "TRUST_OBJECTION",
+          "support": 24,
+          "predicted": 0,
+          "truePositive": 0,
+          "falsePositive": 0,
+          "falseNegative": 24,
+          "precision": {
+            "value": null,
+            "lower95": null,
+            "upper95": null
+          },
+          "recall": {
+            "value": 0,
+            "lower95": 1.3877787807814457e-17,
+            "upper95": 0.13797620467498017
+          },
+          "f1": 0
+        },
+        "VARIANT_SELECTION": {
+          "labelCode": "VARIANT_SELECTION",
+          "support": 122,
+          "predicted": 107,
+          "truePositive": 53,
+          "falsePositive": 54,
+          "falseNegative": 69,
+          "precision": {
+            "value": 0.4953271028037383,
+            "lower95": 0.402410704021837,
+            "upper95": 0.5885674010063757
+          },
+          "recall": {
+            "value": 0.4344262295081967,
+            "lower95": 0.34980063310587917,
+            "upper95": 0.5230552591418602
+          },
+          "f1": 0.46288209606986896
+        }
+      },
+      "confusion": {
+        "REPEATED_SHOP_QUESTION": {
+          "__MISSED__": 182,
+          "REPEATED_SHOP_MESSAGE": 9
+        },
+        "CONTINUATION": {
+          "__MISSED__": 32,
+          "VARIANT_SELECTION": 2,
+          "MATERIAL_OBJECTION": 3,
+          "PRE_SALE_RETURN_POLICY_QUESTION": 1,
+          "PRODUCT_COMPLAINT": 5,
+          "BUYING_CANDIDATE": 1,
+          "PRODUCT_INFO_QUESTION": 2,
+          "BUYING_COMMITTED": 2,
+          "BUYING_NEGATED": 1,
+          "SIZE_QUESTION": 3,
+          "PRICE_QUESTION": 1,
+          "IMAGE_REQUEST": 1,
+          "FIT_OBJECTION": 2
+        },
+        "SIZE_QUESTION": {
+          "__MISSED__": 20,
+          "CONTINUATION": 4,
+          "VARIANT_SELECTION": 6,
+          "PRODUCT_INFO_QUESTION": 1,
+          "BUYING_COMMITTED": 1,
+          "PRICE_QUESTION": 1
+        },
+        "CHECKOUT_DETAILS_PROVIDED": {
+          "__MISSED__": 100,
+          "PRODUCT_COMPLAINT": 15,
+          "IMAGE_REQUEST": 3,
+          "MATERIAL_OBJECTION": 2,
+          "PRICE_QUESTION": 2,
+          "BUYING_COMMITTED": 1
+        },
+        "ORDER_CONFIRMATION_TEXT_OBSERVED": {
+          "__MISSED__": 90,
+          "PREMATURE_PII_REQUEST": 1,
+          "FOLLOW_UP_SPAM": 1
+        },
+        "DELIVERY_DELAY_COMPLAINT": {
+          "MATERIAL_OBJECTION": 3,
+          "PRODUCT_COMPLAINT": 10,
+          "SIZE_QUESTION": 3,
+          "BUYING_COMMITTED": 7,
+          "__MISSED__": 8,
+          "FIT_OBJECTION": 3
+        },
+        "__NONE__": {
+          "SIZE_QUESTION": 40,
+          "CONTINUATION": 176,
+          "PRODUCT_INFO_QUESTION": 15,
+          "BUYING_NEGATED": 44,
+          "ORDER_CANCELLATION": 35,
+          "BUYING_RETRACTED": 11,
+          "PRE_SALE_RETURN_POLICY_QUESTION": 2,
+          "PRICE_QUESTION": 16,
+          "VARIANT_SELECTION": 14,
+          "PRODUCT_COMPLAINT": 59,
+          "BUYING_COMMITTED": 24,
+          "REPEATED_SHOP_QUESTION": 6,
+          "BUYING_CANDIDATE": 9,
+          "MATERIAL_OBJECTION": 21,
+          "PRICE_OBJECTION": 5,
+          "IMAGE_REQUEST": 2,
+          "REPEATED_SHOP_MESSAGE": 31,
+          "FOLLOW_UP_SPAM": 90,
+          "FIT_OBJECTION": 8,
+          "EXCHANGE_REQUEST": 3,
+          "ORDER_CONFIRMATION_TEXT_OBSERVED": 4,
+          "MULTI_PRODUCT_COMPARISON": 1,
+          "POSSIBLE_HANDOFF_LANGUAGE": 1
+        },
+        "PRODUCT_INFO_QUESTION": {
+          "__MISSED__": 45,
+          "SIZE_QUESTION": 53,
+          "MATERIAL_OBJECTION": 11,
+          "PRODUCT_COMPLAINT": 23,
+          "CONTINUATION": 22,
+          "BUYING_NEGATED": 5,
+          "ORDER_CANCELLATION": 5,
+          "VARIANT_SELECTION": 14,
+          "IMAGE_REQUEST": 2,
+          "BUYING_COMMITTED": 6,
+          "BUYING_RETRACTED": 2,
+          "FIT_OBJECTION": 3,
+          "PRICE_QUESTION": 1
+        },
+        "NO_EXPLICIT_CHECKOUT_OBSERVED": {
+          "__MISSED__": 285
+        },
+        "BUYING_CANDIDATE": {
+          "BUYING_COMMITTED": 16,
+          "PRODUCT_INFO_QUESTION": 2,
+          "SIZE_QUESTION": 8,
+          "__MISSED__": 19,
+          "MATERIAL_OBJECTION": 3,
+          "BUYING_NEGATED": 1,
+          "ORDER_CANCELLATION": 1,
+          "PRE_SALE_RETURN_POLICY_QUESTION": 1,
+          "PRICE_QUESTION": 4,
+          "PRODUCT_COMPLAINT": 5,
+          "CONTINUATION": 2,
+          "VARIANT_SELECTION": 1,
+          "BUYING_RETRACTED": 1
+        },
+        "MULTI_PRODUCT_COMPARISON": {
+          "BUYING_COMMITTED": 2,
+          "PRODUCT_INFO_QUESTION": 1,
+          "SIZE_QUESTION": 4,
+          "__MISSED__": 15,
+          "BUYING_NEGATED": 7,
+          "CONTINUATION": 2,
+          "ORDER_CANCELLATION": 8,
+          "MATERIAL_OBJECTION": 1,
+          "PRODUCT_COMPLAINT": 5,
+          "PRICE_OBJECTION": 1,
+          "IMAGE_REQUEST": 1,
+          "BUYING_RETRACTED": 1
+        },
+        "PRICE_QUESTION": {
+          "BUYING_COMMITTED": 3,
+          "PRODUCT_INFO_QUESTION": 1,
+          "SIZE_QUESTION": 14,
+          "__MISSED__": 51,
+          "CONTINUATION": 7,
+          "BUYING_NEGATED": 9,
+          "ORDER_CANCELLATION": 9,
+          "MATERIAL_OBJECTION": 1,
+          "PRODUCT_COMPLAINT": 8,
+          "IMAGE_REQUEST": 1
+        },
+        "VARIANT_SELECTION": {
+          "BUYING_COMMITTED": 6,
+          "PRODUCT_INFO_QUESTION": 2,
+          "SIZE_QUESTION": 1,
+          "__MISSED__": 44,
+          "BUYING_NEGATED": 5,
+          "ORDER_CANCELLATION": 6,
+          "MATERIAL_OBJECTION": 2,
+          "PRE_SALE_RETURN_POLICY_QUESTION": 1,
+          "PRODUCT_COMPLAINT": 10,
+          "BUYING_RETRACTED": 2,
+          "CONTINUATION": 3,
+          "EXCHANGE_REQUEST": 1
+        },
+        "PREMATURE_PII_REQUEST": {
+          "__MISSED__": 63,
+          "REPEATED_SHOP_MESSAGE": 1
+        },
+        "BUYING_COMMITTED": {
+          "__MISSED__": 24,
+          "CONTINUATION": 18,
+          "BUYING_NEGATED": 8,
+          "ORDER_CANCELLATION": 9,
+          "IMAGE_REQUEST": 1,
+          "PRODUCT_COMPLAINT": 2,
+          "BUYING_CANDIDATE": 1,
+          "MATERIAL_OBJECTION": 1,
+          "BUYING_RETRACTED": 2,
+          "SIZE_QUESTION": 1
+        },
+        "ORDER_TRACKING_QUESTION": {
+          "SIZE_QUESTION": 7,
+          "__MISSED__": 9,
+          "PRODUCT_COMPLAINT": 17,
+          "BUYING_NEGATED": 3,
+          "ORDER_CANCELLATION": 4,
+          "CONTINUATION": 5,
+          "MATERIAL_OBJECTION": 4,
+          "FIT_OBJECTION": 2,
+          "BUYING_COMMITTED": 2,
+          "BUYING_RETRACTED": 1
+        },
+        "ORDER_CANCELLATION": {
+          "BUYING_COMMITTED": 4,
+          "MATERIAL_OBJECTION": 3,
+          "PRODUCT_COMPLAINT": 4,
+          "PRODUCT_INFO_QUESTION": 2,
+          "BUYING_RETRACTED": 1,
+          "BUYING_NEGATED": 3,
+          "IMAGE_REQUEST": 1,
+          "SIZE_QUESTION": 3,
+          "__MISSED__": 1,
+          "DELIVERY_DELAY_COMPLAINT": 1,
+          "FIT_OBJECTION": 1,
+          "CONTINUATION": 1
+        },
+        "STYLE_OBJECTION": {
+          "PRODUCT_COMPLAINT": 6,
+          "PRODUCT_INFO_QUESTION": 4,
+          "BUYING_CANDIDATE": 10,
+          "__MISSED__": 6,
+          "PRICE_OBJECTION": 1,
+          "SIZE_QUESTION": 2,
+          "BUYING_NEGATED": 1,
+          "PRE_SALE_RETURN_POLICY_QUESTION": 1,
+          "MATERIAL_OBJECTION": 1,
+          "VARIANT_SELECTION": 2,
+          "CONTINUATION": 2,
+          "BUYING_RETRACTED": 1,
+          "ORDER_CANCELLATION": 1,
+          "BUYING_COMMITTED": 1
+        },
+        "MEASUREMENTS_PROVIDED": {
+          "VARIANT_SELECTION": 11,
+          "__MISSED__": 39,
+          "PRODUCT_COMPLAINT": 6,
+          "SIZE_QUESTION": 5,
+          "BUYING_COMMITTED": 3,
+          "CONTINUATION": 7,
+          "PRODUCT_INFO_QUESTION": 2,
+          "BUYING_RETRACTED": 1,
+          "BUYING_NEGATED": 2
+        },
+        "IMAGE_REQUEST": {
+          "BUYING_NEGATED": 2,
+          "ORDER_CANCELLATION": 2,
+          "CONTINUATION": 6,
+          "SIZE_QUESTION": 8,
+          "__MISSED__": 16,
+          "PRODUCT_COMPLAINT": 8,
+          "VARIANT_SELECTION": 2,
+          "BUYING_CANDIDATE": 1,
+          "PRODUCT_INFO_QUESTION": 3,
+          "MULTI_PRODUCT_COMPARISON": 2,
+          "MATERIAL_OBJECTION": 1,
+          "BUYING_COMMITTED": 1,
+          "PRICE_QUESTION": 1
+        },
+        "FIT_OBJECTION": {
+          "__MISSED__": 8,
+          "PRODUCT_COMPLAINT": 1,
+          "SIZE_QUESTION": 7,
+          "VARIANT_SELECTION": 3,
+          "BUYING_NEGATED": 2,
+          "BUYING_COMMITTED": 2,
+          "ORDER_CANCELLATION": 1,
+          "PRODUCT_INFO_QUESTION": 1,
+          "CONTINUATION": 2
+        },
+        "DELIVERY_OBJECTION": {
+          "MATERIAL_OBJECTION": 8,
+          "PRODUCT_COMPLAINT": 16,
+          "BUYING_COMMITTED": 6,
+          "FIT_OBJECTION": 9,
+          "__MISSED__": 22,
+          "BUYING_NEGATED": 2,
+          "BUYING_RETRACTED": 1,
+          "SIZE_QUESTION": 2,
+          "BUYING_CANDIDATE": 1,
+          "DELIVERY_DELAY_COMPLAINT": 1
+        },
+        "PRODUCT_CONTEXT_LOST": {
+          "__MISSED__": 51
+        },
+        "FOLLOW_UP_SPAM": {
+          "__MISSED__": 31,
+          "REPEATED_SHOP_QUESTION": 26
+        },
+        "IRRELEVANT_SHOP_REPLY": {
+          "__MISSED__": 48,
+          "FOLLOW_UP_SPAM": 1,
+          "REPEATED_SHOP_QUESTION": 1
+        },
+        "EXCHANGE_REQUEST": {
+          "BUYING_NEGATED": 4,
+          "ORDER_CANCELLATION": 3,
+          "BUYING_COMMITTED": 3,
+          "PRE_SALE_RETURN_POLICY_QUESTION": 3,
+          "SIZE_QUESTION": 3,
+          "__MISSED__": 1,
+          "PRODUCT_COMPLAINT": 2,
+          "PRODUCT_INFO_QUESTION": 2,
+          "MATERIAL_OBJECTION": 1,
+          "VARIANT_SELECTION": 1
+        },
+        "PRODUCT_COMPLAINT": {
+          "BUYING_COMMITTED": 5,
+          "PRE_SALE_RETURN_POLICY_QUESTION": 1,
+          "BUYING_NEGATED": 1,
+          "BUYING_RETRACTED": 2,
+          "ORDER_CANCELLATION": 1,
+          "__MISSED__": 4,
+          "CONTINUATION": 2,
+          "VARIANT_SELECTION": 2,
+          "PRODUCT_INFO_QUESTION": 2,
+          "SIZE_QUESTION": 1,
+          "MATERIAL_OBJECTION": 1
+        },
+        "TRUST_OBJECTION": {
+          "__MISSED__": 11,
+          "FIT_OBJECTION": 1,
+          "CONTINUATION": 4,
+          "VARIANT_SELECTION": 1,
+          "IMAGE_REQUEST": 4,
+          "PRODUCT_COMPLAINT": 3,
+          "BUYING_COMMITTED": 3,
+          "SIZE_QUESTION": 2,
+          "BUYING_NEGATED": 2,
+          "ORDER_CANCELLATION": 2,
+          "MATERIAL_OBJECTION": 2,
+          "MULTI_PRODUCT_COMPARISON": 1
+        },
+        "BUYING_NEGATED": {
+          "BUYING_CANDIDATE": 8,
+          "PRODUCT_COMPLAINT": 5,
+          "PRICE_QUESTION": 4,
+          "BUYING_COMMITTED": 5,
+          "PRODUCT_INFO_QUESTION": 1,
+          "SIZE_QUESTION": 5,
+          "CONTINUATION": 2,
+          "MATERIAL_OBJECTION": 1,
+          "__MISSED__": 4,
+          "BUYING_RETRACTED": 2,
+          "ORDER_CANCELLATION": 2
+        },
+        "SIZE_RECOMMENDATION_CONFLICT": {
+          "__MISSED__": 6
+        },
+        "PRE_SALE_RETURN_POLICY_QUESTION": {
+          "RETURN_REQUEST": 1,
+          "BUYING_CANDIDATE": 1,
+          "MATERIAL_OBJECTION": 3,
+          "PRODUCT_COMPLAINT": 1,
+          "__MISSED__": 4,
+          "EXCHANGE_REQUEST": 2,
+          "SIZE_QUESTION": 2
+        },
+        "PRICE_OBJECTION": {
+          "__MISSED__": 3,
+          "PRICE_QUESTION": 7,
+          "PRODUCT_COMPLAINT": 3,
+          "BUYING_COMMITTED": 4,
+          "SIZE_QUESTION": 1,
+          "BUYING_NEGATED": 2,
+          "CONTINUATION": 1,
+          "VARIANT_SELECTION": 1
+        },
+        "MATERIAL_OBJECTION": {
+          "BUYING_CANDIDATE": 4,
+          "BUYING_COMMITTED": 1,
+          "__MISSED__": 1,
+          "IMAGE_REQUEST": 1,
+          "PRODUCT_INFO_QUESTION": 1
+        },
+        "POSSIBLE_HANDOFF_LANGUAGE": {
+          "__MISSED__": 4
+        },
+        "REPEATED_SHOP_MESSAGE": {
+          "__MISSED__": 3
+        },
+        "BUYING_RETRACTED": {
+          "PRE_SALE_RETURN_POLICY_QUESTION": 1,
+          "BUYING_COMMITTED": 2,
+          "CONTINUATION": 2,
+          "__MISSED__": 2,
+          "PRODUCT_COMPLAINT": 1,
+          "BUYING_NEGATED": 1
+        },
+        "RETURN_REQUEST": {
+          "BUYING_CANDIDATE": 1,
+          "MATERIAL_OBJECTION": 2,
+          "PRE_SALE_RETURN_POLICY_QUESTION": 1,
+          "PRODUCT_INFO_QUESTION": 1,
+          "VARIANT_SELECTION": 1,
+          "BUYING_COMMITTED": 1
+        }
+      }
+    },
+    "developmentGate": {
+      "passed": false,
+      "violations": [
+        "SAFETY_PRECISION_BELOW_GATE:BUYING_COMMITTED",
+        "SAFETY_RECALL_BELOW_GATE:BUYING_COMMITTED",
+        "SAFETY_PRECISION_BELOW_GATE:BUYING_NEGATED",
+        "SAFETY_RECALL_BELOW_GATE:BUYING_NEGATED",
+        "SAFETY_PRECISION_BELOW_GATE:PRE_SALE_RETURN_POLICY_QUESTION",
+        "SAFETY_RECALL_BELOW_GATE:PRE_SALE_RETURN_POLICY_QUESTION",
+        "SAFETY_PRECISION_BELOW_GATE:PREMATURE_PII_REQUEST",
+        "SAFETY_RECALL_BELOW_GATE:PREMATURE_PII_REQUEST",
+        "TARGET_F1_IMPROVEMENT_MISSING:BUYING_COMMITTED",
+        "TARGET_F1_IMPROVEMENT_MISSING:RETURN_REQUEST",
+        "TARGET_F1_IMPROVEMENT_MISSING:SIZE_RECOMMENDATION_CONFLICT",
+        "TARGET_F1_IMPROVEMENT_MISSING:PREMATURE_PII_REQUEST"
+      ],
+      "insufficientSupportLabels": [
+        "BUYING_RETRACTED",
+        "POSSIBLE_HANDOFF_LANGUAGE",
+        "RETURN_REQUEST",
+        "SIZE_RECOMMENDATION_CONFLICT"
+      ]
+    },
+    "validationGate": {
+      "passed": false,
+      "violations": [
+        "SAFETY_PRECISION_BELOW_GATE:BUYING_COMMITTED",
+        "SAFETY_RECALL_BELOW_GATE:BUYING_COMMITTED",
+        "SAFETY_PRECISION_BELOW_GATE:PREMATURE_PII_REQUEST",
+        "SAFETY_RECALL_BELOW_GATE:PREMATURE_PII_REQUEST",
+        "TARGET_F1_IMPROVEMENT_MISSING:BUYING_COMMITTED",
+        "TARGET_F1_IMPROVEMENT_MISSING:RETURN_REQUEST",
+        "TARGET_F1_IMPROVEMENT_MISSING:SIZE_RECOMMENDATION_CONFLICT",
+        "TARGET_F1_IMPROVEMENT_MISSING:PREMATURE_PII_REQUEST",
+        "TARGET_F1_IMPROVEMENT_MISSING:POSSIBLE_HANDOFF_LANGUAGE"
+      ],
+      "insufficientSupportLabels": [
+        "BUYING_NEGATED",
+        "BUYING_RETRACTED",
+        "POSSIBLE_HANDOFF_LANGUAGE",
+        "PRE_SALE_RETURN_POLICY_QUESTION",
+        "RETURN_REQUEST",
+        "SIZE_RECOMMENDATION_CONFLICT"
+      ]
+    }
+  },
+  "promotionStatus": "NOT_PROMOTED"
+}
