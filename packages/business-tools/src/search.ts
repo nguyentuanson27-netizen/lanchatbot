@@ -3,6 +3,7 @@ import type {
   ProductSearchResult,
   MediaProductSearchResult,
   BatchStableImageSearchResult,
+  ImageVectorChannel,
   ProductSearchThresholds,
   ScoredStableProduct,
   StableCatalogSearchPort,
@@ -167,6 +168,23 @@ export class ProductSearchService {
         reasonCode: error instanceof Error ? error.message.slice(0, 128) : "IMAGE_SEARCH_FAILED",
       };
     }
+  }
+
+  public async searchImageCandidatesBytes(
+    imageBytes: Uint8Array,
+    channel: ImageVectorChannel,
+  ): Promise<readonly ScoredStableProduct[]> {
+    if (!this.port.searchStableImageBytesByChannel) {
+      throw new Error("IMAGE_CHANNEL_SEARCH_UNSUPPORTED");
+    }
+    return validateAndSortCandidates(
+      await this.port.searchStableImageBytesByChannel(
+        imageBytes,
+        channel,
+        this.thresholds.maxCandidates,
+      ),
+      this.thresholds.maxCandidates,
+    );
   }
 
   private decideSemantic(candidates: readonly ScoredStableProduct[], minimum: number): ProductSearchResult {

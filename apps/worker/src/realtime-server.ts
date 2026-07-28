@@ -41,6 +41,13 @@ import {
   type VertexServiceAccount,
 } from "./vertex.js";
 
+import {
+  RedisRealtimeMediaRecognitionCache,
+  RealtimeImageProcessor,
+  RealtimeMediaRecognitionService,
+} from "./realtime-media-recognition.js";
+import { VertexMediaReranker } from "./vertex-media-reranker.js";
+
 interface N8nVertexCredential {
   email?: unknown;
   privateKey?: unknown;
@@ -280,6 +287,228 @@ const productSearch = new RedisCachedProductSearch(
   boundedInteger("MEDIA_SEARCH_CACHE_TTL_SECONDS", 604_800, 60, 2_592_000),
   process.env.QDRANT_COLLECTION?.trim() || "catalog-v2",
 );
+const mediaCutoutModeRaw =
+  process.env.REALTIME_MEDIA_CUTOUT_MODE?.trim().toUpperCase() || "OFF";
+if (!["OFF", "LIVE"].includes(mediaCutoutModeRaw)) {
+  throw new Error("REALTIME_MEDIA_CUTOUT_MODE_INVALID");
+}
+const mediaAiModeRaw =
+  process.env.REALTIME_MEDIA_AI_RERANK_MODE?.trim().toUpperCase() || "OFF";
+if (!["OFF", "LIVE"].includes(mediaAiModeRaw)) {
+  throw new Error("REALTIME_MEDIA_AI_RERANK_MODE_INVALID");
+}
+const mediaRecognitionPageIds = (
+  process.env.REALTIME_MEDIA_ENABLED_PAGE_IDS ?? ""
+)
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
+if (mediaRecognitionPageIds.some((value) => !/^\d{5,32}$/u.test(value))) {
+  throw new Error("REALTIME_MEDIA_ENABLED_PAGE_IDS_INVALID");
+}
+if (mediaCutoutModeRaw === "LIVE" && mediaRecognitionPageIds.length === 0) {
+  throw new Error("REALTIME_MEDIA_ENABLED_PAGE_IDS_REQUIRED");
+}
+const mediaPipelineVersion =
+  process.env.REALTIME_MEDIA_PIPELINE_VERSION?.trim() ||
+  "cutout-first-ai-v1";
+const mediaAiModel =
+  process.env.REALTIME_MEDIA_AI_RERANK_MODEL?.trim() ||
+  "gemini-3.1-flash-lite";
+const mediaAiPromptVersion =
+  process.env.REALTIME_MEDIA_AI_PROMPT_VERSION?.trim() ||
+  "media-rerank-v1";
+const mediaCacheVersion = [
+  mediaPipelineVersion, mediaAiModeRaw, mediaAiModel, mediaAiPromptVersion,
+].join(":");
+let mediaRecognitionCache:
+  | RedisRealtimeMediaRecognitionCache
+  | undefined;
+let mediaRecognition: RealtimeMediaRecognitionService | undefined;
+if (mediaCutoutModeRaw === "LIVE") {
+  const mediaEmbeddingModel = new VertexShadowModel({
+    projectId: required("VERTEX_PROJECT_ID"),
+    location: process.env.VERTEX_LOCATION?.trim() || credential.region,
+    modelName: required("VERTEX_MODEL_NAME"),
+    serviceAccount: credential.serviceAccount,
+    timeoutMs: boundedInteger(
+      "REALTIME_MEDIA_EMBED_TIMEOUT_MS",
+      4_000,
+      1_000,
+      8_000,
+    ),
+    embeddingLocation:
+      process.env.VERTEX_EMBEDDING_LOCATION?.trim() || "us-central1",
+    embeddingModel:
+      process.env.VERTEX_EMBEDDING_MODEL?.trim() ||
+      "multimodalembedding@001",
+    embeddingDimension: boundedInteger(
+      "VERTEX_EMBEDDING_DIMENSION",
+      1_408,
+      128,
+      1_408,
+    ),
+    maxImageBytes: boundedInteger(
+      "PRODUCT_SEARCH_MAX_IMAGE_BYTES",
+      10 * 1024 * 1024,
+      64 * 1024,
+      20 * 1024 * 1024,
+    ),
+    allowedImageHostSuffixes: allowedMediaHostSuffixes,
+  });
+  const mediaSearch = new ProductSearchService(
+    new QdrantStableCatalogSearchAdapter({
+      baseUrl: required("QDRANT_BASE_URL"),
+      apiKey: secretOrEnvironment("QDRANT_API_KEY", "QDRANT_API_KEY_FILE"),
+      collection: required("QDRANT_COLLECTION"),
+      embedding: mediaEmbeddingModel,
+      expectedDimension: boundedInteger(
+        "VERTEX_EMBEDDING_DIMENSION",
+        1_408,
+        128,
+        1_408,
+      ),
+      timeoutMs: boundedInteger(
+        "REALTIME_MEDIA_QDRANT_TIMEOUT_MS",
+        2_500,
+        500,
+        5_000,
+      ),
+    }),
+    {
+      textMinScore: 0.72,
+      imageMinScore: 0.78,
+      minTopGap: 0.04,
+      maxCandidates: boundedInteger(
+        "REALTIME_MEDIA_AI_MAX_CANDIDATES",
+        3,
+        1,
+        3,
+      ),
+    },
+  );
+  mediaRecognitionCache = new RedisRealtimeMediaRecognitionCache(
+    required("REDIS_URL"),
+    mediaCacheVersion,
+    process.env.QDRANT_COLLECTION?.trim() || "catalog-v2",
+    boundedInteger(
+      "REALTIME_MEDIA_CACHE_TTL_SECONDS",
+      604_800,
+      60,
+      2_592_000,
+    ),
+  );
+  const imageProcessor = new RealtimeImageProcessor({
+    allowedHostSuffixes: allowedMediaHostSuffixes,
+    rembgUrl: required("REMBG_URL"),
+    rembgModel: process.env.REMBG_MODEL?.trim() || "u2netp",
+    rembgAuthHeader: optionalSecretOrEnvironment(
+      "REMBG_AUTH_HEADER",
+      "REMBG_AUTH_HEADER_FILE",
+    ),
+    maxBytes: boundedInteger(
+      "PRODUCT_SEARCH_MAX_IMAGE_BYTES",
+      10 * 1024 * 1024,
+      64 * 1024,
+      20 * 1024 * 1024,
+    ),
+    maxDimension: 768,
+  });
+  const reranker = mediaAiModeRaw === "LIVE"
+    ? new VertexMediaReranker({
+        projectId: required("VERTEX_PROJECT_ID"),
+        location:
+          process.env.REALTIME_MEDIA_AI_LOCATION?.trim() || "global",
+        serviceAccount: credential.serviceAccount,
+      })
+    : undefined;
+  mediaRecognition = new RealtimeMediaRecognitionService(
+    mediaSearch,
+    imageProcessor,
+    {
+      pipelineVersion: mediaPipelineVersion,
+      totalDeadlineMs: boundedInteger(
+        "REALTIME_MEDIA_TOTAL_DEADLINE_MS",
+        12_000,
+        2_000,
+        20_000,
+      ),
+      prepareTimeoutMs: boundedInteger(
+        "REALTIME_MEDIA_PREPARE_TIMEOUT_MS",
+        4_000,
+        500,
+        8_000,
+      ),
+      rembgTimeoutMs: boundedInteger(
+        "REALTIME_MEDIA_REMBG_TIMEOUT_MS",
+        3_500,
+        500,
+        8_000,
+      ),
+      cutoutStrongScore: boundedNumber(
+        "REALTIME_MEDIA_CUTOUT_STRONG_SCORE",
+        0.82,
+        0,
+        1,
+      ),
+      cutoutMinimumScore: boundedNumber(
+        "REALTIME_MEDIA_CUTOUT_MIN_SCORE",
+        0.74,
+        0,
+        1,
+      ),
+      cutoutMinimumGap: boundedNumber(
+        "REALTIME_MEDIA_CUTOUT_MIN_GAP",
+        0.025,
+        0,
+        1,
+      ),
+      rawFallbackScore: boundedNumber(
+        "REALTIME_MEDIA_RAW_FALLBACK_SCORE",
+        0.78,
+        0,
+        1,
+      ),
+      rawFallbackGap: boundedNumber(
+        "REALTIME_MEDIA_RAW_FALLBACK_GAP",
+        0.04,
+        0,
+        1,
+      ),
+      aiMode: mediaAiModeRaw as "OFF" | "LIVE",
+      aiModel: mediaAiModel,
+      aiPromptVersion: mediaAiPromptVersion,
+      aiTimeoutMs: boundedInteger(
+        "REALTIME_MEDIA_AI_TIMEOUT_MS",
+        8_000,
+        500,
+        12_000,
+      ),
+      aiMaxOutputTokens: boundedInteger(
+        "REALTIME_MEDIA_AI_MAX_OUTPUT_TOKENS",
+        250,
+        32,
+        250,
+      ),
+      maxCandidates: boundedInteger(
+        "REALTIME_MEDIA_AI_MAX_CANDIDATES",
+        3,
+        1,
+        3,
+      ),
+      logTelemetry: (telemetry) => {
+        process.stdout.write(`${JSON.stringify({
+          level: "info",
+          component: "realtime-media-recognition",
+          event: "MEDIA_RECOGNITION_DECISION",
+          ...telemetry,
+        })}\n`);
+      },
+    },
+    reranker,
+    mediaRecognitionCache,
+  );
+}
 const videoProcessingTimeoutMs = boundedInteger(
   "VIDEO_PROCESSING_TIMEOUT_MS",
   45_000,
@@ -338,6 +567,9 @@ const history = process.env.HISTORY_CONTEXT_ENABLED === "true"
 if (!(await inbox.ready())) throw new Error("REALTIME_INBOX_NOT_READY");
 if (!(await facts.ready())) throw new Error("BUSINESS_FACT_REDIS_NOT_READY");
 if (!(await productSearch.ready())) throw new Error("MEDIA_SEARCH_CACHE_NOT_READY");
+if (mediaRecognitionCache && !(await mediaRecognitionCache.ready())) {
+  throw new Error("MEDIA_RECOGNITION_CACHE_NOT_READY");
+}
 if (history && !(await history.ready())) throw new Error("CHAT_HISTORY_REDIS_NOT_READY");
 if (canonicalHistory && !(await canonicalHistory.ready())) {
   throw new Error("CHAT_HISTORY_POSTGRES_NOT_READY");
@@ -463,12 +695,17 @@ const runner = new RealtimeRunner(
     recordedReplayCaptureEnabled:
       process.env.REALTIME_RECORDED_REPLAY_CAPTURE_ENABLED === "true",
     recordedReplayPageId: required("META_PAGE_ID"),
+    mediaRecognitionEnabled: mediaCutoutModeRaw === "LIVE",
+    mediaClarificationEnabled:
+      process.env.REALTIME_MEDIA_CLARIFICATION_ENABLED === "true",
+    mediaRecognitionPageIds,
   },
   quota,
   history,
   canonicalHistory,
   videoFrames,
   runtimePolicyResolver,
+  mediaRecognition,
 );
 const pollMs = boundedInteger(
   "REALTIME_POLL_MS",

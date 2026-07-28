@@ -167,6 +167,7 @@ export function createConversationState(input: CreateConversationStateInput): Co
     lastEvent: null,
     currentProductId: null,
     productSelections: [],
+    mediaClarification: null,
     consideredVariant: { offerType: null, color: null, size: null },
     verifiedVariant: null,
     orderDraft: null,
