@@ -93,7 +93,7 @@ async function main(): Promise<void> {
   const store = new PostgresSizeChartExtractionStore(
     secret("DATABASE_URL", "DATABASE_URL_FILE"),
   );
-  const model = process.env.SIZE_CHART_MODEL?.trim() || "gemini-3.1-flash-lite";
+  const model = process.env.SIZE_CHART_MODEL?.trim() || "gemini-3.5-flash-lite";
   const extractionVersion =
     process.env.SIZE_CHART_EXTRACTION_VERSION?.trim() || "size-chart-v1.0.0";
   const maximumRows = boundedInt("SIZE_CHART_MAX_ROWS", 0, 0, 10_000);

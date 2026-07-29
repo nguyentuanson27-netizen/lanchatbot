@@ -10,7 +10,7 @@ const privateKey = generateKeyPairSync("rsa", {
 
 function generated(selected: string): Response {
   return new Response(JSON.stringify({
-    modelVersion: "gemini-3.1-flash-lite-001",
+    modelVersion: "gemini-3.5-flash-lite",
     usageMetadata: {
       promptTokenCount: 1_032,
       candidatesTokenCount: 8,
@@ -24,7 +24,7 @@ function generated(selected: string): Response {
 
 function input() {
   return {
-    modelName: "gemini-3.1-flash-lite",
+    modelName: "gemini-3.5-flash-lite",
     promptVersion: "media-rerank-v1",
     customerImageBytes: new Uint8Array([1, 2, 3]),
     customerImageMimeType: "image/png" as const,

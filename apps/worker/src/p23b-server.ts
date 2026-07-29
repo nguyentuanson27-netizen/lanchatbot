@@ -114,7 +114,7 @@ async function main(): Promise<void> {
 
   const schema = {
     version: process.env.IMAGE_METADATA_VERSION?.trim() || "image-meta-v1.0.0",
-    model: process.env.IMAGE_METADATA_MODEL?.trim() || "gemini-3.1-flash-lite",
+    model: process.env.IMAGE_METADATA_MODEL?.trim() || "gemini-3.5-flash-lite",
     location: process.env.IMAGE_METADATA_LOCATION?.trim() || "global",
   };
 

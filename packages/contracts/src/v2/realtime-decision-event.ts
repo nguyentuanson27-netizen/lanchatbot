@@ -23,6 +23,8 @@ export const RealtimeDecisionEventTypeSchema = z.enum([
   "GUARD_BLOCKED",
   "NO_REPLY",
   "NO_REPLY_SELECTED",
+  "WAVE2_STRATEGY_SELECTED",
+  "WAVE2_BARRIER_DETECTED",
 ]);
 
 const BuyingSignalReasonSchema = z.enum([
@@ -69,6 +71,55 @@ export const RealtimeDecisionEventV1Schema = z.object({
       total: z.number().int().nonnegative().nullable(),
     }).strict(),
     buyingSignalOverride: z.boolean(),
+    wave2Strategy: z.object({
+      rulesetVersion: z.literal("wave2-strategy-v1"),
+      need: z.enum([
+        "NEED_OCCASION",
+        "NEED_STYLE",
+        "NEED_BUDGET",
+        "NOT_ENOUGH_CONTEXT",
+      ]),
+      barrier: z.enum([
+        "NONE",
+        "BARRIER_PRICE",
+        "BARRIER_FIT",
+        "BARRIER_MATERIAL",
+        "BARRIER_TRUST",
+        "BARRIER_DELIVERY",
+        "CHOICE_OVERLOAD",
+      ]),
+      decisionFactor: z.enum([
+        "OCCASION",
+        "STYLE",
+        "BUDGET",
+        "FIT",
+        "MATERIAL",
+        "TRUST",
+        "DELIVERY",
+        "PRODUCT",
+        "UNKNOWN",
+      ]),
+      recommendedStrategy: z.enum([
+        "STRATEGY_RECOMMEND_PRODUCT",
+        "STRATEGY_SHOW_PROOF",
+        "STRATEGY_ANSWER_OBJECTION",
+        "STRATEGY_ASK_CLARIFY",
+        "STRATEGY_CLOSE",
+      ]),
+      ctaPolicy: z.enum([
+        "ASK_OCCASION",
+        "ASK_STYLE",
+        "ASK_BUDGET",
+        "ASK_MEASUREMENTS",
+        "ASK_PROOF_PREFERENCE",
+        "REDUCE_TO_TWO",
+        "NO_ADDITIONAL_CTA",
+      ]),
+      confidence: z.number().min(0).max(1),
+      evidence: z.array(z.string().min(1).max(64)).max(16),
+      experimentId: z.literal("wave2-stage-playbook-v1"),
+      experimentVariant: z.literal("LIVE_100"),
+    }).strict().nullable().optional(),
   }).strict(),
 }).strict();
 

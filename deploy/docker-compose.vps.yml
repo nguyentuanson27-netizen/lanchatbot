@@ -160,7 +160,7 @@ services:
       SHADOW_DATABASE_URL_FILE: /run/secrets/shadow_database_url
       VERTEX_CREDENTIAL_FILE: /run/secrets/vertex_google_api
       VERTEX_PROJECT_ID: project-d44e0453-82e8-4ea2-a9d
-      VERTEX_MODEL_NAME: gemini-3.1-flash-lite
+      VERTEX_MODEL_NAME: gemini-3.5-flash-lite
       VERTEX_TIMEOUT_MS: "30000"
       SHADOW_POLL_MS: "5000"
       SHADOW_MIN_SOURCE_AGE_SECONDS: "30"
@@ -281,7 +281,7 @@ services:
       ANALYTICS_HASH_SALT_FILE: /run/secrets/analytics_hash_salt
       VERTEX_CREDENTIAL_FILE: /run/secrets/vertex_google_api
       VERTEX_PROJECT_ID: project-d44e0453-82e8-4ea2-a9d
-      VERTEX_MODEL_NAME: gemini-3.1-flash-lite
+      VERTEX_MODEL_NAME: gemini-3.5-flash-lite
       VERTEX_TIMEOUT_MS: "30000"
       BUSINESS_FACT_MAX_AGE_SECONDS: "7200"
       BUSINESS_NON_VOLATILE_MAX_AGE_SECONDS: "172800"
@@ -307,6 +307,7 @@ services:
       REALTIME_MEDIA_CLARIFICATION_ENABLED: "${REALTIME_MEDIA_CLARIFICATION_ENABLED:-true}"
       REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1: "${REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1:-false}"
       REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED: "${REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED:-false}"
+      REALTIME_WAVE2_STRATEGY_V1: "${REALTIME_WAVE2_STRATEGY_V1:-false}"
       REALTIME_MEDIA_PIPELINE_VERSION: "${REALTIME_MEDIA_PIPELINE_VERSION:-cutout-first-ai-v1}"
       REALTIME_MEDIA_TOTAL_DEADLINE_MS: "12000"
       REALTIME_MEDIA_PREPARE_TIMEOUT_MS: "4000"
@@ -319,7 +320,7 @@ services:
       REALTIME_MEDIA_RAW_FALLBACK_SCORE: "0.78"
       REALTIME_MEDIA_RAW_FALLBACK_GAP: "0.04"
       REALTIME_MEDIA_AI_RERANK_MODE: "${REALTIME_MEDIA_AI_RERANK_MODE:-LIVE}"
-      REALTIME_MEDIA_AI_RERANK_MODEL: gemini-3.1-flash-lite
+      REALTIME_MEDIA_AI_RERANK_MODEL: gemini-3.5-flash-lite
       REALTIME_MEDIA_AI_LOCATION: global
       REALTIME_MEDIA_AI_PROMPT_VERSION: media-rerank-v1
       REALTIME_MEDIA_AI_MAX_CANDIDATES: "3"
@@ -689,7 +690,7 @@ services:
       GOOGLE_SHEETS_CREDENTIAL_FILE: /run/secrets/vertex_google_api
       LANA_PRODUCT_FEED_URL: https://www.lanadesign.vn/partner_feeds/danh-muc-lanadesign-vn.xml
       VERTEX_PROJECT_ID: project-d44e0453-82e8-4ea2-a9d
-      IMAGE_METADATA_MODEL: gemini-3.1-flash-lite
+      IMAGE_METADATA_MODEL: gemini-3.5-flash-lite
       IMAGE_METADATA_LOCATION: global
       IMAGE_METADATA_VERSION: image-meta-v1.0.0
       IMAGE_METADATA_BATCH_SIZE: "50"
@@ -753,7 +754,7 @@ services:
       DATA_INGESTION_V2_SHEET_ID: 1VGNU55l9wcDh5RFV07f6JdiV7__FM9uGaVCDThUUgS0
       GOOGLE_SHEETS_CREDENTIAL_FILE: /run/secrets/vertex_google_api
       VERTEX_PROJECT_ID: project-d44e0453-82e8-4ea2-a9d
-      SIZE_CHART_MODEL: gemini-3.1-flash-lite
+      SIZE_CHART_MODEL: gemini-3.5-flash-lite
       SIZE_CHART_MODEL_LOCATION: global
       SIZE_CHART_EXTRACTION_VERSION: size-chart-v1.0.0
       SIZE_CHART_MIN_CONFIDENCE: "0.75"

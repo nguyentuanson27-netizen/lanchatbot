@@ -56,6 +56,8 @@ describe("RealtimeDecisionEventV1Schema", () => {
       "PURCHASE_CONFIRMED",
       "HANDOFF_REQUESTED",
       "NO_REPLY_SELECTED",
+      "WAVE2_STRATEGY_SELECTED",
+      "WAVE2_BARRIER_DETECTED",
     ] as const;
     for (const eventType of eventTypes) {
       expect(
@@ -63,6 +65,29 @@ describe("RealtimeDecisionEventV1Schema", () => {
           .eventType,
       ).toBe(eventType);
     }
+  });
+
+  it("accepts bounded Wave 2 strategy dimensions without raw evidence", () => {
+    const parsed = RealtimeDecisionEventV1Schema.parse({
+      ...validEvent,
+      eventType: "WAVE2_STRATEGY_SELECTED",
+      details: {
+        ...validEvent.details,
+        wave2Strategy: {
+          rulesetVersion: "wave2-strategy-v1",
+          need: "NEED_OCCASION",
+          barrier: "NONE",
+          decisionFactor: "OCCASION",
+          recommendedStrategy: "STRATEGY_RECOMMEND_PRODUCT",
+          ctaPolicy: "ASK_STYLE",
+          confidence: 0.9,
+          evidence: ["TEXT_OCCASION"],
+          experimentId: "wave2-stage-playbook-v1",
+          experimentVariant: "LIVE_100",
+        },
+      },
+    });
+    expect(parsed.details.wave2Strategy?.experimentVariant).toBe("LIVE_100");
   });
 
   it("rejects raw transcript fields", () => {

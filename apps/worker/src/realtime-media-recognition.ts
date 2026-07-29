@@ -643,7 +643,7 @@ export class RealtimeMediaRecognitionService {
         if (rerankCandidates.length >= 2) {
           const aiStarted = this.now();
           const response = await this.reranker.rerankMediaCandidates({
-            modelName: this.options.aiModel ?? "gemini-3.1-flash-lite",
+            modelName: this.options.aiModel ?? "gemini-3.5-flash-lite",
             promptVersion: this.options.aiPromptVersion ?? "media-rerank-v1",
             customerImageBytes: normalized,
             customerImageMimeType: "image/png",
@@ -698,7 +698,7 @@ export class RealtimeMediaRecognitionService {
       } catch (error) {
         latency.ai = Math.max(latency.ai, 1);
         aiDecision = errorCode(error, "GEMINI_RERANK_FAILED");
-        aiModel = this.options.aiModel ?? "gemini-3.1-flash-lite";
+        aiModel = this.options.aiModel ?? "gemini-3.5-flash-lite";
         aiPromptVersion = this.options.aiPromptVersion ?? "media-rerank-v1";
       }
     }

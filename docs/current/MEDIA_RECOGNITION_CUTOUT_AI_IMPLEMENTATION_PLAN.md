@@ -288,7 +288,7 @@ tồn hoặc size ở bước chọn để tránh trộn fact.
 
 ### 7.1 Vai trò và điều kiện gọi
 
-Model: `gemini-3.1-flash-lite`. Gemini chỉ phân xử top 3 Qdrant, không phải hệ
+Model: `gemini-3.5-flash-lite`. Gemini chỉ phân xử top 3 Qdrant, không phải hệ
 tìm kiếm catalog.
 
 Chỉ gọi khi:
@@ -456,7 +456,7 @@ REALTIME_MEDIA_AI_RERANK_MODE=OFF
 
 ```text
 REALTIME_MEDIA_AI_RERANK_MODE=LIVE
-REALTIME_MEDIA_AI_RERANK_MODEL=gemini-3.1-flash-lite
+REALTIME_MEDIA_AI_RERANK_MODEL=gemini-3.5-flash-lite
 REALTIME_MEDIA_AI_MAX_CANDIDATES=3
 REALTIME_MEDIA_AI_TIMEOUT_MS=8000
 REALTIME_MEDIA_AI_MAX_OUTPUT_TOKENS=250
@@ -597,7 +597,7 @@ khác và không bật n8n làm owner thay thế.
 
 Theo bảng giá Gemini Developer API tại ngày lập kế hoạch:
 
-- `gemini-3.1-flash-lite` Standard:
+- `gemini-3.5-flash-lite` Standard:
   - Input text/image/video: `0.25 USD / 1M token`.
   - Output gồm thinking token: `1.50 USD / 1M token`.
 - Ảnh lớn chia tile `768x768`, mỗi tile `258 token`.
@@ -606,7 +606,7 @@ Nguồn chính thức:
 
 - <https://ai.google.dev/gemini-api/docs/pricing>
 - <https://ai.google.dev/gemini-api/docs/tokens>
-- <https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite>
+- <https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite>
 
 Một ảnh khách + ba candidate, cạnh dài tối đa 768 px, prompt ngắn và output tối
 đa 250 token:

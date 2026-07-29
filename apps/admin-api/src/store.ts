@@ -617,15 +617,44 @@ export class PostgresAdminStore implements AdminStore {
            )::int AS checkout_missing_conversations
          FROM ${ADMIN_CONVERSATION_EVENTS_SOURCE}
          WHERE ${filters.join(" AND ")}
+       ), wave2 AS (
+         SELECT
+           count(*) FILTER (
+             WHERE event_type = 'WAVE2_STRATEGY_SELECTED'
+           )::int AS wave2_strategy_decisions,
+           count(DISTINCT conversation_id) FILTER (
+             WHERE event_type = 'WAVE2_STRATEGY_SELECTED'
+           )::int AS wave2_eligible_conversations,
+           count(*) FILTER (
+             WHERE event_type = 'WAVE2_BARRIER_DETECTED'
+           )::int AS wave2_barriers,
+           count(*) FILTER (
+             WHERE event_type = 'WAVE2_STRATEGY_SELECTED'
+               AND wave2_strategy = 'STRATEGY_SHOW_PROOF'
+           )::int AS wave2_show_proof,
+           count(*) FILTER (
+             WHERE event_type = 'WAVE2_STRATEGY_SELECTED'
+               AND wave2_strategy = 'STRATEGY_ANSWER_OBJECTION'
+           )::int AS wave2_answer_objection,
+           count(*) FILTER (
+             WHERE event_type = 'WAVE2_STRATEGY_SELECTED'
+               AND wave2_strategy = 'STRATEGY_ASK_CLARIFY'
+           )::int AS wave2_ask_clarify,
+           count(*) FILTER (
+             WHERE event_type = 'WAVE2_STRATEGY_SELECTED'
+               AND wave2_strategy = 'STRATEGY_CLOSE'
+           )::int AS wave2_close
+         FROM ${ADMIN_CONVERSATION_EVENTS_SOURCE}
+         WHERE ${filters.join(" AND ")}
        )
-       SELECT totals.*, checkout_dropoffs.*,
+       SELECT totals.*, checkout_dropoffs.*, wave2.*,
          round(100.0 * size_consulted / NULLIF(price_asked, 0), 2) AS price_to_size_pct,
          round(100.0 * cart_opened / NULLIF(size_consulted, 0), 2) AS size_to_cart_pct,
          round(100.0 * order_preview / NULLIF(cart_opened, 0), 2) AS cart_to_preview_pct,
          round(100.0 * purchase_confirmed / NULLIF(order_preview, 0), 2) AS preview_to_confirmed_pct,
          round(100.0 * purchase_confirmed / NULLIF(price_asked, 0), 2) AS end_to_end_pct,
          $1::int AS lookback_hours
-       FROM totals CROSS JOIN checkout_dropoffs`,
+       FROM totals CROSS JOIN checkout_dropoffs CROSS JOIN wave2`,
       values,
     );
     return sanitize(result.rows[0] ?? {}) as Record<string, unknown>;

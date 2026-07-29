@@ -19,7 +19,7 @@ import { buildXmlProfiles, groupXmlItems, normalizeStructuredExtraction } from "
 import { buildRegistryMap } from "./p23c-jobs.js";
 
 const schema: MetadataSchemaConfig = {
-  version: "image-meta-v1.0.0", model: "gemini-3.1-flash-lite", location: "global",
+  version: "image-meta-v1.0.0", model: "gemini-3.5-flash-lite", location: "global",
 };
 const run: MetadataRunContext = {
   run_id: "test", started_at: "2026-07-21T10:00:00.000Z",

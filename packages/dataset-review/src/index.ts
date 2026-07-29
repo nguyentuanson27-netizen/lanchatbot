@@ -57,6 +57,12 @@ export {
   WAVE1_SCHEMA_VERSION,
 } from "./wave1-schema.js";
 export {
+  WAVE2_GUIDELINE_VERSION,
+  WAVE2_LABEL_SCHEMA,
+  WAVE2_SCHEMA_NAME,
+  WAVE2_SCHEMA_VERSION,
+} from "./wave2-schema.js";
+export {
   parseGoldV2,
   resolveGoldV2Annotations,
   type GoldV2,

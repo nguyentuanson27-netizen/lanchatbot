@@ -314,7 +314,7 @@ const mediaPipelineVersion =
   "cutout-first-ai-v1";
 const mediaAiModel =
   process.env.REALTIME_MEDIA_AI_RERANK_MODEL?.trim() ||
-  "gemini-3.1-flash-lite";
+  "gemini-3.5-flash-lite";
 const mediaAiPromptVersion =
   process.env.REALTIME_MEDIA_AI_PROMPT_VERSION?.trim() ||
   "media-rerank-v1";
@@ -703,6 +703,8 @@ const runner = new RealtimeRunner(
       process.env.REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1 === "true",
     mediaSelectorV2GuardEnabled:
       process.env.REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED === "true",
+    wave2StrategyEnabled:
+      process.env.REALTIME_WAVE2_STRATEGY_V1 === "true",
   },
   quota,
   history,

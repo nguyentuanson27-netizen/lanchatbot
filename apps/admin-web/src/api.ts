@@ -541,6 +541,27 @@ export async function getOverview(signal?: AbortSignal): Promise<Overview> {
         hint: "Đã xem trước đơn nhưng chưa xác nhận mua",
         tone: numberValue(funnel.preview_not_confirmed) > 0 ? "warning" : "good",
       },
+      {
+        label: "Wave 2 đã phân tích",
+        value: numberValue(funnel.wave2_strategy_decisions),
+        hint: `${numberValue(funnel.wave2_eligible_conversations)} hội thoại đủ điều kiện`,
+      },
+      {
+        label: "Rào cản mua hàng",
+        value: numberValue(funnel.wave2_barriers),
+        hint: `${numberValue(funnel.wave2_answer_objection)} lượt xử lý phản đối`,
+        tone: numberValue(funnel.wave2_barriers) > 0 ? "warning" : "good",
+      },
+      {
+        label: "Bằng chứng sản phẩm",
+        value: numberValue(funnel.wave2_show_proof),
+        hint: "Chỉ dùng media đã xác minh",
+      },
+      {
+        label: "Chiến lược chốt",
+        value: numberValue(funnel.wave2_close),
+        hint: `${numberValue(funnel.wave2_ask_clarify)} lượt hỏi làm rõ`,
+      },
     ],
     services: normalizeServices(workers),
     alerts,
