@@ -5,6 +5,7 @@ process.env.NODE_ENV = "test";
 const {
   TOOLS,
   ensureSlash,
+  forwardedOriginHeaders,
   isAllowedRedirect,
   parseScopes,
   publicTool,
@@ -14,6 +15,17 @@ const {
 test("canonical URL helpers keep issuer stable", () => {
   assert.equal(trimSlash("https://dev.example///"), "https://dev.example");
   assert.equal(ensureSlash("https://auth.example/app"), "https://auth.example/app/");
+});
+
+test("internal discovery preserves the public OAuth origin", () => {
+  assert.deepEqual(
+    forwardedOriginHeaders("https://auth.lanadesign.vn/application/o/lana/"),
+    {
+      host: "auth.lanadesign.vn",
+      "x-forwarded-host": "auth.lanadesign.vn",
+      "x-forwarded-proto": "https",
+    },
+  );
 });
 
 test("DCR accepts only ChatGPT connector callbacks", () => {
