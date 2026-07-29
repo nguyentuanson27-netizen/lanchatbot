@@ -429,4 +429,63 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       .toBeLessThan(calls.findIndex((call) => call.sql.includes("UPDATE conversations")));
     expect(calls.at(-1)?.sql.trim()).toBe("COMMIT");
   });
+  it("records a terminal initial-reply failure in the same transaction", async () => {
+    const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
+    const client = {
+      async query(sql: string, values: readonly unknown[] = []) {
+        calls.push({ sql, values });
+        if (sql.includes("UPDATE meta_outbox")) {
+          return {
+            rowCount: 1,
+            rows: [{
+              reply_plan_id: "10000000-0000-4000-8000-000000000001",
+              sequence_no: 0,
+              updated_at: new Date("2026-07-29T10:00:10.000Z"),
+            }],
+          };
+        }
+        if (sql.includes("UPDATE acquisition_sessions") && sql.includes("initial_reply_terminal_status")) {
+          return {
+            rowCount: 1,
+            rows: [{
+              acquisition_session_id: "10000000-0000-4000-8000-000000000002",
+              page_id: "page-1",
+              conversation_id: "10000000-0000-4000-8000-000000000003",
+              customer_hash: "a".repeat(64),
+              entry_message_pk: "10000000-0000-4000-8000-000000000004",
+              entry_message_occurred_at: new Date("2026-07-29T10:00:00.000Z"),
+              initial_reply_plan_id: "10000000-0000-4000-8000-000000000001",
+              initial_reply_accepted_at: null,
+              max_stage_reached: "UNQUALIFIED_ENTRY",
+              current_disposition: "ACTIVE",
+              derivation_version: "ad-acquisition-v1",
+            }],
+          };
+        }
+        return { rowCount: 1, rows: [] };
+      },
+      release() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = {
+      async connect() { return client; },
+    };
+
+    const changed = await store.markMetaTerminal(
+      "10000000-0000-4000-8000-000000000005",
+      "10000000-0000-4000-8000-000000000006",
+      "FAILED_PERMANENT",
+      "META_REJECTED",
+    );
+
+    expect(changed).toBe(true);
+    expect(calls[0]?.sql.trim()).toBe("BEGIN");
+    expect(calls.some((call) => call.sql.includes("BOT_INITIAL_AD_REPLY_SEND_FAILED"))).toBe(false);
+    const event = calls.find((call) => call.sql.includes("INSERT INTO conversation_events"));
+    expect(event?.values).toContain("BOT_INITIAL_AD_REPLY_SEND_FAILED");
+    expect(calls.at(-1)?.sql.trim()).toBe("COMMIT");
+  });
 });

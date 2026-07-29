@@ -106,6 +106,7 @@ import {
   renderPreSalePolicyReply,
 } from "./pre-sale-policy.js";
 
+import { deriveAdLeadQualification } from "./ad-lead-qualification.js";
 export interface RealtimeInboxPort {
   claimNext(
     workerId: string,
@@ -1656,6 +1657,8 @@ export interface RealtimeRunnerOptions {
   readonly conversationalMessageFormatEnabled?: boolean;
   readonly mediaSelectorV2GuardEnabled?: boolean;
   readonly wave2StrategyEnabled?: boolean;
+  readonly adAcquisitionAnalyticsMode?: "OFF" | "SHADOW" | "LIVE";
+  readonly adAcquisitionPageIds?: readonly string[];
 }
 
 export class RealtimeRunner {
@@ -1724,6 +1727,8 @@ export class RealtimeRunner {
       mediaSelectorV2GuardEnabled:
         options.mediaSelectorV2GuardEnabled ?? false,
       wave2StrategyEnabled: options.wave2StrategyEnabled ?? false,
+      adAcquisitionAnalyticsMode: options.adAcquisitionAnalyticsMode ?? "OFF",
+      adAcquisitionPageIds: [...(options.adAcquisitionPageIds ?? [])],
     };
   }
 
@@ -3626,6 +3631,22 @@ export class RealtimeRunner {
       pushDecisionEvent("NO_REPLY");
       pushDecisionEvent("NO_REPLY_SELECTED");
     }
+    const acquisitionDecision = deriveAdLeadQualification({
+      text: message.text ?? "",
+      productMatched: Boolean(resolvedProduct),
+      resolvedAttachment: resolution.media.items.some((item) => item.status === "MATCHED"),
+      businessIntent: explicitCustomerBusinessIntent(message.text ?? ""),
+      preSalePolicyIntent,
+      objectionType: event.objectionType,
+      buyingCommitted: buyingSignal.isBuyingSignal,
+      orderPreviewCreated: salesTelemetry?.orderPreviewCreated === true,
+      purchaseConfirmed: salesTelemetry?.confirmationConfirmed === true,
+    });
+    const acquisitionAnalyticsEnabled =
+      this.options.adAcquisitionAnalyticsMode !== "OFF" &&
+      this.options.adAcquisitionPageIds.includes(claim.pageId) &&
+      !message.isEcho &&
+      triggerMessagePk !== null;
     const result = await this.runtime.commit(
       {
         pageId: claim.pageId,
@@ -3694,6 +3715,26 @@ export class RealtimeRunner {
             }
           : {}),
         ...(salesCyclePlan ? { salesCyclePlan } : {}),
+        ...(acquisitionAnalyticsEnabled
+          ? {
+              acquisitionPlan: {
+                triggerMessagePk: triggerMessagePk!,
+                triggerOccurredAt: new Date(message.occurredAt),
+                replyPlanId: metaMessages.length > 0 ? replyPlanId : null,
+                meaningfulLabels: acquisitionDecision.meaningfulLabels,
+                ambiguousAcknowledgement: acquisitionDecision.ambiguousAcknowledgement,
+                buyingNegated: acquisitionDecision.buyingNegated,
+                buyingCommitted: (buyingSignal.isBuyingSignal || salesTelemetry?.orderPreviewCreated === true) &&
+                  !acquisitionDecision.buyingNegated,
+                purchaseConfirmed: salesTelemetry?.confirmationConfirmed === true && !acquisitionDecision.buyingNegated,
+                firstPlaybook: wave2StrategyDecision?.recommendedStrategy ?? null,
+                firstBarrier:
+                  wave2StrategyDecision?.barrier && wave2StrategyDecision.barrier !== "NONE"
+                    ? wave2StrategyDecision.barrier
+                    : null,
+              },
+            }
+          : {}),
         ...(this.options.decisionTelemetryEnabled && decisionEvents.length > 0
           ? { decisionEvents }
           : {}),

@@ -117,11 +117,29 @@ export interface ServiceHealth {
   checkedAt?: string;
 }
 
+export interface AcquisitionBreakdownItem {
+  label: string;
+  adEntries: number;
+  qualified: number;
+  purchaseConfirmed: number;
+}
+
+export interface AcquisitionBreakdownGroup {
+  key: string;
+  title: string;
+  items: AcquisitionBreakdownItem[];
+}
+
+export interface AcquisitionOverview {
+  metrics: Metric[];
+  breakdowns: AcquisitionBreakdownGroup[];
+}
 export interface Overview {
   pageId: string;
   pageName?: string;
   mode: string;
   metrics: Metric[];
+  acquisition?: AcquisitionOverview;
   services: ServiceHealth[];
   alerts: AlertItem[];
   updatedAt: string;

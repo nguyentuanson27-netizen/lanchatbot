@@ -1,5 +1,16 @@
 export { migrateDownOne, migrateUp, type MigrationResult } from "./migrate.js";
 export {
+  acquisitionEnabled,
+  acquisitionEntrySource,
+  adAcquisitionConfig,
+  deterministicAcquisitionUuid,
+  recordInitialReplySendFailed,
+  type AcquisitionCommitPlan,
+  type AdAcquisitionAnalyticsMode,
+  type AdAcquisitionAnalyticsOptions,
+  type AdAcquisitionConfig,
+} from "./ad-acquisition.js";
+export {
   PostgresShadowMirrorStore,
   constantTimeKeyMatches,
   redactAnalyticsMessage,

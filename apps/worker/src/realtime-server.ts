@@ -137,6 +137,27 @@ const mode =
     : "DRY_RUN";
 const sendEnabled =
   (process.env.APP_SEND_ENABLED ?? "false").trim().toLowerCase() === "true";
+const adAcquisitionModeRaw =
+  process.env.AD_ACQUISITION_ANALYTICS_MODE?.trim().toUpperCase() || "OFF";
+if (!["OFF", "SHADOW", "LIVE"].includes(adAcquisitionModeRaw)) {
+  throw new Error("AD_ACQUISITION_ANALYTICS_MODE_INVALID");
+}
+const adAcquisitionMode = adAcquisitionModeRaw as "OFF" | "SHADOW" | "LIVE";
+if ((process.env.AD_ACQUISITION_WAVE2_INPUT_ENABLED ?? "false").trim().toLowerCase() === "true") {
+  throw new Error("AD_ACQUISITION_WAVE2_INPUT_NOT_IMPLEMENTED");
+}
+const adAcquisitionPageIds = (process.env.AD_ACQUISITION_PAGE_ALLOWLIST ?? "")
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
+const adAcquisitionDerivationVersion =
+  process.env.AD_ACQUISITION_DERIVATION_VERSION?.trim() || "ad-acquisition-v1";
+const adAcquisitionWindowHours = boundedInteger(
+  "AD_ACQUISITION_WINDOW_HOURS",
+  168,
+  1,
+  24 * 30,
+);
 if (mode === "DRY_RUN" && sendEnabled) {
   throw new Error("REALTIME_DRY_RUN_SEND_FORBIDDEN");
 }
@@ -193,6 +214,12 @@ const canonicalHistory = process.env.HISTORY_WRITE_ENABLED === "true"
         "ANALYTICS_HASH_SALT",
         "ANALYTICS_HASH_SALT_FILE",
       ),
+      adAcquisition: {
+        mode: adAcquisitionMode,
+        pageAllowlist: adAcquisitionPageIds,
+        derivationVersion: adAcquisitionDerivationVersion,
+        windowHours: adAcquisitionWindowHours,
+      },
     })
   : undefined;
 const credential = readCredential(required("VERTEX_CREDENTIAL_FILE"));
@@ -705,6 +732,8 @@ const runner = new RealtimeRunner(
       process.env.REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED === "true",
     wave2StrategyEnabled:
       process.env.REALTIME_WAVE2_STRATEGY_V1 === "true",
+    adAcquisitionAnalyticsMode: adAcquisitionMode,
+    adAcquisitionPageIds,
   },
   quota,
   history,

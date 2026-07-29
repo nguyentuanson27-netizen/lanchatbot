@@ -58,7 +58,8 @@ describe("normalizeMetaMessages", () => {
     payload.entry[0]!.messaging[0]!.message = {
       text: "Tôi muốn biết thêm",
       referral: {
-        source: "ADS",
+        source: "ads",
+        type: "OPEN_THREAD",
         ad_id: "ad-921",
         ref: "campaign-summer",
         ads_context_data: {
@@ -74,6 +75,7 @@ describe("normalizeMetaMessages", () => {
     )[0];
     expect(message?.adsContext).toEqual({
       source: "ADS",
+      referralType: "OPEN_THREAD",
       adTitle: "21.7_SV921_CHIỀN_HỒNG_LM",
       postId: "989770333902779",
       adId: "ad-921",

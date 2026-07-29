@@ -51,6 +51,7 @@ export const InboundAttachmentSchema = z.object({
 
 export const MetaAdsContextV1Schema = z.object({
   source: z.string().max(64).nullable(),
+  referralType: z.string().max(64).nullable().optional().default(null),
   adTitle: z.string().max(500).nullable(),
   postId: z.string().max(128).nullable(),
   adId: z.string().max(128).nullable(),

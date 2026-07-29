@@ -10,6 +10,7 @@ import {
   getHandoffs,
   getIdentity,
   getOperations,
+  getOverview,
   getOutreach,
   getProductData,
   getReviewQueue,
@@ -17,6 +18,43 @@ import {
   transitionPolicyArtifact,
 } from "./api.js";
 
+describe("ad acquisition overview", () => {
+  it("maps the acquisition funnel to operator-friendly metrics", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      pages: { total: 1 },
+      ad_acquisition: {
+        lookback_hours: 720,
+        ad_entries: 12,
+        initial_reply_accepted: 11,
+        initial_reply_failed: 1,
+        initial_reply_ambiguous: 0,
+        reengaged: 8,
+        meaningful: 7,
+        qualified: 6,
+        buying_committed: 4,
+        purchase_confirmed: 3,
+        no_response_1h: 3,
+        no_response_24h: 2,
+        accepted_to_reengaged_pct: 72.73,
+        entry_to_qualified_pct: 50,
+        entry_to_purchase_confirmed_pct: 25,
+        breakdowns: {
+          product: [{ key: "CB182", ad_entries: 5, qualified: 4, purchase_confirmed: 2 }],
+          touch: [{ key: "FIRST_TOUCH", ad_entries: 12, qualified: 6, purchase_confirmed: 3 }],
+        },
+      },
+    })));
+    const overview = await getOverview();
+    expect(overview.acquisition?.metrics.map((metric) => metric.value)).toEqual([
+      12, 11, 1, 0, 8, 7, 6, 4, 3, 3, 2,
+    ]);
+    expect(overview.acquisition?.metrics[0]?.label).toContain("Meta Ads");
+    expect(overview.acquisition?.breakdowns).toEqual(expect.arrayContaining([
+      expect.objectContaining({ key: "product", items: [expect.objectContaining({ label: "CB182" })] }),
+      expect.objectContaining({ key: "touch", items: [expect.objectContaining({ label: "FIRST_TOUCH" })] }),
+    ]));
+  });
+});
 afterEach(() => {
   vi.unstubAllGlobals();
 });

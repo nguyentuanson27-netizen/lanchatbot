@@ -26,6 +26,7 @@ const AdsContextDataSchema = z
 const ReferralSchema = z
   .object({
     source: z.string().max(64).optional(),
+    type: z.string().max(64).optional(),
     ref: z.string().max(500).optional(),
     ad_id: z.union([z.string(), z.number()]).optional(),
     ads_context_data: AdsContextDataSchema.optional(),
@@ -156,10 +157,12 @@ export function normalizeMetaMessages(
         ...(attachment.payload?.url ? { url: attachment.payload.url } : {}),
       }));
       const referral = event.message.referral;
+      const normalizedReferralSource = referral?.source?.trim().toUpperCase() || null;
       const ads = referral?.ads_context_data;
-      const adsContext = referral && (ads || referral.source === "ADS" || referral.ad_id)
+      const adsContext = referral && (ads || normalizedReferralSource === "ADS" || referral.ad_id)
         ? {
-            source: referral.source ?? null,
+            source: normalizedReferralSource,
+            referralType: referral.type?.trim() || null,
             adTitle: ads?.ad_title?.trim() || null,
             postId: ads?.post_id === undefined ? null : String(ads.post_id),
             adId:

@@ -266,4 +266,26 @@ describe("database migrations", () => {
       /(?:full_name|phone_number|delivery_address|recipient_name)\s+(?:text|jsonb)/iu,
     );
   });
+  it("creates a PII-free ad acquisition projection with POS conversion disabled", async () => {
+    const sql = await readFile(
+      resolve(directory, "0024_ad_acquisition_analytics.up.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("ADD COLUMN IF NOT EXISTS referral_type text");
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS acquisition_sessions");
+    expect(sql).toContain("VIEW admin_acquisition_sessions_v");
+    expect(sql).toContain("WITH (security_barrier = true)");
+    expect(sql).toContain("NO_RESPONSE_1H");
+    expect(sql).toContain("initial_reply_terminal_status");
+    expect(sql).toContain("acquisition_reply_terminal_ck");
+    expect(sql).toContain("first_playbook");
+    expect(sql).toContain("DEFERRABLE INITIALLY DEFERRED");
+    expect(sql).toContain("NO_RESPONSE_24H");
+    expect(sql).toContain("order_created_at IS NULL OR max_stage_reached = 'CONVERTED'");
+    const viewSql = sql.slice(sql.indexOf("CREATE VIEW admin_acquisition_sessions_v"));
+    expect(viewSql).not.toContain("customer_hash,");
+    expect(viewSql).not.toContain("event_metadata");
+    expect(sql).not.toMatch(/(?:photo_url|image_url|video_url)\s+text/iu);
+  });
+
 });

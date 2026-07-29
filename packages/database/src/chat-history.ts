@@ -3,6 +3,14 @@ import { Pool, type PoolClient } from "pg";
 import { withTransaction } from "./repositories.js";
 import { redactAnalyticsMessage } from "./shadow-mirror.js";
 import { attributeInboundToRecentOutreach } from "./outreach.js";
+import {
+  adAcquisitionConfig,
+  recordInitialReplyAccepted,
+  tryOpenAdAcquisitionSession,
+  tryUpdateAcquisitionProduct,
+  type AdAcquisitionAnalyticsOptions,
+  type AdAcquisitionConfig,
+} from "./ad-acquisition.js";
 
 export interface ChatHistoryMetadata {
   readonly productId?: string | null;
@@ -26,6 +34,7 @@ export interface InboundCustomerMessageInput extends ChatHistoryMetadata {
   readonly receivedAt: Date;
   readonly enqueueShadowEvaluation?: boolean;
   readonly adsContext?: {
+    readonly referralType?: string | null;
     readonly source: string | null;
     readonly adTitle: string | null;
     readonly postId: string | null;
@@ -94,6 +103,7 @@ export interface ChatHistoryItem {
 export interface PostgresChatHistoryOptions {
   readonly analyticsHashSalt: string;
   readonly maxConnections?: number;
+  readonly adAcquisition?: AdAcquisitionAnalyticsOptions;
 }
 
 interface AcceptedOutboxRow {
@@ -103,6 +113,8 @@ interface AcceptedOutboxRow {
   customer_hash: string;
   meta_message_id: string;
   accepted_at: Date;
+  reply_plan_id: string;
+  sequence_no: number;
 }
 
 interface IdentityRow {
@@ -160,6 +172,7 @@ export class PostgresChatHistoryStore {
   private readonly pool: Pool;
   private readonly analyticsHashSalt: string;
 
+  private readonly adAcquisition: AdAcquisitionConfig;
   constructor(connectionString: string, options: PostgresChatHistoryOptions) {
     if (!connectionString.trim()) throw new Error("DATABASE_URL_REQUIRED");
     if (options.analyticsHashSalt.length < 32) {
@@ -171,6 +184,7 @@ export class PostgresChatHistoryStore {
       max: options.maxConnections ?? 5,
       idleTimeoutMillis: 30_000,
     });
+    this.adAcquisition = adAcquisitionConfig(options.adAcquisition);
   }
 
   async ready(): Promise<boolean> {
@@ -281,8 +295,8 @@ export class PostgresChatHistoryStore {
         await client.query(
           `INSERT INTO message_ad_contexts (
              message_pk, message_occurred_at, page_id, conversation_id,
-             source, ad_title, post_id, ad_id, ref
-           ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+             source, referral_type, ad_title, post_id, ad_id, ref
+           ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
            ON CONFLICT (message_pk, message_occurred_at) DO NOTHING`,
           [
             messagePk,
@@ -290,12 +304,26 @@ export class PostgresChatHistoryStore {
             pageId,
             input.conversationId,
             optionalText(input.adsContext.source, 64),
+            optionalText(input.adsContext.referralType, 64),
             optionalText(input.adsContext.adTitle, 500),
             optionalText(input.adsContext.postId, 128),
             optionalText(input.adsContext.adId, 128),
             optionalText(input.adsContext.ref, 500),
           ],
         );
+        await tryOpenAdAcquisitionSession(client, this.adAcquisition, {
+          identityKey,
+          pageId,
+          conversationId: input.conversationId,
+          customerHash: input.customerHash,
+          messagePk,
+          occurredAt: input.occurredAt,
+          source: input.adsContext.source,
+          referralType: input.adsContext.referralType ?? null,
+          adId: input.adsContext.adId,
+          postId: input.adsContext.postId,
+          adTitle: input.adsContext.adTitle,
+        });
       }
       await attributeInboundToRecentOutreach(client, {
         pageId,
@@ -341,6 +369,12 @@ export class PostgresChatHistoryStore {
             input.occurredAt,
             optionalText(input.extractedAdProductId, 128),
           ],
+        );
+        await tryUpdateAcquisitionProduct(
+          client,
+          input.messagePk,
+          input.occurredAt,
+          optionalText(input.extractedAdProductId, 128),
         );
       }
       for (const item of input.media.slice(0, 10)) {
@@ -396,7 +430,7 @@ export class PostgresChatHistoryStore {
     return withTransaction(this.pool, async (client) => {
       const accepted = await client.query<AcceptedOutboxRow>(
         `SELECT outbox_id, page_id, conversation_id, customer_hash,
-                meta_message_id, accepted_at
+                meta_message_id, accepted_at, reply_plan_id, sequence_no
          FROM meta_outbox
          WHERE outbox_id = $1
            AND status IN ('SENT_ACCEPTED', 'DELIVERED', 'READ')
@@ -407,6 +441,15 @@ export class PostgresChatHistoryStore {
       );
       const row = accepted.rows[0];
       if (!row) throw new Error("CHAT_HISTORY_OUTBOX_NOT_ACCEPTED");
+      await recordInitialReplyAccepted(client, {
+        replyPlanId: row.reply_plan_id,
+        outboxId: row.outbox_id,
+        sequenceNo: row.sequence_no,
+        acceptedAt: row.accepted_at,
+        pageId: row.page_id,
+        conversationId: row.conversation_id,
+        customerHash: row.customer_hash,
+      });
 
       const identityKey = `history:outbound:v1:${outboxId}`;
       const messagePk = randomUUID();

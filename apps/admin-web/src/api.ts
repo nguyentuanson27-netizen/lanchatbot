@@ -469,6 +469,7 @@ export async function getOverview(signal?: AbortSignal): Promise<Overview> {
   const queues = record(payload.queues);
   const facts = record(payload.business_facts);
   const funnel = record(payload.sales_funnel);
+  const acquisition = record(payload.ad_acquisition);
   const control = record(payload.admin_control);
   const workers = arrayValue(payload.workers);
   const failedQueues = Object.values(queues).reduce<number>((total, value) => {
@@ -497,6 +498,33 @@ export async function getOverview(signal?: AbortSignal): Promise<Overview> {
       createdAt: stringValue(payload.generated_at, new Date().toISOString()),
     });
   }
+  const acquisitionBreakdownSource = record(acquisition.breakdowns);
+  const acquisitionBreakdownDefinitions = [
+    ["ad", "Theo quảng cáo"],
+    ["post", "Theo bài quảng cáo"],
+    ["product", "Theo sản phẩm"],
+    ["meaningful_label", "Tín hiệu đầu tiên"],
+    ["barrier", "Rào cản đầu tiên"],
+    ["playbook", "Chiến lược Wave 2"],
+    ["version", "Phiên bản phân loại"],
+    ["day", "Theo ngày"],
+    ["touch", "Mô hình attribution"],
+  ] as const;
+  const acquisitionBreakdowns = acquisitionBreakdownDefinitions
+    .map(([key, title]) => ({
+      key,
+      title,
+      items: arrayValue(acquisitionBreakdownSource[key]).map((value) => {
+        const item = record(value);
+        return {
+          label: stringValue(item.key, "UNKNOWN"),
+          adEntries: numberValue(item.ad_entries),
+          qualified: numberValue(item.qualified),
+          purchaseConfirmed: numberValue(item.purchase_confirmed),
+        };
+      }),
+    }))
+    .filter((group) => group.items.length > 0);
   return {
     pageId: pages.length === 1 ? stringValue(firstPage.page_id, "ALL") : "ALL",
     pageName: pages.length === 1
@@ -563,6 +591,68 @@ export async function getOverview(signal?: AbortSignal): Promise<Overview> {
         hint: `${numberValue(funnel.wave2_ask_clarify)} lượt hỏi làm rõ`,
       },
     ],
+    acquisition: {
+      metrics: [
+        {
+          label: "Kh\u00e1ch t\u1eeb Meta Ads",
+          value: numberValue(acquisition.ad_entries),
+          hint: `C\u1eeda s\u1ed5 ${numberValue(acquisition.lookback_hours, 720)} gi\u1edd`,
+        },
+        {
+          label: "Bot \u0111\u00e3 ph\u1ea3n h\u1ed3i",
+          value: numberValue(acquisition.initial_reply_accepted),
+          hint: `${numberValue(acquisition.entry_to_accepted_pct)}% l\u01b0\u1ee3t v\u00e0o qu\u1ea3ng c\u00e1o`,
+        },
+        {
+          label: "G\u1eedi th\u1ea5t b\u1ea1i",
+          value: numberValue(acquisition.initial_reply_failed),
+          hint: "Meta t\u1eeb ch\u1ed1i v\u0129nh vi\u1ec5n",
+          tone: numberValue(acquisition.initial_reply_failed) > 0 ? "warning" : "good",
+        },
+        {
+          label: "G\u1eedi ch\u01b0a x\u00e1c \u0111\u1ecbnh",
+          value: numberValue(acquisition.initial_reply_ambiguous),
+          hint: "Kh\u00f4ng \u0111o\u00e1n l\u00e0 \u0111\u00e3 g\u1eedi th\u00e0nh c\u00f4ng",
+          tone: numberValue(acquisition.initial_reply_ambiguous) > 0 ? "warning" : "good",
+        },
+        {
+          label: "Kh\u00e1ch quay l\u1ea1i",
+          value: numberValue(acquisition.reengaged),
+          hint: `${numberValue(acquisition.accepted_to_reengaged_pct)}% sau ph\u1ea3n h\u1ed3i \u0111\u1ea7u`,
+        },
+        {
+          label: "Ph\u1ea3n h\u1ed3i c\u00f3 \u00fd ngh\u0129a",
+          value: numberValue(acquisition.meaningful),
+          hint: "C\u00f3 t\u00edn hi\u1ec7u t\u01b0 v\u1ea5n ho\u1eb7c mua h\u00e0ng r\u00f5 r\u00e0ng",
+        },
+        {
+          label: "Lead \u0111\u1ee7 \u0111i\u1ec1u ki\u1ec7n",
+          value: numberValue(acquisition.qualified),
+          hint: `${numberValue(acquisition.entry_to_qualified_pct)}% t\u1eeb l\u01b0\u1ee3t v\u00e0o qu\u1ea3ng c\u00e1o`,
+        },
+        {
+          label: "\u0110\u00e3 cam k\u1ebft mua",
+          value: numberValue(acquisition.buying_committed),
+          hint: "Buying signal ho\u1eb7c order preview \u0111\u00e3 \u0111\u01b0\u1ee3c runtime x\u00e1c nh\u1eadn",
+        },
+        {
+          label: "Kh\u00e1ch x\u00e1c nh\u1eadn mua",
+          value: numberValue(acquisition.purchase_confirmed),
+          hint: `${numberValue(acquisition.entry_to_purchase_confirmed_pct)}% t\u1eeb Ads entry; ch\u01b0a ph\u1ea3i \u0111\u01a1n POS`,
+        },
+        {
+          label: "Kh\u00f4ng ph\u1ea3n h\u1ed3i 1 gi\u1edd",
+          value: numberValue(acquisition.no_response_1h),
+          hint: "Ch\u1ec9 l\u00e0 s\u1ed1 li\u1ec7u; kh\u00f4ng t\u1ef1 g\u1eedi nh\u1eafc",
+        },
+        {
+          label: "Kh\u00f4ng ph\u1ea3n h\u1ed3i 24 gi\u1edd",
+          value: numberValue(acquisition.no_response_24h),
+          hint: "Ch\u1ec9 l\u00e0 s\u1ed1 li\u1ec7u; kh\u00f4ng t\u1ef1 g\u1eedi nh\u1eafc",
+        },
+      ],
+      breakdowns: acquisitionBreakdowns,
+    },
     services: normalizeServices(workers),
     alerts,
     updatedAt: stringValue(payload.generated_at, new Date().toISOString()),
