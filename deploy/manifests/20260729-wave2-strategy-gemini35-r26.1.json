@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-29T08:53:41Z",
+  "environment": "production-test-page-live-100-percent",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "0fb115ee564f751894611e6196bdef3d4365b036",
+  "pullRequests": [
+    50,
+    51
+  ],
+  "releaseTag": "20260729-wave2-strategy-gemini35-r26.1",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260729-wave2-strategy-gemini35-r26.1",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260729-media-selector-v2-guard-r25",
+  "composeSha256": "357ccda01a2a919f93ba004ff48df796cf026e34bfb9e14325173d524b6a2175",
+  "sourceMaterialization": {
+    "method": "verified-git-bundle-from-annotated-tag",
+    "bundleSha256": "13fb8adcd70477be8ae3a3ecbbc53272c10d37329ed46bb5837e9b4eda1c8069",
+    "workingTreeClean": true
+  },
+  "image": {
+    "name": "lana-chatbot-app:wave2-strategy-gemini35-r26.1",
+    "imageId": "sha256:6067695c8976c5601bd5ecd092fb33097b2fd0034152132827651f3146c0d13e",
+    "releaseLabel": "20260729-wave2-strategy-gemini35-r26.1",
+    "revisionLabel": "0fb115ee564f751894611e6196bdef3d4365b036",
+    "recreatedServices": [
+      "shadow-worker",
+      "realtime-worker",
+      "admin-api",
+      "admin-simulation-worker",
+      "admin-web",
+      "p23b-metadata-staging",
+      "size-chart-extractor"
+    ],
+    "containerIds": {
+      "shadowWorker": "5b42ab5716b2f0e7dccc566efb453ec114dd8d98d2d2b3ed459eb69d20adc78b",
+      "realtimeWorker": "9dbc4f8cb202036ddb2f188785b51e70e2f08d7ebac2ae1a2e6aa95bf73a1543",
+      "adminApi": "a79a4e56feacb34f973e4a402942f100415604de4d2faf176af56934a3b32075",
+      "adminSimulationWorker": "3ff0785b49eecf198e217072a5b8ae90853ba3f265ff528baee39c8bc590a5fe",
+      "adminWeb": "5821e9438a54cd4b142cffb6e4de25fb1174a99325bf8d167ce5925fa757c231",
+      "p23bMetadataStaging": "cccd1793ab55419463c9d63f7b09454e1d692cf9dac3dcdd13a1cc4168aa4b1b",
+      "sizeChartExtractor": "6ae03733a2efba1a19587ea875fd7eadb52e57308759519b107d5b3375ed63cb"
+    }
+  },
+  "scope": {
+    "pageId": "1198992073286645",
+    "routingOwner": "APP",
+    "sendEnabled": true,
+    "killSwitch": false,
+    "wave2StrategyEnabled": true,
+    "wave2RolloutPercent": 100,
+    "humanTestMode": false,
+    "n8nOwnershipChanged": false,
+    "migration": "0023_wave2_strategy_metrics"
+  },
+  "models": {
+    "primaryRealtime": "gemini-3.5-flash-lite",
+    "shadow": "gemini-3.5-flash-lite",
+    "mediaAiReranker": "gemini-3.5-flash-lite",
+    "imageMetadata": "gemini-3.5-flash-lite",
+    "sizeChartExtraction": "gemini-3.5-flash-lite",
+    "structuredOutputCredentialProbe": "PASS",
+    "officialModelCode": "gemini-3.5-flash-lite"
+  },
+  "wave2": {
+    "rulesetVersion": "wave2-strategy-v1",
+    "experimentId": "wave2-stage-playbook-v1",
+    "experimentVariant": "LIVE_100",
+    "postSaleExcluded": true,
+    "deterministicGuardRemainsFinalAuthority": true,
+    "rawTranscriptExposedToAdmin": false,
+    "customerPiiExposedToAdmin": false,
+    "verifiedCrossSellRelationsAvailable": false,
+    "crossSellBehavior": "FAIL_CLOSED"
+  },
+  "database": {
+    "backupPath": "/opt/lana-chatbot/backups/20260729-wave2-strategy-gemini35-r26-predeploy.dump",
+    "backupSha256": "5242e68f56c2f11ca03bbf2d350836f652c2058ab147e28c0ea84f62f80dee46",
+    "backupChecksumVerified": true,
+    "restoreTest": "UP_DOWN_UP_PASS",
+    "viewOwnerPreserved": "lana_app",
+    "viewAclPreserved": true,
+    "latestMigration": "0023_wave2_strategy_metrics",
+    "wave2AdminViewColumnCount": 7
+  },
+  "verification": {
+    "localFullCheck": "PASS",
+    "dockerFullCheck": "PASS",
+    "monorepoTests": "1011_OF_1011_PASS",
+    "businessToolsTests": "168_OF_168_PASS",
+    "contractsTests": "82_OF_82_PASS",
+    "databaseTests": "88_OF_88_PASS",
+    "datasetReviewTests": "60_OF_60_PASS",
+    "workerTests": "292_OF_292_PASS",
+    "targetServicesHealthy": 6,
+    "targetServicesRunningWithoutHealthcheck": 1,
+    "targetServiceRestartCount": 0,
+    "adminApiReadyStatus": 200,
+    "adminWebIndexStatus": 200,
+    "adminPublicStatus": 302,
+    "adminPublicTarget": "Authentik",
+    "realtimeWorkerStatus": "IDLE",
+    "realtimeWorkerMode": "LIVE",
+    "shadowSendEnabled": false,
+    "metaOutboxActiveCount": 0,
+    "webhookInboxActiveCount": 0,
+    "pancakeOutboxActiveCount": 0,
+    "duplicateMetaSequenceGroupCount": 0,
+    "wave2StrategyEventCountAtCapture": 0,
+    "wave2BarrierEventCountAtCapture": 0,
+    "humanMessengerTestStatus": "PENDING_FIRST_POST_DEPLOY_HUMAN_MESSAGE"
+  },
+  "rollback": {
+    "script": "/tmp/r26-1-rollback.sh",
+    "environmentBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260729-wave2-strategy-gemini35-r26.1",
+    "releasePath": "/opt/lana-chatbot/releases/20260729-media-selector-v2-guard-r25",
+    "realtimeImage": "lana-chatbot-app:media-selector-v2-guard-r25",
+    "wave2FeatureFlag": "REALTIME_WAVE2_STRATEGY_V1=false",
+    "migrationRollbackRequiredForApplicationRollback": false,
+    "dataDeletionRequired": false
+  }
+}

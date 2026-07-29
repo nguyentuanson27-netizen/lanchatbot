@@ -5,21 +5,37 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260729-media-selector-v2-guard-r25`.
-- Previous release: `/opt/lana-chatbot/releases/20260729-realtime-message-format-r24`.
-- Source commit: `f82d9a52a4e1163c4a2bb376f7382be03856fb69`.
-- Source materialization: Git bundle đầy đủ đã xác minh từ annotated tag `20260729-media-selector-v2-guard-r25`; release checkout sạch và không sửa source trực tiếp trên VPS.
-- Compose SHA-256: `4d82be0aaa3d2f77bc21d22cf5191852c2fbe075247934e39de7a8ef3a7b069b`.
+- Current release: `/opt/lana-chatbot/releases/20260729-wave2-strategy-gemini35-r26.1`.
+- Previous release: `/opt/lana-chatbot/releases/20260729-media-selector-v2-guard-r25`.
+- Source commit: `0fb115ee564f751894611e6196bdef3d4365b036`.
+- Source materialization: Git bundle đầy đủ SHA-256 `13fb8adcd70477be8ae3a3ecbbc53272c10d37329ed46bb5837e9b4eda1c8069` đã xác minh từ annotated tag `20260729-wave2-strategy-gemini35-r26.1`; release checkout sạch và không sửa source trực tiếp trên VPS.
+- Compose SHA-256: `357ccda01a2a919f93ba004ff48df796cf026e34bfb9e14325173d524b6a2175`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
-- Migration mới nhất trong production: `0022_dataset_review_acl`.
+- Migration mới nhất trong production: `0023_wave2_strategy_metrics`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-Realtime chạy image `lana-chatbot-app:media-selector-v2-guard-r25`
-(`sha256:e76a41c5856d0fc4b6f879bc7a6177c78c72e8a9360f326ed866b8c4c8eddaf3`).
-API, delivery, Shadow, Admin, POS và P2.3 giữ nguyên image/container. Realtime healthy, restart count 0; ID của mọi container khác không đổi trong cutover.
+Realtime, Shadow, Admin API, Admin Simulation, Admin Web, P2.3B và Size Chart chạy image
+`lana-chatbot-app:wave2-strategy-gemini35-r26.1`
+(`sha256:6067695c8976c5601bd5ecd092fb33097b2fd0034152132827651f3146c0d13e`).
+Sáu service có healthcheck đều healthy; Size Chart running; cả bảy restart count 0.
+API webhook, delivery, POS, P2.3A/C và n8n không bị recreate.
 
-Không có migration mới và không thay đổi webhook, delivery, POS, P2.3, n8n hoặc page allowlist. Shadow vẫn `APP_SEND_ENABLED=false`.
+Migration `0023_wave2_strategy_metrics` đã áp dụng sau backup/restore-test `up → down → up`.
+Không thay đổi page allowlist hoặc ownership; Realtime send true, Shadow send false.
+
+## Wave 2 + Gemini 3.5 Flash-Lite r26.1
+
+- `REALTIME_WAVE2_STRATEGY_V1=true` cho 100% page test `1198992073286645`; không có Human Test Mode riêng.
+- Strategy engine phân loại need, barrier, decision factor, chọn stage playbook và CTA tối đa một câu hỏi. Deterministic guard vẫn là quyền cuối cho fact, offer, media, checkout, handoff và outbound.
+- `POST_SALE` bị loại khỏi strategy engine. Cross-sell fail-closed khi chưa có product relation được duyệt; không dùng similarity để tự suy diễn.
+- Gemini Flash-Lite ở realtime, Shadow, media reranker, P2.3B và Size Chart đều là `gemini-3.5-flash-lite`. Structured-output credential probe production PASS.
+- Admin view chỉ lộ bảy dimension Wave 2 giới hạn; raw transcript, raw event metadata và PII không được đưa ra dashboard.
+- Local và Docker `pnpm check` PASS, 1011/1011 test; Business Tools 168/168, Contracts 82/82, Database 88/88, Dataset Review 60/60, Worker 292/292.
+- Backup SHA-256 `5242e68f56c2f11ca03bbf2d350836f652c2058ab147e28c0ea84f62f80dee46`; restore-test giữ nguyên owner `lana_app` và ACL của Admin view.
+- Hậu kiểm: Admin API/Web 200 nội bộ, public 302 Authentik; page `ACTIVE/APP`, Realtime `IDLE/LIVE`, Shadow send false; ba queue active 0 và duplicate Meta sequence 0.
+- Human test trạng thái `PENDING_FIRST_POST_DEPLOY_HUMAN_MESSAGE`; metric Wave 2 lúc chụp 0/0 vì chưa có inbound mới.
+- Rollback application dùng env backup `.env.infrastructure.backup-20260729-wave2-strategy-gemini35-r26.1`, recreate bảy service bằng image trước release và chuyển `current` về r25. Không cần rollback schema hoặc xóa dữ liệu.
 
 ## Media Selector V2 guard r25
 

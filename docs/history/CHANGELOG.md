@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-29 — Wave 2 + Gemini 3.5 Flash-Lite r26.1
+
+- Bật Wave 2 `LIVE_100` trực tiếp trên page test duy nhất, không tạo Human Test Mode; strategy engine phân loại need/barrier/decision factor và áp dụng stage playbook/CTA giới hạn.
+- Deterministic guard tiếp tục là quyền cuối cho fact, offer, media, checkout, handoff và outbound; `POST_SALE` không đi qua strategy engine, cross-sell chưa có relation thì fail-closed.
+- Đổi mọi vị trí Gemini Flash-Lite đang hoạt động/định nghĩa từ `gemini-3.1-flash-lite` sang `gemini-3.5-flash-lite`.
+- Thêm migration `0023_wave2_strategy_metrics`, dashboard PII-free và Wave 2 annotation taxonomy.
+- Restore-test lần đầu phát hiện rollback view không thể bỏ cột bằng `CREATE OR REPLACE`; PR #51 sửa bằng recreate view có bảo toàn owner/ACL. Production chỉ migrate sau khi `up → down → up` PASS.
+- Local/Docker `pnpm check` PASS, 1011/1011 test; bảy service r26.1 restart 0, Admin 200/302 Authentik, queue active 0 và duplicate Meta sequence 0.
+- Human test đang chờ message đầu tiên sau deploy; application rollback về r25 không cần rollback schema hoặc xóa dữ liệu.
+
 ## 2026-07-29 — Media Selector V2 guard r25
 
 - Giữ Qdrant cho nhận diện cutout/raw và exact-code catalog rehydration; chuyển quyền quyết định attachment product-info sang Media Selector V2.
