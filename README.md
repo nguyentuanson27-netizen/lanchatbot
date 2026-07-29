@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260729-wave2-strategy-gemini35-r26.1`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260729-realtime-accented-split-r26.2`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -16,21 +16,21 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 
 ## Trạng thái production ngày 2026-07-29
 
-- Page test duy nhất đang chạy 100% Wave 2 release `20260729-wave2-strategy-gemini35-r26.1`, source commit `0fb115e`; không có Human Test Mode riêng.
+- Page test duy nhất đang chạy realtime release `20260729-realtime-accented-split-r26.2`, source commit `a4ea57b`, với Wave 2 `LIVE_100`; không có Human Test Mode riêng.
 - Realtime phân loại need/barrier/decision factor/strategy, áp dụng stage playbook và CTA tối đa một câu hỏi. Deterministic guard vẫn là quyền quyết định cuối cho fact, offer, media, checkout, handoff và outbound.
-- Realtime, Shadow, Admin API, Admin Simulation, Admin Web, P2.3B và Size Chart dùng cùng image `lana-chatbot-app:wave2-strategy-gemini35-r26.1`; sáu service healthy, Size Chart running, restart 0.
+- Realtime dùng image `lana-chatbot-app:realtime-accented-split-r26.2`; Shadow, Admin API, Admin Simulation, Admin Web, P2.3B và Size Chart giữ image r26.1. Realtime healthy/restart 0 và không service ngoài realtime bị recreate.
 - Mọi vị trí Gemini Flash-Lite đang hoạt động hoặc được định nghĩa trong release dùng `gemini-3.5-flash-lite`: realtime, Shadow, media reranker, P2.3B và Size Chart.
 - Migration production mới nhất là `0023_wave2_strategy_metrics`; backup có checksum và restore-test `up → down → up` giữ nguyên owner/ACL.
 - Admin API/Web trả 200 nội bộ và public route trả 302 sang Authentik. Wave 2 dashboard đọc view PII-free; lúc cutover chưa có human traffic mới nên metric Wave 2 bằng 0.
-- r25 là release trước và tiếp tục là rollback target. Qdrant nhận diện/rehydrate catalog, còn Media Selector V2 quyết định attachment product-info và guard xác minh đúng URL đã chọn.
+- r26.1 là application rollback target. Qdrant vẫn nhận diện/rehydrate catalog, còn Media Selector V2 quyết định attachment product-info và guard xác minh đúng URL đã chọn; r26.2 không thay đổi luồng tìm sản phẩm.
 - Khi Media Selector V2 trả `NONE`, bot giữ text đã xác minh và không fallback sang ảnh `PRICE_CARD` cũ; attachment không hợp lệ bị loại mà không làm mất text.
-- Hành vi r24 vẫn được giữ: mỗi câu/dòng là một Meta Outbox unit riêng và phần mô tả có dữ liệu chất liệu bắt đầu bằng `Chất liệu`.
+- r26.2 khôi phục contract tiếng Việt có dấu, chặn product-info theo mẫu cũ không dấu, giữ mỗi câu/dòng là một Meta Outbox unit riêng và bắt đầu dòng chất liệu đã xác minh bằng `Chất liệu`.
 - Wave 1 r21 chạy từ merge commit `5f817bbc`: official benchmark vẫn khóa 1.955 hội thoại hợp lệ, split 1.173/391/391, leakage 0; holdout chưa mở.
-- Wave 1 r21 vẫn là nền benchmark/replay; runtime production hiện dùng binary r26.1 và chưa mở locked holdout.
+- Wave 1 r21 vẫn là nền benchmark/replay; realtime production hiện dùng binary r26.2 và chưa mở locked holdout.
 - Semantic candidate vẫn `NOT_PROMOTED`: validation `BUYING_COMMITTED` precision `42,41%`, recall `57,26%`. Production replay đang `WAITING_FOR_ELIGIBLE_TRAFFIC`; không tạo inbound giả và locked holdout vẫn đóng.
 - Admin Web, Admin API và Simulation Worker chạy image r26.1; Admin FE/API nội bộ đều 200 và public route trả 302 sang Authentik.
 
-- Page allowlist vẫn chỉ có `1198992073286645`; webhook, delivery, POS, P2.3A/C và n8n không thay đổi ownership trong release r26.1.
+- Page allowlist vẫn chỉ có `1198992073286645`; webhook, delivery, POS, P2.3A/C và n8n không thay đổi ownership trong release r26.2.
 - Dashboard đọc checkout drop-off qua view ẩn danh `admin_conversation_events_v`; không mở quyền bảng hội thoại gốc cho tài khoản Admin.
 - Checkout tự nhiên dùng structured extraction có evidence/confidence và deterministic guard; app không đưa PII vào decision telemetry.
 - Xác nhận mua hiểu thêm các cách nói tự nhiên nhưng vẫn chặn câu hỏi, phủ định, do dự và yêu cầu ảnh. `OK` chỉ xác nhận khi cart đang ở đúng bước order preview.
@@ -41,7 +41,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - P2.3C đang chạy với endpoint tách nền `139.162.18.93:7000`, khoảng cách gọi Vertex 6 giây và giữ nguyên lỗi retryable cho chu kỳ sau.
 - Cross-sell được để cho bản sau r15, dùng quan hệ phối đồ được duyệt trong PostgreSQL/Admin; không dùng similarity để tự gợi ý.
 - API webhook tiếp tục chạy image `lana-chatbot-app:inbound-debounce-r1`.
-- Realtime page test chạy r26.1 với Wave 2 `LIVE_100`, định dạng mỗi câu một lần gửi, Cutout-first + raw fallback + AI reranker, ProductFactsV2, Media Selector V2, exact-code catalog rehydration và hard gate chỉ cho page `1198992073286645`; Size Chart scheduler vẫn giữ pre-check idempotent.
+- Realtime page test chạy r26.2 với Wave 2 `LIVE_100`, tiếng Việt có dấu, định dạng mỗi câu một lần gửi, Cutout-first + raw fallback + AI reranker, ProductFactsV2, Media Selector V2, exact-code catalog rehydration và hard gate chỉ cho page `1198992073286645`; Size Chart scheduler vẫn giữ pre-check idempotent.
 - Shadow worker chạy image r26.1 với Gemini 3.5 Flash-Lite và Judge v2 ở `DRY_RUN`; send false và role DB không có quyền ghi Meta Outbox.
 - Admin Web, Admin API và Simulation Worker chạy image r26.1; Admin FE/API nội bộ đều 200 và public route trả 302 sang Authentik.
 - Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
@@ -76,7 +76,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - PostgreSQL đã áp dụng migration đến `0023_wave2_strategy_metrics`; view Admin chỉ thêm dimension Wave 2 giới hạn và vẫn ẩn raw event metadata/PII.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Wave 2 + Gemini 3.5 r26.1](deploy/manifests/20260729-wave2-strategy-gemini35-r26.1.json). Rollback dùng env backup r26.1 và release r25; không cần rollback schema và không xóa Inbox/Outbox, Redis, PostgreSQL hoặc Qdrant.
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Realtime trả lời có dấu và tách câu r26.2](deploy/manifests/20260729-realtime-accented-split-r26.2.json). Rollback dùng env backup r26.2 và release r26.1; không cần rollback schema và không xóa Inbox/Outbox, Redis, PostgreSQL hoặc Qdrant.
 
 ## Kiến trúc dữ liệu
 
@@ -158,6 +158,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 - [Trạng thái định dạng mỗi câu một tin r24](docs/current/REALTIME_MESSAGE_FORMAT_R24_STATUS_20260729.md)
 - [Trạng thái Media Selector V2 guard r25](docs/current/MEDIA_SELECTOR_V2_GUARD_R25_STATUS_20260729.md)
 - [Trạng thái Wave 2 + Gemini 3.5 r26.1](docs/current/WAVE2_GEMINI35_R26_1_STATUS_20260729.md)
+- [Trạng thái Realtime trả lời có dấu và tách câu r26.2](docs/current/REALTIME_ACCENTED_SPLIT_R26_2_STATUS_20260729.md)
 - [Quy trình GitHub và triển khai](docs/current/REPOSITORY_AND_DEPLOYMENT.md)
 - [Changelog](docs/history/CHANGELOG.md)
 - [Kiến trúc nền](docs/phase0/02_architecture_contracts.md)

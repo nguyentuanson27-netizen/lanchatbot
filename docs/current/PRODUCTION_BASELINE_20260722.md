@@ -5,24 +5,56 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260729-wave2-strategy-gemini35-r26.1`.
-- Previous release: `/opt/lana-chatbot/releases/20260729-media-selector-v2-guard-r25`.
-- Source commit: `0fb115ee564f751894611e6196bdef3d4365b036`.
-- Source materialization: Git bundle đầy đủ SHA-256 `13fb8adcd70477be8ae3a3ecbbc53272c10d37329ed46bb5837e9b4eda1c8069` đã xác minh từ annotated tag `20260729-wave2-strategy-gemini35-r26.1`; release checkout sạch và không sửa source trực tiếp trên VPS.
-- Compose SHA-256: `357ccda01a2a919f93ba004ff48df796cf026e34bfb9e14325173d524b6a2175`.
+- Current release: `/opt/lana-chatbot/releases/20260729-realtime-accented-split-r26.2`.
+- Previous release: `/opt/lana-chatbot/releases/20260729-wave2-strategy-gemini35-r26.1`.
+- Source commit: `a4ea57b51e5ada5084330dcb71fea05f24138dbd`.
+- Source materialization: Git bundle đầy đủ SHA-256 `f305733f672f849f37a0611611cc5cd040580d539f2a262ae965e458925f8524` đã xác minh từ annotated tag `20260729-realtime-accented-split-r26.2`; release checkout sạch và không sửa source trực tiếp trên VPS.
+- Compose SHA-256: `40cb9e34809eda1266abd2b9709ec1bd1af2db4ab4af7df00a3abbb42f0303ff`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất trong production: `0023_wave2_strategy_metrics`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-Realtime, Shadow, Admin API, Admin Simulation, Admin Web, P2.3B và Size Chart chạy image
+Realtime chạy image `lana-chatbot-app:realtime-accented-split-r26.2`
+(`sha256:2197fe66d942870e482b8a66aeea84380337d32c27d4790b0b68c4fbdfe508cd`).
+Shadow, Admin API, Admin Simulation, Admin Web, P2.3B và Size Chart giữ image
 `lana-chatbot-app:wave2-strategy-gemini35-r26.1`
 (`sha256:6067695c8976c5601bd5ecd092fb33097b2fd0034152132827651f3146c0d13e`).
-Sáu service có healthcheck đều healthy; Size Chart running; cả bảy restart count 0.
-API webhook, delivery, POS, P2.3A/C và n8n không bị recreate.
+Realtime healthy/restart 0; chỉ realtime được recreate. API webhook, delivery,
+Shadow, Admin, POS, P2.3, Size Chart và n8n giữ nguyên container.
 
 Migration `0023_wave2_strategy_metrics` đã áp dụng sau backup/restore-test `up → down → up`.
 Không thay đổi page allowlist hoặc ownership; Realtime send true, Shadow send false.
+
+## Realtime trả lời có dấu và tách câu r26.2
+
+- `REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1=true` và
+  `REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED=true` trên realtime của page test
+  `1198992073286645`; Wave 2, Cutout-first, clarification và AI reranker tiếp tục LIVE.
+- Prompt bắt buộc nội dung hiển thị cho khách dùng tiếng Việt đầy đủ dấu Unicode.
+  Product-info khớp mẫu cũ không dấu bị guard thay bằng proposal deterministic đã
+  xác minh.
+- Câu chứa mã sản phẩm tự nhiên được nhận là ý định `PRICE`; mã không còn phải đứng
+  riêng mới kích hoạt product-info.
+- Mọi câu/dòng text được tách thành Meta Outbox unit riêng cho toàn bộ hội thoại.
+  Dòng chất liệu chỉ xuất hiện khi có dữ liệu catalog đã xác minh và bắt đầu bằng
+  `Chất liệu`.
+- Luồng tìm sản phẩm không đổi: Qdrant nhận diện/rehydrate catalog; Media Selector V2
+  chọn attachment product-info và guard xác minh đúng URL của lượt hiện tại.
+- Local và Docker `pnpm check` PASS; toàn monorepo 1.012/1.012 test, Worker 293/293
+  và targeted regression 66/66.
+- Hậu kiểm: realtime healthy/restart 0, ledger `IDLE/LIVE`, log mới và lỗi mới đều 0;
+  ba queue active 0, ambiguous recent 0 và duplicate Meta sequence 0.
+- Smoke trong image không gửi Messenger: bốn câu tạo bốn text unit, câu chứa mã tự
+  nhiên cho intent `PRICE` và guard nhận đúng reply product-info không dấu.
+- Lần cutover đầu bị evidence guard dùng container ID tĩnh chặn và tự rollback thành
+  công về r26.1. Lần hai dùng container ID động và thành công; không có lỗi ứng dụng
+  hay service ngoài realtime bị thay đổi.
+- Human test Messenger đang `PENDING_NEW_POST_DEPLOY_MESSAGE`.
+- Rollback application dùng env backup
+  `.env.infrastructure.backup-20260729-realtime-accented-split-r26.2-attempt2`,
+  recreate riêng realtime bằng image r26.1 và chuyển `current` về r26.1. Không cần
+  rollback schema hoặc xóa dữ liệu.
 
 ## Wave 2 + Gemini 3.5 Flash-Lite r26.1
 
