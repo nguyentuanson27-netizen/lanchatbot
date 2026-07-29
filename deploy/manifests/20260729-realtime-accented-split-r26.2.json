@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-29T12:30:00Z",
+  "environment": "production-test-page-live-100-percent",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "a4ea57b51e5ada5084330dcb71fea05f24138dbd",
+  "pullRequests": [
+    53
+  ],
+  "releaseTag": "20260729-realtime-accented-split-r26.2",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260729-realtime-accented-split-r26.2",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260729-wave2-strategy-gemini35-r26.1",
+  "composeSha256": "40cb9e34809eda1266abd2b9709ec1bd1af2db4ab4af7df00a3abbb42f0303ff",
+  "sourceMaterialization": {
+    "method": "verified-git-bundle-from-annotated-tag",
+    "tagObject": "0164f72c9b5ddec3ce5d79834abf10d323279f0a",
+    "bundleSha256": "f305733f672f849f37a0611611cc5cd040580d539f2a262ae965e458925f8524",
+    "workingTreeClean": true
+  },
+  "image": {
+    "name": "lana-chatbot-app:realtime-accented-split-r26.2",
+    "imageId": "sha256:2197fe66d942870e482b8a66aeea84380337d32c27d4790b0b68c4fbdfe508cd",
+    "releaseLabel": "20260729-realtime-accented-split-r26.2",
+    "revisionLabel": "a4ea57b51e5ada5084330dcb71fea05f24138dbd",
+    "recreatedServices": [
+      "realtime-worker"
+    ],
+    "containerIds": {
+      "realtimeWorker": "b5aad22597c6daf8866f8dd3c899050ed4683430c704d4920525a15af2fd0570",
+      "shadowWorkerUnchanged": "5b42ab5716b2f0e7dccc566efb453ec114dd8d98d2d2b3ed459eb69d20adc78b",
+      "adminApiUnchanged": "a79a4e56feacb34f973e4a402942f100415604de4d2faf176af56934a3b32075",
+      "adminSimulationWorkerUnchanged": "3ff0785b49eecf198e217072a5b8ae90853ba3f265ff528baee39c8bc590a5fe",
+      "adminWebUnchanged": "5821e9438a54cd4b142cffb6e4de25fb1174a99325bf8d167ce5925fa757c231",
+      "p23bMetadataStagingUnchanged": "cccd1793ab55419463c9d63f7b09454e1d692cf9dac3dcdd13a1cc4168aa4b1b",
+      "sizeChartExtractorUnchanged": "6ae03733a2efba1a19587ea875fd7eadb52e57308759519b107d5b3375ed63cb",
+      "apiUnchanged": "f11d4508a831a60b50fcecff1f54ae6ba52b3d15128d465140c944190d9d62c1",
+      "deliveryUnchanged": "28e542a3b39aa17fd7e9d36d8d26d6ea7af6e1271835a3ba5f5fb9d5d22fbb51",
+      "posUnchanged": "769f3d165bee092d5154ffc5f6917f0805078c235ef4ca5fa50bc940e73d311e",
+      "p23cUnchanged": "301818ce0ffa9a90bf0ee6b7a43d63867af23a95cb62cf58ce25fbcd3a11703b"
+    }
+  },
+  "scope": {
+    "pageId": "1198992073286645",
+    "routingOwner": "APP",
+    "sendEnabled": true,
+    "killSwitch": false,
+    "wave2StrategyEnabled": true,
+    "wave2RolloutPercent": 100,
+    "humanTestMode": false,
+    "conversationalMessageFormatEnabled": true,
+    "mediaSelectorV2GuardEnabled": true,
+    "mediaCutoutMode": "LIVE",
+    "mediaClarificationEnabled": true,
+    "mediaAiRerankMode": "LIVE",
+    "runtimePolicyMode": "PUBLISHED",
+    "salesCycleEnabled": true,
+    "n8nOwnershipChanged": false,
+    "migration": "0023_wave2_strategy_metrics"
+  },
+  "changes": {
+    "accentedVietnamesePromptContract": true,
+    "legacyUnaccentedProductInfoFallback": true,
+    "naturalProductCodeIntentDetection": true,
+    "splitEverySentenceIntoSeparateMetaOutboxUnit": true,
+    "verifiedMaterialPrefix": "Chất liệu",
+    "productRecognitionFlowChanged": false
+  },
+  "verification": {
+    "localFullCheck": "PASS",
+    "dockerFullCheck": "PASS",
+    "monorepoTests": "1012_OF_1012_PASS",
+    "workerTests": "293_OF_293_PASS",
+    "targetedTests": "66_OF_66_PASS",
+    "realtimeContainerHealth": "HEALTHY",
+    "realtimeRestartCount": 0,
+    "realtimeWorkerStatus": "IDLE",
+    "realtimeWorkerMode": "LIVE",
+    "realtimeFreshSecondsAtCapture": 0,
+    "realtimeNewLogLineCount": 0,
+    "realtimeNewErrorLineCount": 0,
+    "metaOutboxActiveCount": 0,
+    "webhookInboxActiveCount": 0,
+    "pancakeOutboxActiveCount": 0,
+    "ambiguousRecentCount": 0,
+    "duplicateMetaSequenceGroupCount": 0,
+    "runtimeSmoke": {
+      "splitCount": 4,
+      "naturalRequestIntent": "PRICE",
+      "legacyUnaccentedGuard": true,
+      "messengerSendPerformed": false
+    },
+    "nonTargetServiceContainerIdsUnchanged": true,
+    "humanMessengerTestStatus": "PENDING_NEW_POST_DEPLOY_MESSAGE"
+  },
+  "guardedCutover": {
+    "attempt1": {
+      "result": "FAILED_GUARD_AND_AUTOMATICALLY_ROLLED_BACK",
+      "reason": "static pre-cutover container-id evidence check",
+      "applicationFailureObserved": false,
+      "rollbackVerified": true,
+      "log": "/opt/lana-chatbot/shared/release-logs/20260729-realtime-accented-split-r26.2-cutover.log"
+    },
+    "attempt2": {
+      "result": "SUCCEEDED",
+      "dynamicContainerIdEvidence": true,
+      "scriptSha256": "7cb8b9b367c387fb9fe65983836c05b37326a5a5eee216111aa5927c643ddb83",
+      "log": "/opt/lana-chatbot/shared/release-logs/20260729-realtime-accented-split-r26.2-cutover-attempt2.log"
+    }
+  },
+  "rollback": {
+    "script": "/tmp/r26-2-rollback.sh",
+    "scriptSha256": "b7b973a6b8a8caf3e5d98bece06cb0773f4319a0f9cc004214feec403ad04043",
+    "syntaxCheck": "PASS",
+    "environmentBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260729-realtime-accented-split-r26.2-attempt2",
+    "releasePath": "/opt/lana-chatbot/releases/20260729-wave2-strategy-gemini35-r26.1",
+    "realtimeImage": "lana-chatbot-app:wave2-strategy-gemini35-r26.1",
+    "automaticRollbackExercisedDuringAttempt1": true,
+    "executedAfterSuccessfulCutover": false,
+    "migrationRollbackRequired": false,
+    "dataDeletionRequired": false
+  }
+}

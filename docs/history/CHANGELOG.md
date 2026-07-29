@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-07-29 — Realtime trả lời có dấu và tách câu r26.2
+
+- Bắt buộc proposal, grounded reply và grounded draft hiển thị tiếng Việt đầy đủ
+  dấu Unicode; guard thay product-info theo mẫu cũ không dấu bằng proposal
+  deterministic đã xác minh.
+- Nhận câu chứa mã sản phẩm tự nhiên là ý định hỏi giá, không yêu cầu mã phải đứng
+  riêng; không thay đổi luồng Qdrant nhận diện/rehydrate hoặc Media Selector V2.
+- Bật lại `REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1=true` và giữ
+  `REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED=true` trên page test; mỗi câu/dòng là
+  một Meta Outbox unit và dòng chất liệu bắt đầu bằng `Chất liệu`.
+- Local/Docker `pnpm check` PASS, 1.012/1.012 test; Worker 293/293, targeted
+  regression 66/66 và runtime smoke không gửi Messenger PASS.
+- Chỉ recreate Realtime Worker; healthy/restart 0, queue active 0, duplicate
+  sequence 0, log lỗi mới 0 và mọi container khác giữ nguyên ID.
+- Evidence guard ở attempt đầu đã tự rollback thành công; attempt hai dùng
+  container ID động và cutover thành công. Human test đang chờ inbound mới;
+  rollback target là r26.1, không cần rollback schema hoặc xóa dữ liệu.
+
 ## 2026-07-29 — Wave 2 + Gemini 3.5 Flash-Lite r26.1
 
 - Bật Wave 2 `LIVE_100` trực tiếp trên page test duy nhất, không tạo Human Test Mode; strategy engine phân loại need/barrier/decision factor và áp dụng stage playbook/CTA giới hạn.
