@@ -227,9 +227,9 @@ export function explicitCustomerBusinessIntent(
   }
   if (/\b(gia|bao nhieu|bn|nhieu tien|price)\b/u.test(text)) return "PRICE";
   if (/\b(con|het|ton|co hang|san hang|available)\b/u.test(text)) return "STOCK";
-  // A bare product code means the customer wants the standard product-info
-  // card. That card starts with the verified price, so it is a PRICE lookup.
-  if (productCodeOnly(value) !== null) return "PRICE";
+  // A product code without another explicit business intent means the customer
+  // wants the standard product-info card, which starts with the verified price.
+  if (productCodeOnly(value) !== null || extractAdProductCodes(value).length > 0) return "PRICE";
   return null;
 }
 
@@ -457,6 +457,22 @@ export function splitRealtimeMetaMessages(
       kind: "TEXT",
       text,
     }));
+  });
+}
+
+export function isLegacyUnaccentedProductInfoReply(value: string): boolean {
+  const lines = value.replace(/\r\n?/gu, "\n").split("\n");
+  const hasVietnameseMark = (line: string): boolean =>
+    /[\u0300-\u036fđĐ]/u.test(line.normalize("NFD"));
+  return lines.some((line) => {
+    if (hasVietnameseMark(line)) return false;
+    const folded = asciiFold(line).trim();
+    return (
+      /^da\s+(?:.*\s)?\d+(?:[.,]\d+)?(?:k|d)\s+a$/u.test(folded) ||
+      folded.includes(
+        "chi cho em xin chieu cao can nang hoac so do 3 vong em tu van size cho minh nha",
+      )
+    );
   });
 }
 
@@ -3043,6 +3059,42 @@ export class RealtimeRunner {
                 proposal.strategyAnalysis ??
                 grounded.proposal.strategyAnalysis,
             };
+          }
+        }
+        if (
+          resolvedProduct &&
+          facts?.status === "OK" &&
+          explicitIntent === "PRICE" &&
+          isLegacyUnaccentedProductInfoReply(proposal.reply)
+        ) {
+          const verifiedFallback = verifiedProductInfoProposal(
+            resolvedProduct,
+            facts,
+            modelContext,
+            this.options.customerProfileEnabled ? customerProfile : null,
+            productFactsV2,
+            now,
+            this.options.conversationalMessageFormatEnabled,
+            mediaSelectorV2GuardActive,
+          );
+          if (verifiedFallback) {
+            const priorSalesSignals = proposal.salesSignals;
+            const priorStrategyAnalysis = proposal.strategyAnalysis;
+            proposal = {
+              ...verifiedFallback,
+              ...(priorSalesSignals === undefined
+                ? {}
+                : { salesSignals: priorSalesSignals }),
+              ...(priorStrategyAnalysis === undefined
+                ? {}
+                : { strategyAnalysis: priorStrategyAnalysis }),
+            };
+            if (mediaSelectorV2GuardActive) {
+              guardVerifiedAttachmentUrls = new Set(verifiedFallback.attachments);
+            }
+            handoffGuardReasonCodes = [
+              ...new Set([...handoffGuardReasonCodes, "LEGACY_UNACCENTED_REPLY_REPLACED"]),
+            ];
           }
         }
         if (

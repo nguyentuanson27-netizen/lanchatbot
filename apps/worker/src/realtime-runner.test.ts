@@ -12,6 +12,7 @@ import {
   explicitCustomerBusinessIntent,
   explicitCustomerBusinessIntents,
   explicitCustomerImageIntent,
+  isLegacyUnaccentedProductInfoReply,
   isPostSaleRequest,
   isPreSalePolicyQuestion,
   FailClosedTagObservationProvider,
@@ -347,10 +348,28 @@ describe("RealtimeRunner", () => {
     expect(productCodeOnly("mã sp: sv695")).toBe("SV695");
     expect(productCodeOnly("sv695 giá bao nhiêu")).toBeNull();
     expect(explicitCustomerBusinessIntent("sv695")).toBe("PRICE");
+    expect(explicitCustomerBusinessIntent("xin gái sv2447")).toBe("PRICE");
     expect(explicitCustomerBusinessIntent("sv695 giá bao nhiêu")).toBe("PRICE");
     expect(explicitCustomerBusinessIntent("sv695 còn size M không")).toBe("SIZE");
     expect(explicitCustomerBusinessIntent("mẫu này còn hàng không")).toBe("STOCK");
     expect(explicitCustomerBusinessIntent("bao lâu thì nhận hàng")).toBe("ETA");
+  });
+
+  it("detects only the legacy unaccented product-info reply", () => {
+    expect(isLegacyUnaccentedProductInfoReply([
+      "Da 729k a",
+      "Size S, M, L, XL",
+      "Chi cho em xin chieu cao can nang hoac so do 3 vong em tu van size cho minh nha.",
+    ].join("\n"))).toBe(true);
+    expect(isLegacyUnaccentedProductInfoReply([
+      "Dạ mẫu SV2447 có giá 729k ạ",
+      "Size S, M, L, XL",
+      "Chị cho em xin chiều cao cân nặng hoặc số đo 3 vòng em tư vấn size cho mình nha.",
+    ].join("\n"))).toBe(false);
+    expect(isLegacyUnaccentedProductInfoReply([
+      "Dạ mẫu SV2447 có giá 729k ạ",
+      "Chi cho em xin chieu cao can nang hoac so do 3 vong em tu van size cho minh nha.",
+    ].join("\n"))).toBe(true);
   });
 
   it("extracts all requested business facts in stable order", () => {
@@ -717,7 +736,7 @@ describe("RealtimeRunner", () => {
     );
   });
 
-  it("routes a bare product code through verified facts and emits image plus fixed form", async () => {
+  it("routes a natural request containing a product code through verified facts and emits split messages", async () => {
     const occurredAt = "2026-07-19T02:00:00.000Z";
     const state = createConversationState({
       conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
@@ -749,7 +768,7 @@ describe("RealtimeRunner", () => {
           occurredAt,
           isEcho: false,
           appId: null,
-          text: "sv695",
+          text: "xin gái sv695",
           attachments: [],
         },
       },
