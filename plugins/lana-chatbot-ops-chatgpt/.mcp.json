@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "lana_chatbot_ops": {
+      "type": "http",
+      "url": "https://dev.lanadesign.vn/mcp"
+    }
+  }
+}
