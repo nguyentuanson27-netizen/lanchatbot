@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lana Chatbot Ops"
+  short_description: "Chẩn đoán và sửa lỗi chatbot Lana có audit"
+  default_prompt: "Dùng $lana-chatbot-ops để kiểm tra tin nhắn mới nhất, xác định nguyên nhân và đề xuất hoặc thực hiện bản sửa qua GitHub."

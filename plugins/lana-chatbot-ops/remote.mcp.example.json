@@ -1,0 +1,7 @@
+{
+  "lana_chatbot_ops_remote": {
+    "url": "https://dev.lanadesign.vn/mcp",
+    "auth": "oauth",
+    "required": true
+  }
+}
