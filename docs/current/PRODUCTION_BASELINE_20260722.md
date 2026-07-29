@@ -5,21 +5,34 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260729-media-image-delivery-r23`.
-- Previous release: `/opt/lana-chatbot/releases/20260728-media-cutout-ai-r22`.
-- Source commit: `a962b4662128f3dc73b45d2e1491d7cb62baf35b`.
-- Source materialization: Git bundle đầy đủ đã xác minh từ annotated tag `20260729-media-image-delivery-r23`; release checkout sạch và không sửa source trực tiếp trên VPS.
-- Compose SHA-256: `d3ee298b72ed8991eba035d0af21716dccd3fb817bb7cecace51b2070d65372c`.
+- Current release: `/opt/lana-chatbot/releases/20260729-realtime-message-format-r24`.
+- Previous release: `/opt/lana-chatbot/releases/20260729-media-image-delivery-r23`.
+- Source commit: `b21b0f5d30a8e830b4c16481f701f811316bd598`.
+- Source materialization: Git bundle đầy đủ đã xác minh từ annotated tag `20260729-realtime-message-format-r24`; release checkout sạch và không sửa source trực tiếp trên VPS.
+- Compose SHA-256: `a668bffe3cbf42034ec8dc207987d57aae9a3530b889bd8be7b9a2900e1c85ed`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất trong production: `0022_dataset_review_acl`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-Realtime chạy image `lana-chatbot-app:media-image-delivery-r23`
-(`sha256:a7661b006a3dac6da1a7861d9085740aa08131a95bccca4e8031c06c1600ab2a`).
+Realtime chạy image `lana-chatbot-app:realtime-message-format-r24`
+(`sha256:577a731df2d21eaba89508421d9259ace42a0b4eb17b27becfd4e631aab97d75`).
 API, delivery, Shadow, Admin, POS và P2.3 giữ nguyên image/container. Realtime healthy, restart count 0; ID của mọi container khác không đổi trong cutover.
 
 Không có migration mới và không thay đổi webhook, delivery, POS, P2.3, n8n hoặc page allowlist. Shadow vẫn `APP_SEND_ENABLED=false`.
+
+## Conversational message format r24
+
+- `REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1` mặc định `false` trong compose và được bật `true` cho Realtime Worker của page test `1198992073286645`.
+- Ngay trước atomic commit, mọi `TEXT` unit trong Meta plan được tách theo dòng và ranh giới câu tiếng Việt; mỗi phần thành một Outbox sequence riêng. Quy tắc này áp dụng chung cho model, policy, sales cycle, clarification, handoff holding reply và product-info.
+- Thứ tự unit được giữ nguyên; ảnh không vượt các câu text vì Outbox vẫn khóa theo `reply_plan_id + sequence_no`.
+- Với thẻ product-info có dữ liệu chất liệu, câu mô tả bắt đầu bằng `Chất liệu`; không tạo claim chất liệu nếu catalog không có dữ liệu.
+- Local và Docker `pnpm check` đều PASS; toàn monorepo đạt 998/998 test, Worker 292/292, targeted realtime-runner 46/46.
+- Smoke không gửi tin trên image r24 xác nhận ba câu tạo ba `TEXT` unit, ảnh giữ sau cùng và material line bắt đầu bằng `Chất liệu`.
+- Sau cutover realtime healthy/restart 0, worker ledger `IDLE/LIVE`, page `APP`/send enabled/kill switch off, Inbox active 0, Outbox active 0 và duplicate reply-plan/sequence 0.
+- Chỉ recreate `realtime-worker`; API, delivery, Shadow, Admin, POS, P2.3, n8n và mọi container khác giữ nguyên ID. Symlink `current` chỉ đổi sau khi worker healthy.
+- Human test Messenger sau deploy đang `PENDING_NEW_POST_DEPLOY_MESSAGE`; chưa coi smoke nội bộ là bằng chứng giao diện Messenger thực tế.
+- Rollback nhanh: recreate riêng realtime-worker với `REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1=false`; rollback code dùng image/release r23. Không xóa Inbox, Outbox, Redis, PostgreSQL hoặc cache.
 
 ## Product image delivery r23
 
