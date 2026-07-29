@@ -68,6 +68,9 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
   const blocked = new Set<string>();
   const productVerified = proposal.productId === null || input.verifiedProductIds.has(proposal.productId);
   const facts = factIsUsable(input, proposal);
+  const verifiedAttachmentUrls = input.verifiedAttachmentUrls ?? (
+    facts === null ? null : new Set(facts.imageUrls)
+  );
 
   if (input.buyingSignal && proposal.action === "NO_REPLY") {
     blocked.add("NO_REPLY_OVERRIDE_BUYING_SIGNAL");
@@ -78,7 +81,10 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
 
   if (!productVerified) blocked.add("UNVERIFIED_PRODUCT");
   if (RAW_URL_PATTERN.test(text)) blocked.add("RAW_URL_IN_TEXT");
-  if (proposal.attachments.some((url) => facts === null || !facts.imageUrls.includes(url))) {
+  const hasUnverifiedAttachment = proposal.attachments.some((url) =>
+    verifiedAttachmentUrls === null || !verifiedAttachmentUrls.has(url)
+  );
+  if (hasUnverifiedAttachment) {
     blocked.add("UNVERIFIED_ATTACHMENT");
   }
 
@@ -160,12 +166,18 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
   }
 
   const blockedReasonCodes = [...blocked].sort();
-  const isBlocked = blockedReasonCodes.length > 0;
+  const hasHardBlock = blockedReasonCodes.some((reason) => reason !== "UNVERIFIED_ATTACHMENT");
+  const useTextOnlyAttachmentFallback =
+    hasUnverifiedAttachment &&
+    input.allowTextOnlyOnUnverifiedAttachment === true &&
+    !hasHardBlock &&
+    text.trim().length > 0;
+  const isBlocked = hasHardBlock || (hasUnverifiedAttachment && !useTextOnlyAttachmentFallback);
   return GuardedReplyPlanV1Schema.parse({
     schemaVersion: 1,
     action: isBlocked ? "HANDOFF" : proposal.action,
     textUnits: isBlocked || text.trim().length === 0 ? [] : [text],
-    imageUrls: isBlocked ? [] : proposal.attachments,
+    imageUrls: isBlocked || useTextOnlyAttachmentFallback ? [] : proposal.attachments,
     productId: proposal.productId,
     handoffReason: isBlocked ? "BUSINESS_POLICY_GUARD" : proposal.handoffReason,
     blockedReasonCodes,

@@ -277,6 +277,42 @@ describe("facts and deterministic policy guard", () => {
     expect(result.sendAuthorized).toBe(false);
   });
 
+  it("uses the verified media selection instead of the legacy facts image set", () => {
+    const fullLookUrl = "https://cdn.example/sd396-full-look.jpg";
+    const result = guardAgentProposal({
+      proposal: proposal("Mẫu SD396 giá 699k ạ", [fullLookUrl]),
+      facts: goodFacts(),
+      verifiedProductIds: new Set(["SD396"]),
+      verifiedAttachmentUrls: new Set([fullLookUrl]),
+      now,
+    });
+
+    expect(result).toMatchObject({
+      action: "REPLY",
+      imageUrls: [fullLookUrl],
+      blockedReasonCodes: [],
+    });
+  });
+
+  it("drops only an unverified attachment when the text-only fallback is enabled", () => {
+    const result = guardAgentProposal({
+      proposal: proposal("Mẫu SD396 giá 699k ạ", ["https://evil.test/x.jpg"]),
+      facts: goodFacts(),
+      verifiedProductIds: new Set(["SD396"]),
+      verifiedAttachmentUrls: new Set(),
+      allowTextOnlyOnUnverifiedAttachment: true,
+      now,
+    });
+
+    expect(result).toMatchObject({
+      action: "REPLY",
+      textUnits: ["Mẫu SD396 giá 699k ạ"],
+      imageUrls: [],
+      blockedReasonCodes: ["UNVERIFIED_ATTACHMENT"],
+      handoffReason: null,
+    });
+  });
+
   it("blocks invented price, promotion, freeship and ship fee", () => {
     const result = guardAgentProposal({
       proposal: proposal("Giá 599k, đang giảm giá, freeship và phí ship 30k ạ"),

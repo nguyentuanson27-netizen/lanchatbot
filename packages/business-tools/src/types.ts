@@ -241,6 +241,10 @@ export interface GuardInput {
   proposal: unknown;
   facts: BusinessFactEnvelopeV1 | null;
   verifiedProductIds: ReadonlySet<string>;
+  /** Exact customer-facing URLs selected by a verified media selector for this proposal. */
+  verifiedAttachmentUrls?: ReadonlySet<string>;
+  /** Preserve otherwise verified text while dropping an attachment that fails the media allowlist. */
+  allowTextOnlyOnUnverifiedAttachment?: boolean;
   buyingSignal?: boolean;
   promotion?: PromotionAuthorization;
   shipping?: ShippingAuthorization;
