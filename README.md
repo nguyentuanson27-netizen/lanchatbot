@@ -151,6 +151,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 - [Production baseline và ownership](docs/current/PRODUCTION_BASELINE_20260722.md)
 - [Kế hoạch nâng cấp Realtime Sales Agent](docs/current/REALTIME_AGENT_UPGRADE_PLAN.md)
 - [Kế hoạch triển khai Wave 1 & Wave 2 v1.2](docs/current/WAVE1_WAVE2_IMPLEMENTATION_PLAN_v1.2.md)
+- [Kế hoạch Task 2.0A — Meta Ads Entry Context & Lead Qualification](docs/current/TASK_2_0A_AD_ENTRY_CONTEXT_AND_LEAD_QUALIFICATION_PLAN.md) — `PLANNED`, analytics sidecar, chưa thay đổi outbound
 - [Kế hoạch nhận diện ảnh Cutout-first + AI reranker](docs/current/MEDIA_RECOGNITION_CUTOUT_AI_IMPLEMENTATION_PLAN.md)
 - [Canary Size Chart + ProductFactsV2 + Media Selector V2](docs/current/SIZE_CHART_PRODUCT_FACTS_V2_CANARY.md)
 - [Trạng thái triển khai nhận diện ảnh r22](docs/current/MEDIA_RECOGNITION_R22_STATUS_20260728.md)
