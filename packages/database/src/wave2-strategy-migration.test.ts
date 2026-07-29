@@ -21,9 +21,13 @@ describe("0023 Wave 2 strategy metrics migration", () => {
     expect(sql).not.toContain("event_metadata AS");
   });
 
-  it("restores the previous Admin view without deleting event data", async () => {
+  it("recreates the previous Admin view while preserving its ACL", async () => {
     const sql = await readFile(rollback, "utf8");
-    expect(sql).toContain("CREATE OR REPLACE VIEW admin_conversation_events_v");
+    expect(sql).toContain("DROP VIEW admin_conversation_events_v");
+    expect(sql).toContain("migration_0023_admin_events_acl");
+    expect(sql).toContain("migration_0023_admin_events_owner");
+    expect(sql).toContain("GRANT %s ON TABLE admin_conversation_events_v");
+    expect(sql).toContain("ALTER VIEW admin_conversation_events_v OWNER TO");
     expect(sql).not.toContain("DROP TABLE");
     expect(sql).not.toContain("DELETE FROM");
   });
