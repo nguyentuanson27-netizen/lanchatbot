@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "lana_chatbot_ops": {
+      "command": "py",
+      "args": [
+        "-3.11",
+        "${PLUGIN_ROOT}/scripts/lana_mcp_server.py"
+      ],
+      "env_vars": [
+        "CODEX_SSH_PASSWORD",
+        "LANA_SSH_PASSWORD_FILE",
+        "LANA_REPO_PATH",
+        "LANA_MCP_DATA_DIR"
+      ]
+    }
+  }
+}
