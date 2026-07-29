@@ -60,6 +60,24 @@ if (liveGates.some((value) => !value)) {
 }
 
 const pageId = required("META_PAGE_ID");
+const adAcquisitionModeRaw =
+  process.env.AD_ACQUISITION_ANALYTICS_MODE?.trim().toUpperCase() || "OFF";
+if (!["OFF", "SHADOW", "LIVE"].includes(adAcquisitionModeRaw)) {
+  throw new Error("AD_ACQUISITION_ANALYTICS_MODE_INVALID");
+}
+const adAcquisitionMode = adAcquisitionModeRaw as "OFF" | "SHADOW" | "LIVE";
+const adAcquisitionPageIds = (process.env.AD_ACQUISITION_PAGE_ALLOWLIST ?? "")
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
+const adAcquisitionDerivationVersion =
+  process.env.AD_ACQUISITION_DERIVATION_VERSION?.trim() || "ad-acquisition-v1";
+const adAcquisitionWindowHours = boundedInteger(
+  "AD_ACQUISITION_WINDOW_HOURS",
+  168,
+  1,
+  24 * 30,
+);
 const metaToken = secretOrEnvironment(
   "META_PAGE_ACCESS_TOKEN",
   "META_PAGE_ACCESS_TOKEN_FILE",
@@ -89,6 +107,12 @@ const canonicalHistory = process.env.HISTORY_WRITE_ENABLED === "true"
         "ANALYTICS_HASH_SALT",
         "ANALYTICS_HASH_SALT_FILE",
       ),
+      adAcquisition: {
+        mode: adAcquisitionMode,
+        pageAllowlist: adAcquisitionPageIds,
+        derivationVersion: adAcquisitionDerivationVersion,
+        windowHours: adAcquisitionWindowHours,
+      },
     })
   : undefined;
 const history = process.env.HISTORY_CONTEXT_ENABLED === "true"

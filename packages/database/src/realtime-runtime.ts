@@ -6,6 +6,11 @@ import {
   type EncryptedValue,
 } from "./envelope-cipher.js";
 import { withTransaction } from "./repositories.js";
+import {
+  commitAcquisitionPlan,
+  recordInitialReplySendFailed,
+  type AcquisitionCommitPlan,
+} from "./ad-acquisition.js";
 
 export interface RealtimeConversationRecord<TState> {
   readonly conversationId: string;
@@ -273,6 +278,7 @@ export interface RealtimeCommitInput<TState, TSalesState = unknown> {
   readonly handoffAcknowledgementPlan?: RealtimeHandoffAcknowledgementPlan;
   readonly salesCyclePlan?: RealtimeSalesCyclePlan<TSalesState>;
   readonly decisionEvents?: readonly RealtimeDecisionEventPlan[];
+  readonly acquisitionPlan?: AcquisitionCommitPlan;
   /**
    * When present, state/outbox and all source inbox rows share one transaction.
    * A newer committed inbound changes the generation and makes this decision a
@@ -857,6 +863,20 @@ export class PostgresRealtimeRuntimeStore {
         reasonCodes.push("META_PLAN_SUPPRESSED");
       }
 
+      if (input.acquisitionPlan) {
+        await commitAcquisitionPlan(client, {
+          pageId: input.pageId,
+          conversationId: input.conversationId,
+          customerHash: input.customerHash,
+          plan: {
+            ...input.acquisitionPlan,
+            replyPlanId: input.metaPlan && sendAuthorized
+              ? input.acquisitionPlan.replyPlanId
+              : null,
+          },
+        });
+      }
+
       let pancakeTagOutboxCreated = false;
       if (input.pancakeTagPlan) {
         pancakeTagOutboxCreated = await this.insertPancakeTagPlan(
@@ -1123,16 +1143,32 @@ export class PostgresRealtimeRuntimeStore {
     status: "AMBIGUOUS" | "FAILED_PERMANENT",
     errorCode: string,
   ): Promise<boolean> {
-    const result = await this.pool.query(
-      `UPDATE meta_outbox
-       SET status = $3,
-           ambiguity_reason = CASE WHEN $3 = 'AMBIGUOUS' THEN $4 ELSE NULL END,
-           last_error_code = $4, lease_owner = NULL, lease_token = NULL,
-           lease_until = NULL, updated_at = now()
-       WHERE outbox_id = $1 AND status = 'SENDING' AND lease_token = $2`,
-      [outboxId, leaseToken, status, errorCode.slice(0, 128)],
-    );
-    return result.rowCount === 1;
+    return withTransaction(this.pool, async (client) => {
+      const result = await client.query<{
+        reply_plan_id: string;
+        sequence_no: number;
+        updated_at: Date;
+      }>(
+        `UPDATE meta_outbox
+         SET status = $3,
+             ambiguity_reason = CASE WHEN $3 = 'AMBIGUOUS' THEN $4 ELSE NULL END,
+             last_error_code = $4, lease_owner = NULL, lease_token = NULL,
+             lease_until = NULL, updated_at = now()
+         WHERE outbox_id = $1 AND status = 'SENDING' AND lease_token = $2
+         RETURNING reply_plan_id, sequence_no, updated_at`,
+        [outboxId, leaseToken, status, errorCode.slice(0, 128)],
+      );
+      const row = result.rows[0];
+      if (!row) return false;
+      await recordInitialReplySendFailed(client, {
+        replyPlanId: row.reply_plan_id,
+        outboxId,
+        sequenceNo: row.sequence_no,
+        failedAt: row.updated_at,
+        terminalStatus: status,
+      });
+      return true;
+    });
   }
 
   async markMetaManualReview(

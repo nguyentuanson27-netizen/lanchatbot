@@ -69,6 +69,8 @@ const MESSAGES: ListSpec = {
 };
 export const ADMIN_CONVERSATION_EVENTS_SOURCE =
   "admin_conversation_events_v";
+export const ADMIN_ACQUISITION_SESSIONS_SOURCE =
+  "admin_acquisition_sessions_v";
 
 const EVENTS: ListSpec = {
   view: "admin_conversation_events_v",
@@ -239,7 +241,7 @@ export class PostgresAdminStore implements AdminStore {
   async dashboard(identity: AdminIdentity): Promise<Record<string, unknown>> {
     const scope = scopeClause(identity, "page_id", 1);
     const values = scope.values;
-    const [pages, conversations, inbox, metaOutbox, pancakeOutbox, evaluations, funnel, workers, facts] =
+    const [pages, conversations, inbox, metaOutbox, pancakeOutbox, evaluations, funnel, acquisition, workers, facts] =
       await Promise.all([
         this.pool.query(
           `SELECT count(*)::int AS total,
@@ -262,6 +264,7 @@ export class PostgresAdminStore implements AdminStore {
         this.statusCounts("admin_pancake_outbox_v", identity),
         this.evaluationSummary(identity),
         this.salesFunnelSummary(identity),
+        this.acquisitionSummary(identity),
         this.listWorkers(identity),
         this.businessFactSummary(identity),
       ]);
@@ -275,6 +278,7 @@ export class PostgresAdminStore implements AdminStore {
       },
       evaluations,
       sales_funnel: funnel,
+      ad_acquisition: acquisition,
       workers,
       business_facts: facts,
       generated_at: new Date().toISOString(),
@@ -573,6 +577,137 @@ export class PostgresAdminStore implements AdminStore {
     return sanitize(result.rows[0] ?? {}) as Record<string, unknown>;
   }
 
+  async acquisitionSummary(
+    identity: AdminIdentity,
+    lookbackHours = 24 * 30,
+  ): Promise<Record<string, unknown>> {
+    const scope = scopeClause(identity, "page_id", 2);
+    const scopeAnd = scope.sql ? scope.sql.replace(/^WHERE /u, "AND ") : "";
+    const hours = Math.max(1, Math.min(24 * 90, Math.trunc(lookbackHours)));
+    const values = [hours, ...scope.values];
+    const [summary, breakdown] = await Promise.all([
+      this.pool.query(
+        `SELECT
+           count(*)::int AS ad_entries,
+           count(*) FILTER (WHERE initial_reply_accepted_at IS NOT NULL)::int AS initial_reply_accepted,
+           count(*) FILTER (WHERE initial_reply_terminal_status = 'FAILED_PERMANENT')::int AS initial_reply_failed,
+           count(*) FILTER (WHERE initial_reply_terminal_status = 'AMBIGUOUS')::int AS initial_reply_ambiguous,
+           count(*) FILTER (WHERE reengaged_at IS NOT NULL)::int AS reengaged,
+           count(*) FILTER (WHERE meaningful_at IS NOT NULL)::int AS meaningful,
+           count(*) FILTER (WHERE qualified_at IS NOT NULL)::int AS qualified,
+           count(*) FILTER (WHERE committed_at IS NOT NULL)::int AS buying_committed,
+           count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL)::int AS purchase_confirmed,
+           count(*) FILTER (WHERE engagement_outcome = 'NO_RESPONSE_1H')::int AS no_response_1h,
+           count(*) FILTER (WHERE engagement_outcome = 'NO_RESPONSE_24H')::int AS no_response_24h,
+           round(100.0 * count(*) FILTER (WHERE initial_reply_accepted_at IS NOT NULL) /
+             NULLIF(count(*), 0), 2) AS entry_to_accepted_pct,
+           round(100.0 * count(*) FILTER (WHERE initial_reply_terminal_status IS NOT NULL) /
+             NULLIF(count(*), 0), 2) AS initial_reply_terminal_pct,
+           round(100.0 * count(*) FILTER (WHERE reengaged_at IS NOT NULL) /
+             NULLIF(count(*) FILTER (WHERE initial_reply_accepted_at IS NOT NULL), 0), 2) AS accepted_to_reengaged_pct,
+           round(100.0 * count(*) FILTER (WHERE qualified_at IS NOT NULL) /
+             NULLIF(count(*), 0), 2) AS entry_to_qualified_pct,
+           round(100.0 * count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL) /
+             NULLIF(count(*), 0), 2) AS entry_to_purchase_confirmed_pct,
+           round(100.0 * count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL) /
+             NULLIF(count(*) FILTER (WHERE qualified_at IS NOT NULL), 0), 2) AS qualified_to_purchase_confirmed_pct,
+           $1::int AS lookback_hours
+         FROM ${ADMIN_ACQUISITION_SESSIONS_SOURCE}
+         WHERE created_at >= now() - ($1::int * interval '1 hour') ${scopeAnd}`,
+        values,
+      ),
+      this.pool.query(
+        `WITH scoped AS MATERIALIZED (
+           SELECT *
+           FROM ${ADMIN_ACQUISITION_SESSIONS_SOURCE}
+           WHERE created_at >= now() - ($1::int * interval '1 hour') ${scopeAnd}
+         ), ranked AS (
+           SELECT scoped.*,
+             row_number() OVER (PARTITION BY conversation_id ORDER BY created_at, acquisition_session_id) AS first_touch_rank,
+             row_number() OVER (PARTITION BY conversation_id ORDER BY created_at DESC, acquisition_session_id DESC) AS last_touch_rank
+           FROM scoped
+         ), dimension_rows AS (
+           SELECT 'ad'::text AS dimension,
+             COALESCE(NULLIF(ad_id, ''), 'UNKNOWN') ||
+               COALESCE(' · ' || NULLIF(ad_title, ''), '') AS dimension_key,
+             count(*)::int AS ad_entries,
+             count(*) FILTER (WHERE qualified_at IS NOT NULL)::int AS qualified,
+             count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL)::int AS purchase_confirmed
+           FROM scoped GROUP BY 2
+           UNION ALL
+           SELECT 'post', COALESCE(NULLIF(post_id, ''), 'UNKNOWN'), count(*)::int,
+             count(*) FILTER (WHERE qualified_at IS NOT NULL)::int,
+             count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL)::int
+           FROM scoped GROUP BY 2
+           UNION ALL
+           SELECT 'product', COALESCE(NULLIF(extracted_product_id, ''), 'UNKNOWN'), count(*)::int,
+             count(*) FILTER (WHERE qualified_at IS NOT NULL)::int,
+             count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL)::int
+           FROM scoped GROUP BY 2
+           UNION ALL
+           SELECT 'meaningful_label', COALESCE(NULLIF(first_meaningful_label, ''), 'NONE'), count(*)::int,
+             count(*) FILTER (WHERE qualified_at IS NOT NULL)::int,
+             count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL)::int
+           FROM scoped GROUP BY 2
+           UNION ALL
+           SELECT 'barrier', COALESCE(NULLIF(first_barrier, ''), 'NONE'), count(*)::int,
+             count(*) FILTER (WHERE qualified_at IS NOT NULL)::int,
+             count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL)::int
+           FROM scoped GROUP BY 2
+           UNION ALL
+           SELECT 'playbook', COALESCE(NULLIF(first_playbook, ''), 'NONE'), count(*)::int,
+             count(*) FILTER (WHERE qualified_at IS NOT NULL)::int,
+             count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL)::int
+           FROM scoped GROUP BY 2
+           UNION ALL
+           SELECT 'version', derivation_version, count(*)::int,
+             count(*) FILTER (WHERE qualified_at IS NOT NULL)::int,
+             count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL)::int
+           FROM scoped GROUP BY 2
+           UNION ALL
+           SELECT 'day', to_char(date_trunc('day', created_at), 'YYYY-MM-DD'), count(*)::int,
+             count(*) FILTER (WHERE qualified_at IS NOT NULL)::int,
+             count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL)::int
+           FROM scoped GROUP BY 2
+           UNION ALL
+           SELECT 'touch', 'FIRST_TOUCH', count(*)::int,
+             count(*) FILTER (WHERE qualified_at IS NOT NULL)::int,
+             count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL)::int
+           FROM ranked WHERE first_touch_rank = 1
+           UNION ALL
+           SELECT 'touch', 'LAST_ELIGIBLE_TOUCH', count(*)::int,
+             count(*) FILTER (WHERE qualified_at IS NOT NULL)::int,
+             count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL)::int
+           FROM ranked WHERE last_touch_rank = 1
+         ), limited AS (
+           SELECT dimension, dimension_key, ad_entries, qualified, purchase_confirmed,
+             row_number() OVER (
+               PARTITION BY dimension ORDER BY ad_entries DESC, dimension_key
+             ) AS dimension_rank
+           FROM dimension_rows
+         )
+         SELECT dimension, dimension_key, ad_entries, qualified, purchase_confirmed
+         FROM limited WHERE dimension_rank <= 12
+         ORDER BY dimension, dimension_rank`,
+        values,
+      ),
+    ]);
+    const breakdowns: Record<string, Record<string, unknown>[]> = {};
+    for (const rawRow of breakdown.rows) {
+      const row = sanitize(rawRow) as Record<string, unknown>;
+      const dimension = String(row.dimension ?? "unknown");
+      (breakdowns[dimension] ??= []).push({
+        key: row.dimension_key,
+        ad_entries: row.ad_entries,
+        qualified: row.qualified,
+        purchase_confirmed: row.purchase_confirmed,
+      });
+    }
+    return {
+      ...(sanitize(summary.rows[0] ?? {}) as Record<string, unknown>),
+      breakdowns,
+    };
+  }
   async salesFunnelSummary(
     identity: AdminIdentity,
     pageId?: string,

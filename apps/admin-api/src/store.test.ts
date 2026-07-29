@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  ADMIN_ACQUISITION_SESSIONS_SOURCE,
   ADMIN_CONVERSATION_EVENTS_SOURCE,
   decodeCursor,
   encodeCursor,
@@ -24,6 +25,10 @@ describe("Admin cursor", () => {
 });
 
 describe("Admin funnel data boundary", () => {
+  it("reads ad acquisition metrics only through the PII-free admin view", () => {
+    assert.equal(ADMIN_ACQUISITION_SESSIONS_SOURCE, "admin_acquisition_sessions_v");
+    assert.notEqual(ADMIN_ACQUISITION_SESSIONS_SOURCE, "acquisition_sessions");
+  });
   it("reads checkout drop-offs only through the anonymized admin view", () => {
     assert.equal(ADMIN_CONVERSATION_EVENTS_SOURCE, "admin_conversation_events_v");
     assert.notEqual(ADMIN_CONVERSATION_EVENTS_SOURCE, "conversation_events");

@@ -43,6 +43,7 @@ import {
   truncate,
 } from "./format.js";
 import type {
+  AcquisitionOverview,
   AdminCommand,
   AdminCommandName,
   AuditLog,
@@ -410,10 +411,10 @@ function renderEmpty(title: string, detail: string): string {
   `;
 }
 
-function renderMetrics(metrics: Metric[]): string {
+function renderMetrics(metrics: Metric[], limit = 4): string {
   if (metrics.length === 0) return "";
   return `<div class="metrics-grid">${metrics
-    .slice(0, 4)
+    .slice(0, limit)
     .map(
       (metric) => `
         <article class="metric-card">
@@ -425,6 +426,34 @@ function renderMetrics(metrics: Metric[]): string {
     .join("")}</div>`;
 }
 
+function renderAcquisition(data: AcquisitionOverview): string {
+  const breakdowns = data.breakdowns.length === 0
+    ? renderEmpty(
+        "Ch\u01b0a c\u00f3 breakdown",
+        "Khi c\u00f3 Ads entry, \u0111i\u1ec3m r\u01a1i theo qu\u1ea3ng c\u00e1o v\u00e0 s\u1ea3n ph\u1ea9m s\u1ebd xu\u1ea5t hi\u1ec7n t\u1ea1i \u0111\u00e2y.",
+      )
+    : `<div class="dashboard-grid">${data.breakdowns.map((group) => `
+        <section class="panel">
+          <div class="panel__header"><div><h3>${escapeHtml(group.title)}</h3><p>Ads entry \u2192 lead \u0111\u1ee7 \u0111i\u1ec1u ki\u1ec7n \u2192 x\u00e1c nh\u1eadn mua.</p></div></div>
+          <div class="breakdown-list">${group.items.map((item) => {
+            const qualifiedPercent = item.adEntries > 0
+              ? Math.round((item.qualified / item.adEntries) * 100)
+              : 0;
+            return `<div class="breakdown">
+              <span><strong>${escapeHtml(item.label)}</strong><em>${escapeHtml(formatNumber(item.adEntries))} l\u01b0\u1ee3t v\u00e0o</em></span>
+              <div><i style="width:${Math.max(0, Math.min(100, qualifiedPercent))}%"></i></div>
+              <small>${escapeHtml(formatNumber(item.qualified))} lead \u0111\u1ee7 \u0111i\u1ec1u ki\u1ec7n \u00b7 ${escapeHtml(formatNumber(item.purchaseConfirmed))} x\u00e1c nh\u1eadn mua</small>
+            </div>`;
+          }).join("")}</div>
+        </section>`).join("")}</div>`;
+  return `
+    <section class="panel panel--wide acquisition-funnel">
+      <div class="panel__header"><div><h2>Ph\u1ec5u kh\u00e1ch t\u1eeb Meta Ads</h2><p>Analytics acquisition; kh\u00f4ng thay \u0111\u1ed5i c\u00e2u tr\u1ea3 l\u1eddi, checkout hay outbound.</p></div></div>
+      ${renderMetrics(data.metrics, data.metrics.length)}
+    </section>
+    ${breakdowns}
+  `;
+}
 function serviceRows(services: ServiceHealth[]): string {
   if (services.length === 0) return renderEmpty("Chưa có dữ liệu dịch vụ", "Khi worker bắt đầu báo trạng thái, dữ liệu sẽ xuất hiện tại đây.");
   return `<div class="service-list">${services
@@ -460,6 +489,7 @@ function renderOverview(data: Overview): string {
       ${badge(statusLabel(data.mode), "info")}
     </section>
     ${renderMetrics(data.metrics)}
+    ${data.acquisition ? renderAcquisition(data.acquisition) : ""}
     <div class="dashboard-grid">
       <section class="panel panel--wide">
         <div class="panel__header"><div><h2>Tình trạng hệ thống</h2><p>Dữ liệu mới nhất từ các dịch vụ nền.</p></div></div>

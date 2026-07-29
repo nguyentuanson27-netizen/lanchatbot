@@ -1,8 +1,8 @@
 # Task 2.0A — Meta Ads Entry Context & Lead Qualification
 
-Trạng thái: `PLANNED`
+Trạng thái: `IMPLEMENTING`
 Phiên bản kế hoạch: `1.0`
-Baseline áp dụng: `20260729-wave2-strategy-gemini35-r26.1`
+Baseline áp dụng: `20260729-realtime-accented-split-r26.2`
 Page triển khai đầu tiên và duy nhất: `1198992073286645`
 
 Tài liệu này cụ thể hóa phần acquisition attribution còn thiếu của Wave 2 cho thực tế đa số hội thoại La.na bắt đầu từ Meta Ads. Task 2.0A là một lớp analytics sidecar: ghi nhận nguồn vào, hành vi sau phản hồi đầu tiên và mức độ qualified; không thay đổi nội dung trả lời, checkout, handoff, offer, ownership hoặc quyền gửi outbound.
@@ -15,8 +15,8 @@ Agent triển khai phải đọc theo thứ tự:
 2. [Production baseline](PRODUCTION_BASELINE_20260722.md).
 3. [Realtime Sales Agent upgrade plan](REALTIME_AGENT_UPGRADE_PLAN.md).
 4. [Wave 1 & Wave 2 implementation plan v1.2](WAVE1_WAVE2_IMPLEMENTATION_PLAN_v1.2.md).
-5. [Wave 2 + Gemini 3.5 r26.1 status](WAVE2_GEMINI35_R26_1_STATUS_20260729.md).
-6. [Manifest r26.1](../../deploy/manifests/20260729-wave2-strategy-gemini35-r26.1.json).
+5. [Realtime accented split r26.2 status](REALTIME_ACCENTED_SPLIT_R26_2_STATUS_20260729.md).
+6. [Manifest r26.2](../../deploy/manifests/20260729-realtime-accented-split-r26.2.json).
 
 Khi có mâu thuẫn, yêu cầu mới nhất của chủ dự án, `AGENTS.md`, README, production baseline và manifest mới nhất có hiệu lực cao hơn tài liệu này.
 
@@ -43,7 +43,7 @@ POS acknowledgement
 
 Không tạo CRM, event platform, worker gửi tin hoặc classifier/model thứ hai. Task này tái sử dụng Inbox, canonical message history, Meta Outbox, `conversation_events`, sales-cycle events và Admin read-model hiện có.
 
-## 3. Capability/delta map trên r26.1
+## 3. Capability/delta map trên r26.2
 
 | Năng lực | Trạng thái | Bằng chứng/ghi chú |
 |---|---|---|
@@ -55,7 +55,7 @@ Không tạo CRM, event platform, worker gửi tin hoặc classifier/model thứ
 | Canonical outbound chỉ ghi sau Meta accepted | `DONE` | `recordAcceptedOutboundBotMessage`; Outbox có `replyPlanId`, `responseGroupId`, `sequenceNo` |
 | Join initial reply với Ads entry | `MISSING` | Chưa có acquisition/reply-plan causal link |
 | Delivery/read receipt | `PARTIAL` | Outbox có trạng thái/cột tương ứng; chỉ dùng khi receipt join chính xác theo provider message |
-| `BUYING_SIGNAL_COMMITTED` và `PURCHASE_CONFIRMED` | `DONE` | Runtime r26.1 phát structured decision events |
+| `BUYING_SIGNAL_COMMITTED` và `PURCHASE_CONFIRMED` | `DONE` | Runtime r26.2 phát structured decision events |
 | `BUYING_CANDIDATE` đáng tin cậy | `PARTIAL` | Không suy ra chỉ từ Ads entry hoặc model text tự do |
 | `ORDER_CREATED` từ POS | `DEFERRED` | Production dừng ở `PURCHASE_CONFIRMED`; chưa có POS acknowledgement |
 | Lead qualification projection | `MISSING` | Chưa có stage/disposition/acquisition grain |
@@ -316,7 +316,7 @@ Acknowledgement chỉ được nâng khi state xác minh target, ví dụ bot h�
 
 ### 7.4 Buying candidate
 
-Không phát `BUYING_CANDIDATE` từ Ads entry, ad title hoặc model text tự do. Trong 2.0A2 chỉ dùng signal deterministic/reviewed. Nếu r26.1 chưa có source đủ tin cậy, stage có thể đi thẳng từ `QUALIFIED_INTEREST` đến `BUYING_COMMITTED`; không tạo candidate giả để làm đẹp funnel.
+Không phát `BUYING_CANDIDATE` từ Ads entry, ad title hoặc model text tự do. Trong 2.0A2 chỉ dùng signal deterministic/reviewed. Nếu r26.2 chưa có source đủ tin cậy, stage có thể đi thẳng từ `QUALIFIED_INTEREST` đến `BUYING_COMMITTED`; không tạo candidate giả để làm đẹp funnel.
 
 ## 8. Lưu trữ và migration
 
@@ -430,7 +430,7 @@ Coding agent phải xác nhận lại file-map ở đầu mỗi PR; không sửa
    - Ads entry, accepted reply, re-engaged.
    - No-response 1h/24h derive theo query.
 
-Rollout: `SHADOW` 100% trên page test. Outbound phải plan-equivalent với r26.1 khi so cùng fixture.
+Rollout: `SHADOW` 100% trên page test. Outbound phải plan-equivalent với r26.2 khi so cùng fixture.
 
 ### 2.0A2 — Meaningful reply và lead qualification
 
@@ -476,7 +476,7 @@ AD_ACQUISITION_WINDOW_HOURS=168
 AD_ACQUISITION_WAVE2_INPUT_ENABLED=false
 ```
 
-- `OFF`: không tạo session/event mới; runtime r26.1 giữ nguyên.
+- `OFF`: không tạo session/event mới; runtime r26.2 giữ nguyên.
 - `SHADOW`: persist và hiển thị nội bộ, không cho downstream behavior sử dụng.
 - `LIVE`: analytics được xem là nguồn dashboard production; outbound vẫn không đổi.
 - `AD_ACQUISITION_WAVE2_INPUT_ENABLED` chỉ cân nhắc sau 2.0A2 gate và vẫn chỉ cấp context cho shadow experiment trước.
@@ -524,14 +524,14 @@ Page allowlist là hard gate trước mọi mode.
 - Không raw sender ID, phone, address, checkout payload hoặc `photo_url`.
 - Admin acquisition view không có `customer_hash` hoặc raw `event_metadata`.
 - Page-scoped RBAC và Authentik boundary giữ nguyên.
-- Migration `up → down → up` giữ owner/ACL; runtime r26.1 đọc được schema mới.
+- Migration `up → down → up` giữ owner/ACL; runtime r26.2 đọc được schema mới.
 
 ### Regression
 
 - `pnpm install --frozen-lockfile`.
 - `pnpm check`.
 - Targeted contract, Meta webhook, database, worker, Admin API/Web tests.
-- Replay r26.1 xác nhận reply plan, handoff, checkout, ownership và Outbox không đổi.
+- Replay r26.2 xác nhận reply plan, handoff, checkout, ownership và Outbox không đổi.
 - Shadow/Simulation tiếp tục không có quyền ghi Meta Outbox.
 
 ## 13. Exit gate và rollout
@@ -598,7 +598,7 @@ và ghi rõ đây là “khách xác nhận mua”, chưa phải “đơn POS đ
 
 1. Đặt `AD_ACQUISITION_ANALYTICS_MODE=OFF`.
 2. Recreate tối thiểu các service đã thay đổi; không recreate toàn bộ compose.
-3. Chuyển application về release r26.1 nếu cần.
+3. Chuyển application về release r26.2 nếu cần.
 4. Không xóa acquisition session/event đã ghi; schema additive có thể được giữ lại.
 5. Chỉ rollback migration khi restore-test đã đạt và không còn binary mới dùng schema.
 6. Không xóa Inbox, Meta Outbox, PostgreSQL, Redis, Qdrant hoặc audit.
