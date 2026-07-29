@@ -107,7 +107,14 @@ replace_block \
 docker exec "$npm_container" nginx -t
 docker exec "$npm_container" nginx -s reload
 
-curl -fsS "https://$domain/health" |
+curl \
+  --retry 6 \
+  --retry-delay 2 \
+  --retry-all-errors \
+  --connect-timeout 5 \
+  --max-time 45 \
+  -fsS \
+  "https://$domain/health" |
   grep -q '"oauth_configured":true'
 curl -fsS \
   "https://auth.lanadesign.vn/application/o/lana-chatgpt-mcp/.well-known/openid-configuration" |
