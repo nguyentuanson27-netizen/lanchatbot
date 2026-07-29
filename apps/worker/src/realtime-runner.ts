@@ -436,6 +436,27 @@ export function holdingMessagesForHandoff(
   return decision.customerMessages.map((text) => ({ kind: "TEXT", text }));
 }
 
+const vietnameseSentenceSegmenter = new Intl.Segmenter("vi", {
+  granularity: "sentence",
+});
+
+export function splitRealtimeMetaMessages(
+  messages: readonly RealtimeMetaMessageUnit[],
+): RealtimeMetaMessageUnit[] {
+  return messages.flatMap((message) => {
+    if (message.kind !== "TEXT") return [message];
+    const segments = message.text
+      .split(/\r?\n+/gu)
+      .flatMap((line) => [...vietnameseSentenceSegmenter.segment(line)])
+      .map(({ segment }) => segment.trim())
+      .filter(Boolean);
+    return segments.map((text): RealtimeMetaMessageUnit => ({
+      kind: "TEXT",
+      text,
+    }));
+  });
+}
+
 export function isResolvedProductCodeOnly(
   value: string,
   product: StableProductDocument,
@@ -610,6 +631,7 @@ function xmlFormPhrase(
 
 export function productDescriptionLine(
   product: StableProductDocument,
+  includeMaterialLabel = false,
 ): string {
   const description = compactXmlDescription(product.descriptionXml);
   const normalized = normalizedVietnamese(description);
@@ -628,7 +650,7 @@ export function productDescriptionLine(
     materialEffect = "mang lại cảm giác nhẹ và thoáng";
   }
   const materialSentence = material
-    ? `${sentenceCase(material)} ${materialEffect}.`
+    ? `${includeMaterialLabel ? `Chất liệu ${material}` : sentenceCase(material)} ${materialEffect}.`
     : "";
 
   let designSentence = "";
@@ -663,12 +685,16 @@ export function verifiedProductInfoProposal(
   profile: CustomerProfileV1 | null = null,
   productFactsV2: ProductFactsV2 | null = null,
   now = new Date(),
+  conversationalMessageFormatEnabled = false,
 ): AgentProposalV1 | null {
   if (facts.status !== "OK" || facts.facts === null) return null;
   const price = facts.facts.salePriceVnd ?? facts.facts.listPriceVnd;
   if (price === null) return null;
   const displayName = productDisplayName(product);
-  const designLine = productDescriptionLine(product);
+  const designLine = productDescriptionLine(
+    product,
+    conversationalMessageFormatEnabled,
+  );
   const sizeLine = facts.facts.sizes.length > 0
     ? `Size ${facts.facts.sizes.join(", ")}`
     : "Size đang cập nhật";
@@ -1605,6 +1631,7 @@ export interface RealtimeRunnerOptions {
   readonly mediaRecognitionEnabled?: boolean;
   readonly mediaClarificationEnabled?: boolean;
   readonly mediaRecognitionPageIds?: readonly string[];
+  readonly conversationalMessageFormatEnabled?: boolean;
 }
 
 export class RealtimeRunner {
@@ -1668,6 +1695,8 @@ export class RealtimeRunner {
       mediaRecognitionPageIds: [
         ...(options.mediaRecognitionPageIds ?? []),
       ],
+      conversationalMessageFormatEnabled:
+        options.conversationalMessageFormatEnabled ?? false,
     };
   }
 
@@ -2863,6 +2892,7 @@ export class RealtimeRunner {
                   this.options.customerProfileEnabled ? customerProfile : null,
                   productFactsV2,
                   now,
+                  this.options.conversationalMessageFormatEnabled,
                 )
               : null;
           if (deterministicProductInfo) {
@@ -3176,6 +3206,9 @@ export class RealtimeRunner {
       this.options.sendEnabled
     ) {
       metaMessages = [...holdingMessagesForHandoff(message, handoff)];
+    }
+    if (this.options.conversationalMessageFormatEnabled) {
+      metaMessages = splitRealtimeMetaMessages(metaMessages);
     }
 
     const planSeed = [
