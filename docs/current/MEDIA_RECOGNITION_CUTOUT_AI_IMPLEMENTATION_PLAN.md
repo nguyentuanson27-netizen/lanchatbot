@@ -664,3 +664,4 @@ query cutout, xóa raw fallback, chỉ test vài positive case, hoặc tự mở
 | MR-D011 | Không log URL/bytes/base64/payload/PII |
 | MR-D012 | Chỉ recreate realtime-worker |
 | MR-D013 | Không gán số release; theo sequence lúc deploy |
+| MR-D014 | Media Selector V2 là nguồn chọn ảnh product-info; guard xác minh đúng selection đó, không dựng allowlist PRICE_CARD song song và không fallback legacy khi V2 trả NONE |

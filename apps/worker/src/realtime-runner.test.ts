@@ -483,6 +483,18 @@ describe("RealtimeRunner", () => {
     expect(
       verifiedProductInfoProposal(product, facts, [], null, productFactsV2)?.attachments,
     ).toEqual([imageUrl]);
+    expect(
+      verifiedProductInfoProposal(
+        product,
+        facts,
+        [],
+        null,
+        productFactsV2,
+        new Date("2026-07-29T00:00:00.000Z"),
+        false,
+        true,
+      )?.attachments,
+    ).toEqual([]);
   });
 
   it("rehydrates a recognized product before creating TEXT then IMAGE outbox units", async () => {
@@ -502,7 +514,53 @@ describe("RealtimeRunner", () => {
     const catalogProduct = {
       ...vectorProduct,
       title: "Áo dài SD395",
-      imageUrls: [catalogImageUrl],
+      observedAt: occurredAt,
+      imageUrls: [
+        "https://cdn.example/sd395-front.jpg",
+        "https://cdn.example/sd395-side.jpg",
+        catalogImageUrl,
+      ],
+      images: [
+        {
+          url: "https://cdn.example/sd395-front.jpg",
+          role: "PRIMARY" as const,
+          angle: "FRONT" as const,
+          imageType: "MODEL" as const,
+          intents: [],
+          partsVisible: ["AO"],
+          sortOrder: 0,
+          qualityScore: 1,
+          feedback: false,
+          reviewStatus: "APPROVED" as const,
+          metadataVerified: true,
+        },
+        {
+          url: "https://cdn.example/sd395-side.jpg",
+          role: "ADDITIONAL" as const,
+          angle: "SIDE" as const,
+          imageType: "MODEL" as const,
+          intents: [],
+          partsVisible: ["AO"],
+          sortOrder: 1,
+          qualityScore: 1,
+          feedback: false,
+          reviewStatus: "APPROVED" as const,
+          metadataVerified: true,
+        },
+        {
+          url: catalogImageUrl,
+          role: "ADDITIONAL" as const,
+          angle: "FRONT" as const,
+          imageType: "MODEL" as const,
+          intents: [],
+          partsVisible: ["FULL_SET"],
+          sortOrder: 2,
+          qualityScore: 1,
+          feedback: false,
+          reviewStatus: "APPROVED" as const,
+          metadataVerified: true,
+        },
+      ],
     };
     const claim = {
       inboxId: "2a9afc47-978a-4b74-9653-3c89e75a89a0",
@@ -551,6 +609,44 @@ describe("RealtimeRunner", () => {
         },
         reasonCode: null,
       })),
+      readCatalogSnapshot: vi.fn(async () => ({
+        schema_version: 3 as const,
+        release_id: "test-release",
+        catalog_version: "catalog-v2",
+        policy_version: "policy-v1",
+        shop_alias: "LANA",
+        brand: "lanadesign",
+        product_id: "SD395",
+        synced_at: occurredAt,
+        data_status: "OK",
+        fulfillment_policy: {
+          tinh_trang: "READY_STOCK",
+          can_order_when_zero: false,
+          prep_min_days: 0,
+          prep_max_days: 1,
+          zero_stock_policy: "",
+          zero_stock_prep_min_days: null,
+          zero_stock_prep_max_days: null,
+          eta_valid_until: "",
+        },
+        selling_rules: {
+          allow_mixed_sizes: false,
+          allow_component_sale: false,
+          source_version: "test-registry",
+        },
+        shipping_eta: {},
+        offers: {
+          DIRECT: {
+            list_price: null,
+            sale_price: 799000,
+            price_status: "OK",
+            rows: [{
+              offer_type: "DIRECT", color: "", size: "M", stock_quantity: 2,
+              list_price: null, sale_price: 799000, stock_status: "IN_STOCK",
+            }],
+          },
+        },
+      })),
       close: vi.fn(async () => undefined),
     };
     const search: RealtimeProductSearchPort = {
@@ -582,6 +678,7 @@ describe("RealtimeRunner", () => {
         workerId: "worker-1", mode: "LIVE", sendEnabled: true,
         mediaRecognitionEnabled: true,
         mediaRecognitionPageIds: ["1198992073286645"],
+        mediaSelectorV2GuardEnabled: true,
       },
       undefined, undefined, undefined, undefined, undefined, mediaRecognition,
     );

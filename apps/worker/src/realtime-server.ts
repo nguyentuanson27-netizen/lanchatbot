@@ -701,6 +701,8 @@ const runner = new RealtimeRunner(
     mediaRecognitionPageIds,
     conversationalMessageFormatEnabled:
       process.env.REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1 === "true",
+    mediaSelectorV2GuardEnabled:
+      process.env.REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED === "true",
   },
   quota,
   history,

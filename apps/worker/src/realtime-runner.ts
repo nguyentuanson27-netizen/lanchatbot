@@ -686,6 +686,7 @@ export function verifiedProductInfoProposal(
   productFactsV2: ProductFactsV2 | null = null,
   now = new Date(),
   conversationalMessageFormatEnabled = false,
+  mediaSelectorV2Authoritative = false,
 ): AgentProposalV1 | null {
   if (facts.status !== "OK" || facts.facts === null) return null;
   const price = facts.facts.salePriceVnd ?? facts.facts.listPriceVnd;
@@ -734,9 +735,11 @@ export function verifiedProductInfoProposal(
       sizeLine,
       followUp,
     ].join("\n"),
-    attachments: v2Images.length > 0
+    attachments: mediaSelectorV2Authoritative
       ? v2Images
-      : verifiedImageUrls(product, "PRICE_CARD"),
+      : v2Images.length > 0
+        ? v2Images
+        : verifiedImageUrls(product, "PRICE_CARD"),
     handoffReason: null,
     businessFactQuery: {
       intent: "PRICE",
@@ -1632,6 +1635,7 @@ export interface RealtimeRunnerOptions {
   readonly mediaClarificationEnabled?: boolean;
   readonly mediaRecognitionPageIds?: readonly string[];
   readonly conversationalMessageFormatEnabled?: boolean;
+  readonly mediaSelectorV2GuardEnabled?: boolean;
 }
 
 export class RealtimeRunner {
@@ -1697,6 +1701,8 @@ export class RealtimeRunner {
       ],
       conversationalMessageFormatEnabled:
         options.conversationalMessageFormatEnabled ?? false,
+      mediaSelectorV2GuardEnabled:
+        options.mediaSelectorV2GuardEnabled ?? false,
     };
   }
 
@@ -2343,6 +2349,10 @@ export class RealtimeRunner {
     }
     let metaMessages: RealtimeMetaMessageUnit[] = [];
     let proposal: AgentProposalV1 | null = null;
+    let guardVerifiedAttachmentUrls: ReadonlySet<string> | undefined;
+    const mediaSelectorV2GuardActive =
+      this.options.mediaSelectorV2GuardEnabled &&
+      this.options.mediaRecognitionPageIds.includes(claim.pageId);
     let handoff = applied.handoff;
     let businessFacts: BusinessFactEnvelopeV1 | null = null;
     let handoffGuardReasonCodes: readonly string[] = [];
@@ -2421,6 +2431,7 @@ export class RealtimeRunner {
             images: mediaV2.selection.selected.map(({ url }) => url),
             reasonCode: mediaV2.unavailableReason ?? "OK",
             customerTextUnits: mediaV2.customerTextUnits,
+            mediaSelectorV2: true,
           }
         : (() => {
             const selection = selectImages(resolvedProduct!, imageIntent);
@@ -2429,6 +2440,7 @@ export class RealtimeRunner {
               images: selection.images.map(({ url }) => url),
               reasonCode: selection.reasonCode,
               customerTextUnits: [] as readonly string[],
+              mediaSelectorV2: false,
             };
           })()
       : null;
@@ -2788,6 +2800,9 @@ export class RealtimeRunner {
             imageRequest.images,
             imageRequest.intent,
           );
+          if (mediaSelectorV2GuardActive && imageRequest.mediaSelectorV2) {
+            guardVerifiedAttachmentUrls = new Set(imageRequest.images);
+          }
         } else if (directProductInfo && resolvedProduct) {
           proposal = productInfoLookupProposal(resolvedProduct);
         } else {
@@ -2893,10 +2908,14 @@ export class RealtimeRunner {
                   productFactsV2,
                   now,
                   this.options.conversationalMessageFormatEnabled,
+                  mediaSelectorV2GuardActive,
                 )
               : null;
           if (deterministicProductInfo) {
             proposal = deterministicProductInfo;
+            if (mediaSelectorV2GuardActive) {
+              guardVerifiedAttachmentUrls = new Set(deterministicProductInfo.attachments);
+            }
           } else if (
             facts.status === "OK" &&
             resolvedProduct &&
@@ -3048,6 +3067,13 @@ export class RealtimeRunner {
           proposal,
           facts,
           verifiedProductIds,
+          ...(mediaSelectorV2GuardActive &&
+              guardVerifiedAttachmentUrls !== undefined
+            ? {
+                verifiedAttachmentUrls: guardVerifiedAttachmentUrls,
+                allowTextOnlyOnUnverifiedAttachment: true,
+              }
+            : {}),
           buyingSignal: buyingSignal.isBuyingSignal,
           now,
         });
