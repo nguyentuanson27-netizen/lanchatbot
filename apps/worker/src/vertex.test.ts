@@ -108,7 +108,18 @@ describe("Vertex shadow client", () => {
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Khong ghi chu [ATTACH_IMAGES:");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("gui text truoc");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("sau do moi gui anh");
-    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Chi cho em xin chieu cao can nang");
+    expect(SHADOW_SYSTEM_INSTRUCTION).toContain("tieng Viet day du dau Unicode");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("tieng Viet day du dau Unicode");
+    expect(GROUNDED_DRAFT_SYSTEM_INSTRUCTION).toContain("tieng Viet day du dau Unicode");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Dạ [Tên sản phẩm] có giá [Price] ạ");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Chất liệu [chất liệu]");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Chị cho em xin chiều cao cân nặng");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).not.toContain("'Da [Price] a'");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).not.toContain(
+      "Chi cho em xin chieu cao can nang hoac so do 3 vong",
+    );
+    expect(SHADOW_SYSTEM_INSTRUCTION).toContain("khong dung viet tat khong dau");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("khong dung viet tat khong dau");
     expect(GROUNDED_SYSTEM_INSTRUCTION).not.toContain("699");
     expect(GROUNDED_SYSTEM_INSTRUCTION).not.toContain("freeship 20");
     expect(GROUNDED_DRAFT_SYSTEM_INSTRUCTION).toContain("Khong duoc quyet dinh action");
