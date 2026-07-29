@@ -75,7 +75,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: lana-chatbot-app:inbound-debounce-r1
+    image: ${API_IMAGE:-lana-chatbot-app:inbound-debounce-r1}
     container_name: lana-chatbot-api
     restart: unless-stopped
     environment:
@@ -471,7 +471,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: lana-chatbot-app:realtime-p1
+    image: ${DELIVERY_IMAGE:-lana-chatbot-app:realtime-p1}
     container_name: lana-chatbot-delivery-worker
     restart: unless-stopped
     command: ["node", "apps/worker/dist/delivery-server.js"]
