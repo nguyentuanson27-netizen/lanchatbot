@@ -699,6 +699,8 @@ const runner = new RealtimeRunner(
     mediaClarificationEnabled:
       process.env.REALTIME_MEDIA_CLARIFICATION_ENABLED === "true",
     mediaRecognitionPageIds,
+    conversationalMessageFormatEnabled:
+      process.env.REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1 === "true",
   },
   quota,
   history,

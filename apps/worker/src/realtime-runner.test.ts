@@ -28,6 +28,7 @@ import {
   RealtimeRunner,
   verifiedSizeGuideAttachments,
   staleFactsRequireHandoff,
+  splitRealtimeMetaMessages,
   unavailableFactsRequireHandoff,
   verifiedProductInfoProposal,
   type RealtimeInboxPort,
@@ -40,6 +41,26 @@ import type { BusinessFactEnvelopeV1, ProductFactsV2 } from "@lana/contracts";
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 
 describe("RealtimeRunner", () => {
+  it("splits every outbound sentence into its own text message and preserves image order", () => {
+    expect(splitRealtimeMetaMessages([
+      {
+        kind: "TEXT",
+        text: [
+          "Dạ mẫu này có giá 999k ạ",
+          "Chất liệu ren hoa mềm. Form suông nhẹ khi di chuyển.",
+          "Size S, M, L",
+        ].join("\n"),
+      },
+      { kind: "IMAGE", imageUrl: "https://cdn.example/sd395.jpg" },
+    ])).toEqual([
+      { kind: "TEXT", text: "Dạ mẫu này có giá 999k ạ" },
+      { kind: "TEXT", text: "Chất liệu ren hoa mềm." },
+      { kind: "TEXT", text: "Form suông nhẹ khi di chuyển." },
+      { kind: "TEXT", text: "Size S, M, L" },
+      { kind: "IMAGE", imageUrl: "https://cdn.example/sd395.jpg" },
+    ]);
+  });
+
   it("uses deterministic bounded jitter for inbox retries", () => {
     expect(inboxRetryDelaySeconds(3, "event-a")).toBe(
       inboxRetryDelaySeconds(3, "event-a"),
@@ -594,8 +615,8 @@ describe("RealtimeRunner", () => {
       catalogVersion: "catalog-v2",
     };
     expect(productDisplayName(product)).toBe("mẫu SV695");
-    expect(productDescriptionLine(product)).toBe(
-      "Lưới cotton tạo bề mặt thêu nổi tinh xảo. Form suông nhẹ giúp tổng thể mềm mại, thanh thoát.",
+    expect(productDescriptionLine(product, true)).toBe(
+      "Chất liệu lưới cotton tạo bề mặt thêu nổi tinh xảo. Form suông nhẹ giúp tổng thể mềm mại, thanh thoát.",
     );
   });
 
@@ -722,7 +743,12 @@ describe("RealtimeRunner", () => {
       facts,
       search,
       new FailClosedTagObservationProvider(),
-      { workerId: "worker-1", mode: "LIVE", sendEnabled: true },
+      {
+        workerId: "worker-1",
+        mode: "LIVE",
+        sendEnabled: true,
+        conversationalMessageFormatEnabled: true,
+      },
     );
 
     expect(await runner.processOne()).toBe(true);
@@ -732,7 +758,11 @@ describe("RealtimeRunner", () => {
     expect(commit).toHaveBeenCalledWith(expect.objectContaining({
       metaPlan: expect.objectContaining({
         messages: [
-          { kind: "TEXT", text: expect.stringContaining("Dạ set váy Quỳnh Dao có giá 770k ạ") },
+          { kind: "TEXT", text: "Dạ set váy Quỳnh Dao có giá 770k ạ" },
+          { kind: "TEXT", text: "Chất liệu lụa mềm tạo bề mặt mềm mại, tinh tế." },
+          { kind: "TEXT", text: "Form chiết eo giúp tổng thể mềm mại, thanh thoát." },
+          { kind: "TEXT", text: "Size M, L, XL" },
+          { kind: "TEXT", text: "Chị cho em xin chiều cao cân nặng hoặc số đo 3 vòng em tư vấn size cho mình nha." },
           { kind: "IMAGE", imageUrl },
         ],
         imageDelayMs: 500,
