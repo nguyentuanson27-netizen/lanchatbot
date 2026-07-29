@@ -269,6 +269,62 @@ export const AgentSalesSignalsV1Schema = z.object({
 }).strict();
 export type AgentSalesSignalsV1 = z.infer<typeof AgentSalesSignalsV1Schema>;
 
+export const AgentStrategyAnalysisV1Schema = z.object({
+  need: z.enum([
+    "NEED_OCCASION",
+    "NEED_STYLE",
+    "NEED_BUDGET",
+    "NOT_ENOUGH_CONTEXT",
+  ]),
+  barrier: z.enum([
+    "NONE",
+    "BARRIER_PRICE",
+    "BARRIER_FIT",
+    "BARRIER_MATERIAL",
+    "BARRIER_TRUST",
+    "BARRIER_DELIVERY",
+    "CHOICE_OVERLOAD",
+  ]),
+  decisionFactor: z.enum([
+    "OCCASION",
+    "STYLE",
+    "BUDGET",
+    "FIT",
+    "MATERIAL",
+    "TRUST",
+    "DELIVERY",
+    "PRODUCT",
+    "UNKNOWN",
+  ]),
+  recommendedStrategy: z.enum([
+    "STRATEGY_RECOMMEND_PRODUCT",
+    "STRATEGY_SHOW_PROOF",
+    "STRATEGY_ANSWER_OBJECTION",
+    "STRATEGY_ASK_CLARIFY",
+    "STRATEGY_CLOSE",
+  ]),
+  confidence: z.number().min(0).max(1),
+  evidence: z.array(z.enum([
+    "TEXT_OCCASION",
+    "TEXT_STYLE",
+    "TEXT_BUDGET",
+    "TEXT_PRICE_OBJECTION",
+    "TEXT_FIT_OBJECTION",
+    "TEXT_MATERIAL_OBJECTION",
+    "TEXT_TRUST_OBJECTION",
+    "TEXT_DELIVERY_OBJECTION",
+    "TEXT_CHOICE_OVERLOAD",
+    "STATE_OBJECTION",
+    "STATE_PRODUCT_MATCHED",
+    "STATE_BUYING_SIGNAL",
+    "STATE_MEASUREMENTS_PRESENT",
+    "DETERMINISTIC_FALLBACK",
+  ])).min(1).max(8),
+}).strict();
+export type AgentStrategyAnalysisV1 = z.infer<
+  typeof AgentStrategyAnalysisV1Schema
+>;
+
 export const AgentProposalV1Schema = z.object({
   schemaVersion: z.literal(1),
   intent: z.string().min(1).max(64),
@@ -286,6 +342,7 @@ export const AgentProposalV1Schema = z.object({
     deliveryRegion: null,
   }),
   salesSignals: AgentSalesSignalsV1Schema.optional(),
+  strategyAnalysis: AgentStrategyAnalysisV1Schema.optional(),
 }).superRefine((value, context) => {
   if (value.action === "HANDOFF") {
     if (value.handoffReason === null) {

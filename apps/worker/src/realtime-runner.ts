@@ -12,6 +12,9 @@ import {
   guardAgentProposal,
   selectImages,
   verifiedImageUrls,
+  applyWave2ReplyPolicy,
+  decideWave2SalesStrategy,
+  type Wave2StrategyDecision,
   type CatalogFactQuery,
   type CustomerImageIntent,
   type ImageSelectionPurpose,
@@ -1636,6 +1639,7 @@ export interface RealtimeRunnerOptions {
   readonly mediaRecognitionPageIds?: readonly string[];
   readonly conversationalMessageFormatEnabled?: boolean;
   readonly mediaSelectorV2GuardEnabled?: boolean;
+  readonly wave2StrategyEnabled?: boolean;
 }
 
 export class RealtimeRunner {
@@ -1703,6 +1707,7 @@ export class RealtimeRunner {
         options.conversationalMessageFormatEnabled ?? false,
       mediaSelectorV2GuardEnabled:
         options.mediaSelectorV2GuardEnabled ?? false,
+      wave2StrategyEnabled: options.wave2StrategyEnabled ?? false,
     };
   }
 
@@ -2370,6 +2375,7 @@ export class RealtimeRunner {
     let hasModelTokenUsage = false;
     let salesHandled = false;
     let guardedPlanHash: string | null = null;
+    let wave2StrategyDecision: Wave2StrategyDecision | null = null;
     let multiFactAudit: NonNullable<
       RealtimeDecisionEventPlan["details"]["factQueryResults"]
     > = [];
@@ -2380,6 +2386,29 @@ export class RealtimeRunner {
             resolvedProduct?.productId ?? nextState.currentProductId,
           ),
         });
+    if (
+      this.options.wave2StrategyEnabled &&
+      !message.isEcho &&
+      nextState.salesStage !== "POST_SALE"
+    ) {
+      wave2StrategyDecision = decideWave2SalesStrategy({
+        text: message.text ?? "",
+        salesStage: nextState.salesStage,
+        objectionType: event.objectionType,
+        buyingSignal: buyingSignal.isBuyingSignal,
+        hasVerifiedProduct: Boolean(
+          resolvedProduct?.productId ?? nextState.currentProductId,
+        ),
+        resolvedProductCount: Math.max(
+          resolution.products.length,
+          resolvedProduct ? 1 : 0,
+        ),
+        hasMeasurements:
+          (customerProfile?.measurements.length ?? 0) > 0 ||
+          hasCustomerMeasurementSignal(message.text ?? ""),
+        modelAnalysis: null,
+      });
+    }
     const imageIntent = message.isEcho
       ? null
       : explicitCustomerImageIntent(message.text ?? "");
@@ -3010,6 +3039,9 @@ export class RealtimeRunner {
             proposal = {
               ...grounded.proposal,
               salesSignals: proposal.salesSignals ?? grounded.proposal.salesSignals,
+              strategyAnalysis:
+                proposal.strategyAnalysis ??
+                grounded.proposal.strategyAnalysis,
             };
           }
         }
@@ -3059,6 +3091,26 @@ export class RealtimeRunner {
               },
             };
           }
+        }
+        if (this.options.wave2StrategyEnabled && wave2StrategyDecision) {
+          wave2StrategyDecision = decideWave2SalesStrategy({
+            text: message.text ?? "",
+            salesStage: nextState.salesStage,
+            objectionType: event.objectionType,
+            buyingSignal: buyingSignal.isBuyingSignal,
+            hasVerifiedProduct: Boolean(
+              resolvedProduct?.productId ?? nextState.currentProductId,
+            ),
+            resolvedProductCount: Math.max(
+              resolution.products.length,
+              resolvedProduct ? 1 : 0,
+            ),
+            hasMeasurements:
+              (customerProfile?.measurements.length ?? 0) > 0 ||
+              hasCustomerMeasurementSignal(message.text ?? ""),
+            modelAnalysis: proposal.strategyAnalysis ?? null,
+          });
+          proposal = applyWave2ReplyPolicy(proposal, wave2StrategyDecision);
         }
         const verifiedProductIds = new Set<string>();
         if (resolvedProduct) verifiedProductIds.add(resolvedProduct.productId);
@@ -3320,6 +3372,7 @@ export class RealtimeRunner {
                   attachmentCount: proposal.attachments.length,
                   handoffReason: proposal.handoffReason,
                   businessFactQuery: proposal.businessFactQuery,
+                  strategyAnalysis: proposal.strategyAnalysis ?? null,
                 })).digest("hex")
               : null,
           guardedPlanHash:
@@ -3377,6 +3430,23 @@ export class RealtimeRunner {
             total: hasModelTokenUsage ? modelTotalTokens : null,
           },
           buyingSignalOverride,
+          wave2Strategy: wave2StrategyDecision
+            ? {
+                rulesetVersion: wave2StrategyDecision.rulesetVersion,
+                need: wave2StrategyDecision.need,
+                barrier: wave2StrategyDecision.barrier,
+                decisionFactor: wave2StrategyDecision.decisionFactor,
+                recommendedStrategy:
+                  wave2StrategyDecision.recommendedStrategy,
+                ctaPolicy: wave2StrategyDecision.ctaPolicy,
+                confidence: wave2StrategyDecision.confidence,
+                evidence: wave2StrategyDecision.evidence,
+                experimentId:
+                  wave2StrategyDecision.experiment.experimentId,
+                experimentVariant:
+                  wave2StrategyDecision.experiment.variant,
+              }
+            : null,
           checkoutCapturedFields: salesTelemetry?.checkoutCapturedFields ?? [],
           checkoutMissingFields: salesTelemetry?.checkoutMissingFields ?? [],
           checkoutCompleted: salesTelemetry?.checkoutCompleted ?? false,
@@ -3392,6 +3462,20 @@ export class RealtimeRunner {
         },
       });
     };
+    if (wave2StrategyDecision) {
+      pushDecisionEvent("WAVE2_STRATEGY_SELECTED", [
+        wave2StrategyDecision.need,
+        wave2StrategyDecision.barrier,
+        wave2StrategyDecision.recommendedStrategy,
+        wave2StrategyDecision.ctaPolicy,
+      ]);
+      if (wave2StrategyDecision.barrier !== "NONE") {
+        pushDecisionEvent("WAVE2_BARRIER_DETECTED", [
+          wave2StrategyDecision.barrier,
+          wave2StrategyDecision.decisionFactor,
+        ]);
+      }
+    }
     if (resolvedProduct) {
       pushDecisionEvent("PRODUCT_RESOLVED");
       pushDecisionEvent("PRODUCT_MATCHED");

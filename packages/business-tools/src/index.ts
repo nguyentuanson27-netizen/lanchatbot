@@ -18,3 +18,4 @@ export * from "./canonical-cart-engine.js";
 export * from "./negotiation-engine-v2.js";
 export * from "./buying-signal.js";
 export * from "./reply-assembler.js";
+export * from "./sales-strategy-v1.js";

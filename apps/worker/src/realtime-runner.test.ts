@@ -664,7 +664,7 @@ describe("RealtimeRunner", () => {
           pipelineVersion: "cutout-first-ai-v1", normalizedImageHash: "a".repeat(64),
           raw: [], cutout: [], rawGap: null, cutoutGap: null, channelsAgree: true,
           cutoutStatus: "OK" as const, cutoutErrorCode: null, aiReason: null,
-          aiDecision: "SD395", aiModel: "gemini-3.1-flash-lite",
+          aiDecision: "SD395", aiModel: "gemini-3.5-flash-lite",
           aiPromptVersion: "media-rerank-v1", aiLatencyMs: 1, cacheHit: false,
           latencyMs: { normalize: 1, rawSearch: 1, cutout: 1, cutoutSearch: 1, ai: 1, total: 5 },
         },

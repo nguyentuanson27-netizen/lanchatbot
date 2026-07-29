@@ -150,7 +150,9 @@ export interface RealtimeDecisionEventPlan {
     | "HANDOFF_REQUESTED"
     | "GUARD_BLOCKED"
     | "NO_REPLY"
-    | "NO_REPLY_SELECTED";
+    | "NO_REPLY_SELECTED"
+    | "WAVE2_STRATEGY_SELECTED"
+    | "WAVE2_BARRIER_DETECTED";
   readonly origin: string | null;
   readonly reasonCodes: readonly string[];
   readonly releaseId: string;
@@ -200,6 +202,50 @@ export interface RealtimeDecisionEventPlan {
       total: number | null;
     }>;
     buyingSignalOverride: boolean;
+    wave2Strategy?: Readonly<{
+      rulesetVersion: "wave2-strategy-v1";
+      need:
+        | "NEED_OCCASION"
+        | "NEED_STYLE"
+        | "NEED_BUDGET"
+        | "NOT_ENOUGH_CONTEXT";
+      barrier:
+        | "NONE"
+        | "BARRIER_PRICE"
+        | "BARRIER_FIT"
+        | "BARRIER_MATERIAL"
+        | "BARRIER_TRUST"
+        | "BARRIER_DELIVERY"
+        | "CHOICE_OVERLOAD";
+      decisionFactor:
+        | "OCCASION"
+        | "STYLE"
+        | "BUDGET"
+        | "FIT"
+        | "MATERIAL"
+        | "TRUST"
+        | "DELIVERY"
+        | "PRODUCT"
+        | "UNKNOWN";
+      recommendedStrategy:
+        | "STRATEGY_RECOMMEND_PRODUCT"
+        | "STRATEGY_SHOW_PROOF"
+        | "STRATEGY_ANSWER_OBJECTION"
+        | "STRATEGY_ASK_CLARIFY"
+        | "STRATEGY_CLOSE";
+      ctaPolicy:
+        | "ASK_OCCASION"
+        | "ASK_STYLE"
+        | "ASK_BUDGET"
+        | "ASK_MEASUREMENTS"
+        | "ASK_PROOF_PREFERENCE"
+        | "REDUCE_TO_TWO"
+        | "NO_ADDITIONAL_CTA";
+      confidence: number;
+      evidence: readonly string[];
+      experimentId: "wave2-stage-playbook-v1";
+      experimentVariant: "LIVE_100";
+    }> | null;
     checkoutCapturedFields?: readonly string[];
     checkoutMissingFields?: readonly string[];
     checkoutCompleted?: boolean;

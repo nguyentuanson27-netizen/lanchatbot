@@ -139,7 +139,7 @@ describe("RealtimeMediaRecognitionService", () => {
     const reranker: RealtimeMediaRerankerPort = {
       rerankMediaCandidates: vi.fn(async () => ({
         selected: "SD395",
-        modelVersion: "gemini-3.1-flash-lite",
+        modelVersion: "gemini-3.5-flash-lite",
         latencyMs: 120,
         tokenUsage: { prompt: 1_032, completion: 8, total: 1_040 },
       })),
@@ -166,7 +166,7 @@ describe("RealtimeMediaRecognitionService", () => {
     const reranker: RealtimeMediaRerankerPort = {
       rerankMediaCandidates: vi.fn(async () => ({
         selected: "SD443",
-        modelVersion: "gemini-3.1-flash-lite",
+        modelVersion: "gemini-3.5-flash-lite",
         latencyMs: 120,
         tokenUsage: {},
       })),
@@ -192,7 +192,7 @@ describe("RealtimeMediaRecognitionService", () => {
     const reranker: RealtimeMediaRerankerPort = {
       rerankMediaCandidates: vi.fn(async () => ({
         selected: "none",
-        modelVersion: "gemini-3.1-flash-lite",
+        modelVersion: "gemini-3.5-flash-lite",
         latencyMs: 90,
         tokenUsage: {},
       })),
