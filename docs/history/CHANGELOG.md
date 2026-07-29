@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-29 — Realtime message format r24
+
+- Tách mọi outbound text theo dòng và ranh giới câu tiếng Việt ngay trước khi ghi Meta Outbox; áp dụng cho toàn bộ nhánh realtime thay vì riêng báo giá.
+- Mỗi câu là một Outbox unit có sequence riêng; ảnh giữ đúng vị trí sau text và delivery vẫn chặn theo thứ tự reply plan.
+- Product-info có dữ liệu chất liệu bắt đầu bằng `Chất liệu`; nhánh hỏi riêng chất liệu tiếp tục dùng label có sẵn.
+- Thêm flag `REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1`, mặc định `false`; chỉ bật `true` cho page test `1198992073286645`.
+- Local và Docker `pnpm check` PASS; monorepo 998/998, Worker 292/292, targeted realtime-runner 46/46; runtime smoke trên image r24 PASS.
+- Chỉ recreate Realtime Worker; healthy/restart 0, page `APP`, Inbox/Outbox active 0, duplicate sequence 0 và mọi container khác giữ nguyên ID.
+- Human test Messenger đang chờ một inbound mới sau deploy; rollback bằng flag hoặc image/release r23, không xóa dữ liệu.
+
 ## 2026-07-29 — Product image delivery r23
 
 - Ưu tiên `FULL_SET/VAY → FULL_LOOK` trước góc `FRONT/BACK/SIDE`, nhưng giữ `CLOSEUP` là nhánh mạnh nhất.
