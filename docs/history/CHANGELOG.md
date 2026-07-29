@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-07-29 — Product image delivery r23
+
+- Ưu tiên `FULL_SET/VAY → FULL_LOOK` trước góc `FRONT/BACK/SIDE`, nhưng giữ `CLOSEUP` là nhánh mạnh nhất.
+- Khi Media Selector V2 không chọn được asset, proposal quay về ảnh `PRICE_CARD` đã verified thay vì tạo phản hồi chỉ có text.
+- Kết quả nhận diện ảnh được exact-match lại theo mã và tổng hợp toàn bộ point catalog cùng mã trước khi dựng ProductFactsV2, text và image attachment.
+- Thêm regression cho phân loại media, fallback V2 rỗng và chuỗi Outbox `TEXT → IMAGE` sau catalog rehydration.
+- Local và Docker `pnpm check` PASS; toàn monorepo 997/997 test, Worker 291/291.
+- Smoke SD395 trên worker live: exact catalog rehydration PASS, 10 ảnh catalog/10 verified/1 `FULL_LOOK`; fallback V2 rỗng PASS.
+- Chỉ recreate Realtime Worker trên page test `1198992073286645`; healthy/restart 0, log lỗi 0, Inbox/Outbox active 0 và mọi container khác giữ nguyên ID.
+- Chưa có inbound mới sau cutover nên human test Messenger vẫn chờ ảnh mới; không coi smoke nội bộ là bằng chứng Meta delivery thực tế.
+
 ## 2026-07-28 — Cutout-first + AI reranker r22
 
 - Realtime nhận diện ảnh bằng `image_cutout` trước, dùng `image_raw` làm fallback và
