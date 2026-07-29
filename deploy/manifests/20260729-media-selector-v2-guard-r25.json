@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-29T07:11:45Z",
+  "environment": "production-test-page-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "f82d9a52a4e1163c4a2bb376f7382be03856fb69",
+  "pullRequest": 48,
+  "releaseTag": "20260729-media-selector-v2-guard-r25",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260729-media-selector-v2-guard-r25",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260729-realtime-message-format-r24",
+  "composeSha256": "4d82be0aaa3d2f77bc21d22cf5191852c2fbe075247934e39de7a8ef3a7b069b",
+  "sourceMaterialization": {
+    "method": "verified-git-bundle-from-annotated-tag",
+    "bundleSha256": "2b830d2f7cbe69b96f09a5612855264b9c63bec42db6ca9b4a87d91bdc69d08b",
+    "workingTreeClean": true
+  },
+  "images": {
+    "realtimeWorker": "lana-chatbot-app:media-selector-v2-guard-r25",
+    "imageId": "sha256:e76a41c5856d0fc4b6f879bc7a6177c78c72e8a9360f326ed866b8c4c8eddaf3",
+    "containerId": "7d4245e2de3822f76654cea57372733a1900b315372d6bb494b196fbce055957",
+    "releaseLabel": "20260729-media-selector-v2-guard-r25",
+    "revisionLabel": "f82d9a52a4e1163c4a2bb376f7382be03856fb69",
+    "recreatedServices": [
+      "realtime-worker"
+    ]
+  },
+  "scope": {
+    "pageId": "1198992073286645",
+    "routingOwner": "APP",
+    "sendEnabled": true,
+    "killSwitch": false,
+    "mediaSelectorV2GuardEnabled": true,
+    "mediaSelectorV2GuardDefault": false,
+    "conversationalMessageFormatV1": true,
+    "cutoutMode": "LIVE",
+    "clarificationEnabled": true,
+    "aiRerankMode": "LIVE",
+    "n8nOwnershipChanged": false,
+    "migrationRequired": false
+  },
+  "changes": {
+    "qdrantRecognitionPreserved": true,
+    "exactCodeCatalogRehydrationPreserved": true,
+    "outboundAttachmentAuthority": "MEDIA_SELECTOR_V2",
+    "guardAllowlist": "EXACT_SELECTED_URLS",
+    "legacyPriceCardFallbackWhenSelectorEmpty": false,
+    "verifiedTextPreservedWhenAttachmentRejected": true,
+    "pageScoped": true
+  },
+  "verification": {
+    "localFullCheck": "PASS",
+    "dockerFullCheck": "PASS",
+    "monorepoTests": "1000_OF_1000_PASS",
+    "businessToolsTests": "162_OF_162_PASS",
+    "workerTests": "292_OF_292_PASS",
+    "targetedRealtimeRunnerTests": "46_OF_46_PASS",
+    "regressionTests": {
+      "selectorUrlAcceptedOutsideLegacyPriceCard": "PASS",
+      "selectorEmptyDoesNotFallback": "PASS",
+      "unverifiedAttachmentDropsToVerifiedText": "PASS",
+      "workerSendsSelectorFullLook": "PASS"
+    },
+    "realtimeWorkerHealth": "HEALTHY",
+    "realtimeWorkerRestartCount": 0,
+    "newErrorLogCount": 0,
+    "unrelatedContainerIdsUnchanged": true,
+    "pageRouting": "APP",
+    "pageSendEnabled": true,
+    "pageKillSwitch": false,
+    "workerStatus": "IDLE",
+    "workerMode": "LIVE",
+    "workerLastError": null,
+    "workerHeartbeatFresh": true,
+    "qdrantStatus": "GREEN",
+    "qdrantPointCount": 917,
+    "qdrantVectors": [
+      "image_cutout",
+      "image_raw",
+      "product_text"
+    ],
+    "inboxActiveCount": 0,
+    "outboxActiveCount": 0,
+    "duplicateOutboxSequenceGroupCount": 0,
+    "unhealthyContainerCount": 0,
+    "humanMessengerTestStatus": "PENDING_NEW_POST_DEPLOY_MESSAGE"
+  },
+  "rollback": {
+    "featureFlag": "REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED=false",
+    "releasePath": "/opt/lana-chatbot/releases/20260729-realtime-message-format-r24",
+    "realtimeImage": "lana-chatbot-app:realtime-message-format-r24",
+    "recreateOnly": [
+      "realtime-worker"
+    ],
+    "migrationRollbackRequired": false,
+    "dataDeletionRequired": false
+  }
+}

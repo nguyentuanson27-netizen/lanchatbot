@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-29 — Media Selector V2 guard r25
+
+- Giữ Qdrant cho nhận diện cutout/raw và exact-code catalog rehydration; chuyển quyền quyết định attachment product-info sang Media Selector V2.
+- Guard nhận allowlist đúng bằng các URL V2 đã chọn, nên không còn chặn ảnh `FULL_LOOK` hợp lệ chỉ vì URL đó không nằm trong tập `PRICE_CARD` suy ra từ Qdrant point.
+- V2 trả `NONE` thì không fallback ảnh `PRICE_CARD` cũ; attachment không hợp lệ bị loại riêng và text đã xác minh vẫn được giữ.
+- Thêm flag `REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED`, mặc định `false`; chỉ bật `true` cho page test `1198992073286645`.
+- Local và Docker `pnpm check` PASS; monorepo 1000/1000, Business Tools 162/162, Worker 292/292, targeted realtime-runner 46/46.
+- Chỉ recreate Realtime Worker; healthy/restart 0, Qdrant green 917 point, page `APP`, Inbox/Outbox active 0, duplicate sequence 0, log lỗi mới 0 và mọi container khác giữ nguyên ID.
+- Human test Messenger đang chờ một inbound mới sau deploy; rollback bằng flag hoặc image/release r24, không xóa dữ liệu.
+
 ## 2026-07-29 — Realtime message format r24
 
 - Tách mọi outbound text theo dòng và ranh giới câu tiếng Việt ngay trước khi ghi Meta Outbox; áp dụng cho toàn bộ nhánh realtime thay vì riêng báo giá.

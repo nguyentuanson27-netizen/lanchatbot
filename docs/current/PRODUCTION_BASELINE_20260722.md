@@ -5,24 +5,38 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260729-realtime-message-format-r24`.
-- Previous release: `/opt/lana-chatbot/releases/20260729-media-image-delivery-r23`.
-- Source commit: `b21b0f5d30a8e830b4c16481f701f811316bd598`.
-- Source materialization: Git bundle đầy đủ đã xác minh từ annotated tag `20260729-realtime-message-format-r24`; release checkout sạch và không sửa source trực tiếp trên VPS.
-- Compose SHA-256: `a668bffe3cbf42034ec8dc207987d57aae9a3530b889bd8be7b9a2900e1c85ed`.
+- Current release: `/opt/lana-chatbot/releases/20260729-media-selector-v2-guard-r25`.
+- Previous release: `/opt/lana-chatbot/releases/20260729-realtime-message-format-r24`.
+- Source commit: `f82d9a52a4e1163c4a2bb376f7382be03856fb69`.
+- Source materialization: Git bundle đầy đủ đã xác minh từ annotated tag `20260729-media-selector-v2-guard-r25`; release checkout sạch và không sửa source trực tiếp trên VPS.
+- Compose SHA-256: `4d82be0aaa3d2f77bc21d22cf5191852c2fbe075247934e39de7a8ef3a7b069b`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất trong production: `0022_dataset_review_acl`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-Realtime chạy image `lana-chatbot-app:realtime-message-format-r24`
-(`sha256:577a731df2d21eaba89508421d9259ace42a0b4eb17b27becfd4e631aab97d75`).
+Realtime chạy image `lana-chatbot-app:media-selector-v2-guard-r25`
+(`sha256:e76a41c5856d0fc4b6f879bc7a6177c78c72e8a9360f326ed866b8c4c8eddaf3`).
 API, delivery, Shadow, Admin, POS và P2.3 giữ nguyên image/container. Realtime healthy, restart count 0; ID của mọi container khác không đổi trong cutover.
 
 Không có migration mới và không thay đổi webhook, delivery, POS, P2.3, n8n hoặc page allowlist. Shadow vẫn `APP_SEND_ENABLED=false`.
 
-## Conversational message format r24
+## Media Selector V2 guard r25
 
+- Qdrant tiếp tục nhận diện ảnh bằng `image_cutout`/`image_raw` và rehydrate catalog document theo exact product code; Qdrant không còn quyết định URL attachment product-info gửi ra.
+- `REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED` mặc định `false` trong compose và được bật `true` cho Realtime Worker của page test `1198992073286645`.
+- Khi flag hoạt động, Media Selector V2 là nguồn có thẩm quyền cho attachment product-info; guard nhận đúng tập URL V2 đã chọn cho lượt hiện tại.
+- Media Selector V2 trả `NONE` thì proposal giữ text đã xác minh và không fallback sang `verifiedImageUrls(product, "PRICE_CARD")`.
+- Attachment ngoài tập V2 bị loại nhưng text đã xác minh vẫn được gửi; guard không làm mất toàn bộ phản hồi chỉ vì một URL không hợp lệ.
+- Local và Docker `pnpm check` đều PASS; toàn monorepo đạt 1000/1000 test, Business Tools 162/162, Worker 292/292, targeted realtime-runner 46/46.
+- Regression xác nhận V2 có thể chọn `FULL_LOOK` không thuộc tập `PRICE_CARD` cũ, V2 `NONE` không lùi về ảnh cũ và soft fallback giữ text khi attachment bị chặn.
+- Sau cutover realtime healthy/restart 0, log lỗi mới 0, worker ledger `IDLE/LIVE`, Qdrant green 917 point, Inbox active 0, Outbox active 0 và duplicate reply-plan/sequence 0.
+- Chỉ recreate `realtime-worker`; API, delivery, Shadow, Admin, POS, P2.3, n8n và mọi container khác giữ nguyên ID. Symlink `current` chỉ đổi sau khi worker healthy.
+- Human test Messenger sau deploy đang `PENDING_NEW_POST_DEPLOY_MESSAGE`.
+- Rollback nhanh: recreate riêng realtime-worker với `REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED=false`; rollback code dùng image/release r24. Không xóa Inbox, Outbox, Redis, PostgreSQL, Qdrant hoặc cache.
+
+
+## Conversational message format r24
 - `REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1` mặc định `false` trong compose và được bật `true` cho Realtime Worker của page test `1198992073286645`.
 - Ngay trước atomic commit, mọi `TEXT` unit trong Meta plan được tách theo dòng và ranh giới câu tiếng Việt; mỗi phần thành một Outbox sequence riêng. Quy tắc này áp dụng chung cho model, policy, sales cycle, clarification, handoff holding reply và product-info.
 - Thứ tự unit được giữ nguyên; ảnh không vượt các câu text vì Outbox vẫn khóa theo `reply_plan_id + sequence_no`.
