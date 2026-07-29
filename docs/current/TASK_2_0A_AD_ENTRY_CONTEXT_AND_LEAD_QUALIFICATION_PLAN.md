@@ -1,8 +1,9 @@
 # Task 2.0A — Meta Ads Entry Context & Lead Qualification
 
-Trạng thái: `IMPLEMENTING`
+Trạng thái: `DEPLOYED_SHADOW_EVIDENCE_PENDING`
 Phiên bản kế hoạch: `1.0`
-Baseline áp dụng: `20260729-realtime-accented-split-r26.2`
+Baseline thiết kế: `20260729-realtime-accented-split-r26.2`
+Release triển khai: `20260729-ad-acquisition-r27.1`
 Page triển khai đầu tiên và duy nhất: `1198992073286645`
 
 Tài liệu này cụ thể hóa phần acquisition attribution còn thiếu của Wave 2 cho thực tế đa số hội thoại La.na bắt đầu từ Meta Ads. Task 2.0A là một lớp analytics sidecar: ghi nhận nguồn vào, hành vi sau phản hồi đầu tiên và mức độ qualified; không thay đổi nội dung trả lời, checkout, handoff, offer, ownership hoặc quyền gửi outbound.
@@ -614,9 +615,22 @@ và ghi rõ đây là “khách xác nhận mua”, chưa phải “đơn POS đ
 - `ORDER_CREATED_ACK` vẫn bị chặn cho tới khi POS cung cấp source-of-truth.
 - Admin view/dashboard không lộ PII hoặc raw metadata.
 - Wave 2 không thay đổi outbound do Task 2.0A.
-- Full check, migration restore-test, shadow evidence và rollback smoke đạt.
-- Baseline/changelog/manifest chỉ cập nhật sau deploy thật, không cập nhật trong PR kế hoạch này.
+- Full check và migration restore-test đã đạt; shadow evidence chờ human traffic. Rollback script đã syntax-check/checksum nhưng không chạy sau cutover thành công.
+- Baseline/status/manifest đã cập nhật sau deploy production r27.1.
 
 ## 17. Thông tin cần bổ sung sau này
 
 Không cần thêm thông tin từ chủ dự án để bắt đầu 2.0A1 và 2.0A2. Trước 2.0A3 cần cung cấp hoặc chốt contract acknowledgement từ POS/order source-of-truth, gồm `orderId`, `salesCycleId`, trạng thái tạo đơn và idempotency key.
+
+## 18. Ghi nhận triển khai production
+
+- Pull request triển khai: `#56`; follow-up Compose image override: `#58`.
+- Release: `20260729-ad-acquisition-r27.1`, commit `1e9c20e24ce092738afa6732427c12eaf69a203f`.
+- Migration production: `0024_ad_acquisition_analytics`.
+- Rollout: `SHADOW` 100% trên page duy nhất `1198992073286645`.
+- `AD_ACQUISITION_WAVE2_INPUT_ENABLED=false`; outbound/prompt Wave 2 không đổi.
+- API, Realtime, Delivery, Admin API và Admin Web healthy/restart 0 trên image r27.1.
+- Admin nội bộ 200; public `admin.lanadesign.vn` 302 sang Authentik.
+- Lúc hậu kiểm chưa có traffic mới nên session/event/view acquisition bằng 0;
+  trạng thái evidence là `PENDING_HUMAN_TRAFFIC`, không tạo inbound giả.
+- 2.0A3 chưa bắt đầu; vẫn cần contract `ORDER_CREATED` từ POS.

@@ -5,26 +5,53 @@
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260729-realtime-accented-split-r26.2`.
-- Previous release: `/opt/lana-chatbot/releases/20260729-wave2-strategy-gemini35-r26.1`.
-- Source commit: `a4ea57b51e5ada5084330dcb71fea05f24138dbd`.
-- Source materialization: Git bundle đầy đủ SHA-256 `f305733f672f849f37a0611611cc5cd040580d539f2a262ae965e458925f8524` đã xác minh từ annotated tag `20260729-realtime-accented-split-r26.2`; release checkout sạch và không sửa source trực tiếp trên VPS.
-- Compose SHA-256: `40cb9e34809eda1266abd2b9709ec1bd1af2db4ab4af7df00a3abbb42f0303ff`.
+- Current release: `/opt/lana-chatbot/releases/20260729-ad-acquisition-r27.1`.
+- Previous release: `/opt/lana-chatbot/releases/20260729-realtime-accented-split-r26.2`.
+- Source commit: `1e9c20e24ce092738afa6732427c12eaf69a203f`.
+- Source materialization: Git bundle đầy đủ SHA-256 `49cb400ca86fe4d4924c567e668d5d33c80e9a6711565a4a25dc744ad14f3b95` đã xác minh từ annotated tag `20260729-ad-acquisition-r27.1`; release checkout sạch và không sửa source trực tiếp trên VPS.
+- Compose SHA-256: `fd615f338b9ac3bb555eacfdfbd08d52936f73f4df016a06a63a426dd8daffb8`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
-- Migration mới nhất trong production: `0023_wave2_strategy_metrics`.
+- Migration mới nhất trong production: `0024_ad_acquisition_analytics`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-Realtime chạy image `lana-chatbot-app:realtime-accented-split-r26.2`
-(`sha256:2197fe66d942870e482b8a66aeea84380337d32c27d4790b0b68c4fbdfe508cd`).
-Shadow, Admin API, Admin Simulation, Admin Web, P2.3B và Size Chart giữ image
-`lana-chatbot-app:wave2-strategy-gemini35-r26.1`
-(`sha256:6067695c8976c5601bd5ecd092fb33097b2fd0034152132827651f3146c0d13e`).
-Realtime healthy/restart 0; chỉ realtime được recreate. API webhook, delivery,
-Shadow, Admin, POS, P2.3, Size Chart và n8n giữ nguyên container.
+API, Realtime, Delivery, Admin API và Admin Web chạy image
+`lana-chatbot-app:ad-acquisition-r27.1`
+(`sha256:1b33e3bc963ab9dfe5c6eb8786bd1825ab907c8422f94575a16688534cdbcdb9`).
+Năm service healthy/restart 0. Shadow, Admin Simulation, POS, P2.3, Size Chart
+và n8n giữ nguyên container/image trước release.
 
-Migration `0023_wave2_strategy_metrics` đã áp dụng sau backup/restore-test `up → down → up`.
-Không thay đổi page allowlist hoặc ownership; Realtime send true, Shadow send false.
+Migration `0024_ad_acquisition_analytics` đã áp dụng sau backup production và
+restore-test `up → down → up`. Acquisition analytics chạy `SHADOW` 100% chỉ trên
+page `1198992073286645`; `AD_ACQUISITION_WAVE2_INPUT_ENABLED=false`, nên không đổi
+prompt, reply, checkout, handoff, offer, ownership hoặc outbound.
+
+## Meta Ads acquisition analytics r27.1
+
+- 2.0A1 tạo acquisition session idempotent chỉ cho referral Ads đã xác nhận,
+  giữ causal chain entry → reply plan → outbox sequence 0 → Meta accepted/terminal.
+- 2.0A2 phân tách stage lịch sử và disposition hiện tại; phủ định thắng commitment
+  xung đột. Funnel dừng ở `PURCHASE_CONFIRMED`; `CONVERTED` tiếp tục bị chặn cho tới
+  khi có acknowledgement `ORDER_CREATED` từ POS.
+- `NO_RESPONSE_1H/24H` là projection theo timestamp, không tạo timer, worker hoặc
+  outbound mới. Delivered/read giữ nullable vì chưa có exact receipt adapter.
+- Dashboard `Phễu khách từ Meta Ads` đọc duy nhất
+  `admin_acquisition_sessions_v`; view không lộ `customer_hash`, raw message hoặc
+  raw event metadata.
+- Local và Docker `pnpm check` PASS, toàn monorepo 1.032/1.032 test; Contracts
+  85/85, Database 97/97, Worker 299/299, Admin API 56/56.
+- Backup `/opt/lana-chatbot/backups/20260729-ad-acquisition-r27-predeploy.dump`
+  có SHA-256 `8d7e1f252847680e0906775d84b0394ce8b58cfef257ca0bdedf7908bdf57b11`;
+  restore-test PostgreSQL 17 không network giữ grant Admin và PII boundary.
+- Hậu kiểm: năm service target healthy/restart 0/error mới 0; API/Admin API/Admin
+  Web nội bộ 200, public Admin 302 sang Authentik; Inbox/Outbox active 0 và duplicate
+  Meta sequence 0.
+- Lúc chụp bằng chứng chưa có inbound mới sau deploy: acquisition session/event/view
+  đều 0. Human traffic evidence còn `PENDING`; không tạo inbound giả.
+- Rollback application dùng env backup
+  `.env.infrastructure.backup-20260729-ad-acquisition-r27.1`, recreate năm service
+  bằng r26.2/r26.1 images và chuyển `current` về r26.2. Giữ migration additive
+  `0024`; không xóa dữ liệu.
 
 ## Realtime trả lời có dấu và tách câu r26.2
 
