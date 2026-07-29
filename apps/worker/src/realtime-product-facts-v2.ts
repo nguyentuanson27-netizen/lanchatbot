@@ -91,14 +91,16 @@ function imagePurpose(image: StableProductDocument["images"][number]): ProductMe
   return [...new Set(purposes)];
 }
 
-function imageView(image: StableProductDocument["images"][number]): ProductMediaAssetV2["view"] {
+export function productMediaView(
+  image: StableProductDocument["images"][number],
+): ProductMediaAssetV2["view"] {
   if (image.angle === "CLOSEUP") return "CLOSE_UP";
-  if (image.angle === "FRONT" || image.angle === "BACK" || image.angle === "SIDE") {
-    return image.angle;
-  }
   if ((image.partsVisible ?? []).some((part) =>
     ["FULL_SET", "VAY"].includes(normalizeCatalogToken(part))
   )) return "FULL_LOOK";
+  if (image.angle === "FRONT" || image.angle === "BACK" || image.angle === "SIDE") {
+    return image.angle;
+  }
   return "OTHER";
 }
 
@@ -126,7 +128,7 @@ function mediaAssets(
       url: image.url,
       componentProductId,
       purposes: imagePurpose(image),
-      view: imageView(image),
+      view: productMediaView(image),
       sortOrder: image.sortOrder,
       verified: image.metadataVerified === true && image.reviewStatus === "APPROVED",
       sourceContentSha256: image.sourceContentSha256 ?? null,
