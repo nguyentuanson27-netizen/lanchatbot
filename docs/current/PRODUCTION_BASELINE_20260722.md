@@ -1,25 +1,37 @@
-# Production baseline — 2026-07-28
+# Production baseline — 2026-07-29
 
 Đây là baseline sống của production. Mỗi release phải cập nhật tài liệu này trước khi tạo tag để bản trong release directory không lệch GitHub `main`.
 
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260728-media-cutout-ai-r22`.
-- Previous release: `/opt/lana-chatbot/releases/20260728-wave1-recorded-replay-r21`.
-- Source commit: `078dae266a39e5172eb8ea96cbb1367821a8ea91`.
-- Source materialization: Git bundle đầy đủ đã xác minh từ annotated tag `20260728-media-cutout-ai-r22`; release checkout sạch và không sửa source trực tiếp trên VPS.
+- Current release: `/opt/lana-chatbot/releases/20260729-media-image-delivery-r23`.
+- Previous release: `/opt/lana-chatbot/releases/20260728-media-cutout-ai-r22`.
+- Source commit: `a962b4662128f3dc73b45d2e1491d7cb62baf35b`.
+- Source materialization: Git bundle đầy đủ đã xác minh từ annotated tag `20260729-media-image-delivery-r23`; release checkout sạch và không sửa source trực tiếp trên VPS.
 - Compose SHA-256: `d3ee298b72ed8991eba035d0af21716dccd3fb817bb7cecace51b2070d65372c`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
 - Migration mới nhất trong production: `0022_dataset_review_acl`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-Realtime chạy image `lana-chatbot-app:media-cutout-ai-r22`
-(`sha256:fd9810c6acb196f96329bc5ac57d446d1a901fd3b48c63b4b7379eb8cff37184`).
-Shadow, Admin API, Admin Simulation và Admin Web vẫn giữ image r21. Realtime healthy, restart count 0; ID/image của mọi container khác không đổi trong cutover.
+Realtime chạy image `lana-chatbot-app:media-image-delivery-r23`
+(`sha256:a7661b006a3dac6da1a7861d9085740aa08131a95bccca4e8031c06c1600ab2a`).
+API, delivery, Shadow, Admin, POS và P2.3 giữ nguyên image/container. Realtime healthy, restart count 0; ID của mọi container khác không đổi trong cutover.
 
-Không có migration mới và không thay đổi webhook, delivery, POS, P2.3, n8n hoặc page allowlist. Realtime capture bằng chứng replay đã ẩn danh cho page test; Shadow vẫn `APP_SEND_ENABLED=false`.
+Không có migration mới và không thay đổi webhook, delivery, POS, P2.3, n8n hoặc page allowlist. Shadow vẫn `APP_SEND_ENABLED=false`.
+
+## Product image delivery r23
+
+- Ảnh có `partsVisible=FULL_SET` hoặc `VAY` được chiếu thành `FULL_LOOK` trước góc `FRONT/BACK/SIDE`; `CLOSEUP` vẫn có ưu tiên cao nhất.
+- Khi Media Selector V2 trả selection rỗng, proposal fallback sang `verifiedImageUrls(product, "PRICE_CARD")` thay vì làm mất attachment.
+- Sau khi Cutout/Raw/Gemini nhận diện mã, realtime exact-match lại mã và dùng document đã tổng hợp từ tối đa 256 point Qdrant cùng mã. Runtime chỉ nhận document có cùng normalized product code; lỗi hydration giữ kết quả nhận diện cũ thay vì làm mất match.
+- Với SD395, smoke read-only trong container r23 tổng hợp 10 ảnh catalog, 10 ảnh verified và 1 ảnh `FULL_LOOK`. Smoke Media Selector V2 rỗng trả đúng ảnh fallback.
+- Local `pnpm check` và Docker `pnpm check` đều PASS; toàn monorepo đạt 997/997 test, Worker 291/291.
+- Sau cutover realtime healthy/restart 0, log lỗi mới 0, worker ledger `IDLE/LIVE`, Inbox active 0, Outbox active 0 và duplicate reply-plan/sequence 0.
+- Chỉ recreate `realtime-worker` cho page `1198992073286645`; mọi container khác giữ nguyên ID. Symlink `current` chỉ đổi sau khi worker healthy.
+- Chưa có inbound/outbox mới trong 15 phút hậu kiểm, vì vậy human test Messenger sau deploy vẫn `PENDING_NEW_POST_DEPLOY_IMAGE`; chưa được ghi nhận là đã xác minh gửi ảnh live.
+- Rollback code: recreate riêng realtime-worker bằng `lana-chatbot-app:media-cutout-ai-r22` và chuyển `current` về `/opt/lana-chatbot/releases/20260728-media-cutout-ai-r22`. Không xóa Inbox, Outbox, Redis, PostgreSQL hoặc cache.
 
 ## Cutout-first + AI reranker r22
 

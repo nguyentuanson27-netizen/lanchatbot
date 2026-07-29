@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-29T04:00:46Z",
+  "environment": "production-test-page-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "a962b4662128f3dc73b45d2e1491d7cb62baf35b",
+  "pullRequest": 44,
+  "releaseTag": "20260729-media-image-delivery-r23",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260729-media-image-delivery-r23",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260728-media-cutout-ai-r22",
+  "composeSha256": "d3ee298b72ed8991eba035d0af21716dccd3fb817bb7cecace51b2070d65372c",
+  "sourceMaterialization": {
+    "method": "verified-git-bundle-from-annotated-tag",
+    "bundleSha256": "797ceb58678f342dcc33f5b67e7238ba08d629e618f206ae428b58f5f9ec12df",
+    "workingTreeClean": true
+  },
+  "images": {
+    "realtimeWorker": "lana-chatbot-app:media-image-delivery-r23",
+    "imageId": "sha256:a7661b006a3dac6da1a7861d9085740aa08131a95bccca4e8031c06c1600ab2a",
+    "releaseLabel": "20260729-media-image-delivery-r23",
+    "revisionLabel": "a962b4662128f3dc73b45d2e1491d7cb62baf35b",
+    "recreatedServices": [
+      "realtime-worker"
+    ]
+  },
+  "scope": {
+    "pageId": "1198992073286645",
+    "routingOwner": "APP",
+    "sendEnabled": true,
+    "killSwitch": false,
+    "cutoutMode": "LIVE",
+    "clarificationEnabled": true,
+    "aiRerankMode": "LIVE",
+    "n8nOwnershipChanged": false,
+    "migrationRequired": false
+  },
+  "changes": {
+    "fullGarmentViewPrecedesDirectionalView": true,
+    "closeupRemainsHighestPriority": true,
+    "emptyMediaSelectorFallsBackToVerifiedPriceCard": true,
+    "recognizedProductExactCodeRehydration": true,
+    "rehydrationRequiresSameNormalizedCode": true,
+    "rehydrationFailureKeepsVerifiedCandidate": true
+  },
+  "verification": {
+    "localFullCheck": "PASS",
+    "dockerFullCheck": "PASS",
+    "monorepoTests": "997_OF_997_PASS",
+    "workerTests": "291_OF_291_PASS",
+    "runtimeSmoke": {
+      "exactCatalogRehydration": "PASS",
+      "productId": "SD395",
+      "aggregatedImageCount": 10,
+      "verifiedImageCount": 10,
+      "verifiedFullLookCount": 1,
+      "emptyMediaV2Fallback": "PASS"
+    },
+    "realtimeWorkerHealth": "HEALTHY",
+    "realtimeWorkerRestartCount": 0,
+    "newErrorLogCount": 0,
+    "unrelatedContainerIdsUnchanged": true,
+    "pageRouting": "APP",
+    "pageSendEnabled": true,
+    "pageKillSwitch": false,
+    "workerStatus": "IDLE",
+    "workerMode": "LIVE",
+    "workerLastError": null,
+    "inboxActiveCount": 0,
+    "outboxActiveCount": 0,
+    "inboxRecent15Minutes": 0,
+    "outboxRecent15Minutes": 0,
+    "duplicateOutboxSequenceGroupCount": 0,
+    "humanMessengerTestStatus": "PENDING_NEW_POST_DEPLOY_IMAGE"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260728-media-cutout-ai-r22",
+    "realtimeImage": "lana-chatbot-app:media-cutout-ai-r22",
+    "recreateOnly": [
+      "realtime-worker"
+    ],
+    "migrationRollbackRequired": false,
+    "dataDeletionRequired": false
+  }
+}
