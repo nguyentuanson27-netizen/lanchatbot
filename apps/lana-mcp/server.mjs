@@ -22,6 +22,7 @@ const ISSUER = ensureSlash(
 const DISCOVERY_URL =
   process.env.LANA_MCP_AUTHENTIK_DISCOVERY_URL ||
   `${ISSUER}.well-known/openid-configuration`;
+const DISCOVERY_HEADERS = forwardedOriginHeaders(ISSUER);
 const CLIENT_ID = secretValue(
   "LANA_MCP_AUTHENTIK_CLIENT_ID",
   "LANA_MCP_AUTHENTIK_CLIENT_ID_FILE",
@@ -58,6 +59,15 @@ export function trimSlash(value) {
 
 export function ensureSlash(value) {
   return `${trimSlash(value)}/`;
+}
+
+export function forwardedOriginHeaders(issuer) {
+  const origin = new URL(ensureSlash(issuer));
+  return {
+    host: origin.host,
+    "x-forwarded-host": origin.host,
+    "x-forwarded-proto": origin.protocol.replace(":", ""),
+  };
 }
 
 function secretValue(directName, fileName, fallback) {
@@ -117,7 +127,9 @@ async function fetchJson(url, options = {}) {
 async function discovery() {
   const now = Date.now();
   if (discoveryCache?.expiresAt > now) return discoveryCache.value;
-  const value = await fetchJson(DISCOVERY_URL);
+  const value = await fetchJson(DISCOVERY_URL, {
+    headers: DISCOVERY_HEADERS,
+  });
   if (ensureSlash(value.issuer) !== ISSUER) {
     throw new Error("OAUTH_ISSUER_DISCOVERY_MISMATCH");
   }
