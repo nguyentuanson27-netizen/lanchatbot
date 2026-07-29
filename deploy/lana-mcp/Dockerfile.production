@@ -1,0 +1,11 @@
+ARG LANA_BASE_IMAGE=lana-chatbot-app:ad-acquisition-r27.1
+FROM ${LANA_BASE_IMAGE}
+
+USER root
+COPY --chown=node:node apps/lana-mcp /app/apps/lana-mcp
+COPY --chown=node:node plugins/lana-chatbot-ops/scripts/remote_ops.mjs /app/plugins/lana-chatbot-ops/scripts/remote_ops.mjs
+RUN mkdir -p /data/exports && chown -R node:node /data
+
+USER node
+EXPOSE 8080
+CMD ["node", "/app/apps/lana-mcp/server.mjs"]

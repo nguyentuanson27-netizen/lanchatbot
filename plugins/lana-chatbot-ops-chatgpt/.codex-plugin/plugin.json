@@ -1,0 +1,37 @@
+{
+  "name": "lana-chatbot-ops-chatgpt",
+  "version": "0.1.0",
+  "description": "OAuth-protected remote diagnostics and controlled operations for the La.na chatbot.",
+  "author": {
+    "name": "La.na Design"
+  },
+  "homepage": "https://dev.lanadesign.vn/docs",
+  "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "keywords": [
+    "lana",
+    "chatbot",
+    "oauth",
+    "redis",
+    "qdrant",
+    "google-sheets"
+  ],
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Lana Chatbot Ops Remote",
+    "shortDescription": "Kiểm tra chatbot Lana qua OAuth",
+    "longDescription": "Kiểm tra VPS, tin nhắn, Redis, Qdrant và Google Sheets; mọi đọc nhạy cảm và ghi Sheet đều có xác nhận và audit.",
+    "developerName": "La.na Design",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://dev.lanadesign.vn",
+    "defaultPrompt": [
+      "Kiểm tra tin nhắn mới nhất và tìm nguyên nhân bot trả lời sai.",
+      "Kiểm tra Qdrant và luồng gửi ảnh sản phẩm.",
+      "Đọc Redis hoặc Sheet sau khi tôi xác nhận quyền nhạy cảm."
+    ],
+    "brandColor": "#C58A93"
+  }
+}
