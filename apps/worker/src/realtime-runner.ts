@@ -695,6 +695,7 @@ export function verifiedProductInfoProposal(
         },
       })
     : null;
+  const v2Images = v2Overview?.selection.selected.map(({ url }) => url) ?? [];
   return {
     schemaVersion: 1,
     intent: "product_info",
@@ -707,9 +708,9 @@ export function verifiedProductInfoProposal(
       sizeLine,
       followUp,
     ].join("\n"),
-    attachments: v2Overview
-      ? v2Overview.selection.selected.map(({ url }) => url)
-      : selectImages(product, "PRICE_CARD").images.map((image) => image.url),
+    attachments: v2Images.length > 0
+      ? v2Images
+      : verifiedImageUrls(product, "PRICE_CARD"),
     handoffReason: null,
     businessFactQuery: {
       intent: "PRICE",
@@ -3591,6 +3592,21 @@ export class RealtimeRunner {
       : null;
   }
 
+  private async rehydrateRecognizedProduct(
+    product: StableProductDocument,
+  ): Promise<StableProductDocument> {
+    try {
+      const hydrated = await this.exactProduct(product.productId);
+      return hydrated &&
+          normalizeProductCode(hydrated.productId) === normalizeProductCode(product.productId)
+        ? hydrated
+        : product;
+    } catch {
+      // A catalog hydration outage must not erase an otherwise verified match.
+      return product;
+    }
+  }
+
   private async searchImages(
     urls: readonly string[],
   ): Promise<readonly MediaProductSearchResult[]> {
@@ -3749,7 +3765,7 @@ export class RealtimeRunner {
         : await this.searchImages(
             imageAttachments.map((item) => item.attachment.url),
           );
-      imageAttachments.forEach((item, index) => {
+      for (const [index, item] of imageAttachments.entries()) {
         const result = results[index] ?? {
           status: "ERROR" as const,
           reasonCode: "IMAGE_SEARCH_RESULT_MISSING",
@@ -3757,13 +3773,14 @@ export class RealtimeRunner {
         if (useRecognition) {
           const recognition = result as RealtimeMediaRecognition;
           if (recognition.status === "MATCHED") {
+            const product = await this.rehydrateRecognizedProduct(recognition.product);
             mediaItems.push(mediaItemFromSearch(
               item.ordinal,
               "IMAGE",
               {
                 status: "MATCHED",
                 matchKind: "SEMANTIC",
-                product: recognition.product,
+                product,
                 score: recognition.score,
                 gap: recognition.gap,
               },
@@ -3800,7 +3817,7 @@ export class RealtimeRunner {
             result as MediaProductSearchResult,
           ));
         }
-      });
+      }
     }
 
     const videos = message.attachments

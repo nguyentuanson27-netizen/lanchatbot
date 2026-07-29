@@ -32,6 +32,7 @@ import {
   verifiedProductInfoProposal,
   type RealtimeInboxPort,
   type RealtimeModelPort,
+  type RealtimeMediaRecognitionPort,
   type RealtimeProductSearchPort,
   type RealtimeRuntimePort,
 } from "./realtime-runner.js";
@@ -413,6 +414,167 @@ describe("RealtimeRunner", () => {
       "Size M, L, XL",
       "Chị cho em xin chiều cao cân nặng hoặc số đo 3 vòng em tư vấn size cho mình nha.",
     ].join("\n"));
+  });
+
+  it("falls back to the verified price-card image when Media Selector V2 returns none", () => {
+    const imageUrl = "https://cdn.example/sd395.jpg";
+    const product = {
+      productId: "SD395", parentProductId: "SD395", canonicalCode: "SD395",
+      aliases: [], title: "Áo dài SD395", colors: [], materials: [],
+      silhouettes: [], occasions: [], imageUrls: [imageUrl], images: [],
+      catalogVersion: "catalog-v2",
+    };
+    const facts = {
+      schemaVersion: 1, status: "OK", source: "POS_SNAPSHOT",
+      observedAt: "2026-07-29T00:00:00.000Z", expiresAt: "2099-01-01T00:00:00.000Z",
+      productId: "SD395",
+      facts: {
+        schemaVersion: 1, productId: "SD395", parentProductId: "SD395",
+        offerType: "DIRECT", listPriceVnd: null, salePriceVnd: 799000,
+        sizes: ["M", "L"], stockStatus: "IN_STOCK", stockQuantity: 2,
+        deliveryEta: null, fulfillmentPolicy: "READY_STOCK", imageUrls: [imageUrl],
+      },
+      reasonCode: null,
+    } as BusinessFactEnvelopeV1;
+    const productFactsV2 = {
+      productId: "SD395",
+      content: {
+        productName: "Áo dài SD395",
+        metadata: {
+          sourceVersion: "catalog-v2",
+          observedAt: "2026-07-29T00:00:00.000Z",
+        },
+      },
+      bom: { components: [] },
+      media: {
+        assets: [],
+        metadata: {
+          authority: "QDRANT_STABLE",
+          sourceVersion: "catalog-v2",
+          observedAt: "2026-07-29T00:00:00.000Z",
+          expiresAt: "2026-08-28T00:00:00.000Z",
+          freshForSeconds: 2_592_000,
+          freshnessState: "FRESH",
+        },
+      },
+    } as unknown as ProductFactsV2;
+
+    expect(
+      verifiedProductInfoProposal(product, facts, [], null, productFactsV2)?.attachments,
+    ).toEqual([imageUrl]);
+  });
+
+  it("rehydrates a recognized product before creating TEXT then IMAGE outbox units", async () => {
+    const occurredAt = "2026-07-29T02:27:12.000Z";
+    const state = createConversationState({
+      conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
+      routingOwner: "APP",
+      now: new Date(occurredAt),
+    });
+    const pointImageUrl = "https://cdn.example/sd395-point.jpg";
+    const catalogImageUrl = "https://cdn.example/sd395-full-look.jpg";
+    const vectorProduct = {
+      productId: "SD395", parentProductId: "SD395", canonicalCode: "SD395",
+      aliases: [], title: "SD395", colors: [], materials: [], silhouettes: [],
+      occasions: [], imageUrls: [pointImageUrl], images: [], catalogVersion: "catalog-v2",
+    };
+    const catalogProduct = {
+      ...vectorProduct,
+      title: "Áo dài SD395",
+      imageUrls: [catalogImageUrl],
+    };
+    const claim = {
+      inboxId: "2a9afc47-978a-4b74-9653-3c89e75a89a0",
+      pageId: "1198992073286645",
+      eventKey: "meta:1198992073286645:message:m-sd395-image",
+      conversationHash: "meta:v1:customer-hash",
+      occurredAt: new Date(occurredAt), receivedAt: new Date(occurredAt),
+      receiveSequence: 21, attemptCount: 1,
+      leaseToken: "68c52ee9-9348-481d-a366-a6178618da3c",
+      envelope: {
+        schemaVersion: 1 as const, customerSendEnabled: false as const,
+        routing: { mode: "APP" as const, routingOwner: "APP" as const, evaluationOnly: false, reason: "APP_OWNS" as const },
+        message: {
+          schemaVersion: 1 as const, traceId: "3021af34-c98c-4086-a33c-3ecb2ad8f8f2",
+          eventKey: "meta:1198992073286645:message:m-sd395-image",
+          pageId: "1198992073286645", messageId: "m-sd395-image",
+          senderId: "customer-1", conversationId: "meta:v1:customer-hash",
+          occurredAt, isEcho: false, appId: null, text: null,
+          attachments: [{ type: "image", url: "https://scontent.xx.fbcdn.net/sd395.jpg" }],
+        },
+      },
+    };
+    const commit = vi.fn(async () => ({
+      stateCommitted: true, metaOutboxCreated: 2, pancakeTagOutboxCreated: false,
+      handoffEventCreated: false, sendAuthorized: true, reasonCodes: [],
+    }));
+    const runtime: RealtimeRuntimePort = {
+      loadOrCreate: vi.fn(async () => ({
+        conversationId: state.conversationId, pageId: claim.pageId,
+        customerHash: claim.conversationHash, stateVersion: 0, state,
+        routingOwner: "APP" as const, appSendEnabled: true, killSwitch: false,
+      })),
+      commit,
+      linkProviderConversation: vi.fn(async () => undefined),
+    };
+    const facts = {
+      ready: vi.fn(async () => true),
+      resolve: vi.fn(async () => ({
+        schemaVersion: 1 as const, status: "OK" as const, source: "POS_SNAPSHOT" as const,
+        observedAt: occurredAt, expiresAt: "2099-01-01T00:00:00.000Z", productId: "SD395",
+        facts: {
+          schemaVersion: 1 as const, productId: "SD395", parentProductId: "SD395",
+          offerType: "DIRECT", listPriceVnd: null, salePriceVnd: 799000,
+          sizes: ["M", "L"], stockStatus: "IN_STOCK" as const, stockQuantity: 2,
+          deliveryEta: null, fulfillmentPolicy: "READY_STOCK", imageUrls: [],
+        },
+        reasonCode: null,
+      })),
+      close: vi.fn(async () => undefined),
+    };
+    const search: RealtimeProductSearchPort = {
+      searchText: vi.fn(async () => ({
+        status: "MATCHED" as const, matchKind: "EXACT_CODE" as const,
+        score: 1, gap: null, product: catalogProduct,
+      })),
+      searchImage: vi.fn(),
+    };
+    const mediaRecognition: RealtimeMediaRecognitionPort = {
+      recognize: vi.fn(async () => ({
+        status: "MATCHED" as const, product: vectorProduct, score: 0.8167, gap: 0.027,
+        candidates: [], reasonCode: "GEMINI_CUTOUT_CONSENSUS",
+        telemetry: {
+          pipelineVersion: "cutout-first-ai-v1", normalizedImageHash: "a".repeat(64),
+          raw: [], cutout: [], rawGap: null, cutoutGap: null, channelsAgree: true,
+          cutoutStatus: "OK" as const, cutoutErrorCode: null, aiReason: null,
+          aiDecision: "SD395", aiModel: "gemini-3.1-flash-lite",
+          aiPromptVersion: "media-rerank-v1", aiLatencyMs: 1, cacheHit: false,
+          latencyMs: { normalize: 1, rawSearch: 1, cutout: 1, cutoutSearch: 1, ai: 1, total: 5 },
+        },
+      })),
+    };
+    const runner = new RealtimeRunner(
+      { claimNext: vi.fn(async () => claim), complete: vi.fn(async () => true), retry: vi.fn(), failPermanent: vi.fn() },
+      runtime, { generate: vi.fn(), groundWithFacts: vi.fn() }, facts, search,
+      new FailClosedTagObservationProvider(),
+      {
+        workerId: "worker-1", mode: "LIVE", sendEnabled: true,
+        mediaRecognitionEnabled: true,
+        mediaRecognitionPageIds: ["1198992073286645"],
+      },
+      undefined, undefined, undefined, undefined, undefined, mediaRecognition,
+    );
+
+    expect(await runner.processOne()).toBe(true);
+    expect(search.searchText).toHaveBeenCalledWith("SD395");
+    expect(commit).toHaveBeenCalledWith(expect.objectContaining({
+      metaPlan: expect.objectContaining({
+        messages: [
+          { kind: "TEXT", text: expect.stringContaining("SD395") },
+          { kind: "IMAGE", imageUrl: catalogImageUrl },
+        ],
+      }),
+    }), expect.any(Date));
   });
 
   it("falls back to the product code when XML title has no actual product name", () => {
