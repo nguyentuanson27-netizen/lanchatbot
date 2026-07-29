@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260729-realtime-message-format-r24`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260729-media-selector-v2-guard-r25`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -16,15 +16,16 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 
 ## Trạng thái production ngày 2026-07-29
 
-- Realtime page test đang chạy r24 từ merge commit `b21b0f5d`: mọi câu hoặc dòng outbound được ghi thành một Meta Outbox unit riêng; phần mô tả có dữ liệu chất liệu bắt đầu bằng `Chất liệu`.
-- Chỉ Realtime Worker dùng image `lana-chatbot-app:realtime-message-format-r24`; container healthy/restart 0. API, delivery, Shadow, Admin, POS, P2.3 và n8n không đổi container trong cutover.
-- Hành vi r23 vẫn được giữ: exact-code catalog rehydration, ưu tiên `FULL_SET/VAY → FULL_LOOK` trừ `CLOSEUP`, và fallback ảnh verified khi Media Selector V2 rỗng.
+- Realtime page test đang chạy r25 từ merge commit `f82d9a5`: Qdrant nhận diện/rehydrate catalog, còn Media Selector V2 quyết định attachment product-info và guard xác minh đúng URL đã chọn.
+- Chỉ Realtime Worker dùng image `lana-chatbot-app:media-selector-v2-guard-r25`; container healthy/restart 0. API, delivery, Shadow, Admin, POS, P2.3 và n8n không đổi container trong cutover.
+- Khi Media Selector V2 trả `NONE`, bot giữ text đã xác minh và không fallback sang ảnh `PRICE_CARD` cũ; attachment không hợp lệ bị loại mà không làm mất text.
+- Hành vi r24 vẫn được giữ: mỗi câu/dòng là một Meta Outbox unit riêng và phần mô tả có dữ liệu chất liệu bắt đầu bằng `Chất liệu`.
 - Wave 1 r21 chạy từ merge commit `5f817bbc`: official benchmark vẫn khóa 1.955 hội thoại hợp lệ, split 1.173/391/391, leakage 0; holdout chưa mở.
 - Realtime r21 trước cutover, Shadow, Admin API, Admin Simulation và Admin Web dùng image `lana-chatbot-app:wave1-recorded-replay-r21`; các service r21 còn lại vẫn healthy/restart 0.
 - Semantic candidate vẫn `NOT_PROMOTED`: validation `BUYING_COMMITTED` precision `42,41%`, recall `57,26%`. Production replay đang `WAITING_FOR_ELIGIBLE_TRAFFIC`; không tạo inbound giả và locked holdout vẫn đóng.
 - Admin Web, Admin API và Simulation Worker chạy cùng image r21; Admin FE health/index/static asset đều 200 và public route trả 302 sang Authentik.
 
-- Page allowlist vẫn chỉ có `1198992073286645`; webhook, delivery, POS, P2.3 và n8n không thay đổi trong release r24.
+- Page allowlist vẫn chỉ có `1198992073286645`; webhook, delivery, POS, P2.3 và n8n không thay đổi trong release r25.
 - Dashboard đọc checkout drop-off qua view ẩn danh `admin_conversation_events_v`; không mở quyền bảng hội thoại gốc cho tài khoản Admin.
 - Checkout tự nhiên dùng structured extraction có evidence/confidence và deterministic guard; app không đưa PII vào decision telemetry.
 - Xác nhận mua hiểu thêm các cách nói tự nhiên nhưng vẫn chặn câu hỏi, phủ định, do dự và yêu cầu ảnh. `OK` chỉ xác nhận khi cart đang ở đúng bước order preview.
@@ -35,7 +36,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - P2.3C đang chạy với endpoint tách nền `139.162.18.93:7000`, khoảng cách gọi Vertex 6 giây và giữ nguyên lỗi retryable cho chu kỳ sau.
 - Cross-sell được để cho bản sau r15, dùng quan hệ phối đồ được duyệt trong PostgreSQL/Admin; không dùng similarity để tự gợi ý.
 - API webhook tiếp tục chạy image `lana-chatbot-app:inbound-debounce-r1`.
-- Realtime page test chạy r24 với định dạng mỗi câu một lần gửi, Cutout-first + raw fallback + AI reranker, ProductFactsV2, Media Selector V2, exact-code catalog rehydration và hard gate chỉ cho page `1198992073286645`; Size Chart scheduler vẫn giữ pre-check idempotent.
+- Realtime page test chạy r25 với định dạng mỗi câu một lần gửi, Cutout-first + raw fallback + AI reranker, ProductFactsV2, Media Selector V2 làm nguồn attachment, exact-code catalog rehydration và hard gate chỉ cho page `1198992073286645`; Size Chart scheduler vẫn giữ pre-check idempotent.
 - Shadow worker chạy cùng image, bật Judge v2 ở `DRY_RUN`; `APP_SEND_ENABLED=false`, `CHATBOT_SEND_ENABLED=false` và role DB không có quyền ghi Meta Outbox.
 - Admin Web, Admin API và Simulation Worker chạy cùng image r21; Admin FE health/index/static asset đều 200 và public route trả 302 sang Authentik.
 - Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
@@ -70,7 +71,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - PostgreSQL đã áp dụng migration đến `0022_dataset_review_acl`; các migration trước đó, gồm projection hồ sơ số đo 48 giờ theo pseudonymous customer key, vẫn tương thích ngược.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
-Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Realtime message format r24](deploy/manifests/20260729-realtime-message-format-r24.json). Rollback realtime dùng flag định dạng hoặc image/release r23; không xóa Inbox/Outbox, Redis hoặc PostgreSQL.
+Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Manifest mới nhất là [Media Selector V2 guard r25](deploy/manifests/20260729-media-selector-v2-guard-r25.json). Rollback realtime dùng flag guard hoặc image/release r24; không xóa Inbox/Outbox, Redis, PostgreSQL hoặc Qdrant.
 
 ## Kiến trúc dữ liệu
 
@@ -80,7 +81,8 @@ Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline
 | Tag hội thoại | Pancake |
 | BOM, giá, tồn | Pancake POS |
 | Snapshot vận hành hiện tại | Google Sheets → app worker → Redis/PostgreSQL |
-| Tìm sản phẩm và ảnh ổn định | Qdrant |
+| Tìm sản phẩm, vector nhận diện và catalog rehydration | Qdrant |
+| Ảnh product-info gửi ra | Media Selector V2 từ catalog đã xác minh |
 | Hội thoại, Inbox/Outbox, audit | PostgreSQL |
 | Cache và projection realtime | Redis |
 | Prompt/model | Release manifest |
@@ -149,6 +151,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 - [Trạng thái triển khai nhận diện ảnh r22](docs/current/MEDIA_RECOGNITION_R22_STATUS_20260728.md)
 - [Trạng thái gửi ảnh sản phẩm sau nhận diện r23](docs/current/MEDIA_IMAGE_DELIVERY_R23_STATUS_20260729.md)
 - [Trạng thái định dạng mỗi câu một tin r24](docs/current/REALTIME_MESSAGE_FORMAT_R24_STATUS_20260729.md)
+- [Trạng thái Media Selector V2 guard r25](docs/current/MEDIA_SELECTOR_V2_GUARD_R25_STATUS_20260729.md)
 - [Quy trình GitHub và triển khai](docs/current/REPOSITORY_AND_DEPLOYMENT.md)
 - [Changelog](docs/history/CHANGELOG.md)
 - [Kiến trúc nền](docs/phase0/02_architecture_contracts.md)
