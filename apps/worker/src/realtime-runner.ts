@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import {
-  detectBuyingSignal,
+  resolveHybridBuyingSignal,
   extractCustomerMeasurements,
   assembleReply,
   buildVerifiedFactBlocks,
@@ -463,6 +463,7 @@ export function splitRealtimeMetaMessages(
 
 export function isLegacyUnaccentedProductInfoReply(value: string): boolean {
   const lines = value.replace(/\r\n?/gu, "\n").split("\n");
+
   const hasVietnameseMark = (line: string): boolean =>
     /[\u0300-\u036fđĐ]/u.test(line.normalize("NFD"));
   return lines.some((line) => {
@@ -474,6 +475,29 @@ export function isLegacyUnaccentedProductInfoReply(value: string): boolean {
         "chi cho em xin chieu cao can nang hoac so do 3 vong em tu van size cho minh nha",
       )
     );
+  });
+}
+
+export function groupRealtimeMetaMessagesV2(
+  messages: readonly RealtimeMetaMessageUnit[],
+  splitProductInfoFollowUp = false,
+): RealtimeMetaMessageUnit[] {
+  if (!splitProductInfoFollowUp) return [...messages];
+  let split = false;
+  return messages.flatMap((message) => {
+    if (split || message.kind !== "TEXT") return [message];
+    const [information, ...followUpParts] = message.text
+      .replace(/\r\n?/gu, "\n")
+      .split(/\n{2,}/gu)
+      .map((part) => part.trim())
+      .filter(Boolean);
+    const followUp = followUpParts.join("\n\n").trim();
+    if (!information || !followUp) return [message];
+    split = true;
+    return [
+      { kind: "TEXT" as const, text: information },
+      { kind: "TEXT" as const, text: followUp },
+    ];
   });
 }
 
@@ -528,7 +552,7 @@ export function multiProductReply(
     : null;
   if (offer) lines.push(offer.message);
   lines.push(
-    "C thích set nào và cho em xin chiều cao, cân nặng hoặc số đo để tư vấn size nha.",
+    "Chị chọn set mình thích và gửi em chiều cao, cân nặng để em tư vấn size phù hợp nhé.",
   );
   return lines.join("\n");
 }
@@ -705,25 +729,35 @@ export function verifiedProductInfoProposal(
   profile: CustomerProfileV1 | null = null,
   productFactsV2: ProductFactsV2 | null = null,
   now = new Date(),
-  conversationalMessageFormatEnabled = false,
+  _conversationalMessageFormatEnabled = false,
   mediaSelectorV2Authoritative = false,
 ): AgentProposalV1 | null {
   if (facts.status !== "OK" || facts.facts === null) return null;
   const price = facts.facts.salePriceVnd ?? facts.facts.listPriceVnd;
   if (price === null) return null;
   const displayName = productDisplayName(product);
-  const designLine = productDescriptionLine(
-    product,
-    conversationalMessageFormatEnabled,
-  );
-  const sizeLine = facts.facts.sizes.length > 0
-    ? `Size ${facts.facts.sizes.join(", ")}`
-    : "Size đang cập nhật";
+  const description = compactXmlDescription(product.descriptionXml);
+  const material = xmlMaterialPhrase(product, description);
+  const form = xmlFormPhrase(product, description);
+  const displayNameContainsCode = normalizedVietnamese(displayName)
+    .replace(/[^a-z0-9]+/gu, "")
+    .includes(normalizedVietnamese(product.productId).replace(/[^a-z0-9]+/gu, ""));
+  const heading = displayNameContainsCode
+    ? sentenceCase(displayName)
+    : `${sentenceCase(displayName)} (mã ${product.productId})`;
+  const informationLines = [
+    `${heading} hiện có giá ${new Intl.NumberFormat("vi-VN").format(price)}đ chị nhé.`,
+    ...(material ? [`Chất liệu: ${material}`] : []),
+    ...(form ? [`Form dáng: ${form}`] : []),
+    ...(facts.facts.sizes.length > 0
+      ? [`Size: ${facts.facts.sizes.join(", ")}`]
+      : []),
+  ];
   const followUp = (profile !== null
     ? profileHasBodyMeasurements(profile)
     : hasBodyProfile(context))
-    ? "Chị gửi thêm số đo 3 vòng để em chốt size chuẩn form cho mình nha."
-    : "Chị cho em xin chiều cao cân nặng hoặc số đo 3 vòng em tư vấn size cho mình nha.";
+    ? "Em đã có số đo chị gửi, em sẽ dùng thông tin này để tư vấn size phù hợp cho mẫu nhé."
+    : "Chị gửi em chiều cao và cân nặng, em tư vấn size phù hợp cho chị nhé.";
   const v2Overview = productFactsV2
     ? selectProductMediaV2({
         product: productFactsV2,
@@ -749,12 +783,7 @@ export function verifiedProductInfoProposal(
     conversationStage: "PRODUCT_MATCHED",
     productId: product.productId,
     action: "REPLY",
-    reply: [
-      `Dạ ${displayName} có giá ${shortPrice(price)} ạ`,
-      designLine,
-      sizeLine,
-      followUp,
-    ].join("\n"),
+    reply: `${informationLines.join("\n")}\n\n${followUp}`,
     attachments: mediaSelectorV2Authoritative
       ? v2Images
       : v2Images.length > 0
@@ -772,12 +801,12 @@ export function verifiedProductInfoProposal(
 }
 
 const IMAGE_INTENT_REPLIES: Readonly<Record<CustomerImageIntent, string>> = {
-  FEEDBACK: "Dạ em gửi chị ảnh khách đã mặc mẫu này ạ",
-  DETAIL: "Dạ em gửi chị ảnh cận chất liệu ạ",
-  BACK: "Dạ em gửi chị ảnh mặt sau ạ",
-  SIZE_GUIDE: "Dạ em gửi chị bảng size ạ",
-  PRODUCT_ONLY: "Dạ em gửi chị ảnh sản phẩm ạ",
-  GENERIC: "Dạ em gửi chị thêm ảnh mẫu này ạ",
+  FEEDBACK: "Em gửi chị ảnh khách đã mặc mẫu này nhé",
+  DETAIL: "Em gửi chị ảnh cận chất liệu nhé",
+  BACK: "Em gửi chị ảnh mặt sau nhé",
+  SIZE_GUIDE: "Em gửi chị bảng size nhé",
+  PRODUCT_ONLY: "Em gửi chị ảnh sản phẩm nhé",
+  GENERIC: "Em gửi chị thêm ảnh của mẫu này nhé",
 };
 
 /**
@@ -821,7 +850,7 @@ function productInfoLookupProposal(product: StableProductDocument): AgentProposa
     conversationStage: "PRODUCT_MATCHED",
     productId: product.productId,
     action: "REPLY",
-    reply: `Dạ em đang kiểm tra mẫu ${product.productId} ạ`,
+    reply: `Em đang kiểm tra thông tin mẫu ${product.productId} để trả lời chị chính xác.`,
     attachments: [],
     handoffReason: null,
     businessFactQuery: {
@@ -871,6 +900,30 @@ export function unavailableFactsRequireHandoff(
   );
 }
 
+export function unresolvedProductRequiresHandoff(
+  customerText: string,
+  context: {
+    readonly isEcho: boolean;
+    readonly hasAdsContext: boolean;
+    readonly hasResolvedProduct: boolean;
+    readonly hasClarification: boolean;
+    readonly hasBuyingSignal: boolean;
+  },
+): boolean {
+  return (
+    !context.isEcho &&
+    !context.hasResolvedProduct &&
+    !context.hasClarification &&
+    (
+      context.hasAdsContext ||
+      productCodeOnly(customerText) !== null ||
+      extractAdProductCodes(customerText).length > 0 ||
+      explicitCustomerBusinessIntent(customerText) !== null ||
+      context.hasBuyingSignal
+    )
+  );
+}
+
 function safeStaleProposal(
   proposal: AgentProposalV1,
   explicitIntent: ExplicitCustomerBusinessIntent | null,
@@ -888,7 +941,7 @@ function safeStaleProposal(
   return {
     ...proposal,
     action: "REPLY",
-    reply: `Dạ em đã tìm thấy mẫu ${productId} ạ. ${detail}`,
+    reply: `Em đã tìm thấy mẫu ${productId}. ${detail}`,
     attachments: [],
     handoffReason: null,
   };
@@ -899,8 +952,8 @@ function safeModelHandoffFallback(
   productId: string | null,
 ): AgentProposalV1 {
   const reply = productId
-    ? `Dạ em đã tìm thấy mẫu ${productId} ạ. Chị muốn xem giá, size, tình trạng hàng hay thời gian giao dự kiến ạ?`
-    : "Dạ chị gửi giúp em mã sản phẩm hoặc ảnh mẫu chị đang quan tâm để em kiểm tra chính xác ạ.";
+    ? `Em đã tìm thấy mẫu ${productId}. Chị muốn xem giá, size, tình trạng hàng hay thời gian giao dự kiến?`
+    : "Chị gửi mã sản phẩm hoặc ảnh mẫu đang quan tâm để em kiểm tra chính xác nhé.";
   return {
     ...proposal,
     productId,
@@ -1165,7 +1218,7 @@ function multiFactReply(
     );
   }
   if (lines.length === 0) return null;
-  lines.push("C chọn mẫu và size muốn lấy để em kiểm tra đúng biến thể nha.");
+  lines.push("Chị chọn mẫu và size muốn lấy để em kiểm tra đúng biến thể nhé.");
   return lines.join("\n");
 }
 
@@ -1222,7 +1275,7 @@ export function catalogAdvisoryReply(
   const answer = structured.length > 0
     ? structured.join(", ")
     : fallback ?? "đang được cập nhật";
-  return `${label} của ${productDisplayName(product)}: ${answer}. C cần em kiểm tra thêm giá hay size nha.`;
+  return `${label} của ${productDisplayName(product)}: ${answer}. Chị cần em kiểm tra thêm giá hay size không?`;
 }
 
 const MEASUREMENT_LABELS: Readonly<Record<MeasurementKind, string>> = {
@@ -1345,7 +1398,7 @@ function sizeEngineProposal(
     return {
       ...proposal,
       action: "REPLY",
-      reply: `Chị cho em xin thêm ${fields} để em chốt size chuẩn form nha.`,
+      reply: `Chị gửi thêm ${fields}, em tư vấn size phù hợp cho mẫu này nhé.`,
       attachments: [],
       handoffReason: null,
     };
@@ -1656,6 +1709,7 @@ export interface RealtimeRunnerOptions {
   readonly mediaRecognitionPageIds?: readonly string[];
   readonly conversationalMessageFormatEnabled?: boolean;
   readonly mediaSelectorV2GuardEnabled?: boolean;
+  readonly messageGroupingV2Enabled?: boolean;
   readonly wave2StrategyEnabled?: boolean;
   readonly adAcquisitionAnalyticsMode?: "OFF" | "SHADOW" | "LIVE";
   readonly adAcquisitionPageIds?: readonly string[];
@@ -1724,6 +1778,8 @@ export class RealtimeRunner {
       ],
       conversationalMessageFormatEnabled:
         options.conversationalMessageFormatEnabled ?? false,
+      messageGroupingV2Enabled:
+        options.messageGroupingV2Enabled ?? false,
       mediaSelectorV2GuardEnabled:
         options.mediaSelectorV2GuardEnabled ?? false,
       wave2StrategyEnabled: options.wave2StrategyEnabled ?? false,
@@ -2400,13 +2456,14 @@ export class RealtimeRunner {
     let multiFactAudit: NonNullable<
       RealtimeDecisionEventPlan["details"]["factQueryResults"]
     > = [];
-    const buyingSignal = message.isEcho
-      ? { isBuyingSignal: false as const, reasons: [] as const }
-      : detectBuyingSignal(message.text ?? "", {
-          hasProductContext: Boolean(
-            resolvedProduct?.productId ?? nextState.currentProductId,
-          ),
-        });
+    let buyingSignal = resolveHybridBuyingSignal(
+      message.isEcho ? "" : message.text ?? "",
+      {
+        hasProductContext: Boolean(
+          resolvedProduct?.productId ?? nextState.currentProductId,
+        ),
+      },
+    );
     if (
       this.options.wave2StrategyEnabled &&
       !message.isEcho &&
@@ -2570,6 +2627,27 @@ export class RealtimeRunner {
         const transitioned = applySilentHandoff(
           nextState,
           "PRODUCT_AMBIGUOUS",
+          nextState.revision,
+          nextState.lastFence,
+          now,
+        );
+        nextState = transitioned.state;
+        handoff = transitioned.handoff;
+      } else if (
+        unresolvedProductRequiresHandoff(message.text ?? "", {
+          isEcho: message.isEcho,
+          hasAdsContext: Boolean(message.adsContext),
+          hasResolvedProduct: resolvedProduct !== null,
+          hasClarification: resolution.clarification !== null,
+          hasBuyingSignal: buyingSignal.isBuyingSignal,
+        })
+      ) {
+        handoffGuardReasonCodes = [
+          "PRODUCT_UNRESOLVED_REQUIRES_HANDOFF",
+        ];
+        const transitioned = applySilentHandoff(
+          nextState,
+          "UNVERIFIED_PRODUCT_ID",
           nextState.revision,
           nextState.lastFence,
           now,
@@ -2821,7 +2899,9 @@ export class RealtimeRunner {
         const directProductInfo = resolvedProduct !== null && imageRequest === null && (
           isResolvedProductCodeOnly(message.text ?? "", resolvedProduct) ||
           resolution.origin === "ADS" || resolution.origin === "MEDIA" ||
-          resolution.origin === "SELECTION" || resolution.origin === "TEXT_CODE"
+          resolution.origin === "SELECTION" || resolution.origin === "TEXT_CODE" ||
+          (explicitCustomerBusinessIntent(message.text ?? "") === "PRICE" &&
+            advisoryIntent === null)
         );
         // Lượt gửi ảnh và thẻ báo giá đều dựng bằng dữ liệu đã xác minh, không
         // gọi model, nên không được trừ hạn ngạch sinh nội dung.
@@ -2891,6 +2971,39 @@ export class RealtimeRunner {
             }
           }
         }
+        const hasVerifiedProductContext = Boolean(
+          resolvedProduct?.productId ?? nextState.currentProductId,
+        );
+        const modelBuyingSignal = resolveHybridBuyingSignal(
+          message.text ?? "",
+          { hasProductContext: true },
+          proposal.salesSignals?.buyingIntent,
+        );
+        buyingSignal = resolveHybridBuyingSignal(
+          message.text ?? "",
+          { hasProductContext: hasVerifiedProductContext },
+          proposal.salesSignals?.buyingIntent,
+        );
+        if (
+          !hasVerifiedProductContext &&
+          modelBuyingSignal.source === "MODEL_STRUCTURED_OUTPUT" &&
+          modelBuyingSignal.isBuyingSignal
+        ) {
+          handoffGuardReasonCodes = [
+            ...new Set([
+              ...handoffGuardReasonCodes,
+              "PRODUCT_UNRESOLVED_REQUIRES_HANDOFF",
+            ]),
+          ];
+          proposal = {
+            ...proposal,
+            productId: null,
+            action: "HANDOFF",
+            reply: "",
+            attachments: [],
+            handoffReason: "UNVERIFIED_PRODUCT_ID",
+          };
+        }
         if (
           this.options.buyingSignalGuardEnabled &&
           proposal.action === "NO_REPLY" &&
@@ -2902,8 +3015,7 @@ export class RealtimeRunner {
                 ...proposal,
                 productId: resolvedProduct.productId,
                 action: "REPLY",
-                reply:
-                  "Em ghi nhận mình chốt mẫu này, c gửi em size/màu muốn lấy nha.",
+                reply: "Mẫu này đã sẵn sàng để lên giỏ. Chị chọn giúp em size và màu muốn lấy nhé.",
                 attachments: [],
                 handoffReason: null,
               }
@@ -2911,8 +3023,7 @@ export class RealtimeRunner {
                 ...proposal,
                 productId: null,
                 action: "ASK_PRODUCT_SELECTION",
-                reply:
-                  "C chốt mẫu nào gửi em mã hoặc ảnh mẫu đó giúp em nha.",
+                reply: "Chị cho em biết mẫu muốn lấy để em hỗ trợ đúng sản phẩm nhé.",
                 attachments: [],
                 handoffReason: null,
               };
@@ -3204,7 +3315,8 @@ export class RealtimeRunner {
         ];
         if (
           guarded.action === "HANDOFF" &&
-          !modelHandoffPermitted(message.text ?? "", facts)
+          !modelHandoffPermitted(message.text ?? "", facts) &&
+          !handoffGuardReasonCodes.includes("PRODUCT_UNRESOLVED_REQUIRES_HANDOFF")
         ) {
           proposal = safeModelHandoffFallback(
             proposal,
@@ -3241,7 +3353,9 @@ export class RealtimeRunner {
           ];
           const transitioned = applySilentHandoff(
             nextState,
-            this.handoffReason(proposal, guarded.blockedReasonCodes),
+            handoffGuardReasonCodes.includes("PRODUCT_UNRESOLVED_REQUIRES_HANDOFF")
+              ? "UNVERIFIED_PRODUCT_ID"
+              : this.handoffReason(proposal, guarded.blockedReasonCodes),
             nextState.revision,
             nextState.lastFence,
             now,
@@ -3342,7 +3456,15 @@ export class RealtimeRunner {
     ) {
       metaMessages = [...holdingMessagesForHandoff(message, handoff)];
     }
-    if (this.options.conversationalMessageFormatEnabled) {
+    if (this.options.messageGroupingV2Enabled) {
+      metaMessages = groupRealtimeMetaMessagesV2(
+        metaMessages,
+        !salesHandled && (
+          proposal?.intent === "product_info" ||
+          proposal?.businessFactQuery.intent === "PRICE"
+        ),
+      );
+    } else if (this.options.conversationalMessageFormatEnabled) {
       metaMessages = splitRealtimeMetaMessages(metaMessages);
     }
 

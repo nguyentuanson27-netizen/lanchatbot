@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { containsBuyingSignal } from "@lana/business-tools";
+import { resolveHybridBuyingSignal } from "@lana/business-tools";
 import {
   CheckoutRevalidationV1Schema,
   OrderPreviewV1Schema,
@@ -168,12 +168,38 @@ function explicitQuantityValue(text: string): number | null {
   return Number.isInteger(value) && value >= 1 && value <= 20 ? value : null;
 }
 
-function explicitQuantity(text: string): number {
-  return explicitQuantityValue(text) ?? 1;
+function requestedQuantityValue(
+  text: string,
+  hasProductContext: boolean,
+  salesSignals: AgentSalesSignalsV1 | null | undefined,
+): number | null {
+  const deterministic = explicitQuantityValue(text);
+  if (deterministic !== null) return deterministic;
+  return resolveHybridBuyingSignal(
+    text,
+    { hasProductContext },
+    salesSignals?.buyingIntent,
+  ).quantity;
 }
 
-function purchaseReady(text: string, hasProductContext: boolean): boolean {
-  return containsBuyingSignal(text, { hasProductContext });
+function requestedQuantity(
+  text: string,
+  hasProductContext: boolean,
+  salesSignals: AgentSalesSignalsV1 | null | undefined,
+): number {
+  return requestedQuantityValue(text, hasProductContext, salesSignals) ?? 1;
+}
+
+function purchaseReady(
+  text: string,
+  hasProductContext: boolean,
+  salesSignals: AgentSalesSignalsV1 | null | undefined,
+): boolean {
+  return resolveHybridBuyingSignal(
+    text,
+    { hasProductContext },
+    salesSignals?.buyingIntent,
+  ).isBuyingSignal;
 }
 
 function exactEvidence(text: string, evidenceText: string | null): boolean {
@@ -371,12 +397,12 @@ function clarificationMessage(
 ): string {
   const labels = missing.map((field) => CHECKOUT_FIELD_LABELS[field]);
   if (attemptCount === 1) {
-    return `C gửi thêm ${labels.join(", ")} giúp em nha.`;
+    return `Chị gửi thêm ${labels.join(", ")} trong một tin nhắn giúp em nhé.`;
   }
   if (attemptCount === 2) {
-    return `Em chưa nhận được ${labels[0]}. C bổ sung riêng mục này giúp em nhé.`;
+    return `Em vẫn còn thiếu ${labels[0]}. Chị bổ sung riêng thông tin này giúp em nhé.`;
   }
-  return `Để tiếp tục lên đơn, c cho em xin ${labels.join(", ")} ạ.`;
+  return `Để tiếp tục lên đơn, chị gửi giúp em ${labels.join(", ")} nhé.`;
 }
 
 function clarificationFingerprint(message: string): string {
@@ -426,7 +452,7 @@ function cartSummary(cart: CartV1): string {
 }
 
 function checkoutTemplate(cart: CartV1): string {
-  return `${cartSummary(cart)}\nC gửi giúp em:\nTên:\nSĐT:\nĐịa chỉ:\nThanh toán: COD hoặc chuyển khoản nha.`;
+  return `${cartSummary(cart)}\nChị gửi giúp em các thông tin nhận hàng:\nTên:\nSĐT:\nĐịa chỉ:\nThanh toán: COD hoặc chuyển khoản nhé.`;
 }
 
 function trustedInbound(input: RealtimeSalesCycleInput): VerifiedInboundMessageV1 {
@@ -780,7 +806,7 @@ export async function evaluateRealtimeSalesCycle(
     const messages: RealtimeSalesCycleOutput["messages"] = [
       {
         kind: "TEXT",
-        text: "Em đã ghi nhận xác nhận mua hàng. Nhân viên sẽ kiểm tra và lên đơn cho c ngay ạ.",
+        text: "Em đã ghi nhận xác nhận mua hàng. Nhân viên sẽ kiểm tra và lên đơn cho chị ngay ạ.",
       },
       ...(result.paymentInstruction
         ? [
@@ -812,7 +838,7 @@ export async function evaluateRealtimeSalesCycle(
       if (!line || state.cart.value.lines.length <= 1) {
         return {
           handled: true,
-          messages: [{ kind: "TEXT", text: "Giỏ chỉ còn một mẫu; c muốn đổi sang mã nào gửi em mã sp nhé." }],
+          messages: [{ kind: "TEXT", text: "Giỏ hiện chỉ còn một sản phẩm. Chị gửi mã mẫu muốn đổi để em kiểm tra giúp chị nhé." }],
           plan: null,
           transferToHuman: false,
           desiredTag: null,
@@ -959,7 +985,7 @@ export async function evaluateRealtimeSalesCycle(
         handled: true,
         messages: [{
           kind: "TEXT",
-          text: `${cartSummary(state.cart.value)}\nNgười nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}\nĐịa chỉ: ${preview.recipient.address}\nThanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}\nDự kiến nhận hàng: ${checked.eta.minDays}-${checked.eta.maxDays} ngày.\nC xác nhận chốt đơn giúp em nhé.`,
+          text: `${cartSummary(state.cart.value)}\nNgười nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}\nĐịa chỉ: ${preview.recipient.address}\nThanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}\nDự kiến nhận hàng: ${checked.eta.minDays}-${checked.eta.maxDays} ngày.\nChị xác nhận chốt đơn giúp em nhé.`,
         }],
         plan: plan(),
         transferToHuman: false,
@@ -975,15 +1001,15 @@ export async function evaluateRealtimeSalesCycle(
     }
 
     if (
-      purchaseReady(input.text, Boolean(input.productId || state.cart)) &&
+      purchaseReady(input.text, Boolean(input.productId || state.cart), input.salesSignals) &&
       input.productId &&
       state.cart.value.lines.some(({ parentProductId }) => parentProductId === input.productId) &&
-      explicitQuantityValue(input.text) !== null
+      requestedQuantityValue(input.text, true, input.salesSignals) !== null
     ) {
       const existing = state.cart.value.lines.find(({ parentProductId }) =>
         parentProductId === input.productId
       )!;
-      const quantity = explicitQuantityValue(input.text)!;
+      const quantity = requestedQuantityValue(input.text, true, input.salesSignals)!;
       if (quantity === existing.quantity) {
         return {
           handled: true,
@@ -1044,7 +1070,7 @@ export async function evaluateRealtimeSalesCycle(
     }
 
     if (
-      purchaseReady(input.text, Boolean(input.productId || state.cart)) &&
+      purchaseReady(input.text, Boolean(input.productId || state.cart), input.salesSignals) &&
       input.productId &&
       !state.cart.value.lines.some(({ parentProductId }) => parentProductId === input.productId)
     ) {
@@ -1054,7 +1080,7 @@ export async function evaluateRealtimeSalesCycle(
         offerType: input.offerType,
         size: explicitSize(input.text) ?? input.size,
         color: input.color,
-        quantity: explicitQuantity(input.text),
+        quantity: requestedQuantity(input.text, true, input.salesSignals),
         lineId: deterministicUuid(`${state.cart.value.cartId}:${input.productId}:${input.eventKey}`),
       }, input.now);
       if (selected.status !== "READY") {
@@ -1062,7 +1088,7 @@ export async function evaluateRealtimeSalesCycle(
           const values = selected.status === "SIZE_REQUIRED" ? selected.availableSizes : selected.availableColors;
           return {
             handled: true,
-            messages: [{ kind: "TEXT", text: `C chọn ${selected.status === "SIZE_REQUIRED" ? "size" : "màu"} ${values.join("/")} giúp em nha.` }],
+            messages: [{ kind: "TEXT", text: `Mẫu này hiện có ${selected.status === "SIZE_REQUIRED" ? "size" : "màu"} ${values.join("/")}. Chị chọn phương án phù hợp để em tiếp tục lên giỏ nhé.` }],
             plan: null,
             transferToHuman: false,
             desiredTag: null,
@@ -1113,7 +1139,7 @@ export async function evaluateRealtimeSalesCycle(
   }
 
   if (
-    purchaseReady(input.text, Boolean(input.productId || state.cart)) &&
+    purchaseReady(input.text, Boolean(input.productId || state.cart), input.salesSignals) &&
     input.productId
   ) {
     const selected = await input.facts.resolveCartSelection({
@@ -1122,7 +1148,7 @@ export async function evaluateRealtimeSalesCycle(
       offerType: input.offerType,
       size: explicitSize(input.text) ?? input.size,
       color: input.color,
-      quantity: explicitQuantity(input.text),
+      quantity: requestedQuantity(input.text, true, input.salesSignals),
       lineId: deterministicUuid(`${input.conversationId}:${input.productId}:${input.eventKey}`),
     }, input.now);
     if (selected.status !== "READY") {
@@ -1136,7 +1162,7 @@ export async function evaluateRealtimeSalesCycle(
         const values = selected.status === "SIZE_REQUIRED" ? selected.availableSizes : selected.availableColors;
         return {
           handled: true,
-          messages: [{ kind: "TEXT", text: `C chọn ${selected.status === "SIZE_REQUIRED" ? "size" : "màu"} ${values.join("/")} giúp em nha.` }],
+          messages: [{ kind: "TEXT", text: `Mẫu này hiện có ${selected.status === "SIZE_REQUIRED" ? "size" : "màu"} ${values.join("/")}. Chị chọn phương án phù hợp để em tiếp tục lên giỏ nhé.` }],
           plan: plan(),
           transferToHuman: false,
           desiredTag: null,

@@ -14,6 +14,7 @@ import {
   explicitCustomerImageIntent,
   isLegacyUnaccentedProductInfoReply,
   isPostSaleRequest,
+  groupRealtimeMetaMessagesV2,
   isPreSalePolicyQuestion,
   FailClosedTagObservationProvider,
   hasCustomerMeasurementSignal,
@@ -31,6 +32,7 @@ import {
   staleFactsRequireHandoff,
   splitRealtimeMetaMessages,
   unavailableFactsRequireHandoff,
+  unresolvedProductRequiresHandoff,
   verifiedProductInfoProposal,
   type RealtimeInboxPort,
   type RealtimeModelPort,
@@ -59,6 +61,41 @@ describe("RealtimeRunner", () => {
       { kind: "TEXT", text: "Form suông nhẹ khi di chuyển." },
       { kind: "TEXT", text: "Size S, M, L" },
       { kind: "IMAGE", imageUrl: "https://cdn.example/sd395.jpg" },
+    ]);
+  });
+
+  it("keeps normal advice in one bubble and splits only the product follow-up", () => {
+    const advice = {
+      kind: "TEXT" as const,
+      text: "Mẫu này có form ôm nhẹ ở eo. Chị chọn size M sẽ thoải mái hơn.",
+    };
+    expect(groupRealtimeMetaMessagesV2([advice])).toEqual([advice]);
+
+    expect(groupRealtimeMetaMessagesV2([
+      {
+        kind: "TEXT",
+        text: [
+          "Set váy Quỳnh Dao (mã SV695) hiện có giá 770.000đ chị nhé.",
+          "Chất liệu: lụa mềm",
+          "Form dáng: chiết eo",
+          "Size: M, L, XL",
+          "",
+          "Chị gửi em chiều cao và cân nặng, em tư vấn size phù hợp cho chị nhé.",
+        ].join("\n"),
+      },
+      { kind: "IMAGE", imageUrl: "https://cdn.example/sv695.jpg" },
+    ], true)).toEqual([
+      {
+        kind: "TEXT",
+        text: [
+          "Set váy Quỳnh Dao (mã SV695) hiện có giá 770.000đ chị nhé.",
+          "Chất liệu: lụa mềm",
+          "Form dáng: chiết eo",
+          "Size: M, L, XL",
+        ].join("\n"),
+      },
+      { kind: "TEXT", text: "Chị gửi em chiều cao và cân nặng, em tư vấn size phù hợp cho chị nhé." },
+      { kind: "IMAGE", imageUrl: "https://cdn.example/sv695.jpg" },
     ]);
   });
 
@@ -343,6 +380,40 @@ describe("RealtimeRunner", () => {
     expect(modelHandoffPermitted("CB182", missing)).toBe(true);
   });
 
+  it("requires silent handoff only for unresolved product-specific requests", () => {
+    const unresolved = {
+      isEcho: false,
+      hasAdsContext: false,
+      hasResolvedProduct: false,
+      hasClarification: false,
+      hasBuyingSignal: false,
+    };
+    expect(unresolvedProductRequiresHandoff("sv999", unresolved)).toBe(true);
+    expect(unresolvedProductRequiresHandoff("mẫu này giá bao nhiêu", unresolved)).toBe(true);
+    expect(unresolvedProductRequiresHandoff("chị cần tư vấn mẫu đi làm", {
+      ...unresolved,
+      hasAdsContext: true,
+    })).toBe(true);
+    expect(unresolvedProductRequiresHandoff("chốt mẫu này", {
+      ...unresolved,
+      hasBuyingSignal: true,
+    })).toBe(true);
+
+    expect(unresolvedProductRequiresHandoff("chị cần tư vấn mẫu đi làm", unresolved)).toBe(false);
+    expect(unresolvedProductRequiresHandoff("sv999", {
+      ...unresolved,
+      hasResolvedProduct: true,
+    })).toBe(false);
+    expect(unresolvedProductRequiresHandoff("sv999", {
+      ...unresolved,
+      hasClarification: true,
+    })).toBe(false);
+    expect(unresolvedProductRequiresHandoff("sv999", {
+      ...unresolved,
+      isEcho: true,
+    })).toBe(false);
+  });
+
   it("treats a bare product code as the standard price/info-card request", () => {
     expect(productCodeOnly("sv695")).toBe("SV695");
     expect(productCodeOnly("mã sp: sv695")).toBe("SV695");
@@ -449,10 +520,12 @@ describe("RealtimeRunner", () => {
       businessFactQuery: { intent: "PRICE" },
     });
     expect(proposal?.reply).toBe([
-      "Dạ áo dài Dao Phụng có giá 1199k ạ",
-      "Ren họa tiết hoa chìm phối tơ ống tạo bề mặt tinh tế, có độ rủ mềm. Form suông rộng giúp tà áo bay nhẹ khi di chuyển.",
-      "Size M, L, XL",
-      "Chị cho em xin chiều cao cân nặng hoặc số đo 3 vòng em tư vấn size cho mình nha.",
+      "Áo dài Dao Phụng (mã SD398) hiện có giá 1.199.000đ chị nhé.",
+      "Chất liệu: ren họa tiết hoa chìm phối tơ ống",
+      "Form dáng: suông rộng",
+      "Size: M, L, XL",
+      "",
+      "Chị gửi em chiều cao và cân nặng, em tư vấn size phù hợp cho chị nhé.",
     ].join("\n"));
   });
 
@@ -736,7 +809,7 @@ describe("RealtimeRunner", () => {
     );
   });
 
-  it("routes a natural request containing a product code through verified facts and emits split messages", async () => {
+  it("routes a product-code request through verified facts and emits the two-bubble product form", async () => {
     const occurredAt = "2026-07-19T02:00:00.000Z";
     const state = createConversationState({
       conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
@@ -864,6 +937,7 @@ describe("RealtimeRunner", () => {
         mode: "LIVE",
         sendEnabled: true,
         conversationalMessageFormatEnabled: true,
+        messageGroupingV2Enabled: true,
       },
     );
 
@@ -874,11 +948,16 @@ describe("RealtimeRunner", () => {
     expect(commit).toHaveBeenCalledWith(expect.objectContaining({
       metaPlan: expect.objectContaining({
         messages: [
-          { kind: "TEXT", text: "Dạ set váy Quỳnh Dao có giá 770k ạ" },
-          { kind: "TEXT", text: "Chất liệu lụa mềm tạo bề mặt mềm mại, tinh tế." },
-          { kind: "TEXT", text: "Form chiết eo giúp tổng thể mềm mại, thanh thoát." },
-          { kind: "TEXT", text: "Size M, L, XL" },
-          { kind: "TEXT", text: "Chị cho em xin chiều cao cân nặng hoặc số đo 3 vòng em tư vấn size cho mình nha." },
+          {
+            kind: "TEXT",
+            text: [
+              "Set váy Quỳnh Dao (mã SV695) hiện có giá 770.000đ chị nhé.",
+              "Chất liệu: lụa mềm",
+              "Form dáng: chiết eo",
+              "Size: M, L, XL",
+            ].join("\n"),
+          },
+          { kind: "TEXT", text: "Chị gửi em chiều cao và cân nặng, em tư vấn size phù hợp cho chị nhé." },
           { kind: "IMAGE", imageUrl },
         ],
         imageDelayMs: 500,
@@ -1338,7 +1417,7 @@ describe("RealtimeRunner", () => {
           occurredAt: now,
           isEcho: false,
           appId: null,
-          text: "mẫu này còn không",
+          text: "chị cần tư vấn mẫu đi làm",
           attachments: [],
         },
       },
@@ -1528,7 +1607,7 @@ describe("RealtimeRunner", () => {
       }),
       metaPlan: expect.objectContaining({ messages: [{
         kind: "TEXT",
-        text: "Set 1 - SV921 - giá 699k - chất ren gấm\nSet 2 - CB182 - giá 759k - chất lụa mềm\nC thích set nào và cho em xin chiều cao, cân nặng hoặc số đo để tư vấn size nha.",
+        text: "Set 1 - SV921 - giá 699k - chất ren gấm\nSet 2 - CB182 - giá 759k - chất lụa mềm\nChị chọn set mình thích và gửi em chiều cao, cân nặng để em tư vấn size phù hợp nhé.",
       }] }),
     }), expect.any(Date));
 

@@ -66,14 +66,24 @@ describe("verified reply assembler", () => {
       blocks: [{
         kind: "PRICE",
         productId: "AD398",
-        text: "Dạ Áo dài Dao Phụng có giá 1199k ạ",
+        text: [
+          "Áo dài Dao Phụng (mã AD398) hiện có giá 1.199.000đ chị nhé.",
+          "Chất liệu: ren, tơ óng",
+          "Form dáng: suông",
+          "Size: S, M, L",
+        ].join("\n"),
         sourceField: "facts.salePriceVnd",
         sourceVersion: "POS_SNAPSHOT:2026-07-23T08:00:00.000Z",
       }],
       reasonCodes: [],
     });
     expect(assembleReply(result, emptyDraft, facts, product).text).toBe(
-      "Dạ Áo dài Dao Phụng có giá 1199k ạ",
+      [
+        "Áo dài Dao Phụng (mã AD398) hiện có giá 1.199.000đ chị nhé.",
+        "Chất liệu: ren, tơ óng",
+        "Form dáng: suông",
+        "Size: S, M, L",
+      ].join("\n"),
     );
   });
 

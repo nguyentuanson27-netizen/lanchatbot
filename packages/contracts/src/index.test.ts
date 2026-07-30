@@ -80,4 +80,41 @@ describe("phase 1 contracts", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("validates structured buying intent while keeping older signals compatible", () => {
+    const base = {
+      checkoutExtraction: {
+        fullName: { value: null, evidenceText: null, confidence: 0 },
+        phone: { value: null, evidenceText: null, confidence: 0 },
+        address: { value: null, evidenceText: null, confidence: 0 },
+        paymentMethod: { value: null, evidenceText: null, confidence: 0 },
+      },
+      purchaseConfirmation: {
+        decision: "UNCLEAR",
+        evidenceText: null,
+        confidence: 0,
+      },
+    } as const;
+    expect(AgentSalesSignalsV1Schema.safeParse(base).success).toBe(true);
+    expect(AgentSalesSignalsV1Schema.safeParse({
+      ...base,
+      buyingIntent: {
+        decision: "COMMITTED",
+        requestedAction: "SET_QUANTITY",
+        quantity: 2,
+        evidenceText: "cho mình hai cái giống nhau",
+        confidence: 0.97,
+      },
+    }).success).toBe(true);
+    expect(AgentSalesSignalsV1Schema.safeParse({
+      ...base,
+      buyingIntent: {
+        decision: "NEGATED",
+        requestedAction: "OPEN_CART",
+        quantity: 1,
+        evidenceText: "không mua",
+        confidence: 0.99,
+      },
+    }).success).toBe(false);
+  });
 });

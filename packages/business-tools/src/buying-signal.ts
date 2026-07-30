@@ -1,9 +1,12 @@
+import type { AgentBuyingIntentV1 } from "@lana/contracts";
+
 export type BuyingSignalReason =
   | "DIRECT_PURCHASE_VERB"
   | "SHIP_REQUEST"
   | "CONFIRMED_SIZE"
   | "CONFIRMED_COLOR"
-  | "COMPONENT_SELECTION";
+  | "COMPONENT_SELECTION"
+  | "MODEL_BUYING_COMMITTED";
 
 export interface BuyingSignalContext {
   readonly hasProductContext?: boolean;
@@ -12,6 +15,12 @@ export interface BuyingSignalContext {
 export interface BuyingSignalDetection {
   readonly isBuyingSignal: boolean;
   readonly reasons: readonly BuyingSignalReason[];
+}
+
+export interface HybridBuyingSignalDetection extends BuyingSignalDetection {
+  readonly decision: "NONE" | "CONSIDERING" | "COMMITTED" | "NEGATED";
+  readonly source: "DETERMINISTIC" | "MODEL_STRUCTURED_OUTPUT" | null;
+  readonly quantity: number | null;
 }
 
 function asciiFold(value: string): string {
@@ -91,4 +100,103 @@ export function containsBuyingSignal(
   context: BuyingSignalContext = {},
 ): boolean {
   return detectBuyingSignal(value, context).isBuyingSignal;
+}
+
+function exactEvidence(value: string, evidenceText: string | null): boolean {
+  return evidenceText !== null &&
+    value.normalize("NFC").includes(evidenceText.normalize("NFC"));
+}
+
+function informationQuestion(value: string): boolean {
+  const text = asciiFold(value);
+  return (
+    value.includes("?") ||
+    /\b(?:bao nhieu|gia gi|gia sao|con hang|con size|co .* khong|duoc khong|the nao|tu van|xem anh|gui anh)\b/u
+      .test(text)
+  );
+}
+
+function validCommittedAction(
+  action: AgentBuyingIntentV1["requestedAction"],
+): boolean {
+  return action === "OPEN_CART" ||
+    action === "ADD_TO_CART" ||
+    action === "SET_QUANTITY" ||
+    action === "PROCEED_TO_PAYMENT";
+}
+
+/**
+ * Model evidence can extend the deterministic recognizer for long-tail
+ * purchase language, but never executes a side effect by itself. Callers must
+ * still verify product context, variants, cart state and policy.
+ */
+export function resolveHybridBuyingSignal(
+  value: string,
+  context: BuyingSignalContext = {},
+  modelSignal: AgentBuyingIntentV1 | null | undefined = null,
+): HybridBuyingSignalDetection {
+  const deterministic = detectBuyingSignal(value, context);
+  if (deterministic.isBuyingSignal) {
+    return {
+      ...deterministic,
+      decision: "COMMITTED",
+      source: "DETERMINISTIC",
+      quantity: null,
+    };
+  }
+
+  const usableModelSignal =
+    context.hasProductContext === true &&
+    modelSignal !== null &&
+    modelSignal !== undefined &&
+    modelSignal.confidence >= 0.9 &&
+    exactEvidence(value, modelSignal.evidenceText);
+  if (!usableModelSignal) {
+    return {
+      isBuyingSignal: false,
+      reasons: [],
+      decision: "NONE",
+      source: null,
+      quantity: null,
+    };
+  }
+
+  if (modelSignal.decision === "NEGATED") {
+    return {
+      isBuyingSignal: false,
+      reasons: [],
+      decision: "NEGATED",
+      source: "MODEL_STRUCTURED_OUTPUT",
+      quantity: null,
+    };
+  }
+  if (modelSignal.decision === "CONSIDERING") {
+    return {
+      isBuyingSignal: false,
+      reasons: [],
+      decision: "CONSIDERING",
+      source: "MODEL_STRUCTURED_OUTPUT",
+      quantity: null,
+    };
+  }
+  if (
+    modelSignal.decision !== "COMMITTED" ||
+    !validCommittedAction(modelSignal.requestedAction) ||
+    informationQuestion(value)
+  ) {
+    return {
+      isBuyingSignal: false,
+      reasons: [],
+      decision: "NONE",
+      source: null,
+      quantity: null,
+    };
+  }
+  return {
+    isBuyingSignal: true,
+    reasons: ["MODEL_BUYING_COMMITTED"],
+    decision: "COMMITTED",
+    source: "MODEL_STRUCTURED_OUTPUT",
+    quantity: modelSignal.quantity,
+  };
 }

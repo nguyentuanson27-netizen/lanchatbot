@@ -98,22 +98,25 @@ describe("Vertex shadow client", () => {
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("salesSignals chi trich");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("evidenceText");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Khong dua ten, so dien thoai hay dia chi");
+    expect(SHADOW_SYSTEM_INSTRUCTION).toContain("buyingIntent.decision=COMMITTED");
+    expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Model chi cung cap evidence buyingIntent");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Khong dung NO_REPLY neu tin moi co tin hieu mua");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Khi HANDOFF: reply rong");
+    expect(SHADOW_SYSTEM_INSTRUCTION).toContain("HANDOFF im lang");
     expect(SHADOW_SYSTEM_INSTRUCTION).not.toContain("[SILENT]");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("BUSINESS_FACT_ENVELOPE la nguon duy nhat");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Khong tu tao khuyen mai");
-    expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Toi da 2 cau ngan");
-    expect(SHADOW_SYSTEM_INSTRUCTION).toContain("ben em bao chuan form");
+    expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Phan hoi thong thuong dung 1-2 cau");
+    expect(SHADOW_SYSTEM_INSTRUCTION).not.toContain("The hien niem tin manh");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Khong ghi chu [ATTACH_IMAGES:");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("gui text truoc");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("sau do moi gui anh");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("tieng Viet day du dau Unicode");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("tieng Viet day du dau Unicode");
     expect(GROUNDED_DRAFT_SYSTEM_INSTRUCTION).toContain("tieng Viet day du dau Unicode");
-    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Dạ [Tên sản phẩm] có giá [Price] ạ");
-    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Chất liệu [chất liệu]");
-    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Chị cho em xin chiều cao cân nặng");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("[Loại sản phẩm] [Tên sản phẩm] (mã [ProductId]) hiện có giá [Price] chị nhé.");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Chất liệu: [chất liệu]");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Chị gửi em chiều cao và cân nặng");
     expect(GROUNDED_SYSTEM_INSTRUCTION).not.toContain("'Da [Price] a'");
     expect(GROUNDED_SYSTEM_INSTRUCTION).not.toContain(
       "Chi cho em xin chieu cao can nang hoac so do 3 vong",

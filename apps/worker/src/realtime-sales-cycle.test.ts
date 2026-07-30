@@ -212,6 +212,13 @@ function signals(input: {
     evidenceText: string | null;
     confidence?: number;
   };
+  buyingIntent?: {
+    decision: "NONE" | "CONSIDERING" | "COMMITTED" | "NEGATED";
+    requestedAction: "NONE" | "OPEN_CART" | "ADD_TO_CART" | "SET_QUANTITY" | "PROCEED_TO_PAYMENT";
+    quantity?: number | null;
+    evidenceText?: string | null;
+    confidence?: number;
+  };
 } = {}): AgentSalesSignalsV1 {
   const textField = (
     field: { value: string; evidenceText?: string; confidence?: number } | undefined,
@@ -246,6 +253,17 @@ function signals(input: {
           evidenceText: null,
           confidence: 0,
         },
+    ...(input.buyingIntent
+      ? {
+          buyingIntent: {
+            decision: input.buyingIntent.decision,
+            requestedAction: input.buyingIntent.requestedAction,
+            quantity: input.buyingIntent.quantity ?? null,
+            evidenceText: input.buyingIntent.evidenceText ?? null,
+            confidence: input.buyingIntent.confidence ?? 0.99,
+          },
+        }
+      : {}),
   };
 }
 
@@ -278,6 +296,81 @@ describe("realtime Phase 3 sales cycle", () => {
       plan: { state: { stage: "CART_OPEN" } },
     });
     expect(output.messages).not.toHaveLength(0);
+  });
+
+  it.each([
+    ["làm đơn mẫu này cho mình", "OPEN_CART"],
+    ["gửi mẫu này về Hà Nội giúp chị", "OPEN_CART"],
+    ["xin số tài khoản để chuyển luôn", "PROCEED_TO_PAYMENT"],
+  ] as const)("opens a cart from guarded long-tail buying evidence: %s", async (text, requestedAction) => {
+    const state = createRealtimeSalesState(conversationId, pageId, now);
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(state, text, `event-hybrid-${requestedAction}`),
+      salesSignals: signals({
+        buyingIntent: {
+          decision: "COMMITTED",
+          requestedAction,
+          evidenceText: text,
+          confidence: 0.97,
+        },
+      }),
+    });
+    expect(output).toMatchObject({
+      handled: true,
+      transferToHuman: false,
+      plan: { state: { stage: "CART_OPEN" } },
+    });
+    expect(output.plan?.state.cart?.value.lines[0]?.quantity).toBe(1);
+  });
+
+  it("uses the model quantity only after the same guarded buying checks pass", async () => {
+    const text = "cho mình hai cái giống nhau";
+    const state = createRealtimeSalesState(conversationId, pageId, now);
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(state, text, "event-hybrid-quantity"),
+      salesSignals: signals({
+        buyingIntent: {
+          decision: "COMMITTED",
+          requestedAction: "SET_QUANTITY",
+          quantity: 2,
+          evidenceText: text,
+          confidence: 0.98,
+        },
+      }),
+    });
+    expect(output.plan?.state.stage).toBe("CART_OPEN");
+    expect(output.plan?.state.cart?.value.lines[0]?.quantity).toBe(2);
+  });
+
+  it.each([
+    {
+      text: "mẫu này giá bao nhiêu?",
+      buyingIntent: {
+        decision: "COMMITTED" as const,
+        requestedAction: "OPEN_CART" as const,
+        evidenceText: "mẫu này giá bao nhiêu?",
+        confidence: 0.99,
+      },
+    },
+    {
+      text: "không mua mẫu này",
+      buyingIntent: {
+        decision: "NEGATED" as const,
+        requestedAction: "NONE" as const,
+        evidenceText: "không mua mẫu này",
+        confidence: 0.99,
+      },
+    },
+  ])("does not open a cart or request PII for informational/negated evidence: $text", async ({ text, buyingIntent }) => {
+    const state = createRealtimeSalesState(conversationId, pageId, now);
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(state, text, `event-hybrid-rejected-${text.length}`),
+      salesSignals: signals({ buyingIntent }),
+    });
+    expect(output.plan?.state.stage).not.toBe("CART_OPEN");
+    expect(output.plan?.state.cart).toBeNull();
+    expect(output.messages.join(" ")).not.toContain("SĐT");
+    expect(output.messages.join(" ")).not.toContain("Địa chỉ");
   });
 
   it("goes from purchase intent to preview and PURCHASE_CONFIRMED exactly once", async () => {

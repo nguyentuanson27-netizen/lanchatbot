@@ -265,7 +265,13 @@ describe("Phase 4 shadow runner", () => {
       proposal: {
         productId: "SQ149",
         action: "REPLY",
-        reply: "Dạ Set SQ149 có giá 699k ạ\nForm thanh lịch, dễ mặc đi làm.\nChị thích màu nào ạ?",
+        reply: [
+          "Set SQ149 hiện có giá 699.000đ chị nhé.",
+          "Size: M",
+          "",
+          "Form thanh lịch, dễ mặc đi làm.",
+          "Chị thích màu nào ạ?",
+        ].join("\n"),
         attachments: ["https://cdn.example/sq149.jpg"],
       },
       businessFactAudit: { status: "OK", productId: "SQ149" },
