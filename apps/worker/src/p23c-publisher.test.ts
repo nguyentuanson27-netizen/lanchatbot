@@ -396,6 +396,10 @@ describe("P2.3C vận hành", () => {
     expect(summary.retryable_failed).toBe(1);
     expect(summary.fatal_failed).toBe(0);
     expect(summary.lock_released).toBe(true);
+    expect(summary.error_sample).toContain("SV695");
+    expect(summary.error_sample).toContain("REMBG_HTTP_503");
+    expect(summary.error_sample).not.toContain("https://");
+    expect(summary.error_sample).not.toContain("lanadesign.vn/a.jpg");
   });
 
   it("lỗi hạ tầng trả FATAL và vẫn giải phóng lock", async () => {
