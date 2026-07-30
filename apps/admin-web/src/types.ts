@@ -43,6 +43,36 @@ export interface ProductMediaUpload {
   uploadedAt: string;
   duplicate: boolean;
 }
+export interface ProductMediaPipelineItem {
+  intakeId: string;
+  maSp: string;
+  brand: string;
+  imageUrl: string;
+  imageHash: string;
+  imageId: string | null;
+  stage: string;
+  reviewStatus: string | null;
+  duplicateChecksum: boolean;
+  retryable: boolean;
+  lastAttemptAt: string | null;
+  error: string | null;
+}
+
+export interface ProductMediaPipeline {
+  items: ProductMediaPipelineItem[];
+  counts: Record<string, number>;
+}
+
+export interface AcquisitionFunnelStage {
+  key: string;
+  label: string;
+  count: number;
+  denominator: number;
+  rate: number | null;
+  previousCount: number;
+  previousRate: number | null;
+}
+
 
 export type PolicyArtifactKind =
   | "SHOP_POLICY"
@@ -134,8 +164,17 @@ export interface AcquisitionOverview {
   metrics: Metric[];
   breakdowns: AcquisitionBreakdownGroup[];
 }
+export interface AcquisitionReport {
+  lookbackHours: number;
+  stages: AcquisitionFunnelStage[];
+  noResponse1h: number;
+  noResponse24h: number;
+  breakdowns: AcquisitionBreakdownGroup[];
+  generatedAt: string;
+}
 export interface Overview {
   pageId: string;
+
   pageName?: string;
   mode: string;
   metrics: Metric[];

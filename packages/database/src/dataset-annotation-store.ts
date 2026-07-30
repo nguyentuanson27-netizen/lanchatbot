@@ -486,6 +486,21 @@ export class PostgresDatasetAnnotationStore {
     return { reviewed: Number(row?.reviewed ?? 0), total: Number(row?.total ?? 0) };
   }
 
+  async adjudicationProgress(projectId: string, split?: SplitV1): Promise<{ reviewed: number; total: number }> {
+    const clause = split ? " AND split = $2" : "";
+    const values: unknown[] = split ? [projectId, split] : [projectId];
+    const result = await this.pool.query<{ reviewed: string; total: string }>(
+      `SELECT
+         count(*) FILTER (WHERE assignment_status = 'REVIEWED')::text AS reviewed,
+         count(*)::text AS total
+       FROM dataset_project_items
+       WHERE project_id = $1 AND queue_reason = 'NEEDS_ADJUDICATION'${clause}`,
+      values,
+    );
+    const row = result.rows[0];
+    return { reviewed: Number(row?.reviewed ?? 0), total: Number(row?.total ?? 0) };
+  }
+
   async getProjectItem(projectItemId: string): Promise<Record<string, unknown> | null> {
     const result = await this.pool.query(
       `SELECT pi.project_item_id, pi.project_id, pi.conversation_id, pi.split,
@@ -547,7 +562,7 @@ export class PostgresDatasetAnnotationStore {
        FROM dataset_project_items pi
        JOIN dataset_conversations c ON c.conversation_id = pi.conversation_id
        WHERE pi.project_id = $1
-         AND pi.assignment_status NOT IN ('REVIEWED', 'LOCKED')
+         AND pi.assignment_status NOT IN ('REVIEWED', 'LOCKED', 'ADJUDICATION_REQUIRED')
          AND (pi.lease_owner IS NULL OR pi.lease_owner = $2 OR pi.lease_until < now())${splitClause}
        ORDER BY (pi.lease_owner = $2) DESC NULLS LAST,
                 pi.priority DESC, pi.created_at ASC, pi.project_item_id ASC
@@ -555,6 +570,40 @@ export class PostgresDatasetAnnotationStore {
       values,
     );
     return result.rows[0] ?? null;
+  }
+
+  // Adjudication stays outside the normal review queue and keeps its own lease.
+  async nextAdjudicationItem(
+    projectId: string,
+    options: { split?: SplitV1; reviewerSubject: string },
+  ): Promise<Record<string, unknown> | null> {
+    const splitClause = options.split ? " AND pi.split = $3" : "";
+    const values: unknown[] = [projectId, options.reviewerSubject];
+    if (options.split) values.push(options.split);
+    const result = await this.pool.query(
+      `SELECT pi.project_item_id, pi.project_id, pi.conversation_id, pi.split,
+              pi.assignment_status, pi.queue_reason, pi.lease_owner, pi.lease_until,
+              pi.revision, c.quality_flags
+       FROM dataset_project_items pi
+       JOIN dataset_conversations c ON c.conversation_id = pi.conversation_id
+       WHERE pi.project_id = $1
+         AND pi.assignment_status = 'ADJUDICATION_REQUIRED'
+         AND (pi.lease_owner IS NULL OR pi.lease_owner = $2 OR pi.lease_until < now())${splitClause}
+       ORDER BY (pi.lease_owner = $2) DESC NULLS LAST, pi.priority DESC, pi.created_at ASC, pi.project_item_id ASC
+       LIMIT 1`,
+      values,
+    );
+    return result.rows[0] ?? null;
+  }
+
+  async releaseReviewLease(projectItemId: string, ownerSubject: string): Promise<boolean> {
+    const result = await this.pool.query(
+      `UPDATE dataset_project_items
+       SET lease_owner = NULL, lease_until = NULL, revision = revision + 1, updated_at = now()
+       WHERE project_item_id = $1 AND lease_owner = $2 AND assignment_status <> 'LOCKED'`,
+      [projectItemId, ownerSubject],
+    );
+    return (result.rowCount ?? 0) === 1;
   }
 
   // Optimistic lease acquisition: succeeds only when the item is unlocked and the
@@ -569,8 +618,10 @@ export class PostgresDatasetAnnotationStore {
       `UPDATE dataset_project_items
        SET lease_owner = $2,
            lease_until = now() + ($3 || ' seconds')::interval,
-           assignment_status = CASE WHEN assignment_status IN ('REVIEWED', 'LOCKED')
-                                    THEN assignment_status ELSE 'IN_REVIEW' END,
+           assignment_status = CASE
+             WHEN assignment_status IN ('REVIEWED', 'LOCKED') THEN assignment_status
+             WHEN queue_reason = 'NEEDS_ADJUDICATION' THEN 'ADJUDICATION_REQUIRED'
+             ELSE 'IN_REVIEW' END,
            revision = revision + 1,
            updated_at = now()
        WHERE project_item_id = $1
@@ -580,6 +631,46 @@ export class PostgresDatasetAnnotationStore {
       [projectItemId, ownerSubject, seconds],
     );
     return result.rows[0] ?? null;
+  }
+
+  async markForAdjudication(
+    projectItemId: string,
+    actorSubject: string,
+    expectedRevision: number,
+  ): Promise<Record<string, unknown> | null> {
+    return withTransaction(this.pool, async (client) => {
+      const current = await client.query(
+        `SELECT project_item_id, assignment_status, queue_reason, revision
+         FROM dataset_project_items
+         WHERE project_item_id = $1 AND lease_owner = $2 AND lease_until > now()
+           AND revision = $3
+           AND assignment_status NOT IN ('REVIEWED', 'LOCKED', 'ADJUDICATION_REQUIRED')
+         FOR UPDATE`,
+        [projectItemId, actorSubject, expectedRevision],
+      );
+      const before = current.rows[0];
+      if (!before) return null;
+      const updated = await client.query(
+        `UPDATE dataset_project_items
+         SET assignment_status = 'ADJUDICATION_REQUIRED', assigned_reviewer_id = $2,
+             queue_reason = 'NEEDS_ADJUDICATION', lease_owner = NULL, lease_until = NULL,
+             revision = revision + 1, updated_at = now()
+         WHERE project_item_id = $1
+         RETURNING project_item_id, assignment_status, assigned_reviewer_id, queue_reason, revision, updated_at`,
+        [projectItemId, actorSubject],
+      );
+      const after = updated.rows[0];
+      if (!after) return null;
+      await this.writeEvent(client, {
+        projectItemId,
+        annotationId: null,
+        actorSubject,
+        action: "ADJUDICATE",
+        before,
+        after,
+      });
+      return after as Record<string, unknown>;
+    });
   }
 
   async reopenReviewItem(

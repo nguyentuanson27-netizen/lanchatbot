@@ -52,9 +52,37 @@ export interface ProductMediaCatalog {
   }[];
 }
 
+export interface ProductMediaPipelineItem {
+  readonly intakeId: string;
+  readonly maSp: string;
+  readonly brand: string;
+  readonly imageUrl: string;
+  readonly imageHash: string;
+  readonly imageId: string | null;
+  readonly stage: "PENDING_AI" | "PENDING_REVIEW" | "APPROVED" | "REJECTED" | "ACTIVE" | "QDRANT" | "ERROR";
+  readonly reviewStatus: string | null;
+  readonly duplicateChecksum: boolean;
+  readonly retryable: boolean;
+  readonly lastAttemptAt: string | null;
+  readonly error: string | null;
+}
+
+export interface ProductMediaPipeline {
+  readonly items: readonly ProductMediaPipelineItem[];
+  readonly counts: Readonly<Record<string, number>>;
+}
+
+export interface ProductMediaRetryResult {
+  readonly intakeId: string;
+  readonly status: "PENDING_AI";
+  readonly retriedAt: string;
+}
+
 export interface ProductMediaService {
   ready(): Promise<boolean>;
   catalog(): Promise<ProductMediaCatalog>;
+  pipeline(limit?: number): Promise<ProductMediaPipeline>;
+  retry(identity: AdminIdentity, intakeId: string): Promise<ProductMediaRetryResult>;
   upload(identity: AdminIdentity, input: ProductMediaUploadInput): Promise<ProductMediaUploadResult>;
 }
 
@@ -90,6 +118,17 @@ const OUTPUT_CODEC: Readonly<Record<string, { codec: string; options: readonly s
   "image/png": { codec: "png", options: ["-compression_level", "7"] },
   "image/webp": { codec: "libwebp", options: ["-q:v", "85"] },
 };
+
+const RETRYABLE_MEDIA_ERROR =
+  /too many requests|timeout|timed out|econnreset|socket hang up|(?<!\d)(?:429|500|502|503|504)(?!\d)/iu;
+
+function safePipelineError(value: unknown): string | null {
+  const text = String(value ?? "").trim();
+  if (!text) return null;
+  return text.replace(/https?:\/\/\S+/giu, "[redacted-url]")
+    .replace(/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/gu, "[redacted-email]")
+    .slice(0, 240);
+}
 
 const PENDING_PUBLIC_PREFIX = ".pending-public-";
 const base64Url = (value: string | Buffer): string => Buffer.from(value).toString("base64url");
@@ -216,6 +255,99 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
         .sort((left, right) => left.localeCompare(right, "vi")),
       products,
     };
+  }
+
+  async pipeline(limit = 100): Promise<ProductMediaPipeline> {
+    await this.ensureSheet();
+    const [intakeValues, registryValues] = await Promise.all([
+      this.getValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:P`),
+      this.getValues("image_registry!A:AP").catch(() => []),
+    ]);
+    const intakeRows = sheetRows(intakeValues);
+    const publicImagePrefix = `${this.options.publicBaseUrl.replace(/\/+$/u, "")}/`;
+    const registryRows = sheetRows(registryValues);
+    const checksumCounts = new Map<string, number>();
+    for (const row of intakeRows) {
+      const hash = String(row.IMAGE_HASH ?? "").toLowerCase();
+      if (hash) checksumCounts.set(hash, (checksumCounts.get(hash) ?? 0) + 1);
+    }
+    const registryByHash = new Map(registryRows.filter((row) => row.IMAGE_HASH)
+      .map((row) => [String(row.IMAGE_HASH).toLowerCase(), row]));
+    const registryById = new Map(registryRows.filter((row) => row.IMAGE_ID)
+      .map((row) => [String(row.IMAGE_ID), row]));
+    const items = intakeRows.slice()
+      .sort((left, right) => String(right.UPLOADED_AT).localeCompare(String(left.UPLOADED_AT)))
+      .slice(0, Math.max(1, Math.min(500, Math.trunc(limit))))
+      .map((row): ProductMediaPipelineItem => {
+        const hash = String(row.IMAGE_HASH ?? "").toLowerCase();
+        const imageId = String(row.IMAGE_ID ?? "") || null;
+        const registry = (imageId ? registryById.get(imageId) : undefined) ?? registryByHash.get(hash);
+        const intakeStatus = String(row.STATUS ?? "PENDING_AI").toUpperCase();
+        const reviewStatus = registry ? String(registry.REVIEW_STATUS ?? "PENDING").toUpperCase() : null;
+        const published = Boolean(registry?.PUBLISHED_HASH || registry?.PUBLISHED_AT);
+        const active = !["FALSE", "0", "NO", "N"].includes(String(registry?.ACTIVE ?? "FALSE").toUpperCase());
+        const error = safePipelineError(row.ERROR);
+        const stage: ProductMediaPipelineItem["stage"] = intakeStatus === "ERROR" ? "ERROR"
+          : published ? "QDRANT"
+            : reviewStatus === "REJECTED" ? "REJECTED"
+              : reviewStatus === "APPROVED" && active ? "ACTIVE"
+                : reviewStatus === "APPROVED" ? "APPROVED"
+                  : registry ? "PENDING_REVIEW" : "PENDING_AI";
+        return {
+          intakeId: String(row.INTAKE_ID ?? ""),
+          maSp: String(row.MA_SP ?? ""),
+          brand: String(row.BRAND ?? ""),
+          imageUrl: String(row.IMAGE_URL ?? "").startsWith(publicImagePrefix)
+            ? String(row.IMAGE_URL) : "",
+          imageHash: hash,
+          imageId,
+          stage,
+          reviewStatus,
+          duplicateChecksum: Boolean(hash && (checksumCounts.get(hash) ?? 0) > 1),
+          retryable: stage === "ERROR" && RETRYABLE_MEDIA_ERROR.test(String(row.ERROR ?? "")),
+          lastAttemptAt: String(row.PROCESSED_AT ?? "") || null,
+          error,
+        };
+      });
+    const counts: Record<string, number> = {};
+    for (const item of items) counts[item.stage] = (counts[item.stage] ?? 0) + 1;
+    return { items, counts };
+  }
+
+  async retry(_identity: AdminIdentity, intakeId: string): Promise<ProductMediaRetryResult> {
+    if (!/^[a-f0-9]{32}$/u.test(intakeId)) throw new Error("PRODUCT_MEDIA_INTAKE_ID_INVALID");
+    return this.withIntakeLock(intakeId, async () => {
+      const values = await this.getValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:P`);
+      const rows: Array<Record<string, string | number> & { rowNumber: number }> =
+        sheetRows(values).map((row, index) => ({ ...row, rowNumber: index + 2 }));
+      const row = rows.find((candidate) => candidate.INTAKE_ID === intakeId);
+      if (!row) throw new Error("PRODUCT_MEDIA_INTAKE_NOT_FOUND");
+      const status = String(row.STATUS).toUpperCase();
+      // Repeating the same retry never creates another intake or Qdrant point.
+      // Once the row has already reached PENDING_AI with its error cleared, the
+      // operation is an idempotent success.
+      if (status === "PENDING_AI" && !String(row.ERROR ?? "").trim()) {
+        return {
+          intakeId,
+          status: "PENDING_AI",
+          retriedAt: String(row.PROCESSED_AT ?? "") || this.now().toISOString(),
+        };
+      }
+      if (status !== "ERROR") throw new Error("PRODUCT_MEDIA_RETRY_STATUS_CONFLICT");
+      if (!RETRYABLE_MEDIA_ERROR.test(String(row.ERROR ?? ""))) throw new Error("PRODUCT_MEDIA_RETRY_NOT_ALLOWED");
+      const hash = String(row.IMAGE_HASH ?? "").toLowerCase();
+      if (!hash || rows.some((candidate) => candidate.INTAKE_ID !== intakeId && String(candidate.IMAGE_HASH ?? "").toLowerCase() === hash)) {
+        throw new Error("PRODUCT_MEDIA_RETRY_DUPLICATE_CHECKSUM");
+      }
+      const registry = sheetRows(await this.getValues("image_registry!A:AP").catch(() => []))
+        .find((candidate) => String(candidate.IMAGE_HASH ?? "").toLowerCase() === hash);
+      if (registry && (String(registry.REVIEW_STATUS).toUpperCase() === "APPROVED" || registry.PUBLISHED_HASH || registry.PUBLISHED_AT)) {
+        throw new Error("PRODUCT_MEDIA_RETRY_ALREADY_PUBLISHED");
+      }
+      await this.putValues(`${MANUAL_IMAGE_INTAKE_SHEET}!H${row.rowNumber}`, [["PENDING_AI"]]);
+      await this.putValues(`${MANUAL_IMAGE_INTAKE_SHEET}!M${row.rowNumber}:O${row.rowNumber}`, [[String(row.IMAGE_ID ?? ""), "", ""]]);
+      return { intakeId, status: "PENDING_AI", retriedAt: this.now().toISOString() };
+    });
   }
 
   async upload(identity: AdminIdentity, input: ProductMediaUploadInput): Promise<ProductMediaUploadResult> {
@@ -514,6 +646,16 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
         body: JSON.stringify({ majorDimension: "ROWS", values: [[...MANUAL_IMAGE_INTAKE_HEADERS]] }),
       },
     );
+  }
+
+  private async putValues(range: string, values: readonly (readonly (string | boolean)[])[]): Promise<void> {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(this.options.spreadsheetId)}`
+      + `/values/${encodeURIComponent(range)}?valueInputOption=RAW`;
+    await this.sheetsRequest(url, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ majorDimension: "ROWS", values }),
+    });
   }
 
   private async appendValues(range: string, values: readonly (readonly (string | boolean)[])[]): Promise<void> {

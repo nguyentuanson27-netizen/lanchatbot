@@ -179,6 +179,11 @@ export interface AdminStore {
   ready(): Promise<boolean>;
   controlReady(): Promise<boolean>;
   dashboard(identity: AdminIdentity): Promise<Record<string, unknown>>;
+  acquisitionSummary(
+    identity: AdminIdentity,
+    lookbackHours?: number,
+    offsetHours?: number,
+  ): Promise<Record<string, unknown>>;
   listPages(identity: AdminIdentity): Promise<readonly Record<string, unknown>[]>;
   pageHealth(identity: AdminIdentity, pageId: string): Promise<Record<string, unknown> | null>;
   listConversations(

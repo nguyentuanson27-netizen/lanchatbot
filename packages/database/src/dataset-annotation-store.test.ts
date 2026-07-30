@@ -239,7 +239,7 @@ describe("nextReviewItem", () => {
     const row = await store.nextReviewItem("p-1", { reviewerSubject: "rev-1", split: "DEVELOPMENT" });
     expect(row).toMatchObject({ project_item_id: "pi-9" });
     const sql = calls[0]?.sql ?? "";
-    expect(sql).toContain("assignment_status NOT IN ('REVIEWED', 'LOCKED')");
+    expect(sql).toContain("assignment_status NOT IN ('REVIEWED', 'LOCKED', 'ADJUDICATION_REQUIRED')");
     expect(sql).toContain("lease_owner IS NULL OR pi.lease_owner = $2 OR pi.lease_until < now()");
     expect(calls[0]?.values).toEqual(["p-1", "rev-1", "DEVELOPMENT"]);
   });
@@ -247,6 +247,23 @@ describe("nextReviewItem", () => {
   it("returns null when nothing is reviewable", async () => {
     const { store } = storeWith(() => ({ rowCount: 0, rows: [] }));
     expect(await store.nextReviewItem("p-1", { reviewerSubject: "rev-1" })).toBeNull();
+  });
+});
+
+describe("nextAdjudicationItem", () => {
+  it("selects only adjudication-required items while respecting split and lease", async () => {
+    const { store, calls } = storeWith(() => ({
+      rowCount: 1,
+      rows: [{ project_item_id: "pi-10", assignment_status: "ADJUDICATION_REQUIRED" }],
+    }));
+    const row = await store.nextAdjudicationItem("p-1", {
+      reviewerSubject: "adjudicator-1",
+      split: "VALIDATION",
+    });
+    expect(row).toMatchObject({ assignment_status: "ADJUDICATION_REQUIRED" });
+    expect(calls[0]?.sql).toContain("assignment_status = 'ADJUDICATION_REQUIRED'");
+    expect(calls[0]?.sql).toContain("lease_owner IS NULL OR pi.lease_owner = $2 OR pi.lease_until < now()");
+    expect(calls[0]?.values).toEqual(["p-1", "adjudicator-1", "VALIDATION"]);
   });
 });
 
@@ -261,6 +278,7 @@ describe("acquireReviewLease", () => {
     // 5s is clamped up to the 60s floor.
     expect(calls[0]?.values).toEqual(["pi-1", "rev-1", "60"]);
     expect(calls[0]?.sql).toContain("assignment_status <> 'LOCKED'");
+    expect(calls[0]?.sql).toContain("queue_reason = 'NEEDS_ADJUDICATION' THEN 'ADJUDICATION_REQUIRED'");
   });
 
   it("returns null when another reviewer already holds an active lease", async () => {

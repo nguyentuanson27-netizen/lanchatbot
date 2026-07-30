@@ -2220,6 +2220,26 @@ select:focus-visible {
   .product-media-form { grid-template-columns: 1fr; }
   .product-media-form__wide { grid-column: auto; }
 }
+/* FE-4: Ads funnel, media pipeline, adjudication */
+.fe4-toolbar { align-items: end; display: grid; gap: 12px; grid-template-columns: minmax(260px, 1fr) repeat(3, minmax(150px, 220px)); }
+.fe4-toolbar label, .fe4-media-filters label { color: var(--muted); display: grid; font-size: .78rem; font-weight: 650; gap: 5px; }
+.fe4-toolbar select, .fe4-toolbar input, .fe4-media-filters select, .fe4-media-filters input { border: 1px solid var(--line); border-radius: 9px; font: inherit; padding: 9px 10px; }
+.fe4-funnel { display: grid; gap: 8px; grid-template-columns: repeat(6, minmax(150px, 1fr)); overflow-x: auto; padding: 2px 0 14px; }
+.fe4-funnel__stage { background: var(--paper); border: 1px solid var(--line); border-radius: 13px; display: grid; gap: 8px; min-width: 150px; padding: 12px; }
+.fe4-funnel__stage > span { align-items: center; background: #edf6f1; border-radius: 999px; color: #245f4e; display: flex; font-size: .75rem; font-weight: 750; height: 24px; justify-content: center; width: 24px; }
+.fe4-funnel__stage strong { display: block; font-size: 1.35rem; }
+.fe4-funnel__stage dl { display: flex; gap: 12px; margin: 0; }.fe4-funnel__stage dl div { display: grid; }.fe4-funnel__stage dt { color: var(--muted); font-size: .68rem; }.fe4-funnel__stage dd { font-weight: 700; margin: 0; }
+.fe4-funnel__stage em { color: var(--muted); font-size: .7rem; font-style: normal; }.fe4-funnel__stage em.is-up { color: #237a5a; }.fe4-funnel__stage em.is-down { color: #a3454b; }
+.fe4-breakdown[hidden], [data-media-row][hidden] { display: none; }
+.product-media-pipeline { margin-top: 18px; max-width: none; }
+.fe4-stage-summary { display: grid; gap: 8px; grid-template-columns: repeat(7, minmax(90px, 1fr)); margin-bottom: 14px; overflow-x: auto; }
+.fe4-stage-summary button { background: #f7faf8; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; display: grid; min-width: 90px; padding: 10px; text-align: left; }.fe4-stage-summary strong { font-size: 1.1rem; }.fe4-stage-summary small { color: var(--muted); }
+.fe4-media-filters { display: flex; gap: 12px; margin-bottom: 12px; }.fe4-media-filters label { min-width: 180px; }
+.fe4-media-thumb { background: #f0f4f2; border-radius: 8px; display: block; height: 52px; overflow: hidden; width: 44px; }.fe4-media-thumb img { height: 100%; object-fit: cover; width: 100%; }
+.product-media-pipeline td { vertical-align: top; }.product-media-pipeline td small { display: block; margin-top: 4px; }.product-media-pipeline code { font-size: .75rem; }
+@media (max-width: 980px) { .fe4-toolbar { grid-template-columns: 1fr 1fr; }.fe4-toolbar > div { grid-column: 1 / -1; }.fe4-stage-summary { grid-template-columns: repeat(7, 100px); } }
+@media (max-width: 640px) { .fe4-toolbar { grid-template-columns: 1fr; }.fe4-toolbar > div { grid-column: auto; }.fe4-media-filters { flex-direction: column; }.fe4-media-filters label { min-width: 0; } }
+
 
 /* AI Evaluation & Dataset Review — Review Queue */
 .review-queue { display: flex; flex-direction: column; gap: 12px; }

@@ -21,6 +21,9 @@ import type {
   ProductMediaUpload,
   ProductMediaCatalog,
   PolicyArtifact,
+  ProductMediaPipeline,
+  AcquisitionReport,
+  AcquisitionBreakdownGroup,
   PolicyArtifactKind,
   PolicyControlData,
   PolicyLifecycle,
@@ -318,6 +321,105 @@ export async function uploadProductMedia(input: {
     status: "PENDING_AI",
     uploadedAt: stringValue(item.uploadedAt),
     duplicate: item.duplicate === true,
+  };
+}
+
+export async function getProductMediaPipeline(signal?: AbortSignal): Promise<ProductMediaPipeline> {
+  const payload = await request<JsonRecord>("/product-media/pipeline", signal);
+  const pipeline = record(payload.pipeline);
+  const counts = record(pipeline.counts);
+  return {
+    counts: Object.fromEntries(Object.entries(counts).map(([key, value]) => [key, numberValue(value)])),
+    items: arrayValue(pipeline.items).map((value) => {
+      const item = record(value);
+      return {
+        intakeId: stringValue(item.intakeId),
+        maSp: stringValue(item.maSp),
+        brand: stringValue(item.brand),
+        imageUrl: stringValue(item.imageUrl),
+        imageHash: stringValue(item.imageHash),
+        imageId: nullableString(item.imageId),
+        stage: stringValue(item.stage, "PENDING_AI"),
+        reviewStatus: nullableString(item.reviewStatus),
+        duplicateChecksum: item.duplicateChecksum === true,
+        retryable: item.retryable === true,
+        lastAttemptAt: nullableString(item.lastAttemptAt),
+        error: nullableString(item.error),
+      };
+    }),
+  };
+}
+
+export async function retryProductMedia(intakeId: string): Promise<void> {
+  await request<JsonRecord>(`/product-media/pipeline/${encodeURIComponent(intakeId)}/retry`, undefined, {
+    method: "POST",
+  });
+}
+
+function acquisitionBreakdowns(value: unknown): AcquisitionBreakdownGroup[] {
+  const source = record(value);
+  const definitions = [
+    ["ad", "Theo quảng cáo"], ["post", "Theo bài quảng cáo"], ["product", "Theo sản phẩm"],
+    ["meaningful_label", "Tín hiệu đầu tiên"], ["barrier", "Rào cản đầu tiên"],
+    ["playbook", "Chiến lược"], ["version", "Phiên bản phân loại"],
+    ["day", "Theo ngày"], ["touch", "Attribution touch"],
+  ] as const;
+  return definitions.map(([key, title]) => ({
+    key,
+    title,
+    items: arrayValue(source[key]).map((entry) => {
+      const item = record(entry);
+      return {
+        label: stringValue(item.key, "UNKNOWN"),
+        adEntries: numberValue(item.ad_entries),
+        qualified: numberValue(item.qualified),
+        purchaseConfirmed: numberValue(item.purchase_confirmed),
+      };
+    }),
+  })).filter((group) => group.items.length > 0);
+}
+
+export async function getAcquisitionReport(
+  lookbackHours: number,
+  signal?: AbortSignal,
+): Promise<AcquisitionReport> {
+  const hours = Math.max(1, Math.min(2160, Math.trunc(lookbackHours)));
+  const payload = await request<JsonRecord>(`/ad-acquisition/summary?lookback_hours=${hours}`, signal);
+  const current = record(payload.current);
+  const previous = record(payload.previous);
+  const definitions = [
+    ["ad_entries", "Ads entry", null],
+    ["initial_reply_accepted", "Reply được nhận", "ad_entries"],
+    ["reengaged", "Khách phản hồi", "initial_reply_accepted"],
+    ["meaningful", "Tín hiệu có ý nghĩa", "reengaged"],
+    ["qualified", "Lead đủ điều kiện", "meaningful"],
+    ["buying_committed", "Có cam kết mua", "qualified"],
+    ["purchase_confirmed", "Khách xác nhận mua", "buying_committed"],
+  ] as const;
+  const rate = (count: number, denominator: number): number | null => denominator > 0
+    ? Math.round((count / denominator) * 1000) / 10
+    : null;
+  return {
+    lookbackHours: hours,
+    stages: definitions.map(([key, label, denominatorKey]) => {
+      const count = numberValue(current[key]);
+      const previousCount = numberValue(previous[key]);
+      const denominator = denominatorKey ? numberValue(current[denominatorKey]) : count;
+      const previousDenominator = denominatorKey ? numberValue(previous[denominatorKey]) : previousCount;
+      return {
+        key,
+        label,
+        count,
+        denominator,
+        rate: rate(count, denominator),
+        previousCount,
+        previousRate: rate(previousCount, previousDenominator),
+      };
+    }),
+    noResponse1h: numberValue(current.no_response_1h),
+    noResponse24h: numberValue(current.no_response_24h),
+    breakdowns: acquisitionBreakdowns(current.breakdowns),
+    generatedAt: stringValue(payload.generated_at, new Date().toISOString()),
   };
 }
 
@@ -1423,8 +1525,12 @@ export async function getReviewQueue(
   projectId: string,
   split: Split | null,
   signal?: AbortSignal,
+  adjudication = false,
 ): Promise<ReviewQueueData> {
-  const query = split ? `?split=${encodeURIComponent(split)}` : "";
+  const params = new URLSearchParams();
+  if (split) params.set("split", split);
+  if (adjudication) params.set("adjudication", "true");
+  const query = params.size ? `?${params.toString()}` : "";
   const payload = await request<JsonRecord>(
     `/dataset-projects/${encodeURIComponent(projectId)}/queue${query}`,
     signal,
@@ -1438,6 +1544,7 @@ export async function getReviewQueue(
     projectName: stringValue(queue.project_name, "Dự án gán nhãn"),
     reviewMode: memberOr(REVIEW_MODES, queue.review_mode, "AI_ASSISTED"),
     split: split ?? splitFromValue(queue.split),
+    adjudication: queue.adjudication === true,
     revealed: queue.revealed === true,
     progress: { reviewed: numberValue(progress.reviewed), total: numberValue(progress.total) },
     labels: arrayValue(queue.labels).map(mapLabelOption),
@@ -1593,6 +1700,20 @@ export async function lockDatasetHoldout(projectId: string): Promise<number> {
   );
   return numberValue(record(payload.holdout).locked);
 }
+export async function markDatasetForAdjudication(projectItemId: string, revision: number): Promise<void> {
+  await request<JsonRecord>(`/dataset-items/${encodeURIComponent(projectItemId)}/adjudication`, undefined, {
+    method: "POST",
+    body: { revision },
+  });
+}
+
+export async function releaseDatasetReviewLease(projectItemId: string): Promise<void> {
+  await request<JsonRecord>(`/dataset-items/${encodeURIComponent(projectItemId)}/release`, undefined, {
+    method: "POST",
+    body: {},
+  });
+}
+
 
 export function datasetExportPath(projectId: string, splits?: readonly Split[]): string {
   const query = splits && splits.length > 0 ? `?splits=${encodeURIComponent(splits.join(","))}` : "";
