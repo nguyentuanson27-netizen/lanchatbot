@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-30T05:58:58Z",
+  "environment": "production-p23c-publisher-live",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "3fa386a6a35daaf64d3b27c8ee0a26bf8b5993e4",
+  "pullRequests": [66, 68],
+  "releaseTag": "20260730-p23c-hash-v3-compose",
+  "tagObject": "6715c94d82113048893d937f14639b5418cf0ce9",
+  "serviceReleasePath": "/opt/lana-chatbot/releases/20260730-p23c-hash-v3-compose",
+  "previousServiceReleasePath": "/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15",
+  "currentSymlinkPath": "/opt/lana-chatbot/releases/20260730-admin-frontend-waves-r28",
+  "currentSymlinkChanged": false,
+  "composeSha256": "6e6a2854f51ec7175bac627d1431cdb63cce498215ec0d43d4ec91794652c3cf",
+  "sourceMaterialization": {
+    "method": "annotated-tag-fetch-and-detached-worktree",
+    "workingTreeClean": true
+  },
+  "image": {
+    "name": "lana-chatbot-app:p23c-hash-v3-20260730",
+    "imageId": "sha256:cf052f89e1d61d40efc81cf7874ae048db99c2131a9210d47439416cf3ebe273",
+    "releaseLabel": "20260730-p23c-hash-v3-compose",
+    "revisionLabel": "3fa386a6a35daaf64d3b27c8ee0a26bf8b5993e4",
+    "recreatedServices": ["p23c-publisher"],
+    "containerId": "dbd3015d0486e80225ee375e301c6eba5922be43cb4b2cd8a74c8b83c501e0b1",
+    "protectedContainerCountUnchanged": 26
+  },
+  "scope": {
+    "hashSchemaVersion": "p23c-hash-v3",
+    "hashV3Mode": "LIVE",
+    "payloadOnlyEnabled": true,
+    "legacyHashMigrationEnabled": true,
+    "maxPayloadUpdatesPerRun": 500,
+    "embeddingBatchSize": 50,
+    "imagePreprocessVersion": "ffmpeg-max-width-800-v1",
+    "cutoutPipelineVersion": "rembg-u2netp-v1",
+    "sheetsAckEnabled": true,
+    "realtimeChanged": false,
+    "metaOutboundChanged": false,
+    "pageAllowlistChanged": false,
+    "posChanged": false,
+    "p23bChanged": false,
+    "n8nOwnershipChanged": false
+  },
+  "hashContracts": {
+    "embeddingHashSchema": "lana-qdrant-embedding-v1",
+    "payloadHashSchema": "lana-qdrant-payload-v1",
+    "provenanceHashSchema": "lana-qdrant-provenance-v1",
+    "legacyContentHashPreserved": true
+  },
+  "qdrant": {
+    "collection": "lana_multimodal_data_v2",
+    "statusBefore": "green",
+    "pointCountBefore": 918,
+    "pointCountAfter": 956,
+    "hashV3PointCountAfter": 956,
+    "snapshot": {
+      "name": "lana_multimodal_data_v2-7015370778539330-2026-07-30-05-19-31.snapshot",
+      "checksum": "fc174ba1306acb03da064c0eab560cd499c46b9a3bd4f0b18a39f265da3feedf",
+      "size": 76951040,
+      "verifiedAfterMigration": true
+    }
+  },
+  "dryRun": {
+    "jobs": 956,
+    "existingPoints": 918,
+    "noop": 0,
+    "payloadOnly": 889,
+    "fullEmbed": 67,
+    "delete": 0,
+    "reasons": {
+      "LEGACY_HASH_MIGRATION": 361,
+      "SHA_BASELINE": 487,
+      "LEGACY_CONTENT_HASH_STALE": 41,
+      "POINT_MISSING": 38,
+      "EMBEDDING_TEXT_CHANGED": 29
+    },
+    "qdrantWrites": 0,
+    "sheetWrites": 0
+  },
+  "liveMigration": {
+    "cycle1": {
+      "selected": 550,
+      "success": 549,
+      "retryableFailed": 1,
+      "fatalFailed": 0,
+      "remaining": 407,
+      "payloadOnlySelected": 500,
+      "fullEmbedSelected": 50,
+      "retryableReason": "VERTEX_HTTP_429"
+    },
+    "cycle2": {
+      "selected": 407,
+      "success": 407,
+      "retryableFailed": 0,
+      "fatalFailed": 0,
+      "remaining": 0,
+      "noop": 549,
+      "payloadOnlySelected": 389,
+      "fullEmbedSelected": 18
+    },
+    "uniquePayloadOnlyJobs": 889,
+    "uniqueFullEmbedJobs": 67,
+    "allJobsMigrated": true
+  },
+  "vectorEvidence": {
+    "beforePointCount": 918,
+    "afterPointCount": 956,
+    "commonPointCount": 918,
+    "addedPoints": 38,
+    "removedPoints": 0,
+    "changedVectors": 29,
+    "unchangedVectors": 889,
+    "payloadOnlyVectorRewriteDetected": false,
+    "beforeArtifact": "/opt/lana-chatbot/shared/release-artifacts/20260730-p23c-hash-v3-compose-vectors-before.json",
+    "beforeArtifactSha256": "f8988e0dacac35a20b20e8d4e848569be24e68e67df21cb4b5d038aec48fcbcb",
+    "finalArtifact": "/opt/lana-chatbot/shared/release-artifacts/20260730-p23c-hash-v3-compose-vectors-final.json",
+    "finalArtifactSha256": "16cd703060fb11ff8ce79f7653a5191781fad29f3ac440215076c639fda74d6f"
+  },
+  "verification": {
+    "localWorkerTypecheck": "PASS",
+    "localWorkerTests": "311_OF_311_PASS",
+    "localWorkerBuild": "PASS",
+    "localMonorepoCheck": "PASS",
+    "dockerMonorepoCheck": "PASS",
+    "buildLogSha256": "b83a25fcc4ace5655b71c91b34964b0320aabba76da7f5e3e1f5ac13635458a7",
+    "targetServiceHealthy": true,
+    "targetServiceRestartCount": 0,
+    "protectedContainersUnchanged": true,
+    "hashV3PointCount": 956,
+    "remainingJobs": 0
+  },
+  "deployment": {
+    "environmentBackupBeforeDryRun": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260730-p23c-hash-v3-compose-pre-dry-run",
+    "environmentBackupBeforeLive": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260730-p23c-hash-v3-compose-before-live",
+    "changeNote": "BY_CHATGPT: P2.3C Hash v3 rollout 2026-07-30"
+  },
+  "rollback": {
+    "firstStep": "Set P23C_HASH_V3_MODE=OFF and recreate only p23c-publisher",
+    "previousImage": "lana-chatbot-app:checkout-natural-confirmation-r15",
+    "previousReleasePath": "/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15",
+    "qdrantSnapshotAvailable": true,
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false,
+    "executedAfterSuccessfulCutover": false
+  }
+}

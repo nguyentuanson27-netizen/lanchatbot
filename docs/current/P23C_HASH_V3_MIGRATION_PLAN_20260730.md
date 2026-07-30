@@ -1,6 +1,6 @@
 # P2.3C Hash v3 — tách hash và migration không tái tạo vector
 
-Trạng thái: `IMPLEMENTED_LOCAL_PENDING_PRODUCTION_DRY_RUN`
+Trạng thái: `DEPLOYED_LIVE_MIGRATION_COMPLETE`
 
 Ngày: `2026-07-30`
 
@@ -170,3 +170,39 @@ Kết quả local trước dry-run:
 4. Không xóa Qdrant, Sheet, Redis hoặc vector.
 
 Các field Hash v3 là additive. Worker cũ bỏ qua chúng và tiếp tục dùng `content_hash` v2.
+
+## Kết quả production
+
+Release chức năng:
+
+```text
+tag=20260730-p23c-hash-v3-compose
+commit=3fa386a6a35daaf64d3b27c8ee0a26bf8b5993e4
+image=lana-chatbot-app:p23c-hash-v3-20260730
+service=p23c-publisher
+mode=LIVE
+```
+
+DRY_RUN trên `956` job:
+
+- `889` `PAYLOAD_ONLY`.
+- `67` `FULL_EMBED`: `38` point thiếu và `29` input embedding thay đổi.
+- `0` delete.
+- `0` Qdrant/Sheet write trong DRY_RUN.
+
+LIVE hoàn thành trong hai cycle:
+
+- Cycle 1: `549/550` thành công; một `VERTEX_HTTP_429` retryable.
+- Cycle 2: `407/407` thành công; retry point trước thành công.
+- `remaining=0`; Qdrant có `956/956` point Hash v3.
+
+Đối chiếu checksum vector trước/sau:
+
+- `38` point mới.
+- `29` vector hiện hữu thay đổi đúng nhóm semantic.
+- `889` vector hiện hữu không đổi đúng nhóm payload/provenance.
+- `0` point bị xóa.
+
+Snapshot Qdrant được tạo và kiểm tra lại sau migration. `26` container ngoài P2.3C giữ nguyên ID/image; symlink runtime chung vẫn ở Admin Frontend r28 vì release này chỉ recreate P2.3C.
+
+Bằng chứng đầy đủ: [manifest P2.3C Hash v3](../../deploy/manifests/20260730-p23c-hash-v3-compose.json).
