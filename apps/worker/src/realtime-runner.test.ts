@@ -787,7 +787,7 @@ describe("RealtimeRunner", () => {
     }), expect.any(Date));
   });
 
-  it("falls back to the product code when XML title has no actual product name", () => {
+  it("keeps the verified product type when the title only contains type and code", () => {
     const product = {
       productId: "SV695",
       parentProductId: "SV695",
@@ -803,7 +803,7 @@ describe("RealtimeRunner", () => {
       images: [],
       catalogVersion: "catalog-v2",
     };
-    expect(productDisplayName(product)).toBe("mẫu SV695");
+    expect(productDisplayName(product)).toBe("set váy SV695");
     expect(productDescriptionLine(product, true)).toBe(
       "Chất liệu lưới cotton tạo bề mặt thêu nổi tinh xảo. Form suông nhẹ giúp tổng thể mềm mại, thanh thoát.",
     );

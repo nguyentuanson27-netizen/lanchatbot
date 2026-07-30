@@ -87,6 +87,23 @@ describe("verified reply assembler", () => {
     );
   });
 
+  it("normalizes a type-and-code-only catalog title without losing the product type", () => {
+    const upperProduct = {
+      ...product,
+      productId: "SV2447",
+      parentProductId: "SV2447",
+      canonicalCode: "SV2447",
+      title: "SET VÁY SV2447",
+    };
+    const upperFacts = {
+      ...facts,
+      productId: "SV2447",
+      facts: facts.facts ? { ...facts.facts, productId: "SV2447", parentProductId: "SV2447" } : null,
+    };
+    expect(buildVerifiedFactBlocks(upperFacts, "PRICE", upperProduct).blocks[0]?.text)
+      .toContain("Set váy SV2447 hiện có giá 1.199.000đ chị nhé.");
+  });
+
   it.each([
     "Mẫu này chỉ 500k thôi ạ",
     "Kho còn 2 sản phẩm",
