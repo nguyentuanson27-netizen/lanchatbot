@@ -1,15 +1,17 @@
 # Trạng thái triển khai Admin Frontend FE4
 
-Status: **READY_FOR_REVIEW_NOT_DEPLOYED**
+Status: **MERGED_RELEASE_CANDIDATE_NOT_DEPLOYED**
 
 Ngày cập nhật: **2026-07-30**
 
 ## Phạm vi nguồn
 
-- Branch: `feat/admin-fe4`.
-- Base: `github/main` tại `be2b725c5dc1a127e93c25f65154203b0f38419e`.
+- PR `#72` đã merge vào `main` tại `7fbe6fde49633dd5e9cab78e039412fee0f7f149`.
+- Release candidate: `20260730-admin-fe4-r29`.
 - Production hiện hành vẫn là `20260730-admin-frontend-waves-r28`.
-- Chưa tạo tag, release manifest hoặc cutover.
+- Manifest release candidate:
+  [`deploy/manifests/20260730-admin-fe4-r29.json`](../../deploy/manifests/20260730-admin-fe4-r29.json).
+- Chưa tạo tag hoặc cutover; production evidence vẫn đang chờ xác thực VPS.
 - Không migration; không sửa dữ liệu production.
 - Không đổi outbound, Meta Send API, Pancake ownership, page allowlist, Realtime,
   Delivery, POS, P2.3, Size Chart, n8n hoặc Qdrant writer.
