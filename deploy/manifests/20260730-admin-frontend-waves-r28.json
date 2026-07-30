@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-30T05:07:15Z",
+  "environment": "production-test-page-live-100-percent-acquisition-shadow",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "e64cf9caa5cc46409eb48eb2ad51c751a61fc9fd",
+  "pullRequests": [65],
+  "releaseTag": "20260730-admin-frontend-waves-r28",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260730-admin-frontend-waves-r28",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260729-ad-acquisition-r27.1",
+  "composeSha256": "fd615f338b9ac3bb555eacfdfbd08d52936f73f4df016a06a63a426dd8daffb8",
+  "sourceMaterialization": {
+    "method": "annotated-tag-fetched-by-read-only-deploy-key",
+    "tagObject": "277b8a8dc34cfa83bb1548a222ce866b5a6e200c",
+    "workingTreeClean": true
+  },
+  "image": {
+    "name": "lana-chatbot-app:admin-frontend-waves-r28",
+    "imageId": "sha256:0a56eaa7221c4750fb63117810bdab032d767876e78d6d087a16d3141f482eed",
+    "releaseLabel": "20260730-admin-frontend-waves-r28",
+    "revisionLabel": "e64cf9caa5cc46409eb48eb2ad51c751a61fc9fd",
+    "recreatedServices": ["admin-api", "admin-web"],
+    "containerIds": {
+      "adminApi": "129401612f2e05b4e161bcbd77564be4072f9177f09d3fdfbe44d5e488ceb755",
+      "adminWeb": "c8b12dd2ec34264ee8e6b362b72f402dec19a1681bbfcb14ed180c6881057a0d",
+      "apiUnchanged": "0a9d6f15d8b23e2ab99348af3fa35944430430de284d638ba2f9629957f256d7",
+      "realtimeUnchanged": "f6cbc5b0718920048cc3d4c97077b0b20e91c2459e30466cdba0720bf345bb5b",
+      "deliveryUnchanged": "b49c07a00d22230654ab3c00a6a1bd0f6e2788d2e35b06364733cc6b3a1d0de8"
+    },
+    "nonTargetServiceContainerIdsUnchanged": true
+  },
+  "scope": {
+    "features": ["FE1", "FE2", "FE3"],
+    "pageId": "1198992073286645",
+    "outboundChanged": false,
+    "pageAllowlistChanged": false,
+    "routingOwnershipChanged": false,
+    "n8nOwnershipChanged": false,
+    "realtimeChanged": false,
+    "deliveryChanged": false
+  },
+  "database": {
+    "backupPath": "/opt/lana-chatbot/backups/20260730-admin-frontend-waves-r28-predeploy.dump",
+    "backupSizeBytes": 21724297,
+    "backupSha256": "43cf8f2eeab994de85fa35dba3009f19aab220d94e3dd30e7acd5b388ef39593",
+    "backupChecksumVerified": true,
+    "restoreTest": "RESTORE_REAL_DATA_AND_0025_UP_DOWN_UP_PASS",
+    "restoreNetwork": "internal-isolated",
+    "latestMigration": "0025_admin_frontend_operations",
+    "migrationSha256": "03ae35424838d34da5a97d366c69cc39aed3a022b6325d4ca6047635b121f854",
+    "adminViewColumnsVerified": 5,
+    "appendOnlyTriggerVerified": true,
+    "adminAclVerified": true
+  },
+  "verification": {
+    "localFullCheck": "PASS",
+    "dockerFullCheck": "PASS",
+    "adminApiTests": "59_OF_59_PASS",
+    "databaseTests": "99_OF_99_PASS",
+    "workerTests": "299_OF_299_PASS",
+    "adminWebVitest": "41_OF_41_PASS",
+    "adminWebNodeTests": "6_OF_6_PASS",
+    "targetServicesHealthy": 5,
+    "targetServiceRestartCount": 0,
+    "newAdminErrorLineCount": 0,
+    "adminApiStatus": 200,
+    "adminWebHealthStatus": 200,
+    "adminWebIndexStatus": 200,
+    "adminPublicStatus": 302,
+    "adminPublicTarget": "Authentik",
+    "webhookInboxProcessedCount": 106,
+    "metaOutboxSentAcceptedCount": 39,
+    "metaOutboxManualReviewCount": 1,
+    "activeQueueItemCount": 0,
+    "duplicateMetaSequenceGroupCount": 0
+  },
+  "artifacts": {
+    "deployScript": {
+      "path": "/opt/lana-chatbot/shared/release-artifacts/20260730-admin-frontend-waves-r28-deploy.sh",
+      "sha256": "2a09982210e3185656be77ac7f42ee07deff6de1646532935f6d85204b4341fc"
+    },
+    "rollbackScript": {
+      "path": "/opt/lana-chatbot/shared/release-artifacts/20260730-admin-frontend-waves-r28-rollback.sh",
+      "sha256": "2641bf70ba3d4e591aa80379347c10a501781c4b24658277ad712614c7b8a3da"
+    },
+    "successfulCutoverScript": {
+      "path": "/opt/lana-chatbot/shared/release-artifacts/20260730-admin-frontend-waves-r28-cutover-retry.sh",
+      "sha256": "80a1e74c33c888d52f9382b0617435367a19d3834dd266f0a77e4bfcd947baf3"
+    },
+    "successfulCutoverLog": {
+      "path": "/opt/lana-chatbot/shared/release-artifacts/20260730-admin-frontend-waves-r28-cutover-retry.log",
+      "sha256": "6036a62a859da83e3a18931c6d3cd4c6ee9ab8c35208648cdf6f4526b61605ac"
+    },
+    "postcheckLog": {
+      "path": "/opt/lana-chatbot/shared/release-artifacts/20260730-admin-frontend-waves-r28-postcheck.log",
+      "sha256": "333200d1157abf3923ab129fa5b1567a8743a64c2c6d84b46ff3225eb884ab47"
+    }
+  },
+  "guardedCutover": {
+    "attempt1": {
+      "result": "FAILED_GUARD_AND_ROLLED_BACK",
+      "reason": "smoke artifact called /health instead of /health/ready and received 404",
+      "productionMigrationApplied": true,
+      "schemaRetainedBecauseAdditive": true,
+      "symlinkChanged": false,
+      "rollbackHealthy": true
+    },
+    "attempt2": {
+      "result": "SUCCEEDED",
+      "readinessEndpoint": "/health/ready",
+      "allGuardsPassed": true
+    }
+  },
+  "rollback": {
+    "script": "/opt/lana-chatbot/shared/release-artifacts/20260730-admin-frontend-waves-r28-rollback.sh",
+    "environmentBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260730-admin-frontend-waves-r28",
+    "releasePath": "/opt/lana-chatbot/releases/20260729-ad-acquisition-r27.1",
+    "image": "lana-chatbot-app:ad-acquisition-r27.1",
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false,
+    "executedAfterSuccessfulCutover": false
+  }
+}

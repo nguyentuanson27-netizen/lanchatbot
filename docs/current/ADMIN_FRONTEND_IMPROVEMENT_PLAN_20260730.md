@@ -1,13 +1,13 @@
 # Kế hoạch cải thiện Admin Frontend và bổ sung tính năng
 
-Status: **FE1_FE2_FE3_IMPLEMENTED_PENDING_RELEASE**
+Status: **FE1_FE2_FE3_DEPLOYED_R28**
 
 Ngày cập nhật: **2026-07-30**
 
 Baseline tham chiếu:
 
-- Production: `20260729-ad-acquisition-r27.1`, commit
-  `1e9c20e24ce092738afa6732427c12eaf69a203f`.
+- Production: `20260730-admin-frontend-waves-r28`, commit
+  `e64cf9caa5cc46409eb48eb2ad51c751a61fc9fd`.
 - GitHub `main` tại thời điểm lập kế hoạch: commit
   `e487357dff5dcc410f5bb8eeefa2b7bfcc05c2e4`.
 - Admin Web/Admin API production đang healthy, restart count `0`; public Admin
@@ -20,7 +20,7 @@ production, không mở thêm page và không cho phép sửa trực tiếp trê
 
 ## 0. Trạng thái triển khai FE1–FE3
 
-Đã triển khai trên nhánh release candidate, chưa deploy production:
+Đã deploy production trong release `20260730-admin-frontend-waves-r28`:
 
 - FE1: typography vận hành tối thiểu 12 px; polling tạm dừng khi nhập liệu hoặc
   có overlay; giữ focus/selection/scroll; toast có live role đúng tone; nối
@@ -42,8 +42,11 @@ Kiểm tra release candidate:
 - Admin Web typecheck và production build đạt; bundle build hiện khoảng
   `120.36 KB` JavaScript và `36.91 KB` CSS trước gzip.
 
-Production vẫn giữ nguyên `20260729-ad-acquisition-r27.1` cho đến khi hoàn tất
-review, merge GitHub, migration rehearsal và deploy theo release runbook.
+Production đã áp dụng migration additive `0025`, restore-test `up → down → up`
+đạt; Admin API/Web healthy/restart `0`, nội bộ `200`, public `302` sang
+Authentik. API, Realtime, Delivery, outbound, page allowlist và ownership giữ
+nguyên. Bằng chứng chi tiết nằm tại
+[trạng thái release r28](ADMIN_FRONTEND_FE1_FE3_R28_STATUS_20260730.md).
 
 ## 1. Mục tiêu
 

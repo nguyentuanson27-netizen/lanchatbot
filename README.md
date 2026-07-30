@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Production hiện hành: `/opt/lana-chatbot/releases/20260729-ad-acquisition-r27.1`.
+- Production hiện hành: `/opt/lana-chatbot/releases/20260730-admin-frontend-waves-r28`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -14,15 +14,15 @@ Không sửa source trực tiếp trong `/opt/lana-chatbot/current`. Mọi thay 
 
 Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/lana-chatbot/repository`. Agent phải đọc `AGENTS.md` trước khi thao tác; working tree này không phải runtime production. User `lana-deploy` có deploy key GitHub read-only chỉ cho repository này; được phép `fetch` tag/commit nhưng không được push.
 
-## Trạng thái production ngày 2026-07-29
+## Trạng thái production ngày 2026-07-30
 
-- Page test duy nhất đang chạy release `20260729-ad-acquisition-r27.1`, source commit `1e9c20e`, với Wave 2 `LIVE_100` và acquisition analytics `SHADOW`; không có Human Test Mode riêng.
+- Production đang trỏ tới release `20260730-admin-frontend-waves-r28`, source commit `e64cf9c`; chỉ Admin API/Web dùng image r28. API, Realtime và Delivery giữ nguyên image/container r27.1.
 - Realtime phân loại need/barrier/decision factor/strategy, áp dụng stage playbook và CTA tối đa một câu hỏi. Deterministic guard vẫn là quyền quyết định cuối cho fact, offer, media, checkout, handoff và outbound.
-- API, Realtime, Delivery, Admin API và Admin Web dùng image `lana-chatbot-app:ad-acquisition-r27.1`; cả năm healthy/restart 0. Shadow, Admin Simulation, POS, P2.3 và Size Chart giữ nguyên container/image trước release.
+- Cả năm service API, Realtime, Delivery, Admin API và Admin Web healthy/restart 0. Shadow, Admin Simulation, POS, P2.3, Size Chart và n8n không bị recreate trong r28.
 - Mọi vị trí Gemini Flash-Lite đang hoạt động hoặc được định nghĩa trong release dùng `gemini-3.5-flash-lite`: realtime, Shadow, media reranker, P2.3B và Size Chart.
-- Migration production mới nhất là `0024_ad_acquisition_analytics`; backup production có checksum và restore-test `up → down → up` xác nhận view PII-free cùng grant Admin.
-- Admin API/Web trả 200 nội bộ và public route trả 302 sang Authentik. Wave 2 dashboard đọc view PII-free; lúc cutover chưa có human traffic mới nên metric Wave 2 bằng 0.
-- r26.2 là application rollback target. Qdrant vẫn nhận diện/rehydrate catalog, còn Media Selector V2 quyết định attachment product-info và guard xác minh đúng URL đã chọn; r27.1 không thay đổi luồng tìm sản phẩm.
+- Migration production mới nhất là `0025_admin_frontend_operations`; backup production có checksum và restore-test `up → down → up` đạt. View handoff là security-barrier, event ledger append-only và ACL Admin đã hậu kiểm.
+- Admin API/Web trả 200 nội bộ và public route trả 302 sang Authentik. FE1–FE3 bổ sung UX ổn định, server-side search/pagination, Handoff SLA Console và Conversation Inspector PII-safe.
+- r27.1 là rollback target cho Admin r28; r26.2 vẫn là full-application rollback target. Qdrant, Media Selector V2, outbound và page allowlist không đổi trong r28.
 - Khi Media Selector V2 trả `NONE`, bot giữ text đã xác minh và không fallback sang ảnh `PRICE_CARD` cũ; attachment không hợp lệ bị loại mà không làm mất text.
 - r26.2 khôi phục contract tiếng Việt có dấu, chặn product-info theo mẫu cũ không dấu, giữ mỗi câu/dòng là một Meta Outbox unit riêng và bắt đầu dòng chất liệu đã xác minh bằng `Chất liệu`.
 - Wave 1 r21 chạy từ merge commit `5f817bbc`: official benchmark vẫn khóa 1.955 hội thoại hợp lệ, split 1.173/391/391, leakage 0; holdout chưa mở.
@@ -151,7 +151,8 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 - [Production baseline và ownership](docs/current/PRODUCTION_BASELINE_20260722.md)
 - [Kế hoạch nâng cấp Realtime Sales Agent](docs/current/REALTIME_AGENT_UPGRADE_PLAN.md)
 - [Kế hoạch triển khai Wave 1 & Wave 2 v1.2](docs/current/WAVE1_WAVE2_IMPLEMENTATION_PLAN_v1.2.md)
-- [Kế hoạch cải thiện Admin Frontend và bổ sung tính năng](docs/current/ADMIN_FRONTEND_IMPROVEMENT_PLAN_20260730.md) — `FE1_FE2_FE3_IMPLEMENTED_PENDING_RELEASE`, không thay đổi outbound, page allowlist hoặc ownership
+- [Kế hoạch cải thiện Admin Frontend và bổ sung tính năng](docs/current/ADMIN_FRONTEND_IMPROVEMENT_PLAN_20260730.md) — `FE1_FE2_FE3_DEPLOYED_R28`, không thay đổi outbound, page allowlist hoặc ownership
+- [Trạng thái Admin Frontend FE1–FE3 r28](docs/current/ADMIN_FRONTEND_FE1_FE3_R28_STATUS_20260730.md)
 - [Kế hoạch Task 2.0A — Meta Ads Entry Context & Lead Qualification](docs/current/TASK_2_0A_AD_ENTRY_CONTEXT_AND_LEAD_QUALIFICATION_PLAN.md) — `DEPLOYED_SHADOW_EVIDENCE_PENDING`, analytics sidecar, không thay đổi outbound
 - [Kế hoạch nhận diện ảnh Cutout-first + AI reranker](docs/current/MEDIA_RECOGNITION_CUTOUT_AI_IMPLEMENTATION_PLAN.md)
 - [Canary Size Chart + ProductFactsV2 + Media Selector V2](docs/current/SIZE_CHART_PRODUCT_FACTS_V2_CANARY.md)
