@@ -598,7 +598,7 @@ function sentenceCase(value: string): string {
 
 function productTypeLowercase(value: string): string {
   return value.replace(
-    /^(Áo dài|Áo|Đầm|Váy|Set|Combo|Quần|Chân váy)\b/u,
+    /^(Áo dài|Chân váy|Set váy|Set quần|Áo|Đầm|Váy|Set|Combo|Quần)\b/iu,
     (prefix) => prefix.toLocaleLowerCase("vi"),
   );
 }
@@ -621,8 +621,12 @@ export function productDisplayName(product: StableProductDocument): string {
       /(?:SANPHAM|CHANVAY|AODAI|CROPTOP|JUMPSUIT|COMBO|MAU|SET|AO|VAY|DAM|QUAN)/gu,
       "",
     );
-  return residual.length >= 2
-    ? productTypeLowercase(title)
+  const productType = title.match(
+    /^(Áo dài|Chân váy|Set váy|Set quần|Áo|Đầm|Váy|Set|Combo|Quần)\b/iu,
+  )?.[0];
+  if (residual.length >= 2) return productTypeLowercase(title);
+  return productType
+    ? `${productType.toLocaleLowerCase("vi")} ${product.productId}`
     : `mẫu ${product.productId}`;
 }
 

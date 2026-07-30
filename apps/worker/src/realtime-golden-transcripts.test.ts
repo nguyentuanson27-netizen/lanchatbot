@@ -227,7 +227,7 @@ describe("realtime golden transcripts", () => {
       {
         kind: "TEXT",
         text: [
-          "Mẫu CB182 hiện có giá 699.000đ chị nhé.",
+          "Set váy CB182 hiện có giá 699.000đ chị nhé.",
           "Chất liệu: gấm",
           "Form dáng: suông",
           "Size: S, M, L",

@@ -33,15 +33,22 @@ function fullPrice(value: number): string {
 function productName(product: StableProductDocument): string {
   const title = product.title.replace(/<[^>]*>/gu, " ").replace(/\s+/gu, " ").trim();
   const name = title || `mẫu ${product.productId}`;
+  const productType = title.match(/^(Áo dài|Chân váy|Set váy|Set quần|Áo|Đầm|Váy|Set|Combo|Quần)\b/iu)?.[0];
   const foldedName = name.normalize("NFD")
     .replace(/[\u0300-\u036f]/gu, "")
     .replace(/[đĐ]/gu, "d")
     .replace(/[^a-z0-9]+/giu, "")
     .toLowerCase();
   const foldedCode = product.productId.replace(/[^a-z0-9]+/giu, "").toLowerCase();
+  const residual = foldedName
+    .replace(foldedCode, "")
+    .replace(/(?:aodai|chanvay|setvay|setquan|ao|dam|vay|set|combo|quan|mau|sanpham)/gu, "");
+  const naturalName = productType !== undefined && residual.length === 0
+    ? `${productType.charAt(0).toLocaleUpperCase("vi")}${productType.slice(1).toLocaleLowerCase("vi")} ${product.productId}`
+    : name;
   return foldedName.includes(foldedCode)
-    ? name
-    : `${name} (mã ${product.productId})`;
+    ? naturalName
+    : `${naturalName} (mã ${product.productId})`;
 }
 
 function sourceVersion(facts: BusinessFactEnvelopeV1): string {
