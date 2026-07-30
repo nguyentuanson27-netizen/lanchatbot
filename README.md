@@ -154,6 +154,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 - [Kế hoạch cải thiện Admin Frontend và bổ sung tính năng](docs/current/ADMIN_FRONTEND_IMPROVEMENT_PLAN_20260730.md) — `FE1_FE2_FE3_IMPLEMENTED_PENDING_RELEASE`, không thay đổi outbound, page allowlist hoặc ownership
 - [Kế hoạch Task 2.0A — Meta Ads Entry Context & Lead Qualification](docs/current/TASK_2_0A_AD_ENTRY_CONTEXT_AND_LEAD_QUALIFICATION_PLAN.md) — `DEPLOYED_SHADOW_EVIDENCE_PENDING`, analytics sidecar, không thay đổi outbound
 - [Kế hoạch nhận diện ảnh Cutout-first + AI reranker](docs/current/MEDIA_RECOGNITION_CUTOUT_AI_IMPLEMENTATION_PLAN.md)
+- [Kế hoạch migration P2.3C Hash v3](docs/current/P23C_HASH_V3_MIGRATION_PLAN_20260730.md) — tách `embedding_hash`, `payload_hash`, `provenance_hash` để tránh embedding lại khi chỉ bổ sung SHA hoặc cập nhật payload
 - [Canary Size Chart + ProductFactsV2 + Media Selector V2](docs/current/SIZE_CHART_PRODUCT_FACTS_V2_CANARY.md)
 - [Trạng thái triển khai nhận diện ảnh r22](docs/current/MEDIA_RECOGNITION_R22_STATUS_20260728.md)
 - [Trạng thái gửi ảnh sản phẩm sau nhận diện r23](docs/current/MEDIA_IMAGE_DELIVERY_R23_STATUS_20260729.md)
