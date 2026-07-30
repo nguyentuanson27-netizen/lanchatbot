@@ -1,6 +1,6 @@
 # Kế hoạch cải thiện Admin Frontend và bổ sung tính năng
 
-Status: **PLANNED**
+Status: **FE1_FE2_FE3_IMPLEMENTED_PENDING_RELEASE**
 
 Ngày cập nhật: **2026-07-30**
 
@@ -17,6 +17,33 @@ Baseline tham chiếu:
 
 Tài liệu này là kế hoạch triển khai. Nó không tự bật feature flag, không thay đổi
 production, không mở thêm page và không cho phép sửa trực tiếp trên VPS.
+
+## 0. Trạng thái triển khai FE1–FE3
+
+Đã triển khai trên nhánh release candidate, chưa deploy production:
+
+- FE1: typography vận hành tối thiểu 12 px; polling tạm dừng khi nhập liệu hoặc
+  có overlay; giữ focus/selection/scroll; toast có live role đúng tone; nối
+  Dataset shortcuts; dialog/drawer có focus trap, restore focus và inert nền;
+  thay native prompt/confirm; tách shared UI runtime và stylesheet wave.
+- FE2: search hội thoại phía server trên projection PII-safe; filter stage/owner;
+  cursor pagination cho Conversations và Audit; filter hội thoại lưu trong URL;
+  topbar lấy page scope từ identity thay vì hard-code.
+- FE3: migration additive `0025_admin_frontend_operations`; assignment, priority,
+  SLA deadline và optimistic revision; transition idempotent/audited; Handoff SLA
+  Console; Conversation Inspector tổng hợp redacted messages, Wave 2 events,
+  evaluations và delivery outbox chỉ qua admin views.
+
+Kiểm tra release candidate:
+
+- Admin API: `59/59` test đạt.
+- Admin Web: `41/41` Vitest và `6/6` Node test đạt.
+- Migration: `20/20` test liên quan đạt.
+- Admin Web typecheck và production build đạt; bundle build hiện khoảng
+  `120.36 KB` JavaScript và `36.91 KB` CSS trước gzip.
+
+Production vẫn giữ nguyên `20260729-ad-acquisition-r27.1` cho đến khi hoàn tất
+review, merge GitHub, migration rehearsal và deploy theo release runbook.
 
 ## 1. Mục tiêu
 

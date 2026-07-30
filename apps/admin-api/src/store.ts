@@ -12,6 +12,7 @@ import {
   type ConversationQuery,
   type EvaluationQuery,
   type HandoffQuery,
+  type HandoffTransitionInput,
   type OperationQuery,
   type OutreachMetricsQuery,
   type OutreachQuery,
@@ -78,7 +79,9 @@ const EVENTS: ListSpec = {
   timeColumn: "occurred_at",
   columns: `event_id, conversation_id, page_id, event_type, intent, stage,
     action, handoff_reason, owner, readiness_score, product_id, order_outcome,
-    prompt_version, model_version, policy_version, catalog_version, occurred_at`,
+    prompt_version, model_version, policy_version, catalog_version, occurred_at,
+    wave2_need, wave2_barrier, wave2_decision_factor, wave2_strategy,
+    wave2_cta_policy, wave2_experiment_id, wave2_experiment_variant`,
 };
 const OUTREACH_MESSAGES: ListSpec = {
   view: "admin_outreach_messages_v",
@@ -116,7 +119,7 @@ const META_OUTBOX: ListSpec = {
   columns: `outbox_id, conversation_id, page_id, sequence_no, status,
     attempt_count, lease_until, request_started_at, accepted_at, delivered_at,
     read_at, ambiguity_reason, last_error_code, next_attempt_at, created_at,
-    updated_at`,
+    updated_at, reply_plan_id, response_group_id`,
 };
 const PANCAKE_OUTBOX: ListSpec = {
   view: "admin_pancake_outbox_v",
@@ -161,6 +164,8 @@ const HANDOFF_COLUMNS = `h.handoff_id, h.conversation_id, h.page_id,
   h.reason_detail_safe, h.product_id, h.facts_status, h.facts_reason_code,
   h.desired_tag, h.owner_before, h.owner_after, h.status, h.occurred_at,
   h.created_at, h.updated_at, h.acknowledged_at, h.resolved_at,
+  h.acknowledged_by_ref, h.resolved_by_ref, h.assignee_ref, h.priority,
+  h.sla_due_at, h.revision, h.last_actor_ref,
   h.pancake_sync_status, h.pancake_sync_error_code,
   h.trigger_message_pk, h.trigger_text_redacted_safe AS trigger_message_text_redacted_safe,
   h.trigger_message_type, h.trigger_attachment_count,
@@ -200,11 +205,12 @@ export class PostgresAdminStore implements AdminStore {
     if (!this.commandPool) return false;
     try {
       const result = await this.commandPool.query(
-        `SELECT 1 FROM information_schema.tables
+        `SELECT count(*)::int AS table_count
+         FROM information_schema.tables
          WHERE table_schema = current_schema()
-           AND table_name = 'admin_commands'`,
+           AND table_name IN ('admin_commands', 'handoff_case_events')`,
       );
-      return result.rowCount === 1;
+      return Number(result.rows[0]?.table_count ?? 0) === 2;
     } catch {
       return false;
     }
@@ -357,6 +363,17 @@ export class PostgresAdminStore implements AdminStore {
     } else if (query.blockingTag) {
       addFilter(filters, values, "blocking_tag", query.blockingTag);
     }
+    if (query.stage) addFilter(filters, values, "sales_stage", query.stage);
+    if (query.search) {
+      values.push(`%${escapeLike(query.search)}%`);
+      const parameter = `$${values.length}`;
+      filters.push(`(
+        customer_ref ILIKE ${parameter} ESCAPE '\\'
+        OR coalesce(product_id, '') ILIKE ${parameter} ESCAPE '\\'
+        OR coalesce(sales_stage, '') ILIKE ${parameter} ESCAPE '\\'
+        OR coalesce(unresolved_question, '') ILIKE ${parameter} ESCAPE '\\'
+      )`);
+    }
     const page = await this.list(CONVERSATIONS, filters, values, query.limit, query.cursor);
     return {
       ...page,
@@ -380,6 +397,56 @@ export class PostgresAdminStore implements AdminStore {
       sanitize(result.rows[0]) as Record<string, unknown>,
     ]);
     return enriched ?? null;
+  }
+
+  async getConversationInspector(identity: AdminIdentity, conversationId: string) {
+    const conversation = await this.getConversation(identity, conversationId);
+    if (!conversation) return null;
+    const pageId = typeof conversation.page_id === "string" ? conversation.page_id : "";
+    const filters = ["conversation_id = $1", "page_id = $2"];
+    const values = [conversationId, pageId];
+    const [messages, events, evaluations, metaOutbox, pancakeOutbox, handoffs] =
+      await Promise.all([
+        this.list(MESSAGES, [...filters], [...values], 50),
+        this.list(EVENTS, [...filters], [...values], 100),
+        this.list(EVALUATIONS, [...filters], [...values], 50),
+        this.list(META_OUTBOX, [...filters], [...values], 50),
+        this.list(PANCAKE_OUTBOX, [...filters], [...values], 50),
+        this.listHandoffs(identity, {
+          limit: 50,
+          conversationId,
+          source: "ALL",
+          desiredTag: "ALL",
+        }),
+      ]);
+    return sanitize({
+      conversation,
+      timeline: {
+        messages: messages.items,
+        events: events.items,
+        evaluations: evaluations.items,
+        handoffs: handoffs.items,
+      },
+      delivery: {
+        meta_outbox: metaOutbox.items,
+        pancake_outbox: pancakeOutbox.items,
+      },
+      cursors: {
+        messages: messages.nextCursor,
+        events: events.nextCursor,
+        evaluations: evaluations.nextCursor,
+        meta_outbox: metaOutbox.nextCursor,
+        pancake_outbox: pancakeOutbox.nextCursor,
+        handoffs: handoffs.nextCursor,
+      },
+      data_boundary: {
+        pii_safe: true,
+        message_source: "admin_messages_v",
+        event_source: ADMIN_CONVERSATION_EVENTS_SOURCE,
+        raw_payloads_included: false,
+      },
+      generated_at: new Date().toISOString(),
+    }) as Record<string, unknown>;
   }
 
   /**
@@ -922,7 +989,14 @@ export class PostgresAdminStore implements AdminStore {
                 )::int AS resolved_24h,
                 min(occurred_at) FILTER (
                   WHERE status IN ('NEW', 'IN_PROGRESS')
-                ) AS oldest_open_at
+                ) AS oldest_open_at,
+                count(*) FILTER (
+                  WHERE status IN ('NEW', 'IN_PROGRESS') AND sla_due_at < now()
+                )::int AS breached,
+                count(*) FILTER (
+                  WHERE status IN ('NEW', 'IN_PROGRESS')
+                    AND sla_due_at BETWEEN now() AND now() + interval '10 minutes'
+                )::int AS due_soon
          FROM admin_handoff_queue_v ${where}`,
         values,
       ),
@@ -967,6 +1041,18 @@ export class PostgresAdminStore implements AdminStore {
     }
     if (query.conversationId) {
       addFilter(filters, values, "h.conversation_id", query.conversationId);
+    }
+    if (query.assigneeRef) {
+      addFilter(filters, values, "h.assignee_ref", query.assigneeRef);
+    }
+    if (query.sla === "BREACHED") {
+      filters.push("h.status IN ('NEW', 'IN_PROGRESS') AND h.sla_due_at < now()");
+    } else if (query.sla === "DUE_SOON") {
+      filters.push(
+        "h.status IN ('NEW', 'IN_PROGRESS') AND h.sla_due_at BETWEEN now() AND now() + interval '10 minutes'",
+      );
+    } else if (query.sla === "ON_TRACK") {
+      filters.push("h.status IN ('NEW', 'IN_PROGRESS') AND h.sla_due_at > now() + interval '10 minutes'");
     }
     if (query.cursor) {
       const cursor = decodeCursor(query.cursor);
@@ -1033,10 +1119,183 @@ export class PostgresAdminStore implements AdminStore {
        LIMIT 100`,
       [enriched.conversation_id, enriched.page_id],
     );
+    const caseHistory = await this.pool.query(
+      `SELECT event_id, opening_handoff_id, action, actor_ref, actor_role,
+              from_status, to_status, from_assignee_ref, to_assignee_ref,
+              from_priority, to_priority, revision, correlation_id,
+              metadata_safe, occurred_at
+       FROM handoff_case_events
+       WHERE opening_handoff_id = $1
+       ORDER BY occurred_at DESC, event_id DESC
+       LIMIT 100`,
+      [handoffId],
+    );
     return {
       ...enriched,
       history: sanitizeRows(history.rows),
+      case_history: sanitizeRows(caseHistory.rows),
     };
+  }
+
+  async transitionHandoff(
+    identity: AdminIdentity,
+    handoffId: string,
+    input: HandoffTransitionInput,
+  ) {
+    if (identity.role !== "OWNER" && identity.role !== "EDITOR") {
+      throw new AdminQueryError("ADMIN_HANDOFF_FORBIDDEN");
+    }
+    if (!this.commandPool) {
+      throw new AdminQueryError("ADMIN_CONTROL_UNAVAILABLE");
+    }
+    const client = await this.commandPool.connect();
+    try {
+      await client.query("BEGIN");
+      const currentResult = await client.query(
+        `SELECT cases.*, event.page_id
+         FROM handoff_cases AS cases
+         JOIN handoff_events AS event
+           ON event.handoff_id = cases.opening_handoff_id
+         WHERE cases.opening_handoff_id = $1
+         FOR UPDATE`,
+        [handoffId],
+      );
+      const current = currentResult.rows[0];
+      if (!current) {
+        await client.query("ROLLBACK");
+        return null;
+      }
+      assertPageAllowed(identity, String(current.page_id));
+      const fingerprint = createHash("sha256").update(JSON.stringify({
+        handoffId,
+        action: input.action,
+        expectedRevision: input.expectedRevision,
+        assigneeRef: input.assigneeRef ?? null,
+        priority: input.priority ?? null,
+      })).digest("hex");
+      const existing = await client.query(
+        `SELECT request_fingerprint
+         FROM handoff_case_events
+         WHERE actor_ref = $1 AND idempotency_key = $2
+         LIMIT 1`,
+        [identity.subject, input.idempotencyKey],
+      );
+      if (existing.rows[0]) {
+        if (existing.rows[0].request_fingerprint !== fingerprint) {
+          throw new AdminQueryError("ADMIN_IDEMPOTENCY_CONFLICT");
+        }
+        await client.query("COMMIT");
+        const handoff = await this.getHandoff(identity, handoffId);
+        return handoff ? { handoff, created: false } : null;
+      }
+      if (Number(current.revision) !== input.expectedRevision) {
+        throw new AdminQueryError("ADMIN_HANDOFF_VERSION_CONFLICT");
+      }
+
+      const fromStatus = String(current.status);
+      const fromAssignee = current.assignee_ref === null ? null : String(current.assignee_ref);
+      const fromPriority = String(current.priority);
+      let status = fromStatus;
+      let assigneeRef = fromAssignee;
+      let priority = fromPriority;
+      let acknowledgedAt = current.acknowledged_at;
+      let acknowledgedByRef = current.acknowledged_by_ref;
+      let resolvedAt = current.resolved_at;
+      let resolvedByRef = current.resolved_by_ref;
+      const now = new Date().toISOString();
+
+      if (input.action === "CLAIM" || input.action === "REASSIGN") {
+        if (fromStatus === "RESOLVED" || !input.assigneeRef) {
+          throw new AdminQueryError("ADMIN_HANDOFF_TRANSITION_INVALID");
+        }
+        status = "IN_PROGRESS";
+        assigneeRef = input.assigneeRef;
+        acknowledgedAt = acknowledgedAt ?? now;
+        acknowledgedByRef = acknowledgedByRef ?? identity.subject;
+      } else if (input.action === "RESOLVE") {
+        if (fromStatus === "RESOLVED") {
+          throw new AdminQueryError("ADMIN_HANDOFF_TRANSITION_INVALID");
+        }
+        status = "RESOLVED";
+        resolvedAt = now;
+        resolvedByRef = identity.subject;
+      } else if (input.action === "REOPEN") {
+        if (fromStatus !== "RESOLVED") {
+          throw new AdminQueryError("ADMIN_HANDOFF_TRANSITION_INVALID");
+        }
+        status = "IN_PROGRESS";
+        assigneeRef = input.assigneeRef ?? fromAssignee ?? identity.subject;
+        acknowledgedAt = now;
+        acknowledgedByRef = identity.subject;
+        resolvedAt = null;
+        resolvedByRef = null;
+      } else if (input.action === "SET_PRIORITY") {
+        if (!input.priority) {
+          throw new AdminQueryError("ADMIN_HANDOFF_TRANSITION_INVALID");
+        }
+        priority = input.priority;
+      }
+
+      const updated = await client.query(
+        `UPDATE handoff_cases
+         SET status = $2, assignee_ref = $3, priority = $4,
+             acknowledged_at = $5, acknowledged_by_ref = $6,
+             resolved_at = $7, resolved_by_ref = $8,
+             revision = revision + 1, last_actor_ref = $9, updated_at = now()
+         WHERE opening_handoff_id = $1
+         RETURNING *`,
+        [
+          handoffId, status, assigneeRef, priority,
+          acknowledgedAt, acknowledgedByRef, resolvedAt, resolvedByRef,
+          identity.subject,
+        ],
+      );
+      const revision = Number(updated.rows[0].revision);
+      await client.query(
+        `INSERT INTO handoff_case_events (
+           opening_handoff_id, action, actor_ref, actor_role,
+           idempotency_key, request_fingerprint, from_status, to_status,
+           from_assignee_ref, to_assignee_ref, from_priority, to_priority,
+           revision, correlation_id, metadata_safe
+         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb)`,
+        [
+          handoffId, input.action, identity.subject, identity.role,
+          input.idempotencyKey, fingerprint, fromStatus, status,
+          fromAssignee, assigneeRef, fromPriority, priority, revision,
+          input.correlationId, JSON.stringify({ page_id: current.page_id }),
+        ],
+      );
+      await client.query(
+        `INSERT INTO audit_log (
+           actor_type, actor_id, action, resource_type, resource_id_hash,
+           metadata_safe, correlation_id, entry_hash
+         ) VALUES (
+           'USER',$1,'HANDOFF_CASE_TRANSITION','HANDOFF_CASE',
+           encode(digest($2, 'sha256'), 'hex'),$3::jsonb,$4,digest('', 'sha256')
+         )`,
+        [
+          identity.subject, handoffId,
+          JSON.stringify({ action: input.action, revision, page_id: current.page_id }),
+          input.correlationId,
+        ],
+      );
+      await client.query("COMMIT");
+      const handoff = await this.getHandoff(identity, handoffId);
+      return {
+        handoff: handoff ?? sanitize(updated.rows[0]) as Record<string, unknown>,
+        created: true,
+      };
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      const databaseError = error as { code?: string; constraint?: string };
+      if (
+        databaseError.code === "23505" &&
+        databaseError.constraint === "handoff_case_events_actor_idempotency_uk"
+      ) throw new AdminQueryError("ADMIN_IDEMPOTENCY_CONFLICT");
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async listAudit(identity: AdminIdentity, query: AuditQuery) {
@@ -2021,6 +2280,10 @@ function addFilter(
 ): void {
   values.push(value);
   filters.push(`${column} = $${values.length}`);
+}
+
+function escapeLike(value: string): string {
+  return value.replace(/[\\%_]/g, "\\$&");
 }
 
 function assertPageAllowed(identity: AdminIdentity, pageId: string): void {
