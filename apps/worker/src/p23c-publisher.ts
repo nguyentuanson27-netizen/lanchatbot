@@ -503,7 +503,7 @@ export class P23cPublisher {
         `RETRYABLE=${progress.retryable_failed}`,
         `FATAL=${progress.fatal_failed}`,
         ...registrySummary,
-        ...failures.slice(0, 10).map((row) => [row.ma_sp, row.image_url, row.error].filter(Boolean).join(" | ")),
+        ...failures.slice(0, 10).map((row) => [row.ma_sp, row.error].filter(Boolean).join(" | ")),
       ].join(" | ").slice(0, 45_000);
 
       return {
