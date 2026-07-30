@@ -1,6 +1,6 @@
 # Trạng thái ổn định giao diện và hiệu năng r30
 
-Status: **MERGED_RELEASE_CANDIDATE_NOT_DEPLOYED**
+Status: **DEPLOYED_VERIFIED_R30**
 
 Ngày cập nhật: **2026-07-30**
 
@@ -8,12 +8,12 @@ Ngày cập nhật: **2026-07-30**
 
 - PR feature `#76` đã merge vào `main` tại
   `ca0b57efec40354bd5569ddb42d386060a4ef43f`.
-- Release candidate: `20260730-performance-ui-stability-r30`; manifest tại
+- Release đã deploy: `20260730-performance-ui-stability-r30`; manifest evidence tại
   [`deploy/manifests/20260730-performance-ui-stability-r30.json`](../../deploy/manifests/20260730-performance-ui-stability-r30.json).
-- Production vẫn chạy `20260730-admin-fe4-r29`; tài liệu này chưa phải bằng chứng deploy.
+- Production đang chạy `/opt/lana-chatbot/releases/20260730-performance-ui-stability-r30` từ annotated tag và commit `8748de1c27e58c6e893e918ba22f4190d363cbaf`.
 - Không sửa source trực tiếp trên VPS. Cutover phải dùng commit/tag đã merge từ GitHub.
 - Có migration additive `0026_product_media_intake_dedupe`.
-- Service dự kiến recreate: `admin-api`, `admin-web`, `realtime`.
+- Service đã recreate: `admin-api`, `admin-web`, `realtime-worker`; các container ngoài phạm vi giữ nguyên ID.
 - Không đổi Meta Send API, Delivery, Pancake ownership, page allowlist, POS, P2.3,
   Size Chart, n8n hoặc Qdrant writer.
 
@@ -105,25 +105,39 @@ packages/database/migrations/0026_product_media_intake_dedupe.down.sql
 5. Backup PostgreSQL có checksum; restore vào database tạm và chạy `up → down → up` cho 0026.
 6. Build image r30 từ tag, không ghi đè image r29.
 7. Apply migration 0026 trước khi start Admin API r30.
-8. Recreate đúng `admin-api`, `admin-web`, `realtime`; giữ nguyên container ngoài phạm vi.
+8. Recreate đúng `admin-api`, `admin-web`, `realtime-worker`; giữ nguyên container ngoài phạm vi.
 9. Smoke readiness, Authentik 302, asset/MIME/404, dedupe an toàn, LISTEN/NOTIFY,
    heartbeat, Inbox/Outbox, page allowlist và canary thật được cho phép.
 10. Chỉ đổi symlink `current` sau khi mọi guard đạt; hậu kiểm và ghi evidence manifest.
 
 ## Rollback
 
-- Đưa riêng `admin-api`, `admin-web`, `realtime` về image/release r29 và xác minh health trước
-  khi đổi symlink về r29.
+- Đưa riêng `admin-api`, `admin-web` về image r29 và `realtime-worker` về image r27.1; xác minh health trước khi đổi symlink về r29.
 - Migration 0026 là additive; rollback ứng dụng giữ bảng để không mất dedupe evidence. Chỉ chạy
   down migration theo quyết định riêng sau backup.
 - Không chạy hai phiên bản realtime worker song song.
 - Không xóa Inbox/Outbox, `product_media_intakes`, Sheet rows, Redis, PostgreSQL, Qdrant hoặc ảnh.
 
-## Evidence còn thiếu
+## Evidence production
 
-- Manifest PR, tag object và image digest.
-- Backup checksum và restore-test production.
-- Container ID trước/sau, health/restart, smoke/canary và error-line delta.
-- Xác nhận symlink production cùng hậu kiểm độc lập.
+- Annotated tag object: `5936d7f87db7baf8b69b4f091524134a33de5f77`; tag commit và image revision:
+  `8748de1c27e58c6e893e918ba22f4190d363cbaf`.
+- Image: `lana-chatbot-app:performance-ui-stability-r30`, ID
+  `sha256:a35de1caebb02ca84e4d7a0e39b93f66a2c2ef3cdbd07628d4358270db7a2e03`.
+- Backup: `/opt/lana-chatbot/shared/backups/20260730-performance-ui-stability-r30-20260730T153838Z.dump`,
+  21.849.346 byte, SHA-256 `d3366fea60203a68b488c3908bf8aa8f671c3dc453150dfe98a6613755f1060b`.
+- Restore-test cách ly: baseline 0025, `UP → DOWN → UP` migration 0026 và unique dedupe smoke đều **PASS**.
+- Cutover lần đầu dùng nhầm compose service `realtime` thay vì `realtime-worker`; guard dừng trước khi đổi Realtime,
+  rollback Admin về r29 và trả symlink về r29 thành công. Migration 0026 additive được giữ lại.
+- Cutover lần hai lúc `2026-07-30T15:54:09Z`: ba target healthy, restart count 0; readiness, RBAC,
+  assets/MIME/404 và Authentik 302 đều **PASS**; symlink chỉ đổi sau tất cả guard.
+- B2 production smoke: `sharp`/libvips `8.17.1` resize WebP đúng kích thước.
+- B4 production smoke: một PostgreSQL listener, `REALTIME_POLL_MS=10000`, `REALTIME_CONCURRENCY=4`,
+  `REALTIME_HEARTBEAT_MS=15000`; heartbeat quan sát 15–30 giây tùy thời điểm lấy mẫu.
+- Canary thật sau cutover: `CUSTOMER | PROCESSED = 1`, `FAILED_PERMANENT = 0`, thời gian xử lý tối đa
+  `5.101` giây; stale `PROCESSING = 0`, error line mới của ba target `= 0`.
+- Rollback artifact độc lập đã tạo và kiểm tra cú pháp; rollback ứng dụng giữ migration/bảng 0026,
+  không xóa Inbox/Outbox, Redis, PostgreSQL, Qdrant, Sheet hoặc ảnh.
 
-Chỉ khi đủ evidence mới đổi status thành **DEPLOYED_VERIFIED_R30**.
+Bằng chứng máy đọc nằm trong
+[`deploy/manifests/20260730-performance-ui-stability-r30.json`](../../deploy/manifests/20260730-performance-ui-stability-r30.json).

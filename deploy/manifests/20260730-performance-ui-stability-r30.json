@@ -1,29 +1,34 @@
 {
   "schemaVersion": 1,
-  "capturedAt": "2026-07-30T15:21:03Z",
-  "status": "RELEASE_CANDIDATE_NOT_DEPLOYED",
+  "capturedAt": "2026-07-30T16:04:00Z",
+  "status": "DEPLOYED_VERIFIED_R30",
   "environment": "production-test-page-live-100-percent-acquisition-shadow",
   "host": "156.67.214.197",
   "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
   "sourceBranch": "main",
-  "sourceCommit": "ca0b57efec40354bd5569ddb42d386060a4ef43f",
-  "pullRequests": [76],
+  "sourceCommit": "8748de1c27e58c6e893e918ba22f4190d363cbaf",
+  "featureCommit": "ca0b57efec40354bd5569ddb42d386060a4ef43f",
+  "pullRequests": [76, 77],
   "releaseTag": "20260730-performance-ui-stability-r30",
   "liveReleasePath": "/opt/lana-chatbot/releases/20260730-performance-ui-stability-r30",
   "previousReleasePath": "/opt/lana-chatbot/releases/20260730-admin-fe4-r29",
   "sourceMaterialization": {
     "method": "annotated-tag-fetched-by-read-only-deploy-key",
-    "tagObject": "EVIDENCE_PENDING",
-    "workingTreeClean": "EVIDENCE_PENDING"
+    "tagObject": "5936d7f87db7baf8b69b4f091524134a33de5f77",
+    "workingTreeClean": true
   },
   "image": {
     "name": "lana-chatbot-app:performance-ui-stability-r30",
-    "imageId": "EVIDENCE_PENDING",
+    "imageId": "sha256:a35de1caebb02ca84e4d7a0e39b93f66a2c2ef3cdbd07628d4358270db7a2e03",
     "releaseLabel": "20260730-performance-ui-stability-r30",
-    "revisionLabel": "ca0b57efec40354bd5569ddb42d386060a4ef43f",
-    "recreatedServices": ["admin-api", "admin-web", "realtime"],
-    "containerIds": "EVIDENCE_PENDING",
-    "nonTargetServiceContainerIdsUnchanged": "EVIDENCE_PENDING"
+    "revisionLabel": "8748de1c27e58c6e893e918ba22f4190d363cbaf",
+    "recreatedServices": ["admin-api", "admin-web", "realtime-worker"],
+    "containerIds": {
+      "admin-api": "78409815e48cee9deab6d40a99abfcf7b523298f7c71cd3010ab127ab1c3b06b",
+      "admin-web": "728e98e2db617587151587aed965970b7f4c2582288ad71cfa5d4d390eb06fa3",
+      "realtime-worker": "7a56e8a72a22c99a755ebb01347981c0e320a2994d824ab7b27e1f5f2dee8363"
+    },
+    "nonTargetServiceContainerIdsUnchanged": true
   },
   "scope": {
     "features": [
@@ -45,19 +50,21 @@
   "database": {
     "migrationRequired": true,
     "latestMigrationExpected": "0026_product_media_intake_dedupe",
-    "migrationApplied": false,
+    "migrationApplied": true,
     "migrationAdditive": true,
     "backupRequired": true,
-    "backupPath": "EVIDENCE_PENDING",
-    "backupSha256": "EVIDENCE_PENDING",
+    "backupPath": "/opt/lana-chatbot/shared/backups/20260730-performance-ui-stability-r30-20260730T153838Z.dump",
+    "backupBytes": 21849346,
+    "backupSha256": "d3366fea60203a68b488c3908bf8aa8f671c3dc453150dfe98a6613755f1060b",
     "restoreTestRequired": true,
     "restoreTestSequence": "UP_DOWN_UP_0026",
-    "restoreTestStatus": "EVIDENCE_PENDING",
-    "dataMutationPlanned": false,
+    "restoreTestStatus": "PASS",
+    "productMediaDedupeSmoke": "PASS_TRANSACTION_ROLLBACK",
     "normalRollbackDropsSchema": false
   },
   "preDeployVerification": {
     "localFullCheck": "PASS",
+    "containerFullCheck": "PASS",
     "adminApiTests": "67_OF_67_PASS",
     "databaseTests": "103_OF_103_PASS",
     "workerTests": "313_OF_313_PASS",
@@ -67,31 +74,68 @@
     "gitDiffCheck": "PASS"
   },
   "productionVerification": {
-    "status": "EVIDENCE_PENDING",
-    "requiredReadinessEndpoint": "/health/ready",
-    "requiredPublicAdminStatus": 302,
-    "requiredPublicAdminTarget": "Authentik",
-    "requiredTargetServicesHealthy": 3,
-    "requiredTargetServiceRestartCount": 0,
-    "requiredNewErrorLineCount": 0,
-    "requiredProductMediaDedupeSmoke": true,
-    "requiredListenNotifySmoke": true,
-    "requiredHeartbeatSmoke": true,
-    "requiredInboxOutboxAudit": true,
-    "requiredPageAllowlistUnchanged": true,
-    "requiredCanaryConversation": true
+    "status": "PASS",
+    "checkedAt": "2026-07-30T16:04:00Z",
+    "readinessEndpoint": "/health/ready",
+    "readinessStatus": 200,
+    "publicAdminStatus": 302,
+    "publicAdminTarget": "Authentik",
+    "targetServicesHealthy": 3,
+    "targetServiceRestartCount": 0,
+    "newErrorLineCount": 0,
+    "sharpSmoke": "PASS_LIBVIPS_8_17_1",
+    "listenNotify": "PASS_LISTENER_COUNT_1",
+    "heartbeat": "PASS_CONFIG_15000MS_OBSERVED_15_TO_30_SECONDS",
+    "customerCanary": {
+      "processed": 1,
+      "failedPermanent": 0,
+      "maxProcessingSeconds": 5.101
+    },
+    "staleProcessingCount": 0,
+    "postgresConnectionsObserved": 22,
+    "pageAllowlistUnchanged": true,
+    "inboxOutboxAudit": "PASS"
   },
+  "deploymentAttempts": [
+    {
+      "attempt": 1,
+      "status": "ROLLED_BACK_PASS",
+      "reason": "Operational artifact used compose service name realtime instead of realtime-worker.",
+      "realtimeChanged": false,
+      "adminRestoredToR29": true,
+      "symlinkRestoredToR29": true,
+      "migration0026Retained": true
+    },
+    {
+      "attempt": 2,
+      "status": "PASS",
+      "cutoverTime": "2026-07-30T15:54:09Z"
+    }
+  ],
   "guardedCutover": {
     "atomicSymlinkSwitchAfterAllGuards": true,
-    "status": "NOT_STARTED"
+    "status": "PASS",
+    "currentRelease": "/opt/lana-chatbot/releases/20260730-performance-ui-stability-r30"
+  },
+  "artifacts": {
+    "buildSha256": "1f3c35c8a2f4b05d534540c4a6467e4508fd8c76cc5cb11b99e42f72c831cf14",
+    "backupSha256": "5d3df892cad50f318114db2d03c71d1243b08d95c7533e98e67e2cd470452ab9",
+    "restoreTestSha256": "912f7f02a0813abe7c9c179a2828697237db2021b8e91c35af2fcefd4cf2e2c4",
+    "cutoverSha256": "0130e866a6c2f6369fab4377a8eb295b281b2ccd74c0ccbce51dcfcd47ef4e06",
+    "rollbackSha256": "d4f6de9d3107f611edab464b501293dcdf81327d7c371d699f1e3d3885ddc0ac",
+    "postcheckSha256": "e7f47cb7762bac760fc7a8ae44ff9476f08f81c1b7c65928668b3513baf38044",
+    "postcheckLogSha256": "722882eabbda958452a36b74d35435c66f5ea4e1830480268d51831fc9d538ff",
+    "postcheckStatusSha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
   },
   "rollback": {
     "releasePath": "/opt/lana-chatbot/releases/20260730-admin-fe4-r29",
-    "image": "lana-chatbot-app:admin-fe4-r29",
-    "services": ["admin-api", "admin-web", "realtime"],
+    "adminImage": "lana-chatbot-app:admin-fe4-r29",
+    "realtimeImage": "lana-chatbot-app:ad-acquisition-r27.1",
+    "services": ["admin-api", "admin-web", "realtime-worker"],
     "schemaRollbackRequired": false,
     "retainProductMediaDedupeTable": true,
     "dataDeletionRequired": false,
-    "executed": false
+    "artifactPrepared": true,
+    "finalReleaseRollbackExecuted": false
   }
 }
