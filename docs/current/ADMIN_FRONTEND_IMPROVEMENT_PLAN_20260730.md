@@ -219,9 +219,9 @@ hoặc SLA event.
 
 ### Wave FE-4 — Ads funnel, Media Pipeline và Dataset Adjudication
 
-Trạng thái thực hiện ngày 2026-07-30: **MERGED_RELEASE_CANDIDATE_NOT_DEPLOYED**.
-PR `#72` đã merge vào `main`; release candidate là `20260730-admin-fe4-r29`,
-production vẫn là r28. Bằng chứng,
+Trạng thái thực hiện ngày 2026-07-30: **DEPLOYED_VERIFIED_R29**.
+PR `#72` và PR release `#74` đã merge; annotated tag/image
+`20260730-admin-fe4-r29` đang chạy trên production. Bằng chứng,
 phạm vi release, smoke và rollback được ghi tại
 [Trạng thái triển khai FE4](ADMIN_FRONTEND_FE4_STATUS_20260730.md).
 
