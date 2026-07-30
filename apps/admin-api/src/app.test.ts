@@ -26,10 +26,15 @@ class FakeAuthenticator implements AdminAuthenticator {
 
 class FakeStore implements AdminStore {
   lastConversationQuery: Parameters<AdminStore["listConversations"]>[1] | null = null;
+  acquisitionCalls: Array<{ lookbackHours: number | undefined; offsetHours: number | undefined }> = [];
   async ready() { return true; }
   async controlReady() { return true; }
   async policyControlReady() { return true; }
   async dashboard() { return { conversations: { total: 3 } }; }
+  async acquisitionSummary(_identity: AdminIdentity, lookbackHours?: number, offsetHours?: number) {
+    this.acquisitionCalls.push({ lookbackHours, offsetHours });
+    return { lookback_hours: lookbackHours, offset_hours: offsetHours };
+  }
   async listPages() { return [{ page_id: "1198992073286645" }]; }
   async pageHealth(_identity: AdminIdentity, pageId: string) {
     return pageId === "1198992073286645" ? { page: { page_id: pageId } } : null;
@@ -185,6 +190,7 @@ type DatasetService = NonNullable<CreateAdminApiOptions["datasetReview"]>;
 
 class FakeDatasetReviewService implements DatasetService {
   calls: string[] = [];
+  lastReviewRequest: Parameters<DatasetService["reviewQueue"]>[1] | null = null;
   async ready() { return true; }
   async close() {}
   async listDatasets() { this.calls.push("listDatasets"); return [{ dataset_id: "ds-1" }]; }
@@ -202,6 +208,7 @@ class FakeDatasetReviewService implements DatasetService {
   }
   async createSplit() { return { assigned: 4, alreadyAssigned: 0, perSplit: { DEVELOPMENT: 2, VALIDATION: 1, HOLDOUT: 1, RARE_SAFETY: 0 } }; }
   async reviewQueue(projectId: string, request: Parameters<DatasetService["reviewQueue"]>[1]) {
+    this.lastReviewRequest = request;
     this.calls.push(`reviewQueue:${request.acquireLease}`);
     return {
       project_id: projectId,
@@ -219,6 +226,14 @@ class FakeDatasetReviewService implements DatasetService {
   async completeReviewItem(id: string, subject: string, revision: number) {
     this.calls.push(`completeReviewItem:${id}:${subject}:${revision}`);
     return { project_item_id: id, assignment_status: "REVIEWED", revision: revision + 1 };
+  }
+  async markForAdjudication(id: string, subject: string, revision: number) {
+    this.calls.push(`markForAdjudication:${id}:${subject}:${revision}`);
+    return { project_item_id: id, assignment_status: "ADJUDICATION_REQUIRED", revision: revision + 1 };
+  }
+  async releaseReviewLease(id: string, subject: string) {
+    this.calls.push(`releaseReviewLease:${id}:${subject}`);
+    return true;
   }
   async lockHoldout() { this.calls.push("lockHoldout"); return { locked: 5 }; }
   async exportProject(_projectId: string, splits: readonly string[]) {
@@ -415,6 +430,16 @@ describe("Admin API", () => {
             products: [{ maSp: "CB182", brand: "La.na Design", active: true }],
           };
         },
+        async pipeline() {
+          return { items: [], counts: {} };
+        },
+        async retry(_identity, intakeId) {
+          return {
+            intakeId,
+            status: "PENDING_AI" as const,
+            retriedAt: "2026-07-24T00:00:00.000Z",
+          };
+        },
         async upload(_identity, input) {
           return {
             intakeId: "intake-1",
@@ -463,6 +488,25 @@ describe("Admin API", () => {
     assert.equal(response.statusCode, 201);
     assert.equal(response.json().upload.status, "PENDING_AI");
     assert.equal(response.json().upload.maSp, "CB182");
+    await app.close();
+  });
+
+  it("returns current and previous acquisition windows with the same denominator period", async () => {
+    const store = new FakeStore();
+    const app = create({ store });
+    const response = await app.inject({
+      method: "GET",
+      url: "/admin/v1/ad-acquisition/summary?lookback_hours=168",
+      headers: { "x-lana-admin-assertion": "valid" },
+    });
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(store.acquisitionCalls, [
+      { lookbackHours: 168, offsetHours: 0 },
+      { lookbackHours: 168, offsetHours: 168 },
+    ]);
+    assert.deepEqual(response.json().current, { lookback_hours: 168, offset_hours: 0 });
+    assert.deepEqual(response.json().previous, { lookback_hours: 168, offset_hours: 168 });
+    assert.equal(typeof response.json().generated_at, "string");
     await app.close();
   });
 
@@ -872,6 +916,53 @@ describe("Dataset review routes", () => {
     });
     assert.equal(allowed.statusCode, 200);
     await ownerApp.close();
+  });
+
+  it("restricts adjudication queue visibility and passes adjudication mode to the service", async () => {
+    const forbiddenApp = datasetApp({ role: "EDITOR" });
+    const forbidden = await forbiddenApp.inject({
+      method: "GET",
+      url: "/admin/v1/dataset-projects/018f1b72-0000-7000-8000-000000000020/queue?adjudication=true",
+      headers: datasetHeaders,
+    });
+    assert.equal(forbidden.statusCode, 403);
+    await forbiddenApp.close();
+
+    const service = new FakeDatasetReviewService();
+    const app = datasetApp({ role: "APPROVER", service });
+    const response = await app.inject({
+      method: "GET",
+      url: "/admin/v1/dataset-projects/018f1b72-0000-7000-8000-000000000020/queue?adjudication=true",
+      headers: datasetHeaders,
+    });
+    assert.equal(response.statusCode, 200);
+    assert.equal(service.lastReviewRequest?.adjudication, true);
+    assert.equal(service.lastReviewRequest?.acquireLease, true);
+    await app.close();
+  });
+
+  it("marks a leased item for adjudication and releases a review lease", async () => {
+    const service = new FakeDatasetReviewService();
+    const app = datasetApp({ role: "EDITOR", service });
+    const itemId = "018f1b72-0000-7000-8000-000000000040";
+    const marked = await app.inject({
+      method: "POST",
+      url: `/admin/v1/dataset-items/${itemId}/adjudication`,
+      headers: datasetHeaders,
+      payload: { revision: 7 },
+    });
+    assert.equal(marked.statusCode, 200);
+    assert.equal(marked.json().item.assignment_status, "ADJUDICATION_REQUIRED");
+    const released = await app.inject({
+      method: "POST",
+      url: `/admin/v1/dataset-items/${itemId}/release`,
+      headers: datasetHeaders,
+    });
+    assert.equal(released.statusCode, 200);
+    assert.equal(released.json().released, true);
+    assert.ok(service.calls.some((call) => call.startsWith("markForAdjudication:")));
+    assert.ok(service.calls.some((call) => call.startsWith("releaseReviewLease:")));
+    await app.close();
   });
 
   it("requires adjudicator rights to REMOVE an annotation", async () => {

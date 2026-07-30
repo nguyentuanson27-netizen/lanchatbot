@@ -23,15 +23,15 @@ export function renderDatasetIndex(
         </div>
       </section>`;
   }
-  const cards = entries.map((entry) => renderDatasetCard(entry, canAdmin, canExport)).join("");
+  const cards = entries.map((entry) => renderDatasetCard(entry, canAdmin, canExport, capability?.canAdjudicate === true)).join("");
   return `<section class="dataset-index" data-dataset-index>${cards}</section>`;
 }
 
-function renderDatasetCard(entry: DatasetIndexEntry, canAdmin: boolean, canExport: boolean): string {
+function renderDatasetCard(entry: DatasetIndexEntry, canAdmin: boolean, canExport: boolean, canAdjudicate: boolean): string {
   const { dataset, projects } = entry;
   const projectRows = projects.length === 0
     ? `<p class="section-note">${canAdmin ? "Chưa có dự án gán nhãn. Tạo dự án qua API để bắt đầu review." : "Chưa có dự án gán nhãn."}</p>`
-    : `<ul class="dataset-project-list">${projects.map((project) => renderProjectRow(project, canAdmin, canExport)).join("")}</ul>`;
+    : `<ul class="dataset-project-list">${projects.map((project) => renderProjectRow(project, canAdmin, canExport, canAdjudicate)).join("")}</ul>`;
   return `
     <article class="panel dataset-card">
       <header class="panel__head">
@@ -52,6 +52,7 @@ function renderProjectRow(
   project: DatasetProjectSummary,
   canAdmin: boolean,
   canExport: boolean,
+  canAdjudicate: boolean,
 ): string {
   const exportLink = canExport
     ? `<a class="secondary-button" href="${escapeHtml(datasetExportPath(project.projectId))}" download>Xuất JSONL</a>`
@@ -59,8 +60,11 @@ function renderProjectRow(
   const lockButton = canAdmin
     ? `<button type="button" class="secondary-button" data-dataset-lock="${escapeHtml(project.projectId)}">Khóa holdout</button>`
     : "";
-  const controls = exportLink || lockButton
-    ? `<div class="dataset-project-row__controls">${exportLink}${lockButton}</div>`
+  const adjudicationLink = canAdjudicate
+    ? `<a class="secondary-button" href="#/datasets/${encodeURIComponent(project.projectId)}?adjudication=true">Phân xử</a>`
+    : "";
+  const controls = exportLink || lockButton || adjudicationLink
+    ? `<div class="dataset-project-row__controls">${adjudicationLink}${exportLink}${lockButton}</div>`
     : "";
   return `
     <li class="dataset-project-row">

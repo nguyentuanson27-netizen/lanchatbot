@@ -219,6 +219,11 @@ hoặc SLA event.
 
 ### Wave FE-4 — Ads funnel, Media Pipeline và Dataset Adjudication
 
+Trạng thái thực hiện ngày 2026-07-30: **READY_FOR_REVIEW_NOT_DEPLOYED**. Code và
+kiểm thử nằm trên branch `feat/admin-fe4`; production vẫn là r28. Bằng chứng,
+phạm vi release, smoke và rollback được ghi tại
+[Trạng thái triển khai FE4](ADMIN_FRONTEND_FE4_STATUS_20260730.md).
+
 Release nên tách thành tối đa ba tag độc lập nếu một miền chưa sẵn sàng.
 
 #### Meta Ads funnel drill-down

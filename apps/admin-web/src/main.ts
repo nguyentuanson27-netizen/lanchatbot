@@ -17,10 +17,13 @@ import {
   getIdentity,
   getOperations,
   getOverview,
+  getAcquisitionReport,
   getOutreach,
   getPolicyControl,
   getProductData,
   getProductMediaCatalog,
+  getProductMediaPipeline,
+  retryProductMedia,
   uploadProductMedia,
   getQuality,
   getDatasetIndex,
@@ -32,10 +35,13 @@ import {
   reopenDatasetReviewItem,
   lockDatasetHoldout,
   type DatasetReviewVerb,
+  markDatasetForAdjudication,
+  releaseDatasetReviewLease,
 } from "./api.js";
 import { bindPolicyControl, renderPolicyControl } from "./policy-control-ui.js";
 import { renderDatasetIndex } from "./dataset-review-screen.js";
 import { bindReviewQueue, renderReviewQueue, resolveShortcut } from "./dataset-review-ui.js";
+import { renderAdsFunnel, renderMediaPipeline } from "./fe4-ui.js";
 import {
   activateDialog,
   hasBlockingOverlay,
@@ -79,7 +85,7 @@ import type {
   ListResponse,
 } from "./types.js";
 
-type RouteName = "overview" | "conversations" | "handoffs" | "outreach" | "quality" | "products" | "media" | "policy" | "datasets" | "operations" | "audit";
+type RouteName = "overview" | "ads" | "conversations" | "handoffs" | "outreach" | "quality" | "products" | "media" | "policy" | "datasets" | "operations" | "audit";
 
 interface NavigationItem {
   id: RouteName;
@@ -93,6 +99,7 @@ const navigation: NavigationItem[] = [
   { id: "conversations", label: "Hội thoại", description: "Bot và bàn giao", icon: "chat" },
   { id: "handoffs", label: "Cần nhân viên xử lý", description: "Bot tự chuyển quyền", icon: "user" },
   { id: "outreach", label: "Hiệu quả upsale", description: "Phản hồi và chuyển đổi", icon: "spark" },
+  { id: "ads", label: "Hiệu quả quảng cáo", description: "Phễu Meta Ads", icon: "pulse" },
   { id: "quality", label: "Chất lượng AI", description: "Đánh giá câu trả lời", icon: "spark" },
   { id: "products", label: "Dữ liệu sản phẩm", description: "Giá, tồn, size, ETA", icon: "bag" },
   { id: "media", label: "Ảnh sản phẩm", description: "Tải ảnh bổ sung", icon: "image" },
@@ -110,6 +117,10 @@ const routeTitles: Record<RouteName, { title: string; subtitle: string }> = {
   conversations: {
     title: "Hội thoại",
     subtitle: "Theo dõi bot, nhân viên và nguyên nhân bàn giao.",
+  },
+  ads: {
+    title: "Hiệu quả quảng cáo",
+    subtitle: "So sánh phễu Meta Ads và tìm điểm rơi theo từng chiều attribution.",
   },
   handoffs: {
     title: "Cần nhân viên xử lý",
@@ -1015,6 +1026,12 @@ async function loadCurrentPage(silent = true): Promise<void> {
       case "overview":
         html = renderOverview(await getOverview(activeController.signal));
         break;
+      case "ads": {
+        const requested = Number.parseInt(readRouteParams().get("lookback") ?? "720", 10);
+        const hours = [24, 168, 720, 2160].includes(requested) ? requested : 720;
+        html = renderAdsFunnel(await getAcquisitionReport(hours, activeController.signal));
+        break;
+      }
       case "conversations": {
         const data = await getConversations(
           { search: conversationSearch, owner: conversationOwner },
@@ -1051,8 +1068,12 @@ async function loadCurrentPage(silent = true): Promise<void> {
         html = renderProducts(await getProductData(activeController.signal));
         break;
       case "media":
-        productMediaCatalog = await getProductMediaCatalog(activeController.signal);
-        html = renderProductMedia(productMediaCatalog);
+        const [catalog, pipeline] = await Promise.all([
+          getProductMediaCatalog(activeController.signal),
+          getProductMediaPipeline(activeController.signal),
+        ]);
+        productMediaCatalog = catalog;
+        html = `${renderProductMedia(catalog)}${renderMediaPipeline(pipeline)}`;
         break;
       case "policy":
         policyControlData = identity?.policyControl
@@ -1068,7 +1089,8 @@ async function loadCurrentPage(silent = true): Promise<void> {
         }
         const projectId = datasetProjectFromHash();
         if (projectId) {
-          datasetQueue = await getReviewQueue(projectId, null, activeController.signal);
+          const adjudication = readRouteParams().get("adjudication") === "true";
+          datasetQueue = await getReviewQueue(projectId, null, activeController.signal, adjudication);
           html = renderReviewQueue(datasetQueue, identity);
         } else {
           datasetQueue = null;
@@ -1179,7 +1201,11 @@ function bindDatasetReviewQueue(content: HTMLElement): void {
         return;
       }
       if (action === "NEEDS_ADJUDICATION") {
-        showToast("Chuyển sang phân xử sẽ được bổ sung trong bản sau.");
+        void runDatasetAction(async () => {
+          await markDatasetForAdjudication(item.projectItemId, item.revision);
+          window.location.hash = "#/datasets";
+          showToast("Đã chuyển hội thoại vào hàng đợi phân xử.");
+        });
         return;
       }
       if (action === "REOPEN") {
@@ -1211,7 +1237,14 @@ function bindDatasetReviewQueue(content: HTMLElement): void {
         return;
       }
       if (action === "SKIP") {
-        window.location.hash = "#/datasets";
+        if (queue.adjudication && item.lease.ownedByCurrent) {
+          void runDatasetAction(async () => {
+            await releaseDatasetReviewLease(item.projectItemId);
+            window.location.hash = "#/datasets";
+          });
+        } else {
+          window.location.hash = "#/datasets";
+        }
         return;
       }
       void runDatasetAction(async () => {
@@ -1270,6 +1303,64 @@ function bindPageEvents(): void {
       if (handoffId) void openHandoff(handoffId);
     });
   });
+  document.querySelector<HTMLSelectElement>("#ads-lookback")?.addEventListener("change", (event) => {
+    const params = readRouteParams();
+    params.set("lookback", (event.currentTarget as HTMLSelectElement).value);
+    writeRouteParams(params);
+    void loadCurrentPage(false);
+  });
+  const filterAdsBreakdowns = (): void => {
+    const dimension = document.querySelector<HTMLSelectElement>("#ads-dimension")?.value ?? "all";
+    const search = document.querySelector<HTMLInputElement>("#ads-breakdown-search")?.value.trim().toLowerCase() ?? "";
+    document.querySelectorAll<HTMLElement>("[data-fe4-breakdown]").forEach((section) => {
+      section.hidden = dimension !== "all" && section.dataset.fe4Breakdown !== dimension;
+      section.querySelectorAll<HTMLElement>("[data-fe4-label]").forEach((row) => {
+        row.hidden = Boolean(search && !String(row.dataset.fe4Label ?? "").includes(search));
+      });
+    });
+  };
+  document.querySelector<HTMLSelectElement>("#ads-dimension")?.addEventListener("change", filterAdsBreakdowns);
+  document.querySelector<HTMLInputElement>("#ads-breakdown-search")?.addEventListener("input", filterAdsBreakdowns);
+
+  const filterMediaPipeline = (): void => {
+    const stage = document.querySelector<HTMLSelectElement>("#media-stage-filter")?.value ?? "all";
+    const search = document.querySelector<HTMLInputElement>("#media-pipeline-search")?.value.trim().toLowerCase() ?? "";
+    document.querySelectorAll<HTMLElement>("[data-media-row]").forEach((row) => {
+      const stageMatches = stage === "all" || row.dataset.mediaStageValue === stage;
+      const searchMatches = !search || String(row.dataset.mediaLabel ?? "").includes(search);
+      row.hidden = !(stageMatches && searchMatches);
+    });
+  };
+  document.querySelector<HTMLSelectElement>("#media-stage-filter")?.addEventListener("change", filterMediaPipeline);
+  document.querySelector<HTMLInputElement>("#media-pipeline-search")?.addEventListener("input", filterMediaPipeline);
+  document.querySelectorAll<HTMLButtonElement>("[data-media-stage]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const select = document.querySelector<HTMLSelectElement>("#media-stage-filter");
+      if (select) select.value = button.dataset.mediaStage ?? "all";
+      filterMediaPipeline();
+    });
+  });
+  document.querySelectorAll<HTMLButtonElement>("[data-media-retry]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const intakeId = button.dataset.mediaRetry;
+      if (!intakeId || button.disabled) return;
+      const confirmed = await requestConfirmation(
+        "Thử lại ảnh này?",
+        "Hệ thống giữ nguyên intake ID và checksum, chỉ đưa lỗi tạm thời về PENDING_AI.",
+      );
+      if (!confirmed) return;
+      button.disabled = true;
+      try {
+        await retryProductMedia(intakeId);
+        showToast("Đã đưa ảnh về hàng chờ AI, không tạo intake hoặc điểm Qdrant mới.");
+        await loadCurrentPage(false);
+      } catch (error) {
+        showToast(error instanceof ApiError ? error.message : "Không thể thử lại ảnh.", "danger");
+        button.disabled = false;
+      }
+    });
+  });
+
   document.querySelectorAll<HTMLElement>("[data-conversation-id]").forEach((element) => {
     element.addEventListener("click", () => {
       const conversationId = element.dataset.conversationId;

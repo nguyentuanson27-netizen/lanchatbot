@@ -198,6 +198,26 @@ export function renderReviewQueue(data: ReviewQueueData, identity: Identity | nu
   const locked = historical || !canAnnotate || isLeaseHeldByOther(item.lease, currentReviewer);
   const revealed = data.revealed ?? false;
   const annotations = visibleAnnotations(item.annotations, data.reviewMode, revealed);
+  const labelGroups = new Map(data.labels
+    .filter((label) => label.mutuallyExclusiveGroup)
+    .map((label) => [label.code, label.mutuallyExclusiveGroup as string]));
+  const groupedCodes = new Map<string, Set<string>>();
+  for (const annotation of annotations) {
+    if (annotation.status === "REJECTED") continue;
+    const group = labelGroups.get(annotation.labelCode);
+    if (!group) continue;
+    const codes = groupedCodes.get(group) ?? new Set<string>();
+    codes.add(annotation.labelCode);
+    groupedCodes.set(group, codes);
+  }
+  const mutualExclusionConflicts = [...groupedCodes.entries()]
+    .filter(([, codes]) => codes.size > 1)
+    .map(([group, codes]) => `${group}: ${[...codes].join(" / ")}`);
+  const conflictBanner = data.adjudication
+    ? `<div class="product-media-safety" data-mutual-exclusion-conflicts="${mutualExclusionConflicts.length}"><span>${mutualExclusionConflicts.length > 0
+      ? `Xung đột loại trừ cần quyết định: ${escapeHtml(mutualExclusionConflicts.join("; "))}`
+      : "Không phát hiện xung đột mutual-exclusion trong các nhãn đang hiệu lực."}</span></div>`
+    : "";
 
   const spansByTurn = new Map<number, Span[]>();
   for (const annotation of annotations) {
@@ -206,6 +226,10 @@ export function renderReviewQueue(data: ReviewQueueData, identity: Identity | nu
     list.push({ start: annotation.evidenceStart, end: annotation.evidenceEnd });
     spansByTurn.set(annotation.turnIndex, list);
   }
+
+  const adjudicationBanner = data.adjudication
+    ? '<div class="product-media-safety"><span>Chế độ phân xử: hiển thị nhãn người và AI để đối chiếu. Mọi quyết định vẫn ghi audit append-only.</span></div>'
+    : "";
 
   const flags = item.qualityFlags.length > 0
     ? `<div class="review-flags">${item.qualityFlags.map((flag) => `<span class="review-flag">${escapeHtml(flag)}</span>`).join("")}</div>`
@@ -238,7 +262,7 @@ export function renderReviewQueue(data: ReviewQueueData, identity: Identity | nu
       </div>
       <div class="review-reviewer">${escapeHtml(currentReviewer)}</div>
     </header>
-    ${lockBanner}${blindNote}
+    ${adjudicationBanner}${conflictBanner}${lockBanner}${blindNote}
     <div class="review-body">
       <div class="review-transcript" aria-label="Hội thoại">${flags}${renderTranscript(item.messages, spansByTurn)}</div>
       <div class="review-labels" aria-label="Nhãn">${proposals}
@@ -250,8 +274,8 @@ export function renderReviewQueue(data: ReviewQueueData, identity: Identity | nu
       ${historical ? `<button type="button" class="primary-button" data-review-action="REOPEN">Sửa lại</button>` : ""}
       <button type="button" data-review-action="ACCEPT_ALL"${disabled}>Chấp nhận tất cả (Shift+A)</button>
       <button type="button" data-review-action="SKIP"${disabled}>Bỏ qua (S)</button>
-      <button type="button" data-review-action="NEEDS_ADJUDICATION"${disabled}>Cần phân xử</button>
-      <button type="button" class="primary-button" data-review-action="SAVE_NEXT"${disabled}>Lưu &amp; tiếp (N)</button>
+      ${data.adjudication ? "" : `<button type="button" data-review-action="NEEDS_ADJUDICATION"${disabled}>Cần phân xử</button>`}
+      <button type="button" class="primary-button" data-review-action="SAVE_NEXT"${disabled}>${data.adjudication ? "Hoàn tất phân xử" : "Lưu &amp; tiếp (N)"}</button>
     </footer>
   </section>`;
 }

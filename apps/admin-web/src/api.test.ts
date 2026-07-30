@@ -3,6 +3,7 @@ import {
   ApiError,
   createConversationCommand,
   datasetExportPath,
+  getAcquisitionReport,
   getConversation,
   getConversationCommands,
   getConversationMessages,
@@ -13,7 +14,11 @@ import {
   getOverview,
   getOutreach,
   getProductData,
+  getProductMediaPipeline,
   getReviewQueue,
+  markDatasetForAdjudication,
+  releaseDatasetReviewLease,
+  retryProductMedia,
   reviewDatasetAnnotation,
   transitionPolicyArtifact,
 } from "./api.js";
@@ -53,6 +58,41 @@ describe("ad acquisition overview", () => {
       expect.objectContaining({ key: "product", items: [expect.objectContaining({ label: "CB182" })] }),
       expect.objectContaining({ key: "touch", items: [expect.objectContaining({ label: "FIRST_TOUCH" })] }),
     ]));
+  });
+
+  it("compares each FE4 funnel step against its direct denominator and prior period", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
+      current: {
+        ad_entries: 20,
+        initial_reply_accepted: 16,
+        reengaged: 8,
+        meaningful: 6,
+        qualified: 3,
+        buying_committed: 2,
+        purchase_confirmed: 1,
+        no_response_1h: 5,
+        no_response_24h: 4,
+        breakdowns: { day: [{ key: "2026-07-30", ad_entries: 20, qualified: 3, purchase_confirmed: 1 }] },
+      },
+      previous: {
+        ad_entries: 10,
+        initial_reply_accepted: 5,
+        reengaged: 2,
+        meaningful: 1,
+        qualified: 1,
+        buying_committed: 0,
+        purchase_confirmed: 0,
+      },
+      generated_at: "2026-07-30T06:00:00.000Z",
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+    const report = await getAcquisitionReport(168);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("lookback_hours=168");
+    expect(report.stages[1]).toMatchObject({ count: 16, denominator: 20, rate: 80, previousRate: 50 });
+    expect(report.stages[2]).toMatchObject({ count: 8, denominator: 16, rate: 50, previousRate: 40 });
+    expect(report.stages.at(-1)?.label).toBe("Khách xác nhận mua");
+    expect(report.breakdowns[0]).toMatchObject({ key: "day", items: [expect.objectContaining({ label: "2026-07-30" })] });
+    expect(report.noResponse24h).toBe(4);
   });
 });
 afterEach(() => {
@@ -447,6 +487,32 @@ describe("catalog and batch worker views", () => {
     expect(result.services[1]).toMatchObject({ name: "Đồng bộ giá và tồn", status: "down" });
     expect(result.services[1]?.detail).toContain("Không nhận heartbeat quá 26 giờ");
   });
+
+  it("maps the media pipeline and sends retry to the same intake id", async () => {
+    const fetchMock = vi.fn().mockImplementation((url: string, init?: RequestInit) => {
+      if (init?.method === "POST") return Promise.resolve(jsonResponse({ retry: { status: "PENDING_AI" } }));
+      return Promise.resolve(jsonResponse({
+        pipeline: {
+          counts: { ERROR: 1 },
+          items: [{
+            intakeId: "a".repeat(32), maSp: "CB182", brand: "La.na Design",
+            imageUrl: "https://admin.lanadesign.vn/a.jpg", imageHash: "deadbeef",
+            imageId: "image-1", stage: "ERROR", reviewStatus: null,
+            duplicateChecksum: false, retryable: true,
+            lastAttemptAt: "2026-07-30T05:00:00.000Z", error: "timeout",
+          }],
+        },
+      }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const pipeline = await getProductMediaPipeline();
+    expect(pipeline.counts.ERROR).toBe(1);
+    expect(pipeline.items[0]).toMatchObject({ maSp: "CB182", stage: "ERROR", retryable: true });
+    await retryProductMedia("a".repeat(32));
+    const [url, init] = fetchMock.mock.calls[1]!;
+    expect(String(url)).toContain(`/product-media/pipeline/${"a".repeat(32)}/retry`);
+    expect(init.method).toBe("POST");
+  });
 });
 
 describe("dataset review API", () => {
@@ -549,6 +615,32 @@ describe("dataset review API", () => {
     const [, init] = fetchMock.mock.calls[0]!;
     expect(init.method).toBe("POST");
     expect(JSON.parse(init.body as string)).toEqual({ action: "REMOVE" });
+  });
+
+  it("requests the adjudication queue and exposes the server adjudication flag", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
+      queue: {
+        project_id: "p-1", review_mode: "AI_ASSISTED", split: "DEVELOPMENT",
+        adjudication: true, revealed: true, progress: { reviewed: 1, total: 2 }, labels: [], item: null,
+      },
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+    const queue = await getReviewQueue("p-1", "DEVELOPMENT", undefined, true);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("adjudication=true");
+    expect(queue.adjudication).toBe(true);
+  });
+
+  it("posts adjudication and lease-release mutations to dedicated endpoints", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({}));
+    vi.stubGlobal("fetch", fetchMock);
+    await markDatasetForAdjudication("pi-1", 7);
+    await releaseDatasetReviewLease("pi-1");
+    const [markUrl, markInit] = fetchMock.mock.calls[0]!;
+    const [releaseUrl, releaseInit] = fetchMock.mock.calls[1]!;
+    expect(String(markUrl)).toContain("/dataset-items/pi-1/adjudication");
+    expect(JSON.parse(markInit.body as string)).toEqual({ revision: 7 });
+    expect(String(releaseUrl)).toContain("/dataset-items/pi-1/release");
+    expect(releaseInit.method).toBe("POST");
   });
 
   it("builds an export path with an optional split filter", () => {

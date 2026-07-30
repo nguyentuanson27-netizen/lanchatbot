@@ -647,11 +647,13 @@ export class PostgresAdminStore implements AdminStore {
   async acquisitionSummary(
     identity: AdminIdentity,
     lookbackHours = 24 * 30,
+    offsetHours = 0,
   ): Promise<Record<string, unknown>> {
-    const scope = scopeClause(identity, "page_id", 2);
+    const scope = scopeClause(identity, "page_id", 3);
     const scopeAnd = scope.sql ? scope.sql.replace(/^WHERE /u, "AND ") : "";
     const hours = Math.max(1, Math.min(24 * 90, Math.trunc(lookbackHours)));
-    const values = [hours, ...scope.values];
+    const offset = Math.max(0, Math.min(24 * 90, Math.trunc(offsetHours)));
+    const values = [hours, offset, ...scope.values];
     const [summary, breakdown] = await Promise.all([
       this.pool.query(
         `SELECT
@@ -678,16 +680,19 @@ export class PostgresAdminStore implements AdminStore {
              NULLIF(count(*), 0), 2) AS entry_to_purchase_confirmed_pct,
            round(100.0 * count(*) FILTER (WHERE purchase_confirmed_at IS NOT NULL) /
              NULLIF(count(*) FILTER (WHERE qualified_at IS NOT NULL), 0), 2) AS qualified_to_purchase_confirmed_pct,
-           $1::int AS lookback_hours
+           $1::int AS lookback_hours,
+           $2::int AS offset_hours
          FROM ${ADMIN_ACQUISITION_SESSIONS_SOURCE}
-         WHERE created_at >= now() - ($1::int * interval '1 hour') ${scopeAnd}`,
+         WHERE created_at >= now() - (($1::int + $2::int) * interval '1 hour')
+           AND created_at < now() - ($2::int * interval '1 hour') ${scopeAnd}`,
         values,
       ),
       this.pool.query(
         `WITH scoped AS MATERIALIZED (
            SELECT *
            FROM ${ADMIN_ACQUISITION_SESSIONS_SOURCE}
-           WHERE created_at >= now() - ($1::int * interval '1 hour') ${scopeAnd}
+           WHERE created_at >= now() - (($1::int + $2::int) * interval '1 hour')
+             AND created_at < now() - ($2::int * interval '1 hour') ${scopeAnd}
          ), ranked AS (
            SELECT scoped.*,
              row_number() OVER (PARTITION BY conversation_id ORDER BY created_at, acquisition_session_id) AS first_touch_rank,

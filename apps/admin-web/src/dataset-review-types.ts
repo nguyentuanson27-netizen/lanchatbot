@@ -108,4 +108,5 @@ export interface ReviewQueueData {
   // pass and the server reveals them.
   revealed?: boolean;
   historical?: boolean;
+  adjudication?: boolean;
 }

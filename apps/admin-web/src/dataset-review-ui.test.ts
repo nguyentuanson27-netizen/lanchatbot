@@ -218,6 +218,49 @@ describe("renderReviewQueue", () => {
     expect(html).toContain('data-annotation-action="DELETE"');
   });
 
+  it("shows human/AI evidence and mutual-exclusion conflicts during adjudication", () => {
+    const queue = data({
+      adjudication: true,
+      labels: [
+        {
+          code: "BUYING_COMMITTED", name: "Cam kết mua", scope: "CUSTOMER_MESSAGE",
+          evidenceRequired: true, confidenceRequired: true,
+          mutuallyExclusiveGroup: "BUYING_STATE", isSafetyCritical: false,
+        },
+        {
+          code: "NOT_BUYING", name: "Chưa mua", scope: "CUSTOMER_MESSAGE",
+          evidenceRequired: true, confidenceRequired: true,
+          mutuallyExclusiveGroup: "BUYING_STATE", isSafetyCritical: false,
+        },
+      ],
+    });
+    queue.item!.annotations = [
+      aiAnnotation(),
+      aiAnnotation({
+        id: "human-1",
+        labelCode: "NOT_BUYING",
+        source: "HUMAN",
+        status: "ACCEPTED",
+        evidenceText: "chưa chốt",
+      }),
+    ];
+    const adjudicator: Identity = {
+      ...identity,
+      datasetReview: {
+        ...identity.datasetReview!,
+        role: "ADJUDICATOR",
+        canAdjudicate: true,
+      },
+    };
+    const html = renderReviewQueue(queue, adjudicator);
+    expect(html).toContain('data-mutual-exclusion-conflicts="1"');
+    expect(html).toContain("BUYING_STATE: BUYING_COMMITTED / NOT_BUYING");
+    expect(html).toContain('data-annotation-source="AI"');
+    expect(html).toContain('data-annotation-source="HUMAN"');
+    expect(html).toContain("lấy mẫu này");
+    expect(html).toContain("chưa chốt");
+  });
+
   it("locks the item and disables actions when another reviewer holds the lease", () => {
     const locked = data();
     locked.item!.lease = { ownerSubject: "other@example.com", until: new Date(Date.now() + 60_000).toISOString() };

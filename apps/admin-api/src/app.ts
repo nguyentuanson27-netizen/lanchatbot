@@ -317,6 +317,21 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
     },
   }));
 
+  app.get<{ Querystring: { lookback_hours?: string } }>(
+    "/admin/v1/ad-acquisition/summary",
+    async (request) => {
+      const lookbackHours = request.query.lookback_hours
+        ? Math.max(1, Math.min(24 * 90, Number.parseInt(request.query.lookback_hours, 10) || 24 * 30))
+        : 24 * 30;
+      const identity = requireIdentity(request);
+      const [current, previous] = await Promise.all([
+        options.store.acquisitionSummary(identity, lookbackHours, 0),
+        options.store.acquisitionSummary(identity, lookbackHours, lookbackHours),
+      ]);
+      return { current, previous, generated_at: new Date().toISOString() };
+    },
+  );
+
   app.get("/admin/v1/pages", async (request) => ({
     items: await options.store.listPages(requireIdentity(request)),
     next_cursor: null,
@@ -548,6 +563,38 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
       }
     },
   );
+
+  app.get("/admin/v1/product-media/pipeline", async (request, reply) => {
+    const identity = requireIdentity(request);
+    if (!options.productMedia) return reply.code(503).send(errorBody("ADMIN_PRODUCT_MEDIA_DISABLED", request.id));
+    if (identity.role !== "OWNER" && identity.role !== "EDITOR") {
+      return reply.code(403).send(errorBody("ADMIN_PRODUCT_MEDIA_FORBIDDEN", request.id));
+    }
+    try {
+      return { pipeline: await options.productMedia.pipeline() };
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "PRODUCT_MEDIA_PIPELINE_FAILED";
+      return reply.code(code.startsWith("PRODUCT_MEDIA_SHEETS_") ? 503 : 500).send(errorBody(code, request.id));
+    }
+  });
+
+  app.post<{ Params: { id: string } }>("/admin/v1/product-media/pipeline/:id/retry", async (request, reply) => {
+    const identity = requireIdentity(request);
+    if (!options.productMedia) return reply.code(503).send(errorBody("ADMIN_PRODUCT_MEDIA_DISABLED", request.id));
+    if (identity.role !== "OWNER" && identity.role !== "EDITOR") {
+      return reply.code(403).send(errorBody("ADMIN_PRODUCT_MEDIA_FORBIDDEN", request.id));
+    }
+    try {
+      return { retry: await options.productMedia.retry(identity, request.params.id) };
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "PRODUCT_MEDIA_RETRY_FAILED";
+      const status = code === "PRODUCT_MEDIA_INTAKE_NOT_FOUND" ? 404
+        : code.includes("CONFLICT") || code.includes("NOT_ALLOWED") || code.includes("DUPLICATE") || code.includes("PUBLISHED") ? 409
+          : code.startsWith("PRODUCT_MEDIA_SHEETS_") ? 503
+            : code.startsWith("PRODUCT_MEDIA_") ? 400 : 500;
+      return reply.code(status).send(errorBody(code, request.id));
+    }
+  });
 
   app.post<{ Body: unknown }>(
     "/admin/v1/product-media/uploads",
@@ -938,12 +985,16 @@ function registerDatasetReviewRoutes(
     },
   );
 
-  app.get<{ Params: { id: string }; Querystring: { split?: string } }>(
+  app.get<{ Params: { id: string }; Querystring: { split?: string; adjudication?: string } }>(
     "/admin/v1/dataset-projects/:id/queue",
     async (request, reply) => {
       const service = requireService(request, reply, "BENCHMARK_VIEWER");
       if (!service) return reply;
       const identity = requireIdentity(request);
+      const adjudication = request.query.adjudication === "true";
+      if (adjudication && !datasetRoleAtLeast(identity, "ADJUDICATOR")) {
+        return reply.code(403).send(errorBody("ADMIN_DATASET_FORBIDDEN", request.id));
+      }
       const split = request.query.split
         ? datasetEnum(SplitV1Schema, request.query.split)
         : undefined;
@@ -953,11 +1004,12 @@ function registerDatasetReviewRoutes(
         return reply.code(403).send(errorBody("ADMIN_DATASET_FORBIDDEN", request.id));
       }
       // Only reviewers (ANNOTATOR+) take a lease; viewers see the queue read-only.
-      const acquireLease = datasetRoleAtLeast(identity, "ANNOTATOR");
+      const acquireLease = datasetRoleAtLeast(identity, adjudication ? "ADJUDICATOR" : "ANNOTATOR");
       const queue = await service.reviewQueue(requiredUuid(request.params.id), {
         reviewerSubject: identity.subject,
         acquireLease,
         ...(split ? { split } : {}),
+        adjudication,
       });
       return queue ? { queue } : notFound(reply, request.id);
     },
@@ -1088,6 +1140,35 @@ function registerDatasetReviewRoutes(
         reviewerSubject: requireIdentity(request).subject,
       });
       return reply.code(201).send({ annotation: created });
+    },
+  );
+
+  app.post<{ Params: { id: string }; Body: DatasetCompleteBody }>(
+    "/admin/v1/dataset-items/:id/adjudication",
+    async (request, reply) => {
+      const service = requireService(request, reply, "ANNOTATOR");
+      if (!service?.markForAdjudication) return reply.code(501).send(errorBody("ADMIN_DATASET_ADJUDICATION_UNAVAILABLE", request.id));
+      const item = await service.markForAdjudication(
+        requiredUuid(request.params.id),
+        requireIdentity(request).subject,
+        datasetRevision(request.body?.revision),
+      );
+      if (!item) return reply.code(409).send(errorBody("ADMIN_DATASET_REVIEW_CONFLICT", request.id));
+      return { item };
+    },
+  );
+
+  app.post<{ Params: { id: string } }>(
+    "/admin/v1/dataset-items/:id/release",
+    async (request, reply) => {
+      const service = requireService(request, reply, "ANNOTATOR");
+      if (!service?.releaseReviewLease) return reply.code(501).send(errorBody("ADMIN_DATASET_RELEASE_UNAVAILABLE", request.id));
+      const released = await service.releaseReviewLease(
+        requiredUuid(request.params.id),
+        requireIdentity(request).subject,
+      );
+      if (!released) return reply.code(409).send(errorBody("ADMIN_DATASET_REVIEW_CONFLICT", request.id));
+      return { released: true };
     },
   );
 

@@ -69,6 +69,7 @@ export interface ReviewQueueRequest {
   readonly split?: SplitV1;
   readonly reviewerSubject: string;
   readonly acquireLease?: boolean;
+  readonly adjudication?: boolean;
 }
 
 export interface ExportResult {
@@ -98,6 +99,8 @@ export interface DatasetReviewService {
   addAnnotation(input: AddAnnotationServiceInput): Promise<JsonRecord>;
   reviewAnnotation(annotationId: string, input: ReviewAnnotationServiceInput): Promise<JsonRecord | null>;
   reopenReviewItem?(projectItemId: string, actorSubject: string): Promise<JsonRecord | null>;
+  markForAdjudication?(projectItemId: string, actorSubject: string, expectedRevision: number): Promise<JsonRecord | null>;
+  releaseReviewLease?(projectItemId: string, actorSubject: string): Promise<boolean>;
   completeReviewItem(
     projectItemId: string,
     actorSubject: string,
@@ -199,18 +202,23 @@ class PostgresDatasetReviewService implements DatasetReviewService {
     const declaredMode = String(project.review_mode ?? "AI_ASSISTED") as ReviewModeV1;
     // When blind review is flagged off, degrade to AI-assisted so proposals are
     // never hidden by a mode the operator cannot currently support.
-    const effectiveMode: ReviewModeV1 =
-      this.blindReviewEnabled ? declaredMode : "AI_ASSISTED";
-    const revealed = effectiveMode === "AI_ASSISTED";
+    const effectiveMode: ReviewModeV1 = request.adjudication
+      ? "AI_ASSISTED"
+      : this.blindReviewEnabled ? declaredMode : "AI_ASSISTED";
+    const initiallyRevealed = effectiveMode === "AI_ASSISTED";
 
     const split = request.split ?? "DEVELOPMENT";
     const labels = await this.labelOptions(project.label_schema_id);
-    const progress = await this.annotation.reviewProgress(projectId, split);
+    const progress = request.adjudication
+      ? await this.annotation.adjudicationProgress(projectId, split)
+      : await this.annotation.reviewProgress(projectId, split);
 
-    let itemRow = await this.annotation.nextReviewItem(projectId, {
-      reviewerSubject: request.reviewerSubject,
-      split,
-    });
+    let itemRow = request.adjudication
+      ? await this.annotation.nextAdjudicationItem(projectId, { reviewerSubject: request.reviewerSubject, split })
+      : await this.annotation.nextReviewItem(projectId, {
+          reviewerSubject: request.reviewerSubject,
+          split,
+        });
 
     if (itemRow && request.acquireLease) {
       const leased = await this.annotation.acquireReviewLease(
@@ -223,7 +231,10 @@ class PostgresDatasetReviewService implements DatasetReviewService {
       if (leased) itemRow = { ...itemRow, ...leased };
     }
 
-    const item = itemRow ? await this.buildItem(itemRow, request.reviewerSubject) : null;
+    const item = itemRow
+      ? await this.buildItem(itemRow, request.reviewerSubject, initiallyRevealed)
+      : null;
+    const revealed = initiallyRevealed || item?.machine_revealed === true;
 
     return {
       project_id: projectId,
@@ -231,6 +242,7 @@ class PostgresDatasetReviewService implements DatasetReviewService {
       review_mode: effectiveMode,
       split,
       revealed,
+      adjudication: request.adjudication === true,
       progress: { reviewed: progress.reviewed, total: progress.total },
       labels,
       item,
@@ -264,7 +276,7 @@ class PostgresDatasetReviewService implements DatasetReviewService {
       historical: true,
       progress: { reviewed: progress.reviewed, total: progress.total },
       labels,
-      item: itemRow ? await this.buildItem(itemRow, request.reviewerSubject) : null,
+      item: itemRow ? await this.buildItem(itemRow, request.reviewerSubject, true) : null,
     };
   }
 
@@ -311,6 +323,18 @@ class PostgresDatasetReviewService implements DatasetReviewService {
       actorSubject,
       expectedRevision,
     );
+  }
+
+  markForAdjudication(
+    projectItemId: string,
+    actorSubject: string,
+    expectedRevision: number,
+  ): Promise<JsonRecord | null> {
+    return this.annotation.markForAdjudication(projectItemId, actorSubject, expectedRevision);
+  }
+
+  releaseReviewLease(projectItemId: string, actorSubject: string): Promise<boolean> {
+    return this.annotation.releaseReviewLease(projectItemId, actorSubject);
   }
 
   async lockHoldout(projectId: string, actorSubject: string): Promise<{ locked: number }> {
@@ -363,13 +387,25 @@ class PostgresDatasetReviewService implements DatasetReviewService {
     };
   }
 
-  private async buildItem(itemRow: JsonRecord, reviewerSubject: string): Promise<JsonRecord> {
+  private async buildItem(
+    itemRow: JsonRecord,
+    reviewerSubject: string,
+    initiallyRevealed: boolean,
+  ): Promise<JsonRecord> {
     const projectItemId = String(itemRow.project_item_id);
     const conversationId = String(itemRow.conversation_id);
     const [messages, annotations] = await Promise.all([
       this.review.getConversationMessages(conversationId),
       this.annotation.listAnnotations(projectItemId),
     ]);
+    const reviewerHasOwnPass = annotations.some((annotation) =>
+      (annotation.source === "HUMAN" || annotation.source === "ADJUDICATOR")
+      && annotation.reviewer_id === reviewerSubject
+    );
+    const machineRevealed = initiallyRevealed || reviewerHasOwnPass;
+    const visibleAnnotations = machineRevealed
+      ? annotations
+      : annotations.filter((annotation) => annotation.source === "HUMAN" || annotation.source === "ADJUDICATOR");
     return {
       project_item_id: projectItemId,
       conversation_id: conversationId,
@@ -387,7 +423,8 @@ class PostgresDatasetReviewService implements DatasetReviewService {
         role: message.role,
         redacted_text: message.redacted_text,
       })),
-      annotations: annotations.map((annotation) => ({
+      machine_revealed: machineRevealed,
+      annotations: visibleAnnotations.map((annotation) => ({
         annotation_id: annotation.annotation_id,
         label_code: annotation.label_code,
         scope: annotation.scope,
