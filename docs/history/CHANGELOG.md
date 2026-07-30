@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-07-31 — Voice Contract V2 + Hybrid Buying Intent r31 candidate
+
+- Phản hồi tư vấn thường được giữ trong một bong bóng, ưu tiên 2 câu tự nhiên và tối đa một câu hỏi; bỏ các câu đệm kiểu ChatGPT, quảng cáo sáo rỗng và việc tách từng câu thành một tin riêng.
+- Báo giá sản phẩm dùng giá VND đầy đủ; bong bóng đầu có loại/tên/mã, chất liệu, form và size đã xác minh; bong bóng thứ hai xin số đo hoặc dùng số đo đã có, ảnh gửi sau.
+- Giữ loại sản phẩm thật từ catalog như `Set váy SV2447`; thiếu product context cho câu hỏi giá/mã/quảng cáo hoặc ý định mua thì handoff im lặng, không đoán sản phẩm.
+- Structured model output có buying decision/action/quantity/evidence/confidence nhưng chỉ được mở hoặc sửa giỏ qua deterministic guard, product context đã xác minh, exact evidence và confidence tối thiểu `0.90`.
+- `NEGATED`, `CONSIDERING`, câu hỏi thông tin và model evidence thiếu guard không tạo side effect; giá/tồn/size/ETA và attachment vẫn do nguồn có thẩm quyền quyết định.
+- Thêm `REALTIME_MESSAGE_GROUPING_V2=true`; không migration, không đổi page allowlist, routing ownership, n8n hoặc Meta delivery transport.
+- `pnpm check` PASS toàn monorepo; Worker 322/322, Business Tools 178/178, Contracts 86/86 và golden transcript 7/7.
+- PR `#79`, `#80` đã merge; release candidate chưa deploy. Production vẫn ở r30 cho tới khi tag, smoke và guarded cutover đạt.
+
 ## 2026-07-29 — Realtime trả lời có dấu và tách câu r26.2
 
 - Bắt buộc proposal, grounded reply và grounded draft hiển thị tiếng Việt đầy đủ
