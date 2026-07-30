@@ -1,17 +1,19 @@
 # Trạng thái triển khai Admin Frontend FE4
 
-Status: **MERGED_RELEASE_CANDIDATE_NOT_DEPLOYED**
+Status: **DEPLOYED_VERIFIED_R29**
 
 Ngày cập nhật: **2026-07-30**
 
 ## Phạm vi nguồn
 
 - PR `#72` đã merge vào `main` tại `7fbe6fde49633dd5e9cab78e039412fee0f7f149`.
-- Release candidate: `20260730-admin-fe4-r29`.
-- Production hiện hành vẫn là `20260730-admin-frontend-waves-r28`.
-- Manifest release candidate:
+- PR release manifest `#74`; merge commit/tag commit
+  `e7114c637b3d1c4732f6b257d6240f434011cd08`.
+- Annotated tag và production release: `20260730-admin-fe4-r29`.
+- Image: `lana-chatbot-app:admin-fe4-r29`
+  (`sha256:113fd4cc0cb5167ef46e20d477eb590085af4fe303f7a9dfa45469f7321f4d1b`).
+- Manifest production:
   [`deploy/manifests/20260730-admin-fe4-r29.json`](../../deploy/manifests/20260730-admin-fe4-r29.json).
-- Chưa tạo tag hoặc cutover; production evidence vẫn đang chờ xác thực VPS.
 - Không migration; không sửa dữ liệu production.
 - Không đổi outbound, Meta Send API, Pancake ownership, page allowlist, Realtime,
   Delivery, POS, P2.3, Size Chart, n8n hoặc Qdrant writer.
@@ -86,35 +88,40 @@ Ngày cập nhật: **2026-07-30**
   đã được cập nhật để xác nhận queue thường loại `ADJUDICATION_REQUIRED`, sau đó
   database test đạt `100/100` và toàn bộ pha test monorepo đạt.
 
-## VPS trước thay đổi
+## VPS preflight và phạm vi cutover
 
-Kiểm tra read-only trước khi sửa source:
+Preflight read-only ngay trước cutover:
 
 - `/opt/lana-chatbot/current` trỏ tới release r28.
 - Admin API/Web healthy, restart `0`.
 - P2.3C redacted image healthy, restart `0`.
-- Disk khoảng `45%`; available memory khoảng `11 GiB`.
+- Disk dùng `41%`; available memory khoảng `11,8 GiB`.
 
-Không có file, service, symlink, database hoặc cấu hình nào trên VPS bị thay đổi
-trong quá trình thực hiện FE4.
+Cutover chỉ recreate `admin-api` và `admin-web`. API, Realtime, Delivery,
+Admin Control, Admin Simulation, PostgreSQL và P2.3C không bị recreate.
 
-## Smoke và cutover còn thiếu
+## Production verification
 
-Các mục sau chỉ thực hiện sau khi PR được review/merge và có yêu cầu deploy rõ ràng:
+- Annotated tag được fetch bằng read-only deploy key; release worktree sạch và đúng commit.
+- Docker build chạy toàn bộ `pnpm check` thành công.
+- Admin API `/health/ready`: PASS; database, product media và dataset review đều ready.
+- Admin Web index, JS/CSS MIME và asset 404: PASS.
+- Ads current/previous funnel API: PASS.
+- Media Pipeline API: PASS.
+- Dataset index, adjudication capability và RBAC route: PASS.
+- Public Admin trả `302` tới Authentik.
+- Admin API/Web healthy, restart `0`; new error line count `0`.
+- Container ID API, Realtime và Delivery giữ nguyên.
+- Symlink `current` chỉ chuyển sang r29 sau khi toàn bộ guard đạt.
+- Hậu kiểm độc lập lần hai: `FE4_POSTCHECK=PASS`.
+- P2.3C publisher vẫn healthy, restart `0`.
 
-1. Tạo tag và release manifest gắn đúng merge commit/image.
-2. Build image Admin API/Web mới từ GitHub source.
-3. Smoke nội bộ health/readiness, FE4 API, asset MIME/404 và public Authentik 302.
-4. Smoke RBAC cho Ads, Media retry và Dataset adjudication bằng dữ liệu an toàn.
-5. Xác nhận Admin API/Web restart `0`; service ngoài phạm vi không recreate.
-6. Chỉ chuyển symlink `current` sau khi toàn bộ guard đạt.
+Production evidence: **PASS**.
 
-Production evidence hiện là **EVIDENCE_PENDING** vì FE4 chưa deploy.
+## Rollback
 
-## Rollback dự kiến
-
-- Rollback image riêng `admin-api` và/hoặc `admin-web` về r28.
-- Chuyển symlink về release r28 sau health/smoke.
-- Không down migration vì FE4 không có migration.
+- Script: `/opt/lana-chatbot/shared/release-artifacts/20260730-admin-fe4-r29-rollback.sh`.
+- Khôi phục riêng Admin API/Web về image r28 rồi chuyển symlink về release r28.
+- Không down migration vì r29 không có migration.
 - Không xóa acquisition event, manual image intake, annotation/audit,
   Inbox/Outbox, Redis, PostgreSQL hoặc Qdrant.
