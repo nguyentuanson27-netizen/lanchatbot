@@ -176,9 +176,10 @@ Các field Hash v3 là additive. Worker cũ bỏ qua chúng và tiếp tục dù
 Release chức năng:
 
 ```text
-tag=20260730-p23c-hash-v3-compose
-commit=3fa386a6a35daaf64d3b27c8ee0a26bf8b5993e4
-image=lana-chatbot-app:p23c-hash-v3-20260730
+migration_tag=20260730-p23c-hash-v3-compose
+runtime_tag=20260730-p23c-hash-v3-redacted
+commit=d85f5225de67effd8c85ea786f01769e3769c5af
+image=lana-chatbot-app:p23c-hash-v3-redacted-20260730
 service=p23c-publisher
 mode=LIVE
 ```
@@ -204,5 +205,7 @@ LIVE hoàn thành trong hai cycle:
 - `0` point bị xóa.
 
 Snapshot Qdrant được tạo và kiểm tra lại sau migration. `26` container ngoài P2.3C giữ nguyên ID/image; symlink runtime chung vẫn ở Admin Frontend r28 vì release này chỉ recreate P2.3C.
+
+Image cuối đã loại URL ảnh khỏi `error_sample`. Smoke sau deploy trả `NOOP=956`, `pending=0`, không gọi embedding; checksum xác nhận `956/956` vector không đổi và log mới có `0` URL ảnh.
 
 Bằng chứng đầy đủ: [manifest P2.3C Hash v3](../../deploy/manifests/20260730-p23c-hash-v3-compose.json).
