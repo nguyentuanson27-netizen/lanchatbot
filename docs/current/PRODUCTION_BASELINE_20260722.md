@@ -1,30 +1,57 @@
-# Production baseline — 2026-07-29
+# Production baseline — 2026-07-30
 
 Đây là baseline sống của production. Mỗi release phải cập nhật tài liệu này trước khi tạo tag để bản trong release directory không lệch GitHub `main`.
 
 ## Runtime
 
 - VPS: `156.67.214.197`.
-- Current release: `/opt/lana-chatbot/releases/20260729-ad-acquisition-r27.1`.
-- Previous release: `/opt/lana-chatbot/releases/20260729-realtime-accented-split-r26.2`.
-- Source commit: `1e9c20e24ce092738afa6732427c12eaf69a203f`.
-- Source materialization: Git bundle đầy đủ SHA-256 `49cb400ca86fe4d4924c567e668d5d33c80e9a6711565a4a25dc744ad14f3b95` đã xác minh từ annotated tag `20260729-ad-acquisition-r27.1`; release checkout sạch và không sửa source trực tiếp trên VPS.
+- Current release: `/opt/lana-chatbot/releases/20260730-admin-frontend-waves-r28`.
+- Previous release: `/opt/lana-chatbot/releases/20260729-ad-acquisition-r27.1`.
+- Source commit: `e64cf9caa5cc46409eb48eb2ad51c751a61fc9fd`.
+- Source materialization: annotated tag `20260730-admin-frontend-waves-r28`
+  (tag object `277b8a8dc34cfa83bb1548a222ce866b5a6e200c`) được fetch bằng deploy key
+  read-only của user `lana-deploy`; release checkout sạch và không sửa source
+  trực tiếp trên VPS.
 - Compose SHA-256: `fd615f338b9ac3bb555eacfdfbd08d52936f73f4df016a06a63a426dd8daffb8`.
 - Page app LIVE: `1198992073286645`.
 - n8n: `2.28.6`.
-- Migration mới nhất trong production: `0024_ad_acquisition_analytics`.
+- Migration mới nhất trong production: `0025_admin_frontend_operations`.
 - `lana-p23-daily.timer`: `disabled/inactive`.
 
-API, Realtime, Delivery, Admin API và Admin Web chạy image
-`lana-chatbot-app:ad-acquisition-r27.1`
-(`sha256:1b33e3bc963ab9dfe5c6eb8786bd1825ab907c8422f94575a16688534cdbcdb9`).
-Năm service healthy/restart 0. Shadow, Admin Simulation, POS, P2.3, Size Chart
-và n8n giữ nguyên container/image trước release.
+Admin API và Admin Web chạy image `lana-chatbot-app:admin-frontend-waves-r28`
+(`sha256:0a56eaa7221c4750fb63117810bdab032d767876e78d6d087a16d3141f482eed`).
+API, Realtime và Delivery giữ image/container r27.1. Cả năm service
+healthy/restart 0. Shadow, Admin Simulation, POS, P2.3, Size Chart và n8n giữ
+nguyên container/image trước release.
 
-Migration `0024_ad_acquisition_analytics` đã áp dụng sau backup production và
-restore-test `up → down → up`. Acquisition analytics chạy `SHADOW` 100% chỉ trên
-page `1198992073286645`; `AD_ACQUISITION_WAVE2_INPUT_ENABLED=false`, nên không đổi
-prompt, reply, checkout, handoff, offer, ownership hoặc outbound.
+Migration `0025_admin_frontend_operations` đã áp dụng sau backup production
+SHA-256 `43cf8f2eeab994de85fa35dba3009f19aab220d94e3dd30e7acd5b388ef39593`
+và restore-test `up → down → up`. Release không đổi prompt, reply, checkout,
+offer, outbound, page allowlist hoặc ownership.
+
+## Admin Frontend FE1–FE3 r28
+
+- FE1 bổ sung typography vận hành, polling-safe editing, accessible toast,
+  keyboard shortcuts và dialog/drawer focus management.
+- FE2 bổ sung server-side search/filter/pagination, URL state và page context.
+- FE3 bổ sung Handoff SLA Console, optimistic/idempotent transitions,
+  append-only case events và Conversation Inspector chỉ đọc projection PII-safe.
+- Migration `0025` có checksum
+  `03ae35424838d34da5a97d366c69cc39aed3a022b6325d4ca6047635b121f854`;
+  hậu kiểm xác nhận năm cột projection, trigger append-only và bốn ACL Admin.
+- Docker `pnpm check` đạt; Admin API 59/59, Database 99/99 và Worker 299/299.
+  Bundle Admin Web là 120,36 KB JavaScript và 36,91 KB CSS trước gzip.
+- Admin API readiness 200, Admin Web health/index 200, public Admin 302 sang
+  Authentik; hai service healthy/restart 0 và không có error log mới.
+- API, Realtime và Delivery giữ nguyên container ID r27.1; queue chỉ có trạng
+  thái terminal/manual-review, duplicate Meta sequence group bằng 0.
+- Cutover đầu bị guard rollback vì artefact smoke gọi nhầm `/health` thay vì
+  `/health/ready`; không đổi symlink. Retry dùng endpoint readiness chính thức
+  đạt toàn bộ guard rồi mới chuyển `current` sang r28.
+- Rollback ứng dụng dùng artefact
+  `/opt/lana-chatbot/shared/release-artifacts/20260730-admin-frontend-waves-r28-rollback.sh`
+  để recreate riêng Admin API/Web bằng r27.1. Giữ migration additive `0025`,
+  không xóa dữ liệu.
 
 ## Meta Ads acquisition analytics r27.1
 
