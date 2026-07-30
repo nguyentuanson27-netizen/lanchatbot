@@ -1,6 +1,6 @@
 # Trạng thái Voice Contract V2 và Hybrid Buying Intent r31
 
-Status: **MERGED_RELEASE_CANDIDATE_NOT_DEPLOYED**
+Status: **DEPLOYED_VERIFIED_R31_HUMAN_TEST_PENDING**
 
 Ngày cập nhật: **2026-07-31**
 
@@ -9,11 +9,13 @@ Ngày cập nhật: **2026-07-31**
 - PR `#79` đã merge vào `main` tại `88e001d9b199450e373e77a5c487f1dcd15c8a0c`.
 - PR bổ sung heading sản phẩm `#80` đã merge tại
   `534e35a999f19aa5043dde2019cf59173bea5107`.
-- Release candidate: `20260731-realtime-voice-hybrid-r31`; manifest tại
+- Release: `20260731-realtime-voice-hybrid-r31`, source commit
+  `7286cec6fee81ae8d7d5894a4d706499be17184a`, annotated tag object
+  `5e546fb82c8edee9fb70784239c97364b5ef22ef`; manifest tại
   [`deploy/manifests/20260731-realtime-voice-hybrid-r31.json`](../../deploy/manifests/20260731-realtime-voice-hybrid-r31.json).
-- Production hiện vẫn chạy `20260730-performance-ui-stability-r30`; tài liệu này chưa phải bằng chứng deploy.
-- Không có migration. Chỉ dự kiến recreate `realtime-worker`; Admin API/Web, API, Delivery,
+- Production đang trỏ tới release r31. Chỉ `realtime-worker` được recreate; Admin API/Web, API, Delivery,
   Shadow, POS và các worker dữ liệu giữ nguyên container.
+- Không có migration; production tiếp tục ở schema `0026_product_media_intake_dedupe`.
 - Không đổi page allowlist, routing ownership, n8n ownership, Meta delivery transport, POS,
   Qdrant writer hoặc nguồn fact có thẩm quyền.
 
@@ -82,17 +84,28 @@ guard này. Contract vẫn backward-compatible khi model output cũ chưa có `b
   handoff, form báo giá hai bong bóng, title loại sản phẩm và grouping V2.
 - `git diff --check`: **PASS**.
 
-## Trình tự phát hành
+## Bằng chứng deploy production
 
-1. Merge hồ sơ release và tạo annotated tag `20260731-realtime-voice-hybrid-r31`.
-2. VPS fetch tag bằng deploy key read-only, materialize thư mục release mới; không sửa source.
-3. Preflight lại symlink r30, health/restart, disk/RAM, Inbox/Outbox và page allowlist.
-4. Build image `lana-chatbot-app:realtime-voice-hybrid-r31` từ tag, không ghi đè image r30.
-5. Runtime smoke không gửi Messenger, sau đó recreate đúng `realtime-worker`.
-6. Kiểm tra process health, restart count, queue, duplicate sequence, error-line delta và public Admin
-   vẫn trả 302 sang Authentik.
-7. Chỉ đổi symlink `current` khi mọi guard đạt; sau đó chờ human test từ page
-   `1198992073286645`, không tạo inbound giả.
+- VPS fetch annotated tag bằng deploy key read-only và materialize working tree sạch; không sửa source
+  trong `current`.
+- Docker build chạy lại `pnpm check` trong Linux và tạo image
+  `lana-chatbot-app:realtime-voice-hybrid-r31`, ID
+  `sha256:de99faab9922ae1746f9461814414d9b07c811d0ed2c8bf16c791211022f82ff`.
+- Smoke side-effect-free đạt cho title `Set váy + mã`, grouping `TEXT → TEXT → IMAGE`, long-tail
+  buying có product context và hai nhánh bị chặn: thiếu product context, câu hỏi giá.
+- Cutover lúc `2026-07-30T18:35:24Z`; chỉ container `realtime-worker` đổi từ
+  `7a56e8a7…` sang `e243d8c2…`. Mọi container ngoài phạm vi giữ nguyên ID.
+- Runtime mới xác nhận `REALTIME_RELEASE_ID=20260731-realtime-voice-hybrid-r31`,
+  `REALTIME_MESSAGE_GROUPING_V2=true`, `VERTEX_MODEL_NAME=gemini-3.5-flash-lite`, Wave 2 và
+  Buying Signal Guard tiếp tục bật.
+- Realtime `IDLE/LIVE`, send enabled, healthy, restart `0`; heartbeat age khi cutover `11` giây và
+  postcheck tăng thêm `15` giây.
+- Inbox active `0`, Outbox active `0`, duplicate `reply_plan_id + sequence_no` bằng `0`, failed
+  permanent sau cutover `0` và log lỗi mới `0`.
+- Page `1198992073286645` vẫn `APP`, send enabled, kill switch off; public Admin trả `302` sang
+  Authentik. Admin API/Web vẫn healthy trên image r30; API/Delivery giữ image r27.1.
+- Symlink `current` chỉ chuyển sang r31 sau khi toàn bộ guard đạt. Rollback artifact về r30 đã chuẩn
+  bị sẵn; không rollback schema hoặc xóa dữ liệu.
 
 ## Rollback
 
@@ -102,10 +115,13 @@ guard này. Contract vẫn backward-compatible khi model output cũ chưa có `b
 - Không rollback schema, không xóa Inbox/Outbox, Redis, PostgreSQL, Qdrant hoặc dữ liệu hội thoại.
 - Không chạy hai Realtime Worker đồng thời.
 
-## Evidence còn thiếu
+## Human test còn thiếu
 
-- Release PR, annotated tag object, release commit và image digest.
-- Container ID trước/sau, health/restart, smoke, queue/duplicate/error delta và symlink cutover.
-- Human test Messenger thật sau deploy cho báo giá, long-tail buying, negation và unresolved product.
+- Từ cutover đến postcheck chưa có inbound khách mới (`customer_processed=0`). Đây là trạng thái chờ
+  hợp lệ, không phải lỗi runtime.
+- Cần human test Messenger thật cho báo giá hai bong bóng, tư vấn thường một bong bóng, long-tail
+  buying, quantity, negation, câu hỏi giá không mở giỏ và sản phẩm không xác định handoff im lặng.
+- Không tạo inbound giả. Kết quả human test sẽ được ghi evidence riêng sau khi bạn thử trên page test.
 
-Chỉ khi đủ evidence mới đổi status thành **DEPLOYED_VERIFIED_R31**.
+Runtime r31 đã deploy và hậu kiểm kỹ thuật đạt; xác nhận nghiệp vụ cuối vẫn ở trạng thái
+**HUMAN_TEST_PENDING**.

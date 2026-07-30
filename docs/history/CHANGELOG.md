@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026-07-31 — Voice Contract V2 + Hybrid Buying Intent r31 candidate
+## 2026-07-31 — Voice Contract V2 + Hybrid Buying Intent r31
 
 - Phản hồi tư vấn thường được giữ trong một bong bóng, ưu tiên 2 câu tự nhiên và tối đa một câu hỏi; bỏ các câu đệm kiểu ChatGPT, quảng cáo sáo rỗng và việc tách từng câu thành một tin riêng.
 - Báo giá sản phẩm dùng giá VND đầy đủ; bong bóng đầu có loại/tên/mã, chất liệu, form và size đã xác minh; bong bóng thứ hai xin số đo hoặc dùng số đo đã có, ảnh gửi sau.
@@ -9,7 +9,9 @@
 - `NEGATED`, `CONSIDERING`, câu hỏi thông tin và model evidence thiếu guard không tạo side effect; giá/tồn/size/ETA và attachment vẫn do nguồn có thẩm quyền quyết định.
 - Thêm `REALTIME_MESSAGE_GROUPING_V2=true`; không migration, không đổi page allowlist, routing ownership, n8n hoặc Meta delivery transport.
 - `pnpm check` PASS toàn monorepo; Worker 322/322, Business Tools 178/178, Contracts 86/86 và golden transcript 7/7.
-- PR `#79`, `#80` đã merge; release candidate chưa deploy. Production vẫn ở r30 cho tới khi tag, smoke và guarded cutover đạt.
+- PR `#79`, `#80`, `#81` đã merge; annotated tag trỏ commit `7286cec`. Image r31 được build từ tag sau khi `pnpm check` trong Docker đạt.
+- Chỉ Realtime Worker được recreate; healthy/restart 0, heartbeat 15 giây, Inbox/Outbox active 0, duplicate 0, log lỗi mới 0, page vẫn `APP` và Admin public 302 Authentik.
+- Production đã chuyển symlink sang r31. Chưa có inbound khách sau cutover nên trạng thái là `DEPLOYED_VERIFIED_R31_HUMAN_TEST_PENDING`; không tạo inbound giả.
 
 ## 2026-07-29 — Realtime trả lời có dấu và tách câu r26.2
 

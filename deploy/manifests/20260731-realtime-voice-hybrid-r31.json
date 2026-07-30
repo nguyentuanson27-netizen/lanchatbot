@@ -1,33 +1,36 @@
 {
   "schemaVersion": 1,
-  "capturedAt": "2026-07-30T18:14:00Z",
-  "status": "RELEASE_CANDIDATE_NOT_DEPLOYED",
+  "capturedAt": "2026-07-30T18:38:31Z",
+  "status": "DEPLOYED_VERIFIED_R31_HUMAN_TEST_PENDING",
   "environment": "production-test-page-live-100-percent-acquisition-shadow",
   "host": "156.67.214.197",
   "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
   "sourceBranch": "main",
-  "sourceCommit": "534e35a999f19aa5043dde2019cf59173bea5107",
+  "sourceCommit": "7286cec6fee81ae8d7d5894a4d706499be17184a",
   "featureCommits": [
     "88e001d9b199450e373e77a5c487f1dcd15c8a0c",
     "534e35a999f19aa5043dde2019cf59173bea5107"
   ],
-  "pullRequests": [79, 80],
+  "pullRequests": [79, 80, 81],
   "releaseTag": "20260731-realtime-voice-hybrid-r31",
   "liveReleasePath": "/opt/lana-chatbot/releases/20260731-realtime-voice-hybrid-r31",
   "previousReleasePath": "/opt/lana-chatbot/releases/20260730-performance-ui-stability-r30",
   "sourceMaterialization": {
     "method": "annotated-tag-fetched-by-read-only-deploy-key",
-    "tagObject": "EVIDENCE_PENDING",
-    "workingTreeClean": "EVIDENCE_PENDING"
+    "tagObject": "5e546fb82c8edee9fb70784239c97364b5ef22ef",
+    "workingTreeClean": true
   },
   "image": {
     "name": "lana-chatbot-app:realtime-voice-hybrid-r31",
-    "imageId": "EVIDENCE_PENDING",
+    "imageId": "sha256:de99faab9922ae1746f9461814414d9b07c811d0ed2c8bf16c791211022f82ff",
     "releaseLabel": "20260731-realtime-voice-hybrid-r31",
-    "revisionLabel": "534e35a999f19aa5043dde2019cf59173bea5107",
+    "revisionLabel": "7286cec6fee81ae8d7d5894a4d706499be17184a",
     "recreatedServices": ["realtime-worker"],
-    "containerIds": "EVIDENCE_PENDING",
-    "nonTargetServiceContainerIdsUnchanged": "EVIDENCE_PENDING"
+    "containerIds": {
+      "before": "7a56e8a72a22c99a755ebb01347981c0e320a2994d824ab7b27e1f5f2dee8363",
+      "after": "e243d8c2a48c9d58ceb07a9597ceb73d80992fe20f5d31c219b87761dcbcb2d3"
+    },
+    "nonTargetServiceContainerIdsUnchanged": true
   },
   "scope": {
     "features": [
@@ -53,6 +56,13 @@
     "modelBuyingEvidenceRequiresDeterministicGuard": true,
     "minimumBuyingEvidenceConfidence": 0.9
   },
+  "runtimeConfig": {
+    "realtimeReleaseId": "20260731-realtime-voice-hybrid-r31",
+    "messageGroupingV2": true,
+    "wave2StrategyV1": true,
+    "buyingSignalGuardV1": true,
+    "envBackupPath": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260731-realtime-voice-hybrid-r31"
+  },
   "database": {
     "migrationRequired": false,
     "latestMigrationExpected": "0026_product_media_intake_dedupe",
@@ -71,22 +81,40 @@
     "gitDiffCheck": "PASS"
   },
   "productionVerification": {
-    "status": "EVIDENCE_PENDING",
-    "requiredTargetServicesHealthy": 1,
-    "requiredTargetServiceRestartCount": 0,
-    "requiredNewErrorLineCount": 0,
-    "requiredRuntimeSmokeWithoutMetaSend": true,
-    "requiredInboxOutboxAudit": true,
-    "requiredDuplicateSequenceCount": 0,
-    "requiredPageAllowlistUnchanged": true,
-    "requiredPublicAdminStatus": 302,
-    "requiredPublicAdminTarget": "Authentik",
-    "requiredHumanTest": true,
+    "status": "PASS_HUMAN_TEST_PENDING",
+    "checkedAt": "2026-07-30T18:38:31Z",
+    "runtimeSmokeWithoutMetaSend": "PASS",
+    "targetServicesHealthy": 1,
+    "targetServiceRestartCount": 0,
+    "workerStatus": "IDLE",
+    "workerMode": "LIVE",
+    "sendEnabled": true,
+    "cutoverHeartbeatAgeSeconds": 11,
+    "postcheckHeartbeatDeltaSeconds": 15,
+    "inboxActive": 0,
+    "outboxActive": 0,
+    "duplicateSequenceCount": 0,
+    "failedPermanentAfterCutover": 0,
+    "newErrorLineCount": 0,
+    "pageAllowlistUnchanged": true,
+    "pageRoutingReady": true,
+    "publicAdminStatus": 302,
+    "publicAdminTarget": "Authentik",
+    "customerProcessedAfterCutover": 0,
+    "humanTest": "PENDING_NO_ELIGIBLE_INBOUND",
     "syntheticInboundAllowed": false
   },
   "guardedCutover": {
     "atomicSymlinkSwitchAfterAllGuards": true,
-    "status": "NOT_STARTED"
+    "status": "PASS",
+    "cutoverTime": "2026-07-30T18:35:24Z",
+    "currentRelease": "/opt/lana-chatbot/releases/20260731-realtime-voice-hybrid-r31"
+  },
+  "artifacts": {
+    "buildSha256": "43840cd06a64a18fde5b950aee65592ff995e364be98bdfaca61d47f66d472cd",
+    "cutoverSha256": "622c66781dba25f0b665d93e8043ecc71b2922c5fe3b1df6147dafcbb03966de",
+    "rollbackSha256": "7d6aabb89868411b2ed5f5c0cad00a9dcf0c72f56f78c18253ec33f2659233af",
+    "postcheckSha256": "453458fdfb5babb072d0099487b0f9072c19b72557f3400a5c9f937505dddfd3"
   },
   "rollback": {
     "releasePath": "/opt/lana-chatbot/releases/20260730-performance-ui-stability-r30",
@@ -96,6 +124,7 @@
     "fullCodeRollbackRequiredForVoiceAndHybridIntent": true,
     "schemaRollbackRequired": false,
     "dataDeletionRequired": false,
+    "artifactPrepared": true,
     "executed": false
   }
 }
