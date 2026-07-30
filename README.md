@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Runtime symlink hiện hành: `/opt/lana-chatbot/releases/20260730-admin-frontend-waves-r28`; P2.3C dùng release riêng `20260730-p23c-hash-v3-compose`.
+- Runtime symlink hiện hành: `/opt/lana-chatbot/releases/20260730-admin-frontend-waves-r28`; P2.3C dùng release riêng `20260730-p23c-hash-v3-redacted`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -39,7 +39,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - Tư vấn size ưu tiên số đo mới nhất, trả độ tin cậy và chỉ đính kèm ảnh size guide khi URL cùng SHA-256 với size-chart artifact đã xác minh.
 - 73/73 point `SIZE_GUIDE` đã duyệt được backfill hash provenance trong Qdrant mà không tạo lại embedding.
 - P2.3C đang chạy với endpoint tách nền `139.162.18.93:7000`, khoảng cách gọi Vertex 6 giây và giữ nguyên lỗi retryable cho chu kỳ sau.
-- P2.3C Hash v3 đang `LIVE`: `956/956` point đã có `embedding_hash`, `payload_hash`, `provenance_hash`; migration giữ nguyên `889` vector payload/provenance, tạo `38` point thiếu và tạo lại đúng `29` vector có input semantic thay đổi.
+- P2.3C Hash v3 đang `LIVE` trên image redacted: `956/956` point đã có ba hash; migration giữ nguyên `889` vector payload/provenance, tạo `38` point thiếu và tạo lại đúng `29` vector semantic; `error_sample` không còn log URL ảnh.
 - Cross-sell được để cho bản sau r15, dùng quan hệ phối đồ được duyệt trong PostgreSQL/Admin; không dùng similarity để tự gợi ý.
 - API webhook chạy image `lana-chatbot-app:ad-acquisition-r27.1`; routing/ownership và send guard giữ nguyên.
 - Realtime page test chạy r27.1 với Wave 2 `LIVE_100`, tiếng Việt có dấu, định dạng mỗi câu một lần gửi, Cutout-first + raw fallback + AI reranker, ProductFactsV2, Media Selector V2, exact-code catalog rehydration và hard gate chỉ cho page `1198992073286645`; acquisition sidecar không đổi outbound và Size Chart scheduler vẫn giữ pre-check idempotent.

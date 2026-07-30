@@ -1,16 +1,17 @@
 {
   "schemaVersion": 1,
-  "capturedAt": "2026-07-30T05:58:58Z",
+  "capturedAt": "2026-07-30T06:39:00Z",
   "environment": "production-p23c-publisher-live",
   "host": "156.67.214.197",
   "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
   "sourceBranch": "main",
-  "sourceCommit": "3fa386a6a35daaf64d3b27c8ee0a26bf8b5993e4",
-  "pullRequests": [66, 68],
-  "releaseTag": "20260730-p23c-hash-v3-compose",
-  "tagObject": "6715c94d82113048893d937f14639b5418cf0ce9",
-  "serviceReleasePath": "/opt/lana-chatbot/releases/20260730-p23c-hash-v3-compose",
-  "previousServiceReleasePath": "/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15",
+  "sourceCommit": "d85f5225de67effd8c85ea786f01769e3769c5af",
+  "pullRequests": [66, 68, 69, 70],
+  "releaseTag": "20260730-p23c-hash-v3-redacted",
+  "migrationSourceTag": "20260730-p23c-hash-v3-compose",
+  "tagObject": "c802d1c25216800071e936cbd5bf1fc0a3bfa36e",
+  "serviceReleasePath": "/opt/lana-chatbot/releases/20260730-p23c-hash-v3-redacted",
+  "previousServiceReleasePath": "/opt/lana-chatbot/releases/20260730-p23c-hash-v3-compose",
   "currentSymlinkPath": "/opt/lana-chatbot/releases/20260730-admin-frontend-waves-r28",
   "currentSymlinkChanged": false,
   "composeSha256": "6e6a2854f51ec7175bac627d1431cdb63cce498215ec0d43d4ec91794652c3cf",
@@ -19,12 +20,12 @@
     "workingTreeClean": true
   },
   "image": {
-    "name": "lana-chatbot-app:p23c-hash-v3-20260730",
-    "imageId": "sha256:cf052f89e1d61d40efc81cf7874ae048db99c2131a9210d47439416cf3ebe273",
-    "releaseLabel": "20260730-p23c-hash-v3-compose",
-    "revisionLabel": "3fa386a6a35daaf64d3b27c8ee0a26bf8b5993e4",
+    "name": "lana-chatbot-app:p23c-hash-v3-redacted-20260730",
+    "imageId": "sha256:2396adfb30e04d85337423d107e7724dd1a352dea692eef6db10f25c2f0726db",
+    "releaseLabel": "20260730-p23c-hash-v3-redacted",
+    "revisionLabel": "d85f5225de67effd8c85ea786f01769e3769c5af",
     "recreatedServices": ["p23c-publisher"],
-    "containerId": "dbd3015d0486e80225ee375e301c6eba5922be43cb4b2cd8a74c8b83c501e0b1",
+    "containerId": "a3e23f19716764eb9d62e0284ccbf74355e08d4138ad4a5d0455b10bb3cfec10",
     "protectedContainerCountUnchanged": 26
   },
   "scope": {
@@ -116,7 +117,7 @@
     "payloadOnlyVectorRewriteDetected": false,
     "beforeArtifact": "/opt/lana-chatbot/shared/release-artifacts/20260730-p23c-hash-v3-compose-vectors-before.json",
     "beforeArtifactSha256": "f8988e0dacac35a20b20e8d4e848569be24e68e67df21cb4b5d038aec48fcbcb",
-    "finalArtifact": "/opt/lana-chatbot/shared/release-artifacts/20260730-p23c-hash-v3-compose-vectors-final.json",
+    "finalArtifact": "/opt/lana-chatbot/shared/release-artifacts/20260730-p23c-hash-v3-redacted-vectors-final.json",
     "finalArtifactSha256": "16cd703060fb11ff8ce79f7653a5191781fad29f3ac440215076c639fda74d6f"
   },
   "verification": {
@@ -125,22 +126,33 @@
     "localWorkerBuild": "PASS",
     "localMonorepoCheck": "PASS",
     "dockerMonorepoCheck": "PASS",
-    "buildLogSha256": "b83a25fcc4ace5655b71c91b34964b0320aabba76da7f5e3e1f5ac13635458a7",
+    "buildLogSha256": "f4bc3358dcc4217c88d7b6eb914177e2bd02e506697eeedc7e741523c9b5ba27",
     "targetServiceHealthy": true,
     "targetServiceRestartCount": 0,
     "protectedContainersUnchanged": true,
     "hashV3PointCount": 956,
     "remainingJobs": 0
   },
+  "redactionVerification": {
+    "imageUrlRemovedFromErrorSample": true,
+    "regressionTest": "PASS",
+    "postDeployNoopCount": 956,
+    "postDeployPendingCount": 0,
+    "postDeployVectorChanges": 0,
+    "postDeployLogUrlCount": 0
+  },
   "deployment": {
     "environmentBackupBeforeDryRun": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260730-p23c-hash-v3-compose-pre-dry-run",
     "environmentBackupBeforeLive": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260730-p23c-hash-v3-compose-before-live",
-    "changeNote": "BY_CHATGPT: P2.3C Hash v3 rollout 2026-07-30"
+    "environmentBackupBeforeRedactedImage": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260730-p23c-hash-v3-redacted",
+    "changeNote": "BY_CHATGPT: P2.3C Hash v3 rollout and redacted image 2026-07-30"
   },
   "rollback": {
     "firstStep": "Set P23C_HASH_V3_MODE=OFF and recreate only p23c-publisher",
-    "previousImage": "lana-chatbot-app:checkout-natural-confirmation-r15",
-    "previousReleasePath": "/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15",
+    "immediatePreviousImage": "lana-chatbot-app:p23c-hash-v3-20260730",
+    "immediatePreviousReleasePath": "/opt/lana-chatbot/releases/20260730-p23c-hash-v3-compose",
+    "hashV3RollbackImage": "lana-chatbot-app:checkout-natural-confirmation-r15",
+    "hashV3RollbackReleasePath": "/opt/lana-chatbot/releases/20260724-checkout-natural-confirmation-r15",
     "qdrantSnapshotAvailable": true,
     "schemaRollbackRequired": false,
     "dataDeletionRequired": false,
