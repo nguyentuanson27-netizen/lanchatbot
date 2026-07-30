@@ -22,6 +22,17 @@ import {
   groupXmlItems,
   normalizeStructuredExtraction,
 } from "./p23c-profiles.js";
+import {
+  contextualTextFromPayload,
+  computePointHashes,
+  hashV3Payload,
+  planHashV3Batch,
+  type ExistingPointState,
+  type HashV3Action,
+  type HashV3Config,
+  type HashV3Reason,
+  type PlannedQdrantJob,
+} from "./p23c-hash-v3.js";
 
 export const INGEST_COLLECTION_LOCK_PREFIX = "lock:ingest:lana_multimodal_data_v2:shard:";
 export const INGEST_PROGRESS_PREFIX = "ingest:progress:lana_multimodal_data_v2:shard:";
@@ -52,8 +63,9 @@ export interface SheetsReader {
 }
 
 export interface QdrantClient {
-  scrollPayloadHashes(): Promise<Map<string, string>>;
+  scrollPointStates(): Promise<Map<string, ExistingPointState>>;
   upsertPoint(point: unknown): Promise<void>;
+  setPayload(pointId: string, payload: Record<string, unknown>): Promise<void>;
   deletePoint(pointId: string): Promise<void>;
 }
 
@@ -84,6 +96,8 @@ export interface PointResult {
   readonly image_url: string;
   readonly metadata_sheet_row: number;
   readonly metadata_publish_hash: string;
+  readonly operation: HashV3Action;
+  readonly reason: HashV3Reason;
   readonly error: string;
 }
 
@@ -108,6 +122,10 @@ export interface P23cRunSummary {
   readonly lock_released: boolean;
   readonly error_sample: string;
   readonly fatal_error: string | null;
+  readonly noop_count: number;
+  readonly payload_only_count: number;
+  readonly full_embed_count: number;
+  readonly delete_count: number;
 }
 
 export interface P23cPublisherOptions {
@@ -123,9 +141,17 @@ export interface P23cPublisherOptions {
   readonly shardCount: number;
   readonly shardIndex: number;
   readonly batchSize: number;
+  readonly payloadBatchSize?: number;
   readonly catalogBuildVersion: string;
   readonly dryRun: boolean;
   readonly sheetsAckEnabled: boolean;
+  readonly hashV3Mode?: "OFF" | "DRY_RUN" | "LIVE";
+  readonly payloadOnlyEnabled?: boolean;
+  readonly legacyHashMigrationEnabled?: boolean;
+  readonly embeddingModel?: string;
+  readonly embeddingDimension?: number;
+  readonly imagePreprocessVersion?: string;
+  readonly cutoutPipelineVersion?: string;
   readonly runId: string;
   readonly now?: () => Date;
   readonly logger?: {
@@ -177,29 +203,68 @@ export class P23cPublisher {
     return `${INGEST_COLLECTION_LOCK_PREFIX}${this.options.shardIndex}:of:${this.options.shardCount}`;
   }
 
-  private async publishPoint(job: QdrantJob): Promise<PointResult> {
+  private hashV3Mode(): "OFF" | "DRY_RUN" | "LIVE" {
+    return this.options.hashV3Mode ?? "OFF";
+  }
+
+  private hashConfig(): HashV3Config {
+    return {
+      embeddingModel: this.options.embeddingModel ?? "multimodalembedding@001",
+      embeddingDimension: this.options.embeddingDimension ?? 1_408,
+      imagePreprocessVersion: this.options.imagePreprocessVersion ?? "ffmpeg-max-width-800-v1",
+      cutoutPipelineVersion: this.options.cutoutPipelineVersion ?? "rembg-u2netp-v1",
+    };
+  }
+
+  private effectiveDryRun(): boolean {
+    return this.options.dryRun || this.hashV3Mode() === "DRY_RUN";
+  }
+
+  private async publishPoint(plan: PlannedQdrantJob): Promise<PointResult> {
+    const job = plan.job;
     const base = {
       point_id: job.point_id,
       ma_sp: String(job.payload?.ma_sp ?? ""),
       image_url: job.image_url,
       metadata_sheet_row: Number(job.metadata_sheet_row || 0),
+      operation: plan.action,
+      reason: plan.reason,
     };
 
     try {
-      if (job.delete_requested) {
-        if (!this.options.dryRun) await this.options.qdrant.deletePoint(job.point_id);
+      if (plan.action === "DELETE") {
+        if (!this.effectiveDryRun()) await this.options.qdrant.deletePoint(job.point_id);
         return { ...base, status: "DELETED", metadata_publish_hash: "", error: "" };
       }
 
-      if (this.options.dryRun) {
+      if (plan.action === "NOOP" || this.effectiveDryRun()) {
         return { ...base, status: "SKIPPED", metadata_publish_hash: job.metadata_publish_hash, error: "" };
+      }
+
+      const payload = this.hashV3Mode() === "OFF"
+        ? {
+            ...job.payload,
+            catalog_version: this.options.catalogBuildVersion,
+            content_hash: job.source_hash,
+            embedding_model: this.hashConfig().embeddingModel,
+            embedding_dimension: this.hashConfig().embeddingDimension,
+          }
+        : hashV3Payload(plan, this.hashConfig(), this.options.catalogBuildVersion);
+
+      if (plan.action === "PAYLOAD_ONLY") {
+        if (this.options.payloadOnlyEnabled !== true) throw new Error("P23C_PAYLOAD_ONLY_DISABLED");
+        await this.options.qdrant.setPayload(job.point_id, payload);
+        return { ...base, status: "SUCCESS", metadata_publish_hash: job.metadata_publish_hash, error: "" };
       }
 
       const prepared = await this.options.images.prepare(job.image_url);
       const rawBase64 = prepared.buffer.toString("base64");
       const cutout = await this.options.images.removeBackground(prepared.buffer, prepared.mime);
       const cutoutBase64 = cutout.toString("base64");
-      const clamped = clampContextualText(job.contextual_text);
+      const contextualText = this.hashV3Mode() === "OFF"
+        ? job.contextual_text
+        : contextualTextFromPayload(job.payload);
+      const clamped = clampContextualText(contextualText);
 
       await this.options.vertexRateLimiter.acquire();
       const rawVectors = await this.options.embeddings.embedImageAndText(rawBase64, clamped.text);
@@ -213,13 +278,7 @@ export class P23cPublisher {
           image_cutout: cutoutVector,
           product_text: rawVectors.text,
         },
-        payload: {
-          ...job.payload,
-          catalog_version: this.options.catalogBuildVersion,
-          content_hash: job.source_hash,
-          embedding_model: "multimodalembedding@001",
-          embedding_dimension: 1_408,
-        },
+        payload,
       };
       await this.options.qdrant.upsertPoint(point);
       return { ...base, status: "SUCCESS", metadata_publish_hash: job.metadata_publish_hash, error: "" };
@@ -230,7 +289,7 @@ export class P23cPublisher {
   }
 
   private async acknowledgeSheets(results: readonly PointResult[]): Promise<void> {
-    if (!this.options.sheetsAckEnabled || this.options.dryRun) return;
+    if (!this.options.sheetsAckEnabled || this.effectiveDryRun()) return;
     const applied = results.filter(
       (row) => ["SUCCESS", "DELETED"].includes(row.status) && Number(row.metadata_sheet_row) >= 2,
     );
@@ -263,6 +322,7 @@ export class P23cPublisher {
       retryable_failed: 0, fatal_failed: 0,
       pending_before: 0, selected: 0, remaining: 0, held_row_count: 0,
       qdrant_existing_point_count: 0,
+      noop_count: 0, payload_only_count: 0, full_embed_count: 0, delete_count: 0,
       registry_errors: [] as string[],
       lock_released: false,
       error_sample: "",
@@ -304,8 +364,45 @@ export class P23cPublisher {
         shard_label: `${this.options.shardIndex + 1}/${this.options.shardCount}`,
       };
       const jobs = buildApprovedQdrantJobs(profiles, imageRows, run);
-      const existing = await this.options.qdrant.scrollPayloadHashes();
-      const batch = selectPendingPointBatch(jobs, existing, run, this.options.batchSize);
+      const existing = await this.options.qdrant.scrollPointStates();
+      const config = this.hashConfig();
+      const batch = this.hashV3Mode() === "OFF"
+        ? (() => {
+            const existingHashes = new Map(
+              [...existing.entries()].map(([id, state]) => [id, state.content_hash]),
+            );
+            const legacy = selectPendingPointBatch(jobs, existingHashes, run, this.options.batchSize);
+            const selected: PlannedQdrantJob[] = legacy.selected.map((job) => ({
+              job,
+              action: job.delete_requested ? "DELETE" : "FULL_EMBED",
+              reason: job.delete_requested ? "DELETE_REQUESTED" : "LEGACY_HASH_MIGRATION",
+              hashes: computePointHashes(job.point_id, job.payload, config),
+            }));
+            const deleteCount = selected.filter((plan) => plan.action === "DELETE").length;
+            return {
+              selected,
+              all: selected,
+              meta: {
+                ...legacy.meta,
+                action_counts: {
+                  NOOP: Math.max(0, legacy.meta.approved_actionable_count - legacy.meta.pending_point_count),
+                  PAYLOAD_ONLY: 0,
+                  FULL_EMBED: Math.max(0, legacy.meta.pending_point_count - deleteCount),
+                  DELETE: deleteCount,
+                },
+                reason_counts: {},
+              },
+            };
+          })()
+        : planHashV3Batch(
+            jobs,
+            existing,
+            run,
+            config,
+            this.options.batchSize,
+            this.options.payloadBatchSize ?? 500,
+            this.options.legacyHashMigrationEnabled === true,
+          );
 
       this.logger.info(
         {
@@ -315,7 +412,10 @@ export class P23cPublisher {
           selected: batch.meta.batch_selected_point_count,
           held: batch.meta.held_row_count,
           existing: batch.meta.qdrant_existing_point_count,
-          dryRun: this.options.dryRun,
+          dryRun: this.effectiveDryRun(),
+          hashV3Mode: this.hashV3Mode(),
+          actionCounts: batch.meta.action_counts,
+          reasonCounts: batch.meta.reason_counts,
         },
         "p23c batch planned",
       );
@@ -335,12 +435,18 @@ export class P23cPublisher {
       }
 
       const results: PointResult[] = [];
-      for (const job of batch.selected) {
-        const result = await this.publishPoint(job);
+      for (const plan of batch.selected) {
+        const result = await this.publishPoint(plan);
         results.push(result);
         if (result.status === "FAILED") {
           this.logger.error(
-            { pointId: result.point_id, maSp: result.ma_sp, err: result.error },
+            {
+              pointId: result.point_id,
+              maSp: result.ma_sp,
+              operation: result.operation,
+              reason: result.reason,
+              err: result.error,
+            },
             "p23c point failed",
           );
         }
@@ -359,7 +465,9 @@ export class P23cPublisher {
         shard_count: this.options.shardCount,
         pending_before: batch.meta.pending_point_count,
         selected: batch.meta.batch_selected_point_count,
-        remaining: batch.meta.remaining_point_count + failures.length,
+        remaining: this.effectiveDryRun()
+          ? batch.meta.pending_point_count
+          : batch.meta.remaining_point_count + failures.length,
         success: count("SUCCESS"),
         deleted: count("DELETED"),
         skipped: count("SKIPPED"),
@@ -367,6 +475,11 @@ export class P23cPublisher {
         retryable_failed: retryable,
         fatal_failed: failures.length - retryable,
         held_row_count: batch.meta.held_row_count,
+        noop_count: batch.meta.action_counts.NOOP,
+        payload_only_count: batch.meta.action_counts.PAYLOAD_ONLY,
+        full_embed_count: batch.meta.action_counts.FULL_EMBED,
+        delete_count: batch.meta.action_counts.DELETE,
+        reason_counts: batch.meta.reason_counts,
         finished_at: finishedAt,
       };
       await redis.set(
@@ -411,6 +524,10 @@ export class P23cPublisher {
         held_row_count: progress.held_row_count,
         qdrant_existing_point_count: batch.meta.qdrant_existing_point_count,
         registry_errors: registryResult.registry_errors,
+        noop_count: progress.noop_count,
+        payload_only_count: progress.payload_only_count,
+        full_embed_count: progress.full_embed_count,
+        delete_count: progress.delete_count,
         lock_released: released,
         error_sample: errorSample,
         fatal_error: null,
@@ -511,8 +628,8 @@ export class HttpQdrantClient implements QdrantClient {
     return response.json();
   }
 
-  async scrollPayloadHashes(): Promise<Map<string, string>> {
-    const existing = new Map<string, string>();
+  async scrollPointStates(): Promise<Map<string, ExistingPointState>> {
+    const existing = new Map<string, ExistingPointState>();
     let offset: unknown;
     do {
       const body: Record<string, unknown> = { limit: 1_000, with_payload: true, with_vector: false };
@@ -525,10 +642,17 @@ export class HttpQdrantClient implements QdrantClient {
       const result = response?.result ?? {};
       if (!Array.isArray(result.points)) throw new Error("QDRANT_APPROVED_SCROLL_RESPONSE_INVALID");
       for (const point of result.points) {
-        existing.set(
-          String(point.id),
-          String(point.payload?.content_hash ?? point.payload?.source_hash ?? ""),
-        );
+        const pointId = String(point.id);
+        const payload = point.payload ?? {};
+        existing.set(pointId, {
+          point_id: pointId,
+          payload,
+          content_hash: String(payload.content_hash ?? payload.source_hash ?? ""),
+          embedding_hash: String(payload.embedding_hash ?? ""),
+          payload_hash: String(payload.payload_hash ?? ""),
+          provenance_hash: String(payload.provenance_hash ?? ""),
+          hash_schema_version: String(payload.hash_schema_version ?? ""),
+        });
       }
       offset = result.next_page_offset;
     } while (offset !== undefined && offset !== null);
@@ -548,6 +672,14 @@ export class HttpQdrantClient implements QdrantClient {
       `/collections/${encodeURIComponent(this.collection)}/points/delete?wait=true`,
       "POST",
       { points: [pointId] },
+    );
+  }
+
+  async setPayload(pointId: string, payload: Record<string, unknown>): Promise<void> {
+    await this.request(
+      `/collections/${encodeURIComponent(this.collection)}/points/payload?wait=true`,
+      "POST",
+      { payload, points: [pointId] },
     );
   }
 }

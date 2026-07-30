@@ -102,9 +102,24 @@ async function main(): Promise<void> {
   const shardCount = boundedInt("INGEST_SHARD_COUNT", 1, 1, 32);
   const shardIndex = Math.min(shardCount - 1, boundedInt("INGEST_SHARD_INDEX", 0, 0, 31));
   const batchSize = boundedInt("INGEST_POINT_BATCH_SIZE", 50, 1, 50);
+  const payloadBatchSize = boundedInt("P23C_MAX_PAYLOAD_UPDATES_PER_RUN", 500, 1, 2_000);
   const intervalMs = boundedInt("P23C_INTERVAL_MS", 86_400_000, 60_000, 86_400_000);
   const dryRun = process.env.P23C_DRY_RUN !== "false";
   const sheetsAckEnabled = process.env.P23C_SHEETS_ACK_ENABLED === "true";
+  const hashV3ModeRaw = process.env.P23C_HASH_V3_MODE?.trim().toUpperCase() || "OFF";
+  if (!["OFF", "DRY_RUN", "LIVE"].includes(hashV3ModeRaw)) {
+    throw new Error("P23C_HASH_V3_MODE_INVALID");
+  }
+  const hashV3Mode = hashV3ModeRaw as "OFF" | "DRY_RUN" | "LIVE";
+  const payloadOnlyEnabled = process.env.P23C_PAYLOAD_ONLY_ENABLED === "true";
+  const legacyHashMigrationEnabled = process.env.P23C_LEGACY_HASH_MIGRATION_ENABLED === "true";
+  const imageMaxWidth = boundedInt("INGEST_IMAGE_MAX_WIDTH", 800, 64, 4_096);
+  const rembgModel = process.env.REMBG_MODEL?.trim() || "u2netp";
+  const embeddingModel = process.env.VERTEX_EMBEDDING_MODEL?.trim() || "multimodalembedding@001";
+  const imagePreprocessVersion = process.env.P23C_IMAGE_PREPROCESS_VERSION?.trim()
+    || `ffmpeg-max-width-${imageMaxWidth}-v1`;
+  const cutoutPipelineVersion = process.env.P23C_CUTOUT_PIPELINE_VERSION?.trim()
+    || `rembg-${rembgModel}-v1`;
 
   const feedUrl = process.env.LANA_PRODUCT_FEED_URL?.trim()
     || "https://www.lanadesign.vn/partner_feeds/danh-muc-lanadesign-vn.xml";
@@ -159,15 +174,15 @@ async function main(): Promise<void> {
     }),
     images: new FfmpegImagePipeline({
       maxBytes: boundedInt("INGEST_IMAGE_MAX_BYTES", 12_582_912, 1_048_576, 33_554_432),
-      maxWidth: boundedInt("INGEST_IMAGE_MAX_WIDTH", 800, 64, 4_096),
+      maxWidth: imageMaxWidth,
       rembgUrl: required("REMBG_URL"),
-      rembgModel: process.env.REMBG_MODEL?.trim() || "u2netp",
+      rembgModel,
       rembgAuthHeader: optionalSecret("REMBG_AUTH_HEADER", "REMBG_AUTH_HEADER_FILE"),
     }),
     embeddings: new VertexEmbeddingClient({
       projectId: required("VERTEX_PROJECT_ID"),
       location: process.env.VERTEX_EMBEDDING_LOCATION?.trim() || "us-central1",
-      model: process.env.VERTEX_EMBEDDING_MODEL?.trim() || "multimodalembedding@001",
+      model: embeddingModel,
       token: vertexToken,
     }),
     vertexRateLimiter: new RedisVertexRateLimiter(
@@ -178,9 +193,17 @@ async function main(): Promise<void> {
     sheetId,
     shardCount,
     shardIndex,
+    payloadBatchSize,
     batchSize,
     catalogBuildVersion: process.env.CATALOG_BUILD_VERSION?.trim() || "catalog-v2",
     dryRun,
+    hashV3Mode,
+    payloadOnlyEnabled,
+    legacyHashMigrationEnabled,
+    embeddingModel,
+    embeddingDimension: 1_408,
+    imagePreprocessVersion,
+    cutoutPipelineVersion,
     sheetsAckEnabled,
     runId: workerId,
     logger: {
@@ -287,10 +310,14 @@ async function main(): Promise<void> {
   log("info", {
     shard: `${shardIndex + 1}/${shardCount}`,
     batchSize,
+    payloadBatchSize,
     intervalMs,
     dryRun,
     sheetsAckEnabled,
     statusReporting: reporter.enabled,
+    hashV3Mode,
+    payloadOnlyEnabled,
+    legacyHashMigrationEnabled,
   }, "p23c publisher started");
 
   await runOnce();
