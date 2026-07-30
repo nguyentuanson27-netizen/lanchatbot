@@ -43,10 +43,20 @@ files under `/opt/lana-chatbot/shared/secrets`; they are not committed.
 
 ## Service boundary
 
-The remote service deliberately exposes diagnostics, Qdrant, Redis and Google
-Sheets tools only. It does not mount the Docker socket and does not edit the VPS
-repository. Source-code changes remain GitHub-first and use the local audited
-Git tools or a separately authorized GitHub connector.
+The remote service exposes diagnostics, Qdrant, Redis, Google Sheets, and an
+immutable repository snapshot built from the tagged GitHub release. ChatGPT can
+list, read, and search source code, README, AGENTS, baseline, manifest, and other
+text documents through the existing `mcp:read` scope.
+
+The snapshot is owned by root and stored inside the read-only container. Build
+context rules exclude `.git`, runtime `.env` files, private keys, generated
+directories, and dependencies. Repository tools also reject absolute paths,
+path traversal, symlinks outside the snapshot, binary files, and files over 1
+MiB.
+
+The service does not mount the Docker socket or a writable VPS repository and
+does not expose a source-write tool. Source-code changes remain GitHub-first and
+use the local audited Git tools or a separately authorized GitHub connector.
 
 Every sensitive read still requires an explicit confirmation argument. Every
 Sheet mutation requires `confirm_write=true`, a reason, and writes a
@@ -56,7 +66,8 @@ Sheet mutation requires `confirm_write=true`, a reason, and writes a
 
 1. Create the Authentik application/provider and owner-only policy.
 2. Write the two MCP-specific secret files.
-3. Build the MCP image from the tagged GitHub release.
+3. Build the MCP image from the tagged GitHub release with
+   `LANA_MCP_SOURCE_COMMIT` and `LANA_MCP_SOURCE_REF` set to that exact source.
 4. Start only `lana-mcp` with the standalone compose file.
 5. Create the Nginx Proxy Manager TLS host for `dev.lanadesign.vn`.
 6. Add the exact discovery override on `auth.lanadesign.vn`.

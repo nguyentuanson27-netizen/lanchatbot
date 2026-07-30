@@ -7,5 +7,9 @@ Credentials are entered only on `auth.lanadesign.vn`. The MCP server receives
 an access token, verifies it and restricts access to the approved owner account.
 
 The remote endpoint covers service health, latest chatbot evidence, Qdrant,
-Redis and Google Sheets. Source-code writes are intentionally excluded from the
-VPS endpoint so fixes continue through GitHub-first workflows.
+Redis, Google Sheets, and a read-only snapshot of the current tagged source.
+The existing `mcp:read` scope can list, read, and search README, AGENTS, source
+code, baseline/release documents, manifests, and related text files.
+
+Runtime secrets, `.git`, dependencies, generated files, binary files, and source
+writes are intentionally excluded. Fixes continue through GitHub-first workflows.

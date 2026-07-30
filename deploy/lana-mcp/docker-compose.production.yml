@@ -5,6 +5,8 @@ services:
       dockerfile: deploy/lana-mcp/Dockerfile.production
       args:
         LANA_BASE_IMAGE: ${LANA_MCP_BASE_IMAGE:-lana-chatbot-app:ad-acquisition-r27.1}
+        LANA_MCP_SOURCE_COMMIT: ${LANA_MCP_SOURCE_COMMIT:-unknown}
+        LANA_MCP_SOURCE_REF: ${LANA_MCP_SOURCE_REF:-unknown}
     image: ${LANA_MCP_IMAGE:-lana-chatbot-mcp:oauth-v1}
     container_name: lana-chatbot-mcp
     restart: unless-stopped
@@ -18,6 +20,7 @@ services:
       LANA_MCP_ALLOWED_USERS_FILE: /run/secrets/lana_mcp_allowed_users
       LANA_MCP_RATE_LIMIT_PER_MINUTE: "60"
       LANA_MCP_DATA_DIR: /data
+      LANA_MCP_REPOSITORY_ROOT: /app/repository
       LANA_MCP_REMOTE_OPS_PATH: /app/apps/lana-mcp/remote-ops-adapter.mjs
       DATABASE_URL: postgresql://${POSTGRES_USER:?Set POSTGRES_USER}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@lana-chatbot-postgres:5432/${POSTGRES_DB:?Set POSTGRES_DB}
       REALTIME_DATA_KEY_FILE: /run/secrets/realtime_data_key

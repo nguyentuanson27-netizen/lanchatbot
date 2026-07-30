@@ -5,12 +5,18 @@ import {
   verify as verifySignature,
 } from "node:crypto";
 import { createReadStream, createWriteStream, mkdirSync } from "node:fs";
-import { readFile } from "node:fs/promises";
+import {
+  lstat,
+  readFile,
+  readdir,
+  realpath,
+  stat,
+} from "node:fs/promises";
 import { createServer } from "node:http";
-import { basename, join } from "node:path";
+import { basename, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { spawn } from "node:child_process";
 
-const VERSION = "0.1.0";
+const VERSION = "0.2.0";
 const PORT = Number(process.env.PORT || 8080);
 const RESOURCE = trimSlash(
   process.env.LANA_MCP_RESOURCE || "https://dev.lanadesign.vn",
@@ -43,6 +49,30 @@ const HELPER =
   "/app/plugins/lana-chatbot-ops/scripts/remote_ops.mjs";
 const DATA_DIR = process.env.LANA_MCP_DATA_DIR || "/data";
 const REQUEST_LIMIT = 1_048_576;
+const REPOSITORY_ROOT = resolve(
+  process.env.LANA_MCP_REPOSITORY_ROOT || "/app/repository",
+);
+const REPOSITORY_SOURCE_COMMIT =
+  process.env.LANA_MCP_SOURCE_COMMIT || "unknown";
+const REPOSITORY_SOURCE_REF = process.env.LANA_MCP_SOURCE_REF || "unknown";
+const REPOSITORY_MAX_FILE_BYTES = 1_048_576;
+const REPOSITORY_MAX_OUTPUT_CHARS = 200_000;
+const REPOSITORY_BLOCKED_SEGMENTS = new Set([
+  ".git",
+  ".agents",
+  ".codex",
+  "node_modules",
+  "dist",
+  "coverage",
+]);
+const REPOSITORY_TEXT_EXTENSIONS = new Set([
+  ".cjs", ".css", ".graphql", ".html", ".ini", ".js", ".json", ".jsonl",
+  ".jsx", ".md", ".mjs", ".prisma", ".properties", ".proto", ".py", ".scss",
+  ".sh", ".sql", ".toml", ".ts", ".tsx", ".txt", ".xml", ".yaml", ".yml",
+]);
+const REPOSITORY_TEXT_BASENAMES = new Set([
+  ".dockerignore", ".gitattributes", ".gitignore", "Dockerfile", "Makefile",
+]);
 const RATE_LIMIT_PER_MINUTE = Number(
   process.env.LANA_MCP_RATE_LIMIT_PER_MINUTE || 60,
 );
@@ -249,6 +279,187 @@ function confirmation(args, field, reasonField) {
   return reason;
 }
 
+function boundedInteger(value, fallback, minimum, maximum) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed)) return fallback;
+  return Math.min(maximum, Math.max(minimum, parsed));
+}
+
+export function normalizeRepositoryPath(value, allowRoot = false) {
+  const raw = String(value ?? "").trim().replaceAll("\\", "/");
+  if (!raw) {
+    if (allowRoot) return "";
+    throw new Error("REPOSITORY_PATH_REQUIRED");
+  }
+  if (raw.includes("\0") || raw.startsWith("/") || /^[A-Za-z]:/.test(raw)) {
+    throw new Error("REPOSITORY_PATH_INVALID");
+  }
+  const segments = raw.split("/").filter((segment) => segment && segment !== ".");
+  if (segments.some((segment) => segment === "..")) {
+    throw new Error("REPOSITORY_PATH_TRAVERSAL_BLOCKED");
+  }
+  if (segments.some((segment) => REPOSITORY_BLOCKED_SEGMENTS.has(segment))) {
+    throw new Error("REPOSITORY_PATH_BLOCKED");
+  }
+  return segments.join("/");
+}
+
+function isRepositoryTextFile(path) {
+  const name = basename(path);
+  if (name === ".env.example") return true;
+  if (name === ".env" || name.startsWith(".env.")) return false;
+  return (
+    REPOSITORY_TEXT_BASENAMES.has(name) || name.startsWith("Dockerfile.") ||
+    REPOSITORY_TEXT_EXTENSIONS.has(extname(name).toLowerCase())
+  );
+}
+
+async function resolveRepositoryPath(value, allowRoot = false) {
+  const normalized = normalizeRepositoryPath(value, allowRoot);
+  const root = await realpath(REPOSITORY_ROOT);
+  const candidate = resolve(root, normalized);
+  const resolved = await realpath(candidate);
+  const fromRoot = relative(root, resolved);
+  if (fromRoot === ".." || fromRoot.startsWith(`..${process.platform === "win32" ? "\\" : "/"}`) || isAbsolute(fromRoot)) {
+    throw new Error("REPOSITORY_PATH_TRAVERSAL_BLOCKED");
+  }
+  const checked = normalizeRepositoryPath(fromRoot.replaceAll("\\", "/"), true);
+  return { normalized: checked, resolved, root };
+}
+
+async function readRepositoryText(path) {
+  const target = await resolveRepositoryPath(path);
+  if (!isRepositoryTextFile(target.normalized)) {
+    throw new Error("REPOSITORY_FILE_TYPE_BLOCKED");
+  }
+  const details = await stat(target.resolved);
+  if (!details.isFile()) throw new Error("REPOSITORY_FILE_REQUIRED");
+  if (details.size > REPOSITORY_MAX_FILE_BYTES) {
+    throw new Error("REPOSITORY_FILE_TOO_LARGE");
+  }
+  const buffer = await readFile(target.resolved);
+  if (buffer.includes(0)) throw new Error("REPOSITORY_BINARY_FILE_BLOCKED");
+  return {
+    path: target.normalized.replaceAll("\\", "/"),
+    bytes: buffer.length,
+    content: buffer.toString("utf8"),
+  };
+}
+
+export async function repositoryListFiles(args = {}) {
+  const limit = boundedInteger(args.limit, 500, 1, 2_000);
+  const start = await resolveRepositoryPath(args.path || "", true);
+  const startDetails = await lstat(start.resolved);
+  const files = [];
+  let truncated = false;
+
+  async function walk(directory, directoryRelative) {
+    const entries = (await readdir(directory, { withFileTypes: true })).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+    for (const entry of entries) {
+      if (files.length >= limit) {
+        truncated = true;
+        return;
+      }
+      if (entry.isSymbolicLink()) continue;
+      const relativePath = [directoryRelative, entry.name].filter(Boolean).join("/");
+      const segments = relativePath.split("/");
+      if (segments.some((segment) => REPOSITORY_BLOCKED_SEGMENTS.has(segment))) continue;
+      const fullPath = join(directory, entry.name);
+      if (entry.isDirectory()) await walk(fullPath, relativePath);
+      else if (entry.isFile() && isRepositoryTextFile(relativePath)) files.push(relativePath);
+      if (truncated) return;
+    }
+  }
+
+  if (startDetails.isSymbolicLink()) throw new Error("REPOSITORY_SYMLINK_BLOCKED");
+  if (startDetails.isFile()) {
+    if (!isRepositoryTextFile(start.normalized)) {
+      throw new Error("REPOSITORY_FILE_TYPE_BLOCKED");
+    }
+    files.push(start.normalized);
+  } else if (startDetails.isDirectory()) {
+    await walk(start.resolved, start.normalized);
+  } else {
+    throw new Error("REPOSITORY_PATH_TYPE_BLOCKED");
+  }
+  return {
+    source_commit: REPOSITORY_SOURCE_COMMIT,
+    source_ref: REPOSITORY_SOURCE_REF,
+    path: start.normalized,
+    files,
+    truncated,
+  };
+}
+
+export async function repositoryReadFile(args = {}) {
+  const file = await readRepositoryText(args.path);
+  const lines = file.content.split(/\r?\n/);
+  const startLine = boundedInteger(args.start_line, 1, 1, Math.max(1, lines.length));
+  const maxLines = boundedInteger(args.max_lines, 400, 1, 1_000);
+  const selected = lines.slice(startLine - 1, startLine - 1 + maxLines);
+  let content = selected.join("\n");
+  let outputTruncated = false;
+  if (content.length > REPOSITORY_MAX_OUTPUT_CHARS) {
+    content = content.slice(0, REPOSITORY_MAX_OUTPUT_CHARS);
+    outputTruncated = true;
+  }
+  return {
+    source_commit: REPOSITORY_SOURCE_COMMIT,
+    source_ref: REPOSITORY_SOURCE_REF,
+    path: file.path,
+    bytes: file.bytes,
+    start_line: startLine,
+    end_line: startLine + Math.max(0, content.split("\n").length - 1),
+    total_lines: lines.length,
+    truncated: outputTruncated || startLine - 1 + selected.length < lines.length,
+    content,
+  };
+}
+
+export async function repositorySearchText(args = {}) {
+  const query = String(args.query || "");
+  if (query.length < 2 || query.length > 200) {
+    throw new Error("REPOSITORY_QUERY_LENGTH_INVALID");
+  }
+  const limit = boundedInteger(args.limit, 50, 1, 200);
+  const listing = await repositoryListFiles({ path: args.path || "", limit: 2_000 });
+  const needle = args.case_sensitive === true ? query : query.toLocaleLowerCase("en");
+  const matches = [];
+  for (const path of listing.files) {
+    let file;
+    try {
+      file = await readRepositoryText(path);
+    } catch (error) {
+      if (error.message === "REPOSITORY_FILE_TOO_LARGE") continue;
+      throw error;
+    }
+    const lines = file.content.split(/\r?\n/);
+    for (let index = 0; index < lines.length; index += 1) {
+      const haystack = args.case_sensitive === true ? lines[index] : lines[index].toLocaleLowerCase("en");
+      if (!haystack.includes(needle)) continue;
+      matches.push({ path, line: index + 1, snippet: lines[index].trim().slice(0, 500) });
+      if (matches.length >= limit) {
+        return {
+          source_commit: REPOSITORY_SOURCE_COMMIT,
+          source_ref: REPOSITORY_SOURCE_REF,
+          query,
+          matches,
+          truncated: true,
+        };
+      }
+    }
+  }
+  return {
+    source_commit: REPOSITORY_SOURCE_COMMIT,
+    source_ref: REPOSITORY_SOURCE_REF,
+    query,
+    matches,
+    truncated: listing.truncated,
+  };
+}
+
 const confirmSensitive = {
   confirm_sensitive_read: {
     type: "boolean",
@@ -297,6 +508,45 @@ function tool(name, description, properties, scopes, options = {}) {
 }
 
 const TOOLS = [
+  tool(
+    "repository_list_files",
+    "List readable source code, README, AGENTS, and related text documents from the immutable release snapshot. Runtime secrets and generated directories are excluded.",
+    {
+      path: { type: "string", description: "Optional repository-relative directory or file." },
+      limit: { type: "integer", minimum: 1, maximum: 2000, default: 500 },
+    },
+    [READ_SCOPE],
+    { title: "List repository files" },
+  ),
+  tool(
+    "repository_read_file",
+    "Read a line range from one text file in the immutable release snapshot. Absolute paths, traversal, secrets, binary files, and generated directories are blocked.",
+    {
+      path: { type: "string", description: "Exact repository-relative file path." },
+      start_line: { type: "integer", minimum: 1, default: 1 },
+      max_lines: { type: "integer", minimum: 1, maximum: 1000, default: 400 },
+    },
+    [READ_SCOPE],
+    {
+      title: "Read repository file",
+      required: ["path"],
+    },
+  ),
+  tool(
+    "repository_search_text",
+    "Search for literal text in source code, README, AGENTS, and related documents in the immutable release snapshot.",
+    {
+      query: { type: "string", minLength: 2, maxLength: 200 },
+      path: { type: "string", description: "Optional repository-relative directory or file." },
+      case_sensitive: { type: "boolean", default: false },
+      limit: { type: "integer", minimum: 1, maximum: 200, default: 50 },
+    },
+    [READ_SCOPE],
+    {
+      title: "Search repository text",
+      required: ["query"],
+    },
+  ),
   tool(
     "vps_status",
     "Check the current Lana service health endpoints without changing runtime state.",
@@ -624,7 +874,13 @@ async function callTool(identity, name, args) {
     let result;
     if (name === "vps_status") result = await vpsStatus();
     else if (name === "redis_export_all") result = await exportRedis(args);
-    else {
+    else if (name === "repository_list_files") {
+      result = await repositoryListFiles(args);
+    } else if (name === "repository_read_file") {
+      result = await repositoryReadFile(args);
+    } else if (name === "repository_search_text") {
+      result = await repositorySearchText(args);
+    } else {
       const helperArgs =
         name === "sheet_approve_image"
           ? { ...args, tab: "image_registry", key_column: "IMAGE_ID" }
@@ -665,7 +921,7 @@ async function dispatch(identity, message) {
       capabilities: { tools: { listChanged: false } },
       serverInfo: { name: "lana-chatbot-ops", version: VERSION },
       instructions:
-        "Inspect evidence before proposing a fix. Sensitive Redis, chat, and Sheet reads require explicit confirmation. Every Sheet mutation requires confirm_write and a change_note; the server records BY_CHATGPT notes.",
+        "Read README, AGENTS, the current baseline, and release documents from the immutable repository snapshot before diagnosing. Inspect runtime evidence before proposing a fix. Sensitive Redis, chat, and Sheet reads require explicit confirmation. Every Sheet mutation requires confirm_write and a change_note; the server records BY_CHATGPT notes. Repository writes are not exposed and remain GitHub-first.",
     });
   }
   if (message.method === "notifications/initialized") return null;
