@@ -44,10 +44,12 @@ const productMedia = config.productMediaEnabled
       publicBaseUrl: config.productMediaPublicBaseUrl,
       maxBytes: config.productMediaMaxBytes,
       resizeMaxDimension: config.productMediaResizeMaxDimension,
+      resizeConcurrency: config.productMediaResizeConcurrency,
       originalTtlMs: config.productMediaOriginalTtlMs,
       cleanupIntervalMs: config.productMediaCleanupIntervalMs,
       spreadsheetId: config.productMediaSheetId,
       credentialJson: config.googleSheetsCredential,
+      databaseUrl: config.controlDatabaseUrl || config.databaseUrl,
     })
   : undefined;
 // Dataset-review module is off unless flagged on AND an envelope cipher exists
@@ -87,6 +89,7 @@ for (const signal of ["SIGTERM", "SIGINT"] as const) {
       await app.close();
       await store.close();
       if (datasetReview) await datasetReview.close();
+      await productMedia?.close?.();
       process.exit(0);
     })();
   });

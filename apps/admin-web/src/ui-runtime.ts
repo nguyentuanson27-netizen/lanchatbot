@@ -3,7 +3,11 @@ export type ToastTone = "good" | "warning" | "danger";
 const interactiveSelector =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-const focusStack: Array<HTMLElement | null> = [];
+interface DialogFocusEntry {
+  readonly restoreFocusTo: HTMLElement | null;
+}
+
+const focusStack: DialogFocusEntry[] = [];
 let dialogDepth = 0;
 
 export function showAccessibleToast(
@@ -64,10 +68,12 @@ export function activateDialog(dialog: HTMLElement): () => void {
   const restoreFocusTo = document.activeElement instanceof HTMLElement
     ? document.activeElement
     : null;
-  focusStack.push(restoreFocusTo);
+  const focusEntry: DialogFocusEntry = { restoreFocusTo };
+  focusStack.push(focusEntry);
   dialogDepth += 1;
-  const app = document.querySelector<HTMLElement>("#app");
-  if (app) app.inert = true;
+  // Overlay layers are siblings of `.app-shell` inside `#app`.
+  const background = document.querySelector<HTMLElement>(".app-shell");
+  if (background) background.inert = true;
   dialog.setAttribute("role", "dialog");
   dialog.setAttribute("aria-modal", "true");
   const focusable = [...dialog.querySelectorAll<HTMLElement>(interactiveSelector)];
@@ -75,7 +81,11 @@ export function activateDialog(dialog: HTMLElement): () => void {
 
   const onKeydown = (event: KeyboardEvent) => {
     if (event.key === "Escape") {
-      dialog.querySelector<HTMLElement>("[data-close-detail], [data-close-modal]")?.click();
+      event.preventDefault();
+      event.stopPropagation();
+      dialog.querySelector<HTMLElement>(
+        "[data-close-detail], [data-close-modal], [data-close-command-modal]",
+      )?.click();
       return;
     }
     if (event.key !== "Tab") return;
@@ -102,9 +112,11 @@ export function activateDialog(dialog: HTMLElement): () => void {
     active = false;
     dialog.removeEventListener("keydown", onKeydown);
     dialogDepth = Math.max(0, dialogDepth - 1);
-    if (app && dialogDepth === 0) app.inert = false;
-    const target = focusStack.pop();
-    target?.focus({ preventScroll: true });
+    if (background && dialogDepth === 0) background.inert = false;
+    const entryIndex = focusStack.indexOf(focusEntry);
+    const wasTopmost = entryIndex === focusStack.length - 1;
+    if (entryIndex >= 0) focusStack.splice(entryIndex, 1);
+    if (wasTopmost) restoreFocusTo?.focus({ preventScroll: true });
   };
 }
 

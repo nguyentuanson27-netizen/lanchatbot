@@ -69,6 +69,9 @@ describe("PostgresRealtimeInboxStore debounce enqueue", () => {
     expect(head?.sql).not.toContain(
       "WHERE conversation_ingress_heads.generation < EXCLUDED.generation",
     );
+    const notification = calls.find((call) => call.sql.includes("pg_notify"));
+    expect(notification?.values).toEqual(["CUSTOMER"]);
+    expect(notification?.sql).toContain("lana_realtime_inbox");
   });
 
   it("does not bump generation or reset quiet time for a duplicate webhook", async () => {
@@ -102,6 +105,7 @@ describe("PostgresRealtimeInboxStore debounce enqueue", () => {
 
     expect(result.inserted).toBe(false);
     expect(calls.some((sql) => sql.includes("conversation_ingress_heads"))).toBe(false);
+    expect(calls.some((sql) => sql.includes("pg_notify"))).toBe(false);
   });
 
   it("stores an app echo without touching the conversation debounce head", async () => {

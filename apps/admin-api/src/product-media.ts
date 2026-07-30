@@ -1,8 +1,13 @@
 import { createHash, createSign, randomUUID } from "node:crypto";
-import { spawn } from "node:child_process";
+import sharp from "sharp";
 import { chmod, mkdir, readFile, readdir, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { AdminIdentity } from "./types.js";
+import {
+  PostgresProductMediaIntakeStore,
+  type ProductMediaIntakeInput,
+  type ProductMediaLegacyIntake,
+} from "@lana/database";
 
 export const MANUAL_IMAGE_INTAKE_SHEET = "manual_image_intake";
 export const MANUAL_IMAGE_INTAKE_HEADERS = [
@@ -84,6 +89,15 @@ export interface ProductMediaService {
   pipeline(limit?: number): Promise<ProductMediaPipeline>;
   retry(identity: AdminIdentity, intakeId: string): Promise<ProductMediaRetryResult>;
   upload(identity: AdminIdentity, input: ProductMediaUploadInput): Promise<ProductMediaUploadResult>;
+  close?(): Promise<void>;
+}
+export interface ProductMediaDedupeStore {
+  ready(): Promise<boolean>;
+  reserve(input: ProductMediaIntakeInput): ReturnType<PostgresProductMediaIntakeStore["reserve"]>;
+  backfill(inputs: readonly ProductMediaLegacyIntake[]): Promise<number>;
+  markProjected(intakeId: string, imageUrl: string): Promise<void>;
+  markFailed(intakeId: string, errorCode: string): Promise<void>;
+  close(): Promise<void>;
 }
 
 interface ServiceAccountCredential {
@@ -97,6 +111,7 @@ export interface ProductMediaServiceOptions {
   readonly publicBaseUrl: string;
   readonly maxBytes: number;
   readonly resizeMaxDimension: number;
+  readonly resizeConcurrency?: number;
   readonly originalTtlMs: number;
   readonly cleanupIntervalMs: number;
   readonly registryCacheMs?: number;
@@ -105,6 +120,7 @@ export interface ProductMediaServiceOptions {
   readonly fetchImpl?: typeof fetch;
   readonly now?: () => Date;
   readonly resizeImpl?: (input: Buffer, mimeType: string, maxDimension: number) => Promise<Buffer>;
+  readonly dedupeStore?: ProductMediaDedupeStore;
 }
 
 const MIME_EXTENSIONS: Readonly<Record<string, string>> = {
@@ -113,11 +129,7 @@ const MIME_EXTENSIONS: Readonly<Record<string, string>> = {
   "image/webp": "webp",
 };
 
-const OUTPUT_CODEC: Readonly<Record<string, { codec: string; options: readonly string[] }>> = {
-  "image/jpeg": { codec: "mjpeg", options: ["-q:v", "3"] },
-  "image/png": { codec: "png", options: ["-compression_level", "7"] },
-  "image/webp": { codec: "libwebp", options: ["-q:v", "85"] },
-};
+// Still-image resize is handled in-process by sharp/libvips.
 
 const RETRYABLE_MEDIA_ERROR =
   /too many requests|timeout|timed out|econnreset|socket hang up|(?<!\d)(?:429|500|502|503|504)(?!\d)/iu;
@@ -148,53 +160,30 @@ function validImageSignature(buffer: Buffer, mimeType: string): boolean {
   return false;
 }
 
-export function resizeProductImage(input: Buffer, mimeType: string, maxDimension: number): Promise<Buffer> {
-  const output = OUTPUT_CODEC[mimeType];
-  if (!output) return Promise.reject(new Error("PRODUCT_MEDIA_MIME_INVALID"));
+export async function resizeProductImage(
+  input: Buffer,
+  mimeType: string,
+  maxDimension: number,
+): Promise<Buffer> {
+  if (!(mimeType in MIME_EXTENSIONS)) throw new Error("PRODUCT_MEDIA_MIME_INVALID");
   const boundedDimension = Math.max(320, Math.min(4_096, Math.trunc(maxDimension)));
-  const args = [
-    "-hide_banner", "-loglevel", "error",
-    "-i", "pipe:0",
-    "-vf", `scale=w='min(${boundedDimension},iw)':h='min(${boundedDimension},ih)':force_original_aspect_ratio=decrease:flags=lanczos`,
-    "-frames:v", "1",
-    ...output.options,
-    "-f", "image2pipe", "-vcodec", output.codec,
-    "pipe:1",
-  ];
-  return new Promise((resolve, reject) => {
-    const child = spawn("ffmpeg", args, { stdio: ["pipe", "pipe", "pipe"] });
-    const chunks: Buffer[] = [];
-    const errors: Buffer[] = [];
-    let settled = false;
-    const fail = (error: Error) => {
-      if (settled) return;
-      settled = true;
-      reject(error);
-    };
-    const timer = setTimeout(() => {
-      child.kill("SIGKILL");
-      fail(new Error("PRODUCT_MEDIA_RESIZE_TIMEOUT"));
-    }, 45_000);
-    child.stdout.on("data", (chunk: Buffer) => chunks.push(chunk));
-    child.stderr.on("data", (chunk: Buffer) => errors.push(chunk));
-    child.on("error", (error) => {
-      clearTimeout(timer);
-      fail(error);
+  let image = sharp(input, {
+    failOn: "error",
+    limitInputPixels: 40_000_000,
+    sequentialRead: true,
+  })
+    .rotate()
+    .resize({
+      width: boundedDimension,
+      height: boundedDimension,
+      fit: "inside",
+      withoutEnlargement: true,
+      kernel: sharp.kernel.lanczos3,
     });
-    child.on("close", (code) => {
-      clearTimeout(timer);
-      if (settled) return;
-      const resized = Buffer.concat(chunks);
-      if (code !== 0 || !resized.length) {
-        fail(new Error(`PRODUCT_MEDIA_RESIZE_FAILED:${Buffer.concat(errors).toString().slice(0, 160)}`));
-        return;
-      }
-      settled = true;
-      resolve(resized);
-    });
-    child.stdin.on("error", () => undefined);
-    child.stdin.end(input);
-  });
+  if (mimeType === "image/jpeg") image = image.jpeg({ quality: 85, chromaSubsampling: "4:2:0" });
+  else if (mimeType === "image/png") image = image.png({ compressionLevel: 7 });
+  else image = image.webp({ quality: 85 });
+  return image.toBuffer();
 }
 
 function sheetRows(values: unknown[][]): Record<string, string>[] {
@@ -221,15 +210,22 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
   private readonly fetchImpl: typeof fetch;
   private readonly now: () => Date;
   private readonly resizeImpl: (input: Buffer, mimeType: string, maxDimension: number) => Promise<Buffer>;
+  private readonly resizeConcurrency: number;
+  private activeResizes = 0;
+  private readonly resizeWaiters: Array<() => void> = [];
   private readonly intakeLocks = new Map<string, Promise<void>>();
   private accessToken: { value: string; expiresAt: number } | null = null;
   private registryCache: { expiresAt: number; products: readonly RegistryProduct[] } | null = null;
+  private readonly dedupeStore: ProductMediaDedupeStore | undefined;
+  private dedupeIndexPromise: Promise<void> | null = null;
 
   constructor(private readonly options: ProductMediaServiceOptions) {
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.now = options.now ?? (() => new Date());
     this.resizeImpl = options.resizeImpl ?? resizeProductImage;
+    this.resizeConcurrency = Math.max(1, Math.min(4, Math.trunc(options.resizeConcurrency ?? 2)));
     void this.cleanupExpiredOriginals().catch(() => undefined);
+    this.dedupeStore = options.dedupeStore;
     const cleanupTimer = setInterval(() => {
       void this.cleanupExpiredOriginals().catch(() => undefined);
     }, options.cleanupIntervalMs);
@@ -237,7 +233,7 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
   }
 
   async ready(): Promise<boolean> {
-    return Boolean(
+    const configured = Boolean(
       this.options.directory
       && this.options.originalDirectory
       && this.options.publicBaseUrl.startsWith("https://")
@@ -245,6 +241,11 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
       && this.options.serviceAccount.email.includes("@")
       && this.options.serviceAccount.privateKey.includes("PRIVATE KEY"),
     );
+    return configured && (!this.dedupeStore || await this.dedupeStore.ready());
+  }
+
+  async close(): Promise<void> {
+    await this.dedupeStore?.close();
   }
 
   async catalog(): Promise<ProductMediaCatalog> {
@@ -379,107 +380,202 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
     if (!extension) throw new Error("PRODUCT_MEDIA_MIME_INVALID");
     const fileName = `${maSp.toLowerCase()}-${hash.slice(0, 24)}.${extension}`;
     const imageUrl = `${this.options.publicBaseUrl.replace(/\/$/u, "")}/${fileName}`;
-    const uploadedAt = this.now().toISOString();
+    const uploadedAtDate = this.now();
+    const uploadedAt = uploadedAtDate.toISOString();
+    await this.ensureDedupeIndex();
 
     return this.withIntakeLock(intakeId, async () => {
-      await this.ensureSheet();
-      const existing = sheetRows(await this.getValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:P`))
-        .find((row) =>
-          row.INTAKE_ID === intakeId
-          || (
-            String(row.MA_SP ?? "").toUpperCase() === maSp
-            && String(row.IMAGE_HASH ?? "").toLowerCase() === hash
-            && (!row.BRAND || normalizeLookupValue(row.BRAND) === normalizeLookupValue(canonicalBrand))
-          )
+      let reservationClaimed = false;
+      let reservationRevision = 0;
+      if (this.dedupeStore) {
+        const reservation = await this.dedupeStore.reserve({
+          intakeId,
+          brand: canonicalBrand,
+          brandKey: normalizeLookupValue(canonicalBrand),
+          productCode: maSp,
+          imageHash: hash,
+          imageUrl,
+          uploadedAt: uploadedAtDate,
+        });
+        if (!reservation.claimed) {
+          return {
+            intakeId: reservation.record.intakeId,
+            maSp: reservation.record.productCode,
+            brand: reservation.record.brand,
+            imageUrl: reservation.record.imageUrl,
+            classificationStatus: "PENDING_AI",
+            status: "PENDING_AI",
+            uploadedAt: reservation.record.uploadedAt.toISOString(),
+            duplicate: true,
+          };
+        }
+        reservationClaimed = true;
+        reservationRevision = reservation.record.revision;
+      }
+
+      try {
+        await this.ensureSheet();
+        const shouldCheckSheet = !this.dedupeStore || reservationRevision > 0;
+        if (shouldCheckSheet) {
+          const existing = sheetRows(await this.getValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:P`))
+            .find((row) =>
+              row.INTAKE_ID === intakeId
+              || (
+                String(row.MA_SP ?? "").toUpperCase() === maSp
+                && String(row.IMAGE_HASH ?? "").toLowerCase() === hash
+                && (!row.BRAND || normalizeLookupValue(row.BRAND) === normalizeLookupValue(canonicalBrand))
+              )
+            );
+          if (existing) {
+            if (this.dedupeStore) {
+              await this.dedupeStore.markProjected(intakeId, existing.IMAGE_URL || imageUrl);
+            }
+            return {
+              intakeId,
+              maSp,
+              brand: existing.BRAND || canonicalBrand,
+              imageUrl: existing.IMAGE_URL || imageUrl,
+              classificationStatus: "PENDING_AI",
+              status: "PENDING_AI",
+              uploadedAt: existing.UPLOADED_AT || uploadedAt,
+              duplicate: true,
+            };
+          }
+        }
+
+        await mkdir(this.options.directory, { recursive: true, mode: 0o755 });
+        await chmod(this.options.directory, 0o755);
+        await mkdir(this.options.originalDirectory, { recursive: true, mode: 0o750 });
+        const originalPath = join(
+          this.options.originalDirectory,
+          `${intakeId}-${this.now().getTime()}-${randomUUID()}.${extension}`,
         );
-      if (existing) {
+        await writeFile(originalPath, image, { flag: "wx", mode: 0o600 });
+
+        const resized = await this.resizeWithLimit(image, input.mimeType, this.options.resizeMaxDimension)
+          .catch(async (error: unknown) => {
+            await unlink(originalPath).catch(() => undefined);
+            throw error;
+          });
+        if (!resized.length || resized.length > this.options.maxBytes) {
+          await unlink(originalPath).catch(() => undefined);
+          throw new Error("PRODUCT_MEDIA_RESIZED_SIZE_INVALID");
+        }
+        if (!validImageSignature(resized, input.mimeType)) {
+          await unlink(originalPath).catch(() => undefined);
+          throw new Error("PRODUCT_MEDIA_RESIZED_SIGNATURE_INVALID");
+        }
+        const finalPath = join(this.options.directory, fileName);
+        const temporaryPath = `${finalPath}.${randomUUID()}.tmp`;
+        const pendingMarkerPath = join(
+          this.options.originalDirectory,
+          `${PENDING_PUBLIC_PREFIX}${intakeId}.json`,
+        );
+        try {
+          await writeFile(
+            pendingMarkerPath,
+            JSON.stringify({ intakeId, fileName, createdAt: uploadedAt }),
+            { flag: "w", mode: 0o600 },
+          );
+          await writeFile(temporaryPath, resized, { flag: "wx", mode: 0o644 });
+          await rename(temporaryPath, finalPath);
+          await chmod(finalPath, 0o644);
+        } catch (error) {
+          await unlink(temporaryPath).catch(() => undefined);
+          await unlink(finalPath).catch(() => undefined);
+          await unlink(pendingMarkerPath).catch(() => undefined);
+          await unlink(originalPath).catch(() => undefined);
+          throw error;
+        }
+
+        await this.appendValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:P`, [[
+          intakeId,
+          maSp,
+          imageUrl,
+          "AI_AUTO",
+          "",
+          "",
+          true,
+          "PENDING_AI",
+          identity.email,
+          uploadedAt,
+          hash,
+          input.originalFileName,
+          "",
+          "",
+          "",
+          canonicalBrand,
+        ]]);
+        await this.dedupeStore?.markProjected(intakeId, imageUrl).catch((error: unknown) => {
+          const code = safePipelineError(
+            error instanceof Error ? error.message : "PRODUCT_MEDIA_DEDUPE_MARK_FAILED",
+          )?.slice(0, 128) ?? "PRODUCT_MEDIA_DEDUPE_MARK_FAILED";
+          process.stderr.write(`${JSON.stringify({ level: "error", code, intakeId })}\n`);
+        });
+        await unlink(pendingMarkerPath).catch(() => undefined);
         return {
           intakeId,
           maSp,
-          brand: existing.BRAND || canonicalBrand,
-          imageUrl: existing.IMAGE_URL || imageUrl,
+          brand: canonicalBrand,
+          imageUrl,
           classificationStatus: "PENDING_AI",
           status: "PENDING_AI",
-          uploadedAt: existing.UPLOADED_AT || uploadedAt,
-          duplicate: true,
+          uploadedAt,
+          duplicate: false,
         };
-      }
-
-      await mkdir(this.options.directory, { recursive: true, mode: 0o755 });
-      await chmod(this.options.directory, 0o755);
-      await mkdir(this.options.originalDirectory, { recursive: true, mode: 0o750 });
-      const originalPath = join(
-        this.options.originalDirectory,
-        `${intakeId}-${this.now().getTime()}-${randomUUID()}.${extension}`,
-      );
-      await writeFile(originalPath, image, { flag: "wx", mode: 0o600 });
-
-      const resized = await this.resizeImpl(image, input.mimeType, this.options.resizeMaxDimension)
-        .catch(async (error: unknown) => {
-          await unlink(originalPath).catch(() => undefined);
-          throw error;
-        });
-      if (!resized.length || resized.length > this.options.maxBytes) {
-        await unlink(originalPath).catch(() => undefined);
-        throw new Error("PRODUCT_MEDIA_RESIZED_SIZE_INVALID");
-      }
-      if (!validImageSignature(resized, input.mimeType)) {
-        await unlink(originalPath).catch(() => undefined);
-        throw new Error("PRODUCT_MEDIA_RESIZED_SIGNATURE_INVALID");
-      }
-      const finalPath = join(this.options.directory, fileName);
-      const temporaryPath = `${finalPath}.${randomUUID()}.tmp`;
-      const pendingMarkerPath = join(
-        this.options.originalDirectory,
-        `${PENDING_PUBLIC_PREFIX}${intakeId}.json`,
-      );
-      try {
-        await writeFile(
-          pendingMarkerPath,
-          JSON.stringify({ intakeId, fileName, createdAt: uploadedAt }),
-          { flag: "w", mode: 0o600 },
-        );
-        await writeFile(temporaryPath, resized, { flag: "wx", mode: 0o644 });
-        await rename(temporaryPath, finalPath);
-        await chmod(finalPath, 0o644);
       } catch (error) {
-        await unlink(temporaryPath).catch(() => undefined);
-        await unlink(finalPath).catch(() => undefined);
-        await unlink(pendingMarkerPath).catch(() => undefined);
-        await unlink(originalPath).catch(() => undefined);
+        if (reservationClaimed) {
+          const code = safePipelineError(
+            error instanceof Error ? error.message : "PRODUCT_MEDIA_UPLOAD_FAILED",
+          )?.slice(0, 128) ?? "PRODUCT_MEDIA_UPLOAD_FAILED";
+          await this.dedupeStore?.markFailed(intakeId, code).catch(() => undefined);
+        }
         throw error;
       }
-
-      await this.appendValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:P`, [[
-        intakeId,
-        maSp,
-        imageUrl,
-        "AI_AUTO",
-        "",
-        "",
-        true,
-        "PENDING_AI",
-        identity.email,
-        uploadedAt,
-        hash,
-        input.originalFileName,
-        "",
-        "",
-        "",
-        canonicalBrand,
-      ]]);
-      await unlink(pendingMarkerPath).catch(() => undefined);
-      return {
-        intakeId,
-        maSp,
-        brand: canonicalBrand,
-        imageUrl,
-        classificationStatus: "PENDING_AI",
-        status: "PENDING_AI",
-        uploadedAt,
-        duplicate: false,
-      };
     });
+  }
+
+  private async ensureDedupeIndex(): Promise<void> {
+    if (!this.dedupeStore) return;
+    if (!this.dedupeIndexPromise) {
+      this.dedupeIndexPromise = (async () => {
+        await this.ensureSheet();
+        const [values, products] = await Promise.all([
+          this.getValues(`${MANUAL_IMAGE_INTAKE_SHEET}!A:P`),
+          this.products(),
+        ]);
+        const brandByProduct = new Map(products.map((product) => [product.maSp, product.brand]));
+        const inputs: ProductMediaLegacyIntake[] = [];
+        for (const row of sheetRows(values)) {
+          const intakeId = String(row.INTAKE_ID ?? "").toLowerCase();
+          const productCode = String(row.MA_SP ?? "").toUpperCase();
+          const imageHash = String(row.IMAGE_HASH ?? "").toLowerCase();
+          const brand = String(row.BRAND ?? "").trim() || brandByProduct.get(productCode) || "";
+          if (
+            !/^[0-9a-f]{32}$/u.test(intakeId)
+            || !/^[0-9a-f]{64}$/u.test(imageHash)
+            || !productCode
+            || !brand
+          ) continue;
+          const parsedUploadedAt = new Date(String(row.UPLOADED_AT ?? ""));
+          inputs.push({
+            intakeId,
+            brand,
+            brandKey: normalizeLookupValue(brand),
+            productCode,
+            imageHash,
+            imageUrl: String(row.IMAGE_URL ?? ""),
+            uploadedAt: Number.isNaN(parsedUploadedAt.getTime()) ? this.now() : parsedUploadedAt,
+            projectionStatus: "PROJECTED",
+          });
+        }
+        await this.dedupeStore?.backfill(inputs);
+      })().catch((error: unknown) => {
+        this.dedupeIndexPromise = null;
+        throw error;
+      });
+    }
+    return this.dedupeIndexPromise;
   }
 
   private async products(): Promise<readonly RegistryProduct[]> {
@@ -556,6 +652,23 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
       await unlink(item.markerPath).catch(() => undefined);
     }
     return removed;
+  }
+
+  private async resizeWithLimit(
+    input: Buffer,
+    mimeType: string,
+    maxDimension: number,
+  ): Promise<Buffer> {
+    if (this.activeResizes >= this.resizeConcurrency) {
+      await new Promise<void>((resolve) => this.resizeWaiters.push(resolve));
+    }
+    this.activeResizes += 1;
+    try {
+      return await this.resizeImpl(input, mimeType, maxDimension);
+    } finally {
+      this.activeResizes = Math.max(0, this.activeResizes - 1);
+      this.resizeWaiters.shift()?.();
+    }
   }
 
   private async withIntakeLock<T>(intakeId: string, operation: () => Promise<T>): Promise<T> {
@@ -669,14 +782,21 @@ export class GoogleSheetsManualImageIntake implements ProductMediaService {
   }
 }
 
-export function createProductMediaService(options: Omit<ProductMediaServiceOptions, "serviceAccount"> & { credentialJson: string }): ProductMediaService {
-  const parsed = JSON.parse(options.credentialJson) as { email?: unknown; privateKey?: unknown };
+export function createProductMediaService(
+  options: Omit<ProductMediaServiceOptions, "serviceAccount" | "dedupeStore"> & {
+    credentialJson: string;
+    databaseUrl: string;
+  },
+): ProductMediaService {
+  const { credentialJson, databaseUrl, ...serviceOptions } = options;
+  const parsed = JSON.parse(credentialJson) as { email?: unknown; privateKey?: unknown };
   if (typeof parsed.email !== "string" || typeof parsed.privateKey !== "string") {
     throw new Error("PRODUCT_MEDIA_GOOGLE_CREDENTIAL_INVALID");
   }
   return new GoogleSheetsManualImageIntake({
-    ...options,
+    ...serviceOptions,
     serviceAccount: { email: parsed.email, privateKey: parsed.privateKey },
+    dedupeStore: new PostgresProductMediaIntakeStore(databaseUrl),
   });
 }
 
