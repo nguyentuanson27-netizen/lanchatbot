@@ -729,6 +729,8 @@ const runner = new RealtimeRunner(
     mediaRecognitionPageIds,
     conversationalMessageFormatEnabled:
       process.env.REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1 === "true",
+    messageGroupingV2Enabled:
+      process.env.REALTIME_MESSAGE_GROUPING_V2 === "true",
     mediaSelectorV2GuardEnabled:
       process.env.REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED === "true",
     wave2StrategyEnabled:

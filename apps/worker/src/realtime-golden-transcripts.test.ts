@@ -202,6 +202,7 @@ async function replayGolden(input: {
       releaseId: "wave0-golden",
       decisionTelemetryEnabled: true,
       buyingSignalGuardEnabled: true,
+      messageGroupingV2Enabled: true,
       groundedDraftEnabled:
         input.groundedDraft !== undefined || input.groundedDraftError === true,
       verifiedFactAssemblerEnabled:
@@ -222,7 +223,22 @@ describe("realtime golden transcripts", () => {
     });
 
     expect(model.generate).not.toHaveBeenCalled();
-    expect(committed?.metaPlan?.messages.map((message) => message.kind)).toEqual(["TEXT", "IMAGE"]);
+    expect(committed?.metaPlan?.messages).toEqual([
+      {
+        kind: "TEXT",
+        text: [
+          "Mẫu CB182 hiện có giá 699.000đ chị nhé.",
+          "Chất liệu: gấm",
+          "Form dáng: suông",
+          "Size: S, M, L",
+        ].join("\n"),
+      },
+      {
+        kind: "TEXT",
+        text: "Chị gửi em chiều cao và cân nặng, em tư vấn size phù hợp cho chị nhé.",
+      },
+      { kind: "IMAGE", imageUrl: "https://cdn.example/cb182.jpg" },
+    ]);
     expect(committed?.decisionEvents?.map((event) => event.eventType)).toEqual([
       "PRODUCT_RESOLVED",
       "PRODUCT_MATCHED",
@@ -238,7 +254,7 @@ describe("realtime golden transcripts", () => {
     );
   });
 
-  it("GOLDEN-BUYING-NOREPLY-001 overrides NO_REPLY for a buying signal", async () => {
+  it("GOLDEN-BUYING-NOREPLY-001 silently hands off an unresolved buying signal", async () => {
     const { committed, model } = await replayGolden({
       fixtureId: "GOLDEN-BUYING-NOREPLY-001",
       text: "Chốt mẫu này",
@@ -246,14 +262,66 @@ describe("realtime golden transcripts", () => {
       modelProposal: noReplyProposal,
     });
 
-    expect(model.generate).toHaveBeenCalledOnce();
-    expect(committed?.metaPlan?.messages).toEqual([
-      { kind: "TEXT", text: expect.stringContaining("mã hoặc ảnh") },
-    ]);
+    expect(model.generate).not.toHaveBeenCalled();
+    expect(committed?.metaPlan).toBeUndefined();
+    expect(committed?.state).toMatchObject({
+      conversationOwner: "HUMAN",
+      ownerReason: "AGENT_HANDOFF",
+    });
+    expect(committed?.handoffEventPlan).toMatchObject({
+      source: "BOT_POLICY",
+      reasonCode: "UNVERIFIED_PRODUCT_ID",
+    });
     expect(committed?.decisionEvents?.map((event) => event.eventType)).toContain(
       "BUYING_SIGNAL_DETECTED",
     );
     expect(committed?.decisionEvents?.map((event) => event.eventType)).not.toContain("NO_REPLY");
+  });
+
+  it("GOLDEN-BUYING-LONGTAIL-001 hands off model buying evidence without product context", async () => {
+    const text = "làm đơn mẫu này cho mình";
+    const { committed, model } = await replayGolden({
+      fixtureId: "GOLDEN-BUYING-LONGTAIL-001",
+      text,
+      productMatched: false,
+      modelProposal: {
+        ...noReplyProposal,
+        intent: "buying_committed",
+        action: "REPLY",
+        reply: "Em hỗ trợ chị lên đơn nhé.",
+        salesSignals: {
+          checkoutExtraction: {
+            fullName: { value: null, evidenceText: null, confidence: 0 },
+            phone: { value: null, evidenceText: null, confidence: 0 },
+            address: { value: null, evidenceText: null, confidence: 0 },
+            paymentMethod: { value: null, evidenceText: null, confidence: 0 },
+          },
+          purchaseConfirmation: {
+            decision: "UNCLEAR",
+            evidenceText: null,
+            confidence: 0,
+          },
+          buyingIntent: {
+            decision: "COMMITTED",
+            requestedAction: "OPEN_CART",
+            quantity: null,
+            evidenceText: text,
+            confidence: 0.97,
+          },
+        },
+      },
+    });
+
+    expect(model.generate).toHaveBeenCalledOnce();
+    expect(committed?.metaPlan).toBeUndefined();
+    expect(committed?.state).toMatchObject({
+      conversationOwner: "HUMAN",
+      ownerReason: "AGENT_HANDOFF",
+    });
+    expect(committed?.handoffEventPlan).toMatchObject({
+      source: "BOT_POLICY",
+      reasonCode: "UNVERIFIED_PRODUCT_ID",
+    });
   });
 
   it("GOLDEN-END-001 preserves NO_REPLY for a plain conversation end", async () => {
@@ -297,7 +365,7 @@ describe("realtime golden transcripts", () => {
 
     expect(committed?.metaPlan?.messages).toEqual([{
       kind: "TEXT",
-      text: "Dạ em đã tìm thấy mẫu CB182 ạ. Chị muốn xem giá, size, tình trạng hàng hay thời gian giao dự kiến ạ?",
+      text: "Em đã tìm thấy mẫu CB182. Chị muốn xem giá, size, tình trạng hàng hay thời gian giao dự kiến?",
     }]);
     expect(committed?.pancakeTagPlan).toBeUndefined();
     expect(committed?.decisionEvents).toEqual(expect.arrayContaining([
@@ -348,7 +416,15 @@ describe("realtime golden transcripts", () => {
       {
         kind: "TEXT",
         text: [
-          "Dạ Set váy CB182 có giá 699k ạ",
+          "Set váy CB182 hiện có giá 699.000đ chị nhé.",
+          "Chất liệu: gấm",
+          "Form dáng: suông",
+          "Size: S, M, L",
+        ].join("\n"),
+      },
+      {
+        kind: "TEXT",
+        text: [
           "Form suông thanh lịch, dễ mặc đi làm.",
           "Chị thích màu be hay đen hơn ạ?",
         ].join("\n"),
@@ -358,10 +434,10 @@ describe("realtime golden transcripts", () => {
     expect(JSON.stringify(committed?.metaPlan)).not.toContain("500k");
   });
 
-  it("GOLDEN-GROUNDED-SCHEMA-001 falls back to the verified fact block without customer-visible failure", async () => {
+  it("GOLDEN-GROUNDED-SCHEMA-001 falls back to the verified product block without customer-visible failure", async () => {
     const { committed } = await replayGolden({
       fixtureId: "GOLDEN-GROUNDED-SCHEMA-001",
-      text: "Mẫu này giá bao nhiêu?",
+      text: "Mẫu này giá bao nhiêu, mặc có tôn dáng không?",
       productMatched: true,
       currentProductId: "CB182",
       groundedDraftError: true,
@@ -386,7 +462,12 @@ describe("realtime golden transcripts", () => {
 
     expect(committed?.metaPlan?.messages).toEqual([{
       kind: "TEXT",
-      text: "Dạ Set váy CB182 có giá 699k ạ",
+      text: [
+        "Set váy CB182 hiện có giá 699.000đ chị nhé.",
+        "Chất liệu: gấm",
+        "Form dáng: suông",
+        "Size: S, M, L",
+      ].join("\n"),
     }]);
     expect(committed?.pancakeTagPlan).toBeUndefined();
     expect(committed?.decisionEvents).toEqual(expect.arrayContaining([

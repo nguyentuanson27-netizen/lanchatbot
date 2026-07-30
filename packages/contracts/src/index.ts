@@ -255,6 +255,61 @@ export const AgentExtractedPaymentFieldV1Schema = z.object({
 });
 export type AgentExtractedPaymentFieldV1 = z.infer<typeof AgentExtractedPaymentFieldV1Schema>;
 
+export const AgentBuyingIntentV1Schema = z.object({
+  decision: z.enum(["NONE", "CONSIDERING", "COMMITTED", "NEGATED"]),
+  requestedAction: z.enum([
+    "NONE",
+    "OPEN_CART",
+    "ADD_TO_CART",
+    "SET_QUANTITY",
+    "PROCEED_TO_PAYMENT",
+  ]),
+  quantity: z.number().int().min(1).max(20).nullable(),
+  evidenceText: z.string().trim().min(1).max(1_000).nullable(),
+  confidence: z.number().min(0).max(1),
+}).strict().superRefine((signal, context) => {
+  if (signal.decision === "NONE") {
+    if (
+      signal.requestedAction !== "NONE" ||
+      signal.quantity !== null ||
+      signal.evidenceText !== null
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "NONE buying intent cannot contain action, quantity or evidence",
+      });
+    }
+    return;
+  }
+  if (signal.evidenceText === null) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["evidenceText"],
+      message: "non-NONE buying intent requires exact evidence",
+    });
+  }
+  if (
+    signal.decision !== "COMMITTED" &&
+    (signal.requestedAction !== "NONE" || signal.quantity !== null)
+  ) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "only COMMITTED buying intent may request a cart action or quantity",
+    });
+  }
+  if (
+    signal.decision === "COMMITTED" &&
+    signal.requestedAction === "NONE"
+  ) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["requestedAction"],
+      message: "COMMITTED buying intent requires a requested action",
+    });
+  }
+});
+export type AgentBuyingIntentV1 = z.infer<typeof AgentBuyingIntentV1Schema>;
+
 export const AgentSalesSignalsV1Schema = z.object({
   checkoutExtraction: z.object({
     fullName: AgentExtractedTextFieldV1Schema,
@@ -267,6 +322,9 @@ export const AgentSalesSignalsV1Schema = z.object({
     evidenceText: z.string().trim().min(1).max(1_000).nullable(),
     confidence: z.number().min(0).max(1),
   }).strict(),
+  // Optional keeps persisted/replay proposals from earlier releases readable.
+  // The current Vertex response schema requires this field for new generations.
+  buyingIntent: AgentBuyingIntentV1Schema.optional(),
 }).strict();
 export type AgentSalesSignalsV1 = z.infer<typeof AgentSalesSignalsV1Schema>;
 

@@ -26,15 +26,22 @@ export interface GroundedReplyAssembly {
   readonly reasonCodes: readonly string[];
 }
 
-function shortPrice(value: number): string {
-  return value % 1_000 === 0
-    ? `${value / 1_000}k`
-    : `${new Intl.NumberFormat("vi-VN").format(value)}đ`;
+function fullPrice(value: number): string {
+  return `${new Intl.NumberFormat("vi-VN").format(value)}đ`;
 }
 
 function productName(product: StableProductDocument): string {
   const title = product.title.replace(/<[^>]*>/gu, " ").replace(/\s+/gu, " ").trim();
-  return title || `mẫu ${product.productId}`;
+  const name = title || `mẫu ${product.productId}`;
+  const foldedName = name.normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[đĐ]/gu, "d")
+    .replace(/[^a-z0-9]+/giu, "")
+    .toLowerCase();
+  const foldedCode = product.productId.replace(/[^a-z0-9]+/giu, "").toLowerCase();
+  return foldedName.includes(foldedCode)
+    ? name
+    : `${name} (mã ${product.productId})`;
 }
 
 function sourceVersion(facts: BusinessFactEnvelopeV1): string {
@@ -68,7 +75,19 @@ export function buildVerifiedFactBlocks(
   if (intent === "PRICE") {
     const price = facts.facts.salePriceVnd ?? facts.facts.listPriceVnd;
     if (price !== null) {
-      add("PRICE", `Dạ ${productName(product)} có giá ${shortPrice(price)} ạ`,
+      const lines = [
+        `${productName(product)} hiện có giá ${fullPrice(price)} chị nhé.`,
+        ...(product.materials.length > 0
+          ? [`Chất liệu: ${product.materials.map((value) => value.toLocaleLowerCase("vi")).join(", ")}`]
+          : []),
+        ...(product.silhouettes.length > 0
+          ? [`Form dáng: ${product.silhouettes.map((value) => value.toLocaleLowerCase("vi")).join(", ")}`]
+          : []),
+        ...(facts.facts.sizes.length > 0
+          ? [`Size: ${facts.facts.sizes.join(", ")}`]
+          : []),
+      ];
+      add("PRICE", lines.join("\n"),
         facts.facts.salePriceVnd !== null ? "facts.salePriceVnd" : "facts.listPriceVnd");
     }
   }
@@ -189,12 +208,10 @@ export function assembleReply(
     }
     if (!images.includes(image)) images.push(image);
   }
-  const lines = [
-    ...factResult.blocks.map((block) => block.text),
-    ...safeAdvisory,
-  ];
+  const verifiedText = factResult.blocks.map((block) => block.text).join("\n");
+  const advisoryText = safeAdvisory.join("\n");
   return {
-    text: lines.join("\n"),
+    text: [verifiedText, advisoryText].filter(Boolean).join("\n\n"),
     imageUrls: images,
     reasonCodes: [...reasonCodes].sort(),
   };

@@ -495,17 +495,17 @@ export function decideWave2SalesStrategy(
 function ctaText(policy: Wave2CtaPolicy): string | null {
   switch (policy) {
     case "ASK_OCCASION":
-      return "C mặc đi làm, đi chơi hay dự tiệc để em lọc đúng form nha?";
+      return "Chị thường mặc đi làm, đi chơi hay dự tiệc để em chọn mẫu phù hợp hơn?";
     case "ASK_STYLE":
-      return "C thích thanh lịch, nhẹ nhàng hay trẻ trung để em lọc sát gu nha?";
+      return "Chị thích phong cách thanh lịch, nhẹ nhàng hay trẻ trung hơn?";
     case "ASK_BUDGET":
-      return "C muốn em lọc trong khoảng giá nào nha?";
+      return "Chị muốn xem các mẫu trong khoảng giá nào?";
     case "ASK_MEASUREMENTS":
-      return "C cho em xin chiều cao, cân nặng hoặc số đo để tư vấn size nha?";
+      return "Chị gửi em chiều cao và cân nặng để em tư vấn size phù hợp nhé.";
     case "ASK_PROOF_PREFERENCE":
-      return "C muốn xem ảnh mặc thực tế hay ảnh cận chất nha?";
+      return "Chị muốn xem ảnh mặc thực tế hay ảnh cận chất liệu?";
     case "REDUCE_TO_TWO":
-      return "C ưu tiên form hay chất liệu để em rút còn hai mẫu nha?";
+      return "Chị ưu tiên form dáng hay chất liệu để em chọn lại hai mẫu sát nhu cầu hơn?";
     case "NO_ADDITIONAL_CTA":
       return null;
   }
