@@ -3,6 +3,8 @@ import type {
   AuditLog,
   Conversation,
   ConversationDetail,
+  ConversationInspector,
+  HandoffTransitionInput,
   ConversationMessage,
   CreateAdminCommandInput,
   Identity,
@@ -729,24 +731,17 @@ function normalizeCommand(value: unknown): AdminCommand {
 }
 
 export async function getConversations(
-  filters: { search?: string; owner?: string; stage?: string } = {},
+  filters: { search?: string; owner?: string; stage?: string; cursor?: string; limit?: number } = {},
   signal?: AbortSignal,
 ): Promise<ListResponse<Conversation>> {
   const search = new URLSearchParams();
   if (filters.owner) search.set("conversation_owner", filters.owner);
-  search.set("limit", "50");
+  if (filters.search) search.set("search", filters.search);
+  if (filters.stage) search.set("stage", filters.stage);
+  if (filters.cursor) search.set("cursor", filters.cursor);
+  search.set("limit", String(filters.limit ?? 50));
   const payload = await request<JsonRecord>(`/conversations?${search.toString()}`, signal);
-  let items = arrayValue(payload.items).map(normalizeConversation);
-  const safeSearch = filters.search?.trim().toLowerCase();
-  if (safeSearch) {
-    items = items.filter((item) =>
-      [item.customerLabel, item.currentProductId, item.stage]
-        .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(safeSearch)));
-  }
-  if (filters.stage) {
-    items = items.filter((item) => item.stage === filters.stage);
-  }
+  const items = arrayValue(payload.items).map(normalizeConversation);
   return {
     items,
     total: numberValue(payload.total, items.length),
@@ -784,6 +779,11 @@ function normalizeHandoff(value: unknown): HandoffEvent {
     createdAt: stringValue(item.created_at),
     acknowledgedAt: typeof item.acknowledged_at === "string" ? item.acknowledged_at : null,
     resolvedAt: typeof item.resolved_at === "string" ? item.resolved_at : null,
+    assigneeRef: typeof item.assignee_ref === "string" ? item.assignee_ref : null,
+    priority: stringValue(item.priority, "NORMAL"),
+    slaDueAt: typeof item.sla_due_at === "string" ? item.sla_due_at : null,
+    revision: numberValue(item.revision),
+    lastActorRef: typeof item.last_actor_ref === "string" ? item.last_actor_ref : null,
     history: arrayValue(item.history).map((value) => {
       const history = record(value);
       return {
@@ -802,6 +802,23 @@ function normalizeHandoff(value: unknown): HandoffEvent {
         occurredAt: stringValue(history.occurred_at, stringValue(history.created_at)),
       };
     }),
+    caseHistory: arrayValue(item.case_history).map((value) => {
+      const event = record(value);
+      return {
+        id: stringValue(event.event_id),
+        action: stringValue(event.action),
+        actorRef: stringValue(event.actor_ref),
+        actorRole: stringValue(event.actor_role),
+        fromStatus: stringValue(event.from_status),
+        toStatus: stringValue(event.to_status),
+        fromAssigneeRef: typeof event.from_assignee_ref === "string" ? event.from_assignee_ref : null,
+        toAssigneeRef: typeof event.to_assignee_ref === "string" ? event.to_assignee_ref : null,
+        fromPriority: stringValue(event.from_priority),
+        toPriority: stringValue(event.to_priority),
+        revision: numberValue(event.revision),
+        occurredAt: stringValue(event.occurred_at),
+      };
+    }),
   };
 }
 
@@ -816,6 +833,8 @@ function normalizeHandoffSummary(value: unknown): HandoffSummary {
     acknowledged,
     resolved: numberValue(item.resolved),
     resolved24h: numberValue(item.resolved_24h),
+    breached: numberValue(item.breached),
+    dueSoon: numberValue(item.due_soon),
     oldestOpenAt: typeof item.oldest_open_at === "string" ? item.oldest_open_at : null,
     reasons: arrayValue(item.reasons).map((value) => {
       const reason = record(value);
@@ -863,6 +882,67 @@ export async function getHandoffs(
 export async function getHandoff(id: string, signal?: AbortSignal): Promise<HandoffEvent> {
   const payload = await request<JsonRecord>(`/handoffs/${encodeURIComponent(id)}`, signal);
   return normalizeHandoff(payload.handoff ?? payload);
+}
+
+export async function transitionHandoff(
+  id: string,
+  input: HandoffTransitionInput,
+  idempotencyKey: string,
+  signal?: AbortSignal,
+): Promise<HandoffEvent> {
+  const payload = await request<JsonRecord>(
+    `/handoffs/${encodeURIComponent(id)}/transitions`,
+    signal,
+    {
+      method: "POST",
+      headers: { "Idempotency-Key": idempotencyKey },
+      body: {
+        action: input.action,
+        expected_revision: input.expectedRevision,
+        ...(input.assigneeRef ? { assignee_ref: input.assigneeRef } : {}),
+        ...(input.priority ? { priority: input.priority } : {}),
+      },
+    },
+  );
+  return normalizeHandoff(payload.handoff ?? payload);
+}
+
+export async function getConversationInspector(
+  id: string,
+  signal?: AbortSignal,
+): Promise<ConversationInspector> {
+  const payload = await request<JsonRecord>(
+    `/conversations/${encodeURIComponent(id)}/inspector`,
+    signal,
+  );
+  const inspector = record(payload.inspector ?? payload);
+  const timeline = record(inspector.timeline);
+  const delivery = record(inspector.delivery);
+  const boundary = record(inspector.data_boundary);
+  return {
+    conversation: normalizeConversation(inspector.conversation),
+    timeline: {
+      messages: arrayValue(timeline.messages).map(record),
+      events: arrayValue(timeline.events).map(record),
+      evaluations: arrayValue(timeline.evaluations).map(record),
+      handoffs: arrayValue(timeline.handoffs).map(record),
+    },
+    delivery: {
+      metaOutbox: arrayValue(delivery.meta_outbox).map(record),
+      pancakeOutbox: arrayValue(delivery.pancake_outbox).map(record),
+    },
+    cursors: Object.fromEntries(
+      Object.entries(record(inspector.cursors))
+        .map(([key, value]) => [key, typeof value === "string" ? value : null]),
+    ),
+    dataBoundary: {
+      piiSafe: boundary.pii_safe === true,
+      messageSource: stringValue(boundary.message_source),
+      eventSource: stringValue(boundary.event_source),
+      rawPayloadsIncluded: boundary.raw_payloads_included === true,
+    },
+    generatedAt: stringValue(inspector.generated_at, new Date().toISOString()),
+  };
 }
 
 export async function getConversation(
@@ -1240,8 +1320,13 @@ export async function getOperations(signal?: AbortSignal): Promise<OperationsSum
   };
 }
 
-export async function getAuditLogs(signal?: AbortSignal): Promise<ListResponse<AuditLog>> {
-  const payload = await request<JsonRecord>("/audit?limit=100", signal);
+export async function getAuditLogs(
+  cursor?: string,
+  signal?: AbortSignal,
+): Promise<ListResponse<AuditLog>> {
+  const search = new URLSearchParams({ limit: "50" });
+  if (cursor) search.set("cursor", cursor);
+  const payload = await request<JsonRecord>(`/audit?${search.toString()}`, signal);
   const items = arrayValue(payload.items).map((entry) => {
     const item = record(entry);
     return {

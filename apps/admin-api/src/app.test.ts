@@ -25,6 +25,7 @@ class FakeAuthenticator implements AdminAuthenticator {
 }
 
 class FakeStore implements AdminStore {
+  lastConversationQuery: Parameters<AdminStore["listConversations"]>[1] | null = null;
   async ready() { return true; }
   async controlReady() { return true; }
   async policyControlReady() { return true; }
@@ -33,12 +34,24 @@ class FakeStore implements AdminStore {
   async pageHealth(_identity: AdminIdentity, pageId: string) {
     return pageId === "1198992073286645" ? { page: { page_id: pageId } } : null;
   }
-  async listConversations() {
+  async listConversations(
+    _identity: AdminIdentity,
+    query: Parameters<AdminStore["listConversations"]>[1],
+  ) {
+    this.lastConversationQuery = query;
     return { items: [{ conversation_id: "c1" }], nextCursor: "next" };
   }
   async getConversation(_identity: AdminIdentity, id: string) {
     return id === "c1" || id === "018f1b72-0000-7000-8000-000000000001"
       ? { conversation_id: id, page_id: "1198992073286645" }
+      : null;
+  }
+  async getConversationInspector(_identity: AdminIdentity, id: string) {
+    return id === "018f1b72-0000-7000-8000-000000000001"
+      ? {
+          conversation: { conversation_id: id },
+          data_boundary: { pii_safe: true, raw_payloads_included: false },
+        }
       : null;
   }
   async listMessages() { return { items: [], nextCursor: null }; }
@@ -90,6 +103,18 @@ class FakeStore implements AdminStore {
   async getHandoff(_identity: AdminIdentity, id: string) {
     return id === "018f1b72-0000-7000-8000-000000000009"
       ? { handoff_id: id, status: "NEW" }
+      : null;
+  }
+  async transitionHandoff(
+    _identity: AdminIdentity,
+    id: string,
+    input: Parameters<AdminStore["transitionHandoff"]>[2],
+  ) {
+    return id === "018f1b72-0000-7000-8000-000000000009"
+      ? {
+          handoff: { handoff_id: id, status: input.action === "RESOLVE" ? "RESOLVED" : "IN_PROGRESS" },
+          created: true,
+        }
       : null;
   }
   async listAudit() { return { items: [], nextCursor: null }; }
@@ -942,6 +967,65 @@ describe("Dataset review routes", () => {
     assert.equal(response.statusCode, 200);
     assert.deepEqual(response.json().holdout, { locked: 5 });
     assert.ok(service.calls.includes("lockHoldout"));
+    await app.close();
+  });
+});
+
+describe("Admin frontend waves", () => {
+  const headers = {
+    "x-lana-admin-assertion": "valid",
+    origin: "https://admin.lanadesign.vn",
+  };
+
+  it("passes bounded server-side search and stage filters to the store", async () => {
+    const store = new FakeStore();
+    const app = create({ store });
+    const response = await app.inject({
+      method: "GET",
+      url: "/admin/v1/conversations?search=SP%20123&stage=QUALIFIED&limit=25",
+      headers,
+    });
+    assert.equal(response.statusCode, 200);
+    const received = store.lastConversationQuery as Parameters<AdminStore["listConversations"]>[1];
+    assert.equal(received?.search, "SP 123");
+    assert.equal(received?.stage, "QUALIFIED");
+    assert.equal(received?.limit, 25);
+    await app.close();
+  });
+
+  it("returns the PII-safe conversation inspector boundary", async () => {
+    const app = create();
+    const response = await app.inject({
+      method: "GET",
+      url: "/admin/v1/conversations/018f1b72-0000-7000-8000-000000000001/inspector",
+      headers: { "x-lana-admin-assertion": "valid" },
+    });
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.json().inspector.data_boundary, {
+      pii_safe: true,
+      raw_payloads_included: false,
+    });
+    await app.close();
+  });
+
+  it("requires idempotency and accepts a revisioned handoff transition", async () => {
+    const app = create();
+    const missingKey = await app.inject({
+      method: "POST",
+      url: "/admin/v1/handoffs/018f1b72-0000-7000-8000-000000000009/transitions",
+      headers,
+      payload: { action: "RESOLVE", expected_revision: 0 },
+    });
+    assert.equal(missingKey.statusCode, 400);
+
+    const resolved = await app.inject({
+      method: "POST",
+      url: "/admin/v1/handoffs/018f1b72-0000-7000-8000-000000000009/transitions",
+      headers: { ...headers, "idempotency-key": "handoff-test-001" },
+      payload: { action: "RESOLVE", expected_revision: 0 },
+    });
+    assert.equal(resolved.statusCode, 201);
+    assert.equal(resolved.json().handoff.status, "RESOLVED");
     await app.close();
   });
 });

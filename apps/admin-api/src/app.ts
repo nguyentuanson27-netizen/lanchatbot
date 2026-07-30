@@ -69,6 +69,8 @@ interface ListQuerystring {
 }
 
 interface ConversationQuerystring extends ListQuerystring {
+  readonly search?: string;
+  readonly stage?: string;
   readonly conversation_owner?: string;
   readonly routing_owner?: string;
   readonly blocking_tag?: string;
@@ -102,6 +104,15 @@ interface HandoffQuerystring extends ListQuerystring {
   readonly conversation_id?: string;
   readonly source?: string;
   readonly desired_tag?: string;
+  readonly assignee_ref?: string;
+  readonly sla?: string;
+}
+
+interface HandoffTransitionBody {
+  readonly action?: unknown;
+  readonly expected_revision?: unknown;
+  readonly assignee_ref?: unknown;
+  readonly priority?: unknown;
 }
 
 interface CommandBody {
@@ -198,11 +209,14 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
     }
     if (error instanceof AdminQueryError) {
       const status = error.code === "ADMIN_PAGE_NOT_ALLOWED" ||
+          error.code === "ADMIN_HANDOFF_FORBIDDEN" ||
           error.code === "ADMIN_POLICY_FORBIDDEN" ||
           error.code === "ADMIN_POLICY_CANARY_LIVE_DISABLED" ||
           error.code === "ADMIN_POLICY_PUBLISH_DISABLED"
         ? 403
-        : error.code === "ADMIN_IDEMPOTENCY_CONFLICT" || error.code === "ADMIN_ARTIFACT_VERSION_CONFLICT"
+        : error.code === "ADMIN_IDEMPOTENCY_CONFLICT" ||
+            error.code === "ADMIN_ARTIFACT_VERSION_CONFLICT" ||
+            error.code === "ADMIN_HANDOFF_VERSION_CONFLICT"
           ? 409
           : error.code === "ADMIN_CONTROL_UNAVAILABLE" || error.code === "ADMIN_POLICY_CONTROL_UNAVAILABLE"
             ? 503
@@ -399,6 +413,17 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
     },
   );
 
+  app.get<{ Params: { id: string } }>(
+    "/admin/v1/conversations/:id/inspector",
+    async (request, reply) => {
+      const result = await options.store.getConversationInspector(
+        requireIdentity(request),
+        requiredUuid(request.params.id),
+      );
+      return result ? { inspector: result } : notFound(reply, request.id);
+    },
+  );
+
   app.get<{ Querystring: TimelineQuerystring }>(
     "/admin/v1/messages",
     async (request, reply) => {
@@ -577,6 +602,32 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
         requiredUuid(request.params.id),
       );
       return result ? { handoff: result } : notFound(reply, request.id);
+    },
+  );
+
+  app.post<{ Params: { id: string }; Body: HandoffTransitionBody }>(
+    "/admin/v1/handoffs/:id/transitions",
+    async (request, reply) => {
+      if (!options.controlEnabled) {
+        return reply.code(503).send(errorBody("ADMIN_CONTROL_DISABLED", request.id));
+      }
+      const identity = requireIdentity(request);
+      const idempotencyHeader = request.headers["idempotency-key"];
+      const idempotencyKey = parseIdempotencyKey(
+        Array.isArray(idempotencyHeader) ? idempotencyHeader[0] : idempotencyHeader,
+      );
+      const result = await options.store.transitionHandoff(
+        identity,
+        requiredUuid(request.params.id),
+        {
+          ...parseHandoffTransitionBody(request.body),
+          idempotencyKey,
+          correlationId: randomUUID(),
+        },
+      );
+      return result
+        ? reply.code(result.created ? 201 : 200).send({ handoff: result.handoff })
+        : notFound(reply, request.id);
     },
   );
 
@@ -1490,6 +1541,8 @@ function parseConversationQuery(query: ConversationQuerystring) {
   );
   return {
     ...parseCommonQuery(query),
+    search: optionalSearch(query.search, 120),
+    stage: optionalToken(query.stage, 64),
     conversationOwner,
     routingOwner,
     blockingTag,
@@ -1513,6 +1566,39 @@ function parseHandoffQuery(query: HandoffQuerystring) {
       query.desired_tag,
       ["NHAN_VIEN", "VAN_DON", "ALL"] as const,
     ),
+    assigneeRef: optionalSearch(query.assignee_ref, 160),
+    sla: optionalEnum(query.sla, ["BREACHED", "DUE_SOON", "ON_TRACK"] as const),
+  };
+}
+
+function parseHandoffTransitionBody(body: HandoffTransitionBody) {
+  const action = typeof body?.action === "string"
+    ? optionalEnum(
+        body.action,
+        ["CLAIM", "REASSIGN", "RESOLVE", "REOPEN", "SET_PRIORITY"] as const,
+      )
+    : undefined;
+  const expectedRevision = body?.expected_revision;
+  const assigneeRef = typeof body?.assignee_ref === "string"
+    ? optionalSearch(body.assignee_ref, 160)
+    : undefined;
+  const priority = typeof body?.priority === "string"
+    ? optionalEnum(body.priority, ["LOW", "NORMAL", "HIGH", "URGENT"] as const)
+    : undefined;
+  if (
+    !action ||
+    !Number.isInteger(expectedRevision) ||
+    Number(expectedRevision) < 0 ||
+    (["CLAIM", "REASSIGN"].includes(action) && !assigneeRef) ||
+    (action === "SET_PRIORITY" && !priority)
+  ) {
+    throw new AdminQueryError("ADMIN_HANDOFF_TRANSITION_INVALID");
+  }
+  return {
+    action,
+    expectedRevision: Number(expectedRevision),
+    ...(assigneeRef ? { assigneeRef } : {}),
+    ...(priority ? { priority } : {}),
   };
 }
 
@@ -1597,6 +1683,22 @@ function optionalToken(
     normalized.length < 1 ||
     normalized.length > maxLength ||
     !/^[\p{L}\p{N}_.:-]+$/u.test(normalized)
+  ) {
+    throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  }
+  return normalized;
+}
+
+function optionalSearch(
+  value: string | undefined,
+  maxLength: number,
+): string | undefined {
+  if (value === undefined) return undefined;
+  const normalized = value.trim().replace(/\s+/g, " ");
+  if (
+    normalized.length < 1 ||
+    normalized.length > maxLength ||
+    /[\u0000-\u001f\u007f]/u.test(normalized)
   ) {
     throw new AdminQueryError("ADMIN_QUERY_INVALID");
   }

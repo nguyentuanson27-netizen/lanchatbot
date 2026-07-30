@@ -1,10 +1,13 @@
 import "./styles.css";
+import "./fe-waves.css";
 import {
   ApiError,
   createConversationCommand,
   getAdminCommand,
   getAuditLogs,
   getConversation,
+  getConversationInspector,
+  transitionHandoff,
   getConversationCommands,
   getConversationMessages,
   getConversations,
@@ -32,7 +35,16 @@ import {
 } from "./api.js";
 import { bindPolicyControl, renderPolicyControl } from "./policy-control-ui.js";
 import { renderDatasetIndex } from "./dataset-review-screen.js";
-import { bindReviewQueue, renderReviewQueue } from "./dataset-review-ui.js";
+import { bindReviewQueue, renderReviewQueue, resolveShortcut } from "./dataset-review-ui.js";
+import {
+  activateDialog,
+  hasBlockingOverlay,
+  isEditingContext,
+  preserveViewport,
+  readRouteParams,
+  showAccessibleToast,
+  writeRouteParams,
+} from "./ui-runtime.js";
 import type { ReviewQueueData } from "./dataset-review-types.js";
 import {
   escapeHtml,
@@ -63,6 +75,8 @@ import type {
   PancakeTag,
   ProductMediaCatalog,
   ProductMediaUpload,
+  ConversationInspector,
+  ListResponse,
 } from "./types.js";
 
 type RouteName = "overview" | "conversations" | "handoffs" | "outreach" | "quality" | "products" | "media" | "policy" | "datasets" | "operations" | "audit";
@@ -147,6 +161,9 @@ let activeController: AbortController | null = null;
 let lastUpdatedAt: string | null = null;
 let conversationSearch = "";
 let conversationOwner = "";
+let conversationData: ListResponse<Conversation> | null = null;
+let auditData: ListResponse<AuditLog> | null = null;
+let overlayCleanup: (() => void) | null = null;
 let commandPollTimer: number | undefined;
 let outreachData: OutreachSummary | null = null;
 let handoffData: HandoffQueue | null = null;
@@ -220,13 +237,13 @@ function icon(name: string, size = 20): string {
 }
 
 function routeFromHash(): RouteName {
-  const candidate = window.location.hash.replace(/^#\/?/, "").split("/")[0];
+  const candidate = window.location.hash.replace(/^#\/?/, "").split(/[/?]/)[0] ?? "";
   return navigation.some((item) => item.id === candidate) ? (candidate as RouteName) : "overview";
 }
 
 // The datasets route carries an optional project id sub-segment: #/datasets/<id>.
 function datasetProjectFromHash(): string | null {
-  const parts = window.location.hash.replace(/^#\/?/, "").split("/");
+  const parts = (window.location.hash.replace(/^#\/?/, "").split("?")[0] ?? "").split("/");
   return parts[0] === "datasets" && parts[1] ? decodeURIComponent(parts[1]) : null;
 }
 
@@ -329,14 +346,14 @@ function renderShell(): void {
       <button class="sidebar-scrim" id="sidebar-scrim" aria-label="Đóng trình đơn"></button>
       <main class="main">
         <header class="topbar">
-          <button class="icon-button mobile-menu" id="mobile-menu" aria-label="Mở trình đơn">${icon("menu")}</button>
+          <button class="icon-button mobile-menu" id="mobile-menu" aria-label="Mở trình đơn" aria-controls="sidebar" aria-expanded="false">${icon("menu")}</button>
           <div class="topbar__context">
             <span class="eyebrow">LA.NA DESIGN</span>
             <span class="topbar__separator"></span>
-            <span class="page-context">Page thử nghiệm · 1198992073286645</span>
+            <span class="page-context">${escapeHtml(identity?.pageScope.includes("ALL") ? "Tất cả page được cấp quyền" : `Page · ${identity?.pageScope[0] ?? "Đang tải"}`)}</span>
           </div>
           <div class="topbar__actions">
-            <span class="live-indicator"><span></span>Tự cập nhật 5 giây</span>
+            <span class="live-indicator"><span></span>Tự cập nhật an toàn · 5 giây</span>
             <button class="icon-button" id="manual-refresh" aria-label="Làm mới dữ liệu">${icon("refresh")}</button>
             <div class="identity identity--top">
               <span class="avatar">${escapeHtml((person?.email ?? "A").slice(0, 1).toUpperCase())}</span>
@@ -369,6 +386,9 @@ function bindShellEvents(): void {
 function toggleSidebar(open: boolean): void {
   document.querySelector("#sidebar")?.classList.toggle("is-open", open);
   document.querySelector("#sidebar-scrim")?.classList.toggle("is-visible", open);
+  const button = document.querySelector("#mobile-menu");
+  button?.setAttribute("aria-expanded", String(open));
+  if (open) document.querySelector<HTMLElement>("#sidebar a")?.focus();
 }
 
 function renderLoading(): string {
@@ -502,7 +522,7 @@ function renderOverview(data: Overview): string {
     </div>`;
 }
 
-function renderConversations(data: { items: Conversation[]; total: number }): string {
+function renderConversations(data: ListResponse<Conversation>): string {
   const rows =
     data.items.length === 0
       ? renderEmpty("Không tìm thấy hội thoại", "Thử thay đổi từ khóa hoặc bộ lọc người phụ trách.")
@@ -539,6 +559,7 @@ function renderConversations(data: { items: Conversation[]; total: number }): st
         </div>
       </div>
       ${rows}
+      ${data.nextCursor ? `<div class="pagination-bar"><button class="button button--secondary" id="load-more-conversations" data-cursor="${escapeHtml(data.nextCursor)}">Tải thêm hội thoại</button></div>` : ""}
     </section>`;
 }
 
@@ -569,9 +590,9 @@ function renderHandoffs(data: HandoffQueue): string {
         </button>`).join("")}</div>`;
   return `
     ${renderMetrics([
-      { label: "Đang chờ xử lý", value: data.summary.open, tone: data.summary.open ? "warning" : "good" },
-      { label: "Mới", value: data.summary.newCount },
-      { label: "Đang xử lý", value: data.summary.acknowledged },
+      { label: "Quá SLA", value: data.summary.breached, tone: data.summary.breached ? "danger" : "good" },
+      { label: "Sắp tới hạn", value: data.summary.dueSoon, tone: data.summary.dueSoon ? "warning" : "good" },
+      { label: "Đang mở", value: data.summary.open },
       { label: "Đã xong 24 giờ", value: data.summary.resolved24h },
     ])}
     <section class="panel">
@@ -767,7 +788,7 @@ function renderOperations(data: OperationsSummary): string {
     </div>`;
 }
 
-function renderAudit(data: { items: AuditLog[]; total: number }): string {
+function renderAudit(data: ListResponse<AuditLog>): string {
   if (data.items.length === 0) return renderEmpty("Chưa có hoạt động", "Nhật ký sẽ xuất hiện khi có người truy cập hoặc hệ thống thay đổi trạng thái.");
   return `
     <section class="panel">
@@ -782,6 +803,7 @@ function renderAudit(data: { items: AuditLog[]; total: number }): string {
             </article>`,
         )
         .join("")}</div>
+      ${data.nextCursor ? `<div class="pagination-bar"><button class="button button--secondary" id="load-more-audit" data-cursor="${escapeHtml(data.nextCursor)}">Tải thêm nhật ký</button></div>` : ""}
     </section>`;
 }
 
@@ -962,6 +984,8 @@ function renderConversationDetail(
           <div><dt>Lý do bàn giao</dt><dd>${escapeHtml(conversation.handoffReason ?? "Không có")}</dd></div>
         </dl>
         ${conversation.pancakeUrl ? `<a class="button button--secondary button--full" href="${escapeHtml(conversation.pancakeUrl)}" target="_blank" rel="noreferrer">${icon("external", 17)} Mở trong Pancake</a>` : ""}
+        <button class="button button--secondary button--full" id="open-conversation-inspector">${icon("pulse", 17)} Mở Inspector kỹ thuật</button>
+        <div id="conversation-inspector"></div>
       </div>
       ${renderConversationControls(conversation, commands)}
       <div class="detail-drawer__body">
@@ -996,6 +1020,7 @@ async function loadCurrentPage(silent = true): Promise<void> {
           { search: conversationSearch, owner: conversationOwner },
           activeController.signal,
         );
+        conversationData = data;
         html = renderConversations(data);
         break;
       }
@@ -1058,10 +1083,12 @@ async function loadCurrentPage(silent = true): Promise<void> {
         html = renderOperations(await getOperations(activeController.signal));
         break;
       case "audit":
-        html = renderAudit(await getAuditLogs(activeController.signal));
+        auditData = await getAuditLogs(undefined, activeController.signal);
+        html = renderAudit(auditData);
         break;
     }
-    content.innerHTML = html;
+    if (silent) preserveViewport(() => { content.innerHTML = html; });
+    else content.innerHTML = html;
     lastUpdatedAt = new Date().toISOString();
     updateRefreshTime();
     bindPageEvents();
@@ -1070,7 +1097,7 @@ async function loadCurrentPage(silent = true): Promise<void> {
         policyControlData,
         identity,
         () => loadCurrentPage(false),
-        (message) => showToast(message),
+        (message) => showToast(message, /lỗi|không thể|thất bại/i.test(message) ? "danger" : "good"),
       );
     }
     if (currentRoute === "datasets") {
@@ -1097,7 +1124,7 @@ async function runDatasetAction(work: () => Promise<void>): Promise<void> {
   try {
     await work();
   } catch (error) {
-    showToast(error instanceof ApiError ? error.message : "Không thể lưu thao tác review.");
+    showToast(error instanceof ApiError ? error.message : "Không thể lưu thao tác review.", "danger");
   } finally {
     datasetActionBusy = false;
   }
@@ -1115,7 +1142,7 @@ function bindDatasetReviewQueue(content: HTMLElement): void {
       void runDatasetAction(async () => {
         if (action === "EDIT") {
           const current = item.annotations.find((entry) => entry.id === annotationId);
-          const nextLabel = window.prompt("Mã nhãn mới", current?.labelCode ?? "");
+          const nextLabel = await requestTextDialog("Sửa mã nhãn", "Mã nhãn mới", current?.labelCode ?? "");
           if (!nextLabel) return;
           await reviewDatasetAnnotation(annotationId, "EDIT", { label_code: nextLabel.trim() });
         } else {
@@ -1196,14 +1223,36 @@ function bindDatasetReviewQueue(content: HTMLElement): void {
       content.querySelector(`#review-turn-${turnIndex}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
     },
   });
+  content.addEventListener("keydown", (event) => {
+    const target = event.target as HTMLElement | null;
+    const action = resolveShortcut({
+      key: event.key,
+      shiftKey: event.shiftKey,
+      ctrlKey: event.ctrlKey,
+      metaKey: event.metaKey,
+      altKey: event.altKey,
+      ...(target?.tagName ? { targetTag: target.tagName } : {}),
+      ...(target ? { isContentEditable: target.isContentEditable } : {}),
+    });
+    if (!action) return;
+    const annotationAction = action === "ACCEPT" || action === "REJECT" || action === "EDIT"
+      ? content.querySelector<HTMLButtonElement>(`[data-annotation-action="${action}"]`)
+      : null;
+    const reviewAction = content.querySelector<HTMLButtonElement>(`[data-review-action="${action}"]`);
+    const button = annotationAction ?? reviewAction;
+    if (!button || button.disabled) return;
+    event.preventDefault();
+    button.click();
+  });
+  if (!content.hasAttribute("tabindex")) content.tabIndex = -1;
 }
 
 function bindDatasetIndex(): void {
   document.querySelectorAll<HTMLElement>("[data-dataset-lock]").forEach((element) => {
-    element.addEventListener("click", () => {
+    element.addEventListener("click", async () => {
       const projectId = element.dataset.datasetLock;
       if (!projectId) return;
-      if (!window.confirm("Khóa toàn bộ mục holdout của dự án này? Sau khi khóa, holdout không thể review tiếp.")) return;
+      if (!await requestConfirmation("Khóa holdout?", "Sau khi khóa, toàn bộ holdout của dự án sẽ không thể review tiếp.")) return;
       void runDatasetAction(async () => {
         const locked = await lockDatasetHoldout(projectId);
         showToast(`Đã khóa ${locked} mục holdout.`);
@@ -1234,13 +1283,61 @@ function bindPageEvents(): void {
       window.clearTimeout(searchTimer);
       searchTimer = window.setTimeout(() => {
         conversationSearch = search.value.trim();
+        const params = readRouteParams();
+        conversationSearch ? params.set("search", conversationSearch) : params.delete("search");
+        params.delete("cursor");
+        writeRouteParams(params);
         void loadCurrentPage(false);
       }, 350);
     });
   }
   document.querySelector<HTMLSelectElement>("#conversation-owner")?.addEventListener("change", (event) => {
     conversationOwner = (event.currentTarget as HTMLSelectElement).value;
+    const params = readRouteParams();
+    conversationOwner ? params.set("owner", conversationOwner) : params.delete("owner");
+    params.delete("cursor");
+    writeRouteParams(params);
     void loadCurrentPage(false);
+  });
+  document.querySelector<HTMLButtonElement>("#load-more-conversations")?.addEventListener("click", async (event) => {
+    const button = event.currentTarget as HTMLButtonElement;
+    if (!button.dataset.cursor || !conversationData) return;
+    button.disabled = true;
+    try {
+      const next = await getConversations({
+        search: conversationSearch,
+        owner: conversationOwner,
+        cursor: button.dataset.cursor,
+      });
+      conversationData = {
+        items: [...conversationData.items, ...next.items],
+        total: conversationData.items.length + next.items.length,
+        nextCursor: next.nextCursor ?? null,
+      };
+      const content = document.querySelector<HTMLDivElement>("#page-content");
+      if (content) { content.innerHTML = renderConversations(conversationData!); bindPageEvents(); }
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "Không thể tải thêm hội thoại.", "danger");
+      button.disabled = false;
+    }
+  });
+  document.querySelector<HTMLButtonElement>("#load-more-audit")?.addEventListener("click", async (event) => {
+    const button = event.currentTarget as HTMLButtonElement;
+    if (!button.dataset.cursor || !auditData) return;
+    button.disabled = true;
+    try {
+      const next = await getAuditLogs(button.dataset.cursor);
+      auditData = {
+        items: [...auditData.items, ...next.items],
+        total: auditData.items.length + next.items.length,
+        nextCursor: next.nextCursor ?? null,
+      };
+      const content = document.querySelector<HTMLDivElement>("#page-content");
+      if (content) { content.innerHTML = renderAudit(auditData!); bindPageEvents(); }
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : "Không thể tải thêm nhật ký.", "danger");
+      button.disabled = false;
+    }
   });
   document.querySelector<HTMLSelectElement>("#handoff-status")?.addEventListener("change", (event) => {
     handoffStatus = (event.currentTarget as HTMLSelectElement).value;
@@ -1459,6 +1556,7 @@ async function openHandoff(id: string): Promise<void> {
   try {
     const handoff = await getHandoff(id);
     const history = handoff.history ?? [];
+    const caseHistory = handoff.caseHistory ?? [];
     layer.innerHTML = `
       <div class="drawer-scrim" data-close-detail></div>
       <aside class="detail-drawer" aria-label="Chi tiết bàn giao">
@@ -1469,15 +1567,38 @@ async function openHandoff(id: string): Promise<void> {
         <div class="detail-drawer__summary">
           ${badge(statusLabel(handoff.status), handoff.status === "NEW" ? "warning" : toneForStatus(handoff.status))}
           ${badge(handoffReasonLabel(handoff.reasonCode), "info")}
+          ${badge(handoff.priority, handoff.priority === "URGENT" ? "danger" : "neutral")}
           <dl>
             <div><dt>Tin nhắn nguồn</dt><dd>${escapeHtml(handoff.triggerMessage)}</dd></div>
             <div><dt>Sản phẩm</dt><dd>${escapeHtml(handoff.productId ?? "Chưa xác định")}</dd></div>
             <div><dt>Nguồn chuyển</dt><dd>${escapeHtml(statusLabel(handoff.source))}</dd></div>
             <div><dt>Thời điểm</dt><dd>${escapeHtml(formatDateTime(handoff.createdAt))}</dd></div>
+            <div><dt>SLA</dt><dd>${escapeHtml(formatDateTime(handoff.slaDueAt))}</dd></div>
+            <div><dt>Người phụ trách</dt><dd>${escapeHtml(handoff.assigneeRef ?? "Chưa nhận")}</dd></div>
           </dl>
+          <div class="handoff-actions">
+            <label>Người phụ trách<input id="handoff-assignee" value="${escapeHtml(handoff.assigneeRef ?? identity?.email ?? "")}" /></label>
+            <label>Ưu tiên<select id="handoff-priority">
+              ${["LOW", "NORMAL", "HIGH", "URGENT"].map((priority) => `<option value="${priority}" ${handoff.priority === priority ? "selected" : ""}>${priority}</option>`).join("")}
+            </select></label>
+            <div>
+              ${handoff.status === "NEW" ? '<button class="button button--primary" data-handoff-action="CLAIM">Nhận xử lý</button>' : ""}
+              ${handoff.status === "IN_PROGRESS" ? '<button class="button button--secondary" data-handoff-action="REASSIGN">Giao lại</button><button class="button button--primary" data-handoff-action="RESOLVE">Hoàn tất</button>' : ""}
+              ${handoff.status === "RESOLVED" ? '<button class="button button--secondary" data-handoff-action="REOPEN">Mở lại</button>' : ""}
+              <button class="button button--secondary" data-handoff-action="SET_PRIORITY">Lưu ưu tiên</button>
+            </div>
+            <small id="handoff-action-error" role="alert"></small>
+          </div>
           <button class="button button--primary button--full" id="open-handoff-conversation">Mở hội thoại</button>
         </div>
         <div class="detail-drawer__body">
+          <h3>Lịch sử xử lý SLA</h3>
+          ${caseHistory.length ? `<div class="handoff-history">${caseHistory.map((event) => `
+            <article class="handoff-history__item">
+              <div><strong>${escapeHtml(statusLabel(event.action))}</strong><time>${escapeHtml(formatDateTime(event.occurredAt))}</time></div>
+              <p>${escapeHtml(statusLabel(event.fromStatus))} → ${escapeHtml(statusLabel(event.toStatus))}</p>
+              <small>${escapeHtml(event.actorRef)} · ${escapeHtml(event.fromPriority)} → ${escapeHtml(event.toPriority)} · revision ${event.revision}</small>
+            </article>`).join("")}</div>` : renderEmpty("Chưa có thao tác SLA", "Handoff này chưa được nhận, giao lại hoặc hoàn tất.")}
           <h3>Lịch sử chuyển quyền</h3>
           <p class="section-note">Mỗi lần bot, khách hoặc quản trị viên chuyển quyền đều được giữ lại.</p>
           ${history.length ? `<div class="handoff-history">${history.map((event) => `
@@ -1490,6 +1611,31 @@ async function openHandoff(id: string): Promise<void> {
         </div>
       </aside>`;
     bindCloseDetail();
+    const drawer = layer.querySelector<HTMLElement>(".detail-drawer");
+    if (drawer) overlayCleanup = activateDialog(drawer);
+    layer.querySelectorAll<HTMLButtonElement>("[data-handoff-action]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const action = button.dataset.handoffAction as "CLAIM" | "REASSIGN" | "RESOLVE" | "REOPEN" | "SET_PRIORITY";
+        const assignee = layer.querySelector<HTMLInputElement>("#handoff-assignee")?.value.trim();
+        const priority = layer.querySelector<HTMLSelectElement>("#handoff-priority")?.value as "LOW" | "NORMAL" | "HIGH" | "URGENT";
+        button.disabled = true;
+        try {
+          await transitionHandoff(handoff.id, {
+            action,
+            expectedRevision: handoff.revision,
+            ...(["CLAIM", "REASSIGN", "REOPEN"].includes(action) && assignee ? { assigneeRef: assignee } : {}),
+            ...(action === "SET_PRIORITY" ? { priority } : {}),
+          }, newIdempotencyKey());
+          showToast("Đã cập nhật bàn giao.", "good");
+          await openHandoff(handoff.id);
+          void loadCurrentPage(true);
+        } catch (error) {
+          const target = layer.querySelector<HTMLElement>("#handoff-action-error");
+          if (target) target.textContent = error instanceof Error ? error.message : "Không thể cập nhật bàn giao.";
+          button.disabled = false;
+        }
+      });
+    });
     document.querySelector("#open-handoff-conversation")?.addEventListener("click", () => {
       void openConversation(handoff.conversationId);
     });
@@ -1512,6 +1658,9 @@ async function openConversation(id: string): Promise<void> {
     ]);
     layer.innerHTML = renderConversationDetail(conversation, commandResponse.items);
     bindCloseDetail();
+    const drawer = layer.querySelector<HTMLElement>(".detail-drawer");
+    if (drawer) overlayCleanup = activateDialog(drawer);
+    bindConversationInspector(conversation.id);
     bindConversationControls(conversation);
     bindConversationHistoryPagination(conversation, commandResponse.items);
     const activeCommand = commandResponse.items.find((command) =>
@@ -1522,6 +1671,35 @@ async function openConversation(id: string): Promise<void> {
     layer.innerHTML = `<div class="drawer-scrim" data-close-detail></div><aside class="detail-drawer"><button class="icon-button drawer-close" data-close-detail>${icon("close")}</button>${renderError(error)}</aside>`;
     bindCloseDetail();
   }
+}
+
+function bindConversationInspector(conversationId: string): void {
+  document.querySelector<HTMLButtonElement>("#open-conversation-inspector")?.addEventListener("click", async (event) => {
+    const button = event.currentTarget as HTMLButtonElement;
+    const target = document.querySelector<HTMLDivElement>("#conversation-inspector");
+    if (!target) return;
+    button.disabled = true;
+    target.innerHTML = renderLoading();
+    try {
+      const inspector: ConversationInspector = await getConversationInspector(conversationId);
+      const sections = [
+        ["Sự kiện", inspector.timeline.events],
+        ["Đánh giá AI", inspector.timeline.evaluations],
+        ["Meta outbox", inspector.delivery.metaOutbox],
+        ["Pancake outbox", inspector.delivery.pancakeOutbox],
+      ] as const;
+      target.innerHTML = `
+        <section class="inspector-panel">
+          <header><strong>PII-safe Inspector</strong>${badge(inspector.dataBoundary.piiSafe && !inspector.dataBoundary.rawPayloadsIncluded ? "Đã ẩn danh" : "Kiểm tra dữ liệu", inspector.dataBoundary.piiSafe ? "good" : "danger")}</header>
+          <p>Chỉ hiển thị redacted message, trạng thái, phiên bản model/prompt/policy và delivery trace.</p>
+          ${sections.map(([title, items]) => `<details><summary>${escapeHtml(title)} (${items.length})</summary><pre>${escapeHtml(JSON.stringify(items.slice(0, 20), null, 2))}</pre></details>`).join("")}
+        </section>`;
+    } catch (error) {
+      target.innerHTML = renderError(error);
+    } finally {
+      button.disabled = false;
+    }
+  });
 }
 
 function bindConversationHistoryPagination(
@@ -1542,7 +1720,10 @@ function bindConversationHistoryPagination(
       if (!layer) return;
       layer.innerHTML = renderConversationDetail(conversation, commands);
       bindCloseDetail();
+      const drawer = layer.querySelector<HTMLElement>(".detail-drawer");
+      if (drawer) overlayCleanup = activateDialog(drawer);
       bindConversationControls(conversation);
+      bindConversationInspector(conversation.id);
       bindConversationHistoryPagination(conversation, commands);
     } catch (error) {
       button.disabled = false;
@@ -1642,7 +1823,10 @@ function openCommandConfirmation(
         <div><button class="button button--secondary" type="button" data-close-command-modal>Hủy</button><button class="button button--primary" type="submit">Xác nhận</button></div>
       </form>
     </section>`;
+  const dialog = modalLayer.querySelector<HTMLElement>(".command-modal");
+  const cleanup = dialog ? activateDialog(dialog) : () => undefined;
   const close = () => {
+    cleanup();
     modalLayer.innerHTML = "";
   };
   modalLayer.querySelectorAll("[data-close-command-modal]").forEach((element) =>
@@ -1731,24 +1915,85 @@ function bindCloseDetail(): void {
       if (layer) layer.innerHTML = "";
       const modalLayer = document.querySelector("#command-modal-layer");
       if (modalLayer) modalLayer.innerHTML = "";
+      overlayCleanup?.();
+      overlayCleanup = null;
     }),
   );
 }
 
+function requestTextDialog(
+  title: string,
+  label: string,
+  initialValue = "",
+): Promise<string | null> {
+  return new Promise((resolve) => {
+    const layer = document.querySelector<HTMLDivElement>("#command-modal-layer");
+    if (!layer) return resolve(null);
+    layer.innerHTML = `
+      <div class="command-modal-scrim" data-close-modal></div>
+      <section class="command-modal" aria-labelledby="shared-dialog-title">
+        <header><h2 id="shared-dialog-title">${escapeHtml(title)}</h2><button class="icon-button" type="button" data-close-modal aria-label="Đóng">${icon("close")}</button></header>
+        <form id="shared-dialog-form">
+          <label>${escapeHtml(label)}<input id="shared-dialog-input" value="${escapeHtml(initialValue)}" required maxlength="128"></label>
+          <div><button class="button button--secondary" type="button" data-close-modal>Hủy</button><button class="button button--primary" type="submit">Lưu</button></div>
+        </form>
+      </section>`;
+    const dialog = layer.querySelector<HTMLElement>(".command-modal");
+    const cleanup = dialog ? activateDialog(dialog) : () => undefined;
+    const finish = (value: string | null) => {
+      cleanup();
+      layer.innerHTML = "";
+      resolve(value);
+    };
+    layer.querySelectorAll("[data-close-modal]").forEach((item) =>
+      item.addEventListener("click", () => finish(null), { once: true }),
+    );
+    layer.querySelector<HTMLFormElement>("#shared-dialog-form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const value = layer.querySelector<HTMLInputElement>("#shared-dialog-input")?.value.trim();
+      finish(value || null);
+    }, { once: true });
+  });
+}
+
+function requestConfirmation(title: string, detail: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const layer = document.querySelector<HTMLDivElement>("#command-modal-layer");
+    if (!layer) return resolve(false);
+    layer.innerHTML = `
+      <div class="command-modal-scrim" data-close-modal></div>
+      <section class="command-modal" aria-labelledby="confirm-dialog-title">
+        <header><h2 id="confirm-dialog-title">${escapeHtml(title)}</h2><button class="icon-button" type="button" data-close-modal aria-label="Đóng">${icon("close")}</button></header>
+        <p>${escapeHtml(detail)}</p>
+        <div><button class="button button--secondary" type="button" data-confirm="false">Hủy</button><button class="button button--primary" type="button" data-confirm="true">Xác nhận</button></div>
+      </section>`;
+    const dialog = layer.querySelector<HTMLElement>(".command-modal");
+    const cleanup = dialog ? activateDialog(dialog) : () => undefined;
+    layer.querySelectorAll<HTMLButtonElement>("[data-confirm], [data-close-modal]").forEach((button) =>
+      button.addEventListener("click", () => {
+        const confirmed = button.dataset.confirm === "true";
+        cleanup();
+        layer.innerHTML = "";
+        resolve(confirmed);
+      }, { once: true }),
+    );
+  });
+}
+
 function showToast(message: string, tone: "good" | "warning" | "danger" = "good"): void {
-  const region = document.querySelector("#toast-region");
-  if (!region) return;
-  const toast = document.createElement("div");
-  toast.className = `toast toast--${tone}`;
-  toast.textContent = message;
-  region.append(toast);
-  window.setTimeout(() => toast.remove(), 3_000);
+  showAccessibleToast(document.querySelector("#toast-region"), message, tone);
 }
 
 function startPolling(): void {
   window.clearInterval(refreshTimer);
   refreshTimer = window.setInterval(() => {
-    if (document.visibilityState === "visible" && currentRoute !== "media" && !(currentRoute === "datasets" && datasetProjectFromHash()) && !document.querySelector(".detail-drawer")) {
+    if (
+      document.visibilityState === "visible" &&
+      currentRoute !== "media" &&
+      !(currentRoute === "datasets" && datasetProjectFromHash()) &&
+      !hasBlockingOverlay() &&
+      !isEditingContext()
+    ) {
       void loadCurrentPage(true);
     }
     updateRefreshTime();
@@ -1791,6 +2036,9 @@ document.addEventListener("keydown", (event) => {
 
 async function initialize(): Promise<void> {
   renderShell();
+  const routeParams = readRouteParams();
+  conversationSearch = routeParams.get("search") ?? "";
+  conversationOwner = routeParams.get("owner") ?? "";
   try {
     identity = await getIdentity();
     const summary = await getHandoffSummary().catch(() => null);

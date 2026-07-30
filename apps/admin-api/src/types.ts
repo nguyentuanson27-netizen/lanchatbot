@@ -27,6 +27,8 @@ export interface PageCursorQuery {
 }
 
 export interface ConversationQuery extends PageCursorQuery {
+  readonly search?: string | undefined;
+  readonly stage?: string | undefined;
   readonly conversationOwner?: "BOT" | "HUMAN" | undefined;
   readonly routingOwner?: "N8N" | "APP" | undefined;
   readonly blockingTag?:
@@ -71,6 +73,24 @@ export interface HandoffQuery extends PageCursorQuery {
   readonly conversationId?: string | undefined;
   readonly source?: "BOT_POLICY" | "CUSTOMER_REQUEST" | "POST_SALE" | "ADMIN" | "ALL" | undefined;
   readonly desiredTag?: "NHAN_VIEN" | "VAN_DON" | "ALL" | undefined;
+  readonly assigneeRef?: string | undefined;
+  readonly sla?: "BREACHED" | "DUE_SOON" | "ON_TRACK" | undefined;
+}
+
+export type HandoffTransitionAction =
+  | "CLAIM"
+  | "REASSIGN"
+  | "RESOLVE"
+  | "REOPEN"
+  | "SET_PRIORITY";
+
+export interface HandoffTransitionInput {
+  readonly action: HandoffTransitionAction;
+  readonly expectedRevision: number;
+  readonly assigneeRef?: string | undefined;
+  readonly priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT" | undefined;
+  readonly idempotencyKey: string;
+  readonly correlationId: string;
 }
 
 export interface AuditQuery extends PageCursorQuery {
@@ -169,6 +189,10 @@ export interface AdminStore {
     identity: AdminIdentity,
     conversationId: string,
   ): Promise<Record<string, unknown> | null>;
+  getConversationInspector(
+    identity: AdminIdentity,
+    conversationId: string,
+  ): Promise<Record<string, unknown> | null>;
   listMessages(
     identity: AdminIdentity,
     query: TimelineQuery,
@@ -228,6 +252,11 @@ export interface AdminStore {
     identity: AdminIdentity,
     handoffId: string,
   ): Promise<Record<string, unknown> | null>;
+  transitionHandoff(
+    identity: AdminIdentity,
+    handoffId: string,
+    input: HandoffTransitionInput,
+  ): Promise<{ handoff: Record<string, unknown>; created: boolean } | null>;
   listAudit(
     identity: AdminIdentity,
     query: AuditQuery,
@@ -316,7 +345,10 @@ export class AdminQueryError extends Error {
     | "ADMIN_SIZE_CHART_BODY_BASIS_REQUIRED"
     | "ADMIN_ARTIFACT_VERSION_CONFLICT"
     | "ADMIN_ARTIFACT_ROLLBACK_TARGET_INVALID"
-    | "ADMIN_ARTIFACT_TRANSITION_INVALID") {
+    | "ADMIN_ARTIFACT_TRANSITION_INVALID"
+    | "ADMIN_HANDOFF_FORBIDDEN"
+    | "ADMIN_HANDOFF_TRANSITION_INVALID"
+    | "ADMIN_HANDOFF_VERSION_CONFLICT") {
     super(code);
   }
 }

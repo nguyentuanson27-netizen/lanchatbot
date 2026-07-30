@@ -218,7 +218,28 @@ export interface HandoffEvent {
   createdAt: string;
   acknowledgedAt?: string | null;
   resolvedAt?: string | null;
+  assigneeRef?: string | null;
+  priority: "LOW" | "NORMAL" | "HIGH" | "URGENT" | string;
+  slaDueAt?: string | null;
+  revision: number;
+  lastActorRef?: string | null;
   history?: HandoffHistoryEntry[];
+  caseHistory?: HandoffCaseHistoryEntry[];
+}
+
+export interface HandoffCaseHistoryEntry {
+  id: string;
+  action: string;
+  actorRef: string;
+  actorRole: string;
+  fromStatus: string;
+  toStatus: string;
+  fromAssigneeRef?: string | null;
+  toAssigneeRef?: string | null;
+  fromPriority: string;
+  toPriority: string;
+  revision: number;
+  occurredAt: string;
 }
 
 export interface HandoffHistoryEntry {
@@ -241,6 +262,8 @@ export interface HandoffSummary {
   acknowledged: number;
   resolved: number;
   resolved24h: number;
+  breached: number;
+  dueSoon: number;
   oldestOpenAt?: string | null;
   reasons: Array<{ reasonCode: string; count: number }>;
   updatedAt: string;
@@ -409,4 +432,33 @@ export interface ListResponse<T> {
   items: T[];
   total: number;
   nextCursor?: string | null;
+}
+
+export interface HandoffTransitionInput {
+  action: "CLAIM" | "REASSIGN" | "RESOLVE" | "REOPEN" | "SET_PRIORITY";
+  expectedRevision: number;
+  assigneeRef?: string;
+  priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT";
+}
+
+export interface ConversationInspector {
+  conversation: Conversation;
+  timeline: {
+    messages: Record<string, unknown>[];
+    events: Record<string, unknown>[];
+    evaluations: Record<string, unknown>[];
+    handoffs: Record<string, unknown>[];
+  };
+  delivery: {
+    metaOutbox: Record<string, unknown>[];
+    pancakeOutbox: Record<string, unknown>[];
+  };
+  cursors: Record<string, string | null>;
+  dataBoundary: {
+    piiSafe: boolean;
+    messageSource: string;
+    eventSource: string;
+    rawPayloadsIncluded: boolean;
+  };
+  generatedAt: string;
 }
