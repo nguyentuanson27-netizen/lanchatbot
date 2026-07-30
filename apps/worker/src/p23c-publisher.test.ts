@@ -91,7 +91,7 @@ const sheetsWith = (imageRows: (string | number)[][]): SheetsReader & { updates:
         {
           range: "image_registry",
           values: [
-            ["IMAGE_ID", "MA_SP", "IMAGE_URL", "REVIEW_STATUS", "ACTIVE", "PUBLISHED_HASH"],
+            ["IMAGE_ID", "MA_SP", "IMAGE_URL", "REVIEW_STATUS", "ACTIVE", "PUBLISHED_HASH", "IMAGE_HASH", "VERIFIED"],
             ...imageRows,
           ],
         },
@@ -104,14 +104,33 @@ const sheetsWith = (imageRows: (string | number)[][]): SheetsReader & { updates:
 };
 
 const okQdrant = (existing = new Map<string, string>()): QdrantClient & {
-  upserts: unknown[]; deletes: string[]; existing: Map<string, string>;
+  upserts: unknown[];
+  payloadUpdates: { id: string; payload: Record<string, unknown> }[];
+  deletes: string[];
+  existing: Map<string, string>;
 } => {
   const upserts: unknown[] = [];
+  const payloadUpdates: { id: string; payload: Record<string, unknown> }[] = [];
   const deletes: string[] = [];
   return {
-    upserts, deletes, existing,
-    async scrollPayloadHashes() { return existing; },
+    upserts, payloadUpdates, deletes, existing,
+    async scrollPointStates() {
+      return new Map([...existing.entries()].map(([id, contentHash]) => [id, {
+        point_id: id,
+        payload: {
+          content_hash: contentHash,
+          embedding_model: "multimodalembedding@001",
+          embedding_dimension: 1_408,
+        },
+        content_hash: contentHash,
+        embedding_hash: "",
+        payload_hash: "",
+        provenance_hash: "",
+        hash_schema_version: "",
+      }]));
+    },
     async upsertPoint(point) { upserts.push(point); },
+    async setPayload(id, payload) { payloadUpdates.push({ id, payload }); },
     async deletePoint(id) { deletes.push(id); },
   };
 };
@@ -137,6 +156,9 @@ const publisherWith = (overrides: {
   dryRun?: boolean;
   sheetsAck?: boolean;
   imageRows?: (string | number)[][];
+  hashV3Mode?: "OFF" | "DRY_RUN" | "LIVE";
+  payloadOnlyEnabled?: boolean;
+  legacyHashMigrationEnabled?: boolean;
 }): { publisher: P23cPublisher; redis: FakeRedis } => {
   const redis = overrides.redis ?? new FakeRedis();
   const publisher = new P23cPublisher({
@@ -157,6 +179,11 @@ const publisherWith = (overrides: {
     catalogBuildVersion: "catalog-v2",
     dryRun: overrides.dryRun ?? false,
     sheetsAckEnabled: overrides.sheetsAck ?? false,
+    ...(overrides.hashV3Mode ? { hashV3Mode: overrides.hashV3Mode } : {}),
+    ...(overrides.payloadOnlyEnabled === undefined ? {} : { payloadOnlyEnabled: overrides.payloadOnlyEnabled }),
+    ...(overrides.legacyHashMigrationEnabled === undefined
+      ? {}
+      : { legacyHashMigrationEnabled: overrides.legacyHashMigrationEnabled }),
     runId: "test-run",
     now: () => new Date("2026-07-21T08:00:00.000Z"),
   });
@@ -245,6 +272,92 @@ describe("P2.3C vận hành", () => {
     expect(summary.skipped).toBe(1);
     expect(qdrant.upserts).toHaveLength(0);
     expect(sheets.updates).toHaveLength(0);
+  });
+
+
+  it("Hash v3 baseline SHA chỉ set payload, không tải ảnh, RemBG hoặc gọi embedding", async () => {
+    const hash = "a".repeat(64);
+    const seedQdrant = okQdrant();
+    await publisherWith({
+      qdrant: seedQdrant,
+      imageRows: [[
+        "",
+        "SV695",
+        "https://www.lanadesign.vn/a.jpg",
+        "APPROVED",
+        "TRUE",
+        "",
+        hash,
+        "TRUE",
+      ]],
+    }).publisher.run();
+    const seeded = seedQdrant.upserts[0] as {
+      id: string;
+      payload: Record<string, unknown>;
+    };
+    const previousPayload = { ...seeded.payload, image_content_sha256: "" };
+    const payloadUpdates: Record<string, unknown>[] = [];
+    const qdrant: QdrantClient = {
+      async scrollPointStates() {
+        return new Map([[
+          seeded.id,
+          {
+            point_id: seeded.id,
+            payload: previousPayload,
+            content_hash: "legacy-stale",
+            embedding_hash: "",
+            payload_hash: "",
+            provenance_hash: "",
+            hash_schema_version: "",
+          },
+        ]]);
+      },
+      async upsertPoint() { throw new Error("unexpected_vector_upsert"); },
+      async setPayload(_id, nextPayload) { payloadUpdates.push(nextPayload); },
+      async deletePoint() { throw new Error("unexpected_delete"); },
+    };
+    let prepareCalls = 0;
+    let embeddingCalls = 0;
+    const summary = await publisherWith({
+      qdrant,
+      hashV3Mode: "LIVE",
+      payloadOnlyEnabled: true,
+      legacyHashMigrationEnabled: true,
+      images: {
+        async prepare() {
+          prepareCalls += 1;
+          throw new Error("unexpected_image_prepare");
+        },
+        async removeBackground() { throw new Error("unexpected_rembg"); },
+      },
+      embeddings: {
+        async embedImageAndText() {
+          embeddingCalls += 1;
+          throw new Error("unexpected_embedding");
+        },
+        async embedImage() {
+          embeddingCalls += 1;
+          throw new Error("unexpected_embedding");
+        },
+      },
+      imageRows: [[
+        seeded.id,
+        "SV695",
+        "https://www.lanadesign.vn/a.jpg",
+        "APPROVED",
+        "TRUE",
+        "",
+        hash,
+        "TRUE",
+      ]],
+    }).publisher.run();
+
+    expect(summary.payload_only_count).toBe(1);
+    expect(summary.full_embed_count).toBe(0);
+    expect(payloadUpdates).toHaveLength(1);
+    expect(payloadUpdates[0]?.image_content_sha256).toBe(hash);
+    expect(prepareCalls).toBe(0);
+    expect(embeddingCalls).toBe(0);
   });
 
   it("ack Sheets chỉ chạy khi bật cờ", async () => {
