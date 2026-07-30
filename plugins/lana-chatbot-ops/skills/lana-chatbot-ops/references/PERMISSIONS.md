@@ -2,12 +2,15 @@
 
 ## Read capabilities
 
-- GitHub/repository: README, AGENTS, baseline/release documents, branches, commits, diffs, checks, logs, and current worktree state.
+- Remote MCP repository snapshot: list, read, and search the Git-tracked source code, README, AGENTS, baseline/release documents, manifests, and related text files embedded in the current MCP image. The response identifies the source commit and release ref.
+- GitHub/local repository tooling: branches, commits, diffs, checks, logs, and current worktree state. These live Git operations are separate from the immutable remote snapshot.
 - VPS: container/image/health status, runtime flags, selected logs, queues, PostgreSQL operational metadata, Qdrant payloads, and Messenger processing evidence.
 - Redis: list all keys, read any key including session, credential, or customer-data keys, and export the whole logical database.
 - Google Sheets: read catalog, image registry, review, price, and product-status data.
 
 Sensitive reads require `confirm_sensitive_read=true` plus a reason. Prefer masked output. Full Redis exports are written to the local MCP data directory and the tool returns a path, SHA-256, and row count instead of printing the export.
+
+Repository snapshot reads use the existing `mcp:read` scope and do not require sensitive confirmation. Runtime `.env` files, credentials, private keys, `.git`, dependencies, generated outputs, binary files, path traversal, and source writes are excluded.
 
 ## Write capabilities
 

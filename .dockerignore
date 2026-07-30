@@ -5,5 +5,12 @@ dist
 .git
 .env
 .env.*
+!.env.example
+!**/.env.example
 coverage
-docs
+*.pem
+*.key
+*.p12
+*.pfx
+**/id_rsa
+**/id_ed25519

@@ -1,10 +1,20 @@
 ARG LANA_BASE_IMAGE=lana-chatbot-app:ad-acquisition-r27.1
 FROM ${LANA_BASE_IMAGE}
 
+ARG LANA_MCP_SOURCE_COMMIT=unknown
+ARG LANA_MCP_SOURCE_REF=unknown
+ENV LANA_MCP_REPOSITORY_ROOT=/app/repository \
+    LANA_MCP_SOURCE_COMMIT=${LANA_MCP_SOURCE_COMMIT} \
+    LANA_MCP_SOURCE_REF=${LANA_MCP_SOURCE_REF}
+
 USER root
 COPY --chown=node:node apps/lana-mcp /app/apps/lana-mcp
 COPY --chown=node:node plugins/lana-chatbot-ops/scripts/remote_ops.mjs /app/plugins/lana-chatbot-ops/scripts/remote_ops.mjs
-RUN mkdir -p /data/exports && chown -R node:node /data
+COPY --chown=root:root . /app/repository
+RUN find /app/repository -type d -exec chmod 0555 {} + \
+    && find /app/repository -type f -exec chmod 0444 {} + \
+    && mkdir -p /data/exports \
+    && chown -R node:node /data
 
 USER node
 EXPOSE 8080

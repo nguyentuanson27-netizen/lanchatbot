@@ -3,8 +3,9 @@
 Personal Codex plugin for diagnosing and repairing the La.na Design chatbot.
 
 - Local transport: STDIO.
-- Planned remote transport: `https://dev.lanadesign.vn/mcp`.
+- Remote transport: `https://dev.lanadesign.vn/mcp` with OAuth and an immutable read-only source snapshot.
 - Source workflow: GitHub branch/PR, then controlled VPS deployment.
+- Remote repository tools: list files, read line ranges, and search source/README/release text through `mcp:read`.
 - Audit directory: `%USERPROFILE%\.lana-mcp` unless `LANA_MCP_DATA_DIR` is set.
 - All Google Sheets mutations attach a `BY_CHATGPT:` note to each changed cell.
 

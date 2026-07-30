@@ -1,6 +1,6 @@
 {
   "name": "lana-chatbot-ops",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Diagnose and repair the Lana chatbot through audited GitHub, VPS, Redis, Qdrant, and Google Sheets workflows.",
   "author": {
     "name": "La.na Design"
@@ -13,12 +13,13 @@
   "interface": {
     "displayName": "Lana Chatbot Ops",
     "shortDescription": "Chẩn đoán và sửa chatbot Lana có kiểm soát",
-    "longDescription": "Kiểm tra tin nhắn mới nhất, VPS, Redis, Qdrant và Google Sheets; tạo bản sửa trên GitHub; ghi audit và BY_CHATGPT cho mọi thay đổi Sheet.",
+    "longDescription": "Đọc source, README và tài liệu release; kiểm tra tin nhắn mới nhất, VPS, Redis, Qdrant và Google Sheets; tạo bản sửa trên GitHub; ghi audit và BY_CHATGPT cho mọi thay đổi Sheet.",
     "developerName": "La.na Design",
     "category": "Productivity",
     "capabilities": ["Read", "Write"],
     "websiteURL": "https://dev.lanadesign.vn",
     "defaultPrompt": [
+      "Đọc README, AGENTS và tài liệu baseline/release mới nhất trước khi chẩn đoán.",
       "Kiểm tra tin nhắn mới nhất của page test và phân tích nguyên nhân bot trả lời sai.",
       "Kiểm tra sản phẩm trong Qdrant, Media Selector và trạng thái gửi ảnh.",
       "Sửa lỗi trên branch GitHub, chạy kiểm thử và chuẩn bị PR; không sửa trực tiếp VPS."
