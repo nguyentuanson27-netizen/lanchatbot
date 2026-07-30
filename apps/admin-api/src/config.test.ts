@@ -10,6 +10,7 @@ describe("Admin API lifecycle safety configuration", () => {
     assert.equal(config.policyCanaryLiveEnabled, false);
     assert.equal(config.policyPublishEnabled, false);
     assert.equal(config.productMediaResizeMaxDimension, 1_600);
+    assert.equal(config.productMediaResizeConcurrency, 2);
     assert.equal(config.productMediaOriginalTtlMs, 86_400_000);
     assert.equal(config.productMediaCleanupIntervalMs, 3_600_000);
     assert.equal(config.productMediaOriginalDirectory, "/var/lib/lana/product-media-originals");

@@ -8,6 +8,7 @@ import {
   GoogleSheetsManualImageIntake,
   MANUAL_IMAGE_INTAKE_HEADERS,
   type ProductMediaUploadInput,
+  type ProductMediaDedupeStore,
 } from "./product-media.js";
 
 const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
@@ -36,12 +37,14 @@ async function createHarness(options: {
   appendDelayMs?: number;
   appendFailure?: boolean;
   now?: () => Date;
+  dedupeStore?: ProductMediaDedupeStore;
 } = {}) {
   const root = await mkdtemp(join(tmpdir(), "lana-product-media-validation-"));
   const rows: unknown[][] = options.existingRows
     ? options.existingRows.map((row) => [...row])
     : [[...MANUAL_IMAGE_INTAKE_HEADERS]];
   let appendCount = 0;
+  let intakeReadCount = 0;
   let resizeCount = 0;
   const fetchImpl = async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     const url = String(input);
@@ -64,6 +67,7 @@ async function createHarness(options: {
       return Response.json({ sheets: [{ properties: { title: "manual_image_intake" } }] });
     }
     if (decodedUrl.includes("manual_image_intake!A:P") && init?.method === "GET") {
+      intakeReadCount += 1;
       return Response.json({ values: rows });
     }
     if (url.includes(":append")) {
@@ -97,6 +101,7 @@ async function createHarness(options: {
       resizeCount += 1;
       return (options.resizeImpl ?? (async () => resizedJpeg))(input, mimeType, maxDimension);
     },
+    ...(options.dedupeStore ? { dedupeStore: options.dedupeStore } : {}),
   });
   return {
     service,
@@ -104,6 +109,7 @@ async function createHarness(options: {
     rows,
     appendCount: () => appendCount,
     resizeCount: () => resizeCount,
+    intakeReadCount: () => intakeReadCount,
   };
 }
 
@@ -264,6 +270,139 @@ test("serializes concurrent duplicate uploads and appends one Sheet row", async 
     assert.equal(harness.appendCount(), 1);
     assert.equal((await readdir(join(harness.root, "public"))).length, 1);
   } finally {
+    await rm(harness.root, { recursive: true, force: true });
+  }
+});
+
+test("uses PostgreSQL reservation and scans the legacy Sheet only once", async () => {
+  type Reservation = Awaited<ReturnType<ProductMediaDedupeStore["reserve"]>>;
+  let record: Reservation["record"] | undefined;
+  let reserveCount = 0;
+  let backfillCount = 0;
+  const dedupeStore: ProductMediaDedupeStore = {
+    async ready() {
+      return true;
+    },
+    async reserve(input) {
+      reserveCount += 1;
+      const current = record;
+      if (current) return { claimed: false, record: current };
+      record = {
+        ...input,
+        projectionStatus: "RESERVED",
+        projectedAt: null,
+        lastErrorCode: null,
+        revision: 0,
+      };
+      return { claimed: true, record };
+    },
+    async backfill() {
+      backfillCount += 1;
+      return 0;
+    },
+    async markProjected(intakeId, imageUrl) {
+      if (!record || record.intakeId !== intakeId) throw new Error("TEST_INTAKE_NOT_FOUND");
+      record = {
+        ...record,
+        imageUrl,
+        projectionStatus: "PROJECTED",
+        projectedAt: new Date("2026-07-24T00:00:01.000Z"),
+        revision: record.revision + 1,
+      };
+    },
+    async markFailed(intakeId, errorCode) {
+      if (!record || record.intakeId !== intakeId) throw new Error("TEST_INTAKE_NOT_FOUND");
+      record = {
+        ...record,
+        projectionStatus: "FAILED",
+        lastErrorCode: errorCode,
+        revision: record.revision + 1,
+      };
+    },
+    async close() {},
+  };
+  const harness = await createHarness({ dedupeStore });
+  try {
+    const first = await harness.service.upload(identity, uploadInput());
+    const duplicate = await harness.service.upload(identity, uploadInput());
+
+    assert.equal(first.duplicate, false);
+    assert.equal(duplicate.duplicate, true);
+    assert.equal(duplicate.imageUrl, first.imageUrl);
+    assert.equal(reserveCount, 2);
+    assert.equal(backfillCount, 1);
+    assert.equal(harness.intakeReadCount(), 1);
+    assert.equal(harness.resizeCount(), 1);
+    assert.equal(harness.appendCount(), 1);
+  } finally {
+    await harness.service.close?.();
+    await rm(harness.root, { recursive: true, force: true });
+  }
+});
+
+test("reconciles a reclaimed reservation with its Sheet row before writing again", async () => {
+  const imageHash = createHash("sha256").update(validJpeg).digest("hex");
+  const intakeId = createHash("sha256")
+    .update(`lanadesign|CB182|${imageHash}`)
+    .digest("hex")
+    .slice(0, 32);
+  const existingUrl = "https://cdn.example/recovered.jpg";
+  const existing = [[...MANUAL_IMAGE_INTAKE_HEADERS], [
+    intakeId,
+    "CB182",
+    existingUrl,
+    "AI_AUTO",
+    "",
+    "",
+    true,
+    "PENDING_AI",
+    "",
+    "2026-07-24T00:00:00.000Z",
+    imageHash,
+    "",
+    "",
+    "",
+    "",
+    "La.na Design",
+  ]];
+  let projected = 0;
+  const dedupeStore: ProductMediaDedupeStore = {
+    async ready() {
+      return true;
+    },
+    async reserve(input) {
+      return {
+        claimed: true,
+        record: {
+          ...input,
+          projectionStatus: "RESERVED",
+          projectedAt: null,
+          lastErrorCode: null,
+          revision: 1,
+        },
+      };
+    },
+    async backfill() {
+      return 0;
+    },
+    async markProjected() {
+      projected += 1;
+    },
+    async markFailed() {},
+    async close() {},
+  };
+  const harness = await createHarness({ dedupeStore, existingRows: existing });
+  try {
+    const result = await harness.service.upload(identity, uploadInput());
+
+    assert.equal(result.duplicate, true);
+    assert.equal(result.imageUrl, existingUrl);
+    assert.equal(projected, 1);
+    assert.equal(harness.intakeReadCount(), 2);
+    assert.equal(harness.resizeCount(), 0);
+    assert.equal(harness.appendCount(), 0);
+  } finally {
+    await harness.service.close?.();
     await rm(harness.root, { recursive: true, force: true });
   }
 });

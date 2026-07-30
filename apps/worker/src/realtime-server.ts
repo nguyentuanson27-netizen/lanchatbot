@@ -28,6 +28,7 @@ import {
   PancakeRealtimeTagObservationProvider,
   RealtimeRunner,
 } from "./realtime-runner.js";
+import { runRealtimeLoop } from "./realtime-loop.js";
 import { RedisRealtimeGenerationQuota } from "./realtime-quota.js";
 import { RedisChatHistoryStore } from "./redis-chat-history.js";
 import { RedisBusinessFactsReader } from "./redis-business-facts.js";
@@ -744,53 +745,43 @@ const runner = new RealtimeRunner(
 );
 const pollMs = boundedInteger(
   "REALTIME_POLL_MS",
+  10_000,
   1_000,
-  100,
   30_000,
 );
-let stopping = false;
+const concurrency = boundedInteger(
+  "REALTIME_CONCURRENCY",
+  4,
+  1,
+  8,
+);
+const heartbeatMs = boundedInteger(
+  "REALTIME_HEARTBEAT_MS",
+  15_000,
+  5_000,
+  60_000,
+);
+const shutdownController = new AbortController();
 for (const signal of ["SIGTERM", "SIGINT"] as const) {
-  process.once(signal, () => {
-    stopping = true;
-  });
+  process.once(signal, () => shutdownController.abort());
 }
 
-await inbox.heartbeat(
+await runRealtimeLoop({
+  runner,
+  inbox,
   workerId,
-  "STARTING",
   mode,
   sendEnabled,
-);
-while (!stopping) {
-  try {
-    await inbox.heartbeat(
-      workerId,
-      "PROCESSING",
-      mode,
-      sendEnabled,
-    );
-    const processed = await runner.processOne();
-    await inbox.heartbeat(workerId, "IDLE", mode, sendEnabled);
-    if (!processed) {
-      await new Promise((resolve) => setTimeout(resolve, pollMs));
-    }
-  } catch (error) {
-    const code =
-      error instanceof Error
-        ? error.message.slice(0, 128)
-        : "REALTIME_WORKER_LOOP_FAILED";
-    await inbox
-      .heartbeat(workerId, "ERROR", mode, sendEnabled, code)
-      .catch(() => undefined);
+  concurrency,
+  fallbackPollMs: pollMs,
+  heartbeatMs,
+  signal: shutdownController.signal,
+  logError: (code) => {
     process.stderr.write(
       `${JSON.stringify({ level: "error", code, workerId, mode })}\n`,
     );
-    await new Promise((resolve) => setTimeout(resolve, pollMs));
-  }
-}
-await inbox
-  .heartbeat(workerId, "STOPPING", mode, sendEnabled)
-  .catch(() => undefined);
+  },
+});
 await runtime.close();
 await inbox.close();
 await facts.close();

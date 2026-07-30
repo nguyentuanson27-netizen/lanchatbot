@@ -175,6 +175,7 @@ let conversationOwner = "";
 let conversationData: ListResponse<Conversation> | null = null;
 let auditData: ListResponse<AuditLog> | null = null;
 let overlayCleanup: (() => void) | null = null;
+let modalCleanup: (() => void) | null = null;
 let commandPollTimer: number | undefined;
 let outreachData: OutreachSummary | null = null;
 let handoffData: HandoffQueue | null = null;
@@ -1703,7 +1704,7 @@ async function openHandoff(id: string): Promise<void> {
       </aside>`;
     bindCloseDetail();
     const drawer = layer.querySelector<HTMLElement>(".detail-drawer");
-    if (drawer) overlayCleanup = activateDialog(drawer);
+    if (drawer) activateDetailDrawer(drawer);
     layer.querySelectorAll<HTMLButtonElement>("[data-handoff-action]").forEach((button) => {
       button.addEventListener("click", async () => {
         const action = button.dataset.handoffAction as "CLAIM" | "REASSIGN" | "RESOLVE" | "REOPEN" | "SET_PRIORITY";
@@ -1750,7 +1751,7 @@ async function openConversation(id: string): Promise<void> {
     layer.innerHTML = renderConversationDetail(conversation, commandResponse.items);
     bindCloseDetail();
     const drawer = layer.querySelector<HTMLElement>(".detail-drawer");
-    if (drawer) overlayCleanup = activateDialog(drawer);
+    if (drawer) activateDetailDrawer(drawer);
     bindConversationInspector(conversation.id);
     bindConversationControls(conversation);
     bindConversationHistoryPagination(conversation, commandResponse.items);
@@ -1812,7 +1813,7 @@ function bindConversationHistoryPagination(
       layer.innerHTML = renderConversationDetail(conversation, commands);
       bindCloseDetail();
       const drawer = layer.querySelector<HTMLElement>(".detail-drawer");
-      if (drawer) overlayCleanup = activateDialog(drawer);
+      if (drawer) activateDetailDrawer(drawer);
       bindConversationControls(conversation);
       bindConversationInspector(conversation.id);
       bindConversationHistoryPagination(conversation, commands);
@@ -1915,7 +1916,7 @@ function openCommandConfirmation(
       </form>
     </section>`;
   const dialog = modalLayer.querySelector<HTMLElement>(".command-modal");
-  const cleanup = dialog ? activateDialog(dialog) : () => undefined;
+  const cleanup = dialog ? activateModalDialog(dialog) : () => undefined;
   const close = () => {
     cleanup();
     modalLayer.innerHTML = "";
@@ -1998,16 +1999,37 @@ function pollAdminCommand(commandId: string, conversationId: string, attempt = 0
   }, 1_500);
 }
 
+function activateDetailDrawer(drawer: HTMLElement): void {
+  overlayCleanup?.();
+  overlayCleanup = activateDialog(drawer);
+}
+
+function activateModalDialog(dialog: HTMLElement): () => void {
+  modalCleanup?.();
+  const cleanup = activateDialog(dialog);
+  let active = true;
+  const managedCleanup = () => {
+    if (!active) return;
+    active = false;
+    cleanup();
+    if (modalCleanup === managedCleanup) modalCleanup = null;
+  };
+  modalCleanup = managedCleanup;
+  return managedCleanup;
+}
+
 function bindCloseDetail(): void {
   document.querySelectorAll("[data-close-detail]").forEach((element) =>
     element.addEventListener("click", () => {
       window.clearTimeout(commandPollTimer);
+      modalCleanup?.();
+      modalCleanup = null;
+      overlayCleanup?.();
+      overlayCleanup = null;
       const layer = document.querySelector("#detail-layer");
       if (layer) layer.innerHTML = "";
       const modalLayer = document.querySelector("#command-modal-layer");
       if (modalLayer) modalLayer.innerHTML = "";
-      overlayCleanup?.();
-      overlayCleanup = null;
     }),
   );
 }
@@ -2030,7 +2052,7 @@ function requestTextDialog(
         </form>
       </section>`;
     const dialog = layer.querySelector<HTMLElement>(".command-modal");
-    const cleanup = dialog ? activateDialog(dialog) : () => undefined;
+    const cleanup = dialog ? activateModalDialog(dialog) : () => undefined;
     const finish = (value: string | null) => {
       cleanup();
       layer.innerHTML = "";
@@ -2059,7 +2081,7 @@ function requestConfirmation(title: string, detail: string): Promise<boolean> {
         <div><button class="button button--secondary" type="button" data-confirm="false">Hủy</button><button class="button button--primary" type="button" data-confirm="true">Xác nhận</button></div>
       </section>`;
     const dialog = layer.querySelector<HTMLElement>(".command-modal");
-    const cleanup = dialog ? activateDialog(dialog) : () => undefined;
+    const cleanup = dialog ? activateModalDialog(dialog) : () => undefined;
     layer.querySelectorAll<HTMLButtonElement>("[data-confirm], [data-close-modal]").forEach((button) =>
       button.addEventListener("click", () => {
         const confirmed = button.dataset.confirm === "true";
@@ -2115,12 +2137,26 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     const modalLayer = document.querySelector("#command-modal-layer");
     if (modalLayer?.hasChildNodes()) {
-      modalLayer.innerHTML = "";
+      const close = modalLayer.querySelector<HTMLElement>(
+        "[data-close-command-modal], [data-close-modal]",
+      );
+      if (close) close.click();
+      else {
+        modalCleanup?.();
+        modalCleanup = null;
+        modalLayer.innerHTML = "";
+      }
       return;
     }
     window.clearTimeout(commandPollTimer);
     const layer = document.querySelector("#detail-layer");
-    if (layer) layer.innerHTML = "";
+    const close = layer?.querySelector<HTMLElement>("[data-close-detail]");
+    if (close) close.click();
+    else {
+      overlayCleanup?.();
+      overlayCleanup = null;
+      if (layer) layer.innerHTML = "";
+    }
     toggleSidebar(false);
   }
 });

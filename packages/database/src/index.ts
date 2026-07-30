@@ -147,3 +147,11 @@ export {
   type PrelabelProposalRow,
   type RecordPrelabelItemInput,
 } from "./dataset-prelabel-store.js";
+export {
+  PostgresProductMediaIntakeStore,
+  type ProductMediaIntakeInput,
+  type ProductMediaIntakeRecord,
+  type ProductMediaLegacyIntake,
+  type ProductMediaProjectionStatus,
+  type ProductMediaReservation,
+} from "./product-media-intake.js";

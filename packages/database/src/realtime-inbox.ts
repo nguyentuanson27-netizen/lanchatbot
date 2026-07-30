@@ -87,6 +87,9 @@ export interface PostgresRealtimeInboxOptions {
 
 export class PostgresRealtimeInboxStore {
   private readonly pool: Pool;
+  private readonly notificationPool: Pool;
+  private notificationClient: PoolClient | null = null;
+  private notificationConnect: Promise<PoolClient> | null = null;
   private readonly payloadRetentionDays: number;
   private readonly customerDebounceMs: number;
 
@@ -99,6 +102,11 @@ export class PostgresRealtimeInboxStore {
     this.pool = new Pool({
       connectionString,
       max: options.maxPoolSize ?? 5,
+    });
+    this.notificationPool = new Pool({
+      connectionString,
+      max: 1,
+      connectionTimeoutMillis: 5_000,
     });
     this.payloadRetentionDays = Math.max(
       1,
@@ -230,6 +238,9 @@ export class PostgresRealtimeInboxStore {
             this.customerDebounceMs,
           ],
         );
+      }
+      if (recorded.inserted) {
+        await client.query("SELECT pg_notify('lana_realtime_inbox', $1)", [eventKind]);
       }
       return {
         inboxId: recorded.inboxId,
@@ -947,7 +958,85 @@ export class PostgresRealtimeInboxStore {
     );
   }
 
+  async waitForWork(timeoutMs: number, signal?: AbortSignal): Promise<void> {
+    const boundedTimeout = Math.max(1_000, Math.min(30_000, Math.trunc(timeoutMs)));
+    if (signal?.aborted) return;
+    let client: PoolClient;
+    try {
+      client = await this.notificationConnection();
+    } catch {
+      await this.waitForTimeout(boundedTimeout, signal);
+      return;
+    }
+    if (signal?.aborted) return;
+    await new Promise<void>((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        client.off("notification", onNotification);
+        signal?.removeEventListener("abort", finish);
+        resolve();
+      };
+      const onNotification = (message: { channel: string }) => {
+        if (message.channel === "lana_realtime_inbox") finish();
+      };
+      const timer = setTimeout(finish, boundedTimeout);
+      client.on("notification", onNotification);
+      signal?.addEventListener("abort", finish, { once: true });
+    });
+  }
+
+  private async notificationConnection(): Promise<PoolClient> {
+    if (this.notificationClient) return this.notificationClient;
+    if (!this.notificationConnect) {
+      this.notificationConnect = (async () => {
+        const client = await this.notificationPool.connect();
+        try {
+          await client.query("LISTEN lana_realtime_inbox");
+        } catch (error) {
+          client.release(true);
+          throw error;
+        }
+        client.once("error", (error: Error) => {
+          if (this.notificationClient === client) this.notificationClient = null;
+          client.release(error);
+        });
+        client.once("end", () => {
+          if (this.notificationClient === client) this.notificationClient = null;
+        });
+        this.notificationClient = client;
+        return client;
+      })().finally(() => {
+        this.notificationConnect = null;
+      });
+    }
+    return this.notificationConnect;
+  }
+
+  private waitForTimeout(timeoutMs: number, signal?: AbortSignal): Promise<void> {
+    if (signal?.aborted) return Promise.resolve();
+    return new Promise((resolve) => {
+      const finish = () => {
+        clearTimeout(timer);
+        signal?.removeEventListener("abort", finish);
+        resolve();
+      };
+      const timer = setTimeout(finish, timeoutMs);
+      signal?.addEventListener("abort", finish, { once: true });
+    });
+  }
+
   async close(): Promise<void> {
+    const notificationClient = this.notificationClient;
+    this.notificationClient = null;
+    if (notificationClient) {
+      await notificationClient.query("UNLISTEN *").catch(() => undefined);
+      notificationClient.removeAllListeners("notification");
+      notificationClient.release();
+    }
+    await this.notificationPool.end();
     await this.pool.end();
   }
 

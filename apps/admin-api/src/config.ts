@@ -26,6 +26,7 @@ export interface AdminApiConfig {
   readonly productMediaPublicBaseUrl: string;
   readonly productMediaMaxBytes: number;
   readonly productMediaResizeMaxDimension: number;
+  readonly productMediaResizeConcurrency: number;
   readonly productMediaOriginalTtlMs: number;
   readonly productMediaCleanupIntervalMs: number;
   readonly productMediaSheetId: string;
@@ -90,6 +91,10 @@ export function adminConfigFromEnvironment(
   if (!Number.isInteger(productMediaResizeMaxDimension) || productMediaResizeMaxDimension < 320 || productMediaResizeMaxDimension > 4096) {
     throw new Error("ADMIN_PRODUCT_MEDIA_RESIZE_MAX_DIMENSION_INVALID");
   }
+  const productMediaResizeConcurrency = Number(environment.ADMIN_PRODUCT_MEDIA_RESIZE_CONCURRENCY ?? "2");
+  if (!Number.isInteger(productMediaResizeConcurrency) || productMediaResizeConcurrency < 1 || productMediaResizeConcurrency > 4) {
+    throw new Error("ADMIN_PRODUCT_MEDIA_RESIZE_CONCURRENCY_INVALID");
+  }
   const productMediaOriginalTtlMs = Number(environment.ADMIN_PRODUCT_MEDIA_ORIGINAL_TTL_MS ?? "86400000");
   if (!Number.isInteger(productMediaOriginalTtlMs) || productMediaOriginalTtlMs < 3_600_000) {
     throw new Error("ADMIN_PRODUCT_MEDIA_ORIGINAL_TTL_MS_INVALID");
@@ -141,6 +146,7 @@ export function adminConfigFromEnvironment(
       || "https://admin.lanadesign.vn/lana-public/products",
     productMediaMaxBytes,
     productMediaResizeMaxDimension,
+    productMediaResizeConcurrency,
     productMediaOriginalTtlMs,
     productMediaCleanupIntervalMs,
     productMediaSheetId: environment.DATA_INGESTION_V2_SHEET_ID?.trim() || "",
