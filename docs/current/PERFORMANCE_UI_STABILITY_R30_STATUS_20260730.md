@@ -1,13 +1,15 @@
 # Trạng thái ổn định giao diện và hiệu năng r30
 
-Status: **IMPLEMENTED_VERIFIED_PENDING_RELEASE**
+Status: **MERGED_RELEASE_CANDIDATE_NOT_DEPLOYED**
 
 Ngày cập nhật: **2026-07-30**
 
 ## Phạm vi nguồn
 
-- Nhánh triển khai: `feat/r30-performance-and-ui-fix`, tạo từ `main` tại `58b532a`.
-- Release dự kiến: `20260730-performance-ui-stability-r30`.
+- PR feature `#76` đã merge vào `main` tại
+  `ca0b57efec40354bd5569ddb42d386060a4ef43f`.
+- Release candidate: `20260730-performance-ui-stability-r30`; manifest tại
+  [`deploy/manifests/20260730-performance-ui-stability-r30.json`](../../deploy/manifests/20260730-performance-ui-stability-r30.json).
 - Production vẫn chạy `20260730-admin-fe4-r29`; tài liệu này chưa phải bằng chứng deploy.
 - Không sửa source trực tiếp trên VPS. Cutover phải dùng commit/tag đã merge từ GitHub.
 - Có migration additive `0026_product_media_intake_dedupe`.
@@ -119,7 +121,7 @@ packages/database/migrations/0026_product_media_intake_dedupe.down.sql
 
 ## Evidence còn thiếu
 
-- Merge commit và số PR feature; manifest PR, tag object và image digest.
+- Manifest PR, tag object và image digest.
 - Backup checksum và restore-test production.
 - Container ID trước/sau, health/restart, smoke/canary và error-line delta.
 - Xác nhận symlink production cùng hậu kiểm độc lập.

@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-30T15:21:03Z",
+  "status": "RELEASE_CANDIDATE_NOT_DEPLOYED",
+  "environment": "production-test-page-live-100-percent-acquisition-shadow",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "ca0b57efec40354bd5569ddb42d386060a4ef43f",
+  "pullRequests": [76],
+  "releaseTag": "20260730-performance-ui-stability-r30",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260730-performance-ui-stability-r30",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260730-admin-fe4-r29",
+  "sourceMaterialization": {
+    "method": "annotated-tag-fetched-by-read-only-deploy-key",
+    "tagObject": "EVIDENCE_PENDING",
+    "workingTreeClean": "EVIDENCE_PENDING"
+  },
+  "image": {
+    "name": "lana-chatbot-app:performance-ui-stability-r30",
+    "imageId": "EVIDENCE_PENDING",
+    "releaseLabel": "20260730-performance-ui-stability-r30",
+    "revisionLabel": "ca0b57efec40354bd5569ddb42d386060a4ef43f",
+    "recreatedServices": ["admin-api", "admin-web", "realtime"],
+    "containerIds": "EVIDENCE_PENDING",
+    "nonTargetServiceContainerIdsUnchanged": "EVIDENCE_PENDING"
+  },
+  "scope": {
+    "features": [
+      "ADMIN_DIALOG_INERT_LIFECYCLE_FIX",
+      "C1_REALTIME_BOUNDED_CONCURRENCY",
+      "B2_ADMIN_SHARP_RESIZE",
+      "B3_POSTGRES_PRODUCT_MEDIA_DEDUPE",
+      "B4_LISTEN_NOTIFY_AND_HEARTBEAT_REDUCTION"
+    ],
+    "pageId": "1198992073286645",
+    "outboundChanged": false,
+    "pageAllowlistChanged": false,
+    "routingOwnershipChanged": false,
+    "n8nOwnershipChanged": false,
+    "realtimeChanged": true,
+    "deliveryChanged": false,
+    "qdrantWriterChanged": false
+  },
+  "database": {
+    "migrationRequired": true,
+    "latestMigrationExpected": "0026_product_media_intake_dedupe",
+    "migrationApplied": false,
+    "migrationAdditive": true,
+    "backupRequired": true,
+    "backupPath": "EVIDENCE_PENDING",
+    "backupSha256": "EVIDENCE_PENDING",
+    "restoreTestRequired": true,
+    "restoreTestSequence": "UP_DOWN_UP_0026",
+    "restoreTestStatus": "EVIDENCE_PENDING",
+    "dataMutationPlanned": false,
+    "normalRollbackDropsSchema": false
+  },
+  "preDeployVerification": {
+    "localFullCheck": "PASS",
+    "adminApiTests": "67_OF_67_PASS",
+    "databaseTests": "103_OF_103_PASS",
+    "workerTests": "313_OF_313_PASS",
+    "adminWebVitest": "54_OF_54_PASS",
+    "adminWebNodeTests": "6_OF_6_PASS",
+    "adminWebProductionBuild": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "productionVerification": {
+    "status": "EVIDENCE_PENDING",
+    "requiredReadinessEndpoint": "/health/ready",
+    "requiredPublicAdminStatus": 302,
+    "requiredPublicAdminTarget": "Authentik",
+    "requiredTargetServicesHealthy": 3,
+    "requiredTargetServiceRestartCount": 0,
+    "requiredNewErrorLineCount": 0,
+    "requiredProductMediaDedupeSmoke": true,
+    "requiredListenNotifySmoke": true,
+    "requiredHeartbeatSmoke": true,
+    "requiredInboxOutboxAudit": true,
+    "requiredPageAllowlistUnchanged": true,
+    "requiredCanaryConversation": true
+  },
+  "guardedCutover": {
+    "atomicSymlinkSwitchAfterAllGuards": true,
+    "status": "NOT_STARTED"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260730-admin-fe4-r29",
+    "image": "lana-chatbot-app:admin-fe4-r29",
+    "services": ["admin-api", "admin-web", "realtime"],
+    "schemaRollbackRequired": false,
+    "retainProductMediaDedupeTable": true,
+    "dataDeletionRequired": false,
+    "executed": false
+  }
+}

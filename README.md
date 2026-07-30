@@ -17,7 +17,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 ## Trạng thái production ngày 2026-07-30
 
 - Production đang trỏ tới release `20260730-admin-fe4-r29`, source commit `e7114c6`; chỉ Admin API/Web dùng image r29. API, Realtime và Delivery giữ nguyên image/container r27.1.
-- r30 đã triển khai và kiểm thử trong source nhưng **chưa phát hành**; xem tài liệu trạng thái r30 trước khi thao tác VPS.
+- r30 đã merge và đang là **release candidate chưa deploy**; xem tài liệu trạng thái r30 trước khi thao tác VPS.
 - Realtime phân loại need/barrier/decision factor/strategy, áp dụng stage playbook và CTA tối đa một câu hỏi. Deterministic guard vẫn là quyền quyết định cuối cho fact, offer, media, checkout, handoff và outbound.
 - Cả năm service API, Realtime, Delivery, Admin API và Admin Web healthy/restart 0. Shadow, Admin Simulation, POS, P2.3, Size Chart và n8n không bị recreate trong r28.
 - Mọi vị trí Gemini Flash-Lite đang hoạt động hoặc được định nghĩa trong release dùng `gemini-3.5-flash-lite`: realtime, Shadow, media reranker, P2.3B và Size Chart.
@@ -156,7 +156,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 - [Kế hoạch cải thiện Admin Frontend và bổ sung tính năng](docs/current/ADMIN_FRONTEND_IMPROVEMENT_PLAN_20260730.md) — `FE1_FE2_FE3_DEPLOYED_R28`, `FE4_DEPLOYED_VERIFIED_R29`
 - [Trạng thái Admin Frontend FE1–FE3 r28](docs/current/ADMIN_FRONTEND_FE1_FE3_R28_STATUS_20260730.md)
 - [Trạng thái triển khai Admin Frontend FE4](docs/current/ADMIN_FRONTEND_FE4_STATUS_20260730.md) — `DEPLOYED_VERIFIED_R29`, không migration, không đổi outbound
-- [Trạng thái ổn định giao diện và hiệu năng r30](docs/current/PERFORMANCE_UI_STABILITY_R30_STATUS_20260730.md) — bản vá đứng giao diện, C1, B2, B3, B4; `IMPLEMENTED_VERIFIED_PENDING_RELEASE`
+- [Trạng thái ổn định giao diện và hiệu năng r30](docs/current/PERFORMANCE_UI_STABILITY_R30_STATUS_20260730.md) — bản vá đứng giao diện, C1, B2, B3, B4; `MERGED_RELEASE_CANDIDATE_NOT_DEPLOYED`
 - [Kế hoạch Task 2.0A — Meta Ads Entry Context & Lead Qualification](docs/current/TASK_2_0A_AD_ENTRY_CONTEXT_AND_LEAD_QUALIFICATION_PLAN.md) — `DEPLOYED_SHADOW_EVIDENCE_PENDING`, analytics sidecar, không thay đổi outbound
 - [Kế hoạch nhận diện ảnh Cutout-first + AI reranker](docs/current/MEDIA_RECOGNITION_CUTOUT_AI_IMPLEMENTATION_PLAN.md)
 - [Kế hoạch migration P2.3C Hash v3](docs/current/P23C_HASH_V3_MIGRATION_PLAN_20260730.md) — tách `embedding_hash`, `payload_hash`, `provenance_hash` để tránh embedding lại khi chỉ bổ sung SHA hoặc cập nhật payload
