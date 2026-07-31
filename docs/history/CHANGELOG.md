@@ -9,7 +9,9 @@
 - Wave 2 không gắn CTA xin phép tư vấn dư thừa; loại toàn bộ wording “đối chiếu size” khỏi runtime và prompt.
 - Không migration, không đổi page allowlist, routing ownership, Meta transport hoặc nguồn fact có thẩm quyền.
 - Targeted regression `84/84` và `pnpm check` toàn monorepo đều PASS; Worker `323/323`, Business Tools `180/180`, Contracts `86/86`, golden transcript `7/7`.
-- PR `#86` đã merge tại `abb37e5`; release candidate chưa deploy khi ghi mục này.
+- PR `#86`, `#87` đã merge; annotated tag trỏ release commit `9fdc049`. Image được build từ tag sau khi `pnpm check` trong Docker đạt.
+- Chỉ Realtime Worker được recreate; r31.2 healthy/restart 0, heartbeat tăng 15 giây, Inbox/Outbox/duplicate/failed/log lỗi mới đều 0 và Admin public vẫn 302 Authentik.
+- Production đã chuyển symlink sang r31.2. Chưa có inbound khách sau cutover nên trạng thái là `DEPLOYED_VERIFIED_R31_2_HUMAN_TEST_PENDING`; không tạo inbound giả.
 
 ## 2026-07-31 — Contextual continuation question r31.1
 
