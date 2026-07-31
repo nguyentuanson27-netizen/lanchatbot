@@ -951,6 +951,8 @@ Agent chỉ đổi trạng thái sau khi có bằng chứng. Giá trị hợp l�
 | 3.2 Catalog advisory | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | structured advisory fixtures trong worker 209 | Flag ON chỉ page test | Qdrant fields trước; DESCRIPTION_XML chỉ fallback được kiểm soát |
 | 3.3 One-question A/B | DEFERRED | — | — | — | — | Làm sau |
 | 3.4 Audit/order intent | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | DB atomic/idempotent 7; contracts 71; toàn repo 739 pass | Decision audit v2 ON; duplicate plan sequence 0 | Không lưu raw model body, PII hay secret; order intent giữ idempotency hiện có |
+| r32.2 Compatibility First plan | CODE_COMPLETE | docs/r32.2-compatibility-first-plan | pending PR | plan + README link | — | Behavioral baseline r31.3; deviations limited to D1–D6 |
+| r32.2 PR-A Regression Shield | NOT_STARTED | — | — | — | — | Must merge before production behavior fixes |
 
 ## 18. Decision log
 
@@ -966,6 +968,9 @@ Agent chỉ đổi trạng thái sau khi có bằng chứng. Giá trị hợp l�
 | 2026-07-31 | D-009 | Any grounded-draft Vertex error uses a deterministic verified-facts fallback | Preserve a safe customer reply without retaining raw provider errors or changing the proposal decision. |
 | 2026-07-31 | D-010 | Size Engine composes with an existing verified reply | Size advice must not replace verified price, stock, ETA, or attachments. |
 | 2026-07-31 | D-011 | Reused handoff timestamps are explicitly cast as timestamptz | PostgreSQL must not infer incompatible parameter types when the timestamp is both stored and used to calculate SLA. |
+| 2026-07-31 | D-012 | Compatibility uses the r31.3 behavioral contract, not a blind implementation snapshot | Preserve customer-visible capabilities while allowing only reviewed D1–D6 fixes. |
+| 2026-07-31 | D-013 | Optional enrichment cannot erase a verified base reply or attachments | Size/model failures must degrade only their own contribution. |
+| 2026-07-31 | D-014 | Pancake ownership is verified once per response group and unverified fails closed | No sequence may escape before a consistent ownership decision exists. |
 | 2026-07-23 | D-007 | Số đo mới nhất được ưu tiên khi xung đột | Chủ dự án muốn dữ liệu khách vừa cung cấp thay thế giá trị cũ, không cần bước xác nhận |
 
 Mọi quyết định mới làm đổi phạm vi, source-of-truth, retention, handoff hoặc safety gate phải ghi thêm một dòng trước khi code.
