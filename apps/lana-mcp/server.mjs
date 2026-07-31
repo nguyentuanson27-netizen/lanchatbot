@@ -16,7 +16,7 @@ import { createServer } from "node:http";
 import { basename, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { spawn } from "node:child_process";
 
-const VERSION = "0.2.0";
+const VERSION = "0.3.0";
 const PORT = Number(process.env.PORT || 8080);
 const RESOURCE = trimSlash(
   process.env.LANA_MCP_RESOURCE || "https://dev.lanadesign.vn",
@@ -52,6 +52,14 @@ const REQUEST_LIMIT = 1_048_576;
 const REPOSITORY_ROOT = resolve(
   process.env.LANA_MCP_REPOSITORY_ROOT || "/app/repository",
 );
+const REPOSITORY_RELEASES_ROOT = String(
+  process.env.LANA_MCP_REPOSITORY_RELEASES_ROOT || "",
+).trim()
+  ? resolve(process.env.LANA_MCP_REPOSITORY_RELEASES_ROOT)
+  : "";
+const REPOSITORY_POINTER_FILE = String(
+  process.env.LANA_MCP_REPOSITORY_POINTER_FILE || "",
+).trim();
 const REPOSITORY_SOURCE_COMMIT =
   process.env.LANA_MCP_SOURCE_COMMIT || "unknown";
 const REPOSITORY_SOURCE_REF = process.env.LANA_MCP_SOURCE_REF || "unknown";
@@ -304,6 +312,80 @@ export function normalizeRepositoryPath(value, allowRoot = false) {
   return segments.join("/");
 }
 
+function isPathInside(root, candidate) {
+  const fromRoot = relative(root, candidate);
+  return !(
+    fromRoot === ".." ||
+    fromRoot.startsWith(`..${process.platform === "win32" ? "\\" : "/"}`) ||
+    isAbsolute(fromRoot)
+  );
+}
+
+function repositoryProvenance(context) {
+  return {
+    source_commit: context.source_commit,
+    source_ref: context.source_ref,
+    source_release: context.source_release,
+    source_updated_at: context.source_updated_at,
+    source_mode: context.source_mode,
+  };
+}
+
+export async function repositoryContext() {
+  if (!REPOSITORY_POINTER_FILE) {
+    return {
+      root: await realpath(REPOSITORY_ROOT),
+      source_commit: REPOSITORY_SOURCE_COMMIT,
+      source_ref: REPOSITORY_SOURCE_REF,
+      source_release: REPOSITORY_SOURCE_REF,
+      source_updated_at: null,
+      source_mode: "embedded_snapshot",
+    };
+  }
+  if (!REPOSITORY_RELEASES_ROOT) {
+    throw new Error("REPOSITORY_RELEASES_ROOT_REQUIRED");
+  }
+  const pointerStat = await stat(REPOSITORY_POINTER_FILE);
+  if (!pointerStat.isFile() || pointerStat.size > 4_096) {
+    throw new Error("REPOSITORY_POINTER_INVALID");
+  }
+  let pointer;
+  try {
+    pointer = JSON.parse(await readFile(REPOSITORY_POINTER_FILE, "utf8"));
+  } catch {
+    throw new Error("REPOSITORY_POINTER_INVALID");
+  }
+  const release = String(pointer?.release || "").trim();
+  const sourceCommit = String(pointer?.source_commit || "").trim().toLowerCase();
+  const sourceRef = String(pointer?.source_ref || release).trim();
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,199}$/.test(release)) {
+    throw new Error("REPOSITORY_POINTER_RELEASE_INVALID");
+  }
+  if (!/^[0-9a-f]{40}$/.test(sourceCommit)) {
+    throw new Error("REPOSITORY_POINTER_COMMIT_INVALID");
+  }
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,199}$/.test(sourceRef)) {
+    throw new Error("REPOSITORY_POINTER_REF_INVALID");
+  }
+  const releasesRoot = await realpath(REPOSITORY_RELEASES_ROOT);
+  const root = await realpath(resolve(releasesRoot, release));
+  if (!isPathInside(releasesRoot, root)) {
+    throw new Error("REPOSITORY_POINTER_TRAVERSAL_BLOCKED");
+  }
+  const rootStat = await stat(root);
+  if (!rootStat.isDirectory()) {
+    throw new Error("REPOSITORY_RELEASE_NOT_DIRECTORY");
+  }
+  return {
+    root,
+    source_commit: sourceCommit,
+    source_ref: sourceRef,
+    source_release: release,
+    source_updated_at: String(pointer?.updated_at || "").slice(0, 64) || null,
+    source_mode: "current_release_pointer",
+  };
+}
+
 function isRepositoryTextFile(path) {
   const name = basename(path);
   if (name === ".env.example") return true;
@@ -314,21 +396,22 @@ function isRepositoryTextFile(path) {
   );
 }
 
-async function resolveRepositoryPath(value, allowRoot = false) {
+async function resolveRepositoryPath(value, allowRoot = false, sourceContext) {
   const normalized = normalizeRepositoryPath(value, allowRoot);
-  const root = await realpath(REPOSITORY_ROOT);
+  const context = sourceContext || await repositoryContext();
+  const root = context.root;
   const candidate = resolve(root, normalized);
   const resolved = await realpath(candidate);
-  const fromRoot = relative(root, resolved);
-  if (fromRoot === ".." || fromRoot.startsWith(`..${process.platform === "win32" ? "\\" : "/"}`) || isAbsolute(fromRoot)) {
+  if (!isPathInside(root, resolved)) {
     throw new Error("REPOSITORY_PATH_TRAVERSAL_BLOCKED");
   }
+  const fromRoot = relative(root, resolved);
   const checked = normalizeRepositoryPath(fromRoot.replaceAll("\\", "/"), true);
-  return { normalized: checked, resolved, root };
+  return { normalized: checked, resolved, root, context };
 }
 
-async function readRepositoryText(path) {
-  const target = await resolveRepositoryPath(path);
+async function readRepositoryText(path, sourceContext) {
+  const target = await resolveRepositoryPath(path, false, sourceContext);
   if (!isRepositoryTextFile(target.normalized)) {
     throw new Error("REPOSITORY_FILE_TYPE_BLOCKED");
   }
@@ -346,9 +429,10 @@ async function readRepositoryText(path) {
   };
 }
 
-export async function repositoryListFiles(args = {}) {
+export async function repositoryListFiles(args = {}, sourceContext) {
   const limit = boundedInteger(args.limit, 500, 1, 2_000);
-  const start = await resolveRepositoryPath(args.path || "", true);
+  const context = sourceContext || await repositoryContext();
+  const start = await resolveRepositoryPath(args.path || "", true, context);
   const startDetails = await lstat(start.resolved);
   const files = [];
   let truncated = false;
@@ -385,16 +469,16 @@ export async function repositoryListFiles(args = {}) {
     throw new Error("REPOSITORY_PATH_TYPE_BLOCKED");
   }
   return {
-    source_commit: REPOSITORY_SOURCE_COMMIT,
-    source_ref: REPOSITORY_SOURCE_REF,
+    ...repositoryProvenance(context),
     path: start.normalized,
     files,
     truncated,
   };
 }
 
-export async function repositoryReadFile(args = {}) {
-  const file = await readRepositoryText(args.path);
+export async function repositoryReadFile(args = {}, sourceContext) {
+  const context = sourceContext || await repositoryContext();
+  const file = await readRepositoryText(args.path, context);
   const lines = file.content.split(/\r?\n/);
   const startLine = boundedInteger(args.start_line, 1, 1, Math.max(1, lines.length));
   const maxLines = boundedInteger(args.max_lines, 400, 1, 1_000);
@@ -406,8 +490,7 @@ export async function repositoryReadFile(args = {}) {
     outputTruncated = true;
   }
   return {
-    source_commit: REPOSITORY_SOURCE_COMMIT,
-    source_ref: REPOSITORY_SOURCE_REF,
+    ...repositoryProvenance(context),
     path: file.path,
     bytes: file.bytes,
     start_line: startLine,
@@ -424,13 +507,17 @@ export async function repositorySearchText(args = {}) {
     throw new Error("REPOSITORY_QUERY_LENGTH_INVALID");
   }
   const limit = boundedInteger(args.limit, 50, 1, 200);
-  const listing = await repositoryListFiles({ path: args.path || "", limit: 2_000 });
+  const context = await repositoryContext();
+  const listing = await repositoryListFiles(
+    { path: args.path || "", limit: 2_000 },
+    context,
+  );
   const needle = args.case_sensitive === true ? query : query.toLocaleLowerCase("en");
   const matches = [];
   for (const path of listing.files) {
     let file;
     try {
-      file = await readRepositoryText(path);
+      file = await readRepositoryText(path, context);
     } catch (error) {
       if (error.message === "REPOSITORY_FILE_TOO_LARGE") continue;
       throw error;
@@ -442,8 +529,7 @@ export async function repositorySearchText(args = {}) {
       matches.push({ path, line: index + 1, snippet: lines[index].trim().slice(0, 500) });
       if (matches.length >= limit) {
         return {
-          source_commit: REPOSITORY_SOURCE_COMMIT,
-          source_ref: REPOSITORY_SOURCE_REF,
+          ...repositoryProvenance(context),
           query,
           matches,
           truncated: true,
@@ -452,8 +538,7 @@ export async function repositorySearchText(args = {}) {
     }
   }
   return {
-    source_commit: REPOSITORY_SOURCE_COMMIT,
-    source_ref: REPOSITORY_SOURCE_REF,
+    ...repositoryProvenance(context),
     query,
     matches,
     truncated: listing.truncated,
@@ -835,6 +920,15 @@ async function vpsStatus() {
   return { resource: RESOURCE, services };
 }
 
+async function repositoryHealth() {
+  try {
+    const context = await repositoryContext();
+    return { healthy: true, ...repositoryProvenance(context) };
+  } catch (error) {
+    return { healthy: false, error: String(error.message).slice(0, 120) };
+  }
+}
+
 function audit(identity, toolName, outcome, args, error = "") {
   const record = {
     timestamp: new Date().toISOString(),
@@ -921,7 +1015,7 @@ async function dispatch(identity, message) {
       capabilities: { tools: { listChanged: false } },
       serverInfo: { name: "lana-chatbot-ops", version: VERSION },
       instructions:
-        "Read README, AGENTS, the current baseline, and release documents from the immutable repository snapshot before diagnosing. Inspect runtime evidence before proposing a fix. Sensitive Redis, chat, and Sheet reads require explicit confirmation. Every Sheet mutation requires confirm_write and a change_note; the server records BY_CHATGPT notes. Repository writes are not exposed and remain GitHub-first.",
+        "Read README, AGENTS, the current baseline, and release documents from the automatically synchronized current production release before diagnosing. Inspect runtime evidence before proposing a fix. Sensitive Redis, chat, and Sheet reads require explicit confirmation. Every Sheet mutation requires confirm_write and a change_note; the server records BY_CHATGPT notes. Repository writes are not exposed and remain GitHub-first.",
     });
   }
   if (message.method === "notifications/initialized") return null;
@@ -1019,10 +1113,12 @@ async function handler(request, response) {
   try {
     const url = new URL(request.url, RESOURCE);
     if (request.method === "GET" && url.pathname === "/health") {
+      const repository = await repositoryHealth();
       return json(response, 200, {
         status: "healthy",
         version: VERSION,
         oauth_configured: Boolean(CLIENT_ID && ALLOWED_USERS.size),
+        repository,
       });
     }
     if (
@@ -1056,6 +1152,9 @@ async function handler(request, response) {
         endpoint: `${RESOURCE}/mcp`,
         authentication: "OAuth 2.1 Authorization Code with PKCE via Authentik",
         scopes: [READ_SCOPE, SENSITIVE_SCOPE, WRITE_SCOPE],
+        repository_source_mode: REPOSITORY_POINTER_FILE
+          ? "current_release_pointer"
+          : "embedded_snapshot",
       });
     }
     if (url.pathname !== "/mcp") return json(response, 404, { error: "not_found" });

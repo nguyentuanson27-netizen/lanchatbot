@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch the Lana current release pointer for MCP source updates
+
+[Path]
+PathChanged=/opt/lana-chatbot/current
+Unit=lana-mcp-source-sync.service
+
+[Install]
+WantedBy=multi-user.target

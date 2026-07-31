@@ -2,7 +2,7 @@
 
 ## Read capabilities
 
-- Remote MCP repository snapshot: list, read, and search the Git-tracked source code, README, AGENTS, baseline/release documents, manifests, and related text files embedded in the current MCP image. The response identifies the source commit and release ref.
+- Remote MCP repository snapshot: list, read, and search the Git-tracked source code, README, AGENTS, baseline/release documents, manifests, and related text files from the automatically synchronized current production release. The response identifies the release, source commit, source ref, update time, and pointer mode.
 - GitHub/local repository tooling: branches, commits, diffs, checks, logs, and current worktree state. These live Git operations are separate from the immutable remote snapshot.
 - VPS: container/image/health status, runtime flags, selected logs, queues, PostgreSQL operational metadata, Qdrant payloads, and Messenger processing evidence.
 - Redis: list all keys, read any key including session, credential, or customer-data keys, and export the whole logical database.

@@ -43,37 +43,62 @@ files under `/opt/lana-chatbot/shared/secrets`; they are not committed.
 
 ## Service boundary
 
-The remote service exposes diagnostics, Qdrant, Redis, Google Sheets, and an
-immutable repository snapshot built from the tagged GitHub release. ChatGPT can
-list, read, and search source code, README, AGENTS, baseline, manifest, and other
-text documents through the existing `mcp:read` scope.
+The remote service exposes diagnostics, Qdrant, Redis, Google Sheets, and the
+immutable source tree of the current production release. ChatGPT can list, read,
+and search source code, README, AGENTS, baseline, manifest, and related text
+documents through the existing `mcp:read` scope.
 
-The snapshot is owned by root and stored inside the read-only container. Build
-context rules exclude `.git`, runtime `.env` files, private keys, generated
-directories, and dependencies. Repository tools also reject absolute paths,
-path traversal, symlinks outside the snapshot, binary files, and files over 1
-MiB.
+The updater creates a root-owned, read-only mirror from the verified Git tag in
+`/opt/lana-chatbot/mcp-source/releases`. The container mounts only
+`/opt/lana-chatbot/mcp-source` read-only. It never mounts production releases,
+`/opt/lana-chatbot/shared`, `.git`, the Docker socket, or a writable repository.
+Repository tools resolve the pointer for every call and reject absolute paths,
+traversal, binary files, generated directories,
+and files over 1 MiB.
 
-The service does not mount the Docker socket or a writable VPS repository and
-does not expose a source-write tool. Source-code changes remain GitHub-first and
-use the local audited Git tools or a separately authorized GitHub connector.
+The service does not expose a source-write tool. Source-code changes remain
+GitHub-first and use the local audited Git tools or a separately authorized
+GitHub connector.
 
 Every sensitive read still requires an explicit confirmation argument. Every
 Sheet mutation requires `confirm_write=true`, a reason, and writes a
 `BY_CHATGPT:` cell note.
 
+
+## Automatic source synchronization
+
+`lana-mcp-source-sync.path` watches `/opt/lana-chatbot/current`. A five-minute
+timer is the fallback if an atomic symlink switch is not observed. The oneshot
+updater:
+
+1. resolves `current` and rejects targets outside `/opt/lana-chatbot/releases`;
+2. validates the release name and required source files;
+3. fetches the same-name tag with the read-only `lana-deploy` key;
+4. verifies README, AGENTS, MCP server, and compose content against that tag;
+5. creates a sanitized, read-only source mirror from `git archive`;
+6. writes `release`, `source_commit`, `source_ref`, and `updated_at` to a
+   root-owned pointer using an atomic rename.
+
+MCP sees the new release on the next repository tool call. It does not need a
+rebuild or restart for later application releases. A bad tag, source mismatch,
+or path traversal leaves the previous pointer untouched and the systemd unit
+failed for operator visibility.
+
 ## Cutover order
 
 1. Create the Authentik application/provider and owner-only policy.
 2. Write the two MCP-specific secret files.
-3. Build the MCP image from the tagged GitHub release with
-   `LANA_MCP_SOURCE_COMMIT` and `LANA_MCP_SOURCE_REF` set to that exact source.
-4. Start only `lana-mcp` with the standalone compose file.
-5. Create the Nginx Proxy Manager TLS host for `dev.lanadesign.vn`.
-6. Add the exact discovery override on `auth.lanadesign.vn`.
-7. Verify protected-resource metadata, DCR rejection tests, OAuth login,
+3. Build the MCP image from the tagged GitHub release.
+4. Run `deploy/lana-mcp/install-source-sync.sh` as root to create the initial
+   pointer and enable the path/timer units.
+5. Start only `lana-mcp` with the standalone compose file.
+6. Create the Nginx Proxy Manager TLS host for `dev.lanadesign.vn`.
+7. Add the exact discovery override on `auth.lanadesign.vn`.
+8. Verify protected-resource metadata, DCR rejection tests, OAuth login,
    token claims, MCP initialization, tool listing and one read-only call.
-8. Add `https://dev.lanadesign.vn/mcp` in ChatGPT developer mode.
+9. Add `https://dev.lanadesign.vn/mcp` in ChatGPT developer mode.
 
-Rollback removes only the `lana-mcp` container and the two new Nginx routes.
-It does not restart API, realtime, delivery, Admin, P2.3, POS or n8n.
+Rollback disables `lana-mcp-source-sync.path` and `.timer`, restores the previous
+root-owned pointer or recreates only `lana-mcp` with the previous image, and
+keeps the prior release directories intact. It does not restart API, realtime,
+delivery, Admin, P2.3, POS or n8n.

@@ -1,0 +1,13 @@
+[Unit]
+Description=Periodically verify the Lana MCP production source pointer
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=30s
+RandomizedDelaySec=20s
+Persistent=true
+Unit=lana-mcp-source-sync.service
+
+[Install]
+WantedBy=timers.target
