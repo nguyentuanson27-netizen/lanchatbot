@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Runtime symlink hiện hành: `/opt/lana-chatbot/releases/20260731-realtime-proactive-size-r31.2`; P2.3C dùng release riêng `20260730-p23c-hash-v3-redacted`.
+- Runtime symlink hiện hành: `/opt/lana-chatbot/releases/20260731-realtime-generation-quota-r31.3`; P2.3C dùng release riêng `20260730-p23c-hash-v3-redacted`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -16,12 +16,12 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 
 ## Trạng thái production ngày 2026-07-31
 
-- Production đang trỏ tới release `20260731-realtime-proactive-size-r31.2`, source commit `9fdc049`; Realtime Worker dùng image r31.2, Admin API/Web giữ image r30, API/Delivery giữ image r27.1.
+- Production đang trỏ tới release `20260731-realtime-generation-quota-r31.3`, source commit `30dd603`; Realtime Worker dùng image r31.3, Admin API/Web giữ image r30, API/Delivery giữ image r27.1.
 - r30 đã **DEPLOYED_VERIFIED_R30**; bản vá đứng giao diện, C1, B2, B3 và B4 đã qua backup/restore-test, guarded cutover và canary thật.
 - r31 đã **DEPLOYED_VERIFIED_R31_HUMAN_TEST_PENDING**: Voice Contract V2, form báo giá hai bong bóng và Hybrid Buying Intent có guard đã live; chưa có inbound khách sau cutover nên còn chờ human test Messenger.
 - Hotfix câu hỏi nối r31.1 đã **DEPLOYED_VERIFIED_R31_1_HUMAN_TEST_PENDING**: đúng một câu hỏi nối cho pre-sale còn mở, không hỏi lại số đo; chốt đơn, hậu mãi và handoff không bị kéo dài. Chưa có inbound khách sau cutover nên còn chờ human test Messenger.
 - r31.2 đã **DEPLOYED_VERIFIED_R31_2_HUMAN_TEST_PENDING**: đủ chiều cao/cân nặng thì Size Engine tư vấn ngay từ bảng size đã xác minh; thiếu trường nào chỉ hỏi trường đó, thiếu bảng size thì handoff. Chưa có inbound khách sau cutover nên còn chờ human test Messenger.
-- Quota per-page mới đã merge qua PR `#89` tại `a9ff18c`; r31.3 đang **MERGED_RELEASE_CANDIDATE_NOT_DEPLOYED** với `500` lượt AI/giờ và `2.000` lượt AI/ngày. Production vẫn chạy quota r31.2 cho tới guarded cutover.
+- r31.3 đã **DEPLOYED_VERIFIED_R31_3** với quota `500` lượt AI/giờ và `2.000` lượt AI/ngày cho mỗi page; quota chỉ tính lượt gọi AI, không tính reply deterministic hoặc Meta message unit.
 - r31 không có migration và chỉ recreate Realtime Worker; giá/tồn/size/ETA, attachment và side effect vẫn do nguồn deterministic đã xác minh quyết định.
 - Realtime phân loại need/barrier/decision factor/strategy, áp dụng stage playbook và đúng một câu hỏi nối khi pre-sale còn mở. Deterministic guard vẫn là quyền quyết định cuối cho fact, offer, media, checkout, handoff và outbound.
 - API, Realtime, Delivery, Admin API và Admin Web đều healthy; ba target r30 có restart count 0. Shadow, Admin Simulation, POS, P2.3, Size Chart, n8n và các service ngoài phạm vi không bị recreate.
@@ -34,7 +34,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - Wave 1 r21 chạy từ merge commit `5f817bbc`: official benchmark vẫn khóa 1.955 hội thoại hợp lệ, split 1.173/391/391, leakage 0; holdout chưa mở.
 - Wave 1 r21 vẫn là nền benchmark/replay; realtime production hiện dùng binary r31 và chưa mở locked holdout.
 - Semantic candidate vẫn `NOT_PROMOTED`: validation `BUYING_COMMITTED` precision `42,41%`, recall `57,26%`. Production replay đang `WAITING_FOR_ELIGIBLE_TRAFFIC`; không tạo inbound giả và locked holdout vẫn đóng.
-- Admin API/Web chạy image r30, Realtime Worker chạy image r31.2; Simulation Worker giữ image cũ. Admin FE/API nội bộ đều 200 và public route trả 302 sang Authentik.
+- Admin API/Web chạy image r30, Realtime Worker chạy image r31.3; Simulation Worker giữ image cũ. Admin FE/API nội bộ đều 200 và public route trả 302 sang Authentik.
 
 - Page allowlist vẫn chỉ có `1198992073286645`; API/Delivery chỉ đổi binary để ghi acquisition sidecar, còn quyền gửi, POS, P2.3A/C và n8n không thay đổi ownership trong r27.1.
 - Dashboard đọc checkout drop-off qua view ẩn danh `admin_conversation_events_v`; không mở quyền bảng hội thoại gốc cho tài khoản Admin.
@@ -48,9 +48,9 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - P2.3C Hash v3 đang `LIVE` trên image redacted: `956/956` point đã có ba hash; migration giữ nguyên `889` vector payload/provenance, tạo `38` point thiếu và tạo lại đúng `29` vector semantic; `error_sample` không còn log URL ảnh.
 - Cross-sell được để cho bản sau r15, dùng quan hệ phối đồ được duyệt trong PostgreSQL/Admin; không dùng similarity để tự gợi ý.
 - API webhook chạy image `lana-chatbot-app:ad-acquisition-r27.1`; routing/ownership và send guard giữ nguyên.
-- Realtime page test chạy image r31.2 với Wave 2 `LIVE_100`, Voice Contract V2, tư vấn size chủ động có guard, tư vấn thường một bong bóng, báo giá hai bong bóng, Hybrid Buying Intent có deterministic guard, Cutout-first + raw fallback + AI reranker, ProductFactsV2, Media Selector V2 và hard gate chỉ cho page `1198992073286645`.
+- Realtime page test chạy image r31.3 với quota `500/2.000`, Wave 2 `LIVE_100`, Voice Contract V2, tư vấn size chủ động có guard, tư vấn thường một bong bóng, báo giá hai bong bóng, Hybrid Buying Intent có deterministic guard, Cutout-first + raw fallback + AI reranker, ProductFactsV2, Media Selector V2 và hard gate chỉ cho page `1198992073286645`.
 - Shadow worker chạy image r26.1 với Gemini 3.5 Flash-Lite và Judge v2 ở `DRY_RUN`; send false và role DB không có quyền ghi Meta Outbox.
-- Admin API/Web chạy image r30, Realtime Worker chạy image r31.2; Simulation Worker giữ image cũ. Admin FE/API nội bộ đều 200 và public route trả 302 sang Authentik.
+- Admin API/Web chạy image r30, Realtime Worker chạy image r31.3; Simulation Worker giữ image cũ. Admin FE/API nội bộ đều 200 và public route trả 302 sang Authentik.
 - Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
 - Bốn policy runtime (shop, offer, closing, payment) đang trỏ tới các version `PUBLISHED` bất biến; `SHOP_POLICY` v2 chứa chính sách chăm sóc khách hàng có cấu trúc và mọi lần chuyển trạng thái đều có audit.
 - Chu trình bán hàng production đã nối cart 48 giờ, thương lượng deterministic, giảm 5% từ hai sản phẩm, freeship/giảm cuối theo policy, thu thông tin nhận hàng, order preview và `PURCHASE_CONFIRMED`.
@@ -165,7 +165,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 - [Trạng thái Voice Contract V2 và Hybrid Buying Intent r31](docs/current/REALTIME_VOICE_HYBRID_R31_STATUS_20260731.md) — báo giá hai bong bóng, handoff sản phẩm chưa xác định và model evidence có deterministic guard; `DEPLOYED_VERIFIED_R31_HUMAN_TEST_PENDING`
 - [Trạng thái hotfix câu hỏi nối r31.1](docs/current/REALTIME_CONTINUATION_QUESTION_R31_1_STATUS_20260731.md) — đúng một câu hỏi nối cho pre-sale còn mở, không hỏi lại số đo và không chen vào chốt đơn/hậu mãi; `DEPLOYED_VERIFIED_R31_1_HUMAN_TEST_PENDING`
 - [Trạng thái tư vấn size chủ động r31.2](docs/current/REALTIME_PROACTIVE_SIZE_R31_2_STATUS_20260731.md) — đủ số đo thì tư vấn ngay bằng Size Engine, thiếu trường nào chỉ hỏi trường đó và thiếu bảng size xác minh thì handoff; `DEPLOYED_VERIFIED_R31_2_HUMAN_TEST_PENDING`
-- [Trạng thái quota lượt AI realtime r31.3](docs/current/REALTIME_GENERATION_QUOTA_R31_3_STATUS_20260731.md) — `500` lượt AI/giờ và `2.000` lượt AI/ngày cho mỗi page; `MERGED_RELEASE_CANDIDATE_NOT_DEPLOYED`
+- [Trạng thái quota lượt AI realtime r31.3](docs/current/REALTIME_GENERATION_QUOTA_R31_3_STATUS_20260731.md) — `500` lượt AI/giờ và `2.000` lượt AI/ngày cho mỗi page; `DEPLOYED_VERIFIED_R31_3`
 - [Kế hoạch Task 2.0A — Meta Ads Entry Context & Lead Qualification](docs/current/TASK_2_0A_AD_ENTRY_CONTEXT_AND_LEAD_QUALIFICATION_PLAN.md) — `DEPLOYED_SHADOW_EVIDENCE_PENDING`, analytics sidecar, không thay đổi outbound
 - [Kế hoạch nhận diện ảnh Cutout-first + AI reranker](docs/current/MEDIA_RECOGNITION_CUTOUT_AI_IMPLEMENTATION_PLAN.md)
 - [Kế hoạch migration P2.3C Hash v3](docs/current/P23C_HASH_V3_MIGRATION_PLAN_20260730.md) — tách `embedding_hash`, `payload_hash`, `provenance_hash` để tránh embedding lại khi chỉ bổ sung SHA hoặc cập nhật payload
