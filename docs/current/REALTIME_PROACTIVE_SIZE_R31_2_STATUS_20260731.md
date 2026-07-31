@@ -1,16 +1,19 @@
 # Trạng thái tư vấn size chủ động r31.2
 
-Status: **MERGED_RELEASE_CANDIDATE_NOT_DEPLOYED**
+Status: **DEPLOYED_VERIFIED_R31_2_HUMAN_TEST_PENDING**
 
 Ngày cập nhật: **2026-07-31**
 
 ## Phạm vi nguồn
 
-- PR `#86` đã merge vào `main` tại `abb37e5c8380929162a5e0ae9efb1ac7964dd4d9`.
-- Release candidate: `20260731-realtime-proactive-size-r31.2`; manifest tại
+- PR tính năng `#86` đã merge tại `abb37e5c8380929162a5e0ae9efb1ac7964dd4d9`.
+- PR release `#87` đã merge tại `9fdc049252ce08cb84ee31f8691a22c9e033b956`.
+- Release: `20260731-realtime-proactive-size-r31.2`, annotated tag object
+  `f5a71652c2fec6c8f2739ecd3fcad68cc5357fef`; manifest tại
   [`deploy/manifests/20260731-realtime-proactive-size-r31.2.json`](../../deploy/manifests/20260731-realtime-proactive-size-r31.2.json).
-- Production hiện vẫn chạy `20260731-realtime-continuation-r31.1`; tài liệu này chưa phải bằng chứng deploy.
-- Không có migration. Chỉ dự kiến recreate `realtime-worker`; mọi service khác giữ nguyên container.
+- Production đang trỏ tới r31.2. Chỉ `realtime-worker` được recreate; Admin API/Web, API,
+  Delivery, Shadow, POS và mọi worker dữ liệu giữ nguyên container.
+- Không có migration; production tiếp tục ở schema `0026_product_media_intake_dedupe`.
 - Không đổi page allowlist, routing ownership, n8n ownership, Meta delivery transport, POS,
   Qdrant writer hoặc nguồn fact có thẩm quyền.
 
@@ -25,7 +28,7 @@ Ngày cập nhật: **2026-07-31**
 - Nếu không có bảng size đã xác minh, bot handoff an toàn với lý do
   `BUSINESS_FACT_UNAVAILABLE`; không đoán size và không phát outbound sai.
 - Wave 2 không gắn thêm CTA xin phép tư vấn size sau khi hồ sơ đã đủ số đo.
-- Các câu “đối chiếu size” và “chị muốn em tư vấn size luôn không?” được loại khỏi runtime/prompt.
+- Các câu “đối chiếu size” và “chị muốn em tư vấn size luôn không?” đã được loại khỏi runtime/prompt.
 
 Giá, tồn, bảng size và kết quả tư vấn tiếp tục do nguồn deterministic đã xác minh quyết định;
 model không được tự tạo business fact.
@@ -43,15 +46,28 @@ model không được tự tạo business fact.
 Regression mới xác nhận: hồ sơ `160 cm / 53 kg` với bảng size xác minh được tư vấn ngay size M;
 reply không còn “đối chiếu” hoặc hỏi xin phép tư vấn; thiếu bảng size xác minh chuyển `HANDOFF`.
 
-## Trình tự phát hành
+## Bằng chứng deploy production
 
-1. Merge hồ sơ release và tạo annotated tag `20260731-realtime-proactive-size-r31.2`.
-2. VPS fetch tag bằng deploy key read-only, materialize thư mục release mới; không sửa source.
-3. Preflight r31.1, health/restart, disk/RAM, Inbox/Outbox và page allowlist.
-4. Build image `lana-chatbot-app:realtime-proactive-size-r31.2` từ tag, không ghi đè image r31.1.
-5. Chạy smoke side-effect-free cho đủ số đo, thiếu từng trường và thiếu bảng size xác minh.
-6. Recreate đúng `realtime-worker`; kiểm tra health, restart, heartbeat, queue, duplicate và log lỗi.
-7. Chỉ đổi symlink `current` khi mọi guard đạt; sau đó chờ human test thật, không tạo inbound giả.
+- VPS fetch annotated tag bằng deploy key read-only và materialize working tree sạch tại
+  `/opt/lana-chatbot/releases/20260731-realtime-proactive-size-r31.2`; không sửa source trong `current`.
+- Docker build chạy lại `pnpm check` trong Linux và tạo image
+  `lana-chatbot-app:realtime-proactive-size-r31.2`, ID
+  `sha256:7342a5bb34df9f5e64236c53025d1a1b5e2f0634a5bfbc7143ee5fe01a8d5263`.
+- Smoke side-effect-free đạt cho năm guard: thiếu chiều cao, thiếu cân nặng, đủ số đo tư vấn size M,
+  Wave 2 không gắn CTA dư và thiếu bảng size xác minh thì handoff fail-closed.
+- Cutover lúc `2026-07-31T02:35:08Z`; chỉ Realtime Worker đổi container từ
+  `aac8b34e…` sang `c3b5b411…`. Mọi container ngoài phạm vi giữ nguyên ID.
+- Runtime xác nhận `REALTIME_RELEASE_ID=20260731-realtime-proactive-size-r31.2`,
+  `REALTIME_MESSAGE_GROUPING_V2=true`, `VERTEX_MODEL_NAME=gemini-3.5-flash-lite`, Wave 2 và
+  Buying Signal Guard tiếp tục bật.
+- Realtime `IDLE/LIVE`, send enabled, healthy, restart `0`; heartbeat age khi cutover `11` giây
+  và postcheck tăng thêm `15` giây.
+- Inbox active `0`, Outbox active `0`, duplicate sequence `0`, failed permanent sau cutover `0`
+  và log lỗi mới `0`.
+- Page `1198992073286645` vẫn `APP`, send enabled, kill switch off; public Admin trả `302` sang
+  Authentik. Admin API/Web vẫn healthy trên image r30; API/Delivery giữ image r27.1.
+- Symlink `current` chỉ chuyển sang r31.2 sau khi toàn bộ guard đạt. Rollback artifact về r31.1 đã
+  chuẩn bị sẵn; không rollback schema hoặc xóa dữ liệu.
 
 ## Rollback
 
@@ -59,12 +75,13 @@ reply không còn “đối chiếu” hoặc hỏi xin phép tư vấn; thiếu
 - Không rollback schema; không xóa Inbox/Outbox, Redis, PostgreSQL, Qdrant hoặc dữ liệu hội thoại.
 - Không chạy hai Realtime Worker đồng thời.
 
-## Evidence còn thiếu
+## Human test còn thiếu
 
-- Release PR, release commit, annotated tag object và image digest.
-- Container ID trước/sau, health/restart, smoke, heartbeat, queue/duplicate/error delta và symlink cutover.
-- Human test Messenger thật cho sản phẩm có bảng size và đủ/thiếu số đo; kiểm tra handoff khi
+- Từ cutover đến postcheck chưa có inbound khách mới (`customer_processed=0`). Đây là trạng thái chờ
+  hợp lệ, không phải lỗi runtime.
+- Cần human test Messenger thật cho sản phẩm có bảng size và đủ/thiếu số đo; kiểm tra handoff khi
   không có bảng size đã xác minh.
+- Không tạo inbound giả. Kết quả human test sẽ được ghi evidence riêng sau khi bạn thử trên page test.
 
-Chỉ sau khi deploy và hậu kiểm đạt mới đổi status thành
-**DEPLOYED_VERIFIED_R31_2_HUMAN_TEST_PENDING**.
+Runtime r31.2 đã deploy và hậu kiểm kỹ thuật đạt; xác nhận nghiệp vụ cuối vẫn ở trạng thái
+**HUMAN_TEST_PENDING**.
