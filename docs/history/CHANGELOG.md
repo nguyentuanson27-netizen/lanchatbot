@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-07-31 — Proactive verified size advice r31.2
+
+- Khi hồ sơ đã đủ chiều cao/cân nặng, runtime gọi Size Engine ngay và tư vấn size từ bảng size đã xác minh; không hỏi khách có muốn tư vấn hay không.
+- Thiếu cân nặng chỉ hỏi cân nặng, thiếu chiều cao chỉ hỏi chiều cao; thiếu cả hai mới hỏi cả hai.
+- Nếu bảng size cần thêm số đo hoặc sở thích độ ôm/rộng, bot chỉ hỏi đúng dữ liệu engine còn thiếu.
+- Không có bảng size xác minh thì `HANDOFF` với `BUSINESS_FACT_UNAVAILABLE`; model không được đoán size.
+- Wave 2 không gắn CTA xin phép tư vấn dư thừa; loại toàn bộ wording “đối chiếu size” khỏi runtime và prompt.
+- Không migration, không đổi page allowlist, routing ownership, Meta transport hoặc nguồn fact có thẩm quyền.
+- Targeted regression `84/84` và `pnpm check` toàn monorepo đều PASS; Worker `323/323`, Business Tools `180/180`, Contracts `86/86`, golden transcript `7/7`.
+- PR `#86` đã merge tại `abb37e5`; release candidate chưa deploy khi ghi mục này.
+
 ## 2026-07-31 — Contextual continuation question r31.1
 
 - Hội thoại trước mua còn mở kết thúc bằng đúng một câu hỏi nối ngắn theo stage khi reply chưa có câu hỏi phù hợp.
