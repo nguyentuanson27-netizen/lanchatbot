@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-31 — Contextual continuation question r31.1
+
+- Hội thoại trước mua còn mở kết thúc bằng đúng một câu hỏi nối ngắn theo stage khi reply chưa có câu hỏi phù hợp.
+- CTA xin số đo đổi từ câu trần thuật sang câu hỏi tự nhiên: `Chị cao và nặng khoảng bao nhiêu để em đối chiếu size phù hợp cho mẫu này?`.
+- Nếu hồ sơ đã có số đo, bot không hỏi lại và chuyển sang hỏi khách có muốn đối chiếu size cho mẫu hiện tại hay không.
+- Không gắn câu hỏi kéo dài khi `HANDOFF`, `NO_REPLY`, `READY_TO_BUY`, `ORDER_REVIEW`, `POST_SALE` hoặc Sales Cycle đang xử lý chốt đơn.
+- Form báo giá vẫn là hai bong bóng text rồi mới tới ảnh; nguồn fact, Meta transport, page allowlist và routing ownership không đổi.
+- Targeted regression `83/83` và `pnpm check` toàn monorepo đều PASS; Worker `322/322`, Business Tools `180/180`.
+- PR `#83` đã merge tại `3ac1ea2`; release candidate chưa deploy khi ghi mục này.
+
 ## 2026-07-31 — Voice Contract V2 + Hybrid Buying Intent r31
 
 - Phản hồi tư vấn thường được giữ trong một bong bóng, ưu tiên 2 câu tự nhiên và tối đa một câu hỏi; bỏ các câu đệm kiểu ChatGPT, quảng cáo sáo rỗng và việc tách từng câu thành một tin riêng.
