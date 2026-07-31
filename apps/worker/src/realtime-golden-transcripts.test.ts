@@ -235,7 +235,7 @@ describe("realtime golden transcripts", () => {
       },
       {
         kind: "TEXT",
-        text: "Chị gửi em chiều cao và cân nặng, em tư vấn size phù hợp cho chị nhé.",
+        text: "Chị cao và nặng khoảng bao nhiêu để em đối chiếu size phù hợp cho mẫu này?",
       },
       { kind: "IMAGE", imageUrl: "https://cdn.example/cb182.jpg" },
     ]);
