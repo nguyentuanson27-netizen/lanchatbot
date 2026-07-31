@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-31T03:26:00Z",
+  "status": "RELEASE_CANDIDATE_NOT_DEPLOYED",
+  "environment": "production-test-page-live-100-percent-acquisition-shadow",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "a9ff18c8f14c57503b4583abd7e16688eaf946ea",
+  "featureCommits": [
+    "15a000162effd96b85dac9db4960f19d7af67db5",
+    "a9ff18c8f14c57503b4583abd7e16688eaf946ea"
+  ],
+  "pullRequests": [89],
+  "releaseTag": "20260731-realtime-generation-quota-r31.3",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260731-realtime-generation-quota-r31.3",
+  "previousReleasePath": "/opt/lana-chatbot/releases/20260731-realtime-proactive-size-r31.2",
+  "sourceMaterialization": {
+    "method": "annotated-tag-fetched-by-read-only-deploy-key",
+    "tagObject": "EVIDENCE_PENDING",
+    "workingTreeClean": "EVIDENCE_PENDING"
+  },
+  "image": {
+    "name": "lana-chatbot-app:realtime-generation-quota-r31.3",
+    "imageId": "EVIDENCE_PENDING",
+    "releaseLabel": "20260731-realtime-generation-quota-r31.3",
+    "revisionLabel": "EVIDENCE_PENDING_RELEASE_COMMIT",
+    "recreatedServices": ["realtime-worker"],
+    "containerIds": "EVIDENCE_PENDING",
+    "nonTargetServiceContainerIdsUnchanged": "EVIDENCE_PENDING"
+  },
+  "scope": {
+    "features": [
+      "PER_PAGE_AI_GENERATION_LIMIT_500_HOURLY",
+      "PER_PAGE_AI_GENERATION_LIMIT_2000_DAILY"
+    ],
+    "pageId": "1198992073286645",
+    "generationQuotaChanged": true,
+    "quotaAccountingChanged": false,
+    "outboundContentChanged": false,
+    "outboundTransportChanged": false,
+    "pageAllowlistChanged": false,
+    "routingOwnershipChanged": false,
+    "n8nOwnershipChanged": false,
+    "realtimeChanged": true,
+    "deliveryChanged": false,
+    "qdrantWriterChanged": false
+  },
+  "quota": {
+    "scope": "PER_PAGE",
+    "unit": "AI_GENERATION",
+    "hourlyBefore": 10,
+    "hourlyAfter": 500,
+    "dailyBefore": 50,
+    "dailyAfter": 2000,
+    "deterministicRepliesCounted": false,
+    "metaMessageUnitsCounted": false
+  },
+  "model": {
+    "realtime": "gemini-3.5-flash-lite",
+    "modelChanged": false
+  },
+  "database": {
+    "migrationRequired": false,
+    "latestMigrationExpected": "0026_product_media_intake_dedupe",
+    "backupRequired": false,
+    "restoreTestRequired": false,
+    "dataMutationPlanned": false
+  },
+  "preDeployVerification": {
+    "localTypecheckAndTests": "PASS",
+    "localBuild": "PASS",
+    "quotaWithinRuntimeBounds": true,
+    "hourlyRuntimeMaximum": 1000,
+    "dailyRuntimeMaximum": 10000,
+    "gitDiffCheck": "PASS"
+  },
+  "productionVerification": {
+    "status": "EVIDENCE_PENDING",
+    "requiredTargetServicesHealthy": 1,
+    "requiredTargetServiceRestartCount": 0,
+    "requiredNewErrorLineCount": 0,
+    "requiredRuntimeQuotaHourly": 500,
+    "requiredRuntimeQuotaDaily": 2000,
+    "requiredInboxOutboxAudit": true,
+    "requiredDuplicateSequenceCount": 0,
+    "requiredPageAllowlistUnchanged": true,
+    "requiredPublicAdminStatus": 302,
+    "requiredPublicAdminTarget": "Authentik"
+  },
+  "guardedCutover": {
+    "atomicSymlinkSwitchAfterAllGuards": true,
+    "status": "NOT_STARTED"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260731-realtime-proactive-size-r31.2",
+    "image": "lana-chatbot-app:realtime-proactive-size-r31.2",
+    "services": ["realtime-worker"],
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false,
+    "artifactPrepared": false,
+    "executed": false
+  }
+}
