@@ -77,18 +77,19 @@ describe("Wave 2 sales strategy v1", () => {
     const rewritten = applyWave2ReplyPolicy(proposal, decision);
     expect(rewritten.reply).toContain("cao và nặng khoảng bao nhiêu");
     expect((rewritten.reply.match(/\?/gu) ?? []).length).toBe(1);
+    expect(rewritten.reply).toContain("tư vấn size phù hợp");
     expect(rewritten.reply).not.toMatch(/số điện thoại|địa chỉ/iu);
   });
 
-  it("does not ask for measurements again when the profile already has them", () => {
+  it("leaves complete measurements to Size Engine without a redundant CTA", () => {
     const decision = decideWave2SalesStrategy({
       ...baseInput,
       hasMeasurements: true,
     });
     const rewritten = applyWave2ReplyPolicy(proposal, decision);
-    expect(rewritten.reply).toContain("muốn em đối chiếu size phù hợp");
-    expect(rewritten.reply).not.toContain("cao và nặng khoảng bao nhiêu");
-    expect((rewritten.reply.match(/\?/gu) ?? []).length).toBe(1);
+    expect(decision.ctaPolicy).toBe("NO_ADDITIONAL_CTA");
+    expect(rewritten.reply).toBe(proposal.reply);
+    expect(rewritten.reply).not.toContain("?");
   });
 
   it("does not add a continuation question after a committed buying signal", () => {

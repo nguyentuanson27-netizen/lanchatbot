@@ -419,6 +419,7 @@ function ctaFor(
   if (need === "NEED_STYLE") return "ASK_OCCASION";
   if (need === "NEED_BUDGET") return "ASK_STYLE";
   if (!input.hasVerifiedProduct) return "ASK_OCCASION";
+  if (input.hasMeasurements) return "NO_ADDITIONAL_CTA";
   return "ASK_MEASUREMENTS";
 }
 
@@ -492,10 +493,7 @@ export function decideWave2SalesStrategy(
   };
 }
 
-function ctaText(
-  policy: Wave2CtaPolicy,
-  evidence: readonly Wave2EvidenceSignal[],
-): string | null {
+function ctaText(policy: Wave2CtaPolicy): string | null {
   switch (policy) {
     case "ASK_OCCASION":
       return "Chị thường mặc đi làm, đi chơi hay dự tiệc để em chọn mẫu phù hợp hơn?";
@@ -504,9 +502,7 @@ function ctaText(
     case "ASK_BUDGET":
       return "Chị muốn xem các mẫu trong khoảng giá nào?";
     case "ASK_MEASUREMENTS":
-      return evidence.includes("STATE_MEASUREMENTS_PRESENT")
-        ? "Chị muốn em đối chiếu size phù hợp cho mẫu này luôn không?"
-        : "Chị cao và nặng khoảng bao nhiêu để em đối chiếu size phù hợp cho mẫu này?";
+      return "Chị cao và nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?";
     case "ASK_PROOF_PREFERENCE":
       return "Chị muốn xem ảnh mặc thực tế hay ảnh cận chất liệu?";
     case "REDUCE_TO_TWO":
@@ -557,7 +553,7 @@ export function applyWave2ReplyPolicy(
   );
   const additionalCta =
     questionCount(limited) === 0
-      ? ctaText(decision.ctaPolicy, decision.evidence)
+      ? ctaText(decision.ctaPolicy)
       : null;
   const reply = [limited, additionalCta].filter(Boolean).join("\n");
   return { ...proposal, reply };

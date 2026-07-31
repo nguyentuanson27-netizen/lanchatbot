@@ -32,6 +32,7 @@ import {
   staleFactsRequireHandoff,
   splitRealtimeMetaMessages,
   unavailableFactsRequireHandoff,
+  withProactiveSizeAdvice,
   unresolvedProductRequiresHandoff,
   verifiedProductInfoProposal,
   type RealtimeInboxPort,
@@ -40,7 +41,12 @@ import {
   type RealtimeProductSearchPort,
   type RealtimeRuntimePort,
 } from "./realtime-runner.js";
-import type { BusinessFactEnvelopeV1, ProductFactsV2 } from "@lana/contracts";
+import type {
+  BusinessFactEnvelopeV1,
+  AgentProposalV1,
+  CustomerProfileV1,
+  ProductFactsV2,
+} from "@lana/contracts";
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 
 describe("RealtimeRunner", () => {
@@ -80,7 +86,7 @@ describe("RealtimeRunner", () => {
           "Form dáng: chiết eo",
           "Size: M, L, XL",
           "",
-          "Chị cao và nặng khoảng bao nhiêu để em đối chiếu size phù hợp cho mẫu này?",
+          "Chị cao và nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?",
         ].join("\n"),
       },
       { kind: "IMAGE", imageUrl: "https://cdn.example/sv695.jpg" },
@@ -94,7 +100,7 @@ describe("RealtimeRunner", () => {
           "Size: M, L, XL",
         ].join("\n"),
       },
-      { kind: "TEXT", text: "Chị cao và nặng khoảng bao nhiêu để em đối chiếu size phù hợp cho mẫu này?" },
+      { kind: "TEXT", text: "Chị cao và nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?" },
       { kind: "IMAGE", imageUrl: "https://cdn.example/sv695.jpg" },
     ]);
   });
@@ -525,8 +531,144 @@ describe("RealtimeRunner", () => {
       "Form dáng: suông rộng",
       "Size: M, L, XL",
       "",
-      "Chị cao và nặng khoảng bao nhiêu để em đối chiếu size phù hợp cho mẫu này?",
+      "Chị cao và nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?",
     ].join("\n"));
+  });
+
+  it("advises a verified size immediately when the stored profile is complete", () => {
+    const timestamp = "2026-07-31T00:00:00.000Z";
+    const product = {
+      productId: "SD398",
+      parentProductId: "SD398",
+      canonicalCode: "SD398",
+      aliases: [],
+      title: "Áo dài Dao Phụng",
+      colors: ["ĐEN"],
+      materials: ["REN"],
+      silhouettes: ["SUÔNG"],
+      occasions: [],
+      imageUrls: [],
+      images: [],
+      catalogVersion: "catalog-v2",
+    };
+    const profile = {
+      schemaVersion: 1,
+      profileId: "30709206-8f96-4a1b-9311-6f03ef4dd8b2",
+      customerKey: {
+        namespace: "lana-customer-v1",
+        algorithm: "HMAC_SHA256",
+        digest: "a".repeat(64),
+      },
+      revision: 2,
+      measurements: [
+        {
+          kind: "HEIGHT_CM",
+          value: 160,
+          provenance: {
+            source: "CUSTOMER_MESSAGE",
+            sourceEventHash: "b".repeat(64),
+            observedAt: timestamp,
+            confidence: 1,
+          },
+        },
+        {
+          kind: "WEIGHT_KG",
+          value: 53,
+          provenance: {
+            source: "CUSTOMER_MESSAGE",
+            sourceEventHash: "c".repeat(64),
+            observedAt: timestamp,
+            confidence: 1,
+          },
+        },
+      ],
+      fitPreference: null,
+      preferences: { colors: [], styles: [], materials: [] },
+      sizeHistory: [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    } as CustomerProfileV1;
+    const policy = {
+      bundle: {
+        artifacts: {
+          sizeCharts: {
+            "ao-dai-dress": {
+              chart: {
+                schemaVersion: 1,
+                reference: {
+                  chartId: "ao-dai-dress",
+                  version: "1",
+                  source: "IMAGE_EXTRACTION",
+                  sourceArtifactRef: "https://cdn.example/ao-dai-size.jpg",
+                  sourceContentSha256: "d".repeat(64),
+                  verificationStatus: "VERIFIED",
+                  verifiedByRef: "admin:owner",
+                  verifiedAt: timestamp,
+                },
+                brand: "LANA",
+                category: "AO_DAI",
+                componentRole: "DRESS",
+                boundaryPolicy: "REQUIRE_HUMAN_REVIEW",
+                bands: [{
+                  size: "M",
+                  ranges: [
+                    { kind: "HEIGHT_CM", minInclusive: 155, maxInclusive: 168 },
+                    { kind: "WEIGHT_KG", minInclusive: 50, maxInclusive: 57 },
+                  ],
+                  note: null,
+                }],
+              },
+              scope: {
+                level: "COMPONENT",
+                parentProductIds: ["SD398"],
+                categories: ["AO_DAI"],
+                componentRole: "DRESS",
+                forms: [],
+                materials: [],
+              },
+              sourceMetadata: {
+                sourceReference: "https://cdn.example/ao-dai-size.jpg",
+              },
+            },
+          },
+        },
+      },
+    } as unknown as RuntimePolicyResolution;
+    const baseProposal = {
+      schemaVersion: 1,
+      intent: "product_info",
+      conversationStage: "PRODUCT_MATCHED",
+      productId: "SD398",
+      action: "REPLY",
+      reply: "Áo dài Dao Phụng hiện có giá 1.199.000đ chị nhé.",
+      attachments: [],
+      handoffReason: null,
+      businessFactQuery: {
+        intent: "PRICE",
+        offerType: null,
+        color: null,
+        size: null,
+        deliveryRegion: null,
+      },
+    } satisfies AgentProposalV1;
+
+    const advised = withProactiveSizeAdvice(
+      baseProposal, product, profile, policy, null, new Date(timestamp),
+    );
+    expect(advised.action).toBe("REPLY");
+    expect(advised.reply).toContain("chị hợp váy size M");
+    expect(advised.reply).not.toContain("đối chiếu");
+    expect(advised.reply).not.toContain("muốn em tư vấn");
+
+    const failClosed = withProactiveSizeAdvice(
+      baseProposal, product, profile, null, null, new Date(timestamp),
+    );
+    expect(failClosed).toMatchObject({
+      action: "HANDOFF",
+      reply: "",
+      attachments: [],
+      handoffReason: "BUSINESS_FACT_UNAVAILABLE",
+    });
   });
 
   it("falls back to the verified price-card image when Media Selector V2 returns none", () => {
@@ -957,7 +1099,7 @@ describe("RealtimeRunner", () => {
               "Size: M, L, XL",
             ].join("\n"),
           },
-          { kind: "TEXT", text: "Chị cao và nặng khoảng bao nhiêu để em đối chiếu size phù hợp cho mẫu này?" },
+          { kind: "TEXT", text: "Chị cao và nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?" },
           { kind: "IMAGE", imageUrl },
         ],
         imageDelayMs: 500,
