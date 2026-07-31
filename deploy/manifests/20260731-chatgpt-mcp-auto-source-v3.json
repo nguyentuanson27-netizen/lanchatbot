@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-31T05:00:00Z",
+  "status": "RELEASE_CANDIDATE_NOT_DEPLOYED",
+  "environment": "production-mcp-owner-only",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "EVIDENCE_PENDING_MERGE_COMMIT",
+  "releaseTag": "20260731-chatgpt-mcp-auto-source-v3",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260731-chatgpt-mcp-auto-source-v3",
+  "previousMcpReleasePath": "/opt/lana-chatbot/releases/20260730-chatgpt-mcp-repository-read-v2",
+  "image": {
+    "name": "lana-chatbot-mcp:auto-source-v3",
+    "recreatedServices": ["lana-mcp"],
+    "futureSourceOnlyUpdatesRequireMcpRecreate": false
+  },
+  "sourceSync": {
+    "currentLink": "/opt/lana-chatbot/current",
+    "releasesRoot": "/opt/lana-chatbot/releases",
+    "snapshotRoot": "/opt/lana-chatbot/mcp-source/releases",
+    "stateDirectory": "/opt/lana-chatbot/mcp-source",
+    "pointerFile": "/opt/lana-chatbot/mcp-source/current.json",
+    "pathUnit": "lana-mcp-source-sync.path",
+    "timerUnit": "lana-mcp-source-sync.timer",
+    "timerIntervalMinutes": 5,
+    "atomicPointerWrite": true,
+    "readOnlyDeployKey": true,
+    "requiredTagSourceMatch": true
+  },
+  "security": {
+    "mountsSharedSecrets": false,
+    "mountsGitMetadata": false,
+    "mountsDockerSocket": false,
+    "mountsProductionReleases": false,
+    "sourceMirrorMountReadOnly": true,
+    "pointerMountReadOnly": true,
+    "pathTraversalFailsClosed": true
+  },
+  "scope": {
+    "mcpChanged": true,
+    "systemdSourceSyncChanged": true,
+    "realtimeChanged": false,
+    "deliveryChanged": false,
+    "apiChanged": false,
+    "adminChanged": false,
+    "databaseMigrationRequired": false,
+    "customerDataMutation": false,
+    "outboundChanged": false
+  },
+  "verification": {
+    "mcpTests": "PASS_10_OF_10",
+    "linuxUpdaterRegression": "PASS_RELEASE_SWITCH_AND_FAIL_CLOSED",
+    "fullRepositoryCheck": "PASS",
+    "composeRender": "PASS",
+    "systemdVerify": "PASS",
+    "productionHealth": "EVIDENCE_PENDING",
+    "nonTargetContainersUnchanged": "EVIDENCE_PENDING"
+  },
+  "rollback": {
+    "image": "lana-chatbot-mcp:repository-read-v2",
+    "disableUnits": [
+      "lana-mcp-source-sync.path",
+      "lana-mcp-source-sync.timer"
+    ],
+    "recreateServices": ["lana-mcp"],
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false
+  }
+}

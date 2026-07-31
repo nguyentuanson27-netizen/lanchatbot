@@ -1,6 +1,6 @@
 {
   "name": "lana-chatbot-ops",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Diagnose and repair the Lana chatbot through audited GitHub, VPS, Redis, Qdrant, and Google Sheets workflows.",
   "author": {
     "name": "La.na Design"

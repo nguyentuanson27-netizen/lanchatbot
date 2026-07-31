@@ -9,7 +9,7 @@ Use the `lana_chatbot_ops` MCP tools as the operational interface. Treat product
 
 ## Operating workflow
 
-1. Use `repository_list_files`, `repository_read_file`, and `repository_search_text` to read `README.md`, `AGENTS.md`, and the newest baseline/release document from the immutable release snapshot before diagnosing code.
+1. Use `repository_list_files`, `repository_read_file`, and `repository_search_text` to read `README.md`, `AGENTS.md`, and the newest baseline/release document from the automatically synchronized current production release before diagnosing code.
    Report `source_commit` and `source_ref` when the diagnosed source version matters.
 2. Inspect Git/GitHub and VPS state before proposing or applying a repair.
 3. Start read-only: page status, latest event, decision events, outbox, worker logs, Redis state, and Qdrant payload.

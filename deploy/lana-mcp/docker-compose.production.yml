@@ -21,6 +21,8 @@ services:
       LANA_MCP_RATE_LIMIT_PER_MINUTE: "60"
       LANA_MCP_DATA_DIR: /data
       LANA_MCP_REPOSITORY_ROOT: /app/repository
+      LANA_MCP_REPOSITORY_RELEASES_ROOT: /app/repository-source/releases
+      LANA_MCP_REPOSITORY_POINTER_FILE: /app/repository-source/current.json
       LANA_MCP_REMOTE_OPS_PATH: /app/apps/lana-mcp/remote-ops-adapter.mjs
       DATABASE_URL: postgresql://${POSTGRES_USER:?Set POSTGRES_USER}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@lana-chatbot-postgres:5432/${POSTGRES_DB:?Set POSTGRES_DB}
       REALTIME_DATA_KEY_FILE: /run/secrets/realtime_data_key
@@ -39,6 +41,12 @@ services:
       - qdrant_api_key
     volumes:
       - lana_mcp_exports:/data
+      - type: bind
+        source: ${LANA_MCP_SOURCE_STATE_DIR:-/opt/lana-chatbot/mcp-source}
+        target: /app/repository-source
+        read_only: true
+        bind:
+          create_host_path: false
     read_only: true
     tmpfs:
       - /tmp:size=32m,mode=1777

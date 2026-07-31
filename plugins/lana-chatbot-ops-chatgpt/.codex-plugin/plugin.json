@@ -1,6 +1,6 @@
 {
   "name": "lana-chatbot-ops-chatgpt",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "OAuth-protected remote diagnostics and controlled operations for the La.na chatbot.",
   "author": {
     "name": "La.na Design"
