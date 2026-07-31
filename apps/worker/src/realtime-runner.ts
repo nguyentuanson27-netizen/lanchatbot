@@ -760,8 +760,8 @@ export function verifiedProductInfoProposal(
   const followUp = (profile !== null
     ? profileHasBodyMeasurements(profile)
     : hasBodyProfile(context))
-    ? "Em đã có số đo chị gửi, em sẽ dùng thông tin này để tư vấn size phù hợp cho mẫu nhé."
-    : "Chị gửi em chiều cao và cân nặng, em tư vấn size phù hợp cho chị nhé.";
+    ? "Em đã có số đo chị gửi. Chị muốn em đối chiếu size phù hợp cho mẫu này luôn không?"
+    : "Chị cao và nặng khoảng bao nhiêu để em đối chiếu size phù hợp cho mẫu này?";
   const v2Overview = productFactsV2
     ? selectProductMediaV2({
         product: productFactsV2,

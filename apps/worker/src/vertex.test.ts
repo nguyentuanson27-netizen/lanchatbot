@@ -116,7 +116,7 @@ describe("Vertex shadow client", () => {
     expect(GROUNDED_DRAFT_SYSTEM_INSTRUCTION).toContain("tieng Viet day du dau Unicode");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("[Loại sản phẩm] [Tên sản phẩm] (mã [ProductId]) hiện có giá [Price] chị nhé.");
     expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Chất liệu: [chất liệu]");
-    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Chị gửi em chiều cao và cân nặng");
+    expect(GROUNDED_SYSTEM_INSTRUCTION).toContain("Chị cao và nặng khoảng bao nhiêu");
     expect(GROUNDED_SYSTEM_INSTRUCTION).not.toContain("'Da [Price] a'");
     expect(GROUNDED_SYSTEM_INSTRUCTION).not.toContain(
       "Chi cho em xin chieu cao can nang hoac so do 3 vong",

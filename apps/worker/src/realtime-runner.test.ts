@@ -80,7 +80,7 @@ describe("RealtimeRunner", () => {
           "Form dáng: chiết eo",
           "Size: M, L, XL",
           "",
-          "Chị gửi em chiều cao và cân nặng, em tư vấn size phù hợp cho chị nhé.",
+          "Chị cao và nặng khoảng bao nhiêu để em đối chiếu size phù hợp cho mẫu này?",
         ].join("\n"),
       },
       { kind: "IMAGE", imageUrl: "https://cdn.example/sv695.jpg" },
@@ -94,7 +94,7 @@ describe("RealtimeRunner", () => {
           "Size: M, L, XL",
         ].join("\n"),
       },
-      { kind: "TEXT", text: "Chị gửi em chiều cao và cân nặng, em tư vấn size phù hợp cho chị nhé." },
+      { kind: "TEXT", text: "Chị cao và nặng khoảng bao nhiêu để em đối chiếu size phù hợp cho mẫu này?" },
       { kind: "IMAGE", imageUrl: "https://cdn.example/sv695.jpg" },
     ]);
   });
@@ -525,7 +525,7 @@ describe("RealtimeRunner", () => {
       "Form dáng: suông rộng",
       "Size: M, L, XL",
       "",
-      "Chị gửi em chiều cao và cân nặng, em tư vấn size phù hợp cho chị nhé.",
+      "Chị cao và nặng khoảng bao nhiêu để em đối chiếu size phù hợp cho mẫu này?",
     ].join("\n"));
   });
 
@@ -957,7 +957,7 @@ describe("RealtimeRunner", () => {
               "Size: M, L, XL",
             ].join("\n"),
           },
-          { kind: "TEXT", text: "Chị gửi em chiều cao và cân nặng, em tư vấn size phù hợp cho chị nhé." },
+          { kind: "TEXT", text: "Chị cao và nặng khoảng bao nhiêu để em đối chiếu size phù hợp cho mẫu này?" },
           { kind: "IMAGE", imageUrl },
         ],
         imageDelayMs: 500,
