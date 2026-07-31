@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-31 — Realtime generation quota r31.3
+
+- Nâng quota per-page từ `10` lên `500` lượt AI/giờ và từ `50` lên `2.000` lượt AI/ngày.
+- Quota chỉ tính AI generation; reply deterministic và số Meta message unit không bị tính.
+- Không đổi thuật toán đếm, prompt, model, Wave 1, Wave 2, Sales Cycle, page allowlist, routing ownership hoặc Meta transport.
+- Default code vẫn là `10/50`; production compose ghi đè `500/2000`, nằm trong biên runtime `1.000/10.000`.
+- Không migration; release chỉ recreate Realtime Worker.
+- Local typecheck, tests và build đều PASS; `git diff --check` PASS.
+- PR `#89` đã merge tại `a9ff18c`; release candidate chưa deploy khi ghi mục này.
+
 ## 2026-07-31 — Proactive verified size advice r31.2
 
 - Khi hồ sơ đã đủ chiều cao/cân nặng, runtime gọi Size Engine ngay và tư vấn size từ bảng size đã xác minh; không hỏi khách có muốn tư vấn hay không.
