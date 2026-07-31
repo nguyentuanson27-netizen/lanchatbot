@@ -20,6 +20,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - r30 đã **DEPLOYED_VERIFIED_R30**; bản vá đứng giao diện, C1, B2, B3 và B4 đã qua backup/restore-test, guarded cutover và canary thật.
 - r31 đã **DEPLOYED_VERIFIED_R31_HUMAN_TEST_PENDING**: Voice Contract V2, form báo giá hai bong bóng và Hybrid Buying Intent có guard đã live; chưa có inbound khách sau cutover nên còn chờ human test Messenger.
 - Hotfix câu hỏi nối r31.1 đã **DEPLOYED_VERIFIED_R31_1_HUMAN_TEST_PENDING**: đúng một câu hỏi nối cho pre-sale còn mở, không hỏi lại số đo; chốt đơn, hậu mãi và handoff không bị kéo dài. Chưa có inbound khách sau cutover nên còn chờ human test Messenger.
+- Bản sửa tư vấn size chủ động đã merge qua PR `#86` tại `abb37e5`; r31.2 đang **MERGED_RELEASE_CANDIDATE_NOT_DEPLOYED**. Khi đủ chiều cao/cân nặng, Size Engine tư vấn ngay từ bảng size đã xác minh; production vẫn chạy r31.1 cho tới guarded cutover.
 - r31 không có migration và chỉ recreate Realtime Worker; giá/tồn/size/ETA, attachment và side effect vẫn do nguồn deterministic đã xác minh quyết định.
 - Realtime phân loại need/barrier/decision factor/strategy, áp dụng stage playbook và đúng một câu hỏi nối khi pre-sale còn mở. Deterministic guard vẫn là quyền quyết định cuối cho fact, offer, media, checkout, handoff và outbound.
 - API, Realtime, Delivery, Admin API và Admin Web đều healthy; ba target r30 có restart count 0. Shadow, Admin Simulation, POS, P2.3, Size Chart, n8n và các service ngoài phạm vi không bị recreate.
@@ -162,6 +163,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 - [Trạng thái ổn định giao diện và hiệu năng r30](docs/current/PERFORMANCE_UI_STABILITY_R30_STATUS_20260730.md) — bản vá đứng giao diện, C1, B2, B3, B4; `DEPLOYED_VERIFIED_R30`
 - [Trạng thái Voice Contract V2 và Hybrid Buying Intent r31](docs/current/REALTIME_VOICE_HYBRID_R31_STATUS_20260731.md) — báo giá hai bong bóng, handoff sản phẩm chưa xác định và model evidence có deterministic guard; `DEPLOYED_VERIFIED_R31_HUMAN_TEST_PENDING`
 - [Trạng thái hotfix câu hỏi nối r31.1](docs/current/REALTIME_CONTINUATION_QUESTION_R31_1_STATUS_20260731.md) — đúng một câu hỏi nối cho pre-sale còn mở, không hỏi lại số đo và không chen vào chốt đơn/hậu mãi; `DEPLOYED_VERIFIED_R31_1_HUMAN_TEST_PENDING`
+- [Trạng thái tư vấn size chủ động r31.2](docs/current/REALTIME_PROACTIVE_SIZE_R31_2_STATUS_20260731.md) — đủ số đo thì tư vấn ngay bằng Size Engine, thiếu trường nào chỉ hỏi trường đó và thiếu bảng size xác minh thì handoff; `MERGED_RELEASE_CANDIDATE_NOT_DEPLOYED`
 - [Kế hoạch Task 2.0A — Meta Ads Entry Context & Lead Qualification](docs/current/TASK_2_0A_AD_ENTRY_CONTEXT_AND_LEAD_QUALIFICATION_PLAN.md) — `DEPLOYED_SHADOW_EVIDENCE_PENDING`, analytics sidecar, không thay đổi outbound
 - [Kế hoạch nhận diện ảnh Cutout-first + AI reranker](docs/current/MEDIA_RECOGNITION_CUTOUT_AI_IMPLEMENTATION_PLAN.md)
 - [Kế hoạch migration P2.3C Hash v3](docs/current/P23C_HASH_V3_MIGRATION_PLAN_20260730.md) — tách `embedding_hash`, `payload_hash`, `provenance_hash` để tránh embedding lại khi chỉ bổ sung SHA hoặc cập nhật payload
