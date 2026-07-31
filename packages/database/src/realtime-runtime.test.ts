@@ -269,6 +269,9 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
 
     expect(result.handoffEventCreated).toBe(true);
     expect(result.pancakeTagOutboxCreated).toBe(true);
+    const handoffCaseInsert = calls.find((call) => call.sql.includes("INSERT INTO handoff_cases"));
+    expect(handoffCaseInsert?.sql).toContain("sla_due_at");
+    expect(handoffCaseInsert?.sql).toContain("interval '30 minutes'");
     const statements = calls.map((call) => call.sql.trim().split(/\s+/u).slice(0, 4).join(" "));
     expect(statements[0]).toBe("BEGIN");
     expect(calls.findIndex((call) => call.sql.includes("UPDATE conversations")))

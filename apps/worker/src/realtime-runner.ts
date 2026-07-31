@@ -1449,7 +1449,7 @@ function sizeEngineProposal(
   };
 }
 
-export function withProactiveSizeAdvice(
+export function withSizeEngineAdvice(
   productInfoProposal: AgentProposalV1,
   product: StableProductDocument,
   profile: CustomerProfileV1,
@@ -1457,7 +1457,6 @@ export function withProactiveSizeAdvice(
   productFactsV2: ProductFactsV2 | null,
   now: Date,
 ): AgentProposalV1 {
-  if (!profileHasBodyMeasurements(profile)) return productInfoProposal;
   const sizeProposal = sizeEngineProposal(
     productInfoProposal,
     product,
@@ -1476,9 +1475,27 @@ export function withProactiveSizeAdvice(
     attachments: [
       ...new Set([...productInfoProposal.attachments, ...sizeProposal.attachments]),
     ],
-
     handoffReason: sizeProposal.handoffReason,
   };
+}
+
+export function withProactiveSizeAdvice(
+  productInfoProposal: AgentProposalV1,
+  product: StableProductDocument,
+  profile: CustomerProfileV1,
+  policyResolution: RuntimePolicyResolution | null,
+  productFactsV2: ProductFactsV2 | null,
+  now: Date,
+): AgentProposalV1 {
+  if (!profileHasBodyMeasurements(profile)) return productInfoProposal;
+  return withSizeEngineAdvice(
+    productInfoProposal,
+    product,
+    profile,
+    policyResolution,
+    productFactsV2,
+    now,
+  );
 }
 export interface RealtimeRuntimePort {
   isOwnMetaMessage?(
@@ -2807,21 +2824,15 @@ export class RealtimeRunner {
             resolutions[0]!.product !== null &&
             first.requestedFacts.includes("SIZE")
           ) {
-            const sizeProposal = sizeEngineProposal(
-              {
-                ...proposal,
-                businessFactQuery: {
-                  ...proposal.businessFactQuery,
-                  intent: "SIZE",
-                },
-              },
+            proposal = withSizeEngineAdvice(
+              proposal,
               resolutions[0]!.product!,
               customerProfile,
               policyResolution,
               productFactsV2,
               now,
             );
-            if (sizeProposal.action === "HANDOFF") {
+            if (proposal.action === "HANDOFF") {
               handoffGuardReasonCodes = [
                 ...new Set([
                   ...handoffGuardReasonCodes,
@@ -2837,13 +2848,6 @@ export class RealtimeRunner {
               );
               nextState = transitioned.state;
               handoff = transitioned.handoff;
-              proposal = sizeProposal;
-            } else {
-              proposal = {
-                ...proposal,
-                reply: [reply, sizeProposal.reply].filter(Boolean).join("\n"),
-                attachments: sizeProposal.attachments,
-              };
             }
           }
           nextState = {
@@ -3195,11 +3199,15 @@ export class RealtimeRunner {
                 attachments: [...assembled.imageUrls],
               };
             } catch (error) {
-              if (!(error instanceof Error) || error.message !== "GROUNDED_SCHEMA_INVALID") {
-                throw error;
-              }
+              const reasonCode =
+                error instanceof Error && (
+                  error.message === "GROUNDED_SCHEMA_INVALID" ||
+                  error.message === "VERTEX_SCHEMA_INVALID"
+                )
+                  ? "GROUNDED_SCHEMA_INVALID"
+                  : "GROUNDED_DRAFT_FALLBACK";
               handoffGuardReasonCodes = [
-                ...new Set([...handoffGuardReasonCodes, "GROUNDED_SCHEMA_INVALID"]),
+                ...new Set([...handoffGuardReasonCodes, reasonCode]),
               ];
               const assembled = assembleReply(
                 factBlocks,
@@ -3296,7 +3304,7 @@ export class RealtimeRunner {
           resolvedProduct &&
           proposal.businessFactQuery.intent === "SIZE"
         ) {
-          proposal = sizeEngineProposal(
+          proposal = withSizeEngineAdvice(
             proposal,
             resolvedProduct,
             customerProfile,

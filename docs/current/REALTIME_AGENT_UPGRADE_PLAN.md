@@ -962,6 +962,9 @@ Agent chỉ đổi trạng thái sau khi có bằng chứng. Giá trị hợp l�
 | 2026-07-23 | D-004 | Guard số theo typed business facts, không cấm mọi số | Tránh chặn mô tả hợp lệ như 3D/2 lớp/6 tà |
 | 2026-07-23 | D-005 | Mọi thay đổi hành vi qua feature flag | Canary và rollback độc lập |
 | 2026-07-23 | D-006 | Judge chỉ đánh giá | Không cho mô hình đánh giá điều khiển outbound |
+| 2026-07-31 | D-008 | Every new handoff case has an explicit 30-minute SLA plus a database default | A missing SLA must never turn a valid handoff into a permanent Inbox failure. |
+| 2026-07-31 | D-009 | Any grounded-draft Vertex error uses a deterministic verified-facts fallback | Preserve a safe customer reply without retaining raw provider errors or changing the proposal decision. |
+| 2026-07-31 | D-010 | Size Engine composes with an existing verified reply | Size advice must not replace verified price, stock, ETA, or attachments. |
 | 2026-07-23 | D-007 | Số đo mới nhất được ưu tiên khi xung đột | Chủ dự án muốn dữ liệu khách vừa cung cấp thay thế giá trị cũ, không cần bước xác nhận |
 
 Mọi quyết định mới làm đổi phạm vi, source-of-truth, retention, handoff hoặc safety gate phải ghi thêm một dòng trước khi code.
