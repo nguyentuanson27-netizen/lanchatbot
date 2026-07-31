@@ -288,4 +288,10 @@ describe("database migrations", () => {
     expect(sql).not.toMatch(/(?:photo_url|image_url|video_url)\s+text/iu);
   });
 
+  it("gives every new handoff case a fail-safe 30-minute SLA", async () => {
+    const sql = await readFile(resolve(directory, "0027_handoff_case_sla_default.up.sql"), "utf8");
+    expect(sql).toContain("ALTER COLUMN sla_due_at SET DEFAULT");
+    expect(sql).toContain("interval '30 minutes'");
+  });
+
 });

@@ -660,6 +660,18 @@ describe("RealtimeRunner", () => {
     expect(advised.reply).not.toContain("đối chiếu");
     expect(advised.reply).not.toContain("muốn em tư vấn");
 
+    const preservedFacts = withProactiveSizeAdvice(
+      { ...baseProposal, reply: "PRICE-VERIFIED; STOCK-VERIFIED; ETA-VERIFIED" },
+      product,
+      profile,
+      policy,
+      null,
+      new Date(timestamp),
+    );
+    expect(preservedFacts.reply).toContain("PRICE-VERIFIED");
+    expect(preservedFacts.reply).toContain("STOCK-VERIFIED");
+    expect(preservedFacts.reply).toContain("ETA-VERIFIED");
+
     const failClosed = withProactiveSizeAdvice(
       baseProposal, product, profile, null, null, new Date(timestamp),
     );

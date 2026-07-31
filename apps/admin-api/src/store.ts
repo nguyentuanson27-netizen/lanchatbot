@@ -1496,8 +1496,8 @@ export class PostgresAdminStore implements AdminStore {
           await client.query(
             `INSERT INTO public.handoff_cases (
                opening_handoff_id, page_id, conversation_id, status,
-               created_at, updated_at
-             ) VALUES ($1,$2,$3,'NEW',now(),now())
+               created_at, updated_at, sla_due_at
+             ) VALUES ($1,$2,$3,'NEW',now(),now(),now() + interval '30 minutes')
              ON CONFLICT DO NOTHING`,
             [handoffId, current.page_id, conversationId],
           );

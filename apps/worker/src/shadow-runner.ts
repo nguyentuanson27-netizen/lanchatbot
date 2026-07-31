@@ -182,11 +182,14 @@ export class Phase4ShadowRunner {
           resolvedProduct,
         );
         if (facts.status === "OK" || facts.reasonCode === "DELIVERY_REGION_REQUIRED") {
-          const grounded = facts.status === "OK" &&
-              resolvedProduct !== null &&
-              this.options.groundedDraftEnabled &&
-              this.options.verifiedFactAssemblerEnabled
-            ? await this.model.groundDraftWithFacts(
+          const useGroundedDraft = facts.status === "OK" &&
+            resolvedProduct !== null &&
+            this.options.groundedDraftEnabled &&
+            this.options.verifiedFactAssemblerEnabled;
+          let grounded: Awaited<ReturnType<VertexShadowModel["groundDraftWithFacts"]>> | null = null;
+          if (useGroundedDraft && resolvedProduct !== null) {
+            try {
+              grounded = await this.model.groundDraftWithFacts(
                 job.context,
                 initialProposal,
                 facts,
@@ -199,9 +202,12 @@ export class Phase4ShadowRunner {
                   occasions: resolvedProduct.occasions,
                 },
                 job.promptVersion,
-              )
-            : null;
-          const legacyGrounded = grounded === null
+              );
+            } catch {
+              // Shadow must remain evaluable when Vertex draft generation fails.
+            }
+          }
+          const legacyGrounded = !useGroundedDraft
             ? await this.model.groundWithFacts(
                 job.context,
                 initialProposal,
@@ -229,6 +235,35 @@ export class Phase4ShadowRunner {
               },
               modelVersion: grounded.modelVersion,
               latencyMs: initial.latencyMs + grounded.latencyMs,
+              tokenUsage,
+            };
+          } else if (useGroundedDraft && resolvedProduct !== null) {
+            const factBlocks = buildVerifiedFactBlocks(
+              facts,
+              initialProposal.businessFactQuery.intent,
+              resolvedProduct,
+            );
+            const assembled = assembleReply(
+              factBlocks,
+              {
+                schemaVersion: 1,
+                advisoryText: "",
+                objectionResponse: "",
+                suggestedQuestion: "",
+                suggestedNextStep: "",
+                attachmentImageIndices: [],
+              },
+              facts,
+              resolvedProduct,
+            );
+            generated = {
+              proposal: {
+                ...initialProposal,
+                reply: assembled.text || initialProposal.reply,
+                attachments: [],
+              },
+              modelVersion: initial.modelVersion,
+              latencyMs: initial.latencyMs,
               tokenUsage,
             };
           } else if (legacyGrounded !== null) {

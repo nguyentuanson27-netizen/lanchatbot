@@ -53,7 +53,7 @@ async function replayGolden(input: {
   modelProposal?: AgentProposalV1;
   currentProductId?: string;
   groundedDraft?: GroundedReplyDraftV1;
-  groundedDraftError?: boolean;
+  groundedDraftError?: boolean | string;
 }) {
   const conversationId = "43820fd4-daa7-4917-9835-a38cb55120e5";
   const initialState = createConversationState({
@@ -134,7 +134,13 @@ async function replayGolden(input: {
     })),
     groundWithFacts: vi.fn(),
     groundDraftWithFacts: vi.fn(async () => {
-      if (input.groundedDraftError) throw new Error("GROUNDED_SCHEMA_INVALID");
+      if (input.groundedDraftError) {
+        throw new Error(
+          typeof input.groundedDraftError === "string"
+            ? input.groundedDraftError
+            : "GROUNDED_SCHEMA_INVALID",
+        );
+      }
       return {
         draft: input.groundedDraft ?? {
           schemaVersion: 1,
@@ -204,9 +210,9 @@ async function replayGolden(input: {
       buyingSignalGuardEnabled: true,
       messageGroupingV2Enabled: true,
       groundedDraftEnabled:
-        input.groundedDraft !== undefined || input.groundedDraftError === true,
+        input.groundedDraft !== undefined || Boolean(input.groundedDraftError),
       verifiedFactAssemblerEnabled:
-        input.groundedDraft !== undefined || input.groundedDraftError === true,
+        input.groundedDraft !== undefined || Boolean(input.groundedDraftError),
     },
   );
 
@@ -474,6 +480,44 @@ describe("realtime golden transcripts", () => {
       expect.objectContaining({
         eventType: "GUARD_BLOCKED",
         reasonCodes: ["GROUNDED_SCHEMA_INVALID"],
+      }),
+    ]));
+  });
+
+  it("GOLDEN-GROUNDED-VERTEX-001 falls back for every Vertex grounded-draft error", async () => {
+    const { committed } = await replayGolden({
+      fixtureId: "GOLDEN-GROUNDED-VERTEX-001",
+      text: "M???u n??y gi?? bao nhi??u?",
+      productMatched: true,
+      currentProductId: "CB182",
+      groundedDraftError: "VERTEX_GROUNDED_DRAFT_FAILED",
+      modelProposal: {
+        schemaVersion: 1,
+        intent: "hoi_gia",
+        conversationStage: "consulting",
+        productId: "CB182",
+        action: "REPLY",
+        reply: "Model ??o??n 500k",
+        attachments: [],
+        handoffReason: null,
+        businessFactQuery: {
+          intent: "PRICE",
+          offerType: null,
+          color: null,
+          size: null,
+          deliveryRegion: null,
+        },
+      },
+    });
+
+    expect(committed?.metaPlan?.messages?.[0]).toEqual(expect.objectContaining({
+      kind: "TEXT",
+      text: expect.stringContaining("699.000"),
+    }));
+    expect(committed?.decisionEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        eventType: "GUARD_BLOCKED",
+        reasonCodes: ["GROUNDED_DRAFT_FALLBACK"],
       }),
     ]));
   });

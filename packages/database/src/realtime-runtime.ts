@@ -1783,8 +1783,8 @@ export class PostgresRealtimeRuntimeStore {
     await client.query(
       `INSERT INTO handoff_cases (
          opening_handoff_id, page_id, conversation_id, status, created_at,
-         updated_at
-       ) VALUES ($1,$2,$3,'NEW',$4,$4)`,
+         updated_at, sla_due_at
+       ) VALUES ($1,$2,$3,'NEW',$4,$4,($4 + interval '30 minutes'))`,
       [created.handoff_id, input.pageId, input.conversationId, plan.occurredAt],
     );
     return true;
