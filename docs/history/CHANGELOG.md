@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-31 -- Realtime audit safety r32 and hotfix r32.1
+
+- r32 adds an explicit 30-minute `sla_due_at` for every handoff case and a database default as the last safeguard.
+- Any grounded Vertex draft exception now produces a verified-facts fallback; provider error text is not retained in the customer-facing path.
+- Size Engine advice is composed with the verified reply, preserving price, stock, ETA and eligible attachments.
+- r32.1 explicitly casts the reused handoff timestamp as `timestamptz`; this fixes the PostgreSQL parameter-inference failure found while recovering five audited Inbox records.
+- PR `#94` delivered r32 and PR `#95` delivered r32.1. Production runs annotated tag `20260731-realtime-audit-safety-r32.1` at commit `90760d2`.
+- Database tests (104), full typecheck, Docker `pnpm check`, and a PostgreSQL parse check passed. Only Realtime Worker and Admin API were recreated; both are healthy with restart count 0.
+- Recovery result: two Vertex Inbox records and five handoff Inbox records completed. Active Inbox and recovery terminal failures are 0; all recent BOT_TO_HUMAN events have a case and no open case lacks an SLA.
+
 ## 2026-07-31 — Realtime generation quota r31.3
 
 - Nâng quota per-page từ `10` lên `500` lượt AI/giờ và từ `50` lên `2.000` lượt AI/ngày.

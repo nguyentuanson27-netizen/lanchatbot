@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-31T09:22:28Z",
+  "status": "DEPLOYED_VERIFIED_R32_1",
+  "environment": "production",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "90760d2cf43c160d58470b0c9907f30032774140",
+  "releaseTag": "20260731-realtime-audit-safety-r32.1",
+  "liveReleasePath": "/opt/lana-chatbot/releases/20260731-realtime-audit-safety-r32.1",
+  "previousLiveReleasePath": "/opt/lana-chatbot/releases/20260731-realtime-audit-safety-r32",
+  "image": {
+    "name": "lana-chatbot-app:realtime-audit-safety-r32.1",
+    "digest": "sha256:3695a4f85efbb2418cae065ebdc6f6a2f9c5714b27f68cd30c23841dbb8f787e",
+    "recreatedServices": ["realtime-worker", "admin-api"],
+    "nonTargetContainersUnchanged": true
+  },
+  "scope": {
+    "handoffSla": "explicit 30-minute writer value plus database default",
+    "groundedVertexFallback": "all draft exceptions use verified-facts fallback",
+    "sizeEngine": "composes with verified price, stock, ETA and attachments",
+    "r32_1": "casts the reused handoff timestamp as timestamptz",
+    "databaseMigration": "0027_handoff_case_sla_default (additive; already present for r32.1)",
+    "outboundImplementationChanged": false,
+    "pageAllowlistChanged": false,
+    "routingOwnershipChanged": false
+  },
+  "verification": {
+    "databaseTests": "PASS_104",
+    "fullTypecheck": "PASS",
+    "dockerPnpmCheck": "PASS",
+    "postgresParseCheck": "PASS_ROLLED_BACK",
+    "postCutover": "PASS_TARGET_HEALTHY_RESTART_0",
+    "worker": "PASS_IDLE_LIVE_SEND_ENABLED",
+    "schema": "PASS_SLA_DEFAULT_AND_NOT_NULL",
+    "recovery": "PASS_2_VERTEX_AND_5_HANDOFF_INBOX_PROCESSED",
+    "finalQueues": "PASS_ACTIVE_INBOX_0_AND_RECOVERY_FAILURES_0",
+    "handoffIntegrity": "PASS_NO_RECENT_BOT_TO_HUMAN_EVENT_WITHOUT_CASE"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260731-realtime-audit-safety-r32",
+    "image": "lana-chatbot-app:realtime-audit-safety-r32",
+    "recreateServices": ["realtime-worker", "admin-api"],
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false
+  }
+}

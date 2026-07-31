@@ -2,6 +2,19 @@
 
 Đây là baseline sống của production. Mỗi release phải cập nhật tài liệu này trước khi tạo tag để bản trong release directory không lệch GitHub `main`.
 
+## Current production runtime override -- 2026-07-31 r32.1
+
+This section supersedes the historical r28 snapshot below.
+
+- Current release: `/opt/lana-chatbot/releases/20260731-realtime-audit-safety-r32.1`.
+- Previous release: `/opt/lana-chatbot/releases/20260731-realtime-audit-safety-r32`.
+- Source: annotated tag `20260731-realtime-audit-safety-r32.1`, commit `90760d2cf43c160d58470b0c9907f30032774140` from GitHub `main`; release materialized on VPS with the read-only deploy key and no server-side source edit.
+- Realtime Worker and Admin API run `lana-chatbot-app:realtime-audit-safety-r32.1` (`sha256:3695a4f85efbb2418cae065ebdc6f6a2f9c5714b27f68cd30c23841dbb8f787e`), healthy with restart count `0`; non-target services were not recreated.
+- Schema remains at additive migration `0027_handoff_case_sla_default`; `handoff_cases.sla_due_at` is NOT NULL and has a 30-minute database default.
+- Production verification: worker `IDLE/LIVE`, active Inbox `0`, terminal failures from the audited recovery `0`, open handoff cases with NULL SLA `0`, and 48-hour BOT_TO_HUMAN events missing a case `0`.
+- r32 repairs handoff SLA, grounded Vertex fallback, and Size Engine fact preservation. r32.1 casts the shared handoff timestamp to `timestamptz` in all SQL uses after recovery exposed PostgreSQL parameter inference failure.
+- Deployment/recovery details: [Realtime audit r32.1](REALTIME_AUDIT_R32_1_20260731.md) and [manifest](../../deploy/manifests/20260731-realtime-audit-safety-r32.1.json).
+
 ## Runtime
 
 - VPS: `156.67.214.197`.
