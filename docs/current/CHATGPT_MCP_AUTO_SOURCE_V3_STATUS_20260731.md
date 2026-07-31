@@ -1,6 +1,6 @@
 # ChatGPT MCP automatic production source — v3
 
-Status: **IMPLEMENTED_NOT_DEPLOYED**
+Status: **DEPLOYED_VERIFIED**
 
 Ngày cập nhật: **2026-07-31**
 
@@ -51,6 +51,21 @@ nên release mới không cần rebuild hoặc recreate MCP chỉ để cập nh
 - Bash syntax, compose render, systemd verify, secret scan và full `pnpm check`.
 - Production smoke: MCP health 200, OAuth unauthenticated 401, repository source
   là r31.3 đúng commit/tag và các service ngoài MCP giữ nguyên container.
+
+## Kết quả production
+
+- PR #92 merge tại `1e404baefd7859c52533481127e99105792d1eb2`.
+- Release tag: `20260731-chatgpt-mcp-auto-source-v3`.
+- Image: `lana-chatbot-mcp:auto-source-v3`,
+  digest `sha256:2938c2f0417a58f2e46e1255a2167d4ddd5d202c82a04272864949a88e161f93`.
+- MCP v0.3.0 healthy, restart count 0.
+- Repository source tự động trỏ tới
+  `20260731-realtime-generation-quota-r31.3`,
+  commit `30dd6030a2e682cdd438f4226073fb77e4a579b7`.
+- Source-sync path/timer active; lượt chạy idempotent trả `unchanged` và không
+  restart MCP.
+- OAuth metadata trả 200; POST `/mcp` không token trả 401.
+- Chỉ `lana-chatbot-mcp` được recreate; ID tất cả container ngoài MCP giữ nguyên.
 
 ## Rollback
 
