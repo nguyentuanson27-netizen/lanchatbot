@@ -1,60 +1,66 @@
 # Trạng thái quota lượt AI realtime r31.3
 
-Status: **MERGED_RELEASE_CANDIDATE_NOT_DEPLOYED**
+Status: **DEPLOYED_VERIFIED_R31_3**
 
 Ngày cập nhật: **2026-07-31**
 
 ## Phạm vi
 
-- PR `#89` đã merge vào `main` tại `a9ff18c8f14c57503b4583abd7e16688eaf946ea`.
-- Release candidate: `20260731-realtime-generation-quota-r31.3`; manifest tại
+- PR cấu hình `#89` đã merge tại `a9ff18c8f14c57503b4583abd7e16688eaf946ea`.
+- PR release `#90` đã merge tại `30dd6030a2e682cdd438f4226073fb77e4a579b7`.
+- Release: `20260731-realtime-generation-quota-r31.3`, annotated tag object
+  `da6239238dccf5d1d2b8d3dc47c9e6f3a67252a0`; manifest tại
   [`deploy/manifests/20260731-realtime-generation-quota-r31.3.json`](../../deploy/manifests/20260731-realtime-generation-quota-r31.3.json).
-- Production hiện vẫn chạy r31.2 với quota `10` lượt AI/giờ và `50` lượt AI/ngày cho mỗi page.
-- Không migration. Chỉ dự kiến recreate `realtime-worker`; mọi service khác giữ nguyên container.
+- Production đang trỏ tới r31.3. Chỉ `realtime-worker` được recreate; mọi service khác giữ nguyên container.
+- Không migration; production tiếp tục ở schema `0026_product_media_intake_dedupe`.
 
-## Cấu hình mới
+## Cấu hình đã live
 
-- `REALTIME_HOURLY_GENERATION_LIMIT`: `10` → `500`.
-- `REALTIME_DAILY_GENERATION_LIMIT`: `50` → `2000`.
+- `REALTIME_HOURLY_GENERATION_LIMIT`: `500`.
+- `REALTIME_DAILY_GENERATION_LIMIT`: `2000`.
 - Phạm vi quota giữ nguyên theo từng page.
 - Chỉ lượt gọi AI được tính. Reply deterministic và số Meta message unit được tách ra không bị tính.
 - Không đổi thuật toán đếm, cửa sổ thời gian, prompt, model, Wave 1, Wave 2, Sales Cycle,
   page allowlist, routing ownership, Meta transport hoặc n8n ownership.
 
-Giới hạn code hiện cho phép tối đa `1.000` lượt/giờ và `10.000` lượt/ngày, vì vậy hai giá trị mới
-nằm trong biên hợp lệ. Default an toàn trong code vẫn là `10/50`; production compose ghi đè bằng
-`500/2000`.
+Default an toàn trong code vẫn là `10/50`; production compose ghi đè bằng `500/2000`. Hai giá trị
+mới nằm trong biên runtime `1.000/10.000`.
 
 ## Bằng chứng kiểm tra trước deploy
 
 - Local typecheck: **PASS**.
 - Local tests: **PASS**.
 - Local build: **PASS**.
+- Docker `pnpm check`: **PASS**.
 - `git diff --check`: **PASS**.
 - Không có thay đổi source TypeScript, schema database hoặc dữ liệu.
 
-## Trình tự phát hành
+## Bằng chứng deploy production
 
-1. Merge hồ sơ release và tạo annotated tag `20260731-realtime-generation-quota-r31.3`.
-2. VPS fetch tag bằng deploy key read-only và materialize thư mục release mới; không sửa source.
-3. Preflight r31.2, health/restart, queue, page routing và quota `10/50` đang chạy.
-4. Build image `lana-chatbot-app:realtime-generation-quota-r31.3` từ tag; Docker chạy lại `pnpm check`.
-5. Xác nhận compose render đúng quota `500/2000`.
-6. Recreate đúng `realtime-worker`; kiểm tra quota env, health, restart, heartbeat, queue,
-   duplicate và log lỗi.
-7. Chỉ đổi symlink `current` khi toàn bộ guard đạt.
+- VPS fetch annotated tag bằng deploy key read-only và materialize working tree sạch tại
+  `/opt/lana-chatbot/releases/20260731-realtime-generation-quota-r31.3`; không sửa source trong `current`.
+- Docker tạo image `lana-chatbot-app:realtime-generation-quota-r31.3`, ID
+  `sha256:54ced1eb0a31313c0d179b71931389f47200974b73dafc93a96f4b8e2b8b79c5`.
+- Smoke side-effect-free của r31.2 tiếp tục PASS.
+- Compose render guard xác nhận quota `500/2000` trước khi recreate worker.
+- Cutover lúc `2026-07-31T03:33:08Z`; chỉ Realtime Worker đổi container từ
+  `c3b5b411…` sang `a510d435…`. Mọi container ngoài phạm vi giữ nguyên ID.
+- Container live xác nhận trực tiếp `REALTIME_HOURLY_GENERATION_LIMIT=500` và
+  `REALTIME_DAILY_GENERATION_LIMIT=2000`.
+- Runtime giữ `gemini-3.5-flash-lite`, Wave 2, Buying Signal Guard, page allowlist và
+  message grouping như r31.2.
+- Realtime `IDLE/LIVE`, send enabled, healthy, restart `0`; heartbeat age khi cutover `11` giây
+  và postcheck tăng thêm `15` giây.
+- Inbox active `0`, Outbox active `0`, duplicate sequence `0`, failed permanent sau cutover `0`
+  và log lỗi mới `0`.
+- Page `1198992073286645` vẫn `APP`, send enabled, kill switch off; public Admin trả `302`
+  sang Authentik.
+- Symlink `current` chỉ chuyển sang r31.3 sau khi toàn bộ guard đạt.
 
 ## Rollback
 
 - Rollback về release/image r31.2 và quota `10/50`; chỉ recreate `realtime-worker`.
 - Không rollback schema; không xóa Inbox/Outbox, Redis, PostgreSQL, Qdrant hoặc dữ liệu hội thoại.
-- Không chạy hai Realtime Worker đồng thời.
+- Rollback artifact đã chuẩn bị nhưng không phải thực thi.
 
-## Evidence còn thiếu
-
-- Release PR, release commit, annotated tag object và image digest.
-- Container ID trước/sau, quota env `500/2000`, health/restart, heartbeat, queue/duplicate/error
-  delta và symlink cutover.
-
-Chỉ sau khi deploy và hậu kiểm đạt mới đổi status thành
-**DEPLOYED_VERIFIED_R31_3**.
+r31.3 đã deploy và hậu kiểm đạt trạng thái **DEPLOYED_VERIFIED_R31_3**.

@@ -8,7 +8,9 @@
 - Default code vẫn là `10/50`; production compose ghi đè `500/2000`, nằm trong biên runtime `1.000/10.000`.
 - Không migration; release chỉ recreate Realtime Worker.
 - Local typecheck, tests và build đều PASS; `git diff --check` PASS.
-- PR `#89` đã merge tại `a9ff18c`; release candidate chưa deploy khi ghi mục này.
+- PR `#89`, `#90` đã merge; annotated tag trỏ release commit `30dd603`. Docker `pnpm check` và compose quota guard đều PASS.
+- Chỉ Realtime Worker được recreate; container live xác nhận quota `500/2000`, healthy/restart 0, heartbeat tăng 15 giây.
+- Inbox/Outbox/duplicate/failed/log lỗi mới đều 0, Admin public vẫn 302 Authentik và production đã chuyển symlink sang r31.3.
 
 ## 2026-07-31 — Proactive verified size advice r31.2
 
