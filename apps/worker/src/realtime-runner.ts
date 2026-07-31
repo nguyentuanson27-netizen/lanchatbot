@@ -757,11 +757,21 @@ export function verifiedProductInfoProposal(
       ? [`Size: ${facts.facts.sizes.join(", ")}`]
       : []),
   ];
-  const followUp = (profile !== null
+  const measurementKinds = new Set(
+    profile?.measurements.map(({ kind }) => kind) ?? [],
+  );
+  const hasHeight = measurementKinds.has("HEIGHT_CM");
+  const hasWeight = measurementKinds.has("WEIGHT_KG");
+  const hasCompleteMeasurements = profile !== null
     ? profileHasBodyMeasurements(profile)
-    : hasBodyProfile(context))
-    ? "Em đã có số đo chị gửi. Chị muốn em đối chiếu size phù hợp cho mẫu này luôn không?"
-    : "Chị cao và nặng khoảng bao nhiêu để em đối chiếu size phù hợp cho mẫu này?";
+    : hasBodyProfile(context);
+  const followUp = hasCompleteMeasurements
+    ? null
+    : hasHeight
+      ? "Chị nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?"
+      : hasWeight
+        ? "Chị cao khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?"
+        : "Chị cao và nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?";
   const v2Overview = productFactsV2
     ? selectProductMediaV2({
         product: productFactsV2,
@@ -787,7 +797,7 @@ export function verifiedProductInfoProposal(
     conversationStage: "PRODUCT_MATCHED",
     productId: product.productId,
     action: "REPLY",
-    reply: `${informationLines.join("\n")}\n\n${followUp}`,
+    reply: [informationLines.join("\n"), followUp].filter(Boolean).join("\n\n"),
     attachments: mediaSelectorV2Authoritative
       ? v2Images
       : v2Images.length > 0
@@ -1439,6 +1449,37 @@ function sizeEngineProposal(
   };
 }
 
+export function withProactiveSizeAdvice(
+  productInfoProposal: AgentProposalV1,
+  product: StableProductDocument,
+  profile: CustomerProfileV1,
+  policyResolution: RuntimePolicyResolution | null,
+  productFactsV2: ProductFactsV2 | null,
+  now: Date,
+): AgentProposalV1 {
+  if (!profileHasBodyMeasurements(profile)) return productInfoProposal;
+  const sizeProposal = sizeEngineProposal(
+    productInfoProposal,
+    product,
+    profile,
+    policyResolution,
+    productFactsV2,
+    now,
+  );
+  if (sizeProposal.action === "HANDOFF") return sizeProposal;
+  return {
+    ...productInfoProposal,
+    action: sizeProposal.action,
+    reply: [productInfoProposal.reply.trim(), sizeProposal.reply.trim()]
+      .filter(Boolean)
+      .join("\n\n"),
+    attachments: [
+      ...new Set([...productInfoProposal.attachments, ...sizeProposal.attachments]),
+    ],
+
+    handoffReason: sizeProposal.handoffReason,
+  };
+}
 export interface RealtimeRuntimePort {
   isOwnMetaMessage?(
     pageId: string,
@@ -3062,7 +3103,7 @@ export class RealtimeRunner {
           (facts.status === "OK" ||
             facts.reasonCode === "DELIVERY_REGION_REQUIRED")
         ) {
-          const deterministicProductInfo = imageRequest
+          let deterministicProductInfo = imageRequest
             ? proposal
             : directProductInfo && resolvedProduct
               ? verifiedProductInfoProposal(
@@ -3076,6 +3117,27 @@ export class RealtimeRunner {
                   mediaSelectorV2GuardActive,
                 )
               : null;
+          if (
+            deterministicProductInfo &&
+            !imageRequest &&
+            resolvedProduct &&
+            this.options.customerProfileEnabled &&
+            customerProfile
+          ) {
+            deterministicProductInfo = withProactiveSizeAdvice(
+              deterministicProductInfo,
+              resolvedProduct,
+              customerProfile,
+              policyResolution,
+              productFactsV2,
+              now,
+            );
+            if (deterministicProductInfo.action === "HANDOFF") {
+              handoffGuardReasonCodes = [...new Set([
+                ...handoffGuardReasonCodes, "VERIFIED_SIZE_CHART_UNAVAILABLE",
+              ])];
+            }
+          }
           if (deterministicProductInfo) {
             proposal = deterministicProductInfo;
             if (mediaSelectorV2GuardActive) {
@@ -3187,7 +3249,7 @@ export class RealtimeRunner {
           explicitIntent === "PRICE" &&
           isLegacyUnaccentedProductInfoReply(proposal.reply)
         ) {
-          const verifiedFallback = verifiedProductInfoProposal(
+          const baseVerifiedFallback = verifiedProductInfoProposal(
             resolvedProduct,
             facts,
             modelContext,
@@ -3197,6 +3259,17 @@ export class RealtimeRunner {
             this.options.conversationalMessageFormatEnabled,
             mediaSelectorV2GuardActive,
           );
+          const verifiedFallback = baseVerifiedFallback &&
+              this.options.customerProfileEnabled && customerProfile
+            ? withProactiveSizeAdvice(
+                baseVerifiedFallback,
+                resolvedProduct,
+                customerProfile,
+                policyResolution,
+                productFactsV2,
+                now,
+              )
+            : baseVerifiedFallback;
           if (verifiedFallback) {
             const priorSalesSignals = proposal.salesSignals;
             const priorStrategyAnalysis = proposal.strategyAnalysis;
