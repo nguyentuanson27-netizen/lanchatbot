@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "capturedAt": "2026-07-31T05:00:00Z",
-  "status": "RELEASE_CANDIDATE_NOT_DEPLOYED",
+  "capturedAt": "2026-07-31T06:31:16Z",
+  "status": "DEPLOYED_VERIFIED",
   "environment": "production-mcp-owner-only",
   "host": "156.67.214.197",
   "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
   "sourceBranch": "main",
-  "sourceCommit": "EVIDENCE_PENDING_MERGE_COMMIT",
+  "sourceCommit": "1e404baefd7859c52533481127e99105792d1eb2",
   "releaseTag": "20260731-chatgpt-mcp-auto-source-v3",
   "liveReleasePath": "/opt/lana-chatbot/releases/20260731-chatgpt-mcp-auto-source-v3",
   "previousMcpReleasePath": "/opt/lana-chatbot/releases/20260730-chatgpt-mcp-repository-read-v2",
@@ -14,6 +14,15 @@
     "name": "lana-chatbot-mcp:auto-source-v3",
     "recreatedServices": ["lana-mcp"],
     "futureSourceOnlyUpdatesRequireMcpRecreate": false
+  },
+  "runtime": {
+    "mcpVersion": "0.3.0",
+    "containerId": "a2323da9548fa2a025f006180d9de059f94fb04671f05071428df910cc4a375c",
+    "imageDigest": "sha256:2938c2f0417a58f2e46e1255a2167d4ddd5d202c82a04272864949a88e161f93",
+    "repositorySourceRelease": "20260731-realtime-generation-quota-r31.3",
+    "repositorySourceCommit": "30dd6030a2e682cdd438f4226073fb77e4a579b7",
+    "repositorySourceMode": "current_release_pointer",
+    "health": "healthy"
   },
   "sourceSync": {
     "currentLink": "/opt/lana-chatbot/current",
@@ -54,8 +63,8 @@
     "fullRepositoryCheck": "PASS",
     "composeRender": "PASS",
     "systemdVerify": "PASS",
-    "productionHealth": "EVIDENCE_PENDING",
-    "nonTargetContainersUnchanged": "EVIDENCE_PENDING"
+    "productionHealth": "PASS_MCP_V0_3_0_REPOSITORY_HEALTHY",
+    "nonTargetContainersUnchanged": "PASS"
   },
   "rollback": {
     "image": "lana-chatbot-mcp:repository-read-v2",
