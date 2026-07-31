@@ -8,7 +8,9 @@
 - Không gắn câu hỏi kéo dài khi `HANDOFF`, `NO_REPLY`, `READY_TO_BUY`, `ORDER_REVIEW`, `POST_SALE` hoặc Sales Cycle đang xử lý chốt đơn.
 - Form báo giá vẫn là hai bong bóng text rồi mới tới ảnh; nguồn fact, Meta transport, page allowlist và routing ownership không đổi.
 - Targeted regression `83/83` và `pnpm check` toàn monorepo đều PASS; Worker `322/322`, Business Tools `180/180`.
-- PR `#83` đã merge tại `3ac1ea2`; release candidate chưa deploy khi ghi mục này.
+- PR `#83`, `#84` đã merge; annotated tag trỏ release commit `0ce9399`. Image được build từ tag sau khi `pnpm check` trong Docker đạt.
+- Chỉ Realtime Worker được recreate; r31.1 healthy/restart 0, heartbeat tăng 15 giây, Inbox/Outbox/duplicate/failed/log lỗi mới đều 0 và Admin public vẫn 302 Authentik.
+- Production đã chuyển symlink sang r31.1. Chưa có inbound khách sau cutover nên trạng thái là `DEPLOYED_VERIFIED_R31_1_HUMAN_TEST_PENDING`; không tạo inbound giả.
 
 ## 2026-07-31 — Voice Contract V2 + Hybrid Buying Intent r31
 
