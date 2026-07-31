@@ -20,6 +20,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - **DEPLOYED_VERIFIED_R32_1:** r32 adds a database SLA default and explicit writer SLA, verified-facts fallback for every grounded Vertex draft error, and Size Engine composition that preserves verified price, stock, ETA and attachments. r32.1 fixes PostgreSQL timestamp parameter inference in the live handoff writer.
 - Recovered Inbox evidence: the two Vertex failures and five handoff failures completed after the verified releases; active Inbox is `0`, recent terminal failures are `0`, and every recent BOT_TO_HUMAN event has a case with a non-null SLA.
 - Full evidence: [Realtime audit r32.1](docs/current/REALTIME_AUDIT_R32_1_20260731.md) and [deployment manifest](deploy/manifests/20260731-realtime-audit-safety-r32.1.json).
+- **APPROVED_FOR_IMPLEMENTATION:** [Release r32.2 — Compatibility First](docs/current/REALTIME_R32_2_COMPATIBILITY_FIRST_PLAN_20260731.md). Page hiện là page test, chưa có người dùng thật; giữ nguyên phạm vi, chưa mở rộng và chưa requeue trước khi hotfix được deploy/xác minh.
 
 
 - Production đang trỏ tới release `20260731-realtime-generation-quota-r31.3`, source commit `30dd603`; Realtime Worker dùng image r31.3, Admin API/Web giữ image r30, API/Delivery giữ image r27.1.
