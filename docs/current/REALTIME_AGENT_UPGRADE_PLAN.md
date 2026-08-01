@@ -952,7 +952,7 @@ Agent chỉ đổi trạng thái sau khi có bằng chứng. Giá trị hợp l�
 | 3.3 One-question A/B | DEFERRED | — | — | — | — | Làm sau |
 | 3.4 Audit/order intent | CANARY_LIVE | feat/realtime-wave2-profile-variant-context | `b29725d` / `20260723-realtime-wave23-canary-r12` | DB atomic/idempotent 7; contracts 71; toàn repo 739 pass | Decision audit v2 ON; duplicate plan sequence 0 | Không lưu raw model body, PII hay secret; order intent giữ idempotency hiện có |
 | r32.2 Compatibility First plan | CODE_COMPLETE | docs/r32.2-compatibility-first-plan | pending PR | plan + README link | — | Behavioral baseline r31.3; deviations limited to D1–D6 |
-| r32.2 PR-A Regression Shield | NOT_STARTED | — | — | — | — | Must merge before production behavior fixes |
+| r32.2 PR-A Regression Shield | CODE_COMPLETE | test/r32.2-r31-regression-shield | pending PR | Worker 32 files; 331 pass; 5 target todo; typecheck pass | — | Test-only; no production behavior change |
 
 ## 18. Decision log
 
