@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-01T04:53:26Z",
+  "status": "INCIDENT_CONTAINMENT_DOCUMENTED_RUNTIME_ACTION_PENDING",
+  "environment": "production-test-page",
+  "host": "156.67.214.197",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "pageId": "1198992073286645",
+  "documentType": "APPEND_ONLY_INCIDENT_ADDENDUM",
+  "incidentAgainst": {
+    "releaseTag": "20260731-realtime-audit-safety-r32.1",
+    "sourceCommit": "90760d2cf43c160d58470b0c9907f30032774140",
+    "manifestPath": "deploy/manifests/20260731-realtime-audit-safety-r32.1.json",
+    "originalManifestMustRemainUnchanged": true,
+    "supersedesOriginalManifest": false
+  },
+  "githubEvidence": {
+    "compatibilityPlanPullRequest": 97,
+    "compatibilityPlanMergeCommit": "2f3c16e87b347f534025bcac6342436dc97575b6",
+    "regressionShieldPullRequest": 98,
+    "regressionShieldMergeCommit": "8a8401d3f2ff0c7179df6042c2f6fb2a6bf9b5fc",
+    "ledgerEvidencePullRequest": 99,
+    "ledgerEvidenceMergeCommit": "b66625da205085b2a9ab98089889467ed6eec1f0",
+    "containmentPullRequest": 100,
+    "containmentInitialContentCommit": "e92d48ecb1d3b629ec5db28d0f7a98f49dfe1352",
+    "containmentMergeCommit": null
+  },
+  "runtimeEvidence": {
+    "lastVerifiedRecord": {
+      "source": "deploy/manifests/20260731-realtime-audit-safety-r32.1.json",
+      "capturedAt": "2026-07-31T09:22:28Z",
+      "releaseTag": "20260731-realtime-audit-safety-r32.1",
+      "image": "lana-chatbot-app:realtime-audit-safety-r32.1",
+      "isCurrentRuntimeAssertion": false
+    },
+    "verificationAttempts": [
+      {
+        "attemptedAt": "2026-08-01",
+        "method": "HTTP_HEALTH",
+        "result": "TIMEOUT"
+      },
+      {
+        "attemptedAt": "2026-08-01",
+        "method": "SSH_READ_ONLY",
+        "result": "AUTHENTICATION_DENIED"
+      }
+    ],
+    "currentLiveRelease": "UNVERIFIED",
+    "currentOutboundState": "UNVERIFIED",
+    "currentQueueState": "UNVERIFIED",
+    "rollbackExecuted": false,
+    "requeueExecutedByThisWork": false
+  },
+  "incident": {
+    "customerImpactBranches": [
+      "SIZE_CHART_MISSING_CAN_ERASE_VERIFIED_BASE",
+      "INITIAL_VERTEX_SCHEMA_INVALID_CAN_FAIL_PERMANENT",
+      "FALLBACK_CAN_LOSE_VOICE_AND_STAGE_CTA",
+      "PANCAKE_TAG_GATE_CAN_FAIL_OPEN_PER_SEQUENCE",
+      "OUTBOX_DESCENDANT_CAN_STALL",
+      "TOKEN_AND_HEALTH_TELEMETRY_INCOMPLETE"
+    ],
+    "pancakeResponseGroupEvidence": {
+      "timelineDate": "NOT_RECORDED_IN_SOURCE_EVIDENCE",
+      "timezone": "Asia/Saigon",
+      "events": [
+        {
+          "time": "16:40:58.264",
+          "event": "FOUR_OUTBOX_SEQUENCES_CREATED"
+        },
+        {
+          "time": "16:40:59.681",
+          "event": "SEQUENCE_0_META_ACCEPTED_CUSTOMER_RECEIVED_QUOTE"
+        },
+        {
+          "time": "16:41:00.008",
+          "event": "SEQUENCE_1_BLOCKED",
+          "reasonCode": "PANCAKE_BLOCKING_TAG_NHAN_VIEN"
+        },
+        {
+          "time": "16:41:00.008",
+          "event": "SEQUENCES_2_AND_3_NOT_SENT"
+        }
+      ],
+      "confirmedConclusion": "NHAN_VIEN was confirmed by the read performed for sequence 1; the response group was not protected by one verified ownership decision before sequence 0.",
+      "workingHypothesisNotProven": "The first Pancake read was stale, unavailable or otherwise unverified and the existing delivery gate failed open."
+    }
+  },
+  "containment": {
+    "pageClassification": "TEST_PAGE_NO_REAL_USERS_REPORTED_BY_OWNER",
+    "trafficExpansion": "PROHIBITED",
+    "outboundLock": {
+      "changedByThisDocsPullRequest": false,
+      "state": "NOT_VERIFIED",
+      "ownerWaiver": "DOCS_AND_REGRESSION_SHIELD_ONLY",
+      "waiverExpiresBeforeRuntimeMutation": true,
+      "requiredBeforeRollbackOrDeploy": true
+    },
+    "inboxOutboxRequeue": {
+      "state": "PROHIBITED",
+      "releaseCondition": "R32_2_DEPLOYED_AND_VERIFIED_PLUS_PER_RECORD_SAFETY_REVIEW"
+    },
+    "dataPreservation": [
+      "CONVERSATIONS",
+      "AUDIT_EVENTS",
+      "INBOX",
+      "OUTBOX",
+      "REDIS",
+      "POSTGRESQL",
+      "QDRANT",
+      "PROVIDER_EVIDENCE",
+      "MIGRATION_0027"
+    ],
+    "sourceOfTruth": "GITHUB_ONLY_NO_DIRECT_VPS_SOURCE_EDIT"
+  },
+  "mandatoryInvariants": [
+    "VERIFIED_FACTS_AND_MEDIA_SURVIVE_OPTIONAL_ENRICHMENT_FAILURE",
+    "DIFFERENTIAL_PARITY_WITH_R31_3_EXCEPT_APPROVED_D1_TO_D6",
+    "ONE_FAIL_CLOSED_OWNERSHIP_DECISION_BEFORE_RESPONSE_GROUP_SEQUENCE_0",
+    "MODEL_SCHEMA_PARSE_FAILURE_MUST_TRY_DETERMINISTIC_VERIFIED_FACTS_FALLBACK_BEFORE_PERMANENT_FAILURE"
+  ],
+  "rollbackTarget": {
+    "releaseTag": "20260731-realtime-generation-quota-r31.3",
+    "sourceCommit": "30dd6030a2e682cdd438f4226073fb77e4a579b7",
+    "releasePath": "/opt/lana-chatbot/releases/20260731-realtime-generation-quota-r31.3",
+    "image": "lana-chatbot-app:realtime-generation-quota-r31.3",
+    "imageId": "sha256:54ced1eb0a31313c0d179b71931389f47200974b73dafc93a96f4b8e2b8b79c5",
+    "servicesAllowedToRecreate": [
+      "realtime-worker"
+    ],
+    "servicesForbiddenToRecreate": [
+      "api",
+      "delivery",
+      "admin-api",
+      "admin-web",
+      "shadow-worker",
+      "simulation-worker",
+      "n8n",
+      "p23c"
+    ],
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false,
+    "outboundMustRemainLockedAfterRollback": true,
+    "runbookPath": "docs/current/REALTIME_R31_3_ROLLBACK_RUNBOOK_20260801.md"
+  },
+  "implementationSequence": [
+    "MERGE_CONTAINMENT_DOCS_AND_AGENTS_INVARIANTS",
+    "RESTORE_READ_ONLY_VPS_VERIFICATION",
+    "LOCK_OUTBOUND_AND_CAPTURE_QUEUE_BASELINE",
+    "ROLLBACK_REALTIME_ONLY_TO_R31_3_IF_OWNER_STILL_APPROVES",
+    "PR_B_D1_SIZE_PRESERVATION",
+    "PR_C_D2_D3_VERTEX_VOICE_CTA",
+    "PR_D_D4_ATOMIC_RESPONSE_GROUP_GATE",
+    "PR_E_D5_D6_OUTBOX_TELEMETRY_HEALTH",
+    "DEPLOY_AND_VERIFY_R32_2_CANARY",
+    "REVIEW_EACH_QUEUE_RECORD_BEFORE_ANY_REQUEUE"
+  ],
+  "auditIntegrity": {
+    "r32_1ManifestModified": false,
+    "r32_1ManifestDeletionAllowed": false,
+    "thisAddendumMayBeEditedAfterMerge": false,
+    "futureEvidenceMustUseNewManifest": true
+  }
+}
