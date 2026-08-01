@@ -16,13 +16,13 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 
 ## Trạng thái production ngày 2026-08-01
 
-- **Current contained canary runtime:** Realtime Worker và Delivery Worker đang chạy `20260801-realtime-compatibility-first-r32.2`; outbound vẫn khóa. Admin API giữ r32.1 và các non-target service không bị recreate.
+- **Current test-page canary runtime:** Realtime Worker và Delivery Worker đang chạy `20260801-realtime-compatibility-first-r32.2`; outbound đã được [mở có điều kiện cho duy nhất page test](deploy/manifests/20260801-r32.2-test-page-outbound-enabled.json) theo chỉ thị owner. Admin API giữ r32.1 và các non-target service không bị recreate.
 - **HISTORICAL_DEPLOYED_VERIFIED_R32_1:** bằng chứng deploy r32.1 được giữ nguyên cho audit, nhưng runtime Realtime đã bị supersede do incident compatibility; không dùng trạng thái này để khẳng định production hiện tại.
 - Queue containment hiện giữ `1` Inbox `FAILED_PERMANENT`; 2 response group cũ đã được [operator CANCEL có audit](deploy/manifests/20260801-r32.2-outbox-cancellation.json), tạo `4` Outbox `FAILED_PERMANENT`. Actionable/MANUAL_REVIEW/stuck đều `0`, chưa record nào được requeue.
 - Full evidence: [Realtime audit r32.1](docs/current/REALTIME_AUDIT_R32_1_20260731.md) and [deployment manifest](deploy/manifests/20260731-realtime-audit-safety-r32.1.json).
-- **IMPLEMENTED_CANARY_CONTAINED:** [Release r32.2 — Compatibility First](docs/current/REALTIME_R32_2_COMPATIBILITY_FIRST_PLAN_20260731.md) đã deploy cho page test nhưng chưa được phép mở outbound/mở rộng; chưa requeue.
-- **ROLLED_BACK_R31_3_OUTBOUND_LOCKED:** [execution manifest](deploy/manifests/20260801-realtime-r31.3-containment-rollback.json), [r32.1 incident addendum](deploy/manifests/20260801-r32.1-incident-containment.json) và [runbook](docs/current/REALTIME_R31_3_ROLLBACK_RUNBOOK_20260801.md). Outbound vẫn khóa; không có Meta send mới và chưa requeue.
-- **R32.2 DEPLOYED CONTAINED — CANARY OBSERVATION REQUIRED:** Artifact/runtime, backup/restore-test, migration 0028–0029, 40/40 post-cutover regression và target health đều đạt. Queue health đã về 200 sau [audited cancellation](deploy/manifests/20260801-r32.2-outbox-cancellation.json); xem thêm [candidate manifest](deploy/manifests/20260801-realtime-compatibility-first-r32.2-candidate.json), [artifact evidence](deploy/manifests/20260801-realtime-compatibility-first-r32.2-artifact.json) và [runtime evidence](deploy/manifests/20260801-realtime-compatibility-first-r32.2-runtime.json). Outbound vẫn khóa và chưa requeue Inbox lỗi.
+- **IMPLEMENTED_CANARY_CONTAINED:** [Release r32.2 — Compatibility First](docs/current/REALTIME_R32_2_COMPATIBILITY_FIRST_PLAN_20260731.md) đã deploy cho page test; owner đã cho phép mở outbound riêng page này nhưng chưa mở rộng allowlist và chưa requeue.
+- **ROLLED_BACK_R31_3_OUTBOUND_LOCKED:** [execution manifest](deploy/manifests/20260801-realtime-r31.3-containment-rollback.json), [r32.1 incident addendum](deploy/manifests/20260801-r32.1-incident-containment.json) và [runbook](docs/current/REALTIME_R31_3_ROLLBACK_RUNBOOK_20260801.md) lưu trạng thái rollback lịch sử; trạng thái khóa này đã được supersede bởi lần mở page test ngày 2026-08-01. Không requeue record cũ.
+- **R32.2 TEST-PAGE OUTBOUND ENABLED — CANARY OBSERVATION REQUIRED:** Artifact/runtime, backup/restore-test, migration 0028–0029, 40/40 post-cutover regression và target health đều đạt. Queue health đã về 200 sau [audited cancellation](deploy/manifests/20260801-r32.2-outbox-cancellation.json); outbound hiện mở cho duy nhất page test theo [gate-change evidence](deploy/manifests/20260801-r32.2-test-page-outbound-enabled.json). Chưa requeue Inbox lỗi và chưa tuyên bố full production promotion.
 
 
 - Production đang trỏ tới release `20260801-realtime-compatibility-first-r32.2`, tag commit `1c004ea`; Realtime/Delivery dùng image r32.2, Admin API giữ image r32.1, Admin Web giữ image r30 và API giữ image r27.1.
@@ -45,7 +45,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - Semantic candidate vẫn `NOT_PROMOTED`: validation `BUYING_COMMITTED` precision `42,41%`, recall `57,26%`. Production replay đang `WAITING_FOR_ELIGIBLE_TRAFFIC`; không tạo inbound giả và locked holdout vẫn đóng.
 - Admin API chạy image r32.1, Admin Web chạy image r30, Realtime/Delivery chạy image r32.2; Simulation Worker giữ image cũ. Admin FE/API nội bộ đều 200 và public route trả 302 sang Authentik.
 
-- Page allowlist vẫn chỉ có `1198992073286645`; API giữ binary r27.1, Delivery r32.2 thêm group gate/health nhưng outbound database gate vẫn khóa. POS, P2.3A/C và n8n không thay đổi ownership.
+- Page allowlist vẫn chỉ có `1198992073286645`; API giữ binary r27.1, Delivery r32.2 thêm group gate/health và outbound database gate đã mở cho page test này. POS, P2.3A/C và n8n không thay đổi ownership.
 - Dashboard đọc checkout drop-off qua view ẩn danh `admin_conversation_events_v`; không mở quyền bảng hội thoại gốc cho tài khoản Admin.
 - Checkout tự nhiên dùng structured extraction có evidence/confidence và deterministic guard; app không đưa PII vào decision telemetry.
 - Xác nhận mua hiểu thêm các cách nói tự nhiên nhưng vẫn chặn câu hỏi, phủ định, do dự và yêu cầu ảnh. `OK` chỉ xác nhận khi cart đang ở đúng bước order preview.
@@ -57,7 +57,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - P2.3C Hash v3 đang `LIVE` trên image redacted: `956/956` point đã có ba hash; migration giữ nguyên `889` vector payload/provenance, tạo `38` point thiếu và tạo lại đúng `29` vector semantic; `error_sample` không còn log URL ảnh.
 - Cross-sell được để cho bản sau r15, dùng quan hệ phối đồ được duyệt trong PostgreSQL/Admin; không dùng similarity để tự gợi ý.
 - API webhook chạy image `lana-chatbot-app:ad-acquisition-r27.1`; routing/ownership và send guard giữ nguyên.
-- Realtime page test chạy image r32.2 với quota `500/2.000`, Wave 2 `LIVE_100`, Voice Contract V2, Compatibility First cho size/Vertex/CTA, group gate fail-closed, Hybrid Buying Intent và Media Selector V2; outbound hard gate vẫn khóa cho page `1198992073286645`.
+- Realtime page test chạy image r32.2 với quota `500/2.000`, Wave 2 `LIVE_100`, Voice Contract V2, Compatibility First cho size/Vertex/CTA, group gate fail-closed, Hybrid Buying Intent và Media Selector V2; outbound đã mở cho page `1198992073286645` để chạy canary Messenger có kiểm soát.
 - Shadow worker chạy image r26.1 với Gemini 3.5 Flash-Lite và Judge v2 ở `DRY_RUN`; send false và role DB không có quyền ghi Meta Outbox.
 - Admin API chạy image r32.1, Admin Web chạy image r30, Realtime/Delivery chạy image r32.2; Simulation Worker giữ image cũ. Admin FE/API nội bộ đều 200 và public route trả 302 sang Authentik.
 - Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
