@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-01T14:59:00.004504Z",
+  "status": "R32_2_TEST_PAGE_OUTBOUND_ENABLED_NO_REQUEUE",
+  "environment": "production-test-page-contained-canary",
+  "host": "156.67.214.197",
+  "pageId": "1198992073286645",
+  "documentType": "APPEND_ONLY_RUNTIME_GATE_CHANGE_EVIDENCE",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "authorization": {
+    "ownerInstruction": "mở outbound đi",
+    "receivedAt": "2026-08-01",
+    "scope": "ENABLE_OUTBOUND_FOR_EXISTING_TEST_PAGE_ONLY_NO_REQUEUE"
+  },
+  "runtime": {
+    "release": "20260801-realtime-compatibility-first-r32.2",
+    "realtimeImage": "lana-chatbot-app:realtime-compatibility-first-r32.2",
+    "deliveryImage": "lana-chatbot-app:realtime-compatibility-first-r32.2",
+    "realtimeContainerHealthy": true,
+    "deliveryContainerHealthy": true,
+    "realtimeProcessFlags": {
+      "APP_SEND_ENABLED": true,
+      "CHATBOT_SEND_ENABLED": true
+    },
+    "deliveryProcessFlags": {
+      "APP_SEND_ENABLED": true,
+      "CHATBOT_SEND_ENABLED": true
+    }
+  },
+  "preAction": {
+    "pageGate": {
+      "status": "ACTIVE",
+      "routingOwner": "APP",
+      "appSendEnabled": false,
+      "killSwitch": true
+    },
+    "inbox": {
+      "FAILED_PERMANENT": 1,
+      "PROCESSED": 229,
+      "actionable": 0,
+      "processing": 0
+    },
+    "outbox": {
+      "FAILED_PERMANENT": 4,
+      "SENT_ACCEPTED": 113,
+      "actionable": 0,
+      "sending": 0,
+      "ambiguous": 0,
+      "manualReview": 0
+    }
+  },
+  "action": {
+    "method": "POSTGRES_GUARDED_TRANSACTION",
+    "preconditions": {
+      "pageStatus": "ACTIVE",
+      "routingOwner": "APP",
+      "appSendEnabled": false,
+      "killSwitch": true
+    },
+    "changes": {
+      "appSendEnabled": true,
+      "killSwitch": false
+    },
+    "committedAt": "2026-08-01T14:59:00.004504Z",
+    "sourceFilesEditedOnVps": false,
+    "servicesRecreated": [],
+    "migrationExecuted": false,
+    "requeueExecuted": false
+  },
+  "postAction": {
+    "pageGate": {
+      "appSendEnabled": true,
+      "killSwitch": false
+    },
+    "inbox": {
+      "FAILED_PERMANENT": 1,
+      "PROCESSED": 229
+    },
+    "outbox": {
+      "FAILED_PERMANENT": 4,
+      "SENT_ACCEPTED": 113
+    },
+    "oldQueueCountsChanged": false,
+    "oldInboxRequeued": false,
+    "oldOutboxAutomaticallySent": false
+  },
+  "investigatedInbox": {
+    "inboxId": "c2a42b30-cf8f-41cb-9c15-70b3edcb919c",
+    "status": "PROCESSED",
+    "releaseId": "20260801-realtime-compatibility-first-r32.2",
+    "outboundMessageCount": 2,
+    "metaOutboxRows": 0,
+    "cause": "PAGE_DATABASE_GATE_WAS_LOCKED_AT_COMMIT",
+    "requeued": false
+  },
+  "scopeAndPromotion": {
+    "testPageOnly": true,
+    "pageAllowlistExpanded": false,
+    "fullProductionPromotionClaimed": false,
+    "controlledMessengerScenariosNowPermitted": true,
+    "remainingPromotionEvidence": [
+      "MINIMUM_48_HOUR_OBSERVATION",
+      "MINIMUM_100_REVIEWED_GENERATIONS",
+      "CONTROLLED_HUMAN_MESSENGER_SCENARIOS"
+    ]
+  },
+  "auditIntegrity": {
+    "priorManifestsModified": false,
+    "databaseHistoryDeleted": false,
+    "thisManifestMustNotBeEditedAfterMerge": true,
+    "evidencePullRequest": null
+  }
+}
