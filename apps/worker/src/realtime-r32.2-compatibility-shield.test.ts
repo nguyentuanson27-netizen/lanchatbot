@@ -12,7 +12,9 @@ import type {
 } from "@lana/contracts";
 import {
   composeSizeEngineAdvice,
+  deterministicVertexProposalFallback,
   groupRealtimeMetaMessagesV2,
+  vertexGroundedFallbackReason,
   verifiedProductInfoProposal,
   withProactiveSizeAdvice,
 } from "./realtime-runner.js";
@@ -306,7 +308,42 @@ describe("r32.2 Compatibility First regression shield", () => {
     ]);
     expect(1 + composition.proposal.attachments.length).toBeGreaterThan(0);
   });
-  it.todo("[D2] VERTEX_SCHEMA_INVALID produces deterministic grounded fallback instead of FAILED_PERMANENT");
+  it("[D2] all Vertex draft failures select one deterministic grounded fallback", () => {
+    const errors = [
+      "VERTEX_SCHEMA_INVALID",
+      "GROUNDED_SCHEMA_INVALID",
+      "VERTEX_TIMEOUT",
+      "VERTEX_GENERATE_RETRYABLE",
+      "VERTEX_GROUNDED_DRAFT_TIMEOUT",
+      "VERTEX_GROUNDED_DRAFT_RETRYABLE",
+      "VERTEX_GROUNDED_DRAFT_NETWORK_ERROR",
+      "VERTEX_GROUNDED_DRAFT_FAILED",
+    ];
+    const fallbacks = errors.map((code) =>
+      deterministicVertexProposalFallback(
+        "Mẫu này giá bao nhiêu, mặc có tôn dáng không?",
+        product,
+        false,
+        new Error(code),
+      )
+    );
+
+    expect(fallbacks.map(({ proposal }) => proposal)).toEqual(
+      fallbacks.map(() => fallbacks[0]!.proposal),
+    );
+    expect(fallbacks[0]).toMatchObject({
+      reasonCode: "GROUNDED_SCHEMA_INVALID",
+      proposal: {
+        action: "REPLY",
+        productId: "SD398",
+        businessFactQuery: { intent: "PRICE" },
+      },
+    });
+    expect(fallbacks.slice(2).map(({ reasonCode }) => reasonCode))
+      .toEqual(fallbacks.slice(2).map(() => "GROUNDED_DRAFT_FALLBACK"));
+    expect(vertexGroundedFallbackReason(new Error("VERTEX_SCHEMA_INVALID")))
+      .toBe("GROUNDED_SCHEMA_INVALID");
+  });
   it.todo("[D4] one verified ownership snapshot fail-closes the entire response group before sequence 0");
   it.todo("[D5] terminal/manual-review predecessor resolves descendants without duplicate sends");
   it.todo("[D6] token usage and queue health expose explicit source/state without changing the reply");

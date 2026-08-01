@@ -54,6 +54,8 @@ async function replayGolden(input: {
   currentProductId?: string;
   groundedDraft?: GroundedReplyDraftV1;
   groundedDraftError?: boolean | string;
+  initialGenerateError?: string;
+  wave2StrategyEnabled?: boolean;
 }) {
   const conversationId = "43820fd4-daa7-4917-9835-a38cb55120e5";
   const initialState = createConversationState({
@@ -126,12 +128,17 @@ async function replayGolden(input: {
     linkProviderConversation: vi.fn(async () => undefined),
   };
   const model: RealtimeModelPort = {
-    generate: vi.fn(async () => ({
-      proposal: input.modelProposal ?? noReplyProposal,
-      modelVersion: "gemini-golden",
-      latencyMs: 1,
-      tokenUsage: {},
-    })),
+    generate: vi.fn(async () => {
+      if (input.initialGenerateError) {
+        throw new Error(input.initialGenerateError);
+      }
+      return {
+        proposal: input.modelProposal ?? noReplyProposal,
+        modelVersion: "gemini-golden",
+        latencyMs: 1,
+        tokenUsage: {},
+      };
+    }),
     groundWithFacts: vi.fn(),
     groundDraftWithFacts: vi.fn(async () => {
       if (input.groundedDraftError) {
@@ -189,12 +196,14 @@ async function replayGolden(input: {
     })),
     close: vi.fn(async () => undefined),
   };
+  const retry = vi.fn(async () => true);
+  const failPermanent = vi.fn(async () => true);
   const runner = new RealtimeRunner(
     {
       claimNext: vi.fn(async () => claim),
       complete: vi.fn(async () => true),
-      retry: vi.fn(async () => true),
-      failPermanent: vi.fn(async () => true),
+      retry,
+      failPermanent,
     },
     runtime,
     model,
@@ -210,14 +219,25 @@ async function replayGolden(input: {
       buyingSignalGuardEnabled: true,
       messageGroupingV2Enabled: true,
       groundedDraftEnabled:
-        input.groundedDraft !== undefined || Boolean(input.groundedDraftError),
+        input.groundedDraft !== undefined ||
+        Boolean(input.groundedDraftError) ||
+        Boolean(input.initialGenerateError),
       verifiedFactAssemblerEnabled:
-        input.groundedDraft !== undefined || Boolean(input.groundedDraftError),
+        input.groundedDraft !== undefined ||
+        Boolean(input.groundedDraftError) ||
+        Boolean(input.initialGenerateError),
+      wave2StrategyEnabled: input.wave2StrategyEnabled ?? false,
     },
   );
 
   await runner.processOne();
-  return { committed: committed as RealtimeCommitInput<unknown> | null, model, facts };
+  return {
+    committed: committed as RealtimeCommitInput<unknown> | null,
+    model,
+    facts,
+    retry,
+    failPermanent,
+  };
 }
 
 describe("realtime golden transcripts", () => {
@@ -518,6 +538,41 @@ describe("realtime golden transcripts", () => {
       expect.objectContaining({
         eventType: "GUARD_BLOCKED",
         reasonCodes: ["GROUNDED_DRAFT_FALLBACK"],
+      }),
+    ]));
+  });
+
+  it("GOLDEN-INITIAL-VERTEX-SCHEMA-001 commits verified facts and one stage CTA", async () => {
+    const { committed, model, retry, failPermanent } = await replayGolden({
+      fixtureId: "GOLDEN-INITIAL-VERTEX-SCHEMA-001",
+      text: "Mẫu này giá bao nhiêu, mặc có tôn dáng không?",
+      productMatched: true,
+      currentProductId: "CB182",
+      initialGenerateError: "VERTEX_SCHEMA_INVALID",
+      wave2StrategyEnabled: true,
+    });
+
+    expect(model.generate).toHaveBeenCalledOnce();
+    expect(model.groundDraftWithFacts).not.toHaveBeenCalled();
+    expect(retry).not.toHaveBeenCalled();
+    expect(failPermanent).not.toHaveBeenCalled();
+    const messages = committed?.metaPlan?.messages ?? [];
+    expect(messages.length).toBeGreaterThan(0);
+    expect(messages[0]).toEqual(expect.objectContaining({
+      kind: "TEXT",
+      text: expect.stringContaining("699.000"),
+    }));
+    const rendered = messages.map((message) =>
+      message.kind === "TEXT" ? message.text : ""
+    ).join("\n");
+    expect(rendered).toContain("chị nhé");
+    expect((rendered.match(/\?/gu) ?? []).length).toBe(1);
+    expect(committed?.decisionEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        eventType: "GUARD_BLOCKED",
+        reasonCodes: expect.arrayContaining([
+          "GROUNDED_SCHEMA_INVALID",
+        ]),
       }),
     ]));
   });
