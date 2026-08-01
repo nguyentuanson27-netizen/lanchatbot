@@ -26,6 +26,7 @@ import {
   productCodeOnly,
   productDescriptionLine,
   productDisplayName,
+  postMediaProofCta,
   proactiveSizeEvidencePrefix,
   RealtimeRunner,
   verifiedSizeGuideAttachments,
@@ -672,6 +673,23 @@ describe("RealtimeRunner", () => {
     expect(preservedFacts.reply).toContain("PRICE-VERIFIED");
     expect(preservedFacts.reply).toContain("STOCK-VERIFIED");
     expect(preservedFacts.reply).toContain("ETA-VERIFIED");
+
+    const proofCta = postMediaProofCta({
+      ctaPolicy: "POST_MEDIA_CLOSE",
+      imageIntent: "DETAIL",
+      imageCount: 2,
+      salesStage: "FIT_CONSULTING",
+      buyingSignal: false,
+      factsVerified: true,
+      product,
+      profile,
+      policyResolution: policy,
+      now: new Date(timestamp),
+    });
+    expect(proofCta).toContain(product.productId);
+    expect(proofCta).toContain("size M");
+    expect(proofCta?.match(/\?/g)).toHaveLength(1);
+    expect(postMediaProofCta({ ctaPolicy: "POST_MEDIA_CLOSE", imageIntent: "DETAIL", imageCount: 0, salesStage: "FIT_CONSULTING", buyingSignal: false, factsVerified: true, product, profile, policyResolution: policy, now: new Date(timestamp) })).toBeNull();
 
     const verifiedBase = {
       ...baseProposal,

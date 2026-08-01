@@ -831,6 +831,14 @@ const IMAGE_INTENT_REPLIES: Readonly<Record<CustomerImageIntent, string>> = {
  * liệu nào; phần cần kiểm là URL đính kèm, vốn đã được `resolveFacts` giới hạn
  * đúng bằng tập ảnh này.
  */
+function requestedProofForImageIntent(
+  intent: CustomerImageIntent | null,
+): "MATERIAL" | "SOCIAL" | null {
+  if (intent === "DETAIL") return "MATERIAL";
+  if (intent === "FEEDBACK") return "SOCIAL";
+  return null;
+}
+
 function requestedImagesProposal(
   product: StableProductDocument,
   imageUrls: readonly string[],
@@ -1404,6 +1412,53 @@ export function proactiveSizeEvidencePrefix(reasonCodes: readonly string[]): str
     : "Theo số đo mới nhất";
 }
 
+function resolveSizeEngineDecision(
+  product: StableProductDocument,
+  profile: CustomerProfileV1,
+  policyResolution: RuntimePolicyResolution | null,
+  now: Date,
+) {
+  const chartArtifacts = Object.values(
+    policyResolution?.bundle?.artifacts.sizeCharts ?? {},
+  );
+  const charts: ScopedSizeChart[] = chartArtifacts.map(({ chart, scope }) => ({
+    chart,
+    scope: scope ? {
+      level: scope.level,
+      ...(scope.parentProductIds.length > 0 ? { parentProductIds: scope.parentProductIds } : {}),
+      ...(scope.categories.length > 0 ? { categories: scope.categories } : {}),
+      ...(scope.componentRole === null ? {} : { componentRole: scope.componentRole }),
+      ...(scope.forms.length > 0 ? { forms: scope.forms } : {}),
+      ...(scope.materials.length > 0 ? { materials: scope.materials } : {}),
+    } : {
+      level: chart.category.trim().toLocaleUpperCase("vi-VN") === "ALL"
+        ? "GLOBAL"
+        : chart.componentRole === null ? "CATEGORY" : "COMPONENT",
+      categories: [chart.category],
+      ...(chart.componentRole === null ? {} : { componentRole: chart.componentRole }),
+    },
+  }));
+  const decision = recommendSize({
+    profile,
+    target: {
+      brand: "LANA",
+      parentProductId: product.productId,
+      componentProductId: product.productId,
+      componentRole: productComponentRole(product),
+      category: productCategory(product),
+      form: product.silhouettes[0] ?? null,
+      material: product.materials[0] ?? null,
+    },
+    charts,
+    generatedAt: now.toISOString(),
+    recommendationId: deterministicUuid(
+      `lana:size:v1:${product.productId}:${profile.profileId}:${profile.revision}`,
+    ),
+  });
+
+  return { decision };
+}
+
 function sizeEngineProposal(
   proposal: AgentProposalV1,
   product: StableProductDocument,
@@ -1565,6 +1620,55 @@ export function composeSizeEngineAdvice(
     requiresHandoff: false,
     reasonCode: null,
   };
+}
+
+export interface PostMediaProofCtaInput {
+  readonly ctaPolicy: Wave2StrategyDecision["ctaPolicy"] | null;
+  readonly imageIntent: CustomerImageIntent | null;
+  readonly imageCount: number;
+  readonly salesStage: SalesStage;
+  readonly buyingSignal: boolean;
+  readonly factsVerified: boolean;
+  readonly product: StableProductDocument | null;
+  readonly profile: CustomerProfileV1 | null;
+  readonly policyResolution: RuntimePolicyResolution | null;
+  readonly now: Date;
+}
+
+export function postMediaProofCta(
+  input: PostMediaProofCtaInput,
+): string | null {
+  if (
+    input.ctaPolicy !== "POST_MEDIA_CLOSE" ||
+    (input.imageIntent !== "DETAIL" && input.imageIntent !== "FEEDBACK") ||
+    input.imageCount <= 0 ||
+    input.buyingSignal ||
+    !input.factsVerified ||
+    !input.product ||
+    !input.profile ||
+    (input.salesStage !== "FIT_CONSULTING" &&
+      input.salesStage !== "OBJECTION_HANDLING")
+  ) {
+    return null;
+  }
+  const { decision } = resolveSizeEngineDecision(
+    input.product,
+    input.profile,
+    input.policyResolution,
+    input.now,
+  );
+  if (decision.action !== "REPLY") return null;
+  const sizes = [...new Set(
+    decision.recommendation.recommendedSizes
+      .map(({ size }) => size.trim().toLocaleUpperCase("vi-VN"))
+      .filter(Boolean),
+  )];
+  if (sizes.length === 0) return null;
+  const verifiedSizes = sizes.length === 1
+    ? `size ${sizes[0]}`
+    : `cÃ¡c size ${naturalList(sizes)}`;
+  const productId = normalizeProductCode(input.product.productId);
+  return `Sau khi xem áº£nh, chá»‹ cÃ³ muá»‘n em giá»¯ ${verifiedSizes} cá»§a máº«u ${productId} Ä‘á»ƒ mÃ¬nh tiáº¿p tá»¥c Ä‘áº·t hÃ ng khÃ´ng?`;
 }
 
 export function withSizeEngineAdvice(
@@ -2718,6 +2822,9 @@ export class RealtimeRunner {
         ),
       },
     );
+    const imageIntent = message.isEcho
+      ? null
+      : explicitCustomerImageIntent(message.text ?? "");
     if (
       this.options.wave2StrategyEnabled &&
       !message.isEcho &&
@@ -2738,12 +2845,10 @@ export class RealtimeRunner {
         hasMeasurements:
           (customerProfile?.measurements.length ?? 0) > 0 ||
           hasCustomerMeasurementSignal(message.text ?? ""),
+        requestedProof: requestedProofForImageIntent(imageIntent),
         modelAnalysis: null,
       });
     }
-    const imageIntent = message.isEcho
-      ? null
-      : explicitCustomerImageIntent(message.text ?? "");
     const catalogSnapshot =
       resolvedProduct && this.factsReader.readCatalogSnapshot
         ? await this.factsReader.readCatalogSnapshot(
@@ -3599,6 +3704,7 @@ export class RealtimeRunner {
             hasMeasurements:
               (customerProfile?.measurements.length ?? 0) > 0 ||
               hasCustomerMeasurementSignal(message.text ?? ""),
+            requestedProof: requestedProofForImageIntent(imageIntent),
             modelAnalysis: proposal.strategyAnalysis ?? null,
           });
           proposal = applyWave2ReplyPolicy(proposal, wave2StrategyDecision);
@@ -3691,6 +3797,18 @@ export class RealtimeRunner {
           (guarded.action === "REPLY" ||
             guarded.action === "ASK_PRODUCT_SELECTION")
         ) {
+          const postMediaCta = postMediaProofCta({
+            ctaPolicy: wave2StrategyDecision?.ctaPolicy ?? null,
+            imageIntent,
+            imageCount: guarded.imageUrls.length,
+            salesStage: nextState.salesStage,
+            buyingSignal: buyingSignal.isBuyingSignal,
+            factsVerified: facts?.status === "OK",
+            product: resolvedProduct,
+            profile: this.options.customerProfileEnabled ? customerProfile : null,
+            policyResolution,
+            now,
+          });
           metaMessages = [
             ...guarded.textUnits.map(
               (text): RealtimeMetaMessageUnit => ({ kind: "TEXT", text }),
@@ -3701,6 +3819,9 @@ export class RealtimeRunner {
                 imageUrl,
               }),
             ),
+            ...(postMediaCta
+              ? [{ kind: "TEXT" as const, text: postMediaCta }]
+              : []),
           ];
         }
         if (sizeAdviceRequiresHandoff && handoff === null) {

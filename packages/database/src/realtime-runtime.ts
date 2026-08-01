@@ -272,6 +272,7 @@ export interface RealtimeDecisionEventPlan {
         | "ASK_MEASUREMENTS"
         | "ASK_PROOF_PREFERENCE"
         | "REDUCE_TO_TWO"
+        | "POST_MEDIA_CLOSE"
         | "NO_ADDITIONAL_CTA";
       confidence: number;
       evidence: readonly string[];
