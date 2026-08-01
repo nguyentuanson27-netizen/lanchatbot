@@ -70,6 +70,14 @@ export const RealtimeDecisionEventV1Schema = z.object({
       output: z.number().int().nonnegative().nullable(),
       total: z.number().int().nonnegative().nullable(),
     }).strict(),
+    modelUsageSource: z.enum(["provider", "estimated", "missing"]).optional(),
+    modelPath: z.enum([
+      "not_called",
+      "model",
+      "initial_fallback",
+      "grounded_draft_fallback",
+    ]).optional(),
+    modelErrorClass: z.string().max(128).nullable().optional(),
     buyingSignalOverride: z.boolean(),
     wave2Strategy: z.object({
       rulesetVersion: z.literal("wave2-strategy-v1"),

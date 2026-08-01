@@ -127,6 +127,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         responseGroupId: "10000000-0000-4000-8000-000000000002",
         recipientId: "customer-1",
         imageDelayMs: 500,
+        sendAfterOwnerHandoff: true,
         messages: [
           { kind: "TEXT", text: "Nội dung báo giá" },
           { kind: "IMAGE", imageUrl: "https://cdn.example/product.jpg" },
@@ -143,6 +144,8 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     expect(inserts[1]?.values[18]).toEqual(
       new Date("2026-07-23T05:00:00.500Z"),
     );
+    expect(inserts.every((insert) => insert.values[19] === true)).toBe(true);
+
   });
 
   it("drops a stale decision before state or outbox commit when a newer inbound advanced the generation", async () => {
@@ -251,6 +254,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         desiredTag: "NHAN_VIEN",
         tagId: "tag-employee",
         handoffGeneration: 2,
+        afterResponseGroupId: "10000000-0000-4000-8000-000000000099",
       },
       handoffEventPlan: {
         source: "BOT_POLICY",
@@ -269,6 +273,11 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
 
     expect(result.handoffEventCreated).toBe(true);
     expect(result.pancakeTagOutboxCreated).toBe(true);
+    const tagInsert = calls.find((call) =>
+      call.sql.includes("INSERT INTO pancake_tag_outbox"));
+    expect(tagInsert?.values[10]).toBe(
+      "10000000-0000-4000-8000-000000000099",
+    );
     const handoffCaseInsert = calls.find((call) => call.sql.includes("INSERT INTO handoff_cases"));
     expect(handoffCaseInsert?.sql).toContain("sla_due_at");
     expect(handoffCaseInsert?.sql).toContain("$4::timestamptz");
@@ -487,6 +496,8 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
 
     expect(changed).toBe(true);
     expect(calls[0]?.sql.trim()).toBe("BEGIN");
+    const held = calls.find((call) => call.values.includes("META_PREDECESSOR_FAILED_PERMANENT"));
+    expect(held?.sql).toContain("sequence_no > $2");
     expect(calls.some((call) => call.sql.includes("BOT_INITIAL_AD_REPLY_SEND_FAILED"))).toBe(false);
     const event = calls.find((call) => call.sql.includes("INSERT INTO conversation_events"));
     expect(event?.values).toContain("BOT_INITIAL_AD_REPLY_SEND_FAILED");
@@ -545,5 +556,173 @@ describe("PostgresRealtimeRuntimeStore response-group gate", () => {
     expect(calls[1]?.sql).toContain("meta_response_group_gates.status = 'UNVERIFIED'");
     expect(calls[1]?.values[4]).toBe("BLOCKED");
     expect(calls[1]?.values[6]).toBe("NHAN_VIEN");
+  });
+});
+
+describe("PostgresRealtimeRuntimeStore outbox compatibility ordering and health", () => {
+  const createStore = () => new PostgresRealtimeRuntimeStore(
+    "postgresql://unused:unused@localhost:5432/unused",
+    new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+  );
+
+  it("claims preserved handoff output after owner transition and delays its tag dependency", async () => {
+    const calls: string[] = [];
+    const store = createStore();
+    (store as unknown as { pool: unknown }).pool = {
+      async query(sql: string) {
+        calls.push(sql);
+        return { rowCount: 0, rows: [] };
+      },
+    };
+
+    expect(await store.claimMetaOutbox("worker-1", 30_000)).toBeNull();
+    expect(await store.claimPancakeTagOutbox("tag-worker-1", 30_000)).toBeNull();
+
+    expect(calls[0]).toContain("OR outbox.send_after_owner_handoff = true");
+    expect(calls[0]).toContain("prior.status NOT IN");
+    expect(calls[1]).toContain("after_response_group_id IS NULL");
+    expect(calls[1]).toContain("dependency.status IN ('PENDING', 'RETRYABLE', 'SENDING')");
+  });
+
+  it("holds every descendant when a predecessor enters manual review", async () => {
+    const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
+    const client = {
+      async query(sql: string, values: readonly unknown[] = []) {
+        calls.push({ sql, values });
+        if (sql.includes("WHERE outbox_id = $1") && sql.includes("RETURNING reply_plan_id")) {
+          return {
+            rowCount: 1,
+            rows: [{
+              reply_plan_id: "10000000-0000-4000-8000-000000000001",
+              sequence_no: 0,
+            }],
+          };
+        }
+        return { rowCount: 0, rows: [] };
+      },
+      release() {},
+    };
+    const store = createStore();
+    (store as unknown as { pool: unknown }).pool = {
+      async connect() { return client; },
+    };
+
+    expect(await store.markMetaManualReview(
+      "10000000-0000-4000-8000-000000000005",
+      "10000000-0000-4000-8000-000000000006",
+      "META_AMBIGUOUS_PROVIDER_RESULT",
+    )).toBe(true);
+
+    const held = calls.find((call) =>
+      call.sql.includes("META_PREDECESSOR_MANUAL_REVIEW"));
+    expect(held?.sql).toContain("sequence_no > $2");
+    expect(held?.sql).toContain("status IN ('PENDING', 'RETRYABLE')");
+    expect(calls[0]?.sql.trim()).toBe("BEGIN");
+    expect(calls.at(-1)?.sql.trim()).toBe("COMMIT");
+  });
+
+  it("quarantines expired sending leases once and holds descendants", async () => {
+    const calls: string[] = [];
+    const store = createStore();
+    (store as unknown as { pool: unknown }).pool = {
+      async query(sql: string) {
+        calls.push(sql);
+        return { rowCount: 1, rows: [{ quarantined_count: "1" }] };
+      },
+    };
+
+    expect(await store.quarantineExpiredMetaSending()).toBe(1);
+    expect(calls[0]).toContain("META_SENDING_LEASE_EXPIRED");
+    expect(calls[0]).toContain("META_PREDECESSOR_AMBIGUOUS");
+    expect(calls[0]).toContain("FROM expired");
+  });
+
+  it("returns a PII-free aggregate queue snapshot", async () => {
+    const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
+    const store = createStore();
+    (store as unknown as { pool: unknown }).pool = {
+      async query(sql: string, values: readonly unknown[] = []) {
+        calls.push({ sql, values });
+        return { rows: [{
+          actionable_count: "2",
+          sending_count: "1",
+          expired_sending_count: "1",
+          manual_review_count: "3",
+          stuck_descendant_count: "0",
+          oldest_actionable_age_seconds: "45.5",
+          oldest_manual_review_age_seconds: "90",
+        }] };
+      },
+    };
+
+    expect(await store.readMetaOutboxHealth("page-1")).toEqual({
+      pageId: "page-1",
+      actionableCount: 2,
+      sendingCount: 1,
+      expiredSendingCount: 1,
+      manualReviewCount: 3,
+      stuckDescendantCount: 0,
+      oldestActionableAgeSeconds: 45.5,
+      oldestManualReviewAgeSeconds: 90,
+    });
+    expect(calls[0]?.values).toEqual(["page-1"]);
+    expect(calls[0]?.sql).not.toMatch(/ciphertext|recipient|customer_hash/iu);
+  });
+});
+
+describe("PostgresRealtimeRuntimeStore manual-review operator action", () => {
+  it("supports audited cancel-only resolution and never requeues", async () => {
+    const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
+    let firstUpdate = true;
+    const client = {
+      async query(sql: string, values: readonly unknown[] = []) {
+        calls.push({ sql, values });
+        if (sql.includes("SELECT page_id") && sql.includes("response_group_id")) {
+          return {
+            rowCount: 1,
+            rows: [{
+              page_id: "page-1",
+              reviewable: firstUpdate,
+              already_cancelled: !firstUpdate,
+            }],
+          };
+        }
+        if (sql.includes("UPDATE meta_outbox")) {
+          const rowCount = firstUpdate ? 2 : 0;
+          firstUpdate = false;
+          return { rowCount, rows: [] };
+        }
+        return { rowCount: 1, rows: [] };
+      },
+      release() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = {
+      async connect() { return client; },
+    };
+    const groupId = "10000000-0000-4000-8000-000000000099";
+
+    expect(await store.cancelMetaResponseGroup(
+      groupId,
+      "operator-1",
+      "PROVIDER_AMBIGUITY_REVIEWED",
+    )).toMatchObject({ cancelledCount: 2, changed: true });
+    expect(await store.cancelMetaResponseGroup(
+      groupId,
+      "operator-1",
+      "PROVIDER_AMBIGUITY_REVIEWED",
+    )).toMatchObject({ cancelledCount: 0, changed: false });
+
+    expect(calls.some((call) => call.sql.includes("bool_or(status IN"))).toBe(true);
+    const update = calls.find((call) => call.sql.includes("UPDATE meta_outbox"));
+    expect(update?.sql).toContain("SET status = 'FAILED_PERMANENT'");
+    expect(update?.sql).not.toContain("'PENDING' AS");
+    const audits = calls.filter((call) =>
+      call.sql.includes("META_RESPONSE_GROUP_CANCELLED"));
+    expect(audits).toHaveLength(1);
+    expect(audits[0]?.values).toContain("operator-1");
   });
 });

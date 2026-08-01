@@ -499,6 +499,9 @@ services:
       PANCAKE_TAG_WORKER_ID: pancake-tag-worker-page-test-1
       PANCAKE_TAG_LEASE_MS: "30000"
       DELIVERY_POLL_MS: "500"
+      DELIVERY_HEALTH_PORT: "8091"
+      META_OUTBOX_ACTIONABLE_SLO_SECONDS: "120"
+      META_OUTBOX_MANUAL_REVIEW_SLO_SECONDS: "1800"
       REALTIME_DATA_KEY_FILE: /run/secrets/realtime_data_key
       REALTIME_DATA_KEY_REF: local-kek-v1
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
@@ -531,7 +534,14 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD", "node", "-e", "try{process.kill(1,0)}catch{process.exit(1)}"]
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:8091/health/ready')
+          .then(r=>{if(!r.ok)process.exit(1)})
+          .catch(()=>process.exit(1))
       interval: 15s
       timeout: 5s
       retries: 4

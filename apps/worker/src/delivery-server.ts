@@ -20,6 +20,7 @@ import {
   SinglePageMetaTokenRegistry,
 } from "./meta-outbox-dispatcher.js";
 import { PancakeTagDispatcher } from "./pancake-tag-dispatcher.js";
+import { createDeliveryHealthServer } from "./delivery-health.js";
 import { RedisChatHistoryStore } from "./redis-chat-history.js";
 
 function required(name: string): string {
@@ -195,6 +196,40 @@ const pollMs = boundedInteger(
   100,
   30_000,
 );
+const healthPort = boundedInteger(
+  "DELIVERY_HEALTH_PORT",
+  8_091,
+  1_024,
+  65_535,
+);
+const queueHealthThresholds = {
+  actionableSloSeconds: boundedInteger(
+    "META_OUTBOX_ACTIONABLE_SLO_SECONDS",
+    120,
+    30,
+    86_400,
+  ),
+  manualReviewSloSeconds: boundedInteger(
+    "META_OUTBOX_MANUAL_REVIEW_SLO_SECONDS",
+    1_800,
+    60,
+    604_800,
+  ),
+};
+const healthServer = createDeliveryHealthServer({
+  store,
+  pageId,
+  thresholds: queueHealthThresholds,
+});
+await store.readMetaOutboxHealth(pageId);
+await new Promise<void>((resolve, reject) => {
+  const onError = (error: Error): void => reject(error);
+  healthServer.once("error", onError);
+  healthServer.listen(healthPort, "127.0.0.1", () => {
+    healthServer.off("error", onError);
+    resolve();
+  });
+});
 let stopping = false;
 for (const signal of ["SIGTERM", "SIGINT"] as const) {
   process.once(signal, () => {
@@ -209,6 +244,9 @@ while (!stopping) {
     await new Promise((resolve) => setTimeout(resolve, pollMs));
   }
 }
+await new Promise<void>((resolve, reject) => {
+  healthServer.close((error) => error ? reject(error) : resolve());
+});
 await store.close();
 await history?.close();
 await canonicalHistory?.close();

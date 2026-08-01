@@ -1883,6 +1883,88 @@ export interface RealtimeRunnerOptions {
   readonly adAcquisitionPageIds?: readonly string[];
 }
 
+export type ModelUsageSource = "provider" | "estimated" | "missing";
+export type ModelExecutionPath =
+  | "not_called"
+  | "model"
+  | "initial_fallback"
+  | "grounded_draft_fallback";
+
+export interface ExplicitModelTelemetry {
+  readonly usageSource: ModelUsageSource;
+  readonly path: ModelExecutionPath;
+  readonly errorClass: string | null;
+  readonly tokenUsage: Readonly<{
+    prompt: number | null;
+    output: number | null;
+    total: number | null;
+  }>;
+}
+
+export function resolveExplicitModelTelemetry(input: Readonly<{
+  modelCalled: boolean;
+  hasProviderUsage: boolean;
+  providerPromptTokens: number;
+  providerOutputTokens: number;
+  providerTotalTokens: number;
+  inputCharacterCount: number;
+  outputCharacterCount: number;
+  initialFallbackUsed: boolean;
+  groundedDraftFallbackUsed: boolean;
+  errorClass: string | null;
+}>): ExplicitModelTelemetry {
+  if (!input.modelCalled) {
+    return {
+      usageSource: "missing",
+      path: "not_called",
+      errorClass: input.errorClass,
+      tokenUsage: { prompt: null, output: null, total: null },
+    };
+  }
+  const path: ModelExecutionPath = input.initialFallbackUsed
+    ? "initial_fallback"
+    : input.groundedDraftFallbackUsed
+      ? "grounded_draft_fallback"
+      : "model";
+  if (input.hasProviderUsage) {
+    return {
+      usageSource: "provider",
+      path,
+      errorClass: input.errorClass,
+      tokenUsage: {
+        prompt: input.providerPromptTokens,
+        output: input.providerOutputTokens,
+        total: input.providerTotalTokens,
+      },
+    };
+  }
+  const prompt = Math.max(1, Math.ceil(input.inputCharacterCount / 4));
+  const output = Math.max(1, Math.ceil(input.outputCharacterCount / 4));
+  return {
+    usageSource: "estimated",
+    path,
+    errorClass: input.errorClass,
+    tokenUsage: { prompt, output, total: prompt + output },
+  };
+}
+
+export interface ResponseGroupHandoffOrdering {
+  readonly sendAfterOwnerHandoff: boolean;
+  readonly afterResponseGroupId: string | null;
+}
+
+export function responseGroupHandoffOrdering(
+  requiresHandoff: boolean,
+  outboundMessageCount: number,
+  responseGroupId: string,
+): ResponseGroupHandoffOrdering {
+  const orderedHandoff = requiresHandoff && outboundMessageCount > 0;
+  return {
+    sendAfterOwnerHandoff: orderedHandoff,
+    afterResponseGroupId: orderedHandoff ? responseGroupId : null,
+  };
+}
+
 export class RealtimeRunner {
   private readonly options: Required<RealtimeRunnerOptions>;
 
@@ -2620,6 +2702,8 @@ export class RealtimeRunner {
     let modelTotalTokens = 0;
     let hasModelTokenUsage = false;
     let initialVertexFallbackUsed = false;
+    let groundedDraftFallbackUsed = false;
+    let modelErrorClass: string | null = null;
     let salesHandled = false;
     let guardedPlanHash: string | null = null;
     let wave2StrategyDecision: Wave2StrategyDecision | null = null;
@@ -3105,8 +3189,12 @@ export class RealtimeRunner {
             modelLatencyMs += initial.latencyMs;
             modelPromptTokens += initial.tokenUsage.promptTokenCount ?? 0;
             modelOutputTokens += initial.tokenUsage.candidatesTokenCount ?? 0;
-            modelTotalTokens += initial.tokenUsage.totalTokenCount ?? 0;
-            hasModelTokenUsage ||= Object.keys(initial.tokenUsage).length > 0;
+            modelTotalTokens += initial.tokenUsage.totalTokenCount ??
+              (initial.tokenUsage.promptTokenCount ?? 0) +
+                (initial.tokenUsage.candidatesTokenCount ?? 0);
+            hasModelTokenUsage ||= Object.values(initial.tokenUsage).some(
+              (value) => typeof value === "number" && Number.isFinite(value),
+            );
             proposal = {
               ...initial.proposal,
               productId:
@@ -3121,6 +3209,7 @@ export class RealtimeRunner {
             );
             proposal = fallback.proposal;
             initialVertexFallbackUsed = true;
+            modelErrorClass = fallback.reasonCode;
             handoffGuardReasonCodes = [
               ...new Set([...handoffGuardReasonCodes, fallback.reasonCode]),
             ];
@@ -3313,15 +3402,22 @@ export class RealtimeRunner {
                 modelLatencyMs += grounded.latencyMs;
                 modelPromptTokens += grounded.tokenUsage.promptTokenCount ?? 0;
                 modelOutputTokens += grounded.tokenUsage.candidatesTokenCount ?? 0;
-                modelTotalTokens += grounded.tokenUsage.totalTokenCount ?? 0;
-                hasModelTokenUsage ||= Object.keys(grounded.tokenUsage).length > 0;
+                modelTotalTokens += grounded.tokenUsage.totalTokenCount ??
+                  (grounded.tokenUsage.promptTokenCount ?? 0) +
+                    (grounded.tokenUsage.candidatesTokenCount ?? 0);
+                hasModelTokenUsage ||= Object.values(grounded.tokenUsage).some(
+                  (value) => typeof value === "number" && Number.isFinite(value),
+                );
                 groundedDraft = grounded.draft;
                 groundedDraftSucceeded = true;
               } catch (error) {
+                const fallbackReason = vertexGroundedFallbackReason(error);
+                groundedDraftFallbackUsed = true;
+                modelErrorClass = fallbackReason;
                 handoffGuardReasonCodes = [
                   ...new Set([
                     ...handoffGuardReasonCodes,
-                    vertexGroundedFallbackReason(error),
+                    fallbackReason,
                   ]),
                 ];
               }
@@ -3357,8 +3453,12 @@ export class RealtimeRunner {
             modelLatencyMs += grounded.latencyMs;
             modelPromptTokens += grounded.tokenUsage.promptTokenCount ?? 0;
             modelOutputTokens += grounded.tokenUsage.candidatesTokenCount ?? 0;
-            modelTotalTokens += grounded.tokenUsage.totalTokenCount ?? 0;
-            hasModelTokenUsage ||= Object.keys(grounded.tokenUsage).length > 0;
+            modelTotalTokens += grounded.tokenUsage.totalTokenCount ??
+              (grounded.tokenUsage.promptTokenCount ?? 0) +
+                (grounded.tokenUsage.candidatesTokenCount ?? 0);
+            hasModelTokenUsage ||= Object.values(grounded.tokenUsage).some(
+              (value) => typeof value === "number" && Number.isFinite(value),
+            );
             proposal = {
               ...grounded.proposal,
               salesSignals: proposal.salesSignals ?? grounded.proposal.salesSignals,
@@ -3730,6 +3830,18 @@ export class RealtimeRunner {
       .digest("hex");
     const salesStageBefore = salesCycleRecord?.state.stage ?? null;
     const salesStageAfter = salesCyclePlan?.state.stage ?? salesStageBefore;
+    const modelTelemetry = resolveExplicitModelTelemetry({
+      modelCalled,
+      hasProviderUsage: hasModelTokenUsage,
+      providerPromptTokens: modelPromptTokens,
+      providerOutputTokens: modelOutputTokens,
+      providerTotalTokens: modelTotalTokens,
+      inputCharacterCount: JSON.stringify(modelContext).length,
+      outputCharacterCount: proposal?.reply.length ?? 0,
+      initialFallbackUsed: initialVertexFallbackUsed,
+      groundedDraftFallbackUsed,
+      errorClass: modelErrorClass,
+    });
     const pushDecisionEvent = (
       eventType: RealtimeDecisionEventPlan["eventType"],
       reasonCodes: readonly string[] = [],
@@ -3837,11 +3949,10 @@ export class RealtimeRunner {
           outboundMessageCount: metaMessages.length,
           modelCalled,
           modelLatencyMs: modelCalled ? modelLatencyMs : null,
-          modelTokenUsage: {
-            prompt: hasModelTokenUsage ? modelPromptTokens : null,
-            output: hasModelTokenUsage ? modelOutputTokens : null,
-            total: hasModelTokenUsage ? modelTotalTokens : null,
-          },
+          modelTokenUsage: modelTelemetry.tokenUsage,
+          modelUsageSource: modelTelemetry.usageSource,
+          modelPath: modelTelemetry.path,
+          modelErrorClass: modelTelemetry.errorClass,
           buyingSignalOverride,
           wave2Strategy: wave2StrategyDecision
             ? {
@@ -4003,6 +4114,11 @@ export class RealtimeRunner {
       this.options.adAcquisitionPageIds.includes(claim.pageId) &&
       !message.isEcho &&
       triggerMessagePk !== null;
+    const handoffDeliveryOrdering = responseGroupHandoffOrdering(
+      sizeAdviceRequiresHandoff,
+      metaMessages.length,
+      responseGroupId,
+    );
     const result = await this.runtime.commit(
       {
         pageId: claim.pageId,
@@ -4018,6 +4134,8 @@ export class RealtimeRunner {
                 recipientId: message.senderId,
                 messages: metaMessages,
                 imageDelayMs: this.options.imageDelayMs,
+                sendAfterOwnerHandoff:
+                  handoffDeliveryOrdering.sendAfterOwnerHandoff,
               },
             }
           : {}),
@@ -4027,6 +4145,8 @@ export class RealtimeRunner {
                 desiredTag,
                 tagId,
                 handoffGeneration: nextState.revision,
+                afterResponseGroupId:
+                  handoffDeliveryOrdering.afterResponseGroupId,
               },
             }
           : {}),
