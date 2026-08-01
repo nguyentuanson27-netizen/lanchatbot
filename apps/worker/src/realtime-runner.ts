@@ -1449,14 +1449,20 @@ function sizeEngineProposal(
   };
 }
 
-export function withSizeEngineAdvice(
+export interface SizeAdviceComposition {
+  readonly proposal: AgentProposalV1;
+  readonly requiresHandoff: boolean;
+  readonly reasonCode: "VERIFIED_SIZE_CHART_UNAVAILABLE" | null;
+}
+
+export function composeSizeEngineAdvice(
   productInfoProposal: AgentProposalV1,
   product: StableProductDocument,
   profile: CustomerProfileV1,
   policyResolution: RuntimePolicyResolution | null,
   productFactsV2: ProductFactsV2 | null,
   now: Date,
-): AgentProposalV1 {
+): SizeAdviceComposition {
   const sizeProposal = sizeEngineProposal(
     productInfoProposal,
     product,
@@ -1465,18 +1471,46 @@ export function withSizeEngineAdvice(
     productFactsV2,
     now,
   );
-  if (sizeProposal.action === "HANDOFF") return sizeProposal;
+  if (sizeProposal.action === "HANDOFF") {
+    return {
+      proposal: productInfoProposal,
+      requiresHandoff: true,
+      reasonCode: "VERIFIED_SIZE_CHART_UNAVAILABLE",
+    };
+  }
   return {
-    ...productInfoProposal,
-    action: sizeProposal.action,
-    reply: [productInfoProposal.reply.trim(), sizeProposal.reply.trim()]
-      .filter(Boolean)
-      .join("\n\n"),
-    attachments: [
-      ...new Set([...productInfoProposal.attachments, ...sizeProposal.attachments]),
-    ],
-    handoffReason: sizeProposal.handoffReason,
+    proposal: {
+      ...productInfoProposal,
+      action: sizeProposal.action,
+      reply: [productInfoProposal.reply.trim(), sizeProposal.reply.trim()]
+        .filter(Boolean)
+        .join("\n\n"),
+      attachments: [
+        ...new Set([...productInfoProposal.attachments, ...sizeProposal.attachments]),
+      ],
+      handoffReason: sizeProposal.handoffReason,
+    },
+    requiresHandoff: false,
+    reasonCode: null,
   };
+}
+
+export function withSizeEngineAdvice(
+  productInfoProposal: AgentProposalV1,
+  product: StableProductDocument,
+  profile: CustomerProfileV1,
+  policyResolution: RuntimePolicyResolution | null,
+  productFactsV2: ProductFactsV2 | null,
+  now: Date,
+): AgentProposalV1 {
+  return composeSizeEngineAdvice(
+    productInfoProposal,
+    product,
+    profile,
+    policyResolution,
+    productFactsV2,
+    now,
+  ).proposal;
 }
 
 export function withProactiveSizeAdvice(
@@ -2500,6 +2534,7 @@ export class RealtimeRunner {
     let handoff = applied.handoff;
     let businessFacts: BusinessFactEnvelopeV1 | null = null;
     let handoffGuardReasonCodes: readonly string[] = [];
+    let sizeAdviceRequiresHandoff = false;
     let salesCyclePlan: RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null = null;
     let salesDesiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null = null;
     let salesHandoffReasonCode: string | null = null;
@@ -2824,7 +2859,7 @@ export class RealtimeRunner {
             resolutions[0]!.product !== null &&
             first.requestedFacts.includes("SIZE")
           ) {
-            proposal = withSizeEngineAdvice(
+            const sizeComposition = composeSizeEngineAdvice(
               proposal,
               resolutions[0]!.product!,
               customerProfile,
@@ -2832,12 +2867,14 @@ export class RealtimeRunner {
               productFactsV2,
               now,
             );
-            if (proposal.action === "HANDOFF") {
+            proposal = sizeComposition.proposal;
+            if (sizeComposition.requiresHandoff) {
+              sizeAdviceRequiresHandoff = true;
               handoffGuardReasonCodes = [
                 ...new Set([
                   ...handoffGuardReasonCodes,
-                  "VERIFIED_SIZE_CHART_UNAVAILABLE",
-                ]),
+                  sizeComposition.reasonCode,
+                ].filter((value): value is string => value !== null)),
               ];
               const transitioned = applySilentHandoff(
                 nextState,
@@ -2858,7 +2895,7 @@ export class RealtimeRunner {
             })),
           };
           if (
-            handoff === null &&
+            (handoff === null || sizeAdviceRequiresHandoff) &&
             this.options.mode === "LIVE" &&
             this.options.sendEnabled
           ) {
@@ -3128,18 +3165,23 @@ export class RealtimeRunner {
             this.options.customerProfileEnabled &&
             customerProfile
           ) {
-            deterministicProductInfo = withProactiveSizeAdvice(
-              deterministicProductInfo,
-              resolvedProduct,
-              customerProfile,
-              policyResolution,
-              productFactsV2,
-              now,
-            );
-            if (deterministicProductInfo.action === "HANDOFF") {
-              handoffGuardReasonCodes = [...new Set([
-                ...handoffGuardReasonCodes, "VERIFIED_SIZE_CHART_UNAVAILABLE",
-              ])];
+            if (profileHasBodyMeasurements(customerProfile)) {
+              const sizeComposition = composeSizeEngineAdvice(
+                deterministicProductInfo,
+                resolvedProduct,
+                customerProfile,
+                policyResolution,
+                productFactsV2,
+                now,
+              );
+              deterministicProductInfo = sizeComposition.proposal;
+              if (sizeComposition.requiresHandoff) {
+                sizeAdviceRequiresHandoff = true;
+                handoffGuardReasonCodes = [...new Set([
+                  ...handoffGuardReasonCodes,
+                  ...(sizeComposition.reasonCode ? [sizeComposition.reasonCode] : []),
+                ])];
+              }
             }
           }
           if (deterministicProductInfo) {
@@ -3267,17 +3309,30 @@ export class RealtimeRunner {
             this.options.conversationalMessageFormatEnabled,
             mediaSelectorV2GuardActive,
           );
-          const verifiedFallback = baseVerifiedFallback &&
-              this.options.customerProfileEnabled && customerProfile
-            ? withProactiveSizeAdvice(
-                baseVerifiedFallback,
-                resolvedProduct,
-                customerProfile,
-                policyResolution,
-                productFactsV2,
-                now,
-              )
-            : baseVerifiedFallback;
+          let verifiedFallback = baseVerifiedFallback;
+          if (
+            baseVerifiedFallback &&
+            this.options.customerProfileEnabled &&
+            customerProfile &&
+            profileHasBodyMeasurements(customerProfile)
+          ) {
+            const sizeComposition = composeSizeEngineAdvice(
+              baseVerifiedFallback,
+              resolvedProduct,
+              customerProfile,
+              policyResolution,
+              productFactsV2,
+              now,
+            );
+            verifiedFallback = sizeComposition.proposal;
+            if (sizeComposition.requiresHandoff) {
+              sizeAdviceRequiresHandoff = true;
+              handoffGuardReasonCodes = [...new Set([
+                ...handoffGuardReasonCodes,
+                ...(sizeComposition.reasonCode ? [sizeComposition.reasonCode] : []),
+              ])];
+            }
+          }
           if (verifiedFallback) {
             const priorSalesSignals = proposal.salesSignals;
             const priorStrategyAnalysis = proposal.strategyAnalysis;
@@ -3304,7 +3359,7 @@ export class RealtimeRunner {
           resolvedProduct &&
           proposal.businessFactQuery.intent === "SIZE"
         ) {
-          proposal = withSizeEngineAdvice(
+          const sizeComposition = composeSizeEngineAdvice(
             proposal,
             resolvedProduct,
             customerProfile,
@@ -3312,6 +3367,14 @@ export class RealtimeRunner {
             productFactsV2,
             now,
           );
+          proposal = sizeComposition.proposal;
+          if (sizeComposition.requiresHandoff) {
+            sizeAdviceRequiresHandoff = true;
+            handoffGuardReasonCodes = [...new Set([
+              ...handoffGuardReasonCodes,
+              ...(sizeComposition.reasonCode ? [sizeComposition.reasonCode] : []),
+            ])];
+          }
         }
         if (
           this.options.verifiedVariantEnabled &&
@@ -3464,6 +3527,17 @@ export class RealtimeRunner {
               }),
             ),
           ];
+        }
+        if (sizeAdviceRequiresHandoff && handoff === null) {
+          const transitioned = applySilentHandoff(
+            nextState,
+            "PRODUCT_TOOL_ERROR",
+            nextState.revision,
+            nextState.lastFence,
+            now,
+          );
+          nextState = transitioned.state;
+          handoff = transitioned.handoff;
         }
       }
     }

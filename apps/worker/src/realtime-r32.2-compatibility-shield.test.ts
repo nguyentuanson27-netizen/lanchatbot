@@ -11,6 +11,7 @@ import type {
   CustomerProfileV1,
 } from "@lana/contracts";
 import {
+  composeSizeEngineAdvice,
   groupRealtimeMetaMessagesV2,
   verifiedProductInfoProposal,
   withProactiveSizeAdvice,
@@ -63,6 +64,33 @@ const incompleteProfile: CustomerProfileV1 = {
   sizeHistory: [],
   createdAt: "2026-07-31T00:00:00.000Z",
   updatedAt: "2026-07-31T00:00:00.000Z",
+};
+
+const completeProfile: CustomerProfileV1 = {
+  ...incompleteProfile,
+  revision: 2,
+  measurements: [
+    {
+      kind: "HEIGHT_CM",
+      value: 160,
+      provenance: {
+        source: "CUSTOMER_MESSAGE",
+        sourceEventHash: "b".repeat(64),
+        observedAt: "2026-07-31T00:00:00.000Z",
+        confidence: 1,
+      },
+    },
+    {
+      kind: "WEIGHT_KG",
+      value: 53,
+      provenance: {
+        source: "CUSTOMER_MESSAGE",
+        sourceEventHash: "c".repeat(64),
+        observedAt: "2026-07-31T00:00:00.000Z",
+        confidence: 1,
+      },
+    },
+  ],
 };
 
 const product: StableProductDocument = {
@@ -246,7 +274,38 @@ describe("r32.2 Compatibility First regression shield", () => {
     ).isBuyingSignal).toBe(false);
   });
 
-  it.todo("[D1] complete measurements plus missing size chart preserve verified price, stock, ETA, image, and CTA");
+  it("[D1] complete measurements plus missing size chart preserve verified price, stock, ETA, image, and CTA", () => {
+    const verifiedBase = {
+      ...protectedBaseProposal,
+      reply: [
+        protectedBaseProposal.reply,
+        "Chị muốn em giữ mẫu này để nhân viên hỗ trợ riêng phần size không?",
+      ].join("\n\n"),
+    };
+    const composition = composeSizeEngineAdvice(
+      verifiedBase,
+      product,
+      completeProfile,
+      null,
+      null,
+      new Date("2026-07-31T00:00:00.000Z"),
+    );
+
+    expect(composition).toMatchObject({
+      requiresHandoff: true,
+      reasonCode: "VERIFIED_SIZE_CHART_UNAVAILABLE",
+    });
+    expect(composition.proposal).toEqual(verifiedBase);
+    expect(composition.proposal.action).toBe("REPLY");
+    expect(composition.proposal.reply).toContain("PRICE-VERIFIED");
+    expect(composition.proposal.reply).toContain("STOCK-VERIFIED");
+    expect(composition.proposal.reply).toContain("ETA-VERIFIED");
+    expect((composition.proposal.reply.match(/\?/gu) ?? []).length).toBe(1);
+    expect(composition.proposal.attachments).toEqual([
+      "https://cdn.example/sd398.jpg",
+    ]);
+    expect(1 + composition.proposal.attachments.length).toBeGreaterThan(0);
+  });
   it.todo("[D2] VERTEX_SCHEMA_INVALID produces deterministic grounded fallback instead of FAILED_PERMANENT");
   it.todo("[D4] one verified ownership snapshot fail-closes the entire response group before sequence 0");
   it.todo("[D5] terminal/manual-review predecessor resolves descendants without duplicate sends");

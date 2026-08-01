@@ -32,6 +32,7 @@ import {
   staleFactsRequireHandoff,
   splitRealtimeMetaMessages,
   unavailableFactsRequireHandoff,
+  composeSizeEngineAdvice,
   withProactiveSizeAdvice,
   unresolvedProductRequiresHandoff,
   verifiedProductInfoProposal,
@@ -672,15 +673,22 @@ describe("RealtimeRunner", () => {
     expect(preservedFacts.reply).toContain("STOCK-VERIFIED");
     expect(preservedFacts.reply).toContain("ETA-VERIFIED");
 
-    const failClosed = withProactiveSizeAdvice(
-      baseProposal, product, profile, null, null, new Date(timestamp),
+    const verifiedBase = {
+      ...baseProposal,
+      reply: "PRICE-VERIFIED; STOCK-VERIFIED; ETA-VERIFIED",
+      attachments: ["https://cdn.example/sd398.jpg"],
+    };
+    const missingChart = composeSizeEngineAdvice(
+      verifiedBase, product, profile, null, null, new Date(timestamp),
     );
-    expect(failClosed).toMatchObject({
-      action: "HANDOFF",
-      reply: "",
-      attachments: [],
-      handoffReason: "BUSINESS_FACT_UNAVAILABLE",
+    expect(missingChart).toMatchObject({
+      requiresHandoff: true,
+      reasonCode: "VERIFIED_SIZE_CHART_UNAVAILABLE",
     });
+    expect(missingChart.proposal).toEqual(verifiedBase);
+    expect(withProactiveSizeAdvice(
+      verifiedBase, product, profile, null, null, new Date(timestamp),
+    )).toEqual(verifiedBase);
   });
 
   it("falls back to the verified price-card image when Media Selector V2 returns none", () => {
@@ -1118,6 +1126,103 @@ describe("RealtimeRunner", () => {
       }),
     }), expect.any(Date));
     expect(complete).toHaveBeenCalledOnce();
+    const profile: CustomerProfileV1 = {
+      schemaVersion: 1,
+      profileId: "30709206-8f96-4a1b-9311-6f03ef4dd8b2",
+      customerKey: {
+        namespace: "lana-customer-v1",
+        algorithm: "HMAC_SHA256",
+        digest: "a".repeat(64),
+      },
+      revision: 2,
+      measurements: [
+        {
+          kind: "HEIGHT_CM",
+          value: 160,
+          provenance: {
+            source: "CUSTOMER_MESSAGE",
+            sourceEventHash: "b".repeat(64),
+            observedAt: occurredAt,
+            confidence: 1,
+          },
+        },
+        {
+          kind: "WEIGHT_KG",
+          value: 53,
+          provenance: {
+            source: "CUSTOMER_MESSAGE",
+            sourceEventHash: "c".repeat(64),
+            observedAt: occurredAt,
+            confidence: 1,
+          },
+        },
+      ],
+      fitPreference: null,
+      preferences: { colors: [], styles: [], materials: [] },
+      sizeHistory: [],
+      createdAt: occurredAt,
+      updatedAt: occurredAt,
+    };
+    const profileCommit = vi.fn(async (_input: unknown) => ({
+      stateCommitted: true,
+      metaOutboxCreated: 2,
+      pancakeTagOutboxCreated: true,
+      handoffEventCreated: true,
+      sendAuthorized: true,
+      reasonCodes: [],
+    }));
+    const profileRuntime = {
+      ...runtime,
+      commit: profileCommit,
+      loadOrCreateCustomerProfile: vi.fn(async () => ({
+        pageId: claim.pageId,
+        customerHash: claim.conversationHash,
+        revision: profile.revision,
+        profile,
+        fieldEvidence: {},
+        expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+      })),
+      compareAndSwapCustomerProfile: vi.fn(async () => true),
+    } as unknown as RealtimeRuntimePort;
+    const profileRunner = new RealtimeRunner(
+      {
+        claimNext: vi.fn(async () => claim),
+        complete,
+        retry: vi.fn(),
+        failPermanent: vi.fn(),
+      },
+      profileRuntime,
+      model,
+      facts,
+      search,
+      new FailClosedTagObservationProvider(),
+      {
+        workerId: "worker-1",
+        mode: "LIVE",
+        sendEnabled: true,
+        customerProfileEnabled: true,
+        conversationalMessageFormatEnabled: true,
+        messageGroupingV2Enabled: true,
+      },
+    );
+
+    expect(await profileRunner.processOne()).toBe(true);
+    const profileCommitInput = profileCommit.mock.calls[0]![0] as {
+      metaPlan?: { messages: readonly unknown[] };
+      handoffEventPlan?: unknown;
+    };
+    expect(profileCommitInput.metaPlan?.messages).toEqual([
+      {
+        kind: "TEXT",
+        text: expect.stringContaining(
+          "Set váy Quỳnh Dao (mã SV695) hiện có giá 770.000đ chị nhé.",
+        ),
+      },
+      { kind: "IMAGE", imageUrl },
+    ]);
+    expect(profileCommitInput.metaPlan?.messages.length).toBeGreaterThan(0);
+    expect(profileCommitInput.handoffEventPlan).toBeDefined();
+    expect(complete).toHaveBeenCalledTimes(2);
   });
 
   it("silently hands a verified product to an employee when its catalog snapshot is missing", async () => {
