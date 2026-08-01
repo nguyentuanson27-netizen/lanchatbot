@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Runtime symlink hiện hành: `/opt/lana-chatbot/releases/20260731-realtime-generation-quota-r31.3`; P2.3C dùng release riêng `20260730-p23c-hash-v3-redacted`.
+- Runtime symlink hiện hành: `/opt/lana-chatbot/releases/20260801-realtime-compatibility-first-r32.2`; P2.3C dùng release riêng `20260730-p23c-hash-v3-redacted`.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -14,18 +14,18 @@ Không sửa source trực tiếp trong `/opt/lana-chatbot/current`. Mọi thay 
 
 Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/lana-chatbot/repository`. Agent phải đọc `AGENTS.md` trước khi thao tác; working tree này không phải runtime production. User `lana-deploy` có deploy key GitHub read-only chỉ cho repository này; được phép `fetch` tag/commit nhưng không được push.
 
-## Trạng thái production ngày 2026-07-31
+## Trạng thái production ngày 2026-08-01
 
-- **Current containment runtime:** Realtime Worker đã rollback về `20260731-realtime-generation-quota-r31.3`; Admin API vẫn giữ r32.1 và các service khác không bị recreate.
+- **Current contained canary runtime:** Realtime Worker và Delivery Worker đang chạy `20260801-realtime-compatibility-first-r32.2`; outbound vẫn khóa. Admin API giữ r32.1 và các non-target service không bị recreate.
 - **HISTORICAL_DEPLOYED_VERIFIED_R32_1:** bằng chứng deploy r32.1 được giữ nguyên cho audit, nhưng runtime Realtime đã bị supersede do incident compatibility; không dùng trạng thái này để khẳng định production hiện tại.
 - Queue containment hiện giữ nguyên `1` Inbox `FAILED_PERMANENT`, `2` Outbox `PENDING` và `2` Outbox `MANUAL_REVIEW`; chưa record nào được requeue.
 - Full evidence: [Realtime audit r32.1](docs/current/REALTIME_AUDIT_R32_1_20260731.md) and [deployment manifest](deploy/manifests/20260731-realtime-audit-safety-r32.1.json).
-- **APPROVED_FOR_IMPLEMENTATION:** [Release r32.2 — Compatibility First](docs/current/REALTIME_R32_2_COMPATIBILITY_FIRST_PLAN_20260731.md). Page hiện là page test, chưa có người dùng thật; giữ nguyên phạm vi, chưa mở rộng và chưa requeue trước khi hotfix được deploy/xác minh.
+- **IMPLEMENTED_CANARY_CONTAINED:** [Release r32.2 — Compatibility First](docs/current/REALTIME_R32_2_COMPATIBILITY_FIRST_PLAN_20260731.md) đã deploy cho page test nhưng chưa được phép mở outbound/mở rộng; chưa requeue.
 - **ROLLED_BACK_R31_3_OUTBOUND_LOCKED:** [execution manifest](deploy/manifests/20260801-realtime-r31.3-containment-rollback.json), [r32.1 incident addendum](deploy/manifests/20260801-r32.1-incident-containment.json) và [runbook](docs/current/REALTIME_R31_3_ROLLBACK_RUNBOOK_20260801.md). Outbound vẫn khóa; không có Meta send mới và chưa requeue.
-- **R32.2 ARTIFACT VERIFIED — DEPLOY PENDING:** PR-B đến PR-E đã merge; full check trong image, compose, backup/restore-test, migration 0028–0029 và fail-closed claim rehearsal đều xanh. Xem [candidate manifest](deploy/manifests/20260801-realtime-compatibility-first-r32.2-candidate.json) và [artifact evidence](deploy/manifests/20260801-realtime-compatibility-first-r32.2-artifact.json). Runtime vẫn là r31.3, outbound vẫn khóa và chưa requeue.
+- **R32.2 DEPLOYED CONTAINED — CANARY OBSERVATION REQUIRED:** Artifact/runtime, backup/restore-test, migration 0028–0029, 40/40 post-cutover regression và target health đều đạt. Queue health còn đỏ do 2 descendant cũ; xem [candidate manifest](deploy/manifests/20260801-realtime-compatibility-first-r32.2-candidate.json), [artifact evidence](deploy/manifests/20260801-realtime-compatibility-first-r32.2-artifact.json) và [runtime evidence](deploy/manifests/20260801-realtime-compatibility-first-r32.2-runtime.json). Outbound vẫn khóa và chưa requeue.
 
 
-- Production đang trỏ tới release `20260731-realtime-generation-quota-r31.3`, source commit `30dd603`; Realtime Worker dùng image r31.3, Admin API giữ image r32.1, Admin Web giữ image r30, API/Delivery giữ image r27.1.
+- Production đang trỏ tới release `20260801-realtime-compatibility-first-r32.2`, tag commit `1c004ea`; Realtime/Delivery dùng image r32.2, Admin API giữ image r32.1, Admin Web giữ image r30 và API giữ image r27.1.
 - r30 đã **DEPLOYED_VERIFIED_R30**; bản vá đứng giao diện, C1, B2, B3 và B4 đã qua backup/restore-test, guarded cutover và canary thật.
 - r31 đã **DEPLOYED_VERIFIED_R31_HUMAN_TEST_PENDING**: Voice Contract V2, form báo giá hai bong bóng và Hybrid Buying Intent có guard đã live; chưa có inbound khách sau cutover nên còn chờ human test Messenger.
 - Hotfix câu hỏi nối r31.1 đã **DEPLOYED_VERIFIED_R31_1_HUMAN_TEST_PENDING**: đúng một câu hỏi nối cho pre-sale còn mở, không hỏi lại số đo; chốt đơn, hậu mãi và handoff không bị kéo dài. Chưa có inbound khách sau cutover nên còn chờ human test Messenger.
@@ -33,19 +33,19 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - r31.3 đã **DEPLOYED_VERIFIED_R31_3** với quota `500` lượt AI/giờ và `2.000` lượt AI/ngày cho mỗi page; quota chỉ tính lượt gọi AI, không tính reply deterministic hoặc Meta message unit.
 - r31 không có migration và chỉ recreate Realtime Worker; giá/tồn/size/ETA, attachment và side effect vẫn do nguồn deterministic đã xác minh quyết định.
 - Realtime phân loại need/barrier/decision factor/strategy, áp dụng stage playbook và đúng một câu hỏi nối khi pre-sale còn mở. Deterministic guard vẫn là quyền quyết định cuối cho fact, offer, media, checkout, handoff và outbound.
-- API, Realtime, Delivery, Admin API và Admin Web đều healthy; ba target r30 có restart count 0. Shadow, Admin Simulation, POS, P2.3, Size Chart, n8n và các service ngoài phạm vi không bị recreate.
+- Realtime và Delivery r32.2 đều healthy/restart 0; Delivery live/ready trả 200. Queue health trả 503 do 2 descendant cũ bị giữ, nên outbound chưa được mở. Shadow, Admin, POS, P2.3, Size Chart, n8n và các service ngoài phạm vi không bị recreate.
 - Mọi vị trí Gemini Flash-Lite đang hoạt động hoặc được định nghĩa trong release dùng `gemini-3.5-flash-lite`: realtime, Shadow, media reranker, P2.3B và Size Chart.
-- Migration production mới nhất là `0026_product_media_intake_dedupe`; backup SHA-256 `d3366fea…f1060b` và restore-test `up → down → up` đạt. Bảng dedupe là nguồn idempotency có thẩm quyền, Google Sheet là projection.
+- Migration production mới nhất là `0029_meta_outbox_handoff_ordering`; backup trước r32.2 SHA-256 `da85c24…637c`, restore-test và migration idempotency đạt. Migration 0027–0029 đều additive; không down migration hoặc xóa dữ liệu.
 - Admin API/Web trả 200 nội bộ và public route trả 302 sang Authentik. FE1–FE3 bổ sung UX ổn định, server-side search/pagination, Handoff SLA Console và Conversation Inspector PII-safe.
-- r29 là rollback target cho Admin r30; Realtime rollback về image r27.1 và migration 0026 additive được giữ lại. Qdrant, outbound và page allowlist không đổi trong r30.
+- Rollback target của r32.2 là Realtime r31.3 và Delivery r27.1; migration 0027–0029 additive được giữ lại. Qdrant, dữ liệu hội thoại, audit, Inbox/Outbox và page allowlist không bị xóa.
 - Khi Media Selector V2 trả `NONE`, bot giữ text đã xác minh và không fallback sang ảnh `PRICE_CARD` cũ; attachment không hợp lệ bị loại mà không làm mất text.
 - r26.2 khôi phục contract tiếng Việt có dấu, chặn product-info theo mẫu cũ không dấu, giữ mỗi câu/dòng là một Meta Outbox unit riêng và bắt đầu dòng chất liệu đã xác minh bằng `Chất liệu`.
 - Wave 1 r21 chạy từ merge commit `5f817bbc`: official benchmark vẫn khóa 1.955 hội thoại hợp lệ, split 1.173/391/391, leakage 0; holdout chưa mở.
-- Wave 1 r21 vẫn là nền benchmark/replay; realtime production hiện dùng binary r31 và chưa mở locked holdout.
+- Wave 1 r21 vẫn là nền benchmark/replay; realtime production hiện dùng binary r32.2 trong containment và chưa mở locked holdout.
 - Semantic candidate vẫn `NOT_PROMOTED`: validation `BUYING_COMMITTED` precision `42,41%`, recall `57,26%`. Production replay đang `WAITING_FOR_ELIGIBLE_TRAFFIC`; không tạo inbound giả và locked holdout vẫn đóng.
-- Admin API/Web chạy image r30, Realtime Worker chạy image r31.3; Simulation Worker giữ image cũ. Admin FE/API nội bộ đều 200 và public route trả 302 sang Authentik.
+- Admin API chạy image r32.1, Admin Web chạy image r30, Realtime/Delivery chạy image r32.2; Simulation Worker giữ image cũ. Admin FE/API nội bộ đều 200 và public route trả 302 sang Authentik.
 
-- Page allowlist vẫn chỉ có `1198992073286645`; API/Delivery chỉ đổi binary để ghi acquisition sidecar, còn quyền gửi, POS, P2.3A/C và n8n không thay đổi ownership trong r27.1.
+- Page allowlist vẫn chỉ có `1198992073286645`; API giữ binary r27.1, Delivery r32.2 thêm group gate/health nhưng outbound database gate vẫn khóa. POS, P2.3A/C và n8n không thay đổi ownership.
 - Dashboard đọc checkout drop-off qua view ẩn danh `admin_conversation_events_v`; không mở quyền bảng hội thoại gốc cho tài khoản Admin.
 - Checkout tự nhiên dùng structured extraction có evidence/confidence và deterministic guard; app không đưa PII vào decision telemetry.
 - Xác nhận mua hiểu thêm các cách nói tự nhiên nhưng vẫn chặn câu hỏi, phủ định, do dự và yêu cầu ảnh. `OK` chỉ xác nhận khi cart đang ở đúng bước order preview.
@@ -57,9 +57,9 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - P2.3C Hash v3 đang `LIVE` trên image redacted: `956/956` point đã có ba hash; migration giữ nguyên `889` vector payload/provenance, tạo `38` point thiếu và tạo lại đúng `29` vector semantic; `error_sample` không còn log URL ảnh.
 - Cross-sell được để cho bản sau r15, dùng quan hệ phối đồ được duyệt trong PostgreSQL/Admin; không dùng similarity để tự gợi ý.
 - API webhook chạy image `lana-chatbot-app:ad-acquisition-r27.1`; routing/ownership và send guard giữ nguyên.
-- Realtime page test chạy image r31.3 với quota `500/2.000`, Wave 2 `LIVE_100`, Voice Contract V2, tư vấn size chủ động có guard, tư vấn thường một bong bóng, báo giá hai bong bóng, Hybrid Buying Intent có deterministic guard, Cutout-first + raw fallback + AI reranker, ProductFactsV2, Media Selector V2 và hard gate chỉ cho page `1198992073286645`.
+- Realtime page test chạy image r32.2 với quota `500/2.000`, Wave 2 `LIVE_100`, Voice Contract V2, Compatibility First cho size/Vertex/CTA, group gate fail-closed, Hybrid Buying Intent và Media Selector V2; outbound hard gate vẫn khóa cho page `1198992073286645`.
 - Shadow worker chạy image r26.1 với Gemini 3.5 Flash-Lite và Judge v2 ở `DRY_RUN`; send false và role DB không có quyền ghi Meta Outbox.
-- Admin API/Web chạy image r30, Realtime Worker chạy image r31.3; Simulation Worker giữ image cũ. Admin FE/API nội bộ đều 200 và public route trả 302 sang Authentik.
+- Admin API chạy image r32.1, Admin Web chạy image r30, Realtime/Delivery chạy image r32.2; Simulation Worker giữ image cũ. Admin FE/API nội bộ đều 200 và public route trả 302 sang Authentik.
 - Runtime Policy Resolver đang `PUBLISHED` và bị hard-gate chỉ cho page `1198992073286645`; page khác bị từ chối trước khi đọc policy.
 - Bốn policy runtime (shop, offer, closing, payment) đang trỏ tới các version `PUBLISHED` bất biến; `SHOP_POLICY` v2 chứa chính sách chăm sóc khách hàng có cấu trúc và mọi lần chuyển trạng thái đều có audit.
 - Chu trình bán hàng production đã nối cart 48 giờ, thương lượng deterministic, giảm 5% từ hai sản phẩm, freeship/giảm cuối theo policy, thu thông tin nhận hàng, order preview và `PURCHASE_CONFIRMED`.
@@ -89,7 +89,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - Canary Messenger 100 inbound thật bắt đầu lúc `2026-07-23T19:14:08Z` (`2026-07-24 02:14:08 +07:00`) cho duy nhất page `1198992073286645`; không tạo inbound giả.
 - Các workflow n8n P2.2/P2.3 tương ứng đang inactive; không được kích hoạt đồng thời với app-native worker.
 - Timer `lana-p23-daily.timer` đang `disabled/inactive`.
-- PostgreSQL đã áp dụng migration đến `0026_product_media_intake_dedupe`; migration 0024 tạo `admin_acquisition_sessions_v` với funnel/dimension Meta Ads nhưng ẩn `customer_hash`, raw message và raw event metadata.
+- PostgreSQL đã áp dụng migration đến `0029_meta_outbox_handoff_ordering`; migration 0024 vẫn tạo `admin_acquisition_sessions_v` với funnel/dimension Meta Ads nhưng ẩn `customer_hash`, raw message và raw event metadata.
 - n8n `2.28.6` vẫn chạy các workflow legacy cho các page/nhóm việc khác. Workflow chatbot n8n chính vẫn active nhưng page canary đã được tách sang app.
 
 Chi tiết bằng chứng runtime và ownership nằm tại [Production baseline](docs/current/PRODUCTION_BASELINE_20260722.md). Runtime chung theo [Performance/UI Stability r30](deploy/manifests/20260730-performance-ui-stability-r30.json); P2.3C theo [Hash v3](deploy/manifests/20260730-p23c-hash-v3-compose.json). Rollback P2.3C tắt `P23C_HASH_V3_MODE` và recreate riêng publisher; không xóa Inbox/Outbox, Redis, PostgreSQL hoặc Qdrant.
