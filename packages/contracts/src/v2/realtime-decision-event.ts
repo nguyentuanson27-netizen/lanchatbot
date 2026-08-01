@@ -121,6 +121,7 @@ export const RealtimeDecisionEventV1Schema = z.object({
         "ASK_MEASUREMENTS",
         "ASK_PROOF_PREFERENCE",
         "REDUCE_TO_TWO",
+        "POST_MEDIA_CLOSE",
         "NO_ADDITIONAL_CTA",
       ]),
       confidence: z.number().min(0).max(1),

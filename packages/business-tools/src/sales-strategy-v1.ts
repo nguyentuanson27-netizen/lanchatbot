@@ -40,6 +40,7 @@ export type Wave2CtaPolicy =
   | "ASK_MEASUREMENTS"
   | "ASK_PROOF_PREFERENCE"
   | "REDUCE_TO_TWO"
+  | "POST_MEDIA_CLOSE"
   | "NO_ADDITIONAL_CTA";
 
 export type Wave2EvidenceSignal =
@@ -56,6 +57,8 @@ export type Wave2EvidenceSignal =
   | "STATE_PRODUCT_MATCHED"
   | "STATE_BUYING_SIGNAL"
   | "STATE_MEASUREMENTS_PRESENT"
+  | "REQUESTED_MATERIAL_PROOF"
+  | "REQUESTED_SOCIAL_PROOF"
   | "MODEL_ANALYSIS_ACCEPTED"
   | "DETERMINISTIC_FALLBACK";
 
@@ -93,6 +96,7 @@ export interface Wave2StrategyInput {
   readonly hasVerifiedProduct: boolean;
   readonly resolvedProductCount: number;
   readonly hasMeasurements: boolean;
+  readonly requestedProof?: "MATERIAL" | "SOCIAL" | null;
   readonly modelAnalysis?: Wave2ModelAnalysis | null;
 }
 
@@ -208,6 +212,25 @@ function stateBarrier(
     default:
       return null;
   }
+}
+
+function requestedProofBarrier(
+  requestedProof: Wave2StrategyInput["requestedProof"],
+): {
+  barrier: Wave2Barrier;
+  factor: Wave2DecisionFactor;
+  evidence: Wave2EvidenceSignal;
+} | null {
+  if (requestedProof === "MATERIAL") {
+    return {
+      barrier: "BARRIER_MATERIAL",
+      factor: "MATERIAL",
+      evidence: "REQUESTED_MATERIAL_PROOF",
+    };
+  }
+  return requestedProof === "SOCIAL"
+    ? { barrier: "BARRIER_TRUST", factor: "TRUST", evidence: "REQUESTED_SOCIAL_PROOF" }
+    : null;
 }
 
 function detectedBarrier(
@@ -406,6 +429,9 @@ function ctaFor(
   if (barrier === "CHOICE_OVERLOAD" || input.resolvedProductCount > 2) {
     return "REDUCE_TO_TWO";
   }
+  if (input.requestedProof && strategy === "STRATEGY_SHOW_PROOF") {
+    return "POST_MEDIA_CLOSE";
+  }
   if (barrier === "BARRIER_TRUST" || barrier === "BARRIER_MATERIAL") {
     return "ASK_PROOF_PREFERENCE";
   }
@@ -438,11 +464,13 @@ export function decideWave2SalesStrategy(
   const needDetection = detectedNeed(text);
   const textBarrier = detectedBarrier(text);
   const objectionBarrier = stateBarrier(input.objectionType);
-  const barrierDetection = objectionBarrier ?? textBarrier;
+  const proofBarrier = requestedProofBarrier(input.requestedProof);
+  const barrierDetection = objectionBarrier ?? proofBarrier ?? textBarrier;
   const evidence = new Set<Wave2EvidenceSignal>();
   if (needDetection.evidence) evidence.add(needDetection.evidence);
   if (textBarrier.evidence) evidence.add(textBarrier.evidence);
   if (objectionBarrier) evidence.add("STATE_OBJECTION");
+  if (proofBarrier) evidence.add(proofBarrier.evidence);
   if (input.hasVerifiedProduct) evidence.add("STATE_PRODUCT_MATCHED");
   if (input.buyingSignal) evidence.add("STATE_BUYING_SIGNAL");
   if (input.hasMeasurements) evidence.add("STATE_MEASUREMENTS_PRESENT");
@@ -507,6 +535,7 @@ function ctaText(policy: Wave2CtaPolicy): string | null {
       return "Chị muốn xem ảnh mặc thực tế hay ảnh cận chất liệu?";
     case "REDUCE_TO_TWO":
       return "Chị ưu tiên form dáng hay chất liệu để em chọn lại hai mẫu sát nhu cầu hơn?";
+    case "POST_MEDIA_CLOSE":
     case "NO_ADDITIONAL_CTA":
       return null;
   }

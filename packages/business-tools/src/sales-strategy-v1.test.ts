@@ -92,6 +92,22 @@ describe("Wave 2 sales strategy v1", () => {
     expect(rewritten.reply).not.toContain("?");
   });
 
+  it("defers a requested material proof CTA until after verified media", () => {
+    const decision = decideWave2SalesStrategy({
+      ...baseInput,
+      salesStage: "FIT_CONSULTING",
+      hasMeasurements: true,
+      requestedProof: "MATERIAL",
+    });
+    const rewritten = applyWave2ReplyPolicy(proposal, decision);
+    expect(decision.barrier).toBe("BARRIER_MATERIAL");
+    expect(decision.recommendedStrategy).toBe("STRATEGY_SHOW_PROOF");
+    expect(decision.ctaPolicy).toBe("POST_MEDIA_CLOSE");
+    expect(decision.evidence).toContain("REQUESTED_MATERIAL_PROOF");
+    expect(rewritten.reply).toBe(proposal.reply);
+    expect(rewritten.reply).not.toContain("?");
+  });
+
   it("does not add a continuation question after a committed buying signal", () => {
     const decision = decideWave2SalesStrategy({
       ...baseInput,
