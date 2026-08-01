@@ -22,6 +22,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - Full evidence: [Realtime audit r32.1](docs/current/REALTIME_AUDIT_R32_1_20260731.md) and [deployment manifest](deploy/manifests/20260731-realtime-audit-safety-r32.1.json).
 - **APPROVED_FOR_IMPLEMENTATION:** [Release r32.2 — Compatibility First](docs/current/REALTIME_R32_2_COMPATIBILITY_FIRST_PLAN_20260731.md). Page hiện là page test, chưa có người dùng thật; giữ nguyên phạm vi, chưa mở rộng và chưa requeue trước khi hotfix được deploy/xác minh.
 - **ROLLED_BACK_R31_3_OUTBOUND_LOCKED:** [execution manifest](deploy/manifests/20260801-realtime-r31.3-containment-rollback.json), [r32.1 incident addendum](deploy/manifests/20260801-r32.1-incident-containment.json) và [runbook](docs/current/REALTIME_R31_3_ROLLBACK_RUNBOOK_20260801.md). Outbound vẫn khóa; không có Meta send mới và chưa requeue.
+- **R32.2 RELEASE CANDIDATE — SOURCE VALIDATED, ARTIFACT PENDING:** PR-B đến PR-E đã merge và full local test/typecheck/build đều xanh; [candidate manifest](deploy/manifests/20260801-realtime-compatibility-first-r32.2-candidate.json) chưa có image digest, chưa deploy và không cho phép requeue.
 
 
 - Production đang trỏ tới release `20260731-realtime-generation-quota-r31.3`, source commit `30dd603`; Realtime Worker dùng image r31.3, Admin API giữ image r32.1, Admin Web giữ image r30, API/Delivery giữ image r27.1.
