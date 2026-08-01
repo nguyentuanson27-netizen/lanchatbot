@@ -1428,17 +1428,30 @@ export class PostgresRealtimeRuntimeStore {
       throw new Error("META_OUTBOX_OPERATOR_REASON_CODE_INVALID");
     }
     return withTransaction(this.pool, async (client) => {
-      const current = await client.query<{ page_id: string }>(
-        `SELECT page_id
+      const current = await client.query<{
+        page_id: string;
+        reviewable: boolean;
+        already_cancelled: boolean;
+      }>(
+        `SELECT page_id,
+                bool_or(status IN ('MANUAL_REVIEW', 'AMBIGUOUS')) AS reviewable,
+                bool_or(
+                  last_error_code = 'OPERATOR_CANCELLED_MANUAL_REVIEW'
+                ) AS already_cancelled
          FROM meta_outbox
          WHERE response_group_id = $1
-         LIMIT 1`,
+         GROUP BY page_id`,
         [responseGroupId],
       );
-      const pageId = current.rows[0]?.page_id;
-      if (!pageId) return null;
-      const updated = await client.query(
-        `UPDATE meta_outbox
+      const row = current.rows[0];
+      if (!row) return null;
+      const pageId = row.page_id;
+      if (!row.reviewable && !row.already_cancelled) {
+        throw new Error("META_OUTBOX_RESPONSE_GROUP_NOT_MANUAL_REVIEW");
+      }
+      const updated = row.reviewable
+        ? await client.query(
+            `UPDATE meta_outbox
          SET status = 'FAILED_PERMANENT',
              last_error_code = 'OPERATOR_CANCELLED_MANUAL_REVIEW',
              lease_owner = NULL, lease_token = NULL, lease_until = NULL,
@@ -1447,8 +1460,9 @@ export class PostgresRealtimeRuntimeStore {
            AND status IN (
              'PENDING', 'RETRYABLE', 'MANUAL_REVIEW', 'AMBIGUOUS'
            )`,
-        [responseGroupId],
-      );
+            [responseGroupId],
+          )
+        : { rowCount: 0 };
       const cancelledCount = updated.rowCount ?? 0;
       if (cancelledCount > 0) {
         await client.query(

@@ -669,6 +669,7 @@ describe("PostgresRealtimeRuntimeStore outbox compatibility ordering and health"
     expect(calls[0]?.sql).not.toMatch(/ciphertext|recipient|customer_hash/iu);
   });
 });
+
 describe("PostgresRealtimeRuntimeStore manual-review operator action", () => {
   it("supports audited cancel-only resolution and never requeues", async () => {
     const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
@@ -677,7 +678,14 @@ describe("PostgresRealtimeRuntimeStore manual-review operator action", () => {
       async query(sql: string, values: readonly unknown[] = []) {
         calls.push({ sql, values });
         if (sql.includes("SELECT page_id") && sql.includes("response_group_id")) {
-          return { rowCount: 1, rows: [{ page_id: "page-1" }] };
+          return {
+            rowCount: 1,
+            rows: [{
+              page_id: "page-1",
+              reviewable: firstUpdate,
+              already_cancelled: !firstUpdate,
+            }],
+          };
         }
         if (sql.includes("UPDATE meta_outbox")) {
           const rowCount = firstUpdate ? 2 : 0;
@@ -708,6 +716,7 @@ describe("PostgresRealtimeRuntimeStore manual-review operator action", () => {
       "PROVIDER_AMBIGUITY_REVIEWED",
     )).toMatchObject({ cancelledCount: 0, changed: false });
 
+    expect(calls.some((call) => call.sql.includes("bool_or(status IN"))).toBe(true);
     const update = calls.find((call) => call.sql.includes("UPDATE meta_outbox"));
     expect(update?.sql).toContain("SET status = 'FAILED_PERMANENT'");
     expect(update?.sql).not.toContain("'PENDING' AS");
