@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-01T10:24:42Z",
+  "status": "RELEASE_CANDIDATE_SOURCE_VALIDATED_ARTIFACT_PENDING",
+  "environment": "production-test-page",
+  "host": "156.67.214.197",
+  "pageId": "1198992073286645",
+  "documentType": "APPEND_ONLY_RELEASE_CANDIDATE_EVIDENCE",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceBranch": "main",
+  "sourceCommit": "1d4e18005381febbb79b8b225a450aedd1ceab49",
+  "plannedReleaseTag": "20260801-realtime-compatibility-first-r32.2",
+  "behavioralBaseline": {
+    "releaseTag": "20260731-realtime-generation-quota-r31.3",
+    "sourceCommit": "30dd6030a2e682cdd438f4226073fb77e4a579b7",
+    "manifestPath": "deploy/manifests/20260731-realtime-generation-quota-r31.3.json"
+  },
+  "githubEvidence": {
+    "compatibilityPlan": { "pullRequest": 97, "mergeCommit": "2f3c16e87b347f534025bcac6342436dc97575b6" },
+    "regressionShield": { "pullRequest": 98, "mergeCommit": "8a8401d3f2ff0c7179df6042c2f6fb2a6bf9b5fc" },
+    "containmentAndRollbackRunbook": { "pullRequest": 100, "mergeCommit": "a0472f50e5ab0d4ba941a91729e81a6da58d2c51" },
+    "sizePreservation": { "pullRequest": 102, "mergeCommit": "1a0bfe3f069435be8861aeac9a2a51855de71e90" },
+    "vertexVoiceCta": { "pullRequest": 103, "mergeCommit": "0d1b4093d0400409adfab61eda749796c924f7e1" },
+    "responseGroupGate": { "pullRequest": 104, "mergeCommit": "9ef73938becd64317235fc5c7bbc5972e9779834" },
+    "outboxTelemetryHealth": { "pullRequest": 105, "mergeCommit": "1d4e18005381febbb79b8b225a450aedd1ceab49" }
+  },
+  "approvedDeviations": {
+    "D1": "Size chart missing or low confidence preserves verified price, stock, ETA and media; only size advice hands off",
+    "D2": "Initial and grounded Vertex draft failures use deterministic verified-facts fallback before permanent failure",
+    "D3": "Voice Contract and one eligible sales-stage CTA are restored without extending buying, no-reply or handoff flows",
+    "D4": "One durable fail-closed Pancake ownership decision protects the whole response group before sequence zero",
+    "D5": "Terminal, manual-review and expired-lease predecessors resolve descendants without blind retry or duplicate send",
+    "D6": "Token source, model path/error class and separated liveness/readiness/queue health are explicit without changing replies"
+  },
+  "additionalCompatibilityOrdering": {
+    "reason": "A size-only handoff commits verified outbound content and HUMAN ownership in one transaction",
+    "behavior": "Marked verified response groups may finish after owner transition; the Pancake NHAN_VIEN tag waits until the response group has no active sequence",
+    "preExistingBlockingTagStillWins": true,
+    "normalHumanOwnedOutboundStillBlocked": true
+  },
+  "migrationPlan": {
+    "alreadyPresent": ["0027_handoff_case_sla_default"],
+    "pendingAdditive": ["0028_meta_response_group_gate", "0029_meta_outbox_handoff_ordering"],
+    "productionDownMigrationPlanned": false,
+    "dataDeletionPlanned": false,
+    "backupAndRestoreTestRequiredBeforeApply": true
+  },
+  "localVerification": {
+    "fullTypecheck": "PASS_18_OF_19_WORKSPACE_PROJECTS",
+    "fullTests": "PASS_ALL_WORKSPACE_SUITES",
+    "workerTests": "PASS_345_OF_345",
+    "databaseTests": "PASS_112_OF_112",
+    "fullBuild": "PASS_18_OF_19_WORKSPACE_PROJECTS",
+    "compatibilityShieldD5D6": "PASS_16_OF_16_TARGETED",
+    "migrationAndRuntimeTargeted": "PASS_35_OF_35",
+    "diffCheck": "PASS",
+    "utf8MojibakeScan": "PASS",
+    "dockerComposeConfig": "NOT_RUN_LOCAL_DOCKER_CLI_UNAVAILABLE_MUST_PASS_ON_VPS_BEFORE_BUILD"
+  },
+  "productionPreflight": {
+    "capturedAt": "2026-08-01T10:24:42Z",
+    "currentReleasePath": "/opt/lana-chatbot/releases/20260731-realtime-generation-quota-r31.3",
+    "realtimeImage": "lana-chatbot-app:realtime-generation-quota-r31.3",
+    "realtimeHealth": "healthy",
+    "realtimeRestartCount": 0,
+    "deliveryImage": "lana-chatbot-app:ad-acquisition-r27.1",
+    "deliveryHealth": "healthy",
+    "deliveryRestartCount": 0,
+    "outboundGate": { "pageStatus": "ACTIVE", "routingOwner": "APP", "appSendEnabled": false, "killSwitch": true },
+    "queueSnapshot": {
+      "inbox": { "FAILED_PERMANENT": 1, "PROCESSED": 228 },
+      "outbox": { "MANUAL_REVIEW": 2, "PENDING": 2, "SENT_ACCEPTED": 113 },
+      "sending": 0,
+      "ambiguous": 0
+    },
+    "migrationsPresent": ["0027_handoff_case_sla_default"],
+    "migrationsNotYetApplied": ["0028_meta_response_group_gate", "0029_meta_outbox_handoff_ordering"],
+    "requeueExecuted": false
+  },
+  "artifact": {
+    "status": "NOT_BUILT",
+    "image": "lana-chatbot-app:realtime-compatibility-first-r32.2",
+    "digest": null,
+    "releasePath": "/opt/lana-chatbot/releases/20260801-realtime-compatibility-first-r32.2",
+    "sourceMustBeMaterializedFromMergedTag": true,
+    "directVpsSourceEditsAllowed": false
+  },
+  "plannedDeployment": {
+    "outboundMustRemainLocked": true,
+    "targetServicesInOrder": ["delivery-worker", "realtime-worker"],
+    "nonTargetServicesMustRemainUnchanged": true,
+    "deliveryFirstMode": "DATABASE_OUTBOUND_GATE_LOCKED_SEND_DISABLED_VALIDATION",
+    "requiredPreCutoverEvidence": [
+      "TAG_AND_COMMIT_PROVENANCE",
+      "CLEAN_RELEASE_PATH",
+      "UNIQUE_IMAGE_DIGEST",
+      "COMPOSE_CONFIG_PASS",
+      "DATABASE_BACKUP_AND_RESTORE_TEST",
+      "MIGRATION_0028_0029_PARSE_AND_APPLY_ON_RESTORE",
+      "NO_SENDING_LEASE",
+      "QUEUE_BASELINE_UNCHANGED",
+      "DRY_RUN_CLAIM_BLOCKED_BY_PAGE_GATE"
+    ],
+    "requiredPostCutoverEvidence": [
+      "BOTH_TARGETS_HEALTHY_RESTART_0",
+      "NON_TARGET_CONTAINER_IDS_UNCHANGED",
+      "LIVENESS_READY_QUEUE_HEALTH_RECORDED",
+      "REGRESSION_SHIELD_IN_ARTIFACT_PASS",
+      "NO_NEW_META_REQUEST_OR_ACCEPTED_SEND_WHILE_LOCKED",
+      "NO_SCHEMA_OR_UNHANDLED_ERRORS",
+      "NO_REQUEUE"
+    ]
+  },
+  "promotionGates": {
+    "canarySmokeScenarios": 30,
+    "minimumObservationHours": 48,
+    "minimumReviewedGenerations": 100,
+    "differentialParityOutsideD1ToD6": "100_PERCENT_REQUIRED",
+    "hardSafetyMetrics": "ZERO_REQUIRED",
+    "statusBeforeAllGates": "CANARY_NOT_PRODUCTION_VERIFIED"
+  },
+  "queueRecovery": {
+    "allowedInThisReleasePreparation": false,
+    "condition": "R32_2_DEPLOYED_AND_VERIFIED_PLUS_PER_RECORD_SUPERSEDE_OWNERSHIP_TAG_AND_PROVIDER_EVIDENCE_REVIEW"
+  },
+  "rollback": {
+    "realtimeTarget": "20260731-realtime-generation-quota-r31.3",
+    "deliveryTarget": "lana-chatbot-app:ad-acquisition-r27.1",
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false,
+    "outboundMustRemainLocked": true,
+    "queueMutationAllowed": false
+  },
+  "auditIntegrity": {
+    "r32_1ManifestModified": false,
+    "incidentContainmentManifestModified": false,
+    "r31_3RollbackManifestModified": false,
+    "thisCandidateMustNotBeEditedAfterMerge": true,
+    "artifactBuildAndRuntimeEvidenceMustUseNewManifest": true
+  }
+}
