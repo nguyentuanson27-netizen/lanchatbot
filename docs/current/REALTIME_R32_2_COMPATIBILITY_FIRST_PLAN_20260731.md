@@ -23,6 +23,8 @@ Nguyên tắc bắt buộc:
 - Page `1198992073286645` là page test, chưa có người dùng thật; không cần bật kill switch chỉ để merge docs và regression shield.
 - Giữ r32.1 ở phạm vi canary hiện tại; không mở rộng page/traffic.
 - Không requeue Inbox/Outbox lỗi trước khi r32.2 đã deploy và xác minh.
+- Incident containment được ghi append-only tại [manifest addendum](../../deploy/manifests/20260801-r32.1-incident-containment.json); manifest r32.1 gốc không được sửa hoặc xóa.
+- Mọi rollback r31.3 phải theo [runbook đã phê duyệt](REALTIME_R31_3_ROLLBACK_RUNBOOK_20260801.md), khóa outbound trước runtime mutation và kết thúc ở trạng thái outbound vẫn khóa.
 - GitHub là source of truth. Không sửa source trực tiếp trong VPS.
 - Không xóa dữ liệu hội thoại, audit event, Inbox, Outbox, Redis, PostgreSQL, Qdrant hoặc provider evidence.
 

@@ -36,6 +36,13 @@ Tài liệu này áp dụng cho toàn bộ repository La.na Chatbot.
 - POS là nguồn gốc BOM, giá và tồn. Google Sheets là lớp quản trị/snapshot. Redis phục vụ realtime. Qdrant chỉ chứa dữ liệu tìm kiếm tương đối ổn định.
 - Inbox chống xử lý lại webhook; Outbox đảm bảo một phản hồi chỉ được gửi một lần.
 
+## Invariant tương thích r31.3 bắt buộc
+
+- Bảo toàn verified facts và media: lỗi ở model, Size Engine hoặc enrichment chỉ được làm mất phần đóng góp của chính nó; không được xóa hay thay thế giá, tồn, ETA, ảnh, CTA hoặc nội dung đã xác minh đã dựng trước đó.
+- Mọi thay đổi realtime phải differential-test với behavioral baseline r31.3; sai khác chỉ hợp lệ khi thuộc deviation đã phê duyệt trong kế hoạch r32.2 và có regression evidence.
+- Delivery gate phải quyết định một lần cho toàn bộ response group trước sequence 0; blocking tag hoặc kết quả stale, timeout, error hay unverified đều fail-closed và không sequence nào được gửi.
+- Không được chuyển Inbox thành `FAILED_PERMANENT` chỉ vì output model sai schema, malformed hoặc parse lỗi; phải thử deterministic fallback từ verified facts trước.
+
 ## Quy trình thay đổi
 
 1. Tạo branch từ `main`; không phát triển trực tiếp trên runtime VPS.
