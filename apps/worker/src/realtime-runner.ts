@@ -29,6 +29,7 @@ import {
   type BusinessFactQueriesV2,
   type BusinessFactEnvelopeV1,
   type CustomerProfileV1,
+  type GroundedReplyDraftV1,
   type HandoffReasonV2,
   type InboundMessageV1,
   type MeasurementKind,
@@ -874,6 +875,77 @@ function productInfoLookupProposal(product: StableProductDocument): AgentProposa
       size: null,
       deliveryRegion: null,
     },
+  };
+}
+
+const DETERMINISTIC_GROUNDED_DRAFT: GroundedReplyDraftV1 = {
+  schemaVersion: 1,
+  advisoryText: "",
+  objectionResponse: "",
+  suggestedQuestion: "",
+  suggestedNextStep: "",
+  attachmentImageIndices: [],
+};
+
+export type VertexGroundedFallbackReason =
+  | "GROUNDED_SCHEMA_INVALID"
+  | "GROUNDED_DRAFT_FALLBACK";
+
+export function vertexGroundedFallbackReason(
+  error: unknown,
+): VertexGroundedFallbackReason {
+  return error instanceof Error && (
+      error.message === "GROUNDED_SCHEMA_INVALID" ||
+      error.message === "VERTEX_SCHEMA_INVALID"
+    )
+    ? "GROUNDED_SCHEMA_INVALID"
+    : "GROUNDED_DRAFT_FALLBACK";
+}
+
+export function deterministicVertexProposalFallback(
+  customerText: string,
+  product: StableProductDocument | null,
+  buyingSignal: boolean,
+  error: unknown,
+): {
+  readonly proposal: AgentProposalV1;
+  readonly reasonCode: VertexGroundedFallbackReason;
+} {
+  const reasonCode = vertexGroundedFallbackReason(error);
+  if (product) {
+    const proposal = productInfoLookupProposal(product);
+    return {
+      proposal: {
+        ...proposal,
+        businessFactQuery: {
+          ...proposal.businessFactQuery,
+          intent: explicitCustomerBusinessIntents(customerText)[0] ?? "PRICE",
+        },
+      },
+      reasonCode,
+    };
+  }
+  return {
+    proposal: {
+      schemaVersion: 1,
+      intent: "deterministic_vertex_fallback",
+      conversationStage: "AWARENESS",
+      productId: null,
+      action: buyingSignal ? "REPLY" : "ASK_PRODUCT_SELECTION",
+      reply: buyingSignal
+        ? "Em đã ghi nhận nhu cầu của chị và sẽ hỗ trợ tiếp ngay ạ."
+        : "Chị gửi giúp em mã hoặc ảnh mẫu đang quan tâm để em kiểm tra thông tin chính xác nhé.",
+      attachments: [],
+      handoffReason: null,
+      businessFactQuery: {
+        intent: "NONE",
+        offerType: null,
+        color: null,
+        size: null,
+        deliveryRegion: null,
+      },
+    },
+    reasonCode,
   };
 }
 
@@ -2547,6 +2619,7 @@ export class RealtimeRunner {
     let modelOutputTokens = 0;
     let modelTotalTokens = 0;
     let hasModelTokenUsage = false;
+    let initialVertexFallbackUsed = false;
     let salesHandled = false;
     let guardedPlanHash: string | null = null;
     let wave2StrategyDecision: Wave2StrategyDecision | null = null;
@@ -3023,21 +3096,35 @@ export class RealtimeRunner {
           proposal = productInfoLookupProposal(resolvedProduct);
         } else {
           modelCalled = true;
-          const initial = await this.model.generate(
-            modelContext,
-            this.options.promptVersion,
-          );
-          modelVersion = initial.modelVersion;
-          modelLatencyMs += initial.latencyMs;
-          modelPromptTokens += initial.tokenUsage.promptTokenCount ?? 0;
-          modelOutputTokens += initial.tokenUsage.candidatesTokenCount ?? 0;
-          modelTotalTokens += initial.tokenUsage.totalTokenCount ?? 0;
-          hasModelTokenUsage ||= Object.keys(initial.tokenUsage).length > 0;
-          proposal = {
-            ...initial.proposal,
-            productId:
-              resolvedProduct?.productId ?? initial.proposal.productId,
-          };
+          try {
+            const initial = await this.model.generate(
+              modelContext,
+              this.options.promptVersion,
+            );
+            modelVersion = initial.modelVersion;
+            modelLatencyMs += initial.latencyMs;
+            modelPromptTokens += initial.tokenUsage.promptTokenCount ?? 0;
+            modelOutputTokens += initial.tokenUsage.candidatesTokenCount ?? 0;
+            modelTotalTokens += initial.tokenUsage.totalTokenCount ?? 0;
+            hasModelTokenUsage ||= Object.keys(initial.tokenUsage).length > 0;
+            proposal = {
+              ...initial.proposal,
+              productId:
+                resolvedProduct?.productId ?? initial.proposal.productId,
+            };
+          } catch (error) {
+            const fallback = deterministicVertexProposalFallback(
+              message.text ?? "",
+              resolvedProduct,
+              buyingSignal.isBuyingSignal,
+              error,
+            );
+            proposal = fallback.proposal;
+            initialVertexFallbackUsed = true;
+            handoffGuardReasonCodes = [
+              ...new Set([...handoffGuardReasonCodes, fallback.reasonCode]),
+            ];
+          }
           const inferredCurrentProductId = aiContinuationProductId(
             message.text ?? "",
             proposal.productId,
@@ -3192,84 +3279,72 @@ export class RealtimeRunner {
           } else if (
             facts.status === "OK" &&
             resolvedProduct &&
-            this.options.groundedDraftEnabled &&
-            this.options.verifiedFactAssemblerEnabled &&
-            this.model.groundDraftWithFacts
+            (initialVertexFallbackUsed || (
+              this.options.groundedDraftEnabled &&
+              this.options.verifiedFactAssemblerEnabled &&
+              this.model.groundDraftWithFacts
+            ))
           ) {
             const factBlocks = buildVerifiedFactBlocks(
               facts,
               proposal.businessFactQuery.intent,
               resolvedProduct,
             );
-            try {
-              modelCalled = true;
-              const grounded = await this.model.groundDraftWithFacts(
-                modelContext,
-                proposal,
-                facts,
-                {
-                  productId: resolvedProduct.productId,
-                  title: resolvedProduct.title,
-                  descriptionXml: resolvedProduct.descriptionXml ?? "",
-                  materials: resolvedProduct.materials,
-                  silhouettes: resolvedProduct.silhouettes,
-                  occasions: resolvedProduct.occasions,
-                },
-                this.options.promptVersion,
-              );
-              modelVersion = grounded.modelVersion;
-              modelLatencyMs += grounded.latencyMs;
-              modelPromptTokens += grounded.tokenUsage.promptTokenCount ?? 0;
-              modelOutputTokens += grounded.tokenUsage.candidatesTokenCount ?? 0;
-              modelTotalTokens += grounded.tokenUsage.totalTokenCount ?? 0;
-              hasModelTokenUsage ||= Object.keys(grounded.tokenUsage).length > 0;
-              const assembled = assembleReply(
-                factBlocks,
-                grounded.draft,
-                facts,
-                resolvedProduct,
-              );
-              handoffGuardReasonCodes = [
-                ...new Set([
-                  ...handoffGuardReasonCodes,
-                  ...assembled.reasonCodes,
-                ]),
-              ];
-              proposal = {
-                ...proposal,
-                reply: assembled.text || proposal.reply,
-                attachments: [...assembled.imageUrls],
-              };
-            } catch (error) {
-              const reasonCode =
-                error instanceof Error && (
-                  error.message === "GROUNDED_SCHEMA_INVALID" ||
-                  error.message === "VERTEX_SCHEMA_INVALID"
-                )
-                  ? "GROUNDED_SCHEMA_INVALID"
-                  : "GROUNDED_DRAFT_FALLBACK";
-              handoffGuardReasonCodes = [
-                ...new Set([...handoffGuardReasonCodes, reasonCode]),
-              ];
-              const assembled = assembleReply(
-                factBlocks,
-                {
-                  schemaVersion: 1,
-                  advisoryText: "",
-                  objectionResponse: "",
-                  suggestedQuestion: "",
-                  suggestedNextStep: "",
-                  attachmentImageIndices: [],
-                },
-                facts,
-                resolvedProduct,
-              );
-              proposal = {
-                ...proposal,
-                reply: assembled.text || proposal.reply,
-                attachments: [],
-              };
+            let groundedDraft = DETERMINISTIC_GROUNDED_DRAFT;
+            let groundedDraftSucceeded = false;
+            if (!initialVertexFallbackUsed) {
+              try {
+                modelCalled = true;
+                const grounded = await this.model.groundDraftWithFacts!(
+                  modelContext,
+                  proposal,
+                  facts,
+                  {
+                    productId: resolvedProduct.productId,
+                    title: resolvedProduct.title,
+                    descriptionXml: resolvedProduct.descriptionXml ?? "",
+                    materials: resolvedProduct.materials,
+                    silhouettes: resolvedProduct.silhouettes,
+                    occasions: resolvedProduct.occasions,
+                  },
+                  this.options.promptVersion,
+                );
+                modelVersion = grounded.modelVersion;
+                modelLatencyMs += grounded.latencyMs;
+                modelPromptTokens += grounded.tokenUsage.promptTokenCount ?? 0;
+                modelOutputTokens += grounded.tokenUsage.candidatesTokenCount ?? 0;
+                modelTotalTokens += grounded.tokenUsage.totalTokenCount ?? 0;
+                hasModelTokenUsage ||= Object.keys(grounded.tokenUsage).length > 0;
+                groundedDraft = grounded.draft;
+                groundedDraftSucceeded = true;
+              } catch (error) {
+                handoffGuardReasonCodes = [
+                  ...new Set([
+                    ...handoffGuardReasonCodes,
+                    vertexGroundedFallbackReason(error),
+                  ]),
+                ];
+              }
             }
+            const assembled = assembleReply(
+              factBlocks,
+              groundedDraft,
+              facts,
+              resolvedProduct,
+            );
+            handoffGuardReasonCodes = [
+              ...new Set([
+                ...handoffGuardReasonCodes,
+                ...assembled.reasonCodes,
+              ]),
+            ];
+            proposal = {
+              ...proposal,
+              reply: assembled.text || proposal.reply,
+              attachments: groundedDraftSucceeded
+                ? [...assembled.imageUrls]
+                : [],
+            };
           } else {
             modelCalled = true;
             const grounded = await this.model.groundWithFacts(
