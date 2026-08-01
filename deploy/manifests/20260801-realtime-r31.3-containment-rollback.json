@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-01T05:31:53Z",
+  "status": "ROLLED_BACK_R31_3_OUTBOUND_LOCKED",
+  "environment": "production-test-page",
+  "host": "156.67.214.197",
+  "pageId": "1198992073286645",
+  "documentType": "APPEND_ONLY_ROLLBACK_EXECUTION_EVIDENCE",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceCommitAtExecution": "a0472f50e5ab0d4ba941a91729e81a6da58d2c51",
+  "ownerApproval": {
+    "instruction": "Continue the approved r32.2 Compatibility First plan",
+    "approvedScope": "Contain outbound, rollback only realtime-worker to r31.3, preserve data and queues, do not requeue",
+    "approvedAt": "2026-08-01"
+  },
+  "githubPrerequisites": {
+    "compatibilityPlanPullRequest": 97,
+    "regressionShieldPullRequest": 98,
+    "ledgerEvidencePullRequest": 99,
+    "containmentAndRunbookPullRequest": 100,
+    "containmentAndRunbookMergeCommit": "a0472f50e5ab0d4ba941a91729e81a6da58d2c51"
+  },
+  "outboundContainment": {
+    "lockedAt": "2026-08-01T05:13:15.867244Z",
+    "pageStatus": "ACTIVE",
+    "routingOwner": "APP",
+    "appSendEnabled": false,
+    "killSwitch": true,
+    "auditAction": "PAGE_OUTBOUND_CONTAINMENT_LOCKED",
+    "auditId": "ade6e21e-8b36-46f3-b272-425c93d8f46f",
+    "correlationId": "65379b60-8841-4a1f-bac3-a552fb2496fe",
+    "eligibleOutboxBeforeCutover": 0,
+    "eligibleOutboxAfterCutover": 0,
+    "remainedLockedAfterRollback": true
+  },
+  "rollback": {
+    "startedAt": "2026-08-01T05:30:05Z",
+    "completedAt": "2026-08-01T05:31:53Z",
+    "fromRelease": "20260731-realtime-audit-safety-r32.1",
+    "toRelease": "20260731-realtime-generation-quota-r31.3",
+    "targetSourceCommit": "30dd6030a2e682cdd438f4226073fb77e4a579b7",
+    "targetReleasePath": "/opt/lana-chatbot/releases/20260731-realtime-generation-quota-r31.3",
+    "targetImage": "lana-chatbot-app:realtime-generation-quota-r31.3",
+    "targetImageId": "sha256:54ced1eb0a31313c0d179b71931389f47200974b73dafc93a96f4b8e2b8b79c5",
+    "releasePathClean": true,
+    "tagAndCommitVerified": true,
+    "imageIdVerified": true,
+    "imageOciRevisionLabel": "ABSENT_IN_EXISTING_R31_3_IMAGE_METADATA",
+    "provenanceAlternative": "Exact immutable image ID plus clean release path at the authoritative tag and commit",
+    "servicesRecreated": [
+      "realtime-worker"
+    ],
+    "nonTargetServicesRecreated": [],
+    "dockerComposeDryRunOnlyTargetedRealtimeWorker": true,
+    "symlinkBefore": "/opt/lana-chatbot/releases/20260731-realtime-audit-safety-r32.1",
+    "symlinkAfter": "/opt/lana-chatbot/releases/20260731-realtime-generation-quota-r31.3",
+    "atomicSymlinkSwitchAfterHealth": true
+  },
+  "runtimeConfig": {
+    "backupPath": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260801T052721Z-r31.3-containment-rollback",
+    "backupSha256": "9f4f2bd830107ba37257c54132f1aca94935721dd1da89f2f152e3fb7a677c1d",
+    "postRollbackSha256": "bd5aa5395616eb98c78978f561928bf42d0f9b2d086dd7e2f8a9f47926920182",
+    "mode": "0600",
+    "keysChanged": [
+      "REALTIME_IMAGE",
+      "REALTIME_RELEASE_ID"
+    ],
+    "realtimeReleaseId": "20260731-realtime-generation-quota-r31.3",
+    "model": "gemini-3.5-flash-lite",
+    "hourlyGenerationLimit": 500,
+    "dailyGenerationLimit": 2000,
+    "buyingSignalGuardV1": true,
+    "decisionTelemetry": true,
+    "mediaClarification": true,
+    "messageGroupingV2": true,
+    "mediaSelectorV2Guard": true,
+    "wave2StrategyV1": true
+  },
+  "containers": {
+    "idFormatForScopeSnapshot": "docker-short-12",
+    "realtimeBefore": "ec8bce3ca115",
+    "realtimeAfter": "c732d22f6081d1aa3104f3be069a2b074c711db0ce248e8c91ee981120463561",
+    "nonTargetIdsBeforeAndAfter": {
+      "admin-api": "7e044bd7af4b",
+      "admin-control-worker": "fbad8b67c21f",
+      "admin-simulation-worker": "3ff0785b49ee",
+      "admin-web": "728e98e2db61",
+      "api": "0a9d6f15d8b2",
+      "delivery-worker": "b49c07a00d22",
+      "media-worker": "cccbbd2248c4",
+      "p23a-registry-sync": "5ec2f985c264",
+      "p23b-metadata-staging": "cccd1793ab55",
+      "p23c-publisher": "a3e23f197167",
+      "pos-snapshot-worker": "769f3d165bee",
+      "postgres": "c6735df2de34",
+      "redis": "11b3485bb881",
+      "retention-worker": "80bba7f8e2b3",
+      "shadow-worker": "5b42ab5716b2",
+      "size-chart-extractor": "6ae03733a2ef"
+    },
+    "nonTargetIdsUnchanged": true,
+    "realtimeHealth": "healthy",
+    "realtimeRestartCount": 0,
+    "heartbeatBefore": "2026-08-01T05:30:02.468721Z",
+    "heartbeatAfterFirst": "2026-08-01T05:30:37.780963Z",
+    "heartbeatAfterSecond": "2026-08-01T05:30:52.748560Z",
+    "heartbeatAdvanced": true,
+    "workerStatus": "IDLE",
+    "workerMode": "LIVE"
+  },
+  "database": {
+    "migration0027Present": true,
+    "migration0027AppliedAt": "2026-07-31T08:27:01.814240Z",
+    "handoffSlaDefault": "now() + 30 minutes",
+    "downMigrationExecuted": false,
+    "dataDeleted": false
+  },
+  "queueEvidence": {
+    "before": {
+      "inbox": {
+        "FAILED_PERMANENT": 1,
+        "PROCESSED": 228,
+        "PROCESSING": 0
+      },
+      "outbox": {
+        "MANUAL_REVIEW": 2,
+        "PENDING": 2,
+        "SENT_ACCEPTED": 113,
+        "SENDING": 0,
+        "AMBIGUOUS": 0
+      },
+      "pancakeTagApplying": 0,
+      "duplicateSequenceCount": 0,
+      "acceptedWatermark": "2026-07-31T10:07:41.350771Z"
+    },
+    "after": {
+      "inbox": {
+        "FAILED_PERMANENT": 1,
+        "PROCESSED": 228,
+        "PROCESSING": 0
+      },
+      "outbox": {
+        "MANUAL_REVIEW": 2,
+        "PENDING": 2,
+        "SENT_ACCEPTED": 113,
+        "SENDING": 0,
+        "AMBIGUOUS": 0
+      },
+      "pancakeTagApplying": 0,
+      "duplicateSequenceCount": 0,
+      "acceptedWatermark": "2026-07-31T10:07:41.350771Z"
+    },
+    "outboxCreatedAfterCutover": 0,
+    "metaRequestsStartedAfterCutover": 0,
+    "metaAcceptedAfterCutover": 0,
+    "requeueExecuted": false,
+    "queueRowsMutatedByRollback": false
+  },
+  "verification": {
+    "r31_3OriginalManifestDockerFullCheck": "PASS",
+    "currentRegressionShieldWorkerFilesPassed": 32,
+    "currentRegressionShieldTestsPassed": 331,
+    "currentRegressionShieldTargetTodos": 5,
+    "currentRegressionShieldFailures": 0,
+    "productionImagePnpmCheck": "NOT_RUN_PRODUCTION_IMAGE_DOES_NOT_CONTAIN_PNPM",
+    "startupAndDependencyReadinessUnderOutboundLock": "PASS",
+    "runtimeSmokeWithoutMetaSend": "PASS",
+    "schemaAndMissingColumnErrorScan": "PASS",
+    "newVertexSchemaPermanentFailureScan": "PASS",
+    "unhandledExceptionScan": "PASS"
+  },
+  "preservation": {
+    "conversations": true,
+    "auditEvents": true,
+    "inbox": true,
+    "outbox": true,
+    "redis": true,
+    "postgresql": true,
+    "qdrant": true,
+    "migration0027": true,
+    "adminApiRemainedR32_1": true,
+    "deliveryRemainedR27_1": true
+  },
+  "nextActions": [
+    "KEEP_OUTBOUND_LOCKED",
+    "DO_NOT_REQUEUE",
+    "IMPLEMENT_PR_B_THROUGH_PR_E_BEHIND_REGRESSION_SHIELD",
+    "DEPLOY_R32_2_TO_CANARY_AND_VERIFY_BEFORE_ANY_QUEUE_RECOVERY"
+  ],
+  "auditIntegrity": {
+    "r32_1ManifestModified": false,
+    "r32_1ContainmentAddendumModified": false,
+    "thisManifestIsAppendOnly": true
+  }
+}

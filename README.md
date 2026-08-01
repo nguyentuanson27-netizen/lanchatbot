@@ -16,15 +16,15 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 
 ## Trạng thái production ngày 2026-07-31
 
-- **Current production release (supersedes older r31.3 runtime lines below):** `20260731-realtime-audit-safety-r32.1`, source commit `90760d2`, image `lana-chatbot-app:realtime-audit-safety-r32.1`.
-- **DEPLOYED_VERIFIED_R32_1:** r32 adds a database SLA default and explicit writer SLA, verified-facts fallback for every grounded Vertex draft error, and Size Engine composition that preserves verified price, stock, ETA and attachments. r32.1 fixes PostgreSQL timestamp parameter inference in the live handoff writer.
-- Recovered Inbox evidence: the two Vertex failures and five handoff failures completed after the verified releases; active Inbox is `0`, recent terminal failures are `0`, and every recent BOT_TO_HUMAN event has a case with a non-null SLA.
+- **Current containment runtime:** Realtime Worker đã rollback về `20260731-realtime-generation-quota-r31.3`; Admin API vẫn giữ r32.1 và các service khác không bị recreate.
+- **HISTORICAL_DEPLOYED_VERIFIED_R32_1:** bằng chứng deploy r32.1 được giữ nguyên cho audit, nhưng runtime Realtime đã bị supersede do incident compatibility; không dùng trạng thái này để khẳng định production hiện tại.
+- Queue containment hiện giữ nguyên `1` Inbox `FAILED_PERMANENT`, `2` Outbox `PENDING` và `2` Outbox `MANUAL_REVIEW`; chưa record nào được requeue.
 - Full evidence: [Realtime audit r32.1](docs/current/REALTIME_AUDIT_R32_1_20260731.md) and [deployment manifest](deploy/manifests/20260731-realtime-audit-safety-r32.1.json).
 - **APPROVED_FOR_IMPLEMENTATION:** [Release r32.2 — Compatibility First](docs/current/REALTIME_R32_2_COMPATIBILITY_FIRST_PLAN_20260731.md). Page hiện là page test, chưa có người dùng thật; giữ nguyên phạm vi, chưa mở rộng và chưa requeue trước khi hotfix được deploy/xác minh.
-- **INCIDENT_CONTAINMENT_DOCUMENTED:** [r32.1 incident addendum](deploy/manifests/20260801-r32.1-incident-containment.json) và [runbook rollback r31.3](docs/current/REALTIME_R31_3_ROLLBACK_RUNBOOK_20260801.md). Đây là tài liệu containment; outbound lock, rollback runtime và requeue vẫn chưa được thực thi/xác minh.
+- **ROLLED_BACK_R31_3_OUTBOUND_LOCKED:** [execution manifest](deploy/manifests/20260801-realtime-r31.3-containment-rollback.json), [r32.1 incident addendum](deploy/manifests/20260801-r32.1-incident-containment.json) và [runbook](docs/current/REALTIME_R31_3_ROLLBACK_RUNBOOK_20260801.md). Outbound vẫn khóa; không có Meta send mới và chưa requeue.
 
 
-- Production đang trỏ tới release `20260731-realtime-generation-quota-r31.3`, source commit `30dd603`; Realtime Worker dùng image r31.3, Admin API/Web giữ image r30, API/Delivery giữ image r27.1.
+- Production đang trỏ tới release `20260731-realtime-generation-quota-r31.3`, source commit `30dd603`; Realtime Worker dùng image r31.3, Admin API giữ image r32.1, Admin Web giữ image r30, API/Delivery giữ image r27.1.
 - r30 đã **DEPLOYED_VERIFIED_R30**; bản vá đứng giao diện, C1, B2, B3 và B4 đã qua backup/restore-test, guarded cutover và canary thật.
 - r31 đã **DEPLOYED_VERIFIED_R31_HUMAN_TEST_PENDING**: Voice Contract V2, form báo giá hai bong bóng và Hybrid Buying Intent có guard đã live; chưa có inbound khách sau cutover nên còn chờ human test Messenger.
 - Hotfix câu hỏi nối r31.1 đã **DEPLOYED_VERIFIED_R31_1_HUMAN_TEST_PENDING**: đúng một câu hỏi nối cho pre-sale còn mở, không hỏi lại số đo; chốt đơn, hậu mãi và handoff không bị kéo dài. Chưa có inbound khách sau cutover nên còn chờ human test Messenger.

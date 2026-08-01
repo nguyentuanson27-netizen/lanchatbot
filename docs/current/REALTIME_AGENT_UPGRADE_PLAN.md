@@ -954,6 +954,7 @@ Agent chỉ đổi trạng thái sau khi có bằng chứng. Giá trị hợp l�
 | r32.2 Compatibility First plan | CODE_COMPLETE | docs/r32.2-compatibility-first-plan / PR #97 | `aa6a445` | plan + README link | GitHub merge `2f3c16e` | Behavioral baseline r31.3; deviations limited to D1–D6 |
 | r32.2 PR-A Regression Shield | CODE_COMPLETE | test/r32.2-r31-regression-shield / PR #98 | `4ed80b6` | Worker 32 files; 331 pass; 5 target todo; typecheck and full repository check pass | GitHub merge `8a8401d` | Test-only; no production behavior change |
 | r32.1 incident containment + r31.3 rollback runbook | CODE_COMPLETE | docs/r32.2-incident-containment / PR #100 | `e92d48e` | AGENTS invariants; addendum JSON parse; docs links | GitHub PR #100; runtime not executed | Docs-only; outbound lock, rollback and requeue not executed |
+| r31.3 containment rollback execution | ROLLED_BACK_R31_3_OUTBOUND_LOCKED | docs/r31.3-rollback-execution-evidence | pending | Worker 32 files; 331 pass; 5 target todo; Docker dry-run targeted only Realtime | [execution manifest](../../deploy/manifests/20260801-realtime-r31.3-containment-rollback.json) | Realtime healthy/restart 0; non-target IDs and queue unchanged; outbound locked; no requeue |
 
 ## 18. Decision log
 
