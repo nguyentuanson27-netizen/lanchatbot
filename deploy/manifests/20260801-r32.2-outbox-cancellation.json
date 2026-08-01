@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-01T12:58:24Z",
+  "status": "OUTBOX_CANCELLED_QUEUE_HEALTHY_OUTBOUND_LOCKED",
+  "environment": "production-test-page-contained-canary",
+  "host": "156.67.214.197",
+  "pageId": "1198992073286645",
+  "documentType": "APPEND_ONLY_OPERATOR_ACTION_EVIDENCE",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "authorization": {
+    "ownerInstruction": "Cancel the stale Outbox response groups",
+    "receivedAt": "2026-08-01",
+    "scope": "CANCEL_ONLY_NO_REQUEUE_NO_DELETE"
+  },
+  "operatorHotfix": {
+    "pullRequest": 109,
+    "mergeCommit": "878a7f8aa02fca9993a591470d8ca62d70badf79",
+    "releaseTag": "20260801-realtime-operator-cancel-r32.2.1",
+    "tagObject": "ef7337e3405b5cbef3571fa88f20202c773f97b2",
+    "releasePath": "/opt/lana-chatbot/releases/20260801-realtime-operator-cancel-r32.2.1",
+    "image": "lana-chatbot-app:realtime-operator-cancel-r32.2.1",
+    "imageId": "sha256:dacc1cb35d253b7d6a09e6f67b71fd2ef8f448bff99ea2cb11d886f9a2cb18cc",
+    "revisionLabel": "878a7f8aa02fca9993a591470d8ca62d70badf79",
+    "versionLabel": "20260801-realtime-operator-cancel-r32.2.1",
+    "buildLogPath": "/opt/lana-chatbot/shared/release-evidence/20260801-realtime-operator-cancel-r32.2.1/docker-build.log",
+    "buildLogSha256": "4a551abf8757ae1ec73b1f13df9ef367798c93f80c2fa25501a1e211b0baba47",
+    "localValidatorTests": "PASS_5_OF_5",
+    "localWorkerTypecheckBuild": "PASS",
+    "localFullCheck": "PASS_347_2_SECONDS",
+    "dockerFullCheck": "PASS",
+    "artifactUuidV5Validation": "PASS",
+    "change": "Accept deterministic UUID v5 in addition to legacy UUID v4; CANCEL transaction and audit logic unchanged"
+  },
+  "preAction": {
+    "outboundGate": {
+      "appSendEnabled": false,
+      "killSwitch": true
+    },
+    "sendingCount": 0,
+    "queueHealthHttpStatus": 503,
+    "queueHealthStatus": "UNHEALTHY",
+    "outbox": {
+      "MANUAL_REVIEW": 2,
+      "PENDING": 2,
+      "SENT_ACCEPTED": 113
+    },
+    "responseGroups": [
+      {
+        "responseGroupId": "04447ff1-4b2f-5b73-8dc7-cbce94a3a1c3",
+        "evidence": "sequence 0 SENT_ACCEPTED; sequence 1 MANUAL_REVIEW with PANCAKE_BLOCKING_TAG_NHAN_VIEN; sequences 2-3 PENDING and never claimed",
+        "plannedCancelCount": 3
+      },
+      {
+        "responseGroupId": "dc0663d7-b71c-5d9b-8a4c-0c5a1eaa6ef8",
+        "evidence": "sequence 0 MANUAL_REVIEW with PANCAKE_BLOCKING_TAG_NHAN_VIEN and never accepted",
+        "plannedCancelCount": 1
+      }
+    ]
+  },
+  "actions": [
+    {
+      "responseGroupId": "04447ff1-4b2f-5b73-8dc7-cbce94a3a1c3",
+      "reasonCode": "STALE_PARTIAL_GROUP_NHAN_VIEN_CONFIRMED",
+      "cancelledCount": 3,
+      "changed": true,
+      "auditCorrelationId": "31e020dc-0018-4e0b-81a2-d374f6d17f2f",
+      "occurredAt": "2026-08-01T12:55:54.386776Z"
+    },
+    {
+      "responseGroupId": "dc0663d7-b71c-5d9b-8a4c-0c5a1eaa6ef8",
+      "reasonCode": "STALE_BLOCKED_GROUP_NHAN_VIEN_CONFIRMED",
+      "cancelledCount": 1,
+      "changed": true,
+      "auditCorrelationId": "a71c5142-b549-4b82-a4d7-cc53b9bd8c8f",
+      "occurredAt": "2026-08-01T12:56:13.205353Z"
+    }
+  ],
+  "idempotency": {
+    "firstGroupSecondRun": { "cancelledCount": 0, "changed": false },
+    "secondGroupSecondRun": { "cancelledCount": 0, "changed": false },
+    "auditEventCount": 2,
+    "duplicateAuditCreated": false
+  },
+  "postAction": {
+    "outboundGate": {
+      "appSendEnabled": false,
+      "killSwitch": true
+    },
+    "queueHealthHttpStatus": 200,
+    "queueHealthStatus": "HEALTHY",
+    "reasonCodes": [],
+    "queue": {
+      "actionableCount": 0,
+      "sendingCount": 0,
+      "expiredSendingCount": 0,
+      "manualReviewCount": 0,
+      "stuckDescendantCount": 0
+    },
+    "outbox": {
+      "FAILED_PERMANENT": 4,
+      "SENT_ACCEPTED": 113
+    },
+    "preservedAcceptedSequenceCount": 1,
+    "newMetaSend": false,
+    "requeueExecuted": false,
+    "recordsDeleted": false
+  },
+  "liveRuntimeUnchanged": {
+    "currentRelease": "20260801-realtime-compatibility-first-r32.2",
+    "deliveryContainerId": "b8df6a17ebd4cd5a4bf0aa2aef809c9e7da0115f65010155150bd90c662581ec",
+    "realtimeContainerId": "4122bc90da39ede8253a80c5c8c26564c5717e4eb5f61f2d27b4d88e1eefebd6",
+    "liveImageId": "sha256:44ecb2fd9f7d6a5aa769938f738a3c6ba42b470db5a9bce3d30fdc364de2a0b7",
+    "bothHealthyRestartZero": true,
+    "servicesRecreatedForOperatorAction": []
+  },
+  "nonMutatingInvocationIssue": {
+    "cause": "CR appended to operator module path on first invocation",
+    "databaseReached": false,
+    "queueChanged": false,
+    "correctedInvocationSucceeded": true
+  },
+  "promotionStatus": {
+    "queueHealthBlockerCleared": true,
+    "outboundUnlockAllowed": false,
+    "remainingConditions": [
+      "MINIMUM_48_HOUR_OBSERVATION_NOT_COMPLETE",
+      "MINIMUM_100_REVIEWED_GENERATIONS_NOT_COMPLETE",
+      "CONTROLLED_HUMAN_MESSENGER_SCENARIOS_NOT_COMPLETE"
+    ]
+  },
+  "nextActions": [
+    "KEEP_OUTBOUND_LOCKED",
+    "DO_NOT_REQUEUE_FAILED_INBOX",
+    "COMPLETE_OBSERVATION_AND_CONTROLLED_MESSENGER_SCENARIOS",
+    "WRITE_NEW_APPEND_ONLY_PROMOTION_OR_ROLLBACK_MANIFEST"
+  ],
+  "auditIntegrity": {
+    "priorManifestsModified": false,
+    "databaseHistoryDeleted": false,
+    "thisManifestMustNotBeEditedAfterMerge": true
+  }
+}
