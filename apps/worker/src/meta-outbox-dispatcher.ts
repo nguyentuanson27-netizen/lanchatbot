@@ -1,5 +1,10 @@
 import type { MetaSendAttemptResultV1 } from "@lana/contracts";
-import { redactAnalyticsMessage, type ClaimedMetaOutbox } from "@lana/database";
+import {
+  redactAnalyticsMessage,
+  type ClaimedMetaOutbox,
+  type MetaResponseGroupGateObservation,
+  type MetaResponseGroupGateSnapshot,
+} from "@lana/database";
 import type {
   MetaMessageUnit,
   MetaSendCommand,
@@ -12,6 +17,16 @@ export interface MetaOutboxDispatchStore {
     workerId: string,
     leaseMs: number,
   ): Promise<ClaimedMetaOutbox | null>;
+  readMetaResponseGroupGate(
+    responseGroupId: string,
+  ): Promise<MetaResponseGroupGateSnapshot | null>;
+  recordMetaResponseGroupGate(input: {
+    readonly responseGroupId: string;
+    readonly replyPlanId: string;
+    readonly conversationId: string;
+    readonly pageId: string;
+    readonly observation: MetaResponseGroupGateObservation;
+  }): Promise<MetaResponseGroupGateSnapshot>;
   markMetaAccepted(
     outboxId: string,
     leaseToken: string,
@@ -56,7 +71,7 @@ export interface MetaPageTokenRegistry {
 export interface MetaPreSendGate {
   authorize(
     claim: ClaimedMetaOutbox,
-  ): Promise<{ allowed: boolean; reasonCode: string | null }>;
+  ): Promise<MetaResponseGroupGateObservation>;
 }
 
 export class SinglePageMetaTokenRegistry
@@ -74,33 +89,111 @@ export class SinglePageMetaTokenRegistry
   }
 }
 
-/** Performs a fresh Pancake tag read immediately before the Meta request.
- * Confirmed blocking tags stop delivery; unavailable Pancake data is fail-open.
+/** Performs the Pancake tag read used to decide one complete response group.
+ * Missing links, transport errors, and unverified data all fail closed.
  */
 export class PancakeMetaPreSendGate implements MetaPreSendGate {
-  constructor(private readonly pancake: PancakeHandoffAdapter) {}
+  constructor(
+    private readonly pancake: PancakeHandoffAdapter,
+    private readonly now: () => Date = () => new Date(),
+    private readonly maxObservationAgeMs = 30_000,
+  ) {}
 
   async authorize(
     claim: ClaimedMetaOutbox,
-  ): Promise<{ allowed: boolean; reasonCode: string | null }> {
+  ): Promise<MetaResponseGroupGateObservation> {
     if (!claim.pancakeConversationId) {
-      return { allowed: true, reasonCode: null };
-    }
-    const observation = await this.pancake.observeBlockingTags(
-      claim.pageId,
-      claim.pancakeConversationId,
-    );
-    if (!observation.verified) {
-      return { allowed: true, reasonCode: null };
-    }
-    if (observation.blockingTag) {
       return {
-        allowed: false,
-        reasonCode: `PANCAKE_BLOCKING_TAG_${observation.blockingTag}`,
+        status: "UNVERIFIED",
+        reasonCode: "PANCAKE_CONVERSATION_LINK_UNAVAILABLE",
+        blockingTag: null,
+        observedAt: null,
       };
     }
-    return { allowed: true, reasonCode: null };
+    try {
+      const observation = await this.pancake.observeBlockingTags(
+        claim.pageId,
+        claim.pancakeConversationId,
+      );
+      const observedAt = new Date(observation.observedAt);
+      const observedAtMs = observedAt.getTime();
+      const ageMs = this.now().getTime() - observedAtMs;
+      if (
+        !Number.isFinite(observedAtMs)
+        || ageMs > this.maxObservationAgeMs
+        || ageMs < -5_000
+      ) {
+        return {
+          status: "UNVERIFIED",
+          reasonCode: "PANCAKE_TAG_OBSERVATION_STALE",
+          blockingTag: null,
+          observedAt: Number.isFinite(observedAtMs) ? observedAt : null,
+        };
+      }
+      if (!observation.verified) {
+        return {
+          status: "UNVERIFIED",
+          reasonCode: observation.reasonCode ?? "PANCAKE_TAG_UNVERIFIED",
+          blockingTag: null,
+          observedAt,
+        };
+      }
+      if (observation.blockingTag) {
+        return {
+          status: "BLOCKED",
+          reasonCode: `PANCAKE_BLOCKING_TAG_${observation.blockingTag}`,
+          blockingTag: observation.blockingTag,
+          observedAt,
+        };
+      }
+      return {
+        status: "ALLOWED",
+        reasonCode: null,
+        blockingTag: null,
+        observedAt,
+      };
+    } catch {
+      return {
+        status: "UNVERIFIED",
+        reasonCode: "PANCAKE_TAG_READ_ERROR",
+        blockingTag: null,
+        observedAt: null,
+      };
+    }
   }
+}
+
+export async function resolveMetaResponseGroupGate(
+  claim: ClaimedMetaOutbox,
+  store: Pick<
+    MetaOutboxDispatchStore,
+    "readMetaResponseGroupGate" | "recordMetaResponseGroupGate"
+  >,
+  gate: MetaPreSendGate,
+  now: Date = new Date(),
+): Promise<MetaResponseGroupGateSnapshot> {
+  const existing = await store.readMetaResponseGroupGate(
+    claim.responseGroupId,
+  );
+  if (existing && existing.status !== "UNVERIFIED") {
+    if (existing.expiresAt.getTime() <= now.getTime()) {
+      return {
+        ...existing,
+        status: "UNVERIFIED",
+        reasonCode: "PANCAKE_RESPONSE_GROUP_GATE_EXPIRED",
+        blockingTag: null,
+      };
+    }
+    return existing;
+  }
+  const observation = await gate.authorize(claim);
+  return store.recordMetaResponseGroupGate({
+    responseGroupId: claim.responseGroupId,
+    replyPlanId: claim.replyPlanId,
+    conversationId: claim.conversationId,
+    pageId: claim.pageId,
+    observation,
+  });
 }
 
 export interface MetaOutboxDispatcherOptions {
@@ -134,12 +227,14 @@ export class MetaOutboxDispatcher {
     );
     if (!claim) return false;
 
-    const gate = await this.preSendGate.authorize(claim);
-    if (!gate.allowed) {
+    const gate = await resolveMetaResponseGroupGate(
+      claim, this.store, this.preSendGate,
+    );
+    if (gate.status !== "ALLOWED") {
       const code = gate.reasonCode ?? "META_PRE_SEND_GATE_BLOCKED";
       if (
         claim.attemptCount >= this.maxGateAttempts ||
-        code.startsWith("PANCAKE_BLOCKING_TAG_")
+        gate.status === "BLOCKED"
       ) {
         await this.store.markMetaManualReview(
           claim.outboxId,
