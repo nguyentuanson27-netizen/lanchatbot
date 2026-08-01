@@ -62,6 +62,8 @@ export {
   type MetaResponseGroupGateObservation,
   type MetaResponseGroupGateSnapshot,
   type MetaResponseGroupGateStatus,
+  type MetaOutboxHealthSnapshot,
+  type MetaOutboxOperatorCancelResult,
   type RealtimeCommitInput,
   type RealtimeCommitResult,
   type RealtimeConversationRecord,

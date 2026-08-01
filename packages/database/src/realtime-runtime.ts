@@ -12,6 +12,24 @@ import {
   type AcquisitionCommitPlan,
 } from "./ad-acquisition.js";
 
+export interface MetaOutboxOperatorCancelResult {
+  readonly responseGroupId: string;
+  readonly pageId: string;
+  readonly cancelledCount: number;
+  readonly changed: boolean;
+}
+
+export interface MetaOutboxHealthSnapshot {
+  readonly pageId: string;
+  readonly actionableCount: number;
+  readonly sendingCount: number;
+  readonly expiredSendingCount: number;
+  readonly manualReviewCount: number;
+  readonly stuckDescendantCount: number;
+  readonly oldestActionableAgeSeconds: number | null;
+  readonly oldestManualReviewAgeSeconds: number | null;
+}
+
 export interface RealtimeConversationRecord<TState> {
   readonly conversationId: string;
   readonly pageId: string;
@@ -43,6 +61,7 @@ export interface RealtimeMetaPlan {
   readonly messages: readonly RealtimeMetaMessageUnit[];
   /** Ảnh chỉ đủ điều kiện gửi sau text và sau khoảng nghỉ này tính từ lúc commit. */
   readonly imageDelayMs?: number;
+  readonly sendAfterOwnerHandoff?: boolean;
 }
 
 export interface RealtimePancakeTagPlan {
@@ -53,6 +72,7 @@ export interface RealtimePancakeTagPlan {
     | "KHONG_UP_SALE";
   readonly tagId: string;
   readonly handoffGeneration: number;
+  readonly afterResponseGroupId?: string | null;
 }
 
 export interface RealtimeSalesCycleRecord<TState> {
@@ -206,6 +226,13 @@ export interface RealtimeDecisionEventPlan {
       output: number | null;
       total: number | null;
     }>;
+    modelUsageSource?: "provider" | "estimated" | "missing";
+    modelPath?:
+      | "not_called"
+      | "model"
+      | "initial_fallback"
+      | "grounded_draft_fallback";
+    modelErrorClass?: string | null;
     buyingSignalOverride: boolean;
     wave2Strategy?: Readonly<{
       rulesetVersion: "wave2-strategy-v1";
@@ -1044,7 +1071,10 @@ export class PostgresRealtimeRuntimeStore {
            AND page.routing_owner = 'APP'
            AND page.app_send_enabled = true
            AND page.kill_switch = false
-           AND conversation.conversation_owner = 'BOT'
+           AND (
+             conversation.conversation_owner = 'BOT'
+             OR outbox.send_after_owner_handoff = true
+           )
            AND conversation.blocking_tag IS NULL
            AND NOT EXISTS (
              SELECT 1
@@ -1298,6 +1328,21 @@ export class PostgresRealtimeRuntimeStore {
       );
       const row = result.rows[0];
       if (!row) return false;
+      await client.query(
+        `UPDATE meta_outbox
+         SET status = 'MANUAL_REVIEW',
+             last_error_code = $3,
+             lease_owner = NULL, lease_token = NULL, lease_until = NULL,
+             updated_at = now()
+         WHERE reply_plan_id = $1
+           AND sequence_no > $2
+           AND status IN ('PENDING', 'RETRYABLE')`,
+        [
+          row.reply_plan_id,
+          row.sequence_no,
+          `META_PREDECESSOR_${status}`,
+        ],
+      );
       await recordInitialReplySendFailed(client, {
         replyPlanId: row.reply_plan_id,
         outboxId,
@@ -1314,32 +1359,192 @@ export class PostgresRealtimeRuntimeStore {
     leaseToken: string,
     errorCode: string,
   ): Promise<boolean> {
-    const result = await this.pool.query(
-      `UPDATE meta_outbox
-       SET status = 'MANUAL_REVIEW',
-           last_error_code = $3, lease_owner = NULL, lease_token = NULL,
-           lease_until = NULL, updated_at = now()
-       WHERE outbox_id = $1 AND status = 'SENDING' AND lease_token = $2`,
-      [outboxId, leaseToken, errorCode.slice(0, 128)],
-    );
-    return result.rowCount === 1;
+    return withTransaction(this.pool, async (client) => {
+      const result = await client.query<{
+        reply_plan_id: string;
+        sequence_no: number;
+      }>(
+        `UPDATE meta_outbox
+         SET status = 'MANUAL_REVIEW',
+             last_error_code = $3, lease_owner = NULL, lease_token = NULL,
+             lease_until = NULL, updated_at = now()
+         WHERE outbox_id = $1 AND status = 'SENDING' AND lease_token = $2
+         RETURNING reply_plan_id, sequence_no`,
+        [outboxId, leaseToken, errorCode.slice(0, 128)],
+      );
+      const row = result.rows[0];
+      if (!row) return false;
+      await client.query(
+        `UPDATE meta_outbox
+         SET status = 'MANUAL_REVIEW',
+             last_error_code = 'META_PREDECESSOR_MANUAL_REVIEW',
+             lease_owner = NULL, lease_token = NULL, lease_until = NULL,
+             updated_at = now()
+         WHERE reply_plan_id = $1
+           AND sequence_no > $2
+           AND status IN ('PENDING', 'RETRYABLE')`,
+        [row.reply_plan_id, row.sequence_no],
+      );
+      return true;
+    });
   }
 
   async quarantineExpiredMetaSending(): Promise<number> {
-    const result = await this.pool.query(
-      `UPDATE meta_outbox
-       SET status = 'AMBIGUOUS',
-           ambiguity_reason = 'META_SENDING_LEASE_EXPIRED',
-           last_error_code = 'META_SENDING_LEASE_EXPIRED',
-           lease_owner = NULL, lease_token = NULL, lease_until = NULL,
-           updated_at = now()
-       WHERE status = 'SENDING'
-         AND lease_until IS NOT NULL
-         AND lease_until <= now()`,
+    const result = await this.pool.query<{ quarantined_count: string }>(
+      `WITH expired AS (
+         UPDATE meta_outbox
+         SET status = 'AMBIGUOUS',
+             ambiguity_reason = 'META_SENDING_LEASE_EXPIRED',
+             last_error_code = 'META_SENDING_LEASE_EXPIRED',
+             lease_owner = NULL, lease_token = NULL, lease_until = NULL,
+             updated_at = now()
+         WHERE status = 'SENDING'
+           AND lease_until IS NOT NULL
+           AND lease_until <= now()
+         RETURNING reply_plan_id, sequence_no
+       ), held AS (
+         UPDATE meta_outbox AS descendant
+         SET status = 'MANUAL_REVIEW',
+             last_error_code = 'META_PREDECESSOR_AMBIGUOUS',
+             lease_owner = NULL, lease_token = NULL, lease_until = NULL,
+             updated_at = now()
+         FROM expired
+         WHERE descendant.reply_plan_id = expired.reply_plan_id
+           AND descendant.sequence_no > expired.sequence_no
+           AND descendant.status IN ('PENDING', 'RETRYABLE')
+         RETURNING descendant.outbox_id
+       )
+       SELECT count(*)::text AS quarantined_count FROM expired`,
     );
-    return result.rowCount ?? 0;
+    return Number(result.rows[0]?.quarantined_count ?? 0);
   }
 
+  async cancelMetaResponseGroup(
+    responseGroupId: string,
+    actorRef: string,
+    reasonCode: string,
+  ): Promise<MetaOutboxOperatorCancelResult | null> {
+    if (!/^[A-Z0-9_:-]{3,128}$/u.test(reasonCode)) {
+      throw new Error("META_OUTBOX_OPERATOR_REASON_CODE_INVALID");
+    }
+    return withTransaction(this.pool, async (client) => {
+      const current = await client.query<{ page_id: string }>(
+        `SELECT page_id
+         FROM meta_outbox
+         WHERE response_group_id = $1
+         LIMIT 1`,
+        [responseGroupId],
+      );
+      const pageId = current.rows[0]?.page_id;
+      if (!pageId) return null;
+      const updated = await client.query(
+        `UPDATE meta_outbox
+         SET status = 'FAILED_PERMANENT',
+             last_error_code = 'OPERATOR_CANCELLED_MANUAL_REVIEW',
+             lease_owner = NULL, lease_token = NULL, lease_until = NULL,
+             updated_at = now()
+         WHERE response_group_id = $1
+           AND status IN (
+             'PENDING', 'RETRYABLE', 'MANUAL_REVIEW', 'AMBIGUOUS'
+           )`,
+        [responseGroupId],
+      );
+      const cancelledCount = updated.rowCount ?? 0;
+      if (cancelledCount > 0) {
+        await client.query(
+          `INSERT INTO audit_log (
+             actor_type, actor_id, action, resource_type, resource_id_hash,
+             metadata_safe, correlation_id, entry_hash
+           ) VALUES (
+             'USER',$1,'META_RESPONSE_GROUP_CANCELLED','META_RESPONSE_GROUP',
+             encode(digest($2, 'sha256'), 'hex'),$3::jsonb,gen_random_uuid(),
+             digest('', 'sha256')
+           )`,
+          [
+            actorRef.slice(0, 256),
+            responseGroupId,
+            JSON.stringify({
+              page_id: pageId,
+              cancelled_count: cancelledCount,
+              reason_code: reasonCode,
+            }),
+          ],
+        );
+      }
+      return {
+        responseGroupId,
+        pageId,
+        cancelledCount,
+        changed: cancelledCount > 0,
+      };
+    });
+  }
+
+  async readMetaOutboxHealth(pageId: string): Promise<MetaOutboxHealthSnapshot> {
+    const result = await this.pool.query<{
+      actionable_count: string;
+      sending_count: string;
+      expired_sending_count: string;
+      manual_review_count: string;
+      stuck_descendant_count: string;
+      oldest_actionable_age_seconds: string | null;
+      oldest_manual_review_age_seconds: string | null;
+    }>(
+      `SELECT
+         count(*) FILTER (
+           WHERE outbox.status IN ('PENDING', 'RETRYABLE')
+         )::text AS actionable_count,
+         count(*) FILTER (
+           WHERE outbox.status = 'SENDING'
+         )::text AS sending_count,
+         count(*) FILTER (
+           WHERE outbox.status = 'SENDING'
+             AND outbox.lease_until IS NOT NULL
+             AND outbox.lease_until <= now()
+         )::text AS expired_sending_count,
+         count(*) FILTER (
+           WHERE outbox.status = 'MANUAL_REVIEW'
+         )::text AS manual_review_count,
+         count(*) FILTER (
+           WHERE outbox.status IN ('PENDING', 'RETRYABLE')
+             AND EXISTS (
+               SELECT 1
+               FROM meta_outbox AS prior
+               WHERE prior.reply_plan_id = outbox.reply_plan_id
+                 AND prior.sequence_no < outbox.sequence_no
+                 AND prior.status IN (
+                   'FAILED_PERMANENT', 'AMBIGUOUS', 'MANUAL_REVIEW'
+                 )
+             )
+         )::text AS stuck_descendant_count,
+         extract(epoch FROM now() - min(outbox.created_at) FILTER (
+           WHERE outbox.status IN ('PENDING', 'RETRYABLE')
+         ))::text AS oldest_actionable_age_seconds,
+         extract(epoch FROM now() - min(outbox.updated_at) FILTER (
+           WHERE outbox.status = 'MANUAL_REVIEW'
+         ))::text AS oldest_manual_review_age_seconds
+       FROM meta_outbox AS outbox
+       WHERE outbox.page_id = $1`,
+      [pageId],
+    );
+    const row = result.rows[0];
+    const nullableNumber = (value: string | null | undefined): number | null =>
+      value === null || value === undefined ? null : Number(value);
+    return {
+      pageId,
+      actionableCount: Number(row?.actionable_count ?? 0),
+      sendingCount: Number(row?.sending_count ?? 0),
+      expiredSendingCount: Number(row?.expired_sending_count ?? 0),
+      manualReviewCount: Number(row?.manual_review_count ?? 0),
+      stuckDescendantCount: Number(row?.stuck_descendant_count ?? 0),
+      oldestActionableAgeSeconds: nullableNumber(
+        row?.oldest_actionable_age_seconds,
+      ),
+      oldestManualReviewAgeSeconds: nullableNumber(
+        row?.oldest_manual_review_age_seconds,
+      ),
+    };
+  }
   async claimPancakeTagOutbox(
     workerId: string,
     leaseMs: number,
@@ -1348,14 +1553,24 @@ export class PostgresRealtimeRuntimeStore {
       `WITH candidate AS (
          SELECT operation_id
          FROM pancake_tag_outbox
-         WHERE (
+         WHERE ((
            status IN ('PENDING', 'RETRYABLE')
            AND (next_attempt_at IS NULL OR next_attempt_at <= now())
          ) OR (
            status = 'APPLYING'
            AND lease_until IS NOT NULL
            AND lease_until <= now()
-         )
+         ))
+           AND (
+             after_response_group_id IS NULL
+             OR NOT EXISTS (
+               SELECT 1
+               FROM meta_outbox AS dependency
+               WHERE dependency.response_group_id =
+                 pancake_tag_outbox.after_response_group_id
+                 AND dependency.status IN ('PENDING', 'RETRYABLE', 'SENDING')
+             )
+           )
          ORDER BY created_at
          FOR UPDATE SKIP LOCKED
          LIMIT 1
@@ -1694,9 +1909,10 @@ export class PostgresRealtimeRuntimeStore {
            recipient_ciphertext, recipient_nonce, recipient_auth_tag,
            payload_ciphertext, payload_nonce, payload_auth_tag,
            payload_encrypted_dek, payload_key_ref, payload_expires_at,
-           payload_fingerprint, sequence_no, next_attempt_at
+           payload_fingerprint, sequence_no, next_attempt_at,
+           send_after_owner_handoff
          ) VALUES (
-           $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19
+           $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20
          )
          ON CONFLICT (idempotency_key) DO NOTHING`,
         [
@@ -1719,6 +1935,7 @@ export class PostgresRealtimeRuntimeStore {
           this.cipher.fingerprint(JSON.stringify(message), "meta-payload:v2"),
           sequence,
           new Date(now.getTime() + imageDelayMs),
+          plan.sendAfterOwnerHandoff === true,
         ],
       );
       created += result.rowCount ?? 0;
@@ -1749,8 +1966,8 @@ export class PostgresRealtimeRuntimeStore {
          operation_id, idempotency_key, page_id, conversation_id,
          desired_tag, pancake_tag_id, handoff_generation,
          pancake_conversation_ciphertext, pancake_conversation_nonce,
-         pancake_conversation_auth_tag
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+         pancake_conversation_auth_tag, after_response_group_id
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
        ON CONFLICT (idempotency_key) DO NOTHING`,
       [
         randomUUID(),
@@ -1763,6 +1980,7 @@ export class PostgresRealtimeRuntimeStore {
         external.external_id_ciphertext,
         external.external_id_nonce,
         external.external_id_auth_tag,
+        plan.afterResponseGroupId ?? null,
       ],
     );
     return result.rowCount === 1;

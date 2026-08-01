@@ -68,3 +68,26 @@ API remains available while migration and secret preparation run.
 After installation, run `deploy/verify-vps.sh`. It requires healthy data/API/worker containers,
 the Phase 4 migration, a recent worker heartbeat, active n8n workflow `C4Qn7aNuUNCHJJ9c`, an empty
 app Meta outbox, and proof that the worker role lacks `INSERT` on `meta_outbox`.
+## Delivery health and MANUAL_REVIEW action
+
+The delivery worker exposes separate internal endpoints on port `8091`:
+
+- `/health/live` checks process liveness only.
+- `/health/ready` checks the PostgreSQL dependency and is the container healthcheck.
+- `/health/queue` reports aggregate, PII-free queue state and returns non-2xx for degraded or unhealthy queues.
+
+`MANUAL_REVIEW` never resumes automatically. After the provider outcome has been investigated,
+an authorized operator may only cancel the held response group with the committed artifact:
+
+```text
+docker compose --env-file deploy/.env.infrastructure -f deploy/docker-compose.vps.yml run --rm \
+  -e META_OUTBOX_OPERATOR_ACTION=CANCEL \
+  -e META_OUTBOX_RESPONSE_GROUP_ID=<uuid> \
+  -e META_OUTBOX_OPERATOR_REF=<operator-ref> \
+  -e META_OUTBOX_OPERATOR_REASON_CODE=<SAFE_REASON_CODE> \
+  delivery-worker node apps/worker/dist/meta-outbox-operator.js
+```
+
+The action is state-idempotent, terminally closes eligible rows as `FAILED_PERMANENT` with an operator-cancel reason, and writes an audit event
+only when it changes rows. It has no retry/requeue mode. Do not run it before the r32.2 artifact
+and migration are deployed and verified.

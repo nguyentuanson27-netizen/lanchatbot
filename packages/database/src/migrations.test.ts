@@ -317,3 +317,20 @@ describe("database migrations", () => {
     expect(down).toContain("DROP TABLE IF EXISTS meta_response_group_gates");
   });
 });
+describe("r32.2 outbox handoff ordering migration", () => {
+  it("adds reversible response-group dependency columns", async () => {
+    const sql = await readFile(
+      resolve(directory, "0029_meta_outbox_handoff_ordering.up.sql"),
+      "utf8",
+    );
+    const down = await readFile(
+      resolve(directory, "0029_meta_outbox_handoff_ordering.down.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("send_after_owner_handoff boolean NOT NULL DEFAULT false");
+    expect(sql).toContain("after_response_group_id uuid");
+    expect(sql).toContain("pancake_tag_outbox_response_group_idx");
+    expect(down).toContain("DROP COLUMN IF EXISTS after_response_group_id");
+    expect(down).toContain("DROP COLUMN IF EXISTS send_after_owner_handoff");
+  });
+});

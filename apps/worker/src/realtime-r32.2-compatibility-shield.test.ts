@@ -15,6 +15,8 @@ import {
   composeSizeEngineAdvice,
   deterministicVertexProposalFallback,
   groupRealtimeMetaMessagesV2,
+  resolveExplicitModelTelemetry,
+  responseGroupHandoffOrdering,
   vertexGroundedFallbackReason,
   verifiedProductInfoProposal,
   withProactiveSizeAdvice,
@@ -24,6 +26,7 @@ import {
   type MetaOutboxDispatchStore,
   type MetaPreSendGate,
 } from "./meta-outbox-dispatcher.js";
+import { classifyMetaOutboxQueueHealth } from "./delivery-health.js";
 
 const R31_3_BASELINE = Object.freeze({
   tag: "20260731-realtime-generation-quota-r31.3",
@@ -427,6 +430,70 @@ describe("r32.2 Compatibility First regression shield", () => {
     expect(sequence2).toEqual(verifiedSequence0);
     expect(gate.authorize).toHaveBeenCalledTimes(2);
   });
-  it.todo("[D5] terminal/manual-review predecessor resolves descendants without duplicate sends");
-  it.todo("[D6] token usage and queue health expose explicit source/state without changing the reply");
+  it("[D5] orders preserved size output before the employee handoff tag", () => {
+    const groupId = "50000000-0000-4000-8000-000000000003";
+    expect(responseGroupHandoffOrdering(true, 4, groupId)).toEqual({
+      sendAfterOwnerHandoff: true,
+      afterResponseGroupId: groupId,
+    });
+    expect(responseGroupHandoffOrdering(true, 0, groupId)).toEqual({
+      sendAfterOwnerHandoff: false,
+      afterResponseGroupId: null,
+    });
+    expect(responseGroupHandoffOrdering(false, 4, groupId)).toEqual({
+      sendAfterOwnerHandoff: false,
+      afterResponseGroupId: null,
+    });
+  });
+
+  it("[D6] exposes token source/path and queue state without changing the reply", () => {
+    const before = JSON.stringify(protectedBaseProposal);
+    expect(resolveExplicitModelTelemetry({
+      modelCalled: true,
+      hasProviderUsage: true,
+      providerPromptTokens: 20,
+      providerOutputTokens: 10,
+      providerTotalTokens: 30,
+      inputCharacterCount: 400,
+      outputCharacterCount: 80,
+      initialFallbackUsed: false,
+      groundedDraftFallbackUsed: false,
+      errorClass: null,
+    })).toMatchObject({
+      usageSource: "provider",
+      path: "model",
+      tokenUsage: { prompt: 20, output: 10, total: 30 },
+    });
+    expect(resolveExplicitModelTelemetry({
+      modelCalled: true,
+      hasProviderUsage: false,
+      providerPromptTokens: 0,
+      providerOutputTokens: 0,
+      providerTotalTokens: 0,
+      inputCharacterCount: 400,
+      outputCharacterCount: 80,
+      initialFallbackUsed: true,
+      groundedDraftFallbackUsed: false,
+      errorClass: "VERTEX_SCHEMA_INVALID",
+    })).toEqual({
+      usageSource: "estimated",
+      path: "initial_fallback",
+      errorClass: "VERTEX_SCHEMA_INVALID",
+      tokenUsage: { prompt: 100, output: 20, total: 120 },
+    });
+    expect(classifyMetaOutboxQueueHealth({
+      pageId: "1198992073286645",
+      actionableCount: 0,
+      sendingCount: 0,
+      expiredSendingCount: 0,
+      manualReviewCount: 1,
+      stuckDescendantCount: 0,
+      oldestActionableAgeSeconds: null,
+      oldestManualReviewAgeSeconds: 60,
+    }, {
+      actionableSloSeconds: 120,
+      manualReviewSloSeconds: 1_800,
+    }).status).toBe("DEGRADED");
+    expect(JSON.stringify(protectedBaseProposal)).toBe(before);
+  });
 });
