@@ -22,7 +22,8 @@
     "regressionShieldMergeCommit": "8a8401d3f2ff0c7179df6042c2f6fb2a6bf9b5fc",
     "ledgerEvidencePullRequest": 99,
     "ledgerEvidenceMergeCommit": "b66625da205085b2a9ab98089889467ed6eec1f0",
-    "containmentPullRequest": null,
+    "containmentPullRequest": 100,
+    "containmentInitialContentCommit": "e92d48ecb1d3b629ec5db28d0f7a98f49dfe1352",
     "containmentMergeCommit": null
   },
   "runtimeEvidence": {
