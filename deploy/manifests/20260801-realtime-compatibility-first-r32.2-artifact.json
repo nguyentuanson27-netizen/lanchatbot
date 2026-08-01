@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-01T10:59:47Z",
+  "status": "ARTIFACT_BUILT_RESTORE_TESTED_DEPLOY_PENDING",
+  "environment": "production-test-page",
+  "host": "156.67.214.197",
+  "pageId": "1198992073286645",
+  "documentType": "APPEND_ONLY_ARTIFACT_BUILD_EVIDENCE",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "releaseTag": "20260801-realtime-compatibility-first-r32.2",
+  "tagObject": "023bdae5030c3911d7d4ae16242879b6e6d7483a",
+  "tagCommit": "1c004eacca7cce309a0a05643d1aa751b897d41c",
+  "candidateSourceCommit": "1d4e18005381febbb79b8b225a450aedd1ceab49",
+  "candidateManifest": "deploy/manifests/20260801-realtime-compatibility-first-r32.2-candidate.json",
+  "candidateManifestPullRequest": 106,
+  "candidateManifestMergeCommit": "1c004eacca7cce309a0a05643d1aa751b897d41c",
+  "sourceMaterialization": {
+    "method": "annotated-tag-fetched-by-read-only-lana-deploy-key",
+    "releasePath": "/opt/lana-chatbot/releases/20260801-realtime-compatibility-first-r32.2",
+    "workingTreeClean": true,
+    "composeConfig": "PASS_WITH_TARGET_IMAGE_OVERRIDES",
+    "directVpsSourceEdits": false
+  },
+  "image": {
+    "name": "lana-chatbot-app:realtime-compatibility-first-r32.2",
+    "imageId": "sha256:44ecb2fd9f7d6a5aa769938f738a3c6ba42b470db5a9bce3d30fdc364de2a0b7",
+    "createdAt": "2026-08-01T10:53:57.887549431Z",
+    "revisionLabel": "1c004eacca7cce309a0a05643d1aa751b897d41c",
+    "versionLabel": "20260801-realtime-compatibility-first-r32.2",
+    "sourceLabel": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+    "dockerfileCheck": "PASS",
+    "buildDurationSeconds": 573.1,
+    "buildLogPath": "/opt/lana-chatbot/shared/release-evidence/20260801-realtime-compatibility-first-r32.2/docker-build.log",
+    "buildLogSha256": "b6a035e5d8e3b18795deb45f348d5e7d72d704a5d8c700f5cdf34de6256074a0"
+  },
+  "databaseRehearsal": {
+    "productionBackupPath": "/opt/lana-chatbot/shared/backups/20260801T105514Z-pre-r32.2.dump",
+    "productionBackupFormat": "POSTGRES_CUSTOM",
+    "productionBackupSha256": "da85c24f8f05117677182501734540e0b67a8cb2128eaa45c79d36b00ceb637c",
+    "productionBackupBytes": 21993387,
+    "restoreTarget": "DISPOSABLE_ISOLATED_POSTGRES_17",
+    "restoreBaseline": {
+      "webhookInboxRows": 229,
+      "metaOutboxRows": 117,
+      "latestMigrationBefore": "0027_handoff_case_sla_default"
+    },
+    "appliedOnRestore": [
+      "0028_meta_response_group_gate",
+      "0029_meta_outbox_handoff_ordering"
+    ],
+    "secondMigrationRun": [],
+    "schemaVerification": {
+      "metaResponseGroupGatesPresent": true,
+      "sendAfterOwnerHandoff": "boolean NOT NULL DEFAULT false",
+      "pancakeAfterResponseGroupId": "uuid nullable"
+    },
+    "restoreTest": "PASS",
+    "restoreLogPath": "/opt/lana-chatbot/shared/release-evidence/20260801-realtime-compatibility-first-r32.2/database-restore-test.log",
+    "restoreLogSha256": "d778ce6eb007e1081174636d01a05d708eaf4504340693df10706cdad6dc0dec",
+    "disposableContainerRemoved": true,
+    "disposableVolumeRemoved": true,
+    "disposableNetworkRemoved": true,
+    "productionMigrationApplied": false
+  },
+  "outboundGateRehearsal": {
+    "method": "READ_ONLY_EXACT_CLAIM_PREDICATE_ON_RESTORED_AND_MIGRATED_DATABASE",
+    "pageState": {
+      "appSendEnabled": false,
+      "killSwitch": true
+    },
+    "pendingRows": 2,
+    "claimableRows": 0,
+    "result": "PASS_FAIL_CLOSED",
+    "logPath": "/opt/lana-chatbot/shared/release-evidence/20260801-realtime-compatibility-first-r32.2/claim-gate-test.log",
+    "logSha256": "e3b0011f918c9307c23a0b0d8621a5d4fa9172356762f65e64562c2ee0174311"
+  },
+  "productionUnchangedAfterPreparation": {
+    "currentReleasePath": "/opt/lana-chatbot/releases/20260731-realtime-generation-quota-r31.3",
+    "realtime": {
+      "containerId": "c732d22f6081d1aa3104f3be069a2b074c711db0ce248e8c91ee981120463561",
+      "image": "lana-chatbot-app:realtime-generation-quota-r31.3",
+      "imageId": "sha256:54ced1eb0a31313c0d179b71931389f47200974b73dafc93a96f4b8e2b8b79c5",
+      "health": "healthy",
+      "restartCount": 0
+    },
+    "delivery": {
+      "containerId": "b49c07a00d22230654ab3c00a6a1bd0f6e2788d2e35b06364733cc6b3a1d0de8",
+      "image": "lana-chatbot-app:ad-acquisition-r27.1",
+      "imageId": "sha256:1b33e3bc963ab9dfe5c6eb8786bd1825ab907c8422f94575a16688534cdbcdb9",
+      "health": "healthy",
+      "restartCount": 0
+    },
+    "outboundGate": {
+      "pageStatus": "ACTIVE",
+      "routingOwner": "APP",
+      "appSendEnabled": false,
+      "killSwitch": true
+    },
+    "queueSnapshot": {
+      "inbox": { "FAILED_PERMANENT": 1, "PROCESSED": 228 },
+      "outbox": { "MANUAL_REVIEW": 2, "PENDING": 2, "SENT_ACCEPTED": 113 },
+      "sending": 0,
+      "ambiguous": 0
+    },
+    "latestProductionMigration": "0027_handoff_case_sla_default",
+    "runtimeCutoverExecuted": false,
+    "requeueExecuted": false
+  },
+  "authorizedNextStep": {
+    "status": "READY_FOR_GUARDED_CUTOVER",
+    "outboundMustRemainLocked": true,
+    "applyMigrations": [
+      "0028_meta_response_group_gate",
+      "0029_meta_outbox_handoff_ordering"
+    ],
+    "serviceOrder": ["delivery-worker", "realtime-worker"],
+    "nonTargetServicesMustRemainUnchanged": true,
+    "atomicCurrentSymlinkAfterTargetHealth": true,
+    "queueMutationOrRequeueAllowed": false
+  },
+  "rollback": {
+    "realtimeReleasePath": "/opt/lana-chatbot/releases/20260731-realtime-generation-quota-r31.3",
+    "realtimeImage": "lana-chatbot-app:realtime-generation-quota-r31.3",
+    "deliveryImage": "lana-chatbot-app:ad-acquisition-r27.1",
+    "schemaDownMigrationRequired": false,
+    "outboundMustRemainLocked": true,
+    "dataDeletionAllowed": false
+  },
+  "auditIntegrity": {
+    "candidateManifestModified": false,
+    "r32_1ManifestModified": false,
+    "incidentContainmentManifestModified": false,
+    "r31_3RollbackManifestModified": false,
+    "thisManifestMustNotBeEditedAfterMerge": true,
+    "runtimeEvidenceMustUseNewManifest": true
+  }
+}
