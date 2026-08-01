@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import type { ClaimedMetaOutbox } from "@lana/database";
 import {
   applyWave2ReplyPolicy,
   decideWave2SalesStrategy,
@@ -18,6 +19,11 @@ import {
   verifiedProductInfoProposal,
   withProactiveSizeAdvice,
 } from "./realtime-runner.js";
+import {
+  resolveMetaResponseGroupGate,
+  type MetaOutboxDispatchStore,
+  type MetaPreSendGate,
+} from "./meta-outbox-dispatcher.js";
 
 const R31_3_BASELINE = Object.freeze({
   tag: "20260731-realtime-generation-quota-r31.3",
@@ -344,7 +350,83 @@ describe("r32.2 Compatibility First regression shield", () => {
     expect(vertexGroundedFallbackReason(new Error("VERTEX_SCHEMA_INVALID")))
       .toBe("GROUNDED_SCHEMA_INVALID");
   });
-  it.todo("[D4] one verified ownership snapshot fail-closes the entire response group before sequence 0");
+  it("[D4] one verified ownership snapshot fail-closes the entire response group before sequence 0", async () => {
+    const groupedClaim = (sequenceNo: number): ClaimedMetaOutbox => ({
+      outboxId: "30000000-0000-4000-8000-00000000000" + sequenceNo,
+      leaseToken: "40000000-0000-4000-8000-00000000000" + sequenceNo,
+      pageId: "1198992073286645",
+      conversationId: "50000000-0000-4000-8000-000000000001",
+      replyPlanId: "50000000-0000-4000-8000-000000000002",
+      responseGroupId: "50000000-0000-4000-8000-000000000003",
+      sequenceNo,
+      recipientId: "customer-1",
+      pancakeConversationId: "pancake-conversation-1",
+      message: { kind: "TEXT", text: "message-" + sequenceNo },
+      attemptCount: 1,
+    });
+    let snapshot: Awaited<
+      ReturnType<MetaOutboxDispatchStore["readMetaResponseGroupGate"]>
+    > = null;
+    const repository: MetaOutboxDispatchStore = {
+      claimMetaOutbox: vi.fn(async () => null),
+      readMetaResponseGroupGate: vi.fn(async () => snapshot),
+      recordMetaResponseGroupGate: vi.fn(async (input) => {
+        if (snapshot?.status === "ALLOWED" || snapshot?.status === "BLOCKED") {
+          return snapshot;
+        }
+        snapshot = {
+          responseGroupId: input.responseGroupId,
+          source: "PANCAKE",
+          status: input.observation.status,
+          reasonCode: input.observation.reasonCode,
+          blockingTag: input.observation.blockingTag,
+          observedAt: input.observation.observedAt,
+          attemptCount: (snapshot?.attemptCount ?? 0) + 1,
+          expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+        };
+        return snapshot;
+      }),
+      markMetaAccepted: vi.fn(async () => true),
+      markMetaRetryable: vi.fn(async () => true),
+      markMetaTerminal: vi.fn(async () => true),
+      markMetaManualReview: vi.fn(async () => true),
+      quarantineExpiredMetaSending: vi.fn(async () => 0),
+    };
+    const gate: MetaPreSendGate = {
+      authorize: vi.fn()
+        .mockResolvedValueOnce({
+          status: "UNVERIFIED",
+          reasonCode: "PANCAKE_TAG_UNVERIFIED",
+          blockingTag: null,
+          observedAt: new Date("2026-07-31T16:40:58.264Z"),
+        })
+        .mockResolvedValueOnce({
+          status: "ALLOWED",
+          reasonCode: null,
+          blockingTag: null,
+          observedAt: new Date("2026-07-31T16:40:59.000Z"),
+        }),
+    };
+
+    const unverifiedSequence0 = await resolveMetaResponseGroupGate(
+      groupedClaim(0), repository, gate,
+    );
+    const verifiedSequence0 = await resolveMetaResponseGroupGate(
+      groupedClaim(0), repository, gate,
+    );
+    const sequence1 = await resolveMetaResponseGroupGate(
+      groupedClaim(1), repository, gate,
+    );
+    const sequence2 = await resolveMetaResponseGroupGate(
+      groupedClaim(2), repository, gate,
+    );
+
+    expect(unverifiedSequence0.status).toBe("UNVERIFIED");
+    expect(verifiedSequence0.status).toBe("ALLOWED");
+    expect(sequence1).toEqual(verifiedSequence0);
+    expect(sequence2).toEqual(verifiedSequence0);
+    expect(gate.authorize).toHaveBeenCalledTimes(2);
+  });
   it.todo("[D5] terminal/manual-review predecessor resolves descendants without duplicate sends");
   it.todo("[D6] token usage and queue health expose explicit source/state without changing the reply");
 });

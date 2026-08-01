@@ -298,11 +298,43 @@ export interface RealtimeCommitResult {
   readonly inboxBatchStatus?: "NOT_REQUESTED" | "COMMITTED" | "SUPERSEDED";
 }
 
+export type MetaResponseGroupGateStatus =
+  | "UNVERIFIED"
+  | "ALLOWED"
+  | "BLOCKED";
+
+export type MetaResponseGroupBlockingTag =
+  | "NHAN_VIEN"
+  | "VAN_DON"
+  | "DA_CHOT_DON"
+  | "KHONG_UP_SALE";
+
+export interface MetaResponseGroupGateSnapshot {
+  readonly responseGroupId: string;
+  readonly source: "PANCAKE";
+  readonly status: MetaResponseGroupGateStatus;
+  readonly reasonCode: string | null;
+  readonly blockingTag: MetaResponseGroupBlockingTag | null;
+  readonly observedAt: Date | null;
+  readonly attemptCount: number;
+  readonly expiresAt: Date;
+}
+
+export interface MetaResponseGroupGateObservation {
+  readonly status: MetaResponseGroupGateStatus;
+  readonly reasonCode: string | null;
+  readonly blockingTag: MetaResponseGroupBlockingTag | null;
+  readonly observedAt: Date | null;
+}
+
 export interface ClaimedMetaOutbox {
   readonly outboxId: string;
   readonly leaseToken: string;
   readonly pageId: string;
   readonly conversationId: string;
+  readonly replyPlanId: string;
+  readonly responseGroupId: string;
+  readonly sequenceNo: number;
   readonly recipientId: string;
   readonly pancakeConversationId: string | null;
   readonly message: RealtimeMetaMessageUnit;
@@ -340,6 +372,9 @@ interface MetaOutboxRow {
   outbox_id: string;
   page_id: string;
   conversation_id: string;
+  reply_plan_id: string;
+  response_group_id: string;
+  sequence_no: number;
   attempt_count: number;
   lease_token: string;
   recipient_ciphertext: Buffer;
@@ -354,6 +389,17 @@ interface MetaOutboxRow {
   pancake_conversation_ciphertext: Buffer | null;
   pancake_conversation_nonce: Buffer | null;
   pancake_conversation_auth_tag: Buffer | null;
+}
+
+interface MetaResponseGroupGateRow {
+  response_group_id: string;
+  source: "PANCAKE";
+  status: MetaResponseGroupGateStatus;
+  reason_code: string | null;
+  blocking_tag: MetaResponseGroupBlockingTag | null;
+  observed_at: Date | null;
+  attempt_count: number;
+  expires_at: Date;
 }
 
 interface PancakeTagOutboxRow {
@@ -1023,7 +1069,8 @@ export class PostgresRealtimeRuntimeStore {
        WHERE outbox.outbox_id = candidate.outbox_id
        RETURNING
          outbox.outbox_id, outbox.page_id, outbox.conversation_id,
-         outbox.attempt_count, outbox.lease_token,
+         outbox.reply_plan_id, outbox.response_group_id,
+         outbox.sequence_no, outbox.attempt_count, outbox.lease_token,
          outbox.recipient_ciphertext, outbox.recipient_nonce,
          outbox.recipient_auth_tag, outbox.payload_ciphertext,
          outbox.payload_nonce, outbox.payload_auth_tag,
@@ -1091,10 +1138,101 @@ export class PostgresRealtimeRuntimeStore {
       leaseToken: row.lease_token,
       pageId: row.page_id,
       conversationId: row.conversation_id,
+      replyPlanId: row.reply_plan_id,
+      responseGroupId: row.response_group_id,
+      sequenceNo: row.sequence_no,
       recipientId: recipient,
       pancakeConversationId,
       message: payload,
       attemptCount: row.attempt_count,
+    };
+  }
+
+  async readMetaResponseGroupGate(
+    responseGroupId: string,
+  ): Promise<MetaResponseGroupGateSnapshot | null> {
+    const result = await this.pool.query<MetaResponseGroupGateRow>(
+      `SELECT response_group_id, source, status, reason_code, blocking_tag,
+              observed_at, attempt_count, expires_at
+       FROM meta_response_group_gates
+       WHERE response_group_id = $1`,
+      [responseGroupId],
+    );
+    const row = result.rows[0];
+    return row ? this.metaResponseGroupGateSnapshot(row) : null;
+  }
+
+  async recordMetaResponseGroupGate(input: {
+    readonly responseGroupId: string;
+    readonly replyPlanId: string;
+    readonly conversationId: string;
+    readonly pageId: string;
+    readonly observation: MetaResponseGroupGateObservation;
+  }): Promise<MetaResponseGroupGateSnapshot> {
+    const reasonCode = input.observation.reasonCode?.slice(0, 128) ?? null;
+    const result = await this.pool.query<MetaResponseGroupGateRow>(
+      `INSERT INTO meta_response_group_gates (
+         response_group_id, reply_plan_id, conversation_id, page_id,
+         status, reason_code, blocking_tag, observed_at, source, expires_at
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'PANCAKE',now() + interval '5 minutes')
+       ON CONFLICT (response_group_id) DO UPDATE
+       SET status = CASE
+             WHEN meta_response_group_gates.status = 'UNVERIFIED'
+               THEN EXCLUDED.status
+             ELSE meta_response_group_gates.status
+           END,
+           reason_code = CASE
+             WHEN meta_response_group_gates.status = 'UNVERIFIED'
+               THEN EXCLUDED.reason_code
+             ELSE meta_response_group_gates.reason_code
+           END,
+           blocking_tag = CASE
+             WHEN meta_response_group_gates.status = 'UNVERIFIED'
+               THEN EXCLUDED.blocking_tag
+             ELSE meta_response_group_gates.blocking_tag
+           END,
+           observed_at = CASE
+             WHEN meta_response_group_gates.status = 'UNVERIFIED'
+               THEN EXCLUDED.observed_at
+             ELSE meta_response_group_gates.observed_at
+           END,
+           expires_at = CASE
+             WHEN meta_response_group_gates.status = 'UNVERIFIED'
+               THEN EXCLUDED.expires_at
+             ELSE meta_response_group_gates.expires_at
+           END,
+           attempt_count = meta_response_group_gates.attempt_count + 1,
+           updated_at = now()
+       RETURNING response_group_id, source, status, reason_code, blocking_tag,
+                 observed_at, attempt_count, expires_at`,
+      [
+        input.responseGroupId,
+        input.replyPlanId,
+        input.conversationId,
+        input.pageId,
+        input.observation.status,
+        reasonCode,
+        input.observation.blockingTag,
+        input.observation.observedAt,
+      ],
+    );
+    const row = result.rows[0];
+    if (!row) throw new Error("META_RESPONSE_GROUP_GATE_NOT_RECORDED");
+    return this.metaResponseGroupGateSnapshot(row);
+  }
+
+  private metaResponseGroupGateSnapshot(
+    row: MetaResponseGroupGateRow,
+  ): MetaResponseGroupGateSnapshot {
+    return {
+      responseGroupId: row.response_group_id,
+      source: row.source,
+      status: row.status,
+      reasonCode: row.reason_code,
+      blockingTag: row.blocking_tag,
+      observedAt: row.observed_at,
+      attemptCount: row.attempt_count,
+      expiresAt: row.expires_at,
     };
   }
 

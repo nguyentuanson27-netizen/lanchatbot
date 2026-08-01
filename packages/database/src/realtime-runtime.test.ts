@@ -493,3 +493,57 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     expect(calls.at(-1)?.sql.trim()).toBe("COMMIT");
   });
 });
+
+describe("PostgresRealtimeRuntimeStore response-group gate", () => {
+  it("persists a durable decision and prevents terminal snapshots from being overwritten", async () => {
+    const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
+    const row = {
+      response_group_id: "50000000-0000-4000-8000-000000000003",
+      source: "PANCAKE" as const,
+      status: "ALLOWED",
+      reason_code: null,
+      blocking_tag: null,
+      observed_at: new Date("2026-07-31T16:40:59.000Z"),
+      attempt_count: 2,
+      expires_at: new Date("2026-07-31T16:45:59.000Z"),
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = {
+      async query(sql: string, values: readonly unknown[] = []) {
+        calls.push({ sql, values });
+        return { rowCount: 1, rows: [row] };
+      },
+      async end() {},
+    };
+
+    const existing = await store.readMetaResponseGroupGate(row.response_group_id);
+    const recorded = await store.recordMetaResponseGroupGate({
+      responseGroupId: row.response_group_id,
+      replyPlanId: "50000000-0000-4000-8000-000000000002",
+      conversationId: "50000000-0000-4000-8000-000000000001",
+      pageId: "1198992073286645",
+      observation: {
+        status: "BLOCKED",
+        reasonCode: "PANCAKE_BLOCKING_TAG_NHAN_VIEN",
+        blockingTag: "NHAN_VIEN",
+        observedAt: new Date("2026-07-31T16:41:00.008Z"),
+      },
+    });
+
+    expect(existing).toEqual(recorded);
+    expect(existing).toMatchObject({
+      source: "PANCAKE",
+      status: "ALLOWED",
+      attemptCount: 2,
+      expiresAt: new Date("2026-07-31T16:45:59.000Z"),
+    });
+    expect(calls[0]?.sql).toContain("WHERE response_group_id = $1");
+    expect(calls[1]?.sql).toContain("ON CONFLICT (response_group_id) DO UPDATE");
+    expect(calls[1]?.sql).toContain("meta_response_group_gates.status = 'UNVERIFIED'");
+    expect(calls[1]?.values[4]).toBe("BLOCKED");
+    expect(calls[1]?.values[6]).toBe("NHAN_VIEN");
+  });
+});

@@ -294,4 +294,26 @@ describe("database migrations", () => {
     expect(sql).toContain("interval '30 minutes'");
   });
 
+  it("persists one fail-closed ownership snapshot per response group", async () => {
+    const sql = await readFile(
+      resolve(directory, "0028_meta_response_group_gate.up.sql"),
+      "utf8",
+    );
+    const down = await readFile(
+      resolve(directory, "0028_meta_response_group_gate.down.sql"),
+      "utf8",
+    );
+
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS meta_response_group_gates");
+    expect(sql).toContain("response_group_id uuid PRIMARY KEY");
+    expect(sql).toContain("'UNVERIFIED', 'ALLOWED', 'BLOCKED'");
+    expect(sql).toContain("meta_response_group_gate_state_ck");
+    expect(sql).toContain("source text NOT NULL DEFAULT 'PANCAKE'");
+    expect(sql).toContain("meta_response_group_gate_ttl_ck");
+    expect(sql).toContain("interval '5 minutes'");
+    expect(sql).toContain("status = 'UNVERIFIED'");
+    expect(sql).toContain("'NHAN_VIEN', 'VAN_DON', 'DA_CHOT_DON', 'KHONG_UP_SALE'");
+    expect(sql).not.toMatch(/(?:recipient|message|customer)_ciphertext/iu);
+    expect(down).toContain("DROP TABLE IF EXISTS meta_response_group_gates");
+  });
 });
