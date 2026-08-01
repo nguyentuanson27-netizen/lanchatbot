@@ -3,6 +3,7 @@ import {
   LocalEnvelopeCipher,
   PostgresRealtimeRuntimeStore,
 } from "@lana/database";
+import { isSupportedMetaResponseGroupId } from "./meta-outbox-operator-validation.js";
 
 function required(name: string): string {
   const value = process.env[name]?.trim();
@@ -19,7 +20,7 @@ if ((process.env.META_OUTBOX_OPERATOR_ACTION ?? "").trim() !== "CANCEL") {
   throw new Error("META_OUTBOX_OPERATOR_ACTION_CANCEL_ONLY");
 }
 const responseGroupId = required("META_OUTBOX_RESPONSE_GROUP_ID");
-if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(responseGroupId)) {
+if (!isSupportedMetaResponseGroupId(responseGroupId)) {
   throw new Error("META_OUTBOX_RESPONSE_GROUP_ID_INVALID");
 }
 const store = new PostgresRealtimeRuntimeStore(
