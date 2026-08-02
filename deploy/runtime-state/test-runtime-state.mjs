@@ -14,6 +14,7 @@ import {
   digestProjection,
   digestRows,
   parseDelimitedRows,
+  postgresQueryInvocation,
   promoteVerifiedCandidate,
   validateRuntimeState,
   validateServiceEvidence,
@@ -42,6 +43,12 @@ assert.deepEqual(attestServiceEvidence({ actualImageId: 'sha256:' + 'b'.repeat(6
 assert.equal(canonicalRows([{ b: 2, a: 1, ignored: 'x' }, { b: 1, a: 2 }], ['a', 'b']), '[1,2]\n[2,1]\n');
 assert.deepEqual(parseDelimitedRows('a\tb\nc\td', ['left', 'right']), [{ left: 'a', right: 'b' }, { left: 'c', right: 'd' }]);
 throws(() => parseDelimitedRows('a|b', ['left', 'right']), 'LIVE_DATABASE_ROW_SHAPE');
+const databasePassword = 'host-only-password-sentinel';
+const databaseInvocation = postgresQueryInvocation({ container: 'postgres', user: 'lana_app', database: 'lana_chatbot', password: databasePassword, sql: 'SELECT 1' }, { SAFE_PARENT_ENV: 'preserved' });
+assert.deepEqual(databaseInvocation.args, ['exec', '--env', 'PGPASSWORD', 'postgres', 'psql', '-X', '-v', 'ON_ERROR_STOP=1', '-U', 'lana_app', '-d', 'lana_chatbot', '-At', '-F', '\t', '-c', 'SELECT 1']);
+assert.equal(databaseInvocation.args.includes(databasePassword), false);
+assert.deepEqual(databaseInvocation.env, { SAFE_PARENT_ENV: 'preserved', PGPASSWORD: databasePassword });
+throws(() => postgresQueryInvocation({ container: 'postgres', user: 'lana_app', database: 'lana_chatbot', password: '', sql: 'SELECT 1' }), 'POSTGRES_PASSWORD_MISSING');
 assert.equal(digestRows([{ migration: 'b', checksumSha256: '2' }, { migration: 'a', checksumSha256: '1' }], ['migration', 'checksumSha256']).sha256, digestRows([{ migration: 'a', checksumSha256: '1' }, { migration: 'b', checksumSha256: '2' }], ['migration', 'checksumSha256']).sha256);
 
 validateServiceEvidence(serviceEvidenceExample, inventory);
