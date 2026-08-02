@@ -13,7 +13,8 @@
     "pretest": "pnpm --filter @lana/contracts build && pnpm --filter @lana/dataset-review build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build && pnpm --filter @lana/chat-runtime build && pnpm --filter @lana/meta-webhook build && pnpm --filter @lana/meta-delivery build && pnpm --filter @lana/pancake-handoff build && pnpm --filter @lana/database build",
     "test": "vitest run",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "meta-outbox:cancel": "node dist/meta-outbox-operator.js"
+    "meta-outbox:cancel": "node dist/meta-outbox-operator.js",
+    "behavior-mode:operator": "node dist/runtime-behavior-mode-operator.js"
   },
   "dependencies": {
     "@lana/business-tools": "workspace:*",

@@ -272,6 +272,13 @@ services:
       SALES_CYCLE_ENABLED: "${SALES_CYCLE_ENABLED:-false}"
       RUNTIME_POLICY_CACHE_TTL_MS: "5000"
       RUNTIME_POLICY_LKG_TTL_MS: "300000"
+      REALTIME_CONFIRMATION_MODE: "${REALTIME_CONFIRMATION_MODE:-LEGACY}"
+      REALTIME_BEHAVIOR_MODE_ENABLED: "${REALTIME_BEHAVIOR_MODE_ENABLED:-false}"
+      REALTIME_BEHAVIOR_MODE_DATABASE_URL_FILE: /run/secrets/runtime_behavior_mode_database_url
+      REALTIME_BEHAVIOR_MODE_CHANNEL: "MESSENGER"
+      REALTIME_CONFIRMATION_CANARY_PAGE_IDS: "${REALTIME_CONFIRMATION_CANARY_PAGE_IDS:-}"
+      REALTIME_BEHAVIOR_MODE_CACHE_TTL_MS: "5000"
+      REALTIME_BEHAVIOR_MODE_LKG_TTL_MS: "300000"
       REALTIME_DATA_KEY_FILE: /run/secrets/realtime_data_key
       REALTIME_DATA_KEY_REF: local-kek-v1
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
@@ -341,6 +348,7 @@ services:
       MEDIA_WORKER_URL: http://media-worker:8090
       MEDIA_WORKER_KEY_FILE: /run/secrets/media_worker_key
     secrets:
+      - runtime_behavior_mode_database_url
       - realtime_data_key
       - analytics_hash_salt
       - vertex_google_api
@@ -1107,6 +1115,8 @@ secrets:
     file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/vertex_google_api
   qdrant_api_key:
     file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/qdrant_api_key
+  runtime_behavior_mode_database_url:
+    file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/runtime_behavior_mode_database_url
   realtime_data_key:
     file: ${SHARED_SECRET_DIR:-/opt/lana-chatbot/shared/secrets}/realtime_data_key
   meta_page_access_token:
