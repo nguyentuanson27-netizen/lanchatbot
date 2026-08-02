@@ -1,0 +1,255 @@
+import { createHash } from "node:crypto";
+
+export type ConfirmationBehaviorMode = "LEGACY" | "V2_SHADOW" | "V2_ACTIVE" | "CLARIFY_ONLY";
+export type BehaviorModeResolutionSource = "DATABASE" | "CACHE" | "LAST_KNOWN_GOOD" | "STARTUP_DEFAULT" | "FAIL_SAFE";
+export interface RuntimeBehaviorModePayload {
+  readonly confirmationMode: ConfirmationBehaviorMode;
+  readonly salesAuthorityMode: "LEGACY" | "SHADOW" | "COMMERCE";
+  readonly stateReadMode: "LEGACY" | "SHADOW" | "V2";
+}
+export interface RuntimeBehaviorModeVersion extends RuntimeBehaviorModePayload {
+  readonly schemaVersion: 1;
+  readonly modeVersionId: string;
+  readonly pageId: string;
+  readonly channel: string;
+  readonly contentHash: string;
+  readonly createdBy: string;
+  readonly reason: string;
+  readonly createdAt: string;
+}
+export interface RuntimeBehaviorModePointer {
+  readonly version: RuntimeBehaviorModeVersion;
+  readonly pointerRevision: number;
+  readonly updatedBy: string;
+  readonly reason: string;
+  readonly updatedAt: string;
+}
+export interface RuntimeBehaviorModeAuditEvent {
+  readonly resolutionId: string;
+  readonly pageId: string;
+  readonly channel: string;
+  readonly confirmationMode: ConfirmationBehaviorMode;
+  readonly modeVersionId: string | null;
+  readonly contentHash: string | null;
+  readonly pointerRevision: number | null;
+  readonly source: BehaviorModeResolutionSource;
+  readonly status: "RESOLVED" | "FALLBACK" | "REJECTED";
+  readonly reasonCodes: readonly string[];
+  readonly workerId: string;
+  readonly pointerUpdatedAt: string | null;
+  readonly resolvedAt: string;
+  readonly propagationMs: number | null;
+}
+export interface RuntimeBehaviorModeSourcePort {
+  loadActiveMode(input: { readonly pageId: string; readonly channel: string }): Promise<RuntimeBehaviorModePointer | null>;
+  recordResolution?(event: RuntimeBehaviorModeAuditEvent): Promise<void>;
+}
+export interface RuntimeBehaviorModeResolution extends RuntimeBehaviorModePayload {
+  readonly modeVersionId: string | null;
+  readonly contentHash: string | null;
+  readonly pointerRevision: number | null;
+  readonly source: BehaviorModeResolutionSource;
+  readonly status: "RESOLVED" | "FALLBACK" | "REJECTED";
+  readonly reasonCodes: readonly string[];
+  readonly pointerUpdatedAt: string | null;
+  readonly resolvedAt: string;
+  readonly propagationMs: number | null;
+  readonly auditWrite: "RECORDED" | "FAILED" | "NOT_CONFIGURED";
+}
+
+const FAIL_SAFE: RuntimeBehaviorModePayload = {
+  confirmationMode: "CLARIFY_ONLY",
+  salesAuthorityMode: "LEGACY",
+  stateReadMode: "LEGACY",
+};
+function canonicalJson(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  const record = value as Record<string, unknown>;
+  return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`).join(",")}}`;
+}
+export function behaviorModeContentHash(payload: RuntimeBehaviorModePayload): string {
+  return `sha256:${createHash("sha256").update(canonicalJson({
+    confirmationMode: payload.confirmationMode,
+    salesAuthorityMode: payload.salesAuthorityMode,
+    schemaVersion: 1,
+    stateReadMode: payload.stateReadMode,
+  }), "utf8").digest("hex")}`;
+}
+interface CachedPointer { readonly pointer: RuntimeBehaviorModePointer; readonly fetchedAtMs: number; }
+
+export class RuntimeBehaviorModeResolver {
+  private readonly cacheTtlMs: number;
+  private readonly lastKnownGoodTtlMs: number;
+  private readonly allowedPageIds: ReadonlySet<string>;
+  private readonly cache = new Map<string, CachedPointer>();
+  private readonly lastKnownGood = new Map<string, CachedPointer>();
+  private readonly inFlight = new Map<string, Promise<CachedPointer>>();
+
+  constructor(
+    private readonly source: RuntimeBehaviorModeSourcePort,
+    options: {
+      readonly cacheTtlMs?: number;
+      readonly lastKnownGoodTtlMs?: number;
+      readonly allowedPageIds?: readonly string[];
+    } = {},
+  ) {
+    this.cacheTtlMs = options.cacheTtlMs ?? 5_000;
+    this.lastKnownGoodTtlMs = options.lastKnownGoodTtlMs ?? 300_000;
+    if (this.cacheTtlMs < 0 || this.cacheTtlMs > 5_000) throw new Error("RUNTIME_BEHAVIOR_CACHE_TTL_INVALID");
+    if (this.lastKnownGoodTtlMs < 0 || this.lastKnownGoodTtlMs > 300_000) throw new Error("RUNTIME_BEHAVIOR_LKG_TTL_INVALID");
+    this.allowedPageIds = new Set(options.allowedPageIds ?? []);
+  }
+
+  invalidate(pageId: string, channel: string): void { this.cache.delete(`${pageId}:${channel}`); }
+
+  private validate(pointer: RuntimeBehaviorModePointer, pageId: string, channel: string): void {
+    const version = pointer.version;
+    if (version.schemaVersion !== 1 || version.pageId !== pageId || version.channel !== channel) throw new Error("RUNTIME_BEHAVIOR_SCOPE_INVALID");
+    if (!Number.isInteger(pointer.pointerRevision) || pointer.pointerRevision < 1) throw new Error("RUNTIME_BEHAVIOR_REVISION_INVALID");
+    if (version.salesAuthorityMode !== "LEGACY" || version.stateReadMode !== "LEGACY") throw new Error("RUNTIME_BEHAVIOR_NON_CONFIRMATION_TRACK_ACTIVE");
+    if (behaviorModeContentHash(version) !== version.contentHash) throw new Error("RUNTIME_BEHAVIOR_HASH_MISMATCH");
+    if (Number.isNaN(Date.parse(pointer.updatedAt))) throw new Error("RUNTIME_BEHAVIOR_UPDATED_AT_INVALID");
+  }
+
+  private async load(pageId: string, channel: string, nowMs: number): Promise<CachedPointer> {
+    const key = `${pageId}:${channel}`;
+    const existing = this.inFlight.get(key);
+    if (existing) return existing;
+    const pending = (async () => {
+      const pointer = await this.source.loadActiveMode({ pageId, channel });
+      if (!pointer) throw new Error("RUNTIME_BEHAVIOR_POINTER_MISSING");
+      this.validate(pointer, pageId, channel);
+      const entry = { pointer, fetchedAtMs: nowMs };
+      this.cache.set(key, entry);
+      this.lastKnownGood.set(key, entry);
+      return entry;
+    })();
+    this.inFlight.set(key, pending);
+    try { return await pending; } finally { this.inFlight.delete(key); }
+  }
+
+  private async audited(
+    input: { readonly resolutionId: string; readonly pageId: string; readonly channel: string; readonly workerId: string },
+    resolution: Omit<RuntimeBehaviorModeResolution, "auditWrite">,
+  ): Promise<RuntimeBehaviorModeResolution> {
+    if (!this.source.recordResolution) return { ...resolution, auditWrite: "NOT_CONFIGURED" };
+    try {
+      await this.source.recordResolution({
+        resolutionId: input.resolutionId,
+        pageId: input.pageId,
+        channel: input.channel,
+        confirmationMode: resolution.confirmationMode,
+        modeVersionId: resolution.modeVersionId,
+        contentHash: resolution.contentHash,
+        pointerRevision: resolution.pointerRevision,
+        source: resolution.source,
+        status: resolution.status,
+        reasonCodes: resolution.reasonCodes,
+        workerId: input.workerId,
+        pointerUpdatedAt: resolution.pointerUpdatedAt,
+        resolvedAt: resolution.resolvedAt,
+        propagationMs: resolution.propagationMs,
+      });
+      return { ...resolution, auditWrite: "RECORDED" };
+    } catch {
+      return {
+        ...FAIL_SAFE,
+        modeVersionId: null,
+        contentHash: null,
+        pointerRevision: null,
+        source: "FAIL_SAFE",
+        status: "FALLBACK",
+        reasonCodes: [...resolution.reasonCodes, "RUNTIME_BEHAVIOR_AUDIT_FAILED"],
+        pointerUpdatedAt: null,
+        resolvedAt: resolution.resolvedAt,
+        propagationMs: null,
+        auditWrite: "FAILED",
+      };
+    }
+  }
+
+  async resolve(input: {
+    readonly resolutionId: string;
+    readonly pageId: string;
+    readonly channel: string;
+    readonly workerId: string;
+    readonly now?: Date;
+  }): Promise<RuntimeBehaviorModeResolution> {
+    const now = input.now ?? new Date();
+    const nowMs = now.getTime();
+    if (Number.isNaN(nowMs)) throw new Error("RUNTIME_BEHAVIOR_NOW_INVALID");
+    const channel = input.channel.trim().toUpperCase();
+    const scoped = { ...input, channel };
+    const key = `${input.pageId}:${channel}`;
+    const cached = this.cache.get(key);
+    let entry: CachedPointer | null = null;
+    let source: BehaviorModeResolutionSource = "DATABASE";
+    let reasonCodes: readonly string[] = [];
+    if (cached && nowMs - cached.fetchedAtMs < this.cacheTtlMs) {
+      entry = cached;
+      source = "CACHE";
+    } else {
+      try { entry = await this.load(input.pageId, channel, nowMs); }
+      catch {
+        const lkg = this.lastKnownGood.get(key);
+        if (lkg && nowMs - lkg.fetchedAtMs <= this.lastKnownGoodTtlMs) {
+          entry = lkg;
+          source = "LAST_KNOWN_GOOD";
+          reasonCodes = ["RUNTIME_BEHAVIOR_SOURCE_UNAVAILABLE"];
+        }
+      }
+    }
+    if (!entry) {
+      return this.audited(scoped, {
+        ...FAIL_SAFE, modeVersionId: null, contentHash: null, pointerRevision: null,
+        source: "FAIL_SAFE", status: "FALLBACK", reasonCodes: ["RUNTIME_BEHAVIOR_LKG_EXPIRED"],
+        pointerUpdatedAt: null, resolvedAt: now.toISOString(), propagationMs: null,
+      });
+    }
+    const pointer = entry.pointer;
+    if (
+      pointer.version.confirmationMode === "V2_ACTIVE"
+      && !this.allowedPageIds.has(input.pageId)
+    ) {
+      return this.audited(scoped, {
+        ...FAIL_SAFE,
+        modeVersionId: pointer.version.modeVersionId,
+        contentHash: pointer.version.contentHash,
+        pointerRevision: pointer.pointerRevision,
+        source: "FAIL_SAFE",
+        status: "REJECTED",
+        reasonCodes: ["RUNTIME_BEHAVIOR_ACTIVE_PAGE_NOT_ALLOWED"],
+        pointerUpdatedAt: pointer.updatedAt,
+        resolvedAt: now.toISOString(),
+        propagationMs: Math.max(0, nowMs - Date.parse(pointer.updatedAt)),
+      });
+    }
+    return this.audited(scoped, {
+      confirmationMode: pointer.version.confirmationMode,
+      salesAuthorityMode: pointer.version.salesAuthorityMode,
+      stateReadMode: pointer.version.stateReadMode,
+      modeVersionId: pointer.version.modeVersionId,
+      contentHash: pointer.version.contentHash,
+      pointerRevision: pointer.pointerRevision,
+      source,
+      status: source === "LAST_KNOWN_GOOD" ? "FALLBACK" : "RESOLVED",
+      reasonCodes,
+      pointerUpdatedAt: pointer.updatedAt,
+      resolvedAt: now.toISOString(),
+      propagationMs: Math.max(0, nowMs - Date.parse(pointer.updatedAt)),
+    });
+  }
+}
+
+export function startupBehaviorModeResolution(
+  confirmationMode: ConfirmationBehaviorMode,
+  now = new Date(),
+): RuntimeBehaviorModeResolution {
+  return {
+    confirmationMode, salesAuthorityMode: "LEGACY", stateReadMode: "LEGACY",
+    modeVersionId: null, contentHash: null, pointerRevision: null,
+    source: "STARTUP_DEFAULT", status: "FALLBACK", reasonCodes: ["RUNTIME_BEHAVIOR_RESOLVER_DISABLED"],
+    pointerUpdatedAt: null, resolvedAt: now.toISOString(), propagationMs: null, auditWrite: "NOT_CONFIGURED",
+  };
+}
