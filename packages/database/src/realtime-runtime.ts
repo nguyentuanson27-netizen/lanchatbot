@@ -291,6 +291,22 @@ export interface RealtimeDecisionEventPlan {
     confirmationAttempted?: boolean;
     confirmationConfirmed?: boolean;
     confirmationSource?: string | null;
+    confirmationAction?: string | null;
+    confirmationBehaviorMode?: "LEGACY" | "V2_SHADOW" | "V2_ACTIVE" | "CLARIFY_ONLY";
+    confirmationModeSource?: "DATABASE" | "CACHE" | "LAST_KNOWN_GOOD" | "STARTUP_DEFAULT" | "FAIL_SAFE";
+    confirmationModeVersionId?: string | null;
+    confirmationModeContentHash?: string | null;
+    confirmationModePointerRevision?: number | null;
+    confirmationModeAuditWrite?: "RECORDED" | "FAILED" | "NOT_CONFIGURED";
+    confirmationContainmentActive?: boolean;
+    confirmationShadow?: Readonly<{
+      decision: "CONFIRM" | "REJECT" | "UNCLEAR";
+      terminal: boolean;
+      reasonCode: string | null;
+      action: string | null;
+      differsFromLegacy: boolean;
+      sideEffects: "DISABLED";
+    }> | null;
   }>;
 }
 

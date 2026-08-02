@@ -5,6 +5,7 @@ import {
 } from "@lana/contracts";
 import {
   computeBusinessContentHash,
+  type RuntimeBehaviorModeResolution,
   type RuntimePolicyResolution,
 } from "@lana/chat-runtime";
 import { describe, expect, it } from "vitest";
@@ -264,6 +265,26 @@ function signals(input: {
           },
         }
       : {}),
+  };
+}
+
+function behaviorResolution(
+  confirmationMode: RuntimeBehaviorModeResolution["confirmationMode"],
+): RuntimeBehaviorModeResolution {
+  return {
+    confirmationMode,
+    salesAuthorityMode: "LEGACY",
+    stateReadMode: "LEGACY",
+    modeVersionId: "30000000-0000-4000-8000-000000000001",
+    contentHash: `sha256:${"a".repeat(64)}`,
+    pointerRevision: 1,
+    source: "DATABASE",
+    status: "RESOLVED",
+    reasonCodes: [],
+    pointerUpdatedAt: now.toISOString(),
+    resolvedAt: now.toISOString(),
+    propagationMs: 0,
+    auditWrite: "RECORDED",
   };
 }
 
@@ -707,5 +728,159 @@ describe("realtime Phase 3 sales cycle", () => {
       telemetry: { checkoutCompleted: true, checkoutMissingFields: [] },
       plan: { state: { stage: "ORDER_PREVIEW", clarification: null } },
     });
+  });
+
+  it("runs V2_SHADOW without changing any customer-visible or durable LEGACY outcome", async () => {
+    const state = await previewState("shadow-no-effects");
+    const text = "Dung chot don";
+    const legacy = await evaluateRealtimeSalesCycle(input(state, text, "shadow-same-event"));
+    const shadow = await evaluateRealtimeSalesCycle({
+      ...input(state, text, "shadow-same-event"),
+      behaviorModeResolution: behaviorResolution("V2_SHADOW"),
+    });
+
+    expect({
+      handled: shadow.handled,
+      messages: shadow.messages,
+      plan: shadow.plan,
+      transferToHuman: shadow.transferToHuman,
+      desiredTag: shadow.desiredTag,
+      reasonCode: shadow.reasonCode,
+    }).toEqual({
+      handled: legacy.handled,
+      messages: legacy.messages,
+      plan: legacy.plan,
+      transferToHuman: legacy.transferToHuman,
+      desiredTag: legacy.desiredTag,
+      reasonCode: legacy.reasonCode,
+    });
+    expect(shadow.telemetry).toMatchObject({
+      confirmationBehaviorMode: "V2_SHADOW",
+      confirmationShadow: {
+        decision: "UNCLEAR",
+        reasonCode: "CONFIRMATION_AMBIGUOUS_UNACCENTED",
+        differsFromLegacy: true,
+        sideEffects: "DISABLED",
+      },
+    });
+  });
+
+  it.each([
+    ["Đúng, chốt đơn giúp chị", "PURCHASE_CONFIRMED"],
+    ["Đừng chốt đơn", "PURCHASE_CONFIRMATION_REJECTED"],
+    ["Dừng chốt đơn", "PURCHASE_CONFIRMATION_REJECTED"],
+  ] as const)("keeps NFC positive and clear rejection distinct in V2_ACTIVE: %s", async (text, expectedReason) => {
+    const state = await previewState(`v2-nfc-${Buffer.byteLength(text)}`);
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(state, text, `v2-nfc-message-${Buffer.byteLength(text)}`),
+      behaviorModeResolution: behaviorResolution("V2_ACTIVE"),
+    });
+    expect(output.reasonCode).toBe(expectedReason);
+    expect(output.plan?.state.stage ?? "ORDER_PREVIEW").toBe(
+      expectedReason === "PURCHASE_CONFIRMED" ? "PURCHASE_CONFIRMED" : "ORDER_PREVIEW",
+    );
+    expect(output.telemetry).toMatchObject({
+      confirmationBehaviorMode: "V2_ACTIVE",
+      confirmationConfirmed: expectedReason === "PURCHASE_CONFIRMED",
+    });
+  });
+
+  it.each([
+    ["Chốt đơn được không?", "CONFIRMATION_QUESTION"],
+    ["Dung chot don", "CONFIRMATION_AMBIGUOUS_UNACCENTED"],
+  ] as const)("asks clarification for V2_ACTIVE nonterminal evidence without mutation: %s", async (text, reasonCode) => {
+    const state = await previewState(`v2-clarify-${Buffer.byteLength(text)}`);
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(state, text, `v2-clarify-message-${Buffer.byteLength(text)}`),
+      behaviorModeResolution: behaviorResolution("V2_ACTIVE"),
+    });
+    expect(output).toMatchObject({
+      handled: true,
+      transferToHuman: false,
+      desiredTag: null,
+      reasonCode: "ASK_CONFIRMATION_CLARIFICATION",
+      telemetry: {
+        confirmationConfirmed: false,
+        confirmationReasonCode: reasonCode,
+        confirmationAction: "ASK_CONFIRMATION_CLARIFICATION",
+      },
+    });
+    expect(output.plan).toBeNull();
+    expect(output.messages.map((message) => message.kind === "TEXT" ? message.text : "").join(" ")).not.toMatch(/SĐT|địa chỉ/iu);
+  });
+
+  it("contains positive confirmation, ignores model fallback, and preserves clear rejection in CLARIFY_ONLY", async () => {
+    const state = await previewState("clarify-only");
+    const text = "ok triển khai giúp chị";
+    const contained = await evaluateRealtimeSalesCycle({
+      ...input(state, text, "clarify-only-model-confirm"),
+      salesSignals: signals({ confirmation: { decision: "CONFIRM", evidenceText: text } }),
+      behaviorModeResolution: behaviorResolution("CLARIFY_ONLY"),
+    });
+    expect(contained).toMatchObject({
+      handled: true,
+      transferToHuman: false,
+      desiredTag: null,
+      reasonCode: "ASK_CONFIRMATION_CLARIFICATION",
+      telemetry: {
+        confirmationBehaviorMode: "CLARIFY_ONLY",
+        confirmationContainmentActive: true,
+        confirmationConfirmed: false,
+        confirmationSource: "DETERMINISTIC_CLASSIFIER",
+        confirmationReasonCode: "CONFIRMATION_DETERMINISTIC_MATCH",
+      },
+    });
+    expect(contained.plan).toBeNull();
+
+    const modelOnlyText = "em xử lý theo phương án đó nhé";
+    const modelOnly = await evaluateRealtimeSalesCycle({
+      ...input(state, modelOnlyText, "clarify-only-model-only-confirm"),
+      salesSignals: signals({
+        confirmation: {
+          decision: "CONFIRM",
+          evidenceText: modelOnlyText,
+        },
+      }),
+      behaviorModeResolution: behaviorResolution("CLARIFY_ONLY"),
+    });
+    expect(modelOnly.plan?.state.confirmation ?? null).toBeNull();
+    expect(modelOnly.desiredTag).not.toBe("DA_CHOT_DON");
+    expect(modelOnly.transferToHuman).toBe(false);
+    expect(modelOnly.reasonCode).not.toBe("PURCHASE_CONFIRMED");
+
+    const rejected = await evaluateRealtimeSalesCycle({
+      ...input(state, "Không muốn chốt đơn", "clarify-only-reject"),
+      behaviorModeResolution: behaviorResolution("CLARIFY_ONLY"),
+    });
+    expect(rejected.plan).toBeNull();
+    expect(rejected).toMatchObject({
+      transferToHuman: false,
+      desiredTag: null,
+      telemetry: {
+        confirmationBehaviorMode: "CLARIFY_ONLY",
+        confirmationConfirmed: false,
+        confirmationReasonCode: "CONFIRMATION_EXPLICIT_REJECTION",
+      },
+    });
+
+    const unrelated = await evaluateRealtimeSalesCycle({
+      ...input(state, "mẫu này giá bao nhiêu?", "clarify-only-price-question"),
+      behaviorModeResolution: behaviorResolution("CLARIFY_ONLY"),
+    });
+    expect(unrelated.reasonCode).not.toBe("ASK_CONFIRMATION_CLARIFICATION");
+    expect(unrelated.plan?.state.confirmation ?? null).toBeNull();
+    expect(unrelated.messages.map((message) => message.kind === "TEXT" ? message.text : "").join(" "))
+      .not.toContain("xác nhận mua");
+  });
+
+  it("never completes purchase confirmation outside ORDER_PREVIEW in V2_ACTIVE", async () => {
+    const state = createRealtimeSalesState(conversationId, pageId, now);
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(state, "Đúng, chốt đơn giúp chị", "v2-active-outside-preview"),
+      behaviorModeResolution: behaviorResolution("V2_ACTIVE"),
+    });
+    expect(output.plan?.state.stage).not.toBe("PURCHASE_CONFIRMED");
+    expect(output.plan?.state.confirmation ?? null).toBeNull();
+    expect(output.desiredTag).not.toBe("DA_CHOT_DON");
   });
 });

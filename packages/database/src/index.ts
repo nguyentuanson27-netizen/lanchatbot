@@ -121,6 +121,18 @@ export {
   type RuntimePolicyDatabasePointerRecord,
 } from "./runtime-policy.js";
 export {
+  PostgresRuntimeBehaviorModeStore,
+  runtimeBehaviorModeContentHash,
+  type RuntimeBehaviorModePayloadRecord,
+  type RuntimeBehaviorModePointerRecord,
+  type RuntimeBehaviorModeResolutionAuditRecord,
+  type RuntimeBehaviorModeSource,
+  type RuntimeBehaviorModeVersionRecord,
+  type RuntimeConfirmationMode,
+  type RuntimeSalesAuthorityMode,
+  type RuntimeStateReadMode,
+} from "./runtime-behavior-mode.js";
+export {
   PostgresSizeChartExtractionStore,
   type SizeChartExtractionLookupInput,
   type StageSizeChartArtifactInput,

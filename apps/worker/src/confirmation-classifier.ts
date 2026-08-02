@@ -10,9 +10,8 @@ export type ConfirmationSource =
   | "MODEL_STRUCTURED_OUTPUT";
 
 /**
- * B0 contract for the future confirmation V2 path. This module is deliberately
- * not wired into the active sales-cycle consumer: CF-03 owns runtime mode
- * resolution and is the only slice allowed to activate it.
+ * B0 classifier contract. CF-03 owns runtime mode resolution and is the only
+ * consumer allowed to make this result customer-visible.
  */
 export interface ConfirmationClassification {
   readonly decision: ConfirmationDecision;

@@ -8,9 +8,11 @@ import {
   PostgresChatHistoryStore,
   PostgresRealtimeInboxStore,
   PostgresRealtimeRuntimeStore,
+  PostgresRuntimeBehaviorModeStore,
   PostgresRuntimePolicyStore,
 } from "@lana/database";
 import {
+  RuntimeBehaviorModeResolver,
   RuntimePolicyResolver,
   type RuntimePolicyAuditPort,
   type RuntimePolicyChannel,
@@ -209,6 +211,39 @@ const runtimePolicyResolver = runtimePolicyStore
       runtimePolicyStore as unknown as RuntimePolicyAuditPort,
     )
   : undefined;
+const confirmationStartupModeRaw =
+  process.env.REALTIME_CONFIRMATION_MODE?.trim().toUpperCase() || "LEGACY";
+if (!["LEGACY", "CLARIFY_ONLY"].includes(confirmationStartupModeRaw)) {
+  throw new Error("REALTIME_CONFIRMATION_MODE_INVALID");
+}
+const confirmationStartupMode = confirmationStartupModeRaw as "LEGACY" | "CLARIFY_ONLY";
+const behaviorModeEnabled =
+  process.env.REALTIME_BEHAVIOR_MODE_ENABLED === "true";
+const behaviorModeDatabaseUrl = optionalSecretOrEnvironment(
+  "REALTIME_BEHAVIOR_MODE_DATABASE_URL",
+  "REALTIME_BEHAVIOR_MODE_DATABASE_URL_FILE",
+);
+const confirmationCanaryPageIds = (
+  process.env.REALTIME_CONFIRMATION_CANARY_PAGE_IDS ?? required("META_PAGE_ID")
+).split(",").map((value) => value.trim()).filter(Boolean);
+if (behaviorModeEnabled && !behaviorModeDatabaseUrl) {
+  throw new Error("REALTIME_BEHAVIOR_MODE_DATABASE_URL_REQUIRED");
+}
+const behaviorModeStore = behaviorModeEnabled
+  ? new PostgresRuntimeBehaviorModeStore(behaviorModeDatabaseUrl!)
+  : undefined;
+const behaviorModeResolver = behaviorModeStore
+  ? new RuntimeBehaviorModeResolver(behaviorModeStore, {
+      cacheTtlMs: boundedInteger(
+        "REALTIME_BEHAVIOR_MODE_CACHE_TTL_MS", 5_000, 100, 5_000,
+      ),
+      lastKnownGoodTtlMs: boundedInteger(
+        "REALTIME_BEHAVIOR_MODE_LKG_TTL_MS", 300_000, 5_000, 300_000,
+      ),
+      allowedPageIds: confirmationCanaryPageIds,
+    })
+  : undefined;
+
 const canonicalHistory = process.env.HISTORY_WRITE_ENABLED === "true"
   ? new PostgresChatHistoryStore(databaseUrl, {
       analyticsHashSalt: secretOrEnvironment(
@@ -693,6 +728,9 @@ const runner = new RealtimeRunner(
     promptVersion:
       process.env.REALTIME_PROMPT_VERSION?.trim() || "lana-realtime-v1",
     metaAppId: required("META_APP_ID"),
+    confirmationStartupMode,
+    behaviorModeChannel:
+      process.env.REALTIME_BEHAVIOR_MODE_CHANNEL?.trim().toUpperCase() || "MESSENGER",
     policyChannel: runtimePolicyChannel,
     releaseId:
       process.env.REALTIME_RELEASE_ID?.trim() || "unversioned",
@@ -744,6 +782,7 @@ const runner = new RealtimeRunner(
   videoFrames,
   runtimePolicyResolver,
   mediaRecognition,
+  behaviorModeResolver,
 );
 const pollMs = boundedInteger(
   "REALTIME_POLL_MS",
@@ -792,3 +831,4 @@ await quota.close();
 await history?.close();
 await canonicalHistory?.close();
 await runtimePolicyStore?.close();
+await behaviorModeStore?.close();

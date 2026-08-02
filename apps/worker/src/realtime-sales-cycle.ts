@@ -17,6 +17,7 @@ import {
   createSalesCycleRuntimeState,
   outboundRuntimePolicy,
   runtimePolicyBundleReference,
+  startupBehaviorModeResolution,
   type BankTransferPolicyResolver,
   type RuntimePolicyResolution,
   type ResolvedCartDraftV1,
@@ -24,6 +25,7 @@ import {
   type SalesCycleCommand,
   type SalesCycleRuntimeResult,
   type SalesCycleRuntimeState,
+  type RuntimeBehaviorModeResolution,
   type SalesCycleTrustedPortsV1,
   type VerifiedInboundMessageV1,
 } from "@lana/chat-runtime";
@@ -37,6 +39,11 @@ import type {
 import type {
   CartSelectionResult,
 } from "./realtime-sales-catalog.js";
+import {
+  ASK_CONFIRMATION_CLARIFICATION,
+  classifyConfirmationContract,
+  confirmationClarificationAction,
+} from "./confirmation-classifier.js";
 
 const CART_TTL_MS = 48 * 60 * 60 * 1_000;
 const PREVIEW_TTL_MS = 30 * 60 * 1_000;
@@ -60,6 +67,7 @@ export interface RealtimeSalesCycleInput {
   readonly color: string | null;
   readonly salesSignals?: AgentSalesSignalsV1 | null;
   readonly shopAlias: string;
+  readonly behaviorModeResolution?: RuntimeBehaviorModeResolution;
   readonly policyResolution: RuntimePolicyResolution | null;
   readonly facts: BusinessFactsReader;
   readonly now: Date;
@@ -100,6 +108,22 @@ export interface RealtimeSalesCycleTelemetry {
     | "DETERMINISTIC_CLASSIFIER"
     | "MODEL_STRUCTURED_OUTPUT"
     | null;
+  readonly confirmationAction?: typeof ASK_CONFIRMATION_CLARIFICATION | null;
+  readonly confirmationBehaviorMode?: RuntimeBehaviorModeResolution["confirmationMode"];
+  readonly confirmationModeSource?: RuntimeBehaviorModeResolution["source"];
+  readonly confirmationModeVersionId?: string | null;
+  readonly confirmationModeContentHash?: string | null;
+  readonly confirmationModePointerRevision?: number | null;
+  readonly confirmationModeAuditWrite?: RuntimeBehaviorModeResolution["auditWrite"];
+  readonly confirmationContainmentActive?: boolean;
+  readonly confirmationShadow?: Readonly<{
+    readonly decision: "CONFIRM" | "REJECT" | "UNCLEAR";
+    readonly terminal: boolean;
+    readonly reasonCode: string | null;
+    readonly action: typeof ASK_CONFIRMATION_CLARIFICATION | null;
+    readonly differsFromLegacy: boolean;
+    readonly sideEffects: "DISABLED";
+  }>;
   readonly confirmationReasonCode?: string | null;
 }
 
@@ -778,7 +802,114 @@ export async function evaluateRealtimeSalesCycle(
       : { handled: false, messages: [], plan: plan(), transferToHuman: false, desiredTag: null, reasonCode: null };
   }
 
-  const confirmationDecision = confirmation(input.text, input.salesSignals);
+  const legacyConfirmationDecision = confirmation(input.text, input.salesSignals);
+  const behaviorModeResolution = input.behaviorModeResolution
+    ?? startupBehaviorModeResolution("LEGACY", input.now);
+  const behaviorMode = behaviorModeResolution.confirmationMode;
+  const v2Classification = behaviorMode === "LEGACY"
+    ? null
+    : classifyConfirmationContract(
+        input.text,
+        behaviorMode === "CLARIFY_ONLY"
+          ? null
+          : input.salesSignals?.purchaseConfirmation ?? null,
+      );
+  const v2Action = v2Classification
+    ? confirmationClarificationAction(v2Classification, state.stage)
+    : null;
+  const confirmationDecision: ConfirmationDecision = v2Classification && (
+    behaviorMode === "V2_ACTIVE" || behaviorMode === "CLARIFY_ONLY"
+  )
+    ? {
+        decision: v2Classification.decision,
+        attempted: v2Classification.evidenceDetected,
+        source: v2Classification.source,
+        reasonCode: v2Classification.reasonCode,
+      }
+    : legacyConfirmationDecision;
+  const behaviorTelemetry = {
+    confirmationBehaviorMode: behaviorMode,
+    confirmationModeSource: behaviorModeResolution.source,
+    confirmationModeVersionId: behaviorModeResolution.modeVersionId,
+    confirmationModeContentHash: behaviorModeResolution.contentHash,
+    confirmationModePointerRevision: behaviorModeResolution.pointerRevision,
+    confirmationModeAuditWrite: behaviorModeResolution.auditWrite,
+    confirmationContainmentActive: behaviorMode === "CLARIFY_ONLY",
+    ...(behaviorMode === "V2_SHADOW" && v2Classification
+      ? {
+          confirmationShadow: {
+            decision: v2Classification.decision,
+            terminal: v2Classification.terminal,
+            reasonCode: v2Classification.reasonCode,
+            action: v2Action,
+            differsFromLegacy:
+              legacyConfirmationDecision.decision !== v2Classification.decision ||
+              legacyConfirmationDecision.attempted !== v2Classification.evidenceDetected,
+            sideEffects: "DISABLED" as const,
+          },
+        }
+      : {}),
+  };
+  if (behaviorMode === "V2_SHADOW") {
+    const legacyOutput = await evaluateRealtimeSalesCycle({
+      ...input,
+      behaviorModeResolution: startupBehaviorModeResolution("LEGACY", input.now),
+    });
+    return {
+      ...legacyOutput,
+      telemetry: {
+        ...legacyOutput.telemetry,
+        ...behaviorTelemetry,
+      },
+    };
+  }
+  const mustClarify = state.stage === "ORDER_PREVIEW" && (
+    behaviorMode === "CLARIFY_ONLY"
+      ? v2Classification?.evidenceDetected === true
+        && v2Classification.decision !== "REJECT"
+      : behaviorMode === "V2_ACTIVE" && v2Action === ASK_CONFIRMATION_CLARIFICATION
+  );
+  if (mustClarify) {
+    return {
+      handled: true,
+      messages: [{ kind: "TEXT", text: "Chị muốn xác nhận mua theo đơn đang xem hay chưa chốt lúc này ạ?" }],
+      plan: plan(),
+      transferToHuman: false,
+      desiredTag: null,
+      reasonCode: ASK_CONFIRMATION_CLARIFICATION,
+      telemetry: {
+        ...behaviorTelemetry,
+        confirmationAttempted: true,
+        confirmationConfirmed: false,
+        confirmationSource: v2Classification?.source ?? null,
+        confirmationReasonCode: v2Classification?.reasonCode ?? "CONFIRMATION_CLARIFY_ONLY_CONTAINMENT",
+        confirmationAction: ASK_CONFIRMATION_CLARIFICATION,
+      },
+    };
+  }
+  if (
+    state.stage === "ORDER_PREVIEW"
+    && behaviorMode !== "LEGACY"
+    && v2Classification?.decision === "REJECT"
+  ) {
+    return {
+      handled: true,
+      messages: [],
+      plan: null,
+      transferToHuman: false,
+      desiredTag: null,
+      reasonCode: "PURCHASE_CONFIRMATION_REJECTED",
+      telemetry: {
+        ...behaviorTelemetry,
+        confirmationAttempted: true,
+        confirmationConfirmed: false,
+        confirmationSource: v2Classification.source,
+        confirmationReasonCode: v2Classification.reasonCode,
+        confirmationAction: null,
+      },
+    };
+  }
+
   if (state.stage === "ORDER_PREVIEW" && confirmationDecision.decision === "CONFIRM") {
     if (!state.cart || !state.preview || !state.checkoutDraft?.address) {
       return failedOutput("ORDER_PREVIEW_STATE_INVALID", plan());
@@ -823,6 +954,7 @@ export async function evaluateRealtimeSalesCycle(
       desiredTag: "DA_CHOT_DON",
       reasonCode: "PURCHASE_CONFIRMED",
       telemetry: {
+        ...behaviorTelemetry,
         confirmationAttempted: true,
         confirmationConfirmed: true,
         confirmationSource: confirmationDecision.source,
@@ -1233,10 +1365,12 @@ export async function evaluateRealtimeSalesCycle(
     ...(state.stage === "ORDER_PREVIEW" && confirmationDecision.attempted
       ? {
           telemetry: {
+            ...behaviorTelemetry,
             confirmationAttempted: true,
             confirmationConfirmed: false,
             confirmationSource: confirmationDecision.source,
             confirmationReasonCode: confirmationDecision.reasonCode,
+            confirmationAction: v2Action,
           },
         }
       : {}),
