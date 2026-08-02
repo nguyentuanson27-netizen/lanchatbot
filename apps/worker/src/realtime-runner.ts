@@ -41,12 +41,15 @@ import type {
   RuntimePolicyChannel,
   RuntimePolicyResolution,
   RuntimePolicyResolverPort,
+  ConfirmationBehaviorMode,
+  RuntimeBehaviorModeResolution,
   SalesCycleRuntimeState,
 } from "@lana/chat-runtime";
 import {
   decideRuntimeMultiItemOffer,
   outboundRuntimePolicy,
   runtimePolicyAuditReference,
+  startupBehaviorModeResolution,
 } from "@lana/chat-runtime";
 import {
   applyInboundEvent,
@@ -1962,6 +1965,8 @@ export interface RealtimeRunnerOptions {
   readonly imageDelayMs?: number;
   readonly promptVersion?: string;
   readonly metaAppId?: string;
+  readonly confirmationStartupMode?: ConfirmationBehaviorMode;
+  readonly behaviorModeChannel?: string;
   readonly policyChannel?: RuntimePolicyChannel;
   readonly releaseId?: string;
   readonly decisionTelemetryEnabled?: boolean;
@@ -1985,6 +1990,16 @@ export interface RealtimeRunnerOptions {
   readonly wave2StrategyEnabled?: boolean;
   readonly adAcquisitionAnalyticsMode?: "OFF" | "SHADOW" | "LIVE";
   readonly adAcquisitionPageIds?: readonly string[];
+}
+
+export interface RuntimeBehaviorModeResolverPort {
+  resolve(input: {
+    readonly resolutionId: string;
+    readonly pageId: string;
+    readonly channel: string;
+    readonly workerId: string;
+    readonly now?: Date;
+  }): Promise<RuntimeBehaviorModeResolution>;
 }
 
 export type ModelUsageSource = "provider" | "estimated" | "missing";
@@ -2086,6 +2101,7 @@ export class RealtimeRunner {
     private readonly videoFrames?: RealtimeVideoFrameExtractorPort,
     private readonly policyResolver?: RuntimePolicyResolverPort,
     private readonly mediaRecognition?: RealtimeMediaRecognitionPort,
+    private readonly behaviorModeResolver?: RuntimeBehaviorModeResolverPort,
   ) {
     if (options.mode === "DRY_RUN" && options.sendEnabled) {
       throw new Error("REALTIME_DRY_RUN_SEND_FORBIDDEN");
@@ -2109,6 +2125,8 @@ export class RealtimeRunner {
       policyChannel: options.policyChannel ?? "CANARY_SHADOW",
       releaseId: options.releaseId ?? "unversioned",
       decisionTelemetryEnabled: options.decisionTelemetryEnabled ?? false,
+      confirmationStartupMode: options.confirmationStartupMode ?? "LEGACY",
+      behaviorModeChannel: options.behaviorModeChannel ?? "MESSENGER",
       buyingSignalGuardEnabled: options.buyingSignalGuardEnabled ?? false,
       groundedDraftEnabled: options.groundedDraftEnabled ?? false,
       verifiedFactAssemblerEnabled:
@@ -2507,6 +2525,16 @@ export class RealtimeRunner {
     const policyAuditRef = policyResolution?.bundle
       ? runtimePolicyAuditReference(policyResolution.bundle)
       : null;
+    const behaviorModeResolution = await this.behaviorModeResolver?.resolve({
+      resolutionId: deterministicUuid(`behavior-mode:${claim.pageId}:${message.eventKey}`),
+      pageId: claim.pageId,
+      channel: this.options.behaviorModeChannel,
+      workerId: this.options.workerId,
+      now,
+    }) ?? startupBehaviorModeResolution(
+      this.options.confirmationStartupMode,
+      now,
+    );
     const customerProfile =
       this.options.customerProfileEnabled && !knownSuperseded && !message.isEcho
         ? await this.loadAndMergeCustomerProfile(
@@ -3877,6 +3905,7 @@ export class RealtimeRunner {
         salesSignals: proposal?.salesSignals ?? null,
         shopAlias: this.options.shopAlias,
         policyResolution,
+        behaviorModeResolution,
         facts: this.factsReader,
         now,
       });
@@ -4104,6 +4133,15 @@ export class RealtimeRunner {
           confirmationAttempted: salesTelemetry?.confirmationAttempted ?? false,
           confirmationConfirmed: salesTelemetry?.confirmationConfirmed ?? false,
           confirmationSource: salesTelemetry?.confirmationSource ?? null,
+          confirmationAction: salesTelemetry?.confirmationAction ?? null,
+          confirmationBehaviorMode: behaviorModeResolution.confirmationMode,
+          confirmationModeSource: behaviorModeResolution.source,
+          confirmationModeVersionId: behaviorModeResolution.modeVersionId,
+          confirmationModeContentHash: behaviorModeResolution.contentHash,
+          confirmationModePointerRevision: behaviorModeResolution.pointerRevision,
+          confirmationModeAuditWrite: behaviorModeResolution.auditWrite,
+          confirmationContainmentActive: salesTelemetry?.confirmationContainmentActive ?? false,
+          confirmationShadow: salesTelemetry?.confirmationShadow ?? null,
         },
       });
     };
