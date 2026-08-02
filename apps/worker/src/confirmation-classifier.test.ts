@@ -22,7 +22,9 @@ describe("CF-02 confirmation classifier contract", () => {
 
   it.each([
     ["Ch\u1ed1t \u0111\u01a1n \u0111\u01b0\u1ee3c kh\u00f4ng?", "CONFIRMATION_QUESTION"],
+    ["Ch\u1ed1t \u0111\u01a1n kh\u00f4ng", "CONFIRMATION_QUESTION"],
     ["ok \u0111\u1ec3 ch\u1ecb suy ngh\u0129", "CONFIRMATION_HESITANT"],
+    ["Ch\u01b0a ch\u1ed1t \u0111\u01a1n", "CONFIRMATION_HESITANT"],
     ["Dung chot don", "CONFIRMATION_AMBIGUOUS_UNACCENTED"],
   ] as const)("keeps questions, hesitation, and unaccented ambiguity non-terminal: %s", (text, reasonCode) => {
     const result = classifyConfirmationContract(text, null);
@@ -33,7 +35,17 @@ describe("CF-02 confirmation classifier contract", () => {
       source: "DETERMINISTIC_CLASSIFIER",
       reasonCode,
     });
-    expect(confirmationClarificationAction(result)).toBe(ASK_CONFIRMATION_CLARIFICATION);
+    expect(confirmationClarificationAction(result, "ORDER_PREVIEW")).toBe(ASK_CONFIRMATION_CLARIFICATION);
+    expect(confirmationClarificationAction(result, "CHECKOUT_CAPTURE")).toBeNull();
+  });
+
+  it("treats an explicit negative phrase as terminal rejection", () => {
+    expect(classifyConfirmationContract("Kh\u00f4ng mu\u1ed1n ch\u1ed1t \u0111\u01a1n", null)).toMatchObject({
+      decision: "REJECT",
+      terminal: true,
+      evidenceDetected: true,
+      reasonCode: "CONFIRMATION_EXPLICIT_REJECTION",
+    });
   });
 
   it("does not turn a question into a rejection even with otherwise usable model evidence", () => {
@@ -65,6 +77,17 @@ describe("CF-02 confirmation classifier contract", () => {
       decision: "CONFIRM",
       confidence: 0.99,
       evidenceText: "kh\u00f4ng c\u00f3 trong tin nh\u1eafn",
+    })).toMatchObject({
+      decision: "UNCLEAR",
+      terminal: false,
+      evidenceDetected: false,
+      source: null,
+      reasonCode: null,
+    });
+    expect(classifyConfirmationContract(text, {
+      decision: "CONFIRM",
+      confidence: 0.84,
+      evidenceText: text,
     })).toMatchObject({
       decision: "UNCLEAR",
       terminal: false,

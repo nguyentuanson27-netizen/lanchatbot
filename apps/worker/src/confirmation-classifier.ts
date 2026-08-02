@@ -67,11 +67,11 @@ function hasConfirmationVocabulary(tokens: string): boolean {
 }
 
 function hasClearRejection(tokens: string): boolean {
-  return /(?:^| )(?:\u0111\u1eebng|d\u1eebng|kh\u00f4ng|ko|k|h\u1ee7y) (?:l\u1ea5y|ch\u1ed1t|x\u00e1c nh\u1eadn|l\u00ean \u0111\u01a1n)(?= |$)/u.test(tokens);
+  return /(?:^| )(?:\u0111\u1eebng|d\u1eebng|kh\u00f4ng|ko|k|h\u1ee7y) (?:(?:mu\u1ed1n|c\u1ea7n) )?(?:l\u1ea5y|ch\u1ed1t|x\u00e1c nh\u1eadn|l\u00ean \u0111\u01a1n)(?= |$)/u.test(tokens);
 }
 
 function hasHesitation(tokens: string): boolean {
-  return /(?:^| )(?:ch\u01b0a (?:\u0111\u00e2u|em)?|\u0111\u1ec3 (?:ch\u1ecb|em)? ?(?:suy ngh\u0129|c\u00e2n nh\u1eafc|xem l\u1ea1i))(?= |$)/u.test(tokens);
+  return /(?:^| )(?:ch\u01b0a|kh\u00f4ng ch\u1eafc|(?:\u0111\u1ec3|\u0111\u1ee3i) (?:ch\u1ecb|em)? ?(?:suy ngh\u0129|c\u00e2n nh\u1eafc|xem l\u1ea1i))(?= |$)/u.test(tokens);
 }
 
 function hasMediaRequest(tokens: string): boolean {
@@ -79,7 +79,9 @@ function hasMediaRequest(tokens: string): boolean {
 }
 
 function hasQuestion(text: string, tokens: string): boolean {
-  return /[?\uFF1F]/u.test(text) || /(?:^| )(?:\u0111\u01b0\u1ee3c kh\u00f4ng|ph\u1ea3i kh\u00f4ng|ch\u01b0a em)(?= |$)/u.test(tokens);
+  return /[?\uFF1F]/u.test(text)
+    || /(?:^| )(?:\u0111\u01b0\u1ee3c kh\u00f4ng|ph\u1ea3i kh\u00f4ng|ch\u01b0a em)(?= |$)/u.test(tokens)
+    || /(?:^| )(?:ch\u1ed1t(?: \u0111\u01a1n)?|l\u1ea5y|l\u00ean \u0111\u01a1n|x\u00e1c nh\u1eadn) (?:kh\u00f4ng|ch\u01b0a(?: em)?)$/u.test(tokens);
 }
 
 function hasAmbiguousUnaccentedDzung(tokens: string, recall: string): boolean {
@@ -162,13 +164,17 @@ export function classifyConfirmationContract(
 }
 
 /**
- * Declares the bounded CF-03 action code without dispatching it. Callers must
- * also enforce the ORDER_PREVIEW boundary and an active runtime mode.
+ * Declares the bounded CF-03 action code without dispatching it. This helper
+ * enforces the ORDER_PREVIEW boundary; callers must still enforce an active
+ * runtime mode before dispatching the action.
  */
 export function confirmationClarificationAction(
   result: ConfirmationClassification,
+  salesStage: string,
 ): ConfirmationAction | null {
-  return result.decision === "UNCLEAR" && result.evidenceDetected
+  return salesStage === "ORDER_PREVIEW"
+    && result.decision === "UNCLEAR"
+    && result.evidenceDetected
     ? ASK_CONFIRMATION_CLARIFICATION
     : null;
 }
