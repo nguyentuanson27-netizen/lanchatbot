@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "inventoryId": "lana-chatbot-production-v1",
+  "description": "Exhaustive production boundary: the lana-chatbot Compose project and the separately deployed lana-mcp service. Authentik and n8n are adjacent projects and are intentionally outside this inventory.",
+  "services": {
+    "postgres": {
+      "container": "lana-chatbot-postgres",
+      "required": true
+    },
+    "redis": {
+      "container": "lana-chatbot-redis",
+      "required": true
+    },
+    "api": {
+      "container": "lana-chatbot-api",
+      "required": true
+    },
+    "shadow-worker": {
+      "container": "lana-chatbot-shadow-worker",
+      "required": true
+    },
+    "realtime-worker": {
+      "container": "lana-chatbot-realtime-worker",
+      "required": true
+    },
+    "pos-snapshot-worker": {
+      "container": "lana-chatbot-pos-snapshot-worker",
+      "required": true
+    },
+    "media-worker": {
+      "container": "lana-chatbot-media-worker",
+      "required": true
+    },
+    "delivery-worker": {
+      "container": "lana-chatbot-delivery-worker",
+      "required": true
+    },
+    "retention-worker": {
+      "container": "lana-chatbot-retention-worker",
+      "required": true
+    },
+    "p23a-registry-sync": {
+      "container": "lana-chatbot-p23a-registry-sync",
+      "required": true
+    },
+    "p23b-metadata-staging": {
+      "container": "lana-chatbot-p23b-metadata-staging",
+      "required": true
+    },
+    "p23c-publisher": {
+      "container": "lana-chatbot-p23c-publisher",
+      "required": true
+    },
+    "size-chart-extractor": {
+      "container": "lana-chatbot-size-chart-extractor",
+      "required": true
+    },
+    "admin-api": {
+      "container": "lana-chatbot-admin-api",
+      "required": true
+    },
+    "admin-control-worker": {
+      "container": "lana-chatbot-admin-control-worker",
+      "required": true
+    },
+    "admin-simulation-worker": {
+      "container": "lana-chatbot-admin-simulation-worker",
+      "required": true
+    },
+    "admin-web": {
+      "container": "lana-chatbot-admin-web",
+      "required": true
+    },
+    "lana-mcp": {
+      "container": "lana-chatbot-mcp",
+      "required": true
+    },
+    "reporting-sidecar": {
+      "container": "lana-chatbot-reporting-sidecar",
+      "required": false
+    }
+  }
+}

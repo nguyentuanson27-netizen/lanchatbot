@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-02T00:00:00Z",
+  "environment": "production",
+  "inventoryId": "lana-chatbot-production-v1",
+  "candidateId": "example-candidate",
+  "current": {
+    "release": "example-release",
+    "symlinkTarget": "/opt/lana-chatbot/releases/example-release",
+    "sourcePointer": {
+      "path": "/opt/lana-chatbot/releases/example-release/.release-source.json",
+      "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+      "tag": "example-release",
+      "commit": "cccccccccccccccccccccccccccccccccccccccc",
+      "attestation": "OBSERVED"
+    }
+  },
+  "services": {
+    "postgres": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-postgres",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "redis": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-redis",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "api": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-api",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "shadow-worker": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-shadow-worker",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "realtime-worker": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-realtime-worker",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "pos-snapshot-worker": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-pos-snapshot-worker",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "media-worker": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-media-worker",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "delivery-worker": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-delivery-worker",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "retention-worker": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-retention-worker",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "p23a-registry-sync": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-p23a-registry-sync",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "p23b-metadata-staging": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-p23b-metadata-staging",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "p23c-publisher": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-p23c-publisher",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "size-chart-extractor": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-size-chart-extractor",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "admin-api": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-admin-api",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "admin-control-worker": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-admin-control-worker",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "admin-simulation-worker": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-admin-simulation-worker",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "admin-web": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-admin-web",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "lana-mcp": {
+      "state": "DEPLOYED",
+      "container": "lana-chatbot-mcp",
+      "image": "example:immutable",
+      "imageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "registryDigest": "example@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ociLabels": {
+        "org.opencontainers.image.revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "attestation": "OBSERVED",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    }
+  },
+  "database": {
+    "latestMigration": "0001_core",
+    "migrationLedgerDigest": {
+      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "canonicalization": "UTF-8 stable projection",
+      "allowlistedKeys": [
+        "APP_SEND_ENABLED"
+      ]
+    }
+  },
+  "digests": {
+    "realtimeNonSecretConfig": {
+      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "canonicalization": "UTF-8 stable projection",
+      "allowlistedKeys": [
+        "APP_SEND_ENABLED"
+      ]
+    }
+  },
+  "routing": {
+    "canaryPageIds": [
+      "1198992073286645"
+    ],
+    "pageAllowlistDigest": {
+      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "canonicalization": "UTF-8 stable projection",
+      "allowlistedKeys": [
+        "APP_SEND_ENABLED"
+      ]
+    }
+  },
+  "evidence": {
+    "reconciliationManifest": "deploy/manifests/20260802-r32.2.2-runtime-reconciliation.json"
+  }
+}

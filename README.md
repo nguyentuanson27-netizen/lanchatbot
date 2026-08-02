@@ -5,7 +5,7 @@
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Runtime symlink hiện hành: `/opt/lana-chatbot/releases/20260801-realtime-compatibility-first-r32.2`; P2.3C dùng release riêng `20260730-p23c-hash-v3-redacted`.
+- Current runtime identity is generated on the VPS; inspect `/opt/lana-chatbot/runtime-state/current.json`, the `current` symlink, and the release-local `.release-source.json` together.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
@@ -16,7 +16,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 
 ## Trạng thái production ngày 2026-08-01
 
-- **Current test-page canary runtime:** Realtime Worker và Delivery Worker đang chạy `20260801-realtime-compatibility-first-r32.2`; outbound đã được [mở có điều kiện cho duy nhất page test](deploy/manifests/20260801-r32.2-test-page-outbound-enabled.json) theo chỉ thị owner. Admin API giữ r32.1 và các non-target service không bị recreate.
+- **Current test-page canary runtime:** inspect generated runtime state and its append-only evidence before making any production-status assertion.
 - **HISTORICAL_DEPLOYED_VERIFIED_R32_1:** bằng chứng deploy r32.1 được giữ nguyên cho audit, nhưng runtime Realtime đã bị supersede do incident compatibility; không dùng trạng thái này để khẳng định production hiện tại.
 - Queue containment hiện giữ `1` Inbox `FAILED_PERMANENT`; 2 response group cũ đã được [operator CANCEL có audit](deploy/manifests/20260801-r32.2-outbox-cancellation.json), tạo `4` Outbox `FAILED_PERMANENT`. Actionable/MANUAL_REVIEW/stuck đều `0`, chưa record nào được requeue.
 - Full evidence: [Realtime audit r32.1](docs/current/REALTIME_AUDIT_R32_1_20260731.md) and [deployment manifest](deploy/manifests/20260731-realtime-audit-safety-r32.1.json).
@@ -25,7 +25,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - **R32.2 TEST-PAGE OUTBOUND ENABLED — CANARY OBSERVATION REQUIRED:** Artifact/runtime, backup/restore-test, migration 0028–0029, 40/40 post-cutover regression và target health đều đạt. Queue health đã về 200 sau [audited cancellation](deploy/manifests/20260801-r32.2-outbox-cancellation.json); outbound hiện mở cho duy nhất page test theo [gate-change evidence](deploy/manifests/20260801-r32.2-test-page-outbound-enabled.json). Chưa requeue Inbox lỗi và chưa tuyên bố full production promotion.
 
 
-- Production đang trỏ tới release `20260801-realtime-compatibility-first-r32.2`, tag commit `1c004ea`; Realtime/Delivery dùng image r32.2, Admin API giữ image r32.1, Admin Web giữ image r30 và API giữ image r27.1.
+- Production runtime status is generated runtime-state evidence; do not use this README to identify the current release.
 - r30 đã **DEPLOYED_VERIFIED_R30**; bản vá đứng giao diện, C1, B2, B3 và B4 đã qua backup/restore-test, guarded cutover và canary thật.
 - r31 đã **DEPLOYED_VERIFIED_R31_HUMAN_TEST_PENDING**: Voice Contract V2, form báo giá hai bong bóng và Hybrid Buying Intent có guard đã live; chưa có inbound khách sau cutover nên còn chờ human test Messenger.
 - Hotfix câu hỏi nối r31.1 đã **DEPLOYED_VERIFIED_R31_1_HUMAN_TEST_PENDING**: đúng một câu hỏi nối cho pre-sale còn mở, không hỏi lại số đo; chốt đơn, hậu mãi và handoff không bị kéo dài. Chưa có inbound khách sau cutover nên còn chờ human test Messenger.
@@ -197,3 +197,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 - [Admin runbook](docs/admin/04_CONTROL_PLANE_RUNBOOK.md)
 
 Các tài liệu `docs/phase*` là hồ sơ thiết kế/lịch sử. Khi mâu thuẫn, README, production baseline và release manifest mới nhất có hiệu lực cao hơn.
+
+## Generated runtime state
+
+Do not update this README to record a current release. Production status comes from `/opt/lana-chatbot/runtime-state/current.json`, its immutable history record, the resolved `/opt/lana-chatbot/current` symlink, and the release-local `.release-source.json`. The generated record must pass source, service, migration, routing, config-digest, and readback parity; the append-only A0 reconciliation artifact is `deploy/manifests/20260802-r32.2.2-runtime-reconciliation.json`.

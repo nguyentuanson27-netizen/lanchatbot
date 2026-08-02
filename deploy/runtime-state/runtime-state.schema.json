@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/nguyentuanson27-netizen/lanchatbot/deploy/runtime-state/runtime-state.schema.json",
+  "title": "La.na production runtime state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "capturedAt", "environment", "inventoryId", "current", "services", "database", "digests", "routing", "evidence"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "capturedAt": { "type": "string", "format": "date-time", "pattern": "Z$" },
+    "environment": { "const": "production" },
+    "inventoryId": { "const": "lana-chatbot-production-v1" },
+    "candidateId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$" },
+    "current": {
+      "type": "object", "additionalProperties": false,
+      "required": ["release", "symlinkTarget", "sourcePointer"],
+      "properties": {
+        "release": { "type": "string", "minLength": 1 },
+        "symlinkTarget": { "type": "string", "pattern": "^/opt/lana-chatbot/releases/[^/]+$" },
+        "sourcePointer": {
+          "type": "object", "additionalProperties": false,
+          "required": ["path", "repository", "tag", "commit", "attestation"],
+          "properties": {
+            "path": { "type": "string", "pattern": "^/opt/lana-chatbot/releases/[^/]+/.release-source\\.json$" },
+            "repository": { "type": "string", "pattern": "^https://github\\.com/nguyentuanson27-netizen/lanchatbot(?:\\.git)?$" },
+            "tag": { "type": "string", "minLength": 1 },
+            "commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+            "attestation": { "enum": ["OBSERVED", "UNVERIFIED", "MISMATCH"] },
+            "reason": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "services": {
+      "type": "object", "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/service" }
+    },
+    "database": {
+      "type": "object", "additionalProperties": false,
+      "required": ["latestMigration", "migrationLedgerDigest"],
+      "properties": {
+        "latestMigration": { "type": "string", "minLength": 1 },
+        "migrationLedgerDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "digests": {
+      "type": "object", "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/digest" }
+    },
+    "routing": {
+      "type": "object", "additionalProperties": false,
+      "required": ["canaryPageIds", "pageAllowlistDigest"],
+      "properties": {
+        "canaryPageIds": { "type": "array", "items": { "type": "string", "pattern": "^[0-9]+$" }, "uniqueItems": true },
+        "pageAllowlistDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["reconciliationManifest"],
+      "properties": { "reconciliationManifest": { "const": "deploy/manifests/20260802-r32.2.2-runtime-reconciliation.json" } }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sha256", "canonicalization", "allowlistedKeys"],
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "canonicalization": { "type": "string", "minLength": 1 },
+        "allowlistedKeys": { "type": "array", "items": { "type": "string", "pattern": "^[A-Z0-9_]+$" }, "uniqueItems": true }
+      }
+    },
+    "service": {
+      "type": "object", "additionalProperties": false,
+      "required": ["state", "container", "image", "imageId", "registryDigest", "ociLabels", "attestation", "rollback"],
+      "properties": {
+        "state": { "enum": ["DEPLOYED", "NOT_DEPLOYED"] },
+        "container": { "type": "string", "minLength": 1 },
+        "image": { "type": "string", "minLength": 1 },
+        "imageId": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "registryDigest": { "type": ["string", "null"], "pattern": "^.+@sha256:[a-f0-9]{64}$" },
+        "ociLabels": { "type": "object", "additionalProperties": { "type": "string" } },
+        "attestation": { "enum": ["OBSERVED", "UNVERIFIED", "MISMATCH"] },
+        "reason": { "type": "string" },
+        "rollback": {
+          "type": "object", "additionalProperties": false,
+          "required": ["release", "image", "imageId"],
+          "properties": {
+            "release": { "type": "string", "minLength": 1 },
+            "image": { "type": "string", "minLength": 1 },
+            "imageId": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+          }
+        }
+      }
+    }
+  }
+}
