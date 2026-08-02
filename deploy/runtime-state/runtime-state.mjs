@@ -220,14 +220,25 @@ export function parseDelimitedRows(output, fields) {
 function captureLiveDatabase(inventory) {
   const postgresContainer = inventory.services.postgres.container;
   const postgres = readJsonFromCommand('docker', ['inspect', postgresContainer]); if (postgres.length !== 1) fail('POSTGRES_CONTAINER_NOT_UNIQUE');
-  const postgresEnv = envMap(postgres[0].Config.Env); const user = postgresEnv.POSTGRES_USER; const database = postgresEnv.POSTGRES_DB;
-  nonEmpty(user, 'POSTGRES_USER_MISSING'); nonEmpty(database, 'POSTGRES_DB_MISSING');
-  const query = (sql) => run('docker', ['exec', postgresContainer, 'psql', '-X', '-v', 'ON_ERROR_STOP=1', '-U', user, '-d', database, '-At', '-F', '\t', '-c', sql]);
+  const postgresEnv = envMap(postgres[0].Config.Env); const user = postgresEnv.POSTGRES_USER; const database = postgresEnv.POSTGRES_DB; const password = postgresEnv.POSTGRES_PASSWORD;
+  nonEmpty(user, 'POSTGRES_USER_MISSING'); nonEmpty(database, 'POSTGRES_DB_MISSING'); nonEmpty(password, 'POSTGRES_PASSWORD_MISSING');
+  const query = (sql) => {
+    const invocation = postgresQueryInvocation({ container: postgresContainer, user, database, password, sql }, process.env);
+    return execFileSync('docker', invocation.args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], env: invocation.env }).trim();
+  };
   const migrationRows = parseDelimitedRows(query('SELECT migration_name, checksum_sha256 FROM schema_migrations ORDER BY migration_name'), ['migration', 'checksumSha256']);
   for (const row of migrationRows) if (!row.migration || !SHA256.test(row.checksumSha256)) fail('LIVE_MIGRATION_ROW_INVALID');
   const routingRaw = parseDelimitedRows(query('SELECT page_id, status, routing_owner, app_send_enabled, kill_switch FROM pages ORDER BY page_id'), ['page_id', 'status', 'routing_owner', 'app_send_enabled', 'kill_switch']);
   const routingRows = routingRaw.map((row) => ({ ...row, app_send_enabled: row.app_send_enabled === 't' ? true : row.app_send_enabled === 'f' ? false : fail('LIVE_ROUTING_BOOLEAN'), kill_switch: row.kill_switch === 't' ? true : row.kill_switch === 'f' ? false : fail('LIVE_ROUTING_BOOLEAN') }));
   return { migration: { latestMigration: migrationRows.at(-1).migration, rows: migrationRows }, routing: { canaryPageIds: routingRows.filter((row) => row.status === 'ACTIVE' && row.routing_owner === 'APP').map((row) => row.page_id), rows: routingRows } };
+}
+
+export function postgresQueryInvocation({ container, user, database, password, sql }, baseEnvironment = {}) {
+  nonEmpty(container, 'POSTGRES_CONTAINER_MISSING'); nonEmpty(user, 'POSTGRES_USER_MISSING'); nonEmpty(database, 'POSTGRES_DB_MISSING'); nonEmpty(password, 'POSTGRES_PASSWORD_MISSING'); nonEmpty(sql, 'POSTGRES_QUERY_MISSING');
+  return {
+    args: ['exec', '--env', 'PGPASSWORD', container, 'psql', '-X', '-v', 'ON_ERROR_STOP=1', '-U', user, '-d', database, '-At', '-F', '\t', '-c', sql],
+    env: { ...baseEnvironment, PGPASSWORD: password },
+  };
 }
 
 export function buildRuntimeState({ candidateId, capturedAt, target, pointer, services, migration, routing, realtimeEnv, deliveryEnv, inventory, allowlists }) {
