@@ -4,71 +4,147 @@
   "title": "La.na production runtime state",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "capturedAt", "environment", "inventoryId", "current", "services", "database", "digests", "routing", "evidence"],
+  "required": ["schemaVersion", "capturedAt", "environment", "inventoryId", "candidateId", "history", "current", "services", "database", "digests", "routing", "evidence"],
   "properties": {
     "schemaVersion": { "const": 1 },
     "capturedAt": { "type": "string", "format": "date-time", "pattern": "Z$" },
     "environment": { "const": "production" },
     "inventoryId": { "const": "lana-chatbot-production-v1" },
     "candidateId": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$" },
+    "history": {
+      "type": "object", "additionalProperties": false, "required": ["path"],
+      "properties": { "path": { "type": "string", "pattern": "^/opt/lana-chatbot/runtime-state/history/[^/]+\\.json$" } }
+    },
     "current": {
-      "type": "object", "additionalProperties": false,
-      "required": ["release", "symlinkTarget", "sourcePointer"],
+      "type": "object", "additionalProperties": false, "required": ["release", "symlinkTarget", "sourcePointer"],
       "properties": {
         "release": { "type": "string", "minLength": 1 },
         "symlinkTarget": { "type": "string", "pattern": "^/opt/lana-chatbot/releases/[^/]+$" },
-        "sourcePointer": {
-          "type": "object", "additionalProperties": false,
-          "required": ["path", "repository", "tag", "commit", "attestation"],
-          "properties": {
-            "path": { "type": "string", "pattern": "^/opt/lana-chatbot/releases/[^/]+/.release-source\\.json$" },
-            "repository": { "type": "string", "pattern": "^https://github\\.com/nguyentuanson27-netizen/lanchatbot(?:\\.git)?$" },
-            "tag": { "type": "string", "minLength": 1 },
-            "commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
-            "attestation": { "enum": ["OBSERVED", "UNVERIFIED", "MISMATCH"] },
-            "reason": { "type": "string", "minLength": 1 }
-          }
-        }
+        "sourcePointer": { "$ref": "#/$defs/sourcePointer" }
       }
     },
     "services": {
-      "type": "object", "minProperties": 1,
-      "additionalProperties": { "$ref": "#/$defs/service" }
-    },
+    "type":  "object",
+    "additionalProperties":  false,
+    "required":  [
+                     "postgres",
+                     "redis",
+                     "api",
+                     "shadow-worker",
+                     "realtime-worker",
+                     "pos-snapshot-worker",
+                     "media-worker",
+                     "delivery-worker",
+                     "retention-worker",
+                     "p23a-registry-sync",
+                     "p23b-metadata-staging",
+                     "p23c-publisher",
+                     "size-chart-extractor",
+                     "admin-api",
+                     "admin-control-worker",
+                     "admin-simulation-worker",
+                     "admin-web",
+                     "lana-mcp"
+                 ],
+    "properties":  {
+                       "postgres":  {
+                                        "$ref":  "#/$defs/service"
+                                    },
+                       "redis":  {
+                                     "$ref":  "#/$defs/service"
+                                 },
+                       "api":  {
+                                   "$ref":  "#/$defs/service"
+                               },
+                       "shadow-worker":  {
+                                             "$ref":  "#/$defs/service"
+                                         },
+                       "realtime-worker":  {
+                                               "$ref":  "#/$defs/service"
+                                           },
+                       "pos-snapshot-worker":  {
+                                                   "$ref":  "#/$defs/service"
+                                               },
+                       "media-worker":  {
+                                            "$ref":  "#/$defs/service"
+                                        },
+                       "delivery-worker":  {
+                                               "$ref":  "#/$defs/service"
+                                           },
+                       "retention-worker":  {
+                                                "$ref":  "#/$defs/service"
+                                            },
+                       "p23a-registry-sync":  {
+                                                  "$ref":  "#/$defs/service"
+                                              },
+                       "p23b-metadata-staging":  {
+                                                     "$ref":  "#/$defs/service"
+                                                 },
+                       "p23c-publisher":  {
+                                              "$ref":  "#/$defs/service"
+                                          },
+                       "size-chart-extractor":  {
+                                                    "$ref":  "#/$defs/service"
+                                                },
+                       "admin-api":  {
+                                         "$ref":  "#/$defs/service"
+                                     },
+                       "admin-control-worker":  {
+                                                    "$ref":  "#/$defs/service"
+                                                },
+                       "admin-simulation-worker":  {
+                                                       "$ref":  "#/$defs/service"
+                                                   },
+                       "admin-web":  {
+                                         "$ref":  "#/$defs/service"
+                                     },
+                       "lana-mcp":  {
+                                        "$ref":  "#/$defs/service"
+                                    },
+                       "reporting-sidecar":  {
+                                                 "$ref":  "#/$defs/service"
+                                             }
+                   }
+},
     "database": {
-      "type": "object", "additionalProperties": false,
-      "required": ["latestMigration", "migrationLedgerDigest"],
-      "properties": {
-        "latestMigration": { "type": "string", "minLength": 1 },
-        "migrationLedgerDigest": { "$ref": "#/$defs/digest" }
-      }
+      "type": "object", "additionalProperties": false, "required": ["latestMigration", "migrationLedgerDigest"],
+      "properties": { "latestMigration": { "type": "string", "minLength": 1 }, "migrationLedgerDigest": { "$ref": "#/$defs/digest" } }
     },
-    "digests": {
-      "type": "object", "minProperties": 1,
-      "additionalProperties": { "$ref": "#/$defs/digest" }
-    },
+    "digests": { "type": "object", "minProperties": 1, "additionalProperties": { "$ref": "#/$defs/digest" } },
     "routing": {
-      "type": "object", "additionalProperties": false,
-      "required": ["canaryPageIds", "pageAllowlistDigest"],
+      "type": "object", "additionalProperties": false, "required": ["canaryPageIds", "pageAllowlistDigest"],
       "properties": {
         "canaryPageIds": { "type": "array", "items": { "type": "string", "pattern": "^[0-9]+$" }, "uniqueItems": true },
         "pageAllowlistDigest": { "$ref": "#/$defs/digest" }
       }
     },
     "evidence": {
-      "type": "object", "additionalProperties": false,
-      "required": ["reconciliationManifest"],
+      "type": "object", "additionalProperties": false, "required": ["reconciliationManifest"],
       "properties": { "reconciliationManifest": { "const": "deploy/manifests/20260802-r32.2.2-runtime-reconciliation.json" } }
     }
   },
   "$defs": {
-    "digest": {
+    "sourcePointer": {
       "type": "object", "additionalProperties": false,
-      "required": ["sha256", "canonicalization", "allowlistedKeys"],
+      "required": ["path", "release", "repository", "tag", "commit", "createdAt", "attestation"],
+      "properties": {
+        "path": { "type": "string", "pattern": "^/opt/lana-chatbot/releases/[^/]+/\\.release-source\\.json$" },
+        "release": { "type": "string", "minLength": 1 },
+        "repository": { "const": "https://github.com/nguyentuanson27-netizen/lanchatbot" },
+        "tag": { "type": "string", "minLength": 1 },
+        "commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+        "createdAt": { "type": "string", "format": "date-time", "pattern": "Z$" },
+        "attestation": { "enum": ["OBSERVED", "UNVERIFIED", "MISMATCH"] },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [{ "if": { "properties": { "attestation": { "not": { "const": "OBSERVED" } } } }, "then": { "properties": { "reason": {} }, "required": ["reason"] } }]
+    },
+    "digest": {
+      "type": "object", "additionalProperties": false, "required": ["sha256", "canonicalization", "allowlistedKeys"],
       "properties": {
         "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "canonicalization": { "type": "string", "minLength": 1 },
-        "allowlistedKeys": { "type": "array", "items": { "type": "string", "pattern": "^[A-Z0-9_]+$" }, "uniqueItems": true }
+        "allowlistedKeys": { "type": "array", "items": { "type": "string", "pattern": "^[A-Za-z0-9_]+$" }, "uniqueItems": true }
       }
     },
     "service": {
@@ -82,17 +158,18 @@
         "registryDigest": { "type": ["string", "null"], "pattern": "^.+@sha256:[a-f0-9]{64}$" },
         "ociLabels": { "type": "object", "additionalProperties": { "type": "string" } },
         "attestation": { "enum": ["OBSERVED", "UNVERIFIED", "MISMATCH"] },
-        "reason": { "type": "string" },
+        "reason": { "type": "string", "minLength": 1 },
         "rollback": {
-          "type": "object", "additionalProperties": false,
-          "required": ["release", "image", "imageId"],
+          "type": "object", "additionalProperties": false, "required": ["release", "image", "imageId"],
           "properties": {
-            "release": { "type": "string", "minLength": 1 },
-            "image": { "type": "string", "minLength": 1 },
-            "imageId": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+            "release": { "type": "string", "minLength": 1 }, "image": { "type": "string", "minLength": 1 }, "imageId": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
           }
         }
-      }
+      },
+      "allOf": [
+        { "if": { "properties": { "attestation": { "not": { "const": "OBSERVED" } } } }, "then": { "properties": { "reason": {} }, "required": ["reason"] } },
+        { "if": { "properties": { "state": { "const": "NOT_DEPLOYED" } } }, "then": { "properties": { "attestation": { "const": "UNVERIFIED" } } } }
+      ]
     }
   }
 }

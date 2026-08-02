@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Approved deployment automation only. A non-zero result leaves current.json untouched.
+# Recaptures the host. A caller-supplied "live parity" file is never trusted.
 script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 : "${RUNTIME_STATE_CANDIDATE:?candidate file is required}"
-: "${RUNTIME_STATE_LIVE_PARITY_FILE:?fresh, secret-free live parity projection is required}"
 : "${RUNTIME_STATE_ROOT:=/opt/lana-chatbot/runtime-state}"
-if ! node "$script_dir/runtime-state.mjs" verify --candidate "$RUNTIME_STATE_CANDIDATE" --live "$RUNTIME_STATE_LIVE_PARITY_FILE"; then
-  incident_dir="$RUNTIME_STATE_ROOT/incidents"; mkdir -p "$incident_dir"
-  incident="$incident_dir/$(date -u +%Y%m%dT%H%M%SZ)-$(basename "$RUNTIME_STATE_CANDIDATE").json"
-  ( set -C; : > "$incident" ) 2>/dev/null || { echo "incident already exists: $incident" >&2; exit 1; }
-  printf '{"schemaVersion":1,"type":"RUNTIME_STATE_PARITY_MISMATCH","candidate":"%s","recordedAt":"%s"}\n' "$(basename "$RUNTIME_STATE_CANDIDATE")" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$incident"
+: "${RUNTIME_STATE_APP_ROOT:=/opt/lana-chatbot}"
+: "${RUNTIME_STATE_SERVICE_EVIDENCE_FILE:?versioned service evidence and rollback map is required}"
+: "${RUNTIME_STATE_GIT_DIR:=/opt/lana-chatbot/repository}"
+observed="$(mktemp "${TMPDIR:-/tmp}/lana-runtime-observed.XXXXXX.json")"
+rm -f "$observed"
+trap 'rm -f "$observed"' EXIT
+node "$script_dir/runtime-state.mjs" capture \
+  --runtime-root "$RUNTIME_STATE_APP_ROOT" \
+  --service-evidence-file "$RUNTIME_STATE_SERVICE_EVIDENCE_FILE" \
+  --candidate-id "readback-$(date -u +%Y%m%dT%H%M%SZ)-$$" \
+  --git-dir "$RUNTIME_STATE_GIT_DIR" \
+  --output "$observed"
+if ! node "$script_dir/runtime-state.mjs" verify --candidate "$RUNTIME_STATE_CANDIDATE" --observed "$observed"; then
+  node "$script_dir/runtime-state.mjs" incident --incident-dir "$RUNTIME_STATE_ROOT/incidents" --candidate "$RUNTIME_STATE_CANDIDATE" --reason FRESH_HOST_PARITY_FAILED >&2
   exit 1
 fi

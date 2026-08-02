@@ -4,14 +4,19 @@
   "environment": "production",
   "inventoryId": "lana-chatbot-production-v1",
   "candidateId": "example-candidate",
+  "history": {
+    "path": "/opt/lana-chatbot/runtime-state/history/2026-08-02T00-00-00Z-example-release.json"
+  },
   "current": {
     "release": "example-release",
     "symlinkTarget": "/opt/lana-chatbot/releases/example-release",
     "sourcePointer": {
       "path": "/opt/lana-chatbot/releases/example-release/.release-source.json",
+      "release": "example-release",
       "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
       "tag": "example-release",
       "commit": "cccccccccccccccccccccccccccccccccccccccc",
+      "createdAt": "2026-08-02T00:00:00Z",
       "attestation": "OBSERVED"
     }
   },
@@ -309,16 +314,24 @@
     "latestMigration": "0001_core",
     "migrationLedgerDigest": {
       "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-      "canonicalization": "UTF-8 stable projection",
+      "canonicalization": "UTF-8 JSON arrays containing allowlisted fields; bytewise row sort; LF terminal newline",
       "allowlistedKeys": [
-        "APP_SEND_ENABLED"
+        "migration",
+        "checksumSha256"
       ]
     }
   },
   "digests": {
     "realtimeNonSecretConfig": {
-      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-      "canonicalization": "UTF-8 stable projection",
+      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "canonicalization": "UTF-8 KEY=VALUE; explicit non-secret allowlist; unknown keys excluded; bytewise key sort; LF terminal newline",
+      "allowlistedKeys": [
+        "APP_SEND_ENABLED"
+      ]
+    },
+    "deliveryNonSecretConfig": {
+      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "canonicalization": "UTF-8 KEY=VALUE; explicit non-secret allowlist; unknown keys excluded; bytewise key sort; LF terminal newline",
       "allowlistedKeys": [
         "APP_SEND_ENABLED"
       ]
@@ -329,10 +342,14 @@
       "1198992073286645"
     ],
     "pageAllowlistDigest": {
-      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-      "canonicalization": "UTF-8 stable projection",
+      "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "canonicalization": "UTF-8 JSON arrays containing allowlisted fields; bytewise row sort; LF terminal newline",
       "allowlistedKeys": [
-        "APP_SEND_ENABLED"
+        "page_id",
+        "status",
+        "routing_owner",
+        "app_send_enabled",
+        "kill_switch"
       ]
     }
   },

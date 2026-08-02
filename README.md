@@ -16,7 +16,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 
 ## Trạng thái production ngày 2026-08-01
 
-- **Current test-page canary runtime:** inspect generated runtime state and its append-only evidence before making any production-status assertion.
+- **Snapshot test-page canary (2026-08-01):** historical evidence only; inspect generated runtime state and its append-only evidence before making any current production-status assertion.
 - **HISTORICAL_DEPLOYED_VERIFIED_R32_1:** bằng chứng deploy r32.1 được giữ nguyên cho audit, nhưng runtime Realtime đã bị supersede do incident compatibility; không dùng trạng thái này để khẳng định production hiện tại.
 - Queue containment hiện giữ `1` Inbox `FAILED_PERMANENT`; 2 response group cũ đã được [operator CANCEL có audit](deploy/manifests/20260801-r32.2-outbox-cancellation.json), tạo `4` Outbox `FAILED_PERMANENT`. Actionable/MANUAL_REVIEW/stuck đều `0`, chưa record nào được requeue.
 - Full evidence: [Realtime audit r32.1](docs/current/REALTIME_AUDIT_R32_1_20260731.md) and [deployment manifest](deploy/manifests/20260731-realtime-audit-safety-r32.1.json).
@@ -41,7 +41,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - Khi Media Selector V2 trả `NONE`, bot giữ text đã xác minh và không fallback sang ảnh `PRICE_CARD` cũ; attachment không hợp lệ bị loại mà không làm mất text.
 - r26.2 khôi phục contract tiếng Việt có dấu, chặn product-info theo mẫu cũ không dấu, giữ mỗi câu/dòng là một Meta Outbox unit riêng và bắt đầu dòng chất liệu đã xác minh bằng `Chất liệu`.
 - Wave 1 r21 chạy từ merge commit `5f817bbc`: official benchmark vẫn khóa 1.955 hội thoại hợp lệ, split 1.173/391/391, leakage 0; holdout chưa mở.
-- Wave 1 r21 vẫn là nền benchmark/replay; realtime production hiện dùng binary r32.2 trong containment và chưa mở locked holdout.
+- Wave 1 r21 vẫn là nền benchmark/replay; tại thời điểm snapshot, realtime dùng binary r32.2 trong containment và chưa mở locked holdout.
 - Semantic candidate vẫn `NOT_PROMOTED`: validation `BUYING_COMMITTED` precision `42,41%`, recall `57,26%`. Production replay đang `WAITING_FOR_ELIGIBLE_TRAFFIC`; không tạo inbound giả và locked holdout vẫn đóng.
 - Admin API chạy image r32.1, Admin Web chạy image r30, Realtime/Delivery chạy image r32.2; Simulation Worker giữ image cũ. Admin FE/API nội bộ đều 200 và public route trả 302 sang Authentik.
 
