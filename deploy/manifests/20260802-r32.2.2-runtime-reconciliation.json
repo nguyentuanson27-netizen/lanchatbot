@@ -1,0 +1,601 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-02T13:13:05Z",
+  "captureWindow": {
+    "startedAt": "2026-08-02T13:05:27Z",
+    "completedAt": "2026-08-02T13:13:05Z"
+  },
+  "status": "RECONSTRUCTED_PARTIAL_BASELINE",
+  "environment": "production-test-page-contained-canary",
+  "host": "156.67.214.197",
+  "documentType": "RECONSTRUCTED_RUNTIME_RECONCILIATION",
+  "reconstructed": true,
+  "runtimeRelease": "20260801-realtime-wave2-post-media-r32.2.2",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "sourceTag": "20260801-realtime-wave2-post-media-r32.2.2",
+  "sourceTagObject": "0f89816c05ddf6232f9bc52bb8b18f3a0ad8de8b",
+  "sourceCommit": "1ff7f17b0bad7f2870397c9f74c3f1b0943b2be9",
+  "attestationLevel": "PARTIAL",
+  "knownFacts": [
+    {
+      "id": "runtime-pointer",
+      "evidenceClass": "DIRECT_OBSERVATION",
+      "value": {
+        "currentSymlink": "/opt/lana-chatbot/current",
+        "symlinkTarget": "/opt/lana-chatbot/releases/20260801-realtime-wave2-post-media-r32.2.2",
+        "releaseDirectoryMode": "0750",
+        "releaseDirectoryOwner": "root:root"
+      }
+    },
+    {
+      "id": "github-tag-provenance",
+      "evidenceClass": "DIRECT_OBSERVATION",
+      "value": {
+        "tagType": "annotated",
+        "tagObject": "0f89816c05ddf6232f9bc52bb8b18f3a0ad8de8b",
+        "peeledCommit": "1ff7f17b0bad7f2870397c9f74c3f1b0943b2be9",
+        "commitTree": "49c8a0ca63da586f63767bd856b4452376a252b8",
+        "tagAndCommitObservedOnOrigin": true
+      }
+    },
+    {
+      "id": "hotfix-source-sample-parity",
+      "evidenceClass": "DIRECT_OBSERVATION",
+      "value": {
+        "algorithm": "git-blob-sha1",
+        "matched": 7,
+        "checked": 7,
+        "scope": "Every file changed by source commit 1ff7f17b0bad7f2870397c9f74c3f1b0943b2be9",
+        "files": [
+          {
+            "path": "apps/worker/src/realtime-runner.test.ts",
+            "blob": "b8aa350f77a12c0c4b4960f802ce874b6a3fa406"
+          },
+          {
+            "path": "apps/worker/src/realtime-runner.ts",
+            "blob": "7b78def4d5d3f46dbf2738071c342e972ab0bd87"
+          },
+          {
+            "path": "deploy/docker-compose.vps.yml",
+            "blob": "b480abce43f6b34d143fdfe0da97149f21638e44"
+          },
+          {
+            "path": "packages/business-tools/src/sales-strategy-v1.test.ts",
+            "blob": "4a789e12b612cb39baf30ad018e2c28f807421e5"
+          },
+          {
+            "path": "packages/business-tools/src/sales-strategy-v1.ts",
+            "blob": "451d0599ff2f326ccae7fffd1d404441ff059e8c"
+          },
+          {
+            "path": "packages/contracts/src/v2/realtime-decision-event.ts",
+            "blob": "8dcf7da2f46e16018f6de3a59f204e83659f7b2f"
+          },
+          {
+            "path": "packages/database/src/realtime-runtime.ts",
+            "blob": "5471b702a0347a71c57db00c0d537e034c48f6a7"
+          }
+        ]
+      }
+    },
+    {
+      "id": "service-inventory",
+      "evidenceClass": "DIRECT_OBSERVATION",
+      "valueReference": "$.serviceInventory"
+    },
+    {
+      "id": "realtime-image-revision-mismatch",
+      "evidenceClass": "DIRECT_OBSERVATION",
+      "value": {
+        "service": "realtime-worker",
+        "imageId": "sha256:3c00dcadef5af7eecd9f176546ce8fd950ab2116f53689e75c0924ed1495e566",
+        "observedRevisionLabel": "1ff7f17d",
+        "expectedFullCommit": "1ff7f17b0bad7f2870397c9f74c3f1b0943b2be9",
+        "attestation": "MISMATCH"
+      }
+    },
+    {
+      "id": "migration-ledger",
+      "evidenceClass": "DIRECT_OBSERVATION",
+      "value": {
+        "migrationCount": 29,
+        "latestMigration": "0029_meta_outbox_handoff_ordering",
+        "digestReference": "$.digests.migrationLedger"
+      }
+    },
+    {
+      "id": "canary-routing-scope",
+      "evidenceClass": "DIRECT_OBSERVATION",
+      "value": {
+        "pageId": "1198992073286645",
+        "status": "ACTIVE",
+        "routingOwner": "APP",
+        "appSendEnabled": true,
+        "killSwitch": false,
+        "realtimeProcessSendEnabled": true,
+        "deliveryProcessSendEnabled": true,
+        "realtimeMediaEnabledPageIds": [
+          "1198992073286645"
+        ],
+        "adAcquisitionPageAllowlist": [
+          "1198992073286645"
+        ],
+        "additionalPageRowsObserved": 0,
+        "digestReference": "$.digests.pageRouting"
+      }
+    },
+    {
+      "id": "non-secret-config-digests",
+      "evidenceClass": "DIRECT_OBSERVATION",
+      "valueReference": "$.digests"
+    },
+    {
+      "id": "vps-repository-is-not-runtime-provenance",
+      "evidenceClass": "DIRECT_OBSERVATION",
+      "value": {
+        "path": "/opt/lana-chatbot/repository",
+        "head": "da88f30d2294bf4abb340f1bb292e149493b2f5a",
+        "branch": "feature/dataset-review-wave1",
+        "workingTreeChangesObserved": false,
+        "matchesRuntimeSourceCommit": false
+      }
+    },
+    {
+      "id": "runtime-source-association",
+      "evidenceClass": "RECONSTRUCTED",
+      "value": {
+        "release": "20260801-realtime-wave2-post-media-r32.2.2",
+        "associatedSourceCommit": "1ff7f17b0bad7f2870397c9f74c3f1b0943b2be9",
+        "basis": [
+          "The current symlink target and REALTIME_RELEASE_ID equal the annotated GitHub tag name.",
+          "The tag peels to the stated full commit on origin.",
+          "All seven files changed by that commit match their Git blob IDs in the release directory."
+        ],
+        "limitation": "No release-local source attestation exists and full-tree parity was not captured."
+      }
+    },
+    {
+      "id": "historical-rollback-targets",
+      "evidenceClass": "RECONSTRUCTED",
+      "value": {
+        "basisManifest": "deploy/manifests/20260801-realtime-compatibility-first-r32.2-runtime.json",
+        "scope": "Historical r32.2 rollback evidence only; not a complete r32.2.2 rollback attestation.",
+        "realtime": {
+          "releasePath": "/opt/lana-chatbot/releases/20260731-realtime-generation-quota-r31.3",
+          "image": "lana-chatbot-app:realtime-generation-quota-r31.3"
+        },
+        "delivery": {
+          "image": "lana-chatbot-app:ad-acquisition-r27.1"
+        },
+        "schemaRollbackRequired": false,
+        "dataDeletionRequired": false
+      }
+    }
+  ],
+  "evidenceSeparation": {
+    "directObservationFactIds": [
+      "runtime-pointer",
+      "github-tag-provenance",
+      "hotfix-source-sample-parity",
+      "service-inventory",
+      "realtime-image-revision-mismatch",
+      "migration-ledger",
+      "canary-routing-scope",
+      "non-secret-config-digests",
+      "vps-repository-is-not-runtime-provenance"
+    ],
+    "reconstructedFactIds": [
+      "runtime-source-association",
+      "historical-rollback-targets"
+    ]
+  },
+  "serviceInventory": {
+    "captureScope": {
+      "includedContainerNamePrefix": "lana-chatbot-",
+      "includedComposeProjects": [
+        "lana-chatbot",
+        "lana-mcp"
+      ],
+      "adjacentProjectsNotIncluded": [
+        "lana-authentik",
+        "n8n-docker"
+      ],
+      "note": "RI-01 must define the exhaustive runtime-state service boundary."
+    },
+    "services": [
+      {
+        "service": "admin-api",
+        "container": "lana-chatbot-admin-api",
+        "image": "lana-chatbot-app:realtime-audit-safety-r32.1",
+        "imageId": "sha256:3695a4f85efbb2418cae065ebdc6f6a2f9c5714b27f68cd30c23841dbb8f787e",
+        "revisionLabel": "90760d2cf43c160d58470b0c9907f30032774140",
+        "versionLabel": "20260731-realtime-audit-safety-r32.1",
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "admin-control-worker",
+        "container": "lana-chatbot-admin-control-worker",
+        "image": "lana-chatbot-app:admin-control",
+        "imageId": "sha256:475d85d291aebaa38d15a7940e7244218d5c894bf7a6fd5a90e96f841d51c39d",
+        "revisionLabel": null,
+        "versionLabel": null,
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "admin-simulation-worker",
+        "container": "lana-chatbot-admin-simulation-worker",
+        "image": "lana-chatbot-app:wave2-strategy-gemini35-r26.1",
+        "imageId": "sha256:6067695c8976c5601bd5ecd092fb33097b2fd0034152132827651f3146c0d13e",
+        "revisionLabel": "0fb115ee564f751894611e6196bdef3d4365b036",
+        "versionLabel": "20260729-wave2-strategy-gemini35-r26.1",
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "admin-web",
+        "container": "lana-chatbot-admin-web",
+        "image": "lana-chatbot-app:performance-ui-stability-r30",
+        "imageId": "sha256:a35de1caebb02ca84e4d7a0e39b93f66a2c2ef3cdbd07628d4358270db7a2e03",
+        "revisionLabel": "8748de1c27e58c6e893e918ba22f4190d363cbaf",
+        "versionLabel": "20260730-performance-ui-stability-r30",
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "api",
+        "container": "lana-chatbot-api",
+        "image": "lana-chatbot-app:ad-acquisition-r27.1",
+        "imageId": "sha256:1b33e3bc963ab9dfe5c6eb8786bd1825ab907c8422f94575a16688534cdbcdb9",
+        "revisionLabel": "1e9c20e24ce092738afa6732427c12eaf69a203f",
+        "versionLabel": "20260729-ad-acquisition-r27.1",
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "delivery-worker",
+        "container": "lana-chatbot-delivery-worker",
+        "image": "lana-chatbot-app:realtime-compatibility-first-r32.2",
+        "imageId": "sha256:44ecb2fd9f7d6a5aa769938f738a3c6ba42b470db5a9bce3d30fdc364de2a0b7",
+        "revisionLabel": "1c004eacca7cce309a0a05643d1aa751b897d41c",
+        "versionLabel": "20260801-realtime-compatibility-first-r32.2",
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "lana-mcp",
+        "container": "lana-chatbot-mcp",
+        "image": "lana-chatbot-mcp:auto-source-v3",
+        "imageId": "sha256:2938c2f0417a58f2e46e1255a2167d4ddd5d202c82a04272864949a88e161f93",
+        "revisionLabel": "1e9c20e24ce092738afa6732427c12eaf69a203f",
+        "versionLabel": "20260729-ad-acquisition-r27.1",
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "media-worker",
+        "container": "lana-chatbot-media-worker",
+        "image": "lana-chatbot-app:media-v1",
+        "imageId": "sha256:bf55f367f3ef872e262d63fc19d50795420c1ca680e4501939deaf83e2cfe691",
+        "revisionLabel": null,
+        "versionLabel": null,
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "p23a-registry-sync",
+        "container": "lana-chatbot-p23a-registry-sync",
+        "image": "lana-chatbot-app:p23a-v1",
+        "imageId": "sha256:50f5a965b4aeaf5e3d701b75dc51eca9f2fbc2bb6987b6ea6f17397819990ce5",
+        "revisionLabel": null,
+        "versionLabel": null,
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "p23b-metadata-staging",
+        "container": "lana-chatbot-p23b-metadata-staging",
+        "image": "lana-chatbot-app:wave2-strategy-gemini35-r26.1",
+        "imageId": "sha256:6067695c8976c5601bd5ecd092fb33097b2fd0034152132827651f3146c0d13e",
+        "revisionLabel": "0fb115ee564f751894611e6196bdef3d4365b036",
+        "versionLabel": "20260729-wave2-strategy-gemini35-r26.1",
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "p23c-publisher",
+        "container": "lana-chatbot-p23c-publisher",
+        "image": "lana-chatbot-app:p23c-hash-v3-redacted-20260730",
+        "imageId": "sha256:2396adfb30e04d85337423d107e7724dd1a352dea692eef6db10f25c2f0726db",
+        "revisionLabel": "d85f5225de67effd8c85ea786f01769e3769c5af",
+        "versionLabel": "20260730-p23c-hash-v3-redacted",
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "pos-snapshot-worker",
+        "container": "lana-chatbot-pos-snapshot-worker",
+        "image": "lana-chatbot-app:sales-cycle-production-r6",
+        "imageId": "sha256:cae918d5dc9d505ccdd88b670abdc5b337b169cabe36cd33220fd6c475a054d2",
+        "revisionLabel": null,
+        "versionLabel": null,
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "postgres",
+        "container": "lana-chatbot-postgres",
+        "image": "postgres:17-alpine",
+        "imageId": "sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193",
+        "revisionLabel": null,
+        "versionLabel": null,
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "realtime-worker",
+        "container": "lana-chatbot-realtime-worker",
+        "image": "lana-chatbot-app:wave2-post-media-r32.2.2",
+        "imageId": "sha256:3c00dcadef5af7eecd9f176546ce8fd950ab2116f53689e75c0924ed1495e566",
+        "revisionLabel": "1ff7f17d",
+        "versionLabel": "20260801-realtime-wave2-post-media-r32.2.2",
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "redis",
+        "container": "lana-chatbot-redis",
+        "image": "redis:7.4-alpine",
+        "imageId": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
+        "revisionLabel": null,
+        "versionLabel": null,
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "retention-worker",
+        "container": "lana-chatbot-retention-worker",
+        "image": "postgres:17-alpine",
+        "imageId": "sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193",
+        "revisionLabel": null,
+        "versionLabel": null,
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "shadow-worker",
+        "container": "lana-chatbot-shadow-worker",
+        "image": "lana-chatbot-app:wave2-strategy-gemini35-r26.1",
+        "imageId": "sha256:6067695c8976c5601bd5ecd092fb33097b2fd0034152132827651f3146c0d13e",
+        "revisionLabel": "0fb115ee564f751894611e6196bdef3d4365b036",
+        "versionLabel": "20260729-wave2-strategy-gemini35-r26.1",
+        "state": "running",
+        "health": "healthy",
+        "restartCount": 0
+      },
+      {
+        "service": "size-chart-extractor",
+        "container": "lana-chatbot-size-chart-extractor",
+        "image": "lana-chatbot-app:wave2-strategy-gemini35-r26.1",
+        "imageId": "sha256:6067695c8976c5601bd5ecd092fb33097b2fd0034152132827651f3146c0d13e",
+        "revisionLabel": "0fb115ee564f751894611e6196bdef3d4365b036",
+        "versionLabel": "20260729-wave2-strategy-gemini35-r26.1",
+        "state": "running",
+        "health": "NO_HEALTHCHECK",
+        "restartCount": 0
+      }
+    ]
+  },
+  "digests": {
+    "migrationLedger": {
+      "sha256": "24ad11d3aedbbc029f1b6f75d95621000a1648eb40ac155ba530a399f050dab0",
+      "canonicalization": "UTF-8 migration_name|checksum_sha256 rows ordered by migration_name, LF line endings, terminal LF",
+      "rowCount": 29
+    },
+    "pageRouting": {
+      "sha256": "ed9aa6479cefd8f3038fddcc8bdf449ce069167111dc1a35795055f4a36d9bb1",
+      "canonicalization": "UTF-8 page_id|status|routing_owner|app_send_enabled|kill_switch rows ordered by page_id, PostgreSQL t/f booleans, LF line endings, terminal LF",
+      "rowCount": 1
+    },
+    "realtimeNonSecretConfig": {
+      "sha256": "e9c1436b46247dbe5f2d1976a938a732a2f825e7d16c337bc40a0e13ef3ae83b",
+      "canonicalization": "Explicit non-secret allowlist rendered as KEY=VALUE, C-locale sorted, LF line endings, terminal LF",
+      "keyCount": 41,
+      "allowlistedKeys": [
+        "AD_ACQUISITION_ANALYTICS_MODE",
+        "AD_ACQUISITION_DERIVATION_VERSION",
+        "AD_ACQUISITION_PAGE_ALLOWLIST",
+        "AD_ACQUISITION_WAVE2_INPUT_ENABLED",
+        "AD_ACQUISITION_WINDOW_HOURS",
+        "APP_SEND_ENABLED",
+        "CHATBOT_SEND_ENABLED",
+        "META_PAGE_ID",
+        "REALTIME_BUYING_SIGNAL_GUARD_V1",
+        "REALTIME_CATALOG_ADVISORY_V1",
+        "REALTIME_CONTEXT_HISTORY_LIMIT",
+        "REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1",
+        "REALTIME_CUSTOMER_PROFILE_V1",
+        "REALTIME_DAILY_GENERATION_LIMIT",
+        "REALTIME_DECISION_AUDIT_V2",
+        "REALTIME_DECISION_TELEMETRY_ENABLED",
+        "REALTIME_GROUNDED_DRAFT_V1",
+        "REALTIME_HOURLY_GENERATION_LIMIT",
+        "REALTIME_MEDIA_AI_PROMPT_VERSION",
+        "REALTIME_MEDIA_AI_RERANK_MODE",
+        "REALTIME_MEDIA_AI_RERANK_MODEL",
+        "REALTIME_MEDIA_CLARIFICATION_ENABLED",
+        "REALTIME_MEDIA_CUTOUT_MODE",
+        "REALTIME_MEDIA_ENABLED_PAGE_IDS",
+        "REALTIME_MEDIA_PIPELINE_VERSION",
+        "REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED",
+        "REALTIME_MESSAGE_GROUPING_V2",
+        "REALTIME_MODE",
+        "REALTIME_MULTI_FACT_QUERY_V2",
+        "REALTIME_PROMPT_VERSION",
+        "REALTIME_RECORDED_REPLAY_CAPTURE_ENABLED",
+        "REALTIME_RELEASE_ID",
+        "REALTIME_VERIFIED_FACT_ASSEMBLER_V1",
+        "REALTIME_VERIFIED_VARIANT_V2",
+        "REALTIME_WAVE2_STRATEGY_V1",
+        "RUNTIME_POLICY_CANARY_LIVE_ENABLED",
+        "RUNTIME_POLICY_CHANNEL",
+        "RUNTIME_POLICY_ENABLED",
+        "RUNTIME_POLICY_PUBLISHED_ENABLED",
+        "SALES_CYCLE_ENABLED",
+        "VERTEX_MODEL_NAME"
+      ]
+    },
+    "deliveryNonSecretConfig": {
+      "sha256": "fa1886b6623ccb96e8dabee2494f976108887ff6ed271670d4a319a9cef1a80a",
+      "canonicalization": "Explicit non-secret allowlist rendered as KEY=VALUE, C-locale sorted, LF line endings, terminal LF",
+      "keyCount": 12,
+      "allowlistedKeys": [
+        "AD_ACQUISITION_ANALYTICS_MODE",
+        "AD_ACQUISITION_DERIVATION_VERSION",
+        "AD_ACQUISITION_PAGE_ALLOWLIST",
+        "AD_ACQUISITION_WINDOW_HOURS",
+        "APP_SEND_ENABLED",
+        "CHATBOT_SEND_ENABLED",
+        "META_DELIVERY_ENABLED",
+        "META_GRAPH_API_VERSION",
+        "META_OUTBOX_ACTIONABLE_SLO_SECONDS",
+        "META_OUTBOX_MANUAL_REVIEW_SLO_SECONDS",
+        "META_PAGE_ID",
+        "REALTIME_MODE"
+      ]
+    }
+  },
+  "migrationLedger": [
+    { "migration": "0001_core", "checksumSha256": "da29d432c0241332b48e6b8ef602d94c87398dfbdc358a3c1555ebdbcd45c2b3" },
+    { "migration": "0002_retention", "checksumSha256": "6455afaf2dceaa15218dc68585762d7a8db34ad7a95c80a489b93834ab428f3d" },
+    { "migration": "0003_shadow_evaluation", "checksumSha256": "0ddb80bf285c30aa589d302c7ed0f4c5adc113bdebe463c978a0766a282c0f55" },
+    { "migration": "0004_business_fact_audit", "checksumSha256": "1706f9c9f670b889322277b3565955f1e70b1cf04ed57755eec7f742ba1487d9" },
+    { "migration": "0005_realtime_runtime", "checksumSha256": "cea0a00ff08e69c005eea2734c9ab805b66e96160ca07764cc2df5d274c5cf28" },
+    { "migration": "0006_admin_read_models", "checksumSha256": "5944f96e1c85de4b303f4783b4bef6839a74178c5f1e0f36caaaf6dbcb13b433" },
+    { "migration": "0007_admin_control_plane", "checksumSha256": "0180ed45f5df512d0c993663ddcf46b4cffca912e77aa5d6b7e00d810667166d" },
+    { "migration": "0008_admin_conversation_identity", "checksumSha256": "83a4a935ad0a76470e00dbf3241c34ad1e8904cb316dcec60adb5a4241cfed30" },
+    { "migration": "0009_chat_history_outreach", "checksumSha256": "1714c573a58e247451a053ee5f920d16cc0e0cc5c37f2a9026169c1829e78108" },
+    { "migration": "0010_handoff_history", "checksumSha256": "a5a0672b1476e2e08a8c28d023d1c635586272e9676228cbf55e790c04aabdfb" },
+    { "migration": "0011_ads_media_analytics", "checksumSha256": "76c06813f4b8f843f1cc7e982b44459f5f9c705467b38a9db82d844495314d65" },
+    { "migration": "0012_batch_worker_catalog_status", "checksumSha256": "366ddb85c70d70937cab73677ed9dae9d409ee4fbfcb652ae139c6f21b19b6d0" },
+    { "migration": "0013_inbound_debounce", "checksumSha256": "888c1b841178efa010f595b61f71b5e0ee9216896e7025310c7d22be5e5477fe" },
+    { "migration": "0014_admin_policy_control", "checksumSha256": "856cf1e0d617c5738e4a518cc0158aa5602f31872450eac62c3f9aff3741164c" },
+    { "migration": "0015_runtime_policy_resolution", "checksumSha256": "8eec83d827939d523841971945e3a3050adcdd74b9a15f7465cf277df08e423a" },
+    { "migration": "0016_admin_simulation_worker", "checksumSha256": "ed60e9158d53ae02ec20a681d7f49f7a9f8295ca93f50b8012d6fc6ede097849" },
+    { "migration": "0017_sales_cycle_runtime", "checksumSha256": "485ee26d11263025ae596adf436aa661680a66d6c4245ddac280ff7169cfcbf2" },
+    { "migration": "0018_shadow_verified_fact_payload", "checksumSha256": "067535fa55bdc3767bf3c6928b93ddbff532387c003ec97d5199a45b1f696ad0" },
+    { "migration": "0019_customer_profile_wave2", "checksumSha256": "e0e631742176ad3ccba8ab403f68f0a58a620658355ed4257d76f035fd6a8d94" },
+    { "migration": "0020_size_chart_extraction", "checksumSha256": "56812a92dd64b0bbc114edc351b387b595652f7d38bdb94e46af73e9ecef87e4" },
+    { "migration": "0021_dataset_review", "checksumSha256": "27734796d4d8f17072cd36fc31f5447b58a0ef89e9d5a32e6cf48dedfc394bf3" },
+    { "migration": "0022_dataset_review_acl", "checksumSha256": "4179140ac4dbe85ffe39c07c6fa3a4a87ebf0fdf4d05bddb13e689d32ec9dcfc" },
+    { "migration": "0023_wave2_strategy_metrics", "checksumSha256": "6eb62cedbe493238e31698817a761abbfaa7f4308fd3ac3e4f4afb85f2e92af7" },
+    { "migration": "0024_ad_acquisition_analytics", "checksumSha256": "6b0145da274fca03cecf2d8a0604ecd72cd52539875c964ec89345e421a8e531" },
+    { "migration": "0025_admin_frontend_operations", "checksumSha256": "03ae35424838d34da5a97d366c69cc39aed3a022b6325d4ca6047635b121f854" },
+    { "migration": "0026_product_media_intake_dedupe", "checksumSha256": "a96660826450b45498c34b08013d438e2fe38b949f038cdec766c5e3df957079" },
+    { "migration": "0027_handoff_case_sla_default", "checksumSha256": "7c6dd5819216f65f07eb4e4c72e21425484b9ee6f1b459fba6deb6bae9e6bea0" },
+    { "migration": "0028_meta_response_group_gate", "checksumSha256": "385f5a4e5cc1a66b047dcd1c9ed48a63e0a5b17f82bec42a2367d061bff6610e" },
+    { "migration": "0029_meta_outbox_handoff_ordering", "checksumSha256": "b15fc0a2e29564321d75d5db4425abdd52e94a205b1a48bf741dd4fbbdd2a773" }
+  ],
+  "unknownOrUnavailableEvidence": [
+    {
+      "id": "release-local-source-attestation",
+      "path": "/opt/lana-chatbot/releases/20260801-realtime-wave2-post-media-r32.2.2/.release-source.json",
+      "status": "MISSING",
+      "impact": "The running release cannot directly attest its full source commit."
+    },
+    {
+      "id": "promoted-runtime-state",
+      "path": "/opt/lana-chatbot/runtime-state/current.json",
+      "status": "MISSING",
+      "impact": "No machine-readable promoted runtime-state baseline exists."
+    },
+    {
+      "id": "r32.2.2-deployment-manifest",
+      "status": "MISSING",
+      "impact": "No append-only deployment manifest specific to r32.2.2 records build, cutover, or rollback evidence."
+    },
+    {
+      "id": "full-release-tree-parity",
+      "status": "NOT_CAPTURED",
+      "impact": "The seven hotfix files match, but this record does not claim full-tree parity."
+    },
+    {
+      "id": "realtime-image-full-revision-label",
+      "status": "MISMATCH",
+      "observed": "1ff7f17d",
+      "expected": "1ff7f17b0bad7f2870397c9f74c3f1b0943b2be9",
+      "impact": "OCI revision cannot serve as source attestation for r32.2.2."
+    },
+    {
+      "id": "r32.2.2-build-provenance",
+      "status": "UNAVAILABLE",
+      "impact": "No release-local SBOM, builder provenance, or immutable build log was found in the audited evidence set."
+    },
+    {
+      "id": "r32.2.2-current-rollback-attestation",
+      "status": "UNAVAILABLE",
+      "impact": "Only the historical r32.2 rollback targets can be cited; current per-service r32.2.2 rollback targets are not attested."
+    },
+    {
+      "id": "exhaustive-multi-project-service-boundary",
+      "status": "DEFERRED_TO_RI_01",
+      "impact": "This capture includes lana-chatbot and lana-mcp containers; RI-01 must decide whether Authentik and n8n are part of the required runtime-state inventory."
+    }
+  ],
+  "sourceEvidenceReferences": [
+    "AGENTS.md",
+    "README.md",
+    "docs/current/PRODUCTION_BASELINE_20260722.md",
+    "docs/current/REALTIME_AGENT_UPGRADE_PLAN.md",
+    "deploy/manifests/20260801-realtime-compatibility-first-r32.2-runtime.json",
+    "deploy/manifests/20260801-r32.2-test-page-outbound-enabled.json"
+  ],
+  "readOnlyEvidenceCommands": [
+    "git fetch origin --tags; git rev-parse <tag>^{}; git ls-remote --tags origin <tag>",
+    "readlink -f /opt/lana-chatbot/current; stat /opt/lana-chatbot/current <resolved-release>",
+    "test -f <resolved-release>/.release-source.json; test -f /opt/lana-chatbot/runtime-state/current.json",
+    "git -C /opt/lana-chatbot/repository rev-parse HEAD; git -C /opt/lana-chatbot/repository status --short --branch",
+    "docker inspect <running-lana-chatbot-containers> with image, image ID, OCI labels, state, health, restart count, compose project/service labels",
+    "docker image inspect <running-image-ids> with image ID, repo tags/digests, and OCI labels",
+    "psql SELECT migration_name, checksum_sha256 FROM schema_migrations ORDER BY migration_name",
+    "psql SELECT page_id, status, routing_owner, app_send_enabled, kill_switch FROM pages ORDER BY page_id",
+    "docker exec <realtime-or-delivery> env | grep <explicit-non-secret-key-allowlist> | LC_ALL=C sort | sha256sum",
+    "git ls-tree <source-commit> <hotfix-paths>; git hash-object <release-hotfix-paths>"
+  ],
+  "integrityReview": {
+    "reviewedAt": "2026-08-02T13:13:05Z",
+    "reviewer": "Codex",
+    "historicalManifestModified": false,
+    "sourceFilesEditedOnVps": false,
+    "runtimeConfigurationChanged": false,
+    "containsSecret": false,
+    "containsRawPii": false,
+    "statement": "This is a new append-only reconciliation record. No historical manifest was rewritten."
+  },
+  "rollback": {
+    "applicable": false,
+    "reason": "The artifact is append-only. Corrections require a new superseding reconciliation record."
+  },
+  "runtimeStateBaselineReference": {
+    "eligible": true,
+    "promotionAllowed": false,
+    "reason": "RI-00 may be referenced by a future runtime-state baseline, but PARTIAL or MISMATCH attestation must not pass Gate R."
+  }
+}
