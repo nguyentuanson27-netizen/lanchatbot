@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "inventoryId": "lana-chatbot-production-v1",
+  "services": {
+    "postgres": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "redis": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "api": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "shadow-worker": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "realtime-worker": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": true,
+      "expectedRevision": "cccccccccccccccccccccccccccccccccccccccc",
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "pos-snapshot-worker": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "media-worker": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "delivery-worker": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "retention-worker": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "p23a-registry-sync": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "p23b-metadata-staging": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "p23c-publisher": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "size-chart-extractor": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "admin-api": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "admin-control-worker": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "admin-simulation-worker": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "admin-web": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    "lana-mcp": {
+      "expectedImageId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revisionRequired": false,
+      "rollback": {
+        "release": "previous-release",
+        "image": "example:previous",
+        "imageId": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    }
+  }
+}

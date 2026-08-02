@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "realtime": ["APP_SEND_ENABLED", "CHATBOT_SEND_ENABLED", "META_PAGE_ID", "REALTIME_MODE", "REALTIME_RELEASE_ID", "REALTIME_PROMPT_VERSION", "REALTIME_WAVE2_STRATEGY_V1"],
+  "delivery": ["APP_SEND_ENABLED", "CHATBOT_SEND_ENABLED", "META_DELIVERY_ENABLED", "META_GRAPH_API_VERSION", "META_PAGE_ID", "REALTIME_MODE"],
+  "routing": ["page_id", "status", "routing_owner", "app_send_enabled", "kill_switch"]
+}

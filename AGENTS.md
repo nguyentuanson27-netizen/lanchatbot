@@ -63,3 +63,11 @@ Tài liệu này áp dụng cho toàn bộ repository La.na Chatbot.
 2. `AGENTS.md` và `README.md` trên branch hiện tại.
 3. `docs/current/PRODUCTION_BASELINE_20260722.md` và manifest release mới nhất.
 4. Tài liệu lịch sử trong `docs/phase*` và `docs/history/`.
+
+## Runtime-state authorization boundary
+
+- When current production status matters, agents must read generated `/opt/lana-chatbot/runtime-state/current.json`, its immutable history record, the resolved `current` symlink, and the release-local `.release-source.json`; unknown, partial, or mismatched evidence must fail closed.
+- Repository source change: branch, review, and merge. Never develop against production runtime.
+- Approved deployment automation: only after explicit production authorization may it create a new release directory from an immutable GitHub tag/commit, create that new release's `.release-source.json` once before activation, and atomically create, verify, and promote runtime-state records.
+- Manual runtime mutation is prohibited. Coding agents must never edit `current`, an existing release directory, an existing source pointer, runtime-state history, or `current.json` manually.
+- Explicit authorization is required before deploy, migration, restart, symlink change, canary send, routing, or page-allowlist change.
