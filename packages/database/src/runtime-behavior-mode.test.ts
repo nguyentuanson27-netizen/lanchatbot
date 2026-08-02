@@ -124,4 +124,30 @@ describe("PostgresRuntimeBehaviorModeStore", () => {
     })).rejects.toThrow("RUNTIME_BEHAVIOR_NON_CONFIRMATION_TRACK_FORBIDDEN");
     expect(mocks.poolQuery).not.toHaveBeenCalled();
   });
+
+  it("fails closed when an idempotency key already belongs to different resolution evidence", async () => {
+    mocks.poolQuery
+      .mockResolvedValueOnce({ rows: [], rowCount: 0 })
+      .mockResolvedValueOnce({ rows: [], rowCount: 0 });
+    const store = new PostgresRuntimeBehaviorModeStore("postgresql://test", 1);
+    await expect(store.recordResolution({
+      resolutionId: "20000000-0000-4000-8000-000000000001",
+      pageId,
+      channel,
+      confirmationMode: "V2_ACTIVE",
+      modeVersionId: targetVersionId,
+      contentHash: targetRow.content_hash,
+      pointerRevision: 8,
+      source: "DATABASE",
+      status: "RESOLVED",
+      reasonCodes: [],
+      workerId: "worker-1",
+      pointerUpdatedAt: updatedAt.toISOString(),
+      resolvedAt: updatedAt.toISOString(),
+      propagationMs: 0,
+    })).rejects.toThrow("RUNTIME_BEHAVIOR_RESOLUTION_AUDIT_CONFLICT");
+    expect(mocks.poolQuery).toHaveBeenCalledTimes(2);
+    expect(String(mocks.poolQuery.mock.calls[0]?.[0])).toContain("ON CONFLICT");
+    expect(String(mocks.poolQuery.mock.calls[1]?.[0])).toContain("IS NOT DISTINCT FROM");
+  });
 });

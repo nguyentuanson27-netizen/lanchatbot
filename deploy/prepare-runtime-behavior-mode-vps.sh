@@ -39,7 +39,7 @@ SELECT format('GRANT CONNECT ON DATABASE %I TO %I', current_database(), :'runtim
 SELECT format('GRANT USAGE ON SCHEMA public TO %I', :'runtime_behavior_user')\gexec
 SELECT format('REVOKE ALL ON ALL TABLES IN SCHEMA public FROM %I', :'runtime_behavior_user')\gexec
 SELECT format(
-  'GRANT SELECT ON runtime_behavior_mode_versions, runtime_behavior_mode_pointers TO %I',
+  'GRANT SELECT ON runtime_behavior_mode_versions, runtime_behavior_mode_pointers, runtime_behavior_mode_resolution_audit TO %I',
   :'runtime_behavior_user'
 ) WHERE to_regclass('public.runtime_behavior_mode_versions') IS NOT NULL\gexec
 SELECT format(
@@ -52,7 +52,12 @@ SELECT format(
 ) WHERE to_regclass('public.runtime_behavior_mode_versions') IS NOT NULL
   AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'control_user')\gexec
 SELECT format(
-  'GRANT SELECT, INSERT, UPDATE ON runtime_behavior_mode_pointers TO %I', :'control_user'
+  'GRANT SELECT, INSERT ON runtime_behavior_mode_pointers TO %I', :'control_user'
+) WHERE to_regclass('public.runtime_behavior_mode_pointers') IS NOT NULL
+  AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'control_user')\gexec
+SELECT format(
+  'GRANT UPDATE (active_version_id, pointer_revision, updated_by, reason, updated_at) ON runtime_behavior_mode_pointers TO %I',
+  :'control_user'
 ) WHERE to_regclass('public.runtime_behavior_mode_pointers') IS NOT NULL
   AND EXISTS (SELECT 1 FROM pg_roles WHERE rolname = :'control_user')\gexec
 SELECT format(

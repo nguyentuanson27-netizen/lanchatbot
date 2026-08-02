@@ -68,7 +68,10 @@ BEGIN
   IF TG_OP = 'UPDATE' AND NEW.pointer_revision <> OLD.pointer_revision + 1 THEN
     RAISE EXCEPTION 'runtime behavior mode pointer revision must increment by one';
   END IF;
-  NEW.updated_at := now();
+  IF TG_OP = 'UPDATE' AND (NEW.page_id <> OLD.page_id OR NEW.channel <> OLD.channel) THEN
+    RAISE EXCEPTION 'runtime behavior mode pointer scope is immutable';
+  END IF;
+  NEW.updated_at := clock_timestamp();
   RETURN NEW;
 END;
 $$;
@@ -164,7 +167,7 @@ CREATE TABLE IF NOT EXISTS runtime_behavior_mode_resolution_audit (
   worker_id text NOT NULL CHECK (length(worker_id) BETWEEN 1 AND 256),
   pointer_updated_at timestamptz,
   resolved_at timestamptz NOT NULL,
-  propagation_ms integer CHECK (propagation_ms IS NULL OR propagation_ms >= 0),
+  propagation_ms bigint CHECK (propagation_ms IS NULL OR propagation_ms >= 0),
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -198,7 +201,7 @@ REVOKE ALL ON runtime_behavior_mode_versions,
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'lana_runtime_behavior_reader') THEN
-    GRANT SELECT ON runtime_behavior_mode_versions, runtime_behavior_mode_pointers
+    GRANT SELECT ON runtime_behavior_mode_versions, runtime_behavior_mode_pointers, runtime_behavior_mode_resolution_audit
       TO lana_runtime_behavior_reader;
     GRANT INSERT ON runtime_behavior_mode_resolution_audit
       TO lana_runtime_behavior_reader;
@@ -206,8 +209,10 @@ BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'lana_admin_control_api') THEN
     GRANT SELECT, INSERT ON runtime_behavior_mode_versions
       TO lana_admin_control_api;
-    GRANT SELECT, INSERT, UPDATE ON runtime_behavior_mode_pointers
+    GRANT SELECT, INSERT ON runtime_behavior_mode_pointers
       TO lana_admin_control_api;
+    GRANT UPDATE (active_version_id, pointer_revision, updated_by, reason, updated_at)
+      ON runtime_behavior_mode_pointers TO lana_admin_control_api;
     GRANT SELECT ON runtime_behavior_mode_activation_audit TO lana_admin_control_api;
     GRANT SELECT ON runtime_behavior_mode_resolution_audit
       TO lana_admin_control_api;

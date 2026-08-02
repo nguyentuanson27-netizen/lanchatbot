@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
 export type ConfirmationBehaviorMode = "LEGACY" | "V2_SHADOW" | "V2_ACTIVE" | "CLARIFY_ONLY";
+export type StartupConfirmationBehaviorMode = "LEGACY" | "CLARIFY_ONLY";
 export type BehaviorModeResolutionSource = "DATABASE" | "CACHE" | "LAST_KNOWN_GOOD" | "STARTUP_DEFAULT" | "FAIL_SAFE";
 export interface RuntimeBehaviorModePayload {
   readonly confirmationMode: ConfirmationBehaviorMode;
@@ -101,7 +102,9 @@ export class RuntimeBehaviorModeResolver {
     this.allowedPageIds = new Set(options.allowedPageIds ?? []);
   }
 
-  invalidate(pageId: string, channel: string): void { this.cache.delete(`${pageId}:${channel}`); }
+  invalidate(pageId: string, channel: string): void {
+    this.cache.delete(`${pageId}:${channel.trim().toUpperCase()}`);
+  }
 
   private validate(pointer: RuntimeBehaviorModePointer, pageId: string, channel: string): void {
     const version = pointer.version;
@@ -120,6 +123,18 @@ export class RuntimeBehaviorModeResolver {
       const pointer = await this.source.loadActiveMode({ pageId, channel });
       if (!pointer) throw new Error("RUNTIME_BEHAVIOR_POINTER_MISSING");
       this.validate(pointer, pageId, channel);
+      const previous = this.lastKnownGood.get(key)?.pointer;
+      if (previous && pointer.pointerRevision < previous.pointerRevision) {
+        throw new Error("RUNTIME_BEHAVIOR_POINTER_REVISION_REGRESSION");
+      }
+      if (
+        previous
+        && pointer.pointerRevision === previous.pointerRevision
+        && (
+          pointer.version.modeVersionId !== previous.version.modeVersionId
+          || pointer.version.contentHash !== previous.version.contentHash
+        )
+      ) throw new Error("RUNTIME_BEHAVIOR_POINTER_REVISION_CONFLICT");
       const entry = { pointer, fetchedAtMs: nowMs };
       this.cache.set(key, entry);
       this.lastKnownGood.set(key, entry);
@@ -186,14 +201,16 @@ export class RuntimeBehaviorModeResolver {
     let entry: CachedPointer | null = null;
     let source: BehaviorModeResolutionSource = "DATABASE";
     let reasonCodes: readonly string[] = [];
-    if (cached && nowMs - cached.fetchedAtMs < this.cacheTtlMs) {
+    const cacheAgeMs = cached ? nowMs - cached.fetchedAtMs : null;
+    if (cached && cacheAgeMs !== null && cacheAgeMs >= 0 && cacheAgeMs < this.cacheTtlMs) {
       entry = cached;
       source = "CACHE";
     } else {
       try { entry = await this.load(input.pageId, channel, nowMs); }
       catch {
         const lkg = this.lastKnownGood.get(key);
-        if (lkg && nowMs - lkg.fetchedAtMs <= this.lastKnownGoodTtlMs) {
+        const lkgAgeMs = lkg ? nowMs - lkg.fetchedAtMs : null;
+        if (lkg && lkgAgeMs !== null && lkgAgeMs >= 0 && lkgAgeMs <= this.lastKnownGoodTtlMs) {
           entry = lkg;
           source = "LAST_KNOWN_GOOD";
           reasonCodes = ["RUNTIME_BEHAVIOR_SOURCE_UNAVAILABLE"];
@@ -243,7 +260,7 @@ export class RuntimeBehaviorModeResolver {
 }
 
 export function startupBehaviorModeResolution(
-  confirmationMode: ConfirmationBehaviorMode,
+  confirmationMode: StartupConfirmationBehaviorMode,
   now = new Date(),
 ): RuntimeBehaviorModeResolution {
   return {

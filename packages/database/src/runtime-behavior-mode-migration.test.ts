@@ -23,9 +23,12 @@ describe("0030 runtime behavior mode control plane", () => {
     }
     expect(sql).toContain("runtime_behavior_mode_versions are immutable");
     expect(sql).toContain("NEW.pointer_revision <> OLD.pointer_revision + 1");
+    expect(sql).toContain("runtime behavior mode pointer scope is immutable");
     expect(sql).toContain("runtime_behavior_mode_pointer_activation_audit");
     expect(sql).toContain("SECURITY DEFINER");
     expect(sql).toContain("runtime behavior mode audit is append-only");
+    expect(sql).toContain("propagation_ms bigint");
+    expect(sql).toContain("NEW.updated_at := clock_timestamp()");
   });
 
   it("keeps non-confirmation tracks LEGACY and applies least privilege", async () => {
@@ -35,6 +38,9 @@ describe("0030 runtime behavior mode control plane", () => {
     expect(sql).toContain("REVOKE ALL ON runtime_behavior_mode_versions");
     expect(sql).toContain("lana_runtime_behavior_reader");
     expect(sql).toContain("lana_admin_control_api");
+    expect(sql).toContain(
+      "GRANT UPDATE (active_version_id, pointer_revision, updated_by, reason, updated_at)",
+    );
     expect(sql).not.toContain("GRANT SELECT, INSERT ON runtime_behavior_mode_activation_audit");
     expect(sql).not.toMatch(/customer_(?:name|phone|address)|payload_ciphertext/iu);
   });

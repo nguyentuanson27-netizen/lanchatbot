@@ -809,9 +809,9 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(output.messages.map((message) => message.kind === "TEXT" ? message.text : "").join(" ")).not.toMatch(/SĐT|địa chỉ/iu);
   });
 
-  it("contains positive and model-only confirmation in CLARIFY_ONLY while preserving clear rejection", async () => {
+  it("contains positive confirmation, ignores model fallback, and preserves clear rejection in CLARIFY_ONLY", async () => {
     const state = await previewState("clarify-only");
-    const text = "triển khai giúp chị";
+    const text = "ok triển khai giúp chị";
     const contained = await evaluateRealtimeSalesCycle({
       ...input(state, text, "clarify-only-model-confirm"),
       salesSignals: signals({ confirmation: { decision: "CONFIRM", evidenceText: text } }),
@@ -826,10 +826,27 @@ describe("realtime Phase 3 sales cycle", () => {
         confirmationBehaviorMode: "CLARIFY_ONLY",
         confirmationContainmentActive: true,
         confirmationConfirmed: false,
-        confirmationSource: null,
+        confirmationSource: "DETERMINISTIC_CLASSIFIER",
+        confirmationReasonCode: "CONFIRMATION_DETERMINISTIC_MATCH",
       },
     });
     expect(contained.plan).toBeNull();
+
+    const modelOnlyText = "em xử lý theo phương án đó nhé";
+    const modelOnly = await evaluateRealtimeSalesCycle({
+      ...input(state, modelOnlyText, "clarify-only-model-only-confirm"),
+      salesSignals: signals({
+        confirmation: {
+          decision: "CONFIRM",
+          evidenceText: modelOnlyText,
+        },
+      }),
+      behaviorModeResolution: behaviorResolution("CLARIFY_ONLY"),
+    });
+    expect(modelOnly.plan?.state.confirmation ?? null).toBeNull();
+    expect(modelOnly.desiredTag).not.toBe("DA_CHOT_DON");
+    expect(modelOnly.transferToHuman).toBe(false);
+    expect(modelOnly.reasonCode).not.toBe("PURCHASE_CONFIRMED");
 
     const rejected = await evaluateRealtimeSalesCycle({
       ...input(state, "Không muốn chốt đơn", "clarify-only-reject"),
@@ -845,6 +862,15 @@ describe("realtime Phase 3 sales cycle", () => {
         confirmationReasonCode: "CONFIRMATION_EXPLICIT_REJECTION",
       },
     });
+
+    const unrelated = await evaluateRealtimeSalesCycle({
+      ...input(state, "mẫu này giá bao nhiêu?", "clarify-only-price-question"),
+      behaviorModeResolution: behaviorResolution("CLARIFY_ONLY"),
+    });
+    expect(unrelated.reasonCode).not.toBe("ASK_CONFIRMATION_CLARIFICATION");
+    expect(unrelated.plan?.state.confirmation ?? null).toBeNull();
+    expect(unrelated.messages.map((message) => message.kind === "TEXT" ? message.text : "").join(" "))
+      .not.toContain("xác nhận mua");
   });
 
   it("never completes purchase confirmation outside ORDER_PREVIEW in V2_ACTIVE", async () => {

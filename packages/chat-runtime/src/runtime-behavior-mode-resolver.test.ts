@@ -147,4 +147,41 @@ describe("RuntimeBehaviorModeResolver", () => {
       confirmationMode: "CLARIFY_ONLY", status: "REJECTED", source: "FAIL_SAFE",
     });
   });
+
+  it("never accepts a regressed or conflicting pointer revision", async () => {
+    const source = new MutableSource();
+    source.value = pointer("V2_SHADOW", 2);
+    const resolver = new RuntimeBehaviorModeResolver(source, {
+      cacheTtlMs: 100,
+      lastKnownGoodTtlMs: 300_000,
+    });
+    await resolver.resolve(input());
+
+    source.value = pointer("LEGACY", 1);
+    expect(await resolver.resolve(input(101))).toMatchObject({
+      confirmationMode: "V2_SHADOW",
+      pointerRevision: 2,
+      source: "LAST_KNOWN_GOOD",
+    });
+
+    source.value = pointer("V2_ACTIVE", 2);
+    expect(await resolver.resolve(input(202))).toMatchObject({
+      confirmationMode: "V2_SHADOW",
+      pointerRevision: 2,
+      source: "LAST_KNOWN_GOOD",
+    });
+  });
+
+  it("does not extend cache or LKG lifetime when the wall clock moves backward", async () => {
+    const source = new MutableSource();
+    const resolver = new RuntimeBehaviorModeResolver(source, {
+      cacheTtlMs: 5_000,
+      lastKnownGoodTtlMs: 300_000,
+    });
+    await resolver.resolve(input());
+    source.failure = true;
+    expect(await resolver.resolve(input(-1))).toMatchObject({
+      confirmationMode: "CLARIFY_ONLY", source: "FAIL_SAFE",
+    });
+  });
 });

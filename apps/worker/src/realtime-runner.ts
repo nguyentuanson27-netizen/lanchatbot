@@ -41,7 +41,7 @@ import type {
   RuntimePolicyChannel,
   RuntimePolicyResolution,
   RuntimePolicyResolverPort,
-  ConfirmationBehaviorMode,
+  StartupConfirmationBehaviorMode,
   RuntimeBehaviorModeResolution,
   SalesCycleRuntimeState,
 } from "@lana/chat-runtime";
@@ -1965,7 +1965,7 @@ export interface RealtimeRunnerOptions {
   readonly imageDelayMs?: number;
   readonly promptVersion?: string;
   readonly metaAppId?: string;
-  readonly confirmationStartupMode?: ConfirmationBehaviorMode;
+  readonly confirmationStartupMode?: StartupConfirmationBehaviorMode;
   readonly behaviorModeChannel?: string;
   readonly policyChannel?: RuntimePolicyChannel;
   readonly releaseId?: string;
@@ -2526,7 +2526,9 @@ export class RealtimeRunner {
       ? runtimePolicyAuditReference(policyResolution.bundle)
       : null;
     const behaviorModeResolution = await this.behaviorModeResolver?.resolve({
-      resolutionId: deterministicUuid(`behavior-mode:${claim.pageId}:${message.eventKey}`),
+      resolutionId: deterministicUuid(
+        `behavior-mode:${claim.pageId}:${this.options.behaviorModeChannel}:${message.eventKey}`,
+      ),
       pageId: claim.pageId,
       channel: this.options.behaviorModeChannel,
       workerId: this.options.workerId,

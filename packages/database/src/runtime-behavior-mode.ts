@@ -204,16 +204,32 @@ export class PostgresRuntimeBehaviorModeStore {
   }
 
   async recordResolution(event: RuntimeBehaviorModeResolutionAuditRecord): Promise<void> {
-    await this.pool.query(
+    const values = [event.resolutionId, event.pageId, event.channel, event.confirmationMode, event.modeVersionId,
+      event.contentHash, event.pointerRevision, event.source, event.status, [...event.reasonCodes],
+      event.workerId, event.pointerUpdatedAt, event.resolvedAt, event.propagationMs];
+    const inserted = await this.pool.query(
       `INSERT INTO runtime_behavior_mode_resolution_audit (
          resolution_id, page_id, channel, confirmation_mode, mode_version_id,
          content_hash, pointer_revision, source, status, reason_codes, worker_id,
          pointer_updated_at, resolved_at, propagation_ms
        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::text[],$11,$12,$13,$14)
-       ON CONFLICT (resolution_id) DO NOTHING`,
-      [event.resolutionId, event.pageId, event.channel, event.confirmationMode, event.modeVersionId,
-        event.contentHash, event.pointerRevision, event.source, event.status, [...event.reasonCodes],
-        event.workerId, event.pointerUpdatedAt, event.resolvedAt, event.propagationMs]);
+       ON CONFLICT (resolution_id) DO NOTHING RETURNING resolution_id`, values);
+    if (inserted.rowCount === 1) return;
+    const matching = await this.pool.query(
+      `SELECT 1 FROM runtime_behavior_mode_resolution_audit
+       WHERE resolution_id=$1 AND page_id=$2 AND channel=$3 AND confirmation_mode=$4
+         AND mode_version_id IS NOT DISTINCT FROM $5::uuid
+         AND content_hash IS NOT DISTINCT FROM $6
+         AND pointer_revision IS NOT DISTINCT FROM $7::bigint
+         AND source=$8 AND status=$9 AND reason_codes=$10::text[] AND worker_id=$11
+         AND pointer_updated_at IS NOT DISTINCT FROM $12::timestamptz
+         AND resolved_at=$13::timestamptz
+         AND propagation_ms IS NOT DISTINCT FROM $14::bigint`,
+      values,
+    );
+    if (matching.rowCount !== 1) {
+      throw new Error("RUNTIME_BEHAVIOR_RESOLUTION_AUDIT_CONFLICT");
+    }
   }
   async close(): Promise<void> { await this.pool.end(); }
 }

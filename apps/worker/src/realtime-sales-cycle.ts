@@ -818,8 +818,7 @@ export async function evaluateRealtimeSalesCycle(
     ? confirmationClarificationAction(v2Classification, state.stage)
     : null;
   const confirmationDecision: ConfirmationDecision = v2Classification && (
-    behaviorMode === "V2_ACTIVE"
-    || (behaviorMode === "CLARIFY_ONLY" && v2Classification.decision === "REJECT")
+    behaviorMode === "V2_ACTIVE" || behaviorMode === "CLARIFY_ONLY"
   )
     ? {
         decision: v2Classification.decision,
@@ -866,7 +865,8 @@ export async function evaluateRealtimeSalesCycle(
   }
   const mustClarify = state.stage === "ORDER_PREVIEW" && (
     behaviorMode === "CLARIFY_ONLY"
-      ? v2Classification?.decision !== "REJECT"
+      ? v2Classification?.evidenceDetected === true
+        && v2Classification.decision !== "REJECT"
       : behaviorMode === "V2_ACTIVE" && v2Action === ASK_CONFIRMATION_CLARIFICATION
   );
   if (mustClarify) {

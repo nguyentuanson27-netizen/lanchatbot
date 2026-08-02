@@ -41,6 +41,7 @@ async function main(): Promise<void> {
   try {
     if (command === "read") {
       const pointer = await store.loadActiveMode({ pageId, channel });
+      if (!pointer) throw new Error("RUNTIME_BEHAVIOR_POINTER_MISSING");
       process.stdout.write(`${JSON.stringify({ source: "DATABASE", pointer }, null, 2)}\n`);
       return;
     }
