@@ -165,6 +165,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 
 ## Tài liệu
 
+- [Architecture Program — active BF/DF/UR context index](docs/current/architecture-program/README.md) — nguồn định tuyến context gọn; hiện tạm dừng DF/UR và ưu tiên incident BF, không tự cấp quyền deploy
 - [Production baseline và ownership](docs/current/PRODUCTION_BASELINE_20260722.md)
 - [Kế hoạch nâng cấp Realtime Sales Agent](docs/current/REALTIME_AGENT_UPGRADE_PLAN.md)
 - [Kế hoạch triển khai Wave 1 & Wave 2 v1.2](docs/current/WAVE1_WAVE2_IMPLEMENTATION_PLAN_v1.2.md)

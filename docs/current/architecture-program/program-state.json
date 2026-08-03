@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "status": "BUGFIX_PLANNING_READY_NOT_DEPLOY_AUTHORIZED",
+  "evidenceAsOf": "2026-08-03",
+  "git": {
+    "evidenceMainCommit": "381ed381b119de4b4888170a348ecc6ae11f027f",
+    "releaseTag": "20260803-dataset-store-boundary-r3",
+    "releaseCommit": "9288708c536080587acf4b08d84b5a509ef768bc",
+    "implementationCommit": "0a5844a57cb1dd9c5687158cb9774a466d512024"
+  },
+  "runtime": {
+    "runtimeStateSha256": "1744af5cf9d79b90e8033a738e3414350af39c25e5bd00f9890acdcc50e61fad",
+    "migration": "0030_runtime_behavior_modes",
+    "confirmationMode": "V2_ACTIVE",
+    "salesAuthorityMode": "LEGACY",
+    "stateReadMode": "LEGACY",
+    "behaviorRevision": 3,
+    "behaviorSource": "DATABASE",
+    "pageAllowlist": ["1198992073286645"]
+  },
+  "completed": {
+    "releaseIntegrity": "GATE_R_PASSED",
+    "confirmation": "GATE_C_PASSED",
+    "datasetBoundary": "GATE_D_PASSED",
+    "r3Deployment": "DEPLOY_SUCCESS"
+  },
+  "active": {
+    "track": "BF",
+    "nextIssue": "BF-04",
+    "gate": "GATE_BF_PENDING"
+  },
+  "future": ["DF-01..DF-13", "UR-00..UR-10"],
+  "hardStops": [
+    "NO_ADMIN_WEB_OR_ADMIN_SIMULATION_WORKER_RECREATE_WITH_SHARED_ADMIN_IMAGE",
+    "NO_UNVERIFIED_HOST_SCRIPT_REUSE",
+    "NO_PAGE_ALLOWLIST_EXPANSION",
+    "NO_PRODUCTION_MUTATION_WITHOUT_EXPLICIT_APPROVAL"
+  ]
+}

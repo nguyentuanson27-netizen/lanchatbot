@@ -6,10 +6,11 @@ Tài liệu này áp dụng cho toàn bộ repository La.na Chatbot.
 
 1. Đọc `README.md`.
 2. Đọc `docs/current/PRODUCTION_BASELINE_20260722.md`.
-3. Đọc `docs/current/REALTIME_AGENT_UPGRADE_PLAN.md` nếu công việc liên quan realtime agent, prompt, sales flow, model, profile, variant, facts, audit hoặc funnel.
-4. Đọc manifest mới nhất trong `deploy/manifests/`.
-5. Kiểm tra `git status`, branch hiện tại và thay đổi chưa commit trước khi sửa file.
-6. Nếu đang ở VPS, chỉ làm việc trong `/opt/lana-chatbot/repository`.
+3. Với công việc thuộc chương trình kiến trúc hoặc incident `BF/DF/UR`, đọc `docs/current/architecture-program/README.md` rồi chỉ nạp các file/section được index đó định tuyến; không nạp `archive/` hoặc toàn bộ kế hoạch cũ theo mặc định.
+4. Đọc `docs/current/REALTIME_AGENT_UPGRADE_PLAN.md` cho công việc realtime không thuộc `BF/DF/UR`, hoặc khi index kiến trúc dẫn chiếu trực tiếp tới kế hoạch này.
+5. Đọc manifest mới nhất trong `deploy/manifests/`.
+6. Kiểm tra `git status`, branch hiện tại và thay đổi chưa commit trước khi sửa file.
+7. Nếu đang ở VPS, chỉ làm việc trong `/opt/lana-chatbot/repository`.
 
 ## Nguồn chuẩn và phạm vi VPS
 
@@ -61,8 +62,10 @@ Tài liệu này áp dụng cho toàn bộ repository La.na Chatbot.
 
 1. Yêu cầu mới nhất của người dùng.
 2. `AGENTS.md` và `README.md` trên branch hiện tại.
-3. `docs/current/PRODUCTION_BASELINE_20260722.md` và manifest release mới nhất.
-4. Tài liệu lịch sử trong `docs/phase*` và `docs/history/`.
+3. Với `BF/DF/UR`: các file active được định tuyến từ `docs/current/architecture-program/README.md`.
+4. Generated runtime-state, source pointer, symlink và manifest release mới nhất khi trạng thái production có liên quan; bằng chứng live mới hơn luôn thắng snapshot tài liệu.
+5. `docs/current/PRODUCTION_BASELINE_20260722.md`.
+6. Tài liệu lịch sử trong `docs/phase*`, `docs/history/` và `docs/current/architecture-program/archive/`.
 
 ## Runtime-state authorization boundary
 
