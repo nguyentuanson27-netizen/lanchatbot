@@ -119,24 +119,28 @@ describe("RealtimeRunner", () => {
     });
   });
 
-  it("limits chị, nhé and ạ to one use across a response group", () => {
+  it("limits nhé and ạ to one use per response group but keeps the chị pronoun", () => {
     const grouped = groupRealtimeMetaMessagesV2([
       { kind: "TEXT", text: "Chị xem mẫu này nhé ạ." },
       { kind: "TEXT", text: "Chị gửi thêm ảnh nhé ạ." },
     ]);
     expect(grouped).toEqual([
       { kind: "TEXT", text: "Chị xem mẫu này nhé ạ." },
-      { kind: "TEXT", text: "gửi thêm ảnh." },
+      { kind: "TEXT", text: "Chị gửi thêm ảnh." },
     ]);
     const rendered = grouped
       .filter((message): message is Extract<typeof message, { kind: "TEXT" }> => message.kind === "TEXT")
       .map((message) => message.text)
       .join("\n");
-    for (const token of ["chị", "nhé", "ạ"]) {
+    for (const token of ["nhé", "ạ"]) {
       expect(Array.from(rendered.matchAll(
         new RegExp(`(?<![\\p{L}\\p{N}_])${token}(?![\\p{L}\\p{N}_])`, "giu"),
       ))).toHaveLength(1);
     }
+    // "chị" is a pronoun, not a politeness particle: it must survive on every message.
+    expect(Array.from(rendered.matchAll(
+      /(?<![\p{L}\p{N}_])chị(?![\p{L}\p{N}_])/giu,
+    ))).toHaveLength(2);
   });
 
   it("uses deterministic bounded jitter for inbox retries", () => {

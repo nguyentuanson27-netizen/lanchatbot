@@ -508,8 +508,10 @@ export function groupRealtimeMetaMessagesV2(
   return limitResponseGroupPoliteness(grouped);
 }
 
-const RESPONSE_GROUP_POLITENESS_TOKENS = new Set(["chị", "nhé", "ạ"]);
-const RESPONSE_GROUP_POLITENESS_TOKEN = /(?<![\p{L}\p{N}_])(chị|nhé|ạ)(?![\p{L}\p{N}_])/giu;
+// "chị" is a second-person pronoun, not a decorative particle, so it is intentionally
+// excluded — deduplicating it would drop sentence subjects and produce curt replies.
+const RESPONSE_GROUP_POLITENESS_TOKENS = new Set(["nhé", "ạ"]);
+const RESPONSE_GROUP_POLITENESS_TOKEN = /(?<![\p{L}\p{N}_])(nhé|ạ)(?![\p{L}\p{N}_])/giu;
 
 /** Keeps the conversational particles natural by using each at most once per response group. */
 export function limitResponseGroupPoliteness(
