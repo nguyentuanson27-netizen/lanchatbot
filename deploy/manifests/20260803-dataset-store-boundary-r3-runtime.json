@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-03T13:09:50Z",
+  "status": "DEPLOYED_TEST_PAGE_AND_RUNTIME_STATE_RECONCILED",
+  "environment": "production-test-page",
+  "host": "156.67.214.197",
+  "pageId": "1198992073286645",
+  "documentType": "APPEND_ONLY_RUNTIME_DEPLOYMENT_EVIDENCE",
+  "evidenceSource": "OWNER_PROVIDED_DEPLOY_SUCCESS_REPORT",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "releaseTag": "20260803-dataset-store-boundary-r3",
+  "tagObject": "8b21464c77ea75c035719fc00ad94ebaf846c587",
+  "tagCommit": "9288708c536080587acf4b08d84b5a509ef768bc",
+  "implementationCommit": "0a5844a57cb1dd9c5687158cb9774a466d512024",
+  "candidateManifest": "deploy/manifests/20260803-dataset-store-boundary-r3.json",
+  "releasePath": "/opt/lana-chatbot/releases/20260803-dataset-store-boundary-r3",
+  "currentSymlink": "/opt/lana-chatbot/releases/20260803-dataset-store-boundary-r3",
+  "sourceMaterialization": {
+    "tagIsAnnotated": true,
+    "tagContainsCandidateManifest": true,
+    "workingTreeCleanAtCutover": true,
+    "releaseSourcePointer": {
+      "path": "/opt/lana-chatbot/releases/20260803-dataset-store-boundary-r3/.release-source.json",
+      "commit": "9288708c536080587acf4b08d84b5a509ef768bc",
+      "attestation": "OBSERVED"
+    },
+    "releaseSourceExcludedViaGitInfoExclude": true,
+    "trackedSourceEditedOnVps": false,
+    "commitOrPushFromVps": false,
+    "deployKeyMode": "READ_ONLY"
+  },
+  "image": {
+    "name": "lana-chatbot-app:dataset-store-boundary-r3",
+    "imageId": "sha256:923c0f254b7ecc15aace27f0f50e098125cf45f514643f515b88aa20003dfcb5",
+    "revisionLabel": "9288708c536080587acf4b08d84b5a509ef768bc",
+    "versionLabel": "20260803-dataset-store-boundary-r3",
+    "uniqueDigestVerified": true
+  },
+  "database": {
+    "migrationRequired": false,
+    "productionMigrationsApplied": [],
+    "latestProductionMigration": "0030_runtime_behavior_modes",
+    "backfillExecuted": false,
+    "downMigrationExecuted": false,
+    "dataDeleted": false
+  },
+  "guardedCutover": {
+    "targetServices": ["admin-api"],
+    "servicesRecreated": ["admin-api"],
+    "nonTargetServicesRecreated": [],
+    "nonTargetImagesAndContainerIdsUnchanged": true,
+    "currentSymlinkSwitchedAfterTargetGuards": true,
+    "autoRollbackTrapArmed": true,
+    "result": "CUTOVER_PASS"
+  },
+  "targets": {
+    "adminApi": {
+      "containerIdShort": "d8f6573a",
+      "image": "lana-chatbot-app:dataset-store-boundary-r3",
+      "imageId": "sha256:923c0f254b7ecc15aace27f0f50e098125cf45f514643f515b88aa20003dfcb5",
+      "ociRevision": "9288708c536080587acf4b08d84b5a509ef768bc",
+      "health": "healthy",
+      "readinessStatus": 200,
+      "restartCount": 0,
+      "processUid": 1000,
+      "reportedProcessUser": "ubuntu",
+      "privilegeDrop": "NON_ROOT_VIA_SU_EXEC"
+    }
+  },
+  "nonTargetRuntime": {
+    "allContainersHealthy": true,
+    "deliveryReadinessStatus": 200,
+    "realtime": {
+      "release": "r32.2.4",
+      "health": "healthy",
+      "restartCount": 0,
+      "imageAndContainerIdUnchanged": true
+    },
+    "delivery": {
+      "release": "r32.2",
+      "imageAndContainerIdUnchanged": true
+    },
+    "adminWeb": {
+      "release": "r30",
+      "imageAndContainerIdUnchanged": true
+    },
+    "adminSimulation": {
+      "release": "r26.1",
+      "imageAndContainerIdUnchanged": true
+    },
+    "api": {
+      "release": "r27.1",
+      "imageAndContainerIdUnchanged": true
+    },
+    "shadow": {
+      "release": "r26.1",
+      "imageAndContainerIdUnchanged": true
+    },
+    "secretValuesPresentInContainerConfigEnv": 0
+  },
+  "runtimeBehaviorModes": {
+    "changedByRelease": false,
+    "confirmation": "V2_ACTIVE",
+    "salesAuthority": "LEGACY",
+    "stateRead": "LEGACY",
+    "pointerRevision": 3,
+    "source": "DATABASE",
+    "contentHashEvidence": {
+      "fullValueRecorded": false,
+      "reportedPrefix": "sha256:72912576e4f64b31",
+      "reportedSuffix": "f1a2c40e",
+      "reason": "DEPLOY_REPORT_DISPLAYED_A_TRUNCATED_HASH"
+    }
+  },
+  "routing": {
+    "changedByRelease": false,
+    "canaryPageIds": ["1198992073286645"],
+    "allowlistCount": 1
+  },
+  "verification": {
+    "build": "PASS_FROZEN_INSTALL_RELEASE_INTEGRITY_TYPECHECK_TEST_BUILD_IN_IMAGE",
+    "artifactDatasetStoreBoundarySmoke": "PASS",
+    "renderedComposeImage": "PASS",
+    "preflightInvariants": "PASS",
+    "guardedCutoverVerification": "PASS",
+    "adminApiHealthRestartOciRevisionNonRootReadiness": "PASS",
+    "atomicSymlinkSwitch": "PASS",
+    "postcheck": {
+      "result": "PASS",
+      "metaOutboxPendingBefore": 0,
+      "metaOutboxPendingAfter": 0,
+      "metaOutboxStuckBefore": 0,
+      "metaOutboxStuckAfter": 0,
+      "duplicates": 0,
+      "adminApiNewErrorCount": 0
+    },
+    "soak": {
+      "samples": 3,
+      "cleanSamples": 3,
+      "result": "PASS"
+    }
+  },
+  "runtimeStateReconciliation": {
+    "requiredServicesAttestation": "OBSERVED_18_OF_18",
+    "capture": "PASS",
+    "verifyParity": "PASS",
+    "promote": "PASS",
+    "postPromoteReverify": "PASS",
+    "currentFile": "/opt/lana-chatbot/runtime-state/current.json",
+    "currentJsonSha256": "1744af5cf9d79b90e8033a738e3414350af39c25e5bd00f9890acdcc50e61fad"
+  },
+  "preSuccessAbortAndRollbackEvidence": {
+    "abortCount": 3,
+    "applicationSourceOrBuiltArtifactDefect": false,
+    "verificationScriptDefect": true,
+    "causes": [
+      "VERIFY_SCRIPT_PASSED_CONTAINER_NAME_INSTEAD_OF_COMPOSE_SERVICE_NAME",
+      "VERIFY_SCRIPT_DOCKER_TOP_FORMAT_OMITTED_REQUIRED_PID_COLUMN",
+      "VERIFY_SCRIPT_ENCODED_A_TEXT_CONTENT_HASH_AS_BINARY"
+    ],
+    "rollbackTrapExecutedOnEveryAbort": true,
+    "rollbackPassCount": 3,
+    "rollbackReturnedAdminApiToR32_1Healthy": true,
+    "finalCutoverSucceededAfterVerificationScriptCorrections": true,
+    "trackedRepositorySourceChangedOnHost": false
+  },
+  "hostOnlyDeploymentArtifacts": {
+    "releaseScriptsAdjustedOnHost": true,
+    "releaseScriptsTrackedInRepository": false,
+    "releaseScriptSha256ValuesRecordedOnHost": true,
+    "releaseScriptSha256ValuesIncludedInOwnerReport": false,
+    "applicationSourceChangedOnHost": false
+  },
+  "rollback": {
+    "releaseTag": "20260803-realtime-voice-template-safety-r32.2.4",
+    "sourceCommit": "d9d97533d6a850f557c8b3aad12bfa2b85116139",
+    "releasePath": "/opt/lana-chatbot/releases/20260803-realtime-voice-template-safety-r32.2.4",
+    "adminApiImage": "lana-chatbot-app:realtime-audit-safety-r32.1",
+    "adminApiImageId": "sha256:3695a4f85efbb2418cae065ebdc6f6a2f9c5714b27f68cd30c23841dbb8f787e",
+    "rollbackPathVerifiedDuringDeployment": true,
+    "successfulRollbackExecutions": 3,
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false,
+    "runtimeBehaviorModeRollbackRequired": false
+  },
+  "residualRisks": [
+    {
+      "id": "SHARED_ADMIN_IMAGE_SELECTOR",
+      "status": "OPEN_FAIL_CLOSED_GATE_REQUIRED",
+      "observation": "ADMIN_IMAGE is shared by admin-api, admin-web and admin-simulation-worker; the desired image now resolves to R3 while the two non-target containers remain on r30 and r26.1.",
+      "risk": "A later unrelated recreate of admin-web or admin-simulation-worker could move it to the R3 image.",
+      "requiredGate": "DO_NOT_RECREATE_ADMIN_WEB_OR_ADMIN_SIMULATION_WORKER_UNTIL_PER_SERVICE_IMAGE_SELECTION_IS_EXPLICITLY_PINNED_AND_REVIEWED"
+    },
+    {
+      "id": "HOST_ONLY_RELEASE_SCRIPTS_NOT_VERSIONED",
+      "status": "OBSERVED",
+      "observation": "Deployment verification scripts were corrected on the host and protected by recorded SHA-256 values, but are not tracked in this repository.",
+      "requiredGate": "FUTURE_REUSE_REQUIRES_REVIEWED_SOURCE_CONTROLLED_ARTIFACTS_OR_FRESH_HASH_VERIFICATION"
+    }
+  ],
+  "notAssertedByThisEvidence": [
+    "full untruncated runtime behavior content hash",
+    "full non-target container identifiers",
+    "runtime-state immutable history path and exact host capture timestamp",
+    "release-artifact script SHA-256 values",
+    "Messenger production transcript or newly generated customer traffic"
+  ],
+  "manifestIntegrity": {
+    "candidateManifestModified": false,
+    "releaseTagMoved": false,
+    "appendOnlyFollowUp": true,
+    "directVpsTrackedSourceEditsAllowed": false
+  }
+}
