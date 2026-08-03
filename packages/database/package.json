@@ -13,17 +13,16 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "pretypecheck": "pnpm --filter @lana/contracts --filter @lana/dataset-review build",
+    "pretypecheck": "pnpm --filter @lana/contracts build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "pretest": "pnpm --filter @lana/contracts --filter @lana/dataset-review build",
+    "pretest": "pnpm --filter @lana/contracts build",
     "test": "vitest run",
-    "prelint": "pnpm --filter @lana/contracts --filter @lana/dataset-review build",
+    "prelint": "pnpm --filter @lana/contracts build",
     "lint": "tsc -p tsconfig.json --noEmit",
     "migrate": "node dist/migrate.js up"
   },
   "dependencies": {
     "@lana/contracts": "workspace:*",
-    "@lana/dataset-review": "workspace:*",
     "pg": "^8.16.3"
   },
   "devDependencies": {

@@ -193,9 +193,6 @@ importers:
       '@lana/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@lana/dataset-review':
-        specifier: workspace:*
-        version: link:../dataset-review
       pg:
         specifier: ^8.16.3
         version: 8.22.0

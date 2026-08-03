@@ -230,7 +230,7 @@ xử" is a placeholder toast. Those transitions are the next backend increment.
 pnpm --filter @lana/contracts test        # 80 passed (8 v5)
 pnpm --filter @lana/dataset-review test    # 42 passed (import pipeline incl.)
 pnpm --filter @lana/database test          # 80 passed (migration + generic stores)
-pnpm --filter @lana/dataset-store test     # 39 passed (4 persistence suites)
+pnpm --filter @lana/dataset-store test     # 40 passed (4 persistence suites + compatibility)
 pnpm --filter @lana/worker test            # 270 passed (incl. 10 pre-label)
 pnpm --filter @lana/admin-web test         # 38 vitest + 4 auth (13 UI + 6 API)
 pnpm --filter @lana/admin-api test         # 52 node:test (dataset routes + RBAC)
