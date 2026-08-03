@@ -1,4 +1,4 @@
-import type { PostgresDatasetPrelabelStore } from "@lana/database";
+import type { PostgresDatasetPrelabelStore } from "@lana/dataset-store";
 import type { VertexShadowModel } from "./vertex.js";
 import type { PrelabelModelPort, PrelabelStorePort } from "./dataset-prelabel-runner.js";
 

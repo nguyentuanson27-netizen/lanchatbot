@@ -7,8 +7,7 @@ import {
   type ConversationImport,
   type ImportReport,
 } from "@lana/dataset-review";
-import { LocalEnvelopeCipher } from "./envelope-cipher.js";
-import { withTransaction } from "./repositories.js";
+import { LocalEnvelopeCipher, withTransaction } from "@lana/database";
 
 // Persistence for the AI Evaluation & Dataset Review import pipeline. Raw payload
 // and raw message text are envelope-encrypted at rest; only redacted projections

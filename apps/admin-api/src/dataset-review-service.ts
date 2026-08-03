@@ -5,14 +5,14 @@ import {
   type ReviewModeV1,
   type SplitV1,
 } from "@lana/contracts";
+import { LocalEnvelopeCipher } from "@lana/database";
 import {
-  LocalEnvelopeCipher,
   PostgresDatasetAnnotationStore,
   PostgresDatasetReviewStore,
   type CreateLabelSchemaResult,
   type CreateSplitResult,
   type ReviewAction,
-} from "@lana/database";
+} from "@lana/dataset-store";
 
 // Thin composition layer over the two dataset-review persistence stores. It
 // serves redacted projections only — raw ciphertext columns are never selected

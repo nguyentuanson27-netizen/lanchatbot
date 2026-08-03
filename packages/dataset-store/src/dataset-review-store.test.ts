@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { LocalEnvelopeCipher } from "./envelope-cipher.js";
+import { LocalEnvelopeCipher } from "@lana/database";
 import { PostgresDatasetReviewStore } from "./dataset-review-store.js";
 
 interface QueryCall {

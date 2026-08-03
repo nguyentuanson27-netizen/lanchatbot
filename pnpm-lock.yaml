@@ -29,6 +29,9 @@ importers:
       '@lana/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@lana/dataset-store':
+        specifier: workspace:*
+        version: link:../../packages/dataset-store
       fastify:
         specifier: ^5.4.0
         version: 5.10.0
@@ -130,6 +133,9 @@ importers:
       '@lana/dataset-review':
         specifier: workspace:*
         version: link:../../packages/dataset-review
+      '@lana/dataset-store':
+        specifier: workspace:*
+        version: link:../../packages/dataset-store
       '@lana/durable-messaging':
         specifier: workspace:*
         version: link:../../packages/durable-messaging
@@ -209,6 +215,25 @@ importers:
       zod:
         specifier: ^3.25.67
         version: 3.25.76
+
+  packages/dataset-store:
+    dependencies:
+      '@lana/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@lana/database':
+        specifier: workspace:*
+        version: link:../database
+      '@lana/dataset-review':
+        specifier: workspace:*
+        version: link:../dataset-review
+      pg:
+        specifier: ^8.16.3
+        version: 8.22.0
+    devDependencies:
+      '@types/pg':
+        specifier: ^8.15.5
+        version: 8.20.0
 
   packages/durable-messaging:
     dependencies:

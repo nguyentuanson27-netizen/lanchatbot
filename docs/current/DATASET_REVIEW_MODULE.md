@@ -68,7 +68,7 @@ Concurrency: `dataset_project_items.lease_owner/lease_until/revision`.
 `AnnotationEvidenceV1`, strict AI output `PrelabelResponseV1` +
 `PRELABEL_RESPONSE_SCHEMA` (Vertex dialect), all enums, `ADMIN_ROLE_TO_DATASET_ROLE`.
 
-## `@lana/database` store & import pipeline (Batch 2b)
+## `@lana/dataset-store` store & import pipeline (Batch 2b)
 
 - `computeConversationImport` / `buildImportReport` (in `@lana/dataset-review`) —
   pure per-record parse → redact → flag → dedup → checksum, plus the aggregate
@@ -85,13 +85,13 @@ Concurrency: `dataset_project_items.lease_owner/lease_until/revision`.
 ```
 DATABASE_URL=... REALTIME_DATA_KEY=<32-byte hex/base64> REALTIME_DATA_KEY_REF=<ref> \
 DATASET_IMPORT_ACTOR=<subject> \
-node packages/database/dist/dataset-import.js history_export_2000_curated.json
+node packages/dataset-store/dist/dataset-import.js history_export_2000_curated.json
 ```
 
 Idempotent: re-running the same file returns the same dataset (created=false) and
 re-imported records are DUPLICATE no-ops. Output is aggregate counts only.
 
-## `@lana/database` annotation core (Batch 3)
+## `@lana/dataset-store` annotation core (Batch 3)
 
 `PostgresDatasetAnnotationStore`:
 - **Label schemas** — `createLabelSchema` validates against `LabelSchemaV1Schema`
@@ -126,7 +126,7 @@ OAuth/token, retry and timeout infra and returns the strict `PrelabelResponseV1`
   `runBatch` isolates per-item failure.
 - `apps/worker/src/dataset-prelabel-wiring.ts` — thin adapters: Vertex → port,
   `PostgresDatasetPrelabelStore` → port.
-- `packages/database/src/dataset-prelabel-store.ts` — `PostgresDatasetPrelabelStore`:
+- `packages/dataset-store/src/dataset-prelabel-store.ts` — `PostgresDatasetPrelabelStore`:
   `createRun` (stores model, model version, prompt version, schema version, run id),
   `reserveRunItem` (idempotent by `(run, item, input_checksum)`; SUCCEEDED/
   VALIDATION_FAILED = done, FAILED/PENDING re-runnable), `persistProposals`
@@ -229,7 +229,8 @@ xử" is a placeholder toast. Those transitions are the next backend increment.
 ```
 pnpm --filter @lana/contracts test        # 80 passed (8 v5)
 pnpm --filter @lana/dataset-review test    # 42 passed (import pipeline incl.)
-pnpm --filter @lana/database test          # 63 passed (migration + 3 stores)
+pnpm --filter @lana/database test          # 80 passed (migration + generic stores)
+pnpm --filter @lana/dataset-store test     # 39 passed (4 persistence suites)
 pnpm --filter @lana/worker test            # 270 passed (incl. 10 pre-label)
 pnpm --filter @lana/admin-web test         # 38 vitest + 4 auth (13 UI + 6 API)
 pnpm --filter @lana/admin-api test         # 52 node:test (dataset routes + RBAC)
