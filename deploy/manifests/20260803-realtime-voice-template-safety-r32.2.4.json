@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-03T00:00:00Z",
+  "status": "RELEASE_CANDIDATE_SOURCE_VERIFIED_ARTIFACT_PENDING",
+  "environment": "production-test-page",
+  "host": "156.67.214.197",
+  "documentType": "APPEND_ONLY_RELEASE_CANDIDATE_EVIDENCE",
+  "releaseTag": "20260803-realtime-voice-template-safety-r32.2.4",
+  "source": {
+    "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+    "branch": "main",
+    "implementationCommit": "c7b5a0372d15e229ca5c6c26d800fe9c1cf6d45b",
+    "mergeCommit": "a4905d3a4b9a699dd3578d577f1a037f13dd34be",
+    "tagMustPointToCommitContainingThisManifest": true
+  },
+  "image": {
+    "name": "lana-chatbot-app:realtime-voice-template-safety-r32.2.4",
+    "digest": null,
+    "status": "NOT_BUILT",
+    "targetService": "realtime-worker",
+    "releasePath": "/opt/lana-chatbot/releases/20260803-realtime-voice-template-safety-r32.2.4"
+  },
+  "behavioralBaseline": {
+    "releaseTag": "20260803-confirmation-control-plane-b0-b2-r1.5",
+    "sourceCommit": "c880a59c101067b65c9326d62fc32fd02fa8f7f0",
+    "status": "LIVE_AT_CANDIDATE_CREATION"
+  },
+  "scope": {
+    "pageId": "1198992073286645",
+    "routingOwner": "APP",
+    "recreatedServices": ["realtime-worker"],
+    "nonTargetServicesMustRemainUnchanged": true,
+    "migrationRequired": false,
+    "dataDeletionRequired": false
+  },
+  "changes": {
+    "deterministicQuote": "removes the forced phrase chị nhé from verified price blocks",
+    "groundedPrompt": "removes the mandatory chị nhé product-price form",
+    "requestedImageTemplates": "six concise deterministic templates",
+    "cartAndHandoff": "removes repetitive suffixes from the single-item cart-change and purchase-handoff replies",
+    "responseGroupPoliteness": "nhé and ạ appear at most once per response group; chị remains an unrestricted pronoun"
+  },
+  "localVerification": {
+    "businessTools": { "status": "PASS", "tests": "184_OF_184" },
+    "worker": { "status": "PASS", "tests": "372_OF_372", "evidence": "verified before candidate manifest creation" },
+    "targetedVoiceRegression": { "status": "PASS", "tests": "73_OF_73" },
+    "build": { "status": "PASS", "command": "pnpm -r build", "evidence": "verified before candidate manifest creation" },
+    "releaseIntegrity": "PASS",
+    "workerTypecheck": "PASS",
+    "diffCheck": "PASS",
+    "fullPnpmCheck": "NOT_RECORDED: local runner timeout; must pass in the release artifact verification"
+  },
+  "vpsPreflight": {
+    "status": "READ_ONLY_CHECKED",
+    "currentRelease": "/opt/lana-chatbot/releases/20260803-confirmation-control-plane-b0-b2-r1.5",
+    "health": "all chatbot containers with configured health checks were healthy",
+    "artifactBuildAndCutoverEvidence": "PENDING"
+  },
+  "requiredBeforeCutover": [
+    "TAG_AND_COMMIT_PROVENANCE",
+    "CLEAN_RELEASE_PATH",
+    "UNIQUE_IMAGE_DIGEST",
+    "COMPOSE_CONFIG_PASS",
+    "REALTIME_WORKER_SMOKE_WITHOUT_MESSENGER_SEND",
+    "REALTIME_WORKER_HEALTHY_RESTART_0",
+    "NON_TARGET_CONTAINER_IDS_UNCHANGED",
+    "INBOX_OUTBOX_AND_PAGE_ALLOWLIST_CHECK"
+  ],
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260803-confirmation-control-plane-b0-b2-r1.5",
+    "realtimeImage": "lana-chatbot-app:confirmation-control-plane-b0-b2-r1.5",
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false
+  },
+  "manifestIntegrity": {
+    "immutableAfterTag": true,
+    "runtimeEvidenceMustBeRecordedAsAppendOnlyFollowUp": true,
+    "directVpsSourceEditsAllowed": false
+  }
+}
