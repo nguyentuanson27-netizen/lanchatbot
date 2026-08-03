@@ -1,7 +1,7 @@
 FROM node:22-alpine AS build
 
 RUN npm install --global pnpm@10.12.4 --silent
-RUN apk add --no-cache ffmpeg
+RUN apk add --no-cache ffmpeg git
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
