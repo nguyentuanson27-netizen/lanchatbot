@@ -17,7 +17,12 @@ validateReleaseSource(JSON.parse(readFileSync(join(runtimeDir, '.release-source.
 
 const inventory = JSON.parse(readFileSync(join(runtimeDir, 'service-inventory.json'), 'utf8'));
 validateServiceEvidence(JSON.parse(readFileSync(join(runtimeDir, 'service-evidence.example.json'), 'utf8')), inventory);
-const compose = readFileSync(join(root, 'deploy', 'docker-compose.vps.yml'), 'utf8').split(/\r?\n/);
+const composeText = readFileSync(join(root, 'deploy', 'docker-compose.vps.yml'), 'utf8');
+if (!composeText.includes('export REALTIME_BEHAVIOR_MODE_DATABASE_URL="$$(cat')) {
+  throw new Error('REALTIME_BEHAVIOR_SECRET_ROOT_BOOTSTRAP_MISSING');
+}
+if (!composeText.includes('exec su-exec node node apps/worker/dist/realtime-server.js')) throw new Error('REALTIME_BEHAVIOR_NODE_PRIVILEGE_DROP_MISSING');
+const compose = composeText.split(/\r?\n/);
 const composeServices = []; let inServices = false;
 for (const line of compose) {
   if (line === 'services:') { inServices = true; continue; }

@@ -229,7 +229,14 @@ services:
     image: ${REALTIME_IMAGE:-lana-chatbot-app:inbound-debounce-r1}
     container_name: lana-chatbot-realtime-worker
     restart: unless-stopped
-    command: ["node", "apps/worker/dist/realtime-server.js"]
+    user: "0:0"
+    command:
+      - /bin/sh
+      - -ec
+      - >-
+        export REALTIME_BEHAVIOR_MODE_DATABASE_URL="$$(cat
+        /run/secrets/runtime_behavior_mode_database_url)";
+        exec su-exec node node apps/worker/dist/realtime-server.js
     environment:
       NODE_ENV: production
       META_APP_ID: "921453707665419"
