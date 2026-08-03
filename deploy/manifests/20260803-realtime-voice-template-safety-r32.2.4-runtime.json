@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-03T07:40:00Z",
+  "status": "DEPLOYED_TEST_PAGE_AND_RUNTIME_STATE_RECONCILED",
+  "environment": "production-test-page",
+  "host": "156.67.214.197",
+  "pageId": "1198992073286645",
+  "documentType": "APPEND_ONLY_RUNTIME_DEPLOYMENT_EVIDENCE",
+  "sourceRepository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+  "releaseTag": "20260803-realtime-voice-template-safety-r32.2.4",
+  "tagObject": "a3cbe7f792b646bed6d1c634211793127b74bbc8",
+  "tagCommit": "d9d97533d6a850f557c8b3aad12bfa2b85116139",
+  "implementationCommit": "c7b5a0372d15e229ca5c6c26d800fe9c1cf6d45b",
+  "mergeCommit": "a4905d3a4b9a699dd3578d577f1a037f13dd34be",
+  "candidateManifest": "deploy/manifests/20260803-realtime-voice-template-safety-r32.2.4.json",
+  "releasePath": "/opt/lana-chatbot/releases/20260803-realtime-voice-template-safety-r32.2.4",
+  "currentSymlink": "/opt/lana-chatbot/releases/20260803-realtime-voice-template-safety-r32.2.4",
+  "sourceMaterialization": {
+    "workingTreeClean": true,
+    "composeConfig": "PASS",
+    "composeSha256": "5abfd9c38e3b22111f5a53edc6a9c230ffd2c358b84c83938fad3a3601fe2b3f",
+    "directVpsSourceEdits": false
+  },
+  "image": {
+    "name": "lana-chatbot-app:realtime-voice-template-safety-r32.2.4",
+    "imageId": "sha256:d6374e4b1d37dd6cae72a037b28907299b04f65ab1f660e6fe651195a5672833",
+    "revisionLabel": "d9d97533d6a850f557c8b3aad12bfa2b85116139",
+    "versionLabel": "20260803-realtime-voice-template-safety-r32.2.4"
+  },
+  "database": {
+    "migrationRequired": false,
+    "productionMigrationsApplied": [],
+    "latestProductionMigration": "0030_runtime_behavior_modes",
+    "backupTaken": false,
+    "downMigrationExecuted": false,
+    "dataDeleted": false
+  },
+  "runtimeConfig": {
+    "backupPath": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260803-realtime-voice-template-safety-r32.2.4",
+    "backupSha256": "07a1b09fd80c073f6ec3943de3839e6fefa210a3f32a0abfd6f88b2d049a5331",
+    "deployedSha256": "d0f4ab10391996e9cdebf6263a98b25089c6828a988fc5ebd48e2e0506c13208",
+    "mode": "0600",
+    "keysChanged": ["REALTIME_IMAGE", "REALTIME_RELEASE_ID"],
+    "preservedEnabledFeatures": [
+      "REALTIME_MESSAGE_GROUPING_V2",
+      "REALTIME_WAVE2_STRATEGY_V1",
+      "REALTIME_BUYING_SIGNAL_GUARD_V1"
+    ],
+    "model": "gemini-3.5-flash-lite",
+    "hourlyGenerationLimit": 500,
+    "dailyGenerationLimit": 2000
+  },
+  "guardedCutover": {
+    "cutoverTime": "2026-08-03T05:10:26Z",
+    "serviceOrder": ["realtime-worker"],
+    "servicesRecreated": ["realtime-worker"],
+    "nonTargetServicesRecreated": [],
+    "nonTargetContainerIdsUnchanged": true,
+    "currentSymlinkSwitchedAfterTargetGuards": true,
+    "autoRollbackTrapArmed": true
+  },
+  "targets": {
+    "realtime": {
+      "containerId": "4536c239ea7d3ab09c5aa6ae35067ef9a538e3bde2bff1376e1438925a54581c",
+      "previousContainerId": "926fba850bc64c5383f581da2027909395cc74787d5f1acfc4c8cc1ecdae9198",
+      "imageId": "sha256:d6374e4b1d37dd6cae72a037b28907299b04f65ab1f660e6fe651195a5672833",
+      "ociRevision": "d9d97533d6a850f557c8b3aad12bfa2b85116139",
+      "health": "healthy",
+      "restartCount": 0,
+      "workerMode": "LIVE",
+      "workerStatus": "IDLE",
+      "heartbeatAgeSeconds": 12
+    }
+  },
+  "verification": {
+    "imageVoiceSmoke": "R32_2_4_VOICE_SMOKE=PASS",
+    "renderedComposeImage": "RENDERED_IMAGE_OK",
+    "cutover": {
+      "result": "CUTOVER_PASS",
+      "publicStatus": 302,
+      "duplicates": 0,
+      "newErrorCount": 0
+    },
+    "postcheck": {
+      "result": "POSTCHECK_PASS",
+      "customerProcessed": 0,
+      "heartbeatDeltaSeconds": 15,
+      "failedAfter": 0,
+      "inboxActive": 0,
+      "outboxActive": 0,
+      "duplicates": 0,
+      "pageReady": 1,
+      "publicStatus": 302,
+      "publicRedirectTarget": "outpost.goauthentik.io",
+      "newErrorCount": 0
+    },
+    "localVerificationInImage": {
+      "fullPnpmCheck": "PASS_RELEASE_INTEGRITY_TYPECHECK_TESTS_BUILD",
+      "workerTests": "PASS_372_OF_372",
+      "businessToolsTests": "PASS_184_OF_184"
+    }
+  },
+  "runtimeStateReconciliation": {
+    "note": "Performed as the required append-only follow-up; the initial cutover recreated the container and flipped the symlink but had not yet written the release source pointer or promoted runtime-state, which a read-only checkpoint correctly flagged as drift.",
+    "releaseSourcePointer": {
+      "path": "/opt/lana-chatbot/releases/20260803-realtime-voice-template-safety-r32.2.4/.release-source.json",
+      "commit": "d9d97533d6a850f557c8b3aad12bfa2b85116139",
+      "createdAt": "2026-08-03T04:44:53.858Z",
+      "attestation": "OBSERVED"
+    },
+    "serviceEvidenceFile": "/opt/lana-chatbot/runtime-state/evidence/20260803-realtime-voice-template-safety-r32.2.4.json",
+    "allServicesAttestation": "OBSERVED_18_OF_18",
+    "verifyParity": "PASS",
+    "candidateSha256": "0f1c23de964d468a53f8dd7853d1a6e85c4d5865536524d297d5d0ba899fded4",
+    "promote": {
+      "historyFile": "/opt/lana-chatbot/runtime-state/history/2026-08-03T07-33-06-571Z-20260803-realtime-voice-template-safety-r32.2.4.json",
+      "currentFile": "/opt/lana-chatbot/runtime-state/current.json",
+      "currentJsonSha256": "0f1c23de964d468a53f8dd7853d1a6e85c4d5865536524d297d5d0ba899fded4"
+    },
+    "postPromoteReverify": "PASS"
+  },
+  "releaseArtifacts": {
+    "buildSha256": "922ed73bb3e803f163b46ef289236d91c7e003f029971c7e7ab7132caf7a2754",
+    "cutoverSha256": "fa073cac2d527d3bd7f834178a63ea8e11e76043389cc691f90b23dac68a497a",
+    "rollbackSha256": "81cac83d185afad3548a191b382868dd3f78beb6cc550a73c0fa89574e8e42b6",
+    "postcheckSha256": "424ab8f1d1af1211aa51d30f13c90a53c64813c2de4d0f4f5c4ff670b9bed9b6"
+  },
+  "rollback": {
+    "release": "20260803-confirmation-control-plane-b0-b2-r1.5",
+    "image": "lana-chatbot-app:confirmation-control-plane-b0-b2-r1.5",
+    "imageId": "sha256:5345d4cf02fb4222faafdd74df61ec5ade4c796472f2ca6852753bd4af1daee5",
+    "envBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-20260803-realtime-voice-template-safety-r32.2.4",
+    "rollbackScript": "shared/release-artifacts/20260803-realtime-voice-template-safety-r32.2.4-rollback.sh",
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false
+  },
+  "manifestIntegrity": {
+    "immutableAfterCommit": true,
+    "appendOnlyFollowUp": true
+  }
+}
