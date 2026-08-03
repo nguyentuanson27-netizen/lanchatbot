@@ -31,16 +31,21 @@ pretypecheck/pretest/prelint hook builds it. The permitted direction is one-way:
 lower-level package may depend on the store, and `@lana/dataset-review` may not
 depend on the database.
 
-`deploy/runtime-state/dataset-boundary-guard.mjs` recursively checks package source
+`deploy/runtime-state/dataset-boundary-guard.mjs` recursively checks every
+package-owned JavaScript/TypeScript file (excluding generated/vendor directories)
 with the TypeScript AST plus manifests, rather than an allowlist of individual
-files. It rejects type-only imports, static imports/re-exports, dynamic literal
-imports, and CommonJS imports plus dependency entries or lifecycle scripts that
-name a forbidden owner. It is wired into `pnpm check:release-integrity`.
+files. It rejects exact or subpath type-only imports, static imports/re-exports,
+dynamic literal imports, and CommonJS imports plus dependency entries or lifecycle
+scripts that name a forbidden owner. Its workspace sweep also rejects moved
+`PostgresDataset*` imports from `@lana/database` and consumers that import
+`@lana/dataset-store` without a direct manifest dependency. It is wired into
+`pnpm check:release-integrity`.
 
 The guard's isolated temporary fixtures demonstrate both directions:
 
 - a valid one-way `dataset-store -> database + dataset-review` graph passes;
-- a database source reverse import fails;
+- database source and outside-`src` subpath reverse imports fail;
+- stale consumer imports and missing direct dependencies fail;
 - a database manifest dependency and a build hook each fail; and
 - a dataset-review re-export of database fails.
 

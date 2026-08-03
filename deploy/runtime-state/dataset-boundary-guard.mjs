@@ -12,7 +12,7 @@ import { basename, dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
-const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".mts", ".cts", ".js", ".mjs", ".cjs"]);
+const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"]);
 const MANIFEST_DEPENDENCY_FIELDS = [
   "dependencies",
   "devDependencies",
@@ -35,8 +35,7 @@ function toRepositoryPath(repositoryRoot, filePath) {
 }
 
 function sourceFiles(packageRoot) {
-  const sourceRoot = join(packageRoot, "src");
-  if (!existsSync(sourceRoot)) return [];
+  if (!existsSync(packageRoot)) return [];
   const found = [];
   const visit = (directory) => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
@@ -46,7 +45,7 @@ function sourceFiles(packageRoot) {
       else if (SOURCE_EXTENSIONS.has(entry.name.slice(entry.name.lastIndexOf(".")))) found.push(candidate);
     }
   };
-  visit(sourceRoot);
+  visit(packageRoot);
   return found;
 }
 
@@ -59,7 +58,9 @@ function sourceReferencesPackage(filePath, packageName) {
     filePath.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
   );
   let referenced = false;
-  const isTarget = (value) => ts.isStringLiteral(value) && value.text === packageName;
+  const isTarget = (value) =>
+    ts.isStringLiteral(value) &&
+    (value.text === packageName || value.text.startsWith(`${packageName}/`));
   const visit = (node) => {
     if (referenced) return;
     if (
@@ -95,6 +96,115 @@ function sourceReferencesPackage(filePath, packageName) {
   return referenced;
 }
 
+function movedDatasetDatabaseImports(filePath) {
+  const parsed = ts.createSourceFile(
+    filePath,
+    readFileSync(filePath, "utf8"),
+    ts.ScriptTarget.Latest,
+    true,
+    filePath.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+  );
+  const moved = new Set();
+  const databaseNamespaces = new Set();
+  const isDatabase = (value) =>
+    ts.isStringLiteral(value) &&
+    (value.text === "@lana/database" || value.text.startsWith("@lana/database/"));
+  const recordNamedBindings = (bindings) => {
+    if (!bindings || !ts.isNamedImports(bindings)) return;
+    for (const element of bindings.elements) {
+      const importedName = (element.propertyName ?? element.name).text;
+      if (importedName.startsWith("PostgresDataset")) moved.add(importedName);
+    }
+  };
+  const collectImports = (node) => {
+    if (ts.isImportDeclaration(node) && isDatabase(node.moduleSpecifier)) {
+      const bindings = node.importClause?.namedBindings;
+      recordNamedBindings(bindings);
+      if (bindings && ts.isNamespaceImport(bindings)) databaseNamespaces.add(bindings.name.text);
+    }
+    if (
+      ts.isExportDeclaration(node) &&
+      node.moduleSpecifier &&
+      isDatabase(node.moduleSpecifier) &&
+      node.exportClause &&
+      ts.isNamedExports(node.exportClause)
+    ) {
+      for (const element of node.exportClause.elements) {
+        const importedName = (element.propertyName ?? element.name).text;
+        if (importedName.startsWith("PostgresDataset")) moved.add(importedName);
+      }
+    }
+    ts.forEachChild(node, collectImports);
+  };
+  collectImports(parsed);
+  const collectNamespaceUses = (node) => {
+    if (
+      ts.isPropertyAccessExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      databaseNamespaces.has(node.expression.text) &&
+      node.name.text.startsWith("PostgresDataset")
+    ) {
+      moved.add(node.name.text);
+    }
+    if (
+      ts.isElementAccessExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      databaseNamespaces.has(node.expression.text) &&
+      node.argumentExpression &&
+      ts.isStringLiteral(node.argumentExpression) &&
+      node.argumentExpression.text.startsWith("PostgresDataset")
+    ) {
+      moved.add(node.argumentExpression.text);
+    }
+    ts.forEachChild(node, collectNamespaceUses);
+  };
+  collectNamespaceUses(parsed);
+  return [...moved].sort();
+}
+
+function workspacePackageRoots(repositoryRoot) {
+  const found = [];
+  const visit = (directory) => {
+    if (!existsSync(directory)) return;
+    if (existsSync(join(directory, "package.json"))) found.push(directory);
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (!entry.isDirectory() || ["node_modules", "dist", ".git"].includes(entry.name)) continue;
+      visit(join(directory, entry.name));
+    }
+  };
+  visit(join(repositoryRoot, "apps"));
+  visit(join(repositoryRoot, "packages"));
+  return found;
+}
+
+function workspaceConsumerErrors(repositoryRoot) {
+  const errors = [];
+  for (const packageRoot of workspacePackageRoots(repositoryRoot)) {
+    const manifestPath = join(packageRoot, "package.json");
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    const declaresDatasetStore = MANIFEST_DEPENDENCY_FIELDS.some((field) =>
+      Object.prototype.hasOwnProperty.call(manifest[field] ?? {}, "@lana/dataset-store"),
+    );
+    for (const filePath of sourceFiles(packageRoot)) {
+      for (const symbol of movedDatasetDatabaseImports(filePath)) {
+        errors.push(
+          `${toRepositoryPath(repositoryRoot, filePath)}: moved ${symbol} must import from @lana/dataset-store, not @lana/database`,
+        );
+      }
+      if (
+        manifest.name !== "@lana/dataset-store" &&
+        sourceReferencesPackage(filePath, "@lana/dataset-store") &&
+        !declaresDatasetStore
+      ) {
+        errors.push(
+          `${toRepositoryPath(repositoryRoot, manifestPath)}: ${toRepositoryPath(repositoryRoot, filePath)} imports @lana/dataset-store without a direct dependency`,
+        );
+      }
+    }
+  }
+  return errors;
+}
+
 function packageManifestErrors(repositoryRoot, owner, forbidden) {
   const manifestPath = join(repositoryRoot, owner, "package.json");
   if (!existsSync(manifestPath)) return [`${owner}/package.json: missing manifest`];
@@ -119,7 +229,7 @@ function packageManifestErrors(repositoryRoot, owner, forbidden) {
 }
 
 export function validateDatasetBoundary(repositoryRoot) {
-  const errors = [];
+  const errors = workspaceConsumerErrors(repositoryRoot);
   for (const { owner, forbidden } of OWNER_RULES) {
     errors.push(...packageManifestErrors(repositoryRoot, owner, forbidden));
     for (const filePath of sourceFiles(join(repositoryRoot, owner))) {
@@ -163,9 +273,21 @@ export function runSelfTest() {
     write("packages/dataset-store/src/index.ts", 'import type { DatabaseHealth } from "@lana/database";\nimport type { ReviewState } from "@lana/dataset-review";\nexport type StoreState = DatabaseHealth | ReviewState;\n');
     requireClean(fixtureRoot, "valid one-way fixture rejected");
 
+    write("apps/consumer/package.json", manifest("@lana/consumer", { "@lana/database": "workspace:*" }));
+    write("apps/consumer/src/index.ts", 'import { PostgresDatasetReviewStore } from "@lana/database";\nexport type Store = PostgresDatasetReviewStore;\n');
+    requireViolation(fixtureRoot, "apps/consumer/src/index.ts: moved PostgresDatasetReviewStore must import from @lana/dataset-store", "moved consumer import fixture was accepted");
+    write("apps/consumer/src/index.ts", 'import type { PostgresDatasetReviewStore } from "@lana/dataset-store";\nexport type Store = PostgresDatasetReviewStore;\n');
+    requireViolation(fixtureRoot, "apps/consumer/package.json: apps/consumer/src/index.ts imports @lana/dataset-store without a direct dependency", "missing consumer dependency fixture was accepted");
+    write("apps/consumer/package.json", manifest("@lana/consumer", { "@lana/dataset-store": "workspace:*" }));
+    requireClean(fixtureRoot, "valid direct consumer dependency rejected");
+
     write("packages/database/src/index.ts", 'export * from "@lana/dataset-review";\n');
     requireViolation(fixtureRoot, "packages/database/src/index.ts: forbidden import or re-export of @lana/dataset-review", "database reverse-import fixture was accepted");
     write("packages/database/src/index.ts", 'export type DatabaseHealth = "READY";\n');
+
+    write("packages/database/tools/illegal.mjs", 'await import("@lana/dataset-store/internal");\n');
+    requireViolation(fixtureRoot, "packages/database/tools/illegal.mjs: forbidden import or re-export of @lana/dataset-store", "database package-wide subpath fixture was accepted");
+    rmSync(join(fixtureRoot, "packages/database/tools/illegal.mjs"));
 
     write("packages/database/package.json", manifest("@lana/database", { "@lana/contracts": "workspace:*", "@lana/dataset-review": "workspace:*" }));
     requireViolation(fixtureRoot, "packages/database/package.json: forbidden dependencies entry @lana/dataset-review", "database manifest dependency fixture was accepted");
