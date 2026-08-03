@@ -7,6 +7,7 @@ import {
   type SizeChartV1,
 } from "@lana/contracts";
 import {
+  createVerifiedSizeRecommendationClaim,
   recommendSize,
   selectVerifiedSizeChart,
   stageSizeChartFromImageRegistry,
@@ -264,6 +265,49 @@ describe("recommendSize", () => {
     expect(decision.recommendation.reasonCodes).toContain("MEASUREMENTS_MATCHES_VERIFIED_CHART");
   });
 
+  it("mints a fresh scoped protected claim only for a verified Size Engine reply", () => {
+    const customer = profile([
+      measurement("HEIGHT_CM", 162),
+      measurement("WEIGHT_KG", 54),
+    ]);
+    const decision = recommendSize({
+      profile: customer,
+      target,
+      charts: [scoped("COMPONENT")],
+      generatedAt,
+      recommendationId,
+    });
+    const claim = createVerifiedSizeRecommendationClaim({
+      decision,
+      productId: "CB182",
+      variantId: null,
+      profile: customer,
+    });
+    expect(claim).toMatchObject({
+      id: recommendationId,
+      type: "SIZE_RECOMMENDATION",
+      source: "VERIFIED_SIZE_ENGINE_V1",
+      productId: "CB182",
+      customerProfileId: customer.profileId,
+      customerProfileRevision: customer.revision,
+      value: { recommendedSizes: ["M"] },
+    });
+    expect(Date.parse(claim!.expiresAt)).toBeGreaterThan(Date.parse(generatedAt));
+
+    const unavailable = recommendSize({
+      profile: customer,
+      target,
+      charts: [],
+      generatedAt,
+      recommendationId,
+    });
+    expect(createVerifiedSizeRecommendationClaim({
+      decision: unavailable,
+      productId: "CB182",
+      variantId: null,
+      profile: customer,
+    })).toBeNull();
+  });
   it("asks for every required direct measurement before selecting a size", () => {
     const withBust = SizeChartV1Schema.parse({
       ...chart("with-bust", "TOP"),

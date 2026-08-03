@@ -384,6 +384,55 @@ export type AgentStrategyAnalysisV1 = z.infer<
   typeof AgentStrategyAnalysisV1Schema
 >;
 
+/**
+ * A size recommendation can only be emitted from the deterministic Size Engine
+ * evidence path. This is intentionally narrower than the long-term generic
+ * protected-claim contract: BF-04 must not create a second authority for the
+ * other business facts while it closes the immediate safety gap.
+ */
+export const SizeRecommendationClaimValueV1Schema = z.object({
+  recommendedSizes: z.array(z.string().trim().min(1).max(16)).min(1).max(4),
+  alternativeSizes: z.array(z.string().trim().min(1).max(16)).max(4),
+}).strict().superRefine((value, context) => {
+  const sizes = [...value.recommendedSizes, ...value.alternativeSizes]
+    .map((size) => size.toLocaleUpperCase("vi-VN"));
+  if (new Set(sizes).size !== sizes.length) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "size recommendation claim sizes must be unique",
+    });
+  }
+});
+export type SizeRecommendationClaimValueV1 = z.infer<
+  typeof SizeRecommendationClaimValueV1Schema
+>;
+
+export const SizeRecommendationProtectedClaimV1Schema = z.object({
+  id: z.string().uuid(),
+  type: z.literal("SIZE_RECOMMENDATION"),
+  value: SizeRecommendationClaimValueV1Schema,
+  productId: z.string().trim().min(1).max(128),
+  variantId: z.string().trim().min(1).max(128).nullable(),
+  evidenceRef: z.string().trim().min(1).max(512),
+  source: z.literal("VERIFIED_SIZE_ENGINE_V1"),
+  observedAt: z.string().datetime(),
+  expiresAt: z.string().datetime(),
+  customerProfileId: z.string().uuid(),
+  customerProfileRevision: z.number().int().positive(),
+  measurementFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+}).strict().superRefine((claim, context) => {
+  if (Date.parse(claim.expiresAt) <= Date.parse(claim.observedAt)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["expiresAt"],
+      message: "size recommendation claim expiry must be later than observation",
+    });
+  }
+});
+export type SizeRecommendationProtectedClaimV1 = z.infer<
+  typeof SizeRecommendationProtectedClaimV1Schema
+>;
+
 export const AgentProposalV1Schema = z.object({
   schemaVersion: z.literal(1),
   intent: z.string().min(1).max(64),
@@ -393,6 +442,9 @@ export const AgentProposalV1Schema = z.object({
   reply: z.string().max(2_000),
   attachments: z.array(z.string().url()).max(4),
   handoffReason: z.string().min(1).max(128).nullable(),
+  // Model output may reference a trusted claim ID, but never carries the
+  // provenance itself. The runtime supplies and verifies that provenance.
+  protectedClaimIds: z.array(z.string().uuid()).max(16).optional(),
   businessFactQuery: AgentBusinessFactQueryV1Schema.default({
     intent: "NONE",
     offerType: null,

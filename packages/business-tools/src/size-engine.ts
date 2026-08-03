@@ -9,6 +9,7 @@ import {
   type ProductComponentRole,
   type SizeChartV1,
   type SizeRecommendationV1,
+  type SizeRecommendationProtectedClaimV1,
 } from "@lana/contracts";
 
 const DIRECT_MEASUREMENTS: readonly MeasurementKind[] = [
@@ -579,5 +580,81 @@ export function recommendSize(input: SizeEngineInput): SizeEngineDecision {
     alternativeSizes: [],
     missingInputs: [],
     selectedScope: selected.scope.level,
+  };
+}
+/** A short-lived, code-created envelope used only by the final outbound guard. */
+export const SIZE_RECOMMENDATION_CLAIM_TTL_MS = 5 * 60 * 1_000;
+
+export interface VerifiedSizeRecommendationClaimInput {
+  readonly decision: SizeEngineDecision;
+  readonly productId: string;
+  readonly variantId: string | null;
+  readonly profile: CustomerProfileV1;
+}
+
+function sizeMeasurementFingerprint(
+  recommendation: SizeRecommendationV1,
+): string {
+  return createHash("sha256").update(JSON.stringify(
+    recommendation.measurementsUsed.map((measurement) => ({
+      kind: measurement.kind,
+      value: measurement.value,
+      source: measurement.provenance.source,
+      sourceEventHash: measurement.provenance.sourceEventHash,
+      observedAt: measurement.provenance.observedAt,
+    })),
+  )).digest("hex");
+}
+
+/**
+ * Only a successful recommendation from this module may mint the evidence the
+ * reply guard accepts. The model receives an ID at most; it never creates this
+ * provenance object itself.
+ */
+export function createVerifiedSizeRecommendationClaim(
+  input: VerifiedSizeRecommendationClaimInput,
+): SizeRecommendationProtectedClaimV1 | null {
+  const recommendation = input.decision.recommendation;
+  if (
+    input.decision.action !== "REPLY" ||
+    recommendation.status !== "RECOMMENDED" ||
+    recommendation.chartRef?.verificationStatus !== "VERIFIED" ||
+    recommendation.confidence === null ||
+    recommendation.recommendedSizes.length === 0 ||
+    normalize(recommendation.parentProductId) !== normalize(input.productId) ||
+    recommendation.customerProfileId !== input.profile.profileId ||
+    recommendation.customerProfileRevision !== input.profile.revision
+  ) return null;
+
+  const observedAtMs = Date.parse(recommendation.generatedAt);
+  if (!Number.isFinite(observedAtMs)) return null;
+  const measurementFingerprint = sizeMeasurementFingerprint(recommendation);
+  const recommendedSizes = recommendation.recommendedSizes
+    .map(({ size }) => size.trim().toLocaleUpperCase("vi-VN"));
+  const alternativeSizes = input.decision.alternativeSizes
+    .map((size) => size.trim().toLocaleUpperCase("vi-VN"))
+    .filter((size) => !recommendedSizes.includes(size));
+  return {
+    id: recommendation.recommendationId,
+    type: "SIZE_RECOMMENDATION",
+    value: { recommendedSizes, alternativeSizes },
+    productId: input.productId,
+    variantId: input.variantId,
+    evidenceRef: [
+      "size-engine:v1",
+      recommendation.recommendationId,
+      recommendation.chartRef.chartId,
+      input.profile.profileId,
+      input.profile.revision,
+      measurementFingerprint,
+    ].join(":"),
+    source: "VERIFIED_SIZE_ENGINE_V1",
+    observedAt: recommendation.generatedAt,
+    expiresAt: new Date(
+      observedAtMs + SIZE_RECOMMENDATION_CLAIM_TTL_MS,
+    ).toISOString(),
+    customerProfileId: input.profile.profileId,
+    customerProfileRevision: input.profile.revision,
+    measurementFingerprint,
   };
 }

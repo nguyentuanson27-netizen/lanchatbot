@@ -5,6 +5,7 @@ import {
   createServiceAccountAssertion,
   GROUNDED_SYSTEM_INSTRUCTION,
   GROUNDED_DRAFT_SYSTEM_INSTRUCTION,
+  SIZE_CLAIM_REPAIR_SYSTEM_INSTRUCTION,
   SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
   SHADOW_SYSTEM_INSTRUCTION,
   vertexGenerateEndpoint,
@@ -130,6 +131,41 @@ describe("Vertex shadow client", () => {
     expect(GROUNDED_DRAFT_SYSTEM_INSTRUCTION).toContain("Khong viet gia, ton");
   });
 
+  it("sends one bounded size-claim repair request with only trusted claim context", async () => {
+    const requests: unknown[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      requests.push(JSON.parse(String(init?.body)));
+      return generatedProposalResponse();
+    }) as unknown as typeof fetch;
+    const result = await modelWith(fetchMock).repairSizeClaimDraft(
+      context,
+      {
+        schemaVersion: 1,
+        intent: "size_consulting",
+        conversationStage: "FIT_CONSULTING",
+        productId: "SD398",
+        action: "REPLY",
+        reply: "Chị hợp size L.",
+        attachments: [],
+        handoffReason: null,
+        protectedClaimIds: [],
+        businessFactQuery: { intent: "SIZE", offerType: null, color: null, size: null, deliveryRegion: null },
+      },
+      ["SIZE_RECOMMENDATION_UNDECLARED"],
+      [],
+      "prompt-v1",
+    );
+    expect(result.proposal.protectedClaimIds ?? []).toEqual([]);
+    expect(SIZE_CLAIM_REPAIR_SYSTEM_INSTRUCTION).toContain("Khong duoc tu tao");
+    expect(requests).toHaveLength(1);
+    const request = requests[0] as { systemInstruction: { parts: Array<{ text: string }> }; contents: Array<{ parts: Array<{ text: string }> }> };
+    expect(request.systemInstruction.parts[0]?.text).toBe(SIZE_CLAIM_REPAIR_SYSTEM_INSTRUCTION);
+    expect(request.contents[0]?.parts[0]?.text).toContain("SIZE_RECOMMENDATION_UNDECLARED");
+    expect(request.contents[0]?.parts[0]?.text).toContain("TRUSTED_SIZE_CLAIMS_JSON");
+  });
   it("normalizes literal newline escapes in an n8n private key", () => {
     const assertion = createServiceAccountAssertion(
       {

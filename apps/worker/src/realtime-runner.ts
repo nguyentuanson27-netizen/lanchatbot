@@ -8,6 +8,7 @@ import {
   normalizeProductCode,
   ProductSearchService,
   recommendSize,
+  createVerifiedSizeRecommendationClaim,
   selectProductMediaV2,
   guardAgentProposal,
   selectImages,
@@ -1661,6 +1662,44 @@ export function composeSizeEngineAdvice(
   };
 }
 
+/** The safe terminal response after the one permitted model repair is invalid. */
+export function approvedSizeClaimClarification(
+  proposal: AgentProposalV1,
+): AgentProposalV1 {
+  return {
+    ...proposal,
+    action: "REPLY",
+    reply: "Để tư vấn size chính xác, chị cho em xin chiều cao, cân nặng hoặc số đo phù hợp nhé.",
+    attachments: [],
+    handoffReason: null,
+    protectedClaimIds: [],
+  };
+}
+
+function verifiedSizeRecommendationClaimForGuard(
+  product: StableProductDocument,
+  profile: CustomerProfileV1,
+  policyResolution: RuntimePolicyResolution | null,
+  variantId: string | null,
+  now: Date,
+) {
+  const { decision } = resolveSizeEngineDecision(
+    product,
+    profile,
+    policyResolution,
+    now,
+  );
+  return createVerifiedSizeRecommendationClaim({
+    decision,
+    productId: product.productId,
+    variantId,
+    profile,
+  });
+}
+
+function hasSizeRecommendationBlock(reasonCodes: readonly string[]): boolean {
+  return reasonCodes.some((reason) => reason.startsWith("SIZE_RECOMMENDATION_"));
+}
 export interface PostMediaProofCtaInput {
   readonly ctaPolicy: Wave2StrategyDecision["ctaPolicy"] | null;
   readonly imageIntent: CustomerImageIntent | null;
@@ -1832,6 +1871,7 @@ export interface RealtimeModelPort {
   generate: VertexShadowModel["generate"];
   groundWithFacts: VertexShadowModel["groundWithFacts"];
   groundDraftWithFacts?: VertexShadowModel["groundDraftWithFacts"];
+  repairSizeClaimDraft?: VertexShadowModel["repairSizeClaimDraft"];
 }
 
 export interface CanonicalChatHistoryPort {
@@ -3778,9 +3818,32 @@ export class RealtimeRunner {
         const verifiedProductIds = new Set<string>();
         if (resolvedProduct) verifiedProductIds.add(resolvedProduct.productId);
         if (facts?.status === "OK") verifiedProductIds.add(facts.productId);
-        let guarded = guardAgentProposal({
-          proposal,
-          facts,
+        const activeSizeProductId = resolvedProduct?.productId ?? null;
+        const activeSizeVariantId = nextState.verifiedVariant?.selectedVariantId ?? null;
+        const verifiedSizeClaim =
+          resolvedProduct && customerProfile
+            ? verifiedSizeRecommendationClaimForGuard(
+                resolvedProduct,
+                customerProfile,
+                policyResolution,
+                activeSizeVariantId,
+                now,
+              )
+            : null;
+        if (verifiedSizeClaim) {
+          proposal = {
+            ...proposal,
+            protectedClaimIds: [
+              ...new Set([...(proposal.protectedClaimIds ?? []), verifiedSizeClaim.id]),
+            ],
+          };
+        }
+        const guardProposal = (
+          candidate: AgentProposalV1,
+          candidateFacts: BusinessFactEnvelopeV1 | null = facts,
+        ) => guardAgentProposal({
+          proposal: candidate,
+          facts: candidateFacts,
           verifiedProductIds,
           ...(mediaSelectorV2GuardActive &&
               guardVerifiedAttachmentUrls !== undefined
@@ -3790,24 +3853,100 @@ export class RealtimeRunner {
               }
             : {}),
           buyingSignal: buyingSignal.isBuyingSignal,
+          sizeClaimContext: {
+            activeProductId: activeSizeProductId,
+            activeVariantId: activeSizeVariantId,
+            customerProfileId: customerProfile?.profileId ?? null,
+            customerProfileRevision: customerProfile?.revision ?? null,
+            claims: verifiedSizeClaim ? [verifiedSizeClaim] : [],
+          },
           now,
         });
-        guardedPlanHash = createHash("sha256").update(JSON.stringify({
-          action: guarded.action,
-          productId: guarded.productId,
-          handoffReason: guarded.handoffReason,
-          blockedReasonCodes: guarded.blockedReasonCodes,
-          textUnitHashes: guarded.textUnits.map((text) =>
-            createHash("sha256").update(text).digest("hex")
-          ),
-          imageCount: guarded.imageUrls.length,
-        })).digest("hex");
+        let guarded = guardProposal(proposal);
+        const guardedPlanHashFor = (value: typeof guarded): string =>
+          createHash("sha256").update(JSON.stringify({
+            action: value.action,
+            productId: value.productId,
+            handoffReason: value.handoffReason,
+            blockedReasonCodes: value.blockedReasonCodes,
+            textUnitHashes: value.textUnits.map((text) =>
+              createHash("sha256").update(text).digest("hex")
+            ),
+            imageCount: value.imageUrls.length,
+          })).digest("hex");
+        guardedPlanHash = guardedPlanHashFor(guarded);
         handoffGuardReasonCodes = [
           ...new Set([
             ...handoffGuardReasonCodes,
             ...guarded.blockedReasonCodes,
           ]),
         ];
+        if (hasSizeRecommendationBlock(guarded.blockedReasonCodes)) {
+          let repaired = false;
+          if (this.model.repairSizeClaimDraft) {
+            try {
+              modelCalled = true;
+              const repair = await this.model.repairSizeClaimDraft(
+                modelContext,
+                proposal,
+                guarded.blockedReasonCodes.filter((reason) =>
+                  reason.startsWith("SIZE_RECOMMENDATION_"),
+                ),
+                verifiedSizeClaim ? [verifiedSizeClaim] : [],
+                this.options.promptVersion,
+              );
+              modelVersion = repair.modelVersion;
+              modelLatencyMs += repair.latencyMs;
+              modelPromptTokens += repair.tokenUsage.promptTokenCount ?? 0;
+              modelOutputTokens += repair.tokenUsage.candidatesTokenCount ?? 0;
+              modelTotalTokens += repair.tokenUsage.totalTokenCount ??
+                (repair.tokenUsage.promptTokenCount ?? 0) +
+                  (repair.tokenUsage.candidatesTokenCount ?? 0);
+              hasModelTokenUsage ||= Object.values(repair.tokenUsage).some(
+                (value) => typeof value === "number" && Number.isFinite(value),
+              );
+              proposal = {
+                ...repair.proposal,
+                salesSignals: proposal.salesSignals ?? repair.proposal.salesSignals,
+                strategyAnalysis:
+                  proposal.strategyAnalysis ?? repair.proposal.strategyAnalysis,
+              };
+              guarded = guardProposal(proposal);
+              repaired =
+                !hasSizeRecommendationBlock(guarded.blockedReasonCodes) &&
+                (guarded.action === "REPLY" ||
+                  guarded.action === "ASK_PRODUCT_SELECTION");
+              if (repaired) {
+                handoffGuardReasonCodes = [...new Set([
+                  ...handoffGuardReasonCodes,
+                  "SIZE_RECOMMENDATION_REPAIRED",
+                ])];
+              }
+            } catch (error) {
+              const repairFailure = vertexGroundedFallbackReason(error);
+              modelErrorClass = repairFailure;
+              handoffGuardReasonCodes = [...new Set([
+                ...handoffGuardReasonCodes,
+                repairFailure,
+              ])];
+            }
+          } else {
+            handoffGuardReasonCodes = [...new Set([
+              ...handoffGuardReasonCodes,
+              "SIZE_RECOMMENDATION_REPAIR_UNAVAILABLE",
+            ])];
+          }
+          if (!repaired) {
+            proposal = approvedSizeClaimClarification(proposal);
+            guarded = guardProposal(proposal);
+            handoffGuardReasonCodes = [...new Set([
+              ...handoffGuardReasonCodes,
+              "SIZE_RECOMMENDATION_REPAIR_FAILED",
+              ...guarded.blockedReasonCodes,
+            ])];
+          }
+          guardedPlanHash = guardedPlanHashFor(guarded);
+        }
         if (
           guarded.action === "HANDOFF" &&
           !modelHandoffPermitted(message.text ?? "", facts) &&
@@ -3821,23 +3960,8 @@ export class RealtimeRunner {
               nextState.currentProductId,
             ),
           );
-          guarded = guardAgentProposal({
-            proposal,
-            facts: null,
-            verifiedProductIds,
-            buyingSignal: buyingSignal.isBuyingSignal,
-            now,
-          });
-          guardedPlanHash = createHash("sha256").update(JSON.stringify({
-            action: guarded.action,
-            productId: guarded.productId,
-            handoffReason: guarded.handoffReason,
-            blockedReasonCodes: guarded.blockedReasonCodes,
-            textUnitHashes: guarded.textUnits.map((text) =>
-              createHash("sha256").update(text).digest("hex")
-            ),
-            imageCount: guarded.imageUrls.length,
-          })).digest("hex");
+          guarded = guardProposal(proposal, null);
+          guardedPlanHash = guardedPlanHashFor(guarded);
         }
         if (guarded.action === "HANDOFF") {
           handoffGuardReasonCodes = [

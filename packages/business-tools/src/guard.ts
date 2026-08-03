@@ -4,6 +4,7 @@ import {
   GuardedReplyPlanV1Schema,
   type AgentProposalV1,
   type ProductFactsV1,
+  type SizeRecommendationProtectedClaimV1,
 } from "@lana/contracts";
 import type { GuardInput, GuardResult } from "./types.js";
 
@@ -19,6 +20,137 @@ const FREESHIP_PATTERN = /\b(?:freeship|free\s*ship|miễn\s+phí\s+(?:giao|ship
 const SHIP_FEE_PATTERN = /(?:phí\s*(?:ship|giao)|ship)\D{0,12}(?:\d[\d.,]*)\s*(?:k\b|nghìn\b|vnd\b|đ|₫)/iu;
 const ETA_VALUES_PATTERN = /\b(\d+)\s*(?:(?:-|–|đến)\s*(\d+))?\s*(?:ngày|day)\b/giu;
 const ORDER_INFO_REQUEST_PATTERN = /(?:xin|gửi|cho\s+(?:em|shop))[^.!?\n]{0,36}(?:tên|họ\s*tên|số\s*điện\s*thoại|sđt|địa\s*chỉ)|(?:tên|sđt|địa\s*chỉ)[^.!?\n]{0,24}(?:nhận\s*hàng|đặt\s*hàng)/iu;
+const SIZE_TOKEN = "(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\\d|50)";
+const SIZE_REFERENCE_PATTERN = new RegExp(
+  `(?:\\bsize|\\bsz|kich\\s*co|co)\\s*(?:la|:|=|\\u2013|-)?\\s*(${SIZE_TOKEN})(?:\\s*(?:-|\\u2013|den|to|/)\\s*(?:den\\s*)?(${SIZE_TOKEN}))?\\b`,
+  "giu",
+);
+const BARE_SIZE_FIT_PATTERN = new RegExp(
+  `\\b(?:mac|hop|vua|chon|lay|nen\\s*(?:chon|lay)|tu\\s*van)\\s*(?:size\\s*)?(${SIZE_TOKEN})\\b`,
+  "giu",
+);
+const SIZE_CATALOG_LIST_PATTERN = new RegExp(
+  `(?:\\bsize|\\bsz|kich\\s*co|co)\\s*[:=]?\\s*${SIZE_TOKEN}(?:\\s*[/,;]\\s*${SIZE_TOKEN})+`,
+  "iu",
+);
+const SIZE_CATALOG_LABEL_PATTERN = new RegExp(
+  `^\\s*(?:size|sz|kich\\s*co|co)\\s*[:=]\\s*${SIZE_TOKEN}\\s*[.!]?$`,
+  "iu",
+);
+const SIZE_STOCK_CONTEXT_PATTERN = /(?:con|het|san\s*hang|available|ton\s*kho|pre\s*order|dat\s*truoc)\s*(?:size|sz|kich\s*co|co)?\s*(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\b/iu;
+const SIZE_NEGATION_PATTERN = /(?:khong|chua|chang)\s+(?:the\s+)?(?:tu\s*van|goi\s*y|khuyen|xac\s*dinh|chon|ket\s*luan|bao)\b/iu;
+
+function normalizedVietnameseForGuard(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[\u0111\u0110]/gu, "d")
+    .toLocaleLowerCase("vi-VN");
+}
+
+/**
+ * Defense in depth only: this catches a concrete fit assertion omitted from
+ * the structured claim references. It deliberately ignores questions,
+ * negatives, stock statements and catalog lists; semantic intent remains the
+ * model/code proposal boundary, never this detector.
+ */
+export function detectConcreteSizeRecommendations(text: string): readonly string[] {
+  const sizes = new Set<string>();
+  for (const rawSentence of text.split(/(?<=[.!?\n])/u)) {
+    const sentence = normalizedVietnameseForGuard(rawSentence).trim();
+    if (
+      sentence.length === 0 ||
+      sentence.includes("?") ||
+      SIZE_NEGATION_PATTERN.test(sentence) ||
+      SIZE_CATALOG_LIST_PATTERN.test(sentence) ||
+      SIZE_CATALOG_LABEL_PATTERN.test(sentence) ||
+      SIZE_STOCK_CONTEXT_PATTERN.test(sentence)
+    ) {
+      continue;
+    }
+    for (const match of sentence.matchAll(SIZE_REFERENCE_PATTERN)) {
+      sizes.add((match[1] ?? "").toLocaleUpperCase("vi-VN"));
+      if (match[2]) sizes.add(match[2].toLocaleUpperCase("vi-VN"));
+    }
+    for (const match of sentence.matchAll(BARE_SIZE_FIT_PATTERN)) {
+      sizes.add((match[1] ?? "").toLocaleUpperCase("vi-VN"));
+    }
+  }
+  return [...sizes].filter(Boolean).sort();
+}
+
+function sizeClaimReason(
+  claim: SizeRecommendationProtectedClaimV1,
+  input: GuardInput,
+): string | null {
+  const context = input.sizeClaimContext;
+  if (!context) return "SIZE_RECOMMENDATION_MISSING_PROVENANCE";
+  if (claim.source !== "VERIFIED_SIZE_ENGINE_V1" || !claim.evidenceRef) {
+    return "SIZE_RECOMMENDATION_SOURCE_INVALID";
+  }
+  if (
+    context.activeProductId === null ||
+    claim.productId !== context.activeProductId
+  ) return "SIZE_RECOMMENDATION_PRODUCT_SCOPE_MISMATCH";
+  if (claim.variantId !== context.activeVariantId) {
+    return "SIZE_RECOMMENDATION_VARIANT_SCOPE_MISMATCH";
+  }
+  if (
+    context.customerProfileId === null ||
+    context.customerProfileRevision === null ||
+    claim.customerProfileId !== context.customerProfileId ||
+    claim.customerProfileRevision !== context.customerProfileRevision
+  ) return "SIZE_RECOMMENDATION_MEASUREMENT_SCOPE_MISMATCH";
+  const observedAt = Date.parse(claim.observedAt);
+  const expiresAt = Date.parse(claim.expiresAt);
+  if (
+    !Number.isFinite(observedAt) ||
+    !Number.isFinite(expiresAt) ||
+    observedAt > input.now.getTime() ||
+    expiresAt <= input.now.getTime()
+  ) return "SIZE_RECOMMENDATION_STALE";
+  return null;
+}
+
+function validateSizeRecommendations(
+  proposal: AgentProposalV1,
+  input: GuardInput,
+): readonly string[] {
+  const assertedSizes = detectConcreteSizeRecommendations(proposal.reply);
+  if (assertedSizes.length === 0) return [];
+  const context = input.sizeClaimContext;
+  const declared = new Set(proposal.protectedClaimIds ?? []);
+  const claims = context?.claims ?? [];
+  const declaredClaims = claims.filter((claim) => declared.has(claim.id));
+  if (declaredClaims.length === 0) return [
+    declared.size === 0
+      ? "SIZE_RECOMMENDATION_UNDECLARED"
+      : "SIZE_RECOMMENDATION_MISSING_PROVENANCE",
+  ];
+  const reasons = new Set<string>();
+  for (const size of assertedSizes) {
+    const eligible = declaredClaims.some((claim) => {
+      const reason = sizeClaimReason(claim, input);
+      if (reason !== null) {
+        reasons.add(reason);
+        return false;
+      }
+      const allowed = new Set([
+        ...claim.value.recommendedSizes,
+        ...claim.value.alternativeSizes,
+      ].map((value) => value.toLocaleUpperCase("vi-VN")));
+      if (!allowed.has(size)) {
+        reasons.add("SIZE_RECOMMENDATION_VALUE_MISMATCH");
+        return false;
+      }
+      return true;
+    });
+    if (!eligible && reasons.size === 0) {
+      reasons.add("SIZE_RECOMMENDATION_MISSING_PROVENANCE");
+    }
+  }
+  return [...reasons].sort();
+}
 
 function parseMoney(text: string): number[] {
   const values: number[] = [];
@@ -165,6 +297,9 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
     }
   }
 
+  for (const reason of validateSizeRecommendations(proposal, input)) {
+    blocked.add(reason);
+  }
   const blockedReasonCodes = [...blocked].sort();
   const hasHardBlock = blockedReasonCodes.some((reason) => reason !== "UNVERIFIED_ATTACHMENT");
   const useTextOnlyAttachmentFallback =

@@ -5,6 +5,7 @@ import {
 } from "@lana/conversation-engine";
 import {
   aiContinuationProductId,
+  approvedSizeClaimClarification,
   catalogAdvisoryIntent,
   catalogAdvisoryReply,
   continuationProductId,
@@ -53,6 +54,33 @@ import type {
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
 
 describe("RealtimeRunner", () => {
+  it("uses the approved no-size clarification after a rejected size-claim repair", () => {
+    const fallback = approvedSizeClaimClarification({
+      schemaVersion: 1,
+      intent: "size_consulting",
+      conversationStage: "FIT_CONSULTING",
+      productId: "SD398",
+      action: "REPLY",
+      reply: "Theo số đo chị hợp size L.",
+      attachments: [],
+      handoffReason: null,
+      protectedClaimIds: ["22222222-2222-4222-8222-222222222222"],
+      businessFactQuery: {
+        intent: "SIZE",
+        offerType: null,
+        color: null,
+        size: null,
+        deliveryRegion: null,
+      },
+    });
+    expect(fallback).toMatchObject({
+      action: "REPLY",
+      attachments: [],
+      handoffReason: null,
+      protectedClaimIds: [],
+    });
+    expect(fallback.reply).not.toMatch(/(?:size|cỡ|kích cỡ)\s*(?:s|m|l|xl|xxl|\d+)/iu);
+  });
   it("splits every outbound sentence into its own text message and preserves image order", () => {
     expect(splitRealtimeMetaMessages([
       {
