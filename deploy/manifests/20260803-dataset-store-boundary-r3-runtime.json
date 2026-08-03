@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "capturedAt": "2026-08-03T13:09:50Z",
+  "capturedAtSemantics": "REPOSITORY_RECORD_CREATED_AT_NOT_HOST_RUNTIME_CAPTURE_TIME",
   "status": "DEPLOYED_TEST_PAGE_AND_RUNTIME_STATE_RECONCILED",
   "environment": "production-test-page",
   "host": "156.67.214.197",
