@@ -87,6 +87,9 @@ describe("PostgresRuntimeBehaviorModeStore", () => {
       expect.stringContaining("pointer_revision=$8"),
       "COMMIT",
     ]));
+    const pointerLock = statements.find((sql) => sql.includes("FROM runtime_behavior_mode_pointers p"));
+    expect(pointerLock).toContain("FOR UPDATE OF p");
+    expect(pointerLock).not.toMatch(/FOR UPDATE\s*$/u);
     expect(statements.some((sql) => sql.includes("INSERT INTO runtime_behavior_mode_activation_audit"))).toBe(false);
     expect(mocks.release).toHaveBeenCalledOnce();
   });

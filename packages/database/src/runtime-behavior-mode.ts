@@ -174,7 +174,7 @@ export class PostgresRuntimeBehaviorModeStore {
         `SELECT p.active_version_id, p.pointer_revision, v.confirmation_mode AS previous_confirmation_mode
          FROM runtime_behavior_mode_pointers p
          JOIN runtime_behavior_mode_versions v ON v.mode_version_id = p.active_version_id
-         WHERE p.page_id = $1 AND p.channel = $2 FOR UPDATE`, [pageId, channel]);
+         WHERE p.page_id = $1 AND p.channel = $2 FOR UPDATE OF p`, [pageId, channel]);
       const current = currentResult.rows[0] as Record<string, unknown> | undefined;
       const currentRevision = current ? Number(current.pointer_revision) : 0;
       if (currentRevision !== input.expectedPointerRevision) throw new Error("RUNTIME_BEHAVIOR_POINTER_CAS_MISMATCH");
