@@ -1,0 +1,32 @@
+{
+  "name": "@lana/dataset-store",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "prebuild": "pnpm --filter @lana/contracts --filter @lana/dataset-review --filter @lana/database build",
+    "build": "tsc -p tsconfig.json",
+    "pretypecheck": "pnpm --filter @lana/contracts --filter @lana/dataset-review --filter @lana/database build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pretest": "pnpm --filter @lana/contracts --filter @lana/dataset-review --filter @lana/database build",
+    "test": "vitest run",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@lana/contracts": "workspace:*",
+    "@lana/database": "workspace:*",
+    "@lana/dataset-review": "workspace:*",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.5"
+  }
+}

@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { PiiType } from "@lana/dataset-review";
-import { LocalEnvelopeCipher } from "./envelope-cipher.js";
+import { LocalEnvelopeCipher } from "@lana/database";
 import {
   PostgresDatasetReviewStore,
   type ImportRecord,

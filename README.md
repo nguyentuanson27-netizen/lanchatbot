@@ -121,6 +121,7 @@ apps/admin-control-worker   Lệnh quản trị và đồng bộ tag
 apps/admin-simulation-worker Replay policy side-effect-free trên lịch sử ẩn danh
 packages/contracts          Schema dùng chung
 packages/database           Migration và repository PostgreSQL
+packages/dataset-store      Dataset persistence encrypted/review/import/annotation/prelabel
 packages/business-tools     Facts và policy guard
 packages/conversation-engine Trạng thái, ownership và handoff
 packages/meta-delivery      Meta Outbox

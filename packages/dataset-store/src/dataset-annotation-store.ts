@@ -12,7 +12,7 @@ import {
   type SplitV1,
 } from "@lana/contracts";
 import { assignSplits, type SplitItem, type SplitTargets } from "@lana/dataset-review";
-import { withTransaction } from "./repositories.js";
+import { withTransaction } from "@lana/database";
 
 // Annotation-core persistence: dynamic label schemas, annotation projects,
 // deterministic group-aware split assignment, annotations, and the append-only

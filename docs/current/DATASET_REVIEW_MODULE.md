@@ -85,7 +85,7 @@ Concurrency: `dataset_project_items.lease_owner/lease_until/revision`.
 ```
 DATABASE_URL=... REALTIME_DATA_KEY=<32-byte hex/base64> REALTIME_DATA_KEY_REF=<ref> \
 DATASET_IMPORT_ACTOR=<subject> \
-node packages/database/dist/dataset-import.js history_export_2000_curated.json
+node packages/dataset-store/dist/dataset-import.js history_export_2000_curated.json
 ```
 
 Idempotent: re-running the same file returns the same dataset (created=false) and
@@ -126,7 +126,7 @@ OAuth/token, retry and timeout infra and returns the strict `PrelabelResponseV1`
   `runBatch` isolates per-item failure.
 - `apps/worker/src/dataset-prelabel-wiring.ts` — thin adapters: Vertex → port,
   `PostgresDatasetPrelabelStore` → port.
-- `packages/database/src/dataset-prelabel-store.ts` — `PostgresDatasetPrelabelStore`:
+- `packages/dataset-store/src/dataset-prelabel-store.ts` — `PostgresDatasetPrelabelStore`:
   `createRun` (stores model, model version, prompt version, schema version, run id),
   `reserveRunItem` (idempotent by `(run, item, input_checksum)`; SUCCEEDED/
   VALIDATION_FAILED = done, FAILED/PENDING re-runnable), `persistProposals`

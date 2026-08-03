@@ -5,7 +5,7 @@ import type {
   AnnotationScopeV1,
 } from "@lana/contracts";
 import type { ValidationMessage } from "@lana/dataset-review";
-import { withTransaction } from "./repositories.js";
+import { withTransaction } from "@lana/database";
 
 // Persistence for AI/heuristic pre-label runs. Stores model, model version,
 // prompt version, schema version, run id and per-item input checksum; enforces
