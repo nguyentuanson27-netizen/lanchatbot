@@ -486,9 +486,11 @@ export function groupRealtimeMetaMessagesV2(
   messages: readonly RealtimeMetaMessageUnit[],
   splitProductInfoFollowUp = false,
 ): RealtimeMetaMessageUnit[] {
-  if (!splitProductInfoFollowUp) return [...messages];
+  if (!splitProductInfoFollowUp) {
+    return limitResponseGroupPoliteness(messages);
+  }
   let split = false;
-  return messages.flatMap((message) => {
+  const grouped = messages.flatMap((message) => {
     if (split || message.kind !== "TEXT") return [message];
     const [information, ...followUpParts] = message.text
       .replace(/\r\n?/gu, "\n")
@@ -503,6 +505,38 @@ export function groupRealtimeMetaMessagesV2(
       { kind: "TEXT" as const, text: followUp },
     ];
   });
+  return limitResponseGroupPoliteness(grouped);
+}
+
+const RESPONSE_GROUP_POLITENESS_TOKENS = new Set(["chị", "nhé", "ạ"]);
+const RESPONSE_GROUP_POLITENESS_TOKEN = /(?<![\p{L}\p{N}_])(chị|nhé|ạ)(?![\p{L}\p{N}_])/giu;
+
+/** Keeps the conversational particles natural by using each at most once per response group. */
+export function limitResponseGroupPoliteness(
+  messages: readonly RealtimeMetaMessageUnit[],
+): RealtimeMetaMessageUnit[] {
+  const used = new Set<string>();
+  const limited: RealtimeMetaMessageUnit[] = [];
+  for (const message of messages) {
+    if (message.kind !== "TEXT") {
+      limited.push(message);
+      continue;
+    }
+    const text = message.text.replace(RESPONSE_GROUP_POLITENESS_TOKEN, (match) => {
+      const token = match.toLocaleLowerCase("vi");
+      if (!RESPONSE_GROUP_POLITENESS_TOKENS.has(token) || !used.has(token)) {
+        used.add(token);
+        return match;
+      }
+      return "";
+    })
+      .replace(/[ \t]+([,.;:!?])/gu, "$1")
+      .replace(/[ \t]{2,}/gu, " ")
+      .replace(/[ \t]*\n[ \t]*/gu, "\n")
+      .trim();
+    if (text) limited.push({ kind: "TEXT", text });
+  }
+  return limited;
 }
 
 export function isResolvedProductCodeOnly(
@@ -754,7 +788,7 @@ export function verifiedProductInfoProposal(
     ? sentenceCase(displayName)
     : `${sentenceCase(displayName)} (mã ${product.productId})`;
   const informationLines = [
-    `${heading} hiện có giá ${new Intl.NumberFormat("vi-VN").format(price)}đ chị nhé.`,
+    `${heading} hiện có giá ${new Intl.NumberFormat("vi-VN").format(price)}đ.`,
     ...(material ? [`Chất liệu: ${material}`] : []),
     ...(form ? [`Form dáng: ${form}`] : []),
     ...(facts.facts.sizes.length > 0
@@ -818,13 +852,13 @@ export function verifiedProductInfoProposal(
   };
 }
 
-const IMAGE_INTENT_REPLIES: Readonly<Record<CustomerImageIntent, string>> = {
-  FEEDBACK: "Em gửi chị ảnh khách đã mặc mẫu này nhé",
-  DETAIL: "Em gửi chị ảnh cận chất liệu nhé",
-  BACK: "Em gửi chị ảnh mặt sau nhé",
-  SIZE_GUIDE: "Em gửi chị bảng size nhé",
-  PRODUCT_ONLY: "Em gửi chị ảnh sản phẩm nhé",
-  GENERIC: "Em gửi chị thêm ảnh của mẫu này nhé",
+export const IMAGE_INTENT_REPLIES: Readonly<Record<CustomerImageIntent, string>> = {
+  FEEDBACK: "Em gửi chị ảnh khách đã mặc mẫu này.",
+  DETAIL: "Em gửi chị ảnh cận chất liệu của mẫu này.",
+  BACK: "Em gửi chị ảnh mặt sau của mẫu này.",
+  SIZE_GUIDE: "Em gửi chị bảng size của mẫu này.",
+  PRODUCT_ONLY: "Em gửi chị ảnh sản phẩm của mẫu này.",
+  GENERIC: "Em gửi chị thêm ảnh của mẫu này.",
 };
 
 /**

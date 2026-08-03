@@ -67,7 +67,7 @@ describe("verified reply assembler", () => {
         kind: "PRICE",
         productId: "AD398",
         text: [
-          "Áo dài Dao Phụng (mã AD398) hiện có giá 1.199.000đ chị nhé.",
+          "Áo dài Dao Phụng (mã AD398) hiện có giá 1.199.000đ.",
           "Chất liệu: ren, tơ óng",
           "Form dáng: suông",
           "Size: S, M, L",
@@ -79,12 +79,18 @@ describe("verified reply assembler", () => {
     });
     expect(assembleReply(result, emptyDraft, facts, product).text).toBe(
       [
-        "Áo dài Dao Phụng (mã AD398) hiện có giá 1.199.000đ chị nhé.",
+        "Áo dài Dao Phụng (mã AD398) hiện có giá 1.199.000đ.",
         "Chất liệu: ren, tơ óng",
         "Form dáng: suông",
         "Size: S, M, L",
       ].join("\n"),
     );
+  });
+
+  it("never includes chị nhé in a deterministic fact block", () => {
+    const result = buildVerifiedFactBlocks(facts, "PRICE", product);
+    expect(result.blocks).toHaveLength(1);
+    expect(result.blocks[0]?.text).not.toContain("chị nhé");
   });
 
   it("normalizes a type-and-code-only catalog title without losing the product type", () => {
@@ -101,7 +107,7 @@ describe("verified reply assembler", () => {
       facts: facts.facts ? { ...facts.facts, productId: "SV2447", parentProductId: "SV2447" } : null,
     };
     expect(buildVerifiedFactBlocks(upperFacts, "PRICE", upperProduct).blocks[0]?.text)
-      .toContain("Set váy SV2447 hiện có giá 1.199.000đ chị nhé.");
+      .toContain("Set váy SV2447 hiện có giá 1.199.000đ.");
   });
 
   it.each([

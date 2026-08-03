@@ -165,7 +165,7 @@ describe("r32.2 Compatibility First regression shield", () => {
     const proposal = verifiedProductInfoProposal(product, facts, []);
     expect(proposal).not.toBeNull();
     expect(proposal?.reply).toBe([
-      "Áo dài Dao Phụng (mã SD398) hiện có giá 1.199.000đ chị nhé.",
+      "Áo dài Dao Phụng (mã SD398) hiện có giá 1.199.000đ.",
       "Chất liệu: ren họa tiết hoa chìm phối tơ ống",
       "Form dáng: suông rộng",
       "Size: M, L, XL",
@@ -181,7 +181,7 @@ describe("r32.2 Compatibility First regression shield", () => {
       {
         kind: "TEXT",
         text: [
-          "Áo dài Dao Phụng (mã SD398) hiện có giá 1.199.000đ chị nhé.",
+          "Áo dài Dao Phụng (mã SD398) hiện có giá 1.199.000đ.",
           "Chất liệu: ren họa tiết hoa chìm phối tơ ống",
           "Form dáng: suông rộng",
           "Size: M, L, XL",

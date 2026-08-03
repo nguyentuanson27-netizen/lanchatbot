@@ -436,6 +436,27 @@ describe("realtime Phase 3 sales cycle", () => {
       reasonCode: "PURCHASE_CONFIRMED",
       plan: { state: { stage: "PURCHASE_CONFIRMED" } },
     });
+    expect(confirmed.messages[0]).toEqual({
+      kind: "TEXT",
+      text: "Em đã ghi nhận xác nhận mua hàng. Nhân viên sẽ kiểm tra và lên đơn cho chị.",
+    });
+  });
+
+  it("uses the concise prompt when the customer changes a single-item cart", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "event-single-cart-open",
+    ));
+    const changed = await evaluateRealtimeSalesCycle(input(
+      opened.plan!.state,
+      "bỏ mẫu này",
+      "event-single-cart-change",
+    ));
+    expect(changed.messages).toEqual([{
+      kind: "TEXT",
+      text: "Giỏ hiện chỉ còn một sản phẩm. Chị gửi mã mẫu muốn đổi để em kiểm tra.",
+    }]);
   });
 
   it("stacks 5%, freeship and final 20k while the same evidence cannot escalate twice", async () => {

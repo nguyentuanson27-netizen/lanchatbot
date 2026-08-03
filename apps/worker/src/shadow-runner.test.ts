@@ -266,7 +266,7 @@ describe("Phase 4 shadow runner", () => {
         productId: "SQ149",
         action: "REPLY",
         reply: [
-          "Set SQ149 hiện có giá 699.000đ chị nhé.",
+          "Set SQ149 hiện có giá 699.000đ.",
           "Size: M",
           "",
           "Form thanh lịch, dễ mặc đi làm.",

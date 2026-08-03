@@ -937,7 +937,7 @@ export async function evaluateRealtimeSalesCycle(
     const messages: RealtimeSalesCycleOutput["messages"] = [
       {
         kind: "TEXT",
-        text: "Em đã ghi nhận xác nhận mua hàng. Nhân viên sẽ kiểm tra và lên đơn cho chị ngay ạ.",
+        text: "Em đã ghi nhận xác nhận mua hàng. Nhân viên sẽ kiểm tra và lên đơn cho chị.",
       },
       ...(result.paymentInstruction
         ? [
@@ -970,7 +970,7 @@ export async function evaluateRealtimeSalesCycle(
       if (!line || state.cart.value.lines.length <= 1) {
         return {
           handled: true,
-          messages: [{ kind: "TEXT", text: "Giỏ hiện chỉ còn một sản phẩm. Chị gửi mã mẫu muốn đổi để em kiểm tra giúp chị nhé." }],
+          messages: [{ kind: "TEXT", text: "Giỏ hiện chỉ còn một sản phẩm. Chị gửi mã mẫu muốn đổi để em kiểm tra." }],
           plan: null,
           transferToHuman: false,
           desiredTag: null,
