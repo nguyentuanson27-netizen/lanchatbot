@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-03T05:25:01Z",
+  "status": "CUTOVER_PASS_POSTCHECK_HEALTH_PASS",
+  "documentType": "APPEND_ONLY_RUNTIME_EVIDENCE",
+  "candidateManifest": "deploy/manifests/20260803-realtime-voice-template-safety-r32.2.4.json",
+  "releaseTag": "20260803-realtime-voice-template-safety-r32.2.4",
+  "tagCommit": "d9d97533d6a850f557c8b3aad12bfa2b85116139",
+  "host": "156.67.214.197",
+  "runtime": {
+    "currentReleasePath": "/opt/lana-chatbot/releases/20260803-realtime-voice-template-safety-r32.2.4",
+    "realtimeWorker": {
+      "container": "lana-chatbot-realtime-worker",
+      "image": "lana-chatbot-app:realtime-voice-template-safety-r32.2.4",
+      "imageId": "sha256:d6374e4b1d37dd6cae72a037b28907299b04f65ab1f660e6fe651195a5672833",
+      "startedAt": "2026-08-03T05:10:57.332856748Z",
+      "health": "healthy",
+      "restartCount": 0
+    },
+    "nonTargetServices": {
+      "deliveryWorker": "realtime-compatibility-first-r32.2|healthy",
+      "api": "ad-acquisition-r27.1|healthy",
+      "shadowWorker": "wave2-strategy-gemini35-r26.1|healthy",
+      "adminApi": "realtime-audit-safety-r32.1|healthy",
+      "adminWeb": "performance-ui-stability-r30|healthy",
+      "sizeChartExtractor": "wave2-strategy-gemini35-r26.1|no healthcheck configured"
+    }
+  },
+  "postcheck": {
+    "currentSymlinkMatchesReleaseTag": true,
+    "targetServiceHealthy": true,
+    "targetServiceRestartCount": 0,
+    "releaseGitMetadataPresent": false,
+    "releaseProvenance": "tag and deployment path verified; release directory is a source materialization without .git metadata",
+    "containerInventoryReadOnlyCheck": "PASS"
+  },
+  "notAssertedByThisEvidence": [
+    "messenger smoke transcript",
+    "inbox and outbox queue counts",
+    "non-target container ID equality",
+    "full runtime source-tree parity"
+  ],
+  "integrity": {
+    "candidateManifestModified": false,
+    "releaseTagMoved": false,
+    "appendOnlyFollowUp": true,
+    "directVpsSourceEditsAllowed": false
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260803-confirmation-control-plane-b0-b2-r1.5",
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false
+  }
+}
