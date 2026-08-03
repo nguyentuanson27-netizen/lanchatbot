@@ -109,11 +109,42 @@ function movedDatasetDatabaseImports(filePath) {
   const isDatabase = (value) =>
     ts.isStringLiteral(value) &&
     (value.text === "@lana/database" || value.text.startsWith("@lana/database/"));
+  const recordMovedName = (name) => {
+    if (name?.startsWith("PostgresDataset")) moved.add(name);
+  };
   const recordNamedBindings = (bindings) => {
     if (!bindings || !ts.isNamedImports(bindings)) return;
     for (const element of bindings.elements) {
-      const importedName = (element.propertyName ?? element.name).text;
-      if (importedName.startsWith("PostgresDataset")) moved.add(importedName);
+      recordMovedName((element.propertyName ?? element.name).text);
+    }
+  };
+  const recordObjectBinding = (binding) => {
+    if (!ts.isObjectBindingPattern(binding)) return;
+    for (const element of binding.elements) {
+      const importedName = element.propertyName
+        ? element.propertyName.text
+        : ts.isIdentifier(element.name)
+          ? element.name.text
+          : undefined;
+      recordMovedName(importedName);
+    }
+  };
+  const recordModuleResult = (call) => {
+    let parent = call.parent;
+    while (ts.isAwaitExpression(parent) || ts.isParenthesizedExpression(parent)) {
+      parent = parent.parent;
+    }
+    if (ts.isVariableDeclaration(parent)) {
+      recordObjectBinding(parent.name);
+      if (ts.isIdentifier(parent.name)) databaseNamespaces.add(parent.name.text);
+    }
+    if (ts.isPropertyAccessExpression(parent)) recordMovedName(parent.name.text);
+    if (
+      ts.isElementAccessExpression(parent) &&
+      parent.argumentExpression &&
+      ts.isStringLiteral(parent.argumentExpression)
+    ) {
+      recordMovedName(parent.argumentExpression.text);
     }
   };
   const collectImports = (node) => {
@@ -123,6 +154,14 @@ function movedDatasetDatabaseImports(filePath) {
       if (bindings && ts.isNamespaceImport(bindings)) databaseNamespaces.add(bindings.name.text);
     }
     if (
+      ts.isImportEqualsDeclaration(node) &&
+      ts.isExternalModuleReference(node.moduleReference) &&
+      node.moduleReference.expression &&
+      isDatabase(node.moduleReference.expression)
+    ) {
+      databaseNamespaces.add(node.name.text);
+    }
+    if (
       ts.isExportDeclaration(node) &&
       node.moduleSpecifier &&
       isDatabase(node.moduleSpecifier) &&
@@ -130,9 +169,28 @@ function movedDatasetDatabaseImports(filePath) {
       ts.isNamedExports(node.exportClause)
     ) {
       for (const element of node.exportClause.elements) {
-        const importedName = (element.propertyName ?? element.name).text;
-        if (importedName.startsWith("PostgresDataset")) moved.add(importedName);
+        recordMovedName((element.propertyName ?? element.name).text);
       }
+    }
+    if (
+      ts.isCallExpression(node) &&
+      node.arguments.length > 0 &&
+      isDatabase(node.arguments[0]) &&
+      (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
+        (ts.isIdentifier(node.expression) && node.expression.text === "require"))
+    ) {
+      recordModuleResult(node);
+    }
+    if (
+      ts.isImportTypeNode(node) &&
+      ts.isLiteralTypeNode(node.argument) &&
+      isDatabase(node.argument.literal) &&
+      node.qualifier
+    ) {
+      const qualifierName = ts.isIdentifier(node.qualifier)
+        ? node.qualifier.text
+        : node.qualifier.right.text;
+      recordMovedName(qualifierName);
     }
     ts.forEachChild(node, collectImports);
   };
@@ -141,27 +199,24 @@ function movedDatasetDatabaseImports(filePath) {
     if (
       ts.isPropertyAccessExpression(node) &&
       ts.isIdentifier(node.expression) &&
-      databaseNamespaces.has(node.expression.text) &&
-      node.name.text.startsWith("PostgresDataset")
+      databaseNamespaces.has(node.expression.text)
     ) {
-      moved.add(node.name.text);
+      recordMovedName(node.name.text);
     }
     if (
       ts.isElementAccessExpression(node) &&
       ts.isIdentifier(node.expression) &&
       databaseNamespaces.has(node.expression.text) &&
       node.argumentExpression &&
-      ts.isStringLiteral(node.argumentExpression) &&
-      node.argumentExpression.text.startsWith("PostgresDataset")
+      ts.isStringLiteral(node.argumentExpression)
     ) {
-      moved.add(node.argumentExpression.text);
+      recordMovedName(node.argumentExpression.text);
     }
     ts.forEachChild(node, collectNamespaceUses);
   };
   collectNamespaceUses(parsed);
   return [...moved].sort();
 }
-
 function workspacePackageRoots(repositoryRoot) {
   const found = [];
   const visit = (directory) => {
@@ -276,6 +331,8 @@ export function runSelfTest() {
     write("apps/consumer/package.json", manifest("@lana/consumer", { "@lana/database": "workspace:*" }));
     write("apps/consumer/src/index.ts", 'import { PostgresDatasetReviewStore } from "@lana/database";\nexport type Store = PostgresDatasetReviewStore;\n');
     requireViolation(fixtureRoot, "apps/consumer/src/index.ts: moved PostgresDatasetReviewStore must import from @lana/dataset-store", "moved consumer import fixture was accepted");
+    write("apps/consumer/src/index.ts", 'const { PostgresDatasetReviewStore } = await import("@lana/database");\nexport const Store = PostgresDatasetReviewStore;\n');
+    requireViolation(fixtureRoot, "apps/consumer/src/index.ts: moved PostgresDatasetReviewStore must import from @lana/dataset-store", "moved dynamic consumer import fixture was accepted");
     write("apps/consumer/src/index.ts", 'import type { PostgresDatasetReviewStore } from "@lana/dataset-store";\nexport type Store = PostgresDatasetReviewStore;\n');
     requireViolation(fixtureRoot, "apps/consumer/package.json: apps/consumer/src/index.ts imports @lana/dataset-store without a direct dependency", "missing consumer dependency fixture was accepted");
     write("apps/consumer/package.json", manifest("@lana/consumer", { "@lana/dataset-store": "workspace:*" }));
