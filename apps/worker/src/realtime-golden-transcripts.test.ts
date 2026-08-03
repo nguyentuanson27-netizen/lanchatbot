@@ -253,7 +253,7 @@ describe("realtime golden transcripts", () => {
       {
         kind: "TEXT",
         text: [
-          "Set váy CB182 hiện có giá 699.000đ chị nhé.",
+          "Set váy CB182 hiện có giá 699.000đ.",
           "Chất liệu: gấm",
           "Form dáng: suông",
           "Size: S, M, L",
@@ -442,7 +442,7 @@ describe("realtime golden transcripts", () => {
       {
         kind: "TEXT",
         text: [
-          "Set váy CB182 hiện có giá 699.000đ chị nhé.",
+          "Set váy CB182 hiện có giá 699.000đ.",
           "Chất liệu: gấm",
           "Form dáng: suông",
           "Size: S, M, L",
@@ -489,7 +489,7 @@ describe("realtime golden transcripts", () => {
     expect(committed?.metaPlan?.messages).toEqual([{
       kind: "TEXT",
       text: [
-        "Set váy CB182 hiện có giá 699.000đ chị nhé.",
+        "Set váy CB182 hiện có giá 699.000đ.",
         "Chất liệu: gấm",
         "Form dáng: suông",
         "Size: S, M, L",
@@ -565,7 +565,7 @@ describe("realtime golden transcripts", () => {
     const rendered = messages.map((message) =>
       message.kind === "TEXT" ? message.text : ""
     ).join("\n");
-    expect(rendered).toContain("chị nhé");
+    expect(rendered).not.toContain("chị nhé");
     expect((rendered.match(/\?/gu) ?? []).length).toBe(1);
     expect(committed?.decisionEvents).toEqual(expect.arrayContaining([
       expect.objectContaining({

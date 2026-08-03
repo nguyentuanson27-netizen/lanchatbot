@@ -15,6 +15,7 @@ import {
   isLegacyUnaccentedProductInfoReply,
   isPostSaleRequest,
   groupRealtimeMetaMessagesV2,
+  IMAGE_INTENT_REPLIES,
   isPreSalePolicyQuestion,
   FailClosedTagObservationProvider,
   hasCustomerMeasurementSignal,
@@ -83,7 +84,7 @@ describe("RealtimeRunner", () => {
       {
         kind: "TEXT",
         text: [
-          "Set váy Quỳnh Dao (mã SV695) hiện có giá 770.000đ chị nhé.",
+          "Set váy Quỳnh Dao (mã SV695) hiện có giá 770.000đ.",
           "Chất liệu: lụa mềm",
           "Form dáng: chiết eo",
           "Size: M, L, XL",
@@ -96,7 +97,7 @@ describe("RealtimeRunner", () => {
       {
         kind: "TEXT",
         text: [
-          "Set váy Quỳnh Dao (mã SV695) hiện có giá 770.000đ chị nhé.",
+          "Set váy Quỳnh Dao (mã SV695) hiện có giá 770.000đ.",
           "Chất liệu: lụa mềm",
           "Form dáng: chiết eo",
           "Size: M, L, XL",
@@ -105,6 +106,41 @@ describe("RealtimeRunner", () => {
       { kind: "TEXT", text: "Chị cao và nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?" },
       { kind: "IMAGE", imageUrl: "https://cdn.example/sv695.jpg" },
     ]);
+  });
+
+  it("uses six concise templates for requested images", () => {
+    expect(IMAGE_INTENT_REPLIES).toEqual({
+      FEEDBACK: "Em gửi chị ảnh khách đã mặc mẫu này.",
+      DETAIL: "Em gửi chị ảnh cận chất liệu của mẫu này.",
+      BACK: "Em gửi chị ảnh mặt sau của mẫu này.",
+      SIZE_GUIDE: "Em gửi chị bảng size của mẫu này.",
+      PRODUCT_ONLY: "Em gửi chị ảnh sản phẩm của mẫu này.",
+      GENERIC: "Em gửi chị thêm ảnh của mẫu này.",
+    });
+  });
+
+  it("limits nhé and ạ to one use per response group but keeps the chị pronoun", () => {
+    const grouped = groupRealtimeMetaMessagesV2([
+      { kind: "TEXT", text: "Chị xem mẫu này nhé ạ." },
+      { kind: "TEXT", text: "Chị gửi thêm ảnh nhé ạ." },
+    ]);
+    expect(grouped).toEqual([
+      { kind: "TEXT", text: "Chị xem mẫu này nhé ạ." },
+      { kind: "TEXT", text: "Chị gửi thêm ảnh." },
+    ]);
+    const rendered = grouped
+      .filter((message): message is Extract<typeof message, { kind: "TEXT" }> => message.kind === "TEXT")
+      .map((message) => message.text)
+      .join("\n");
+    for (const token of ["nhé", "ạ"]) {
+      expect(Array.from(rendered.matchAll(
+        new RegExp(`(?<![\\p{L}\\p{N}_])${token}(?![\\p{L}\\p{N}_])`, "giu"),
+      ))).toHaveLength(1);
+    }
+    // "chị" is a pronoun, not a politeness particle: it must survive on every message.
+    expect(Array.from(rendered.matchAll(
+      /(?<![\p{L}\p{N}_])chị(?![\p{L}\p{N}_])/giu,
+    ))).toHaveLength(2);
   });
 
   it("uses deterministic bounded jitter for inbox retries", () => {
@@ -528,7 +564,7 @@ describe("RealtimeRunner", () => {
       businessFactQuery: { intent: "PRICE" },
     });
     expect(proposal?.reply).toBe([
-      "Áo dài Dao Phụng (mã SD398) hiện có giá 1.199.000đ chị nhé.",
+      "Áo dài Dao Phụng (mã SD398) hiện có giá 1.199.000đ.",
       "Chất liệu: ren họa tiết hoa chìm phối tơ ống",
       "Form dáng: suông rộng",
       "Size: M, L, XL",
@@ -642,7 +678,7 @@ describe("RealtimeRunner", () => {
       conversationStage: "PRODUCT_MATCHED",
       productId: "SD398",
       action: "REPLY",
-      reply: "Áo dài Dao Phụng hiện có giá 1.199.000đ chị nhé.",
+      reply: "Áo dài Dao Phụng hiện có giá 1.199.000đ.",
       attachments: [],
       handoffReason: null,
       businessFactQuery: {
@@ -1131,7 +1167,7 @@ describe("RealtimeRunner", () => {
           {
             kind: "TEXT",
             text: [
-              "Set váy Quỳnh Dao (mã SV695) hiện có giá 770.000đ chị nhé.",
+              "Set váy Quỳnh Dao (mã SV695) hiện có giá 770.000đ.",
               "Chất liệu: lụa mềm",
               "Form dáng: chiết eo",
               "Size: M, L, XL",
@@ -1233,7 +1269,7 @@ describe("RealtimeRunner", () => {
       {
         kind: "TEXT",
         text: expect.stringContaining(
-          "Set váy Quỳnh Dao (mã SV695) hiện có giá 770.000đ chị nhé.",
+          "Set váy Quỳnh Dao (mã SV695) hiện có giá 770.000đ.",
         ),
       },
       { kind: "IMAGE", imageUrl },

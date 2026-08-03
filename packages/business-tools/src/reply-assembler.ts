@@ -83,7 +83,7 @@ export function buildVerifiedFactBlocks(
     const price = facts.facts.salePriceVnd ?? facts.facts.listPriceVnd;
     if (price !== null) {
       const lines = [
-        `${productName(product)} hiện có giá ${fullPrice(price)} chị nhé.`,
+        `${productName(product)} hiện có giá ${fullPrice(price)}.`,
         ...(product.materials.length > 0
           ? [`Chất liệu: ${product.materials.map((value) => value.toLocaleLowerCase("vi")).join(", ")}`]
           : []),
