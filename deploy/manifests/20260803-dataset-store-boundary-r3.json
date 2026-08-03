@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-03T09:29:09Z",
+  "status": "RELEASE_CANDIDATE_SOURCE_VERIFIED_ARTIFACT_PENDING",
+  "environment": "production-test-page",
+  "host": "156.67.214.197",
+  "documentType": "APPEND_ONLY_RELEASE_CANDIDATE_EVIDENCE",
+  "releaseTag": "20260803-dataset-store-boundary-r3",
+  "source": {
+    "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+    "branch": "main",
+    "implementationCommit": "0a5844a57cb1dd9c5687158cb9774a466d512024",
+    "pullRequests": [
+      {
+        "number": 123,
+        "scope": "C1_DB_01_DB_02",
+        "mergeCommit": "c064327f42f7a45ad7330b1850a9c8fe053c3f34"
+      },
+      {
+        "number": 124,
+        "scope": "C2_DB_03_DB_05",
+        "mergeCommit": "0a5844a57cb1dd9c5687158cb9774a466d512024"
+      }
+    ],
+    "tagMustPointToCommitContainingThisManifest": true,
+    "tagMustNotPointDirectlyToImplementationCommit": true
+  },
+  "artifact": {
+    "status": "NOT_BUILT",
+    "image": "lana-chatbot-app:dataset-store-boundary-r3",
+    "digest": null,
+    "releasePath": "/opt/lana-chatbot/releases/20260803-dataset-store-boundary-r3",
+    "sourceMustBeMaterializedFromMergedTag": true,
+    "directVpsSourceEditsAllowed": false
+  },
+  "productionBaseline": {
+    "releaseTag": "20260803-realtime-voice-template-safety-r32.2.4",
+    "releaseName": "r32.2.4",
+    "sourceCommit": "d9d97533d6a850f557c8b3aad12bfa2b85116139",
+    "releasePath": "/opt/lana-chatbot/releases/20260803-realtime-voice-template-safety-r32.2.4",
+    "status": "LIVE_AT_CANDIDATE_CREATION_CONFIRMED_BY_PREFLIGHT",
+    "rollbackTarget": true,
+    "supersedesAsRollbackTarget": "20260803-confirmation-control-plane-b0-b2-r1.5"
+  },
+  "scope": {
+    "programRelease": "R3",
+    "milestone": "M3_DATASET_BOUNDARY_CLEAN",
+    "slices": ["C1", "C2"],
+    "issues": ["DB-01", "DB-02", "DB-03", "DB-04", "DB-05"],
+    "targetServices": ["admin-api"],
+    "workerConsumerCompatibilityIncluded": true,
+    "workerRuntimeRecreationRequired": false,
+    "nonTargetServicesMustRemainUnchanged": true,
+    "applicationCodeChangedByThisPreparation": false,
+    "customerVisibleBehaviorChange": false,
+    "routingChangeRequired": false,
+    "pageAllowlistChangeRequired": false,
+    "messengerProductionTestRequiredForPreparation": false
+  },
+  "changes": {
+    "datasetPersistenceOwner": "@lana/dataset-store",
+    "databaseBoundary": "@lana/database no longer depends on or re-exports dataset persistence",
+    "consumerMigration": "Admin API, worker prelabel wiring, dataset import and gold replacement entry points use the dataset-store owner",
+    "architectureGuard": "bidirectional package and exhaustive literal consumer rules are enforced by check:release-integrity",
+    "compatibility": "SQL, table names, encryption, AAD, ciphertext, retention, idempotency and error behavior remain compatible"
+  },
+  "database": {
+    "migrationRequired": false,
+    "migrationsToApply": [],
+    "backfillRequired": false,
+    "backfillPlan": null,
+    "dataRewriteRequired": false,
+    "schemaRollbackRequired": false,
+    "latestObservedProductionMigration": "0030_runtime_behavior_modes"
+  },
+  "runtimeBehaviorModes": {
+    "changeRequired": false,
+    "controlPlaneMutationAllowed": false,
+    "confirmation": "PRESERVE_CURRENT_DATABASE_SELECTION",
+    "salesAuthority": "PRESERVE_CURRENT_DATABASE_SELECTION",
+    "stateRead": "PRESERVE_CURRENT_DATABASE_SELECTION"
+  },
+  "implementationVerification": {
+    "frozenInstall": "PASS_PNPM_10_12_4",
+    "datasetStoreTests": "PASS_40_OF_40",
+    "databaseTests": "PASS_80_OF_80",
+    "adminApiTests": "PASS_67_OF_67",
+    "workerDatasetPrelabelTests": "PASS_10_OF_10",
+    "datasetCliFailClosedSmokes": "PASS",
+    "fullPnpmCheck": "PASS_ON_IMPLEMENTATION_COMMIT_565_2_SECONDS",
+    "architectureConsumerGuard": "PASS_POSITIVE_NEGATIVE_AND_REPOSITORY_VALIDATION",
+    "migrationDiffSecretPiiRuntimeStateReleaseScope": "PASS_CLEAN"
+  },
+  "releasePreparationVerification": {
+    "frozenInstall": "PASS_PNPM_10_12_4",
+    "jsonParse": "PASS",
+    "releaseIntegrity": "PASS_REPOSITORY_ARTIFACTS_ONLY_NO_LIVE_HOST_PARITY_CLAIM",
+    "runtimeStateContracts": "PASS_VALIDATION_CAPTURE_PARITY_IMMUTABILITY_ATOMIC_PROMOTION_TESTS",
+    "datasetBoundaryGuard": "PASS_SELF_TEST_AND_REPOSITORY_VALIDATION",
+    "diffCheck": "PASS_FINAL_STAGED_HOST_ONLY_MANIFEST",
+    "secretPiiScan": "PASS_FINAL_STAGED_DIFF",
+    "fullPnpmCheck": "PASS_548_3_SECONDS"
+  },
+  "requiredBeforeBuild": [
+    "RELEASE_PREPARATION_PR_MERGED",
+    "ANNOTATED_TAG_POINTS_TO_MERGED_COMMIT_CONTAINING_THIS_MANIFEST",
+    "TAG_AND_COMMIT_PROVENANCE_PASS",
+    "CLEAN_RELEASE_PATH",
+    "CREATE_ONCE_RELEASE_SOURCE_POINTER",
+    "UNIQUE_IMAGE_DIGEST",
+    "COMPOSE_CONFIG_PASS"
+  ],
+  "requiredBeforeCutover": [
+    "ADMIN_API_ARTIFACT_SMOKE",
+    "DATASET_REVIEW_AND_PRELABEL_COMPATIBILITY_SMOKE_WITHOUT_CUSTOMER_TRAFFIC",
+    "TARGET_SERVICE_HEALTHY_RESTART_0",
+    "NON_TARGET_CONTAINER_IDS_UNCHANGED",
+    "MIGRATION_LEDGER_UNCHANGED_AT_0030",
+    "RUNTIME_BEHAVIOR_MODE_READBACK_UNCHANGED",
+    "ROUTING_AND_PAGE_ALLOWLIST_UNCHANGED",
+    "RUNTIME_STATE_CAPTURE_VERIFY_AND_ATOMIC_PROMOTION"
+  ],
+  "rollback": {
+    "releaseTag": "20260803-realtime-voice-template-safety-r32.2.4",
+    "sourceCommit": "d9d97533d6a850f557c8b3aad12bfa2b85116139",
+    "releasePath": "/opt/lana-chatbot/releases/20260803-realtime-voice-template-safety-r32.2.4",
+    "adminApiImage": "lana-chatbot-app:realtime-audit-safety-r32.1",
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false,
+    "runtimeBehaviorModeRollbackRequired": false
+  },
+  "authorizationBoundary": {
+    "artifactBuildAuthorized": false,
+    "deploymentAuthorized": false,
+    "migrationAuthorized": false,
+    "restartAuthorized": false,
+    "runtimeModeSwitchAuthorized": false,
+    "messengerProductionTestAuthorized": false,
+    "vpsMutationAuthorized": false
+  },
+  "manifestIntegrity": {
+    "immutableAfterTag": true,
+    "runtimeEvidenceMustBeRecordedAsAppendOnlyFollowUp": true,
+    "directVpsSourceEditsAllowed": false
+  }
+}
