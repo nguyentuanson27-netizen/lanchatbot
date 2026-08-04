@@ -13,6 +13,8 @@ import {
   type StableProductDocument,
 } from "@lana/business-tools";
 import type { RuntimePolicyResolution } from "@lana/chat-runtime";
+import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
+import { sizeChartTarget } from "./size-chart-target.js";
 
 const plusSeconds = (value: string, seconds: number): string =>
   new Date(Date.parse(value) + seconds * 1_000).toISOString();
@@ -46,34 +48,13 @@ function fulfillmentType(value: string): ProductFactsV2["fulfillment"]["policyTy
 
 function verifiedSizeChart(
   policy: RuntimePolicyResolution | null,
-  productId: string,
-  observedAt: string,
-): ProductFactsV2["sizeChart"] {
-  const artifacts = Object.values(policy?.bundle?.artifacts.sizeCharts ?? {});
-  const selected = artifacts.find((content) => {
-    if (content.chart.reference.verificationStatus !== "VERIFIED") return false;
-    if (content.extraction && content.extraction.measurementBasis !== "BODY") return false;
-    const scope = content.scope;
-    return !scope || scope.parentProductIds.length === 0 ||
-      scope.parentProductIds.some((value) =>
-        normalizeCatalogToken(value) === normalizeCatalogToken(productId)
-      );
+  product: StableProductDocument,
+): ReturnType<typeof evaluateSizeChartEligibility> {
+  return evaluateSizeChartEligibility({
+    policy,
+    productId: product.productId,
+    target: sizeChartTarget(product),
   });
-  if (!selected) return null;
-  return {
-    sizeChartId: selected.chart.reference.chartId,
-    sizeChartVersion: selected.chart.reference.version,
-    verificationStatus: "VERIFIED",
-    sourceContentSha256: selected.chart.reference.sourceContentSha256,
-    metadata: {
-      authority: "ADMIN_POLICY",
-      sourceVersion: selected.chart.reference.version,
-      observedAt,
-      expiresAt: null,
-      freshForSeconds: null,
-      freshnessState: "FRESH",
-    },
-  };
 }
 
 function imagePurpose(image: StableProductDocument["images"][number]): ProductMediaAssetV2["purposes"] {
@@ -165,6 +146,7 @@ export function buildRealtimeProductFactsV2(input: {
   if (input.snapshot.selling_rules.allow_component_sale) {
     availableOfferKinds.push("COMPONENT");
   }
+  const sizeChart = verifiedSizeChart(input.policy, input.product);
 
   try {
     const projected = projectProductFactsV2({
@@ -236,7 +218,7 @@ export function buildRealtimeProductFactsV2(input: {
               Date.parse(fulfillmentExpiresAt) > input.now.getTime() ? "FRESH" : "STALE",
           },
         },
-        sizeChart: verifiedSizeChart(input.policy, input.product.productId, stableObservedAt),
+        sizeChart: sizeChart.sizeChart,
         media: {
           assets: [],
           metadata: {
@@ -257,6 +239,7 @@ export function buildRealtimeProductFactsV2(input: {
     });
     return ProductFactsV2Schema.parse({
       ...projected,
+      sizeChartEligibility: sizeChart.eligibility,
       media: {
         ...projected.media,
         assets: mediaAssets(input.product, projected.bom),

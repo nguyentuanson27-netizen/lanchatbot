@@ -266,6 +266,14 @@ describe("RealtimeRunner", () => {
     };
     const policy = {
       bundle: {
+
+        channel: "PUBLISHED",
+        resolvedAt: occurredAt,
+        versionReferences: [{
+          artifactKey: "ao-dai-dress",
+          artifactKind: "SIZE_CHART",
+          lifecycle: "PUBLISHED",
+        }],
         policy: { policyVersion: 'bf04-size-engine-e2e' },
         bundleHash: 'sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
         artifacts: {
@@ -292,6 +300,7 @@ describe("RealtimeRunner", () => {
                 level: "COMPONENT", parentProductIds: ["SD398"], categories: ["AO_DAI"], componentRole: "DRESS",
                 forms: [], materials: [],
               },
+              extraction: { measurementBasis: "BODY", confidence: 1, extractorVersion: "fixture" },
               sourceMetadata: { sourceReference: "https://cdn.example/ao-dai-size.jpg" },
             },
           },
@@ -414,6 +423,112 @@ describe("RealtimeRunner", () => {
         "SIZE_RECOMMENDATION_REPAIRED",
       ]),
     }));
+
+    const sizeHandoffCommit = vi.fn(async (_input: unknown) => ({
+      stateCommitted: true,
+      metaOutboxCreated: 0,
+      pancakeTagOutboxCreated: false,
+      handoffEventCreated: true,
+      sendAuthorized: false,
+      reasonCodes: [],
+    }));
+    const sizeHandoffRuntime = {
+      loadOrCreate: vi.fn(async () => ({
+        conversationId: state.conversationId,
+        pageId: claim.pageId,
+        customerHash: claim.conversationHash,
+        stateVersion: 0,
+        state,
+        routingOwner: "APP" as const,
+        appSendEnabled: true,
+        killSwitch: false,
+      })),
+      loadOrCreateCustomerProfile: vi.fn(async () => ({
+        pageId: claim.pageId,
+        customerHash: claim.conversationHash,
+        revision: profile.revision,
+        profile,
+        fieldEvidence: {},
+        expiresAt: "2099-01-01T00:00:00.000Z",
+      })),
+      compareAndSwapCustomerProfile: vi.fn(async () => true),
+      commit: sizeHandoffCommit,
+      linkProviderConversation: vi.fn(async () => undefined),
+    } as unknown as RealtimeRuntimePort;
+    const unavailableSizeProposal = {
+      ...unsafeProposal,
+      reply: "Em kiểm tra bảng size cho mẫu này.",
+      businessFactQuery: {
+        intent: "SIZE" as const,
+        offerType: null,
+        color: null,
+        size: null,
+        deliveryRegion: null,
+      },
+    } satisfies AgentProposalV1;
+    const unavailableSizeModel: RealtimeModelPort = {
+      generate: vi.fn(async () => result(unavailableSizeProposal)),
+      groundWithFacts: vi.fn(async () => result(unavailableSizeProposal)),
+    };
+
+    const sizeHandoffRunner = new RealtimeRunner(
+      {
+        claimNext: vi.fn().mockResolvedValueOnce(claim).mockResolvedValueOnce(null),
+        complete: vi.fn(async () => true),
+        retry: vi.fn(),
+        failPermanent: vi.fn(),
+      },
+      sizeHandoffRuntime,
+      unavailableSizeModel,
+      facts,
+      {
+        searchText: vi.fn(async () => ({
+          status: "MATCHED" as const,
+          matchKind: "SEMANTIC" as const,
+          score: 1,
+          gap: null,
+          product,
+        })),
+        searchImage: vi.fn(),
+      },
+      new FailClosedTagObservationProvider(),
+      {
+        workerId: "worker-1",
+        mode: "LIVE",
+        sendEnabled: true,
+        customerProfileEnabled: true,
+        decisionTelemetryEnabled: true,
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { resolve: vi.fn(async () => ({ status: "UNAVAILABLE", bundle: null } as RuntimePolicyResolution)) },
+    );
+
+    expect(await sizeHandoffRunner.processOne()).toBe(true);
+    const sizeHandoffInput = sizeHandoffCommit.mock.calls[0]![0] as unknown as {
+      readonly handoffEventPlan?: {
+        readonly reasonDetailSafe?: { readonly guard_reason_codes?: readonly string[] };
+      };
+      readonly decisionEvents?: readonly {
+        readonly eventType: string;
+        readonly reasonCodes: readonly string[];
+      }[];
+    };
+    expect(sizeHandoffInput.handoffEventPlan?.reasonDetailSafe?.guard_reason_codes).toContain(
+      "SIZE_CHART_POLICY_BUNDLE_UNAVAILABLE",
+    );
+    expect(sizeHandoffInput.decisionEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        eventType: "GUARD_BLOCKED",
+        reasonCodes: expect.arrayContaining(["SIZE_CHART_POLICY_BUNDLE_UNAVAILABLE"]),
+      }),
+      expect.objectContaining({
+        eventType: "HANDOFF",
+        reasonCodes: expect.arrayContaining(["SIZE_CHART_POLICY_BUNDLE_UNAVAILABLE"]),
+      }),
+    ]));
   });
   it("splits every outbound sentence into its own text message and preserves image order", () => {
     expect(splitRealtimeMetaMessages([
@@ -990,6 +1105,14 @@ describe("RealtimeRunner", () => {
     } as CustomerProfileV1;
     const policy = {
       bundle: {
+
+        channel: "PUBLISHED",
+        resolvedAt: timestamp,
+        versionReferences: [{
+          artifactKey: "ao-dai-dress",
+          artifactKind: "SIZE_CHART",
+          lifecycle: "PUBLISHED",
+        }],
         artifacts: {
           sizeCharts: {
             "ao-dai-dress": {
@@ -1026,6 +1149,7 @@ describe("RealtimeRunner", () => {
                 forms: [],
                 materials: [],
               },
+              extraction: { measurementBasis: "BODY", confidence: 1, extractorVersion: "fixture" },
               sourceMetadata: {
                 sourceReference: "https://cdn.example/ao-dai-size.jpg",
               },
@@ -1099,7 +1223,7 @@ describe("RealtimeRunner", () => {
     );
     expect(missingChart).toMatchObject({
       requiresHandoff: true,
-      reasonCode: "VERIFIED_SIZE_CHART_UNAVAILABLE",
+      reasonCodes: expect.arrayContaining(["SIZE_CHART_POLICY_BUNDLE_UNAVAILABLE", "NO_VERIFIED_SIZE_CHART_FOR_SCOPE"]),
     });
     expect(missingChart.proposal).toEqual(verifiedBase);
     expect(withProactiveSizeAdvice(

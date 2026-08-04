@@ -304,7 +304,7 @@ describe("r32.2 Compatibility First regression shield", () => {
 
     expect(composition).toMatchObject({
       requiresHandoff: true,
-      reasonCode: "VERIFIED_SIZE_CHART_UNAVAILABLE",
+      reasonCodes: expect.arrayContaining(["SIZE_CHART_POLICY_BUNDLE_UNAVAILABLE", "NO_VERIFIED_SIZE_CHART_FOR_SCOPE"]),
     });
     expect(composition.proposal).toEqual(verifiedBase);
     expect(composition.proposal.action).toBe("REPLY");

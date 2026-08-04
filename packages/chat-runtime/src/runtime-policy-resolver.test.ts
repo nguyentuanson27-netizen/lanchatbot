@@ -216,6 +216,7 @@ describe("RuntimePolicyResolver", () => {
       },
     });
     expect(result.bundle?.versionReferences).toHaveLength(3);
+    expect(result.bundle?.versionReferences.every((ref) => ref.lifecycle === "CANARY")).toBe(true);
     expect(runtimePolicyBundleReference(result.bundle!)).toMatchObject({
       id: `admin-policy:${pageId}`,
       version: expect.any(String),
@@ -319,6 +320,51 @@ describe("RuntimePolicyResolver", () => {
     expect(expired).toMatchObject({ status: "UNAVAILABLE", bundle: null });
   });
 
+  it("reads a hash-valid pre-BF-05 pin whose version refs lack lifecycle", async () => {
+    const source = new MutableSource();
+    source.value = records("PUBLISHED");
+    const pins = new MemoryPins();
+    const resolver = new RuntimePolicyResolver(source, {
+      enabled: true,
+      publishedEnabled: true,
+    }, pins);
+    const input = {
+      pageId,
+      channel: "PUBLISHED" as const,
+      pin: { scopeType: "CART" as const, scopeId: "legacy-cart" },
+      now: new Date(at),
+    };
+    const initial = await resolver.resolve(input);
+    const stored = pins.values.get("CART:legacy-cart");
+    expect(initial.status).toBe("PINNED");
+    expect(stored).toBeDefined();
+
+    const legacyReferences = stored!.bundle.versionReferences.map(({ lifecycle: ignored, ...reference }) => {
+      void ignored;
+      return reference;
+    });
+    const { bundleHash: ignored, ...legacyHashable } = stored!.bundle;
+    void ignored;
+    const legacyHash = hash({ ...legacyHashable, versionReferences: legacyReferences });
+    pins.values.set("CART:legacy-cart", {
+      ...stored!,
+      bundleHash: legacyHash,
+      bundle: {
+        ...stored!.bundle,
+        bundleHash: legacyHash,
+        versionReferences: legacyReferences,
+      },
+    });
+
+    const replay = await resolver.resolve({ ...input, now: new Date(Date.parse(at) + 1_000) });
+    expect(replay).toMatchObject({ status: "PINNED", source: "PIN" });
+    expect(replay.bundle?.bundleHash).toBe(legacyHash);
+    expect(replay.bundle?.versionReferences.every((reference) => reference.lifecycle === undefined)).toBe(true);
+    const mixedReferences = legacyReferences.map((reference, index) => index === 0 ? { ...reference, lifecycle: "PUBLISHED" as const } : reference);
+    const mixedHash = hash({ ...legacyHashable, versionReferences: mixedReferences });
+    pins.values.set("CART:legacy-cart", { ...stored!, bundleHash: mixedHash, bundle: { ...stored!.bundle, bundleHash: mixedHash, versionReferences: mixedReferences } });
+    await expect(resolver.resolve({ ...input, now: new Date(Date.parse(at) + 2_000) })).resolves.toMatchObject({ status: "REJECTED", reasonCodes: ["POLICY_PIN_INVALID"] });
+  });
   it("observes a published pointer rollback while preserving the cart's pinned v2 bundle", async () => {
     const source = new MutableSource();
     source.value = records("PUBLISHED", 2).map((record, index) => ({
@@ -359,6 +405,7 @@ describe("RuntimePolicyResolver", () => {
     expect(afterRollback.status).toBe("RESOLVED");
     expect(afterRollback.bundle?.bundleHash).not.toBe(pinnedV2.bundle?.bundleHash);
     expect(afterRollback.bundle?.versionReferences.every((ref) => ref.versionNumber === 1)).toBe(true);
+    expect(afterRollback.bundle?.versionReferences.every((ref) => ref.lifecycle === "PUBLISHED")).toBe(true);
   });
 
   it("rejects a hash-tampered active artifact and never authorizes shadow outbound", async () => {

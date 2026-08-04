@@ -435,6 +435,34 @@ export const ProductSizeChartLinkV1Schema = z
   .strict();
 export type ProductSizeChartLinkV1 = z.infer<typeof ProductSizeChartLinkV1Schema>;
 
+/**
+ * Additive runtime projection evidence for a size-chart link. A missing link
+ * is not self-explanatory: the caller must retain which eligibility gate
+ * rejected it so that an unavailable chart is never mistaken for a verified
+ * one.
+ */
+export const ProductSizeChartEligibilityV1Schema = z
+  .object({
+    schemaVersion: z.literal(1),
+    status: z.enum(["ELIGIBLE", "INELIGIBLE"]),
+    policyBundle: z.enum([
+      "FRESH",
+      "STALE",
+      "UNAVAILABLE",
+      "PARSE_FAILED",
+      "INTEGRITY_FAILED",
+    ]),
+    publication: z.enum(["PUBLISHED", "NOT_PUBLISHED", "NOT_EVALUATED"]),
+    verification: z.enum(["VERIFIED", "UNVERIFIED", "NOT_EVALUATED"]),
+    measurementBasis: z.enum(["BODY", "UNSUPPORTED", "NOT_EVALUATED"]),
+    scope: z.enum(["MATCHED", "MISMATCH", "NOT_EVALUATED"]),
+    reasonCodes: z.array(z.string().trim().min(1).max(128)).max(8),
+  })
+  .strict();
+export type ProductSizeChartEligibilityV1 = z.infer<
+  typeof ProductSizeChartEligibilityV1Schema
+>;
+
 export const ProductMediaPurposeV2Schema = z.enum([
   "HERO",
   "PRODUCT_OVERVIEW",
@@ -509,6 +537,7 @@ export const ProductFactsV2Schema = z
     fulfillment: ParentFulfillmentV1Schema,
     sizeChart: ProductSizeChartLinkV1Schema.nullable(),
     media: ProductMediaFactsV2Schema,
+    sizeChartEligibility: ProductSizeChartEligibilityV1Schema.optional(),
   })
   .strict()
   .superRefine((value, context) => {
