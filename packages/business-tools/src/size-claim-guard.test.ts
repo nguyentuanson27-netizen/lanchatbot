@@ -178,6 +178,117 @@ describe("BF-04 size recommendation detector", () => {
     expect(detectConcreteSizeRecommendations(reply)).toEqual(expected);
   });
 
+  it.each([
+    ["Theo s\u1ed1 \u0111o, ch\u1ecb thu\u1ed9c size L.", ["L"]],
+    ["Theo so do, chi thuoc size L.", ["L"]],
+    ["S\u1ed1 \u0111o n\u00e0y t\u01b0\u01a1ng \u1ee9ng size L.", ["L"]],
+    ["So do nay tuong ung size L.", ["L"]],
+    ["Theo s\u1ed1 \u0111o, form n\u00e0y size L l\u00e0 chu\u1ea9n nh\u1ea5t cho ch\u1ecb.", ["L"]],
+    ["Theo so do, form nay size L la chuan nhat cho chi.", ["L"]],
+    ["Theo s\u1ed1 \u0111o, em x\u1ebfp ch\u1ecb v\u00e0o size L.", ["L"]],
+    ["Theo so do, em xep chi vao size L.", ["L"]],
+    ["Theo s\u1ed1 \u0111o ch\u1ecb r\u01a1i v\u00e0o L.", ["L"]],
+    ["S\u1ed1 \u0111o n\u00e0y \u0111\u00fang c\u1ee1 L.", ["L"]],
+    ["L\u1ea5y L l\u00e0 v\u1eeba.", ["L"]],
+    ["L chu\u1ea9n form ch\u1ecb.", ["L"]],
+    ["C\u1ee1 L d\u00e0nh cho s\u1ed1 \u0111o n\u00e0y.", ["L"]],
+    ["Theo s\u1ed1 \u0111o, ch\u1ecb thu\u1ed9c c\u1ee1 M-L.", ["L", "M"]],
+    ["Theo so do, chi thuoc co M-L.", ["L", "M"]],
+    ["Theo s\u1ed1 \u0111o, ch\u1ecb thu\u1ed9c size 40.", ["40"]],
+  ])("fails closed for unclassified size assertions: %s", (reply, expected) => {
+    expect(detectConcreteSizeRecommendations(reply)).toEqual(expected);
+  });
+
+  it.each([
+    ["Ng\u01b0\u1eddi m\u1eabu m\u1eb7c size S.", []],
+    ["Nguoi mau mac size S.", []],
+    ["Mannequin size M.", []],
+    ["M\u1eabu A c\u00f3 size L.", []],
+    ["Mau A co size L.", []],
+    ["Size L h\u1ee3p l\u1ec7 trong catalog.", []],
+    ["Size L hop le trong catalog.", []],
+    ["Chu\u1ea9n h\u00f3a size code L trong catalog.", []],
+    ["Size: S/M/L.", []],
+    ["S\u1ed1 \u0111o v\u00f2ng eo 40 cm.", []],
+    [
+      "M\u1eabu A size L h\u1ee3p l\u1ec7, theo s\u1ed1 \u0111o ch\u1ecb n\u00ean ch\u1ecdn size M.",
+      ["M"],
+    ],
+    [
+      "Size L ph\u00f9 h\u1ee3p v\u1edbi m\u1eabu A, theo s\u1ed1 \u0111o ch\u1ecb h\u1ee3p size M.",
+      ["M"],
+    ],
+    [
+      "Ng\u01b0\u1eddi m\u1eabu m\u1eb7c size S; theo s\u1ed1 \u0111o ch\u1ecb thu\u1ed9c size L.",
+      ["L"],
+    ],
+    [
+      "M\u1eabu A c\u00f3 size L\nTheo s\u1ed1 \u0111o ch\u1ecb r\u01a1i v\u00e0o size M.",
+      ["M"],
+    ],
+    [
+      "Theo s\u1ed1 \u0111o ch\u1ecb r\u01a1i v\u00e0o size M - size L ph\u00f9 h\u1ee3p v\u1edbi m\u1eabu A.",
+      ["M"],
+    ],
+  ])("exempts only proven safe mention spans: %s", (reply, expected) => {
+    expect(detectConcreteSizeRecommendations(reply)).toEqual(expected);
+  });
+
+  it("keeps safe and unsafe mentions isolated across arbitrary composition", () => {
+    const safeFragments = [
+      "M\u1eabu A c\u00f3 size S",
+      "Ng\u01b0\u1eddi m\u1eabu m\u1eb7c size S",
+      "Size: S",
+      "M\u1eabu size S v\u1eeba m\u1edbi v\u1ec1",
+      "Em ch\u01b0a th\u1ec3 t\u01b0 v\u1ea5n size S",
+      "Size S c\u00f3 ph\u00f9 h\u1ee3p kh\u00f4ng",
+    ];
+    const unsafeFragments = [
+      "theo s\u1ed1 \u0111o ch\u1ecb thu\u1ed9c size M",
+      "s\u1ed1 \u0111o n\u00e0y t\u01b0\u01a1ng \u1ee9ng size M",
+      "em x\u1ebfp ch\u1ecb v\u00e0o size M",
+    ];
+    const separators = [", ", "; ", " - ", "\n", " trong khi ", " song ", " / "];
+    for (const safe of safeFragments) {
+      for (const unsafe of unsafeFragments) {
+        for (const separator of separators) {
+          expect(
+            detectConcreteSizeRecommendations(`${safe}${separator}${unsafe}`),
+            `safe-first: ${safe}${separator}${unsafe}`,
+          ).toEqual(["M"]);
+          expect(
+            detectConcreteSizeRecommendations(`${unsafe}${separator}${safe}`),
+            `unsafe-first: ${unsafe}${separator}${safe}`,
+          ).toEqual(["M"]);
+        }
+      }
+    }
+  });
+  it("fails closed and emits the bounded reason for the new assertion families", () => {
+    for (const reply of [
+      "Theo s\u1ed1 \u0111o, ch\u1ecb thu\u1ed9c size L.",
+      "S\u1ed1 \u0111o n\u00e0y t\u01b0\u01a1ng \u1ee9ng size L.",
+      "Theo s\u1ed1 \u0111o, form n\u00e0y size L l\u00e0 chu\u1ea9n nh\u1ea5t cho ch\u1ecb.",
+      "Theo s\u1ed1 \u0111o, em x\u1ebfp ch\u1ecb v\u00e0o size L.",
+      "Theo s\u1ed1 \u0111o ch\u1ecb r\u01a1i v\u00e0o L.",
+    ]) {
+      expect(guard(reply, null)).toMatchObject({
+        action: "HANDOFF",
+        blockedReasonCodes: ["SIZE_RECOMMENDATION_UNDECLARED"],
+      });
+    }
+    for (const reply of [
+      "Ng\u01b0\u1eddi m\u1eabu m\u1eb7c size S.",
+      "Mannequin size M.",
+      "M\u1eabu A c\u00f3 size L.",
+      "Size L h\u1ee3p l\u1ec7 trong catalog.",
+    ]) {
+      expect(guard(reply, null)).toMatchObject({
+        action: "REPLY",
+        blockedReasonCodes: [],
+      });
+    }
+  });
   it("drives the final guard only for undeclared affirmative assertions", () => {
     for (const reply of [
       "Theo s\u1ed1 \u0111o, L s\u1ebd v\u1eeba v\u1edbi ch\u1ecb nh\u1ea5t.",
