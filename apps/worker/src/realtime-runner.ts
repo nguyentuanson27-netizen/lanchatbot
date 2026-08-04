@@ -23,6 +23,7 @@ import {
   type StableProductDocument,
   type CustomerProfileFieldEvidence,
   type ScopedSizeChart,
+  type VerifiedSizeRecommendationVariantScope,
 } from "@lana/business-tools";
 import {
   BusinessFactQueriesV2Schema,
@@ -1662,25 +1663,46 @@ export function composeSizeEngineAdvice(
   };
 }
 
-/** The safe terminal response after the one permitted model repair is invalid. */
+/**
+ * A deterministic response assembled from independently verified context after
+ * the single permitted repair fails. It never edits model wording in place.
+ */
+export interface ApprovedSizeClaimFallbackContext {
+  readonly facts: BusinessFactEnvelopeV1 | null;
+  readonly product: StableProductDocument | null;
+  readonly attachmentUrls: readonly string[];
+  readonly preservedProtectedClaimIds: readonly string[];
+  readonly approvedCta: string | null;
+}
+
 export function approvedSizeClaimClarification(
   proposal: AgentProposalV1,
+  context?: ApprovedSizeClaimFallbackContext,
 ): AgentProposalV1 {
+  const verifiedFactText = context?.facts && context.product
+    ? (["PRICE", "STOCK", "ETA"] as const)
+      .flatMap((intent) => buildVerifiedFactBlocks(context.facts!, intent, context.product!).blocks)
+      .map((block) => block.text)
+      .filter((text, index, values) => values.indexOf(text) === index)
+      .join("\n\n")
+    : "";
+  const clarification = "Để tư vấn size chính xác, chị cho em xin chiều cao, cân nặng hoặc số đo phù hợp nhé.";
   return {
     ...proposal,
     action: "REPLY",
-    reply: "Để tư vấn size chính xác, chị cho em xin chiều cao, cân nặng hoặc số đo phù hợp nhé.",
-    attachments: [],
+    reply: [verifiedFactText, clarification, context?.approvedCta?.trim() ?? ""]
+      .filter(Boolean)
+      .join("\n\n"),
+    attachments: [...new Set(context?.attachmentUrls ?? [])],
     handoffReason: null,
-    protectedClaimIds: [],
+    protectedClaimIds: [...new Set(context?.preservedProtectedClaimIds ?? [])],
   };
 }
-
 function verifiedSizeRecommendationClaimForGuard(
   product: StableProductDocument,
   profile: CustomerProfileV1,
   policyResolution: RuntimePolicyResolution | null,
-  variantId: string | null,
+  variantScope: VerifiedSizeRecommendationVariantScope | null,
   now: Date,
 ) {
   const { decision } = resolveSizeEngineDecision(
@@ -1692,7 +1714,7 @@ function verifiedSizeRecommendationClaimForGuard(
   return createVerifiedSizeRecommendationClaim({
     decision,
     productId: product.productId,
-    variantId,
+    variantScope,
     profile,
   });
 }
@@ -3819,14 +3841,27 @@ export class RealtimeRunner {
         if (resolvedProduct) verifiedProductIds.add(resolvedProduct.productId);
         if (facts?.status === "OK") verifiedProductIds.add(facts.productId);
         const activeSizeProductId = resolvedProduct?.productId ?? null;
-        const activeSizeVariantId = nextState.verifiedVariant?.selectedVariantId ?? null;
+        const activeVerifiedVariant = nextState.verifiedVariant;
+        const activeSizeVariantId =
+          activeVerifiedVariant?.parentProductId === activeSizeProductId
+            ? activeVerifiedVariant.selectedVariantId
+            : null;
+        const activeSizeVariantScope =
+          activeSizeVariantId !== null &&
+          activeVerifiedVariant?.selectedSizeCode
+            ? {
+                variantId: activeSizeVariantId,
+                parentProductId: activeVerifiedVariant.parentProductId,
+                size: activeVerifiedVariant.selectedSizeCode,
+              }
+            : null;
         const verifiedSizeClaim =
           resolvedProduct && customerProfile
             ? verifiedSizeRecommendationClaimForGuard(
                 resolvedProduct,
                 customerProfile,
                 policyResolution,
-                activeSizeVariantId,
+                activeSizeVariantScope,
                 now,
               )
             : null;
@@ -3882,6 +3917,7 @@ export class RealtimeRunner {
           ]),
         ];
         if (hasSizeRecommendationBlock(guarded.blockedReasonCodes)) {
+          const sizeRepairBaseline = proposal;
           let repaired = false;
           if (this.model.repairSizeClaimDraft) {
             try {
@@ -3937,7 +3973,22 @@ export class RealtimeRunner {
             ])];
           }
           if (!repaired) {
-            proposal = approvedSizeClaimClarification(proposal);
+            const verifiedAttachmentUrlsForFallback = new Set(
+              guardVerifiedAttachmentUrls ?? facts?.facts?.imageUrls ?? [],
+            );
+            proposal = approvedSizeClaimClarification(sizeRepairBaseline, {
+              facts,
+              product: resolvedProduct,
+              attachmentUrls: sizeRepairBaseline.attachments.filter((url) =>
+                verifiedAttachmentUrlsForFallback.has(url)
+              ),
+              preservedProtectedClaimIds: (sizeRepairBaseline.protectedClaimIds ?? []).filter(
+                (claimId) => claimId !== verifiedSizeClaim?.id,
+              ),
+              // The independently authorized post-media CTA is constructed
+              // after this fallback from the guarded media plan below.
+              approvedCta: null,
+            });
             guarded = guardProposal(proposal);
             handoffGuardReasonCodes = [...new Set([
               ...handoffGuardReasonCodes,

@@ -43,13 +43,18 @@ function verifiedClaim(
     value: { recommendedSizes: ["L"], alternativeSizes: ["M"] },
     productId: "SD398",
     variantId: null,
-    evidenceRef: "size-engine:v1:22222222-2222-4222-8222-222222222222:chart-398",
+    evidenceRef: `size-engine:v1:22222222-2222-4222-8222-222222222222:chart-398:measurements:${"a".repeat(64)}`,
     source: "VERIFIED_SIZE_ENGINE_V1",
     observedAt: "2026-08-04T00:00:00.000Z",
     expiresAt: "2026-08-04T00:05:00.000Z",
     customerProfileId: profileId,
     customerProfileRevision: 7,
     measurementFingerprint: "a".repeat(64),
+    evidenceBasis: {
+      kind: "CURRENT_MEASUREMENTS",
+      measurementFingerprint: "a".repeat(64),
+      sourceEventHashes: ["b".repeat(64)],
+    },
     ...overrides,
   });
 }
@@ -83,11 +88,22 @@ describe("BF-04 size recommendation detector", () => {
     expect(detectConcreteSizeRecommendations("Em tư vấn chị mặc size M nhé.")).toEqual(["M"]);
   });
 
+  it("keeps detecting a recommendation when another clause is a catalog, negative, question, or stock statement", () => {
+    expect(detectConcreteSizeRecommendations("Size c\u00f3 S/M/L, ch\u1ecb h\u1ee3p size L.")).toEqual(["L"]);
+    expect(detectConcreteSizeRecommendations("Em ch\u01b0a th\u1ec3 t\u01b0 v\u1ea5n size M, nh\u01b0ng ch\u1ecb h\u1ee3p size L.")).toEqual(["L"]);
+    expect(detectConcreteSizeRecommendations("Ch\u1ecb h\u1ee3p size L, \u0111\u00fang kh\u00f4ng?")).toEqual(["L"]);
+    expect(detectConcreteSizeRecommendations("Ch\u1ecb h\u1ee3p size L \u0111\u00fang kh\u00f4ng?")).toEqual(["L"]);
+    expect(detectConcreteSizeRecommendations("M\u1eabu c\u00f2n size M, theo s\u1ed1 \u0111o ch\u1ecb h\u1ee3p size L.")).toEqual(["L"]);
+    expect(detectConcreteSizeRecommendations("Em \u0111\u1ec1 xu\u1ea5t L.")).toEqual(["L"]);
+    expect(detectConcreteSizeRecommendations("Size ph\u00f9 h\u1ee3p nh\u1ea5t l\u00e0 L.")).toEqual(["L"]);
+  });
   it("does not treat negatives, questions, stock messages or catalog lists as fit assertions", () => {
     expect(detectConcreteSizeRecommendations("Em chưa thể tư vấn size L khi thiếu số đo.")).toEqual([]);
     expect(detectConcreteSizeRecommendations("Chị muốn chọn size L hay M ạ?")).toEqual([]);
     expect(detectConcreteSizeRecommendations("Mẫu còn size L ở kho.")).toEqual([]);
     expect(detectConcreteSizeRecommendations("Size: S/M/L.")).toEqual([]);
+    expect(detectConcreteSizeRecommendations("Size dang co: M, L.")).toEqual([]);
+    expect(detectConcreteSizeRecommendations("Size: M, L.")).toEqual([]);
   });
 });
 

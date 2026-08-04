@@ -280,7 +280,7 @@ describe("recommendSize", () => {
     const claim = createVerifiedSizeRecommendationClaim({
       decision,
       productId: "CB182",
-      variantId: null,
+      variantScope: null,
       profile: customer,
     });
     expect(claim).toMatchObject({
@@ -293,6 +293,25 @@ describe("recommendSize", () => {
       value: { recommendedSizes: ["M"] },
     });
     expect(Date.parse(claim!.expiresAt)).toBeGreaterThan(Date.parse(generatedAt));
+    expect(claim).toMatchObject({
+      evidenceBasis: {
+        kind: "CURRENT_MEASUREMENTS",
+        sourceEventHashes: [hash("b"), hash("c")],
+      },
+    });
+    expect(claim!.evidenceRef).toContain(`measurements:${claim!.measurementFingerprint}`);
+    expect(createVerifiedSizeRecommendationClaim({
+      decision,
+      productId: "CB182",
+      variantScope: { variantId: "variant-M", parentProductId: "CB182", size: "M" },
+      profile: customer,
+    })?.variantId).toBe("variant-M");
+    expect(createVerifiedSizeRecommendationClaim({
+      decision,
+      productId: "CB182",
+      variantScope: { variantId: "variant-L", parentProductId: "CB182", size: "L" },
+      profile: customer,
+    })?.variantId).toBeNull();
 
     const unavailable = recommendSize({
       profile: customer,
@@ -304,7 +323,7 @@ describe("recommendSize", () => {
     expect(createVerifiedSizeRecommendationClaim({
       decision: unavailable,
       productId: "CB182",
-      variantId: null,
+      variantScope: null,
       profile: customer,
     })).toBeNull();
   });
@@ -348,7 +367,7 @@ describe("recommendSize", () => {
     expect(decision.recommendation.confidence).toBeLessThan(0.9);
   });
 
-  it("uses a prior worn size only if it exists in a verified chart", () => {
+  it("mints PAST_SIZE only with accepted history provenance bound to its source event", () => {
     const customer = profile([], {
       sizeHistory: [{
         productId: "CB182",
@@ -366,10 +385,63 @@ describe("recommendSize", () => {
       generatedAt,
       recommendationId,
     });
-    expect(decision.recommendation.recommendedSizes[0]?.size).toBe("L");
-    expect(decision.recommendation.reasonCodes).toContain("PAST_SIZE_MATCHES_VERIFIED_CHART");
+    const claim = createVerifiedSizeRecommendationClaim({
+      decision,
+      productId: "CB182",
+      variantScope: { variantId: "variant-L", parentProductId: "CB182", size: "L" },
+      profile: customer,
+    });
+    expect(decision.recommendation.measurementsUsed).toEqual([]);
+    expect(claim).toMatchObject({
+      variantId: "variant-L",
+      evidenceBasis: {
+        kind: "ACCEPTED_SIZE_HISTORY",
+        sourceEventHash: hash("f"),
+        productId: "CB182",
+        size: "L",
+        outcome: "CUSTOMER_ACCEPTED",
+      },
+    });
+    expect(claim!.evidenceRef).toContain(`history:${hash("f")}`);
+
+    const staleCustomer = profile([], {
+      sizeHistory: [{
+        productId: "CB182", componentRole: "TOP", size: "L", outcome: "PURCHASED",
+        sourceEventHash: hash("e"), recordedAt: "2026-07-19T03:30:00.000Z",
+      }],
+    });
+    const staleDecision = recommendSize({
+      profile: staleCustomer,
+      target,
+      charts: [scoped("COMPONENT")],
+      generatedAt,
+      recommendationId,
+    });
+    expect(createVerifiedSizeRecommendationClaim({
+      decision: staleDecision,
+      productId: "CB182",
+      variantScope: null,
+      profile: staleCustomer,
+    })).toBeNull();
   });
 
+  it("does not use PAST_SIZE without an accepted-history source event", () => {
+    const customer = profile([], {
+      sizeHistory: [{
+        productId: "CB182", componentRole: "TOP", size: "L", outcome: "PURCHASED",
+        sourceEventHash: null, recordedAt: "2026-07-22T03:30:00.000Z",
+      }],
+    });
+    const decision = recommendSize({
+      profile: customer,
+      target,
+      charts: [scoped("COMPONENT")],
+      generatedAt,
+      recommendationId,
+    });
+    expect(decision.action).toBe("ASK_MORE");
+    expect(decision.recommendation.recommendedSizes).toEqual([]);
+  });
   it("does not reuse an unaccepted prior recommendation as proof of worn size", () => {
     const customer = profile([], {
       sizeHistory: [{

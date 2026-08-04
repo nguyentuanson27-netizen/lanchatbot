@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ProductComponentRoleSchema } from "./v2/product-policy-media.js";
 
 export const RoutingOwnerSchema = z.enum(["N8N", "APP"]);
 export type RoutingOwner = z.infer<typeof RoutingOwnerSchema>;
@@ -407,6 +408,34 @@ export type SizeRecommendationClaimValueV1 = z.infer<
   typeof SizeRecommendationClaimValueV1Schema
 >;
 
+const SizeRecommendationEvidenceHashV1Schema = z.string().regex(/^[a-f0-9]{64}$/);
+
+/**
+ * A size recommendation is grounded either in current body measurements or in
+ * one accepted customer-history record. The two sources are deliberately not
+ * interchangeable: a history decision must carry the exact accepted-event
+ * hash, while a measurement decision must carry every contributing event hash.
+ */
+export const SizeRecommendationEvidenceBasisV1Schema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("CURRENT_MEASUREMENTS"),
+    measurementFingerprint: SizeRecommendationEvidenceHashV1Schema,
+    sourceEventHashes: z.array(SizeRecommendationEvidenceHashV1Schema).min(1).max(5),
+  }).strict(),
+  z.object({
+    kind: z.literal("ACCEPTED_SIZE_HISTORY"),
+    sourceEventHash: SizeRecommendationEvidenceHashV1Schema,
+    recordedAt: z.string().datetime(),
+    productId: z.string().trim().min(1).max(128).nullable(),
+    componentRole: ProductComponentRoleSchema,
+    size: z.string().trim().min(1).max(16),
+    outcome: z.enum(["CUSTOMER_ACCEPTED", "PURCHASED"]),
+  }).strict(),
+]);
+export type SizeRecommendationEvidenceBasisV1 = z.infer<
+  typeof SizeRecommendationEvidenceBasisV1Schema
+>;
+
 export const SizeRecommendationProtectedClaimV1Schema = z.object({
   id: z.string().uuid(),
   type: z.literal("SIZE_RECOMMENDATION"),
@@ -419,7 +448,8 @@ export const SizeRecommendationProtectedClaimV1Schema = z.object({
   expiresAt: z.string().datetime(),
   customerProfileId: z.string().uuid(),
   customerProfileRevision: z.number().int().positive(),
-  measurementFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
+  measurementFingerprint: SizeRecommendationEvidenceHashV1Schema,
+  evidenceBasis: SizeRecommendationEvidenceBasisV1Schema,
 }).strict().superRefine((claim, context) => {
   if (Date.parse(claim.expiresAt) <= Date.parse(claim.observedAt)) {
     context.addIssue({
@@ -428,11 +458,57 @@ export const SizeRecommendationProtectedClaimV1Schema = z.object({
       message: "size recommendation claim expiry must be later than observation",
     });
   }
+
+  if (claim.evidenceBasis.kind === "CURRENT_MEASUREMENTS") {
+    if (new Set(claim.evidenceBasis.sourceEventHashes).size !== claim.evidenceBasis.sourceEventHashes.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["evidenceBasis", "sourceEventHashes"],
+        message: "measurement evidence event hashes must be unique",
+      });
+    }
+    if (claim.evidenceBasis.measurementFingerprint !== claim.measurementFingerprint) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["evidenceBasis", "measurementFingerprint"],
+        message: "measurement evidence basis must bind the claim fingerprint",
+      });
+    }
+    if (!claim.evidenceRef.includes(`measurements:${claim.measurementFingerprint}`)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["evidenceRef"],
+        message: "measurement evidence reference must bind the fingerprint",
+      });
+    }
+    return;
+  }
+
+  if (claim.evidenceBasis.productId !== null && claim.evidenceBasis.productId !== claim.productId) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["evidenceBasis", "productId"],
+      message: "accepted history evidence must bind the claim product",
+    });
+  }
+  if (!claim.value.recommendedSizes.includes(claim.evidenceBasis.size)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["evidenceBasis", "size"],
+      message: "accepted history size must be the recommended size",
+    });
+  }
+  if (!claim.evidenceRef.includes(`history:${claim.evidenceBasis.sourceEventHash}`)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["evidenceRef"],
+      message: "accepted history evidence reference must bind the source event",
+    });
+  }
 });
 export type SizeRecommendationProtectedClaimV1 = z.infer<
   typeof SizeRecommendationProtectedClaimV1Schema
 >;
-
 export const AgentProposalV1Schema = z.object({
   schemaVersion: z.literal(1),
   intent: z.string().min(1).max(64),

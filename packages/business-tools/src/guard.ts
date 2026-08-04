@@ -2,6 +2,7 @@ import {
   AgentProposalV1Schema,
   BusinessFactEnvelopeV1Schema,
   GuardedReplyPlanV1Schema,
+  SizeRecommendationProtectedClaimV1Schema,
   type AgentProposalV1,
   type ProductFactsV1,
   type SizeRecommendationProtectedClaimV1,
@@ -26,7 +27,7 @@ const SIZE_REFERENCE_PATTERN = new RegExp(
   "giu",
 );
 const BARE_SIZE_FIT_PATTERN = new RegExp(
-  `\\b(?:mac|hop|vua|chon|lay|nen\\s*(?:chon|lay)|tu\\s*van)\\s*(?:size\\s*)?(${SIZE_TOKEN})\\b`,
+  `\\b(?:mac|hop|vua|chon|lay|nen\\s*(?:chon|lay)|tu\\s*van|de\\s*xuat|goi\\s*y|khuyen\\s*nghi)\\s*(?:size\\s*)?(${SIZE_TOKEN})\\b`,
   "giu",
 );
 const SIZE_CATALOG_LIST_PATTERN = new RegExp(
@@ -39,7 +40,20 @@ const SIZE_CATALOG_LABEL_PATTERN = new RegExp(
 );
 const SIZE_STOCK_CONTEXT_PATTERN = /(?:con|het|san\s*hang|available|ton\s*kho|pre\s*order|dat\s*truoc)\s*(?:size|sz|kich\s*co|co)?\s*(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\b/iu;
 const SIZE_NEGATION_PATTERN = /(?:khong|chua|chang)\s+(?:the\s+)?(?:tu\s*van|goi\s*y|khuyen|xac\s*dinh|chon|ket\s*luan|bao)\b/iu;
+const SIZE_FIT_ASSERTION_PATTERN = /\b(?:hop|vua|phu\s*hop|de\s*xuat|goi\s*y|khuyen\s*nghi)\b/iu;
+const SIZE_RECOMMENDATION_DESCRIPTOR_PATTERN = new RegExp(
+  `\\b(?:size|sz|kich\\s*co|co)\\s+(?:phu\\s*hop(?:\\s*nhat)?|nen\\s*(?:chon|lay)|de\\s*xuat)\\s*(?:la|:|=)?\\s*(${SIZE_TOKEN})\\b`,
+  "giu",
+);
+const SIZE_AVAILABILITY_PATTERN = new RegExp(
+  `\\b(?:co|con|het|san\\s*hang|available|ton\\s*kho|pre\\s*order|dat\\s*truoc)\\s*(?:size|sz|kich\\s*co|co)\\s*${SIZE_TOKEN}\\b`,
+  "iu",
+);
 
+const SIZE_CATALOG_AVAILABILITY_PATTERN = new RegExp(
+  `\\b(?:size|sz|kich\\s*co|co)(?:\\s+dang)?\\s+co\\s*[:=]?\\s*${SIZE_TOKEN}(?:\\s*[/,;]\\s*${SIZE_TOKEN})*\\b`,
+  "iu",
+);
 function normalizedVietnameseForGuard(value: string): string {
   return value
     .normalize("NFD")
@@ -50,35 +64,43 @@ function normalizedVietnameseForGuard(value: string): string {
 
 /**
  * Defense in depth only: this catches a concrete fit assertion omitted from
- * the structured claim references. It deliberately ignores questions,
- * negatives, stock statements and catalog lists; semantic intent remains the
- * model/code proposal boundary, never this detector.
+ * the structured claim references. Exclusions apply only to the clause that
+ * contains the match, so a mixed sentence cannot hide a later assertion.
  */
 export function detectConcreteSizeRecommendations(text: string): readonly string[] {
   const sizes = new Set<string>();
-  for (const rawSentence of text.split(/(?<=[.!?\n])/u)) {
-    const sentence = normalizedVietnameseForGuard(rawSentence).trim();
+  const clauses = normalizedVietnameseForGuard(text)
+    .replace(/\n/gu, ",")
+    .split(/[,;\n]+|(?<=[.!?])|\b(?:nhung|tuy\s+nhien)\b|(?=\btheo\s+so\s+do\b)/u)
+    .map((clause) => clause.trim())
+    .filter(Boolean);
+  for (const clause of clauses) {
+    const isQuestionWithoutFitAssertion =
+      clause.includes("?") && !SIZE_FIT_ASSERTION_PATTERN.test(clause);
     if (
-      sentence.length === 0 ||
-      sentence.includes("?") ||
-      SIZE_NEGATION_PATTERN.test(sentence) ||
-      SIZE_CATALOG_LIST_PATTERN.test(sentence) ||
-      SIZE_CATALOG_LABEL_PATTERN.test(sentence) ||
-      SIZE_STOCK_CONTEXT_PATTERN.test(sentence)
+      isQuestionWithoutFitAssertion ||
+      SIZE_NEGATION_PATTERN.test(clause) ||
+      SIZE_CATALOG_LIST_PATTERN.test(clause) ||
+      SIZE_CATALOG_LABEL_PATTERN.test(clause) ||
+      SIZE_STOCK_CONTEXT_PATTERN.test(clause) ||
+      SIZE_AVAILABILITY_PATTERN.test(clause) ||
+      SIZE_CATALOG_AVAILABILITY_PATTERN.test(clause)
     ) {
       continue;
     }
-    for (const match of sentence.matchAll(SIZE_REFERENCE_PATTERN)) {
+    for (const match of clause.matchAll(SIZE_REFERENCE_PATTERN)) {
       sizes.add((match[1] ?? "").toLocaleUpperCase("vi-VN"));
       if (match[2]) sizes.add(match[2].toLocaleUpperCase("vi-VN"));
     }
-    for (const match of sentence.matchAll(BARE_SIZE_FIT_PATTERN)) {
+    for (const match of clause.matchAll(BARE_SIZE_FIT_PATTERN)) {
+      sizes.add((match[1] ?? "").toLocaleUpperCase("vi-VN"));
+    }
+    for (const match of clause.matchAll(SIZE_RECOMMENDATION_DESCRIPTOR_PATTERN)) {
       sizes.add((match[1] ?? "").toLocaleUpperCase("vi-VN"));
     }
   }
   return [...sizes].filter(Boolean).sort();
 }
-
 function sizeClaimReason(
   claim: SizeRecommendationProtectedClaimV1,
   input: GuardInput,
@@ -88,6 +110,8 @@ function sizeClaimReason(
   if (claim.source !== "VERIFIED_SIZE_ENGINE_V1" || !claim.evidenceRef) {
     return "SIZE_RECOMMENDATION_SOURCE_INVALID";
   }
+  const parsedClaim = SizeRecommendationProtectedClaimV1Schema.safeParse(claim);
+  if (!parsedClaim.success) return "SIZE_RECOMMENDATION_EVIDENCE_BASIS_INVALID";
   if (
     context.activeProductId === null ||
     claim.productId !== context.activeProductId
