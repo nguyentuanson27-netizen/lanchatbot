@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ProductComponentRoleSchema } from "./v2/product-policy-media.js";
 
 export const RoutingOwnerSchema = z.enum(["N8N", "APP"]);
 export type RoutingOwner = z.infer<typeof RoutingOwnerSchema>;
@@ -384,6 +385,138 @@ export type AgentStrategyAnalysisV1 = z.infer<
   typeof AgentStrategyAnalysisV1Schema
 >;
 
+/**
+ * A size recommendation can only be emitted from the deterministic Size Engine
+ * evidence path. This is intentionally narrower than the long-term generic
+ * protected-claim contract: BF-04 must not create a second authority for the
+ * other business facts while it closes the immediate safety gap.
+ */
+export const SizeRecommendationClaimValueV1Schema = z.object({
+  recommendedSizes: z.array(z.string().trim().min(1).max(16)).min(1).max(4),
+  alternativeSizes: z.array(z.string().trim().min(1).max(16)).max(4),
+}).strict().superRefine((value, context) => {
+  const sizes = [...value.recommendedSizes, ...value.alternativeSizes]
+    .map((size) => size.toLocaleUpperCase("vi-VN"));
+  if (new Set(sizes).size !== sizes.length) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "size recommendation claim sizes must be unique",
+    });
+  }
+});
+export type SizeRecommendationClaimValueV1 = z.infer<
+  typeof SizeRecommendationClaimValueV1Schema
+>;
+
+const SizeRecommendationEvidenceHashV1Schema = z.string().regex(/^[a-f0-9]{64}$/);
+
+/**
+ * A size recommendation is grounded either in current body measurements or in
+ * one accepted customer-history record. The two sources are deliberately not
+ * interchangeable: a history decision must carry the exact accepted-event
+ * hash, while a measurement decision must carry every contributing event hash.
+ */
+export const SizeRecommendationEvidenceBasisV1Schema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("CURRENT_MEASUREMENTS"),
+    measurementFingerprint: SizeRecommendationEvidenceHashV1Schema,
+    sourceEventHashes: z.array(SizeRecommendationEvidenceHashV1Schema).min(1).max(5),
+  }).strict(),
+  z.object({
+    kind: z.literal("ACCEPTED_SIZE_HISTORY"),
+    sourceEventHash: SizeRecommendationEvidenceHashV1Schema,
+    recordedAt: z.string().datetime(),
+    productId: z.string().trim().min(1).max(128),
+    componentRole: ProductComponentRoleSchema,
+    size: z.string().trim().min(1).max(16),
+    outcome: z.enum(["CUSTOMER_ACCEPTED", "PURCHASED"]),
+  }).strict(),
+]);
+export type SizeRecommendationEvidenceBasisV1 = z.infer<
+  typeof SizeRecommendationEvidenceBasisV1Schema
+>;
+
+export const SizeRecommendationProtectedClaimV1Schema = z.object({
+  id: z.string().uuid(),
+  type: z.literal("SIZE_RECOMMENDATION"),
+  value: SizeRecommendationClaimValueV1Schema,
+  productId: z.string().trim().min(1).max(128),
+  variantId: z.string().trim().min(1).max(128).nullable(),
+  evidenceRef: z.string().trim().min(1).max(512),
+  source: z.literal("VERIFIED_SIZE_ENGINE_V1"),
+  observedAt: z.string().datetime(),
+  expiresAt: z.string().datetime(),
+  customerProfileId: z.string().uuid(),
+  customerProfileRevision: z.number().int().positive(),
+  measurementFingerprint: SizeRecommendationEvidenceHashV1Schema,
+  evidenceBasis: SizeRecommendationEvidenceBasisV1Schema,
+}).strict().superRefine((claim, context) => {
+  if (Date.parse(claim.expiresAt) <= Date.parse(claim.observedAt)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["expiresAt"],
+      message: "size recommendation claim expiry must be later than observation",
+    });
+  }
+
+  if (claim.variantId !== null) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["variantId"],
+      message: "variant-scoped size claims require a verifier-owned catalog artifact",
+    });
+  }
+
+  if (claim.evidenceBasis.kind === "CURRENT_MEASUREMENTS") {
+    if (new Set(claim.evidenceBasis.sourceEventHashes).size !== claim.evidenceBasis.sourceEventHashes.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["evidenceBasis", "sourceEventHashes"],
+        message: "measurement evidence event hashes must be unique",
+      });
+    }
+    if (claim.evidenceBasis.measurementFingerprint !== claim.measurementFingerprint) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["evidenceBasis", "measurementFingerprint"],
+        message: "measurement evidence basis must bind the claim fingerprint",
+      });
+    }
+    if (!claim.evidenceRef.includes(`measurements:${claim.measurementFingerprint}`)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["evidenceRef"],
+        message: "measurement evidence reference must bind the fingerprint",
+      });
+    }
+    return;
+  }
+
+  if (claim.evidenceBasis.productId !== claim.productId) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["evidenceBasis", "productId"],
+      message: "accepted history evidence must bind the claim product",
+    });
+  }
+  if (!claim.value.recommendedSizes.includes(claim.evidenceBasis.size)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["evidenceBasis", "size"],
+      message: "accepted history size must be the recommended size",
+    });
+  }
+  if (!claim.evidenceRef.includes(`history:${claim.evidenceBasis.sourceEventHash}`)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["evidenceRef"],
+      message: "accepted history evidence reference must bind the source event",
+    });
+  }
+});
+export type SizeRecommendationProtectedClaimV1 = z.infer<
+  typeof SizeRecommendationProtectedClaimV1Schema
+>;
 export const AgentProposalV1Schema = z.object({
   schemaVersion: z.literal(1),
   intent: z.string().min(1).max(64),
@@ -393,6 +526,9 @@ export const AgentProposalV1Schema = z.object({
   reply: z.string().max(2_000),
   attachments: z.array(z.string().url()).max(4),
   handoffReason: z.string().min(1).max(128).nullable(),
+  // Model output may reference a trusted claim ID, but never carries the
+  // provenance itself. The runtime supplies and verifies that provenance.
+  protectedClaimIds: z.array(z.string().uuid()).max(16).optional(),
   businessFactQuery: AgentBusinessFactQueryV1Schema.default({
     intent: "NONE",
     offerType: null,

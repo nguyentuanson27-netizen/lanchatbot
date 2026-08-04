@@ -7,6 +7,7 @@ import {
   type SizeChartV1,
 } from "@lana/contracts";
 import {
+  createVerifiedSizeRecommendationClaim,
   recommendSize,
   selectVerifiedSizeChart,
   stageSizeChartFromImageRegistry,
@@ -43,13 +44,15 @@ const measurement = (
   kind: CustomerProfileV1["measurements"][number]["kind"],
   value: number,
   confidence = 1,
+  observedAt = "2026-07-22T04:00:00.000Z",
+  sourceEventHash: string | null = hash(kind === "WEIGHT_KG" ? "b" : "c"),
 ): CustomerProfileV1["measurements"][number] => ({
   kind,
   value,
   provenance: {
     source: "CUSTOMER_MESSAGE",
-    sourceEventHash: hash(kind === "WEIGHT_KG" ? "b" : "c"),
-    observedAt: "2026-07-22T04:00:00.000Z",
+    sourceEventHash,
+    observedAt,
     confidence,
   },
 });
@@ -126,6 +129,7 @@ const target = {
   form: "SUONG",
   material: "GAM",
 };
+
 
 const input = (
   customer: CustomerProfileV1,
@@ -264,6 +268,149 @@ describe("recommendSize", () => {
     expect(decision.recommendation.reasonCodes).toContain("MEASUREMENTS_MATCHES_VERIFIED_CHART");
   });
 
+  it("mints a fresh scoped protected claim only for a verified Size Engine reply", () => {
+    const customer = profile([
+      measurement("HEIGHT_CM", 162),
+      measurement("WEIGHT_KG", 54),
+    ]);
+    const decision = recommendSize({
+      profile: customer,
+      target,
+      charts: [scoped("COMPONENT")],
+      generatedAt,
+      recommendationId,
+    });
+    const claim = createVerifiedSizeRecommendationClaim({
+      decision,
+      productId: "CB182",
+      profile: customer,
+    });
+    expect(claim).toMatchObject({
+      id: recommendationId,
+      type: "SIZE_RECOMMENDATION",
+      source: "VERIFIED_SIZE_ENGINE_V1",
+      productId: "CB182",
+      customerProfileId: customer.profileId,
+      customerProfileRevision: customer.revision,
+      value: { recommendedSizes: ["M"] },
+    });
+    expect(Date.parse(claim!.expiresAt)).toBeGreaterThan(Date.parse(generatedAt));
+    expect(claim).toMatchObject({
+      evidenceBasis: {
+        kind: "CURRENT_MEASUREMENTS",
+        sourceEventHashes: [hash("b"), hash("c")],
+      },
+    });
+    expect(claim!.evidenceRef).toContain(`measurements:${claim!.measurementFingerprint}`);
+    expect(claim?.variantId).toBeNull();
+
+    const callerOnlyScope = {
+      decision,
+      productId: "CB182",
+      profile: customer,
+      variantScope: { variantId: "caller-only", parentProductId: "CB182", size: "M" },
+    };
+    expect(createVerifiedSizeRecommendationClaim(callerOnlyScope)?.variantId).toBeNull();
+
+    const callerAuthoredVariant = {
+      source: "VERIFIED_CATALOG_VARIANT_V2",
+      sourceVersion: "caller-authored-version",
+      verifiedAt: generatedAt,
+      variantId: "CALLER-EVIL",
+      parentProductId: "CB182",
+      size: "M",
+    };
+    const forgedDecision = recommendSize({
+      profile: customer,
+      target,
+      charts: [scoped("COMPONENT")],
+      generatedAt,
+      recommendationId,
+      variantBinding: callerAuthoredVariant,
+    } as Parameters<typeof recommendSize>[0]);
+    const forgedClaim = createVerifiedSizeRecommendationClaim({
+      decision: forgedDecision,
+      productId: "CB182",
+      profile: customer,
+      variantScope: callerAuthoredVariant,
+    } as Parameters<typeof createVerifiedSizeRecommendationClaim>[0]);
+    expect(forgedClaim?.variantId).toBeNull();
+    expect(forgedClaim?.evidenceRef).not.toContain("CALLER-EVIL");
+    expect(JSON.stringify(forgedClaim?.evidenceBasis)).not.toContain("CALLER-EVIL");
+    expect(forgedClaim?.evidenceBasis).not.toHaveProperty("variantBinding");
+
+    const unavailable = recommendSize({
+      profile: customer,
+      target,
+      charts: [],
+      generatedAt,
+      recommendationId,
+    });
+    expect(createVerifiedSizeRecommendationClaim({
+      decision: unavailable,
+      productId: "CB182",
+      profile: customer,
+    })).toBeNull();
+  });
+  it("fails closed for stale, future, invalid or unhashed current measurements", () => {
+    const claimFor = (observedAt: string, sourceEventHash: string | null = hash("b")) => {
+      const customer = profile([
+        measurement("HEIGHT_CM", 162, 1, observedAt, hash("c")),
+        measurement("WEIGHT_KG", 54, 1, observedAt, sourceEventHash),
+      ]);
+      const decision = recommendSize({
+        profile: customer,
+        target,
+        charts: [scoped("COMPONENT")],
+        generatedAt,
+        recommendationId,
+      });
+      return createVerifiedSizeRecommendationClaim({
+        decision,
+        productId: "CB182",
+        profile: customer,
+      });
+    };
+
+    expect(claimFor("2026-07-20T05:00:00.000Z")).not.toBeNull();
+    expect(claimFor("2026-07-20T04:59:59.999Z")).toBeNull();
+    expect(claimFor("2026-07-22T05:00:00.001Z")).toBeNull();
+    expect(claimFor("2026-07-22T04:00:00.000Z", null)).toBeNull();
+
+    const customer = profile([
+      measurement("HEIGHT_CM", 162),
+      measurement("WEIGHT_KG", 54),
+    ]);
+    const validDecision = recommendSize({
+      profile: customer,
+      target,
+      charts: [scoped("COMPONENT")],
+      generatedAt,
+      recommendationId,
+    });
+    const invalidMeasurements = validDecision.recommendation.measurementsUsed.map(
+      (item) => ({
+        ...item,
+        provenance: { ...item.provenance, observedAt: "not-a-date" },
+      }),
+    );
+    const invalidDecision = {
+      ...validDecision,
+      recommendation: {
+        ...validDecision.recommendation,
+        measurementsUsed: invalidMeasurements,
+      },
+      evidenceBasis: {
+        kind: "CURRENT_MEASUREMENTS" as const,
+        measurements: invalidMeasurements,
+      },
+    };
+    expect(createVerifiedSizeRecommendationClaim({
+      decision: invalidDecision,
+      productId: "CB182",
+      profile: customer,
+    })).toBeNull();
+  });
   it("asks for every required direct measurement before selecting a size", () => {
     const withBust = SizeChartV1Schema.parse({
       ...chart("with-bust", "TOP"),
@@ -304,7 +451,7 @@ describe("recommendSize", () => {
     expect(decision.recommendation.confidence).toBeLessThan(0.9);
   });
 
-  it("uses a prior worn size only if it exists in a verified chart", () => {
+  it("mints PAST_SIZE only with accepted history provenance bound to its source event", () => {
     const customer = profile([], {
       sizeHistory: [{
         productId: "CB182",
@@ -322,10 +469,89 @@ describe("recommendSize", () => {
       generatedAt,
       recommendationId,
     });
-    expect(decision.recommendation.recommendedSizes[0]?.size).toBe("L");
-    expect(decision.recommendation.reasonCodes).toContain("PAST_SIZE_MATCHES_VERIFIED_CHART");
+    const claim = createVerifiedSizeRecommendationClaim({
+      decision,
+      productId: "CB182",
+      profile: customer,
+    });
+    expect(decision.recommendation.measurementsUsed).toEqual([]);
+    expect(claim).toMatchObject({
+      variantId: null,
+      evidenceBasis: {
+        kind: "ACCEPTED_SIZE_HISTORY",
+        sourceEventHash: hash("f"),
+        productId: "CB182",
+        size: "L",
+        outcome: "CUSTOMER_ACCEPTED",
+      },
+    });
+    expect(claim!.evidenceRef).toContain(`history:${hash("f")}`);
+
+    const staleCustomer = profile([], {
+      sizeHistory: [{
+        productId: "CB182", componentRole: "TOP", size: "L", outcome: "PURCHASED",
+        sourceEventHash: hash("e"), recordedAt: "2026-07-19T03:30:00.000Z",
+      }],
+    });
+    const staleDecision = recommendSize({
+      profile: staleCustomer,
+      target,
+      charts: [scoped("COMPONENT")],
+      generatedAt,
+      recommendationId,
+    });
+    expect(createVerifiedSizeRecommendationClaim({
+      decision: staleDecision,
+      productId: "CB182",
+      profile: staleCustomer,
+    })).toBeNull();
   });
 
+  it.each([null, "OTHER"])(
+    "does not bind accepted history with product %s to the active product",
+    (historyProductId) => {
+      const customer = profile([], {
+        sizeHistory: [{
+          productId: historyProductId,
+          componentRole: "TOP",
+          size: "L",
+          outcome: "PURCHASED",
+          sourceEventHash: hash("f"),
+          recordedAt: "2026-07-22T03:30:00.000Z",
+        }],
+      });
+      const decision = recommendSize({
+        profile: customer,
+        target,
+        charts: [scoped("COMPONENT")],
+        generatedAt,
+        recommendationId,
+      });
+      expect(decision.action).toBe("ASK_MORE");
+      expect(createVerifiedSizeRecommendationClaim({
+        decision,
+        productId: "CB182",
+        profile: customer,
+      })).toBeNull();
+    },
+  );
+  it("does not use PAST_SIZE without an accepted-history source event", () => {
+    const customer = profile([], {
+      sizeHistory: [{
+        productId: "CB182", componentRole: "TOP", size: "L", outcome: "PURCHASED",
+        sourceEventHash: null, recordedAt: "2026-07-22T03:30:00.000Z",
+      }],
+    });
+    const decision = recommendSize({
+      profile: customer,
+      target,
+      charts: [scoped("COMPONENT")],
+      generatedAt,
+      recommendationId,
+    });
+    expect(decision.action).toBe("ASK_MORE");
+    expect(decision.recommendation.recommendedSizes).toEqual([]);
+  });
   it("does not reuse an unaccepted prior recommendation as proof of worn size", () => {
     const customer = profile([], {
       sizeHistory: [{

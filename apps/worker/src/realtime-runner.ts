@@ -8,6 +8,7 @@ import {
   normalizeProductCode,
   ProductSearchService,
   recommendSize,
+  createVerifiedSizeRecommendationClaim,
   selectProductMediaV2,
   guardAgentProposal,
   selectImages,
@@ -1661,6 +1662,63 @@ export function composeSizeEngineAdvice(
   };
 }
 
+/**
+ * A deterministic response assembled from independently verified context after
+ * the single permitted repair fails. It never edits model wording in place.
+ */
+export interface ApprovedSizeClaimFallbackContext {
+  readonly facts: BusinessFactEnvelopeV1 | null;
+  readonly product: StableProductDocument | null;
+  readonly attachmentUrls: readonly string[];
+  readonly preservedProtectedClaimIds: readonly string[];
+  readonly approvedCta: string | null;
+}
+
+export function approvedSizeClaimClarification(
+  proposal: AgentProposalV1,
+  context?: ApprovedSizeClaimFallbackContext,
+): AgentProposalV1 {
+  const verifiedFactText = context?.facts && context.product
+    ? (["PRICE", "STOCK", "ETA"] as const)
+      .flatMap((intent) => buildVerifiedFactBlocks(context.facts!, intent, context.product!).blocks)
+      .map((block) => block.text)
+      .filter((text, index, values) => values.indexOf(text) === index)
+      .join("\n\n")
+    : "";
+  const clarification = "Để tư vấn size chính xác, chị cho em xin chiều cao, cân nặng hoặc số đo phù hợp nhé.";
+  return {
+    ...proposal,
+    action: "REPLY",
+    reply: [verifiedFactText, clarification, context?.approvedCta?.trim() ?? ""]
+      .filter(Boolean)
+      .join("\n\n"),
+    attachments: [...new Set(context?.attachmentUrls ?? [])],
+    handoffReason: null,
+    protectedClaimIds: [...new Set(context?.preservedProtectedClaimIds ?? [])],
+  };
+}
+function verifiedSizeRecommendationClaimForGuard(
+  product: StableProductDocument,
+  profile: CustomerProfileV1,
+  policyResolution: RuntimePolicyResolution | null,
+  now: Date,
+) {
+  const { decision } = resolveSizeEngineDecision(
+    product,
+    profile,
+    policyResolution,
+    now,
+  );
+  return createVerifiedSizeRecommendationClaim({
+    decision,
+    productId: product.productId,
+    profile,
+  });
+}
+
+function hasSizeRecommendationBlock(reasonCodes: readonly string[]): boolean {
+  return reasonCodes.some((reason) => reason.startsWith("SIZE_RECOMMENDATION_"));
+}
 export interface PostMediaProofCtaInput {
   readonly ctaPolicy: Wave2StrategyDecision["ctaPolicy"] | null;
   readonly imageIntent: CustomerImageIntent | null;
@@ -1832,6 +1890,7 @@ export interface RealtimeModelPort {
   generate: VertexShadowModel["generate"];
   groundWithFacts: VertexShadowModel["groundWithFacts"];
   groundDraftWithFacts?: VertexShadowModel["groundDraftWithFacts"];
+  repairSizeClaimDraft?: VertexShadowModel["repairSizeClaimDraft"];
 }
 
 export interface CanonicalChatHistoryPort {
@@ -3778,9 +3837,35 @@ export class RealtimeRunner {
         const verifiedProductIds = new Set<string>();
         if (resolvedProduct) verifiedProductIds.add(resolvedProduct.productId);
         if (facts?.status === "OK") verifiedProductIds.add(facts.productId);
-        let guarded = guardAgentProposal({
-          proposal,
-          facts,
+        const activeSizeProductId = resolvedProduct?.productId ?? null;
+        const activeVerifiedVariant = nextState.verifiedVariant;
+        const activeSizeVariantId =
+          activeVerifiedVariant?.parentProductId === activeSizeProductId
+            ? activeVerifiedVariant.selectedVariantId
+            : null;
+        const verifiedSizeClaim =
+          resolvedProduct && customerProfile
+            ? verifiedSizeRecommendationClaimForGuard(
+                resolvedProduct,
+                customerProfile,
+                policyResolution,
+                now,
+              )
+            : null;
+        if (verifiedSizeClaim) {
+          proposal = {
+            ...proposal,
+            protectedClaimIds: [
+              ...new Set([...(proposal.protectedClaimIds ?? []), verifiedSizeClaim.id]),
+            ],
+          };
+        }
+        const guardProposal = (
+          candidate: AgentProposalV1,
+          candidateFacts: BusinessFactEnvelopeV1 | null = facts,
+        ) => guardAgentProposal({
+          proposal: candidate,
+          facts: candidateFacts,
           verifiedProductIds,
           ...(mediaSelectorV2GuardActive &&
               guardVerifiedAttachmentUrls !== undefined
@@ -3790,24 +3875,116 @@ export class RealtimeRunner {
               }
             : {}),
           buyingSignal: buyingSignal.isBuyingSignal,
+          sizeClaimContext: {
+            activeProductId: activeSizeProductId,
+            activeVariantId: activeSizeVariantId,
+            customerProfileId: customerProfile?.profileId ?? null,
+            customerProfileRevision: customerProfile?.revision ?? null,
+            claims: verifiedSizeClaim ? [verifiedSizeClaim] : [],
+          },
           now,
         });
-        guardedPlanHash = createHash("sha256").update(JSON.stringify({
-          action: guarded.action,
-          productId: guarded.productId,
-          handoffReason: guarded.handoffReason,
-          blockedReasonCodes: guarded.blockedReasonCodes,
-          textUnitHashes: guarded.textUnits.map((text) =>
-            createHash("sha256").update(text).digest("hex")
-          ),
-          imageCount: guarded.imageUrls.length,
-        })).digest("hex");
+        let guarded = guardProposal(proposal);
+        const guardedPlanHashFor = (value: typeof guarded): string =>
+          createHash("sha256").update(JSON.stringify({
+            action: value.action,
+            productId: value.productId,
+            handoffReason: value.handoffReason,
+            blockedReasonCodes: value.blockedReasonCodes,
+            textUnitHashes: value.textUnits.map((text) =>
+              createHash("sha256").update(text).digest("hex")
+            ),
+            imageCount: value.imageUrls.length,
+          })).digest("hex");
+        guardedPlanHash = guardedPlanHashFor(guarded);
         handoffGuardReasonCodes = [
           ...new Set([
             ...handoffGuardReasonCodes,
             ...guarded.blockedReasonCodes,
           ]),
         ];
+        if (hasSizeRecommendationBlock(guarded.blockedReasonCodes)) {
+          const sizeRepairBaseline = proposal;
+          let repaired = false;
+          if (this.model.repairSizeClaimDraft) {
+            try {
+              modelCalled = true;
+              const repair = await this.model.repairSizeClaimDraft(
+                modelContext,
+                proposal,
+                guarded.blockedReasonCodes.filter((reason) =>
+                  reason.startsWith("SIZE_RECOMMENDATION_"),
+                ),
+                verifiedSizeClaim ? [verifiedSizeClaim] : [],
+                this.options.promptVersion,
+              );
+              modelVersion = repair.modelVersion;
+              modelLatencyMs += repair.latencyMs;
+              modelPromptTokens += repair.tokenUsage.promptTokenCount ?? 0;
+              modelOutputTokens += repair.tokenUsage.candidatesTokenCount ?? 0;
+              modelTotalTokens += repair.tokenUsage.totalTokenCount ??
+                (repair.tokenUsage.promptTokenCount ?? 0) +
+                  (repair.tokenUsage.candidatesTokenCount ?? 0);
+              hasModelTokenUsage ||= Object.values(repair.tokenUsage).some(
+                (value) => typeof value === "number" && Number.isFinite(value),
+              );
+              proposal = {
+                ...repair.proposal,
+                salesSignals: proposal.salesSignals ?? repair.proposal.salesSignals,
+                strategyAnalysis:
+                  proposal.strategyAnalysis ?? repair.proposal.strategyAnalysis,
+              };
+              guarded = guardProposal(proposal);
+              repaired =
+                !hasSizeRecommendationBlock(guarded.blockedReasonCodes) &&
+                (guarded.action === "REPLY" ||
+                  guarded.action === "ASK_PRODUCT_SELECTION");
+              if (repaired) {
+                handoffGuardReasonCodes = [...new Set([
+                  ...handoffGuardReasonCodes,
+                  "SIZE_RECOMMENDATION_REPAIRED",
+                ])];
+              }
+            } catch (error) {
+              const repairFailure = vertexGroundedFallbackReason(error);
+              modelErrorClass = repairFailure;
+              handoffGuardReasonCodes = [...new Set([
+                ...handoffGuardReasonCodes,
+                repairFailure,
+              ])];
+            }
+          } else {
+            handoffGuardReasonCodes = [...new Set([
+              ...handoffGuardReasonCodes,
+              "SIZE_RECOMMENDATION_REPAIR_UNAVAILABLE",
+            ])];
+          }
+          if (!repaired) {
+            const verifiedAttachmentUrlsForFallback = new Set(
+              guardVerifiedAttachmentUrls ?? facts?.facts?.imageUrls ?? [],
+            );
+            proposal = approvedSizeClaimClarification(sizeRepairBaseline, {
+              facts,
+              product: resolvedProduct,
+              attachmentUrls: sizeRepairBaseline.attachments.filter((url) =>
+                verifiedAttachmentUrlsForFallback.has(url)
+              ),
+              preservedProtectedClaimIds: (sizeRepairBaseline.protectedClaimIds ?? []).filter(
+                (claimId) => claimId !== verifiedSizeClaim?.id,
+              ),
+              // The independently authorized post-media CTA is constructed
+              // after this fallback from the guarded media plan below.
+              approvedCta: null,
+            });
+            guarded = guardProposal(proposal);
+            handoffGuardReasonCodes = [...new Set([
+              ...handoffGuardReasonCodes,
+              "SIZE_RECOMMENDATION_REPAIR_FAILED",
+              ...guarded.blockedReasonCodes,
+            ])];
+          }
+          guardedPlanHash = guardedPlanHashFor(guarded);
+        }
         if (
           guarded.action === "HANDOFF" &&
           !modelHandoffPermitted(message.text ?? "", facts) &&
@@ -3821,23 +3998,8 @@ export class RealtimeRunner {
               nextState.currentProductId,
             ),
           );
-          guarded = guardAgentProposal({
-            proposal,
-            facts: null,
-            verifiedProductIds,
-            buyingSignal: buyingSignal.isBuyingSignal,
-            now,
-          });
-          guardedPlanHash = createHash("sha256").update(JSON.stringify({
-            action: guarded.action,
-            productId: guarded.productId,
-            handoffReason: guarded.handoffReason,
-            blockedReasonCodes: guarded.blockedReasonCodes,
-            textUnitHashes: guarded.textUnits.map((text) =>
-              createHash("sha256").update(text).digest("hex")
-            ),
-            imageCount: guarded.imageUrls.length,
-          })).digest("hex");
+          guarded = guardProposal(proposal, null);
+          guardedPlanHash = guardedPlanHashFor(guarded);
         }
         if (guarded.action === "HANDOFF") {
           handoffGuardReasonCodes = [

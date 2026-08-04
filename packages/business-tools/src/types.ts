@@ -3,6 +3,7 @@ import type {
   BusinessFactSource,
   GuardedReplyPlanV1,
   ProductFactsV1,
+  SizeRecommendationProtectedClaimV1,
 } from "@lana/contracts";
 
 export const SUPPORTED_SIZES = ["S", "M", "L", "XL"] as const;
@@ -248,6 +249,17 @@ export interface GuardInput {
   buyingSignal?: boolean;
   promotion?: PromotionAuthorization;
   shipping?: ShippingAuthorization;
+  /**
+   * Trusted, code-created Size Engine claims for the active reply only. Model
+   * IDs are verified against this envelope; model output is never evidence.
+   */
+  sizeClaimContext?: {
+    activeProductId: string | null;
+    activeVariantId: string | null;
+    customerProfileId: string | null;
+    customerProfileRevision: number | null;
+    claims: readonly SizeRecommendationProtectedClaimV1[];
+  };
   now: Date;
 }
 

@@ -5,6 +5,7 @@ import {
 } from "@lana/conversation-engine";
 import {
   aiContinuationProductId,
+  approvedSizeClaimClarification,
   catalogAdvisoryIntent,
   catalogAdvisoryReply,
   continuationProductId,
@@ -50,9 +51,370 @@ import type {
   CustomerProfileV1,
   ProductFactsV2,
 } from "@lana/contracts";
-import type { RuntimePolicyResolution } from "@lana/chat-runtime";
+import type { RuntimePolicyResolution, RuntimePolicyResolverPort } from "@lana/chat-runtime";
 
 describe("RealtimeRunner", () => {
+  it("uses the approved no-size clarification after a rejected size-claim repair", () => {
+    const fallback = approvedSizeClaimClarification({
+      schemaVersion: 1,
+      intent: "size_consulting",
+      conversationStage: "FIT_CONSULTING",
+      productId: "SD398",
+      action: "REPLY",
+      reply: "Theo số đo chị hợp size L.",
+      attachments: [],
+      handoffReason: null,
+      protectedClaimIds: ["22222222-2222-4222-8222-222222222222"],
+      businessFactQuery: {
+        intent: "SIZE",
+        offerType: null,
+        color: null,
+        size: null,
+        deliveryRegion: null,
+      },
+    });
+    expect(fallback).toMatchObject({
+      action: "REPLY",
+      attachments: [],
+      handoffReason: null,
+      protectedClaimIds: [],
+    });
+    expect(fallback.reply).not.toMatch(/(?:size|cỡ|kích cỡ)\s*(?:s|m|l|xl|xxl|\d+)/iu);
+  });
+  it("repairs an undeclared size once, re-guards it, and falls back without losing verified facts or media", async () => {
+    const occurredAt = "2026-08-04T00:00:00.000Z";
+    const imageUrl = "https://cdn.example/sd398-verified.jpg";
+    const state = createConversationState({
+      conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
+      routingOwner: "APP",
+      now: new Date(occurredAt),
+    });
+    const claim = {
+      inboxId: "2a9afc47-978a-4b74-9653-3c89e75a89a0",
+      pageId: "1198992073286645",
+      eventKey: "meta:1198992073286645:message:bf04-repair-failure",
+      conversationHash: "meta:v1:customer-hash",
+      occurredAt: new Date(occurredAt), receivedAt: new Date(occurredAt), receiveSequence: 31,
+      attemptCount: 1, leaseToken: "68c52ee9-9348-481d-a366-a6178618da3c",
+      envelope: {
+        schemaVersion: 1 as const, customerSendEnabled: false as const,
+        routing: { mode: "APP" as const, routingOwner: "APP" as const, evaluationOnly: false, reason: "APP_OWNS" as const },
+        message: {
+          schemaVersion: 1 as const, traceId: "3021af34-c98c-4086-a33c-3ecb2ad8f8f2",
+          eventKey: "meta:1198992073286645:message:bf04-repair-failure",
+          pageId: "1198992073286645", messageId: "bf04-repair-failure", senderId: "customer-1",
+          conversationId: "meta:v1:customer-hash", occurredAt, isEcho: false, appId: null,
+          text: "tu van size giup chi", attachments: [],
+        },
+      },
+    };
+    const unsafeProposal = {
+      schemaVersion: 1 as const,
+      intent: "size_consulting",
+      conversationStage: "FIT_CONSULTING" as const,
+      productId: "SD398",
+      action: "REPLY" as const,
+      reply: "Price 1199000 VND. Chi hop size L.",
+      attachments: [imageUrl],
+      handoffReason: null,
+      protectedClaimIds: ["33333333-3333-4333-8333-333333333333"],
+      businessFactQuery: { intent: "PRICE" as const, offerType: null, color: null, size: null, deliveryRegion: null },
+    } satisfies AgentProposalV1;
+    const result = (proposal: AgentProposalV1) => ({
+      proposal, modelVersion: "gemini-test", latencyMs: 1, tokenUsage: {},
+    });
+    const repair = vi.fn(async () => result(unsafeProposal));
+    const model: RealtimeModelPort = {
+      generate: vi.fn(async () => result(unsafeProposal)),
+      groundWithFacts: vi.fn(async () => result(unsafeProposal)),
+      repairSizeClaimDraft: repair,
+    };
+    let persistedState = state;
+    let persistedStateVersion = 0;
+    let durableCommitInput: unknown = null;
+    const commit = vi.fn(async (input: { state: typeof state }) => {
+      durableCommitInput = input;
+      persistedState = input.state;
+      persistedStateVersion += 1;
+      throw new Error("COMMIT_ACK_LOST");
+    });
+    const runtime: RealtimeRuntimePort = {
+      loadOrCreate: vi.fn(async () => ({
+        conversationId: state.conversationId, pageId: claim.pageId, customerHash: claim.conversationHash,
+        stateVersion: persistedStateVersion, state: persistedState, routingOwner: "APP" as const, appSendEnabled: true, killSwitch: false,
+      })),
+      commit,
+      linkProviderConversation: vi.fn(async () => undefined),
+    };
+    const facts = {
+      ready: vi.fn(async () => true),
+      resolve: vi.fn(async () => ({
+        schemaVersion: 1 as const, status: "OK" as const, source: "POS_SNAPSHOT" as const,
+        observedAt: occurredAt, expiresAt: "2099-01-01T00:00:00.000Z", productId: "SD398",
+        facts: {
+          schemaVersion: 1 as const, productId: "SD398", parentProductId: "SD398", offerType: "AO_DAI",
+          listPriceVnd: null, salePriceVnd: 1199000, sizes: ["M", "L"], stockStatus: "IN_STOCK" as const,
+          stockQuantity: 2, deliveryEta: { minDays: 1, maxDays: 2 }, fulfillmentPolicy: "READY_STOCK",
+          imageUrls: [imageUrl],
+        },
+        reasonCode: null,
+      })),
+      close: vi.fn(async () => undefined),
+    };
+    const product = {
+      productId: "SD398", parentProductId: "SD398", canonicalCode: "SD398", aliases: [],
+      title: "Ao dai SD398", colors: [], materials: [], silhouettes: [], occasions: [],
+      imageUrls: [imageUrl], images: [], catalogVersion: "catalog-v2",
+    };
+    const retryClaim = {
+      ...claim,
+      attemptCount: 2,
+      leaseToken: "68c52ee9-9348-481d-a366-a6178618da3d",
+    };
+    const complete = vi.fn(async () => true);
+    const retry = vi.fn(async () => true);
+    const runner = new RealtimeRunner(
+      {
+        claimNext: vi.fn()
+          .mockResolvedValueOnce(claim)
+          .mockResolvedValueOnce(retryClaim)
+          .mockResolvedValueOnce(null),
+        complete, retry, failPermanent: vi.fn(),
+      },
+      runtime,
+      model,
+      facts,
+      { searchText: vi.fn(async () => ({ status: "MATCHED" as const, matchKind: "EXACT_CODE" as const, score: 1, gap: null, product })), searchImage: vi.fn() },
+      new FailClosedTagObservationProvider(),
+      { workerId: "worker-1", mode: "LIVE", sendEnabled: true, decisionAuditV2Enabled: true, decisionTelemetryEnabled: true },
+    );
+
+    expect(await runner.processOne()).toBe(true);
+    expect(await runner.processOne()).toBe(true);
+    expect(await runner.processOne()).toBe(false);
+    expect(model.generate).toHaveBeenCalledOnce();
+    expect(model.groundWithFacts).toHaveBeenCalledOnce();
+    expect(repair).toHaveBeenCalledTimes(1);
+    expect(retry).toHaveBeenCalledOnce();
+    expect(retry).toHaveBeenCalledWith(claim.inboxId, claim.leaseToken, "COMMIT_ACK_LOST", expect.any(Number));
+    expect(complete).toHaveBeenCalledOnce();
+    expect(complete).toHaveBeenCalledWith(retryClaim.inboxId, retryClaim.leaseToken);
+    expect(commit).toHaveBeenCalledOnce();
+    const commitInput = durableCommitInput as {
+      metaPlan?: { messages: readonly ({ kind: "TEXT"; text: string } | { kind: "IMAGE"; imageUrl: string })[] };
+      decisionEvents?: readonly { eventType: string; reasonCodes: readonly string[] }[];
+    };
+    const text = (commitInput.metaPlan?.messages ?? [])
+      .filter((message): message is { kind: "TEXT"; text: string } => message.kind === "TEXT")
+      .map((message) => message.text).join("\n");
+    expect(text).toContain("1.199.000");
+    expect(text).not.toMatch(/hop size L/iu);
+    expect(commitInput.metaPlan?.messages).toContainEqual({ kind: "IMAGE", imageUrl });
+    expect(commitInput.metaPlan?.messages.filter((message) => message.kind === "IMAGE")).toHaveLength(1);
+    expect(commitInput.decisionEvents?.filter((event) => event.eventType === "GUARD_BLOCKED")).toHaveLength(1);
+    expect(commitInput.decisionEvents).toContainEqual(expect.objectContaining({
+      eventType: "GUARD_BLOCKED",
+      reasonCodes: expect.arrayContaining([
+        "SIZE_RECOMMENDATION_MISSING_PROVENANCE",
+        "SIZE_RECOMMENDATION_REPAIR_FAILED",
+      ]),
+    }));
+  });
+  it("accepts one successful E2E size repair only when it binds the verified Size Engine claim", async () => {
+    const occurredAt = "2026-08-04T00:00:00.000Z";
+    const imageUrl = "https://cdn.example/sd398-verified.jpg";
+    const state = createConversationState({
+      conversationId: "13820fd4-daa7-4917-9835-a38cb55120e5",
+      routingOwner: "APP",
+      now: new Date(occurredAt),
+    });
+    const claim = {
+      inboxId: "1a9afc47-978a-4b74-9653-3c89e75a89a0",
+      pageId: "1198992073286645",
+      eventKey: "meta:1198992073286645:message:bf04-repair-success",
+      conversationHash: "meta:v1:customer-hash-success",
+      occurredAt: new Date(occurredAt), receivedAt: new Date(occurredAt), receiveSequence: 32,
+      attemptCount: 1, leaseToken: "78c52ee9-9348-481d-a366-a6178618da3c",
+      envelope: {
+        schemaVersion: 1 as const, customerSendEnabled: false as const,
+        routing: { mode: "APP" as const, routingOwner: "APP" as const, evaluationOnly: false, reason: "APP_OWNS" as const },
+        message: {
+          schemaVersion: 1 as const, traceId: "4021af34-c98c-4086-a33c-3ecb2ad8f8f2",
+          eventKey: "meta:1198992073286645:message:bf04-repair-success",
+          pageId: "1198992073286645", messageId: "bf04-repair-success", senderId: "customer-2",
+          conversationId: "meta:v1:customer-hash-success", occurredAt, isEcho: false, appId: null,
+          text: "tu van size giup chi", attachments: [],
+        },
+      },
+    };
+    const product = {
+      productId: "SD398", parentProductId: "SD398", canonicalCode: "SD398", aliases: [],
+      title: "Ao dai Dao Phung", colors: [], materials: [], silhouettes: [], occasions: [],
+      imageUrls: [imageUrl], images: [], catalogVersion: "catalog-v2",
+    };
+    const profile: CustomerProfileV1 = {
+      schemaVersion: 1,
+      profileId: "30709206-8f96-4a1b-9311-6f03ef4dd8b2",
+      customerKey: { namespace: "lana-customer-v1", algorithm: "HMAC_SHA256", digest: "a".repeat(64) },
+      revision: 2,
+      measurements: [
+        { kind: "HEIGHT_CM", value: 160, provenance: { source: "CUSTOMER_MESSAGE", sourceEventHash: "b".repeat(64), observedAt: occurredAt, confidence: 1 } },
+        { kind: "WEIGHT_KG", value: 53, provenance: { source: "CUSTOMER_MESSAGE", sourceEventHash: "c".repeat(64), observedAt: occurredAt, confidence: 1 } },
+      ],
+      fitPreference: null, preferences: { colors: [], styles: [], materials: [] }, sizeHistory: [],
+      createdAt: occurredAt, updatedAt: occurredAt,
+    };
+    const policy = {
+      bundle: {
+        policy: { policyVersion: 'bf04-size-engine-e2e' },
+        bundleHash: 'sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        artifacts: {
+          sizeCharts: {
+            "ao-dai-dress": {
+              chart: {
+                schemaVersion: 1,
+                reference: {
+                  chartId: "ao-dai-dress", version: "1", source: "IMAGE_EXTRACTION",
+                  sourceArtifactRef: "https://cdn.example/ao-dai-size.jpg", sourceContentSha256: "d".repeat(64),
+                  verificationStatus: "VERIFIED", verifiedByRef: "admin:owner", verifiedAt: occurredAt,
+                },
+                brand: "LANA", category: "AO_DAI", componentRole: "DRESS", boundaryPolicy: "REQUIRE_HUMAN_REVIEW",
+                bands: [{
+                  size: "M",
+                  ranges: [
+                    { kind: "HEIGHT_CM", minInclusive: 155, maxInclusive: 168 },
+                    { kind: "WEIGHT_KG", minInclusive: 50, maxInclusive: 57 },
+                  ],
+                  note: null,
+                }],
+              },
+              scope: {
+                level: "COMPONENT", parentProductIds: ["SD398"], categories: ["AO_DAI"], componentRole: "DRESS",
+                forms: [], materials: [],
+              },
+              sourceMetadata: { sourceReference: "https://cdn.example/ao-dai-size.jpg" },
+            },
+          },
+        },
+      },
+    } as unknown as RuntimePolicyResolution;
+    const unsafeProposal = {
+      schemaVersion: 1 as const, intent: "size_consulting", conversationStage: "FIT_CONSULTING" as const,
+      productId: "SD398", action: "REPLY" as const, reply: "Price 1199000 VND. Chi hop size XL.",
+      attachments: [imageUrl], handoffReason: null,
+      businessFactQuery: { intent: "PRICE" as const, offerType: null, color: null, size: null, deliveryRegion: null },
+    } satisfies AgentProposalV1;
+    const result = (proposal: AgentProposalV1) => ({ proposal, modelVersion: "gemini-test", latencyMs: 1, tokenUsage: {} });
+    const repair = vi.fn(async (...args: Parameters<NonNullable<RealtimeModelPort["repairSizeClaimDraft"]>>) => {
+      const trustedClaims = args[3];
+      return result({
+        ...unsafeProposal,
+        reply: "Price 1199000 VND. Chi hop size M.",
+        protectedClaimIds: trustedClaims.map(({ id }) => id),
+      });
+    });
+    const model: RealtimeModelPort = {
+      generate: vi.fn(async () => result(unsafeProposal)),
+      groundWithFacts: vi.fn(async () => result(unsafeProposal)),
+      repairSizeClaimDraft: repair,
+    };
+    let persistedState = state;
+    let persistedStateVersion = 0;
+    let durableCommitInput: unknown = null;
+    const commit = vi.fn(async (input: { state: typeof state }) => {
+      durableCommitInput = input;
+      persistedState = input.state;
+      persistedStateVersion += 1;
+      throw new Error("COMMIT_ACK_LOST");
+    });
+    const runtime = {
+      loadOrCreate: vi.fn(async () => ({
+        conversationId: state.conversationId, pageId: claim.pageId, customerHash: claim.conversationHash,
+        stateVersion: persistedStateVersion, state: persistedState, routingOwner: "APP" as const, appSendEnabled: true, killSwitch: false,
+      })),
+      loadOrCreateCustomerProfile: vi.fn(async () => ({
+        pageId: claim.pageId, customerHash: claim.conversationHash, revision: profile.revision, profile,
+        fieldEvidence: {}, expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+      })),
+      compareAndSwapCustomerProfile: vi.fn(async () => true),
+      commit, linkProviderConversation: vi.fn(async () => undefined),
+    } as unknown as RealtimeRuntimePort;
+    const facts = {
+      ready: vi.fn(async () => true),
+      resolve: vi.fn(async () => ({
+        schemaVersion: 1 as const, status: "OK" as const, source: "POS_SNAPSHOT" as const,
+        observedAt: occurredAt, expiresAt: "2099-01-01T00:00:00.000Z", productId: "SD398",
+        facts: {
+          schemaVersion: 1 as const, productId: "SD398", parentProductId: "SD398", offerType: "AO_DAI",
+          listPriceVnd: null, salePriceVnd: 1199000, sizes: ["M", "L"], stockStatus: "IN_STOCK" as const,
+          stockQuantity: 2, deliveryEta: null, fulfillmentPolicy: "READY_STOCK", imageUrls: [imageUrl],
+        }, reasonCode: null,
+      })),
+      close: vi.fn(async () => undefined),
+    };
+    const policyResolver: RuntimePolicyResolverPort = { resolve: vi.fn(async () => policy) };
+    const retryClaim = {
+      ...claim,
+      attemptCount: 2,
+      leaseToken: "78c52ee9-9348-481d-a366-a6178618da3d",
+    };
+    const queue = {
+      claimNext: vi.fn()
+        .mockResolvedValueOnce(claim)
+        .mockResolvedValueOnce(retryClaim)
+        .mockResolvedValueOnce(null),
+      complete: vi.fn(async () => true),
+      retry: vi.fn(async () => true),
+      failPermanent: vi.fn(),
+    };
+    const runner = new RealtimeRunner(
+      queue,
+      runtime, model, facts,
+      { searchText: vi.fn(async () => ({ status: "MATCHED" as const, matchKind: "SEMANTIC" as const, score: 1, gap: null, product })), searchImage: vi.fn() },
+      new FailClosedTagObservationProvider(),
+      { workerId: "worker-1", mode: "LIVE", sendEnabled: true, customerProfileEnabled: true, decisionTelemetryEnabled: true },
+      undefined, undefined, undefined, undefined, policyResolver,
+    );
+
+    expect(await runner.processOne()).toBe(true);
+    expect(await runner.processOne()).toBe(true);
+    expect(await runner.processOne()).toBe(false);
+
+    expect(model.generate).toHaveBeenCalledOnce();
+    expect(model.groundWithFacts).toHaveBeenCalledOnce();
+    expect(queue.retry).toHaveBeenCalledOnce();
+    expect(queue.retry).toHaveBeenCalledWith(claim.inboxId, claim.leaseToken, "COMMIT_ACK_LOST", expect.any(Number));
+    expect(queue.complete).toHaveBeenCalledOnce();
+    expect(queue.complete).toHaveBeenCalledWith(retryClaim.inboxId, retryClaim.leaseToken);
+    expect(commit).toHaveBeenCalledOnce();
+    expect(repair).toHaveBeenCalledTimes(1);
+    const trustedClaims = repair.mock.calls[0]![3];
+    expect(trustedClaims).toHaveLength(1);
+    expect(trustedClaims[0]).toMatchObject({
+      value: { recommendedSizes: ["M"] },
+      evidenceBasis: { kind: "CURRENT_MEASUREMENTS", sourceEventHashes: ["b".repeat(64), "c".repeat(64)] },
+    });
+    const commitInput = durableCommitInput as {
+      metaPlan?: { messages: readonly ({ kind: "TEXT"; text: string } | { kind: "IMAGE"; imageUrl: string })[] };
+      decisionEvents?: readonly { eventType: string; reasonCodes: readonly string[] }[];
+    };
+    const text = (commitInput.metaPlan?.messages ?? [])
+      .filter((message): message is { kind: "TEXT"; text: string } => message.kind === "TEXT")
+      .map((message) => message.text).join("\n");
+    expect(text).toContain("hop size M");
+    expect(text).not.toContain("hop size XL");
+    expect(text).not.toContain("can them so do");
+    expect(commitInput.metaPlan?.messages).toContainEqual({ kind: "IMAGE", imageUrl });
+    expect(commitInput.metaPlan?.messages.filter((message) => message.kind === "IMAGE")).toHaveLength(1);
+    expect(commitInput.decisionEvents?.filter((event) => event.eventType === "GUARD_BLOCKED")).toHaveLength(1);
+    expect(commitInput.decisionEvents).toContainEqual(expect.objectContaining({
+      eventType: "GUARD_BLOCKED",
+      reasonCodes: expect.arrayContaining([
+        "SIZE_RECOMMENDATION_VALUE_MISMATCH",
+        "SIZE_RECOMMENDATION_REPAIRED",
+      ]),
+    }));
+  });
   it("splits every outbound sentence into its own text message and preserves image order", () => {
     expect(splitRealtimeMetaMessages([
       {
