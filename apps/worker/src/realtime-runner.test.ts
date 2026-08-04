@@ -129,14 +129,19 @@ describe("RealtimeRunner", () => {
       groundWithFacts: vi.fn(async () => result(unsafeProposal)),
       repairSizeClaimDraft: repair,
     };
-    const commit = vi.fn(async (_input: unknown) => ({
-      stateCommitted: true, metaOutboxCreated: 2, pancakeTagOutboxCreated: false,
-      handoffEventCreated: false, sendAuthorized: true, reasonCodes: [],
-    }));
+    let persistedState = state;
+    let persistedStateVersion = 0;
+    let durableCommitInput: unknown = null;
+    const commit = vi.fn(async (input: { state: typeof state }) => {
+      durableCommitInput = input;
+      persistedState = input.state;
+      persistedStateVersion += 1;
+      throw new Error("COMMIT_ACK_LOST");
+    });
     const runtime: RealtimeRuntimePort = {
       loadOrCreate: vi.fn(async () => ({
         conversationId: state.conversationId, pageId: claim.pageId, customerHash: claim.conversationHash,
-        stateVersion: 0, state, routingOwner: "APP" as const, appSendEnabled: true, killSwitch: false,
+        stateVersion: persistedStateVersion, state: persistedState, routingOwner: "APP" as const, appSendEnabled: true, killSwitch: false,
       })),
       commit,
       linkProviderConversation: vi.fn(async () => undefined),
@@ -161,11 +166,20 @@ describe("RealtimeRunner", () => {
       title: "Ao dai SD398", colors: [], materials: [], silhouettes: [], occasions: [],
       imageUrls: [imageUrl], images: [], catalogVersion: "catalog-v2",
     };
+    const retryClaim = {
+      ...claim,
+      attemptCount: 2,
+      leaseToken: "68c52ee9-9348-481d-a366-a6178618da3d",
+    };
     const complete = vi.fn(async () => true);
+    const retry = vi.fn(async () => true);
     const runner = new RealtimeRunner(
       {
-        claimNext: vi.fn().mockResolvedValueOnce(claim).mockResolvedValueOnce(null),
-        complete, retry: vi.fn(), failPermanent: vi.fn(),
+        claimNext: vi.fn()
+          .mockResolvedValueOnce(claim)
+          .mockResolvedValueOnce(retryClaim)
+          .mockResolvedValueOnce(null),
+        complete, retry, failPermanent: vi.fn(),
       },
       runtime,
       model,
@@ -176,11 +190,17 @@ describe("RealtimeRunner", () => {
     );
 
     expect(await runner.processOne()).toBe(true);
+    expect(await runner.processOne()).toBe(true);
     expect(await runner.processOne()).toBe(false);
+    expect(model.generate).toHaveBeenCalledOnce();
+    expect(model.groundWithFacts).toHaveBeenCalledOnce();
     expect(repair).toHaveBeenCalledTimes(1);
+    expect(retry).toHaveBeenCalledOnce();
+    expect(retry).toHaveBeenCalledWith(claim.inboxId, claim.leaseToken, "COMMIT_ACK_LOST", expect.any(Number));
     expect(complete).toHaveBeenCalledOnce();
+    expect(complete).toHaveBeenCalledWith(retryClaim.inboxId, retryClaim.leaseToken);
     expect(commit).toHaveBeenCalledOnce();
-    const commitInput = commit.mock.calls[0]![0] as {
+    const commitInput = durableCommitInput as {
       metaPlan?: { messages: readonly ({ kind: "TEXT"; text: string } | { kind: "IMAGE"; imageUrl: string })[] };
       decisionEvents?: readonly { eventType: string; reasonCodes: readonly string[] }[];
     };
@@ -190,6 +210,8 @@ describe("RealtimeRunner", () => {
     expect(text).toContain("1.199.000");
     expect(text).not.toMatch(/hop size L/iu);
     expect(commitInput.metaPlan?.messages).toContainEqual({ kind: "IMAGE", imageUrl });
+    expect(commitInput.metaPlan?.messages.filter((message) => message.kind === "IMAGE")).toHaveLength(1);
+    expect(commitInput.decisionEvents?.filter((event) => event.eventType === "GUARD_BLOCKED")).toHaveLength(1);
     expect(commitInput.decisionEvents).toContainEqual(expect.objectContaining({
       eventType: "GUARD_BLOCKED",
       reasonCodes: expect.arrayContaining([
@@ -296,14 +318,19 @@ describe("RealtimeRunner", () => {
       groundWithFacts: vi.fn(async () => result(unsafeProposal)),
       repairSizeClaimDraft: repair,
     };
-    const commit = vi.fn(async (_input: unknown) => ({
-      stateCommitted: true, metaOutboxCreated: 2, pancakeTagOutboxCreated: false,
-      handoffEventCreated: false, sendAuthorized: true, reasonCodes: [],
-    }));
+    let persistedState = state;
+    let persistedStateVersion = 0;
+    let durableCommitInput: unknown = null;
+    const commit = vi.fn(async (input: { state: typeof state }) => {
+      durableCommitInput = input;
+      persistedState = input.state;
+      persistedStateVersion += 1;
+      throw new Error("COMMIT_ACK_LOST");
+    });
     const runtime = {
       loadOrCreate: vi.fn(async () => ({
         conversationId: state.conversationId, pageId: claim.pageId, customerHash: claim.conversationHash,
-        stateVersion: 0, state, routingOwner: "APP" as const, appSendEnabled: true, killSwitch: false,
+        stateVersion: persistedStateVersion, state: persistedState, routingOwner: "APP" as const, appSendEnabled: true, killSwitch: false,
       })),
       loadOrCreateCustomerProfile: vi.fn(async () => ({
         pageId: claim.pageId, customerHash: claim.conversationHash, revision: profile.revision, profile,
@@ -326,7 +353,20 @@ describe("RealtimeRunner", () => {
       close: vi.fn(async () => undefined),
     };
     const policyResolver: RuntimePolicyResolverPort = { resolve: vi.fn(async () => policy) };
-    const queue = { claimNext: vi.fn(async () => claim), complete: vi.fn(async () => true), retry: vi.fn(), failPermanent: vi.fn() };
+    const retryClaim = {
+      ...claim,
+      attemptCount: 2,
+      leaseToken: "78c52ee9-9348-481d-a366-a6178618da3d",
+    };
+    const queue = {
+      claimNext: vi.fn()
+        .mockResolvedValueOnce(claim)
+        .mockResolvedValueOnce(retryClaim)
+        .mockResolvedValueOnce(null),
+      complete: vi.fn(async () => true),
+      retry: vi.fn(async () => true),
+      failPermanent: vi.fn(),
+    };
     const runner = new RealtimeRunner(
       queue,
       runtime, model, facts,
@@ -337,8 +377,16 @@ describe("RealtimeRunner", () => {
     );
 
     expect(await runner.processOne()).toBe(true);
+    expect(await runner.processOne()).toBe(true);
+    expect(await runner.processOne()).toBe(false);
 
     expect(model.generate).toHaveBeenCalledOnce();
+    expect(model.groundWithFacts).toHaveBeenCalledOnce();
+    expect(queue.retry).toHaveBeenCalledOnce();
+    expect(queue.retry).toHaveBeenCalledWith(claim.inboxId, claim.leaseToken, "COMMIT_ACK_LOST", expect.any(Number));
+    expect(queue.complete).toHaveBeenCalledOnce();
+    expect(queue.complete).toHaveBeenCalledWith(retryClaim.inboxId, retryClaim.leaseToken);
+    expect(commit).toHaveBeenCalledOnce();
     expect(repair).toHaveBeenCalledTimes(1);
     const trustedClaims = repair.mock.calls[0]![3];
     expect(trustedClaims).toHaveLength(1);
@@ -346,7 +394,7 @@ describe("RealtimeRunner", () => {
       value: { recommendedSizes: ["M"] },
       evidenceBasis: { kind: "CURRENT_MEASUREMENTS", sourceEventHashes: ["b".repeat(64), "c".repeat(64)] },
     });
-    const commitInput = commit.mock.calls[0]![0] as {
+    const commitInput = durableCommitInput as {
       metaPlan?: { messages: readonly ({ kind: "TEXT"; text: string } | { kind: "IMAGE"; imageUrl: string })[] };
       decisionEvents?: readonly { eventType: string; reasonCodes: readonly string[] }[];
     };
@@ -357,6 +405,8 @@ describe("RealtimeRunner", () => {
     expect(text).not.toContain("hop size XL");
     expect(text).not.toContain("can them so do");
     expect(commitInput.metaPlan?.messages).toContainEqual({ kind: "IMAGE", imageUrl });
+    expect(commitInput.metaPlan?.messages.filter((message) => message.kind === "IMAGE")).toHaveLength(1);
+    expect(commitInput.decisionEvents?.filter((event) => event.eventType === "GUARD_BLOCKED")).toHaveLength(1);
     expect(commitInput.decisionEvents).toContainEqual(expect.objectContaining({
       eventType: "GUARD_BLOCKED",
       reasonCodes: expect.arrayContaining([

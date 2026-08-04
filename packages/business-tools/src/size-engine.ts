@@ -183,22 +183,34 @@ export interface SizeRecommendationTarget {
   readonly material: string | null;
 }
 
+export interface VerifiedSizeRecommendationVariantBinding {
+  readonly source: "VERIFIED_CATALOG_VARIANT_V2";
+  readonly sourceVersion: string;
+  readonly verifiedAt: string;
+  readonly variantId: string;
+  readonly parentProductId: string;
+  readonly size: string;
+}
+
 export interface SizeEngineInput {
   readonly profile: CustomerProfileV1;
   readonly target: SizeRecommendationTarget;
   readonly charts: readonly ScopedSizeChart[];
   readonly generatedAt: string;
   readonly recommendationId?: string;
+  readonly variantBinding?: VerifiedSizeRecommendationVariantBinding | null;
 }
 
 export type SizeRecommendationDecisionEvidence =
   | {
       readonly kind: "CURRENT_MEASUREMENTS";
       readonly measurements: readonly BodyMeasurementV1[];
+      readonly variantBinding: VerifiedSizeRecommendationVariantBinding | null;
     }
   | {
       readonly kind: "ACCEPTED_SIZE_HISTORY";
       readonly history: CustomerProfileV1["sizeHistory"][number];
+      readonly variantBinding: VerifiedSizeRecommendationVariantBinding | null;
     }
   | null;
 
@@ -354,7 +366,8 @@ const acceptedHistoryEvidence = (
   const validSizes = new Set(chart.bands.map(({ size }) => normalize(size)));
   return profile.sizeHistory
     .filter((entry) => entry.componentRole === target.componentRole)
-    .filter((entry) => entry.productId === null || normalize(entry.productId) === normalize(target.parentProductId))
+    .filter((entry) => entry.productId !== null)
+    .filter((entry) => normalize(entry.productId!) === normalize(target.parentProductId))
     .filter((entry) => validSizes.has(normalize(entry.size)))
     .filter((entry) => entry.outcome === "CUSTOMER_ACCEPTED" || entry.outcome === "PURCHASED")
     .filter((entry) => entry.sourceEventHash !== null)
@@ -477,11 +490,19 @@ export function recommendSize(input: SizeEngineInput): SizeEngineDecision {
         ({ size }) => normalize(size) === normalize(priorHistory.size),
       ).sort(compareSizeBands);
       used = [];
-      evidenceBasis = { kind: "ACCEPTED_SIZE_HISTORY", history: priorHistory };
+      evidenceBasis = {
+        kind: "ACCEPTED_SIZE_HISTORY",
+        history: priorHistory,
+        variantBinding: input.variantBinding ?? null,
+      };
     }
   }
   if (source === "MEASUREMENTS" || source === "BODY_PROFILE") {
-    evidenceBasis = { kind: "CURRENT_MEASUREMENTS", measurements: used };
+    evidenceBasis = {
+      kind: "CURRENT_MEASUREMENTS",
+      measurements: used,
+      variantBinding: input.variantBinding ?? null,
+    };
   }
 
   if (source === null) {
@@ -604,18 +625,13 @@ export function recommendSize(input: SizeEngineInput): SizeEngineDecision {
 }
 /** A short-lived, code-created envelope used only by the final outbound guard. */
 export const SIZE_RECOMMENDATION_CLAIM_TTL_MS = 5 * 60 * 1_000;
+export const SIZE_MEASUREMENT_CLAIM_EVIDENCE_MAX_AGE_MS = 48 * 60 * 60 * 1_000;
 export const SIZE_HISTORY_CLAIM_EVIDENCE_MAX_AGE_MS = 48 * 60 * 60 * 1_000;
-
-export interface VerifiedSizeRecommendationVariantScope {
-  readonly variantId: string;
-  readonly parentProductId: string;
-  readonly size: string;
-}
+export const SIZE_VARIANT_BINDING_MAX_AGE_MS = 48 * 60 * 60 * 1_000;
 
 export interface VerifiedSizeRecommendationClaimInput {
   readonly decision: SizeEngineDecision;
   readonly productId: string;
-  readonly variantScope: VerifiedSizeRecommendationVariantScope | null;
   readonly profile: CustomerProfileV1;
 }
 
@@ -646,19 +662,26 @@ function sizeHistoryFingerprint(
   })).digest("hex");
 }
 
-function coveredVariantId(
-  scope: VerifiedSizeRecommendationVariantScope | null,
+function verifiedVariantBindingForClaim(
+  evidence: Exclude<SizeRecommendationDecisionEvidence, null>,
   recommendation: SizeRecommendationV1,
   recommendedSizes: readonly string[],
-): string | null {
-  if (scope === null) return null;
+  observedAtMs: number,
+): VerifiedSizeRecommendationVariantBinding | null {
+  const binding = evidence.variantBinding;
+  if (binding === null) return null;
+  const verifiedAtMs = Date.parse(binding.verifiedAt);
   if (
-    !scope.variantId.trim() ||
-    !scope.size.trim() ||
-    normalize(scope.parentProductId) !== normalize(recommendation.parentProductId) ||
-    !recommendedSizes.some((size) => normalize(size) === normalize(scope.size))
+    binding.source !== "VERIFIED_CATALOG_VARIANT_V2" ||
+    !binding.variantId.trim() ||
+    !binding.sourceVersion.trim() ||
+    !Number.isFinite(verifiedAtMs) ||
+    verifiedAtMs > observedAtMs ||
+    observedAtMs - verifiedAtMs > SIZE_VARIANT_BINDING_MAX_AGE_MS ||
+    normalize(binding.parentProductId) !== normalize(recommendation.parentProductId) ||
+    !recommendedSizes.some((size) => normalize(size) === normalize(binding.size))
   ) return null;
-  return scope.variantId;
+  return binding;
 }
 
 /**
@@ -690,7 +713,13 @@ export function createVerifiedSizeRecommendationClaim(
   const alternativeSizes = input.decision.alternativeSizes
     .map((size) => size.trim().toLocaleUpperCase("vi-VN"))
     .filter((size) => !recommendedSizes.includes(size));
-  const variantId = coveredVariantId(input.variantScope, recommendation, recommendedSizes);
+  const variantBinding = verifiedVariantBindingForClaim(
+    decisionEvidence,
+    recommendation,
+    recommendedSizes,
+    observedAtMs,
+  );
+  const variantId = variantBinding?.variantId ?? null;
 
   if (decisionEvidence.kind === "CURRENT_MEASUREMENTS") {
     const measurementFingerprint = sizeMeasurementFingerprint(recommendation.measurementsUsed);
@@ -698,10 +727,18 @@ export function createVerifiedSizeRecommendationClaim(
     const sourceEventHashes = recommendation.measurementsUsed
       .map((measurement) => measurement.provenance.sourceEventHash)
       .filter((hash): hash is string => hash !== null);
+    const measurementsAreFresh = recommendation.measurementsUsed.every((measurement) => {
+      const measurementObservedAtMs = Date.parse(measurement.provenance.observedAt);
+      return Number.isFinite(measurementObservedAtMs) &&
+        measurementObservedAtMs <= observedAtMs &&
+        observedAtMs - measurementObservedAtMs <=
+          SIZE_MEASUREMENT_CLAIM_EVIDENCE_MAX_AGE_MS;
+    });
     if (
       recommendation.measurementsUsed.length === 0 ||
       measurementFingerprint !== evidenceFingerprint ||
-      sourceEventHashes.length !== recommendation.measurementsUsed.length
+      sourceEventHashes.length !== recommendation.measurementsUsed.length ||
+      !measurementsAreFresh
     ) return null;
     return {
       id: recommendation.recommendationId,
@@ -717,6 +754,9 @@ export function createVerifiedSizeRecommendationClaim(
         input.profile.revision,
         "measurements",
         measurementFingerprint,
+        ...(variantBinding
+          ? ["variant", variantBinding.variantId, variantBinding.sourceVersion]
+          : []),
       ].join(":"),
       source: "VERIFIED_SIZE_ENGINE_V1",
       observedAt: recommendation.generatedAt,
@@ -728,6 +768,14 @@ export function createVerifiedSizeRecommendationClaim(
         kind: "CURRENT_MEASUREMENTS",
         measurementFingerprint,
         sourceEventHashes: [...new Set(sourceEventHashes)].sort(),
+        variantBinding: variantBinding ? {
+          source: variantBinding.source,
+          sourceVersion: variantBinding.sourceVersion,
+          verifiedAt: variantBinding.verifiedAt,
+          variantId: variantBinding.variantId,
+          productId: variantBinding.parentProductId,
+          size: variantBinding.size,
+        } : null,
       },
     };
   }
@@ -740,7 +788,8 @@ export function createVerifiedSizeRecommendationClaim(
     !Number.isFinite(historyObservedAtMs) ||
     historyObservedAtMs > observedAtMs ||
     observedAtMs - historyObservedAtMs > SIZE_HISTORY_CLAIM_EVIDENCE_MAX_AGE_MS ||
-    (history.productId !== null && normalize(history.productId) !== normalize(input.productId)) ||
+    history.productId === null ||
+    normalize(history.productId) !== normalize(input.productId) ||
     !recommendedSizes.some((size) => normalize(size) === normalize(history.size)) ||
     (history.outcome !== "CUSTOMER_ACCEPTED" && history.outcome !== "PURCHASED")
   ) return null;
@@ -759,6 +808,9 @@ export function createVerifiedSizeRecommendationClaim(
       input.profile.revision,
       "history",
       historySourceEventHash,
+      ...(variantBinding
+        ? ["variant", variantBinding.variantId, variantBinding.sourceVersion]
+        : []),
     ].join(":"),
     source: "VERIFIED_SIZE_ENGINE_V1",
     observedAt: recommendation.generatedAt,
@@ -774,6 +826,14 @@ export function createVerifiedSizeRecommendationClaim(
       componentRole: history.componentRole,
       size: history.size,
       outcome: history.outcome,
+      variantBinding: variantBinding ? {
+        source: variantBinding.source,
+        sourceVersion: variantBinding.sourceVersion,
+        verifiedAt: variantBinding.verifiedAt,
+        variantId: variantBinding.variantId,
+        productId: variantBinding.parentProductId,
+        size: variantBinding.size,
+      } : null,
     },
   };
 }

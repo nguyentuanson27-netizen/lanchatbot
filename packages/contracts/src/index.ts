@@ -409,6 +409,14 @@ export type SizeRecommendationClaimValueV1 = z.infer<
 >;
 
 const SizeRecommendationEvidenceHashV1Schema = z.string().regex(/^[a-f0-9]{64}$/);
+const SizeRecommendationVariantBindingV1Schema = z.object({
+  source: z.literal("VERIFIED_CATALOG_VARIANT_V2"),
+  sourceVersion: z.string().trim().min(1).max(256),
+  verifiedAt: z.string().datetime(),
+  variantId: z.string().trim().min(1).max(128),
+  productId: z.string().trim().min(1).max(128),
+  size: z.string().trim().min(1).max(16),
+}).strict();
 
 /**
  * A size recommendation is grounded either in current body measurements or in
@@ -421,15 +429,17 @@ export const SizeRecommendationEvidenceBasisV1Schema = z.discriminatedUnion("kin
     kind: z.literal("CURRENT_MEASUREMENTS"),
     measurementFingerprint: SizeRecommendationEvidenceHashV1Schema,
     sourceEventHashes: z.array(SizeRecommendationEvidenceHashV1Schema).min(1).max(5),
+    variantBinding: SizeRecommendationVariantBindingV1Schema.nullable().optional(),
   }).strict(),
   z.object({
     kind: z.literal("ACCEPTED_SIZE_HISTORY"),
     sourceEventHash: SizeRecommendationEvidenceHashV1Schema,
     recordedAt: z.string().datetime(),
-    productId: z.string().trim().min(1).max(128).nullable(),
+    productId: z.string().trim().min(1).max(128),
     componentRole: ProductComponentRoleSchema,
     size: z.string().trim().min(1).max(16),
     outcome: z.enum(["CUSTOMER_ACCEPTED", "PURCHASED"]),
+    variantBinding: SizeRecommendationVariantBindingV1Schema.nullable().optional(),
   }).strict(),
 ]);
 export type SizeRecommendationEvidenceBasisV1 = z.infer<
@@ -459,6 +469,36 @@ export const SizeRecommendationProtectedClaimV1Schema = z.object({
     });
   }
 
+  const variantBinding = claim.evidenceBasis.variantBinding ?? null;
+  if (claim.variantId === null && variantBinding !== null) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["evidenceBasis", "variantBinding"],
+      message: "product-scoped size claims cannot carry a variant binding",
+    });
+  } else if (claim.variantId !== null) {
+    if (
+      variantBinding === null ||
+      variantBinding.variantId !== claim.variantId ||
+      variantBinding.productId !== claim.productId ||
+      !claim.value.recommendedSizes.includes(variantBinding.size)
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["evidenceBasis", "variantBinding"],
+        message: "variant-scoped size claims require matching verified variant evidence",
+      });
+    } else if (!claim.evidenceRef.includes(
+      `variant:${variantBinding.variantId}:${variantBinding.sourceVersion}`,
+    )) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["evidenceRef"],
+        message: "size recommendation evidence reference must bind the verified variant",
+      });
+    }
+  }
+
   if (claim.evidenceBasis.kind === "CURRENT_MEASUREMENTS") {
     if (new Set(claim.evidenceBasis.sourceEventHashes).size !== claim.evidenceBasis.sourceEventHashes.length) {
       context.addIssue({
@@ -484,7 +524,7 @@ export const SizeRecommendationProtectedClaimV1Schema = z.object({
     return;
   }
 
-  if (claim.evidenceBasis.productId !== null && claim.evidenceBasis.productId !== claim.productId) {
+  if (claim.evidenceBasis.productId !== claim.productId) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["evidenceBasis", "productId"],

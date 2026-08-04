@@ -12,6 +12,7 @@ import {
   selectVerifiedSizeChart,
   stageSizeChartFromImageRegistry,
   type ScopedSizeChart,
+  type VerifiedSizeRecommendationVariantBinding,
 } from "./size-engine.js";
 
 const id = "30709206-8f96-4a1b-9311-6f03ef4dd8b2";
@@ -44,13 +45,15 @@ const measurement = (
   kind: CustomerProfileV1["measurements"][number]["kind"],
   value: number,
   confidence = 1,
+  observedAt = "2026-07-22T04:00:00.000Z",
+  sourceEventHash: string | null = hash(kind === "WEIGHT_KG" ? "b" : "c"),
 ): CustomerProfileV1["measurements"][number] => ({
   kind,
   value,
   provenance: {
     source: "CUSTOMER_MESSAGE",
-    sourceEventHash: hash(kind === "WEIGHT_KG" ? "b" : "c"),
-    observedAt: "2026-07-22T04:00:00.000Z",
+    sourceEventHash,
+    observedAt,
     confidence,
   },
 });
@@ -127,6 +130,18 @@ const target = {
   form: "SUONG",
   material: "GAM",
 };
+
+const verifiedVariantBinding = (
+  overrides: Partial<VerifiedSizeRecommendationVariantBinding> = {},
+): VerifiedSizeRecommendationVariantBinding => ({
+  source: "VERIFIED_CATALOG_VARIANT_V2",
+  sourceVersion: `catalog:sha256:${hash("d")}`,
+  verifiedAt: "2026-07-22T04:30:00.000Z",
+  variantId: "variant-M",
+  parentProductId: "CB182",
+  size: "M",
+  ...overrides,
+});
 
 const input = (
   customer: CustomerProfileV1,
@@ -280,7 +295,6 @@ describe("recommendSize", () => {
     const claim = createVerifiedSizeRecommendationClaim({
       decision,
       productId: "CB182",
-      variantScope: null,
       profile: customer,
     });
     expect(claim).toMatchObject({
@@ -300,18 +314,64 @@ describe("recommendSize", () => {
       },
     });
     expect(claim!.evidenceRef).toContain(`measurements:${claim!.measurementFingerprint}`);
-    expect(createVerifiedSizeRecommendationClaim({
+    expect(claim?.variantId).toBeNull();
+
+    const callerOnlyScope = {
       decision,
       productId: "CB182",
-      variantScope: { variantId: "variant-M", parentProductId: "CB182", size: "M" },
       profile: customer,
-    })?.variantId).toBe("variant-M");
-    expect(createVerifiedSizeRecommendationClaim({
-      decision,
+      variantScope: { variantId: "caller-only", parentProductId: "CB182", size: "M" },
+    };
+    expect(createVerifiedSizeRecommendationClaim(callerOnlyScope)?.variantId).toBeNull();
+
+    const variantDecision = recommendSize({
+      profile: customer,
+      target,
+      charts: [scoped("COMPONENT")],
+      generatedAt,
+      recommendationId,
+      variantBinding: verifiedVariantBinding(),
+    });
+    const variantClaim = createVerifiedSizeRecommendationClaim({
+      decision: variantDecision,
       productId: "CB182",
-      variantScope: { variantId: "variant-L", parentProductId: "CB182", size: "L" },
       profile: customer,
-    })?.variantId).toBeNull();
+    });
+    expect(variantClaim).toMatchObject({
+      variantId: "variant-M",
+      evidenceBasis: {
+        variantBinding: {
+          source: "VERIFIED_CATALOG_VARIANT_V2",
+          variantId: "variant-M",
+          productId: "CB182",
+          size: "M",
+        },
+      },
+    });
+    expect(variantClaim!.evidenceRef).toContain(
+      `variant:variant-M:${verifiedVariantBinding().sourceVersion}`,
+    );
+
+    for (const invalidBinding of [
+      verifiedVariantBinding({ parentProductId: "OTHER" }),
+      verifiedVariantBinding({ size: "L", variantId: "variant-L" }),
+      verifiedVariantBinding({ verifiedAt: "2026-07-19T04:59:59.999Z" }),
+      verifiedVariantBinding({ verifiedAt: "2026-07-22T05:00:00.001Z" }),
+    ]) {
+      const invalidDecision = recommendSize({
+        profile: customer,
+        target,
+        charts: [scoped("COMPONENT")],
+        generatedAt,
+        recommendationId,
+        variantBinding: invalidBinding,
+      });
+      expect(createVerifiedSizeRecommendationClaim({
+        decision: invalidDecision,
+        productId: "CB182",
+        profile: customer,
+      })?.variantId).toBeNull();
+    }
 
     const unavailable = recommendSize({
       profile: customer,
@@ -323,7 +383,66 @@ describe("recommendSize", () => {
     expect(createVerifiedSizeRecommendationClaim({
       decision: unavailable,
       productId: "CB182",
-      variantScope: null,
+      profile: customer,
+    })).toBeNull();
+  });
+  it("fails closed for stale, future, invalid or unhashed current measurements", () => {
+    const claimFor = (observedAt: string, sourceEventHash: string | null = hash("b")) => {
+      const customer = profile([
+        measurement("HEIGHT_CM", 162, 1, observedAt, hash("c")),
+        measurement("WEIGHT_KG", 54, 1, observedAt, sourceEventHash),
+      ]);
+      const decision = recommendSize({
+        profile: customer,
+        target,
+        charts: [scoped("COMPONENT")],
+        generatedAt,
+        recommendationId,
+      });
+      return createVerifiedSizeRecommendationClaim({
+        decision,
+        productId: "CB182",
+        profile: customer,
+      });
+    };
+
+    expect(claimFor("2026-07-20T05:00:00.000Z")).not.toBeNull();
+    expect(claimFor("2026-07-20T04:59:59.999Z")).toBeNull();
+    expect(claimFor("2026-07-22T05:00:00.001Z")).toBeNull();
+    expect(claimFor("2026-07-22T04:00:00.000Z", null)).toBeNull();
+
+    const customer = profile([
+      measurement("HEIGHT_CM", 162),
+      measurement("WEIGHT_KG", 54),
+    ]);
+    const validDecision = recommendSize({
+      profile: customer,
+      target,
+      charts: [scoped("COMPONENT")],
+      generatedAt,
+      recommendationId,
+    });
+    const invalidMeasurements = validDecision.recommendation.measurementsUsed.map(
+      (item) => ({
+        ...item,
+        provenance: { ...item.provenance, observedAt: "not-a-date" },
+      }),
+    );
+    const invalidDecision = {
+      ...validDecision,
+      recommendation: {
+        ...validDecision.recommendation,
+        measurementsUsed: invalidMeasurements,
+      },
+      evidenceBasis: {
+        kind: "CURRENT_MEASUREMENTS" as const,
+        measurements: invalidMeasurements,
+        variantBinding: null,
+      },
+    };
+    expect(createVerifiedSizeRecommendationClaim({
+      decision: invalidDecision,
+      productId: "CB182",
       profile: customer,
     })).toBeNull();
   });
@@ -384,11 +503,11 @@ describe("recommendSize", () => {
       charts: [scoped("COMPONENT")],
       generatedAt,
       recommendationId,
+      variantBinding: verifiedVariantBinding({ variantId: "variant-L", size: "L" }),
     });
     const claim = createVerifiedSizeRecommendationClaim({
       decision,
       productId: "CB182",
-      variantScope: { variantId: "variant-L", parentProductId: "CB182", size: "L" },
       profile: customer,
     });
     expect(decision.recommendation.measurementsUsed).toEqual([]);
@@ -420,11 +539,38 @@ describe("recommendSize", () => {
     expect(createVerifiedSizeRecommendationClaim({
       decision: staleDecision,
       productId: "CB182",
-      variantScope: null,
       profile: staleCustomer,
     })).toBeNull();
   });
 
+  it.each([null, "OTHER"])(
+    "does not bind accepted history with product %s to the active product",
+    (historyProductId) => {
+      const customer = profile([], {
+        sizeHistory: [{
+          productId: historyProductId,
+          componentRole: "TOP",
+          size: "L",
+          outcome: "PURCHASED",
+          sourceEventHash: hash("f"),
+          recordedAt: "2026-07-22T03:30:00.000Z",
+        }],
+      });
+      const decision = recommendSize({
+        profile: customer,
+        target,
+        charts: [scoped("COMPONENT")],
+        generatedAt,
+        recommendationId,
+      });
+      expect(decision.action).toBe("ASK_MORE");
+      expect(createVerifiedSizeRecommendationClaim({
+        decision,
+        productId: "CB182",
+        profile: customer,
+      })).toBeNull();
+    },
+  );
   it("does not use PAST_SIZE without an accepted-history source event", () => {
     const customer = profile([], {
       sizeHistory: [{

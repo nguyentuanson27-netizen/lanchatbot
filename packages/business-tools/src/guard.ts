@@ -41,6 +41,14 @@ const SIZE_CATALOG_LABEL_PATTERN = new RegExp(
 const SIZE_STOCK_CONTEXT_PATTERN = /(?:con|het|san\s*hang|available|ton\s*kho|pre\s*order|dat\s*truoc)\s*(?:size|sz|kich\s*co|co)?\s*(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\b/iu;
 const SIZE_NEGATION_PATTERN = /(?:khong|chua|chang)\s+(?:the\s+)?(?:tu\s*van|goi\s*y|khuyen|xac\s*dinh|chon|ket\s*luan|bao)\b/iu;
 const SIZE_FIT_ASSERTION_PATTERN = /\b(?:hop|vua|phu\s*hop|de\s*xuat|goi\s*y|khuyen\s*nghi)\b/iu;
+const SIZE_INFORMATION_QUESTION_PATTERN = new RegExp(
+  `^\\s*(?:size|sz|kich\\s*co|co)\\s*${SIZE_TOKEN}\\b[^.!?]{0,48}\\b(?:co\\s+)?(?:hop|vua|phu\\s*hop)\\b[^.!?]{0,32}\\b(?:khong|ko|hong|ha|a)\\s*[?]?$`,
+  "iu",
+);
+const SIZE_SELECTION_QUESTION_PATTERN = new RegExp(
+  `\\b(?:muon\\s+)?chon\\b[^.!?]{0,48}\\b(?:size|sz|kich\\s*co|co)?\\s*${SIZE_TOKEN}\\b[^.!?]{0,24}\\b(?:hay|hoac)\\b`,
+  "iu",
+);
 const SIZE_RECOMMENDATION_DESCRIPTOR_PATTERN = new RegExp(
   `\\b(?:size|sz|kich\\s*co|co)\\s+(?:phu\\s*hop(?:\\s*nhat)?|nen\\s*(?:chon|lay)|de\\s*xuat)\\s*(?:la|:|=)?\\s*(${SIZE_TOKEN})\\b`,
   "giu",
@@ -69,16 +77,15 @@ function normalizedVietnameseForGuard(value: string): string {
  */
 export function detectConcreteSizeRecommendations(text: string): readonly string[] {
   const sizes = new Set<string>();
-  const clauses = normalizedVietnameseForGuard(text)
+  const microClauses = normalizedVietnameseForGuard(text)
     .replace(/\n/gu, ",")
-    .split(/[,;\n]+|(?<=[.!?])|\b(?:nhung|tuy\s+nhien)\b|(?=\btheo\s+so\s+do\b)/u)
+    .split(
+      /[,;\n]+|(?<=[.!?])|\b(?:va|ma|nhung|tuy\s+nhien|con|nen)\b|(?=\btheo\s+so\s+do\b)/u,
+    )
     .map((clause) => clause.trim())
     .filter(Boolean);
-  for (const clause of clauses) {
-    const isQuestionWithoutFitAssertion =
-      clause.includes("?") && !SIZE_FIT_ASSERTION_PATTERN.test(clause);
+  for (const clause of microClauses) {
     if (
-      isQuestionWithoutFitAssertion ||
       SIZE_NEGATION_PATTERN.test(clause) ||
       SIZE_CATALOG_LIST_PATTERN.test(clause) ||
       SIZE_CATALOG_LABEL_PATTERN.test(clause) ||
@@ -88,14 +95,27 @@ export function detectConcreteSizeRecommendations(text: string): readonly string
     ) {
       continue;
     }
-    for (const match of clause.matchAll(SIZE_REFERENCE_PATTERN)) {
-      sizes.add((match[1] ?? "").toLocaleUpperCase("vi-VN"));
-      if (match[2]) sizes.add(match[2].toLocaleUpperCase("vi-VN"));
+    const descriptorMatches = [...clause.matchAll(SIZE_RECOMMENDATION_DESCRIPTOR_PATTERN)];
+    const bareFitMatches = [...clause.matchAll(BARE_SIZE_FIT_PATTERN)];
+    const isPureInformationQuestion =
+      clause.includes("?") &&
+      descriptorMatches.length === 0 &&
+      (
+        SIZE_INFORMATION_QUESTION_PATTERN.test(clause) ||
+        SIZE_SELECTION_QUESTION_PATTERN.test(clause)
+      );
+    if (isPureInformationQuestion) continue;
+
+    if (SIZE_FIT_ASSERTION_PATTERN.test(clause)) {
+      for (const match of clause.matchAll(SIZE_REFERENCE_PATTERN)) {
+        sizes.add((match[1] ?? "").toLocaleUpperCase("vi-VN"));
+        if (match[2]) sizes.add(match[2].toLocaleUpperCase("vi-VN"));
+      }
     }
-    for (const match of clause.matchAll(BARE_SIZE_FIT_PATTERN)) {
+    for (const match of bareFitMatches) {
       sizes.add((match[1] ?? "").toLocaleUpperCase("vi-VN"));
     }
-    for (const match of clause.matchAll(SIZE_RECOMMENDATION_DESCRIPTOR_PATTERN)) {
+    for (const match of descriptorMatches) {
       sizes.add((match[1] ?? "").toLocaleUpperCase("vi-VN"));
     }
   }

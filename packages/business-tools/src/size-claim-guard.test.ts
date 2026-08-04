@@ -37,13 +37,15 @@ function proposal(reply: string, protectedClaimIds: readonly string[] = []) {
 function verifiedClaim(
   overrides: Partial<SizeRecommendationProtectedClaimV1> = {},
 ): SizeRecommendationProtectedClaimV1 {
+  const variantId = overrides.variantId ?? null;
+  const variantSourceVersion = `catalog:sha256:${"c".repeat(64)}`;
   return SizeRecommendationProtectedClaimV1Schema.parse({
     id: claimId,
     type: "SIZE_RECOMMENDATION",
     value: { recommendedSizes: ["L"], alternativeSizes: ["M"] },
     productId: "SD398",
-    variantId: null,
-    evidenceRef: `size-engine:v1:22222222-2222-4222-8222-222222222222:chart-398:measurements:${"a".repeat(64)}`,
+    variantId,
+    evidenceRef: `size-engine:v1:22222222-2222-4222-8222-222222222222:chart-398:measurements:${"a".repeat(64)}${variantId ? `:variant:${variantId}:${variantSourceVersion}` : ""}`,
     source: "VERIFIED_SIZE_ENGINE_V1",
     observedAt: "2026-08-04T00:00:00.000Z",
     expiresAt: "2026-08-04T00:05:00.000Z",
@@ -54,6 +56,14 @@ function verifiedClaim(
       kind: "CURRENT_MEASUREMENTS",
       measurementFingerprint: "a".repeat(64),
       sourceEventHashes: ["b".repeat(64)],
+      variantBinding: variantId ? {
+        source: "VERIFIED_CATALOG_VARIANT_V2",
+        sourceVersion: variantSourceVersion,
+        verifiedAt: "2026-08-03T23:59:00.000Z",
+        variantId,
+        productId: overrides.productId ?? "SD398",
+        size: "L",
+      } : null,
     },
     ...overrides,
   });
@@ -97,6 +107,18 @@ describe("BF-04 size recommendation detector", () => {
     expect(detectConcreteSizeRecommendations("Em \u0111\u1ec1 xu\u1ea5t L.")).toEqual(["L"]);
     expect(detectConcreteSizeRecommendations("Size ph\u00f9 h\u1ee3p nh\u1ea5t l\u00e0 L.")).toEqual(["L"]);
   });
+  it.each([
+    ["Size c\u00f3 S/M/L v\u00e0 ch\u1ecb h\u1ee3p size L.", ["L"]],
+    ["Size co S/M/L va chi hop size L", ["L"]],
+    ["Ch\u1ecb h\u1ee3p size L v\u00e0 size c\u00f3 S/M/L.", ["L"]],
+    ["M\u1eabu c\u00f2n size M v\u00e0 ch\u1ecb h\u1ee3p size L.", ["L"]],
+    ["Chi hop size L ma mau con size M", ["L"]],
+    ["Em ch\u01b0a th\u1ec3 t\u01b0 v\u1ea5n size M m\u00e0 ch\u1ecb h\u1ee3p size L.", ["L"]],
+    ["Em chua the tu van size M ma chi hop size L", ["L"]],
+    ["Ch\u1ecb h\u1ee3p size L; m\u1eabu c\u00f2n size M.", ["L"]],
+  ])("isolates conjunction and punctuation micro-clauses: %s", (reply, expected) => {
+    expect(detectConcreteSizeRecommendations(reply)).toEqual(expected);
+  });
   it("does not treat negatives, questions, stock messages or catalog lists as fit assertions", () => {
     expect(detectConcreteSizeRecommendations("Em chưa thể tư vấn size L khi thiếu số đo.")).toEqual([]);
     expect(detectConcreteSizeRecommendations("Chị muốn chọn size L hay M ạ?")).toEqual([]);
@@ -104,6 +126,10 @@ describe("BF-04 size recommendation detector", () => {
     expect(detectConcreteSizeRecommendations("Size: S/M/L.")).toEqual([]);
     expect(detectConcreteSizeRecommendations("Size dang co: M, L.")).toEqual([]);
     expect(detectConcreteSizeRecommendations("Size: M, L.")).toEqual([]);
+    expect(detectConcreteSizeRecommendations("Size L c\u00f3 ph\u00f9 h\u1ee3p kh\u00f4ng?")).toEqual([]);
+    expect(detectConcreteSizeRecommendations("Size M co hop voi chi khong?")).toEqual([]);
+    expect(detectConcreteSizeRecommendations("M\u1eabu c\u00f2n size M v\u00e0 size L kh\u00f4ng?")).toEqual([]);
+    expect(detectConcreteSizeRecommendations("Size c\u00f3 S/M/L v\u00e0 em ch\u01b0a th\u1ec3 t\u01b0 v\u1ea5n size L.")).toEqual([]);
   });
 });
 

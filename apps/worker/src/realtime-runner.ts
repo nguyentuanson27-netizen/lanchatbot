@@ -23,7 +23,7 @@ import {
   type StableProductDocument,
   type CustomerProfileFieldEvidence,
   type ScopedSizeChart,
-  type VerifiedSizeRecommendationVariantScope,
+  type VerifiedSizeRecommendationVariantBinding,
 } from "@lana/business-tools";
 import {
   BusinessFactQueriesV2Schema,
@@ -1458,6 +1458,7 @@ function resolveSizeEngineDecision(
   profile: CustomerProfileV1,
   policyResolution: RuntimePolicyResolution | null,
   now: Date,
+  variantBinding: VerifiedSizeRecommendationVariantBinding | null = null,
 ) {
   const chartArtifacts = Object.values(
     policyResolution?.bundle?.artifacts.sizeCharts ?? {},
@@ -1495,6 +1496,7 @@ function resolveSizeEngineDecision(
     recommendationId: deterministicUuid(
       `lana:size:v1:${product.productId}:${profile.profileId}:${profile.revision}`,
     ),
+    variantBinding,
   });
 
   return { decision };
@@ -1702,7 +1704,7 @@ function verifiedSizeRecommendationClaimForGuard(
   product: StableProductDocument,
   profile: CustomerProfileV1,
   policyResolution: RuntimePolicyResolution | null,
-  variantScope: VerifiedSizeRecommendationVariantScope | null,
+  variantBinding: VerifiedSizeRecommendationVariantBinding | null,
   now: Date,
 ) {
   const { decision } = resolveSizeEngineDecision(
@@ -1710,11 +1712,11 @@ function verifiedSizeRecommendationClaimForGuard(
     profile,
     policyResolution,
     now,
+    variantBinding,
   );
   return createVerifiedSizeRecommendationClaim({
     decision,
     productId: product.productId,
-    variantScope,
     profile,
   });
 }
@@ -3846,10 +3848,15 @@ export class RealtimeRunner {
           activeVerifiedVariant?.parentProductId === activeSizeProductId
             ? activeVerifiedVariant.selectedVariantId
             : null;
-        const activeSizeVariantScope =
+        const activeSizeVariantBinding: VerifiedSizeRecommendationVariantBinding | null =
           activeSizeVariantId !== null &&
-          activeVerifiedVariant?.selectedSizeCode
+          activeVerifiedVariant?.selectedSizeCode &&
+          activeVerifiedVariant.resolution === "VERIFIED" &&
+          activeVerifiedVariant.sourceVersion !== null
             ? {
+                source: "VERIFIED_CATALOG_VARIANT_V2",
+                sourceVersion: activeVerifiedVariant.sourceVersion,
+                verifiedAt: activeVerifiedVariant.verifiedAt,
                 variantId: activeSizeVariantId,
                 parentProductId: activeVerifiedVariant.parentProductId,
                 size: activeVerifiedVariant.selectedSizeCode,
@@ -3861,7 +3868,7 @@ export class RealtimeRunner {
                 resolvedProduct,
                 customerProfile,
                 policyResolution,
-                activeSizeVariantScope,
+                activeSizeVariantBinding,
                 now,
               )
             : null;
