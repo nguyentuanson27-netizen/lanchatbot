@@ -21,44 +21,53 @@ const FREESHIP_PATTERN = /\b(?:freeship|free\s*ship|miễn\s+phí\s+(?:giao|ship
 const SHIP_FEE_PATTERN = /(?:phí\s*(?:ship|giao)|ship)\D{0,12}(?:\d[\d.,]*)\s*(?:k\b|nghìn\b|vnd\b|đ|₫)/iu;
 const ETA_VALUES_PATTERN = /\b(\d+)\s*(?:(?:-|–|đến)\s*(\d+))?\s*(?:ngày|day)\b/giu;
 const ORDER_INFO_REQUEST_PATTERN = /(?:xin|gửi|cho\s+(?:em|shop))[^.!?\n]{0,36}(?:tên|họ\s*tên|số\s*điện\s*thoại|sđt|địa\s*chỉ)|(?:tên|sđt|địa\s*chỉ)[^.!?\n]{0,24}(?:nhận\s*hàng|đặt\s*hàng)/iu;
-const SIZE_TOKEN = "(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\\d|50)";
-const SIZE_REFERENCE_PATTERN = new RegExp(
-  `(?:\\bsize|\\bsz|kich\\s*co|co)\\s*(?:la|:|=|\\u2013|-)?\\s*(${SIZE_TOKEN})(?:\\s*(?:-|\\u2013|den|to|/)\\s*(?:den\\s*)?(${SIZE_TOKEN}))?\\b`,
-  "giu",
-);
-const SIZE_FIT_PREDICATE =
-  "(?:mac|hop|vua|phu\\s*hop(?:\\s*nhat)?|chon|lay|nen\\s*(?:chon|lay)|tu\\s*van|de\\s*xuat|goi\\s*y|khuyen\\s*nghi)";
-const SIZE_RANGE_SUFFIX = `(?:\\s*(?:-|\\u2013|den|to|/)\\s*(?:den\\s*)?(${SIZE_TOKEN}))?`;
-const BARE_SIZE_FIT_PATTERN = new RegExp(
-  `\\b${SIZE_FIT_PREDICATE}\\s*(?:size|sz|kich\\s*co|co)?\\s*(${SIZE_TOKEN})${SIZE_RANGE_SUFFIX}\\b`,
-  "giu",
-);
-const SIZE_CATALOG_LIST_PATTERN = new RegExp(
-  `(?:\\bsize|\\bsz|kich\\s*co|co)\\s*[:=]?\\s*${SIZE_TOKEN}(?:\\s*[/,;]\\s*${SIZE_TOKEN}\\b)+`,
-  "iu",
-);
-const SIZE_CATALOG_LABEL_PATTERN = new RegExp(
-  `^\\s*(?:size|sz|kich\\s*co|co)\\s*[:=]\\s*${SIZE_TOKEN}\\s*[.!]?$`,
-  "iu",
-);
-const SIZE_STOCK_CONTEXT_PATTERN = /(?:con|het|san\s*hang|available|ton\s*kho|pre\s*order|dat\s*truoc)\s*(?:size|sz|kich\s*co|co)?\s*(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\b/iu;
-const SIZE_RECOMMENDATION_DESCRIPTOR_PATTERN = new RegExp(
-  `\\b(?:size|sz|kich\\s*co|co)\\s+(?:phu\\s*hop(?:\\s*nhat)?|nen\\s*(?:chon|lay)|de\\s*xuat)\\s*(?:la|:|=)?\\s*(${SIZE_TOKEN})${SIZE_RANGE_SUFFIX}\\b`,
-  "giu",
-);
-const SIZE_BEFORE_FIT_PATTERN = new RegExp(
-  `\\b(?:size|sz|kich\\s*co|co)\\s*(${SIZE_TOKEN})${SIZE_RANGE_SUFFIX}\\b[^,;.!?]{0,32}\\b(?:la\\s+)?(?:hop|vua|phu\\s*hop)(?:\\s*nhat)?\\b`,
-  "giu",
-);
-const SIZE_AVAILABILITY_PATTERN = new RegExp(
-  `\\b(?:co|con|het|san\\s*hang|available|ton\\s*kho|pre\\s*order|dat\\s*truoc)\\s*(?:size|sz|kich\\s*co|co)\\s*${SIZE_TOKEN}\\b`,
-  "iu",
-);
-
-const SIZE_CATALOG_AVAILABILITY_PATTERN = new RegExp(
-  `\\b(?:size|sz|kich\\s*co|co)(?:\\s+dang)?\\s+co\\s*[:=]?\\s*${SIZE_TOKEN}(?:\\s*[/,;]\\s*${SIZE_TOKEN})*\\b`,
-  "iu",
-);
+const SIZE_VALUES = new Set([
+  "xxxs",
+  "xxs",
+  "xs",
+  "s",
+  "m",
+  "l",
+  "xl",
+  "xxl",
+  "xxxl",
+  ...Array.from({ length: 17 }, (_, i) => String(i + 34)),
+]);
+const SIZE_RANGE_SEPARATORS = new Set([
+  "-",
+  "\u2013",
+  "\u2014",
+  "/",
+  "den",
+  "to",
+]);
+const SIZE_PREDICATES = [
+  ["khuyen", "nghi"],
+  ["phu", "hop"],
+  ["can", "nhac"],
+  ["tu", "van"],
+  ["de", "xuat"],
+  ["goi", "y"],
+  ["nen", "chon"],
+  ["nen", "lay"],
+  ["nen", "mac"],
+  ["hop"],
+  ["vua"],
+  ["chon"],
+  ["lay"],
+  ["mac"],
+] as const;
+type SizeToken = {
+  readonly text: string;
+  readonly start: number;
+  readonly end: number;
+};
+type SizeMention = {
+  readonly start: number;
+  readonly end: number;
+  readonly sizes: readonly string[];
+};
+type SizePredicate = { readonly start: number; readonly end: number };
 function normalizedVietnameseForGuard(value: string): string {
   return value
     .normalize("NFD")
@@ -66,70 +75,204 @@ function normalizedVietnameseForGuard(value: string): string {
     .replace(/[\u0111\u0110]/gu, "d")
     .toLocaleLowerCase("vi-VN");
 }
-
-/**
- * Defense in depth only: this catches a concrete fit assertion omitted from
- * the structured claim references. Exclusions apply only to the clause that
- * contains the match, so a mixed sentence cannot hide a later assertion.
- */
-export function detectConcreteSizeRecommendations(text: string): readonly string[] {
-  const sizes = new Set<string>();
-  const normalized = normalizedVietnameseForGuard(text);
-  type Candidate = { readonly start: number; readonly end: number; readonly sizes: readonly string[] };
-  const candidates: Candidate[] = [];
-  for (const pattern of [BARE_SIZE_FIT_PATTERN, SIZE_RECOMMENDATION_DESCRIPTOR_PATTERN, SIZE_BEFORE_FIT_PATTERN]) {
-    for (const match of normalized.matchAll(pattern)) {
-      candidates.push({
-        start: match.index,
-        end: match.index + match[0].length,
-        sizes: [match[1], match[2]].filter((value): value is string => Boolean(value)),
-      });
-    }
-  }
-
-  const exclusionPatterns = [
-    SIZE_CATALOG_LIST_PATTERN,
-    SIZE_CATALOG_LABEL_PATTERN,
-    SIZE_STOCK_CONTEXT_PATTERN,
-    SIZE_AVAILABILITY_PATTERN,
-    SIZE_CATALOG_AVAILABILITY_PATTERN,
-    new RegExp(
-      `\\b(?:khong|chua|chang)\\s+(?:the\\s+)?${SIZE_FIT_PREDICATE}\\s*(?:size|sz|kich\\s*co|co)?\\s*${SIZE_TOKEN}(?:\\s*(?:-|\\u2013|den|to|/)\\s*(?:den\\s*)?${SIZE_TOKEN})?\\b`,
-      "giu",
-    ),
-  ];
-  const excludedSpans = exclusionPatterns.flatMap((pattern) =>
-    [...normalized.matchAll(new RegExp(pattern.source, pattern.flags.includes("g") ? pattern.flags : `${pattern.flags}g`))]
-      .map((match) => ({ start: match.index, end: match.index + match[0].length })),
+function tokenizeSizeText(value: string): readonly SizeToken[] {
+  return [...value.matchAll(/[a-z0-9]+|[(),;.!?/:=\u2013\u2014-]|\n/gu)].map(
+    (m) => ({ text: m[0], start: m.index, end: m.index + m[0].length }),
   );
-
-  for (const candidate of candidates) {
-    if (excludedSpans.some((span) => span.start < candidate.end && candidate.start < span.end)) continue;
-    const fragmentStart = Math.max(
-      normalized.lastIndexOf(",", candidate.start - 1),
-      normalized.lastIndexOf(";", candidate.start - 1),
-      normalized.lastIndexOf(".", candidate.start - 1),
-      normalized.lastIndexOf("!", candidate.start - 1),
-      normalized.lastIndexOf("?", candidate.start - 1),
-      normalized.lastIndexOf("\n", candidate.start - 1),
-    ) + 1;
-    const boundaryAfter = normalized.slice(candidate.end).search(/[,;.!?\n]/u);
-    const punctuationEnd = boundaryAfter === -1 ? normalized.length : candidate.end + boundaryAfter;
-    const nextCandidateStart = candidates
-      .filter((other) => other.start >= candidate.end)
-      .reduce((nearest, other) => Math.min(nearest, other.start), normalized.length);
-    const fragmentEnd = Math.min(punctuationEnd, nextCandidateStart);
-    const fragment = normalized.slice(fragmentStart, fragmentEnd).trim();
-    const tail = normalized.slice(candidate.end, fragmentEnd).trim();
-    const isTagQuestion = /\b(?:dung|phai)\s+(?:khong|ko|hong)\s*$/u.test(tail);
-    const hasQuestionTail = /\b(?:khong|ko|hong|ha|a)\s*$/u.test(tail) ||
-      /^(?:co\s+)?(?:hop|vua|phu\s*hop|duoc)?\s*(?:khong|ko|hong|ha|a)\b/u.test(tail);
-    const isSelectionQuestion = /\b(?:hay|hoac)\b/u.test(fragment) && /\b(?:muon|chon|lay)\b/u.test(fragment);
-    if ((hasQuestionTail && !isTagQuestion) || isSelectionQuestion) continue;
-
-    for (const size of candidate.sizes) sizes.add(size.toLocaleUpperCase("vi-VN"));
+}
+function findSizeMentions(
+  tokens: readonly SizeToken[],
+): readonly SizeMention[] {
+  const result: SizeMention[] = [];
+  for (let i = 0; i < tokens.length; i += 1) {
+    const first = tokens[i];
+    if (!first || !SIZE_VALUES.has(first.text)) continue;
+    const sizes = [first.text];
+    let end = i;
+    while (end + 2 < tokens.length) {
+      const separator = tokens[end + 1];
+      if (!separator || !SIZE_RANGE_SEPARATORS.has(separator.text)) break;
+      let valueIndex = end + 2;
+      if (tokens[valueIndex]?.text === "den") valueIndex += 1;
+      const valueToken = tokens[valueIndex];
+      if (!valueToken || !SIZE_VALUES.has(valueToken.text)) break;
+      sizes.push(valueToken.text);
+      end = valueIndex;
+    }
+    const last = tokens[end];
+    if (!last) continue;
+    result.push({ start: first.start, end: last.end, sizes });
+    i = end;
   }
-  return [...sizes].filter(Boolean).sort();
+  return result;
+}
+function findSizePredicates(
+  tokens: readonly SizeToken[],
+): readonly SizePredicate[] {
+  const result: SizePredicate[] = [];
+  for (let i = 0; i < tokens.length; i += 1) {
+    const phrase = SIZE_PREDICATES.find((p) =>
+      p.every((word, offset) => tokens[i + offset]?.text === word),
+    );
+    if (!phrase) continue;
+    const end = i + phrase.length - 1;
+    if (
+      phrase.length === 1 &&
+      phrase[0] === "vua" &&
+      tokens.slice(end + 1, end + 4).some((token) =>
+        /^(?:ve|cap|nhap|het)$/u.test(token.text),
+      )
+    ) continue;
+    const first = tokens[i];
+    const last = tokens[end];
+    if (!first || !last) continue;
+    result.push({ start: first.start, end: last.end });
+    i = end;
+  }
+  return result;
+}
+function hasSentenceBoundary(value: string): boolean {
+  return /[.;!?\n]/u.test(value);
+}
+function mentionDistance(m: SizeMention, p: SizePredicate): number {
+  if (m.end <= p.start) return p.start - m.end;
+  if (p.end <= m.start) return m.start - p.end;
+  return 0;
+}
+function punctuationScope(
+  value: string,
+  start: number,
+  end: number,
+): { start: number; end: number } {
+  const before = Math.max(
+    ...[",", ";", ".", "!", "?", "\n"].map((mark) =>
+      value.lastIndexOf(mark, start - 1),
+    ),
+  );
+  const after = value.slice(end).search(/[,;.!?\n]/u);
+  return {
+    start: before + 1,
+    end: after === -1 ? value.length : end + after + 1,
+  };
+}
+function isAffirmativeSizeCandidate(
+  value: string,
+  tokens: readonly SizeToken[],
+  mention: SizeMention,
+  predicateStart: number,
+  predicateEnd: number,
+  scopeStart: number,
+  scopeEnd: number,
+): boolean {
+  const fragment = value.slice(scopeStart, scopeEnd).trim();
+  const unitEnd = Math.max(mention.end, predicateEnd);
+  const beforePredicate = value.slice(scopeStart, predicateStart);
+  const suffix = value.slice(unitEnd, scopeEnd).trim();
+  const local = tokens.filter(
+    (token) => token.start >= scopeStart && token.end <= scopeEnd,
+  );
+  if (/\b(?:khong|chua|chang)\b/u.test(beforePredicate)) return false;
+  if (mention.sizes.length >= 3 && /[:=/]/u.test(fragment)) return false;
+  if (/\b(?:dung|phai)\s+(?:khong|ko|hong)\s*\?*$/u.test(suffix)) return true;
+  if (fragment.includes("?")) return false;
+  const coBefore = local.some(
+    (token) => token.text === "co" && token.start < predicateEnd,
+  );
+  const questionAfter = local.some(
+    (token) =>
+      /^(?:khong|ko|hong)$/u.test(token.text) && token.start >= unitEnd,
+  );
+  if (coBefore && questionAfter) return false;
+  const count = local.filter((token) => SIZE_VALUES.has(token.text)).length;
+  if (
+    local.some((token) => token.text === "hay" || token.text === "hoac") &&
+    count >= 2
+  )
+    return false;
+  if (/\b(?:lieu|nao|bao\s+nhieu)\b/u.test(fragment) && fragment.includes("?"))
+    return false;
+  if (/\b(?:khong|ko|hong|ha)\s*\?*$/u.test(suffix)) return false;
+  return true;
+}
+/** Defense in depth only; typed Size Engine provenance remains authoritative. */
+export function detectConcreteSizeRecommendations(
+  text: string,
+): readonly string[] {
+  const value = normalizedVietnameseForGuard(text);
+  const tokens = tokenizeSizeText(value);
+  const mentions = findSizeMentions(tokens);
+  const predicates = findSizePredicates(tokens);
+  const byMention = new Map<
+    number,
+    { mention: SizeMention; predicates: SizePredicate[] }
+  >();
+  for (const predicate of predicates) {
+    const nearest = mentions
+      .filter((mention) => {
+        const between = value.slice(
+          Math.min(mention.end, predicate.end),
+          Math.max(mention.start, predicate.start),
+        );
+        return (
+          mentionDistance(mention, predicate) <= 80 &&
+          !hasSentenceBoundary(between)
+        );
+      })
+      .sort(
+        (a, b) =>
+          mentionDistance(a, predicate) - mentionDistance(b, predicate) ||
+          Number(b.start >= predicate.end) - Number(a.start >= predicate.end),
+      )[0];
+    if (!nearest) continue;
+    const entry = byMention.get(nearest.start) ?? {
+      mention: nearest,
+      predicates: [],
+    };
+    entry.predicates.push(predicate);
+    byMention.set(nearest.start, entry);
+  }
+  const candidates = [...byMention.values()]
+    .map(({ mention, predicates: matched }) => ({
+      mention,
+      predicateStart: Math.min(...matched.map((p) => p.start)),
+      predicateEnd: Math.max(...matched.map((p) => p.end)),
+      start: Math.min(mention.start, ...matched.map((p) => p.start)),
+      end: Math.max(mention.end, ...matched.map((p) => p.end)),
+    }))
+    .sort((a, b) => a.start - b.start);
+  const result = new Set<string>();
+  candidates.forEach((candidate, index) => {
+    const punctuation = punctuationScope(value, candidate.start, candidate.end);
+    const previous = candidates[index - 1];
+    const next = candidates[index + 1];
+    const start =
+      previous &&
+      !hasSentenceBoundary(value.slice(previous.end, candidate.start))
+        ? Math.max(
+            punctuation.start,
+            Math.floor((previous.end + candidate.start) / 2),
+          )
+        : punctuation.start;
+    const end =
+      next && !hasSentenceBoundary(value.slice(candidate.end, next.start))
+        ? Math.min(punctuation.end, Math.ceil((candidate.end + next.start) / 2))
+        : punctuation.end;
+    if (
+      !isAffirmativeSizeCandidate(
+        value,
+        tokens,
+        candidate.mention,
+        candidate.predicateStart,
+        candidate.predicateEnd,
+        start,
+        end,
+      )
+    )
+      return;
+    for (const size of candidate.mention.sizes)
+      result.add(size.toLocaleUpperCase("vi-VN"));
+  });
+  return [...result].sort();
 }
 function sizeClaimReason(
   claim: SizeRecommendationProtectedClaimV1,

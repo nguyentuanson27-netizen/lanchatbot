@@ -134,6 +134,71 @@ describe("BF-04 size recommendation detector", () => {
     expect(detectConcreteSizeRecommendations("Chi mac size M co vua khong")).toEqual([]);
     expect(detectConcreteSizeRecommendations("Ch\u1ecb kh\u00f4ng h\u1ee3p size L.")).toEqual([]);
   });
+  it.each([
+    ["Theo s\u1ed1 \u0111o, L s\u1ebd v\u1eeba v\u1edbi ch\u1ecb nh\u1ea5t.", ["L"]],
+    ["Theo so do, L se vua voi chi nhat.", ["L"]],
+    ["Ch\u1ecb h\u1ee3p (size L), \u0111\u00fang kh\u00f4ng?", ["L"]],
+    ["Chi hop (size L), dung khong?", ["L"]],
+    ["D\u00e1ng ch\u1ecb th\u00ec L l\u00e0 ph\u00f9 h\u1ee3p nh\u1ea5t.", ["L"]],
+    ["Dang chi thi L la phu hop nhat.", ["L"]],
+    ["Size L c\u00f3 h\u1ee3p ch\u1ecb kh\u00f4ng nh\u01b0ng theo s\u1ed1 \u0111o ch\u1ecb h\u1ee3p size M.", ["M"]],
+    ["Size L co hop chi khong nhung theo so do chi hop size M.", ["M"]],
+    ["Theo ch\u1ecb size L h\u1ee3p h\u01a1n hay size M?", []],
+    ["Theo chi size L hop hon hay size M?", []],
+    ["Em kh\u00f4ng ngh\u0129 ch\u1ecb h\u1ee3p size L.", []],
+    ["Em khong nghi chi hop size L.", []],
+    ["Ch\u1ecb ch\u01b0a ch\u1eafc h\u1ee3p size L.", []],
+    ["Chi chua chac hop size L.", []],
+    ["Kh\u00f4ng ph\u1ea3i ch\u1ecb h\u1ee3p size L \u0111\u00e2u.", []],
+    ["Khong phai chi hop size L dau.", []],
+  ])("classifies each required Unicode/ASCII mention: %s", (reply, expected) => {
+    expect(detectConcreteSizeRecommendations(reply)).toEqual(expected);
+  });
+
+  it.each([
+    ["Ch\u1ecb h\u1ee3p (size L).", ["L"]],
+    ["(L) s\u1ebd v\u1eeba v\u1edbi ch\u1ecb nh\u1ea5t.", ["L"]],
+    ["Size L ph\u00f9 h\u1ee3p nh\u1ea5t v\u1edbi ch\u1ecb.", ["L"]],
+    ["Em \u0111\u1ec1 xu\u1ea5t - L.", ["L"]],
+    ["Theo s\u1ed1 \u0111o, ch\u1ecb n\u00ean ch\u1ecdn M-L.", ["L", "M"]],
+    ["Size c\u00f3 S/M/L\nTheo s\u1ed1 \u0111o ch\u1ecb h\u1ee3p size M.", ["M"]],
+    ["M\u1eabu c\u00f2n size S song ch\u1ecb h\u1ee3p size L.", ["L"]],
+    ["Ch\u1ecb h\u1ee3p size L b\u1edfi v\u00ec s\u1ed1 \u0111o ph\u00f9 h\u1ee3p.", ["L"]],
+    ["D\u00f9 m\u1eabu c\u00f2n size S, size L ph\u00f9 h\u1ee3p nh\u1ea5t v\u1edbi ch\u1ecb.", ["L"]],
+    ["Size L ph\u00f9 h\u1ee3p nh\u1ea5t v\u1edbi ch\u1ecb - \u0111\u00fang kh\u00f4ng?", ["L"]],
+    ["Size ph\u00f9 h\u1ee3p: S/M/L.", []],
+    ["M\u1eabu size M v\u1eeba v\u1ec1.", []],
+    ["M\u1eabu size M v\u1eeba m\u1edbi v\u1ec1.", []],
+    ["Size L kh\u00f4ng ph\u00f9 h\u1ee3p v\u1edbi ch\u1ecb.", []],
+    ["Size L ph\u00f9 h\u1ee3p v\u1edbi ch\u1ecb?", []],
+    ["Ch\u1ecb c\u00f3 h\u1ee3p size L kh\u00f4ng", []],
+    ["Ch\u1ecb m\u1eb7c size M c\u00f3 v\u1eeba kh\u00f4ng?", []],
+    ["Em ch\u01b0a th\u1ec3 t\u01b0 v\u1ea5n size L.", []],
+  ])("keeps mention-scoped behavior under metamorphic composition: %s", (reply, expected) => {
+    expect(detectConcreteSizeRecommendations(reply)).toEqual(expected);
+  });
+
+  it("drives the final guard only for undeclared affirmative assertions", () => {
+    for (const reply of [
+      "Theo s\u1ed1 \u0111o, L s\u1ebd v\u1eeba v\u1edbi ch\u1ecb nh\u1ea5t.",
+      "Ch\u1ecb h\u1ee3p (size L), \u0111\u00fang kh\u00f4ng?",
+      "D\u00e1ng ch\u1ecb th\u00ec L l\u00e0 ph\u00f9 h\u1ee3p nh\u1ea5t.",
+    ]) {
+      expect(guard(reply, null)).toMatchObject({
+        action: "HANDOFF",
+        blockedReasonCodes: ["SIZE_RECOMMENDATION_UNDECLARED"],
+      });
+    }
+    for (const reply of [
+      "Theo ch\u1ecb size L h\u1ee3p h\u01a1n hay size M?",
+      "Em kh\u00f4ng ngh\u0129 ch\u1ecb h\u1ee3p size L.",
+      "Ch\u1ecb ch\u01b0a ch\u1eafc h\u1ee3p size L.",
+      "Kh\u00f4ng ph\u1ea3i ch\u1ecb h\u1ee3p size L \u0111\u00e2u.",
+    ]) {
+      expect(guard(reply, null)).toMatchObject({ action: "REPLY", blockedReasonCodes: [] });
+    }
+  });
+
 });
 
 describe("BF-04 verified size claims", () => {
