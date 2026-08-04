@@ -26,12 +26,15 @@ const SIZE_REFERENCE_PATTERN = new RegExp(
   `(?:\\bsize|\\bsz|kich\\s*co|co)\\s*(?:la|:|=|\\u2013|-)?\\s*(${SIZE_TOKEN})(?:\\s*(?:-|\\u2013|den|to|/)\\s*(?:den\\s*)?(${SIZE_TOKEN}))?\\b`,
   "giu",
 );
+const SIZE_FIT_PREDICATE =
+  "(?:mac|hop|vua|phu\\s*hop(?:\\s*nhat)?|chon|lay|nen\\s*(?:chon|lay)|tu\\s*van|de\\s*xuat|goi\\s*y|khuyen\\s*nghi)";
+const SIZE_RANGE_SUFFIX = `(?:\\s*(?:-|\\u2013|den|to|/)\\s*(?:den\\s*)?(${SIZE_TOKEN}))?`;
 const BARE_SIZE_FIT_PATTERN = new RegExp(
-  `\\b(?:mac|hop|vua|chon|lay|nen\\s*(?:chon|lay)|tu\\s*van|de\\s*xuat|goi\\s*y|khuyen\\s*nghi)\\s*(?:size\\s*)?(${SIZE_TOKEN})\\b`,
+  `\\b${SIZE_FIT_PREDICATE}\\s*(?:size|sz|kich\\s*co|co)?\\s*(${SIZE_TOKEN})${SIZE_RANGE_SUFFIX}\\b`,
   "giu",
 );
 const SIZE_CATALOG_LIST_PATTERN = new RegExp(
-  `(?:\\bsize|\\bsz|kich\\s*co|co)\\s*[:=]?\\s*${SIZE_TOKEN}(?:\\s*[/,;]\\s*${SIZE_TOKEN})+`,
+  `(?:\\bsize|\\bsz|kich\\s*co|co)\\s*[:=]?\\s*${SIZE_TOKEN}(?:\\s*[/,;]\\s*${SIZE_TOKEN}\\b)+`,
   "iu",
 );
 const SIZE_CATALOG_LABEL_PATTERN = new RegExp(
@@ -39,18 +42,12 @@ const SIZE_CATALOG_LABEL_PATTERN = new RegExp(
   "iu",
 );
 const SIZE_STOCK_CONTEXT_PATTERN = /(?:con|het|san\s*hang|available|ton\s*kho|pre\s*order|dat\s*truoc)\s*(?:size|sz|kich\s*co|co)?\s*(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\b/iu;
-const SIZE_NEGATION_PATTERN = /(?:khong|chua|chang)\s+(?:the\s+)?(?:tu\s*van|goi\s*y|khuyen|xac\s*dinh|chon|ket\s*luan|bao)\b/iu;
-const SIZE_FIT_ASSERTION_PATTERN = /\b(?:hop|vua|phu\s*hop|de\s*xuat|goi\s*y|khuyen\s*nghi)\b/iu;
-const SIZE_INFORMATION_QUESTION_PATTERN = new RegExp(
-  `^\\s*(?:size|sz|kich\\s*co|co)\\s*${SIZE_TOKEN}\\b[^.!?]{0,48}\\b(?:co\\s+)?(?:hop|vua|phu\\s*hop)\\b[^.!?]{0,32}\\b(?:khong|ko|hong|ha|a)\\s*[?]?$`,
-  "iu",
-);
-const SIZE_SELECTION_QUESTION_PATTERN = new RegExp(
-  `\\b(?:muon\\s+)?chon\\b[^.!?]{0,48}\\b(?:size|sz|kich\\s*co|co)?\\s*${SIZE_TOKEN}\\b[^.!?]{0,24}\\b(?:hay|hoac)\\b`,
-  "iu",
-);
 const SIZE_RECOMMENDATION_DESCRIPTOR_PATTERN = new RegExp(
-  `\\b(?:size|sz|kich\\s*co|co)\\s+(?:phu\\s*hop(?:\\s*nhat)?|nen\\s*(?:chon|lay)|de\\s*xuat)\\s*(?:la|:|=)?\\s*(${SIZE_TOKEN})\\b`,
+  `\\b(?:size|sz|kich\\s*co|co)\\s+(?:phu\\s*hop(?:\\s*nhat)?|nen\\s*(?:chon|lay)|de\\s*xuat)\\s*(?:la|:|=)?\\s*(${SIZE_TOKEN})${SIZE_RANGE_SUFFIX}\\b`,
+  "giu",
+);
+const SIZE_BEFORE_FIT_PATTERN = new RegExp(
+  `\\b(?:size|sz|kich\\s*co|co)\\s*(${SIZE_TOKEN})${SIZE_RANGE_SUFFIX}\\b[^,;.!?]{0,32}\\b(?:la\\s+)?(?:hop|vua|phu\\s*hop)(?:\\s*nhat)?\\b`,
   "giu",
 );
 const SIZE_AVAILABILITY_PATTERN = new RegExp(
@@ -77,47 +74,60 @@ function normalizedVietnameseForGuard(value: string): string {
  */
 export function detectConcreteSizeRecommendations(text: string): readonly string[] {
   const sizes = new Set<string>();
-  const microClauses = normalizedVietnameseForGuard(text)
-    .replace(/\n/gu, ",")
-    .split(
-      /[,;\n]+|(?<=[.!?])|\b(?:va|ma|nhung|tuy\s+nhien|con|nen)\b|(?=\btheo\s+so\s+do\b)/u,
-    )
-    .map((clause) => clause.trim())
-    .filter(Boolean);
-  for (const clause of microClauses) {
-    if (
-      SIZE_NEGATION_PATTERN.test(clause) ||
-      SIZE_CATALOG_LIST_PATTERN.test(clause) ||
-      SIZE_CATALOG_LABEL_PATTERN.test(clause) ||
-      SIZE_STOCK_CONTEXT_PATTERN.test(clause) ||
-      SIZE_AVAILABILITY_PATTERN.test(clause) ||
-      SIZE_CATALOG_AVAILABILITY_PATTERN.test(clause)
-    ) {
-      continue;
+  const normalized = normalizedVietnameseForGuard(text);
+  type Candidate = { readonly start: number; readonly end: number; readonly sizes: readonly string[] };
+  const candidates: Candidate[] = [];
+  for (const pattern of [BARE_SIZE_FIT_PATTERN, SIZE_RECOMMENDATION_DESCRIPTOR_PATTERN, SIZE_BEFORE_FIT_PATTERN]) {
+    for (const match of normalized.matchAll(pattern)) {
+      candidates.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        sizes: [match[1], match[2]].filter((value): value is string => Boolean(value)),
+      });
     }
-    const descriptorMatches = [...clause.matchAll(SIZE_RECOMMENDATION_DESCRIPTOR_PATTERN)];
-    const bareFitMatches = [...clause.matchAll(BARE_SIZE_FIT_PATTERN)];
-    const isPureInformationQuestion =
-      clause.includes("?") &&
-      descriptorMatches.length === 0 &&
-      (
-        SIZE_INFORMATION_QUESTION_PATTERN.test(clause) ||
-        SIZE_SELECTION_QUESTION_PATTERN.test(clause)
-      );
-    if (isPureInformationQuestion) continue;
+  }
 
-    if (SIZE_FIT_ASSERTION_PATTERN.test(clause)) {
-      for (const match of clause.matchAll(SIZE_REFERENCE_PATTERN)) {
-        sizes.add((match[1] ?? "").toLocaleUpperCase("vi-VN"));
-        if (match[2]) sizes.add(match[2].toLocaleUpperCase("vi-VN"));
-      }
-    }
-    for (const match of bareFitMatches) {
-      sizes.add((match[1] ?? "").toLocaleUpperCase("vi-VN"));
-    }
-    for (const match of descriptorMatches) {
-      sizes.add((match[1] ?? "").toLocaleUpperCase("vi-VN"));
-    }
+  const exclusionPatterns = [
+    SIZE_CATALOG_LIST_PATTERN,
+    SIZE_CATALOG_LABEL_PATTERN,
+    SIZE_STOCK_CONTEXT_PATTERN,
+    SIZE_AVAILABILITY_PATTERN,
+    SIZE_CATALOG_AVAILABILITY_PATTERN,
+    new RegExp(
+      `\\b(?:khong|chua|chang)\\s+(?:the\\s+)?${SIZE_FIT_PREDICATE}\\s*(?:size|sz|kich\\s*co|co)?\\s*${SIZE_TOKEN}(?:\\s*(?:-|\\u2013|den|to|/)\\s*(?:den\\s*)?${SIZE_TOKEN})?\\b`,
+      "giu",
+    ),
+  ];
+  const excludedSpans = exclusionPatterns.flatMap((pattern) =>
+    [...normalized.matchAll(new RegExp(pattern.source, pattern.flags.includes("g") ? pattern.flags : `${pattern.flags}g`))]
+      .map((match) => ({ start: match.index, end: match.index + match[0].length })),
+  );
+
+  for (const candidate of candidates) {
+    if (excludedSpans.some((span) => span.start < candidate.end && candidate.start < span.end)) continue;
+    const fragmentStart = Math.max(
+      normalized.lastIndexOf(",", candidate.start - 1),
+      normalized.lastIndexOf(";", candidate.start - 1),
+      normalized.lastIndexOf(".", candidate.start - 1),
+      normalized.lastIndexOf("!", candidate.start - 1),
+      normalized.lastIndexOf("?", candidate.start - 1),
+      normalized.lastIndexOf("\n", candidate.start - 1),
+    ) + 1;
+    const boundaryAfter = normalized.slice(candidate.end).search(/[,;.!?\n]/u);
+    const punctuationEnd = boundaryAfter === -1 ? normalized.length : candidate.end + boundaryAfter;
+    const nextCandidateStart = candidates
+      .filter((other) => other.start >= candidate.end)
+      .reduce((nearest, other) => Math.min(nearest, other.start), normalized.length);
+    const fragmentEnd = Math.min(punctuationEnd, nextCandidateStart);
+    const fragment = normalized.slice(fragmentStart, fragmentEnd).trim();
+    const tail = normalized.slice(candidate.end, fragmentEnd).trim();
+    const isTagQuestion = /\b(?:dung|phai)\s+(?:khong|ko|hong)\s*$/u.test(tail);
+    const hasQuestionTail = /\b(?:khong|ko|hong|ha|a)\s*$/u.test(tail) ||
+      /^(?:co\s+)?(?:hop|vua|phu\s*hop|duoc)?\s*(?:khong|ko|hong|ha|a)\b/u.test(tail);
+    const isSelectionQuestion = /\b(?:hay|hoac)\b/u.test(fragment) && /\b(?:muon|chon|lay)\b/u.test(fragment);
+    if ((hasQuestionTail && !isTagQuestion) || isSelectionQuestion) continue;
+
+    for (const size of candidate.sizes) sizes.add(size.toLocaleUpperCase("vi-VN"));
   }
   return [...sizes].filter(Boolean).sort();
 }

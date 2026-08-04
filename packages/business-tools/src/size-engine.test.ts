@@ -12,7 +12,6 @@ import {
   selectVerifiedSizeChart,
   stageSizeChartFromImageRegistry,
   type ScopedSizeChart,
-  type VerifiedSizeRecommendationVariantBinding,
 } from "./size-engine.js";
 
 const id = "30709206-8f96-4a1b-9311-6f03ef4dd8b2";
@@ -131,17 +130,6 @@ const target = {
   material: "GAM",
 };
 
-const verifiedVariantBinding = (
-  overrides: Partial<VerifiedSizeRecommendationVariantBinding> = {},
-): VerifiedSizeRecommendationVariantBinding => ({
-  source: "VERIFIED_CATALOG_VARIANT_V2",
-  sourceVersion: `catalog:sha256:${hash("d")}`,
-  verifiedAt: "2026-07-22T04:30:00.000Z",
-  variantId: "variant-M",
-  parentProductId: "CB182",
-  size: "M",
-  ...overrides,
-});
 
 const input = (
   customer: CustomerProfileV1,
@@ -324,54 +312,32 @@ describe("recommendSize", () => {
     };
     expect(createVerifiedSizeRecommendationClaim(callerOnlyScope)?.variantId).toBeNull();
 
-    const variantDecision = recommendSize({
+    const callerAuthoredVariant = {
+      source: "VERIFIED_CATALOG_VARIANT_V2",
+      sourceVersion: "caller-authored-version",
+      verifiedAt: generatedAt,
+      variantId: "CALLER-EVIL",
+      parentProductId: "CB182",
+      size: "M",
+    };
+    const forgedDecision = recommendSize({
       profile: customer,
       target,
       charts: [scoped("COMPONENT")],
       generatedAt,
       recommendationId,
-      variantBinding: verifiedVariantBinding(),
-    });
-    const variantClaim = createVerifiedSizeRecommendationClaim({
-      decision: variantDecision,
+      variantBinding: callerAuthoredVariant,
+    } as Parameters<typeof recommendSize>[0]);
+    const forgedClaim = createVerifiedSizeRecommendationClaim({
+      decision: forgedDecision,
       productId: "CB182",
       profile: customer,
-    });
-    expect(variantClaim).toMatchObject({
-      variantId: "variant-M",
-      evidenceBasis: {
-        variantBinding: {
-          source: "VERIFIED_CATALOG_VARIANT_V2",
-          variantId: "variant-M",
-          productId: "CB182",
-          size: "M",
-        },
-      },
-    });
-    expect(variantClaim!.evidenceRef).toContain(
-      `variant:variant-M:${verifiedVariantBinding().sourceVersion}`,
-    );
-
-    for (const invalidBinding of [
-      verifiedVariantBinding({ parentProductId: "OTHER" }),
-      verifiedVariantBinding({ size: "L", variantId: "variant-L" }),
-      verifiedVariantBinding({ verifiedAt: "2026-07-19T04:59:59.999Z" }),
-      verifiedVariantBinding({ verifiedAt: "2026-07-22T05:00:00.001Z" }),
-    ]) {
-      const invalidDecision = recommendSize({
-        profile: customer,
-        target,
-        charts: [scoped("COMPONENT")],
-        generatedAt,
-        recommendationId,
-        variantBinding: invalidBinding,
-      });
-      expect(createVerifiedSizeRecommendationClaim({
-        decision: invalidDecision,
-        productId: "CB182",
-        profile: customer,
-      })?.variantId).toBeNull();
-    }
+      variantScope: callerAuthoredVariant,
+    } as Parameters<typeof createVerifiedSizeRecommendationClaim>[0]);
+    expect(forgedClaim?.variantId).toBeNull();
+    expect(forgedClaim?.evidenceRef).not.toContain("CALLER-EVIL");
+    expect(JSON.stringify(forgedClaim?.evidenceBasis)).not.toContain("CALLER-EVIL");
+    expect(forgedClaim?.evidenceBasis).not.toHaveProperty("variantBinding");
 
     const unavailable = recommendSize({
       profile: customer,
@@ -437,7 +403,6 @@ describe("recommendSize", () => {
       evidenceBasis: {
         kind: "CURRENT_MEASUREMENTS" as const,
         measurements: invalidMeasurements,
-        variantBinding: null,
       },
     };
     expect(createVerifiedSizeRecommendationClaim({
@@ -503,7 +468,6 @@ describe("recommendSize", () => {
       charts: [scoped("COMPONENT")],
       generatedAt,
       recommendationId,
-      variantBinding: verifiedVariantBinding({ variantId: "variant-L", size: "L" }),
     });
     const claim = createVerifiedSizeRecommendationClaim({
       decision,
@@ -512,7 +476,7 @@ describe("recommendSize", () => {
     });
     expect(decision.recommendation.measurementsUsed).toEqual([]);
     expect(claim).toMatchObject({
-      variantId: "variant-L",
+      variantId: null,
       evidenceBasis: {
         kind: "ACCEPTED_SIZE_HISTORY",
         sourceEventHash: hash("f"),
