@@ -1291,7 +1291,8 @@ export class PostgresRealtimeRuntimeStore {
     const result = await this.pool.query(
       `UPDATE meta_outbox
        SET status = 'SENT_ACCEPTED', meta_message_id = $3,
-           accepted_at = now(), lease_owner = NULL, lease_token = NULL,
+           accepted_at = now(), last_error_code = NULL,
+           lease_owner = NULL, lease_token = NULL,
            lease_until = NULL, updated_at = now()
        WHERE outbox_id = $1 AND status = 'SENDING' AND lease_token = $2`,
       [outboxId, leaseToken, providerMessageId],
