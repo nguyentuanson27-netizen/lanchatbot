@@ -68,6 +68,7 @@ describe("Admin Meta Outbox projection", () => {
       page_id: "page-1",
       status: "SENT_ACCEPTED",
       last_error_code: null,
+      next_attempt_at: null,
       created_at: "2026-08-05T04:00:00.000Z",
       updated_at: "2026-08-05T04:00:01.000Z",
     };
@@ -101,6 +102,7 @@ describe("Admin Meta Outbox projection", () => {
 
     const projection = await store.listMetaOutbox(identity, { limit: 10 });
     assert.equal(projection.items[0]?.last_error_code, null);
+    assert.equal(projection.items[0]?.next_attempt_at, null);
     assert.match(
       queries.find((sql) => sql.includes("FROM admin_meta_outbox_v") && !sql.includes("GROUP BY status")) ?? "",
       /last_error_code/u,

@@ -735,6 +735,8 @@ describe("PostgresRealtimeRuntimeStore markMetaAccepted", () => {
     leaseToken: string;
     lastErrorCode: string | null;
     providerMessageId: string | null;
+    nextAttemptAt: string | null;
+    attemptCount: number;
   };
 
   const createStore = (overrides: Partial<OutboxState> = {}) => {
@@ -744,12 +746,19 @@ describe("PostgresRealtimeRuntimeStore markMetaAccepted", () => {
       leaseToken: "10000000-0000-4000-8000-000000000006",
       lastErrorCode: "PANCAKE_CONVERSATION_NOT_FOUND",
       providerMessageId: null,
+      nextAttemptAt: "2026-08-05T10:00:00.000Z",
+      attemptCount: 2,
       ...overrides,
     };
     const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
-    const pool = {
-      async query(sql: string, values: readonly unknown[] = []) {
+    const query = async (sql: string, values: readonly unknown[] = []) => {
         calls.push({ sql, values });
+        if (["BEGIN", "COMMIT", "ROLLBACK"].includes(sql.trim())) {
+          return { rowCount: 0, rows: [] };
+        }
+        if (sql.includes("INSERT INTO audit_log")) {
+          return { rowCount: 1, rows: [] };
+        }
         if (sql.includes("SET status = 'SENT_ACCEPTED'")) {
           const [outboxId, leaseToken, providerMessageId] = values as [
             string,
@@ -763,10 +772,15 @@ describe("PostgresRealtimeRuntimeStore markMetaAccepted", () => {
           ) {
             return { rowCount: 0, rows: [] };
           }
+          const priorErrorCode = state.lastErrorCode;
           state.status = "SENT_ACCEPTED";
           state.providerMessageId = providerMessageId;
           state.lastErrorCode = null;
-          return { rowCount: 1, rows: [] };
+          state.nextAttemptAt = null;
+          return {
+            rowCount: 1,
+            rows: [{ prior_error_code: priorErrorCode, attempt_count: state.attemptCount }],
+          };
         }
         if (sql.includes("SET status = 'RETRYABLE'")) {
           const [outboxId, leaseToken, , errorCode] = values as [
@@ -784,10 +798,15 @@ describe("PostgresRealtimeRuntimeStore markMetaAccepted", () => {
           }
           state.status = "RETRYABLE";
           state.lastErrorCode = errorCode;
+          state.nextAttemptAt = "scheduled";
           return { rowCount: 1, rows: [] };
         }
         return { rowCount: 0, rows: [] };
-      },
+    };
+    const client = { query, release() {} };
+    const pool = {
+      query,
+      async connect() { return client; },
       async end() {},
     };
     const store = new PostgresRealtimeRuntimeStore(
@@ -810,13 +829,21 @@ describe("PostgresRealtimeRuntimeStore markMetaAccepted", () => {
       status: "SENT_ACCEPTED",
       providerMessageId: "mid-accepted",
       lastErrorCode: null,
+      nextAttemptAt: null,
+      attemptCount: 2,
     });
-    expect(calls[0]?.sql).toContain("status = 'SENT_ACCEPTED'");
-    expect(calls[0]?.sql).toContain("last_error_code = NULL");
+    const update = calls.find((call) => call.sql.includes("SET status = 'SENT_ACCEPTED'"));
+    expect(update?.sql).toContain("last_error_code = NULL");
+    expect(update?.sql).toContain("next_attempt_at = NULL");
+    const audit = calls.find((call) => call.sql.includes("INSERT INTO audit_log"));
+    expect(audit?.values[1]).toContain("PANCAKE_CONVERSATION_NOT_FOUND");
+    expect(audit?.values[1]).toContain("attempt_count");
+    expect(calls[0]?.sql.trim()).toBe("BEGIN");
+    expect(calls.at(-1)?.sql.trim()).toBe("COMMIT");
   });
 
   it("keeps an already-null error null and rejects an acceptance replay", async () => {
-    const { store, state } = createStore({ lastErrorCode: null });
+    const { store, state, calls } = createStore({ lastErrorCode: null });
 
     expect(await store.markMetaAccepted(
       state.outboxId,
@@ -832,7 +859,9 @@ describe("PostgresRealtimeRuntimeStore markMetaAccepted", () => {
       status: "SENT_ACCEPTED",
       providerMessageId: "mid-first",
       lastErrorCode: null,
+      nextAttemptAt: null,
     });
+    expect(calls.filter((call) => call.sql.includes("INSERT INTO audit_log"))).toHaveLength(0);
   });
 
   it("preserves errors for retryable and rejected acceptance paths", async () => {
@@ -851,6 +880,7 @@ describe("PostgresRealtimeRuntimeStore markMetaAccepted", () => {
     expect(retry.state).toMatchObject({
       status: "RETRYABLE",
       lastErrorCode: "META_TRANSPORT_TIMEOUT",
+      nextAttemptAt: "scheduled",
     });
 
     const stale = createStore();
@@ -863,6 +893,7 @@ describe("PostgresRealtimeRuntimeStore markMetaAccepted", () => {
       status: "SENDING",
       lastErrorCode: "PANCAKE_CONVERSATION_NOT_FOUND",
       providerMessageId: null,
+      nextAttemptAt: "2026-08-05T10:00:00.000Z",
     });
   });
 
