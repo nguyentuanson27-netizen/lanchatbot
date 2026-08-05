@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-05T07:10:56Z",
+  "capturedAtSemantics": "repository correction commit creation time; equals this corrected manifest commit timestamp and is not a host runtime observation or capture time",
+  "status": "RELEASE_CANDIDATE_SOURCE_VERIFIED_ARTIFACT_PENDING",
+  "environment": "production-test-page",
+  "host": "156.67.214.197",
+  "documentType": "APPEND_ONLY_RELEASE_CANDIDATE_EVIDENCE",
+  "releaseTag": "20260805-bf10-meta-accepted-r5.2.1",
+  "source": {
+    "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+    "branch": "main",
+    "implementationCommit": "e8bb7a8fa7a067655b0435713d6dd7abf70e63d7",
+    "mergeCommit": "3bc3e0a440ce64b5017f84d400a7e9a4085c435c",
+    "pullRequest": 131,
+    "tagMustPointToCommitContainingThisManifest": true,
+    "tagMustNotPointDirectlyToImplementationCommit": true
+  },
+  "image": {
+    "name": "lana-chatbot-app:bf10-meta-accepted-r5.2.1",
+    "digest": null,
+    "status": "NOT_BUILT",
+    "targetService": "realtime-worker",
+    "releasePath": "/opt/lana-chatbot/releases/20260805-bf10-meta-accepted-r5.2.1"
+  },
+  "behavioralBaseline": {
+    "releaseTag": "20260805-bf05-size-chart-eligibility-r5.1",
+    "sourceCommit": "bd1b98c772018bbb676db27c50464a1917fd5731",
+    "repositoryProvenance": "ANNOTATED_TAG_AND_SOURCE_COMMIT_ONLY",
+    "nonAuthoritativeObservedRuntimeStateSha256": "4d41a0d84e43c890c7140e01e1e85c643eb4832c79df25ca7567a3a9994d4459",
+    "observationAuthority": "NON_AUTHORITATIVE_READ_ONLY_OBSERVATION_NOT_CURRENT_LIVE_PARITY_EVIDENCE"
+  },
+  "scope": {
+    "programRelease": "BF_WAVE_A3",
+    "issues": ["BF-10"],
+    "pageId": "1198992073286645",
+    "routingOwner": "APP",
+    "recreatedServices": ["realtime-worker"],
+    "nonTargetServicesMustRemainUnchanged": true,
+    "migrationRequired": false,
+    "backfillRequired": false,
+    "dataDeletionRequired": false,
+    "runtimeModeChangeRequired": false,
+    "controlPlaneMutationAllowed": false,
+    "pageAllowlistChangeRequired": false,
+    "messengerProductionTestRequiredForPreparation": false
+  },
+  "changes": {
+    "acceptedMetaTransition": "markMetaAccepted atomically transitions an eligible row to SENT_ACCEPTED while clearing active last_error_code and next_attempt_at",
+    "historicalEvidence": "attempt_count is retained and prior failure evidence is appended to canonical audit_log",
+    "safetyBoundary": "CAS, stale-lease rejection, dedupe, replay and delivery semantics remain unchanged; APP_ECHO does not infer delivery"
+  },
+  "implementationVerification": {
+    "frozenInstall": "PASS_PNPM_10_12_4",
+    "database": "PASS_14_FILES_84_TESTS",
+    "adminApi": "PASS_72_TESTS",
+    "worker": "PASS_36_FILES_391_TESTS",
+    "fullPnpmCheck": "PASS_ON_REVIEWED_BF10_HEAD",
+    "independentExactHeadReview": "PASS_SOL_HIGH_MERGE_RECOMMENDED",
+    "migrationDiffSecretPiiRuntimeStateReleaseScope": "PASS_CLEAN"
+  },
+  "vpsPreflight": {
+    "status": "NON_AUTHORITATIVE_READ_ONLY_OBSERVATION_NO_PRODUCTION_MUTATION",
+    "observedRelease": "/opt/lana-chatbot/releases/20260805-bf05-size-chart-eligibility-r5.1",
+    "observedRealtimeImage": "lana-chatbot-app:bf05-size-chart-eligibility-r5.1",
+    "observedRuntimeStateSha256": "4d41a0d84e43c890c7140e01e1e85c643eb4832c79df25ca7567a3a9994d4459",
+    "observedRealtimeWorker": "HEALTHY_RESTART_0_ON_BF05_R5_1",
+    "observationAuthority": "REPOSITORY_RECORD_ONLY_NOT_IMMUTABLE_RUNTIME_EVIDENCE",
+    "requiredDeploymentVerification": "during a separately authorized deployment, freshly capture and verify current.json, immutable runtime-state history, resolved current symlink and release-local .release-source.json, then record parity as append-only runtime evidence",
+    "artifactBuildAndCutoverEvidence": "PENDING"
+  },
+  "requiredBeforeBuild": [
+    "RELEASE_PREPARATION_PR_MERGED",
+    "ANNOTATED_TAG_POINTS_TO_MERGED_COMMIT_CONTAINING_THIS_MANIFEST",
+    "TAG_AND_COMMIT_PROVENANCE_PASS",
+    "CLEAN_RELEASE_PATH",
+    "CREATE_ONCE_RELEASE_SOURCE_POINTER",
+    "UNIQUE_IMAGE_DIGEST",
+    "COMPOSE_CONFIG_PASS"
+  ],
+  "requiredBeforeCutover": [
+    "REALTIME_WORKER_SMOKE_WITHOUT_MESSENGER_SEND",
+    "REALTIME_WORKER_HEALTHY_RESTART_0",
+    "NON_TARGET_CONTAINER_IDS_UNCHANGED",
+    "MIGRATION_LEDGER_UNCHANGED",
+    "RUNTIME_BEHAVIOR_MODE_READBACK_UNCHANGED",
+    "ROUTING_AND_PAGE_ALLOWLIST_UNCHANGED",
+    "INBOX_OUTBOX_CHECK",
+    "RUNTIME_STATE_CAPTURE_VERIFY_AND_ATOMIC_PROMOTION"
+  ],
+  "rollback": {
+    "releaseTag": "20260805-bf05-size-chart-eligibility-r5.1",
+    "sourceCommit": "bd1b98c772018bbb676db27c50464a1917fd5731",
+    "releasePath": "/opt/lana-chatbot/releases/20260805-bf05-size-chart-eligibility-r5.1",
+    "realtimeImage": "lana-chatbot-app:bf05-size-chart-eligibility-r5.1",
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false,
+    "runtimeBehaviorModeRollbackRequired": false
+  },
+  "authorizationBoundary": {
+    "artifactBuildAuthorized": false,
+    "deploymentAuthorized": false,
+    "migrationAuthorized": false,
+    "restartAuthorized": false,
+    "runtimeModeSwitchAuthorized": false,
+    "messengerProductionTestAuthorized": false,
+    "vpsMutationAuthorized": false
+  },
+  "manifestIntegrity": {
+    "immutableAfterTag": true,
+    "runtimeEvidenceMustBeRecordedAsAppendOnlyFollowUp": true,
+    "repositoryTagProvenanceDoesNotEstablishLiveParity": true,
+    "freshLiveParityVerificationRequiresSeparateDeploymentAuthorization": true,
+    "directVpsSourceEditsAllowed": false
+  }
+}
