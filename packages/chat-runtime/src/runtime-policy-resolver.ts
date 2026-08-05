@@ -6,6 +6,7 @@ import {
   PolicyBundleV1Schema,
   type AdminArtifactContentV1,
   type AdminArtifactKindV1,
+  type AdminArtifactLifecycleV1,
   type PolicyBundleV1,
 } from "@lana/contracts";
 
@@ -34,6 +35,8 @@ export interface RuntimePolicyVersionReference {
   readonly artifactKind: AdminArtifactKindV1;
   readonly versionId: string;
   readonly versionNumber: number;
+  /** Present on BF-05+ bundles. Missing only on valid, persisted pre-BF-05 pins. */
+  readonly lifecycle?: AdminArtifactLifecycleV1;
   readonly contentHash: string;
   readonly pointerId: string;
   readonly pointerRevision: number;
@@ -227,7 +230,16 @@ function validatePinnedBundle(value: RuntimePolicyPin): boolean {
     ...(artifacts.handoffMatrix ? [artifacts.handoffMatrix] : []),
     ...(artifacts.paymentPolicy ? [artifacts.paymentPolicy] : []),
   ];
+  const expectedLifecycle = value.bundle.channel === "PUBLISHED" ? "PUBLISHED" : "CANARY";
+  const missingLifecycleCount = value.bundle.versionReferences.filter((reference) =>
+    reference.lifecycle === undefined
+  ).length;
+  const lifecycleCompatible = missingLifecycleCount === value.bundle.versionReferences.length || (
+    missingLifecycleCount === 0 &&
+    value.bundle.versionReferences.every((reference) => reference.lifecycle === expectedLifecycle)
+  );
   return bundleHash(hashable) === value.bundleHash &&
+    lifecycleCompatible &&
     PolicyBundleV1Schema.safeParse(value.bundle.policy).success &&
     structuredArtifacts.every((artifact) => AdminArtifactContentV1Schema.safeParse(artifact).success) &&
     value.bundle.versionReferences.length >= 3 &&
@@ -420,6 +432,7 @@ export class RuntimePolicyResolver {
           artifactKey: version.artifactKey,
           artifactKind: version.artifactKind,
           versionId: version.versionId,
+          lifecycle: version.lifecycle,
           versionNumber: version.versionNumber,
           contentHash: version.contentHash,
           pointerId: pointer.pointerId,

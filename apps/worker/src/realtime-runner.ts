@@ -22,7 +22,6 @@ import {
   type MediaProductSearchResult,
   type StableProductDocument,
   type CustomerProfileFieldEvidence,
-  type ScopedSizeChart,
 } from "@lana/business-tools";
 import {
   BusinessFactQueriesV2Schema,
@@ -101,6 +100,8 @@ import type {
 } from "./realtime-media-recognition.js";
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
+import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
+import { sizeChartTarget } from "./size-chart-target.js";
 import {
   createRealtimeSalesState,
   evaluateRealtimeSalesCycle,
@@ -1214,26 +1215,6 @@ function verifiedVariantState(
   };
 }
 
-function productComponentRole(product: StableProductDocument): ProductComponentRole {
-  const value = normalizedVietnamese(`${product.title} ${product.canonicalCode}`);
-  if (/\b(?:chan\s*vay|cv)\b/u.test(value)) return "SKIRT";
-  if (/\bquan\b/u.test(value)) return "PANTS";
-  if (/\b(?:vay|dam|ao\s*dai)\b/u.test(value)) return "DRESS";
-  if (/\b(?:ao\s*khoac|jacket)\b/u.test(value)) return "JACKET";
-  if (/\bao\b/u.test(value)) return "TOP";
-  return "OTHER";
-}
-
-function productCategory(product: StableProductDocument): string {
-  const value = normalizedVietnamese(product.title);
-  if (/\bao\s*dai\b/u.test(value)) return "AO_DAI";
-  if (/\bchan\s*vay\b/u.test(value)) return "CHAN_VAY";
-  if (/\bquan\b/u.test(value)) return "QUAN";
-  if (/\b(?:vay|dam)\b/u.test(value)) return "VAY";
-  if (/\bset\b/u.test(value)) return "SET";
-  if (/\bao\b/u.test(value)) return "AO";
-  return "ALL";
-}
 
 interface MultiFactResolution {
   readonly queryId: string;
@@ -1458,45 +1439,24 @@ function resolveSizeEngineDecision(
   policyResolution: RuntimePolicyResolution | null,
   now: Date,
 ) {
-  const chartArtifacts = Object.values(
-    policyResolution?.bundle?.artifacts.sizeCharts ?? {},
-  );
-  const charts: ScopedSizeChart[] = chartArtifacts.map(({ chart, scope }) => ({
-    chart,
-    scope: scope ? {
-      level: scope.level,
-      ...(scope.parentProductIds.length > 0 ? { parentProductIds: scope.parentProductIds } : {}),
-      ...(scope.categories.length > 0 ? { categories: scope.categories } : {}),
-      ...(scope.componentRole === null ? {} : { componentRole: scope.componentRole }),
-      ...(scope.forms.length > 0 ? { forms: scope.forms } : {}),
-      ...(scope.materials.length > 0 ? { materials: scope.materials } : {}),
-    } : {
-      level: chart.category.trim().toLocaleUpperCase("vi-VN") === "ALL"
-        ? "GLOBAL"
-        : chart.componentRole === null ? "CATEGORY" : "COMPONENT",
-      categories: [chart.category],
-      ...(chart.componentRole === null ? {} : { componentRole: chart.componentRole }),
-    },
-  }));
+  const target = sizeChartTarget(product);
+
+  const eligibility = evaluateSizeChartEligibility({
+    policy: policyResolution,
+    productId: product.productId,
+    target,
+  });
   const decision = recommendSize({
     profile,
-    target: {
-      brand: "LANA",
-      parentProductId: product.productId,
-      componentProductId: product.productId,
-      componentRole: productComponentRole(product),
-      category: productCategory(product),
-      form: product.silhouettes[0] ?? null,
-      material: product.materials[0] ?? null,
-    },
-    charts,
+    target,
+    charts: eligibility.charts,
     generatedAt: now.toISOString(),
     recommendationId: deterministicUuid(
       `lana:size:v1:${product.productId}:${profile.profileId}:${profile.revision}`,
     ),
   });
 
-  return { decision };
+  return { decision, eligibility };
 }
 
 function sizeEngineProposal(
@@ -1516,51 +1476,10 @@ function sizeEngineProposal(
     ACCESSORY: "phụ kiện",
     OTHER: "sản phẩm",
   };
+  const { decision } = resolveSizeEngineDecision(product, profile, policyResolution, now);
   const chartArtifacts = Object.values(
     policyResolution?.bundle?.artifacts.sizeCharts ?? {},
   );
-  const charts: ScopedSizeChart[] = chartArtifacts.map(({ chart, scope }) => ({
-    chart,
-    scope: scope ? {
-      level: scope.level,
-      ...(scope.parentProductIds.length > 0
-        ? { parentProductIds: scope.parentProductIds }
-        : {}),
-      ...(scope.categories.length > 0 ? { categories: scope.categories } : {}),
-      ...(scope.componentRole === null ? {} : { componentRole: scope.componentRole }),
-      ...(scope.forms.length > 0 ? { forms: scope.forms } : {}),
-      ...(scope.materials.length > 0 ? { materials: scope.materials } : {}),
-    } : {
-      level:
-        chart.category.trim().toLocaleUpperCase("vi-VN") === "ALL"
-          ? "GLOBAL"
-          : chart.componentRole === null
-            ? "CATEGORY"
-            : "COMPONENT",
-      categories: [chart.category],
-      ...(chart.componentRole === null
-        ? {}
-        : { componentRole: chart.componentRole }),
-    },
-  }));
-  const role = productComponentRole(product);
-  const decision = recommendSize({
-    profile,
-    target: {
-      brand: "LANA",
-      parentProductId: product.productId,
-      componentProductId: product.productId,
-      componentRole: role,
-      category: productCategory(product),
-      form: product.silhouettes[0] ?? null,
-      material: product.materials[0] ?? null,
-    },
-    charts,
-    generatedAt: now.toISOString(),
-    recommendationId: deterministicUuid(
-      `lana:size:v1:${product.productId}:${profile.profileId}:${profile.revision}`,
-    ),
-  });
   if (decision.action === "HANDOFF") {
     return {
       ...proposal,
@@ -1619,7 +1538,7 @@ function sizeEngineProposal(
 export interface SizeAdviceComposition {
   readonly proposal: AgentProposalV1;
   readonly requiresHandoff: boolean;
-  readonly reasonCode: "VERIFIED_SIZE_CHART_UNAVAILABLE" | null;
+  readonly reasonCodes: readonly string[];
 }
 
 export function composeSizeEngineAdvice(
@@ -1630,6 +1549,7 @@ export function composeSizeEngineAdvice(
   productFactsV2: ProductFactsV2 | null,
   now: Date,
 ): SizeAdviceComposition {
+  const { decision, eligibility } = resolveSizeEngineDecision(product, profile, policyResolution, now);
   const sizeProposal = sizeEngineProposal(
     productInfoProposal,
     product,
@@ -1642,7 +1562,10 @@ export function composeSizeEngineAdvice(
     return {
       proposal: productInfoProposal,
       requiresHandoff: true,
-      reasonCode: "VERIFIED_SIZE_CHART_UNAVAILABLE",
+      reasonCodes: [...new Set([
+        ...eligibility.eligibility.reasonCodes,
+        ...decision.recommendation.reasonCodes,
+      ])],
     };
   }
   return {
@@ -1658,7 +1581,7 @@ export function composeSizeEngineAdvice(
       handoffReason: sizeProposal.handoffReason,
     },
     requiresHandoff: false,
-    reasonCode: null,
+    reasonCodes: [],
   };
 }
 
@@ -3260,7 +3183,7 @@ export class RealtimeRunner {
               handoffGuardReasonCodes = [
                 ...new Set([
                   ...handoffGuardReasonCodes,
-                  sizeComposition.reasonCode,
+                  ...sizeComposition.reasonCodes,
                 ].filter((value): value is string => value !== null)),
               ];
               const transitioned = applySilentHandoff(
@@ -3585,7 +3508,7 @@ export class RealtimeRunner {
                 sizeAdviceRequiresHandoff = true;
                 handoffGuardReasonCodes = [...new Set([
                   ...handoffGuardReasonCodes,
-                  ...(sizeComposition.reasonCode ? [sizeComposition.reasonCode] : []),
+                  ...sizeComposition.reasonCodes,
                 ])];
               }
             }
@@ -3734,7 +3657,7 @@ export class RealtimeRunner {
               sizeAdviceRequiresHandoff = true;
               handoffGuardReasonCodes = [...new Set([
                 ...handoffGuardReasonCodes,
-                ...(sizeComposition.reasonCode ? [sizeComposition.reasonCode] : []),
+                ...sizeComposition.reasonCodes,
               ])];
             }
           }
@@ -3777,7 +3700,7 @@ export class RealtimeRunner {
             sizeAdviceRequiresHandoff = true;
             handoffGuardReasonCodes = [...new Set([
               ...handoffGuardReasonCodes,
-              ...(sizeComposition.reasonCode ? [sizeComposition.reasonCode] : []),
+              ...sizeComposition.reasonCodes,
             ])];
           }
         }
