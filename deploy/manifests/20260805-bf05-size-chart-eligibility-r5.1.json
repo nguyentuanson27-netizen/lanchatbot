@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-05T00:00:00Z",
+  "status": "RELEASE_CANDIDATE_SOURCE_VERIFIED_ARTIFACT_PENDING",
+  "environment": "production-test-page",
+  "host": "156.67.214.197",
+  "documentType": "APPEND_ONLY_RELEASE_CANDIDATE_EVIDENCE",
+  "releaseTag": "20260805-bf05-size-chart-eligibility-r5.1",
+  "source": {
+    "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+    "branch": "main",
+    "implementationCommit": "d64cc2dcc4c50ad84ff25472b9f6affa17feb9e4",
+    "mergeCommit": "1799448da706515dc2794ecbfc7b5087692957d0",
+    "pullRequest": 129,
+    "tagMustPointToCommitContainingThisManifest": true,
+    "tagMustNotPointDirectlyToImplementationCommit": true
+  },
+  "image": {
+    "name": "lana-chatbot-app:bf05-size-chart-eligibility-r5.1",
+    "digest": null,
+    "status": "NOT_BUILT",
+    "targetService": "realtime-worker",
+    "releasePath": "/opt/lana-chatbot/releases/20260805-bf05-size-chart-eligibility-r5.1"
+  },
+  "behavioralBaseline": {
+    "releaseTag": "20260804-bf04-size-claim-guard-r4",
+    "sourceCommit": "ef7e07acd56c5812328c4b6bee4607bd23364b50",
+    "status": "LIVE_AT_CANDIDATE_CREATION_CONFIRMED_BY_READ_ONLY_PREFLIGHT"
+  },
+  "scope": {
+    "programRelease": "BF_WAVE_A2",
+    "issues": ["BF-05"],
+    "pageId": "1198992073286645",
+    "routingOwner": "APP",
+    "recreatedServices": ["realtime-worker"],
+    "nonTargetServicesMustRemainUnchanged": true,
+    "migrationRequired": false,
+    "backfillRequired": false,
+    "dataDeletionRequired": false,
+    "runtimeModeChangeRequired": false,
+    "controlPlaneMutationAllowed": false,
+    "pageAllowlistChangeRequired": false,
+    "messengerProductionTestRequiredForPreparation": false
+  },
+  "changes": {
+    "sizeChartEligibility": "preserves independent policy-bundle, publication, verification, measurement-basis, scope and projection-freshness states through ProductFactsV2 and Size Engine consumers",
+    "reasonCodes": "emits bounded stage-specific fail-closed SIZE_CHART reason codes through handoff and guard audit events instead of VERIFIED_SIZE_CHART_UNAVAILABLE",
+    "provenanceCompatibility": "accepts only all-missing legacy policy-pin lifecycle references or all-explicit references matching the bundle channel; mixed or contradictory provenance fails closed",
+    "securityBoundary": "does not bypass verified Size Engine evidence, create model authority, change routing, or alter control-plane behavior"
+  },
+  "implementationVerification": {
+    "frozenInstall": "PASS_PNPM_10_12_4",
+    "focusedRegression": "PASS_5_FILES_93_TESTS",
+    "fullPnpmCheck": "PASS_ON_REVIEWED_BF05_HEAD",
+    "independentExactHeadReview": "PASS_SOL_HIGH_MERGE_RECOMMENDED",
+    "migrationDiffSecretPiiRuntimeStateReleaseScope": "PASS_CLEAN"
+  },
+  "vpsPreflight": {
+    "status": "READ_ONLY_CHECKED_NO_PRODUCTION_MUTATION",
+    "currentRelease": "/opt/lana-chatbot/releases/20260804-bf04-size-claim-guard-r4",
+    "realtimeWorker": "HEALTHY_RESTART_0_ON_BF04_R4",
+    "artifactBuildAndCutoverEvidence": "PENDING"
+  },
+  "requiredBeforeBuild": [
+    "RELEASE_PREPARATION_PR_MERGED",
+    "ANNOTATED_TAG_POINTS_TO_MERGED_COMMIT_CONTAINING_THIS_MANIFEST",
+    "TAG_AND_COMMIT_PROVENANCE_PASS",
+    "CLEAN_RELEASE_PATH",
+    "CREATE_ONCE_RELEASE_SOURCE_POINTER",
+    "UNIQUE_IMAGE_DIGEST",
+    "COMPOSE_CONFIG_PASS"
+  ],
+  "requiredBeforeCutover": [
+    "REALTIME_WORKER_SMOKE_WITHOUT_MESSENGER_SEND",
+    "REALTIME_WORKER_HEALTHY_RESTART_0",
+    "NON_TARGET_CONTAINER_IDS_UNCHANGED",
+    "MIGRATION_LEDGER_UNCHANGED",
+    "RUNTIME_BEHAVIOR_MODE_READBACK_UNCHANGED",
+    "ROUTING_AND_PAGE_ALLOWLIST_UNCHANGED",
+    "INBOX_OUTBOX_AND_PAGE_ALLOWLIST_CHECK",
+    "RUNTIME_STATE_CAPTURE_VERIFY_AND_ATOMIC_PROMOTION"
+  ],
+  "rollback": {
+    "releaseTag": "20260804-bf04-size-claim-guard-r4",
+    "sourceCommit": "ef7e07acd56c5812328c4b6bee4607bd23364b50",
+    "releasePath": "/opt/lana-chatbot/releases/20260804-bf04-size-claim-guard-r4",
+    "realtimeImage": "lana-chatbot-app:bf04-size-claim-guard-r4",
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false,
+    "runtimeBehaviorModeRollbackRequired": false
+  },
+  "authorizationBoundary": {
+    "artifactBuildAuthorized": false,
+    "deploymentAuthorized": false,
+    "migrationAuthorized": false,
+    "restartAuthorized": false,
+    "runtimeModeSwitchAuthorized": false,
+    "messengerProductionTestAuthorized": false,
+    "vpsMutationAuthorized": false
+  },
+  "manifestIntegrity": {
+    "immutableAfterTag": true,
+    "runtimeEvidenceMustBeRecordedAsAppendOnlyFollowUp": true,
+    "directVpsSourceEditsAllowed": false
+  }
+}
