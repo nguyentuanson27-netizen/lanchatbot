@@ -726,3 +726,191 @@ describe("PostgresRealtimeRuntimeStore manual-review operator action", () => {
     expect(audits[0]?.values).toContain("operator-1");
   });
 });
+
+describe("PostgresRealtimeRuntimeStore markMetaAccepted", () => {
+  type OutboxStatus = "SENDING" | "RETRYABLE" | "SENT_ACCEPTED" | "AMBIGUOUS" | "FAILED_PERMANENT" | "MANUAL_REVIEW";
+  type OutboxState = {
+    outboxId: string;
+    status: OutboxStatus;
+    leaseToken: string;
+    lastErrorCode: string | null;
+    providerMessageId: string | null;
+    nextAttemptAt: string | null;
+    attemptCount: number;
+  };
+
+  const createStore = (overrides: Partial<OutboxState> = {}) => {
+    const state: OutboxState = {
+      outboxId: "10000000-0000-4000-8000-000000000005",
+      status: "SENDING",
+      leaseToken: "10000000-0000-4000-8000-000000000006",
+      lastErrorCode: "PANCAKE_CONVERSATION_NOT_FOUND",
+      providerMessageId: null,
+      nextAttemptAt: "2026-08-05T10:00:00.000Z",
+      attemptCount: 2,
+      ...overrides,
+    };
+    const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
+    const query = async (sql: string, values: readonly unknown[] = []) => {
+        calls.push({ sql, values });
+        if (["BEGIN", "COMMIT", "ROLLBACK"].includes(sql.trim())) {
+          return { rowCount: 0, rows: [] };
+        }
+        if (sql.includes("INSERT INTO audit_log")) {
+          return { rowCount: 1, rows: [] };
+        }
+        if (sql.includes("SET status = 'SENT_ACCEPTED'")) {
+          const [outboxId, leaseToken, providerMessageId] = values as [
+            string,
+            string,
+            string,
+          ];
+          if (
+            state.outboxId !== outboxId
+            || state.status !== "SENDING"
+            || state.leaseToken !== leaseToken
+          ) {
+            return { rowCount: 0, rows: [] };
+          }
+          const priorErrorCode = state.lastErrorCode;
+          state.status = "SENT_ACCEPTED";
+          state.providerMessageId = providerMessageId;
+          state.lastErrorCode = null;
+          state.nextAttemptAt = null;
+          return {
+            rowCount: 1,
+            rows: [{ prior_error_code: priorErrorCode, attempt_count: state.attemptCount }],
+          };
+        }
+        if (sql.includes("SET status = 'RETRYABLE'")) {
+          const [outboxId, leaseToken, , errorCode] = values as [
+            string,
+            string,
+            number,
+            string,
+          ];
+          if (
+            state.outboxId !== outboxId
+            || state.status !== "SENDING"
+            || state.leaseToken !== leaseToken
+          ) {
+            return { rowCount: 0, rows: [] };
+          }
+          state.status = "RETRYABLE";
+          state.lastErrorCode = errorCode;
+          state.nextAttemptAt = "scheduled";
+          return { rowCount: 1, rows: [] };
+        }
+        return { rowCount: 0, rows: [] };
+    };
+    const client = { query, release() {} };
+    const pool = {
+      query,
+      async connect() { return client; },
+      async end() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = pool;
+    return { store, state, calls };
+  };
+
+  it("clears a prior attempt error atomically with accepted status", async () => {
+    const { store, state, calls } = createStore();
+
+    expect(await store.markMetaAccepted(
+      state.outboxId,
+      state.leaseToken,
+      "mid-accepted",
+    )).toBe(true);
+    expect(state).toMatchObject({
+      status: "SENT_ACCEPTED",
+      providerMessageId: "mid-accepted",
+      lastErrorCode: null,
+      nextAttemptAt: null,
+      attemptCount: 2,
+    });
+    const update = calls.find((call) => call.sql.includes("SET status = 'SENT_ACCEPTED'"));
+    expect(update?.sql).toContain("last_error_code = NULL");
+    expect(update?.sql).toContain("next_attempt_at = NULL");
+    const audit = calls.find((call) => call.sql.includes("INSERT INTO audit_log"));
+    expect(audit?.values[1]).toContain("PANCAKE_CONVERSATION_NOT_FOUND");
+    expect(audit?.values[1]).toContain("attempt_count");
+    expect(calls[0]?.sql.trim()).toBe("BEGIN");
+    expect(calls.at(-1)?.sql.trim()).toBe("COMMIT");
+  });
+
+  it("keeps an already-null error null and rejects an acceptance replay", async () => {
+    const { store, state, calls } = createStore({ lastErrorCode: null });
+
+    expect(await store.markMetaAccepted(
+      state.outboxId,
+      state.leaseToken,
+      "mid-first",
+    )).toBe(true);
+    expect(await store.markMetaAccepted(
+      state.outboxId,
+      state.leaseToken,
+      "mid-replay",
+    )).toBe(false);
+    expect(state).toMatchObject({
+      status: "SENT_ACCEPTED",
+      providerMessageId: "mid-first",
+      lastErrorCode: null,
+      nextAttemptAt: null,
+    });
+    expect(calls.filter((call) => call.sql.includes("INSERT INTO audit_log"))).toHaveLength(0);
+  });
+
+  it("preserves errors for retryable and rejected acceptance paths", async () => {
+    const retry = createStore();
+    expect(await retry.store.markMetaRetryable(
+      retry.state.outboxId,
+      retry.state.leaseToken,
+      "META_TRANSPORT_TIMEOUT",
+      2,
+    )).toBe(true);
+    expect(await retry.store.markMetaAccepted(
+      retry.state.outboxId,
+      retry.state.leaseToken,
+      "mid-too-late",
+    )).toBe(false);
+    expect(retry.state).toMatchObject({
+      status: "RETRYABLE",
+      lastErrorCode: "META_TRANSPORT_TIMEOUT",
+      nextAttemptAt: "scheduled",
+    });
+
+    const stale = createStore();
+    expect(await stale.store.markMetaAccepted(
+      stale.state.outboxId,
+      "stale-lease-token",
+      "mid-stale",
+    )).toBe(false);
+    expect(stale.state).toMatchObject({
+      status: "SENDING",
+      lastErrorCode: "PANCAKE_CONVERSATION_NOT_FOUND",
+      providerMessageId: null,
+      nextAttemptAt: "2026-08-05T10:00:00.000Z",
+    });
+  });
+
+  it("does not clear errors when acceptance is attempted for any non-success state", async () => {
+    for (const status of [
+      "RETRYABLE",
+      "AMBIGUOUS",
+      "FAILED_PERMANENT",
+      "MANUAL_REVIEW",
+    ] as const) {
+      const { store, state } = createStore({ status });
+      expect(await store.markMetaAccepted(
+        state.outboxId,
+        state.leaseToken,
+        "mid-invalid",
+      )).toBe(false);
+      expect(state.lastErrorCode).toBe("PANCAKE_CONVERSATION_NOT_FOUND");
+    }
+  });
+});

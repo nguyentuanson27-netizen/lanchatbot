@@ -1288,15 +1288,51 @@ export class PostgresRealtimeRuntimeStore {
     leaseToken: string,
     providerMessageId: string,
   ): Promise<boolean> {
-    const result = await this.pool.query(
-      `UPDATE meta_outbox
-       SET status = 'SENT_ACCEPTED', meta_message_id = $3,
-           accepted_at = now(), lease_owner = NULL, lease_token = NULL,
-           lease_until = NULL, updated_at = now()
-       WHERE outbox_id = $1 AND status = 'SENDING' AND lease_token = $2`,
-      [outboxId, leaseToken, providerMessageId],
-    );
-    return result.rowCount === 1;
+    return withTransaction(this.pool, async (client) => {
+      const result = await client.query<{
+        prior_error_code: string | null;
+        attempt_count: number;
+      }>(
+        `WITH candidate AS (
+           SELECT outbox_id, last_error_code AS prior_error_code, attempt_count
+           FROM meta_outbox
+           WHERE outbox_id = $1 AND status = 'SENDING' AND lease_token = $2
+           FOR UPDATE
+         )
+         UPDATE meta_outbox AS outbox
+         SET status = 'SENT_ACCEPTED', meta_message_id = $3,
+             accepted_at = now(), last_error_code = NULL,
+             next_attempt_at = NULL,
+             lease_owner = NULL, lease_token = NULL,
+             lease_until = NULL, updated_at = now()
+         FROM candidate
+         WHERE outbox.outbox_id = candidate.outbox_id
+         RETURNING candidate.prior_error_code, candidate.attempt_count`,
+        [outboxId, leaseToken, providerMessageId],
+      );
+      const row = result.rows[0];
+      if (!row) return false;
+      if (row.prior_error_code) {
+        await client.query(
+          `INSERT INTO audit_log (
+             actor_type, actor_id, action, resource_type, resource_id_hash,
+             metadata_safe, correlation_id, entry_hash
+           ) VALUES (
+             'SERVICE','meta-outbox-runtime','META_OUTBOX_ACCEPTED_AFTER_RETRY',
+             'META_OUTBOX',encode(digest($1, 'sha256'), 'hex'),$2::jsonb,
+             gen_random_uuid(),digest('', 'sha256')
+           )`,
+          [
+            outboxId,
+            JSON.stringify({
+              attempt_count: row.attempt_count,
+              cleared_error_code: row.prior_error_code,
+            }),
+          ],
+        );
+      }
+      return true;
+    });
   }
 
   async markMetaRetryable(
