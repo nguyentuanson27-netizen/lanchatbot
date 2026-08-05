@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "capturedAt": "2026-08-05T00:00:00Z",
-  "capturedAtSemantics": "repository release-candidate record creation time, not host runtime capture time",
+  "capturedAt": "2026-08-05T07:10:56Z",
+  "capturedAtSemantics": "repository correction commit creation time; equals this corrected manifest commit timestamp and is not a host runtime observation or capture time",
   "status": "RELEASE_CANDIDATE_SOURCE_VERIFIED_ARTIFACT_PENDING",
   "environment": "production-test-page",
   "host": "156.67.214.197",
@@ -26,8 +26,9 @@
   "behavioralBaseline": {
     "releaseTag": "20260805-bf05-size-chart-eligibility-r5.1",
     "sourceCommit": "bd1b98c772018bbb676db27c50464a1917fd5731",
-    "runtimeStateSha256": "4d41a0d84e43c890c7140e01e1e85c643eb4832c79df25ca7567a3a9994d4459",
-    "status": "LIVE_AT_CANDIDATE_CREATION_CONFIRMED_BY_READ_ONLY_PREFLIGHT"
+    "repositoryProvenance": "ANNOTATED_TAG_AND_SOURCE_COMMIT_ONLY",
+    "nonAuthoritativeObservedRuntimeStateSha256": "4d41a0d84e43c890c7140e01e1e85c643eb4832c79df25ca7567a3a9994d4459",
+    "observationAuthority": "NON_AUTHORITATIVE_READ_ONLY_OBSERVATION_NOT_CURRENT_LIVE_PARITY_EVIDENCE"
   },
   "scope": {
     "programRelease": "BF_WAVE_A3",
@@ -59,11 +60,13 @@
     "migrationDiffSecretPiiRuntimeStateReleaseScope": "PASS_CLEAN"
   },
   "vpsPreflight": {
-    "status": "READ_ONLY_CHECKED_NO_PRODUCTION_MUTATION",
-    "currentRelease": "/opt/lana-chatbot/releases/20260805-bf05-size-chart-eligibility-r5.1",
-    "currentRealtimeImage": "lana-chatbot-app:bf05-size-chart-eligibility-r5.1",
-    "currentRuntimeStateSha256": "4d41a0d84e43c890c7140e01e1e85c643eb4832c79df25ca7567a3a9994d4459",
-    "realtimeWorker": "HEALTHY_RESTART_0_ON_BF05_R5_1",
+    "status": "NON_AUTHORITATIVE_READ_ONLY_OBSERVATION_NO_PRODUCTION_MUTATION",
+    "observedRelease": "/opt/lana-chatbot/releases/20260805-bf05-size-chart-eligibility-r5.1",
+    "observedRealtimeImage": "lana-chatbot-app:bf05-size-chart-eligibility-r5.1",
+    "observedRuntimeStateSha256": "4d41a0d84e43c890c7140e01e1e85c643eb4832c79df25ca7567a3a9994d4459",
+    "observedRealtimeWorker": "HEALTHY_RESTART_0_ON_BF05_R5_1",
+    "observationAuthority": "REPOSITORY_RECORD_ONLY_NOT_IMMUTABLE_RUNTIME_EVIDENCE",
+    "requiredDeploymentVerification": "during a separately authorized deployment, freshly capture and verify current.json, immutable runtime-state history, resolved current symlink and release-local .release-source.json, then record parity as append-only runtime evidence",
     "artifactBuildAndCutoverEvidence": "PENDING"
   },
   "requiredBeforeBuild": [
@@ -106,6 +109,8 @@
   "manifestIntegrity": {
     "immutableAfterTag": true,
     "runtimeEvidenceMustBeRecordedAsAppendOnlyFollowUp": true,
+    "repositoryTagProvenanceDoesNotEstablishLiveParity": true,
+    "freshLiveParityVerificationRequiresSeparateDeploymentAuthorization": true,
     "directVpsSourceEditsAllowed": false
   }
 }
