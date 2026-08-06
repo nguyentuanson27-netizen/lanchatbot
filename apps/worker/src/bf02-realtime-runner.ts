@@ -134,7 +134,6 @@ async function recoverVerifiedProduct(
   scope: AsyncLocalStorage<Bf02ExecutionContext>,
   productSearch: RealtimeProductSearchPort,
   modelContext: Parameters<RealtimeModelPort["generate"]>[0],
-  preferredProductId: string | null = null,
 ): Promise<StableProductDocument | null> {
   const execution = scope.getStore();
   const state = execution?.state ?? null;
@@ -174,16 +173,9 @@ async function recoverVerifiedProduct(
     });
   };
 
-  if (preferredProductId) {
-    const preferred = await exactProduct(productSearch, preferredProductId);
-    if (preferred) {
-      addCandidate(preferred, "CURRENT_TURN", currentFence, observedAt, null);
-    }
-  } else {
-    const current = await currentTurnProduct(productSearch, customerText);
-    if (current) {
-      addCandidate(current, "CURRENT_TURN", currentFence, observedAt, null);
-    }
+  const current = await currentTurnProduct(productSearch, customerText);
+  if (current) {
+    addCandidate(current, "CURRENT_TURN", currentFence, observedAt, null);
   }
 
   for (const explicitProductId of explicitProductIds) {
@@ -276,12 +268,7 @@ function wrapModel(
     try {
       return await model.groundWithFacts(...args);
     } catch (error) {
-      const product = await recoverVerifiedProduct(
-        scope,
-        productSearch,
-        args[0],
-        args[1].productId,
-      );
+      const product = await recoverVerifiedProduct(scope, productSearch, args[0]);
       if (!product) throw error;
       return fallbackResult(
         latestCustomerContext(args[0])?.text ?? "",
