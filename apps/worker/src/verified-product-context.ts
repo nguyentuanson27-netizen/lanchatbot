@@ -55,6 +55,14 @@ function isFresh(candidate: VerifiedProductContextCandidate, now: Date): boolean
   return expiresAt !== null && expiresAt > now.getTime();
 }
 
+function normalizedDistinctProductIds(
+  candidates: readonly VerifiedProductContextCandidate[],
+): readonly string[] {
+  return [...new Set(candidates.map(({ productId }) =>
+    normalizeProductCode(productId)
+  ))];
+}
+
 /**
  * Resolves only independently verified product context. Invalid model output is
  * intentionally absent from this contract: proposal validity must never decide
@@ -96,10 +104,11 @@ export function resolveVerifiedProductContext(
         rejected.push("CONTEXT_STATE_REVISION_MISMATCH");
         return false;
       }
-      if (
-        candidate.fence !== null &&
-        candidate.fence < input.minimumFence
-      ) {
+      if (candidate.fence === null || !Number.isSafeInteger(candidate.fence)) {
+        rejected.push("CONTEXT_FENCE_MISSING");
+        return false;
+      }
+      if (candidate.fence < input.minimumFence) {
         rejected.push("CONTEXT_FENCE_STALE");
         return false;
       }
@@ -126,10 +135,16 @@ export function resolveVerifiedProductContext(
     };
   }
 
-  const distinctIds = [...new Set(eligible.map((candidate) =>
-    normalizeProductCode(candidate.productId)
-  ))];
-  if (distinctIds.length > 1) {
+  const highestPriority = eligible[0]
+    ? SOURCE_PRECEDENCE[eligible[0].source]
+    : null;
+  const authoritativeTier = highestPriority === null
+    ? []
+    : eligible.filter((candidate) =>
+        SOURCE_PRECEDENCE[candidate.source] === highestPriority
+      );
+  const authoritativeIds = normalizedDistinctProductIds(authoritativeTier);
+  if (authoritativeIds.length > 1) {
     return {
       productId: null,
       source: null,
@@ -137,7 +152,7 @@ export function resolveVerifiedProductContext(
     };
   }
 
-  const selected = eligible[0];
+  const selected = authoritativeTier[0];
   if (!selected) {
     return {
       productId: null,
