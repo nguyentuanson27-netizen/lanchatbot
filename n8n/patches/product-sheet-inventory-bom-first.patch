@@ -1,0 +1,302 @@
+--- a/Fetch POS And Build Inventory.js
++++ b/Fetch POS And Build Inventory.js
+@@ -98,6 +98,7 @@
+         api_key: shop.apiKey,
+         page_number: page,
+         page_size: Number(cfg.posPageSize || 100),
++        included_composite: true,
+       },
+       json: true,
+       timeout: 120000,
+@@ -111,8 +112,16 @@
+   return all;
+ }
+ 
+-function createInventoryIndex(variations) {
+-  const index = new Map();
++function createInventoryIndexes(variations) {
++  const inventoryIndex = new Map();
++  const variationSkuToProductSku = new Map();
++
++  function addQuantity(matrix, color, size, quantity) {
++    if (!matrix.has(color)) matrix.set(color, { S: 0, M: 0, L: 0, XL: 0 });
++    matrix.get(color)[size] += quantity;
++  }
++
++  // Pass 1: build direct inventory and a variation-SKU lookup.
+   for (const variation of variations) {
+     const productSku = normalizedSku(
+       variation?.product?.display_id ||
+@@ -122,18 +131,126 @@
+     );
+     if (!productSku) continue;
+ 
++    const variationSku = normalizedSku(variation?.display_id || variation?.custom_id || '');
++    if (variationSku) variationSkuToProductSku.set(variationSku, productSku);
++
++    const size = normalized(fieldValue(variation?.fields, ['size', 'kích cỡ', 'kich co']));
++    if (!['S', 'M', 'L', 'XL'].includes(size)) continue;
++    const color = normalized(fieldValue(variation?.fields, ['màu', 'mau', 'color', 'colour'])) || '__NO_COLOR__';
++    const quantity = inventoryQuantity(variation);
++
++    if (!inventoryIndex.has(productSku)) inventoryIndex.set(productSku, new Map());
++    addQuantity(inventoryIndex.get(productSku), color, size, quantity);
++  }
++
++  // Pass 2: build the real parent -> child relationship from Pancake BOM.
++  const bomIndex = new Map();
++  for (const variation of variations) {
++    const parentSku = normalizedSku(
++      variation?.product?.display_id ||
++      variation?.product?.custom_id ||
++      variation?.product_display_id ||
++      ''
++    );
++    const rawComponents = Array.isArray(variation?.composite_products)
++      ? variation.composite_products
++      : [];
++
++    if (!parentSku || variation?.is_composite !== true || !rawComponents.length) continue;
++
+     const size = normalized(fieldValue(variation?.fields, ['size', 'kích cỡ', 'kich co']));
+     if (!['S', 'M', 'L', 'XL'].includes(size)) continue;
+-    const color = normalized(fieldValue(variation?.fields, ['màu', 'mau', 'color', 'colour']));
++    const color = normalized(fieldValue(variation?.fields, ['màu', 'mau', 'color', 'colour'])) || '__NO_COLOR__';
+     const quantity = inventoryQuantity(variation);
+ 
+-    if (!index.has(productSku)) index.set(productSku, new Map());
+-    const colors = index.get(productSku);
+-    const colorKey = color || '__NO_COLOR__';
+-    if (!colors.has(colorKey)) colors.set(colorKey, { S: 0, M: 0, L: 0, XL: 0 });
+-    colors.get(colorKey)[size] += quantity;
++    const components = rawComponents.map(item => {
++      const component = item?.component || {};
++      const variationSku = normalizedSku(component?.display_id || component?.custom_id || '');
++      const productSku = normalizedSku(
++        component?.product?.display_id ||
++        component?.product?.custom_id ||
++        component?.product_display_id ||
++        variationSkuToProductSku.get(variationSku) ||
++        ''
++      );
++      return {
++        productSku,
++        variationSku,
++        quantity: Math.max(1, Number(item?.quantity || 1)),
++      };
++    }).filter(component => component.productSku || component.variationSku);
++
++    if (!bomIndex.has(parentSku)) {
++      bomIndex.set(parentSku, {
++        stock: new Map(),
++        stockByOffer: new Map(),
++        componentSkus: {
++          AO: new Set(),
++          CV: new Set(),
++          QUAN: new Set(),
++          OTHER: new Set(),
++        },
++      });
++    }
++
++    const bom = bomIndex.get(parentSku);
++    addQuantity(bom.stock, color, size, quantity);
++
++    let hasAo = false;
++    let hasCv = false;
++    let hasQuan = false;
++    for (const component of components) {
++      const sku = component.productSku || component.variationSku;
++      if (/-AO$/.test(sku)) {
++        hasAo = true;
++        bom.componentSkus.AO.add(component.productSku || sku);
++      } else if (/-CV$/.test(sku)) {
++        hasCv = true;
++        bom.componentSkus.CV.add(component.productSku || sku);
++      } else if (/-QUAN$/.test(sku)) {
++        hasQuan = true;
++        bom.componentSkus.QUAN.add(component.productSku || sku);
++      } else {
++        bom.componentSkus.OTHER.add(component.productSku || sku);
++      }
++    }
++
++    let offerType = 'COMPOSITE';
++    if (hasAo && hasCv && hasQuan) offerType = 'COMBO_3';
++    else if (hasAo && hasQuan) offerType = 'SET_QUAN';
++    else if (hasAo && hasCv) offerType = 'SET_CV';
++
++    if (!bom.stockByOffer.has(offerType)) bom.stockByOffer.set(offerType, new Map());
++    addQuantity(bom.stockByOffer.get(offerType), color, size, quantity);
++  }
++
++  return { inventoryIndex, bomIndex };
++}
++
++function mergeInventoryMatrices(index, skus) {
++  const uniqueSkus = Array.from(new Set(Array.from(skus || []).filter(Boolean)));
++  const result = new Map();
++  let found = false;
++
++  for (const sku of uniqueSkus) {
++    const matrix = index.get(sku);
++    if (!matrix?.size) continue;
++    found = true;
++    for (const [color, sizes] of matrix.entries()) {
++      if (!result.has(color)) result.set(color, { S: 0, M: 0, L: 0, XL: 0 });
++      for (const size of ['S', 'M', 'L', 'XL']) {
++        result.get(color)[size] += Number(sizes?.[size] || 0);
++      }
++    }
+   }
+-  return index;
++
++  return found ? result : null;
++}
++
++function bomComponentMatrix(inventoryIndex, bom, type, fallbackSku = '') {
++  const skus = new Set(bom?.componentSkus?.[type] || []);
++  if (!skus.size && fallbackSku) skus.add(fallbackSku);
++  return mergeInventoryMatrices(inventoryIndex, skus);
+ }
+ 
+ function formatMatrix(matrix) {
+@@ -200,7 +317,7 @@
+   }
+   try {
+     const variations = await fetchShopVariations.call(this, shop);
+-    shopIndexes.set(shopKey, createInventoryIndex(variations));
++    shopIndexes.set(shopKey, createInventoryIndexes(variations));
+   } catch (error) {
+     const message = text(error?.response?.body?.message || error?.message || error).slice(0, 160);
+     shopErrors.set(shopKey, `SHOP_ERROR: ${message}`);
+@@ -252,8 +369,8 @@
+     continue;
+   }
+ 
+-  const index = shopIndexes.get(shopKey);
+-  if (!index) {
++  const indexes = shopIndexes.get(shopKey);
++  if (!indexes) {
+     output.push({
+       json: {
+         STT: stt,
+@@ -266,40 +383,89 @@
+     continue;
+   }
+ 
++  const { inventoryIndex, bomIndex } = indexes;
++  const bom = bomIndex.get(code);
++
++  // BOM-first, matching La.na chatbot:
++  // parent composite variation stock is the source of truth for TỒN SET.
++  // SKU suffix rules are retained only as a fallback when Pancake has no BOM.
+   if (/^SV/.test(code)) {
+-    const ao = index.get(`${code}-AO`);
+-    const cv = index.get(`${code}-CV`);
+-    setStock = formatMatrix(minMatrix(ao, cv));
+-    topStock = formatMatrix(ao);
+-    bottomStock = formatMatrix(cv);
++    if (bom?.stock?.size) {
++      const ao = bomComponentMatrix(inventoryIndex, bom, 'AO', `${code}-AO`);
++      const cv = bomComponentMatrix(inventoryIndex, bom, 'CV', `${code}-CV`);
++      setStock = formatMatrix(bom.stock);
++      topStock = formatMatrix(ao);
++      bottomStock = formatMatrix(cv);
++    } else {
++      const ao = inventoryIndex.get(`${code}-AO`);
++      const cv = inventoryIndex.get(`${code}-CV`);
++      setStock = formatMatrix(minMatrix(ao, cv));
++      topStock = formatMatrix(ao);
++      bottomStock = formatMatrix(cv);
++    }
+   } else if (/^SQ/.test(code)) {
+-    const ao = index.get(`${code}-AO`);
+-    const quan = index.get(`${code}-QUAN`);
+-    setStock = formatMatrix(minMatrix(ao, quan));
+-    topStock = formatMatrix(ao);
+-    bottomStock = formatMatrix(quan);
+-  } else if (/^CB/.test(code)) {
+-    const ao = index.get(`${code}-AO`);
+-    const cv = index.get(`${code}-CV`);
+-    const quan = index.get(`${code}-QUAN`);
+-    const setParts = [];
+-    const bottomParts = [];
+-
+-    if (cv?.size) {
+-      setParts.push(labeledMatrix('SET CV', minMatrix(ao, cv)));
+-      bottomParts.push(labeledMatrix('CV', cv));
++    if (bom?.stock?.size) {
++      const ao = bomComponentMatrix(inventoryIndex, bom, 'AO', `${code}-AO`);
++      const quan = bomComponentMatrix(inventoryIndex, bom, 'QUAN', `${code}-QUAN`);
++      setStock = formatMatrix(bom.stock);
++      topStock = formatMatrix(ao);
++      bottomStock = formatMatrix(quan);
++    } else {
++      const ao = inventoryIndex.get(`${code}-AO`);
++      const quan = inventoryIndex.get(`${code}-QUAN`);
++      setStock = formatMatrix(minMatrix(ao, quan));
++      topStock = formatMatrix(ao);
++      bottomStock = formatMatrix(quan);
+     }
+-
+-    if (quan?.size) {
+-      setParts.push(labeledMatrix('SET QUAN', minMatrix(ao, quan)));
+-      bottomParts.push(labeledMatrix('QUAN', quan));
++  } else if (/^CB/.test(code)) {
++    if (bom?.stock?.size) {
++      const ao = bomComponentMatrix(inventoryIndex, bom, 'AO', `${code}-AO`);
++      const cv = bomComponentMatrix(inventoryIndex, bom, 'CV', `${code}-CV`);
++      const quan = bomComponentMatrix(inventoryIndex, bom, 'QUAN', `${code}-QUAN`);
++      const setParts = [];
++      const bottomParts = [];
++
++      const setCv = bom.stockByOffer.get('SET_CV');
++      const setQuan = bom.stockByOffer.get('SET_QUAN');
++      const combo3 = bom.stockByOffer.get('COMBO_3');
++      const composite = bom.stockByOffer.get('COMPOSITE');
++
++      if (setCv?.size) setParts.push(labeledMatrix('SET CV', setCv));
++      if (setQuan?.size) setParts.push(labeledMatrix('SET QUAN', setQuan));
++      if (combo3?.size) setParts.push(labeledMatrix('SET 3 MON', combo3));
++      if (composite?.size) setParts.push(labeledMatrix('SET', composite));
++
++      if (cv?.size) bottomParts.push(labeledMatrix('CV', cv));
++      if (quan?.size) bottomParts.push(labeledMatrix('QUAN', quan));
++
++      setStock = setParts.length ? setParts.join('\n') : formatMatrix(bom.stock);
++      topStock = formatMatrix(ao);
++      bottomStock = bottomParts.length ? bottomParts.join('\n') : 'NOT_FOUND';
++    } else {
++      const ao = inventoryIndex.get(`${code}-AO`);
++      const cv = inventoryIndex.get(`${code}-CV`);
++      const quan = inventoryIndex.get(`${code}-QUAN`);
++      const setParts = [];
++      const bottomParts = [];
++
++      if (cv?.size) {
++        setParts.push(labeledMatrix('SET CV', minMatrix(ao, cv)));
++        bottomParts.push(labeledMatrix('CV', cv));
++      }
++
++      if (quan?.size) {
++        setParts.push(labeledMatrix('SET QUAN', minMatrix(ao, quan)));
++        bottomParts.push(labeledMatrix('QUAN', quan));
++      }
++
++      setStock = setParts.length ? setParts.join('\n') : 'NOT_FOUND';
++      topStock = formatMatrix(ao);
++      bottomStock = bottomParts.length ? bottomParts.join('\n') : 'NOT_FOUND';
+     }
+-
+-    setStock = setParts.length ? setParts.join('\n') : 'NOT_FOUND';
+-    topStock = formatMatrix(ao);
+-    bottomStock = bottomParts.length ? bottomParts.join('\n') : 'NOT_FOUND';
++  } else if (bom?.stock?.size) {
++    setStock = formatMatrix(bom.stock);
+   } else {
+-    setStock = formatMatrix(index.get(code));
++    setStock = formatMatrix(inventoryIndex.get(code));
+   }
+ 
+   output.push({
