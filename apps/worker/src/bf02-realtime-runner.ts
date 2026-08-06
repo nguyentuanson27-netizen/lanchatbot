@@ -75,7 +75,7 @@ function captureClaims(
       readonly message: {
         readonly text: string | null;
         readonly occurredAt: string;
-        readonly adsContext: {
+        readonly adsContext?: {
           readonly adTitle: string | null;
         } | null;
         readonly attachments: readonly unknown[];
@@ -298,9 +298,11 @@ function classifyTextResolution(
   );
   if (continuationProductId === productId) return "STATE";
 
-  if (store.customerTexts.some((text) => text.trim() === searchValue.trim())) {
-    return "CURRENT_TURN";
-  }
+  const normalizedSearch = searchValue.trim();
+  if (
+    store.customerTexts.some((text) => text.trim() === normalizedSearch) ||
+    store.customerTexts.join("\n").trim() === normalizedSearch
+  ) return "CURRENT_TURN";
   return null;
 }
 
@@ -428,12 +430,16 @@ async function recoverVerifiedProduct(
   const customerContext = latestCustomerContext(modelContext);
   const customerText = customerContext?.text ?? execution.customerTexts.at(-1) ?? "";
   const explicitProductIds = explicitMessageProductIds(execution);
+  const hasCurrentTurnProductEvidence = execution.verifiedProducts.some(
+    ({ source }) => source !== "STATE" && source !== "PREVIOUS_BOT",
+  );
 
   const continuationProductId = verifiedContinuationProductId(
     customerText,
     state.currentProductId,
   );
   if (
+    !hasCurrentTurnProductEvidence &&
     continuationProductId &&
     !execution.verifiedProducts.some((candidate) =>
       candidate.source === "STATE" &&
