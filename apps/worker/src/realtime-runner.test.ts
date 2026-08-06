@@ -222,6 +222,9 @@ describe("RealtimeRunner", () => {
   });
   it("accepts one successful E2E size repair only when it binds the verified Size Engine claim", async () => {
     const occurredAt = "2026-08-04T00:00:00.000Z";
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-04T00:01:00.000Z"));
+    try {
     const imageUrl = "https://cdn.example/sd398-verified.jpg";
     const state = createConversationState({
       conversationId: "13820fd4-daa7-4917-9835-a38cb55120e5",
@@ -529,6 +532,9 @@ describe("RealtimeRunner", () => {
         reasonCodes: expect.arrayContaining(["SIZE_CHART_POLICY_BUNDLE_UNAVAILABLE"]),
       }),
     ]));
+    } finally {
+      vi.useRealTimers();
+    }
   });
   it("splits every outbound sentence into its own text message and preserves image order", () => {
     expect(splitRealtimeMetaMessages([
