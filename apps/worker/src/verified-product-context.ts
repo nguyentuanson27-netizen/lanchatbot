@@ -42,6 +42,24 @@ const SOURCE_PRECEDENCE: Readonly<Record<VerifiedProductContextSource, number>> 
   MEDIA_OR_AD: 4,
 };
 
+function asciiFold(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[đĐ]/gu, "d")
+    .toLocaleLowerCase("vi-VN");
+}
+
+/** Only explicit product abandonment resets verified fallback context. */
+export function productContextResetRequested(value: string): boolean {
+  const text = asciiFold(value)
+    .trim()
+    .replace(/[.!?]+$/gu, "")
+    .replace(/\s+/gu, " ");
+  return /^(?:bo (?:qua )?(?:mau|san pham|sp) nay|khong xem (?:mau|san pham|sp) nay nua|(?:doi sang|xem) (?:mau|san pham|sp) khac|bat dau lai|reset)(?: nhe| nha| a)?$/u
+    .test(text);
+}
+
 function validTimestamp(value: string): number | null {
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? timestamp : null;
