@@ -81,12 +81,12 @@ function catalogSearch(
           }
         : {
             status: "NOT_FOUND" as const,
-            reasonCode: "NO_MATCH",
+            reasonCode: "NO_CANDIDATES" as const,
           };
     }),
     searchImage: vi.fn(async () => ({
       status: "NOT_FOUND" as const,
-      reasonCode: "NO_MATCH",
+      reasonCode: "NO_CANDIDATES" as const,
     })),
   };
 }
@@ -368,8 +368,8 @@ describe("BF-02 realtime context fallback", () => {
 
     const commit = harness.committed();
     const reply = textFromCommit(commit);
-    expect(harness.generate).toHaveBeenCalledOnce();
-    expect(harness.groundWithFacts).toHaveBeenCalledOnce();
+    expect(harness.generate).not.toHaveBeenCalled();
+    expect(harness.groundWithFacts).not.toHaveBeenCalled();
     expect(reply).toContain("SD375");
     expect(reply).not.toContain("SD398");
     expect(commit?.state.currentProductId).toBe("SD375");
@@ -379,7 +379,7 @@ describe("BF-02 realtime context fallback", () => {
     }));
   });
 
-  it("keeps an ad-resolved switch through grounded schema failure", async () => {
+  it("keeps an ad-resolved switch without resurrecting the old state product", async () => {
     const harness = createHarness({
       messages: [{ text: "nhẹ nhàng đi", adProductId: "SD375" }],
       products: [product398, product375],
@@ -389,8 +389,8 @@ describe("BF-02 realtime context fallback", () => {
 
     const commit = harness.committed();
     const reply = textFromCommit(commit);
-    expect(harness.generate).toHaveBeenCalledOnce();
-    expect(harness.groundWithFacts).toHaveBeenCalledOnce();
+    expect(harness.generate).not.toHaveBeenCalled();
+    expect(harness.groundWithFacts).not.toHaveBeenCalled();
     expect(reply).toContain("SD375");
     expect(reply).not.toContain("SD398");
     expect(commit?.state.currentProductId).toBe("SD375");

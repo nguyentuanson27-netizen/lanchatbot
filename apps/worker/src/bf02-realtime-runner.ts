@@ -77,7 +77,7 @@ function captureClaims(
         readonly occurredAt: string;
         readonly adsContext?: {
           readonly adTitle: string | null;
-        } | null;
+        } | null | undefined;
         readonly attachments: readonly unknown[];
       };
     };
