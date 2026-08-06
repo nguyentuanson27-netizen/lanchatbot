@@ -49,11 +49,12 @@ describe("resolveVerifiedProductContext", () => {
     });
   });
 
-  it("prefers current-turn verified evidence over matching state context", () => {
+  it("lets current-turn verified evidence replace a different valid state product", () => {
     const resolution = resolveVerifiedProductContext(input({
       candidates: [
         candidate(),
         candidate({
+          productId: "SD375",
           source: "CURRENT_TURN",
           stateRevision: null,
           fence: 121,
@@ -61,8 +62,11 @@ describe("resolveVerifiedProductContext", () => {
       ],
     }));
 
-    expect(resolution.source).toBe("CURRENT_TURN");
-    expect(resolution.productId).toBe("SD398");
+    expect(resolution).toEqual({
+      productId: "SD375",
+      source: "CURRENT_TURN",
+      reasonCodes: ["CONTEXT_SELECTED_CURRENT_TURN"],
+    });
   });
 
   it("accepts an explicit product switch only when that product is verified", () => {
@@ -95,12 +99,15 @@ describe("resolveVerifiedProductContext", () => {
     expect(resolution.reasonCodes).toContain("CONTEXT_EXPLICIT_PRODUCT_NOT_VERIFIED");
   });
 
-  it("fails closed for stale, revision-mismatched, or stale-fence state", () => {
+  it("fails closed for stale, revision-mismatched, missing-fence, or stale-fence state", () => {
     const stale = resolveVerifiedProductContext(input({
       candidates: [candidate({ expiresAt: "2026-08-06T01:00:00.000Z" })],
     }));
     const revisionMismatch = resolveVerifiedProductContext(input({
       candidates: [candidate({ stateRevision: 11 })],
+    }));
+    const missingFence = resolveVerifiedProductContext(input({
+      candidates: [candidate({ fence: null })],
     }));
     const staleFence = resolveVerifiedProductContext(input({
       candidates: [candidate({ fence: 119 })],
@@ -110,6 +117,8 @@ describe("resolveVerifiedProductContext", () => {
     expect(stale.reasonCodes).toContain("CONTEXT_CANDIDATE_STALE");
     expect(revisionMismatch.productId).toBeNull();
     expect(revisionMismatch.reasonCodes).toContain("CONTEXT_STATE_REVISION_MISMATCH");
+    expect(missingFence.productId).toBeNull();
+    expect(missingFence.reasonCodes).toContain("CONTEXT_FENCE_MISSING");
     expect(staleFence.productId).toBeNull();
     expect(staleFence.reasonCodes).toContain("CONTEXT_FENCE_STALE");
   });
@@ -128,7 +137,7 @@ describe("resolveVerifiedProductContext", () => {
     expect(human.reasonCodes).toEqual(["CONTEXT_OWNER_HUMAN"]);
   });
 
-  it("does not choose among conflicting verified product candidates", () => {
+  it("ignores conflicting lower-precedence context after selecting valid state", () => {
     const resolution = resolveVerifiedProductContext(input({
       candidates: [
         candidate(),
@@ -142,10 +151,48 @@ describe("resolveVerifiedProductContext", () => {
     }));
 
     expect(resolution).toEqual({
+      productId: "SD398",
+      source: "STATE",
+      reasonCodes: ["CONTEXT_SELECTED_STATE"],
+    });
+  });
+
+  it("fails closed when the highest-priority tier contains multiple products", () => {
+    const resolution = resolveVerifiedProductContext(input({
+      candidates: [
+        candidate({
+          source: "CURRENT_TURN",
+          stateRevision: null,
+          fence: 121,
+        }),
+        candidate({
+          productId: "SD375",
+          source: "CURRENT_TURN",
+          stateRevision: null,
+          fence: 121,
+        }),
+        candidate(),
+      ],
+    }));
+
+    expect(resolution).toEqual({
       productId: null,
       source: null,
       reasonCodes: ["CONTEXT_CANDIDATES_CONFLICT"],
     });
+  });
+
+  it("requires ordering evidence for non-state candidates too", () => {
+    const resolution = resolveVerifiedProductContext(input({
+      candidates: [candidate({
+        source: "CURRENT_TURN",
+        stateRevision: null,
+        fence: null,
+      })],
+    }));
+
+    expect(resolution.productId).toBeNull();
+    expect(resolution.reasonCodes).toContain("CONTEXT_FENCE_MISSING");
   });
 
   it("rejects multiple explicit product references", () => {
