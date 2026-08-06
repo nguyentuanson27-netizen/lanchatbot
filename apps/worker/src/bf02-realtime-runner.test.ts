@@ -1,4 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import {
@@ -28,11 +35,14 @@ const product = {
   catalogVersion: "catalog-v2",
 };
 
-function createHarness(text: string) {
+function createHarness(
+  text: string,
+  priorAt = "2026-08-06T01:59:00.000Z",
+) {
   const baseState = createConversationState({
     conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
     routingOwner: "APP",
-    now: new Date("2026-08-06T01:58:00.000Z"),
+    now: new Date(priorAt),
   });
   const state = {
     ...baseState,
@@ -40,14 +50,14 @@ function createHarness(text: string) {
     lastFence: 120,
     lastEvent: {
       eventKey: "meta:prior",
-      occurredAt: "2026-08-06T01:59:00.000Z",
+      occurredAt: priorAt,
       receiveSequence: 120,
     },
     currentProductId: "SD398",
     tagGateStatus: "VERIFIED_ABSENT" as const,
     blockingTag: null,
-    blockingTagVerifiedAt: "2026-08-06T01:59:00.000Z",
-    updatedAt: "2026-08-06T01:59:00.000Z",
+    blockingTagVerifiedAt: priorAt,
+    updatedAt: priorAt,
   };
   const claim = {
     inboxId: "2a9afc47-978a-4b74-9653-3c89e75a89a0",
@@ -87,12 +97,13 @@ function createHarness(text: string) {
   };
 
   const complete = vi.fn(async () => true);
+  const retry = vi.fn(async () => true);
   const inbox: RealtimeInboxPort = {
     claimNext: vi.fn()
       .mockResolvedValueOnce(claim)
       .mockResolvedValueOnce(null),
     complete,
-    retry: vi.fn(async () => true),
+    retry,
     failPermanent: vi.fn(async () => true),
   };
 
@@ -205,6 +216,7 @@ function createHarness(text: string) {
     generate,
     groundWithFacts,
     complete,
+    retry,
     productSearch,
     committed: () => committed,
   };
@@ -222,6 +234,15 @@ function textFromCommit(
 }
 
 describe("BF-02 realtime context fallback", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(occurredAt));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("preserves verified SD398 through initial and grounded schema failures", async () => {
     const harness = createHarness("nhẹ nhàng đi");
 
@@ -244,6 +265,21 @@ describe("BF-02 realtime context fallback", () => {
 
   it("does not resurrect SD398 after an explicit context reset", async () => {
     const harness = createHarness("đổi sang mẫu khác");
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const reply = textFromCommit(harness.committed());
+    expect(harness.generate).toHaveBeenCalledOnce();
+    expect(harness.groundWithFacts).not.toHaveBeenCalled();
+    expect(reply).not.toContain("SD398");
+    expect(reply).toMatch(/mã|ảnh/iu);
+  });
+
+  it("does not use an expired state product after a schema failure", async () => {
+    const harness = createHarness(
+      "nhẹ nhàng đi",
+      "2026-07-01T01:59:00.000Z",
+    );
 
     expect(await harness.runner.processOne()).toBe(true);
 
