@@ -261,15 +261,16 @@ function createHarness(options: HarnessOptions) {
   const model: RealtimeModelPort = { generate, groundWithFacts };
   const productSearch = catalogSearch(products);
 
+  const resolveFacts: BusinessFactsReader["resolve"] = async ({ productId }) => {
+    const product = products.find((candidate) =>
+      candidate.productId === productId
+    );
+    if (!product) throw new Error("TEST_PRODUCT_NOT_FOUND");
+    return productFacts(product);
+  };
   const facts = {
     ready: vi.fn(async () => true),
-    resolve: vi.fn(async ({ productId }: { productId: string }) => {
-      const product = products.find((candidate) =>
-        candidate.productId === productId
-      );
-      if (!product) throw new Error("TEST_PRODUCT_NOT_FOUND");
-      return productFacts(product);
-    }),
+    resolve: vi.fn(resolveFacts),
     close: vi.fn(async () => undefined),
   } as unknown as BusinessFactsReader;
 
