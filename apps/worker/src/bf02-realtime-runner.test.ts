@@ -8,6 +8,7 @@ import {
 } from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
+import { VertexShadowError } from "./vertex.js";
 import {
   RealtimeRunner,
   productPreferenceContinuationId,
@@ -253,10 +254,10 @@ function createHarness(options: HarnessOptions) {
   };
 
   const generate = vi.fn(async () => {
-    throw new Error("GROUNDED_SCHEMA_INVALID");
+    throw new VertexShadowError("VERTEX_SCHEMA_INVALID", true);
   });
   const groundWithFacts = vi.fn(async () => {
-    throw new Error("GROUNDED_SCHEMA_INVALID");
+    throw new VertexShadowError("VERTEX_SCHEMA_INVALID", true);
   });
   const model: RealtimeModelPort = { generate, groundWithFacts };
   const productSearch = catalogSearch(products);
@@ -335,7 +336,7 @@ describe("BF-02 realtime context fallback", () => {
     vi.useRealTimers();
   });
 
-  it("preserves verified SD398 through initial and grounded schema failures", async () => {
+  it("preserves verified SD398 through production initial and grounded schema failures", async () => {
     const harness = createHarness({ messages: [{ text: "nhẹ nhàng đi" }] });
 
     expect(await harness.runner.processOne()).toBe(true);
