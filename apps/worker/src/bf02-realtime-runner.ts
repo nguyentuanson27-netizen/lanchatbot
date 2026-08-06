@@ -32,6 +32,8 @@ import {
 
 export * from "./realtime-runner.js";
 
+const BF02_STATE_CONTEXT_TTL_MS = 20 * 24 * 60 * 60 * 1_000;
+
 interface Bf02ExecutionContext {
   state: ConversationState | null;
   stateVersion: number | null;
@@ -130,6 +132,13 @@ async function currentTurnProduct(
   return result.status === "MATCHED" ? result.product : null;
 }
 
+function stateContextExpiry(updatedAt: string): string {
+  const timestamp = Date.parse(updatedAt);
+  return Number.isFinite(timestamp)
+    ? new Date(timestamp + BF02_STATE_CONTEXT_TTL_MS).toISOString()
+    : updatedAt;
+}
+
 async function recoverVerifiedProduct(
   scope: AsyncLocalStorage<Bf02ExecutionContext>,
   productSearch: RealtimeProductSearchPort,
@@ -159,6 +168,7 @@ async function recoverVerifiedProduct(
     fence: number,
     candidateObservedAt: string,
     stateRevision: number | null,
+    expiresAt: string | null,
   ): void => {
     const normalized = normalizeProductCode(product.productId);
     productsById.set(normalized, product);
@@ -167,7 +177,7 @@ async function recoverVerifiedProduct(
       source,
       verified: true,
       observedAt: candidateObservedAt,
-      expiresAt: null,
+      expiresAt,
       stateRevision,
       fence,
     });
@@ -175,13 +185,20 @@ async function recoverVerifiedProduct(
 
   const current = await currentTurnProduct(productSearch, customerText);
   if (current) {
-    addCandidate(current, "CURRENT_TURN", currentFence, observedAt, null);
+    addCandidate(current, "CURRENT_TURN", currentFence, observedAt, null, null);
   }
 
   for (const explicitProductId of explicitProductIds) {
     const explicitProduct = await exactProduct(productSearch, explicitProductId);
     if (explicitProduct) {
-      addCandidate(explicitProduct, "MESSAGE_CODE", currentFence, observedAt, null);
+      addCandidate(
+        explicitProduct,
+        "MESSAGE_CODE",
+        currentFence,
+        observedAt,
+        null,
+        null,
+      );
     }
   }
 
@@ -194,6 +211,7 @@ async function recoverVerifiedProduct(
         state.lastFence,
         state.updatedAt,
         state.revision,
+        stateContextExpiry(state.updatedAt),
       );
     }
   }
