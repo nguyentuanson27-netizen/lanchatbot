@@ -392,8 +392,8 @@ function errorCode(error: unknown): string {
   return error instanceof Error ? error.message.trim() : "";
 }
 
-function isGroundedSchemaFailure(error: unknown): boolean {
-  return errorCode(error) === "GROUNDED_SCHEMA_INVALID";
+function isAgentProposalSchemaFailure(error: unknown): boolean {
+  return errorCode(error) === "VERTEX_SCHEMA_INVALID";
 }
 
 function previousVerifiedBotProduct(
@@ -607,7 +607,7 @@ function wrapModel(
     try {
       return await model.generate(...args);
     } catch (error) {
-      if (!isGroundedSchemaFailure(error)) throw error;
+      if (!isAgentProposalSchemaFailure(error)) throw error;
       const product = await recoverVerifiedProduct(scope, productSearch, args[0]);
       if (!product) throw error;
       return fallbackResult(
@@ -624,7 +624,7 @@ function wrapModel(
     try {
       return await model.groundWithFacts(...args);
     } catch (error) {
-      if (!isGroundedSchemaFailure(error)) throw error;
+      if (!isAgentProposalSchemaFailure(error)) throw error;
       const execution = scope.getStore();
       const customerText = latestCustomerContext(args[0])?.text ??
         execution?.customerTexts.at(-1) ?? "";
