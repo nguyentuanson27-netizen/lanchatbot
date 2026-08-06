@@ -418,6 +418,49 @@ function previousVerifiedBotProduct(
     : null;
 }
 
+function evidenceCandidates(
+  evidence: readonly Bf02VerifiedProductEvidence[],
+): readonly VerifiedProductContextCandidate[] {
+  return evidence.map((candidate) => ({
+    productId: normalizeProductCode(candidate.product.productId),
+    source: candidate.source,
+    verified: true,
+    observedAt: candidate.observedAt,
+    expiresAt: candidate.expiresAt,
+    stateRevision: candidate.stateRevision,
+    fence: candidate.fence,
+  }));
+}
+
+function eligibleGroundedProductIds(
+  execution: Bf02ExecutionContext,
+  customerText: string,
+): ReadonlySet<string> {
+  const state = execution.state;
+  if (!state || execution.stateVersion === null) return new Set();
+  const eligible = new Set<string>();
+  const productIds = [...new Set(execution.verifiedProducts.map(({ product }) =>
+    normalizeProductCode(product.productId)
+  ))];
+  for (const productId of productIds) {
+    const matchingEvidence = execution.verifiedProducts.filter(({ product }) =>
+      normalizeProductCode(product.productId) === productId
+    );
+    const resolution = resolveVerifiedProductContext({
+      candidates: evidenceCandidates(matchingEvidence),
+      expectedStateRevision: execution.stateVersion,
+      minimumFence: state.lastFence,
+      conversationOwner: state.conversationOwner,
+      hasActiveClarification: state.mediaClarification?.status === "ACTIVE",
+      resetRequested: productContextResetRequested(customerText),
+      explicitProductIds: explicitMessageProductIds(execution),
+      now: new Date(),
+    });
+    if (resolution.productId === productId) eligible.add(productId);
+  }
+  return eligible;
+}
+
 async function recoverVerifiedProduct(
   scope: AsyncLocalStorage<Bf02ExecutionContext>,
   productSearch: RealtimeProductSearchPort,
@@ -477,23 +520,11 @@ async function recoverVerifiedProduct(
   }
 
   const productsById = new Map<string, StableProductDocument>();
-  const candidates: VerifiedProductContextCandidate[] = execution.verifiedProducts
-    .map((evidence) => {
-      const productId = normalizeProductCode(evidence.product.productId);
-      productsById.set(productId, evidence.product);
-      return {
-        productId,
-        source: evidence.source,
-        verified: true,
-        observedAt: evidence.observedAt,
-        expiresAt: evidence.expiresAt,
-        stateRevision: evidence.stateRevision,
-        fence: evidence.fence,
-      };
-    });
-
+  for (const evidence of execution.verifiedProducts) {
+    productsById.set(normalizeProductCode(evidence.product.productId), evidence.product);
+  }
   const resolution = resolveVerifiedProductContext({
-    candidates,
+    candidates: evidenceCandidates(execution.verifiedProducts),
     expectedStateRevision: execution.stateVersion,
     minimumFence: state.lastFence,
     conversationOwner: state.conversationOwner,
@@ -510,7 +541,7 @@ async function recoverVerifiedProduct(
 /**
  * Grounded recovery is bound to the product identity already verified by core.
  * Both the pre-grounding proposal and the facts envelope must agree, the ID must
- * be present in the core resolution evidence, and it is exact-matched again.
+ * be present in eligible core resolution evidence, and it is exact-matched again.
  */
 export async function verifiedGroundedProduct(
   productSearch: RealtimeProductSearchPort,
@@ -594,11 +625,12 @@ function wrapModel(
       return await model.groundWithFacts(...args);
     } catch (error) {
       if (!isGroundedSchemaFailure(error)) throw error;
-      const verifiedIds = new Set(
-        scope.getStore()?.verifiedProducts.map(({ product }) =>
-          normalizeProductCode(product.productId)
-        ) ?? [],
-      );
+      const execution = scope.getStore();
+      const customerText = latestCustomerContext(args[0])?.text ??
+        execution?.customerTexts.at(-1) ?? "";
+      const verifiedIds = execution
+        ? eligibleGroundedProductIds(execution, customerText)
+        : new Set<string>();
       const product = await verifiedGroundedProduct(
         productSearch,
         args[1],
@@ -607,7 +639,7 @@ function wrapModel(
       );
       if (!product) throw error;
       return fallbackResult(
-        latestCustomerContext(args[0])?.text ?? "",
+        customerText,
         product,
         error,
         Math.max(0, Date.now() - startedAt),
