@@ -340,8 +340,12 @@ describe("BF-02 realtime context fallback", () => {
       productId: "SD375",
     } as Parameters<RealtimeModelPort["groundWithFacts"]>[2];
 
-    await expect(verifiedGroundedProduct(productSearch, proposal, facts))
-      .resolves.toEqual(product375);
+    await expect(verifiedGroundedProduct(
+      productSearch,
+      proposal,
+      facts,
+      new Set(["SD375"]),
+    )).resolves.toEqual(product375);
   });
 
   it("fails closed when grounded proposal and facts reference different products", async () => {
@@ -353,7 +357,28 @@ describe("BF-02 realtime context fallback", () => {
       productId: "SD375",
     } as Parameters<RealtimeModelPort["groundWithFacts"]>[2];
 
-    await expect(verifiedGroundedProduct(productSearch, proposal, facts))
-      .resolves.toBeNull();
+    await expect(verifiedGroundedProduct(
+      productSearch,
+      proposal,
+      facts,
+      new Set(["SD398", "SD375"]),
+    )).resolves.toBeNull();
+  });
+
+  it("rejects matching proposal and facts without core resolution evidence", async () => {
+    const productSearch = catalogSearch([product398, product375]);
+    const proposal = {
+      productId: "SD375",
+    } as Parameters<RealtimeModelPort["groundWithFacts"]>[1];
+    const facts = {
+      productId: "SD375",
+    } as Parameters<RealtimeModelPort["groundWithFacts"]>[2];
+
+    await expect(verifiedGroundedProduct(
+      productSearch,
+      proposal,
+      facts,
+      new Set(),
+    )).resolves.toBeNull();
   });
 });
