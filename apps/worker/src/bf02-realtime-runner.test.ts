@@ -53,8 +53,7 @@ function catalogSearch(
       const normalized = value.trim().toLocaleUpperCase("vi-VN");
       const product = products.find((candidate) =>
         candidate.productId === normalized ||
-        candidate.canonicalCode === normalized ||
-        candidate.aliases.includes(normalized)
+        candidate.canonicalCode === normalized
       );
       return product
         ? {
