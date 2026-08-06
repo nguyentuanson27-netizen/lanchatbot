@@ -10,6 +10,8 @@ import { createConversationState } from "@lana/conversation-engine";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import {
   RealtimeRunner,
+  productPreferenceContinuationId,
+  verifiedGroundedProduct,
   type RealtimeInboxPort,
   type RealtimeModelPort,
   type RealtimeProductSearchPort,
@@ -20,7 +22,7 @@ import {
 const occurredAt = "2026-08-06T02:00:00.000Z";
 const pageId = "1198992073286645";
 
-const product = {
+const product398 = {
   productId: "SD398",
   parentProductId: "SD398",
   canonicalCode: "SD398",
@@ -34,6 +36,45 @@ const product = {
   images: [],
   catalogVersion: "catalog-v2",
 };
+
+const product375 = {
+  ...product398,
+  productId: "SD375",
+  parentProductId: "SD375",
+  canonicalCode: "SD375",
+  title: "Áo dài SD375",
+};
+
+function catalogSearch(
+  products = [product398],
+): RealtimeProductSearchPort {
+  return {
+    searchText: vi.fn(async (value: string) => {
+      const normalized = value.trim().toLocaleUpperCase("vi-VN");
+      const product = products.find((candidate) =>
+        candidate.productId === normalized ||
+        candidate.canonicalCode === normalized ||
+        candidate.aliases.includes(normalized)
+      );
+      return product
+        ? {
+            status: "MATCHED" as const,
+            matchKind: "EXACT_CODE" as const,
+            score: 1,
+            gap: null,
+            product,
+          }
+        : {
+            status: "NOT_FOUND" as const,
+            reasonCode: "NO_MATCH",
+          };
+    }),
+    searchImage: vi.fn(async () => ({
+      status: "NOT_FOUND" as const,
+      reasonCode: "NO_MATCH",
+    })),
+  };
+}
 
 function createHarness(
   text: string,
@@ -133,27 +174,7 @@ function createHarness(
     throw new Error("GROUNDED_SCHEMA_INVALID");
   });
   const model: RealtimeModelPort = { generate, groundWithFacts };
-
-  const productSearch: RealtimeProductSearchPort = {
-    searchText: vi.fn(async (value: string) =>
-      value.trim().toLocaleUpperCase("vi-VN") === "SD398"
-        ? {
-            status: "MATCHED" as const,
-            matchKind: "EXACT_CODE" as const,
-            score: 1,
-            gap: null,
-            product,
-          }
-        : {
-            status: "NOT_FOUND" as const,
-            reasonCode: "NO_MATCH",
-          }
-    ),
-    searchImage: vi.fn(async () => ({
-      status: "NOT_FOUND" as const,
-      reasonCode: "NO_MATCH",
-    })),
-  };
+  const productSearch = catalogSearch();
 
   const facts = {
     ready: vi.fn(async () => true),
@@ -288,5 +309,52 @@ describe("BF-02 realtime context fallback", () => {
     expect(harness.groundWithFacts).not.toHaveBeenCalled();
     expect(reply).not.toContain("SD398");
     expect(reply).toMatch(/mã|ảnh/iu);
+  });
+
+  it("does not project the state product onto a non-product turn", async () => {
+    const harness = createHarness("shop ở đâu");
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const reply = textFromCommit(harness.committed());
+    expect(harness.generate).toHaveBeenCalledOnce();
+    expect(harness.groundWithFacts).not.toHaveBeenCalled();
+    expect(reply).not.toContain("SD398");
+    expect(reply).toMatch(/mã|ảnh/iu);
+  });
+
+  it("keeps the incident preference phrase narrow and product-scoped", () => {
+    expect(productPreferenceContinuationId("nhẹ nhàng đi", "SD398"))
+      .toBe("SD398");
+    expect(productPreferenceContinuationId("shop ở đâu", "SD398"))
+      .toBeNull();
+    expect(productPreferenceContinuationId("phí ship bao nhiêu", "SD398"))
+      .toBeNull();
+  });
+
+  it("binds batch-switch and media/ad grounded recovery to core facts", async () => {
+    const productSearch = catalogSearch([product398, product375]);
+    const proposal = {
+      productId: "SD375",
+    } as Parameters<RealtimeModelPort["groundWithFacts"]>[1];
+    const facts = {
+      productId: "SD375",
+    } as Parameters<RealtimeModelPort["groundWithFacts"]>[2];
+
+    await expect(verifiedGroundedProduct(productSearch, proposal, facts))
+      .resolves.toEqual(product375);
+  });
+
+  it("fails closed when grounded proposal and facts reference different products", async () => {
+    const productSearch = catalogSearch([product398, product375]);
+    const proposal = {
+      productId: "SD398",
+    } as Parameters<RealtimeModelPort["groundWithFacts"]>[1];
+    const facts = {
+      productId: "SD375",
+    } as Parameters<RealtimeModelPort["groundWithFacts"]>[2];
+
+    await expect(verifiedGroundedProduct(productSearch, proposal, facts))
+      .resolves.toBeNull();
   });
 });
