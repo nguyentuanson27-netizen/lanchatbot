@@ -7,6 +7,7 @@ import type { RuntimePolicyResolverPort } from "@lana/chat-runtime";
 import type { ConversationState } from "@lana/conversation-engine";
 import {
   RealtimeRunner as CoreRealtimeRunner,
+  currentProductContinuationId,
   deterministicVertexProposalFallback,
   productCodeOnly,
   type CanonicalChatHistoryPort,
@@ -123,13 +124,39 @@ async function exactProduct(
     : null;
 }
 
-async function currentTurnProduct(
-  productSearch: RealtimeProductSearchPort,
-  text: string,
-): Promise<StableProductDocument | null> {
-  if (!text.trim()) return null;
-  const result = await productSearch.searchText(text);
-  return result.status === "MATCHED" ? result.product : null;
+function asciiFold(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[đĐ]/gu, "d")
+    .toLocaleLowerCase("vi-VN");
+}
+
+/**
+ * Narrow containment for terse product-style adjustments that the existing
+ * continuation helper does not yet cover. This must not classify general shop,
+ * policy, delivery, or support questions as product continuation.
+ */
+export function productPreferenceContinuationId(
+  value: string,
+  currentProductId: string | null,
+): string | null {
+  if (!currentProductId) return null;
+  const text = asciiFold(value)
+    .trim()
+    .replace(/[.!?]+$/gu, "")
+    .replace(/\s+/gu, " ");
+  const preferenceOnly = /^(?:(?:cho|lam|muon) )?(?:nhe nhang|don gian|thanh lich|tre trung|sang|dam|nhat|dai|ngan|rong|om)(?: hon| di| nhe| nha| a)?$/u
+    .test(text);
+  return preferenceOnly ? normalizeProductCode(currentProductId) : null;
+}
+
+function verifiedContinuationProductId(
+  value: string,
+  currentProductId: string | null,
+): string | null {
+  return currentProductContinuationId(value, currentProductId) ??
+    productPreferenceContinuationId(value, currentProductId);
 }
 
 function stateContextExpiry(updatedAt: string): string {
@@ -137,6 +164,21 @@ function stateContextExpiry(updatedAt: string): string {
   return Number.isFinite(timestamp)
     ? new Date(timestamp + BF02_STATE_CONTEXT_TTL_MS).toISOString()
     : updatedAt;
+}
+
+function errorCode(error: unknown): string {
+  if (error instanceof Error && error.message.trim()) return error.message.trim();
+  if (
+    error !== null &&
+    typeof error === "object" &&
+    "code" in error &&
+    typeof error.code === "string"
+  ) return error.code.trim();
+  return "";
+}
+
+function isGroundedSchemaFailure(error: unknown): boolean {
+  return errorCode(error) === "GROUNDED_SCHEMA_INVALID";
 }
 
 async function recoverVerifiedProduct(
@@ -183,11 +225,6 @@ async function recoverVerifiedProduct(
     });
   };
 
-  const current = await currentTurnProduct(productSearch, customerText);
-  if (current) {
-    addCandidate(current, "CURRENT_TURN", currentFence, observedAt, null, null);
-  }
-
   for (const explicitProductId of explicitProductIds) {
     const explicitProduct = await exactProduct(productSearch, explicitProductId);
     if (explicitProduct) {
@@ -202,8 +239,12 @@ async function recoverVerifiedProduct(
     }
   }
 
-  if (state.currentProductId) {
-    const stateProduct = await exactProduct(productSearch, state.currentProductId);
+  const continuationProductId = verifiedContinuationProductId(
+    customerText,
+    state.currentProductId,
+  );
+  if (continuationProductId && state.currentProductId) {
+    const stateProduct = await exactProduct(productSearch, continuationProductId);
     if (stateProduct) {
       addCandidate(
         stateProduct,
@@ -229,6 +270,30 @@ async function recoverVerifiedProduct(
   return resolution.productId === null
     ? null
     : productsById.get(resolution.productId) ?? null;
+}
+
+/**
+ * Grounded recovery is bound to the product identity already verified by core.
+ * Both the pre-grounding proposal and the facts envelope must agree, and the
+ * agreed identifier is exact-matched again against the stable catalog.
+ */
+export async function verifiedGroundedProduct(
+  productSearch: RealtimeProductSearchPort,
+  proposal: Parameters<RealtimeModelPort["groundWithFacts"]>[1],
+  facts: Parameters<RealtimeModelPort["groundWithFacts"]>[2],
+): Promise<StableProductDocument | null> {
+  const proposalId = proposal.productId
+    ? normalizeProductCode(proposal.productId)
+    : "";
+  const factsId = facts.productId
+    ? normalizeProductCode(facts.productId)
+    : "";
+  if (!proposalId || !factsId || proposalId !== factsId) return null;
+
+  const product = await exactProduct(productSearch, proposalId);
+  return product && normalizeProductCode(product.productId) === proposalId
+    ? product
+    : null;
 }
 
 function fallbackResult(
@@ -270,6 +335,7 @@ function wrapModel(
     try {
       return await model.generate(...args);
     } catch (error) {
+      if (!isGroundedSchemaFailure(error)) throw error;
       const product = await recoverVerifiedProduct(scope, productSearch, args[0]);
       if (!product) throw error;
       return fallbackResult(
@@ -286,7 +352,12 @@ function wrapModel(
     try {
       return await model.groundWithFacts(...args);
     } catch (error) {
-      const product = await recoverVerifiedProduct(scope, productSearch, args[0]);
+      if (!isGroundedSchemaFailure(error)) throw error;
+      const product = await verifiedGroundedProduct(
+        productSearch,
+        args[1],
+        args[2],
+      );
       if (!product) throw error;
       return fallbackResult(
         latestCustomerContext(args[0])?.text ?? "",
