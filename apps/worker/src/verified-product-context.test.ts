@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  productContextResetRequested,
   resolveVerifiedProductContext,
   type VerifiedProductContextCandidate,
   type VerifiedProductContextInput,
@@ -135,6 +136,14 @@ describe("resolveVerifiedProductContext", () => {
     expect(reset.reasonCodes).toEqual(["CONTEXT_RESET_REQUESTED"]);
     expect(clarification.reasonCodes).toEqual(["CONTEXT_PRODUCT_AMBIGUOUS"]);
     expect(human.reasonCodes).toEqual(["CONTEXT_OWNER_HUMAN"]);
+  });
+
+  it("detects only explicit product reset requests", () => {
+    expect(productContextResetRequested("bỏ qua mẫu này nhé")).toBe(true);
+    expect(productContextResetRequested("đổi sang sản phẩm khác")).toBe(true);
+    expect(productContextResetRequested("bắt đầu lại")).toBe(true);
+    expect(productContextResetRequested("nhẹ nhàng đi")).toBe(false);
+    expect(productContextResetRequested("shop ở đâu")).toBe(false);
   });
 
   it("ignores conflicting lower-precedence context after selecting valid state", () => {
