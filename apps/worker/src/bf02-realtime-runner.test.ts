@@ -19,6 +19,7 @@ import {
   type RealtimeProductSearchPort,
   type RealtimeRuntimePort,
   type RealtimeTagObservationProvider,
+  type RealtimeVideoFrameExtractorPort,
 } from "./bf02-realtime-runner.js";
 
 const occurredAt = "2026-08-06T02:00:00.000Z";
@@ -53,6 +54,8 @@ type TestProduct = typeof product398;
 interface HarnessMessage {
   readonly text: string;
   readonly adProductId?: string;
+  readonly imageProductId?: string;
+  readonly videoProductId?: string;
 }
 
 interface HarnessOptions {
@@ -63,24 +66,55 @@ interface HarnessOptions {
   readonly productSelections?: readonly TestProduct[];
   readonly mediaClarification?: boolean;
   readonly initialProposal?: AgentProposalV1;
+  readonly semanticMatchByMention?: boolean;
 }
 
 function catalogSearch(
   products: readonly TestProduct[] = [product398],
+  options: { readonly semanticMatchByMention?: boolean } = {},
 ): RealtimeProductSearchPort {
   return {
     searchText: vi.fn(async (value: string) => {
       const normalized = value.trim().toLocaleUpperCase("vi-VN");
-      const product = products.find((candidate) =>
+      const exact = products.find((candidate) =>
         candidate.productId === normalized ||
         candidate.canonicalCode === normalized
+      );
+      if (exact) {
+        return {
+          status: "MATCHED" as const,
+          matchKind: "EXACT_CODE" as const,
+          score: 1,
+          gap: null,
+          product: exact,
+        };
+      }
+      const semantic = options.semanticMatchByMention
+        ? products.find((candidate) => normalized.includes(candidate.productId))
+        : undefined;
+      return semantic
+        ? {
+            status: "MATCHED" as const,
+            matchKind: "SEMANTIC" as const,
+            score: 0.93,
+            gap: 0.2,
+            product: semantic,
+          }
+        : {
+            status: "NOT_FOUND" as const,
+            reasonCode: "NO_CANDIDATES" as const,
+          };
+    }),
+    searchImage: vi.fn(async (url: string) => {
+      const product = products.find((candidate) =>
+        url.toLocaleUpperCase("vi-VN").includes(candidate.productId)
       );
       return product
         ? {
             status: "MATCHED" as const,
-            matchKind: "EXACT_CODE" as const,
-            score: 1,
-            gap: null,
+            matchKind: "SEMANTIC" as const,
+            score: 0.95,
+            gap: 0.2,
             product,
           }
         : {
@@ -88,10 +122,23 @@ function catalogSearch(
             reasonCode: "NO_CANDIDATES" as const,
           };
     }),
-    searchImage: vi.fn(async () => ({
-      status: "NOT_FOUND" as const,
-      reasonCode: "NO_CANDIDATES" as const,
-    })),
+    searchImageBytes: vi.fn(async (frame: Uint8Array) => {
+      const product = frame[0] === 3
+        ? products.find((candidate) => candidate.productId === "SD375")
+        : undefined;
+      return product
+        ? {
+            status: "MATCHED" as const,
+            matchKind: "SEMANTIC" as const,
+            score: 0.94,
+            gap: 0.2,
+            product,
+          }
+        : {
+            status: "NOT_FOUND" as const,
+            reasonCode: "NO_CANDIDATES" as const,
+          };
+    }),
   };
 }
 
@@ -131,7 +178,20 @@ function claimFor(message: HarnessMessage, index: number) {
         isEcho: false,
         appId: null,
         text: message.text,
-        attachments: [],
+        attachments: [
+          ...(message.imageProductId
+            ? [{
+                type: "image",
+                url: `https://cdn.example.test/${message.imageProductId}.jpg`,
+              }]
+            : []),
+          ...(message.videoProductId
+            ? [{
+                type: "video",
+                url: `https://cdn.example.test/${message.videoProductId}.mp4`,
+              }]
+            : []),
+        ],
         adsContext: message.adProductId
           ? {
               source: "facebook",
@@ -292,7 +352,9 @@ function createHarness(options: HarnessOptions) {
     throw new VertexShadowError("VERTEX_SCHEMA_INVALID", true);
   });
   const model: RealtimeModelPort = { generate, groundWithFacts };
-  const productSearch = catalogSearch(products);
+  const productSearch = catalogSearch(products, {
+    semanticMatchByMention: options.semanticMatchByMention,
+  });
 
   const resolveFacts: BusinessFactsReader["resolve"] = async ({ productId }) => {
     const product = products.find((candidate) =>
@@ -318,6 +380,13 @@ function createHarness(options: HarnessOptions) {
     })),
   };
 
+  const videoFrames: RealtimeVideoFrameExtractorPort = {
+    extract: vi.fn(async () => ({
+      durationSeconds: 1,
+      frames: [new Uint8Array([3, 7, 5])],
+    })),
+  };
+
   const runner = new RealtimeRunner(
     inbox,
     runtime,
@@ -333,6 +402,10 @@ function createHarness(options: HarnessOptions) {
       decisionAuditV2Enabled: true,
       releaseId: "bf02-test",
     },
+    undefined,
+    undefined,
+    undefined,
+    videoFrames,
   );
 
   return {
@@ -344,6 +417,8 @@ function createHarness(options: HarnessOptions) {
     retry,
     retryBatch,
     commit,
+    productSearch,
+    videoFrames,
     committed: () => committed,
   };
 }
@@ -530,6 +605,28 @@ describe("BF-02 realtime context fallback", () => {
     expect(textFromCommit(commit)).not.toContain("SD375");
     expect(commit?.state.currentProductId).toBeNull();
   });
+
+  it("cuts pre-reset text out of production-like semantic search", async () => {
+    const harness = createHarness({
+      messages: [
+        { text: "xin giá SD375" },
+        { text: "đổi sang mẫu khác" },
+      ],
+      products: [product398, product375],
+      nativeBatch: true,
+      semanticMatchByMention: true,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const commit = harness.committed();
+    expect(textFromCommit(commit)).not.toContain("SD375");
+    expect(commit?.state.currentProductId).toBeNull();
+    expect(harness.productSearch.searchText).not.toHaveBeenCalledWith(
+      expect.stringContaining("xin giá SD375\nđổi sang mẫu khác"),
+    );
+  });
+
   it("does not recover a product from an ad before a later reset", async () => {
     const harness = createHarness({
       messages: [
@@ -544,6 +641,43 @@ describe("BF-02 realtime context fallback", () => {
 
     const commit = harness.committed();
     expect(harness.groundWithFacts).not.toHaveBeenCalled();
+    expect(textFromCommit(commit)).not.toContain("SD375");
+    expect(commit?.state.currentProductId).toBeNull();
+  });
+
+  it("does not resolve an image that arrived before a later reset", async () => {
+    const harness = createHarness({
+      messages: [
+        { text: "", imageProductId: "SD375" },
+        { text: "đổi sang mẫu khác" },
+      ],
+      products: [product398, product375],
+      nativeBatch: true,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const commit = harness.committed();
+    expect(harness.productSearch.searchImage).not.toHaveBeenCalled();
+    expect(textFromCommit(commit)).not.toContain("SD375");
+    expect(commit?.state.currentProductId).toBeNull();
+  });
+
+  it("does not resolve video frame bytes from media before a later reset", async () => {
+    const harness = createHarness({
+      messages: [
+        { text: "", videoProductId: "SD375" },
+        { text: "đổi sang mẫu khác" },
+      ],
+      products: [product398, product375],
+      nativeBatch: true,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const commit = harness.committed();
+    expect(harness.videoFrames.extract).toHaveBeenCalledOnce();
+    expect(harness.productSearch.searchImageBytes).not.toHaveBeenCalled();
     expect(textFromCommit(commit)).not.toContain("SD375");
     expect(commit?.state.currentProductId).toBeNull();
   });
