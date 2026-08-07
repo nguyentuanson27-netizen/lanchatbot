@@ -297,12 +297,17 @@ function batchProductContextResetRequested(store: Bf02ExecutionContext): boolean
     explicitMessageProductIds(store).length === 0;
 }
 
+function adProductIds(store: Bf02ExecutionContext): readonly string[] {
+  const resetIndex = latestProductContextResetIndex(store);
+  return [...new Set(store.adTitles.slice(resetIndex + 1).flatMap(extractAdProductCodes))];
+}
+
 function resetDiscardedProductIds(store: Bf02ExecutionContext): readonly string[] {
   const resetIndex = latestProductContextResetIndex(store);
   if (resetIndex < 0) return [];
   return [...new Set([
-    ...customerTextProductIds(store.customerTexts.slice(0, resetIndex)),
-    ...store.adTitles.slice(0, resetIndex).flatMap(extractAdProductCodes),
+    ...customerTextProductIds(store.customerTexts.slice(0, resetIndex + 1)),
+    ...store.adTitles.slice(0, resetIndex + 1).flatMap(extractAdProductCodes),
   ])];
 }
 
@@ -336,7 +341,8 @@ function scopedSearchTextAfterReset(
   if (
     code !== null &&
     resetDiscardedProductIds(store).includes(code) &&
-    !explicitMessageProductIds(store).includes(code)
+    !explicitMessageProductIds(store).includes(code) &&
+    !adProductIds(store).includes(code)
   ) return null;
   return searchValue;
 }
@@ -368,10 +374,6 @@ function resetBoundaryNotFound() {
   };
 }
 
-function adProductIds(store: Bf02ExecutionContext): readonly string[] {
-  const resetIndex = latestProductContextResetIndex(store);
-  return [...new Set(store.adTitles.slice(resetIndex + 1).flatMap(extractAdProductCodes))];
-}
 function activeStateSelectionProductIds(
   store: Bf02ExecutionContext,
 ): readonly string[] {
