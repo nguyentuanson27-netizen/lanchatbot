@@ -55,7 +55,8 @@ interface Bf02ExecutionContext {
   customerTexts: string[];
   customerOccurredAt: string | null;
   adTitles: string[];
-  hasMedia: boolean;
+  mediaUrlsByMessage: string[][];
+  discardedMediaFrames: WeakSet<object>;
   verifiedProducts: Bf02VerifiedProductEvidence[];
 }
 
@@ -65,6 +66,17 @@ function bindOrReturn<T extends object>(
 ): unknown {
   const value = Reflect.get(target, property, target);
   return typeof value === "function" ? value.bind(target) : value;
+}
+
+function attachmentUrl(attachment: unknown): string | null {
+  if (
+    attachment === null ||
+    typeof attachment !== "object" ||
+    !("url" in attachment) ||
+    typeof attachment.url !== "string"
+  ) return null;
+  const url = attachment.url.trim();
+  return url || null;
 }
 
 function captureClaims(
@@ -93,8 +105,10 @@ function captureClaims(
   store.customerOccurredAt = last?.envelope.message.occurredAt ?? null;
   store.adTitles = ordered
     .map(({ envelope }) => envelope.message.adsContext?.adTitle?.trim() ?? "");
-  store.hasMedia = ordered.some(({ envelope }) =>
-    envelope.message.attachments.length > 0
+  store.mediaUrlsByMessage = ordered.map(({ envelope }) =>
+    envelope.message.attachments
+      .map(attachmentUrl)
+      .filter((url): url is string => url !== null)
   );
 }
 
@@ -292,13 +306,66 @@ function resetDiscardedProductIds(store: Bf02ExecutionContext): readonly string[
   ])];
 }
 
-function searchIsDiscardedByReset(
+function mergedCustomerText(texts: readonly string[]): string {
+  return texts.map((text) => text.trim()).filter(Boolean).join("\n").trim();
+}
+
+function scopedSearchTextAfterReset(
   store: Bf02ExecutionContext,
   searchValue: string,
-): boolean {
-  if (!batchProductContextResetRequested(store)) return false;
+): string | null {
+  const resetIndex = latestProductContextResetIndex(store);
+  if (resetIndex < 0) return searchValue;
+
+  const normalizedSearch = searchValue.trim();
+  const discardedTexts = store.customerTexts
+    .slice(0, resetIndex + 1)
+    .map((text) => text.trim())
+    .filter(Boolean);
+  if (discardedTexts.includes(normalizedSearch)) return null;
+
+  const fullBatchText = mergedCustomerText(store.customerTexts);
+  if (normalizedSearch === fullBatchText) {
+    const activeBatchText = mergedCustomerText(
+      store.customerTexts.slice(resetIndex + 1),
+    );
+    return activeBatchText || null;
+  }
+
   const code = productCodeOnly(searchValue);
-  return code !== null && resetDiscardedProductIds(store).includes(code);
+  if (
+    code !== null &&
+    resetDiscardedProductIds(store).includes(code) &&
+    !explicitMessageProductIds(store).includes(code)
+  ) return null;
+  return searchValue;
+}
+
+function activeMediaUrls(store: Bf02ExecutionContext): readonly string[] {
+  const resetIndex = latestProductContextResetIndex(store);
+  return store.mediaUrlsByMessage.slice(resetIndex + 1).flat();
+}
+
+function mediaUrlDiscardedByReset(
+  store: Bf02ExecutionContext,
+  mediaUrl: string,
+): boolean {
+  const resetIndex = latestProductContextResetIndex(store);
+  if (resetIndex < 0) return false;
+  const normalized = mediaUrl.trim();
+  if (!normalized) return false;
+  if (activeMediaUrls(store).includes(normalized)) return false;
+  return store.mediaUrlsByMessage
+    .slice(0, resetIndex + 1)
+    .flat()
+    .includes(normalized);
+}
+
+function resetBoundaryNotFound() {
+  return {
+    status: "NOT_FOUND" as const,
+    reasonCode: "NO_CANDIDATES" as const,
+  };
 }
 
 function adProductIds(store: Bf02ExecutionContext): readonly string[] {
@@ -329,7 +396,6 @@ async function recordActiveStateSelectionEvidence(
   }
 }
 
-
 function classifyTextResolution(
   store: Bf02ExecutionContext,
   searchValue: string,
@@ -339,7 +405,7 @@ function classifyTextResolution(
   const productId = normalizeProductCode(product.productId);
   if (explicitMessageProductIds(store).includes(productId)) return "MESSAGE_CODE";
   if (adProductIds(store).includes(productId)) return "MEDIA_OR_AD";
-  if (store.hasMedia) return "MEDIA_OR_AD";
+  if (activeMediaUrls(store).length > 0) return "MEDIA_OR_AD";
 
   const latestText = store.customerTexts.at(-1) ?? "";
   const selectedFromClarification = state?.mediaClarification?.status === "ACTIVE"
@@ -368,7 +434,7 @@ function classifyTextResolution(
   const normalizedSearch = searchValue.trim();
   if (
     store.customerTexts.some((text) => text.trim() === normalizedSearch) ||
-    store.customerTexts.join("\n").trim() === normalizedSearch
+    mergedCustomerText(store.customerTexts.slice(latestProductContextResetIndex(store) + 1)) === normalizedSearch
   ) return "CURRENT_TURN";
   return null;
 }
@@ -397,11 +463,10 @@ function wrapProductSearch(
       if (property === "searchText") {
         return async (...args: Parameters<RealtimeProductSearchPort["searchText"]>) => {
           const store = scope.getStore();
-          if (store && searchIsDiscardedByReset(store, args[0])) {
-            return {
-              status: "NOT_FOUND" as const,
-              reasonCode: "NO_CANDIDATES" as const,
-            };
+          if (store) {
+            const scopedValue = scopedSearchTextAfterReset(store, args[0]);
+            if (scopedValue === null) return resetBoundaryNotFound();
+            args[0] = scopedValue;
           }
           const result = await target.searchText(...args);
           const product = matchedProduct(result);
@@ -414,8 +479,11 @@ function wrapProductSearch(
       }
       if (property === "searchImage") {
         return async (...args: Parameters<RealtimeProductSearchPort["searchImage"]>) => {
-          const result = await target.searchImage(...args);
           const store = scope.getStore();
+          if (store && mediaUrlDiscardedByReset(store, args[0])) {
+            return resetBoundaryNotFound();
+          }
+          const result = await target.searchImage(...args);
           const product = matchedProduct(result);
           if (store && product) {
             recordVerifiedProduct(store, product, "MEDIA_OR_AD");
@@ -428,25 +496,80 @@ function wrapProductSearch(
         return async (...args: Parameters<NonNullable<RealtimeProductSearchPort["searchImages"]>>) => {
           const results = await target.searchImages!(...args);
           const store = scope.getStore();
-          if (store) {
-            for (const result of results) {
-              const product = matchedProduct(result);
-              if (product) recordVerifiedProduct(store, product, "MEDIA_OR_AD");
+          if (!store) return results;
+          return results.map((result, index) => {
+            const mediaUrl = args[0][index] ?? "";
+            if (mediaUrlDiscardedByReset(store, mediaUrl)) {
+              return resetBoundaryNotFound();
             }
-          }
-          return results;
+            const product = matchedProduct(result);
+            if (product) recordVerifiedProduct(store, product, "MEDIA_OR_AD");
+            return result;
+          });
         };
       }
       if (property === "searchImageBytes") {
         if (!target.searchImageBytes) return undefined;
         return async (...args: Parameters<NonNullable<RealtimeProductSearchPort["searchImageBytes"]>>) => {
-          const result = await target.searchImageBytes!(...args);
           const store = scope.getStore();
+          if (store && store.discardedMediaFrames.has(args[0])) {
+            return resetBoundaryNotFound();
+          }
+          const result = await target.searchImageBytes!(...args);
           const product = matchedProduct(result);
           if (store && product) {
             recordVerifiedProduct(store, product, "MEDIA_OR_AD");
           }
           return result;
+        };
+      }
+      return bindOrReturn(target, property);
+    },
+  });
+}
+
+function wrapVideoFrames(
+  videoFrames: RealtimeVideoFrameExtractorPort | undefined,
+  scope: AsyncLocalStorage<Bf02ExecutionContext>,
+): RealtimeVideoFrameExtractorPort | undefined {
+  if (!videoFrames) return undefined;
+  return new Proxy(videoFrames, {
+    get(target, property) {
+      if (property === "extract") {
+        return async (...args: Parameters<RealtimeVideoFrameExtractorPort["extract"]>) => {
+          const extraction = await target.extract(...args);
+          const store = scope.getStore();
+          if (store && mediaUrlDiscardedByReset(store, args[0])) {
+            for (const frame of extraction.frames) {
+              store.discardedMediaFrames.add(frame);
+            }
+          }
+          return extraction;
+        };
+      }
+      return bindOrReturn(target, property);
+    },
+  });
+}
+
+function wrapMediaRecognition(
+  mediaRecognition: RealtimeMediaRecognitionPort | undefined,
+  scope: AsyncLocalStorage<Bf02ExecutionContext>,
+): RealtimeMediaRecognitionPort | undefined {
+  if (!mediaRecognition) return undefined;
+  return new Proxy(mediaRecognition, {
+    get(target, property) {
+      if (property === "recognize") {
+        return async (...args: Parameters<RealtimeMediaRecognitionPort["recognize"]>) => {
+          const result = await target.recognize(...args);
+          const store = scope.getStore();
+          if (!store || !mediaUrlDiscardedByReset(store, args[0])) return result;
+          return {
+            status: "NOT_FOUND" as const,
+            candidates: [],
+            reasonCode: "BF02_RESET_BOUNDARY",
+            telemetry: result.telemetry,
+          };
         };
       }
       return bindOrReturn(target, property);
@@ -742,9 +865,9 @@ export class RealtimeRunner extends CoreRealtimeRunner {
       quota,
       history,
       canonicalHistory,
-      videoFrames,
+      wrapVideoFrames(videoFrames, scope),
       policyResolver,
-      mediaRecognition,
+      wrapMediaRecognition(mediaRecognition, scope),
       behaviorModeResolver,
     );
     this.bf02Scope = scope;
@@ -759,7 +882,8 @@ export class RealtimeRunner extends CoreRealtimeRunner {
         customerTexts: [],
         customerOccurredAt: null,
         adTitles: [],
-        hasMedia: false,
+        mediaUrlsByMessage: [],
+        discardedMediaFrames: new WeakSet<object>(),
         verifiedProducts: [],
       },
       () => super.processOne(),
