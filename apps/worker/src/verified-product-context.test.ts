@@ -32,6 +32,7 @@ function input(
     minimumFence: 120,
     conversationOwner: "BOT",
     hasActiveClarification: false,
+    activeStateSelectionProductIds: [],
     resetRequested: false,
     explicitProductIds: [],
     now,
@@ -136,6 +137,50 @@ describe("resolveVerifiedProductContext", () => {
     expect(reset.reasonCodes).toEqual(["CONTEXT_RESET_REQUESTED"]);
     expect(clarification.reasonCodes).toEqual(["CONTEXT_PRODUCT_AMBIGUOUS"]);
     expect(human.reasonCodes).toEqual(["CONTEXT_OWNER_HUMAN"]);
+  });
+
+  it("allows a verified explicit code to resolve an active clarification", () => {
+    const resolution = resolveVerifiedProductContext(input({
+      hasActiveClarification: true,
+      explicitProductIds: ["SD398"],
+    }));
+
+    expect(resolution).toEqual({
+      productId: "SD398",
+      source: "STATE",
+      reasonCodes: ["CONTEXT_EXPLICIT_PRODUCT_VERIFIED"],
+    });
+  });
+
+  it("fails closed for multiple valid state selections unless a verified explicit code wins", () => {
+    const ambiguous = resolveVerifiedProductContext(input({
+      activeStateSelectionProductIds: ["SD398", "SD375"],
+      candidates: [
+        candidate(),
+        candidate({ productId: "SD375" }),
+      ],
+    }));
+    const explicit = resolveVerifiedProductContext(input({
+      activeStateSelectionProductIds: ["SD398", "SD375"],
+      explicitProductIds: ["SD375"],
+      candidates: [
+        candidate(),
+        candidate({
+          productId: "SD375",
+          source: "MESSAGE_CODE",
+          stateRevision: null,
+          fence: 121,
+        }),
+      ],
+    }));
+
+    expect(ambiguous.reasonCodes).toEqual(["CONTEXT_PRODUCT_AMBIGUOUS"]);
+    expect(ambiguous.productId).toBeNull();
+    expect(explicit).toEqual({
+      productId: "SD375",
+      source: "MESSAGE_CODE",
+      reasonCodes: ["CONTEXT_EXPLICIT_PRODUCT_VERIFIED"],
+    });
   });
 
   it("detects only explicit product reset requests", () => {

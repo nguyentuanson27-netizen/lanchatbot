@@ -41,6 +41,19 @@ describe("RealtimeDecisionEventV1Schema", () => {
     expect(RealtimeDecisionEventV1Schema.parse(validEvent)).toEqual(validEvent);
   });
 
+  it("accepts an audited grounded schema fallback path", () => {
+    const parsed = RealtimeDecisionEventV1Schema.parse({
+      ...validEvent,
+      details: {
+        ...validEvent.details,
+        modelPath: "grounded_fallback",
+        modelErrorClass: "VERTEX_SCHEMA_INVALID",
+      },
+    });
+
+    expect(parsed.details.modelPath).toBe("grounded_fallback");
+    expect(parsed.details.modelErrorClass).toBe("VERTEX_SCHEMA_INVALID");
+  });
   it("accepts the additive Wave 1 event taxonomy", () => {
     const eventTypes = [
       "PRODUCT_MATCHED",

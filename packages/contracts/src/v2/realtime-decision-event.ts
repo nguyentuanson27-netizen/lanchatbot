@@ -75,6 +75,7 @@ export const RealtimeDecisionEventV1Schema = z.object({
       "not_called",
       "model",
       "initial_fallback",
+      "grounded_fallback",
       "grounded_draft_fallback",
     ]).optional(),
     modelErrorClass: z.string().max(128).nullable().optional(),

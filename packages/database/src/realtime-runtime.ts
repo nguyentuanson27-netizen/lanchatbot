@@ -231,6 +231,7 @@ export interface RealtimeDecisionEventPlan {
       | "not_called"
       | "model"
       | "initial_fallback"
+      | "grounded_fallback"
       | "grounded_draft_fallback";
     modelErrorClass?: string | null;
     buyingSignalOverride: boolean;

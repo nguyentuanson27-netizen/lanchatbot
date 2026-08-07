@@ -23,6 +23,7 @@ export interface VerifiedProductContextInput {
   readonly minimumFence: number;
   readonly conversationOwner: "BOT" | "HUMAN";
   readonly hasActiveClarification: boolean;
+  readonly activeStateSelectionProductIds: readonly string[];
   readonly resetRequested: boolean;
   readonly explicitProductIds: readonly string[];
   readonly now: Date;
@@ -92,16 +93,12 @@ export function resolveVerifiedProductContext(
   if (input.conversationOwner !== "BOT") {
     return { productId: null, source: null, reasonCodes: ["CONTEXT_OWNER_HUMAN"] };
   }
-  if (input.resetRequested) {
-    return { productId: null, source: null, reasonCodes: ["CONTEXT_RESET_REQUESTED"] };
-  }
-  if (input.hasActiveClarification) {
-    return { productId: null, source: null, reasonCodes: ["CONTEXT_PRODUCT_AMBIGUOUS"] };
-  }
-
   const explicitIds = [...new Set(input.explicitProductIds.map(normalizeProductCode))];
   if (explicitIds.length > 1) {
     return { productId: null, source: null, reasonCodes: ["CONTEXT_EXPLICIT_MULTI_PRODUCT"] };
+  }
+  if (input.resetRequested && explicitIds.length === 0) {
+    return { productId: null, source: null, reasonCodes: ["CONTEXT_RESET_REQUESTED"] };
   }
 
   const rejected: string[] = [];
@@ -150,6 +147,26 @@ export function resolveVerifiedProductContext(
       productId: normalizeProductCode(explicitMatch.productId),
       source: explicitMatch.source,
       reasonCodes: ["CONTEXT_EXPLICIT_PRODUCT_VERIFIED"],
+    };
+  }
+
+  if (input.hasActiveClarification) {
+    return { productId: null, source: null, reasonCodes: ["CONTEXT_PRODUCT_AMBIGUOUS"] };
+  }
+
+  const activeStateSelectionIds = [...new Set(
+    input.activeStateSelectionProductIds.map(normalizeProductCode),
+  )];
+  const eligibleStateSelectionIds = activeStateSelectionIds.filter((productId) =>
+    eligible.some((candidate) =>
+      normalizeProductCode(candidate.productId) === productId
+    )
+  );
+  if (eligibleStateSelectionIds.length > 1) {
+    return {
+      productId: null,
+      source: null,
+      reasonCodes: ["CONTEXT_PRODUCT_AMBIGUOUS"],
     };
   }
 

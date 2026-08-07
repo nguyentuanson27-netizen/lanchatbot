@@ -8,7 +8,7 @@ import type { ConversationState } from "@lana/conversation-engine";
 import {
   RealtimeRunner as CoreRealtimeRunner,
   currentProductContinuationId,
-  deterministicVertexProposalFallback,
+  RealtimeContextPreservingSchemaError,
   productCodeOnly,
   type CanonicalChatHistoryPort,
   type RealtimeInboxPort,
@@ -89,12 +89,10 @@ function captureClaims(
   const last = ordered.at(-1);
   store.receiveSequence = last?.receiveSequence ?? null;
   store.customerTexts = ordered
-    .map(({ envelope }) => envelope.message.text?.trim() ?? "")
-    .filter(Boolean);
+    .map(({ envelope }) => envelope.message.text?.trim() ?? "");
   store.customerOccurredAt = last?.envelope.message.occurredAt ?? null;
   store.adTitles = ordered
-    .map(({ envelope }) => envelope.message.adsContext?.adTitle?.trim() ?? "")
-    .filter(Boolean);
+    .map(({ envelope }) => envelope.message.adsContext?.adTitle?.trim() ?? "");
   store.hasMedia = ordered.some(({ envelope }) =>
     envelope.message.attachments.length > 0
   );
@@ -138,11 +136,19 @@ function wrapRuntime(
         return async (...args: Parameters<RealtimeRuntimePort["loadOrCreate"]>) => {
           const record = await target.loadOrCreate(...args);
           const store = scope.getStore();
+          const state = store && batchProductContextResetRequested(store)
+            ? {
+                ...record.state,
+                currentProductId: null,
+                productSelections: [],
+                mediaClarification: null,
+              }
+            : record.state;
           if (store) {
-            store.state = record.state;
+            store.state = state;
             store.stateVersion = record.stateVersion;
           }
-          return record;
+          return state === record.state ? record : { ...record, state };
         };
       }
       return bindOrReturn(target, property);
@@ -252,16 +258,77 @@ function recordVerifiedProduct(
   if (!duplicate) store.verifiedProducts.push(evidence);
 }
 
-function explicitMessageProductIds(store: Bf02ExecutionContext): readonly string[] {
-  return [...new Set(store.customerTexts.flatMap((text) => [
+function customerTextProductIds(texts: readonly string[]): readonly string[] {
+  return [...new Set(texts.flatMap((text) => [
     ...(productCodeOnly(text) ? [productCodeOnly(text)!] : []),
     ...extractAdProductCodes(text),
   ]))];
 }
 
-function adProductIds(store: Bf02ExecutionContext): readonly string[] {
-  return [...new Set(store.adTitles.flatMap(extractAdProductCodes))];
+function latestProductContextResetIndex(store: Bf02ExecutionContext): number {
+  return store.customerTexts.reduce<number>(
+    (latest, text, index) =>
+      productContextResetRequested(text) ? index : latest,
+    -1,
+  );
 }
+
+function explicitMessageProductIds(store: Bf02ExecutionContext): readonly string[] {
+  const resetIndex = latestProductContextResetIndex(store);
+  return customerTextProductIds(store.customerTexts.slice(resetIndex + 1));
+}
+
+function batchProductContextResetRequested(store: Bf02ExecutionContext): boolean {
+  return latestProductContextResetIndex(store) >= 0 &&
+    explicitMessageProductIds(store).length === 0;
+}
+
+function resetDiscardedProductIds(store: Bf02ExecutionContext): readonly string[] {
+  const resetIndex = latestProductContextResetIndex(store);
+  if (resetIndex < 0) return [];
+  return [...new Set([
+    ...customerTextProductIds(store.customerTexts.slice(0, resetIndex)),
+    ...store.adTitles.slice(0, resetIndex).flatMap(extractAdProductCodes),
+  ])];
+}
+
+function searchIsDiscardedByReset(
+  store: Bf02ExecutionContext,
+  searchValue: string,
+): boolean {
+  if (!batchProductContextResetRequested(store)) return false;
+  const code = productCodeOnly(searchValue);
+  return code !== null && resetDiscardedProductIds(store).includes(code);
+}
+
+function adProductIds(store: Bf02ExecutionContext): readonly string[] {
+  const resetIndex = latestProductContextResetIndex(store);
+  return [...new Set(store.adTitles.slice(resetIndex + 1).flatMap(extractAdProductCodes))];
+}
+function activeStateSelectionProductIds(
+  store: Bf02ExecutionContext,
+): readonly string[] {
+  return [...new Set((store.state?.productSelections ?? []).map(({ productId }) =>
+    normalizeProductCode(productId)
+  ))];
+}
+
+async function recordActiveStateSelectionEvidence(
+  store: Bf02ExecutionContext,
+  productSearch: RealtimeProductSearchPort,
+): Promise<void> {
+  if (!store.state) return;
+  for (const productId of activeStateSelectionProductIds(store)) {
+    const duplicate = store.verifiedProducts.some((candidate) =>
+      candidate.source === "STATE" &&
+      normalizeProductCode(candidate.product.productId) === productId
+    );
+    if (duplicate) continue;
+    const product = await exactProduct(productSearch, productId);
+    if (product) recordVerifiedProduct(store, product, "STATE");
+  }
+}
+
 
 function classifyTextResolution(
   store: Bf02ExecutionContext,
@@ -329,8 +396,14 @@ function wrapProductSearch(
     get(target, property) {
       if (property === "searchText") {
         return async (...args: Parameters<RealtimeProductSearchPort["searchText"]>) => {
-          const result = await target.searchText(...args);
           const store = scope.getStore();
+          if (store && searchIsDiscardedByReset(store, args[0])) {
+            return {
+              status: "NOT_FOUND" as const,
+              reasonCode: "NO_CANDIDATES" as const,
+            };
+          }
+          const result = await target.searchText(...args);
           const product = matchedProduct(result);
           if (store && product) {
             const source = classifyTextResolution(store, args[0], product);
@@ -432,40 +505,39 @@ function evidenceCandidates(
   }));
 }
 
-function eligibleGroundedProductIds(
+async function eligibleGroundedProductIds(
   execution: Bf02ExecutionContext,
-  customerText: string,
-): ReadonlySet<string> {
+  productSearch: RealtimeProductSearchPort,
+): Promise<ReadonlySet<string>> {
   const state = execution.state;
   if (!state || execution.stateVersion === null) return new Set();
-  const eligible = new Set<string>();
-  const productIds = [...new Set(execution.verifiedProducts.map(({ product }) =>
-    normalizeProductCode(product.productId)
-  ))];
-  for (const productId of productIds) {
-    const matchingEvidence = execution.verifiedProducts.filter(({ product }) =>
-      normalizeProductCode(product.productId) === productId
-    );
-    const resolution = resolveVerifiedProductContext({
-      candidates: evidenceCandidates(matchingEvidence),
-      expectedStateRevision: execution.stateVersion,
-      minimumFence: state.lastFence,
-      conversationOwner: state.conversationOwner,
-      hasActiveClarification: state.mediaClarification?.status === "ACTIVE",
-      resetRequested: productContextResetRequested(customerText),
-      explicitProductIds: explicitMessageProductIds(execution),
-      now: new Date(),
-    });
-    if (resolution.productId === productId) eligible.add(productId);
-  }
-  return eligible;
+  await recordActiveStateSelectionEvidence(execution, productSearch);
+  const resolution = resolveVerifiedProductContext({
+    candidates: evidenceCandidates(execution.verifiedProducts),
+    expectedStateRevision: execution.stateVersion,
+    minimumFence: state.lastFence,
+    conversationOwner: state.conversationOwner,
+    hasActiveClarification: state.mediaClarification?.status === "ACTIVE",
+    activeStateSelectionProductIds: activeStateSelectionProductIds(execution),
+    resetRequested: batchProductContextResetRequested(execution),
+    explicitProductIds: explicitMessageProductIds(execution),
+    now: new Date(),
+  });
+  return resolution.productId === null
+    ? new Set()
+    : new Set([resolution.productId]);
+}
+
+interface VerifiedProductRecovery {
+  readonly product: StableProductDocument;
+  readonly source: VerifiedProductContextSource;
 }
 
 async function recoverVerifiedProduct(
   scope: AsyncLocalStorage<Bf02ExecutionContext>,
   productSearch: RealtimeProductSearchPort,
   modelContext: Parameters<RealtimeModelPort["generate"]>[0],
-): Promise<StableProductDocument | null> {
+): Promise<VerifiedProductRecovery | null> {
   const execution = scope.getStore();
   const state = execution?.state ?? null;
   if (!execution || !state || execution.stateVersion === null) return null;
@@ -476,6 +548,7 @@ async function recoverVerifiedProduct(
   const hasCurrentTurnProductEvidence = execution.verifiedProducts.some(
     ({ source }) => source !== "STATE" && source !== "PREVIOUS_BOT",
   );
+  await recordActiveStateSelectionEvidence(execution, productSearch);
 
   const continuationProductId = verifiedContinuationProductId(
     customerText,
@@ -529,13 +602,15 @@ async function recoverVerifiedProduct(
     minimumFence: state.lastFence,
     conversationOwner: state.conversationOwner,
     hasActiveClarification: state.mediaClarification?.status === "ACTIVE",
-    resetRequested: productContextResetRequested(customerText),
+    activeStateSelectionProductIds: activeStateSelectionProductIds(execution),
+    resetRequested: batchProductContextResetRequested(execution),
     explicitProductIds,
     now: new Date(),
   });
-  return resolution.productId === null
-    ? null
-    : productsById.get(resolution.productId) ?? null;
+  if (resolution.productId === null) return null;
+  const product = productsById.get(resolution.productId);
+  const source = resolution.source;
+  return product && source ? { product, source } : null;
 }
 
 /**
@@ -568,68 +643,41 @@ export async function verifiedGroundedProduct(
     : null;
 }
 
-function fallbackResult(
-  customerText: string,
-  product: StableProductDocument,
-  error: unknown,
-  latencyMs: number,
-  priorProposal?: Parameters<RealtimeModelPort["groundWithFacts"]>[1],
-): Awaited<ReturnType<RealtimeModelPort["generate"]>> {
-  const fallback = deterministicVertexProposalFallback(
-    customerText,
-    product,
-    false,
-    error,
-  );
-  return {
-    proposal: {
-      ...fallback.proposal,
-      ...(priorProposal?.salesSignals === undefined
-        ? {}
-        : { salesSignals: priorProposal.salesSignals }),
-      ...(priorProposal?.strategyAnalysis === undefined
-        ? {}
-        : { strategyAnalysis: priorProposal.strategyAnalysis }),
-    },
-    modelVersion: `bf02-context-fallback:${fallback.reasonCode}`,
-    latencyMs,
-    tokenUsage: {},
-  };
-}
-
 function wrapModel(
   model: RealtimeModelPort,
   productSearch: RealtimeProductSearchPort,
   scope: AsyncLocalStorage<Bf02ExecutionContext>,
 ): RealtimeModelPort {
   const generate: RealtimeModelPort["generate"] = async (...args) => {
-    const startedAt = Date.now();
     try {
       return await model.generate(...args);
     } catch (error) {
       if (!isAgentProposalSchemaFailure(error)) throw error;
-      const product = await recoverVerifiedProduct(scope, productSearch, args[0]);
-      if (!product) throw error;
-      return fallbackResult(
-        latestCustomerContext(args[0])?.text ?? "",
-        product,
+      const recovered = await recoverVerifiedProduct(scope, productSearch, args[0]);
+      if (!recovered) throw error;
+      const origin = recovered.source === "MESSAGE_CODE"
+        ? "TEXT_CODE"
+        : recovered.source === "CURRENT_TURN"
+          ? "TEXT_SEMANTIC"
+          : recovered.source === "MEDIA_OR_AD"
+            ? "MEDIA"
+            : "STATE";
+      throw new RealtimeContextPreservingSchemaError(
         error,
-        Math.max(0, Date.now() - startedAt),
+        recovered.product,
+        origin,
       );
     }
   };
 
   const groundWithFacts: RealtimeModelPort["groundWithFacts"] = async (...args) => {
-    const startedAt = Date.now();
     try {
       return await model.groundWithFacts(...args);
     } catch (error) {
       if (!isAgentProposalSchemaFailure(error)) throw error;
       const execution = scope.getStore();
-      const customerText = latestCustomerContext(args[0])?.text ??
-        execution?.customerTexts.at(-1) ?? "";
       const verifiedIds = execution
-        ? eligibleGroundedProductIds(execution, customerText)
+        ? await eligibleGroundedProductIds(execution, productSearch)
         : new Set<string>();
       const product = await verifiedGroundedProduct(
         productSearch,
@@ -638,12 +686,11 @@ function wrapModel(
         verifiedIds,
       );
       if (!product) throw error;
-      return fallbackResult(
-        customerText,
-        product,
+      throw new RealtimeContextPreservingSchemaError(
         error,
-        Math.max(0, Date.now() - startedAt),
-        args[1],
+        product,
+        "STATE",
+        "GROUNDED",
       );
     }
   };

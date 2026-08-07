@@ -7,6 +7,7 @@ import {
   vi,
 } from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
+import type { AgentProposalV1 } from "@lana/contracts";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import { VertexShadowError } from "./vertex.js";
 import {
@@ -59,6 +60,9 @@ interface HarnessOptions {
   readonly priorAt?: string;
   readonly products?: readonly TestProduct[];
   readonly nativeBatch?: boolean;
+  readonly productSelections?: readonly TestProduct[];
+  readonly mediaClarification?: boolean;
+  readonly initialProposal?: AgentProposalV1;
 }
 
 function catalogSearch(
@@ -177,6 +181,12 @@ function createHarness(options: HarnessOptions) {
     routingOwner: "APP",
     now: new Date(priorAt),
   });
+  const selectedProducts = options.productSelections ??
+    (options.mediaClarification ? products : []);
+  const productSelections = selectedProducts.map((product, index) => ({
+    label: `MAU_${index + 1}`,
+    productId: product.productId,
+  }));
   const state = {
     ...baseState,
     revision: 12,
@@ -191,6 +201,19 @@ function createHarness(options: HarnessOptions) {
     blockingTag: null,
     blockingTagVerifiedAt: priorAt,
     updatedAt: priorAt,
+    ...(productSelections.length > 0 ? { productSelections } : {}),
+    ...(options.mediaClarification
+      ? {
+          mediaClarification: {
+            status: "ACTIVE" as const,
+            candidates: productSelections,
+            attemptCount: 2,
+            maxAttempts: 3,
+            reasonCode: "MEDIA_CLARIFICATION_OPEN",
+            openedAt: priorAt,
+          },
+        }
+      : {}),
   };
   const claims = options.messages.map(claimFor);
   const lastClaim = claims.at(-1)!;
@@ -235,6 +258,10 @@ function createHarness(options: HarnessOptions) {
       };
 
   let committed: Parameters<RealtimeRuntimePort["commit"]>[0] | null = null;
+  const commit = vi.fn(async (input: Parameters<RealtimeRuntimePort["commit"]>[0]) => {
+    committed = input;
+    return {} as Awaited<ReturnType<RealtimeRuntimePort["commit"]>>;
+  });
   const runtime: RealtimeRuntimePort = {
     loadOrCreate: vi.fn(async () => ({
       conversationId: state.conversationId,
@@ -246,14 +273,19 @@ function createHarness(options: HarnessOptions) {
       appSendEnabled: true,
       killSwitch: false,
     })),
-    commit: vi.fn(async (input) => {
-      committed = input;
-      return {} as Awaited<ReturnType<RealtimeRuntimePort["commit"]>>;
-    }),
+    commit,
     linkProviderConversation: vi.fn(async () => undefined),
   };
 
   const generate = vi.fn(async () => {
+    if (options.initialProposal) {
+      return {
+        proposal: options.initialProposal,
+        modelVersion: "bf02-test-model",
+        latencyMs: 1,
+        tokenUsage: {},
+      };
+    }
     throw new VertexShadowError("VERTEX_SCHEMA_INVALID", true);
   });
   const groundWithFacts = vi.fn(async () => {
@@ -311,6 +343,7 @@ function createHarness(options: HarnessOptions) {
     completeBatch,
     retry,
     retryBatch,
+    commit,
     committed: () => committed,
   };
 }
@@ -336,7 +369,7 @@ describe("BF-02 realtime context fallback", () => {
     vi.useRealTimers();
   });
 
-  it("preserves verified SD398 through production initial and grounded schema failures", async () => {
+  it("uses the initial schema fallback without a second grounding call", async () => {
     const harness = createHarness({ messages: [{ text: "nhẹ nhàng đi" }] });
 
     expect(await harness.runner.processOne()).toBe(true);
@@ -345,7 +378,9 @@ describe("BF-02 realtime context fallback", () => {
     const commit = harness.committed();
     const reply = textFromCommit(commit);
     expect(harness.generate).toHaveBeenCalledOnce();
-    expect(harness.groundWithFacts).toHaveBeenCalledOnce();
+    expect(harness.groundWithFacts).not.toHaveBeenCalled();
+    expect(harness.commit).toHaveBeenCalledOnce();
+    expect(harness.complete).toHaveBeenCalledOnce();
     expect(reply).toContain("SD398");
     expect(reply).not.toMatch(/(?:mã|ma)(?: sản phẩm)? hoặc ảnh/iu);
     expect(commit?.state.currentProductId).toBe("SD398");
@@ -353,9 +388,51 @@ describe("BF-02 realtime context fallback", () => {
       eventType: "PRODUCT_RESOLVED",
       origin: "STATE",
       productId: "SD398",
+      details: expect.objectContaining({
+        modelPath: "initial_fallback",
+        modelErrorClass: "VERTEX_SCHEMA_INVALID",
+      }),
     }));
   });
 
+  it("reports a verified grounded schema fallback without treating it as model success", async () => {
+    const harness = createHarness({
+      messages: [{ text: "nhẹ nhàng đi" }],
+      initialProposal: {
+        schemaVersion: 1,
+        intent: "product_inquiry",
+        conversationStage: "consulting",
+        productId: "SD398",
+        action: "REPLY",
+        reply: "Mẫu SD398 ạ.",
+        attachments: [],
+        handoffReason: null,
+        businessFactQuery: {
+          intent: "PRICE",
+          offerType: null,
+          color: null,
+          size: null,
+          deliveryRegion: null,
+        },
+      },
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const commit = harness.committed();
+    expect(harness.generate).toHaveBeenCalledOnce();
+    expect(harness.groundWithFacts).toHaveBeenCalledOnce();
+    expect(harness.retry).not.toHaveBeenCalled();
+    expect(commit?.state.currentProductId).toBe("SD398");
+    expect(commit?.decisionEvents).toContainEqual(expect.objectContaining({
+      eventType: "PRODUCT_RESOLVED",
+      productId: "SD398",
+      details: expect.objectContaining({
+        modelPath: "grounded_fallback",
+        modelErrorClass: "VERTEX_SCHEMA_INVALID",
+      }),
+    }));
+  });
   it("keeps a verified batch switch instead of returning to the old state product", async () => {
     const harness = createHarness({
       messages: [{ text: "SD375" }, { text: "nhẹ nhàng đi" }],
@@ -415,6 +492,163 @@ describe("BF-02 realtime context fallback", () => {
     expect(reply).toMatch(/mã|ảnh/iu);
   });
 
+  it("honors an earlier reset in a native batch before a vague follow-up", async () => {
+    const harness = createHarness({
+      messages: [
+        { text: "đổi sang mẫu khác" },
+        { text: "nhẹ nhàng đi" },
+      ],
+      nativeBatch: true,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const commit = harness.committed();
+    const reply = textFromCommit(commit);
+    expect(harness.generate).toHaveBeenCalledOnce();
+    expect(harness.groundWithFacts).not.toHaveBeenCalled();
+    expect(reply).not.toContain("SD398");
+    expect(commit?.state.currentProductId).toBeNull();
+    expect(commit?.state.productSelections).toEqual([]);
+  });
+
+  it("lets a later reset override an earlier explicit product in the same batch", async () => {
+    const harness = createHarness({
+      messages: [
+        { text: "xin giá SD375" },
+        { text: "đổi sang mẫu khác" },
+      ],
+      products: [product398, product375],
+      nativeBatch: true,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const commit = harness.committed();
+    expect(harness.generate).not.toHaveBeenCalled();
+    expect(harness.groundWithFacts).not.toHaveBeenCalled();
+    expect(textFromCommit(commit)).not.toContain("SD375");
+    expect(commit?.state.currentProductId).toBeNull();
+  });
+  it("does not recover a product from an ad before a later reset", async () => {
+    const harness = createHarness({
+      messages: [
+        { text: "nhẹ nhàng đi", adProductId: "SD375" },
+        { text: "đổi sang mẫu khác" },
+      ],
+      products: [product398, product375],
+      nativeBatch: true,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const commit = harness.committed();
+    expect(harness.groundWithFacts).not.toHaveBeenCalled();
+    expect(textFromCommit(commit)).not.toContain("SD375");
+    expect(commit?.state.currentProductId).toBeNull();
+  });
+
+  it("lets an explicit new product after a reset take deterministic precedence", async () => {
+    const harness = createHarness({
+      messages: [
+        { text: "đổi sang mẫu khác" },
+        { text: "xin giá SD375" },
+      ],
+      products: [product398, product375],
+      nativeBatch: true,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const commit = harness.committed();
+    expect(harness.generate).not.toHaveBeenCalled();
+    expect(harness.groundWithFacts).not.toHaveBeenCalled();
+    expect(textFromCommit(commit)).toContain("SD375");
+    expect(commit?.state.currentProductId).toBe("SD375");
+  });
+
+  it("clears active media clarification when a fresh explicit code is supplied", async () => {
+    const harness = createHarness({
+      messages: [{ text: "xin giá SD398" }],
+      products: [product398, product375],
+      productSelections: [product398, product375],
+      mediaClarification: true,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const commit = harness.committed();
+    expect(harness.generate).not.toHaveBeenCalled();
+    expect(harness.groundWithFacts).not.toHaveBeenCalled();
+    expect(textFromCommit(commit)).toContain("SD398");
+    expect(commit?.state.currentProductId).toBe("SD398");
+    expect(commit?.state.mediaClarification).toBeNull();
+    expect(JSON.stringify(commit?.decisionEvents)).not.toContain(
+      "MEDIA_CLARIFICATION_EXHAUSTED",
+    );
+  });
+
+  it("fails closed for multiple active state selections until an explicit code resolves them", async () => {
+    const ambiguous = createHarness({
+      messages: [{ text: "nhẹ nhàng đi" }],
+      products: [product398, product375],
+      productSelections: [product398, product375],
+    });
+
+    expect(await ambiguous.runner.processOne()).toBe(true);
+
+    const ambiguousCommit = ambiguous.committed();
+    expect(ambiguous.generate).toHaveBeenCalledOnce();
+    expect(ambiguous.groundWithFacts).not.toHaveBeenCalled();
+    expect(textFromCommit(ambiguousCommit)).not.toContain("SD398");
+    expect(textFromCommit(ambiguousCommit)).not.toContain("SD375");
+    expect(ambiguousCommit?.decisionEvents).not.toContainEqual(expect.objectContaining({
+      eventType: "PRODUCT_RESOLVED",
+    }));
+
+    const explicit = createHarness({
+      messages: [{ text: "xin giá SD375" }],
+      products: [product398, product375],
+      productSelections: [product398, product375],
+    });
+
+    expect(await explicit.runner.processOne()).toBe(true);
+    expect(explicit.generate).not.toHaveBeenCalled();
+    expect(textFromCommit(explicit.committed())).toContain("SD375");
+    expect(explicit.committed()?.state.currentProductId).toBe("SD375");
+  });
+
+  it("does not ground or commit when eligible context evidence conflicts", async () => {
+    const harness = createHarness({
+      messages: [{ text: "nhẹ nhàng đi" }],
+      products: [product398, product375],
+      productSelections: [product398, product375],
+      initialProposal: {
+        schemaVersion: 1,
+        intent: "product_inquiry",
+        conversationStage: "consulting",
+        productId: "SD398",
+        action: "REPLY",
+        reply: "Mẫu SD398 ạ.",
+        attachments: [],
+        handoffReason: null,
+        businessFactQuery: {
+          intent: "PRICE",
+          offerType: null,
+          color: null,
+          size: null,
+          deliveryRegion: null,
+        },
+      },
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    expect(harness.generate).toHaveBeenCalledOnce();
+    expect(harness.groundWithFacts).toHaveBeenCalledOnce();
+    expect(harness.retry).toHaveBeenCalledOnce();
+    expect(harness.commit).not.toHaveBeenCalled();
+  });
   it("does not use an expired state product after a schema failure", async () => {
     const harness = createHarness({
       messages: [{ text: "nhẹ nhàng đi" }],
