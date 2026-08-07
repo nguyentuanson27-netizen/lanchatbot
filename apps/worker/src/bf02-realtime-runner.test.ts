@@ -352,9 +352,10 @@ function createHarness(options: HarnessOptions) {
     throw new VertexShadowError("VERTEX_SCHEMA_INVALID", true);
   });
   const model: RealtimeModelPort = { generate, groundWithFacts };
-  const productSearch = catalogSearch(products, {
-    semanticMatchByMention: options.semanticMatchByMention,
-  });
+  const productSearch = catalogSearch(
+    products,
+    options.semanticMatchByMention ? { semanticMatchByMention: true } : {},
+  );
 
   const resolveFacts: BusinessFactsReader["resolve"] = async ({ productId }) => {
     const product = products.find((candidate) =>
