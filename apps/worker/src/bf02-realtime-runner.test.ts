@@ -646,6 +646,48 @@ describe("BF-02 realtime context fallback", () => {
     expect(commit?.state.currentProductId).toBeNull();
   });
 
+  it("does not resolve an ad attached to the reset message", async () => {
+    const harness = createHarness({
+      messages: [
+        { text: "nhẹ nhàng đi" },
+        { text: "đổi sang mẫu khác", adProductId: "SD375" },
+      ],
+      products: [product398, product375],
+      nativeBatch: true,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const commit = harness.committed();
+    expect(harness.productSearch.searchText).not.toHaveBeenCalledWith("SD375");
+    expect(textFromCommit(commit)).not.toContain("SD375");
+    expect(commit?.state.currentProductId).toBeNull();
+  });
+
+  it("allows a fresh ad after reset to introduce a product", async () => {
+    const harness = createHarness({
+      messages: [
+        { text: "đổi sang mẫu khác" },
+        { text: "nhẹ nhàng đi", adProductId: "SD375" },
+      ],
+      products: [product398, product375],
+      nativeBatch: true,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const commit = harness.committed();
+    expect(harness.generate).not.toHaveBeenCalled();
+    expect(harness.groundWithFacts).not.toHaveBeenCalled();
+    expect(textFromCommit(commit)).toContain("SD375");
+    expect(commit?.state.currentProductId).toBe("SD375");
+    expect(commit?.decisionEvents).toContainEqual(expect.objectContaining({
+      eventType: "PRODUCT_RESOLVED",
+      origin: "ADS",
+      productId: "SD375",
+    }));
+  });
+
   it("does not resolve an image that arrived before a later reset", async () => {
     const harness = createHarness({
       messages: [
