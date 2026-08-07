@@ -90,7 +90,10 @@ function catalogSearch(
         };
       }
       const semantic = options.semanticMatchByMention
-        ? products.find((candidate) => normalized.includes(candidate.productId))
+        ? products.find((candidate) => normalized.includes(candidate.productId)) ??
+          (normalized.includes("MẪU MỚI NHẸ NHÀNG")
+            ? products.find((candidate) => candidate.productId === "SD375")
+            : undefined)
         : undefined;
       return semantic
         ? {
@@ -626,6 +629,38 @@ describe("BF-02 realtime context fallback", () => {
     expect(harness.productSearch.searchText).not.toHaveBeenCalledWith(
       expect.stringContaining("xin giá SD375\nđổi sang mẫu khác"),
     );
+  });
+
+  it("preserves a fresh post-reset semantic match through schema failure", async () => {
+    const harness = createHarness({
+      messages: [
+        { text: "đổi sang mẫu khác" },
+        { text: "mẫu mới nhẹ nhàng" },
+      ],
+      products: [product398, product375],
+      nativeBatch: true,
+      semanticMatchByMention: true,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const commit = harness.committed();
+    const reply = textFromCommit(commit);
+    expect(harness.generate).toHaveBeenCalledOnce();
+    expect(harness.groundWithFacts).not.toHaveBeenCalled();
+    expect(reply).toContain("SD375");
+    expect(reply).not.toContain("SD398");
+    expect(reply).not.toMatch(/(?:mã|ma)(?: sản phẩm)? hoặc ảnh/iu);
+    expect(commit?.state.currentProductId).toBe("SD375");
+    expect(commit?.decisionEvents).toContainEqual(expect.objectContaining({
+      eventType: "PRODUCT_RESOLVED",
+      origin: "TEXT_SEMANTIC",
+      productId: "SD375",
+      details: expect.objectContaining({
+        modelPath: "initial_fallback",
+        modelErrorClass: "VERTEX_SCHEMA_INVALID",
+      }),
+    }));
   });
 
   it("does not recover a product from an ad before a later reset", async () => {
