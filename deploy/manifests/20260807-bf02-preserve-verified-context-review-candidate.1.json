@@ -1,0 +1,112 @@
+{
+    "schemaVersion":  1,
+    "capturedAt":  "2026-08-07T09:02:12Z",
+    "capturedAtSemantics":  "repository manifest creation and commit time; not a host runtime observation or capture time",
+    "status":  "REVIEW_CANDIDATE_SOURCE_VERIFIED_ARTIFACT_PENDING",
+    "environment":  "repository-review-candidate",
+    "documentType":  "APPEND_ONLY_REVIEW_CANDIDATE_EVIDENCE",
+    "reviewCandidate":  {
+                            "tag":  "20260807-bf02-preserve-verified-context-review-candidate.1",
+                            "purpose":  "SOL_HIGH_EXACT_HEAD_READ_ONLY_REVIEW_ONLY_NOT_DEPLOY_AUTHORIZATION",
+                            "immutableAfterTag":  true,
+                            "finalPostMergeReleaseTag":  null
+                        },
+    "source":  {
+                   "repository":  "https://github.com/nguyentuanson27-netizen/lanchatbot",
+                   "branch":  "codex/bf-02-preserve-verified-context",
+                   "pullRequest":  133,
+                   "preCorrectionReviewedHead":  "29d93bbd8abd38a967bb432db6b35d91fba73c1f",
+                   "implementationCommit":  "f5a74af1086f503b906cb0792cb70050100aae76",
+                   "baseCommit":  "cf5890eec615b957d14acc66f352e533fe0ba602",
+                   "mergeBase":  "cf5890eec615b957d14acc66f352e533fe0ba602",
+                   "candidateTagMustPeelToCommitContainingThisManifest":  true,
+                   "candidateTagMustNotAuthorizeBuildDeploymentOrCutover":  true
+               },
+    "image":  {
+                  "name":  "lana-chatbot-app:bf02-preserve-verified-context-review-candidate.1",
+                  "digest":  null,
+                  "status":  "NOT_BUILT",
+                  "targetService":  "realtime-worker"
+              },
+    "behavioralBaseline":  {
+                               "releaseTag":  "20260805-bf05-size-chart-eligibility-r5.1",
+                               "sourceCommit":  "bd1b98c772018bbb676db27c50464a1917fd5731",
+                               "repositoryProvenance":  "ANNOTATED_TAG_AND_SOURCE_COMMIT_ONLY",
+                               "observationAuthority":  "REPOSITORY_PROVENANCE_ONLY_NOT_CURRENT_LIVE_PARITY_EVIDENCE"
+                           },
+    "scope":  {
+                  "programRelease":  "BF_WAVE_B1",
+                  "issues":  [
+                                 "BF-02"
+                             ],
+                  "targetService":  "realtime-worker",
+                  "migrationRequired":  false,
+                  "backfillRequired":  false,
+                  "dataDeletionRequired":  false,
+                  "runtimeModeChangeRequired":  false,
+                  "controlPlaneMutationAllowed":  false,
+                  "routingChangeRequired":  false,
+                  "pageAllowlistChangeRequired":  false,
+                  "messengerProductionTestRequiredForPreparation":  false
+              },
+    "changes":  {
+                    "nativeBatchReset":  "chronological reset or abandon-context intent clears stale product state and blocks pre-reset text or ad product recovery; a later explicit product code takes precedence",
+                    "multiProductAmbiguity":  "multiple valid active state product selections remain ambiguous across eligible evidence until a verified explicit product code resolves them",
+                    "vertexSchemaFallback":  "initial and grounded VERTEX_SCHEMA_INVALID failures remain explicit fallback paths with truthful model path and error-class audit data; no schema failure is returned as model success",
+                    "mediaClarification":  "a fresh exact product code clears active media clarification without exhausting its retry budget"
+                },
+    "implementationVerification":  {
+                                       "frozenInstall":  "PASS_PNPM_10_12_4",
+                                       "targetedBf02RealtimeVertexAndContract":  "PASS_48_TESTS",
+                                       "workerTypecheck":  "PASS",
+                                       "workerTests":  "PASS_38_FILES_421_TESTS",
+                                       "fullPnpmCheck":  "PASS_ON_IMPLEMENTATION_COMMIT_f5a74af1086f503b906cb0792cb70050100aae76",
+                                       "migrationGeneratedRuntimeStateReleaseScope":  "PASS_CLEAN",
+                                       "independentExactHeadReview":  "PENDING_SOL_HIGH"
+                                   },
+    "runtimeEvidence":  {
+                            "status":  "NOT_CAPTURED",
+                            "authority":  "NO_VPS_OR_RUNTIME_READ_OR_MUTATION_PERFORMED",
+                            "requiredForAnySeparatelyAuthorizedDeployment":  "freshly capture and verify live runtime parity and record it only as append-only follow-up evidence"
+                        },
+    "requiredBeforeBuild":  [
+                                "RELEASE_PREPARATION_PR_MERGED",
+                                "FINAL_POST_MERGE_RELEASE_TAG_ON_MAIN_CONTAINING_MANIFEST",
+                                "TAG_AND_COMMIT_PROVENANCE_PASS",
+                                "SEPARATE_BUILD_AUTHORIZATION"
+                            ],
+    "requiredBeforeCutover":  [
+                                  "SEPARATE_DEPLOYMENT_AUTHORIZATION",
+                                  "FRESH_RUNTIME_STATE_CAPTURE_AND_PARITY_VERIFICATION",
+                                  "NO_MIGRATION_OR_BACKFILL_UNLESS_SEPARATELY_AUTHORIZED",
+                                  "ROUTING_MODE_ALLOWLIST_AND_CONTROL_PLANE_UNCHANGED",
+                                  "NO_MESSENGER_PRODUCTION_TEST_UNLESS_SEPARATELY_AUTHORIZED"
+                              ],
+    "rollback":  {
+                     "repositoryReferenceTag":  "20260805-bf05-size-chart-eligibility-r5.1",
+                     "repositoryReferenceCommit":  "bd1b98c772018bbb676db27c50464a1917fd5731",
+                     "schemaRollbackRequired":  false,
+                     "dataDeletionRequired":  false,
+                     "runtimeRollbackAuthorization":  "NOT_GRANTED"
+                 },
+    "authorizationBoundary":  {
+                                  "artifactBuildAuthorized":  false,
+                                  "deploymentAuthorized":  false,
+                                  "migrationAuthorized":  false,
+                                  "backfillAuthorized":  false,
+                                  "restartAuthorized":  false,
+                                  "runtimeModeSwitchAuthorized":  false,
+                                  "controlPlaneMutationAuthorized":  false,
+                                  "routingMutationAuthorized":  false,
+                                  "pageAllowlistMutationAuthorized":  false,
+                                  "messengerProductionTestAuthorized":  false,
+                                  "vpsMutationAuthorized":  false
+                              },
+    "manifestIntegrity":  {
+                              "immutableAfterTag":  true,
+                              "runtimeEvidenceMustBeRecordedAsAppendOnlyFollowUp":  true,
+                              "repositoryTagProvenanceDoesNotEstablishLiveParity":  true,
+                              "freshLiveParityVerificationRequiresSeparateDeploymentAuthorization":  true,
+                              "directVpsSourceEditsAllowed":  false
+                          }
+}
