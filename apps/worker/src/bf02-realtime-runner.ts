@@ -292,9 +292,18 @@ function explicitMessageProductIds(store: Bf02ExecutionContext): readonly string
   return customerTextProductIds(store.customerTexts.slice(resetIndex + 1));
 }
 
+function hasFreshPostResetProductEvidence(store: Bf02ExecutionContext): boolean {
+  return store.verifiedProducts.some(({ source }) =>
+    source === "CURRENT_TURN" ||
+    source === "MESSAGE_CODE" ||
+    source === "MEDIA_OR_AD"
+  );
+}
+
 function batchProductContextResetRequested(store: Bf02ExecutionContext): boolean {
   return latestProductContextResetIndex(store) >= 0 &&
-    explicitMessageProductIds(store).length === 0;
+    explicitMessageProductIds(store).length === 0 &&
+    !hasFreshPostResetProductEvidence(store);
 }
 
 function adProductIds(store: Bf02ExecutionContext): readonly string[] {
