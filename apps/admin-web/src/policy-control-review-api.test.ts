@@ -1,7 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getPolicyReviewContext, listPolicyArtifacts } from "./policy-control-review-api.js";
+import {
+  batchTransitionPolicyArtifacts,
+  getPolicyReviewContext,
+  listPolicyArtifacts,
+} from "./policy-control-review-api.js";
 
 const VERSION_ID = "018f1b72-0000-7000-8000-000000000101";
+const VERSION_ID_B = "018f1b72-0000-7000-8000-000000000102";
 const POINTER_ID = "018f1b72-0000-7000-8000-000000000201";
 
 function jsonResponse(payload: unknown): Response {
@@ -74,5 +79,109 @@ describe("policy review API client", () => {
       next_cursor: null,
     })));
     await expect(listPolicyArtifacts({})).rejects.toThrow("Invalid policy revision value");
+  });
+
+  it("preserves PostgreSQL bigint current_revision strings in batch conflicts", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
+      request_id: "request-1",
+      action: "APPROVE",
+      results: [{
+        version_id: VERSION_ID,
+        ok: false,
+        error_code: "ADMIN_ARTIFACT_VERSION_CONFLICT",
+        current_revision: "9",
+      }],
+      summary: { total: 1, succeeded: 0, failed: 1 },
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await batchTransitionPolicyArtifacts("APPROVE", [{
+      versionId: VERSION_ID,
+      expectedRevision: 3,
+    }]);
+
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("/policy/review-artifacts/batch-transitions");
+    expect(result.results[0]).toMatchObject({
+      versionId: VERSION_ID,
+      ok: false,
+      errorCode: "ADMIN_ARTIFACT_VERSION_CONFLICT",
+      currentRevision: 9,
+    });
+  });
+
+  it("rejects an unknown action in a 200 response instead of inventing a default", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      request_id: "request-2",
+      action: "PUBLISH",
+      results: [],
+      summary: { total: 0, succeeded: 0, failed: 0 },
+    })));
+
+    await expect(batchTransitionPolicyArtifacts("APPROVE", [{
+      versionId: VERSION_ID,
+      expectedRevision: 3,
+    }])).rejects.toThrow("Invalid policy batch response");
+  });
+
+  it("rejects a truncated 200 response after an ambiguous partial mutation", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      request_id: "request-3",
+      action: "APPROVE",
+      results: [{
+        version_id: VERSION_ID,
+        ok: false,
+        error_code: "ADMIN_INTERNAL_ERROR",
+      }],
+      summary: { total: 1, succeeded: 0, failed: 1 },
+    })));
+
+    await expect(batchTransitionPolicyArtifacts("APPROVE", [
+      { versionId: VERSION_ID, expectedRevision: 3 },
+      { versionId: VERSION_ID_B, expectedRevision: 4 },
+    ])).rejects.toThrow("Invalid policy batch response");
+  });
+
+  it("rejects reordered result ids even when counts look valid", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      request_id: "request-4",
+      action: "APPROVE",
+      results: [
+        { version_id: VERSION_ID_B, ok: false, error_code: "ADMIN_INTERNAL_ERROR" },
+        { version_id: VERSION_ID, ok: false, error_code: "ADMIN_INTERNAL_ERROR" },
+      ],
+      summary: { total: 2, succeeded: 0, failed: 2 },
+    })));
+
+    await expect(batchTransitionPolicyArtifacts("APPROVE", [
+      { versionId: VERSION_ID, expectedRevision: 3 },
+      { versionId: VERSION_ID_B, expectedRevision: 4 },
+    ])).rejects.toThrow("Invalid policy batch response");
+  });
+
+  it("rejects a malformed success artifact instead of defaulting required fields", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      request_id: "request-5",
+      action: "APPROVE",
+      results: [{
+        version_id: VERSION_ID,
+        ok: true,
+        artifact: {
+          version_id: VERSION_ID,
+          artifact_kind: "SIZE_CHART",
+          version_number: 3,
+          lifecycle: "APPROVED",
+          revision: "4",
+          content: { kind: "SIZE_CHART" },
+          updated_by_subject: "owner",
+          updated_at: "2026-08-08T00:00:00.000Z",
+        },
+      }],
+      summary: { total: 1, succeeded: 1, failed: 0 },
+    })));
+
+    await expect(batchTransitionPolicyArtifacts("APPROVE", [{
+      versionId: VERSION_ID,
+      expectedRevision: 3,
+    }])).rejects.toThrow("Invalid policy batch response");
   });
 });

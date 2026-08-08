@@ -43,7 +43,43 @@ export interface PolicyReviewContext {
   readonly rollbackCandidates: PolicyRollbackCandidate[];
 }
 
+export interface PolicyBatchItem {
+  readonly versionId: string;
+  readonly expectedRevision: number;
+}
+
+export interface PolicyBatchResultItem {
+  readonly versionId: string;
+  readonly ok: boolean;
+  readonly artifact?: PolicyArtifact;
+  readonly errorCode?: string;
+  readonly currentRevision?: number;
+}
+
+export interface PolicyBatchResult {
+  readonly requestId: string;
+  readonly action: "VALIDATE" | "APPROVE";
+  readonly results: PolicyBatchResultItem[];
+  readonly summary: { total: number; succeeded: number; failed: number };
+}
+
+export class PolicyBatchResponseError extends TypeError {
+  constructor() {
+    super("Invalid policy batch response");
+    this.name = "PolicyBatchResponseError";
+  }
+}
+
 type JsonRecord = Record<string, unknown>;
+
+const POLICY_ARTIFACT_KINDS = new Set<PolicyArtifactKind>([
+  "SHOP_POLICY",
+  "OFFER_POLICY",
+  "CLOSING_STRATEGY",
+  "SIZE_CHART",
+  "HANDOFF_MATRIX",
+  "PAYMENT_POLICY",
+]);
 
 export async function listPolicyPageIds(signal?: AbortSignal): Promise<string[]> {
   const payload = await policyRequest("/pages", signal);
@@ -75,6 +111,14 @@ export async function listPolicyArtifacts(
   };
 }
 
+export async function getPolicyArtifact(
+  versionId: string,
+  signal?: AbortSignal,
+): Promise<PolicyArtifact> {
+  const payload = await policyRequest(`/policy/artifacts/${encodeURIComponent(versionId)}`, signal);
+  return normalizeArtifact(record(payload.artifact));
+}
+
 export async function getPolicyReviewContext(
   versionId: string,
   signal?: AbortSignal,
@@ -100,11 +144,37 @@ export async function getPolicyReviewContext(
   };
 }
 
-async function policyRequest(path: string, signal?: AbortSignal): Promise<JsonRecord> {
+export async function batchTransitionPolicyArtifacts(
+  action: "VALIDATE" | "APPROVE",
+  items: readonly PolicyBatchItem[],
+  signal?: AbortSignal,
+): Promise<PolicyBatchResult> {
+  const payload = await policyRequest("/policy/review-artifacts/batch-transitions", signal, {
+    method: "POST",
+    body: {
+      action,
+      items: items.map((item) => ({
+        version_id: item.versionId,
+        expected_revision: item.expectedRevision,
+      })),
+    },
+  });
+  return parsePolicyBatchResult(payload, action, items);
+}
+
+async function policyRequest(
+  path: string,
+  signal?: AbortSignal,
+  options: { method?: "GET" | "POST"; body?: unknown } = {},
+): Promise<JsonRecord> {
   const response = await fetch(`${API_BASE}${path}`, {
-    method: "GET",
+    method: options.method ?? "GET",
     credentials: "same-origin",
-    headers: { Accept: "application/json" },
+    headers: {
+      Accept: "application/json",
+      ...(options.body === undefined ? {} : { "Content-Type": "application/json" }),
+    },
+    ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
     ...(signal ? { signal } : {}),
   });
   const payload = record(await response.json().catch(() => ({})));
@@ -118,6 +188,147 @@ async function policyRequest(path: string, signal?: AbortSignal): Promise<JsonRe
     );
   }
   return payload;
+}
+
+function parsePolicyBatchResult(
+  payload: JsonRecord,
+  expectedAction: "VALIDATE" | "APPROVE",
+  expectedItems: readonly PolicyBatchItem[],
+): PolicyBatchResult {
+  try {
+    return parsePolicyBatchResultShape(payload, expectedAction, expectedItems);
+  } catch (error) {
+    if (error instanceof PolicyBatchResponseError) throw error;
+    throw new PolicyBatchResponseError();
+  }
+}
+
+function parsePolicyBatchResultShape(
+  payload: JsonRecord,
+  expectedAction: "VALIDATE" | "APPROVE",
+  expectedItems: readonly PolicyBatchItem[],
+): PolicyBatchResult {
+  const requestId = nonEmptyString(payload.request_id);
+  if (!requestId || payload.action !== expectedAction || !Array.isArray(payload.results)) {
+    throw new PolicyBatchResponseError();
+  }
+  if (payload.results.length !== expectedItems.length) throw new PolicyBatchResponseError();
+
+  const targetLifecycle: PolicyLifecycle = expectedAction === "VALIDATE" ? "VALIDATED" : "APPROVED";
+  const results = payload.results.map((value, index): PolicyBatchResultItem => {
+    const result = strictRecord(value);
+    const expected = expectedItems[index];
+    if (!result || !expected || result.version_id !== expected.versionId || typeof result.ok !== "boolean") {
+      throw new PolicyBatchResponseError();
+    }
+
+    if (result.ok) {
+      if (hasOwn(result, "error_code") || hasOwn(result, "current_revision")) {
+        throw new PolicyBatchResponseError();
+      }
+      return {
+        versionId: expected.versionId,
+        ok: true,
+        artifact: parseBatchSuccessArtifact(
+          result.artifact,
+          expected.versionId,
+          targetLifecycle,
+          expected.expectedRevision,
+        ),
+      };
+    }
+
+    if (hasOwn(result, "artifact")) throw new PolicyBatchResponseError();
+    const errorCode = nonEmptyString(result.error_code);
+    if (!errorCode) throw new PolicyBatchResponseError();
+    const hasCurrentRevision = hasOwn(result, "current_revision");
+    const currentRevision = hasCurrentRevision
+      ? requiredBatchRevision(result.current_revision)
+      : null;
+    if (errorCode === "ADMIN_ARTIFACT_VERSION_CONFLICT" && currentRevision === null) {
+      throw new PolicyBatchResponseError();
+    }
+    return {
+      versionId: expected.versionId,
+      ok: false,
+      errorCode,
+      ...(currentRevision === null ? {} : { currentRevision }),
+    };
+  });
+
+  const summary = strictRecord(payload.summary);
+  if (!summary) throw new PolicyBatchResponseError();
+  const total = requiredCount(summary.total);
+  const succeeded = requiredCount(summary.succeeded);
+  const failed = requiredCount(summary.failed);
+  const actualSucceeded = results.filter((result) => result.ok).length;
+  if (
+    total !== expectedItems.length ||
+    succeeded !== actualSucceeded ||
+    failed !== results.length - actualSucceeded ||
+    total !== succeeded + failed
+  ) {
+    throw new PolicyBatchResponseError();
+  }
+
+  return {
+    requestId,
+    action: expectedAction,
+    results,
+    summary: { total, succeeded, failed },
+  };
+}
+
+function parseBatchSuccessArtifact(
+  value: unknown,
+  expectedVersionId: string,
+  targetLifecycle: PolicyLifecycle,
+  expectedRevision: number,
+): PolicyArtifact {
+  const item = strictRecord(value);
+  const id = item ? nonEmptyString(item.version_id) : null;
+  const key = item ? nonEmptyString(item.artifact_key) : null;
+  const kind = item ? policyArtifactKindValue(item.artifact_kind) : null;
+  const version = item ? positiveSafeInteger(item.version_number) : null;
+  const revision = item ? requiredBatchRevision(item.revision) : null;
+  const expectedNextRevision = expectedRevision + 1;
+  const contentHash = item ? nonEmptyString(item.content_hash) : null;
+  const content = item ? strictRecord(item.content) : null;
+  const updatedBy = item && typeof item.updated_by_subject === "string"
+    ? item.updated_by_subject
+    : null;
+  const updatedAt = item ? validTimestampString(item.updated_at) : null;
+  if (
+    !item ||
+    id !== expectedVersionId ||
+    !key ||
+    !kind ||
+    version === null ||
+    item.lifecycle !== targetLifecycle ||
+    revision === null ||
+    !Number.isSafeInteger(expectedRevision) ||
+    expectedRevision < 0 ||
+    !Number.isSafeInteger(expectedNextRevision) ||
+    revision !== expectedNextRevision ||
+    !contentHash ||
+    !content ||
+    updatedBy === null ||
+    !updatedAt
+  ) {
+    throw new PolicyBatchResponseError();
+  }
+  return {
+    id,
+    key,
+    kind,
+    version,
+    lifecycle: targetLifecycle,
+    revision,
+    contentHash,
+    content,
+    updatedBy,
+    updatedAt,
+  };
 }
 
 function normalizeArtifact(item: JsonRecord): PolicyArtifact {
@@ -151,9 +362,13 @@ function normalizePointer(value: unknown): PolicyPointer {
 }
 
 function record(value: unknown): JsonRecord {
+  return strictRecord(value) ?? {};
+}
+
+function strictRecord(value: unknown): JsonRecord | null {
   return typeof value === "object" && value !== null && !Array.isArray(value)
     ? value as JsonRecord
-    : {};
+    : null;
 }
 
 function arrayValue(value: unknown): unknown[] {
@@ -164,17 +379,61 @@ function stringValue(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;
 }
 
+function nonEmptyString(value: unknown): string | null {
+  return typeof value === "string" && value.length > 0 ? value : null;
+}
+
 function numberValue(value: unknown, fallback = 0): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
-function revisionValue(value: unknown): number {
+function positiveSafeInteger(value: unknown): number | null {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0
+    ? value
+    : null;
+}
+
+function policyArtifactKindValue(value: unknown): PolicyArtifactKind | null {
+  return typeof value === "string" && POLICY_ARTIFACT_KINDS.has(value as PolicyArtifactKind)
+    ? value as PolicyArtifactKind
+    : null;
+}
+
+function validTimestampString(value: unknown): string | null {
+  if (typeof value !== "string" || value.length === 0) return null;
+  return Number.isFinite(Date.parse(value)) ? value : null;
+}
+
+function hasOwn(recordValue: JsonRecord, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(recordValue, key);
+}
+
+function requiredCount(value: unknown): number {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
+    throw new PolicyBatchResponseError();
+  }
+  return value;
+}
+
+function requiredBatchRevision(value: unknown): number {
+  const revision = optionalRevisionValue(value);
+  if (revision === null) throw new PolicyBatchResponseError();
+  return revision;
+}
+
+function optionalRevisionValue(value: unknown): number | null {
   if (typeof value === "number" && Number.isSafeInteger(value) && value >= 0) return value;
   if (typeof value === "string" && /^(?:0|[1-9]\d*)$/u.test(value)) {
     const parsed = Number(value);
     if (Number.isSafeInteger(parsed)) return parsed;
   }
-  throw new Error("Invalid policy revision value");
+  return null;
+}
+
+function revisionValue(value: unknown): number {
+  const revision = optionalRevisionValue(value);
+  if (revision === null) throw new Error("Invalid policy revision value");
+  return revision;
 }
 
 function policyErrorMessage(code: string): string {

@@ -1,15 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { ApiError } from "./api.js";
+import {
+  batchTransitionPolicyArtifacts,
+  type PolicyListPage,
+  type PolicyListQuery,
+  type PolicyReviewContext,
+} from "./policy-control-review-api.js";
 import {
   createLatestPolicyListLoader,
   createLatestPolicyReviewLoader,
+  executePolicyBatchWithRecovery,
   policyPageChoices,
   resolvePolicyPageContext,
 } from "./policy-control-runtime.js";
-import type {
-  PolicyListPage,
-  PolicyListQuery,
-  PolicyReviewContext,
-} from "./policy-control-review-api.js";
 import type { Identity, PolicyArtifact, PolicyControlData } from "./types.js";
 
 const identity: Identity = {
@@ -30,14 +33,18 @@ const identity: Identity = {
 
 const emptyData: PolicyControlData = { artifacts: [], pointers: [], simulations: [] };
 
-function artifact(id: string): PolicyArtifact {
+function artifact(
+  id: string,
+  lifecycle: PolicyArtifact["lifecycle"] = "VALIDATED",
+  revision = 1,
+): PolicyArtifact {
   return {
     id,
     key: `policy:${id}`,
     kind: "SHOP_POLICY",
     version: 1,
-    lifecycle: "VALIDATED",
-    revision: 1,
+    lifecycle,
+    revision,
     contentHash: "sha256:test",
     content: { kind: "SHOP_POLICY" },
     updatedBy: "owner",
@@ -53,6 +60,17 @@ function reviewContext(id: string): PolicyReviewContext {
     rollbackCandidates: [],
   };
 }
+
+function jsonResponse(payload: unknown): Response {
+  return new Response(JSON.stringify(payload), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe("policy list latest-query loader", () => {
   it("drops a delayed stale response after a newer filter request starts", async () => {
@@ -144,5 +162,86 @@ describe("policy page action context", () => {
 
   it("auto-selects exactly one concrete page", () => {
     expect(resolvePolicyPageContext(["page-only"], null)).toBe("page-only");
+  });
+});
+
+describe("phase2 ambiguous batch recovery", () => {
+  it("reconciles after a transport failure and never replays the full batch", async () => {
+    const snapshot = [
+      { versionId: "done", expectedRevision: 1, lifecycle: "DRAFT" as const },
+      { versionId: "retry", expectedRevision: 1, lifecycle: "DRAFT" as const },
+      { versionId: "manual", expectedRevision: 1, lifecycle: "DRAFT" as const },
+    ];
+    let transitionCalls = 0;
+    const outcome = await executePolicyBatchWithRecovery(
+      "VALIDATE",
+      snapshot,
+      async () => {
+        transitionCalls += 1;
+        throw new TypeError("connection lost after server processing");
+      },
+      async (id) => {
+        if (id === "done") return artifact("done", "VALIDATED", 2);
+        if (id === "retry") return artifact("retry", "DRAFT", 1);
+        return artifact("manual", "DRAFT", 2);
+      },
+    );
+    expect(transitionCalls).toBe(1);
+    expect(outcome.kind).toBe("recovery");
+    if (outcome.kind !== "recovery") throw new Error("expected recovery");
+    expect(outcome.recovery.recoveredIds).toEqual(["done"]);
+    expect(outcome.recovery.retryableIds).toEqual(["retry"]);
+    expect(outcome.recovery.manualIds).toEqual(["manual"]);
+  });
+
+  it("treats 5xx as ambiguous but does not auto-retry a revision conflict", async () => {
+    let transitionCalls = 0;
+    const outcome = await executePolicyBatchWithRecovery(
+      "APPROVE",
+      [{ versionId: "retry", expectedRevision: 1, lifecycle: "VALIDATED" as const }],
+      async () => {
+        transitionCalls += 1;
+        throw new ApiError("temporary", 503);
+      },
+      async () => artifact("retry", "VALIDATED", 1),
+    );
+    expect(transitionCalls).toBe(1);
+    expect(outcome.kind).toBe("recovery");
+  });
+
+  it("reconciles a malformed success 200 instead of surfacing a generic parser error", async () => {
+    const versionId = "018f1b72-0000-7000-8000-000000000301";
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      request_id: "request-malformed-success",
+      action: "APPROVE",
+      results: [{
+        version_id: versionId,
+        ok: true,
+        artifact: {
+          version_id: versionId,
+          artifact_key: `policy:${versionId}`,
+          artifact_kind: "SHOP_POLICY",
+          version_number: 1,
+          lifecycle: "APPROVED",
+          revision: "not-a-revision",
+          content_hash: "sha256:test",
+          content: { kind: "SHOP_POLICY" },
+          updated_by_subject: "owner",
+          updated_at: "2026-08-08T00:00:00.000Z",
+        },
+      }],
+      summary: { total: 1, succeeded: 1, failed: 0 },
+    })));
+
+    const outcome = await executePolicyBatchWithRecovery(
+      "APPROVE",
+      [{ versionId, expectedRevision: 3, lifecycle: "VALIDATED" }],
+      batchTransitionPolicyArtifacts,
+      async () => artifact(versionId, "APPROVED", 4),
+    );
+
+    expect(outcome.kind).toBe("recovery");
+    if (outcome.kind !== "recovery") throw new Error("expected recovery");
+    expect(outcome.recovery.recoveredIds).toEqual([versionId]);
   });
 });
