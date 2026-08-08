@@ -248,9 +248,11 @@ function createHarness(input: {
     linkProviderConversation: vi.fn(async () => undefined),
   };
 
-  const generate = vi.fn(async () =>
-    modelResult(proposal(input.modelIntent ?? "SIZE"))
-  );
+  const generatedContexts: Parameters<RealtimeModelPort["generate"]>[0][] = [];
+  const generate: RealtimeModelPort["generate"] = async (context) => {
+    generatedContexts.push(context);
+    return modelResult(proposal(input.modelIntent ?? "SIZE"));
+  };
   const model: RealtimeModelPort = {
     generate,
     groundWithFacts: vi.fn(async (_context, initial) => modelResult(initial)),
@@ -347,7 +349,7 @@ function createHarness(input: {
 
   return {
     runner,
-    generate,
+    generatedContexts,
     searchText,
     resolveFacts,
     committed: () => committed,
@@ -355,7 +357,7 @@ function createHarness(input: {
 }
 
 function modelContext(harness: ReturnType<typeof createHarness>) {
-  return harness.generate.mock.calls[0]?.[0] ?? [];
+  return harness.generatedContexts[0] ?? [];
 }
 
 function hasBf03Instruction(context: ReturnType<typeof modelContext>): boolean {
@@ -383,7 +385,7 @@ describe("BF-03 RealtimeRunner", () => {
 
     expect(await harness.runner.processOne()).toBe(true);
     expect(harness.resolveFacts).not.toHaveBeenCalled();
-    expect(harness.generate).toHaveBeenCalledOnce();
+    expect(harness.generatedContexts).toHaveLength(1);
     const context = modelContext(harness);
     expect(context).toContainEqual(expect.objectContaining({
       senderType: "CUSTOMER",
