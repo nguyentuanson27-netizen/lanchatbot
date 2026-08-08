@@ -32,6 +32,10 @@ export type Bf01ReplyReconciliationPolicy =
   | "LEGACY"
   | "CLARIFY_RECONCILED_V1";
 
+type Bf01ReconciliationReasonCode =
+  | "BF01_ASK_CLARIFY_NO_REPLY_RECONCILED"
+  | "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED";
+
 interface Bf01RuntimeSnapshot {
   readonly routingOwner: "N8N" | "APP";
   readonly appSendEnabled: boolean;
@@ -51,7 +55,7 @@ interface Bf01ExecutionContext {
 
 interface Bf01ReconciliationTarget {
   readonly event: RealtimeDecisionEventPlan;
-  readonly reasonCode: "BF01_ASK_CLARIFY_NO_REPLY_RECONCILED";
+  readonly reasonCode: Bf01ReconciliationReasonCode;
 }
 
 interface Bf01GeneratedClarification {
@@ -64,7 +68,15 @@ interface Bf01GeneratedClarification {
     output: number | null;
     total: number | null;
   }>;
+  readonly repairSkippedReason: "BF01_REPAIR_QUOTA_UNAVAILABLE" | null;
 }
+
+const BF01_DIRECT_QUESTION_INTENTS = new Set([
+  "PRICE",
+  "STOCK",
+  "SIZE",
+  "ETA",
+]);
 
 function bindOrReturn<T extends object>(
   target: T,
@@ -242,16 +254,19 @@ function guardedClarification(
     : null;
 }
 
-function repairInstruction(occurredAt: string): Parameters<RealtimeModelPort["generate"]>[0][number] {
+function repairInstruction(
+  occurredAt: string,
+  reasonCode: Bf01ReconciliationReasonCode,
+): Parameters<RealtimeModelPort["generate"]>[0][number] {
   return {
     direction: "INBOUND",
     senderType: "SYSTEM",
     messageType: "EVENT",
     text: JSON.stringify({
       type: "BF01_REPLY_RECONCILIATION",
-      reasonCode: "ASK_CLARIFY_NO_REPLY",
+      reasonCode,
       instruction:
-        "The final deterministic strategy requires clarification but the prior proposal selected NO_REPLY. Draft exactly one concise customer-facing clarification question in Vietnamese. Do not assert price, stock, size recommendation, ETA, shipping fee, promotion, or product-media facts. Do not request cart/order/state side effects. Return a REPLY with no attachments and no business fact query.",
+        "The final deterministic reconciliation requires a customer response but the prior proposal selected NO_REPLY. Draft exactly one concise customer-facing clarification or direct-answer question in Vietnamese. Do not assert price, stock, size recommendation, ETA, shipping fee, promotion, or product-media facts. Do not request cart/order/state side effects. Return a REPLY with no attachments and no business fact query.",
     }),
     attachmentCount: 0,
     occurredAt,
@@ -283,20 +298,48 @@ function tokenUsage(
   return { prompt, output, total };
 }
 
+async function reserveRepairQuota(
+  quota: RealtimeGenerationQuota | undefined,
+  pageId: string,
+  now: Date,
+): Promise<boolean> {
+  if (!quota) return true;
+  try {
+    return await quota.reserve(pageId, now);
+  } catch {
+    return false;
+  }
+}
+
 async function generateClarification(
   store: Bf01ExecutionContext,
   model: RealtimeModelPort,
+  quota: RealtimeGenerationQuota | undefined,
+  pageId: string,
   stage: string | null,
   now: Date,
   defaultPromptVersion: string,
+  reasonCode: Bf01ReconciliationReasonCode,
 ): Promise<Bf01GeneratedClarification | null> {
   const baseContext = fallbackContext(store);
-  if (baseContext.length > 0) {
+  let modelCalled = false;
+  let repairSkippedReason: Bf01GeneratedClarification["repairSkippedReason"] = null;
+  const repairQuotaReserved = baseContext.length === 0
+    ? false
+    : await reserveRepairQuota(quota, pageId, now);
+  if (baseContext.length > 0 && !repairQuotaReserved) {
+    repairSkippedReason = "BF01_REPAIR_QUOTA_UNAVAILABLE";
+  }
+  if (baseContext.length > 0 && repairQuotaReserved) {
+    modelCalled = true;
     try {
       const generated = await model.generate(
         [
           ...baseContext,
-          repairInstruction(store.customerOccurredAt ?? now.toISOString()),
+          repairInstruction(
+            store.customerOccurredAt ?? now.toISOString(),
+            reasonCode,
+          ),
         ],
         `${store.modelPromptVersion ?? defaultPromptVersion}:bf01-reconcile-v1`,
       );
@@ -310,6 +353,7 @@ async function generateClarification(
           modelCalled: true,
           modelLatencyMs: generated.latencyMs,
           modelTokenUsage: tokenUsage(generated.tokenUsage),
+          repairSkippedReason: null,
         };
       }
     } catch {
@@ -324,11 +368,16 @@ async function generateClarification(
     ? {
         text: fallback,
         source: "APPROVED_FALLBACK",
-        modelCalled: baseContext.length > 0,
+        modelCalled,
         modelLatencyMs: null,
         modelTokenUsage: { prompt: null, output: null, total: null },
+        repairSkippedReason,
       }
     : null;
+}
+
+function directQuestionEvidence(event: RealtimeDecisionEventPlan): boolean {
+  return event.intent !== null && BF01_DIRECT_QUESTION_INTENTS.has(event.intent);
 }
 
 export function bf01ReconciliationTarget(
@@ -361,16 +410,24 @@ export function bf01ReconciliationTarget(
   ) return null;
 
   const event = input.events.find((candidate) => {
-    if (candidate.eventType !== "WAVE2_STRATEGY_SELECTED") return false;
     if (candidate.action !== "NO_REPLY" || candidate.mode !== "LIVE") return false;
     const details = candidate.details;
-    return details.guardOutcome === "ALLOWED" &&
-      details.outboundMessageCount === 0 &&
-      details.wave2Strategy?.recommendedStrategy === "STRATEGY_ASK_CLARIFY";
+    if (
+      details.guardOutcome !== "ALLOWED" ||
+      details.guardReasonCodes.length > 0 ||
+      details.outboundMessageCount !== 0
+    ) return false;
+    return details.wave2Strategy?.recommendedStrategy === "STRATEGY_ASK_CLARIFY" ||
+      directQuestionEvidence(candidate);
   });
-  return event
-    ? { event, reasonCode: "BF01_ASK_CLARIFY_NO_REPLY_RECONCILED" }
-    : null;
+  if (!event) return null;
+  return {
+    event,
+    reasonCode:
+      event.details.wave2Strategy?.recommendedStrategy === "STRATEGY_ASK_CLARIFY"
+        ? "BF01_ASK_CLARIFY_NO_REPLY_RECONCILED"
+        : "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+  };
 }
 
 function renderedReplyHash(text: string): string {
@@ -396,13 +453,18 @@ function mergedTokenUsage(
 function reconciledEvents(
   events: readonly RealtimeDecisionEventPlan[],
   clarification: Bf01GeneratedClarification,
+  reconciliationReasonCode: Bf01ReconciliationReasonCode,
 ): readonly RealtimeDecisionEventPlan[] {
   const replyHash = renderedReplyHash(clarification.text);
   const sourceCode = clarification.source === "MODEL_REPAIR"
     ? "BF01_MODEL_CLARIFICATION_REPAIR"
     : "BF01_APPROVED_FALLBACK_USED";
   return events.map((event): RealtimeDecisionEventPlan => {
-    if (event.action !== "NO_REPLY") return event;
+    if (
+      event.action !== "NO_REPLY" ||
+      event.details.guardOutcome !== "ALLOWED" ||
+      event.details.outboundMessageCount !== 0
+    ) return event;
     const convertedType: RealtimeDecisionEventPlan["eventType"] =
       event.eventType === "NO_REPLY" || event.eventType === "NO_REPLY_SELECTED"
         ? "CLARIFICATION_REQUESTED"
@@ -414,8 +476,11 @@ function reconciledEvents(
       reasonCodes: [
         ...new Set([
           ...event.reasonCodes,
-          "BF01_ASK_CLARIFY_NO_REPLY_RECONCILED",
+          reconciliationReasonCode,
           sourceCode,
+          ...(clarification.repairSkippedReason
+            ? [clarification.repairSkippedReason]
+            : []),
         ]),
       ],
       details: {
@@ -439,6 +504,7 @@ function reconciledEvents(
 function wrapRuntime(
   runtime: RealtimeRuntimePort,
   model: RealtimeModelPort,
+  quota: RealtimeGenerationQuota | undefined,
   options: RealtimeRunnerOptions,
   scope: AsyncLocalStorage<Bf01ExecutionContext>,
 ): RealtimeRuntimePort {
@@ -483,9 +549,12 @@ function wrapRuntime(
           const clarification = await generateClarification(
             store,
             model,
+            quota,
+            input.pageId,
             targetDecision.event.stage,
             now,
             options.promptVersion ?? "lana-realtime-v1",
+            targetDecision.reasonCode,
           );
           if (!clarification || !store.recipientId) {
             return target.commit(input, nowArg);
@@ -501,7 +570,11 @@ function wrapRuntime(
               messages: [{ kind: "TEXT", text: clarification.text }],
               sendAfterOwnerHandoff: false,
             },
-            decisionEvents: reconciledEvents(events, clarification),
+            decisionEvents: reconciledEvents(
+              events,
+              clarification,
+              targetDecision.reasonCode,
+            ),
           };
           return target.commit(nextInput, nowArg);
         };
@@ -514,8 +587,9 @@ function wrapRuntime(
 /**
  * BF-01 adapter layered on top of the accepted BF-02 runner. The core runner
  * still owns strategy calculation, guard evaluation, ownership, dedupe and the
- * commit transaction. This adapter only reconciles the terminal contradiction
- * ASK_CLARIFY + NO_REPLY after core has recorded guardOutcome=ALLOWED.
+ * commit transaction. This adapter only reconciles an allowed terminal
+ * NO_REPLY when existing direct-question evidence or ASK_CLARIFY requires a
+ * response; model repair remains quota-bound and guarded before commit.
  */
 export class RealtimeRunner extends Bf02RealtimeRunner {
   private readonly bf01Scope: AsyncLocalStorage<Bf01ExecutionContext>;
@@ -539,7 +613,7 @@ export class RealtimeRunner extends Bf02RealtimeRunner {
     const scope = new AsyncLocalStorage<Bf01ExecutionContext>();
     super(
       wrapInbox(inbox, scope),
-      wrapRuntime(runtime, model, options, scope),
+      wrapRuntime(runtime, model, quota, options, scope),
       wrapModel(model, scope),
       factsReader,
       productSearch,
