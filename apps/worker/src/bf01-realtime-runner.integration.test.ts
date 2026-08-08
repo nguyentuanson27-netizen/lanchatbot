@@ -22,6 +22,7 @@ const pageId = "1198992073286645";
 const conversationHash = "meta:v1:bf01-customer";
 const fallbackText = "Chị muốn em làm rõ phần nào để em trả lời đúng ý chị?";
 const safeRepairText = "Chị muốn em làm rõ biến thể nào của mẫu này để em trả lời đúng ý chị?";
+const existingReplyText = "Chị muốn em nói rõ phần biến thể nào của mẫu này?";
 
 const product = {
   productId: "SD398",
@@ -61,7 +62,7 @@ function proposal(
     action,
     reply,
     attachments: [],
-    handoffReason: null,
+    handoffReason: action === "HANDOFF" ? "AGENT_REQUEST" : null,
     businessFactQuery: {
       intent: "NONE",
       offerType: null,
@@ -142,9 +143,11 @@ function policyResolution(): RuntimePolicyResolution {
 }
 
 type RepairMode = "SAFE" | "UNSAFE" | "THROW";
+type InitialMode = "NO_REPLY" | "REPLY" | "HANDOFF";
 
 function createHarness(input: {
   repairMode?: RepairMode;
+  initialMode?: InitialMode;
   quotaResults?: readonly boolean[];
   conversationOwner?: "BOT" | "HUMAN";
   blockingTag?: "NHAN_VIEN" | null;
@@ -234,7 +237,16 @@ function createHarness(input: {
   };
 
   const generate = vi.fn(async () => {
-    if (generate.mock.calls.length === 1) return modelResult(proposal("NO_REPLY"));
+    if (generate.mock.calls.length === 1) {
+      switch (input.initialMode ?? "NO_REPLY") {
+        case "REPLY":
+          return modelResult(proposal("REPLY", existingReplyText));
+        case "HANDOFF":
+          return modelResult(proposal("HANDOFF"));
+        case "NO_REPLY":
+          return modelResult(proposal("NO_REPLY"));
+      }
+    }
     if (input.repairMode === "THROW") throw new Error("BF01_REPAIR_TEST_FAILURE");
     if (input.repairMode === "UNSAFE") {
       return modelResult(proposal(
@@ -354,6 +366,14 @@ function committedText(
     .join("\n");
 }
 
+function hasBf01Reason(
+  value: Parameters<RealtimeRuntimePort["commit"]>[0] | null,
+): boolean {
+  return (value?.decisionEvents ?? []).some((event) =>
+    event.reasonCodes.some((reason) => reason.startsWith("BF01_"))
+  );
+}
+
 describe("BF-01 runner reconciliation", () => {
   it("commits exactly one guarded reply and matching audit hash for the reported incident", async () => {
     const harness = createHarness();
@@ -429,5 +449,27 @@ describe("BF-01 runner reconciliation", () => {
     expect(await blocked.runner.processOne()).toBe(true);
     expect(blocked.generate).toHaveBeenCalledTimes(0);
     expect(blocked.committed()?.metaPlan).toBeUndefined();
+  });
+
+  it("does not add a second plan when the core already produced outbound", async () => {
+    const harness = createHarness({ initialMode: "REPLY" });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    const commit = harness.committed();
+    expect(harness.generate).toHaveBeenCalledTimes(1);
+    expect(harness.reserve).toHaveBeenCalledTimes(1);
+    expect(commit?.metaPlan?.messages.length).toBeGreaterThan(0);
+    expect(hasBf01Reason(commit)).toBe(false);
+  });
+
+  it("does not override an existing core handoff", async () => {
+    const harness = createHarness({ initialMode: "HANDOFF" });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    const commit = harness.committed();
+    expect(harness.generate).toHaveBeenCalledTimes(1);
+    expect(harness.reserve).toHaveBeenCalledTimes(1);
+    expect(commit?.state.conversationOwner).toBe("HUMAN");
+    expect(hasBf01Reason(commit)).toBe(false);
   });
 });
