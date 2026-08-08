@@ -322,6 +322,12 @@ async function generateClarification(
 ): Promise<Bf01GeneratedClarification | null> {
   const baseContext = fallbackContext(store);
   let modelCalled = false;
+  let repairModelLatencyMs: number | null = null;
+  let repairModelTokenUsage: Bf01GeneratedClarification["modelTokenUsage"] = {
+    prompt: null,
+    output: null,
+    total: null,
+  };
   let repairSkippedReason: Bf01GeneratedClarification["repairSkippedReason"] = null;
   const repairQuotaReserved = baseContext.length === 0
     ? false
@@ -342,6 +348,8 @@ async function generateClarification(
         ],
         `${store.modelPromptVersion ?? defaultPromptVersion}:bf01-reconcile-v1`,
       );
+      repairModelLatencyMs = generated.latencyMs;
+      repairModelTokenUsage = tokenUsage(generated.tokenUsage);
       const text = generated.proposal.action === "REPLY"
         ? guardedClarification(generated.proposal.reply, stage, now)
         : null;
@@ -350,8 +358,8 @@ async function generateClarification(
           text,
           source: "MODEL_REPAIR",
           modelCalled: true,
-          modelLatencyMs: generated.latencyMs,
-          modelTokenUsage: tokenUsage(generated.tokenUsage),
+          modelLatencyMs: repairModelLatencyMs,
+          modelTokenUsage: repairModelTokenUsage,
           repairSkippedReason: null,
         };
       }
@@ -368,8 +376,8 @@ async function generateClarification(
         text: fallback,
         source: "APPROVED_FALLBACK",
         modelCalled,
-        modelLatencyMs: null,
-        modelTokenUsage: { prompt: null, output: null, total: null },
+        modelLatencyMs: repairModelLatencyMs,
+        modelTokenUsage: repairModelTokenUsage,
         repairSkippedReason,
       }
     : null;
