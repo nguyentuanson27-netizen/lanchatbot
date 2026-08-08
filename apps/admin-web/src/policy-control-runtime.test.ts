@@ -82,6 +82,15 @@ describe("policy page action context", () => {
     expect(resolvePolicyPageContext(choices, "ALL")).toBeNull();
   });
 
+  it("intersects configured policy pages with the current identity page scope", () => {
+    const choices = policyPageChoices({
+      ...identity,
+      policyPageIds: ["page-1", "page-2"],
+      pageScope: ["page-2"],
+    }, emptyData);
+    expect(choices).toEqual(["page-2"]);
+  });
+
   it("never exposes ALL as a concrete page id and can use scoped pages when policy capability is ALL", () => {
     const choices = policyPageChoices({
       ...identity,
