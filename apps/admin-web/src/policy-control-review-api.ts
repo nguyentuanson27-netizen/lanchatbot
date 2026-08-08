@@ -1,3 +1,4 @@
+import "./policy-control-route-sync.js";
 import { ApiError } from "./api.js";
 import type {
   PolicyArtifact,
