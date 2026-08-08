@@ -3,6 +3,12 @@ import type { ConversationState } from "@lana/conversation-engine";
 import type { RealtimeDecisionEventPlan } from "@lana/database";
 import { bf01ReconciliationTarget } from "./bf02-realtime-runner.js";
 
+type QuestionEvidence = Readonly<{
+  decision: "ASKING" | "NOT_ASKING" | "NEGATED_ASKING";
+  evidenceText: string | null;
+  confidence: number;
+}>;
+
 function state(): ConversationState {
   return {
     routingOwner: "APP",
@@ -63,9 +69,34 @@ function event(
   } as RealtimeDecisionEventPlan;
 }
 
+function askingEvidence(customerText: string): QuestionEvidence {
+  return {
+    decision: "ASKING",
+    evidenceText: customerText,
+    confidence: 0.95,
+  };
+}
+
+function notAskingEvidence(): QuestionEvidence {
+  return {
+    decision: "NOT_ASKING",
+    evidenceText: null,
+    confidence: 0.95,
+  };
+}
+
+function negatedAskingEvidence(customerText: string): QuestionEvidence {
+  return {
+    decision: "NEGATED_ASKING",
+    evidenceText: customerText,
+    confidence: 0.95,
+  };
+}
+
 function target(
   value: RealtimeDecisionEventPlan,
   customerText = "Giá mẫu này bao nhiêu?",
+  questionEvidence: QuestionEvidence = askingEvidence(customerText),
 ) {
   const input = {
     policy: "CLARIFY_RECONCILED_V1" as const,
@@ -82,89 +113,149 @@ function target(
     sendEnabled: true,
     recipientId: "customer-1",
     customerText,
+    questionEvidence,
   } as Parameters<typeof bf01ReconciliationTarget>[0] & {
     readonly customerText: string;
+    readonly questionEvidence: QuestionEvidence;
   };
   return bf01ReconciliationTarget(input);
 }
 
 describe("BF-01 direct-question reconciliation", () => {
-  it("reuses explicit business intent only when the customer is actually asking a question", () => {
+  it("reuses explicit business intent only when typed dialogue evidence says the customer is asking", () => {
     expect(target(event())).toMatchObject({
       reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
     });
   });
 
   it("does not turn a business-topic closing statement into a direct question", () => {
-    expect(target(event(), "Em biet gia roi, cam on")).toBeNull();
+    expect(target(
+      event(),
+      "Em biet gia roi, cam on",
+      notAskingEvidence(),
+    )).toBeNull();
   });
 
   it("does not treat known interrogative content inside a closing statement as a question", () => {
-    expect(target(event(), "Em biet gia bao nhieu roi, cam on")).toBeNull();
+    expect(target(
+      event(),
+      "Em biet gia bao nhieu roi, cam on",
+      notAskingEvidence(),
+    )).toBeNull();
   });
 
   it("does not treat a negated question act as a direct question", () => {
-    expect(target(event(), "Em khong hoi gia bao nhieu, cam on")).toBeNull();
+    const customerText = "Em khong hoi gia bao nhieu, cam on";
+    expect(target(
+      event(),
+      customerText,
+      negatedAskingEvidence(customerText),
+    )).toBeNull();
   });
 
-  it("uses the terminal clause so a prior negated question act does not hide a real follow-up", () => {
+  it("keeps a later typed question after a prior negated question act", () => {
+    const customerText = "Em khong hoi gia bao nhieu, con size nao?";
     expect(target(
       event({ intent: "SIZE" }),
-      "Em khong hoi gia bao nhieu, con size nao?",
+      customerText,
+      askingEvidence("con size nao?"),
     )).toMatchObject({
       reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
     });
   });
 
-  it("uses the terminal clause so prior known information does not hide a real follow-up", () => {
+  it("keeps a later typed question after prior known information", () => {
+    const customerText = "Em biet gia bao nhieu roi, con size nao";
     expect(target(
       event({ intent: "SIZE" }),
-      "Em biet gia bao nhieu roi, con size nao",
+      customerText,
+      askingEvidence("con size nao"),
     )).toMatchObject({
       reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
     });
   });
 
-  it("uses a sentence boundary so prior known information does not hide a real follow-up", () => {
+  it("keeps a sentence-separated typed question after prior known information", () => {
+    const customerText = "Em biet gia bao nhieu roi. Con size nao";
     expect(target(
       event({ intent: "SIZE" }),
-      "Em biet gia bao nhieu roi. Con size nao",
+      customerText,
+      askingEvidence("Con size nao"),
     )).toMatchObject({
       reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
     });
   });
 
-  it("uses a sentence boundary so a prior negated question act does not hide a real follow-up", () => {
+  it("keeps a sentence-separated typed question after a prior negated question act", () => {
+    const customerText = "Em khong hoi gia bao nhieu. Con size nao?";
     expect(target(
       event({ intent: "SIZE" }),
-      "Em khong hoi gia bao nhieu. Con size nao?",
+      customerText,
+      askingEvidence("Con size nao?"),
     )).toMatchObject({
       reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
     });
   });
 
-  it("ignores a trailing courtesy sentence after a direct question", () => {
+  it("keeps a typed question before a trailing courtesy sentence", () => {
+    const customerText = "Con size nao? Cam on";
     expect(target(
       event({ intent: "SIZE" }),
-      "Con size nao? Cam on",
+      customerText,
+      askingEvidence("Con size nao?"),
     )).toMatchObject({
       reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
     });
   });
 
-  it("ignores a trailing courtesy clause after a direct question", () => {
+  it("keeps a typed question before a trailing courtesy clause", () => {
+    const customerText = "Con size nao, cam on";
     expect(target(
       event({ intent: "SIZE" }),
-      "Con size nao, cam on",
+      customerText,
+      askingEvidence("Con size nao"),
     )).toMatchObject({
       reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
     });
   });
 
-  it("keeps formatted numeric dots inside a terminal question", () => {
+  it("keeps a typed question with formatted numeric punctuation", () => {
+    const customerText = "Em lay gia 1.199.000 khong";
     expect(target(
       event({ intent: "PRICE" }),
-      "Em lay gia 1.199.000 khong",
+      customerText,
+      askingEvidence(customerText),
+    )).toMatchObject({
+      reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+    });
+  });
+
+  it("reconciles a typed price question without interrogative regex tokens", () => {
+    const customerText = "Cho em hoi gia mau nay";
+    expect(target(
+      event({ intent: "PRICE" }),
+      customerText,
+      askingEvidence(customerText),
+    )).toMatchObject({
+      reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+    });
+  });
+
+  it("does not force a reply when typed evidence says a later interrogative phrase is negated", () => {
+    const customerText = "Em khong hoi gia nua, bao nhieu cung duoc, cam on";
+    expect(target(
+      event({ intent: "PRICE" }),
+      customerText,
+      negatedAskingEvidence("Em khong hoi gia nua"),
+    )).toBeNull();
+  });
+
+  it("reconciles a typed size question before an unrecognized courtesy variant", () => {
+    const customerText = "Con size nao? Em cam on";
+    expect(target(
+      event({ intent: "SIZE" }),
+      customerText,
+      askingEvidence("Con size nao?"),
     )).toMatchObject({
       reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
     });
