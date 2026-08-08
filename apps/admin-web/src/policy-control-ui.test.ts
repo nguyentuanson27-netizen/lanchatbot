@@ -102,7 +102,7 @@ describe("policy phase1 drawer", () => {
 
   it("keeps SIZE_CHART on generic read-only content in phase1", () => {
     const html = renderReviewDrawer(context(artifact("size", "VALIDATED", "SIZE_CHART")), identity, "page-1");
-    expect(html).toContain("SIZE CHART");
+    expect(html).toContain("SIZE_CHART");
     expect(html).not.toContain("policy-size-chart");
   });
 });
