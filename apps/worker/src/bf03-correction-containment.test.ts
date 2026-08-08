@@ -117,6 +117,17 @@ describe("BF-03 correction containment", () => {
     ).applies).toBe(false);
   });
 
+  it.each([
+    "size có rồi mà, cho chị xin giá",
+    "size có rồi mà, kiểm tra còn hàng giúp chị",
+    "size có rồi mà, khi nào giao đến chị",
+  ])("does not contain an independent business-fact request: %s", (text) => {
+    expect(bf03CorrectionContainmentDecision(
+      text,
+      "CORRECTION_CONTAINMENT_V1",
+    ).applies).toBe(false);
+  });
+
   it("is inert under LEGACY policy", () => {
     const decision = bf03CorrectionContainmentDecision(
       "có giá vs size rồi mà",
@@ -128,15 +139,14 @@ describe("BF-03 correction containment", () => {
     expect(bf03ContainProposal(proposal("SIZE"), decision)).toEqual(proposal("SIZE"));
   });
 
-  it("never promotes another business capability", () => {
+  it("only suppresses the false SIZE capability and preserves unrelated facts", () => {
     const decision = bf03CorrectionContainmentDecision(
       "có giá vs size rồi mà",
       "CORRECTION_CONTAINMENT_V1",
     );
-    expect(bf03ContainProposal(proposal("PRICE"), decision).businessFactQuery.intent)
-      .toBe("NONE");
-    expect(bf03ContainProposal(proposal("ETA"), decision).businessFactQuery.intent)
-      .toBe("NONE");
+    expect(bf03ContainProposal(proposal("PRICE"), decision)).toEqual(proposal("PRICE"));
+    expect(bf03ContainProposal(proposal("STOCK"), decision)).toEqual(proposal("STOCK"));
+    expect(bf03ContainProposal(proposal("ETA"), decision)).toEqual(proposal("ETA"));
   });
 
   it("records bounded evidence and removes the false SIZE_CONSULT_STARTED audit", () => {
