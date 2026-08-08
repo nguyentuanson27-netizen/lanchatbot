@@ -99,6 +99,14 @@ describe("BF-01 direct-question reconciliation", () => {
     expect(target(event(), "Em biet gia roi, cam on")).toBeNull();
   });
 
+  it("does not treat known interrogative content inside a closing statement as a question", () => {
+    expect(target(event(), "Em biet gia bao nhieu roi, cam on")).toBeNull();
+  });
+
+  it("does not treat a negated question act as a direct question", () => {
+    expect(target(event(), "Em khong hoi gia bao nhieu, cam on")).toBeNull();
+  });
+
   it("does not treat unrelated decision intents as direct-question evidence", () => {
     expect(target(event({ intent: "BUYING_SIGNAL" }))).toBeNull();
   });
