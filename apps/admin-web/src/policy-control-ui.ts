@@ -82,6 +82,20 @@ export function bulkActionForSelection(
   return null;
 }
 
+export function nextReviewArtifactId(
+  artifacts: readonly PolicyArtifact[],
+  currentId: string,
+): string | null {
+  if (!artifacts.length) return null;
+  const currentIndex = artifacts.findIndex((item) => item.id === currentId);
+  if (currentIndex < 0) {
+    return artifacts.find((item) => item.lifecycle === "VALIDATED")?.id ?? null;
+  }
+  const after = artifacts.slice(currentIndex + 1).find((item) => item.lifecycle === "VALIDATED");
+  if (after) return after.id;
+  return artifacts.slice(0, currentIndex).find((item) => item.lifecycle === "VALIDATED")?.id ?? null;
+}
+
 export function renderPolicyControl(data: PolicyControlData, identity: Identity | null): string {
   if (!identity?.policyControl) {
     return `<section class="empty-state"><h3>Chức năng quản lý chính sách đang tắt</h3><p>Cần migration và bật riêng Policy Control Plane trước khi sử dụng.</p></section>`;
@@ -291,6 +305,31 @@ export function bindPolicyControl(
     if (layer) layer.innerHTML = "";
   };
 
+  const approveArtifact = async (
+    artifact: PolicyArtifact,
+    advance: boolean,
+    cleanup?: () => void,
+  ): Promise<boolean> => {
+    if (!window.confirm(`Duyệt ${artifact.key} · v${artifact.version}?`)) return false;
+    const nextBefore = advance ? nextReviewArtifactId(pageItems, artifact.id) : null;
+    try {
+      await transitionPolicyArtifact(artifact, "APPROVE", null, null);
+      closeLayer(cleanup);
+      notify("Đã duyệt phiên bản cấu hình.");
+      await loadPage(true);
+      if (advance) {
+        const nextId = nextBefore && pageItems.some((item) => item.id === nextBefore)
+          ? nextBefore
+          : pageItems.find((item) => item.lifecycle === "VALIDATED")?.id ?? null;
+        if (nextId) await openReview(nextId);
+      }
+      return true;
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Không thể duyệt cấu hình.");
+      return false;
+    }
+  };
+
   const openReview = async (versionId: string) => {
     const layer = document.querySelector<HTMLElement>("#command-modal-layer");
     if (!layer) return;
@@ -319,6 +358,12 @@ export function bindPolicyControl(
     layer.querySelector<HTMLButtonElement>("[data-policy-edit]")?.addEventListener("click", () => {
       closeLayer(cleanup);
       openDraftEditor(context.artifact, reload, notify);
+    });
+    layer.querySelector<HTMLButtonElement>("[data-policy-approve-next]")?.addEventListener("click", async (event) => {
+      const button = event.currentTarget as HTMLButtonElement;
+      button.disabled = true;
+      const completed = await approveArtifact(context.artifact, true, cleanup);
+      if (!completed && button.isConnected) button.disabled = false;
     });
     layer.querySelectorAll<HTMLButtonElement>("[data-policy-drawer-action]").forEach((button) => {
       button.addEventListener("click", async () => {
@@ -516,7 +561,7 @@ export function bindPolicyControl(
       void openReview(current.id);
     } else if (event.key.toLowerCase() === "a" && current?.lifecycle === "VALIDATED") {
       event.preventDefault();
-      void openReview(current.id);
+      void approveArtifact(current, false);
     }
   });
 
@@ -524,7 +569,7 @@ export function bindPolicyControl(
   void loadPage(true);
 }
 
-function renderReviewDrawer(context: PolicyReviewContext, identity: Identity): string {
+export function renderReviewDrawer(context: PolicyReviewContext, identity: Identity): string {
   const artifact = context.artifact;
   const content = artifact.kind === "SIZE_CHART"
     ? `${renderSizeChartReview(artifact.content)}<details><summary>Xem cấu hình gốc chỉ đọc</summary>${renderContent(artifact.content)}</details>`
@@ -552,7 +597,7 @@ function renderDrawerActions(context: PolicyReviewContext, identity: Identity): 
     case "DRAFT":
       return `<button type="button" class="secondary-button" data-policy-edit>Chỉnh sửa</button><button type="button" data-policy-drawer-action="VALIDATE">Kiểm tra cấu hình</button>`;
     case "VALIDATED":
-      return `<button type="button" data-policy-drawer-action="APPROVE">Duyệt phiên bản</button>`;
+      return `<button type="button" class="secondary-button" data-policy-approve-next>Duyệt & sang mục tiếp theo</button><button type="button" data-policy-drawer-action="APPROVE">Duyệt phiên bản</button>`;
     case "APPROVED":
       return `<button type="button" data-policy-drawer-action="START_CANARY" data-canary-mode="SHADOW">Thử nghiệm shadow</button>${identity.policyCanaryLiveEnabled ? '<button type="button" class="secondary-button" data-policy-drawer-action="START_CANARY" data-canary-mode="LIVE_OUTBOUND">Thử nghiệm gửi thật</button>' : '<button type="button" class="secondary-button" disabled aria-disabled="true">Thử nghiệm gửi thật · đang khóa</button>'}`;
     case "CANARY":
