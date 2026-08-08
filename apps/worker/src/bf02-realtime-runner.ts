@@ -8,8 +8,10 @@ import type { ConversationState } from "@lana/conversation-engine";
 import {
   RealtimeRunner as CoreRealtimeRunner,
   currentProductContinuationId,
+  hasCustomerMeasurementSignal,
   RealtimeContextPreservingSchemaError,
   productCodeOnly,
+  textWithoutMeasurementTokens,
   type CanonicalChatHistoryPort,
   type RealtimeInboxPort,
   type RealtimeMediaRecognitionPort,
@@ -170,16 +172,6 @@ function wrapRuntime(
   });
 }
 
-function latestCustomerContext(
-  context: Parameters<RealtimeModelPort["generate"]>[0],
-) {
-  return [...context]
-    .reverse()
-    .find((message) =>
-      message.direction === "INBOUND" && message.senderType === "CUSTOMER"
-    ) ?? null;
-}
-
 async function exactProduct(
   productSearch: RealtimeProductSearchPort,
   productId: string,
@@ -273,10 +265,15 @@ function recordVerifiedProduct(
 }
 
 function customerTextProductIds(texts: readonly string[]): readonly string[] {
-  return [...new Set(texts.flatMap((text) => [
-    ...(productCodeOnly(text) ? [productCodeOnly(text)!] : []),
-    ...extractAdProductCodes(text),
-  ]))];
+  return [...new Set(texts.flatMap((text) => {
+    const searchText = hasCustomerMeasurementSignal(text)
+      ? textWithoutMeasurementTokens(text)
+      : text;
+    return [
+      ...(productCodeOnly(text) ? [productCodeOnly(text)!] : []),
+      ...extractAdProductCodes(searchText),
+    ];
+  }))];
 }
 
 function latestProductContextResetIndex(store: Bf02ExecutionContext): number {
@@ -302,7 +299,6 @@ function hasFreshPostResetProductEvidence(store: Bf02ExecutionContext): boolean 
 
 function batchProductContextResetRequested(store: Bf02ExecutionContext): boolean {
   return latestProductContextResetIndex(store) >= 0 &&
-    explicitMessageProductIds(store).length === 0 &&
     !hasFreshPostResetProductEvidence(store);
 }
 
@@ -324,6 +320,12 @@ function mergedCustomerText(texts: readonly string[]): string {
   return texts.map((text) => text.trim()).filter(Boolean).join("\n").trim();
 }
 
+function activeCustomerText(store: Bf02ExecutionContext): string {
+  return mergedCustomerText(
+    store.customerTexts.slice(latestProductContextResetIndex(store) + 1),
+  );
+}
+
 function scopedSearchTextAfterReset(
   store: Bf02ExecutionContext,
   searchValue: string,
@@ -340,9 +342,7 @@ function scopedSearchTextAfterReset(
 
   const fullBatchText = mergedCustomerText(store.customerTexts);
   if (normalizedSearch === fullBatchText) {
-    const activeBatchText = mergedCustomerText(
-      store.customerTexts.slice(resetIndex + 1),
-    );
+    const activeBatchText = activeCustomerText(store);
     return activeBatchText || null;
   }
 
@@ -396,6 +396,11 @@ async function recordActiveStateSelectionEvidence(
   productSearch: RealtimeProductSearchPort,
 ): Promise<void> {
   if (!store.state) return;
+  const continuation = verifiedContinuationProductId(
+    activeCustomerText(store),
+    store.state.currentProductId,
+  );
+  if (!continuation) return;
   for (const productId of activeStateSelectionProductIds(store)) {
     const duplicate = store.verifiedProducts.some((candidate) =>
       candidate.source === "STATE" &&
@@ -418,7 +423,7 @@ function classifyTextResolution(
   if (adProductIds(store).includes(productId)) return "MEDIA_OR_AD";
   if (activeMediaUrls(store).length > 0) return "MEDIA_OR_AD";
 
-  const latestText = store.customerTexts.at(-1) ?? "";
+  const latestText = activeCustomerText(store);
   const selectedFromClarification = state?.mediaClarification?.status === "ACTIVE"
     ? selectedProductId(latestText, state.mediaClarification.candidates)
     : null;
@@ -445,7 +450,7 @@ function classifyTextResolution(
   const normalizedSearch = searchValue.trim();
   if (
     store.customerTexts.some((text) => text.trim() === normalizedSearch) ||
-    mergedCustomerText(store.customerTexts.slice(latestProductContextResetIndex(store) + 1)) === normalizedSearch
+    activeCustomerText(store) === normalizedSearch
   ) return "CURRENT_TURN";
   return null;
 }
@@ -676,8 +681,7 @@ async function recoverVerifiedProduct(
   const state = execution?.state ?? null;
   if (!execution || !state || execution.stateVersion === null) return null;
 
-  const customerContext = latestCustomerContext(modelContext);
-  const customerText = customerContext?.text ?? execution.customerTexts.at(-1) ?? "";
+  const customerText = activeCustomerText(execution);
   const explicitProductIds = explicitMessageProductIds(execution);
   const hasCurrentTurnProductEvidence = execution.verifiedProducts.some(
     ({ source }) => source !== "STATE" && source !== "PREVIOUS_BOT",
