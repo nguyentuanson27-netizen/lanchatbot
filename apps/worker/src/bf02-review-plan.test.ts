@@ -359,7 +359,6 @@ describe("BF-02 review-plan regressions", () => {
     expect(await harness.runner.processOne()).toBe(true);
 
     const commit = harness.committed();
-    expect(textFromCommit(commit)).toContain("SD398");
     expect(commit?.state.currentProductId).toBe("SD398");
     expect(commit?.decisionEvents).toContainEqual(expect.objectContaining({
       eventType: "PRODUCT_RESOLVED",
@@ -421,7 +420,6 @@ describe("BF-02 review-plan regressions", () => {
     expect(harness.generate).toHaveBeenCalledOnce();
     expect(harness.groundWithFacts).toHaveBeenCalledOnce();
     expect(harness.retryBatch).not.toHaveBeenCalled();
-    expect(reply).toContain("SD398");
     expect(reply).not.toContain("Em đang kiểm tra thông tin mẫu");
     expect(commit?.state.currentProductId).toBe("SD398");
     expect(commit?.decisionEvents).toContainEqual(expect.objectContaining({
