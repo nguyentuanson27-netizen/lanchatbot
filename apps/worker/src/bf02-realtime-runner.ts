@@ -58,8 +58,14 @@ interface Bf01ReconciliationTarget {
   readonly reasonCode: Bf01ReconciliationReasonCode;
 }
 
+interface Bf01GuardedClarification {
+  readonly text: string;
+  readonly guardedPlanHash: string;
+}
+
 interface Bf01GeneratedClarification {
   readonly text: string;
+  readonly guardedPlanHash: string;
   readonly source: "MODEL_REPAIR" | "APPROVED_FALLBACK";
   readonly modelCalled: boolean;
   readonly modelLatencyMs: number | null;
@@ -233,11 +239,24 @@ function candidateProposal(
   };
 }
 
+function guardedPlanHashFor(
+  value: ReturnType<typeof guardAgentProposal>,
+): string {
+  return sha256(JSON.stringify({
+    action: value.action,
+    productId: value.productId,
+    handoffReason: value.handoffReason,
+    blockedReasonCodes: value.blockedReasonCodes,
+    textUnitHashes: value.textUnits.map((text) => sha256(text)),
+    imageCount: value.imageUrls.length,
+  }));
+}
+
 function guardedClarification(
   text: string,
   stage: string | null,
   now: Date,
-): string | null {
+): Bf01GuardedClarification | null {
   if (!text.trim()) return null;
   const guarded = guardAgentProposal({
     proposal: candidateProposal(text, stage),
@@ -245,12 +264,16 @@ function guardedClarification(
     verifiedProductIds: new Set<string>(),
     now,
   });
-  return guarded.action === "REPLY" &&
-      guarded.blockedReasonCodes.length === 0 &&
-      guarded.imageUrls.length === 0 &&
-      guarded.textUnits.length > 0
-    ? guarded.textUnits.join("\n").trim()
-    : null;
+  if (
+    guarded.action !== "REPLY" ||
+    guarded.blockedReasonCodes.length > 0 ||
+    guarded.imageUrls.length > 0 ||
+    guarded.textUnits.length === 0
+  ) return null;
+  return {
+    text: guarded.textUnits.join("\n").trim(),
+    guardedPlanHash: guardedPlanHashFor(guarded),
+  };
 }
 
 function repairInstruction(
@@ -350,12 +373,13 @@ async function generateClarification(
       );
       repairModelLatencyMs = generated.latencyMs;
       repairModelTokenUsage = tokenUsage(generated.tokenUsage);
-      const text = generated.proposal.action === "REPLY"
+      const guarded = generated.proposal.action === "REPLY"
         ? guardedClarification(generated.proposal.reply, stage, now)
         : null;
-      if (text) {
+      if (guarded) {
         return {
-          text,
+          text: guarded.text,
+          guardedPlanHash: guarded.guardedPlanHash,
           source: "MODEL_REPAIR",
           modelCalled: true,
           modelLatencyMs: repairModelLatencyMs,
@@ -373,7 +397,8 @@ async function generateClarification(
     : null;
   return fallback
     ? {
-        text: fallback,
+        text: fallback.text,
+        guardedPlanHash: fallback.guardedPlanHash,
         source: "APPROVED_FALLBACK",
         modelCalled,
         modelLatencyMs: repairModelLatencyMs,
@@ -383,8 +408,59 @@ async function generateClarification(
     : null;
 }
 
-function directQuestionEvidence(event: RealtimeDecisionEventPlan): boolean {
-  return event.intent !== null && BF01_DIRECT_QUESTION_INTENTS.has(event.intent);
+function normalizedDialogueText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[\u0111\u0110]/gu, "d")
+    .toLocaleLowerCase("vi-VN")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
+function customerQuestionEvidence(value: string): boolean {
+  const raw = value.trim();
+  if (!raw) return false;
+  if (/[?？]\s*$/u.test(raw)) return true;
+
+  const text = normalizedDialogueText(raw);
+  if (
+    /\b(?:bao nhieu|khi nao|bao lau|may ngay|o dau|tai sao|vi sao|the nao|lam sao)\b/u.test(text)
+  ) return true;
+  if (
+    /\b(?:gi|nao)(?:\s+(?:nua|vay|a|ha|nhi|nhe))?\s*[.!]*$/u.test(text)
+  ) return true;
+  return /\b(?:co|con|duoc|giao|ship|mac|chon|lay|dat|doi)\b[^.!?]{0,80}\b(?:khong|ko|k|chua)\s*[.!?]*$/u.test(text);
+}
+
+function directQuestionEvidence(
+  event: RealtimeDecisionEventPlan,
+  customerText: string,
+): boolean {
+  return event.intent !== null &&
+    BF01_DIRECT_QUESTION_INTENTS.has(event.intent) &&
+    customerQuestionEvidence(customerText);
+}
+
+function reconciliationEventRank(event: RealtimeDecisionEventPlan): number {
+  if (event.eventType === "NO_REPLY_SELECTED") return 0;
+  if (event.eventType === "NO_REPLY") return 1;
+  return 2;
+}
+
+function reconciliationCandidate(
+  event: RealtimeDecisionEventPlan,
+  customerText: string,
+): boolean {
+  if (event.action !== "NO_REPLY" || event.mode !== "LIVE") return false;
+  const details = event.details;
+  if (
+    details.guardOutcome !== "ALLOWED" ||
+    details.guardReasonCodes.length > 0 ||
+    details.outboundMessageCount !== 0
+  ) return false;
+  return details.wave2Strategy?.recommendedStrategy === "STRATEGY_ASK_CLARIFY" ||
+    directQuestionEvidence(event, customerText);
 }
 
 export function bf01ReconciliationTarget(
@@ -398,6 +474,7 @@ export function bf01ReconciliationTarget(
     readonly mode: RealtimeRunnerOptions["mode"];
     readonly sendEnabled: boolean;
     readonly recipientId: string | null;
+    readonly customerText: string;
   },
 ): Bf01ReconciliationTarget | null {
   if (input.policy !== "CLARIFY_RECONCILED_V1") return null;
@@ -416,17 +493,13 @@ export function bf01ReconciliationTarget(
     input.state.tagGateStatus === "BLOCKING"
   ) return null;
 
-  const event = input.events.find((candidate) => {
-    if (candidate.action !== "NO_REPLY" || candidate.mode !== "LIVE") return false;
-    const details = candidate.details;
-    if (
-      details.guardOutcome !== "ALLOWED" ||
-      details.guardReasonCodes.length > 0 ||
-      details.outboundMessageCount !== 0
-    ) return false;
-    return details.wave2Strategy?.recommendedStrategy === "STRATEGY_ASK_CLARIFY" ||
-      directQuestionEvidence(candidate);
-  });
+  const event = input.events
+    .filter((candidate) => reconciliationCandidate(candidate, input.customerText))
+    .sort((left, right) =>
+      reconciliationEventRank(left) - reconciliationEventRank(right) ||
+      left.eventId.localeCompare(right.eventId)
+    )
+    .at(0);
   if (!event) return null;
   return {
     event,
@@ -459,6 +532,7 @@ function mergedTokenUsage(
 
 function reconciledEvents(
   events: readonly RealtimeDecisionEventPlan[],
+  targetEventId: string,
   clarification: Bf01GeneratedClarification,
   reconciliationReasonCode: Bf01ReconciliationReasonCode,
 ): readonly RealtimeDecisionEventPlan[] {
@@ -467,11 +541,7 @@ function reconciledEvents(
     ? "BF01_MODEL_CLARIFICATION_REPAIR"
     : "BF01_APPROVED_FALLBACK_USED";
   return events.map((event): RealtimeDecisionEventPlan => {
-    if (
-      event.action !== "NO_REPLY" ||
-      event.details.guardOutcome !== "ALLOWED" ||
-      event.details.outboundMessageCount !== 0
-    ) return event;
+    if (event.eventId !== targetEventId) return event;
     const convertedType: RealtimeDecisionEventPlan["eventType"] =
       event.eventType === "NO_REPLY" || event.eventType === "NO_REPLY_SELECTED"
         ? "CLARIFICATION_REQUESTED"
@@ -492,6 +562,7 @@ function reconciledEvents(
       ],
       details: {
         ...event.details,
+        guardedPlanHash: clarification.guardedPlanHash,
         renderedReplyHash: replyHash,
         outboundMessageCount: 1,
         modelCalled: event.details.modelCalled || clarification.modelCalled,
@@ -549,6 +620,7 @@ function wrapRuntime(
             mode: options.mode,
             sendEnabled: options.sendEnabled,
             recipientId: store.recipientId,
+            customerText: store.customerText,
           });
           if (!targetDecision) return target.commit(input, nowArg);
 
@@ -579,6 +651,7 @@ function wrapRuntime(
             },
             decisionEvents: reconciledEvents(
               events,
+              targetDecision.event.eventId,
               clarification,
               targetDecision.reasonCode,
             ),
