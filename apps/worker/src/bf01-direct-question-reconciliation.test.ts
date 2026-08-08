@@ -218,12 +218,34 @@ describe("BF-01 direct-question reconciliation", () => {
     });
   });
 
-  it("does not reconcile when typed query intent disagrees with the audited topic", () => {
-    expect(target(event({ intent: "PRICE" }), "Con size nao?", "SIZE")).toBeNull();
+  it.each([
+    ["Mau nay mac khong?", "PRICE" as const],
+    ["Bao gio em nhan duoc?", "ETA" as const],
+  ])(
+    "uses typed semantic query when legacy audited intent is missing: %s",
+    (customerText, modelBusinessFactIntent) => {
+      expect(target(
+        event({ intent: null }),
+        customerText,
+        modelBusinessFactIntent,
+      )).toMatchObject({
+        reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+      });
+    },
+  );
+
+  it("uses typed semantic query even when the legacy audited topic disagrees", () => {
+    expect(target(event({ intent: "PRICE" }), "Con size nao?", "SIZE")).toMatchObject({
+      reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+    });
   });
 
-  it("does not treat unrelated decision intents as direct-question evidence", () => {
-    expect(target(event({ intent: "BUYING_SIGNAL" }))).toBeNull();
+  it("does not reconcile without typed semantic query evidence", () => {
+    expect(target(
+      event({ intent: "BUYING_SIGNAL" }),
+      "Em cam on",
+      "NONE",
+    )).toBeNull();
   });
 
   it("does not override an explicitly reason-coded guard block", () => {
