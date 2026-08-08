@@ -16,7 +16,7 @@ export interface PolicyListQuery {
   readonly cursor?: string;
   readonly search?: string;
   readonly artifactKind?: PolicyArtifactKind;
-  readonly lifecycle?: PolicyLifecycle;
+  readonly lifecycle?: PolicyLifecycle | undefined;
   readonly active?: PolicyActiveFilter;
   readonly sort?: PolicyListSort;
 }
