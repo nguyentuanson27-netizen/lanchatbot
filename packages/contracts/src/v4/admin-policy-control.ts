@@ -101,7 +101,18 @@ export const ClosingStrategyAdminContentV1Schema = z.unknown().transform(
       for (const issue of extension.error.issues) context.addIssue({ ...issue });
       return z.NEVER;
     }
-    return { ...legacy.data, ...extension.data };
+    return {
+      ...legacy.data,
+      ...(extension.data.replyReconciliationPolicy === undefined
+        ? {}
+        : { replyReconciliationPolicy: extension.data.replyReconciliationPolicy }),
+      ...(extension.data.replyReconciliationFallbackText === undefined
+        ? {}
+        : {
+            replyReconciliationFallbackText:
+              extension.data.replyReconciliationFallbackText,
+          }),
+    };
   },
 ) as z.ZodType<ClosingStrategyAdminContentV1>;
 
