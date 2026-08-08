@@ -1,5 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "./api.js";
+import {
+  batchTransitionPolicyArtifacts,
+  type PolicyListPage,
+  type PolicyListQuery,
+  type PolicyReviewContext,
+} from "./policy-control-review-api.js";
 import {
   createLatestPolicyListLoader,
   createLatestPolicyReviewLoader,
@@ -7,11 +13,6 @@ import {
   policyPageChoices,
   resolvePolicyPageContext,
 } from "./policy-control-runtime.js";
-import type {
-  PolicyListPage,
-  PolicyListQuery,
-  PolicyReviewContext,
-} from "./policy-control-review-api.js";
 import type { Identity, PolicyArtifact, PolicyControlData } from "./types.js";
 
 const identity: Identity = {
@@ -59,6 +60,17 @@ function reviewContext(id: string): PolicyReviewContext {
     rollbackCandidates: [],
   };
 }
+
+function jsonResponse(payload: unknown): Response {
+  return new Response(JSON.stringify(payload), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe("policy list latest-query loader", () => {
   it("drops a delayed stale response after a newer filter request starts", async () => {
@@ -195,5 +207,41 @@ describe("phase2 ambiguous batch recovery", () => {
     );
     expect(transitionCalls).toBe(1);
     expect(outcome.kind).toBe("recovery");
+  });
+
+  it("reconciles a malformed success 200 instead of surfacing a generic parser error", async () => {
+    const versionId = "018f1b72-0000-7000-8000-000000000301";
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      request_id: "request-malformed-success",
+      action: "APPROVE",
+      results: [{
+        version_id: versionId,
+        ok: true,
+        artifact: {
+          version_id: versionId,
+          artifact_key: `policy:${versionId}`,
+          artifact_kind: "SHOP_POLICY",
+          version_number: 1,
+          lifecycle: "APPROVED",
+          revision: "not-a-revision",
+          content_hash: "sha256:test",
+          content: { kind: "SHOP_POLICY" },
+          updated_by_subject: "owner",
+          updated_at: "2026-08-08T00:00:00.000Z",
+        },
+      }],
+      summary: { total: 1, succeeded: 1, failed: 0 },
+    })));
+
+    const outcome = await executePolicyBatchWithRecovery(
+      "APPROVE",
+      [{ versionId, expectedRevision: 3, lifecycle: "VALIDATED" }],
+      batchTransitionPolicyArtifacts,
+      async () => artifact(versionId, "APPROVED", 4),
+    );
+
+    expect(outcome.kind).toBe("recovery");
+    if (outcome.kind !== "recovery") throw new Error("expected recovery");
+    expect(outcome.recovery.recoveredIds).toEqual([versionId]);
   });
 });
