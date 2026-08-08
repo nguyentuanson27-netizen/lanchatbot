@@ -26,15 +26,16 @@ The review stack is intentionally linear so every slice stays independently revi
 
 1. `main → #140` — Phase 1A: Admin API/store read boundary.
 2. `#140 → #136` — Phase 1B: Admin Web client API/runtime/route synchronization.
-3. `#136 → #147` — Phase 1C: table/drawer UI, CSS and this rollout document.
-4. `#147 → #139` — Phase 2A: batch API, response contract and ambiguous-result recovery.
-5. `#139 → #148` — Phase 2B: current-page selection, bulk Validate/Approve UI and CSS.
+3. `#136 → #147` — Phase 1C: policy review CSS and rollout/ownership documentation.
+4. `#147 → #153` — Phase 1D: table/drawer UI and targeted UI regressions.
+5. `#153 → #139` — Phase 2A: batch API, response contract and ambiguous-result recovery.
+6. `#139 → #148` — Phase 2B: current-page selection, bulk Validate/Approve UI and CSS.
 
 Do not retarget a later slice around an earlier slice or merge the stack out of order.
 
 ## Phase 1 — list, filtering and safe review drawer
 
-Phase 1 is delivered by three stacked slices: #140 owns the read boundary, #136 owns client API/runtime/route synchronization, and #147 owns table/drawer rendering, CSS and documentation.
+Phase 1 is delivered by four stacked slices: #140 owns the read boundary, #136 owns client API/runtime/route synchronization, #147 owns policy review CSS and rollout documentation, and #153 owns table/drawer rendering and interaction tests.
 
 ### Admin API/store — #140 (Phase 1A)
 
@@ -50,9 +51,9 @@ Search remains parameterized. Literal `%`, `_` and the chosen escape character m
 
 PostgreSQL `bigint` revisions may arrive from `pg` as decimal strings. Phase 1 normalizes safe non-negative revision strings explicitly and never silently falls back to `0`.
 
-### Admin Web — #136 (Phase 1B) + #147 (Phase 1C)
+### Admin Web — #136 (Phase 1B) + #147 (Phase 1C) + #153 (Phase 1D)
 
-#136 owns the client API, runtime state/recovery helpers and route synchronization required by the review surface. #147 owns the visible table/drawer implementation, CSS and this document.
+#136 owns the client API, runtime state/recovery helpers and route synchronization required by the review surface. #147 owns policy review CSS and this rollout document. #153 owns the visible table/drawer implementation and targeted UI regressions.
 
 Together they replace the large card grid with:
 
@@ -112,9 +113,10 @@ A green CI run does not replace the browser walkthrough for UI behavior. If brow
 
 1. Merge #140 (Phase 1A) independently.
 2. Merge #136 (Phase 1B) onto the accepted #140 boundary.
-3. Merge #147 (Phase 1C) onto #136.
-4. Merge #139 (Phase 2A) onto the accepted #147 boundary.
-5. Merge #148 (Phase 2B) onto #139.
-6. Rebase/retarget Phase 3 onto the appropriate merged baseline and review it independently.
+3. Merge #147 (Phase 1C styles/docs) onto #136.
+4. Merge #153 (Phase 1D table/drawer UI) onto #147.
+5. Merge #139 (Phase 2A) onto the accepted #153 boundary.
+6. Merge #148 (Phase 2B) onto #139.
+7. Rebase/retarget Phase 3 onto the appropriate merged baseline and review it independently.
 
 No phase or slice is considered complete merely because the combined prototype existed on an earlier branch.
