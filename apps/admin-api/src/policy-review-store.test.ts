@@ -46,6 +46,22 @@ describe("policy review list query", () => {
     assert.match(validated.sql, /ORDER BY v\.validated_at ASC NULLS LAST, v\.version_id ASC/u);
   });
 
+  it("continues duplicate artifact keys with the version-id cursor tie breaker", () => {
+    const cursor = encodePolicyCursor({
+      sort: "artifact_key_asc",
+      value: "size-chart:SQ603",
+      id: "018f1b72-0000-7000-8000-000000000010",
+    });
+    const built = buildPolicyArtifactListQuery(scopedIdentity, {
+      limit: 50,
+      sort: "artifact_key_asc",
+      cursor,
+    });
+    assert.match(built.sql, /v\.artifact_key > \$\d+ OR \(v\.artifact_key = \$\d+ AND v\.version_id::text > \$\d+\)/u);
+    assert.ok(built.values.includes("size-chart:SQ603"));
+    assert.ok(built.values.includes("018f1b72-0000-7000-8000-000000000010"));
+  });
+
   it("rejects validated-oldest outside the validated queue", () => {
     assert.throws(
       () => buildPolicyArtifactListQuery(scopedIdentity, {
@@ -76,6 +92,18 @@ describe("policy review cursor", () => {
     });
     assert.throws(
       () => decodePolicyCursor(cursor, "updated_desc"),
+      (error) => error instanceof AdminQueryError && error.code === "ADMIN_POLICY_CURSOR_INVALID",
+    );
+  });
+
+  it("rejects a missing primary value for artifact-key sorting", () => {
+    const cursor = encodePolicyCursor({
+      sort: "artifact_key_asc",
+      value: null,
+      id: "018f1b72-0000-7000-8000-000000000001",
+    });
+    assert.throws(
+      () => decodePolicyCursor(cursor, "artifact_key_asc"),
       (error) => error instanceof AdminQueryError && error.code === "ADMIN_POLICY_CURSOR_INVALID",
     );
   });

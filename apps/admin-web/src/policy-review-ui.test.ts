@@ -1,11 +1,30 @@
 import { describe, expect, it } from "vitest";
 import {
   bulkActionForSelection,
+  nextReviewArtifactId,
   policyQuickViewQuery,
   renderPolicyListTable,
+  renderReviewDrawer,
   renderSizeChartReview,
 } from "./policy-control-ui.js";
-import type { PolicyArtifact } from "./types.js";
+import type { PolicyReviewContext } from "./policy-control-review-api.js";
+import type { Identity, PolicyArtifact } from "./types.js";
+
+const identity: Identity = {
+  email: "owner@example.com",
+  name: "Owner",
+  role: "OWNER",
+  pageScope: ["page-1"],
+  canControl: true,
+  historyEnabled: true,
+  controlPageIds: ["page-1"],
+  policyControl: true,
+  policyPageIds: ["page-1"],
+  policyCanaryShadowEnabled: true,
+  policyCanaryLiveEnabled: false,
+  policyPublishEnabled: false,
+  productMediaUpload: false,
+};
 
 function artifact(
   id: string,
@@ -65,6 +84,30 @@ describe("policy bulk review", () => {
     expect(html).toContain("Đã qua kiểm tra");
     expect(html).not.toContain("PUBLISH");
     expect(html).not.toContain("START_CANARY");
+  });
+});
+
+describe("sequential policy review", () => {
+  it("renders approve-and-next for a validated artifact", () => {
+    const context: PolicyReviewContext = {
+      artifact: artifact("b", "VALIDATED"),
+      previousVersion: null,
+      activePointers: [],
+      rollbackCandidates: [],
+    };
+    const html = renderReviewDrawer(context, identity);
+    expect(html).toContain('data-policy-approve-next');
+    expect(html).toContain("Duyệt & sang mục tiếp theo");
+  });
+
+  it("chooses the next validated row and wraps within the current page", () => {
+    const items = [
+      artifact("a", "APPROVED"),
+      artifact("b", "VALIDATED"),
+      artifact("c", "VALIDATED"),
+    ];
+    expect(nextReviewArtifactId(items, "b")).toBe("c");
+    expect(nextReviewArtifactId(items, "c")).toBe("b");
   });
 });
 

@@ -115,6 +115,18 @@ describe("policy review routes", () => {
     await app.close();
   });
 
+  it("rejects oversized search before the store boundary", async () => {
+    const { app, queries } = create();
+    const response = await app.inject({
+      method: "GET",
+      url: `/admin/v1/policy/artifacts?search=${"x".repeat(121)}`,
+      headers: { "x-lana-admin-assertion": "valid" },
+    });
+    assert.equal(response.statusCode, 400);
+    assert.deepEqual(queries, []);
+    await app.close();
+  });
+
   it("returns review context without depending on the current list page", async () => {
     const { app } = create();
     const response = await app.inject({
