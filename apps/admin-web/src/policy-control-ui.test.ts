@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   nextReviewArtifactId,
+  policyBatchSelection,
+  policyBulkActionEligibility,
   policyQuickViewQuery,
   policyRowNavigationIndex,
   renderPolicyListTable,
@@ -46,6 +48,10 @@ function artifact(
   };
 }
 
+function row(id: string, lifecycle: PolicyArtifact["lifecycle"]): PolicyArtifactRow {
+  return { ...artifact(id, lifecycle), active: false };
+}
+
 function context(item: PolicyArtifact): PolicyReviewContext {
   return {
     artifact: item,
@@ -56,15 +62,6 @@ function context(item: PolicyArtifact): PolicyReviewContext {
 }
 
 describe("policy phase1 table", () => {
-  it("renders a compact table without phase2 bulk-selection controls", () => {
-    const rows: PolicyArtifactRow[] = [{ ...artifact("a", "DRAFT"), active: false }];
-    const html = renderPolicyListTable(rows);
-    expect(html).toContain("policy-list-table");
-    expect(html).toContain("Revision");
-    expect(html).not.toContain("checkbox");
-    expect(html).not.toContain("data-policy-bulk");
-  });
-
   it("keeps quick-view semantics deterministic", () => {
     expect(policyQuickViewQuery("review")).toEqual({
       lifecycle: "VALIDATED",
@@ -96,6 +93,50 @@ describe("policy phase1 table", () => {
   });
 });
 
+describe("policy phase2 bulk review", () => {
+  it("renders current-page selection only for DRAFT and VALIDATED rows", () => {
+    const html = renderPolicyListTable([
+      row("draft", "DRAFT"),
+      row("validated", "VALIDATED"),
+      row("approved", "APPROVED"),
+    ], new Set(["draft"]));
+    expect(html).toContain('data-policy-select-page');
+    expect(html).toMatch(/data-policy-select="draft"[^>]*checked/u);
+    expect(html).toContain('data-policy-select="validated"');
+    expect(html).toMatch(/data-policy-select="approved"[^>]*disabled/u);
+  });
+
+  it("enables exactly one safe bulk transition for a homogeneous selection", () => {
+    const items = [row("draft-a", "DRAFT"), row("draft-b", "DRAFT"), row("validated", "VALIDATED")];
+    expect(policyBulkActionEligibility(items, new Set(["draft-a", "draft-b"]))).toEqual({
+      selectedCount: 2,
+      canValidate: true,
+      canApprove: false,
+    });
+    expect(policyBulkActionEligibility(items, new Set(["validated"]))).toEqual({
+      selectedCount: 1,
+      canValidate: false,
+      canApprove: true,
+    });
+    expect(policyBulkActionEligibility(items, new Set(["draft-a", "validated"]))).toEqual({
+      selectedCount: 2,
+      canValidate: false,
+      canApprove: false,
+    });
+  });
+
+  it("builds a request snapshot in current-page order with revision guards", () => {
+    const items = [row("a", "DRAFT"), row("b", "DRAFT"), row("c", "VALIDATED")];
+    expect(policyBatchSelection(items, new Set(["b", "a"]), "VALIDATE")).toEqual([
+      { versionId: "a", expectedRevision: 3, lifecycle: "DRAFT" },
+      { versionId: "b", expectedRevision: 3, lifecycle: "DRAFT" },
+    ]);
+    expect(() => policyBatchSelection(items, new Set(["a", "c"]), "VALIDATE")).toThrow(
+      "Selection is not eligible for VALIDATE",
+    );
+  });
+});
+
 describe("policy phase1 drawer", () => {
   it("disables page-scoped actions until a concrete page is selected", () => {
     const html = renderReviewDrawer(context(artifact("approved", "APPROVED")), {
@@ -107,7 +148,7 @@ describe("policy phase1 drawer", () => {
     expect(html).toMatch(/data-policy-drawer-action="START_CANARY"[^>]*disabled/u);
   });
 
-  it("keeps SIZE_CHART on generic read-only content in phase1", () => {
+  it("keeps SIZE_CHART on generic read-only content in phase2", () => {
     const html = renderReviewDrawer(context(artifact("size", "VALIDATED", "SIZE_CHART")), identity, "page-1");
     expect(html).toContain("SIZE_CHART");
     expect(html).not.toContain("policy-size-chart");
