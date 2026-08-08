@@ -409,9 +409,21 @@ describe("BF-01 runner reconciliation", () => {
     expect(harness.generate).toHaveBeenCalledTimes(2);
     expect(committedText(commit)).toBe(fallbackText);
     expect(committedText(commit)).not.toContain("1.199.000");
-    expect(commit?.decisionEvents).toContainEqual(expect.objectContaining({
+    const reconciled = commit?.decisionEvents?.find((event) =>
+      event.reasonCodes.includes("BF01_APPROVED_FALLBACK_USED")
+    );
+    expect(reconciled).toMatchObject({
       reasonCodes: expect.arrayContaining(["BF01_APPROVED_FALLBACK_USED"]),
-    }));
+      details: {
+        modelCalled: true,
+        modelLatencyMs: 10,
+        modelTokenUsage: {
+          prompt: 24,
+          output: 8,
+          total: 32,
+        },
+      },
+    });
   });
 
   it("uses the approved fallback when repair generation fails", async () => {
