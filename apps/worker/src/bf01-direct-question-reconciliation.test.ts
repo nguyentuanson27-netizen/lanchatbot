@@ -107,6 +107,24 @@ describe("BF-01 direct-question reconciliation", () => {
     expect(target(event(), "Em khong hoi gia bao nhieu, cam on")).toBeNull();
   });
 
+  it("uses the terminal clause so a prior negated question act does not hide a real follow-up", () => {
+    expect(target(
+      event({ intent: "SIZE" }),
+      "Em khong hoi gia bao nhieu, con size nao?",
+    )).toMatchObject({
+      reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+    });
+  });
+
+  it("uses the terminal clause so prior known information does not hide a real follow-up", () => {
+    expect(target(
+      event({ intent: "SIZE" }),
+      "Em biet gia bao nhieu roi, con size nao",
+    )).toMatchObject({
+      reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+    });
+  });
+
   it("does not treat unrelated decision intents as direct-question evidence", () => {
     expect(target(event({ intent: "BUYING_SIGNAL" }))).toBeNull();
   });
