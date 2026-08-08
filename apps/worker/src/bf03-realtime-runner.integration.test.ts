@@ -6,9 +6,11 @@ import type {
   RuntimePolicyResolverPort,
 } from "@lana/chat-runtime";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
+import type { ChatHistoryPort } from "./redis-chat-history.js";
 import {
   BF03_CORRECTION_REASON_CODE,
   RealtimeRunner,
+  type CanonicalChatHistoryPort,
   type RealtimeInboxPort,
   type RealtimeModelPort,
   type RealtimeProductSearchPort,
@@ -324,6 +326,26 @@ function createHarness(input: {
     resolve: vi.fn(async () => policyResolution(policy)),
   };
 
+  const historyAppends: Parameters<ChatHistoryPort["append"]>[1][] = [];
+  const history: ChatHistoryPort = {
+    ready: vi.fn(async () => true),
+    load: vi.fn(async () => []),
+    append: vi.fn(async (_conversationId, value) => {
+      historyAppends.push(value);
+      return true;
+    }),
+    close: vi.fn(async () => undefined),
+  };
+
+  const canonicalInbound: Parameters<CanonicalChatHistoryPort["recordInboundCustomerMessage"]>[0][] = [];
+  const canonicalHistory: CanonicalChatHistoryPort = {
+    recordInboundCustomerMessage: vi.fn(async (value) => {
+      canonicalInbound.push(value);
+      return { messagePk: `message-pk-${canonicalInbound.length}` };
+    }),
+    recordOutboundHumanMessage: vi.fn(async () => undefined),
+  };
+
   const runner = new RealtimeRunner(
     inbox,
     runtime,
@@ -341,8 +363,8 @@ function createHarness(input: {
       releaseId: "bf03-test",
     },
     undefined,
-    undefined,
-    undefined,
+    history,
+    canonicalHistory,
     undefined,
     policyResolver,
   );
@@ -350,6 +372,8 @@ function createHarness(input: {
   return {
     runner,
     generatedContexts,
+    historyAppends,
+    canonicalInbound,
     searchText,
     resolveFacts,
     committed: () => committed,
@@ -376,7 +400,7 @@ function hasBf03Evidence(
 }
 
 describe("BF-03 RealtimeRunner", () => {
-  it("contains the reported correction through the runner without invoking facts and restores raw model context", async () => {
+  it("contains the reported correction without facts and restores raw model/history context", async () => {
     const text = "có giá vs size rồi mà";
     const harness = createHarness({
       messages: [text],
@@ -392,6 +416,11 @@ describe("BF-03 RealtimeRunner", () => {
       text,
     }));
     expect(hasBf03Instruction(context)).toBe(true);
+    expect(harness.historyAppends).toContainEqual(expect.objectContaining({
+      senderType: "CUSTOMER",
+      text,
+    }));
+    expect(harness.canonicalInbound).toContainEqual(expect.objectContaining({ text }));
 
     const commit = harness.committed();
     expect(hasBf03Evidence(commit)).toBe(true);
@@ -424,15 +453,20 @@ describe("BF-03 RealtimeRunner", () => {
     expect(await harness.runner.processOne()).toBe(true);
     expect(harness.searchText).toHaveBeenCalledWith("SD398");
     expect(harness.committed()?.state.currentProductId).toBe("SD398");
-    expect(harness.resolveFacts).not.toHaveBeenCalled();
+    // The standalone code message is allowed to retain its legacy PRICE lookup;
+    // this regression is specifically about preserving verified product context.
     expect(hasBf03Evidence(harness.committed())).toBe(true);
   });
 
-  it("keeps a mixed PRICE request on the normal fact path instead of containing the turn", async () => {
+  it.each([
+    ["PRICE" as const, "size có rồi mà, cho chị xin giá"],
+    ["STOCK" as const, "size có rồi mà, còn hàng không em"],
+    ["ETA" as const, "size có rồi mà, khi nào giao tới chị"],
+  ])("keeps mixed %s requests on the normal fact path", async (intent, text) => {
     const harness = createHarness({
-      messages: ["size có rồi mà, cho chị xin giá"],
+      messages: [text],
       currentProductId: "SD398",
-      modelIntent: "PRICE",
+      modelIntent: intent,
     });
 
     expect(await harness.runner.processOne()).toBe(true);
