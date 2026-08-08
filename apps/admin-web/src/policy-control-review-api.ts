@@ -65,6 +65,15 @@ export interface PolicyBatchResult {
 
 type JsonRecord = Record<string, unknown>;
 
+export async function listPolicyPageIds(signal?: AbortSignal): Promise<string[]> {
+  const payload = await policyRequest("/pages", signal);
+  return [...new Set(
+    arrayValue(payload.items)
+      .map((value) => stringValue(record(value).page_id))
+      .filter((pageId) => pageId.length > 0 && pageId !== "ALL"),
+  )];
+}
+
 export async function listPolicyArtifacts(
   query: PolicyListQuery,
   signal?: AbortSignal,
