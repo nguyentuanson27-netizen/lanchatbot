@@ -426,12 +426,27 @@ describe("BF-01 runner reconciliation", () => {
     });
   });
 
-  it("uses the approved fallback when repair generation fails", async () => {
+  it("uses the approved fallback when repair generation fails without fabricating provider telemetry", async () => {
     const harness = createHarness({ repairMode: "THROW" });
 
     expect(await harness.runner.processOne()).toBe(true);
+    const commit = harness.committed();
     expect(harness.generate).toHaveBeenCalledTimes(2);
-    expect(committedText(harness.committed())).toBe(fallbackText);
+    expect(committedText(commit)).toBe(fallbackText);
+    const reconciled = commit?.decisionEvents?.find((event) =>
+      event.reasonCodes.includes("BF01_APPROVED_FALLBACK_USED")
+    );
+    expect(reconciled).toMatchObject({
+      details: {
+        modelCalled: true,
+        modelLatencyMs: 5,
+        modelTokenUsage: {
+          prompt: 12,
+          output: 4,
+          total: 16,
+        },
+      },
+    });
   });
 
   it("does not make the repair model call when the second quota reservation fails", async () => {
