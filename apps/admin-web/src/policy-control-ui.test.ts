@@ -1,115 +1,128 @@
 import { describe, expect, it } from "vitest";
-import {
-  nextReviewArtifactId,
-  policyQuickViewQuery,
-  policyRowNavigationIndex,
-  renderPolicyListTable,
-  renderReviewDrawer,
-} from "./policy-control-ui.js";
-import type { PolicyArtifactRow, PolicyReviewContext } from "./policy-control-review-api.js";
-import type { Identity, PolicyArtifact } from "./types.js";
+import { renderPolicyControl } from "./policy-control-ui.js";
+import type { Identity, PolicyArtifact, PolicyControlData } from "./types.js";
 
 const identity: Identity = {
   email: "owner@example.com",
   name: "Owner",
   role: "OWNER",
-  pageScope: ["page-1"],
+  pageScope: ["1198992073286645"],
   canControl: true,
   historyEnabled: true,
-  controlPageIds: ["page-1"],
+  controlPageIds: ["1198992073286645"],
   policyControl: true,
-  policyPageIds: ["page-1"],
+  policyPageIds: ["1198992073286645"],
   policyCanaryShadowEnabled: true,
   policyCanaryLiveEnabled: false,
   policyPublishEnabled: false,
   productMediaUpload: false,
 };
 
-function artifact(
-  id: string,
-  lifecycle: PolicyArtifact["lifecycle"],
-  kind: PolicyArtifact["kind"] = "SHOP_POLICY",
-): PolicyArtifact {
+function artifact(lifecycle: PolicyArtifact["lifecycle"], version: number): PolicyArtifact {
   return {
-    id,
-    key: `${kind.toLowerCase()}:${id}`,
-    kind,
-    version: 1,
+    id: `version-${version}`,
+    key: `lana.policy.${lifecycle.toLowerCase()}`,
+    kind: "SHOP_POLICY",
+    version,
     lifecycle,
-    revision: 3,
+    revision: 1,
     contentHash: "sha256:test",
-    content: kind === "SIZE_CHART"
-      ? { kind: "SIZE_CHART", chart: { bands: [{ size: "M", ranges: [] }] } }
-      : { kind: "SHOP_POLICY", shipping: { eta: "2-3 ngày" } },
+    content: { kind: "SHOP_POLICY" },
     updatedBy: "owner",
-    updatedAt: "2026-08-08T08:00:00.000Z",
+    updatedAt: "2026-07-22T08:00:00.000Z",
   };
 }
 
-function context(item: PolicyArtifact): PolicyReviewContext {
-  return {
-    artifact: item,
-    previousVersion: null,
-    activePointers: [],
-    rollbackCandidates: [],
-  };
-}
+const data: PolicyControlData = {
+  artifacts: [artifact("APPROVED", 1), artifact("CANARY", 2)],
+  pointers: [],
+  simulations: [],
+};
 
-describe("policy phase1 table", () => {
-  it("renders a compact table without phase2 bulk-selection controls", () => {
-    const rows: PolicyArtifactRow[] = [{ ...artifact("a", "DRAFT"), active: false }];
-    const html = renderPolicyListTable(rows);
-    expect(html).toContain("policy-list-table");
-    expect(html).toContain("Revision");
-    expect(html).not.toContain("checkbox");
-    expect(html).not.toContain("data-policy-bulk");
+describe("policy lifecycle safety UI", () => {
+  it("keeps shadow available and clearly disables live canary and publish by default", () => {
+    const html = renderPolicyControl(data, identity);
+    expect(html).toContain('data-canary-mode="SHADOW"');
+    expect(html).toContain('data-policy-feature-disabled="CANARY_LIVE" disabled');
+    expect(html).toContain('data-policy-feature-disabled="PUBLISHED" disabled');
+    expect(html).toContain("Canary gửi thật: khóa");
+    expect(html).toContain("Phát hành: khóa");
+    expect(html).not.toContain('data-canary-mode="LIVE_OUTBOUND"');
+    expect(html).not.toContain('data-policy-action="PUBLISH"');
   });
 
-  it("keeps quick-view semantics deterministic", () => {
-    expect(policyQuickViewQuery("review")).toEqual({
-      lifecycle: "VALIDATED",
-      active: "any",
-      sort: "validated_oldest",
-    });
-    expect(policyQuickViewQuery("running")).toEqual({
-      lifecycle: undefined,
-      active: "active",
-      sort: "updated_desc",
-    });
-  });
-
-  it("moves approve-and-next only among validated rows", () => {
-    const items = [
-      artifact("draft", "DRAFT"),
-      artifact("one", "VALIDATED"),
-      artifact("approved", "APPROVED"),
-      artifact("two", "VALIDATED"),
-    ];
-    expect(nextReviewArtifactId(items, "one")).toBe("two");
-    expect(nextReviewArtifactId(items, "two")).toBe("one");
-  });
-
-  it("focuses the first row on the first J press when no row is focused", () => {
-    expect(policyRowNavigationIndex(3, -1, "j")).toBe(0);
-    expect(policyRowNavigationIndex(3, 0, "j")).toBe(1);
-    expect(policyRowNavigationIndex(3, 2, "j")).toBe(2);
-  });
-});
-
-describe("policy phase1 drawer", () => {
-  it("disables page-scoped actions until a concrete page is selected", () => {
-    const html = renderReviewDrawer(context(artifact("approved", "APPROVED")), {
+  it("renders live canary and publish actions only when the server advertises both flags", () => {
+    const html = renderPolicyControl(data, {
       ...identity,
       policyCanaryLiveEnabled: true,
       policyPublishEnabled: true,
-    }, null);
-    expect(html).toContain("Chưa chọn");
-    expect(html).toMatch(/data-policy-drawer-action="START_CANARY"[^>]*disabled/u);
+    });
+    expect(html).toContain('data-canary-mode="LIVE_OUTBOUND"');
+    expect(html).toContain('data-policy-action="PUBLISH"');
+    expect(html).not.toContain("data-policy-feature-disabled");
   });
 
-  it("keeps SIZE_CHART on generic read-only content in phase1", () => {
-    const html = renderReviewDrawer(context(artifact("size", "VALIDATED", "SIZE_CHART")), identity, "page-1");
-    expect(html).toContain("SIZE_CHART");
-    expect(html).not.toContain("policy-size-chart");
+  it("keeps guarded retire and rollback recovery controls available", () => {
+    const previous = { ...artifact("PUBLISHED", 1), key: "lana.policy.published" };
+    const current = { ...artifact("PUBLISHED", 2), key: "lana.policy.published" };
+    const html = renderPolicyControl({
+      artifacts: [previous, current],
+      pointers: [{
+        id: "pointer-1",
+        key: current.key,
+        kind: current.kind,
+        pageId: "1198992073286645",
+        channel: "PUBLISHED",
+        versionId: current.id,
+        version: current.version,
+        revision: 4,
+        updatedAt: "2026-07-22T08:00:00.000Z",
+      }],
+      simulations: [],
+    }, identity);
+    expect(html).toContain(`data-policy-rollback="${previous.id}"`);
+    expect(html).toContain('data-policy-action="RETIRE"');
+  });
+
+  it("offers pre-publish rollback only between canary versions", () => {
+    const previous = { ...artifact("CANARY", 1), key: "lana.policy.canary" };
+    const current = { ...artifact("CANARY", 2), key: "lana.policy.canary" };
+    const published = { ...artifact("PUBLISHED", 3), key: "lana.policy.canary" };
+    const html = renderPolicyControl({
+      artifacts: [previous, current, published],
+      pointers: [{
+        id: "pointer-shadow",
+        key: current.key,
+        kind: current.kind,
+        pageId: "1198992073286645",
+        channel: "CANARY_SHADOW",
+        versionId: current.id,
+        version: current.version,
+        revision: 2,
+        updatedAt: "2026-07-22T08:00:00.000Z",
+      }],
+      simulations: [],
+    }, identity);
+    expect(html).toContain(`data-policy-rollback="${previous.id}"`);
+    expect(html).not.toContain(`data-policy-rollback="${published.id}"`);
+    expect(html).toContain('data-policy-feature-disabled="CANARY_LIVE" disabled');
+
+    const enabledHtml = renderPolicyControl({
+      artifacts: [previous, current, published],
+      pointers: [{
+        id: "pointer-shadow",
+        key: current.key,
+        kind: current.kind,
+        pageId: "1198992073286645",
+        channel: "CANARY_SHADOW",
+        versionId: current.id,
+        version: current.version,
+        revision: 2,
+        updatedAt: "2026-07-22T08:00:00.000Z",
+      }],
+      simulations: [],
+    }, { ...identity, policyCanaryLiveEnabled: true });
+    expect(enabledHtml).toContain("Chuyển sang canary gửi thật");
+    expect(enabledHtml).toContain('data-canary-mode="LIVE_OUTBOUND"');
   });
 });
