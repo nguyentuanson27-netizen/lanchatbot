@@ -4,6 +4,7 @@ import type {
   PolicyBatchResult,
   PolicyListPage,
   PolicyListQuery,
+  PolicyReviewContext,
 } from "./policy-control-review-api.js";
 import type {
   Identity,
@@ -27,6 +28,11 @@ export interface PolicyBatchRecovery {
 export type PolicyBatchExecution =
   | { readonly kind: "result"; readonly result: PolicyBatchResult }
   | { readonly kind: "recovery"; readonly recovery: PolicyBatchRecovery };
+
+export interface LatestPolicyReviewLoader {
+  load(versionId: string): Promise<PolicyReviewContext | null>;
+  cancel(): void;
+}
 
 export function policyPageChoices(
   identity: Identity,
@@ -78,6 +84,39 @@ export function createLatestPolicyListLoader(
     } finally {
       if (requestGeneration === generation) controller = null;
     }
+  };
+}
+
+export function createLatestPolicyReviewLoader(
+  load: (versionId: string, signal?: AbortSignal) => Promise<PolicyReviewContext>,
+): LatestPolicyReviewLoader {
+  let generation = 0;
+  let controller: AbortController | null = null;
+
+  const cancel = () => {
+    generation += 1;
+    controller?.abort();
+    controller = null;
+  };
+
+  return {
+    async load(versionId) {
+      controller?.abort();
+      const requestGeneration = ++generation;
+      const requestController = new AbortController();
+      controller = requestController;
+      try {
+        const context = await load(versionId, requestController.signal);
+        if (requestGeneration !== generation || requestController.signal.aborted) return null;
+        return context;
+      } catch (error) {
+        if (requestGeneration !== generation || requestController.signal.aborted) return null;
+        throw error;
+      } finally {
+        if (requestGeneration === generation) controller = null;
+      }
+    },
+    cancel,
   };
 }
 
