@@ -149,14 +149,13 @@ export async function batchTransitionPolicyArtifacts(
     action: payload.action === "APPROVE" ? "APPROVE" : "VALIDATE",
     results: arrayValue(payload.results).map((value): PolicyBatchResultItem => {
       const result = record(value);
+      const currentRevision = safeIntegerValue(result.current_revision);
       return {
         versionId: stringValue(result.version_id),
         ok: result.ok === true,
         ...(result.artifact ? { artifact: normalizeArtifact(record(result.artifact)) } : {}),
         ...(typeof result.error_code === "string" ? { errorCode: result.error_code } : {}),
-        ...(typeof result.current_revision === "number"
-          ? { currentRevision: result.current_revision }
-          : {}),
+        ...(currentRevision === null ? {} : { currentRevision }),
       };
     }),
     summary: {
@@ -202,7 +201,7 @@ function normalizeArtifact(item: JsonRecord): PolicyArtifact {
     kind: stringValue(item.artifact_kind) as PolicyArtifactKind,
     version: numberValue(item.version_number),
     lifecycle: stringValue(item.lifecycle) as PolicyLifecycle,
-    revision: numberValue(item.revision),
+    revision: revisionValue(item.revision),
     contentHash: stringValue(item.content_hash),
     content: record(item.content),
     updatedBy: stringValue(item.updated_by_subject),
@@ -220,7 +219,7 @@ function normalizePointer(value: unknown): PolicyPointer {
     channel: stringValue(item.channel) as PolicyPointer["channel"],
     versionId: stringValue(item.version_id),
     version: numberValue(item.version_number),
-    revision: numberValue(item.revision),
+    revision: revisionValue(item.revision),
     updatedAt: stringValue(item.updated_at),
   };
 }
@@ -241,6 +240,21 @@ function stringValue(value: unknown, fallback = ""): string {
 
 function numberValue(value: unknown, fallback = 0): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function safeIntegerValue(value: unknown): number | null {
+  if (typeof value === "number" && Number.isSafeInteger(value) && value >= 0) return value;
+  if (typeof value === "string" && /^(?:0|[1-9]\d*)$/u.test(value)) {
+    const parsed = Number(value);
+    if (Number.isSafeInteger(parsed)) return parsed;
+  }
+  return null;
+}
+
+function revisionValue(value: unknown): number {
+  const revision = safeIntegerValue(value);
+  if (revision === null) throw new Error("Invalid policy revision value");
+  return revision;
 }
 
 function policyErrorMessage(code: string): string {
