@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ApiError } from "./api.js";
 import {
   createLatestPolicyListLoader,
   executePolicyBatchWithRecovery,
@@ -102,15 +103,11 @@ describe("policy page action context", () => {
   });
 
   it("uses concrete page-directory ids when policy and identity scopes are ALL with no pointers", () => {
-    const data = {
-      ...emptyData,
-      pageIds: ["page-a", "page-b"],
-    } as PolicyControlData & { readonly pageIds: readonly string[] };
     const choices = policyPageChoices({
       ...identity,
       policyPageIds: ["ALL"],
       pageScope: ["ALL"],
-    }, data);
+    }, emptyData, ["page-a", "page-b"]);
     expect(choices).toEqual(["page-a", "page-b"]);
     expect(choices).not.toContain("ALL");
   });
@@ -166,5 +163,30 @@ describe("ambiguous batch recovery", () => {
       "retry",
       "manual",
     ]);
+  });
+
+  it("treats a 5xx response as ambiguous and reconciles without replaying the batch", async () => {
+    const snapshot = [{
+      versionId: "retry",
+      expectedRevision: 1,
+      lifecycle: "VALIDATED" as const,
+    }];
+    let transitionCalls = 0;
+    const outcome = await executePolicyBatchWithRecovery(
+      "APPROVE",
+      snapshot,
+      async () => {
+        transitionCalls += 1;
+        throw new ApiError("temporary server failure", 503);
+      },
+      async () => artifact("retry", "VALIDATED", 1),
+    );
+
+    expect(transitionCalls).toBe(1);
+    expect(outcome.kind).toBe("recovery");
+    if (outcome.kind !== "recovery") throw new Error("expected recovery");
+    expect(outcome.recovery.recoveredIds).toEqual([]);
+    expect(outcome.recovery.retryableIds).toEqual(["retry"]);
+    expect(outcome.recovery.manualIds).toEqual([]);
   });
 });
