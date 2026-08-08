@@ -2,9 +2,11 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   buildPolicyArtifactListQuery,
+  createPolicyReviewStore,
   decodePolicyCursor,
   encodePolicyCursor,
 } from "./policy-review-store.js";
+import type { AdminStore } from "./types.js";
 import { AdminQueryError } from "./types.js";
 
 const scopedIdentity = {
@@ -13,6 +15,31 @@ const scopedIdentity = {
   pageScope: ["page-1", "page-2"] as const,
   subject: "owner-1",
 };
+
+async function revisionThroughStore(value: unknown): Promise<unknown> {
+  const base = {
+    async getArtifactVersion() {
+      return {
+        version_id: "018f1b72-0000-7000-8000-000000000001",
+        revision: value,
+      };
+    },
+    async close() {},
+  } as unknown as AdminStore;
+  const store = createPolicyReviewStore(
+    base,
+    "postgresql://lana:lana@127.0.0.1:5432/lana_policy_review_test",
+  );
+  try {
+    const row = await store.getArtifactVersion(
+      scopedIdentity,
+      "018f1b72-0000-7000-8000-000000000001",
+    );
+    return row?.revision;
+  } finally {
+    await store.close();
+  }
+}
 
 describe("policy review list query", () => {
   it("keeps search parameterized with a valid one-character escape", () => {
@@ -89,6 +116,31 @@ describe("policy review cursor", () => {
     assert.throws(
       () => decodePolicyCursor(cursor, "updated_desc"),
       (error) => error instanceof AdminQueryError && error.code === "ADMIN_POLICY_CURSOR_INVALID",
+    );
+  });
+});
+
+describe("policy review PostgreSQL bigint revision normalization", () => {
+  it("accepts a safe integer number", async () => {
+    assert.equal(await revisionThroughStore(7), 7);
+  });
+
+  it("accepts a canonical decimal string", async () => {
+    assert.equal(await revisionThroughStore("42"), 42);
+  });
+
+  it("fails closed for malformed and out-of-safe-range revisions", async () => {
+    await assert.rejects(
+      () => revisionThroughStore("not-a-revision"),
+      /Invalid PostgreSQL revision value/u,
+    );
+    await assert.rejects(
+      () => revisionThroughStore("9007199254740992"),
+      /Invalid PostgreSQL revision value/u,
+    );
+    await assert.rejects(
+      () => revisionThroughStore(Number.MAX_SAFE_INTEGER + 1),
+      /Invalid PostgreSQL revision value/u,
     );
   });
 });
