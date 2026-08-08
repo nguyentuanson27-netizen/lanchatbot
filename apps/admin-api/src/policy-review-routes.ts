@@ -85,7 +85,7 @@ function requirePolicyControl(enabled: boolean): void {
 }
 
 function requireIdentity(request: FastifyRequest): AdminIdentity {
-  if (!request.adminIdentity) throw new AdminQueryError("ADMIN_AUTH_REQUIRED");
+  if (!request.adminIdentity) throw new AdminQueryError("ADMIN_QUERY_INVALID");
   return request.adminIdentity;
 }
 
@@ -110,9 +110,8 @@ function optionalEnum<T extends string>(
   allowed: readonly T[],
 ): T | undefined {
   if (value === undefined || value === "") return undefined;
-  return allowed.includes(value as T) ? value as T : (() => {
-    throw new AdminQueryError("ADMIN_QUERY_INVALID");
-  })();
+  if (!allowed.includes(value as T)) throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  return value as T;
 }
 
 function requiredUuid(value: string): string {
