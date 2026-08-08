@@ -18,16 +18,16 @@ describe("policy review list query", () => {
   it("keeps search parameterized, escapes LIKE wildcards, and scopes active pointers", () => {
     const built = buildPolicyArtifactListQuery(scopedIdentity, {
       limit: 50,
-      search: "SQ%_603",
+      search: "SQ%_!603",
       active: "active",
       sort: "artifact_key_asc",
     });
 
     assert.match(built.sql, /artifact_key ILIKE/u);
-    assert.match(built.sql, /ESCAPE '\\\\'/u);
+    assert.match(built.sql, /ESCAPE '!'/u);
     assert.match(built.sql, /p\.page_id = ANY\(/u);
     assert.match(built.sql, /ORDER BY v\.artifact_key ASC, v\.version_id ASC/u);
-    assert.ok(built.values.includes("%SQ\\%\\_603%"));
+    assert.ok(built.values.includes("%SQ!%!_!!603%"));
     assert.ok(built.values.some((value) => Array.isArray(value) && value.join(",") === "page-1,page-2"));
   });
 
