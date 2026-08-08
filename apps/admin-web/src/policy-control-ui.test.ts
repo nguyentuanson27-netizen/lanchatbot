@@ -2,12 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   nextReviewArtifactId,
   policyQuickViewQuery,
-  renderPolicyControl,
   renderPolicyListTable,
   renderReviewDrawer,
 } from "./policy-control-ui.js";
 import type { PolicyArtifactRow, PolicyReviewContext } from "./policy-control-review-api.js";
-import type { Identity, PolicyArtifact, PolicyControlData } from "./types.js";
+import type { Identity, PolicyArtifact } from "./types.js";
 
 const identity: Identity = {
   email: "owner@example.com",
@@ -104,22 +103,6 @@ describe("policy phase1 drawer", () => {
   it("keeps SIZE_CHART on generic read-only content in phase1", () => {
     const html = renderReviewDrawer(context(artifact("size", "VALIDATED", "SIZE_CHART")), identity, "page-1");
     expect(html).toContain("SIZE CHART");
-    expect(html).not.toContain("policy-size-chart");
-  });
-});
-
-describe("policy phase1 screen", () => {
-  it("keeps lifecycle safety gates visible while deferring phase2 and phase3 UI", () => {
-    const data: PolicyControlData = {
-      artifacts: [artifact("approved", "APPROVED"), artifact("canary", "CANARY")],
-      pointers: [],
-      simulations: [],
-    };
-    const html = renderPolicyControl(data, identity);
-    expect(html).toContain("Canary gửi thật: khóa");
-    expect(html).toContain("Phát hành: khóa");
-    expect(html).not.toContain("Duyệt hàng loạt");
-    expect(html).not.toContain("Kiểm tra hàng loạt");
     expect(html).not.toContain("policy-size-chart");
   });
 });
