@@ -229,7 +229,12 @@ function parsePolicyBatchResultShape(
       return {
         versionId: expected.versionId,
         ok: true,
-        artifact: parseBatchSuccessArtifact(result.artifact, expected.versionId, targetLifecycle),
+        artifact: parseBatchSuccessArtifact(
+          result.artifact,
+          expected.versionId,
+          targetLifecycle,
+          expected.expectedRevision,
+        ),
       };
     }
 
@@ -278,12 +283,15 @@ function parseBatchSuccessArtifact(
   value: unknown,
   expectedVersionId: string,
   targetLifecycle: PolicyLifecycle,
+  expectedRevision: number,
 ): PolicyArtifact {
   const item = strictRecord(value);
   const id = item ? nonEmptyString(item.version_id) : null;
   const key = item ? nonEmptyString(item.artifact_key) : null;
   const kind = item ? policyArtifactKindValue(item.artifact_kind) : null;
   const version = item ? positiveSafeInteger(item.version_number) : null;
+  const revision = item ? requiredBatchRevision(item.revision) : null;
+  const expectedNextRevision = expectedRevision + 1;
   const contentHash = item ? nonEmptyString(item.content_hash) : null;
   const content = item ? strictRecord(item.content) : null;
   const updatedBy = item && typeof item.updated_by_subject === "string"
@@ -297,6 +305,11 @@ function parseBatchSuccessArtifact(
     !kind ||
     version === null ||
     item.lifecycle !== targetLifecycle ||
+    revision === null ||
+    !Number.isSafeInteger(expectedRevision) ||
+    expectedRevision < 0 ||
+    !Number.isSafeInteger(expectedNextRevision) ||
+    revision !== expectedNextRevision ||
     !contentHash ||
     !content ||
     updatedBy === null ||
@@ -310,7 +323,7 @@ function parseBatchSuccessArtifact(
     kind,
     version,
     lifecycle: targetLifecycle,
-    revision: requiredBatchRevision(item.revision),
+    revision,
     contentHash,
     content,
     updatedBy,
