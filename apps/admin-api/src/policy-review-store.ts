@@ -125,7 +125,7 @@ export function createPolicyReviewStore(
         [artifact.artifact_key, artifact.artifact_kind, artifact.version_number],
       );
 
-      const values: unknown[] = [artifact.artifact_key, artifact.artifact_kind];
+      const values: unknown[] = [artifact.artifact_key, artifact.artifact_kind, artifact.version_id];
       const scope = pointerScopePredicate(identity, values, "p");
       const pointers = await pool.query(
         `SELECT
@@ -163,6 +163,7 @@ export function createPolicyReviewStore(
          ) target ON TRUE
          WHERE p.artifact_key = $1
            AND p.artifact_kind = $2
+           AND p.version_id = $3
            AND ${scope}
          ORDER BY p.page_id NULLS FIRST, p.channel, p.pointer_id`,
         values,
