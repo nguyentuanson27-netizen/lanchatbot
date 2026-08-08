@@ -31,6 +31,7 @@ export type PolicyBatchExecution =
 export function policyPageChoices(
   identity: Identity,
   data: PolicyControlData,
+  directoryPageIds: readonly string[] = [],
 ): string[] {
   const configured = concretePageIds(identity.policyPageIds);
   const scoped = concretePageIds(identity.pageScope);
@@ -43,6 +44,9 @@ export function policyPageChoices(
     .map((pointer) => pointer.pageId)
     .filter((pageId): pageId is string => isConcretePageId(pageId))
     .filter((pageId) => scopeAll || scoped.includes(pageId));
+  if (scopeAll) {
+    return [...new Set([...concretePageIds(directoryPageIds), ...pointerPages])];
+  }
   return [...new Set([...scoped, ...pointerPages])];
 }
 
