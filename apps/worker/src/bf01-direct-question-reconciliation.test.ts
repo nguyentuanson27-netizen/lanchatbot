@@ -143,6 +143,24 @@ describe("BF-01 direct-question reconciliation", () => {
     });
   });
 
+  it("ignores a trailing courtesy sentence after a direct question", () => {
+    expect(target(
+      event({ intent: "SIZE" }),
+      "Con size nao? Cam on",
+    )).toMatchObject({
+      reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+    });
+  });
+
+  it("ignores a trailing courtesy clause after a direct question", () => {
+    expect(target(
+      event({ intent: "SIZE" }),
+      "Con size nao, cam on",
+    )).toMatchObject({
+      reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+    });
+  });
+
   it("keeps formatted numeric dots inside a terminal question", () => {
     expect(target(
       event({ intent: "PRICE" }),
