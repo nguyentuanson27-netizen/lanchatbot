@@ -101,6 +101,20 @@ describe("policy page action context", () => {
     expect(choices).not.toContain("ALL");
   });
 
+  it("uses concrete page-directory ids when policy and identity scopes are ALL with no pointers", () => {
+    const data = {
+      ...emptyData,
+      pageIds: ["page-a", "page-b"],
+    } as PolicyControlData & { readonly pageIds: readonly string[] };
+    const choices = policyPageChoices({
+      ...identity,
+      policyPageIds: ["ALL"],
+      pageScope: ["ALL"],
+    }, data);
+    expect(choices).toEqual(["page-a", "page-b"]);
+    expect(choices).not.toContain("ALL");
+  });
+
   it("disables page-scoped drawer actions until a concrete page is selected", () => {
     const html = renderReviewDrawer({
       artifact: artifact("approved", "APPROVED"),
