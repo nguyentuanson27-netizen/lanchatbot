@@ -418,12 +418,26 @@ function normalizedDialogueText(value: string): string {
     .trim();
 }
 
+function negatedQuestionAct(text: string): boolean {
+  return /\b(?:khong|ko|k)\s+(?:(?:can|muon)\s+)?hoi\b/u.test(text);
+}
+
+function declarativeKnowledgeFrame(text: string): boolean {
+  if (/\b(?:muon|can|chua|khong|ko|k)\s+(?:biet|ro)\b/u.test(text)) {
+    return false;
+  }
+  return /\b(?:biet|ro)\b[^?？]{0,120}\b(?:bao nhieu|khi nao|bao lau|may ngay|o dau|tai sao|vi sao|the nao|lam sao)\b/u.test(text);
+}
+
 function customerQuestionEvidence(value: string): boolean {
   const raw = value.trim();
   if (!raw) return false;
-  if (/[?？]\s*$/u.test(raw)) return true;
 
   const text = normalizedDialogueText(raw);
+  if (negatedQuestionAct(text)) return false;
+  if (/[?？]\s*$/u.test(raw)) return true;
+  if (declarativeKnowledgeFrame(text)) return false;
+
   if (
     /\b(?:bao nhieu|khi nao|bao lau|may ngay|o dau|tai sao|vi sao|the nao|lam sao)\b/u.test(text)
   ) return true;
@@ -540,43 +554,49 @@ function reconciledEvents(
   const sourceCode = clarification.source === "MODEL_REPAIR"
     ? "BF01_MODEL_CLARIFICATION_REPAIR"
     : "BF01_APPROVED_FALLBACK_USED";
-  return events.map((event): RealtimeDecisionEventPlan => {
-    if (event.eventId !== targetEventId) return event;
-    const convertedType: RealtimeDecisionEventPlan["eventType"] =
-      event.eventType === "NO_REPLY" || event.eventType === "NO_REPLY_SELECTED"
-        ? "CLARIFICATION_REQUESTED"
-        : event.eventType;
-    return {
-      ...event,
-      eventType: convertedType,
-      action: "REPLY",
-      reasonCodes: [
-        ...new Set([
-          ...event.reasonCodes,
-          reconciliationReasonCode,
-          sourceCode,
-          ...(clarification.repairSkippedReason
-            ? [clarification.repairSkippedReason]
-            : []),
-        ]),
-      ],
-      details: {
-        ...event.details,
-        guardedPlanHash: clarification.guardedPlanHash,
-        renderedReplyHash: replyHash,
-        outboundMessageCount: 1,
-        modelCalled: event.details.modelCalled || clarification.modelCalled,
-        modelLatencyMs:
-          clarification.modelLatencyMs === null
-            ? event.details.modelLatencyMs
-            : (event.details.modelLatencyMs ?? 0) + clarification.modelLatencyMs,
-        modelTokenUsage: mergedTokenUsage(
-          event.details.modelTokenUsage,
-          clarification.modelTokenUsage,
-        ),
-      },
-    };
-  });
+  return events
+    .filter((event) =>
+      event.eventId === targetEventId ||
+      event.eventType !== "NO_REPLY" ||
+      event.action !== "NO_REPLY"
+    )
+    .map((event): RealtimeDecisionEventPlan => {
+      if (event.eventId !== targetEventId) return event;
+      const convertedType: RealtimeDecisionEventPlan["eventType"] =
+        event.eventType === "NO_REPLY" || event.eventType === "NO_REPLY_SELECTED"
+          ? "CLARIFICATION_REQUESTED"
+          : event.eventType;
+      return {
+        ...event,
+        eventType: convertedType,
+        action: "REPLY",
+        reasonCodes: [
+          ...new Set([
+            ...event.reasonCodes,
+            reconciliationReasonCode,
+            sourceCode,
+            ...(clarification.repairSkippedReason
+              ? [clarification.repairSkippedReason]
+              : []),
+          ]),
+        ],
+        details: {
+          ...event.details,
+          guardedPlanHash: clarification.guardedPlanHash,
+          renderedReplyHash: replyHash,
+          outboundMessageCount: 1,
+          modelCalled: event.details.modelCalled || clarification.modelCalled,
+          modelLatencyMs:
+            clarification.modelLatencyMs === null
+              ? event.details.modelLatencyMs
+              : (event.details.modelLatencyMs ?? 0) + clarification.modelLatencyMs,
+          modelTokenUsage: mergedTokenUsage(
+            event.details.modelTokenUsage,
+            clarification.modelTokenUsage,
+          ),
+        },
+      };
+    });
 }
 
 function wrapRuntime(
