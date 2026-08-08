@@ -418,12 +418,22 @@ function normalizedDialogueText(value: string): string {
     .trim();
 }
 
+function courtesyOnlyClause(value: string): boolean {
+  const text = normalizedDialogueText(value)
+    .replace(/[.!?]+$/u, "")
+    .trim();
+  return /^(?:cam on|thank you|thanks)(?:\s+(?:shop|em|chi|anh|ban))?(?:\s+(?:nhe|nha|a))?$/u.test(text);
+}
+
 function terminalDialogueClause(value: string): string {
-  return value
+  const clauses = value
     .split(/[,;\n]+|[.!?](?=\s+\S)/u)
     .map((clause) => clause.trim())
-    .filter(Boolean)
-    .at(-1) ?? value.trim();
+    .filter(Boolean);
+  while (clauses.length > 1 && courtesyOnlyClause(clauses.at(-1)!)) {
+    clauses.pop();
+  }
+  return clauses.at(-1) ?? value.trim();
 }
 
 function negatedQuestionAct(text: string): boolean {
