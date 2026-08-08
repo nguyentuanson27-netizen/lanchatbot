@@ -20,11 +20,23 @@ All phases keep the existing control-plane boundaries:
 - Simulation remains page-scoped and side-effect free.
 - No production deploy, page allowlist change, prompt change, outbound ownership change, or migration is part of these UI phases.
 
+## Live PR stack and ownership
+
+The review stack is intentionally linear so every slice stays independently reviewable:
+
+1. `main → #140` — Phase 1A: Admin API/store read boundary.
+2. `#140 → #136` — Phase 1B: Admin Web client API/runtime/route synchronization.
+3. `#136 → Phase 1C UI PR` — table/drawer UI, CSS and this rollout document.
+4. `Phase 1C UI PR → #139` — Phase 2A: batch API, response contract and ambiguous-result recovery.
+5. `#139 → Phase 2B UI PR` — current-page selection, bulk Validate/Approve UI and CSS.
+
+Do not retarget a later slice around an earlier slice or merge the stack out of order. The Phase 1C and Phase 2B PR numbers are recorded once those split PRs are opened.
+
 ## Phase 1 — list, filtering and safe review drawer
 
-Phase 1 is the scope of PR #136.
+Phase 1 is delivered by three stacked slices: #140 owns the read boundary, #136 owns client API/runtime/route synchronization, and the Phase 1C UI PR owns table/drawer rendering, CSS and documentation.
 
-### Admin API/store
+### Admin API/store — #140 (Phase 1A)
 
 Provide a read-oriented review boundary with:
 
@@ -38,9 +50,11 @@ Search remains parameterized. Literal `%`, `_` and the chosen escape character m
 
 PostgreSQL `bigint` revisions may arrive from `pg` as decimal strings. Phase 1 normalizes safe non-negative revision strings explicitly and never silently falls back to `0`.
 
-### Admin Web
+### Admin Web — #136 (Phase 1B) + Phase 1C UI PR
 
-Replace the large card grid with:
+#136 owns the client API, runtime state/recovery helpers and route synchronization required by the review surface. The stacked Phase 1C UI PR owns the visible table/drawer implementation, CSS and this document.
+
+Together they replace the large card grid with:
 
 - compact table;
 - search and filter controls;
@@ -64,9 +78,9 @@ Drawer detail loading is latest-request-wins. Opening B aborts/invalidates A, an
 
 ## Phase 2 — bulk Validate/Approve
 
-Phase 2 is a separate PR based on the accepted Phase 1 boundary.
+Phase 2 is delivered only after the full Phase 1 stack is accepted. #139 owns Phase 2A batch API/contract/recovery; the stacked Phase 2B UI PR owns current-page selection, bulk controls and CSS.
 
-It may add only current-page selection and bulk `VALIDATE` / `APPROVE` with a maximum of 100 items. Every request item carries `version_id + expected_revision`. Results preserve request order and return independent success/failure information.
+It may add only current-page selection and bulk `VALIDATE` / `APPROVE` with a maximum of 100 items. Every request item carries `version_id + expected_revision`. Results preserve request order and return independent success/failure information. A successful result must bind to the request revision and return exactly `expected_revision + 1`.
 
 A revision conflict returns the current revision when it can be read. The implementation must handle PostgreSQL bigint string values rather than dropping conflict metadata.
 
@@ -96,8 +110,11 @@ A green CI run does not replace the browser walkthrough for UI behavior. If brow
 
 ## Merge order
 
-1. Merge Phase 1 independently.
-2. Rebase/retarget Phase 2 onto the merged Phase 1 and review it independently.
-3. Rebase/retarget Phase 3 onto the appropriate merged baseline and review it independently.
+1. Merge #140 (Phase 1A) independently.
+2. Merge #136 (Phase 1B) onto the accepted #140 boundary.
+3. Merge the Phase 1C UI PR onto #136.
+4. Merge #139 (Phase 2A) onto the accepted Phase 1C UI boundary.
+5. Merge the Phase 2B UI PR onto #139.
+6. Rebase/retarget Phase 3 onto the appropriate merged baseline and review it independently.
 
-No phase is considered complete merely because the combined prototype existed on an earlier branch.
+No phase or slice is considered complete merely because the combined prototype existed on an earlier branch.
