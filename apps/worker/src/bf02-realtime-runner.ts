@@ -246,7 +246,6 @@ function guardedClarification(
     now,
   });
   return guarded.action === "REPLY" &&
-      guarded.sendAuthorized &&
       guarded.blockedReasonCodes.length === 0 &&
       guarded.imageUrls.length === 0 &&
       guarded.textUnits.length > 0
@@ -303,7 +302,7 @@ async function reserveRepairQuota(
   pageId: string,
   now: Date,
 ): Promise<boolean> {
-  if (!quota) return true;
+  if (!quota) return false;
   try {
     return await quota.reserve(pageId, now);
   } catch {
