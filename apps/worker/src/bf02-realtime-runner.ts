@@ -36,6 +36,8 @@ type Bf01ReconciliationReasonCode =
   | "BF01_ASK_CLARIFY_NO_REPLY_RECONCILED"
   | "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED";
 
+type Bf01ModelBusinessFactIntent = AgentProposalV1["businessFactQuery"]["intent"];
+
 interface Bf01RuntimeSnapshot {
   readonly routingOwner: "N8N" | "APP";
   readonly appSendEnabled: boolean;
@@ -48,6 +50,7 @@ interface Bf01ExecutionContext {
   customerOccurredAt: string | null;
   modelContext: Parameters<RealtimeModelPort["generate"]>[0] | null;
   modelPromptVersion: string | null;
+  modelBusinessFactIntent: Bf01ModelBusinessFactIntent | null;
   runtime: Bf01RuntimeSnapshot | null;
   replyReconciliationPolicy: Bf01ReplyReconciliationPolicy;
   approvedFallbackText: string | null;
@@ -171,7 +174,11 @@ function wrapModel(
       store.modelContext = args[0];
       store.modelPromptVersion = args[1];
     }
-    return model.generate(...args);
+    const generated = await model.generate(...args);
+    if (store) {
+      store.modelBusinessFactIntent = generated.proposal.businessFactQuery.intent;
+    }
+    return generated;
   };
   const wrapped: RealtimeModelPort = {
     generate,
@@ -408,71 +415,15 @@ async function generateClarification(
     : null;
 }
 
-function normalizedDialogueText(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/gu, "")
-    .replace(/[\u0111\u0110]/gu, "d")
-    .toLocaleLowerCase("vi-VN")
-    .replace(/\s+/gu, " ")
-    .trim();
-}
-
-function courtesyOnlyClause(value: string): boolean {
-  const text = normalizedDialogueText(value)
-    .replace(/[.!?]+$/u, "")
-    .trim();
-  return /^(?:cam on|thank you|thanks)(?:\s+(?:shop|em|chi|anh|ban))?(?:\s+(?:nhe|nha|a))?$/u.test(text);
-}
-
-function terminalDialogueClause(value: string): string {
-  const clauses = value
-    .split(/[,;\n]+|[.!?](?=\s+\S)/u)
-    .map((clause) => clause.trim())
-    .filter(Boolean);
-  while (clauses.length > 1 && courtesyOnlyClause(clauses.at(-1)!)) {
-    clauses.pop();
-  }
-  return clauses.at(-1) ?? value.trim();
-}
-
-function negatedQuestionAct(text: string): boolean {
-  return /\b(?:khong|ko|k)\s+(?:(?:can|muon)\s+)?hoi\b/u.test(text);
-}
-
-function declarativeKnowledgeFrame(text: string): boolean {
-  if (/\b(?:muon|can|chua|khong|ko|k)\s+(?:biet|ro)\b/u.test(text)) {
-    return false;
-  }
-  return /\b(?:biet|ro)\b[^?？]{0,120}\b(?:bao nhieu|khi nao|bao lau|may ngay|o dau|tai sao|vi sao|the nao|lam sao)\b/u.test(text);
-}
-
-function customerQuestionEvidence(value: string): boolean {
-  const raw = terminalDialogueClause(value);
-  if (!raw) return false;
-
-  const text = normalizedDialogueText(raw);
-  if (negatedQuestionAct(text)) return false;
-  if (/[?？]\s*$/u.test(raw)) return true;
-  if (declarativeKnowledgeFrame(text)) return false;
-
-  if (
-    /\b(?:bao nhieu|khi nao|bao lau|may ngay|o dau|tai sao|vi sao|the nao|lam sao)\b/u.test(text)
-  ) return true;
-  if (
-    /\b(?:gi|nao)(?:\s+(?:nua|vay|a|ha|nhi|nhe))?\s*[.!]*$/u.test(text)
-  ) return true;
-  const numericSafeText = text.replace(/(?<=\d)\.(?=\d)/gu, "");
-  return /\b(?:co|con|duoc|giao|ship|mac|chon|lay|dat|doi)\b[^.!?]{0,80}\b(?:khong|ko|k|chua)\s*[.!?]*$/u.test(numericSafeText);
-}
-
 function directQuestionEvidence(
   event: RealtimeDecisionEventPlan,
-  customerText: string,
+  modelBusinessFactIntent: Bf01ModelBusinessFactIntent | null,
 ): boolean {
   return event.intent !== null &&
     BF01_DIRECT_QUESTION_INTENTS.has(event.intent) &&
-    customerQuestionEvidence(customerText);
+    modelBusinessFactIntent !== null &&
+    modelBusinessFactIntent !== "NONE" &&
+    event.intent === modelBusinessFactIntent;
 }
 
 function reconciliationEventRank(event: RealtimeDecisionEventPlan): number {
@@ -483,7 +434,7 @@ function reconciliationEventRank(event: RealtimeDecisionEventPlan): number {
 
 function reconciliationCandidate(
   event: RealtimeDecisionEventPlan,
-  customerText: string,
+  modelBusinessFactIntent: Bf01ModelBusinessFactIntent | null,
 ): boolean {
   if (event.action !== "NO_REPLY" || event.mode !== "LIVE") return false;
   const details = event.details;
@@ -493,7 +444,7 @@ function reconciliationCandidate(
     details.outboundMessageCount !== 0
   ) return false;
   return details.wave2Strategy?.recommendedStrategy === "STRATEGY_ASK_CLARIFY" ||
-    directQuestionEvidence(event, customerText);
+    directQuestionEvidence(event, modelBusinessFactIntent);
 }
 
 export function bf01ReconciliationTarget(
@@ -507,7 +458,7 @@ export function bf01ReconciliationTarget(
     readonly mode: RealtimeRunnerOptions["mode"];
     readonly sendEnabled: boolean;
     readonly recipientId: string | null;
-    readonly customerText: string;
+    readonly modelBusinessFactIntent: Bf01ModelBusinessFactIntent | null;
   },
 ): Bf01ReconciliationTarget | null {
   if (input.policy !== "CLARIFY_RECONCILED_V1") return null;
@@ -527,7 +478,9 @@ export function bf01ReconciliationTarget(
   ) return null;
 
   const event = input.events
-    .filter((candidate) => reconciliationCandidate(candidate, input.customerText))
+    .filter((candidate) =>
+      reconciliationCandidate(candidate, input.modelBusinessFactIntent)
+    )
     .sort((left, right) =>
       reconciliationEventRank(left) - reconciliationEventRank(right) ||
       left.eventId.localeCompare(right.eventId)
@@ -659,7 +612,7 @@ function wrapRuntime(
             mode: options.mode,
             sendEnabled: options.sendEnabled,
             recipientId: store.recipientId,
-            customerText: store.customerText,
+            modelBusinessFactIntent: store.modelBusinessFactIntent,
           });
           if (!targetDecision) return target.commit(input, nowArg);
 
@@ -707,7 +660,7 @@ function wrapRuntime(
  * BF-01 adapter layered on top of the accepted BF-02 runner. The core runner
  * still owns strategy calculation, guard evaluation, ownership, dedupe and the
  * commit transaction. This adapter only reconciles an allowed terminal
- * NO_REPLY when existing direct-question evidence or ASK_CLARIFY requires a
+ * NO_REPLY when existing typed fact-query evidence or ASK_CLARIFY requires a
  * response; model repair remains quota-bound and guarded before commit.
  */
 export class RealtimeRunner extends Bf02RealtimeRunner {
@@ -757,6 +710,7 @@ export class RealtimeRunner extends Bf02RealtimeRunner {
         customerOccurredAt: null,
         modelContext: null,
         modelPromptVersion: null,
+        modelBusinessFactIntent: null,
         runtime: null,
         replyReconciliationPolicy: "LEGACY",
         approvedFallbackText: null,
