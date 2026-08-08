@@ -125,6 +125,33 @@ describe("BF-01 direct-question reconciliation", () => {
     });
   });
 
+  it("uses a sentence boundary so prior known information does not hide a real follow-up", () => {
+    expect(target(
+      event({ intent: "SIZE" }),
+      "Em biet gia bao nhieu roi. Con size nao",
+    )).toMatchObject({
+      reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+    });
+  });
+
+  it("uses a sentence boundary so a prior negated question act does not hide a real follow-up", () => {
+    expect(target(
+      event({ intent: "SIZE" }),
+      "Em khong hoi gia bao nhieu. Con size nao?",
+    )).toMatchObject({
+      reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+    });
+  });
+
+  it("keeps formatted numeric dots inside a terminal question", () => {
+    expect(target(
+      event({ intent: "PRICE" }),
+      "Em lay gia 1.199.000 khong",
+    )).toMatchObject({
+      reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+    });
+  });
+
   it("does not treat unrelated decision intents as direct-question evidence", () => {
     expect(target(event({ intent: "BUYING_SIGNAL" }))).toBeNull();
   });
