@@ -63,11 +63,14 @@ function event(
   } as RealtimeDecisionEventPlan;
 }
 
-function target(value: RealtimeDecisionEventPlan) {
-  return bf01ReconciliationTarget({
-    policy: "CLARIFY_RECONCILED_V1",
+function target(
+  value: RealtimeDecisionEventPlan,
+  customerText = "Giá mẫu này bao nhiêu?",
+) {
+  const input = {
+    policy: "CLARIFY_RECONCILED_V1" as const,
     runtime: {
-      routingOwner: "APP",
+      routingOwner: "APP" as const,
       appSendEnabled: true,
       killSwitch: false,
     },
@@ -75,17 +78,25 @@ function target(value: RealtimeDecisionEventPlan) {
     metaPlanPresent: false,
     handoffPlanPresent: false,
     events: [value],
-    mode: "LIVE",
+    mode: "LIVE" as const,
     sendEnabled: true,
     recipientId: "customer-1",
-  });
+    customerText,
+  } as Parameters<typeof bf01ReconciliationTarget>[0] & {
+    readonly customerText: string;
+  };
+  return bf01ReconciliationTarget(input);
 }
 
 describe("BF-01 direct-question reconciliation", () => {
-  it("reuses existing explicit business-question evidence even when Wave2 is not ASK_CLARIFY", () => {
+  it("reuses explicit business intent only when the customer is actually asking a question", () => {
     expect(target(event())).toMatchObject({
       reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
     });
+  });
+
+  it("does not turn a business-topic closing statement into a direct question", () => {
+    expect(target(event(), "Em biet gia roi, cam on")).toBeNull();
   });
 
   it("does not treat unrelated decision intents as direct-question evidence", () => {

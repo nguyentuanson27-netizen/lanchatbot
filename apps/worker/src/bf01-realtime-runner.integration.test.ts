@@ -50,6 +50,17 @@ function renderedReplyHash(text: string): string {
   }]));
 }
 
+function guardedClarificationPlanHash(text: string): string {
+  return sha256(JSON.stringify({
+    action: "REPLY",
+    productId: null,
+    handoffReason: null,
+    blockedReasonCodes: [],
+    textUnitHashes: [sha256(text)],
+    imageCount: 0,
+  }));
+}
+
 function proposal(
   action: AgentProposalV1["action"],
   reply = "",
@@ -152,6 +163,7 @@ function createHarness(input: {
   quotaResults?: readonly boolean[];
   conversationOwner?: "BOT" | "HUMAN";
   blockingTag?: "NHAN_VIEN" | null;
+  commitAckLostOnce?: boolean;
 } = {}) {
   const base = createConversationState({
     conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
@@ -202,16 +214,39 @@ function createHarness(input: {
       },
     },
   };
+  const retryClaim = {
+    ...claim,
+    attemptCount: 2,
+    leaseToken: "68c52ee9-9348-481d-a366-a6178618da3d",
+  };
+  const claimNext = vi.fn();
+  if (input.commitAckLostOnce) {
+    claimNext
+      .mockResolvedValueOnce(claim)
+      .mockResolvedValueOnce(retryClaim)
+      .mockResolvedValueOnce(null);
+  } else {
+    claimNext.mockResolvedValueOnce(claim).mockResolvedValueOnce(null);
+  }
+  const complete = vi.fn(async () => true);
+  const retry = vi.fn(async () => true);
   const inbox: RealtimeInboxPort = {
-    claimNext: vi.fn().mockResolvedValueOnce(claim).mockResolvedValueOnce(null),
-    complete: vi.fn(async () => true),
-    retry: vi.fn(async () => true),
+    claimNext,
+    complete,
+    retry,
     failPermanent: vi.fn(async () => true),
   };
 
+  let persistedState = state;
+  let persistedStateVersion = state.revision;
   let committed: Parameters<RealtimeRuntimePort["commit"]>[0] | null = null;
   const commit = vi.fn(async (value: Parameters<RealtimeRuntimePort["commit"]>[0]) => {
     committed = value;
+    persistedState = value.state as typeof state;
+    persistedStateVersion += 1;
+    if (input.commitAckLostOnce && commit.mock.calls.length === 1) {
+      throw new Error("COMMIT_ACK_LOST");
+    }
     return {
       stateCommitted: true,
       metaOutboxCreated: value.metaPlan?.messages.length ?? 0,
@@ -227,8 +262,8 @@ function createHarness(input: {
       conversationId: state.conversationId,
       pageId,
       customerHash: conversationHash,
-      stateVersion: state.revision,
-      state,
+      stateVersion: persistedStateVersion,
+      state: persistedState,
       routingOwner: "APP" as const,
       appSendEnabled: true,
       killSwitch: false,
@@ -350,6 +385,8 @@ function createHarness(input: {
     generate,
     reserve,
     commit,
+    retry,
+    complete,
     committed: () => committed,
   };
 }
@@ -374,7 +411,7 @@ function hasBf01Reason(
 }
 
 describe("BF-01 runner reconciliation", () => {
-  it("commits exactly one guarded reply and matching audit hash for the reported incident", async () => {
+  it("commits exactly one guarded reply and matching audit hashes for the reported incident", async () => {
     const harness = createHarness();
 
     expect(await harness.runner.processOne()).toBe(true);
@@ -384,6 +421,11 @@ describe("BF-01 runner reconciliation", () => {
     expect(commit?.metaPlan?.messages).toEqual([
       { kind: "TEXT", text: safeRepairText },
     ]);
+
+    const clarificationEvents = (commit?.decisionEvents ?? []).filter((event) =>
+      event.eventType === "CLARIFICATION_REQUESTED"
+    );
+    expect(clarificationEvents).toHaveLength(1);
 
     const reconciled = commit?.decisionEvents?.find((event) =>
       event.reasonCodes.includes("BF01_ASK_CLARIFY_NO_REPLY_RECONCILED")
@@ -395,6 +437,7 @@ describe("BF-01 runner reconciliation", () => {
         "BF01_MODEL_CLARIFICATION_REPAIR",
       ]),
       details: {
+        guardedPlanHash: guardedClarificationPlanHash(safeRepairText),
         outboundMessageCount: 1,
         renderedReplyHash: renderedReplyHash(safeRepairText),
       },
@@ -415,6 +458,7 @@ describe("BF-01 runner reconciliation", () => {
     expect(reconciled).toMatchObject({
       reasonCodes: expect.arrayContaining(["BF01_APPROVED_FALLBACK_USED"]),
       details: {
+        guardedPlanHash: guardedClarificationPlanHash(fallbackText),
         modelCalled: true,
         modelLatencyMs: 10,
         modelTokenUsage: {
@@ -438,6 +482,7 @@ describe("BF-01 runner reconciliation", () => {
     );
     expect(reconciled).toMatchObject({
       details: {
+        guardedPlanHash: guardedClarificationPlanHash(fallbackText),
         modelCalled: true,
         modelLatencyMs: 5,
         modelTokenUsage: {
@@ -498,5 +543,29 @@ describe("BF-01 runner reconciliation", () => {
     expect(commit?.state.conversationOwner).toBe("HUMAN");
     expect(commit?.handoffEventPlan?.source).toBe("CUSTOMER_REQUEST");
     expect(hasBf01Reason(commit)).toBe(false);
+  });
+
+  it("keeps one deterministic clarification side effect across commit ACK loss and replay", async () => {
+    const harness = createHarness({ commitAckLostOnce: true });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(await harness.runner.processOne()).toBe(false);
+
+    expect(harness.generate).toHaveBeenCalledTimes(2);
+    expect(harness.reserve).toHaveBeenCalledTimes(2);
+    expect(harness.commit).toHaveBeenCalledTimes(1);
+    expect(harness.retry).toHaveBeenCalledTimes(1);
+    expect(harness.complete).toHaveBeenCalledTimes(1);
+
+    const commit = harness.committed();
+    expect(commit?.metaPlan?.messages).toEqual([
+      { kind: "TEXT", text: safeRepairText },
+    ]);
+    const clarificationEvents = (commit?.decisionEvents ?? []).filter((event) =>
+      event.eventType === "CLARIFICATION_REQUESTED"
+    );
+    expect(clarificationEvents).toHaveLength(1);
+    expect(new Set(clarificationEvents.map((event) => event.eventId)).size).toBe(1);
   });
 });
