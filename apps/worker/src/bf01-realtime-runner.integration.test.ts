@@ -62,7 +62,7 @@ function proposal(
     action,
     reply,
     attachments: [],
-    handoffReason: action === "HANDOFF" ? "AGENT_REQUEST" : null,
+    handoffReason: null,
     businessFactQuery: {
       intent: "NONE",
       offerType: null,
@@ -143,11 +143,12 @@ function policyResolution(): RuntimePolicyResolution {
 }
 
 type RepairMode = "SAFE" | "UNSAFE" | "THROW";
-type InitialMode = "NO_REPLY" | "REPLY" | "HANDOFF";
+type InitialMode = "NO_REPLY" | "REPLY";
 
 function createHarness(input: {
   repairMode?: RepairMode;
   initialMode?: InitialMode;
+  customerText?: string;
   quotaResults?: readonly boolean[];
   conversationOwner?: "BOT" | "HUMAN";
   blockingTag?: "NHAN_VIEN" | null;
@@ -196,7 +197,7 @@ function createHarness(input: {
         occurredAt,
         isEcho: false,
         appId: null,
-        text: "có biến thể gì nữa",
+        text: input.customerText ?? "có biến thể gì nữa",
         attachments: [],
       },
     },
@@ -215,7 +216,7 @@ function createHarness(input: {
       stateCommitted: true,
       metaOutboxCreated: value.metaPlan?.messages.length ?? 0,
       pancakeTagOutboxCreated: false,
-      handoffEventCreated: false,
+      handoffEventCreated: value.handoffEventPlan !== undefined,
       sendAuthorized: true,
       reasonCodes: [],
       inboxBatchStatus: "NOT_REQUESTED" as const,
@@ -241,8 +242,6 @@ function createHarness(input: {
       switch (input.initialMode ?? "NO_REPLY") {
         case "REPLY":
           return modelResult(proposal("REPLY", existingReplyText));
-        case "HANDOFF":
-          return modelResult(proposal("HANDOFF"));
         case "NO_REPLY":
           return modelResult(proposal("NO_REPLY"));
       }
@@ -463,13 +462,14 @@ describe("BF-01 runner reconciliation", () => {
   });
 
   it("does not override an existing core handoff", async () => {
-    const harness = createHarness({ initialMode: "HANDOFF" });
+    const harness = createHarness({ customerText: "cho gặp nhân viên" });
 
     expect(await harness.runner.processOne()).toBe(true);
     const commit = harness.committed();
-    expect(harness.generate).toHaveBeenCalledTimes(1);
-    expect(harness.reserve).toHaveBeenCalledTimes(1);
+    expect(harness.generate).toHaveBeenCalledTimes(0);
+    expect(harness.reserve).toHaveBeenCalledTimes(0);
     expect(commit?.state.conversationOwner).toBe("HUMAN");
+    expect(commit?.handoffEventPlan?.source).toBe("CUSTOMER_REQUEST");
     expect(hasBf01Reason(commit)).toBe(false);
   });
 });
