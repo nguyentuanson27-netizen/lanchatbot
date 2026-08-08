@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-08T07:37:41Z",
+  "capturedAtSemantics": "repository release-preparation record creation time; the final manifest commit is recorded at this timestamp and this is not a host runtime capture time",
+  "status": "RELEASE_PREPARATION_SOURCE_ONLY_ARTIFACT_PENDING",
+  "environment": "repository-release-preparation",
+  "documentType": "APPEND_ONLY_RELEASE_PREPARATION_EVIDENCE",
+  "releasePreparation": {
+    "purpose": "prepare a separately reviewable GitHub source candidate for BF-02 after the combined PR #134 and PR #133 baseline",
+    "reviewCandidateTag": "20260808-bf02-preserve-verified-context-release-prep-review-candidate.1",
+    "reviewCandidateTagPurpose": "SOL_HIGH_EXACT_HEAD_READ_ONLY_REVIEW_ONLY_NOT_DEPLOY_AUTHORIZATION",
+    "finalPostMergeReleaseTag": null,
+    "finalPostMergeReleaseTagRequired": true,
+    "immutableAfterReviewCandidateTag": true
+  },
+  "combinedBaselineProvenance": {
+    "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+    "combinedSourceBaselineCommit": "1fae830f79a404e1cbd7f71b69e40420a1a1e1d1",
+    "combinedSourceBaselineTree": "e713c8a7d10a1d3d3eb0833cd16e28b15a9a2126",
+    "sourceOnlyTag": "20260808-bf02-preserve-verified-context-source-r5.3",
+    "sourceOnlyTagObject": "55b3746c65b9ebfb589392e6ee25cec2238f544d",
+    "sourceOnlyTagPeeledCommit": "1fae830f79a404e1cbd7f71b69e40420a1a1e1d1",
+    "sourceOnlyTagSemantics": "immutable repository provenance for the combined baseline; not a deploy authorization and not the final post-merge release tag",
+    "originMainAtBoundaryVerification": "1fae830f79a404e1cbd7f71b69e40420a1a1e1d1",
+    "boundaryRule": "the combined source boundary is the origin/main commit above before this release-preparation manifest; the manifest PR adds only this new evidence file",
+    "commitsBetweenPr134MergeAndPr133Merge": [],
+    "unrelatedCommitsIncludedInCandidateBoundary": [],
+    "boundaryTriage": "PR #134 merge cf5890e is the first parent baseline for PR #133 merge 1fae830; no unrelated main commit is between them or silently included"
+  },
+  "provenance": {
+    "pr134Hotfix": {
+      "pullRequest": 134,
+      "url": "https://github.com/nguyentuanson27-netizen/lanchatbot/pull/134",
+      "reviewedHead": "c8ce30199d05cc03a7776c740a34d3dc169f237b",
+      "mergeCommit": "cf5890eec615b957d14acc66f352e533fe0ba602",
+      "baseCommit": "a1c045c9138c871902f2d7e4491eeace14815126",
+      "scope": ["apps/worker/src/realtime-runner.test.ts"],
+      "changeClass": "test-only trustedClaims fixture clock stabilization; no runtime behavior, TTL, contract, or production semantics change",
+      "dependencyOrder": "merged first; required for reproducible full-gate baseline before BF-02"
+    },
+    "pr133Bf02": {
+      "pullRequest": 133,
+      "url": "https://github.com/nguyentuanson27-netizen/lanchatbot/pull/133",
+      "reviewedHeadWhenMerged": "e6c0d3de1230092215e76f538949fbe474c5f941",
+      "mergeCommit": "1fae830f79a404e1cbd7f71b69e40420a1a1e1d1",
+      "mergeBase": "cf5890eec615b957d14acc66f352e533fe0ba602",
+      "scope": [
+        ".github/workflows/ci.yml",
+        "apps/worker/src/bf02-realtime-runner.test.ts",
+        "apps/worker/src/bf02-realtime-runner.ts",
+        "apps/worker/src/bf02-review-plan.test.ts",
+        "apps/worker/src/realtime-runner.ts",
+        "apps/worker/src/realtime-server.ts",
+        "apps/worker/src/verified-product-context.test.ts",
+        "apps/worker/src/verified-product-context.ts",
+        "deploy/manifests/20260807-bf02-preserve-verified-context-review-candidate.1.json",
+        "packages/contracts/src/v2/realtime-decision-event.test.ts",
+        "packages/contracts/src/v2/realtime-decision-event.ts",
+        "packages/database/src/realtime-runtime.ts"
+      ],
+      "changeClass": "BF-02 verified conversation-context preservation in realtime worker, with review-plan regression coverage and no migration/backfill",
+      "dependencyOrder": "merged after PR #134; its merge commit is the combined source baseline for this preparation"
+    }
+  },
+  "source": {
+    "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+    "branch": "main",
+    "implementationBoundary": "BF-02 source is represented by merged PR #133; PR #134 is the prerequisite test-only baseline component",
+    "pullRequests": [134, 133],
+    "mergeCommit": "1fae830f79a404e1cbd7f71b69e40420a1a1e1d1",
+    "tagMustPointToCommitContainingThisManifest": false,
+    "reviewCandidateTagMustPointToCommitContainingThisManifest": true,
+    "sourceOnlyTagMustNotAuthorizeBuildDeploymentOrCutover": true,
+    "finalReleaseTagMustBeCreatedOnlyPostMergeOnMain": true
+  },
+  "image": {
+    "name": null,
+    "digest": null,
+    "status": "NOT_BUILT",
+    "targetService": "realtime-worker",
+    "serviceScopeDerivation": "BF-02 production code and runtime wiring are confined to the realtime worker path; contracts/database changes support that worker and do not authorize other service recreation"
+  },
+  "behavioralBaseline": {
+    "releaseTag": "20260805-bf05-size-chart-eligibility-r5.1",
+    "sourceCommit": "bd1b98c772018bbb676db27c50464a1917fd5731",
+    "repositoryProvenance": "ANNOTATED_TAG_AND_SOURCE_COMMIT_ONLY",
+    "observationAuthority": "REPOSITORY_PROVENANCE_ONLY_NOT_CURRENT_LIVE_PARITY_EVIDENCE",
+    "liveRuntimeEvidence": "NOT_CAPTURED_IN_THIS_SOURCE_ONLY_PREPARATION"
+  },
+  "scope": {
+    "programRelease": "BF_WAVE_B1",
+    "issues": ["BF-02"],
+    "combinedBaselineIncludes": ["PR-134-test-only-baseline", "PR-133-BF-02"],
+    "targetService": "realtime-worker",
+    "candidateComponentScope": [
+      "apps/worker realtime decision and verified-context runtime",
+      "packages/contracts realtime decision-event contract support",
+      "packages/database realtime runtime support"
+    ],
+    "nonTargetServicesMustRemainUnchanged": true,
+    "migrationRequired": false,
+    "backfillRequired": false,
+    "dataDeletionRequired": false,
+    "runtimeModeChangeRequired": false,
+    "controlPlaneMutationAllowed": false,
+    "routingChangeRequired": false,
+    "pageAllowlistChangeRequired": false,
+    "messengerProductionTestRequiredForPreparation": false,
+    "prohibitedActions": [
+      "migration",
+      "backfill",
+      "restart_or_recreate",
+      "control_plane_mutation",
+      "routing_mutation",
+      "page_allowlist_mutation",
+      "secret_change",
+      "Messenger_production_test"
+    ]
+  },
+  "changes": {
+    "pr134Hotfix": "keeps the trustedClaims fixture evidence within the existing 48-hour max-age contract using a scoped fake clock; no runtime behavior change",
+    "nativeBatchReset": "evaluates customer messages chronologically so an earlier reset or abandon-context intent blocks stale product recovery from later vague text while later explicit product references follow documented precedence",
+    "multiProductAmbiguity": "keeps multiple valid active product selections and equal-precedence grounded evidence ambiguous until a higher-precedence explicit product code resolves them; grounded fallback does not silently choose one",
+    "vertexSchemaFallback": "preserves initialFallbackUsed and modelErrorClass for VERTEX_SCHEMA_INVALID, avoids unnecessary grounding after deterministic fallback, and records truthful audit/reason/call-count state",
+    "mediaClarification": "allows a fresh exact product code such as SD398 to resolve active media clarification without MEDIA_CLARIFICATION_EXHAUSTED"
+  },
+  "runtimeEvidence": {
+    "status": "NOT_CAPTURED",
+    "authority": "NO_VPS_OR_RUNTIME_READ_OR_MUTATION_PERFORMED",
+    "requiredForAnySeparatelyAuthorizedDeployment": "freshly capture and verify current.json, immutable runtime-state history, resolved current symlink, release-local .release-source.json, service identity, migration, routing/allowlist, config and health parity; record only as append-only follow-up evidence",
+    "repositoryMergeDoesNotImplyDeployment": true
+  },
+  "implementationVerification": {
+    "frozenInstall": "PASS_PNPM_10_12_4",
+    "canonicalReleaseIntegrity": "PASS_REPOSITORY_ONLY_ON_RELEASE_PREP_HEAD",
+    "datasetBoundary": "PASS_REPOSITORY_ONLY_ON_RELEASE_PREP_HEAD",
+    "jsonSchemaAndManifestInvariants": "PASS_ON_RELEASE_PREP_HEAD",
+    "diffWhitespaceScopeSecretPiiForbiddenPathScans": "PASS_CLEAN",
+    "sourceProvenanceAndAncestry": "PASS_PR134_PR133_COMBINED_BOUNDARY_VERIFIED",
+    "independentExactHeadReview": "PENDING_SOL_HIGH_RELEASE_PREP"
+  },
+  "requiredBeforeBuild": [
+    "RELEASE_PREPARATION_PR_MERGED",
+    "FINAL_POST_MERGE_RELEASE_TAG_ON_MAIN_CONTAINING_THIS_MANIFEST",
+    "TAG_AND_COMMIT_PROVENANCE_PASS",
+    "SEPARATE_BUILD_AUTHORIZATION",
+    "FRESH_RUNTIME_PRECHECK_AUTHORIZED_AND_CAPTURED"
+  ],
+  "requiredBeforeCutover": [
+    "SEPARATE_DEPLOYMENT_AUTHORIZATION",
+    "FRESH_RUNTIME_STATE_CAPTURE_AND_PARITY_VERIFICATION",
+    "NO_MIGRATION_OR_BACKFILL_UNLESS_SEPARATELY_AUTHORIZED",
+    "ROUTING_MODE_ALLOWLIST_CONTROL_PLANE_AND_SECRET_BOUNDARY_UNCHANGED",
+    "TARGET_SERVICE_ONLY_RECREATE_CONFIRMED",
+    "HEALTH_READINESS_RESTART_AND_QUEUE_GATES_PASS",
+    "NO_MESSENGER_PRODUCTION_TEST_UNLESS_SEPARATELY_AUTHORIZED"
+  ],
+  "rollback": {
+    "repositoryReferenceTag": "20260805-bf05-size-chart-eligibility-r5.1",
+    "repositoryReferenceCommit": "bd1b98c772018bbb676db27c50464a1917fd5731",
+    "rollbackScope": "realtime-worker source/image only after separately authorized deployment; preserve database, Inbox/Outbox, Redis, routing and allowlist",
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false,
+    "runtimeRollbackAuthorization": "NOT_GRANTED",
+    "freshRuntimeRollbackEvidenceRequired": true
+  },
+  "authorizationBoundary": {
+    "artifactBuildAuthorized": false,
+    "deploymentAuthorized": false,
+    "migrationAuthorized": false,
+    "backfillAuthorized": false,
+    "restartAuthorized": false,
+    "runtimeModeSwitchAuthorized": false,
+    "controlPlaneMutationAuthorized": false,
+    "routingMutationAuthorized": false,
+    "pageAllowlistMutationAuthorized": false,
+    "secretMutationAuthorized": false,
+    "messengerProductionTestAuthorized": false,
+    "vpsMutationAuthorized": false,
+    "finalReleaseTagAuthorized": false
+  },
+  "manifestIntegrity": {
+    "appendOnlyNewArtifact": true,
+    "immutableAfterReviewCandidateTag": true,
+    "runtimeEvidenceMustBeRecordedAsAppendOnlyFollowUp": true,
+    "repositoryTagProvenanceDoesNotEstablishLiveParity": true,
+    "freshLiveParityVerificationRequiresSeparateDeploymentAuthorization": true,
+    "directVpsSourceEditsAllowed": false
+  }
+}
