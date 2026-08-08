@@ -6,6 +6,7 @@ import {
 } from "./policy-control-review-api.js";
 
 const VERSION_ID = "018f1b72-0000-7000-8000-000000000101";
+const VERSION_ID_B = "018f1b72-0000-7000-8000-000000000102";
 const POINTER_ID = "018f1b72-0000-7000-8000-000000000201";
 
 function jsonResponse(payload: unknown): Response {
@@ -108,7 +109,7 @@ describe("policy review API client", () => {
     });
   });
 
-  it("rejects a malformed 200 response instead of inventing batch results", async () => {
+  it("rejects an unknown action in a 200 response instead of inventing a default", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
       request_id: "request-2",
       action: "PUBLISH",
@@ -120,5 +121,40 @@ describe("policy review API client", () => {
       versionId: VERSION_ID,
       expectedRevision: 3,
     }])).rejects.toThrow("Invalid policy batch response");
+  });
+
+  it("rejects a truncated 200 response after an ambiguous partial mutation", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      request_id: "request-3",
+      action: "APPROVE",
+      results: [{
+        version_id: VERSION_ID,
+        ok: false,
+        error_code: "ADMIN_INTERNAL_ERROR",
+      }],
+      summary: { total: 1, succeeded: 0, failed: 1 },
+    })));
+
+    await expect(batchTransitionPolicyArtifacts("APPROVE", [
+      { versionId: VERSION_ID, expectedRevision: 3 },
+      { versionId: VERSION_ID_B, expectedRevision: 4 },
+    ])).rejects.toThrow("Invalid policy batch response");
+  });
+
+  it("rejects reordered result ids even when counts look valid", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      request_id: "request-4",
+      action: "APPROVE",
+      results: [
+        { version_id: VERSION_ID_B, ok: false, error_code: "ADMIN_INTERNAL_ERROR" },
+        { version_id: VERSION_ID, ok: false, error_code: "ADMIN_INTERNAL_ERROR" },
+      ],
+      summary: { total: 2, succeeded: 0, failed: 2 },
+    })));
+
+    await expect(batchTransitionPolicyArtifacts("APPROVE", [
+      { versionId: VERSION_ID, expectedRevision: 3 },
+      { versionId: VERSION_ID_B, expectedRevision: 4 },
+    ])).rejects.toThrow("Invalid policy batch response");
   });
 });
