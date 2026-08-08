@@ -418,6 +418,14 @@ function normalizedDialogueText(value: string): string {
     .trim();
 }
 
+function terminalDialogueClause(value: string): string {
+  return value
+    .split(/[,;\n]+/u)
+    .map((clause) => clause.trim())
+    .filter(Boolean)
+    .at(-1) ?? value.trim();
+}
+
 function negatedQuestionAct(text: string): boolean {
   return /\b(?:khong|ko|k)\s+(?:(?:can|muon)\s+)?hoi\b/u.test(text);
 }
@@ -430,7 +438,7 @@ function declarativeKnowledgeFrame(text: string): boolean {
 }
 
 function customerQuestionEvidence(value: string): boolean {
-  const raw = value.trim();
+  const raw = terminalDialogueClause(value);
   if (!raw) return false;
 
   const text = normalizedDialogueText(raw);
