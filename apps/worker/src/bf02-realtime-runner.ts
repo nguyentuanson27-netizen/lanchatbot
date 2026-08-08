@@ -1,17 +1,19 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import {
+  assembleReply,
+  buildVerifiedFactBlocks,
+  extractCustomerMeasurements,
   normalizeProductCode,
   type StableProductDocument,
 } from "@lana/business-tools";
+import type { GroundedReplyDraftV1 } from "@lana/contracts";
 import type { RuntimePolicyResolverPort } from "@lana/chat-runtime";
 import type { ConversationState } from "@lana/conversation-engine";
 import {
   RealtimeRunner as CoreRealtimeRunner,
   currentProductContinuationId,
-  hasCustomerMeasurementSignal,
   RealtimeContextPreservingSchemaError,
   productCodeOnly,
-  textWithoutMeasurementTokens,
   type CanonicalChatHistoryPort,
   type RealtimeInboxPort,
   type RealtimeMediaRecognitionPort,
@@ -40,6 +42,16 @@ import {
 export * from "./realtime-runner.js";
 
 const BF02_STATE_CONTEXT_TTL_MS = 20 * 24 * 60 * 60 * 1_000;
+const BF02_MEASUREMENT_SIGNAL_TIME = "2000-01-01T00:00:00.000Z";
+const BF02_MEASUREMENT_SIGNAL_HASH = "0".repeat(64);
+const BF02_DETERMINISTIC_GROUNDED_DRAFT: GroundedReplyDraftV1 = {
+  schemaVersion: 1,
+  advisoryText: "",
+  objectionResponse: "",
+  suggestedQuestion: "",
+  suggestedNextStep: "",
+  attachmentImageIndices: [],
+};
 
 interface Bf02VerifiedProductEvidence {
   readonly product: StableProductDocument;
@@ -60,6 +72,7 @@ interface Bf02ExecutionContext {
   mediaUrlsByMessage: string[][];
   discardedMediaFrames: WeakSet<object>;
   verifiedProducts: Bf02VerifiedProductEvidence[];
+  groundedSchemaFallbackUsed: boolean;
 }
 
 function bindOrReturn<T extends object>(
@@ -142,6 +155,23 @@ function wrapInbox(
   });
 }
 
+function withGroundedFallbackTelemetry(
+  input: Parameters<RealtimeRuntimePort["commit"]>[0],
+): Parameters<RealtimeRuntimePort["commit"]>[0] {
+  if (!input.decisionEvents) return input;
+  return {
+    ...input,
+    decisionEvents: input.decisionEvents.map((event) => ({
+      ...event,
+      details: {
+        ...event.details,
+        modelPath: "grounded_fallback",
+        modelErrorClass: "VERTEX_SCHEMA_INVALID",
+      },
+    })),
+  };
+}
+
 function wrapRuntime(
   runtime: RealtimeRuntimePort,
   scope: AsyncLocalStorage<Bf02ExecutionContext>,
@@ -167,6 +197,15 @@ function wrapRuntime(
           return state === record.state ? record : { ...record, state };
         };
       }
+      if (property === "commit") {
+        return async (...args: Parameters<RealtimeRuntimePort["commit"]>) => {
+          const store = scope.getStore();
+          const input = store?.groundedSchemaFallbackUsed
+            ? withGroundedFallbackTelemetry(args[0])
+            : args[0];
+          return target.commit(input, args[1]);
+        };
+      }
       return bindOrReturn(target, property);
     },
   });
@@ -189,6 +228,21 @@ function asciiFold(value: string): string {
     .replace(/[\u0300-\u036f]/gu, "")
     .replace(/[đĐ]/gu, "d")
     .toLocaleLowerCase("vi-VN");
+}
+
+function bf02HasCustomerMeasurementSignal(value: string): boolean {
+  return extractCustomerMeasurements({
+    text: value,
+    observedAt: BF02_MEASUREMENT_SIGNAL_TIME,
+    sourceEventHash: BF02_MEASUREMENT_SIGNAL_HASH,
+  }).length > 0;
+}
+
+function bf02TextWithoutMeasurementTokens(value: string): string {
+  return value
+    .replace(/\b[12]\s*m\s*\d{1,2}\b/giu, " ")
+    .replace(/\b\d{2,3}(?:[.,]\d+)?\s*(?:kg|ky|ki)\b/giu, " ")
+    .replace(/\b\d{2,3}(?:[.,]\d+)?\s*[-/x]\s*\d{2,3}(?:[.,]\d+)?\s*[-/x]\s*\d{2,3}(?:[.,]\d+)?\b/giu, " ");
 }
 
 /**
@@ -266,8 +320,8 @@ function recordVerifiedProduct(
 
 function customerTextProductIds(texts: readonly string[]): readonly string[] {
   return [...new Set(texts.flatMap((text) => {
-    const searchText = hasCustomerMeasurementSignal(text)
-      ? textWithoutMeasurementTokens(text)
+    const searchText = bf02HasCustomerMeasurementSignal(text)
+      ? bf02TextWithoutMeasurementTokens(text)
       : text;
     return [
       ...(productCodeOnly(text) ? [productCodeOnly(text)!] : []),
@@ -324,6 +378,19 @@ function activeCustomerText(store: Bf02ExecutionContext): string {
   return mergedCustomerText(
     store.customerTexts.slice(latestProductContextResetIndex(store) + 1),
   );
+}
+
+function clarificationSelectionOverridesCode(
+  store: Bf02ExecutionContext,
+  searchValue: string,
+): boolean {
+  const clarification = store.state?.mediaClarification;
+  if (clarification?.status !== "ACTIVE") return false;
+  const selected = selectedProductId(activeCustomerText(store), clarification.candidates);
+  const code = productCodeOnly(searchValue);
+  return selected !== null &&
+    code !== null &&
+    normalizeProductCode(selected) !== code;
 }
 
 function scopedSearchTextAfterReset(
@@ -480,6 +547,9 @@ function wrapProductSearch(
         return async (...args: Parameters<RealtimeProductSearchPort["searchText"]>) => {
           const store = scope.getStore();
           if (store) {
+            if (clarificationSelectionOverridesCode(store, args[0])) {
+              return resetBoundaryNotFound();
+            }
             const scopedValue = scopedSearchTextAfterReset(store, args[0]);
             if (scopedValue === null) return resetBoundaryNotFound();
             args[0] = scopedValue;
@@ -824,12 +894,32 @@ function wrapModel(
         verifiedIds,
       );
       if (!product) throw error;
-      throw new RealtimeContextPreservingSchemaError(
-        error,
+      const factBlocks = buildVerifiedFactBlocks(
+        args[2],
+        args[1].businessFactQuery.intent,
         product,
-        "STATE",
-        "GROUNDED",
       );
+      const assembled = assembleReply(
+        factBlocks,
+        BF02_DETERMINISTIC_GROUNDED_DRAFT,
+        args[2],
+        product,
+      );
+      if (!assembled.text.trim()) throw error;
+      if (execution) execution.groundedSchemaFallbackUsed = true;
+      return {
+        proposal: {
+          ...args[1],
+          productId: product.productId,
+          action: "REPLY",
+          reply: assembled.text,
+          attachments: [],
+          handoffReason: null,
+        },
+        modelVersion: "bf02-context-fallback:VERTEX_SCHEMA_INVALID",
+        latencyMs: 0,
+        tokenUsage: {},
+      };
     }
   };
 
@@ -900,6 +990,7 @@ export class RealtimeRunner extends CoreRealtimeRunner {
         mediaUrlsByMessage: [],
         discardedMediaFrames: new WeakSet<object>(),
         verifiedProducts: [],
+        groundedSchemaFallbackUsed: false,
       },
       () => super.processOne(),
     );
