@@ -249,7 +249,27 @@ export function bindPolicyControl(data: PolicyControlData, identity: Identity | 
   root.querySelector<HTMLFormElement>("[data-policy-filters]")?.addEventListener("submit", (event) => { event.preventDefault(); const formData = new FormData(event.currentTarget as HTMLFormElement); const params = readRouteParams(); params.delete("cursor"); setRouteParam(params, "search", String(formData.get("search") ?? "").trim()); setRouteParam(params, "artifact_kind", String(formData.get("artifact_kind") ?? "")); setRouteParam(params, "lifecycle", String(formData.get("lifecycle") ?? "")); const active = String(formData.get("active") ?? "any"); setRouteParam(params, "active", active === "any" ? "" : active); let sort = String(formData.get("sort") ?? "updated_desc"); if (sort === "validated_oldest" && formData.get("lifecycle") !== "VALIDATED") sort = "updated_desc"; setRouteParam(params, "sort", sort === "updated_desc" ? "" : sort); writeRouteParams(params, true); void loadPage(); });
   root.querySelectorAll<HTMLButtonElement>("[data-policy-view]").forEach((button) => button.addEventListener("click", () => { const preset = policyQuickViewQuery(button.dataset.policyView as PolicyQuickView); const params = new URLSearchParams(); if (selectedPageId) params.set("policy_page", selectedPageId); if (preset.lifecycle) params.set("lifecycle", preset.lifecycle); if (preset.active && preset.active !== "any") params.set("active", preset.active); if (preset.sort && preset.sort !== "updated_desc") params.set("sort", preset.sort); writeRouteParams(params, true); void loadPage(); }));
   root.querySelector<HTMLButtonElement>("[data-policy-simulate]")?.addEventListener("click", async () => { if (!selectedPageId) return notify("Hãy chọn page thao tác trước khi mô phỏng."); const versions = data.artifacts.filter((item) => ["APPROVED", "CANARY", "PUBLISHED"].includes(item.lifecycle)).map(({ id }) => id).slice(0, 20); if (!versions.length || !window.confirm("Mô phỏng trên dữ liệu chat đã ẩn danh? Thao tác này không gửi tin hay gắn tag.")) return; try { await startPolicySimulation(versions, selectedPageId); notify("Đã đưa lượt mô phỏng vào hàng chờ."); await reload(); } catch (error) { notify(error instanceof Error ? error.message : "Không thể chạy mô phỏng."); } });
-  root.addEventListener("keydown", (event) => { if (isEditingContext() || event.altKey || event.ctrlKey || event.metaKey) return; const rows = [...root.querySelectorAll<HTMLElement>("[data-policy-row]")]; if (!rows.length) return; const currentIndex = Math.max(0, rows.findIndex((row) => row.dataset.policyRow === focusedRowId)); if (event.key.toLowerCase() === "j" || event.key.toLowerCase() === "k") { event.preventDefault(); rows[Math.min(rows.length - 1, Math.max(0, currentIndex + (event.key.toLowerCase() === "j" ? 1 : -1))]?.focus(); return; } const current = pageItems.find((item) => item.id === focusedRowId); if (event.key === "Enter" && current) { event.preventDefault(); void openReview(current.id); } else if (event.key.toLowerCase() === "a" && current?.lifecycle === "VALIDATED") { event.preventDefault(); void approveArtifact(current, false); } });
+  root.addEventListener("keydown", (event) => {
+    if (isEditingContext() || event.altKey || event.ctrlKey || event.metaKey) return;
+    const rows = [...root.querySelectorAll<HTMLElement>("[data-policy-row]")];
+    if (!rows.length) return;
+    const currentIndex = Math.max(0, rows.findIndex((row) => row.dataset.policyRow === focusedRowId));
+    if (event.key.toLowerCase() === "j" || event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      const delta = event.key.toLowerCase() === "j" ? 1 : -1;
+      const nextIndex = Math.min(rows.length - 1, Math.max(0, currentIndex + delta));
+      rows[nextIndex]?.focus();
+      return;
+    }
+    const current = pageItems.find((item) => item.id === focusedRowId);
+    if (event.key === "Enter" && current) {
+      event.preventDefault();
+      void openReview(current.id);
+    } else if (event.key.toLowerCase() === "a" && current?.lifecycle === "VALIDATED") {
+      event.preventDefault();
+      void approveArtifact(current, false);
+    }
+  });
 
   syncPageScopedActions();
   if (pageDirectoryRequired) void listPolicyPageIds().then((directoryPageIds) => { pageChoices = policyPageChoices(identity, data, directoryPageIds); selectedPageId = resolvePolicyPageContext(pageChoices, requestedPageId); pageDirectoryLoading = false; syncPageScopedActions(); }).catch((error) => { pageChoices = []; selectedPageId = null; pageDirectoryLoading = false; syncPageScopedActions(); notify(error instanceof Error ? error.message : "Không thể tải danh sách page thao tác."); });
