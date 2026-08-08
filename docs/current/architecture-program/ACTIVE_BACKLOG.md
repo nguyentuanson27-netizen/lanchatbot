@@ -101,3 +101,9 @@ Gate BF passes only when:
 - [ ] An immutable post-fix V1 baseline records model/config, prompt, policy versions, evidence-envelope version, and page scope.
 
 Passing Gate BF resumes the DF plan. It does not authorize `COMMERCE`, State V2, a second page/brand, or any production mutation.
+
+## Append-only deployment checkpoints
+
+| Issue | PR and source | Release/deploy status | Observation | Rollback | Residual |
+|---|---|---|---|---|---|
+| BF-01 | [PR #137](https://github.com/nguyentuanson27-netizen/lanchatbot/pull/137) merged as `a63a3ccbd7dc2b3061cf96d56c3fa3e19c26851d`; reviewed head `5815f621e928d5be297b3726190441ce9cb38099` | `20260809-bf01-reconcile-final-reply-r5.4` deployed to the existing test-page runtime; immutable tag object `d57d5a9cabe4ef922d738c0c909ac9bd1dc08fd1` peels to the merge commit. Only `realtime-worker` was recreated; no migration/backfill. | Operator report records healthy worker, restart `0`, fresh heartbeat, queue/error/duplicate/failed-permanent counts `0` in the reported post-cutover window; no Messenger outbound or test. | `20260808-bf02-preserve-verified-context-r5.3` retained and rollback-ready; rollback not executed, no schema or data rollback required. | BF-01 is deployed, but Gate BF remains pending and all remaining BF issues are unchanged. The recorded soak is greater than 60 seconds, not a long-traffic conclusion. Full host digests remain in append-only runtime evidence. See `deploy/manifests/20260809-bf01-reconcile-final-reply-r5.4-runtime.json`. |

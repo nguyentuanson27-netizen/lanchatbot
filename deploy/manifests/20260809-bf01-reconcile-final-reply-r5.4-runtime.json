@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-08T18:22:07.122Z",
+  "capturedAtSemantics": "UTC timestamp encoded in the immutable runtime-state history filename reported after the BF-01 cutover; this repository record was created later from that operator-provided deployment report.",
+  "status": "DEPLOYED_TEST_PAGE_RUNTIME_EVIDENCE_RECORDED",
+  "environment": "production-test-page",
+  "documentType": "APPEND_ONLY_RUNTIME_DEPLOYMENT_EVIDENCE",
+  "evidenceAuthority": {
+    "source": "operator-provided post-deployment live report",
+    "repositoryRecorderPerformedVpsRead": false,
+    "repositoryRecorderPerformedVpsMutation": false,
+    "interpretation": "Git and tag values below were independently reconciled against GitHub. Host observations are recorded as reported; they are not re-presented as an independent repository-side VPS attestation."
+  },
+  "source": {
+    "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+    "pullRequest": 137,
+    "pullRequestUrl": "https://github.com/nguyentuanson27-netizen/lanchatbot/pull/137",
+    "pullRequestState": "MERGED",
+    "reviewedHead": "5815f621e928d5be297b3726190441ce9cb38099",
+    "mergeCommit": "a63a3ccbd7dc2b3061cf96d56c3fa3e19c26851d",
+    "mergeParents": [
+      "27467d1431020f7f10958ca762f66593a1c5b4f6",
+      "5815f621e928d5be297b3726190441ce9cb38099"
+    ],
+    "mergeTree": "0a75f3478dc7d03df674bf993cd36f0ebf888d81",
+    "releaseTag": "20260809-bf01-reconcile-final-reply-r5.4",
+    "tagObject": "d57d5a9cabe4ef922d738c0c909ac9bd1dc08fd1",
+    "tagPeeledCommit": "a63a3ccbd7dc2b3061cf96d56c3fa3e19c26851d",
+    "tagCommitMatchesMergeCommit": true
+  },
+  "deployment": {
+    "releasePath": "/opt/lana-chatbot/releases/20260809-bf01-reconcile-final-reply-r5.4",
+    "releaseSourcePointerPresentBeforeActivation": true,
+    "releaseSourcePointerCommit": "a63a3ccbd7dc2b3061cf96d56c3fa3e19c26851d",
+    "releaseWorkingTreeClean": true,
+    "directVpsSourceEdits": false,
+    "serviceScope": ["realtime-worker"],
+    "servicesRecreated": ["realtime-worker"],
+    "nonTargetServicesRecreated": [],
+    "currentSymlinkPromotedAfterTargetGuards": true
+  },
+  "imageReconciliation": {
+    "reportedImage": "lana-chatbot-app:bf01-reconcile-final-reply-r5.4",
+    "reportedImageIdPrefix": "sha256:2c34155c",
+    "reportedOciRevision": "a63a3ccbd7dc2b3061cf96d56c3fa3e19c26851d",
+    "reportedOciVersion": "20260809-bf01-reconcile-final-reply-r5.4",
+    "tagCommitMatchesImageRevision": true,
+    "fullImageDigest": null,
+    "fullImageDigestSemantics": "The operator report displayed a full host image digest. It is intentionally not retyped from a screenshot; the host-side immutable runtime evidence remains the authoritative digest record."
+  },
+  "preflightAndBuild": {
+    "previousCurrentRelease": "20260808-bf02-preserve-verified-context-r5.3",
+    "previousCurrentCommit": "27467d1431020f7f10958ca762f66593a1c5b4f6",
+    "previousRuntimeEvidenceReportedConsistent": true,
+    "rollbackIdentityReadFromLiveEvidence": true,
+    "frozenInstall": "PASS_PNPM_10_12_4",
+    "runtimeStateContract": "PASS",
+    "runtimeStateCaptureParityImmutabilityAtomicPromotion": "PASS",
+    "releaseIntegrity": "PASS",
+    "datasetBoundary": "PASS",
+    "typecheck": "PASS",
+    "workerTests": "PASS_43_FILES_470_TESTS",
+    "contractsTests": "PASS",
+    "fullBuild": "PASS"
+  },
+  "runtime": {
+    "runtimeState": {
+      "currentFile": "/opt/lana-chatbot/runtime-state/current.json",
+      "historyFile": "/opt/lana-chatbot/runtime-state/history/2026-08-08T18-22-07-122Z-20260809-bf01-reconcile-final-reply-r5.4.json",
+      "candidateFile": null,
+      "candidateFileSemantics": "The operator report stated that the candidate, history, and current records were byte-identical. The candidate pathname is not retyped from a screenshot into this repository evidence.",
+      "serviceEvidenceFile": "/opt/lana-chatbot/runtime-state/evidence/20260809-bf01-reconcile-final-reply-r5.4.json",
+      "hostReportedCandidateHistoryCurrentByteIdentical": true,
+      "hostReportedFreshParityValidation": "PASS",
+      "currentJsonSha256": null,
+      "currentJsonSha256Semantics": "The full checksum is retained in the host runtime-state record and was not copied from a screenshot into this repository evidence."
+    },
+    "realtimeWorker": {
+      "container": "lana-chatbot-realtime-worker",
+      "health": "healthy",
+      "restartCount": 0,
+      "workerMode": "LIVE",
+      "workerStatus": "IDLE",
+      "heartbeatAgeSeconds": 12,
+      "uid": 1000
+    },
+    "behaviorAndDataBoundaries": {
+      "latestMigration": "0030_runtime_behavior_modes",
+      "migrationAppliedForBf01": false,
+      "backfillApplied": false,
+      "dataDeletion": false,
+      "confirmationMode": "V2_ACTIVE",
+      "salesAuthorityMode": "LEGACY",
+      "stateReadMode": "LEGACY",
+      "behaviorPointerRevision": 3,
+      "pageAllowlistChanged": false,
+      "routingChanged": false,
+      "controlPlaneChanged": false,
+      "secretValuesRecorded": false
+    }
+  },
+  "cutoverAndObservation": {
+    "result": "CUTOVER_PASS",
+    "imageSmoke": "BF01_SMOKE_PRESENT",
+    "renderedImage": "OK",
+    "queuePrecheckMatchesBaseline": true,
+    "postCutoverSoakSeconds": 60,
+    "postCutoverHealthy": true,
+    "postCutoverNewErrorCount": 0,
+    "inboxActive": 0,
+    "outboxActive": 0,
+    "duplicateCount": 0,
+    "failedPermanentCount": 0,
+    "messengerProductionTest": false,
+    "messengerOutboundCreated": 0,
+    "messengerOutboundAccepted": 0,
+    "messengerOutboundDelivered": 0,
+    "newWebhookInboxRecords": 0,
+    "observation": "The target worker was healthy with a fresh heartbeat and no queue/error movement during the reported post-cutover window. This is an operational observation, not a customer-traffic or Messenger smoke-test claim."
+  },
+  "rollback": {
+    "status": "READY_NOT_EXECUTED",
+    "release": "20260808-bf02-preserve-verified-context-r5.3",
+    "releaseDirectoryRetained": true,
+    "reportedImage": "lana-chatbot-app:bf02-preserve-verified-context-r5.3",
+    "rollbackScriptSyntax": "PASS",
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false,
+    "rollbackTriggered": false
+  },
+  "residuals": [
+    "No Messenger production transcript was sent or asserted during this deployment.",
+    "The recorded soak is the reported greater-than-60-second post-cutover window; it is not a long-traffic soak conclusion.",
+    "BF-01 deployment evidence does not pass Gate BF or close the remaining BF issues.",
+    "Full image and runtime-state digests remain authoritative only in the host append-only evidence until independently retrieved through a separately authorized read-only verification."
+  ],
+  "authorizationBoundary": {
+    "deploymentExecuted": true,
+    "migrationExecuted": false,
+    "backfillExecuted": false,
+    "restartOrRecreateScope": "realtime-worker-only",
+    "routingMutation": false,
+    "pageAllowlistMutation": false,
+    "controlPlaneMutation": false,
+    "secretMutation": false,
+    "messengerProductionTest": false
+  },
+  "manifestIntegrity": {
+    "appendOnlyNewArtifact": true,
+    "historicalRuntimeEvidenceModified": false,
+    "repositoryTagProvenanceReconciled": true,
+    "hostObservationsKeptDistinctFromRepositoryVerification": true
+  }
+}
