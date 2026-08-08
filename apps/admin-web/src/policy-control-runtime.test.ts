@@ -2,12 +2,17 @@ import { describe, expect, it } from "vitest";
 import { ApiError } from "./api.js";
 import {
   createLatestPolicyListLoader,
+  createLatestPolicyReviewLoader,
   executePolicyBatchWithRecovery,
   policyPageChoices,
   resolvePolicyPageContext,
 } from "./policy-control-runtime.js";
 import { renderReviewDrawer } from "./policy-control-ui.js";
-import type { PolicyListPage, PolicyListQuery } from "./policy-control-review-api.js";
+import type {
+  PolicyListPage,
+  PolicyListQuery,
+  PolicyReviewContext,
+} from "./policy-control-review-api.js";
 import type { Identity, PolicyArtifact, PolicyControlData } from "./types.js";
 
 const identity: Identity = {
@@ -47,6 +52,15 @@ function artifact(
   };
 }
 
+function reviewContext(id: string): PolicyReviewContext {
+  return {
+    artifact: artifact(id, "VALIDATED"),
+    previousVersion: null,
+    activePointers: [],
+    rollbackCandidates: [],
+  };
+}
+
 describe("policy list latest-query loader", () => {
   it("drops a delayed stale response after a newer filter request starts", async () => {
     const pending: Array<{
@@ -71,6 +85,34 @@ describe("policy list latest-query loader", () => {
       items: [{ ...artifact("new", "DRAFT"), active: false }],
       nextCursor: null,
     });
+  });
+});
+
+describe("policy review latest-detail loader", () => {
+  it("aborts stale drawer requests and can invalidate the active request on close", async () => {
+    const pending: Array<{
+      id: string;
+      signal?: AbortSignal;
+      resolve: (context: PolicyReviewContext) => void;
+    }> = [];
+    const load = (id: string, signal?: AbortSignal) => new Promise<PolicyReviewContext>((resolve) => {
+      pending.push({ id, ...(signal ? { signal } : {}), resolve });
+    });
+    const latest = createLatestPolicyReviewLoader(load);
+
+    const first = latest.load("old");
+    const second = latest.load("new");
+    expect(pending[0]?.signal?.aborted).toBe(true);
+    pending[0]!.resolve(reviewContext("old"));
+    await expect(first).resolves.toBeNull();
+    pending[1]!.resolve(reviewContext("new"));
+    await expect(second).resolves.toEqual(reviewContext("new"));
+
+    const closing = latest.load("closing");
+    latest.cancel();
+    expect(pending[2]?.signal?.aborted).toBe(true);
+    pending[2]!.resolve(reviewContext("closing"));
+    await expect(closing).resolves.toBeNull();
   });
 });
 
