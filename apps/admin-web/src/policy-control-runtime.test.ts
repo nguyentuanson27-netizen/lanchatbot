@@ -54,7 +54,7 @@ describe("policy list latest-query loader", () => {
       resolve: (page: PolicyListPage) => void;
     }> = [];
     const load = (query: PolicyListQuery, signal?: AbortSignal) => new Promise<PolicyListPage>((resolve) => {
-      pending.push({ query, signal, resolve });
+      pending.push({ query, ...(signal ? { signal } : {}), resolve });
     });
     const latest = createLatestPolicyListLoader(load);
 
