@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getPolicyReviewContext, listPolicyArtifacts } from "./policy-control-review-api.js";
+import {
+  batchTransitionPolicyArtifacts,
+  getPolicyReviewContext,
+  listPolicyArtifacts,
+} from "./policy-control-review-api.js";
 
 const VERSION_ID = "018f1b72-0000-7000-8000-000000000101";
 const POINTER_ID = "018f1b72-0000-7000-8000-000000000201";
@@ -74,5 +78,47 @@ describe("policy review API client", () => {
       next_cursor: null,
     })));
     await expect(listPolicyArtifacts({})).rejects.toThrow("Invalid policy revision value");
+  });
+
+  it("preserves PostgreSQL bigint current_revision strings in batch conflicts", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
+      request_id: "request-1",
+      action: "APPROVE",
+      results: [{
+        version_id: VERSION_ID,
+        ok: false,
+        error_code: "ADMIN_ARTIFACT_VERSION_CONFLICT",
+        current_revision: "9",
+      }],
+      summary: { total: 1, succeeded: 0, failed: 1 },
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await batchTransitionPolicyArtifacts("APPROVE", [{
+      versionId: VERSION_ID,
+      expectedRevision: 3,
+    }]);
+
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain("/policy/review-artifacts/batch-transitions");
+    expect(result.results[0]).toMatchObject({
+      versionId: VERSION_ID,
+      ok: false,
+      errorCode: "ADMIN_ARTIFACT_VERSION_CONFLICT",
+      currentRevision: 9,
+    });
+  });
+
+  it("rejects a malformed 200 response instead of inventing batch results", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      request_id: "request-2",
+      action: "PUBLISH",
+      results: [],
+      summary: { total: 0, succeeded: 0, failed: 0 },
+    })));
+
+    await expect(batchTransitionPolicyArtifacts("APPROVE", [{
+      versionId: VERSION_ID,
+      expectedRevision: 3,
+    }])).rejects.toThrow("Invalid policy batch response");
   });
 });
