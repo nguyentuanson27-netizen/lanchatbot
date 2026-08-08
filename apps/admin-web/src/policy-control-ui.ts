@@ -10,6 +10,7 @@ import {
   getPolicyArtifact,
   getPolicyReviewContext,
   listPolicyArtifacts,
+  listPolicyPageIds,
   type PolicyActiveFilter,
   type PolicyArtifactRow,
   type PolicyListQuery,
@@ -101,6 +102,10 @@ export function nextReviewArtifactId(
   return artifacts.slice(0, currentIndex).find((item) => item.lifecycle === "VALIDATED")?.id ?? null;
 }
 
+function needsPolicyPageDirectory(identity: Identity): boolean {
+  return identity.policyPageIds.includes("ALL") && identity.pageScope.includes("ALL");
+}
+
 export function renderPolicyControl(data: PolicyControlData, identity: Identity | null): string {
   if (!identity?.policyControl) {
     return `<section class="empty-state"><h3>Chức năng quản lý chính sách đang tắt</h3><p>Cần migration và bật riêng Policy Control Plane trước khi sử dụng.</p></section>`;
@@ -109,10 +114,16 @@ export function renderPolicyControl(data: PolicyControlData, identity: Identity 
     ...artifact,
     active: data.pointers.some((pointer) => pointer.versionId === artifact.id),
   }));
-  const pageChoices = policyPageChoices(identity, data);
+  const pageDirectoryRequired = needsPolicyPageDirectory(identity);
+  const pageChoices = pageDirectoryRequired ? [] : policyPageChoices(identity, data);
   const initialPageId = resolvePolicyPageContext(pageChoices, null);
   const hasSimulationVersions = data.artifacts.some((item) => ["APPROVED", "CANARY", "PUBLISHED"].includes(item.lifecycle));
   const pageOptions = pageChoices.map((pageId) => `<option value="${escapeHtml(pageId)}" ${pageId === initialPageId ? "selected" : ""}>${escapeHtml(pageId)}</option>`).join("");
+  const pagePlaceholder = pageDirectoryRequired
+    ? "Đang tải page…"
+    : pageChoices.length
+      ? "Chọn page…"
+      : "Chưa có page cụ thể";
   const pointers = data.pointers.map((pointer) => `<tr><td>${escapeHtml(kindLabels[pointer.kind])}</td><td>${escapeHtml(pointer.key)}</td><td>${escapeHtml(pointer.channel)}</td><td>v${pointer.version}</td><td>${escapeHtml(pointer.pageId ?? "Toàn shop")}</td></tr>`).join("");
   const simulations = data.simulations.map((run) => `<tr><td>${escapeHtml(formatDateTime(run.createdAt))}</td><td>${escapeHtml(run.status)}</td><td>${run.versionIds.length}</td><td>${run.maxConversations}</td></tr>`).join("");
 
@@ -121,7 +132,7 @@ export function renderPolicyControl(data: PolicyControlData, identity: Identity 
     <section class="policy-review__header">
       <div><h2>Phiên bản cấu hình</h2><p>Lọc, rà soát và duyệt theo trang. PostgreSQL vẫn là nguồn chuẩn policy artifact.</p></div>
       <div class="policy-review__page-actions">
-        <label class="policy-page-context"><span>Page thao tác</span><select data-policy-page-select aria-label="Page cho Canary, Publish và mô phỏng" ${pageChoices.length ? "" : "disabled"}><option value="">${pageChoices.length ? "Chọn page…" : "Chưa có page cụ thể"}</option>${pageOptions}</select><small>Canary, Publish và mô phỏng chỉ chạy trên page đã chọn.</small></label>
+        <label class="policy-page-context"><span>Page thao tác</span><select data-policy-page-select aria-label="Page cho Canary, Publish và mô phỏng" ${pageChoices.length && !pageDirectoryRequired ? "" : "disabled"}><option value="">${pagePlaceholder}</option>${pageOptions}</select><small>Canary, Publish và mô phỏng chỉ chạy trên page đã chọn.</small></label>
         <button class="secondary-button" data-policy-simulate ${hasSimulationVersions && initialPageId ? "" : "disabled"}>Mô phỏng trên chat cũ</button>
       </div>
     </section>
@@ -210,7 +221,9 @@ export function bindPolicyControl(
 ): void {
   const root = document.querySelector<HTMLElement>("[data-policy-root]");
   if (!root || !identity?.policyControl) return;
-  const pageChoices = policyPageChoices(identity, data);
+  const pageDirectoryRequired = needsPolicyPageDirectory(identity);
+  let pageDirectoryLoading = pageDirectoryRequired;
+  let pageChoices = pageDirectoryRequired ? [] : policyPageChoices(identity, data);
   const requestedPageId = readRouteParams().get("policy_page");
   let selectedPageId = resolvePolicyPageContext(pageChoices, requestedPageId);
   let pageItems: PolicyArtifactRow[] = [];
@@ -226,7 +239,16 @@ export function bindPolicyControl(
 
   const syncPageScopedActions = () => {
     const select = root.querySelector<HTMLSelectElement>("[data-policy-page-select]");
-    if (select) select.value = selectedPageId ?? "";
+    if (select) {
+      const placeholder = pageDirectoryLoading
+        ? "Đang tải page…"
+        : pageChoices.length
+          ? "Chọn page…"
+          : "Chưa có page cụ thể";
+      select.innerHTML = `<option value="">${placeholder}</option>${pageChoices.map((pageId) => `<option value="${escapeHtml(pageId)}">${escapeHtml(pageId)}</option>`).join("")}`;
+      select.disabled = pageDirectoryLoading || pageChoices.length === 0;
+      select.value = selectedPageId ?? "";
+    }
     const simulate = root.querySelector<HTMLButtonElement>("[data-policy-simulate]");
     if (simulate) simulate.disabled = !selectedPageId || !hasSimulationVersions;
   };
@@ -589,6 +611,22 @@ export function bindPolicyControl(
   });
 
   syncPageScopedActions();
+  if (pageDirectoryRequired) {
+    void listPolicyPageIds()
+      .then((directoryPageIds) => {
+        pageChoices = policyPageChoices(identity, data, directoryPageIds);
+        selectedPageId = resolvePolicyPageContext(pageChoices, requestedPageId);
+        pageDirectoryLoading = false;
+        syncPageScopedActions();
+      })
+      .catch((error) => {
+        pageChoices = [];
+        selectedPageId = null;
+        pageDirectoryLoading = false;
+        syncPageScopedActions();
+        notify(error instanceof Error ? error.message : "Không thể tải danh sách page thao tác.");
+      });
+  }
   syncFilterControls(root, currentQuery());
   void loadPage(true);
 }
