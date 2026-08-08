@@ -29,7 +29,7 @@ import {
   FailClosedTagObservationProvider,
   PancakeRealtimeTagObservationProvider,
   RealtimeRunner,
-} from "./realtime-runner.js";
+} from "./bf02-realtime-runner.js";
 import { runRealtimeLoop } from "./realtime-loop.js";
 import { RedisRealtimeGenerationQuota } from "./realtime-quota.js";
 import { RedisChatHistoryStore } from "./redis-chat-history.js";

@@ -1894,6 +1894,31 @@ interface ProductResolution {
   readonly clarification: MediaClarificationDecision | null;
 }
 
+export class RealtimeContextPreservingSchemaError extends Error {
+  readonly code: string;
+
+  constructor(
+    error: unknown,
+    readonly verifiedProduct: StableProductDocument | null,
+    readonly productResolutionOrigin: ProductResolution["origin"],
+    readonly phase: "INITIAL" | "GROUNDED" = "INITIAL",
+  ) {
+    const code =
+      error !== null &&
+      typeof error === "object" &&
+      "code" in error &&
+      typeof error.code === "string" &&
+      error.code.trim()
+        ? error.code.trim()
+        : error instanceof Error && error.message.trim()
+          ? error.message.trim()
+          : "VERTEX_SCHEMA_INVALID";
+    super(code);
+    this.name = "RealtimeContextPreservingSchemaError";
+    this.code = code;
+  }
+}
+
 export interface RealtimeTagObservationProvider {
   observe(input: {
     pageId: string;
@@ -2025,6 +2050,7 @@ export type ModelExecutionPath =
   | "not_called"
   | "model"
   | "initial_fallback"
+  | "grounded_fallback"
   | "grounded_draft_fallback";
 
 export interface ExplicitModelTelemetry {
@@ -2047,6 +2073,7 @@ export function resolveExplicitModelTelemetry(input: Readonly<{
   inputCharacterCount: number;
   outputCharacterCount: number;
   initialFallbackUsed: boolean;
+  groundedFallbackUsed?: boolean;
   groundedDraftFallbackUsed: boolean;
   errorClass: string | null;
 }>): ExplicitModelTelemetry {
@@ -2060,9 +2087,11 @@ export function resolveExplicitModelTelemetry(input: Readonly<{
   }
   const path: ModelExecutionPath = input.initialFallbackUsed
     ? "initial_fallback"
-    : input.groundedDraftFallbackUsed
-      ? "grounded_draft_fallback"
-      : "model";
+    : input.groundedFallbackUsed
+      ? "grounded_fallback"
+      : input.groundedDraftFallbackUsed
+        ? "grounded_draft_fallback"
+        : "model";
   if (input.hasProviderUsage) {
     return {
       usageSource: "provider",
@@ -2740,6 +2769,7 @@ export class RealtimeRunner {
       : await this.resolveProducts(message, state, claim.pageId);
     let resolvedProduct = resolution.primary;
     let productResolutionOrigin: ProductResolution["origin"] = resolution.origin;
+    let suppressStateContinuation = false;
     if (
       triggerMessagePk &&
       this.canonicalHistory?.recordMessageAnalysis &&
@@ -2854,6 +2884,7 @@ export class RealtimeRunner {
     let modelTotalTokens = 0;
     let hasModelTokenUsage = false;
     let initialVertexFallbackUsed = false;
+    let groundedFallbackUsed = false;
     let groundedDraftFallbackUsed = false;
     let modelErrorClass: string | null = null;
     let salesHandled = false;
@@ -3354,6 +3385,17 @@ export class RealtimeRunner {
                 resolvedProduct?.productId ?? initial.proposal.productId,
             };
           } catch (error) {
+            const contextFallback =
+              error instanceof RealtimeContextPreservingSchemaError
+                ? error
+                : null;
+            if (contextFallback) {
+              suppressStateContinuation = true;
+              if (!resolvedProduct && contextFallback.verifiedProduct) {
+                resolvedProduct = contextFallback.verifiedProduct;
+                productResolutionOrigin = contextFallback.productResolutionOrigin;
+              }
+            }
             const fallback = deterministicVertexProposalFallback(
               message.text ?? "",
               resolvedProduct,
@@ -3362,7 +3404,7 @@ export class RealtimeRunner {
             );
             proposal = fallback.proposal;
             initialVertexFallbackUsed = true;
-            modelErrorClass = fallback.reasonCode;
+            modelErrorClass = contextFallback?.code ?? fallback.reasonCode;
             handoffGuardReasonCodes = [
               ...new Set([...handoffGuardReasonCodes, fallback.reasonCode]),
             ];
@@ -3372,7 +3414,7 @@ export class RealtimeRunner {
             proposal.productId,
             nextState.currentProductId,
           );
-          if (!resolvedProduct && inferredCurrentProductId) {
+          if (!resolvedProduct && !suppressStateContinuation && inferredCurrentProductId) {
             const verifiedCurrentProduct = await this.exactProduct(
               inferredCurrentProductId,
             );
@@ -3596,29 +3638,58 @@ export class RealtimeRunner {
             };
           } else {
             modelCalled = true;
-            const grounded = await this.model.groundWithFacts(
-              modelContext,
-              proposal,
-              facts,
-              this.options.promptVersion,
-            );
-            modelVersion = grounded.modelVersion;
-            modelLatencyMs += grounded.latencyMs;
-            modelPromptTokens += grounded.tokenUsage.promptTokenCount ?? 0;
-            modelOutputTokens += grounded.tokenUsage.candidatesTokenCount ?? 0;
-            modelTotalTokens += grounded.tokenUsage.totalTokenCount ??
-              (grounded.tokenUsage.promptTokenCount ?? 0) +
-                (grounded.tokenUsage.candidatesTokenCount ?? 0);
-            hasModelTokenUsage ||= Object.values(grounded.tokenUsage).some(
-              (value) => typeof value === "number" && Number.isFinite(value),
-            );
-            proposal = {
-              ...grounded.proposal,
-              salesSignals: proposal.salesSignals ?? grounded.proposal.salesSignals,
-              strategyAnalysis:
-                proposal.strategyAnalysis ??
-                grounded.proposal.strategyAnalysis,
-            };
+            try {
+              const grounded = await this.model.groundWithFacts(
+                modelContext,
+                proposal,
+                facts,
+                this.options.promptVersion,
+              );
+              modelVersion = grounded.modelVersion;
+              modelLatencyMs += grounded.latencyMs;
+              modelPromptTokens += grounded.tokenUsage.promptTokenCount ?? 0;
+              modelOutputTokens += grounded.tokenUsage.candidatesTokenCount ?? 0;
+              modelTotalTokens += grounded.tokenUsage.totalTokenCount ??
+                (grounded.tokenUsage.promptTokenCount ?? 0) +
+                  (grounded.tokenUsage.candidatesTokenCount ?? 0);
+              hasModelTokenUsage ||= Object.values(grounded.tokenUsage).some(
+                (value) => typeof value === "number" && Number.isFinite(value),
+              );
+              proposal = {
+                ...grounded.proposal,
+                salesSignals: proposal.salesSignals ?? grounded.proposal.salesSignals,
+                strategyAnalysis:
+                  proposal.strategyAnalysis ??
+                  grounded.proposal.strategyAnalysis,
+              };
+            } catch (error) {
+              const contextFallback =
+                error instanceof RealtimeContextPreservingSchemaError &&
+                error.phase === "GROUNDED"
+                  ? error
+                  : null;
+              if (!contextFallback) throw error;
+              const fallback = deterministicVertexProposalFallback(
+                message.text ?? "",
+                resolvedProduct ?? contextFallback.verifiedProduct,
+                buyingSignal.isBuyingSignal,
+                error,
+              );
+              proposal = {
+                ...fallback.proposal,
+                ...(proposal.salesSignals === undefined
+                  ? {}
+                  : { salesSignals: proposal.salesSignals }),
+                ...(proposal.strategyAnalysis === undefined
+                  ? {}
+                  : { strategyAnalysis: proposal.strategyAnalysis }),
+              };
+              groundedFallbackUsed = true;
+              modelErrorClass = contextFallback.code;
+              handoffGuardReasonCodes = [
+                ...new Set([...handoffGuardReasonCodes, fallback.reasonCode]),
+              ];
+            }
           }
         }
         if (
@@ -4112,6 +4183,7 @@ export class RealtimeRunner {
       inputCharacterCount: JSON.stringify(modelContext).length,
       outputCharacterCount: proposal?.reply.length ?? 0,
       initialFallbackUsed: initialVertexFallbackUsed,
+      groundedFallbackUsed,
       groundedDraftFallbackUsed,
       errorClass: modelErrorClass,
     });
@@ -4645,14 +4717,26 @@ export class RealtimeRunner {
       );
     const activeClarification = state.mediaClarification;
     if (activeClarification?.status === "ACTIVE" && imageAttachments.length === 0) {
-      const selectedByLabel = selectedProductId(text, activeClarification.candidates);
-      const code = productCodeOnly(text);
-      const selectedByCode = code
-        ? activeClarification.candidates.find((candidate) =>
-            normalizeProductCode(candidate.productId) === code
-          )?.productId ?? null
-        : null;
-      const selected = selectedByLabel ?? selectedByCode;
+      const explicitCodes = [...new Set([
+        ...(productCodeOnly(text) ? [productCodeOnly(text)!] : []),
+        ...extractAdProductCodes(text),
+      ])];
+      if (explicitCodes.length === 1) {
+        const product = await this.exactProduct(explicitCodes[0]!);
+        if (product) {
+          return {
+            ...this.singleResolution(product, "TEXT_CODE"),
+            clarification: {
+              action: "CLEAR",
+              candidates: [],
+              attemptCount: activeClarification.attemptCount,
+              maxAttempts: activeClarification.maxAttempts,
+              reasonCode: "MEDIA_CLARIFICATION_EXPLICIT_CODE",
+            },
+          };
+        }
+      }
+      const selected = selectedProductId(text, activeClarification.candidates);
       if (selected) {
         const product = await this.exactProduct(selected);
         if (product) {
