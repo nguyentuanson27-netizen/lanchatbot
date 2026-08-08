@@ -78,7 +78,7 @@ function target(input: {
   event?: RealtimeDecisionEventPlan;
   metaPlanPresent?: boolean;
   handoffPlanPresent?: boolean;
-}) {
+} = {}) {
   return bf01ReconciliationTarget({
     policy: input.policy ?? "CLARIFY_RECONCILED_V1",
     runtime,

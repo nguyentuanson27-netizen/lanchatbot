@@ -401,11 +401,11 @@ function reconciledEvents(
   const sourceCode = clarification.source === "MODEL_REPAIR"
     ? "BF01_MODEL_CLARIFICATION_REPAIR"
     : "BF01_APPROVED_FALLBACK_USED";
-  return events.map((event) => {
+  return events.map((event): RealtimeDecisionEventPlan => {
     if (event.action !== "NO_REPLY") return event;
-    const convertedType =
+    const convertedType: RealtimeDecisionEventPlan["eventType"] =
       event.eventType === "NO_REPLY" || event.eventType === "NO_REPLY_SELECTED"
-        ? "CLARIFICATION_REQUESTED" as const
+        ? "CLARIFICATION_REQUESTED"
         : event.eventType;
     return {
       ...event,
@@ -431,14 +431,6 @@ function reconciledEvents(
           event.details.modelTokenUsage,
           clarification.modelTokenUsage,
         ),
-        modelUsageSource:
-          clarification.source === "MODEL_REPAIR"
-            ? "provider"
-            : event.details.modelUsageSource,
-        modelPath:
-          clarification.source === "MODEL_REPAIR"
-            ? "model"
-            : event.details.modelPath,
       },
     };
   });
