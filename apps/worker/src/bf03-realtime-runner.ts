@@ -11,6 +11,7 @@ import {
 import { createConversationState } from "@lana/conversation-engine";
 import {
   RealtimeRunner as Bf01RealtimeRunner,
+  explicitCustomerBusinessIntents,
   hasCustomerMeasurementSignal,
   type CanonicalChatHistoryPort,
   type RealtimeInboxPort,
@@ -26,6 +27,7 @@ import {
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import type { RealtimeGenerationQuota } from "./realtime-quota.js";
 import type { ChatHistoryPort } from "./redis-chat-history.js";
+import { extractAdProductCodes } from "./media-resolution.js";
 import { classifyPreSalePolicyIntent } from "./pre-sale-policy.js";
 
 export * from "./bf01-realtime-runner.js";
@@ -103,10 +105,23 @@ function hasSizeRequestEvidence(value: string, text: string): boolean {
   return false;
 }
 
+function hasIndependentBusinessFactRequest(value: string, text: string): boolean {
+  const intents = explicitCustomerBusinessIntents(value).filter((intent) =>
+    intent !== "SIZE"
+  );
+  if (intents.includes("STOCK") || intents.includes("ETA")) return true;
+  if (!intents.includes("PRICE")) return false;
+  return (
+    /\b(?:xin|hoi|bao|check|kiem tra|cho biet|muon biet|can biet)\b.{0,40}\b(?:gia|price)\b/u.test(text) ||
+    /\b(?:gia|price)\b.{0,40}\b(?:bao nhieu|the nao|la bao nhieu|may)\b/u.test(text)
+  );
+}
+
 /**
  * BF-03 is a temporary negative gate on the known legacy SIZE keyword path.
- * It never promotes another business intent. Clear size requests keep the
- * legacy path; only correction-shaped topic mentions are contained.
+ * It never promotes another business intent. Clear size requests and unrelated
+ * business-fact requests keep the normal path; only correction-shaped topic
+ * mentions are contained.
  *
  * Retirement dependency: DF-09 Context V2 evidence + atomic DF-11 legacy-regex
  * demotion/cutover.
@@ -122,7 +137,8 @@ export function bf03CorrectionContainmentDecision(
   if (
     !mentionsLegacySizeTopic(text) ||
     !hasClearCorrectionMarker(text) ||
-    hasSizeRequestEvidence(value, text)
+    hasSizeRequestEvidence(value, text) ||
+    hasIndependentBusinessFactRequest(value, text)
   ) {
     return { applies: false, reasonCodes: [] };
   }
@@ -149,7 +165,7 @@ export function bf03ContainProposal(
   proposal: AgentProposalV1,
   decision: Bf03CorrectionContainmentDecision,
 ): AgentProposalV1 {
-  if (!decision.applies || proposal.businessFactQuery.intent === "NONE") {
+  if (!decision.applies || proposal.businessFactQuery.intent !== "SIZE") {
     return proposal;
   }
   return {
@@ -346,12 +362,17 @@ function wrapInbox(
             routingOwner: latest.envelope.routing.routingOwner,
           }, runtime, resolver, options);
           const decision = correctionDecision(store);
-          return decision.applies
-            ? {
-                ...batch,
-                items: batch.items.map((item) => containedClaim(item, decision)),
-              }
-            : batch;
+          if (!decision.applies) return batch;
+          return {
+            ...batch,
+            items: batch.items.map((item) => containedClaim(
+              item,
+              bf03CorrectionContainmentDecision(
+                item.envelope.message.text ?? "",
+                store.correctionDialoguePolicy,
+              ),
+            )),
+          };
         };
       }
       return bindOrReturn(target, property);
@@ -387,6 +408,36 @@ function originalTextForOccurredAt(
   occurredAt: string,
 ): string | null {
   return store.rawMessages.find((message) => message.occurredAt === occurredAt)?.text ?? null;
+}
+
+function rawProductCode(store: Bf03ExecutionContext): string | null {
+  const codes = [...new Set(store.rawMessages.flatMap((message) =>
+    extractAdProductCodes(message.text)
+  ))];
+  return codes.length === 1 ? codes[0] ?? null : null;
+}
+
+function wrapProductSearch(
+  productSearch: RealtimeProductSearchPort,
+  scope: AsyncLocalStorage<Bf03ExecutionContext>,
+): RealtimeProductSearchPort {
+  return new Proxy(productSearch, {
+    get(target, property) {
+      if (property === "searchText") {
+        return async (...args: Parameters<RealtimeProductSearchPort["searchText"]>) => {
+          const store = scope.getStore();
+          const decision = store ? correctionDecision(store) : { applies: false, reasonCodes: [] };
+          const code = store && decision.applies ? rawProductCode(store) : null;
+          const value = args[0];
+          if (code && extractAdProductCodes(value).length === 0) {
+            return target.searchText(code);
+          }
+          return target.searchText(...args);
+        };
+      }
+      return bindOrReturn(target, property);
+    },
+  });
 }
 
 function bf03Instruction(
@@ -528,10 +579,9 @@ function wrapRuntime(
  * BF-03 is layered on the accepted BF-01/BF-02 runner. Before core processing,
  * an exact page/conversation-scoped policy resolution may substitute a neutral
  * classifier-only view for correction turns. Raw customer wording is restored
- * for model input and both history stores. This prevents the pre-model legacy
- * multi-fact/SIZE regex path from calling Size Engine or repeating facts while
- * leaving facts, ownership, guard, state, dedupe and side-effect authority in
- * the accepted runner.
+ * for model input and both history stores. Explicit product codes are still
+ * resolved through the verified product-search boundary, and native batches
+ * only neutralize correction-shaped items rather than unrelated messages.
  */
 export class RealtimeRunner extends Bf01RealtimeRunner {
   private readonly bf03Scope: AsyncLocalStorage<Bf03ExecutionContext>;
@@ -558,7 +608,7 @@ export class RealtimeRunner extends Bf01RealtimeRunner {
       wrapRuntime(runtime, scope),
       wrapModel(model, scope),
       factsReader,
-      productSearch,
+      wrapProductSearch(productSearch, scope),
       tags,
       options,
       quota,
