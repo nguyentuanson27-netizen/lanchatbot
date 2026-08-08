@@ -6,6 +6,9 @@ import {
   bf03ContainDecisionEvents,
   bf03ContainProposal,
   bf03CorrectionContainmentDecision,
+  bf03LegacyClassifierView,
+  explicitCustomerBusinessIntent,
+  explicitCustomerBusinessIntents,
 } from "./bf03-realtime-runner.js";
 
 function proposal(intent: AgentProposalV1["businessFactQuery"]["intent"]): AgentProposalV1 {
@@ -48,7 +51,7 @@ function event(
     intent,
     stage: "PRODUCT_MATCHED",
     action: "NO_REPLY",
-    occurredAt: "2026-08-09T00:00:00.000Z",
+    occurredAt: new Date("2026-08-09T00:00:00.000Z"),
     details: {} as RealtimeDecisionEventPlan["details"],
   };
 }
@@ -71,6 +74,20 @@ describe("BF-03 correction containment", () => {
         size: null,
         deliveryRegion: null,
       });
+  });
+
+  it("neutralizes the pre-model legacy fact classifier view", () => {
+    const decision = bf03CorrectionContainmentDecision(
+      "có giá vs size rồi mà",
+      "CORRECTION_CONTAINMENT_V1",
+    );
+    const classifierView = bf03LegacyClassifierView(
+      "có giá vs size rồi mà",
+      decision,
+    );
+    expect(classifierView).toBe("đã có thông tin đó rồi mà");
+    expect(explicitCustomerBusinessIntent(classifierView)).toBeNull();
+    expect(explicitCustomerBusinessIntents(classifierView)).toEqual([]);
   });
 
   it.each([
@@ -106,6 +123,8 @@ describe("BF-03 correction containment", () => {
       "LEGACY",
     );
     expect(decision.applies).toBe(false);
+    expect(bf03LegacyClassifierView("có giá vs size rồi mà", decision))
+      .toBe("có giá vs size rồi mà");
     expect(bf03ContainProposal(proposal("SIZE"), decision)).toEqual(proposal("SIZE"));
   });
 
