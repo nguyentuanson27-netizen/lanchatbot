@@ -33,14 +33,17 @@ export function policyPageChoices(
   data: PolicyControlData,
 ): string[] {
   const configured = concretePageIds(identity.policyPageIds);
-  if (configured.length > 0) return configured;
+  const scoped = concretePageIds(identity.pageScope);
+  const scopeAll = identity.pageScope.includes("ALL");
+  if (configured.length > 0) {
+    return scopeAll ? configured : configured.filter((pageId) => scoped.includes(pageId));
+  }
   if (!identity.policyPageIds.includes("ALL")) return [];
-  return [...new Set([
-    ...concretePageIds(identity.pageScope),
-    ...data.pointers
-      .map((pointer) => pointer.pageId)
-      .filter((pageId): pageId is string => isConcretePageId(pageId)),
-  ])];
+  const pointerPages = data.pointers
+    .map((pointer) => pointer.pageId)
+    .filter((pageId): pageId is string => isConcretePageId(pageId))
+    .filter((pageId) => scopeAll || scoped.includes(pageId));
+  return [...new Set([...scoped, ...pointerPages])];
 }
 
 export function resolvePolicyPageContext(
