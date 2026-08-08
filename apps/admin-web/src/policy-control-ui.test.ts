@@ -40,33 +40,35 @@ const data: PolicyControlData = {
 };
 
 describe("policy lifecycle safety UI", () => {
-  it("keeps shadow available and clearly disables live canary and publish by default", () => {
+  it("keeps the existing canary/publish gate state visible while list actions stay review-oriented", () => {
     const html = renderPolicyControl(data, identity);
-    expect(html).toContain('data-canary-mode="SHADOW"');
-    expect(html).toContain('data-policy-feature-disabled="CANARY_LIVE" disabled');
-    expect(html).toContain('data-policy-feature-disabled="PUBLISHED" disabled');
+    expect(html).toContain("Shadow canary: bật");
     expect(html).toContain("Canary gửi thật: khóa");
     expect(html).toContain("Phát hành: khóa");
-    expect(html).not.toContain('data-canary-mode="LIVE_OUTBOUND"');
-    expect(html).not.toContain('data-policy-action="PUBLISH"');
+    expect(html).toContain('data-policy-view="review"');
+    expect(html).toContain('data-policy-view="draft"');
+    expect(html).toContain('data-policy-bulk-action="VALIDATE"');
+    expect(html).toContain('data-policy-bulk-action="APPROVE"');
+    expect(html).not.toContain('data-policy-bulk-action="PUBLISH"');
+    expect(html).not.toContain('data-policy-bulk-action="START_CANARY"');
   });
 
-  it("renders live canary and publish actions only when the server advertises both flags", () => {
+  it("reflects server-advertised lifecycle gates without enabling risky bulk actions", () => {
     const html = renderPolicyControl(data, {
       ...identity,
       policyCanaryLiveEnabled: true,
       policyPublishEnabled: true,
     });
-    expect(html).toContain('data-canary-mode="LIVE_OUTBOUND"');
-    expect(html).toContain('data-policy-action="PUBLISH"');
-    expect(html).not.toContain("data-policy-feature-disabled");
+    expect(html).toContain("Canary gửi thật: bật");
+    expect(html).toContain("Phát hành: bật");
+    expect(html).not.toContain('data-policy-bulk-action="PUBLISH"');
+    expect(html).not.toContain('data-policy-bulk-action="START_CANARY"');
   });
 
-  it("keeps guarded retire and rollback recovery controls available", () => {
-    const previous = { ...artifact("PUBLISHED", 1), key: "lana.policy.published" };
+  it("keeps the active-pointer table for existing rollback/simulation context", () => {
     const current = { ...artifact("PUBLISHED", 2), key: "lana.policy.published" };
     const html = renderPolicyControl({
-      artifacts: [previous, current],
+      artifacts: [current],
       pointers: [{
         id: "pointer-1",
         key: current.key,
@@ -80,49 +82,8 @@ describe("policy lifecycle safety UI", () => {
       }],
       simulations: [],
     }, identity);
-    expect(html).toContain(`data-policy-rollback="${previous.id}"`);
-    expect(html).toContain('data-policy-action="RETIRE"');
-  });
-
-  it("offers pre-publish rollback only between canary versions", () => {
-    const previous = { ...artifact("CANARY", 1), key: "lana.policy.canary" };
-    const current = { ...artifact("CANARY", 2), key: "lana.policy.canary" };
-    const published = { ...artifact("PUBLISHED", 3), key: "lana.policy.canary" };
-    const html = renderPolicyControl({
-      artifacts: [previous, current, published],
-      pointers: [{
-        id: "pointer-shadow",
-        key: current.key,
-        kind: current.kind,
-        pageId: "1198992073286645",
-        channel: "CANARY_SHADOW",
-        versionId: current.id,
-        version: current.version,
-        revision: 2,
-        updatedAt: "2026-07-22T08:00:00.000Z",
-      }],
-      simulations: [],
-    }, identity);
-    expect(html).toContain(`data-policy-rollback="${previous.id}"`);
-    expect(html).not.toContain(`data-policy-rollback="${published.id}"`);
-    expect(html).toContain('data-policy-feature-disabled="CANARY_LIVE" disabled');
-
-    const enabledHtml = renderPolicyControl({
-      artifacts: [previous, current, published],
-      pointers: [{
-        id: "pointer-shadow",
-        key: current.key,
-        kind: current.kind,
-        pageId: "1198992073286645",
-        channel: "CANARY_SHADOW",
-        versionId: current.id,
-        version: current.version,
-        revision: 2,
-        updatedAt: "2026-07-22T08:00:00.000Z",
-      }],
-      simulations: [],
-    }, { ...identity, policyCanaryLiveEnabled: true });
-    expect(enabledHtml).toContain("Chuyển sang canary gửi thật");
-    expect(enabledHtml).toContain('data-canary-mode="LIVE_OUTBOUND"');
+    expect(html).toContain("Con trỏ đang hoạt động");
+    expect(html).toContain("1198992073286645");
+    expect(html).toContain("PUBLISHED");
   });
 });

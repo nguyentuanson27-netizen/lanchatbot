@@ -144,11 +144,12 @@ export function createPolicyReviewStore(
            target.revision AS target_revision,
            target.content AS target_content,
            target.content_hash AS target_content_hash,
+           target.updated_by_subject AS target_updated_by_subject,
            target.updated_at AS target_updated_at
          FROM admin_active_pointers_v p
          LEFT JOIN LATERAL (
            SELECT v.version_id, v.version_number, v.lifecycle, v.revision,
-                  v.content, v.content_hash, v.updated_at
+                  v.content, v.content_hash, v.updated_by_subject, v.updated_at
            FROM admin_artifact_versions_v v
            WHERE v.artifact_key = p.artifact_key
              AND v.artifact_kind = p.artifact_kind
@@ -174,11 +175,14 @@ export function createPolicyReviewStore(
           pointer: pointerSnapshot(row),
           target_version: policySafeRow({
             version_id: row.target_version_id,
+            artifact_key: row.artifact_key,
+            artifact_kind: row.artifact_kind,
             version_number: row.target_version_number,
             lifecycle: row.target_lifecycle,
             revision: row.target_revision,
             content: row.target_content,
             content_hash: row.target_content_hash,
+            updated_by_subject: row.target_updated_by_subject,
             updated_at: row.target_updated_at,
           }),
         }));
@@ -198,7 +202,7 @@ export function createPolicyReviewStore(
 
   return new Proxy(base as AdminStore & PolicyReviewStoreExtension, {
     get(target, property) {
-      if (property in extension) {
+      if (Object.prototype.hasOwnProperty.call(extension, property)) {
         const value = Reflect.get(extension, property, extension);
         return typeof value === "function" ? value.bind(extension) : value;
       }
@@ -247,7 +251,7 @@ export function buildPolicyArtifactListQuery(
   return {
     sort,
     values,
-    sql: `SELECT ${ARTIFACT_COLUMNS.replaceAll(/(^|\n\s*)([a-z_]+)/g, "$1v.$2")},
+    sql: `SELECT ${ARTIFACT_COLUMNS},
                  ${activeExpression} AS is_active
           FROM admin_artifact_versions_v v
           ${where}
@@ -283,8 +287,11 @@ export function decodePolicyCursor(
     ) {
       throw new Error("invalid-date");
     }
-    if (expectedSort === "updated_desc" && parsed.value === null) {
-      throw new Error("missing-date");
+    if (
+      (expectedSort === "updated_desc" || expectedSort === "artifact_key_asc") &&
+      parsed.value === null
+    ) {
+      throw new Error("missing-primary-value");
     }
     return parsed as PolicyCursor;
   } catch {
