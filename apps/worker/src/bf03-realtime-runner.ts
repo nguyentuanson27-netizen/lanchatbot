@@ -18,12 +18,12 @@ import {
   type RealtimeTagObservationProvider,
   type RealtimeVideoFrameExtractorPort,
   type RuntimeBehaviorModeResolverPort,
-} from "./bf02-realtime-runner.js";
+} from "./bf01-realtime-runner.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import type { RealtimeGenerationQuota } from "./realtime-quota.js";
 import type { ChatHistoryPort } from "./redis-chat-history.js";
 
-export * from "./bf02-realtime-runner.js";
+export * from "./bf01-realtime-runner.js";
 
 export const BF03_CORRECTION_REASON_CODE = "CORRECTION_CONTAINMENT" as const;
 
