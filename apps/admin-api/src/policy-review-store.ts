@@ -230,7 +230,7 @@ export function buildPolicyArtifactListQuery(
   if (query.artifactKey) addFilter(filters, values, "v.artifact_key", query.artifactKey);
   if (query.search) {
     values.push(`%${escapeLike(query.search)}%`);
-    filters.push(`v.artifact_key ILIKE $${values.length} ESCAPE '\\\\'`);
+    filters.push(`v.artifact_key ILIKE $${values.length} ESCAPE '!'`);
   }
 
   const scope = pointerScopePredicate(identity, values, "p");
@@ -407,7 +407,7 @@ function addFilter(
 }
 
 function escapeLike(value: string): string {
-  return value.replace(/[\\%_]/g, "\\$&");
+  return value.replace(/[!%_]/g, "!$&");
 }
 
 function policySafeRow(row: Record<string, unknown>): Record<string, unknown> {
