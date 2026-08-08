@@ -157,4 +157,31 @@ describe("policy review API client", () => {
       { versionId: VERSION_ID_B, expectedRevision: 4 },
     ])).rejects.toThrow("Invalid policy batch response");
   });
+
+  it("rejects a malformed success artifact instead of defaulting required fields", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      request_id: "request-5",
+      action: "APPROVE",
+      results: [{
+        version_id: VERSION_ID,
+        ok: true,
+        artifact: {
+          version_id: VERSION_ID,
+          artifact_kind: "SIZE_CHART",
+          version_number: 3,
+          lifecycle: "APPROVED",
+          revision: "4",
+          content: { kind: "SIZE_CHART" },
+          updated_by_subject: "owner",
+          updated_at: "2026-08-08T00:00:00.000Z",
+        },
+      }],
+      summary: { total: 1, succeeded: 1, failed: 0 },
+    })));
+
+    await expect(batchTransitionPolicyArtifacts("APPROVE", [{
+      versionId: VERSION_ID,
+      expectedRevision: 3,
+    }])).rejects.toThrow("Invalid policy batch response");
+  });
 });
