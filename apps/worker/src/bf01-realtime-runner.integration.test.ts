@@ -410,6 +410,16 @@ function hasBf01Reason(
   );
 }
 
+function unresolvedTerminalNoReplyEvents(
+  value: Parameters<RealtimeRuntimePort["commit"]>[0] | null,
+) {
+  return (value?.decisionEvents ?? []).filter((event) =>
+    event.eventType === "NO_REPLY" &&
+    event.action === "NO_REPLY" &&
+    !event.reasonCodes.some((reason) => reason.includes("SUPERSEDED"))
+  );
+}
+
 describe("BF-01 runner reconciliation", () => {
   it("commits exactly one guarded reply and matching audit hashes for the reported incident", async () => {
     const harness = createHarness();
@@ -426,6 +436,7 @@ describe("BF-01 runner reconciliation", () => {
       event.eventType === "CLARIFICATION_REQUESTED"
     );
     expect(clarificationEvents).toHaveLength(1);
+    expect(unresolvedTerminalNoReplyEvents(commit)).toEqual([]);
 
     const reconciled = commit?.decisionEvents?.find((event) =>
       event.reasonCodes.includes("BF01_ASK_CLARIFY_NO_REPLY_RECONCILED")
@@ -567,5 +578,6 @@ describe("BF-01 runner reconciliation", () => {
     );
     expect(clarificationEvents).toHaveLength(1);
     expect(new Set(clarificationEvents.map((event) => event.eventId)).size).toBe(1);
+    expect(unresolvedTerminalNoReplyEvents(commit)).toEqual([]);
   });
 });
