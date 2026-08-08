@@ -61,7 +61,7 @@ function proposal(
       deliveryRegion: null,
     },
     strategyAnalysis: {
-      need: "FOLLOW_UP_NEEDED",
+      need: "NOT_ENOUGH_CONTEXT",
       barrier: "NONE",
       decisionFactor: "UNKNOWN",
       recommendedStrategy: "STRATEGY_CLOSE",
