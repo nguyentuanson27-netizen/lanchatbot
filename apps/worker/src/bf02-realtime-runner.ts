@@ -59,6 +59,7 @@ interface Bf01ExecutionContext {
 interface Bf01ReconciliationTarget {
   readonly event: RealtimeDecisionEventPlan;
   readonly reasonCode: Bf01ReconciliationReasonCode;
+  readonly reconciledIntent: Bf01ModelBusinessFactIntent | null;
 }
 
 interface Bf01GuardedClarification {
@@ -415,15 +416,15 @@ async function generateClarification(
     : null;
 }
 
-function directQuestionEvidence(
-  event: RealtimeDecisionEventPlan,
+function directQuestionIntent(
   modelBusinessFactIntent: Bf01ModelBusinessFactIntent | null,
-): boolean {
-  return event.intent !== null &&
-    BF01_DIRECT_QUESTION_INTENTS.has(event.intent) &&
-    modelBusinessFactIntent !== null &&
-    modelBusinessFactIntent !== "NONE" &&
-    event.intent === modelBusinessFactIntent;
+): Bf01ModelBusinessFactIntent | null {
+  if (
+    modelBusinessFactIntent === null ||
+    modelBusinessFactIntent === "NONE" ||
+    !BF01_DIRECT_QUESTION_INTENTS.has(modelBusinessFactIntent)
+  ) return null;
+  return modelBusinessFactIntent;
 }
 
 function reconciliationEventRank(event: RealtimeDecisionEventPlan): number {
@@ -434,7 +435,7 @@ function reconciliationEventRank(event: RealtimeDecisionEventPlan): number {
 
 function reconciliationCandidate(
   event: RealtimeDecisionEventPlan,
-  modelBusinessFactIntent: Bf01ModelBusinessFactIntent | null,
+  semanticIntent: Bf01ModelBusinessFactIntent | null,
 ): boolean {
   if (event.action !== "NO_REPLY" || event.mode !== "LIVE") return false;
   const details = event.details;
@@ -443,8 +444,8 @@ function reconciliationCandidate(
     details.guardReasonCodes.length > 0 ||
     details.outboundMessageCount !== 0
   ) return false;
-  return details.wave2Strategy?.recommendedStrategy === "STRATEGY_ASK_CLARIFY" ||
-    directQuestionEvidence(event, modelBusinessFactIntent);
+  return semanticIntent !== null ||
+    details.wave2Strategy?.recommendedStrategy === "STRATEGY_ASK_CLARIFY";
 }
 
 export function bf01ReconciliationTarget(
@@ -477,22 +478,26 @@ export function bf01ReconciliationTarget(
     input.state.tagGateStatus === "BLOCKING"
   ) return null;
 
+  const semanticIntent = directQuestionIntent(input.modelBusinessFactIntent);
   const event = input.events
-    .filter((candidate) =>
-      reconciliationCandidate(candidate, input.modelBusinessFactIntent)
-    )
+    .filter((candidate) => reconciliationCandidate(candidate, semanticIntent))
     .sort((left, right) =>
       reconciliationEventRank(left) - reconciliationEventRank(right) ||
       left.eventId.localeCompare(right.eventId)
     )
     .at(0);
   if (!event) return null;
+  if (semanticIntent !== null) {
+    return {
+      event,
+      reasonCode: "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+      reconciledIntent: semanticIntent,
+    };
+  }
   return {
     event,
-    reasonCode:
-      event.details.wave2Strategy?.recommendedStrategy === "STRATEGY_ASK_CLARIFY"
-        ? "BF01_ASK_CLARIFY_NO_REPLY_RECONCILED"
-        : "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+    reasonCode: "BF01_ASK_CLARIFY_NO_REPLY_RECONCILED",
+    reconciledIntent: null,
   };
 }
 
@@ -521,6 +526,7 @@ function reconciledEvents(
   targetEventId: string,
   clarification: Bf01GeneratedClarification,
   reconciliationReasonCode: Bf01ReconciliationReasonCode,
+  reconciledIntent: Bf01ModelBusinessFactIntent | null,
 ): readonly RealtimeDecisionEventPlan[] {
   const replyHash = renderedReplyHash(clarification.text);
   const sourceCode = clarification.source === "MODEL_REPAIR"
@@ -541,6 +547,7 @@ function reconciledEvents(
       return {
         ...event,
         eventType: convertedType,
+        intent: reconciledIntent ?? event.intent,
         action: "REPLY",
         reasonCodes: [
           ...new Set([
@@ -646,6 +653,7 @@ function wrapRuntime(
               targetDecision.event.eventId,
               clarification,
               targetDecision.reasonCode,
+              targetDecision.reconciledIntent,
             ),
           };
           return target.commit(nextInput, nowArg);
