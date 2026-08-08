@@ -420,7 +420,7 @@ function normalizedDialogueText(value: string): string {
 
 function terminalDialogueClause(value: string): string {
   return value
-    .split(/[,;\n]+/u)
+    .split(/[,;\n]+|[.!?](?=\s+\S)/u)
     .map((clause) => clause.trim())
     .filter(Boolean)
     .at(-1) ?? value.trim();
@@ -452,7 +452,8 @@ function customerQuestionEvidence(value: string): boolean {
   if (
     /\b(?:gi|nao)(?:\s+(?:nua|vay|a|ha|nhi|nhe))?\s*[.!]*$/u.test(text)
   ) return true;
-  return /\b(?:co|con|duoc|giao|ship|mac|chon|lay|dat|doi)\b[^.!?]{0,80}\b(?:khong|ko|k|chua)\s*[.!?]*$/u.test(text);
+  const numericSafeText = text.replace(/(?<=\d)\.(?=\d)/gu, "");
+  return /\b(?:co|con|duoc|giao|ship|mac|chon|lay|dat|doi)\b[^.!?]{0,80}\b(?:khong|ko|k|chua)\s*[.!?]*$/u.test(numericSafeText);
 }
 
 function directQuestionEvidence(
