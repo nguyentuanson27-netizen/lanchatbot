@@ -171,7 +171,7 @@ export function createPolicyReviewStore(
 
       const activePointers = pointers.rows.map(pointerSnapshot);
       const rollbackCandidates = pointers.rows
-        .filter((row) => typeof row.target_version_id === "string")
+        .filter(isConcreteRollbackCandidateRow)
         .map((row) => ({
           pointer: pointerSnapshot(row),
           target_version: policySafeRow({
@@ -374,6 +374,12 @@ function pointerScopePredicate(
   if (identity.pageScope.length === 0) return `${alias}.page_id IS NULL`;
   values.push([...identity.pageScope]);
   return `(${alias}.page_id IS NULL OR ${alias}.page_id = ANY($${values.length}::text[]))`;
+}
+
+export function isConcreteRollbackCandidateRow(row: Record<string, unknown>): boolean {
+  return typeof row.target_version_id === "string" &&
+    typeof row.page_id === "string" &&
+    row.page_id.length > 0;
 }
 
 function pointerSnapshot(row: Record<string, unknown>): Record<string, unknown> {
