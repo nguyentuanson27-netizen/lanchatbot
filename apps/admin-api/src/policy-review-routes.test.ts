@@ -74,7 +74,7 @@ function makeStore() {
     },
     async getArtifactVersion(_identity: AdminIdentity, versionId: string) {
       return versionId === VERSION_B
-        ? { version_id: VERSION_B, lifecycle: "DRAFT", revision: 9 }
+        ? { version_id: VERSION_B, lifecycle: "DRAFT", revision: "9" }
         : null;
     },
   } as unknown as ReviewStore;
