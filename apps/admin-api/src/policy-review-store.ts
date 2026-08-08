@@ -71,7 +71,7 @@ export function createPolicyReviewStore(
     query_timeout: 10_000,
   });
 
-  const extension: Pick<AdminStore, "listArtifactVersions" | "listActivePointers" | "close"> &
+  const extension: Pick<AdminStore, "listArtifactVersions" | "getArtifactVersion" | "listActivePointers" | "close"> &
     PolicyReviewStoreExtension = {
     async listArtifactVersions(identity, query) {
       const reviewQuery = query as PolicyReviewArtifactQuery;
@@ -86,6 +86,11 @@ export function createPolicyReviewStore(
           ? encodePolicyCursor(cursorFromRow(last, built.sort))
           : null,
       };
+    },
+
+    async getArtifactVersion(identity, versionId) {
+      const artifact = await base.getArtifactVersion(identity, versionId);
+      return artifact ? policySafeRow(artifact) : null;
     },
 
     async listActivePointers(identity) {
@@ -413,8 +418,21 @@ function escapeLike(value: string): string {
 function policySafeRow(row: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(Object.entries(row).map(([key, value]) => [
     key,
-    value instanceof Date ? value.toISOString() : value,
+    key === "revision"
+      ? revisionValue(value)
+      : value instanceof Date
+        ? value.toISOString()
+        : value,
   ]));
+}
+
+function revisionValue(value: unknown): number {
+  if (typeof value === "number" && Number.isSafeInteger(value) && value >= 0) return value;
+  if (typeof value === "string" && /^(?:0|[1-9]\d*)$/u.test(value)) {
+    const parsed = Number(value);
+    if (Number.isSafeInteger(parsed)) return parsed;
+  }
+  throw new Error("Invalid PostgreSQL revision value");
 }
 
 function toIso(value: unknown): string {
