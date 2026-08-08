@@ -89,7 +89,7 @@ function target(input: {
     mode: "LIVE",
     sendEnabled: true,
     recipientId: "customer-1",
-    customerText: "có biến thể gì nữa",
+    modelBusinessFactIntent: null,
   });
 }
 
