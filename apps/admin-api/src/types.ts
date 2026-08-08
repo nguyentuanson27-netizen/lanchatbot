@@ -102,6 +102,9 @@ export interface ArtifactVersionQuery extends PageCursorQuery {
   readonly artifactKind?: AdminArtifactKindV1 | undefined;
   readonly lifecycle?: AdminArtifactLifecycleV1 | undefined;
   readonly artifactKey?: string | undefined;
+  readonly search?: string | undefined;
+  readonly active?: "any" | "active" | "inactive" | undefined;
+  readonly sort?: "updated_desc" | "validated_oldest" | "artifact_key_asc" | undefined;
 }
 
 export interface CreateArtifactVersionInput {
@@ -338,6 +341,8 @@ export class AdminAuthError extends Error {
 export class AdminQueryError extends Error {
   constructor(readonly code:
     | "ADMIN_QUERY_INVALID"
+    | "ADMIN_POLICY_CURSOR_INVALID"
+    | "ADMIN_POLICY_SORT_INVALID"
     | "ADMIN_PAGE_NOT_ALLOWED"
     | "ADMIN_COMMAND_INVALID"
     | "ADMIN_IDEMPOTENCY_CONFLICT"

@@ -127,6 +127,9 @@ interface ArtifactQuerystring extends ListQuerystring {
   readonly artifact_kind?: string;
   readonly lifecycle?: string;
   readonly artifact_key?: string;
+  readonly search?: string;
+  readonly active?: string;
+  readonly sort?: string;
 }
 
 interface CreateArtifactBody {
@@ -146,6 +149,16 @@ interface TransitionArtifactBody {
   readonly canary_mode?: unknown;
 }
 
+interface BatchTransitionArtifactBody {
+  readonly action?: unknown;
+  readonly items?: unknown;
+}
+
+interface BatchTransitionArtifactItem {
+  readonly versionId: string;
+  readonly expectedRevision: number;
+}
+
 interface RollbackArtifactBody {
   readonly artifact_key?: unknown;
   readonly artifact_kind?: unknown;
@@ -153,6 +166,13 @@ interface RollbackArtifactBody {
   readonly channel?: unknown;
   readonly target_version_id?: unknown;
   readonly expected_pointer_revision?: unknown;
+}
+
+interface PolicyReviewStore extends AdminStore {
+  getArtifactReviewContext(
+    identity: AdminIdentity,
+    versionId: string,
+  ): Promise<Record<string, unknown> | null>;
 }
 
 export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance {
@@ -745,6 +765,22 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
   );
 
   app.get<{ Params: { id: string } }>(
+    "/admin/v1/policy/artifacts/:id/review-context",
+    async (request, reply) => {
+      requirePolicyControl(options);
+      const reviewStore = options.store as AdminStore & Partial<PolicyReviewStore>;
+      if (typeof reviewStore.getArtifactReviewContext !== "function") {
+        throw new AdminQueryError("ADMIN_POLICY_CONTROL_UNAVAILABLE");
+      }
+      const context = await reviewStore.getArtifactReviewContext(
+        requireIdentity(request),
+        requiredUuid(request.params.id),
+      );
+      return context ? { review_context: context } : notFound(reply, request.id);
+    },
+  );
+
+  app.get<{ Params: { id: string } }>(
     "/admin/v1/policy/artifacts/:id/events",
     async (request) => {
       requirePolicyControl(options);
@@ -799,6 +835,74 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
         },
       );
       return result ? { artifact: result } : notFound(reply, request.id);
+    },
+  );
+
+  app.post<{ Body: BatchTransitionArtifactBody }>(
+    "/admin/v1/policy/artifacts/batch-transitions",
+    async (request) => {
+      requirePolicyControl(options);
+      const identity = requireIdentity(request);
+      const input = parseBatchTransitionArtifactBody(request.body);
+      requireBatchArtifactRole(identity, input.action);
+      const correlationId = randomUUID();
+      const results: Array<Record<string, unknown>> = [];
+      for (const item of input.items) {
+        try {
+          const artifact = await options.store.transitionArtifactVersion(
+            identity,
+            item.versionId,
+            {
+              expectedRevision: item.expectedRevision,
+              action: input.action,
+              pageId: null,
+              canaryMode: null,
+              correlationId,
+            },
+          );
+          results.push(artifact
+            ? { version_id: item.versionId, ok: true, artifact }
+            : { version_id: item.versionId, ok: false, error_code: "ADMIN_NOT_FOUND" });
+        } catch (error) {
+          if (error instanceof AdminQueryError) {
+            const currentRevision = error.code === "ADMIN_ARTIFACT_VERSION_CONFLICT"
+              ? await readCurrentArtifactRevision(options.store, identity, item.versionId)
+              : undefined;
+            results.push({
+              version_id: item.versionId,
+              ok: false,
+              error_code: error.code,
+              ...(currentRevision === undefined ? {} : { current_revision: currentRevision }),
+            });
+            continue;
+          }
+          process.stderr.write(`${JSON.stringify({
+            level: "error",
+            service: "admin-api",
+            event: "policy_batch_item_failed",
+            request_id: request.id,
+            batch_request_id: correlationId,
+            action: input.action,
+            error_name: error instanceof Error ? error.name : "UnknownError",
+          })}\n`);
+          results.push({
+            version_id: item.versionId,
+            ok: false,
+            error_code: "ADMIN_INTERNAL_ERROR",
+          });
+        }
+      }
+      const succeeded = results.filter((item) => item.ok === true).length;
+      return {
+        request_id: correlationId,
+        action: input.action,
+        results,
+        summary: {
+          total: results.length,
+          succeeded,
+          failed: results.length - succeeded,
+        },
+      };
     },
   );
 
@@ -998,12 +1102,9 @@ function registerDatasetReviewRoutes(
       const split = request.query.split
         ? datasetEnum(SplitV1Schema, request.query.split)
         : undefined;
-      // HOLDOUT is a privileged benchmark. Lower roles must not inspect its
-      // conversations through the review queue.
       if (split === "HOLDOUT" && !datasetRoleAtLeast(identity, "DATASET_ADMIN")) {
         return reply.code(403).send(errorBody("ADMIN_DATASET_FORBIDDEN", request.id));
       }
-      // Only reviewers (ANNOTATOR+) take a lease; viewers see the queue read-only.
       const acquireLease = datasetRoleAtLeast(identity, adjudication ? "ADJUDICATOR" : "ANNOTATOR");
       const queue = await service.reviewQueue(requiredUuid(request.params.id), {
         reviewerSubject: identity.subject,
@@ -1082,7 +1183,6 @@ function registerDatasetReviewRoutes(
         return reply.code(403).send(errorBody("ADMIN_DATASET_FORBIDDEN", request.id));
       }
       const splits = datasetExportSplits(request.query.splits);
-      // The holdout benchmark is privileged — only DATASET_ADMIN may export it.
       if (splits.includes("HOLDOUT") && !datasetRoleAtLeast(identity, "DATASET_ADMIN")) {
         return reply.code(403).send(errorBody("ADMIN_DATASET_FORBIDDEN", request.id));
       }
@@ -1210,7 +1310,6 @@ function registerDatasetReviewRoutes(
   app.post<{ Params: { id: string }; Body: DatasetReviewBody }>(
     "/admin/v1/dataset-annotations/:id/review",
     async (request, reply) => {
-      // REMOVE is an adjudication-grade action; ACCEPT/REJECT/EDIT need ANNOTATOR.
       const action = datasetReviewAction(request.body?.action);
       const minimum: DatasetRoleV1 = action === "REMOVE" ? "ADJUDICATOR" : "ANNOTATOR";
       const service = requireService(request, reply, minimum);
@@ -1553,7 +1652,68 @@ function parseArtifactQuery(query: ArtifactQuerystring) {
     artifactKind: kind?.data,
     lifecycle: lifecycle?.data,
     artifactKey: optionalToken(query.artifact_key, 128),
+    search: optionalSearch(query.search, 120),
+    active: optionalEnum(query.active, ["any", "active", "inactive"] as const) ?? "any",
+    sort: optionalEnum(
+      query.sort,
+      ["updated_desc", "validated_oldest", "artifact_key_asc"] as const,
+    ) ?? "updated_desc",
   };
+}
+
+function parseBatchTransitionArtifactBody(body: BatchTransitionArtifactBody | undefined): {
+  action: "VALIDATE" | "APPROVE";
+  items: readonly BatchTransitionArtifactItem[];
+} {
+  if (!body || typeof body !== "object") {
+    throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+  }
+  if (body.action !== "VALIDATE" && body.action !== "APPROVE") {
+    throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+  }
+  if (!Array.isArray(body.items) || body.items.length < 1 || body.items.length > 100) {
+    throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+  }
+  const seen = new Set<string>();
+  const items = body.items.map((raw) => {
+    if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
+      throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+    }
+    const item = raw as Record<string, unknown>;
+    const versionId = requiredArtifactUuid(item.version_id);
+    if (seen.has(versionId)) throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+    seen.add(versionId);
+    return {
+      versionId,
+      expectedRevision: requiredRevision(item.expected_revision),
+    };
+  });
+  return { action: body.action, items };
+}
+
+function requireBatchArtifactRole(
+  identity: AdminIdentity,
+  action: "VALIDATE" | "APPROVE",
+): void {
+  const allowed = action === "VALIDATE"
+    ? identity.role === "OWNER" || identity.role === "EDITOR"
+    : identity.role === "OWNER" || identity.role === "APPROVER";
+  if (!allowed) throw new AdminQueryError("ADMIN_POLICY_FORBIDDEN");
+}
+
+async function readCurrentArtifactRevision(
+  store: AdminStore,
+  identity: AdminIdentity,
+  versionId: string,
+): Promise<number | undefined> {
+  try {
+    const current = await store.getArtifactVersion(identity, versionId);
+    return current && typeof current.revision === "number" && Number.isSafeInteger(current.revision)
+      ? current.revision
+      : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function parseArtifactContent(value: unknown) {
@@ -1564,6 +1724,16 @@ function parseArtifactContent(value: unknown) {
 
 function requiredArtifactKey(value: unknown): string {
   if (typeof value !== "string" || !/^[A-Za-z0-9._:-]{1,128}$/.test(value)) {
+    throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
+  }
+  return value;
+}
+
+function requiredArtifactUuid(value: unknown): string {
+  if (
+    typeof value !== "string" ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+  ) {
     throw new AdminQueryError("ADMIN_ARTIFACT_INVALID");
   }
   return value;

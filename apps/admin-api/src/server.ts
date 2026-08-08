@@ -2,6 +2,7 @@ import { createAdminApi } from "./app.js";
 import { InternalAssertionAuthenticator } from "./auth.js";
 import { adminConfigFromEnvironment } from "./config.js";
 import { PostgresAdminStore } from "./store.js";
+import { createPolicyReviewStore } from "./policy-review-store.js";
 import { LocalEnvelopeCipher } from "@lana/database";
 import { createProductMediaService } from "./product-media.js";
 import { createDatasetReviewService } from "./dataset-review-service.js";
@@ -21,11 +22,12 @@ if (config.controlEnabled && !config.controlDatabaseUrl) {
 const identityCipher = config.realtimeDataKey
   ? new LocalEnvelopeCipher(config.realtimeDataKey, config.realtimeDataKeyRef)
   : undefined;
-const store = new PostgresAdminStore(
+const baseStore = new PostgresAdminStore(
   config.databaseUrl,
   config.controlDatabaseUrl,
   identityCipher,
 );
+const store = createPolicyReviewStore(baseStore, config.databaseUrl);
 const authenticator = new InternalAssertionAuthenticator(
   {
     secret: config.internalAuthSecret,
