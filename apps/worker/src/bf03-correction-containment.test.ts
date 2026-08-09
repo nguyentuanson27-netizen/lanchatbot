@@ -97,6 +97,12 @@ describe("BF-03 correction containment", () => {
     "có giá vs size rồi mà?",
     "em nói giá và size rồi mà",
     "giá + size chị có rồi nhé",
+    "em nói rồi, size không cần hỏi lại",
+    "em đã nói rồi: size M",
+    "chị đổi size rồi mà",
+    "em noi roi size khong can hoi lai",
+    "em da noi roi: size M",
+    "chi doi size roi ma",
   ])("contains clear correction phrasing: %s", (text) => {
     expect(bf03CorrectionContainmentDecision(
       text,
@@ -112,6 +118,14 @@ describe("BF-03 correction containment", () => {
     "đã có size M chưa?",
     "size rồi mà size nào vừa chị?",
     "chị muốn đổi size M",
+    "em chưa nói size nào",
+    "em không nói size M",
+    "em nói rồi nhưng chị chưa biết size nào vừa",
+    "không chắc size M có vừa không",
+    "size S, M, L bên em có đủ không?",
+    "chị chọn size M",
+    "vòng ngực 88 eo 68 thì mặc size gì",
+    "90-60-90",
   ])("preserves genuine size-request recall: %s", (text) => {
     expect(bf03CorrectionContainmentDecision(
       text,
@@ -120,14 +134,25 @@ describe("BF-03 correction containment", () => {
   });
 
   it.each([
-    "size có rồi mà, cho chị xin giá",
-    "size có rồi mà, kiểm tra còn hàng giúp chị",
-    "size có rồi mà, khi nào giao đến chị",
-  ])("does not contain an independent business-fact request: %s", (text) => {
-    expect(bf03CorrectionContainmentDecision(
+    ["size có rồi mà, cho chị xin giá", ["PRICE"]],
+    ["cho chị xin giá; size có rồi mà", ["PRICE"]],
+    ["size co roi ma cho chi xin gia", ["PRICE"]],
+    ["size có rồi mà, kiểm tra còn hàng giúp chị", ["STOCK"]],
+    ["kiểm tra còn hàng giúp chị; size có rồi mà", ["STOCK"]],
+    ["size có rồi mà, khi nào giao đến chị", ["ETA"]],
+    ["khi nào giao đến chị, size có rồi mà", ["ETA"]],
+  ])("suppresses false SIZE while preserving an independent fact: %s", (
+    text,
+    expectedIntents,
+  ) => {
+    const decision = bf03CorrectionContainmentDecision(
       text,
       "CORRECTION_CONTAINMENT_V1",
-    ).applies).toBe(false);
+    );
+    expect(decision.applies).toBe(true);
+    const classifierView = bf03LegacyClassifierView(text, decision);
+    expect(explicitCustomerBusinessIntents(classifierView)).toEqual(expectedIntents);
+    expect(explicitCustomerBusinessIntents(classifierView)).not.toContain("SIZE");
   });
 
   it("is inert under LEGACY policy", () => {

@@ -118,7 +118,14 @@ function policyResolution(
   };
 }
 
-function claimFor(text: string, index: number) {
+function claimFor(
+  text: string,
+  index: number,
+  overrides: {
+    readonly isEcho?: boolean;
+    readonly envelopeSchemaVersion?: number;
+  } = {},
+) {
   const sequence = 151 + index;
   const eventKey = `meta:${pageId}:message:bf03-${index}`;
   return {
@@ -132,7 +139,7 @@ function claimFor(text: string, index: number) {
     attemptCount: 1,
     leaseToken: "68c52ee9-9348-481d-a366-a6178618da4c",
     envelope: {
-      schemaVersion: 1 as const,
+      schemaVersion: (overrides.envelopeSchemaVersion ?? 1) as 1,
       customerSendEnabled: false as const,
       routing: {
         mode: "APP" as const,
@@ -151,7 +158,7 @@ function claimFor(text: string, index: number) {
         senderId: "customer-1",
         conversationId: conversationHash,
         occurredAt,
-        isEcho: false,
+        isEcho: overrides.isEcho ?? false,
         appId: null,
         text,
         attachments: [],
@@ -166,9 +173,19 @@ function createHarness(input: {
   policy?: "LEGACY" | "CORRECTION_CONTAINMENT_V1";
   currentProductId?: string | null;
   modelIntent?: AgentProposalV1["businessFactQuery"]["intent"];
+  isEcho?: boolean;
+  ownMetaMessage?: boolean;
+  envelopeSchemaVersion?: number;
+  batchDeliveries?: number;
+  batchCurrentSequence?: readonly boolean[];
 }) {
   const policy = input.policy ?? "CORRECTION_CONTAINMENT_V1";
-  const claims = input.messages.map(claimFor);
+  const claims = input.messages.map((text, index) => claimFor(text, index, {
+    ...(input.isEcho === undefined ? {} : { isEcho: input.isEcho }),
+    ...(input.envelopeSchemaVersion === undefined
+      ? {}
+      : { envelopeSchemaVersion: input.envelopeSchemaVersion }),
+  }));
   const lastClaim = claims.at(-1)!;
   const base = createConversationState({
     conversationId: "43820fd4-daa7-4917-9835-a38cb55120e6",
@@ -188,29 +205,42 @@ function createHarness(input: {
 
   const complete = vi.fn(async () => true);
   const completeBatch = vi.fn(async () => true);
+  const retry = vi.fn(async () => true);
+  const retryBatch = vi.fn(async () => true);
+  const claimNextBatch = vi.fn();
+  const batchValue = {
+    pageId,
+    conversationHash,
+    generation: 3,
+    leaseToken: lastClaim.leaseToken,
+    inboxIds: claims.map(({ inboxId }) => inboxId),
+    evaluationGroupId: "bf03-batch",
+    eventKind: "CUSTOMER" as const,
+    firstReceiveSequence: claims[0]!.receiveSequence,
+    lastReceiveSequence: lastClaim.receiveSequence,
+    attemptCount: 1,
+    items: claims,
+  };
+  for (let index = 0; index < (input.batchDeliveries ?? 1); index += 1) {
+    claimNextBatch.mockResolvedValueOnce(batchValue);
+  }
+  claimNextBatch.mockResolvedValueOnce(null);
+  let currentCheck = 0;
+  const isBatchCurrent = vi.fn(async () => {
+    const sequence = input.batchCurrentSequence ?? [true];
+    const value = sequence[Math.min(currentCheck, sequence.length - 1)] ?? true;
+    currentCheck += 1;
+    return value;
+  });
   const inbox: RealtimeInboxPort = input.nativeBatch
     ? {
         claimNext: vi.fn(async () => null),
-        claimNextBatch: vi.fn()
-          .mockResolvedValueOnce({
-            pageId,
-            conversationHash,
-            generation: 3,
-            leaseToken: lastClaim.leaseToken,
-            inboxIds: claims.map(({ inboxId }) => inboxId),
-            evaluationGroupId: "bf03-batch",
-            eventKind: "CUSTOMER" as const,
-            firstReceiveSequence: claims[0]!.receiveSequence,
-            lastReceiveSequence: lastClaim.receiveSequence,
-            attemptCount: 1,
-            items: claims,
-          })
-          .mockResolvedValueOnce(null),
+        claimNextBatch,
         complete,
         completeBatch,
-        isBatchCurrent: vi.fn(async () => true),
-        retry: vi.fn(async () => true),
-        retryBatch: vi.fn(async () => true),
+        isBatchCurrent,
+        retry,
+        retryBatch,
         failPermanent: vi.fn(async () => true),
         failBatchPermanent: vi.fn(async () => true),
       }
@@ -219,13 +249,12 @@ function createHarness(input: {
           .mockResolvedValueOnce(lastClaim)
           .mockResolvedValueOnce(null),
         complete,
-        retry: vi.fn(async () => true),
+        retry,
         failPermanent: vi.fn(async () => true),
       };
 
   let committed: Parameters<RealtimeRuntimePort["commit"]>[0] | null = null;
-  const runtime: RealtimeRuntimePort = {
-    loadOrCreate: vi.fn(async () => ({
+  const loadOrCreate = vi.fn(async () => ({
       conversationId: state.conversationId,
       pageId,
       customerHash: conversationHash,
@@ -234,8 +263,8 @@ function createHarness(input: {
       routingOwner: "APP" as const,
       appSendEnabled: true,
       killSwitch: false,
-    })),
-    commit: vi.fn(async (value) => {
+    }));
+  const commit = vi.fn(async (value: Parameters<RealtimeRuntimePort["commit"]>[0]) => {
       committed = value;
       return {
         stateCommitted: true,
@@ -246,8 +275,14 @@ function createHarness(input: {
         reasonCodes: [],
         inboxBatchStatus: input.nativeBatch ? "COMMITTED" as const : "NOT_REQUESTED" as const,
       };
-    }),
-    linkProviderConversation: vi.fn(async () => undefined),
+    });
+  const linkProviderConversation = vi.fn(async () => undefined);
+  const isOwnMetaMessage = vi.fn(async () => input.ownMetaMessage ?? false);
+  const runtime: RealtimeRuntimePort = {
+    loadOrCreate,
+    commit,
+    linkProviderConversation,
+    isOwnMetaMessage,
   };
 
   const generatedContexts: Parameters<RealtimeModelPort["generate"]>[0][] = [];
@@ -322,9 +357,8 @@ function createHarness(input: {
       reasonCode: null,
     })),
   };
-  const policyResolver: RuntimePolicyResolverPort = {
-    resolve: vi.fn(async () => policyResolution(policy)),
-  };
+  const resolvePolicy = vi.fn(async () => policyResolution(policy));
+  const policyResolver: RuntimePolicyResolverPort = { resolve: resolvePolicy };
 
   const historyAppends: Parameters<ChatHistoryPort["append"]>[1][] = [];
   const history: ChatHistoryPort = {
@@ -376,6 +410,16 @@ function createHarness(input: {
     canonicalInbound,
     searchText,
     resolveFacts,
+    loadOrCreate,
+    commit,
+    linkProviderConversation,
+    isOwnMetaMessage,
+    resolvePolicy,
+    observeTags: tags.observe,
+    complete,
+    completeBatch,
+    retry,
+    retryBatch,
     committed: () => committed,
   };
 }
@@ -403,6 +447,19 @@ function hasBf03Evidence(
   return (value?.decisionEvents ?? []).some((event) =>
     event.reasonCodes.includes(BF03_CORRECTION_REASON_CODE)
   );
+}
+
+function expectNoDomainEffects(harness: ReturnType<typeof createHarness>): void {
+  expect(harness.loadOrCreate).not.toHaveBeenCalled();
+  expect(harness.linkProviderConversation).not.toHaveBeenCalled();
+  expect(harness.resolvePolicy).not.toHaveBeenCalled();
+  expect(harness.observeTags).not.toHaveBeenCalled();
+  expect(harness.commit).not.toHaveBeenCalled();
+  expect(harness.resolveFacts).not.toHaveBeenCalled();
+  expect(harness.searchText).not.toHaveBeenCalled();
+  expect(harness.generatedContexts).toHaveLength(0);
+  expect(harness.historyAppends).toHaveLength(0);
+  expect(harness.canonicalInbound).toHaveLength(0);
 }
 
 describe("BF-03 RealtimeRunner", () => {
@@ -497,9 +554,15 @@ describe("BF-03 RealtimeRunner", () => {
 
   it.each([
     ["PRICE" as const, "size có rồi mà, cho chị xin giá"],
+    ["PRICE" as const, "cho chị xin giá; size có rồi mà"],
     ["STOCK" as const, "size có rồi mà, còn hàng không em"],
+    ["STOCK" as const, "còn hàng không em; size có rồi mà"],
     ["ETA" as const, "size có rồi mà, khi nào giao tới chị"],
-  ])("keeps mixed %s requests on the normal fact path", async (intent, text) => {
+    ["ETA" as const, "khi nào giao tới chị; size có rồi mà"],
+  ])("suppresses false SIZE while keeping mixed %s on the fact path", async (
+    intent,
+    text,
+  ) => {
     const harness = createHarness({
       messages: [text],
       currentProductId: "SD398",
@@ -507,9 +570,80 @@ describe("BF-03 RealtimeRunner", () => {
     });
 
     expect(await harness.runner.processOne()).toBe(true);
-    expect(harness.resolveFacts).toHaveBeenCalled();
-    expect(hasBf03Instruction(modelContext(harness))).toBe(false);
-    expect(hasBf03Evidence(harness.committed())).toBe(false);
+    expect(harness.resolveFacts).toHaveBeenCalledTimes(1);
+    expect(harness.resolveFacts).toHaveBeenCalledWith(expect.objectContaining({ intent }));
+    if (harness.generatedContexts.length > 0) {
+      expect(hasBf03Instruction(modelContext(harness))).toBe(true);
+    }
+    expect(hasBf03Evidence(harness.committed())).toBe(true);
+    expect(harness.committed()?.decisionEvents ?? []).not.toContainEqual(
+      expect.objectContaining({ eventType: "SIZE_CONSULT_STARTED" }),
+    );
+  });
+
+  it("does not resolve policy or mutate conversation state for an own Meta echo", async () => {
+    const harness = createHarness({
+      messages: ["size có rồi mà"],
+      isEcho: true,
+      ownMetaMessage: true,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(harness.isOwnMetaMessage).toHaveBeenCalledTimes(1);
+    expectNoDomainEffects(harness);
+    expect(harness.complete).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not resolve policy or mutate domain state for a malformed envelope", async () => {
+    const harness = createHarness({
+      messages: ["size có rồi mà"],
+      envelopeSchemaVersion: 2,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expectNoDomainEffects(harness);
+    expect(harness.retry).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not resolve policy or mutate domain state for a stale native generation", async () => {
+    const harness = createHarness({
+      messages: ["size có rồi mà"],
+      nativeBatch: true,
+      batchCurrentSequence: [false],
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expectNoDomainEffects(harness);
+    expect(harness.completeBatch).toHaveBeenCalledWith(
+      expect.objectContaining({ generation: 3 }),
+      true,
+    );
+  });
+
+  it("keeps replay after a committed lost ACK side-effect free", async () => {
+    const harness = createHarness({
+      messages: ["size có rồi mà"],
+      nativeBatch: true,
+      currentProductId: "SD398",
+      batchDeliveries: 2,
+      batchCurrentSequence: [true, false],
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(harness.commit).toHaveBeenCalledTimes(1);
+    expect(harness.resolvePolicy).toHaveBeenCalledTimes(1);
+    expect(harness.generatedContexts).toHaveLength(1);
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(harness.commit).toHaveBeenCalledTimes(1);
+    expect(harness.resolvePolicy).toHaveBeenCalledTimes(1);
+    expect(harness.loadOrCreate).toHaveBeenCalledTimes(1);
+    expect(harness.generatedContexts).toHaveLength(1);
+    expect(harness.resolveFacts).not.toHaveBeenCalled();
+    expect(harness.completeBatch).toHaveBeenCalledWith(
+      expect.objectContaining({ generation: 3 }),
+      true,
+    );
   });
 
   it("keeps LEGACY behavior inert", async () => {

@@ -2,13 +2,16 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import type {
   AgentProposalV1,
   CorrectionDialoguePolicyV1,
+  InboundMessageV1,
 } from "@lana/contracts";
-import type { RuntimePolicyResolverPort } from "@lana/chat-runtime";
+import type {
+  RuntimePolicyResolution,
+  RuntimePolicyResolverPort,
+} from "@lana/chat-runtime";
 import {
   redactAnalyticsMessage,
   type RealtimeDecisionEventPlan,
 } from "@lana/database";
-import { createConversationState } from "@lana/conversation-engine";
 import {
   RealtimeRunner as Bf01RealtimeRunner,
   explicitCustomerBusinessIntents,
@@ -28,7 +31,6 @@ import type { BusinessFactsReader } from "./redis-business-facts.js";
 import type { RealtimeGenerationQuota } from "./realtime-quota.js";
 import type { ChatHistoryPort } from "./redis-chat-history.js";
 import { extractAdProductCodes } from "./media-resolution.js";
-import { classifyPreSalePolicyIntent } from "./pre-sale-policy.js";
 
 export * from "./bf01-realtime-runner.js";
 
@@ -44,9 +46,7 @@ type Bf03PolicyResolution = Awaited<
 >;
 
 interface Bf03RawMessage {
-  readonly eventKey: string;
   readonly occurredAt: string;
-  readonly messageId: string | null;
   readonly text: string;
 }
 
@@ -54,7 +54,6 @@ interface Bf03ExecutionContext {
   customerText: string;
   correctionDialoguePolicy: CorrectionDialoguePolicyV1;
   rawMessages: readonly Bf03RawMessage[];
-  preResolvedPolicy: Bf03PolicyResolution | undefined;
 }
 
 function bindOrReturn<T extends object>(
@@ -83,37 +82,120 @@ function hasClearCorrectionMarker(text: string): boolean {
   return (
     /\broi\s+(?:ma|a|nha|nhe)\b/u.test(text) ||
     /\bda\s+co\b.{0,80}\broi\b/u.test(text) ||
+    /\b(?:em|chi|minh|toi)\s+(?:da\s+)?(?:noi|bao|nhac)\b.{0,80}\broi\b/u.test(text) ||
     /\b(?:gia|size|sz|kich co|co nao|mac co)\b.{0,60}\broi\b/u.test(text)
   );
 }
 
-function hasSizeRequestEvidence(value: string, text: string): boolean {
+function hasStandaloneCorrectionLead(text: string): boolean {
+  return /\b(?:em|chi|minh|toi)\s+(?:da\s+)?(?:noi|bao|nhac)\b.{0,32}\broi\b/u.test(text);
+}
+
+function hasStrongSizeRequestEvidence(value: string, text: string): boolean {
   if (hasCustomerMeasurementSignal(value)) return true;
+  const requestText = text.replace(
+    /\bkhong\s+can\s+(?:hoi|nhac|noi)\s+lai\b/gu,
+    "",
+  );
   if (
-    /\b(size|sz|kich co|co nao|mac co)\b.{0,48}\b(nao|gi|bao nhieu|may|vua|hop|nen|chon|lay|doi|muon|can|tu van|recommend|hay)\b/u.test(text)
+    /\b(?:chua|khong|chang)\s+(?:duoc\s+)?(?:noi|bao|nhac|co|biet|chac)\b/u.test(requestText) &&
+    !/\bkhong\s+can\s+hoi\s+lai\b/u.test(text)
   ) return true;
   if (
-    /\b(nao|gi|bao nhieu|may|vua|hop|nen|chon|lay|doi|muon|can|tu van|recommend)\b.{0,48}\b(size|sz|kich co|co nao|mac co)\b/u.test(text)
+    /\b(?:khong biet|khong chac|phan van|do du|chua biet)\b/u.test(requestText)
+  ) return true;
+  if (/\b(?:(?:chua|khong)\s+dung|sai)\b/u.test(requestText)) return true;
+  if (
+    /\b(size|sz|kich co|co nao|mac co)\b.{0,48}\b(nao|gi|bao nhieu|may|vua|hop|nen|chon|lay|muon|can|tu van|recommend|hay)\b/u.test(requestText)
   ) return true;
   if (
-    /\b(?:size|sz)\s*(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\b/u.test(text)
+    /\b(nao|gi|bao nhieu|may|vua|hop|nen|chon|lay|muon|can|tu van|recommend)\b.{0,48}\b(size|sz|kich co|co nao|mac co)\b/u.test(requestText)
   ) return true;
-  if (
-    /\b(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\s+(?:hay|or|voi)\s+(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\b/u.test(text)
-  ) return true;
+  if (/\bmuon\s+doi\b.{0,32}\b(?:size|sz|kich co)\b/u.test(requestText)) return true;
+  if (/\b(?:size|sz)\b.{0,40}\b(?:con|co)\s+(?:hang|du)\b/u.test(requestText)) return true;
   return false;
 }
 
-function hasIndependentBusinessFactRequest(value: string, text: string): boolean {
-  const intents = explicitCustomerBusinessIntents(value).filter((intent) =>
-    intent !== "SIZE"
-  );
-  if (intents.includes("STOCK") || intents.includes("ETA")) return true;
-  if (!intents.includes("PRICE")) return false;
+function hasExplicitSizeChoice(text: string): boolean {
   return (
-    /\b(?:xin|hoi|bao|check|kiem tra|cho biet|muon biet|can biet)\b.{0,40}\b(?:gia|price)\b/u.test(text) ||
-    /\b(?:gia|price)\b.{0,40}\b(?:bao nhieu|the nao|la bao nhieu|may)\b/u.test(text)
+    /\b(?:size|sz)\s*(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\b/u.test(text) ||
+    /\b(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\s+(?:hay|or|voi)\s+(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\b/u.test(text)
   );
+}
+
+const BF03_CLAUSE_SEPARATOR = /([,;.!?\n]+|\s+(?:nhưng|nhung|tuy nhiên|tuy nhien)\s+)/giu;
+
+interface Bf03ClauseAnalysis {
+  readonly parts: readonly string[];
+  readonly containedPartIndexes: ReadonlySet<number>;
+  readonly genuineSizeRequest: boolean;
+}
+
+function analyzeCorrectionClauses(value: string): Bf03ClauseAnalysis {
+  const parts = value.split(BF03_CLAUSE_SEPARATOR);
+  const containedPartIndexes = new Set<number>();
+  let genuineSizeRequest = false;
+  let pendingCorrectionLead = false;
+  for (let index = 0; index < parts.length; index += 1) {
+    const part = parts[index] ?? "";
+    if (!part.trim()) continue;
+    const text = asciiFold(part);
+    if (/^[,;.!?\n]+$/u.test(part.trim())) continue;
+    if (/^(?:nhung|tuy nhien)$/u.test(text)) {
+      pendingCorrectionLead = false;
+      continue;
+    }
+    if (!mentionsLegacySizeTopic(text)) {
+      pendingCorrectionLead = hasStandaloneCorrectionLead(text);
+      continue;
+    }
+
+    const correctionContext = hasClearCorrectionMarker(text) || pendingCorrectionLead;
+    if (correctionContext) {
+      if (hasStrongSizeRequestEvidence(part, text)) {
+        genuineSizeRequest = true;
+      } else {
+        containedPartIndexes.add(index);
+      }
+    } else if (hasStrongSizeRequestEvidence(part, text) || hasExplicitSizeChoice(text)) {
+      genuineSizeRequest = true;
+    }
+    pendingCorrectionLead = false;
+  }
+  return { parts, containedPartIndexes, genuineSizeRequest };
+}
+
+function independentRequestIntents(value: string): readonly Exclude<
+  ReturnType<typeof explicitCustomerBusinessIntents>[number],
+  "SIZE"
+>[] {
+  const text = asciiFold(value);
+  const intents: ("PRICE" | "STOCK" | "ETA")[] = [];
+  if (
+    /\b(?:xin|hoi|bao|check|kiem tra|cho biet|muon biet|can biet)\b.{0,48}\b(?:gia|price)\b/u.test(text) ||
+    /\b(?:gia|price)\b.{0,48}\b(?:bao nhieu|the nao|la bao nhieu|may)\b/u.test(text)
+  ) intents.push("PRICE");
+  if (
+    /\b(?:kiem tra|check)\b.{0,48}\b(?:con|het|ton|co hang|san hang|available)\b/u.test(text) ||
+    /\b(?:con hang|het hang|ton kho|co hang|san hang|available)\b.{0,24}\b(?:khong|khong em|giup|nhe|a)?\b/u.test(text)
+  ) intents.push("STOCK");
+  if (/\b(?:bao lau|khi nao|may ngay|ngay nao|giao den|nhan hang|eta)\b/u.test(text)) {
+    intents.push("ETA");
+  }
+  return intents;
+}
+
+function classifierClauseView(value: string): string {
+  const independentIntents = independentRequestIntents(value);
+  if (independentIntents.length === 0) return "đã có thông tin đó rồi mà";
+  return value
+    .replace(/\b[A-Za-z]{1,6}\s*[-_.]?\s*\d{1,8}[A-Za-z0-9]*\b/gu, " ")
+    .replace(
+      /\b(?:size|sz)(?:\s*(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50))?\b|kích\s*cỡ|kich\s*co|cỡ\s*nào|co\s*nao|mặc\s*cỡ|mac\s*co/giu,
+      "thông tin đó",
+    )
+    .replace(/\s+/gu, " ")
+    .trim();
 }
 
 /**
@@ -132,13 +214,8 @@ export function bf03CorrectionContainmentDecision(
   if (policy !== "CORRECTION_CONTAINMENT_V1") {
     return { applies: false, reasonCodes: [] };
   }
-  const text = asciiFold(value);
-  if (
-    !mentionsLegacySizeTopic(text) ||
-    !hasClearCorrectionMarker(text) ||
-    hasSizeRequestEvidence(value, text) ||
-    hasIndependentBusinessFactRequest(value, text)
-  ) {
+  const analysis = analyzeCorrectionClauses(value);
+  if (analysis.containedPartIndexes.size === 0 || analysis.genuineSizeRequest) {
     return { applies: false, reasonCodes: [] };
   }
   return {
@@ -157,7 +234,11 @@ export function bf03LegacyClassifierView(
   value: string,
   decision: Bf03CorrectionContainmentDecision,
 ): string {
-  return decision.applies ? "đã có thông tin đó rồi mà" : value;
+  if (!decision.applies) return value;
+  const analysis = analyzeCorrectionClauses(value);
+  return analysis.parts.map((part, index) =>
+    analysis.containedPartIndexes.has(index) ? classifierClauseView(part) : part
+  ).join("");
 }
 
 export function bf03ContainProposal(
@@ -208,9 +289,7 @@ function captureRawMessages(
     readonly receiveSequence: number;
     readonly envelope: {
       readonly message: {
-        readonly eventKey: string;
         readonly occurredAt: string;
-        readonly messageId: string | null;
         readonly text: string | null;
       };
     };
@@ -220,9 +299,7 @@ function captureRawMessages(
     left.receiveSequence - right.receiveSequence
   );
   store.rawMessages = ordered.map(({ envelope }) => ({
-    eventKey: envelope.message.eventKey,
     occurredAt: envelope.message.occurredAt,
-    messageId: envelope.message.messageId,
     text: envelope.message.text ?? "",
   }));
   store.customerText = store.rawMessages
@@ -232,100 +309,16 @@ function captureRawMessages(
 }
 
 function correctionPolicyFromResolution(
-  resolution: Bf03PolicyResolution,
+  resolution: Bf03PolicyResolution | null,
 ): CorrectionDialoguePolicyV1 {
-  const livePolicy = resolution.bundle?.sideEffects === "LIVE_OUTBOUND";
+  const livePolicy = resolution?.bundle?.sideEffects === "LIVE_OUTBOUND";
   return livePolicy
-    ? resolution.bundle?.artifacts.closingStrategy?.correctionDialoguePolicy ?? "LEGACY"
+    ? resolution?.bundle?.artifacts.closingStrategy?.correctionDialoguePolicy ?? "LEGACY"
     : "LEGACY";
-}
-
-async function preResolveCorrectionPolicy(
-  store: Bf03ExecutionContext,
-  input: {
-    readonly pageId: string;
-    readonly conversationHash: string;
-    readonly routingOwner: "N8N" | "APP";
-  },
-  runtime: RealtimeRuntimePort,
-  resolver: RuntimePolicyResolverPort | undefined,
-  options: RealtimeRunnerOptions,
-): Promise<void> {
-  if (!resolver || !store.customerText.trim()) return;
-  const candidate = bf03CorrectionContainmentDecision(
-    store.customerText,
-    "CORRECTION_CONTAINMENT_V1",
-  );
-  if (!candidate.applies) return;
-
-  const now = new Date();
-  try {
-    const record = await runtime.loadOrCreate(
-      input.pageId,
-      input.conversationHash,
-      input.routingOwner,
-      (conversationId) => createConversationState({
-        conversationId,
-        routingOwner: input.routingOwner,
-        now,
-      }),
-      now,
-    );
-    const channel = options.policyChannel ?? "CANARY_SHADOW";
-    const preSalePolicyIntent = classifyPreSalePolicyIntent(store.customerText);
-    const resolution = await resolver.resolve({
-      pageId: input.pageId,
-      channel,
-      ...(channel === "CANARY_SHADOW" || preSalePolicyIntent !== null
-        ? {}
-        : {
-            pin: {
-              scopeType: "SALES_EPISODE" as const,
-              scopeId: `${record.conversationId}:${channel}`,
-            },
-          }),
-      now,
-    });
-    store.preResolvedPolicy = resolution;
-    store.correctionDialoguePolicy = correctionPolicyFromResolution(resolution);
-  } catch {
-    // Pre-resolution is an optimization for the legacy classifier view, never
-    // an authorization fallback. On any read/pin error BF-03 stays LEGACY and
-    // the core resolver still gets its normal chance to resolve later.
-    store.preResolvedPolicy = undefined;
-    store.correctionDialoguePolicy = "LEGACY";
-  }
-}
-
-function containedClaim<T extends {
-  readonly envelope: {
-    readonly message: { readonly text: string | null };
-  };
-}>(
-  claim: T,
-  decision: Bf03CorrectionContainmentDecision,
-): T {
-  if (!decision.applies) return claim;
-  return {
-    ...claim,
-    envelope: {
-      ...claim.envelope,
-      message: {
-        ...claim.envelope.message,
-        text: bf03LegacyClassifierView(
-          claim.envelope.message.text ?? "",
-          decision,
-        ),
-      },
-    },
-  };
 }
 
 function wrapInbox(
   inbox: RealtimeInboxPort,
-  runtime: RealtimeRuntimePort,
-  resolver: RuntimePolicyResolverPort | undefined,
-  options: RealtimeRunnerOptions,
   scope: AsyncLocalStorage<Bf03ExecutionContext>,
 ): RealtimeInboxPort {
   return new Proxy(inbox, {
@@ -336,12 +329,7 @@ function wrapInbox(
           const store = scope.getStore();
           if (!claim || !store) return claim;
           captureRawMessages(store, [claim]);
-          await preResolveCorrectionPolicy(store, {
-            pageId: claim.pageId,
-            conversationHash: claim.conversationHash,
-            routingOwner: claim.envelope.routing.routingOwner,
-          }, runtime, resolver, options);
-          return containedClaim(claim, correctionDecision(store));
+          return claim;
         };
       }
       if (property === "claimNextBatch") {
@@ -351,50 +339,7 @@ function wrapInbox(
           const store = scope.getStore();
           if (!batch || !store) return batch;
           captureRawMessages(store, batch.items);
-          const latest = [...batch.items]
-            .sort((left, right) => left.receiveSequence - right.receiveSequence)
-            .at(-1);
-          if (!latest) return batch;
-          await preResolveCorrectionPolicy(store, {
-            pageId: latest.pageId,
-            conversationHash: latest.conversationHash,
-            routingOwner: latest.envelope.routing.routingOwner,
-          }, runtime, resolver, options);
-          const decision = correctionDecision(store);
-          if (!decision.applies) return batch;
-          return {
-            ...batch,
-            items: batch.items.map((item) => containedClaim(
-              item,
-              bf03CorrectionContainmentDecision(
-                item.envelope.message.text ?? "",
-                store.correctionDialoguePolicy,
-              ),
-            )),
-          };
-        };
-      }
-      return bindOrReturn(target, property);
-    },
-  });
-}
-
-function wrapPolicyResolver(
-  resolver: RuntimePolicyResolverPort | undefined,
-  scope: AsyncLocalStorage<Bf03ExecutionContext>,
-): RuntimePolicyResolverPort | undefined {
-  if (!resolver) return undefined;
-  return new Proxy(resolver, {
-    get(target, property) {
-      if (property === "resolve") {
-        return async (...args: Parameters<RuntimePolicyResolverPort["resolve"]>) => {
-          const store = scope.getStore();
-          const resolution = store?.preResolvedPolicy ?? await target.resolve(...args);
-          if (store) {
-            store.correctionDialoguePolicy = correctionPolicyFromResolution(resolution);
-            store.preResolvedPolicy = undefined;
-          }
-          return resolution;
+          return batch;
         };
       }
       return bindOrReturn(target, property);
@@ -508,59 +453,6 @@ function wrapModel(
   return wrapped;
 }
 
-function wrapHistory(
-  history: ChatHistoryPort | undefined,
-  scope: AsyncLocalStorage<Bf03ExecutionContext>,
-): ChatHistoryPort | undefined {
-  if (!history) return undefined;
-  return new Proxy(history, {
-    get(target, property) {
-      if (property === "append") {
-        return async (...args: Parameters<ChatHistoryPort["append"]>) => {
-          const [conversationId, entry] = args;
-          const store = scope.getStore();
-          const raw = store?.rawMessages.find((message) =>
-            message.eventKey === entry.identityKey
-          )?.text;
-          return target.append(
-            conversationId,
-            raw === undefined
-              ? entry
-              : { ...entry, text: redactAnalyticsMessage(raw).text },
-          );
-        };
-      }
-      return bindOrReturn(target, property);
-    },
-  });
-}
-
-function wrapCanonicalHistory(
-  history: CanonicalChatHistoryPort | undefined,
-  scope: AsyncLocalStorage<Bf03ExecutionContext>,
-): CanonicalChatHistoryPort | undefined {
-  if (!history) return undefined;
-  return new Proxy(history, {
-    get(target, property) {
-      if (property === "recordInboundCustomerMessage") {
-        return async (...args: Parameters<CanonicalChatHistoryPort["recordInboundCustomerMessage"]>) => {
-          const [input] = args;
-          const store = scope.getStore();
-          const raw = store?.rawMessages.find((message) =>
-            message.messageId === input.providerMessageId ||
-            `event:${message.eventKey}` === input.providerMessageId
-          )?.text;
-          return target.recordInboundCustomerMessage({
-            ...input,
-            ...(raw === undefined ? {} : { text: raw }),
-          });
-        };
-      }
-      return bindOrReturn(target, property);
-    },
-  });
-}
-
 function wrapRuntime(
   runtime: RealtimeRuntimePort,
   scope: AsyncLocalStorage<Bf03ExecutionContext>,
@@ -599,6 +491,28 @@ function wrapRuntime(
 export class RealtimeRunner extends Bf01RealtimeRunner {
   private readonly bf03Scope: AsyncLocalStorage<Bf03ExecutionContext>;
 
+  protected override transformInboundAfterPolicyResolution(
+    message: InboundMessageV1,
+    resolution: RuntimePolicyResolution | null,
+  ): InboundMessageV1 {
+    const store = this.bf03Scope.getStore();
+    if (!store) return message;
+    store.correctionDialoguePolicy = correctionPolicyFromResolution(resolution);
+    const decision = correctionDecision(store);
+    if (!decision.applies) return message;
+    const text = store.rawMessages
+      .map(({ text: rawText }) => {
+        const itemDecision = bf03CorrectionContainmentDecision(
+          rawText,
+          store.correctionDialoguePolicy,
+        );
+        return bf03LegacyClassifierView(rawText, itemDecision).trim();
+      })
+      .filter(Boolean)
+      .join("\n");
+    return { ...message, text: text || null };
+  }
+
   constructor(
     inbox: RealtimeInboxPort,
     runtime: RealtimeRuntimePort,
@@ -617,7 +531,7 @@ export class RealtimeRunner extends Bf01RealtimeRunner {
   ) {
     const scope = new AsyncLocalStorage<Bf03ExecutionContext>();
     super(
-      wrapInbox(inbox, runtime, policyResolver, options, scope),
+      wrapInbox(inbox, scope),
       wrapRuntime(runtime, scope),
       wrapModel(model, scope),
       factsReader,
@@ -625,10 +539,10 @@ export class RealtimeRunner extends Bf01RealtimeRunner {
       tags,
       options,
       quota,
-      wrapHistory(history, scope),
-      wrapCanonicalHistory(canonicalHistory, scope),
+      history,
+      canonicalHistory,
       videoFrames,
-      wrapPolicyResolver(policyResolver, scope),
+      policyResolver,
       mediaRecognition,
       behaviorModeResolver,
     );
@@ -641,7 +555,6 @@ export class RealtimeRunner extends Bf01RealtimeRunner {
         customerText: "",
         correctionDialoguePolicy: "LEGACY",
         rawMessages: [],
-        preResolvedPolicy: undefined,
       },
       () => super.processOne(),
     );
