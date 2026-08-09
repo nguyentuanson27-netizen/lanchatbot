@@ -120,3 +120,21 @@ A green CI run does not replace the browser walkthrough for UI behavior. If brow
 7. Rebase/retarget Phase 3 onto the appropriate merged baseline and review it independently.
 
 No phase or slice is considered complete merely because the combined prototype existed on an earlier branch.
+
+## Production release boundary — r6.1
+
+The six UI/API phase PRs above remain source-only changes and did not individually
+authorize production mutation. Production rollout is owned by the separate
+`20260809-admin-policy-review-r6.1` release boundary after the per-service Admin
+image selector fix in PR #160 and the runtime/build dependency security patches
+in PR #162.
+
+That release may recreate exactly `admin-api` and `admin-web` through the reviewed
+scripts under `deploy/releases/20260809-admin-policy-review-r6.1`. It must preserve
+the current `admin-simulation-worker` image and every other container identity.
+The release has no migration, backfill, Messenger production test, routing change,
+page-allowlist change, behavior-mode change or secret change.
+
+Cutover remains blocked until a browser or human walkthrough record, exhaustive
+deployment and rollback service evidence, target artifact smoke, Compose config,
+health/readiness, rollback readiness and fresh runtime-state parity all pass.
