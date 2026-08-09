@@ -70,5 +70,53 @@ describe("BF-07 multi-product clarification", () => {
       accepted: false,
       reasonCodes: ["MULTI_PRODUCT_UNVERIFIED_PRODUCT"],
     });
+
+    expect(verifyMultiProductClarificationProposal(
+      proposal("Chị thấy SD375 đẹp hơn SD398 phải không ạ?"),
+      ["SD375", "SD398"],
+    )).toEqual({
+      accepted: false,
+      reasonCodes: expect.arrayContaining([
+        "MULTI_PRODUCT_DRAFT_BOUNDARY_INVALID",
+        "MULTI_PRODUCT_UNVERIFIED_COMMERCIAL_CLAIM",
+      ]),
+    });
+
+    expect(verifyMultiProductClarificationProposal({
+      ...proposal("Chị muốn xem mẫu SD375 hay SD398 trước ạ?"),
+      productId: "SD375",
+      attachments: ["https://example.test/unverified.jpg"],
+    }, ["SD375", "SD398"])).toEqual({
+      accepted: false,
+      reasonCodes: ["MULTI_PRODUCT_DRAFT_BOUNDARY_INVALID"],
+    });
+
+    expect(verifyMultiProductClarificationProposal(
+      proposal("Chị muốn xem SD375? Chị muốn xem SD398?"),
+      ["SD375", "SD398"],
+    )).toEqual({
+      accepted: false,
+      reasonCodes: ["MULTI_PRODUCT_DRAFT_BOUNDARY_INVALID"],
+    });
+
+    expect(verifyMultiProductClarificationProposal(
+      proposal("Chị muốn xem mẫu AB12X hay SD398 trước ạ?"),
+      ["AB12X", "SD398"],
+    )).toEqual({ accepted: true, reasonCodes: [] });
+
+    expect(verifyMultiProductClarificationProposal(
+      proposal("Trong hai mẫu SD375 và SD398, chị ưng mẫu nào để em hỗ trợ tiếp ạ?"),
+      ["SD375", "SD398"],
+    )).toEqual({ accepted: true, reasonCodes: [] });
+  });
+
+  it("fails closed before a model call when the numbered candidate limit is exceeded", () => {
+    expect(decideMultiProductResolution({
+      policy: "CLARIFY_V1",
+      productIds: Array.from({ length: 11 }, (_, index) => `SD${100 + index}`),
+    })).toMatchObject({
+      disposition: "FAIL_CLOSED",
+      reasonCodes: ["MULTI_PRODUCT_CANDIDATE_LIMIT_EXCEEDED"],
+    });
   });
 });

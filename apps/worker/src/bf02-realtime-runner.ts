@@ -191,6 +191,10 @@ function wrapModel(
   if (model.repairSizeClaimDraft) {
     wrapped.repairSizeClaimDraft = model.repairSizeClaimDraft.bind(model);
   }
+  if (model.draftMultiProductClarification) {
+    wrapped.draftMultiProductClarification =
+      model.draftMultiProductClarification.bind(model);
+  }
   return wrapped;
 }
 

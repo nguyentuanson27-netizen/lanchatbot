@@ -779,7 +779,7 @@ describe("BF-02 realtime context fallback", () => {
     expect(commit?.state.currentProductId).toBe("SD375");
   });
 
-  it("clears active media clarification when a fresh explicit code is supplied", async () => {
+  it("replays BF-07/BF-02 explicit-code resolution from active multi-image clarification", async () => {
     const harness = createHarness({
       messages: [{ text: "xin giá SD398" }],
       products: [product398, product375],

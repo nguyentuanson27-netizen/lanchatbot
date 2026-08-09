@@ -33,6 +33,7 @@ import {
   type HandoffReasonV2,
   type InboundMessageV1,
   type MediaPartialResolutionPolicyV1,
+  type MultiProductResolutionPolicyV1,
   type MeasurementKind,
   type ProductComponentRole,
   type ProductFactsV2,
@@ -97,6 +98,11 @@ import {
   type MediaAnalysisItem,
   type MediaPartialResolutionPolicy,
 } from "./media-resolution.js";
+import {
+  decideMultiProductResolution,
+  type MultiProductResolutionPolicy,
+  verifyMultiProductClarificationProposal,
+} from "./multi-product-clarification.js";
 import type {
   RealtimeMediaRecognition,
   RealtimeMediaRecognitionService,
@@ -169,6 +175,16 @@ function activeMediaPartialResolutionPolicy(
   if (resolution?.bundle?.sideEffects !== "LIVE_OUTBOUND") return "LEGACY";
   const selected: MediaPartialResolutionPolicyV1 | undefined =
     resolution.bundle.artifacts?.closingStrategy?.mediaPartialResolutionPolicy;
+  return selected ?? "LEGACY";
+}
+
+function activeMultiProductResolutionPolicy(
+  resolution: RuntimePolicyResolution | null,
+): MultiProductResolutionPolicy {
+  const bundle = outboundRuntimePolicy(resolution);
+  if (!bundle) return "LEGACY";
+  const selected: MultiProductResolutionPolicyV1 | undefined =
+    bundle.artifacts?.closingStrategy?.multiProductResolutionPolicy;
   return selected ?? "LEGACY";
 }
 
@@ -1826,6 +1842,7 @@ export interface RealtimeModelPort {
   groundWithFacts: VertexShadowModel["groundWithFacts"];
   groundDraftWithFacts?: VertexShadowModel["groundDraftWithFacts"];
   repairSizeClaimDraft?: VertexShadowModel["repairSizeClaimDraft"];
+  draftMultiProductClarification?: VertexShadowModel["draftMultiProductClarification"];
 }
 
 export interface CanonicalChatHistoryPort {
@@ -2812,7 +2829,15 @@ export class RealtimeRunner {
       hasClarification:
         resolution.clarification !== null && resolution.clarification.action !== "CLEAR",
     });
-    let resolvedProduct = resolution.primary;
+    const multiProductDecision = decideMultiProductResolution({
+      policy: activeMultiProductResolutionPolicy(policyResolution),
+      productIds: resolution.origin === "MEDIA"
+        ? resolution.products.map((product) => product.productId)
+        : [],
+    });
+    let resolvedProduct = multiProductDecision.disposition !== "CONTINUE"
+      ? null
+      : resolution.primary;
     let productResolutionOrigin: ProductResolution["origin"] = resolution.origin;
     let suppressStateContinuation = false;
     if (
@@ -2865,7 +2890,7 @@ export class RealtimeRunner {
         ...(resolvedProduct ? {} : { productSelections: [] }),
       };
     }
-    let mediaClarificationHandled = false;
+    let clarificationHandled = false;
     const stateClarification =
       resolution.clarification && (
         resolution.clarification.action === "CLEAR" ||
@@ -3021,7 +3046,7 @@ export class RealtimeRunner {
           },
         })
       : null;
-    const imageRequest = imageIntent !== null && resolution.primary !== null
+    const imageRequest = imageIntent !== null && resolvedProduct !== null
       ? mediaV2
         ? {
             intent: imageIntent,
@@ -3087,7 +3112,7 @@ export class RealtimeRunner {
         resolution.clarification &&
         resolution.clarification.action !== "CLEAR"
       ) {
-        mediaClarificationHandled = true;
+        clarificationHandled = true;
         if (resolution.clarification.action === "EXHAUSTED") {
           handoffGuardReasonCodes = [
             "MEDIA_CLARIFICATION_EXHAUSTED",
@@ -3121,6 +3146,103 @@ export class RealtimeRunner {
         );
         nextState = transitioned.state;
         handoff = transitioned.handoff;
+      } else if (multiProductDecision.disposition === "FAIL_CLOSED") {
+        handoffGuardReasonCodes = multiProductDecision.reasonCodes;
+        const transitioned = applySilentHandoff(
+          nextState,
+          "PRODUCT_TOOL_ERROR",
+          nextState.revision,
+          nextState.lastFence,
+          now,
+        );
+        nextState = transitioned.state;
+        handoff = transitioned.handoff;
+      } else if (multiProductDecision.disposition === "CLARIFY_SELECTION") {
+        const selections = multiProductDecision.productIds.map((productId, index) => ({
+          label: `SET_${index + 1}`,
+          productId,
+        }));
+        nextState = {
+          ...nextState,
+          currentProductId: null,
+          productSelections: selections,
+          mediaClarification: null,
+        };
+        let rejectionReasonCodes: readonly string[] = [];
+        if (!this.model.draftMultiProductClarification) {
+          rejectionReasonCodes = ["MULTI_PRODUCT_CLARIFICATION_MODEL_UNAVAILABLE"];
+        } else {
+          const quotaAvailable = !this.quota || await this.quota.reserve(claim.pageId, now);
+          if (!quotaAvailable) {
+            rejectionReasonCodes = ["MULTI_PRODUCT_CLARIFICATION_QUOTA_DENIED"];
+          } else {
+            for (let attempt = 0; attempt < 2; attempt += 1) {
+              try {
+                modelCalled = true;
+                const drafted = await this.model.draftMultiProductClarification(
+                  multiProductDecision.productIds,
+                  this.options.promptVersion,
+                  rejectionReasonCodes,
+                );
+                modelVersion = drafted.modelVersion;
+                modelLatencyMs += drafted.latencyMs;
+                modelPromptTokens += drafted.tokenUsage.promptTokenCount ?? 0;
+                modelOutputTokens += drafted.tokenUsage.candidatesTokenCount ?? 0;
+                modelTotalTokens += drafted.tokenUsage.totalTokenCount ??
+                  (drafted.tokenUsage.promptTokenCount ?? 0) +
+                    (drafted.tokenUsage.candidatesTokenCount ?? 0);
+                hasModelTokenUsage ||= Object.values(drafted.tokenUsage).some(
+                  (value) => typeof value === "number" && Number.isFinite(value),
+                );
+                const verification = verifyMultiProductClarificationProposal(
+                  drafted.proposal,
+                  multiProductDecision.productIds,
+                );
+                if (verification.accepted) {
+                  proposal = drafted.proposal;
+                  clarificationHandled = true;
+                  nextState = {
+                    ...nextState,
+                    mediaClarification: {
+                      status: "ACTIVE",
+                      candidates: selections,
+                      attemptCount: 0,
+                      maxAttempts: 3,
+                      reasonCode: "MULTI_PRODUCT_SELECTION_REQUIRED",
+                      openedAt: now.toISOString(),
+                    },
+                  };
+                  if (this.options.mode === "LIVE" && this.options.sendEnabled) {
+                    metaMessages = [{ kind: "TEXT", text: drafted.proposal.reply }];
+                  }
+                  break;
+                }
+                rejectionReasonCodes = verification.reasonCodes;
+              } catch {
+                rejectionReasonCodes = ["MULTI_PRODUCT_CLARIFICATION_MODEL_FAILED"];
+                break;
+              }
+            }
+          }
+        }
+        if (!proposal) {
+          handoffGuardReasonCodes = [
+            ...new Set([
+              ...multiProductDecision.reasonCodes,
+              ...rejectionReasonCodes,
+              "MULTI_PRODUCT_CLARIFICATION_REJECTED",
+            ]),
+          ];
+          const transitioned = applySilentHandoff(
+            nextState,
+            "PRODUCT_TOOL_ERROR",
+            nextState.revision,
+            nextState.lastFence,
+            now,
+          );
+          nextState = transitioned.state;
+          handoff = transitioned.handoff;
+        }
       } else if (
         unresolvedProductRequiresHandoff(message.text ?? "", {
           isEcho: message.isEcho,
@@ -4114,7 +4236,7 @@ export class RealtimeRunner {
       salesCycleRecord &&
       !message.isEcho &&
       preSalePolicyIntent === null &&
-      !mediaClarificationHandled &&
+      !clarificationHandled &&
       handoff === null
     ) {
       const sales = await evaluateRealtimeSalesCycle({
@@ -4403,6 +4525,15 @@ export class RealtimeRunner {
           wave2StrategyDecision.decisionFactor,
         ]);
       }
+    }
+    if (
+      multiProductDecision.disposition === "CLARIFY_SELECTION" &&
+      proposal?.action === "REPLY"
+    ) {
+      pushDecisionEvent(
+        "CLARIFICATION_REQUESTED",
+        multiProductDecision.reasonCodes,
+      );
     }
     if (resolvedProduct) {
       pushDecisionEvent("PRODUCT_RESOLVED");
