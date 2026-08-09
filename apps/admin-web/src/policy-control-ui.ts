@@ -487,7 +487,9 @@ function renderDrawerActions(context: PolicyReviewContext, identity: Identity, s
   if (identity.role !== "OWNER") return lifecycleActions || "<span>Chỉ đọc</span>";
   const safeRemoval = context.activePointers.length
     ? context.activePointers.map((pointer, index) => `<button type="button" class="secondary-button policy-danger-button" data-policy-deactivate-pointer="${index}">Ngừng kích hoạt · ${escapeHtml(pointer.channel)}</button>`).join("")
-    : `<button type="button" class="secondary-button policy-danger-button" data-policy-delete-artifact>Xóa khỏi danh sách</button>`;
+    : context.deletionEligible
+      ? `<button type="button" class="secondary-button policy-danger-button" data-policy-delete-artifact>Xóa khỏi danh sách</button>`
+      : `<span>Không thể xóa: phiên bản đang được kích hoạt trên page khác.</span>`;
   return `${lifecycleActions}${safeRemoval}`;
 }
 

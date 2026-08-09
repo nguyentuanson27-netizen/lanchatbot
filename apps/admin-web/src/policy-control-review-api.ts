@@ -43,6 +43,7 @@ export interface PolicyReviewContext {
   readonly previousVersion: PolicyArtifact | null;
   readonly activePointers: PolicyPointer[];
   readonly rollbackCandidates: PolicyRollbackCandidate[];
+  readonly deletionEligible: boolean;
 }
 
 export interface PolicyBatchItem {
@@ -138,6 +139,7 @@ export async function getPolicyReviewContext(
       ? null
       : normalizeArtifact(record(context.previous_version)),
     activePointers: arrayValue(context.active_pointers).map(normalizePointer),
+    deletionEligible: context.deletion_eligible === true,
     rollbackCandidates: arrayValue(context.rollback_candidates).map((value) => {
       const candidate = record(value);
       return {

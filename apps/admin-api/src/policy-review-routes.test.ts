@@ -50,6 +50,7 @@ function create(role: AdminIdentity["role"] = "OWNER") {
         previous_version: null,
         active_pointers: [],
         rollback_candidates: [],
+        deletion_eligible: false,
       } : null;
     },
     async transitionArtifactVersion(
@@ -199,6 +200,7 @@ describe("policy review phase1 routes", () => {
     });
     assert.equal(response.statusCode, 200);
     assert.equal(response.json().review_context.artifact.revision, "3");
+    assert.equal(response.json().review_context.deletion_eligible, false);
     await app.close();
   });
 });

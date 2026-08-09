@@ -1855,6 +1855,15 @@ export class PostgresAdminStore implements AdminStore {
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
+      const versionLock = await client.query(
+        `SELECT p.version_id
+         FROM admin_active_pointers p
+         JOIN admin_artifact_versions v ON v.version_id = p.version_id
+         WHERE p.pointer_id = $1
+         FOR UPDATE OF v`,
+        [pointerId],
+      );
+      if (!versionLock.rows[0]) { await client.query("ROLLBACK"); return null; }
       const selected = await client.query(
         `SELECT pointer_id, artifact_key, artifact_kind, page_id, channel,
                 version_id, active, revision, updated_by_subject, updated_at
@@ -1865,6 +1874,9 @@ export class PostgresAdminStore implements AdminStore {
       );
       const current = selected.rows[0];
       if (!current) { await client.query("ROLLBACK"); return null; }
+      if (String(current.version_id) !== String(versionLock.rows[0].version_id)) {
+        throw new AdminQueryError("ADMIN_ARTIFACT_VERSION_CONFLICT");
+      }
       if (current.page_id === null) {
         if (identity.pageScope !== "ALL") throw new AdminQueryError("ADMIN_PAGE_NOT_ALLOWED");
       } else {

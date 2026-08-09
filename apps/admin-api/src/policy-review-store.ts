@@ -120,6 +120,13 @@ export function createPolicyReviewStore(
       const artifact = current.rows[0];
       if (!artifact) return null;
 
+      const deletionEligibility = await pool.query(
+        `SELECT NOT EXISTS (
+           SELECT 1 FROM admin_active_pointers_v WHERE version_id = $1
+         ) AS deletion_eligible`,
+        [versionId],
+      );
+
       const previous = await pool.query(
         `SELECT ${ARTIFACT_COLUMNS}
          FROM admin_artifact_versions_v
@@ -201,6 +208,7 @@ export function createPolicyReviewStore(
         previous_version: previous.rows[0] ? policySafeRow(previous.rows[0]) : null,
         active_pointers: activePointers,
         rollback_candidates: rollbackCandidates,
+        deletion_eligible: deletionEligibility.rows[0]?.deletion_eligible === true,
       };
     },
 
