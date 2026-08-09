@@ -11,10 +11,14 @@ Labels:
 - `PASS_THROUGH`: the turn must retain the normal path because it is a genuine
   size request/control or does not contain the BF-03 defect.
 
-The committed gate is zero false positives and zero false negatives. The worker
-benchmark test also checks the exact non-SIZE intents preserved in mixed
-PRICE/STOCK/ETA cases. The corpus is part of the worker test suite and therefore
-runs in the canonical repository `pnpm check` gate.
+The committed corpus contains 66 synthetic cases: 36 `CONTAIN` positives and 30
+`PASS_THROUGH` negatives. Its gate is zero false positives and zero false
+negatives. Unicode and ASCII mixed PRICE/STOCK/ETA cases include punctuated and
+natural no-punctuation forward/reverse forms. The worker benchmark checks their
+exact canonical non-SIZE intents, and the BF-03 runner integration suite loads
+the same labeled cases to verify final outbound action, fact calls, and the
+absence of SIZE calls/events with a compliant model stub. Both suites run in the
+canonical repository `pnpm check` gate.
 
 BF-03 remains temporary and retires with DF-09 evidence plus the atomic DF-11
 legacy-regex demotion/cutover.

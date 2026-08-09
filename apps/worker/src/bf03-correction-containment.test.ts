@@ -85,7 +85,7 @@ describe("BF-03 correction containment", () => {
       "có giá vs size rồi mà",
       decision,
     );
-    expect(classifierView).toBe("đã có thông tin đó rồi mà");
+    expect(classifierView).toBe("thông tin đó");
     expect(explicitCustomerBusinessIntent(classifierView)).toBeNull();
     expect(explicitCustomerBusinessIntents(classifierView)).toEqual([]);
   });
@@ -122,6 +122,8 @@ describe("BF-03 correction containment", () => {
     "em không nói size M",
     "em nói rồi nhưng chị chưa biết size nào vừa",
     "không chắc size M có vừa không",
+    "size có rồi mà không chắc có vừa không",
+    "size co roi ma khong chac co vua khong",
     "size S, M, L bên em có đủ không?",
     "chị chọn size M",
     "vòng ngực 88 eo 68 thì mặc size gì",
@@ -137,10 +139,22 @@ describe("BF-03 correction containment", () => {
     ["size có rồi mà, cho chị xin giá", ["PRICE"]],
     ["cho chị xin giá; size có rồi mà", ["PRICE"]],
     ["size co roi ma cho chi xin gia", ["PRICE"]],
+    ["size có rồi mà bao nhiêu tiền em", ["PRICE"]],
+    ["bao nhiêu tiền em size có rồi mà", ["PRICE"]],
+    ["size co roi ma bao nhieu tien em", ["PRICE"]],
+    ["bao nhieu tien em size co roi ma", ["PRICE"]],
     ["size có rồi mà, kiểm tra còn hàng giúp chị", ["STOCK"]],
     ["kiểm tra còn hàng giúp chị; size có rồi mà", ["STOCK"]],
+    ["size có rồi mà hàng còn không em", ["STOCK"]],
+    ["hàng còn không em size có rồi mà", ["STOCK"]],
+    ["size co roi ma hang con khong em", ["STOCK"]],
+    ["hang con khong em size co roi ma", ["STOCK"]],
     ["size có rồi mà, khi nào giao đến chị", ["ETA"]],
     ["khi nào giao đến chị, size có rồi mà", ["ETA"]],
+    ["size có rồi mà ship mấy ngày", ["ETA"]],
+    ["ship mấy ngày size có rồi mà", ["ETA"]],
+    ["size co roi ma ship may ngay", ["ETA"]],
+    ["ship may ngay size co roi ma", ["ETA"]],
   ])("suppresses false SIZE while preserving an independent fact: %s", (
     text,
     expectedIntents,

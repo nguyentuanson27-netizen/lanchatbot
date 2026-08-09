@@ -34,6 +34,18 @@
     { "id": "p22", "label": "CONTAIN", "category": "no-punctuation", "text": "em nhắc size rồi mà chị", "expectedClassifierIntents": [] },
     { "id": "p23", "label": "CONTAIN", "category": "uppercase", "text": "SIZE CÓ RỒI MÀ", "expectedClassifierIntents": [] },
     { "id": "p24", "label": "CONTAIN", "category": "extra-spacing", "text": "size   có   rồi   mà", "expectedClassifierIntents": [] },
+    { "id": "p25", "label": "CONTAIN", "category": "mixed-price-natural-no-punctuation-forward", "text": "size có rồi mà bao nhiêu tiền em", "expectedClassifierIntents": ["PRICE"] },
+    { "id": "p26", "label": "CONTAIN", "category": "mixed-price-natural-no-punctuation-reverse", "text": "bao nhiêu tiền em size có rồi mà", "expectedClassifierIntents": ["PRICE"] },
+    { "id": "p27", "label": "CONTAIN", "category": "mixed-price-ascii-no-punctuation-natural-forward", "text": "size co roi ma bao nhieu tien em", "expectedClassifierIntents": ["PRICE"] },
+    { "id": "p28", "label": "CONTAIN", "category": "mixed-price-ascii-no-punctuation-natural-reverse", "text": "bao nhieu tien em size co roi ma", "expectedClassifierIntents": ["PRICE"] },
+    { "id": "p29", "label": "CONTAIN", "category": "mixed-stock-natural-no-punctuation-forward", "text": "size có rồi mà hàng còn không em", "expectedClassifierIntents": ["STOCK"] },
+    { "id": "p30", "label": "CONTAIN", "category": "mixed-stock-natural-no-punctuation-reverse", "text": "hàng còn không em size có rồi mà", "expectedClassifierIntents": ["STOCK"] },
+    { "id": "p31", "label": "CONTAIN", "category": "mixed-stock-ascii-no-punctuation-forward", "text": "size co roi ma hang con khong em", "expectedClassifierIntents": ["STOCK"] },
+    { "id": "p32", "label": "CONTAIN", "category": "mixed-stock-ascii-no-punctuation-reverse", "text": "hang con khong em size co roi ma", "expectedClassifierIntents": ["STOCK"] },
+    { "id": "p33", "label": "CONTAIN", "category": "mixed-eta-natural-no-punctuation-forward", "text": "size có rồi mà ship mấy ngày", "expectedClassifierIntents": ["ETA"] },
+    { "id": "p34", "label": "CONTAIN", "category": "mixed-eta-natural-no-punctuation-reverse", "text": "ship mấy ngày size có rồi mà", "expectedClassifierIntents": ["ETA"] },
+    { "id": "p35", "label": "CONTAIN", "category": "mixed-eta-ascii-no-punctuation-forward", "text": "size co roi ma ship may ngay", "expectedClassifierIntents": ["ETA"] },
+    { "id": "p36", "label": "CONTAIN", "category": "mixed-eta-ascii-no-punctuation-reverse", "text": "ship may ngay size co roi ma", "expectedClassifierIntents": ["ETA"] },
 
     { "id": "n01", "label": "PASS_THROUGH", "category": "true-question", "text": "size nào vừa em" },
     { "id": "n02", "label": "PASS_THROUGH", "category": "recommendation", "text": "tư vấn size cho chị" },
@@ -62,6 +74,8 @@
     { "id": "n25", "label": "PASS_THROUGH", "category": "unrelated-statement", "text": "chị cảm ơn em" },
     { "id": "n26", "label": "PASS_THROUGH", "category": "size-stock-question", "text": "size M còn hàng không em" },
     { "id": "n27", "label": "PASS_THROUGH", "category": "explicit-request-no-question-mark", "text": "lấy cho chị size M" },
-    { "id": "n28", "label": "PASS_THROUGH", "category": "incorrect-prior-size", "text": "size em nói rồi chưa đúng, tư vấn lại giúp chị" }
+    { "id": "n28", "label": "PASS_THROUGH", "category": "incorrect-prior-size", "text": "size em nói rồi chưa đúng, tư vấn lại giúp chị" },
+    { "id": "n29", "label": "PASS_THROUGH", "category": "mixed-correction-fit-uncertainty", "text": "size có rồi mà không chắc có vừa không" },
+    { "id": "n30", "label": "PASS_THROUGH", "category": "mixed-correction-fit-uncertainty-ascii", "text": "size co roi ma khong chac co vua khong" }
   ]
 }

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
 import type { AgentProposalV1 } from "@lana/contracts";
@@ -21,6 +22,32 @@ import {
 const occurredAt = "2026-08-09T00:00:00.000Z";
 const pageId = "1198992073286645";
 const conversationHash = "meta:v1:bf03-customer";
+
+interface BenchmarkCase {
+  readonly id: string;
+  readonly label: "CONTAIN" | "PASS_THROUGH";
+  readonly category: string;
+  readonly text: string;
+  readonly expectedClassifierIntents?: readonly string[];
+}
+
+interface BenchmarkCorpus {
+  readonly cases: readonly BenchmarkCase[];
+}
+
+const benchmarkCorpus = JSON.parse(readFileSync(new URL(
+  "../../../benchmarks/bf03/correction-containment-v1.json",
+  import.meta.url,
+), "utf8")) as BenchmarkCorpus;
+
+const mixedFactBenchmarkCases = benchmarkCorpus.cases.flatMap((benchmarkCase) => {
+  const intents = benchmarkCase.expectedClassifierIntents ?? [];
+  return benchmarkCase.label === "CONTAIN" &&
+      intents.length === 1 &&
+      intents[0] !== "SIZE"
+    ? [[benchmarkCase.id, intents[0], benchmarkCase.text] as const]
+    : [];
+});
 
 const product = {
   productId: "SD398",
@@ -178,6 +205,8 @@ function createHarness(input: {
   envelopeSchemaVersion?: number;
   batchDeliveries?: number;
   batchCurrentSequence?: readonly boolean[];
+  compliantBf03Model?: boolean;
+  concurrentSingleClaims?: boolean;
 }) {
   const policy = input.policy ?? "CORRECTION_CONTAINMENT_V1";
   const claims = input.messages.map((text, index) => claimFor(text, index, {
@@ -245,9 +274,11 @@ function createHarness(input: {
         failBatchPermanent: vi.fn(async () => true),
       }
     : {
-        claimNext: vi.fn()
-          .mockResolvedValueOnce(lastClaim)
-          .mockResolvedValueOnce(null),
+        claimNext: input.concurrentSingleClaims
+          ? vi.fn(async () => claims.shift() ?? null)
+          : vi.fn()
+            .mockResolvedValueOnce(lastClaim)
+            .mockResolvedValueOnce(null),
         complete,
         retry,
         failPermanent: vi.fn(async () => true),
@@ -288,11 +319,24 @@ function createHarness(input: {
   const generatedContexts: Parameters<RealtimeModelPort["generate"]>[0][] = [];
   const generate: RealtimeModelPort["generate"] = async (context) => {
     generatedContexts.push(context);
+    if (input.compliantBf03Model) {
+      const instruction = [...context].reverse().find((entry) =>
+        entry.senderType === "SYSTEM" &&
+        entry.text.includes("BF03_CORRECTION_CONTAINMENT")
+      );
+      const payload = instruction
+        ? JSON.parse(instruction.text) as {
+            readonly allowedBusinessFactIntents?: readonly AgentProposalV1["businessFactQuery"]["intent"][];
+          }
+        : null;
+      return modelResult(proposal(payload?.allowedBusinessFactIntents?.[0] ?? "NONE"));
+    }
     return modelResult(proposal(input.modelIntent ?? "SIZE"));
   };
+  const groundWithFacts = vi.fn(async (_context, initial) => modelResult(initial));
   const model: RealtimeModelPort = {
     generate,
-    groundWithFacts: vi.fn(async (_context, initial) => modelResult(initial)),
+    groundWithFacts,
   };
 
   const searchText = vi.fn(async (value: string) => {
@@ -406,6 +450,7 @@ function createHarness(input: {
   return {
     runner,
     generatedContexts,
+    groundWithFacts,
     historyAppends,
     canonicalInbound,
     searchText,
@@ -439,6 +484,20 @@ function hasBf03Instruction(context: ReturnType<typeof modelContext>): boolean {
     entry.senderType === "SYSTEM" &&
     entry.text.includes("BF03_CORRECTION_CONTAINMENT")
   );
+}
+
+function bf03AllowedFactIntents(
+  context: ReturnType<typeof modelContext>,
+): readonly AgentProposalV1["businessFactQuery"]["intent"][] | null {
+  const instruction = [...context].reverse().find((entry) =>
+    entry.senderType === "SYSTEM" &&
+    entry.text.includes("BF03_CORRECTION_CONTAINMENT")
+  );
+  if (!instruction) return null;
+  const payload = JSON.parse(instruction.text) as {
+    readonly allowedBusinessFactIntents?: readonly AgentProposalV1["businessFactQuery"]["intent"][];
+  };
+  return payload.allowedBusinessFactIntents ?? null;
 }
 
 function hasBf03Evidence(
@@ -555,10 +614,22 @@ describe("BF-03 RealtimeRunner", () => {
   it.each([
     ["PRICE" as const, "size có rồi mà, cho chị xin giá"],
     ["PRICE" as const, "cho chị xin giá; size có rồi mà"],
+    ["PRICE" as const, "size có rồi mà bao nhiêu tiền em"],
+    ["PRICE" as const, "bao nhiêu tiền em size có rồi mà"],
+    ["PRICE" as const, "size co roi ma bao nhieu tien em"],
+    ["PRICE" as const, "bao nhieu tien em size co roi ma"],
     ["STOCK" as const, "size có rồi mà, còn hàng không em"],
     ["STOCK" as const, "còn hàng không em; size có rồi mà"],
+    ["STOCK" as const, "size có rồi mà hàng còn không em"],
+    ["STOCK" as const, "hàng còn không em size có rồi mà"],
+    ["STOCK" as const, "size co roi ma hang con khong em"],
+    ["STOCK" as const, "hang con khong em size co roi ma"],
     ["ETA" as const, "size có rồi mà, khi nào giao tới chị"],
     ["ETA" as const, "khi nào giao tới chị; size có rồi mà"],
+    ["ETA" as const, "size có rồi mà ship mấy ngày"],
+    ["ETA" as const, "ship mấy ngày size có rồi mà"],
+    ["ETA" as const, "size co roi ma ship may ngay"],
+    ["ETA" as const, "ship may ngay size co roi ma"],
   ])("suppresses false SIZE while keeping mixed %s on the fact path", async (
     intent,
     text,
@@ -566,19 +637,94 @@ describe("BF-03 RealtimeRunner", () => {
     const harness = createHarness({
       messages: [text],
       currentProductId: "SD398",
-      modelIntent: intent,
+      compliantBf03Model: true,
     });
 
     expect(await harness.runner.processOne()).toBe(true);
     expect(harness.resolveFacts).toHaveBeenCalledTimes(1);
     expect(harness.resolveFacts).toHaveBeenCalledWith(expect.objectContaining({ intent }));
     if (harness.generatedContexts.length > 0) {
+      expect(harness.generatedContexts).toHaveLength(1);
       expect(hasBf03Instruction(modelContext(harness))).toBe(true);
+      expect(bf03AllowedFactIntents(modelContext(harness))).toEqual([intent]);
     }
+    expect(harness.groundWithFacts).toHaveBeenCalledTimes(
+      harness.generatedContexts.length > 0 ? 1 : 0,
+    );
     expect(hasBf03Evidence(harness.committed())).toBe(true);
+    expect(harness.committed()?.metaPlan?.messages.length).toBeGreaterThan(0);
     expect(harness.committed()?.decisionEvents ?? []).not.toContainEqual(
       expect.objectContaining({ eventType: "SIZE_CONSULT_STARTED" }),
     );
+  });
+
+  it.each(mixedFactBenchmarkCases)(
+    "couples benchmark %s to the final %s runtime contract",
+    async (_id, intent, text) => {
+      const harness = createHarness({
+        messages: [text],
+        currentProductId: "SD398",
+        compliantBf03Model: true,
+      });
+
+      expect(await harness.runner.processOne()).toBe(true);
+      if (harness.generatedContexts.length > 0) {
+        expect(harness.generatedContexts).toHaveLength(1);
+        expect(bf03AllowedFactIntents(modelContext(harness))).toEqual([intent]);
+      }
+      expect(harness.resolveFacts).toHaveBeenCalledTimes(1);
+      expect(harness.resolveFacts).toHaveBeenCalledWith(
+        expect.objectContaining({ intent }),
+      );
+      expect(harness.resolveFacts).not.toHaveBeenCalledWith(
+        expect.objectContaining({ intent: "SIZE" }),
+      );
+      expect(harness.groundWithFacts).toHaveBeenCalledTimes(
+        harness.generatedContexts.length > 0 ? 1 : 0,
+      );
+      expect(harness.committed()?.metaPlan?.messages.length).toBeGreaterThan(0);
+      expect(harness.committed()?.decisionEvents ?? []).not.toContainEqual(
+        expect.objectContaining({ eventType: "SIZE_CONSULT_STARTED" }),
+      );
+    },
+  );
+
+  it("isolates BF-03 raw context across concurrent processOne calls", async () => {
+    const messages = [
+      "size có rồi mà hàng còn không em",
+      "ship mấy ngày size có rồi mà",
+    ] as const;
+    const harness = createHarness({
+      messages,
+      currentProductId: "SD398",
+      compliantBf03Model: true,
+      concurrentSingleClaims: true,
+    });
+
+    expect(await Promise.all([
+      harness.runner.processOne(),
+      harness.runner.processOne(),
+    ])).toEqual([true, true]);
+    expect(harness.generatedContexts).toHaveLength(2);
+    expect(harness.generatedContexts.map(customerTexts)).toEqual(
+      expect.arrayContaining([[messages[0]], [messages[1]]]),
+    );
+    expect(harness.generatedContexts.map(bf03AllowedFactIntents)).toEqual(
+      expect.arrayContaining([["STOCK"], ["ETA"]]),
+    );
+    expect(harness.resolveFacts).toHaveBeenCalledTimes(2);
+    expect(harness.resolveFacts).toHaveBeenCalledWith(
+      expect.objectContaining({ intent: "STOCK" }),
+    );
+    expect(harness.resolveFacts).toHaveBeenCalledWith(
+      expect.objectContaining({ intent: "ETA" }),
+    );
+    expect(harness.resolveFacts).not.toHaveBeenCalledWith(
+      expect.objectContaining({ intent: "SIZE" }),
+    );
+    expect(harness.resolvePolicy).toHaveBeenCalledTimes(2);
+    expect(harness.loadOrCreate).toHaveBeenCalledTimes(2);
+    expect(harness.commit).toHaveBeenCalledTimes(2);
   });
 
   it("does not resolve policy or mutate conversation state for an own Meta echo", async () => {

@@ -15,7 +15,6 @@ import {
 import {
   RealtimeRunner as Bf01RealtimeRunner,
   explicitCustomerBusinessIntents,
-  hasCustomerMeasurementSignal,
   type CanonicalChatHistoryPort,
   type RealtimeInboxPort,
   type RealtimeMediaRecognitionPort,
@@ -74,6 +73,14 @@ function asciiFold(value: string): string {
     .trim();
 }
 
+function asciiFoldPreserveLayout(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/[đĐ]/gu, "d")
+    .toLocaleLowerCase("vi-VN");
+}
+
 function mentionsLegacySizeTopic(text: string): boolean {
   return /\b(size|sz|kich co|co nao|mac co)\b/u.test(text);
 }
@@ -91,48 +98,109 @@ function hasStandaloneCorrectionLead(text: string): boolean {
   return /\b(?:em|chi|minh|toi)\s+(?:da\s+)?(?:noi|bao|nhac)\b.{0,32}\broi\b/u.test(text);
 }
 
-function hasStrongSizeRequestEvidence(value: string, text: string): boolean {
-  if (hasCustomerMeasurementSignal(value)) return true;
-  const requestText = text.replace(
-    /\bkhong\s+can\s+(?:hoi|nhac|noi)\s+lai\b/gu,
-    "",
+function rejectsPriorSizeAnswer(text: string): boolean {
+  return (
+    /\b(?:chua|khong|chang)\s+dung\b/u.test(text) ||
+    /\bsai\b/u.test(text) ||
+    /\btu van\s+lai\b/u.test(text)
   );
-  if (
-    /\b(?:chua|khong|chang)\s+(?:duoc\s+)?(?:noi|bao|nhac|co|biet|chac)\b/u.test(requestText) &&
-    !/\bkhong\s+can\s+hoi\s+lai\b/u.test(text)
-  ) return true;
-  if (
-    /\b(?:khong biet|khong chac|phan van|do du|chua biet)\b/u.test(requestText)
-  ) return true;
-  if (/\b(?:(?:chua|khong)\s+dung|sai)\b/u.test(requestText)) return true;
-  if (
-    /\b(size|sz|kich co|co nao|mac co)\b.{0,48}\b(nao|gi|bao nhieu|may|vua|hop|nen|chon|lay|muon|can|tu van|recommend|hay)\b/u.test(requestText)
-  ) return true;
-  if (
-    /\b(nao|gi|bao nhieu|may|vua|hop|nen|chon|lay|muon|can|tu van|recommend)\b.{0,48}\b(size|sz|kich co|co nao|mac co)\b/u.test(requestText)
-  ) return true;
-  if (/\bmuon\s+doi\b.{0,32}\b(?:size|sz|kich co)\b/u.test(requestText)) return true;
-  if (/\b(?:size|sz)\b.{0,40}\b(?:con|co)\s+(?:hang|du)\b/u.test(requestText)) return true;
-  return false;
 }
 
-function hasExplicitSizeChoice(text: string): boolean {
+function hasUnresolvedSizeFitQuestion(text: string): boolean {
   return (
-    /\b(?:size|sz)\s*(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\b/u.test(text) ||
-    /\b(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\s+(?:hay|or|voi)\s+(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)\b/u.test(text)
+    /\b(?:khong|chua)\s+(?:biet|chac)\b.{0,48}\b(?:co\s+)?(?:vua|hop)\b/u.test(text) ||
+    /\b(?:co\s+)?(?:vua|hop)\s+(?:khong|ko)\b/u.test(text)
   );
 }
 
 const BF03_CLAUSE_SEPARATOR = /([,;.!?\n]+|\s+(?:nhưng|nhung|tuy nhiên|tuy nhien)\s+)/giu;
+const BF03_FOLDED_SIZE_TOPIC = /\b(?:size|sz|kich co|co nao|mac co)\b/gu;
+const BF03_COMPLETION_MARKER = /\broi(?:\s+(?:ma|a|nha|nhe))?\b/gu;
+const BF03_SPEAKER_COMPLETION = /\b(?:em|chi|minh|toi)\s+(?:da\s+)?(?:noi|bao|nhac)\b.{0,32}?\broi\b/gu;
+
+interface Bf03TextSpan {
+  readonly start: number;
+  readonly end: number;
+}
 
 interface Bf03ClauseAnalysis {
   readonly parts: readonly string[];
   readonly containedPartIndexes: ReadonlySet<number>;
+  readonly classifierParts: readonly string[];
   readonly genuineSizeRequest: boolean;
 }
 
+function correctionPricePrefixStart(text: string, topicStart: number): number {
+  const prefix = text.slice(0, topicStart);
+  const match = /\b(?:(?:da\s+)?co\s+)?gia\s*(?:vs|voi|va|\+)\s*$/u.exec(prefix);
+  return match?.index ?? topicStart;
+}
+
+function correctionSpans(value: string, pendingCorrectionLead: boolean): readonly Bf03TextSpan[] {
+  const text = asciiFoldPreserveLayout(value.normalize("NFC"));
+  const topics = [...text.matchAll(BF03_FOLDED_SIZE_TOPIC)].map((match) => ({
+    start: match.index,
+    end: match.index + match[0].length,
+  }));
+  if (topics.length === 0) return [];
+
+  const spans: Bf03TextSpan[] = [];
+  for (const marker of text.matchAll(BF03_COMPLETION_MARKER)) {
+    const markerEnd = marker.index + marker[0].length;
+    let topic: Bf03TextSpan | undefined;
+    for (let index = topics.length - 1; index >= 0; index -= 1) {
+      const candidate = topics[index]!;
+      if (candidate.end <= markerEnd && markerEnd - candidate.end <= 80) {
+        topic = candidate;
+        break;
+      }
+    }
+    if (!topic) continue;
+    spans.push({
+      start: correctionPricePrefixStart(text, topic.start),
+      end: markerEnd,
+    });
+  }
+
+  for (const lead of text.matchAll(BF03_SPEAKER_COMPLETION)) {
+    const leadEnd = lead.index + lead[0].length;
+    const topic = topics.find((candidate) =>
+      candidate.start >= leadEnd && candidate.start - leadEnd <= 48
+    );
+    if (topic) spans.push(topic);
+  }
+
+  if (pendingCorrectionLead && spans.length === 0) {
+    spans.push(topics[0]!);
+  }
+
+  return spans
+    .sort((left, right) => left.start - right.start)
+    .reduce<Bf03TextSpan[]>((merged, span) => {
+      const previous = merged.at(-1);
+      if (!previous || span.start > previous.end) {
+        merged.push(span);
+      } else {
+        merged[merged.length - 1] = {
+          start: previous.start,
+          end: Math.max(previous.end, span.end),
+        };
+      }
+      return merged;
+    }, []);
+}
+
+function neutralizeCorrectionSpans(value: string, spans: readonly Bf03TextSpan[]): string {
+  let result = value.normalize("NFC");
+  for (const span of [...spans].sort((left, right) => right.start - left.start)) {
+    result = `${result.slice(0, span.start)} thông tin đó ${result.slice(span.end)}`;
+  }
+  return result.replace(/\s+/gu, " ").trim();
+}
+
 function analyzeCorrectionClauses(value: string): Bf03ClauseAnalysis {
-  const parts = value.split(BF03_CLAUSE_SEPARATOR);
+  const parts = value.normalize("NFC").split(BF03_CLAUSE_SEPARATOR);
+  const classifierParts = [...parts];
   const containedPartIndexes = new Set<number>();
   let genuineSizeRequest = false;
   let pendingCorrectionLead = false;
@@ -152,50 +220,29 @@ function analyzeCorrectionClauses(value: string): Bf03ClauseAnalysis {
 
     const correctionContext = hasClearCorrectionMarker(text) || pendingCorrectionLead;
     if (correctionContext) {
-      if (hasStrongSizeRequestEvidence(part, text)) {
+      if (rejectsPriorSizeAnswer(text) || hasUnresolvedSizeFitQuestion(text)) {
         genuineSizeRequest = true;
-      } else {
-        containedPartIndexes.add(index);
+        pendingCorrectionLead = false;
+        continue;
       }
-    } else if (hasStrongSizeRequestEvidence(part, text) || hasExplicitSizeChoice(text)) {
+      const spans = correctionSpans(part, pendingCorrectionLead);
+      if (spans.length > 0) {
+        const classifierPart = neutralizeCorrectionSpans(part, spans);
+        classifierParts[index] = classifierPart;
+        if (explicitCustomerBusinessIntents(classifierPart).includes("SIZE")) {
+          genuineSizeRequest = true;
+        } else {
+          containedPartIndexes.add(index);
+        }
+      } else {
+        genuineSizeRequest = true;
+      }
+    } else if (explicitCustomerBusinessIntents(part).includes("SIZE")) {
       genuineSizeRequest = true;
     }
     pendingCorrectionLead = false;
   }
-  return { parts, containedPartIndexes, genuineSizeRequest };
-}
-
-function independentRequestIntents(value: string): readonly Exclude<
-  ReturnType<typeof explicitCustomerBusinessIntents>[number],
-  "SIZE"
->[] {
-  const text = asciiFold(value);
-  const intents: ("PRICE" | "STOCK" | "ETA")[] = [];
-  if (
-    /\b(?:xin|hoi|bao|check|kiem tra|cho biet|muon biet|can biet)\b.{0,48}\b(?:gia|price)\b/u.test(text) ||
-    /\b(?:gia|price)\b.{0,48}\b(?:bao nhieu|the nao|la bao nhieu|may)\b/u.test(text)
-  ) intents.push("PRICE");
-  if (
-    /\b(?:kiem tra|check)\b.{0,48}\b(?:con|het|ton|co hang|san hang|available)\b/u.test(text) ||
-    /\b(?:con hang|het hang|ton kho|co hang|san hang|available)\b.{0,24}\b(?:khong|khong em|giup|nhe|a)?\b/u.test(text)
-  ) intents.push("STOCK");
-  if (/\b(?:bao lau|khi nao|may ngay|ngay nao|giao den|nhan hang|eta)\b/u.test(text)) {
-    intents.push("ETA");
-  }
-  return intents;
-}
-
-function classifierClauseView(value: string): string {
-  const independentIntents = independentRequestIntents(value);
-  if (independentIntents.length === 0) return "đã có thông tin đó rồi mà";
-  return value
-    .replace(/\b[A-Za-z]{1,6}\s*[-_.]?\s*\d{1,8}[A-Za-z0-9]*\b/gu, " ")
-    .replace(
-      /\b(?:size|sz)(?:\s*(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50))?\b|kích\s*cỡ|kich\s*co|cỡ\s*nào|co\s*nao|mặc\s*cỡ|mac\s*co/giu,
-      "thông tin đó",
-    )
-    .replace(/\s+/gu, " ")
-    .trim();
+  return { parts, containedPartIndexes, classifierParts, genuineSizeRequest };
 }
 
 /**
@@ -237,8 +284,11 @@ export function bf03LegacyClassifierView(
   if (!decision.applies) return value;
   const analysis = analyzeCorrectionClauses(value);
   return analysis.parts.map((part, index) =>
-    analysis.containedPartIndexes.has(index) ? classifierClauseView(part) : part
-  ).join("");
+    analysis.containedPartIndexes.has(index) ? analysis.classifierParts[index] : part
+  ).join("")
+    .replace(/\b[A-Za-z]{1,6}\s*[-_.]?\s*\d{1,8}[A-Za-z0-9]*\b/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
 }
 
 export function bf03ContainProposal(
@@ -406,7 +456,14 @@ function wrapProductSearch(
 
 function bf03Instruction(
   occurredAt: string,
+  allowedBusinessFactIntents: readonly Exclude<
+    ReturnType<typeof explicitCustomerBusinessIntents>[number],
+    "SIZE"
+  >[],
 ): Parameters<RealtimeModelPort["generate"]>[0][number] {
+  const businessFactInstruction = allowedBusinessFactIntents.length === 0
+    ? "No independent business-fact request remains. Keep businessFactQuery.intent=NONE."
+    : `An independent business-fact request remains. You may set businessFactQuery.intent to exactly one of: ${allowedBusinessFactIntents.join(", ")}. Otherwise use NONE.`;
   return {
     direction: "INBOUND",
     senderType: "SYSTEM",
@@ -414,8 +471,9 @@ function bf03Instruction(
     text: JSON.stringify({
       type: "BF03_CORRECTION_CONTAINMENT",
       reasonCode: BF03_CORRECTION_REASON_CODE,
+      allowedBusinessFactIntents,
       instruction:
-        "The latest customer turn is a correction indicating the mentioned size/price information was already provided. A topic mention is not a new capability request. Reply naturally and concisely in Vietnamese without repeating price or size facts, without requesting Size Engine/business facts, and without proposing any side effect. Keep businessFactQuery.intent=NONE.",
+        `The latest customer turn contains a correction indicating the mentioned size information was already provided. That corrected topic mention is not a new SIZE request. Reply naturally and concisely in Vietnamese; do not re-ask or request Size Engine for the already-resolved size and do not invent facts or side effects. ${businessFactInstruction}`,
     }),
     attachmentCount: 0,
     occurredAt,
@@ -433,8 +491,11 @@ function wrapModel(
 
     const restoredContext = restoreRawCustomerModelContext(args[0], store);
     const occurredAt = store.rawMessages.at(-1)?.occurredAt ?? new Date().toISOString();
+    const allowedBusinessFactIntents = explicitCustomerBusinessIntents(
+      bf03LegacyClassifierView(store.customerText, decision),
+    ).filter((intent): intent is Exclude<typeof intent, "SIZE"> => intent !== "SIZE");
     const generated = await model.generate(
-      [...restoredContext, bf03Instruction(occurredAt)],
+      [...restoredContext, bf03Instruction(occurredAt, allowedBusinessFactIntents)],
       args[1],
     );
     const proposal = bf03ContainProposal(generated.proposal, decision);
