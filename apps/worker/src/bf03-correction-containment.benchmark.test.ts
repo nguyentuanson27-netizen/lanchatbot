@@ -1,9 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  bf03CorrectionAnalysis,
   bf03CorrectionContainmentDecision,
-  bf03LegacyClassifierView,
-  explicitCustomerBusinessIntents,
 } from "./bf03-realtime-runner.js";
 
 interface BenchmarkCase {
@@ -12,6 +11,13 @@ interface BenchmarkCase {
   readonly category: string;
   readonly text: string;
   readonly expectedClassifierIntents?: readonly string[];
+  readonly expectedAction?: "REPLY";
+  readonly expectedFactIntents?: readonly string[];
+  readonly runtimeContract?:
+    | "CONTAIN_NO_FACTS"
+    | "CONTAIN_AUTHORIZED_FACT"
+    | "PASS_THROUGH_SIZE";
+  readonly unauthorizedModelIntents?: readonly string[];
 }
 
 interface BenchmarkCorpus {
@@ -39,6 +45,13 @@ describe(`BF-03 governed benchmark ${corpus.benchmarkVersion}`, () => {
     expect(corpus.provenance).toBe("SYNTHETIC_REVIEWED_NO_PII");
     expect(new Set(corpus.cases.map(({ id }) => id)).size).toBe(corpus.cases.length);
     expect(new Set(corpus.cases.map(({ text }) => text)).size).toBe(corpus.cases.length);
+    expect(corpus.cases).toHaveLength(86);
+    expect(corpus.gate).toEqual({
+      maxFalsePositives: 0,
+      maxFalseNegatives: 0,
+      maxFalsePositiveRate: 0,
+      maxFalseNegativeRate: 0,
+    });
 
     let positives = 0;
     let negatives = 0;
@@ -64,21 +77,38 @@ describe(`BF-03 governed benchmark ${corpus.benchmarkVersion}`, () => {
       }
 
       if (benchmarkCase.expectedClassifierIntents) {
-        const classifierView = bf03LegacyClassifierView(
+        const analysis = bf03CorrectionAnalysis(
           benchmarkCase.text,
-          decision,
+          corpus.policy,
         );
-        expect(
-          explicitCustomerBusinessIntents(classifierView),
-          benchmarkCase.id,
-        ).toEqual(benchmarkCase.expectedClassifierIntents);
+        expect(analysis.canonicalIntents, benchmarkCase.id)
+          .toEqual(benchmarkCase.expectedClassifierIntents);
+      }
+      if (benchmarkCase.runtimeContract === "CONTAIN_NO_FACTS") {
+        expect(benchmarkCase.label, benchmarkCase.id).toBe("CONTAIN");
+        expect(benchmarkCase.expectedFactIntents, benchmarkCase.id).toEqual([]);
+        expect(benchmarkCase.unauthorizedModelIntents, benchmarkCase.id)
+          .toEqual(["PRICE", "STOCK", "ETA", "SIZE"]);
+      }
+      if (benchmarkCase.runtimeContract === "PASS_THROUGH_SIZE") {
+        expect(benchmarkCase.label, benchmarkCase.id).toBe("PASS_THROUGH");
+        expect(benchmarkCase.expectedClassifierIntents, benchmarkCase.id).toEqual(["SIZE"]);
+        expect(benchmarkCase.expectedFactIntents, benchmarkCase.id).toEqual(["SIZE"]);
+      }
+      if (benchmarkCase.runtimeContract === "CONTAIN_AUTHORIZED_FACT") {
+        expect(benchmarkCase.label, benchmarkCase.id).toBe("CONTAIN");
+        expect(benchmarkCase.expectedFactIntents, benchmarkCase.id)
+          .toEqual(benchmarkCase.expectedClassifierIntents);
+        expect(benchmarkCase.unauthorizedModelIntents, benchmarkCase.id)
+          .not.toContain(benchmarkCase.expectedFactIntents?.[0]);
       }
     }
 
     const falsePositiveRate = negatives === 0 ? 0 : falsePositives / negatives;
     const falseNegativeRate = positives === 0 ? 0 : falseNegatives / positives;
     expect(positives).toBeGreaterThan(0);
-    expect(negatives).toBeGreaterThan(0);
+    expect(positives).toBe(36);
+    expect(negatives).toBe(50);
     expect(falsePositiveIds).toEqual([]);
     expect(falseNegativeIds).toEqual([]);
     expect(falsePositives).toBeLessThanOrEqual(corpus.gate.maxFalsePositives);

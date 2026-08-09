@@ -308,6 +308,58 @@ function hasSizeOnlyContinuationSignal(value: string): boolean {
     .test(text);
 }
 
+const TOPIC_CARRIED_SIZE_VALUES = new Set([
+  "xxxs", "xxs", "xs", "s", "m", "l", "xl", "xxl", "xxxl",
+]);
+
+/**
+ * Canonical extension point for a residual clause whose SIZE topic was
+ * established outside the residual itself. BF-03 uses this only after it has
+ * located and removed a bounded correction assertion. The helper recognizes
+ * structural size continuations; it does not locate correction language.
+ */
+export function hasTopicCarriedSizeContinuationSignal(value: string): boolean {
+  if (hasSizeOnlyContinuationSignal(value)) return true;
+  const text = asciiFold(value)
+    .replace(/[^a-z0-9]+/gu, " ")
+    .trim();
+  if (!text) return false;
+  const tokens = text.split(/\s+/gu);
+  const sizeValues = tokens.filter((token) =>
+    TOPIC_CARRIED_SIZE_VALUES.has(token) ||
+    (/^3[4-9]$|^4\d$|^50$/u).test(token)
+  );
+  const includes = (...values: readonly string[]): boolean =>
+    values.some((value) => tokens.includes(value));
+  const hasSequence = (...values: readonly string[]): boolean => {
+    let cursor = -1;
+    for (const value of values) {
+      cursor = tokens.findIndex((token, index) => index > cursor && token === value);
+      if (cursor < 0) return false;
+    }
+    return true;
+  };
+
+  const comparison = sizeValues.length >= 2 && includes("hay", "hoac");
+  const fit = sizeValues.length > 0 && includes("vua", "hop", "chat", "rong");
+  const uncertainty = sizeValues.length > 0 && hasSequence("phan", "van");
+  const choice = sizeValues.length > 0 && (
+    includes("chon", "lay") || hasSequence("doi", "sang")
+  );
+  const catalogQuestion = sizeValues.length >= 2 &&
+    includes("co") && includes("du") && includes("khong", "ko");
+  const carriedFitQuestion = sizeValues.length === 0 && (
+    (includes("khong", "chua") && includes("biet", "chac") && includes("vua", "hop")) ||
+    (includes("vua", "hop") && includes("khong", "ko"))
+  );
+  const rejectedPriorAnswer = includes("sai") ||
+    hasSequence("chua", "dung") ||
+    hasSequence("khong", "dung") ||
+    hasSequence("tu", "van", "lai");
+  return comparison || fit || uncertainty || choice || catalogQuestion ||
+    carriedFitQuestion || rejectedPriorAnswer;
+}
+
 function hasColorContinuationSignal(value: string): boolean {
   const text = asciiFold(value)
     .trim()

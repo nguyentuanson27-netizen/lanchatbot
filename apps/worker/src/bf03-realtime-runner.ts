@@ -15,6 +15,7 @@ import {
 import {
   RealtimeRunner as Bf01RealtimeRunner,
   explicitCustomerBusinessIntents,
+  hasTopicCarriedSizeContinuationSignal,
   type CanonicalChatHistoryPort,
   type RealtimeInboxPort,
   type RealtimeMediaRecognitionPort,
@@ -40,6 +41,26 @@ export interface Bf03CorrectionContainmentDecision {
   readonly reasonCodes: readonly string[];
 }
 
+type Bf03BusinessFactIntent = ReturnType<typeof explicitCustomerBusinessIntents>[number];
+type Bf03AllowedBusinessFactIntent = Exclude<Bf03BusinessFactIntent, "SIZE">;
+
+export interface Bf03CorrectionSpan {
+  readonly partIndex: number;
+  readonly start: number;
+  readonly end: number;
+}
+
+export interface Bf03StructuredCorrectionAnalysis {
+  readonly decision: Bf03CorrectionContainmentDecision;
+  readonly correctionSpans: readonly Bf03CorrectionSpan[];
+  readonly residualView: string;
+  readonly classifierView: string;
+  readonly topicCarriedClassifierView: string;
+  readonly canonicalIntents: readonly Bf03BusinessFactIntent[];
+  readonly allowedBusinessFactIntents: readonly Bf03AllowedBusinessFactIntent[];
+  readonly genuineSizeContinuation: boolean;
+}
+
 type Bf03PolicyResolution = Awaited<
   ReturnType<RuntimePolicyResolverPort["resolve"]>
 >;
@@ -53,6 +74,7 @@ interface Bf03ExecutionContext {
   customerText: string;
   correctionDialoguePolicy: CorrectionDialoguePolicyV1;
   rawMessages: readonly Bf03RawMessage[];
+  correctionAnalysis: Bf03StructuredCorrectionAnalysis | null;
 }
 
 function bindOrReturn<T extends object>(
@@ -98,21 +120,6 @@ function hasStandaloneCorrectionLead(text: string): boolean {
   return /\b(?:em|chi|minh|toi)\s+(?:da\s+)?(?:noi|bao|nhac)\b.{0,32}\broi\b/u.test(text);
 }
 
-function rejectsPriorSizeAnswer(text: string): boolean {
-  return (
-    /\b(?:chua|khong|chang)\s+dung\b/u.test(text) ||
-    /\bsai\b/u.test(text) ||
-    /\btu van\s+lai\b/u.test(text)
-  );
-}
-
-function hasUnresolvedSizeFitQuestion(text: string): boolean {
-  return (
-    /\b(?:khong|chua)\s+(?:biet|chac)\b.{0,48}\b(?:co\s+)?(?:vua|hop)\b/u.test(text) ||
-    /\b(?:co\s+)?(?:vua|hop)\s+(?:khong|ko)\b/u.test(text)
-  );
-}
-
 const BF03_CLAUSE_SEPARATOR = /([,;.!?\n]+|\s+(?:nhưng|nhung|tuy nhiên|tuy nhien)\s+)/giu;
 const BF03_FOLDED_SIZE_TOPIC = /\b(?:size|sz|kich co|co nao|mac co)\b/gu;
 const BF03_COMPLETION_MARKER = /\broi(?:\s+(?:ma|a|nha|nhe))?\b/gu;
@@ -127,7 +134,8 @@ interface Bf03ClauseAnalysis {
   readonly parts: readonly string[];
   readonly containedPartIndexes: ReadonlySet<number>;
   readonly classifierParts: readonly string[];
-  readonly genuineSizeRequest: boolean;
+  readonly residualParts: readonly string[];
+  readonly correctionSpans: readonly Bf03CorrectionSpan[];
 }
 
 function correctionPricePrefixStart(text: string, topicStart: number): number {
@@ -190,19 +198,31 @@ function correctionSpans(value: string, pendingCorrectionLead: boolean): readonl
     }, []);
 }
 
-function neutralizeCorrectionSpans(value: string, spans: readonly Bf03TextSpan[]): string {
+function replaceCorrectionSpans(
+  value: string,
+  spans: readonly Bf03TextSpan[],
+  replacement: string,
+): string {
   let result = value.normalize("NFC");
   for (const span of [...spans].sort((left, right) => right.start - left.start)) {
-    result = `${result.slice(0, span.start)} thông tin đó ${result.slice(span.end)}`;
+    result = `${result.slice(0, span.start)}${replacement}${result.slice(span.end)}`;
   }
   return result.replace(/\s+/gu, " ").trim();
+}
+
+function normalizedResidualView(value: string): string {
+  return value
+    .replace(/^[\s,;.!?]+|[\s,;.!?]+$/gu, " ")
+    .replace(/[\s,;.!?\n]+/gu, " ")
+    .trim();
 }
 
 function analyzeCorrectionClauses(value: string): Bf03ClauseAnalysis {
   const parts = value.normalize("NFC").split(BF03_CLAUSE_SEPARATOR);
   const classifierParts = [...parts];
+  const residualParts = [...parts];
   const containedPartIndexes = new Set<number>();
-  let genuineSizeRequest = false;
+  const structuredSpans: Bf03CorrectionSpan[] = [];
   let pendingCorrectionLead = false;
   for (let index = 0; index < parts.length; index += 1) {
     const part = parts[index] ?? "";
@@ -220,29 +240,26 @@ function analyzeCorrectionClauses(value: string): Bf03ClauseAnalysis {
 
     const correctionContext = hasClearCorrectionMarker(text) || pendingCorrectionLead;
     if (correctionContext) {
-      if (rejectsPriorSizeAnswer(text) || hasUnresolvedSizeFitQuestion(text)) {
-        genuineSizeRequest = true;
-        pendingCorrectionLead = false;
-        continue;
-      }
       const spans = correctionSpans(part, pendingCorrectionLead);
       if (spans.length > 0) {
-        const classifierPart = neutralizeCorrectionSpans(part, spans);
+        const classifierPart = replaceCorrectionSpans(part, spans, " thông tin đó ");
         classifierParts[index] = classifierPart;
-        if (explicitCustomerBusinessIntents(classifierPart).includes("SIZE")) {
-          genuineSizeRequest = true;
-        } else {
-          containedPartIndexes.add(index);
+        residualParts[index] = replaceCorrectionSpans(part, spans, " ");
+        containedPartIndexes.add(index);
+        for (const span of spans) {
+          structuredSpans.push({ partIndex: index, start: span.start, end: span.end });
         }
-      } else {
-        genuineSizeRequest = true;
       }
-    } else if (explicitCustomerBusinessIntents(part).includes("SIZE")) {
-      genuineSizeRequest = true;
     }
     pendingCorrectionLead = false;
   }
-  return { parts, containedPartIndexes, classifierParts, genuineSizeRequest };
+  return {
+    parts,
+    containedPartIndexes,
+    classifierParts,
+    residualParts,
+    correctionSpans: structuredSpans,
+  };
 }
 
 /**
@@ -258,16 +275,56 @@ export function bf03CorrectionContainmentDecision(
   value: string,
   policy: CorrectionDialoguePolicyV1,
 ): Bf03CorrectionContainmentDecision {
-  if (policy !== "CORRECTION_CONTAINMENT_V1") {
-    return { applies: false, reasonCodes: [] };
-  }
+  return bf03CorrectionAnalysis(value, policy).decision;
+}
+
+function withoutProductCodes(value: string): string {
+  return value
+    .replace(/\b[A-Za-z]{1,6}\s*[-_.]?\s*\d{1,8}[A-Za-z0-9]*\b/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
+export function bf03CorrectionAnalysis(
+  value: string,
+  policy: CorrectionDialoguePolicyV1,
+): Bf03StructuredCorrectionAnalysis {
   const analysis = analyzeCorrectionClauses(value);
-  if (analysis.containedPartIndexes.size === 0 || analysis.genuineSizeRequest) {
-    return { applies: false, reasonCodes: [] };
-  }
+  const classifierView = withoutProductCodes(
+    analysis.parts.map((part, index) =>
+      analysis.containedPartIndexes.has(index) ? analysis.classifierParts[index] : part
+    ).join(""),
+  );
+  const residualView = normalizedResidualView(withoutProductCodes(
+    analysis.residualParts.join(""),
+  ));
+  const residualIntents = explicitCustomerBusinessIntents(residualView);
+  const genuineSizeContinuation = residualIntents.includes("SIZE") ||
+    hasTopicCarriedSizeContinuationSignal(residualView);
+  const topicCarriedClassifierView = genuineSizeContinuation &&
+      !residualIntents.includes("SIZE")
+    ? `size ${residualView}`.trim()
+    : residualView;
+  const canonicalIntents = explicitCustomerBusinessIntents(topicCarriedClassifierView);
+  const applies = policy === "CORRECTION_CONTAINMENT_V1" &&
+    analysis.correctionSpans.length > 0 &&
+    !genuineSizeContinuation;
+  const decision: Bf03CorrectionContainmentDecision = applies
+    ? { applies: true, reasonCodes: [BF03_CORRECTION_REASON_CODE] }
+    : { applies: false, reasonCodes: [] };
   return {
-    applies: true,
-    reasonCodes: [BF03_CORRECTION_REASON_CODE],
+    decision,
+    correctionSpans: analysis.correctionSpans,
+    residualView,
+    classifierView,
+    topicCarriedClassifierView,
+    canonicalIntents,
+    allowedBusinessFactIntents: applies
+      ? canonicalIntents.filter(
+          (intent): intent is Bf03AllowedBusinessFactIntent => intent !== "SIZE",
+        )
+      : [],
+    genuineSizeContinuation,
   };
 }
 
@@ -282,22 +339,21 @@ export function bf03LegacyClassifierView(
   decision: Bf03CorrectionContainmentDecision,
 ): string {
   if (!decision.applies) return value;
-  const analysis = analyzeCorrectionClauses(value);
-  return analysis.parts.map((part, index) =>
-    analysis.containedPartIndexes.has(index) ? analysis.classifierParts[index] : part
-  ).join("")
-    .replace(/\b[A-Za-z]{1,6}\s*[-_.]?\s*\d{1,8}[A-Za-z0-9]*\b/gu, " ")
-    .replace(/\s+/gu, " ")
-    .trim();
+  return bf03CorrectionAnalysis(value, "CORRECTION_CONTAINMENT_V1").classifierView;
 }
 
 export function bf03ContainProposal(
   proposal: AgentProposalV1,
   decision: Bf03CorrectionContainmentDecision,
+  allowedBusinessFactIntents: readonly Bf03AllowedBusinessFactIntent[] = [],
 ): AgentProposalV1 {
-  if (!decision.applies || proposal.businessFactQuery.intent !== "SIZE") {
+  if (!decision.applies || proposal.businessFactQuery.intent === "NONE") {
     return proposal;
   }
+  if (
+    proposal.businessFactQuery.intent !== "SIZE" &&
+    allowedBusinessFactIntents.includes(proposal.businessFactQuery.intent)
+  ) return proposal;
   return {
     ...proposal,
     businessFactQuery: {
@@ -326,11 +382,15 @@ export function bf03ContainDecisionEvents(
     }));
 }
 
-function correctionDecision(store: Bf03ExecutionContext): Bf03CorrectionContainmentDecision {
-  return bf03CorrectionContainmentDecision(
+function correctionAnalysis(store: Bf03ExecutionContext): Bf03StructuredCorrectionAnalysis {
+  return store.correctionAnalysis ?? bf03CorrectionAnalysis(
     store.customerText,
     store.correctionDialoguePolicy,
   );
+}
+
+function correctionDecision(store: Bf03ExecutionContext): Bf03CorrectionContainmentDecision {
+  return correctionAnalysis(store).decision;
 }
 
 function captureRawMessages(
@@ -356,6 +416,7 @@ function captureRawMessages(
     .map(({ text }) => text.trim())
     .filter(Boolean)
     .join("\n");
+  store.correctionAnalysis = null;
 }
 
 function correctionPolicyFromResolution(
@@ -491,19 +552,35 @@ function wrapModel(
 
     const restoredContext = restoreRawCustomerModelContext(args[0], store);
     const occurredAt = store.rawMessages.at(-1)?.occurredAt ?? new Date().toISOString();
-    const allowedBusinessFactIntents = explicitCustomerBusinessIntents(
-      bf03LegacyClassifierView(store.customerText, decision),
-    ).filter((intent): intent is Exclude<typeof intent, "SIZE"> => intent !== "SIZE");
+    const allowedBusinessFactIntents = correctionAnalysis(store)
+      .allowedBusinessFactIntents;
     const generated = await model.generate(
       [...restoredContext, bf03Instruction(occurredAt, allowedBusinessFactIntents)],
       args[1],
     );
-    const proposal = bf03ContainProposal(generated.proposal, decision);
+    const proposal = bf03ContainProposal(
+      generated.proposal,
+      decision,
+      allowedBusinessFactIntents,
+    );
     return proposal === generated.proposal ? generated : { ...generated, proposal };
+  };
+  const groundWithFacts: RealtimeModelPort["groundWithFacts"] = async (...args) => {
+    const grounded = await model.groundWithFacts(...args);
+    const store = scope.getStore();
+    if (!store) return grounded;
+    const analysis = correctionAnalysis(store);
+    if (!analysis.decision.applies) return grounded;
+    const proposal = bf03ContainProposal(
+      grounded.proposal,
+      analysis.decision,
+      analysis.allowedBusinessFactIntents,
+    );
+    return proposal === grounded.proposal ? grounded : { ...grounded, proposal };
   };
   const wrapped: RealtimeModelPort = {
     generate,
-    groundWithFacts: model.groundWithFacts.bind(model),
+    groundWithFacts,
   };
   if (model.groundDraftWithFacts) {
     wrapped.groundDraftWithFacts = model.groundDraftWithFacts.bind(model);
@@ -559,7 +636,11 @@ export class RealtimeRunner extends Bf01RealtimeRunner {
     const store = this.bf03Scope.getStore();
     if (!store) return message;
     store.correctionDialoguePolicy = correctionPolicyFromResolution(resolution);
-    const decision = correctionDecision(store);
+    store.correctionAnalysis = bf03CorrectionAnalysis(
+      store.customerText,
+      store.correctionDialoguePolicy,
+    );
+    const decision = store.correctionAnalysis.decision;
     if (!decision.applies) return message;
     const text = store.rawMessages
       .map(({ text: rawText }) => {
@@ -616,6 +697,7 @@ export class RealtimeRunner extends Bf01RealtimeRunner {
         customerText: "",
         correctionDialoguePolicy: "LEGACY",
         rawMessages: [],
+        correctionAnalysis: null,
       },
       () => super.processOne(),
     );

@@ -5,6 +5,7 @@ import {
   BF03_CORRECTION_REASON_CODE,
   bf03ContainDecisionEvents,
   bf03ContainProposal,
+  bf03CorrectionAnalysis,
   bf03CorrectionContainmentDecision,
   bf03LegacyClassifierView,
   explicitCustomerBusinessIntent,
@@ -57,6 +58,27 @@ function event(
 }
 
 describe("BF-03 correction containment", () => {
+  it.each([
+    ["có giá vs size rồi mà", "", [], [], true, false],
+    ["size có rồi mà bao nhiêu tiền em", "bao nhiêu tiền em", ["PRICE"], ["PRICE"], true, false],
+    ["size có rồi mà M hay L hợp hơn", "M hay L hợp hơn", ["SIZE"], [], false, true],
+  ] as const)("builds one structured correction result for %s", (
+    text,
+    residualView,
+    canonicalIntents,
+    allowedBusinessFactIntents,
+    applies,
+    genuineSizeContinuation,
+  ) => {
+    const analysis = bf03CorrectionAnalysis(text, "CORRECTION_CONTAINMENT_V1");
+    expect(analysis.correctionSpans.length).toBeGreaterThan(0);
+    expect(analysis.residualView).toBe(residualView);
+    expect(analysis.canonicalIntents).toEqual(canonicalIntents);
+    expect(analysis.allowedBusinessFactIntents).toEqual(allowedBusinessFactIntents);
+    expect(analysis.decision.applies).toBe(applies);
+    expect(analysis.genuineSizeContinuation).toBe(genuineSizeContinuation);
+  });
+
   it("replays BUG-03 without promoting the topic mention to SIZE", () => {
     const decision = bf03CorrectionContainmentDecision(
       "có giá vs size rồi mà",
@@ -128,6 +150,26 @@ describe("BF-03 correction containment", () => {
     "chị chọn size M",
     "vòng ngực 88 eo 68 thì mặc size gì",
     "90-60-90",
+    "size có rồi mà M hay L hợp hơn",
+    "size co roi ma M hay L hop hon",
+    "size có rồi mà, M hay L hợp hơn?",
+    "size co roi ma\nM hay L hop hon",
+    "M hay L hợp hơn, size có rồi mà",
+    "size có rồi mà chị phân vân M hay L",
+    "size co roi ma chi phan van M hay L",
+    "chị phân vân M hay L; size có rồi mà",
+    "size có rồi mà M có chật không em",
+    "size co roi ma M co chat khong em",
+    "M có chật không em, size có rồi mà",
+    "size có rồi mà chị đổi sang M",
+    "size co roi ma chi doi sang M",
+    "chị đổi sang M, size có rồi mà",
+    "size có rồi mà M hơi chật, tư vấn lại giúp chị",
+    "size co roi ma M hoi chat\ntu van lai giup chi",
+    "M hơi chật, tư vấn lại giúp chị; size có rồi mà",
+    "size có rồi mà S M L có đủ không",
+    "size co roi ma S M L co du khong",
+    "S M L có đủ không, size có rồi mà",
   ])("preserves genuine size-request recall: %s", (text) => {
     expect(bf03CorrectionContainmentDecision(
       text,
@@ -169,6 +211,40 @@ describe("BF-03 correction containment", () => {
     expect(explicitCustomerBusinessIntents(classifierView)).not.toContain("SIZE");
   });
 
+  it("keeps multiple correction spans local and preserves the residual classifier", () => {
+    const correctionOnly = bf03CorrectionAnalysis(
+      "size có rồi mà, size cũng đã có rồi mà",
+      "CORRECTION_CONTAINMENT_V1",
+    );
+    expect(correctionOnly.correctionSpans).toHaveLength(2);
+    expect(correctionOnly.decision.applies).toBe(true);
+    expect(correctionOnly.canonicalIntents).toEqual([]);
+
+    const mixedFact = bf03CorrectionAnalysis(
+      "size có rồi mà và hàng còn không em",
+      "CORRECTION_CONTAINMENT_V1",
+    );
+    expect(mixedFact.decision.applies).toBe(true);
+    expect(mixedFact.allowedBusinessFactIntents).toEqual(["STOCK"]);
+
+    const mixedGenuineSize = bf03CorrectionAnalysis(
+      "size có rồi mà, giá bao nhiêu, M hay L hợp hơn",
+      "CORRECTION_CONTAINMENT_V1",
+    );
+    expect(mixedGenuineSize.decision.applies).toBe(false);
+    expect(mixedGenuineSize.canonicalIntents).toEqual(["PRICE", "SIZE"]);
+  });
+
+  it.each([
+    "oversize có rồi mà",
+    "sizes có rồi mà",
+    "size có rồi mà mindset này ổn",
+  ])("does not create a SIZE continuation from token-boundary noise: %s", (text) => {
+    const analysis = bf03CorrectionAnalysis(text, "CORRECTION_CONTAINMENT_V1");
+    expect(analysis.genuineSizeContinuation).toBe(false);
+    expect(analysis.canonicalIntents).not.toContain("SIZE");
+  });
+
   it("is inert under LEGACY policy", () => {
     const decision = bf03CorrectionContainmentDecision(
       "có giá vs size rồi mà",
@@ -180,14 +256,41 @@ describe("BF-03 correction containment", () => {
     expect(bf03ContainProposal(proposal("SIZE"), decision)).toEqual(proposal("SIZE"));
   });
 
-  it("only suppresses the false SIZE capability and preserves unrelated facts", () => {
+  it.each(["PRICE", "STOCK", "ETA", "SIZE"] as const)(
+    "denies correction-only model intent %s outside the empty canonical allow-set",
+    (intent) => {
+      const decision = bf03CorrectionContainmentDecision(
+        "có giá vs size rồi mà",
+        "CORRECTION_CONTAINMENT_V1",
+      );
+      expect(bf03ContainProposal(proposal(intent), decision, []))
+        .toEqual(proposal("NONE"));
+    },
+  );
+
+  it.each([
+    ["PRICE" as const, ["PRICE"] as const, ["STOCK", "ETA", "SIZE"] as const],
+    ["STOCK" as const, ["STOCK"] as const, ["PRICE", "ETA", "SIZE"] as const],
+    ["ETA" as const, ["ETA"] as const, ["PRICE", "STOCK", "SIZE"] as const],
+  ])("allows only canonical mixed %s and denies every other model fact", (
+    allowedIntent,
+    allowed,
+    deniedIntents,
+  ) => {
     const decision = bf03CorrectionContainmentDecision(
-      "có giá vs size rồi mà",
+      `size có rồi mà ${allowedIntent === "PRICE"
+        ? "bao nhiêu tiền em"
+        : allowedIntent === "STOCK"
+          ? "hàng còn không em"
+          : "ship mấy ngày"}`,
       "CORRECTION_CONTAINMENT_V1",
     );
-    expect(bf03ContainProposal(proposal("PRICE"), decision)).toEqual(proposal("PRICE"));
-    expect(bf03ContainProposal(proposal("STOCK"), decision)).toEqual(proposal("STOCK"));
-    expect(bf03ContainProposal(proposal("ETA"), decision)).toEqual(proposal("ETA"));
+    expect(bf03ContainProposal(proposal(allowedIntent), decision, allowed))
+      .toEqual(proposal(allowedIntent));
+    for (const deniedIntent of deniedIntents) {
+      expect(bf03ContainProposal(proposal(deniedIntent), decision, allowed))
+        .toEqual(proposal("NONE"));
+    }
   });
 
   it("records bounded evidence and removes the false SIZE_CONSULT_STARTED audit", () => {

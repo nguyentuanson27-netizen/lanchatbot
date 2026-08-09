@@ -29,6 +29,13 @@ interface BenchmarkCase {
   readonly category: string;
   readonly text: string;
   readonly expectedClassifierIntents?: readonly string[];
+  readonly expectedAction?: "REPLY";
+  readonly expectedFactIntents?: readonly AgentProposalV1["businessFactQuery"]["intent"][];
+  readonly runtimeContract?:
+    | "CONTAIN_NO_FACTS"
+    | "CONTAIN_AUTHORIZED_FACT"
+    | "PASS_THROUGH_SIZE";
+  readonly unauthorizedModelIntents?: readonly AgentProposalV1["businessFactQuery"]["intent"][];
 }
 
 interface BenchmarkCorpus {
@@ -48,6 +55,39 @@ const mixedFactBenchmarkCases = benchmarkCorpus.cases.flatMap((benchmarkCase) =>
     ? [[benchmarkCase.id, intents[0], benchmarkCase.text] as const]
     : [];
 });
+
+const correctionOnlyAuthorizationCases = benchmarkCorpus.cases.flatMap((benchmarkCase) =>
+  benchmarkCase.runtimeContract === "CONTAIN_NO_FACTS"
+    ? (benchmarkCase.unauthorizedModelIntents ?? []).map((modelIntent) => [
+        benchmarkCase.id,
+        benchmarkCase.text,
+        modelIntent,
+        benchmarkCase.expectedAction,
+      ] as const)
+    : []
+);
+
+const passThroughSizeBenchmarkCases = benchmarkCorpus.cases.flatMap((benchmarkCase) =>
+  benchmarkCase.runtimeContract === "PASS_THROUGH_SIZE"
+    ? [[
+        benchmarkCase.id,
+        benchmarkCase.text,
+        benchmarkCase.expectedAction,
+        benchmarkCase.expectedFactIntents?.[0],
+      ] as const]
+    : []
+);
+
+const authorizedFactDenialCases = benchmarkCorpus.cases.flatMap((benchmarkCase) =>
+  benchmarkCase.runtimeContract === "CONTAIN_AUTHORIZED_FACT"
+    ? (benchmarkCase.unauthorizedModelIntents ?? []).map((modelIntent) => [
+        benchmarkCase.id,
+        benchmarkCase.text,
+        benchmarkCase.expectedFactIntents?.[0],
+        modelIntent,
+      ] as const)
+    : []
+);
 
 const product = {
   productId: "SD398",
@@ -200,6 +240,7 @@ function createHarness(input: {
   policy?: "LEGACY" | "CORRECTION_CONTAINMENT_V1";
   currentProductId?: string | null;
   modelIntent?: AgentProposalV1["businessFactQuery"]["intent"];
+  groundedModelIntent?: AgentProposalV1["businessFactQuery"]["intent"];
   isEcho?: boolean;
   ownMetaMessage?: boolean;
   envelopeSchemaVersion?: number;
@@ -333,7 +374,13 @@ function createHarness(input: {
     }
     return modelResult(proposal(input.modelIntent ?? "SIZE"));
   };
-  const groundWithFacts = vi.fn(async (_context, initial) => modelResult(initial));
+  const groundWithFacts = vi.fn(async (_context, initial) => modelResult({
+    ...initial,
+    businessFactQuery: {
+      ...initial.businessFactQuery,
+      intent: input.groundedModelIntent ?? initial.businessFactQuery.intent,
+    },
+  }));
   const model: RealtimeModelPort = {
     generate,
     groundWithFacts,
@@ -686,6 +733,104 @@ describe("BF-03 RealtimeRunner", () => {
       expect(harness.committed()?.decisionEvents ?? []).not.toContainEqual(
         expect.objectContaining({ eventType: "SIZE_CONSULT_STARTED" }),
       );
+    },
+  );
+
+  it.each(correctionOnlyAuthorizationCases)(
+    "couples correction-only benchmark %s to denied model %s/%s",
+    async (_id, text, modelIntent, expectedAction) => {
+    const harness = createHarness({
+      messages: [text],
+      currentProductId: "SD398",
+      modelIntent,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(bf03AllowedFactIntents(modelContext(harness))).toEqual([]);
+    expect(harness.resolveFacts).not.toHaveBeenCalled();
+    expect(harness.groundWithFacts).not.toHaveBeenCalled();
+    expect(harness.committed()?.metaPlan?.messages.length).toBeGreaterThan(0);
+    expect(harness.committed()?.decisionEvents ?? []).toContainEqual(
+      expect.objectContaining({ action: expectedAction }),
+    );
+    expect(harness.committed()?.decisionEvents ?? []).not.toContainEqual(
+      expect.objectContaining({ intent: modelIntent }),
+    );
+    },
+  );
+
+  it.each(authorizedFactDenialCases)(
+    "couples authorized benchmark %s to denied %s->%s",
+    async (_id, text, allowedIntent, modelIntent) => {
+    const harness = createHarness({
+      messages: [text],
+      currentProductId: "SD398",
+      modelIntent,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    if (harness.generatedContexts.length > 0) {
+      expect(bf03AllowedFactIntents(modelContext(harness))).toEqual([allowedIntent]);
+      expect(harness.resolveFacts).not.toHaveBeenCalled();
+      expect(harness.groundWithFacts).not.toHaveBeenCalled();
+    } else {
+      expect(harness.resolveFacts).toHaveBeenCalledTimes(1);
+      expect(harness.resolveFacts).toHaveBeenCalledWith(
+        expect.objectContaining({ intent: allowedIntent }),
+      );
+      expect(harness.resolveFacts).not.toHaveBeenCalledWith(
+        expect.objectContaining({ intent: modelIntent }),
+      );
+    }
+    expect(harness.committed()?.decisionEvents ?? []).not.toContainEqual(
+      expect.objectContaining({ intent: modelIntent }),
+    );
+    },
+  );
+
+  it("re-authorizes a grounded proposal before decision/outbox effects", async () => {
+    const harness = createHarness({
+      messages: ["size có rồi mà hàng còn không em"],
+      currentProductId: "SD398",
+      compliantBf03Model: true,
+      groundedModelIntent: "ETA",
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(harness.resolveFacts).toHaveBeenCalledTimes(1);
+    expect(harness.resolveFacts).toHaveBeenCalledWith(
+      expect.objectContaining({ intent: "STOCK" }),
+    );
+    expect(harness.groundWithFacts).toHaveBeenCalledTimes(1);
+    expect(harness.committed()?.decisionEvents ?? []).not.toContainEqual(
+      expect.objectContaining({ intent: "ETA" }),
+    );
+  });
+
+  it.each(passThroughSizeBenchmarkCases)(
+    "couples pass-through benchmark %s to guarded SIZE runtime",
+    async (_id, text, expectedAction, expectedFactIntent) => {
+    const harness = createHarness({
+      messages: [text],
+      currentProductId: "SD398",
+      modelIntent: "SIZE",
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(hasBf03Instruction(modelContext(harness))).toBe(false);
+    expect(harness.resolveFacts).toHaveBeenCalledTimes(1);
+    expect(expectedFactIntent).toBe("SIZE");
+    expect(harness.resolveFacts).toHaveBeenCalledWith(
+      expect.objectContaining({ intent: expectedFactIntent }),
+    );
+    expect(harness.groundWithFacts).toHaveBeenCalledTimes(1);
+    expect(harness.committed()?.decisionEvents ?? []).toContainEqual(
+      expect.objectContaining({
+        eventType: "SIZE_CONSULT_STARTED",
+        intent: "SIZE",
+        action: expectedAction,
+      }),
+    );
     },
   );
 
