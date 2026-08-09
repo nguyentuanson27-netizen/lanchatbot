@@ -153,6 +153,7 @@ async function runSingleTurn(input: {
   readonly policy?: RuntimePolicyResolution;
   readonly text?: string | null;
   readonly quotaAllowed?: boolean;
+  readonly quotaResults?: readonly boolean[];
   readonly draftReplies?: readonly string[];
   readonly modelAvailable?: boolean;
 }) {
@@ -249,7 +250,10 @@ async function runSingleTurn(input: {
   const policyResolver: RuntimePolicyResolverPort | undefined = input.policy
     ? { resolve: vi.fn(async () => input.policy!) }
     : undefined;
-  const quotaReserve = vi.fn(async () => input.quotaAllowed ?? true);
+  let quotaIndex = 0;
+  const quotaReserve = vi.fn(async () =>
+    input.quotaResults?.[quotaIndex++] ?? input.quotaAllowed ?? true
+  );
   const retry = vi.fn(async () => true);
   const runner = new RealtimeRunner(
     {
@@ -277,7 +281,7 @@ async function runSingleTurn(input: {
     },
     new FailClosedTagObservationProvider(),
     { workerId: "worker-bf07", mode: "LIVE", sendEnabled: true, decisionTelemetryEnabled: true },
-    input.quotaAllowed === undefined
+    input.quotaAllowed === undefined && input.quotaResults === undefined
       ? undefined
       : { reserve: quotaReserve, close: vi.fn(async () => undefined) },
     undefined,
@@ -411,7 +415,7 @@ describe("BF-07 realtime multi-product clarification", () => {
         "Chị muốn xem mẫu SD375 hay SD398 trước ạ?",
       ],
     });
-    expect(scenario.quotaReserve).toHaveBeenCalledOnce();
+    expect(scenario.quotaReserve).toHaveBeenCalledTimes(2);
     expect(scenario.draftMultiProductClarification).toHaveBeenCalledTimes(2);
     expect(scenario.draftMultiProductClarification.mock.calls[1]?.[2]).toEqual(
       expect.arrayContaining([
@@ -426,6 +430,27 @@ describe("BF-07 realtime multi-product clarification", () => {
     expect(JSON.stringify(scenario.commitInput)).not.toContain("699k");
     expect(scenario.commitInput?.state.mediaClarification).toMatchObject({ status: "ACTIVE" });
     expect(scenario.commitInput?.handoffEventPlan).toBeUndefined();
+  });
+
+  it("fails closed when quota permits the draft but denies the repair call", async () => {
+    const scenario = await runSingleTurn({
+      matchedProducts: [sd375, sd398],
+      policy: livePolicy(),
+      quotaResults: [true, false],
+      draftReplies: [
+        "SD375 giá 699k, chị chốt mẫu này nhé.",
+        "Chị muốn xem mẫu SD375 hay SD398 trước ạ?",
+      ],
+    });
+    expect(scenario.quotaReserve).toHaveBeenCalledTimes(2);
+    expect(scenario.draftMultiProductClarification).toHaveBeenCalledOnce();
+    expect(scenario.commitInput?.metaPlan).toBeUndefined();
+    expect(scenario.commitInput?.handoffEventPlan).toBeDefined();
+    expect(JSON.stringify(scenario.commitInput)).not.toContain("699k");
+    expect(scenario.commitInput?.decisionEvents).toContainEqual(expect.objectContaining({
+      eventType: "GUARD_BLOCKED",
+      reasonCodes: expect.arrayContaining(["MULTI_PRODUCT_CLARIFICATION_QUOTA_DENIED"]),
+    }));
   });
 
   it("does not consume quota when the clarification model port is unavailable", async () => {
@@ -696,7 +721,7 @@ describe("BF-07 realtime multi-product clarification", () => {
 
     expect(await runner.processOne()).toBe(true);
     expect(draftMultiProductClarification).toHaveBeenCalledTimes(2);
-    expect(quotaReserve).toHaveBeenCalledTimes(3);
+    expect(quotaReserve).toHaveBeenCalledTimes(4);
     expect(draftMultiProductClarification.mock.calls[1]?.[2]).toEqual(
       expect.arrayContaining([
         "MULTI_PRODUCT_CANDIDATE_OMITTED",

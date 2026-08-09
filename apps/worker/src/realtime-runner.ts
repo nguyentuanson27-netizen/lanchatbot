@@ -3172,56 +3172,55 @@ export class RealtimeRunner {
         if (!this.model.draftMultiProductClarification) {
           rejectionReasonCodes = ["MULTI_PRODUCT_CLARIFICATION_MODEL_UNAVAILABLE"];
         } else {
-          const quotaAvailable = !this.quota || await this.quota.reserve(claim.pageId, now);
-          if (!quotaAvailable) {
-            rejectionReasonCodes = ["MULTI_PRODUCT_CLARIFICATION_QUOTA_DENIED"];
-          } else {
-            for (let attempt = 0; attempt < 2; attempt += 1) {
-              try {
-                modelCalled = true;
-                const drafted = await this.model.draftMultiProductClarification(
-                  multiProductDecision.productIds,
-                  this.options.promptVersion,
-                  rejectionReasonCodes,
-                );
-                modelVersion = drafted.modelVersion;
-                modelLatencyMs += drafted.latencyMs;
-                modelPromptTokens += drafted.tokenUsage.promptTokenCount ?? 0;
-                modelOutputTokens += drafted.tokenUsage.candidatesTokenCount ?? 0;
-                modelTotalTokens += drafted.tokenUsage.totalTokenCount ??
-                  (drafted.tokenUsage.promptTokenCount ?? 0) +
-                    (drafted.tokenUsage.candidatesTokenCount ?? 0);
-                hasModelTokenUsage ||= Object.values(drafted.tokenUsage).some(
-                  (value) => typeof value === "number" && Number.isFinite(value),
-                );
-                const verification = verifyMultiProductClarificationProposal(
-                  drafted.proposal,
-                  multiProductDecision.productIds,
-                );
-                if (verification.accepted) {
-                  proposal = drafted.proposal;
-                  clarificationHandled = true;
-                  nextState = {
-                    ...nextState,
-                    mediaClarification: {
-                      status: "ACTIVE",
-                      candidates: selections,
-                      attemptCount: 0,
-                      maxAttempts: 3,
-                      reasonCode: "MULTI_PRODUCT_SELECTION_REQUIRED",
-                      openedAt: now.toISOString(),
-                    },
-                  };
-                  if (this.options.mode === "LIVE" && this.options.sendEnabled) {
-                    metaMessages = [{ kind: "TEXT", text: drafted.proposal.reply }];
-                  }
-                  break;
+          for (let attempt = 0; attempt < 2; attempt += 1) {
+            if (this.quota && !(await this.quota.reserve(claim.pageId, now))) {
+              rejectionReasonCodes = ["MULTI_PRODUCT_CLARIFICATION_QUOTA_DENIED"];
+              break;
+            }
+            try {
+              modelCalled = true;
+              const drafted = await this.model.draftMultiProductClarification(
+                multiProductDecision.productIds,
+                this.options.promptVersion,
+                rejectionReasonCodes,
+              );
+              modelVersion = drafted.modelVersion;
+              modelLatencyMs += drafted.latencyMs;
+              modelPromptTokens += drafted.tokenUsage.promptTokenCount ?? 0;
+              modelOutputTokens += drafted.tokenUsage.candidatesTokenCount ?? 0;
+              modelTotalTokens += drafted.tokenUsage.totalTokenCount ??
+                (drafted.tokenUsage.promptTokenCount ?? 0) +
+                  (drafted.tokenUsage.candidatesTokenCount ?? 0);
+              hasModelTokenUsage ||= Object.values(drafted.tokenUsage).some(
+                (value) => typeof value === "number" && Number.isFinite(value),
+              );
+              const verification = verifyMultiProductClarificationProposal(
+                drafted.proposal,
+                multiProductDecision.productIds,
+              );
+              if (verification.accepted) {
+                proposal = drafted.proposal;
+                clarificationHandled = true;
+                nextState = {
+                  ...nextState,
+                  mediaClarification: {
+                    status: "ACTIVE",
+                    candidates: selections,
+                    attemptCount: 0,
+                    maxAttempts: 3,
+                    reasonCode: "MULTI_PRODUCT_SELECTION_REQUIRED",
+                    openedAt: now.toISOString(),
+                  },
+                };
+                if (this.options.mode === "LIVE" && this.options.sendEnabled) {
+                  metaMessages = [{ kind: "TEXT", text: drafted.proposal.reply }];
                 }
-                rejectionReasonCodes = verification.reasonCodes;
-              } catch {
-                rejectionReasonCodes = ["MULTI_PRODUCT_CLARIFICATION_MODEL_FAILED"];
                 break;
               }
+              rejectionReasonCodes = verification.reasonCodes;
+            } catch {
+              rejectionReasonCodes = ["MULTI_PRODUCT_CLARIFICATION_MODEL_FAILED"];
+              break;
             }
           }
         }
