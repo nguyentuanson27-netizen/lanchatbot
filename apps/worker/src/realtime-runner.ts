@@ -32,6 +32,7 @@ import {
   type GroundedReplyDraftV1,
   type HandoffReasonV2,
   type InboundMessageV1,
+  type MediaPartialResolutionPolicyV1,
   type MeasurementKind,
   type ProductComponentRole,
   type ProductFactsV2,
@@ -88,11 +89,13 @@ import {
   aggregateMedia,
   aggregateVideoFrames,
   containsCustomerUrl,
+  decideMediaBatchDisposition,
   extractAdProductCodes,
   mediaItemFromSearch,
   selectedProductId,
   type MediaAggregation,
   type MediaAnalysisItem,
+  type MediaPartialResolutionPolicy,
 } from "./media-resolution.js";
 import type {
   RealtimeMediaRecognition,
@@ -159,6 +162,15 @@ type BatchCommitStatus =
   | "SUPERSEDED"
   | "NOT_REQUESTED"
   | "INBOX_ONLY";
+
+function activeMediaPartialResolutionPolicy(
+  resolution: RuntimePolicyResolution | null,
+): MediaPartialResolutionPolicy {
+  if (resolution?.bundle?.sideEffects !== "LIVE_OUTBOUND") return "LEGACY";
+  const selected: MediaPartialResolutionPolicyV1 | undefined =
+    resolution.bundle.artifacts?.closingStrategy?.mediaPartialResolutionPolicy;
+  return selected ?? "LEGACY";
+}
 
 function deterministicUuid(input: string): string {
   const hash = createHash("sha256").update(input).digest("hex");
@@ -2782,11 +2794,24 @@ export class RealtimeRunner {
       return batchCommitStatus(result);
     }
     const hasCustomerUrl = !message.isEcho && containsCustomerUrl(message.text ?? "");
+    const mediaPartialResolutionPolicy =
+      activeMediaPartialResolutionPolicy(policyResolution);
     const resolution = message.isEcho || hasCustomerUrl ||
         isPostSaleRequest(message.text ?? "") ||
         preSalePolicyIntent !== null
       ? this.emptyResolution()
-      : await this.resolveProducts(message, state, claim.pageId);
+      : await this.resolveProducts(
+          message,
+          state,
+          claim.pageId,
+          mediaPartialResolutionPolicy,
+        );
+    const mediaDisposition = decideMediaBatchDisposition({
+      aggregation: resolution.media,
+      policy: mediaPartialResolutionPolicy,
+      hasClarification:
+        resolution.clarification !== null && resolution.clarification.action !== "CLEAR",
+    });
     let resolvedProduct = resolution.primary;
     let productResolutionOrigin: ProductResolution["origin"] = resolution.origin;
     let suppressStateContinuation = false;
@@ -2841,8 +2866,15 @@ export class RealtimeRunner {
       };
     }
     let mediaClarificationHandled = false;
-    if (resolution.clarification) {
-      const clarification = resolution.clarification;
+    const stateClarification =
+      resolution.clarification && (
+        resolution.clarification.action === "CLEAR" ||
+        mediaDisposition.disposition === "OPEN_CLARIFICATION"
+      )
+        ? resolution.clarification
+        : null;
+    if (stateClarification) {
+      const clarification = stateClarification;
       if (clarification.action === "OPEN") {
         const selections = clarification.candidates.map((product, index) => ({
           label: `MAU_${index + 1}`,
@@ -3051,6 +3083,7 @@ export class RealtimeRunner {
           handoff = transitioned.handoff;
         }
       } else if (
+        mediaDisposition.disposition === "OPEN_CLARIFICATION" &&
         resolution.clarification &&
         resolution.clarification.action !== "CLEAR"
       ) {
@@ -3077,11 +3110,8 @@ export class RealtimeRunner {
             resolution.clarification.maxAttempts,
           );
         }
-      } else if (resolution.media.requiresHandoff) {
-        handoffGuardReasonCodes = [
-          "MEDIA_UNCERTAIN_RATIO_EXCEEDED",
-          `MEDIA_UNCERTAIN_${resolution.media.uncertainCount}_OF_${resolution.media.totalCount}`,
-        ];
+      } else if (mediaDisposition.disposition === "HANDOFF") {
+        handoffGuardReasonCodes = [...mediaDisposition.reasonCodes];
         const transitioned = applySilentHandoff(
           nextState,
           "PRODUCT_AMBIGUOUS",
@@ -4376,7 +4406,12 @@ export class RealtimeRunner {
     }
     if (resolvedProduct) {
       pushDecisionEvent("PRODUCT_RESOLVED");
-      pushDecisionEvent("PRODUCT_MATCHED");
+      pushDecisionEvent(
+        "PRODUCT_MATCHED",
+        mediaDisposition.disposition === "CONTINUE_MATCHES"
+          ? mediaDisposition.reasonCodes
+          : [],
+      );
     }
     if (
       metaMessages.length > 0 &&
@@ -4695,9 +4730,18 @@ export class RealtimeRunner {
 
   private async searchImages(
     urls: readonly string[],
+    policy: MediaPartialResolutionPolicy,
   ): Promise<readonly MediaProductSearchResult[]> {
     if (this.productSearch.searchImages) {
-      return this.productSearch.searchImages(urls, 3);
+      if (policy === "LEGACY") {
+        return this.productSearch.searchImages(urls, 3);
+      }
+      try {
+        return await this.productSearch.searchImages(urls, 3);
+      } catch {
+        // Fall through to isolated per-asset searches. One malformed or failed
+        // asset must not erase successful siblings in the same customer turn.
+      }
     }
     return Promise.all(urls.map(async (url): Promise<MediaProductSearchResult> => {
       try {
@@ -4709,6 +4753,24 @@ export class RealtimeRunner {
         };
       }
     }));
+  }
+
+  private async recognizeImages(
+    urls: readonly string[],
+    policy: MediaPartialResolutionPolicy,
+  ): Promise<readonly PromiseSettledResult<RealtimeMediaRecognition>[]> {
+    const pending = urls.map((url) => this.mediaRecognition!.recognize(url));
+    if (policy === "PER_ASSET_V1") return Promise.allSettled(pending);
+    const results = await Promise.all(pending);
+    return results.map((value) => ({ status: "fulfilled", value }));
+  }
+
+  private boundedMediaFailureReason(error: unknown): string {
+    const value = error instanceof Error ? error.message.trim() : "";
+    const code = value.split(":", 1)[0] ?? "";
+    return /^(?:MEDIA|IMAGE|QDRANT)_[A-Z0-9_]{1,120}$/u.test(code)
+      ? code
+      : "MEDIA_ASSET_PROCESSING_FAILED";
   }
 
   private async searchImageBytes(
@@ -4724,6 +4786,7 @@ export class RealtimeRunner {
     message: InboundMessageV1,
     state: ConversationState,
     pageId: string,
+    mediaPartialResolutionPolicy: MediaPartialResolutionPolicy,
   ): Promise<ProductResolution> {
     const text = message.text?.trim() ?? "";
     const imageAttachments = message.attachments
@@ -4856,20 +4919,37 @@ export class RealtimeRunner {
     let mediaClarification: MediaClarificationDecision | null = null;
     if (imageAttachments.length > 0) {
       const useRecognition = this.mediaRecognitionEnabledForPage(pageId);
-      const results = useRecognition
-        ? await Promise.all(imageAttachments.map((item) =>
-            this.mediaRecognition!.recognize(item.attachment.url)
-          ))
+      const recognitionResults = useRecognition
+        ? await this.recognizeImages(
+            imageAttachments.map((item) => item.attachment.url),
+            mediaPartialResolutionPolicy,
+          )
+        : null;
+      const searchResults = useRecognition
+        ? null
         : await this.searchImages(
             imageAttachments.map((item) => item.attachment.url),
+            mediaPartialResolutionPolicy,
           );
       for (const [index, item] of imageAttachments.entries()) {
-        const result = results[index] ?? {
-          status: "ERROR" as const,
-          reasonCode: "IMAGE_SEARCH_RESULT_MISSING",
-        };
         if (useRecognition) {
-          const recognition = result as RealtimeMediaRecognition;
+          const settled = recognitionResults?.[index];
+          if (!settled || settled.status === "rejected") {
+            mediaItems.push({
+              ordinal: item.ordinal,
+              mediaType: "IMAGE",
+              status: "ERROR",
+              product: null,
+              score: null,
+              gap: null,
+              reasonCode: settled
+                ? this.boundedMediaFailureReason(settled.reason)
+                : "IMAGE_SEARCH_RESULT_MISSING",
+              frameCount: 1,
+            });
+            continue;
+          }
+          const recognition: RealtimeMediaRecognition = settled.value;
           if (recognition.status === "MATCHED") {
             const product = await this.rehydrateRecognizedProduct(recognition.product);
             mediaItems.push(mediaItemFromSearch(
@@ -4909,6 +4989,10 @@ export class RealtimeRunner {
             };
           }
         } else {
+          const result = searchResults?.[index] ?? {
+            status: "ERROR" as const,
+            reasonCode: "IMAGE_SEARCH_RESULT_MISSING",
+          };
           mediaItems.push(mediaItemFromSearch(
             item.ordinal,
             "IMAGE",

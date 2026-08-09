@@ -52,6 +52,7 @@ import type {
   ProductFactsV2,
 } from "@lana/contracts";
 import type { RuntimePolicyResolution, RuntimePolicyResolverPort } from "@lana/chat-runtime";
+import type { RealtimeMediaRecognition } from "./realtime-media-recognition.js";
 
 describe("RealtimeRunner", () => {
   it("uses the approved no-size clarification after a rejected size-claim repair", () => {
@@ -2412,6 +2413,7 @@ describe("RealtimeRunner", () => {
     expect(model.generate).not.toHaveBeenCalled();
     expect(commit).toHaveBeenCalledWith(expect.objectContaining({
       state: expect.objectContaining({
+        mediaClarification: null,
         productSelections: [
           { label: "SET_1", productId: "SV921" },
           { label: "SET_2", productId: "CB182" },
@@ -2446,6 +2448,251 @@ describe("RealtimeRunner", () => {
     expect(multiProductReply([sv921, cb182], resolvedFacts, livePolicy)).toContain(
       "Ưu đãi từ 2 sản phẩm: giảm 5%",
     );
+
+    const partialCommit = vi.fn(async () => ({
+      stateCommitted: true,
+      metaOutboxCreated: 1,
+      pancakeTagOutboxCreated: false,
+      handoffEventCreated: false,
+      sendAuthorized: true,
+      reasonCodes: [],
+    }));
+    const partialSearch: RealtimeProductSearchPort = {
+      searchText: vi.fn(),
+      searchImage: vi.fn(),
+      searchImages: vi.fn(async () => [
+        { status: "MATCHED" as const, matchKind: "SEMANTIC" as const, product: sv921, score: 0.9, gap: 0.1 },
+        { status: "ERROR" as const, reasonCode: "MEDIA_IMAGE_DOWNLOAD_FAILED" },
+        { status: "MATCHED" as const, matchKind: "SEMANTIC" as const, product: cb182, score: 0.88, gap: 0.08 },
+      ]),
+    };
+    const partialPolicyResolver: RuntimePolicyResolverPort = {
+      resolve: vi.fn(async () => ({
+        status: "RESOLVED",
+        source: "DATABASE",
+        mayAffectOutbound: true,
+        reasonCodes: [],
+        audit: {},
+        auditWrite: "RECORDED",
+        bundle: {
+          schemaVersion: 1,
+          bundleId: "runtime:bf06-test",
+          bundleHash: `sha256:${"b".repeat(64)}`,
+          pageId: claim.pageId,
+          channel: "PUBLISHED",
+          sideEffects: "LIVE_OUTBOUND",
+          resolvedAt: occurredAt,
+          policy: {
+            policyVersion: "bf06-test",
+            multiItemOffer: { minimumProductCount: 2, discountBps: 500 },
+          },
+          versionReferences: [],
+          artifacts: {
+            shopPolicy: {},
+            offerPolicy: {},
+            closingStrategy: { mediaPartialResolutionPolicy: "PER_ASSET_V1" },
+            sizeCharts: {},
+            handoffMatrix: null,
+            paymentPolicy: null,
+          },
+        },
+      } as unknown as RuntimePolicyResolution)),
+    };
+    const partialRetry = vi.fn(async () => true);
+    const partialRunner = new RealtimeRunner(
+      { claimNext: vi.fn(async () => claim), complete: vi.fn(async () => true), retry: partialRetry, failPermanent: vi.fn() },
+      { ...runtime, commit: partialCommit },
+      model,
+      facts,
+      partialSearch,
+      new FailClosedTagObservationProvider(),
+      {
+        workerId: "worker-1",
+        mode: "LIVE",
+        sendEnabled: true,
+        decisionTelemetryEnabled: true,
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      partialPolicyResolver,
+    );
+
+    expect(await partialRunner.processOne()).toBe(true);
+    expect(partialRetry).not.toHaveBeenCalled();
+    expect(partialCommit).toHaveBeenCalledWith(expect.objectContaining({
+      state: expect.objectContaining({
+        productSelections: [
+          { label: "SET_1", productId: "SV921" },
+          { label: "SET_2", productId: "CB182" },
+        ],
+      }),
+      metaPlan: expect.any(Object),
+      decisionEvents: expect.arrayContaining([expect.objectContaining({
+        eventType: "PRODUCT_MATCHED",
+        reasonCodes: ["MEDIA_PARTIAL_MATCHES_PRESERVED", "MEDIA_USABLE_2_OF_3"],
+      })]),
+    }), expect.any(Date));
+    const partialCalls = partialCommit.mock.calls as unknown as readonly [
+      { readonly handoffEventPlan?: unknown },
+      Date,
+    ][];
+    expect(partialCalls[0]?.[0].handoffEventPlan).toBeUndefined();
+
+    const legacyBatchCommit = vi.fn();
+    const legacyBatchRetry = vi.fn(async () => true);
+    const legacyBatchRunner = new RealtimeRunner(
+      {
+        claimNext: vi.fn(async () => claim),
+        complete: vi.fn(async () => true),
+        retry: legacyBatchRetry,
+        failPermanent: vi.fn(),
+      },
+      { ...runtime, commit: legacyBatchCommit },
+      model,
+      facts,
+      {
+        searchText: vi.fn(),
+        searchImage: vi.fn(async () => ({ status: "NOT_FOUND" as const, reasonCode: "NO_CANDIDATES" as const })),
+        searchImages: vi.fn(async () => { throw new Error("REDIS_UNAVAILABLE"); }),
+      },
+      new FailClosedTagObservationProvider(),
+      { workerId: "worker-1", mode: "LIVE", sendEnabled: true },
+    );
+
+    expect(await legacyBatchRunner.processOne()).toBe(true);
+    expect(legacyBatchRetry).toHaveBeenCalledWith(
+      claim.inboxId,
+      claim.leaseToken,
+      "REDIS_UNAVAILABLE",
+      expect.any(Number),
+    );
+    expect(legacyBatchCommit).not.toHaveBeenCalled();
+
+    const legacyRecognitionCommit = vi.fn();
+    const legacyRecognitionRetry = vi.fn(async () => true);
+    const legacyRecognitionRunner = new RealtimeRunner(
+      {
+        claimNext: vi.fn(async () => claim),
+        complete: vi.fn(async () => true),
+        retry: legacyRecognitionRetry,
+        failPermanent: vi.fn(),
+      },
+      { ...runtime, commit: legacyRecognitionCommit },
+      model,
+      facts,
+      { searchText: vi.fn(), searchImage: vi.fn() },
+      new FailClosedTagObservationProvider(),
+      {
+        workerId: "worker-1",
+        mode: "LIVE",
+        sendEnabled: true,
+        mediaRecognitionEnabled: true,
+        mediaRecognitionPageIds: [claim.pageId],
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { recognize: vi.fn(async () => { throw new Error("MEDIA_RECOGNITION_UNAVAILABLE"); }) },
+    );
+
+    expect(await legacyRecognitionRunner.processOne()).toBe(true);
+    expect(legacyRecognitionRetry).toHaveBeenCalledWith(
+      claim.inboxId,
+      claim.leaseToken,
+      "MEDIA_RECOGNITION_UNAVAILABLE",
+      expect.any(Number),
+    );
+    expect(legacyRecognitionCommit).not.toHaveBeenCalled();
+
+    const recognitionCommit = vi.fn(async () => ({
+      stateCommitted: true,
+      metaOutboxCreated: 1,
+      pancakeTagOutboxCreated: false,
+      handoffEventCreated: false,
+      sendAuthorized: true,
+      reasonCodes: [],
+    }));
+    const recognitionSearch: RealtimeProductSearchPort = {
+      searchText: vi.fn(async (query) => ({
+        status: "MATCHED" as const,
+        matchKind: "EXACT_CODE" as const,
+        product: query.includes("CB182") ? cb182 : sv921,
+        score: 1,
+        gap: null,
+      })),
+      searchImage: vi.fn(),
+    };
+    const recognitionTelemetry = {
+      pipelineVersion: "bf06-test",
+      normalizedImageHash: "a".repeat(64),
+      raw: [],
+      cutout: [],
+      rawGap: null,
+      cutoutGap: null,
+      channelsAgree: true,
+      cutoutStatus: "OK" as const,
+      cutoutErrorCode: null,
+      aiReason: null,
+      aiDecision: null,
+      aiModel: null,
+      aiPromptVersion: null,
+      aiLatencyMs: null,
+      cacheHit: false,
+      latencyMs: { normalize: 1, rawSearch: 1, cutout: 1, cutoutSearch: 1, ai: 0, total: 5 },
+    };
+    const recognitions: readonly RealtimeMediaRecognition[] = [
+      { status: "MATCHED", product: sv921, score: 0.9, gap: 0.1, candidates: [], reasonCode: "MATCHED", telemetry: recognitionTelemetry },
+      {
+        status: "AMBIGUOUS",
+        candidates: [{ product: cb182, cutoutScore: 0.8, rawScore: 0.8 }],
+        reasonCode: "MEDIA_AMBIGUOUS",
+        telemetry: recognitionTelemetry,
+      },
+      { status: "MATCHED", product: cb182, score: 0.88, gap: 0.08, candidates: [], reasonCode: "MATCHED", telemetry: recognitionTelemetry },
+    ];
+    let recognitionIndex = 0;
+    const recognitionRunner = new RealtimeRunner(
+      { claimNext: vi.fn(async () => claim), complete: vi.fn(async () => true), retry: vi.fn(), failPermanent: vi.fn() },
+      { ...runtime, commit: recognitionCommit },
+      model,
+      facts,
+      recognitionSearch,
+      new FailClosedTagObservationProvider(),
+      {
+        workerId: "worker-1",
+        mode: "LIVE",
+        sendEnabled: true,
+        decisionTelemetryEnabled: true,
+        mediaRecognitionEnabled: true,
+        mediaClarificationEnabled: true,
+        mediaRecognitionPageIds: [claim.pageId],
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      partialPolicyResolver,
+      { recognize: vi.fn(async () => recognitions[recognitionIndex++]!) },
+    );
+
+    expect(await recognitionRunner.processOne()).toBe(true);
+    expect(recognitionCommit).toHaveBeenCalledWith(expect.objectContaining({
+      state: expect.objectContaining({
+        mediaClarification: null,
+        productSelections: [
+          { label: "SET_1", productId: "SV921" },
+          { label: "SET_2", productId: "CB182" },
+        ],
+      }),
+      decisionEvents: expect.arrayContaining([expect.objectContaining({
+        eventType: "PRODUCT_MATCHED",
+        reasonCodes: ["MEDIA_PARTIAL_MATCHES_PRESERVED", "MEDIA_USABLE_2_OF_3"],
+      })]),
+    }), expect.any(Date));
   });
 
   it("silently hands off a customer text URL before search or model generation", async () => {
