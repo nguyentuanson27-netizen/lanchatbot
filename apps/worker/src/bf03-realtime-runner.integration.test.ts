@@ -474,9 +474,24 @@ describe("BF-03 RealtimeRunner", () => {
     expect(await harness.runner.processOne()).toBe(true);
     expect(harness.searchText).toHaveBeenCalledWith("SD398");
     expect(harness.committed()?.state.currentProductId).toBe("SD398");
+    // A standalone product-code item may complete through the existing
+    // deterministic fact path without calling the model. This regression is
+    // specifically about preserving BF-02 verified product context.
+    expect(hasBf03Evidence(harness.committed())).toBe(true);
+  });
+
+  it("restores same-timestamp native batch messages to the model in receive order", async () => {
+    const messages = ["chị nhắc rồi đó", "size có rồi mà"] as const;
+    const harness = createHarness({
+      messages,
+      nativeBatch: true,
+      currentProductId: "SD398",
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(harness.generatedContexts).toHaveLength(1);
     expect(customerTexts(modelContext(harness))).toEqual(messages);
-    // The standalone code message is allowed to retain its legacy PRICE lookup;
-    // this regression is specifically about preserving verified product context.
+    expect(hasBf03Instruction(modelContext(harness))).toBe(true);
     expect(hasBf03Evidence(harness.committed())).toBe(true);
   });
 
