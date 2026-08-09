@@ -106,8 +106,11 @@ describe("media resolution policy", () => {
         status: "AMBIGUOUS",
         reasonCode: "MEDIA_AMBIGUOUS",
         candidates: [],
-      }),
-      mediaItemFromSearch(3, "IMAGE", { status: "NOT_FOUND", reasonCode: "NO_VIABLE_CANDIDATES" }),
+      } as unknown as MediaProductSearchResult),
+      mediaItemFromSearch(3, "IMAGE", {
+        status: "NOT_FOUND",
+        reasonCode: "NO_VIABLE_CANDIDATES",
+      } as unknown as MediaProductSearchResult),
     ]);
 
     expect(aggregation.items.map(({ status, reasonCode }) => ({ status, reasonCode }))).toEqual([

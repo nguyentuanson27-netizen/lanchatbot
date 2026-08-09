@@ -2446,6 +2446,97 @@ describe("RealtimeRunner", () => {
     expect(multiProductReply([sv921, cb182], resolvedFacts, livePolicy)).toContain(
       "Ưu đãi từ 2 sản phẩm: giảm 5%",
     );
+
+    const partialCommit = vi.fn(async () => ({
+      stateCommitted: true,
+      metaOutboxCreated: 1,
+      pancakeTagOutboxCreated: false,
+      handoffEventCreated: false,
+      sendAuthorized: true,
+      reasonCodes: [],
+    }));
+    const partialSearch: RealtimeProductSearchPort = {
+      searchText: vi.fn(),
+      searchImage: vi.fn(),
+      searchImages: vi.fn(async () => [
+        { status: "MATCHED" as const, matchKind: "SEMANTIC" as const, product: sv921, score: 0.9, gap: 0.1 },
+        { status: "ERROR" as const, reasonCode: "MEDIA_IMAGE_DOWNLOAD_FAILED" },
+        { status: "MATCHED" as const, matchKind: "SEMANTIC" as const, product: cb182, score: 0.88, gap: 0.08 },
+      ]),
+    };
+    const partialPolicyResolver: RuntimePolicyResolverPort = {
+      resolve: vi.fn(async () => ({
+        status: "RESOLVED",
+        source: "DATABASE",
+        mayAffectOutbound: true,
+        reasonCodes: [],
+        audit: {},
+        auditWrite: "RECORDED",
+        bundle: {
+          schemaVersion: 1,
+          bundleId: "runtime:bf06-test",
+          bundleHash: `sha256:${"b".repeat(64)}`,
+          pageId: claim.pageId,
+          channel: "PUBLISHED",
+          sideEffects: "LIVE_OUTBOUND",
+          resolvedAt: occurredAt,
+          policy: {
+            policyVersion: "bf06-test",
+            multiItemOffer: { minimumProductCount: 2, discountBps: 500 },
+          },
+          versionReferences: [],
+          artifacts: {
+            shopPolicy: {},
+            offerPolicy: {},
+            closingStrategy: { mediaPartialResolutionPolicy: "PER_ASSET_V1" },
+            sizeCharts: {},
+            handoffMatrix: null,
+            paymentPolicy: null,
+          },
+        },
+      } as unknown as RuntimePolicyResolution)),
+    };
+    const partialRetry = vi.fn(async () => true);
+    const partialRunner = new RealtimeRunner(
+      { claimNext: vi.fn(async () => claim), complete: vi.fn(async () => true), retry: partialRetry, failPermanent: vi.fn() },
+      { ...runtime, commit: partialCommit },
+      model,
+      facts,
+      partialSearch,
+      new FailClosedTagObservationProvider(),
+      {
+        workerId: "worker-1",
+        mode: "LIVE",
+        sendEnabled: true,
+        decisionTelemetryEnabled: true,
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      partialPolicyResolver,
+    );
+
+    expect(await partialRunner.processOne()).toBe(true);
+    expect(partialRetry).not.toHaveBeenCalled();
+    expect(partialCommit).toHaveBeenCalledWith(expect.objectContaining({
+      state: expect.objectContaining({
+        productSelections: [
+          { label: "SET_1", productId: "SV921" },
+          { label: "SET_2", productId: "CB182" },
+        ],
+      }),
+      metaPlan: expect.any(Object),
+      decisionEvents: expect.arrayContaining([expect.objectContaining({
+        eventType: "PRODUCT_MATCHED",
+        reasonCodes: ["MEDIA_PARTIAL_MATCHES_PRESERVED", "MEDIA_USABLE_2_OF_3"],
+      })]),
+    }), expect.any(Date));
+    const partialCalls = partialCommit.mock.calls as unknown as readonly [
+      { readonly handoffEventPlan?: unknown },
+      Date,
+    ][];
+    expect(partialCalls[0]?.[0].handoffEventPlan).toBeUndefined();
   });
 
   it("silently hands off a customer text URL before search or model generation", async () => {

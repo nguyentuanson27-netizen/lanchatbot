@@ -24,6 +24,13 @@ export interface MediaAggregation {
   readonly requiresHandoff: boolean;
 }
 
+export type MediaPartialResolutionPolicy = "LEGACY" | "PER_ASSET_V1";
+
+export interface MediaBatchDisposition {
+  readonly disposition: "CONTINUE_MATCHES" | "OPEN_CLARIFICATION" | "HANDOFF";
+  readonly reasonCodes: readonly string[];
+}
+
 export function containsCustomerUrl(value: string): boolean {
   return /(?:https?:\/\/|www\.)[^\s<>]+/iu.test(value);
 }
@@ -131,6 +138,54 @@ export function aggregateMedia(items: readonly MediaAnalysisItem[]): MediaAggreg
     uncertainRatio,
     requiresHandoff: totalCount > 0 && uncertainRatio > 0.2,
   };
+}
+
+/**
+ * BF-06 final media-batch reconciliation. Asset analysis remains independent;
+ * this policy decides only whether already verified matches may continue.
+ */
+export function decideMediaBatchDisposition(input: {
+  readonly aggregation: MediaAggregation;
+  readonly policy: MediaPartialResolutionPolicy;
+  readonly hasClarification: boolean;
+}): MediaBatchDisposition {
+  const { aggregation, policy, hasClarification } = input;
+  const usableCount = aggregation.items.filter((item) => item.status === "MATCHED").length;
+
+  if (policy === "PER_ASSET_V1" && usableCount > 0) {
+    return {
+      disposition: "CONTINUE_MATCHES",
+      reasonCodes: aggregation.uncertainCount === 0
+        ? []
+        : [
+            "MEDIA_PARTIAL_MATCHES_PRESERVED",
+            `MEDIA_USABLE_${usableCount}_OF_${aggregation.totalCount}`,
+          ],
+    };
+  }
+  if (hasClarification) {
+    return {
+      disposition: "OPEN_CLARIFICATION",
+      reasonCodes: ["MEDIA_CLARIFICATION_REQUIRED"],
+    };
+  }
+  if (aggregation.totalCount > 0 && (
+    aggregation.requiresHandoff || usableCount === 0
+  )) {
+    return {
+      disposition: "HANDOFF",
+      reasonCodes: policy === "LEGACY"
+        ? [
+            "MEDIA_UNCERTAIN_RATIO_EXCEEDED",
+            `MEDIA_UNCERTAIN_${aggregation.uncertainCount}_OF_${aggregation.totalCount}`,
+          ]
+        : [
+            "MEDIA_NO_USABLE_ASSET",
+            `MEDIA_UNUSABLE_${aggregation.uncertainCount}_OF_${aggregation.totalCount}`,
+          ],
+    };
+  }
+  return { disposition: "CONTINUE_MATCHES", reasonCodes: [] };
 }
 
 export function selectedProductId(
