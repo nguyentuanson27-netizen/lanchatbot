@@ -1,13 +1,31 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { MediaProductSearchResult, StableProductDocument } from "@lana/business-tools";
 import {
   aggregateMedia,
   aggregateVideoFrames,
   containsCustomerUrl,
+  decideMediaBatchDisposition,
   extractAdProductCodes,
   mediaItemFromSearch,
   selectedProductId,
 } from "./media-resolution.js";
+
+interface Bf06ReplayCase {
+  readonly name: string;
+  readonly policy: "LEGACY" | "PER_ASSET_V1";
+  readonly assetStatuses: readonly {
+    readonly status: "MATCHED" | "AMBIGUOUS" | "NOT_FOUND" | "ERROR";
+    readonly reasonCode: string | null;
+  }[];
+  readonly hasClarification: boolean;
+  readonly expectedDisposition: "CONTINUE_MATCHES" | "OPEN_CLARIFICATION" | "HANDOFF";
+}
+
+const bf06Replay = JSON.parse(readFileSync(
+  new URL("../../../benchmarks/bf06/per-asset-resolution-v1.json", import.meta.url),
+  "utf8",
+)) as readonly Bf06ReplayCase[];
 
 function product(productId: string): StableProductDocument {
   return {
@@ -60,6 +78,44 @@ describe("media resolution policy", () => {
       mediaItemFromSearch(1, "IMAGE", match("SV2")),
       mediaItemFromSearch(2, "IMAGE", unclear),
     ]).requiresHandoff).toBe(true);
+  });
+
+  it.each(bf06Replay)("replays BF-06 per-asset policy: $name", (fixture) => {
+    const aggregation = aggregateMedia(fixture.assetStatuses.map((asset, ordinal) =>
+      asset.status === "MATCHED"
+        ? mediaItemFromSearch(ordinal, "IMAGE", match(`SD${390 + ordinal}`))
+        : mediaItemFromSearch(ordinal, "IMAGE", {
+            status: asset.status,
+            reasonCode: asset.reasonCode!,
+            ...(asset.status === "AMBIGUOUS" ? { candidates: [] } : {}),
+          } as MediaProductSearchResult)
+    ));
+
+    expect(decideMediaBatchDisposition({
+      aggregation,
+      policy: fixture.policy,
+      hasClarification: fixture.hasClarification,
+    }).disposition).toBe(fixture.expectedDisposition);
+  });
+
+  it("keeps download, unsupported-type, ambiguity and low-confidence evidence distinct", () => {
+    const aggregation = aggregateMedia([
+      mediaItemFromSearch(0, "IMAGE", { status: "ERROR", reasonCode: "MEDIA_IMAGE_DOWNLOAD_FAILED" }),
+      mediaItemFromSearch(1, "IMAGE", { status: "ERROR", reasonCode: "MEDIA_IMAGE_CONTENT_TYPE_INVALID" }),
+      mediaItemFromSearch(2, "IMAGE", {
+        status: "AMBIGUOUS",
+        reasonCode: "MEDIA_AMBIGUOUS",
+        candidates: [],
+      }),
+      mediaItemFromSearch(3, "IMAGE", { status: "NOT_FOUND", reasonCode: "NO_VIABLE_CANDIDATES" }),
+    ]);
+
+    expect(aggregation.items.map(({ status, reasonCode }) => ({ status, reasonCode }))).toEqual([
+      { status: "ERROR", reasonCode: "MEDIA_IMAGE_DOWNLOAD_FAILED" },
+      { status: "ERROR", reasonCode: "MEDIA_IMAGE_CONTENT_TYPE_INVALID" },
+      { status: "AMBIGUOUS", reasonCode: "MEDIA_AMBIGUOUS" },
+      { status: "NOT_FOUND", reasonCode: "NO_VIABLE_CANDIDATES" },
+    ]);
   });
 
   it("requires two of three video frames to agree", () => {

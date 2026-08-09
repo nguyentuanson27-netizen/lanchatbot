@@ -1,0 +1,65 @@
+[
+  {
+    "name": "two images preserve one match after download failure",
+    "policy": "PER_ASSET_V1",
+    "assetStatuses": [
+      { "status": "MATCHED", "reasonCode": null },
+      { "status": "ERROR", "reasonCode": "MEDIA_IMAGE_DOWNLOAD_FAILED" }
+    ],
+    "hasClarification": false,
+    "expectedDisposition": "CONTINUE_MATCHES"
+  },
+  {
+    "name": "three images preserve two matches despite ambiguity",
+    "policy": "PER_ASSET_V1",
+    "assetStatuses": [
+      { "status": "MATCHED", "reasonCode": null },
+      { "status": "AMBIGUOUS", "reasonCode": "MEDIA_AMBIGUOUS" },
+      { "status": "MATCHED", "reasonCode": null }
+    ],
+    "hasClarification": true,
+    "expectedDisposition": "CONTINUE_MATCHES"
+  },
+  {
+    "name": "four images preserve three matches after unsupported type",
+    "policy": "PER_ASSET_V1",
+    "assetStatuses": [
+      { "status": "MATCHED", "reasonCode": null },
+      { "status": "MATCHED", "reasonCode": null },
+      { "status": "ERROR", "reasonCode": "MEDIA_IMAGE_CONTENT_TYPE_INVALID" },
+      { "status": "MATCHED", "reasonCode": null }
+    ],
+    "hasClarification": false,
+    "expectedDisposition": "CONTINUE_MATCHES"
+  },
+  {
+    "name": "all failed assets may clarify when candidates remain",
+    "policy": "PER_ASSET_V1",
+    "assetStatuses": [
+      { "status": "AMBIGUOUS", "reasonCode": "MEDIA_AMBIGUOUS" },
+      { "status": "NOT_FOUND", "reasonCode": "NO_VIABLE_CANDIDATES" }
+    ],
+    "hasClarification": true,
+    "expectedDisposition": "OPEN_CLARIFICATION"
+  },
+  {
+    "name": "all failed assets hand off when no safe result or clarification remains",
+    "policy": "PER_ASSET_V1",
+    "assetStatuses": [
+      { "status": "ERROR", "reasonCode": "MEDIA_IMAGE_DOWNLOAD_TIMEOUT" },
+      { "status": "NOT_FOUND", "reasonCode": "NO_VIABLE_CANDIDATES" }
+    ],
+    "hasClarification": false,
+    "expectedDisposition": "HANDOFF"
+  },
+  {
+    "name": "legacy ratio authority remains the inactive-default rollback",
+    "policy": "LEGACY",
+    "assetStatuses": [
+      { "status": "MATCHED", "reasonCode": null },
+      { "status": "ERROR", "reasonCode": "MEDIA_IMAGE_DOWNLOAD_FAILED" }
+    ],
+    "hasClarification": false,
+    "expectedDisposition": "HANDOFF"
+  }
+]
