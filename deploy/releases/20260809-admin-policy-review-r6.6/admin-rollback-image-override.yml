@@ -1,0 +1,5 @@
+services:
+  admin-api:
+    image: ${ROLLBACK_ADMIN_API_IMAGE:?ROLLBACK_ADMIN_API_IMAGE must be pinned}
+  admin-web:
+    image: ${ROLLBACK_ADMIN_WEB_IMAGE:?ROLLBACK_ADMIN_WEB_IMAGE must be pinned}

@@ -70,7 +70,7 @@ const unknownField = structuredClone(example); unknownField.unapproved = true; i
 
 const manifestDir = join(root, 'deploy', 'manifests');
 for (const file of readdirSync(manifestDir).filter((name) => name.endsWith('.json'))) JSON.parse(readFileSync(join(manifestDir, file), 'utf8'));
-const adminReleaseTag = '20260809-admin-policy-review-r6.5';
+const adminReleaseTag = '20260809-admin-policy-review-r6.6';
 const adminReleaseDir = join(root, 'deploy', 'releases', adminReleaseTag);
 const adminReleaseScripts = [
   'common.sh',
@@ -140,7 +140,7 @@ if (JSON.stringify(adminManifest.scope?.targetServices) !== JSON.stringify(['adm
 if (adminManifest.scope?.adminSimulationWorkerMustRemainUnchanged !== true || adminManifest.scope?.messengerProductionTestAllowed !== false) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_NON_TARGET_SCOPE');
 }
-if (adminManifest.supersedesUnexecutedRelease !== '20260809-admin-policy-review-r6.4' ||
+if (adminManifest.supersedesUnexecutedRelease !== '20260809-admin-policy-review-r6.5' ||
     adminManifest.deploymentAutomation?.automaticRollbackOnSoakFailure !== true ||
     adminManifest.deploymentAutomation?.globalDeploymentLockRequired !== true ||
     adminManifest.rollback?.runtimeDefinitionAuthority !== 'previous release Compose plus reviewed image-only override') {
@@ -149,6 +149,13 @@ if (adminManifest.supersedesUnexecutedRelease !== '20260809-admin-policy-review-
 const adminReleaseSelfTest = spawnSync(process.execPath, [join(adminReleaseDir, 'test-release-automation.mjs')], { encoding: 'utf8' });
 if (adminReleaseSelfTest.status !== 0) {
   throw new Error(`ADMIN_POLICY_RELEASE_SELF_TEST_FAILED:${adminReleaseSelfTest.stderr.trim()}`);
+}
+const dockerfile = readFileSync(join(root, 'deploy', 'Dockerfile'), 'utf8');
+if (!dockerfile.includes('RUN apk add --no-cache bash ffmpeg git')) {
+  throw new Error('ADMIN_POLICY_RELEASE_BUILD_BASH_MISSING');
+}
+if ((dockerfile.split('FROM node:22-alpine AS runtime')[1] ?? '').match(/apk add[^\n]*\bbash\b/)) {
+  throw new Error('ADMIN_POLICY_RELEASE_RUNTIME_BASH_FORBIDDEN');
 }
 const a0Name = '20260802-r32.2.2-runtime-reconciliation.json'; const a0Bytes = readFileSync(join(manifestDir, a0Name)); const a0 = JSON.parse(a0Bytes);
 if (a0.schemaVersion !== 1 || typeof a0.capturedAt !== 'string' || typeof a0.documentType !== 'string' || !/^[a-f0-9]{40}$/.test(a0.sourceCommit ?? '') || a0.attestationLevel !== 'PARTIAL') throw new Error('A0_RECONCILIATION_REQUIRED_FIELDS');
