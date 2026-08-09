@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { validateReleaseSource } from './release-source.mjs';
@@ -69,6 +70,53 @@ const unknownField = structuredClone(example); unknownField.unapproved = true; i
 
 const manifestDir = join(root, 'deploy', 'manifests');
 for (const file of readdirSync(manifestDir).filter((name) => name.endsWith('.json'))) JSON.parse(readFileSync(join(manifestDir, file), 'utf8'));
+const adminReleaseTag = '20260809-admin-policy-review-r6.1';
+const adminReleaseDir = join(root, 'deploy', 'releases', adminReleaseTag);
+const adminReleaseScripts = [
+  'common.sh',
+  'preflight.sh',
+  'run-build.sh',
+  'cutover.sh',
+  'promote-runtime-state.sh',
+  'postcheck.sh',
+  'soak.sh',
+  'rollback.sh'
+];
+for (const scriptName of adminReleaseScripts) {
+  const scriptPath = join(adminReleaseDir, scriptName);
+  if (!existsSync(scriptPath)) throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_MISSING:${scriptName}`);
+  const script = readFileSync(scriptPath, 'utf8');
+  if (!script.startsWith('#!/usr/bin/env bash\nset -euo pipefail\n')) throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_NOT_FAIL_CLOSED:${scriptName}`);
+  if (/\beval\b/.test(script)) throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_EVAL_FORBIDDEN:${scriptName}`);
+  const syntax = spawnSync('bash', ['-n', scriptPath], { encoding: 'utf8' });
+  if (!syntax.error && syntax.status !== 0) throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_SYNTAX:${scriptName}:${syntax.stderr.trim()}`);
+  if (syntax.error && syntax.error.code !== 'ENOENT') throw syntax.error;
+}
+const adminCutover = readFileSync(join(adminReleaseDir, 'cutover.sh'), 'utf8');
+for (const required of ['--no-deps', 'admin-api', 'admin-web', 'ADMIN_SIMULATION_IMAGE', 'rollback.sh']) {
+  if (!adminCutover.includes(required)) throw new Error(`ADMIN_POLICY_CUTOVER_GUARD_MISSING:${required}`);
+}
+const adminRollback = readFileSync(join(adminReleaseDir, 'rollback.sh'), 'utf8');
+for (const required of ['--no-deps', 'admin-api', 'admin-web', 'RUNTIME_STATE_ROLLBACK_EVIDENCE_FILE']) {
+  if (!adminRollback.includes(required)) throw new Error(`ADMIN_POLICY_ROLLBACK_GUARD_MISSING:${required}`);
+}
+const adminManifest = JSON.parse(readFileSync(join(manifestDir, `${adminReleaseTag}.json`), 'utf8'));
+if (adminManifest.releaseTag !== adminReleaseTag || adminManifest.source?.implementationCommit !== 'aaa1a28200c98fa7be79ec1c4c66f5f10a95272a') {
+  throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_PROVENANCE');
+}
+if (adminManifest.database?.migrationRequired !== false || adminManifest.database?.backfillRequired !== false) {
+  throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_DATABASE_SCOPE');
+}
+if (JSON.stringify(adminManifest.scope?.targetServices) !== JSON.stringify(['admin-api', 'admin-web'])) {
+  throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_SERVICE_SCOPE');
+}
+if (adminManifest.scope?.adminSimulationWorkerMustRemainUnchanged !== true || adminManifest.scope?.messengerProductionTestAllowed !== false) {
+  throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_NON_TARGET_SCOPE');
+}
+const adminReleaseSelfTest = spawnSync(process.execPath, [join(adminReleaseDir, 'test-release-automation.mjs')], { encoding: 'utf8' });
+if (adminReleaseSelfTest.status !== 0) {
+  throw new Error(`ADMIN_POLICY_RELEASE_SELF_TEST_FAILED:${adminReleaseSelfTest.stderr.trim()}`);
+}
 const a0Name = '20260802-r32.2.2-runtime-reconciliation.json'; const a0Bytes = readFileSync(join(manifestDir, a0Name)); const a0 = JSON.parse(a0Bytes);
 if (a0.schemaVersion !== 1 || typeof a0.capturedAt !== 'string' || typeof a0.documentType !== 'string' || !/^[a-f0-9]{40}$/.test(a0.sourceCommit ?? '') || a0.attestationLevel !== 'PARTIAL') throw new Error('A0_RECONCILIATION_REQUIRED_FIELDS');
 const recordedA0Digest = readFileSync(join(manifestDir, `${a0Name}.sha256`), 'utf8').trim().split(/\s+/)[0];
