@@ -15,9 +15,9 @@
     "@lana/contracts": "workspace:*",
     "@lana/database": "workspace:*",
     "@lana/dataset-store": "workspace:*",
-    "fastify": "^5.4.0",
+    "fastify": "^5.11.3",
     "pg": "^8.16.3",
-    "sharp": "0.34.3"
+    "sharp": "0.35.3"
   },
   "devDependencies": {
     "@types/pg": "^8.15.5"
