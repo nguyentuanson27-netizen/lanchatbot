@@ -34,6 +34,7 @@ import {
   type InboundMessageV1,
   type MediaPartialResolutionPolicyV1,
   type MultiProductResolutionPolicyV1,
+  type CustomerUrlPolicyV1,
   type MeasurementKind,
   type ProductComponentRole,
   type ProductFactsV2,
@@ -89,7 +90,6 @@ import type { ChatHistoryPort } from "./redis-chat-history.js";
 import {
   aggregateMedia,
   aggregateVideoFrames,
-  containsCustomerUrl,
   decideMediaBatchDisposition,
   extractAdProductCodes,
   mediaItemFromSearch,
@@ -98,6 +98,14 @@ import {
   type MediaAnalysisItem,
   type MediaPartialResolutionPolicy,
 } from "./media-resolution.js";
+import {
+  classifyCustomerUrls,
+  customerUrlItemAuthorizesProduct,
+  redactCustomerUrlsForModel,
+  verifyCustomerUrlExplanationProposal,
+  type CustomerUrlDecision,
+  type CustomerUrlDisposition,
+} from "./customer-url-policy.js";
 import {
   decideMultiProductResolution,
   type MultiProductResolutionPolicy,
@@ -187,6 +195,16 @@ function activeMultiProductResolutionPolicy(
     bundle.artifacts?.closingStrategy?.multiProductResolutionPolicy;
   return selected ?? "LEGACY";
 }
+
+function activeCustomerUrlPolicy(
+  resolution: RuntimePolicyResolution | null,
+): CustomerUrlPolicyV1 {
+  const bundle = outboundRuntimePolicy(resolution);
+  return bundle?.artifacts?.closingStrategy?.customerUrlPolicy ?? "STRICT_BLOCK_ALL";
+}
+
+const CUSTOMER_URL_SAFE_FALLBACK_REPLY =
+  "Em kh\u00f4ng th\u1ec3 m\u1edf li\u00ean k\u1ebft n\u00e0y an to\u00e0n. Ch\u1ecb g\u1eedi m\u00e3 s\u1ea3n ph\u1ea9m ho\u1eb7c \u1ea3nh \u0111\u1ec3 em ki\u1ec3m tra nh\u00e9.";
 
 function deterministicUuid(input: string): string {
   const hash = createHash("sha256").update(input).digest("hex");
@@ -1843,6 +1861,7 @@ export interface RealtimeModelPort {
   groundDraftWithFacts?: VertexShadowModel["groundDraftWithFacts"];
   repairSizeClaimDraft?: VertexShadowModel["repairSizeClaimDraft"];
   draftMultiProductClarification?: VertexShadowModel["draftMultiProductClarification"];
+  draftCustomerUrlExplanation?: VertexShadowModel["draftCustomerUrlExplanation"];
 }
 
 export interface CanonicalChatHistoryPort {
@@ -2618,6 +2637,10 @@ export class RealtimeRunner {
       message,
       policyResolution,
     );
+    const customerUrlDecision = classifyCustomerUrls(
+      message.text ?? "",
+      activeCustomerUrlPolicy(policyResolution),
+    );
     const policyAuditRef = policyResolution?.bundle
       ? runtimePolicyAuditReference(policyResolution.bundle)
       : null;
@@ -2707,7 +2730,9 @@ export class RealtimeRunner {
             ? ("MIXED" as const)
             : ("IMAGE" as const)
           : ("TEXT" as const),
-      text: redactAnalyticsMessage(original.text ?? "").text,
+      text: redactCustomerUrlsForModel(
+        redactAnalyticsMessage(original.text ?? "").text,
+      ),
       attachmentCount: original.attachments.length,
       occurredAt: original.occurredAt,
     }));
@@ -2719,6 +2744,10 @@ export class RealtimeRunner {
         this.options.contextHistoryLimit,
       )
         .catch(() => [])]
+        .map((entry) => ({
+          ...entry,
+          text: redactCustomerUrlsForModel(entry.text),
+        }))
         .filter((entry) => !currentFingerprints.has(contextFingerprint(entry)));
       for (let index = 0; index < currentContexts.length; index += 1) {
         const currentContext = currentContexts[index];
@@ -2787,6 +2816,7 @@ export class RealtimeRunner {
         message,
         batch.lastReceiveSequence,
         null,
+        customerUrlDecision.disposition === "HANDOFF",
       );
       const applied = applyInboundEvent({
         state,
@@ -2810,14 +2840,35 @@ export class RealtimeRunner {
       );
       return batchCommitStatus(result);
     }
-    const hasCustomerUrl = !message.isEcho && containsCustomerUrl(message.text ?? "");
     const mediaPartialResolutionPolicy =
       activeMediaPartialResolutionPolicy(policyResolution);
-    const resolution = message.isEcho || hasCustomerUrl ||
+    let customerUrlDisposition: CustomerUrlDisposition = customerUrlDecision.disposition;
+    let customerUrlReasonCodes = [...customerUrlDecision.reasonCodes];
+    const approvedCustomerUrl = !message.isEcho &&
+      (customerUrlDisposition === "CONTINUE" ||
+        customerUrlDisposition === "VERIFY_ADMIN_MEDIA") &&
+      customerUrlDecision.items.length > 0;
+    const approvedCustomerUrlResolution = approvedCustomerUrl
+      ? await this.resolveCustomerUrlProducts(customerUrlDecision)
+      : null;
+    if (approvedCustomerUrl && approvedCustomerUrlResolution === null) {
+      customerUrlDisposition = "EXPLAIN_UNSUPPORTED";
+      customerUrlReasonCodes = [
+        ...new Set([
+          ...customerUrlReasonCodes,
+          customerUrlDecision.disposition === "VERIFY_ADMIN_MEDIA"
+            ? "CUSTOMER_URL_MEDIA_NOT_VERIFIED"
+            : "CUSTOMER_URL_PRODUCT_NOT_FOUND",
+        ]),
+      ];
+    }
+    const resolution = message.isEcho ||
+        customerUrlDisposition === "HANDOFF" ||
+        customerUrlDisposition === "EXPLAIN_UNSUPPORTED" ||
         isPostSaleRequest(message.text ?? "") ||
         preSalePolicyIntent !== null
       ? this.emptyResolution()
-      : await this.resolveProducts(
+      : approvedCustomerUrlResolution ?? await this.resolveProducts(
           message,
           state,
           claim.pageId,
@@ -2865,6 +2916,7 @@ export class RealtimeRunner {
       message,
       batch.lastReceiveSequence,
       resolvedProduct?.productId ?? null,
+      customerUrlDisposition === "HANDOFF",
     );
     const applied = applyInboundEvent({
       state,
@@ -2946,7 +2998,8 @@ export class RealtimeRunner {
       this.options.mediaRecognitionPageIds.includes(claim.pageId);
     let handoff = applied.handoff;
     let businessFacts: BusinessFactEnvelopeV1 | null = null;
-    let handoffGuardReasonCodes: readonly string[] = [];
+    let handoffGuardReasonCodes: readonly string[] =
+      customerUrlDisposition === "HANDOFF" ? customerUrlReasonCodes : [];
     let sizeAdviceRequiresHandoff = false;
     let salesCyclePlan: RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null = null;
     let salesDesiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null = null;
@@ -3083,7 +3136,75 @@ export class RealtimeRunner {
       (multiFactQueries.queries[0]?.requestedFacts.length ?? 0) > 1
     );
     if (applied.status === "APPLIED" && applied.authorization.allowEvaluate) {
-      if (preSalePolicyIntent !== null) {
+      if (customerUrlDisposition === "EXPLAIN_UNSUPPORTED") {
+        clarificationHandled = true;
+        const soleCustomerUrl = customerUrlDecision.items.length === 1
+          ? customerUrlDecision.items[0]
+          : undefined;
+        const explanationClass = soleCustomerUrl &&
+            soleCustomerUrl.classification !== "SUSPICIOUS_DANGEROUS"
+          ? soleCustomerUrl.classification
+          : "UNSUPPORTED_EXTERNAL";
+        let explanationRejectionReasons: readonly string[] = [];
+        if (!this.model.draftCustomerUrlExplanation) {
+          explanationRejectionReasons = ["CUSTOMER_URL_EXPLANATION_MODEL_UNAVAILABLE"];
+        } else {
+          for (let attempt = 0; attempt < 2; attempt += 1) {
+            if (this.quota && !(await this.quota.reserve(claim.pageId, now))) {
+              explanationRejectionReasons = ["CUSTOMER_URL_EXPLANATION_QUOTA_DENIED"];
+              break;
+            }
+            try {
+              modelCalled = true;
+              const drafted = await this.model.draftCustomerUrlExplanation(
+                explanationClass,
+                customerUrlReasonCodes,
+                this.options.promptVersion,
+              );
+              modelVersion = drafted.modelVersion;
+              modelLatencyMs += drafted.latencyMs;
+              modelPromptTokens += drafted.tokenUsage.promptTokenCount ?? 0;
+              modelOutputTokens += drafted.tokenUsage.candidatesTokenCount ?? 0;
+              modelTotalTokens += drafted.tokenUsage.totalTokenCount ??
+                (drafted.tokenUsage.promptTokenCount ?? 0) +
+                  (drafted.tokenUsage.candidatesTokenCount ?? 0);
+              hasModelTokenUsage ||= Object.values(drafted.tokenUsage).some(
+                (value) => typeof value === "number" && Number.isFinite(value),
+              );
+              const verification = verifyCustomerUrlExplanationProposal(drafted.proposal);
+              if (verification.accepted) {
+                proposal = drafted.proposal;
+                customerUrlReasonCodes = [
+                  ...new Set([
+                    ...customerUrlReasonCodes,
+                    "CUSTOMER_URL_SAFE_EXPLANATION_SENT",
+                  ]),
+                ];
+                if (this.options.mode === "LIVE" && this.options.sendEnabled) {
+                  metaMessages = [{ kind: "TEXT", text: drafted.proposal.reply }];
+                }
+                break;
+              }
+              explanationRejectionReasons = verification.reasonCodes;
+            } catch {
+              explanationRejectionReasons = ["CUSTOMER_URL_EXPLANATION_MODEL_FAILED"];
+              break;
+            }
+          }
+        }
+        if (!proposal) {
+          customerUrlReasonCodes = [
+            ...new Set([
+              ...customerUrlReasonCodes,
+              ...explanationRejectionReasons,
+              "CUSTOMER_URL_SAFE_EXPLANATION_FALLBACK",
+            ]),
+          ];
+          if (this.options.mode === "LIVE" && this.options.sendEnabled) {
+            metaMessages = [{ kind: "TEXT", text: CUSTOMER_URL_SAFE_FALLBACK_REPLY }];
+          }
+        }
+      } else if (preSalePolicyIntent !== null) {
         const reply = renderPreSalePolicyReply(
           preSalePolicyIntent,
           outboundRuntimePolicy(policyResolution),
@@ -4538,9 +4659,12 @@ export class RealtimeRunner {
       pushDecisionEvent("PRODUCT_RESOLVED");
       pushDecisionEvent(
         "PRODUCT_MATCHED",
-        mediaDisposition.disposition === "CONTINUE_MATCHES"
-          ? mediaDisposition.reasonCodes
-          : [],
+        [
+          ...(mediaDisposition.disposition === "CONTINUE_MATCHES"
+            ? mediaDisposition.reasonCodes
+            : []),
+          ...(approvedCustomerUrl ? customerUrlReasonCodes : []),
+        ],
       );
     }
     if (
@@ -4626,6 +4750,9 @@ export class RealtimeRunner {
     }
     if (handoffGuardReasonCodes.length > 0) {
       pushDecisionEvent("GUARD_BLOCKED", handoffGuardReasonCodes);
+    }
+    if (customerUrlDisposition === "EXPLAIN_UNSUPPORTED") {
+      pushDecisionEvent("GUARD_BLOCKED", customerUrlReasonCodes);
     }
     if (
       !message.isEcho &&
@@ -4833,6 +4960,36 @@ export class RealtimeRunner {
       if (imageUrl) units.push({ kind: "IMAGE", imageUrl });
     });
     return units;
+  }
+
+  private async resolveCustomerUrlProducts(
+    decision: CustomerUrlDecision,
+  ): Promise<ProductResolution | null> {
+    const products: StableProductDocument[] = [];
+    const references: ResolvedProductReference[] = [];
+    for (const item of decision.items) {
+      if (
+        item.classification !== "APPROVED_FIRST_PARTY_PRODUCT" &&
+        item.classification !== "APPROVED_SHOP_CDN"
+      ) return null;
+      if (!item.productCode) return null;
+      const product = await this.exactProduct(item.productCode);
+      if (!product || !customerUrlItemAuthorizesProduct(item, product)) return null;
+      references.push({ raw: item.productCode, product, resolution: "RESOLVED" });
+      if (!products.some(({ productId }) => productId === product.productId)) {
+        products.push(product);
+      }
+    }
+    if (products.length === 0) return null;
+    return {
+      primary: products[0] ?? null,
+      products,
+      references,
+      media: aggregateMedia([]),
+      origin: "TEXT_CODE",
+      extractedAdProductId: null,
+      clarification: null,
+    };
   }
 
   private async exactProduct(value: string): Promise<StableProductDocument | null> {
@@ -5233,6 +5390,7 @@ export class RealtimeRunner {
     message: InboundMessageV1,
     receiveSequence: number,
     productId: string | null,
+    customerUrlRequiresHandoff = false,
   ): InboundConversationEvent {
     const text = (message.text ?? "").toLocaleLowerCase("vi");
     const postSale = isPostSaleRequest(message.text ?? "");
@@ -5246,7 +5404,7 @@ export class RealtimeRunner {
       journey: postSale ? "POST_SALE" : "PRE_SALE",
       requestedHandoffReason: postSale
         ? postSaleHandoffReason(message.text ?? "")
-        : containsCustomerUrl(message.text ?? "")
+        : customerUrlRequiresHandoff
           ? "SENSITIVE_CASE"
         : humanRequest
           ? "CUSTOMER_REQUESTED_HUMAN"

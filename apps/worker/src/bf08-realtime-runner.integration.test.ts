@@ -217,11 +217,32 @@ async function runTurn(input: {
   };
   const facts: BusinessFactsReader = {
     ready: vi.fn(async () => true),
-    resolve: vi.fn(async () => ({
-      schemaVersion: 1, status: "UNAVAILABLE", source: "POS_SNAPSHOT",
-      observedAt: occurredAt, expiresAt: occurredAt, productId: null,
-      facts: null, reasonCode: "FACTS_UNAVAILABLE",
-    })),
+    resolve: vi.fn(async (query: Parameters<BusinessFactsReader["resolve"]>[0]) => input.exactProduct
+      ? ({
+          schemaVersion: 1 as const, status: "OK" as const, source: "POS_SNAPSHOT" as const,
+          observedAt: occurredAt, expiresAt: "2099-01-01T00:00:00.000Z",
+          productId: query.productId,
+          facts: {
+            schemaVersion: 1 as const,
+            productId: query.productId,
+            parentProductId: query.productId,
+            offerType: "DIRECT",
+            listPriceVnd: null,
+            salePriceVnd: 799_000,
+            sizes: ["M", "L"],
+            stockStatus: "IN_STOCK" as const,
+            stockQuantity: 2,
+            deliveryEta: null,
+            fulfillmentPolicy: "READY_STOCK",
+            imageUrls: [],
+          },
+          reasonCode: null,
+        })
+      : ({
+          schemaVersion: 1 as const, status: "ERROR" as const, source: "POS_SNAPSHOT" as const,
+          observedAt: occurredAt, expiresAt: occurredAt, productId: query.productId,
+          facts: null, reasonCode: "FACTS_UNAVAILABLE",
+        })),
     close: vi.fn(async () => undefined),
   };
   const resolver: RuntimePolicyResolverPort | undefined = input.policy
@@ -270,7 +291,7 @@ describe("BF-08 production-wrapper customer URL policy", () => {
   ])("keeps %s on strict fail-closed behavior", async (_name, selectedPolicy) => {
     const result = await runTurn({
       text: "https://www.lanadesign.vn/sv695",
-      policy: selectedPolicy,
+      ...(selectedPolicy ? { policy: selectedPolicy } : {}),
     });
     expect(result.searchText).not.toHaveBeenCalled();
     expect(result.generate).not.toHaveBeenCalled();

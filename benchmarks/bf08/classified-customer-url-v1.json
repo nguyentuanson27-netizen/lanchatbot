@@ -10,15 +10,16 @@
   {
     "name": "official product CDN filename resolves offline",
     "text": "https://admin.lanadesign.vn/lana-public/products/sd398-0123456789abcdef01234567.jpg",
-    "expectedDisposition": "CONTINUE",
+    "expectedDisposition": "VERIFY_ADMIN_MEDIA",
     "expectedClass": "APPROVED_SHOP_CDN",
     "expectedReason": "CUSTOMER_URL_APPROVED_SHOP_CDN",
-    "expectedProductCodes": ["SD398"]
+    "expectedProductCodes": [],
+    "expectedCandidateProductCodes": ["SD398"]
   },
   {
     "name": "benign external URL is unsupported",
     "text": "xem giup https://example.com/sd398",
-    "expectedDisposition": "HANDOFF",
+    "expectedDisposition": "EXPLAIN_UNSUPPORTED",
     "expectedClass": "UNSUPPORTED_EXTERNAL",
     "expectedReason": "CUSTOMER_URL_UNSUPPORTED_EXTERNAL",
     "expectedProductCodes": []
