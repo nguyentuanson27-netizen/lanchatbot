@@ -109,6 +109,7 @@ function proposal(
 function policy(
   customerUrlPolicy: "STRICT_BLOCK_ALL" | "CLASSIFIED_ALLOWLIST_V1" | "OMITTED",
   sideEffects: "DISABLED" | "LIVE_OUTBOUND" = "LIVE_OUTBOUND",
+  multiProductPolicy: "CLARIFY_V1" | "OMITTED" = "CLARIFY_V1",
 ): RuntimePolicyResolution {
   return {
     status: "RESOLVED",
@@ -130,7 +131,14 @@ function policy(
       versionReferences: [],
       artifacts: {
         shopPolicy: {}, offerPolicy: {},
-        closingStrategy: customerUrlPolicy === "OMITTED" ? {} : { customerUrlPolicy },
+        closingStrategy: customerUrlPolicy === "OMITTED"
+          ? {}
+          : {
+              customerUrlPolicy,
+              ...(multiProductPolicy === "CLARIFY_V1"
+                ? { multiProductResolutionPolicy: "CLARIFY_V1" as const }
+                : {}),
+            },
         sizeCharts: {}, handoffMatrix: null, paymentPolicy: null,
       },
     },
@@ -141,6 +149,7 @@ async function runTurn(input: {
   readonly text: string;
   readonly policy?: RuntimePolicyResolution;
   readonly exactProduct?: StableProductDocument;
+  readonly exactProducts?: readonly StableProductDocument[];
   readonly explanationReplies?: readonly string[];
 }) {
   const commits: RealtimeCommitInput[] = [];
@@ -173,8 +182,9 @@ async function runTurn(input: {
     }),
     linkProviderConversation: vi.fn(async () => undefined),
   };
+  const exactProducts = input.exactProducts ?? (input.exactProduct ? [input.exactProduct] : []);
   const generated = {
-    proposal: proposal("I can help with this verified product.", input.exactProduct?.productId ?? null, "product_info"),
+    proposal: proposal("I can help with this verified product.", exactProducts[0]?.productId ?? null, "product_info"),
     modelVersion: "gemini-bf08-test",
     latencyMs: 1,
     tokenUsage: {},
@@ -198,13 +208,26 @@ async function runTurn(input: {
     generate,
     groundWithFacts: vi.fn(async () => generated),
     draftCustomerUrlExplanation,
+    draftMultiProductClarification: vi.fn(async (productIds: readonly string[]) => ({
+      proposal: {
+        ...proposal(
+          `Chị muốn xem ${productIds.join(" hay ")} trước ạ?`,
+          null,
+          "multi_product_selection",
+        ),
+        conversationStage: "PRODUCT_MATCHED" as const,
+      },
+      modelVersion: "gemini-bf08-test",
+      latencyMs: 1,
+      tokenUsage: {},
+    })),
   } as unknown as RealtimeModelPort;
   const searchText = vi.fn(async (query: string) =>
-    input.exactProduct && query === input.exactProduct.productId
+    exactProducts.find(({ productId }) => query === productId)
       ? {
           status: "MATCHED" as const,
           matchKind: "EXACT_CODE" as const,
-          product: input.exactProduct,
+          product: exactProducts.find(({ productId }) => query === productId)!,
           score: 1,
           gap: null,
         }
@@ -217,7 +240,7 @@ async function runTurn(input: {
   };
   const facts: BusinessFactsReader = {
     ready: vi.fn(async () => true),
-    resolve: vi.fn(async (query: Parameters<BusinessFactsReader["resolve"]>[0]) => input.exactProduct
+    resolve: vi.fn(async (query: Parameters<BusinessFactsReader["resolve"]>[0]) => exactProducts.length > 0
       ? ({
           schemaVersion: 1 as const, status: "OK" as const, source: "POS_SNAPSHOT" as const,
           observedAt: occurredAt, expiresAt: "2099-01-01T00:00:00.000Z",
@@ -277,6 +300,7 @@ async function runTurn(input: {
     commit: commits[0]!,
     generate,
     draftCustomerUrlExplanation,
+    draftMultiProductClarification: model.draftMultiProductClarification!,
     searchText,
     productSearch,
   };
@@ -333,6 +357,41 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     expect(result.commit.pancakeTagPlan).toBeUndefined();
   });
 
+  it("routes two approved product URLs through BF-07 clarification without selecting the first", async () => {
+    const result = await runTurn({
+      text: "compare https://www.lanadesign.vn/SD398 and https://www.lanadesign.vn/SV695",
+      policy: policy("CLASSIFIED_ALLOWLIST_V1"),
+      exactProducts: [product("SD398"), product("SV695")],
+    });
+    expect(result.searchText).toHaveBeenCalledWith("SD398");
+    expect(result.searchText).toHaveBeenCalledWith("SV695");
+    expect(result.generate).not.toHaveBeenCalled();
+    expect(result.draftMultiProductClarification).toHaveBeenCalledOnce();
+    expect(result.commit.metaPlan).toBeDefined();
+    expect(result.commit.state).toMatchObject({
+      currentProductId: null,
+      mediaClarification: { status: "ACTIVE" },
+    });
+  });
+
+  it("fails closed on two approved products when BF-07 clarification is not active", async () => {
+    const result = await runTurn({
+      text: "compare https://www.lanadesign.vn/SD398 and https://www.lanadesign.vn/SV695",
+      policy: policy("CLASSIFIED_ALLOWLIST_V1", "LIVE_OUTBOUND", "OMITTED"),
+      exactProducts: [product("SD398"), product("SV695")],
+    });
+    expect(result.generate).not.toHaveBeenCalled();
+    expect(result.draftMultiProductClarification).not.toHaveBeenCalled();
+    expect(result.commit.metaPlan).toBeUndefined();
+    expect(result.commit.pancakeTagPlan).toBeDefined();
+    expect(result.commit.decisionEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        eventType: "GUARD_BLOCKED",
+        reasonCodes: expect.arrayContaining(["CUSTOMER_URL_MULTI_PRODUCT_POLICY_REQUIRED"]),
+      }),
+    ]));
+  });
+
   it("explains a benign unsupported URL without handoff or raw URL exposure", async () => {
     const result = await runTurn({
       text: "please check https://example.com/product?token=secret",
@@ -356,6 +415,12 @@ describe("BF-08 production-wrapper customer URL policy", () => {
       ],
     });
     expect(result.draftCustomerUrlExplanation).toHaveBeenCalledTimes(2);
+    expect(result.draftCustomerUrlExplanation.mock.calls[1]?.[1]).toEqual(
+      expect.arrayContaining([
+        "CUSTOMER_URL_EXPLANATION_RAW_URL",
+        "CUSTOMER_URL_EXPLANATION_UNVERIFIED_CLAIM",
+      ]),
+    );
     expect(result.commit.metaPlan).toBeDefined();
     expect(JSON.stringify(result.commit.metaPlan)).not.toContain("699k");
   });

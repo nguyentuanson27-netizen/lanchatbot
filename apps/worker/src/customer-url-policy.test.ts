@@ -32,6 +32,50 @@ describe("BF-08 classified customer URL policy", () => {
       .toMatchObject({ disposition: "CONTINUE", items: [] });
   });
 
+  it.each([
+    ["lanadesign.vn/sv695", "EXPLAIN_UNSUPPORTED"],
+    ["example.com/a", "EXPLAIN_UNSUPPORTED"],
+    ["//evil.test/path", "EXPLAIN_UNSUPPORTED"],
+  ] as const)("classifies and redacts URL form %s", (text, disposition) => {
+    expect(classifyCustomerUrls(text, "CLASSIFIED_ALLOWLIST_V1").disposition)
+      .toBe(disposition);
+    expect(redactCustomerUrlsForModel(`check ${text}`)).toBe("check [CUSTOMER_URL]");
+  });
+
+  it.each([
+    "https:/example.com/a?token=raw-sentinel",
+    "https:example.com/a?token=raw-sentinel",
+    "www。lanadesign.vn/sv695",
+    "https://www.lanadesign.vn/%ZZ",
+    "169.254.169.254/latest/meta-data",
+    "localhost/admin",
+  ])("blocks and redacts malformed or private URL-like input %s", (text) => {
+    expect(classifyCustomerUrls(text, "CLASSIFIED_ALLOWLIST_V1")).toMatchObject({
+      disposition: "HANDOFF",
+    });
+    expect(redactCustomerUrlsForModel(text)).toBe("[CUSTOMER_URL]");
+  });
+
+  it("fails closed when the URL candidate bound is exceeded", () => {
+    const text = Array.from({ length: 9 }, (_, index) => `https://example${index}.com/a`).join(" ");
+    expect(classifyCustomerUrls(text, "CLASSIFIED_ALLOWLIST_V1")).toMatchObject({
+      disposition: "HANDOFF",
+      reasonCodes: expect.arrayContaining(["CUSTOMER_URL_LIMIT_EXCEEDED"]),
+    });
+    expect(redactCustomerUrlsForModel(text)).not.toContain("example8.com");
+    const approvedThenPrivate = [
+      ...Array.from({ length: 8 }, () => "https://www.lanadesign.vn/sv695"),
+      "https://169.254.169.254/latest/meta-data",
+    ].join(" ");
+    expect(classifyCustomerUrls(approvedThenPrivate, "CLASSIFIED_ALLOWLIST_V1")).toMatchObject({
+      disposition: "HANDOFF",
+      reasonCodes: expect.arrayContaining([
+        "CUSTOMER_URL_LIMIT_EXCEEDED",
+        "CUSTOMER_URL_PRIVATE_ADDRESS",
+      ]),
+    });
+  });
+
   it.each(replay)("replays $name", (fixture) => {
     const decision = classifyCustomerUrls(fixture.text, "CLASSIFIED_ALLOWLIST_V1");
     expect(decision).toMatchObject({
@@ -273,6 +317,10 @@ describe("BF-08 classified customer URL policy", () => {
       { ...proposal, reply: "Send your phone number and address to place the order." },
       { ...proposal, reply: "Mẫu này còn hàng và được miễn phí vận chuyển." },
       { ...proposal, reply: "Chị gửi số điện thoại và địa chỉ để đặt hàng nhé." },
+      { ...proposal, reply: "This link is safe, please open it." },
+      { ...proposal, reply: "This is our official link. Please send the product code." },
+      { ...proposal, reply: "Liên kết này an toàn, chị cứ mở nhé. Chị cũng có thể gửi mã sản phẩm." },
+      { ...proposal, reply: "I cannot open that link. Please send the product code. This dress costs less than usual and can ship promptly." },
     ]) {
       expect(verifyCustomerUrlExplanationProposal(rejected).accepted).toBe(false);
     }

@@ -2880,12 +2880,21 @@ export class RealtimeRunner {
       hasClarification:
         resolution.clarification !== null && resolution.clarification.action !== "CLEAR",
     });
-    const multiProductDecision = decideMultiProductResolution({
-      policy: activeMultiProductResolutionPolicy(policyResolution),
-      productIds: resolution.origin === "MEDIA"
-        ? resolution.products.map((product) => product.productId)
-        : [],
-    });
+    const multiProductPolicy = activeMultiProductResolutionPolicy(policyResolution);
+    const multiProductIds = resolution.origin === "MEDIA" || approvedCustomerUrl
+      ? resolution.products.map((product) => product.productId)
+      : [];
+    const multiProductDecision = approvedCustomerUrl &&
+        multiProductPolicy === "LEGACY" && new Set(multiProductIds).size > 1
+      ? {
+          disposition: "FAIL_CLOSED" as const,
+          productIds: multiProductIds,
+          reasonCodes: ["CUSTOMER_URL_MULTI_PRODUCT_POLICY_REQUIRED"],
+        }
+      : decideMultiProductResolution({
+          policy: multiProductPolicy,
+          productIds: multiProductIds,
+        });
     let resolvedProduct = multiProductDecision.disposition !== "CONTINUE"
       ? null
       : resolution.primary;
@@ -3158,7 +3167,10 @@ export class RealtimeRunner {
               modelCalled = true;
               const drafted = await this.model.draftCustomerUrlExplanation(
                 explanationClass,
-                customerUrlReasonCodes,
+                [...new Set([
+                  ...customerUrlReasonCodes,
+                  ...explanationRejectionReasons,
+                ])],
                 this.options.promptVersion,
               );
               modelVersion = drafted.modelVersion;

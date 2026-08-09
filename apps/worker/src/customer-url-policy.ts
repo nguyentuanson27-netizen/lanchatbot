@@ -34,12 +34,22 @@ export interface CustomerUrlDecision {
   readonly explanationAllowed: boolean;
 }
 
-const URL_CANDIDATE = /(?:(?:https?|[a-z][a-z0-9+.-]{1,15}):\/\/|(?:javascript|data|file|ftp|blob):(?:\/\/)?|www\.)[^\s<>"']+/giu;
+const URL_CANDIDATE = /(?<![\p{L}\p{N}@._-])(?:https?:\/{0,2}|[a-z][a-z0-9+.-]{1,15}:\/\/|(?:javascript|data|file|ftp|blob):(?:\/\/)?|\/\/|www[.\u3002\uff0e\uff61]|localhost(?::\d{1,5})?(?:\/|(?=$|[\s),.;!?\]}]))|(?:\d{1,3}\.){3}\d{1,3}(?::\d{1,5})?(?:\/|(?=$|[\s),.;!?\]}]))|(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]{0,61}[\p{L}\p{N}])?[.\u3002\uff0e\uff61])+(?:[\p{L}]{2,63}|xn--[a-z0-9-]{2,59})(?::\d{1,5})?(?:\/|(?=$|[\s),.;!?\]}])))[^\s<>"']*/giu;
 const CONTROL_OR_BIDI = /[\u0000-\u001f\u007f\u200e\u200f\u202a-\u202e\u2066-\u2069]/u;
 const FIRST_PARTY_HOST = "www.lanadesign.vn";
 const ADMIN_MEDIA_HOST = "admin.lanadesign.vn";
 const ADMIN_MEDIA_PATH = /^\/lana-public\/products\/(.+)-([a-f0-9]{24})\.(jpg|png|webp)$/u;
 const TRACKING_QUERY_KEY = /^(?:utm_[a-z0-9_]+|fbclid|gclid|_ga)$/u;
+const EXPLANATION_ALLOWED_WORDS = new Set([
+  "a", "access", "an", "anh", "ban", "ben", "can", "cannot", "check",
+  "chi", "chia", "chua", "code", "cung", "de", "do", "duoc", "duong",
+  "em", "gui", "help", "here", "hinh", "ho", "hoac", "i", "image", "instead",
+  "it", "ket", "khong", "kiem", "link", "lien", "long", "ma", "minh", "mo", "nay",
+  "nhe", "not", "ngoai", "open", "or", "pham", "photo", "please", "product",
+  "provide", "safely", "san", "se", "send", "share", "so", "support", "t",
+  "that", "the", "theo", "this", "toan", "tra", "truy", "unable", "us", "vao",
+  "vi", "vui", "we", "with", "your",
+]);
 
 function trimCandidate(value: string): string {
   let output = value;
@@ -50,8 +60,7 @@ function trimCandidate(value: string): string {
 function extractCandidates(value: string): readonly string[] {
   return (value.match(URL_CANDIDATE) ?? [])
     .map(trimCandidate)
-    .filter(Boolean)
-    .slice(0, 8);
+    .filter(Boolean);
 }
 
 function privateOrReservedHost(hostname: string): boolean {
@@ -108,15 +117,26 @@ function classifyCandidate(raw: string): CustomerUrlItem {
   if (raw.length > 2_048 || raw.includes("\\") || CONTROL_OR_BIDI.test(raw)) {
     return dangerous("CUSTOMER_URL_INVALID");
   }
+  if (/[\u3002\uff0e\uff61]/u.test(raw)) {
+    return dangerous("CUSTOMER_URL_DECEPTIVE_HOST");
+  }
+  if (/%(?![a-f0-9]{2})/iu.test(raw)) return dangerous("CUSTOMER_URL_INVALID");
   const rawPath = raw.split(/[?#]/u, 1)[0] ?? raw;
   if (
     /%(?:2e|2f|5c|25)/iu.test(rawPath) ||
     /\/(?:\.{1,2})(?:\/|$)/u.test(rawPath)
   ) return dangerous("CUSTOMER_URL_INVALID");
   if (/xn--/iu.test(raw)) return dangerous("CUSTOMER_URL_DECEPTIVE_HOST");
+  if (/^https?:(?!\/\/)/iu.test(raw)) return dangerous("CUSTOMER_URL_INVALID");
   let url: URL;
   try {
-    url = new URL(/^www\./iu.test(raw) ? `https://${raw}` : raw);
+    url = new URL(
+      raw.startsWith("//")
+        ? `https:${raw}`
+        : /^www\./iu.test(raw) || !/^[a-z][a-z0-9+.-]{1,15}:/iu.test(raw)
+          ? `https://${raw}`
+          : raw,
+    );
   } catch {
     return dangerous("CUSTOMER_URL_INVALID");
   }
@@ -183,6 +203,14 @@ function classifyCandidate(raw: string): CustomerUrlItem {
     };
   }
 
+  if (hostname === "lanadesign.vn") {
+    return {
+      classification: "UNSUPPORTED_EXTERNAL",
+      normalizedUrl: url.toString(),
+      productCode: null,
+      reasonCode: "CUSTOMER_URL_PATH_NOT_APPROVED",
+    };
+  }
   if (hostname.includes("lanadesign") || hostname.split(".").some((label) => label.startsWith("xn--"))) {
     return dangerous("CUSTOMER_URL_DECEPTIVE_HOST", url.toString());
   }
@@ -207,6 +235,23 @@ export function classifyCustomerUrls(
       productCodes: [],
       candidateProductCodes: [],
       reasonCodes: [],
+      explanationAllowed: false,
+    };
+  }
+  if (candidates.length > 8) {
+    const overflowItems = candidates.slice(0, 32).map(classifyCandidate);
+    const overflowDangerReasons = overflowItems
+      .filter(({ classification }) => classification === "SUSPICIOUS_DANGEROUS")
+      .map(({ reasonCode }) => reasonCode);
+    return {
+      policy,
+      disposition: "HANDOFF",
+      items: overflowItems,
+      productCodes: [],
+      candidateProductCodes: [],
+      reasonCodes: policy === "STRICT_BLOCK_ALL"
+        ? ["CUSTOMER_URL_STRICT_BLOCK_ALL"]
+        : [...new Set(["CUSTOMER_URL_LIMIT_EXCEEDED", ...overflowDangerReasons])],
       explanationAllowed: false,
     };
   }
@@ -336,8 +381,30 @@ export function verifyCustomerUrlExplanationProposal(
   if (/(?:https?:\/\/|www\.)/iu.test(reply)) {
     reasons.push("CUSTOMER_URL_EXPLANATION_RAW_URL");
   }
+  const foldedReply = reply.normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/\u0111/gu, "d")
+    .toLocaleLowerCase("vi");
+  const statesSafeLimitation =
+    /\b(?:cannot|can't|unable|do not support)\b.{0,80}\b(?:open|access|check)\b/iu.test(foldedReply) ||
+    /\b(?:khong the|chua the|khong ho tro)\b.{0,80}\b(?:mo|truy cap|kiem tra)\b/iu.test(foldedReply);
+  const requestsSafeInput =
+    /\b(?:product code|image)\b/iu.test(foldedReply) ||
+    /\b(?:ma san pham|hinh anh|anh)\b/iu.test(foldedReply);
+  const givesUnsafeLinkGuidance =
+    /\b(?:this|the) link (?:is|looks|appears|seems) (?:safe|official|trusted|legitimate)\b/iu.test(foldedReply) ||
+    /\b(?:please|you can|you should|go ahead and) (?:open|click|visit|follow|access)\b/iu.test(foldedReply) ||
+    /\b(?:link|lien ket) (?:nay )?(?:an toan|chinh thuc|uy tin|khong nguy hiem)\b/iu.test(foldedReply) ||
+    /\b(?:cu|hay|vui long|chi co the) (?:mo|bam|truy cap)\b/iu.test(foldedReply) ||
+    /\b(?:bam vao|truy cap) (?:link|lien ket)\b/iu.test(foldedReply) ||
+    /\b(?:safe|official|trusted|legitimate) link\b/iu.test(foldedReply);
+  if (!statesSafeLimitation || !requestsSafeInput || givesUnsafeLinkGuidance) {
+    reasons.push("CUSTOMER_URL_EXPLANATION_SAFETY_INVALID");
+  }
   if (
     /\d/u.test(reply) ||
+    (foldedReply.match(/[\p{L}]+/gu) ?? [])
+      .some((word) => !EXPLANATION_ALLOWED_WORDS.has(word)) ||
     /\b(?:price|stock|size|delivery|shipping|freeship|discount|promotion|sale|eta|tomorrow|available)\b/iu.test(reply) ||
     /\b(?:phone|address|place (?:an )?order|payment|card)\b/iu.test(reply) ||
     /(?:giá|còn hàng|hết hàng|kích cỡ|giao hàng|vận chuyển|phí ship|miễn phí|freeship|khuyến mãi|giảm giá|ngày mai)/iu.test(reply) ||
