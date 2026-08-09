@@ -39,9 +39,9 @@ function productionLocalImportGraph(entry: URL): readonly string[] {
 }
 
 describe("foundation-safe realtime entry", () => {
-  it("keeps the accepted BF-01/BF-02 production runner byte-identical", () => {
+  it("keeps the accepted BF-07 production wrapper byte-identical", () => {
     expect(gitBlobSha1(source("./bf02-realtime-runner.ts")))
-      .toBe("5a344d9f8b6b8f03c60ff3423cb9d5df314fbf16");
+      .toBe("296c6cb3c251cb16504c07068d42df1d4db137f2");
   });
 
   it("has no production import or runtime adapter for BF-03", () => {

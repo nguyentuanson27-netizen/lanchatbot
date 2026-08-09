@@ -28,6 +28,14 @@ export type MediaPartialResolutionPolicyV1 = z.infer<
   typeof MediaPartialResolutionPolicyV1Schema
 >;
 
+export const MultiProductResolutionPolicyV1Schema = z.enum([
+  "LEGACY",
+  "CLARIFY_V1",
+]);
+export type MultiProductResolutionPolicyV1 = z.infer<
+  typeof MultiProductResolutionPolicyV1Schema
+>;
+
 type LegacyClosingStrategyAdminContentV1 = z.infer<
   typeof LegacyClosingStrategyAdminContentV1Schema
 >;
@@ -37,12 +45,14 @@ export type ClosingStrategyAdminContentV1 =
     replyReconciliationPolicy?: ReplyReconciliationPolicyV1;
     replyReconciliationFallbackText?: string;
     mediaPartialResolutionPolicy?: MediaPartialResolutionPolicyV1;
+    multiProductResolutionPolicy?: MultiProductResolutionPolicyV1;
   }>;
 
 const ClosingStrategyIncidentExtensionV1Schema = z.object({
   replyReconciliationPolicy: ReplyReconciliationPolicyV1Schema.optional(),
   replyReconciliationFallbackText: z.string().trim().min(1).max(500).optional(),
   mediaPartialResolutionPolicy: MediaPartialResolutionPolicyV1Schema.optional(),
+  multiProductResolutionPolicy: MultiProductResolutionPolicyV1Schema.optional(),
 }).strict().superRefine((value, context) => {
   if (value.replyReconciliationPolicy === undefined) {
     if (value.replyReconciliationFallbackText !== undefined) {
@@ -104,6 +114,10 @@ export const ClosingStrategyAdminContentV1Schema = z.unknown().transform(
       extensionInput.mediaPartialResolutionPolicy = record.mediaPartialResolutionPolicy;
       delete record.mediaPartialResolutionPolicy;
     }
+    if (Object.prototype.hasOwnProperty.call(record, "multiProductResolutionPolicy")) {
+      extensionInput.multiProductResolutionPolicy = record.multiProductResolutionPolicy;
+      delete record.multiProductResolutionPolicy;
+    }
 
     const legacy = LegacyClosingStrategyAdminContentV1Schema.safeParse(record);
     if (!legacy.success) {
@@ -131,6 +145,12 @@ export const ClosingStrategyAdminContentV1Schema = z.unknown().transform(
         : {
             mediaPartialResolutionPolicy:
               extension.data.mediaPartialResolutionPolicy,
+          }),
+      ...(extension.data.multiProductResolutionPolicy === undefined
+        ? {}
+        : {
+            multiProductResolutionPolicy:
+              extension.data.multiProductResolutionPolicy,
           }),
     };
   },

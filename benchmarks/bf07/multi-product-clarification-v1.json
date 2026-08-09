@@ -1,0 +1,20 @@
+[
+  {
+    "name": "distinct SD375 and SD398 require selection",
+    "policy": "CLARIFY_V1",
+    "productIds": ["SD375", "SD398"],
+    "expectedDisposition": "CLARIFY_SELECTION"
+  },
+  {
+    "name": "duplicate SD398 images continue as one product",
+    "policy": "CLARIFY_V1",
+    "productIds": ["SD398", "SD398"],
+    "expectedDisposition": "CONTINUE"
+  },
+  {
+    "name": "legacy policy preserves reviewed prior behavior",
+    "policy": "LEGACY",
+    "productIds": ["SD375", "SD398"],
+    "expectedDisposition": "CONTINUE"
+  }
+]

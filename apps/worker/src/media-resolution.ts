@@ -198,5 +198,8 @@ export function selectedProductId(
     .match(/\b(set|mau)\s*([1-9]|10)\b/iu);
   if (!match) return null;
   const label = `${match[1]?.toLocaleUpperCase("en-US")}_${match[2]}`;
-  return selections.find((item) => item.label === label)?.productId ?? null;
+  const exact = selections.find((item) => item.label === label)?.productId;
+  if (exact) return exact;
+  const ordinal = Number(match[2]) - 1;
+  return selections[ordinal]?.productId ?? null;
 }

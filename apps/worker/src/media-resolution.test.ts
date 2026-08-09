@@ -135,5 +135,9 @@ describe("media resolution policy", () => {
       { label: "SET_1", productId: "SV921" },
       { label: "SET_2", productId: "CB182" },
     ])).toBe("CB182");
+    expect(selectedProductId("chị chọn mẫu 2", [
+      { label: "SET_1", productId: "SV921" },
+      { label: "SET_2", productId: "CB182" },
+    ])).toBe("CB182");
   });
 });
