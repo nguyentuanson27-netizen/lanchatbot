@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -70,12 +70,13 @@ const unknownField = structuredClone(example); unknownField.unapproved = true; i
 
 const manifestDir = join(root, 'deploy', 'manifests');
 for (const file of readdirSync(manifestDir).filter((name) => name.endsWith('.json'))) JSON.parse(readFileSync(join(manifestDir, file), 'utf8'));
-const adminReleaseTag = '20260809-admin-policy-review-r6.1';
+const adminReleaseTag = '20260809-admin-policy-review-r6.6';
 const adminReleaseDir = join(root, 'deploy', 'releases', adminReleaseTag);
 const adminReleaseScripts = [
   'common.sh',
   'preflight.sh',
   'run-build.sh',
+  'artifact-smoke.sh',
   'cutover.sh',
   'promote-runtime-state.sh',
   'postcheck.sh',
@@ -85,6 +86,14 @@ const adminReleaseScripts = [
 for (const scriptName of adminReleaseScripts) {
   const scriptPath = join(adminReleaseDir, scriptName);
   if (!existsSync(scriptPath)) throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_MISSING:${scriptName}`);
+  if (existsSync(join(root, '.git'))) {
+    const relativeScriptPath = `deploy/releases/${adminReleaseTag}/${scriptName}`;
+    const indexedMode = spawnSync('git', ['-C', root, 'ls-files', '--stage', '--', relativeScriptPath], { encoding: 'utf8' })
+      .stdout.trim().split(/\s+/, 1)[0];
+    if (indexedMode !== '100755') throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_NOT_EXECUTABLE:${scriptName}:${indexedMode || 'UNTRACKED'}`);
+  } else if ((statSync(scriptPath).mode & 0o111) === 0) {
+    throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_NOT_EXECUTABLE_IN_ARCHIVE:${scriptName}`);
+  }
   const script = readFileSync(scriptPath, 'utf8');
   if (!script.startsWith('#!/usr/bin/env bash\nset -euo pipefail\n')) throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_NOT_FAIL_CLOSED:${scriptName}`);
   if (/\beval\b/.test(script)) throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_EVAL_FORBIDDEN:${scriptName}`);
@@ -92,14 +101,27 @@ for (const scriptName of adminReleaseScripts) {
   if (!syntax.error && syntax.status !== 0) throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_SYNTAX:${scriptName}:${syntax.stderr.trim()}`);
   if (syntax.error && syntax.error.code !== 'ENOENT') throw syntax.error;
 }
+for (const requiredFile of [
+  'admin-rollback-image-override.yml',
+  'capture-deployment-boundary.mjs',
+  'validate-deployment-boundary.mjs',
+  'validate-runtime-invariants.mjs'
+]) {
+  if (!existsSync(join(adminReleaseDir, requiredFile))) throw new Error(`ADMIN_POLICY_RELEASE_FILE_MISSING:${requiredFile}`);
+}
 const adminCutover = readFileSync(join(adminReleaseDir, 'cutover.sh'), 'utf8');
-for (const required of ['--no-deps', 'admin-api', 'admin-web', 'ADMIN_SIMULATION_IMAGE', 'rollback.sh']) {
+for (const required of ['--no-deps', 'admin-api', 'admin-web', 'ADMIN_SIMULATION_IMAGE', 'arm_automatic_rollback', 'disarm_automatic_rollback', 'acquire_deployment_lock', 'soak.sh', 'capture-deployment-boundary.mjs']) {
   if (!adminCutover.includes(required)) throw new Error(`ADMIN_POLICY_CUTOVER_GUARD_MISSING:${required}`);
 }
 const adminRollback = readFileSync(join(adminReleaseDir, 'rollback.sh'), 'utf8');
-for (const required of ['--no-deps', 'admin-api', 'admin-web', 'RUNTIME_STATE_ROLLBACK_EVIDENCE_FILE']) {
+for (const required of ['--no-deps', 'admin-api', 'admin-web', 'require_rollback_inputs', 'rollback_compose', 'ROLLBACK_ADMIN_API_IMAGE_ID', 'ROLLBACK_ADMIN_WEB_IMAGE_ID']) {
   if (!adminRollback.includes(required)) throw new Error(`ADMIN_POLICY_ROLLBACK_GUARD_MISSING:${required}`);
 }
+const adminCommon = readFileSync(join(adminReleaseDir, 'common.sh'), 'utf8');
+for (const required of ['RUNTIME_STATE_ROLLBACK_EVIDENCE_FILE', 'require_rollback_inputs', 'readonly DEPLOYMENT_LOCK_FILE=', '/proc/$$/fd/9', 'trap automatic_rollback_on_exit EXIT']) {
+  if (!adminCommon.includes(required)) throw new Error(`ADMIN_POLICY_ROLLBACK_INPUT_GUARD_MISSING:${required}`);
+}
+if (adminRollback.includes('require_cutover_inputs')) throw new Error('ADMIN_POLICY_ROLLBACK_DEPENDS_ON_CUTOVER_GATE');
 const adminManifest = JSON.parse(readFileSync(join(manifestDir, `${adminReleaseTag}.json`), 'utf8'));
 if (adminManifest.releaseTag !== adminReleaseTag || adminManifest.source?.implementationCommit !== '43a42392cf975891ddb284083efe153581388d55') {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_PROVENANCE');
@@ -118,9 +140,22 @@ if (JSON.stringify(adminManifest.scope?.targetServices) !== JSON.stringify(['adm
 if (adminManifest.scope?.adminSimulationWorkerMustRemainUnchanged !== true || adminManifest.scope?.messengerProductionTestAllowed !== false) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_NON_TARGET_SCOPE');
 }
+if (adminManifest.supersedesUnexecutedRelease !== '20260809-admin-policy-review-r6.5' ||
+    adminManifest.deploymentAutomation?.automaticRollbackOnSoakFailure !== true ||
+    adminManifest.deploymentAutomation?.globalDeploymentLockRequired !== true ||
+    adminManifest.rollback?.runtimeDefinitionAuthority !== 'previous release Compose plus reviewed image-only override') {
+  throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_DEPLOYMENT_SAFETY');
+}
 const adminReleaseSelfTest = spawnSync(process.execPath, [join(adminReleaseDir, 'test-release-automation.mjs')], { encoding: 'utf8' });
 if (adminReleaseSelfTest.status !== 0) {
   throw new Error(`ADMIN_POLICY_RELEASE_SELF_TEST_FAILED:${adminReleaseSelfTest.stderr.trim()}`);
+}
+const dockerfile = readFileSync(join(root, 'deploy', 'Dockerfile'), 'utf8');
+if (!dockerfile.includes('RUN apk add --no-cache bash ffmpeg git')) {
+  throw new Error('ADMIN_POLICY_RELEASE_BUILD_BASH_MISSING');
+}
+if ((dockerfile.split('FROM node:22-alpine AS runtime')[1] ?? '').match(/apk add[^\n]*\bbash\b/)) {
+  throw new Error('ADMIN_POLICY_RELEASE_RUNTIME_BASH_FORBIDDEN');
 }
 const a0Name = '20260802-r32.2.2-runtime-reconciliation.json'; const a0Bytes = readFileSync(join(manifestDir, a0Name)); const a0 = JSON.parse(a0Bytes);
 if (a0.schemaVersion !== 1 || typeof a0.capturedAt !== 'string' || typeof a0.documentType !== 'string' || !/^[a-f0-9]{40}$/.test(a0.sourceCommit ?? '') || a0.attestationLevel !== 'PARTIAL') throw new Error('A0_RECONCILIATION_REQUIRED_FIELDS');
