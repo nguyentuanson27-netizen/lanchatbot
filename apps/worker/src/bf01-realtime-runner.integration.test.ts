@@ -272,7 +272,9 @@ function createHarness(input: {
     linkProviderConversation: vi.fn(async () => undefined),
   };
 
-  const generate = vi.fn(async () => {
+  const generate = vi.fn(async (
+    _context: Parameters<RealtimeModelPort["generate"]>[0],
+  ) => {
     if (generate.mock.calls.length === 1) {
       switch (input.initialMode ?? "NO_REPLY") {
         case "REPLY":
@@ -554,6 +556,30 @@ describe("BF-01 runner reconciliation", () => {
     expect(commit?.state.conversationOwner).toBe("HUMAN");
     expect(commit?.handoffEventPlan?.source).toBe("CUSTOMER_REQUEST");
     expect(hasBf01Reason(commit)).toBe(false);
+  });
+
+  it("isolates accepted-runner context across concurrent executions", async () => {
+    const firstText = "foundation concurrent context alpha";
+    const secondText = "foundation concurrent context beta";
+    const first = createHarness({ initialMode: "REPLY", customerText: firstText });
+    const second = createHarness({ initialMode: "REPLY", customerText: secondText });
+
+    await Promise.all([
+      first.runner.processOne(),
+      second.runner.processOne(),
+    ]);
+
+    const customerTexts = (
+      generate: typeof first.generate,
+    ): string[] => (generate.mock.calls[0]?.[0] ?? [])
+      .filter(({ senderType }) => senderType === "CUSTOMER")
+      .map(({ text }) => text);
+    expect(customerTexts(first.generate)).toContain(firstText);
+    expect(customerTexts(first.generate)).not.toContain(secondText);
+    expect(customerTexts(second.generate)).toContain(secondText);
+    expect(customerTexts(second.generate)).not.toContain(firstText);
+    expect(first.commit).toHaveBeenCalledOnce();
+    expect(second.commit).toHaveBeenCalledOnce();
   });
 
   it("keeps one deterministic clarification side effect across commit ACK loss and replay", async () => {

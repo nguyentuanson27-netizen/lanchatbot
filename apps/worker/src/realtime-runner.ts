@@ -2207,6 +2207,18 @@ export class RealtimeRunner {
     };
   }
 
+  /**
+   * Policy-aware extension point for the current inbound message.
+   * The default is intentionally inert. An override can only run after the
+   * envelope, generation and own-echo gates and canonical policy resolution.
+   */
+  protected transformInboundAfterPolicyResolution(
+    message: InboundMessageV1,
+    _policyResolution: RuntimePolicyResolution | null,
+  ): InboundMessageV1 {
+    return message;
+  }
+
   private async loadAndMergeCustomerProfile(
     pageId: string,
     customerHash: string,
@@ -2331,6 +2343,10 @@ export class RealtimeRunner {
         this.inbox.isBatchCurrent
           ? !(await this.inbox.isBatchCurrent(this.batchLease(batch)))
           : false;
+      if (knownSuperseded) {
+        await this.completeWork(batch, true);
+        return true;
+      }
       const status = await this.processBatch(batch, knownSuperseded);
       if (status === "COMMITTED" || status === "SUPERSEDED") return true;
       await this.completeWork(batch, status === "INBOX_ONLY");
@@ -2481,7 +2497,7 @@ export class RealtimeRunner {
     const texts = sourceMessages
       .map((item) => item.text?.trim() ?? "")
       .filter(Boolean);
-    const message: InboundMessageV1 = {
+    let message: InboundMessageV1 = {
       ...envelope.message,
       text: texts.length > 0 ? texts.join("\n") : null,
       attachments: sourceMessages.flatMap((item) => item.attachments),
@@ -2569,6 +2585,10 @@ export class RealtimeRunner {
           }),
       now,
     }) ?? null;
+    message = this.transformInboundAfterPolicyResolution(
+      message,
+      policyResolution,
+    );
     const policyAuditRef = policyResolution?.bundle
       ? runtimePolicyAuditReference(policyResolution.bundle)
       : null;
