@@ -1,11 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import {
-  bf03CorrectionAnalysis,
-  bf03CorrectionContainmentDecision,
-} from "./bf03-realtime-runner.js";
 
-interface BenchmarkCase {
+interface EvaluationCase {
   readonly id: string;
   readonly label: "CONTAIN" | "PASS_THROUGH";
   readonly category: string;
@@ -20,100 +16,61 @@ interface BenchmarkCase {
   readonly unauthorizedModelIntents?: readonly string[];
 }
 
-interface BenchmarkCorpus {
+interface EvaluationCorpus {
   readonly schemaVersion: 1;
   readonly benchmarkVersion: string;
+  readonly status: "INACTIVE_RESEARCH_ONLY";
+  readonly runtimeAuthority: "NO_RUNTIME_AUTHORITY";
+  readonly activationPath: "NO_ACTIVATION_PATH";
   readonly provenance: "SYNTHETIC_REVIEWED_NO_PII";
   readonly policy: "CORRECTION_CONTAINMENT_V1";
   readonly gate: {
-    readonly maxFalsePositives: number;
-    readonly maxFalseNegatives: number;
-    readonly maxFalsePositiveRate: number;
-    readonly maxFalseNegativeRate: number;
+    readonly maxFalsePositives: 0;
+    readonly maxFalseNegatives: 0;
+    readonly maxFalsePositiveRate: 0;
+    readonly maxFalseNegativeRate: 0;
   };
-  readonly cases: readonly BenchmarkCase[];
+  readonly cases: readonly EvaluationCase[];
 }
 
 const corpus = JSON.parse(readFileSync(new URL(
   "../../../benchmarks/bf03/correction-containment-v1.json",
   import.meta.url,
-), "utf8")) as BenchmarkCorpus;
+), "utf8")) as EvaluationCorpus;
 
-describe(`BF-03 governed benchmark ${corpus.benchmarkVersion}`, () => {
-  it("meets the committed false-positive and false-negative gate", () => {
+describe(`inactive BF-03 research corpus ${corpus.benchmarkVersion}`, () => {
+  it("is explicitly non-runtime, synthetic, reviewable, and internally valid", () => {
     expect(corpus.schemaVersion).toBe(1);
+    expect(corpus.status).toBe("INACTIVE_RESEARCH_ONLY");
+    expect(corpus.runtimeAuthority).toBe("NO_RUNTIME_AUTHORITY");
+    expect(corpus.activationPath).toBe("NO_ACTIVATION_PATH");
     expect(corpus.provenance).toBe("SYNTHETIC_REVIEWED_NO_PII");
-    expect(new Set(corpus.cases.map(({ id }) => id)).size).toBe(corpus.cases.length);
-    expect(new Set(corpus.cases.map(({ text }) => text)).size).toBe(corpus.cases.length);
-    expect(corpus.cases).toHaveLength(86);
     expect(corpus.gate).toEqual({
       maxFalsePositives: 0,
       maxFalseNegatives: 0,
       maxFalsePositiveRate: 0,
       maxFalseNegativeRate: 0,
     });
+    expect(corpus.cases).toHaveLength(86);
+    expect(new Set(corpus.cases.map(({ id }) => id)).size)
+      .toBe(corpus.cases.length);
+    expect(new Set(corpus.cases.map(({ text }) => text)).size)
+      .toBe(corpus.cases.length);
 
-    let positives = 0;
-    let negatives = 0;
-    let falsePositives = 0;
-    let falseNegatives = 0;
-    const falsePositiveIds: string[] = [];
-    const falseNegativeIds: string[] = [];
-    for (const benchmarkCase of corpus.cases) {
-      const expected = benchmarkCase.label === "CONTAIN";
-      const decision = bf03CorrectionContainmentDecision(
-        benchmarkCase.text,
-        corpus.policy,
-      );
-      if (expected) positives += 1;
-      else negatives += 1;
-      if (decision.applies && !expected) {
-        falsePositives += 1;
-        falsePositiveIds.push(benchmarkCase.id);
-      }
-      if (!decision.applies && expected) {
-        falseNegatives += 1;
-        falseNegativeIds.push(benchmarkCase.id);
-      }
-
-      if (benchmarkCase.expectedClassifierIntents) {
-        const analysis = bf03CorrectionAnalysis(
-          benchmarkCase.text,
-          corpus.policy,
-        );
-        expect(analysis.canonicalIntents, benchmarkCase.id)
-          .toEqual(benchmarkCase.expectedClassifierIntents);
-      }
-      if (benchmarkCase.runtimeContract === "CONTAIN_NO_FACTS") {
-        expect(benchmarkCase.label, benchmarkCase.id).toBe("CONTAIN");
-        expect(benchmarkCase.expectedFactIntents, benchmarkCase.id).toEqual([]);
-        expect(benchmarkCase.unauthorizedModelIntents, benchmarkCase.id)
-          .toEqual(["PRICE", "STOCK", "ETA", "SIZE"]);
-      }
-      if (benchmarkCase.runtimeContract === "PASS_THROUGH_SIZE") {
-        expect(benchmarkCase.label, benchmarkCase.id).toBe("PASS_THROUGH");
-        expect(benchmarkCase.expectedClassifierIntents, benchmarkCase.id).toEqual(["SIZE"]);
-        expect(benchmarkCase.expectedFactIntents, benchmarkCase.id).toEqual(["SIZE"]);
-      }
-      if (benchmarkCase.runtimeContract === "CONTAIN_AUTHORIZED_FACT") {
-        expect(benchmarkCase.label, benchmarkCase.id).toBe("CONTAIN");
-        expect(benchmarkCase.expectedFactIntents, benchmarkCase.id)
-          .toEqual(benchmarkCase.expectedClassifierIntents);
-        expect(benchmarkCase.unauthorizedModelIntents, benchmarkCase.id)
-          .not.toContain(benchmarkCase.expectedFactIntents?.[0]);
-      }
+    expect(corpus.cases.filter(({ label }) => label === "CONTAIN"))
+      .toHaveLength(36);
+    expect(corpus.cases.filter(({ label }) => label === "PASS_THROUGH"))
+      .toHaveLength(50);
+    for (const evaluationCase of corpus.cases) {
+      expect(evaluationCase.id).toMatch(/^[pn]\d{2}$/u);
+      expect(evaluationCase.category.trim()).not.toBe("");
+      expect(evaluationCase.text.trim()).not.toBe("");
+      expect(["CONTAIN", "PASS_THROUGH"]).toContain(evaluationCase.label);
     }
+  });
 
-    const falsePositiveRate = negatives === 0 ? 0 : falsePositives / negatives;
-    const falseNegativeRate = positives === 0 ? 0 : falseNegatives / positives;
-    expect(positives).toBeGreaterThan(0);
-    expect(positives).toBe(36);
-    expect(negatives).toBe(50);
-    expect(falsePositiveIds).toEqual([]);
-    expect(falseNegativeIds).toEqual([]);
-    expect(falsePositives).toBeLessThanOrEqual(corpus.gate.maxFalsePositives);
-    expect(falseNegatives).toBeLessThanOrEqual(corpus.gate.maxFalseNegatives);
-    expect(falsePositiveRate).toBeLessThanOrEqual(corpus.gate.maxFalsePositiveRate);
-    expect(falseNegativeRate).toBeLessThanOrEqual(corpus.gate.maxFalseNegativeRate);
+  it("does not import an analyzer, runner, or production module", () => {
+    const testSource = readFileSync(new URL(import.meta.url), "utf8");
+    expect(testSource).not.toMatch(/from\s+["'][^"']*(?:runner|realtime|analy)/iu);
   });
 });

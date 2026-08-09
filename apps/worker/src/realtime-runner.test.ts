@@ -805,6 +805,7 @@ describe("RealtimeRunner", () => {
       commit: vi.fn(),
       linkProviderConversation: vi.fn(),
     };
+    const policyResolver: RuntimePolicyResolverPort = { resolve: vi.fn() };
     const runner = new RealtimeRunner(
       inbox,
       runtime,
@@ -813,12 +814,18 @@ describe("RealtimeRunner", () => {
       { searchText: vi.fn(), searchImage: vi.fn() },
       new FailClosedTagObservationProvider(),
       { workerId: "worker-1", mode: "LIVE", sendEnabled: true, metaAppId: "app-1" },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      policyResolver,
     );
 
     expect(await runner.processOne()).toBe(true);
     expect(runtime.isOwnMetaMessage).toHaveBeenCalledWith(claim.pageId, "mid.bot-1");
     expect(runtime.loadOrCreate).not.toHaveBeenCalled();
     expect(runtime.commit).not.toHaveBeenCalled();
+    expect(policyResolver.resolve).not.toHaveBeenCalled();
     expect(complete).toHaveBeenCalledOnce();
   });
 
@@ -2568,6 +2575,118 @@ describe("RealtimeRunner inbound batching", () => {
       groundWithFacts: vi.fn(),
     };
   }
+
+  function earlyBoundaryHarness(input: {
+    current: boolean;
+    malformed?: boolean;
+  }) {
+    const original = item(30, "foundation boundary");
+    const entry = input.malformed
+      ? {
+          ...original,
+          envelope: { ...original.envelope, schemaVersion: 2 as never },
+        }
+      : original;
+    const batch = {
+      pageId,
+      conversationHash,
+      generation: 8,
+      leaseToken: entry.leaseToken,
+      inboxIds: [entry.inboxId],
+      evaluationGroupId: "75c357b4-aec3-4cc4-9840-1a15f368a0f0",
+      eventKind: "CUSTOMER" as const,
+      firstReceiveSequence: 30,
+      lastReceiveSequence: 30,
+      attemptCount: 1,
+      items: [entry],
+    };
+    const completeBatch = vi.fn(async () => true);
+    const retryBatch = vi.fn(async () => true);
+    const inbox: RealtimeInboxPort = {
+      claimNext: vi.fn(async () => null),
+      claimNextBatch: vi.fn(async () => batch),
+      complete: vi.fn(async () => true),
+      completeBatch,
+      isBatchCurrent: vi.fn(async () => input.current),
+      retry: vi.fn(async () => true),
+      retryBatch,
+      failPermanent: vi.fn(async () => true),
+      failBatchPermanent: vi.fn(async () => true),
+    };
+    const loadOrCreate = vi.fn();
+    const commit = vi.fn();
+    const runtime: RealtimeRuntimePort = {
+      loadOrCreate,
+      commit,
+      linkProviderConversation: vi.fn(),
+    };
+    const model: RealtimeModelPort = {
+      generate: vi.fn(),
+      groundWithFacts: vi.fn(),
+    };
+    const policyResolver: RuntimePolicyResolverPort = { resolve: vi.fn() };
+    const runner = new RealtimeRunner(
+      inbox,
+      runtime,
+      model,
+      { ready: vi.fn(), resolve: vi.fn(), close: vi.fn() },
+      { searchText: vi.fn(), searchImage: vi.fn() },
+      clearTagObservation(),
+      { workerId: "worker-1", mode: "LIVE", sendEnabled: true },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      policyResolver,
+    );
+    return {
+      batch,
+      commit,
+      completeBatch,
+      loadOrCreate,
+      model,
+      policyResolver,
+      retryBatch,
+      runner,
+    };
+  }
+
+  it("completes a stale native generation before state or policy resolution", async () => {
+    const harness = earlyBoundaryHarness({ current: false });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(harness.completeBatch).toHaveBeenCalledWith({
+      pageId,
+      conversationHash,
+      generation: 8,
+      leaseToken: harness.batch.leaseToken,
+      inboxIds: harness.batch.inboxIds,
+    }, true);
+    expect(harness.loadOrCreate).not.toHaveBeenCalled();
+    expect(harness.policyResolver.resolve).not.toHaveBeenCalled();
+    expect(harness.model.generate).not.toHaveBeenCalled();
+    expect(harness.commit).not.toHaveBeenCalled();
+  });
+
+  it("retries a malformed native envelope before state or policy resolution", async () => {
+    const harness = earlyBoundaryHarness({ current: true, malformed: true });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(harness.retryBatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pageId,
+        conversationHash,
+        generation: 8,
+        inboxIds: harness.batch.inboxIds,
+      }),
+      "REALTIME_ENVELOPE_INVALID",
+      expect.any(Number),
+    );
+    expect(harness.loadOrCreate).not.toHaveBeenCalled();
+    expect(harness.policyResolver.resolve).not.toHaveBeenCalled();
+    expect(harness.model.generate).not.toHaveBeenCalled();
+    expect(harness.commit).not.toHaveBeenCalled();
+  });
 
   it("uses one product/tool/model decision and one reply plan for a three-message burst", async () => {
     const middle = item(32, "em muốn hỏi");

@@ -20,14 +20,6 @@ export type ReplyReconciliationPolicyV1 = z.infer<
   typeof ReplyReconciliationPolicyV1Schema
 >;
 
-export const CorrectionDialoguePolicyV1Schema = z.enum([
-  "LEGACY",
-  "CORRECTION_CONTAINMENT_V1",
-]);
-export type CorrectionDialoguePolicyV1 = z.infer<
-  typeof CorrectionDialoguePolicyV1Schema
->;
-
 type LegacyClosingStrategyAdminContentV1 = z.infer<
   typeof LegacyClosingStrategyAdminContentV1Schema
 >;
@@ -36,13 +28,11 @@ export type ClosingStrategyAdminContentV1 =
   LegacyClosingStrategyAdminContentV1 & Readonly<{
     replyReconciliationPolicy?: ReplyReconciliationPolicyV1;
     replyReconciliationFallbackText?: string;
-    correctionDialoguePolicy?: CorrectionDialoguePolicyV1;
   }>;
 
-const ClosingStrategyIncidentExtensionsV1Schema = z.object({
+const ReplyReconciliationExtensionV1Schema = z.object({
   replyReconciliationPolicy: ReplyReconciliationPolicyV1Schema.optional(),
   replyReconciliationFallbackText: z.string().trim().min(1).max(500).optional(),
-  correctionDialoguePolicy: CorrectionDialoguePolicyV1Schema.optional(),
 }).strict().superRefine((value, context) => {
   if (value.replyReconciliationPolicy === undefined) {
     if (value.replyReconciliationFallbackText !== undefined) {
@@ -74,10 +64,10 @@ const ClosingStrategyIncidentExtensionsV1Schema = z.object({
 });
 
 /**
- * BF-01 and BF-03 add optional, independently auditable behavior selections to
- * the existing immutable CLOSING_STRATEGY artifact. Legacy parsing remains the
- * normalization authority; incident fields are parsed separately and merged
- * only after the legacy schema succeeds.
+ * BF-01 adds an optional, versioned reply-reconciliation selection to the
+ * existing immutable CLOSING_STRATEGY artifact. Legacy parsing remains the
+ * normalization authority; BF-01 fields are parsed separately and merged only
+ * after the legacy schema succeeds.
  */
 export const ClosingStrategyAdminContentV1Schema = z.unknown().transform(
   (value, context): ClosingStrategyAdminContentV1 => {
@@ -100,17 +90,13 @@ export const ClosingStrategyAdminContentV1Schema = z.unknown().transform(
         record.replyReconciliationFallbackText;
       delete record.replyReconciliationFallbackText;
     }
-    if (Object.prototype.hasOwnProperty.call(record, "correctionDialoguePolicy")) {
-      extensionInput.correctionDialoguePolicy = record.correctionDialoguePolicy;
-      delete record.correctionDialoguePolicy;
-    }
 
     const legacy = LegacyClosingStrategyAdminContentV1Schema.safeParse(record);
     if (!legacy.success) {
       for (const issue of legacy.error.issues) context.addIssue({ ...issue });
       return z.NEVER;
     }
-    const extension = ClosingStrategyIncidentExtensionsV1Schema.safeParse(extensionInput);
+    const extension = ReplyReconciliationExtensionV1Schema.safeParse(extensionInput);
     if (!extension.success) {
       for (const issue of extension.error.issues) context.addIssue({ ...issue });
       return z.NEVER;
@@ -126,9 +112,6 @@ export const ClosingStrategyAdminContentV1Schema = z.unknown().transform(
             replyReconciliationFallbackText:
               extension.data.replyReconciliationFallbackText,
           }),
-      ...(extension.data.correctionDialoguePolicy === undefined
-        ? {}
-        : { correctionDialoguePolicy: extension.data.correctionDialoguePolicy }),
     };
   },
 ) as z.ZodType<ClosingStrategyAdminContentV1>;

@@ -1,6 +1,9 @@
 {
   "schemaVersion": 1,
   "benchmarkVersion": "bf03-correction-containment-v1",
+  "status": "INACTIVE_RESEARCH_ONLY",
+  "runtimeAuthority": "NO_RUNTIME_AUTHORITY",
+  "activationPath": "NO_ACTIVATION_PATH",
   "provenance": "SYNTHETIC_REVIEWED_NO_PII",
   "policy": "CORRECTION_CONTAINMENT_V1",
   "gate": {
