@@ -49,6 +49,14 @@ describe("BF-08 classified customer URL policy", () => {
     "https://www.lanadesign.vn/%ZZ",
     "169.254.169.254/latest/meta-data",
     "localhost/admin",
+    "[::1]/admin",
+    "127.1/admin",
+    "2130706433/admin",
+    "0x7f000001/admin",
+    "user:secret@example.com/a",
+    "lanadesign.vn@evil.test/a",
+    "localhost:999999/admin",
+    "example.com:999999/path",
   ])("blocks and redacts malformed or private URL-like input %s", (text) => {
     expect(classifyCustomerUrls(text, "CLASSIFIED_ALLOWLIST_V1")).toMatchObject({
       disposition: "HANDOFF",

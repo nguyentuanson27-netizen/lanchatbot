@@ -442,4 +442,26 @@ describe("BF-08 production-wrapper customer URL policy", () => {
       }),
     ]));
   });
+
+  it.each([
+    "[::1]/admin",
+    "127.1/admin",
+    "2130706433/admin",
+    "0x7f000001/admin",
+    "user:secret@example.com/a",
+    "lanadesign.vn@evil.test/a",
+    "localhost:999999/admin",
+    "example.com:999999/path",
+  ])("fails closed before model or resolver for scheme-less authority %s", async (text) => {
+    const result = await runTurn({
+      text: `please check ${text}`,
+      policy: policy("CLASSIFIED_ALLOWLIST_V1"),
+    });
+    expect(result.searchText).not.toHaveBeenCalled();
+    expect(result.generate).not.toHaveBeenCalled();
+    expect(result.draftCustomerUrlExplanation).not.toHaveBeenCalled();
+    expect(result.commit.metaPlan).toBeUndefined();
+    expect(result.commit.pancakeTagPlan).toBeDefined();
+    expect(JSON.stringify(result.commit)).not.toContain(text);
+  });
 });
