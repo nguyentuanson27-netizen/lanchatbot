@@ -58,6 +58,7 @@ function context(item: PolicyArtifact): PolicyReviewContext {
     previousVersion: null,
     activePointers: [],
     rollbackCandidates: [],
+    deletionEligible: true,
   };
 }
 
@@ -178,6 +179,7 @@ describe("policy phase1 drawer", () => {
     const published = artifact("published", "PUBLISHED");
     const activeContext = {
       ...context(published),
+      deletionEligible: false,
       activePointers: [{
         id: "pointer-1",
         key: published.key,
@@ -196,5 +198,16 @@ describe("policy phase1 drawer", () => {
 
     const inactiveHtml = renderReviewDrawer(context(published), identity, "page-1");
     expect(inactiveHtml).toContain("Xóa khỏi danh sách");
+  });
+
+  it("does not offer deletion when an active pointer exists outside the visible scope", () => {
+    const hiddenActiveContext = {
+      ...context(artifact("published", "PUBLISHED")),
+      activePointers: [],
+      deletionEligible: false,
+    };
+    const html = renderReviewDrawer(hiddenActiveContext, identity, "page-1");
+    expect(html).not.toContain("Xóa khỏi danh sách");
+    expect(html).toContain("đang được kích hoạt trên page khác");
   });
 });

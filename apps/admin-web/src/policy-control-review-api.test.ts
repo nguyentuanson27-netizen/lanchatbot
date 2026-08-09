@@ -93,12 +93,14 @@ describe("policy review API client", () => {
           updated_at: "2026-08-08T00:00:00.000Z",
         }],
         rollback_candidates: [],
+        deletion_eligible: false,
       },
     })));
 
     const context = await getPolicyReviewContext(VERSION_ID);
     expect(context.artifact.revision).toBe(3);
     expect(context.activePointers[0]?.revision).toBe(7);
+    expect(context.deletionEligible).toBe(false);
   });
 
   it("fails closed instead of silently converting an invalid revision to zero", async () => {
