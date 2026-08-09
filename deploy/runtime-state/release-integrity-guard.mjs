@@ -70,7 +70,7 @@ const unknownField = structuredClone(example); unknownField.unapproved = true; i
 
 const manifestDir = join(root, 'deploy', 'manifests');
 for (const file of readdirSync(manifestDir).filter((name) => name.endsWith('.json'))) JSON.parse(readFileSync(join(manifestDir, file), 'utf8'));
-const adminReleaseTag = '20260809-admin-policy-review-r6.3';
+const adminReleaseTag = '20260809-admin-policy-review-r6.4';
 const adminReleaseDir = join(root, 'deploy', 'releases', adminReleaseTag);
 const adminReleaseScripts = [
   'common.sh',
@@ -136,7 +136,7 @@ if (JSON.stringify(adminManifest.scope?.targetServices) !== JSON.stringify(['adm
 if (adminManifest.scope?.adminSimulationWorkerMustRemainUnchanged !== true || adminManifest.scope?.messengerProductionTestAllowed !== false) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_NON_TARGET_SCOPE');
 }
-if (adminManifest.supersedesUnexecutedRelease !== '20260809-admin-policy-review-r6.2' ||
+if (adminManifest.supersedesUnexecutedRelease !== '20260809-admin-policy-review-r6.3' ||
     adminManifest.deploymentAutomation?.automaticRollbackOnSoakFailure !== true ||
     adminManifest.deploymentAutomation?.globalDeploymentLockRequired !== true ||
     adminManifest.rollback?.runtimeDefinitionAuthority !== 'previous release Compose plus reviewed image-only override') {
