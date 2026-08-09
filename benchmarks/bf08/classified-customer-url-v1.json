@@ -1,0 +1,34 @@
+[
+  {
+    "name": "official product URL resolves offline",
+    "text": "xem giup https://www.lanadesign.vn/sv695",
+    "expectedDisposition": "CONTINUE",
+    "expectedClass": "APPROVED_FIRST_PARTY_PRODUCT",
+    "expectedReason": "CUSTOMER_URL_APPROVED_FIRST_PARTY_PRODUCT",
+    "expectedProductCodes": ["SV695"]
+  },
+  {
+    "name": "official product CDN filename resolves offline",
+    "text": "https://admin.lanadesign.vn/lana-public/products/sd398-0123456789abcdef01234567.jpg",
+    "expectedDisposition": "CONTINUE",
+    "expectedClass": "APPROVED_SHOP_CDN",
+    "expectedReason": "CUSTOMER_URL_APPROVED_SHOP_CDN",
+    "expectedProductCodes": ["SD398"]
+  },
+  {
+    "name": "benign external URL is unsupported",
+    "text": "xem giup https://example.com/sd398",
+    "expectedDisposition": "HANDOFF",
+    "expectedClass": "UNSUPPORTED_EXTERNAL",
+    "expectedReason": "CUSTOMER_URL_UNSUPPORTED_EXTERNAL",
+    "expectedProductCodes": []
+  },
+  {
+    "name": "private-network URL is dangerous",
+    "text": "xem giup https://127.0.0.1/admin",
+    "expectedDisposition": "HANDOFF",
+    "expectedClass": "SUSPICIOUS_DANGEROUS",
+    "expectedReason": "CUSTOMER_URL_PRIVATE_ADDRESS",
+    "expectedProductCodes": []
+  }
+]
