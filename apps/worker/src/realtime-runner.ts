@@ -2794,14 +2794,21 @@ export class RealtimeRunner {
       return batchCommitStatus(result);
     }
     const hasCustomerUrl = !message.isEcho && containsCustomerUrl(message.text ?? "");
+    const mediaPartialResolutionPolicy =
+      activeMediaPartialResolutionPolicy(policyResolution);
     const resolution = message.isEcho || hasCustomerUrl ||
         isPostSaleRequest(message.text ?? "") ||
         preSalePolicyIntent !== null
       ? this.emptyResolution()
-      : await this.resolveProducts(message, state, claim.pageId);
+      : await this.resolveProducts(
+          message,
+          state,
+          claim.pageId,
+          mediaPartialResolutionPolicy,
+        );
     const mediaDisposition = decideMediaBatchDisposition({
       aggregation: resolution.media,
-      policy: activeMediaPartialResolutionPolicy(policyResolution),
+      policy: mediaPartialResolutionPolicy,
       hasClarification:
         resolution.clarification !== null && resolution.clarification.action !== "CLEAR",
     });
@@ -4723,8 +4730,12 @@ export class RealtimeRunner {
 
   private async searchImages(
     urls: readonly string[],
+    policy: MediaPartialResolutionPolicy,
   ): Promise<readonly MediaProductSearchResult[]> {
     if (this.productSearch.searchImages) {
+      if (policy === "LEGACY") {
+        return this.productSearch.searchImages(urls, 3);
+      }
       try {
         return await this.productSearch.searchImages(urls, 3);
       } catch {
@@ -4742,6 +4753,16 @@ export class RealtimeRunner {
         };
       }
     }));
+  }
+
+  private async recognizeImages(
+    urls: readonly string[],
+    policy: MediaPartialResolutionPolicy,
+  ): Promise<readonly PromiseSettledResult<RealtimeMediaRecognition>[]> {
+    const pending = urls.map((url) => this.mediaRecognition!.recognize(url));
+    if (policy === "PER_ASSET_V1") return Promise.allSettled(pending);
+    const results = await Promise.all(pending);
+    return results.map((value) => ({ status: "fulfilled", value }));
   }
 
   private boundedMediaFailureReason(error: unknown): string {
@@ -4765,6 +4786,7 @@ export class RealtimeRunner {
     message: InboundMessageV1,
     state: ConversationState,
     pageId: string,
+    mediaPartialResolutionPolicy: MediaPartialResolutionPolicy,
   ): Promise<ProductResolution> {
     const text = message.text?.trim() ?? "";
     const imageAttachments = message.attachments
@@ -4898,14 +4920,16 @@ export class RealtimeRunner {
     if (imageAttachments.length > 0) {
       const useRecognition = this.mediaRecognitionEnabledForPage(pageId);
       const recognitionResults = useRecognition
-        ? await Promise.allSettled(imageAttachments.map((item) =>
-            this.mediaRecognition!.recognize(item.attachment.url)
-          ))
+        ? await this.recognizeImages(
+            imageAttachments.map((item) => item.attachment.url),
+            mediaPartialResolutionPolicy,
+          )
         : null;
       const searchResults = useRecognition
         ? null
         : await this.searchImages(
             imageAttachments.map((item) => item.attachment.url),
+            mediaPartialResolutionPolicy,
           );
       for (const [index, item] of imageAttachments.entries()) {
         if (useRecognition) {

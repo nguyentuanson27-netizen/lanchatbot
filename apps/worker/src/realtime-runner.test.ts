@@ -2540,6 +2540,74 @@ describe("RealtimeRunner", () => {
     ][];
     expect(partialCalls[0]?.[0].handoffEventPlan).toBeUndefined();
 
+    const legacyBatchCommit = vi.fn();
+    const legacyBatchRetry = vi.fn(async () => true);
+    const legacyBatchRunner = new RealtimeRunner(
+      {
+        claimNext: vi.fn(async () => claim),
+        complete: vi.fn(async () => true),
+        retry: legacyBatchRetry,
+        failPermanent: vi.fn(),
+      },
+      { ...runtime, commit: legacyBatchCommit },
+      model,
+      facts,
+      {
+        searchText: vi.fn(),
+        searchImage: vi.fn(async () => ({ status: "NOT_FOUND" as const, reasonCode: "NO_CANDIDATES" as const })),
+        searchImages: vi.fn(async () => { throw new Error("REDIS_UNAVAILABLE"); }),
+      },
+      new FailClosedTagObservationProvider(),
+      { workerId: "worker-1", mode: "LIVE", sendEnabled: true },
+    );
+
+    expect(await legacyBatchRunner.processOne()).toBe(true);
+    expect(legacyBatchRetry).toHaveBeenCalledWith(
+      claim.inboxId,
+      claim.leaseToken,
+      "REDIS_UNAVAILABLE",
+      expect.any(Number),
+    );
+    expect(legacyBatchCommit).not.toHaveBeenCalled();
+
+    const legacyRecognitionCommit = vi.fn();
+    const legacyRecognitionRetry = vi.fn(async () => true);
+    const legacyRecognitionRunner = new RealtimeRunner(
+      {
+        claimNext: vi.fn(async () => claim),
+        complete: vi.fn(async () => true),
+        retry: legacyRecognitionRetry,
+        failPermanent: vi.fn(),
+      },
+      { ...runtime, commit: legacyRecognitionCommit },
+      model,
+      facts,
+      { searchText: vi.fn(), searchImage: vi.fn() },
+      new FailClosedTagObservationProvider(),
+      {
+        workerId: "worker-1",
+        mode: "LIVE",
+        sendEnabled: true,
+        mediaRecognitionEnabled: true,
+        mediaRecognitionPageIds: [claim.pageId],
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { recognize: vi.fn(async () => { throw new Error("MEDIA_RECOGNITION_UNAVAILABLE"); }) },
+    );
+
+    expect(await legacyRecognitionRunner.processOne()).toBe(true);
+    expect(legacyRecognitionRetry).toHaveBeenCalledWith(
+      claim.inboxId,
+      claim.leaseToken,
+      "MEDIA_RECOGNITION_UNAVAILABLE",
+      expect.any(Number),
+    );
+    expect(legacyRecognitionCommit).not.toHaveBeenCalled();
+
     const recognitionCommit = vi.fn(async () => ({
       stateCommitted: true,
       metaOutboxCreated: 1,
