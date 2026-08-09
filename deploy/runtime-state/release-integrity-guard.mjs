@@ -70,7 +70,7 @@ const unknownField = structuredClone(example); unknownField.unapproved = true; i
 
 const manifestDir = join(root, 'deploy', 'manifests');
 for (const file of readdirSync(manifestDir).filter((name) => name.endsWith('.json'))) JSON.parse(readFileSync(join(manifestDir, file), 'utf8'));
-const adminReleaseTag = '20260809-admin-policy-review-r6.6';
+const adminReleaseTag = '20260809-admin-policy-review-r6.7';
 const adminReleaseDir = join(root, 'deploy', 'releases', adminReleaseTag);
 const adminReleaseScripts = [
   'common.sh',
@@ -122,6 +122,10 @@ for (const required of ['RUNTIME_STATE_ROLLBACK_EVIDENCE_FILE', 'require_rollbac
   if (!adminCommon.includes(required)) throw new Error(`ADMIN_POLICY_ROLLBACK_INPUT_GUARD_MISSING:${required}`);
 }
 if (adminRollback.includes('require_cutover_inputs')) throw new Error('ADMIN_POLICY_ROLLBACK_DEPENDS_ON_CUTOVER_GATE');
+const adminArtifactSmoke = readFileSync(join(adminReleaseDir, 'artifact-smoke.sh'), 'utf8');
+if (!/cd apps\/admin-api\s+node -e "import\(\\"sharp\\"\)/.test(adminArtifactSmoke)) {
+  throw new Error('ADMIN_POLICY_SHARP_SMOKE_WORKSPACE_ANCHOR_MISSING');
+}
 const adminManifest = JSON.parse(readFileSync(join(manifestDir, `${adminReleaseTag}.json`), 'utf8'));
 if (adminManifest.releaseTag !== adminReleaseTag || adminManifest.source?.implementationCommit !== '43a42392cf975891ddb284083efe153581388d55') {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_PROVENANCE');
@@ -140,7 +144,7 @@ if (JSON.stringify(adminManifest.scope?.targetServices) !== JSON.stringify(['adm
 if (adminManifest.scope?.adminSimulationWorkerMustRemainUnchanged !== true || adminManifest.scope?.messengerProductionTestAllowed !== false) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_NON_TARGET_SCOPE');
 }
-if (adminManifest.supersedesUnexecutedRelease !== '20260809-admin-policy-review-r6.5' ||
+if (adminManifest.supersedesUnexecutedRelease !== '20260809-admin-policy-review-r6.6' ||
     adminManifest.deploymentAutomation?.automaticRollbackOnSoakFailure !== true ||
     adminManifest.deploymentAutomation?.globalDeploymentLockRequired !== true ||
     adminManifest.rollback?.runtimeDefinitionAuthority !== 'previous release Compose plus reviewed image-only override') {
