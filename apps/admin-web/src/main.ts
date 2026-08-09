@@ -39,6 +39,13 @@ import {
   releaseDatasetReviewLease,
 } from "./api.js";
 import { bindPolicyControl, renderPolicyControl } from "./policy-control-ui.js";
+import {
+  autoRefreshLabel,
+  readAutoRefreshEnabled,
+  renderAutoRefreshToggle,
+  shouldAutoRefresh,
+  writeAutoRefreshEnabled,
+} from "./auto-refresh.js";
 import { renderDatasetIndex } from "./dataset-review-screen.js";
 import { bindReviewQueue, renderReviewQueue, resolveShortcut } from "./dataset-review-ui.js";
 import { renderAdsFunnel, renderMediaPipeline } from "./fe4-ui.js";
@@ -168,6 +175,7 @@ let currentRoute = routeFromHash();
 let identity: Identity | null = null;
 let productMediaCatalog: ProductMediaCatalog | null = null;
 let refreshTimer: number | undefined;
+let autoRefreshEnabled = readAutoRefreshEnabled(browserPreferenceStorage());
 let activeController: AbortController | null = null;
 let lastUpdatedAt: string | null = null;
 let conversationSearch = "";
@@ -365,7 +373,7 @@ function renderShell(): void {
             <span class="page-context">${escapeHtml(identity?.pageScope.includes("ALL") ? "Tất cả page được cấp quyền" : `Page · ${identity?.pageScope[0] ?? "Đang tải"}`)}</span>
           </div>
           <div class="topbar__actions">
-            <span class="live-indicator"><span></span>Tự cập nhật an toàn · 5 giây</span>
+            ${renderAutoRefreshToggle(autoRefreshEnabled)}
             <button class="icon-button" id="manual-refresh" aria-label="Làm mới dữ liệu">${icon("refresh")}</button>
             <div class="identity identity--top">
               <span class="avatar">${escapeHtml((person?.email ?? "A").slice(0, 1).toUpperCase())}</span>
@@ -391,8 +399,31 @@ function renderShell(): void {
 
 function bindShellEvents(): void {
   document.querySelector("#manual-refresh")?.addEventListener("click", () => void loadCurrentPage(false));
+  document.querySelector("#auto-refresh-toggle")?.addEventListener("click", () => {
+    autoRefreshEnabled = !autoRefreshEnabled;
+    writeAutoRefreshEnabled(browserPreferenceStorage(), autoRefreshEnabled);
+    syncAutoRefreshToggle();
+  });
   document.querySelector("#mobile-menu")?.addEventListener("click", () => toggleSidebar(true));
   document.querySelector("#sidebar-scrim")?.addEventListener("click", () => toggleSidebar(false));
+}
+
+function browserPreferenceStorage(): Storage | null {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+function syncAutoRefreshToggle(): void {
+  const toggle = document.querySelector<HTMLButtonElement>("#auto-refresh-toggle");
+  if (!toggle) return;
+  const label = autoRefreshLabel(autoRefreshEnabled);
+  toggle.setAttribute("aria-checked", String(autoRefreshEnabled));
+  toggle.setAttribute("aria-label", label);
+  const copy = toggle.querySelector<HTMLElement>(".auto-refresh-toggle__label");
+  if (copy) copy.textContent = label;
 }
 
 function toggleSidebar(open: boolean): void {
@@ -2100,13 +2131,14 @@ function showToast(message: string, tone: "good" | "warning" | "danger" = "good"
 function startPolling(): void {
   window.clearInterval(refreshTimer);
   refreshTimer = window.setInterval(() => {
-    if (
-      document.visibilityState === "visible" &&
-      currentRoute !== "media" &&
-      !(currentRoute === "datasets" && datasetProjectFromHash()) &&
-      !hasBlockingOverlay() &&
-      !isEditingContext()
-    ) {
+    if (shouldAutoRefresh({
+      enabled: autoRefreshEnabled,
+      visible: document.visibilityState === "visible",
+      routeSupportsPolling: currentRoute !== "media" &&
+        !(currentRoute === "datasets" && datasetProjectFromHash()),
+      hasBlockingOverlay: hasBlockingOverlay(),
+      isEditing: isEditingContext(),
+    })) {
       void loadCurrentPage(true);
     }
     updateRefreshTime();

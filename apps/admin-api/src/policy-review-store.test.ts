@@ -71,6 +71,20 @@ describe("policy review list query", () => {
     );
   });
 
+  it("filters exact version and revision with parameters and hides tombstones", () => {
+    const built = buildPolicyArtifactListQuery(scopedIdentity, {
+      limit: 50,
+      version: 3,
+      revision: 9,
+      sort: "updated_desc",
+    });
+    assert.match(built.sql, /v\.version_number = \$\d+/u);
+    assert.match(built.sql, /v\.revision = \$\d+::bigint/u);
+    assert.match(built.sql, /NOT EXISTS[\s\S]*admin_artifact_deletions/u);
+    assert.ok(built.values.includes(3));
+    assert.ok(built.values.includes(9));
+  });
+
   it("continues duplicate artifact keys with the version-id cursor tie breaker", () => {
     const cursor = encodePolicyCursor({
       sort: "artifact_key_asc",

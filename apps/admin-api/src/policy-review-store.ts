@@ -113,11 +113,19 @@ export function createPolicyReviewStore(
         `SELECT ${ARTIFACT_COLUMNS}
          FROM admin_artifact_versions_v
          WHERE version_id = $1
+           AND NOT EXISTS (SELECT 1 FROM admin_artifact_deletions d WHERE d.version_id = admin_artifact_versions_v.version_id)
          LIMIT 1`,
         [versionId],
       );
       const artifact = current.rows[0];
       if (!artifact) return null;
+
+      const deletionEligibility = await pool.query(
+        `SELECT NOT EXISTS (
+           SELECT 1 FROM admin_active_pointers_v WHERE version_id = $1
+         ) AS deletion_eligible`,
+        [versionId],
+      );
 
       const previous = await pool.query(
         `SELECT ${ARTIFACT_COLUMNS}
@@ -125,6 +133,7 @@ export function createPolicyReviewStore(
          WHERE artifact_key = $1
            AND artifact_kind = $2
            AND version_number < $3
+           AND NOT EXISTS (SELECT 1 FROM admin_artifact_deletions d WHERE d.version_id = admin_artifact_versions_v.version_id)
          ORDER BY version_number DESC, version_id DESC
          LIMIT 1`,
         [artifact.artifact_key, artifact.artifact_kind, artifact.version_number],
@@ -159,6 +168,7 @@ export function createPolicyReviewStore(
            WHERE v.artifact_key = p.artifact_key
              AND v.artifact_kind = p.artifact_kind
              AND v.version_number < p.version_number
+             AND NOT EXISTS (SELECT 1 FROM admin_artifact_deletions d WHERE d.version_id = v.version_id)
              AND v.lifecycle = CASE
                WHEN p.channel = 'PUBLISHED' THEN 'PUBLISHED'
                ELSE 'CANARY'
@@ -198,6 +208,7 @@ export function createPolicyReviewStore(
         previous_version: previous.rows[0] ? policySafeRow(previous.rows[0]) : null,
         active_pointers: activePointers,
         rollback_candidates: rollbackCandidates,
+        deletion_eligible: deletionEligibility.rows[0]?.deletion_eligible === true,
       };
     },
 
@@ -233,6 +244,11 @@ export function buildPolicyArtifactListQuery(
   if (query.artifactKind) addFilter(filters, values, "v.artifact_kind", query.artifactKind);
   if (query.lifecycle) addFilter(filters, values, "v.lifecycle", query.lifecycle);
   if (query.artifactKey) addFilter(filters, values, "v.artifact_key", query.artifactKey);
+  if (query.version !== undefined) addFilter(filters, values, "v.version_number", query.version);
+  if (query.revision !== undefined) {
+    values.push(query.revision);
+    filters.push(`v.revision = $${values.length}::bigint`);
+  }
   if (query.search) {
     values.push(`%${escapeLike(query.search)}%`);
     filters.push(`v.artifact_key ILIKE $${values.length} ESCAPE '!'`);
@@ -245,6 +261,9 @@ export function buildPolicyArtifactListQuery(
     WHERE p.version_id = v.version_id
       AND ${scope}
   )`;
+  filters.push(`NOT EXISTS (
+    SELECT 1 FROM admin_artifact_deletions d WHERE d.version_id = v.version_id
+  )`);
   if (active === "active") filters.push(activeExpression);
   if (active === "inactive") filters.push(`NOT ${activeExpression}`);
 

@@ -216,6 +216,7 @@ export function createAdminApi(options: CreateAdminApiOptions): FastifyInstance 
         ? 403
         : error.code === "ADMIN_IDEMPOTENCY_CONFLICT" ||
             error.code === "ADMIN_ARTIFACT_VERSION_CONFLICT" ||
+            error.code === "ADMIN_ARTIFACT_DELETE_ACTIVE" ||
             error.code === "ADMIN_HANDOFF_VERSION_CONFLICT"
           ? 409
           : error.code === "ADMIN_CONTROL_UNAVAILABLE" || error.code === "ADMIN_POLICY_CONTROL_UNAVAILABLE"

@@ -8,6 +8,8 @@ import {
   type AuditQuery,
   type ArtifactVersionQuery,
   type CreateArtifactVersionInput,
+  type DeactivateArtifactPointerInput,
+  type DeleteArtifactVersionInput,
   type CreateAdminCommandInput,
   type ConversationQuery,
   type EvaluationQuery,
@@ -1585,7 +1587,9 @@ export class PostgresAdminStore implements AdminStore {
   }
 
   async listArtifactVersions(_identity: AdminIdentity, query: ArtifactVersionQuery) {
-    const filters: string[] = [];
+    const filters: string[] = [
+      "NOT EXISTS (SELECT 1 FROM admin_artifact_deletions d WHERE d.version_id = admin_artifact_versions_v.version_id)",
+    ];
     const values: unknown[] = [];
     if (query.artifactKind) addFilter(filters, values, "artifact_kind", query.artifactKind);
     if (query.lifecycle) addFilter(filters, values, "lifecycle", query.lifecycle);
@@ -1618,7 +1622,13 @@ export class PostgresAdminStore implements AdminStore {
   async getArtifactVersion(_identity: AdminIdentity, versionId: string) {
     const result = await this.pool.query(
       `SELECT ${ARTIFACT_VERSIONS.columns}
-       FROM admin_artifact_versions_v WHERE version_id = $1 LIMIT 1`,
+       FROM admin_artifact_versions_v
+       WHERE version_id = $1
+         AND NOT EXISTS (
+           SELECT 1 FROM admin_artifact_deletions d
+           WHERE d.version_id = admin_artifact_versions_v.version_id
+         )
+       LIMIT 1`,
       [versionId],
     );
     return result.rows[0] ? policySafeRow(result.rows[0]) : null;
@@ -1688,7 +1698,10 @@ export class PostgresAdminStore implements AdminStore {
       await client.query("BEGIN");
       const currentResult = await client.query(
         `SELECT version_id, artifact_key, artifact_kind, lifecycle, revision
-         FROM admin_artifact_versions WHERE version_id = $1 FOR UPDATE`,
+         FROM admin_artifact_versions
+         WHERE version_id = $1
+           AND NOT EXISTS (SELECT 1 FROM admin_artifact_deletions d WHERE d.version_id = admin_artifact_versions.version_id)
+         FOR UPDATE`,
         [versionId],
       );
       const current = currentResult.rows[0];
@@ -1735,7 +1748,10 @@ export class PostgresAdminStore implements AdminStore {
       await client.query("BEGIN");
       const selected = await client.query(
         `SELECT version_id, artifact_key, artifact_kind, lifecycle, revision, content
-         FROM admin_artifact_versions WHERE version_id = $1 FOR UPDATE`,
+         FROM admin_artifact_versions
+         WHERE version_id = $1
+           AND NOT EXISTS (SELECT 1 FROM admin_artifact_deletions d WHERE d.version_id = admin_artifact_versions.version_id)
+         FOR UPDATE`,
         [versionId],
       );
       const current = selected.rows[0];
@@ -1829,6 +1845,144 @@ export class PostgresAdminStore implements AdminStore {
     return result.rows.map(policySafeRow);
   }
 
+  async deactivateArtifactPointer(
+    identity: AdminIdentity,
+    pointerId: string,
+    input: DeactivateArtifactPointerInput,
+  ) {
+    assertPolicyRole(identity, ["OWNER"]);
+    const pool = this.requirePolicyPool();
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const versionLock = await client.query(
+        `SELECT p.version_id
+         FROM admin_active_pointers p
+         JOIN admin_artifact_versions v ON v.version_id = p.version_id
+         WHERE p.pointer_id = $1
+         FOR UPDATE OF v`,
+        [pointerId],
+      );
+      if (!versionLock.rows[0]) { await client.query("ROLLBACK"); return null; }
+      const selected = await client.query(
+        `SELECT pointer_id, artifact_key, artifact_kind, page_id, channel,
+                version_id, active, revision, updated_by_subject, updated_at
+         FROM admin_active_pointers
+         WHERE pointer_id = $1
+         FOR UPDATE`,
+        [pointerId],
+      );
+      const current = selected.rows[0];
+      if (!current) { await client.query("ROLLBACK"); return null; }
+      if (String(current.version_id) !== String(versionLock.rows[0].version_id)) {
+        throw new AdminQueryError("ADMIN_ARTIFACT_VERSION_CONFLICT");
+      }
+      if (current.page_id === null) {
+        if (identity.pageScope !== "ALL") throw new AdminQueryError("ADMIN_PAGE_NOT_ALLOWED");
+      } else {
+        assertPageAllowed(identity, String(current.page_id));
+      }
+      const expectedNextRevision = input.expectedRevision + 1;
+      if (!current.active) {
+        if (!Number.isSafeInteger(expectedNextRevision) ||
+            !matchesPolicyRevision(current.revision, expectedNextRevision)) {
+          throw new AdminQueryError("ADMIN_ARTIFACT_VERSION_CONFLICT");
+        }
+        await client.query("COMMIT");
+        return policySafeRow(current);
+      }
+      if (!matchesPolicyRevision(current.revision, input.expectedRevision)) {
+        throw new AdminQueryError("ADMIN_ARTIFACT_VERSION_CONFLICT");
+      }
+      const updated = await client.query(
+        `UPDATE admin_active_pointers
+         SET active = false, revision = revision + 1,
+             updated_by_subject = $2, updated_at = now()
+         WHERE pointer_id = $1
+         RETURNING pointer_id, artifact_key, artifact_kind, page_id, channel,
+                   version_id, active, revision, updated_by_subject, updated_at`,
+        [pointerId, identity.subject],
+      );
+      await insertArtifactEvent(client, {
+        versionId: String(current.version_id),
+        artifactKey: String(current.artifact_key),
+        action: "POINTER_CHANGED",
+        fromLifecycle: null,
+        toLifecycle: null,
+        identity,
+        correlationId: input.correlationId,
+        pageId: current.page_id === null ? null : String(current.page_id),
+        channel: String(current.channel),
+      });
+      await client.query("COMMIT");
+      return policySafeRow(updated.rows[0]);
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async deleteArtifactVersion(
+    identity: AdminIdentity,
+    versionId: string,
+    input: DeleteArtifactVersionInput,
+  ) {
+    assertPolicyRole(identity, ["OWNER"]);
+    const pool = this.requirePolicyPool();
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const currentResult = await client.query(
+        `SELECT version_id, artifact_key, artifact_kind, revision
+         FROM admin_artifact_versions
+         WHERE version_id = $1
+         FOR UPDATE`,
+        [versionId],
+      );
+      const current = currentResult.rows[0];
+      if (!current) { await client.query("ROLLBACK"); return null; }
+      const existing = await client.query(
+        `SELECT version_id, artifact_revision, deleted_at
+         FROM admin_artifact_deletions
+         WHERE version_id = $1`,
+        [versionId],
+      );
+      if (existing.rows[0]) {
+        if (!matchesPolicyRevision(existing.rows[0].artifact_revision, input.expectedRevision)) {
+          throw new AdminQueryError("ADMIN_ARTIFACT_VERSION_CONFLICT");
+        }
+        await client.query("COMMIT");
+        return policySafeRow({ ...existing.rows[0], deleted: true });
+      }
+      if (!matchesPolicyRevision(current.revision, input.expectedRevision)) {
+        throw new AdminQueryError("ADMIN_ARTIFACT_VERSION_CONFLICT");
+      }
+      const active = await client.query(
+        "SELECT 1 FROM admin_active_pointers WHERE version_id = $1 AND active LIMIT 1 FOR UPDATE",
+        [versionId],
+      );
+      if (active.rowCount) throw new AdminQueryError("ADMIN_ARTIFACT_DELETE_ACTIVE");
+      const inserted = await client.query(
+        `INSERT INTO admin_artifact_deletions (
+           version_id, artifact_key, artifact_kind, artifact_revision,
+           deleted_by_subject, actor_role, correlation_id
+         ) VALUES ($1,$2,$3,$4,$5,$6,$7)
+         RETURNING version_id, artifact_revision, deleted_at`,
+        [versionId, current.artifact_key, current.artifact_kind, current.revision,
+          identity.subject, identity.role, input.correlationId],
+      );
+      await client.query("COMMIT");
+      return policySafeRow({ ...inserted.rows[0], deleted: true });
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async rollbackArtifactPointer(identity: AdminIdentity, input: RollbackArtifactInput) {
     assertPolicyRole(identity, ["OWNER"]);
     assertPageAllowed(identity, input.pageId);
@@ -1838,7 +1992,10 @@ export class PostgresAdminStore implements AdminStore {
       await client.query("BEGIN");
       const target = await client.query(
         `SELECT version_id, artifact_key, artifact_kind, lifecycle
-         FROM admin_artifact_versions WHERE version_id = $1 FOR UPDATE`,
+         FROM admin_artifact_versions
+         WHERE version_id = $1
+           AND NOT EXISTS (SELECT 1 FROM admin_artifact_deletions d WHERE d.version_id = admin_artifact_versions.version_id)
+         FOR UPDATE`,
         [input.targetVersionId],
       );
       const row = target.rows[0];
@@ -2029,6 +2186,12 @@ function assertPolicyRole(identity: AdminIdentity, allowed: readonly AdminIdenti
   if (!allowed.includes(identity.role)) {
     throw new AdminQueryError("ADMIN_POLICY_FORBIDDEN");
   }
+}
+
+function matchesPolicyRevision(value: unknown, expected: number): boolean {
+  if (!Number.isSafeInteger(expected) || expected < 0) return false;
+  if (typeof value === "number") return Number.isSafeInteger(value) && value === expected;
+  return typeof value === "string" && /^(?:0|[1-9]\d*)$/u.test(value) && value === String(expected);
 }
 
 function assertTransitionRole(

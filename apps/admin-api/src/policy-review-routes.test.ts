@@ -32,6 +32,8 @@ class Authenticator implements AdminAuthenticator {
 function create(role: AdminIdentity["role"] = "OWNER") {
   const queries: ArtifactVersionQuery[] = [];
   const transitions: string[] = [];
+  const deactivations: Array<{ id: string; revision: number }> = [];
+  const deletions: Array<{ id: string; revision: number }> = [];
   const store = {
     async listArtifactVersions(_identity: AdminIdentity, query: ArtifactVersionQuery) {
       queries.push(query);
@@ -48,6 +50,7 @@ function create(role: AdminIdentity["role"] = "OWNER") {
         previous_version: null,
         active_pointers: [],
         rollback_candidates: [],
+        deletion_eligible: false,
       } : null;
     },
     async transitionArtifactVersion(
@@ -76,6 +79,14 @@ function create(role: AdminIdentity["role"] = "OWNER") {
         ? { version_id: VERSION_B, lifecycle: "DRAFT", revision: "9" }
         : null;
     },
+    async deactivateArtifactPointer(_identity: AdminIdentity, pointerId: string, input: { expectedRevision: number }) {
+      deactivations.push({ id: pointerId, revision: input.expectedRevision });
+      return { pointer_id: pointerId, active: false, revision: input.expectedRevision + 1 };
+    },
+    async deleteArtifactVersion(_identity: AdminIdentity, versionId: string, input: { expectedRevision: number }) {
+      deletions.push({ id: versionId, revision: input.expectedRevision });
+      return { version_id: versionId, deleted: true };
+    },
   } as unknown as AdminStore & PolicyReviewStoreExtension;
   const app = createAdminApi({
     authenticator: new Authenticator(role),
@@ -84,7 +95,7 @@ function create(role: AdminIdentity["role"] = "OWNER") {
     policyPageIds: ["page-1"],
   });
   registerPolicyReviewRoutes(app, store, true);
-  return { app, queries, transitions };
+  return { app, queries, transitions, deactivations, deletions };
 }
 
 describe("policy review phase1 routes", () => {
@@ -92,7 +103,7 @@ describe("policy review phase1 routes", () => {
     const { app, queries } = create();
     const response = await app.inject({
       method: "GET",
-      url: "/admin/v1/policy/review-artifacts?limit=50&search=SQ603&active=active&sort=artifact_key_asc",
+      url: "/admin/v1/policy/review-artifacts?limit=50&search=SQ603&active=active&sort=artifact_key_asc&version=3&revision=9",
       headers: { "x-lana-admin-assertion": "valid" },
     });
     assert.equal(response.statusCode, 200);
@@ -104,9 +115,53 @@ describe("policy review phase1 routes", () => {
       lifecycle: undefined,
       artifactKey: undefined,
       search: "SQ603",
+      version: 3,
+      revision: 9,
       active: "active",
       sort: "artifact_key_asc",
     });
+    await app.close();
+  });
+
+  it("routes revision-guarded pointer deactivation and safe deletion", async () => {
+    const { app, deactivations, deletions } = create();
+    const pointer = await app.inject({
+      method: "DELETE",
+      url: `/admin/v1/policy/pointers/${VERSION_B}`,
+      headers: { "x-lana-admin-assertion": "valid" },
+      payload: { expected_revision: 7 },
+    });
+    const artifact = await app.inject({
+      method: "DELETE",
+      url: `/admin/v1/policy/review-artifacts/${VERSION_A}`,
+      headers: { "x-lana-admin-assertion": "valid" },
+      payload: { expected_revision: 3 },
+    });
+    assert.equal(pointer.statusCode, 200);
+    assert.equal(artifact.statusCode, 200);
+    assert.deepEqual(deactivations, [{ id: VERSION_B, revision: 7 }]);
+    assert.deepEqual(deletions, [{ id: VERSION_A, revision: 3 }]);
+    await app.close();
+  });
+
+  it("rejects deactivation and deletion for non-owner roles", async () => {
+    const { app, deactivations, deletions } = create("APPROVER");
+    const pointer = await app.inject({
+      method: "DELETE",
+      url: `/admin/v1/policy/pointers/${VERSION_B}`,
+      headers: { "x-lana-admin-assertion": "valid" },
+      payload: { expected_revision: 7 },
+    });
+    const artifact = await app.inject({
+      method: "DELETE",
+      url: `/admin/v1/policy/review-artifacts/${VERSION_A}`,
+      headers: { "x-lana-admin-assertion": "valid" },
+      payload: { expected_revision: 3 },
+    });
+    assert.equal(pointer.statusCode, 403);
+    assert.equal(artifact.statusCode, 403);
+    assert.deepEqual(deactivations, []);
+    assert.deepEqual(deletions, []);
     await app.close();
   });
 
@@ -122,6 +177,20 @@ describe("policy review phase1 routes", () => {
     await app.close();
   });
 
+  it("rejects invalid version and revision filters before the store boundary", async () => {
+    const { app, queries } = create();
+    for (const query of ["version=0", "version=1.5", "revision=-1", "revision=9007199254740992"]) {
+      const response = await app.inject({
+        method: "GET",
+        url: `/admin/v1/policy/review-artifacts?${query}`,
+        headers: { "x-lana-admin-assertion": "valid" },
+      });
+      assert.equal(response.statusCode, 400, query);
+    }
+    assert.deepEqual(queries, []);
+    await app.close();
+  });
+
   it("returns review context independently of the current list page", async () => {
     const { app } = create();
     const response = await app.inject({
@@ -131,6 +200,7 @@ describe("policy review phase1 routes", () => {
     });
     assert.equal(response.statusCode, 200);
     assert.equal(response.json().review_context.artifact.revision, "3");
+    assert.equal(response.json().review_context.deletion_eligible, false);
     await app.close();
   });
 });

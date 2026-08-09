@@ -7,6 +7,8 @@ import {
 } from "./api.js";
 import {
   batchTransitionPolicyArtifacts,
+  deactivatePolicyPointer,
+  deletePolicyArtifact,
   getPolicyArtifact,
   getPolicyReviewContext,
   listPolicyArtifacts,
@@ -114,7 +116,7 @@ export function renderPolicyControl(data: PolicyControlData, identity: Identity 
     <section class="policy-safety" role="status"><strong>Chế độ an toàn tạm thời</strong><span>Shadow canary: bật · Canary gửi thật: ${identity.policyCanaryLiveEnabled ? "bật" : "khóa"} · Phát hành: ${identity.policyPublishEnabled ? "bật" : "khóa"}</span></section>
     <section class="policy-review__header"><div><h2>Phiên bản cấu hình</h2><p>Lọc và rà soát theo trang. PostgreSQL vẫn là nguồn chuẩn policy artifact.</p></div><div class="policy-review__page-actions"><label class="policy-page-context"><span>Page thao tác</span><select data-policy-page-select aria-label="Page cho Canary, Publish và mô phỏng" ${pageChoices.length && !pageDirectoryRequired ? "" : "disabled"}><option value="">${pagePlaceholder}</option>${pageOptions}</select><small>Canary, Publish và mô phỏng chỉ chạy trên page đã chọn.</small></label><button class="secondary-button" data-policy-simulate ${hasSimulationVersions && initialPageId ? "" : "disabled"}>Mô phỏng trên chat cũ</button></div></section>
     <nav class="policy-quick-views" aria-label="Bộ lọc nhanh"><button type="button" class="secondary-button" data-policy-view="review">Cần duyệt</button><button type="button" class="secondary-button" data-policy-view="draft">Bản nháp</button><button type="button" class="secondary-button" data-policy-view="running">Đang chạy</button><button type="button" class="secondary-button" data-policy-view="all">Tất cả</button></nav>
-    <form class="policy-filters" data-policy-filters><label class="policy-filters__search"><span>Tìm mã</span><input name="search" type="search" maxlength="120" autocomplete="off" placeholder="SQ603"></label><label><span>Loại</span><select name="artifact_kind"><option value="">Tất cả loại</option>${Object.entries(kindLabels).map(([value, label]) => `<option value="${value}">${escapeHtml(label)}</option>`).join("")}</select></label><label><span>Trạng thái</span><select name="lifecycle"><option value="">Tất cả trạng thái</option>${Object.entries(lifecycleLabels).map(([value, label]) => `<option value="${value}">${escapeHtml(label)}</option>`).join("")}</select></label><label><span>Đang dùng</span><select name="active"><option value="any">Tất cả</option><option value="active">Đang dùng</option><option value="inactive">Chưa dùng</option></select></label><label><span>Sắp xếp</span><select name="sort"><option value="updated_desc">Mới cập nhật</option><option value="validated_oldest">Chờ duyệt lâu nhất</option><option value="artifact_key_asc">Mã A → Z</option></select></label><button type="submit">Áp dụng</button></form>
+    <form class="policy-filters" data-policy-filters><label class="policy-filters__search"><span>Tìm mã</span><input name="search" type="search" maxlength="120" autocomplete="off" placeholder="SQ603"></label><label><span>Loại</span><select name="artifact_kind"><option value="">Tất cả loại</option>${Object.entries(kindLabels).map(([value, label]) => `<option value="${value}">${escapeHtml(label)}</option>`).join("")}</select></label><label><span>Trạng thái</span><select name="lifecycle"><option value="">Tất cả trạng thái</option>${Object.entries(lifecycleLabels).map(([value, label]) => `<option value="${value}">${escapeHtml(label)}</option>`).join("")}</select></label><label><span>Version</span><input name="version" type="number" min="1" step="1" inputmode="numeric" placeholder="Tất cả"></label><label><span>Revision</span><input name="revision" type="number" min="0" step="1" inputmode="numeric" placeholder="Tất cả"></label><label><span>Đang dùng</span><select name="active"><option value="any">Tất cả</option><option value="active">Đang dùng</option><option value="inactive">Chưa dùng</option></select></label><label><span>Sắp xếp</span><select name="sort"><option value="updated_desc">Mới cập nhật</option><option value="validated_oldest">Chờ duyệt lâu nhất</option><option value="artifact_key_asc">Mã A → Z</option></select></label><button type="submit">Áp dụng</button></form>
     <section class="policy-bulk-bar" data-policy-bulk-bar hidden><strong data-policy-selected-count>0 mục đã chọn</strong><span class="policy-bulk-bar__spacer"></span><button type="button" class="secondary-button" data-policy-bulk="VALIDATE" disabled>Kiểm tra hàng loạt</button><button type="button" data-policy-bulk="APPROVE" disabled>Duyệt hàng loạt</button><button type="button" class="secondary-button" data-policy-clear-selection>Bỏ chọn</button></section>
     <section class="policy-bulk-results" data-policy-bulk-results aria-live="polite" hidden></section>
     <section class="panel policy-review-table" aria-busy="false"><div class="policy-review-table__scroll" data-policy-table>${renderPolicyListTable(initialRows)}</div><footer class="policy-pagination" data-policy-pagination></footer></section>
@@ -360,6 +362,34 @@ export function bindPolicyControl(data: PolicyControlData, identity: Identity | 
       try { await rollbackPolicyPointer(candidate.pointer, candidate.targetVersion.id); closeReview(); notify("Đã rollback bằng cách đổi con trỏ đang dùng."); await reload(); }
       catch (error) { notify(error instanceof Error ? error.message : "Không thể rollback cấu hình."); button.disabled = false; }
     }));
+    layer.querySelectorAll<HTMLButtonElement>("[data-policy-deactivate-pointer]").forEach((button) => button.addEventListener("click", async () => {
+      const pointer = context.activePointers[Number(button.dataset.policyDeactivatePointer)];
+      if (!pointer || !window.confirm(`Ngừng kích hoạt ${pointer.channel} trên ${pointer.pageId ?? "toàn shop"}? Phiên bản vẫn được giữ lại để kiểm toán.`)) return;
+      button.disabled = true;
+      try {
+        await deactivatePolicyPointer(pointer.id, pointer.revision);
+        closeReview();
+        notify("Đã ngừng kích hoạt con trỏ chính sách.");
+        await reload();
+      } catch (error) {
+        notify(error instanceof Error ? error.message : "Không thể ngừng kích hoạt chính sách.");
+        button.disabled = false;
+      }
+    }));
+    layer.querySelector<HTMLButtonElement>("[data-policy-delete-artifact]")?.addEventListener("click", async (event) => {
+      const button = event.currentTarget as HTMLButtonElement;
+      if (!window.confirm(`Xóa ${context.artifact.key} · v${context.artifact.version} khỏi danh sách? Lịch sử kiểm toán vẫn được lưu và thao tác này không thể hoàn tác trên giao diện.`)) return;
+      button.disabled = true;
+      try {
+        await deletePolicyArtifact(context.artifact.id, context.artifact.revision);
+        closeReview();
+        notify("Đã xóa phiên bản khỏi danh sách; lịch sử kiểm toán vẫn được giữ.");
+        await reload();
+      } catch (error) {
+        notify(error instanceof Error ? error.message : "Không thể xóa phiên bản khỏi danh sách.");
+        button.disabled = false;
+      }
+    });
   };
 
   const bindPageRows = () => {
@@ -399,7 +429,7 @@ export function bindPolicyControl(data: PolicyControlData, identity: Identity | 
   }));
   root.querySelector<HTMLButtonElement>("[data-policy-clear-selection]")?.addEventListener("click", () => { selectedIds.clear(); renderPage(); });
   root.querySelector<HTMLSelectElement>("[data-policy-page-select]")?.addEventListener("change", (event) => { const select = event.currentTarget as HTMLSelectElement; selectedIds.clear(); clearBulkFeedback(); selectedPageId = pageChoices.includes(select.value) ? select.value : null; const params = readRouteParams(); setRouteParam(params, "policy_page", selectedPageId ?? ""); writeRouteParams(params, true); syncPageScopedActions(); renderPage(); });
-  root.querySelector<HTMLFormElement>("[data-policy-filters]")?.addEventListener("submit", (event) => { event.preventDefault(); const formData = new FormData(event.currentTarget as HTMLFormElement); const params = readRouteParams(); params.delete("cursor"); setRouteParam(params, "search", String(formData.get("search") ?? "").trim()); setRouteParam(params, "artifact_kind", String(formData.get("artifact_kind") ?? "")); setRouteParam(params, "lifecycle", String(formData.get("lifecycle") ?? "")); const active = String(formData.get("active") ?? "any"); setRouteParam(params, "active", active === "any" ? "" : active); let sort = String(formData.get("sort") ?? "updated_desc"); if (sort === "validated_oldest" && formData.get("lifecycle") !== "VALIDATED") sort = "updated_desc"; setRouteParam(params, "sort", sort === "updated_desc" ? "" : sort); writeRouteParams(params, true); void loadPage(); });
+  root.querySelector<HTMLFormElement>("[data-policy-filters]")?.addEventListener("submit", (event) => { event.preventDefault(); const formData = new FormData(event.currentTarget as HTMLFormElement); const params = readRouteParams(); params.delete("cursor"); setRouteParam(params, "search", String(formData.get("search") ?? "").trim()); setRouteParam(params, "artifact_kind", String(formData.get("artifact_kind") ?? "")); setRouteParam(params, "lifecycle", String(formData.get("lifecycle") ?? "")); setRouteParam(params, "version", normalizedIntegerFilter(formData.get("version"), 1)); setRouteParam(params, "revision", normalizedIntegerFilter(formData.get("revision"), 0)); const active = String(formData.get("active") ?? "any"); setRouteParam(params, "active", active === "any" ? "" : active); let sort = String(formData.get("sort") ?? "updated_desc"); if (sort === "validated_oldest" && formData.get("lifecycle") !== "VALIDATED") sort = "updated_desc"; setRouteParam(params, "sort", sort === "updated_desc" ? "" : sort); writeRouteParams(params, true); void loadPage(); });
   root.querySelectorAll<HTMLButtonElement>("[data-policy-view]").forEach((button) => button.addEventListener("click", () => { const preset = policyQuickViewQuery(button.dataset.policyView as PolicyQuickView); const params = new URLSearchParams(); if (selectedPageId) params.set("policy_page", selectedPageId); if (preset.lifecycle) params.set("lifecycle", preset.lifecycle); if (preset.active && preset.active !== "any") params.set("active", preset.active); if (preset.sort && preset.sort !== "updated_desc") params.set("sort", preset.sort); writeRouteParams(params, true); void loadPage(); }));
   root.querySelector<HTMLButtonElement>("[data-policy-simulate]")?.addEventListener("click", async () => { if (!selectedPageId) return notify("Hãy chọn page thao tác trước khi mô phỏng."); const versions = data.artifacts.filter((item) => ["APPROVED", "CANARY", "PUBLISHED"].includes(item.lifecycle)).map(({ id }) => id).slice(0, 20); if (!versions.length || !window.confirm("Mô phỏng trên dữ liệu chat đã ẩn danh? Thao tác này không gửi tin hay gắn tag.")) return; try { await startPolicySimulation(versions, selectedPageId); notify("Đã đưa lượt mô phỏng vào hàng chờ."); await reload(); } catch (error) { notify(error instanceof Error ? error.message : "Không thể chạy mô phỏng."); } });
   root.addEventListener("keydown", (event) => {
@@ -445,37 +475,108 @@ function renderDrawerActions(context: PolicyReviewContext, identity: Identity, s
   const artifact = context.artifact;
   const rollback = context.rollbackCandidates.map((candidate, index) => `<button type="button" class="secondary-button" data-policy-drawer-rollback="${index}">Quay lại v${candidate.targetVersion.version}</button>`).join("");
   const pageDisabled = selectedPageId ? "" : ' disabled aria-disabled="true" title="Chọn page thao tác trước"';
+  let lifecycleActions = "";
   switch (artifact.lifecycle) {
-    case "DRAFT": return `<button type="button" class="secondary-button" data-policy-edit>Chỉnh sửa</button><button type="button" data-policy-drawer-action="VALIDATE">Kiểm tra cấu hình</button>`;
-    case "VALIDATED": return `<button type="button" class="secondary-button" data-policy-approve-next>Duyệt & sang mục tiếp theo</button><button type="button" data-policy-drawer-action="APPROVE">Duyệt phiên bản</button>`;
-    case "APPROVED": return `<button type="button" data-policy-drawer-action="START_CANARY" data-canary-mode="SHADOW"${pageDisabled}>Thử nghiệm shadow</button>${identity.policyCanaryLiveEnabled ? `<button type="button" class="secondary-button" data-policy-drawer-action="START_CANARY" data-canary-mode="LIVE_OUTBOUND"${pageDisabled}>Thử nghiệm gửi thật</button>` : '<button type="button" class="secondary-button" disabled>Thử nghiệm gửi thật · đang khóa</button>'}`;
-    case "CANARY": return `${identity.policyCanaryLiveEnabled && context.activePointers.some((pointer) => pointer.channel === "CANARY_SHADOW") ? `<button type="button" class="secondary-button" data-policy-drawer-action="START_CANARY" data-canary-mode="LIVE_OUTBOUND"${pageDisabled}>Chuyển sang canary gửi thật</button>` : ""}${identity.policyPublishEnabled ? `<button type="button" data-policy-drawer-action="PUBLISH"${pageDisabled}>Phát hành cho page test</button>` : '<button type="button" disabled>Phát hành · đang khóa</button>'}${rollback}`;
-    case "PUBLISHED": return `${rollback}${context.activePointers.length === 0 ? '<button type="button" class="secondary-button" data-policy-drawer-action="RETIRE">Ngừng phiên bản</button>' : ""}` || "<span>Đang được sử dụng</span>";
-    case "RETIRED": return "<span>Chỉ đọc</span>";
+    case "DRAFT": lifecycleActions = `<button type="button" class="secondary-button" data-policy-edit>Chỉnh sửa</button><button type="button" data-policy-drawer-action="VALIDATE">Kiểm tra cấu hình</button>`; break;
+    case "VALIDATED": lifecycleActions = `<button type="button" class="secondary-button" data-policy-approve-next>Duyệt & sang mục tiếp theo</button><button type="button" data-policy-drawer-action="APPROVE">Duyệt phiên bản</button>`; break;
+    case "APPROVED": lifecycleActions = `<button type="button" data-policy-drawer-action="START_CANARY" data-canary-mode="SHADOW"${pageDisabled}>Thử nghiệm shadow</button>${identity.policyCanaryLiveEnabled ? `<button type="button" class="secondary-button" data-policy-drawer-action="START_CANARY" data-canary-mode="LIVE_OUTBOUND"${pageDisabled}>Thử nghiệm gửi thật</button>` : '<button type="button" class="secondary-button" disabled>Thử nghiệm gửi thật · đang khóa</button>'}`; break;
+    case "CANARY": lifecycleActions = `${identity.policyCanaryLiveEnabled && context.activePointers.some((pointer) => pointer.channel === "CANARY_SHADOW") ? `<button type="button" class="secondary-button" data-policy-drawer-action="START_CANARY" data-canary-mode="LIVE_OUTBOUND"${pageDisabled}>Chuyển sang canary gửi thật</button>` : ""}${identity.policyPublishEnabled ? `<button type="button" data-policy-drawer-action="PUBLISH"${pageDisabled}>Phát hành cho page test</button>` : '<button type="button" disabled>Phát hành · đang khóa</button>'}${rollback}`; break;
+    case "PUBLISHED": lifecycleActions = `${rollback}${context.activePointers.length === 0 ? '<button type="button" class="secondary-button" data-policy-drawer-action="RETIRE">Ngừng phiên bản</button>' : ""}`; break;
+    case "RETIRED": lifecycleActions = "<span>Chỉ đọc</span>"; break;
   }
+  if (identity.role !== "OWNER") return lifecycleActions || "<span>Chỉ đọc</span>";
+  const safeRemoval = context.activePointers.length
+    ? context.activePointers.map((pointer, index) => `<button type="button" class="secondary-button policy-danger-button" data-policy-deactivate-pointer="${index}">Ngừng kích hoạt · ${escapeHtml(pointer.channel)}</button>`).join("")
+    : context.deletionEligible
+      ? `<button type="button" class="secondary-button policy-danger-button" data-policy-delete-artifact>Xóa khỏi danh sách</button>`
+      : `<span>Không thể xóa: phiên bản đang được kích hoạt trên page khác.</span>`;
+  return `${lifecycleActions}${safeRemoval}`;
 }
 
 function policyQueryFromRoute(params: URLSearchParams): PolicyListQuery {
   const lifecycle = params.get("lifecycle") as PolicyLifecycle | null;
   const artifactKind = params.get("artifact_kind") as PolicyArtifact["kind"] | null;
-  return { limit: 50, ...(params.get("cursor") ? { cursor: params.get("cursor")! } : {}), ...(params.get("search") ? { search: params.get("search")! } : {}), ...(artifactKind ? { artifactKind } : {}), ...(lifecycle ? { lifecycle } : {}), active: (params.get("active") ?? "any") as PolicyActiveFilter, sort: (params.get("sort") ?? "updated_desc") as PolicyListSort };
+  const version = routeIntegerFilter(params.get("version"), 1);
+  const revision = routeIntegerFilter(params.get("revision"), 0);
+  return { limit: 50, ...(params.get("cursor") ? { cursor: params.get("cursor")! } : {}), ...(params.get("search") ? { search: params.get("search")! } : {}), ...(artifactKind ? { artifactKind } : {}), ...(lifecycle ? { lifecycle } : {}), ...(version === null ? {} : { version }), ...(revision === null ? {} : { revision }), active: (params.get("active") ?? "any") as PolicyActiveFilter, sort: (params.get("sort") ?? "updated_desc") as PolicyListSort };
 }
 
 function syncFilterControls(root: HTMLElement, query: PolicyListQuery): void {
   const form = root.querySelector<HTMLFormElement>("[data-policy-filters]");
-  if (form) { const set = (name: string, value: string) => { const control = form.elements.namedItem(name); if (control instanceof HTMLInputElement || control instanceof HTMLSelectElement) control.value = value; }; set("search", query.search ?? ""); set("artifact_kind", query.artifactKind ?? ""); set("lifecycle", query.lifecycle ?? ""); set("active", query.active ?? "any"); set("sort", query.sort ?? "updated_desc"); }
+  if (form) { const set = (name: string, value: string) => { const control = form.elements.namedItem(name); if (control instanceof HTMLInputElement || control instanceof HTMLSelectElement) control.value = value; }; set("search", query.search ?? ""); set("artifact_kind", query.artifactKind ?? ""); set("lifecycle", query.lifecycle ?? ""); set("version", query.version === undefined ? "" : String(query.version)); set("revision", query.revision === undefined ? "" : String(query.revision)); set("active", query.active ?? "any"); set("sort", query.sort ?? "updated_desc"); }
   const activeView = matchingQuickView(query);
   root.querySelectorAll<HTMLButtonElement>("[data-policy-view]").forEach((button) => { const active = button.dataset.policyView === activeView; button.classList.toggle("is-active", active); button.setAttribute("aria-pressed", String(active)); });
 }
 
 function matchingQuickView(query: PolicyListQuery): PolicyQuickView | null {
-  if (query.search || query.artifactKind) return null;
+  if (query.search || query.artifactKind || query.version !== undefined || query.revision !== undefined) return null;
   for (const view of ["review", "draft", "running", "all"] as const) { const preset = policyQuickViewQuery(view); if (query.lifecycle === preset.lifecycle && (query.active ?? "any") === (preset.active ?? "any") && (query.sort ?? "updated_desc") === (preset.sort ?? "updated_desc")) return view; }
   return null;
 }
 
 function setRouteParam(params: URLSearchParams, key: string, value: string): void { if (value) params.set(key, value); else params.delete(key); }
-function renderContent(content: Record<string, unknown>): string { const rows = flatten(content).filter(([key]) => !key.endsWith("sourceMetadata.observedAt")); return `<dl class="policy-content">${rows.map(([key, value]) => `<div><dt>${escapeHtml(readableKey(key))}</dt><dd>${escapeHtml(String(value))}</dd></div>`).join("")}</dl>`; }
+function normalizedIntegerFilter(value: FormDataEntryValue | null, minimum: number): string { const text = String(value ?? "").trim(); return routeIntegerFilter(text, minimum) === null ? "" : text; }
+function routeIntegerFilter(value: string | null, minimum: number): number | null { if (value === null || !/^(?:0|[1-9]\d*)$/u.test(value)) return null; const parsed = Number(value); return Number.isSafeInteger(parsed) && parsed >= minimum ? parsed : null; }
+function renderContent(content: Record<string, unknown>): string { if (content.kind === "SIZE_CHART") return renderSizeChart(content); const rows = flatten(content).filter(([key]) => !key.endsWith("sourceMetadata.observedAt")); return `<dl class="policy-content">${rows.map(([key, value]) => `<div><dt>${escapeHtml(readableKey(key))}</dt><dd>${escapeHtml(String(value))}</dd></div>`).join("")}</dl>`; }
+function renderSizeChart(content: Record<string, unknown>): string {
+  const chart = objectValue(content.chart);
+  const bands = Array.isArray(chart?.bands)
+    ? chart.bands.map(objectValue).filter((band): band is Record<string, unknown> => band !== null)
+    : [];
+  const table = bands.length
+    ? `<div class="policy-review-table__scroll"><table class="policy-size-chart"><thead><tr><th>Size</th><th>Chiều cao</th><th>Cân nặng</th><th>Vòng ngực</th><th>Vòng eo</th><th>Vòng mông</th></tr></thead><tbody>${bands.map(renderSizeChartBand).join("")}</tbody></table></div>`
+    : '<p class="policy-empty">Bảng size chưa có thông số.</p>';
+  const metadata = flatten(content).filter(([key]) =>
+    !/^chart\.bands\[\d+\]\.(?:size|ranges(?:\[\d+\])?\.)/u.test(key),
+  );
+  if (!metadata.length) return table;
+  return `${table}<div class="policy-size-chart__metadata"><h4>Phạm vi và thông tin xác minh</h4><dl class="policy-content">${metadata.map(([key, value]) => `<div><dt>${escapeHtml(sizeChartMetadataLabel(key, bands))}</dt><dd>${escapeHtml(sizeChartMetadataValue(value))}</dd></div>`).join("")}</dl></div>`;
+}
+
+function renderSizeChartBand(band: Record<string, unknown>): string {
+  const ranges = Array.isArray(band.ranges)
+    ? band.ranges.map(objectValue).filter((range): range is Record<string, unknown> => range !== null)
+    : [];
+  const byKind = new Map(ranges.map((range) => [String(range.kind ?? ""), range]));
+  return `<tr><th scope="row">${escapeHtml(String(band.size ?? "—"))}</th>${["HEIGHT_CM", "WEIGHT_KG", "BUST_CM", "WAIST_CM", "HIPS_CM"].map((kind) => `<td>${escapeHtml(formatMeasurementRange(byKind.get(kind), kind === "WEIGHT_KG" ? "kg" : "cm"))}</td>`).join("")}</tr>`;
+}
+
+function sizeChartMetadataLabel(key: string, bands: readonly Record<string, unknown>[]): string {
+  const bandNote = /^chart\.bands\[(\d+)\]\.note$/u.exec(key);
+  if (bandNote) return `Bảng size › Size ${String(bands[Number(bandNote[1])]?.size ?? "—")} › Ghi chú`;
+  const labels: Record<string, string> = {
+    schemaVersion: "Phiên bản cấu trúc", kind: "Loại nội dung", chart: "Bảng size",
+    reference: "Xác minh", chartId: "Mã bảng size", version: "Phiên bản", source: "Nguồn",
+    sourceArtifactRef: "Tham chiếu nguồn", sourceContentSha256: "Mã băm nội dung",
+    verificationStatus: "Trạng thái xác minh", verifiedByRef: "Người xác minh", verifiedAt: "Thời điểm xác minh",
+    brand: "Thương hiệu", category: "Nhóm sản phẩm", componentRole: "Vai trò thành phần",
+    boundaryPolicy: "Chính sách sát biên", scope: "Phạm vi", level: "Cấp áp dụng",
+    parentProductIds: "Mã sản phẩm cha", categories: "Nhóm sản phẩm", forms: "Phom", materials: "Chất liệu",
+    extraction: "Trích xuất", measurementBasis: "Cơ sở số đo", confidence: "Độ tin cậy",
+    extractorVersion: "Phiên bản bộ trích xuất", sourceMetadata: "Nguồn dữ liệu",
+    sourceReference: "Tham chiếu nguồn", sourceVersion: "Phiên bản nguồn", observedAt: "Thời điểm ghi nhận",
+  };
+  return key.split(".").map((segment) => {
+    const match = /^([^[]+)(.*)$/u.exec(segment);
+    return `${labels[match?.[1] ?? segment] ?? readableKey(match?.[1] ?? segment)}${match?.[2] ?? ""}`;
+  }).join(" › ");
+}
+
+function sizeChartMetadataValue(value: string | number | boolean): string {
+  const labels: Record<string, string> = {
+    SIZE_CHART: "Bảng size", COMPONENT: "Theo thành phần", CATEGORY: "Theo nhóm sản phẩm", GLOBAL: "Toàn bộ",
+    BODY: "Số đo cơ thể", GARMENT: "Số đo sản phẩm", UNKNOWN: "Chưa xác định",
+    VERIFIED: "Đã xác minh", EXTRACTED_UNREVIEWED: "Đã trích xuất, chưa duyệt",
+    REQUIRE_HUMAN_REVIEW: "Cần người kiểm tra", PREFER_SMALLER_SIZE: "Ưu tiên size nhỏ hơn",
+    PREFER_LARGER_SIZE: "Ưu tiên size lớn hơn", IMAGE_EXTRACTION: "Trích xuất từ ảnh",
+    STRUCTURED_IMPORT: "Nhập dữ liệu có cấu trúc", ADMIN: "Quản trị viên", GOOGLE_SHEETS_IMPORT: "Nhập từ Google Sheets",
+  };
+  const text = String(value);
+  return labels[text] ? `${labels[text]} (${text})` : text;
+}
+function objectValue(value: unknown): Record<string, unknown> | null { return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null; }
+function formatMeasurementRange(range: Record<string, unknown> | undefined, unit: "cm" | "kg"): string { if (!range) return "—"; const min = finiteMeasurement(range.minInclusive); const max = finiteMeasurement(range.maxInclusive); if (min === null && max === null) return "—"; if (min === null) return `≤ ${max} ${unit}`; if (max === null) return `≥ ${min} ${unit}`; return min === max ? `${min} ${unit}` : `${min}–${max} ${unit}`; }
+function finiteMeasurement(value: unknown): number | null { return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null; }
 function renderDiff(before: Record<string, unknown>, after: Record<string, unknown>): string { const left = new Map(flatten(before).map(([key, value]) => [key, String(value)])); const right = new Map(flatten(after).map(([key, value]) => [key, String(value)])); const keys = [...new Set([...left.keys(), ...right.keys()])].sort(); const changes = keys.filter((key) => left.get(key) !== right.get(key)); if (!changes.length) return "<p>Không có thay đổi nội dung.</p>"; return `<div class="policy-review-table__scroll"><table class="policy-diff"><thead><tr><th>Trường</th><th>Trước</th><th>Sau</th></tr></thead><tbody>${changes.map((key) => `<tr><td>${escapeHtml(readableKey(key))}</td><td>${escapeHtml(left.get(key) ?? "—")}</td><td>${escapeHtml(right.get(key) ?? "—")}</td></tr>`).join("")}</tbody></table></div>`; }
 function flatten(value: unknown, prefix = ""): Array<[string, string | number | boolean]> { if (Array.isArray(value)) return value.flatMap((item, index) => flatten(item, `${prefix}[${index}]`)); if (value !== null && typeof value === "object") return Object.entries(value as Record<string, unknown>).flatMap(([key, item]) => flatten(item, prefix ? `${prefix}.${key}` : key)); return [[prefix, value === null ? "—" : value as string | number | boolean]]; }
 function readableKey(key: string): string { return key.replaceAll(".", " › ").replace(/([a-z])([A-Z])/g, "$1 $2"); }

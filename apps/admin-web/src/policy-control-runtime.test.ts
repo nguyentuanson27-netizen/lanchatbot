@@ -58,6 +58,7 @@ function reviewContext(id: string): PolicyReviewContext {
     previousVersion: null,
     activePointers: [],
     rollbackCandidates: [],
+    deletionEligible: true,
   };
 }
 

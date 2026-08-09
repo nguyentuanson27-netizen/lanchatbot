@@ -102,6 +102,8 @@ export interface ArtifactVersionQuery extends PageCursorQuery {
   readonly artifactKind?: AdminArtifactKindV1 | undefined;
   readonly lifecycle?: AdminArtifactLifecycleV1 | undefined;
   readonly artifactKey?: string | undefined;
+  readonly version?: number | undefined;
+  readonly revision?: number | undefined;
 }
 
 export interface CreateArtifactVersionInput {
@@ -131,6 +133,16 @@ export interface RollbackArtifactInput {
   readonly channel: "CANARY_SHADOW" | "CANARY_LIVE" | "PUBLISHED";
   readonly targetVersionId: string;
   readonly expectedPointerRevision: number;
+  readonly correlationId: string;
+}
+
+export interface DeactivateArtifactPointerInput {
+  readonly expectedRevision: number;
+  readonly correlationId: string;
+}
+
+export interface DeleteArtifactVersionInput {
+  readonly expectedRevision: number;
   readonly correlationId: string;
 }
 
@@ -294,6 +306,16 @@ export interface AdminStore {
     input: TransitionArtifactInput,
   ): Promise<Record<string, unknown> | null>;
   listActivePointers(identity: AdminIdentity): Promise<readonly Record<string, unknown>[]>;
+  deactivateArtifactPointer(
+    identity: AdminIdentity,
+    pointerId: string,
+    input: DeactivateArtifactPointerInput,
+  ): Promise<Record<string, unknown> | null>;
+  deleteArtifactVersion(
+    identity: AdminIdentity,
+    versionId: string,
+    input: DeleteArtifactVersionInput,
+  ): Promise<Record<string, unknown> | null>;
   rollbackArtifactPointer(
     identity: AdminIdentity,
     input: RollbackArtifactInput,
@@ -351,6 +373,7 @@ export class AdminQueryError extends Error {
     | "ADMIN_ARTIFACT_INVALID"
     | "ADMIN_SIZE_CHART_BODY_BASIS_REQUIRED"
     | "ADMIN_ARTIFACT_VERSION_CONFLICT"
+    | "ADMIN_ARTIFACT_DELETE_ACTIVE"
     | "ADMIN_ARTIFACT_ROLLBACK_TARGET_INVALID"
     | "ADMIN_ARTIFACT_TRANSITION_INVALID"
     | "ADMIN_HANDOFF_FORBIDDEN"

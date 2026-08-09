@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   batchTransitionPolicyArtifacts,
+  deactivatePolicyPointer,
+  deletePolicyArtifact,
   getPolicyReviewContext,
   listPolicyArtifacts,
 } from "./policy-control-review-api.js";
@@ -48,6 +50,32 @@ describe("policy review API client", () => {
     expect(result.items[0]).toMatchObject({ revision: 3, active: true });
   });
 
+  it("sends exact version and revision filters to the review boundary", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ items: [], next_cursor: null }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await listPolicyArtifacts({ version: 3, revision: 9 });
+
+    const url = String(fetchMock.mock.calls[0]?.[0]);
+    expect(url).toContain("version=3");
+    expect(url).toContain("revision=9");
+  });
+
+  it("uses revision-guarded endpoints for deactivation and safe deletion", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse({ pointer: { pointer_id: POINTER_ID, active: false, revision: "8" } }))
+      .mockResolvedValueOnce(jsonResponse({ deletion: { version_id: VERSION_ID, deleted: true } }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await deactivatePolicyPointer(POINTER_ID, 7);
+    await deletePolicyArtifact(VERSION_ID, 3);
+
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({ method: "DELETE" });
+    expect(fetchMock.mock.calls[1]?.[1]).toMatchObject({ method: "DELETE" });
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({ expected_revision: 7 });
+    expect(JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body))).toEqual({ expected_revision: 3 });
+  });
+
   it("normalizes PostgreSQL bigint revision strings for artifacts and pointers", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
       review_context: {
@@ -65,12 +93,14 @@ describe("policy review API client", () => {
           updated_at: "2026-08-08T00:00:00.000Z",
         }],
         rollback_candidates: [],
+        deletion_eligible: false,
       },
     })));
 
     const context = await getPolicyReviewContext(VERSION_ID);
     expect(context.artifact.revision).toBe(3);
     expect(context.activePointers[0]?.revision).toBe(7);
+    expect(context.deletionEligible).toBe(false);
   });
 
   it("fails closed instead of silently converting an invalid revision to zero", async () => {
