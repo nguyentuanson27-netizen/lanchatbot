@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -70,7 +70,7 @@ const unknownField = structuredClone(example); unknownField.unapproved = true; i
 
 const manifestDir = join(root, 'deploy', 'manifests');
 for (const file of readdirSync(manifestDir).filter((name) => name.endsWith('.json'))) JSON.parse(readFileSync(join(manifestDir, file), 'utf8'));
-const adminReleaseTag = '20260809-admin-policy-review-r6.4';
+const adminReleaseTag = '20260809-admin-policy-review-r6.5';
 const adminReleaseDir = join(root, 'deploy', 'releases', adminReleaseTag);
 const adminReleaseScripts = [
   'common.sh',
@@ -86,10 +86,14 @@ const adminReleaseScripts = [
 for (const scriptName of adminReleaseScripts) {
   const scriptPath = join(adminReleaseDir, scriptName);
   if (!existsSync(scriptPath)) throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_MISSING:${scriptName}`);
-  const relativeScriptPath = `deploy/releases/${adminReleaseTag}/${scriptName}`;
-  const indexedMode = spawnSync('git', ['-C', root, 'ls-files', '--stage', '--', relativeScriptPath], { encoding: 'utf8' })
-    .stdout.trim().split(/\s+/, 1)[0];
-  if (indexedMode !== '100755') throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_NOT_EXECUTABLE:${scriptName}:${indexedMode || 'UNTRACKED'}`);
+  if (existsSync(join(root, '.git'))) {
+    const relativeScriptPath = `deploy/releases/${adminReleaseTag}/${scriptName}`;
+    const indexedMode = spawnSync('git', ['-C', root, 'ls-files', '--stage', '--', relativeScriptPath], { encoding: 'utf8' })
+      .stdout.trim().split(/\s+/, 1)[0];
+    if (indexedMode !== '100755') throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_NOT_EXECUTABLE:${scriptName}:${indexedMode || 'UNTRACKED'}`);
+  } else if ((statSync(scriptPath).mode & 0o111) === 0) {
+    throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_NOT_EXECUTABLE_IN_ARCHIVE:${scriptName}`);
+  }
   const script = readFileSync(scriptPath, 'utf8');
   if (!script.startsWith('#!/usr/bin/env bash\nset -euo pipefail\n')) throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_NOT_FAIL_CLOSED:${scriptName}`);
   if (/\beval\b/.test(script)) throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_EVAL_FORBIDDEN:${scriptName}`);
@@ -136,7 +140,7 @@ if (JSON.stringify(adminManifest.scope?.targetServices) !== JSON.stringify(['adm
 if (adminManifest.scope?.adminSimulationWorkerMustRemainUnchanged !== true || adminManifest.scope?.messengerProductionTestAllowed !== false) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_NON_TARGET_SCOPE');
 }
-if (adminManifest.supersedesUnexecutedRelease !== '20260809-admin-policy-review-r6.3' ||
+if (adminManifest.supersedesUnexecutedRelease !== '20260809-admin-policy-review-r6.4' ||
     adminManifest.deploymentAutomation?.automaticRollbackOnSoakFailure !== true ||
     adminManifest.deploymentAutomation?.globalDeploymentLockRequired !== true ||
     adminManifest.rollback?.runtimeDefinitionAuthority !== 'previous release Compose plus reviewed image-only override') {
