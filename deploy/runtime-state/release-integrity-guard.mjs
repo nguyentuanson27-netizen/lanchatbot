@@ -23,6 +23,36 @@ if (!composeText.includes('export REALTIME_BEHAVIOR_MODE_DATABASE_URL="$$(cat'))
 }
 if (!composeText.includes('exec su-exec node node apps/worker/dist/realtime-server.js')) throw new Error('REALTIME_BEHAVIOR_NODE_PRIVILEGE_DROP_MISSING');
 const compose = composeText.split(/\r?\n/);
+function composeServiceBlock(serviceName) {
+  const start = compose.findIndex((line) => line === `  ${serviceName}:`);
+  if (start < 0) throw new Error(`COMPOSE_SERVICE_BLOCK_MISSING:${serviceName}`);
+  const next = compose.findIndex((line, index) => index > start && /^  [A-Za-z0-9_-]+:\s*$/.test(line));
+  return compose.slice(start, next < 0 ? compose.length : next).join('\n');
+}
+
+const adminImageSelectors = {
+  'admin-api': 'ADMIN_API_IMAGE',
+  'admin-simulation-worker': 'ADMIN_SIMULATION_IMAGE',
+  'admin-web': 'ADMIN_WEB_IMAGE'
+};
+for (const [serviceName, selector] of Object.entries(adminImageSelectors)) {
+  const block = composeServiceBlock(serviceName);
+  const requiredSelector = `image: \${${selector}:?${selector} must be pinned}`;
+  if (!block.includes(requiredSelector)) throw new Error(`COMPOSE_ADMIN_IMAGE_SELECTOR_NOT_REQUIRED:${serviceName}:${selector}`);
+  if (block.includes('ADMIN_IMAGE')) throw new Error(`COMPOSE_SHARED_ADMIN_IMAGE_SELECTOR_FORBIDDEN:${serviceName}`);
+  for (const otherSelector of Object.values(adminImageSelectors)) {
+    if (otherSelector !== selector && block.includes(otherSelector)) {
+      throw new Error(`COMPOSE_ADMIN_IMAGE_SELECTOR_CROSSED:${serviceName}:${otherSelector}`);
+    }
+  }
+}
+const infrastructureEnvExample = readFileSync(join(root, 'deploy', '.env.infrastructure.example'), 'utf8');
+for (const selector of Object.values(adminImageSelectors)) {
+  if (!new RegExp(`^${selector}=\\S+$`, 'm').test(infrastructureEnvExample)) {
+    throw new Error(`INFRASTRUCTURE_ENV_ADMIN_IMAGE_SELECTOR_MISSING:${selector}`);
+  }
+}
+if (/^ADMIN_IMAGE=/m.test(infrastructureEnvExample)) throw new Error('INFRASTRUCTURE_ENV_SHARED_ADMIN_IMAGE_SELECTOR_FORBIDDEN');
 const composeServices = []; let inServices = false;
 for (const line of compose) {
   if (line === 'services:') { inServices = true; continue; }
