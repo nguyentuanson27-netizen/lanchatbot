@@ -70,13 +70,15 @@ const unknownField = structuredClone(example); unknownField.unapproved = true; i
 
 const manifestDir = join(root, 'deploy', 'manifests');
 for (const file of readdirSync(manifestDir).filter((name) => name.endsWith('.json'))) JSON.parse(readFileSync(join(manifestDir, file), 'utf8'));
-const adminReleaseTag = '20260809-admin-policy-review-r6.7';
+const adminReleaseTag = '20260810-admin-policy-review-r6.8';
 const adminReleaseDir = join(root, 'deploy', 'releases', adminReleaseTag);
 const adminReleaseScripts = [
   'common.sh',
   'preflight.sh',
   'run-build.sh',
   'artifact-smoke.sh',
+  'backup-restore-test.sh',
+  'migrate-production.sh',
   'cutover.sh',
   'promote-runtime-state.sh',
   'postcheck.sh',
@@ -110,7 +112,7 @@ for (const requiredFile of [
   if (!existsSync(join(adminReleaseDir, requiredFile))) throw new Error(`ADMIN_POLICY_RELEASE_FILE_MISSING:${requiredFile}`);
 }
 const adminCutover = readFileSync(join(adminReleaseDir, 'cutover.sh'), 'utf8');
-for (const required of ['--no-deps', 'admin-api', 'admin-web', 'ADMIN_SIMULATION_IMAGE', 'arm_automatic_rollback', 'disarm_automatic_rollback', 'acquire_deployment_lock', 'soak.sh', 'capture-deployment-boundary.mjs']) {
+for (const required of ['--no-deps', 'admin-api', 'admin-web', 'ADMIN_SIMULATION_IMAGE', 'backup-restore-test.sh', 'migrate-production.sh', 'arm_automatic_rollback', 'disarm_automatic_rollback', 'acquire_deployment_lock', 'soak.sh', 'capture-deployment-boundary.mjs']) {
   if (!adminCutover.includes(required)) throw new Error(`ADMIN_POLICY_CUTOVER_GUARD_MISSING:${required}`);
 }
 const adminRollback = readFileSync(join(adminReleaseDir, 'rollback.sh'), 'utf8');
@@ -127,7 +129,7 @@ if (!/cd apps\/admin-api\s+node -e "import\(\\"sharp\\"\)/.test(adminArtifactSmo
   throw new Error('ADMIN_POLICY_SHARP_SMOKE_WORKSPACE_ANCHOR_MISSING');
 }
 const adminManifest = JSON.parse(readFileSync(join(manifestDir, `${adminReleaseTag}.json`), 'utf8'));
-if (adminManifest.releaseTag !== adminReleaseTag || adminManifest.source?.implementationCommit !== '43a42392cf975891ddb284083efe153581388d55') {
+if (adminManifest.releaseTag !== adminReleaseTag || adminManifest.source?.implementationCommit !== '694fa313107c1a6ae83a97b4333cc288ed3c2133') {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_PROVENANCE');
 }
 const adminSecurityPrerequisite = adminManifest.source?.pullRequests?.find(({ number }) => number === 162);
@@ -135,7 +137,16 @@ if (adminSecurityPrerequisite?.mergeCommit !== '43a42392cf975891ddb284083efe1535
     adminSecurityPrerequisite?.scope !== 'RUNTIME_AND_BUILD_DEPENDENCY_SECURITY_PATCHES') {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_SECURITY_PREREQUISITE');
 }
-if (adminManifest.database?.migrationRequired !== false || adminManifest.database?.backfillRequired !== false) {
+const adminSafeControls = adminManifest.source?.pullRequests?.find(({ number }) => number === 171);
+if (adminSafeControls?.mergeCommit !== '694fa313107c1a6ae83a97b4333cc288ed3c2133' ||
+    adminSafeControls?.scope !== 'ADMIN_POLICY_SAFE_CONTROLS_AND_SIZE_REVIEW_UI') {
+  throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_SAFE_CONTROLS_PR');
+}
+if (adminManifest.database?.migrationRequired !== true ||
+    JSON.stringify(adminManifest.database?.migrationsToApply) !== JSON.stringify(['0031_admin_policy_safe_deletion']) ||
+    adminManifest.database?.backfillRequired !== false ||
+    adminManifest.database?.dataRewriteRequired !== false ||
+    adminManifest.database?.schemaRollbackRequired !== false) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_DATABASE_SCOPE');
 }
 if (JSON.stringify(adminManifest.scope?.targetServices) !== JSON.stringify(['admin-api', 'admin-web'])) {
@@ -144,7 +155,7 @@ if (JSON.stringify(adminManifest.scope?.targetServices) !== JSON.stringify(['adm
 if (adminManifest.scope?.adminSimulationWorkerMustRemainUnchanged !== true || adminManifest.scope?.messengerProductionTestAllowed !== false) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_NON_TARGET_SCOPE');
 }
-if (adminManifest.supersedesUnexecutedRelease !== '20260809-admin-policy-review-r6.6' ||
+if (adminManifest.supersedesRelease !== '20260809-admin-policy-review-r6.7' ||
     adminManifest.deploymentAutomation?.automaticRollbackOnSoakFailure !== true ||
     adminManifest.deploymentAutomation?.globalDeploymentLockRequired !== true ||
     adminManifest.rollback?.runtimeDefinitionAuthority !== 'previous release Compose plus reviewed image-only override') {
