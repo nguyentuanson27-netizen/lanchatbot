@@ -19,6 +19,8 @@ interface PolicyReviewQuerystring {
   readonly page_id?: string;
   readonly artifact_kind?: string;
   readonly lifecycle?: string;
+  readonly version?: string;
+  readonly revision?: string;
   readonly artifact_key?: string;
   readonly search?: string;
   readonly active?: string;
@@ -28,6 +30,10 @@ interface PolicyReviewQuerystring {
 interface PolicyBatchBody {
   readonly action?: unknown;
   readonly items?: unknown;
+}
+
+interface RevisionGuardBody {
+  readonly expected_revision?: unknown;
 }
 
 interface PolicyBatchItem {
@@ -66,6 +72,36 @@ export function registerPolicyReviewRoutes(
         return reply.code(404).send({ code: "ADMIN_NOT_FOUND", request_id: request.id });
       }
       return { review_context: context };
+    },
+  );
+
+  app.delete<{ Params: { id: string }; Body: RevisionGuardBody }>(
+    "/admin/v1/policy/pointers/:id",
+    async (request, reply) => {
+      requirePolicyControl(policyControlEnabled);
+      const identity = requireIdentity(request);
+      requireOwner(identity);
+      const pointer = await store.deactivateArtifactPointer(identity, requiredUuid(request.params.id), {
+        expectedRevision: safeRevision(request.body?.expected_revision),
+        correlationId: randomUUID(),
+      });
+      if (!pointer) return reply.code(404).send({ code: "ADMIN_NOT_FOUND", request_id: request.id });
+      return { pointer };
+    },
+  );
+
+  app.delete<{ Params: { id: string }; Body: RevisionGuardBody }>(
+    "/admin/v1/policy/review-artifacts/:id",
+    async (request, reply) => {
+      requirePolicyControl(policyControlEnabled);
+      const identity = requireIdentity(request);
+      requireOwner(identity);
+      const deletion = await store.deleteArtifactVersion(identity, requiredUuid(request.params.id), {
+        expectedRevision: safeRevision(request.body?.expected_revision),
+        correlationId: randomUUID(),
+      });
+      if (!deletion) return reply.code(404).send({ code: "ADMIN_NOT_FOUND", request_id: request.id });
+      return { deletion };
     },
   );
 
@@ -159,6 +195,8 @@ function parsePolicyReviewQuery(query: PolicyReviewQuerystring): PolicyReviewArt
     pageId: optionalToken(query.page_id, 128),
     artifactKind: kind?.data,
     lifecycle: lifecycle?.data,
+    version: optionalPositiveInteger(query.version),
+    revision: optionalNonnegativeInteger(query.revision),
     artifactKey: optionalToken(query.artifact_key, 128),
     search: optionalToken(query.search, 120),
     active: optionalEnum<PolicyArtifactActiveFilter>(query.active, ["any", "active", "inactive"]) ?? "any",
@@ -197,6 +235,10 @@ function requireBatchRole(identity: AdminIdentity, action: PolicyBatchAction): v
     ? identity.role === "OWNER" || identity.role === "EDITOR"
     : identity.role === "OWNER" || identity.role === "APPROVER";
   if (!allowed) throw new AdminQueryError("ADMIN_POLICY_FORBIDDEN");
+}
+
+function requireOwner(identity: AdminIdentity): void {
+  if (identity.role !== "OWNER") throw new AdminQueryError("ADMIN_POLICY_FORBIDDEN");
 }
 
 async function readCurrentRevision(
@@ -243,6 +285,20 @@ function optionalLimit(value: string | undefined): number {
   if (!Number.isSafeInteger(parsed) || parsed < 1 || parsed > 100) {
     throw new AdminQueryError("ADMIN_QUERY_INVALID");
   }
+  return parsed;
+}
+
+function optionalPositiveInteger(value: string | undefined): number | undefined {
+  const parsed = optionalNonnegativeInteger(value);
+  if (parsed === 0) throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  return parsed;
+}
+
+function optionalNonnegativeInteger(value: string | undefined): number | undefined {
+  if (value === undefined || value === "") return undefined;
+  if (!/^(?:0|[1-9]\d*)$/u.test(value)) throw new AdminQueryError("ADMIN_QUERY_INVALID");
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed)) throw new AdminQueryError("ADMIN_QUERY_INVALID");
   return parsed;
 }
 

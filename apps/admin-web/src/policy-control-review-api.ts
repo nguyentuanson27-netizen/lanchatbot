@@ -18,6 +18,8 @@ export interface PolicyListQuery {
   readonly search?: string;
   readonly artifactKind?: PolicyArtifactKind;
   readonly lifecycle?: PolicyLifecycle | undefined;
+  readonly version?: number | undefined;
+  readonly revision?: number | undefined;
   readonly active?: PolicyActiveFilter;
   readonly sort?: PolicyListSort;
 }
@@ -99,6 +101,8 @@ export async function listPolicyArtifacts(
   if (query.search) params.set("search", query.search);
   if (query.artifactKind) params.set("artifact_kind", query.artifactKind);
   if (query.lifecycle) params.set("lifecycle", query.lifecycle);
+  if (query.version !== undefined) params.set("version", String(query.version));
+  if (query.revision !== undefined) params.set("revision", String(query.revision));
   if (query.active && query.active !== "any") params.set("active", query.active);
   if (query.sort) params.set("sort", query.sort);
   const payload = await policyRequest(`/policy/review-artifacts?${params.toString()}`, signal);
@@ -162,10 +166,34 @@ export async function batchTransitionPolicyArtifacts(
   return parsePolicyBatchResult(payload, action, items);
 }
 
+export async function deactivatePolicyPointer(
+  pointerId: string,
+  expectedRevision: number,
+  signal?: AbortSignal,
+): Promise<JsonRecord> {
+  const payload = await policyRequest(`/policy/pointers/${encodeURIComponent(pointerId)}`, signal, {
+    method: "DELETE",
+    body: { expected_revision: expectedRevision },
+  });
+  return record(payload.pointer);
+}
+
+export async function deletePolicyArtifact(
+  versionId: string,
+  expectedRevision: number,
+  signal?: AbortSignal,
+): Promise<JsonRecord> {
+  const payload = await policyRequest(`/policy/review-artifacts/${encodeURIComponent(versionId)}`, signal, {
+    method: "DELETE",
+    body: { expected_revision: expectedRevision },
+  });
+  return record(payload.deletion);
+}
+
 async function policyRequest(
   path: string,
   signal?: AbortSignal,
-  options: { method?: "GET" | "POST"; body?: unknown } = {},
+  options: { method?: "GET" | "POST" | "DELETE"; body?: unknown } = {},
 ): Promise<JsonRecord> {
   const response = await fetch(`${API_BASE}${path}`, {
     method: options.method ?? "GET",
@@ -446,6 +474,8 @@ function policyErrorMessage(code: string): string {
       return "Trang dữ liệu đã hết hiệu lực. Hãy tải lại danh sách.";
     case "ADMIN_POLICY_SORT_INVALID":
       return "Kiểu sắp xếp không hợp lệ với bộ lọc hiện tại.";
+    case "ADMIN_ARTIFACT_DELETE_ACTIVE":
+      return "Phiên bản vẫn đang được kích hoạt. Hãy ngừng kích hoạt trước khi xóa khỏi danh sách.";
     default:
       return "Không thể tải hoặc cập nhật chính sách.";
   }

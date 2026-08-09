@@ -316,6 +316,19 @@ describe("database migrations", () => {
     expect(sql).not.toMatch(/(?:recipient|message|customer)_ciphertext/iu);
     expect(down).toContain("DROP TABLE IF EXISTS meta_response_group_gates");
   });
+
+  it("adds append-only policy tombstones without deleting artifact audit history", async () => {
+    const sql = await readFile(
+      resolve(directory, "0031_admin_policy_safe_deletion.up.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS admin_artifact_deletions");
+    expect(sql).toContain("admin_artifact_deletions is append-only");
+    expect(sql).toContain("deleted admin artifact version cannot be activated");
+    expect(sql).toContain("TO lana_admin_readonly");
+    expect(sql).toContain("TO lana_admin_control_api");
+    expect(sql).not.toMatch(/DELETE\s+FROM\s+admin_artifact_versions/iu);
+  });
 });
 describe("r32.2 outbox handoff ordering migration", () => {
   it("adds reversible response-group dependency columns", async () => {

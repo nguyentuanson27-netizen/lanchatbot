@@ -86,6 +86,7 @@ SELECT format(
   'GRANT SELECT ON dataset_review_datasets, dataset_conversations, dataset_messages TO %I',
   :'admin_user'
 )\gexec
+SELECT format('GRANT SELECT ON admin_artifact_deletions TO %I', :'admin_user')\gexec
 
 SELECT format('ALTER ROLE %I SET default_transaction_read_only = on', :'admin_user')\gexec
 
@@ -109,6 +110,7 @@ SELECT format('GRANT SELECT ON conversations TO %I', :'control_api_user')\gexec
 SELECT format('GRANT SELECT ON provider_conversation_links TO %I', :'control_api_user')\gexec
 SELECT format('GRANT SELECT ON admin_conversation_identities TO %I', :'control_api_user')\gexec
 SELECT format('GRANT SELECT, INSERT, UPDATE ON admin_artifact_versions TO %I', :'control_api_user')\gexec
+SELECT format('GRANT SELECT, INSERT ON admin_artifact_deletions TO %I', :'control_api_user')\gexec
 SELECT format('GRANT SELECT, INSERT ON admin_artifact_events TO %I', :'control_api_user')\gexec
 SELECT format('GRANT SELECT, INSERT, UPDATE ON admin_active_pointers TO %I', :'control_api_user')\gexec
 SELECT format('GRANT SELECT, INSERT, UPDATE ON admin_simulation_runs TO %I', :'control_api_user')\gexec

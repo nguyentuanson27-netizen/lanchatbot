@@ -148,9 +148,53 @@ describe("policy phase1 drawer", () => {
     expect(html).toMatch(/data-policy-drawer-action="START_CANARY"[^>]*disabled/u);
   });
 
-  it("keeps SIZE_CHART on generic read-only content in phase2", () => {
-    const html = renderReviewDrawer(context(artifact("size", "VALIDATED", "SIZE_CHART")), identity, "page-1");
-    expect(html).toContain("SIZE_CHART");
-    expect(html).not.toContain("policy-size-chart");
+  it("renders SIZE_CHART as a concise Vietnamese measurement table", () => {
+    const item: PolicyArtifact = {
+      ...artifact("size", "VALIDATED", "SIZE_CHART"),
+      content: {
+        kind: "SIZE_CHART",
+        chart: {
+          bands: [{
+            size: "M",
+            ranges: [
+              { kind: "HEIGHT_CM", minInclusive: 155, maxInclusive: 165 },
+              { kind: "WEIGHT_KG", minInclusive: 48, maxInclusive: 54 },
+              { kind: "BUST_CM", minInclusive: 84, maxInclusive: 88 },
+            ],
+          }],
+        },
+      },
+    };
+    const html = renderReviewDrawer(context(item), identity, "page-1");
+    expect(html).toContain("Chiều cao");
+    expect(html).toContain("Cân nặng");
+    expect(html).toContain("Vòng ngực");
+    expect(html).toContain("155–165 cm");
+    expect(html).not.toContain("chart › bands[0]");
+    expect(html).not.toContain("HEIGHT_CM");
+  });
+
+  it("offers pointer deactivation separately from safe artifact deletion", () => {
+    const published = artifact("published", "PUBLISHED");
+    const activeContext = {
+      ...context(published),
+      activePointers: [{
+        id: "pointer-1",
+        key: published.key,
+        kind: published.kind,
+        pageId: "page-1",
+        channel: "PUBLISHED" as const,
+        versionId: published.id,
+        version: published.version,
+        revision: 8,
+        updatedAt: published.updatedAt,
+      }],
+    };
+    const activeHtml = renderReviewDrawer(activeContext, identity, "page-1");
+    expect(activeHtml).toContain("Ngừng kích hoạt");
+    expect(activeHtml).not.toContain("Xóa khỏi danh sách");
+
+    const inactiveHtml = renderReviewDrawer(context(published), identity, "page-1");
+    expect(inactiveHtml).toContain("Xóa khỏi danh sách");
   });
 });

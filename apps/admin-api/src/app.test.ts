@@ -134,6 +134,8 @@ class FakeStore implements AdminStore {
     return { version_id: id, revision: input.expectedRevision + 1, lifecycle: input.action };
   }
   async listActivePointers() { return []; }
+  async deactivateArtifactPointer() { return null; }
+  async deleteArtifactVersion() { return null; }
   async rollbackArtifactPointer() { return { pointer_id: "018f1b72-0000-7000-8000-000000000011" }; }
   async createSimulation() { return { simulation_id: "018f1b72-0000-7000-8000-000000000012" }; }
   async listSimulations() { return { items: [], nextCursor: null }; }
