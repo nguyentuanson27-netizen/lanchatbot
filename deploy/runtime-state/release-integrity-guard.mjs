@@ -101,8 +101,13 @@ for (const required of ['--no-deps', 'admin-api', 'admin-web', 'RUNTIME_STATE_RO
   if (!adminRollback.includes(required)) throw new Error(`ADMIN_POLICY_ROLLBACK_GUARD_MISSING:${required}`);
 }
 const adminManifest = JSON.parse(readFileSync(join(manifestDir, `${adminReleaseTag}.json`), 'utf8'));
-if (adminManifest.releaseTag !== adminReleaseTag || adminManifest.source?.implementationCommit !== 'aaa1a28200c98fa7be79ec1c4c66f5f10a95272a') {
+if (adminManifest.releaseTag !== adminReleaseTag || adminManifest.source?.implementationCommit !== '43a42392cf975891ddb284083efe153581388d55') {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_PROVENANCE');
+}
+const adminSecurityPrerequisite = adminManifest.source?.pullRequests?.find(({ number }) => number === 162);
+if (adminSecurityPrerequisite?.mergeCommit !== '43a42392cf975891ddb284083efe153581388d55' ||
+    adminSecurityPrerequisite?.scope !== 'RUNTIME_AND_BUILD_DEPENDENCY_SECURITY_PATCHES') {
+  throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_SECURITY_PREREQUISITE');
 }
 if (adminManifest.database?.migrationRequired !== false || adminManifest.database?.backfillRequired !== false) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_DATABASE_SCOPE');

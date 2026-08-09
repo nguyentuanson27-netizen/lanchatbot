@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "capturedAt": "2026-08-09T07:15:32Z",
-  "capturedAtSemantics": "repository release-preparation record creation time; not a live host capture",
+  "capturedAt": "2026-08-09T08:34:24Z",
+  "capturedAtSemantics": "repository release-preparation record update time; not a live host capture",
   "status": "RELEASE_PREPARATION_SOURCE_VERIFIED_RUNTIME_EVIDENCE_PENDING",
   "environment": "production-admin-policy-review",
   "documentType": "APPEND_ONLY_RELEASE_CANDIDATE_EVIDENCE",
@@ -9,7 +9,7 @@
   "source": {
     "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
     "branch": "main",
-    "implementationCommit": "aaa1a28200c98fa7be79ec1c4c66f5f10a95272a",
+    "implementationCommit": "43a42392cf975891ddb284083efe153581388d55",
     "pullRequests": [
       { "number": 140, "mergeCommit": "34ab8fcd4a5cdd71295c6217501568b5b94dfb62", "scope": "ADMIN_POLICY_REVIEW_READ_BOUNDARY" },
       { "number": 136, "mergeCommit": "14a3c78b8a8df9af5d7ad2fbd38c4c1569dd14f3", "scope": "ADMIN_POLICY_REVIEW_CLIENT_RUNTIME" },
@@ -17,7 +17,8 @@
       { "number": 153, "mergeCommit": "658f3ceae577e8832e9cca0ae9761a9d4a5634af", "scope": "ADMIN_POLICY_REVIEW_TABLE_DRAWER_UI" },
       { "number": 139, "mergeCommit": "131c898776d3bb129bfc3d7f8196edc4e4bbc890", "scope": "ADMIN_POLICY_BATCH_API_AND_RECOVERY" },
       { "number": 148, "mergeCommit": "77b7578546d7f7b9d539f641f8dec82fe8f46a67", "scope": "ADMIN_POLICY_BULK_UI" },
-      { "number": 160, "mergeCommit": "aaa1a28200c98fa7be79ec1c4c66f5f10a95272a", "scope": "PER_SERVICE_ADMIN_IMAGE_SELECTORS" }
+      { "number": 160, "mergeCommit": "aaa1a28200c98fa7be79ec1c4c66f5f10a95272a", "scope": "PER_SERVICE_ADMIN_IMAGE_SELECTORS" },
+      { "number": 162, "mergeCommit": "43a42392cf975891ddb284083efe153581388d55", "scope": "RUNTIME_AND_BUILD_DEPENDENCY_SECURITY_PATCHES" }
     ],
     "tagMustPointToCommitContainingThisManifest": true,
     "tagMustNotPointDirectlyToImplementationCommit": true
@@ -38,7 +39,8 @@
       "ADMIN_POLICY_REVIEW_DETAIL_CONTEXT",
       "ADMIN_POLICY_BATCH_VALIDATE_APPROVE",
       "ADMIN_POLICY_BULK_SELECTION",
-      "PER_SERVICE_ADMIN_IMAGE_SELECTORS"
+      "PER_SERVICE_ADMIN_IMAGE_SELECTORS",
+      "RUNTIME_AND_BUILD_DEPENDENCY_SECURITY_PATCHES"
     ],
     "targetServices": ["admin-api", "admin-web"],
     "adminSimulationWorkerMustRemainUnchanged": true,
@@ -76,7 +78,8 @@
     "TAG_AND_COMMIT_PROVENANCE_PASS",
     "CLEAN_NEW_RELEASE_AND_EVIDENCE_PATHS",
     "LIVE_ROLLBACK_IDENTITIES_CAPTURED",
-    "THREE_PER_SERVICE_IMAGE_SELECTORS_PINNED"
+    "THREE_PER_SERVICE_IMAGE_SELECTORS_PINNED",
+    "NATIVE_PNPM_AUDIT_NO_KNOWN_VULNERABILITIES"
   ],
   "requiredBeforeCutover": [
     "ADMIN_UI_BROWSER_OR_HUMAN_WALKTHROUGH_EVIDENCE",

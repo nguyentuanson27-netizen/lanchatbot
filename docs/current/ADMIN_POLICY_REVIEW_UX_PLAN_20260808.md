@@ -126,7 +126,8 @@ No phase or slice is considered complete merely because the combined prototype e
 The six UI/API phase PRs above remain source-only changes and did not individually
 authorize production mutation. Production rollout is owned by the separate
 `20260809-admin-policy-review-r6.1` release boundary after the per-service Admin
-image selector fix in PR #160.
+image selector fix in PR #160 and the runtime/build dependency security patches
+in PR #162.
 
 That release may recreate exactly `admin-api` and `admin-web` through the reviewed
 scripts under `deploy/releases/20260809-admin-policy-review-r6.1`. It must preserve

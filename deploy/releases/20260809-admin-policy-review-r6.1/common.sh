@@ -2,7 +2,7 @@
 set -euo pipefail
 
 readonly EXPECTED_RELEASE_TAG="20260809-admin-policy-review-r6.1"
-readonly IMPLEMENTATION_COMMIT="aaa1a28200c98fa7be79ec1c4c66f5f10a95272a"
+readonly IMPLEMENTATION_COMMIT="43a42392cf975891ddb284083efe153581388d55"
 readonly EXPECTED_ADMIN_IMAGE="lana-chatbot-app:admin-policy-review-r6.1"
 
 APP_ROOT="${APP_ROOT:-/opt/lana-chatbot}"
