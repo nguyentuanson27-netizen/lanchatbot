@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
@@ -232,6 +232,7 @@ async function seedVersion(
   revision: number,
   artifactKey = "size-chart:postgres-test",
 ): Promise<string> {
+  const content = { schemaVersion: 1, kind: "SIZE_CHART", chart: { bands: [] } };
   const result = await query(current, `INSERT INTO admin_artifact_versions (
       artifact_key, artifact_kind, version_number, lifecycle, revision,
       content, content_hash, created_by_subject, updated_by_subject
@@ -240,10 +241,25 @@ async function seedVersion(
     artifactKey,
     lifecycle,
     revision,
-    JSON.stringify({ schemaVersion: 1, kind: "SIZE_CHART", chart: { bands: [] } }),
-    `sha256:${"a".repeat(64)}`,
+    JSON.stringify(content),
+    structuredContentHash(content),
   ]);
   return String(result.rows[0]?.version_id);
+}
+
+function structuredContentHash(content: unknown): string {
+  const canonicalize = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(canonicalize);
+    if (value !== null && typeof value === "object") {
+      return Object.fromEntries(
+        Object.entries(value as Record<string, unknown>)
+          .sort(([left], [right]) => left.localeCompare(right))
+          .map(([key, item]) => [key, canonicalize(item)]),
+      );
+    }
+    return value;
+  };
+  return `sha256:${createHash("sha256").update(JSON.stringify(canonicalize(content))).digest("hex")}`;
 }
 
 async function seedPointer(
