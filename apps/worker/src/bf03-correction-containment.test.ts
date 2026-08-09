@@ -93,6 +93,8 @@ describe("BF-03 correction containment", () => {
   it.each([
     "giá với size đã có rồi",
     "size có rồi mà",
+    "size có rồi mà?",
+    "có giá vs size rồi mà?",
     "em nói giá và size rồi mà",
     "giá + size chị có rồi nhé",
   ])("contains clear correction phrasing: %s", (text) => {
