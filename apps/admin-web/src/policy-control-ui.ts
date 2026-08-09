@@ -518,7 +518,62 @@ function setRouteParam(params: URLSearchParams, key: string, value: string): voi
 function normalizedIntegerFilter(value: FormDataEntryValue | null, minimum: number): string { const text = String(value ?? "").trim(); return routeIntegerFilter(text, minimum) === null ? "" : text; }
 function routeIntegerFilter(value: string | null, minimum: number): number | null { if (value === null || !/^(?:0|[1-9]\d*)$/u.test(value)) return null; const parsed = Number(value); return Number.isSafeInteger(parsed) && parsed >= minimum ? parsed : null; }
 function renderContent(content: Record<string, unknown>): string { if (content.kind === "SIZE_CHART") return renderSizeChart(content); const rows = flatten(content).filter(([key]) => !key.endsWith("sourceMetadata.observedAt")); return `<dl class="policy-content">${rows.map(([key, value]) => `<div><dt>${escapeHtml(readableKey(key))}</dt><dd>${escapeHtml(String(value))}</dd></div>`).join("")}</dl>`; }
-function renderSizeChart(content: Record<string, unknown>): string { const chart = objectValue(content.chart); const bands = Array.isArray(chart?.bands) ? chart.bands.map(objectValue).filter((band): band is Record<string, unknown> => band !== null) : []; if (!bands.length) return '<p class="policy-empty">Bảng size chưa có thông số.</p>'; const cells = bands.map((band) => { const ranges = Array.isArray(band.ranges) ? band.ranges.map(objectValue).filter((range): range is Record<string, unknown> => range !== null) : []; const byKind = new Map(ranges.map((range) => [String(range.kind ?? ""), range])); return `<tr><th scope="row">${escapeHtml(String(band.size ?? "—"))}</th>${["HEIGHT_CM", "WEIGHT_KG", "BUST_CM", "WAIST_CM", "HIPS_CM"].map((kind) => `<td>${escapeHtml(formatMeasurementRange(byKind.get(kind), kind === "WEIGHT_KG" ? "kg" : "cm"))}</td>`).join("")}</tr>`; }).join(""); return `<div class="policy-review-table__scroll"><table class="policy-size-chart"><thead><tr><th>Size</th><th>Chiều cao</th><th>Cân nặng</th><th>Vòng ngực</th><th>Vòng eo</th><th>Vòng mông</th></tr></thead><tbody>${cells}</tbody></table></div>`; }
+function renderSizeChart(content: Record<string, unknown>): string {
+  const chart = objectValue(content.chart);
+  const bands = Array.isArray(chart?.bands)
+    ? chart.bands.map(objectValue).filter((band): band is Record<string, unknown> => band !== null)
+    : [];
+  const table = bands.length
+    ? `<div class="policy-review-table__scroll"><table class="policy-size-chart"><thead><tr><th>Size</th><th>Chiều cao</th><th>Cân nặng</th><th>Vòng ngực</th><th>Vòng eo</th><th>Vòng mông</th></tr></thead><tbody>${bands.map(renderSizeChartBand).join("")}</tbody></table></div>`
+    : '<p class="policy-empty">Bảng size chưa có thông số.</p>';
+  const metadata = flatten(content).filter(([key]) =>
+    !/^chart\.bands\[\d+\]\.(?:size|ranges(?:\[\d+\])?\.)/u.test(key),
+  );
+  if (!metadata.length) return table;
+  return `${table}<div class="policy-size-chart__metadata"><h4>Phạm vi và thông tin xác minh</h4><dl class="policy-content">${metadata.map(([key, value]) => `<div><dt>${escapeHtml(sizeChartMetadataLabel(key, bands))}</dt><dd>${escapeHtml(sizeChartMetadataValue(value))}</dd></div>`).join("")}</dl></div>`;
+}
+
+function renderSizeChartBand(band: Record<string, unknown>): string {
+  const ranges = Array.isArray(band.ranges)
+    ? band.ranges.map(objectValue).filter((range): range is Record<string, unknown> => range !== null)
+    : [];
+  const byKind = new Map(ranges.map((range) => [String(range.kind ?? ""), range]));
+  return `<tr><th scope="row">${escapeHtml(String(band.size ?? "—"))}</th>${["HEIGHT_CM", "WEIGHT_KG", "BUST_CM", "WAIST_CM", "HIPS_CM"].map((kind) => `<td>${escapeHtml(formatMeasurementRange(byKind.get(kind), kind === "WEIGHT_KG" ? "kg" : "cm"))}</td>`).join("")}</tr>`;
+}
+
+function sizeChartMetadataLabel(key: string, bands: readonly Record<string, unknown>[]): string {
+  const bandNote = /^chart\.bands\[(\d+)\]\.note$/u.exec(key);
+  if (bandNote) return `Bảng size › Size ${String(bands[Number(bandNote[1])]?.size ?? "—")} › Ghi chú`;
+  const labels: Record<string, string> = {
+    schemaVersion: "Phiên bản cấu trúc", kind: "Loại nội dung", chart: "Bảng size",
+    reference: "Xác minh", chartId: "Mã bảng size", version: "Phiên bản", source: "Nguồn",
+    sourceArtifactRef: "Tham chiếu nguồn", sourceContentSha256: "Mã băm nội dung",
+    verificationStatus: "Trạng thái xác minh", verifiedByRef: "Người xác minh", verifiedAt: "Thời điểm xác minh",
+    brand: "Thương hiệu", category: "Nhóm sản phẩm", componentRole: "Vai trò thành phần",
+    boundaryPolicy: "Chính sách sát biên", scope: "Phạm vi", level: "Cấp áp dụng",
+    parentProductIds: "Mã sản phẩm cha", categories: "Nhóm sản phẩm", forms: "Phom", materials: "Chất liệu",
+    extraction: "Trích xuất", measurementBasis: "Cơ sở số đo", confidence: "Độ tin cậy",
+    extractorVersion: "Phiên bản bộ trích xuất", sourceMetadata: "Nguồn dữ liệu",
+    sourceReference: "Tham chiếu nguồn", sourceVersion: "Phiên bản nguồn", observedAt: "Thời điểm ghi nhận",
+  };
+  return key.split(".").map((segment) => {
+    const match = /^([^[]+)(.*)$/u.exec(segment);
+    return `${labels[match?.[1] ?? segment] ?? readableKey(match?.[1] ?? segment)}${match?.[2] ?? ""}`;
+  }).join(" › ");
+}
+
+function sizeChartMetadataValue(value: string | number | boolean): string {
+  const labels: Record<string, string> = {
+    SIZE_CHART: "Bảng size", COMPONENT: "Theo thành phần", CATEGORY: "Theo nhóm sản phẩm", GLOBAL: "Toàn bộ",
+    BODY: "Số đo cơ thể", GARMENT: "Số đo sản phẩm", UNKNOWN: "Chưa xác định",
+    VERIFIED: "Đã xác minh", EXTRACTED_UNREVIEWED: "Đã trích xuất, chưa duyệt",
+    REQUIRE_HUMAN_REVIEW: "Cần người kiểm tra", PREFER_SMALLER_SIZE: "Ưu tiên size nhỏ hơn",
+    PREFER_LARGER_SIZE: "Ưu tiên size lớn hơn", IMAGE_EXTRACTION: "Trích xuất từ ảnh",
+    STRUCTURED_IMPORT: "Nhập dữ liệu có cấu trúc", ADMIN: "Quản trị viên", GOOGLE_SHEETS_IMPORT: "Nhập từ Google Sheets",
+  };
+  const text = String(value);
+  return labels[text] ? `${labels[text]} (${text})` : text;
+}
 function objectValue(value: unknown): Record<string, unknown> | null { return typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : null; }
 function formatMeasurementRange(range: Record<string, unknown> | undefined, unit: "cm" | "kg"): string { if (!range) return "—"; const min = finiteMeasurement(range.minInclusive); const max = finiteMeasurement(range.maxInclusive); if (min === null && max === null) return "—"; if (min === null) return `≤ ${max} ${unit}`; if (max === null) return `≥ ${min} ${unit}`; return min === max ? `${min} ${unit}` : `${min}–${max} ${unit}`; }
 function finiteMeasurement(value: unknown): number | null { return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null; }

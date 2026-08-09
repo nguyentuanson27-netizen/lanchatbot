@@ -153,10 +153,46 @@ describe("policy phase1 drawer", () => {
     const item: PolicyArtifact = {
       ...artifact("size", "VALIDATED", "SIZE_CHART"),
       content: {
+        schemaVersion: 1,
         kind: "SIZE_CHART",
+        scope: {
+          level: "COMPONENT",
+          parentProductIds: ["SD398"],
+          categories: ["Đầm"],
+          componentRole: "DRESS",
+          forms: ["Ôm"],
+          materials: ["Lụa"],
+        },
+        extraction: {
+          measurementBasis: "BODY",
+          confidence: 0.97,
+          extractorVersion: "size-extractor-v2",
+        },
+        sourceMetadata: {
+          source: "IMAGE_EXTRACTION",
+          sourceReference: "asset:size-chart:SD398",
+          sourceVersion: "v2",
+          observedAt: "2026-08-09T00:00:00.000Z",
+        },
         chart: {
+          schemaVersion: 1,
+          reference: {
+            chartId: "size-chart:SD398",
+            version: "v2",
+            source: "IMAGE_EXTRACTION",
+            sourceArtifactRef: "asset:size-chart:SD398",
+            sourceContentSha256: "a".repeat(64),
+            verificationStatus: "VERIFIED",
+            verifiedByRef: "owner-1",
+            verifiedAt: "2026-08-09T00:05:00.000Z",
+          },
+          brand: "La.na",
+          category: "Đầm",
+          componentRole: "DRESS",
+          boundaryPolicy: "REQUIRE_HUMAN_REVIEW",
           bands: [{
             size: "M",
+            note: "Ưu tiên hỏi thêm khi sát biên.",
             ranges: [
               { kind: "HEIGHT_CM", minInclusive: 155, maxInclusive: 165 },
               { kind: "WEIGHT_KG", minInclusive: 48, maxInclusive: 54 },
@@ -171,6 +207,13 @@ describe("policy phase1 drawer", () => {
     expect(html).toContain("Cân nặng");
     expect(html).toContain("Vòng ngực");
     expect(html).toContain("155–165 cm");
+    expect(html).toContain("COMPONENT");
+    expect(html).toContain("SD398");
+    expect(html).toContain("BODY");
+    expect(html).toContain("size-extractor-v2");
+    expect(html).toContain("VERIFIED");
+    expect(html).toContain("REQUIRE_HUMAN_REVIEW");
+    expect(html).toContain("Ưu tiên hỏi thêm khi sát biên.");
     expect(html).not.toContain("chart › bands[0]");
     expect(html).not.toContain("HEIGHT_CM");
   });
