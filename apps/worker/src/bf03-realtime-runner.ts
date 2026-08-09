@@ -89,7 +89,6 @@ function hasClearCorrectionMarker(text: string): boolean {
 
 function hasSizeRequestEvidence(value: string, text: string): boolean {
   if (hasCustomerMeasurementSignal(value)) return true;
-  if (/[?？]/u.test(value)) return true;
   if (
     /\b(size|sz|kich co|co nao|mac co)\b.{0,48}\b(nao|gi|bao nhieu|may|vua|hop|nen|chon|lay|doi|muon|can|tu van|recommend|hay)\b/u.test(text)
   ) return true;
@@ -403,11 +402,31 @@ function wrapPolicyResolver(
   });
 }
 
-function originalTextForOccurredAt(
+function restoreRawCustomerModelContext(
+  context: Parameters<RealtimeModelPort["generate"]>[0],
   store: Bf03ExecutionContext,
-  occurredAt: string,
-): string | null {
-  return store.rawMessages.find((message) => message.occurredAt === occurredAt)?.text ?? null;
+): Parameters<RealtimeModelPort["generate"]>[0] {
+  if (store.rawMessages.length === 0) return context;
+
+  const restored = [...context];
+  let contextIndex = restored.length - 1;
+  for (let rawIndex = store.rawMessages.length - 1; rawIndex >= 0; rawIndex -= 1) {
+    const raw = store.rawMessages[rawIndex]!;
+    let matchedIndex = contextIndex;
+    for (; matchedIndex >= 0; matchedIndex -= 1) {
+      const entry = restored[matchedIndex]!;
+      if (entry.senderType !== "CUSTOMER" || entry.occurredAt !== raw.occurredAt) {
+        continue;
+      }
+      restored[matchedIndex] = {
+        ...entry,
+        text: redactAnalyticsMessage(raw.text).text,
+      };
+      contextIndex = matchedIndex - 1;
+      break;
+    }
+  }
+  return restored;
 }
 
 function rawProductCode(store: Bf03ExecutionContext): string | null {
@@ -467,13 +486,7 @@ function wrapModel(
     const decision = store ? correctionDecision(store) : { applies: false, reasonCodes: [] };
     if (!store || !decision.applies) return model.generate(...args);
 
-    const restoredContext = args[0].map((entry) => {
-      if (entry.senderType !== "CUSTOMER") return entry;
-      const raw = originalTextForOccurredAt(store, entry.occurredAt);
-      return raw === null
-        ? entry
-        : { ...entry, text: redactAnalyticsMessage(raw).text };
-    });
+    const restoredContext = restoreRawCustomerModelContext(args[0], store);
     const occurredAt = store.rawMessages.at(-1)?.occurredAt ?? new Date().toISOString();
     const generated = await model.generate(
       [...restoredContext, bf03Instruction(occurredAt)],
