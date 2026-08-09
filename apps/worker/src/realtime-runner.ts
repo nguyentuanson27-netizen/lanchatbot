@@ -2859,8 +2859,15 @@ export class RealtimeRunner {
       };
     }
     let mediaClarificationHandled = false;
-    if (resolution.clarification) {
-      const clarification = resolution.clarification;
+    const stateClarification =
+      resolution.clarification && (
+        resolution.clarification.action === "CLEAR" ||
+        mediaDisposition.disposition === "OPEN_CLARIFICATION"
+      )
+        ? resolution.clarification
+        : null;
+    if (stateClarification) {
+      const clarification = stateClarification;
       if (clarification.action === "OPEN") {
         const selections = clarification.candidates.map((product, index) => ({
           label: `MAU_${index + 1}`,

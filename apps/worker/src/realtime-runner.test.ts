@@ -52,6 +52,7 @@ import type {
   ProductFactsV2,
 } from "@lana/contracts";
 import type { RuntimePolicyResolution, RuntimePolicyResolverPort } from "@lana/chat-runtime";
+import type { RealtimeMediaRecognition } from "./realtime-media-recognition.js";
 
 describe("RealtimeRunner", () => {
   it("uses the approved no-size clarification after a rejected size-claim repair", () => {
@@ -2412,6 +2413,7 @@ describe("RealtimeRunner", () => {
     expect(model.generate).not.toHaveBeenCalled();
     expect(commit).toHaveBeenCalledWith(expect.objectContaining({
       state: expect.objectContaining({
+        mediaClarification: null,
         productSelections: [
           { label: "SET_1", productId: "SV921" },
           { label: "SET_2", productId: "CB182" },
@@ -2537,6 +2539,92 @@ describe("RealtimeRunner", () => {
       Date,
     ][];
     expect(partialCalls[0]?.[0].handoffEventPlan).toBeUndefined();
+
+    const recognitionCommit = vi.fn(async () => ({
+      stateCommitted: true,
+      metaOutboxCreated: 1,
+      pancakeTagOutboxCreated: false,
+      handoffEventCreated: false,
+      sendAuthorized: true,
+      reasonCodes: [],
+    }));
+    const recognitionSearch: RealtimeProductSearchPort = {
+      searchText: vi.fn(async (query) => ({
+        status: "MATCHED" as const,
+        matchKind: "EXACT_CODE" as const,
+        product: query.includes("CB182") ? cb182 : sv921,
+        score: 1,
+        gap: null,
+      })),
+      searchImage: vi.fn(),
+    };
+    const recognitionTelemetry = {
+      pipelineVersion: "bf06-test",
+      normalizedImageHash: "a".repeat(64),
+      raw: [],
+      cutout: [],
+      rawGap: null,
+      cutoutGap: null,
+      channelsAgree: true,
+      cutoutStatus: "OK" as const,
+      cutoutErrorCode: null,
+      aiReason: null,
+      aiDecision: null,
+      aiModel: null,
+      aiPromptVersion: null,
+      aiLatencyMs: null,
+      cacheHit: false,
+      latencyMs: { normalize: 1, rawSearch: 1, cutout: 1, cutoutSearch: 1, ai: 0, total: 5 },
+    };
+    const recognitions: readonly RealtimeMediaRecognition[] = [
+      { status: "MATCHED", product: sv921, score: 0.9, gap: 0.1, candidates: [], reasonCode: "MATCHED", telemetry: recognitionTelemetry },
+      {
+        status: "AMBIGUOUS",
+        candidates: [{ product: cb182, cutoutScore: 0.8, rawScore: 0.8 }],
+        reasonCode: "MEDIA_AMBIGUOUS",
+        telemetry: recognitionTelemetry,
+      },
+      { status: "MATCHED", product: cb182, score: 0.88, gap: 0.08, candidates: [], reasonCode: "MATCHED", telemetry: recognitionTelemetry },
+    ];
+    let recognitionIndex = 0;
+    const recognitionRunner = new RealtimeRunner(
+      { claimNext: vi.fn(async () => claim), complete: vi.fn(async () => true), retry: vi.fn(), failPermanent: vi.fn() },
+      { ...runtime, commit: recognitionCommit },
+      model,
+      facts,
+      recognitionSearch,
+      new FailClosedTagObservationProvider(),
+      {
+        workerId: "worker-1",
+        mode: "LIVE",
+        sendEnabled: true,
+        decisionTelemetryEnabled: true,
+        mediaRecognitionEnabled: true,
+        mediaClarificationEnabled: true,
+        mediaRecognitionPageIds: [claim.pageId],
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      partialPolicyResolver,
+      { recognize: vi.fn(async () => recognitions[recognitionIndex++]!) },
+    );
+
+    expect(await recognitionRunner.processOne()).toBe(true);
+    expect(recognitionCommit).toHaveBeenCalledWith(expect.objectContaining({
+      state: expect.objectContaining({
+        mediaClarification: null,
+        productSelections: [
+          { label: "SET_1", productId: "SV921" },
+          { label: "SET_2", productId: "CB182" },
+        ],
+      }),
+      decisionEvents: expect.arrayContaining([expect.objectContaining({
+        eventType: "PRODUCT_MATCHED",
+        reasonCodes: ["MEDIA_PARTIAL_MATCHES_PRESERVED", "MEDIA_USABLE_2_OF_3"],
+      })]),
+    }), expect.any(Date));
   });
 
   it("silently hands off a customer text URL before search or model generation", async () => {
