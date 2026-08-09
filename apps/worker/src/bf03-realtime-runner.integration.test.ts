@@ -384,6 +384,12 @@ function modelContext(harness: ReturnType<typeof createHarness>) {
   return harness.generatedContexts[0] ?? [];
 }
 
+function customerTexts(context: ReturnType<typeof modelContext>): string[] {
+  return context
+    .filter((entry) => entry.senderType === "CUSTOMER")
+    .map((entry) => entry.text);
+}
+
 function hasBf03Instruction(context: ReturnType<typeof modelContext>): boolean {
   return context.some((entry) =>
     entry.senderType === "SYSTEM" &&
@@ -432,6 +438,20 @@ describe("BF-03 RealtimeRunner", () => {
     ]);
   });
 
+  it("contains correction-shaped rhetorical questions instead of treating punctuation as SIZE evidence", async () => {
+    const text = "có giá vs size rồi mà?";
+    const harness = createHarness({
+      messages: [text],
+      currentProductId: "SD398",
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(harness.resolveFacts).not.toHaveBeenCalled();
+    expect(customerTexts(modelContext(harness))).toContain(text);
+    expect(hasBf03Instruction(modelContext(harness))).toBe(true);
+    expect(hasBf03Evidence(harness.committed())).toBe(true);
+  });
+
   it("preserves an explicit product code in a single correction turn", async () => {
     const harness = createHarness({
       messages: ["SD398 có giá với size rồi mà"],
@@ -445,14 +465,16 @@ describe("BF-03 RealtimeRunner", () => {
   });
 
   it("preserves a preceding explicit product-code message in a native batch", async () => {
+    const messages = ["SD398", "size có rồi mà"] as const;
     const harness = createHarness({
-      messages: ["SD398", "size có rồi mà"],
+      messages,
       nativeBatch: true,
     });
 
     expect(await harness.runner.processOne()).toBe(true);
     expect(harness.searchText).toHaveBeenCalledWith("SD398");
     expect(harness.committed()?.state.currentProductId).toBe("SD398");
+    expect(customerTexts(modelContext(harness))).toEqual(messages);
     // The standalone code message is allowed to retain its legacy PRICE lookup;
     // this regression is specifically about preserving verified product context.
     expect(hasBf03Evidence(harness.committed())).toBe(true);
