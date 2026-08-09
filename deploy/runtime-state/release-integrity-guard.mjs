@@ -70,12 +70,13 @@ const unknownField = structuredClone(example); unknownField.unapproved = true; i
 
 const manifestDir = join(root, 'deploy', 'manifests');
 for (const file of readdirSync(manifestDir).filter((name) => name.endsWith('.json'))) JSON.parse(readFileSync(join(manifestDir, file), 'utf8'));
-const adminReleaseTag = '20260809-admin-policy-review-r6.1';
+const adminReleaseTag = '20260809-admin-policy-review-r6.2';
 const adminReleaseDir = join(root, 'deploy', 'releases', adminReleaseTag);
 const adminReleaseScripts = [
   'common.sh',
   'preflight.sh',
   'run-build.sh',
+  'artifact-smoke.sh',
   'cutover.sh',
   'promote-runtime-state.sh',
   'postcheck.sh',
@@ -92,14 +93,27 @@ for (const scriptName of adminReleaseScripts) {
   if (!syntax.error && syntax.status !== 0) throw new Error(`ADMIN_POLICY_RELEASE_SCRIPT_SYNTAX:${scriptName}:${syntax.stderr.trim()}`);
   if (syntax.error && syntax.error.code !== 'ENOENT') throw syntax.error;
 }
+for (const requiredFile of [
+  'admin-rollback-image-override.yml',
+  'capture-deployment-boundary.mjs',
+  'validate-deployment-boundary.mjs',
+  'validate-runtime-invariants.mjs'
+]) {
+  if (!existsSync(join(adminReleaseDir, requiredFile))) throw new Error(`ADMIN_POLICY_RELEASE_FILE_MISSING:${requiredFile}`);
+}
 const adminCutover = readFileSync(join(adminReleaseDir, 'cutover.sh'), 'utf8');
-for (const required of ['--no-deps', 'admin-api', 'admin-web', 'ADMIN_SIMULATION_IMAGE', 'rollback.sh']) {
+for (const required of ['--no-deps', 'admin-api', 'admin-web', 'ADMIN_SIMULATION_IMAGE', 'arm_automatic_rollback', 'disarm_automatic_rollback', 'acquire_deployment_lock', 'soak.sh', 'capture-deployment-boundary.mjs']) {
   if (!adminCutover.includes(required)) throw new Error(`ADMIN_POLICY_CUTOVER_GUARD_MISSING:${required}`);
 }
 const adminRollback = readFileSync(join(adminReleaseDir, 'rollback.sh'), 'utf8');
-for (const required of ['--no-deps', 'admin-api', 'admin-web', 'RUNTIME_STATE_ROLLBACK_EVIDENCE_FILE']) {
+for (const required of ['--no-deps', 'admin-api', 'admin-web', 'require_rollback_inputs', 'rollback_compose', 'ROLLBACK_ADMIN_API_IMAGE_ID', 'ROLLBACK_ADMIN_WEB_IMAGE_ID']) {
   if (!adminRollback.includes(required)) throw new Error(`ADMIN_POLICY_ROLLBACK_GUARD_MISSING:${required}`);
 }
+const adminCommon = readFileSync(join(adminReleaseDir, 'common.sh'), 'utf8');
+for (const required of ['RUNTIME_STATE_ROLLBACK_EVIDENCE_FILE', 'require_rollback_inputs', 'readonly DEPLOYMENT_LOCK_FILE=', '/proc/$$/fd/9', 'trap automatic_rollback_on_exit EXIT']) {
+  if (!adminCommon.includes(required)) throw new Error(`ADMIN_POLICY_ROLLBACK_INPUT_GUARD_MISSING:${required}`);
+}
+if (adminRollback.includes('require_cutover_inputs')) throw new Error('ADMIN_POLICY_ROLLBACK_DEPENDS_ON_CUTOVER_GATE');
 const adminManifest = JSON.parse(readFileSync(join(manifestDir, `${adminReleaseTag}.json`), 'utf8'));
 if (adminManifest.releaseTag !== adminReleaseTag || adminManifest.source?.implementationCommit !== '43a42392cf975891ddb284083efe153581388d55') {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_PROVENANCE');
@@ -117,6 +131,12 @@ if (JSON.stringify(adminManifest.scope?.targetServices) !== JSON.stringify(['adm
 }
 if (adminManifest.scope?.adminSimulationWorkerMustRemainUnchanged !== true || adminManifest.scope?.messengerProductionTestAllowed !== false) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_NON_TARGET_SCOPE');
+}
+if (adminManifest.supersedesUnexecutedRelease !== '20260809-admin-policy-review-r6.1' ||
+    adminManifest.deploymentAutomation?.automaticRollbackOnSoakFailure !== true ||
+    adminManifest.deploymentAutomation?.globalDeploymentLockRequired !== true ||
+    adminManifest.rollback?.runtimeDefinitionAuthority !== 'previous release Compose plus reviewed image-only override') {
+  throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_DEPLOYMENT_SAFETY');
 }
 const adminReleaseSelfTest = spawnSync(process.execPath, [join(adminReleaseDir, 'test-release-automation.mjs')], { encoding: 'utf8' });
 if (adminReleaseSelfTest.status !== 0) {
