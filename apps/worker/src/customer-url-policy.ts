@@ -34,15 +34,18 @@ export interface CustomerUrlDecision {
   readonly explanationAllowed: boolean;
 }
 
-const URL_TOKEN_BOUNDARY = String.raw`(?:\/|(?=$|[\s),.;!?\]}]))`;
+const URL_TOKEN_BOUNDARY = String.raw`(?:[/\\]|(?=$|[\s),.;!?\]}]))`;
 const DOMAIN_LIKE = String.raw`(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]{0,61}[\p{L}\p{N}])?[.\u3002\uff0e\uff61])+(?:[\p{L}]{2,63}|xn--[a-z0-9-]{2,59})`;
 const NUMERIC_HOST_LIKE = String.raw`(?:(?:\d{1,12}\.){1,3}\d{1,12}|0x[a-f0-9]+|\d{7,12})`;
-const PORT_LIKE = String.raw`(?::(?:[^/\s]+|(?=\/)))?`;
-const SHORT_NUMERIC_AUTHORITY_LIKE = String.raw`\d{1,12}${PORT_LIKE}\/(?=[\p{L}%._~-])`;
+const PORT_LIKE = String.raw`(?::[^/\\\s]+)?`;
+const AUTHORITY_CONTINUATION = String.raw`(?:[/\\](?=[\p{L}%._~-])|[?#])`;
+const SHORT_NUMERIC_AUTHORITY_LIKE = String.raw`\d{1,12}${PORT_LIKE}${AUTHORITY_CONTINUATION}`;
 const BRACKETED_HOST_LIKE = String.raw`\[[a-f0-9:.%]+\]`;
 const HOST_LIKE = `(?:${DOMAIN_LIKE}|localhost|${NUMERIC_HOST_LIKE}|${BRACKETED_HOST_LIKE})`;
 const USERINFO_LIKE = `(?:[\\p{L}\\p{N}._~-]+(?::[^@\\s/]+)?|${DOMAIN_LIKE})@`;
-const BARE_AUTHORITY_LIKE = `(?:${USERINFO_LIKE}(?:${HOST_LIKE}|\\d{1,12})${PORT_LIKE}\\/|${SHORT_NUMERIC_AUTHORITY_LIKE}|${HOST_LIKE}${PORT_LIKE}${URL_TOKEN_BOUNDARY})`;
+const AUTHORITY_HOST_LIKE = `(?:${HOST_LIKE}|\\d{1,12})`;
+const EMPTY_PORT_AUTHORITY_LIKE = `(?:${USERINFO_LIKE})?${AUTHORITY_HOST_LIKE}:(?=$|[/\\\\?#\\s),.;!?\\]}])`;
+const BARE_AUTHORITY_LIKE = `(?:${EMPTY_PORT_AUTHORITY_LIKE}|${USERINFO_LIKE}${AUTHORITY_HOST_LIKE}${PORT_LIKE}(?:[/\\\\]|[?#])|${SHORT_NUMERIC_AUTHORITY_LIKE}|${HOST_LIKE}${PORT_LIKE}${URL_TOKEN_BOUNDARY})`;
 const URL_CANDIDATE = new RegExp(
   String.raw`(?<![\p{L}\p{N}@._-])(?:https?:\/{0,2}|[a-z][a-z0-9+.-]{1,15}:\/\/|(?:javascript|data|file|ftp|blob):(?:\/\/)?|\/\/|www[.\u3002\uff0e\uff61]|${BARE_AUTHORITY_LIKE})[^\s<>"']*`,
   "giu",

@@ -344,6 +344,13 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     "user@127:/admin",
     "user@[::1]:/admin",
     "https://example.com:/path",
+    "user@example.com:?token=s",
+    "127:?token=s",
+    "user@127:#x",
+    "user@[::1]:?token=s",
+    "user@example.com:",
+    "127:",
+    "user@example.com:\\path",
   ])("keeps the production wrapper strict for malformed authority %s", async (text) => {
     const result = await runTurn({
       text: `please check ${text}`,
@@ -632,6 +639,18 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     "[::1]:/admin",
     "user@[::1]:/admin",
     "https://example.com:/path",
+    "user@example.com:?token=s",
+    "127:?token=s",
+    "user@127:#x",
+    "user@[::1]:?token=s",
+    "example.com:",
+    "user@example.com:",
+    "127:",
+    "user@[::1]:",
+    "example.com:\\path",
+    "user@example.com:\\path",
+    "127:\\admin",
+    "user@[::1]:\\admin",
   ])("fails closed before model or resolver for malformed authority %s", async (text) => {
     const result = await runTurn({
       text: `please check ${text}`,
