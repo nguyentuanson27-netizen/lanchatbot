@@ -481,7 +481,7 @@ describe("BF-08 production-wrapper customer URL policy", () => {
       text: "please check https://example.com/product",
       policy: policy("CLASSIFIED_ALLOWLIST_V1"),
       explanationReplies: [
-        "I cannot open that link. Product code \"cannot\": open it. Please send an image.",
+        "Product code \"I cannot\": open it. Please send an image.",
         "I cannot safely open that link. Please send the product code or an image so I can check it.",
       ],
     });

@@ -430,7 +430,7 @@ export function verifyCustomerUrlExplanationProposal(
     const actorPrefix = clausePrefix.slice(0, negation.index ?? 0).split(
       /[,.!?;]|\b(?:but|however|then|nhung|tuy nhien|sau do)\b/giu,
     ).at(-1) ?? "";
-    if (!/\b(?:i(?:\s+am)?|we(?:\s+are)?|em|toi|chung toi)\s*$/iu.test(actorPrefix)) {
+    if (!/^\s*(?:i(?:\s+am)?|we(?:\s+are)?|em|toi|chung toi)\s*$/iu.test(actorPrefix)) {
       return false;
     }
     const tail = clausePrefix.slice((negation.index ?? 0) + negation[0].length);
