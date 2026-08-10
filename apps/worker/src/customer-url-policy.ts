@@ -38,7 +38,7 @@ const URL_TOKEN_BOUNDARY = String.raw`(?:[/\\]|(?=$|[\s),.;!?\]}]))`;
 const DOMAIN_LIKE = String.raw`(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]{0,61}[\p{L}\p{N}])?[.\u3002\uff0e\uff61])+(?:[\p{L}]{2,63}|xn--[a-z0-9-]{2,59})`;
 const NUMERIC_HOST_LIKE = String.raw`(?:(?:\d{1,12}\.){1,3}\d{1,12}|0x[a-f0-9]+|\d{7,12})`;
 const PORT_LIKE = String.raw`(?::[^/\\\s]+)?`;
-const AUTHORITY_CONTINUATION = String.raw`(?:[/\\](?=[\p{L}%._~-])|[?#])`;
+const AUTHORITY_CONTINUATION = String.raw`[/\\](?=[\p{L}%._~-])`;
 const SHORT_NUMERIC_AUTHORITY_LIKE = String.raw`\d{1,12}${PORT_LIKE}${AUTHORITY_CONTINUATION}`;
 const BRACKETED_HOST_LIKE = String.raw`\[[a-f0-9:.%]+\]`;
 const HOST_LIKE = `(?:${DOMAIN_LIKE}|localhost|${NUMERIC_HOST_LIKE}|${BRACKETED_HOST_LIKE})`;

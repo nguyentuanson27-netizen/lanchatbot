@@ -51,6 +51,18 @@ describe("BF-08 classified customer URL policy", () => {
   });
 
   it.each([
+    "ch\u1ecb ch\u1ecdn m\u1eabu 1?",
+    "size 2?",
+    "ch\u1ecb ch\u1ecdn ph\u01b0\u01a1ng \u00e1n 2#",
+  ])("keeps ordinary numeric questions out of URL handling: %s", (text) => {
+    expect(classifyCustomerUrls(text, "CLASSIFIED_ALLOWLIST_V1"))
+      .toMatchObject({ disposition: "CONTINUE", items: [] });
+    expect(classifyCustomerUrls(text, "STRICT_BLOCK_ALL"))
+      .toMatchObject({ disposition: "CONTINUE", items: [] });
+    expect(redactCustomerUrlsForModel(text)).toBe(text);
+  });
+
+  it.each([
     ["lanadesign.vn/sv695", "EXPLAIN_UNSUPPORTED"],
     ["example.com/a", "EXPLAIN_UNSUPPORTED"],
     ["//evil.test/path", "EXPLAIN_UNSUPPORTED"],

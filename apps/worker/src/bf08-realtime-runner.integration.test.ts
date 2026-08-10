@@ -376,6 +376,19 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     expect(JSON.stringify(result.commit.decisionEvents)).not.toContain("CUSTOMER_URL");
   });
 
+  it.each([
+    "ch\u1ecb ch\u1ecdn m\u1eabu 1?",
+    "size 2?",
+    "ch\u1ecb ch\u1ecdn ph\u01b0\u01a1ng \u00e1n 2#",
+  ])("keeps ordinary numeric questions on the normal production path: %s", async (text) => {
+    const result = await runTurn({
+      text,
+      policy: policy("STRICT_BLOCK_ALL"),
+    });
+    expect(result.draftCustomerUrlExplanation).not.toHaveBeenCalled();
+    expect(JSON.stringify(result.commit.decisionEvents)).not.toContain("CUSTOMER_URL");
+  });
+
   it("resolves an approved product URL offline through the production BF-02 wrapper", async () => {
     const result = await runTurn({
       text: "please check https://www.lanadesign.vn/products/SD398?utm_source=chat#detail",
