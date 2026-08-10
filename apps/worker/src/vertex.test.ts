@@ -5,6 +5,7 @@ import {
   createServiceAccountAssertion,
   GROUNDED_SYSTEM_INSTRUCTION,
   GROUNDED_DRAFT_SYSTEM_INSTRUCTION,
+  CUSTOMER_URL_EXPLANATION_SYSTEM_INSTRUCTION,
   MULTI_PRODUCT_CLARIFICATION_SYSTEM_INSTRUCTION,
   SIZE_CLAIM_REPAIR_SYSTEM_INSTRUCTION,
   SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
@@ -247,6 +248,43 @@ describe("Vertex shadow client", () => {
       ["SD375", "SD398"],
       "prompt-v1",
     )).rejects.toThrow("VERTEX_SCHEMA_INVALID");
+  });
+
+  it("drafts URL explanations from sanitized class and bounded reason codes only", async () => {
+    const requests: unknown[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      requests.push(JSON.parse(String(init?.body)));
+      return generatedReplyResponse("Please send the product code or an image so I can check it.");
+    }) as unknown as typeof fetch;
+    const result = await modelWith(fetchMock).draftCustomerUrlExplanation(
+      "UNSUPPORTED_EXTERNAL",
+      ["CUSTOMER_URL_UNSUPPORTED_EXTERNAL", "https://secret.example/token"],
+      "prompt-v1",
+    );
+    expect(result.proposal).toMatchObject({
+      intent: "customer_url_unsupported",
+      action: "REPLY",
+      productId: null,
+      attachments: [],
+      protectedClaimIds: [],
+      businessFactQuery: { intent: "NONE" },
+    });
+    const request = requests[0] as {
+      systemInstruction: { parts: Array<{ text: string }> };
+      contents: Array<{ parts: Array<{ text: string }> }>;
+      generationConfig: { responseSchema: { required: string[] } };
+      tools?: unknown;
+    };
+    expect(request.systemInstruction.parts[0]?.text).toBe(CUSTOMER_URL_EXPLANATION_SYSTEM_INSTRUCTION);
+    expect(request.generationConfig.responseSchema.required).toEqual(["reply"]);
+    expect(request.tools).toBeUndefined();
+    const prompt = request.contents[0]?.parts[0]?.text ?? "";
+    expect(prompt).toContain("CUSTOMER_URL_CLASS=UNSUPPORTED_EXTERNAL");
+    expect(prompt).toContain('["CUSTOMER_URL_UNSUPPORTED_EXTERNAL"]');
+    expect(prompt).not.toContain("secret.example");
   });
   it("normalizes literal newline escapes in an n8n private key", () => {
     const assertion = createServiceAccountAssertion(

@@ -36,6 +36,57 @@ function job(): ShadowEvaluationJob {
 }
 
 describe("Phase 4 shadow runner", () => {
+  it("redacts customer URLs from every shadow model context", async () => {
+    const rawUrl = "user@example.com:?token=sentinel";
+    const urlJob = {
+      ...job(),
+      context: [{
+        ...job().context[0]!,
+        text: `Xin xem ${rawUrl}; chị chọn mẫu 1/2`,
+      }],
+    };
+    const store = {
+      claimNext: vi.fn(async () => urlJob),
+      complete: vi.fn(async () => undefined),
+      fail: vi.fn(async () => undefined),
+    } as unknown as ShadowEvaluationStore;
+    const generate = vi.fn(async (_context: readonly unknown[]) => ({
+      proposal: {
+        schemaVersion: 1 as const,
+        intent: "other",
+        conversationStage: "consulting",
+        productId: null,
+        action: "HANDOFF" as const,
+        reply: "",
+        attachments: [],
+        handoffReason: "BUSINESS_FACT_REQUIRED",
+        businessFactQuery: {
+          intent: "NONE" as const,
+          offerType: null,
+          color: null,
+          size: null,
+          deliveryRegion: null,
+        },
+      },
+      modelVersion: "gemini-test",
+      latencyMs: 1,
+      tokenUsage: {},
+    }));
+    const runner = new Phase4ShadowRunner(
+      store,
+      { generate } as never,
+      { modelName: "gemini-test" },
+    );
+
+    await expect(runner.processOne()).resolves.toBe(true);
+    const serializedContext = JSON.stringify(generate.mock.calls[0]?.[0]);
+    expect(serializedContext).toContain("[CUSTOMER_URL]");
+    expect(serializedContext).not.toContain(rawUrl);
+    expect(serializedContext).not.toContain("secret");
+    expect(serializedContext).not.toContain("sentinel");
+    expect(serializedContext).toContain("chị chọn mẫu 1/2");
+  });
+
   it("stores a guarded structured proposal without authorizing send", async () => {
     const complete = vi.fn(async (
       _evaluationId: string,
@@ -288,6 +339,7 @@ describe("Phase 4 shadow runner", () => {
   });
 
   it("passes the persisted verified envelope to Judge v2 in DRY_RUN", async () => {
+    const rawUrl = "user@127:#judge-sentinel";
     const completeComparison = vi.fn(async (
       _comparisonJob: unknown,
       _similarity: number,
@@ -320,11 +372,11 @@ describe("Phase 4 shadow runner", () => {
       evaluationId: "eval-v2",
       claimToken: "claim-v2",
       proposalReply: "Dạ Set SQ149 có giá 699k ạ",
-      actualOutboundText: "Dạ Set SQ149 có giá 699k ạ",
+      actualOutboundText: `Dạ Set SQ149 có giá 699k ạ ${rawUrl}`,
       actualOutboundCount: 1,
-      context: job().context,
-      proposalSummary: { productId: "SQ149", action: "REPLY" },
-      guardOutcome: { action: "REPLY", blockedReasonCodes: [] },
+      context: [{ ...job().context[0]!, text: `Xin xem ${rawUrl}; chị chọn mẫu 1/2` }],
+      proposalSummary: { productId: "SQ149", action: "REPLY", reply: rawUrl },
+      guardOutcome: { action: "REPLY", blockedReasonCodes: [], detail: rawUrl },
       businessFactEnvelope: verifiedEnvelope,
     };
     const store = {
@@ -368,12 +420,14 @@ describe("Phase 4 shadow runner", () => {
 
     await expect(runner.processComparisonOne()).resolves.toBe(true);
     expect(model.judgeSalesReplyV2).toHaveBeenCalledWith(
-      comparison.context,
-      comparison.actualOutboundText,
+      [{ ...comparison.context[0]!, text: "Xin xem [CUSTOMER_URL]; chị chọn mẫu 1/2" }],
+      "Dạ Set SQ149 có giá 699k ạ [CUSTOMER_URL]",
       verifiedEnvelope,
-      comparison.proposalSummary,
-      comparison.guardOutcome,
+      { productId: "SQ149", action: "REPLY", reply: "[CUSTOMER_URL]" },
+      { action: "REPLY", blockedReasonCodes: [], detail: "[CUSTOMER_URL]" },
     );
+    expect(JSON.stringify(model.judgeSalesReplyV2.mock.calls[0])).not.toContain("secret");
+    expect(JSON.stringify(model.judgeSalesReplyV2.mock.calls[0])).not.toContain("judge-sentinel");
     expect(model.judgeSalesReply).not.toHaveBeenCalled();
     expect(completeComparison.mock.calls[0]?.[2]).toMatchObject({
       schemaVersion: 2,

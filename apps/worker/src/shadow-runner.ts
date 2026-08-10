@@ -11,6 +11,7 @@ import {
 } from "@lana/business-tools";
 import { BusinessFactEnvelopeV1Schema, type AgentProposalV1, type BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { redactAnalyticsMessage, type ShadowContextMessage, type ShadowEvaluationStore } from "@lana/database";
+import { redactCustomerUrlsForModel } from "./customer-url-policy.js";
 import { VertexShadowError, type VertexShadowModel } from "./vertex.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 
@@ -104,6 +105,22 @@ export class Phase4ShadowRunner {
     return [...context].reverse().find((message) => message.direction === "INBOUND" && message.text.trim())?.text.trim() ?? "";
   }
 
+  private modelContext(context: readonly ShadowContextMessage[]): ShadowContextMessage[] {
+    return context.map((message) => ({
+      ...message,
+      text: redactCustomerUrlsForModel(message.text),
+    }));
+  }
+
+  private modelEvidence(value: unknown): unknown {
+    if (typeof value === "string") return redactCustomerUrlsForModel(value);
+    if (Array.isArray(value)) return value.map((item) => this.modelEvidence(item));
+    if (typeof value !== "object" || value === null) return value;
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, this.modelEvidence(item)]),
+    );
+  }
+
   private productCodes(text: string): string[] {
     return [...new Set((text.toUpperCase().match(/\b[A-Z]{1,4}\s*[-_]?\s*\d{2,6}\b/gu) ?? [])
       .map((value) => value.replace(/[\s_-]+/gu, ""))
@@ -116,10 +133,11 @@ export class Phase4ShadowRunner {
   ): Promise<StableProductDocument | null> {
     if (!this.productSearch) return null;
     const latest = this.latestCustomerText(context);
+    const safeLatest = redactCustomerUrlsForModel(latest);
     const queries = [
       proposal.productId,
-      ...this.productCodes(latest),
-      latest,
+      ...this.productCodes(safeLatest),
+      safeLatest.includes("[CUSTOMER_URL]") ? null : safeLatest,
     ].filter((value): value is string => typeof value === "string" && value.trim().length > 0);
     for (const query of [...new Set(queries)]) {
       const result = await this.productSearch.searchText(query);
@@ -162,7 +180,8 @@ export class Phase4ShadowRunner {
     const job = await this.store.claimNext();
     if (!job) return false;
     try {
-      const initial = await this.model.generate(job.context, job.promptVersion);
+      const modelContext = this.modelContext(job.context);
+      const initial = await this.model.generate(modelContext, job.promptVersion);
       const resolvedProduct = await this.resolveProduct(job.context, initial.proposal);
       const initialProposal = this.productSearch
         ? { ...initial.proposal, productId: resolvedProduct?.productId ?? null }
@@ -190,7 +209,7 @@ export class Phase4ShadowRunner {
           if (useGroundedDraft && resolvedProduct !== null) {
             try {
               grounded = await this.model.groundDraftWithFacts(
-                job.context,
+                modelContext,
                 initialProposal,
                 facts,
                 {
@@ -209,7 +228,7 @@ export class Phase4ShadowRunner {
           }
           const legacyGrounded = !useGroundedDraft
             ? await this.model.groundWithFacts(
-                job.context,
+                modelContext,
                 initialProposal,
                 facts,
                 job.promptVersion,
@@ -353,17 +372,19 @@ export class Phase4ShadowRunner {
       const parsedFacts = BusinessFactEnvelopeV1Schema.safeParse(
         job.businessFactEnvelope,
       );
+      const modelContext = this.modelContext(job.context);
+      const modelActualOutboundText = redactCustomerUrlsForModel(job.actualOutboundText);
       const assessment = this.options.judgeV2Enabled
         ? await this.model.judgeSalesReplyV2(
-            job.context,
-            job.actualOutboundText,
+            modelContext,
+            modelActualOutboundText,
             parsedFacts.success ? parsedFacts.data : null,
-            job.proposalSummary,
-            job.guardOutcome,
+            this.modelEvidence(job.proposalSummary),
+            this.modelEvidence(job.guardOutcome),
           )
         : await this.model.judgeSalesReply(
-            job.context,
-            job.actualOutboundText,
+            modelContext,
+            modelActualOutboundText,
           );
       const improvedReplyGuard = assessment.schemaVersion === 2
         ? guardAgentProposal({

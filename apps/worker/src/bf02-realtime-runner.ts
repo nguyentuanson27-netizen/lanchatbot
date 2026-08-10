@@ -195,6 +195,10 @@ function wrapModel(
     wrapped.draftMultiProductClarification =
       model.draftMultiProductClarification.bind(model);
   }
+  if (model.draftCustomerUrlExplanation) {
+    wrapped.draftCustomerUrlExplanation =
+      model.draftCustomerUrlExplanation.bind(model);
+  }
   return wrapped;
 }
 

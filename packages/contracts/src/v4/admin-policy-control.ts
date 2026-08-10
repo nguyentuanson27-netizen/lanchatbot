@@ -36,6 +36,12 @@ export type MultiProductResolutionPolicyV1 = z.infer<
   typeof MultiProductResolutionPolicyV1Schema
 >;
 
+export const CustomerUrlPolicyV1Schema = z.enum([
+  "STRICT_BLOCK_ALL",
+  "CLASSIFIED_ALLOWLIST_V1",
+]);
+export type CustomerUrlPolicyV1 = z.infer<typeof CustomerUrlPolicyV1Schema>;
+
 type LegacyClosingStrategyAdminContentV1 = z.infer<
   typeof LegacyClosingStrategyAdminContentV1Schema
 >;
@@ -46,6 +52,7 @@ export type ClosingStrategyAdminContentV1 =
     replyReconciliationFallbackText?: string;
     mediaPartialResolutionPolicy?: MediaPartialResolutionPolicyV1;
     multiProductResolutionPolicy?: MultiProductResolutionPolicyV1;
+    customerUrlPolicy?: CustomerUrlPolicyV1;
   }>;
 
 const ClosingStrategyIncidentExtensionV1Schema = z.object({
@@ -53,6 +60,7 @@ const ClosingStrategyIncidentExtensionV1Schema = z.object({
   replyReconciliationFallbackText: z.string().trim().min(1).max(500).optional(),
   mediaPartialResolutionPolicy: MediaPartialResolutionPolicyV1Schema.optional(),
   multiProductResolutionPolicy: MultiProductResolutionPolicyV1Schema.optional(),
+  customerUrlPolicy: CustomerUrlPolicyV1Schema.optional(),
 }).strict().superRefine((value, context) => {
   if (value.replyReconciliationPolicy === undefined) {
     if (value.replyReconciliationFallbackText !== undefined) {
@@ -118,6 +126,10 @@ export const ClosingStrategyAdminContentV1Schema = z.unknown().transform(
       extensionInput.multiProductResolutionPolicy = record.multiProductResolutionPolicy;
       delete record.multiProductResolutionPolicy;
     }
+    if (Object.prototype.hasOwnProperty.call(record, "customerUrlPolicy")) {
+      extensionInput.customerUrlPolicy = record.customerUrlPolicy;
+      delete record.customerUrlPolicy;
+    }
 
     const legacy = LegacyClosingStrategyAdminContentV1Schema.safeParse(record);
     if (!legacy.success) {
@@ -152,6 +164,9 @@ export const ClosingStrategyAdminContentV1Schema = z.unknown().transform(
             multiProductResolutionPolicy:
               extension.data.multiProductResolutionPolicy,
           }),
+      ...(extension.data.customerUrlPolicy === undefined
+        ? {}
+        : { customerUrlPolicy: extension.data.customerUrlPolicy }),
     };
   },
 ) as z.ZodType<ClosingStrategyAdminContentV1>;

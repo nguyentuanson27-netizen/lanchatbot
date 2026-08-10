@@ -346,6 +346,12 @@ export const MULTI_PRODUCT_CLARIFICATION_SYSTEM_INSTRUCTION = [
   "Reply chi gom mot cau hoi tieng Viet co dau, ngan gon, toi da 500 ky tu, de khach chon mot ma.",
   "SAFE_REASON_CODES_JSON chi mo ta loi guard o lan truoc; khong duoc bien reason code thanh noi dung cho khach.",
 ].join("\n");
+export const CUSTOMER_URL_EXPLANATION_SYSTEM_INSTRUCTION = [
+  "Ban chi soan mot cau giai thich ngan bang tieng Viet co dau khi he thong khong ho tro mo lien ket ben ngoai. Tra JSON chi co truong reply.",
+  "Khong lap lai, suy doan hoac tao URL. Khong nhac gia, ton kho, size, giao hang, phi ship, khuyen mai, san pham cu the, thanh toan, so dien thoai hay dia chi.",
+  "Chi de nghi khach gui ma san pham hoac anh. Khong yeu cau thong tin dat hang va khong tu quyet dinh handoff hay bat ky side effect nao.",
+  "CUSTOMER_URL_CLASS va SAFE_REASON_CODES_JSON la du lieu he thong da loc; khong bien reason code thanh noi dung ky thuat cho khach.",
+].join("\n");
 export const GROUNDED_DRAFT_SYSTEM_INSTRUCTION = [
   "VAI TRO",
   "Ban chi soan phan dien dat tu van cho La.na Design va phai tra JSON dung schema.",
@@ -577,6 +583,14 @@ function parseCandidateText(body: unknown): { text: string; modelVersion: string
 }
 
 const MULTI_PRODUCT_CLARIFICATION_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  required: ["reply"],
+  properties: {
+    reply: { type: "STRING" },
+  },
+};
+
+const CUSTOMER_URL_EXPLANATION_RESPONSE_SCHEMA = {
   type: "OBJECT",
   required: ["reply"],
   properties: {
@@ -1126,6 +1140,54 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
           schemaVersion: 1,
           intent: "multi_product_selection",
           conversationStage: "PRODUCT_MATCHED",
+          productId: null,
+          action: "REPLY",
+          reply: (payload as { reply: string }).reply,
+          attachments: [],
+          handoffReason: null,
+          protectedClaimIds: [],
+          businessFactQuery: {
+            intent: "NONE",
+            offerType: null,
+            color: null,
+            size: null,
+            deliveryRegion: null,
+          },
+        };
+      },
+    );
+  }
+
+  async draftCustomerUrlExplanation(
+    urlClass: "APPROVED_FIRST_PARTY_PRODUCT" | "APPROVED_SHOP_CDN" |
+      "UNSUPPORTED_EXTERNAL",
+    reasonCodes: readonly string[],
+    promptVersion: string,
+  ): Promise<VertexShadowResult> {
+    const safeReasonCodes = reasonCodes
+      .filter((reasonCode) => /^CUSTOMER_URL_[A-Z0-9_]{1,96}$/u.test(reasonCode))
+      .slice(0, 8);
+    return this.structuredAgentRequest(
+      CUSTOMER_URL_EXPLANATION_SYSTEM_INSTRUCTION,
+      [
+        `PROMPT_VERSION=${promptVersion}`,
+        `CUSTOMER_URL_CLASS=${urlClass}`,
+        "<SAFE_REASON_CODES_JSON>",
+        JSON.stringify(safeReasonCodes),
+        "</SAFE_REASON_CODES_JSON>",
+      ].join("\n"),
+      CUSTOMER_URL_EXPLANATION_RESPONSE_SCHEMA,
+      (payload) => {
+        if (
+          typeof payload !== "object" || payload === null ||
+          Array.isArray(payload) || Object.keys(payload).length !== 1 ||
+          !Object.prototype.hasOwnProperty.call(payload, "reply") ||
+          typeof (payload as { reply?: unknown }).reply !== "string"
+        ) return null;
+        return {
+          schemaVersion: 1,
+          intent: "customer_url_unsupported",
+          conversationStage: "DISCOVERY",
           productId: null,
           action: "REPLY",
           reply: (payload as { reply: string }).reply,
