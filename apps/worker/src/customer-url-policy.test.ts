@@ -347,6 +347,14 @@ describe("BF-08 classified customer URL policy", () => {
       },
     };
     expect(verifyCustomerUrlExplanationProposal(proposal)).toEqual({ accepted: true, reasonCodes: [] });
+    expect(verifyCustomerUrlExplanationProposal({
+      ...proposal,
+      reply: "I cannot check that link. Please send the product code or an image so I can check it.",
+    })).toEqual({ accepted: true, reasonCodes: [] });
+    expect(verifyCustomerUrlExplanationProposal({
+      ...proposal,
+      reply: "Em khong the kiem tra lien ket nay. Chi gui ma san pham hoac anh de em kiem tra.",
+    })).toEqual({ accepted: true, reasonCodes: [] });
     expect(verifyCustomerUrlExplanationProposal({ ...proposal, reply: "Open https://example.com for price 699k." })).toEqual({
       accepted: false,
       reasonCodes: expect.arrayContaining([
@@ -373,6 +381,8 @@ describe("BF-08 classified customer URL policy", () => {
       { ...proposal, reply: "I cannot safely open that link. Please send the product code or an image. Access it." },
       { ...proposal, reply: "I cannot safely open that link, but access it after sending the product code or image." },
       { ...proposal, reply: "I cannot safely open that link; then visit it after sending the product code or image." },
+      { ...proposal, reply: "I cannot check that link. Please send the product code or an image. Please check that link." },
+      { ...proposal, reply: "Em khong the kiem tra link nay. Chi gui ma san pham hoac anh. Kiem tra link nay." },
       { ...proposal, reply: "This is our official link. Please send the product code." },
       { ...proposal, reply: "Liên kết này an toàn, chị cứ mở nhé. Chị cũng có thể gửi mã sản phẩm." },
       { ...proposal, reply: "I cannot open that link. Please send the product code. This dress costs less than usual and can ship promptly." },

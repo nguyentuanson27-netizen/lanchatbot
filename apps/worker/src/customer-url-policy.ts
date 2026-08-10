@@ -403,15 +403,28 @@ export function verifyCustomerUrlExplanationProposal(
   const requestsSafeInput =
     /\b(?:product code|image)\b/iu.test(foldedReply) ||
     /\b(?:ma san pham|hinh anh|anh)\b/iu.test(foldedReply);
+  const clausePrefixBefore = (index: number): string =>
+    foldedReply.slice(0, index).split(
+      /[,.!?;]|\b(?:but|however|then|nhung|tuy nhien|sau do)\b/giu,
+    ).at(-1) ?? "";
+  const isNegatedAction = (clausePrefix: string): boolean =>
+    /\b(?:cannot|can't|unable(?: to)?|do not|don't|not able to|khong the|chua the|khong ho tro)\b.{0,48}$/iu
+      .test(clausePrefix);
   const hasAffirmativeLinkAction = [...foldedReply.matchAll(
     /\b(?:open|access|click|visit|follow|mo|bam|truy cap)\b/giu,
   )].some((match) => {
-    const prefix = foldedReply.slice(0, match.index);
-    const clausePrefix = prefix.split(
-      /[,.!?;]|\b(?:but|however|then|nhung|tuy nhien|sau do)\b/giu,
-    ).at(-1) ?? "";
-    return !/\b(?:cannot|can't|unable(?: to)?|do not|don't|not able to|khong the|chua the|khong ho tro)\b.{0,48}$/iu
-      .test(clausePrefix);
+    return !isNegatedAction(clausePrefixBefore(match.index));
+  });
+  const hasAffirmativeCustomerCheck = [...foldedReply.matchAll(
+    /\b(?:check|kiem tra)\b/giu,
+  )].some((match) => {
+    const clausePrefix = clausePrefixBefore(match.index);
+    if (isNegatedAction(clausePrefix)) return false;
+    const botDirected = /\b(?:(?:so|then)\s+)?(?:i|we)\s*(?:can|will|may)?\s*$/iu
+        .test(clausePrefix) ||
+      /\b(?:de\s+)?(?:em|toi|chung toi)\s*(?:co the|se)?\s*$/iu
+        .test(clausePrefix);
+    return !botDirected;
   });
   const givesUnsafeLinkGuidance =
     /\b(?:this|the) link (?:is|looks|appears|seems) (?:safe|official|trusted|legitimate)\b/iu.test(foldedReply) ||
@@ -420,7 +433,7 @@ export function verifyCustomerUrlExplanationProposal(
     /\b(?:cu|hay|vui long|chi co the) (?:mo|bam|truy cap)\b/iu.test(foldedReply) ||
     /\b(?:bam vao|truy cap) (?:link|lien ket)\b/iu.test(foldedReply) ||
     /\b(?:safe|official|trusted|legitimate) link\b/iu.test(foldedReply) ||
-    hasAffirmativeLinkAction;
+    hasAffirmativeLinkAction || hasAffirmativeCustomerCheck;
   if (!statesSafeLimitation || !requestsSafeInput || givesUnsafeLinkGuidance) {
     reasons.push("CUSTOMER_URL_EXPLANATION_SAFETY_INVALID");
   }

@@ -481,7 +481,7 @@ describe("BF-08 production-wrapper customer URL policy", () => {
       text: "please check https://example.com/product",
       policy: policy("CLASSIFIED_ALLOWLIST_V1"),
       explanationReplies: [
-        "I cannot safely open that link. Please send the product code or an image. Open it.",
+        "I cannot check that link. Please send the product code or an image. Please check that link.",
         "I cannot safely open that link. Please send the product code or an image so I can check it.",
       ],
     });
@@ -492,7 +492,7 @@ describe("BF-08 production-wrapper customer URL policy", () => {
       ]),
     );
     expect(result.commit.metaPlan).toBeDefined();
-    expect(JSON.stringify(result.commit.metaPlan)).not.toContain("Open it");
+    expect(JSON.stringify(result.commit.metaPlan)).not.toContain("Please check that link");
   });
 
   it("uses the deterministic safe fallback after two contradictory explanations", async () => {
