@@ -4,7 +4,7 @@ set -euo pipefail
 readonly EXPECTED_RELEASE_TAG="20260810-bf03-wave-c-r5.5"
 readonly IMPLEMENTATION_COMMIT="6c8de97c29e30ac428f742fd92a951c72caee9f7"
 readonly EXPECTED_REALTIME_IMAGE="lana-chatbot-app:bf03-wave-c-r5.5"
-readonly EXPECTED_MANIFEST_SHA256="7fd68c37f651535a979a5c4c278ff2b4f9077b5e61a094837ab9719e5ba060ed"
+readonly EXPECTED_MANIFEST_SHA256="0afa947abc1d6784c73bb9f9bb90b02a319ee4bc839966a6acda4b57ea31c8e0"
 readonly EXPECTED_COMPOSE_SHA256="e59ab08b6ad42c2d1d2e3a5a11ce9e34a935921c866917b0d23b6c3c5d69ac33"
 readonly EXPECTED_LATEST_MIGRATION="0031_admin_policy_safe_deletion"
 readonly EXPECTED_PAGE_ID="1198992073286645"
@@ -15,7 +15,7 @@ readonly EXPECTED_ROLLBACK_REALTIME_IMAGE="lana-chatbot-app:bf01-reconcile-final
 readonly EXPECTED_ROLLBACK_REALTIME_IMAGE_ID="sha256:2c34155c8ddf51014801e2dd0424e4ca14e0bb6a5d0c055cd657a126c1db0b6e"
 readonly EXPECTED_ROLLBACK_REALTIME_REVISION="a63a3ccbd7dc2b3061cf96d56c3fa3e19c26851d"
 readonly EXPECTED_ROLLBACK_REALTIME_RELEASE_ID="20260809-bf01-reconcile-final-reply-r5.4"
-readonly EXPECTED_CANDIDATE_TAG="20260810-bf03-wave-c-r5.5-review-candidate.5"
+readonly EXPECTED_CANDIDATE_TAG="20260810-bf03-wave-c-r5.5-review-candidate.6"
 readonly EXPECTED_ORIGIN_SSH="git@github.com:nguyentuanson27-netizen/lanchatbot.git"
 readonly EXPECTED_ORIGIN_HTTPS="https://github.com/nguyentuanson27-netizen/lanchatbot.git"
 

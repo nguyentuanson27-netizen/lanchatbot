@@ -44,20 +44,23 @@ const singletonKinds = new Set(['SHOP_POLICY', 'OFFER_POLICY', 'CLOSING_STRATEGY
 const kindCounts = new Map();
 let previousScope = '';
 const seenScopes = new Set();
+const seenVersionIds = new Set();
 for (const item of publishedBundle) {
-  const scope = `${item?.artifactKind ?? ''}\u0000${item?.artifactKey ?? ''}\u0000${item?.pointerId ?? ''}`;
+  const scope = `${item?.artifactKind ?? ''}\u0000${item?.artifactKey ?? ''}`;
   if (!allowedKinds.has(item?.artifactKind) ||
       typeof item?.artifactKey !== 'string' || item.artifactKey.length === 0 ||
+      item?.versionArtifactKind !== item.artifactKind || item?.versionArtifactKey !== item.artifactKey ||
       !uuid.test(item?.pointerId ?? '') || !uuid.test(item?.versionId ?? '') ||
       !Number.isInteger(item?.pointerRevision) || item.pointerRevision < 0 ||
       !Number.isInteger(item?.versionNumber) || item.versionNumber < 1 ||
       !Number.isInteger(item?.versionRevision) || item.versionRevision < 0 ||
       !/^sha256:[a-f0-9]{64}$/u.test(item?.contentHash ?? '') || item?.lifecycle !== 'PUBLISHED' ||
-      scope <= previousScope || seenScopes.has(scope)) {
+      scope <= previousScope || seenScopes.has(scope) || seenVersionIds.has(item.versionId)) {
     throw new Error('OPERATIONAL_STATE_PUBLISHED_BUNDLE_IDENTITY_INVALID');
   }
   previousScope = scope;
   seenScopes.add(scope);
+  seenVersionIds.add(item.versionId);
   const kindCount = (kindCounts.get(item.artifactKind) ?? 0) + 1;
   kindCounts.set(item.artifactKind, kindCount);
   if (singletonKinds.has(item.artifactKind) && kindCount > 1) {

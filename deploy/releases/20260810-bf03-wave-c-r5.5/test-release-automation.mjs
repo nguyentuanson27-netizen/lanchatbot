@@ -114,19 +114,22 @@ try {
         {
           artifactKey: 'lana.closing-strategy', artifactKind: 'CLOSING_STRATEGY',
           pointerId: '11111111-1111-4111-8111-111111111111', pointerRevision: 1,
-          versionId: '22222222-2222-4222-8222-222222222222', versionNumber: 1, versionRevision: 4,
+          versionId: '22222222-2222-4222-8222-222222222222', versionArtifactKey: 'lana.closing-strategy',
+          versionArtifactKind: 'CLOSING_STRATEGY', versionNumber: 1, versionRevision: 4,
           contentHash: aaaa, lifecycle: 'PUBLISHED',
         },
         {
           artifactKey: 'lana.offer-policy', artifactKind: 'OFFER_POLICY',
           pointerId: '33333333-3333-4333-8333-333333333333', pointerRevision: 2,
-          versionId: '44444444-4444-4444-8444-444444444444', versionNumber: 1, versionRevision: 3,
+          versionId: '44444444-4444-4444-8444-444444444444', versionArtifactKey: 'lana.offer-policy',
+          versionArtifactKind: 'OFFER_POLICY', versionNumber: 1, versionRevision: 3,
           contentHash: bbbb, lifecycle: 'PUBLISHED',
         },
         {
           artifactKey: 'lana.shop-policy', artifactKind: 'SHOP_POLICY',
           pointerId: '55555555-5555-4555-8555-555555555555', pointerRevision: 3,
-          versionId: '66666666-6666-4666-8666-666666666666', versionNumber: 1, versionRevision: 2,
+          versionId: '66666666-6666-4666-8666-666666666666', versionArtifactKey: 'lana.shop-policy',
+          versionArtifactKind: 'SHOP_POLICY', versionNumber: 1, versionRevision: 2,
           contentHash: cccc, lifecycle: 'PUBLISHED',
         },
       ],
@@ -148,6 +151,35 @@ try {
   const operationalPath = join(scratch, 'operational.json');
   writeFileSync(operationalPath, JSON.stringify(operational));
   if (run('validate-operational-state.mjs', [operationalPath]).status !== 0) throw new Error('valid operational state rejected');
+  operational.policy.publishedBundle[1].versionArtifactKind = 'SHOP_POLICY';
+  writeFileSync(operationalPath, JSON.stringify(operational));
+  if (run('validate-operational-state.mjs', [operationalPath]).status === 0) {
+    throw new Error('pointer/version artifact kind mismatch accepted');
+  }
+  operational.policy.publishedBundle[1].versionArtifactKind = 'OFFER_POLICY';
+  operational.policy.publishedBundle[2].versionId = operational.policy.publishedBundle[1].versionId;
+  writeFileSync(operationalPath, JSON.stringify(operational));
+  if (run('validate-operational-state.mjs', [operationalPath]).status === 0) {
+    throw new Error('duplicate published policy version identity accepted');
+  }
+  operational.policy.publishedBundle[2].versionId = '66666666-6666-4666-8666-666666666666';
+  const duplicateSizeChartScope = {
+    artifactKey: 'lana.size-chart.alpha', artifactKind: 'SIZE_CHART',
+    pointerId: '77777777-7777-4777-8777-777777777777', pointerRevision: 1,
+    versionId: '88888888-8888-4888-8888-888888888888', versionArtifactKey: 'lana.size-chart.alpha',
+    versionArtifactKind: 'SIZE_CHART', versionNumber: 1, versionRevision: 1,
+    contentHash: aaaa, lifecycle: 'PUBLISHED',
+  };
+  operational.policy.publishedBundle.splice(3, 0, duplicateSizeChartScope, {
+    ...duplicateSizeChartScope,
+    pointerId: '99999999-9999-4999-8999-999999999999',
+    versionId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+  });
+  writeFileSync(operationalPath, JSON.stringify(operational));
+  if (run('validate-operational-state.mjs', [operationalPath]).status === 0) {
+    throw new Error('duplicate logical published policy scope accepted');
+  }
+  operational.policy.publishedBundle.splice(3, 2);
   operational.policy.waveCFieldsAbsent = false;
   writeFileSync(operationalPath, JSON.stringify(operational));
   if (run('validate-operational-state.mjs', [operationalPath]).status === 0) throw new Error('active Wave-C policy accepted');
@@ -282,7 +314,7 @@ try {
   }
 
   requireText('common.sh', /EXPECTED_RELEASE_TAG="20260810-bf03-wave-c-r5\.5"/u, 'release identity not pinned');
-  requireText('common.sh', /EXPECTED_CANDIDATE_TAG="20260810-bf03-wave-c-r5\.5-review-candidate\.5"/u, 'reviewed candidate ordinal not pinned');
+  requireText('common.sh', /EXPECTED_CANDIDATE_TAG="20260810-bf03-wave-c-r5\.5-review-candidate\.6"/u, 'reviewed candidate ordinal not pinned');
   requireText('common.sh', /EXPECTED_ROLLBACK_REALTIME_IMAGE_ID="sha256:2c34155c8ddf51014801e2dd0424e4ca14e0bb6a5d0c055cd657a126c1db0b6e"/u, 'rollback image ID not pinned');
   requireText('common.sh', /EXPECTED_ROLLBACK_REALTIME_REVISION="a63a3ccbd7dc2b3061cf96d56c3fa3e19c26851d"/u, 'rollback revision not pinned');
   requireText('common.sh', /final release merge parents mismatch/u, 'exact final merge-parent gate missing');
