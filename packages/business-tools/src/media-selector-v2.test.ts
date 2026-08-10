@@ -360,6 +360,47 @@ describe("Media selector V2", () => {
       product: facts(fullLooks), kind: "FULL_LOOK", now: NOW, unavailableFallback,
     });
     expect(result.selection.selected).toHaveLength(3);
+    expect(result.selection.selected.map(({ assetId }) => assetId)).toEqual([
+      "look-0",
+      "look-1",
+      "look-2",
+    ]);
+  });
+
+  it("deduplicates exact and similarity assets without changing stable exact ordering", () => {
+    const first = asset("first", { view: "FULL_LOOK", sortOrder: 1 });
+    const shared = asset("shared", { view: "FULL_LOOK", sortOrder: 2 });
+    const result = selectProductMediaV2({
+      product: facts([shared, first]),
+      kind: "FULL_LOOK",
+      maxAssets: 3,
+      now: NOW,
+      unavailableFallback,
+      similarityMatches: [{ productId: "SV100", asset: shared, score: 0.99 }],
+    });
+    expect(result.selection.selected.map(({ assetId }) => assetId)).toEqual([
+      "first",
+      "shared",
+    ]);
+    expect(result.selectedVia).toEqual(["EXACT_METADATA", "EXACT_METADATA"]);
+  });
+
+  it("keeps unverified full-look media out of otherwise eligible selections", () => {
+    const approved = asset("approved-look", { view: "FULL_LOOK", sortOrder: 2 });
+    const draft = asset("draft-look", {
+      view: "FULL_LOOK",
+      sortOrder: 1,
+      verified: false,
+    });
+    const result = selectProductMediaV2({
+      product: facts([draft, approved]),
+      kind: "FULL_LOOK",
+      now: NOW,
+      unavailableFallback,
+    });
+    expect(result.selection.selected.map(({ assetId }) => assetId)).toEqual([
+      "approved-look",
+    ]);
   });
 
   it("rejects unverified assets and invalid fallback evidence", () => {

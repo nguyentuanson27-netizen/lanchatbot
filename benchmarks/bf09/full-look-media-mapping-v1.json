@@ -1,0 +1,52 @@
+{
+  "incident": {
+    "name": "SD375 AO plus QUAN images remain eligible full looks",
+    "productId": "SD375",
+    "compositionRoles": ["TOP", "PANTS"],
+    "images": [
+      { "id": "component-top", "partsVisible": ["AO"], "angle": "FRONT", "sortOrder": 0 },
+      { "id": "look-2", "partsVisible": ["QUAN", "AO"], "angle": "SIDE", "sortOrder": 2 },
+      { "id": "look-1", "partsVisible": ["AO", "QUAN"], "angle": "FRONT", "sortOrder": 1 },
+      { "id": "look-4", "partsVisible": ["AO", "QUAN"], "angle": "BACK", "sortOrder": 4 },
+      { "id": "look-3", "partsVisible": ["FULL_SET", "AO"], "angle": "FRONT", "sortOrder": 3 }
+    ],
+    "expectedSelectedIds": ["look-1", "look-2", "look-3"]
+  },
+  "counterexamples": [
+    {
+      "name": "tag order does not change a complete top and pants composition",
+      "compositionRoles": ["TOP", "PANTS"],
+      "partsVisible": ["QUAN", "AO"],
+      "angle": "FRONT",
+      "expectedDisposition": "FULL_LOOK"
+    },
+    {
+      "name": "closeup remains stronger than a complete component combination",
+      "compositionRoles": ["TOP", "PANTS"],
+      "partsVisible": ["AO", "QUAN"],
+      "angle": "CLOSEUP",
+      "expectedDisposition": "EXCLUDED"
+    },
+    {
+      "name": "top and pants cannot complete a top and skirt composition",
+      "compositionRoles": ["TOP", "SKIRT"],
+      "partsVisible": ["AO", "QUAN"],
+      "angle": "FRONT",
+      "expectedDisposition": "EXCLUDED"
+    },
+    {
+      "name": "two visible components cannot complete a three component composition",
+      "compositionRoles": ["TOP", "SKIRT", "PANTS"],
+      "partsVisible": ["AO", "QUAN"],
+      "angle": "FRONT",
+      "expectedDisposition": "EXCLUDED"
+    },
+    {
+      "name": "top plus accessory remains scoped to the top component",
+      "compositionRoles": ["TOP", "PANTS"],
+      "partsVisible": ["AO", "PHU_KIEN"],
+      "angle": "FRONT",
+      "expectedDisposition": "TOP"
+    }
+  ]
+}

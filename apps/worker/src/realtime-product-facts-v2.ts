@@ -76,45 +76,111 @@ export function productMediaView(
   image: StableProductDocument["images"][number],
 ): ProductMediaAssetV2["view"] {
   if (image.angle === "CLOSEUP") return "CLOSE_UP";
-  if ((image.partsVisible ?? []).some((part) =>
-    ["FULL_SET", "VAY"].includes(normalizeCatalogToken(part))
-  )) return "FULL_LOOK";
+  const parts = new Set((image.partsVisible ?? []).map(normalizeCatalogToken));
+  if (parts.has("FULL_SET") || parts.has("VAY")) {
+    return "FULL_LOOK";
+  }
   if (image.angle === "FRONT" || image.angle === "BACK" || image.angle === "SIDE") {
     return image.angle;
   }
   return "OTHER";
 }
 
+type MediaComponentRole = Extract<
+  ProductFactsV2["bom"]["components"][number]["role"],
+  "TOP" | "SKIRT" | "PANTS"
+>;
+
+const MEDIA_PART_ROLES: Readonly<Record<string, MediaComponentRole>> = {
+  AO: "TOP",
+  CHAN_VAY: "SKIRT",
+  CV: "SKIRT",
+  QUAN: "PANTS",
+};
+
+function isMediaComponentRole(
+  role: ProductFactsV2["bom"]["components"][number]["role"] | undefined,
+): role is MediaComponentRole {
+  return role === "TOP" || role === "SKIRT" || role === "PANTS";
+}
+
+function visibleComponentRoles(parts: ReadonlySet<string>): ReadonlySet<MediaComponentRole> {
+  return new Set([...parts]
+    .map((part) => MEDIA_PART_ROLES[part])
+    .filter((role): role is MediaComponentRole => role !== undefined));
+}
+
+function representsCompleteOfferComposition(
+  parts: ReadonlySet<string>,
+  bom: ProductFactsV2["bom"],
+): boolean {
+  const visibleRoles = visibleComponentRoles(parts);
+  if (visibleRoles.size < 2) return false;
+  const componentsById = new Map(bom.components.map((component) => [
+    component.componentProductId,
+    component,
+  ]));
+
+  return bom.offerCompositions.some((composition) => {
+    const roles = composition.componentProductIds.map((componentProductId) =>
+      componentsById.get(componentProductId)?.role);
+    if (!roles.every(isMediaComponentRole)) {
+      return false;
+    }
+    const compositionRoles = new Set(roles);
+    // Duplicate component roles cannot be proven complete by role-level image tags.
+    if (compositionRoles.size !== composition.componentProductIds.length) return false;
+    return compositionRoles.size === visibleRoles.size
+      && [...compositionRoles].every((role) => visibleRoles.has(role));
+  });
+}
+
+function scopedComponentId(
+  parts: ReadonlySet<string>,
+  bom: ProductFactsV2["bom"],
+): string | null | undefined {
+  const roles = visibleComponentRoles(parts);
+  if (roles.size === 0) return null;
+  // An incomplete multi-component image cannot be represented by one component ID.
+  if (roles.size > 1) return undefined;
+  const role = roles.values().next().value;
+  if (role === undefined) return undefined;
+  const matches = bom.components.filter((component) => component.role === role);
+  return matches.length === 1 ? matches[0]!.componentProductId : undefined;
+}
+
+function projectedMediaView(
+  image: StableProductDocument["images"][number],
+  parts: ReadonlySet<string>,
+  bom: ProductFactsV2["bom"],
+): ProductMediaAssetV2["view"] {
+  const explicitView = productMediaView(image);
+  if (explicitView === "CLOSE_UP" || explicitView === "FULL_LOOK") return explicitView;
+  return representsCompleteOfferComposition(parts, bom) ? "FULL_LOOK" : explicitView;
+}
+
 function mediaAssets(
   product: StableProductDocument,
   bom: ProductFactsV2["bom"],
 ): ProductMediaAssetV2[] {
-  const componentForRole = (
-    role: ProductFactsV2["bom"]["components"][number]["role"],
-  ): string | null => {
-    const matches = bom.components.filter((component) => component.role === role);
-    return matches.length === 1 ? matches[0]!.componentProductId : null;
-  };
-  return product.images.map((image, index) => {
+  return product.images.flatMap((image, index) => {
     const parts = new Set((image.partsVisible ?? []).map(normalizeCatalogToken));
-    const componentProductId = parts.has("AO")
-      ? componentForRole("TOP")
-      : parts.has("CHAN_VAY") || parts.has("CV")
-        ? componentForRole("SKIRT")
-        : parts.has("QUAN")
-          ? componentForRole("PANTS")
-          : null;
-    return {
+    const view = projectedMediaView(image, parts, bom);
+    const componentProductId = view === "FULL_LOOK"
+      ? null
+      : scopedComponentId(parts, bom);
+    if (componentProductId === undefined) return [];
+    return [{
       assetId: `${product.productId}:${index}:${image.url}`.slice(0, 256),
       url: image.url,
       componentProductId,
       purposes: imagePurpose(image),
-      view: productMediaView(image),
+      view,
       sortOrder: image.sortOrder,
       verified: image.metadataVerified === true && image.reviewStatus === "APPROVED",
       sourceContentSha256: image.sourceContentSha256 ?? null,
       reviewStatus: image.reviewStatus ?? null,
-    };
+    }];
   });
 }
 
