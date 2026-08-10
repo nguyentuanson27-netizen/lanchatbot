@@ -19,6 +19,7 @@ outbox_duplicates="$(database_query "SELECT count(*) FROM (SELECT reply_plan_id,
 pancake_active="$(database_query "SELECT count(*) FROM pancake_tag_outbox WHERE status IN ('PENDING','APPLYING','RETRYABLE')")"
 pancake_failed="$(database_query "SELECT count(*) FROM pancake_tag_outbox WHERE status='FAILED_PERMANENT'")"
 pancake_duplicates="$(database_query "SELECT count(*) FROM (SELECT idempotency_key FROM pancake_tag_outbox GROUP BY idempotency_key HAVING count(*)>1) d")"
+published_bundle_hex="$(database_query "SELECT encode(convert_to(COALESCE(jsonb_agg(jsonb_build_object('artifactKey', p.artifact_key, 'artifactKind', p.artifact_kind, 'pointerId', p.pointer_id, 'pointerRevision', p.revision, 'versionId', v.version_id, 'versionNumber', v.version_number, 'versionRevision', v.revision, 'contentHash', v.content_hash, 'lifecycle', v.lifecycle) ORDER BY p.artifact_kind, p.artifact_key, p.pointer_id), '[]'::jsonb)::text, 'UTF8'), 'hex') FROM admin_active_pointers p JOIN admin_artifact_versions v ON v.version_id=p.version_id WHERE p.active AND p.page_id='$EXPECTED_PAGE_ID' AND p.channel='PUBLISHED'")"
 closing="$(database_query "SELECT p.pointer_id, p.revision, v.version_id, v.version_number, v.revision, v.content_hash, COALESCE(v.content->>'replyReconciliationPolicy','OMITTED'), (v.content ? 'mediaPartialResolutionPolicy')::int, (v.content ? 'multiProductResolutionPolicy')::int, (v.content ? 'customerUrlPolicy')::int, (v.content ? 'correctionDialoguePolicy')::int FROM admin_active_pointers p JOIN admin_artifact_versions v ON v.version_id=p.version_id WHERE p.active AND p.page_id='$EXPECTED_PAGE_ID' AND p.channel='PUBLISHED' AND p.artifact_kind='CLOSING_STRATEGY'")"
 test "$(printf '%s\n' "$closing" | wc -l | tr -d ' ')" = "1" || die "published closing strategy must be singular"
 IFS='|' read -r closing_pointer_id closing_pointer_revision closing_version_id closing_version_number closing_version_revision closing_hash reply_policy media_policy multi_policy url_policy correction_policy <<<"$closing"
@@ -44,6 +45,7 @@ node - "$output" \
   "$inbox_active" "$inbox_failed" "$inbox_duplicates" \
   "$outbox_active" "$outbox_failed" "$outbox_duplicates" \
   "$pancake_active" "$pancake_failed" "$pancake_duplicates" \
+  "$published_bundle_hex" \
   "$closing_pointer_id" "$closing_pointer_revision" "$closing_version_id" "$closing_version_number" "$closing_version_revision" \
   "$closing_hash" "$reply_policy" "$media_policy" "$multi_policy" "$url_policy" "$correction_policy" \
   "$behavior_hash" "$behavior_confirmation" "$behavior_sales" "$behavior_state" "$behavior_revision" \
@@ -56,6 +58,7 @@ const [
   inboxActive, inboxFailed, inboxDuplicates,
   outboxActive, outboxFailed, outboxDuplicates,
   pancakeActive, pancakeFailed, pancakeDuplicates,
+  publishedBundleHex,
   closingPointerId, closingPointerRevision, closingVersionId, closingVersionNumber, closingVersionRevision,
   closingHash, replyPolicy, mediaPolicy, multiPolicy, urlPolicy, correctionPolicy,
   behaviorHash, behaviorConfirmation, behaviorSales, behaviorState, behaviorRevision,
@@ -69,6 +72,8 @@ const integer = (value) => {
   return Number(value);
 };
 const absent = (value) => value === '0';
+if (!/^(?:[a-f0-9]{2})+$/u.test(publishedBundleHex ?? '')) throw new Error('OPERATIONAL_PUBLISHED_BUNDLE_ENCODING_INVALID');
+const publishedBundle = JSON.parse(Buffer.from(publishedBundleHex, 'hex').toString('utf8'));
 const state = {
   schemaVersion: 1,
   queues: {
@@ -80,6 +85,7 @@ const state = {
     channel: runtimePolicyChannel,
     enabled: runtimePolicyEnabled,
     publishedEnabled: runtimePolicyPublished,
+    publishedBundle,
     closingContentHash: closingHash,
     closingPointerId,
     closingPointerRevision: integer(closingPointerRevision),

@@ -34,6 +34,38 @@ if (!['OMITTED', 'LEGACY', 'CLARIFY_RECONCILED_V1'].includes(current.policy?.rep
   throw new Error('OPERATIONAL_STATE_REPLY_RECONCILIATION_INVALID');
 }
 const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/u;
+const publishedBundle = current.policy?.publishedBundle;
+if (!Array.isArray(publishedBundle) || publishedBundle.length < 3) {
+  throw new Error('OPERATIONAL_STATE_PUBLISHED_BUNDLE_INVALID');
+}
+const requiredCoreKinds = new Set(['SHOP_POLICY', 'OFFER_POLICY', 'CLOSING_STRATEGY']);
+const allowedKinds = new Set(['SHOP_POLICY', 'OFFER_POLICY', 'CLOSING_STRATEGY', 'SIZE_CHART', 'HANDOFF_MATRIX', 'PAYMENT_POLICY']);
+const singletonKinds = new Set(['SHOP_POLICY', 'OFFER_POLICY', 'CLOSING_STRATEGY', 'HANDOFF_MATRIX', 'PAYMENT_POLICY']);
+const kindCounts = new Map();
+let previousScope = '';
+const seenScopes = new Set();
+for (const item of publishedBundle) {
+  const scope = `${item?.artifactKind ?? ''}\u0000${item?.artifactKey ?? ''}\u0000${item?.pointerId ?? ''}`;
+  if (!allowedKinds.has(item?.artifactKind) ||
+      typeof item?.artifactKey !== 'string' || item.artifactKey.length === 0 ||
+      !uuid.test(item?.pointerId ?? '') || !uuid.test(item?.versionId ?? '') ||
+      !Number.isInteger(item?.pointerRevision) || item.pointerRevision < 0 ||
+      !Number.isInteger(item?.versionNumber) || item.versionNumber < 1 ||
+      !Number.isInteger(item?.versionRevision) || item.versionRevision < 0 ||
+      !/^sha256:[a-f0-9]{64}$/u.test(item?.contentHash ?? '') || item?.lifecycle !== 'PUBLISHED' ||
+      scope <= previousScope || seenScopes.has(scope)) {
+    throw new Error('OPERATIONAL_STATE_PUBLISHED_BUNDLE_IDENTITY_INVALID');
+  }
+  previousScope = scope;
+  seenScopes.add(scope);
+  const kindCount = (kindCounts.get(item.artifactKind) ?? 0) + 1;
+  kindCounts.set(item.artifactKind, kindCount);
+  if (singletonKinds.has(item.artifactKind) && kindCount > 1) {
+    throw new Error('OPERATIONAL_STATE_PUBLISHED_BUNDLE_SINGLETON_DUPLICATE');
+  }
+  requiredCoreKinds.delete(item.artifactKind);
+}
+if (requiredCoreKinds.size !== 0) throw new Error('OPERATIONAL_STATE_PUBLISHED_BUNDLE_CORE_INCOMPLETE');
 if (!/^sha256:[a-f0-9]{64}$/u.test(current.policy?.closingContentHash ?? '') ||
     !uuid.test(current.policy?.closingPointerId ?? '') ||
     !uuid.test(current.policy?.closingVersionId ?? '') ||
@@ -41,6 +73,15 @@ if (!/^sha256:[a-f0-9]{64}$/u.test(current.policy?.closingContentHash ?? '') ||
     !Number.isInteger(current.policy?.closingVersionNumber) || current.policy.closingVersionNumber < 1 ||
     !Number.isInteger(current.policy?.closingVersionRevision) || current.policy.closingVersionRevision < 0) {
   throw new Error('OPERATIONAL_STATE_POLICY_IDENTITY_INVALID');
+}
+const closingBundleItem = publishedBundle.find((item) => item.artifactKind === 'CLOSING_STRATEGY');
+if (closingBundleItem.pointerId !== current.policy.closingPointerId ||
+    closingBundleItem.pointerRevision !== current.policy.closingPointerRevision ||
+    closingBundleItem.versionId !== current.policy.closingVersionId ||
+    closingBundleItem.versionNumber !== current.policy.closingVersionNumber ||
+    closingBundleItem.versionRevision !== current.policy.closingVersionRevision ||
+    closingBundleItem.contentHash !== current.policy.closingContentHash) {
+  throw new Error('OPERATIONAL_STATE_CLOSING_BUNDLE_IDENTITY_MISMATCH');
 }
 if (current.policy?.effectiveDefaults?.mediaPartialResolutionPolicy !== 'LEGACY' ||
     current.policy?.effectiveDefaults?.multiProductResolutionPolicy !== 'LEGACY' ||

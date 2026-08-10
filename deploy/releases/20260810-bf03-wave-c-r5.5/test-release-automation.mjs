@@ -110,6 +110,26 @@ try {
     },
     policy: {
       channel: 'PUBLISHED', enabled: 'true', publishedEnabled: 'true', closingContentHash: aaaa,
+      publishedBundle: [
+        {
+          artifactKey: 'lana.closing-strategy', artifactKind: 'CLOSING_STRATEGY',
+          pointerId: '11111111-1111-4111-8111-111111111111', pointerRevision: 1,
+          versionId: '22222222-2222-4222-8222-222222222222', versionNumber: 1, versionRevision: 4,
+          contentHash: aaaa, lifecycle: 'PUBLISHED',
+        },
+        {
+          artifactKey: 'lana.offer-policy', artifactKind: 'OFFER_POLICY',
+          pointerId: '33333333-3333-4333-8333-333333333333', pointerRevision: 2,
+          versionId: '44444444-4444-4444-8444-444444444444', versionNumber: 1, versionRevision: 3,
+          contentHash: bbbb, lifecycle: 'PUBLISHED',
+        },
+        {
+          artifactKey: 'lana.shop-policy', artifactKind: 'SHOP_POLICY',
+          pointerId: '55555555-5555-4555-8555-555555555555', pointerRevision: 3,
+          versionId: '66666666-6666-4666-8666-666666666666', versionNumber: 1, versionRevision: 2,
+          contentHash: cccc, lifecycle: 'PUBLISHED',
+        },
+      ],
       closingPointerId: '11111111-1111-4111-8111-111111111111', closingPointerRevision: 1,
       closingVersionId: '22222222-2222-4222-8222-222222222222', closingVersionNumber: 1, closingVersionRevision: 4,
       replyReconciliationPolicy: 'OMITTED', waveCFieldsAbsent: true, correctionDialogueFieldAbsent: true,
@@ -135,6 +155,15 @@ try {
   const operationalBaselinePath = join(scratch, 'operational-baseline.json');
   const operationalBaseline = structuredClone(operational);
   writeFileSync(operationalBaselinePath, JSON.stringify(operationalBaseline));
+  operational.policy.publishedBundle[1].pointerRevision += 1;
+  operational.realtimeWorker.lastSeenEpochMs += 1_000;
+  operational.realtimeWorker.capturedAtEpochMs += 1_000;
+  writeFileSync(operationalPath, JSON.stringify(operational));
+  result = run('validate-operational-state.mjs', [operationalPath, operationalBaselinePath, 'strict']);
+  if (result.status === 0 || !result.stderr.includes('OPERATIONAL_STATE_DRIFT:policy')) {
+    throw new Error('non-closing published policy pointer drift did not fail closed');
+  }
+  operational.policy.publishedBundle[1].pointerRevision -= 1;
   operational.realtimeWorker.lastSeenEpochMs += 1_000;
   operational.realtimeWorker.capturedAtEpochMs += 1_000;
   operational.queues.inbox.active = 1;
@@ -253,7 +282,7 @@ try {
   }
 
   requireText('common.sh', /EXPECTED_RELEASE_TAG="20260810-bf03-wave-c-r5\.5"/u, 'release identity not pinned');
-  requireText('common.sh', /EXPECTED_CANDIDATE_TAG="20260810-bf03-wave-c-r5\.5-review-candidate\.4"/u, 'reviewed candidate ordinal not pinned');
+  requireText('common.sh', /EXPECTED_CANDIDATE_TAG="20260810-bf03-wave-c-r5\.5-review-candidate\.5"/u, 'reviewed candidate ordinal not pinned');
   requireText('common.sh', /EXPECTED_ROLLBACK_REALTIME_IMAGE_ID="sha256:2c34155c8ddf51014801e2dd0424e4ca14e0bb6a5d0c055cd657a126c1db0b6e"/u, 'rollback image ID not pinned');
   requireText('common.sh', /EXPECTED_ROLLBACK_REALTIME_REVISION="a63a3ccbd7dc2b3061cf96d56c3fa3e19c26851d"/u, 'rollback revision not pinned');
   requireText('common.sh', /final release merge parents mismatch/u, 'exact final merge-parent gate missing');
@@ -277,6 +306,7 @@ try {
   requireText('postcheck.sh', /capture-deployment-boundary\.mjs/u, 'soak-time secret boundary check missing');
   requireText('capture-operational-state.sh', /realtime_worker_status/u, 'realtime worker readiness readback missing');
   requireText('capture-operational-state.sh', /p\.pointer_id, p\.revision, v\.version_id/u, 'closing pointer identity readback missing');
+  requireText('capture-operational-state.sh', /jsonb_agg[\s\S]*p\.channel='PUBLISHED'/u, 'complete published policy bundle readback missing');
   requireText('common.sh', /verify_delivery_health/u, 'delivery readiness helper missing');
   requireText('common.sh', /compose\(\) \{\s+require_no_inherited_compose_overrides/u, 'cutover Compose interpolation override gate missing');
   requireText('common.sh', /rollback_compose\(\) \{\s+require_no_inherited_compose_overrides/u, 'rollback Compose interpolation override gate missing');
