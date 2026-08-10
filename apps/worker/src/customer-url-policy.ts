@@ -427,10 +427,12 @@ export function verifyCustomerUrlExplanationProposal(
       /\b(?:cannot|can't|unable(?: to)?|do not|don't|not able to|khong the|chua the|khong ho tro)\b/giu,
     )].at(-1);
     if (!negation) return false;
-    const priorAction = [...clausePrefix.matchAll(
-      /\b(?:open|access|click|visit|follow|check|mo|bam|truy cap|kiem tra)\b/giu,
-    )].at(-1);
-    return (negation.index ?? -1) > (priorAction?.index ?? -1);
+    const tail = clausePrefix.slice((negation.index ?? 0) + negation[0].length);
+    const tailWords = tail.match(/[\p{L}\p{N}]+/gu) ?? [];
+    return tailWords.every((word) =>
+      ["safely", "securely", "directly", "reliably", "currently", "now", "an", "toan"]
+        .includes(word)
+    );
   };
   const hasAffirmativeLinkAction = [...foldedReply.matchAll(
     /\b(?:open|access|click|visit|follow|mo|bam|truy cap)\b/giu,
