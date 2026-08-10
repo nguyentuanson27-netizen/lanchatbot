@@ -396,7 +396,9 @@ export function verifyCustomerUrlExplanationProposal(
   const foldedReply = reply.normalize("NFD")
     .replace(/[\u0300-\u036f]/gu, "")
     .replace(/\u0111/gu, "d")
-    .toLocaleLowerCase("vi");
+    .toLocaleLowerCase("vi")
+    .replace(/\s+/gu, " ")
+    .trim();
   const statesSafeLimitation =
     /\b(?:cannot|can't|unable|do not support)\b.{0,80}\b(?:open|access|check)\b/iu.test(foldedReply) ||
     /\b(?:khong the|chua the|khong ho tro)\b.{0,80}\b(?:mo|truy cap|kiem tra)\b/iu.test(foldedReply);
