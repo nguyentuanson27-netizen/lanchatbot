@@ -4691,7 +4691,12 @@ export class RealtimeRunner {
     ) {
       pushDecisionEvent(
         "CLARIFICATION_REQUESTED",
-        multiProductDecision.reasonCodes,
+        [...new Set([
+          ...multiProductDecision.reasonCodes,
+          ...(mediaDisposition.disposition === "CONTINUE_MATCHES"
+            ? mediaDisposition.reasonCodes
+            : []),
+        ])],
       );
     }
     if (resolvedProduct) {
