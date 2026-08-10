@@ -406,6 +406,7 @@ export function verifyCustomerUrlExplanationProposal(
     .replace(/\blien[^\p{L}\p{N}]+ket\b/gu, "lien ket")
     .replace(/\bma[^\p{L}\p{N}]+san[^\p{L}\p{N}]+pham\b/gu, "ma san pham")
     .replace(/\bhinh[^\p{L}\p{N}]+anh\b/gu, "hinh anh")
+    .replace(/[\r\n\v\f\u0085\u2028\u2029]+/gu, "\uE000")
     .replace(/\s+/gu, " ")
     .trim();
   const statesSafeLimitation =
@@ -432,11 +433,11 @@ export function verifyCustomerUrlExplanationProposal(
       return false;
     }
     const tail = clausePrefix.slice((negation.index ?? 0) + negation[0].length);
-    const tailWords = tail.match(/[\p{L}\p{N}]+/gu) ?? [];
-    return tailWords.every((word) =>
-      ["safely", "securely", "directly", "reliably", "currently", "now", "an", "toan"]
-        .includes(word)
+    const unrecognizedTail = tail.replace(
+      /\b(?:safely|securely|directly|reliably|currently|now|an|toan)\b/gu,
+      "",
     );
+    return /^[\t\p{Zs}]*$/u.test(unrecognizedTail);
   };
   const firstActionIndex = [...foldedReply.matchAll(
     /\b(?:open|access|click|visit|follow|check|mo|bam|truy cap|kiem tra)\b/giu,
