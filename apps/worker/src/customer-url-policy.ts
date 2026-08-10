@@ -427,6 +427,12 @@ export function verifyCustomerUrlExplanationProposal(
       /\b(?:cannot|can't|unable(?: to)?|do not|don't|not able to|khong the|chua the|khong ho tro)\b/giu,
     )].at(-1);
     if (!negation) return false;
+    const actorPrefix = clausePrefix.slice(0, negation.index ?? 0).split(
+      /[,.!?;]|\b(?:but|however|then|nhung|tuy nhien|sau do)\b/giu,
+    ).at(-1) ?? "";
+    if (!/\b(?:i(?:\s+am)?|we(?:\s+are)?|em|toi|chung toi)\s*$/iu.test(actorPrefix)) {
+      return false;
+    }
     const tail = clausePrefix.slice((negation.index ?? 0) + negation[0].length);
     const tailWords = tail.match(/[\p{L}\p{N}]+/gu) ?? [];
     return tailWords.every((word) =>
@@ -434,16 +440,20 @@ export function verifyCustomerUrlExplanationProposal(
         .includes(word)
     );
   };
+  const firstActionIndex = [...foldedReply.matchAll(
+    /\b(?:open|access|click|visit|follow|check|mo|bam|truy cap|kiem tra)\b/giu,
+  )][0]?.index ?? -1;
   const hasAffirmativeLinkAction = [...foldedReply.matchAll(
     /\b(?:open|access|click|visit|follow|mo|bam|truy cap)\b/giu,
   )].some((match) => {
-    return !isNegatedAction(clausePrefixBefore(match.index));
+    return match.index !== firstActionIndex ||
+      !isNegatedAction(clausePrefixBefore(match.index));
   });
   const hasAffirmativeCustomerCheck = [...foldedReply.matchAll(
     /\b(?:check|kiem tra)\b/giu,
   )].some((match) => {
     const clausePrefix = clausePrefixBefore(match.index);
-    if (isNegatedAction(clausePrefix)) return false;
+    if (match.index === firstActionIndex && isNegatedAction(clausePrefix)) return false;
     const checksLink = /\b(?:this|that|the)?\s*(?:link|lien ket)\b/iu.test(
       clauseSuffixAfter(match.index + match[0].length),
     );
