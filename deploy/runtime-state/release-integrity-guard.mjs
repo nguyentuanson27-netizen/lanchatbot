@@ -70,7 +70,7 @@ const unknownField = structuredClone(example); unknownField.unapproved = true; i
 
 const manifestDir = join(root, 'deploy', 'manifests');
 for (const file of readdirSync(manifestDir).filter((name) => name.endsWith('.json'))) JSON.parse(readFileSync(join(manifestDir, file), 'utf8'));
-const adminReleaseTag = '20260810-admin-policy-review-r6.8';
+const adminReleaseTag = '20260810-admin-policy-review-r6.9';
 const adminReleaseDir = join(root, 'deploy', 'releases', adminReleaseTag);
 const adminReleaseScripts = [
   'common.sh',
@@ -129,7 +129,7 @@ if (!/cd apps\/admin-api\s+node -e "import\(\\"sharp\\"\)/.test(adminArtifactSmo
   throw new Error('ADMIN_POLICY_SHARP_SMOKE_WORKSPACE_ANCHOR_MISSING');
 }
 const adminManifest = JSON.parse(readFileSync(join(manifestDir, `${adminReleaseTag}.json`), 'utf8'));
-if (adminManifest.releaseTag !== adminReleaseTag || adminManifest.source?.implementationCommit !== '694fa313107c1a6ae83a97b4333cc288ed3c2133') {
+if (adminManifest.releaseTag !== adminReleaseTag || adminManifest.source?.implementationCommit !== '8eabe32c44529721e79b56b3ec5d0ea1ed333780') {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_PROVENANCE');
 }
 const adminSecurityPrerequisite = adminManifest.source?.pullRequests?.find(({ number }) => number === 162);
@@ -141,6 +141,11 @@ const adminSafeControls = adminManifest.source?.pullRequests?.find(({ number }) 
 if (adminSafeControls?.mergeCommit !== '694fa313107c1a6ae83a97b4333cc288ed3c2133' ||
     adminSafeControls?.scope !== 'ADMIN_POLICY_SAFE_CONTROLS_AND_SIZE_REVIEW_UI') {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_SAFE_CONTROLS_PR');
+}
+const adminDockerBuildFix = adminManifest.source?.pullRequests?.find(({ number }) => number === 174);
+if (adminDockerBuildFix?.mergeCommit !== '8eabe32c44529721e79b56b3ec5d0ea1ed333780' ||
+    adminDockerBuildFix?.scope !== 'DOCKER_BUILD_BENCHMARK_FIXTURES') {
+  throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_DOCKER_BUILD_FIX_PR');
 }
 if (adminManifest.database?.migrationRequired !== true ||
     JSON.stringify(adminManifest.database?.migrationsToApply) !== JSON.stringify(['0031_admin_policy_safe_deletion']) ||
@@ -155,7 +160,7 @@ if (JSON.stringify(adminManifest.scope?.targetServices) !== JSON.stringify(['adm
 if (adminManifest.scope?.adminSimulationWorkerMustRemainUnchanged !== true || adminManifest.scope?.messengerProductionTestAllowed !== false) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_NON_TARGET_SCOPE');
 }
-if (adminManifest.supersedesRelease !== '20260809-admin-policy-review-r6.7' ||
+if (adminManifest.supersedesUnexecutedRelease !== '20260810-admin-policy-review-r6.8' ||
     adminManifest.deploymentAutomation?.automaticRollbackOnSoakFailure !== true ||
     adminManifest.deploymentAutomation?.globalDeploymentLockRequired !== true ||
     adminManifest.rollback?.runtimeDefinitionAuthority !== 'previous release Compose plus reviewed image-only override') {
