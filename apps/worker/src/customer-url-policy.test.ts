@@ -28,7 +28,13 @@ describe("BF-08 classified customer URL policy", () => {
   it("does not intervene in a normal no-URL turn", () => {
     expect(classifyCustomerUrls("please check product SV695", "CLASSIFIED_ALLOWLIST_V1"))
       .toMatchObject({ disposition: "CONTINUE", items: [], reasonCodes: [], productCodes: [] });
+    expect(classifyCustomerUrls("xin giá SD398", "CLASSIFIED_ALLOWLIST_V1"))
+      .toMatchObject({ disposition: "CONTINUE", items: [] });
+    expect(classifyCustomerUrls("chị chọn mẫu 2", "CLASSIFIED_ALLOWLIST_V1"))
+      .toMatchObject({ disposition: "CONTINUE", items: [] });
     expect(classifyCustomerUrls("size:M; code:SV695", "CLASSIFIED_ALLOWLIST_V1"))
+      .toMatchObject({ disposition: "CONTINUE", items: [] });
+    expect(classifyCustomerUrls("contact user@example.com", "CLASSIFIED_ALLOWLIST_V1"))
       .toMatchObject({ disposition: "CONTINUE", items: [] });
   });
 
@@ -54,8 +60,15 @@ describe("BF-08 classified customer URL policy", () => {
     "2130706433/admin",
     "0x7f000001/admin",
     "user:secret@example.com/a",
+    "user@example.com/a?token=secret",
+    "user@127.0.0.1/admin",
+    "user@[::1]/admin",
     "lanadesign.vn@evil.test/a",
+    "127/admin",
+    "0177.0.0.1/admin",
+    "0300.0250.0001.0001/admin",
     "localhost:999999/admin",
+    "example.com:abc/path",
     "example.com:999999/path",
   ])("blocks and redacts malformed or private URL-like input %s", (text) => {
     expect(classifyCustomerUrls(text, "CLASSIFIED_ALLOWLIST_V1")).toMatchObject({
@@ -277,6 +290,22 @@ describe("BF-08 classified customer URL policy", () => {
     });
   });
 
+  it.each([
+    "user@example.com/a?token=secret",
+    "user@127.0.0.1/admin",
+    "user@[::1]/admin",
+    "127/admin",
+    "0177.0.0.1/admin",
+    "0300.0250.0001.0001/admin",
+    "example.com:abc/path",
+  ])("keeps strict mode fail closed for scheme-less authority %s", (text) => {
+    expect(classifyCustomerUrls(text, "STRICT_BLOCK_ALL")).toMatchObject({
+      disposition: "HANDOFF",
+      reasonCodes: ["CUSTOMER_URL_STRICT_BLOCK_ALL"],
+    });
+    expect(redactCustomerUrlsForModel(text)).toBe("[CUSTOMER_URL]");
+  });
+
   it("redacts raw URLs before any model context", () => {
     const raw = "check https://user:secret@example.com/a?token=top-secret and www.lanadesign.vn/sv695";
     const redacted = redactCustomerUrlsForModel(raw);
@@ -326,6 +355,10 @@ describe("BF-08 classified customer URL policy", () => {
       { ...proposal, reply: "Mẫu này còn hàng và được miễn phí vận chuyển." },
       { ...proposal, reply: "Chị gửi số điện thoại và địa chỉ để đặt hàng nhé." },
       { ...proposal, reply: "This link is safe, please open it." },
+      { ...proposal, reply: "I cannot safely open that link. Please send the product code or an image. Open it." },
+      { ...proposal, reply: "I cannot safely open that link. Please send the product code or an image. Access it." },
+      { ...proposal, reply: "I cannot safely open that link, but access it after sending the product code or image." },
+      { ...proposal, reply: "I cannot safely open that link; then visit it after sending the product code or image." },
       { ...proposal, reply: "This is our official link. Please send the product code." },
       { ...proposal, reply: "Liên kết này an toàn, chị cứ mở nhé. Chị cũng có thể gửi mã sản phẩm." },
       { ...proposal, reply: "I cannot open that link. Please send the product code. This dress costs less than usual and can ship promptly." },

@@ -330,6 +330,24 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     ]));
   });
 
+  it.each([
+    "user@example.com/a?token=secret",
+    "127/admin",
+    "0177.0.0.1/admin",
+    "example.com:abc/path",
+  ])("keeps the production wrapper strict for scheme-less authority %s", async (text) => {
+    const result = await runTurn({
+      text: `please check ${text}`,
+      policy: policy("STRICT_BLOCK_ALL"),
+    });
+    expect(result.searchText).not.toHaveBeenCalled();
+    expect(result.generate).not.toHaveBeenCalled();
+    expect(result.draftCustomerUrlExplanation).not.toHaveBeenCalled();
+    expect(result.commit.metaPlan).toBeUndefined();
+    expect(result.commit.pancakeTagPlan).toBeDefined();
+    expect(JSON.stringify(result.commit)).not.toContain(text);
+  });
+
   it("resolves an approved product URL offline through the production BF-02 wrapper", async () => {
     const result = await runTurn({
       text: "please check https://www.lanadesign.vn/products/SD398?utm_source=chat#detail",
@@ -374,6 +392,46 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     });
   });
 
+  it("combines an approved URL with a residual product code before BF-07 clarification", async () => {
+    const result = await runTurn({
+      text: "compare https://www.lanadesign.vn/SD398 and SV695",
+      policy: policy("CLASSIFIED_ALLOWLIST_V1"),
+      exactProducts: [product("SD398"), product("SV695")],
+    });
+    expect(result.searchText).toHaveBeenCalledWith("SD398");
+    expect(result.searchText).toHaveBeenCalledWith("SV695");
+    expect(result.generate).not.toHaveBeenCalled();
+    expect(result.draftMultiProductClarification).toHaveBeenCalledWith(
+      ["SD398", "SV695"],
+      expect.any(String),
+      [],
+    );
+    expect(result.commit.state).toMatchObject({
+      currentProductId: null,
+      mediaClarification: { status: "ACTIVE" },
+    });
+  });
+
+  it("fails closed when a residual product code beside an approved URL cannot be verified", async () => {
+    const result = await runTurn({
+      text: "compare https://www.lanadesign.vn/SD398 and ZZ999",
+      policy: policy("CLASSIFIED_ALLOWLIST_V1"),
+      exactProduct: product("SD398"),
+    });
+    expect(result.searchText).toHaveBeenCalledWith("SD398");
+    expect(result.searchText).toHaveBeenCalledWith("ZZ999");
+    expect(result.generate).not.toHaveBeenCalled();
+    expect(result.draftMultiProductClarification).not.toHaveBeenCalled();
+    expect(result.commit.metaPlan).toBeUndefined();
+    expect(result.commit.pancakeTagPlan).toBeDefined();
+    expect(result.commit.decisionEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        eventType: "GUARD_BLOCKED",
+        reasonCodes: expect.arrayContaining(["CUSTOMER_URL_RESIDUAL_PRODUCT_UNRESOLVED"]),
+      }),
+    ]));
+  });
+
   it("fails closed on two approved products when BF-07 clarification is not active", async () => {
     const result = await runTurn({
       text: "compare https://www.lanadesign.vn/SD398 and https://www.lanadesign.vn/SV695",
@@ -410,19 +468,38 @@ describe("BF-08 production-wrapper customer URL policy", () => {
       text: "please check https://example.com/product",
       policy: policy("CLASSIFIED_ALLOWLIST_V1"),
       explanationReplies: [
-        "Open https://example.com for price 699k.",
+        "I cannot safely open that link. Please send the product code or an image. Open it.",
         "I cannot safely open that link. Please send the product code or an image so I can check it.",
       ],
     });
     expect(result.draftCustomerUrlExplanation).toHaveBeenCalledTimes(2);
     expect(result.draftCustomerUrlExplanation.mock.calls[1]?.[1]).toEqual(
       expect.arrayContaining([
-        "CUSTOMER_URL_EXPLANATION_RAW_URL",
-        "CUSTOMER_URL_EXPLANATION_UNVERIFIED_CLAIM",
+        "CUSTOMER_URL_EXPLANATION_SAFETY_INVALID",
       ]),
     );
     expect(result.commit.metaPlan).toBeDefined();
-    expect(JSON.stringify(result.commit.metaPlan)).not.toContain("699k");
+    expect(JSON.stringify(result.commit.metaPlan)).not.toContain("Open it");
+  });
+
+  it("uses the deterministic safe fallback after two contradictory explanations", async () => {
+    const unsafe = "I cannot safely open that link. Please send the product code or an image. Access it.";
+    const result = await runTurn({
+      text: "please check https://example.com/product",
+      policy: policy("CLASSIFIED_ALLOWLIST_V1"),
+      explanationReplies: [unsafe, unsafe],
+    });
+    expect(result.draftCustomerUrlExplanation).toHaveBeenCalledTimes(2);
+    expect(result.commit.metaPlan).toBeDefined();
+    expect(JSON.stringify(result.commit.metaPlan)).not.toContain("Access it");
+    expect(result.commit.decisionEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        reasonCodes: expect.arrayContaining([
+          "CUSTOMER_URL_EXPLANATION_SAFETY_INVALID",
+          "CUSTOMER_URL_SAFE_EXPLANATION_FALLBACK",
+        ]),
+      }),
+    ]));
   });
 
   it("silently hands off dangerous URLs with a durable safety reason", async () => {
@@ -449,8 +526,15 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     "2130706433/admin",
     "0x7f000001/admin",
     "user:secret@example.com/a",
+    "user@example.com/a?token=secret",
+    "user@127.0.0.1/admin",
+    "user@[::1]/admin",
     "lanadesign.vn@evil.test/a",
+    "127/admin",
+    "0177.0.0.1/admin",
+    "0300.0250.0001.0001/admin",
     "localhost:999999/admin",
+    "example.com:abc/path",
     "example.com:999999/path",
   ])("fails closed before model or resolver for scheme-less authority %s", async (text) => {
     const result = await runTurn({

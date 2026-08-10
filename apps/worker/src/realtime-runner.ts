@@ -2862,13 +2862,40 @@ export class RealtimeRunner {
         ]),
       ];
     }
+    const residualCustomerUrlResolution = approvedCustomerUrlResolution
+      ? await this.resolveResidualCustomerUrlProducts(
+          message,
+          state,
+          claim.pageId,
+          mediaPartialResolutionPolicy,
+        )
+      : null;
+    if (
+      residualCustomerUrlResolution?.references.some(
+        ({ resolution: referenceResolution }) => referenceResolution !== "RESOLVED",
+      )
+    ) {
+      customerUrlDisposition = "HANDOFF";
+      customerUrlReasonCodes = [
+        ...new Set([
+          ...customerUrlReasonCodes,
+          "CUSTOMER_URL_RESIDUAL_PRODUCT_UNRESOLVED",
+        ]),
+      ];
+    }
+    const combinedCustomerUrlResolution = approvedCustomerUrlResolution
+      ? this.combineCustomerUrlResolutions(
+          approvedCustomerUrlResolution,
+          residualCustomerUrlResolution ?? this.emptyResolution(),
+        )
+      : null;
     const resolution = message.isEcho ||
         customerUrlDisposition === "HANDOFF" ||
         customerUrlDisposition === "EXPLAIN_UNSUPPORTED" ||
         isPostSaleRequest(message.text ?? "") ||
         preSalePolicyIntent !== null
       ? this.emptyResolution()
-      : approvedCustomerUrlResolution ?? await this.resolveProducts(
+      : combinedCustomerUrlResolution ?? await this.resolveProducts(
           message,
           state,
           claim.pageId,
@@ -5001,6 +5028,105 @@ export class RealtimeRunner {
       origin: "TEXT_CODE",
       extractedAdProductId: null,
       clarification: null,
+    };
+  }
+
+  private async resolveResidualCustomerUrlProducts(
+    message: InboundMessageV1,
+    state: ConversationState,
+    pageId: string,
+    mediaPartialResolutionPolicy: MediaPartialResolutionPolicy,
+  ): Promise<ProductResolution> {
+    const residualText = redactCustomerUrlsForModel(message.text ?? "")
+      .replace(/\[CUSTOMER_URL\]/gu, " ")
+      .replace(/\s+/gu, " ")
+      .trim();
+    const residualCodes = [...new Set([
+      ...(productCodeOnly(residualText) ? [productCodeOnly(residualText)!] : []),
+      ...extractAdProductCodes(residualText),
+    ].map((code) => normalizeProductCode(code)).filter(Boolean))];
+    if (residualCodes.length > 10) {
+      return {
+        ...this.emptyResolution(),
+        references: [{
+          raw: "CUSTOMER_URL_RESIDUAL_LIMIT_EXCEEDED",
+          product: null,
+          resolution: "NOT_FOUND",
+        }],
+      };
+    }
+    if (residualCodes.length > 0) {
+      const references = await Promise.all(residualCodes.map(async (code) => {
+        const product = await this.exactProduct(code);
+        return {
+          raw: code,
+          product,
+          resolution: product === null ? "NOT_FOUND" as const : "RESOLVED" as const,
+        };
+      }));
+      const products = references
+        .map(({ product }) => product)
+        .filter((product): product is StableProductDocument => product !== null);
+      return {
+        primary: products[0] ?? null,
+        products,
+        references,
+        media: aggregateMedia([]),
+        origin: "TEXT_CODE",
+        extractedAdProductId: null,
+        clarification: null,
+      };
+    }
+
+    const hasResolvableTransportEvidence = Boolean(message.adsContext) ||
+      message.attachments.some((attachment) =>
+        (attachment.type.toLowerCase() === "image" ||
+          attachment.type.toLowerCase() === "video") && Boolean(attachment.url)
+      );
+    if (!hasResolvableTransportEvidence) return this.emptyResolution();
+    const resolution = await this.resolveProducts(
+      { ...message, text: residualText || null },
+      state,
+      pageId,
+      mediaPartialResolutionPolicy,
+    );
+    return resolution.origin === "ADS" || resolution.origin === "MEDIA" ||
+        resolution.origin === "TEXT_CODE" || resolution.origin === "SELECTION"
+      ? resolution
+      : this.emptyResolution();
+  }
+
+  private combineCustomerUrlResolutions(
+    approved: ProductResolution,
+    residual: ProductResolution,
+  ): ProductResolution {
+    const products: StableProductDocument[] = [];
+    for (const product of [...approved.products, ...residual.products]) {
+      const productId = normalizeProductCode(product.productId);
+      if (!products.some((candidate) =>
+        normalizeProductCode(candidate.productId) === productId
+      )) products.push(product);
+    }
+    const references: ResolvedProductReference[] = [];
+    for (const reference of [...approved.references, ...residual.references]) {
+      const key = reference.product
+        ? normalizeProductCode(reference.product.productId)
+        : `${normalizeProductCode(reference.raw)}:${reference.resolution}`;
+      if (!references.some((candidate) => {
+        const candidateKey = candidate.product
+          ? normalizeProductCode(candidate.product.productId)
+          : `${normalizeProductCode(candidate.raw)}:${candidate.resolution}`;
+        return candidateKey === key;
+      })) references.push(reference);
+    }
+    return {
+      primary: products[0] ?? null,
+      products,
+      references,
+      media: residual.media,
+      origin: approved.origin,
+      extractedAdProductId: residual.extractedAdProductId,
+      clarification: residual.clarification,
     };
   }
 

@@ -36,11 +36,12 @@ export interface CustomerUrlDecision {
 
 const URL_TOKEN_BOUNDARY = String.raw`(?:\/|(?=$|[\s),.;!?\]}]))`;
 const DOMAIN_LIKE = String.raw`(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]{0,61}[\p{L}\p{N}])?[.\u3002\uff0e\uff61])+(?:[\p{L}]{2,63}|xn--[a-z0-9-]{2,59})`;
-const NUMERIC_HOST_LIKE = String.raw`(?:(?:\d{1,3}\.){1,3}\d{1,3}|0x[a-f0-9]+|\d{7,12})`;
+const NUMERIC_HOST_LIKE = String.raw`(?:(?:\d{1,12}\.){1,3}\d{1,12}|0x[a-f0-9]+|\d{7,12})`;
+const SHORT_NUMERIC_AUTHORITY_LIKE = String.raw`\d{1,12}(?::[^/\s]+)?\/`;
 const BRACKETED_HOST_LIKE = String.raw`\[[a-f0-9:.%]+\]`;
 const HOST_LIKE = `(?:${DOMAIN_LIKE}|localhost|${NUMERIC_HOST_LIKE}|${BRACKETED_HOST_LIKE})`;
-const USERINFO_LIKE = `(?:(?:[\\p{L}\\p{N}._~-]+:[^@\\s/]+|${DOMAIN_LIKE})@)?`;
-const BARE_AUTHORITY_LIKE = `${USERINFO_LIKE}${HOST_LIKE}(?::\\d+)?${URL_TOKEN_BOUNDARY}`;
+const USERINFO_LIKE = `(?:[\\p{L}\\p{N}._~-]+(?::[^@\\s/]+)?|${DOMAIN_LIKE})@`;
+const BARE_AUTHORITY_LIKE = `(?:${USERINFO_LIKE}${HOST_LIKE}(?::[^/\\s]+)?\\/|${SHORT_NUMERIC_AUTHORITY_LIKE}|${HOST_LIKE}(?::[^/\\s]+)?${URL_TOKEN_BOUNDARY})`;
 const URL_CANDIDATE = new RegExp(
   String.raw`(?<![\p{L}\p{N}@._-])(?:https?:\/{0,2}|[a-z][a-z0-9+.-]{1,15}:\/\/|(?:javascript|data|file|ftp|blob):(?:\/\/)?|\/\/|www[.\u3002\uff0e\uff61]|${BARE_AUTHORITY_LIKE})[^\s<>"']*`,
   "giu",
@@ -140,7 +141,7 @@ function classifyCandidate(raw: string): CustomerUrlItem {
   if (/^https?:(?!\/\/)/iu.test(raw)) return dangerous("CUSTOMER_URL_INVALID");
   let url: URL;
   try {
-    const hasBareUserInfo = /^(?:[^@\s/]+:[^@\s/]+|(?:[^@\s/]+\.)+[^@\s/]+)@/iu.test(raw);
+    const hasBareUserInfo = /^[^/?#\s]+@/iu.test(raw);
     url = new URL(
       raw.startsWith("//")
         ? `https:${raw}`
@@ -402,13 +403,24 @@ export function verifyCustomerUrlExplanationProposal(
   const requestsSafeInput =
     /\b(?:product code|image)\b/iu.test(foldedReply) ||
     /\b(?:ma san pham|hinh anh|anh)\b/iu.test(foldedReply);
+  const hasAffirmativeLinkAction = [...foldedReply.matchAll(
+    /\b(?:open|access|click|visit|follow|mo|bam|truy cap)\b/giu,
+  )].some((match) => {
+    const prefix = foldedReply.slice(0, match.index);
+    const clausePrefix = prefix.split(
+      /[,.!?;]|\b(?:but|however|then|nhung|tuy nhien|sau do)\b/giu,
+    ).at(-1) ?? "";
+    return !/\b(?:cannot|can't|unable(?: to)?|do not|don't|not able to|khong the|chua the|khong ho tro)\b.{0,48}$/iu
+      .test(clausePrefix);
+  });
   const givesUnsafeLinkGuidance =
     /\b(?:this|the) link (?:is|looks|appears|seems) (?:safe|official|trusted|legitimate)\b/iu.test(foldedReply) ||
     /\b(?:please|you can|you should|go ahead and) (?:open|click|visit|follow|access)\b/iu.test(foldedReply) ||
     /\b(?:link|lien ket) (?:nay )?(?:an toan|chinh thuc|uy tin|khong nguy hiem)\b/iu.test(foldedReply) ||
     /\b(?:cu|hay|vui long|chi co the) (?:mo|bam|truy cap)\b/iu.test(foldedReply) ||
     /\b(?:bam vao|truy cap) (?:link|lien ket)\b/iu.test(foldedReply) ||
-    /\b(?:safe|official|trusted|legitimate) link\b/iu.test(foldedReply);
+    /\b(?:safe|official|trusted|legitimate) link\b/iu.test(foldedReply) ||
+    hasAffirmativeLinkAction;
   if (!statesSafeLimitation || !requestsSafeInput || givesUnsafeLinkGuidance) {
     reasons.push("CUSTOMER_URL_EXPLANATION_SAFETY_INVALID");
   }
