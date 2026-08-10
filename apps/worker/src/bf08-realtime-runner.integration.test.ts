@@ -151,6 +151,7 @@ async function runTurn(input: {
   readonly exactProduct?: StableProductDocument;
   readonly exactProducts?: readonly StableProductDocument[];
   readonly explanationReplies?: readonly string[];
+  readonly quotaAllowed?: readonly boolean[];
 }) {
   const commits: RealtimeCommitInput[] = [];
   const state = createConversationState({
@@ -190,6 +191,8 @@ async function runTurn(input: {
     tokenUsage: {},
   };
   let explanationIndex = 0;
+  let quotaIndex = 0;
+  const quotaReserve = vi.fn(async () => input.quotaAllowed?.[quotaIndex++] ?? true);
   const draftCustomerUrlExplanation = vi.fn(async (...args: readonly unknown[]) => {
     expect(JSON.stringify(args)).not.toContain(input.text);
     return {
@@ -290,7 +293,7 @@ async function runTurn(input: {
       employeeTagId: "25",
       decisionTelemetryEnabled: true,
     },
-    { reserve: vi.fn(async () => true), close: vi.fn(async () => undefined) },
+    { reserve: quotaReserve, close: vi.fn(async () => undefined) },
     undefined, undefined, undefined,
     resolver,
   );
@@ -299,6 +302,7 @@ async function runTurn(input: {
   return {
     commit: commits[0]!,
     generate,
+    quotaReserve,
     draftCustomerUrlExplanation,
     draftMultiProductClarification: model.draftMultiProductClarification!,
     searchText,
@@ -471,6 +475,10 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     expect(result.searchText).not.toHaveBeenCalled();
     expect(result.generate).not.toHaveBeenCalled();
     expect(result.draftCustomerUrlExplanation).toHaveBeenCalledOnce();
+    expect(result.quotaReserve).toHaveBeenCalledOnce();
+    expect(result.quotaReserve.mock.invocationCallOrder[0]).toBeLessThan(
+      result.draftCustomerUrlExplanation.mock.invocationCallOrder[0]!,
+    );
     expect(result.commit.metaPlan).toBeDefined();
     expect(result.commit.pancakeTagPlan).toBeUndefined();
     expect(JSON.stringify(result.commit)).not.toContain("token=secret");
@@ -486,6 +494,13 @@ describe("BF-08 production-wrapper customer URL policy", () => {
       ],
     });
     expect(result.draftCustomerUrlExplanation).toHaveBeenCalledTimes(2);
+    expect(result.quotaReserve).toHaveBeenCalledTimes(2);
+    expect(result.quotaReserve.mock.invocationCallOrder[0]).toBeLessThan(
+      result.draftCustomerUrlExplanation.mock.invocationCallOrder[0]!,
+    );
+    expect(result.quotaReserve.mock.invocationCallOrder[1]).toBeLessThan(
+      result.draftCustomerUrlExplanation.mock.invocationCallOrder[1]!,
+    );
     expect(result.draftCustomerUrlExplanation.mock.calls[1]?.[1]).toEqual(
       expect.arrayContaining([
         "CUSTOMER_URL_EXPLANATION_SAFETY_INVALID",
@@ -496,6 +511,50 @@ describe("BF-08 production-wrapper customer URL policy", () => {
       kind: "TEXT",
       text: "I cannot safely open that link. Please send the product code or an image so I can check it.",
     }]);
+  });
+
+  it("falls back without a model call when the initial explanation quota is denied", async () => {
+    const result = await runTurn({
+      text: "please check https://example.com/product",
+      policy: policy("CLASSIFIED_ALLOWLIST_V1"),
+      quotaAllowed: [false],
+    });
+    expect(result.quotaReserve).toHaveBeenCalledOnce();
+    expect(result.draftCustomerUrlExplanation).not.toHaveBeenCalled();
+    expect(result.commit.metaPlan).toBeDefined();
+    expect(result.commit.decisionEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        reasonCodes: expect.arrayContaining([
+          "CUSTOMER_URL_EXPLANATION_QUOTA_DENIED",
+          "CUSTOMER_URL_SAFE_EXPLANATION_FALLBACK",
+        ]),
+      }),
+    ]));
+  });
+
+  it("falls back without a repair model call when the repair quota is denied", async () => {
+    const unsafe = "I cannot safely open that link. Please send an image. Access it.";
+    const result = await runTurn({
+      text: "please check https://example.com/product",
+      policy: policy("CLASSIFIED_ALLOWLIST_V1"),
+      explanationReplies: [unsafe],
+      quotaAllowed: [true, false],
+    });
+    expect(result.quotaReserve).toHaveBeenCalledTimes(2);
+    expect(result.draftCustomerUrlExplanation).toHaveBeenCalledOnce();
+    expect(result.quotaReserve.mock.invocationCallOrder[0]).toBeLessThan(
+      result.draftCustomerUrlExplanation.mock.invocationCallOrder[0]!,
+    );
+    expect(result.commit.metaPlan).toBeDefined();
+    expect(JSON.stringify(result.commit.metaPlan)).not.toContain("Access it");
+    expect(result.commit.decisionEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        reasonCodes: expect.arrayContaining([
+          "CUSTOMER_URL_EXPLANATION_QUOTA_DENIED",
+          "CUSTOMER_URL_SAFE_EXPLANATION_FALLBACK",
+        ]),
+      }),
+    ]));
   });
 
   it("uses the deterministic safe fallback after two contradictory explanations", async () => {
