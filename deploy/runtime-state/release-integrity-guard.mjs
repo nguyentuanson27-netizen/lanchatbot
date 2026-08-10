@@ -166,6 +166,9 @@ if (adminReleaseSelfTest.status !== 0) {
   throw new Error(`ADMIN_POLICY_RELEASE_SELF_TEST_FAILED:${adminReleaseSelfTest.stderr.trim()}`);
 }
 const dockerfile = readFileSync(join(root, 'deploy', 'Dockerfile'), 'utf8');
+if (!dockerfile.includes('COPY benchmarks ./benchmarks')) {
+  throw new Error('DOCKER_BUILD_BENCHMARK_FIXTURES_MISSING');
+}
 if (!dockerfile.includes('RUN apk add --no-cache bash ffmpeg git')) {
   throw new Error('ADMIN_POLICY_RELEASE_BUILD_BASH_MISSING');
 }
