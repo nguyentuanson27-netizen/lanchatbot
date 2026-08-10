@@ -37,11 +37,12 @@ export interface CustomerUrlDecision {
 const URL_TOKEN_BOUNDARY = String.raw`(?:\/|(?=$|[\s),.;!?\]}]))`;
 const DOMAIN_LIKE = String.raw`(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]{0,61}[\p{L}\p{N}])?[.\u3002\uff0e\uff61])+(?:[\p{L}]{2,63}|xn--[a-z0-9-]{2,59})`;
 const NUMERIC_HOST_LIKE = String.raw`(?:(?:\d{1,12}\.){1,3}\d{1,12}|0x[a-f0-9]+|\d{7,12})`;
-const SHORT_NUMERIC_AUTHORITY_LIKE = String.raw`\d{1,12}(?::[^/\s]+)?\/(?=[\p{L}%._~-])`;
+const PORT_LIKE = String.raw`(?::(?:[^/\s]+|(?=\/)))?`;
+const SHORT_NUMERIC_AUTHORITY_LIKE = String.raw`\d{1,12}${PORT_LIKE}\/(?=[\p{L}%._~-])`;
 const BRACKETED_HOST_LIKE = String.raw`\[[a-f0-9:.%]+\]`;
 const HOST_LIKE = `(?:${DOMAIN_LIKE}|localhost|${NUMERIC_HOST_LIKE}|${BRACKETED_HOST_LIKE})`;
 const USERINFO_LIKE = `(?:[\\p{L}\\p{N}._~-]+(?::[^@\\s/]+)?|${DOMAIN_LIKE})@`;
-const BARE_AUTHORITY_LIKE = `(?:${USERINFO_LIKE}(?:${HOST_LIKE}|\\d{1,12})(?::[^/\\s]+)?\\/|${SHORT_NUMERIC_AUTHORITY_LIKE}|${HOST_LIKE}(?::[^/\\s]+)?${URL_TOKEN_BOUNDARY})`;
+const BARE_AUTHORITY_LIKE = `(?:${USERINFO_LIKE}(?:${HOST_LIKE}|\\d{1,12})${PORT_LIKE}\\/|${SHORT_NUMERIC_AUTHORITY_LIKE}|${HOST_LIKE}${PORT_LIKE}${URL_TOKEN_BOUNDARY})`;
 const URL_CANDIDATE = new RegExp(
   String.raw`(?<![\p{L}\p{N}@._-])(?:https?:\/{0,2}|[a-z][a-z0-9+.-]{1,15}:\/\/|(?:javascript|data|file|ftp|blob):(?:\/\/)?|\/\/|www[.\u3002\uff0e\uff61]|${BARE_AUTHORITY_LIKE})[^\s<>"']*`,
   "giu",
@@ -72,6 +73,14 @@ function extractCandidates(value: string): readonly string[] {
   return (value.match(URL_CANDIDATE) ?? [])
     .map(trimCandidate)
     .filter(Boolean);
+}
+
+function hasEmptyAuthorityPort(raw: string): boolean {
+  const withoutScheme = raw
+    .replace(/^[a-z][a-z0-9+.-]{1,15}:\/\//iu, "")
+    .replace(/^\/\//u, "");
+  const authority = withoutScheme.split(/[/?#]/u, 1)[0] ?? "";
+  return authority.endsWith(":");
 }
 
 function privateOrReservedHost(hostname: string): boolean {
@@ -132,6 +141,7 @@ function classifyCandidate(raw: string): CustomerUrlItem {
     return dangerous("CUSTOMER_URL_DECEPTIVE_HOST");
   }
   if (/%(?![a-f0-9]{2})/iu.test(raw)) return dangerous("CUSTOMER_URL_INVALID");
+  if (hasEmptyAuthorityPort(raw)) return dangerous("CUSTOMER_URL_INVALID");
   const rawPath = raw.split(/[?#]/u, 1)[0] ?? raw;
   if (
     /%(?:2e|2f|5c|25)/iu.test(rawPath) ||

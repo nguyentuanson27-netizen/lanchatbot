@@ -83,6 +83,14 @@ describe("BF-08 classified customer URL policy", () => {
     "localhost:999999/admin",
     "example.com:abc/path",
     "example.com:999999/path",
+    "example.com:/path",
+    "user@example.com:/path",
+    "127:/admin",
+    "user@127:/admin",
+    "[::1]:/admin",
+    "user@[::1]:/admin",
+    "https://example.com:/path",
+    "https://[::1]:/admin",
   ])("blocks and redacts malformed or private URL-like input %s", (text) => {
     expect(classifyCustomerUrls(text, "CLASSIFIED_ALLOWLIST_V1")).toMatchObject({
       disposition: "HANDOFF",
@@ -312,7 +320,15 @@ describe("BF-08 classified customer URL policy", () => {
     "0177.0.0.1/admin",
     "0300.0250.0001.0001/admin",
     "example.com:abc/path",
-  ])("keeps strict mode fail closed for scheme-less authority %s", (text) => {
+    "example.com:/path",
+    "user@example.com:/path",
+    "127:/admin",
+    "user@127:/admin",
+    "[::1]:/admin",
+    "user@[::1]:/admin",
+    "https://example.com:/path",
+    "https://[::1]:/admin",
+  ])("keeps strict mode fail closed for malformed authority %s", (text) => {
     expect(classifyCustomerUrls(text, "STRICT_BLOCK_ALL")).toMatchObject({
       disposition: "HANDOFF",
       reasonCodes: ["CUSTOMER_URL_STRICT_BLOCK_ALL"],

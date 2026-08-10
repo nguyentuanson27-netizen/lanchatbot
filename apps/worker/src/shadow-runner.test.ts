@@ -37,7 +37,7 @@ function job(): ShadowEvaluationJob {
 
 describe("Phase 4 shadow runner", () => {
   it("redacts customer URLs from every shadow model context", async () => {
-    const rawUrl = "user@example.com/a?token=sentinel";
+    const rawUrl = "user@example.com:/a?token=sentinel";
     const urlJob = {
       ...job(),
       context: [{
@@ -339,7 +339,7 @@ describe("Phase 4 shadow runner", () => {
   });
 
   it("passes the persisted verified envelope to Judge v2 in DRY_RUN", async () => {
-    const rawUrl = "user@example.com/a?token=judge-sentinel";
+    const rawUrl = "user@example.com:/a?token=judge-sentinel";
     const completeComparison = vi.fn(async (
       _comparisonJob: unknown,
       _similarity: number,

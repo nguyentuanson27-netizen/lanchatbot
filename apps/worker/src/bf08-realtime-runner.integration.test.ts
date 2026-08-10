@@ -340,7 +340,11 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     "127/admin",
     "0177.0.0.1/admin",
     "example.com:abc/path",
-  ])("keeps the production wrapper strict for scheme-less authority %s", async (text) => {
+    "example.com:/path",
+    "user@127:/admin",
+    "user@[::1]:/admin",
+    "https://example.com:/path",
+  ])("keeps the production wrapper strict for malformed authority %s", async (text) => {
     const result = await runTurn({
       text: `please check ${text}`,
       policy: policy("STRICT_BLOCK_ALL"),
@@ -521,7 +525,10 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     });
     expect(result.quotaReserve).toHaveBeenCalledOnce();
     expect(result.draftCustomerUrlExplanation).not.toHaveBeenCalled();
-    expect(result.commit.metaPlan).toBeDefined();
+    expect(result.commit.metaPlan?.messages).toEqual([{
+      kind: "TEXT",
+      text: "Em kh\u00f4ng th\u1ec3 m\u1edf li\u00ean k\u1ebft n\u00e0y an to\u00e0n. Ch\u1ecb g\u1eedi m\u00e3 s\u1ea3n ph\u1ea9m ho\u1eb7c \u1ea3nh \u0111\u1ec3 em ki\u1ec3m tra nh\u00e9.",
+    }]);
     expect(result.commit.decisionEvents).toEqual(expect.arrayContaining([
       expect.objectContaining({
         reasonCodes: expect.arrayContaining([
@@ -545,7 +552,13 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     expect(result.quotaReserve.mock.invocationCallOrder[0]).toBeLessThan(
       result.draftCustomerUrlExplanation.mock.invocationCallOrder[0]!,
     );
-    expect(result.commit.metaPlan).toBeDefined();
+    expect(result.draftCustomerUrlExplanation.mock.invocationCallOrder[0]).toBeLessThan(
+      result.quotaReserve.mock.invocationCallOrder[1]!,
+    );
+    expect(result.commit.metaPlan?.messages).toEqual([{
+      kind: "TEXT",
+      text: "Em kh\u00f4ng th\u1ec3 m\u1edf li\u00ean k\u1ebft n\u00e0y an to\u00e0n. Ch\u1ecb g\u1eedi m\u00e3 s\u1ea3n ph\u1ea9m ho\u1eb7c \u1ea3nh \u0111\u1ec3 em ki\u1ec3m tra nh\u00e9.",
+    }]);
     expect(JSON.stringify(result.commit.metaPlan)).not.toContain("Access it");
     expect(result.commit.decisionEvents).toEqual(expect.arrayContaining([
       expect.objectContaining({
@@ -612,7 +625,14 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     "localhost:999999/admin",
     "example.com:abc/path",
     "example.com:999999/path",
-  ])("fails closed before model or resolver for scheme-less authority %s", async (text) => {
+    "example.com:/path",
+    "user@example.com:/path",
+    "127:/admin",
+    "user@127:/admin",
+    "[::1]:/admin",
+    "user@[::1]:/admin",
+    "https://example.com:/path",
+  ])("fails closed before model or resolver for malformed authority %s", async (text) => {
     const result = await runTurn({
       text: `please check ${text}`,
       policy: policy("CLASSIFIED_ALLOWLIST_V1"),
