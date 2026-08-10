@@ -1,0 +1,291 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-10T07:36:34Z",
+  "capturedAtSemantics": "repository release-preparation record time; not a live host capture",
+  "documentType": "APPEND_ONLY_COMBINED_RELEASE_PREPARATION_EVIDENCE",
+  "status": "REVIEW_CANDIDATE_SOURCE_AND_AUTOMATION_RUNTIME_DEPLOYMENT_PENDING",
+  "environment": "production-single-approved-page",
+  "releaseTag": "20260810-bf03-wave-c-r5.5",
+  "releasePreparation": {
+    "branch": "ops/20260810-bf03-wave-c-r5.5-release-prep",
+    "reviewCandidateTag": "20260810-bf03-wave-c-r5.5-review-candidate.6",
+    "reviewCandidateSemantics": "annotated immutable exact-head review candidate only; not deploy authorization",
+    "finalTagRequiredOnNormalMainMergeCommit": true,
+    "candidateTagMustNeverMove": true,
+    "changesRequireNextCandidateOrdinal": true,
+    "ciCheckoutFullHistoryRequiredForExactProvenance": true,
+    "ciCheckoutExactHeadRequired": true
+  },
+  "source": {
+    "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+    "branch": "main",
+    "implementationBoundaryCommit": "6c8de97c29e30ac428f742fd92a951c72caee9f7",
+    "implementationBoundaryTree": "b9843a150d1b681638dd625d471e4595bd1a2580",
+    "originMainAtFreshBoundaryVerification": "6c8de97c29e30ac428f742fd92a951c72caee9f7",
+    "originMainDriftClassification": "NO_DRIFT_AFTER_OWNER_CHECKPOINT",
+    "finalTagMustPointToCommitContainingThisManifestAndAutomation": true,
+    "pullRequests": [
+      {
+        "number": 158,
+        "issue": "BF-03",
+        "baseCommit": "2b1d0f2f0bfe7577588a0865a466b8bd42d7415a",
+        "reviewedHead": "5555cc086cc38cc19f064e9164dd254f37a3905c",
+        "mergeCommit": "cf7f2aae7fbc3ca12612f78acee927cd9262afce",
+        "mergeTree": "12bb8049d4d84d66c3a68dc6b4f737173272a8e7",
+        "scope": "FOUNDATION_ONLY_INACTIVE_CORRECTION_CONTAINMENT"
+      },
+      {
+        "number": 169,
+        "issue": "BF-06",
+        "baseCommit": "cf7f2aae7fbc3ca12612f78acee927cd9262afce",
+        "reviewedHead": "496babde5f2cedb8559dd60f5e45bbec580772a6",
+        "mergeCommit": "58507aedaf938c80fbd39c2c0180281af8d99dfd",
+        "mergeTree": "5e30073cd93b82c929bba07d4596ab03d05e7e12",
+        "scope": "PER_ASSET_MEDIA_RESOLUTION"
+      },
+      {
+        "number": 170,
+        "issue": "BF-07",
+        "baseCommit": "58507aedaf938c80fbd39c2c0180281af8d99dfd",
+        "reviewedHead": "e11278a10920a78a48959a34fd6b1c567b5faa6b",
+        "mergeCommit": "67201e8f96b060e670d9ce7960ec3b3b5f6add49",
+        "mergeTree": "a90fe7abcf91a83ed512f99cb1ddb585a5f82880",
+        "scope": "DISTINCT_PRODUCT_CLARIFICATION_AND_BF02_REPLAY_COMPATIBILITY"
+      },
+      {
+        "number": 172,
+        "issue": "BF-08",
+        "baseCommit": "dc4b2b2751c8da2877d58b981e7aa30c885a62b9",
+        "reviewedHead": "0e081cc8d29176fabdd8e7fa4267b06a04b58670",
+        "mergeCommit": "dfff2f41e0320e2514ccffe1bc621a88805675cb",
+        "mergeTree": "8712481f22e49420b5eac2479820a4a14d2b05dd",
+        "scope": "CLASSIFIED_CUSTOMER_URL_POLICY"
+      },
+      {
+        "number": 178,
+        "issue": "BF-09",
+        "baseCommit": "dfff2f41e0320e2514ccffe1bc621a88805675cb",
+        "reviewedHead": "805a41ccc47577064b31193c7f9a6408fbedfd5e",
+        "mergeCommit": "5431073ae80cd40fb9156ea18f681e7fc9d56aca",
+        "mergeTree": "abc4f24a834f14d8402908dfb2394494348c8a21",
+        "scope": "FULL_LOOK_MEDIA_MAPPING"
+      },
+      {
+        "number": 179,
+        "issue": "WAVE_C_COMBINED_EVIDENCE",
+        "baseCommit": "5431073ae80cd40fb9156ea18f681e7fc9d56aca",
+        "reviewedHead": "cec160d4e1d8a0296600b022155ef8b3fd44d9c1",
+        "mergeCommit": "6c8de97c29e30ac428f742fd92a951c72caee9f7",
+        "mergeTree": "b9843a150d1b681638dd625d471e4595bd1a2580",
+        "scope": "REQUIRED_MULTI_IMAGE_CLARIFICATION_SD398_REPLAY"
+      }
+    ],
+    "interleavedMainClassification": {
+      "liveR610SourceBoundaryCommits": [
+        "694fa313107c1a6ae83a97b4333cc288ed3c2133",
+        "fcfe88f5dae407746e5e354e1f3c754e69d09829",
+        "8eabe32c44529721e79b56b3ec5d0ea1ed333780",
+        "943b422539b14fe6a807071062a62e8726ee8415",
+        "ac1aa96a1058b97fb8ee67b5c121aef1ae281cf2"
+      ],
+      "postR610EvidenceOnlyCommits": [
+        "dc4b2b2751c8da2877d58b981e7aa30c885a62b9"
+      ],
+      "classification": "ADMIN_R6_8_TO_R6_10_PRESENT_IN_LIVE_SOURCE;_DC4B2B2_IS_POST_RELEASE_APPEND_ONLY_RUNTIME_EVIDENCE_ONLY",
+      "releaseEffect": "retained for reproducible main ancestry; this cutover does not recreate Admin services or apply Admin migration"
+    }
+  },
+  "compatibility": {
+    "bf01LiveRollback": {
+      "releaseTag": "20260809-bf01-reconcile-final-reply-r5.4",
+      "tagObject": "d57d5a9cabe4ef922d738c0c909ac9bd1dc08fd1",
+      "commit": "a63a3ccbd7dc2b3061cf96d56c3fa3e19c26851d"
+    },
+    "bf02": {
+      "releaseTag": "20260808-bf02-preserve-verified-context-r5.3",
+      "tagObject": "d74207636caf2a5b906ca5a56e5ec3726eb79b01",
+      "commit": "27467d1431020f7f10958ca762f66593a1c5b4f6",
+      "requiredReplay": "multi-image -> clarification ACTIVE -> xin gia SD398 resolves SD398 immediately without MEDIA_CLARIFICATION_EXHAUSTED"
+    },
+    "bf04": {
+      "releaseTag": "20260804-bf04-size-claim-guard-r4",
+      "tagObject": "431b3f4e11329d5164696b011f5fbd9566a09b31",
+      "commit": "ef7e07acd56c5812328c4b6bee4607bd23364b50"
+    },
+    "bf05": {
+      "releaseTag": "20260805-bf05-size-chart-eligibility-r5.1",
+      "tagObject": "e3d08f66a0d34fd0eac2781be0430e723b9e7275",
+      "commit": "bd1b98c772018bbb676db27c50464a1917fd5731"
+    }
+  },
+  "bf03InactiveInvariant": {
+    "required": true,
+    "runtimeAdapterPresent": false,
+    "productionImportPresent": false,
+    "publishableCorrectionPolicyPresent": false,
+    "activationPathPresent": false,
+    "proof": [
+      "apps/worker/src/foundation-runtime-boundary.test.ts",
+      "packages/contracts/src/v4/foundation-safe-correction-policy.test.ts",
+      "benchmarks/bf03/README.md"
+    ],
+    "mustRemainTrueAfterDeploy": true
+  },
+  "artifact": {
+    "status": "NOT_BUILT",
+    "image": "lana-chatbot-app:bf03-wave-c-r5.5",
+    "imageId": null,
+    "releasePath": "/opt/lana-chatbot/releases/20260810-bf03-wave-c-r5.5",
+    "automationPath": "deploy/releases/20260810-bf03-wave-c-r5.5",
+    "sourceMustBeMaterializedFromFinalAnnotatedTag": true,
+    "directVpsSourceEditsAllowed": false
+  },
+  "scope": {
+    "targetServices": ["realtime-worker"],
+    "targetedComposeInvocation": "docker compose up -d --no-deps realtime-worker",
+    "nonTargetServicesMustRemainUnchanged": true,
+    "migrationRequired": false,
+    "backfillRequired": false,
+    "dataDeletionRequired": false,
+    "routingChanged": false,
+    "pageAllowlistChanged": false,
+    "approvedPageId": "1198992073286645",
+    "messengerProductionTestAllowed": false,
+    "n8nActionAllowed": false,
+    "configEnvSecretBoundary": "preserve existing baseline; no secret entry or value may be added or changed",
+    "allowedInfrastructureEnvChanges": ["REALTIME_IMAGE", "REALTIME_RELEASE_ID"]
+  },
+  "policy": {
+    "codeDeployStage": "CURRENT_PUBLISHED_BUNDLE_UNCHANGED",
+    "effectiveWaveCDefaults": {
+      "mediaPartialResolutionPolicy": "LEGACY",
+      "multiProductResolutionPolicy": "LEGACY",
+      "customerUrlPolicy": "STRICT_BLOCK_ALL"
+    },
+    "replyReconciliationPolicy": "preserve exact current BF-01 field/value or omission",
+    "bf03CorrectionDialoguePolicy": "ABSENT_AND_SCHEMA_REJECTED",
+    "activationDuringThisDeployment": false,
+    "activationBlocker": "no reviewed immutable complete SHOP_POLICY + OFFER_POLICY + CLOSING_STRATEGY canary bundle with exact version IDs, hashes, simulation, CAS activation, readback, audit, bounded stages and rollback pointer",
+    "requiredFutureCanaryOrder": [
+      "review complete immutable bundle and simulations with side effects disabled",
+      "CANARY_SHADOW on the single approved page with exact pointer CAS and readback",
+      "CANARY_LIVE only if separately authorized and all stop thresholds remain green",
+      "PUBLISHED only after bounded evidence and fresh independent review",
+      "rollback pointer/channel first on any threshold"
+    ],
+    "mustNotInventFlagsValuesOrPointers": true
+  },
+  "freshHostBaseline": {
+    "capturedAt": "2026-08-10T07:08:10Z",
+    "capturedAtSemantics": "fresh read-only host observation time, distinct from repository record time",
+    "currentRelease": "20260810-admin-policy-review-r6.10",
+    "currentSourceCommit": "ac1aa96a1058b97fb8ee67b5c121aef1ae281cf2",
+    "currentRuntimeStateSha256": "518589bdd45975b7f9233c807919e4e68a4967a569ae7728360deadefda770a0",
+    "currentHistorySha256": "518589bdd45975b7f9233c807919e4e68a4967a569ae7728360deadefda770a0",
+    "currentReleaseSourceSha256": "4443b2e0e3eecd1c864f5eb323dc5343cdf6397da2793f9e05c6123958f4d51d",
+    "composeSha256": "e59ab08b6ad42c2d1d2e3a5a11ce9e34a935921c866917b0d23b6c3c5d69ac33",
+    "migrationLatest": "0031_admin_policy_safe_deletion",
+    "migrationLedgerDigest": "c2f764b824f9cdf9d865ff8b5fb853771f17405f889dbbd2bf4c66c44a8a4180",
+    "realtimeRollback": {
+      "image": "lana-chatbot-app:bf01-reconcile-final-reply-r5.4",
+      "imageId": "sha256:2c34155c8ddf51014801e2dd0424e4ca14e0bb6a5d0c055cd657a126c1db0b6e",
+      "containerId": "9da75a490df6f01f99a2fb5acb050c2f01003940ed46823035b02dd05fe5c9df",
+      "releaseId": "20260809-bf01-reconcile-final-reply-r5.4",
+      "health": "healthy",
+      "restartCount": 0,
+      "pid1Uid": 1000
+    },
+    "routingDigest": "746b8b4ba5e44d1bc5104f49715d66f0f1b6cdf24121c3cf0d76686a6fd6c9b5",
+    "realtimeConfigDigest": "a010db764638e4ccad9382e42500ff64127409dabaef8978ef98a2e9e0b7b647",
+    "deliveryConfigDigest": "9366860529d4950e7cfff535b3f88d38e80531264e333191e49ce9a4bc84f64a",
+    "queueActive": 0,
+    "duplicates": 0,
+    "secretObservation": "credential-bearing DATABASE_URL and REDIS_URL entries pre-exist in Config.Env; values were not captured; owner explicitly authorizes preservation only, not addition or change"
+  },
+  "deploymentAutomation": {
+    "preflight": "deploy/releases/20260810-bf03-wave-c-r5.5/preflight.sh",
+    "build": "deploy/releases/20260810-bf03-wave-c-r5.5/run-build.sh",
+    "artifactSmoke": "deploy/releases/20260810-bf03-wave-c-r5.5/artifact-smoke.sh",
+    "cutover": "deploy/releases/20260810-bf03-wave-c-r5.5/cutover.sh",
+    "postcheck": "deploy/releases/20260810-bf03-wave-c-r5.5/postcheck.sh",
+    "soak": "deploy/releases/20260810-bf03-wave-c-r5.5/soak.sh",
+    "runtimeStatePromotion": "deploy/releases/20260810-bf03-wave-c-r5.5/promote-runtime-state.sh",
+    "rollback": "deploy/releases/20260810-bf03-wave-c-r5.5/rollback.sh",
+    "automaticRollbackOnCutoverFailure": true,
+    "automaticRollbackOnSoakFailure": true,
+    "globalDeploymentLockRequired": true,
+    "runtimeStatePromotionOnlyAfterPostcheckAndSoak": true,
+    "secretSafeBoundaryDigestRequired": true
+  },
+  "successCriteria": [
+    "FINAL_TAG_OBJECT_PEELED_COMMIT_MAIN_MERGE_PARENTS_AND_ANCESTRY_PASS",
+    "IMMUTABLE_IMAGE_ID_LABELS_AND_ARTIFACT_SMOKE_PASS",
+    "ONLY_REALTIME_WORKER_RECREATED",
+    "REALTIME_HEALTHY_RESTART_ZERO_PID1_UID_1000",
+    "NON_TARGET_CONTAINER_IDS_UNCHANGED",
+    "MIGRATION_LEDGER_UNCHANGED",
+    "ROUTING_AND_SINGLE_PAGE_ALLOWLIST_UNCHANGED",
+    "NO_CONFIG_ENV_SECRET_ENTRY_OR_VALUE_ADDED_OR_CHANGED",
+    "INBOX_OUTBOX_PANCAKE_ACTIVE_AND_DUPLICATE_ZERO_WITH_NO_FAILURE_DELTA",
+    "DELIVERY_READY_AND_REALTIME_LOGS_CLEAN",
+    "POLICY_POINTER_HASH_MODE_AND_OFF_DEFAULTS_UNCHANGED",
+    "BF03_INACTIVE_AND_NON_ACTIVATABLE",
+    "SOAK_THREE_OF_THREE_PASS",
+    "RUNTIME_STATE_FRESH_PARITY_AND_ATOMIC_PROMOTION_PASS"
+  ],
+  "stopThresholds": [
+    "target unhealthy, readiness failure, restart count above zero, or PID1 UID not 1000",
+    "any non-target container ID changes",
+    "migration ledger, routing, allowlist, delivery config, or secret-safe runtime boundary changes",
+    "Inbox, Meta Outbox, or Pancake active/duplicate count above zero or failed-permanent total increases",
+    "runtime policy pointer/hash/channel or behavior-mode revision/hash/readback changes",
+    "any Wave-C policy field unexpectedly active or BF-03 correction field accepted",
+    "new fatal, uncaught, unhandled, or error log after cutover",
+    "unsupported URL network attempt, silent multi-product first-selection, safe partial-match loss, unverified media, or forbidden side effect"
+  ],
+  "rollback": {
+    "order": ["policy pointer/channel first if a separately authorized policy stage ever occurred", "exact BF-01 realtime image and previous r6.10 release"],
+    "release": "20260810-admin-policy-review-r6.10",
+    "realtimeImage": "lana-chatbot-app:bf01-reconcile-final-reply-r5.4",
+    "realtimeImageId": "sha256:2c34155c8ddf51014801e2dd0424e4ca14e0bb6a5d0c055cd657a126c1db0b6e",
+    "runtimeDefinitionAuthority": "previous release Compose plus reviewed realtime image-only override",
+    "preserve": ["PostgreSQL", "Redis", "Qdrant", "Inbox", "Outbox"],
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false,
+    "runtimeStateRollbackPromotionRequired": true
+  },
+  "authorizationBoundary": {
+    "ownerDeploymentInstructionRecorded": true,
+    "artifactBuildAuthorized": true,
+    "deploymentAuthorizedForRealtimeWorker": true,
+    "realtimeRestartAuthorized": true,
+    "vpsMutationAuthorizedOnlyThroughReviewedScripts": true,
+    "existingConfigEnvSecretBaselinePreservationAuthorized": true,
+    "configEnvSecretAdditionOrChangeAuthorized": false,
+    "migrationAuthorized": false,
+    "backfillAuthorized": false,
+    "dataDeletionAuthorized": false,
+    "policyActivationAuthorizedWithoutReviewedArtifact": false,
+    "routingMutationAuthorized": false,
+    "pageAllowlistMutationAuthorized": false,
+    "messengerProductionTestAuthorized": false,
+    "n8nActionAuthorized": false,
+    "directVpsSourceEditAuthorized": false
+  },
+  "verification": {
+    "frozenInstall": "PENDING_EXACT_HEAD",
+    "canonicalPnpmCheck": "PENDING_EXACT_HEAD",
+    "combinedWaveCInteractionReplay": "PENDING_EXACT_HEAD",
+    "releaseIntegrityRuntimeStateDatasetBoundary": "PENDING_EXACT_HEAD",
+    "secretPiiMigrationGeneratedDiffScans": "PENDING_EXACT_HEAD",
+    "githubCi": "PENDING_EXACT_HEAD",
+    "independentExactHeadReview": "PENDING"
+  },
+  "manifestIntegrity": {
+    "appendOnlyNewArtifact": true,
+    "immutableAfterCandidateTag": true,
+    "runtimeEvidenceMustBeAppendOnlyFollowUpPr": true,
+    "repositoryRecordDoesNotClaimLiveDeployment": true,
+    "directVpsSourceEditsAllowed": false
+  }
+}
