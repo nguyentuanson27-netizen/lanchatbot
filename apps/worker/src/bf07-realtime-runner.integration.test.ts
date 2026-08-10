@@ -480,7 +480,7 @@ describe("BF-07 realtime multi-product clarification", () => {
     }));
   });
 
-  it("replays multi-image clarification then resolves explicit SD398 without exhaustion", async () => {
+  it("preserves BF-06 partial matches through BF-07 clarification and resolves explicit SD398 via BF-02", async () => {
     const claims = [
       claim({
         suffix: "bf07-images",
@@ -488,16 +488,18 @@ describe("BF-07 realtime multi-product clarification", () => {
         text: null,
         imageUrls: [
           "https://cdn.example.test/SD375.jpg",
+          "https://cdn.example.test/download-fails.jpg",
           "https://cdn.example.test/SD398.jpg",
         ],
       }),
       claim({ suffix: "bf07-price", sequence: 2, text: "xin giá SD398" }),
     ];
     const claimNext = vi.fn(async () => claims.shift() ?? null);
+    const complete = vi.fn(async () => true);
     const retry = vi.fn(async () => true);
     const inbox: RealtimeInboxPort = {
       claimNext,
-      complete: vi.fn(async () => true),
+      complete,
       retry,
       failPermanent: vi.fn(async () => true),
     };
@@ -536,18 +538,41 @@ describe("BF-07 realtime multi-product clarification", () => {
       linkProviderConversation: vi.fn(async () => undefined),
     };
 
-    const search: RealtimeProductSearchPort = {
-      searchText: vi.fn(async (value) => value.toLocaleUpperCase("vi").includes("SD398")
+    const searchText = vi.fn(async (value: string) => value.toLocaleUpperCase("vi").includes("SD398")
         ? { status: "MATCHED" as const, matchKind: "EXACT_CODE" as const, product: sd398, score: 1, gap: null }
-        : { status: "NOT_FOUND" as const, reasonCode: "NO_CANDIDATES" as const }),
+        : { status: "NOT_FOUND" as const, reasonCode: "NO_CANDIDATES" as const });
+    const searchImages = vi.fn(async (urls: readonly string[]) => urls.length === 3
+      ? [
+          {
+            status: "MATCHED" as const,
+            matchKind: "SEMANTIC" as const,
+            product: sd375,
+            score: 0.9,
+            gap: 0.1,
+          },
+          {
+            status: "ERROR" as const,
+            reasonCode: "MEDIA_IMAGE_DOWNLOAD_FAILED" as const,
+          },
+          {
+            status: "MATCHED" as const,
+            matchKind: "SEMANTIC" as const,
+            product: sd398,
+            score: 0.9,
+            gap: 0.1,
+          },
+        ]
+      : [sd375, sd398].map((matched) => ({
+          status: "MATCHED" as const,
+          matchKind: "SEMANTIC" as const,
+          product: matched,
+          score: 0.9,
+          gap: 0.1,
+        })));
+    const search: RealtimeProductSearchPort = {
+      searchText,
       searchImage: vi.fn(),
-      searchImages: vi.fn(async () => [sd375, sd398].map((matched) => ({
-        status: "MATCHED" as const,
-        matchKind: "SEMANTIC" as const,
-        product: matched,
-        score: 0.9,
-        gap: 0.1,
-      }))),
+      searchImages,
     };
     const facts: BusinessFactsReader = {
       ready: vi.fn(async () => true),
@@ -588,7 +613,7 @@ describe("BF-07 realtime multi-product clarification", () => {
       draftMultiProductClarification,
     };
     const policyResolver: RuntimePolicyResolverPort = {
-      resolve: vi.fn(async () => livePolicy()),
+      resolve: vi.fn(async () => livePolicy("CLARIFY_V1")),
     };
     const analyses: Parameters<NonNullable<CanonicalChatHistoryPort["recordMessageAnalysis"]>>[0][] = [];
     const history: CanonicalChatHistoryPort = {
@@ -621,6 +646,9 @@ describe("BF-07 realtime multi-product clarification", () => {
 
     expect(await runner.processOne()).toBe(true);
     expect(retry).not.toHaveBeenCalled();
+    expect(complete).toHaveBeenCalledOnce();
+    expect(searchImages).toHaveBeenCalledOnce();
+    expect(facts.resolve).not.toHaveBeenCalled();
     expect(draftMultiProductClarification).toHaveBeenCalledOnce();
     expect(quotaReserve).toHaveBeenCalledOnce();
     expect(draftMultiProductClarification).toHaveBeenCalledWith(
@@ -636,6 +664,12 @@ describe("BF-07 realtime multi-product clarification", () => {
       ],
       mediaClarification: {
         status: "ACTIVE",
+        candidates: [
+          { label: "SET_1", productId: "SD375" },
+          { label: "SET_2", productId: "SD398" },
+        ],
+        attemptCount: 0,
+        maxAttempts: 3,
         reasonCode: "MULTI_PRODUCT_SELECTION_REQUIRED",
       },
     });
@@ -645,24 +679,67 @@ describe("BF-07 realtime multi-product clarification", () => {
     }]);
     expect(commits[0]?.decisionEvents).toContainEqual(expect.objectContaining({
       eventType: "CLARIFICATION_REQUESTED",
-      reasonCodes: ["MULTI_PRODUCT_SELECTION_REQUIRED"],
+      origin: "MEDIA",
+      productId: null,
+      reasonCodes: [
+        "MULTI_PRODUCT_SELECTION_REQUIRED",
+        "MEDIA_PARTIAL_MATCHES_PRESERVED",
+        "MEDIA_USABLE_2_OF_3",
+      ],
     }));
-    expect(analyses[0]?.media.map(({ ordinal, productId }) => ({ ordinal, productId }))).toEqual([
-      { ordinal: 0, productId: "SD375" },
-      { ordinal: 1, productId: "SD398" },
+    expect(
+      (commits[0]?.decisionEvents ?? []).filter(
+        ({ eventType }) => eventType === "CLARIFICATION_REQUESTED",
+      ),
+    ).toHaveLength(1);
+    expect(commits[0]?.decisionEvents).not.toContainEqual(expect.objectContaining({
+      eventType: "PRODUCT_RESOLVED",
+    }));
+    expect(commits[0]?.decisionEvents).not.toContainEqual(expect.objectContaining({
+      eventType: "PRODUCT_MATCHED",
+    }));
+    expect(commits[0]?.decisionEvents).not.toContainEqual(expect.objectContaining({
+      eventType: "GUARD_BLOCKED",
+    }));
+    expect(commits[0]?.handoffEventPlan).toBeUndefined();
+    expect(JSON.stringify(commits[0])).not.toContain("MEDIA_CLARIFICATION_EXHAUSTED");
+    expect(
+      analyses[0]?.media.map(({ ordinal, status, productId, reasonCode }) => ({
+        ordinal,
+        status,
+        productId,
+        reasonCode,
+      })),
+    ).toEqual([
+      { ordinal: 0, status: "MATCHED", productId: "SD375", reasonCode: null },
+      {
+        ordinal: 1,
+        status: "ERROR",
+        productId: null,
+        reasonCode: "MEDIA_IMAGE_DOWNLOAD_FAILED",
+      },
+      { ordinal: 2, status: "MATCHED", productId: "SD398", reasonCode: null },
     ]);
 
     expect(await runner.processOne()).toBe(true);
     expect(retry).not.toHaveBeenCalled();
+    expect(complete).toHaveBeenCalledTimes(2);
+    expect(commits).toHaveLength(2);
+    expect(searchImages).toHaveBeenCalledOnce();
+    expect(searchText).toHaveBeenCalledOnce();
     expect(draftMultiProductClarification).toHaveBeenCalledOnce();
     expect(quotaReserve).toHaveBeenCalledOnce();
     expect(model.generate).not.toHaveBeenCalled();
+    expect(model.groundWithFacts).not.toHaveBeenCalled();
     expect(commits[1]?.state).toMatchObject({
       currentProductId: "SD398",
       productSelections: [],
       mediaClarification: null,
     });
     expect(JSON.stringify(commits[1]?.metaPlan)).toContain("SD398");
+    expect(facts.resolve).toHaveBeenCalledOnce();
+    expect(facts.resolve).toHaveBeenCalledWith(expect.objectContaining({ productId: "SD398" }));
+    expect(JSON.stringify(commits.slice(0, 2))).not.toContain("MEDIA_CLARIFICATION_EXHAUSTED");
     expect(JSON.stringify(commits[1]?.decisionEvents)).not.toContain(
       "MEDIA_CLARIFICATION_EXHAUSTED",
     );
@@ -687,6 +764,9 @@ describe("BF-07 realtime multi-product clarification", () => {
     expect(await runner.processOne()).toBe(true);
     expect(quotaReserve).toHaveBeenCalledTimes(2);
     expect(commits[2]?.state.mediaClarification).toMatchObject({ status: "ACTIVE" });
+    expect(JSON.stringify(commits[2]?.decisionEvents)).not.toContain(
+      "MEDIA_PARTIAL_MATCHES_PRESERVED",
+    );
 
     claims.push(claim({ suffix: "bf07-ordinal-selection", sequence: 4, text: "chị chọn mẫu 2" }));
     expect(await runner.processOne()).toBe(true);
