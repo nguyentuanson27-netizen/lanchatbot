@@ -244,6 +244,8 @@ for (const required of [
 }
 const waveCManifest = JSON.parse(readFileSync(join(manifestDir, `${waveCReleaseTag}.json`), 'utf8'));
 if (waveCManifest.releaseTag !== waveCReleaseTag ||
+    waveCManifest.releasePreparation?.ciCheckoutFullHistoryRequiredForExactProvenance !== true ||
+    waveCManifest.releasePreparation?.ciCheckoutExactHeadRequired !== true ||
     waveCManifest.source?.implementationBoundaryCommit !== '6c8de97c29e30ac428f742fd92a951c72caee9f7' ||
     waveCManifest.source?.implementationBoundaryTree !== 'b9843a150d1b681638dd625d471e4595bd1a2580' ||
     JSON.stringify(waveCManifest.scope?.targetServices) !== JSON.stringify(['realtime-worker']) ||
@@ -254,6 +256,13 @@ if (waveCManifest.releaseTag !== waveCReleaseTag ||
     waveCManifest.scope?.messengerProductionTestAllowed !== false ||
     waveCManifest.scope?.n8nActionAllowed !== false) {
   throw new Error('WAVE_C_RELEASE_MANIFEST_SCOPE_OR_PROVENANCE');
+}
+const ciWorkflowPath = join(root, '.github', 'workflows', 'ci.yml');
+if (existsSync(ciWorkflowPath)) {
+  const ciWorkflow = readFileSync(ciWorkflowPath, 'utf8');
+  if (!/uses: actions\/checkout@[a-f0-9]+[^\n]*\n\s+with:\n\s+ref: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}\n\s+fetch-depth: 0/u.test(ciWorkflow)) {
+    throw new Error('WAVE_C_CI_FULL_HISTORY_PROVENANCE_MISSING');
+  }
 }
 const expectedWaveCPullRequests = [
   { number: 158, issue: 'BF-03', baseCommit: '2b1d0f2f0bfe7577588a0865a466b8bd42d7415a', reviewedHead: '5555cc086cc38cc19f064e9164dd254f37a3905c', mergeCommit: 'cf7f2aae7fbc3ca12612f78acee927cd9262afce', mergeTree: '12bb8049d4d84d66c3a68dc6b4f737173272a8e7', scope: 'FOUNDATION_ONLY_INACTIVE_CORRECTION_CONTAINMENT' },

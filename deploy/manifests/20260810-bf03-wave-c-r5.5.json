@@ -12,7 +12,9 @@
     "reviewCandidateSemantics": "annotated immutable exact-head review candidate only; not deploy authorization",
     "finalTagRequiredOnNormalMainMergeCommit": true,
     "candidateTagMustNeverMove": true,
-    "changesRequireNextCandidateOrdinal": true
+    "changesRequireNextCandidateOrdinal": true,
+    "ciCheckoutFullHistoryRequiredForExactProvenance": true,
+    "ciCheckoutExactHeadRequired": true
   },
   "source": {
     "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
