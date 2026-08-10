@@ -397,15 +397,15 @@ export function verifyCustomerUrlExplanationProposal(
     .replace(/[\u0300-\u036f]/gu, "")
     .replace(/\u0111/gu, "d")
     .toLocaleLowerCase("vi")
-    .replace(/\bkhong[\s\p{Cf}\p{P}\p{S}]+ho[\s\p{Cf}\p{P}\p{S}]+tro\b/gu, "khong ho tro")
-    .replace(/\b(?:khong|chua)[\s\p{Cf}\p{P}\p{S}]+the\b/gu, (value) =>
+    .replace(/\bkhong[^\p{L}\p{N}]+ho[^\p{L}\p{N}]+tro\b/gu, "khong ho tro")
+    .replace(/\b(?:khong|chua)[^\p{L}\p{N}]+the\b/gu, (value) =>
       value.startsWith("khong") ? "khong the" : "chua the"
     )
-    .replace(/\bkiem[\s\p{Cf}\p{P}\p{S}]+tra\b/gu, "kiem tra")
-    .replace(/\btruy[\s\p{Cf}\p{P}\p{S}]+cap\b/gu, "truy cap")
-    .replace(/\blien[\s\p{Cf}\p{P}\p{S}]+ket\b/gu, "lien ket")
-    .replace(/\bma[\s\p{Cf}\p{P}\p{S}]+san[\s\p{Cf}\p{P}\p{S}]+pham\b/gu, "ma san pham")
-    .replace(/\bhinh[\s\p{Cf}\p{P}\p{S}]+anh\b/gu, "hinh anh")
+    .replace(/\bkiem[^\p{L}\p{N}]+tra\b/gu, "kiem tra")
+    .replace(/\btruy[^\p{L}\p{N}]+cap\b/gu, "truy cap")
+    .replace(/\blien[^\p{L}\p{N}]+ket\b/gu, "lien ket")
+    .replace(/\bma[^\p{L}\p{N}]+san[^\p{L}\p{N}]+pham\b/gu, "ma san pham")
+    .replace(/\bhinh[^\p{L}\p{N}]+anh\b/gu, "hinh anh")
     .replace(/\s+/gu, " ")
     .trim();
   const statesSafeLimitation =
