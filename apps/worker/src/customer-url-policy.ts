@@ -407,6 +407,10 @@ export function verifyCustomerUrlExplanationProposal(
     foldedReply.slice(0, index).split(
       /[,.!?;]|\b(?:but|however|then|nhung|tuy nhien|sau do)\b/giu,
     ).at(-1) ?? "";
+  const clauseSuffixAfter = (index: number): string =>
+    foldedReply.slice(index).split(
+      /[,.!?;]|\b(?:but|however|then|nhung|tuy nhien|sau do)\b/giu,
+    )[0] ?? "";
   const isNegatedAction = (clausePrefix: string): boolean =>
     /\b(?:cannot|can't|unable(?: to)?|do not|don't|not able to|khong the|chua the|khong ho tro)\b.{0,48}$/iu
       .test(clausePrefix);
@@ -420,6 +424,10 @@ export function verifyCustomerUrlExplanationProposal(
   )].some((match) => {
     const clausePrefix = clausePrefixBefore(match.index);
     if (isNegatedAction(clausePrefix)) return false;
+    const checksLink = /\b(?:this|that|the)?\s*(?:link|lien ket)\b/iu.test(
+      clauseSuffixAfter(match.index + match[0].length),
+    );
+    if (checksLink) return true;
     const botDirected = /\b(?:(?:so|then)\s+)?(?:i|we)\s*(?:can|will|may)?\s*$/iu
         .test(clausePrefix) ||
       /\b(?:de\s+)?(?:em|toi|chung toi)\s*(?:co the|se)?\s*$/iu
