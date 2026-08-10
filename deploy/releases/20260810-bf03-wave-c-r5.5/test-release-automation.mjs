@@ -211,6 +211,7 @@ try {
   }
 
   requireText('common.sh', /EXPECTED_RELEASE_TAG="20260810-bf03-wave-c-r5\.5"/u, 'release identity not pinned');
+  requireText('common.sh', /EXPECTED_CANDIDATE_TAG="20260810-bf03-wave-c-r5\.5-review-candidate\.3"/u, 'reviewed candidate ordinal not pinned');
   requireText('common.sh', /EXPECTED_ROLLBACK_REALTIME_IMAGE_ID="sha256:2c34155c8ddf51014801e2dd0424e4ca14e0bb6a5d0c055cd657a126c1db0b6e"/u, 'rollback image ID not pinned');
   requireText('common.sh', /EXPECTED_ROLLBACK_REALTIME_REVISION="a63a3ccbd7dc2b3061cf96d56c3fa3e19c26851d"/u, 'rollback revision not pinned');
   requireText('common.sh', /final release merge parents mismatch/u, 'exact final merge-parent gate missing');
