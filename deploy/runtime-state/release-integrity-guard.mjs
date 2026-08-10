@@ -70,7 +70,7 @@ const unknownField = structuredClone(example); unknownField.unapproved = true; i
 
 const manifestDir = join(root, 'deploy', 'manifests');
 for (const file of readdirSync(manifestDir).filter((name) => name.endsWith('.json'))) JSON.parse(readFileSync(join(manifestDir, file), 'utf8'));
-const adminReleaseTag = '20260810-admin-policy-review-r6.9';
+const adminReleaseTag = '20260810-admin-policy-review-r6.10';
 const adminReleaseDir = join(root, 'deploy', 'releases', adminReleaseTag);
 const adminReleaseScripts = [
   'common.sh',
@@ -160,7 +160,9 @@ if (JSON.stringify(adminManifest.scope?.targetServices) !== JSON.stringify(['adm
 if (adminManifest.scope?.adminSimulationWorkerMustRemainUnchanged !== true || adminManifest.scope?.messengerProductionTestAllowed !== false) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_NON_TARGET_SCOPE');
 }
-if (adminManifest.supersedesUnexecutedRelease !== '20260810-admin-policy-review-r6.8' ||
+if (adminManifest.supersedesFailedRelease !== '20260810-admin-policy-review-r6.9' ||
+    adminManifest.failedReleaseOutcome !== 'PRE_CUTOVER_DDL_PERMISSION_FAILURE_AUTOMATIC_ROLLBACK_PASS' ||
+    adminManifest.deploymentAutomation?.productionMigrationAuthority !== 'EXACT_TARGET_IMAGE_SQL_APPLIED_BY_DATABASE_OWNER_WITH_ATOMIC_LEDGER' ||
     adminManifest.deploymentAutomation?.automaticRollbackOnSoakFailure !== true ||
     adminManifest.deploymentAutomation?.globalDeploymentLockRequired !== true ||
     adminManifest.rollback?.runtimeDefinitionAuthority !== 'previous release Compose plus reviewed image-only override') {
