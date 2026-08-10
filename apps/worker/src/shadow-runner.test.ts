@@ -42,7 +42,7 @@ describe("Phase 4 shadow runner", () => {
       ...job(),
       context: [{
         ...job().context[0]!,
-        text: `Xin xem ${rawUrl}`,
+        text: `Xin xem ${rawUrl}; chị chọn mẫu 1/2`,
       }],
     };
     const store = {
@@ -84,6 +84,7 @@ describe("Phase 4 shadow runner", () => {
     expect(serializedContext).not.toContain(rawUrl);
     expect(serializedContext).not.toContain("secret");
     expect(serializedContext).not.toContain("sentinel");
+    expect(serializedContext).toContain("chị chọn mẫu 1/2");
   });
 
   it("stores a guarded structured proposal without authorizing send", async () => {
@@ -373,7 +374,7 @@ describe("Phase 4 shadow runner", () => {
       proposalReply: "Dạ Set SQ149 có giá 699k ạ",
       actualOutboundText: `Dạ Set SQ149 có giá 699k ạ ${rawUrl}`,
       actualOutboundCount: 1,
-      context: [{ ...job().context[0]!, text: `Xin xem ${rawUrl}` }],
+      context: [{ ...job().context[0]!, text: `Xin xem ${rawUrl}; chị chọn mẫu 1/2` }],
       proposalSummary: { productId: "SQ149", action: "REPLY", reply: rawUrl },
       guardOutcome: { action: "REPLY", blockedReasonCodes: [], detail: rawUrl },
       businessFactEnvelope: verifiedEnvelope,
@@ -419,7 +420,7 @@ describe("Phase 4 shadow runner", () => {
 
     await expect(runner.processComparisonOne()).resolves.toBe(true);
     expect(model.judgeSalesReplyV2).toHaveBeenCalledWith(
-      [{ ...comparison.context[0]!, text: "Xin xem [CUSTOMER_URL]" }],
+      [{ ...comparison.context[0]!, text: "Xin xem [CUSTOMER_URL]; chị chọn mẫu 1/2" }],
       "Dạ Set SQ149 có giá 699k ạ [CUSTOMER_URL]",
       verifiedEnvelope,
       { productId: "SQ149", action: "REPLY", reply: "[CUSTOMER_URL]" },

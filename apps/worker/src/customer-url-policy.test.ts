@@ -32,6 +32,18 @@ describe("BF-08 classified customer URL policy", () => {
       .toMatchObject({ disposition: "CONTINUE", items: [] });
     expect(classifyCustomerUrls("chị chọn mẫu 2", "CLASSIFIED_ALLOWLIST_V1"))
       .toMatchObject({ disposition: "CONTINUE", items: [] });
+    for (const ordinaryText of [
+      "chị chọn mẫu 1/2",
+      "chị chọn 1/2",
+      "ảnh 1/2 đẹp hơn",
+      "ngày 10/08",
+    ]) {
+      expect(classifyCustomerUrls(ordinaryText, "CLASSIFIED_ALLOWLIST_V1"))
+        .toMatchObject({ disposition: "CONTINUE", items: [] });
+      expect(classifyCustomerUrls(ordinaryText, "STRICT_BLOCK_ALL"))
+        .toMatchObject({ disposition: "CONTINUE", items: [] });
+      expect(redactCustomerUrlsForModel(ordinaryText)).toBe(ordinaryText);
+    }
     expect(classifyCustomerUrls("size:M; code:SV695", "CLASSIFIED_ALLOWLIST_V1"))
       .toMatchObject({ disposition: "CONTINUE", items: [] });
     expect(classifyCustomerUrls("contact user@example.com", "CLASSIFIED_ALLOWLIST_V1"))
@@ -62,6 +74,7 @@ describe("BF-08 classified customer URL policy", () => {
     "user:secret@example.com/a",
     "user@example.com/a?token=secret",
     "user@127.0.0.1/admin",
+    "user@127/admin",
     "user@[::1]/admin",
     "lanadesign.vn@evil.test/a",
     "127/admin",
@@ -293,6 +306,7 @@ describe("BF-08 classified customer URL policy", () => {
   it.each([
     "user@example.com/a?token=secret",
     "user@127.0.0.1/admin",
+    "user@127/admin",
     "user@[::1]/admin",
     "127/admin",
     "0177.0.0.1/admin",

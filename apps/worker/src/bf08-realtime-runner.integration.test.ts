@@ -332,6 +332,7 @@ describe("BF-08 production-wrapper customer URL policy", () => {
 
   it.each([
     "user@example.com/a?token=secret",
+    "user@127/admin",
     "127/admin",
     "0177.0.0.1/admin",
     "example.com:abc/path",
@@ -346,6 +347,18 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     expect(result.commit.metaPlan).toBeUndefined();
     expect(result.commit.pancakeTagPlan).toBeDefined();
     expect(JSON.stringify(result.commit)).not.toContain(text);
+  });
+
+  it.each([
+    "chị chọn mẫu 1/2",
+    "ngày 10/08",
+  ])("keeps ordinary numeric slash text on the normal production path: %s", async (text) => {
+    const result = await runTurn({
+      text,
+      policy: policy("STRICT_BLOCK_ALL"),
+    });
+    expect(result.draftCustomerUrlExplanation).not.toHaveBeenCalled();
+    expect(JSON.stringify(result.commit.decisionEvents)).not.toContain("CUSTOMER_URL");
   });
 
   it("resolves an approved product URL offline through the production BF-02 wrapper", async () => {
@@ -528,6 +541,7 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     "user:secret@example.com/a",
     "user@example.com/a?token=secret",
     "user@127.0.0.1/admin",
+    "user@127/admin",
     "user@[::1]/admin",
     "lanadesign.vn@evil.test/a",
     "127/admin",
