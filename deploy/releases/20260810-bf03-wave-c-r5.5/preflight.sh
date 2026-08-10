@@ -20,6 +20,8 @@ git -C "$REPOSITORY_DIR" fetch --no-tags origin \
   "+refs/heads/main:refs/remotes/origin/main"
 require_release_identity
 require_image_inputs
+require_no_inherited_compose_overrides "" "$REPOSITORY_DIR/deploy/docker-compose.vps.yml"
+verify_prospective_realtime_env_parity "$REPOSITORY_DIR/deploy/docker-compose.vps.yml"
 test "$(git -C "$REPOSITORY_DIR" rev-parse HEAD)" = "$RELEASE_COMMIT" || die "repository worktree is not the exact release commit"
 test -z "$(git -C "$REPOSITORY_DIR" status --short)" || die "repository worktree is not clean"
 

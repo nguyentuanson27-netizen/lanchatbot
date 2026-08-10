@@ -8,7 +8,7 @@
   "releaseTag": "20260810-bf03-wave-c-r5.5",
   "releasePreparation": {
     "branch": "ops/20260810-bf03-wave-c-r5.5-release-prep",
-    "reviewCandidateTag": "20260810-bf03-wave-c-r5.5-review-candidate.3",
+    "reviewCandidateTag": "20260810-bf03-wave-c-r5.5-review-candidate.4",
     "reviewCandidateSemantics": "annotated immutable exact-head review candidate only; not deploy authorization",
     "finalTagRequiredOnNormalMainMergeCommit": true,
     "candidateTagMustNeverMove": true,

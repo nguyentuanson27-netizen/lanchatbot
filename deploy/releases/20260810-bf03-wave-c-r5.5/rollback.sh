@@ -10,6 +10,7 @@ for command_name in docker node cp chmod readlink flock mktemp rm mv; do
 done
 acquire_deployment_lock
 require_rollback_inputs
+require_no_inherited_compose_overrides "ROLLBACK_REALTIME_IMAGE" "$PREVIOUS_COMPOSE_FILE" "$ROLLBACK_COMPOSE_OVERRIDE"
 test -f "$ENV_BACKUP" || die "rollback env backup missing"
 test -f "$COMPOSE_FILE" || die "release compose missing"
 : "${PRECUTOVER_RUNTIME_STATE_FILE:=$EVIDENCE_DIR/precutover-runtime-state.json}"

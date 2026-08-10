@@ -18,6 +18,8 @@ install -d -m 0750 "$RELEASE_DIR"
 git -C "$REPOSITORY_DIR" archive "$RELEASE_TAG" | tar -x -C "$RELEASE_DIR"
 test -f "$COMPOSE_FILE" || die "release materialization incomplete"
 test "$(sha256sum "$COMPOSE_FILE" | awk '{print $1}')" = "$EXPECTED_COMPOSE_SHA256" || die "materialized Compose checksum mismatch"
+require_no_inherited_compose_overrides "" "$COMPOSE_FILE"
+verify_prospective_realtime_env_parity "$COMPOSE_FILE"
 
 RELEASE_SOURCE_DIR="$RELEASE_DIR" \
 RELEASE_SOURCE_TAG="$RELEASE_TAG" \

@@ -11,6 +11,8 @@ for command_name in docker node sha256sum readlink cp chmod date awk mktemp mv c
 done
 acquire_deployment_lock
 require_cutover_inputs
+require_no_inherited_compose_overrides "" "$COMPOSE_FILE"
+verify_prospective_realtime_env_parity "$COMPOSE_FILE"
 test -f "$RELEASE_DIR/.release-source.json" || die "release source pointer missing"
 node "$script_dir/validate-release-pointer.mjs" "$RELEASE_DIR/.release-source.json" "$RELEASE_TAG" "$RELEASE_COMMIT"
 test -s "$EVIDENCE_DIR/image-id" || die "built image evidence missing"
@@ -26,7 +28,8 @@ node "$script_dir/validate-target-evidence.mjs" \
   "$RUNTIME_STATE_SERVICE_EVIDENCE_FILE" \
   "$RUNTIME_STATE_ROLLBACK_EVIDENCE_FILE" \
   "$RELEASE_DIR/deploy/runtime-state/service-inventory.json" \
-  "$target_image_id" "$ROLLBACK_REALTIME_IMAGE" "$ROLLBACK_REALTIME_IMAGE_ID"
+  "$target_image_id" "$ROLLBACK_REALTIME_IMAGE" "$ROLLBACK_REALTIME_IMAGE_ID" \
+  "$ROLLBACK_REALTIME_RELEASE_ID" "$EXPECTED_ROLLBACK_REALTIME_REVISION"
 
 precutover_candidate_id="$RELEASE_TAG-precutover-rollback-$(date -u +%Y%m%dT%H%M%SZ)-$$"
 precutover_candidate="$APP_ROOT/runtime-state/candidates/$precutover_candidate_id.json"

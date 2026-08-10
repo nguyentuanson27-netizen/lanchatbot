@@ -211,6 +211,8 @@ for (const requiredFile of [
   'capture-deployment-boundary.mjs',
   'validate-deployment-boundary.mjs',
   'validate-operational-state.mjs',
+  'validate-prospective-realtime-env.mjs',
+  'validate-realtime-log.mjs',
   'validate-runtime-invariants.mjs',
   'validate-target-evidence.mjs',
   'validate-release-pointer.mjs',

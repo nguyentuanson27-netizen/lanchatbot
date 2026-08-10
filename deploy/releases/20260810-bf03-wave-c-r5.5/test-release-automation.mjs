@@ -44,17 +44,27 @@ try {
   deployment.services['realtime-worker'].expectedImageId = aaaa;
   deployment.services['realtime-worker'].rollback = { release: 'old', image: 'old:realtime', imageId: bbbb };
   rollback.services['realtime-worker'].expectedImageId = bbbb;
+  rollback.services['realtime-worker'].expectedRevision = 'a'.repeat(40);
+  rollback.services['realtime-worker'].rollback = { release: 'old', image: 'old:realtime', imageId: bbbb };
   const deploymentPath = join(scratch, 'deployment.json');
   const rollbackPath = join(scratch, 'rollback.json');
   writeFileSync(deploymentPath, JSON.stringify(deployment));
   writeFileSync(rollbackPath, JSON.stringify(rollback));
-  let result = run('validate-target-evidence.mjs', [deploymentPath, rollbackPath, inventoryPath, aaaa, 'old:realtime', bbbb]);
+  const targetEvidenceArgs = [deploymentPath, rollbackPath, inventoryPath, aaaa, 'old:realtime', bbbb, 'old', 'a'.repeat(40)];
+  let result = run('validate-target-evidence.mjs', targetEvidenceArgs);
   if (result.status !== 0) throw new Error(`valid target evidence rejected: ${result.stderr}`);
   rollback.services.api.rollback.imageId = cccc;
   writeFileSync(rollbackPath, JSON.stringify(rollback));
-  result = run('validate-target-evidence.mjs', [deploymentPath, rollbackPath, inventoryPath, aaaa, 'old:realtime', bbbb]);
+  result = run('validate-target-evidence.mjs', targetEvidenceArgs);
   if (result.status === 0 || !result.stderr.includes('NON_TARGET_EVIDENCE_MISMATCH:api')) {
     throw new Error('non-target evidence drift did not fail closed');
+  }
+  rollback.services.api.rollback.imageId = deployment.services.api.rollback.imageId;
+  rollback.services['realtime-worker'].rollback.imageId = cccc;
+  writeFileSync(rollbackPath, JSON.stringify(rollback));
+  result = run('validate-target-evidence.mjs', targetEvidenceArgs);
+  if (result.status === 0 || !result.stderr.includes('ROLLBACK_RECOVERY_IDENTITY_MISMATCH:realtime-worker')) {
+    throw new Error('wrong future realtime rollback identity did not fail closed');
   }
 
   const runtimeBefore = {
@@ -184,6 +194,38 @@ try {
   writeFileSync(boundaryAfterPath, JSON.stringify(boundary));
   if (run('validate-deployment-boundary.mjs', [boundaryBeforePath, boundaryAfterPath]).status === 0) throw new Error('Config.Env boundary drift accepted');
 
+  const prospectivePath = join(scratch, 'prospective-compose.json');
+  const liveInspectPath = join(scratch, 'live-inspect.json');
+  const imageInspectPath = join(scratch, 'image-inspect.json');
+  const prospective = { services: { 'realtime-worker': { environment: {
+    PATH: '/usr/local/bin', DATABASE_URL: 'baseline-secret', REALTIME_RELEASE_ID: 'next-release',
+  } } } };
+  const liveInspect = [{ Config: { Env: ['PATH=/usr/local/bin', 'DATABASE_URL=baseline-secret', 'REALTIME_RELEASE_ID=old-release'] } }];
+  const imageInspect = [{ Config: { Env: ['PATH=/usr/local/bin'] } }];
+  writeFileSync(prospectivePath, JSON.stringify(prospective));
+  writeFileSync(liveInspectPath, JSON.stringify(liveInspect));
+  writeFileSync(imageInspectPath, JSON.stringify(imageInspect));
+  if (run('validate-prospective-realtime-env.mjs', [prospectivePath, liveInspectPath, imageInspectPath]).status !== 0) {
+    throw new Error('valid prospective realtime environment parity rejected');
+  }
+  prospective.services['realtime-worker'].environment.DATABASE_URL = 'drifted-secret';
+  writeFileSync(prospectivePath, JSON.stringify(prospective));
+  result = run('validate-prospective-realtime-env.mjs', [prospectivePath, liveInspectPath, imageInspectPath]);
+  if (result.status === 0 || !result.stderr.includes('PROSPECTIVE_REALTIME_ENV_DRIFT:DATABASE_URL') ||
+      result.stderr.includes('baseline-secret') || result.stderr.includes('drifted-secret')) {
+    throw new Error('prospective secret drift did not fail closed without disclosure');
+  }
+
+  const safeLogPath = join(scratch, 'realtime-safe.log');
+  const errorLogPath = join(scratch, 'realtime-error.log');
+  writeFileSync(safeLogPath, '{"level":"info","code":"LOOP_HEARTBEAT_OK"}\n');
+  writeFileSync(errorLogPath, '{"level":"error","code":"REALTIME_LOOP_HEARTBEAT_FAILED"}\n');
+  if (run('validate-realtime-log.mjs', [safeLogPath]).status !== 0) throw new Error('safe structured realtime log rejected');
+  result = run('validate-realtime-log.mjs', [errorLogPath]);
+  if (result.status === 0 || !result.stderr.includes('REALTIME_LOG_STRUCTURED_ERROR_LEVEL_DETECTED')) {
+    throw new Error('structured realtime level:error log accepted');
+  }
+
   const release = '20260810-bf03-wave-c-r5.5';
   const commit = 'f'.repeat(40);
   const pointerPath = join(scratch, 'release-source.json');
@@ -211,7 +253,7 @@ try {
   }
 
   requireText('common.sh', /EXPECTED_RELEASE_TAG="20260810-bf03-wave-c-r5\.5"/u, 'release identity not pinned');
-  requireText('common.sh', /EXPECTED_CANDIDATE_TAG="20260810-bf03-wave-c-r5\.5-review-candidate\.3"/u, 'reviewed candidate ordinal not pinned');
+  requireText('common.sh', /EXPECTED_CANDIDATE_TAG="20260810-bf03-wave-c-r5\.5-review-candidate\.4"/u, 'reviewed candidate ordinal not pinned');
   requireText('common.sh', /EXPECTED_ROLLBACK_REALTIME_IMAGE_ID="sha256:2c34155c8ddf51014801e2dd0424e4ca14e0bb6a5d0c055cd657a126c1db0b6e"/u, 'rollback image ID not pinned');
   requireText('common.sh', /EXPECTED_ROLLBACK_REALTIME_REVISION="a63a3ccbd7dc2b3061cf96d56c3fa3e19c26851d"/u, 'rollback revision not pinned');
   requireText('common.sh', /final release merge parents mismatch/u, 'exact final merge-parent gate missing');
@@ -226,13 +268,69 @@ try {
   if (/import\(.*realtime-server/u.test(source('artifact-smoke.sh'))) throw new Error('artifact smoke imports top-level realtime server');
   requireText('cutover.sh', /compose up -d --no-deps realtime-worker/u, 'target-only cutover missing');
   requireText('cutover.sh', /arm_automatic_rollback[\s\S]*upsert_env_pin REALTIME_IMAGE/u, 'rollback is not armed before first mutation');
+  requireText('cutover.sh', /require_no_inherited_compose_overrides[\s\S]*arm_automatic_rollback/u, 'Compose override gate does not run before cutover mutation');
+  requireText('cutover.sh', /verify_prospective_realtime_env_parity[\s\S]*arm_automatic_rollback/u, 'prospective environment parity does not run before cutover mutation');
   requireText('cutover.sh', /postcheck\.sh[\s\S]*soak\.sh[\s\S]*promote-runtime-state\.sh/u, 'verification/promotion order invalid');
   requireText('cutover.sh', /postcheck\.sh" "\$EVIDENCE_DIR\/operational-state\.before\.json" "\$initial_postcheck_operational"/u, 'initial append-only operational sample missing');
   requireText('rollback.sh', /rollback_compose up -d --no-deps realtime-worker/u, 'target-only rollback missing');
+  requireText('rollback.sh', /require_no_inherited_compose_overrides[\s\S]*cp --preserve=mode "\$ENV_BACKUP"/u, 'Compose override gate does not run before rollback mutation');
   requireText('postcheck.sh', /capture-deployment-boundary\.mjs/u, 'soak-time secret boundary check missing');
   requireText('capture-operational-state.sh', /realtime_worker_status/u, 'realtime worker readiness readback missing');
   requireText('capture-operational-state.sh', /p\.pointer_id, p\.revision, v\.version_id/u, 'closing pointer identity readback missing');
   requireText('common.sh', /verify_delivery_health/u, 'delivery readiness helper missing');
+  requireText('common.sh', /compose\(\) \{\s+require_no_inherited_compose_overrides/u, 'cutover Compose interpolation override gate missing');
+  requireText('common.sh', /rollback_compose\(\) \{\s+require_no_inherited_compose_overrides/u, 'rollback Compose interpolation override gate missing');
+  requireText('common.sh', /config --format json \|[\s\S]*--live-container lana-chatbot-realtime-worker/u, 'prospective environment parity is not memory-only');
+  if (/lana-(compose-config|live-inspect|image-inspect)/u.test(source('common.sh'))) {
+    throw new Error('prospective environment parity persists raw secret-bearing captures');
+  }
+  requireText('run-build.sh', /require_no_inherited_compose_overrides "" "\$COMPOSE_FILE"/u, 'build-time Compose interpolation override gate missing');
+  requireText('preflight.sh', /verify_prospective_realtime_env_parity/u, 'preflight prospective environment parity missing');
+  const composeEnvPath = join(scratch, 'compose.env');
+  writeFileSync(composeEnvPath, 'POSTGRES_PASSWORD=baseline-secret\nRUNTIME_POLICY_CHANNEL=PUBLISHED\n');
+  const composeInterpolationPath = join(scratch, 'compose.yml');
+  writeFileSync(composeInterpolationPath, 'services:\n  realtime-worker:\n    image: ${REALTIME_IMAGE:-example:latest}\n    environment:\n      REALTIME_MEDIA_CUTOUT_MODE: ${REALTIME_MEDIA_CUTOUT_MODE:-LIVE}\n');
+  const inheritedOverride = runBash(`
+    set -euo pipefail
+    INFRASTRUCTURE_ENV_FILE='${composeEnvPath.replaceAll('\\', '/')}'
+    source '${join(releaseDir, 'common.sh').replaceAll('\\', '/')}'
+    export POSTGRES_PASSWORD='must-not-leak'
+    require_no_inherited_compose_overrides
+  `);
+  if (inheritedOverride.status === 0 || !inheritedOverride.stderr.includes('inherited Compose environment override forbidden: POSTGRES_PASSWORD') ||
+      inheritedOverride.stderr.includes('must-not-leak')) {
+    throw new Error('inherited secret Compose override did not fail closed without disclosure');
+  }
+  const absentReferencedOverride = runBash(`
+    set -euo pipefail
+    INFRASTRUCTURE_ENV_FILE='${composeEnvPath.replaceAll('\\', '/')}'
+    source '${join(releaseDir, 'common.sh').replaceAll('\\', '/')}'
+    export REALTIME_MEDIA_CUTOUT_MODE='OFF'
+    require_no_inherited_compose_overrides '' '${composeInterpolationPath.replaceAll('\\', '/')}'
+  `);
+  if (absentReferencedOverride.status === 0 ||
+      !absentReferencedOverride.stderr.includes('inherited Compose interpolation override forbidden: REALTIME_MEDIA_CUTOUT_MODE')) {
+    throw new Error('inherited defaulted Compose interpolation override did not fail closed');
+  }
+  const cleanComposeEnvironment = runBash(`
+    set -euo pipefail
+    INFRASTRUCTURE_ENV_FILE='${composeEnvPath.replaceAll('\\', '/')}'
+    source '${join(releaseDir, 'common.sh').replaceAll('\\', '/')}'
+    require_no_inherited_compose_overrides '' '${composeInterpolationPath.replaceAll('\\', '/')}'
+  `);
+  if (cleanComposeEnvironment.status !== 0) throw new Error(`clean Compose environment rejected: ${cleanComposeEnvironment.stderr}`);
+  const duplicateComposeEnvPath = join(scratch, 'compose-duplicate.env');
+  writeFileSync(duplicateComposeEnvPath, 'RUNTIME_POLICY_CHANNEL=PUBLISHED\nRUNTIME_POLICY_CHANNEL=CANARY_LIVE\n');
+  const duplicateComposeEnvironment = runBash(`
+    set -euo pipefail
+    INFRASTRUCTURE_ENV_FILE='${duplicateComposeEnvPath.replaceAll('\\', '/')}'
+    source '${join(releaseDir, 'common.sh').replaceAll('\\', '/')}'
+    require_no_inherited_compose_overrides
+  `);
+  if (duplicateComposeEnvironment.status === 0 ||
+      !duplicateComposeEnvironment.stderr.includes('duplicate infrastructure environment key forbidden: RUNTIME_POLICY_CHANNEL')) {
+    throw new Error('duplicate Compose environment keys did not fail closed');
+  }
   requireText('soak.sh', /readonly iterations=3/u, 'soak is not fixed at three samples');
   requireText('soak.sh', /for iteration[\s\S]*sleep 20[\s\S]*postcheck\.sh" "\$previous" "\$output"/u, 'soak does not wait for a fresh production heartbeat before every sample');
   requireText('soak.sh', /postcheck\.sh" "\$previous" "\$output"[\s\S]*previous="\$output"/u, 'soak samples do not form a heartbeat evidence chain');

@@ -4,7 +4,7 @@ set -euo pipefail
 readonly EXPECTED_RELEASE_TAG="20260810-bf03-wave-c-r5.5"
 readonly IMPLEMENTATION_COMMIT="6c8de97c29e30ac428f742fd92a951c72caee9f7"
 readonly EXPECTED_REALTIME_IMAGE="lana-chatbot-app:bf03-wave-c-r5.5"
-readonly EXPECTED_MANIFEST_SHA256="b32ab09896162011baafb84134841d39fa0fe618bc4151820eda135768e6f7f1"
+readonly EXPECTED_MANIFEST_SHA256="6830823e12ff412921257c2e35118bb38dde7d2dc80fa4c147cb3790b2e810e3"
 readonly EXPECTED_COMPOSE_SHA256="e59ab08b6ad42c2d1d2e3a5a11ce9e34a935921c866917b0d23b6c3c5d69ac33"
 readonly EXPECTED_LATEST_MIGRATION="0031_admin_policy_safe_deletion"
 readonly EXPECTED_PAGE_ID="1198992073286645"
@@ -15,7 +15,7 @@ readonly EXPECTED_ROLLBACK_REALTIME_IMAGE="lana-chatbot-app:bf01-reconcile-final
 readonly EXPECTED_ROLLBACK_REALTIME_IMAGE_ID="sha256:2c34155c8ddf51014801e2dd0424e4ca14e0bb6a5d0c055cd657a126c1db0b6e"
 readonly EXPECTED_ROLLBACK_REALTIME_REVISION="a63a3ccbd7dc2b3061cf96d56c3fa3e19c26851d"
 readonly EXPECTED_ROLLBACK_REALTIME_RELEASE_ID="20260809-bf01-reconcile-final-reply-r5.4"
-readonly EXPECTED_CANDIDATE_TAG="20260810-bf03-wave-c-r5.5-review-candidate.3"
+readonly EXPECTED_CANDIDATE_TAG="20260810-bf03-wave-c-r5.5-review-candidate.4"
 readonly EXPECTED_ORIGIN_SSH="git@github.com:nguyentuanson27-netizen/lanchatbot.git"
 readonly EXPECTED_ORIGIN_HTTPS="https://github.com/nguyentuanson27-netizen/lanchatbot.git"
 
@@ -191,13 +191,64 @@ disarm_automatic_rollback() {
 }
 
 compose() {
+  require_no_inherited_compose_overrides "" "$COMPOSE_FILE"
   docker compose --env-file "$INFRASTRUCTURE_ENV_FILE" -f "$COMPOSE_FILE" "$@"
 }
 
 rollback_compose() {
+  require_no_inherited_compose_overrides "ROLLBACK_REALTIME_IMAGE" "$PREVIOUS_COMPOSE_FILE" "$ROLLBACK_COMPOSE_OVERRIDE"
   ROLLBACK_REALTIME_IMAGE="$ROLLBACK_REALTIME_IMAGE" \
     docker compose --env-file "$INFRASTRUCTURE_ENV_FILE" \
       -f "$PREVIOUS_COMPOSE_FILE" -f "$ROLLBACK_COMPOSE_OVERRIDE" "$@"
+}
+
+require_no_inherited_compose_overrides() {
+  local allowed_csv="${1-}"
+  shift || true
+  command -v printenv >/dev/null 2>&1 || die "required command missing: printenv"
+  command -v grep >/dev/null 2>&1 || die "required command missing: grep"
+  command -v sed >/dev/null 2>&1 || die "required command missing: sed"
+  test -f "$INFRASTRUCTURE_ENV_FILE" || die "production infrastructure env missing"
+  local line key seen_keys=$'\n'
+  while IFS= read -r line || test -n "$line"; do
+    [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)= ]] || continue
+    key="${BASH_REMATCH[1]}"
+    if [[ "$seen_keys" == *$'\n'"$key"$'\n'* ]]; then
+      die "duplicate infrastructure environment key forbidden: $key"
+    fi
+    seen_keys+="$key"$'\n'
+    if printenv "$key" >/dev/null 2>&1; then
+      die "inherited Compose environment override forbidden: $key"
+    fi
+  done < "$INFRASTRUCTURE_ENV_FILE"
+  local compose_file allowed
+  for compose_file in "$@"; do
+    test -f "$compose_file" || die "Compose interpolation source missing"
+    while IFS= read -r key; do
+      allowed=0
+      case ",$allowed_csv," in
+        *,"$key",*) allowed=1 ;;
+      esac
+      if test "$allowed" = "0" && printenv "$key" >/dev/null 2>&1; then
+        die "inherited Compose interpolation override forbidden: $key"
+      fi
+    done < <(grep -hoE '\$\{[A-Za-z_][A-Za-z0-9_]*' "$compose_file" | sed 's/^${//')
+  done
+  for key in COMPOSE_PROJECT_NAME COMPOSE_PROFILES COMPOSE_FILE COMPOSE_PATH_SEPARATOR; do
+    if printenv "$key" >/dev/null 2>&1; then
+      die "inherited Compose control override forbidden: $key"
+    fi
+  done
+}
+
+verify_prospective_realtime_env_parity() {
+  local compose_source="${1:?Compose source is required}"
+  require_no_inherited_compose_overrides "" "$compose_source"
+  if ! docker compose --env-file "$INFRASTRUCTURE_ENV_FILE" -f "$compose_source" config --format json |
+      node "$RELEASE_SCRIPT_DIR/validate-prospective-realtime-env.mjs" \
+        --live-container lana-chatbot-realtime-worker REALTIME_RELEASE_ID; then
+    die "prospective realtime environment parity failed"
+  fi
 }
 
 container_id() {

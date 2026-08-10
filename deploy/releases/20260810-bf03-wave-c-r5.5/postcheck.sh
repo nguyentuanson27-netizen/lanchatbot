@@ -10,7 +10,7 @@ operational="${2:?usage: postcheck.sh <previous-operational-state> <output-opera
 test -s "$previous_operational" || die "previous operational sample missing"
 test ! -e "$operational" || die "operational sample path already exists"
 
-for command_name in docker readlink grep mktemp cat; do
+for command_name in docker readlink mktemp cat node; do
   require_command "$command_name"
 done
 require_cutover_inputs
@@ -45,7 +45,7 @@ if ! docker logs --since "$cutover_started_at" lana-chatbot-realtime-worker > "$
   rm -f "$log_file"
   die "unable to read realtime logs"
 fi
-if grep -Eiq '(^|[^a-z])(fatal|uncaught|unhandled|\[error\])([^a-z]|$)' "$log_file"; then
+if ! node "$script_dir/validate-realtime-log.mjs" "$log_file"; then
   rm -f "$log_file"
   die "new fatal/error realtime log detected"
 fi
