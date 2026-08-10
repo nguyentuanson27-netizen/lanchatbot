@@ -422,9 +422,16 @@ export function verifyCustomerUrlExplanationProposal(
     foldedReply.slice(index).split(
       /[,.!?;]|\b(?:but|however|then|nhung|tuy nhien|sau do)\b/giu,
     )[0] ?? "";
-  const isNegatedAction = (clausePrefix: string): boolean =>
-    /\b(?:cannot|can't|unable(?: to)?|do not|don't|not able to|khong the|chua the|khong ho tro)\b.{0,48}$/iu
-      .test(clausePrefix);
+  const isNegatedAction = (clausePrefix: string): boolean => {
+    const negation = [...clausePrefix.matchAll(
+      /\b(?:cannot|can't|unable(?: to)?|do not|don't|not able to|khong the|chua the|khong ho tro)\b/giu,
+    )].at(-1);
+    if (!negation) return false;
+    const priorAction = [...clausePrefix.matchAll(
+      /\b(?:open|access|click|visit|follow|check|mo|bam|truy cap|kiem tra)\b/giu,
+    )].at(-1);
+    return (negation.index ?? -1) > (priorAction?.index ?? -1);
+  };
   const hasAffirmativeLinkAction = [...foldedReply.matchAll(
     /\b(?:open|access|click|visit|follow|mo|bam|truy cap)\b/giu,
   )].some((match) => {
