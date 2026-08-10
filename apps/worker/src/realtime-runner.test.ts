@@ -1305,32 +1305,36 @@ describe("RealtimeRunner", () => {
     ).toEqual([]);
   });
 
-  it("rehydrates a recognized product before creating TEXT then IMAGE outbox units", async () => {
+  it("rehydrates SD375 before creating TEXT then three bounded full-look IMAGE units", async () => {
     const occurredAt = "2026-07-29T02:27:12.000Z";
     const state = createConversationState({
       conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
       routingOwner: "APP",
       now: new Date(occurredAt),
     });
-    const pointImageUrl = "https://cdn.example/sd395-point.jpg";
-    const catalogImageUrl = "https://cdn.example/sd395-full-look.jpg";
+    const pointImageUrl = "https://cdn.example/sd375-point.jpg";
+    const catalogImageUrls = [
+      "https://cdn.example/sd375-look-1.jpg",
+      "https://cdn.example/sd375-look-2.jpg",
+      "https://cdn.example/sd375-look-3.jpg",
+      "https://cdn.example/sd375-look-4.jpg",
+    ];
     const vectorProduct = {
-      productId: "SD395", parentProductId: "SD395", canonicalCode: "SD395",
-      aliases: [], title: "SD395", colors: [], materials: [], silhouettes: [],
+      productId: "SD375", parentProductId: "SD375", canonicalCode: "SD375",
+      aliases: [], title: "SD375", colors: [], materials: [], silhouettes: [],
       occasions: [], imageUrls: [pointImageUrl], images: [], catalogVersion: "catalog-v2",
     };
     const catalogProduct = {
       ...vectorProduct,
-      title: "Áo dài SD395",
+      title: "Áo dài SD375",
       observedAt: occurredAt,
       imageUrls: [
-        "https://cdn.example/sd395-front.jpg",
-        "https://cdn.example/sd395-side.jpg",
-        catalogImageUrl,
+        "https://cdn.example/sd375-top.jpg",
+        ...catalogImageUrls,
       ],
       images: [
         {
-          url: "https://cdn.example/sd395-front.jpg",
+          url: "https://cdn.example/sd375-top.jpg",
           role: "PRIMARY" as const,
           angle: "FRONT" as const,
           imageType: "MODEL" as const,
@@ -1343,12 +1347,12 @@ describe("RealtimeRunner", () => {
           metadataVerified: true,
         },
         {
-          url: "https://cdn.example/sd395-side.jpg",
+          url: catalogImageUrls[0]!,
           role: "ADDITIONAL" as const,
-          angle: "SIDE" as const,
+          angle: "FRONT" as const,
           imageType: "MODEL" as const,
-          intents: [],
-          partsVisible: ["AO"],
+          intents: ["LOOKBOOK"],
+          partsVisible: ["AO", "QUAN"],
           sortOrder: 1,
           qualityScore: 1,
           feedback: false,
@@ -1356,24 +1360,37 @@ describe("RealtimeRunner", () => {
           metadataVerified: true,
         },
         {
-          url: catalogImageUrl,
+          url: catalogImageUrls[1]!,
           role: "ADDITIONAL" as const,
-          angle: "FRONT" as const,
+          angle: "SIDE" as const,
           imageType: "MODEL" as const,
           intents: [],
-          partsVisible: ["FULL_SET"],
+          partsVisible: ["QUAN", "AO"],
           sortOrder: 2,
           qualityScore: 1,
           feedback: false,
           reviewStatus: "APPROVED" as const,
           metadataVerified: true,
         },
+        ...catalogImageUrls.slice(2).map((url, index) => ({
+          url,
+          role: "ADDITIONAL" as const,
+          angle: "FRONT" as const,
+          imageType: "MODEL" as const,
+          intents: ["PRODUCT_OVERVIEW"],
+          partsVisible: index === 0 ? ["FULL_SET"] : ["AO", "QUAN"],
+          sortOrder: index + 3,
+          qualityScore: 1,
+          feedback: false,
+          reviewStatus: "APPROVED" as const,
+          metadataVerified: true,
+        })),
       ],
     };
     const claim = {
       inboxId: "2a9afc47-978a-4b74-9653-3c89e75a89a0",
       pageId: "1198992073286645",
-      eventKey: "meta:1198992073286645:message:m-sd395-image",
+      eventKey: "meta:1198992073286645:message:m-sd375-image",
       conversationHash: "meta:v1:customer-hash",
       occurredAt: new Date(occurredAt), receivedAt: new Date(occurredAt),
       receiveSequence: 21, attemptCount: 1,
@@ -1383,16 +1400,16 @@ describe("RealtimeRunner", () => {
         routing: { mode: "APP" as const, routingOwner: "APP" as const, evaluationOnly: false, reason: "APP_OWNS" as const },
         message: {
           schemaVersion: 1 as const, traceId: "3021af34-c98c-4086-a33c-3ecb2ad8f8f2",
-          eventKey: "meta:1198992073286645:message:m-sd395-image",
-          pageId: "1198992073286645", messageId: "m-sd395-image",
+          eventKey: "meta:1198992073286645:message:m-sd375-image",
+          pageId: "1198992073286645", messageId: "m-sd375-image",
           senderId: "customer-1", conversationId: "meta:v1:customer-hash",
           occurredAt, isEcho: false, appId: null, text: null,
-          attachments: [{ type: "image", url: "https://scontent.xx.fbcdn.net/sd395.jpg" }],
+          attachments: [{ type: "image", url: "https://scontent.xx.fbcdn.net/sd375.jpg" }],
         },
       },
     };
     const commit = vi.fn(async () => ({
-      stateCommitted: true, metaOutboxCreated: 2, pancakeTagOutboxCreated: false,
+      stateCommitted: true, metaOutboxCreated: 4, pancakeTagOutboxCreated: false,
       handoffEventCreated: false, sendAuthorized: true, reasonCodes: [],
     }));
     const runtime: RealtimeRuntimePort = {
@@ -1408,10 +1425,10 @@ describe("RealtimeRunner", () => {
       ready: vi.fn(async () => true),
       resolve: vi.fn(async () => ({
         schemaVersion: 1 as const, status: "OK" as const, source: "POS_SNAPSHOT" as const,
-        observedAt: occurredAt, expiresAt: "2099-01-01T00:00:00.000Z", productId: "SD395",
+        observedAt: occurredAt, expiresAt: "2099-01-01T00:00:00.000Z", productId: "SD375",
         facts: {
-          schemaVersion: 1 as const, productId: "SD395", parentProductId: "SD395",
-          offerType: "DIRECT", listPriceVnd: null, salePriceVnd: 799000,
+          schemaVersion: 1 as const, productId: "SD375", parentProductId: "SD375",
+          offerType: "SET", listPriceVnd: null, salePriceVnd: 799000,
           sizes: ["M", "L"], stockStatus: "IN_STOCK" as const, stockQuantity: 2,
           deliveryEta: null, fulfillmentPolicy: "READY_STOCK", imageUrls: [],
         },
@@ -1424,7 +1441,7 @@ describe("RealtimeRunner", () => {
         policy_version: "policy-v1",
         shop_alias: "LANA",
         brand: "lanadesign",
-        product_id: "SD395",
+        product_id: "SD375",
         synced_at: occurredAt,
         data_status: "OK",
         fulfillment_policy: {
@@ -1444,13 +1461,20 @@ describe("RealtimeRunner", () => {
         },
         shipping_eta: {},
         offers: {
-          DIRECT: {
+          SET: {
             list_price: null,
             sale_price: 799000,
             price_status: "OK",
             rows: [{
-              offer_type: "DIRECT", color: "", size: "M", stock_quantity: 2,
+              offer_type: "SET", price_sku: "SD375-SET", color: "", size: "M", stock_quantity: 2,
               list_price: null, sale_price: 799000, stock_status: "IN_STOCK",
+              bom_status: "OK",
+              parent_variation_id: "SD375-SET-M",
+              parent_variation_sku: "SD375-SET-M",
+              components: [
+                { component_id: "1", product_sku: "SD375-AO", variation_sku: "", quantity: 1 },
+                { component_id: "2", product_sku: "SD375-QUAN", variation_sku: "", quantity: 1 },
+              ],
             }],
           },
         },
@@ -1472,7 +1496,7 @@ describe("RealtimeRunner", () => {
           pipelineVersion: "cutout-first-ai-v1", normalizedImageHash: "a".repeat(64),
           raw: [], cutout: [], rawGap: null, cutoutGap: null, channelsAgree: true,
           cutoutStatus: "OK" as const, cutoutErrorCode: null, aiReason: null,
-          aiDecision: "SD395", aiModel: "gemini-3.5-flash-lite",
+          aiDecision: "SD375", aiModel: "gemini-3.5-flash-lite",
           aiPromptVersion: "media-rerank-v1", aiLatencyMs: 1, cacheHit: false,
           latencyMs: { normalize: 1, rawSearch: 1, cutout: 1, cutoutSearch: 1, ai: 1, total: 5 },
         },
@@ -1492,12 +1516,14 @@ describe("RealtimeRunner", () => {
     );
 
     expect(await runner.processOne()).toBe(true);
-    expect(search.searchText).toHaveBeenCalledWith("SD395");
+    expect(search.searchText).toHaveBeenCalledWith("SD375");
     expect(commit).toHaveBeenCalledWith(expect.objectContaining({
       metaPlan: expect.objectContaining({
         messages: [
-          { kind: "TEXT", text: expect.stringContaining("SD395") },
-          { kind: "IMAGE", imageUrl: catalogImageUrl },
+          { kind: "TEXT", text: expect.stringContaining("SD375") },
+          { kind: "IMAGE", imageUrl: catalogImageUrls[0] },
+          { kind: "IMAGE", imageUrl: catalogImageUrls[1] },
+          { kind: "IMAGE", imageUrl: catalogImageUrls[2] },
         ],
       }),
     }), expect.any(Date));

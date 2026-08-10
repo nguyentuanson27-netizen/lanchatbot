@@ -92,6 +92,10 @@ function mediaSnapshot(
       can_order_when_zero: false,
       prep_min_days: null,
       prep_max_days: null,
+      zero_stock_policy: "",
+      zero_stock_prep_min_days: null,
+      zero_stock_prep_max_days: null,
+      eta_valid_until: "",
     },
     selling_rules: {
       allow_mixed_sizes: false,
@@ -120,7 +124,7 @@ function mediaSnapshot(
         }],
       },
     },
-  } as CatalogSnapshotV3;
+  };
 }
 
 function mediaProduct(
