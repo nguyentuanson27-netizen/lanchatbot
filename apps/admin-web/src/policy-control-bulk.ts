@@ -12,8 +12,16 @@ export interface PolicyBulkActionEligibility {
   readonly canApprove: boolean;
 }
 
-export function isPolicyBulkSelectable(artifact: PolicyArtifactRow): boolean {
-  return artifact.lifecycle === "DRAFT" || artifact.lifecycle === "VALIDATED";
+export function isPolicyBulkSelectable(_artifact: PolicyArtifactRow): boolean {
+  return true;
+}
+
+export function reconcilePolicyBulkSelection(
+  selectedIds: ReadonlySet<string>,
+  items: readonly PolicyArtifactRow[],
+): Set<string> {
+  const visibleIds = new Set(items.map((item) => item.id));
+  return new Set([...selectedIds].filter((id) => visibleIds.has(id)));
 }
 
 export function policyBulkActionEligibility(

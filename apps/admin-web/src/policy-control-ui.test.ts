@@ -4,6 +4,7 @@ import {
   policyBatchSelection,
   policyBulkActionEligibility,
   policyQuickViewQuery,
+  reconcilePolicyBulkSelection,
   policyRowNavigationIndex,
   renderPolicyListTable,
   renderReviewDrawer,
@@ -95,16 +96,29 @@ describe("policy phase1 table", () => {
 });
 
 describe("policy phase2 bulk review", () => {
-  it("renders current-page selection only for DRAFT and VALIDATED rows", () => {
+  it("keeps all lifecycle rows selectable while batch eligibility stays fail-safe", () => {
     const html = renderPolicyListTable([
       row("draft", "DRAFT"),
       row("validated", "VALIDATED"),
       row("approved", "APPROVED"),
-    ], new Set(["draft"]));
+      row("canary", "CANARY"),
+      row("published", "PUBLISHED"),
+    ], new Set(["approved", "canary", "published"]));
     expect(html).toContain('data-policy-select-page');
-    expect(html).toMatch(/data-policy-select="draft"[^>]*checked/u);
-    expect(html).toContain('data-policy-select="validated"');
-    expect(html).toMatch(/data-policy-select="approved"[^>]*disabled/u);
+    expect(html).toMatch(/data-policy-select="approved"[^>]*checked/u);
+    expect(html).toMatch(/data-policy-select="canary"[^>]*checked/u);
+    expect(html).toMatch(/data-policy-select="published"[^>]*checked/u);
+    expect(html).not.toMatch(/data-policy-select="approved"[^>]*disabled/u);
+    expect(html).not.toMatch(/data-policy-select="canary"[^>]*disabled/u);
+    expect(html).not.toMatch(/data-policy-select="published"[^>]*disabled/u);
+  });
+
+  it("retains still-visible selections after a policy-list refresh", () => {
+    const refreshed = reconcilePolicyBulkSelection(
+      new Set(["approved", "canary", "published", "removed"]),
+      [row("approved", "APPROVED"), row("canary", "CANARY"), row("published", "PUBLISHED")],
+    );
+    expect(refreshed).toEqual(new Set(["approved", "canary", "published"]));
   });
 
   it("enables exactly one safe bulk transition for a homogeneous selection", () => {

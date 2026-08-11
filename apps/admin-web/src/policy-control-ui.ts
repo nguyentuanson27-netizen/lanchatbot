@@ -31,9 +31,14 @@ import {
   isPolicyBulkSelectable,
   policyBatchSelection,
   policyBulkActionEligibility,
+  reconcilePolicyBulkSelection,
   renderPolicyBatchExecution,
 } from "./policy-control-bulk.js";
-export { policyBatchSelection, policyBulkActionEligibility } from "./policy-control-bulk.js";
+export {
+  policyBatchSelection,
+  policyBulkActionEligibility,
+  reconcilePolicyBulkSelection,
+} from "./policy-control-bulk.js";
 import { escapeHtml, formatDateTime } from "./format.js";
 import {
   activateDialog,
@@ -101,7 +106,11 @@ function needsPolicyPageDirectory(identity: Identity): boolean {
   return identity.policyPageIds.includes("ALL") && identity.pageScope.includes("ALL");
 }
 
-export function renderPolicyControl(data: PolicyControlData, identity: Identity | null): string {
+export function renderPolicyControl(
+  data: PolicyControlData,
+  identity: Identity | null,
+  selectedIds: ReadonlySet<string> = new Set<string>(),
+): string {
   if (!identity?.policyControl) return `<section class="empty-state"><h3>Chức năng quản lý chính sách đang tắt</h3><p>Cần migration và bật riêng Policy Control Plane trước khi sử dụng.</p></section>`;
   const initialRows: PolicyArtifactRow[] = data.artifacts.map((artifact) => ({ ...artifact, active: data.pointers.some((pointer) => pointer.versionId === artifact.id) }));
   const pageDirectoryRequired = needsPolicyPageDirectory(identity);
@@ -119,7 +128,7 @@ export function renderPolicyControl(data: PolicyControlData, identity: Identity 
     <form class="policy-filters" data-policy-filters><label class="policy-filters__search"><span>Tìm mã</span><input name="search" type="search" maxlength="120" autocomplete="off" placeholder="SQ603"></label><label><span>Loại</span><select name="artifact_kind"><option value="">Tất cả loại</option>${Object.entries(kindLabels).map(([value, label]) => `<option value="${value}">${escapeHtml(label)}</option>`).join("")}</select></label><label><span>Trạng thái</span><select name="lifecycle"><option value="">Tất cả trạng thái</option>${Object.entries(lifecycleLabels).map(([value, label]) => `<option value="${value}">${escapeHtml(label)}</option>`).join("")}</select></label><label><span>Version</span><input name="version" type="number" min="1" step="1" inputmode="numeric" placeholder="Tất cả"></label><label><span>Revision</span><input name="revision" type="number" min="0" step="1" inputmode="numeric" placeholder="Tất cả"></label><label><span>Đang dùng</span><select name="active"><option value="any">Tất cả</option><option value="active">Đang dùng</option><option value="inactive">Chưa dùng</option></select></label><label><span>Sắp xếp</span><select name="sort"><option value="updated_desc">Mới cập nhật</option><option value="validated_oldest">Chờ duyệt lâu nhất</option><option value="artifact_key_asc">Mã A → Z</option></select></label><button type="submit">Áp dụng</button></form>
     <section class="policy-bulk-bar" data-policy-bulk-bar hidden><strong data-policy-selected-count>0 mục đã chọn</strong><span class="policy-bulk-bar__spacer"></span><button type="button" class="secondary-button" data-policy-bulk="VALIDATE" disabled>Kiểm tra hàng loạt</button><button type="button" data-policy-bulk="APPROVE" disabled>Duyệt hàng loạt</button><button type="button" class="secondary-button" data-policy-clear-selection>Bỏ chọn</button></section>
     <section class="policy-bulk-results" data-policy-bulk-results aria-live="polite" hidden></section>
-    <section class="panel policy-review-table" aria-busy="false"><div class="policy-review-table__scroll" data-policy-table>${renderPolicyListTable(initialRows)}</div><footer class="policy-pagination" data-policy-pagination></footer></section>
+    <section class="panel policy-review-table" aria-busy="false"><div class="policy-review-table__scroll" data-policy-table>${renderPolicyListTable(initialRows, selectedIds)}</div><footer class="policy-pagination" data-policy-pagination></footer></section>
     <section class="panel policy-table"><header><h2>Con trỏ đang hoạt động</h2><small>Giữ ngữ cảnh Canary/Publish/Rollback hiện tại.</small></header><div class="policy-review-table__scroll"><table><thead><tr><th>Loại</th><th>Mã</th><th>Kênh</th><th>Phiên bản</th><th>Page</th></tr></thead><tbody>${pointers || "<tr><td colspan=5>Chưa phát hành cấu hình.</td></tr>"}</tbody></table></div></section>
     <section class="panel policy-table"><header><h2>Lịch sử mô phỏng</h2><small>Luôn tắt gửi tin và gắn tag</small></header><div class="policy-review-table__scroll"><table><thead><tr><th>Thời gian</th><th>Trạng thái</th><th>Số cấu hình</th><th>Hội thoại tối đa</th></tr></thead><tbody>${simulations || "<tr><td colspan=4>Chưa chạy mô phỏng.</td></tr>"}</tbody></table></div></section>
   </section>`;
@@ -140,7 +149,13 @@ export function renderPolicyListTable(
   return `<table class="policy-list-table"><thead><tr><th class="policy-select-cell"><input type="checkbox" data-policy-select-page aria-label="Chọn các mục có thể xử lý trên trang này"${allSelectableSelected ? " checked" : ""}${selectable.length ? "" : " disabled"}></th><th>Mã</th><th>Loại</th><th>Trạng thái</th><th>Version</th><th>Revision</th><th>Cập nhật</th><th>Đang dùng</th><th>Hành động</th></tr></thead><tbody>${body || "<tr><td colspan=9 class=\"policy-empty\">Không có cấu hình phù hợp bộ lọc.</td></tr>"}</tbody></table>`;
 }
 
-export function bindPolicyControl(data: PolicyControlData, identity: Identity | null, reload: () => Promise<void>, notify: (message: string) => void): void {
+export function bindPolicyControl(
+  data: PolicyControlData,
+  identity: Identity | null,
+  reload: () => Promise<void>,
+  selectedIds: Set<string>,
+  notify: (message: string) => void,
+): void {
   const root = document.querySelector<HTMLElement>("[data-policy-root]");
   if (!root || !identity?.policyControl) return;
   const pageDirectoryRequired = needsPolicyPageDirectory(identity);
@@ -155,7 +170,6 @@ export function bindPolicyControl(data: PolicyControlData, identity: Identity | 
   let reviewCleanup: (() => void) | null = null;
   let bulkBusy = false;
   let pendingRetry: { action: "VALIDATE" | "APPROVE"; snapshot: PolicyBatchSnapshotItem[] } | null = null;
-  const selectedIds = new Set<string>();
   const latestListLoader = createLatestPolicyListLoader(listPolicyArtifacts);
   const latestReviewLoader = createLatestPolicyReviewLoader(getPolicyReviewContext);
   const hasSimulationVersions = data.artifacts.some((item) => ["APPROVED", "CANARY", "PUBLISHED"].includes(item.lifecycle));
@@ -221,7 +235,6 @@ export function bindPolicyControl(data: PolicyControlData, identity: Identity | 
 
   const loadPage = async (options: { preserveBulkFeedback?: boolean } = {}) => {
     const generation = ++loadGeneration;
-    selectedIds.clear();
     if (!options.preserveBulkFeedback) clearBulkFeedback();
     root.querySelector<HTMLElement>(".policy-review-table")?.setAttribute("aria-busy", "true");
     const query = currentQuery();
@@ -229,6 +242,9 @@ export function bindPolicyControl(data: PolicyControlData, identity: Identity | 
       const page = await latestListLoader(query);
       if (!page || generation !== loadGeneration) return;
       pageItems = page.items;
+      const preservedSelection = reconcilePolicyBulkSelection(selectedIds, pageItems);
+      selectedIds.clear();
+      for (const id of preservedSelection) selectedIds.add(id);
       nextCursor = page.nextCursor;
       renderPage();
       syncFilterControls(root, query);

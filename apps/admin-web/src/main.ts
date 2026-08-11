@@ -185,6 +185,8 @@ let auditData: ListResponse<AuditLog> | null = null;
 let overlayCleanup: (() => void) | null = null;
 let modalCleanup: (() => void) | null = null;
 let commandPollTimer: number | undefined;
+const policyBulkSelectedIds = new Set<string>();
+let policyBulkSelectionRouteKey: string | null = null;
 let outreachData: OutreachSummary | null = null;
 let handoffData: HandoffQueue | null = null;
 let handoffOpenCount = 0;
@@ -1108,10 +1110,14 @@ async function loadCurrentPage(silent = true): Promise<void> {
         html = `${renderProductMedia(catalog)}${renderMediaPipeline(pipeline)}`;
         break;
       case "policy":
+        if (policyBulkSelectionRouteKey !== window.location.hash) {
+          policyBulkSelectedIds.clear();
+          policyBulkSelectionRouteKey = window.location.hash;
+        }
         policyControlData = identity?.policyControl
           ? await getPolicyControl(activeController.signal)
           : { artifacts: [], pointers: [], simulations: [] };
-        html = renderPolicyControl(policyControlData, identity);
+        html = renderPolicyControl(policyControlData, identity, policyBulkSelectedIds);
         break;
       case "datasets": {
         if (identity?.datasetReview?.enabled !== true) {
@@ -1151,6 +1157,7 @@ async function loadCurrentPage(silent = true): Promise<void> {
         policyControlData,
         identity,
         () => loadCurrentPage(false),
+        policyBulkSelectedIds,
         (message) => showToast(message, /lỗi|không thể|thất bại/i.test(message) ? "danger" : "good"),
       );
     }
