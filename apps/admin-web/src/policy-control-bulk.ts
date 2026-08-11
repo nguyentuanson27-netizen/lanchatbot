@@ -29,17 +29,26 @@ export interface PolicyBulkSelectionSession {
   readonly generation: number;
 }
 
+export interface PolicyBulkBatchSession {
+  readonly id: number;
+}
+
 export interface PolicyBulkSelectionStore {
   readonly selectedIds: Set<string>;
+  readonly batchInFlight: boolean;
   begin(contextKey: string): PolicyBulkSelectionSession;
   isCurrent(session: PolicyBulkSelectionSession): boolean;
   reconcile(session: PolicyBulkSelectionSession, items: readonly PolicyArtifactRow[]): boolean;
+  startBatch(session: PolicyBulkSelectionSession): PolicyBulkBatchSession | null;
+  finishBatch(session: PolicyBulkBatchSession): boolean;
 }
 
 export function createPolicyBulkSelectionStore(): PolicyBulkSelectionStore {
   const selectedIds = new Set<string>();
   let contextKey: string | null = null;
   let generation = 0;
+  let nextBatchId = 0;
+  let activeBatchId: number | null = null;
 
   const isCurrent = (session: PolicyBulkSelectionSession): boolean => (
     session.contextKey === contextKey && session.generation === generation
@@ -47,6 +56,9 @@ export function createPolicyBulkSelectionStore(): PolicyBulkSelectionStore {
 
   return {
     selectedIds,
+    get batchInFlight() {
+      return activeBatchId !== null;
+    },
     begin(nextContextKey) {
       if (contextKey !== nextContextKey) {
         selectedIds.clear();
@@ -61,6 +73,16 @@ export function createPolicyBulkSelectionStore(): PolicyBulkSelectionStore {
       const preservedSelection = reconcilePolicyBulkSelection(selectedIds, items);
       selectedIds.clear();
       for (const id of preservedSelection) selectedIds.add(id);
+      return true;
+    },
+    startBatch(session) {
+      if (!isCurrent(session) || activeBatchId !== null) return null;
+      activeBatchId = ++nextBatchId;
+      return { id: activeBatchId };
+    },
+    finishBatch(session) {
+      if (activeBatchId !== session.id) return false;
+      activeBatchId = null;
       return true;
     },
   };

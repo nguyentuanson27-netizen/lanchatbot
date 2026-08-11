@@ -147,6 +147,25 @@ describe("policy phase2 bulk review", () => {
     expect(selection.selectedIds).toEqual(new Set(["current-selection"]));
   });
 
+  it("keeps an in-flight bulk operation locked across a policy-screen rebind", () => {
+    const selection = createPolicyBulkSelectionStore();
+    const contextKey = "owner@example.com|#/policy?active=inactive";
+    const firstBinding = selection.begin(contextKey);
+    selection.selectedIds.add("approved-selection");
+    const batch = selection.startBatch(firstBinding);
+
+    expect(batch).not.toBeNull();
+
+    const reboundBinding = selection.begin(contextKey);
+
+    expect(selection.selectedIds).toEqual(new Set(["approved-selection"]));
+    expect(selection.batchInFlight).toBe(true);
+    expect(selection.startBatch(reboundBinding)).toBeNull();
+    expect(selection.finishBatch(batch!)).toBe(true);
+    expect(selection.batchInFlight).toBe(false);
+    expect(selection.startBatch(reboundBinding)).not.toBeNull();
+  });
+
   it("enables exactly one safe bulk transition for a homogeneous selection", () => {
     const items = [row("draft-a", "DRAFT"), row("draft-b", "DRAFT"), row("validated", "VALIDATED")];
     expect(policyBulkActionEligibility(items, new Set(["draft-a", "draft-b"]))).toEqual({

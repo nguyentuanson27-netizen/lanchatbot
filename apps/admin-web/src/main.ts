@@ -1110,10 +1110,11 @@ async function loadCurrentPage(silent = true): Promise<void> {
         html = `${renderProductMedia(catalog)}${renderMediaPipeline(pipeline)}`;
         break;
       case "policy":
-        policyBulkSelection.begin(`${identity?.email ?? ""}\u0000${window.location.hash}`);
         policyControlData = identity?.policyControl
           ? await getPolicyControl(activeController.signal)
           : { artifacts: [], pointers: [], simulations: [] };
+        if (silent && policyBulkSelection.batchInFlight) return;
+        policyBulkSelection.begin(`${identity?.email ?? ""}\u0000${window.location.hash}`);
         html = renderPolicyControl(policyControlData, identity, policyBulkSelection.selectedIds);
         break;
       case "datasets": {
@@ -2135,7 +2136,7 @@ function showToast(message: string, tone: "good" | "warning" | "danger" = "good"
 function startPolling(): void {
   window.clearInterval(refreshTimer);
   refreshTimer = window.setInterval(() => {
-    if (shouldAutoRefresh({
+    if (!policyBulkSelection.batchInFlight && shouldAutoRefresh({
       enabled: autoRefreshEnabled,
       visible: document.visibilityState === "visible",
       routeSupportsPolling: currentRoute !== "media" &&
