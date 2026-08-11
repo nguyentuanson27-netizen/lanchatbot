@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "repositoryRecordCreatedAt": "2026-08-10T10:40:28Z",
+  "capturedAt": "2026-08-10T10:35:31.561Z",
+  "capturedAtSemantics": "canonical promoted production runtime-state capture after CUTOVER_PASS and SOAK_PASS 3/3; repository record time is separate",
+  "documentType": "APPEND_ONLY_RUNTIME_DEPLOYMENT_EVIDENCE",
+  "status": "DEPLOY_SUCCESS",
+  "environment": "production-realtime-worker",
+  "host": "156.67.214.197",
+  "release": {
+    "tag": "20260810-bf03-wave-c-r5.5",
+    "tagObject": "16a8f925aafbd01805f79a1c72974eafcf6a8257",
+    "commit": "31d74695a794a28d6f93427416593b2a414270d6",
+    "candidateTag": "20260810-bf03-wave-c-r5.5-review-candidate.6",
+    "candidateTagObject": "e96d16e4d281ec07b1313548d6eb7153fed0e849",
+    "candidateCommit": "d9129423cfff81a7ecbddf47b09c4a64cc999d90",
+    "releasePreparationPullRequest": 180,
+    "releasePreparationBase": "6c8de97c29e30ac428f742fd92a951c72caee9f7",
+    "releasePath": "/opt/lana-chatbot/releases/20260810-bf03-wave-c-r5.5",
+    "releaseSourceSha256": "4c6b05d201b708500eaec414265756592928637e1aeddbc0763d982c4befb22e"
+  },
+  "provenance": {
+    "pullRequests": [158, 169, 170, 172, 178, 179, 180],
+    "manifestSha256": "0afa947abc1d6784c73bb9f9bb90b02a319ee4bc839966a6acda4b57ea31c8e0",
+    "exactHeadCiRun": 31374601470,
+    "exactMainCiRun": 31376065008,
+    "finalTagVerifiedRemote": true
+  },
+  "artifact": {
+    "image": "lana-chatbot-app:bf03-wave-c-r5.5",
+    "imageId": "sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a",
+    "configDigest": "sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a",
+    "ociRevision": "31d74695a794a28d6f93427416593b2a414270d6",
+    "archiveSha256": "cb17666c3828df97dfc15a12e6d57a3fa563d1e8a1da53d3e910d83b1b40ba44",
+    "imageMetadataSha256": "033000c9d86524273b08f5279c26d3a49a5fcbd9ef94b7e41db10d6d5dcc54c5",
+    "artifactSmoke": "PASS",
+    "builtFromFinalTag": true
+  },
+  "cutover": {
+    "targetService": "realtime-worker",
+    "composeAction": "up -d --no-deps realtime-worker",
+    "containerIdBefore": "9da75a490df6f01f99a2fb5acb050c2f01003940ed46823035b02dd05fe5c9df",
+    "containerIdAfter": "facda92073374bd385e8e47f8c49288ece146ef98bcbf054fa3f37c182d96794",
+    "nonTargetContainerCount": 17,
+    "nonTargetContainerIdsUnchanged": true,
+    "nonTargetServiceEvidenceComparison": "PASS",
+    "automaticRollbackArmedBeforeMutation": true,
+    "automaticRollbackTriggered": false,
+    "symlinkPromotion": "PASS"
+  },
+  "runtimeState": {
+    "currentPath": "/opt/lana-chatbot/runtime-state/current.json",
+    "previousSha256": "518589bdd45975b7f9233c807919e4e68a4967a569ae7728360deadefda770a0",
+    "sha256": "8f554aec543f5d5e00deaa598197aa4aea812b9ceb5a012ef24c94148a27f1ec",
+    "historyPath": "/opt/lana-chatbot/runtime-state/history/2026-08-10T10-35-31-561Z-20260810-bf03-wave-c-r5.5.json",
+    "historyByteIdenticalToCurrent": true,
+    "freshHostParity": "PASS",
+    "promotion": "PASS"
+  },
+  "targetReadback": {
+    "health": "healthy",
+    "realtimeStatus": "IDLE",
+    "realtimeMode": "LIVE",
+    "sendEnabled": true,
+    "heartbeatAgeMilliseconds": 7963,
+    "lastErrorCodeAbsent": true,
+    "restartCount": 0,
+    "pid1Uid": 1000,
+    "pid1Gid": 1000,
+    "image": "lana-chatbot-app:bf03-wave-c-r5.5",
+    "imageId": "sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a",
+    "revision": "31d74695a794a28d6f93427416593b2a414270d6"
+  },
+  "deliveryReadback": {
+    "readinessStatus": 200,
+    "queueStatus": 200,
+    "containerIdUnchanged": true,
+    "restartCount": 0
+  },
+  "database": {
+    "migrationCount": 31,
+    "latestMigration": "0031_admin_policy_safe_deletion",
+    "migrationLedgerSha256": "c2f764b824f9cdf9d865ff8b5fb853771f17405f889dbbd2bf4c66c44a8a4180",
+    "migrationLedgerUnchanged": true,
+    "migrationPerformed": false,
+    "backfillPerformed": false,
+    "dataRewritePerformed": false
+  },
+  "routing": {
+    "pageAllowlist": ["1198992073286645"],
+    "pageStatus": "ACTIVE",
+    "routingOwner": "APP",
+    "appSendEnabled": true,
+    "killSwitch": false,
+    "pageAllowlistSha256": "746b8b4ba5e44d1bc5104f49715d66f0f1b6cdf24121c3cf0d76686a6fd6c9b5",
+    "changedByThisRelease": false
+  },
+  "policyReadback": {
+    "channel": "PUBLISHED",
+    "runtimePolicyEnabled": true,
+    "publishedEnabled": true,
+    "publishedPointerCount": 11,
+    "publishedVersionCount": 11,
+    "closingContentHash": "sha256:9f151edb8e953720ffffd5f09f549d0cba962a200aad92e5d1497e66a8933476",
+    "replyReconciliationPolicy": "OMITTED",
+    "waveCFieldsAbsent": true,
+    "correctionDialogueFieldAbsent": true,
+    "effectiveWaveCDefaults": {
+      "mediaPartialResolutionPolicy": "LEGACY",
+      "multiProductResolutionPolicy": "LEGACY",
+      "customerUrlPolicy": "STRICT_BLOCK_ALL"
+    },
+    "bundleUnchangedAcrossCutoverAndSoak": true,
+    "waveCPolicyActivationPerformed": false,
+    "waveCPolicyActivationBlockedReason": "no reviewed immutable full policy bundle and canary activation/rollback artifact"
+  },
+  "behaviorModeReadback": {
+    "pageId": "1198992073286645",
+    "channel": "MESSENGER",
+    "confirmationMode": "V2_ACTIVE",
+    "salesAuthorityMode": "LEGACY",
+    "stateReadMode": "LEGACY",
+    "pointerRevision": 3,
+    "contentHash": "sha256:72912576e4f64b311280c0455cf3c8ead22dc3723d90fdef4ab593a7f1a2c40e",
+    "changedByThisRelease": false
+  },
+  "queues": {
+    "inbox": {
+      "active": 0,
+      "failedPermanent": 1,
+      "duplicates": 0
+    },
+    "metaOutbox": {
+      "active": 0,
+      "failedPermanent": 4,
+      "duplicates": 0
+    },
+    "pancakeOutbox": {
+      "active": 0,
+      "failedPermanent": 0,
+      "duplicates": 0
+    },
+    "unchangedAcrossCutoverAndSoak": true
+  },
+  "configurationBoundary": {
+    "beforeSha256": "cdff475cf340c8374f776d9497283f95d61ee64722e4a6e27c7750f72f9a868e",
+    "afterSha256": "cdff475cf340c8374f776d9497283f95d61ee64722e4a6e27c7750f72f9a868e",
+    "realtimeNonSecretConfigSha256": "b9397438185fe9a5ef9a13093b43fbae549209f7e3e17c435859c1d23a73c6b2",
+    "deliveryNonSecretConfigSha256": "9366860529d4950e7cfff535b3f88d38e80531264e333191e49ce9a4bc84f64a",
+    "inheritedComposeOverrideGate": "PASS",
+    "prospectiveRealtimeEnvironmentParity": "PASS",
+    "secretEntryOrValueAddedOrChanged": false,
+    "preExistingCredentialBearingConfigEnvPreserved": true
+  },
+  "verification": {
+    "preflight": "PASS",
+    "cutover": "PASS",
+    "postcheck": "PASS",
+    "soak": "3/3 PASS",
+    "heartbeatAdvancedEverySample": true,
+    "realtimeAndDeliveryNewErrorLogCount": 0,
+    "deploymentBoundaryBeforeSha256": "cdff475cf340c8374f776d9497283f95d61ee64722e4a6e27c7750f72f9a868e",
+    "deploymentBoundaryAfterSha256": "cdff475cf340c8374f776d9497283f95d61ee64722e4a6e27c7750f72f9a868e",
+    "operationalStateBeforeSha256": "9376d34eb4557bfd738ed98cf27ef2eaeea96dbb04bcc0e641e56d2504e1f7d8",
+    "operationalStateFinalSoakSha256": "68c6a2070b7695bf4ab98d17dc31d27a2e2aaabbb88d0d9fa2067548817ec532",
+    "deploymentServiceEvidenceSha256": "3746003372bdf7107ce4a795a0bd465dd29fcf9f25f17e397cd569af380802e0",
+    "rollbackServiceEvidenceSha256": "e6e2eebec7290e493feea4d4ff0f2eda85bca41babdd1c0f6385ff104ff7efbf"
+  },
+  "rollback": {
+    "release": "20260810-admin-policy-review-r6.10",
+    "realtimeImage": "lana-chatbot-app:bf01-reconcile-final-reply-r5.4",
+    "realtimeImageId": "sha256:2c34155c8ddf51014801e2dd0424e4ca14e0bb6a5d0c055cd657a126c1db0b6e",
+    "realtimeReleaseId": "20260809-bf01-reconcile-final-reply-r5.4",
+    "realtimeOciRevision": "a63a3ccbd7dc2b3061cf96d56c3fa3e19c26851d",
+    "ready": true,
+    "order": "policy pointer/channel first if any future policy rollout occurs, then exact BF-01 realtime image and previous r6.10 release",
+    "runtimeStateRollbackPromotionRequired": true,
+    "dataServicesPreserved": ["PostgreSQL", "Redis", "Qdrant", "Inbox", "Outbox"]
+  },
+  "invariants": {
+    "bf03FoundationInactive": true,
+    "bf03RuntimeAdapterPresent": false,
+    "bf03ProductionImportPresent": false,
+    "bf03ActivationPathPresent": false,
+    "bf03PublishableCorrectionPolicyPresent": false,
+    "migrationOrBackfillPerformed": false,
+    "routingOrAllowlistMutationPerformed": false,
+    "messengerProductionTestOrSendPerformed": false,
+    "n8nActionPerformed": false,
+    "directVpsSourceEditPerformed": false,
+    "nonTargetServiceRecreated": false,
+    "naturalTrafficObservedDuringSoak": false,
+    "naturalTrafficAbsenceResidual": "no synthetic Messenger traffic was fabricated"
+  }
+}
