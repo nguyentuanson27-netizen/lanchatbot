@@ -34,7 +34,9 @@ import {
   reconcilePolicyBulkSelection,
   renderPolicyBatchExecution,
 } from "./policy-control-bulk.js";
+import type { PolicyBulkSelectionStore } from "./policy-control-bulk.js";
 export {
+  createPolicyBulkSelectionStore,
   policyBatchSelection,
   policyBulkActionEligibility,
   reconcilePolicyBulkSelection,
@@ -153,7 +155,7 @@ export function bindPolicyControl(
   data: PolicyControlData,
   identity: Identity | null,
   reload: () => Promise<void>,
-  selectedIds: Set<string>,
+  selection: PolicyBulkSelectionStore,
   notify: (message: string) => void,
 ): void {
   const root = document.querySelector<HTMLElement>("[data-policy-root]");
@@ -174,6 +176,15 @@ export function bindPolicyControl(
   const latestReviewLoader = createLatestPolicyReviewLoader(getPolicyReviewContext);
   const hasSimulationVersions = data.artifacts.some((item) => ["APPROVED", "CANARY", "PUBLISHED"].includes(item.lifecycle));
   const currentQuery = (): PolicyListQuery => policyQueryFromRoute(readRouteParams());
+  const selectionContextKey = (): string => `${identity.email}\u0000${window.location.hash}`;
+  let selectionSession = selection.begin(selectionContextKey());
+  const selectedIds = selection.selectedIds;
+  const ensureSelectionSession = (): boolean => {
+    const contextKey = selectionContextKey();
+    if (contextKey === selectionSession.contextKey) return false;
+    selectionSession = selection.begin(contextKey);
+    return true;
+  };
   const canValidateRole = identity.role === "OWNER" || identity.role === "EDITOR";
   const canApproveRole = identity.role === "OWNER" || identity.role === "APPROVER";
 
@@ -234,24 +245,26 @@ export function bindPolicyControl(
   };
 
   const loadPage = async (options: { preserveBulkFeedback?: boolean } = {}) => {
+    const contextChanged = ensureSelectionSession();
+    const loadSelectionSession = selectionSession;
+    if (!selection.isCurrent(loadSelectionSession)) return;
+    if (contextChanged) renderPage();
     const generation = ++loadGeneration;
     if (!options.preserveBulkFeedback) clearBulkFeedback();
     root.querySelector<HTMLElement>(".policy-review-table")?.setAttribute("aria-busy", "true");
     const query = currentQuery();
     try {
       const page = await latestListLoader(query);
-      if (!page || generation !== loadGeneration) return;
+      if (!page || generation !== loadGeneration || !selection.isCurrent(loadSelectionSession)) return;
       pageItems = page.items;
-      const preservedSelection = reconcilePolicyBulkSelection(selectedIds, pageItems);
-      selectedIds.clear();
-      for (const id of preservedSelection) selectedIds.add(id);
+      if (!selection.reconcile(loadSelectionSession, pageItems)) return;
       nextCursor = page.nextCursor;
       renderPage();
       syncFilterControls(root, query);
     } catch (error) {
-      if (generation === loadGeneration) notify(error instanceof Error ? error.message : "Không thể tải danh sách chính sách.");
+      if (generation === loadGeneration && selection.isCurrent(loadSelectionSession)) notify(error instanceof Error ? error.message : "Không thể tải danh sách chính sách.");
     } finally {
-      if (generation === loadGeneration) root.querySelector<HTMLElement>(".policy-review-table")?.setAttribute("aria-busy", "false");
+      if (generation === loadGeneration && selection.isCurrent(loadSelectionSession)) root.querySelector<HTMLElement>(".policy-review-table")?.setAttribute("aria-busy", "false");
     }
   };
 
@@ -260,6 +273,8 @@ export function bindPolicyControl(
     snapshot: PolicyBatchSnapshotItem[],
     retry = false,
   ) => {
+    const batchSelectionSession = selectionSession;
+    if (!selection.isCurrent(batchSelectionSession)) return;
     const verb = action === "VALIDATE" ? "kiểm tra" : "duyệt";
     const prompt = retry
       ? `Gửi lại ${snapshot.length} mục đã được đối soát là chưa thay đổi?`
@@ -274,6 +289,7 @@ export function bindPolicyControl(
         batchTransitionPolicyArtifacts,
         getPolicyArtifact,
       );
+      if (!selection.isCurrent(batchSelectionSession)) return;
       selectedIds.clear();
       pendingRetry = null;
       const results = root.querySelector<HTMLElement>("[data-policy-bulk-results]");
@@ -298,7 +314,7 @@ export function bindPolicyControl(
       notify(error instanceof Error ? error.message : "Không thể xử lý batch chính sách.");
     } finally {
       bulkBusy = false;
-      syncBulkControls();
+      if (selection.isCurrent(batchSelectionSession)) syncBulkControls();
     }
   };
 
@@ -444,7 +460,7 @@ export function bindPolicyControl(
     }
   }));
   root.querySelector<HTMLButtonElement>("[data-policy-clear-selection]")?.addEventListener("click", () => { selectedIds.clear(); renderPage(); });
-  root.querySelector<HTMLSelectElement>("[data-policy-page-select]")?.addEventListener("change", (event) => { const select = event.currentTarget as HTMLSelectElement; selectedIds.clear(); clearBulkFeedback(); selectedPageId = pageChoices.includes(select.value) ? select.value : null; const params = readRouteParams(); setRouteParam(params, "policy_page", selectedPageId ?? ""); writeRouteParams(params, true); syncPageScopedActions(); renderPage(); });
+  root.querySelector<HTMLSelectElement>("[data-policy-page-select]")?.addEventListener("change", (event) => { const select = event.currentTarget as HTMLSelectElement; selectedIds.clear(); clearBulkFeedback(); selectedPageId = pageChoices.includes(select.value) ? select.value : null; const params = readRouteParams(); setRouteParam(params, "policy_page", selectedPageId ?? ""); writeRouteParams(params, true); ensureSelectionSession(); syncPageScopedActions(); renderPage(); });
   root.querySelector<HTMLFormElement>("[data-policy-filters]")?.addEventListener("submit", (event) => { event.preventDefault(); const formData = new FormData(event.currentTarget as HTMLFormElement); const params = readRouteParams(); params.delete("cursor"); setRouteParam(params, "search", String(formData.get("search") ?? "").trim()); setRouteParam(params, "artifact_kind", String(formData.get("artifact_kind") ?? "")); setRouteParam(params, "lifecycle", String(formData.get("lifecycle") ?? "")); setRouteParam(params, "version", normalizedIntegerFilter(formData.get("version"), 1)); setRouteParam(params, "revision", normalizedIntegerFilter(formData.get("revision"), 0)); const active = String(formData.get("active") ?? "any"); setRouteParam(params, "active", active === "any" ? "" : active); let sort = String(formData.get("sort") ?? "updated_desc"); if (sort === "validated_oldest" && formData.get("lifecycle") !== "VALIDATED") sort = "updated_desc"; setRouteParam(params, "sort", sort === "updated_desc" ? "" : sort); writeRouteParams(params, true); void loadPage(); });
   root.querySelectorAll<HTMLButtonElement>("[data-policy-view]").forEach((button) => button.addEventListener("click", () => { const preset = policyQuickViewQuery(button.dataset.policyView as PolicyQuickView); const params = new URLSearchParams(); if (selectedPageId) params.set("policy_page", selectedPageId); if (preset.lifecycle) params.set("lifecycle", preset.lifecycle); if (preset.active && preset.active !== "any") params.set("active", preset.active); if (preset.sort && preset.sort !== "updated_desc") params.set("sort", preset.sort); writeRouteParams(params, true); void loadPage(); }));
   root.querySelector<HTMLButtonElement>("[data-policy-simulate]")?.addEventListener("click", async () => { if (!selectedPageId) return notify("Hãy chọn page thao tác trước khi mô phỏng."); const versions = data.artifacts.filter((item) => ["APPROVED", "CANARY", "PUBLISHED"].includes(item.lifecycle)).map(({ id }) => id).slice(0, 20); if (!versions.length || !window.confirm("Mô phỏng trên dữ liệu chat đã ẩn danh? Thao tác này không gửi tin hay gắn tag.")) return; try { await startPolicySimulation(versions, selectedPageId); notify("Đã đưa lượt mô phỏng vào hàng chờ."); await reload(); } catch (error) { notify(error instanceof Error ? error.message : "Không thể chạy mô phỏng."); } });

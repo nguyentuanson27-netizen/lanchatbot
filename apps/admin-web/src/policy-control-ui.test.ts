@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  createPolicyBulkSelectionStore,
   nextReviewArtifactId,
   policyBatchSelection,
   policyBulkActionEligibility,
@@ -121,6 +122,31 @@ describe("policy phase2 bulk review", () => {
     expect(refreshed).toEqual(new Set(["approved", "canary", "published"]));
   });
 
+  it("preserves selection only while the policy list context is unchanged", () => {
+    const selection = createPolicyBulkSelectionStore();
+    selection.begin("owner@example.com|#/policy?lifecycle=APPROVED");
+    selection.selectedIds.add("approved");
+
+    selection.begin("owner@example.com|#/policy?lifecycle=CANARY");
+
+    expect(selection.selectedIds).toEqual(new Set());
+  });
+
+  it("ignores a stale policy-list binding after the screen rebinds", () => {
+    const selection = createPolicyBulkSelectionStore();
+    const firstBinding = selection.begin("owner@example.com|#/policy?active=inactive");
+    selection.selectedIds.add("old-selection");
+
+    const currentBinding = selection.begin("owner@example.com|#/policy?active=inactive");
+    selection.selectedIds.clear();
+    selection.selectedIds.add("current-selection");
+
+    expect(selection.reconcile(firstBinding, [row("old-selection", "APPROVED")])).toBe(false);
+    expect(selection.selectedIds).toEqual(new Set(["current-selection"]));
+    expect(selection.reconcile(currentBinding, [row("current-selection", "CANARY")])).toBe(true);
+    expect(selection.selectedIds).toEqual(new Set(["current-selection"]));
+  });
+
   it("enables exactly one safe bulk transition for a homogeneous selection", () => {
     const items = [row("draft-a", "DRAFT"), row("draft-b", "DRAFT"), row("validated", "VALIDATED")];
     expect(policyBulkActionEligibility(items, new Set(["draft-a", "draft-b"]))).toEqual({
@@ -135,6 +161,12 @@ describe("policy phase2 bulk review", () => {
     });
     expect(policyBulkActionEligibility(items, new Set(["draft-a", "validated"]))).toEqual({
       selectedCount: 2,
+      canValidate: false,
+      canApprove: false,
+    });
+    const nonBatchItems = [row("approved", "APPROVED"), row("canary", "CANARY"), row("published", "PUBLISHED")];
+    expect(policyBulkActionEligibility(nonBatchItems, new Set(["approved", "canary", "published"]))).toEqual({
+      selectedCount: 3,
       canValidate: false,
       canApprove: false,
     });

@@ -24,6 +24,48 @@ export function reconcilePolicyBulkSelection(
   return new Set([...selectedIds].filter((id) => visibleIds.has(id)));
 }
 
+export interface PolicyBulkSelectionSession {
+  readonly contextKey: string;
+  readonly generation: number;
+}
+
+export interface PolicyBulkSelectionStore {
+  readonly selectedIds: Set<string>;
+  begin(contextKey: string): PolicyBulkSelectionSession;
+  isCurrent(session: PolicyBulkSelectionSession): boolean;
+  reconcile(session: PolicyBulkSelectionSession, items: readonly PolicyArtifactRow[]): boolean;
+}
+
+export function createPolicyBulkSelectionStore(): PolicyBulkSelectionStore {
+  const selectedIds = new Set<string>();
+  let contextKey: string | null = null;
+  let generation = 0;
+
+  const isCurrent = (session: PolicyBulkSelectionSession): boolean => (
+    session.contextKey === contextKey && session.generation === generation
+  );
+
+  return {
+    selectedIds,
+    begin(nextContextKey) {
+      if (contextKey !== nextContextKey) {
+        selectedIds.clear();
+        contextKey = nextContextKey;
+      }
+      generation += 1;
+      return { contextKey: nextContextKey, generation };
+    },
+    isCurrent,
+    reconcile(session, items) {
+      if (!isCurrent(session)) return false;
+      const preservedSelection = reconcilePolicyBulkSelection(selectedIds, items);
+      selectedIds.clear();
+      for (const id of preservedSelection) selectedIds.add(id);
+      return true;
+    },
+  };
+}
+
 export function policyBulkActionEligibility(
   items: readonly PolicyArtifactRow[],
   selectedIds: ReadonlySet<string>,
