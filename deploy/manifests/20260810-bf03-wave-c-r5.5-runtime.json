@@ -24,7 +24,6 @@
     "manifestSha256": "0afa947abc1d6784c73bb9f9bb90b02a319ee4bc839966a6acda4b57ea31c8e0",
     "exactHeadCiRun": 31374601470,
     "exactMainCiRun": 31376065008,
-    "candidateReview": "MERGE_RECOMMENDED",
     "finalTagVerifiedRemote": true
   },
   "artifact": {
