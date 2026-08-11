@@ -1,14 +1,20 @@
 import { describe, expect, it } from "vitest";
 import {
+  createPolicyBulkSelectionStore,
+  isPolicyBulkInteractionLocked,
   nextReviewArtifactId,
   policyBatchSelection,
   policyBulkActionEligibility,
   policyQuickViewQuery,
+  reconcilePolicyBulkSelection,
   policyRowNavigationIndex,
   renderPolicyListTable,
+  renderPolicyBatchExecution,
   renderReviewDrawer,
+  shouldPreservePolicyRefreshScreen,
 } from "./policy-control-ui.js";
 import type { PolicyArtifactRow, PolicyReviewContext } from "./policy-control-review-api.js";
+import type { PolicyBatchExecution, PolicyBatchSnapshotItem } from "./policy-control-runtime.js";
 import type { Identity, PolicyArtifact } from "./types.js";
 
 const identity: Identity = {
@@ -95,16 +101,130 @@ describe("policy phase1 table", () => {
 });
 
 describe("policy phase2 bulk review", () => {
-  it("renders current-page selection only for DRAFT and VALIDATED rows", () => {
+  it("keeps all lifecycle rows selectable while batch eligibility stays fail-safe", () => {
     const html = renderPolicyListTable([
       row("draft", "DRAFT"),
       row("validated", "VALIDATED"),
       row("approved", "APPROVED"),
-    ], new Set(["draft"]));
+      row("canary", "CANARY"),
+      row("published", "PUBLISHED"),
+    ], new Set(["approved", "canary", "published"]));
     expect(html).toContain('data-policy-select-page');
-    expect(html).toMatch(/data-policy-select="draft"[^>]*checked/u);
-    expect(html).toContain('data-policy-select="validated"');
-    expect(html).toMatch(/data-policy-select="approved"[^>]*disabled/u);
+    expect(html).toMatch(/data-policy-select="approved"[^>]*checked/u);
+    expect(html).toMatch(/data-policy-select="canary"[^>]*checked/u);
+    expect(html).toMatch(/data-policy-select="published"[^>]*checked/u);
+    expect(html).not.toMatch(/data-policy-select="approved"[^>]*disabled/u);
+    expect(html).not.toMatch(/data-policy-select="canary"[^>]*disabled/u);
+    expect(html).not.toMatch(/data-policy-select="published"[^>]*disabled/u);
+  });
+
+  it("retains still-visible selections after a policy-list refresh", () => {
+    const refreshed = reconcilePolicyBulkSelection(
+      new Set(["approved", "canary", "published", "removed"]),
+      [row("approved", "APPROVED"), row("canary", "CANARY"), row("published", "PUBLISHED")],
+    );
+    expect(refreshed).toEqual(new Set(["approved", "canary", "published"]));
+  });
+
+  it("preserves selection only while the policy list context is unchanged", () => {
+    const selection = createPolicyBulkSelectionStore();
+    selection.begin("owner@example.com|#/policy?lifecycle=APPROVED");
+    selection.selectedIds.add("approved");
+
+    selection.begin("owner@example.com|#/policy?lifecycle=CANARY");
+
+    expect(selection.selectedIds).toEqual(new Set());
+  });
+
+  it("ignores a stale policy-list binding after the screen rebinds", () => {
+    const selection = createPolicyBulkSelectionStore();
+    const firstBinding = selection.begin("owner@example.com|#/policy?active=inactive");
+    selection.selectedIds.add("old-selection");
+
+    const currentBinding = selection.begin("owner@example.com|#/policy?active=inactive");
+    selection.selectedIds.clear();
+    selection.selectedIds.add("current-selection");
+
+    expect(selection.reconcile(firstBinding, [row("old-selection", "APPROVED")])).toBe(false);
+    expect(selection.selectedIds).toEqual(new Set(["current-selection"]));
+    expect(selection.reconcile(currentBinding, [row("current-selection", "CANARY")])).toBe(true);
+    expect(selection.selectedIds).toEqual(new Set(["current-selection"]));
+  });
+
+  it("keeps an in-flight bulk operation locked across a policy-screen rebind", () => {
+    const selection = createPolicyBulkSelectionStore();
+    const contextKey = "owner@example.com|#/policy?active=inactive";
+    const firstBinding = selection.begin(contextKey);
+    selection.selectedIds.add("approved-selection");
+    const batch = selection.startBatch(firstBinding);
+
+    expect(batch).not.toBeNull();
+
+    const reboundBinding = selection.begin(contextKey);
+
+    expect(selection.selectedIds).toEqual(new Set(["approved-selection"]));
+    expect(selection.batchInFlight).toBe(true);
+    expect(selection.startBatch(reboundBinding)).toBeNull();
+    expect(selection.finishBatch(batch!)).toBe(true);
+    expect(selection.batchInFlight).toBe(false);
+    expect(selection.startBatch(reboundBinding)).not.toBeNull();
+  });
+
+  it("preserves a recovery decision across refresh rebinds until the owner dismisses it", () => {
+    const selection = createPolicyBulkSelectionStore();
+    const snapshot: PolicyBatchSnapshotItem[] = [
+      { versionId: "draft", expectedRevision: 3, lifecycle: "DRAFT" },
+    ];
+    const execution: PolicyBatchExecution = {
+      kind: "recovery",
+      recovery: {
+        recoveredIds: [],
+        retryableIds: ["draft"],
+        manualIds: [],
+        currentArtifacts: [],
+        details: ["draft chưa thay đổi"],
+      },
+    };
+
+    const binding = selection.begin("owner@example.com|#/policy?lifecycle=DRAFT");
+    const batch = selection.startBatch(binding);
+    selection.setPendingRecovery({ action: "VALIDATE", snapshot, execution });
+    expect(selection.finishBatch(batch!)).toBe(true);
+    selection.begin("owner@example.com|#/policy?lifecycle=VALIDATED");
+
+    expect(selection.batchInFlight).toBe(false);
+    expect(selection.pendingRecovery).toEqual({ action: "VALIDATE", snapshot, execution });
+    expect(isPolicyBulkInteractionLocked(selection)).toBe(true);
+
+    selection.clearPendingRecovery();
+
+    expect(selection.pendingRecovery).toBeNull();
+    expect(isPolicyBulkInteractionLocked(selection)).toBe(false);
+  });
+
+  it("keeps both successful and failed silent refreshes from replacing an active batch screen", () => {
+    expect(shouldPreservePolicyRefreshScreen(true, "policy", true)).toBe(true);
+    expect(shouldPreservePolicyRefreshScreen(false, "policy", true)).toBe(false);
+    expect(shouldPreservePolicyRefreshScreen(true, "overview", true)).toBe(false);
+    expect(shouldPreservePolicyRefreshScreen(true, "policy", false)).toBe(false);
+  });
+
+  it("renders an explicit dismiss action for an ambiguous recovery", () => {
+    const execution: PolicyBatchExecution = {
+      kind: "recovery",
+      recovery: {
+        recoveredIds: [],
+        retryableIds: ["draft"],
+        manualIds: [],
+        currentArtifacts: [],
+        details: ["draft chưa thay đổi"],
+      },
+    };
+
+    const html = renderPolicyBatchExecution("VALIDATE", execution);
+
+    expect(html).toContain("data-policy-retry-batch");
+    expect(html).toContain("data-policy-dismiss-recovery");
   });
 
   it("enables exactly one safe bulk transition for a homogeneous selection", () => {
@@ -121,6 +241,12 @@ describe("policy phase2 bulk review", () => {
     });
     expect(policyBulkActionEligibility(items, new Set(["draft-a", "validated"]))).toEqual({
       selectedCount: 2,
+      canValidate: false,
+      canApprove: false,
+    });
+    const nonBatchItems = [row("approved", "APPROVED"), row("canary", "CANARY"), row("published", "PUBLISHED")];
+    expect(policyBulkActionEligibility(nonBatchItems, new Set(["approved", "canary", "published"]))).toEqual({
+      selectedCount: 3,
       canValidate: false,
       canApprove: false,
     });

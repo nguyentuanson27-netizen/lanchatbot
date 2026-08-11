@@ -40,6 +40,11 @@ import {
 } from "./api.js";
 import { bindPolicyControl, renderPolicyControl } from "./policy-control-ui.js";
 import {
+  createPolicyBulkSelectionStore,
+  isPolicyBulkInteractionLocked,
+  shouldPreservePolicyRefreshScreen,
+} from "./policy-control-bulk.js";
+import {
   autoRefreshLabel,
   readAutoRefreshEnabled,
   renderAutoRefreshToggle,
@@ -185,6 +190,7 @@ let auditData: ListResponse<AuditLog> | null = null;
 let overlayCleanup: (() => void) | null = null;
 let modalCleanup: (() => void) | null = null;
 let commandPollTimer: number | undefined;
+const policyBulkSelection = createPolicyBulkSelectionStore();
 let outreachData: OutreachSummary | null = null;
 let handoffData: HandoffQueue | null = null;
 let handoffOpenCount = 0;
@@ -1045,6 +1051,7 @@ function renderConversationDetail(
 }
 
 async function loadCurrentPage(silent = true): Promise<void> {
+  const routeAtLoad = currentRoute;
   activeController?.abort();
   activeController = new AbortController();
   const content = document.querySelector<HTMLDivElement>("#page-content");
@@ -1111,7 +1118,9 @@ async function loadCurrentPage(silent = true): Promise<void> {
         policyControlData = identity?.policyControl
           ? await getPolicyControl(activeController.signal)
           : { artifacts: [], pointers: [], simulations: [] };
-        html = renderPolicyControl(policyControlData, identity);
+        if (shouldPreservePolicyRefreshScreen(silent, routeAtLoad, isPolicyBulkInteractionLocked(policyBulkSelection))) return;
+        policyBulkSelection.begin(`${identity?.email ?? ""}\u0000${window.location.hash}`);
+        html = renderPolicyControl(policyControlData, identity, policyBulkSelection.selectedIds);
         break;
       case "datasets": {
         if (identity?.datasetReview?.enabled !== true) {
@@ -1151,6 +1160,7 @@ async function loadCurrentPage(silent = true): Promise<void> {
         policyControlData,
         identity,
         () => loadCurrentPage(false),
+        policyBulkSelection,
         (message) => showToast(message, /lỗi|không thể|thất bại/i.test(message) ? "danger" : "good"),
       );
     }
@@ -1160,6 +1170,7 @@ async function loadCurrentPage(silent = true): Promise<void> {
     }
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") return;
+    if (shouldPreservePolicyRefreshScreen(silent, routeAtLoad, isPolicyBulkInteractionLocked(policyBulkSelection))) return;
     content.innerHTML = renderError(error);
     document.querySelector("#retry-load")?.addEventListener("click", () => void loadCurrentPage(false));
   } finally {
@@ -2131,7 +2142,7 @@ function showToast(message: string, tone: "good" | "warning" | "danger" = "good"
 function startPolling(): void {
   window.clearInterval(refreshTimer);
   refreshTimer = window.setInterval(() => {
-    if (shouldAutoRefresh({
+    if (!policyBulkSelection.batchInFlight && shouldAutoRefresh({
       enabled: autoRefreshEnabled,
       visible: document.visibilityState === "visible",
       routeSupportsPolling: currentRoute !== "media" &&
