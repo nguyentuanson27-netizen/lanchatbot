@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createPolicyBulkSelectionStore,
+  isPolicyBulkInteractionLocked,
   nextReviewArtifactId,
   policyBatchSelection,
   policyBulkActionEligibility,
@@ -8,9 +9,12 @@ import {
   reconcilePolicyBulkSelection,
   policyRowNavigationIndex,
   renderPolicyListTable,
+  renderPolicyBatchExecution,
   renderReviewDrawer,
+  shouldPreservePolicyRefreshScreen,
 } from "./policy-control-ui.js";
 import type { PolicyArtifactRow, PolicyReviewContext } from "./policy-control-review-api.js";
+import type { PolicyBatchExecution, PolicyBatchSnapshotItem } from "./policy-control-runtime.js";
 import type { Identity, PolicyArtifact } from "./types.js";
 
 const identity: Identity = {
@@ -164,6 +168,63 @@ describe("policy phase2 bulk review", () => {
     expect(selection.finishBatch(batch!)).toBe(true);
     expect(selection.batchInFlight).toBe(false);
     expect(selection.startBatch(reboundBinding)).not.toBeNull();
+  });
+
+  it("preserves a recovery decision across refresh rebinds until the owner dismisses it", () => {
+    const selection = createPolicyBulkSelectionStore();
+    const snapshot: PolicyBatchSnapshotItem[] = [
+      { versionId: "draft", expectedRevision: 3, lifecycle: "DRAFT" },
+    ];
+    const execution: PolicyBatchExecution = {
+      kind: "recovery",
+      recovery: {
+        recoveredIds: [],
+        retryableIds: ["draft"],
+        manualIds: [],
+        currentArtifacts: [],
+        details: ["draft chưa thay đổi"],
+      },
+    };
+
+    const binding = selection.begin("owner@example.com|#/policy?lifecycle=DRAFT");
+    const batch = selection.startBatch(binding);
+    selection.setPendingRecovery({ action: "VALIDATE", snapshot, execution });
+    expect(selection.finishBatch(batch!)).toBe(true);
+    selection.begin("owner@example.com|#/policy?lifecycle=VALIDATED");
+
+    expect(selection.batchInFlight).toBe(false);
+    expect(selection.pendingRecovery).toEqual({ action: "VALIDATE", snapshot, execution });
+    expect(isPolicyBulkInteractionLocked(selection)).toBe(true);
+
+    selection.clearPendingRecovery();
+
+    expect(selection.pendingRecovery).toBeNull();
+    expect(isPolicyBulkInteractionLocked(selection)).toBe(false);
+  });
+
+  it("keeps both successful and failed silent refreshes from replacing an active batch screen", () => {
+    expect(shouldPreservePolicyRefreshScreen(true, "policy", true)).toBe(true);
+    expect(shouldPreservePolicyRefreshScreen(false, "policy", true)).toBe(false);
+    expect(shouldPreservePolicyRefreshScreen(true, "overview", true)).toBe(false);
+    expect(shouldPreservePolicyRefreshScreen(true, "policy", false)).toBe(false);
+  });
+
+  it("renders an explicit dismiss action for an ambiguous recovery", () => {
+    const execution: PolicyBatchExecution = {
+      kind: "recovery",
+      recovery: {
+        recoveredIds: [],
+        retryableIds: ["draft"],
+        manualIds: [],
+        currentArtifacts: [],
+        details: ["draft chưa thay đổi"],
+      },
+    };
+
+    const html = renderPolicyBatchExecution("VALIDATE", execution);
+
+    expect(html).toContain("data-policy-retry-batch");
+    expect(html).toContain("data-policy-dismiss-recovery");
   });
 
   it("enables exactly one safe bulk transition for a homogeneous selection", () => {

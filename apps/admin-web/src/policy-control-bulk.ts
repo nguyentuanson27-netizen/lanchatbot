@@ -33,14 +33,37 @@ export interface PolicyBulkBatchSession {
   readonly id: number;
 }
 
+export interface PolicyBulkPendingRecovery {
+  readonly action: "VALIDATE" | "APPROVE";
+  readonly snapshot: readonly PolicyBatchSnapshotItem[];
+  readonly execution: Extract<PolicyBatchExecution, { readonly kind: "recovery" }>;
+}
+
 export interface PolicyBulkSelectionStore {
   readonly selectedIds: Set<string>;
   readonly batchInFlight: boolean;
+  readonly pendingRecovery: PolicyBulkPendingRecovery | null;
   begin(contextKey: string): PolicyBulkSelectionSession;
   isCurrent(session: PolicyBulkSelectionSession): boolean;
   reconcile(session: PolicyBulkSelectionSession, items: readonly PolicyArtifactRow[]): boolean;
   startBatch(session: PolicyBulkSelectionSession): PolicyBulkBatchSession | null;
   finishBatch(session: PolicyBulkBatchSession): boolean;
+  setPendingRecovery(recovery: PolicyBulkPendingRecovery): void;
+  clearPendingRecovery(): void;
+}
+
+export function isPolicyBulkInteractionLocked(
+  selection: Pick<PolicyBulkSelectionStore, "batchInFlight" | "pendingRecovery">,
+): boolean {
+  return selection.batchInFlight || selection.pendingRecovery !== null;
+}
+
+export function shouldPreservePolicyRefreshScreen(
+  silent: boolean,
+  route: string,
+  interactionLocked: boolean,
+): boolean {
+  return silent && route === "policy" && interactionLocked;
 }
 
 export function createPolicyBulkSelectionStore(): PolicyBulkSelectionStore {
@@ -49,6 +72,7 @@ export function createPolicyBulkSelectionStore(): PolicyBulkSelectionStore {
   let generation = 0;
   let nextBatchId = 0;
   let activeBatchId: number | null = null;
+  let pendingRecovery: PolicyBulkPendingRecovery | null = null;
 
   const isCurrent = (session: PolicyBulkSelectionSession): boolean => (
     session.contextKey === contextKey && session.generation === generation
@@ -58,6 +82,9 @@ export function createPolicyBulkSelectionStore(): PolicyBulkSelectionStore {
     selectedIds,
     get batchInFlight() {
       return activeBatchId !== null;
+    },
+    get pendingRecovery() {
+      return pendingRecovery;
     },
     begin(nextContextKey) {
       if (contextKey !== nextContextKey) {
@@ -84,6 +111,12 @@ export function createPolicyBulkSelectionStore(): PolicyBulkSelectionStore {
       if (activeBatchId !== session.id) return false;
       activeBatchId = null;
       return true;
+    },
+    setPendingRecovery(recovery) {
+      pendingRecovery = recovery;
+    },
+    clearPendingRecovery() {
+      pendingRecovery = null;
     },
   };
 }
@@ -142,5 +175,5 @@ export function renderPolicyBatchExecution(
   const retry = recovery.retryableIds.length
     ? `<button type="button" class="secondary-button" data-policy-retry-batch data-policy-retry-action="${action}">Gửi lại ${recovery.retryableIds.length} mục đã đối soát</button>`
     : "";
-  return `<div class="policy-bulk-result policy-bulk-result--recovery"><strong>Mất phản hồi chắc chắn; đã đối soát từng mục</strong><ul>${items}</ul>${retry}</div>`;
+  return `<div class="policy-bulk-result policy-bulk-result--recovery"><strong>Mất phản hồi chắc chắn; đã đối soát từng mục</strong><ul>${items}</ul><div class="policy-bulk-result__actions">${retry}<button type="button" class="secondary-button" data-policy-dismiss-recovery>Đóng kết quả đối soát</button></div></div>`;
 }

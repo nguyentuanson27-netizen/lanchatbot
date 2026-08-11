@@ -39,7 +39,11 @@ import {
   releaseDatasetReviewLease,
 } from "./api.js";
 import { bindPolicyControl, renderPolicyControl } from "./policy-control-ui.js";
-import { createPolicyBulkSelectionStore } from "./policy-control-bulk.js";
+import {
+  createPolicyBulkSelectionStore,
+  isPolicyBulkInteractionLocked,
+  shouldPreservePolicyRefreshScreen,
+} from "./policy-control-bulk.js";
 import {
   autoRefreshLabel,
   readAutoRefreshEnabled,
@@ -1047,6 +1051,7 @@ function renderConversationDetail(
 }
 
 async function loadCurrentPage(silent = true): Promise<void> {
+  const routeAtLoad = currentRoute;
   activeController?.abort();
   activeController = new AbortController();
   const content = document.querySelector<HTMLDivElement>("#page-content");
@@ -1113,7 +1118,7 @@ async function loadCurrentPage(silent = true): Promise<void> {
         policyControlData = identity?.policyControl
           ? await getPolicyControl(activeController.signal)
           : { artifacts: [], pointers: [], simulations: [] };
-        if (silent && policyBulkSelection.batchInFlight) return;
+        if (shouldPreservePolicyRefreshScreen(silent, routeAtLoad, isPolicyBulkInteractionLocked(policyBulkSelection))) return;
         policyBulkSelection.begin(`${identity?.email ?? ""}\u0000${window.location.hash}`);
         html = renderPolicyControl(policyControlData, identity, policyBulkSelection.selectedIds);
         break;
@@ -1165,6 +1170,7 @@ async function loadCurrentPage(silent = true): Promise<void> {
     }
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") return;
+    if (shouldPreservePolicyRefreshScreen(silent, routeAtLoad, isPolicyBulkInteractionLocked(policyBulkSelection))) return;
     content.innerHTML = renderError(error);
     document.querySelector("#retry-load")?.addEventListener("click", () => void loadCurrentPage(false));
   } finally {
