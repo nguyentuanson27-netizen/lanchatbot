@@ -70,7 +70,7 @@ const unknownField = structuredClone(example); unknownField.unapproved = true; i
 
 const manifestDir = join(root, 'deploy', 'manifests');
 for (const file of readdirSync(manifestDir).filter((name) => name.endsWith('.json'))) JSON.parse(readFileSync(join(manifestDir, file), 'utf8'));
-const adminReleaseTag = '20260810-admin-policy-review-r6.10';
+const adminReleaseTag = '20260811-admin-policy-review-r6.11';
 const adminReleaseDir = join(root, 'deploy', 'releases', adminReleaseTag);
 const adminReleaseScripts = [
   'common.sh',
@@ -78,7 +78,7 @@ const adminReleaseScripts = [
   'run-build.sh',
   'artifact-smoke.sh',
   'backup-restore-test.sh',
-  'migrate-production.sh',
+  'verify-production-schema.sh',
   'cutover.sh',
   'promote-runtime-state.sh',
   'postcheck.sh',
@@ -112,24 +112,26 @@ for (const requiredFile of [
   if (!existsSync(join(adminReleaseDir, requiredFile))) throw new Error(`ADMIN_POLICY_RELEASE_FILE_MISSING:${requiredFile}`);
 }
 const adminCutover = readFileSync(join(adminReleaseDir, 'cutover.sh'), 'utf8');
-for (const required of ['--no-deps', 'admin-api', 'admin-web', 'ADMIN_SIMULATION_IMAGE', 'backup-restore-test.sh', 'migrate-production.sh', 'arm_automatic_rollback', 'disarm_automatic_rollback', 'acquire_deployment_lock', 'soak.sh', 'capture-deployment-boundary.mjs']) {
+for (const required of ['--no-deps', 'admin-web', 'PRESERVED_ADMIN_API_IMAGE', 'PRESERVED_ADMIN_SIMULATION_IMAGE', 'backup-restore-test.sh', 'verify-production-schema.sh', 'arm_automatic_rollback', 'disarm_automatic_rollback', 'acquire_deployment_lock', 'soak.sh', 'capture-deployment-boundary.mjs']) {
   if (!adminCutover.includes(required)) throw new Error(`ADMIN_POLICY_CUTOVER_GUARD_MISSING:${required}`);
 }
+if (/compose up -d --no-deps admin-api/.test(adminCutover)) throw new Error('ADMIN_POLICY_CUTOVER_ADMIN_API_RECREATE_FORBIDDEN');
 const adminRollback = readFileSync(join(adminReleaseDir, 'rollback.sh'), 'utf8');
-for (const required of ['--no-deps', 'admin-api', 'admin-web', 'require_rollback_inputs', 'rollback_compose', 'ROLLBACK_ADMIN_API_IMAGE_ID', 'ROLLBACK_ADMIN_WEB_IMAGE_ID']) {
+for (const required of ['--no-deps', 'admin-web', 'require_rollback_inputs', 'rollback_compose', 'PRESERVED_ADMIN_API_IMAGE_ID', 'ROLLBACK_ADMIN_WEB_IMAGE_ID']) {
   if (!adminRollback.includes(required)) throw new Error(`ADMIN_POLICY_ROLLBACK_GUARD_MISSING:${required}`);
 }
+if (/rollback_compose up -d --no-deps admin-api/.test(adminRollback)) throw new Error('ADMIN_POLICY_ROLLBACK_ADMIN_API_RECREATE_FORBIDDEN');
 const adminCommon = readFileSync(join(adminReleaseDir, 'common.sh'), 'utf8');
 for (const required of ['RUNTIME_STATE_ROLLBACK_EVIDENCE_FILE', 'require_rollback_inputs', 'readonly DEPLOYMENT_LOCK_FILE=', '/proc/$$/fd/9', 'trap automatic_rollback_on_exit EXIT']) {
   if (!adminCommon.includes(required)) throw new Error(`ADMIN_POLICY_ROLLBACK_INPUT_GUARD_MISSING:${required}`);
 }
 if (adminRollback.includes('require_cutover_inputs')) throw new Error('ADMIN_POLICY_ROLLBACK_DEPENDS_ON_CUTOVER_GATE');
 const adminArtifactSmoke = readFileSync(join(adminReleaseDir, 'artifact-smoke.sh'), 'utf8');
-if (!/cd apps\/admin-api\s+node -e "import\(\\"sharp\\"\)/.test(adminArtifactSmoke)) {
-  throw new Error('ADMIN_POLICY_SHARP_SMOKE_WORKSPACE_ANCHOR_MISSING');
+if (!adminArtifactSmoke.includes('apps/admin-web/dist/index.html') || /apps\/admin-api|sharp/.test(adminArtifactSmoke)) {
+  throw new Error('ADMIN_POLICY_ADMIN_WEB_ARTIFACT_SMOKE_SCOPE');
 }
 const adminManifest = JSON.parse(readFileSync(join(manifestDir, `${adminReleaseTag}.json`), 'utf8'));
-if (adminManifest.releaseTag !== adminReleaseTag || adminManifest.source?.implementationCommit !== '8eabe32c44529721e79b56b3ec5d0ea1ed333780') {
+if (adminManifest.releaseTag !== adminReleaseTag || adminManifest.source?.implementationCommit !== '116d46104113fc73a71108241414104b47e70e01') {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_PROVENANCE');
 }
 const adminSecurityPrerequisite = adminManifest.source?.pullRequests?.find(({ number }) => number === 162);
@@ -147,25 +149,35 @@ if (adminDockerBuildFix?.mergeCommit !== '8eabe32c44529721e79b56b3ec5d0ea1ed3337
     adminDockerBuildFix?.scope !== 'DOCKER_BUILD_BENCHMARK_FIXTURES') {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_DOCKER_BUILD_FIX_PR');
 }
-if (adminManifest.database?.migrationRequired !== true ||
-    JSON.stringify(adminManifest.database?.migrationsToApply) !== JSON.stringify(['0031_admin_policy_safe_deletion']) ||
+const adminSelectionRefreshFix = adminManifest.source?.pullRequests?.find(({ number }) => number === 182);
+if (adminSelectionRefreshFix?.mergeCommit !== '116d46104113fc73a71108241414104b47e70e01' ||
+    adminSelectionRefreshFix?.scope !== 'ADMIN_POLICY_SELECTION_REFRESH_AND_BATCH_RECOVERY') {
+  throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_SELECTION_REFRESH_PR');
+}
+if (adminManifest.database?.migrationRequired !== false ||
+    JSON.stringify(adminManifest.database?.migrationsToApply) !== JSON.stringify([]) ||
     adminManifest.database?.backfillRequired !== false ||
     adminManifest.database?.dataRewriteRequired !== false ||
-    adminManifest.database?.schemaRollbackRequired !== false) {
+    adminManifest.database?.schemaRollbackRequired !== false ||
+    adminManifest.database?.previousLatestMigration !== '0031_admin_policy_safe_deletion' ||
+    adminManifest.database?.latestMigrationMustRemain !== '0031_admin_policy_safe_deletion') {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_DATABASE_SCOPE');
 }
-if (JSON.stringify(adminManifest.scope?.targetServices) !== JSON.stringify(['admin-api', 'admin-web'])) {
+if (JSON.stringify(adminManifest.scope?.targetServices) !== JSON.stringify(['admin-web'])) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_SERVICE_SCOPE');
 }
-if (adminManifest.scope?.adminSimulationWorkerMustRemainUnchanged !== true || adminManifest.scope?.messengerProductionTestAllowed !== false) {
+if (adminManifest.scope?.adminApiMustRemainUnchanged !== true ||
+    adminManifest.scope?.adminSimulationWorkerMustRemainUnchanged !== true ||
+    adminManifest.scope?.messengerProductionTestAllowed !== false) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_NON_TARGET_SCOPE');
 }
-if (adminManifest.supersedesFailedRelease !== '20260810-admin-policy-review-r6.9' ||
-    adminManifest.failedReleaseOutcome !== 'PRE_CUTOVER_DDL_PERMISSION_FAILURE_AUTOMATIC_ROLLBACK_PASS' ||
-    adminManifest.deploymentAutomation?.productionMigrationAuthority !== 'EXACT_TARGET_IMAGE_SQL_APPLIED_BY_DATABASE_OWNER_WITH_ATOMIC_LEDGER' ||
+if (adminManifest.supersedesRelease !== '20260810-admin-policy-review-r6.10' ||
+    adminManifest.deploymentAutomation?.productionMigrationAuthority !== 'NO_DDL_SCHEMA_0031_READ_ONLY_VERIFICATION' ||
+    adminManifest.deploymentAutomation?.targetedComposeInvocation !== 'docker compose up -d --no-deps admin-web' ||
     adminManifest.deploymentAutomation?.automaticRollbackOnSoakFailure !== true ||
     adminManifest.deploymentAutomation?.globalDeploymentLockRequired !== true ||
-    adminManifest.rollback?.runtimeDefinitionAuthority !== 'previous release Compose plus reviewed image-only override') {
+    adminManifest.rollback?.runtimeDefinitionAuthority !== 'previous release Compose plus reviewed Admin Web image-only override' ||
+    adminManifest.authorizationBoundary?.migrationAuthorized !== false) {
   throw new Error('ADMIN_POLICY_RELEASE_MANIFEST_DEPLOYMENT_SAFETY');
 }
 const adminReleaseSelfTest = spawnSync(process.execPath, [join(adminReleaseDir, 'test-release-automation.mjs')], { encoding: 'utf8' });
