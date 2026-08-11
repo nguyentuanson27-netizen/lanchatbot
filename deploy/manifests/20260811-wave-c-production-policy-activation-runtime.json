@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "documentType": "APPEND_ONLY_RUNTIME_POLICY_ACTIVATION_EVIDENCE",
+  "status": "ACTIVATION_SUCCESS",
+  "environment": "production-single-approved-page",
+  "capturedAt": "2026-08-11T11:27:41.638966Z",
+  "capturedAtSemantics": "fresh production database and host readback after direct PUBLISHED activation, three bounded soak samples, and runtime-state promotion; distinct from repository record time",
+  "repositoryRecord": {
+    "baseCommit": "c99105cbc578d0da8985447385ce3c74913a74f3",
+    "branch": "docs/20260811-wave-c-production-policy-activation",
+    "appendOnly": true
+  },
+  "authorization": {
+    "ownerAuthorizedAdminApiOnlyCompatibilityDeployment": true,
+    "ownerAuthorizedDirectPublishedPolicyActivation": true,
+    "approvedPageId": "1198992073286645",
+    "migrationAuthorized": false,
+    "backfillAuthorized": false,
+    "routingMutationAuthorized": false,
+    "pageAllowlistMutationAuthorized": false,
+    "messengerSyntheticSendAuthorized": false
+  },
+  "adminApiCompatibilityCutover": {
+    "reason": "the preserved r6.10 Admin API accepted only LEGACY incident values and did not contain the BF-08 customer URL field; the API rejected the activation payload before version creation",
+    "targetServices": [
+      "admin-api"
+    ],
+    "sourceArtifact": {
+      "releaseTag": "20260810-bf03-wave-c-r5.5",
+      "tagObject": "16a8f925aafbd01805f79a1c72974eafcf6a8257",
+      "commit": "31d74695a794a28d6f93427416593b2a414270d6",
+      "image": "lana-chatbot-app:bf03-wave-c-r5.5",
+      "imageId": "sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a"
+    },
+    "previousAdminApi": {
+      "image": "lana-chatbot-app:admin-policy-review-r6.10",
+      "imageId": "sha256:d7277becbe67b8cfb2cdd7e4b4099c5ec11374c91b278ef7d542af3a115a6f2e",
+      "revision": "ac1aa96a1058b97fb8ee67b5c121aef1ae281cf2"
+    },
+    "currentAdminApi": {
+      "containerId": "d269d0a683e26b517b776c8ff9a01d2818cf6efa82101318a2c7739c66273b71",
+      "image": "lana-chatbot-app:bf03-wave-c-r5.5",
+      "imageId": "sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a",
+      "revision": "31d74695a794a28d6f93427416593b2a414270d6",
+      "health": "healthy",
+      "restartCount": 0,
+      "pid1Uid": 1000,
+      "readiness": 200
+    },
+    "currentReleaseSymlinkRemains": "/opt/lana-chatbot/releases/20260811-admin-policy-review-r6.11",
+    "nonTargetContainerIdsUnchanged": true,
+    "configEnvKeyValuesUnchanged": true,
+    "secretEntryOrValueAddedOrChanged": false,
+    "environmentBackup": "/opt/lana-chatbot/shared/.env.infrastructure.backup-wave-c-admin-api-20260811",
+    "firstAttemptGuard": {
+      "result": "AUTOMATIC_ROLLBACK_PASS",
+      "reason": "raw Docker Config.Env array ordering changed after recreate; canonical sorted key/value parity and fresh runtime-state parity proved no semantic environment drift before the successful retry"
+    }
+  },
+  "policyActivation": {
+    "artifactKey": "lana.closing-strategy",
+    "artifactKind": "CLOSING_STRATEGY",
+    "pageId": "1198992073286645",
+    "channel": "PUBLISHED",
+    "previous": {
+      "versionId": "949db7d1-778a-47fa-94ee-27b27bbebfa9",
+      "versionNumber": 1,
+      "contentHash": "sha256:9f151edb8e953720ffffd5f09f549d0cba962a200aad92e5d1497e66a8933476",
+      "pointerId": "cefcecd6-2619-4ba9-bd54-ac43b25f5abd",
+      "pointerRevisionBeforeActivation": 0
+    },
+    "current": {
+      "versionId": "0f71ab3c-c98e-4dda-b227-50693c071ea0",
+      "versionNumber": 2,
+      "artifactRevision": 4,
+      "lifecycle": "PUBLISHED",
+      "contentHash": "sha256:90d548b4b84bdd2339ed48821d22a7f810be2af67c28036ba1be90b3425bbc52",
+      "pointerId": "cefcecd6-2619-4ba9-bd54-ac43b25f5abd",
+      "pointerRevision": 3
+    },
+    "effective": {
+      "mediaPartialResolutionPolicy": "PER_ASSET_V1",
+      "multiProductResolutionPolicy": "CLARIFY_V1",
+      "customerUrlPolicy": "CLASSIFIED_ALLOWLIST_V1"
+    },
+    "lifecycle": {
+      "sequence": [
+        "DRAFT",
+        "VALIDATED",
+        "APPROVED",
+        "CANARY_SHADOW_LIFECYCLE_ONLY",
+        "PUBLISHED"
+      ],
+      "canaryTrafficEnabled": false,
+      "workerChannelChanged": false,
+      "workerChannel": "PUBLISHED",
+      "activeCanaryPointerAfterPublish": false,
+      "directProductionRequestedByOwner": true
+    },
+    "recoverySequence": {
+      "initialPublishCompleted": true,
+      "postPublishArtifactEventsReadbackFailed": true,
+      "artifactEventsReadbackDatabaseCode": "42501",
+      "artifactEventsReadbackMutationImpact": "NONE",
+      "automaticPointerRollbackToV1Completed": true,
+      "finalPointerSetToPublishedV2UsingExistingCasRollbackEndpoint": true,
+      "reason": "v2 was already lifecycle PUBLISHED and the transition contract does not allow PUBLISH from PUBLISHED; exact pointer CAS is the existing supported mechanism for selecting a PUBLISHED target version"
+    },
+    "shopAndOfferPublishedPointersUnchanged": true,
+    "bf03": {
+      "correctionDialoguePolicyPresent": false,
+      "productionImportPresent": false,
+      "activationPathPresent": false,
+      "status": "INACTIVE_AND_NON_ACTIVATABLE"
+    }
+  },
+  "runtimeState": {
+    "beforeSha256": "e0c3ab4a2a7585362fc09d2538a789d4b2327c5a47ca6cf3d064e38031c154d2",
+    "afterSha256": "52504d7be78029bb9e3bccffef3c324b33beb824a3f108bb6e545f37fdf59fa2",
+    "currentPath": "/opt/lana-chatbot/runtime-state/current.json",
+    "historyPath": "/opt/lana-chatbot/runtime-state/history/2026-08-11T11-25-53-502Z-20260811-admin-policy-review-r6.11.json",
+    "currentHistoryByteIdentical": true,
+    "freshHostParity": "PASS",
+    "promotion": "PASS"
+  },
+  "verification": {
+    "soak": "3/3 PASS",
+    "realtimeWorker": {
+      "containerId": "facda92073374bd385e8e47f8c49288ece146ef98bcbf054fa3f37c182d96794",
+      "health": "healthy",
+      "restartCount": 0,
+      "pid1Uid": 1000,
+      "status": "IDLE",
+      "mode": "LIVE",
+      "sendEnabled": true,
+      "heartbeatAgeSeconds": 5,
+      "lastErrorCode": null
+    },
+    "queues": {
+      "inboxActive": 0,
+      "inboxDuplicates": 0,
+      "metaOutboxActive": 0,
+      "metaOutboxDuplicates": 0,
+      "pancakeOutboxActive": 0
+    },
+    "delivery": {
+      "readiness": 200,
+      "queueHealth": 200
+    },
+    "migrationCount": 31,
+    "latestMigration": "0031_admin_policy_safe_deletion",
+    "page": {
+      "pageId": "1198992073286645",
+      "status": "ACTIVE",
+      "routingOwner": "APP",
+      "sendEnabled": true,
+      "killSwitch": false
+    },
+    "realtimeErrorLogsDuringActivationWindow": 0,
+    "nonTargetContainerIdsUnchanged": true
+  },
+  "rollback": {
+    "order": [
+      "CAS the PUBLISHED CLOSING_STRATEGY pointer back to v1 first",
+      "restore the exact infrastructure environment backup",
+      "recreate only admin-api with the r6.10 image",
+      "fresh-verify service, policy, queue, routing, migration, and runtime-state parity",
+      "promote a rollback runtime-state candidate"
+    ],
+    "policy": {
+      "endpoint": "/admin/v1/policy/pointers/rollback",
+      "targetVersionId": "949db7d1-778a-47fa-94ee-27b27bbebfa9",
+      "targetContentHash": "sha256:9f151edb8e953720ffffd5f09f549d0cba962a200aad92e5d1497e66a8933476",
+      "expectedPointerRevision": 3,
+      "channel": "PUBLISHED"
+    },
+    "adminApi": {
+      "image": "lana-chatbot-app:admin-policy-review-r6.10",
+      "imageId": "sha256:d7277becbe67b8cfb2cdd7e4b4099c5ec11374c91b278ef7d542af3a115a6f2e",
+      "revision": "ac1aa96a1058b97fb8ee67b5c121aef1ae281cf2",
+      "targetServices": [
+        "admin-api"
+      ]
+    },
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false
+  },
+  "boundaries": {
+    "migrationPerformed": false,
+    "backfillPerformed": false,
+    "dataDeletionPerformed": false,
+    "routingMutationPerformed": false,
+    "pageAllowlistMutationPerformed": false,
+    "messengerProductionSendOrTestPerformedByOperator": false,
+    "n8nActionPerformed": false,
+    "directVpsSourceEditPerformed": false,
+    "sourceBuildPerformed": false,
+    "humanTestingMayProceedOnApprovedPage": true
+  }
+}
