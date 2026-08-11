@@ -21,7 +21,7 @@
     "messengerSyntheticSendAuthorized": false
   },
   "adminApiCompatibilityCutover": {
-    "reason": "the preserved r6.10 Admin API accepted only LEGACY incident values and did not contain the BF-08 customer URL field; the API rejected the activation payload before version creation",
+    "reason": "the preserved r6.10 Admin API supported the BF-06 and BF-07 selections but did not contain the BF-08 customer URL field; its strict schema rejected the combined activation payload before version creation",
     "targetServices": [
       "admin-api"
     ],
