@@ -1,0 +1,3 @@
+services:
+  admin-web:
+    image: ${ROLLBACK_ADMIN_WEB_IMAGE:?ROLLBACK_ADMIN_WEB_IMAGE must be pinned}
