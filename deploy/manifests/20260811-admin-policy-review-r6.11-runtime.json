@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-11T09:37:35Z",
+  "capturedAtSemantics": "live production readback after CUTOVER_PASS and SOAK_PASS 3/3",
+  "status": "DEPLOY_SUCCESS",
+  "environment": "production-admin-policy-review",
+  "release": {
+    "tag": "20260811-admin-policy-review-r6.11",
+    "tagObject": "b20afc9fea50777f683fe2d8b74bdc12de9d930e",
+    "commit": "a7a1a21a59440ccdf3cfde5d8cdfd8ef256190bb",
+    "featurePullRequest": 182,
+    "releasePreparationPullRequest": 183,
+    "releasePreparationHead": "71b91e3068ec20244933dac68d064592edc13d77"
+  },
+  "artifact": {
+    "image": "lana-chatbot-app:admin-policy-review-r6.11",
+    "imageId": "sha256:293d044fec41ca98c8044033aa40cbd83d0f54a364b1ba10d6ddf578f5be6dcf",
+    "revision": "a7a1a21a59440ccdf3cfde5d8cdfd8ef256190bb",
+    "releaseSourceBundleSha256": "f1094e3cbd0f842f91298fab99771414fc766738959c8d85dde2b0b1fcbd664c",
+    "artifactSmoke": "PASS"
+  },
+  "scope": {
+    "targetServices": ["admin-web"],
+    "adminApiPreserved": true,
+    "adminSimulationWorkerPreserved": true,
+    "nonTargetServicesPreserved": true
+  },
+  "database": {
+    "previousLatestMigration": "0031_admin_policy_safe_deletion",
+    "latestMigration": "0031_admin_policy_safe_deletion",
+    "migrationChecksumSha256": "e121786b814e0cb500be2970d2f350b2fae62f619b01c0af9fb7a8a2f1817047",
+    "migrationExecution": "NONE_READ_ONLY_SCHEMA_VERIFICATION",
+    "migrationObjects": {
+      "adminArtifactDeletionsTablePresent": true,
+      "requiredTriggerCount": 2
+    },
+    "backfillPerformed": false,
+    "dataRewritePerformed": false,
+    "backup": {
+      "path": "/opt/lana-chatbot/backups/20260811-admin-policy-review-r6.11/lana_chatbot_pre_r611.dump",
+      "sha256": "5d242061dac5f18518f1bbfd79a1295a58fa78abcaa86d5fffb66693359c8901",
+      "customFormatValidation": "PASS",
+      "isolatedRestore": "PASS"
+    },
+    "schemaEvidenceSha256": "e87c7b9e461b334f94049c84337d08d8549ccd335bde7398c643971687233702"
+  },
+  "runtimeState": {
+    "currentReleasePath": "/opt/lana-chatbot/releases/20260811-admin-policy-review-r6.11",
+    "currentPath": "/opt/lana-chatbot/runtime-state/current.json",
+    "sha256": "e0c3ab4a2a7585362fc09d2538a789d4b2327c5a47ca6cf3d064e38031c154d2",
+    "freshHostParity": "PASS",
+    "promotion": "PASS"
+  },
+  "targets": {
+    "admin-web": {
+      "health": "healthy",
+      "internalHealth": 200,
+      "publicAuthentikStatus": 302,
+      "restartCount": 0,
+      "pid1Uid": 1000,
+      "imageId": "sha256:293d044fec41ca98c8044033aa40cbd83d0f54a364b1ba10d6ddf578f5be6dcf",
+      "revision": "a7a1a21a59440ccdf3cfde5d8cdfd8ef256190bb"
+    }
+  },
+  "preservedServices": {
+    "admin-api": {
+      "health": "healthy",
+      "readiness": 200,
+      "restartCount": 0,
+      "image": "lana-chatbot-app:admin-policy-review-r6.10",
+      "imageId": "sha256:d7277becbe67b8cfb2cdd7e4b4099c5ec11374c91b278ef7d542af3a115a6f2e"
+    },
+    "admin-simulation-worker": {
+      "health": "healthy",
+      "restartCount": 0,
+      "image": "lana-chatbot-app:wave2-strategy-gemini35-r26.1",
+      "imageId": "sha256:6067695c8976c5601bd5ecd092fb33097b2fd0034152132827651f3146c0d13e"
+    },
+    "realtime-worker": {
+      "health": "healthy",
+      "restartCount": 0,
+      "imageId": "sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a"
+    },
+    "delivery-worker": {
+      "health": "healthy",
+      "restartCount": 0,
+      "imageId": "sha256:44ecb2fd9f7d6a5aa769938f738a3c6ba42b470db5a9bce3d30fdc364de2a0b7"
+    },
+    "unhealthyContainerCount": 0,
+    "exhaustiveRuntimeInvariantComparison": "PASS",
+    "deploymentBoundaryComparison": "PASS"
+  },
+  "verification": {
+    "featurePullRequestCiRun": 31470330011,
+    "featureMainCiRun": 31471522467,
+    "releasePullRequestCiRun": 31472924738,
+    "releaseMainCiRun": 31473904387,
+    "walkthroughEvidenceSha256": "cd656d2f85084797884bb53c8895c03c62bcb1039ae0c59b95fd7e9ec414cde5",
+    "deploymentServiceEvidenceSha256": "bf917c76dceb76dc4e0744a47ac6b6755d1da2a7a3ba9a3aba43ad3f29cf262c",
+    "rollbackServiceEvidenceSha256": "cfb15d4296ae4827a6b93d6e68afcef7415b9963d86a5ddd4bda8ced0ae0b978",
+    "postcheck": "PASS",
+    "soak": "3/3 PASS",
+    "cutover": "PASS",
+    "automaticRollbackTriggered": false
+  },
+  "rollbackReadiness": {
+    "previousReleasePath": "/opt/lana-chatbot/releases/20260810-bf03-wave-c-r5.5",
+    "adminWebImage": "lana-chatbot-app:admin-policy-review-r6.10",
+    "adminWebImageId": "sha256:d7277becbe67b8cfb2cdd7e4b4099c5ec11374c91b278ef7d542af3a115a6f2e",
+    "environmentBackupMode": "600",
+    "serviceEvidence": "PASS"
+  },
+  "authorization": {
+    "messengerProductionTestPerformed": false,
+    "runtimeModeMutationPerformed": false,
+    "controlPlaneMutationPerformed": false,
+    "routingMutationPerformed": false,
+    "pageAllowlistMutationPerformed": false,
+    "secretMutationPerformed": false
+  }
+}
