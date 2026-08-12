@@ -42,15 +42,15 @@ Original DF01-DF13 and UR00-UR10 identifiers remain traceable. PREPROD groups th
 | Train | PREPROD slices | Original IDs | Boundary |
 |---|---|---|---|
 | `DF-A` | `DF-P1..DF-P3` | DF01-DF06 | Minimum decision telemetry/normalization then canonical evidence/readiness. |
-| `DF-B` | `DF-P4..DF-P6` | DF07-DF10 | Deterministic phase/barrier, Context V2, locked offline/replay evaluation. |
-| `DF-C` | `DF-P7` | DF11-DF13 | Direct controlled `LEGACY -> COMMERCE` activation, readback, critical journeys, rollback. |
+| `DF-B` | `DF-P4..DF-P6` | DF07-DF10 | Deterministic phase/barrier, Context V2, locked offline/replay evaluation with exact candidate identity. |
+| `DF-C` | `DF-P7` | DF11-DF13 | Release-bound candidate, quiescent direct `LEGACY -> COMMERCE`, readback, critical journeys, rollback. |
 
 ### UR
 
 | Train | PREPROD slices | Original IDs | Boundary |
 |---|---|---|---|
 | `UR-A` | `UR-P1..UR-P2` | UR00-UR03 | State V2 contract then atomic persistence. |
-| `UR-B` | `UR-P3` | UR04-UR07 | Measured migration/comparator then direct controlled `LEGACY -> V2` read switch/rollback. |
+| `UR-B` | `UR-P3` | UR04-UR07 | Measured migration/comparator then quiescent direct `LEGACY -> V2` read switch/rollback. |
 | deferred retirement | — | UR08-UR09 | Resume only after later stability/hardening evidence intentionally closes the legacy rollback window. |
 | destructive cleanup | — | UR10 | Separate later approval only. |
 
@@ -63,7 +63,7 @@ Preferred evidence stack:
 1. deterministic unit/contract tests;
 2. focused integration tests;
 3. immutable incident/counterexample replay;
-4. locked offline model/context corpus with pre-declared expected behavior;
+4. locked offline model/context corpus with pre-declared expected behavior and exact candidate identity;
 5. side-effect-free legacy/new comparator where semantic equivalence matters;
 6. transition/concurrency/idempotency/revision-fence matrices;
 7. bounded controlled human E2E at explicit architecture/system checkpoints;
@@ -74,6 +74,12 @@ Do not manufacture Messenger traffic merely to satisfy a numeric Gate. Synthetic
 Overlapping legacy defects may prevent a human conversation from reaching the component under test. Focused deterministic/integration evidence may therefore close a component-level criterion when it proves the actual owning boundary. Full-journey testing remains mandatory at the explicit later checkpoints defined by the roadmap.
 
 Natural traffic, long soak, live sample volume, statistical confidence, and traffic-percentage canaries are supplemental in `ENGINEERING_PREPROD` unless a specific changed risk has an explicit owner-approved requirement.
+
+### Exact offline-candidate provenance
+
+When an offline/replay evaluation is the primary generative evidence for a future authority cutover, PASS must bind to an immutable candidate manifest rather than to an informal label such as “Context V2”. The manifest must include the exact model identifier, generation configuration, prompt/template version+hash, Context/evidence-envelope schema versions, relevant generation/interpretation policy versions, exact source revision used for the scored run, and corpus/rubric identity.
+
+The final immutable release may be a later source revision because authority-cutover plumbing follows Gate E. It must carry the exact evaluated candidate-manifest hash. If any material candidate-identity field changes, the prior offline result is invalid and the owning evaluation must be rerun before activation.
 
 ## 6. Authority transition semantics
 
@@ -88,7 +94,20 @@ state read:       LEGACY -> V2
 
 Before either switch, the replacement path must be proven by its Gate using deterministic/replay/comparator evidence. Activation then requires explicit approval, audited CAS, exact readback, bounded propagation, controlled scenarios, and complete rollback to `LEGACY`.
 
+Because bounded propagation can temporarily expose different workers to different revisions, every direct switch must use the page-scoped quiescent cutover contract from `contracts/BEHAVIOR_CONTROL_PLANE.md`:
+
+1. hold new eligible protected work;
+2. prove no protected command/cart/order/authority-sensitive operation is in flight;
+3. drain or hold eligible queued work;
+4. CAS the new revision;
+5. keep work held until every relevant authority consumer reads back the exact new revision/hash/source;
+6. release work only after convergence is proven.
+
+Failure to prove quiescence or exact convergence aborts/fails closed to complete `LEGACY` authority.
+
 A legacy/new comparator may be used offline or in controlled side-effect-free verification. It is verification tooling, not a third authority state.
+
+Default episode/cart pinning is not required when the quiescent boundary can be proven. If a future implementation cannot safely quiesce a specific authority-sensitive lifecycle, pinning may be added narrowly for that lifecycle as a correctness mechanism, not as traffic-rollout ceremony.
 
 ## 7. Production-hardening trigger
 
@@ -115,6 +134,8 @@ The old `>=100` pair/non-inferiority concept is not automatically carried forwar
 - auth/authz/least privilege/audit requirements remain enforced;
 - database changes remain additive/backward-compatible unless separately approved;
 - no partial authority merge or mixed legacy/new field synthesis is allowed;
+- direct authority changes satisfy the quiescent cutover boundary before protected work resumes;
+- evaluated generative candidates retain exact manifest provenance through activation;
 - readback, bounded propagation and complete `LEGACY` rollback remain required for authority changes;
 - no silent data loss, unsafe fallback, direct VPS source edit, premature retirement or destructive cleanup is authorized;
 - Git/release/runtime provenance remains mandatory for deployed Release Trains.
