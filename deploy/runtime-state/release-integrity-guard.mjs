@@ -368,7 +368,7 @@ if (JSON.stringify(bf10DeliveryManifest.scope?.targetServices) !== JSON.stringif
     bf10DeliveryManifest.scope?.messengerProductionSendOrTestAllowed !== false || bf10DeliveryManifest.scope?.n8nActionAllowed !== false) {
   throw new Error('BF10_DELIVERY_MANIFEST_SCOPE_INVALID');
 }
-if (bf10DeliveryManifest.reviewCandidateTag !== `${bf10DeliveryTag}-review-candidate.2` ||
+if (bf10DeliveryManifest.reviewCandidateTag !== `${bf10DeliveryTag}-review-candidate.3` ||
     bf10DeliveryManifest.implementationBoundaryCommit !== 'a7669d058d59a9331f0dadc2c04fe91a7888c51b' ||
     bf10DeliveryManifest.provenance?.bf10ImplementationCommit !== 'e8bb7a8fa7a067655b0435713d6dd7abf70e63d7' ||
     bf10DeliveryManifest.provenance?.bf10MergeCommit !== '3bc3e0a440ce64b5017f84d400a7e9a4085c435c' ||

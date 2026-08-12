@@ -126,15 +126,28 @@ if (bf10.cutoverAt !== '1970-01-01T00:00:00Z' && bf10.postCutover.accepted > 0 &
     (bf10.postCutover.activeError !== 0 || bf10.postCutover.retryScheduled !== 0)) {
   throw new Error('OPERATIONAL_STATE_BF10_ACTIVE_FIELDS_NOT_CLEARED');
 }
-if (bf10.postCutover.attemptHistory > bf10.postCutover.accepted) {
-  throw new Error('OPERATIONAL_STATE_BF10_ATTEMPT_HISTORY_INVALID');
+if (bf10.cutoverAt !== '1970-01-01T00:00:00Z' &&
+    bf10.postCutover.attemptHistory !== bf10.postCutover.accepted) {
+  throw new Error('OPERATIONAL_STATE_BF10_ATTEMPT_HISTORY_NOT_PRESERVED');
 }
 if (baselinePath) {
   const baseline = JSON.parse(readFileSync(resolve(baselinePath), 'utf8'));
   for (const name of ['policy', 'behaviorMode', 'runtime']) {
     if (!isDeepStrictEqual(current[name], baseline[name])) throw new Error(`OPERATIONAL_STATE_DRIFT:${name}`);
   }
-  if (current.bf10.cutoverAt === '1970-01-01T00:00:00Z') throw new Error('OPERATIONAL_STATE_BF10_CUTOVER_WINDOW_MISSING');
+  if (validationMode === 'strict' && current.bf10.cutoverAt === '1970-01-01T00:00:00Z') {
+    throw new Error('OPERATIONAL_STATE_BF10_CUTOVER_WINDOW_MISSING');
+  }
+  if (current.bf10.historical.activeError !== baseline.bf10?.historical?.activeError ||
+      current.bf10.historical.retryScheduled !== baseline.bf10?.historical?.retryScheduled) {
+    throw new Error('OPERATIONAL_STATE_BF10_HISTORICAL_DIRTY_ROWS_CHANGED');
+  }
+  if (current.bf10.historical.accepted < baseline.bf10?.historical?.accepted ||
+      current.bf10.historical.attemptHistory < baseline.bf10?.historical?.attemptHistory ||
+      current.bf10.historical.accepted - baseline.bf10.historical.accepted !==
+        current.bf10.historical.attemptHistory - baseline.bf10.historical.attemptHistory) {
+    throw new Error('OPERATIONAL_STATE_BF10_HISTORICAL_ATTEMPT_DELTA_INVALID');
+  }
   if (validationMode === 'strict' && !isDeepStrictEqual(current.queues, baseline.queues)) {
     throw new Error('OPERATIONAL_STATE_DRIFT:queues');
   }

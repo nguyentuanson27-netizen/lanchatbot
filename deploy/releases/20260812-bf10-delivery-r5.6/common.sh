@@ -4,7 +4,7 @@ set -euo pipefail
 readonly EXPECTED_RELEASE_TAG="20260812-bf10-delivery-r5.6"
 readonly IMPLEMENTATION_COMMIT="a7669d058d59a9331f0dadc2c04fe91a7888c51b"
 readonly EXPECTED_DELIVERY_IMAGE="lana-chatbot-app:bf10-delivery-r5.6"
-readonly EXPECTED_MANIFEST_SHA256="e510dcfb0b5777c7faf99109c3353fb76266dec7c5456e4201cc06a8ec2a7938"
+readonly EXPECTED_MANIFEST_SHA256="7b41e3531742ffeac209b862b810f5ee7eff8a7fb8fb9a75d7712d9f92617d5e"
 readonly EXPECTED_COMPOSE_SHA256="e59ab08b6ad42c2d1d2e3a5a11ce9e34a935921c866917b0d23b6c3c5d69ac33"
 readonly EXPECTED_LATEST_MIGRATION="0031_admin_policy_safe_deletion"
 readonly EXPECTED_PAGE_ID="1198992073286645"
@@ -16,7 +16,7 @@ readonly EXPECTED_ROLLBACK_DELIVERY_IMAGE="lana-chatbot-app:realtime-compatibili
 readonly EXPECTED_ROLLBACK_DELIVERY_IMAGE_ID="sha256:44ecb2fd9f7d6a5aa769938f738a3c6ba42b470db5a9bce3d30fdc364de2a0b7"
 readonly EXPECTED_ROLLBACK_DELIVERY_REVISION="1c004eacca7cce309a0a05643d1aa751b897d41c"
 readonly EXPECTED_ROLLBACK_DELIVERY_RELEASE="20260801-realtime-compatibility-first-r32.2"
-readonly EXPECTED_CANDIDATE_TAG="20260812-bf10-delivery-r5.6-review-candidate.2"
+readonly EXPECTED_CANDIDATE_TAG="20260812-bf10-delivery-r5.6-review-candidate.3"
 readonly EXPECTED_ORIGIN_SSH="git@github.com:nguyentuanson27-netizen/lanchatbot.git"
 readonly EXPECTED_ORIGIN_HTTPS="https://github.com/nguyentuanson27-netizen/lanchatbot.git"
 

@@ -65,6 +65,76 @@ try {
   if (duplicate.status === 0 || !duplicate.stderr.includes('PROSPECTIVE_DELIVERY_ENV_DUPLICATE_OR_KEY_INVALID')) {
     throw new Error('PROSPECTIVE_ENV_DUPLICATE_NOT_REJECTED');
   }
+
+  const hashA = `sha256:${'a'.repeat(64)}`;
+  const hashB = `sha256:${'b'.repeat(64)}`;
+  const hashC = `sha256:${'c'.repeat(64)}`;
+  const operationalBaseline = {
+    schemaVersion: 1,
+    queues: {
+      inbox: { active: 0, failedPermanent: 1, duplicates: 0 },
+      metaOutbox: { active: 0, failedPermanent: 4, duplicates: 0 },
+      pancakeOutbox: { active: 0, failedPermanent: 0, duplicates: 0 },
+    },
+    policy: {
+      channel: 'PUBLISHED', enabled: 'true', publishedEnabled: 'true', closingContentHash: hashA,
+      publishedBundle: [
+        { artifactKey: 'lana.closing-strategy', artifactKind: 'CLOSING_STRATEGY', pointerId: '11111111-1111-4111-8111-111111111111', pointerRevision: 4, versionId: '22222222-2222-4222-8222-222222222222', versionArtifactKey: 'lana.closing-strategy', versionArtifactKind: 'CLOSING_STRATEGY', versionNumber: 3, versionRevision: 4, contentHash: hashA, lifecycle: 'PUBLISHED' },
+        { artifactKey: 'lana.offer-policy', artifactKind: 'OFFER_POLICY', pointerId: '33333333-3333-4333-8333-333333333333', pointerRevision: 2, versionId: '44444444-4444-4444-8444-444444444444', versionArtifactKey: 'lana.offer-policy', versionArtifactKind: 'OFFER_POLICY', versionNumber: 1, versionRevision: 3, contentHash: hashB, lifecycle: 'PUBLISHED' },
+        { artifactKey: 'lana.shop-policy', artifactKind: 'SHOP_POLICY', pointerId: '55555555-5555-4555-8555-555555555555', pointerRevision: 3, versionId: '66666666-6666-4666-8666-666666666666', versionArtifactKey: 'lana.shop-policy', versionArtifactKind: 'SHOP_POLICY', versionNumber: 1, versionRevision: 2, contentHash: hashC, lifecycle: 'PUBLISHED' },
+      ],
+      closingPointerId: '11111111-1111-4111-8111-111111111111', closingPointerRevision: 4,
+      closingVersionId: '22222222-2222-4222-8222-222222222222', closingVersionNumber: 3, closingVersionRevision: 4,
+      replyReconciliationPolicy: 'CLARIFY_RECONCILED_V1', correctionDialogueFieldAbsent: true,
+      effective: { mediaPartialResolutionPolicy: 'PER_ASSET_V1', multiProductResolutionPolicy: 'CLARIFY_V1', customerUrlPolicy: 'CLASSIFIED_ALLOWLIST_V1' },
+    },
+    behaviorMode: { enabled: 'true', startupConfirmationMode: 'V2_ACTIVE', contentHash: hashB, confirmationMode: 'V2_ACTIVE', salesAuthorityMode: 'LEGACY', stateReadMode: 'LEGACY', pointerRevision: 3 },
+    runtime: { mode: 'LIVE', appSendEnabled: 'true', chatbotSendEnabled: 'true', hourlyGenerationLimit: 500, dailyGenerationLimit: 2000 },
+    realtimeWorker: { workerId: 'realtime-worker-1', status: 'IDLE', mode: 'LIVE', sendEnabled: true, lastSeenEpochMs: 1_700_000_000_000, capturedAtEpochMs: 1_700_000_001_000, lastErrorCodeAbsent: true },
+    bf10: {
+      cutoverAt: '1970-01-01T00:00:00Z',
+      historical: { accepted: 247, activeError: 13, retryScheduled: 233, attemptHistory: 247 },
+      postCutover: { accepted: 247, activeError: 13, retryScheduled: 233, attemptHistory: 247, acceptedAfterRetryAudit: 0 },
+      classification: 'BASELINE_ONLY',
+    },
+  };
+  const baselinePath = join(temp, 'operational-baseline.json');
+  const operationalPath = join(temp, 'operational-current.json');
+  const operationalValidator = join(root, 'validate-operational-state.mjs');
+  writeFileSync(baselinePath, JSON.stringify(operationalBaseline));
+
+  const rollbackState = structuredClone(operationalBaseline);
+  rollbackState.realtimeWorker.lastSeenEpochMs += 1_000;
+  rollbackState.realtimeWorker.capturedAtEpochMs += 1_000;
+  writeFileSync(operationalPath, JSON.stringify(rollbackState));
+  const rollbackValidation = spawnSync(process.execPath, [operationalValidator, operationalPath, baselinePath, 'rollback'], { encoding: 'utf8' });
+  if (rollbackValidation.status !== 0) throw new Error('ROLLBACK_SENTINEL_OPERATIONAL_STATE_REJECTED');
+  const strictSentinel = spawnSync(process.execPath, [operationalValidator, operationalPath, baselinePath, 'strict'], { encoding: 'utf8' });
+  if (strictSentinel.status === 0 || !strictSentinel.stderr.includes('OPERATIONAL_STATE_BF10_CUTOVER_WINDOW_MISSING')) {
+    throw new Error('STRICT_SENTINEL_OPERATIONAL_STATE_ACCEPTED');
+  }
+
+  const deployedState = structuredClone(rollbackState);
+  deployedState.bf10.cutoverAt = '2026-08-12T04:30:00Z';
+  deployedState.bf10.classification = 'NATURAL_TRANSITION_WINDOW_OBSERVED';
+  deployedState.bf10.postCutover = { accepted: 1, activeError: 0, retryScheduled: 0, attemptHistory: 0, acceptedAfterRetryAudit: 0 };
+  deployedState.bf10.historical.accepted += 1;
+  writeFileSync(operationalPath, JSON.stringify(deployedState));
+  const lostAttempt = spawnSync(process.execPath, [operationalValidator, operationalPath, baselinePath, 'strict'], { encoding: 'utf8' });
+  if (lostAttempt.status === 0 || !lostAttempt.stderr.includes('OPERATIONAL_STATE_BF10_ATTEMPT_HISTORY_NOT_PRESERVED')) {
+    throw new Error('BF10_MISSING_ATTEMPT_HISTORY_ACCEPTED');
+  }
+  deployedState.bf10.postCutover.attemptHistory = 1;
+  deployedState.bf10.historical.attemptHistory += 1;
+  writeFileSync(operationalPath, JSON.stringify(deployedState));
+  const preservedAttempt = spawnSync(process.execPath, [operationalValidator, operationalPath, baselinePath, 'strict'], { encoding: 'utf8' });
+  if (preservedAttempt.status !== 0) throw new Error('BF10_PRESERVED_ATTEMPT_HISTORY_REJECTED');
+  deployedState.bf10.historical.activeError -= 1;
+  writeFileSync(operationalPath, JSON.stringify(deployedState));
+  const historicalCleanup = spawnSync(process.execPath, [operationalValidator, operationalPath, baselinePath, 'strict'], { encoding: 'utf8' });
+  if (historicalCleanup.status === 0 || !historicalCleanup.stderr.includes('OPERATIONAL_STATE_BF10_HISTORICAL_DIRTY_ROWS_CHANGED')) {
+    throw new Error('BF10_HISTORICAL_DIRTY_ROW_CHANGE_ACCEPTED');
+  }
 } finally {
   rmSync(temp, { recursive: true, force: true });
 }
