@@ -450,6 +450,8 @@ for (const shellName of ['common.sh', 'preflight.sh', 'run-build.sh', 'artifact-
   if (process.platform !== 'win32' && spawnSync('bash', ['-n', shellPath]).status !== 0) throw new Error(`TEXT_MEDIA_SHELL_SYNTAX_INVALID:${shellName}`);
 }
 if (textMediaManifest.source?.implementationBoundaryCommit !== 'ab0638e30d360c190f04f11faa59dc7a7348391c' ||
+    textMediaManifest.source?.originMainAtFreshBoundaryVerification !== '66763a058937a84f018bd10a391d3d5e70ce1e4d' ||
+    textMediaManifest.source?.governanceIntegration?.operatingMode !== 'ENGINEERING_PREPROD' ||
     textMediaManifest.source?.behaviorPullRequest?.reviewedHead !== 'eaca8fe3c91719b435cc6b1abef47c0eede885bd' ||
     textMediaManifest.source?.behaviorPullRequest?.mergeCommit !== 'ab0638e30d360c190f04f11faa59dc7a7348391c' ||
     JSON.stringify(textMediaManifest.scope?.targetServices) !== JSON.stringify(['realtime-worker']) ||

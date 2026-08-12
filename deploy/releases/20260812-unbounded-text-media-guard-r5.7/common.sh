@@ -3,8 +3,9 @@ set -euo pipefail
 
 readonly EXPECTED_RELEASE_TAG="20260812-unbounded-text-media-guard-r5.7"
 readonly IMPLEMENTATION_COMMIT="ab0638e30d360c190f04f11faa59dc7a7348391c"
+readonly EXPECTED_MAIN_BASE="66763a058937a84f018bd10a391d3d5e70ce1e4d"
 readonly EXPECTED_REALTIME_IMAGE="lana-chatbot-app:unbounded-text-media-guard-r5.7"
-readonly EXPECTED_MANIFEST_SHA256="fb773240ff290adf6bab7408e053a98b5c4e41a27eca62af1e2153328094d15e"
+readonly EXPECTED_MANIFEST_SHA256="2d0f44a87a2a9b48005bbf5867872e244c156850cde6c59de59d116f8f1e0e44"
 readonly EXPECTED_COMPOSE_SHA256="e59ab08b6ad42c2d1d2e3a5a11ce9e34a935921c866917b0d23b6c3c5d69ac33"
 readonly EXPECTED_LATEST_MIGRATION="0031_admin_policy_safe_deletion"
 readonly EXPECTED_PAGE_ID="1198992073286645"
@@ -15,7 +16,7 @@ readonly EXPECTED_ROLLBACK_REALTIME_IMAGE="lana-chatbot-app:bf03-wave-c-r5.5"
 readonly EXPECTED_ROLLBACK_REALTIME_IMAGE_ID="sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a"
 readonly EXPECTED_ROLLBACK_REALTIME_REVISION="31d74695a794a28d6f93427416593b2a414270d6"
 readonly EXPECTED_ROLLBACK_REALTIME_RELEASE_ID="20260810-bf03-wave-c-r5.5"
-readonly EXPECTED_CANDIDATE_TAG="20260812-unbounded-text-media-guard-r5.7-review-candidate.2"
+readonly EXPECTED_CANDIDATE_TAG="20260812-unbounded-text-media-guard-r5.7-review-candidate.3"
 readonly EXPECTED_ORIGIN_SSH="git@github.com:nguyentuanson27-netizen/lanchatbot.git"
 readonly EXPECTED_ORIGIN_HTTPS="https://github.com/nguyentuanson27-netizen/lanchatbot.git"
 
@@ -78,7 +79,7 @@ require_release_provenance() {
   test "$(git -C "$REPOSITORY_DIR" rev-parse "$candidate_ref^{}")" = "$REVIEWED_CANDIDATE_COMMIT" || die "candidate tag/commit mismatch"
   local parent_line
   parent_line="$(git -C "$REPOSITORY_DIR" show -s --format='%P' "$RELEASE_COMMIT")"
-  test "$parent_line" = "$IMPLEMENTATION_COMMIT $REVIEWED_CANDIDATE_COMMIT" || die "final release merge parents mismatch"
+  test "$parent_line" = "$EXPECTED_MAIN_BASE $REVIEWED_CANDIDATE_COMMIT" || die "final release merge parents mismatch"
   git -C "$REPOSITORY_DIR" merge-base --is-ancestor "$IMPLEMENTATION_COMMIT" "$RELEASE_COMMIT" || die "implementation commit is not in release"
   git -C "$REPOSITORY_DIR" cat-file -e "refs/remotes/origin/main^{commit}" || die "origin/main is not available for provenance"
   test "$(git -C "$REPOSITORY_DIR" rev-parse refs/remotes/origin/main)" = "$RELEASE_COMMIT" || die "final release commit is not exact fetched origin/main"
