@@ -2,8 +2,19 @@
 
 **Activation condition:** Gate BF passed and the immutable post-fix V1 baseline has been captured.
 **Default context now:** Do not load this file for BF-01 through BF-10 unless a bug fix explicitly changes a future contract.
+**Operating mode:** `ENGINEERING_PREPROD`; logical dependencies stay item-level, while full verification and test-page deployment default to Release Train boundaries.
 
 Completed RI, CF, and DB detail lives in `archive/completed/`; lasting invariants live in `contracts/`.
+
+## Default Release Trains
+
+- `DF-A`: DF-01 through DF-06. Telemetry and normalization precede completion of canonical evidence/readiness.
+- `DF-B`: DF-07 through DF-10. Phase/barrier shadow precedes Context V2 paired evaluation.
+- `DF-C`: DF-11 through DF-13. Authority implementation, shadow evidence, and controlled promotion remain ordered.
+
+Each DF item normally remains a focused PR. Frozen install, full repository verification, cross-item integration/replay, immutable release preparation, and any owner-authorized `PREPROD_TEST_PAGE` deployment happen once the train is complete. Splitting or combining a train requires an explicit recorded dependency/rollback reason.
+
+UR is grouped by dependency/vertical outcome rather than one UR item per deploy: `UR-A` (UR-00–03, design through atomic dual-write), `UR-B` (UR-04–05, backfill/comparator), `UR-C` (UR-06–07, V2 read/canary/rollback), `UR-D` (UR-08–09, ordered retirement), and separately approved destructive `UR-X` (UR-10). UR-00 remains a go/no-go dependency before schema work, and UR-10 is never implied by another train or Gate.
 
 ## DF-01 through DF-03 — Observability and explicit analytics
 
@@ -47,6 +58,8 @@ Migrate duplicated normalization toward named NFC, recall-folding, and ASCII-tok
 
 ## Gate E — Canonical evidence and model context
 
+Gate E is an engineering/architecture evidence gate for DF-A/DF-B. It is not a production-readiness or deployment authorization.
+
 - [ ] Canonical buying intent reuses the existing hybrid resolver.
 - [ ] Dialogue evidence is separate from buying intent.
 - [ ] Protected claims have typed verified provenance.
@@ -56,6 +69,8 @@ Migrate duplicated normalization toward named NFC, recall-folding, and ASCII-tok
 - [ ] At least 100 stratified pairs meet safety and non-inferiority gates.
 
 ## Gate F — Funnel authority
+
+Gate F is an engineering/architecture authority gate for DF-C. It is not a production-readiness or deployment authorization.
 
 - [ ] Commerce FSM is authoritative and conversation phase is derived.
 - [ ] Context V2, derived phase, V2 consumers, final reconciliation, and regex demotion activate atomically.
@@ -86,6 +101,8 @@ Use database-backed `LEGACY | SHADOW | V2`. Never merge partial V2/legacy fields
 - UR-10 keeps archival/drop as a separately approved destructive-change ADR after retention, legal/audit review, backup, and restore test.
 
 ## Gate U — Unified state
+
+Gate U is an engineering/architecture evidence gate across the approved UR trains. It does not authorize public production promotion or UR-10 destructive work.
 
 - [ ] ADR/security/database/runtime reviews approve the exact design.
 - [ ] Core and commerce envelopes are encrypted and expire independently.

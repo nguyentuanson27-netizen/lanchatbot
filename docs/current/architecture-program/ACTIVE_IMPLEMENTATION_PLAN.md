@@ -1,12 +1,13 @@
 # LANA Chatbot — Revised Bug-Fix Wave Integration Plan
 
-**Status:** Review-ready; not execution or production authorization
+**Status:** Review-ready; not execution, deployment, or public-production authorization
 **Companion source of issue truth:** `ACTIVE_BACKLOG.md`
 **Insertion point:** after completed R3/C2 and before the first unfinished DF release slice
+**Operating mode:** `ENGINEERING_PREPROD`; see `OPERATING_MODE.md`.
 
 ## 1. Decision
 
-Pause the remaining architecture program and execute three ordered bug-fix waves. Resume DF only after Gate BF passes and the post-fix production baseline has been captured.
+Pause the remaining architecture program and execute three ordered bug-fix waves. Resume DF only after Gate BF passes and the post-fix `PREPROD_TEST_PAGE` V1 baseline has been captured.
 
 The existing architecture direction remains valid. The incident track provides immediate containment and correctness fixes; root authority changes remain in DF-05 through DF-13 and State V2 design remains in UR.
 
@@ -110,17 +111,17 @@ Incident wave B: BF-02 -> BF-01 -> BF-03
 Incident wave C: BF-06 -> BF-07 -> BF-08 -> BF-09
 
 Gate BF + post-fix immutable baseline
-  -> resume DF-01/DF-02/DF-03
-  -> DF-04
-  -> DF-05/DF-06
-  -> DF-07/DF-08
-  -> DF-09/DF-10 paired evaluation
-  -> DF-11/DF-12 shadow authority
-  -> DF-13 controlled COMMERCE promotion
-  -> UR-00 and State V2 track
+  -> DF-A: DF-01..DF-06
+     (observability -> normalization -> canonical evidence/readiness)
+  -> DF-B: DF-07..DF-10
+     (phase/barrier shadow -> Context V2 paired evaluation)
+  -> DF-C: DF-11..DF-13
+     (authority implementation/shadow -> controlled COMMERCE promotion)
+  -> UR dependency/vertical trains: UR-A -> UR-B -> UR-C -> UR-D
+  -> separately approved destructive UR-X/UR-10
 ```
 
-Each bug remains one PR and one immutable release candidate. Adjacent bugs must not share a diff merely because they belong to the same wave.
+Each bug remains one focused PR. Adjacent bugs must not share a diff merely because they belong to the same wave. Full verification, immutable release preparation, and authorized test-page deployment occur at the wave/Release Train boundary rather than once per PR.
 
 ## 4. Runtime-policy design
 
@@ -156,7 +157,7 @@ Fallback rules:
 
 ### BF-04 first
 
-This is the only P0 and blocks the rest of the incident wave. It is a mandatory fail-closed safety invariant and cannot be disabled by a runtime flag. Deployment still requires separate owner authorization and an immutable tagged release; rollback uses the previously verified release. Production acceptance requires evidence that unverified size recommendations are blocked while verified Size Engine recommendations remain usable.
+This is the only P0 and blocks the rest of the incident wave. It is a mandatory fail-closed safety invariant and cannot be disabled by a runtime flag. Deployment still requires separate owner authorization and an immutable tagged release; rollback uses the previously verified release. Release Train acceptance requires evidence that unverified size recommendations are blocked while verified Size Engine recommendations remain usable.
 
 ### BF-05 second
 
@@ -227,37 +228,39 @@ Wave-C exit evidence:
 For every bug:
 
 1. Fetch current GitHub `main`; read README, all applicable `AGENTS.md`, current baseline, latest release/runtime-state evidence, and this incident plan.
-2. Check production read-only and compare it with the last authoritative evidence.
+2. Check the live runtime read-only and compare it with the last authoritative evidence.
 3. Create a clean worktree and bug-specific branch.
 4. Write an incident fixture before or with the fix; add negative and counterexample fixtures.
 5. Keep the diff to one bug and its direct observability/tests.
-6. Run targeted package tests, architecture guards, frozen install, full `pnpm check`, migration diff, secret/PII, runtime-state, and release-integrity checks.
-7. Open a Draft PR with scope, non-goals, evidence, rollout, rollback, and future architectural retirement link.
+6. Run focused package/consumer tests plus all risk-applicable architecture, migration-diff, secret/PII, security, and data-integrity checks. Broaden verification when the PR's own dependency surface requires it.
+7. Open a Draft PR with scope, non-goals, focused evidence, Release Train assignment, and future architectural retirement link.
 8. Perform an independent exact-head review. Reviewers must inspect the diff from the actual GitHub base and rerun the relevant gates.
-9. Merge only after `MERGE_RECOMMENDED`; deploy only under a separate explicit production instruction.
+9. Merge only after `MERGE_RECOMMENDED`; a merged PR does not require an immediate tag, manifest, full repository gate, or deployment.
+
+At the Release Train boundary, run frozen install, full `pnpm check`, cross-PR integration/replay, architecture and release-integrity guards, and all applicable security/data checks before immutable release preparation.
 
 ## 9. Deployment protocol
 
-Each approved release follows GitHub -> immutable tag -> new VPS release directory -> targeted service recreation -> candidate runtime-state verification -> promotion.
+Each owner-authorized Release Train deployment follows GitHub -> immutable tag -> new VPS release directory -> targeted service recreation -> candidate runtime-state verification -> promotion on the `PREPROD_TEST_PAGE`.
 
 For policy-gated changes:
 
 1. deploy binary with prior/safest policy active;
 2. verify health, readiness, runtime-state, image identity, migration ledger, control-plane readback, Outbox, and service UID/restarts;
-3. activate only the single approved page through audited CAS;
+3. activate only the `PREPROD_TEST_PAGE` through audited CAS;
 4. verify propagation/readback within the existing cache bound;
 5. run authorized controlled scenarios and bounded soak;
 6. promote or revert the policy revision without redeploy;
-7. append production evidence tied to the immutable tag.
+7. append live/test-page evidence tied to the immutable tag.
 
 Do not recreate `admin-web` or `admin-simulation-worker` until per-service image selectors are pinned and reviewed. The shared `ADMIN_IMAGE` residual remains fail-closed. Host-only deployment scripts require a reviewed repository artifact or fresh hash verification before reuse.
 
 ## 10. Post-wave evaluation baseline
 
-After all three waves are deployed and Gate BF passes:
+After all three waves pass their Release Train verification and Gate BF passes:
 
 - create an immutable post-fix baseline tag and runtime evidence record;
-- freeze the production model, generation configuration, prompts, policy versions, evidence-envelope version, and page scope;
+- freeze the deployed test-page model, generation configuration, prompts, policy versions, evidence-envelope version, and page scope;
 - preserve all ten incidents plus counterexamples as replay strata;
 - record which incidents are containment fixes and which are root fixes;
 - use this post-fix live path as Context V1 in DF-09/DF-10 paired evaluation.
@@ -308,4 +311,4 @@ The incident track is complete only when:
 - later DF/UR documents contain the root-fix obligations listed above;
 - the post-fix V1 baseline is frozen for future paired evaluation.
 
-Passing Gate BF authorizes resuming the architecture plan. It does not authorize sales-authority `COMMERCE`, State V2, a second page, a second brand, or any production deployment without its own approval.
+Passing Gate BF authorizes resuming the architecture plan. It is not a production-readiness declaration and does not authorize sales-authority `COMMERCE`, State V2, a second page, a second brand, deployment, or any live mutation without its own approval.

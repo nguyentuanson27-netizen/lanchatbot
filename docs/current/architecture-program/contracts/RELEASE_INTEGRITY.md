@@ -1,5 +1,7 @@
 # Durable Contract — Release Integrity
 
+This contract applies in every operating mode at each deployed Release Train boundary. A focused PR merge is not itself a release and does not require a tag, manifest, runtime-state promotion, or deployment. Once a Release Train is prepared or deployed, every rule below applies without relaxation. `ENGINEERING_PREPROD` changes batching and ceremony, not provenance, rollback, or runtime-integrity requirements.
+
 1. GitHub `main` and immutable fetched tags are the only source-code authority.
 2. Never edit application source in `/opt/lana-chatbot/current` or a VPS release directory.
 3. Every release starts from a clean GitHub commit and uses a new immutable release directory.

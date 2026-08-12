@@ -5,10 +5,11 @@
 **Next issue:** BF-04
 **Exit:** Gate BF
 **Detailed issue contracts:** `BF_ISSUE_SPECS.md`
+**Operating mode:** `ENGINEERING_PREPROD`; PRs use focused verification and Release Trains own full verification/deploy preparation.
 
 ## Objective
 
-Correct the ten confirmed production defects without introducing another language-regex authority, another sales-state authority, a model-only side effect, or an unverified business claim.
+Correct the ten confirmed live-runtime defects without introducing another language-regex authority, another sales-state authority, a model-only side effect, or an unverified business claim.
 
 ```text
 Model:
@@ -27,7 +28,7 @@ Code:
 
 ## Starting point
 
-Use `CURRENT_BASELINE.md` as the last accepted checkpoint, then fetch and verify current GitHub `main` and current read-only production evidence before each PR. Completed RI/CF/DB details are archived; their invariants remain in `contracts/`.
+Use `CURRENT_BASELINE.md` as the last accepted checkpoint, then fetch and verify current GitHub `main` and current read-only live evidence before each PR. Completed RI/CF/DB details are archived; their invariants remain in `contracts/`.
 
 ## Release order
 
@@ -53,7 +54,7 @@ Wave C: BF-06 -> BF-07 -> BF-08 -> BF-09
 -> activate FUTURE_BACKLOG.md
 ```
 
-Each issue is one PR and one independently reviewable immutable release candidate. Each PR starts from freshly fetched `main`, not the preceding bug branch.
+Each issue is one focused PR starting from freshly fetched `main`, not the preceding bug branch. PR merge does not imply one release or one deploy. Immutable release preparation, full verification, and any authorized `PREPROD_TEST_PAGE` deployment occur at the applicable Release Train boundary.
 
 ## Required per-issue context
 
@@ -73,7 +74,7 @@ For one BF task, load only:
 - Code must not rewrite normal customer wording by deleting regex-matched phrases.
 - A rejected draft receives bounded repair evidence; after bounded failure, use an approved safe clarification/handoff with no unsupported claim.
 - Every original incident gets a replay fixture plus counterexamples that prevent keyword overfitting.
-- No Messenger production test, merge, migration, activation, service recreation, or deployment without explicit authorization.
+- No live Messenger send/test, merge, migration, activation, service recreation, or deployment without explicit authorization.
 
 ## Dependencies into later architecture
 
@@ -96,8 +97,8 @@ Gate BF passes only when:
 - [ ] URL classification remains SSRF/phishing fail-closed.
 - [ ] Terminal Outbox success has no active stale error while attempt history remains intact.
 - [ ] Behavior activation, readback, cache propagation, audit, and rollback pass on the single approved page.
-- [ ] Frozen install, targeted tests, full `pnpm check`, migration diff, secret/PII, runtime-state, release-integrity, and architecture guards pass for every PR.
-- [ ] Production evidence and soak are append-only and tied to immutable tags.
+- [ ] Focused tests and applicable migration-diff, secret/PII, security, data-integrity, and architecture checks pass for every PR; frozen install, full `pnpm check`, integration/replay, runtime-state, and release-integrity gates pass at the Release Train boundary.
+- [ ] Any test-page deployment evidence and soak are append-only and tied to immutable tags.
 - [ ] An immutable post-fix V1 baseline records model/config, prompt, policy versions, evidence-envelope version, and page scope.
 
-Passing Gate BF resumes the DF plan. It does not authorize `COMMERCE`, State V2, a second page/brand, or any production mutation.
+Passing Gate BF resumes the DF plan. Gate BF is an engineering/architecture gate; it does not declare production readiness or authorize `COMMERCE`, State V2, a second page/brand, deployment, or any live mutation.

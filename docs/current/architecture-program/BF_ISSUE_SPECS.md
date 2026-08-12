@@ -16,13 +16,13 @@ This amendment adds an incident-remediation track to the existing architecture b
 - Runtime-state SHA: `1744af5cf9d79b90e8033a738e3414350af39c25e5bd00f9890acdcc50e61fad`.
 - Migration ledger remains `0030_runtime_behavior_modes`; no R3 backfill.
 - Runtime modes remain confirmation `V2_ACTIVE`, sales authority `LEGACY`, state read `LEGACY`, revision `3`, source `DATABASE`.
-- Production allowlist remains page `1198992073286645` only.
+- Live `PREPROD_TEST_PAGE` allowlist remains page `1198992073286645` only.
 
 The implementation task must still fetch and verify the current `origin/main` and read the latest generated runtime evidence before each PR. The values above are a checkpoint, not permission to ignore newer valid main commits.
 
 ## 2. Incident-track objective
 
-Correct the ten confirmed production defects without introducing another language-regex authority, another sales-state authority, an unsafe model-only side effect, or an unverified business claim.
+Correct the ten confirmed live-runtime defects without introducing another language-regex authority, another sales-state authority, an unsafe model-only side effect, or an unverified business claim.
 
 Target decision boundary:
 
@@ -45,7 +45,7 @@ The model proposes decisions; code remains the final authority for facts, state 
 
 ## 3. Global implementation rules
 
-1. One confirmed bug equals one PR and one independently reviewable release candidate.
+1. One confirmed bug equals one focused PR. Release candidates are prepared at the applicable Release Train boundary, not once per bug by default.
 2. Every PR starts from freshly fetched GitHub `main`, not a previous bug branch.
 3. Each behavior-changing fix deploys inactive or in its safest mode, then uses the existing database-backed, page-scoped, versioned behavior control plane for activation and readback.
 4. Environment variables are startup fail-safe defaults only. Do not create env-only runtime flags.
@@ -54,7 +54,7 @@ The model proposes decisions; code remains the final authority for facts, state 
 7. No PR silently rewrites model wording with regex. A rejected draft receives bounded repair evidence; after bounded failure, use an approved safe clarification or handoff response.
 8. Every protected claim in customer-facing text must be declared and linked to verified provenance. Undeclared protected claims fail closed.
 9. Every PR adds a replay fixture for its original incident and a counterexample set that prevents overfitting.
-10. Merge, release, activation, Messenger canary, and production deployment remain separate approvals.
+10. Merge, Release Train preparation, activation, live Messenger testing, deployment, and public-production hardening remain separate approvals.
 
 ## 4. Release slices
 
@@ -264,8 +264,8 @@ Gate BF passes only when:
 - [ ] URL classification remains SSRF/phishing fail-closed.
 - [ ] Terminal Outbox success has no active stale error while history remains intact.
 - [ ] Behavior-policy activation, readback, cache propagation, audit, and rollback pass on the single approved page.
-- [ ] Frozen install, targeted tests, full `pnpm check`, migration diff, secret/PII, release-integrity, runtime-state, and architecture guards pass for every PR.
-- [ ] Production evidence and soak are append-only and tied to immutable tags.
+- [ ] Focused tests and risk-applicable migration-diff, secret/PII, security, data-integrity, and architecture checks pass for every PR; frozen install, full `pnpm check`, integration/replay, release-integrity, and runtime-state gates pass at the Release Train boundary.
+- [ ] Any test-page deployment evidence and soak are append-only and tied to immutable tags.
 
 ## 7. Required changes to later backlog items
 
@@ -282,7 +282,7 @@ Add observability for dialogue act, protected-claim validation, draft repair, re
 ### DF-09 through DF-10
 
 - Feed canonical dialogue and claim evidence into Context V2.
-- Use the post-Gate-BF production path as the V1 baseline.
+- Use the post-Gate-BF verified `PREPROD_TEST_PAGE` path as the V1 baseline.
 - Include all ten incidents and counterexamples in deterministic and generative evaluation strata.
 
 ### DF-11 through DF-13
