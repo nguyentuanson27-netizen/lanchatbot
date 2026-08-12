@@ -118,6 +118,10 @@ import type {
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
+import { mapWithBoundedConcurrency } from "./bounded-concurrency.js";
+
+const BUSINESS_FACT_QUERY_CONCURRENCY = 3;
+const MAX_INBOUND_IMAGE_ATTACHMENTS = 10;
 import { sizeChartTarget } from "./size-chart-target.js";
 import {
   createRealtimeSalesState,
@@ -1262,7 +1266,7 @@ function verifiedVariantState(
 }
 
 
-interface MultiFactResolution {
+export interface MultiFactResolution {
   readonly queryId: string;
   readonly rawProductRef: string;
   readonly product: StableProductDocument | null;
@@ -1271,6 +1275,88 @@ interface MultiFactResolution {
     readonly requestedFact: RequestedBusinessFactV2;
     readonly envelope: BusinessFactEnvelopeV1;
   }[];
+}
+
+export async function resolveBusinessFactQueriesBounded(
+  queries: BusinessFactQueriesV2,
+  products: readonly StableProductDocument[],
+  resolveFact: BusinessFactsReader["resolve"],
+  shopAlias: string,
+): Promise<readonly MultiFactResolution[]> {
+  const byId = new Map(products.map((product) => [product.productId, product]));
+  return mapWithBoundedConcurrency(
+    queries.queries,
+    BUSINESS_FACT_QUERY_CONCURRENCY,
+    async (query) => {
+      const productId = query.productRef.productId;
+      const product = productId ? byId.get(productId) : undefined;
+      if (!productId || !product) {
+        return {
+          queryId: query.queryId,
+          rawProductRef: query.productRef.raw,
+          product: null,
+          resolution: query.productRef.resolution,
+          facts: [],
+        };
+      }
+      const facts: MultiFactResolution["facts"][number][] = [];
+      for (const requestedFact of query.requestedFacts) {
+        const envelope = await resolveFact({
+          shopAlias,
+          productId,
+          intent: requestedFact,
+          offerType: query.qualifiers.offerType,
+          color: query.qualifiers.color,
+          size: query.qualifiers.size,
+          deliveryRegion: query.qualifiers.deliveryRegion,
+        });
+        facts.push({ requestedFact, envelope });
+      }
+      return {
+        queryId: query.queryId,
+        rawProductRef: query.productRef.raw,
+        product,
+        resolution: query.productRef.resolution,
+        facts,
+      };
+    },
+  );
+}
+
+export async function resolveProductReferencesBounded(
+  productCodes: readonly string[],
+  resolveProduct: (productCode: string) => Promise<StableProductDocument | null>,
+): Promise<readonly ResolvedProductReference[]> {
+  return mapWithBoundedConcurrency(
+    productCodes,
+    BUSINESS_FACT_QUERY_CONCURRENCY,
+    async (productCode) => {
+      const product = await resolveProduct(productCode);
+      return {
+        raw: productCode,
+        product,
+        resolution: product === null ? "NOT_FOUND" as const : "RESOLVED" as const,
+      };
+    },
+  );
+}
+
+export function classifyCustomerUrlsForInbound(
+  text: string,
+  policy: CustomerUrlPolicyV1,
+  mediaInputLimitExceeded: boolean,
+  classify: typeof classifyCustomerUrls = classifyCustomerUrls,
+): CustomerUrlDecision {
+  if (!mediaInputLimitExceeded) return classify(text, policy);
+  return {
+    policy,
+    disposition: "CONTINUE",
+    items: [],
+    productCodes: [],
+    candidateProductCodes: [],
+    reasonCodes: [],
+    explanationAllowed: false,
+  };
 }
 
 export interface ResolvedProductReference {
@@ -1305,9 +1391,18 @@ export function buildBusinessFactQueries(
   const color = text.match(
     /(?:\bmàu|\bcolor)\s*[:=]?\s*([\p{L}][\p{L}\s-]{0,30}?)(?=\s+(?:size|sz|cỡ)\b|[,.!?;\n]|$)/iu,
   )?.[1]?.trim() ?? null;
+  const seenReferences = new Set<string>();
+  const distinctReferences = references.filter((reference) => {
+    const identity = normalizeProductCode(
+      reference.product?.productId ?? reference.raw,
+    );
+    if (seenReferences.has(identity)) return false;
+    seenReferences.add(identity);
+    return true;
+  });
   return BusinessFactQueriesV2Schema.parse({
     schemaVersion: 2,
-    queries: references.slice(0, 3).map((reference, index) => ({
+    queries: distinctReferences.map((reference, index) => ({
       schemaVersion: 2,
       queryId: deterministicUuid(`${eventKey}:business-fact-query:v2:${index}`),
       productRef: {
@@ -1326,7 +1421,7 @@ export function buildBusinessFactQueries(
   });
 }
 
-function multiFactReply(
+export function multiFactReply(
   resolutions: readonly MultiFactResolution[],
 ): string | null {
   const lines: string[] = [];
@@ -2340,42 +2435,12 @@ export class RealtimeRunner {
     queries: BusinessFactQueriesV2,
     products: readonly StableProductDocument[],
   ): Promise<readonly MultiFactResolution[]> {
-    const byId = new Map(products.map((product) => [product.productId, product]));
-    // At most three query tasks are active. Facts inside one product query stay
-    // ordered and execute sequentially, preventing a 3x4 fan-out burst.
-    return Promise.all(queries.queries.map(async (query) => {
-      const productId = query.productRef.productId;
-      const product = productId ? byId.get(productId) : undefined;
-      if (!productId || !product) {
-        return {
-          queryId: query.queryId,
-          rawProductRef: query.productRef.raw,
-          product: null,
-          resolution: query.productRef.resolution,
-          facts: [],
-        };
-      }
-      const facts: MultiFactResolution["facts"][number][] = [];
-      for (const requestedFact of query.requestedFacts) {
-        const envelope = await this.factsReader.resolve({
-          shopAlias: this.options.shopAlias,
-          productId,
-          intent: requestedFact,
-          offerType: query.qualifiers.offerType,
-          color: query.qualifiers.color,
-          size: query.qualifiers.size,
-          deliveryRegion: query.qualifiers.deliveryRegion,
-        });
-        facts.push({ requestedFact, envelope });
-      }
-      return {
-        queryId: query.queryId,
-        rawProductRef: query.productRef.raw,
-        product,
-        resolution: query.productRef.resolution,
-        facts,
-      };
-    }));
+    return resolveBusinessFactQueriesBounded(
+      queries,
+      products,
+      this.factsReader.resolve.bind(this.factsReader),
+      this.options.shopAlias,
+    );
   }
 
   async processOne(): Promise<boolean> {
@@ -2637,9 +2702,14 @@ export class RealtimeRunner {
       message,
       policyResolution,
     );
-    const customerUrlDecision = classifyCustomerUrls(
+    const mediaInputLimitExceeded = !message.isEcho &&
+      message.attachments.filter((attachment) =>
+        attachment.type.toLowerCase() === "image"
+      ).length > MAX_INBOUND_IMAGE_ATTACHMENTS;
+    const customerUrlDecision = classifyCustomerUrlsForInbound(
       message.text ?? "",
       activeCustomerUrlPolicy(policyResolution),
+      mediaInputLimitExceeded,
     );
     const policyAuditRef = policyResolution?.bundle
       ? runtimePolicyAuditReference(policyResolution.bundle)
@@ -2844,7 +2914,7 @@ export class RealtimeRunner {
       activeMediaPartialResolutionPolicy(policyResolution);
     let customerUrlDisposition: CustomerUrlDisposition = customerUrlDecision.disposition;
     let customerUrlReasonCodes = [...customerUrlDecision.reasonCodes];
-    const approvedCustomerUrl = !message.isEcho &&
+    const approvedCustomerUrl = !mediaInputLimitExceeded && !message.isEcho &&
       (customerUrlDisposition === "CONTINUE" ||
         customerUrlDisposition === "VERIFY_ADMIN_MEDIA") &&
       customerUrlDecision.items.length > 0;
@@ -2889,7 +2959,7 @@ export class RealtimeRunner {
           residualCustomerUrlResolution ?? this.emptyResolution(),
         )
       : null;
-    const resolution = message.isEcho ||
+    const resolution = mediaInputLimitExceeded || message.isEcho ||
         customerUrlDisposition === "HANDOFF" ||
         customerUrlDisposition === "EXPLAIN_UNSUPPORTED" ||
         isPostSaleRequest(message.text ?? "") ||
@@ -2901,6 +2971,14 @@ export class RealtimeRunner {
           claim.pageId,
           mediaPartialResolutionPolicy,
         );
+    const multiFactQueries =
+      this.options.multiFactQueryEnabled && !message.isEcho
+        ? buildBusinessFactQueries(
+            message.eventKey,
+            message.text ?? "",
+            resolution.references,
+          )
+        : null;
     const mediaDisposition = decideMediaBatchDisposition({
       aggregation: resolution.media,
       policy: mediaPartialResolutionPolicy,
@@ -2908,7 +2986,9 @@ export class RealtimeRunner {
         resolution.clarification !== null && resolution.clarification.action !== "CLEAR",
     });
     const multiProductPolicy = activeMultiProductResolutionPolicy(policyResolution);
-    const multiProductIds = resolution.origin === "MEDIA" || approvedCustomerUrl
+    const approvedUrlRequiresSelection = approvedCustomerUrl &&
+      multiFactQueries === null;
+    const multiProductIds = resolution.origin === "MEDIA" || approvedUrlRequiresSelection
       ? resolution.products.map((product) => product.productId)
       : [];
     const multiProductDecision = approvedCustomerUrl &&
@@ -3033,6 +3113,7 @@ export class RealtimeRunner {
       this.options.mediaSelectorV2GuardEnabled &&
       this.options.mediaRecognitionPageIds.includes(claim.pageId);
     let handoff = applied.handoff;
+    let handoffEventReasonCode: string | null = null;
     let businessFacts: BusinessFactEnvelopeV1 | null = null;
     let handoffGuardReasonCodes: readonly string[] =
       customerUrlDisposition === "HANDOFF" ? customerUrlReasonCodes : [];
@@ -3159,20 +3240,24 @@ export class RealtimeRunner {
       this.options.catalogAdvisoryEnabled && !message.isEcho
         ? catalogAdvisoryIntent(message.text ?? "")
         : null;
-    const multiFactQueries =
-      this.options.multiFactQueryEnabled && !message.isEcho
-        ? buildBusinessFactQueries(
-            message.eventKey,
-            message.text ?? "",
-            resolution.references,
-          )
-        : null;
     const shouldUseMultiFacts = multiFactQueries !== null && (
       multiFactQueries.queries.length > 1 ||
       (multiFactQueries.queries[0]?.requestedFacts.length ?? 0) > 1
     );
     if (applied.status === "APPLIED" && applied.authorization.allowEvaluate) {
-      if (customerUrlDisposition === "EXPLAIN_UNSUPPORTED") {
+      if (mediaInputLimitExceeded) {
+        handoffGuardReasonCodes = ["MEDIA_INPUT_LIMIT_EXCEEDED"];
+        handoffEventReasonCode = "MEDIA_INPUT_LIMIT_EXCEEDED";
+        const transitioned = applySilentHandoff(
+          nextState,
+          "PRODUCT_AMBIGUOUS",
+          nextState.revision,
+          nextState.lastFence,
+          now,
+        );
+        nextState = transitioned.state;
+        handoff = transitioned.handoff;
+      } else if (customerUrlDisposition === "EXPLAIN_UNSUPPORTED") {
         clarificationHandled = true;
         const soleCustomerUrl = customerUrlDecision.items.length === 1
           ? customerUrlDecision.items[0]
@@ -4871,6 +4956,7 @@ export class RealtimeRunner {
                       ? ("POST_SALE" as const)
                       : ("BOT_POLICY" as const),
                 reasonCode:
+                  handoffEventReasonCode ??
                   salesHandoffReasonCode ??
                   businessFacts?.reasonCode ??
                   handoff.reason,
@@ -5050,25 +5136,11 @@ export class RealtimeRunner {
       ...(productCodeOnly(residualText) ? [productCodeOnly(residualText)!] : []),
       ...extractAdProductCodes(residualText),
     ].map((code) => normalizeProductCode(code)).filter(Boolean))];
-    if (residualCodes.length > 10) {
-      return {
-        ...this.emptyResolution(),
-        references: [{
-          raw: "CUSTOMER_URL_RESIDUAL_LIMIT_EXCEEDED",
-          product: null,
-          resolution: "NOT_FOUND",
-        }],
-      };
-    }
     if (residualCodes.length > 0) {
-      const references = await Promise.all(residualCodes.map(async (code) => {
-        const product = await this.exactProduct(code);
-        return {
-          raw: code,
-          product,
-          resolution: product === null ? "NOT_FOUND" as const : "RESOLVED" as const,
-        };
-      }));
+      const references = await resolveProductReferencesBounded(
+        residualCodes,
+        (code) => this.exactProduct(code),
+      );
       const products = references
         .map(({ product }) => product)
         .filter((product): product is StableProductDocument => product !== null);
@@ -5234,11 +5306,22 @@ export class RealtimeRunner {
         ...(productCodeOnly(text) ? [productCodeOnly(text)!] : []),
         ...extractAdProductCodes(text),
       ])];
-      if (explicitCodes.length === 1) {
-        const product = await this.exactProduct(explicitCodes[0]!);
-        if (product) {
+      if (explicitCodes.length > 0) {
+        const references = await resolveProductReferencesBounded(
+          explicitCodes,
+          (code) => this.exactProduct(code),
+        );
+        const products = references
+          .map(({ product }) => product)
+          .filter((product): product is StableProductDocument => product !== null);
+        if (products.length > 0) {
           return {
-            ...this.singleResolution(product, "TEXT_CODE"),
+            primary: products[0] ?? null,
+            products,
+            references,
+            media: aggregateMedia([]),
+            origin: "TEXT_CODE",
+            extractedAdProductId: null,
             clarification: {
               action: "CLEAR",
               candidates: [],
@@ -5306,16 +5389,12 @@ export class RealtimeRunner {
     const textCodes = [...new Set([
       ...(productCodeOnly(text) ? [productCodeOnly(text)!] : []),
       ...extractAdProductCodes(text),
-    ])].slice(0, 3);
+    ])];
     if (this.options.multiFactQueryEnabled && textCodes.length > 1) {
-      const references = await Promise.all(textCodes.map(async (code) => {
-        const product = await this.exactProduct(code);
-        return {
-          raw: code,
-          product,
-          resolution: product === null ? "NOT_FOUND" as const : "RESOLVED" as const,
-        };
-      }));
+      const references = await resolveProductReferencesBounded(
+        textCodes,
+        (code) => this.exactProduct(code),
+      );
       const products = references
         .map(({ product }) => product)
         .filter((product): product is StableProductDocument => product !== null);

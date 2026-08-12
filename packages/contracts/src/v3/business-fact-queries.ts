@@ -50,7 +50,7 @@ export type BusinessFactQueryV2 = z.infer<typeof BusinessFactQueryV2Schema>;
 export const BusinessFactQueriesV2Schema = z
   .object({
     schemaVersion: z.literal(2),
-    queries: z.array(BusinessFactQueryV2Schema).min(1).max(3),
+    queries: z.array(BusinessFactQueryV2Schema).min(1),
   })
   .strict()
   .superRefine((value, context) => {
@@ -64,4 +64,3 @@ export const BusinessFactQueriesV2Schema = z
     }
   });
 export type BusinessFactQueriesV2 = z.infer<typeof BusinessFactQueriesV2Schema>;
-

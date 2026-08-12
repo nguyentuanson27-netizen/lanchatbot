@@ -67,6 +67,7 @@ interface HarnessOptions {
   readonly mediaClarification?: boolean;
   readonly initialProposal?: AgentProposalV1;
   readonly semanticMatchByMention?: boolean;
+  readonly multiFactQueryEnabled?: boolean;
 }
 
 function catalogSearch(
@@ -405,6 +406,7 @@ function createHarness(options: HarnessOptions) {
       decisionTelemetryEnabled: true,
       decisionAuditV2Enabled: true,
       releaseId: "bf02-test",
+      multiFactQueryEnabled: options.multiFactQueryEnabled ?? false,
     },
     undefined,
     undefined,
@@ -798,6 +800,40 @@ describe("BF-02 realtime context fallback", () => {
     expect(JSON.stringify(commit?.decisionEvents)).not.toContain(
       "MEDIA_CLARIFICATION_EXHAUSTED",
     );
+  });
+
+  it("clears active media clarification and resolves every explicit text code beyond ten", async () => {
+    const products = Array.from({ length: 12 }, (_, index) => {
+      const productId = `SD${String(index + 1).padStart(3, "0")}`;
+      return {
+        ...product398,
+        productId,
+        parentProductId: productId,
+        canonicalCode: productId,
+        title: `Product ${productId}`,
+      };
+    });
+    const harness = createHarness({
+      messages: [{
+        text: `${products.map(({ productId }) => productId).join(" ")} giá bao nhiêu`,
+      }],
+      products,
+      productSelections: [products[0]!, products[1]!],
+      mediaClarification: true,
+      multiFactQueryEnabled: true,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+
+    const commit = harness.committed();
+    const reply = textFromCommit(commit);
+    expect(harness.productSearch.searchText).toHaveBeenCalledTimes(12);
+    expect(commit?.state.mediaClarification).toBeNull();
+    expect(commit?.handoffEventPlan).toBeUndefined();
+    expect(JSON.stringify(commit?.decisionEvents)).not.toContain(
+      "MEDIA_CLARIFICATION_EXHAUSTED",
+    );
+    for (const { productId } of products) expect(reply).toContain(productId);
   });
 
   it("fails closed for multiple active state selections until an explicit code resolves them", async () => {

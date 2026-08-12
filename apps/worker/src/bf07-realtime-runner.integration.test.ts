@@ -465,7 +465,7 @@ describe("BF-07 realtime multi-product clarification", () => {
     expect(scenario.commitInput?.handoffEventPlan).toBeDefined();
   });
 
-  it("fails closed before quota or model use when more than ten products resolve", async () => {
+  it("silently hands off before quota or model use when more than ten images arrive", async () => {
     const scenario = await runSingleTurn({
       matchedProducts: Array.from({ length: 11 }, (_, index) => product(`SD${100 + index}`)),
       policy: livePolicy(),
@@ -476,8 +476,9 @@ describe("BF-07 realtime multi-product clarification", () => {
     expect(scenario.commitInput?.handoffEventPlan).toBeDefined();
     expect(scenario.commitInput?.decisionEvents).toContainEqual(expect.objectContaining({
       eventType: "GUARD_BLOCKED",
-      reasonCodes: ["MULTI_PRODUCT_CANDIDATE_LIMIT_EXCEEDED"],
+      reasonCodes: ["MEDIA_INPUT_LIMIT_EXCEEDED"],
     }));
+    expect(scenario.commitInput?.metaPlan).toBeUndefined();
   });
 
   it("preserves BF-06 partial matches through BF-07 clarification and resolves explicit SD398 via BF-02", async () => {
