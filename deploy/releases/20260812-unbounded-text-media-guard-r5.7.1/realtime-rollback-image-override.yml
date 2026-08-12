@@ -1,0 +1,3 @@
+services:
+  realtime-worker:
+    image: ${ROLLBACK_REALTIME_IMAGE:?ROLLBACK_REALTIME_IMAGE must be pinned}

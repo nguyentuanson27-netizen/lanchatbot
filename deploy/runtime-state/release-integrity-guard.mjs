@@ -515,6 +515,50 @@ if (existsSync(join(root, '.git'))) {
 }
 const textMediaSelfTest = spawnSync(process.execPath, [join(textMediaReleaseDir, 'test-release-automation.mjs')], { encoding: 'utf8' });
 if (textMediaSelfTest.status !== 0) throw new Error(`TEXT_MEDIA_RELEASE_SELF_TEST_FAILED:${textMediaSelfTest.stderr.trim()}`);
+const textMediaHotfixReleaseTag = '20260812-unbounded-text-media-guard-r5.7.1';
+const textMediaHotfixReleaseDir = join(root, 'deploy', 'releases', textMediaHotfixReleaseTag);
+const textMediaHotfixManifest = JSON.parse(readFileSync(join(root, 'deploy', 'manifests', `${textMediaHotfixReleaseTag}.json`), 'utf8'));
+for (const requiredFile of [
+  'README.md', 'common.sh', 'preflight.sh', 'run-build.sh', 'artifact-smoke.sh',
+  'capture-deployment-boundary.mjs', 'capture-operational-state.sh', 'cutover.sh',
+  'postcheck.sh', 'soak.sh', 'rollback.sh', 'promote-runtime-state.sh',
+  'realtime-rollback-image-override.yml', 'validate-target-evidence.mjs',
+  'validate-service-evidence.mjs', 'validate-runtime-invariants.mjs',
+  'validate-operational-state.mjs', 'validate-prospective-realtime-env.mjs',
+  'validate-realtime-log.mjs', 'validate-deployment-boundary.mjs',
+  'validate-release-pointer.mjs', 'list-inventory-services.mjs', 'test-release-automation.mjs',
+  'validate-reviewed-live-baseline.mjs'
+]) {
+  if (!existsSync(join(textMediaHotfixReleaseDir, requiredFile))) throw new Error(`TEXT_MEDIA_HOTFIX_RELEASE_FILE_MISSING:${requiredFile}`);
+}
+if (textMediaHotfixManifest.releaseTag !== textMediaHotfixReleaseTag ||
+    textMediaHotfixManifest.source?.originMainAtFreshBoundaryVerification !== '25ce732904009be2b9ea67e1016f0f81bd94b18b' ||
+    textMediaHotfixManifest.supersededUndeployedRelease?.tag !== textMediaReleaseTag ||
+    textMediaHotfixManifest.supersededUndeployedRelease?.tagObject !== 'd55a74e5f95f6fd650aecb900d9836abea5b79ce' ||
+    textMediaHotfixManifest.supersededUndeployedRelease?.commit !== '25ce732904009be2b9ea67e1016f0f81bd94b18b' ||
+    textMediaHotfixManifest.supersededUndeployedRelease?.preflightResult !== 'FAILED_CLOSED_BEFORE_BUILD' ||
+    textMediaHotfixManifest.supersededUndeployedRelease?.artifactBuilt !== false ||
+    textMediaHotfixManifest.supersededUndeployedRelease?.serviceMutationPerformed !== false ||
+    textMediaHotfixManifest.supersededUndeployedRelease?.runtimeStateMutationPerformed !== false ||
+    JSON.stringify(textMediaHotfixManifest.scope?.targetServices) !== JSON.stringify(['realtime-worker']) ||
+    JSON.stringify(textMediaHotfixManifest.scope?.allowedInfrastructureEnvChanges) !== JSON.stringify(['REALTIME_IMAGE'])) {
+  throw new Error('TEXT_MEDIA_HOTFIX_MANIFEST_CONTRACT_INVALID');
+}
+const textMediaHotfixBaseline = readFileSync(join(textMediaHotfixReleaseDir, 'validate-reviewed-live-baseline.mjs'), 'utf8');
+if (!/const closing = parseClosingRow\(query\([\s\S]*?\)\);/u.test(textMediaHotfixBaseline) ||
+    !textMediaHotfixBaseline.includes('parseDelimitedRows(raw, closingFields)') ||
+    !textMediaHotfixBaseline.includes('TAB_CLOSING_ROW') || !textMediaHotfixBaseline.includes('PIPE_CLOSING_ROW') ||
+    textMediaHotfixBaseline.includes(".split('|')")) {
+  throw new Error('TEXT_MEDIA_HOTFIX_CLOSING_DELIMITER_INVALID');
+}
+const textMediaHotfixCommon = readFileSync(join(textMediaHotfixReleaseDir, 'common.sh'), 'utf8');
+if (!textMediaHotfixCommon.includes(`EXPECTED_RELEASE_TAG="${textMediaHotfixReleaseTag}"`) ||
+    !textMediaHotfixCommon.includes('EXPECTED_MAIN_BASE="25ce732904009be2b9ea67e1016f0f81bd94b18b"') ||
+    !textMediaHotfixCommon.includes(`EXPECTED_CANDIDATE_TAG="${textMediaHotfixReleaseTag}-review-candidate.1"`)) {
+  throw new Error('TEXT_MEDIA_HOTFIX_PROVENANCE_CONSTANTS_INVALID');
+}
+const textMediaHotfixSelfTest = spawnSync(process.execPath, [join(textMediaHotfixReleaseDir, 'test-release-automation.mjs')], { encoding: 'utf8' });
+if (textMediaHotfixSelfTest.status !== 0) throw new Error(`TEXT_MEDIA_HOTFIX_RELEASE_SELF_TEST_FAILED:${textMediaHotfixSelfTest.stderr.trim()}`);
 const dockerfile = readFileSync(join(root, 'deploy', 'Dockerfile'), 'utf8');
 if (!dockerfile.includes('COPY benchmarks ./benchmarks')) {
   throw new Error('DOCKER_BUILD_BENCHMARK_FIXTURES_MISSING');
