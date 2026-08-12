@@ -422,6 +422,99 @@ if (existsSync(join(root, '.git'))) {
 }
 const bf10SelfTest = spawnSync(process.execPath, [join(bf10DeliveryDir, 'test-release-automation.mjs')], { encoding: 'utf8' });
 if (bf10SelfTest.status !== 0) throw new Error(`BF10_DELIVERY_RELEASE_SELF_TEST_FAILED:${bf10SelfTest.stderr.trim()}`);
+const textMediaReleaseTag = '20260812-unbounded-text-media-guard-r5.7';
+const textMediaReleaseDir = join(root, 'deploy', 'releases', textMediaReleaseTag);
+const textMediaManifest = JSON.parse(readFileSync(join(root, 'deploy', 'manifests', `${textMediaReleaseTag}.json`), 'utf8'));
+for (const requiredFile of [
+  'README.md', 'common.sh', 'preflight.sh', 'run-build.sh', 'artifact-smoke.sh',
+  'capture-deployment-boundary.mjs', 'capture-operational-state.sh', 'cutover.sh',
+  'postcheck.sh', 'soak.sh', 'rollback.sh', 'promote-runtime-state.sh',
+  'realtime-rollback-image-override.yml', 'validate-target-evidence.mjs',
+  'validate-service-evidence.mjs', 'validate-runtime-invariants.mjs',
+  'validate-operational-state.mjs', 'validate-prospective-realtime-env.mjs',
+  'validate-realtime-log.mjs', 'validate-deployment-boundary.mjs',
+  'validate-release-pointer.mjs', 'list-inventory-services.mjs', 'test-release-automation.mjs',
+  'validate-reviewed-live-baseline.mjs'
+]) {
+  if (!existsSync(join(textMediaReleaseDir, requiredFile))) throw new Error(`TEXT_MEDIA_RELEASE_FILE_MISSING:${requiredFile}`);
+}
+for (const shellName of ['common.sh', 'preflight.sh', 'run-build.sh', 'artifact-smoke.sh', 'capture-operational-state.sh', 'cutover.sh', 'postcheck.sh', 'soak.sh', 'rollback.sh', 'promote-runtime-state.sh']) {
+  const shellPath = join(textMediaReleaseDir, shellName);
+  const source = readFileSync(shellPath, 'utf8');
+  if (!/^#!\/usr\/bin\/env bash\r?\nset -euo pipefail\r?\n/u.test(source) || /\beval\b/u.test(source)) {
+    throw new Error(`TEXT_MEDIA_SHELL_FAIL_CLOSED_INVALID:${shellName}`);
+  }
+  if (process.platform !== 'win32' && existsSync(join(root, '.git')) && (statSync(shellPath).mode & 0o111) === 0) {
+    throw new Error(`TEXT_MEDIA_SHELL_NOT_EXECUTABLE:${shellName}`);
+  }
+  if (process.platform !== 'win32' && spawnSync('bash', ['-n', shellPath]).status !== 0) throw new Error(`TEXT_MEDIA_SHELL_SYNTAX_INVALID:${shellName}`);
+}
+if (textMediaManifest.source?.implementationBoundaryCommit !== 'ab0638e30d360c190f04f11faa59dc7a7348391c' ||
+    textMediaManifest.source?.originMainAtFreshBoundaryVerification !== '66763a058937a84f018bd10a391d3d5e70ce1e4d' ||
+    textMediaManifest.source?.governanceIntegration?.operatingMode !== 'ENGINEERING_PREPROD' ||
+    textMediaManifest.environment !== 'engineering-preprod-single-approved-test-page' ||
+    textMediaManifest.source?.behaviorPullRequest?.reviewedHead !== 'eaca8fe3c91719b435cc6b1abef47c0eede885bd' ||
+    textMediaManifest.source?.behaviorPullRequest?.mergeCommit !== 'ab0638e30d360c190f04f11faa59dc7a7348391c' ||
+    JSON.stringify(textMediaManifest.scope?.targetServices) !== JSON.stringify(['realtime-worker']) ||
+    JSON.stringify(textMediaManifest.scope?.allowedInfrastructureEnvChanges) !== JSON.stringify(['REALTIME_IMAGE']) ||
+    textMediaManifest.scope?.migrationRequired !== false || textMediaManifest.scope?.policyMutationRequired !== false ||
+    textMediaManifest.scope?.messengerSyntheticActionAllowed !== false || textMediaManifest.scope?.directVpsSourceEditAllowed !== false ||
+    textMediaManifest.behaviorContract?.textProducts?.hardCountCap !== false ||
+    textMediaManifest.behaviorContract?.textProducts?.factConcurrency !== 3 ||
+    textMediaManifest.behaviorContract?.media?.moreThanTen !== 'SILENT_HANDOFF_WHOLE_TURN' ||
+    textMediaManifest.behaviorContract?.media?.downstreamCallsAllowed !== false ||
+    textMediaManifest.behaviorContract?.media?.replyOrOutboxAllowed !== false) {
+  throw new Error('TEXT_MEDIA_RELEASE_MANIFEST_CONTRACT_INVALID');
+}
+if (textMediaManifest.policyPreservation?.replyReconciliationPolicy !== 'CLARIFY_RECONCILED_V1' ||
+    textMediaManifest.policyPreservation?.mediaPartialResolutionPolicy !== 'PER_ASSET_V1' ||
+    textMediaManifest.policyPreservation?.multiProductResolutionPolicy !== 'CLARIFY_V1' ||
+    textMediaManifest.policyPreservation?.customerUrlPolicy !== 'CLASSIFIED_ALLOWLIST_V1' ||
+    textMediaManifest.policyPreservation?.correctionDialoguePolicy !== 'ABSENT_AND_NON_ACTIVATABLE') {
+  throw new Error('TEXT_MEDIA_RELEASE_POLICY_PRESERVATION_INVALID');
+}
+const textMediaCutover = readFileSync(join(textMediaReleaseDir, 'cutover.sh'), 'utf8');
+const textMediaRollback = readFileSync(join(textMediaReleaseDir, 'rollback.sh'), 'utf8');
+if (!textMediaCutover.includes('compose up -d --no-deps realtime-worker') ||
+    /compose up[^\n]*(delivery-worker|admin-api|admin-web|admin-simulation-worker)/u.test(textMediaCutover) ||
+    !textMediaCutover.includes('upsert_env_pin REALTIME_IMAGE') || textMediaCutover.includes('upsert_env_pin REALTIME_RELEASE_ID') ||
+    !textMediaRollback.includes('rollback_compose up -d --no-deps realtime-worker')) {
+  throw new Error('TEXT_MEDIA_RELEASE_TARGET_SCOPE_INVALID');
+}
+for (const forbidden of [/\bmigrate\b/u, /\bbackfill\b/u, /admin\/v1\/policy/u, /graph\.facebook/u, /\bn8n\b/u]) {
+  if (forbidden.test(textMediaCutover) || forbidden.test(textMediaRollback)) throw new Error('TEXT_MEDIA_RELEASE_FORBIDDEN_MUTATION');
+}
+const textMediaOperational = readFileSync(join(textMediaReleaseDir, 'validate-operational-state.mjs'), 'utf8');
+for (const required of ['CLARIFY_RECONCILED_V1', 'PER_ASSET_V1', 'CLARIFY_V1', 'CLASSIFIED_ALLOWLIST_V1', 'OPERATIONAL_STATE_BF03_FIELD_PRESENT']) {
+  if (!textMediaOperational.includes(required)) throw new Error(`TEXT_MEDIA_RELEASE_POLICY_GATE_MISSING:${required}`);
+}
+const textMediaBaseline = readFileSync(join(textMediaReleaseDir, 'validate-reviewed-live-baseline.mjs'), 'utf8');
+for (const required of [textMediaManifest.freshHostBaseline.currentRuntimeStateSha256, textMediaManifest.freshHostBaseline.currentReleaseSourceSha256, textMediaManifest.freshHostBaseline.realtimeRollback.containerId, textMediaManifest.freshHostBaseline.deliveryContainerId, textMediaManifest.policyPreservation.closingContentHash, textMediaManifest.policyPreservation.fullPublishedBundleCanonicalJsonNoLfSha256]) {
+  if (!textMediaBaseline.includes(required)) throw new Error(`TEXT_MEDIA_REVIEWED_BASELINE_GATE_MISSING:${required}`);
+}
+const textMediaSmoke = readFileSync(join(textMediaReleaseDir, 'artifact-smoke.sh'), 'utf8');
+for (const required of ['bounded-concurrency.js', 'realtime-runner.js', 'business-fact-queries.js', '--network none']) {
+  if (!textMediaSmoke.includes(required)) throw new Error(`TEXT_MEDIA_RELEASE_SMOKE_GATE_MISSING:${required}`);
+}
+const textMediaRunner = readFileSync(join(root, 'apps', 'worker', 'src', 'realtime-runner.ts'), 'utf8');
+const boundedConcurrency = readFileSync(join(root, 'apps', 'worker', 'src', 'bounded-concurrency.ts'), 'utf8');
+const businessFactSchema = readFileSync(join(root, 'packages', 'contracts', 'src', 'v3', 'business-fact-queries.ts'), 'utf8');
+if (!textMediaRunner.includes('BUSINESS_FACT_QUERY_CONCURRENCY = 3') ||
+    !textMediaRunner.includes('MAX_INBOUND_IMAGE_ATTACHMENTS = 10') ||
+    !textMediaRunner.includes('MEDIA_INPUT_LIMIT_EXCEEDED') ||
+    !textMediaRunner.includes('mapWithBoundedConcurrency') ||
+    !boundedConcurrency.includes('await Promise.all(workers)') || !boundedConcurrency.includes('throw error') ||
+    !businessFactSchema.includes('queries: z.array(BusinessFactQueryV2Schema).min(1),')) {
+  throw new Error('TEXT_MEDIA_IMPLEMENTATION_BOUNDARY_INVALID');
+}
+if (existsSync(join(root, '.git'))) {
+  const merge = textMediaManifest.source.behaviorPullRequest.mergeCommit;
+  if (spawnSync('git', ['merge-base', '--is-ancestor', merge, textMediaManifest.source.implementationBoundaryCommit], { cwd: root }).status !== 0) {
+    throw new Error('TEXT_MEDIA_RELEASE_PROVENANCE_INVALID');
+  }
+}
+const textMediaSelfTest = spawnSync(process.execPath, [join(textMediaReleaseDir, 'test-release-automation.mjs')], { encoding: 'utf8' });
+if (textMediaSelfTest.status !== 0) throw new Error(`TEXT_MEDIA_RELEASE_SELF_TEST_FAILED:${textMediaSelfTest.stderr.trim()}`);
 const dockerfile = readFileSync(join(root, 'deploy', 'Dockerfile'), 'utf8');
 if (!dockerfile.includes('COPY benchmarks ./benchmarks')) {
   throw new Error('DOCKER_BUILD_BENCHMARK_FIXTURES_MISSING');

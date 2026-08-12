@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-12T08:12:00Z",
+  "capturedAtSemantics": "repository release-preparation record time; distinct from fresh host capture time",
+  "documentType": "APPEND_ONLY_REALTIME_RELEASE_PREPARATION_EVIDENCE",
+  "status": "REVIEW_CANDIDATE_SOURCE_AND_AUTOMATION_DEPLOYMENT_PENDING",
+  "environment": "engineering-preprod-single-approved-test-page",
+  "releaseTag": "20260812-unbounded-text-media-guard-r5.7",
+  "releasePreparation": {
+    "branch": "ops/20260812-unbounded-text-media-guard-r5.7-release-prep",
+    "reviewCandidateTag": "20260812-unbounded-text-media-guard-r5.7-review-candidate.4",
+    "reviewCandidateSemantics": "annotated immutable exact-head review candidate only; not deploy authorization",
+    "candidateTagMustNeverMove": true,
+    "changesRequireNextCandidateOrdinal": true,
+    "finalTagRequiredOnNormalMainMergeCommit": true,
+    "ciCheckoutExactHeadAndFullHistoryRequired": true
+  },
+  "source": {
+    "repository": "https://github.com/nguyentuanson27-netizen/lanchatbot",
+    "implementationBoundaryCommit": "ab0638e30d360c190f04f11faa59dc7a7348391c",
+    "implementationBoundaryTree": "868b70ba035eeefab35fc095773b9c5fb2708086",
+    "originMainAtFreshBoundaryVerification": "66763a058937a84f018bd10a391d3d5e70ce1e4d",
+    "originMainDriftClassification": "PR_190_ENGINEERING_PREPROD_GOVERNANCE_INTEGRATED;_NO_RUNTIME_BEHAVIOR_OR_DEPLOY_SCOPE_CHANGE",
+    "governanceIntegration": {
+      "pullRequest": 190,
+      "mergeCommit": "66763a058937a84f018bd10a391d3d5e70ce1e4d",
+      "scope": "AGENTS_README_ACTIVE_PLANS_OPERATING_MODE_AND_RELEASE_INTEGRITY_GOVERNANCE_ONLY",
+      "operatingMode": "ENGINEERING_PREPROD",
+      "livePageRole": "PREPROD_TEST_PAGE",
+      "ownerAuthorizationForThisReleaseTrainPreserved": true
+    },
+    "behaviorPullRequest": {
+      "number": 189,
+      "baseCommit": "c3f2cea9580d1a141f8b75cbba14dd238b51079e",
+      "reviewedHead": "eaca8fe3c91719b435cc6b1abef47c0eede885bd",
+      "mergeCommit": "ab0638e30d360c190f04f11faa59dc7a7348391c",
+      "mergeTree": "868b70ba035eeefab35fc095773b9c5fb2708086",
+      "mergeParents": [
+        "c3f2cea9580d1a141f8b75cbba14dd238b51079e",
+        "eaca8fe3c91719b435cc6b1abef47c0eede885bd"
+      ],
+      "exactHeadCiRun": 31575320667,
+      "exactHeadCiJob": 94046078559,
+      "reviewVerdict": "MERGE_RECOMMENDED"
+    },
+    "bf10DeliveryEvidenceMerge": "c3f2cea9580d1a141f8b75cbba14dd238b51079e",
+    "finalTagMustContainManifestAutomationAndImplementation": true
+  },
+  "behaviorContract": {
+    "textProducts": {
+      "hardCountCap": false,
+      "distinctIdentity": "normalized/exact product codes; first occurrence wins",
+      "resultOrder": "customer encounter order",
+      "factConcurrency": 3,
+      "allValidProductsRequired": true,
+      "partialCompletionMayMasqueradeAsComplete": false,
+      "existingBoundsPreserved": ["message/payload size", "global deadline", "model quota", "fact authorization", "response-group safety"]
+    },
+    "media": {
+      "normalMaximumImages": 10,
+      "moreThanTen": "SILENT_HANDOFF_WHOLE_TURN",
+      "reasonCode": "MEDIA_INPUT_LIMIT_EXCEEDED",
+      "downstreamCallsAllowed": false,
+      "replyOrOutboxAllowed": false,
+      "mixedTextMediaPrecedence": "MEDIA_LIMIT_WINS",
+      "replayExactlyOnceRequired": true,
+      "rawUrlOrPiiInReasonForbidden": true
+    }
+  },
+  "artifact": {
+    "status": "NOT_BUILT",
+    "image": "lana-chatbot-app:unbounded-text-media-guard-r5.7",
+    "releasePath": "/opt/lana-chatbot/releases/20260812-unbounded-text-media-guard-r5.7",
+    "automationPath": "deploy/releases/20260812-unbounded-text-media-guard-r5.7",
+    "sourceMustBeMaterializedFromFinalAnnotatedTag": true
+  },
+  "scope": {
+    "targetServices": ["realtime-worker"],
+    "targetedComposeInvocation": "docker compose up -d --no-deps realtime-worker",
+    "nonTargetServicesMustRemainUnchanged": true,
+    "allowedInfrastructureEnvChanges": ["REALTIME_IMAGE"],
+    "configEnvBoundary": "all container Config.Env keys and values remain byte-equivalent; REALTIME_RELEASE_ID stays at the pre-release value; only the host-side Compose image selector changes",
+    "migrationRequired": false,
+    "backfillRequired": false,
+    "dataDeletionRequired": false,
+    "requeueRequired": false,
+    "policyMutationRequired": false,
+    "routingOrAllowlistMutationRequired": false,
+    "messengerSyntheticActionAllowed": false,
+    "n8nActionAllowed": false,
+    "directVpsSourceEditAllowed": false,
+    "approvedPageId": "1198992073286645"
+  },
+  "policyPreservation": {
+    "closingPointerId": "cefcecd6-2619-4ba9-bd54-ac43b25f5abd",
+    "closingPointerRevision": 4,
+    "closingVersionId": "805931e1-0363-4cb2-a66d-de9058982af5",
+    "closingVersionNumber": 3,
+    "closingVersionRevision": 4,
+    "closingContentHash": "sha256:e151e450efe47cfe9a48b7a55ea714ff2e1413399090fbd45d928816ecd067df",
+    "replyReconciliationPolicy": "CLARIFY_RECONCILED_V1",
+    "mediaPartialResolutionPolicy": "PER_ASSET_V1",
+    "multiProductResolutionPolicy": "CLARIFY_V1",
+    "customerUrlPolicy": "CLASSIFIED_ALLOWLIST_V1",
+    "correctionDialoguePolicy": "ABSENT_AND_NON_ACTIVATABLE",
+    "fullPublishedBundlePointerAndHashParityRequired": true
+    ,"fullPublishedBundleCanonicalJsonNoLfSha256": "1bfb247d8da44d7b219ea6e0d8733bfad2a446e3df08cb060ae5a296120376f0"
+  },
+  "freshHostBaseline": {
+    "capturedAt": "2026-08-12T08:06:50Z",
+    "capturedAtSemantics": "fresh read-only live PREPROD_TEST_PAGE observation; not public-production evidence and not repository record time",
+    "currentRelease": "20260812-bf10-delivery-r5.6",
+    "currentSourceCommit": "a5d5066660a2c4365657a6ff99276c259848931d",
+    "currentRuntimeStateSha256": "bdcb97fcc4878cf4b753fa3b027d5a6cd41b2b98f7ae9f570ee05fa080578245",
+    "currentHistorySha256": "bdcb97fcc4878cf4b753fa3b027d5a6cd41b2b98f7ae9f570ee05fa080578245",
+    "currentReleaseSourceSha256": "e819f81dbe053ff11dea6dd02a82f0477dde411dd9d1d9af1ce7515669c6e4bd",
+    "composeSha256": "e59ab08b6ad42c2d1d2e3a5a11ce9e34a935921c866917b0d23b6c3c5d69ac33",
+    "migrationLatest": "0031_admin_policy_safe_deletion",
+    "migrationLedgerDigest": "c2f764b824f9cdf9d865ff8b5fb853771f17405f889dbbd2bf4c66c44a8a4180",
+    "routingDigest": "746b8b4ba5e44d1bc5104f49715d66f0f1b6cdf24121c3cf0d76686a6fd6c9b5",
+    "realtimeConfigDigest": "b9397438185fe9a5ef9a13093b43fbae549209f7e3e17c435859c1d23a73c6b2",
+    "deliveryConfigDigest": "9366860529d4950e7cfff535b3f88d38e80531264e333191e49ce9a4bc84f64a",
+    "queueActive": 0,
+    "duplicates": 0,
+    "realtimeRollback": {
+      "containerId": "facda92073374bd385e8e47f8c49288ece146ef98bcbf054fa3f37c182d96794",
+      "image": "lana-chatbot-app:bf03-wave-c-r5.5",
+      "imageId": "sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a",
+      "revision": "31d74695a794a28d6f93427416593b2a414270d6",
+      "releaseId": "20260810-bf03-wave-c-r5.5",
+      "health": "healthy",
+      "restartCount": 0,
+      "pid1Uid": 1000
+    },
+    "deliveryContainerId": "b47558b172477d3d1b536aa35d19b4c8478254d565decdcbc906d4c65894aeaf"
+  },
+  "deploymentAutomation": {
+    "preflight": "deploy/releases/20260812-unbounded-text-media-guard-r5.7/preflight.sh",
+    "build": "deploy/releases/20260812-unbounded-text-media-guard-r5.7/run-build.sh",
+    "artifactSmoke": "deploy/releases/20260812-unbounded-text-media-guard-r5.7/artifact-smoke.sh",
+    "cutover": "deploy/releases/20260812-unbounded-text-media-guard-r5.7/cutover.sh",
+    "postcheck": "deploy/releases/20260812-unbounded-text-media-guard-r5.7/postcheck.sh",
+    "soak": "deploy/releases/20260812-unbounded-text-media-guard-r5.7/soak.sh",
+    "runtimeStatePromotion": "deploy/releases/20260812-unbounded-text-media-guard-r5.7/promote-runtime-state.sh",
+    "rollback": "deploy/releases/20260812-unbounded-text-media-guard-r5.7/rollback.sh",
+    "automaticRollback": true,
+    "runtimeStatePromotionOnlyAfterSoak": true
+  },
+  "stopThresholds": [
+    "tag/head/merge-parent/manifest/source/live parity mismatch",
+    "target unhealthy, restart count nonzero, PID1 UID not 1000, stale/error worker readback",
+    "any non-target container ID changes, including delivery r5.6",
+    "migration, routing, allowlist, Config.Env, policy pointer/hash/content, queue or duplicate drift",
+    "new fatal/error logs or forbidden downstream call/reply for media input over ten",
+    "text product silent truncation, completion-order reversal, concurrency above three, or partial-complete response"
+  ],
+  "rollback": {
+    "previousOverallRelease": "20260812-bf10-delivery-r5.6",
+    "realtimeImage": "lana-chatbot-app:bf03-wave-c-r5.5",
+    "realtimeImageId": "sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a",
+    "realtimeRevision": "31d74695a794a28d6f93427416593b2a414270d6",
+    "realtimeReleaseId": "20260810-bf03-wave-c-r5.5",
+    "targetOnly": true,
+    "preserve": ["delivery r5.6", "PostgreSQL", "Redis", "Qdrant", "Inbox", "Outbox"],
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false,
+    "runtimeStateRollbackPromotionRequired": true
+  },
+  "verification": {
+    "frozenInstall": "PENDING_EXACT_HEAD",
+    "targetedBehaviorMatrix": "PENDING_EXACT_HEAD",
+    "canonicalPnpmCheck": "PENDING_EXACT_HEAD",
+    "releaseIntegrityRuntimeStateDatasetBoundary": "PENDING_EXACT_HEAD",
+    "secretPiiMigrationGeneratedDiffScans": "PENDING_EXACT_HEAD",
+    "githubCi": "PENDING_EXACT_HEAD",
+    "independentExactHeadReview": "PENDING"
+  },
+  "manifestIntegrity": {
+    "appendOnlyNewArtifact": true,
+    "immutableAfterCandidateTag": true,
+    "runtimeEvidenceMustBeAppendOnlyFollowUpPr": true,
+    "repositoryRecordDoesNotClaimLiveDeployment": true
+  }
+}
