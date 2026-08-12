@@ -26,14 +26,15 @@ After Gate BF, `FUTURE_BACKLOG.md` becomes active and completed BF detail moves 
 
 | Task | Additional files |
 |---|---|
-| Process, Gate, PR/release, or environment classification | `OPERATING_MODE.md` |
+| Process, Gate, PR/release, environment classification, or PREPROD evidence semantics | `OPERATING_MODE.md` |
 | BF-01–BF-10 implementation/review | Relevant issue/wave sections + `contracts/MODEL_CLAIM_BOUNDARY.md` |
 | Policy-gated behavior | `contracts/BEHAVIOR_CONTROL_PLANE.md` |
 | Release/deploy/evidence | `contracts/RELEASE_INTEGRITY.md` |
 | Dataset/package work | `contracts/DATASET_BOUNDARY.md` |
-| DF work after Gate BF | `FUTURE_BACKLOG.md` + relevant contracts |
-| Commerce authority cutover | Gate E/F in `FUTURE_BACKLOG.md` + all contracts |
-| State V2 | UR-00–UR-10 in `FUTURE_BACKLOG.md` + all contracts |
+| DF work after Gate BF | `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + relevant contracts |
+| Commerce authority cutover | Gate E/F-PREPROD in `FUTURE_BACKLOG.md` + all contracts |
+| State V2 | UR PREPROD slices / Gate U-PREPROD in `FUTURE_BACKLOG.md` + all contracts |
+| Production-hardening preparation | `OPERATING_MODE.md` + deferred production-hardening section in `FUTURE_BACKLOG.md` |
 | Historical audit/regression | One completed checkpoint and, only if needed, one full file under `archive/source/` |
 
 ## Source-of-truth rule
@@ -41,10 +42,11 @@ After Gate BF, `FUTURE_BACKLOG.md` becomes active and completed BF detail moves 
 On a branch containing this directory, the following ownership applies. The two original full planning files remain immutable historical source material under `archive/source/`; disagreement in IDs, dependencies, or gates stops execution.
 
 - `ACTIVE_BACKLOG.md` owns current BF order, dependencies, and Gate BF.
-- `OPERATING_MODE.md` owns current environment classification, PR-versus-Release-Train process, Gate semantics, and the `PRODUCTION_HARDENING` trigger.
+- `OPERATING_MODE.md` owns current environment classification, PR-versus-Release-Train process, PREPROD evidence semantics, Gate semantics, and the `PRODUCTION_HARDENING` trigger.
 - `BF_ISSUE_SPECS.md` owns detailed BF acceptance criteria.
-- `ACTIVE_IMPLEMENTATION_PLAN.md` owns active architecture and rollout.
+- `ACTIVE_IMPLEMENTATION_PLAN.md` owns active BF architecture and rollout.
 - `FUTURE_BACKLOG.md` owns deferred DF/UR work and activates after Gate BF.
+- `PREPROD_DF_UR_PLAN_AMENDMENT.md` records the rationale for grouping original DF/UR IDs into PREPROD execution slices and deferring traffic-dependent validation.
 - `contracts/` owns durable invariants.
 - `CURRENT_BASELINE.md` and `program-state.json` record the last accepted checkpoint but never replace fresh runtime evidence.
 - `archive/` is immutable historical context.
@@ -67,8 +69,21 @@ When an evidence-bearing Release Train or Gate acceptance completes:
 ```text
 Completed: Release Integrity -> Confirmation -> Dataset Boundary -> R3
 Mode: ENGINEERING_PREPROD; live page role: PREPROD_TEST_PAGE
-Architecture flow: BF -> DF-A (DF01-06) -> DF-B (DF07-10) -> DF-C (DF11-13) -> UR dependency/vertical trains
-Gates BF/E/F/U: engineering/architecture evidence only; never automatic production readiness or deploy authority
+Current active track: BF -> Gate BF -> immutable POST_BF_V1
+Deferred architecture flow after Gate BF:
+  DF-A (DF-P1..P3 / original DF01-06)
+  -> DF-B (DF-P4..P6 / original DF07-10)
+  -> Gate E-PREPROD
+  -> DF-C (DF-P7 / original DF11-13)
+  -> controlled human E2E
+  -> Gate F-PREPROD
+  -> UR-A/B/C (UR-P1..P4 / original UR00-09)
+  -> Gate U-PREPROD
+  -> controlled human E2E after State V2
+  -> explicit owner trigger: PRODUCTION_HARDENING
+  -> production readiness / rollout
+  -> UR-X / UR10 destructive cleanup only by separate later approval
+Engineering Gates never imply automatic production readiness or deploy authority.
 ```
 
-This package never by itself authorizes merge, migration, activation, service recreation, Messenger production testing, deployment, page expansion, or destructive data work.
+This package never by itself authorizes merge, migration, activation, service recreation, Messenger production testing, deployment, page expansion, production-hardening transition, or destructive data work.
