@@ -40,7 +40,7 @@
     "imageId": "sha256:cfb2af1c0a6e54d4a0df5249af24a3ac806fbc31ef2431c5e43471e420af6daf",
     "revision": "92bc150b452f7ef40e52871f16a444a4979a8d8c",
     "imageMetadataSha256": "d118a581cca104b4760b0ff4d68dc9d55bddadf2335cc2746948b1cc8d768a33",
-    "sourceArchiveSha256": "efa82bf41a277e590eddcfd4fe20feeb31a2f5890fce8cf8b6d395a1446dc6ae",
+    "imageArchiveSha256": "efa82bf41a277e590eddcfd4fe20feeb31a2f5890fce8cf8b6d395a1446dc6ae",
     "artifactSmoke": "PASS"
   },
   "guardedCutover": {
