@@ -48,7 +48,7 @@
     },
     "effective": {
       "replyReconciliationPolicy": "CLARIFY_RECONCILED_V1",
-      "replyReconciliationFallback": "Chị muốn em làm rõ phần nào để em trả lời đúng ý chị?",
+      "replyReconciliationFallbackText": "Chị muốn em làm rõ phần nào để em trả lời đúng ý chị?",
       "mediaPartialResolutionPolicy": "PER_ASSET_V1",
       "multiProductResolutionPolicy": "CLARIFY_V1",
       "customerUrlPolicy": "CLASSIFIED_ALLOWLIST_V1",
