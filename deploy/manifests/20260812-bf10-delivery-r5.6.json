@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "documentType": "APPEND_ONLY_RELEASE_PREPARATION_MANIFEST",
+  "status": "REVIEW_CANDIDATE_NOT_DEPLOYED",
+  "releaseTag": "20260812-bf10-delivery-r5.6",
+  "reviewCandidateTag": "20260812-bf10-delivery-r5.6-review-candidate.1",
+  "repositoryRecordTimeSemantics": "commit and tag record time; not production host capture time",
+  "implementationBoundaryCommit": "a7669d058d59a9331f0dadc2c04fe91a7888c51b",
+  "provenance": {
+    "repository": "git@github.com:nguyentuanson27-netizen/lanchatbot.git",
+    "bf10ImplementationCommit": "e8bb7a8fa7a067655b0435713d6dd7abf70e63d7",
+    "bf10MergeCommit": "3bc3e0a440ce64b5017f84d400a7e9a4085c435c",
+    "bf10PullRequest": 131,
+    "evidenceBeforeReleasePullRequest": 186,
+    "evidenceBeforeReleaseMerge": "a7669d058d59a9331f0dadc2c04fe91a7888c51b",
+    "bf10ImplementationAndMergeMustBeAncestors": true
+  },
+  "scope": {
+    "targetServices": ["delivery-worker"],
+    "servicesRecreated": ["delivery-worker"],
+    "nonTargetServicesRecreated": [],
+    "nonTargetContainerIdsMustRemainUnchanged": true,
+    "allowedInfrastructureEnvChanges": ["DELIVERY_IMAGE"],
+    "dockerConfigEnvAdditionsOrChangesAllowed": false,
+    "migrationRequired": false,
+    "backfillAllowed": false,
+    "requeueAllowed": false,
+    "dataDeletionAllowed": false,
+    "routingMutationAllowed": false,
+    "pageAllowlistMutationAllowed": false,
+    "policyMutationAllowed": false,
+    "messengerProductionSendOrTestAllowed": false,
+    "n8nActionAllowed": false
+  },
+  "freshProductionCapture": {
+    "capturedAt": "2026-08-12T04:18:28Z/2026-08-12T04:20:39Z",
+    "release": "20260811-admin-policy-review-r6.11",
+    "releasePath": "/opt/lana-chatbot/releases/20260811-admin-policy-review-r6.11",
+    "sourceCommit": "a7a1a21a59440ccdf3cfde5d8cdfd8ef256190bb",
+    "sourcePointerSha256": "b3151e9c66596acd275ec7375557a8ceb777f6719e955aa13f5d1a83f6693605",
+    "runtimeStateSha256": "75678be53e4e420568ee8f2f0ff448c1e366327934c9604d83a60cd9af8d1034",
+    "currentHistoryByteIdentical": true,
+    "latestMigration": "0031_admin_policy_safe_deletion",
+    "migrationCount": 31,
+    "approvedPageId": "1198992073286645"
+  },
+  "rollback": {
+    "releasePath": "/opt/lana-chatbot/releases/20260811-admin-policy-review-r6.11",
+    "deliveryContainerId": "b8df6a17ebd4cd5a4bf0aa2aef809c9e7da0115f65010155150bd90c662581ec",
+    "deliveryImage": "lana-chatbot-app:realtime-compatibility-first-r32.2",
+    "deliveryImageId": "sha256:44ecb2fd9f7d6a5aa769938f738a3c6ba42b470db5a9bce3d30fdc364de2a0b7",
+    "deliveryRevision": "1c004eacca7cce309a0a05643d1aa751b897d41c",
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false
+  },
+  "bf10": {
+    "ownerService": "delivery-worker",
+    "callPath": "delivery-server -> MetaOutboxDispatcher.processOne -> PostgresRealtimeRuntimeStore.markMetaAccepted",
+    "terminalSuccess": "atomically clear last_error_code, next_attempt_at and lease fields",
+    "history": "preserve attempt_count and append META_OUTBOX_ACCEPTED_AFTER_RETRY audit when a prior error exists",
+    "unchangedSemantics": ["CAS", "stale lease rejection", "dedupe", "idempotency", "delivery interpretation", "APP_ECHO does not infer delivery"],
+    "historicalDirtyRowsBackfilled": false,
+    "naturalTrafficEvidenceRule": "if no natural accepted transition occurs, classify live behavior as PENDING_NATURAL_TRANSITION_EVIDENCE"
+  },
+  "preservedRuntimePolicy": {
+    "replyReconciliationPolicy": "CLARIFY_RECONCILED_V1",
+    "mediaPartialResolutionPolicy": "PER_ASSET_V1",
+    "multiProductResolutionPolicy": "CLARIFY_V1",
+    "customerUrlPolicy": "CLASSIFIED_ALLOWLIST_V1",
+    "correctionDialoguePolicyPresent": false,
+    "bf03Status": "INACTIVE_AND_NON_ACTIVATABLE"
+  },
+  "requiredGates": [
+    "frozen pnpm 10.12.4 install",
+    "canonical pnpm check and exact-head CI",
+    "BF-10 database and dispatcher regressions",
+    "release-integrity self-test",
+    "diff, secret, PII, migration, generated and runtime-state scans",
+    "annotated candidate tag exact-head review",
+    "final annotated tag on normal manifest merge",
+    "immutable final-tag build and artifact smoke",
+    "delivery-only cutover with automatic rollback",
+    "health/readiness/queue/UID/restart/non-target identity parity",
+    "bounded soak 3/3 and atomic runtime-state promotion",
+    "append-only runtime evidence PR"
+  ],
+  "stopThresholds": [
+    "tag, merge-parent, manifest, source or live parity mismatch",
+    "delivery health or readiness non-200, restart nonzero or PID1 UID not 1000",
+    "delivery Config.Env entry/value drift",
+    "any non-target container ID change",
+    "migration, routing, allowlist or published policy drift",
+    "active/stuck queue or duplicate increase",
+    "new structured delivery error log",
+    "rollback identity mismatch"
+  ],
+  "automationDirectory": "deploy/releases/20260812-bf10-delivery-r5.6",
+  "runtimeEvidenceMustBeAppendOnlyFollowUpPr": true,
+  "directVpsSourceEditsAllowed": false
+}
