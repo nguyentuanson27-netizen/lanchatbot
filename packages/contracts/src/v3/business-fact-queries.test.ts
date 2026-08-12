@@ -19,7 +19,7 @@ const query = {
 };
 
 describe("BusinessFactQueriesV2", () => {
-  it("accepts at most three ordered independently-resolved queries", () => {
+  it("accepts ordered independently-resolved queries", () => {
     const parsed = BusinessFactQueriesV2Schema.parse({
       schemaVersion: 2,
       queries: [query],
@@ -49,14 +49,22 @@ describe("BusinessFactQueriesV2", () => {
     }).success).toBe(false);
   });
 
-  it("rejects more than three queries", () => {
-    expect(BusinessFactQueriesV2Schema.safeParse({
+  it("accepts more than ten queries without introducing a product-count cap", () => {
+    const parsed = BusinessFactQueriesV2Schema.parse({
       schemaVersion: 2,
-      queries: Array.from({ length: 4 }, (_, index) => ({
+      queries: Array.from({ length: 12 }, (_, index) => ({
         ...query,
-        queryId: `10000000-0000-4000-8000-00000000000${index + 1}`,
+        queryId: `10000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+        productRef: {
+          ...query.productRef,
+          raw: `SD${String(index + 1).padStart(3, "0")}`,
+          productId: `SD${String(index + 1).padStart(3, "0")}`,
+        },
       })),
-    }).success).toBe(false);
+    });
+
+    expect(parsed.queries.map(({ productRef }) => productRef.productId)).toEqual(
+      Array.from({ length: 12 }, (_, index) => `SD${String(index + 1).padStart(3, "0")}`),
+    );
   });
 });
-
