@@ -30,25 +30,25 @@ Do not load `FUTURE_BACKLOG.md` during BF work unless the change explicitly affe
 | Release/deploy/evidence | `contracts/RELEASE_INTEGRITY.md` |
 | Dataset/package work | `contracts/DATASET_BOUNDARY.md` |
 | DF work after Gate BF | `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + relevant contracts |
-| Commerce authority | Gate E/F-PREPROD + all relevant contracts |
-| State V2 | UR sections / Gate U-PREPROD + all relevant contracts |
+| Commerce authority | Gate E/F-PREPROD + `contracts/BEHAVIOR_CONTROL_PLANE.md` + relevant contracts |
+| State V2 | UR sections / Gate U-PREPROD + `contracts/BEHAVIOR_CONTROL_PLANE.md` + relevant contracts |
 | Production hardening | `OPERATING_MODE.md` + deferred hardening section in `FUTURE_BACKLOG.md` |
 | Historical audit | one relevant completed checkpoint/archive source only as needed |
 
 ## Source-of-truth ownership
 
 - `ACTIVE_BACKLOG.md`: current BF order/dependencies/Gate BF.
-- `OPERATING_MODE.md`: environment classification, release batching, PREPROD evidence semantics, Gate semantics, `PRODUCTION_HARDENING` trigger.
+- `OPERATING_MODE.md`: environment classification, release batching, PREPROD evidence semantics, Gate semantics, and `PRODUCTION_HARDENING` trigger.
 - `BF_ISSUE_SPECS.md`: BF acceptance criteria.
-- `ACTIVE_IMPLEMENTATION_PLAN.md`: active BF architecture/rollout.
-- `FUTURE_BACKLOG.md`: deferred DF/UR work after Gate BF.
-- `PREPROD_DF_UR_PLAN_AMENDMENT.md`: rationale for PREPROD regrouping/evidence changes.
-- `contracts/`: durable invariants.
+- `ACTIVE_IMPLEMENTATION_PLAN.md`: active BF architecture/rollout. Its future-facing DF/UR shadow/canary text is superseded after Gate BF by the files below.
+- `FUTURE_BACKLOG.md`: authoritative deferred DF/UR work after Gate BF.
+- `PREPROD_DF_UR_PLAN_AMENDMENT.md`: authoritative rationale/review contract for PREPROD simplification and future-topology changes.
+- `contracts/`: durable technical invariants.
 - `CURRENT_BASELINE.md` and `program-state.json`: last accepted checkpoint only; fresh runtime evidence wins for live facts.
 - `archive/`: immutable historical context.
 - `incidents/`: accepted incident inputs unless contradictory evidence appears.
 
-Disagreement in IDs, dependencies or Gates stops execution until reconciled.
+Disagreement in IDs, dependencies, authority topology, or Gates stops execution until reconciled.
 
 ## Completion/archive policy
 
@@ -72,11 +72,11 @@ Deferred PREPROD:
   DF-A: DF-P1..DF-P3 / DF01-06
   -> DF-B: DF-P4..DF-P6 / DF07-10
   -> Gate E-PREPROD
-  -> DF-C: DF-P7 / DF11-13 / LEGACY -> SHADOW -> COMMERCE
-  -> controlled human E2E
+  -> DF-C: DF-P7 / DF11-13 / controlled LEGACY -> COMMERCE
+  -> controlled critical human E2E
   -> Gate F-PREPROD
   -> UR-A: UR-P1..UR-P2 / UR00-03
-  -> UR-B: UR-P3 / UR04-07 / LEGACY -> SHADOW -> V2
+  -> UR-B: UR-P3 / UR04-07 / controlled LEGACY -> V2
   -> Gate U-PREPROD
   -> controlled full human E2E on State V2
   -> explicit owner trigger: PRODUCTION_HARDENING
@@ -84,6 +84,8 @@ Deferred PREPROD:
   -> later UR08 -> UR09 -> UR10 under separate approvals
 ```
 
-Key distinction: PREPROD may replace unavailable traffic volume with deterministic/replay/controlled evidence, but it does not skip durable authority stages, rollback, protected-claim verification or objective expected-behavior checks.
+Key distinction: PREPROD removes mandatory runtime SHADOW, live statistical gates, traffic-percent canaries, premature legacy retirement, and other production-scale ceremony that currently lacks meaningful traffic/scale. It does **not** remove deterministic verification, protected-claim safety, authority separation, security, exact readback, or complete `LEGACY` rollback.
+
+Production mechanisms may be reintroduced later only by an explicit `PRODUCTION_HARDENING` decision based on measured traffic/risk rather than assumed future scale.
 
 This package never by itself authorizes merge, migration, activation, service recreation, Messenger production testing, deployment, page expansion, production-hardening transition, or destructive data work.
