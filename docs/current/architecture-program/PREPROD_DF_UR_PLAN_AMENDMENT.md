@@ -5,327 +5,211 @@
 **Scope:** Deferred DF/UR execution and evidence strategy only
 **Non-goals:** Gate BF disposition, runtime mutation, deployment authorization, production-readiness claim, destructive cleanup
 
-## 1. Context
+## 1. Why this amendment exists
 
-The architecture direction remains valid, but the original DF/UR evidence plan assumes a level of organic traffic and end-to-end conversational stability that the current project does not yet have.
+The project is not public production. It currently has one bounded `PREPROD_TEST_PAGE`, low/irregular organic traffic, and overlapping legacy defects that can prevent a complete human conversation from reaching the component under test.
 
-The project currently operates with one `PREPROD_TEST_PAGE`, not public production. Several legacy defects overlap, so a full human conversation can fail before it reaches the component under test. That makes production-style traffic gates a poor fit for the current phase.
+The original DF/UR architecture direction remains valid, but some evidence mechanics assume a production-like population: large live shadow samples, statistical non-inferiority, percentage canaries, and long traffic-based observation windows. Those mechanisms are not meaningful when the required population does not yet exist. Synthetic traffic may be useful test data, but it must not be presented as production statistical evidence.
 
-In particular, the original plan depends on mechanisms such as:
+This amendment therefore changes **execution grouping and PREPROD evidence mechanics**, not the core architecture, safety, or rollback contracts.
 
-- live Context V1/V2 shadow sampling;
-- at least 100 stratified eligible live pairs;
-- statistical non-inferiority over those pairs;
-- traffic canary/divergence evidence;
-- long observation windows that assume meaningful user volume.
+## 2. What remains invariant
 
-Those are valid production-hardening mechanisms, but they are not honest or useful engineering gates when the project cannot naturally generate the required population. Creating synthetic traffic merely to satisfy a numeric threshold would produce false confidence.
+The following remain binding:
 
-## 2. Decision
+- protected business claims require fresh typed verified provenance;
+- model output is advisory and cannot authorize protected side effects;
+- safety boundaries remain fail-closed;
+- SSRF/phishing, PII, secret, authz, least-privilege, idempotency, concurrency and data-integrity controls remain mandatory;
+- sales authority keeps `LEGACY -> SHADOW -> COMMERCE`;
+- state-read authority keeps `LEGACY -> SHADOW -> V2`;
+- `SHADOW` is not skipped, but PREPROD may evidence it with deterministic dual-compute/replay and bounded controlled scenarios instead of production traffic volume;
+- complete `LEGACY` rollback remains available while replacement authority is being proven;
+- immutable Git/release/runtime provenance remains mandatory for any deployed Release Train.
 
-Keep the DF01-DF13 and UR00-UR10 identifiers for traceability, but execute them as smaller PREPROD-oriented vertical slices.
+## 3. PREPROD evidence hierarchy
 
-The evidence hierarchy in `ENGINEERING_PREPROD` becomes:
+Use the cheapest evidence that actually proves the owning boundary:
 
 1. deterministic unit/contract tests;
 2. focused integration tests across real boundaries;
-3. immutable incident and counterexample replay;
-4. controlled offline V1/V2 evaluation against a locked corpus and pre-registered rubric;
-5. mandatory `SHADOW` authority stages exercised with deterministic dual-compute/replay and bounded controlled scenarios even when organic traffic volume is unavailable;
-6. transition/concurrency/idempotency matrices for stateful authority work;
-7. bounded controlled human E2E only after the architecture is sufficiently converged to support a complete journey;
-8. exact runtime identity/readback/rollback evidence for any owner-authorized test-page deployment.
+3. immutable BF incident and counterexample replay;
+4. locked offline model/context corpus with pre-declared expected behaviors;
+5. deterministic `SHADOW` dual-compute/replay and transition matrices;
+6. concurrency/idempotency/revision-fence tests for stateful work;
+7. bounded human E2E only at architecture checkpoints where a complete journey is expected to be possible;
+8. exact artifact/runtime readback and rollback evidence for owner-authorized test-page deployment.
 
-This amendment changes the **evidence mechanism and execution grouping**, not the correctness, quality, safety, authority-transition, or rollback bar.
+A component may be accepted from focused evidence when unrelated legacy defects prevent an E2E path from reaching it. That exception does not remove the later full-journey checkpoints.
 
-The following remain mandatory:
+## 4. DF PREPROD execution slices
 
-- fresh typed provenance for protected claims;
-- deterministic authorization of side effects;
-- fail-closed behavior at safety boundaries;
-- SSRF/phishing, PII, secret, authz, least-privilege, idempotency and data-integrity controls;
-- sales authority transition topology `LEGACY -> SHADOW -> COMMERCE`;
-- state-read authority transition topology `LEGACY -> SHADOW -> V2`;
-- complete `LEGACY` rollback and a usable legacy comparison path until later hardening/rollout evidence permits separately approved retirement;
-- immutable Git/release/runtime provenance for deployed Release Trains.
-
-`SHADOW` is therefore **not optional**. PREPROD changes how `SHADOW` is evidenced: deterministic/replay/controlled evidence can replace unavailable production traffic volume, but the authority stage itself is preserved.
-
-## 3. DF PREPROD execution slices
-
-The original DF IDs are preserved and grouped into seven execution slices.
+Keep original DF01-DF13 identifiers for traceability, but execute them as seven slices.
 
 ### DF-P1 — Minimal architecture telemetry (DF01-DF03)
 
-Add only the bounded, versioned, PII-safe fields needed to explain and replay architecture decisions: dialogue evidence, buying intent, protected-claim validation, readiness, phase/barrier, context version, strategy/CTA, guard/reconciliation and final side-effect plan.
+Add only bounded, versioned, PII-safe fields needed to explain/replay architecture decisions: dialogue evidence, buying intent, claim validation, readiness, phase/barrier, context version, strategy/CTA, reconciliation, guard and final side-effect plan.
 
-Do not require production dashboards, SLOs, warehouse-style analytics migration or reinterpretation of historical rows.
+Do not require production dashboards, SLOs, warehouse-style analytics migration, or reinterpretation of historical rows.
 
 ### DF-P2 — Targeted normalization (DF04)
 
-Move only consumers required by the new architecture to named normalization primitives. Do not use normalization work as a broad legacy refactor.
+Move only consumers needed by the new architecture to named normalization primitives. Do not use this work as a broad legacy refactor.
 
 ### DF-P3 — Canonical evidence and readiness (DF05-DF06)
 
-Create the canonical evidence boundary:
-
-- keep buying intent on the existing approved hybrid resolver;
-- add dialogue evidence as a separate versioned contract;
-- add typed protected-claim provenance, including size/fit;
-- derive product-aware readiness from fresh verified evidence immediately before side effects;
-- keep model output advisory: model evidence alone cannot authorize cart/order/state effects.
+Create the canonical evidence boundary: approved buying-intent authority, separate dialogue evidence, typed protected-claim provenance, and product-aware deterministic readiness immediately before side effects.
 
 ### DF-P4 — Derived phase and barriers (DF07-DF08)
 
-Derive `ConversationPhaseV2` and finite-lifecycle barriers deterministically from commerce/canonical evidence. Keep ownership/handoff separate. Support backward phase movement when authoritative state changes.
-
-Verification is a deterministic transition matrix plus replay, not traffic volume.
+Derive `ConversationPhaseV2` and finite-lifecycle barriers deterministically from canonical/commerce state. Keep ownership/handoff separate and allow backward phase movement when authoritative state changes.
 
 ### DF-P5 — Context V2 (DF09)
 
-Version Context V2 and migrate the intended consumers: strategy, CTA, post-media logic, output interpretation and audit metadata. Context V2 consumes canonical dialogue evidence, verified claims, buying intent, readiness, derived phase/barrier and product/media context.
+Version Context V2 and migrate the intended consumers: strategy, CTA, post-media logic, output interpretation and audit metadata.
 
-### DF-P6 — Locked offline paired evaluation (DF10)
+### DF-P6 — Locked offline evaluation (DF10)
 
-Replace the PREPROD requirement for at least 100 live shadow pairs with a controlled evaluation corpus built from:
+Do not require `>=100` organic/live pairs in PREPROD. Build a versioned corpus from accepted BF incidents/counterexamples, relevant safe historical conversations, and controlled fixtures for product switching, correction, media, URL, size, order review and confirmation.
 
-- the ten BF incidents and accepted counterexamples;
-- relevant historical conversations when available and safe to use;
-- product-switch, correction, media, URL, size, order-review and confirmation fixtures;
-- explicitly labelled synthetic variants used only as test data.
+Before the first scored run, freeze:
 
-Before running the comparison, commit/freeze a versioned corpus manifest and rubric. Each eligible case must declare:
+- corpus membership and strata;
+- each case's `MUST_PASS` expected behaviors;
+- safety/factual/side-effect assertions;
+- any additional objective quality rubric and its acceptance rule.
 
-- its stratum;
-- objective `MUST_PASS` safety/factual/behavioral assertions;
-- the scoring rule for non-safety correctness/helpfulness/context coherence where an objective expected behavior exists;
-- any case that is intentionally qualitative-only and therefore excluded from numeric acceptance.
+Gate on V2 meeting the frozen expected-behavior contract. V1 may be run against the same corpus for diagnosis/comparison, but **V1 is not the quality gold standard** because the current baseline contains known defects.
 
-Run V1 and V2 side-effect-free against the same eligible inputs. Gate E-PREPROD requires all of the following pre-registered engineering rules:
+Mandatory PREPROD rule:
 
-1. **Safety:** 100% of safety-critical `MUST_PASS` assertions pass for V2; zero safety regression from V1.
-2. **Factual/contract correctness:** 100% of required factual/protected-claim/side-effect assertions pass for V2.
-3. **Non-safety quality non-regression:** within every pre-registered stratum, V2 must pass at least as many required non-safety rubric assertions as V1; aggregate required non-safety pass count must also be `V2 >= V1`.
-4. **No post-hoc rubric changes:** corpus membership, strata, required assertions and scoring rules cannot be changed after results are inspected except through a reviewed amendment that invalidates and reruns the evaluation.
-5. **Qualitative review remains supplemental:** style/preference findings may inform future work but cannot override a failed required assertion or be used to manufacture a pass.
+- 100% of safety-critical, protected-claim, side-effect and other `MUST_PASS` assertions pass for V2;
+- no required rubric/threshold may be changed after results are inspected unless a reviewed amendment invalidates and reruns the evaluation;
+- qualitative style/preferences remain supplemental and cannot override a failed required assertion.
 
-This is deterministic PREPROD engineering evidence, **not** a claim of production statistical confidence.
+This is objective engineering evidence, not production statistical confidence. Real-population statistical validation remains for `PRODUCTION_HARDENING` if it is still appropriate then.
 
-The former `>=100` live-pair and `V2 - V1 >= -0.15` statistical gate is deferred to `PRODUCTION_HARDENING`, where a realistic population can exist. Synthetic fixtures must not be presented as production statistical evidence.
+### DF-P7 — Commerce authority (DF11-DF13)
 
-### DF-P7 — Commerce authority cutover (DF11-DF13)
+Implement and exercise `LEGACY -> SHADOW -> COMMERCE` in order. PREPROD `SHADOW` uses deterministic dual-compute/replay and bounded controlled scenarios; it does not require a minimum organic traffic count.
 
-Implement database-backed `LEGACY | SHADOW | COMMERCE` and preserve the mandatory transition topology:
+Before `COMMERCE` acceptance: transition matrix and BF/DF replay pass, missing commerce state fails closed, Context V2/derived phase/reconciliation/legacy-authority demotion switch coherently, no COMMERCE decision relies on legacy `salesStage`, and complete `LEGACY` rollback is verified.
 
-```text
-LEGACY -> SHADOW -> COMMERCE
-```
+Then run the approved controlled human critical-journey set before Gate F-PREPROD.
 
-`SHADOW` must be entered and verified before `COMMERCE`. In PREPROD, its evidence may come primarily from deterministic dual-compute/replay plus bounded controlled scenarios rather than organic traffic volume.
+## 5. Gate E-PREPROD
 
-Before `COMMERCE` activation:
+Gate E is an engineering/architecture gate, not production readiness.
 
-- locked DF-P6 evaluation passes;
-- transition matrix passes;
-- BF/DF replay corpus passes;
+Required:
+
+- canonical buying intent has one approved authority;
+- dialogue evidence is separate from buying intent;
+- protected claims have typed verified provenance;
+- product-aware readiness is fresh and deterministic;
+- phase/barrier contracts are versioned, deterministic and PII-safe;
+- Context V2 and intended consumers are implemented;
+- accepted BF incident/counterexample replay passes;
+- the DF-P6 corpus/rubric is frozen before scoring;
+- V2 passes all frozen `MUST_PASS` safety, factual, side-effect and required behavioral assertions;
+- evaluation paths are side-effect-free and cost bounded.
+
+Not required in `ENGINEERING_PREPROD`: organic traffic volume, a fixed live pair count, production statistical confidence, or traffic-percent canary evidence.
+
+## 6. Gate F-PREPROD
+
+Required:
+
+- `LEGACY -> SHADOW -> COMMERCE` is exercised in order;
+- Commerce FSM is authoritative in `COMMERCE` and phase is derived;
+- Context V2, derived phase, reconciliation and legacy authority demotion switch coherently;
+- no COMMERCE decision consumes legacy `salesStage` as authority;
 - missing commerce state with committed intent fails closed;
-- Context V2, derived phase, final reconciliation and legacy regex-authority demotion switch coherently;
-- no COMMERCE decision depends on legacy `salesStage` authority;
-- `SHADOW` divergence is reason-coded and contains no safety-critical/unclassified divergence in the controlled evidence set;
+- full transition matrix and BF/DF replay pass;
+- controlled PREPROD human critical journeys pass;
+- exact runtime identity/readback is verified for any deployed candidate;
 - complete `LEGACY` rollback is verified.
 
-After those checks, run bounded controlled human E2E on the `PREPROD_TEST_PAGE` before Gate F-PREPROD is accepted.
+## 7. UR PREPROD plan
 
-## 4. Gate E-PREPROD
-
-Gate E remains an engineering/architecture gate, but its evidence must fit the current environment without weakening the quality bar.
-
-Required:
-
-- [ ] Canonical buying intent has one approved authority.
-- [ ] Dialogue evidence is separate from buying intent.
-- [ ] Protected claims have typed verified provenance.
-- [ ] Product-aware readiness is fresh and deterministic before side effects.
-- [ ] Phase/barrier contracts are versioned, deterministic and PII-safe.
-- [ ] Context V2 contract and intended consumers are implemented.
-- [ ] Full accepted BF incident/counterexample replay passes.
-- [ ] Offline V1/V2 corpus manifest, strata, required assertions and rubric are frozen before result inspection.
-- [ ] V2 passes 100% of safety-critical and required factual/contract assertions.
-- [ ] V2 has no per-stratum or aggregate regression in required non-safety rubric pass count versus V1.
-- [ ] Evaluation/shadow paths are side-effect-free and cost bounded.
-
-Not required in `ENGINEERING_PREPROD`:
-
-- organic traffic volume;
-- a fixed minimum live pair count;
-- production statistical confidence;
-- traffic-percent canary evidence.
-
-Those traffic-dependent mechanisms are deferred; the locked offline quality rule above is their PREPROD engineering replacement, not a statistical substitute.
-
-## 5. Gate F-PREPROD
-
-Required:
-
-- [ ] `LEGACY -> SHADOW -> COMMERCE` is exercised in order; `SHADOW` is not skipped.
-- [ ] Commerce FSM is authoritative in `COMMERCE`; conversation phase is derived.
-- [ ] Context V2, derived phase, final reconciliation and legacy authority demotion switch coherently.
-- [ ] No COMMERCE decision consumes legacy `salesStage` as authority.
-- [ ] Missing commerce state with committed intent fails closed with bounded evidence.
-- [ ] Full transition matrix and BF/DF replay pass.
-- [ ] Controlled `SHADOW` comparison has no safety-critical/unclassified divergence in the approved evidence set.
-- [ ] Controlled `PREPROD_TEST_PAGE` human E2E passes for the critical journey set.
-- [ ] Exact runtime identity/readback is verified for any deployed candidate.
-- [ ] Emergency complete-`LEGACY` rollback is verified and remains usable after the Gate.
-
-## 6. UR PREPROD execution slices
-
-State V2 remains pre-production architecture work because deferring the persistence migration until after public production would increase operational risk. The original UR IDs are preserved and grouped into four planning/execution slices, but actual legacy retirement is deliberately later than PREPROD Gate U.
+State V2 stays pre-production architecture work, but actual legacy retirement does not need to happen before production hardening.
 
 ### UR-P1 — State V2 contract/go-no-go (UR00)
 
-Approve the exact State V2 scope, encryption/AAD/key usage, independent expiry envelopes, revision/fence semantics, transaction boundary, product selection/reset representation, migration/read policy and rollback.
+Approve exact state scope, encryption/AAD/key usage, independent expiry envelopes, revision/fence semantics, transaction boundary, product selection/reset representation, migration/read policy and rollback.
 
 ### UR-P2 — Atomic State V2 persistence (UR01-UR03)
 
 Implement additive schema, deterministic reducer and atomic persistence so State V2, legacy compatibility projections, events, Outbox, handoff and tags succeed or fail together. Prove concurrency, idempotency and revision/fence behavior.
 
-### UR-P3 — Controlled migration and mandatory SHADOW read switch (UR04-UR07)
+### UR-P3 — Controlled migration and read authority (UR04-UR07)
 
-Use bounded, resumable, PII-safe backfill only for the data needed to verify the test environment. Compare V2 with active legacy reads side-effect-free using deterministic/replay evidence. Conflicts remain ineligible and reason-coded.
+Use bounded resumable PII-safe backfill only as needed for the PREPROD dataset. Exercise `LEGACY -> SHADOW -> V2` in order. Compare V2 with legacy reads side-effect-free using deterministic/replay evidence; conflicts remain ineligible and reason-coded. Never merge partial V2/legacy fields.
 
-Preserve the mandatory state-read topology:
+Switch V2 read authority only after comparator/readback evidence and verify complete rollback to `LEGACY`. Keep the legacy comparison/rollback path available after Gate U.
 
-```text
-LEGACY -> SHADOW -> V2
-```
+### UR08-UR09 — Deferred legacy retirement
 
-`SHADOW` must be entered and verified before V2 read authority. In PREPROD, the comparison can be driven by deterministic/replay and bounded controlled scenarios instead of production traffic volume. Never merge partial V2/legacy fields.
+Do not execute legacy writer/reader retirement merely to complete PREPROD architecture. Keep these original IDs for the later ordered retirement after production-hardening/rollout evidence closes the rollback window:
 
-Switch to V2 only after comparator/readback evidence and verify complete rollback to `LEGACY`. The legacy read path remains intact and operational after PREPROD acceptance so it can support later hardening comparison, canary and rollback rehearsal.
+1. UR08 stops legacy commercial writes only after explicit approval to close that rollback window;
+2. UR09 removes legacy readers/flags in a later release after UR08 and a zero-consumer/readback check.
 
-After the V2 read switch, rerun the approved controlled human E2E critical journey set **before Gate U-PREPROD**.
+### UR10 — Destructive cleanup later still
 
-### UR-P4 — Legacy retirement readiness (UR08-UR09)
+Archival/drop remains a separate destructive ADR/change after retention, audit/legal, backup and restore requirements are satisfied. It is never implied by Gate U.
 
-In `ENGINEERING_PREPROD`, UR-P4 proves retirement readiness but does **not** yet stop legacy writes or remove legacy readers/flags.
+## 8. Gate U-PREPROD and human acceptance
 
-Required PREPROD work:
+Gate U proves the State V2 architecture and rollback boundary. It does **not** include the full human E2E checkpoint in its own checklist.
 
-- perform a global consumer/dependency sweep;
-- identify the exact UR08 writer-stop and UR09 reader/flag-removal changes;
-- prove that legacy and V2 paths do not form partial/co-authoritative merges;
-- document rollback dependencies and the minimum observation window needed before retirement;
-- keep the complete legacy comparison/rollback path usable through `PRODUCTION_HARDENING` and the public-production rollout decision.
+Required Gate U evidence:
 
-Actual UR08/UR09 retirement remains ordered and separately approved:
+- State V2 design/security/database/runtime review is approved;
+- encryption/expiry semantics are implemented as designed;
+- atomic persistence is idempotent, concurrency tested and revision/fence protected;
+- controlled backfill/comparator/replay passes with conflicts ineligible;
+- `LEGACY -> SHADOW -> V2` is exercised in order;
+- V2 read switch and complete `LEGACY` rollback pass on PREPROD;
+- UR08/UR09 retirement remains deferred and the legacy comparison/rollback path remains available;
+- UR10 remains separately approved destructive work.
 
-1. UR08 may stop legacy commercial writes only after future production-hardening/rollout evidence establishes that the legacy rollback window can close.
-2. UR09 may remove legacy readers/flags only in a later focused release after UR08 and a global zero-consumer/readback check.
+After Gate U-PREPROD, run the controlled full human E2E checkpoint on State V2 before entering production hardening. This keeps the architecture gate and system-level acceptance checkpoint distinct.
 
-This amendment does not authorize either retirement step.
+## 9. Production hardening
 
-### UR10 — Destructive cleanup remains deferred
+`PRODUCTION_HARDENING` begins only after explicit owner instruction. This is where traffic-dependent and operational-readiness evidence belongs, as applicable:
 
-Archival/drop remains a separate destructive ADR/change. It is not required for Gate U-PREPROD and is not authorized by this amendment. Retaining legacy storage/compatibility is preferred until production rollout, rollback-window closure and a later explicit owner decision justify destructive cleanup.
-
-## 7. Gate U-PREPROD
-
-Gate U-PREPROD proves that State V2 is a viable PREPROD authority with a complete legacy rollback path. It does **not** require or authorize legacy retirement.
-
-Required:
-
-- [ ] ADR/security/database/runtime reviews approve the exact State V2 design.
-- [ ] Core and commerce envelopes have the approved encryption/expiry semantics.
-- [ ] Atomic persistence is idempotent, revision/fence protected and concurrency tested.
-- [ ] Controlled backfill/comparator/replay passes with conflicts ineligible.
-- [ ] `LEGACY -> SHADOW -> V2` is exercised in order; `SHADOW` is not skipped.
-- [ ] V2 read switch and complete `LEGACY` rollback pass on PREPROD.
-- [ ] Controlled human E2E passes after the State V2 read switch.
-- [ ] UR-P4 retirement-readiness sweep/documentation is complete while legacy writers/readers remain available for comparison/rollback.
-- [ ] UR08/UR09 actual retirement and UR10 destructive cleanup remain separately approved later work.
-
-## 8. Production hardening after Gate U-PREPROD
-
-`PRODUCTION_HARDENING` begins only after the existing explicit owner trigger. This is where traffic-dependent ceremony belongs, including as applicable:
-
-- real eligible V1/V2 or legacy/new-authority shadow sampling while legacy comparison paths still exist;
+- real eligible V1/V2 or legacy/new shadow sampling;
 - statistically meaningful comparison and pre-registered thresholds;
-- the former `>=100` real eligible pair and non-inferiority target, if still appropriate when the phase begins;
-- production traffic strategy and percentage canaries;
-- sustained soak against realistic volume;
-- capacity/load testing;
-- SLOs, dashboards, alerting, runbooks and incident drills;
+- traffic canaries and realistic soak;
+- capacity/load evidence;
+- SLOs, dashboards, alerting and incident runbooks;
 - final security/compliance/operational-readiness review;
 - public-production go/no-go and rollback rehearsal.
 
-These requirements are deferred, not deleted. They become mandatory only under the production-hardening governance decision appropriate to the future environment.
+The former `>=100` real eligible-pair/non-inferiority idea may be reconsidered here against the real population; it is not automatically mandatory forever.
 
-Legacy comparison/rollback paths must remain usable throughout this phase. Actual UR08/UR09 retirement happens only after the separately approved rollback window is closed; UR10 remains later still.
-
-## 9. Resulting roadmap
+## 10. Resulting roadmap
 
 ```text
 Gate BF + immutable POST_BF_V1
-  -> DF-P1 telemetry (DF01-03)
-  -> DF-P2 targeted normalization (DF04)
-  -> DF-P3 canonical evidence/readiness (DF05-06)
-  -> DF-P4 phase/barrier (DF07-08)
-  -> DF-P5 Context V2 (DF09)
-  -> DF-P6 locked offline evaluation (DF10)
+  -> DF-P1..DF-P6
   -> Gate E-PREPROD
-  -> DF-P7 LEGACY -> SHADOW -> COMMERCE (DF11-13)
+  -> DF-P7 / LEGACY -> SHADOW -> COMMERCE
   -> controlled human E2E
   -> Gate F-PREPROD
-  -> UR-P1 State V2 contract (UR00)
-  -> UR-P2 atomic persistence (UR01-03)
-  -> UR-P3 LEGACY -> SHADOW -> V2 (UR04-07)
-  -> controlled human E2E after State V2 read switch
-  -> UR-P4 retirement readiness; legacy retained (UR08-09)
+  -> UR-P1..UR-P3 / LEGACY -> SHADOW -> V2
   -> Gate U-PREPROD
+  -> controlled full human E2E on State V2
   -> explicit owner trigger: PRODUCTION_HARDENING
-  -> real shadow/canary/statistical/operational readiness with LEGACY rollback still available
+  -> real traffic / operational readiness as applicable
   -> public-production readiness / rollout decision
-  -> separately approved rollback-window closure
-  -> UR08 stop legacy writes
+  -> later UR08 stop legacy writes
   -> later UR09 remove legacy readers/flags
-  -> UR10 destructive cleanup only under separate later approval
+  -> later UR10 destructive cleanup under separate approval
 ```
-
-## 10. Alternatives considered
-
-### Keep the original traffic gates unchanged
-
-Rejected for PREPROD because the project does not have a reliable organic population large enough to make those gates reachable or meaningful.
-
-### Generate synthetic traffic until numeric thresholds are met
-
-Rejected because synthetic fixtures are useful for deterministic coverage but cannot honestly stand in for production statistical evidence.
-
-### Make SHADOW optional in PREPROD
-
-Rejected because `SHADOW` is part of the durable authority-transition and rollback topology. PREPROD may change how it is evidenced, not whether the stage exists.
-
-### Retire legacy before production hardening
-
-Rejected because later real shadow/canary/rollback evidence may still require the legacy comparison and rollback path. PREPROD proves retirement readiness; actual retirement waits for separately approved rollback-window closure.
-
-### Skip DF/UR architecture and proceed directly to human testing
-
-Rejected because current overlapping legacy defects make human E2E a poor component-level diagnostic, and postponing canonical evidence/authority/State V2 work would increase production risk.
-
-### Chosen direction
-
-Keep the architecture, quality, safety, authority-transition and rollback invariants; simplify execution grouping; use deterministic/replay evidence during PREPROD; and reserve traffic-dependent validation for the future environment where it can be measured honestly.
 
 ## 11. Change boundary
 
-This document does not:
-
-- declare Gate BF passed;
-- create `POST_BF_V1`;
-- authorize DF activation before its existing dependency;
-- mutate policy, database, runtime, page allowlist, routing or Messenger traffic;
-- authorize deployment or production hardening;
-- authorize UR08/UR09 retirement;
-- authorize UR10 destructive cleanup.
+This amendment does not pass Gate BF, create `POST_BF_V1`, activate DF, deploy anything, mutate runtime/database/policy/page routing, authorize production hardening, or authorize destructive cleanup.
