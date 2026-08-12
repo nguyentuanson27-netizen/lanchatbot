@@ -1,11 +1,14 @@
 # Unbounded text products + media guard r5.7 deployment
 
-This directory is the reviewed production automation for
+This directory is the reviewed `ENGINEERING_PREPROD` Release Train automation for
 `20260812-unbounded-text-media-guard-r5.7`. It materializes and builds only from the final
 annotated GitHub tag, then recreates exactly `realtime-worker`. It never
 recreates Admin, delivery, data, or adjacent services and performs no
 migration, backfill, routing, page-allowlist, Messenger, n8n, or policy-pointer
 mutation.
+
+The only live page is `1198992073286645`, classified by repository governance
+as `PREPROD_TEST_PAGE`. This release does not claim public-production readiness.
 
 The cutover preserves the exact active published bundle: BF-01
 `CLARIFY_RECONCILED_V1`, BF-06 `PER_ASSET_V1`, BF-07 `CLARIFY_V1`, and BF-08

@@ -4,11 +4,11 @@
   "capturedAtSemantics": "repository release-preparation record time; distinct from fresh host capture time",
   "documentType": "APPEND_ONLY_REALTIME_RELEASE_PREPARATION_EVIDENCE",
   "status": "REVIEW_CANDIDATE_SOURCE_AND_AUTOMATION_DEPLOYMENT_PENDING",
-  "environment": "production-single-approved-page",
+  "environment": "engineering-preprod-single-approved-test-page",
   "releaseTag": "20260812-unbounded-text-media-guard-r5.7",
   "releasePreparation": {
     "branch": "ops/20260812-unbounded-text-media-guard-r5.7-release-prep",
-    "reviewCandidateTag": "20260812-unbounded-text-media-guard-r5.7-review-candidate.3",
+    "reviewCandidateTag": "20260812-unbounded-text-media-guard-r5.7-review-candidate.4",
     "reviewCandidateSemantics": "annotated immutable exact-head review candidate only; not deploy authorization",
     "candidateTagMustNeverMove": true,
     "changesRequireNextCandidateOrdinal": true,
@@ -108,7 +108,7 @@
   },
   "freshHostBaseline": {
     "capturedAt": "2026-08-12T08:06:50Z",
-    "capturedAtSemantics": "fresh read-only production observation; not repository record time",
+    "capturedAtSemantics": "fresh read-only live PREPROD_TEST_PAGE observation; not public-production evidence and not repository record time",
     "currentRelease": "20260812-bf10-delivery-r5.6",
     "currentSourceCommit": "a5d5066660a2c4365657a6ff99276c259848931d",
     "currentRuntimeStateSha256": "bdcb97fcc4878cf4b753fa3b027d5a6cd41b2b98f7ae9f570ee05fa080578245",
