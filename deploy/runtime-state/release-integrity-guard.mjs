@@ -343,9 +343,21 @@ for (const requiredFile of [
   'delivery-rollback-image-override.yml', 'validate-target-evidence.mjs',
   'validate-service-evidence.mjs', 'validate-runtime-invariants.mjs',
   'validate-operational-state.mjs', 'validate-prospective-delivery-env.mjs',
-  'validate-delivery-log.mjs', 'test-release-automation.mjs'
+  'validate-delivery-log.mjs', 'validate-deployment-boundary.mjs',
+  'validate-release-pointer.mjs', 'list-inventory-services.mjs', 'test-release-automation.mjs'
 ]) {
   if (!existsSync(join(bf10DeliveryDir, requiredFile))) throw new Error(`BF10_DELIVERY_RELEASE_FILE_MISSING:${requiredFile}`);
+}
+for (const shellName of ['common.sh', 'preflight.sh', 'run-build.sh', 'artifact-smoke.sh', 'capture-operational-state.sh', 'cutover.sh', 'postcheck.sh', 'soak.sh', 'rollback.sh', 'promote-runtime-state.sh']) {
+  const shellPath = join(bf10DeliveryDir, shellName);
+  const source = readFileSync(shellPath, 'utf8');
+  if (!/^#!\/usr\/bin\/env bash\r?\nset -euo pipefail\r?\n/u.test(source) || /\beval\b/u.test(source)) {
+    throw new Error(`BF10_DELIVERY_SHELL_FAIL_CLOSED_INVALID:${shellName}`);
+  }
+  if (process.platform !== 'win32' && existsSync(join(root, '.git')) && (statSync(shellPath).mode & 0o111) === 0) {
+    throw new Error(`BF10_DELIVERY_SHELL_NOT_EXECUTABLE:${shellName}`);
+  }
+  if (process.platform !== 'win32' && spawnSync('bash', ['-n', shellPath]).status !== 0) throw new Error(`BF10_DELIVERY_SHELL_SYNTAX_INVALID:${shellName}`);
 }
 if (JSON.stringify(bf10DeliveryManifest.scope?.targetServices) !== JSON.stringify(['delivery-worker']) ||
     JSON.stringify(bf10DeliveryManifest.scope?.servicesRecreated) !== JSON.stringify(['delivery-worker']) ||
@@ -355,6 +367,22 @@ if (JSON.stringify(bf10DeliveryManifest.scope?.targetServices) !== JSON.stringif
     bf10DeliveryManifest.scope?.routingMutationAllowed !== false || bf10DeliveryManifest.scope?.policyMutationAllowed !== false ||
     bf10DeliveryManifest.scope?.messengerProductionSendOrTestAllowed !== false || bf10DeliveryManifest.scope?.n8nActionAllowed !== false) {
   throw new Error('BF10_DELIVERY_MANIFEST_SCOPE_INVALID');
+}
+if (bf10DeliveryManifest.reviewCandidateTag !== `${bf10DeliveryTag}-review-candidate.2` ||
+    bf10DeliveryManifest.implementationBoundaryCommit !== 'a7669d058d59a9331f0dadc2c04fe91a7888c51b' ||
+    bf10DeliveryManifest.provenance?.bf10ImplementationCommit !== 'e8bb7a8fa7a067655b0435713d6dd7abf70e63d7' ||
+    bf10DeliveryManifest.provenance?.bf10MergeCommit !== '3bc3e0a440ce64b5017f84d400a7e9a4085c435c' ||
+    bf10DeliveryManifest.rollback?.deliveryImage !== 'lana-chatbot-app:realtime-compatibility-first-r32.2' ||
+    bf10DeliveryManifest.rollback?.deliveryImageId !== 'sha256:44ecb2fd9f7d6a5aa769938f738a3c6ba42b470db5a9bce3d30fdc364de2a0b7' ||
+    bf10DeliveryManifest.rollback?.deliveryRevision !== '1c004eacca7cce309a0a05643d1aa751b897d41c') {
+  throw new Error('BF10_DELIVERY_MANIFEST_IDENTITY_INVALID');
+}
+if (bf10DeliveryManifest.preservedRuntimePolicy?.replyReconciliationPolicy !== 'CLARIFY_RECONCILED_V1' ||
+    bf10DeliveryManifest.preservedRuntimePolicy?.mediaPartialResolutionPolicy !== 'PER_ASSET_V1' ||
+    bf10DeliveryManifest.preservedRuntimePolicy?.multiProductResolutionPolicy !== 'CLARIFY_V1' ||
+    bf10DeliveryManifest.preservedRuntimePolicy?.customerUrlPolicy !== 'CLASSIFIED_ALLOWLIST_V1' ||
+    bf10DeliveryManifest.preservedRuntimePolicy?.correctionDialoguePolicyPresent !== false) {
+  throw new Error('BF10_DELIVERY_ACTIVE_POLICY_CONTRACT_INVALID');
 }
 const bf10Cutover = readFileSync(join(bf10DeliveryDir, 'cutover.sh'), 'utf8');
 if (!bf10Cutover.includes('compose up -d --no-deps delivery-worker') ||
@@ -371,6 +399,17 @@ if (!bf10Rollback.includes('rollback_compose up -d --no-deps delivery-worker') |
 const bf10Boundary = readFileSync(join(bf10DeliveryDir, 'capture-deployment-boundary.mjs'), 'utf8');
 if (!bf10Boundary.includes("new Set(['DELIVERY_IMAGE'])") || bf10Boundary.includes('DELIVERY_RELEASE_ID') ||
     !bf10Boundary.includes('lana-chatbot-delivery-worker')) throw new Error('BF10_DELIVERY_CONFIG_BOUNDARY_INVALID');
+const bf10Build = readFileSync(join(bf10DeliveryDir, 'run-build.sh'), 'utf8');
+if (!bf10Build.includes('verify_prospective_delivery_env_parity "$COMPOSE_FILE" "$TARGET_DELIVERY_IMAGE"')) {
+  throw new Error('BF10_DELIVERY_TARGET_IMAGE_ENV_PREFLIGHT_MISSING');
+}
+const bf10OperationalCapture = readFileSync(join(bf10DeliveryDir, 'capture-operational-state.sh'), 'utf8');
+const bf10OperationalValidator = readFileSync(join(bf10DeliveryDir, 'validate-operational-state.mjs'), 'utf8');
+for (const required of ['postCutover', 'activeError', 'retryScheduled', 'attemptHistory', 'acceptedAfterRetryAudit', 'PENDING_NATURAL_TRANSITION_EVIDENCE']) {
+  if (!bf10OperationalCapture.includes(required) && !bf10OperationalValidator.includes(required)) {
+    throw new Error(`BF10_DELIVERY_AGGREGATE_EVIDENCE_MISSING:${required}`);
+  }
+}
 const bf10Source = readFileSync(join(root, 'packages', 'database', 'src', 'realtime-runtime.ts'), 'utf8');
 for (const required of ["status = 'SENT_ACCEPTED'", 'last_error_code = NULL', 'next_attempt_at = NULL', 'META_OUTBOX_ACCEPTED_AFTER_RETRY']) {
   if (!bf10Source.includes(required)) throw new Error(`BF10_DELIVERY_SOURCE_CONTRACT_MISSING:${required}`);

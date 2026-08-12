@@ -1,4 +1,4 @@
-﻿import { readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 
@@ -17,7 +17,7 @@ if (firstArgument === '--live-container') {
   compose = JSON.parse(readFileSync(0, 'utf8'));
   [live] = JSON.parse(execFileSync('docker', ['inspect', container], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
   if (!live?.Image) throw new Error('LIVE_CONTAINER_IMAGE_ID_MISSING');
-  [image] = JSON.parse(execFileSync('docker', ['image', 'inspect', live.Image], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
+  [image] = JSON.parse(execFileSync('docker', ['image', 'inspect', fourthArgument || live.Image], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
 } else {
   if (!secondArgument || !thirdArgument) {
     throw new Error('USAGE: validate-prospective-delivery-env.mjs <compose-json> <live-inspect-json> <image-inspect-json> [allowed-csv]');
@@ -46,16 +46,16 @@ const envMap = (entries, label) => {
   }
   return result;
 };
-const prospective = new Map(Object.entries(prospectiveObject).map(([key, value]) => [key, value === null ? '' : String(value)]));
 const liveEnv = envMap(live.Config?.Env, 'live');
 const imageDefaults = envMap(image.Config?.Env ?? [], 'image');
+const prospective = new Map(imageDefaults);
+for (const [key, value] of Object.entries(prospectiveObject)) prospective.set(key, value === null ? '' : String(value));
 for (const [key, value] of prospective) {
   if (allowed.has(key)) continue;
   if (!liveEnv.has(key) || liveEnv.get(key) !== value) throw new Error(`PROSPECTIVE_DELIVERY_ENV_DRIFT:${key}`);
 }
 for (const [key, value] of liveEnv) {
   if (allowed.has(key) || prospective.has(key)) continue;
-  if (imageDefaults.get(key) === value) continue;
   throw new Error(`PROSPECTIVE_DELIVERY_ENV_LIVE_EXTRA:${key}`);
 }
 console.log('prospective delivery environment parity: PASS');

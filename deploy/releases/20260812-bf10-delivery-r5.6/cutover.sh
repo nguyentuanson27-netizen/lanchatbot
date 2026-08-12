@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 set -euo pipefail
 set -E
 
@@ -12,7 +12,7 @@ done
 acquire_deployment_lock
 require_cutover_inputs
 require_no_inherited_compose_overrides "" "$COMPOSE_FILE"
-verify_prospective_delivery_env_parity "$COMPOSE_FILE"
+verify_prospective_delivery_env_parity "$COMPOSE_FILE" "$TARGET_DELIVERY_IMAGE"
 test -f "$RELEASE_DIR/.release-source.json" || die "release source pointer missing"
 node "$script_dir/validate-release-pointer.mjs" "$RELEASE_DIR/.release-source.json" "$RELEASE_TAG" "$RELEASE_COMMIT"
 test -s "$EVIDENCE_DIR/image-id" || die "built image evidence missing"

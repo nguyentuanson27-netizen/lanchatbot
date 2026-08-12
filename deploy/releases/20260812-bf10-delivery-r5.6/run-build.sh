@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
@@ -34,6 +34,10 @@ docker build \
   --file "$RELEASE_DIR/deploy/Dockerfile" \
   --tag "$TARGET_DELIVERY_IMAGE" \
   "$RELEASE_DIR"
+
+# Compare the newly built image's defaults plus rendered Compose environment
+# against the live delivery container before any recreation.
+verify_prospective_delivery_env_parity "$COMPOSE_FILE" "$TARGET_DELIVERY_IMAGE"
 
 install -d -m 0700 "$EVIDENCE_DIR"
 docker image inspect --format '{{.Id}}' "$TARGET_DELIVERY_IMAGE" > "$EVIDENCE_DIR/image-id"

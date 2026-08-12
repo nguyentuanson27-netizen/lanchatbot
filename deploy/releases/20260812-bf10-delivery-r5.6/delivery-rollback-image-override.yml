@@ -1,3 +1,3 @@
-﻿services:
+services:
   delivery-worker:
     image: ${ROLLBACK_DELIVERY_IMAGE:?ROLLBACK_DELIVERY_IMAGE must be pinned}

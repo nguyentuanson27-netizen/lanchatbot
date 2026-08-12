@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
@@ -29,7 +29,8 @@ verify_non_target_ids "$EVIDENCE_DIR/non-target-container-ids.before"
 verify_required_service_health
 verify_delivery_health strict
 
-"$script_dir/capture-operational-state.sh" "$operational" "$previous_operational" strict
+cutover_started_at="$(cat "$EVIDENCE_DIR/cutover-started-at")"
+"$script_dir/capture-operational-state.sh" "$operational" "$previous_operational" strict "$cutover_started_at"
 
 boundary="${operational%.json}.deployment-boundary.json"
 test "$boundary" != "$operational" || die "operational sample must end in .json"
@@ -38,7 +39,6 @@ node "$script_dir/capture-deployment-boundary.mjs" "$INFRASTRUCTURE_ENV_FILE" "$
 node "$script_dir/validate-deployment-boundary.mjs" \
   "$EVIDENCE_DIR/deployment-boundary.before.json" "$boundary"
 
-cutover_started_at="$(cat "$EVIDENCE_DIR/cutover-started-at")"
 log_file="$(mktemp "${TMPDIR:-/tmp}/lana-delivery-postcheck.XXXXXX.log")"
 if ! docker logs --since "$cutover_started_at" lana-chatbot-delivery-worker > "$log_file" 2>&1; then
   rm -f "$log_file"

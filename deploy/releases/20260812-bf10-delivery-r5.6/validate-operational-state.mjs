@@ -1,4 +1,4 @@
-﻿import { readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 
@@ -27,10 +27,10 @@ if (validationMode === 'report') {
 if (current.policy?.channel !== 'PUBLISHED' || current.policy?.enabled !== 'true' || current.policy?.publishedEnabled !== 'true') {
   throw new Error('OPERATIONAL_STATE_POLICY_CHANNEL_INVALID');
 }
-if (current.policy?.waveCFieldsAbsent !== true || current.policy?.correctionDialogueFieldAbsent !== true) {
-  throw new Error('OPERATIONAL_STATE_POLICY_DEFAULTS_NOT_OFF');
+if (current.policy?.correctionDialogueFieldAbsent !== true) {
+  throw new Error('OPERATIONAL_STATE_BF03_FIELD_PRESENT');
 }
-if (!['OMITTED', 'LEGACY', 'CLARIFY_RECONCILED_V1'].includes(current.policy?.replyReconciliationPolicy)) {
+if (current.policy?.replyReconciliationPolicy !== 'CLARIFY_RECONCILED_V1') {
   throw new Error('OPERATIONAL_STATE_REPLY_RECONCILIATION_INVALID');
 }
 const uuid = /^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/u;
@@ -86,10 +86,10 @@ if (closingBundleItem.pointerId !== current.policy.closingPointerId ||
     closingBundleItem.contentHash !== current.policy.closingContentHash) {
   throw new Error('OPERATIONAL_STATE_CLOSING_BUNDLE_IDENTITY_MISMATCH');
 }
-if (current.policy?.effectiveDefaults?.mediaPartialResolutionPolicy !== 'LEGACY' ||
-    current.policy?.effectiveDefaults?.multiProductResolutionPolicy !== 'LEGACY' ||
-    current.policy?.effectiveDefaults?.customerUrlPolicy !== 'STRICT_BLOCK_ALL') {
-  throw new Error('OPERATIONAL_STATE_POLICY_DEFAULTS_INVALID');
+if (current.policy?.effective?.mediaPartialResolutionPolicy !== 'PER_ASSET_V1' ||
+    current.policy?.effective?.multiProductResolutionPolicy !== 'CLARIFY_V1' ||
+    current.policy?.effective?.customerUrlPolicy !== 'CLASSIFIED_ALLOWLIST_V1') {
+  throw new Error('OPERATIONAL_STATE_ACTIVE_POLICY_INVALID');
 }
 if (current.behaviorMode?.enabled !== 'true' ||
     current.behaviorMode?.confirmationMode !== 'V2_ACTIVE' ||
@@ -112,11 +112,29 @@ if (worker?.workerId !== 'realtime-worker-1' || !['IDLE', 'PROCESSING'].includes
     worker.capturedAtEpochMs - worker.lastSeenEpochMs > 60_000) {
   throw new Error('OPERATIONAL_STATE_REALTIME_WORKER_NOT_READY');
 }
+const bf10 = current.bf10;
+for (const section of ['historical', 'postCutover']) {
+  for (const value of Object.values(bf10?.[section] ?? {})) {
+    if (!Number.isInteger(value) || value < 0) throw new Error(`OPERATIONAL_STATE_BF10_AGGREGATE_INVALID:${section}`);
+  }
+}
+if (!['BASELINE_ONLY', 'PENDING_NATURAL_TRANSITION_EVIDENCE', 'NATURAL_TRANSITION_WINDOW_OBSERVED'].includes(bf10?.classification) ||
+    (bf10.cutoverAt === '1970-01-01T00:00:00Z') !== (bf10.classification === 'BASELINE_ONLY')) {
+  throw new Error('OPERATIONAL_STATE_BF10_CLASSIFICATION_INVALID');
+}
+if (bf10.cutoverAt !== '1970-01-01T00:00:00Z' && bf10.postCutover.accepted > 0 &&
+    (bf10.postCutover.activeError !== 0 || bf10.postCutover.retryScheduled !== 0)) {
+  throw new Error('OPERATIONAL_STATE_BF10_ACTIVE_FIELDS_NOT_CLEARED');
+}
+if (bf10.postCutover.attemptHistory > bf10.postCutover.accepted) {
+  throw new Error('OPERATIONAL_STATE_BF10_ATTEMPT_HISTORY_INVALID');
+}
 if (baselinePath) {
   const baseline = JSON.parse(readFileSync(resolve(baselinePath), 'utf8'));
   for (const name of ['policy', 'behaviorMode', 'runtime']) {
     if (!isDeepStrictEqual(current[name], baseline[name])) throw new Error(`OPERATIONAL_STATE_DRIFT:${name}`);
   }
+  if (current.bf10.cutoverAt === '1970-01-01T00:00:00Z') throw new Error('OPERATIONAL_STATE_BF10_CUTOVER_WINDOW_MISSING');
   if (validationMode === 'strict' && !isDeepStrictEqual(current.queues, baseline.queues)) {
     throw new Error('OPERATIONAL_STATE_DRIFT:queues');
   }

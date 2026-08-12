@@ -1,10 +1,10 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 readonly EXPECTED_RELEASE_TAG="20260812-bf10-delivery-r5.6"
 readonly IMPLEMENTATION_COMMIT="a7669d058d59a9331f0dadc2c04fe91a7888c51b"
 readonly EXPECTED_DELIVERY_IMAGE="lana-chatbot-app:bf10-delivery-r5.6"
-readonly EXPECTED_MANIFEST_SHA256="e9d709160b4467467c910b33e2986d1ac526c5d4eaf7d60de7ef9a1652d11bcc"
+readonly EXPECTED_MANIFEST_SHA256="e510dcfb0b5777c7faf99109c3353fb76266dec7c5456e4201cc06a8ec2a7938"
 readonly EXPECTED_COMPOSE_SHA256="e59ab08b6ad42c2d1d2e3a5a11ce9e34a935921c866917b0d23b6c3c5d69ac33"
 readonly EXPECTED_LATEST_MIGRATION="0031_admin_policy_safe_deletion"
 readonly EXPECTED_PAGE_ID="1198992073286645"
@@ -16,7 +16,7 @@ readonly EXPECTED_ROLLBACK_DELIVERY_IMAGE="lana-chatbot-app:realtime-compatibili
 readonly EXPECTED_ROLLBACK_DELIVERY_IMAGE_ID="sha256:44ecb2fd9f7d6a5aa769938f738a3c6ba42b470db5a9bce3d30fdc364de2a0b7"
 readonly EXPECTED_ROLLBACK_DELIVERY_REVISION="1c004eacca7cce309a0a05643d1aa751b897d41c"
 readonly EXPECTED_ROLLBACK_DELIVERY_RELEASE="20260801-realtime-compatibility-first-r32.2"
-readonly EXPECTED_CANDIDATE_TAG="20260812-bf10-delivery-r5.6-review-candidate.1"
+readonly EXPECTED_CANDIDATE_TAG="20260812-bf10-delivery-r5.6-review-candidate.2"
 readonly EXPECTED_ORIGIN_SSH="git@github.com:nguyentuanson27-netizen/lanchatbot.git"
 readonly EXPECTED_ORIGIN_HTTPS="https://github.com/nguyentuanson27-netizen/lanchatbot.git"
 
@@ -241,10 +241,11 @@ require_no_inherited_compose_overrides() {
 
 verify_prospective_delivery_env_parity() {
   local compose_source="${1:?Compose source is required}"
+  local target_image="${2:-}"
   require_no_inherited_compose_overrides "" "$compose_source"
   if ! docker compose --env-file "$INFRASTRUCTURE_ENV_FILE" -f "$compose_source" config --format json |
       node "$RELEASE_SCRIPT_DIR/validate-prospective-delivery-env.mjs" \
-        --live-container lana-chatbot-delivery-worker; then
+        --live-container lana-chatbot-delivery-worker "" "$target_image"; then
     die "prospective delivery environment parity failed"
   fi
 }

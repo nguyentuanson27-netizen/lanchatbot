@@ -1,5 +1,7 @@
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
@@ -41,6 +43,31 @@ requireText(prospective, "compose.services?.['delivery-worker']?.environment", '
 requireText(target, "deployment.services['delivery-worker']", 'DELIVERY_SERVICE_EVIDENCE_MISSING');
 requireText(smoke, 'apps/worker/dist/delivery-server.js', 'DELIVERY_ARTIFACT_SMOKE_MISSING');
 requireText(smoke, 'packages/database/dist/realtime-runtime.js', 'BF10_DATABASE_ARTIFACT_SMOKE_MISSING');
+const temp = mkdtempSync(join(tmpdir(), 'bf10-delivery-release-test-'));
+try {
+  const composePath = join(temp, 'compose.json');
+  const livePath = join(temp, 'live.json');
+  const imagePath = join(temp, 'image.json');
+  writeFileSync(composePath, JSON.stringify({ services: { 'delivery-worker': { environment: { DATABASE_URL: 'baseline-secret' } } } }));
+  writeFileSync(livePath, JSON.stringify([{ Config: { Env: ['PATH=/usr/local/bin', 'DATABASE_URL=baseline-secret'] } }]));
+  writeFileSync(imagePath, JSON.stringify([{ Config: { Env: ['PATH=/usr/local/bin'] } }]));
+  const validator = join(root, 'validate-prospective-delivery-env.mjs');
+  const clean = spawnSync(process.execPath, [validator, composePath, livePath, imagePath], { encoding: 'utf8' });
+  if (clean.status !== 0) throw new Error('PROSPECTIVE_ENV_CLEAN_FIXTURE_REJECTED');
+  writeFileSync(imagePath, JSON.stringify([{ Config: { Env: ['PATH=/different-target-default'] } }]));
+  const drift = spawnSync(process.execPath, [validator, composePath, livePath, imagePath], { encoding: 'utf8' });
+  if (drift.status === 0 || !drift.stderr.includes('PROSPECTIVE_DELIVERY_ENV_DRIFT:PATH') || drift.stderr.includes('baseline-secret')) {
+    throw new Error('PROSPECTIVE_TARGET_IMAGE_DRIFT_NOT_REJECTED_SAFELY');
+  }
+  writeFileSync(livePath, JSON.stringify([{ Config: { Env: ['PATH=/usr/local/bin', 'PATH=/duplicate', 'DATABASE_URL=baseline-secret'] } }]));
+  writeFileSync(imagePath, JSON.stringify([{ Config: { Env: ['PATH=/usr/local/bin'] } }]));
+  const duplicate = spawnSync(process.execPath, [validator, composePath, livePath, imagePath], { encoding: 'utf8' });
+  if (duplicate.status === 0 || !duplicate.stderr.includes('PROSPECTIVE_DELIVERY_ENV_DUPLICATE_OR_KEY_INVALID')) {
+    throw new Error('PROSPECTIVE_ENV_DUPLICATE_NOT_REJECTED');
+  }
+} finally {
+  rmSync(temp, { recursive: true, force: true });
+}
 for (const source of [common, preflight, cutover, rollback, postcheck]) {
   forbid(source, /\beval\b/u, 'EVAL_FORBIDDEN');
   forbid(source, /docker compose down|docker compose restart|docker system prune|rm -rf/u, 'DESTRUCTIVE_COMMAND_FORBIDDEN');
