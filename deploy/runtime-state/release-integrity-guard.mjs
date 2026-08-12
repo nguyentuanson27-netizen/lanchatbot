@@ -531,6 +531,17 @@ for (const requiredFile of [
 ]) {
   if (!existsSync(join(textMediaHotfixReleaseDir, requiredFile))) throw new Error(`TEXT_MEDIA_HOTFIX_RELEASE_FILE_MISSING:${requiredFile}`);
 }
+for (const shellName of ['common.sh', 'preflight.sh', 'run-build.sh', 'artifact-smoke.sh', 'capture-operational-state.sh', 'cutover.sh', 'postcheck.sh', 'soak.sh', 'rollback.sh', 'promote-runtime-state.sh']) {
+  const shellPath = join(textMediaHotfixReleaseDir, shellName);
+  const source = readFileSync(shellPath, 'utf8');
+  if (!/^#!\/usr\/bin\/env bash\r?\nset -euo pipefail\r?\n/u.test(source) || /\beval\b/u.test(source)) {
+    throw new Error(`TEXT_MEDIA_HOTFIX_SHELL_FAIL_CLOSED_INVALID:${shellName}`);
+  }
+  if (process.platform !== 'win32' && existsSync(join(root, '.git')) && (statSync(shellPath).mode & 0o111) === 0) {
+    throw new Error(`TEXT_MEDIA_HOTFIX_SHELL_NOT_EXECUTABLE:${shellName}`);
+  }
+  if (process.platform !== 'win32' && spawnSync('bash', ['-n', shellPath]).status !== 0) throw new Error(`TEXT_MEDIA_HOTFIX_SHELL_SYNTAX_INVALID:${shellName}`);
+}
 if (textMediaHotfixManifest.releaseTag !== textMediaHotfixReleaseTag ||
     textMediaHotfixManifest.source?.originMainAtFreshBoundaryVerification !== '25ce732904009be2b9ea67e1016f0f81bd94b18b' ||
     textMediaHotfixManifest.supersededUndeployedRelease?.tag !== textMediaReleaseTag ||
@@ -554,7 +565,7 @@ if (!/const closing = parseClosingRow\(query\([\s\S]*?\)\);/u.test(textMediaHotf
 const textMediaHotfixCommon = readFileSync(join(textMediaHotfixReleaseDir, 'common.sh'), 'utf8');
 if (!textMediaHotfixCommon.includes(`EXPECTED_RELEASE_TAG="${textMediaHotfixReleaseTag}"`) ||
     !textMediaHotfixCommon.includes('EXPECTED_MAIN_BASE="25ce732904009be2b9ea67e1016f0f81bd94b18b"') ||
-    !textMediaHotfixCommon.includes(`EXPECTED_CANDIDATE_TAG="${textMediaHotfixReleaseTag}-review-candidate.1"`)) {
+    !textMediaHotfixCommon.includes(`EXPECTED_CANDIDATE_TAG="${textMediaHotfixReleaseTag}-review-candidate.2"`)) {
   throw new Error('TEXT_MEDIA_HOTFIX_PROVENANCE_CONSTANTS_INVALID');
 }
 const textMediaHotfixSelfTest = spawnSync(process.execPath, [join(textMediaHotfixReleaseDir, 'test-release-automation.mjs')], { encoding: 'utf8' });

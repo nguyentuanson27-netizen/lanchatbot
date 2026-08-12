@@ -322,7 +322,7 @@ try {
   }
 
   requireText('common.sh', /EXPECTED_RELEASE_TAG="20260812-unbounded-text-media-guard-r5\.7\.1"/u, 'release identity not pinned');
-  requireText('common.sh', /EXPECTED_CANDIDATE_TAG="20260812-unbounded-text-media-guard-r5\.7\.1-review-candidate\.1"/u, 'reviewed candidate ordinal not pinned');
+  requireText('common.sh', /EXPECTED_CANDIDATE_TAG="20260812-unbounded-text-media-guard-r5\.7\.1-review-candidate\.2"/u, 'reviewed candidate ordinal not pinned');
   requireText('README.md', /ENGINEERING_PREPROD[\s\S]*PREPROD_TEST_PAGE[\s\S]*does not claim public-production readiness/u, 'current operating-mode semantics missing');
   requireText('common.sh', /EXPECTED_MAIN_BASE="25ce732904009be2b9ea67e1016f0f81bd94b18b"/u, 'fresh governance main base not pinned');
   requireText('common.sh', /EXPECTED_ROLLBACK_REALTIME_IMAGE_ID="sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a"/u, 'rollback image ID not pinned');
