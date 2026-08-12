@@ -16,9 +16,11 @@ In particular:
 - remove mandatory runtime `SHADOW` authority modes from DF and UR;
 - replace `LEGACY -> SHADOW -> COMMERCE` with controlled `LEGACY -> COMMERCE`;
 - replace `LEGACY -> SHADOW -> V2` with controlled `LEGACY -> V2`;
+- require a verified quiescent boundary around every direct authority cutover so bounded control-plane propagation cannot create unsafe mixed authority;
 - keep side-effect-free legacy/new comparators as verification tooling where they provide semantic evidence;
 - replace live sampled Context V2/`>=100` organic pair/statistical gates with a locked reproducible offline/replay corpus and pre-declared objective acceptance rules;
-- remove traffic-percentage canary/pinning/long-soak requirements from PREPROD hard Gates;
+- bind offline generative PASS to an immutable exact candidate manifest, then bind the later activation release to the same manifest hash;
+- remove traffic-percentage canary/default pinning/long-soak requirements from PREPROD hard Gates;
 - make production-grade resumable/batched migration orchestration conditional on measured data volume/lock/runtime risk;
 - defer UR08-UR10 retirement/destructive cleanup until later stability/hardening evidence intentionally closes the legacy rollback path.
 
@@ -36,9 +38,32 @@ A legacy defect can block a conversation before it reaches the component being v
 
 ### 2.3 Production mechanisms without production scale create complexity without proportional evidence
 
-Runtime SHADOW lifecycle, live paired model sampling, statistical promotion, percentage canaries, mixed-authority pinning, broad dashboard completeness, and production-grade migration orchestration are valuable when real traffic/scale justifies them. Building them as mandatory PREPROD architecture adds code, control-plane states, review surface, and failure modes before their evidence is meaningful.
+Runtime SHADOW lifecycle, live paired model sampling, statistical promotion, percentage canaries, broad mixed-authority pinning, dashboard completeness, and production-grade migration orchestration are valuable when real traffic/scale justifies them. Building them as mandatory PREPROD architecture adds code, control-plane states, review surface, and failure modes before their evidence is meaningful.
 
-### 2.4 Simplification does not lower the safety bar
+### 2.4 Direct cutover still needs an atomicity boundary
+
+Removing runtime SHADOW does not make a control-plane mode switch instantaneous. The existing propagation contract is bounded, so different authority consumers can temporarily observe different revisions unless the cutover is fenced.
+
+PREPROD therefore uses a **quiescent cutover boundary**, not traffic canary/pinning ceremony:
+
+1. hold new eligible protected work for the target page;
+2. prove no protected command, cart/order transition, or other authority-sensitive operation is in flight;
+3. drain or hold eligible queued events;
+4. CAS the new authority revision;
+5. keep protected work held while the revision propagates;
+6. release only after every relevant authority consumer reads back the exact revision/hash/source.
+
+If that cannot be proven, activation aborts/fails closed to complete `LEGACY` authority. Narrow episode/cart pinning is only a fallback design option if a future implementation cannot safely quiesce a specific lifecycle; it is not the default PREPROD topology.
+
+### 2.5 Offline evaluation must identify the exact candidate being accepted
+
+After removing live Context-V2 shadow, DF-P6 becomes the primary generative evidence before authority cutover. A result labeled merely “Context V2 PASS” is insufficient if model, generation config, prompt, context/evidence schema, or source changes later.
+
+Gate E therefore freezes a canonical `ContextV2CandidateManifest` containing the exact evaluated candidate identity. Gate F may use a later immutable release revision for authority plumbing, but that release must carry the same candidate-manifest hash. Any material candidate identity change invalidates the prior DF-P6 evidence and requires rerun.
+
+This preserves provenance without forcing the final DF-P7 release SHA to exist before Gate E, which would violate the dependency order.
+
+### 2.6 Simplification does not lower the safety bar
 
 This amendment does not waive:
 
@@ -49,7 +74,7 @@ This amendment does not waive:
 - PII/secrets/auth/authz/least-privilege controls;
 - additive/backward-compatible database discipline;
 - atomicity, idempotency, concurrency, revision/fence protections;
-- exact readback, immutable release identity, bounded propagation, and complete `LEGACY` rollback.
+- exact readback, immutable release identity, bounded propagation, quiescent direct cutover, and complete `LEGACY` rollback.
 
 The change is primarily **which evidence mechanism is mandatory at the current stage**, plus simplification of future authority topology from three modes to two.
 
@@ -63,6 +88,8 @@ Review every future requirement as one of:
 
 A reviewer should not argue that shadow/canary/statistical rollout is generally useful; the review question is whether it is required to prove the current PREPROD contract. Conversely, the word “simplification” must never justify skipping a current correctness/security/rollback invariant.
 
+For direct cutover, quiescence and exact revision convergence are `CURRENT_REQUIRED`. For DF-P6, exact candidate identity and activation-release binding are `CURRENT_REQUIRED` provenance.
+
 ## 4. PREPROD evidence hierarchy
 
 Use the cheapest evidence that proves the owning boundary:
@@ -70,11 +97,11 @@ Use the cheapest evidence that proves the owning boundary:
 1. deterministic unit/contract tests;
 2. focused integration tests across real boundaries;
 3. immutable BF incident/counterexample replay;
-4. locked offline model/context corpus with pre-declared expected behaviors;
+4. locked offline model/context corpus with pre-declared expected behaviors and immutable candidate identity;
 5. side-effect-free legacy/new comparator when semantic equivalence matters;
 6. transition/concurrency/idempotency/revision-fence matrices;
 7. bounded human E2E only at checkpoints where a complete journey should now be possible;
-8. exact artifact/runtime readback and complete rollback evidence for owner-authorized test-page deployment.
+8. exact artifact/runtime readback, quiescent activation evidence, and complete rollback evidence for owner-authorized test-page deployment.
 
 Synthetic fixtures are valid test data but never production statistical evidence. Natural traffic/soak is supplemental in PREPROD unless a specific changed risk explicitly requires it.
 
@@ -110,17 +137,30 @@ Version Context V2 and migrate intended consumers: strategy, CTA, post-media log
 
 Build a versioned corpus from accepted BF incidents/counterexamples, safe relevant historical cases, and controlled fixtures for correction, product switching, media, URL, size, order review, confirmation, and protected side effects.
 
-Before first scored run freeze:
+Before the first scored run, freeze:
 
 - corpus membership/strata;
 - each case’s `MUST_PASS` behavior;
 - safety/factual/side-effect assertions;
-- any additional objective quality rubric and acceptance rule.
+- any additional objective quality rubric and acceptance rule;
+- an immutable `ContextV2CandidateManifest` containing:
+  - model provider/name/version or immutable model identifier;
+  - generation configuration that can affect output;
+  - prompt/template version and content hash;
+  - Context V2 version/schema and relevant consumer-contract version;
+  - verified-evidence envelope/schema version;
+  - relevant policy/config versions affecting candidate generation or interpretation;
+  - exact Git source revision used for the scored run;
+  - corpus/rubric version and content hash.
+
+Record the canonical manifest hash with the scored result.
 
 Mandatory PREPROD acceptance:
 
 - V2 passes 100% of frozen safety-critical, protected-claim, side-effect, and other `MUST_PASS` assertions;
 - required rules cannot be changed after results are inspected without a reviewed amendment and full rerun;
+- PASS is valid only for the exact recorded candidate-manifest hash;
+- any material candidate-identity change invalidates Gate-E evidence and requires full DF-P6 rerun;
 - V1 may be run for diagnosis/comparison but is not the gold standard because the baseline contains known defects;
 - qualitative style preferences are supplemental and cannot override failed required assertions.
 
@@ -136,10 +176,13 @@ Before activation prove:
 - missing commerce state with committed intent fails closed;
 - Context V2, derived phase, final reconciliation, and legacy regex/`salesStage` authority demotion switch coherently;
 - no COMMERCE decision consumes legacy `salesStage` as authority;
+- the immutable activation release carries the exact Gate-E `ContextV2CandidateManifest` hash;
+- any material candidate identity change since Gate E has triggered a DF-P6 rerun;
+- the quiescent cutover protocol is verified;
 - exact control-plane readback works;
 - complete rollback to `LEGACY` works.
 
-Then, after explicit owner authorization, activate `COMMERCE` only on the `PREPROD_TEST_PAGE` and run the controlled critical human journeys.
+Then, after explicit owner authorization, activate `COMMERCE` only on the `PREPROD_TEST_PAGE` inside the quiescent boundary. Keep protected work held until every relevant authority consumer reads back the exact new revision/hash/source, then release held work and run the controlled critical human journeys.
 
 ## 6. Gate E-PREPROD
 
@@ -155,7 +198,8 @@ Required:
 - Context V2 and intended consumers implemented;
 - BF incident/counterexample replay passes;
 - DF-P6 corpus/rubric frozen before scoring;
-- V2 passes every frozen required assertion;
+- exact `ContextV2CandidateManifest` and canonical hash frozen before scoring;
+- V2 passes every frozen required assertion using that exact candidate manifest;
 - evaluation paths are side-effect-free and cost bounded.
 
 Not required: runtime SHADOW, organic traffic volume, a fixed live pair count, traffic canary, or production statistical confidence.
@@ -169,11 +213,13 @@ Required:
 - no COMMERCE decision consumes legacy `salesStage` as authority;
 - missing commerce state with committed intent fails closed;
 - transition matrix and BF/DF replay pass;
+- immutable release is bound to the exact Gate-E candidate-manifest hash;
+- direct authority cutover satisfies the page-scoped quiescent boundary and all relevant consumers converge to the exact authority revision before protected work resumes;
 - controlled PREPROD critical human journeys pass;
-- exact runtime identity/control-plane readback is verified for a deployed candidate;
+- exact runtime identity/control-plane readback is verified for the deployed candidate;
 - complete `COMMERCE -> LEGACY` rollback is verified.
 
-Traffic-percent canary, mixed-authority pinning, quantitative shadow, or long natural-traffic soak are not Gate F requirements in the current mode.
+Traffic-percent canary, default mixed-authority pinning, quantitative shadow, or long natural-traffic soak are not Gate F requirements in the current mode.
 
 ## 8. UR PREPROD plan
 
@@ -193,7 +239,9 @@ Add resumable/multi-batch/rate-throttled orchestration only if measured dataset 
 
 The comparator may read legacy and V2 representations side-effect-free, but it is verification tooling rather than a `SHADOW` runtime read authority.
 
-After comparator/readback evidence passes, switch `LEGACY -> V2` only with explicit approval. Never merge partial V2/legacy fields. Verify complete rollback to `LEGACY` and keep that rollback path available after Gate U.
+After comparator/readback evidence passes, switch `LEGACY -> V2` only with explicit approval and the same page-scoped quiescent cutover protocol. Never merge partial V2/legacy fields. Keep eligible state-dependent work held through propagation until all relevant read-authority consumers read back the exact V2 revision/hash/source. Abort/fail closed to complete `LEGACY` if quiescence or convergence cannot be proven.
+
+Verify complete rollback to `LEGACY` and keep that rollback path available after Gate U.
 
 ### UR08-UR10 — Deferred later cleanup
 
@@ -213,7 +261,7 @@ Required Gate U evidence:
 - encryption/independent-expiry semantics implemented as designed;
 - atomic persistence idempotent, concurrency tested, revision/fence protected;
 - measured migration/comparator/replay passes with conflicts ineligible;
-- direct V2 read switch/readback passes on PREPROD;
+- direct V2 read switch satisfies the quiescent-boundary contract and exact readback passes on PREPROD;
 - complete `V2 -> LEGACY` rollback passes;
 - legacy rollback remains available;
 - UR08-UR10 remain deferred/separately approved.
@@ -240,11 +288,11 @@ These mechanisms are deferred because they are not currently meaningful, not bec
 ```text
 Gate BF + immutable POST_BF_V1
   -> DF-P1..DF-P6
-  -> Gate E-PREPROD
-  -> DF-P7 / controlled LEGACY -> COMMERCE
+  -> Gate E-PREPROD / freeze exact candidate manifest
+  -> DF-P7 / release bound to candidate manifest / quiescent LEGACY -> COMMERCE
   -> controlled critical human E2E
   -> Gate F-PREPROD
-  -> UR-P1..UR-P3 / controlled LEGACY -> V2
+  -> UR-P1..UR-P3 / quiescent LEGACY -> V2
   -> Gate U-PREPROD
   -> controlled full human E2E on State V2
   -> explicit owner trigger: PRODUCTION_HARDENING
