@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-12T10:46:55Z",
+  "capturedAtSemantics": "fresh read-only host readback after guarded cutover, postcheck, soak 3/3, and atomic runtime-state promotion; distinct from repository record time",
+  "documentType": "APPEND_ONLY_RUNTIME_DEPLOYMENT_EVIDENCE",
+  "status": "DEPLOY_SUCCESS",
+  "environment": "ENGINEERING_PREPROD",
+  "pageRole": "PREPROD_TEST_PAGE",
+  "pageId": "1198992073286645",
+  "publicProductionReadinessClaimed": false,
+  "release": {
+    "tag": "20260812-unbounded-text-media-guard-r5.7.1",
+    "tagObject": "d0afb24333edf21b40fe1da30de02cad759fe931",
+    "commit": "92bc150b452f7ef40e52871f16a444a4979a8d8c",
+    "releasePreparationPullRequest": 192,
+    "releasePreparationHead": "9dc0a3ba1fd26f4ab810431a182a72ec1729282d",
+    "reviewCandidateTag": "20260812-unbounded-text-media-guard-r5.7.1-review-candidate.2",
+    "reviewCandidateTagObject": "33798acc805ae9713db5233afc7926703c947e28",
+    "releasePath": "/opt/lana-chatbot/releases/20260812-unbounded-text-media-guard-r5.7.1",
+    "currentSymlink": "/opt/lana-chatbot/releases/20260812-unbounded-text-media-guard-r5.7.1"
+  },
+  "supersededUndeployedRelease": {
+    "tag": "20260812-unbounded-text-media-guard-r5.7",
+    "tagObject": "d55a74e5f95f6fd650aecb900d9836abea5b79ce",
+    "commit": "25ce732904009be2b9ea67e1016f0f81bd94b18b",
+    "preflightResult": "FAILED_CLOSED_BEFORE_BUILD",
+    "artifactBuilt": false,
+    "serviceMutationPerformed": false,
+    "runtimeStateMutationPerformed": false,
+    "immutableTagMoved": false
+  },
+  "sourceMaterialization": {
+    "releaseSourceSha256": "3506fc099d043bcc8f1779d4fbe514c65df7938f2bbeefca45da9e5e36c1f4b3",
+    "trackedSourceEditedOnVps": false,
+    "commitOrPushFromVps": false,
+    "deployKeyMode": "READ_ONLY"
+  },
+  "artifact": {
+    "image": "lana-chatbot-app:unbounded-text-media-guard-r5.7.1",
+    "imageId": "sha256:cfb2af1c0a6e54d4a0df5249af24a3ac806fbc31ef2431c5e43471e420af6daf",
+    "revision": "92bc150b452f7ef40e52871f16a444a4979a8d8c",
+    "imageMetadataSha256": "d118a581cca104b4760b0ff4d68dc9d55bddadf2335cc2746948b1cc8d768a33",
+    "sourceArchiveSha256": "efa82bf41a277e590eddcfd4fe20feeb31a2f5890fce8cf8b6d395a1446dc6ae",
+    "artifactSmoke": "PASS"
+  },
+  "guardedCutover": {
+    "result": "CUTOVER_PASS",
+    "targetServices": ["realtime-worker"],
+    "servicesRecreated": ["realtime-worker"],
+    "nonTargetServicesRecreated": [],
+    "previousRealtimeContainerId": "facda92073374bd385e8e47f8c49288ece146ef98bcbf054fa3f37c182d96794",
+    "currentRealtimeContainerId": "3f369356f2395983f15cc3ae63a3585d1f9894cda6c552a5ccf152cca2920ce4",
+    "nonTargetContainerIdsUnchanged": true,
+    "deliveryContainerId": "b47558b172477d3d1b536aa35d19b4c8478254d565decdcbc906d4c65894aeaf",
+    "automaticRollbackArmed": true,
+    "postcheck": "PASS",
+    "soak": "3/3 PASS"
+  },
+  "target": {
+    "health": "healthy",
+    "restartCount": 0,
+    "pid1Uid": 1000,
+    "workerStatus": "IDLE",
+    "workerMode": "LIVE",
+    "sendEnabled": true,
+    "lastErrorCodeAbsent": true
+  },
+  "runtimeState": {
+    "beforeSha256": "bdcb97fcc4878cf4b753fa3b027d5a6cd41b2b98f7ae9f570ee05fa080578245",
+    "afterSha256": "3facb2f3b60840c6bc5dd442640207e882ee1fb0f4bde3b631248ecc67f8aa65",
+    "historyPath": "/opt/lana-chatbot/runtime-state/history/2026-08-12T10-46-25-822Z-20260812-unbounded-text-media-guard-r5.7.1.json",
+    "currentHistoryByteIdentical": true,
+    "freshHostParity": "PASS",
+    "promotion": "PASS"
+  },
+  "policyPreservation": {
+    "publishedBundleChanged": false,
+    "closingPointerId": "cefcecd6-2619-4ba9-bd54-ac43b25f5abd",
+    "closingPointerRevision": 4,
+    "closingVersionId": "805931e1-0363-4cb2-a66d-de9058982af5",
+    "closingContentHash": "sha256:e151e450efe47cfe9a48b7a55ea714ff2e1413399090fbd45d928816ecd067df",
+    "replyReconciliationPolicy": "CLARIFY_RECONCILED_V1",
+    "mediaPartialResolutionPolicy": "PER_ASSET_V1",
+    "multiProductResolutionPolicy": "CLARIFY_V1",
+    "customerUrlPolicy": "CLASSIFIED_ALLOWLIST_V1",
+    "bf03CorrectionDialoguePolicy": "ABSENT_AND_NON_ACTIVATABLE"
+  },
+  "preservation": {
+    "deploymentBoundaryBeforeSha256": "954549ad3b5e5ba286cd4eba025633303d649e9c01895be9b97baae88c02c967",
+    "deploymentBoundaryAfterSha256": "954549ad3b5e5ba286cd4eba025633303d649e9c01895be9b97baae88c02c967",
+    "configEnvKeyOrValueAddedOrChanged": false,
+    "realtimeReleaseIdPreserved": "20260810-bf03-wave-c-r5.5",
+    "migrationLedgerChanged": false,
+    "routingChanged": false,
+    "pageAllowlistChanged": false,
+    "policyMutationPerformed": false
+  },
+  "queues": {
+    "inbox": {"active": 0, "failedPermanent": 1, "duplicates": 0},
+    "metaOutbox": {"active": 0, "failedPermanent": 4, "duplicates": 0},
+    "pancakeOutbox": {"active": 0, "failedPermanent": 0, "duplicates": 0},
+    "syntheticMessengerTrafficPerformed": false
+  },
+  "evidence": {
+    "deploymentServiceEvidenceSha256": "1122a4c62f978aa8fc7be7e4bfea21f73e153c3c2ab0d5b3ba1c055498ae41d1",
+    "rollbackServiceEvidenceSha256": "d41d5957575514ee33446c6b1a28c39b259aae5baa77b9d11f829d67c56471d6",
+    "nonTargetContainerIdsSha256": "efb3557a361085ff43ddc0eccbf62c8ccbbf723735c7919c7bf27d5e0f20d50c",
+    "operationalBeforeSha256": "6cd8c0d4f396a65470133afe9afa11fe1ac0a6ce668346bd9da5c093cbffe2bf",
+    "initialPostcheckSha256": "ff810e1d46a03e084a7f5bd0f919650dccfbca0be2595e9336880940d52de22f",
+    "soakSha256": [
+      "fba32e97b3230379c10d9a58e442b641d7468e8e1b4093d6878d2db9d1dc8715",
+      "a20a23f85cbac3a4e6f83dec26c4a8bd6512fc8a9fc18eb3d61e9132381468d9",
+      "830f72372ad63c3e027b7fc8cccc67d67f43a06921415d61a62193db52353622"
+    ]
+  },
+  "verification": {
+    "behaviorPullRequest": 189,
+    "releasePreparationPullRequest": 192,
+    "candidateCiRun": 31585355497,
+    "postMergeCiRun": 31586495852,
+    "frozenInstallAndCanonicalPnpmCheck": "PASS",
+    "targetedBehaviorMatrix": "PASS",
+    "releaseIntegrityRuntimeStateDatasetBoundary": "PASS"
+  },
+  "rollback": {
+    "previousOverallRelease": "20260812-bf10-delivery-r5.6",
+    "realtimeImage": "lana-chatbot-app:bf03-wave-c-r5.5",
+    "realtimeImageId": "sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a",
+    "realtimeRevision": "31d74695a794a28d6f93427416593b2a414270d6",
+    "realtimeReleaseId": "20260810-bf03-wave-c-r5.5",
+    "readiness": "VERIFIED_READY",
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false
+  },
+  "authorization": {
+    "migrationPerformed": false,
+    "backfillPerformed": false,
+    "routingMutationPerformed": false,
+    "pageAllowlistMutationPerformed": false,
+    "messengerProductionActionPerformed": false,
+    "n8nActionPerformed": false,
+    "directVpsSourceEditPerformed": false,
+    "policyActivationPerformed": false
+  },
+  "manifestIntegrity": {
+    "releasePreparationManifestModified": false,
+    "releaseTagMoved": false,
+    "appendOnlyFollowUp": true
+  }
+}
