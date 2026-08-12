@@ -5,142 +5,126 @@
 **Live page role:** `PREPROD_TEST_PAGE`
 **Approved page:** `1198992073286645`
 
-This document defines how changes are reviewed, grouped, verified, and released. It does not replace fresh runtime-state evidence, authorize a deployment, change the page allowlist, or weaken any safety, quality, authority-transition, or rollback invariant.
+This document defines how changes are reviewed, grouped, verified, and released. It does not replace fresh runtime-state evidence, authorize deployment, change the page allowlist, or weaken durable safety/authority/rollback invariants.
 
 ## 1. Current operating mode
 
-The project operates in `ENGINEERING_PREPROD` until the owner explicitly requests a transition to `PRODUCTION_HARDENING`.
+The project operates in `ENGINEERING_PREPROD` until the owner explicitly requests `PRODUCTION_HARDENING`.
 
-The currently connected live page is the `PREPROD_TEST_PAGE`. It is a bounded engineering environment for controlled human testing and release-train validation; it is not a declaration that the system or any Gate is public-production-ready. Historical files may use the word “production” to describe where evidence was captured. Those records remain immutable and do not override the current operating mode.
+The connected page is a bounded engineering test environment. It is not evidence that the system or any architecture Gate is public-production-ready.
 
-## 2. Change and release units
+## 2. PR and Release Train units
 
 ### Pull request
 
-A PR is the unit of change, focused review, and focused verification:
+A PR is the unit of focused change/review/verification:
 
-- keep the diff small and independently understandable;
-- run tests and static checks that directly cover the changed contract, its consumers, and its risk boundary;
-- run applicable secret/PII, security, migration-diff, ownership, and data-integrity checks;
-- require exact-head review before merge;
-- do not create a deploy expectation merely because the PR merged.
-
-Routine PRs do not each require a release tag, full repository verification, a release manifest, or a test-page deployment. A PR may still require broader verification when its own risk or dependency surface demands it.
+- keep scope small and independently understandable;
+- run checks that cover the changed contract, consumers and risk boundary;
+- apply security/PII/data/migration checks where relevant;
+- require exact-head review;
+- merge never implies deployment.
 
 ### Release Train
 
-A Release Train is the default unit of integration, full verification, immutable release preparation, and deployment to the `PREPROD_TEST_PAGE` when separately authorized by the owner. At the train boundary:
+A Release Train is the default unit of integration, full repository verification, immutable release preparation, and any separately owner-authorized `PREPROD_TEST_PAGE` deployment.
 
-1. verify every included PR and dependency from an immutable GitHub commit;
-2. run frozen install, full repository checks, integration/replay suites, architecture and release-integrity guards, and all applicable security/data checks;
-3. create reviewed release metadata, immutable tag, rollback identity, and runtime evidence under the existing release-integrity contract;
-4. deploy only the intended services to the `PREPROD_TEST_PAGE` after explicit owner authorization;
-5. verify readback, health, restart/UID, routing/allowlist, migration ledger, queues, soak, and rollback readiness.
+At a train boundary verify included PRs/dependencies, run full applicable repository/integration/security/data checks, create immutable release/rollback identity if deploying, then verify runtime readback/health/routing/migration/queues/rollback readiness.
 
-Merging a PR, passing a Gate, or completing a Release Train review does not by itself authorize deployment.
+## 3. Architecture-program PREPROD grouping
 
-## 3. Architecture-program PREPROD execution groups
+Original DF01-DF13 and UR00-UR10 identifiers remain traceable. PREPROD groups them into fewer vertical slices because traffic-dependent ceremony is not a useful per-item boundary in the current environment.
 
-The architecture-program keeps the original DF01-DF13 and UR00-UR10 identifiers for traceability, but PREPROD execution groups them into fewer vertical slices. `PREPROD_DF_UR_PLAN_AMENDMENT.md` records the rationale and `FUTURE_BACKLOG.md` owns the detailed deferred work.
-
-Default DF grouping:
+### DF
 
 | Train | PREPROD slices | Original IDs | Boundary |
 |---|---|---|---|
-| `DF-A` | `DF-P1` through `DF-P3` | DF01-DF06 | Minimal telemetry and targeted normalization precede canonical evidence/readiness completion. |
-| `DF-B` | `DF-P4` through `DF-P6` | DF07-DF10 | Derived phase/barrier and Context V2 precede locked offline paired evaluation. |
-| `DF-C` | `DF-P7` | DF11-DF13 | Mandatory `LEGACY -> SHADOW -> COMMERCE`, controlled PREPROD activation, human E2E and complete-LEGACY rollback form the authority boundary. |
+| `DF-A` | `DF-P1..DF-P3` | DF01-DF06 | Minimal telemetry/normalization then canonical evidence/readiness. |
+| `DF-B` | `DF-P4..DF-P6` | DF07-DF10 | Derived phase/barrier, Context V2, locked offline evaluation. |
+| `DF-C` | `DF-P7` | DF11-DF13 | `LEGACY -> SHADOW -> COMMERCE`, controlled human E2E and rollback. |
 
-Default UR grouping:
+### UR
 
 | Train | PREPROD slices | Original IDs | Boundary |
 |---|---|---|---|
-| `UR-A` | `UR-P1` through `UR-P2` | UR00-UR03 | State V2 contract/go-no-go precedes schema/reducer/atomic persistence. |
-| `UR-B` | `UR-P3` | UR04-UR07 | Controlled migration, mandatory `LEGACY -> SHADOW -> V2`, post-switch human E2E and complete-LEGACY rollback form one vertical. |
-| `UR-C` | `UR-P4` | UR08-UR09 | PREPROD proves retirement readiness only; legacy writer/reader paths remain available through hardening/rollout rollback decisions. |
-| `UR-X` | separate destructive work | UR10 | Archival/drop remains a separate owner-approved change and is never implied by Gate U-PREPROD. |
+| `UR-A` | `UR-P1..UR-P2` | UR00-UR03 | State V2 contract then atomic persistence. |
+| `UR-B` | `UR-P3` | UR04-UR07 | Controlled migration and `LEGACY -> SHADOW -> V2` with rollback. |
+| later retirement | — | UR08-UR09 | Executed only after later rollback-window closure. |
+| destructive cleanup | — | UR10 | Separate later approval only. |
 
-Individual slices may use multiple focused PRs and merge incrementally. By default, full repository verification and test-page deployment occur once per completed Release Train, not once per original DF/UR identifier.
-
-The owner may approve a different train boundary when dependency, rollback, or operational risk requires it. Any exception must be recorded before release preparation and must not weaken the logical dependency graph or durable authority-transition topology.
+The owner may approve a different train boundary when dependency/rollback/operational risk requires it, but no regrouping may weaken logical dependencies or durable contracts.
 
 ## 4. PREPROD evidence semantics
 
-Engineering evidence must match the environment that actually exists without changing the architecture contract being evidenced.
+Evidence must match the environment that actually exists.
 
-While the project remains `ENGINEERING_PREPROD`, the preferred evidence stack is:
+Preferred stack:
 
 1. deterministic unit/contract tests;
 2. focused integration tests;
-3. immutable incident and counterexample replay;
-4. locked offline model/context comparison with pre-registered objective rubric where needed;
-5. mandatory SHADOW dual-compute/replay and bounded controlled scenarios for authority transitions;
-6. transition/concurrency/idempotency matrices for stateful authority work;
-7. bounded controlled human E2E only after the architecture is sufficiently converged to support the target journey;
-8. exact runtime identity/readback/rollback evidence for any owner-authorized test-page deployment.
+3. immutable incident/counterexample replay;
+4. locked offline model/context corpus with pre-declared expected behavior;
+5. deterministic SHADOW dual-compute/replay and bounded controlled scenarios;
+6. transition/concurrency/idempotency matrices;
+7. bounded human E2E at explicit architecture/system checkpoints;
+8. exact runtime identity/readback/rollback evidence for any deployed candidate.
 
-Do not manufacture synthetic Messenger traffic merely to satisfy a numeric traffic gate. Synthetic fixtures are valid deterministic test data but are not production statistical evidence.
+Do not manufacture Messenger traffic merely to satisfy a numeric gate. Synthetic fixtures are valid test data but are not production statistical evidence.
 
-Overlapping legacy defects may prevent an end-to-end conversation from reaching the component under test. In that case, focused deterministic/integration evidence may close the component-level acceptance criteria if it proves the actual owning boundary. Full human E2E becomes mandatory at the explicit architecture checkpoints defined by Gate F-PREPROD and Gate U-PREPROD, and must occur **before** the Gate whose checklist requires it.
+Overlapping legacy defects may prevent E2E traffic from reaching the component under test. Focused evidence may therefore close a component-level acceptance criterion when it proves the actual owning boundary. Full-journey testing remains mandatory at the explicit later checkpoints defined by the roadmap.
 
-Traffic scarcity may replace the **volume/source of SHADOW evidence**, but never the SHADOW stage itself. Durable authority topology remains:
+Traffic scarcity may change the **source/volume of SHADOW evidence**, never the authority topology:
 
 ```text
 sales authority: LEGACY -> SHADOW -> COMMERCE
 state read authority: LEGACY -> SHADOW -> V2
 ```
 
+These match the durable behavior-control-plane contract.
+
 ## 5. Gate semantics
 
-Gate BF, Gate E-PREPROD, Gate F-PREPROD, and Gate U-PREPROD are engineering/architecture evidence gates. They show that their stated contracts and evidence thresholds have passed within the current program scope.
+Gate BF, Gate E-PREPROD, Gate F-PREPROD and Gate U-PREPROD are engineering/architecture evidence gates. They do not automatically mean public-production readiness or deployment authorization.
 
-They do **not** automatically mean:
+For PREPROD:
 
-- public-production readiness;
-- permission to deploy, migrate, activate a policy, expand a page/brand, or send a production test;
-- completion of production capacity, SLO, alerting, incident-response, compliance, or operational-readiness work.
-
-For PREPROD gates, correctness/security/quality requirements remain strict while traffic-dependent evidence is replaced by deterministic/replay/controlled evidence only where `FUTURE_BACKLOG.md` explicitly defines an objective replacement. A missing traffic population is not permission to remove a quality threshold or authority stage.
+- correctness/security/claim provenance/side-effect authorization remain strict;
+- traffic-dependent evidence may be replaced only by an explicit deterministic/replay/controlled mechanism in `FUTURE_BACKLOG.md`;
+- a missing production population is not permission to skip SHADOW, rollback, or objective expected-behavior checks;
+- full human E2E may be a separate checkpoint after an architecture Gate when the roadmap intentionally separates architecture proof from system-level acceptance.
 
 ## 6. Production-hardening trigger
 
-`PRODUCTION_HARDENING` begins only after an explicit owner instruction naming that mode or explicitly authorizing the public-production hardening phase. The transition must be recorded in this document or a superseding authoritative governance decision before its ceremony is treated as mandatory.
+`PRODUCTION_HARDENING` begins only after explicit owner instruction and a recorded governance transition.
 
-That phase is the proper home for traffic-dependent validation such as, as applicable:
+That phase is the proper home for traffic-dependent/operational evidence, as applicable:
 
-- real eligible legacy/new or V1/V2 shadow sampling while legacy comparison paths remain available;
-- statistically meaningful paired comparison and pre-registered thresholds;
-- the previously proposed `>=100` real eligible pair and non-inferiority target if still appropriate at that future point;
-- production traffic strategy and percentage canaries;
-- sustained soak against realistic volume;
+- real eligible legacy/new or V1/V2 shadow sampling;
+- statistically meaningful comparison with pre-registered thresholds;
+- traffic strategy/canaries and realistic soak;
 - capacity/load evidence;
-- SLOs and alerting;
-- incident runbooks and rollback drills;
+- SLOs, alerting, incident runbooks and rollback drills;
 - final security/compliance/operational-readiness review;
-- final public-production go/no-go approval.
+- public-production go/no-go.
 
-Until then, do not infer those requirements from an engineering Gate, do not describe the `PREPROD_TEST_PAGE` as public production, and do not claim production statistical confidence from synthetic fixtures.
+The old `>=100` pair/non-inferiority concept is not automatically carried forward unchanged; it should be reassessed against the real future population before becoming mandatory.
 
-Legacy comparison and complete-LEGACY rollback paths must remain usable through this phase and the public-production rollout decision. PREPROD Gate U does not retire them. Actual legacy writer/reader retirement requires a later separately approved rollback-window closure.
+Legacy comparison and complete-`LEGACY` rollback paths remain available through production hardening and the rollout decision. PREPROD Gate U does not retire them.
 
 ## 7. Invariants preserved in every mode
 
-The operating-mode change alters batching and evidence ceremony only. The following remain mandatory at PR and Release Train boundaries wherever applicable:
-
-- every protected business claim has fresh, typed, verified provenance;
-- the model may propose decisions and wording but cannot authorize side effects;
+- every protected business claim has fresh typed verified provenance;
+- the model may propose decisions/wording but cannot authorize protected side effects;
 - URL/network handling remains SSRF/phishing fail-closed;
-- PII, credentials, and secrets remain protected and excluded from repository evidence/logs/prompts;
-- authentication, authorization, least privilege, and audit requirements remain enforced;
-- database changes remain additive/backward-compatible unless separately approved, with backup/restore and data-safety controls proportional to risk;
-- sales authority transitions preserve `LEGACY -> SHADOW -> COMMERCE`;
-- state read transitions preserve `LEGACY -> SHADOW -> V2`;
-- `SHADOW` remains mandatory even when PREPROD evidence is deterministic/replay-based rather than traffic-volume-based;
-- explicit readback, bounded propagation and complete `LEGACY` rollback remain required at authority transitions;
-- legacy comparison/rollback remains available until a separately approved later retirement window is closed;
-- GitHub/immutable-tag provenance, per-service artifact identity, append-only evidence, runtime-state parity, and release integrity remain mandatory for every deployed Release Train;
-- no silent data loss, partial authority merge, unsafe fallback, direct VPS source edit, premature legacy retirement, or destructive cleanup is authorized by this mode.
+- PII, credentials and secrets remain protected;
+- auth/authz/least privilege/audit requirements remain enforced;
+- database changes remain additive/backward-compatible unless separately approved;
+- sales authority preserves `LEGACY -> SHADOW -> COMMERCE`;
+- state read preserves `LEGACY -> SHADOW -> V2`;
+- readback, bounded propagation and complete `LEGACY` rollback remain required;
+- no partial authority merge, silent data loss, unsafe fallback, direct VPS source edit, premature retirement or destructive cleanup is authorized;
+- Git/release/runtime provenance remains mandatory for deployed Release Trains.
 
-## 8. Precedence and historical records
+## 8. Precedence
 
-For current process questions, this file is the operating-mode authority and is routed from root `AGENTS.md`, root `README.md`, and the architecture-program index. Durable contracts continue to own technical invariants. Fresh generated runtime evidence owns live runtime facts. Archive, history, manifests, and baseline evidence retain their original wording and must not be rewritten to match this governance change.
+For process questions this file owns operating mode, batching, PREPROD evidence semantics, Gate semantics and the `PRODUCTION_HARDENING` trigger. Durable contracts own technical invariants; fresh runtime evidence owns live facts; archives/history remain immutable.
