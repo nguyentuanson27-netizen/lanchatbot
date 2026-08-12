@@ -4,6 +4,7 @@ import {
   buildBusinessFactQueries,
   multiFactReply,
   resolveBusinessFactQueriesBounded,
+  resolveProductReferencesBounded,
   type ResolvedProductReference,
 } from "./realtime-runner.js";
 
@@ -183,5 +184,23 @@ describe("unbounded text product business-fact queries", () => {
     for (const { raw } of references) {
       expect(reply.match(new RegExp(raw, "gu"))).toHaveLength(1);
     }
+  });
+
+  it("resolves more than ten residual text codes with stable order and peak concurrency three", async () => {
+    const codes = Array.from({ length: 14 }, (_, index) => code(index + 1));
+    let active = 0;
+    let peak = 0;
+    const references = await resolveProductReferencesBounded(codes, async (productCode) => {
+      active += 1;
+      peak = Math.max(peak, active);
+      const ordinal = Number.parseInt(productCode.slice(2), 10);
+      await new Promise((resolve) => setTimeout(resolve, 15 - ordinal));
+      active -= 1;
+      return product(productCode);
+    });
+
+    expect(peak).toBeLessThanOrEqual(3);
+    expect(references.map(({ raw }) => raw)).toEqual(codes);
+    expect(references.every(({ resolution }) => resolution === "RESOLVED")).toBe(true);
   });
 });

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
 import {
+  classifyCustomerUrlsForInbound,
   FailClosedTagObservationProvider,
   RealtimeRunner,
   type RealtimeInboxPort,
@@ -196,6 +197,26 @@ function createHarness(input: {
 }
 
 describe("RealtimeRunner media input safety limit", () => {
+  it("bypasses URL classification entirely when the image limit is exceeded", () => {
+    const classify = vi.fn(() => {
+      throw new Error("CUSTOMER_URL_CLASSIFIER_MUST_NOT_RUN");
+    });
+
+    const decision = classifyCustomerUrlsForInbound(
+      "https://example.com/private?token=must-not-leak",
+      "CLASSIFIED_ALLOWLIST_V1",
+      true,
+      classify,
+    );
+
+    expect(classify).not.toHaveBeenCalled();
+    expect(decision).toEqual(expect.objectContaining({
+      disposition: "CONTINUE",
+      items: [],
+      reasonCodes: [],
+    }));
+  });
+
   it("continues through the normal media pipeline for exactly ten images", async () => {
     const scenario = createHarness({ imageCount: 10 });
 

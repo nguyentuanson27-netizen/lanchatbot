@@ -152,6 +152,7 @@ async function runTurn(input: {
   readonly exactProducts?: readonly StableProductDocument[];
   readonly explanationReplies?: readonly string[];
   readonly quotaAllowed?: readonly boolean[];
+  readonly multiFactQueryEnabled?: boolean;
 }) {
   const commits: RealtimeCommitInput[] = [];
   const state = createConversationState({
@@ -292,6 +293,7 @@ async function runTurn(input: {
       sendEnabled: true,
       employeeTagId: "25",
       decisionTelemetryEnabled: true,
+      multiFactQueryEnabled: input.multiFactQueryEnabled ?? false,
     },
     { reserve: quotaReserve, close: vi.fn(async () => undefined) },
     undefined, undefined, undefined,
@@ -451,6 +453,29 @@ describe("BF-08 production-wrapper customer URL policy", () => {
       currentProductId: null,
       mediaClarification: { status: "ACTIVE" },
     });
+  });
+
+  it("answers an approved URL plus more than ten residual text codes without truncation", async () => {
+    const residualProducts = Array.from({ length: 11 }, (_, index) =>
+      product(`SD${String(index + 1).padStart(3, "0")}`)
+    );
+    const allProducts = [product("SD398"), ...residualProducts];
+    const result = await runTurn({
+      text: `giá https://www.lanadesign.vn/SD398 ${residualProducts
+        .map(({ productId }) => productId).join(" ")}`,
+      policy: policy("CLASSIFIED_ALLOWLIST_V1"),
+      exactProducts: allProducts,
+      multiFactQueryEnabled: true,
+    });
+
+    expect(result.searchText).toHaveBeenCalledTimes(allProducts.length);
+    expect(result.draftMultiProductClarification).not.toHaveBeenCalled();
+    expect(result.commit.handoffEventPlan).toBeUndefined();
+    const reply = result.commit.metaPlan?.messages
+      .filter((message) => message.kind === "TEXT")
+      .map((message) => message.text)
+      .join("\n") ?? "";
+    for (const { productId } of allProducts) expect(reply).toContain(productId);
   });
 
   it("fails closed when a residual product code beside an approved URL cannot be verified", async () => {
