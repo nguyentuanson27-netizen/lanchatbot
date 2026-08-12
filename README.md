@@ -2,6 +2,17 @@
 
 Ứng dụng chatbot Facebook Messenger cho La.na Design. Repository này là nguồn mã chuẩn cho app realtime, Admin, worker dữ liệu và các workflow n8n đã được chuẩn hóa.
 
+## Operating mode hiện tại
+
+- Mode: `ENGINEERING_PREPROD`.
+- Live page `1198992073286645` được định nghĩa là `PREPROD_TEST_PAGE`, không phải public production.
+- PR nhỏ là đơn vị thay đổi, focused verification và exact-head review.
+- Release Train là đơn vị mặc định chạy full verification, chuẩn bị immutable release và deploy test page khi owner cấp quyền rõ ràng.
+- Gate BF/E/F/U là engineering/architecture gates, không tự động đồng nghĩa production-ready.
+- Chỉ owner mới có thể chuyển chương trình sang `PRODUCTION_HARDENING` bằng yêu cầu rõ ràng.
+
+Nguồn governance authoritative: [Operating Mode](docs/current/architecture-program/OPERATING_MODE.md). Việc đổi mode không thay đổi verified-claim, side-effect authorization, SSRF, PII/secret, auth, database-safety, authority-transition, rollback hoặc release-integrity invariants.
+
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
@@ -10,11 +21,13 @@
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
 
-Không sửa source trực tiếp trong `/opt/lana-chatbot/current`. Mọi thay đổi phải đi qua branch, kiểm thử, review, tag release và thư mục release mới trên VPS.
+Không sửa source trực tiếp trong `/opt/lana-chatbot/current`. Thay đổi source phải đi qua branch, focused verification, exact-head review và merge. Chỉ Release Train được owner cấp quyền deploy mới tiếp tục qua immutable tag và thư mục release mới trên VPS; source-only PR không mặc định tạo release hoặc chạm live runtime.
 
-Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/lana-chatbot/repository`. Agent phải đọc `AGENTS.md` trước khi thao tác; working tree này không phải runtime production. User `lana-deploy` có deploy key GitHub read-only chỉ cho repository này; được phép `fetch` tag/commit nhưng không được push.
+Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/lana-chatbot/repository`. Agent phải đọc `AGENTS.md` trước khi thao tác; working tree này không phải live runtime. User `lana-deploy` có deploy key GitHub read-only chỉ cho repository này; được phép `fetch` tag/commit nhưng không được push.
 
-## Trạng thái production ngày 2026-08-01
+## Snapshot runtime lịch sử ngày 2026-08-01
+
+Phần này giữ nguyên thuật ngữ của bằng chứng lịch sử. Nó không định nghĩa operating mode hiện tại hoặc chứng minh public-production readiness.
 
 - **Snapshot test-page canary (2026-08-01):** historical evidence only; inspect generated runtime state and its append-only evidence before making any current production-status assertion.
 - **HISTORICAL_DEPLOYED_VERIFIED_R32_1:** bằng chứng deploy r32.1 được giữ nguyên cho audit, nhưng runtime Realtime đã bị supersede do incident compatibility; không dùng trạng thái này để khẳng định production hiện tại.
@@ -25,7 +38,7 @@ Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/l
 - **R32.2 TEST-PAGE OUTBOUND ENABLED — CANARY OBSERVATION REQUIRED:** Artifact/runtime, backup/restore-test, migration 0028–0029, 40/40 post-cutover regression và target health đều đạt. Queue health đã về 200 sau [audited cancellation](deploy/manifests/20260801-r32.2-outbox-cancellation.json); outbound hiện mở cho duy nhất page test theo [gate-change evidence](deploy/manifests/20260801-r32.2-test-page-outbound-enabled.json). Chưa requeue Inbox lỗi và chưa tuyên bố full production promotion.
 
 
-- Production runtime status is generated runtime-state evidence; do not use this README to identify the current release.
+- Live runtime status is generated runtime-state evidence; do not use this README to identify the current release.
 - r30 đã **DEPLOYED_VERIFIED_R30**; bản vá đứng giao diện, C1, B2, B3 và B4 đã qua backup/restore-test, guarded cutover và canary thật.
 - r31 đã **DEPLOYED_VERIFIED_R31_HUMAN_TEST_PENDING**: Voice Contract V2, form báo giá hai bong bóng và Hybrid Buying Intent có guard đã live; chưa có inbound khách sau cutover nên còn chờ human test Messenger.
 - Hotfix câu hỏi nối r31.1 đã **DEPLOYED_VERIFIED_R31_1_HUMAN_TEST_PENDING**: đúng một câu hỏi nối cho pre-sale còn mở, không hỏi lại số đo; chốt đơn, hậu mãi và handoff không bị kéo dài. Chưa có inbound khách sau cutover nên còn chờ human test Messenger.
@@ -139,19 +152,19 @@ pnpm install --frozen-lockfile
 pnpm check
 ```
 
-Không dùng credential production trong môi trường phát triển. Chỉ copy `.env.example` và các file `deploy/.env.*.example`; secret thật nằm ngoài repository.
+Không dùng credential live trong môi trường phát triển. Chỉ copy `.env.example` và các file `deploy/.env.*.example`; secret thật nằm ngoài repository.
 
 ## Quy trình release
 
 1. Tạo branch từ `main`.
-2. Thay đổi code và migration theo hướng additive/backward-compatible.
-3. Chạy `pnpm check` và smoke test cần thiết.
-4. Review thay đổi về source-of-truth, ownership, secret và dữ liệu khách.
-5. Merge `main`, tạo tag release.
-6. Build release mới vào `/opt/lana-chatbot/releases/<tag-or-commit>`.
+2. Giữ PR nhỏ, thay đổi code/migration theo hướng additive/backward-compatible và chạy focused verification theo phạm vi/rủi ro.
+3. Exact-head review rồi merge `main`; mỗi PR không mặc định là một release hoặc một lần deploy.
+4. Gom các PR đã review theo Release Train và logical dependencies.
+5. Tại train boundary, chạy frozen install, full `pnpm check`, integration/replay, security/data và architecture/release-integrity gates.
+6. Sau full train verification và owner authorization, tạo immutable tag/manifest, build release mới vào `/opt/lana-chatbot/releases/<tag-or-commit>`.
 7. Backup/restore-test nếu có migration.
-8. Canary trên page `1198992073286645`.
-9. Chỉ đổi symlink `current` sau khi health/smoke đạt.
+8. Controlled verification trên `PREPROD_TEST_PAGE` `1198992073286645`.
+9. Chỉ đổi symlink `current` sau khi health/smoke/readback đạt; giữ exact rollback target.
 
 Không recreate toàn bộ compose khi chỉ cần cập nhật một service; các service production hiện dùng nhiều image digest khác nhau.
 
@@ -165,7 +178,8 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 
 ## Tài liệu
 
-- [Architecture Program — active BF/DF/UR context index](docs/current/architecture-program/README.md) — nguồn định tuyến context gọn; hiện tạm dừng DF/UR và ưu tiên incident BF, không tự cấp quyền deploy
+- [Architecture Program — active BF/DF/UR context index](docs/current/architecture-program/README.md) — nguồn định tuyến context gọn; không tự cấp quyền merge hoặc deploy
+- [Operating Mode — ENGINEERING_PREPROD governance](docs/current/architecture-program/OPERATING_MODE.md) — định nghĩa PR/Release Train, Gate semantics, PREPROD_TEST_PAGE và trigger PRODUCTION_HARDENING
 - [Production baseline và ownership](docs/current/PRODUCTION_BASELINE_20260722.md)
 - [Kế hoạch nâng cấp Realtime Sales Agent](docs/current/REALTIME_AGENT_UPGRADE_PLAN.md)
 - [Kế hoạch triển khai Wave 1 & Wave 2 v1.2](docs/current/WAVE1_WAVE2_IMPLEMENTATION_PLAN_v1.2.md)
@@ -202,4 +216,4 @@ Các tài liệu `docs/phase*` là hồ sơ thiết kế/lịch sử. Khi mâu t
 
 ## Generated runtime state
 
-Do not update this README to record a current release. Production status comes from `/opt/lana-chatbot/runtime-state/current.json`, its immutable history record, the resolved `/opt/lana-chatbot/current` symlink, and the release-local `.release-source.json`. The generated record must pass source, service, migration, routing, config-digest, and readback parity; the append-only A0 reconciliation artifact is `deploy/manifests/20260802-r32.2.2-runtime-reconciliation.json`.
+Do not update this README to record a current release. Live runtime status comes from `/opt/lana-chatbot/runtime-state/current.json`, its immutable history record, the resolved `/opt/lana-chatbot/current` symlink, and the release-local `.release-source.json`. The generated record must pass source, service, migration, routing, config-digest, and readback parity; the append-only A0 reconciliation artifact is `deploy/manifests/20260802-r32.2.2-runtime-reconciliation.json`.
