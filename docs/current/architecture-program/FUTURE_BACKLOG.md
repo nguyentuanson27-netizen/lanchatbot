@@ -46,10 +46,25 @@ Build a versioned corpus from accepted BF incidents/counterexamples, safe releva
 
 Before first scored run freeze corpus membership/strata, each case’s `MUST_PASS` expected behavior, safety/factual/side-effect assertions, and any additional objective quality rubric/acceptance rule.
 
+Also freeze an immutable `ContextV2CandidateManifest` for the exact evaluated generative candidate. At minimum it binds:
+
+- model provider/name/version or immutable model identifier;
+- generation configuration that can affect output;
+- prompt/template version and content hash;
+- Context V2 version/schema and relevant consumer contract version;
+- verified-evidence envelope/schema version used to construct model input;
+- relevant policy/config versions that affect candidate generation or interpretation;
+- exact Git source revision used for the scored DF-P6 run;
+- corpus/rubric version and content hash.
+
+The manifest has a canonical hash recorded with the evaluation evidence.
+
 Acceptance:
 
 - V2 passes 100% of frozen safety-critical, protected-claim, side-effect, and other `MUST_PASS` assertions;
 - required rules cannot change after results are inspected without a reviewed amendment and rerun;
+- the scored results are tied to one exact `ContextV2CandidateManifest` hash;
+- any material change to a candidate-identity field invalidates the prior Gate-E evaluation and requires a complete DF-P6 rerun;
 - V1 may be evaluated for diagnosis/comparison but is not the quality gold standard;
 - qualitative style/preferences are supplemental only.
 
@@ -65,7 +80,8 @@ No `>=100` organic/live-pair or production-statistical-confidence requirement in
 - [ ] Context V2 and intended consumers are implemented.
 - [ ] Accepted BF incident/counterexample replay passes.
 - [ ] DF-P6 corpus/rubric is frozen before scoring.
-- [ ] V2 passes all frozen required safety/factual/side-effect/behavior assertions.
+- [ ] Exact `ContextV2CandidateManifest` and canonical hash are frozen before scoring.
+- [ ] V2 passes all frozen required safety/factual/side-effect/behavior assertions using that exact candidate manifest.
 - [ ] Evaluation paths are side-effect-free and cost bounded.
 
 Not Gate E requirements: runtime SHADOW, organic traffic volume, fixed live pair count, traffic canary, or production statistical confidence.
@@ -84,9 +100,18 @@ Target transition:
 LEGACY -> COMMERCE
 ```
 
-Before activation: transition matrix and BF/DF replay pass; missing commerce state fails closed; Context V2/derived phase/final reconciliation/legacy authority demotion switch coherently; no COMMERCE decision consumes legacy `salesStage` as authority; exact readback and complete `LEGACY` rollback are verified.
+Before activation:
 
-After explicit owner authorization, activate only on `PREPROD_TEST_PAGE` and run the controlled critical human journeys.
+- transition matrix and BF/DF replay pass;
+- missing commerce state fails closed;
+- Context V2, derived phase, final reconciliation, and legacy authority demotion switch coherently;
+- no COMMERCE decision consumes legacy `salesStage` as authority;
+- the immutable release artifact carries the exact Gate-E `ContextV2CandidateManifest` hash;
+- any material candidate-identity change since Gate E forces DF-P6 rerun before activation;
+- complete `LEGACY` rollback is ready;
+- the page-scoped quiescent cutover protocol from `contracts/BEHAVIOR_CONTROL_PLANE.md` is verified.
+
+After explicit owner authorization, activate only on `PREPROD_TEST_PAGE` using that quiescent boundary, verify exact authority revision/hash/source readback across every relevant consumer, then release held eligible work and run the controlled critical human journeys.
 
 ## Gate F-PREPROD
 
@@ -95,11 +120,13 @@ After explicit owner authorization, activate only on `PREPROD_TEST_PAGE` and run
 - [ ] No COMMERCE decision consumes legacy `salesStage` as authority.
 - [ ] Missing commerce state with committed intent fails closed.
 - [ ] Full transition matrix and BF/DF replay pass.
+- [ ] Activated immutable release is bound to the exact Gate-E `ContextV2CandidateManifest` hash.
+- [ ] Quiescent cutover holds new eligible protected work, proves no authority-sensitive in-flight/queued work can cross the boundary, and releases work only after all relevant consumers read back the exact new revision.
 - [ ] Controlled PREPROD critical human journeys pass.
-- [ ] Exact runtime identity/control-plane readback is verified for any deployed candidate.
+- [ ] Exact runtime identity/control-plane readback is verified for the deployed candidate.
 - [ ] Complete `COMMERCE -> LEGACY` rollback is verified.
 
-Not Gate F requirements: quantitative shadow, traffic-percent canary, mixed-authority pinning, or long natural-traffic soak.
+Not Gate F requirements: quantitative shadow, traffic-percent canary, default mixed-authority episode pinning, or long natural-traffic soak.
 
 ## UR PREPROD Release Trains
 
@@ -130,7 +157,9 @@ Switch:
 LEGACY -> V2
 ```
 
-only after comparator/readback evidence and explicit approval. Verify complete rollback to `LEGACY` and keep the rollback path available after Gate U.
+only after comparator/readback evidence, explicit approval, and verification of the same page-scoped quiescent cutover contract. Hold eligible state-dependent work through CAS propagation until every relevant read-authority consumer reports the exact V2 revision/hash/source; abort or return to complete `LEGACY` if quiescence or exact readback cannot be proven.
+
+Verify complete rollback to `LEGACY` and keep the rollback path available after Gate U.
 
 ## Gate U-PREPROD
 
@@ -140,7 +169,7 @@ Gate U proves State V2 architecture and rollback boundary. Full human E2E is a s
 - [ ] Core/commerce envelopes use approved encryption/independent-expiry semantics.
 - [ ] Atomic persistence is idempotent, concurrency tested, and revision/fence protected.
 - [ ] Measured migration/comparator/replay passes with conflicts ineligible.
-- [ ] Direct V2 read switch/readback passes on PREPROD.
+- [ ] Direct V2 read cutover satisfies the quiescent-boundary contract and exact readback passes on PREPROD.
 - [ ] Complete `V2 -> LEGACY` rollback passes.
 - [ ] Legacy rollback remains available after the Gate.
 - [ ] UR08/UR09 retirement and UR10 destructive cleanup remain deferred/separately approved.
@@ -174,12 +203,12 @@ The prior `>=100` pair/non-inferiority idea may be reconsidered against the real
 Gate BF + immutable POST_BF_V1
   -> DF-A: DF-P1..DF-P3
   -> DF-B: DF-P4..DF-P6
-  -> Gate E-PREPROD
-  -> DF-C: DF-P7 / controlled LEGACY -> COMMERCE
+  -> Gate E-PREPROD / freeze candidate manifest
+  -> DF-C: DF-P7 / bind release to candidate manifest / quiescent LEGACY -> COMMERCE
   -> controlled critical human E2E
   -> Gate F-PREPROD
   -> UR-A: UR-P1..UR-P2
-  -> UR-B: UR-P3 / controlled LEGACY -> V2
+  -> UR-B: UR-P3 / quiescent LEGACY -> V2
   -> Gate U-PREPROD
   -> controlled full human E2E on State V2
   -> explicit owner trigger: PRODUCTION_HARDENING
