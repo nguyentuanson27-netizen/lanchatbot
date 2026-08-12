@@ -21,7 +21,7 @@ Nguồn governance authoritative: [Operating Mode](docs/current/architecture-pro
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
 
-Không sửa source trực tiếp trong `/opt/lana-chatbot/current`. Mọi thay đổi phải đi qua branch, kiểm thử, review, tag release và thư mục release mới trên VPS.
+Không sửa source trực tiếp trong `/opt/lana-chatbot/current`. Thay đổi source phải đi qua branch, focused verification, exact-head review và merge. Chỉ Release Train được owner cấp quyền deploy mới tiếp tục qua immutable tag và thư mục release mới trên VPS; source-only PR không mặc định tạo release hoặc chạm live runtime.
 
 Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/lana-chatbot/repository`. Agent phải đọc `AGENTS.md` trước khi thao tác; working tree này không phải live runtime. User `lana-deploy` có deploy key GitHub read-only chỉ cho repository này; được phép `fetch` tag/commit nhưng không được push.
 

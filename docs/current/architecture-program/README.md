@@ -52,7 +52,9 @@ On a branch containing this directory, the following ownership applies. The two 
 
 ## Completion/archive policy
 
-When a PR slice or Release Train completes:
+Merging a source-only PR records source provenance in Git/GitHub. It does not by itself update `CURRENT_BASELINE.md` or `program-state.json`, create a completed runtime checkpoint, or imply release/runtime acceptance.
+
+When an evidence-bearing Release Train or Gate acceptance completes:
 
 1. Update baseline/state from reviewed append-only evidence.
 2. Keep only status, immutable commits/tags, gate, durable contracts, rollback, residuals, and evidence links in active context.

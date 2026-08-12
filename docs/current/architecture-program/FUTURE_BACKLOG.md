@@ -74,7 +74,7 @@ Gate F is an engineering/architecture authority gate for DF-C. It is not a produ
 
 - [ ] Commerce FSM is authoritative and conversation phase is derived.
 - [ ] Context V2, derived phase, V2 consumers, final reconciliation, and regex demotion activate atomically.
-- [ ] No production decision consumes legacy `salesStage` in `COMMERCE`.
+- [ ] No live decision consumes legacy `salesStage` in `COMMERCE`.
 - [ ] Quantitative shadow, canary, readback, pinning, emergency override, and rollback pass.
 - [ ] Missing commerce state with committed intent alerts and fails closed.
 
