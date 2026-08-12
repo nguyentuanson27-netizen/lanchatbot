@@ -8,7 +8,7 @@
   "releaseTag": "20260812-unbounded-text-media-guard-r5.7",
   "releasePreparation": {
     "branch": "ops/20260812-unbounded-text-media-guard-r5.7-release-prep",
-    "reviewCandidateTag": "20260812-unbounded-text-media-guard-r5.7-review-candidate.1",
+    "reviewCandidateTag": "20260812-unbounded-text-media-guard-r5.7-review-candidate.2",
     "reviewCandidateSemantics": "annotated immutable exact-head review candidate only; not deploy authorization",
     "candidateTagMustNeverMove": true,
     "changesRequireNextCandidateOrdinal": true,

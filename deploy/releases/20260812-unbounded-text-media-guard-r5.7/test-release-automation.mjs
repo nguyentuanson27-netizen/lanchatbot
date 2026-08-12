@@ -322,7 +322,7 @@ try {
   }
 
   requireText('common.sh', /EXPECTED_RELEASE_TAG="20260812-unbounded-text-media-guard-r5\.7"/u, 'release identity not pinned');
-  requireText('common.sh', /EXPECTED_CANDIDATE_TAG="20260812-unbounded-text-media-guard-r5\.7-review-candidate\.1"/u, 'reviewed candidate ordinal not pinned');
+  requireText('common.sh', /EXPECTED_CANDIDATE_TAG="20260812-unbounded-text-media-guard-r5\.7-review-candidate\.2"/u, 'reviewed candidate ordinal not pinned');
   requireText('common.sh', /EXPECTED_ROLLBACK_REALTIME_IMAGE_ID="sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a"/u, 'rollback image ID not pinned');
   requireText('common.sh', /EXPECTED_ROLLBACK_REALTIME_REVISION="31d74695a794a28d6f93427416593b2a414270d6"/u, 'rollback revision not pinned');
   requireText('validate-operational-state.mjs', /CLARIFY_RECONCILED_V1[\s\S]*PER_ASSET_V1[\s\S]*CLARIFY_V1[\s\S]*CLASSIFIED_ALLOWLIST_V1/u, 'active production policy preservation gate missing');
@@ -339,6 +339,7 @@ try {
   requireText('cutover.sh', /compose up -d --no-deps realtime-worker/u, 'target-only cutover missing');
   requireText('cutover.sh', /arm_automatic_rollback[\s\S]*upsert_env_pin REALTIME_IMAGE/u, 'rollback is not armed before first mutation');
   if (/upsert_env_pin REALTIME_RELEASE_ID/u.test(source('cutover.sh'))) throw new Error('container Config.Env release ID mutation accepted');
+  requireText('postcheck.sh', /REALTIME_RELEASE_ID\)" = "\$ROLLBACK_REALTIME_RELEASE_ID"/u, 'postcheck does not preserve realtime release ID');
   requireText('preflight.sh', /validate-reviewed-live-baseline\.mjs/u, 'reviewed live baseline missing from preflight');
   requireText('cutover.sh', /validate-reviewed-live-baseline\.mjs/u, 'reviewed live baseline missing immediately before cutover');
   requireText('cutover.sh', /require_no_inherited_compose_overrides[\s\S]*arm_automatic_rollback/u, 'Compose override gate does not run before cutover mutation');

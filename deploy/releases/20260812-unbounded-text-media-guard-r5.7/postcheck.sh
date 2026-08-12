@@ -24,7 +24,7 @@ id="$(compose ps -q realtime-worker)"
 test "$(docker inspect --format '{{.RestartCount}}' "$id")" = "0" || die "realtime-worker restarted"
 test "$(docker inspect --format '{{.Image}}' "$id")" = "$expected_image_id" || die "realtime target image mismatch"
 test "$(docker exec "$id" awk '/^Uid:/{print $2}' /proc/1/status)" = "1000" || die "realtime PID1 is not UID 1000"
-test "$(container_env_value "$id" REALTIME_RELEASE_ID)" = "$RELEASE_TAG" || die "realtime release readback mismatch"
+test "$(container_env_value "$id" REALTIME_RELEASE_ID)" = "$ROLLBACK_REALTIME_RELEASE_ID" || die "realtime Config.Env release ID changed"
 test "$(database_latest_migration)" = "$EXPECTED_LATEST_MIGRATION" || die "migration ledger changed"
 verify_non_target_ids "$EVIDENCE_DIR/non-target-container-ids.before"
 verify_required_service_health
