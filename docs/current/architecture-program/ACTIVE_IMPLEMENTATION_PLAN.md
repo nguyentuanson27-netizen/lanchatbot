@@ -1,13 +1,13 @@
 # LANA Chatbot — Revised Bug-Fix Wave Integration Plan
 
-**Status:** Review-ready; not execution, deployment, or public-production authorization
-**Companion source of issue truth:** `ACTIVE_BACKLOG.md`
-**Insertion point:** after completed R3/C2 and before the first unfinished DF release slice
+**Status:** Reconciled 2026-08-12; Gate BF is blocked, so this plan remains a retained incident/DF dependency record.
+**Companion source of issue truth:** `ACTIVE_BACKLOG.md` and `CURRENT_BASELINE.md`.
+**Insertion point:** completed incident waves; before any eligible DF release slice
 **Operating mode:** `ENGINEERING_PREPROD`; see `OPERATING_MODE.md`.
 
 ## 1. Decision
 
-Pause the remaining architecture program and execute three ordered bug-fix waves. Resume DF only after Gate BF passes and the post-fix `PREPROD_TEST_PAGE` V1 baseline has been captured.
+The three incident waves have source/release evidence, but Gate BF is not passed. Keep DF paused until the BF-04 P0 known gap is closed, BF-10 has its required terminal-transition evidence, and the post-fix PREPROD_TEST_PAGE V1 baseline is captured.
 
 The existing architecture direction remains valid. The incident track provides immediate containment and correctness fixes; root authority changes remain in DF-05 through DF-13 and State V2 design remains in UR.
 
@@ -121,6 +121,8 @@ Gate BF + post-fix immutable baseline
   -> separately approved destructive UR-X/UR-10
 ```
 
+**Current program point:** all three waves have merged/deployed evidence, but the arrow after Gate BF is not available. The active next work is BF-04 residual closure and Gate BF evidence reconciliation; DF-A is not active.
+
 Each bug remains one focused PR. Adjacent bugs must not share a diff merely because they belong to the same wave. Full verification, immutable release preparation, and authorized test-page deployment occur at the wave/Release Train boundary rather than once per PR.
 
 ## 4. Runtime-policy design
@@ -131,9 +133,6 @@ Behavioral containment uses the existing versioned database control plane. The l
 replyReconciliationPolicy:
   LEGACY | CLARIFY_RECONCILED_V1
 
-correctionDialoguePolicy:
-  LEGACY | CORRECTION_CONTAINMENT_V1
-
 mediaPartialResolutionPolicy:
   LEGACY | PER_ASSET_V1
 
@@ -143,6 +142,8 @@ multiProductResolutionPolicy:
 customerUrlPolicy:
   STRICT_BLOCK_ALL | CLASSIFIED_ALLOWLIST_V1
 ```
+
+The BF-03 correctionDialoguePolicy is deliberately absent: PR #158 removed its runtime adapter and the publishable schema rejects that field. The retained BF-03 foundations are non-authoritative and cannot be activated through this control plane.
 
 Exact storage names may follow current repository conventions. Required properties are immutable versions, CAS activation, page scope, append-only audit, content hash, worker readback, bounded cache propagation, last-known-good behavior, and an explicit safest fallback.
 
@@ -187,14 +188,14 @@ Create the minimum final reconciler needed to prevent customer silence from cont
 
 ### BF-03 third
 
-Add narrow correction containment to the legacy path. Mark it temporary, version it, benchmark false positives, and link its removal to the atomic DF-11 cutover where dialogue evidence replaces regex authority.
+**Canonical disposition:** do not add or reactivate correction containment. PR #158 retained only foundation-safe, non-runtime components: an inert post-gate extension point, stale-generation ordering, replay/own-echo/concurrency evidence, a pure unused authorization primitive, and research-only corpus data. The original correction-as-SIZE behavior remains a root dialogue-evidence obligation for DF-05/DF-06 and DF-09/DF-11; it is not claimed as a completed BF runtime behavior.
 
 Wave-B exit evidence:
 
 - active product survives grounded-output failure when still valid;
 - direct questions receive a response unless a higher-priority policy explicitly blocks it;
-- corrections do not trigger the SIZE capability merely because they mention size;
-- genuine size questions retain recall;
+- BF-03’s non-activatable foundation disposition remains intact; no correction heuristic or policy field can return to the production import graph;
+- general correction semantics move to the later canonical dialogue-evidence path, not a second legacy classifier;
 - model remains the author of customer-facing clarification text.
 
 ## 7. Wave C — Media and URL handling
@@ -275,7 +276,7 @@ Add bounded observability and analytics dimensions for dialogue evidence, claim 
 
 ### DF-04
 
-Continue consumer-specific normalization migration. The BF-03 containment may use named shared primitives, but moving normalization code must not silently expand classifier behavior.
+Continue consumer-specific normalization migration. BF-03 has no runtime containment to reuse; retained foundation primitives must not acquire dialogue-classification authority during a utility move.
 
 ### DF-05 through DF-06
 
@@ -291,13 +292,17 @@ Context V2 receives canonical dialogue evidence, verified claims, derived phase/
 
 ### DF-11 through DF-13
 
-Activate derived phase, Context V2 consumers, final reconciliation, and regex-writer demotion atomically under sales-authority mode. Remove BF-03 containment only after the replacement passes shadow/canary evidence. Do not retain both paths as co-authorities.
+Activate derived phase, Context V2 consumers, final reconciliation, and regex-writer demotion atomically under sales-authority mode. The replacement must handle correction semantics through canonical evidence; do not introduce a new BF-03 containment path or retain co-authorities.
 
 ### UR-00 and State V2
 
 The ADR must decide the canonical shape for multiple considered products and one active selection before schema work. It must cover ordered media evidence, product switching, reset, expiry, encryption, and legacy compatibility projection. BF-07 remains a clarification containment until that design is approved.
 
 ## 12. Gate BF and definition of done
+
+**Current state: GATE_BF_BLOCKED.** This definition remains binding. The blockers and
+the prohibition on creating POST_BF_V1 early are recorded in ACTIVE_BACKLOG.md and
+CURRENT_BASELINE.md.
 
 The incident track is complete only when:
 

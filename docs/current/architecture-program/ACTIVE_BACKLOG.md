@@ -1,10 +1,10 @@
 # LANA Chatbot — Active Incident Backlog
 
-**Status:** Planning-ready; implementation, merge, activation, and deployment require separate authorization.
-**Active track:** BF incident remediation
-**Next issue:** BF-04
-**Exit:** Gate BF
-**Detailed issue contracts:** `BF_ISSUE_SPECS.md`
+**Status:** Reconciled on 2026-08-12; **GATE_BF_BLOCKED**.
+**Active track:** BF residual closure; DF work remains inactive.
+**Next issue:** BF-04 remediation decision (do not treat the known gap as closed).
+**Exit:** GATE_BF_PASSED plus immutable POST_BF_V1 baseline.
+**Detailed issue contracts:** `BF_ISSUE_SPECS.md`; current disposition is below.
 **Operating mode:** `ENGINEERING_PREPROD`; PRs use focused verification and Release Trains own full verification/deploy preparation.
 
 ## Objective
@@ -28,7 +28,7 @@ Code:
 
 ## Starting point
 
-Use `CURRENT_BASELINE.md` as the last accepted checkpoint, then fetch and verify current GitHub `main` and current read-only live evidence before each PR. Completed RI/CF/DB details are archived; their invariants remain in `contracts/`.
+Use `CURRENT_BASELINE.md` as the current reconciliation checkpoint and Gate disposition, then fetch and verify current GitHub `main` and current read-only live evidence before each PR. Completed RI/CF/DB details are archived; their invariants remain in `contracts/`.
 
 ## Release order
 
@@ -39,7 +39,7 @@ Use `CURRENT_BASELINE.md` as the last accepted checkpoint, then fetch and verify
 | 3 | BF-10 terminal Outbox error cleanup | P2 | Data consistency | Immutable release rollback |
 | 4 | BF-02 preserve verified product context | P1 | Context correctness | Immutable release rollback |
 | 5 | BF-01 reconcile clarification/reply action | P1 | Customer-visible | Database-backed policy version |
-| 6 | BF-03 correction containment for legacy SIZE | P1 | Temporary behavior containment | Database-backed policy version |
+| 6 | BF-03 foundation-safe correction disposition | P1 | Non-activatable retained foundations | No runtime policy or activation path |
 | 7 | BF-06 per-asset partial media resolution | P1 | Customer-visible | Database-backed policy version |
 | 8 | BF-07 multi-product clarification | P1 | Customer-visible | Database-backed policy version |
 | 9 | BF-08 classified customer-URL policy | P1 | Security/customer-visible | Strict fail-closed fallback |
@@ -53,6 +53,24 @@ Wave C: BF-06 -> BF-07 -> BF-08 -> BF-09
 -> capture immutable post-fix V1 baseline
 -> activate FUTURE_BACKLOG.md
 ```
+
+## Post-wave reconciliation matrix (2026-08-12)
+
+| BF | Source/release status | Effective live state | Residual / disposition |
+|---|---|---|---|
+| BF-01 | Merged and in the realtime artifact | CLARIFY_RECONCILED_V1 published | Active; no Gate BF blocker recorded |
+| BF-02 | Merged and in the realtime artifact | Direct runtime path | Active; replay evidence retained |
+| BF-03 | PR #158 foundation-safe merge | No adapter, import, policy field, or activation path | Canonical non-activatable disposition; do not revive the heuristic |
+| BF-04 | PR #128 merged; later realtime artifacts contain the code | Direct claim-guard path | **PARTIAL / KNOWN_GAP** P0 bypasses; Gate BF blocker |
+| BF-05 | Merged and in the realtime artifact | Direct runtime path | Active; eligibility remains fail-closed |
+| BF-06 | Merged and in the realtime artifact | PER_ASSET_V1 published | Active |
+| BF-07 | Merged and in the realtime artifact | CLARIFY_V1 published | Active |
+| BF-08 | Merged and in the realtime artifact | CLASSIFIED_ALLOWLIST_V1 published | Active; strict fallback retained |
+| BF-09 | Merged and in the realtime artifact | Direct runtime path | Active; bounded full-look mapping |
+| BF-10 | delivery-only r5.6 is live | New path has no observed natural terminal transition | Gate BF evidence blocker; do not mutate historical rows or claim live transition evidence |
+
+**DF_A_READY: NOT_DF_READY.** The source/deploy inventory is complete enough to
+identify blockers, but not to certify Gate BF or create POST_BF_V1.
 
 Each issue is one focused PR starting from freshly fetched `main`, not the preceding bug branch. PR merge does not imply one release or one deploy. Immutable release preparation, full verification, and any authorized `PREPROD_TEST_PAGE` deployment occur at the applicable Release Train boundary.
 
@@ -78,8 +96,8 @@ For one BF task, load only:
 
 ## Dependencies into later architecture
 
-- BF-04 adds the immediate typed size-claim containment required for safety; the generalized canonical evidence contract and full writer cutover remain DF-05/DF-06 obligations.
-- BF-03 is temporary and retires only after DF-09/DF-11 evidence and atomic regex demotion.
+- BF-04 remains an unresolved mandatory safety boundary. Its verified-claim design informs DF-05/DF-06, but its known P0 bypasses must not be represented as closed containment.
+- BF-03 has the canonical foundation-only disposition from PR #158: retained inert primitives and evaluation data have no runtime authority or activation path. Do not revive correction containment; the root dialogue-evidence and writer-demotion obligations remain DF-05/DF-06 and DF-09/DF-11.
 - BF-07 clarifies multiple products; canonical multi-product state remains an UR-00 ADR obligation.
 - DF-09/DF-10 must use the post-Gate-BF V1 baseline, never the known-buggy pre-wave path.
 - Detailed remaining DF/UR work stays inactive in `FUTURE_BACKLOG.md` until Gate BF.
@@ -87,6 +105,11 @@ For one BF task, load only:
 ## Gate BF
 
 Gate BF passes only when:
+
+**Current disposition: NOT PASSED.** The listed conditions remain the acceptance contract.
+BF-04 fails the protected-claim condition because of the owner-recorded P0 bypasses. BF-10
+does not yet have the required post-cutover terminal-transition evidence; its historical rows
+must remain unchanged. The matrix above is a status inventory, not a checkbox waiver.
 
 - [ ] All ten original incidents and their counterexamples pass stable replay.
 - [ ] No protected business claim lacks typed verified provenance.
