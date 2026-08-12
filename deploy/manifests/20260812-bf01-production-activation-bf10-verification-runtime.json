@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 1,
+  "documentType": "APPEND_ONLY_RUNTIME_POLICY_ACTIVATION_AND_DEPLOYMENT_VERIFICATION_EVIDENCE",
+  "status": "ACTIVATION_SUCCESS",
+  "environment": "production-single-approved-page",
+  "capturedAt": "2026-08-12T03:40:16Z",
+  "capturedAtSemantics": "fresh production host and database readback after BF-01 activation, three bounded soak samples, and runtime-state promotion; distinct from repository record time",
+  "repositoryRecord": {
+    "baseCommit": "8a4d5b0b5d4d3dd37c0dc795fd19820534ca3498",
+    "branch": "docs/20260812-bf01-activation-bf10-verification",
+    "appendOnly": true
+  },
+  "authorization": {
+    "ownerAuthorizedAdminPolicyMutationForBf01Only": true,
+    "approvedPageId": "1198992073286645",
+    "sourceChangeAuthorized": false,
+    "imageBuildAuthorized": false,
+    "serviceDeployRestartOrRecreateAuthorized": false,
+    "migrationAuthorized": false,
+    "backfillAuthorized": false,
+    "routingMutationAuthorized": false,
+    "pageAllowlistMutationAuthorized": false,
+    "messengerSyntheticSendAuthorized": false,
+    "n8nActionAuthorized": false
+  },
+  "bf01Activation": {
+    "result": "ACTIVATION_SUCCESS",
+    "artifactKey": "lana.closing-strategy",
+    "artifactKind": "CLOSING_STRATEGY",
+    "pageId": "1198992073286645",
+    "channel": "PUBLISHED",
+    "rollbackTarget": {
+      "versionId": "0f71ab3c-c98e-4dda-b227-50693c071ea0",
+      "versionNumber": 2,
+      "artifactRevision": 4,
+      "contentHash": "sha256:90d548b4b84bdd2339ed48821d22a7f810be2af67c28036ba1be90b3425bbc52",
+      "pointerId": "cefcecd6-2619-4ba9-bd54-ac43b25f5abd",
+      "pointerRevisionBeforeActivation": 3
+    },
+    "current": {
+      "versionId": "805931e1-0363-4cb2-a66d-de9058982af5",
+      "versionNumber": 3,
+      "artifactRevision": 4,
+      "lifecycle": "PUBLISHED",
+      "contentHash": "sha256:e151e450efe47cfe9a48b7a55ea714ff2e1413399090fbd45d928816ecd067df",
+      "pointerId": "cefcecd6-2619-4ba9-bd54-ac43b25f5abd",
+      "pointerRevision": 4
+    },
+    "effective": {
+      "replyReconciliationPolicy": "CLARIFY_RECONCILED_V1",
+      "replyReconciliationFallbackText": "Chị muốn em làm rõ phần nào để em trả lời đúng ý chị?",
+      "mediaPartialResolutionPolicy": "PER_ASSET_V1",
+      "multiProductResolutionPolicy": "CLARIFY_V1",
+      "customerUrlPolicy": "CLASSIFIED_ALLOWLIST_V1",
+      "correctionDialoguePolicyPresent": false
+    },
+    "preservation": {
+      "shopAndOfferPublishedPointersUnchanged": true,
+      "allClosingValuesExceptReplyReconciliationUnchanged": true,
+      "bf06Unchanged": true,
+      "bf07Unchanged": true,
+      "bf08Unchanged": true,
+      "bf03ProductionImportPresent": false,
+      "bf03ActivationPathPresent": false,
+      "bf03Status": "INACTIVE_AND_NON_ACTIVATABLE"
+    },
+    "lifecycle": {
+      "sequence": [
+        "DRAFT",
+        "VALIDATED",
+        "APPROVED",
+        "CANARY_SHADOW_LIFECYCLE_ONLY",
+        "PUBLISHED"
+      ],
+      "shadowTrafficEnabled": false,
+      "workerChannelChanged": false,
+      "workerChannel": "PUBLISHED",
+      "activeShadowPointerAfterPublish": false,
+      "pointerPromotionUsedExistingAdminApiCas": true,
+      "sqlBypassOrDirectDatabaseEdit": false
+    }
+  },
+  "bf10Verification": {
+    "classification": "SOURCE_PRESENT_BUT_PRODUCTION_BEHAVIOR_NOT_ACTIVE",
+    "featureFlagOrControlPlaneModeExists": false,
+    "implementation": {
+      "commit": "e8bb7a8fa7a067655b0435713d6dd7abf70e63d7",
+      "mergeCommit": "3bc3e0a440ce64b5017f84d400a7e9a4085c435c",
+      "sourcePath": "packages/database/src/realtime-runtime.ts",
+      "behavior": "transactional markMetaAccepted clears active last_error_code, next_attempt_at, and lease fields while preserving attempt_count and append-only retry audit history"
+    },
+    "r55Source": {
+      "releaseTag": "20260810-bf03-wave-c-r5.5",
+      "tagObject": "16a8f925aafbd01805f79a1c72974eafcf6a8257",
+      "commit": "31d74695a794a28d6f93427416593b2a414270d6",
+      "implementationCommitIsAncestor": true,
+      "mergeCommitIsAncestor": true,
+      "sourceContainsBehavior": true
+    },
+    "productionOwnerService": {
+      "service": "delivery-worker",
+      "containerId": "b8df6a17ebd4cd5a4bf0aa2aef809c9e7da0115f65010155150bd90c662581ec",
+      "image": "lana-chatbot-app:realtime-compatibility-first-r32.2",
+      "imageId": "sha256:44ecb2fd9f7d6a5aa769938f738a3c6ba42b470db5a9bce3d30fdc364de2a0b7",
+      "revision": "1c004eacca7cce309a0a05643d1aa751b897d41c",
+      "implementationCommitIsAncestorOfDeployedRevision": false,
+      "health": "healthy",
+      "restartCount": 0,
+      "mutatedByThisActivation": false
+    },
+    "aggregateRedactedReadback": {
+      "allHistoricalSentAccepted": {
+        "rows": 247,
+        "rowsRetainingLastErrorCode": 13,
+        "rowsRetainingRetrySchedule": 233,
+        "rowsRetainingAttemptHistory": 247
+      },
+      "sinceR55RealtimeCutover": {
+        "cutoverAt": "2026-08-10T10:35:31.561Z",
+        "rows": 77,
+        "rowsRetainingLastErrorCode": 5,
+        "rowsRetainingRetrySchedule": 77,
+        "rowsRetainingAttemptHistory": 77,
+        "acceptedAfterRetryAuditRows": 0
+      },
+      "customerContentCaptured": false,
+      "testRecordCreated": false,
+      "existingOutboxRecordMutated": false
+    },
+    "conclusion": "BF-10 exists in the r5.5 source tree but is not active on production because the behavior-owning delivery-worker remains on the pre-BF-10 r32.2 image; the aggregate readback is consistent with the old behavior. No delivery-worker change was authorized or performed."
+  },
+  "runtimeState": {
+    "beforeSha256": "52504d7be78029bb9e3bccffef3c324b33beb824a3f108bb6e545f37fdf59fa2",
+    "afterSha256": "75678be53e4e420568ee8f2f0ff448c1e366327934c9604d83a60cd9af8d1034",
+    "currentPath": "/opt/lana-chatbot/runtime-state/current.json",
+    "historyPath": "/opt/lana-chatbot/runtime-state/history/2026-08-12T03-38-08-476Z-20260811-admin-policy-review-r6.11.json",
+    "currentHistoryByteIdentical": true,
+    "freshHostParity": "PASS",
+    "promotion": "PASS",
+    "evidenceDirectory": "/opt/lana-chatbot/shared/policy-activation/20260812-bf01-production"
+  },
+  "productionIdentity": {
+    "currentReleaseSymlink": "/opt/lana-chatbot/releases/20260811-admin-policy-review-r6.11",
+    "sourceCommit": "a7a1a21a59440ccdf3cfde5d8cdfd8ef256190bb",
+    "sourcePointerSha256": "b3151e9c66596acd275ec7375557a8ceb777f6719e955aa13f5d1a83f6693605",
+    "realtimeWorker": {
+      "containerId": "facda92073374bd385e8e47f8c49288ece146ef98bcbf054fa3f37c182d96794",
+      "image": "lana-chatbot-app:bf03-wave-c-r5.5",
+      "imageId": "sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a",
+      "revision": "31d74695a794a28d6f93427416593b2a414270d6",
+      "health": "healthy",
+      "restartCount": 0,
+      "pid1Uid": 1000
+    },
+    "adminApi": {
+      "containerId": "d269d0a683e26b517b776c8ff9a01d2818cf6efa82101318a2c7739c66273b71",
+      "image": "lana-chatbot-app:bf03-wave-c-r5.5",
+      "imageId": "sha256:97b59eb4c7fbf03be8c4efd292af06fcfafa0068dbaeb2be9d6aa8385eea951a",
+      "revision": "31d74695a794a28d6f93427416593b2a414270d6",
+      "health": "healthy",
+      "restartCount": 0,
+      "pid1Uid": 1000
+    }
+  },
+  "verification": {
+    "soak": "3/3 PASS",
+    "soakSamplesUtc": [
+      "2026-08-12T03:36:31Z",
+      "2026-08-12T03:36:51Z",
+      "2026-08-12T03:37:11Z"
+    ],
+    "realtimeWorker": {
+      "status": "IDLE",
+      "mode": "LIVE",
+      "sendEnabled": true,
+      "finalHeartbeatAgeSeconds": 6,
+      "lastErrorCode": null
+    },
+    "queues": {
+      "inboxActive": 0,
+      "inboxDuplicates": 0,
+      "metaOutboxActive": 0,
+      "metaOutboxDuplicates": 0,
+      "pancakeOutboxActive": 0
+    },
+    "delivery": {
+      "readiness": 200,
+      "queueHealth": 200
+    },
+    "migrationCount": 31,
+    "latestMigration": "0031_admin_policy_safe_deletion",
+    "page": {
+      "pageId": "1198992073286645",
+      "status": "ACTIVE",
+      "routingOwner": "APP",
+      "sendEnabled": true,
+      "killSwitch": false
+    },
+    "realtimeErrorLogsDuringActivationWindow": 0,
+    "serviceContainerIdsUnchanged": true,
+    "serviceRestartOrRecreatePerformed": false,
+    "naturalMessengerTrafficRequiredForActivationEvidence": false
+  },
+  "rollback": {
+    "policy": {
+      "endpoint": "/admin/v1/policy/pointers/rollback",
+      "pointerId": "cefcecd6-2619-4ba9-bd54-ac43b25f5abd",
+      "targetVersionId": "0f71ab3c-c98e-4dda-b227-50693c071ea0",
+      "targetVersionNumber": 2,
+      "targetContentHash": "sha256:90d548b4b84bdd2339ed48821d22a7f810be2af67c28036ba1be90b3425bbc52",
+      "expectedCurrentPointerRevision": 4,
+      "channel": "PUBLISHED",
+      "readiness": "VERIFIED_READY"
+    },
+    "imageOrServiceRollbackRequired": false,
+    "schemaRollbackRequired": false,
+    "dataDeletionRequired": false
+  },
+  "boundaries": {
+    "sourceChanged": false,
+    "imageBuilt": false,
+    "serviceDeployedRestartedOrRecreated": false,
+    "deliveryWorkerChanged": false,
+    "migrationPerformed": false,
+    "backfillPerformed": false,
+    "dataDeletionPerformed": false,
+    "routingMutationPerformed": false,
+    "pageAllowlistMutationPerformed": false,
+    "messengerProductionSendOrTestPerformedByOperator": false,
+    "n8nActionPerformed": false,
+    "directVpsSourceEditPerformed": false,
+    "directDatabaseEditOrSqlBypassPerformed": false
+  }
+}
