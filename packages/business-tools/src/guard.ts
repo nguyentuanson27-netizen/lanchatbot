@@ -4,6 +4,8 @@ import {
   GuardedReplyPlanV1Schema,
   SizeRecommendationProtectedClaimV1Schema,
   type AgentProposalV1,
+  type GuardedProtectedClaimTypeV1,
+  type GuardedProtectedClaimValidationV1,
   type ProductFactsV1,
   type SizeRecommendationProtectedClaimV1,
 } from "@lana/contracts";
@@ -41,6 +43,16 @@ const SIZE_RANGE_SEPARATORS = new Set([
   "den",
   "to",
 ]);
+const PROTECTED_CLAIM_TYPE_ORDER = [
+  "PRICE",
+  "STOCK",
+  "SIZE_FIT",
+  "ETA",
+  "SHIPPING_FEE",
+  "FREESHIP",
+  "PROMOTION_OFFER",
+  "PRODUCT_MEDIA",
+] as const satisfies readonly GuardedProtectedClaimTypeV1[];
 type SizeToken = {
   readonly text: string;
   readonly start: number;
@@ -493,8 +505,8 @@ function sizeClaimReason(
 function validateSizeRecommendations(
   proposal: AgentProposalV1,
   input: GuardInput,
+  assertedSizes: readonly string[],
 ): readonly string[] {
-  const assertedSizes = detectConcreteSizeRecommendations(proposal.reply);
   if (assertedSizes.length === 0) return [];
   const context = input.sizeClaimContext;
   const declared = new Set(proposal.protectedClaimIds ?? []);
@@ -556,6 +568,27 @@ function normalizedContains(text: string, allowedPhrase: string): boolean {
   return text.toLocaleLowerCase("vi").includes(allowedPhrase.toLocaleLowerCase("vi"));
 }
 
+function protectedClaimValidation(
+  observed: ReadonlySet<GuardedProtectedClaimTypeV1>,
+  rejected: ReadonlySet<GuardedProtectedClaimTypeV1>,
+): GuardedProtectedClaimValidationV1 {
+  const claimTypes = PROTECTED_CLAIM_TYPE_ORDER.filter((claimType) =>
+    observed.has(claimType)
+  );
+  const rejectedCount = claimTypes.filter((claimType) =>
+    rejected.has(claimType)
+  ).length;
+  const validatedCount = claimTypes.length - rejectedCount;
+  const outcome = claimTypes.length === 0
+    ? "NO_PROTECTED_CLAIMS"
+    : rejectedCount === 0
+      ? "VALIDATED"
+      : validatedCount === 0
+        ? "BLOCKED"
+        : "PARTIALLY_BLOCKED";
+  return { outcome, claimTypes, validatedCount, rejectedCount };
+}
+
 export function guardAgentProposal(input: GuardInput): GuardResult {
   const proposalResult = AgentProposalV1Schema.safeParse(input.proposal);
   if (!proposalResult.success) {
@@ -567,6 +600,7 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
       productId: null,
       handoffReason: "INVALID_AGENT_PROPOSAL",
       blockedReasonCodes: ["INVALID_AGENT_PROPOSAL"],
+      protectedClaimValidation: protectedClaimValidation(new Set(), new Set()),
       sendAuthorized: false,
     });
   }
@@ -576,6 +610,8 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
   const shippingClaim = text.match(SHIP_FEE_PATTERN)?.[0] ?? "";
   const textWithoutShippingFee = shippingClaim.length === 0 ? text : text.replace(shippingClaim, "");
   const blocked = new Set<string>();
+  const observedProtectedClaims = new Set<GuardedProtectedClaimTypeV1>();
+  const rejectedProtectedClaims = new Set<GuardedProtectedClaimTypeV1>();
   const productVerified = proposal.productId === null || input.verifiedProductIds.has(proposal.productId);
   const facts = factIsUsable(input, proposal);
   const verifiedAttachmentUrls = input.verifiedAttachmentUrls ?? (
@@ -594,18 +630,28 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
   const hasUnverifiedAttachment = proposal.attachments.some((url) =>
     verifiedAttachmentUrls === null || !verifiedAttachmentUrls.has(url)
   );
+  if (proposal.attachments.length > 0) {
+    observedProtectedClaims.add("PRODUCT_MEDIA");
+  }
   if (hasUnverifiedAttachment) {
     blocked.add("UNVERIFIED_ATTACHMENT");
+    rejectedProtectedClaims.add("PRODUCT_MEDIA");
   }
 
   const prices = parseMoney(textWithoutShippingFee);
-  if (prices.length > 0 || PRICE_CLAIM_PATTERN.test(textWithoutShippingFee)) {
+  const hasPriceClaim =
+    prices.length > 0 || PRICE_CLAIM_PATTERN.test(textWithoutShippingFee);
+  if (hasPriceClaim) {
+    observedProtectedClaims.add("PRICE");
     const allowed = new Set([facts?.listPriceVnd, facts?.salePriceVnd].filter((value): value is number => value !== null && value !== undefined));
     if (facts === null || prices.length === 0 || prices.some((price) => !allowed.has(price))) {
       blocked.add("UNAUTHORIZED_PRICE");
+      rejectedProtectedClaims.add("PRICE");
     }
   }
-  if (STOCK_PATTERN.test(text)) {
+  const hasStockClaim = STOCK_PATTERN.test(text);
+  if (hasStockClaim) {
+    observedProtectedClaims.add("STOCK");
     const normalizedText = text.toLocaleLowerCase("vi");
     const saysAvailable = /\b(?:còn\s+hàng|sẵn\s+hàng)\b/iu.test(normalizedText);
     const saysUnavailable = /\bhết\s+hàng\b/iu.test(normalizedText);
@@ -623,22 +669,33 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
       (availableSize === undefined || facts.sizes.includes(availableSize)) &&
       (unavailableSize === undefined || !facts.sizes.includes(unavailableSize)) &&
       !componentSpecific;
-    if (!consistent) blocked.add("UNAUTHORIZED_STOCK");
+    if (!consistent) {
+      blocked.add("UNAUTHORIZED_STOCK");
+      rejectedProtectedClaims.add("STOCK");
+    }
   }
-  if (ETA_PATTERN.test(text)) {
+  const hasEtaClaim = ETA_PATTERN.test(text);
+  if (hasEtaClaim) {
+    observedProtectedClaims.add("ETA");
     const eta = facts?.deliveryEta;
-    if (eta === null || eta === undefined) blocked.add("UNAUTHORIZED_ETA");
+    if (eta === null || eta === undefined) {
+      blocked.add("UNAUTHORIZED_ETA");
+      rejectedProtectedClaims.add("ETA");
+    }
     else {
       const mentioned = [...text.matchAll(ETA_VALUES_PATTERN)].flatMap((match) =>
         [match[1], match[2]].filter((value): value is string => value !== undefined).map(Number),
       );
       if (mentioned.length === 0 || mentioned.some((days) => days < eta.minDays || days > eta.maxDays)) {
         blocked.add("UNAUTHORIZED_ETA");
+        rejectedProtectedClaims.add("ETA");
       }
     }
   }
 
-  if (PROMOTION_PATTERN.test(text)) {
+  const hasPromotionClaim = PROMOTION_PATTERN.test(text);
+  if (hasPromotionClaim) {
+    observedProtectedClaims.add("PROMOTION_OFFER");
     const authorization = input.promotion;
     if (
       authorization === undefined ||
@@ -647,9 +704,12 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
       !authorization.allowedPhrases.some((phrase) => normalizedContains(text, phrase))
     ) {
       blocked.add("UNAUTHORIZED_PROMOTION");
+      rejectedProtectedClaims.add("PROMOTION_OFFER");
     }
   }
-  if (FREESHIP_PATTERN.test(text)) {
+  const hasFreeshipClaim = FREESHIP_PATTERN.test(text);
+  if (hasFreeshipClaim) {
+    observedProtectedClaims.add("FREESHIP");
     const shipping = input.shipping;
     if (
       shipping === undefined ||
@@ -658,9 +718,12 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
       Date.parse(shipping.expiresAt) <= input.now.getTime()
     ) {
       blocked.add("UNAUTHORIZED_FREESHIP");
+      rejectedProtectedClaims.add("FREESHIP");
     }
   }
-  if (SHIP_FEE_PATTERN.test(text)) {
+  const hasShippingFeeClaim = SHIP_FEE_PATTERN.test(text);
+  if (hasShippingFeeClaim) {
+    observedProtectedClaims.add("SHIPPING_FEE");
     const shipping = input.shipping;
     const fees = parseMoney(shippingClaim);
     if (
@@ -672,11 +735,22 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
       fees.some((fee) => fee !== shipping.feeVnd)
     ) {
       blocked.add("UNAUTHORIZED_SHIP_FEE");
+      rejectedProtectedClaims.add("SHIPPING_FEE");
     }
   }
 
-  for (const reason of validateSizeRecommendations(proposal, input)) {
+  const assertedSizes = detectConcreteSizeRecommendations(text);
+  const sizeClaimReasons = validateSizeRecommendations(
+    proposal,
+    input,
+    assertedSizes,
+  );
+  if (assertedSizes.length > 0) {
+    observedProtectedClaims.add("SIZE_FIT");
+  }
+  for (const reason of sizeClaimReasons) {
     blocked.add(reason);
+    rejectedProtectedClaims.add("SIZE_FIT");
   }
   const blockedReasonCodes = [...blocked].sort();
   const hasHardBlock = blockedReasonCodes.some((reason) => reason !== "UNVERIFIED_ATTACHMENT");
@@ -694,6 +768,10 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
     productId: proposal.productId,
     handoffReason: isBlocked ? "BUSINESS_POLICY_GUARD" : proposal.handoffReason,
     blockedReasonCodes,
+    protectedClaimValidation: protectedClaimValidation(
+      observedProtectedClaims,
+      rejectedProtectedClaims,
+    ),
     // A later ownership/delivery gate is the only component allowed to promote this to send intent.
     sendAuthorized: false,
   });

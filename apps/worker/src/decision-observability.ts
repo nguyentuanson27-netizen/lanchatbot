@@ -1,11 +1,21 @@
 import { createHash } from "node:crypto";
-import type { DecisionObservabilityV1 } from "@lana/contracts";
+import {
+  DECISION_BUYING_INTENT_EVIDENCE_CODES_V1,
+  DECISION_DIALOGUE_EVIDENCE_CODES_V1,
+  DECISION_GUARD_REASON_CODES_V1,
+  DECISION_RECONCILIATION_REASON_CODES_V1,
+  DECISION_SIDE_EFFECT_REASON_CODES_V1,
+  DecisionObservabilityV1Schema,
+  type DecisionObservabilityV1,
+} from "@lana/contracts";
 
 type DialogueEvidenceSource =
   DecisionObservabilityV1["dialogueEvidence"]["source"];
 type BuyingIntent = DecisionObservabilityV1["buyingIntent"];
 type ProtectedClaimType =
   DecisionObservabilityV1["protectedClaimValidation"]["claimTypes"][number];
+type ProtectedClaimOutcome =
+  DecisionObservabilityV1["protectedClaimValidation"]["outcome"];
 type GuardOutcome = DecisionObservabilityV1["guard"]["outcome"];
 type Phase = DecisionObservabilityV1["phaseBarrier"]["phase"];
 type PhaseSource = DecisionObservabilityV1["phaseBarrier"]["phaseSource"];
@@ -17,6 +27,31 @@ type SideEffectType =
   DecisionObservabilityV1["sideEffectPlan"]["effectTypes"][number];
 
 const REASON_CODE = /^[A-Z0-9][A-Z0-9_.:-]{0,127}$/u;
+const DIALOGUE_CODES = new Set<string>(DECISION_DIALOGUE_EVIDENCE_CODES_V1);
+const BUYING_CODES = new Set<string>(DECISION_BUYING_INTENT_EVIDENCE_CODES_V1);
+const GUARD_CODES = new Set<string>(DECISION_GUARD_REASON_CODES_V1);
+const RECONCILIATION_CODES = new Set<string>(
+  DECISION_RECONCILIATION_REASON_CODES_V1,
+);
+const SIDE_EFFECT_CODES = new Set<string>(DECISION_SIDE_EFFECT_REASON_CODES_V1);
+const PROTECTED_CLAIM_REASON_CODES = new Set<string>([
+  "UNAUTHORIZED_PRICE",
+  "UNAUTHORIZED_STOCK",
+  "UNAUTHORIZED_ETA",
+  "UNAUTHORIZED_PROMOTION",
+  "UNAUTHORIZED_FREESHIP",
+  "UNAUTHORIZED_SHIP_FEE",
+  "UNVERIFIED_ATTACHMENT",
+  ...DECISION_GUARD_REASON_CODES_V1.filter((code) =>
+    code.startsWith("SIZE_RECOMMENDATION_")
+  ),
+]);
+
+export function protectedClaimReasonCodes(
+  values: readonly string[],
+): readonly string[] {
+  return boundedCodes(values, 20, PROTECTED_CLAIM_REASON_CODES);
+}
 
 export interface BuildDecisionObservabilityInput {
   readonly dialogueEvidenceCodes: readonly string[];
@@ -30,6 +65,10 @@ export interface BuildDecisionObservabilityInput {
     reasonCodes: readonly string[];
   }>;
   readonly protectedClaimTypes: readonly ProtectedClaimType[];
+  readonly protectedClaimOutcome: ProtectedClaimOutcome;
+  readonly protectedClaimValidatedCount: number;
+  readonly protectedClaimRejectedCount: number;
+  readonly protectedClaimReasonCodes: readonly string[];
   readonly guardOutcome: GuardOutcome;
   readonly guardReasonCodes: readonly string[];
   readonly guardedPlanHash: string | null;
@@ -39,13 +78,20 @@ export interface BuildDecisionObservabilityInput {
   readonly strategy: Strategy;
   readonly cta: Cta;
   readonly strategyUsesModelEvidence: boolean;
+  readonly readinessOutcome: DecisionObservabilityV1["readiness"]["outcome"];
   readonly productScope: ProductScope;
   readonly sideEffectTypes: readonly SideEffectType[];
   readonly sideEffectReasonCodes: readonly string[];
 }
 
-function boundedCodes(values: readonly string[], maximum = 20): string[] {
-  return [...new Set(values.filter((value) => REASON_CODE.test(value)))]
+function boundedCodes(
+  values: readonly string[],
+  maximum = 20,
+  allowed?: ReadonlySet<string>,
+): string[] {
+  return [...new Set(values.filter((value) =>
+    REASON_CODE.test(value) && (allowed === undefined || allowed.has(value))
+  ))]
     .sort()
     .slice(0, maximum);
 }
@@ -67,40 +113,48 @@ function confidenceBand(
   return "LOW";
 }
 
+export interface ProtectedClaimValidationSummary {
+  readonly outcome: ProtectedClaimOutcome;
+  readonly claimTypes: readonly ProtectedClaimType[];
+  readonly validatedCount: number;
+  readonly rejectedCount: number;
+}
+
 export function buildDecisionObservabilityV1(
   input: BuildDecisionObservabilityInput,
 ): DecisionObservabilityV1 {
-  const dialogueCodes = boundedCodes(input.dialogueEvidenceCodes, 16);
-  const buyingReasonCodes = boundedCodes(input.buyingIntent.reasonCodes, 16);
-  const guardReasonCodes = boundedCodes(input.guardReasonCodes);
-  const sideEffectReasonCodes = boundedCodes(input.sideEffectReasonCodes);
+  const dialogueCodes = boundedCodes(input.dialogueEvidenceCodes, 16, DIALOGUE_CODES);
+  const buyingReasonCodes = boundedCodes(input.buyingIntent.reasonCodes, 16, BUYING_CODES);
+  const guardReasonCodes = boundedCodes(input.guardReasonCodes, 20, GUARD_CODES);
+  const protectedClaimReasonCodes = boundedCodes(
+    input.protectedClaimReasonCodes,
+    20,
+    GUARD_CODES,
+  );
+  const sideEffectReasonCodes = boundedCodes(
+    input.sideEffectReasonCodes,
+    20,
+    SIDE_EFFECT_CODES,
+  );
   const claimTypes = sortedUnique(input.protectedClaimTypes).slice(0, 8);
   const sideEffectTypes = sortedUnique(input.sideEffectTypes).slice(0, 8);
-  const protectedClaimOutcome = input.guardedPlanHash === null
-    ? "NOT_EVALUATED"
-    : claimTypes.length === 0
-      ? "NO_PROTECTED_CLAIMS"
-      : input.guardOutcome === "ALLOWED"
-        ? "VALIDATED"
-        : "BLOCKED";
+  const dialogueEvidenceSource = dialogueCodes.length === 0
+    ? "NONE"
+    : input.dialogueEvidenceSource === "NONE"
+      ? "DETERMINISTIC_RUNTIME"
+      : input.dialogueEvidenceSource;
   const sideEffectDisposition = sideEffectTypes.length === 0
     ? "NONE"
     : input.guardOutcome === "BLOCKED"
       ? "SAFE_FALLBACK_PLANNED"
       : "PLANNED";
-  const readinessOutcome = input.guardOutcome === "NOT_EVALUATED"
-    ? "NOT_EVALUATED"
-    : input.guardOutcome === "BLOCKED"
-      ? "LEGACY_NOT_READY"
-      : "LEGACY_READY";
-
-  return {
+  const observation: DecisionObservabilityV1 = {
     schemaVersion: 1,
     dialogueEvidence: {
-      source: input.dialogueEvidenceSource,
+      source: dialogueEvidenceSource,
       codes: dialogueCodes,
       evidenceHash: dialogueCodes.length > 0
-        ? evidenceHash([input.dialogueEvidenceSource, dialogueCodes])
+        ? evidenceHash([dialogueEvidenceSource, dialogueCodes])
         : null,
     },
     buyingIntent: {
@@ -123,21 +177,17 @@ export function buildDecisionObservabilityV1(
     },
     protectedClaimValidation: {
       verifierVersion: "LEGACY_GUARD_V1",
-      outcome: protectedClaimOutcome,
+      outcome: input.protectedClaimOutcome,
       claimTypes,
-      validatedCount: protectedClaimOutcome === "VALIDATED"
-        ? claimTypes.length
-        : 0,
-      rejectedCount: protectedClaimOutcome === "BLOCKED"
-        ? claimTypes.length
-        : 0,
-      reasonCodes: guardReasonCodes,
+      validatedCount: input.protectedClaimValidatedCount,
+      rejectedCount: input.protectedClaimRejectedCount,
+      reasonCodes: protectedClaimReasonCodes,
     },
     readiness: {
       rulesetVersion: "LEGACY_READINESS_OBSERVATION_V1",
-      outcome: readinessOutcome,
+      outcome: input.readinessOutcome,
       productScope: input.productScope,
-      reasonCodes: guardReasonCodes,
+      reasonCodes: [],
     },
     phaseBarrier: {
       contractVersion: "LEGACY_PHASE_BARRIER_OBSERVATION_V1",
@@ -182,22 +232,32 @@ export function buildDecisionObservabilityV1(
       reasonCodes: sideEffectReasonCodes,
     },
   };
+  // Validate the normalized envelope at the persistence boundary. This keeps
+  // additive observability from making an otherwise valid runtime commit fail
+  // later in the database adapter with an internally inconsistent source/hash.
+  return DecisionObservabilityV1Schema.parse(observation);
 }
 
 export function reconcileDecisionObservabilityV1(
   current: DecisionObservabilityV1,
   reasonCodes: readonly string[],
 ): DecisionObservabilityV1 {
-  return {
+  const reconciliationReasonCodes = boundedCodes(
+    reasonCodes,
+    20,
+    RECONCILIATION_CODES,
+  );
+  const sideEffectReasonCodes = boundedCodes(
+    [...current.sideEffectPlan.reasonCodes, ...reasonCodes],
+    20,
+    SIDE_EFFECT_CODES,
+  );
+  const reconciled: DecisionObservabilityV1 = {
     ...current,
-    readiness: {
-      ...current.readiness,
-      outcome: "LEGACY_READY",
-    },
     reconciliation: {
       contractVersion: "BF01_RECONCILIATION_V1",
       outcome: "OVERRIDDEN",
-      reasonCodes: boundedCodes(reasonCodes),
+      reasonCodes: reconciliationReasonCodes,
     },
     sideEffectPlan: {
       ...current.sideEffectPlan,
@@ -206,10 +266,8 @@ export function reconcileDecisionObservabilityV1(
         ...current.sideEffectPlan.effectTypes,
         "META_OUTBOX",
       ]),
-      reasonCodes: boundedCodes([
-        ...current.sideEffectPlan.reasonCodes,
-        ...reasonCodes,
-      ]),
+      reasonCodes: sideEffectReasonCodes,
     },
   };
+  return DecisionObservabilityV1Schema.parse(reconciled);
 }

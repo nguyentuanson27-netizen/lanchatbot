@@ -136,7 +136,9 @@ import {
 import { deriveAdLeadQualification } from "./ad-lead-qualification.js";
 import {
   buildDecisionObservabilityV1,
+  protectedClaimReasonCodes,
   type BuildDecisionObservabilityInput,
+  type ProtectedClaimValidationSummary,
 } from "./decision-observability.js";
 export interface RealtimeInboxPort {
   claimNext(
@@ -3141,6 +3143,12 @@ export class RealtimeRunner {
     let salesHandled = false;
     let guardedPlanHash: string | null = null;
     let proposalGuardReasonCodes: readonly string[] | null = null;
+    let protectedClaimValidation: ProtectedClaimValidationSummary = {
+      outcome: "NOT_EVALUATED",
+      claimTypes: [],
+      validatedCount: 0,
+      rejectedCount: 0,
+    };
     let wave2StrategyDecision: Wave2StrategyDecision | null = null;
     let multiFactAudit: NonNullable<
       RealtimeDecisionEventPlan["details"]["factQueryResults"]
@@ -4468,6 +4476,9 @@ export class RealtimeRunner {
           ];
         }
         proposalGuardReasonCodes = [...guarded.blockedReasonCodes];
+        if (guarded.protectedClaimValidation) {
+          protectedClaimValidation = guarded.protectedClaimValidation;
+        }
         if (sizeAdviceRequiresHandoff && handoff === null) {
           const transitioned = applySilentHandoff(
             nextState,
@@ -4613,9 +4624,11 @@ export class RealtimeRunner {
       ...buyingSignal.reasons,
       ...(wave2StrategyDecision?.evidence ?? []),
     ];
+    const strategyUsesModelEvidence =
+      wave2StrategyDecision?.evidence.includes("MODEL_ANALYSIS_ACCEPTED") ?? false;
     const modelDialogueEvidence =
       buyingSignal.source === "MODEL_STRUCTURED_OUTPUT" ||
-      proposal?.strategyAnalysis !== undefined;
+      strategyUsesModelEvidence;
     const deterministicDialogueEvidence =
       buyingSignal.source === "DETERMINISTIC" ||
       wave2StrategyDecision !== null;
@@ -4628,27 +4641,6 @@ export class RealtimeRunner {
           : deterministicDialogueEvidence
             ? "DETERMINISTIC_RUNTIME"
             : "NONE";
-    const protectedClaimTypes: Array<
-      BuildDecisionObservabilityInput["protectedClaimTypes"][number]
-    > = [];
-    const proposalFactIntent = proposal?.businessFactQuery.intent;
-    const protectedFactIntent =
-      proposalFactIntent && proposalFactIntent !== "NONE"
-        ? proposalFactIntent
-        : explicitCustomerBusinessIntent(message.text ?? "") ?? "NONE";
-    if (protectedFactIntent === "PRICE") protectedClaimTypes.push("PRICE");
-    if (protectedFactIntent === "STOCK") protectedClaimTypes.push("STOCK");
-    if (protectedFactIntent === "SIZE") protectedClaimTypes.push("SIZE_FIT");
-    if (protectedFactIntent === "ETA") protectedClaimTypes.push("ETA");
-    if (
-      (proposal?.attachments.length ?? 0) > 0 ||
-      metaMessages.some((unit) => unit.kind === "IMAGE")
-    ) {
-      protectedClaimTypes.push("PRODUCT_MEDIA");
-    }
-    if ((proposal?.protectedClaimIds?.length ?? 0) > 0) {
-      protectedClaimTypes.push("SIZE_FIT");
-    }
     const sideEffectTypes: Array<
       BuildDecisionObservabilityInput["sideEffectTypes"][number]
     > = ["CONVERSATION_STATE"];
@@ -4694,7 +4686,13 @@ export class RealtimeRunner {
         confidence: observedModelBuyingIntent?.confidence ?? null,
         reasonCodes: buyingSignal.reasons,
       },
-      protectedClaimTypes,
+      protectedClaimTypes: protectedClaimValidation.claimTypes,
+      protectedClaimOutcome: protectedClaimValidation.outcome,
+      protectedClaimValidatedCount: protectedClaimValidation.validatedCount,
+      protectedClaimRejectedCount: protectedClaimValidation.rejectedCount,
+      protectedClaimReasonCodes: protectedClaimReasonCodes(
+        proposalGuardReasonCodes ?? [],
+      ),
       guardOutcome: observabilityGuardOutcome,
       guardReasonCodes: proposalGuardReasonCodes ?? [],
       guardedPlanHash,
@@ -4705,10 +4703,11 @@ export class RealtimeRunner {
       barrier: wave2StrategyDecision?.barrier ?? "NOT_EVALUATED",
       strategy: wave2StrategyDecision?.recommendedStrategy ?? "NONE",
       cta: wave2StrategyDecision?.ctaPolicy ?? "NONE",
-      strategyUsesModelEvidence: proposal?.strategyAnalysis !== undefined,
+      strategyUsesModelEvidence,
+      readinessOutcome: "NOT_EVALUATED",
       productScope: observedProductId
         ? "RESOLVED"
-        : protectedClaimTypes.length > 0 || salesCyclePlan !== null
+        : protectedClaimValidation.claimTypes.length > 0 || salesCyclePlan !== null
           ? "UNRESOLVED"
           : "NOT_REQUIRED",
       sideEffectTypes,

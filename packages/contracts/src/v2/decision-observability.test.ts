@@ -105,6 +105,89 @@ describe("DecisionObservabilityV1Schema", () => {
     })).toThrow();
   });
 
+  it("rejects PII-shaped and unregistered dynamic reason codes", () => {
+    for (const reasonCode of [
+      "PHONE_0900000000",
+      "UNREGISTERED_RUNTIME_REASON",
+      "REASON_7",
+    ]) {
+      const invalidEnvelopes = [
+        {
+          ...validObservability,
+          dialogueEvidence: {
+            ...validObservability.dialogueEvidence,
+            codes: [reasonCode],
+          },
+        },
+        {
+          ...validObservability,
+          buyingIntent: {
+            ...validObservability.buyingIntent,
+            evidenceReasonCodes: [reasonCode],
+          },
+        },
+        {
+          ...validObservability,
+          protectedClaimValidation: {
+            ...validObservability.protectedClaimValidation,
+            reasonCodes: [reasonCode],
+          },
+        },
+        {
+          ...validObservability,
+          readiness: {
+            ...validObservability.readiness,
+            reasonCodes: [reasonCode],
+          },
+        },
+        {
+          ...validObservability,
+          reconciliation: {
+            ...validObservability.reconciliation,
+            reasonCodes: [reasonCode],
+          },
+        },
+        {
+          ...validObservability,
+          guard: {
+            ...validObservability.guard,
+            reasonCodes: [reasonCode],
+          },
+        },
+        {
+          ...validObservability,
+          sideEffectPlan: {
+            ...validObservability.sideEffectPlan,
+            reasonCodes: [reasonCode],
+          },
+        },
+      ];
+      for (const invalidEnvelope of invalidEnvelopes) {
+        expect(() => DecisionObservabilityV1Schema.parse(invalidEnvelope))
+          .toThrow();
+      }
+    }
+  });
+
+  it("accepts only the finite bounded projections emitted by current producers", () => {
+    for (const reasonCode of [
+      "MEDIA_USABLE_7_OF_9",
+      "PRE_SALE_POLICY_EXCHANGE_SIZE",
+      "IMAGE_REQUEST_SIZE_GUIDE",
+      "SIZE_CHART_SCOPE_MISMATCH",
+      "CART_PRICE_NOT_FOUND",
+      "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
+    ]) {
+      expect(DecisionObservabilityV1Schema.parse({
+        ...validObservability,
+        sideEffectPlan: {
+          ...validObservability.sideEffectPlan,
+          reasonCodes: [reasonCode],
+        },
+      }).sideEffectPlan.reasonCodes).toEqual([reasonCode]);
+    }
+  });
+
   it("rejects contradictory observations that could misstate authority", () => {
     expect(() => DecisionObservabilityV1Schema.parse({
       ...validObservability,
@@ -129,5 +212,30 @@ describe("DecisionObservabilityV1Schema", () => {
         disposition: "NONE",
       },
     })).toThrow();
+    for (const protectedClaimValidation of [
+      {
+        ...validObservability.protectedClaimValidation,
+        outcome: "NO_PROTECTED_CLAIMS",
+      },
+      {
+        ...validObservability.protectedClaimValidation,
+        outcome: "PARTIALLY_BLOCKED",
+      },
+      {
+        ...validObservability.protectedClaimValidation,
+        outcome: "BLOCKED",
+        validatedCount: 1,
+        rejectedCount: 1,
+      },
+      {
+        ...validObservability.protectedClaimValidation,
+        claimTypes: ["PRICE", "PRICE"],
+      },
+    ]) {
+      expect(() => DecisionObservabilityV1Schema.parse({
+        ...validObservability,
+        protectedClaimValidation,
+      })).toThrow();
+    }
   });
 });

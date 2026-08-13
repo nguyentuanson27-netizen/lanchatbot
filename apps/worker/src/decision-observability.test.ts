@@ -18,6 +18,10 @@ describe("DF-P1 decision observability", () => {
         reasonCodes: ["MODEL_BUYING_COMMITTED"],
       },
       protectedClaimTypes: ["PRODUCT_MEDIA", "PRICE", "PRICE"],
+      protectedClaimOutcome: "VALIDATED",
+      protectedClaimValidatedCount: 2,
+      protectedClaimRejectedCount: 0,
+      protectedClaimReasonCodes: [],
       guardOutcome: "ALLOWED",
       guardReasonCodes: [],
       guardedPlanHash: "a".repeat(64),
@@ -27,6 +31,7 @@ describe("DF-P1 decision observability", () => {
       strategy: "STRATEGY_ANSWER_OBJECTION",
       cta: "ASK_BUDGET",
       strategyUsesModelEvidence: true,
+      readinessOutcome: "NOT_EVALUATED",
       productScope: "RESOLVED",
       sideEffectTypes: ["SALES_CYCLE_STATE", "META_OUTBOX", "META_OUTBOX"],
       sideEffectReasonCodes: [],
@@ -47,7 +52,7 @@ describe("DF-P1 decision observability", () => {
         validatedCount: 2,
         rejectedCount: 0,
       },
-      readiness: { outcome: "LEGACY_READY" },
+      readiness: { outcome: "NOT_EVALUATED" },
       context: { contextVersion: "LEGACY_CONTEXT_V1" },
       strategyCta: {
         source: "MODEL_WITH_DETERMINISTIC_POLICY",
@@ -57,6 +62,7 @@ describe("DF-P1 decision observability", () => {
         effectTypes: ["META_OUTBOX", "SALES_CYCLE_STATE"],
       },
     });
+    expect(typeof result.dialogueEvidence.evidenceHash).toBe("string");
     expect(result.dialogueEvidence.evidenceHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(result.buyingIntent.evidenceHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(JSON.stringify(result)).not.toContain("0900000000");
@@ -75,6 +81,10 @@ describe("DF-P1 decision observability", () => {
         reasonCodes: [],
       },
       protectedClaimTypes: ["SIZE_FIT"],
+      protectedClaimOutcome: "BLOCKED",
+      protectedClaimValidatedCount: 0,
+      protectedClaimRejectedCount: 1,
+      protectedClaimReasonCodes: ["SIZE_RECOMMENDATION_CLAIM_REQUIRED"],
       guardOutcome: "BLOCKED",
       guardReasonCodes: ["SIZE_RECOMMENDATION_CLAIM_REQUIRED"],
       guardedPlanHash: "b".repeat(64),
@@ -84,6 +94,7 @@ describe("DF-P1 decision observability", () => {
       strategy: "STRATEGY_ASK_CLARIFY",
       cta: "ASK_MEASUREMENTS",
       strategyUsesModelEvidence: false,
+      readinessOutcome: "NOT_EVALUATED",
       productScope: "RESOLVED",
       sideEffectTypes: ["META_OUTBOX"],
       sideEffectReasonCodes: ["SIZE_RECOMMENDATION_CLAIM_REQUIRED"],
@@ -97,7 +108,7 @@ describe("DF-P1 decision observability", () => {
       },
       readiness: {
         rulesetVersion: "LEGACY_READINESS_OBSERVATION_V1",
-        outcome: "LEGACY_NOT_READY",
+        outcome: "NOT_EVALUATED",
       },
       sideEffectPlan: { disposition: "SAFE_FALLBACK_PLANNED" },
     });
@@ -116,6 +127,10 @@ describe("DF-P1 decision observability", () => {
         reasonCodes: [],
       },
       protectedClaimTypes: [],
+      protectedClaimOutcome: "NO_PROTECTED_CLAIMS",
+      protectedClaimValidatedCount: 0,
+      protectedClaimRejectedCount: 0,
+      protectedClaimReasonCodes: [],
       guardOutcome: "ALLOWED",
       guardReasonCodes: [],
       guardedPlanHash: "c".repeat(64),
@@ -125,6 +140,7 @@ describe("DF-P1 decision observability", () => {
       strategy: "STRATEGY_ASK_CLARIFY",
       cta: "ASK_OCCASION",
       strategyUsesModelEvidence: false,
+      readinessOutcome: "NOT_EVALUATED",
       productScope: "NOT_REQUIRED",
       sideEffectTypes: [],
       sideEffectReasonCodes: [],
@@ -133,6 +149,7 @@ describe("DF-P1 decision observability", () => {
     const reconciled = reconcileDecisionObservabilityV1(initial, [
       "BF01_ASK_CLARIFY_NO_REPLY_RECONCILED",
       "BF01_MODEL_CLARIFICATION_REPAIR",
+      "PHONE_0900000000",
     ]);
 
     expect(reconciled.reconciliation).toEqual({
@@ -144,6 +161,8 @@ describe("DF-P1 decision observability", () => {
       ],
     });
     expect(reconciled.buyingIntent).toEqual(initial.buyingIntent);
+    expect(reconciled.readiness).toEqual(initial.readiness);
+    expect(JSON.stringify(reconciled)).not.toContain("PHONE_0900000000");
     expect(reconciled.sideEffectPlan).toEqual({
       ...initial.sideEffectPlan,
       disposition: "PLANNED",
@@ -154,4 +173,163 @@ describe("DF-P1 decision observability", () => {
       ],
     });
   });
+
+  it("normalizes an evidence-free model source before schema validation", () => {
+    const result = buildDecisionObservabilityV1({
+      dialogueEvidenceCodes: [],
+      dialogueEvidenceSource: "MODEL_STRUCTURED_OUTPUT",
+      buyingIntent: {
+        decision: "NONE",
+        source: null,
+        requestedAction: "NONE",
+        quantity: null,
+        confidence: null,
+        reasonCodes: [],
+      },
+      protectedClaimTypes: [],
+      protectedClaimOutcome: "NO_PROTECTED_CLAIMS",
+      protectedClaimValidatedCount: 0,
+      protectedClaimRejectedCount: 0,
+      protectedClaimReasonCodes: [],
+      guardOutcome: "ALLOWED",
+      guardReasonCodes: [],
+      guardedPlanHash: "d".repeat(64),
+      phase: "DISCOVERY",
+      phaseSource: "LEGACY_CONVERSATION_STAGE_V1",
+      barrier: "NOT_EVALUATED",
+      strategy: "NONE",
+      cta: "NONE",
+      strategyUsesModelEvidence: false,
+      readinessOutcome: "NOT_EVALUATED",
+      productScope: "NOT_REQUIRED",
+      sideEffectTypes: ["CONVERSATION_STATE"],
+      sideEffectReasonCodes: [],
+    });
+
+    expect(result.dialogueEvidence).toEqual({
+      source: "NONE",
+      codes: [],
+      evidenceHash: null,
+    });
+  });
+
+  it("drops unregistered reason codes before validating persistence", () => {
+    const result = buildDecisionObservabilityV1({
+      dialogueEvidenceCodes: ["UNKNOWN_DIALOGUE_CODE"],
+      dialogueEvidenceSource: "MODEL_STRUCTURED_OUTPUT",
+      buyingIntent: {
+        decision: "NONE",
+        source: null,
+        requestedAction: "NONE",
+        quantity: null,
+        confidence: null,
+        reasonCodes: ["UNKNOWN_BUYING_CODE"],
+      },
+      protectedClaimTypes: [],
+      protectedClaimOutcome: "NO_PROTECTED_CLAIMS",
+      protectedClaimValidatedCount: 0,
+      protectedClaimRejectedCount: 0,
+      protectedClaimReasonCodes: [],
+      guardOutcome: "ALLOWED",
+      guardReasonCodes: ["UNKNOWN_GUARD_CODE"],
+      guardedPlanHash: "f".repeat(64),
+      phase: "DISCOVERY",
+      phaseSource: "LEGACY_CONVERSATION_STAGE_V1",
+      barrier: "NOT_EVALUATED",
+      strategy: "NONE",
+      cta: "NONE",
+      strategyUsesModelEvidence: false,
+      readinessOutcome: "NOT_EVALUATED",
+      productScope: "NOT_REQUIRED",
+      sideEffectTypes: ["CONVERSATION_STATE"],
+      sideEffectReasonCodes: ["UNKNOWN_SIDE_EFFECT_CODE"],
+    });
+
+    expect(result.dialogueEvidence).toEqual({
+      source: "NONE",
+      codes: [],
+      evidenceHash: null,
+    });
+    expect(result.guard.reasonCodes).toEqual([]);
+    expect(result.sideEffectPlan.reasonCodes).toEqual([]);
+  });
+
+  it("records mixed validated and rejected claim types independently", () => {
+    const result = buildDecisionObservabilityV1({
+      dialogueEvidenceCodes: ["TEXT_PRICE_OBJECTION"],
+      dialogueEvidenceSource: "DETERMINISTIC_RUNTIME",
+      buyingIntent: {
+        decision: "NONE",
+        source: null,
+        requestedAction: "NONE",
+        quantity: null,
+        confidence: null,
+        reasonCodes: [],
+      },
+      protectedClaimTypes: ["PRICE", "PRODUCT_MEDIA"],
+      protectedClaimOutcome: "PARTIALLY_BLOCKED",
+      protectedClaimValidatedCount: 1,
+      protectedClaimRejectedCount: 1,
+      protectedClaimReasonCodes: ["UNVERIFIED_ATTACHMENT"],
+      guardOutcome: "BLOCKED",
+      guardReasonCodes: ["UNVERIFIED_ATTACHMENT"],
+      guardedPlanHash: "e".repeat(64),
+      phase: "PRODUCT_MATCHED",
+      phaseSource: "LEGACY_CONVERSATION_STAGE_V1",
+      barrier: "BARRIER_PRICE",
+      strategy: "STRATEGY_ANSWER_OBJECTION",
+      cta: "ASK_BUDGET",
+      strategyUsesModelEvidence: false,
+      readinessOutcome: "NOT_EVALUATED",
+      productScope: "RESOLVED",
+      sideEffectTypes: ["META_OUTBOX"],
+      sideEffectReasonCodes: ["UNVERIFIED_ATTACHMENT"],
+    });
+
+    expect(result.protectedClaimValidation).toMatchObject({
+      outcome: "PARTIALLY_BLOCKED",
+      claimTypes: ["PRICE", "PRODUCT_MEDIA"],
+      validatedCount: 1,
+      rejectedCount: 1,
+    });
+    expect(result.readiness.outcome).toBe("NOT_EVALUATED");
+  });
+
+  it("keeps a non-claim guard failure out of claim and readiness reasons", () => {
+    const result = buildDecisionObservabilityV1({
+      dialogueEvidenceCodes: [],
+      dialogueEvidenceSource: "NONE",
+      buyingIntent: {
+        decision: "NONE",
+        source: null,
+        requestedAction: "NONE",
+        quantity: null,
+        confidence: null,
+        reasonCodes: [],
+      },
+      protectedClaimTypes: [],
+      protectedClaimOutcome: "NO_PROTECTED_CLAIMS",
+      protectedClaimValidatedCount: 0,
+      protectedClaimRejectedCount: 0,
+      protectedClaimReasonCodes: [],
+      guardOutcome: "BLOCKED",
+      guardReasonCodes: ["RAW_URL_IN_TEXT"],
+      guardedPlanHash: "1".repeat(64),
+      phase: "DISCOVERY",
+      phaseSource: "LEGACY_CONVERSATION_STAGE_V1",
+      barrier: "NOT_EVALUATED",
+      strategy: "NONE",
+      cta: "NONE",
+      strategyUsesModelEvidence: false,
+      readinessOutcome: "NOT_EVALUATED",
+      productScope: "NOT_REQUIRED",
+      sideEffectTypes: ["CONVERSATION_STATE"],
+      sideEffectReasonCodes: ["RAW_URL_IN_TEXT"],
+    });
+
+    expect(result.protectedClaimValidation.reasonCodes).toEqual([]);
+    expect(result.readiness.reasonCodes).toEqual([]);
+    expect(result.guard.reasonCodes).toEqual(["RAW_URL_IN_TEXT"]);
+  });
+
 });
