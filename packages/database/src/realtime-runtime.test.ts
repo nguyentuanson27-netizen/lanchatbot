@@ -66,6 +66,69 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           modelLatencyMs: null,
           modelTokenUsage: { prompt: null, output: null, total: null },
           buyingSignalOverride: false,
+          decisionObservability: {
+            schemaVersion: 1,
+            dialogueEvidence: {
+              source: "DETERMINISTIC_RUNTIME",
+              codes: ["DIRECT_PURCHASE_VERB"],
+              evidenceHash: "c".repeat(64),
+            },
+            buyingIntent: {
+              authorityVersion: "HYBRID_BUYING_INTENT_V1",
+              decision: "COMMITTED",
+              source: "DETERMINISTIC",
+              requestedAction: "NONE",
+              quantity: null,
+              confidenceBand: "UNKNOWN",
+              evidenceReasonCodes: ["DIRECT_PURCHASE_VERB"],
+              evidenceHash: "d".repeat(64),
+            },
+            protectedClaimValidation: {
+              verifierVersion: "LEGACY_GUARD_V1",
+              outcome: "NO_PROTECTED_CLAIMS",
+              claimTypes: [],
+              validatedCount: 0,
+              rejectedCount: 0,
+              reasonCodes: [],
+            },
+            readiness: {
+              rulesetVersion: "LEGACY_READINESS_OBSERVATION_V1",
+              outcome: "LEGACY_READY",
+              productScope: "RESOLVED",
+              reasonCodes: [],
+            },
+            phaseBarrier: {
+              contractVersion: "LEGACY_PHASE_BARRIER_OBSERVATION_V1",
+              phase: "CART_OPEN",
+              phaseSource: "SALES_CYCLE_STAGE_V1",
+              barrier: "NOT_EVALUATED",
+              barrierSource: "NONE",
+            },
+            context: { schemaVersion: 1, contextVersion: "LEGACY_CONTEXT_V1" },
+            strategyCta: {
+              rulesetVersion: "NONE",
+              strategy: "NONE",
+              cta: "NONE",
+              source: "NONE",
+            },
+            reconciliation: {
+              contractVersion: "BF01_RECONCILIATION_V1",
+              outcome: "NOT_APPLIED",
+              reasonCodes: [],
+            },
+            guard: {
+              contractVersion: "AGENT_PROPOSAL_GUARD_V1",
+              outcome: "ALLOWED",
+              reasonCodes: [],
+              planHash: "e".repeat(64),
+            },
+            sideEffectPlan: {
+              contractVersion: "REALTIME_COMMIT_PLAN_V1",
+              disposition: "PLANNED",
+              effectTypes: ["META_OUTBOX"],
+              reasonCodes: [],
+            },
+          },
         },
       }],
     }, occurredAt);
@@ -76,6 +139,8 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     const serialized = JSON.stringify(insert?.values ?? []);
     expect(serialized).not.toContain("0900000000");
     expect(serialized).not.toContain("rawText");
+    expect(serialized).toContain("decisionObservability");
+    expect(serialized).toContain("HYBRID_BUYING_INTENT_V1");
     expect(calls.at(-1)?.sql).toContain("COMMIT");
   });
 

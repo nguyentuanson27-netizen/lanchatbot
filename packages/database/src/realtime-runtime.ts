@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
+import type { DecisionObservabilityV1 } from "@lana/contracts";
 import type { CipherBundle } from "./repositories.js";
 import {
   LocalEnvelopeCipher,
@@ -192,6 +193,7 @@ export interface RealtimeDecisionEventPlan {
   readonly action: string | null;
   readonly occurredAt: Date;
   readonly details: Readonly<{
+    decisionObservability?: DecisionObservabilityV1;
     auditSchemaVersion?: 1 | 2;
     stateRevisionBefore?: number;
     stateRevisionAfter?: number;

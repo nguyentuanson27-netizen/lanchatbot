@@ -270,6 +270,25 @@ describe("realtime golden transcripts", () => {
       "PRODUCT_MATCHED",
       "PRICE_CARD_SENT",
     ]);
+    const observation = committed?.decisionEvents?.find((event) =>
+      event.details.decisionObservability !== undefined
+    )?.details.decisionObservability;
+    expect(observation)
+      .toMatchObject({
+        schemaVersion: 1,
+        protectedClaimValidation: {
+          verifierVersion: "LEGACY_GUARD_V1",
+          claimTypes: expect.arrayContaining(["PRICE", "PRODUCT_MEDIA"]),
+        },
+        phaseBarrier: {
+          phaseSource: "LEGACY_CONVERSATION_STAGE_V1",
+        },
+        context: { contextVersion: "LEGACY_CONTEXT_V1" },
+        sideEffectPlan: {
+          disposition: "PLANNED",
+          effectTypes: ["CONVERSATION_STATE", "META_OUTBOX"],
+        },
+      });
     const replay = await replayGolden({
       fixtureId: "GOLDEN-PRODUCT-PRICE-001",
       text: "CB182",
@@ -575,5 +594,70 @@ describe("realtime golden transcripts", () => {
         ]),
       }),
     ]));
+  });
+
+  it("keeps Wave2-off strategy analysis out of persisted model evidence", async () => {
+    const { committed } = await replayGolden({
+      fixtureId: "DFP1-WAVE2-OFF-MODEL-ANALYSIS",
+      text: "Tư vấn giúp chị",
+      productMatched: false,
+      wave2StrategyEnabled: false,
+      modelProposal: {
+        ...noReplyProposal,
+        intent: "clarify",
+        action: "NO_REPLY",
+        reply: "",
+        strategyAnalysis: {
+          need: "NEED_OCCASION",
+          barrier: "NONE",
+          decisionFactor: "OCCASION",
+          recommendedStrategy: "STRATEGY_RECOMMEND_PRODUCT",
+          confidence: 0.95,
+          evidence: ["TEXT_OCCASION"],
+        },
+      },
+    });
+
+    const observation = committed?.decisionEvents?.find((event) =>
+      event.details.decisionObservability !== undefined
+    )?.details.decisionObservability;
+    expect(observation)
+      .toMatchObject({
+        dialogueEvidence: { source: "NONE", codes: [], evidenceHash: null },
+        strategyCta: { source: "NONE", strategy: "NONE", cta: "NONE" },
+        protectedClaimValidation: {
+          outcome: "NO_PROTECTED_CLAIMS",
+          claimTypes: [],
+        },
+        readiness: { outcome: "NOT_EVALUATED" },
+      });
+  });
+
+  it("labels rejected Wave2 model analysis as deterministic runtime evidence", async () => {
+    const { committed } = await replayGolden({
+      fixtureId: "DFP1-WAVE2-REJECTED-MODEL-ANALYSIS",
+      text: "Tư vấn giúp chị",
+      productMatched: false,
+      wave2StrategyEnabled: true,
+      modelProposal: {
+        ...noReplyProposal,
+        intent: "clarify",
+        action: "REPLY",
+        reply: "Chị đang tìm mẫu để mặc dịp nào ạ?",
+        strategyAnalysis: {
+          need: "NEED_BUDGET",
+          barrier: "BARRIER_PRICE",
+          decisionFactor: "BUDGET",
+          recommendedStrategy: "STRATEGY_ANSWER_OBJECTION",
+          confidence: 0.4,
+          evidence: ["TEXT_BUDGET"],
+        },
+      },
+    });
+
+    const observation = committed?.decisionEvents?.[0]?.details.decisionObservability;
+    expect(observation?.dialogueEvidence.source).toBe("DETERMINISTIC_RUNTIME");
+    expect(observation?.dialogueEvidence.codes).not.toContain("MODEL_ANALYSIS_ACCEPTED");
+    expect(observation?.strategyCta.source).toBe("DETERMINISTIC_RUNTIME");
   });
 });

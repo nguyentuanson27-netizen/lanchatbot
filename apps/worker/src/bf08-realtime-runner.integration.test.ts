@@ -531,6 +531,23 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     expect(result.commit.metaPlan).toBeDefined();
     expect(result.commit.pancakeTagPlan).toBeUndefined();
     expect(JSON.stringify(result.commit)).not.toContain("token=secret");
+    expect(result.commit.decisionEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        details: expect.objectContaining({
+          decisionObservability: expect.objectContaining({
+            sideEffectPlan: {
+              contractVersion: "REALTIME_COMMIT_PLAN_V1",
+              disposition: "SAFE_FALLBACK_PLANNED",
+              effectTypes: ["CONVERSATION_STATE", "META_OUTBOX"],
+              reasonCodes: [
+                "CUSTOMER_URL_SAFE_EXPLANATION_SENT",
+                "CUSTOMER_URL_UNSUPPORTED_EXTERNAL",
+              ],
+            },
+          }),
+        }),
+      }),
+    ]));
   });
 
   it("uses only bounded repair output for an initially invalid explanation", async () => {
@@ -649,6 +666,20 @@ describe("BF-08 production-wrapper customer URL policy", () => {
       expect.objectContaining({
         eventType: "GUARD_BLOCKED",
         reasonCodes: expect.arrayContaining(["CUSTOMER_URL_PRIVATE_ADDRESS"]),
+        details: expect.objectContaining({
+          decisionObservability: expect.objectContaining({
+            sideEffectPlan: {
+              contractVersion: "REALTIME_COMMIT_PLAN_V1",
+              disposition: "SAFE_FALLBACK_PLANNED",
+              effectTypes: [
+                "CONVERSATION_STATE",
+                "HANDOFF",
+                "PANCAKE_TAG_OUTBOX",
+              ],
+              reasonCodes: ["CUSTOMER_URL_PRIVATE_ADDRESS"],
+            },
+          }),
+        }),
       }),
     ]));
   });

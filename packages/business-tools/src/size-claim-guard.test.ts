@@ -319,6 +319,12 @@ describe("BF-04 verified size claims", () => {
       action: "HANDOFF",
       textUnits: [],
       blockedReasonCodes: ["SIZE_RECOMMENDATION_UNDECLARED"],
+      protectedClaimValidation: {
+        outcome: "BLOCKED",
+        claimTypes: ["SIZE_FIT"],
+        validatedCount: 0,
+        rejectedCount: 1,
+      },
     });
   });
 
@@ -328,6 +334,12 @@ describe("BF-04 verified size claims", () => {
       action: "REPLY",
       textUnits: ["Theo số đo, chị hợp size L; mặc thoải mái có thể cân nhắc size M."],
       blockedReasonCodes: [],
+      protectedClaimValidation: {
+        outcome: "VALIDATED",
+        claimTypes: ["SIZE_FIT"],
+        validatedCount: 1,
+        rejectedCount: 0,
+      },
     });
   });
 
@@ -346,6 +358,15 @@ describe("BF-04 verified size claims", () => {
 
   it("does not require a fit claim for a catalog list", () => {
     const result = guard("Size: S/M/L.", null);
-    expect(result).toMatchObject({ action: "REPLY", blockedReasonCodes: [] });
+    expect(result).toMatchObject({
+      action: "REPLY",
+      blockedReasonCodes: [],
+      protectedClaimValidation: {
+        outcome: "NO_PROTECTED_CLAIMS",
+        claimTypes: [],
+        validatedCount: 0,
+        rejectedCount: 0,
+      },
+    });
   });
 });

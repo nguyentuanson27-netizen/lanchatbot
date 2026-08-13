@@ -453,6 +453,20 @@ describe("BF-01 runner reconciliation", () => {
         guardedPlanHash: guardedClarificationPlanHash(safeRepairText),
         outboundMessageCount: 1,
         renderedReplyHash: renderedReplyHash(safeRepairText),
+        decisionObservability: {
+          reconciliation: {
+            contractVersion: "BF01_RECONCILIATION_V1",
+            outcome: "OVERRIDDEN",
+            reasonCodes: expect.arrayContaining([
+              "BF01_ASK_CLARIFY_NO_REPLY_RECONCILED",
+              "BF01_MODEL_CLARIFICATION_REPAIR",
+            ]),
+          },
+          sideEffectPlan: {
+            disposition: "PLANNED",
+            effectTypes: expect.arrayContaining(["META_OUTBOX"]),
+          },
+        },
       },
     });
   });

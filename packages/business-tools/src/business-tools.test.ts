@@ -275,6 +275,14 @@ describe("facts and deterministic policy guard", () => {
     expect(result.blockedReasonCodes).toEqual([]);
     expect(result.action).toBe("REPLY");
     expect(result.sendAuthorized).toBe(false);
+    expect(result).toMatchObject({
+      protectedClaimValidation: {
+        outcome: "VALIDATED",
+        claimTypes: ["PRICE", "STOCK", "ETA", "PRODUCT_MEDIA"],
+        validatedCount: 4,
+        rejectedCount: 0,
+      },
+    });
   });
 
   it("uses the verified media selection instead of the legacy facts image set", () => {
@@ -310,6 +318,12 @@ describe("facts and deterministic policy guard", () => {
       imageUrls: [],
       blockedReasonCodes: ["UNVERIFIED_ATTACHMENT"],
       handoffReason: null,
+      protectedClaimValidation: {
+        outcome: "PARTIALLY_BLOCKED",
+        claimTypes: ["PRICE", "PRODUCT_MEDIA"],
+        validatedCount: 1,
+        rejectedCount: 1,
+      },
     });
   });
 
@@ -326,7 +340,18 @@ describe("facts and deterministic policy guard", () => {
       "UNAUTHORIZED_FREESHIP",
       "UNAUTHORIZED_SHIP_FEE",
     ]));
-    expect(result).toMatchObject({ action: "HANDOFF", textUnits: [], imageUrls: [], sendAuthorized: false });
+    expect(result).toMatchObject({
+      action: "HANDOFF",
+      textUnits: [],
+      imageUrls: [],
+      sendAuthorized: false,
+      protectedClaimValidation: {
+        outcome: "BLOCKED",
+        claimTypes: ["PRICE", "SHIPPING_FEE", "FREESHIP", "PROMOTION_OFFER"],
+        validatedCount: 0,
+        rejectedCount: 4,
+      },
+    });
   });
 
   it("blocks stale facts, raw URLs, unverified products and attachments", () => {
@@ -368,5 +393,44 @@ describe("facts and deterministic policy guard", () => {
       now,
     });
     expect(result.blockedReasonCodes).toContain("PREMATURE_ORDER_INFO_REQUEST");
+  });
+
+  it("does not fabricate a protected-claim rejection for a non-claim guard block", () => {
+    const result = guardAgentProposal({
+      proposal: proposal("See https://evil.test/x"),
+      facts: null,
+      verifiedProductIds: new Set(["SD396"]),
+      now,
+    });
+
+    expect(result.blockedReasonCodes).toEqual(["RAW_URL_IN_TEXT"]);
+    expect(result).toMatchObject({
+      protectedClaimValidation: {
+        outcome: "NO_PROTECTED_CLAIMS",
+        claimTypes: [],
+        validatedCount: 0,
+        rejectedCount: 0,
+      },
+    });
+  });
+
+  it("emits a bounded no-claim summary for invalid proposals", () => {
+    const result = guardAgentProposal({
+      proposal: { reply: "unparsed customer or model text" },
+      facts: null,
+      verifiedProductIds: new Set(),
+      now,
+    });
+
+    expect(result).toMatchObject({
+      action: "HANDOFF",
+      blockedReasonCodes: ["INVALID_AGENT_PROPOSAL"],
+      protectedClaimValidation: {
+        outcome: "NO_PROTECTED_CLAIMS",
+        claimTypes: [],
+        validatedCount: 0,
+        rejectedCount: 0,
+      },
+    });
   });
 });

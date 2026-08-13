@@ -556,6 +556,107 @@ export const AgentProposalV1Schema = z.object({
 });
 export type AgentProposalV1 = z.infer<typeof AgentProposalV1Schema>;
 
+export const GuardedProtectedClaimTypeV1Schema = z.enum([
+  "PRICE",
+  "STOCK",
+  "SIZE_FIT",
+  "ETA",
+  "SHIPPING_FEE",
+  "FREESHIP",
+  "PROMOTION_OFFER",
+  "PRODUCT_MEDIA",
+]);
+export type GuardedProtectedClaimTypeV1 = z.infer<
+  typeof GuardedProtectedClaimTypeV1Schema
+>;
+
+/**
+ * Bounded observation of the claims evaluated by this exact guard pass. This
+ * is not canonical readiness or the future DF05/DF06 evidence authority.
+ */
+export const GuardedProtectedClaimValidationV1Schema = z.object({
+  outcome: z.enum([
+    "NO_PROTECTED_CLAIMS",
+    "VALIDATED",
+    "PARTIALLY_BLOCKED",
+    "BLOCKED",
+  ]),
+  claimTypes: z.array(GuardedProtectedClaimTypeV1Schema).max(8),
+  validatedCount: z.number().int().nonnegative().max(8),
+  rejectedCount: z.number().int().nonnegative().max(8),
+}).strict().superRefine((value, context) => {
+  const uniqueClaimCount = new Set(value.claimTypes).size;
+  if (uniqueClaimCount !== value.claimTypes.length) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["claimTypes"],
+      message: "guarded protected claim types must be unique",
+    });
+  }
+  if (
+    value.validatedCount > value.claimTypes.length ||
+    value.rejectedCount > value.claimTypes.length ||
+    value.validatedCount + value.rejectedCount !== value.claimTypes.length
+  ) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "guarded claim counts must account for each declared claim type once",
+    });
+  }
+
+  if (value.outcome === "NO_PROTECTED_CLAIMS") {
+    if (
+      value.claimTypes.length !== 0 ||
+      value.validatedCount !== 0 ||
+      value.rejectedCount !== 0
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "NO_PROTECTED_CLAIMS requires an empty guarded claim summary",
+      });
+    }
+    return;
+  }
+  if (value.claimTypes.length === 0) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["claimTypes"],
+      message: "an observed guarded claim outcome requires at least one claim type",
+    });
+    return;
+  }
+  if (
+    value.outcome === "VALIDATED" &&
+    (value.validatedCount !== value.claimTypes.length || value.rejectedCount !== 0)
+  ) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "VALIDATED requires every guarded claim type to pass",
+    });
+  }
+  if (
+    value.outcome === "PARTIALLY_BLOCKED" &&
+    (value.validatedCount === 0 || value.rejectedCount === 0)
+  ) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "PARTIALLY_BLOCKED requires both validated and rejected guarded claims",
+    });
+  }
+  if (
+    value.outcome === "BLOCKED" &&
+    (value.validatedCount !== 0 || value.rejectedCount !== value.claimTypes.length)
+  ) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "BLOCKED requires every guarded claim type to be rejected",
+    });
+  }
+});
+export type GuardedProtectedClaimValidationV1 = z.infer<
+  typeof GuardedProtectedClaimValidationV1Schema
+>;
+
 export const GuardedReplyPlanV1Schema = z.object({
   schemaVersion: z.literal(1),
   action: ReplyActionSchema,
@@ -564,6 +665,7 @@ export const GuardedReplyPlanV1Schema = z.object({
   productId: z.string().min(1).max(128).nullable(),
   handoffReason: z.string().min(1).max(128).nullable(),
   blockedReasonCodes: z.array(z.string().min(1).max(128)).max(20),
+  protectedClaimValidation: GuardedProtectedClaimValidationV1Schema.optional(),
   sendAuthorized: z.literal(false),
 });
 export type GuardedReplyPlanV1 = z.infer<typeof GuardedReplyPlanV1Schema>;

@@ -134,6 +134,12 @@ import {
 } from "./pre-sale-policy.js";
 
 import { deriveAdLeadQualification } from "./ad-lead-qualification.js";
+import {
+  buildDecisionObservabilityV1,
+  protectedClaimReasonCodes,
+  type BuildDecisionObservabilityInput,
+  type ProtectedClaimValidationSummary,
+} from "./decision-observability.js";
 export interface RealtimeInboxPort {
   claimNext(
     workerId: string,
@@ -3136,6 +3142,13 @@ export class RealtimeRunner {
     let modelErrorClass: string | null = null;
     let salesHandled = false;
     let guardedPlanHash: string | null = null;
+    let proposalGuardReasonCodes: readonly string[] | null = null;
+    let protectedClaimValidation: ProtectedClaimValidationSummary = {
+      outcome: "NOT_EVALUATED",
+      claimTypes: [],
+      validatedCount: 0,
+      rejectedCount: 0,
+    };
     let wave2StrategyDecision: Wave2StrategyDecision | null = null;
     let multiFactAudit: NonNullable<
       RealtimeDecisionEventPlan["details"]["factQueryResults"]
@@ -4462,6 +4475,10 @@ export class RealtimeRunner {
               : []),
           ];
         }
+        proposalGuardReasonCodes = [...guarded.blockedReasonCodes];
+        if (guarded.protectedClaimValidation) {
+          protectedClaimValidation = guarded.protectedClaimValidation;
+        }
         if (sizeAdviceRequiresHandoff && handoff === null) {
           const transitioned = applySilentHandoff(
             nextState,
@@ -4590,6 +4607,119 @@ export class RealtimeRunner {
       .digest("hex");
     const salesStageBefore = salesCycleRecord?.state.stage ?? null;
     const salesStageAfter = salesCyclePlan?.state.stage ?? salesStageBefore;
+    const guardOutcome: RealtimeDecisionEventPlan["details"]["guardOutcome"] =
+      guardedPlanHash === null
+        ? "NOT_APPLICABLE"
+        : handoffGuardReasonCodes.length > 0 || handoff !== null
+          ? "BLOCKED"
+          : "ALLOWED";
+    const observabilityGuardOutcome:
+      BuildDecisionObservabilityInput["guardOutcome"] =
+      proposalGuardReasonCodes === null
+        ? "NOT_EVALUATED"
+        : proposalGuardReasonCodes.length > 0
+          ? "BLOCKED"
+          : "ALLOWED";
+    const dialogueEvidenceCodes = [
+      ...buyingSignal.reasons,
+      ...(wave2StrategyDecision?.evidence ?? []),
+    ];
+    const strategyUsesModelEvidence =
+      wave2StrategyDecision?.evidence.includes("MODEL_ANALYSIS_ACCEPTED") ?? false;
+    const modelDialogueEvidence =
+      buyingSignal.source === "MODEL_STRUCTURED_OUTPUT" ||
+      strategyUsesModelEvidence;
+    const deterministicDialogueEvidence =
+      buyingSignal.source === "DETERMINISTIC" ||
+      wave2StrategyDecision !== null;
+    const dialogueEvidenceSource:
+      BuildDecisionObservabilityInput["dialogueEvidenceSource"] =
+      modelDialogueEvidence && deterministicDialogueEvidence
+        ? "HYBRID_RUNTIME"
+        : modelDialogueEvidence
+          ? "MODEL_STRUCTURED_OUTPUT"
+          : deterministicDialogueEvidence
+            ? "DETERMINISTIC_RUNTIME"
+            : "NONE";
+    const sideEffectTypes: Array<
+      BuildDecisionObservabilityInput["sideEffectTypes"][number]
+    > = ["CONVERSATION_STATE"];
+    if (metaMessages.length > 0) sideEffectTypes.push("META_OUTBOX");
+    if (desiredTag && tagId) sideEffectTypes.push("PANCAKE_TAG_OUTBOX");
+    if (
+      handoff &&
+      state.conversationOwner === "BOT" &&
+      nextState.conversationOwner === "HUMAN"
+    ) sideEffectTypes.push("HANDOFF");
+    if (salesCyclePlan) {
+      sideEffectTypes.push("SALES_CYCLE_STATE");
+      if (salesCyclePlan.events.some((event) =>
+        event.commandKind === "CART_OPENED" ||
+        event.commandKind === "CART_MUTATED" ||
+        event.commandKind === "CART_READY" ||
+        event.commandKind === "CHECKOUT_DETAILS_CAPTURED" ||
+        event.commandKind === "CLARIFICATION_REQUESTED" ||
+        event.commandKind === "CLARIFICATION_RESOLVED"
+      )) sideEffectTypes.push("CART");
+      if (salesCyclePlan.events.some((event) =>
+        event.commandKind === "PREVIEW_CREATED" ||
+        event.commandKind === "CONFIRM_PURCHASE" ||
+        event.commandKind === "PAYMENT_RECEIPT_RECEIVED"
+      )) sideEffectTypes.push("ORDER");
+    }
+    const observedModelBuyingIntent =
+      buyingSignal.source === "MODEL_STRUCTURED_OUTPUT"
+        ? proposal?.salesSignals?.buyingIntent
+        : undefined;
+    const observedProductId =
+      businessFacts?.productId ??
+      resolvedProduct?.productId ??
+      nextState.currentProductId;
+    const customerUrlSafeFallbackPlanned =
+      customerUrlDisposition === "HANDOFF" ||
+      customerUrlDisposition === "EXPLAIN_UNSUPPORTED";
+    const decisionObservability = buildDecisionObservabilityV1({
+      dialogueEvidenceCodes,
+      dialogueEvidenceSource,
+      buyingIntent: {
+        decision: buyingSignal.decision,
+        source: buyingSignal.source,
+        requestedAction: observedModelBuyingIntent?.requestedAction ?? "NONE",
+        quantity: buyingSignal.quantity,
+        confidence: observedModelBuyingIntent?.confidence ?? null,
+        reasonCodes: buyingSignal.reasons,
+      },
+      protectedClaimTypes: protectedClaimValidation.claimTypes,
+      protectedClaimOutcome: protectedClaimValidation.outcome,
+      protectedClaimValidatedCount: protectedClaimValidation.validatedCount,
+      protectedClaimRejectedCount: protectedClaimValidation.rejectedCount,
+      protectedClaimReasonCodes: protectedClaimReasonCodes(
+        proposalGuardReasonCodes ?? [],
+      ),
+      guardOutcome: observabilityGuardOutcome,
+      guardReasonCodes: proposalGuardReasonCodes ?? [],
+      guardedPlanHash,
+      phase: salesStageAfter ?? nextState.salesStage,
+      phaseSource: salesStageAfter === null
+        ? "LEGACY_CONVERSATION_STAGE_V1"
+        : "SALES_CYCLE_STAGE_V1",
+      barrier: wave2StrategyDecision?.barrier ?? "NOT_EVALUATED",
+      strategy: wave2StrategyDecision?.recommendedStrategy ?? "NONE",
+      cta: wave2StrategyDecision?.ctaPolicy ?? "NONE",
+      strategyUsesModelEvidence,
+      readinessOutcome: "NOT_EVALUATED",
+      productScope: observedProductId
+        ? "RESOLVED"
+        : protectedClaimValidation.claimTypes.length > 0 || salesCyclePlan !== null
+          ? "UNRESOLVED"
+          : "NOT_REQUIRED",
+      sideEffectTypes,
+      sideEffectReasonCodes: [
+        ...handoffGuardReasonCodes,
+        ...(customerUrlSafeFallbackPlanned ? customerUrlReasonCodes : []),
+      ],
+      safeFallbackPlanned: customerUrlSafeFallbackPlanned,
+    });
     const modelTelemetry = resolveExplicitModelTelemetry({
       modelCalled,
       hasProviderUsage: hasModelTokenUsage,
@@ -4638,6 +4768,7 @@ export class RealtimeRunner {
         action: finalAction,
         occurredAt,
         details: {
+          decisionObservability,
           auditSchemaVersion: this.options.decisionAuditV2Enabled ? 2 : 1,
           stateRevisionBefore: state.revision,
           stateRevisionAfter: nextState.revision,
@@ -4687,12 +4818,7 @@ export class RealtimeRunner {
             this.options.decisionAuditV2Enabled && businessFacts
               ? `${businessFacts.source}:${businessFacts.observedAt}`
               : null,
-          guardOutcome:
-            guardedPlanHash === null
-              ? "NOT_APPLICABLE"
-              : handoffGuardReasonCodes.length > 0 || handoff !== null
-                ? "BLOCKED"
-                : "ALLOWED",
+          guardOutcome,
           processingLatencyMs:
             this.options.decisionAuditV2Enabled
               ? Math.max(0, Date.now() - processingStartedAt)

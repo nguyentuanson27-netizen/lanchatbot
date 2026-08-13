@@ -36,6 +36,112 @@ describe("phase 1 contracts", () => {
     expect(result.success).toBe(false);
   });
 
+  it("keeps legacy guarded plans valid without a claim-validation summary", () => {
+    expect(GuardedReplyPlanV1Schema.safeParse({
+      schemaVersion: 1,
+      action: "REPLY",
+      textUnits: ["Dạ mẫu này còn ạ"],
+      imageUrls: [],
+      productId: "SQ149",
+      handoffReason: null,
+      blockedReasonCodes: [],
+      sendAuthorized: false,
+    }).success).toBe(true);
+  });
+
+  it("accepts a strict bounded guard claim-validation summary", () => {
+    const protectedClaimValidation = {
+      outcome: "PARTIALLY_BLOCKED",
+      claimTypes: ["PRICE", "PRODUCT_MEDIA"],
+      validatedCount: 1,
+      rejectedCount: 1,
+    } as const;
+    const parsed = GuardedReplyPlanV1Schema.parse({
+      schemaVersion: 1,
+      action: "REPLY",
+      textUnits: ["Dạ em gửi thông tin đã kiểm tra ạ"],
+      imageUrls: [],
+      productId: "SQ149",
+      handoffReason: null,
+      blockedReasonCodes: ["UNVERIFIED_ATTACHMENT"],
+      protectedClaimValidation,
+      sendAuthorized: false,
+    });
+
+    expect(parsed.protectedClaimValidation).toEqual(protectedClaimValidation);
+  });
+
+  it("rejects PII fields, unknown claim types and inconsistent guard counts", () => {
+    const plan = {
+      schemaVersion: 1,
+      action: "REPLY",
+      textUnits: ["Dạ em gửi thông tin đã kiểm tra ạ"],
+      imageUrls: [],
+      productId: "SQ149",
+      handoffReason: null,
+      blockedReasonCodes: [],
+      sendAuthorized: false,
+    } as const;
+    const invalidSummaries = [
+      {
+        outcome: "VALIDATED",
+        claimTypes: ["PRICE"],
+        validatedCount: 1,
+        rejectedCount: 0,
+        rawText: "SĐT 0900000000",
+      },
+      {
+        outcome: "VALIDATED",
+        claimTypes: ["CUSTOMER_PHONE"],
+        validatedCount: 1,
+        rejectedCount: 0,
+      },
+      {
+        outcome: "NO_PROTECTED_CLAIMS",
+        claimTypes: ["PRICE"],
+        validatedCount: 0,
+        rejectedCount: 0,
+      },
+      {
+        outcome: "VALIDATED",
+        claimTypes: ["PRICE", "STOCK"],
+        validatedCount: 1,
+        rejectedCount: 0,
+      },
+      {
+        outcome: "PARTIALLY_BLOCKED",
+        claimTypes: ["PRICE", "STOCK"],
+        validatedCount: 2,
+        rejectedCount: 0,
+      },
+      {
+        outcome: "BLOCKED",
+        claimTypes: ["PRICE"],
+        validatedCount: 1,
+        rejectedCount: 1,
+      },
+      {
+        outcome: "BLOCKED",
+        claimTypes: ["PRICE"],
+        validatedCount: 0,
+        rejectedCount: 2,
+      },
+      {
+        outcome: "VALIDATED",
+        claimTypes: ["PRICE", "PRICE"],
+        validatedCount: 2,
+        rejectedCount: 0,
+      },
+    ];
+
+    for (const protectedClaimValidation of invalidSummaries) {
+      expect(GuardedReplyPlanV1Schema.safeParse({
+        ...plan,
+        protectedClaimValidation,
+      }).success).toBe(false);
+    }
+  });
+
   it("accepts an authoritative product fact envelope", () => {
     expect(
       BusinessFactEnvelopeV1Schema.parse({
