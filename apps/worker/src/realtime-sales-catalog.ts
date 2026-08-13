@@ -63,6 +63,10 @@ export type CartSelectionResult =
         readonly eta: string | null;
       };
       readonly eta: { readonly minDays: number; readonly maxDays: number } | null;
+      readonly etaExpiresAt: string | null;
+      readonly sourceAuthority: "POS_SNAPSHOT";
+      readonly stockStatus: "IN_STOCK" | "PRE_ORDER";
+      readonly stockAvailableQuantity: number;
       readonly sourceObservedAt: string;
       readonly sourceExpiresAt: string;
     }
@@ -393,6 +397,9 @@ export function cartSelectionFromSnapshot(
   }
   const stockQuantity = typeof row.stock_quantity === "number" ? row.stock_quantity : null;
   const policy = snapshot.fulfillment_policy;
+  if (stockQuantity === null) {
+    return failed("OUT_OF_STOCK", "CART_STOCK_UNAVAILABLE", matching);
+  }
   if (stockQuantity === 0 && !policy?.can_order_when_zero) {
     return failed("OUT_OF_STOCK", "CART_VARIANT_OUT_OF_STOCK", matching);
   }
@@ -435,6 +442,7 @@ export function cartSelectionFromSnapshot(
 
   let eta: { minDays: number; maxDays: number } | null = null;
   let etaVersion: string | null = null;
+  let etaExpiresAt: string | null = null;
   if (query.deliveryAddress) {
     const region = resolveRegion(snapshot, query.deliveryAddress);
     const zeroStock = stockQuantity === 0 && policy?.can_order_when_zero === true;
@@ -446,7 +454,19 @@ export function cartSelectionFromSnapshot(
       prepMin === null || prepMin === undefined || prepMax === null || prepMax === undefined ||
       transitMin === null || transitMax === null
     ) return failed("ETA_UNAVAILABLE", "CART_ETA_UNAVAILABLE", matching);
+    const rawEtaValidUntil = text(policy?.eta_valid_until);
+    const etaValidUntil = rawEtaValidUntil === "" ? null : Date.parse(rawEtaValidUntil);
+    if (etaValidUntil !== null && !Number.isFinite(etaValidUntil)) {
+      return failed("ETA_UNAVAILABLE", "CART_ETA_TIMESTAMP_INVALID", matching);
+    }
+    if (etaValidUntil !== null && etaValidUntil <= now.getTime()) {
+      return failed("ETA_UNAVAILABLE", "CART_ETA_STALE", matching);
+    }
     eta = { minDays: prepMin + transitMin, maxDays: prepMax + transitMax };
+    etaExpiresAt = new Date(Math.min(
+      expiresAt.getTime(),
+      etaValidUntil ?? Number.POSITIVE_INFINITY,
+    )).toISOString();
     etaVersion = version("eta", {
       policy: snapshot.policy_version,
       region: region?.[0] ?? null,
@@ -511,6 +531,10 @@ export function cartSelectionFromSnapshot(
       eta: etaVersion,
     },
     eta,
+    etaExpiresAt,
+    sourceAuthority: "POS_SNAPSHOT",
+    stockStatus: stockQuantity < query.quantity ? "PRE_ORDER" : "IN_STOCK",
+    stockAvailableQuantity: stockQuantity,
     sourceObservedAt: snapshot.synced_at,
     sourceExpiresAt: expiresAt.toISOString(),
   };

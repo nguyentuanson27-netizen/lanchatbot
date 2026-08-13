@@ -58,11 +58,20 @@ describe("DF05 typed protected-claim provenance", () => {
       productId: "SP-001", variantId: "SET-M", priceVnd: 1_250_000,
       priceVersion: "price:7", inventoryVersion: "inventory:9",
       etaVersion: "eta:2", eta: { minDays: 2, maxDays: 4 },
+      sourceAuthority: "POS_SNAPSHOT",
+      stockStatus: "PRE_ORDER", stockAvailableQuantity: 0,
       observedAt: "2026-08-13T05:00:00.000Z",
       expiresAt: "2026-08-13T05:05:00.000Z",
+      etaExpiresAt: "2026-08-13T05:03:00.000Z",
     }]);
     expect(result.map(({ type }) => type)).toEqual(["ETA", "PRICE", "STOCK"]);
     expect(result.every(({ authorization }) => authorization === "NONE")).toBe(true);
+    expect(result.find(({ type }) => type === "STOCK")).toMatchObject({
+      provenance: { authority: "POS_SNAPSHOT" },
+      value: { status: "PRE_ORDER", availableQuantity: 0 },
+    });
+    expect(result.find(({ type }) => type === "ETA")?.provenance.expiresAt)
+      .toBe("2026-08-13T05:03:00.000Z");
   });
 
   it("builds finite price, stock, ETA and size claims from verified sources", () => {

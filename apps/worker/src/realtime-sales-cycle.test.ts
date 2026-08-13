@@ -169,6 +169,10 @@ const facts: BusinessFactsReader = {
         eta: query.deliveryAddress ? "eta-v1" : null,
       },
       eta: query.deliveryAddress ? { minDays: 3, maxDays: 6 } : null,
+      etaExpiresAt: query.deliveryAddress ? "2026-07-25T02:00:00.000Z" : null,
+      sourceAuthority: "POS_SNAPSHOT",
+      stockStatus: "IN_STOCK",
+      stockAvailableQuantity: 3,
       sourceObservedAt: "2026-07-23T02:00:00.000Z",
       sourceExpiresAt: "2026-07-25T02:00:00.000Z",
     };
@@ -489,13 +493,25 @@ describe("realtime Phase 3 sales cycle", () => {
       reasonCode: "PURCHASE_CONFIRMED",
       plan: {
         state: { stage: "PURCHASE_CONFIRMED" },
-        effectReadiness: [{ effect: "PURCHASE_CONFIRMATION", outcome: "READY", authorization: "NONE" }],
+        effectReadiness: expect.arrayContaining([
+          expect.objectContaining({ effect: "PURCHASE_CONFIRMATION", outcome: "READY", authorization: "NONE" }),
+          expect.objectContaining({ effect: "PROTECTED_OUTBOUND", outcome: "READY", authorization: "NONE" }),
+        ]),
         deterministicConfirmationEvidence: {
           authorityVersion: "DETERMINISTIC_CONFIRMATION_EVIDENCE_V1",
           classifierVersion: "LEGACY_CONFIRMATION_V1",
           decision: "CONFIRM",
           reasonCode: "CONFIRMATION_DETERMINISTIC_MATCH",
           authorization: "NONE",
+        },
+      },
+      protectedOutbound: {
+        claims: [],
+        claimTypes: [],
+        readiness: {
+          effect: "PROTECTED_OUTBOUND",
+          outcome: "READY",
+          deterministicEvidenceHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
         },
       },
     });
@@ -528,6 +544,10 @@ describe("realtime Phase 3 sales cycle", () => {
             eta: null,
           },
           eta: null,
+          etaExpiresAt: null,
+          sourceAuthority: "POS_SNAPSHOT",
+          stockStatus: "IN_STOCK",
+          stockAvailableQuantity: 3,
           sourceObservedAt: "2026-07-23T02:00:00.000Z",
           sourceExpiresAt: "2026-07-25T02:00:00.000Z",
         };
@@ -560,6 +580,10 @@ describe("realtime Phase 3 sales cycle", () => {
             eta: null,
           },
           eta: null,
+          etaExpiresAt: null,
+          sourceAuthority: "POS_SNAPSHOT",
+          stockStatus: "IN_STOCK",
+          stockAvailableQuantity: 3,
           sourceObservedAt: "2026-07-23T02:59:00.000Z",
           sourceExpiresAt: "2026-07-23T03:00:30.000Z",
         };

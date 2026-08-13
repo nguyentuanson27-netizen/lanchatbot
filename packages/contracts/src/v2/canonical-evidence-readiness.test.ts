@@ -195,6 +195,33 @@ describe("DF06 deterministic readiness contract", () => {
     expect(readiness.authorization).toBe("NONE");
   });
 
+  it("supports payload-only protected outbound readiness with a deterministic hash", () => {
+    expect(DeterministicEffectReadinessV1Schema.parse({
+      schemaVersion: 1,
+      rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1",
+      effect: "PROTECTED_OUTBOUND",
+      outcome: "READY",
+      pageId: "page-1",
+      conversationId: "conversation-1",
+      sourceMessageIdHash: HASH,
+      conversationRevision: 7,
+      salesCycleRevision: 3,
+      productIds: ["SP-001"],
+      cartId: "cart-1",
+      cartVersion: 2,
+      orderPreviewId: "preview-1",
+      orderPreviewHash: OTHER_HASH,
+      buyingIntentHash: null,
+      deterministicEvidenceHash: HASH,
+      claimSetHash: null,
+      protectedClaimTypes: [],
+      checkedAt: "2026-08-13T05:00:00.000Z",
+      expiresAt: "2026-08-13T05:00:30.000Z",
+      reasonCodes: [],
+      authorization: "NONE",
+    }).deterministicEvidenceHash).toBe(HASH);
+  });
+
   it("requires order bindings for purchase confirmation", () => {
     expect(DeterministicEffectReadinessV1Schema.safeParse({
       schemaVersion: 1,

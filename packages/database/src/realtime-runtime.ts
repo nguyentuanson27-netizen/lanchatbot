@@ -437,7 +437,12 @@ function validateSalesEffectReadiness<TState, TSalesState>(
       throw new Error("EFFECT_READINESS_STALE");
     }
     const claims = claimSets.get(readiness.effect);
-    if (!claims || hash([...claims].sort((a, b) => a.claimId.localeCompare(b.claimId))) !== readiness.claimSetHash) {
+    const expectedClaimSetHash = claims?.length === 0
+      ? null
+      : claims
+        ? hash([...claims].sort((a, b) => a.claimId.localeCompare(b.claimId)))
+        : undefined;
+    if (!claims || expectedClaimSetHash !== readiness.claimSetHash) {
       throw new Error("EFFECT_READINESS_CLAIM_BINDING_MISMATCH");
     }
     if (claims.some((claim) =>
@@ -458,9 +463,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     const cartProductIds = [...new Set((cart?.lines ?? [])
       .map(({ parentProductId }) => parentProductId)
       .filter((value): value is string => typeof value === "string"))].sort();
-    const productsMatch = readiness.effect === "CART_MUTATION"
-      ? readiness.productIds.every((productId) => cartProductIds.includes(productId))
-      : JSON.stringify(readiness.productIds) === JSON.stringify(cartProductIds);
+    const productsMatch = JSON.stringify(readiness.productIds) === JSON.stringify(cartProductIds);
     if (!productsMatch) {
       throw new Error("EFFECT_READINESS_PRODUCT_MISMATCH");
     }
@@ -498,7 +501,17 @@ function validateMetaEffectReadiness<TState, TSalesState>(
   now: Date,
 ): void {
   const meta = input.metaPlan;
-  if (!meta?.protectedClaimTypes?.length) return;
+  if (!meta) return;
+  if (!meta.effectReadiness) {
+    if (
+      (meta.protectedClaimTypes?.length ?? 0) > 0 ||
+      (meta.protectedClaims?.length ?? 0) > 0 ||
+      meta.sourceMessageIdHash !== undefined
+    ) {
+      throw new Error("PROTECTED_OUTBOUND_READINESS_REQUIRED");
+    }
+    return;
+  }
   const readiness = DeterministicEffectReadinessV1Schema.parse(meta.effectReadiness);
   if (readiness.effect !== "PROTECTED_OUTBOUND" || readiness.outcome !== "READY") {
     throw new Error("PROTECTED_OUTBOUND_READINESS_REQUIRED");
@@ -516,13 +529,15 @@ function validateMetaEffectReadiness<TState, TSalesState>(
     const record = value as Record<string, unknown>;
     return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${canonical(record[key])}`).join(",")}}`;
   };
-  const claimHash = createHash("sha256").update(canonical(
-    [...claims].sort((a, b) => a.claimId.localeCompare(b.claimId)),
-  ), "utf8").digest("hex");
+  const claimHash = claims.length === 0
+    ? null
+    : createHash("sha256").update(canonical(
+        [...claims].sort((a, b) => a.claimId.localeCompare(b.claimId)),
+      ), "utf8").digest("hex");
   const actualClaimTypes = [...new Set(claims.map(({ type }) => type))].sort();
   const expectedClaimTypes = [...readiness.protectedClaimTypes].sort();
   if (claimHash !== readiness.claimSetHash ||
-    JSON.stringify([...meta.protectedClaimTypes].sort()) !== JSON.stringify([...readiness.protectedClaimTypes].sort()) ||
+    JSON.stringify([...(meta.protectedClaimTypes ?? [])].sort()) !== JSON.stringify([...readiness.protectedClaimTypes].sort()) ||
     JSON.stringify(actualClaimTypes) !== JSON.stringify(expectedClaimTypes)) {
     throw new Error("PROTECTED_OUTBOUND_CLAIM_BINDING_MISMATCH");
   }

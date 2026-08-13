@@ -31,6 +31,10 @@ export interface VerifiedCartSelectionClaimSourceV1 {
   readonly inventoryVersion: string;
   readonly etaVersion: string | null;
   readonly eta: { readonly minDays: number; readonly maxDays: number } | null;
+  readonly etaExpiresAt: string | null;
+  readonly sourceAuthority: "POS_LIVE" | "POS_SNAPSHOT";
+  readonly stockStatus: "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK" | "PRE_ORDER" | "COMING_SOON" | "UNKNOWN";
+  readonly stockAvailableQuantity: number | null;
   readonly observedAt: string;
   readonly expiresAt: string;
 }
@@ -271,13 +275,18 @@ export function buildProtectedClaimsFromCartSelectionsV1(
       productId: selection.productId,
       variantId: selection.variantId,
     };
-    const provenance = (kind: string, sourceVersion: string, value: unknown) => ({
-      authority: "POS_LIVE" as const,
+    const provenance = (
+      kind: string,
+      sourceVersion: string,
+      value: unknown,
+      expiresAt = selection.expiresAt,
+    ) => ({
+      authority: selection.sourceAuthority,
       sourceVersion,
       evidenceRef: `cart-selection:${kind}:${sha256([selection.productId, sourceVersion, value])}`,
       contentHash: sha256(value),
       observedAt: selection.observedAt,
-      expiresAt: selection.expiresAt,
+      expiresAt,
     });
     claims.push(ProtectedClaimV1Schema.parse({
       schemaVersion: 1,
@@ -293,8 +302,14 @@ export function buildProtectedClaimsFromCartSelectionsV1(
       claimId: deterministicUuid([selection.productId, selection.variantId, "STOCK", selection.inventoryVersion]),
       type: "STOCK",
       scope,
-      provenance: provenance("stock", selection.inventoryVersion, "IN_STOCK"),
-      value: { status: "IN_STOCK", availableQuantity: null },
+      provenance: provenance("stock", selection.inventoryVersion, {
+        status: selection.stockStatus,
+        availableQuantity: selection.stockAvailableQuantity,
+      }),
+      value: {
+        status: selection.stockStatus,
+        availableQuantity: selection.stockAvailableQuantity,
+      },
       authorization: "NONE",
     }));
     if (selection.eta !== null && selection.etaVersion !== null) {
@@ -303,7 +318,12 @@ export function buildProtectedClaimsFromCartSelectionsV1(
         claimId: deterministicUuid([selection.productId, selection.variantId, "ETA", selection.etaVersion]),
         type: "ETA",
         scope,
-        provenance: provenance("eta", selection.etaVersion, selection.eta),
+        provenance: provenance(
+          "eta",
+          selection.etaVersion,
+          selection.eta,
+          selection.etaExpiresAt ?? selection.expiresAt,
+        ),
         value: selection.eta,
         authorization: "NONE",
       }));

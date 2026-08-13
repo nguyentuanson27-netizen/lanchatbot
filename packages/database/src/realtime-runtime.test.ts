@@ -348,6 +348,43 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         responseGroupId: "10000000-0000-4000-8000-000000000007",
       },
     }, now)).rejects.toThrow("PROTECTED_OUTBOUND_READINESS_MISMATCH");
+
+    transactionNow = now;
+    const payloadOnlyMessages = [{ kind: "TEXT" as const, text: "Em đã ghi nhận xác nhận mua hàng." }];
+    const payloadOnlyInput: RealtimeCommitInput<{
+      revision: number;
+      routingOwner: "APP";
+      conversationOwner: "BOT";
+    }> = {
+      ...commitInput,
+      metaPlan: {
+        replyPlanId: "10000000-0000-4000-8000-000000000008",
+        responseGroupId: "10000000-0000-4000-8000-000000000009",
+        recipientId: "customer-1",
+        messages: payloadOnlyMessages,
+        protectedClaimTypes: [],
+        sourceMessageIdHash: "a".repeat(64),
+        protectedClaims: [],
+        effectReadiness: {
+          ...commitInput.metaPlan!.effectReadiness!,
+          deterministicEvidenceHash: sha256(payloadOnlyMessages),
+          claimSetHash: null,
+          protectedClaimTypes: [],
+        },
+      },
+    };
+    await expect(store.commit(payloadOnlyInput, now)).resolves.toMatchObject({
+      metaOutboxCreated: 1,
+    });
+    await expect(store.commit({
+      ...payloadOnlyInput,
+      metaPlan: {
+        ...payloadOnlyInput.metaPlan!,
+        replyPlanId: "10000000-0000-4000-8000-00000000000a",
+        responseGroupId: "10000000-0000-4000-8000-00000000000b",
+        messages: [{ kind: "TEXT", text: "Payload confirmation đã bị thay đổi." }],
+      },
+    }, now)).rejects.toThrow("PROTECTED_OUTBOUND_PAYLOAD_MISMATCH");
   });
 
   it("drops a stale decision before state or outbox commit when a newer inbound advanced the generation", async () => {
@@ -773,6 +810,109 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         effectReadiness: [],
       },
     }, now)).rejects.toThrow("EFFECT_READINESS_REQUIRED");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+  });
+
+  it("rejects cart mutation readiness that omits a final-cart product", async () => {
+    const calls: string[] = [];
+    const client = {
+      async query(sql: string) {
+        calls.push(sql);
+        if (sql.includes("SELECT routing_owner")) {
+          return { rowCount: 1, rows: [{
+            routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+            transaction_now: new Date("2026-08-13T03:00:00.000Z"),
+          }] };
+        }
+        if (sql.includes("SELECT conversation_owner")) {
+          return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+        }
+        if (sql.includes("SELECT state_revision")) {
+          return { rowCount: 1, rows: [{ state_revision: "2" }] };
+        }
+        return { rowCount: 1, rows: [] };
+      },
+      release() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = { async connect() { return client; } };
+    const now = new Date("2026-08-13T03:00:00.000Z");
+    const productScope = { kind: "PRODUCT" as const, productId: "SP-001", variantId: null };
+    const provenance = (sourceVersion: string, contentHash: string) => ({
+      authority: "POS_SNAPSHOT" as const,
+      sourceVersion,
+      evidenceRef: `cart-selection:${sourceVersion}`,
+      contentHash,
+      observedAt: "2026-08-13T02:59:00.000Z",
+      expiresAt: "2026-08-13T03:05:00.000Z",
+    });
+    const claims = [{
+      schemaVersion: 1 as const,
+      claimId: "10000000-0000-4000-8000-000000000011",
+      type: "PRICE" as const,
+      scope: productScope,
+      provenance: provenance("price:1", "1".repeat(64)),
+      value: { amountVnd: 699_000, currency: "VND" as const },
+      authorization: "NONE" as const,
+    }, {
+      schemaVersion: 1 as const,
+      claimId: "10000000-0000-4000-8000-000000000012",
+      type: "STOCK" as const,
+      scope: productScope,
+      provenance: provenance("inventory:1", "2".repeat(64)),
+      value: { status: "IN_STOCK" as const, availableQuantity: 3 },
+      authorization: "NONE" as const,
+    }];
+    const cartId = "10000000-0000-4000-8000-000000000013";
+
+    await expect(store.commit({
+      pageId: "page-1", customerHash: "hash",
+      conversationId: "33333333-3333-4333-8333-333333333333",
+      expectedStateVersion: 4,
+      state: { revision: 5, routingOwner: "APP", conversationOwner: "BOT" },
+      salesCyclePlan: {
+        expectedRevision: 2,
+        readinessContractVersion: "DF06_EFFECT_READINESS_V1",
+        sourceMessageIdHash: "a".repeat(64),
+        canonicalBuyingIntent: {
+          schemaVersion: 1, authorityVersion: "CANONICAL_BUYING_INTENT_V1",
+          decision: "NONE", requestedAction: "NONE", quantity: null,
+          productId: null, contributors: [], sourceMessageIdHash: "a".repeat(64),
+          evidenceHash: null, reasonCodes: [], evaluatedAt: "2026-08-13T02:59:00.000Z",
+          authorization: "NONE",
+        },
+        state: {
+          revision: 3,
+          cart: { value: { cartId, revision: 2, lines: [
+            { parentProductId: "SP-001" },
+            { parentProductId: "SP-UNVERIFIED" },
+          ] } },
+        },
+        cartExpiresAt: new Date("2026-08-14T03:00:00.000Z"),
+        expiresAt: new Date("2026-08-14T03:00:00.000Z"),
+        events: [{
+          commandId: "sales:event-2:cart-mutation", commandKind: "CART_MUTATED",
+          outcome: "APPLIED", stateRevisionBefore: 2, stateRevisionAfter: 3,
+          stageBefore: "CART_OPEN", stageAfter: "CART_OPEN", cartId, cartVersion: 2,
+          reasonCode: null, occurredAt: now,
+        }],
+        effectClaimSets: [{ effect: "CART_MUTATION", claims }],
+        effectReadiness: [{
+          schemaVersion: 1, rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1",
+          effect: "CART_MUTATION", outcome: "READY", pageId: "page-1",
+          conversationId: "33333333-3333-4333-8333-333333333333",
+          sourceMessageIdHash: "a".repeat(64), conversationRevision: 4,
+          salesCycleRevision: 2, productIds: ["SP-001"], cartId, cartVersion: 1,
+          orderPreviewId: null, orderPreviewHash: null, buyingIntentHash: null,
+          deterministicEvidenceHash: "d".repeat(64), claimSetHash: sha256(claims),
+          protectedClaimTypes: [], checkedAt: now.toISOString(),
+          expiresAt: "2026-08-13T03:01:00.000Z", reasonCodes: [], authorization: "NONE",
+        }],
+      },
+    }, now)).rejects.toThrow("EFFECT_READINESS_PRODUCT_MISMATCH");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
   });
 

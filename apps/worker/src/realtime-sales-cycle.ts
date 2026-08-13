@@ -753,6 +753,10 @@ export async function evaluateRealtimeSalesCycle(
       inventoryVersion: selection.versions.inventory,
       etaVersion: selection.versions.eta,
       eta: selection.eta,
+      etaExpiresAt: selection.etaExpiresAt,
+      sourceAuthority: selection.sourceAuthority,
+      stockStatus: selection.stockStatus,
+      stockAvailableQuantity: selection.stockAvailableQuantity,
       observedAt: selection.sourceObservedAt,
       expiresAt: selection.sourceExpiresAt,
     })));
@@ -837,6 +841,10 @@ export async function evaluateRealtimeSalesCycle(
         inventoryVersion: selection.versions.inventory,
         etaVersion: selection.versions.eta,
         eta: selection.eta,
+        etaExpiresAt: selection.etaExpiresAt,
+        sourceAuthority: selection.sourceAuthority,
+        stockStatus: selection.stockStatus,
+        stockAvailableQuantity: selection.stockAvailableQuantity,
         observedAt: selection.sourceObservedAt,
         expiresAt: selection.sourceExpiresAt,
       }))),
@@ -1157,6 +1165,34 @@ export async function evaluateRealtimeSalesCycle(
           ]
         : []),
     ];
+    const protectedPayloadHash = createHash("sha256")
+      .update(canonicalJson(messages), "utf8")
+      .digest("hex");
+    const protectedOutboundReadiness = evaluateDeterministicEffectReadinessV1({
+      effect: "PROTECTED_OUTBOUND",
+      pageId: input.pageId,
+      conversationId: input.conversationId,
+      sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+      conversationRevision: input.conversationRevision,
+      salesCycleRevision: input.stateRevision,
+      productIds: state.cart?.value.lines.map(({ parentProductId }) => parentProductId) ?? [],
+      cartId: state.cart?.value.cartId ?? null,
+      cartVersion: state.cart?.value.revision ?? null,
+      orderPreviewId: state.preview?.previewId ?? null,
+      orderPreviewHash: state.preview?.previewHash.replace(/^sha256:/u, "") ?? null,
+      buyingIntent: null,
+      claims: [],
+      protectedClaimTypes: [],
+      deterministicEvidenceHash: protectedPayloadHash,
+      checkedAt: confirmationCheckedAt,
+    });
+    effectClaimSets.set("PROTECTED_OUTBOUND", []);
+    if (!acceptReadiness(protectedOutboundReadiness)) {
+      return failedOutput(
+        protectedOutboundReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED",
+        plan(),
+      );
+    }
     return {
       handled: true,
       messages,
@@ -1164,6 +1200,11 @@ export async function evaluateRealtimeSalesCycle(
       transferToHuman: true,
       desiredTag: "DA_CHOT_DON",
       reasonCode: "PURCHASE_CONFIRMED",
+      protectedOutbound: {
+        claims: [],
+        claimTypes: [],
+        readiness: protectedOutboundReadiness,
+      },
       telemetry: {
         ...behaviorTelemetry,
         confirmationAttempted: true,

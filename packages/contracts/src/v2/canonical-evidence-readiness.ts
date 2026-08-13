@@ -352,10 +352,13 @@ export const DeterministicEffectReadinessV1Schema = z.object({
     });
   }
   if (value.outcome === "READY") {
+    const payloadOnlyProtectedOutbound = value.effect === "PROTECTED_OUTBOUND" &&
+      value.protectedClaimTypes.length === 0 &&
+      value.deterministicEvidenceHash !== null;
     if (
       value.reasonCodes.length > 0 ||
       value.productIds.length === 0 ||
-      value.claimSetHash === null
+      (value.claimSetHash === null && !payloadOnlyProtectedOutbound)
     ) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
@@ -386,7 +389,8 @@ export const DeterministicEffectReadinessV1Schema = z.object({
       });
     }
     if (value.effect === "PROTECTED_OUTBOUND" &&
-      value.protectedClaimTypes.length === 0) {
+      value.protectedClaimTypes.length === 0 &&
+      value.deterministicEvidenceHash === null) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["protectedClaimTypes"],

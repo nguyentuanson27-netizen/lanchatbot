@@ -5,7 +5,6 @@ import {
   buildProtectedMediaClaimsV1,
   evaluateDeterministicEffectReadinessV1,
   hashProtectedClaimSetV1,
-  detectBuyingSignal,
   extractCustomerMeasurements,
   assembleReply,
   buildVerifiedFactBlocks,
@@ -28,7 +27,6 @@ import {
   type StableProductDocument,
   type CustomerProfileFieldEvidence,
   type CanonicalDecisionEvidenceV1,
-  hasGuardedModelBuyingCommitmentEvidence,
 } from "@lana/business-tools";
 import {
   BusinessFactQueriesV2Schema,
@@ -3178,14 +3176,6 @@ export class RealtimeRunner {
     let multiFactAudit: NonNullable<
       RealtimeDecisionEventPlan["details"]["factQueryResults"]
     > = [];
-    let buyingSignal = detectBuyingSignal(
-      message.isEcho ? "" : message.text ?? "",
-      {
-        hasProductContext: Boolean(
-          resolvedProduct?.productId ?? nextState.currentProductId,
-        ),
-      },
-    );
     let canonicalDecisionEvidence: CanonicalDecisionEvidenceV1 | null = null;
     const canonicalDecisionEvidenceForTurn = (): CanonicalDecisionEvidenceV1 => {
       canonicalDecisionEvidence ??= buildCanonicalDecisionEvidenceV1({
@@ -3197,6 +3187,10 @@ export class RealtimeRunner {
         evaluatedAt: now,
       });
       return canonicalDecisionEvidence;
+    };
+    let buyingSignal = {
+      isBuyingSignal: false,
+      reasons: [] as readonly string[],
     };
     const imageIntent = message.isEcho
       ? null
@@ -3543,7 +3537,9 @@ export class RealtimeRunner {
           hasAdsContext: Boolean(message.adsContext),
           hasResolvedProduct: resolvedProduct !== null,
           hasClarification: resolution.clarification !== null,
-          hasBuyingSignal: buyingSignal.isBuyingSignal,
+          // Buying intent is resolved once after model semantics are available.
+          // This early product-resolution guard must never act as that authority.
+          hasBuyingSignal: false,
         })
       ) {
         handoffGuardReasonCodes = [
@@ -3904,10 +3900,7 @@ export class RealtimeRunner {
         };
         if (
           !hasVerifiedProductContext &&
-          hasGuardedModelBuyingCommitmentEvidence(
-            message.text ?? "",
-            proposal.salesSignals?.buyingIntent,
-          )
+          canonicalEvidence.buyingIntent.decision === "COMMITTED"
         ) {
           handoffGuardReasonCodes = [
             ...new Set([
@@ -3922,6 +3915,24 @@ export class RealtimeRunner {
             reply: "",
             attachments: [],
             handoffReason: "UNVERIFIED_PRODUCT_ID",
+          };
+        } else if (
+          !hasVerifiedProductContext &&
+          proposal.salesSignals?.buyingIntent?.decision === "COMMITTED"
+        ) {
+          handoffGuardReasonCodes = [
+            ...new Set([
+              ...handoffGuardReasonCodes,
+              "MODEL_BUYING_EVIDENCE_NON_AUTHORIZING",
+            ]),
+          ];
+          proposal = {
+            ...proposal,
+            productId: null,
+            action: "ASK_PRODUCT_SELECTION",
+            reply: "Chị gửi giúp em mã hoặc ảnh mẫu muốn lấy để em kiểm tra đúng sản phẩm nhé.",
+            attachments: [],
+            handoffReason: null,
           };
         }
         if (
@@ -4640,7 +4651,7 @@ export class RealtimeRunner {
       : salesProtectedOutbound?.claimTypes ?? (
           !salesHandled ? protectedClaimValidation.claimTypes : []
         );
-    if (protectedOutboundReadiness !== null && outboundClaimTypes.length > 0) {
+    if (protectedOutboundReadiness !== null) {
       protectedOutboundReadiness = {
         ...protectedOutboundReadiness,
         deterministicEvidenceHash: canonicalSha256(metaMessages),

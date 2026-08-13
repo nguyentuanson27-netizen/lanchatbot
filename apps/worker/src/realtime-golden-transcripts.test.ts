@@ -307,7 +307,7 @@ describe("realtime golden transcripts", () => {
       modelProposal: noReplyProposal,
     });
 
-    expect(model.generate).not.toHaveBeenCalled();
+    expect(model.generate).toHaveBeenCalledOnce();
     expect(committed?.metaPlan).toBeUndefined();
     expect(committed?.state).toMatchObject({
       conversationOwner: "HUMAN",
@@ -323,7 +323,25 @@ describe("realtime golden transcripts", () => {
     expect(committed?.decisionEvents?.map((event) => event.eventType)).not.toContain("NO_REPLY");
   });
 
-  it("GOLDEN-BUYING-LONGTAIL-001 hands off model buying evidence without product context", async () => {
+  it("does not let a purchase-looking question trigger the unresolved-product handoff", async () => {
+    const { committed, model } = await replayGolden({
+      fixtureId: "GOLDEN-BUYING-QUESTION-001",
+      text: "mẫu này chốt được không?",
+      productMatched: false,
+      modelProposal: noReplyProposal,
+    });
+
+    expect(model.generate).toHaveBeenCalledOnce();
+    expect(committed?.handoffEventPlan).toBeUndefined();
+    expect(committed?.state).toMatchObject({
+      conversationOwner: "BOT",
+    });
+    expect(committed?.decisionEvents?.map((event) => event.eventType)).not.toContain(
+      "BUYING_SIGNAL_DETECTED",
+    );
+  });
+
+  it("GOLDEN-BUYING-LONGTAIL-001 keeps model-only buying evidence non-authorizing", async () => {
     const text = "làm đơn mẫu này cho mình";
     const { committed, model } = await replayGolden({
       fixtureId: "GOLDEN-BUYING-LONGTAIL-001",
@@ -358,15 +376,16 @@ describe("realtime golden transcripts", () => {
     });
 
     expect(model.generate).toHaveBeenCalledOnce();
-    expect(committed?.metaPlan).toBeUndefined();
+    expect(committed?.metaPlan?.messages).toEqual([
+      { kind: "TEXT", text: "Chị gửi giúp em mã hoặc ảnh mẫu muốn lấy để em kiểm tra đúng sản phẩm nhé." },
+    ]);
     expect(committed?.state).toMatchObject({
-      conversationOwner: "HUMAN",
-      ownerReason: "AGENT_HANDOFF",
+      conversationOwner: "BOT",
     });
-    expect(committed?.handoffEventPlan).toMatchObject({
-      source: "BOT_POLICY",
-      reasonCode: "UNVERIFIED_PRODUCT_ID",
-    });
+    expect(committed?.handoffEventPlan).toBeUndefined();
+    expect(committed?.decisionEvents?.map((event) => event.eventType)).not.toContain(
+      "BUYING_SIGNAL_DETECTED",
+    );
   });
 
   it("GOLDEN-END-001 preserves NO_REPLY for a plain conversation end", async () => {

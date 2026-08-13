@@ -24,8 +24,8 @@ function snapshot(stockQuantity = 3) {
       prep_min_days: 1,
       prep_max_days: 2,
       zero_stock_policy: "",
-      zero_stock_prep_min_days: null,
-      zero_stock_prep_max_days: null,
+      zero_stock_prep_min_days: null as number | null,
+      zero_stock_prep_max_days: null as number | null,
       eta_valid_until: "",
     },
     selling_rules: {
@@ -140,6 +140,38 @@ describe("realtime sales catalog", () => {
       lineId: "13000000-0000-4000-8000-000000000001",
     }, new Date("2026-07-25T02:00:00.001Z")))
       .toMatchObject({ status: "STALE", reasonCode: "CATALOG_PRICE_STALE" });
+  });
+
+  it("reports preorder stock from the POS snapshot without claiming live inventory", () => {
+    const preorder = snapshot(0);
+    preorder.fulfillment_policy.can_order_when_zero = true;
+    preorder.fulfillment_policy.zero_stock_policy = "PRE_ORDER";
+    preorder.fulfillment_policy.zero_stock_prep_min_days = 5;
+    preorder.fulfillment_policy.zero_stock_prep_max_days = 7;
+
+    expect(cartSelectionFromSnapshot(preorder, {
+      shopAlias: "LANA", productId: "CB182", offerType: "SET",
+      size: "M", color: "BE", quantity: 1,
+      lineId: "13000000-0000-4000-8000-000000000001",
+      deliveryAddress: "Tân Châu, Tây Ninh",
+    }, now)).toMatchObject({
+      status: "READY",
+      sourceAuthority: "POS_SNAPSHOT",
+      stockStatus: "PRE_ORDER",
+      stockAvailableQuantity: 0,
+    });
+  });
+
+  it("fails closed when the fulfillment ETA policy has expired", () => {
+    const staleEta = snapshot();
+    staleEta.fulfillment_policy.eta_valid_until = "2026-07-23T02:59:59.000Z";
+
+    expect(cartSelectionFromSnapshot(staleEta, {
+      shopAlias: "LANA", productId: "CB182", offerType: "SET",
+      size: "M", color: "BE", quantity: 1,
+      lineId: "13000000-0000-4000-8000-000000000001",
+      deliveryAddress: "Tân Châu, Tây Ninh",
+    }, now)).toMatchObject({ status: "ETA_UNAVAILABLE", reasonCode: "CART_ETA_STALE" });
   });
 
   it("projects a variant only from exact POS color and size values", () => {

@@ -109,7 +109,8 @@ export function evaluateDeterministicEffectReadinessV1(
     }
   }
   if (input.effect === "PROTECTED_OUTBOUND" &&
-    (input.protectedClaimTypes?.length ?? 0) === 0) {
+    (input.protectedClaimTypes?.length ?? 0) === 0 &&
+    !input.deterministicEvidenceHash) {
     reasons.add("CLAIM_MISSING");
   }
   if (input.effect === "PURCHASE_CONFIRMATION" &&
