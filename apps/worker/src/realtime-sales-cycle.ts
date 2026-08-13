@@ -99,6 +99,7 @@ export interface RealtimeSalesCycleOutput {
   readonly transferToHuman: boolean;
   readonly desiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null;
   readonly reasonCode: string | null;
+  readonly readinessAttempt?: DeterministicEffectReadinessV1;
   readonly protectedOutbound?: Readonly<{
     claims: readonly ProtectedClaimV1[];
     claimTypes: readonly ProtectedClaimV1["type"][];
@@ -486,7 +487,7 @@ function trustedInbound(input: RealtimeSalesCycleInput): VerifiedInboundMessageV
   };
 }
 
-function failedOutput(
+function baseFailedOutput(
   reasonCode: string,
   plan: RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null = null,
 ): RealtimeSalesCycleOutput {
@@ -682,6 +683,14 @@ export async function evaluateRealtimeSalesCycle(
   const events: RealtimeSalesCycleEventPlan[] = [];
   const effectReadiness: DeterministicEffectReadinessV1[] = [];
   const cartMutationEvidence: DeterministicCartMutationEvidenceV1[] = [];
+  let lastReadinessAttempt: DeterministicEffectReadinessV1 | null = null;
+  const failedOutput = (
+    reasonCode: string,
+    failurePlan: RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null = null,
+  ): RealtimeSalesCycleOutput => ({
+    ...baseFailedOutput(reasonCode, failurePlan),
+    ...(lastReadinessAttempt === null ? {} : { readinessAttempt: lastReadinessAttempt }),
+  });
   const effectClaimSets = new Map<
     DeterministicEffectReadinessV1["effect"],
     ReturnType<typeof buildProtectedClaimsFromCartSelectionsV1>
@@ -789,6 +798,7 @@ export async function evaluateRealtimeSalesCycle(
     });
   };
   const acceptReadiness = (readiness: DeterministicEffectReadinessV1): boolean => {
+    lastReadinessAttempt = readiness;
     if (readiness.outcome !== "READY") return false;
     effectReadiness.push(readiness);
     return true;
@@ -1431,6 +1441,7 @@ export async function evaluateRealtimeSalesCycle(
         "ORDER_PREVIEW", readySelections, state.cart.value,
         null, null, preflightCheckedAt,
       );
+      lastReadinessAttempt = preflightReadiness;
       if (preflightReadiness.outcome !== "READY") {
         return failedOutput(
           preflightReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED",

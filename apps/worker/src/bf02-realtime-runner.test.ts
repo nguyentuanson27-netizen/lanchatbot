@@ -833,6 +833,12 @@ describe("BF-02 realtime context fallback", () => {
     expect(JSON.stringify(commit?.decisionEvents)).not.toContain(
       "MEDIA_CLARIFICATION_EXHAUSTED",
     );
+    expect(commit?.metaPlan?.effectReadiness?.productIds).toEqual(
+      products.map(({ productId }) => productId).sort(),
+    );
+    expect([...new Set(commit?.metaPlan?.protectedClaims?.flatMap(({ scope }) =>
+      scope.kind === "PRODUCT" ? [scope.productId] : []
+    ) ?? [])].sort()).toEqual(products.map(({ productId }) => productId).sort());
     for (const { productId } of products) expect(reply).toContain(productId);
   });
 

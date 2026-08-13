@@ -600,6 +600,10 @@ describe("realtime Phase 3 sales cycle", () => {
       transferToHuman: true,
       messages: [],
       reasonCode: "CLAIM_STALE",
+      readinessAttempt: {
+        outcome: "BLOCKED",
+        reasonCodes: expect.arrayContaining(["CLAIM_STALE"]),
+      },
     });
   });
 

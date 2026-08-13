@@ -11,6 +11,7 @@ import {
   validateEffectClaimSemanticsV1,
   type ProtectedClaimV1,
 } from "./canonical-evidence-readiness.js";
+import { MAX_CART_LINES_V1 } from "./customer-size-cart.js";
 
 const HASH = "a".repeat(64);
 const OTHER_HASH = "b".repeat(64);
@@ -182,6 +183,10 @@ describe("DF05 canonical evidence contracts", () => {
 });
 
 describe("DF06 deterministic readiness contract", () => {
+  it("keeps the readiness envelope aligned with the canonical cart capacity", () => {
+    expect(MAX_READINESS_PRODUCT_IDS_V1).toBe(MAX_CART_LINES_V1);
+  });
+
   it.each([
     [0, 0, true, false, false],
     [1, 1, false, false, false],

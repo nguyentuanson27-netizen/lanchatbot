@@ -471,6 +471,12 @@ describe("BF-08 production-wrapper customer URL policy", () => {
     expect(result.searchText).toHaveBeenCalledTimes(allProducts.length);
     expect(result.draftMultiProductClarification).not.toHaveBeenCalled();
     expect(result.commit.handoffEventPlan).toBeUndefined();
+    expect(result.commit.metaPlan?.effectReadiness?.productIds).toEqual(
+      allProducts.map(({ productId }) => productId).sort(),
+    );
+    expect([...new Set(result.commit.metaPlan?.protectedClaims?.flatMap(({ scope }) =>
+      scope.kind === "PRODUCT" ? [scope.productId] : []
+    ) ?? [])].sort()).toEqual(allProducts.map(({ productId }) => productId).sort());
     const reply = result.commit.metaPlan?.messages
       .filter((message) => message.kind === "TEXT")
       .map((message) => message.text)

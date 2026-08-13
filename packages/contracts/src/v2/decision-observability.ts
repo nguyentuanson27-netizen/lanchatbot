@@ -1,6 +1,10 @@
 import { z } from "zod";
+import { DeterministicReadinessReasonCodeV1Schema } from "./readiness-reason-codes.js";
 
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
+// 50 product scopes x up to 8 protected claim types, plus bounded cart claims.
+// This is an observability envelope bound, not a commerce product-count policy.
+export const MAX_CANONICAL_PROTECTED_CLAIMS_V1 = 408;
 
 function registeredCodeSchema(
   registryName: string,
@@ -301,6 +305,10 @@ const SideEffectReasonCodeSchema = registeredCodeSchema(
 );
 
 const GuardReasonCodesSchema = z.array(GuardReasonCodeSchema).max(20);
+const ReadinessReasonCodesSchema = z.array(z.union([
+  GuardReasonCodeSchema,
+  DeterministicReadinessReasonCodeV1Schema,
+])).max(20);
 const ReconciliationReasonCodesSchema = z
   .array(ReconciliationReasonCodeSchema)
   .max(20);
@@ -414,7 +422,8 @@ export const ProtectedClaimValidationV1Schema = z.object({
   claimTypes: z.array(ProtectedClaimTypeV1Schema).max(8),
   validatedCount: z.number().int().nonnegative().max(8),
   rejectedCount: z.number().int().nonnegative().max(8),
-  canonicalClaimCount: z.number().int().nonnegative().max(16).optional(),
+  canonicalClaimCount: z.number().int().nonnegative()
+    .max(MAX_CANONICAL_PROTECTED_CLAIMS_V1).optional(),
   canonicalClaimSetHash: Sha256Schema.nullable().optional(),
   reasonCodes: GuardReasonCodesSchema,
 }).strict().superRefine((value, context) => {
@@ -497,7 +506,7 @@ export const ReadinessObservationV1Schema = z.object({
     "AMBIGUOUS",
     "STALE",
   ]),
-  reasonCodes: GuardReasonCodesSchema,
+  reasonCodes: ReadinessReasonCodesSchema,
 }).strict();
 
 export const ObservedConversationPhaseV1Schema = z.enum([

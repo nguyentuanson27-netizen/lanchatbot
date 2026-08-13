@@ -24,8 +24,9 @@ describe("DF-P1 decision observability", () => {
       phase: "CART_OPEN", phaseSource: "SALES_CYCLE_STAGE_V1",
       barrier: "NONE", strategy: "NONE", cta: "NONE",
       strategyUsesModelEvidence: false,
-      readinessOutcome: "READY",
+      readinessOutcome: "BLOCKED",
       readinessRulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1",
+      readinessReasonCodes: ["CLAIM_STALE"],
       productScope: "RESOLVED", sideEffectTypes: ["CART"], sideEffectReasonCodes: [],
     });
     expect(result.buyingIntent).toMatchObject({
@@ -36,7 +37,8 @@ describe("DF-P1 decision observability", () => {
       canonicalClaimCount: 2, canonicalClaimSetHash: "4".repeat(64),
     });
     expect(result.readiness).toMatchObject({
-      rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1", outcome: "READY",
+      rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1", outcome: "BLOCKED",
+      reasonCodes: ["CLAIM_STALE"],
     });
   });
 

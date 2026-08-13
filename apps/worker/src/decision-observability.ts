@@ -5,6 +5,7 @@ import {
   DECISION_GUARD_REASON_CODES_V1,
   DECISION_RECONCILIATION_REASON_CODES_V1,
   DECISION_SIDE_EFFECT_REASON_CODES_V1,
+  DETERMINISTIC_READINESS_REASON_CODES_V1,
   DecisionObservabilityV1Schema,
   type DecisionObservabilityV1,
 } from "@lana/contracts";
@@ -34,6 +35,10 @@ const RECONCILIATION_CODES = new Set<string>(
   DECISION_RECONCILIATION_REASON_CODES_V1,
 );
 const SIDE_EFFECT_CODES = new Set<string>(DECISION_SIDE_EFFECT_REASON_CODES_V1);
+const READINESS_CODES = new Set<string>([
+  ...DECISION_GUARD_REASON_CODES_V1,
+  ...DETERMINISTIC_READINESS_REASON_CODES_V1,
+]);
 const PROTECTED_CLAIM_REASON_CODES = new Set<string>([
   "UNAUTHORIZED_PRICE",
   "UNAUTHORIZED_STOCK",
@@ -85,6 +90,7 @@ export interface BuildDecisionObservabilityInput {
   readonly strategyUsesModelEvidence: boolean;
   readonly readinessOutcome: DecisionObservabilityV1["readiness"]["outcome"];
   readonly readinessRulesetVersion?: DecisionObservabilityV1["readiness"]["rulesetVersion"];
+  readonly readinessReasonCodes?: readonly string[];
   readonly productScope: ProductScope;
   readonly sideEffectTypes: readonly SideEffectType[];
   readonly sideEffectReasonCodes: readonly string[];
@@ -143,6 +149,11 @@ export function buildDecisionObservabilityV1(
     20,
     SIDE_EFFECT_CODES,
   );
+  const readinessReasonCodes = boundedCodes(
+    input.readinessReasonCodes ?? [],
+    20,
+    READINESS_CODES,
+  );
   const claimTypes = sortedUnique(input.protectedClaimTypes).slice(0, 8);
   const sideEffectTypes = sortedUnique(input.sideEffectTypes).slice(0, 8);
   const dialogueEvidenceSource = dialogueCodes.length === 0
@@ -200,7 +211,7 @@ export function buildDecisionObservabilityV1(
       rulesetVersion: input.readinessRulesetVersion ?? "LEGACY_READINESS_OBSERVATION_V1",
       outcome: input.readinessOutcome,
       productScope: input.productScope,
-      reasonCodes: [],
+      reasonCodes: readinessReasonCodes,
     },
     phaseBarrier: {
       contractVersion: "LEGACY_PHASE_BARRIER_OBSERVATION_V1",

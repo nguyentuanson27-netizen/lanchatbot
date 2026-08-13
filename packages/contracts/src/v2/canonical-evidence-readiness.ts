@@ -4,6 +4,8 @@ import {
   DECISION_DIALOGUE_EVIDENCE_CODES_V1,
 } from "./decision-observability.js";
 import { MAX_CART_LINES_V1 } from "./customer-size-cart.js";
+import { DETERMINISTIC_READINESS_REASON_CODES_V1 } from "./readiness-reason-codes.js";
+export { DETERMINISTIC_READINESS_REASON_CODES_V1 } from "./readiness-reason-codes.js";
 
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 const BoundedIdSchema = z.string().trim().min(1).max(128);
@@ -411,27 +413,6 @@ export function validateEffectClaimSemanticsV1(input: Readonly<{
     conflict: [...contentByClaimKey.values()].some((contents) => contents.size > 1),
   };
 }
-
-export const DETERMINISTIC_READINESS_REASON_CODES_V1 = [
-  "BUYING_INTENT_MISSING",
-  "BUYING_INTENT_SCOPE_MISMATCH",
-  "PRODUCT_UNRESOLVED",
-  "PRODUCT_AMBIGUOUS",
-  "PRODUCT_SCOPE_INVALID",
-  "CART_CAPACITY_EXCEEDED",
-  "CLAIM_MISSING",
-  "CLAIM_STALE",
-  "CLAIM_SCOPE_MISMATCH",
-  "CLAIM_CONFLICT",
-  "STATE_REVISION_MISMATCH",
-  "CART_REQUIRED",
-  "CART_STATE_BINDING_MISSING",
-  "CART_VERSION_MISMATCH",
-  "ORDER_PREVIEW_REQUIRED",
-  "ORDER_PREVIEW_MISMATCH",
-  "EFFECT_NOT_SUPPORTED",
-  "DETERMINISTIC_EVIDENCE_MISSING",
-] as const;
 
 export const DeterministicEffectReadinessV1Schema = z.object({
   schemaVersion: z.literal(1),

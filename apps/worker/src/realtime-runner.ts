@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import {
   buildCanonicalDecisionEvidenceV1,
-  buildProtectedClaimsFromVerifiedFactsV1,
+  buildProtectedClaimsFromVerifiedFactSetV1,
   buildProtectedMediaClaimsV1,
   evaluateDeterministicEffectReadinessV1,
   hashProtectedClaimSetV1,
@@ -46,6 +46,7 @@ import {
   type RequestedBusinessFactV2,
   type SizeRecommendationProtectedClaimV1,
   type DeterministicEffectReadinessV1,
+  type ProtectedClaimV1,
 } from "@lana/contracts";
 import type {
   RuntimePolicyChannel,
@@ -3142,6 +3143,8 @@ export class RealtimeRunner {
     let handoff = applied.handoff;
     let handoffEventReasonCode: string | null = null;
     let businessFacts: BusinessFactEnvelopeV1 | null = null;
+    let businessFactEnvelopes: BusinessFactEnvelopeV1[] = [];
+    let deterministicProtectedClaimTypes: ProtectedClaimV1["type"][] = [];
     let handoffGuardReasonCodes: readonly string[] =
       customerUrlDisposition === "HANDOFF" ? customerUrlReasonCodes : [];
     let sizeAdviceRequiresHandoff = false;
@@ -3150,6 +3153,7 @@ export class RealtimeRunner {
     let salesHandoffReasonCode: string | null = null;
     let salesTelemetry: RealtimeSalesCycleTelemetry | null = null;
     let salesProtectedOutbound: RealtimeSalesCycleOutput["protectedOutbound"] | null = null;
+    let salesReadinessAttempt: DeterministicEffectReadinessV1 | null = null;
     let buyingSignalOverride = false;
     let modelCalled = false;
     let modelVersion: string | null = null;
@@ -3593,6 +3597,7 @@ export class RealtimeRunner {
           }))
         );
         businessFacts = flattened[0]?.envelope ?? null;
+        businessFactEnvelopes = flattened.map(({ envelope }) => envelope);
         const unsafe = flattened.some(({ envelope }) =>
           staleFactsRequireHandoff(message.text ?? "", envelope) ||
           unavailableFactsRequireHandoff(envelope)
@@ -3612,6 +3617,12 @@ export class RealtimeRunner {
           nextState = transitioned.state;
           handoff = transitioned.handoff;
         } else {
+          deterministicProtectedClaimTypes = [...new Set(flattened.map(({ requestedFact }) => ({
+            PRICE: "PRICE" as const,
+            STOCK: "STOCK" as const,
+            SIZE: "SIZE_FIT" as const,
+            ETA: "ETA" as const,
+          })[requestedFact]))].sort();
           const first = multiFactQueries.queries[0]!;
           proposal = {
             schemaVersion: 1,
@@ -3718,11 +3729,13 @@ export class RealtimeRunner {
           })
         ));
         businessFacts = allFacts[0] ?? null;
+        businessFactEnvelopes = allFacts;
         const reply = multiProductReply(
           resolution.products,
           allFacts,
           policyResolution,
         );
+        if (reply !== null) deterministicProtectedClaimTypes = ["PRICE"];
         if (!reply) {
           handoffGuardReasonCodes = ["MULTI_PRODUCT_FACT_UNAVAILABLE"];
           const transitioned = applySilentHandoff(
@@ -3965,6 +3978,7 @@ export class RealtimeRunner {
           imageRequest ? imageRequest.intent : "PRICE_CARD",
         );
         businessFacts = facts;
+        businessFactEnvelopes = facts === null ? [] : [facts];
         const explicitIntent = explicitCustomerBusinessIntent(message.text ?? "");
         if (facts?.status === "STALE") {
           proposal = staleFactsRequireHandoff(message.text ?? "", facts)
@@ -4541,10 +4555,10 @@ export class RealtimeRunner {
       }
     }
 
-    const protectedClaimSet = buildProtectedClaimsFromVerifiedFactsV1({
-      facts: businessFacts,
+    const protectedClaimSet = buildProtectedClaimsFromVerifiedFactSetV1({
+      facts: businessFactEnvelopes,
       sizeClaim: verifiedSizeClaimForTurn,
-      expectedProductId:
+      expectedSizeProductId:
         resolvedProduct?.productId ?? nextState.currentProductId,
     });
 
@@ -4603,6 +4617,7 @@ export class RealtimeRunner {
       salesHandled = sales.handled;
       salesTelemetry = sales.telemetry ?? null;
       salesProtectedOutbound = sales.protectedOutbound ?? null;
+      salesReadinessAttempt = sales.readinessAttempt ?? null;
       if (sales.handled) {
         metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled
           ? [...sales.messages]
@@ -4646,10 +4661,15 @@ export class RealtimeRunner {
     let protectedOutboundReadiness: DeterministicEffectReadinessV1 | null =
       salesProtectedOutbound?.readiness ?? null;
     let protectedOutboundClaims = salesProtectedOutbound?.claims ?? protectedClaimSet.claims;
-    const outboundClaimTypes = metaMessages.length === 0
+    const outboundClaimTypes: readonly ProtectedClaimV1["type"][] = metaMessages.length === 0
       ? []
       : salesProtectedOutbound?.claimTypes ?? (
-          !salesHandled ? protectedClaimValidation.claimTypes : []
+          !salesHandled
+            ? [...new Set([
+                ...protectedClaimValidation.claimTypes,
+                ...deterministicProtectedClaimTypes,
+              ])].sort()
+            : []
         );
     if (protectedOutboundReadiness !== null) {
       protectedOutboundReadiness = {
@@ -4659,15 +4679,24 @@ export class RealtimeRunner {
     }
     if (outboundClaimTypes.length > 0 && !salesProtectedOutbound) {
       const canonicalEvidence = canonicalDecisionEvidenceForTurn();
-      const outboundProductId = businessFacts?.productId ??
+      const expectedOutboundProductIds = [...new Set(
+        businessFactEnvelopes.map(({ productId }) => productId),
+      )].sort();
+      const fallbackOutboundProductId = businessFacts?.productId ??
         resolvedProduct?.productId ?? nextState.currentProductId;
-      if (outboundProductId !== null && outboundClaimTypes.includes("PRODUCT_MEDIA")) {
+      if (expectedOutboundProductIds.length === 0 && fallbackOutboundProductId !== null) {
+        expectedOutboundProductIds.push(fallbackOutboundProductId);
+      }
+      const mediaProductId = expectedOutboundProductIds.length === 1
+        ? expectedOutboundProductIds[0]!
+        : null;
+      if (mediaProductId !== null && outboundClaimTypes.includes("PRODUCT_MEDIA")) {
         protectedOutboundClaims = [
           ...protectedOutboundClaims,
           ...buildProtectedMediaClaimsV1({
-            productId: outboundProductId,
+            productId: mediaProductId,
             imageUrls: metaMessages.flatMap((unit) => unit.kind === "IMAGE" ? [unit.imageUrl] : []),
-            sourceVersion: `MEDIA_SELECTOR_V2:${outboundProductId}`,
+            sourceVersion: `MEDIA_SELECTOR_V2:${mediaProductId}`,
             observedAt: now.toISOString(),
             expiresAt: new Date(now.getTime() + 60_000).toISOString(),
           }),
@@ -4684,9 +4713,7 @@ export class RealtimeRunner {
         sourceMessageIdHash: canonicalEvidence.buyingIntent.sourceMessageIdHash,
         conversationRevision: record.stateVersion,
         salesCycleRevision: salesCycleRecord?.stateRevision ?? null,
-        productIds: [
-          businessFacts?.productId ?? resolvedProduct?.productId ?? nextState.currentProductId,
-        ].filter((value): value is string => value !== null),
+        productIds: expectedOutboundProductIds,
         cartId: null,
         cartVersion: null,
         cartStateHash: null,
@@ -4810,6 +4837,11 @@ export class RealtimeRunner {
     const customerUrlSafeFallbackPlanned =
       customerUrlDisposition === "HANDOFF" ||
       customerUrlDisposition === "EXPLAIN_UNSUPPORTED";
+    const readinessObservations = [
+      ...(salesCyclePlan?.effectReadiness ?? []),
+      ...(salesReadinessAttempt === null ? [] : [salesReadinessAttempt]),
+      ...(protectedOutboundReadiness === null ? [] : [protectedOutboundReadiness]),
+    ];
     const decisionObservability = buildDecisionObservabilityV1({
       dialogueEvidenceCodes,
       dialogueEvidenceSource,
@@ -4862,14 +4894,15 @@ export class RealtimeRunner {
       strategy: wave2StrategyDecision?.recommendedStrategy ?? "NONE",
       cta: wave2StrategyDecision?.ctaPolicy ?? "NONE",
       strategyUsesModelEvidence,
-      readinessOutcome: salesCyclePlan?.effectReadiness?.length
-        ? salesCyclePlan.effectReadiness.every(({ outcome }) => outcome === "READY")
+      readinessOutcome: readinessObservations.length > 0
+        ? readinessObservations.every(({ outcome }) => outcome === "READY")
           ? "READY"
           : "BLOCKED"
         : "NOT_EVALUATED",
-      readinessRulesetVersion: salesCyclePlan?.effectReadiness?.length
+      readinessRulesetVersion: readinessObservations.length > 0
         ? "DETERMINISTIC_EFFECT_READINESS_V1"
         : "LEGACY_READINESS_OBSERVATION_V1",
+      readinessReasonCodes: readinessObservations.flatMap(({ reasonCodes }) => reasonCodes),
       productScope: observedProductId
         ? "RESOLVED"
         : protectedClaimValidation.claimTypes.length > 0 || salesCyclePlan !== null

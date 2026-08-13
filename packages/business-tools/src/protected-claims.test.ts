@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildProtectedCartPolicyClaimsV1,
+  buildProtectedClaimsFromVerifiedFactSetV1,
   buildProtectedMediaClaimsV1,
   buildProtectedClaimsFromCartSelectionsV1,
   buildProtectedClaimsFromVerifiedFactsV1,
@@ -8,6 +9,32 @@ import {
 } from "./protected-claims.js";
 
 const HASH = "a".repeat(64);
+
+function verifiedFacts(productId: string, salePriceVnd: number) {
+  return {
+    schemaVersion: 1 as const,
+    status: "OK" as const,
+    source: "POS_LIVE" as const,
+    observedAt: "2026-08-13T05:00:00.000Z",
+    expiresAt: "2026-08-13T05:05:00.000Z",
+    productId,
+    reasonCode: null,
+    facts: {
+      schemaVersion: 1 as const,
+      productId,
+      parentProductId: productId,
+      offerType: "SET" as const,
+      listPriceVnd: salePriceVnd + 50_000,
+      salePriceVnd,
+      sizes: ["S", "M", "L"],
+      stockStatus: "IN_STOCK" as const,
+      stockQuantity: 3,
+      deliveryEta: { minDays: 2, maxDays: 4 },
+      fulfillmentPolicy: "STANDARD",
+      imageUrls: [],
+    },
+  };
+}
 
 describe("DF05 typed protected-claim provenance", () => {
   it("adapts canonical cart policy decisions into shipping and promotion claims", () => {
@@ -132,6 +159,27 @@ describe("DF05 typed protected-claim provenance", () => {
     expect(hashProtectedClaimSetV1(result.claims)).toMatch(/^[a-f0-9]{64}$/u);
     expect(JSON.stringify(result.claims)).not.toContain("secret");
     expect(JSON.stringify(result.claims)).not.toContain("example.invalid");
+  });
+
+  it("aggregates every verified product scope once in deterministic order", () => {
+    const sp2 = verifiedFacts("SP-002", 1_450_000);
+    const sp1 = verifiedFacts("SP-001", 1_250_000);
+
+    const result = buildProtectedClaimsFromVerifiedFactSetV1({
+      facts: [sp2, sp1, sp2],
+      sizeClaim: null,
+    });
+
+    expect(result.reasonCodes).toEqual([]);
+    expect(result.claims).toHaveLength(6);
+    expect([...new Set(result.claims.map(({ scope }) =>
+      scope.kind === "PRODUCT" ? scope.productId : null
+    ))].sort()).toEqual(["SP-001", "SP-002"]);
+    expect(new Set(result.claims.map(({ claimId }) => claimId)).size).toBe(6);
+    expect(result).toEqual(buildProtectedClaimsFromVerifiedFactSetV1({
+      facts: [sp1, sp2],
+      sizeClaim: null,
+    }));
   });
 
   it("fails closed when verified facts have no finite expiry", () => {

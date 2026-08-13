@@ -18,6 +18,12 @@ export interface BuildProtectedClaimsFromVerifiedFactsV1Input {
   readonly expectedProductId?: string | null;
 }
 
+export interface BuildProtectedClaimsFromVerifiedFactSetV1Input {
+  readonly facts: readonly BusinessFactEnvelopeV1[];
+  readonly sizeClaim: SizeRecommendationProtectedClaimV1 | null;
+  readonly expectedSizeProductId?: string | null;
+}
+
 export interface ProtectedClaimBuildResultV1 {
   readonly claims: readonly ProtectedClaimV1[];
   readonly reasonCodes: readonly ProtectedClaimBuildReason[];
@@ -261,6 +267,42 @@ export function buildProtectedClaimsFromVerifiedFactsV1(
   }
   return {
     claims: claims.sort((left, right) => left.type.localeCompare(right.type)),
+    reasonCodes: [...reasonCodes].sort(),
+  };
+}
+
+/**
+ * The only aggregation boundary for protected claims backed by product facts.
+ * A multi-product reply must retain every verified product scope; duplicate
+ * fact envelopes are collapsed by their deterministic claim identity.
+ */
+export function buildProtectedClaimsFromVerifiedFactSetV1(
+  input: BuildProtectedClaimsFromVerifiedFactSetV1Input,
+): ProtectedClaimBuildResultV1 {
+  const claimsById = new Map<string, ProtectedClaimV1>();
+  const reasonCodes = new Set<ProtectedClaimBuildReason>();
+  const append = (result: ProtectedClaimBuildResultV1) => {
+    for (const claim of result.claims) claimsById.set(claim.claimId, claim);
+    for (const reasonCode of result.reasonCodes) reasonCodes.add(reasonCode);
+  };
+
+  for (const facts of input.facts) {
+    append(buildProtectedClaimsFromVerifiedFactsV1({
+      facts,
+      sizeClaim: null,
+      expectedProductId: facts.productId,
+    }));
+  }
+  append(buildProtectedClaimsFromVerifiedFactsV1({
+    facts: null,
+    sizeClaim: input.sizeClaim,
+    expectedProductId: input.expectedSizeProductId ?? null,
+  }));
+
+  return {
+    claims: [...claimsById.values()].sort((left, right) =>
+      left.type.localeCompare(right.type) || left.claimId.localeCompare(right.claimId)
+    ),
     reasonCodes: [...reasonCodes].sort(),
   };
 }
