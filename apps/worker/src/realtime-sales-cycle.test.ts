@@ -505,6 +505,79 @@ describe("realtime Phase 3 sales cycle", () => {
     });
   });
 
+  it("uses one authoritative selection snapshot for protected cart text and claims", async () => {
+    let reads = 0;
+    const changingFacts: BusinessFactsReader = {
+      ...facts,
+      async resolveCartSelection(query) {
+        reads += 1;
+        const amount = reads === 1 ? 699_000 : 799_000;
+        const selectedLine = line(query.quantity);
+        return {
+          status: "READY",
+          line: {
+            ...selectedLine,
+            posUnitPriceVnd: amount,
+            lineTotalVnd: amount * query.quantity,
+          },
+          shopId: "LANA",
+          versions: {
+            price: `price-v${reads}`,
+            inventory: "inventory-v1",
+            size: "size-v1",
+            eta: null,
+          },
+          eta: null,
+          sourceObservedAt: "2026-07-23T02:00:00.000Z",
+          sourceExpiresAt: "2026-07-25T02:00:00.000Z",
+        };
+      },
+    };
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(createRealtimeSalesState(conversationId, pageId, now), "chốt CB182 size M", "event-snapshot"),
+      facts: changingFacts,
+    });
+
+    expect(reads).toBe(1);
+    expect(output.messages[0]).toMatchObject({ text: expect.stringContaining("699.000") });
+    expect(output.protectedOutbound?.claims.find(({ type }) => type === "PRICE")).toMatchObject({
+      value: { amountVnd: 699_000, currency: "VND" },
+    });
+  });
+
+  it("blocks protected cart output when facts expire during the turn", async () => {
+    const expiringFacts: BusinessFactsReader = {
+      ...facts,
+      async resolveCartSelection(query) {
+        return {
+          status: "READY",
+          line: line(query.quantity),
+          shopId: "LANA",
+          versions: {
+            price: "price-expiring",
+            inventory: "inventory-expiring",
+            size: "size-expiring",
+            eta: null,
+          },
+          eta: null,
+          sourceObservedAt: "2026-07-23T02:59:00.000Z",
+          sourceExpiresAt: "2026-07-23T03:00:30.000Z",
+        };
+      },
+    };
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(createRealtimeSalesState(conversationId, pageId, now), "chốt CB182 size M", "event-expiring"),
+      facts: expiringFacts,
+      effectNow: () => new Date("2026-07-23T03:00:45.000Z"),
+    });
+
+    expect(output).toMatchObject({
+      transferToHuman: true,
+      messages: [],
+      reasonCode: "CLAIM_STALE",
+    });
+  });
+
   it("uses the concise prompt when the customer changes a single-item cart", async () => {
     const opened = await evaluateRealtimeSalesCycle(input(
       createRealtimeSalesState(conversationId, pageId, now),

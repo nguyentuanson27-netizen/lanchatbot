@@ -82,6 +82,8 @@ export interface RealtimeSalesCycleInput {
   readonly policyResolution: RuntimePolicyResolution | null;
   readonly facts: BusinessFactsReader;
   readonly now: Date;
+  /** Production supplies a live clock; deterministic tests may omit it. */
+  readonly effectNow?: () => Date;
 }
 
 export interface RealtimeSalesCycleOutput {
@@ -537,6 +539,8 @@ async function currentSelections(
   input: RealtimeSalesCycleInput,
   cart: CartV1,
   address: string,
+  checkedAt: Date = input.now,
+  quantityOverrides: ReadonlyMap<string, number> = new Map(),
 ): Promise<readonly CartSelectionResult[]> {
   if (!input.facts.resolveCartSelection) return [];
   return Promise.all(cart.lines.map((line) => {
@@ -548,11 +552,31 @@ async function currentSelections(
       offerType: line.offerId,
       size: sizes.length === 1 ? sizes[0]! : null,
       color: colors.length === 1 ? colors[0]! : null,
-      quantity: line.quantity,
+      quantity: quantityOverrides.get(line.lineId) ?? line.quantity,
       lineId: line.lineId,
       deliveryAddress: address,
-    }, input.now);
+    }, checkedAt);
   }));
+}
+
+type ReadyCartSelection = Extract<CartSelectionResult, { status: "READY" }>;
+
+function selectionsMatchCartLines(
+  lines: CartV1["lines"],
+  selections: readonly ReadyCartSelection[],
+): boolean {
+  if (lines.length !== selections.length) return false;
+  const byLineId = new Map(selections.map((selection) => [selection.line.lineId, selection.line]));
+  return lines.every((line) => {
+    const selected = byLineId.get(line.lineId);
+    return selected !== undefined &&
+      selected.parentProductId === line.parentProductId &&
+      selected.offerId === line.offerId &&
+      selected.quantity === line.quantity &&
+      selected.posUnitPriceVnd === line.posUnitPriceVnd &&
+      selected.lineTotalVnd === line.lineTotalVnd &&
+      canonicalJson(selected.components) === canonicalJson(line.components);
+  });
 }
 
 function fact(
@@ -659,6 +683,11 @@ export async function evaluateRealtimeSalesCycle(
     ReturnType<typeof buildProtectedClaimsFromCartSelectionsV1>
   >();
   let deterministicConfirmationEvidence: DeterministicConfirmationEvidenceV1 | null = null;
+  const effectNow = (): Date => {
+    const value = input.effectNow?.() ?? input.now;
+    if (!Number.isFinite(value.getTime())) throw new Error("EFFECT_CLOCK_INVALID");
+    return value;
+  };
   const references = new Map<string, unknown>();
   const inbound = trustedInbound(input);
   let checkoutValidation: CheckoutRevalidationV1 | null = null;
@@ -714,6 +743,7 @@ export async function evaluateRealtimeSalesCycle(
     cart: CartV1 | null = null,
     preview: SalesCycleRuntimeState["preview"] = null,
     deterministicEvidenceHash: string | null = null,
+    checkedAt: Date = effectNow(),
   ): DeterministicEffectReadinessV1 => {
     const claims = buildProtectedClaimsFromCartSelectionsV1(selections.map((selection) => ({
       productId: selection.line.parentProductId,
@@ -744,7 +774,7 @@ export async function evaluateRealtimeSalesCycle(
         : null,
       claims,
       deterministicEvidenceHash,
-      checkedAt: input.now,
+      checkedAt,
     });
   };
   const acceptReadiness = (readiness: DeterministicEffectReadinessV1): boolean => {
@@ -774,38 +804,32 @@ export async function evaluateRealtimeSalesCycle(
   };
 
   const protectedCartReply = async (
-    text: string,
+    render: (cart: CartV1, selections: readonly ReadyCartSelection[]) => string,
     options: Readonly<{
+      selections: readonly ReadyCartSelection[];
       includeEta?: boolean;
       telemetry?: RealtimeSalesCycleTelemetry;
-    }> = {},
+    }>,
   ): Promise<RealtimeSalesCycleOutput> => {
     if (!state.cart) return failedOutput("PROTECTED_OUTBOUND_CART_MISSING", plan());
-    const selections = await currentSelections(
-      input,
-      state.cart.value,
-      state.checkoutDraft?.address ?? "",
-    );
-    const readySelections = selections.filter((value): value is Extract<CartSelectionResult, { status: "READY" }> =>
-      value.status === "READY"
-    );
-    if (readySelections.length !== state.cart.value.lines.length) {
-      const unavailable = selections.find(({ status }) => status !== "READY");
-      return failedOutput(
-        unavailable && "reasonCode" in unavailable
-          ? unavailable.reasonCode
-          : "PROTECTED_OUTBOUND_FACTS_UNAVAILABLE",
-        plan(),
-      );
+    if (!selectionsMatchCartLines(state.cart.value.lines, options.selections)) {
+      return failedOutput("PROTECTED_OUTBOUND_CART_SNAPSHOT_CHANGED", plan());
     }
+    const checkedAt = effectNow();
+    const cartClaimExpiry = new Date(Math.min(
+      Date.parse(state.cart.expiresAt),
+      bundle.policy.effectiveUntil === null
+        ? Number.POSITIVE_INFINITY
+        : Date.parse(bundle.policy.effectiveUntil),
+    )).toISOString();
     const cartClaims = buildProtectedCartPolicyClaimsV1({
       cart: state.cart.value,
       policySourceVersion: `${bundle.policy.policyBundleId}:${bundle.policy.policyVersion}`,
       policyEvidenceRef: `policy:${policyReference.contentHash}`,
-      expiresAt: state.cart.expiresAt,
+      expiresAt: cartClaimExpiry,
     });
     const allClaims = [
-      ...buildProtectedClaimsFromCartSelectionsV1(readySelections.map((selection) => ({
+      ...buildProtectedClaimsFromCartSelectionsV1(options.selections.map((selection) => ({
         productId: selection.line.parentProductId,
         variantId: selection.line.offerId,
         priceVnd: selection.line.posUnitPriceVnd!,
@@ -840,7 +864,7 @@ export async function evaluateRealtimeSalesCycle(
       buyingIntent: null,
       claims,
       protectedClaimTypes: claimTypes,
-      checkedAt: input.now,
+      checkedAt,
     });
     effectClaimSets.set("PROTECTED_OUTBOUND", claims);
     if (!acceptReadiness(readiness)) {
@@ -848,7 +872,7 @@ export async function evaluateRealtimeSalesCycle(
     }
     return {
       handled: true,
-      messages: [{ kind: "TEXT", text }],
+      messages: [{ kind: "TEXT", text: render(state.cart.value, options.selections) }],
       plan: plan(),
       transferToHuman: false,
       desiredTag: null,
@@ -1063,11 +1087,14 @@ export async function evaluateRealtimeSalesCycle(
     if (!state.cart || !state.preview || !state.checkoutDraft?.address) {
       return failedOutput("ORDER_PREVIEW_STATE_INVALID", plan());
     }
-    const selections = await currentSelections(input, state.cart.value, state.checkoutDraft.address);
+    const selections = await currentSelections(
+      input, state.cart.value, state.checkoutDraft.address, effectNow(),
+    );
+    const confirmationCheckedAt = effectNow();
     checkoutValidation = revalidation(
       state.cart.value,
       selections,
-      input.now,
+      confirmationCheckedAt,
       state.preview.revalidation,
     ).value;
     const readySelections = selections.filter((value): value is Extract<CartSelectionResult, { status: "READY" }> =>
@@ -1092,7 +1119,7 @@ export async function evaluateRealtimeSalesCycle(
           "CONFIRMATION_DETERMINISTIC_MATCH",
         ]), "utf8")
         .digest("hex"),
-      evaluatedAt: input.now.toISOString(),
+      evaluatedAt: confirmationCheckedAt.toISOString(),
       authorization: "NONE",
     };
     const confirmationReadiness = freshReadiness(
@@ -1100,6 +1127,7 @@ export async function evaluateRealtimeSalesCycle(
       createHash("sha256")
         .update(canonicalJson(deterministicConfirmationEvidence), "utf8")
         .digest("hex"),
+      confirmationCheckedAt,
     );
     if (!acceptReadiness(confirmationReadiness)) {
       return failedOutput(confirmationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED", plan());
@@ -1164,10 +1192,15 @@ export async function evaluateRealtimeSalesCycle(
         input,
         state.cart.value,
         state.checkoutDraft?.address ?? "",
+        effectNow(),
       );
       const readySelections = selections.filter((value): value is Extract<CartSelectionResult, { status: "READY" }> =>
         value.status === "READY" && value.line.lineId !== line.lineId
       );
+      const remainingLines = state.cart.value.lines.filter(({ lineId }) => lineId !== line.lineId);
+      if (!selectionsMatchCartLines(remainingLines, readySelections)) {
+        return failedOutput("CART_REMOVE_SNAPSHOT_CHANGED", plan());
+      }
       const removeReadiness = freshReadiness(
         "CART_MUTATION",
         readySelections,
@@ -1193,11 +1226,32 @@ export async function evaluateRealtimeSalesCycle(
         mutationReasonCode: "LINE_REMOVED",
       });
       if (result.status !== "APPLIED" || !state.cart) return failedOutput("CART_REMOVE_FAILED", plan());
-      return protectedCartReply(`${cartSummary(state.cart.value)}\nEm đã tính lại ưu đãi theo giỏ mới ạ.`);
+      return protectedCartReply(
+        (cart) => `${cartSummary(cart)}\nEm đã tính lại ưu đãi theo giỏ mới ạ.`,
+        { selections: readySelections },
+      );
     }
 
     if (priceObjection(input.text)) {
       if (!state.negotiation) return failedOutput("NEGOTIATION_STATE_MISSING", plan());
+      const negotiationSelections = await currentSelections(
+        input, state.cart.value, state.checkoutDraft?.address ?? "", effectNow(),
+      );
+      const readyNegotiationSelections = negotiationSelections.filter(
+        (value): value is ReadyCartSelection => value.status === "READY",
+      );
+      if (readyNegotiationSelections.length !== state.cart.value.lines.length) {
+        const unavailable = negotiationSelections.find(({ status }) => status !== "READY");
+        return failedOutput(
+          unavailable && "reasonCode" in unavailable
+            ? unavailable.reasonCode
+            : "NEGOTIATION_FACTS_UNAVAILABLE",
+          plan(),
+        );
+      }
+      if (!selectionsMatchCartLines(state.cart.value.lines, readyNegotiationSelections)) {
+        return failedOutput("NEGOTIATION_CART_SNAPSHOT_CHANGED", plan());
+      }
       const result = apply({
         kind: "NEGOTIATION_EVENT",
         commandId: commandId("price-objection"),
@@ -1223,8 +1277,10 @@ export async function evaluateRealtimeSalesCycle(
       if (result.status !== "APPLIED" || !state.cart || !state.negotiation) {
         return failedOutput("NEGOTIATION_FAILED", plan());
       }
-      const intro = negotiationOfferText(state.cart.value, state.negotiation.customerState);
-      return protectedCartReply(`${intro}\n${cartSummary(state.cart.value)}`);
+      return protectedCartReply(
+        (cart) => `${negotiationOfferText(cart, state.negotiation!.customerState)}\n${cartSummary(cart)}`,
+        { selections: readyNegotiationSelections },
+      );
     }
 
     const details = checkoutDetails(input.text, input.salesSignals);
@@ -1257,22 +1313,30 @@ export async function evaluateRealtimeSalesCycle(
       if (state.checkoutDraft.paymentMethod === "BANK_TRANSFER" && !bank) {
         return failedOutput("BANK_TRANSFER_POLICY_UNAVAILABLE", plan());
       }
+      const selections = await currentSelections(
+        input, state.cart.value, state.checkoutDraft.address, effectNow(),
+      );
+      const readySelections = selections.filter(
+        (value): value is ReadyCartSelection => value.status === "READY",
+      );
+      if (!selectionsMatchCartLines(state.cart.value.lines, readySelections)) {
+        return failedOutput("ORDER_PREVIEW_CART_SNAPSHOT_CHANGED", plan());
+      }
       const ready = apply({
         kind: "CART_READY",
         commandId: commandId("cart-ready"),
         expectedCartVersion: state.cart.value.revision,
       });
       if (ready.status !== "APPLIED" || !state.cart) return failedOutput("CART_READY_REJECTED", plan());
-      const selections = await currentSelections(input, state.cart.value, state.checkoutDraft.address);
-      const checked = revalidation(state.cart.value, selections, input.now);
+      const previewCheckedAt = effectNow();
+      const checked = revalidation(state.cart.value, selections, previewCheckedAt);
       if (!checked.value.eligible || !checked.eta) {
         return failedOutput("CHECKOUT_REVALIDATION_UNAVAILABLE", plan());
       }
-      const readySelections = selections.filter((value): value is Extract<CartSelectionResult, { status: "READY" }> =>
-        value.status === "READY"
-      );
+      const checkedEta = checked.eta;
       const previewReadiness = freshReadiness(
         "ORDER_PREVIEW", readySelections, state.cart.value,
+        null, null, previewCheckedAt,
       );
       if (!acceptReadiness(previewReadiness)) {
         return failedOutput(previewReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED", plan());
@@ -1293,10 +1357,10 @@ export async function evaluateRealtimeSalesCycle(
           ? { method: "COD" as const, bankTransferPolicyRef: null }
           : { method: "BANK_TRANSFER" as const, bankTransferPolicyRef: bank!.reference },
         revalidation: checked.value,
-        createdAt: input.now.toISOString(),
+        createdAt: previewCheckedAt.toISOString(),
         expiresAt: new Date(Math.min(
           Date.parse(state.cart.expiresAt),
-          input.now.getTime() + PREVIEW_TTL_MS,
+          previewCheckedAt.getTime() + PREVIEW_TTL_MS,
         )).toISOString(),
       };
       const preview = OrderPreviewV1Schema.parse({
@@ -1310,8 +1374,8 @@ export async function evaluateRealtimeSalesCycle(
       });
       if (previewed.status !== "APPLIED" || !state.cart) return failedOutput("ORDER_PREVIEW_REJECTED", plan());
       return protectedCartReply(
-        `${cartSummary(state.cart.value)}\nNgười nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}\nĐịa chỉ: ${preview.recipient.address}\nThanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}\nDự kiến nhận hàng: ${checked.eta.minDays}-${checked.eta.maxDays} ngày.\nChị xác nhận chốt đơn giúp em nhé.`,
-        { includeEta: true, telemetry: {
+        (cart) => `${cartSummary(cart)}\nNgười nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}\nĐịa chỉ: ${preview.recipient.address}\nThanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}\nDự kiến nhận hàng: ${checkedEta.minDays}-${checkedEta.maxDays} ngày.\nChị xác nhận chốt đơn giúp em nhé.`,
+        { selections: readySelections, includeEta: true, telemetry: {
           checkoutCapturedFields: capturedFields,
           checkoutMissingFields: [],
           checkoutCompleted: true,
@@ -1340,23 +1404,27 @@ export async function evaluateRealtimeSalesCycle(
           reasonCode: "CART_QUANTITY_UNCHANGED",
         };
       }
-      const sizes = [...new Set(existing.components
-        .map(({ size }) => size)
-        .filter((value): value is string => value !== null))];
-      const colors = [...new Set(existing.components
-        .map(({ color }) => color)
-        .filter((value): value is string => value !== null))];
-      const verified = await input.facts.resolveCartSelection({
-        shopAlias: input.shopAlias,
-        productId: existing.parentProductId,
-        offerType: existing.offerId,
-        size: sizes.length === 1 ? sizes[0]! : null,
-        color: colors.length === 1 ? colors[0]! : null,
-        quantity,
-        lineId: existing.lineId,
-      }, input.now);
-      if (verified.status !== "READY") return failedOutput(verified.reasonCode, plan());
-      const mutationReadiness = freshReadiness("CART_MUTATION", [verified], state.cart.value);
+      const selections = await currentSelections(
+        input,
+        state.cart.value,
+        state.checkoutDraft?.address ?? "",
+        effectNow(),
+        new Map([[existing.lineId, quantity]]),
+      );
+      const readySelections = selections.filter(
+        (value): value is ReadyCartSelection => value.status === "READY",
+      );
+      const prospectiveLines = state.cart.value.lines.map((line) => line.lineId === existing.lineId
+        ? {
+            ...line,
+            quantity,
+            lineTotalVnd: line.posUnitPriceVnd === null ? null : line.posUnitPriceVnd * quantity,
+          }
+        : line);
+      if (!selectionsMatchCartLines(prospectiveLines, readySelections)) {
+        return failedOutput("CART_QUANTITY_SNAPSHOT_CHANGED", plan());
+      }
+      const mutationReadiness = freshReadiness("CART_MUTATION", readySelections, state.cart.value);
       if (!acceptReadiness(mutationReadiness)) {
         return failedOutput(mutationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED", plan());
       }
@@ -1383,7 +1451,7 @@ export async function evaluateRealtimeSalesCycle(
       if (result.status !== "APPLIED" || !state.cart) {
         return failedOutput("CART_QUANTITY_CHANGE_FAILED", plan());
       }
-      return protectedCartReply(checkoutTemplate(state.cart.value));
+      return protectedCartReply(checkoutTemplate, { selections: readySelections });
     }
 
     if (
@@ -1399,7 +1467,7 @@ export async function evaluateRealtimeSalesCycle(
         color: input.color,
         quantity: requestedQuantity(input.canonicalBuyingIntent),
         lineId: deterministicUuid(`${state.cart.value.cartId}:${input.productId}:${input.eventKey}`),
-      }, input.now);
+      }, effectNow());
       if (selected.status !== "READY") {
         if (selected.status === "SIZE_REQUIRED" || selected.status === "COLOR_REQUIRED") {
           const values = selected.status === "SIZE_REQUIRED" ? selected.availableSizes : selected.availableColors;
@@ -1414,7 +1482,17 @@ export async function evaluateRealtimeSalesCycle(
         }
         return failedOutput(selected.reasonCode, plan());
       }
-      const mutationReadiness = freshReadiness("CART_MUTATION", [selected], state.cart.value);
+      const existingSelections = await currentSelections(
+        input, state.cart.value, state.checkoutDraft?.address ?? "", effectNow(),
+      );
+      const readyExistingSelections = existingSelections.filter(
+        (value): value is ReadyCartSelection => value.status === "READY",
+      );
+      if (!selectionsMatchCartLines(state.cart.value.lines, readyExistingSelections)) {
+        return failedOutput("CART_ADD_SNAPSHOT_CHANGED", plan());
+      }
+      const readySelections = [...readyExistingSelections, selected];
+      const mutationReadiness = freshReadiness("CART_MUTATION", readySelections, state.cart.value);
       if (!acceptReadiness(mutationReadiness)) {
         return failedOutput(mutationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED", plan());
       }
@@ -1433,7 +1511,7 @@ export async function evaluateRealtimeSalesCycle(
         mutationReasonCode: "LINE_ADDED",
       });
       if (result.status !== "APPLIED" || !state.cart) return failedOutput("CART_ADD_FAILED", plan());
-      return protectedCartReply(checkoutTemplate(state.cart.value));
+      return protectedCartReply(checkoutTemplate, { selections: readySelections });
     }
 
     if (state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING") {
@@ -1464,7 +1542,7 @@ export async function evaluateRealtimeSalesCycle(
       color: input.color,
       quantity: requestedQuantity(input.canonicalBuyingIntent),
       lineId: deterministicUuid(`${input.conversationId}:${input.productId}:${input.eventKey}`),
-    }, input.now);
+    }, effectNow());
     if (selected.status !== "READY") {
       if (selected.status === "SIZE_REQUIRED" || selected.status === "COLOR_REQUIRED") {
         if (state.stage === "DISCOVERY") {
@@ -1524,7 +1602,7 @@ export async function evaluateRealtimeSalesCycle(
       expiresAt: new Date(input.now.getTime() + CART_TTL_MS).toISOString(),
     });
     if (opened.status !== "APPLIED" || !state.cart) return failedOutput("CART_OPEN_FAILED", plan());
-    return protectedCartReply(checkoutTemplate(state.cart.value));
+    return protectedCartReply(checkoutTemplate, { selections: [selected] });
   }
 
   if (

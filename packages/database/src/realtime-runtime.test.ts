@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
 import { LocalEnvelopeCipher } from "./envelope-cipher.js";
-import { PostgresRealtimeRuntimeStore } from "./realtime-runtime.js";
+import {
+  PostgresRealtimeRuntimeStore,
+  type RealtimeCommitInput,
+} from "./realtime-runtime.js";
 
 function canonicalJson(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
@@ -23,7 +26,8 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       async query(sql: string, values: readonly unknown[] = []) {
         calls.push({ sql, values });
         if (sql.includes("SELECT routing_owner")) {
-          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }] };
+          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+            transaction_now: new Date("2026-07-23T05:00:00.000Z") }] };
         }
         if (sql.includes("SELECT conversation_owner")) {
           return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
@@ -170,6 +174,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
               routing_owner: "APP",
               app_send_enabled: true,
               kill_switch: false,
+              transaction_now: new Date("2026-07-23T05:00:00.000Z"),
             }],
           };
         }
@@ -229,11 +234,15 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
 
   it("commits a price-only protected reply when its typed claim set matches exactly", async () => {
     const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
+    let transactionNow = new Date("2026-08-13T05:00:00.000Z");
     const client = {
       async query(sql: string, values: readonly unknown[] = []) {
         calls.push({ sql, values });
         if (sql.includes("SELECT routing_owner")) {
-          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }] };
+          return { rowCount: 1, rows: [{
+            routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+            transaction_now: transactionNow,
+          }] };
         }
         if (sql.includes("SELECT conversation_owner")) {
           return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
@@ -270,7 +279,12 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       value: { amountVnd: 1_250_000, currency: "VND" as const },
       authorization: "NONE" as const,
     };
-    const result = await store.commit({
+    const messages = [{ kind: "TEXT" as const, text: "Giá hiện tại là 1.250.000đ." }];
+    const commitInput: RealtimeCommitInput<{
+      revision: number;
+      routingOwner: "APP";
+      conversationOwner: "BOT";
+    }> = {
       pageId: "page-1",
       customerHash: "hash",
       conversationId: "33333333-3333-4333-8333-333333333333",
@@ -280,7 +294,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         replyPlanId: "10000000-0000-4000-8000-000000000001",
         responseGroupId: "10000000-0000-4000-8000-000000000002",
         recipientId: "customer-1",
-        messages: [{ kind: "TEXT", text: "Giá hiện tại là 1.250.000đ." }],
+        messages,
         protectedClaimTypes: ["PRICE"],
         sourceMessageIdHash: "a".repeat(64),
         protectedClaims: [claim],
@@ -300,7 +314,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           orderPreviewId: null,
           orderPreviewHash: null,
           buyingIntentHash: null,
-          deterministicEvidenceHash: null,
+          deterministicEvidenceHash: sha256(messages),
           claimSetHash: sha256([claim]),
           protectedClaimTypes: ["PRICE"],
           checkedAt: now.toISOString(),
@@ -309,10 +323,31 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           authorization: "NONE",
         },
       },
-    }, now);
+    };
+    const result = await store.commit(commitInput, now);
 
     expect(result.metaOutboxCreated).toBe(1);
     expect(calls.at(-1)?.sql.trim()).toBe("COMMIT");
+
+    await expect(store.commit({
+      ...commitInput,
+      metaPlan: {
+        ...commitInput.metaPlan!,
+        replyPlanId: "10000000-0000-4000-8000-000000000004",
+        responseGroupId: "10000000-0000-4000-8000-000000000005",
+        messages: [{ kind: "TEXT", text: "Giá bị thay đổi sau khi readiness đã được chốt." }],
+      },
+    }, now)).rejects.toThrow("PROTECTED_OUTBOUND_PAYLOAD_MISMATCH");
+
+    transactionNow = new Date("2026-08-13T05:02:00.000Z");
+    await expect(store.commit({
+      ...commitInput,
+      metaPlan: {
+        ...commitInput.metaPlan!,
+        replyPlanId: "10000000-0000-4000-8000-000000000006",
+        responseGroupId: "10000000-0000-4000-8000-000000000007",
+      },
+    }, now)).rejects.toThrow("PROTECTED_OUTBOUND_READINESS_MISMATCH");
   });
 
   it("drops a stale decision before state or outbox commit when a newer inbound advanced the generation", async () => {
@@ -323,7 +358,8 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         if (sql.includes("SELECT routing_owner")) {
           return {
             rowCount: 1,
-            rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }],
+            rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+              transaction_now: new Date("2026-08-13T05:00:00.000Z") }],
           };
         }
         if (sql.includes("SELECT generation")) {
@@ -370,7 +406,8 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       async query(sql: string, values: readonly unknown[] = []) {
         calls.push({ sql, values });
         if (sql.includes("SELECT routing_owner")) {
-          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }] };
+          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+            transaction_now: new Date("2026-07-20T10:00:00.000Z") }] };
         }
         if (sql.includes("SELECT conversation_owner")) {
           return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
@@ -466,7 +503,8 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       async query(statement: string) {
         sql.push(statement);
         if (statement.includes("SELECT routing_owner")) {
-          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }] };
+          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+            transaction_now: new Date("2026-07-20T10:00:00.000Z") }] };
         }
         if (statement.includes("SELECT conversation_owner")) {
           return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
@@ -506,7 +544,8 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       async query(sql: string, values: readonly unknown[] = []) {
         calls.push({ sql, values });
         if (sql.includes("SELECT routing_owner")) {
-          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }] };
+          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+            transaction_now: new Date("2026-07-20T10:05:00.000Z") }] };
         }
         if (sql.includes("SELECT conversation_owner")) {
           return { rowCount: 1, rows: [{ conversation_owner: "HUMAN" }] };
@@ -542,7 +581,8 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       async query(sql: string, values: readonly unknown[] = []) {
         calls.push({ sql, values });
         if (sql.includes("SELECT routing_owner")) {
-          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }] };
+          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+            transaction_now: new Date("2026-07-23T03:00:00.000Z") }] };
         }
         if (sql.includes("SELECT conversation_owner")) {
           return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
@@ -616,7 +656,8 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       async query(sql: string) {
         calls.push(sql);
         if (sql.includes("SELECT routing_owner")) {
-          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }] };
+          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+            transaction_now: new Date("2026-08-13T03:00:00.000Z") }] };
         }
         if (sql.includes("SELECT conversation_owner")) {
           return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
@@ -682,7 +723,8 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       async query(sql: string) {
         calls.push(sql);
         if (sql.includes("SELECT routing_owner")) {
-          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }] };
+          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+            transaction_now: new Date("2026-08-13T03:00:00.000Z") }] };
         }
         if (sql.includes("SELECT conversation_owner")) {
           return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };

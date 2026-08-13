@@ -440,6 +440,12 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     if (!claims || hash([...claims].sort((a, b) => a.claimId.localeCompare(b.claimId))) !== readiness.claimSetHash) {
       throw new Error("EFFECT_READINESS_CLAIM_BINDING_MISMATCH");
     }
+    if (claims.some((claim) =>
+      Date.parse(claim.provenance.observedAt) > now.getTime() ||
+      Date.parse(claim.provenance.expiresAt) <= now.getTime()
+    )) {
+      throw new Error("EFFECT_READINESS_CLAIM_STALE");
+    }
     if (claims.some((claim) => claim.scope.kind === "PRODUCT"
       ? !readiness.productIds.includes(claim.scope.productId)
       : claim.scope.kind === "CART" &&
@@ -519,6 +525,16 @@ function validateMetaEffectReadiness<TState, TSalesState>(
     JSON.stringify([...meta.protectedClaimTypes].sort()) !== JSON.stringify([...readiness.protectedClaimTypes].sort()) ||
     JSON.stringify(actualClaimTypes) !== JSON.stringify(expectedClaimTypes)) {
     throw new Error("PROTECTED_OUTBOUND_CLAIM_BINDING_MISMATCH");
+  }
+  if (readiness.deterministicEvidenceHash !== createHash("sha256")
+    .update(canonical(meta.messages), "utf8").digest("hex")) {
+    throw new Error("PROTECTED_OUTBOUND_PAYLOAD_MISMATCH");
+  }
+  if (claims.some((claim) =>
+    Date.parse(claim.provenance.observedAt) > now.getTime() ||
+    Date.parse(claim.provenance.expiresAt) <= now.getTime()
+  )) {
+    throw new Error("PROTECTED_OUTBOUND_CLAIM_STALE");
   }
   if (claims.some((claim) => claim.scope.kind === "PRODUCT"
     ? !readiness.productIds.includes(claim.scope.productId)
@@ -1018,13 +1034,19 @@ export class PostgresRealtimeRuntimeStore {
         routing_owner: "N8N" | "APP";
         app_send_enabled: boolean;
         kill_switch: boolean;
+        transaction_now: Date;
       }>(
-        `SELECT routing_owner, app_send_enabled, kill_switch
+        `SELECT routing_owner, app_send_enabled, kill_switch,
+                clock_timestamp() AS transaction_now
          FROM pages WHERE page_id = $1 FOR UPDATE`,
         [input.pageId],
       );
       const page = route.rows[0];
       if (!page) throw new Error("REALTIME_PAGE_NOT_FOUND");
+      if (!(page.transaction_now instanceof Date) || !Number.isFinite(page.transaction_now.getTime())) {
+        throw new Error("REALTIME_TRANSACTION_CLOCK_INVALID");
+      }
+      const transactionNow = page.transaction_now;
       if (input.inboxBatchGuard) {
         const current = await this.lockCurrentInboxBatch(
           client,
@@ -1067,9 +1089,9 @@ export class PostgresRealtimeRuntimeStore {
       );
       const ownerBefore = before.rows[0]?.conversation_owner;
       if (!ownerBefore) throw new Error("STATE_REVISION_CONFLICT");
-      validateMetaEffectReadiness(input, now);
+      validateMetaEffectReadiness(input, transactionNow);
       if (input.salesCyclePlan) {
-        validateSalesEffectReadiness(input, now);
+        validateSalesEffectReadiness(input, transactionNow);
         await this.commitSalesCyclePlan(
           client,
           input.pageId,

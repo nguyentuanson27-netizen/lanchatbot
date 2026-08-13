@@ -237,6 +237,19 @@ function deterministicUuid(input: string): string {
   ].join("-");
 }
 
+function canonicalJson(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  const record = value as Record<string, unknown>;
+  return `{${Object.keys(record).sort().map((key) =>
+    `${JSON.stringify(key)}:${canonicalJson(record[key])}`
+  ).join(",")}}`;
+}
+
+function canonicalSha256(value: unknown): string {
+  return createHash("sha256").update(canonicalJson(value), "utf8").digest("hex");
+}
+
 export function inboxRetryDelaySeconds(attemptCount: number, seed: string): number {
   const boundedAttempt = Math.max(0, Math.min(30, Math.floor(attemptCount)));
   const baseSeconds = Math.min(300, 2 ** boundedAttempt);
@@ -4573,6 +4586,7 @@ export class RealtimeRunner {
         behaviorModeResolution,
         facts: this.factsReader,
         now,
+        effectNow: () => new Date(),
       });
       salesCyclePlan = sales.plan;
       salesHandled = sales.handled;
@@ -4626,6 +4640,12 @@ export class RealtimeRunner {
       : salesProtectedOutbound?.claimTypes ?? (
           !salesHandled ? protectedClaimValidation.claimTypes : []
         );
+    if (protectedOutboundReadiness !== null && outboundClaimTypes.length > 0) {
+      protectedOutboundReadiness = {
+        ...protectedOutboundReadiness,
+        deterministicEvidenceHash: canonicalSha256(metaMessages),
+      };
+    }
     if (outboundClaimTypes.length > 0 && !salesProtectedOutbound) {
       const canonicalEvidence = canonicalDecisionEvidenceForTurn();
       const outboundProductId = businessFacts?.productId ??
@@ -4663,8 +4683,14 @@ export class RealtimeRunner {
         buyingIntent: null,
         claims: protectedOutboundClaims,
         protectedClaimTypes: outboundClaimTypes,
-        checkedAt: now,
+        checkedAt: new Date(),
       });
+      if (protectedOutboundReadiness.outcome === "READY") {
+        protectedOutboundReadiness = {
+          ...protectedOutboundReadiness,
+          deterministicEvidenceHash: canonicalSha256(metaMessages),
+        };
+      }
       if (protectedOutboundReadiness.outcome !== "READY") {
         metaMessages = [];
         handoffGuardReasonCodes = [...new Set([
@@ -5270,7 +5296,7 @@ export class RealtimeRunner {
           : {}),
         ...(inboxBatchGuard ? { inboxBatchGuard } : {}),
       },
-      now,
+      new Date(),
     );
     return batchCommitStatus(result);
   }
