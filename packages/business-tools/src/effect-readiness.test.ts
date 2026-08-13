@@ -121,6 +121,18 @@ describe("deterministic effect readiness", () => {
     expect(overCapacity.productIds).toHaveLength(50);
     expect(overCapacity.reasonCodes).toContain("PRODUCT_AMBIGUOUS");
 
+    for (const invalidId of ["", "   ", "x".repeat(129)]) {
+      const invalid = evaluateDeterministicEffectReadinessV1({
+        ...base,
+        effect: "CART_MUTATION",
+        productIds: [...fiftyProductIds, invalidId],
+        deterministicEvidenceHash: hash("f"),
+      });
+      expect(invalid.outcome).toBe("BLOCKED");
+      expect(invalid.productIds).toHaveLength(50);
+      expect(invalid.reasonCodes).toContain("PRODUCT_AMBIGUOUS");
+    }
+
     const duplicate = evaluateDeterministicEffectReadinessV1({
       ...base,
       effect: "CART_MUTATION",

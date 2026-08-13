@@ -766,6 +766,90 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(atCapacity.cart.value.lines).toHaveLength(50);
   });
 
+  it("discards checkout PII and cart-ready events when preview readiness is blocked", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "event-blocked-preview-open",
+    ));
+    const openedState = opened.plan!.state;
+    const openedCart = openedState.cart!.value;
+    const baseLine = openedCart.lines[0]!;
+    if (!baseLine.priceAuthority) throw new Error("test cart requires price authority");
+    const lines = Array.from({ length: 4 }, (_, index) => {
+      const parentProductId = `PRODUCT-${index + 1}`;
+      return {
+        ...baseLine,
+        lineId: `14000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+        parentProductId,
+        priceAuthority: {
+          ...baseLine.priceAuthority,
+          priceFactRef: `pos:${parentProductId}:set`,
+          parentProductId,
+        },
+      };
+    });
+    const subtotalVnd = lines.reduce((total, cartLine) => total + cartLine.lineTotalVnd!, 0);
+    const discountTotalVnd = openedCart.adjustments.reduce(
+      (total, adjustment) => total + adjustment.amountVnd,
+      0,
+    );
+    const cart = CartV1Schema.parse({
+      ...openedCart,
+      lines,
+      subtotalVnd,
+      discountTotalVnd,
+      grandTotalVnd: subtotalVnd + openedCart.shippingFeeVnd! - discountTotalVnd,
+    });
+    const persisted = {
+      ...openedState,
+      cart: { ...openedState.cart!, value: cart },
+    };
+    const persistedFacts: BusinessFactsReader = {
+      ...facts,
+      async resolveCartSelection(query) {
+        const persistedLine = cart.lines.find(({ parentProductId }) =>
+          parentProductId === query.productId
+        )!;
+        return {
+          status: "READY",
+          line: persistedLine,
+          shopId: "LANA",
+          versions: {
+            price: `price-${query.productId}`,
+            inventory: `inventory-${query.productId}`,
+            size: `size-${query.productId}`,
+            eta: "eta-v1",
+          },
+          eta: { minDays: 3, maxDays: 6 },
+          etaExpiresAt: "2026-07-25T02:00:00.000Z",
+          sourceAuthority: "POS_SNAPSHOT",
+          stockStatus: "IN_STOCK",
+          stockAvailableQuantity: 3,
+          sourceObservedAt: "2026-07-23T02:00:00.000Z",
+          sourceExpiresAt: "2026-07-25T02:00:00.000Z",
+        };
+      },
+    };
+
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(
+        persisted,
+        "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh\nCOD",
+        "event-blocked-preview-details",
+      ),
+      facts: persistedFacts,
+    });
+
+    expect(output).toMatchObject({
+      transferToHuman: true,
+      reasonCode: "PRODUCT_AMBIGUOUS",
+      plan: null,
+    });
+    expect(persisted.checkoutDraft).toBeNull();
+    expect(persisted.cart.value.status).toBe("OPEN");
+  });
+
   it("stacks 5%, freeship and final 20k while the same evidence cannot escalate twice", async () => {
     let state = createRealtimeSalesState(conversationId, pageId, now);
     const opened = await evaluateRealtimeSalesCycle(input(

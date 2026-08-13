@@ -1327,52 +1327,86 @@ export async function evaluateRealtimeSalesCycle(
     const details = checkoutDetails(input.text, input.salesSignals);
     const hasDetails = Object.keys(details).length > 0;
     if (hasDetails) {
+      const prospectiveCheckoutDraft = { ...state.checkoutDraft, ...details };
+      const capturedFields = checkoutCapturedFields(details);
+      const prospectiveMissing = [
+        ...(prospectiveCheckoutDraft.fullName ? [] : ["FULL_NAME" as const]),
+        ...(prospectiveCheckoutDraft.phone ? [] : ["PHONE" as const]),
+        ...(prospectiveCheckoutDraft.address ? [] : ["ADDRESS" as const]),
+        ...(prospectiveCheckoutDraft.paymentMethod ? [] : ["PAYMENT_METHOD" as const]),
+      ];
+      if (prospectiveMissing.length > 0) {
+        const captured = apply({
+          kind: "CHECKOUT_DETAILS_CAPTURED",
+          commandId: commandId("checkout-details"),
+          details,
+        });
+        if (captured.status !== "APPLIED") {
+          return failedOutput("CHECKOUT_DETAILS_REJECTED", plan());
+        }
+        return requestCheckoutClarification(prospectiveMissing, capturedFields);
+      }
+      if (prospectiveCheckoutDraft.paymentMethod === "BANK_TRANSFER" && !bank) {
+        return failedOutput("BANK_TRANSFER_POLICY_UNAVAILABLE");
+      }
+      if (!state.cart) return failedOutput("CHECKOUT_DRAFT_INCOMPLETE");
+      const preflightCheckedAt = effectNow();
+      const selections = await currentSelections(
+        input, state.cart.value, prospectiveCheckoutDraft.address!, preflightCheckedAt,
+      );
+      const readySelections = selections.filter(
+        (value): value is ReadyCartSelection => value.status === "READY",
+      );
+      if (!selectionsMatchCartLines(state.cart.value.lines, readySelections)) {
+        return failedOutput("ORDER_PREVIEW_CART_SNAPSHOT_CHANGED");
+      }
+      const preflightValidation = revalidation(
+        state.cart.value, selections, preflightCheckedAt,
+      );
+      if (!preflightValidation.value.eligible || !preflightValidation.eta) {
+        return failedOutput("CHECKOUT_REVALIDATION_UNAVAILABLE");
+      }
+      const preflightReadiness = freshReadiness(
+        "ORDER_PREVIEW", readySelections, state.cart.value,
+        null, null, preflightCheckedAt,
+      );
+      if (preflightReadiness.outcome !== "READY") {
+        return failedOutput(
+          preflightReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED",
+        );
+      }
       const captured = apply({
         kind: "CHECKOUT_DETAILS_CAPTURED",
         commandId: commandId("checkout-details"),
         details,
       });
-      if (captured.status !== "APPLIED") return failedOutput("CHECKOUT_DETAILS_REJECTED", plan());
-      const capturedFields = checkoutCapturedFields(details);
-      const missing = missingCheckout(state);
-      if (missing.length > 0) {
-        return requestCheckoutClarification(missing, capturedFields);
-      }
+      if (captured.status !== "APPLIED") return failedOutput("CHECKOUT_DETAILS_REJECTED");
       if (state.clarification) {
         const resolved = apply({
           kind: "CLARIFICATION_RESOLVED",
           commandId: commandId("clarification-resolved"),
         });
         if (resolved.status !== "APPLIED") {
-          return failedOutput("CLARIFICATION_RESOLVE_REJECTED", plan());
+          return failedOutput("CLARIFICATION_RESOLVE_REJECTED");
         }
       }
       if (!state.cart || !state.checkoutDraft?.fullName || !state.checkoutDraft.phone ||
           !state.checkoutDraft.address || !state.checkoutDraft.paymentMethod) {
-        return failedOutput("CHECKOUT_DRAFT_INCOMPLETE", plan());
+        return failedOutput("CHECKOUT_DRAFT_INCOMPLETE");
       }
       if (state.checkoutDraft.paymentMethod === "BANK_TRANSFER" && !bank) {
-        return failedOutput("BANK_TRANSFER_POLICY_UNAVAILABLE", plan());
-      }
-      const selections = await currentSelections(
-        input, state.cart.value, state.checkoutDraft.address, effectNow(),
-      );
-      const readySelections = selections.filter(
-        (value): value is ReadyCartSelection => value.status === "READY",
-      );
-      if (!selectionsMatchCartLines(state.cart.value.lines, readySelections)) {
-        return failedOutput("ORDER_PREVIEW_CART_SNAPSHOT_CHANGED", plan());
+        return failedOutput("BANK_TRANSFER_POLICY_UNAVAILABLE");
       }
       const ready = apply({
         kind: "CART_READY",
         commandId: commandId("cart-ready"),
         expectedCartVersion: state.cart.value.revision,
       });
-      if (ready.status !== "APPLIED" || !state.cart) return failedOutput("CART_READY_REJECTED", plan());
+      if (ready.status !== "APPLIED" || !state.cart) return failedOutput("CART_READY_REJECTED");
       const previewCheckedAt = effectNow();
       const checked = revalidation(state.cart.value, selections, previewCheckedAt);
       if (!checked.value.eligible || !checked.eta) {
-        return failedOutput("CHECKOUT_REVALIDATION_UNAVAILABLE", plan());
+        return failedOutput("CHECKOUT_REVALIDATION_UNAVAILABLE");
       }
       const checkedEta = checked.eta;
       const previewReadiness = freshReadiness(
@@ -1380,7 +1414,7 @@ export async function evaluateRealtimeSalesCycle(
         null, null, previewCheckedAt,
       );
       if (!acceptReadiness(previewReadiness)) {
-        return failedOutput(previewReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED", plan());
+        return failedOutput(previewReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
       }
       const previewPayload = {
         schemaVersion: 1 as const,

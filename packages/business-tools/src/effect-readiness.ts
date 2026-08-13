@@ -50,10 +50,22 @@ export function evaluateDeterministicEffectReadinessV1(
   input: EvaluateDeterministicEffectReadinessV1Input,
 ): DeterministicEffectReadinessV1 {
   const reasons = new Set<DeterministicEffectReadinessV1["reasonCodes"][number]>();
-  const canonicalProductIds = [...new Set(input.productIds)].sort();
+  const rawProductIds = input.productIds as readonly unknown[];
+  const normalizedProductIds = rawProductIds
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim());
+  const validProductIds = normalizedProductIds.filter(
+    (value) => value.length > 0 && value.length <= 128,
+  );
+  const canonicalProductIds = [...new Set(validProductIds)].sort();
   const productIds = canonicalProductIds.slice(0, 50);
   if (productIds.length === 0) reasons.add("PRODUCT_UNRESOLVED");
-  if (canonicalProductIds.length !== input.productIds.length || canonicalProductIds.length > 3) {
+  if (
+    validProductIds.length !== rawProductIds.length ||
+    normalizedProductIds.some((value, index) => value !== rawProductIds[index]) ||
+    canonicalProductIds.length !== validProductIds.length ||
+    canonicalProductIds.length > 3
+  ) {
     reasons.add("PRODUCT_AMBIGUOUS");
   }
 

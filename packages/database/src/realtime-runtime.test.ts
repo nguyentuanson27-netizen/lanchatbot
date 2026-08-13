@@ -754,7 +754,9 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
   });
 
-  it("requires protected outbound readiness for a versioned negotiation event", async () => {
+  it.each(["NEGOTIATION_EVENT", "CART_READY"] as const)(
+    "requires effect readiness for a versioned %s event",
+    async (commandKind) => {
     const calls: string[] = [];
     const client = {
       async query(sql: string) {
@@ -801,7 +803,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         cartExpiresAt: new Date("2026-08-14T03:00:00.000Z"),
         expiresAt: new Date("2026-08-14T03:00:00.000Z"),
         events: [{
-          commandId: "sales:event-2:negotiation", commandKind: "NEGOTIATION_EVENT",
+          commandId: `sales:event-2:${commandKind.toLowerCase()}`, commandKind,
           outcome: "APPLIED", stateRevisionBefore: 2, stateRevisionAfter: 3,
           stageBefore: "CART_OPEN", stageAfter: "CART_OPEN",
           cartId: "10000000-0000-4000-8000-000000000001", cartVersion: 2,
@@ -811,7 +813,8 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       },
     }, now)).rejects.toThrow("EFFECT_READINESS_REQUIRED");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
-  });
+    },
+  );
 
   it("rejects cart mutation readiness that omits a final-cart product", async () => {
     const calls: string[] = [];
