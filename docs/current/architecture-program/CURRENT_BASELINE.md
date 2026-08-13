@@ -1,28 +1,33 @@
 # Current Reconciliation Baseline
 
 **Evidence date:** 2026-08-12
-**Purpose:** authoritative current checkpoint for the BF-to-DF transition. It records
-fresh GitHub and read-only VPS parity; it is not a deployment authorization.
+**Purpose:** authoritative `POST_BF_V1` comparison checkpoint for the BF-to-DF transition.
+It records fresh GitHub and read-only VPS parity plus the owner waiver decision; it is not
+a deployment authorization.
 
 ## Reconciliation verdict
 
-**GATE_BF_BLOCKED** — the project remains in the BF incident track. Do **not** call this
-checkpoint POST_BF_V1, start DF-A, or use it as the V1 comparator for DF-09/DF-10.
+**GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS** — this checkpoint is `POST_BF_V1` and DF-A
+source work may begin. This is a governance acceptance of known residuals, not an
+unqualified technical pass and not a runtime/deploy authorization.
 
-The two blocking facts are:
+The accepted residuals are:
 
 1. **BF-04 is PARTIAL / KNOWN_GAP.** The owner record on
    [PR #128](https://github.com/nguyentuanson27-netizen/lanchatbot/pull/128#issuecomment-5177514678)
    preserves P0 bypasses that can allow an undeclared size recommendation. The original
-   BF-04 mandatory fail-closed acceptance is therefore not complete.
+   BF-04 mandatory fail-closed acceptance is therefore not complete. The owner waived it
+   only as a DF-progression blocker on 2026-08-13; the finding remains open.
 2. **BF-10 lacks a post-cutover natural terminal transition.** The delivery worker is
    deployed on the BF-10 image and source/test evidence is green, but the fresh aggregate
    readback found 0 SENT_ACCEPTED records since its cutover. Historical rows are
    deliberately immutable: 13 old SENT_ACCEPTED rows retain a stale error and 233 retain
    an old retry schedule. They are not evidence that the new transactional path has run,
-   and must not be rewritten or silently treated as fixed.
+   and must not be rewritten or silently treated as fixed. The absence of natural traffic
+   is a non-blocking evidence residual because it was not part of the original BF-10
+   acceptance contract.
 
-BF-10 is an evidence blocker for Gate BF, not a claim that current delivery is unhealthy:
+BF-10 is not a claim that current delivery is unhealthy:
 the active queues are empty, duplicates are zero, and no post-cutover cleanup violation
 was observed because no such transition occurred.
 
@@ -79,8 +84,8 @@ production-readiness claim is implied.
   VERTEX_MODEL_NAME sha256:37a58c167b3b8f674049d3c259bacf074a8d47c406de12f2ca2ece97e0cf658a;
   REALTIME_PROMPT_VERSION sha256:e4bd88afa6988ebafc9c8911c82268812f2205b2f5b3abf98c2bd4f637ee0d1c;
   REALTIME_MEDIA_AI_PROMPT_VERSION sha256:adb3f24fcb6ea47acad022b7d1c24c7e4c4c42482ee30c23967ffa482b387e73.
-  A future POST_BF_V1 baseline must record its approved, PII/secret-safe model and
-  prompt identities under the release-integrity contract.
+  This `POST_BF_V1` baseline records their approved, PII/secret-safe hashes under the
+  release-integrity contract.
 
 ## Rollback and preserved boundaries
 
@@ -96,10 +101,11 @@ production-readiness claim is implied.
 
 ## Continuing residuals and hard stops
 
-1. Resolve the BF-04 accepted P0 bypasses with a separately reviewed fail-closed design;
-   do not revive a broad text heuristic as a substitute for verified claims.
-2. Keep BF-10 historical records immutable. Gate evidence must distinguish their old
-   terminal state from a new natural accepted-after-retry transition.
+1. BF-04 remains `PARTIAL / KNOWN_GAP`. Any remediation requires a separately reviewed
+   fail-closed design; do not revive a broad text heuristic as a substitute for verified claims.
+2. Keep BF-10 historical records immutable. Future evidence must distinguish their old
+   terminal state from a new natural accepted-after-retry transition; pending evidence is
+   non-blocking under the owner waiver.
 3. Do not recreate admin-web or admin-simulation-worker without reviewed per-service
    image selection.
 4. Host-only deployment scripts require a reviewed repository artifact or fresh hash

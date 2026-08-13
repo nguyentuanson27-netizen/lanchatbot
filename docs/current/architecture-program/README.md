@@ -20,9 +20,10 @@
 
 Do not load `FUTURE_BACKLOG.md` or `archive/` during a BF task unless the change explicitly touches a later contract.
 
-Only after a recorded **GATE_BF_PASSED** verdict does FUTURE_BACKLOG.md become
-active and completed BF detail move to archive/completed/. A source merge, a
-deployment, or an evidence PR is not a substitute for that verdict.
+Only after a recorded **GATE_BF_PASSED** or **GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS**
+verdict does FUTURE_BACKLOG.md become active and completed BF detail move to
+archive/completed/. A source merge, deployment, or evidence PR is not a substitute for
+that explicit verdict.
 
 ## Context routing
 
@@ -70,9 +71,9 @@ When an evidence-bearing Release Train or Gate acceptance completes:
 ```text
 Completed before the incident track: Release Integrity -> Confirmation -> Dataset Boundary -> R3
 Mode: ENGINEERING_PREPROD; live page role: PREPROD_TEST_PAGE
-Current reconciliation: GATE_BF_BLOCKED; active track remains BF
-Current blockers: BF-04 PARTIAL / KNOWN_GAP and BF-10 natural-terminal evidence pending
-Next eligible architecture work: none; DF-A activates only after GATE_BF_PASSED and POST_BF_V1 capture
+Current reconciliation: GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS; POST_BF_V1 recorded
+Accepted residuals: BF-03 deferred/non-activatable; BF-04 PARTIAL / KNOWN_GAP; BF-10 natural-terminal evidence pending
+Next eligible architecture work: DF-A (DF01-06) source work; deploy still requires separate authorization
 Architecture flow after that gate: DF-A (DF01-06) -> DF-B (DF07-10) -> DF-C (DF11-13) -> UR dependency/vertical trains
 Gates BF/E/F/U: engineering/architecture evidence only; never automatic production readiness or deploy authority
 ```

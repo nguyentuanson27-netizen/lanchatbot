@@ -11,7 +11,7 @@
 - Gate BF/E/F/U là engineering/architecture gates, không tự động đồng nghĩa production-ready.
 - Chỉ owner mới có thể chuyển chương trình sang `PRODUCTION_HARDENING` bằng yêu cầu rõ ràng.
 
-**Vị trí chương trình hiện tại:** Gate BF đang bị chặn: BF-04 vẫn là PARTIAL / KNOWN_GAP và BF-10 chưa có natural terminal transition sau cutover. Vì vậy DF-A chưa active và chưa có POST_BF_V1 baseline. Xem [Current reconciliation baseline](docs/current/architecture-program/CURRENT_BASELINE.md) và [active backlog](docs/current/architecture-program/ACTIVE_BACKLOG.md).
+**Vị trí chương trình hiện tại:** Gate BF đã được owner chấp nhận với waiver có ghi nhận (`GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS`). BF-04 vẫn là `PARTIAL / KNOWN_GAP`; BF-10 vẫn chưa có natural terminal transition sau cutover; BF-03 giữ nguyên foundation-only/non-activatable. Các residual này không được diễn giải là đã sửa, nhưng không còn chặn DF-A. `POST_BF_V1` neo vào runtime evidence hiện tại và DF-A đã sẵn sàng cho source work; không có deploy nào được suy ra từ quyết định này. Xem [Current reconciliation baseline](docs/current/architecture-program/CURRENT_BASELINE.md) và [active backlog](docs/current/architecture-program/ACTIVE_BACKLOG.md).
 
 Nguồn governance authoritative: [Operating Mode](docs/current/architecture-program/OPERATING_MODE.md). Việc đổi mode không thay đổi verified-claim, side-effect authorization, SSRF, PII/secret, auth, database-safety, authority-transition, rollback hoặc release-integrity invariants.
 

@@ -1,9 +1,9 @@
 # LANA Chatbot — Active Incident Backlog
 
-**Status:** Reconciled on 2026-08-12; **GATE_BF_BLOCKED**.
-**Active track:** BF residual closure; DF work remains inactive.
-**Next issue:** BF-04 remediation decision (do not treat the known gap as closed).
-**Exit:** GATE_BF_PASSED plus immutable POST_BF_V1 baseline.
+**Status:** Reconciled on 2026-08-13; **GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS**.
+**Active track:** DF-A source work is eligible; BF residuals remain recorded and unchanged.
+**Next issue:** DF-01 under the DF-A Release Train contract.
+**Exit:** owner acceptance is recorded and `POST_BF_V1` is anchored to the immutable reconciled runtime evidence.
 **Detailed issue contracts:** `BF_ISSUE_SPECS.md`; current disposition is below.
 **Operating mode:** `ENGINEERING_PREPROD`; PRs use focused verification and Release Trains own full verification/deploy preparation.
 
@@ -60,17 +60,19 @@ Wave C: BF-06 -> BF-07 -> BF-08 -> BF-09
 |---|---|---|---|
 | BF-01 | Merged and in the realtime artifact | CLARIFY_RECONCILED_V1 published | Active; no Gate BF blocker recorded |
 | BF-02 | Merged and in the realtime artifact | Direct runtime path | Active; replay evidence retained |
-| BF-03 | PR #158 foundation-safe merge | No adapter, import, policy field, or activation path | Canonical non-activatable disposition; do not revive the heuristic |
-| BF-04 | PR #128 merged; later realtime artifacts contain the code | Direct claim-guard path | **PARTIAL / KNOWN_GAP** P0 bypasses; Gate BF blocker |
+| BF-03 | PR #158 foundation-safe merge | No adapter, import, policy field, or activation path | Owner-approved deferred deviation; canonical non-activatable disposition; do not revive the heuristic |
+| BF-04 | PR #128 merged; later realtime artifacts contain the code | Direct claim-guard path | **PARTIAL / KNOWN_GAP** P0 bypasses; owner waived it only as a Gate blocker, not as a correctness finding |
 | BF-05 | Merged and in the realtime artifact | Direct runtime path | Active; eligibility remains fail-closed |
 | BF-06 | Merged and in the realtime artifact | PER_ASSET_V1 published | Active |
 | BF-07 | Merged and in the realtime artifact | CLARIFY_V1 published | Active |
 | BF-08 | Merged and in the realtime artifact | CLASSIFIED_ALLOWLIST_V1 published | Active; strict fallback retained |
 | BF-09 | Merged and in the realtime artifact | Direct runtime path | Active; bounded full-look mapping |
-| BF-10 | delivery-only r5.6 is live | New path has no observed natural terminal transition | Gate BF evidence blocker; do not mutate historical rows or claim live transition evidence |
+| BF-10 | delivery-only r5.6 is live | New path has no observed natural terminal transition | Accepted non-blocking evidence residual; do not mutate historical rows or claim live transition evidence |
 
-**DF_A_READY: NOT_DF_READY.** The source/deploy inventory is complete enough to
-identify blockers, but not to certify Gate BF or create POST_BF_V1.
+**DF_A_READY: READY_FOR_DF_A_SOURCE_WORK.** This is an owner governance decision, not
+a claim that BF-04 is fixed, BF-10 has natural-transition evidence, or a deployment is authorized.
+`POST_BF_V1` uses the immutable r5.7.1 realtime plus r5.6 delivery evidence recorded in
+`CURRENT_BASELINE.md` as its comparison anchor.
 
 Each issue is one focused PR starting from freshly fetched `main`, not the preceding bug branch. PR merge does not imply one release or one deploy. Immutable release preparation, full verification, and any authorized `PREPROD_TEST_PAGE` deployment occur at the applicable Release Train boundary.
 
@@ -96,20 +98,27 @@ For one BF task, load only:
 
 ## Dependencies into later architecture
 
-- BF-04 remains an unresolved mandatory safety boundary. Its verified-claim design informs DF-05/DF-06, but its known P0 bypasses must not be represented as closed containment.
-- BF-03 has the canonical foundation-only disposition from PR #158: retained inert primitives and evaluation data have no runtime authority or activation path. Do not revive correction containment; the root dialogue-evidence and writer-demotion obligations remain DF-05/DF-06 and DF-09/DF-11.
+- BF-04 remains an unresolved safety residual. Its verified-claim design informs DF-05/DF-06, but its known P0 bypasses must not be represented as closed containment. The 2026-08-13 owner waiver permits DF progression only.
+- BF-03 has an owner-approved deferred deviation and the canonical foundation-only disposition from PR #158: retained inert primitives and evaluation data have no runtime authority or activation path. Do not revive correction containment; the root dialogue-evidence and writer-demotion obligations remain DF-05/DF-06 and DF-09/DF-11.
 - BF-07 clarifies multiple products; canonical multi-product state remains an UR-00 ADR obligation.
 - DF-09/DF-10 must use the post-Gate-BF V1 baseline, never the known-buggy pre-wave path.
-- Detailed remaining DF/UR work stays inactive in `FUTURE_BACKLOG.md` until Gate BF.
+- Detailed DF-A work is active in `FUTURE_BACKLOG.md`; later trains retain their logical dependencies.
 
 ## Gate BF
 
-Gate BF passes only when:
+The original strict Gate BF checklist remains the technical acceptance contract. It is **not
+claimed fully satisfied**. On 2026-08-13 the owner explicitly accepted progression with these
+bounded deviations:
 
-**Current disposition: NOT PASSED.** The listed conditions remain the acceptance contract.
-BF-04 fails the protected-claim condition because of the owner-recorded P0 bypasses. BF-10
-does not yet have the required post-cutover terminal-transition evidence; its historical rows
-must remain unchanged. The matrix above is a status inventory, not a checkbox waiver.
+- BF-03 semantics are deferred to the canonical DF dialogue-evidence/authority work; the
+  foundation-only implementation remains non-activatable.
+- BF-04 remains `PARTIAL / KNOWN_GAP`; its P0 bypass is accepted as an open safety residual.
+- BF-10 natural post-cutover evidence remains pending. This is absence of live exercise, not
+  a failed runtime condition and not a newly invented mandatory acceptance criterion.
+
+Accordingly the governance verdict is `GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS`, not an
+unqualified technical `GATE_BF_PASSED`. The following checklist is preserved so later work
+cannot erase or misrepresent the residuals:
 
 - [ ] All ten original incidents and their counterexamples pass stable replay.
 - [ ] No protected business claim lacks typed verified provenance.
@@ -124,4 +133,6 @@ must remain unchanged. The matrix above is a status inventory, not a checkbox wa
 - [ ] Any test-page deployment evidence and soak are append-only and tied to immutable tags.
 - [ ] An immutable post-fix V1 baseline records model/config, prompt, policy versions, evidence-envelope version, and page scope.
 
-Passing Gate BF resumes the DF plan. Gate BF is an engineering/architecture gate; it does not declare production readiness or authorize `COMMERCE`, State V2, a second page/brand, deployment, or any live mutation.
+Owner acceptance resumes DF-A source work and creates the `POST_BF_V1` comparison anchor.
+Gate BF is an engineering/architecture gate; it does not declare production readiness or
+authorize `COMMERCE`, State V2, a second page/brand, deployment, or any live mutation.

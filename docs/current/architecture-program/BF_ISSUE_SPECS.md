@@ -173,7 +173,7 @@ Acceptance:
 
 **Accepted deviation:** the reviewed runtime containment was not kept. PR #158 restored the accepted BF-01/BF-02 production runner, removed the BF-03 adapter/heuristic/policy field and all activation paths, and retained only non-authoritative foundations: post-gate ordering, stale-generation completion, replay/own-echo/malformed/concurrency evidence, a pure unused allow-set primitive, and inactive research corpus data.
 
-**Current acceptance boundary:** BF-03 does not claim a customer-visible correction behavior and must not be reactivated through a versioned policy or an environment flag. The original semantic requirement moves to the canonical dialogue-evidence and atomic writer-demotion work in DF-05/DF-06 and DF-09/DF-11. Mentioning a topic remains insufficient authority for a capability, but no BF-03 regex classifier may become a second authority.
+**Current acceptance boundary:** by owner-approved deferred deviation, BF-03 does not claim a customer-visible correction behavior and must not be reactivated through a versioned policy or an environment flag. The original semantic requirement moves to the canonical dialogue-evidence and atomic writer-demotion work in DF-05/DF-06 and DF-09/DF-11. Mentioning a topic remains insufficient authority for a capability, but no BF-03 regex classifier may become a second authority.
 
 ### BF-06 — Resolve media per asset
 
@@ -243,7 +243,7 @@ Acceptance:
 
 ## 6. Gate BF — Incident remediation
 
-**Current state: GATE_BF_BLOCKED.** The original checklist remains binding. PR #128 explicitly leaves BF-04 PARTIAL / KNOWN_GAP with P0 size-claim bypasses, and the deployed BF-10 path has no post-cutover natural terminal transition. No item in this file may be read as a waiver or as a claim that POST_BF_V1 exists.
+**Current state: GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS.** The original checklist remains the strict technical contract and is not claimed fully satisfied. On 2026-08-13 the owner explicitly accepted: BF-03 as a deferred, non-activatable foundation; BF-04 as `PARTIAL / KNOWN_GAP` with its P0 bypass still open; and BF-10 natural-transition evidence as a pending non-blocking residual. This governance waiver permits DF-A progression and a `POST_BF_V1` comparison anchor; it does not claim the residuals are fixed or authorize deploy/runtime changes.
 
 Gate BF passes only when:
 

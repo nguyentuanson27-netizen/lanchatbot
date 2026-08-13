@@ -1,13 +1,13 @@
 # LANA Chatbot — Revised Bug-Fix Wave Integration Plan
 
-**Status:** Reconciled 2026-08-12; Gate BF is blocked, so this plan remains a retained incident/DF dependency record.
+**Status:** Reconciled 2026-08-13; Gate BF is accepted with owner waivers and DF-A source work is eligible.
 **Companion source of issue truth:** `ACTIVE_BACKLOG.md` and `CURRENT_BASELINE.md`.
 **Insertion point:** completed incident waves; before any eligible DF release slice
 **Operating mode:** `ENGINEERING_PREPROD`; see `OPERATING_MODE.md`.
 
 ## 1. Decision
 
-The three incident waves have source/release evidence, but Gate BF is not passed. Keep DF paused until the BF-04 P0 known gap is closed, BF-10 has its required terminal-transition evidence, and the post-fix PREPROD_TEST_PAGE V1 baseline is captured.
+The three incident waves have source/release evidence. The owner explicitly accepts the BF-03 deferred deviation, the BF-04 P0 known gap, and pending BF-10 natural-transition evidence for progression. These remain recorded residuals rather than completed technical acceptance. `POST_BF_V1` is anchored to the reconciled PREPROD_TEST_PAGE runtime evidence, so DF-A source work may start.
 
 The existing architecture direction remains valid. The incident track provides immediate containment and correctness fixes; root authority changes remain in DF-05 through DF-13 and State V2 design remains in UR.
 
@@ -121,7 +121,7 @@ Gate BF + post-fix immutable baseline
   -> separately approved destructive UR-X/UR-10
 ```
 
-**Current program point:** all three waves have merged/deployed evidence, but the arrow after Gate BF is not available. The active next work is BF-04 residual closure and Gate BF evidence reconciliation; DF-A is not active.
+**Current program point:** all three waves have merged/deployed evidence and the owner has accepted Gate BF with explicit waivers. DF-A is the active source-work train. This decision does not activate a runtime mode, authorize deployment, or close the recorded BF residuals.
 
 Each bug remains one focused PR. Adjacent bugs must not share a diff merely because they belong to the same wave. Full verification, immutable release preparation, and authorized test-page deployment occur at the wave/Release Train boundary rather than once per PR.
 
@@ -158,7 +158,7 @@ Fallback rules:
 
 ### BF-04 first
 
-This is the only P0 and blocks the rest of the incident wave. It is a mandatory fail-closed safety invariant and cannot be disabled by a runtime flag. Deployment still requires separate owner authorization and an immutable tagged release; rollback uses the previously verified release. Release Train acceptance requires evidence that unverified size recommendations are blocked while verified Size Engine recommendations remain usable.
+This is the only P0. Its fail-closed invariant and known detector bypass remain unresolved and cannot be disabled by a runtime flag. The owner waived the finding only as a DF-progression blocker on 2026-08-13; it must remain visible in review and cannot be represented as fixed. Any future remediation or deployment still requires separate review and authorization.
 
 ### BF-05 second
 
@@ -300,9 +300,10 @@ The ADR must decide the canonical shape for multiple considered products and one
 
 ## 12. Gate BF and definition of done
 
-**Current state: GATE_BF_BLOCKED.** This definition remains binding. The blockers and
-the prohibition on creating POST_BF_V1 early are recorded in ACTIVE_BACKLOG.md and
-CURRENT_BASELINE.md.
+**Current state: GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS.** The original strict checklist
+remains the technical contract, but BF-03, BF-04, and BF-10 deviations are explicitly
+recorded in ACTIVE_BACKLOG.md and CURRENT_BASELINE.md. `POST_BF_V1` is a comparison
+anchor for DF work, not proof that those residuals were fixed or authorization to deploy.
 
 The incident track is complete only when:
 

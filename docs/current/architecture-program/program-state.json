@@ -1,7 +1,8 @@
 {
   "schemaVersion": 2,
-  "status": "GATE_BF_BLOCKED",
+  "status": "GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS",
   "evidenceAsOf": "2026-08-12T10:46:25.822Z",
+  "ownerDecisionAt": "2026-08-13",
   "operatingMode": "ENGINEERING_PREPROD",
   "livePageRole": "PREPROD_TEST_PAGE",
   "git": {
@@ -47,27 +48,29 @@
   "bf": {
     "BF-01": "DEPLOYED_AND_ACTIVE_POLICY",
     "BF-02": "DEPLOYED_DIRECT_RUNTIME",
-    "BF-03": "FOUNDATION_ONLY_NON_ACTIVATABLE_BY_DESIGN",
-    "BF-04": "PARTIAL_KNOWN_GAP_GATE_BLOCKER",
+    "BF-03": "OWNER_ACCEPTED_DEFERRED_FOUNDATION_ONLY_NON_ACTIVATABLE",
+    "BF-04": "PARTIAL_KNOWN_GAP_OWNER_WAIVED_FOR_DF_PROGRESSION",
     "BF-05": "DEPLOYED_DIRECT_RUNTIME",
     "BF-06": "DEPLOYED_AND_ACTIVE_POLICY",
     "BF-07": "DEPLOYED_AND_ACTIVE_POLICY",
     "BF-08": "DEPLOYED_AND_ACTIVE_POLICY",
     "BF-09": "DEPLOYED_DIRECT_RUNTIME",
-    "BF-10": "DEPLOYED_NATURAL_TERMINAL_EVIDENCE_PENDING_GATE_BLOCKER"
+    "BF-10": "DEPLOYED_NATURAL_TERMINAL_EVIDENCE_PENDING_NON_BLOCKING_RESIDUAL"
   },
   "gateBF": {
-    "status": "BLOCKED",
-    "blockers": [
-      "BF-04 accepted P0 unverified size-claim bypasses remain",
+    "status": "ACCEPTED_WITH_OWNER_WAIVERS",
+    "blockers": [],
+    "acceptedResiduals": [
+      "BF-03 semantic correction behavior is deferred to canonical DF work; foundation remains non-activatable",
+      "BF-04 P0 unverified size-claim bypasses remain open and must not be represented as fixed",
       "BF-10 has no post-cutover natural SENT_ACCEPTED transition; historical stale terminal fields remain immutable"
     ],
-    "postFixV1Baseline": "NOT_CREATED"
+    "postFixV1Baseline": "POST_BF_V1"
   },
   "active": {
-    "track": "BF",
-    "nextIssue": "BF-04_REMEDIATION_DECISION",
-    "gate": "GATE_BF_BLOCKED"
+    "track": "DF-A",
+    "nextIssue": "DF-01",
+    "gate": "GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS"
   },
   "future": [
     "DF-A: DF-01..DF-06",
@@ -76,7 +79,7 @@
     "UR-A..UR-X"
   ],
   "hardStops": [
-    "NO_DF_ACTIVATION_OR_POST_BF_V1_BASELINE_UNTIL_GATE_BF_PASSES",
+    "NO_BF_RESIDUAL_MISREPRESENTATION_AS_FIXED",
     "NO_BF03_RUNTIME_CONTAINMENT_REACTIVATION",
     "NO_ADMIN_WEB_OR_ADMIN_SIMULATION_WORKER_RECREATE_WITHOUT_REVIEWED_PER_SERVICE_IMAGE_SELECTION",
     "NO_UNVERIFIED_HOST_SCRIPT_REUSE",
