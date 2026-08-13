@@ -50,9 +50,10 @@ export function evaluateDeterministicEffectReadinessV1(
   input: EvaluateDeterministicEffectReadinessV1Input,
 ): DeterministicEffectReadinessV1 {
   const reasons = new Set<DeterministicEffectReadinessV1["reasonCodes"][number]>();
-  const productIds = [...new Set(input.productIds)].sort();
+  const canonicalProductIds = [...new Set(input.productIds)].sort();
+  const productIds = canonicalProductIds.slice(0, 50);
   if (productIds.length === 0) reasons.add("PRODUCT_UNRESOLVED");
-  if (productIds.length !== input.productIds.length || productIds.length > 3) {
+  if (canonicalProductIds.length !== input.productIds.length || canonicalProductIds.length > 3) {
     reasons.add("PRODUCT_AMBIGUOUS");
   }
 

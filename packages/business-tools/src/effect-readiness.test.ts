@@ -97,6 +97,43 @@ describe("deterministic effect readiness", () => {
     expect(result.reasonCodes).toContain("PRODUCT_AMBIGUOUS");
   });
 
+  it("bounds oversized blocked readiness without throwing", () => {
+    const fiftyProductIds = Array.from({ length: 50 }, (_, index) => `product-${index + 1}`);
+    const atCapacity = evaluateDeterministicEffectReadinessV1({
+      ...base,
+      effect: "CART_MUTATION",
+      productIds: fiftyProductIds,
+      deterministicEvidenceHash: hash("f"),
+    });
+    expect(atCapacity).toMatchObject({
+      outcome: "BLOCKED",
+      productIds: fiftyProductIds.sort(),
+      reasonCodes: expect.arrayContaining(["PRODUCT_AMBIGUOUS"]),
+    });
+
+    const overCapacity = evaluateDeterministicEffectReadinessV1({
+      ...base,
+      effect: "CART_MUTATION",
+      productIds: [...fiftyProductIds, "product-51"],
+      deterministicEvidenceHash: hash("f"),
+    });
+    expect(overCapacity.outcome).toBe("BLOCKED");
+    expect(overCapacity.productIds).toHaveLength(50);
+    expect(overCapacity.reasonCodes).toContain("PRODUCT_AMBIGUOUS");
+
+    const duplicate = evaluateDeterministicEffectReadinessV1({
+      ...base,
+      effect: "CART_MUTATION",
+      productIds: ["product-1", "product-1"],
+      deterministicEvidenceHash: hash("f"),
+    });
+    expect(duplicate).toMatchObject({
+      outcome: "BLOCKED",
+      productIds: ["product-1"],
+      reasonCodes: expect.arrayContaining(["PRODUCT_AMBIGUOUS"]),
+    });
+  });
+
   it("allows protected outbound without buying intent but still requires product claims", () => {
     const result = evaluateDeterministicEffectReadinessV1({
       ...base, effect: "PROTECTED_OUTBOUND", buyingIntent: null,

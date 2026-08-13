@@ -1500,6 +1500,9 @@ export async function evaluateRealtimeSalesCycle(
       input.productId &&
       !state.cart.value.lines.some(({ parentProductId }) => parentProductId === input.productId)
     ) {
+      if (state.cart.value.lines.length >= 50) {
+        return failedOutput("PRODUCT_AMBIGUOUS", plan());
+      }
       const selected = await input.facts.resolveCartSelection({
         shopAlias: input.shopAlias,
         productId: input.productId,

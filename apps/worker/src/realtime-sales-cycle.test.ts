@@ -3,6 +3,7 @@ import {
 } from "@lana/business-tools";
 import {
   PolicyBundleV1Schema,
+  CartV1Schema,
   type AgentBuyingIntentV1,
   type AgentSalesSignalsV1,
   type CartLineV1,
@@ -699,6 +700,70 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(state.cart?.value.lines).toHaveLength(3);
     expect(state.cart?.value.lines.map(({ parentProductId }) => parentProductId))
       .toEqual(["PRODUCT-1", "PRODUCT-2", "PRODUCT-3"]);
+  });
+
+  it("fails closed before readiness when a valid fifty-line cart adds product fifty-one", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "event-capacity-open",
+    ));
+    const openedState = opened.plan!.state;
+    const openedCart = openedState.cart!.value;
+    const baseLine = openedCart.lines[0]!;
+    if (!baseLine.priceAuthority) throw new Error("test cart requires price authority");
+    const lines = Array.from({ length: 50 }, (_, index) => {
+      const parentProductId = `PRODUCT-${index + 1}`;
+      return {
+        ...baseLine,
+        lineId: `13000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+        parentProductId,
+        priceAuthority: {
+          ...baseLine.priceAuthority,
+          priceFactRef: `pos:${parentProductId}:set`,
+          parentProductId,
+        },
+      };
+    });
+    const subtotalVnd = lines.reduce((total, cartLine) => total + cartLine.lineTotalVnd!, 0);
+    const discountTotalVnd = openedCart.adjustments.reduce(
+      (total, adjustment) => total + adjustment.amountVnd,
+      0,
+    );
+    const cart = CartV1Schema.parse({
+      ...openedCart,
+      lines,
+      subtotalVnd,
+      discountTotalVnd,
+      grandTotalVnd: subtotalVnd + openedCart.shippingFeeVnd! - discountTotalVnd,
+    });
+    const atCapacity = {
+      ...openedState,
+      cart: { ...openedState.cart!, value: cart },
+    };
+    const text = "chốt PRODUCT-51 size M";
+
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(atCapacity, text, "event-capacity-51"),
+      productId: "PRODUCT-51",
+      canonicalBuyingIntent: buildCanonicalDecisionEvidenceV1({
+        text,
+        sourceMessageId: `mid:${text}`,
+        productId: "PRODUCT-51",
+        modelBuyingIntent: null,
+        evaluatedAt: now,
+      }).buyingIntent,
+    });
+
+    expect(output).toMatchObject({
+      handled: true,
+      messages: [],
+      plan: null,
+      transferToHuman: true,
+      desiredTag: "NHAN_VIEN",
+      reasonCode: "PRODUCT_AMBIGUOUS",
+    });
+    expect(atCapacity.cart.value.lines).toHaveLength(50);
   });
 
   it("stacks 5%, freeship and final 20k while the same evidence cannot escalate twice", async () => {
