@@ -1,6 +1,20 @@
 import { describe, expect, it, vi } from "vitest";
+import { createHash } from "node:crypto";
 import { LocalEnvelopeCipher } from "./envelope-cipher.js";
 import { PostgresRealtimeRuntimeStore } from "./realtime-runtime.js";
+
+function canonicalJson(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  const record = value as Record<string, unknown>;
+  return `{${Object.keys(record).sort().map((key) =>
+    `${JSON.stringify(key)}:${canonicalJson(record[key])}`
+  ).join(",")}}`;
+}
+
+function sha256(value: unknown): string {
+  return createHash("sha256").update(canonicalJson(value), "utf8").digest("hex");
+}
 
 describe("PostgresRealtimeRuntimeStore handoff commit", () => {
   it("persists idempotent PII-free decision events in the state transaction", async () => {
@@ -211,6 +225,94 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     );
     expect(inserts.every((insert) => insert.values[19] === true)).toBe(true);
 
+  });
+
+  it("commits a price-only protected reply when its typed claim set matches exactly", async () => {
+    const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
+    const client = {
+      async query(sql: string, values: readonly unknown[] = []) {
+        calls.push({ sql, values });
+        if (sql.includes("SELECT routing_owner")) {
+          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }] };
+        }
+        if (sql.includes("SELECT conversation_owner")) {
+          return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+        }
+        if (sql.includes("UPDATE conversations") || sql.includes("INSERT INTO meta_outbox")) {
+          return { rowCount: 1, rows: [] };
+        }
+        return { rowCount: 0, rows: [] };
+      },
+      release() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = {
+      async connect() { return client; },
+      async end() {},
+    };
+    const now = new Date("2026-08-13T05:00:00.000Z");
+    const claim = {
+      schemaVersion: 1 as const,
+      claimId: "10000000-0000-4000-8000-000000000003",
+      type: "PRICE" as const,
+      scope: { kind: "PRODUCT" as const, productId: "SP-001", variantId: null },
+      provenance: {
+        authority: "POS_SNAPSHOT" as const,
+        sourceVersion: "POS_SNAPSHOT:2026-08-13T04:59:00.000Z",
+        evidenceRef: `business-fact:price:${"b".repeat(64)}`,
+        contentHash: "c".repeat(64),
+        observedAt: "2026-08-13T04:59:00.000Z",
+        expiresAt: "2026-08-13T05:05:00.000Z",
+      },
+      value: { amountVnd: 1_250_000, currency: "VND" as const },
+      authorization: "NONE" as const,
+    };
+    const result = await store.commit({
+      pageId: "page-1",
+      customerHash: "hash",
+      conversationId: "33333333-3333-4333-8333-333333333333",
+      expectedStateVersion: 0,
+      state: { revision: 1, routingOwner: "APP", conversationOwner: "BOT" },
+      metaPlan: {
+        replyPlanId: "10000000-0000-4000-8000-000000000001",
+        responseGroupId: "10000000-0000-4000-8000-000000000002",
+        recipientId: "customer-1",
+        messages: [{ kind: "TEXT", text: "Giá hiện tại là 1.250.000đ." }],
+        protectedClaimTypes: ["PRICE"],
+        sourceMessageIdHash: "a".repeat(64),
+        protectedClaims: [claim],
+        effectReadiness: {
+          schemaVersion: 1,
+          rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1",
+          effect: "PROTECTED_OUTBOUND",
+          outcome: "READY",
+          pageId: "page-1",
+          conversationId: "33333333-3333-4333-8333-333333333333",
+          sourceMessageIdHash: "a".repeat(64),
+          conversationRevision: 0,
+          salesCycleRevision: null,
+          productIds: ["SP-001"],
+          cartId: null,
+          cartVersion: null,
+          orderPreviewId: null,
+          orderPreviewHash: null,
+          buyingIntentHash: null,
+          deterministicEvidenceHash: null,
+          claimSetHash: sha256([claim]),
+          protectedClaimTypes: ["PRICE"],
+          checkedAt: now.toISOString(),
+          expiresAt: "2026-08-13T05:01:00.000Z",
+          reasonCodes: [],
+          authorization: "NONE",
+        },
+      },
+    }, now);
+
+    expect(result.metaOutboxCreated).toBe(1);
+    expect(calls.at(-1)?.sql.trim()).toBe("COMMIT");
   });
 
   it("drops a stale decision before state or outbox commit when a newer inbound advanced the generation", async () => {

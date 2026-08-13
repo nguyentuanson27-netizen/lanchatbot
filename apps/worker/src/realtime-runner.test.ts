@@ -202,7 +202,11 @@ describe("RealtimeRunner", () => {
     expect(complete).toHaveBeenCalledWith(retryClaim.inboxId, retryClaim.leaseToken);
     expect(commit).toHaveBeenCalledOnce();
     const commitInput = durableCommitInput as {
-      metaPlan?: { messages: readonly ({ kind: "TEXT"; text: string } | { kind: "IMAGE"; imageUrl: string })[] };
+      metaPlan?: {
+        messages: readonly ({ kind: "TEXT"; text: string } | { kind: "IMAGE"; imageUrl: string })[];
+        protectedClaimTypes?: readonly string[];
+        protectedClaims?: readonly { type: string }[];
+      };
       decisionEvents?: readonly { eventType: string; reasonCodes: readonly string[] }[];
     };
     const text = (commitInput.metaPlan?.messages ?? [])
@@ -212,6 +216,8 @@ describe("RealtimeRunner", () => {
     expect(text).not.toMatch(/hop size L/iu);
     expect(commitInput.metaPlan?.messages).toContainEqual({ kind: "IMAGE", imageUrl });
     expect(commitInput.metaPlan?.messages.filter((message) => message.kind === "IMAGE")).toHaveLength(1);
+    expect([...new Set(commitInput.metaPlan?.protectedClaims?.map(({ type }) => type) ?? [])].sort())
+      .toEqual([...(commitInput.metaPlan?.protectedClaimTypes ?? [])].sort());
     expect(commitInput.decisionEvents?.filter((event) => event.eventType === "GUARD_BLOCKED")).toHaveLength(1);
     expect(commitInput.decisionEvents).toContainEqual(expect.objectContaining({
       eventType: "GUARD_BLOCKED",

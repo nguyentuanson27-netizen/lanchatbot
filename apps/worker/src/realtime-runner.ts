@@ -4636,6 +4636,10 @@ export class RealtimeRunner {
           }),
         ];
       }
+      const outboundClaimTypeSet = new Set(outboundClaimTypes);
+      protectedOutboundClaims = protectedOutboundClaims.filter(({ type }) =>
+        outboundClaimTypeSet.has(type)
+      );
       protectedOutboundReadiness = evaluateDeterministicEffectReadinessV1({
         effect: "PROTECTED_OUTBOUND",
         pageId: claim.pageId,
