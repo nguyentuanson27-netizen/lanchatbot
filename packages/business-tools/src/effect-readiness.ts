@@ -1,4 +1,5 @@
 import {
+  canonicalBuyingIntentAuthorizesCartMutationV1,
   canonicalizeReadinessProductIdsV1,
   DeterministicEffectReadinessV1Schema,
   validateEffectClaimSemanticsV1,
@@ -26,6 +27,7 @@ export interface EvaluateDeterministicEffectReadinessV1Input {
   readonly claims: readonly ProtectedClaimV1[];
   readonly protectedClaimTypes?: readonly ProtectedClaimV1["type"][];
   readonly deterministicEvidenceHash?: string | null;
+  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | null;
   readonly checkedAt: Date;
 }
 
@@ -39,7 +41,9 @@ export function evaluateDeterministicEffectReadinessV1(
   if (canonicalProducts.invalid) reasons.add("PRODUCT_SCOPE_INVALID");
   if (canonicalProducts.capacityExceeded) reasons.add("CART_CAPACITY_EXCEEDED");
 
-  const requiresIntent = input.effect === "CART_OPEN";
+  const requiresIntent = input.effect === "CART_OPEN" || (
+    input.effect === "CART_MUTATION" && input.mutationAction !== "REMOVE_LINE"
+  );
   if (requiresIntent) {
     if (input.buyingIntent?.decision !== "COMMITTED") {
       reasons.add("BUYING_INTENT_MISSING");
@@ -52,6 +56,19 @@ export function evaluateDeterministicEffectReadinessV1(
       reasons.add("BUYING_INTENT_SCOPE_MISMATCH");
     }
   }
+  if (
+    input.effect === "CART_MUTATION" &&
+    input.mutationAction !== null &&
+    input.mutationAction !== undefined &&
+    input.mutationAction !== "REMOVE_LINE" &&
+    input.buyingIntent !== null &&
+    input.buyingIntent.productId !== null &&
+    !canonicalBuyingIntentAuthorizesCartMutationV1(
+      input.buyingIntent,
+      input.mutationAction,
+      input.buyingIntent.productId,
+    )
+  ) reasons.add("BUYING_INTENT_SCOPE_MISMATCH");
   if (input.effect === "CART_MUTATION" && !input.deterministicEvidenceHash) {
     reasons.add("DETERMINISTIC_EVIDENCE_MISSING");
   }

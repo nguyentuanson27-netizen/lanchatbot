@@ -650,7 +650,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     expect(calls.some((call) => call.sql.includes("INSERT INTO handoff_events"))).toBe(false);
   });
 
-  it("commits encrypted sales-cycle state and its PII-free ledger in the conversation transaction", async () => {
+  it("rejects protected sales-cycle events that omit the DF06 readiness contract", async () => {
     const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
     const client = {
       async query(sql: string, values: readonly unknown[] = []) {
@@ -680,7 +680,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     const now = new Date("2026-07-23T03:00:00.000Z");
     const expiresAt = new Date("2026-07-25T03:00:00.000Z");
 
-    await store.commit({
+    await expect(store.commit({
       pageId: "page-1",
       customerHash: "hash",
       conversationId: "33333333-3333-4333-8333-333333333333",
@@ -713,16 +713,56 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           occurredAt: now,
         }],
       },
-    }, now);
+    }, now)).rejects.toThrow("EFFECT_READINESS_CONTRACT_REQUIRED");
+    expect(calls.at(-1)?.sql.trim()).toBe("ROLLBACK");
+  });
 
-    const salesUpdate = calls.find((call) => call.sql.includes("UPDATE sales_cycle_states"));
-    expect(Buffer.isBuffer(salesUpdate?.values[3])).toBe(true);
-    expect(String(salesUpdate?.values[3])).not.toContain("0984997797");
-    const ledgerInsert = calls.find((call) => call.sql.includes("INSERT INTO sales_cycle_events"));
-    expect(ledgerInsert?.values.join("|")).not.toContain("0984997797");
-    expect(calls.findIndex((call) => call.sql.includes("UPDATE sales_cycle_states")))
-      .toBeLessThan(calls.findIndex((call) => call.sql.includes("UPDATE conversations")));
-    expect(calls.at(-1)?.sql.trim()).toBe("COMMIT");
+  it("keeps unversioned non-protected sales-cycle events backward compatible", async () => {
+    const calls: string[] = [];
+    const client = {
+      async query(sql: string) {
+        calls.push(sql);
+        if (sql.includes("SELECT routing_owner")) {
+          return { rowCount: 1, rows: [{
+            routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+            transaction_now: new Date("2026-07-23T03:00:00.000Z"),
+          }] };
+        }
+        if (sql.includes("SELECT conversation_owner")) {
+          return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+        }
+        if (sql.includes("SELECT state_revision")) {
+          return { rowCount: 1, rows: [{ state_revision: "0" }] };
+        }
+        return { rowCount: 1, rows: [] };
+      },
+      release() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = { async connect() { return client; } };
+    const now = new Date("2026-07-23T03:00:00.000Z");
+    await expect(store.commit({
+      pageId: "page-1", customerHash: "hash",
+      conversationId: "33333333-3333-4333-8333-333333333333",
+      expectedStateVersion: 4,
+      state: { revision: 5, routingOwner: "APP", conversationOwner: "BOT" },
+      salesCyclePlan: {
+        expectedRevision: 0,
+        state: { revision: 1, stage: "PRODUCT_FIT" },
+        cartExpiresAt: null,
+        expiresAt: new Date("2026-07-25T03:00:00.000Z"),
+        events: [{
+          commandId: "sales:event-1:facts", commandKind: "FACTS_PRESENTED",
+          outcome: "APPLIED", stateRevisionBefore: 0, stateRevisionAfter: 1,
+          stageBefore: "DISCOVERY", stageAfter: "PRODUCT_FIT",
+          cartId: null, cartVersion: null, reasonCode: null, occurredAt: now,
+        }],
+      },
+    }, now)).resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
   });
 
   it("rejects a stale readiness binding inside the sales commit transaction", async () => {
@@ -855,8 +895,9 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     },
   );
 
-  it("rejects cart mutation readiness that omits a final-cart product", async () => {
+  it("enforces exact cart-mutation authority, claims, payload and locked-state binding", async () => {
     const calls: string[] = [];
+    let lockedSalesRow: Record<string, unknown> | null = null;
     const client = {
       async query(sql: string) {
         calls.push(sql);
@@ -870,19 +911,20 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
         }
         if (sql.includes("SELECT state_revision")) {
-          return { rowCount: 1, rows: [{ state_revision: "2" }] };
+          return { rowCount: 1, rows: [lockedSalesRow ?? { state_revision: "2" }] };
         }
         return { rowCount: 1, rows: [] };
       },
       release() {},
     };
+    const cipher = new LocalEnvelopeCipher("00".repeat(32), "test-key-v1");
     const store = new PostgresRealtimeRuntimeStore(
       "postgresql://unused:unused@localhost:5432/unused",
-      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+      cipher,
     );
     (store as unknown as { pool: unknown }).pool = { async connect() { return client; } };
     const now = new Date("2026-08-13T03:00:00.000Z");
-    const productScope = { kind: "PRODUCT" as const, productId: "SP-001", variantId: null };
+    const productScope = { kind: "PRODUCT" as const, productId: "SP-001", variantId: "SET" };
     const provenance = (sourceVersion: string, contentHash: string) => ({
       authority: "POS_SNAPSHOT" as const,
       sourceVersion,
@@ -910,6 +952,24 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     }];
     const cartId = "10000000-0000-4000-8000-000000000013";
     const mutationCommandId = "sales:event-2:cart-mutation";
+    const mutationLineId = "10000000-0000-4000-8000-000000000014";
+    const canonicalIntent = {
+      schemaVersion: 1 as const,
+      authorityVersion: "CANONICAL_BUYING_INTENT_V1" as const,
+      decision: "COMMITTED" as const,
+      requestedAction: "SET_QUANTITY" as const,
+      quantity: 2,
+      productId: "SP-001",
+      contributors: ["DETERMINISTIC_RUNTIME" as const],
+      sourceMessageIdHash: "a".repeat(64),
+      evidenceHash: "b".repeat(64),
+      reasonCodes: ["DIRECT_PURCHASE_VERB" as const],
+      evaluatedAt: "2026-08-13T02:59:00.000Z",
+      authorization: "NONE" as const,
+    };
+    const mutationPayloadHash = sha256({
+      mutation: { kind: "SET_QUANTITY", lineId: mutationLineId, quantity: 2 },
+    });
 
     const commitInput = {
       pageId: "page-1", customerHash: "hash",
@@ -920,13 +980,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         expectedRevision: 2,
         readinessContractVersion: "DF06_EFFECT_READINESS_V1",
         sourceMessageIdHash: "a".repeat(64),
-        canonicalBuyingIntent: {
-          schemaVersion: 1, authorityVersion: "CANONICAL_BUYING_INTENT_V1",
-          decision: "NONE", requestedAction: "NONE", quantity: null,
-          productId: null, contributors: [], sourceMessageIdHash: "a".repeat(64),
-          evidenceHash: null, reasonCodes: [], evaluatedAt: "2026-08-13T02:59:00.000Z",
-          authorization: "NONE",
-        },
+        canonicalBuyingIntent: canonicalIntent,
         state: {
           revision: 3,
           cart: { value: { cartId, revision: 2, lines: [
@@ -940,6 +994,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           commandId: "sales:event-2:cart-mutation", commandKind: "CART_MUTATED",
           outcome: "APPLIED", stateRevisionBefore: 2, stateRevisionAfter: 3,
           stageBefore: "CART_OPEN", stageAfter: "CART_OPEN", cartId, cartVersion: 2,
+          mutationAction: "SET_QUANTITY" as const, mutationPayloadHash,
           reasonCode: null, occurredAt: now,
         }],
         effectClaimSets: [{ effect: "CART_MUTATION", claims }],
@@ -950,7 +1005,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           sourceMessageIdHash: "a".repeat(64), conversationRevision: 4,
           salesCycleRevision: 2, productIds: ["SP-001"], cartId, cartVersion: 1,
           cartStateHash: "e".repeat(64),
-          orderPreviewId: null, orderPreviewHash: null, buyingIntentHash: null,
+          orderPreviewId: null, orderPreviewHash: null, buyingIntentHash: sha256(canonicalIntent),
           deterministicEvidenceHash: "d".repeat(64), claimSetHash: sha256(claims),
           protectedClaimTypes: [], checkedAt: now.toISOString(),
           expiresAt: "2026-08-13T03:01:00.000Z", reasonCodes: [], authorization: "NONE",
@@ -995,17 +1050,88 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       .rejects.toThrow("EFFECT_READINESS_PRODUCT_MISMATCH");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
-    const exactCart = {
-      cartId,
-      revision: 2,
-      lines: [{ parentProductId: "SP-001", offerId: "SET", quantity: 2 }],
+    const exactLine = {
+      lineId: mutationLineId,
+      parentProductId: "SP-001",
+      offerId: "SET",
+      offerKind: "SET" as const,
+      quantity: 2,
+      components: [{
+        componentProductId: "SP-001-TOP",
+        componentSku: "SP-001-TOP-M",
+        componentRole: "TOP" as const,
+        color: "BE",
+        size: "M",
+        quantity: 1,
+      }, {
+        componentProductId: "SP-001-SKIRT",
+        componentSku: "SP-001-SKIRT-M",
+        componentRole: "SKIRT" as const,
+        color: "BE",
+        size: "M",
+        quantity: 1,
+      }],
+      allowMixedSizes: false,
+      allowComponentSale: false,
+      posUnitPriceVnd: 699_000,
+      priceAuthority: {
+        priceFactRef: "price:1",
+        shopId: "LANA",
+        parentProductId: "SP-001",
+        offerId: "SET",
+        offerPriceKind: "SET" as const,
+        componentProductId: null,
+        metadata: {
+          authority: "PANCAKE_POS" as const,
+          sourceVersion: "snapshot:1",
+          observedAt: "2026-08-13T02:59:00.000Z",
+          expiresAt: "2026-08-15T02:59:00.000Z",
+          freshForSeconds: 172_800 as const,
+          freshnessState: "FRESH" as const,
+        },
+      },
+      lineTotalVnd: 1_398_000,
     };
-    const beforeCartStateHash = "9".repeat(64);
+    const exactCart = {
+      schemaVersion: 1 as const,
+      cartId,
+      salesEpisodeId: "10000000-0000-4000-8000-000000000015",
+      customerProfileId: "10000000-0000-4000-8000-000000000016",
+      revision: 2,
+      currency: "VND" as const,
+      status: "OPEN" as const,
+      checkoutEligibility: "ELIGIBLE" as const,
+      lines: [exactLine],
+      adjustments: [],
+      shippingFeeVnd: 30_000,
+      subtotalVnd: 1_398_000,
+      discountTotalVnd: 0,
+      grandTotalVnd: 1_428_000,
+      createdAt: "2026-08-13T02:55:00.000Z",
+      updatedAt: "2026-08-13T03:00:00.000Z",
+    };
+    const beforeCart = {
+      ...exactCart,
+      revision: 1,
+      lines: [{ ...exactLine, quantity: 1, lineTotalVnd: 699_000 }],
+      subtotalVnd: 699_000,
+      grandTotalVnd: 729_000,
+      updatedAt: "2026-08-13T02:59:00.000Z",
+    };
+    const beforeCartStateHash = sha256(beforeCart);
     const afterCartStateHash = sha256(exactCart);
     const evaluatedAt = now.toISOString();
     const evidenceCore = [
       "DETERMINISTIC_CART_MUTATION_EVIDENCE_V1",
       "SET_QUANTITY",
+      "CANONICAL_BUYING_INTENT",
+      sha256(canonicalIntent),
+      {
+        kind: "SET_QUANTITY",
+        lineId: mutationLineId,
+        quantity: 2,
+      },
+      mutationPayloadHash,
       "a".repeat(64),
       rawSha256(mutationCommandId),
       beforeCartStateHash,
@@ -1016,6 +1142,14 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       schemaVersion: 1 as const,
       authorityVersion: "DETERMINISTIC_CART_MUTATION_EVIDENCE_V1" as const,
       action: "SET_QUANTITY" as const,
+      authorityKind: "CANONICAL_BUYING_INTENT" as const,
+      authorityEvidenceHash: sha256(canonicalIntent),
+      mutation: {
+        kind: "SET_QUANTITY" as const,
+        lineId: mutationLineId,
+        quantity: 2,
+      },
+      mutationPayloadHash,
       sourceMessageIdHash: "a".repeat(64),
       commandIdHash: rawSha256(mutationCommandId),
       beforeCartStateHash,
@@ -1040,7 +1174,25 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         })),
       },
     };
-    const changedOfferWithoutNewReadiness = {
+    const salesExpiresAt = new Date("2026-08-14T03:00:00.000Z");
+    const lockedBundle = cipher.encryptJson({
+      revision: 2,
+      stage: "CART_OPEN",
+      cart: { value: beforeCart, expiresAt: salesExpiresAt.toISOString() },
+    }, `lana:sales-cycle:v1:page-1:${commitInput.conversationId}`, salesExpiresAt);
+    lockedSalesRow = {
+      conversation_id: commitInput.conversationId,
+      page_id: "page-1",
+      state_revision: "2",
+      state_ciphertext: lockedBundle.ciphertext,
+      state_nonce: lockedBundle.nonce,
+      state_auth_tag: lockedBundle.authTag,
+      state_encrypted_dek: lockedBundle.encryptedDek,
+      state_key_ref: lockedBundle.keyRef,
+      cart_expires_at: salesExpiresAt,
+      expires_at: salesExpiresAt,
+    };
+    const changedCartWithoutNewReadiness = {
       ...exactMutation,
       salesCyclePlan: {
         ...exactMutation.salesCyclePlan,
@@ -1048,12 +1200,12 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           revision: 3,
           cart: { value: {
             ...exactCart,
-            lines: [{ parentProductId: "SP-001", offerId: "SEPARATE", quantity: 2 }],
+            updatedAt: "2026-08-13T03:00:01.000Z",
           } },
         },
       },
     };
-    await expect(store.commit(changedOfferWithoutNewReadiness, now))
+    await expect(store.commit(changedCartWithoutNewReadiness, now))
       .rejects.toThrow("EFFECT_READINESS_CART_STATE_MISMATCH");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
@@ -1064,6 +1216,101 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       salesCyclePlan: planWithoutMutationEvidence,
     }, now)).rejects.toThrow("CART_MUTATION_EVIDENCE_REQUIRED");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const claimsForWrongOffer = claims.map((claim) => ({
+      ...claim,
+      scope: { ...claim.scope, variantId: "WRONG-OFFER" },
+    }));
+    await expect(store.commit({
+      ...exactMutation,
+      salesCyclePlan: {
+        ...exactMutation.salesCyclePlan,
+        effectClaimSets: [{ effect: "CART_MUTATION", claims: claimsForWrongOffer }],
+        effectReadiness: exactMutation.salesCyclePlan.effectReadiness.map((readiness) => ({
+          ...readiness,
+          claimSetHash: sha256(claimsForWrongOffer),
+        })),
+      },
+    }, now)).rejects.toThrow("EFFECT_READINESS_CLAIM_VALUE_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const claimsForWrongPrice = claims.map((claim) => claim.type === "PRICE"
+      ? { ...claim, value: { amountVnd: 1, currency: "VND" as const } }
+      : claim);
+    await expect(store.commit({
+      ...exactMutation,
+      salesCyclePlan: {
+        ...exactMutation.salesCyclePlan,
+        effectClaimSets: [{ effect: "CART_MUTATION", claims: claimsForWrongPrice }],
+        effectReadiness: exactMutation.salesCyclePlan.effectReadiness.map((readiness) => ({
+          ...readiness,
+          claimSetHash: sha256(claimsForWrongPrice),
+        })),
+      },
+    }, now)).rejects.toThrow("EFFECT_READINESS_CLAIM_VALUE_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    await expect(store.commit({
+      ...exactMutation,
+      salesCyclePlan: {
+        ...exactMutation.salesCyclePlan,
+        events: exactMutation.salesCyclePlan.events.map((event) => ({
+          ...event,
+          mutationAction: "REMOVE_LINE" as const,
+        })),
+      },
+    }, now)).rejects.toThrow("CART_MUTATION_EVIDENCE_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    await expect(store.commit({
+      ...exactMutation,
+      salesCyclePlan: {
+        ...exactMutation.salesCyclePlan,
+        events: exactMutation.salesCyclePlan.events.map((event) => ({
+          ...event,
+          mutationPayloadHash: "f".repeat(64),
+        })),
+      },
+    }, now)).rejects.toThrow("CART_MUTATION_EVIDENCE_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const wrongBeforeEvidence = {
+      ...mutationEvidence,
+      beforeCartStateHash: "9".repeat(64),
+    };
+    const wrongBeforeEvidenceWithHash = {
+      ...wrongBeforeEvidence,
+      evidenceHash: sha256([
+        wrongBeforeEvidence.authorityVersion,
+        wrongBeforeEvidence.action,
+        wrongBeforeEvidence.authorityKind,
+        wrongBeforeEvidence.authorityEvidenceHash,
+        wrongBeforeEvidence.mutation,
+        wrongBeforeEvidence.mutationPayloadHash,
+        wrongBeforeEvidence.sourceMessageIdHash,
+        wrongBeforeEvidence.commandIdHash,
+        wrongBeforeEvidence.beforeCartStateHash,
+        wrongBeforeEvidence.afterCartStateHash,
+        wrongBeforeEvidence.evaluatedAt,
+      ]),
+    };
+    await expect(store.commit({
+      ...exactMutation,
+      salesCyclePlan: {
+        ...exactMutation.salesCyclePlan,
+        cartMutationEvidence: [wrongBeforeEvidenceWithHash],
+        effectReadiness: exactMutation.salesCyclePlan.effectReadiness.map((readiness) => ({
+          ...readiness,
+          deterministicEvidenceHash: wrongBeforeEvidenceWithHash.evidenceHash,
+        })),
+      },
+    }, now)).rejects.toThrow("CART_MUTATION_BEFORE_STATE_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    await expect(store.commit(exactMutation, now)).resolves.toMatchObject({
+      stateCommitted: true,
+    });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
   });
 
   it("records a terminal initial-reply failure in the same transaction", async () => {

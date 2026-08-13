@@ -4,9 +4,11 @@ import {
   buildProtectedClaimsFromCartSelectionsV1,
   evaluateDeterministicEffectReadinessV1,
   foldVietnameseForRecall,
+  hashCanonicalBuyingIntentV1,
 } from "@lana/business-tools";
 import {
   CheckoutRevalidationV1Schema,
+  canonicalBuyingIntentAuthorizesCartMutationV1,
   DeterministicCartMutationEvidenceV1Schema,
   OrderPreviewV1Schema,
   type AgentSalesSignalsV1,
@@ -218,6 +220,18 @@ function purchaseReady(
   buyingIntent: CanonicalBuyingIntentV1,
 ): boolean {
   return buyingIntent.decision === "COMMITTED";
+}
+
+function deterministicMutationIntentReady(
+  buyingIntent: CanonicalBuyingIntentV1,
+  action: "ADD_LINE" | "SET_QUANTITY",
+  productId: string,
+): boolean {
+  return canonicalBuyingIntentAuthorizesCartMutationV1(
+    buyingIntent,
+    action,
+    productId,
+  );
 }
 
 function exactEvidence(text: string, evidenceText: string | null): boolean {
@@ -722,6 +736,14 @@ export async function evaluateRealtimeSalesCycle(
 
   const apply = (command: SalesCycleCommand): SalesCycleRuntimeResult => {
     const before = state;
+    const resolvedMutation = command.kind === "CART_MUTATED"
+      ? references.get(canonicalJson(command.mutationRef)) as ResolvedCartMutationV1 | undefined
+      : undefined;
+    const readinessMutationAction = resolvedMutation?.mutation.kind === "ADD_LINE" ||
+        resolvedMutation?.mutation.kind === "REMOVE_LINE" ||
+        resolvedMutation?.mutation.kind === "SET_QUANTITY"
+      ? resolvedMutation.mutation.kind
+      : null;
     const result = applySalesCycleCommand({
       state,
       expectedRevision: state.revision,
@@ -743,6 +765,10 @@ export async function evaluateRealtimeSalesCycle(
         cartId: state.cart?.value.cartId ?? null,
         cartVersion: state.cart?.value.revision ?? null,
         reasonCode: result.status === "HANDOFF" ? result.reasonCode : null,
+        mutationAction: readinessMutationAction,
+        mutationPayloadHash: readinessMutationAction === null || resolvedMutation === undefined
+          ? null
+          : computeBusinessContentHash(resolvedMutation).replace(/^sha256:/u, ""),
         occurredAt: input.now,
       });
     }
@@ -757,6 +783,7 @@ export async function evaluateRealtimeSalesCycle(
     preview: SalesCycleRuntimeState["preview"] = null,
     deterministicEvidenceHash: string | null = null,
     checkedAt: Date = effectNow(),
+    mutationAction: DeterministicCartMutationEvidenceV1["action"] | null = null,
   ): DeterministicEffectReadinessV1 => {
     const claims = buildProtectedClaimsFromCartSelectionsV1(selections.map((selection) => ({
       productId: selection.line.parentProductId,
@@ -789,11 +816,14 @@ export async function evaluateRealtimeSalesCycle(
         : computeBusinessContentHash(cart).replace(/^sha256:/u, ""),
       orderPreviewId: preview?.previewId ?? null,
       orderPreviewHash: preview?.previewHash.replace(/^sha256:/u, "") ?? null,
-      buyingIntent: effect === "CART_OPEN" || effect === "CART_MUTATION"
+      buyingIntent: effect === "CART_OPEN" || (
+        effect === "CART_MUTATION" && mutationAction !== "REMOVE_LINE"
+      )
         ? input.canonicalBuyingIntent
         : null,
       claims,
       deterministicEvidenceHash,
+      mutationAction,
       checkedAt,
     });
   };
@@ -811,6 +841,10 @@ export async function evaluateRealtimeSalesCycle(
     beforeCart: CartV1,
     selections: readonly ReadyCartSelection[],
     checkedAt: Date,
+    mutation: DeterministicCartMutationEvidenceV1["mutation"],
+    mutationPayloadHash: string,
+    authorityKind: DeterministicCartMutationEvidenceV1["authorityKind"],
+    authorityEvidenceHash: string,
   ): DeterministicEffectReadinessV1 => {
     if (!state.cart) {
       return freshReadiness("CART_MUTATION", selections, null, null, null, checkedAt);
@@ -818,6 +852,10 @@ export async function evaluateRealtimeSalesCycle(
     const evidenceCore = [
       "DETERMINISTIC_CART_MUTATION_EVIDENCE_V1",
       action,
+      authorityKind,
+      authorityEvidenceHash,
+      mutation,
+      mutationPayloadHash,
       input.canonicalBuyingIntent.sourceMessageIdHash,
       createHash("sha256").update(mutationCommandId, "utf8").digest("hex"),
       cartHash(beforeCart),
@@ -828,10 +866,14 @@ export async function evaluateRealtimeSalesCycle(
       schemaVersion: 1,
       authorityVersion: "DETERMINISTIC_CART_MUTATION_EVIDENCE_V1",
       action,
+      authorityKind,
+      authorityEvidenceHash,
+      mutation,
+      mutationPayloadHash,
       sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
-      commandIdHash: evidenceCore[3],
-      beforeCartStateHash: evidenceCore[4],
-      afterCartStateHash: evidenceCore[5],
+      commandIdHash: evidenceCore[7],
+      beforeCartStateHash: evidenceCore[8],
+      afterCartStateHash: evidenceCore[9],
       evidenceHash: createHash("sha256")
         .update(canonicalJson(evidenceCore), "utf8")
         .digest("hex"),
@@ -846,6 +888,7 @@ export async function evaluateRealtimeSalesCycle(
       null,
       evidence.evidenceHash,
       checkedAt,
+      action,
     );
     if (acceptReadiness(readiness)) cartMutationEvidence.push(evidence);
     return readiness;
@@ -1314,6 +1357,7 @@ export async function evaluateRealtimeSalesCycle(
       }
       const beforeCart = state.cart.value;
       const resolved = { mutation: { kind: "REMOVE_LINE" as const, lineId: line.lineId } };
+      const mutationPayloadHash = computeBusinessContentHash(resolved).replace(/^sha256:/u, "");
       const reference = {
         id: `cart-mutation:${state.cart.value.cartId}`,
         version: `${state.cart.value.revision + 1}`,
@@ -1334,6 +1378,14 @@ export async function evaluateRealtimeSalesCycle(
         beforeCart,
         readySelections,
         effectNow(),
+        resolved.mutation,
+        mutationPayloadHash,
+        "DETERMINISTIC_REMOVE_CLASSIFIER",
+        createHash("sha256").update(canonicalJson([
+          "DETERMINISTIC_REMOVE_CLASSIFIER_V1",
+          input.canonicalBuyingIntent.sourceMessageIdHash,
+          mutationPayloadHash,
+        ]), "utf8").digest("hex"),
       );
       if (removeReadiness.outcome !== "READY") {
         return failedOutput(removeReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
@@ -1537,6 +1589,11 @@ export async function evaluateRealtimeSalesCycle(
       state.cart.value.lines.some(({ parentProductId }) => parentProductId === input.productId) &&
       requestedQuantityValue(input.canonicalBuyingIntent) !== null
     ) {
+      if (!deterministicMutationIntentReady(
+        input.canonicalBuyingIntent,
+        "SET_QUANTITY",
+        input.productId,
+      )) return failedOutput("BUYING_INTENT_MISSING");
       const existing = state.cart.value.lines.find(({ parentProductId }) =>
         parentProductId === input.productId
       )!;
@@ -1579,6 +1636,7 @@ export async function evaluateRealtimeSalesCycle(
           quantity,
         },
       };
+      const mutationPayloadHash = computeBusinessContentHash(resolved).replace(/^sha256:/u, "");
       const reference = {
         id: `cart-mutation:${state.cart.value.cartId}`,
         version: `${state.cart.value.revision + 1}`,
@@ -1601,6 +1659,10 @@ export async function evaluateRealtimeSalesCycle(
         beforeCart,
         readySelections,
         effectNow(),
+        resolved.mutation,
+        mutationPayloadHash,
+        "CANONICAL_BUYING_INTENT",
+        hashCanonicalBuyingIntentV1(input.canonicalBuyingIntent),
       );
       if (mutationReadiness.outcome !== "READY") {
         return failedOutput(mutationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
@@ -1613,6 +1675,11 @@ export async function evaluateRealtimeSalesCycle(
       input.productId &&
       !state.cart.value.lines.some(({ parentProductId }) => parentProductId === input.productId)
     ) {
+      if (!deterministicMutationIntentReady(
+        input.canonicalBuyingIntent,
+        "ADD_LINE",
+        input.productId,
+      )) return failedOutput("BUYING_INTENT_MISSING");
       if (state.cart.value.lines.length >= MAX_CART_LINES_V1) {
         return failedOutput("CART_CAPACITY_EXCEEDED", plan());
       }
@@ -1651,6 +1718,7 @@ export async function evaluateRealtimeSalesCycle(
       const readySelections = [...readyExistingSelections, selected];
       const beforeCart = state.cart.value;
       const resolved = { mutation: { kind: "ADD_LINE" as const, line: selected.line } };
+      const mutationPayloadHash = computeBusinessContentHash(resolved).replace(/^sha256:/u, "");
       const reference = {
         id: `cart-mutation:${state.cart.value.cartId}`,
         version: `${state.cart.value.revision + 1}`,
@@ -1671,6 +1739,10 @@ export async function evaluateRealtimeSalesCycle(
         beforeCart,
         readySelections,
         effectNow(),
+        resolved.mutation,
+        mutationPayloadHash,
+        "CANONICAL_BUYING_INTENT",
+        hashCanonicalBuyingIntentV1(input.canonicalBuyingIntent),
       );
       if (mutationReadiness.outcome !== "READY") {
         return failedOutput(mutationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");

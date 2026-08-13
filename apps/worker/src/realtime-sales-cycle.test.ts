@@ -704,6 +704,11 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(mutationEvidence).toMatchObject({
       authorityVersion: "DETERMINISTIC_CART_MUTATION_EVIDENCE_V1",
       action: "ADD_LINE",
+      authorityKind: "CANONICAL_BUYING_INTENT",
+      mutation: {
+        kind: "ADD_LINE",
+        line: expect.objectContaining({ parentProductId: "PRODUCT-4" }),
+      },
       contributor: "DETERMINISTIC_RUNTIME",
       afterCartStateHash: computeBusinessContentHash(finalCart).replace(/^sha256:/u, ""),
       authorization: "NONE",
@@ -714,6 +719,48 @@ describe("realtime Phase 3 sales cycle", () => {
         cartStateHash: mutationEvidence?.afterCartStateHash,
         deterministicEvidenceHash: mutationEvidence?.evidenceHash,
       });
+  });
+
+  it("does not mutate an existing cart from model-only add or quantity evidence", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "event-model-mutation-open",
+    ));
+    const state = opened.plan!.state;
+    const initialCart = state.cart!.value;
+    const modelText = "cho mình hai cái giống nhau";
+    const modelOnly = canonicalBuyingIntent(modelText, {
+      decision: "COMMITTED",
+      requestedAction: "SET_QUANTITY",
+      quantity: 2,
+      evidenceText: modelText,
+      confidence: 0.99,
+    });
+
+    const quantity = await evaluateRealtimeSalesCycle({
+      ...input(state, modelText, "event-model-set-quantity"),
+      canonicalBuyingIntent: modelOnly,
+    });
+    expect(quantity.plan).toBeNull();
+    expect(quantity.transferToHuman).toBe(true);
+    expect(state.cart!.value).toEqual(initialCart);
+
+    const addText = "gửi thêm mẫu PRODUCT-2 cho mình";
+    const add = await evaluateRealtimeSalesCycle({
+      ...input(state, addText, "event-model-add-line"),
+      productId: "PRODUCT-2",
+      canonicalBuyingIntent: canonicalBuyingIntent(addText, {
+        decision: "COMMITTED",
+        requestedAction: "ADD_TO_CART",
+        quantity: 1,
+        evidenceText: addText,
+        confidence: 0.99,
+      }),
+    });
+    expect(add.plan).toBeNull();
+    expect(add.transferToHuman).toBe(true);
+    expect(state.cart!.value).toEqual(initialCart);
   });
 
   it("fails closed before readiness when a valid fifty-line cart adds product fifty-one", async () => {

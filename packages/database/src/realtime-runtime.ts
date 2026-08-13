@@ -1,13 +1,17 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
 import {
+  canonicalBuyingIntentAuthorizesCartMutationV1,
+  CartV1Schema,
   DeterministicCartMutationEvidenceV1Schema,
   DeterministicConfirmationEvidenceV1Schema,
   DeterministicEffectReadinessV1Schema,
   CanonicalBuyingIntentV1Schema,
   ProtectedClaimV1Schema,
+  validateCartEffectClaimSemanticsV1,
   validateEffectClaimSemanticsV1,
   type DecisionObservabilityV1,
+  type CartV1,
   type DeterministicEffectReadinessV1,
 } from "@lana/contracts";
 import type { CipherBundle } from "./repositories.js";
@@ -122,6 +126,8 @@ export interface RealtimeSalesCycleEventPlan {
   readonly cartId: string | null;
   readonly cartVersion: number | null;
   readonly reasonCode: string | null;
+  readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | null;
+  readonly mutationPayloadHash?: string | null;
   readonly occurredAt: Date;
 }
 
@@ -368,29 +374,60 @@ export interface RealtimeCommitResult {
   readonly inboxBatchStatus?: "NOT_REQUESTED" | "COMMITTED" | "SUPERSEDED";
 }
 
+const SALES_EFFECT_BY_COMMAND_V1: Readonly<Partial<Record<
+  RealtimeSalesCycleEventPlan["commandKind"],
+  DeterministicEffectReadinessV1["effect"]
+>>> = {
+  CART_OPENED: "CART_OPEN",
+  CART_MUTATED: "CART_MUTATION",
+  CART_READY: "ORDER_PREVIEW",
+  NEGOTIATION_EVENT: "PROTECTED_OUTBOUND",
+  PREVIEW_CREATED: "ORDER_PREVIEW",
+  CONFIRM_PURCHASE: "PURCHASE_CONFIRMATION",
+};
+
+function canonicalJsonV1(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(canonicalJsonV1).join(",")}]`;
+  const record = value as Record<string, unknown>;
+  return `{${Object.keys(record).sort().map((key) =>
+    `${JSON.stringify(key)}:${canonicalJsonV1(record[key])}`
+  ).join(",")}}`;
+}
+
+function sha256CanonicalV1(value: unknown): string {
+  return createHash("sha256").update(canonicalJsonV1(value), "utf8").digest("hex");
+}
+
+function sha256TextV1(value: string): string {
+  return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function planRequiresEffectReadinessV1(
+  plan: RealtimeSalesCyclePlan<unknown>,
+): boolean {
+  return plan.events.some(({ commandKind }) =>
+    SALES_EFFECT_BY_COMMAND_V1[commandKind] !== undefined
+  );
+}
+
 function validateSalesEffectReadiness<TState, TSalesState>(
   input: RealtimeCommitInput<TState, TSalesState>,
   now: Date,
 ): void {
   const plan = input.salesCyclePlan;
-  if (!plan || plan.readinessContractVersion !== "DF06_EFFECT_READINESS_V1") return;
+  if (!plan) return;
+  if (plan.readinessContractVersion !== "DF06_EFFECT_READINESS_V1") {
+    if (planRequiresEffectReadinessV1(plan)) {
+      throw new Error("EFFECT_READINESS_CONTRACT_REQUIRED");
+    }
+    return;
+  }
   const parsed = (plan.effectReadiness ?? []).map((value) =>
     DeterministicEffectReadinessV1Schema.parse(value)
   );
-  const canonicalJson = (value: unknown): string => {
-    if (value === null || typeof value !== "object") return JSON.stringify(value);
-    if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
-    const record = value as Record<string, unknown>;
-    return `{${Object.keys(record).sort().map((key) =>
-      `${JSON.stringify(key)}:${canonicalJson(record[key])}`
-    ).join(",")}}`;
-  };
-  const hash = (value: unknown) =>
-    createHash("sha256").update(canonicalJson(value), "utf8").digest("hex");
-  const hashText = (value: string) =>
-    createHash("sha256").update(value, "utf8").digest("hex");
   const buyingIntent = CanonicalBuyingIntentV1Schema.parse(plan.canonicalBuyingIntent);
-  const intentHash = hash(buyingIntent);
+  const intentHash = sha256CanonicalV1(buyingIntent);
   const confirmationEvidence = plan.deterministicConfirmationEvidence === undefined
     ? null
     : DeterministicConfirmationEvidenceV1Schema.parse(plan.deterministicConfirmationEvidence);
@@ -399,23 +436,23 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     claims.map((claim) => ProtectedClaimV1Schema.parse(claim)),
   ]));
   const state = plan.state as Record<string, unknown>;
-  const cartEnvelope = state.cart as { value?: { cartId?: string; revision?: number; lines?: readonly { parentProductId?: string }[] } } | null | undefined;
+  const cartEnvelope = state.cart as { value?: {
+    cartId?: string;
+    revision?: number;
+    lines?: readonly {
+      lineId?: string;
+      parentProductId?: string;
+      offerId?: string;
+      quantity?: number;
+      posUnitPriceVnd?: number | null;
+      priceAuthority?: { priceFactRef?: string } | null;
+    }[];
+  } } | null | undefined;
   const cart = cartEnvelope?.value;
-  const finalCartStateHash = cart === undefined ? null : hash(cart);
+  const finalCartStateHash = cart === undefined ? null : sha256CanonicalV1(cart);
   const preview = state.preview as { previewId?: string; previewHash?: string } | null | undefined;
-  const requiredByCommand: Readonly<Partial<Record<
-    RealtimeSalesCycleEventPlan["commandKind"],
-    DeterministicEffectReadinessV1["effect"]
-  >>> = {
-    CART_OPENED: "CART_OPEN",
-    CART_MUTATED: "CART_MUTATION",
-    CART_READY: "ORDER_PREVIEW",
-    NEGOTIATION_EVENT: "PROTECTED_OUTBOUND",
-    PREVIEW_CREATED: "ORDER_PREVIEW",
-    CONFIRM_PURCHASE: "PURCHASE_CONFIRMATION",
-  };
   const required = new Set(plan.events
-    .map(({ commandKind }) => requiredByCommand[commandKind])
+    .map(({ commandKind }) => SALES_EFFECT_BY_COMMAND_V1[commandKind])
     .filter((effect): effect is DeterministicEffectReadinessV1["effect"] =>
       effect !== undefined
     ));
@@ -447,7 +484,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     const expectedClaimSetHash = claims?.length === 0
       ? null
       : claims
-        ? hash([...claims].sort((a, b) => a.claimId.localeCompare(b.claimId)))
+        ? sha256CanonicalV1([...claims].sort((a, b) => a.claimId.localeCompare(b.claimId)))
         : undefined;
     if (!claims || expectedClaimSetHash !== readiness.claimSetHash) {
       throw new Error("EFFECT_READINESS_CLAIM_BINDING_MISMATCH");
@@ -484,6 +521,42 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     if (!productsMatch) {
       throw new Error("EFFECT_READINESS_PRODUCT_MISMATCH");
     }
+    if (cart !== undefined && (
+      readiness.effect !== "PROTECTED_OUTBOUND" || readiness.cartId !== null
+    )) {
+      const lines = (cart.lines ?? []).map((line) => ({
+        parentProductId: line.parentProductId,
+        offerId: line.offerId,
+        quantity: line.quantity,
+        posUnitPriceVnd: line.posUnitPriceVnd,
+        priceFactRef: line.priceAuthority?.priceFactRef ?? null,
+      }));
+      if (lines.some((line) =>
+        typeof line.parentProductId !== "string" ||
+        typeof line.offerId !== "string" ||
+        typeof line.quantity !== "number" ||
+        (typeof line.posUnitPriceVnd !== "number" && line.posUnitPriceVnd !== null)
+      )) throw new Error("EFFECT_READINESS_CART_LINE_INVALID");
+      const cartClaimSemantics = validateCartEffectClaimSemanticsV1({
+        effect: readiness.effect,
+        lines: lines as readonly {
+          parentProductId: string;
+          offerId: string;
+          quantity: number;
+          posUnitPriceVnd: number | null;
+          priceFactRef: string | null;
+        }[],
+        claims,
+        cartId: readiness.cartId,
+        cartVersion: readiness.cartVersion,
+        protectedClaimTypes: readiness.protectedClaimTypes,
+      });
+      if (cartClaimSemantics.mismatch) {
+        throw new Error("EFFECT_READINESS_CLAIM_VALUE_MISMATCH");
+      }
+      if (cartClaimSemantics.missing) throw new Error("EFFECT_READINESS_CLAIM_MISSING");
+      if (cartClaimSemantics.conflict) throw new Error("EFFECT_READINESS_CLAIM_CONFLICT");
+    }
     const bindsFinalCart = readiness.effect !== "PROTECTED_OUTBOUND" ||
       readiness.cartId !== null;
     if (bindsFinalCart && readiness.cartStateHash !== finalCartStateHash) {
@@ -500,10 +573,10 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     }
     if (readiness.effect === "PURCHASE_CONFIRMATION" && (
       confirmationEvidence === null ||
-      readiness.deterministicEvidenceHash !== hash(confirmationEvidence) ||
+      readiness.deterministicEvidenceHash !== sha256CanonicalV1(confirmationEvidence) ||
       confirmationEvidence.sourceMessageIdHash !== readiness.sourceMessageIdHash ||
       confirmationEvidence.evaluatedAt !== readiness.checkedAt ||
-      confirmationEvidence.evidenceHash !== hash([
+      confirmationEvidence.evidenceHash !== sha256CanonicalV1([
         confirmationEvidence.sourceMessageIdHash,
         confirmationEvidence.classifierVersion,
         confirmationEvidence.decision,
@@ -523,12 +596,17 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     throw new Error("CART_MUTATION_EVIDENCE_REQUIRED");
   }
   for (const event of mutationEvents) {
-    const commandIdHash = hashText(event.commandId);
+    const commandIdHash = sha256TextV1(event.commandId);
     const evidence = mutationEvidence.find((value) => value.commandIdHash === commandIdHash);
     if (!evidence) throw new Error("CART_MUTATION_EVIDENCE_REQUIRED");
-    const expectedEvidenceHash = hash([
+    const expectedMutationPayloadHash = sha256CanonicalV1({ mutation: evidence.mutation });
+    const expectedEvidenceHash = sha256CanonicalV1([
       evidence.authorityVersion,
       evidence.action,
+      evidence.authorityKind,
+      evidence.authorityEvidenceHash,
+      evidence.mutation,
+      evidence.mutationPayloadHash,
       evidence.sourceMessageIdHash,
       evidence.commandIdHash,
       evidence.beforeCartStateHash,
@@ -537,11 +615,38 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     ]);
     if (
       evidence.sourceMessageIdHash !== plan.sourceMessageIdHash ||
+      event.mutationAction !== evidence.action ||
+      event.mutationPayloadHash !== evidence.mutationPayloadHash ||
+      evidence.mutationPayloadHash !== expectedMutationPayloadHash ||
       evidence.afterCartStateHash !== finalCartStateHash ||
       evidence.evidenceHash !== expectedEvidenceHash ||
       Date.parse(evidence.evaluatedAt) > now.getTime()
     ) {
       throw new Error("CART_MUTATION_EVIDENCE_MISMATCH");
+    }
+    if (evidence.action === "REMOVE_LINE") {
+      const removalAuthority = sha256CanonicalV1([
+        "DETERMINISTIC_REMOVE_CLASSIFIER_V1",
+        evidence.sourceMessageIdHash,
+        evidence.mutationPayloadHash,
+      ]);
+      if (evidence.authorityEvidenceHash !== removalAuthority) {
+        throw new Error("CART_MUTATION_AUTHORITY_MISMATCH");
+      }
+    } else if (
+      buyingIntent.productId === null ||
+      !canonicalBuyingIntentAuthorizesCartMutationV1(
+        buyingIntent,
+        evidence.action,
+        buyingIntent.productId,
+      ) ||
+      !parsed.some((value) =>
+        value.effect === "CART_MUTATION" &&
+        value.productIds.includes(buyingIntent.productId!)
+      ) ||
+      evidence.authorityEvidenceHash !== intentHash
+    ) {
+      throw new Error("CART_MUTATION_AUTHORITY_MISMATCH");
     }
     const readiness = parsed.find((value) =>
       value.effect === "CART_MUTATION" &&
@@ -550,6 +655,72 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     );
     if (!readiness) throw new Error("CART_MUTATION_EVIDENCE_BINDING_MISMATCH");
   }
+}
+
+function validateLockedCartMutationTransitionV1(
+  plan: RealtimeSalesCyclePlan<unknown>,
+  lockedState: unknown,
+): void {
+  const mutationEvents = plan.events.filter(({ commandKind, outcome }) =>
+    commandKind === "CART_MUTATED" && outcome === "APPLIED"
+  );
+  if (mutationEvents.length === 0) return;
+  const readCart = (state: unknown): CartV1 => {
+    const record = state !== null && typeof state === "object"
+      ? state as Record<string, unknown>
+      : {};
+    const envelope = record.cart !== null && typeof record.cart === "object"
+      ? record.cart as Record<string, unknown>
+      : {};
+    return CartV1Schema.parse(envelope.value);
+  };
+  const beforeCart = readCart(lockedState);
+  const afterCart = readCart(plan.state);
+  const evidence = (plan.cartMutationEvidence ?? []).map((value) =>
+    DeterministicCartMutationEvidenceV1Schema.parse(value)
+  );
+  const evidenceByCommand = new Map(evidence.map((value) => [value.commandIdHash, value]));
+  if (
+    beforeCart.cartId !== afterCart.cartId ||
+    beforeCart.salesEpisodeId !== afterCart.salesEpisodeId ||
+    beforeCart.customerProfileId !== afterCart.customerProfileId ||
+    afterCart.revision !== beforeCart.revision + mutationEvents.length
+  ) throw new Error("CART_MUTATION_TRANSITION_MISMATCH");
+
+  let lines = [...beforeCart.lines];
+  let priorHash = sha256CanonicalV1(beforeCart);
+  for (const event of mutationEvents) {
+    const receipt = evidenceByCommand.get(sha256TextV1(event.commandId));
+    if (!receipt || receipt.beforeCartStateHash !== priorHash) {
+      throw new Error("CART_MUTATION_BEFORE_STATE_MISMATCH");
+    }
+    const mutation = receipt.mutation;
+    if (mutation.kind === "ADD_LINE") {
+      if (lines.some(({ lineId }) => lineId === mutation.line.lineId)) {
+        throw new Error("CART_MUTATION_TRANSITION_MISMATCH");
+      }
+      lines = [...lines, mutation.line];
+    } else {
+      const lineIndex = lines.findIndex(({ lineId }) => lineId === mutation.lineId);
+      if (lineIndex < 0) throw new Error("CART_MUTATION_TRANSITION_MISMATCH");
+      if (mutation.kind === "REMOVE_LINE") {
+        lines = lines.filter((_, index) => index !== lineIndex);
+      } else {
+        lines = lines.map((line, index) => index === lineIndex ? {
+          ...line,
+          quantity: mutation.quantity,
+          lineTotalVnd: line.posUnitPriceVnd === null
+            ? null
+            : line.posUnitPriceVnd * mutation.quantity,
+        } : line);
+      }
+    }
+    priorHash = receipt.afterCartStateHash;
+  }
+  if (
+    priorHash !== sha256CanonicalV1(afterCart) ||
+    canonicalJsonV1(lines) !== canonicalJsonV1(afterCart.lines)
+  ) throw new Error("CART_MUTATION_TRANSITION_MISMATCH");
 }
 
 function validateMetaEffectReadiness<TState, TSalesState>(
@@ -2361,8 +2532,10 @@ export class PostgresRealtimeRuntimeStore {
     ) {
       throw new Error("SALES_CYCLE_EXPIRY_INVALID");
     }
-    const locked = await client.query<{ state_revision: string }>(
-      `SELECT state_revision
+    const locked = await client.query<SalesCycleRow>(
+      `SELECT state_revision, conversation_id, page_id,
+              state_ciphertext, state_nonce, state_auth_tag,
+              state_encrypted_dek, state_key_ref, cart_expires_at, expires_at
        FROM sales_cycle_states
        WHERE conversation_id = $1 AND page_id = $2
        FOR UPDATE`,
@@ -2371,6 +2544,18 @@ export class PostgresRealtimeRuntimeStore {
     const storedRevision = Number(locked.rows[0]?.state_revision ?? -1);
     if (storedRevision !== plan.expectedRevision) {
       throw new Error("SALES_CYCLE_STATE_REVISION_CONFLICT");
+    }
+    if (plan.events.some(({ commandKind, outcome }) =>
+      commandKind === "CART_MUTATED" && outcome === "APPLIED"
+    )) {
+      const lockedRow = locked.rows[0];
+      if (!lockedRow?.state_ciphertext) {
+        throw new Error("CART_MUTATION_LOCKED_STATE_REQUIRED");
+      }
+      validateLockedCartMutationTransitionV1(
+        plan as RealtimeSalesCyclePlan<unknown>,
+        this.salesCycleRecord<unknown>(lockedRow).state,
+      );
     }
     const nextRevision = this.stateNumber(
       plan.state,

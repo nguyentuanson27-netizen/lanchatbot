@@ -79,6 +79,7 @@ describe("deterministic effect readiness", () => {
       productIds,
       cartId: "cart-1",
       cartVersion: 2,
+      mutationAction: "REMOVE_LINE",
       deterministicEvidenceHash: hash("f"),
       claims: claimsFor(productIds),
     });
@@ -109,6 +110,53 @@ describe("deterministic effect readiness", () => {
     });
     expect(modelOnly.outcome).toBe("BLOCKED");
     expect(modelOnly.reasonCodes).toContain("BUYING_INTENT_MISSING");
+  });
+
+  it("blocks model-only authority for add or quantity cart mutations", () => {
+    const modelOnly = CanonicalBuyingIntentV1Schema.parse({
+      ...intent,
+      requestedAction: "ADD_TO_CART",
+      contributors: ["MODEL_STRUCTURED_OUTPUT"],
+      reasonCodes: ["MODEL_BUYING_COMMITTED"],
+    });
+    const result = evaluateDeterministicEffectReadinessV1({
+      ...base,
+      effect: "CART_MUTATION",
+      cartId: "cart-1",
+      cartVersion: 2,
+      mutationAction: "ADD_LINE",
+      deterministicEvidenceHash: hash("f"),
+      buyingIntent: modelOnly,
+    });
+    expect(result.outcome).toBe("BLOCKED");
+    expect(result.reasonCodes).toContain("BUYING_INTENT_MISSING");
+    const wrongAction = evaluateDeterministicEffectReadinessV1({
+      ...base,
+      effect: "CART_MUTATION",
+      cartId: "cart-1",
+      cartVersion: 2,
+      mutationAction: "SET_QUANTITY",
+      deterministicEvidenceHash: hash("f"),
+      buyingIntent: CanonicalBuyingIntentV1Schema.parse({
+        ...intent,
+        requestedAction: "ADD_TO_CART",
+      }),
+    });
+    expect(wrongAction.outcome).toBe("BLOCKED");
+    expect(wrongAction.reasonCodes).toContain("BUYING_INTENT_SCOPE_MISMATCH");
+  });
+
+  it("allows deterministic removal authority without buying intent", () => {
+    const result = evaluateDeterministicEffectReadinessV1({
+      ...base,
+      effect: "CART_MUTATION",
+      cartId: "cart-1",
+      cartVersion: 2,
+      mutationAction: "REMOVE_LINE",
+      deterministicEvidenceHash: hash("f"),
+      buyingIntent: null,
+    });
+    expect(result.outcome).toBe("READY");
   });
 
   it("blocks stale, missing, conflicting, and cross-product claims", () => {
@@ -144,6 +192,7 @@ describe("deterministic effect readiness", () => {
       productIds,
       cartId: "cart-1",
       cartVersion: 2,
+      mutationAction: "ADD_LINE",
       deterministicEvidenceHash: hash("f"),
       claims: claimsFor(productIds),
     });

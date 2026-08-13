@@ -8,6 +8,7 @@ import {
   DeterministicEffectReadinessV1Schema,
   MAX_READINESS_PRODUCT_IDS_V1,
   ProtectedClaimV1Schema,
+  validateCartEffectClaimSemanticsV1,
   validateEffectClaimSemanticsV1,
   type ProtectedClaimV1,
 } from "./canonical-evidence-readiness.js";
@@ -293,6 +294,76 @@ describe("DF06 deterministic readiness contract", () => {
     }).conflict).toBe(true);
   });
 
+  it("requires exact offer-scoped cart claims with matching price and orderable stock", () => {
+    const line = {
+      parentProductId: "P-001",
+      offerId: "SET",
+      quantity: 2,
+      posUnitPriceVnd: 699_000,
+      priceFactRef: "price:P-001:SET:v1",
+    } as const;
+    const exact: ProtectedClaimV1[] = [
+      ProtectedClaimV1Schema.parse({
+        ...productClaim("PRICE", "P-001"),
+        scope: { kind: "PRODUCT" as const, productId: "P-001", variantId: "SET" },
+        provenance: {
+          ...productClaim("PRICE", "P-001").provenance,
+          sourceVersion: line.priceFactRef,
+        },
+        value: { amountVnd: line.posUnitPriceVnd, currency: "VND" as const },
+      }),
+      ProtectedClaimV1Schema.parse({
+        ...productClaim("STOCK", "P-001"),
+        scope: { kind: "PRODUCT" as const, productId: "P-001", variantId: "SET" },
+        value: { status: "IN_STOCK" as const, availableQuantity: 3 },
+      }),
+      ProtectedClaimV1Schema.parse({
+        ...productClaim("ETA", "P-001"),
+        scope: { kind: "PRODUCT" as const, productId: "P-001", variantId: "SET" },
+      }),
+    ];
+
+    expect(validateCartEffectClaimSemanticsV1({
+      effect: "ORDER_PREVIEW",
+      lines: [line],
+      claims: exact,
+    })).toEqual({ missing: false, conflict: false, mismatch: false });
+    expect(validateCartEffectClaimSemanticsV1({
+      effect: "ORDER_PREVIEW",
+      lines: [line],
+      claims: exact.map((claim) => ProtectedClaimV1Schema.parse({
+        ...claim,
+        scope: { ...claim.scope, variantId: "WRONG-OFFER" },
+      })),
+    }).mismatch).toBe(true);
+    expect(validateCartEffectClaimSemanticsV1({
+      effect: "ORDER_PREVIEW",
+      lines: [line],
+      claims: exact.map((claim) => ProtectedClaimV1Schema.parse(claim.type === "PRICE"
+        ? { ...claim, value: { amountVnd: 1, currency: "VND" as const } }
+        : claim)),
+    }).mismatch).toBe(true);
+    expect(validateCartEffectClaimSemanticsV1({
+      effect: "ORDER_PREVIEW",
+      lines: [line],
+      claims: exact.map((claim) => ProtectedClaimV1Schema.parse(claim.type === "STOCK"
+        ? { ...claim, value: { status: "IN_STOCK" as const, availableQuantity: 1 } }
+        : claim)),
+    }).mismatch).toBe(true);
+    expect(validateCartEffectClaimSemanticsV1({
+      effect: "ORDER_PREVIEW",
+      lines: [line],
+      claims: exact.map((claim) => ProtectedClaimV1Schema.parse(claim.type === "STOCK"
+        ? { ...claim, value: { status: "PRE_ORDER" as const, availableQuantity: 0 } }
+        : claim)),
+    }).mismatch).toBe(false);
+    expect(validateCartEffectClaimSemanticsV1({
+      effect: "ORDER_PREVIEW",
+      lines: [line, { ...line, quantity: 2 }],
+      claims: exact,
+    }).mismatch).toBe(true);
+  });
+
   it("keeps purchase confirmation evidence deterministic, typed, and non-authorizing", () => {
     const evidence = DeterministicConfirmationEvidenceV1Schema.parse({
       schemaVersion: 1,
@@ -378,7 +449,15 @@ describe("DF06 deterministic readiness contract", () => {
     const evidence = {
       schemaVersion: 1,
       authorityVersion: "DETERMINISTIC_CART_MUTATION_EVIDENCE_V1",
-      action: "ADD_LINE",
+      action: "SET_QUANTITY",
+      authorityKind: "CANONICAL_BUYING_INTENT",
+      authorityEvidenceHash: OTHER_HASH,
+      mutation: {
+        kind: "SET_QUANTITY",
+        lineId: "3f4c7f35-3ac1-4bb1-a398-1f6fc5b6e364",
+        quantity: 2,
+      },
+      mutationPayloadHash: HASH,
       sourceMessageIdHash: HASH,
       commandIdHash: OTHER_HASH,
       beforeCartStateHash: HASH,
@@ -394,6 +473,11 @@ describe("DF06 deterministic readiness contract", () => {
     expect(DeterministicCartMutationEvidenceV1Schema.safeParse({
       ...evidence,
       contributor: "MODEL_STRUCTURED_OUTPUT",
+    }).success).toBe(false);
+    expect(DeterministicCartMutationEvidenceV1Schema.safeParse({
+      ...evidence,
+      authorityKind: "DETERMINISTIC_REMOVE_CLASSIFIER",
+      action: "SET_QUANTITY",
     }).success).toBe(false);
     expect(DeterministicCartMutationEvidenceV1Schema.safeParse({
       ...evidence,
