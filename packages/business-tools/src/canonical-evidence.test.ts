@@ -64,7 +64,7 @@ describe("DF05 canonical decision evidence", () => {
 
     expect(result.buyingIntent).toMatchObject({
       decision: "COMMITTED",
-      contributors: ["DETERMINISTIC_RUNTIME", "MODEL_STRUCTURED_OUTPUT"],
+      contributors: ["MODEL_STRUCTURED_OUTPUT"],
       authorization: "NONE",
     });
     expect(result.dialogueEvidence.contributors).toContain(

@@ -120,6 +120,24 @@ export type CanonicalBuyingIntentV1 = z.infer<
   typeof CanonicalBuyingIntentV1Schema
 >;
 
+export const DeterministicConfirmationEvidenceV1Schema = z.object({
+  schemaVersion: z.literal(1),
+  authorityVersion: z.literal("DETERMINISTIC_CONFIRMATION_EVIDENCE_V1"),
+  classifierVersion: z.enum([
+    "LEGACY_CONFIRMATION_V1",
+    "CONFIRMATION_CLASSIFIER_V2",
+  ]),
+  decision: z.literal("CONFIRM"),
+  reasonCode: z.literal("CONFIRMATION_DETERMINISTIC_MATCH"),
+  sourceMessageIdHash: Sha256Schema,
+  evidenceHash: Sha256Schema,
+  evaluatedAt: z.string().datetime(),
+  authorization: z.literal("NONE"),
+}).strict();
+export type DeterministicConfirmationEvidenceV1 = z.infer<
+  typeof DeterministicConfirmationEvidenceV1Schema
+>;
+
 export const ProtectedClaimScopeV1Schema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("PRODUCT"),
@@ -287,6 +305,7 @@ export const DETERMINISTIC_READINESS_REASON_CODES_V1 = [
   "ORDER_PREVIEW_REQUIRED",
   "ORDER_PREVIEW_MISMATCH",
   "EFFECT_NOT_SUPPORTED",
+  "DETERMINISTIC_EVIDENCE_MISSING",
 ] as const;
 
 export const DeterministicEffectReadinessV1Schema = z.object({
@@ -311,7 +330,12 @@ export const DeterministicEffectReadinessV1Schema = z.object({
   orderPreviewId: BoundedIdSchema.nullable(),
   orderPreviewHash: Sha256Schema.nullable(),
   buyingIntentHash: Sha256Schema.nullable(),
+  deterministicEvidenceHash: Sha256Schema.nullable(),
   claimSetHash: Sha256Schema.nullable(),
+  protectedClaimTypes: z.array(z.enum([
+    "PRICE", "STOCK", "SIZE_FIT", "ETA", "SHIPPING_FEE", "FREESHIP",
+    "PROMOTION_OFFER", "PRODUCT_MEDIA",
+  ])).max(8),
   checkedAt: z.string().datetime(),
   expiresAt: z.string().datetime(),
   reasonCodes: z.array(z.enum(DETERMINISTIC_READINESS_REASON_CODES_V1)).max(16),
@@ -319,6 +343,7 @@ export const DeterministicEffectReadinessV1Schema = z.object({
 }).strict().superRefine((value, context) => {
   uniqueValues(value.productIds, context, ["productIds"]);
   uniqueValues(value.reasonCodes, context, ["reasonCodes"]);
+  uniqueValues(value.protectedClaimTypes, context, ["protectedClaimTypes"]);
   if (Date.parse(value.expiresAt) <= Date.parse(value.checkedAt)) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
@@ -337,13 +362,35 @@ export const DeterministicEffectReadinessV1Schema = z.object({
         message: "ready effects require product and claim bindings without block reasons",
       });
     }
-    const requiresBuyingIntent = value.effect === "CART_OPEN" ||
-      value.effect === "CART_MUTATION";
+    const requiresBuyingIntent = value.effect === "CART_OPEN";
     if (requiresBuyingIntent && value.buyingIntentHash === null) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["buyingIntentHash"],
         message: "ready cart changes require canonical buying intent",
+      });
+    }
+    if (value.effect === "CART_MUTATION" && value.buyingIntentHash === null &&
+      value.deterministicEvidenceHash === null) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "cart mutation requires canonical intent or deterministic command evidence",
+      });
+    }
+    if (value.effect === "PURCHASE_CONFIRMATION" &&
+      value.deterministicEvidenceHash === null) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["deterministicEvidenceHash"],
+        message: "purchase confirmation requires deterministic evidence",
+      });
+    }
+    if (value.effect === "PROTECTED_OUTBOUND" &&
+      value.protectedClaimTypes.length === 0) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["protectedClaimTypes"],
+        message: "protected outbound requires exact claim-type bindings",
       });
     }
   } else if (value.reasonCodes.length === 0) {

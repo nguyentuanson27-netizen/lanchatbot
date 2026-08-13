@@ -21,6 +21,8 @@ export interface EvaluateDeterministicEffectReadinessV1Input {
   readonly orderPreviewHash: string | null;
   readonly buyingIntent: CanonicalBuyingIntentV1 | null;
   readonly claims: readonly ProtectedClaimV1[];
+  readonly protectedClaimTypes?: readonly ProtectedClaimV1["type"][];
+  readonly deterministicEvidenceHash?: string | null;
   readonly checkedAt: Date;
 }
 
@@ -29,10 +31,10 @@ function scopeKey(claim: ProtectedClaimV1): string {
 }
 
 function requiredClaimTypes(
-  effect: DeterministicEffectReadinessV1["effect"],
+  input: EvaluateDeterministicEffectReadinessV1Input,
 ): readonly ProtectedClaimV1["type"][] {
-  if (effect === "PROTECTED_OUTBOUND") return [];
-  if (effect === "CART_OPEN" || effect === "CART_MUTATION") {
+  if (input.effect === "PROTECTED_OUTBOUND") return input.protectedClaimTypes ?? [];
+  if (input.effect === "CART_OPEN" || input.effect === "CART_MUTATION") {
     return ["PRICE", "STOCK"];
   }
   return ["PRICE", "STOCK", "ETA"];
@@ -48,8 +50,7 @@ export function evaluateDeterministicEffectReadinessV1(
     reasons.add("PRODUCT_AMBIGUOUS");
   }
 
-  const requiresIntent = input.effect === "CART_OPEN" ||
-    input.effect === "CART_MUTATION";
+  const requiresIntent = input.effect === "CART_OPEN";
   if (requiresIntent) {
     if (input.buyingIntent?.decision !== "COMMITTED") {
       reasons.add("BUYING_INTENT_MISSING");
@@ -62,6 +63,12 @@ export function evaluateDeterministicEffectReadinessV1(
       reasons.add("BUYING_INTENT_SCOPE_MISMATCH");
     }
   }
+  if (input.effect === "CART_MUTATION" &&
+    !input.deterministicEvidenceHash &&
+    (input.buyingIntent?.decision !== "COMMITTED" ||
+      !input.buyingIntent.contributors.includes("DETERMINISTIC_RUNTIME"))) {
+    reasons.add("DETERMINISTIC_EVIDENCE_MISSING");
+  }
 
   const nowMs = input.checkedAt.getTime();
   for (const claim of input.claims) {
@@ -73,7 +80,7 @@ export function evaluateDeterministicEffectReadinessV1(
     }
   }
   for (const productId of productIds) {
-    for (const type of requiredClaimTypes(input.effect)) {
+    for (const type of requiredClaimTypes(input)) {
       const matching = input.claims.filter((claim) =>
         claim.type === type && claim.scope.kind === "PRODUCT" &&
         claim.scope.productId === productId
@@ -81,11 +88,17 @@ export function evaluateDeterministicEffectReadinessV1(
       if (matching.length === 0) reasons.add("CLAIM_MISSING");
     }
   }
-  if (input.effect === "PROTECTED_OUTBOUND" && input.claims.length === 0) {
+  if (input.effect === "PROTECTED_OUTBOUND" &&
+    (input.protectedClaimTypes?.length ?? 0) === 0) {
     reasons.add("CLAIM_MISSING");
+  }
+  if (input.effect === "PURCHASE_CONFIRMATION" &&
+    !input.deterministicEvidenceHash) {
+    reasons.add("DETERMINISTIC_EVIDENCE_MISSING");
   }
   const contentByClaimKey = new Map<string, Set<string>>();
   for (const claim of input.claims) {
+    if (claim.type === "PRODUCT_MEDIA" || claim.type === "PROMOTION_OFFER") continue;
     const key = `${claim.type}:${scopeKey(claim)}`;
     const values = contentByClaimKey.get(key) ?? new Set<string>();
     values.add(claim.provenance.contentHash);
@@ -127,7 +140,9 @@ export function evaluateDeterministicEffectReadinessV1(
     buyingIntentHash: input.buyingIntent === null
       ? null
       : hashCanonicalBuyingIntentV1(input.buyingIntent),
+    deterministicEvidenceHash: input.deterministicEvidenceHash ?? null,
     claimSetHash: input.claims.length === 0 ? null : hashProtectedClaimSetV1(input.claims),
+    protectedClaimTypes: [...new Set(input.protectedClaimTypes ?? [])].sort(),
     checkedAt: input.checkedAt.toISOString(),
     expiresAt: new Date(expiresAtMs).toISOString(),
     reasonCodes: [...reasons].sort(),

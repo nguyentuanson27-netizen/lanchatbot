@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   CanonicalBuyingIntentV1Schema,
   CanonicalDialogueEvidenceV1Schema,
+  DeterministicConfirmationEvidenceV1Schema,
   DeterministicEffectReadinessV1Schema,
   ProtectedClaimV1Schema,
 } from "./canonical-evidence-readiness.js";
@@ -144,6 +145,26 @@ describe("DF05 canonical evidence contracts", () => {
 });
 
 describe("DF06 deterministic readiness contract", () => {
+  it("keeps purchase confirmation evidence deterministic, typed, and non-authorizing", () => {
+    const evidence = DeterministicConfirmationEvidenceV1Schema.parse({
+      schemaVersion: 1,
+      authorityVersion: "DETERMINISTIC_CONFIRMATION_EVIDENCE_V1",
+      classifierVersion: "LEGACY_CONFIRMATION_V1",
+      decision: "CONFIRM",
+      reasonCode: "CONFIRMATION_DETERMINISTIC_MATCH",
+      sourceMessageIdHash: HASH,
+      evidenceHash: OTHER_HASH,
+      evaluatedAt: "2026-08-13T05:00:00.000Z",
+      authorization: "NONE",
+    });
+
+    expect(evidence.authorization).toBe("NONE");
+    expect(DeterministicConfirmationEvidenceV1Schema.safeParse({
+      ...evidence,
+      classifierVersion: "MODEL_STRUCTURED_OUTPUT",
+    }).success).toBe(false);
+  });
+
   it("binds a ready effect to message, state, product, cart and claim revisions", () => {
     const readiness = DeterministicEffectReadinessV1Schema.parse({
       schemaVersion: 1,
@@ -161,7 +182,9 @@ describe("DF06 deterministic readiness contract", () => {
       orderPreviewId: null,
       orderPreviewHash: null,
       buyingIntentHash: OTHER_HASH,
+      deterministicEvidenceHash: null,
       claimSetHash: HASH,
+      protectedClaimTypes: [],
       checkedAt: "2026-08-13T05:00:00.000Z",
       expiresAt: "2026-08-13T05:00:30.000Z",
       reasonCodes: [],
@@ -189,7 +212,9 @@ describe("DF06 deterministic readiness contract", () => {
       orderPreviewId: null,
       orderPreviewHash: null,
       buyingIntentHash: OTHER_HASH,
+      deterministicEvidenceHash: HASH,
       claimSetHash: HASH,
+      protectedClaimTypes: [],
       checkedAt: "2026-08-13T05:00:00.000Z",
       expiresAt: "2026-08-13T05:00:30.000Z",
       reasonCodes: [],
@@ -214,7 +239,9 @@ describe("DF06 deterministic readiness contract", () => {
       orderPreviewId: null,
       orderPreviewHash: null,
       buyingIntentHash: null,
+      deterministicEvidenceHash: null,
       claimSetHash: null,
+      protectedClaimTypes: [],
       checkedAt: "2026-08-13T05:00:00.000Z",
       expiresAt: "2026-08-13T05:00:30.000Z",
       reasonCodes: [],

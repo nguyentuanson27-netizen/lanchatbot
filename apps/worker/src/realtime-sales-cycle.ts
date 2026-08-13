@@ -10,6 +10,7 @@ import {
   type AgentSalesSignalsV1,
   type CanonicalBuyingIntentV1,
   type CartV1,
+  type DeterministicConfirmationEvidenceV1,
   type DeterministicEffectReadinessV1,
   type BankTransferPolicyV1,
   type CheckoutRevalidationV1,
@@ -646,6 +647,11 @@ export async function evaluateRealtimeSalesCycle(
   let state = initial;
   const events: RealtimeSalesCycleEventPlan[] = [];
   const effectReadiness: DeterministicEffectReadinessV1[] = [];
+  const effectClaimSets = new Map<
+    DeterministicEffectReadinessV1["effect"],
+    ReturnType<typeof buildProtectedClaimsFromCartSelectionsV1>
+  >();
+  let deterministicConfirmationEvidence: DeterministicConfirmationEvidenceV1 | null = null;
   const references = new Map<string, unknown>();
   const inbound = trustedInbound(input);
   let checkoutValidation: CheckoutRevalidationV1 | null = null;
@@ -700,6 +706,7 @@ export async function evaluateRealtimeSalesCycle(
     selections: readonly Extract<CartSelectionResult, { status: "READY" }>[],
     cart: CartV1 | null = null,
     preview: SalesCycleRuntimeState["preview"] = null,
+    deterministicEvidenceHash: string | null = null,
   ): DeterministicEffectReadinessV1 => {
     const claims = buildProtectedClaimsFromCartSelectionsV1(selections.map((selection) => ({
       productId: selection.line.parentProductId,
@@ -712,6 +719,7 @@ export async function evaluateRealtimeSalesCycle(
       observedAt: selection.sourceObservedAt,
       expiresAt: selection.sourceExpiresAt,
     })));
+    effectClaimSets.set(effect, claims);
     return evaluateDeterministicEffectReadinessV1({
       effect,
       pageId: input.pageId,
@@ -728,6 +736,7 @@ export async function evaluateRealtimeSalesCycle(
         ? input.canonicalBuyingIntent
         : null,
       claims,
+      deterministicEvidenceHash,
       checkedAt: input.now,
     });
   };
@@ -746,6 +755,13 @@ export async function evaluateRealtimeSalesCycle(
       cartExpiresAt: cartExpiry,
       expiresAt,
       events,
+      readinessContractVersion: "DF06_EFFECT_READINESS_V1",
+      sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+      canonicalBuyingIntent: input.canonicalBuyingIntent,
+      ...(deterministicConfirmationEvidence
+        ? { deterministicConfirmationEvidence }
+        : {}),
+      effectClaimSets: [...effectClaimSets].map(([effect, claims]) => ({ effect, claims })),
       ...(effectReadiness.length > 0 ? { effectReadiness } : {}),
     };
   };
@@ -934,6 +950,24 @@ export async function evaluateRealtimeSalesCycle(
   }
 
   if (state.stage === "ORDER_PREVIEW" && confirmationDecision.decision === "CONFIRM") {
+    if (confirmationDecision.source !== "DETERMINISTIC_CLASSIFIER") {
+      return {
+        handled: true,
+        messages: [{ kind: "TEXT", text: "Chị xác nhận rõ giúp em là đồng ý chốt đơn đang xem nhé." }],
+        plan: null,
+        transferToHuman: false,
+        desiredTag: null,
+        reasonCode: "ASK_CONFIRMATION_CLARIFICATION",
+        telemetry: {
+          ...behaviorTelemetry,
+          confirmationAttempted: true,
+          confirmationConfirmed: false,
+          confirmationSource: confirmationDecision.source,
+          confirmationReasonCode: "MODEL_CONFIRMATION_NOT_AUTHORITY",
+          confirmationAction: ASK_CONFIRMATION_CLARIFICATION,
+        },
+      };
+    }
     if (!state.cart || !state.preview || !state.checkoutDraft?.address) {
       return failedOutput("ORDER_PREVIEW_STATE_INVALID", plan());
     }
@@ -947,8 +981,33 @@ export async function evaluateRealtimeSalesCycle(
     const readySelections = selections.filter((value): value is Extract<CartSelectionResult, { status: "READY" }> =>
       value.status === "READY"
     );
+    deterministicConfirmationEvidence = {
+      schemaVersion: 1,
+      authorityVersion: "DETERMINISTIC_CONFIRMATION_EVIDENCE_V1",
+      classifierVersion: behaviorMode === "LEGACY"
+        ? "LEGACY_CONFIRMATION_V1"
+        : "CONFIRMATION_CLASSIFIER_V2",
+      decision: "CONFIRM",
+      reasonCode: "CONFIRMATION_DETERMINISTIC_MATCH",
+      sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+      evidenceHash: createHash("sha256")
+        .update(canonicalJson([
+          input.canonicalBuyingIntent.sourceMessageIdHash,
+          behaviorMode === "LEGACY"
+            ? "LEGACY_CONFIRMATION_V1"
+            : "CONFIRMATION_CLASSIFIER_V2",
+          "CONFIRM",
+          "CONFIRMATION_DETERMINISTIC_MATCH",
+        ]), "utf8")
+        .digest("hex"),
+      evaluatedAt: input.now.toISOString(),
+      authorization: "NONE",
+    };
     const confirmationReadiness = freshReadiness(
       "PURCHASE_CONFIRMATION", readySelections, state.cart.value, state.preview,
+      createHash("sha256")
+        .update(canonicalJson(deterministicConfirmationEvidence), "utf8")
+        .digest("hex"),
     );
     if (!acceptReadiness(confirmationReadiness)) {
       return failedOutput(confirmationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED", plan());
@@ -1008,6 +1067,24 @@ export async function evaluateRealtimeSalesCycle(
           desiredTag: null,
           reasonCode: null,
         };
+      }
+      const selections = await currentSelections(
+        input,
+        state.cart.value,
+        state.checkoutDraft?.address ?? "",
+      );
+      const readySelections = selections.filter((value): value is Extract<CartSelectionResult, { status: "READY" }> =>
+        value.status === "READY" && value.line.lineId !== line.lineId
+      );
+      const removeReadiness = freshReadiness(
+        "CART_MUTATION",
+        readySelections,
+        state.cart.value,
+        null,
+        createHash("sha256").update(`remove:${input.messageId}:${line.lineId}`, "utf8").digest("hex"),
+      );
+      if (!acceptReadiness(removeReadiness)) {
+        return failedOutput(removeReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED", plan());
       }
       const resolved = { mutation: { kind: "REMOVE_LINE" as const, lineId: line.lineId } };
       const reference = {

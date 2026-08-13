@@ -87,15 +87,28 @@ describe("deterministic effect readiness", () => {
   it("allows protected outbound without buying intent but still requires product claims", () => {
     const result = evaluateDeterministicEffectReadinessV1({
       ...base, effect: "PROTECTED_OUTBOUND", buyingIntent: null,
+      protectedClaimTypes: ["PRICE"],
     });
     expect(result.outcome).toBe("READY");
     expect(result.buyingIntentHash).toBeNull();
+  });
+
+  it("binds protected outbound to the exact protected claim types", () => {
+    const result = evaluateDeterministicEffectReadinessV1({
+      ...base,
+      effect: "PROTECTED_OUTBOUND",
+      buyingIntent: null,
+      protectedClaimTypes: ["ETA"],
+    });
+    expect(result.outcome).toBe("BLOCKED");
+    expect(result.reasonCodes).toContain("CLAIM_MISSING");
   });
 
   it("requires cart and preview bindings for purchase confirmation", () => {
     const result = evaluateDeterministicEffectReadinessV1({
       ...base, effect: "PURCHASE_CONFIRMATION", buyingIntent: null,
       cartId: null, cartVersion: null, orderPreviewId: null, orderPreviewHash: null,
+      deterministicEvidenceHash: hash("f"),
     });
     expect(result.outcome).toBe("BLOCKED");
     expect(result.reasonCodes).toEqual(expect.arrayContaining(["CART_REQUIRED", "ORDER_PREVIEW_REQUIRED"]));

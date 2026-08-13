@@ -342,7 +342,7 @@ describe("realtime Phase 3 sales cycle", () => {
     ["làm đơn mẫu này cho mình", "OPEN_CART"],
     ["gửi mẫu này về Hà Nội giúp chị", "OPEN_CART"],
     ["xin số tài khoản để chuyển luôn", "PROCEED_TO_PAYMENT"],
-  ] as const)("opens a cart from guarded long-tail buying evidence: %s", async (text, requestedAction) => {
+  ] as const)("blocks model-only long-tail buying evidence: %s", async (text, requestedAction) => {
     const state = createRealtimeSalesState(conversationId, pageId, now);
     const output = await evaluateRealtimeSalesCycle({
       ...input(state, text, `event-hybrid-${requestedAction}`),
@@ -362,15 +362,11 @@ describe("realtime Phase 3 sales cycle", () => {
         },
       }),
     });
-    expect(output).toMatchObject({
-      handled: true,
-      transferToHuman: false,
-      plan: { state: { stage: "CART_OPEN" } },
-    });
-    expect(output.plan?.state.cart?.value.lines[0]?.quantity).toBe(1);
+    expect(output).toMatchObject({ handled: true, transferToHuman: true });
+    expect(output.plan?.state.cart ?? null).toBeNull();
   });
 
-  it("uses the model quantity only after the same guarded buying checks pass", async () => {
+  it("blocks model-only quantity evidence from opening a cart", async () => {
     const text = "cho mình hai cái giống nhau";
     const state = createRealtimeSalesState(conversationId, pageId, now);
     const output = await evaluateRealtimeSalesCycle({
@@ -392,8 +388,8 @@ describe("realtime Phase 3 sales cycle", () => {
         },
       }),
     });
-    expect(output.plan?.state.stage).toBe("CART_OPEN");
-    expect(output.plan?.state.cart?.value.lines[0]?.quantity).toBe(2);
+    expect(output.transferToHuman).toBe(true);
+    expect(output.plan?.state.cart ?? null).toBeNull();
   });
 
   it.each([
@@ -480,6 +476,13 @@ describe("realtime Phase 3 sales cycle", () => {
       plan: {
         state: { stage: "PURCHASE_CONFIRMED" },
         effectReadiness: [{ effect: "PURCHASE_CONFIRMATION", outcome: "READY", authorization: "NONE" }],
+        deterministicConfirmationEvidence: {
+          authorityVersion: "DETERMINISTIC_CONFIRMATION_EVIDENCE_V1",
+          classifierVersion: "LEGACY_CONFIRMATION_V1",
+          decision: "CONFIRM",
+          reasonCode: "CONFIRMATION_DETERMINISTIC_MATCH",
+          authorization: "NONE",
+        },
       },
     });
     expect(confirmed.messages[0]).toEqual({
@@ -667,7 +670,7 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(output.plan?.state.confirmation ?? null).toBeNull();
   });
 
-  it("uses a high-confidence model confirmation only with exact latest-message evidence", async () => {
+  it("never lets model-only confirmation authorize purchase", async () => {
     const state = await previewState("event-model-confirm");
     const text = "triển khai giúp chị";
     const confirmed = await evaluateRealtimeSalesCycle({
@@ -677,10 +680,11 @@ describe("realtime Phase 3 sales cycle", () => {
       }),
     });
     expect(confirmed.telemetry).toMatchObject({
-      confirmationConfirmed: true,
+      confirmationConfirmed: false,
       confirmationSource: "MODEL_STRUCTURED_OUTPUT",
     });
-    expect(confirmed.plan?.state.stage).toBe("PURCHASE_CONFIRMED");
+    expect(confirmed.plan?.state.confirmation ?? null).toBeNull();
+    expect(confirmed.reasonCode).toBe("ASK_CONFIRMATION_CLARIFICATION");
 
     const rejected = await evaluateRealtimeSalesCycle({
       ...input(state, text, "event-model-confirm-hallucinated"),

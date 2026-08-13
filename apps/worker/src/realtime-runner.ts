@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import {
   buildCanonicalDecisionEvidenceV1,
   buildProtectedClaimsFromVerifiedFactsV1,
+  buildProtectedMediaClaimsV1,
+  evaluateDeterministicEffectReadinessV1,
   hashProtectedClaimSetV1,
   detectBuyingSignal,
   extractCustomerMeasurements,
@@ -45,6 +47,7 @@ import {
   type ProductFactsV2,
   type RequestedBusinessFactV2,
   type SizeRecommendationProtectedClaimV1,
+  type DeterministicEffectReadinessV1,
 } from "@lana/contracts";
 import type {
   RuntimePolicyChannel,
@@ -4612,6 +4615,55 @@ export class RealtimeRunner {
       metaMessages = splitRealtimeMetaMessages(metaMessages);
     }
 
+    let protectedOutboundReadiness: DeterministicEffectReadinessV1 | null = null;
+    let protectedOutboundClaims = protectedClaimSet.claims;
+    const outboundClaimTypes = !salesHandled && metaMessages.length > 0
+      ? protectedClaimValidation.claimTypes
+      : [];
+    if (outboundClaimTypes.length > 0) {
+      const canonicalEvidence = canonicalDecisionEvidenceForTurn();
+      const outboundProductId = businessFacts?.productId ??
+        resolvedProduct?.productId ?? nextState.currentProductId;
+      if (outboundProductId !== null && outboundClaimTypes.includes("PRODUCT_MEDIA")) {
+        protectedOutboundClaims = [
+          ...protectedOutboundClaims,
+          ...buildProtectedMediaClaimsV1({
+            productId: outboundProductId,
+            imageUrls: metaMessages.flatMap((unit) => unit.kind === "IMAGE" ? [unit.imageUrl] : []),
+            sourceVersion: `MEDIA_SELECTOR_V2:${outboundProductId}`,
+            observedAt: now.toISOString(),
+            expiresAt: new Date(now.getTime() + 60_000).toISOString(),
+          }),
+        ];
+      }
+      protectedOutboundReadiness = evaluateDeterministicEffectReadinessV1({
+        effect: "PROTECTED_OUTBOUND",
+        pageId: claim.pageId,
+        conversationId: record.conversationId,
+        sourceMessageIdHash: canonicalEvidence.buyingIntent.sourceMessageIdHash,
+        conversationRevision: record.stateVersion,
+        salesCycleRevision: salesCycleRecord?.stateRevision ?? null,
+        productIds: [
+          businessFacts?.productId ?? resolvedProduct?.productId ?? nextState.currentProductId,
+        ].filter((value): value is string => value !== null),
+        cartId: null,
+        cartVersion: null,
+        orderPreviewId: null,
+        orderPreviewHash: null,
+        buyingIntent: null,
+        claims: protectedOutboundClaims,
+        protectedClaimTypes: outboundClaimTypes,
+        checkedAt: now,
+      });
+      if (protectedOutboundReadiness.outcome !== "READY") {
+        metaMessages = [];
+        handoffGuardReasonCodes = [...new Set([
+          ...handoffGuardReasonCodes,
+          ...protectedOutboundReadiness.reasonCodes,
+        ])];
+      }
+    }
+
     const planSeed = [
       "lana:realtime-reply:v1",
       batch.pageId,
@@ -5119,6 +5171,14 @@ export class RealtimeRunner {
                 imageDelayMs: this.options.imageDelayMs,
                 sendAfterOwnerHandoff:
                   handoffDeliveryOrdering.sendAfterOwnerHandoff,
+                ...(protectedOutboundReadiness?.outcome === "READY"
+                  ? {
+                      protectedClaimTypes: protectedOutboundReadiness.protectedClaimTypes,
+                      sourceMessageIdHash: protectedOutboundReadiness.sourceMessageIdHash,
+                      effectReadiness: protectedOutboundReadiness,
+                      protectedClaims: protectedOutboundClaims,
+                    }
+                  : {}),
               },
             }
           : {}),

@@ -120,13 +120,15 @@ export function buildCanonicalDecisionEvidenceV1(
     ? "NONE" as const
     : resolved.decision;
   const observed = decision !== "NONE";
+  const deterministic = resolveHybridBuyingSignal(
+    input.text,
+    { hasProductContext: input.productId !== null },
+    null,
+  );
   const contributors = !observed
     ? []
     : resolved.source === "MODEL_STRUCTURED_OUTPUT"
-      ? decision === "COMMITTED" && hasGuardedModelBuyingCommitmentEvidence(
-          input.text,
-          input.modelBuyingIntent,
-        )
+      ? decision === "COMMITTED" && deterministic.decision === "COMMITTED"
         ? ["DETERMINISTIC_RUNTIME", "MODEL_STRUCTURED_OUTPUT"] as const
         : ["MODEL_STRUCTURED_OUTPUT"] as const
       : resolved.source === "DETERMINISTIC"

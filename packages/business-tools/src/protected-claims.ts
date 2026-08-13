@@ -244,3 +244,31 @@ export function buildProtectedClaimsFromCartSelectionsV1(
     )
   );
 }
+
+export function buildProtectedMediaClaimsV1(input: Readonly<{
+  productId: string;
+  imageUrls: readonly string[];
+  sourceVersion: string;
+  observedAt: string;
+  expiresAt: string;
+}>): readonly ProtectedClaimV1[] {
+  return [...new Set(input.imageUrls)].map((imageUrl) => {
+    const assetSha256 = sha256(imageUrl);
+    return ProtectedClaimV1Schema.parse({
+      schemaVersion: 1,
+      claimId: deterministicUuid([input.productId, "PRODUCT_MEDIA", assetSha256]),
+      type: "PRODUCT_MEDIA",
+      scope: { kind: "PRODUCT", productId: input.productId, variantId: null },
+      provenance: {
+        authority: "MEDIA_SELECTOR_V2",
+        sourceVersion: input.sourceVersion,
+        evidenceRef: `media-selector:${assetSha256}`,
+        contentHash: assetSha256,
+        observedAt: input.observedAt,
+        expiresAt: input.expiresAt,
+      },
+      value: { assetId: `media-${assetSha256.slice(0, 32)}`, assetSha256 },
+      authorization: "NONE",
+    });
+  }).sort((left, right) => left.claimId.localeCompare(right.claimId));
+}

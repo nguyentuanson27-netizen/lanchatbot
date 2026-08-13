@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildProtectedMediaClaimsV1,
   buildProtectedClaimsFromCartSelectionsV1,
   buildProtectedClaimsFromVerifiedFactsV1,
   hashProtectedClaimSetV1,
@@ -8,6 +9,20 @@ import {
 const HASH = "a".repeat(64);
 
 describe("DF05 typed protected-claim provenance", () => {
+  it("hashes verified media identity without retaining its URL or credentials", () => {
+    const result = buildProtectedMediaClaimsV1({
+      productId: "SP-001",
+      imageUrls: ["https://user:secret@example.invalid/private.jpg?token=secret"],
+      sourceVersion: "media-v2:7",
+      observedAt: "2026-08-13T05:00:00.000Z",
+      expiresAt: "2026-08-13T05:01:00.000Z",
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ type: "PRODUCT_MEDIA", authorization: "NONE" });
+    expect(JSON.stringify(result)).not.toContain("secret");
+    expect(JSON.stringify(result)).not.toContain("example.invalid");
+  });
+
   it("adapts fresh cart facts into typed price, stock, and ETA claims", () => {
     const result = buildProtectedClaimsFromCartSelectionsV1([{
       productId: "SP-001", variantId: "SET-M", priceVnd: 1_250_000,
