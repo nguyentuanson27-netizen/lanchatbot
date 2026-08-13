@@ -850,6 +850,67 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(persisted.cart.value.status).toBe("OPEN");
   });
 
+  it("discards checkout and preview events when final protected facts become stale", async () => {
+    const expiringCheckoutFacts: BusinessFactsReader = {
+      ...facts,
+      async resolveCartSelection(query) {
+        return {
+          status: "READY",
+          line: line(query.quantity),
+          shopId: "LANA",
+          versions: {
+            price: "price-expiring-checkout",
+            inventory: "inventory-expiring-checkout",
+            size: "size-expiring-checkout",
+            eta: "eta-expiring-checkout",
+          },
+          eta: { minDays: 3, maxDays: 6 },
+          etaExpiresAt: "2026-07-23T03:00:30.000Z",
+          sourceAuthority: "POS_SNAPSHOT",
+          stockStatus: "IN_STOCK",
+          stockAvailableQuantity: 3,
+          sourceObservedAt: "2026-07-23T02:59:00.000Z",
+          sourceExpiresAt: "2026-07-23T03:00:30.000Z",
+        };
+      },
+    };
+    const opened = await evaluateRealtimeSalesCycle({
+      ...input(
+        createRealtimeSalesState(conversationId, pageId, now),
+        "chốt CB182 size M",
+        "event-final-stale-open",
+      ),
+      facts: expiringCheckoutFacts,
+    });
+    const persisted = opened.plan!.state;
+    let clockRead = 0;
+    const clock = [
+      new Date("2026-07-23T03:00:00.000Z"),
+      new Date("2026-07-23T03:00:00.000Z"),
+      new Date("2026-07-23T03:00:45.000Z"),
+    ];
+
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(
+        persisted,
+        "Tên: Lan\nSĐT: 0984997797\nĐịa chỉ: Tân Châu, Tây Ninh\nCOD",
+        "event-final-stale-details",
+      ),
+      facts: expiringCheckoutFacts,
+      effectNow: () => clock[Math.min(clockRead++, clock.length - 1)]!,
+    });
+
+    expect(output).toMatchObject({
+      transferToHuman: true,
+      messages: [],
+      reasonCode: "CLAIM_STALE",
+      plan: null,
+    });
+    expect(persisted.checkoutDraft).toBeNull();
+    expect(persisted.cart?.value.status).toBe("OPEN");
+    expect(persisted.preview).toBeNull();
+  });
+
   it("stacks 5%, freeship and final 20k while the same evidence cannot escalate twice", async () => {
     let state = createRealtimeSalesState(conversationId, pageId, now);
     const opened = await evaluateRealtimeSalesCycle(input(

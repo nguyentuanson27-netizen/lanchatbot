@@ -1,14 +1,50 @@
 import { describe, expect, it } from "vitest";
 import {
+  canonicalizeReadinessProductIdsV1,
   CanonicalBuyingIntentV1Schema,
   CanonicalDialogueEvidenceV1Schema,
   DeterministicConfirmationEvidenceV1Schema,
   DeterministicEffectReadinessV1Schema,
+  MAX_READINESS_PRODUCT_IDS_V1,
   ProtectedClaimV1Schema,
+  validateEffectClaimSemanticsV1,
+  type ProtectedClaimV1,
 } from "./canonical-evidence-readiness.js";
 
 const HASH = "a".repeat(64);
 const OTHER_HASH = "b".repeat(64);
+
+function productClaim(
+  type: "PRICE" | "STOCK" | "ETA",
+  productId: string,
+  contentHash = OTHER_HASH,
+): ProtectedClaimV1 {
+  const value = type === "PRICE"
+    ? { amountVnd: 1250000, currency: "VND" as const }
+    : type === "STOCK"
+      ? { status: "IN_STOCK" as const, availableQuantity: 3 }
+      : { minDays: 2, maxDays: 4 };
+  return ProtectedClaimV1Schema.parse({
+    schemaVersion: 1,
+    claimId: type === "PRICE"
+      ? "3f4c7f35-3ac1-4bb1-a398-1f6fc5b6e361"
+      : type === "STOCK"
+        ? "3f4c7f35-3ac1-4bb1-a398-1f6fc5b6e362"
+        : "3f4c7f35-3ac1-4bb1-a398-1f6fc5b6e363",
+    type,
+    scope: { kind: "PRODUCT", productId, variantId: null },
+    provenance: {
+      authority: "POS_LIVE",
+      sourceVersion: "version-1",
+      evidenceRef: `opaque:${type}:${productId}`,
+      contentHash,
+      observedAt: "2026-08-13T05:00:00.000Z",
+      expiresAt: "2026-08-13T05:05:00.000Z",
+    },
+    value,
+    authorization: "NONE",
+  });
+}
 
 describe("DF05 canonical evidence contracts", () => {
   it("keeps dialogue evidence observational and separate from buying intent", () => {
@@ -145,6 +181,106 @@ describe("DF05 canonical evidence contracts", () => {
 });
 
 describe("DF06 deterministic readiness contract", () => {
+  it.each([
+    [0, 0, true, false],
+    [1, 1, false, false],
+    [3, 3, false, false],
+    [4, 4, false, true],
+    [49, 49, false, true],
+    [50, 50, false, true],
+    [51, 50, false, true],
+  ] as const)(
+    "canonicalizes product count %i into a bounded deterministic envelope",
+    (count, expectedCount, unresolved, ambiguous) => {
+      const input = Array.from({ length: count }, (_, index) => `P-${String(index).padStart(3, "0")}`);
+      const first = canonicalizeReadinessProductIdsV1(input);
+      const second = canonicalizeReadinessProductIdsV1(input);
+
+      expect(first).toEqual(second);
+      expect(first.productIds).toHaveLength(expectedCount);
+      expect(first.productIds.length).toBeLessThanOrEqual(MAX_READINESS_PRODUCT_IDS_V1);
+      expect(first.unresolved).toBe(unresolved);
+      expect(first.ambiguous).toBe(ambiguous);
+    },
+  );
+
+  it.each([
+    [[null, "P-001"]],
+    [[17, "P-001"]],
+    [["", "P-001"]],
+    [["   ", "P-001"]],
+    [["X".repeat(129), "P-001"]],
+    [[" P-001 "]],
+    [["P-001", "P-001"]],
+  ] as const)("blocks malformed, normalized, or duplicate product IDs at the choke point", (input) => {
+    expect(() => canonicalizeReadinessProductIdsV1(input)).not.toThrow();
+    const result = canonicalizeReadinessProductIdsV1(input);
+    expect(result.ambiguous).toBe(true);
+    expect(result.productIds.length).toBeLessThanOrEqual(MAX_READINESS_PRODUCT_IDS_V1);
+  });
+
+  it.each([null, undefined, 17, {}, "P-001"])(
+    "turns a malformed product-ID container into bounded unresolved input",
+    (input) => {
+      expect(canonicalizeReadinessProductIdsV1(input)).toEqual({
+        productIds: [],
+        unresolved: true,
+        ambiguous: true,
+      });
+    },
+  );
+
+  it("stays bounded and deterministic across broad cardinalities and malformed mixtures", () => {
+    for (const count of [...Array.from({ length: 65 }, (_, index) => index), 100, 1001]) {
+      const valid = Array.from({ length: count }, (_, index) => `P-${String(index).padStart(4, "0")}`);
+      const input: unknown[] = [...valid, null, "", " P-0000 ", "P-0000"];
+      const result = canonicalizeReadinessProductIdsV1(input);
+      expect(result).toEqual(canonicalizeReadinessProductIdsV1(input));
+      expect(result.productIds.length).toBeLessThanOrEqual(MAX_READINESS_PRODUCT_IDS_V1);
+      expect(result.ambiguous).toBe(true);
+    }
+  });
+
+  it.each([
+    ["CART_OPEN", ["PRICE", "STOCK"]],
+    ["CART_MUTATION", ["PRICE", "STOCK"]],
+    ["ORDER_PREVIEW", ["PRICE", "STOCK", "ETA"]],
+    ["PURCHASE_CONFIRMATION", ["PRICE", "STOCK", "ETA"]],
+  ] as const)("enforces complete per-product claim coverage for %s", (effect, requiredTypes) => {
+    const productIds = ["P-001", "P-002"];
+    const complete = productIds.flatMap((productId) =>
+      requiredTypes.map((type) => productClaim(type, productId))
+    );
+    expect(validateEffectClaimSemanticsV1({
+      effect,
+      productIds,
+      cartId: "cart-1",
+      cartVersion: 2,
+      claims: complete,
+    })).toEqual({ missing: false, conflict: false });
+    expect(validateEffectClaimSemanticsV1({
+      effect,
+      productIds,
+      cartId: "cart-1",
+      cartVersion: 2,
+      claims: complete.slice(0, -1),
+    }).missing).toBe(true);
+  });
+
+  it("detects conflicting protected claims through the shared semantic guard", () => {
+    expect(validateEffectClaimSemanticsV1({
+      effect: "CART_MUTATION",
+      productIds: ["P-001"],
+      cartId: "cart-1",
+      cartVersion: 2,
+      claims: [
+        productClaim("PRICE", "P-001", HASH),
+        productClaim("PRICE", "P-001", OTHER_HASH),
+        productClaim("STOCK", "P-001"),
+      ],
+    }).conflict).toBe(true);
+  });
+
   it("keeps purchase confirmation evidence deterministic, typed, and non-authorizing", () => {
     const evidence = DeterministicConfirmationEvidenceV1Schema.parse({
       schemaVersion: 1,

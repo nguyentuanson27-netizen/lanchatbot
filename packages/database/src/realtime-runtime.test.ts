@@ -871,7 +871,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     }];
     const cartId = "10000000-0000-4000-8000-000000000013";
 
-    await expect(store.commit({
+    const commitInput = {
       pageId: "page-1", customerHash: "hash",
       conversationId: "33333333-3333-4333-8333-333333333333",
       expectedStateVersion: 4,
@@ -915,7 +915,40 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           expiresAt: "2026-08-13T03:01:00.000Z", reasonCodes: [], authorization: "NONE",
         }],
       },
-    }, now)).rejects.toThrow("EFFECT_READINESS_PRODUCT_MISMATCH");
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+
+    const priceOnlyClaims = claims.filter(({ type }) => type === "PRICE");
+    const missingSemanticClaims = {
+      ...commitInput,
+      salesCyclePlan: {
+        ...commitInput.salesCyclePlan,
+        state: {
+          revision: 3,
+          cart: { value: { cartId, revision: 2, lines: [
+            { parentProductId: "SP-001" },
+          ] } },
+        },
+        events: commitInput.salesCyclePlan.events.map((event) => ({
+          ...event,
+          commandKind: "CART_READY" as const,
+        })),
+        effectClaimSets: [{ effect: "ORDER_PREVIEW" as const, claims: priceOnlyClaims }],
+        effectReadiness: commitInput.salesCyclePlan.effectReadiness.map((readiness) => ({
+          ...readiness,
+          effect: "ORDER_PREVIEW" as const,
+          productIds: ["SP-001"],
+          cartVersion: 2,
+          deterministicEvidenceHash: null,
+          claimSetHash: sha256(priceOnlyClaims),
+        })),
+      },
+    };
+    await expect(store.commit(missingSemanticClaims, now))
+      .rejects.toThrow("EFFECT_READINESS_CLAIM_MISSING");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    await expect(store.commit(commitInput, now))
+      .rejects.toThrow("EFFECT_READINESS_PRODUCT_MISMATCH");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
   });
 

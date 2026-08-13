@@ -6,6 +6,35 @@ import {
 
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 const BoundedIdSchema = z.string().trim().min(1).max(128);
+export const MAX_READINESS_PRODUCT_IDS_V1 = 50;
+
+// Single ingress choke point: arbitrary product-ID input becomes a bounded,
+// deterministic envelope; invalidity is data for BLOCKED, never an exception.
+export function canonicalizeReadinessProductIdsV1(
+  input: unknown,
+): Readonly<{
+  productIds: readonly string[];
+  unresolved: boolean;
+  ambiguous: boolean;
+}> {
+  if (!Array.isArray(input)) {
+    return { productIds: [], unresolved: true, ambiguous: true };
+  }
+  const strings = input.filter((value): value is string => typeof value === "string");
+  const normalized = strings.map((value) => value.trim());
+  const valid = normalized.filter((value) => value.length > 0 && value.length <= 128);
+  const canonical = [...new Set(valid)].sort();
+  return {
+    productIds: canonical.slice(0, MAX_READINESS_PRODUCT_IDS_V1),
+    unresolved: canonical.length === 0,
+    ambiguous:
+      strings.length !== input.length ||
+      valid.length !== normalized.length ||
+      normalized.some((value, index) => value !== strings[index]) ||
+      canonical.length !== valid.length ||
+      canonical.length > 3,
+  };
+}
 
 function uniqueValues(
   values: readonly string[],
@@ -290,6 +319,67 @@ export const ProtectedClaimV1Schema = z.discriminatedUnion("type", [
 });
 export type ProtectedClaimV1 = z.infer<typeof ProtectedClaimV1Schema>;
 
+const CART_SCOPED_PROTECTED_CLAIM_TYPES_V1 = new Set<ProtectedClaimV1["type"]>([
+  "SHIPPING_FEE", "FREESHIP", "PROMOTION_OFFER",
+]);
+
+export function requiredProtectedClaimTypesForEffectV1(
+  effect: DeterministicEffectReadinessV1["effect"],
+  protectedClaimTypes: readonly ProtectedClaimV1["type"][] = [],
+): readonly ProtectedClaimV1["type"][] {
+  if (effect === "PROTECTED_OUTBOUND") return protectedClaimTypes;
+  if (effect === "CART_OPEN" || effect === "CART_MUTATION") return ["PRICE", "STOCK"];
+  return ["PRICE", "STOCK", "ETA"];
+}
+
+function protectedClaimScopeKeyV1(claim: ProtectedClaimV1): string {
+  if (claim.scope.kind === "PRODUCT") {
+    return `PRODUCT:${claim.scope.productId}:${claim.scope.variantId ?? ""}`;
+  }
+  if (claim.scope.kind === "CART") {
+    return `CART:${claim.scope.cartId}:${claim.scope.cartVersion}`;
+  }
+  return `SHOP:${claim.scope.shopId}`;
+}
+
+// Shared semantic-validation choke point used when readiness is created and again
+// inside the DB transaction, so required coverage and conflicts cannot drift.
+export function validateEffectClaimSemanticsV1(input: Readonly<{
+  effect: DeterministicEffectReadinessV1["effect"];
+  productIds: readonly string[];
+  cartId: string | null;
+  cartVersion: number | null;
+  protectedClaimTypes?: readonly ProtectedClaimV1["type"][];
+  claims: readonly ProtectedClaimV1[];
+}>): Readonly<{ missing: boolean; conflict: boolean }> {
+  const requiredTypes = requiredProtectedClaimTypesForEffectV1(
+    input.effect,
+    input.protectedClaimTypes,
+  );
+  const missing = requiredTypes.some((type) => {
+    if (CART_SCOPED_PROTECTED_CLAIM_TYPES_V1.has(type)) {
+      return !input.claims.some((claim) => claim.type === type && claim.scope.kind === "CART" &&
+        claim.scope.cartId === input.cartId && claim.scope.cartVersion === input.cartVersion);
+    }
+    return input.productIds.some((productId) => !input.claims.some((claim) =>
+      claim.type === type && claim.scope.kind === "PRODUCT" &&
+      claim.scope.productId === productId
+    ));
+  });
+  const contentByClaimKey = new Map<string, Set<string>>();
+  for (const claim of input.claims) {
+    if (claim.type === "PRODUCT_MEDIA" || claim.type === "PROMOTION_OFFER") continue;
+    const key = `${claim.type}:${protectedClaimScopeKeyV1(claim)}`;
+    const contents = contentByClaimKey.get(key) ?? new Set<string>();
+    contents.add(claim.provenance.contentHash);
+    contentByClaimKey.set(key, contents);
+  }
+  return {
+    missing,
+    conflict: [...contentByClaimKey.values()].some((contents) => contents.size > 1),
+  };
+}
+
 export const DETERMINISTIC_READINESS_REASON_CODES_V1 = [
   "BUYING_INTENT_MISSING",
   "BUYING_INTENT_SCOPE_MISMATCH",
@@ -324,7 +414,7 @@ export const DeterministicEffectReadinessV1Schema = z.object({
   sourceMessageIdHash: Sha256Schema,
   conversationRevision: z.number().int().nonnegative(),
   salesCycleRevision: z.number().int().nonnegative().nullable(),
-  productIds: z.array(BoundedIdSchema).max(50),
+  productIds: z.array(BoundedIdSchema).max(MAX_READINESS_PRODUCT_IDS_V1),
   cartId: BoundedIdSchema.nullable(),
   cartVersion: z.number().int().nonnegative().nullable(),
   orderPreviewId: BoundedIdSchema.nullable(),

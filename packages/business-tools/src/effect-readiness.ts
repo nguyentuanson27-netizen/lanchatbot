@@ -1,5 +1,7 @@
 import {
+  canonicalizeReadinessProductIdsV1,
   DeterministicEffectReadinessV1Schema,
+  validateEffectClaimSemanticsV1,
   type CanonicalBuyingIntentV1,
   type DeterministicEffectReadinessV1,
   type ProtectedClaimV1,
@@ -26,48 +28,14 @@ export interface EvaluateDeterministicEffectReadinessV1Input {
   readonly checkedAt: Date;
 }
 
-function scopeKey(claim: ProtectedClaimV1): string {
-  return JSON.stringify(claim.scope);
-}
-
-function requiredClaimTypes(
-  input: EvaluateDeterministicEffectReadinessV1Input,
-): readonly ProtectedClaimV1["type"][] {
-  if (input.effect === "PROTECTED_OUTBOUND") return input.protectedClaimTypes ?? [];
-  if (input.effect === "CART_OPEN" || input.effect === "CART_MUTATION") {
-    return ["PRICE", "STOCK"];
-  }
-  return ["PRICE", "STOCK", "ETA"];
-}
-
-const CART_SCOPED_CLAIM_TYPES = new Set<ProtectedClaimV1["type"]>([
-  "SHIPPING_FEE",
-  "FREESHIP",
-  "PROMOTION_OFFER",
-]);
-
 export function evaluateDeterministicEffectReadinessV1(
   input: EvaluateDeterministicEffectReadinessV1Input,
 ): DeterministicEffectReadinessV1 {
   const reasons = new Set<DeterministicEffectReadinessV1["reasonCodes"][number]>();
-  const rawProductIds = input.productIds as readonly unknown[];
-  const normalizedProductIds = rawProductIds
-    .filter((value): value is string => typeof value === "string")
-    .map((value) => value.trim());
-  const validProductIds = normalizedProductIds.filter(
-    (value) => value.length > 0 && value.length <= 128,
-  );
-  const canonicalProductIds = [...new Set(validProductIds)].sort();
-  const productIds = canonicalProductIds.slice(0, 50);
-  if (productIds.length === 0) reasons.add("PRODUCT_UNRESOLVED");
-  if (
-    validProductIds.length !== rawProductIds.length ||
-    normalizedProductIds.some((value, index) => value !== rawProductIds[index]) ||
-    canonicalProductIds.length !== validProductIds.length ||
-    canonicalProductIds.length > 3
-  ) {
-    reasons.add("PRODUCT_AMBIGUOUS");
-  }
+  const canonicalProducts = canonicalizeReadinessProductIdsV1(input.productIds);
+  const productIds = canonicalProducts.productIds;
+  if (canonicalProducts.unresolved) reasons.add("PRODUCT_UNRESOLVED");
+  if (canonicalProducts.ambiguous) reasons.add("PRODUCT_AMBIGUOUS");
 
   const requiresIntent = input.effect === "CART_OPEN";
   if (requiresIntent) {
@@ -102,25 +70,15 @@ export function evaluateDeterministicEffectReadinessV1(
       reasons.add("CLAIM_SCOPE_MISMATCH");
     }
   }
-  for (const productId of productIds) {
-    for (const type of requiredClaimTypes(input).filter((value) =>
-      !CART_SCOPED_CLAIM_TYPES.has(value)
-    )) {
-      const matching = input.claims.filter((claim) =>
-        claim.type === type && claim.scope.kind === "PRODUCT" &&
-        claim.scope.productId === productId
-      );
-      if (matching.length === 0) reasons.add("CLAIM_MISSING");
-    }
-  }
-  for (const type of requiredClaimTypes(input).filter((value) =>
-    CART_SCOPED_CLAIM_TYPES.has(value)
-  )) {
-    if (!input.claims.some((claim) => claim.type === type && claim.scope.kind === "CART" &&
-      claim.scope.cartId === input.cartId && claim.scope.cartVersion === input.cartVersion)) {
-      reasons.add("CLAIM_MISSING");
-    }
-  }
+  const claimSemantics = validateEffectClaimSemanticsV1({
+    effect: input.effect,
+    productIds,
+    cartId: input.cartId,
+    cartVersion: input.cartVersion,
+    protectedClaimTypes: input.protectedClaimTypes ?? [],
+    claims: input.claims,
+  });
+  if (claimSemantics.missing) reasons.add("CLAIM_MISSING");
   if (input.effect === "PROTECTED_OUTBOUND" &&
     (input.protectedClaimTypes?.length ?? 0) === 0 &&
     !input.deterministicEvidenceHash) {
@@ -130,17 +88,7 @@ export function evaluateDeterministicEffectReadinessV1(
     !input.deterministicEvidenceHash) {
     reasons.add("DETERMINISTIC_EVIDENCE_MISSING");
   }
-  const contentByClaimKey = new Map<string, Set<string>>();
-  for (const claim of input.claims) {
-    if (claim.type === "PRODUCT_MEDIA" || claim.type === "PROMOTION_OFFER") continue;
-    const key = `${claim.type}:${scopeKey(claim)}`;
-    const values = contentByClaimKey.get(key) ?? new Set<string>();
-    values.add(claim.provenance.contentHash);
-    contentByClaimKey.set(key, values);
-  }
-  if ([...contentByClaimKey.values()].some((values) => values.size > 1)) {
-    reasons.add("CLAIM_CONFLICT");
-  }
+  if (claimSemantics.conflict) reasons.add("CLAIM_CONFLICT");
 
   const needsCart = input.effect === "CART_MUTATION" ||
     input.effect === "ORDER_PREVIEW" || input.effect === "PURCHASE_CONFIRMATION";

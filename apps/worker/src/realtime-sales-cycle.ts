@@ -876,7 +876,7 @@ export async function evaluateRealtimeSalesCycle(
     });
     effectClaimSets.set("PROTECTED_OUTBOUND", claims);
     if (!acceptReadiness(readiness)) {
-      return failedOutput(readiness.reasonCodes[0] ?? "PROTECTED_OUTBOUND_BLOCKED", plan());
+      return failedOutput(readiness.reasonCodes[0] ?? "PROTECTED_OUTBOUND_BLOCKED");
     }
     return {
       handled: true,
@@ -1447,7 +1447,7 @@ export async function evaluateRealtimeSalesCycle(
         commandId: commandId("preview"),
         preview,
       });
-      if (previewed.status !== "APPLIED" || !state.cart) return failedOutput("ORDER_PREVIEW_REJECTED", plan());
+      if (previewed.status !== "APPLIED" || !state.cart) return failedOutput("ORDER_PREVIEW_REJECTED");
       return protectedCartReply(
         (cart) => `${cartSummary(cart)}\nNgười nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}\nĐịa chỉ: ${preview.recipient.address}\nThanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}\nDự kiến nhận hàng: ${checkedEta.minDays}-${checkedEta.maxDays} ngày.\nChị xác nhận chốt đơn giúp em nhé.`,
         { selections: readySelections, includeEta: true, telemetry: {

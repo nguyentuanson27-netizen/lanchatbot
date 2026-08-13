@@ -34,7 +34,56 @@ const base = {
   buyingIntent: intent, claims, checkedAt: now,
 };
 
+function claimsFor(productIds: readonly string[]) {
+  return productIds.flatMap((productId, index) => ([
+    ProtectedClaimV1Schema.parse({
+      schemaVersion: 1,
+      claimId: `10000000-0000-5000-8000-${String(index * 2 + 1).padStart(12, "0")}`,
+      type: "PRICE",
+      scope: { kind: "PRODUCT", productId, variantId: null },
+      provenance: provenance("PRICE"),
+      value: { amountVnd: 120_000, currency: "VND" },
+      authorization: "NONE",
+    }),
+    ProtectedClaimV1Schema.parse({
+      schemaVersion: 1,
+      claimId: `20000000-0000-5000-8000-${String(index * 2 + 2).padStart(12, "0")}`,
+      type: "STOCK",
+      scope: { kind: "PRODUCT", productId, variantId: null },
+      provenance: provenance("STOCK"),
+      value: { status: "IN_STOCK", availableQuantity: 4 },
+      authorization: "NONE",
+    }),
+  ]));
+}
+
 describe("deterministic effect readiness", () => {
+  it.each([
+    [0, "BLOCKED", "PRODUCT_UNRESOLVED"],
+    [1, "READY", null],
+    [3, "READY", null],
+    [4, "BLOCKED", "PRODUCT_AMBIGUOUS"],
+    [49, "BLOCKED", "PRODUCT_AMBIGUOUS"],
+    [50, "BLOCKED", "PRODUCT_AMBIGUOUS"],
+    [51, "BLOCKED", "PRODUCT_AMBIGUOUS"],
+  ] as const)("evaluates product-count boundary %i without throwing", (count, outcome, reason) => {
+    const productIds = Array.from({ length: count }, (_, index) =>
+      `product-${String(index).padStart(3, "0")}`
+    );
+    const result = evaluateDeterministicEffectReadinessV1({
+      ...base,
+      effect: "CART_MUTATION",
+      productIds,
+      cartId: "cart-1",
+      cartVersion: 2,
+      deterministicEvidenceHash: hash("f"),
+      claims: claimsFor(productIds),
+    });
+    expect(result.outcome).toBe(outcome);
+    expect(result.productIds.length).toBeLessThanOrEqual(50);
+    if (reason !== null) expect(result.reasonCodes).toContain(reason);
+  });
+
   it("authorizes nothing while producing a fresh READY binding for a verified cart open", () => {
     const result = evaluateDeterministicEffectReadinessV1(base);
     expect(result.outcome).toBe("READY");
@@ -145,6 +194,28 @@ describe("deterministic effect readiness", () => {
       reasonCodes: expect.arrayContaining(["PRODUCT_AMBIGUOUS"]),
     });
   });
+
+  it.each([null, undefined, 17, {}, "product-1"])(
+    "turns malformed runtime product-ID containers into a controlled block",
+    (productIds) => {
+      expect(() => evaluateDeterministicEffectReadinessV1({
+        ...base,
+        effect: "CART_MUTATION",
+        productIds: productIds as unknown as readonly string[],
+        deterministicEvidenceHash: hash("f"),
+      })).not.toThrow();
+      expect(evaluateDeterministicEffectReadinessV1({
+        ...base,
+        effect: "CART_MUTATION",
+        productIds: productIds as unknown as readonly string[],
+        deterministicEvidenceHash: hash("f"),
+      })).toMatchObject({
+        outcome: "BLOCKED",
+        productIds: [],
+        reasonCodes: expect.arrayContaining(["PRODUCT_AMBIGUOUS", "PRODUCT_UNRESOLVED"]),
+      });
+    },
+  );
 
   it("allows protected outbound without buying intent but still requires product claims", () => {
     const result = evaluateDeterministicEffectReadinessV1({

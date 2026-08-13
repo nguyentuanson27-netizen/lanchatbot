@@ -5,6 +5,7 @@ import {
   DeterministicEffectReadinessV1Schema,
   CanonicalBuyingIntentV1Schema,
   ProtectedClaimV1Schema,
+  validateEffectClaimSemanticsV1,
   type DecisionObservabilityV1,
   type DeterministicEffectReadinessV1,
 } from "@lana/contracts";
@@ -446,6 +447,16 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     if (!claims || expectedClaimSetHash !== readiness.claimSetHash) {
       throw new Error("EFFECT_READINESS_CLAIM_BINDING_MISMATCH");
     }
+    const claimSemantics = validateEffectClaimSemanticsV1({
+      effect: readiness.effect,
+      productIds: readiness.productIds,
+      cartId: readiness.cartId,
+      cartVersion: readiness.cartVersion,
+      protectedClaimTypes: readiness.protectedClaimTypes,
+      claims,
+    });
+    if (claimSemantics.missing) throw new Error("EFFECT_READINESS_CLAIM_MISSING");
+    if (claimSemantics.conflict) throw new Error("EFFECT_READINESS_CLAIM_CONFLICT");
     if (claims.some((claim) =>
       Date.parse(claim.provenance.observedAt) > now.getTime() ||
       Date.parse(claim.provenance.expiresAt) <= now.getTime()
