@@ -5,3 +5,4 @@ export * from "./realtime-decision-event.js";
 export * from "./grounded-reply.js";
 export * from "./ad-acquisition.js";
 export * from "./decision-observability.js";
+export * from "./canonical-evidence-readiness.js";
