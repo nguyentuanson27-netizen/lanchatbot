@@ -135,6 +135,7 @@ import { sizeChartTarget } from "./size-chart-target.js";
 import {
   createRealtimeSalesState,
   evaluateRealtimeSalesCycle,
+  type RealtimeSalesCycleOutput,
   type RealtimeSalesCycleTelemetry,
 } from "./realtime-sales-cycle.js";
 import {
@@ -3137,6 +3138,7 @@ export class RealtimeRunner {
     let salesDesiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null = null;
     let salesHandoffReasonCode: string | null = null;
     let salesTelemetry: RealtimeSalesCycleTelemetry | null = null;
+    let salesProtectedOutbound: RealtimeSalesCycleOutput["protectedOutbound"] | null = null;
     let buyingSignalOverride = false;
     let modelCalled = false;
     let modelVersion: string | null = null;
@@ -4575,6 +4577,7 @@ export class RealtimeRunner {
       salesCyclePlan = sales.plan;
       salesHandled = sales.handled;
       salesTelemetry = sales.telemetry ?? null;
+      salesProtectedOutbound = sales.protectedOutbound ?? null;
       if (sales.handled) {
         metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled
           ? [...sales.messages]
@@ -4615,12 +4618,15 @@ export class RealtimeRunner {
       metaMessages = splitRealtimeMetaMessages(metaMessages);
     }
 
-    let protectedOutboundReadiness: DeterministicEffectReadinessV1 | null = null;
-    let protectedOutboundClaims = protectedClaimSet.claims;
-    const outboundClaimTypes = !salesHandled && metaMessages.length > 0
-      ? protectedClaimValidation.claimTypes
-      : [];
-    if (outboundClaimTypes.length > 0) {
+    let protectedOutboundReadiness: DeterministicEffectReadinessV1 | null =
+      salesProtectedOutbound?.readiness ?? null;
+    let protectedOutboundClaims = salesProtectedOutbound?.claims ?? protectedClaimSet.claims;
+    const outboundClaimTypes = metaMessages.length === 0
+      ? []
+      : salesProtectedOutbound?.claimTypes ?? (
+          !salesHandled ? protectedClaimValidation.claimTypes : []
+        );
+    if (outboundClaimTypes.length > 0 && !salesProtectedOutbound) {
       const canonicalEvidence = canonicalDecisionEvidenceForTurn();
       const outboundProductId = businessFacts?.productId ??
         resolvedProduct?.productId ?? nextState.currentProductId;

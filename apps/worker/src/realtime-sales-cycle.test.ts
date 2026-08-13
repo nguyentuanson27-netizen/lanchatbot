@@ -439,9 +439,16 @@ describe("realtime Phase 3 sales cycle", () => {
       transferToHuman: false,
       plan: {
         state: { stage: "CART_OPEN" },
-        effectReadiness: [{ effect: "CART_OPEN", outcome: "READY", authorization: "NONE" }],
+      },
+      protectedOutbound: {
+        readiness: { effect: "PROTECTED_OUTBOUND", outcome: "READY" },
+        claimTypes: expect.arrayContaining(["PRICE", "SHIPPING_FEE"]),
       },
     });
+    expect(opened.plan?.effectReadiness).toEqual(expect.arrayContaining([
+      expect.objectContaining({ effect: "CART_OPEN", outcome: "READY", authorization: "NONE" }),
+      expect.objectContaining({ effect: "PROTECTED_OUTBOUND", outcome: "READY", authorization: "NONE" }),
+    ]));
     state = opened.plan!.state;
 
     const previewed = await evaluateRealtimeSalesCycle(input(
@@ -454,9 +461,16 @@ describe("realtime Phase 3 sales cycle", () => {
       transferToHuman: false,
       plan: {
         state: { stage: "ORDER_PREVIEW" },
-        effectReadiness: [{ effect: "ORDER_PREVIEW", outcome: "READY", authorization: "NONE" }],
+      },
+      protectedOutbound: {
+        readiness: { effect: "PROTECTED_OUTBOUND", outcome: "READY" },
+        claimTypes: expect.arrayContaining(["ETA", "PRICE", "SHIPPING_FEE"]),
       },
     });
+    expect(previewed.plan?.effectReadiness).toEqual(expect.arrayContaining([
+      expect.objectContaining({ effect: "ORDER_PREVIEW", outcome: "READY", authorization: "NONE" }),
+      expect.objectContaining({ effect: "PROTECTED_OUTBOUND", outcome: "READY", authorization: "NONE" }),
+    ]));
     expect(previewed.messages[0]).toMatchObject({
       kind: "TEXT",
       text: expect.stringContaining("3-6"),
@@ -527,6 +541,13 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(state.negotiation?.customerState).toBe("HESITANT");
     expect(state.cart?.value.adjustments.some(({ kind }) => kind === "FREE_SHIPPING")).toBe(true);
     expect(state.cart?.value.discountTotalVnd).toBe(99_900);
+    expect(hesitant.protectedOutbound).toMatchObject({
+      readiness: { effect: "PROTECTED_OUTBOUND", outcome: "READY" },
+      claimTypes: expect.arrayContaining(["FREESHIP", "PRICE", "PROMOTION_OFFER"]),
+    });
+    expect(hesitant.plan?.effectReadiness).toEqual(expect.arrayContaining([
+      expect.objectContaining({ effect: "PROTECTED_OUTBOUND", outcome: "READY" }),
+    ]));
     expect(hesitant.messages[0]).toMatchObject({ text: expect.stringContaining("giảm 5% và freeship") });
 
     const retry = await evaluateRealtimeSalesCycle({
@@ -548,6 +569,10 @@ describe("realtime Phase 3 sales cycle", () => {
     state = cautious.plan!.state;
     expect(state.negotiation?.customerState).toBe("CAUTIOUS");
     expect(state.cart?.value.discountTotalVnd).toBe(119_900);
+    expect(cautious.protectedOutbound).toMatchObject({
+      readiness: { effect: "PROTECTED_OUTBOUND", outcome: "READY" },
+      claimTypes: expect.arrayContaining(["FREESHIP", "PRICE", "PROMOTION_OFFER"]),
+    });
     expect(cautious.messages[0]).toMatchObject({ text: expect.stringContaining("giảm thêm 20.000đ") });
     expect(cautious.messages[0]).not.toMatchObject({ text: expect.stringContaining("20k") });
   });

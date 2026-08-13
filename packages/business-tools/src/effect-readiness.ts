@@ -40,6 +40,12 @@ function requiredClaimTypes(
   return ["PRICE", "STOCK", "ETA"];
 }
 
+const CART_SCOPED_CLAIM_TYPES = new Set<ProtectedClaimV1["type"]>([
+  "SHIPPING_FEE",
+  "FREESHIP",
+  "PROMOTION_OFFER",
+]);
+
 export function evaluateDeterministicEffectReadinessV1(
   input: EvaluateDeterministicEffectReadinessV1Input,
 ): DeterministicEffectReadinessV1 {
@@ -78,14 +84,28 @@ export function evaluateDeterministicEffectReadinessV1(
     if (claim.scope.kind === "PRODUCT" && !productIds.includes(claim.scope.productId)) {
       reasons.add("CLAIM_SCOPE_MISMATCH");
     }
+    if (claim.scope.kind === "CART" &&
+      (claim.scope.cartId !== input.cartId || claim.scope.cartVersion !== input.cartVersion)) {
+      reasons.add("CLAIM_SCOPE_MISMATCH");
+    }
   }
   for (const productId of productIds) {
-    for (const type of requiredClaimTypes(input)) {
+    for (const type of requiredClaimTypes(input).filter((value) =>
+      !CART_SCOPED_CLAIM_TYPES.has(value)
+    )) {
       const matching = input.claims.filter((claim) =>
         claim.type === type && claim.scope.kind === "PRODUCT" &&
         claim.scope.productId === productId
       );
       if (matching.length === 0) reasons.add("CLAIM_MISSING");
+    }
+  }
+  for (const type of requiredClaimTypes(input).filter((value) =>
+    CART_SCOPED_CLAIM_TYPES.has(value)
+  )) {
+    if (!input.claims.some((claim) => claim.type === type && claim.scope.kind === "CART" &&
+      claim.scope.cartId === input.cartId && claim.scope.cartVersion === input.cartVersion)) {
+      reasons.add("CLAIM_MISSING");
     }
   }
   if (input.effect === "PROTECTED_OUTBOUND" &&

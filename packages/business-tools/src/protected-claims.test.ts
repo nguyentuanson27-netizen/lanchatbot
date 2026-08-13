@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildProtectedCartPolicyClaimsV1,
   buildProtectedMediaClaimsV1,
   buildProtectedClaimsFromCartSelectionsV1,
   buildProtectedClaimsFromVerifiedFactsV1,
@@ -9,6 +10,35 @@ import {
 const HASH = "a".repeat(64);
 
 describe("DF05 typed protected-claim provenance", () => {
+  it("adapts canonical cart policy decisions into shipping and promotion claims", () => {
+    const claims = buildProtectedCartPolicyClaimsV1({
+      cart: {
+        cartId: "10000000-0000-4000-8000-000000000001",
+        revision: 2,
+        adjustments: [{
+          adjustmentId: "10000000-0000-4000-8000-000000000004",
+          kind: "FIXED_DISCOUNT",
+          amountVnd: 20_000,
+          percentageBps: null,
+          policyAuthorization: {
+            policyBundleId: "policy-1",
+            policyBundleVersion: "v1",
+            ruleId: "FINAL_DISCOUNT",
+            decisionId: "10000000-0000-4000-8000-000000000005",
+            authorizedAt: "2026-08-13T05:00:00.000Z",
+          },
+        }],
+        shippingFeeVnd: 30_000,
+        updatedAt: "2026-08-13T05:00:00.000Z",
+      },
+      policySourceVersion: "policy-1:v1",
+      policyEvidenceRef: "policy:sha256:safe-ref",
+      expiresAt: "2026-08-13T05:05:00.000Z",
+    });
+    expect(claims.map(({ type }) => type)).toEqual(["PROMOTION_OFFER", "SHIPPING_FEE"]);
+    expect(claims.every(({ scope }) => scope.kind === "CART")).toBe(true);
+  });
+
   it("hashes verified media identity without retaining its URL or credentials", () => {
     const result = buildProtectedMediaClaimsV1({
       productId: "SP-001",

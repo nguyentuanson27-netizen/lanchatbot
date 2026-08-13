@@ -675,6 +675,65 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     }, now)).rejects.toThrow("EFFECT_READINESS_STALE");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
   });
+
+  it("requires protected outbound readiness for a versioned negotiation event", async () => {
+    const calls: string[] = [];
+    const client = {
+      async query(sql: string) {
+        calls.push(sql);
+        if (sql.includes("SELECT routing_owner")) {
+          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }] };
+        }
+        if (sql.includes("SELECT conversation_owner")) {
+          return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+        }
+        if (sql.includes("SELECT state_revision")) {
+          return { rowCount: 1, rows: [{ state_revision: "2" }] };
+        }
+        return { rowCount: 1, rows: [] };
+      },
+      release() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = { async connect() { return client; } };
+    const now = new Date("2026-08-13T03:00:00.000Z");
+
+    await expect(store.commit({
+      pageId: "page-1", customerHash: "hash",
+      conversationId: "33333333-3333-4333-8333-333333333333",
+      expectedStateVersion: 4,
+      state: { revision: 5, routingOwner: "APP", conversationOwner: "BOT" },
+      salesCyclePlan: {
+        expectedRevision: 2,
+        readinessContractVersion: "DF06_EFFECT_READINESS_V1",
+        sourceMessageIdHash: "a".repeat(64),
+        canonicalBuyingIntent: {
+          schemaVersion: 1, authorityVersion: "CANONICAL_BUYING_INTENT_V1",
+          decision: "NONE", requestedAction: "NONE", quantity: null,
+          productId: null, contributors: [],
+          sourceMessageIdHash: "a".repeat(64), evidenceHash: null,
+          reasonCodes: [],
+          evaluatedAt: "2026-08-13T02:58:00.000Z", authorization: "NONE",
+        },
+        state: { revision: 3 },
+        cartExpiresAt: new Date("2026-08-14T03:00:00.000Z"),
+        expiresAt: new Date("2026-08-14T03:00:00.000Z"),
+        events: [{
+          commandId: "sales:event-2:negotiation", commandKind: "NEGOTIATION_EVENT",
+          outcome: "APPLIED", stateRevisionBefore: 2, stateRevisionAfter: 3,
+          stageBefore: "CART_OPEN", stageAfter: "CART_OPEN",
+          cartId: "10000000-0000-4000-8000-000000000001", cartVersion: 2,
+          reasonCode: null, occurredAt: now,
+        }],
+        effectReadiness: [],
+      },
+    }, now)).rejects.toThrow("EFFECT_READINESS_REQUIRED");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+  });
+
   it("records a terminal initial-reply failure in the same transaction", async () => {
     const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
     const client = {

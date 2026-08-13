@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import {
+  buildProtectedCartPolicyClaimsV1,
   buildProtectedClaimsFromCartSelectionsV1,
   evaluateDeterministicEffectReadinessV1,
   foldVietnameseForRecall,
@@ -12,6 +13,7 @@ import {
   type CartV1,
   type DeterministicConfirmationEvidenceV1,
   type DeterministicEffectReadinessV1,
+  type ProtectedClaimV1,
   type BankTransferPolicyV1,
   type CheckoutRevalidationV1,
   type RevalidatedFactV1,
@@ -92,6 +94,11 @@ export interface RealtimeSalesCycleOutput {
   readonly transferToHuman: boolean;
   readonly desiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null;
   readonly reasonCode: string | null;
+  readonly protectedOutbound?: Readonly<{
+    claims: readonly ProtectedClaimV1[];
+    claimTypes: readonly ProtectedClaimV1["type"][];
+    readiness: DeterministicEffectReadinessV1;
+  }>;
   readonly telemetry?: RealtimeSalesCycleTelemetry;
 }
 
@@ -766,6 +773,91 @@ export async function evaluateRealtimeSalesCycle(
     };
   };
 
+  const protectedCartReply = async (
+    text: string,
+    options: Readonly<{
+      includeEta?: boolean;
+      telemetry?: RealtimeSalesCycleTelemetry;
+    }> = {},
+  ): Promise<RealtimeSalesCycleOutput> => {
+    if (!state.cart) return failedOutput("PROTECTED_OUTBOUND_CART_MISSING", plan());
+    const selections = await currentSelections(
+      input,
+      state.cart.value,
+      state.checkoutDraft?.address ?? "",
+    );
+    const readySelections = selections.filter((value): value is Extract<CartSelectionResult, { status: "READY" }> =>
+      value.status === "READY"
+    );
+    if (readySelections.length !== state.cart.value.lines.length) {
+      const unavailable = selections.find(({ status }) => status !== "READY");
+      return failedOutput(
+        unavailable && "reasonCode" in unavailable
+          ? unavailable.reasonCode
+          : "PROTECTED_OUTBOUND_FACTS_UNAVAILABLE",
+        plan(),
+      );
+    }
+    const cartClaims = buildProtectedCartPolicyClaimsV1({
+      cart: state.cart.value,
+      policySourceVersion: `${bundle.policy.policyBundleId}:${bundle.policy.policyVersion}`,
+      policyEvidenceRef: `policy:${policyReference.contentHash}`,
+      expiresAt: state.cart.expiresAt,
+    });
+    const allClaims = [
+      ...buildProtectedClaimsFromCartSelectionsV1(readySelections.map((selection) => ({
+        productId: selection.line.parentProductId,
+        variantId: selection.line.offerId,
+        priceVnd: selection.line.posUnitPriceVnd!,
+        priceVersion: selection.versions.price,
+        inventoryVersion: selection.versions.inventory,
+        etaVersion: selection.versions.eta,
+        eta: selection.eta,
+        observedAt: selection.sourceObservedAt,
+        expiresAt: selection.sourceExpiresAt,
+      }))),
+      ...cartClaims,
+    ];
+    const claimTypes = [...new Set<ProtectedClaimV1["type"]>([
+      "PRICE",
+      ...cartClaims.map(({ type }) => type),
+      ...(options.includeEta ? ["ETA" as const] : []),
+    ])].sort();
+    const claimTypeSet = new Set(claimTypes);
+    const claims = allClaims.filter(({ type }) => claimTypeSet.has(type));
+    const readiness = evaluateDeterministicEffectReadinessV1({
+      effect: "PROTECTED_OUTBOUND",
+      pageId: input.pageId,
+      conversationId: input.conversationId,
+      sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+      conversationRevision: input.conversationRevision,
+      salesCycleRevision: initial.revision,
+      productIds: state.cart.value.lines.map(({ parentProductId }) => parentProductId),
+      cartId: state.cart.value.cartId,
+      cartVersion: state.cart.value.revision,
+      orderPreviewId: state.preview?.previewId ?? null,
+      orderPreviewHash: state.preview?.previewHash.replace(/^sha256:/u, "") ?? null,
+      buyingIntent: null,
+      claims,
+      protectedClaimTypes: claimTypes,
+      checkedAt: input.now,
+    });
+    effectClaimSets.set("PROTECTED_OUTBOUND", claims);
+    if (!acceptReadiness(readiness)) {
+      return failedOutput(readiness.reasonCodes[0] ?? "PROTECTED_OUTBOUND_BLOCKED", plan());
+    }
+    return {
+      handled: true,
+      messages: [{ kind: "TEXT", text }],
+      plan: plan(),
+      transferToHuman: false,
+      desiredTag: null,
+      reasonCode: null,
+      protectedOutbound: { claims, claimTypes, readiness },
+      ...(options.telemetry ? { telemetry: options.telemetry } : {}),
+    };
+  };
+
   const requestCheckoutClarification = (
     missing: readonly CheckoutFieldKey[],
     capturedFields: readonly CheckoutFieldKey[] = [],
@@ -1101,14 +1193,7 @@ export async function evaluateRealtimeSalesCycle(
         mutationReasonCode: "LINE_REMOVED",
       });
       if (result.status !== "APPLIED" || !state.cart) return failedOutput("CART_REMOVE_FAILED", plan());
-      return {
-        handled: true,
-        messages: [{ kind: "TEXT", text: `${cartSummary(state.cart.value)}\nEm đã tính lại ưu đãi theo giỏ mới ạ.` }],
-        plan: plan(),
-        transferToHuman: false,
-        desiredTag: null,
-        reasonCode: null,
-      };
+      return protectedCartReply(`${cartSummary(state.cart.value)}\nEm đã tính lại ưu đãi theo giỏ mới ạ.`);
     }
 
     if (priceObjection(input.text)) {
@@ -1139,14 +1224,7 @@ export async function evaluateRealtimeSalesCycle(
         return failedOutput("NEGOTIATION_FAILED", plan());
       }
       const intro = negotiationOfferText(state.cart.value, state.negotiation.customerState);
-      return {
-        handled: true,
-        messages: [{ kind: "TEXT", text: `${intro}\n${cartSummary(state.cart.value)}` }],
-        plan: plan(),
-        transferToHuman: false,
-        desiredTag: null,
-        reasonCode: null,
-      };
+      return protectedCartReply(`${intro}\n${cartSummary(state.cart.value)}`);
     }
 
     const details = checkoutDetails(input.text, input.salesSignals);
@@ -1231,23 +1309,15 @@ export async function evaluateRealtimeSalesCycle(
         preview,
       });
       if (previewed.status !== "APPLIED" || !state.cart) return failedOutput("ORDER_PREVIEW_REJECTED", plan());
-      return {
-        handled: true,
-        messages: [{
-          kind: "TEXT",
-          text: `${cartSummary(state.cart.value)}\nNgười nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}\nĐịa chỉ: ${preview.recipient.address}\nThanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}\nDự kiến nhận hàng: ${checked.eta.minDays}-${checked.eta.maxDays} ngày.\nChị xác nhận chốt đơn giúp em nhé.`,
-        }],
-        plan: plan(),
-        transferToHuman: false,
-        desiredTag: null,
-        reasonCode: null,
-        telemetry: {
+      return protectedCartReply(
+        `${cartSummary(state.cart.value)}\nNgười nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}\nĐịa chỉ: ${preview.recipient.address}\nThanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}\nDự kiến nhận hàng: ${checked.eta.minDays}-${checked.eta.maxDays} ngày.\nChị xác nhận chốt đơn giúp em nhé.`,
+        { includeEta: true, telemetry: {
           checkoutCapturedFields: capturedFields,
           checkoutMissingFields: [],
           checkoutCompleted: true,
           orderPreviewCreated: true,
-        },
-      };
+        } },
+      );
     }
 
     if (
@@ -1313,14 +1383,7 @@ export async function evaluateRealtimeSalesCycle(
       if (result.status !== "APPLIED" || !state.cart) {
         return failedOutput("CART_QUANTITY_CHANGE_FAILED", plan());
       }
-      return {
-        handled: true,
-        messages: [{ kind: "TEXT", text: checkoutTemplate(state.cart.value) }],
-        plan: plan(),
-        transferToHuman: false,
-        desiredTag: null,
-        reasonCode: null,
-      };
+      return protectedCartReply(checkoutTemplate(state.cart.value));
     }
 
     if (
@@ -1370,14 +1433,7 @@ export async function evaluateRealtimeSalesCycle(
         mutationReasonCode: "LINE_ADDED",
       });
       if (result.status !== "APPLIED" || !state.cart) return failedOutput("CART_ADD_FAILED", plan());
-      return {
-        handled: true,
-        messages: [{ kind: "TEXT", text: checkoutTemplate(state.cart.value) }],
-        plan: plan(),
-        transferToHuman: false,
-        desiredTag: null,
-        reasonCode: null,
-      };
+      return protectedCartReply(checkoutTemplate(state.cart.value));
     }
 
     if (state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING") {
@@ -1468,14 +1524,7 @@ export async function evaluateRealtimeSalesCycle(
       expiresAt: new Date(input.now.getTime() + CART_TTL_MS).toISOString(),
     });
     if (opened.status !== "APPLIED" || !state.cart) return failedOutput("CART_OPEN_FAILED", plan());
-    return {
-      handled: true,
-      messages: [{ kind: "TEXT", text: checkoutTemplate(state.cart.value) }],
-      plan: plan(),
-      transferToHuman: false,
-      desiredTag: null,
-      reasonCode: null,
-    };
+    return protectedCartReply(checkoutTemplate(state.cart.value));
   }
 
   if (

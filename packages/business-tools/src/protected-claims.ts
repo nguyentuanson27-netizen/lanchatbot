@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import {
   ProtectedClaimV1Schema,
   type BusinessFactEnvelopeV1,
+  type CartV1,
   type ProtectedClaimV1,
   type SizeRecommendationProtectedClaimV1,
 } from "@lana/contracts";
@@ -34,6 +35,16 @@ export interface VerifiedCartSelectionClaimSourceV1 {
   readonly expiresAt: string;
 }
 
+export interface BuildProtectedCartPolicyClaimsV1Input {
+  readonly cart: Pick<
+    CartV1,
+    "cartId" | "revision" | "adjustments" | "shippingFeeVnd" | "updatedAt"
+  >;
+  readonly policySourceVersion: string;
+  readonly policyEvidenceRef: string;
+  readonly expiresAt: string;
+}
+
 function canonicalJson(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
@@ -59,6 +70,66 @@ export function hashProtectedClaimSetV1(
   return sha256([...claims]
     .sort((left, right) => left.claimId.localeCompare(right.claimId))
     .map((claim) => claim));
+}
+
+export function buildProtectedCartPolicyClaimsV1(
+  input: BuildProtectedCartPolicyClaimsV1Input,
+): readonly ProtectedClaimV1[] {
+  const { cart } = input;
+  const scope = {
+    kind: "CART" as const,
+    cartId: cart.cartId,
+    cartVersion: cart.revision,
+  };
+  const provenance = (field: string, value: unknown) => ({
+    authority: "CART_POLICY_V1" as const,
+    sourceVersion: input.policySourceVersion,
+    evidenceRef: `${input.policyEvidenceRef}:${field}:${sha256(value)}`,
+    contentHash: sha256(value),
+    observedAt: cart.updatedAt,
+    expiresAt: input.expiresAt,
+  });
+  const claims: ProtectedClaimV1[] = [];
+  const freeShipping = cart.adjustments.some(({ kind }) => kind === "FREE_SHIPPING") ||
+    cart.shippingFeeVnd === 0;
+  if (freeShipping) {
+    claims.push(ProtectedClaimV1Schema.parse({
+      schemaVersion: 1,
+      claimId: deterministicUuid([cart.cartId, cart.revision, "FREESHIP"]),
+      type: "FREESHIP",
+      scope,
+      provenance: provenance("freeship", true),
+      value: { eligible: true },
+      authorization: "NONE",
+    }));
+  } else if (cart.shippingFeeVnd !== null) {
+    claims.push(ProtectedClaimV1Schema.parse({
+      schemaVersion: 1,
+      claimId: deterministicUuid([cart.cartId, cart.revision, "SHIPPING_FEE", cart.shippingFeeVnd]),
+      type: "SHIPPING_FEE",
+      scope,
+      provenance: provenance("shippingFeeVnd", cart.shippingFeeVnd),
+      value: { amountVnd: cart.shippingFeeVnd, currency: "VND" },
+      authorization: "NONE",
+    }));
+  }
+  for (const adjustment of cart.adjustments) {
+    if (adjustment.kind === "FREE_SHIPPING") continue;
+    claims.push(ProtectedClaimV1Schema.parse({
+      schemaVersion: 1,
+      claimId: deterministicUuid([cart.cartId, cart.revision, "PROMOTION_OFFER", adjustment.adjustmentId]),
+      type: "PROMOTION_OFFER",
+      scope,
+      provenance: provenance(`adjustment:${adjustment.adjustmentId}`, adjustment),
+      value: {
+        adjustmentId: adjustment.adjustmentId,
+        amountVnd: adjustment.amountVnd,
+      },
+      authorization: "NONE",
+    }));
+  }
+  return claims.sort((left, right) => left.type.localeCompare(right.type) ||
+    left.claimId.localeCompare(right.claimId));
 }
 
 export function buildProtectedClaimsFromVerifiedFactsV1(

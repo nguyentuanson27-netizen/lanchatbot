@@ -104,6 +104,35 @@ describe("deterministic effect readiness", () => {
     expect(result.reasonCodes).toContain("CLAIM_MISSING");
   });
 
+  it("accepts cart-scoped shipping claims once instead of requiring them per product", () => {
+    const shipping = ProtectedClaimV1Schema.parse({
+      schemaVersion: 1,
+      claimId: "55555555-5555-5555-8555-555555555555",
+      type: "SHIPPING_FEE",
+      scope: { kind: "CART", cartId: "10000000-0000-4000-8000-000000000001", cartVersion: 2 },
+      provenance: {
+        authority: "CART_POLICY_V1",
+        sourceVersion: "policy:v1",
+        evidenceRef: "policy:safe-ref",
+        contentHash: hash("f"),
+        observedAt: "2026-08-13T02:59:00.000Z",
+        expiresAt: "2026-08-13T03:05:00.000Z",
+      },
+      value: { amountVnd: 30_000, currency: "VND" },
+      authorization: "NONE",
+    });
+    const result = evaluateDeterministicEffectReadinessV1({
+      ...base,
+      effect: "PROTECTED_OUTBOUND",
+      buyingIntent: null,
+      cartId: "10000000-0000-4000-8000-000000000001",
+      cartVersion: 2,
+      claims: [claims[0]!, shipping],
+      protectedClaimTypes: ["PRICE", "SHIPPING_FEE"],
+    });
+    expect(result.outcome).toBe("READY");
+  });
+
   it("requires cart and preview bindings for purchase confirmation", () => {
     const result = evaluateDeterministicEffectReadinessV1({
       ...base, effect: "PURCHASE_CONFIRMATION", buyingIntent: null,
