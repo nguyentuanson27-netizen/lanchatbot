@@ -36,14 +36,19 @@ A direct authority switch is allowed only after the owning future Gate has deter
 
 Because control-plane propagation is bounded rather than instantaneous, a direct switch must occur inside a verified page-scoped **quiescent cutover boundary**. The cutover protocol must:
 
-1. hold admission of new eligible protected work for the target page;
-2. verify no protected command, cart/order transition, or other authority-sensitive operation is in flight;
-3. drain or hold eligible queued events that could cross the authority boundary;
+1. hold admission of all new authority-dependent eligible work for the target page;
+2. verify no authority-dependent message, read, classification, context/phase/CTA/reconciliation decision, command, cart/order transition, or side-effect plan is in flight;
+3. drain or hold all eligible queued events that can observe or consume the changing authority;
 4. CAS-activate the new authority revision;
-5. keep eligible protected work held through the propagation interval until every relevant authority consumer reads back the exact new revision/hash/source;
+5. keep all authority-dependent work held through the propagation interval until every relevant authority consumer reads back the exact new revision/hash/source;
 6. release held work only after that exact readback succeeds.
 
 If quiescence cannot be proven, a relevant consumer does not converge to the exact revision within the reviewed bound, or readback is ambiguous, activation must abort/fail closed and remain or return to complete `LEGACY` authority.
+
+Authority-dependent work includes non-side-effecting inputs whose classification, state read,
+phase, context, strategy, CTA, reconciliation, or subsequent plan can differ by authority.
+Only a finite class proven by reviewed contract tests to be independent of both authorities
+may bypass the fence; merely being outside the protected-side-effect set is insufficient.
 
 This quiescent boundary is an atomicity/correctness requirement for direct cutover. It is not a traffic canary, SHADOW stage, or percentage rollout. Episode/cart pinning is not a default PREPROD invariant; it may be introduced later only if the implementation cannot prove a safe quiescent boundary for a specific authority-sensitive lifecycle.
 

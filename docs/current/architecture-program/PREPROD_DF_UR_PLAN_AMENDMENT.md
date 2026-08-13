@@ -1,9 +1,9 @@
 # PREPROD DF/UR Plan Amendment
 
-**Status:** Proposed architecture-program amendment; review required before merge
+**Status:** Accepted and authoritative when present on merged `main`; proposed on unmerged feature branches
 **Mode:** `ENGINEERING_PREPROD`
 **Scope:** Deferred DF/UR architecture execution, evidence, Gate, and authority-transition strategy
-**Non-goals:** Gate BF disposition, runtime mutation, deployment authorization, production-readiness claim, destructive cleanup
+**Non-goals:** changing the recorded Gate BF owner-waiver disposition or `POST_BF_V1`, runtime mutation, deployment authorization, production-readiness claim, destructive cleanup
 
 ## 1. Decision
 
@@ -19,7 +19,7 @@ In particular:
 - require a verified quiescent boundary around every direct authority cutover so bounded control-plane propagation cannot create unsafe mixed authority;
 - keep side-effect-free legacy/new comparators as verification tooling where they provide semantic evidence;
 - replace live sampled Context V2/`>=100` organic pair/statistical gates with a locked reproducible offline/replay corpus and pre-declared objective acceptance rules;
-- bind offline generative PASS to an immutable exact candidate manifest, then bind the later activation release to the same manifest hash;
+- bind offline generative PASS to an immutable exact candidate manifest/content fingerprint, then re-derive and compare that identity from the later activation release;
 - remove traffic-percentage canary/default pinning/long-soak requirements from PREPROD hard Gates;
 - make production-grade resumable/batched migration orchestration conditional on measured data volume/lock/runtime risk;
 - defer UR08-UR10 retirement/destructive cleanup until later stability/hardening evidence intentionally closes the legacy rollback path.
@@ -46,11 +46,11 @@ Removing runtime SHADOW does not make a control-plane mode switch instantaneous.
 
 PREPROD therefore uses a **quiescent cutover boundary**, not traffic canary/pinning ceremony:
 
-1. hold new eligible protected work for the target page;
-2. prove no protected command, cart/order transition, or other authority-sensitive operation is in flight;
-3. drain or hold eligible queued events;
+1. hold all new authority-dependent eligible work for the target page;
+2. prove no authority-dependent message, read, classification, context/phase/CTA/reconciliation decision, command, cart/order transition, or side-effect plan is in flight;
+3. drain or hold every eligible queued event that can observe or consume the changing authority;
 4. CAS the new authority revision;
-5. keep protected work held while the revision propagates;
+5. keep all authority-dependent work held while the revision propagates;
 6. release only after every relevant authority consumer reads back the exact revision/hash/source.
 
 If that cannot be proven, activation aborts/fails closed to complete `LEGACY` authority. Narrow episode/cart pinning is only a fallback design option if a future implementation cannot safely quiesce a specific lifecycle; it is not the default PREPROD topology.
@@ -59,7 +59,7 @@ If that cannot be proven, activation aborts/fails closed to complete `LEGACY` au
 
 After removing live Context-V2 shadow, DF-P6 becomes the primary generative evidence before authority cutover. A result labeled merely “Context V2 PASS” is insufficient if model, generation config, prompt, context/evidence schema, or source changes later.
 
-Gate E therefore freezes a canonical `ContextV2CandidateManifest` containing the exact evaluated candidate identity. Gate F may use a later immutable release revision for authority plumbing, but that release must carry the same candidate-manifest hash. Any material candidate identity change invalidates the prior DF-P6 evidence and requires rerun.
+Gate E therefore freezes a canonical `ContextV2CandidateManifest` containing the exact evaluated candidate identity plus a canonical content fingerprint of candidate-affecting source/build artifacts. Gate F may use a later immutable release revision for authority plumbing, but it must re-derive the candidate projection and fingerprint from that final artifact and prove field-by-field equality. Copying the old manifest hash into a later release is insufficient. Any mismatch or non-reproducible field invalidates the prior DF-P6 evidence and requires rerun on the final candidate.
 
 This preserves provenance without forcing the final DF-P7 release SHA to exist before Gate E, which would violate the dependency order.
 
@@ -151,7 +151,9 @@ Before the first scored run, freeze:
   - verified-evidence envelope/schema version;
   - relevant policy/config versions affecting candidate generation or interpretation;
   - exact Git source revision used for the scored run;
-  - corpus/rubric version and content hash.
+  - corpus/rubric version and content hash;
+  - canonical content fingerprint for the reviewed set of candidate-affecting source and
+    built artifacts, including model-input construction and output interpretation.
 
 Record the canonical manifest hash with the scored result.
 
@@ -176,13 +178,14 @@ Before activation prove:
 - missing commerce state with committed intent fails closed;
 - Context V2, derived phase, final reconciliation, and legacy regex/`salesStage` authority demotion switch coherently;
 - no COMMERCE decision consumes legacy `salesStage` as authority;
-- the immutable activation release carries the exact Gate-E `ContextV2CandidateManifest` hash;
-- any material candidate identity change since Gate E has triggered a DF-P6 rerun;
+- the immutable activation release carries the exact Gate-E `ContextV2CandidateManifest` hash and re-derives its candidate projection/content fingerprint from the final artifact;
+- the re-derived fields match Gate E exactly; copying the prior hash is not accepted as evidence;
+- any mismatch, missing derivation input, or material candidate identity change since Gate E has triggered a DF-P6 rerun on the final candidate;
 - the quiescent cutover protocol is verified;
 - exact control-plane readback works;
 - complete rollback to `LEGACY` works.
 
-Then, after explicit owner authorization, activate `COMMERCE` only on the `PREPROD_TEST_PAGE` inside the quiescent boundary. Keep protected work held until every relevant authority consumer reads back the exact new revision/hash/source, then release held work and run the controlled critical human journeys.
+Then, after explicit owner authorization, activate `COMMERCE` only on the `PREPROD_TEST_PAGE` inside the quiescent boundary. Keep all authority-dependent work held until every relevant authority consumer reads back the exact new revision/hash/source, then release held work and run the controlled critical human journeys.
 
 ## 6. Gate E-PREPROD
 
@@ -198,7 +201,7 @@ Required:
 - Context V2 and intended consumers implemented;
 - BF incident/counterexample replay passes;
 - DF-P6 corpus/rubric frozen before scoring;
-- exact `ContextV2CandidateManifest` and canonical hash frozen before scoring;
+- exact `ContextV2CandidateManifest`, candidate content fingerprint, and canonical hash frozen before scoring;
 - V2 passes every frozen required assertion using that exact candidate manifest;
 - evaluation paths are side-effect-free and cost bounded.
 
@@ -213,8 +216,8 @@ Required:
 - no COMMERCE decision consumes legacy `salesStage` as authority;
 - missing commerce state with committed intent fails closed;
 - transition matrix and BF/DF replay pass;
-- immutable release is bound to the exact Gate-E candidate-manifest hash;
-- direct authority cutover satisfies the page-scoped quiescent boundary and all relevant consumers converge to the exact authority revision before protected work resumes;
+- immutable release re-derives and matches the exact Gate-E candidate projection/content fingerprint; a carried hash alone is insufficient;
+- direct authority cutover satisfies the page-scoped quiescent boundary and all relevant consumers converge to the exact authority revision before authority-dependent work resumes;
 - controlled PREPROD critical human journeys pass;
 - exact runtime identity/control-plane readback is verified for the deployed candidate;
 - complete `COMMERCE -> LEGACY` rollback is verified.
@@ -239,7 +242,7 @@ Add resumable/multi-batch/rate-throttled orchestration only if measured dataset 
 
 The comparator may read legacy and V2 representations side-effect-free, but it is verification tooling rather than a `SHADOW` runtime read authority.
 
-After comparator/readback evidence passes, switch `LEGACY -> V2` only with explicit approval and the same page-scoped quiescent cutover protocol. Never merge partial V2/legacy fields. Keep eligible state-dependent work held through propagation until all relevant read-authority consumers read back the exact V2 revision/hash/source. Abort/fail closed to complete `LEGACY` if quiescence or convergence cannot be proven.
+After comparator/readback evidence passes, switch `LEGACY -> V2` only with explicit approval and the same page-scoped quiescent cutover protocol. Never merge partial V2/legacy fields. Keep every authority-dependent input/read/decision held through propagation until all relevant read-authority consumers read back the exact V2 revision/hash/source. Abort/fail closed to complete `LEGACY` if quiescence or convergence cannot be proven.
 
 Verify complete rollback to `LEGACY` and keep that rollback path available after Gate U.
 
@@ -286,10 +289,10 @@ These mechanisms are deferred because they are not currently meaningful, not bec
 ## 11. Resulting roadmap
 
 ```text
-Gate BF + immutable POST_BF_V1
+GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS + immutable POST_BF_V1 (recorded)
   -> DF-P1..DF-P6
   -> Gate E-PREPROD / freeze exact candidate manifest
-  -> DF-P7 / release bound to candidate manifest / quiescent LEGACY -> COMMERCE
+  -> DF-P7 / re-derive candidate fingerprint / quiescent LEGACY -> COMMERCE
   -> controlled critical human E2E
   -> Gate F-PREPROD
   -> UR-P1..UR-P3 / quiescent LEGACY -> V2
@@ -303,10 +306,10 @@ Gate BF + immutable POST_BF_V1
 
 ## 12. Source-of-truth and supersession
 
-`FUTURE_BACKLOG.md` and this amendment own post-Gate-BF DF/UR execution on a branch containing this decision. Future-facing references in `ACTIVE_IMPLEMENTATION_PLAN.md` to phase/barrier shadow, sampled second live model calls, paired live evaluation, shadow/canary evidence, or three-state authority topology are superseded by this amendment after Gate BF. The active BF wave requirements in that file remain unchanged unless separately reconciled.
+`FUTURE_BACKLOG.md` and this amendment own post-Gate-BF DF/UR execution when this decision is merged into `main`. Future-facing references in `ACTIVE_IMPLEMENTATION_PLAN.md` to phase/barrier shadow, sampled second live model calls, paired live evaluation, shadow/canary evidence, or three-state authority topology are superseded by this amendment after the recorded Gate BF owner-waiver decision. The accepted BF residuals remain unchanged unless separately reconciled.
 
 Archives, historical manifests, baseline evidence, and past runtime records remain immutable and must not be rewritten to match this later planning decision.
 
 ## 13. Change boundary
 
-This amendment does not pass Gate BF, create `POST_BF_V1`, activate DF, deploy anything, mutate runtime/database/policy/page routing, authorize production hardening, or authorize destructive cleanup.
+This amendment does not alter the already recorded `GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS` disposition or `POST_BF_V1`, deploy anything, mutate runtime/database/policy/page routing, authorize production hardening, or authorize destructive cleanup. It activates only the documented DF-A source-work plan when merged.

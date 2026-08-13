@@ -18,13 +18,18 @@
 10. directly relevant `contracts/`
 11. fresh runtime/release evidence when live state matters
 
-Do not load `FUTURE_BACKLOG.md` during BF work unless the change explicitly affects a future contract. After Gate BF + immutable `POST_BF_V1`, future DF/UR planning becomes active.
+Do not load `FUTURE_BACKLOG.md` or `archive/` during a BF task unless the change explicitly touches a later contract.
+
+Only after a recorded **GATE_BF_PASSED** or **GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS**
+verdict does FUTURE_BACKLOG.md become active and completed BF detail move to
+archive/completed/. A source merge, deployment, or evidence PR is not a substitute for
+that explicit verdict.
 
 ## Context routing
 
 | Task | Additional files |
 |---|---|
-| Process/Gate/PR/release/PREPROD evidence | `OPERATING_MODE.md` |
+| Process/Gate/PR/release/PREPROD evidence or CI-unavailable fallback | `OPERATING_MODE.md` |
 | BF implementation/review | matching BF docs + relevant contracts |
 | Policy-gated behavior | `contracts/BEHAVIOR_CONTROL_PLANE.md` |
 | Release/deploy/evidence | `contracts/RELEASE_INTEGRITY.md` |
@@ -42,13 +47,25 @@ Do not load `FUTURE_BACKLOG.md` during BF work unless the change explicitly affe
 - `BF_ISSUE_SPECS.md`: BF acceptance criteria.
 - `ACTIVE_IMPLEMENTATION_PLAN.md`: active BF architecture/rollout. Its future-facing DF/UR shadow/canary text is superseded after Gate BF by the files below.
 - `FUTURE_BACKLOG.md`: authoritative deferred DF/UR work after Gate BF.
-- `PREPROD_DF_UR_PLAN_AMENDMENT.md`: authoritative rationale/review contract for PREPROD simplification and future-topology changes.
+- `PREPROD_DF_UR_PLAN_AMENDMENT.md`: authoritative on merged `main`; rationale/review contract for PREPROD simplification and future-topology changes.
 - `contracts/`: durable technical invariants.
 - `CURRENT_BASELINE.md` and `program-state.json`: last accepted checkpoint only; fresh runtime evidence wins for live facts.
 - `archive/`: immutable historical context.
 - `incidents/`: accepted incident inputs unless contradictory evidence appears.
 
-Disagreement in IDs, dependencies, authority topology, or Gates stops execution until reconciled.
+- ACTIVE_BACKLOG.md owns current BF order, the Gate BF matrix, and current blocker
+-  disposition.
+- `OPERATING_MODE.md` owns current environment classification, PR-versus-Release-Train process, Gate semantics, and the `PRODUCTION_HARDENING` trigger.
+- `BF_ISSUE_SPECS.md` owns detailed BF acceptance criteria.
+- `ACTIVE_IMPLEMENTATION_PLAN.md` owns active architecture and rollout.
+- `FUTURE_BACKLOG.md` owns deferred DF/UR work and activates after Gate BF.
+- `contracts/` owns durable invariants.
+- CURRENT_BASELINE.md and program-state.json record the latest reconciled checkpoint and its Gate disposition; they never replace fresh runtime evidence.
+- `archive/` is immutable historical context.
+- `incidents/` preserves accepted incident inputs; diagnosis is not reopened unless contradictory evidence is presented.
+
+Disagreement in IDs, dependencies, authority topology, Gate status, or owner-waiver
+disposition stops execution until reconciled.
 
 ## Completion/archive policy
 
@@ -65,10 +82,12 @@ At evidence-bearing train/Gate completion:
 ## Current/deferred roadmap
 
 ```text
-Current:
-  BF -> Gate BF -> immutable POST_BF_V1
+Completed before the incident track: Release Integrity -> Confirmation -> Dataset Boundary -> R3
+Mode: ENGINEERING_PREPROD; live page role: PREPROD_TEST_PAGE
+Current reconciliation: GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS; POST_BF_V1 recorded
+Accepted residuals: BF-03 deferred/non-activatable; BF-04 PARTIAL / KNOWN_GAP; BF-10 natural-terminal evidence pending
 
-Deferred PREPROD:
+Active PREPROD roadmap:
   DF-A: DF-P1..DF-P3 / DF01-06
   -> DF-B: DF-P4..DF-P6 / DF07-10
   -> Gate E-PREPROD
@@ -82,6 +101,7 @@ Deferred PREPROD:
   -> explicit owner trigger: PRODUCTION_HARDENING
   -> production-readiness / rollout decision
   -> later UR08 -> UR09 -> UR10 under separate approvals
+Gates BF/E/F/U: engineering/architecture evidence only; never automatic production readiness or deploy authority
 ```
 
 Key distinction: PREPROD removes mandatory runtime SHADOW, live statistical gates, traffic-percent canaries, premature legacy retirement, and other production-scale ceremony that currently lacks meaningful traffic/scale. It does **not** remove deterministic verification, protected-claim safety, authority separation, security, exact readback, or complete `LEGACY` rollback.

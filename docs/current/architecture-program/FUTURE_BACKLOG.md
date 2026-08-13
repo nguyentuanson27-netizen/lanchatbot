@@ -1,7 +1,9 @@
 # Deferred Active Backlog — DF and UR
 
-**Activation condition:** Gate BF passed and immutable `POST_BF_V1` captured.
-**Operating mode:** `ENGINEERING_PREPROD`.
+**Activation condition:** Gate BF is passed or explicitly accepted with recorded owner waivers, and the immutable `POST_BF_V1` comparison baseline has been captured.
+**Current status:** **DF-A ACTIVE FOR SOURCE WORK.** On 2026-08-13 the owner accepted Gate BF with recorded BF-03/BF-04/BF-10 deviations. This does not close those residuals or authorize deployment.
+**Default context now:** Do not load this file for BF work except when a BF residual explicitly changes a future contract.
+**Operating mode:** `ENGINEERING_PREPROD`; logical dependencies stay item-level, while full verification and test-page deployment default to Release Train boundaries.
 **Plan rationale:** `PREPROD_DF_UR_PLAN_AMENDMENT.md`.
 
 Original DF01-DF13 and UR00-UR10 identifiers remain traceable. PREPROD groups them into fewer execution slices and replaces production-scale traffic evidence with deterministic/replay/comparator/controlled evidence appropriate to the current environment.
@@ -55,7 +57,9 @@ Also freeze an immutable `ContextV2CandidateManifest` for the exact evaluated ge
 - verified-evidence envelope/schema version used to construct model input;
 - relevant policy/config versions that affect candidate generation or interpretation;
 - exact Git source revision used for the scored DF-P6 run;
-- corpus/rubric version and content hash.
+- corpus/rubric version and content hash;
+- canonical content fingerprint of the reviewed candidate-affecting source/build artifacts,
+  including model-input construction and output interpretation.
 
 The manifest has a canonical hash recorded with the evaluation evidence.
 
@@ -80,7 +84,7 @@ No `>=100` organic/live-pair or production-statistical-confidence requirement in
 - [ ] Context V2 and intended consumers are implemented.
 - [ ] Accepted BF incident/counterexample replay passes.
 - [ ] DF-P6 corpus/rubric is frozen before scoring.
-- [ ] Exact `ContextV2CandidateManifest` and canonical hash are frozen before scoring.
+- [ ] Exact `ContextV2CandidateManifest`, candidate content fingerprint, and canonical hash are frozen before scoring.
 - [ ] V2 passes all frozen required safety/factual/side-effect/behavior assertions using that exact candidate manifest.
 - [ ] Evaluation paths are side-effect-free and cost bounded.
 
@@ -106,8 +110,9 @@ Before activation:
 - missing commerce state fails closed;
 - Context V2, derived phase, final reconciliation, and legacy authority demotion switch coherently;
 - no COMMERCE decision consumes legacy `salesStage` as authority;
-- the immutable release artifact carries the exact Gate-E `ContextV2CandidateManifest` hash;
-- any material candidate-identity change since Gate E forces DF-P6 rerun before activation;
+- the immutable release artifact carries the exact Gate-E `ContextV2CandidateManifest` hash and re-derives the candidate projection/content fingerprint from the final artifact;
+- the re-derived fields match Gate E exactly; copying the prior hash is not evidence;
+- any mismatch, unavailable derivation input, or material candidate-identity change since Gate E forces DF-P6 rerun on the final candidate before activation;
 - complete `LEGACY` rollback is ready;
 - the page-scoped quiescent cutover protocol from `contracts/BEHAVIOR_CONTROL_PLANE.md` is verified.
 
@@ -120,8 +125,8 @@ After explicit owner authorization, activate only on `PREPROD_TEST_PAGE` using t
 - [ ] No COMMERCE decision consumes legacy `salesStage` as authority.
 - [ ] Missing commerce state with committed intent fails closed.
 - [ ] Full transition matrix and BF/DF replay pass.
-- [ ] Activated immutable release is bound to the exact Gate-E `ContextV2CandidateManifest` hash.
-- [ ] Quiescent cutover holds new eligible protected work, proves no authority-sensitive in-flight/queued work can cross the boundary, and releases work only after all relevant consumers read back the exact new revision.
+- [ ] Activated immutable release re-derives and matches the exact Gate-E candidate projection/content fingerprint; a carried manifest hash alone is insufficient.
+- [ ] Quiescent cutover holds all authority-dependent eligible work, proves no authority-dependent in-flight/queued work can cross the boundary, and releases work only after all relevant consumers read back the exact new revision.
 - [ ] Controlled PREPROD critical human journeys pass.
 - [ ] Exact runtime identity/control-plane readback is verified for the deployed candidate.
 - [ ] Complete `COMMERCE -> LEGACY` rollback is verified.
@@ -204,7 +209,7 @@ Gate BF + immutable POST_BF_V1
   -> DF-A: DF-P1..DF-P3
   -> DF-B: DF-P4..DF-P6
   -> Gate E-PREPROD / freeze candidate manifest
-  -> DF-C: DF-P7 / bind release to candidate manifest / quiescent LEGACY -> COMMERCE
+  -> DF-C: DF-P7 / re-derive candidate fingerprint / quiescent LEGACY -> COMMERCE
   -> controlled critical human E2E
   -> Gate F-PREPROD
   -> UR-A: UR-P1..UR-P2

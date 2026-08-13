@@ -33,6 +33,36 @@ A Release Train is the default unit of integration, full repository verification
 
 At a train boundary verify included PRs/dependencies, run full applicable repository/integration/security/data checks, create immutable release/rollback identity if deploying, then verify runtime readback/health/routing/migration/queues/rollback readiness.
 
+### 3.1 `CI_UNAVAILABLE_FALLBACK`
+
+GitHub Actions remains the default remote check. A PR may use the fallback below only
+when the provider check cannot start or executes zero repository steps because of an
+external condition such as billing, quota, or service outage. The failed run URL and its
+provider annotation must be recorded. This fallback is forbidden when a repository command
+ran and failed, when the cause is ambiguous, or when the run was manually cancelled to avoid
+a result.
+
+For an eligible fallback:
+
+1. lock the exact remote PR head, base, merge-base, diff, and provider-failure evidence;
+2. use a clean isolated worktree and the repository-pinned runtime/package manager;
+3. run frozen install plus all focused/risk-applicable gates for the PR; at a Release Train,
+   release, migration, or architecture-Gate boundary, run the full canonical `pnpm check`
+   and every applicable integration/replay/security/data/release-integrity gate;
+4. capture commands, tool versions, start/end time, exit codes, and a SHA-256 of the complete
+   redacted log outside the repository; never capture secrets or production PII;
+5. perform an independent read-only review on the same exact head and re-fetch head/base
+   after verification;
+6. require an explicit owner merge override comment that cites the unavailable CI run and
+   the local evidence. Record `LOCAL_EXACT_HEAD_VERIFIED_CI_UNAVAILABLE`, never `CI_PASS`,
+   and never synthesize or forge a green CI status;
+7. if any commit, base, dependency, or required input changes, discard the authorization and
+   repeat the fallback on the new exact head.
+
+This fallback supplies engineering verification only. It does not authorize deployment,
+runtime mutation, `PRODUCTION_HARDENING`, or public-production readiness. A later production
+hardening decision may require functioning independent remote CI as a separate mandatory gate.
+
 ## 4. Architecture-program PREPROD grouping
 
 Original DF01-DF13 and UR00-UR10 identifiers remain traceable. PREPROD groups them into fewer vertical slices because production-scale rollout ceremony is not a useful item boundary in the current environment.
@@ -77,9 +107,9 @@ Natural traffic, long soak, live sample volume, statistical confidence, and traf
 
 ### Exact offline-candidate provenance
 
-When an offline/replay evaluation is the primary generative evidence for a future authority cutover, PASS must bind to an immutable candidate manifest rather than to an informal label such as “Context V2”. The manifest must include the exact model identifier, generation configuration, prompt/template version+hash, Context/evidence-envelope schema versions, relevant generation/interpretation policy versions, exact source revision used for the scored run, and corpus/rubric identity.
+When an offline/replay evaluation is the primary generative evidence for a future authority cutover, PASS must bind to an immutable candidate manifest rather than to an informal label such as “Context V2”. The manifest must include the exact model identifier, generation configuration, prompt/template version+hash, Context/evidence-envelope schema versions, relevant generation/interpretation policy versions, exact source revision used for the scored run, corpus/rubric identity, and a canonical content fingerprint of every candidate-affecting source/build artifact.
 
-The final immutable release may be a later source revision because authority-cutover plumbing follows Gate E. It must carry the exact evaluated candidate-manifest hash. If any material candidate-identity field changes, the prior offline result is invalid and the owning evaluation must be rerun before activation.
+The final immutable release may be a later source revision because authority-cutover plumbing follows Gate E. Carrying the old manifest hash is not proof of equivalence. The release workflow must re-derive the candidate identity and content fingerprint from the final artifact, compare it field-by-field with Gate-E evidence, and record that comparison. If the fingerprint or any material candidate-identity field differs—or cannot be reproduced—the prior result is invalid and the owning evaluation must be rerun on the final candidate before activation.
 
 ## 6. Authority transition semantics
 
@@ -96,12 +126,15 @@ Before either switch, the replacement path must be proven by its Gate using dete
 
 Because bounded propagation can temporarily expose different workers to different revisions, every direct switch must use the page-scoped quiescent cutover contract from `contracts/BEHAVIOR_CONTROL_PLANE.md`:
 
-1. hold new eligible protected work;
-2. prove no protected command/cart/order/authority-sensitive operation is in flight;
-3. drain or hold eligible queued work;
+1. hold all new authority-dependent eligible work;
+2. prove no authority-dependent message, read, classification, context/phase/CTA/reconciliation decision, command, cart/order transition, or side-effect plan is in flight;
+3. drain or hold all queued work that can observe or consume the changing authority;
 4. CAS the new revision;
 5. keep work held until every relevant authority consumer reads back the exact new revision/hash/source;
-6. release work only after convergence is proven.
+6. release authority-dependent work only after convergence is proven.
+
+Only a finite, reviewed class proven by contract tests to be independent of both the old and
+new authority may bypass the fence; absence from the protected-side-effect set is not enough.
 
 Failure to prove quiescence or exact convergence aborts/fails closed to complete `LEGACY` authority.
 
@@ -134,8 +167,8 @@ The old `>=100` pair/non-inferiority concept is not automatically carried forwar
 - auth/authz/least privilege/audit requirements remain enforced;
 - database changes remain additive/backward-compatible unless separately approved;
 - no partial authority merge or mixed legacy/new field synthesis is allowed;
-- direct authority changes satisfy the quiescent cutover boundary before protected work resumes;
-- evaluated generative candidates retain exact manifest provenance through activation;
+- direct authority changes satisfy the quiescent cutover boundary before any authority-dependent work resumes;
+- evaluated generative candidates retain reproducible manifest and content-fingerprint provenance through activation;
 - readback, bounded propagation and complete `LEGACY` rollback remain required for authority changes;
 - no silent data loss, unsafe fallback, direct VPS source edit, premature retirement or destructive cleanup is authorized;
 - Git/release/runtime provenance remains mandatory for deployed Release Trains.
