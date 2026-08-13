@@ -20,7 +20,10 @@
 
 Do not load `FUTURE_BACKLOG.md` or `archive/` during a BF task unless the change explicitly touches a later contract.
 
-After Gate BF, `FUTURE_BACKLOG.md` becomes active and completed BF detail moves to `archive/completed/`.
+Only after a recorded **GATE_BF_PASSED** or **GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS**
+verdict does FUTURE_BACKLOG.md become active and completed BF detail move to
+archive/completed/. A source merge, deployment, or evidence PR is not a substitute for
+that explicit verdict.
 
 ## Context routing
 
@@ -40,13 +43,14 @@ After Gate BF, `FUTURE_BACKLOG.md` becomes active and completed BF detail moves 
 
 On a branch containing this directory, the following ownership applies. The two original full planning files remain immutable historical source material under `archive/source/`; disagreement in IDs, dependencies, or gates stops execution.
 
-- `ACTIVE_BACKLOG.md` owns current BF order, dependencies, and Gate BF.
+- ACTIVE_BACKLOG.md owns current BF order, the Gate BF matrix, and current blocker
+-  disposition.
 - `OPERATING_MODE.md` owns current environment classification, PR-versus-Release-Train process, Gate semantics, and the `PRODUCTION_HARDENING` trigger.
 - `BF_ISSUE_SPECS.md` owns detailed BF acceptance criteria.
 - `ACTIVE_IMPLEMENTATION_PLAN.md` owns active architecture and rollout.
 - `FUTURE_BACKLOG.md` owns deferred DF/UR work and activates after Gate BF.
 - `contracts/` owns durable invariants.
-- `CURRENT_BASELINE.md` and `program-state.json` record the last accepted checkpoint but never replace fresh runtime evidence.
+- CURRENT_BASELINE.md and program-state.json record the latest reconciled checkpoint and its Gate disposition; they never replace fresh runtime evidence.
 - `archive/` is immutable historical context.
 - `incidents/` preserves accepted incident inputs; diagnosis is not reopened unless contradictory evidence is presented.
 
@@ -65,9 +69,12 @@ When an evidence-bearing Release Train or Gate acceptance completes:
 ## Current position
 
 ```text
-Completed: Release Integrity -> Confirmation -> Dataset Boundary -> R3
+Completed before the incident track: Release Integrity -> Confirmation -> Dataset Boundary -> R3
 Mode: ENGINEERING_PREPROD; live page role: PREPROD_TEST_PAGE
-Architecture flow: BF -> DF-A (DF01-06) -> DF-B (DF07-10) -> DF-C (DF11-13) -> UR dependency/vertical trains
+Current reconciliation: GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS; POST_BF_V1 recorded
+Accepted residuals: BF-03 deferred/non-activatable; BF-04 PARTIAL / KNOWN_GAP; BF-10 natural-terminal evidence pending
+Next eligible architecture work: DF-A (DF01-06) source work; deploy still requires separate authorization
+Architecture flow after that gate: DF-A (DF01-06) -> DF-B (DF07-10) -> DF-C (DF11-13) -> UR dependency/vertical trains
 Gates BF/E/F/U: engineering/architecture evidence only; never automatic production readiness or deploy authority
 ```
 

@@ -1,6 +1,6 @@
 # LANA Chatbot — Incident Bug-Fix Backlog Amendment
 
-**Status:** Review-ready amendment; not deployment authorization
+**Status:** Historical detailed issue contracts with one active canonical deviation; see ACTIVE_BACKLOG.md for the current Gate BF disposition. This file is not deployment authorization.
 **Applies after:** R3 / C2 / PR-06
 **Must complete before:** the first unfinished DF release slice
 **Companion document:** `ACTIVE_IMPLEMENTATION_PLAN.md`
@@ -65,7 +65,7 @@ The model proposes decisions; code remains the final authority for facts, state 
 | BF-A3 | BF-10 terminal Outbox error cleanup | P2 | Data consistency | Tagged-release rollback |
 | BF-B1 | BF-02 preserve verified product context | P1 | Context correctness | Tagged-release rollback |
 | BF-B2 | BF-01 reconcile clarification and reply action | P1 | Customer-visible behavior | Database-backed policy version |
-| BF-B3 | BF-03 correction containment for legacy SIZE branch | P1 | Temporary customer-visible containment | Database-backed policy version |
+| BF-B3 | BF-03 correction-as-SIZE incident | P1 | Foundation-only canonical disposition | No runtime policy or activation path |
 | BF-C1 | BF-06 per-asset partial media resolution | P1 | Customer-visible behavior | Database-backed policy version |
 | BF-C2 | BF-07 multi-product clarification | P1 | Customer-visible behavior | Database-backed policy version |
 | BF-C3 | BF-08 classified customer-URL policy | P1 | Security/customer-visible behavior | Database-backed policy version; emergency fallback stays strict |
@@ -167,22 +167,13 @@ Acceptance:
 - Human ownership, dedupe, blocked outbound, and explicit silence policies are not bypassed.
 - Every override records a bounded reason code.
 
-### BF-03 — Contain correction-as-SIZE misclassification
+### BF-03 — Correction-as-SIZE: canonical foundation-only disposition
 
-**Objective:** Stop clear customer corrections from entering the legacy SIZE branch before dialogue-act migration.
+**Original objective:** stop clear customer corrections from entering the legacy SIZE branch before dialogue-act migration.
 
-Required behavior:
+**Accepted deviation:** the reviewed runtime containment was not kept. PR #158 restored the accepted BF-01/BF-02 production runner, removed the BF-03 adapter/heuristic/policy field and all activation paths, and retained only non-authoritative foundations: post-gate ordering, stale-generation completion, replay/own-echo/malformed/concurrency evidence, a pure unused allow-set primitive, and inactive research corpus data.
 
-- Add a narrow, versioned containment rule for correction constructions such as “rồi mà” and “đã có ... rồi”.
-- Mentioning a topic is not equivalent to requesting the topic capability.
-- Record `CORRECTION_CONTAINMENT` evidence and keep the rule removable.
-- Do not add another buying-intent classifier.
-
-Acceptance:
-
-- The reported correction does not call Size Engine or repeat price/size.
-- Genuine size requests, comparisons, and measurement questions still work.
-- The containment rule has an explicit retirement dependency on DF-09/DF-11.
+**Current acceptance boundary:** by owner-approved deferred deviation, BF-03 does not claim a customer-visible correction behavior and must not be reactivated through a versioned policy or an environment flag. The original semantic requirement moves to the canonical dialogue-evidence and atomic writer-demotion work in DF-05/DF-06 and DF-09/DF-11. Mentioning a topic remains insufficient authority for a capability, but no BF-03 regex classifier may become a second authority.
 
 ### BF-06 — Resolve media per asset
 
@@ -252,6 +243,8 @@ Acceptance:
 
 ## 6. Gate BF — Incident remediation
 
+**Current state: GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS.** The original checklist remains the strict technical contract and is not claimed fully satisfied. On 2026-08-13 the owner explicitly accepted: BF-03 as a deferred, non-activatable foundation; BF-04 as `PARTIAL / KNOWN_GAP` with its P0 bypass still open; and BF-10 natural-transition evidence as a pending non-blocking residual. This governance waiver permits DF-A progression and a `POST_BF_V1` comparison anchor; it does not claim the residuals are fixed or authorize deploy/runtime changes.
+
 Gate BF passes only when:
 
 - [ ] All ten original incidents exist as stable replay fixtures and pass.
@@ -288,7 +281,7 @@ Add observability for dialogue act, protected-claim validation, draft repair, re
 ### DF-11 through DF-13
 
 - Activate Context V2, derived phase, deterministic V2 consumers, final reconciliation, and regex demotion atomically.
-- Retire the temporary BF-03 correction containment after quantitative evidence proves the replacement.
+- Implement correction semantics through canonical dialogue evidence and atomic writer demotion; the retired BF-03 containment must not be recreated as a co-authority.
 
 ### UR-00
 

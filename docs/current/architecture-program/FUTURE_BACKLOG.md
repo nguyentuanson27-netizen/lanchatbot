@@ -1,7 +1,8 @@
 # Deferred Active Backlog — DF and UR
 
-**Activation condition:** Gate BF passed and the immutable post-fix V1 baseline has been captured.
-**Default context now:** Do not load this file for BF-01 through BF-10 unless a bug fix explicitly changes a future contract.
+**Activation condition:** Gate BF is passed or explicitly accepted with recorded owner waivers, and the immutable `POST_BF_V1` comparison baseline has been captured.
+**Current status:** **DF-A ACTIVE FOR SOURCE WORK.** On 2026-08-13 the owner accepted Gate BF with recorded BF-03/BF-04/BF-10 deviations. This does not close those residuals or authorize deployment.
+**Default context now:** Do not load this file for BF work except when a BF residual explicitly changes a future contract.
 **Operating mode:** `ENGINEERING_PREPROD`; logical dependencies stay item-level, while full verification and test-page deployment default to Release Train boundaries.
 
 Completed RI, CF, and DB detail lives in `archive/completed/`; lasting invariants live in `contracts/`.
