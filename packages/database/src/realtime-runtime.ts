@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
 import {
+  DeterministicCartMutationEvidenceV1Schema,
   DeterministicConfirmationEvidenceV1Schema,
   DeterministicEffectReadinessV1Schema,
   CanonicalBuyingIntentV1Schema,
@@ -134,6 +135,7 @@ export interface RealtimeSalesCyclePlan<TState> {
   readonly sourceMessageIdHash?: string;
   readonly canonicalBuyingIntent?: import("@lana/contracts").CanonicalBuyingIntentV1;
   readonly deterministicConfirmationEvidence?: import("@lana/contracts").DeterministicConfirmationEvidenceV1;
+  readonly cartMutationEvidence?: readonly import("@lana/contracts").DeterministicCartMutationEvidenceV1[];
   readonly effectClaimSets?: readonly Readonly<{
     effect: DeterministicEffectReadinessV1["effect"];
     claims: readonly import("@lana/contracts").ProtectedClaimV1[];
@@ -385,6 +387,8 @@ function validateSalesEffectReadiness<TState, TSalesState>(
   };
   const hash = (value: unknown) =>
     createHash("sha256").update(canonicalJson(value), "utf8").digest("hex");
+  const hashText = (value: string) =>
+    createHash("sha256").update(value, "utf8").digest("hex");
   const buyingIntent = CanonicalBuyingIntentV1Schema.parse(plan.canonicalBuyingIntent);
   const intentHash = hash(buyingIntent);
   const confirmationEvidence = plan.deterministicConfirmationEvidence === undefined
@@ -397,6 +401,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
   const state = plan.state as Record<string, unknown>;
   const cartEnvelope = state.cart as { value?: { cartId?: string; revision?: number; lines?: readonly { parentProductId?: string }[] } } | null | undefined;
   const cart = cartEnvelope?.value;
+  const finalCartStateHash = cart === undefined ? null : hash(cart);
   const preview = state.preview as { previewId?: string; previewHash?: string } | null | undefined;
   const requiredByCommand: Readonly<Partial<Record<
     RealtimeSalesCycleEventPlan["commandKind"],
@@ -479,11 +484,13 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     if (!productsMatch) {
       throw new Error("EFFECT_READINESS_PRODUCT_MISMATCH");
     }
-    if (readiness.effect !== "CART_OPEN" &&
-      (readiness.cartId !== cart?.cartId ||
-        (readiness.effect === "CART_MUTATION"
-          ? readiness.cartVersion !== (cart?.revision ?? 0) - 1
-          : readiness.cartVersion !== cart?.revision))) {
+    const bindsFinalCart = readiness.effect !== "PROTECTED_OUTBOUND" ||
+      readiness.cartId !== null;
+    if (bindsFinalCart && readiness.cartStateHash !== finalCartStateHash) {
+      throw new Error("EFFECT_READINESS_CART_STATE_MISMATCH");
+    }
+    if (readiness.effect !== "PROTECTED_OUTBOUND" &&
+      (readiness.cartId !== cart?.cartId || readiness.cartVersion !== cart?.revision)) {
       throw new Error("EFFECT_READINESS_CART_MISMATCH");
     }
     if (readiness.effect === "PURCHASE_CONFIRMATION" &&
@@ -505,6 +512,43 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     )) {
       throw new Error("EFFECT_READINESS_CONFIRMATION_BINDING_MISMATCH");
     }
+  }
+  const mutationEvents = plan.events.filter(({ commandKind, outcome }) =>
+    commandKind === "CART_MUTATED" && outcome === "APPLIED"
+  );
+  const mutationEvidence = (plan.cartMutationEvidence ?? []).map((value) =>
+    DeterministicCartMutationEvidenceV1Schema.parse(value)
+  );
+  if (mutationEvents.length !== mutationEvidence.length) {
+    throw new Error("CART_MUTATION_EVIDENCE_REQUIRED");
+  }
+  for (const event of mutationEvents) {
+    const commandIdHash = hashText(event.commandId);
+    const evidence = mutationEvidence.find((value) => value.commandIdHash === commandIdHash);
+    if (!evidence) throw new Error("CART_MUTATION_EVIDENCE_REQUIRED");
+    const expectedEvidenceHash = hash([
+      evidence.authorityVersion,
+      evidence.action,
+      evidence.sourceMessageIdHash,
+      evidence.commandIdHash,
+      evidence.beforeCartStateHash,
+      evidence.afterCartStateHash,
+      evidence.evaluatedAt,
+    ]);
+    if (
+      evidence.sourceMessageIdHash !== plan.sourceMessageIdHash ||
+      evidence.afterCartStateHash !== finalCartStateHash ||
+      evidence.evidenceHash !== expectedEvidenceHash ||
+      Date.parse(evidence.evaluatedAt) > now.getTime()
+    ) {
+      throw new Error("CART_MUTATION_EVIDENCE_MISMATCH");
+    }
+    const readiness = parsed.find((value) =>
+      value.effect === "CART_MUTATION" &&
+      value.deterministicEvidenceHash === evidence.evidenceHash &&
+      value.checkedAt === evidence.evaluatedAt
+    );
+    if (!readiness) throw new Error("CART_MUTATION_EVIDENCE_BINDING_MISMATCH");
   }
 }
 
@@ -569,6 +613,16 @@ function validateMetaEffectReadiness<TState, TSalesState>(
       (claim.scope.cartId !== readiness.cartId || claim.scope.cartVersion !== readiness.cartVersion))) {
     throw new Error("PROTECTED_OUTBOUND_CLAIM_SCOPE_MISMATCH");
   }
+  const claimSemantics = validateEffectClaimSemanticsV1({
+    effect: "PROTECTED_OUTBOUND",
+    productIds: readiness.productIds,
+    cartId: readiness.cartId,
+    cartVersion: readiness.cartVersion,
+    protectedClaimTypes: readiness.protectedClaimTypes,
+    claims,
+  });
+  if (claimSemantics.missing) throw new Error("PROTECTED_OUTBOUND_CLAIM_MISSING");
+  if (claimSemantics.conflict) throw new Error("PROTECTED_OUTBOUND_CLAIM_CONFLICT");
 }
 
 export type MetaResponseGroupGateStatus =

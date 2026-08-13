@@ -3,6 +3,7 @@ import {
   canonicalizeReadinessProductIdsV1,
   CanonicalBuyingIntentV1Schema,
   CanonicalDialogueEvidenceV1Schema,
+  DeterministicCartMutationEvidenceV1Schema,
   DeterministicConfirmationEvidenceV1Schema,
   DeterministicEffectReadinessV1Schema,
   MAX_READINESS_PRODUCT_IDS_V1,
@@ -321,6 +322,7 @@ describe("DF06 deterministic readiness contract", () => {
       productIds: ["SP-001"],
       cartId: null,
       cartVersion: null,
+      cartStateHash: HASH,
       orderPreviewId: null,
       orderPreviewHash: null,
       buyingIntentHash: OTHER_HASH,
@@ -337,6 +339,63 @@ describe("DF06 deterministic readiness contract", () => {
     expect(readiness.authorization).toBe("NONE");
   });
 
+  it("rejects READY cart effects without an exact final-cart state hash", () => {
+    const parsed = DeterministicEffectReadinessV1Schema.safeParse({
+      schemaVersion: 1,
+      rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1",
+      effect: "CART_MUTATION",
+      outcome: "READY",
+      pageId: "page-1",
+      conversationId: "conversation-1",
+      sourceMessageIdHash: HASH,
+      conversationRevision: 7,
+      salesCycleRevision: 3,
+      productIds: ["SP-001"],
+      cartId: "cart-1",
+      cartVersion: 2,
+      cartStateHash: null,
+      orderPreviewId: null,
+      orderPreviewHash: null,
+      buyingIntentHash: OTHER_HASH,
+      deterministicEvidenceHash: OTHER_HASH,
+      claimSetHash: HASH,
+      protectedClaimTypes: [],
+      checkedAt: "2026-08-13T05:00:00.000Z",
+      expiresAt: "2026-08-13T05:00:30.000Z",
+      reasonCodes: [],
+      authorization: "NONE",
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
+  it("accepts only deterministic typed cart-mutation evidence", () => {
+    const evidence = {
+      schemaVersion: 1,
+      authorityVersion: "DETERMINISTIC_CART_MUTATION_EVIDENCE_V1",
+      action: "ADD_LINE",
+      sourceMessageIdHash: HASH,
+      commandIdHash: OTHER_HASH,
+      beforeCartStateHash: HASH,
+      afterCartStateHash: OTHER_HASH,
+      evidenceHash: HASH,
+      evaluatedAt: "2026-08-13T05:00:00.000Z",
+      contributor: "DETERMINISTIC_RUNTIME",
+      authorization: "NONE",
+    } as const;
+
+    expect(DeterministicCartMutationEvidenceV1Schema.parse(evidence).authorization)
+      .toBe("NONE");
+    expect(DeterministicCartMutationEvidenceV1Schema.safeParse({
+      ...evidence,
+      contributor: "MODEL_STRUCTURED_OUTPUT",
+    }).success).toBe(false);
+    expect(DeterministicCartMutationEvidenceV1Schema.safeParse({
+      ...evidence,
+      afterCartStateHash: evidence.beforeCartStateHash,
+    }).success).toBe(false);
+  });
+
   it("supports payload-only protected outbound readiness with a deterministic hash", () => {
     expect(DeterministicEffectReadinessV1Schema.parse({
       schemaVersion: 1,
@@ -351,6 +410,7 @@ describe("DF06 deterministic readiness contract", () => {
       productIds: ["SP-001"],
       cartId: "cart-1",
       cartVersion: 2,
+      cartStateHash: null,
       orderPreviewId: "preview-1",
       orderPreviewHash: OTHER_HASH,
       buyingIntentHash: null,
@@ -378,6 +438,7 @@ describe("DF06 deterministic readiness contract", () => {
       productIds: ["SP-001"],
       cartId: null,
       cartVersion: null,
+      cartStateHash: null,
       orderPreviewId: null,
       orderPreviewHash: null,
       buyingIntentHash: OTHER_HASH,
@@ -405,6 +466,7 @@ describe("DF06 deterministic readiness contract", () => {
       productIds: [],
       cartId: null,
       cartVersion: null,
+      cartStateHash: null,
       orderPreviewId: null,
       orderPreviewHash: null,
       buyingIntentHash: null,

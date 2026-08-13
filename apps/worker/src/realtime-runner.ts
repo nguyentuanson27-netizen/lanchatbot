@@ -4689,6 +4689,7 @@ export class RealtimeRunner {
         ].filter((value): value is string => value !== null),
         cartId: null,
         cartVersion: null,
+        cartStateHash: null,
         orderPreviewId: null,
         orderPreviewHash: null,
         buyingIntent: null,

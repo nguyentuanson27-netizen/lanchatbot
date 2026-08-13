@@ -31,6 +31,7 @@ const base = {
   sourceMessageIdHash: hash("d"), conversationRevision: 8,
   salesCycleRevision: 2, productIds: ["product-1"],
   cartId: null, cartVersion: null, orderPreviewId: null, orderPreviewHash: null,
+  cartStateHash: hash("f"),
   buyingIntent: intent, claims, checkedAt: now,
 };
 

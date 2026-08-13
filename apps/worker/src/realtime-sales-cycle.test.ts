@@ -695,6 +695,21 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(fourth.plan?.state.cart?.value.lines).toHaveLength(4);
     expect(fourth.plan?.state.cart?.value.lines.map(({ parentProductId }) => parentProductId))
       .toEqual(["PRODUCT-1", "PRODUCT-2", "PRODUCT-3", "PRODUCT-4"]);
+    const finalCart = fourth.plan!.state.cart!.value;
+    const mutationEvidence = fourth.plan!.cartMutationEvidence?.[0];
+    expect(mutationEvidence).toMatchObject({
+      authorityVersion: "DETERMINISTIC_CART_MUTATION_EVIDENCE_V1",
+      action: "ADD_LINE",
+      contributor: "DETERMINISTIC_RUNTIME",
+      afterCartStateHash: computeBusinessContentHash(finalCart).replace(/^sha256:/u, ""),
+      authorization: "NONE",
+    });
+    expect(fourth.plan!.effectReadiness?.find(({ effect }) => effect === "CART_MUTATION"))
+      .toMatchObject({
+        cartVersion: finalCart.revision,
+        cartStateHash: mutationEvidence?.afterCartStateHash,
+        deterministicEvidenceHash: mutationEvidence?.evidenceHash,
+      });
   });
 
   it("fails closed before readiness when a valid fifty-line cart adds product fifty-one", async () => {

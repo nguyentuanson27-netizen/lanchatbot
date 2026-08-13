@@ -174,6 +174,31 @@ export type DeterministicConfirmationEvidenceV1 = z.infer<
   typeof DeterministicConfirmationEvidenceV1Schema
 >;
 
+export const DeterministicCartMutationEvidenceV1Schema = z.object({
+  schemaVersion: z.literal(1),
+  authorityVersion: z.literal("DETERMINISTIC_CART_MUTATION_EVIDENCE_V1"),
+  action: z.enum(["ADD_LINE", "REMOVE_LINE", "SET_QUANTITY"]),
+  sourceMessageIdHash: Sha256Schema,
+  commandIdHash: Sha256Schema,
+  beforeCartStateHash: Sha256Schema,
+  afterCartStateHash: Sha256Schema,
+  evidenceHash: Sha256Schema,
+  evaluatedAt: z.string().datetime(),
+  contributor: z.literal("DETERMINISTIC_RUNTIME"),
+  authorization: z.literal("NONE"),
+}).strict().superRefine((value, context) => {
+  if (value.beforeCartStateHash === value.afterCartStateHash) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["afterCartStateHash"],
+      message: "cart mutation evidence must bind a changed cart state",
+    });
+  }
+});
+export type DeterministicCartMutationEvidenceV1 = z.infer<
+  typeof DeterministicCartMutationEvidenceV1Schema
+>;
+
 export const ProtectedClaimScopeV1Schema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("PRODUCT"),
@@ -400,6 +425,7 @@ export const DETERMINISTIC_READINESS_REASON_CODES_V1 = [
   "CLAIM_CONFLICT",
   "STATE_REVISION_MISMATCH",
   "CART_REQUIRED",
+  "CART_STATE_BINDING_MISSING",
   "CART_VERSION_MISMATCH",
   "ORDER_PREVIEW_REQUIRED",
   "ORDER_PREVIEW_MISMATCH",
@@ -426,6 +452,7 @@ export const DeterministicEffectReadinessV1Schema = z.object({
   productIds: z.array(BoundedIdSchema).max(MAX_READINESS_PRODUCT_IDS_V1),
   cartId: BoundedIdSchema.nullable(),
   cartVersion: z.number().int().nonnegative().nullable(),
+  cartStateHash: Sha256Schema.nullable().optional().default(null),
   orderPreviewId: BoundedIdSchema.nullable(),
   orderPreviewHash: Sha256Schema.nullable(),
   buyingIntentHash: Sha256Schema.nullable(),
@@ -472,11 +499,10 @@ export const DeterministicEffectReadinessV1Schema = z.object({
         message: "ready cart changes require canonical buying intent",
       });
     }
-    if (value.effect === "CART_MUTATION" && value.buyingIntentHash === null &&
-      value.deterministicEvidenceHash === null) {
+    if (value.effect === "CART_MUTATION" && value.deterministicEvidenceHash === null) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "cart mutation requires canonical intent or deterministic command evidence",
+        message: "cart mutation requires typed deterministic command evidence",
       });
     }
     if (value.effect === "PURCHASE_CONFIRMATION" &&
@@ -510,6 +536,14 @@ export const DeterministicEffectReadinessV1Schema = z.object({
     context.addIssue({
       code: z.ZodIssueCode.custom,
       message: "ready cart/order effects require cart identity and version",
+    });
+  }
+  const changesOrUsesCart = value.effect === "CART_OPEN" || needsCart;
+  if (value.outcome === "READY" && changesOrUsesCart && value.cartStateHash === null) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["cartStateHash"],
+      message: "ready cart effects require an exact final-cart state hash",
     });
   }
   if (value.outcome === "READY" && value.effect === "PURCHASE_CONFIRMATION" &&

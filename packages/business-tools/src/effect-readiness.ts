@@ -19,6 +19,7 @@ export interface EvaluateDeterministicEffectReadinessV1Input {
   readonly productIds: readonly string[];
   readonly cartId: string | null;
   readonly cartVersion: number | null;
+  readonly cartStateHash: string | null;
   readonly orderPreviewId: string | null;
   readonly orderPreviewHash: string | null;
   readonly buyingIntent: CanonicalBuyingIntentV1 | null;
@@ -51,10 +52,7 @@ export function evaluateDeterministicEffectReadinessV1(
       reasons.add("BUYING_INTENT_SCOPE_MISMATCH");
     }
   }
-  if (input.effect === "CART_MUTATION" &&
-    !input.deterministicEvidenceHash &&
-    (input.buyingIntent?.decision !== "COMMITTED" ||
-      !input.buyingIntent.contributors.includes("DETERMINISTIC_RUNTIME"))) {
+  if (input.effect === "CART_MUTATION" && !input.deterministicEvidenceHash) {
     reasons.add("DETERMINISTIC_EVIDENCE_MISSING");
   }
 
@@ -96,6 +94,9 @@ export function evaluateDeterministicEffectReadinessV1(
   if (needsCart && (input.cartId === null || input.cartVersion === null)) {
     reasons.add("CART_REQUIRED");
   }
+  if (input.effect !== "PROTECTED_OUTBOUND" && input.cartStateHash === null) {
+    reasons.add("CART_STATE_BINDING_MISSING");
+  }
   if (input.effect === "PURCHASE_CONFIRMATION" &&
     (input.orderPreviewId === null || input.orderPreviewHash === null)) {
     reasons.add("ORDER_PREVIEW_REQUIRED");
@@ -118,6 +119,7 @@ export function evaluateDeterministicEffectReadinessV1(
     productIds,
     cartId: input.cartId,
     cartVersion: input.cartVersion,
+    cartStateHash: input.cartStateHash,
     orderPreviewId: input.orderPreviewId,
     orderPreviewHash: input.orderPreviewHash,
     buyingIntentHash: input.buyingIntent === null
