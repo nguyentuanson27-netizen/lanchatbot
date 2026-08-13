@@ -71,11 +71,29 @@ describe("DF05 canonical evidence contracts", () => {
     }).success).toBe(false);
   });
 
+  it("keeps committed intent observable when product scope is unresolved", () => {
+    expect(CanonicalBuyingIntentV1Schema.parse({
+      schemaVersion: 1,
+      authorityVersion: "CANONICAL_BUYING_INTENT_V1",
+      decision: "COMMITTED",
+      requestedAction: "OPEN_CART",
+      quantity: null,
+      productId: null,
+      contributors: ["DETERMINISTIC_RUNTIME"],
+      sourceMessageIdHash: HASH,
+      evidenceHash: OTHER_HASH,
+      reasonCodes: ["DIRECT_PURCHASE_VERB"],
+      evaluatedAt: "2026-08-13T05:00:00.000Z",
+      authorization: "NONE",
+    }).productId).toBeNull();
+  });
+
   it.each([
     ["PRICE", "POS_LIVE", { kind: "PRODUCT", productId: "SP-001", variantId: null }, { amountVnd: 1250000, currency: "VND" }],
-    ["STOCK", "POS_LIVE", { kind: "PRODUCT", productId: "SP-001", variantId: "VAR-001" }, { availableQuantity: 3 }],
+    ["STOCK", "POS_LIVE", { kind: "PRODUCT", productId: "SP-001", variantId: "VAR-001" }, { status: "IN_STOCK", availableQuantity: 3 }],
     ["SIZE_FIT", "VERIFIED_SIZE_ENGINE_V1", { kind: "PRODUCT", productId: "SP-001", variantId: "VAR-001" }, {
-      recommendedSize: "M",
+      recommendedSizes: ["M"],
+      alternativeSizes: [],
       customerProfileId: "3f4c7f35-3ac1-4bb1-a398-1f6fc5b6e361",
       customerProfileRevision: 2,
       measurementFingerprint: HASH,

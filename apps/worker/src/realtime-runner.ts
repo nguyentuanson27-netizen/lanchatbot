@@ -1,6 +1,9 @@
 import { createHash } from "node:crypto";
 import {
-  resolveHybridBuyingSignal,
+  buildCanonicalDecisionEvidenceV1,
+  buildProtectedClaimsFromVerifiedFactsV1,
+  hashProtectedClaimSetV1,
+  detectBuyingSignal,
   extractCustomerMeasurements,
   assembleReply,
   buildVerifiedFactBlocks,
@@ -22,6 +25,8 @@ import {
   type MediaProductSearchResult,
   type StableProductDocument,
   type CustomerProfileFieldEvidence,
+  type CanonicalDecisionEvidenceV1,
+  hasGuardedModelBuyingCommitmentEvidence,
 } from "@lana/business-tools";
 import {
   BusinessFactQueriesV2Schema,
@@ -39,6 +44,7 @@ import {
   type ProductComponentRole,
   type ProductFactsV2,
   type RequestedBusinessFactV2,
+  type SizeRecommendationProtectedClaimV1,
 } from "@lana/contracts";
 import type {
   RuntimePolicyChannel,
@@ -3149,11 +3155,12 @@ export class RealtimeRunner {
       validatedCount: 0,
       rejectedCount: 0,
     };
+    let verifiedSizeClaimForTurn: SizeRecommendationProtectedClaimV1 | null = null;
     let wave2StrategyDecision: Wave2StrategyDecision | null = null;
     let multiFactAudit: NonNullable<
       RealtimeDecisionEventPlan["details"]["factQueryResults"]
     > = [];
-    let buyingSignal = resolveHybridBuyingSignal(
+    let buyingSignal = detectBuyingSignal(
       message.isEcho ? "" : message.text ?? "",
       {
         hasProductContext: Boolean(
@@ -3161,6 +3168,18 @@ export class RealtimeRunner {
         ),
       },
     );
+    let canonicalDecisionEvidence: CanonicalDecisionEvidenceV1 | null = null;
+    const canonicalDecisionEvidenceForTurn = (): CanonicalDecisionEvidenceV1 => {
+      canonicalDecisionEvidence ??= buildCanonicalDecisionEvidenceV1({
+        text: message.isEcho ? "" : message.text ?? "",
+        sourceMessageId: message.messageId ?? message.eventKey,
+        productId:
+          resolvedProduct?.productId ?? nextState.currentProductId,
+        modelBuyingIntent: proposal?.salesSignals?.buyingIntent ?? null,
+        evaluatedAt: now,
+      });
+      return canonicalDecisionEvidence;
+    };
     const imageIntent = message.isEcho
       ? null
       : explicitCustomerImageIntent(message.text ?? "");
@@ -3860,20 +3879,17 @@ export class RealtimeRunner {
         const hasVerifiedProductContext = Boolean(
           resolvedProduct?.productId ?? nextState.currentProductId,
         );
-        const modelBuyingSignal = resolveHybridBuyingSignal(
-          message.text ?? "",
-          { hasProductContext: true },
-          proposal.salesSignals?.buyingIntent,
-        );
-        buyingSignal = resolveHybridBuyingSignal(
-          message.text ?? "",
-          { hasProductContext: hasVerifiedProductContext },
-          proposal.salesSignals?.buyingIntent,
-        );
+        const canonicalEvidence = canonicalDecisionEvidenceForTurn();
+        buyingSignal = {
+          isBuyingSignal: canonicalEvidence.buyingIntent.decision === "COMMITTED",
+          reasons: canonicalEvidence.buyingIntent.reasonCodes,
+        };
         if (
           !hasVerifiedProductContext &&
-          modelBuyingSignal.source === "MODEL_STRUCTURED_OUTPUT" &&
-          modelBuyingSignal.isBuyingSignal
+          hasGuardedModelBuyingCommitmentEvidence(
+            message.text ?? "",
+            proposal.salesSignals?.buyingIntent,
+          )
         ) {
           handoffGuardReasonCodes = [
             ...new Set([
@@ -4266,7 +4282,7 @@ export class RealtimeRunner {
           activeVerifiedVariant?.parentProductId === activeSizeProductId
             ? activeVerifiedVariant.selectedVariantId
             : null;
-        const verifiedSizeClaim =
+        verifiedSizeClaimForTurn =
           resolvedProduct && customerProfile
             ? verifiedSizeRecommendationClaimForGuard(
                 resolvedProduct,
@@ -4275,11 +4291,14 @@ export class RealtimeRunner {
                 now,
               )
             : null;
-        if (verifiedSizeClaim) {
+        if (verifiedSizeClaimForTurn) {
           proposal = {
             ...proposal,
             protectedClaimIds: [
-              ...new Set([...(proposal.protectedClaimIds ?? []), verifiedSizeClaim.id]),
+              ...new Set([
+                ...(proposal.protectedClaimIds ?? []),
+                verifiedSizeClaimForTurn.id,
+              ]),
             ],
           };
         }
@@ -4303,7 +4322,7 @@ export class RealtimeRunner {
             activeVariantId: activeSizeVariantId,
             customerProfileId: customerProfile?.profileId ?? null,
             customerProfileRevision: customerProfile?.revision ?? null,
-            claims: verifiedSizeClaim ? [verifiedSizeClaim] : [],
+            claims: verifiedSizeClaimForTurn ? [verifiedSizeClaimForTurn] : [],
           },
           now,
         });
@@ -4338,7 +4357,7 @@ export class RealtimeRunner {
                 guarded.blockedReasonCodes.filter((reason) =>
                   reason.startsWith("SIZE_RECOMMENDATION_"),
                 ),
-                verifiedSizeClaim ? [verifiedSizeClaim] : [],
+                verifiedSizeClaimForTurn ? [verifiedSizeClaimForTurn] : [],
                 this.options.promptVersion,
               );
               modelVersion = repair.modelVersion;
@@ -4393,7 +4412,7 @@ export class RealtimeRunner {
                 verifiedAttachmentUrlsForFallback.has(url)
               ),
               preservedProtectedClaimIds: (sizeRepairBaseline.protectedClaimIds ?? []).filter(
-                (claimId) => claimId !== verifiedSizeClaim?.id,
+                (claimId) => claimId !== verifiedSizeClaimForTurn?.id,
               ),
               // The independently authorized post-media CTA is constructed
               // after this fallback from the guarded media plan below.
@@ -4493,6 +4512,13 @@ export class RealtimeRunner {
       }
     }
 
+    const protectedClaimSet = buildProtectedClaimsFromVerifiedFactsV1({
+      facts: businessFacts,
+      sizeClaim: verifiedSizeClaimForTurn,
+      expectedProductId:
+        resolvedProduct?.productId ?? nextState.currentProductId,
+    });
+
     if (
       salesCycleRecord &&
       !message.isEcho &&
@@ -4500,12 +4526,18 @@ export class RealtimeRunner {
       !clarificationHandled &&
       handoff === null
     ) {
+      const canonicalEvidence = canonicalDecisionEvidenceForTurn();
+      buyingSignal = {
+        isBuyingSignal: canonicalEvidence.buyingIntent.decision === "COMMITTED",
+        reasons: canonicalEvidence.buyingIntent.reasonCodes,
+      };
       const sales = await evaluateRealtimeSalesCycle({
         pageId: claim.pageId,
         conversationId: record.conversationId,
         customerHash: claim.conversationHash,
         state: salesCycleRecord.state,
         stateRevision: salesCycleRecord.stateRevision,
+        conversationRevision: record.stateVersion,
         text: message.text ?? "",
         messageId: message.messageId ?? message.eventKey,
         eventKey: message.eventKey,
@@ -4529,6 +4561,7 @@ export class RealtimeRunner {
         color:
           proposal?.businessFactQuery.color ??
           nextState.consideredVariant.color,
+        canonicalBuyingIntent: canonicalEvidence.buyingIntent,
         salesSignals: proposal?.salesSignals ?? null,
         shopAlias: this.options.shopAlias,
         policyResolution,
@@ -4620,18 +4653,21 @@ export class RealtimeRunner {
         : proposalGuardReasonCodes.length > 0
           ? "BLOCKED"
           : "ALLOWED";
+    const canonicalEvidence = canonicalDecisionEvidenceForTurn();
     const dialogueEvidenceCodes = [
-      ...buyingSignal.reasons,
+      ...canonicalEvidence.dialogueEvidence.reasonCodes,
       ...(wave2StrategyDecision?.evidence ?? []),
     ];
     const strategyUsesModelEvidence =
       wave2StrategyDecision?.evidence.includes("MODEL_ANALYSIS_ACCEPTED") ?? false;
     const modelDialogueEvidence =
-      buyingSignal.source === "MODEL_STRUCTURED_OUTPUT" ||
-      strategyUsesModelEvidence;
+      canonicalEvidence.dialogueEvidence.contributors.includes(
+        "MODEL_STRUCTURED_OUTPUT",
+      ) || strategyUsesModelEvidence;
     const deterministicDialogueEvidence =
-      buyingSignal.source === "DETERMINISTIC" ||
-      wave2StrategyDecision !== null;
+      canonicalEvidence.dialogueEvidence.contributors.includes(
+        "DETERMINISTIC_RUNTIME",
+      ) || wave2StrategyDecision !== null;
     const dialogueEvidenceSource:
       BuildDecisionObservabilityInput["dialogueEvidenceSource"] =
       modelDialogueEvidence && deterministicDialogueEvidence
@@ -4667,10 +4703,6 @@ export class RealtimeRunner {
         event.commandKind === "PAYMENT_RECEIPT_RECEIVED"
       )) sideEffectTypes.push("ORDER");
     }
-    const observedModelBuyingIntent =
-      buyingSignal.source === "MODEL_STRUCTURED_OUTPUT"
-        ? proposal?.salesSignals?.buyingIntent
-        : undefined;
     const observedProductId =
       businessFacts?.productId ??
       resolvedProduct?.productId ??
@@ -4681,18 +4713,41 @@ export class RealtimeRunner {
     const decisionObservability = buildDecisionObservabilityV1({
       dialogueEvidenceCodes,
       dialogueEvidenceSource,
+      dialogueEvidenceHash: canonicalEvidence.dialogueEvidence.evidenceHash,
       buyingIntent: {
-        decision: buyingSignal.decision,
-        source: buyingSignal.source,
-        requestedAction: observedModelBuyingIntent?.requestedAction ?? "NONE",
-        quantity: buyingSignal.quantity,
-        confidence: observedModelBuyingIntent?.confidence ?? null,
-        reasonCodes: buyingSignal.reasons,
+        authorityVersion: canonicalEvidence.buyingIntent.authorityVersion,
+        decision: canonicalEvidence.buyingIntent.decision,
+        source:
+          canonicalEvidence.buyingIntent.contributors.length === 2
+            ? "HYBRID_RUNTIME"
+            : canonicalEvidence.buyingIntent.contributors[0] ===
+                "MODEL_STRUCTURED_OUTPUT"
+              ? "MODEL_STRUCTURED_OUTPUT"
+              : canonicalEvidence.buyingIntent.contributors[0] ===
+                  "DETERMINISTIC_RUNTIME"
+                ? "DETERMINISTIC"
+                : null,
+        requestedAction: canonicalEvidence.buyingIntent.requestedAction,
+        quantity: canonicalEvidence.buyingIntent.quantity,
+        confidence:
+          canonicalEvidence.buyingIntent.decision === "NONE"
+            ? null
+            : canonicalEvidence.dialogueEvidence.confidenceBand === "HIGH"
+              ? 0.95
+              : canonicalEvidence.dialogueEvidence.confidenceBand === "MEDIUM"
+                ? 0.8
+                : 0.5,
+        reasonCodes: canonicalEvidence.buyingIntent.reasonCodes,
+        evidenceHash: canonicalEvidence.buyingIntent.evidenceHash,
       },
       protectedClaimTypes: protectedClaimValidation.claimTypes,
       protectedClaimOutcome: protectedClaimValidation.outcome,
       protectedClaimValidatedCount: protectedClaimValidation.validatedCount,
       protectedClaimRejectedCount: protectedClaimValidation.rejectedCount,
+      canonicalClaimCount: protectedClaimSet.claims.length,
+      canonicalClaimSetHash: protectedClaimSet.claims.length > 0
+        ? hashProtectedClaimSetV1(protectedClaimSet.claims)
+        : null,
       protectedClaimReasonCodes: protectedClaimReasonCodes(
         proposalGuardReasonCodes ?? [],
       ),
@@ -4707,7 +4762,14 @@ export class RealtimeRunner {
       strategy: wave2StrategyDecision?.recommendedStrategy ?? "NONE",
       cta: wave2StrategyDecision?.ctaPolicy ?? "NONE",
       strategyUsesModelEvidence,
-      readinessOutcome: "NOT_EVALUATED",
+      readinessOutcome: salesCyclePlan?.effectReadiness?.length
+        ? salesCyclePlan.effectReadiness.every(({ outcome }) => outcome === "READY")
+          ? "READY"
+          : "BLOCKED"
+        : "NOT_EVALUATED",
+      readinessRulesetVersion: salesCyclePlan?.effectReadiness?.length
+        ? "DETERMINISTIC_EFFECT_READINESS_V1"
+        : "LEGACY_READINESS_OBSERVATION_V1",
       productScope: observedProductId
         ? "RESOLVED"
         : protectedClaimValidation.claimTypes.length > 0 || salesCyclePlan !== null

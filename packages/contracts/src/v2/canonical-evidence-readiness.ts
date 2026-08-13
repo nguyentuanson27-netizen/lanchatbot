@@ -97,10 +97,10 @@ export const CanonicalBuyingIntentV1Schema = z.object({
     });
   }
   if (value.decision === "COMMITTED") {
-    if (value.requestedAction === "NONE" || value.productId === null) {
+    if (value.requestedAction === "NONE") {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "committed buying intent requires an action and verified product scope",
+        message: "committed buying intent requires a requested action",
       });
     }
     return;
@@ -181,12 +181,23 @@ export const ProtectedClaimV1Schema = z.discriminatedUnion("type", [
   }).strict(),
   ProtectedClaimBase.extend({
     type: z.literal("STOCK"),
-    value: z.object({ availableQuantity: z.number().int().nonnegative() }).strict(),
+    value: z.object({
+      status: z.enum([
+        "IN_STOCK",
+        "LOW_STOCK",
+        "OUT_OF_STOCK",
+        "PRE_ORDER",
+        "COMING_SOON",
+        "UNKNOWN",
+      ]),
+      availableQuantity: z.number().int().nonnegative().nullable(),
+    }).strict(),
   }).strict(),
   ProtectedClaimBase.extend({
     type: z.literal("SIZE_FIT"),
     value: z.object({
-      recommendedSize: BoundedIdSchema,
+      recommendedSizes: z.array(BoundedIdSchema).min(1).max(4),
+      alternativeSizes: z.array(BoundedIdSchema).max(4),
       customerProfileId: z.string().uuid(),
       customerProfileRevision: z.number().int().positive(),
       measurementFingerprint: Sha256Schema,
@@ -319,12 +330,20 @@ export const DeterministicEffectReadinessV1Schema = z.object({
     if (
       value.reasonCodes.length > 0 ||
       value.productIds.length === 0 ||
-      value.buyingIntentHash === null ||
       value.claimSetHash === null
     ) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "ready effects require product, intent, and claim bindings without block reasons",
+        message: "ready effects require product and claim bindings without block reasons",
+      });
+    }
+    const requiresBuyingIntent = value.effect === "CART_OPEN" ||
+      value.effect === "CART_MUTATION";
+    if (requiresBuyingIntent && value.buyingIntentHash === null) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["buyingIntentHash"],
+        message: "ready cart changes require canonical buying intent",
       });
     }
   } else if (value.reasonCodes.length === 0) {

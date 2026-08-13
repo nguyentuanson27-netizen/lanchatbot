@@ -507,6 +507,61 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       .toBeLessThan(calls.findIndex((call) => call.sql.includes("UPDATE conversations")));
     expect(calls.at(-1)?.sql.trim()).toBe("COMMIT");
   });
+
+  it("rejects a stale readiness binding inside the sales commit transaction", async () => {
+    const calls: string[] = [];
+    const client = {
+      async query(sql: string) {
+        calls.push(sql);
+        if (sql.includes("SELECT routing_owner")) {
+          return { rowCount: 1, rows: [{ routing_owner: "APP", app_send_enabled: true, kill_switch: false }] };
+        }
+        if (sql.includes("SELECT conversation_owner")) {
+          return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+        }
+        return { rowCount: 1, rows: [] };
+      },
+      release() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = { async connect() { return client; } };
+    const now = new Date("2026-08-13T03:00:00.000Z");
+    await expect(store.commit({
+      pageId: "page-1", customerHash: "hash",
+      conversationId: "33333333-3333-4333-8333-333333333333",
+      expectedStateVersion: 4,
+      state: { revision: 5, routingOwner: "APP", conversationOwner: "BOT" },
+      salesCyclePlan: {
+        expectedRevision: 2,
+        state: { revision: 3 },
+        cartExpiresAt: new Date("2026-08-14T03:00:00.000Z"),
+        expiresAt: new Date("2026-08-14T03:00:00.000Z"),
+        events: [{
+          commandId: "sales:event-2:cart-open", commandKind: "CART_OPENED",
+          outcome: "APPLIED", stateRevisionBefore: 2, stateRevisionAfter: 3,
+          stageBefore: "SIZE_RECOMMENDED", stageAfter: "CART_OPEN",
+          cartId: "10000000-0000-4000-8000-000000000001", cartVersion: 1,
+          reasonCode: null, occurredAt: now,
+        }],
+        effectReadiness: [{
+          schemaVersion: 1, rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1",
+          effect: "CART_OPEN", outcome: "READY", pageId: "page-1",
+          conversationId: "33333333-3333-4333-8333-333333333333",
+          sourceMessageIdHash: "a".repeat(64), conversationRevision: 4,
+          salesCycleRevision: 2, productIds: ["SP-001"], cartId: null,
+          cartVersion: null, orderPreviewId: null, orderPreviewHash: null,
+          buyingIntentHash: "b".repeat(64), claimSetHash: "c".repeat(64),
+          checkedAt: "2026-08-13T02:58:00.000Z",
+          expiresAt: "2026-08-13T02:59:00.000Z",
+          reasonCodes: [], authorization: "NONE",
+        }],
+      },
+    }, now)).rejects.toThrow("EFFECT_READINESS_STALE");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+  });
   it("records a terminal initial-reply failure in the same transaction", async () => {
     const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
     const client = {

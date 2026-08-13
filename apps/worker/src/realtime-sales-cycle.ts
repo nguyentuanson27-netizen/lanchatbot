@@ -1,13 +1,16 @@
 import { createHash } from "node:crypto";
 import {
+  buildProtectedClaimsFromCartSelectionsV1,
+  evaluateDeterministicEffectReadinessV1,
   foldVietnameseForRecall,
-  resolveHybridBuyingSignal,
 } from "@lana/business-tools";
 import {
   CheckoutRevalidationV1Schema,
   OrderPreviewV1Schema,
   type AgentSalesSignalsV1,
+  type CanonicalBuyingIntentV1,
   type CartV1,
+  type DeterministicEffectReadinessV1,
   type BankTransferPolicyV1,
   type CheckoutRevalidationV1,
   type RevalidatedFactV1,
@@ -58,6 +61,7 @@ export interface RealtimeSalesCycleInput {
   readonly customerHash: string;
   readonly state: SalesCycleRuntimeState;
   readonly stateRevision: number;
+  readonly conversationRevision: number;
   readonly text: string;
   readonly messageId: string;
   readonly eventKey: string;
@@ -68,6 +72,7 @@ export interface RealtimeSalesCycleInput {
   readonly offerType: string | null;
   readonly size: string | null;
   readonly color: string | null;
+  readonly canonicalBuyingIntent: CanonicalBuyingIntentV1;
   readonly salesSignals?: AgentSalesSignalsV1 | null;
   readonly shopAlias: string;
   readonly behaviorModeResolution?: RuntimeBehaviorModeResolution;
@@ -183,46 +188,22 @@ function explicitSize(text: string): string | null {
   return text.toUpperCase().match(/(?:^|[^A-Z])(S|M|L|XL)(?:$|[^A-Z])/u)?.[1] ?? null;
 }
 
-function explicitQuantityValue(text: string): number | null {
-  const folded = asciiFold(text);
-  const match = folded.match(/(?:^|\s)(\d{1,2})\s*(?:set|bo|sp|san pham|mau)(?:\s|$)/u);
-  if (!match?.[1]) return null;
-  const value = Number(match[1]);
-  return Number.isInteger(value) && value >= 1 && value <= 20 ? value : null;
-}
-
 function requestedQuantityValue(
-  text: string,
-  hasProductContext: boolean,
-  salesSignals: AgentSalesSignalsV1 | null | undefined,
+  buyingIntent: CanonicalBuyingIntentV1,
 ): number | null {
-  const deterministic = explicitQuantityValue(text);
-  if (deterministic !== null) return deterministic;
-  return resolveHybridBuyingSignal(
-    text,
-    { hasProductContext },
-    salesSignals?.buyingIntent,
-  ).quantity;
+  return buyingIntent.decision === "COMMITTED" ? buyingIntent.quantity : null;
 }
 
 function requestedQuantity(
-  text: string,
-  hasProductContext: boolean,
-  salesSignals: AgentSalesSignalsV1 | null | undefined,
+  buyingIntent: CanonicalBuyingIntentV1,
 ): number {
-  return requestedQuantityValue(text, hasProductContext, salesSignals) ?? 1;
+  return requestedQuantityValue(buyingIntent) ?? 1;
 }
 
 function purchaseReady(
-  text: string,
-  hasProductContext: boolean,
-  salesSignals: AgentSalesSignalsV1 | null | undefined,
+  buyingIntent: CanonicalBuyingIntentV1,
 ): boolean {
-  return resolveHybridBuyingSignal(
-    text,
-    { hasProductContext },
-    salesSignals?.buyingIntent,
-  ).isBuyingSignal;
+  return buyingIntent.decision === "COMMITTED";
 }
 
 function exactEvidence(text: string, evidenceText: string | null): boolean {
@@ -664,6 +645,7 @@ export async function evaluateRealtimeSalesCycle(
   }
   let state = initial;
   const events: RealtimeSalesCycleEventPlan[] = [];
+  const effectReadiness: DeterministicEffectReadinessV1[] = [];
   const references = new Map<string, unknown>();
   const inbound = trustedInbound(input);
   let checkoutValidation: CheckoutRevalidationV1 | null = null;
@@ -713,6 +695,47 @@ export async function evaluateRealtimeSalesCycle(
   };
 
   const commandId = (suffix: string) => `sales:${input.eventKey}:${suffix}`;
+  const freshReadiness = (
+    effect: DeterministicEffectReadinessV1["effect"],
+    selections: readonly Extract<CartSelectionResult, { status: "READY" }>[],
+    cart: CartV1 | null = null,
+    preview: SalesCycleRuntimeState["preview"] = null,
+  ): DeterministicEffectReadinessV1 => {
+    const claims = buildProtectedClaimsFromCartSelectionsV1(selections.map((selection) => ({
+      productId: selection.line.parentProductId,
+      variantId: selection.line.offerId,
+      priceVnd: selection.line.posUnitPriceVnd!,
+      priceVersion: selection.versions.price,
+      inventoryVersion: selection.versions.inventory,
+      etaVersion: selection.versions.eta,
+      eta: selection.eta,
+      observedAt: selection.sourceObservedAt,
+      expiresAt: selection.sourceExpiresAt,
+    })));
+    return evaluateDeterministicEffectReadinessV1({
+      effect,
+      pageId: input.pageId,
+      conversationId: input.conversationId,
+      sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+      conversationRevision: input.conversationRevision,
+      salesCycleRevision: initial.revision,
+      productIds: selections.map(({ line }) => line.parentProductId),
+      cartId: cart?.cartId ?? null,
+      cartVersion: cart?.revision ?? null,
+      orderPreviewId: preview?.previewId ?? null,
+      orderPreviewHash: preview?.previewHash.replace(/^sha256:/u, "") ?? null,
+      buyingIntent: effect === "CART_OPEN" || effect === "CART_MUTATION"
+        ? input.canonicalBuyingIntent
+        : null,
+      claims,
+      checkedAt: input.now,
+    });
+  };
+  const acceptReadiness = (readiness: DeterministicEffectReadinessV1): boolean => {
+    if (readiness.outcome !== "READY") return false;
+    effectReadiness.push(readiness);
+    return true;
+  };
   const plan = (): RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null => {
     if (events.length === 0) return null;
     const cartExpiry = state.cart ? new Date(state.cart.expiresAt) : null;
@@ -723,6 +746,7 @@ export async function evaluateRealtimeSalesCycle(
       cartExpiresAt: cartExpiry,
       expiresAt,
       events,
+      ...(effectReadiness.length > 0 ? { effectReadiness } : {}),
     };
   };
 
@@ -920,6 +944,15 @@ export async function evaluateRealtimeSalesCycle(
       input.now,
       state.preview.revalidation,
     ).value;
+    const readySelections = selections.filter((value): value is Extract<CartSelectionResult, { status: "READY" }> =>
+      value.status === "READY"
+    );
+    const confirmationReadiness = freshReadiness(
+      "PURCHASE_CONFIRMATION", readySelections, state.cart.value, state.preview,
+    );
+    if (!acceptReadiness(confirmationReadiness)) {
+      return failedOutput(confirmationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED", plan());
+    }
     const result = apply({
       kind: "CONFIRM_PURCHASE",
       commandId: commandId("confirm"),
@@ -1080,6 +1113,15 @@ export async function evaluateRealtimeSalesCycle(
       if (!checked.value.eligible || !checked.eta) {
         return failedOutput("CHECKOUT_REVALIDATION_UNAVAILABLE", plan());
       }
+      const readySelections = selections.filter((value): value is Extract<CartSelectionResult, { status: "READY" }> =>
+        value.status === "READY"
+      );
+      const previewReadiness = freshReadiness(
+        "ORDER_PREVIEW", readySelections, state.cart.value,
+      );
+      if (!acceptReadiness(previewReadiness)) {
+        return failedOutput(previewReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED", plan());
+      }
       const previewPayload = {
         schemaVersion: 1 as const,
         previewId: deterministicUuid(`${state.cart.value.cartId}:${state.cart.value.revision}:preview`),
@@ -1132,15 +1174,15 @@ export async function evaluateRealtimeSalesCycle(
     }
 
     if (
-      purchaseReady(input.text, Boolean(input.productId || state.cart), input.salesSignals) &&
+      purchaseReady(input.canonicalBuyingIntent) &&
       input.productId &&
       state.cart.value.lines.some(({ parentProductId }) => parentProductId === input.productId) &&
-      requestedQuantityValue(input.text, true, input.salesSignals) !== null
+      requestedQuantityValue(input.canonicalBuyingIntent) !== null
     ) {
       const existing = state.cart.value.lines.find(({ parentProductId }) =>
         parentProductId === input.productId
       )!;
-      const quantity = requestedQuantityValue(input.text, true, input.salesSignals)!;
+      const quantity = requestedQuantityValue(input.canonicalBuyingIntent)!;
       if (quantity === existing.quantity) {
         return {
           handled: true,
@@ -1167,6 +1209,10 @@ export async function evaluateRealtimeSalesCycle(
         lineId: existing.lineId,
       }, input.now);
       if (verified.status !== "READY") return failedOutput(verified.reasonCode, plan());
+      const mutationReadiness = freshReadiness("CART_MUTATION", [verified], state.cart.value);
+      if (!acceptReadiness(mutationReadiness)) {
+        return failedOutput(mutationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED", plan());
+      }
       const resolved = {
         mutation: {
           kind: "SET_QUANTITY" as const,
@@ -1201,7 +1247,7 @@ export async function evaluateRealtimeSalesCycle(
     }
 
     if (
-      purchaseReady(input.text, Boolean(input.productId || state.cart), input.salesSignals) &&
+      purchaseReady(input.canonicalBuyingIntent) &&
       input.productId &&
       !state.cart.value.lines.some(({ parentProductId }) => parentProductId === input.productId)
     ) {
@@ -1211,7 +1257,7 @@ export async function evaluateRealtimeSalesCycle(
         offerType: input.offerType,
         size: explicitSize(input.text) ?? input.size,
         color: input.color,
-        quantity: requestedQuantity(input.text, true, input.salesSignals),
+        quantity: requestedQuantity(input.canonicalBuyingIntent),
         lineId: deterministicUuid(`${state.cart.value.cartId}:${input.productId}:${input.eventKey}`),
       }, input.now);
       if (selected.status !== "READY") {
@@ -1227,6 +1273,10 @@ export async function evaluateRealtimeSalesCycle(
           };
         }
         return failedOutput(selected.reasonCode, plan());
+      }
+      const mutationReadiness = freshReadiness("CART_MUTATION", [selected], state.cart.value);
+      if (!acceptReadiness(mutationReadiness)) {
+        return failedOutput(mutationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED", plan());
       }
       const resolved = { mutation: { kind: "ADD_LINE" as const, line: selected.line } };
       const reference = {
@@ -1270,7 +1320,7 @@ export async function evaluateRealtimeSalesCycle(
   }
 
   if (
-    purchaseReady(input.text, Boolean(input.productId || state.cart), input.salesSignals) &&
+    purchaseReady(input.canonicalBuyingIntent) &&
     input.productId
   ) {
     const selected = await input.facts.resolveCartSelection({
@@ -1279,7 +1329,7 @@ export async function evaluateRealtimeSalesCycle(
       offerType: input.offerType,
       size: explicitSize(input.text) ?? input.size,
       color: input.color,
-      quantity: requestedQuantity(input.text, true, input.salesSignals),
+      quantity: requestedQuantity(input.canonicalBuyingIntent),
       lineId: deterministicUuid(`${input.conversationId}:${input.productId}:${input.eventKey}`),
     }, input.now);
     if (selected.status !== "READY") {
@@ -1301,6 +1351,10 @@ export async function evaluateRealtimeSalesCycle(
         };
       }
       return failedOutput(selected.reasonCode, plan());
+    }
+    const cartOpenReadiness = freshReadiness("CART_OPEN", [selected]);
+    if (!acceptReadiness(cartOpenReadiness)) {
+      return failedOutput(cartOpenReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED", plan());
     }
     if (state.stage === "DISCOVERY") {
       apply({ kind: "FACTS_PRESENTED", commandId: commandId("facts") });

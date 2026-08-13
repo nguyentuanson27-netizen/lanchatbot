@@ -343,7 +343,10 @@ export const BuyingIntentRequestedActionV1Schema = z.enum([
 ]);
 
 export const BuyingIntentObservationV1Schema = z.object({
-  authorityVersion: z.literal("HYBRID_BUYING_INTENT_V1"),
+  authorityVersion: z.enum([
+    "HYBRID_BUYING_INTENT_V1",
+    "CANONICAL_BUYING_INTENT_V1",
+  ]),
   decision: BuyingIntentDecisionV1Schema,
   source: z.enum([
     "DETERMINISTIC",
@@ -411,6 +414,8 @@ export const ProtectedClaimValidationV1Schema = z.object({
   claimTypes: z.array(ProtectedClaimTypeV1Schema).max(8),
   validatedCount: z.number().int().nonnegative().max(8),
   rejectedCount: z.number().int().nonnegative().max(8),
+  canonicalClaimCount: z.number().int().nonnegative().max(16).optional(),
+  canonicalClaimSetHash: Sha256Schema.nullable().optional(),
   reasonCodes: GuardReasonCodesSchema,
 }).strict().superRefine((value, context) => {
   const uniqueClaimCount = new Set(value.claimTypes).size;
@@ -474,11 +479,16 @@ export const ProtectedClaimValidationV1Schema = z.object({
 });
 
 export const ReadinessObservationV1Schema = z.object({
-  rulesetVersion: z.literal("LEGACY_READINESS_OBSERVATION_V1"),
+  rulesetVersion: z.enum([
+    "LEGACY_READINESS_OBSERVATION_V1",
+    "DETERMINISTIC_EFFECT_READINESS_V1",
+  ]),
   outcome: z.enum([
     "NOT_EVALUATED",
     "LEGACY_READY",
     "LEGACY_NOT_READY",
+    "READY",
+    "BLOCKED",
   ]),
   productScope: z.enum([
     "NOT_REQUIRED",

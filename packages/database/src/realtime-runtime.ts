@@ -1,6 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
-import type { DecisionObservabilityV1 } from "@lana/contracts";
+import {
+  DeterministicEffectReadinessV1Schema,
+  type DecisionObservabilityV1,
+  type DeterministicEffectReadinessV1,
+} from "@lana/contracts";
 import type { CipherBundle } from "./repositories.js";
 import {
   LocalEnvelopeCipher,
@@ -118,6 +122,7 @@ export interface RealtimeSalesCyclePlan<TState> {
   readonly cartExpiresAt: Date | null;
   readonly expiresAt: Date;
   readonly events: readonly RealtimeSalesCycleEventPlan[];
+  readonly effectReadiness?: readonly DeterministicEffectReadinessV1[];
 }
 
 export interface RealtimeHandoffEventPlan {
@@ -343,6 +348,53 @@ export interface RealtimeCommitResult {
   readonly sendAuthorized: boolean;
   readonly reasonCodes: readonly string[];
   readonly inboxBatchStatus?: "NOT_REQUESTED" | "COMMITTED" | "SUPERSEDED";
+}
+
+function validateSalesEffectReadiness<TState, TSalesState>(
+  input: RealtimeCommitInput<TState, TSalesState>,
+  now: Date,
+): void {
+  const plan = input.salesCyclePlan;
+  if (!plan?.effectReadiness) return;
+  const parsed = plan.effectReadiness.map((value) =>
+    DeterministicEffectReadinessV1Schema.parse(value)
+  );
+  const requiredByCommand: Readonly<Partial<Record<
+    RealtimeSalesCycleEventPlan["commandKind"],
+    DeterministicEffectReadinessV1["effect"]
+  >>> = {
+    CART_OPENED: "CART_OPEN",
+    CART_MUTATED: "CART_MUTATION",
+    PREVIEW_CREATED: "ORDER_PREVIEW",
+    CONFIRM_PURCHASE: "PURCHASE_CONFIRMATION",
+  };
+  const required = new Set(plan.events
+    .map(({ commandKind }) => requiredByCommand[commandKind])
+    .filter((effect): effect is DeterministicEffectReadinessV1["effect"] =>
+      effect !== undefined
+    ));
+  for (const effect of required) {
+    if (!parsed.some((value) => value.effect === effect)) {
+      throw new Error("EFFECT_READINESS_REQUIRED");
+    }
+  }
+  for (const readiness of parsed) {
+    if (readiness.outcome !== "READY") throw new Error("EFFECT_READINESS_BLOCKED");
+    if (readiness.authorization !== "NONE") throw new Error("EFFECT_READINESS_AUTHORITY_INVALID");
+    if (
+      readiness.pageId !== input.pageId ||
+      readiness.conversationId !== input.conversationId
+    ) throw new Error("EFFECT_READINESS_SCOPE_MISMATCH");
+    if (
+      readiness.conversationRevision !== input.expectedStateVersion ||
+      readiness.salesCycleRevision !== plan.expectedRevision
+    ) throw new Error("EFFECT_READINESS_REVISION_MISMATCH");
+    const checkedAt = Date.parse(readiness.checkedAt);
+    const expiresAt = Date.parse(readiness.expiresAt);
+    if (checkedAt > now.getTime() || expiresAt <= now.getTime()) {
+      throw new Error("EFFECT_READINESS_STALE");
+    }
+  }
 }
 
 export type MetaResponseGroupGateStatus =
@@ -885,6 +937,7 @@ export class PostgresRealtimeRuntimeStore {
       const ownerBefore = before.rows[0]?.conversation_owner;
       if (!ownerBefore) throw new Error("STATE_REVISION_CONFLICT");
       if (input.salesCyclePlan) {
+        validateSalesEffectReadiness(input, now);
         await this.commitSalesCyclePlan(
           client,
           input.pageId,

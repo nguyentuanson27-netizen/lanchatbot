@@ -1,5 +1,9 @@
 import {
+  buildCanonicalDecisionEvidenceV1,
+} from "@lana/business-tools";
+import {
   PolicyBundleV1Schema,
+  type AgentBuyingIntentV1,
   type AgentSalesSignalsV1,
   type CartLineV1,
 } from "@lana/contracts";
@@ -171,6 +175,19 @@ const facts: BusinessFactsReader = {
   },
 };
 
+function canonicalBuyingIntent(
+  text: string,
+  modelBuyingIntent: AgentBuyingIntentV1 | null = null,
+) {
+  return buildCanonicalDecisionEvidenceV1({
+    text,
+    sourceMessageId: `mid:${text}`,
+    productId: "CB182",
+    modelBuyingIntent,
+    evaluatedAt: now,
+  }).buyingIntent;
+}
+
 function input(
   state: ReturnType<typeof createRealtimeSalesState>,
   text: string,
@@ -182,6 +199,7 @@ function input(
     customerHash: "customer-hash",
     state,
     stateRevision: state.revision,
+    conversationRevision: 7,
     text,
     messageId: `mid-${eventKey}`,
     eventKey,
@@ -192,6 +210,7 @@ function input(
     offerType: "SET",
     size: "M",
     color: "BE",
+    canonicalBuyingIntent: canonicalBuyingIntent(text),
     shopAlias: "LANA",
     policyResolution,
     facts,
@@ -327,6 +346,13 @@ describe("realtime Phase 3 sales cycle", () => {
     const state = createRealtimeSalesState(conversationId, pageId, now);
     const output = await evaluateRealtimeSalesCycle({
       ...input(state, text, `event-hybrid-${requestedAction}`),
+      canonicalBuyingIntent: canonicalBuyingIntent(text, {
+        decision: "COMMITTED",
+        requestedAction,
+        quantity: null,
+        evidenceText: text,
+        confidence: 0.97,
+      }),
       salesSignals: signals({
         buyingIntent: {
           decision: "COMMITTED",
@@ -349,6 +375,13 @@ describe("realtime Phase 3 sales cycle", () => {
     const state = createRealtimeSalesState(conversationId, pageId, now);
     const output = await evaluateRealtimeSalesCycle({
       ...input(state, text, "event-hybrid-quantity"),
+      canonicalBuyingIntent: canonicalBuyingIntent(text, {
+        decision: "COMMITTED",
+        requestedAction: "SET_QUANTITY",
+        quantity: 2,
+        evidenceText: text,
+        confidence: 0.98,
+      }),
       salesSignals: signals({
         buyingIntent: {
           decision: "COMMITTED",
@@ -386,6 +419,10 @@ describe("realtime Phase 3 sales cycle", () => {
     const state = createRealtimeSalesState(conversationId, pageId, now);
     const output = await evaluateRealtimeSalesCycle({
       ...input(state, text, `event-hybrid-rejected-${text.length}`),
+      canonicalBuyingIntent: canonicalBuyingIntent(text, {
+        ...buyingIntent,
+        quantity: null,
+      }),
       salesSignals: signals({ buyingIntent }),
     });
     expect(output.plan?.state.stage).not.toBe("CART_OPEN");
@@ -404,7 +441,10 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(opened).toMatchObject({
       handled: true,
       transferToHuman: false,
-      plan: { state: { stage: "CART_OPEN" } },
+      plan: {
+        state: { stage: "CART_OPEN" },
+        effectReadiness: [{ effect: "CART_OPEN", outcome: "READY", authorization: "NONE" }],
+      },
     });
     state = opened.plan!.state;
 
@@ -416,7 +456,10 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(previewed).toMatchObject({
       handled: true,
       transferToHuman: false,
-      plan: { state: { stage: "ORDER_PREVIEW" } },
+      plan: {
+        state: { stage: "ORDER_PREVIEW" },
+        effectReadiness: [{ effect: "ORDER_PREVIEW", outcome: "READY", authorization: "NONE" }],
+      },
     });
     expect(previewed.messages[0]).toMatchObject({
       kind: "TEXT",
@@ -434,7 +477,10 @@ describe("realtime Phase 3 sales cycle", () => {
       transferToHuman: true,
       desiredTag: "DA_CHOT_DON",
       reasonCode: "PURCHASE_CONFIRMED",
-      plan: { state: { stage: "PURCHASE_CONFIRMED" } },
+      plan: {
+        state: { stage: "PURCHASE_CONFIRMED" },
+        effectReadiness: [{ effect: "PURCHASE_CONFIRMATION", outcome: "READY", authorization: "NONE" }],
+      },
     });
     expect(confirmed.messages[0]).toEqual({
       kind: "TEXT",
