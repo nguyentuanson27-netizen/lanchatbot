@@ -324,7 +324,7 @@ export const DeterministicEffectReadinessV1Schema = z.object({
   sourceMessageIdHash: Sha256Schema,
   conversationRevision: z.number().int().nonnegative(),
   salesCycleRevision: z.number().int().nonnegative().nullable(),
-  productIds: z.array(BoundedIdSchema).max(3),
+  productIds: z.array(BoundedIdSchema).max(50),
   cartId: BoundedIdSchema.nullable(),
   cartVersion: z.number().int().nonnegative().nullable(),
   orderPreviewId: BoundedIdSchema.nullable(),

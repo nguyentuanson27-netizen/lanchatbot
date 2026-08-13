@@ -84,6 +84,19 @@ describe("deterministic effect readiness", () => {
     ]));
   });
 
+  it("returns a controlled block for a fourth distinct cart product", () => {
+    const result = evaluateDeterministicEffectReadinessV1({
+      ...base,
+      effect: "CART_MUTATION",
+      productIds: ["product-1", "product-2", "product-3", "product-4"],
+      deterministicEvidenceHash: hash("f"),
+    });
+
+    expect(result.outcome).toBe("BLOCKED");
+    expect(result.productIds).toEqual(["product-1", "product-2", "product-3", "product-4"]);
+    expect(result.reasonCodes).toContain("PRODUCT_AMBIGUOUS");
+  });
+
   it("allows protected outbound without buying intent but still requires product claims", () => {
     const result = evaluateDeterministicEffectReadinessV1({
       ...base, effect: "PROTECTED_OUTBOUND", buyingIntent: null,

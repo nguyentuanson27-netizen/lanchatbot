@@ -619,6 +619,88 @@ describe("realtime Phase 3 sales cycle", () => {
     }]);
   });
 
+  it("blocks a fourth distinct cart product without throwing or mutating the cart", async () => {
+    const multiProductFacts: BusinessFactsReader = {
+      ...facts,
+      async resolveCartSelection(query) {
+        const selectedLine = line(query.quantity);
+        if (!selectedLine.priceAuthority) throw new Error("test selection requires price authority");
+        return {
+          status: "READY",
+          line: {
+            ...selectedLine,
+            lineId: query.lineId,
+            parentProductId: query.productId,
+            components: selectedLine.components.map((component) => ({
+              ...component,
+              componentProductId: `${query.productId}_${component.componentRole}`,
+              componentSku: `${query.productId}_${component.componentRole}_BE_M`,
+            })),
+            priceAuthority: {
+              ...selectedLine.priceAuthority,
+              priceFactRef: `pos:${query.productId}:set`,
+              parentProductId: query.productId,
+            },
+          },
+          shopId: "LANA",
+          versions: {
+            price: `price-${query.productId}`,
+            inventory: `inventory-${query.productId}`,
+            size: `size-${query.productId}`,
+            eta: null,
+          },
+          eta: null,
+          etaExpiresAt: null,
+          sourceAuthority: "POS_SNAPSHOT",
+          stockStatus: "IN_STOCK",
+          stockAvailableQuantity: 3,
+          sourceObservedAt: "2026-07-23T02:00:00.000Z",
+          sourceExpiresAt: "2026-07-25T02:00:00.000Z",
+        };
+      },
+    };
+    const productInput = (
+      state: ReturnType<typeof createRealtimeSalesState>,
+      productId: string,
+      turn: number,
+    ) => {
+      const text = `chốt ${productId} size M`;
+      return {
+        ...input(state, text, `event-product-${turn}`),
+        productId,
+        canonicalBuyingIntent: buildCanonicalDecisionEvidenceV1({
+          text,
+          sourceMessageId: `mid:${text}`,
+          productId,
+          modelBuyingIntent: null,
+          evaluatedAt: now,
+        }).buyingIntent,
+        facts: multiProductFacts,
+      };
+    };
+
+    let state = createRealtimeSalesState(conversationId, pageId, now);
+    for (const [index, productId] of ["PRODUCT-1", "PRODUCT-2", "PRODUCT-3"].entries()) {
+      const output = await evaluateRealtimeSalesCycle(productInput(state, productId, index + 1));
+      expect(output.reasonCode).toBeNull();
+      state = output.plan!.state;
+    }
+
+    const fourth = await evaluateRealtimeSalesCycle(productInput(state, "PRODUCT-4", 4));
+
+    expect(fourth).toMatchObject({
+      handled: true,
+      messages: [],
+      transferToHuman: true,
+      desiredTag: "NHAN_VIEN",
+      reasonCode: "PRODUCT_AMBIGUOUS",
+      plan: null,
+    });
+    expect(state.cart?.value.lines).toHaveLength(3);
+    expect(state.cart?.value.lines.map(({ parentProductId }) => parentProductId))
+      .toEqual(["PRODUCT-1", "PRODUCT-2", "PRODUCT-3"]);
+  });
+
   it("stacks 5%, freeship and final 20k while the same evidence cannot escalate twice", async () => {
     let state = createRealtimeSalesState(conversationId, pageId, now);
     const opened = await evaluateRealtimeSalesCycle(input(
