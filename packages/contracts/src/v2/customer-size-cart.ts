@@ -630,6 +630,9 @@ export type CartCheckoutEligibility = z.infer<
   typeof CartCheckoutEligibilitySchema
 >;
 
+/** Canonical cart capacity. Readiness and worker preflight must reuse this value. */
+export const MAX_CART_LINES_V1 = 50;
+
 export const CartV1Schema = z
   .object({
     schemaVersion: z.literal(1),
@@ -640,7 +643,7 @@ export const CartV1Schema = z
     currency: z.literal("VND"),
     status: z.enum(["OPEN", "READY_FOR_CONFIRMATION", "CONFIRMED", "ABANDONED"]),
     checkoutEligibility: CartCheckoutEligibilitySchema,
-    lines: z.array(CartLineV1Schema).min(1).max(50),
+    lines: z.array(CartLineV1Schema).min(1).max(MAX_CART_LINES_V1),
     adjustments: z.array(CartAdjustmentV1Schema).max(10),
     shippingFeeVnd: VndAmountSchema.nullable(),
     subtotalVnd: VndAmountSchema.nullable(),

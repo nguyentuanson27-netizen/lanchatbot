@@ -620,7 +620,7 @@ describe("realtime Phase 3 sales cycle", () => {
     }]);
   });
 
-  it("blocks a fourth distinct cart product without throwing or mutating the cart", async () => {
+  it("adds a fourth distinct cart product when deterministic facts are ready", async () => {
     const multiProductFacts: BusinessFactsReader = {
       ...facts,
       async resolveCartSelection(query) {
@@ -689,17 +689,12 @@ describe("realtime Phase 3 sales cycle", () => {
 
     const fourth = await evaluateRealtimeSalesCycle(productInput(state, "PRODUCT-4", 4));
 
-    expect(fourth).toMatchObject({
-      handled: true,
-      messages: [],
-      transferToHuman: true,
-      desiredTag: "NHAN_VIEN",
-      reasonCode: "PRODUCT_AMBIGUOUS",
-      plan: null,
-    });
-    expect(state.cart?.value.lines).toHaveLength(3);
-    expect(state.cart?.value.lines.map(({ parentProductId }) => parentProductId))
-      .toEqual(["PRODUCT-1", "PRODUCT-2", "PRODUCT-3"]);
+    expect(fourth.reasonCode).toBeNull();
+    expect(fourth.transferToHuman).toBe(false);
+    expect(fourth.plan).not.toBeNull();
+    expect(fourth.plan?.state.cart?.value.lines).toHaveLength(4);
+    expect(fourth.plan?.state.cart?.value.lines.map(({ parentProductId }) => parentProductId))
+      .toEqual(["PRODUCT-1", "PRODUCT-2", "PRODUCT-3", "PRODUCT-4"]);
   });
 
   it("fails closed before readiness when a valid fifty-line cart adds product fifty-one", async () => {
@@ -761,7 +756,7 @@ describe("realtime Phase 3 sales cycle", () => {
       plan: null,
       transferToHuman: true,
       desiredTag: "NHAN_VIEN",
-      reasonCode: "PRODUCT_AMBIGUOUS",
+      reasonCode: "CART_CAPACITY_EXCEEDED",
     });
     expect(atCapacity.cart.value.lines).toHaveLength(50);
   });
@@ -819,10 +814,12 @@ describe("realtime Phase 3 sales cycle", () => {
             price: `price-${query.productId}`,
             inventory: `inventory-${query.productId}`,
             size: `size-${query.productId}`,
-            eta: "eta-v1",
+            eta: query.productId === "PRODUCT-4" ? null : "eta-v1",
           },
-          eta: { minDays: 3, maxDays: 6 },
-          etaExpiresAt: "2026-07-25T02:00:00.000Z",
+          eta: query.productId === "PRODUCT-4" ? null : { minDays: 3, maxDays: 6 },
+          etaExpiresAt: query.productId === "PRODUCT-4"
+            ? null
+            : "2026-07-25T02:00:00.000Z",
           sourceAuthority: "POS_SNAPSHOT",
           stockStatus: "IN_STOCK",
           stockAvailableQuantity: 3,
@@ -843,7 +840,7 @@ describe("realtime Phase 3 sales cycle", () => {
 
     expect(output).toMatchObject({
       transferToHuman: true,
-      reasonCode: "PRODUCT_AMBIGUOUS",
+      reasonCode: "CHECKOUT_REVALIDATION_UNAVAILABLE",
       plan: null,
     });
     expect(persisted.checkoutDraft).toBeNull();

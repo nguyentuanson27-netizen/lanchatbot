@@ -62,10 +62,12 @@ describe("deterministic effect readiness", () => {
     [0, "BLOCKED", "PRODUCT_UNRESOLVED"],
     [1, "READY", null],
     [3, "READY", null],
-    [4, "BLOCKED", "PRODUCT_AMBIGUOUS"],
-    [49, "BLOCKED", "PRODUCT_AMBIGUOUS"],
-    [50, "BLOCKED", "PRODUCT_AMBIGUOUS"],
-    [51, "BLOCKED", "PRODUCT_AMBIGUOUS"],
+    [4, "READY", null],
+    [10, "READY", null],
+    [11, "READY", null],
+    [49, "READY", null],
+    [50, "READY", null],
+    [51, "BLOCKED", "CART_CAPACITY_EXCEEDED"],
   ] as const)("evaluates product-count boundary %i without throwing", (count, outcome, reason) => {
     const productIds = Array.from({ length: count }, (_, index) =>
       `product-${String(index).padStart(3, "0")}`
@@ -133,17 +135,21 @@ describe("deterministic effect readiness", () => {
     ]));
   });
 
-  it("returns a controlled block for a fourth distinct cart product", () => {
+  it("keeps a fourth distinct cart product eligible when all deterministic facts are ready", () => {
+    const productIds = ["product-1", "product-2", "product-3", "product-4"];
     const result = evaluateDeterministicEffectReadinessV1({
       ...base,
       effect: "CART_MUTATION",
-      productIds: ["product-1", "product-2", "product-3", "product-4"],
+      productIds,
+      cartId: "cart-1",
+      cartVersion: 2,
       deterministicEvidenceHash: hash("f"),
+      claims: claimsFor(productIds),
     });
 
-    expect(result.outcome).toBe("BLOCKED");
-    expect(result.productIds).toEqual(["product-1", "product-2", "product-3", "product-4"]);
-    expect(result.reasonCodes).toContain("PRODUCT_AMBIGUOUS");
+    expect(result.outcome).toBe("READY");
+    expect(result.productIds).toEqual(productIds);
+    expect(result.reasonCodes).toEqual([]);
   });
 
   it("bounds oversized blocked readiness without throwing", () => {
@@ -157,7 +163,7 @@ describe("deterministic effect readiness", () => {
     expect(atCapacity).toMatchObject({
       outcome: "BLOCKED",
       productIds: fiftyProductIds.sort(),
-      reasonCodes: expect.arrayContaining(["PRODUCT_AMBIGUOUS"]),
+      reasonCodes: expect.arrayContaining(["CLAIM_MISSING"]),
     });
 
     const overCapacity = evaluateDeterministicEffectReadinessV1({
@@ -168,7 +174,7 @@ describe("deterministic effect readiness", () => {
     });
     expect(overCapacity.outcome).toBe("BLOCKED");
     expect(overCapacity.productIds).toHaveLength(50);
-    expect(overCapacity.reasonCodes).toContain("PRODUCT_AMBIGUOUS");
+    expect(overCapacity.reasonCodes).toContain("CART_CAPACITY_EXCEEDED");
 
     for (const invalidId of ["", "   ", "x".repeat(129)]) {
       const invalid = evaluateDeterministicEffectReadinessV1({
@@ -179,7 +185,7 @@ describe("deterministic effect readiness", () => {
       });
       expect(invalid.outcome).toBe("BLOCKED");
       expect(invalid.productIds).toHaveLength(50);
-      expect(invalid.reasonCodes).toContain("PRODUCT_AMBIGUOUS");
+      expect(invalid.reasonCodes).toContain("PRODUCT_SCOPE_INVALID");
     }
 
     const duplicate = evaluateDeterministicEffectReadinessV1({
@@ -191,7 +197,7 @@ describe("deterministic effect readiness", () => {
     expect(duplicate).toMatchObject({
       outcome: "BLOCKED",
       productIds: ["product-1"],
-      reasonCodes: expect.arrayContaining(["PRODUCT_AMBIGUOUS"]),
+      reasonCodes: expect.arrayContaining(["PRODUCT_SCOPE_INVALID"]),
     });
   });
 
@@ -212,7 +218,7 @@ describe("deterministic effect readiness", () => {
       })).toMatchObject({
         outcome: "BLOCKED",
         productIds: [],
-        reasonCodes: expect.arrayContaining(["PRODUCT_AMBIGUOUS", "PRODUCT_UNRESOLVED"]),
+        reasonCodes: expect.arrayContaining(["PRODUCT_SCOPE_INVALID", "PRODUCT_UNRESOLVED"]),
       });
     },
   );

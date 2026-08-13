@@ -3,10 +3,11 @@ import {
   DECISION_BUYING_INTENT_EVIDENCE_CODES_V1,
   DECISION_DIALOGUE_EVIDENCE_CODES_V1,
 } from "./decision-observability.js";
+import { MAX_CART_LINES_V1 } from "./customer-size-cart.js";
 
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 const BoundedIdSchema = z.string().trim().min(1).max(128);
-export const MAX_READINESS_PRODUCT_IDS_V1 = 50;
+export const MAX_READINESS_PRODUCT_IDS_V1 = MAX_CART_LINES_V1;
 
 // Single ingress choke point: arbitrary product-ID input becomes a bounded,
 // deterministic envelope; invalidity is data for BLOCKED, never an exception.
@@ -15,10 +16,16 @@ export function canonicalizeReadinessProductIdsV1(
 ): Readonly<{
   productIds: readonly string[];
   unresolved: boolean;
-  ambiguous: boolean;
+  invalid: boolean;
+  capacityExceeded: boolean;
 }> {
   if (!Array.isArray(input)) {
-    return { productIds: [], unresolved: true, ambiguous: true };
+    return {
+      productIds: [],
+      unresolved: true,
+      invalid: true,
+      capacityExceeded: false,
+    };
   }
   const strings = input.filter((value): value is string => typeof value === "string");
   const normalized = strings.map((value) => value.trim());
@@ -27,12 +34,12 @@ export function canonicalizeReadinessProductIdsV1(
   return {
     productIds: canonical.slice(0, MAX_READINESS_PRODUCT_IDS_V1),
     unresolved: canonical.length === 0,
-    ambiguous:
+    invalid:
       strings.length !== input.length ||
       valid.length !== normalized.length ||
       normalized.some((value, index) => value !== strings[index]) ||
-      canonical.length !== valid.length ||
-      canonical.length > 3,
+      canonical.length !== valid.length,
+    capacityExceeded: canonical.length > MAX_READINESS_PRODUCT_IDS_V1,
   };
 }
 
@@ -385,6 +392,8 @@ export const DETERMINISTIC_READINESS_REASON_CODES_V1 = [
   "BUYING_INTENT_SCOPE_MISMATCH",
   "PRODUCT_UNRESOLVED",
   "PRODUCT_AMBIGUOUS",
+  "PRODUCT_SCOPE_INVALID",
+  "CART_CAPACITY_EXCEEDED",
   "CLAIM_MISSING",
   "CLAIM_STALE",
   "CLAIM_SCOPE_MISMATCH",

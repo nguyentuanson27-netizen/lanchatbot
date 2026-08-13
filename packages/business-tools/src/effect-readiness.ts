@@ -35,7 +35,8 @@ export function evaluateDeterministicEffectReadinessV1(
   const canonicalProducts = canonicalizeReadinessProductIdsV1(input.productIds);
   const productIds = canonicalProducts.productIds;
   if (canonicalProducts.unresolved) reasons.add("PRODUCT_UNRESOLVED");
-  if (canonicalProducts.ambiguous) reasons.add("PRODUCT_AMBIGUOUS");
+  if (canonicalProducts.invalid) reasons.add("PRODUCT_SCOPE_INVALID");
+  if (canonicalProducts.capacityExceeded) reasons.add("CART_CAPACITY_EXCEEDED");
 
   const requiresIntent = input.effect === "CART_OPEN";
   if (requiresIntent) {

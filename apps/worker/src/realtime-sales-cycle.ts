@@ -13,6 +13,7 @@ import {
   type CartV1,
   type DeterministicConfirmationEvidenceV1,
   type DeterministicEffectReadinessV1,
+  MAX_CART_LINES_V1,
   type ProtectedClaimV1,
   type BankTransferPolicyV1,
   type CheckoutRevalidationV1,
@@ -1534,8 +1535,8 @@ export async function evaluateRealtimeSalesCycle(
       input.productId &&
       !state.cart.value.lines.some(({ parentProductId }) => parentProductId === input.productId)
     ) {
-      if (state.cart.value.lines.length >= 50) {
-        return failedOutput("PRODUCT_AMBIGUOUS", plan());
+      if (state.cart.value.lines.length >= MAX_CART_LINES_V1) {
+        return failedOutput("CART_CAPACITY_EXCEEDED", plan());
       }
       const selected = await input.facts.resolveCartSelection({
         shopAlias: input.shopAlias,

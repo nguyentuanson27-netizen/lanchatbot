@@ -182,16 +182,18 @@ describe("DF05 canonical evidence contracts", () => {
 
 describe("DF06 deterministic readiness contract", () => {
   it.each([
-    [0, 0, true, false],
-    [1, 1, false, false],
-    [3, 3, false, false],
-    [4, 4, false, true],
-    [49, 49, false, true],
-    [50, 50, false, true],
-    [51, 50, false, true],
+    [0, 0, true, false, false],
+    [1, 1, false, false, false],
+    [3, 3, false, false, false],
+    [4, 4, false, false, false],
+    [10, 10, false, false, false],
+    [11, 11, false, false, false],
+    [49, 49, false, false, false],
+    [50, 50, false, false, false],
+    [51, 50, false, false, true],
   ] as const)(
     "canonicalizes product count %i into a bounded deterministic envelope",
-    (count, expectedCount, unresolved, ambiguous) => {
+    (count, expectedCount, unresolved, invalid, capacityExceeded) => {
       const input = Array.from({ length: count }, (_, index) => `P-${String(index).padStart(3, "0")}`);
       const first = canonicalizeReadinessProductIdsV1(input);
       const second = canonicalizeReadinessProductIdsV1(input);
@@ -200,7 +202,8 @@ describe("DF06 deterministic readiness contract", () => {
       expect(first.productIds).toHaveLength(expectedCount);
       expect(first.productIds.length).toBeLessThanOrEqual(MAX_READINESS_PRODUCT_IDS_V1);
       expect(first.unresolved).toBe(unresolved);
-      expect(first.ambiguous).toBe(ambiguous);
+      expect(first.invalid).toBe(invalid);
+      expect(first.capacityExceeded).toBe(capacityExceeded);
     },
   );
 
@@ -215,7 +218,8 @@ describe("DF06 deterministic readiness contract", () => {
   ] as const)("blocks malformed, normalized, or duplicate product IDs at the choke point", (input) => {
     expect(() => canonicalizeReadinessProductIdsV1(input)).not.toThrow();
     const result = canonicalizeReadinessProductIdsV1(input);
-    expect(result.ambiguous).toBe(true);
+    expect(result.invalid).toBe(true);
+    expect(result.capacityExceeded).toBe(false);
     expect(result.productIds.length).toBeLessThanOrEqual(MAX_READINESS_PRODUCT_IDS_V1);
   });
 
@@ -225,7 +229,8 @@ describe("DF06 deterministic readiness contract", () => {
       expect(canonicalizeReadinessProductIdsV1(input)).toEqual({
         productIds: [],
         unresolved: true,
-        ambiguous: true,
+        invalid: true,
+        capacityExceeded: false,
       });
     },
   );
@@ -237,7 +242,8 @@ describe("DF06 deterministic readiness contract", () => {
       const result = canonicalizeReadinessProductIdsV1(input);
       expect(result).toEqual(canonicalizeReadinessProductIdsV1(input));
       expect(result.productIds.length).toBeLessThanOrEqual(MAX_READINESS_PRODUCT_IDS_V1);
-      expect(result.ambiguous).toBe(true);
+      expect(result.invalid).toBe(true);
+      expect(result.capacityExceeded).toBe(count > MAX_READINESS_PRODUCT_IDS_V1);
     }
   });
 
