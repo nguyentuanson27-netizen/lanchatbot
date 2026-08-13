@@ -4675,6 +4675,9 @@ export class RealtimeRunner {
       businessFacts?.productId ??
       resolvedProduct?.productId ??
       nextState.currentProductId;
+    const customerUrlSafeFallbackPlanned =
+      customerUrlDisposition === "HANDOFF" ||
+      customerUrlDisposition === "EXPLAIN_UNSUPPORTED";
     const decisionObservability = buildDecisionObservabilityV1({
       dialogueEvidenceCodes,
       dialogueEvidenceSource,
@@ -4711,7 +4714,11 @@ export class RealtimeRunner {
           ? "UNRESOLVED"
           : "NOT_REQUIRED",
       sideEffectTypes,
-      sideEffectReasonCodes: handoffGuardReasonCodes,
+      sideEffectReasonCodes: [
+        ...handoffGuardReasonCodes,
+        ...(customerUrlSafeFallbackPlanned ? customerUrlReasonCodes : []),
+      ],
+      safeFallbackPlanned: customerUrlSafeFallbackPlanned,
     });
     const modelTelemetry = resolveExplicitModelTelemetry({
       modelCalled,

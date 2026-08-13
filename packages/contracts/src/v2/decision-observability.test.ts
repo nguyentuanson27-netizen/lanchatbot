@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { DecisionObservabilityV1Schema } from "./decision-observability.js";
+import {
+  DECISION_CUSTOMER_URL_REASON_CODES_V1,
+  DecisionObservabilityV1Schema,
+} from "./decision-observability.js";
 
 const validObservability = {
   schemaVersion: 1,
@@ -178,6 +181,49 @@ describe("DecisionObservabilityV1Schema", () => {
       "CART_PRICE_NOT_FOUND",
       "BF01_DIRECT_QUESTION_NO_REPLY_RECONCILED",
     ]) {
+      expect(DecisionObservabilityV1Schema.parse({
+        ...validObservability,
+        sideEffectPlan: {
+          ...validObservability.sideEffectPlan,
+          reasonCodes: [reasonCode],
+        },
+      }).sideEffectPlan.reasonCodes).toEqual([reasonCode]);
+    }
+  });
+
+  it("registers the finite current BF-08 customer URL policy reasons", () => {
+    expect(DECISION_CUSTOMER_URL_REASON_CODES_V1).toEqual([
+      "CUSTOMER_URL_APPROVED_FIRST_PARTY_PRODUCT",
+      "CUSTOMER_URL_APPROVED_SHOP_CDN",
+      "CUSTOMER_URL_CREDENTIALS_FORBIDDEN",
+      "CUSTOMER_URL_DECEPTIVE_HOST",
+      "CUSTOMER_URL_EXPLANATION_BOUNDARY_INVALID",
+      "CUSTOMER_URL_EXPLANATION_LENGTH_INVALID",
+      "CUSTOMER_URL_EXPLANATION_MODEL_FAILED",
+      "CUSTOMER_URL_EXPLANATION_MODEL_UNAVAILABLE",
+      "CUSTOMER_URL_EXPLANATION_QUOTA_DENIED",
+      "CUSTOMER_URL_EXPLANATION_RAW_URL",
+      "CUSTOMER_URL_EXPLANATION_SAFETY_INVALID",
+      "CUSTOMER_URL_EXPLANATION_UNVERIFIED_CLAIM",
+      "CUSTOMER_URL_HTTPS_REQUIRED",
+      "CUSTOMER_URL_INVALID",
+      "CUSTOMER_URL_LIMIT_EXCEEDED",
+      "CUSTOMER_URL_MEDIA_NOT_VERIFIED",
+      "CUSTOMER_URL_MIXED_TRUST",
+      "CUSTOMER_URL_MULTI_PRODUCT_POLICY_REQUIRED",
+      "CUSTOMER_URL_PATH_NOT_APPROVED",
+      "CUSTOMER_URL_PORT_FORBIDDEN",
+      "CUSTOMER_URL_PRIVATE_ADDRESS",
+      "CUSTOMER_URL_PRODUCT_NOT_FOUND",
+      "CUSTOMER_URL_QUERY_FORBIDDEN",
+      "CUSTOMER_URL_RESIDUAL_PRODUCT_UNRESOLVED",
+      "CUSTOMER_URL_SAFE_EXPLANATION_FALLBACK",
+      "CUSTOMER_URL_SAFE_EXPLANATION_SENT",
+      "CUSTOMER_URL_SCHEME_FORBIDDEN",
+      "CUSTOMER_URL_STRICT_BLOCK_ALL",
+      "CUSTOMER_URL_UNSUPPORTED_EXTERNAL",
+    ]);
+    for (const reasonCode of DECISION_CUSTOMER_URL_REASON_CODES_V1) {
       expect(DecisionObservabilityV1Schema.parse({
         ...validObservability,
         sideEffectPlan: {

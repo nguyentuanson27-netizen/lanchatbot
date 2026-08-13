@@ -82,6 +82,7 @@ export interface BuildDecisionObservabilityInput {
   readonly productScope: ProductScope;
   readonly sideEffectTypes: readonly SideEffectType[];
   readonly sideEffectReasonCodes: readonly string[];
+  readonly safeFallbackPlanned?: boolean;
 }
 
 function boundedCodes(
@@ -145,7 +146,7 @@ export function buildDecisionObservabilityV1(
       : input.dialogueEvidenceSource;
   const sideEffectDisposition = sideEffectTypes.length === 0
     ? "NONE"
-    : input.guardOutcome === "BLOCKED"
+    : input.safeFallbackPlanned || input.guardOutcome === "BLOCKED"
       ? "SAFE_FALLBACK_PLANNED"
       : "PLANNED";
   const observation: DecisionObservabilityV1 = {
