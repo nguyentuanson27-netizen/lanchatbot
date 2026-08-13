@@ -71,7 +71,31 @@ SELECT
             FROM jsonb_array_elements_text(
               event_metadata #> '{decisionObservability,dialogueEvidence,codes}'
             ) WITH ORDINALITY AS dialogue_code(code, ordinality)
-            WHERE code ~ '^[A-Z][A-Z0-9_.:-]{0,127}$'
+            WHERE code IN (
+              'DIRECT_PURCHASE_VERB',
+              'SHIP_REQUEST',
+              'CONFIRMED_SIZE',
+              'CONFIRMED_COLOR',
+              'COMPONENT_SELECTION',
+              'MODEL_BUYING_COMMITTED',
+              'TEXT_OCCASION',
+              'TEXT_STYLE',
+              'TEXT_BUDGET',
+              'TEXT_PRICE_OBJECTION',
+              'TEXT_FIT_OBJECTION',
+              'TEXT_MATERIAL_OBJECTION',
+              'TEXT_TRUST_OBJECTION',
+              'TEXT_DELIVERY_OBJECTION',
+              'TEXT_CHOICE_OVERLOAD',
+              'STATE_OBJECTION',
+              'STATE_PRODUCT_MATCHED',
+              'STATE_BUYING_SIGNAL',
+              'STATE_MEASUREMENTS_PRESENT',
+              'REQUESTED_MATERIAL_PROOF',
+              'REQUESTED_SOCIAL_PROOF',
+              'MODEL_ANALYSIS_ACCEPTED',
+              'DETERMINISTIC_FALLBACK'
+            )
             ORDER BY ordinality
             LIMIT 16
           ) AS bounded_code

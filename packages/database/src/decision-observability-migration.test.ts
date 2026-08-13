@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { DECISION_DIALOGUE_EVIDENCE_CODES_V1 } from "@lana/contracts";
 import { describe, expect, it } from "vitest";
 
 const migration = new URL(
@@ -34,6 +35,38 @@ describe("0032 DF-P1 decision observability migration", () => {
     expect(sql).not.toContain("event_metadata AS");
     expect(sql).not.toMatch(/raw_(?:text|payload)|provider_payload/iu);
     expect(sql).not.toMatch(/GRANT\s+.*\s+TO\s+PUBLIC/iu);
+  });
+
+  it("projects only registered dialogue evidence codes and rejects PII-shaped or unknown values", async () => {
+    const sql = await readFile(migration, "utf8");
+    const dialogueProjection = sql.match(
+      /jsonb_array_elements_text\([\s\S]*?decisionObservability,dialogueEvidence,codes[\s\S]*?WITH ORDINALITY AS dialogue_code\(code, ordinality\)([\s\S]*?)ORDER BY ordinality\s+LIMIT 16/iu,
+    )?.[1];
+    const projectedAllowlist = [
+      ...(dialogueProjection?.matchAll(/'([A-Z][A-Z0-9_.:-]{0,127})'/gu) ?? []),
+    ].map((match) => match[1]);
+
+    expect(dialogueProjection).toBeDefined();
+    expect(projectedAllowlist).toEqual([
+      ...DECISION_DIALOGUE_EVIDENCE_CODES_V1,
+    ]);
+    expect(dialogueProjection).not.toMatch(/code\s*~/u);
+
+    const storedCodes = [
+      "PHONE_0900000000",
+      DECISION_DIALOGUE_EVIDENCE_CODES_V1[0],
+      "UNKNOWN_CODE",
+      ...DECISION_DIALOGUE_EVIDENCE_CODES_V1.slice(1),
+    ];
+    const adminProjection = storedCodes
+      .filter((code) => projectedAllowlist.includes(code))
+      .slice(0, 16);
+
+    expect(adminProjection).toEqual(
+      DECISION_DIALOGUE_EVIDENCE_CODES_V1.slice(0, 16),
+    );
+    expect(adminProjection).not.toContain("PHONE_0900000000");
+    expect(adminProjection).not.toContain("UNKNOWN_CODE");
   });
 
   it("restores the previous view while preserving owner and grants", async () => {

@@ -188,6 +188,44 @@ describe("DecisionObservabilityV1Schema", () => {
     }
   });
 
+  it("rejects VALIDATED protected-claim observations with no declared claims", () => {
+    expect(() => DecisionObservabilityV1Schema.parse({
+      ...validObservability,
+      protectedClaimValidation: {
+        verifierVersion: "LEGACY_GUARD_V1",
+        outcome: "VALIDATED",
+        claimTypes: [],
+        validatedCount: 0,
+        rejectedCount: 0,
+        reasonCodes: [],
+      },
+    })).toThrow();
+  });
+
+  it("rejects strategy observations that mix an absent ruleset with a present strategy", () => {
+    expect(() => DecisionObservabilityV1Schema.parse({
+      ...validObservability,
+      strategyCta: {
+        rulesetVersion: "NONE",
+        strategy: "STRATEGY_CLOSE",
+        cta: "NONE",
+        source: "NONE",
+      },
+    })).toThrow();
+  });
+
+  it("accepts an authoritative strategy observation without an additional CTA", () => {
+    expect(DecisionObservabilityV1Schema.parse({
+      ...validObservability,
+      strategyCta: {
+        rulesetVersion: "WAVE2_STRATEGY_V1",
+        strategy: "STRATEGY_CLOSE",
+        cta: "NONE",
+        source: "DETERMINISTIC_RUNTIME",
+      },
+    }).strategyCta.cta).toBe("NONE");
+  });
+
   it("rejects contradictory observations that could misstate authority", () => {
     expect(() => DecisionObservabilityV1Schema.parse({
       ...validObservability,

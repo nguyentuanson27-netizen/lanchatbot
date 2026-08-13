@@ -409,11 +409,13 @@ export const ProtectedClaimValidationV1Schema = z.object({
   }
   if (
     value.outcome === "VALIDATED" &&
-    (value.validatedCount !== value.claimTypes.length || value.rejectedCount !== 0)
+    (value.claimTypes.length === 0 ||
+      value.validatedCount !== value.claimTypes.length ||
+      value.rejectedCount !== 0)
   ) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "VALIDATED requires every declared protected claim type to pass",
+      message: "VALIDATED requires at least one declared protected claim type and every claim to pass",
     });
   }
   if (
@@ -549,10 +551,12 @@ export const StrategyCtaObservationV1Schema = z.object({
 }).strict().superRefine((value, context) => {
   const absent = value.rulesetVersion === "NONE" &&
     value.strategy === "NONE" && value.cta === "NONE" && value.source === "NONE";
-  if ((value.strategy === "NONE") !== absent) {
+  const present = value.rulesetVersion === "WAVE2_STRATEGY_V1" &&
+    value.strategy !== "NONE" && value.source !== "NONE";
+  if (!absent && !present) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "absent strategy/CTA observations must be consistently NONE",
+      message: "strategy/CTA observations must be consistently absent or authoritative",
     });
   }
 });
