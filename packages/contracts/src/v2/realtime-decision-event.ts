@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DecisionObservabilityV1Schema } from "./decision-observability.js";
 
 export const RealtimeDecisionEventTypeSchema = z.enum([
   "PRODUCT_RESOLVED",
@@ -130,6 +131,7 @@ export const RealtimeDecisionEventV1Schema = z.object({
       experimentId: z.literal("wave2-stage-playbook-v1"),
       experimentVariant: z.literal("LIVE_100"),
     }).strict().nullable().optional(),
+    decisionObservability: DecisionObservabilityV1Schema.optional(),
   }).strict(),
 }).strict();
 

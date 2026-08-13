@@ -270,6 +270,22 @@ describe("realtime golden transcripts", () => {
       "PRODUCT_MATCHED",
       "PRICE_CARD_SENT",
     ]);
+    expect(committed?.decisionEvents?.[0]?.details.decisionObservability)
+      .toMatchObject({
+        schemaVersion: 1,
+        protectedClaimValidation: {
+          verifierVersion: "LEGACY_GUARD_V1",
+          claimTypes: expect.arrayContaining(["PRICE", "PRODUCT_MEDIA"]),
+        },
+        phaseBarrier: {
+          phaseSource: "LEGACY_CONVERSATION_STAGE_V1",
+        },
+        context: { contextVersion: "LEGACY_CONTEXT_V1" },
+        sideEffectPlan: {
+          disposition: "PLANNED",
+          effectTypes: ["CONVERSATION_STATE", "META_OUTBOX"],
+        },
+      });
     const replay = await replayGolden({
       fixtureId: "GOLDEN-PRODUCT-PRICE-001",
       text: "CB182",

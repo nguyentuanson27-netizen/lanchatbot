@@ -25,6 +25,7 @@ import type { BusinessFactsReader } from "./redis-business-facts.js";
 import type { RealtimeGenerationQuota } from "./realtime-quota.js";
 import type { ChatHistoryPort } from "./redis-chat-history.js";
 import type { SalesCycleRuntimeState } from "@lana/chat-runtime";
+import { reconcileDecisionObservabilityV1 } from "./decision-observability.js";
 
 export * from "./bf02-core-realtime-runner.js";
 
@@ -569,6 +570,20 @@ function reconciledEvents(
         ],
         details: {
           ...event.details,
+          ...(event.details.decisionObservability
+            ? {
+                decisionObservability: reconcileDecisionObservabilityV1(
+                  event.details.decisionObservability,
+                  [
+                    reconciliationReasonCode,
+                    sourceCode,
+                    ...(clarification.repairSkippedReason
+                      ? [clarification.repairSkippedReason]
+                      : []),
+                  ],
+                ),
+              }
+            : {}),
           guardedPlanHash: clarification.guardedPlanHash,
           renderedReplyHash: replyHash,
           outboundMessageCount: 1,
