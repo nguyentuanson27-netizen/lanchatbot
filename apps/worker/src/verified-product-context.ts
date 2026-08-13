@@ -1,4 +1,7 @@
-import { normalizeProductCode } from "@lana/business-tools";
+import {
+  foldVietnameseForRecall,
+  normalizeProductCode,
+} from "@lana/business-tools";
 
 export type VerifiedProductContextSource =
   | "CURRENT_TURN"
@@ -44,11 +47,7 @@ const SOURCE_PRECEDENCE: Readonly<Record<VerifiedProductContextSource, number>> 
 };
 
 function asciiFold(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/gu, "")
-    .replace(/[đĐ]/gu, "d")
-    .toLocaleLowerCase("vi-VN");
+  return foldVietnameseForRecall(value);
 }
 
 /** Only explicit product abandonment resets verified fallback context. */
