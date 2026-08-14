@@ -1313,6 +1313,308 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     expect(calls.at(-1)?.trim()).toBe("COMMIT");
   });
 
+  it("commits a chained multi-mutation plan and rejects a forged link", async () => {
+    const calls: string[] = [];
+    let lockedSalesRow: Record<string, unknown> | null = null;
+    const client = {
+      async query(sql: string) {
+        calls.push(sql);
+        if (sql.includes("SELECT routing_owner")) {
+          return { rowCount: 1, rows: [{
+            routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+            transaction_now: new Date("2026-08-13T03:00:00.000Z"),
+          }] };
+        }
+        if (sql.includes("SELECT conversation_owner")) {
+          return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+        }
+        if (sql.includes("SELECT state_revision")) {
+          return { rowCount: 1, rows: [lockedSalesRow ?? { state_revision: "2" }] };
+        }
+        return { rowCount: 1, rows: [] };
+      },
+      release() {},
+    };
+    const cipher = new LocalEnvelopeCipher("00".repeat(32), "test-key-v1");
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      cipher,
+    );
+    (store as unknown as { pool: unknown }).pool = { async connect() { return client; } };
+    const now = new Date("2026-08-13T03:00:00.000Z");
+    const conversationId = "33333333-3333-4333-8333-333333333333";
+    const cartId = "10000000-0000-4000-8000-000000000013";
+    const mutationLineId = "10000000-0000-4000-8000-000000000014";
+    const productScope = { kind: "PRODUCT" as const, productId: "SP-001", variantId: "SET" };
+    const provenance = (sourceVersion: string, contentHash: string) => ({
+      authority: "POS_SNAPSHOT" as const,
+      sourceVersion,
+      evidenceRef: `cart-selection:${sourceVersion}`,
+      contentHash,
+      observedAt: "2026-08-13T02:59:00.000Z",
+      expiresAt: "2026-08-13T03:05:00.000Z",
+    });
+    const claims = [{
+      schemaVersion: 1 as const,
+      claimId: "10000000-0000-4000-8000-000000000011",
+      type: "PRICE" as const,
+      scope: productScope,
+      provenance: provenance("price:1", "1".repeat(64)),
+      value: { amountVnd: 699_000, currency: "VND" as const },
+      authorization: "NONE" as const,
+    }, {
+      schemaVersion: 1 as const,
+      claimId: "10000000-0000-4000-8000-000000000012",
+      type: "STOCK" as const,
+      scope: productScope,
+      provenance: provenance("inventory:1", "2".repeat(64)),
+      value: { status: "IN_STOCK" as const, availableQuantity: 9 },
+      authorization: "NONE" as const,
+    }];
+    const canonicalIntent = {
+      schemaVersion: 1 as const,
+      authorityVersion: "CANONICAL_BUYING_INTENT_V1" as const,
+      decision: "COMMITTED" as const,
+      requestedAction: "SET_QUANTITY" as const,
+      quantity: 3,
+      productId: "SP-001",
+      contributors: ["DETERMINISTIC_RUNTIME" as const],
+      sourceMessageIdHash: "a".repeat(64),
+      evidenceHash: "b".repeat(64),
+      reasonCodes: ["DIRECT_PURCHASE_VERB" as const],
+      evaluatedAt: "2026-08-13T02:59:00.000Z",
+      authorization: "NONE" as const,
+    };
+    const chainLine = {
+      lineId: mutationLineId,
+      parentProductId: "SP-001",
+      offerId: "SET",
+      offerKind: "SET" as const,
+      quantity: 1,
+      components: [{
+        componentProductId: "SP-001-TOP",
+        componentSku: "SP-001-TOP-M",
+        componentRole: "TOP" as const,
+        color: "BE",
+        size: "M",
+        quantity: 1,
+      }, {
+        componentProductId: "SP-001-SKIRT",
+        componentSku: "SP-001-SKIRT-M",
+        componentRole: "SKIRT" as const,
+        color: "BE",
+        size: "M",
+        quantity: 1,
+      }],
+      allowMixedSizes: false,
+      allowComponentSale: false,
+      posUnitPriceVnd: 699_000,
+      priceAuthority: {
+        priceFactRef: "price:1",
+        shopId: "LANA",
+        parentProductId: "SP-001",
+        offerId: "SET",
+        offerPriceKind: "SET" as const,
+        componentProductId: null,
+        metadata: {
+          authority: "PANCAKE_POS" as const,
+          sourceVersion: "snapshot:1",
+          observedAt: "2026-08-13T02:59:00.000Z",
+          expiresAt: "2026-08-15T02:59:00.000Z",
+          freshForSeconds: 172_800 as const,
+          freshnessState: "FRESH" as const,
+        },
+      },
+      lineTotalVnd: 699_000,
+    };
+    const cartAt = (revision: number, quantity: number, updatedAt: string) => ({
+      schemaVersion: 1 as const,
+      cartId,
+      salesEpisodeId: "10000000-0000-4000-8000-000000000015",
+      customerProfileId: "10000000-0000-4000-8000-000000000016",
+      revision,
+      currency: "VND" as const,
+      status: "OPEN" as const,
+      checkoutEligibility: "ELIGIBLE" as const,
+      lines: [{ ...chainLine, quantity, lineTotalVnd: 699_000 * quantity }],
+      adjustments: [],
+      shippingFeeVnd: 30_000,
+      subtotalVnd: 699_000 * quantity,
+      discountTotalVnd: 0,
+      grandTotalVnd: 699_000 * quantity + 30_000,
+      createdAt: "2026-08-13T02:55:00.000Z",
+      updatedAt,
+    });
+    const beforeCart = cartAt(1, 1, "2026-08-13T02:59:00.000Z");
+    const midCart = cartAt(2, 2, "2026-08-13T02:59:30.000Z");
+    const finalCart = cartAt(3, 3, "2026-08-13T03:00:00.000Z");
+    const evaluatedAt = now.toISOString();
+    const buildEvidence = (
+      commandId: string,
+      quantity: number,
+      before: unknown,
+      after: unknown,
+    ) => {
+      const mutation = { kind: "SET_QUANTITY" as const, lineId: mutationLineId, quantity };
+      const mutationPayloadHash = sha256({ mutation });
+      const core = [
+        "DETERMINISTIC_CART_MUTATION_EVIDENCE_V1",
+        "SET_QUANTITY",
+        "CANONICAL_BUYING_INTENT",
+        sha256(canonicalIntent),
+        mutation,
+        mutationPayloadHash,
+        "a".repeat(64),
+        rawSha256(commandId),
+        sha256(before),
+        sha256(after),
+        evaluatedAt,
+      ];
+      return {
+        schemaVersion: 1 as const,
+        authorityVersion: "DETERMINISTIC_CART_MUTATION_EVIDENCE_V1" as const,
+        action: "SET_QUANTITY" as const,
+        authorityKind: "CANONICAL_BUYING_INTENT" as const,
+        authorityEvidenceHash: sha256(canonicalIntent),
+        mutation,
+        mutationPayloadHash,
+        sourceMessageIdHash: "a".repeat(64),
+        commandIdHash: rawSha256(commandId),
+        beforeCartStateHash: sha256(before),
+        afterCartStateHash: sha256(after),
+        evidenceHash: sha256(core),
+        evaluatedAt,
+        contributor: "DETERMINISTIC_RUNTIME" as const,
+        authorization: "NONE" as const,
+      };
+    };
+    const firstCommandId = "sales:event-2:cart-mutation-1";
+    const secondCommandId = "sales:event-2:cart-mutation-2";
+    const firstEvidence = buildEvidence(firstCommandId, 2, beforeCart, midCart);
+    const secondEvidence = buildEvidence(secondCommandId, 3, midCart, finalCart);
+    const readinessFor = (evidenceHash: string) => ({
+      schemaVersion: 1 as const,
+      rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1" as const,
+      effect: "CART_MUTATION" as const,
+      outcome: "READY" as const,
+      pageId: "page-1",
+      conversationId,
+      sourceMessageIdHash: "a".repeat(64),
+      conversationRevision: 4,
+      salesCycleRevision: 2,
+      productIds: ["SP-001"],
+      cartId,
+      cartVersion: 3,
+      cartStateHash: sha256(finalCart),
+      orderPreviewId: null,
+      orderPreviewHash: null,
+      buyingIntentHash: sha256(canonicalIntent),
+      deterministicEvidenceHash: evidenceHash,
+      claimSetHash: sha256(claims),
+      protectedClaimTypes: [],
+      checkedAt: evaluatedAt,
+      expiresAt: "2026-08-13T03:01:00.000Z",
+      reasonCodes: [],
+      authorization: "NONE" as const,
+    });
+    const mutationEvent = (
+      commandId: string,
+      mutationPayloadHash: string,
+      revisionBefore: number,
+    ) => ({
+      commandId,
+      commandKind: "CART_MUTATED" as const,
+      outcome: "APPLIED" as const,
+      stateRevisionBefore: revisionBefore,
+      stateRevisionAfter: revisionBefore + 1,
+      stageBefore: "CART_OPEN",
+      stageAfter: "CART_OPEN",
+      cartId,
+      cartVersion: revisionBefore,
+      mutationAction: "SET_QUANTITY" as const,
+      mutationPayloadHash,
+      reasonCode: null,
+      occurredAt: now,
+    });
+    const chainedCommit = {
+      pageId: "page-1",
+      customerHash: "hash",
+      conversationId,
+      expectedStateVersion: 4,
+      state: { revision: 5, routingOwner: "APP", conversationOwner: "BOT" },
+      salesCyclePlan: {
+        expectedRevision: 2,
+        readinessContractVersion: "DF06_EFFECT_READINESS_V1",
+        sourceMessageIdHash: "a".repeat(64),
+        canonicalBuyingIntent: canonicalIntent,
+        state: { revision: 4, cart: { value: finalCart } },
+        cartExpiresAt: new Date("2026-08-14T03:00:00.000Z"),
+        expiresAt: new Date("2026-08-14T03:00:00.000Z"),
+        events: [
+          mutationEvent(firstCommandId, firstEvidence.mutationPayloadHash, 2),
+          mutationEvent(secondCommandId, secondEvidence.mutationPayloadHash, 3),
+        ],
+        cartMutationEvidence: [firstEvidence, secondEvidence],
+        effectClaimSets: [{ effect: "CART_MUTATION", claims }],
+        effectReadiness: [
+          readinessFor(firstEvidence.evidenceHash),
+          readinessFor(secondEvidence.evidenceHash),
+        ],
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+
+    const salesExpiresAt = new Date("2026-08-14T03:00:00.000Z");
+    const lockedBundle = cipher.encryptJson({
+      revision: 2,
+      stage: "CART_OPEN",
+      cart: { value: beforeCart, expiresAt: salesExpiresAt.toISOString() },
+    }, `lana:sales-cycle:v1:page-1:${conversationId}`, salesExpiresAt);
+    lockedSalesRow = {
+      conversation_id: conversationId,
+      page_id: "page-1",
+      state_revision: "2",
+      state_ciphertext: lockedBundle.ciphertext,
+      state_nonce: lockedBundle.nonce,
+      state_auth_tag: lockedBundle.authTag,
+      state_encrypted_dek: lockedBundle.encryptedDek,
+      state_key_ref: lockedBundle.keyRef,
+      cart_expires_at: salesExpiresAt,
+      expires_at: salesExpiresAt,
+    };
+
+    // A forged intermediate after-state breaks the chain even though every
+    // receipt stays internally self-consistent.
+    await expect(store.commit({
+      ...chainedCommit,
+      salesCyclePlan: {
+        ...chainedCommit.salesCyclePlan,
+        cartMutationEvidence: [
+          { ...firstEvidence, afterCartStateHash: "7".repeat(64) },
+          secondEvidence,
+        ],
+      },
+    }, now)).rejects.toThrow("CART_MUTATION_EVIDENCE_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    // The last receipt must still land exactly on the committed cart.
+    await expect(store.commit({
+      ...chainedCommit,
+      salesCyclePlan: {
+        ...chainedCommit.salesCyclePlan,
+        cartMutationEvidence: [
+          firstEvidence,
+          { ...secondEvidence, afterCartStateHash: "8".repeat(64) },
+        ],
+      },
+    }, now)).rejects.toThrow("CART_MUTATION_EVIDENCE_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    await expect(store.commit(chainedCommit, now)).resolves.toMatchObject({
+      stateCommitted: true,
+    });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+  });
+
   it("records a terminal initial-reply failure in the same transaction", async () => {
     const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
     const client = {

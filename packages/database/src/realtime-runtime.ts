@@ -595,10 +595,22 @@ function validateSalesEffectReadiness<TState, TSalesState>(
   if (mutationEvents.length !== mutationEvidence.length) {
     throw new Error("CART_MUTATION_EVIDENCE_REQUIRED");
   }
-  for (const event of mutationEvents) {
-    const commandIdHash = sha256TextV1(event.commandId);
-    const evidence = mutationEvidence.find((value) => value.commandIdHash === commandIdHash);
+  // Receipts form a chain in event order: each one's after-state is the next
+  // one's before-state, and only the last lands on the committed cart. Binding
+  // every receipt to the final cart instead would reject any plan carrying more
+  // than one mutation, which the locked-state replay below already supports.
+  const orderedEvidence = mutationEvents.map((event) => {
+    const evidence = mutationEvidence.find((value) =>
+      value.commandIdHash === sha256TextV1(event.commandId)
+    );
     if (!evidence) throw new Error("CART_MUTATION_EVIDENCE_REQUIRED");
+    return evidence;
+  });
+  for (const [index, event] of mutationEvents.entries()) {
+    const evidence = orderedEvidence[index]!;
+    const expectedAfterCartStateHash = index === orderedEvidence.length - 1
+      ? finalCartStateHash
+      : orderedEvidence[index + 1]!.beforeCartStateHash;
     const expectedMutationPayloadHash = sha256CanonicalV1({ mutation: evidence.mutation });
     const expectedEvidenceHash = sha256CanonicalV1([
       evidence.authorityVersion,
@@ -618,7 +630,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
       event.mutationAction !== evidence.action ||
       event.mutationPayloadHash !== evidence.mutationPayloadHash ||
       evidence.mutationPayloadHash !== expectedMutationPayloadHash ||
-      evidence.afterCartStateHash !== finalCartStateHash ||
+      evidence.afterCartStateHash !== expectedAfterCartStateHash ||
       evidence.evidenceHash !== expectedEvidenceHash ||
       Date.parse(evidence.evaluatedAt) > now.getTime()
     ) {
