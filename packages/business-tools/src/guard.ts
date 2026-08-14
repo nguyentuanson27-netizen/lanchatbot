@@ -10,6 +10,7 @@ import {
   type SizeRecommendationProtectedClaimV1,
 } from "@lana/contracts";
 import type { GuardInput, GuardResult } from "./types.js";
+import { foldVietnameseForRecall } from "./vietnamese-text.js";
 
 const RAW_URL_PATTERN = /https?:\/\/\S+/iu;
 const PRICE_PATTERN = /(?:\d[\d.,]*)\s*(?:k\b|nghìn\b|vnd\b|triệu\b|đ|₫)/giu;
@@ -70,11 +71,7 @@ type SizeMentionScope = {
   readonly sentenceEnd: number;
 };
 function normalizedVietnameseForGuard(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/gu, "")
-    .replace(/[\u0111\u0110]/gu, "d")
-    .toLocaleLowerCase("vi-VN");
+  return foldVietnameseForRecall(value);
 }
 function tokenizeSizeText(value: string): readonly SizeToken[] {
   return [...value.matchAll(/[a-z0-9]+|[(),;.!?/:=\u2013\u2014-]|\n/gu)].map(

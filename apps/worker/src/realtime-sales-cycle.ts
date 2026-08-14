@@ -1,5 +1,8 @@
 import { createHash } from "node:crypto";
-import { resolveHybridBuyingSignal } from "@lana/business-tools";
+import {
+  foldVietnameseForRecall,
+  resolveHybridBuyingSignal,
+} from "@lana/business-tools";
 import {
   CheckoutRevalidationV1Schema,
   OrderPreviewV1Schema,
@@ -150,11 +153,7 @@ interface RevalidationBuild {
 }
 
 function asciiFold(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .replace(/đ/giu, "d")
-    .toLowerCase();
+  return foldVietnameseForRecall(value);
 }
 
 function canonicalJson(value: unknown): string {

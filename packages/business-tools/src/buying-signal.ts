@@ -1,4 +1,5 @@
 import type { AgentBuyingIntentV1 } from "@lana/contracts";
+import { foldVietnameseForRecall } from "./vietnamese-text.js";
 
 export type BuyingSignalReason =
   | "DIRECT_PURCHASE_VERB"
@@ -24,11 +25,7 @@ export interface HybridBuyingSignalDetection extends BuyingSignalDetection {
 }
 
 function asciiFold(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/gu, "")
-    .replace(/[đĐ]/gu, "d")
-    .toLowerCase()
+  return foldVietnameseForRecall(value)
     .replace(/[^a-z0-9]+/gu, " ")
     .trim();
 }
