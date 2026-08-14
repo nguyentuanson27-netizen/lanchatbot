@@ -41,5 +41,11 @@ describe("DF05 canonical buying authority wiring", () => {
     expect(database).toContain("EFFECT_READINESS_CLAIM_SCOPE_MISMATCH");
     expect(database).toContain("EFFECT_READINESS_CONFIRMATION_BINDING_MISMATCH");
     expect(database).toContain("EFFECT_READINESS_PREVIEW_MISMATCH");
+    expect(database).toContain("validateLockedCartOpenTransitionV1");
+    expect(database).toContain("FROM runtime_policy_pins");
+    expect(database).toContain("createCanonicalCartV2");
+    expect(database).toContain("deriveCanonicalNegotiationCustomerStateV1");
+    expect(database).toContain("authorizationNow: transactionNow");
+    expect(database).not.toContain("customerState: context.customerState");
   });
 });

@@ -13,6 +13,9 @@ Status: source-only implementation evidence for DF-P3 in Release Train DF-A. It 
 7. Commerce Meta output binds its exact claim set and final payload, plus the exact sales parent, cart, offer set, and preview. The outbound claim set may be a semantically validated subset/superset for the rendered text; Meta readiness cannot independently authorize commerce output.
 8. A blocked worker path returns no committable mutation plan and retains no checkout PII, cart-ready event, preview event, or cart mutation.
 9. Model evidence has authorization `NONE` and cannot authorize cart, order, or protected effects.
+10. `CART_OPENED` carries `CartOpenEvidenceV1`: the current buying intent, one exact seed line, cart draft, policy reference, and immutable `SALES_EPISODE` policy pin are bound together. The database reads the pin and independently creates the complete cart and initial negotiation state.
+11. `NEGOTIATION_EVENT` carries `NegotiationTransitionEvidenceV1`. The database derives the next tier from the locked negotiation ledger and exact current-message event; caller-supplied `cartReplayContext.customerState` is only a claim to compare, never authority.
+12. Artifact timestamps preserve the worker decision preimage, while policy and POS freshness authorization use the database `clock_timestamp()` captured inside the commit transaction.
 
 The current worker emits one receipt per message. The contract and database verifier support an atomic N-receipt batch only when every receipt independently carries approved authority and the complete chain replays to the exact final cart.
 
@@ -31,6 +34,10 @@ The canonical cart reducer and shop-policy evaluator live in the lower-level `@l
 | Blocked checkout or facts become stale after local evaluation | No plan, PII, `CART_READY`, preview, or cart mutation survives | sales-cycle tests |
 | Atomic N mutation batch | Receipts connect prior after-hash to next before-hash; wrong order, gap, duplicate command, wrong final hash, action, product, or offer is rejected | commerce binding contract and database replay tests |
 | Full cart field changes under an unchanged line/product set | Complete canonical cart hash/replay mismatch; transaction rejects | canonical cart and database replay tests |
+| New cart changes a timestamp/status/total while resealing its self-declared hash | DB recreates the cart from the one-line draft plus pinned policy and rejects `CART_OPEN_FULL_REPLAY_MISMATCH` | cart-open contract, worker, and database transaction tests |
+| Cart-open policy is valid at artifact time but expired at DB transaction time | Canonical replay is blocked using the transaction authorization clock; no state commits | commerce-kernel and database transaction tests |
+| Caller submits one price objection but claims `CAUTIOUS` directly | DB derives `HESITANT` from the locked `READY` ledger and rejects the forged transition | negotiation contract, worker, and database transaction tests |
+| Cart-open or negotiation evidence uses a different message/command/evidence hash | Transaction rejects the typed transition evidence before state commit | contract and database transaction tests |
 | Missing, stale, conflicting, cross-product, wrong-offer, wrong-price, or insufficient-stock claims | `BLOCKED` before worker mutation or transaction rejection | business-tools and database tests |
 | `CART_READY` with incomplete claim coverage | Transaction rejects `EFFECT_READINESS_CLAIM_MISSING` | database runtime tests |
 | Preview or confirmation with missing/wrong parent artifact | Transaction rejects parent/cart/preview binding mismatch | readiness and database tests |

@@ -1,5 +1,9 @@
 import type { PolicyBundleV1 } from "@lana/contracts";
 import {
+  canonicalNegotiationEventFingerprintV1,
+  deriveCanonicalNegotiationCustomerStateV1,
+} from "@lana/commerce-kernel";
+import {
   evaluateShopPolicy,
   type AuthorizedPolicyAdjustment,
   type ClosingCustomerState,
@@ -89,6 +93,7 @@ export interface ApplyNegotiationEventV2Input {
   readonly cart: NegotiationCartSnapshotV2;
   readonly policy: PolicyBundleV1;
   readonly now: Date;
+  readonly authorizationNow?: Date;
 }
 
 export type NegotiationBlockReasonV2 =
@@ -159,50 +164,7 @@ function validId(value: string): boolean {
 }
 
 function eventFingerprint(input: ApplyNegotiationEventV2Input): string {
-  const evidence = input.evidence.intent === "PRICE_OBJECTION"
-    ? [input.evidence.source, input.evidence.intent, input.evidence.evidenceId, input.evidence.objectionEvidenceId, input.evidence.reasonCode, input.evidence.observedAt]
-    : input.evidence.intent === "CART_MUTATED"
-      ? [input.evidence.source, input.evidence.intent, input.evidence.evidenceId, input.evidence.mutationReasonCode, input.evidence.observedAt]
-      : [input.evidence.source, input.evidence.intent, input.evidence.evidenceId, input.evidence.observedAt];
-  const lines = [...input.cart.lines]
-    .sort((left, right) => left.lineId.localeCompare(right.lineId))
-    .map((line) => [
-      line.lineId,
-      line.shopId,
-      line.parentProductId,
-      line.offerKind,
-      line.quantity,
-      line.priceEvidence.authority,
-      line.priceEvidence.shopId,
-      line.priceEvidence.parentProductId,
-      line.priceEvidence.offerKind,
-      line.priceEvidence.sourceVersion,
-      line.priceEvidence.observedAt,
-      line.priceEvidence.expiresAt,
-      line.priceEvidence.freshForSeconds,
-      line.priceEvidence.unitPriceVnd,
-    ]);
-  return JSON.stringify([
-    input.negotiationId,
-    input.expectedStateVersion,
-    input.expectedCartVersion,
-    input.cart.cartId,
-    input.cart.cartVersion,
-    evidence,
-    lines,
-  ]);
-}
-
-function nextCustomerState(
-  current: ClosingCustomerState | null,
-  evidence: NegotiationEvidenceV2,
-  objectionAlreadyConsumed: boolean,
-): ClosingCustomerState {
-  const base = current ?? "READY";
-  if (evidence.intent !== "PRICE_OBJECTION" || objectionAlreadyConsumed) return base;
-  if (base === "READY") return "HESITANT";
-  if (base === "HESITANT") return "CAUTIOUS";
-  return "CAUTIOUS";
+  return canonicalNegotiationEventFingerprintV1(input);
 }
 
 function policyEvidenceFor(state: ClosingCustomerState) {
@@ -302,6 +264,7 @@ function blocked(
  * unable to both advance the concession tier.
  */
 export function applyNegotiationEventV2(input: ApplyNegotiationEventV2Input): NegotiationDecisionV2 {
+  const authorizationNow = input.authorizationNow ?? input.now;
   if (
     !validId(input.negotiationId) ||
     !validId(input.cart.cartId) ||
@@ -310,7 +273,8 @@ export function applyNegotiationEventV2(input: ApplyNegotiationEventV2Input): Ne
     (input.evidence.intent === "PRICE_OBJECTION" && (!validId(input.evidence.objectionEvidenceId) || !validId(input.evidence.reasonCode)))
   ) return blocked(input, "INVALID_IDENTITY");
   const evidenceTime = Date.parse(input.evidence.observedAt);
-  if (!Number.isFinite(input.now.getTime()) || !Number.isFinite(evidenceTime) || evidenceTime > input.now.getTime() + 5 * 60 * 1_000) {
+  if (!Number.isFinite(input.now.getTime()) || !Number.isFinite(authorizationNow.getTime()) ||
+    !Number.isFinite(evidenceTime) || evidenceTime > authorizationNow.getTime() + 5 * 60 * 1_000) {
     return blocked(input, "EVIDENCE_INVALID");
   }
   if (
@@ -359,12 +323,17 @@ export function applyNegotiationEventV2(input: ApplyNegotiationEventV2Input): Ne
     (input.state?.processedEvents.length ?? 0) >= 200 ||
     (input.evidence.intent === "PRICE_OBJECTION" && !objectionAlreadyConsumed && (input.state?.consumedObjectionEvidenceIds.length ?? 0) >= 50)
   ) return blocked(input, "NEGOTIATION_LEDGER_FULL");
-  const customerState = nextCustomerState(input.state?.customerState ?? null, input.evidence, objectionAlreadyConsumed);
+  const customerState = deriveCanonicalNegotiationCustomerStateV1(
+    input.state?.customerState ?? null,
+    input.evidence.intent,
+    objectionAlreadyConsumed,
+  );
   const evaluation = evaluateShopPolicy({
     policy: input.policy,
     lines: input.cart.lines,
     closingEvidence: policyEvidenceFor(customerState),
     now: input.now,
+    authorizationNow,
   });
   if (evaluation.status === "BLOCKED") {
     return blocked(input, "POLICY_EVALUATION_BLOCKED", evaluation.reasonCode);

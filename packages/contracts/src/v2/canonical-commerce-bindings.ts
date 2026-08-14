@@ -260,6 +260,88 @@ export type CanonicalCartReplayContextV1 = z.infer<
   typeof CanonicalCartReplayContextV1Schema
 >;
 
+const RuntimePolicyPinBindingV1Schema = z.object({
+  scopeType: z.literal("SALES_EPISODE"),
+  scopeId: ExactBoundedIdSchema,
+  channel: z.enum(["CANARY_LIVE", "PUBLISHED"]),
+  bundleHash: z.string().regex(/^sha256:[a-f0-9]{64}$/u),
+}).strict();
+
+const CanonicalCartDraftV1Schema = z.object({
+  identity: z.object({
+    cartId: z.string().uuid(),
+    salesEpisodeId: z.string().uuid(),
+    customerProfileId: z.string().uuid(),
+  }).strict(),
+  // The current CART_OPEN authority is one deterministic product selection.
+  // Later additions use CartMutationBatchEvidenceV1 rather than widening this seed.
+  lines: z.array(CartLineV1Schema).length(1),
+  shopId: ExactBoundedIdSchema,
+  policyRef: VersionedPolicyReferenceV1Schema,
+}).strict();
+
+export const CartOpenEvidenceV1Schema = z.object({
+  schemaVersion: z.literal(1),
+  contractVersion: z.literal("CART_OPEN_EVIDENCE_V1"),
+  sourceMessageIdHash: Sha256Schema,
+  commandIdHash: Sha256Schema,
+  cartDraftRef: VersionedPolicyReferenceV1Schema,
+  draft: CanonicalCartDraftV1Schema,
+  replayContext: CanonicalCartReplayContextV1Schema,
+  policyPin: RuntimePolicyPinBindingV1Schema,
+  createdAt: z.string().datetime(),
+  evidenceHash: Sha256Schema,
+}).strict().superRefine((value, context) => {
+  if (value.replayContext.customerState !== null) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["replayContext", "customerState"], message: "cart open derives READY state during replay" });
+  }
+  if (value.draft.shopId !== value.replayContext.shopId ||
+    canonicalJsonV1(value.draft.policyRef) !== canonicalJsonV1(value.replayContext.policyRef)) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["draft"], message: "cart draft must bind the exact replay shop and policy" });
+  }
+});
+export type CartOpenEvidenceV1 = z.infer<typeof CartOpenEvidenceV1Schema>;
+
+export function cartOpenEvidenceHashPreimageV1(
+  input: z.input<typeof CartOpenEvidenceV1Schema>,
+): string {
+  const { evidenceHash: _evidenceHash, ...evidence } = CartOpenEvidenceV1Schema.parse(input);
+  return `CART_OPEN_EVIDENCE_V1\n${canonicalJsonV1(evidence)}`;
+}
+
+export const NegotiationTransitionEvidenceV1Schema = z.object({
+  schemaVersion: z.literal(1),
+  contractVersion: z.literal("NEGOTIATION_TRANSITION_EVIDENCE_V1"),
+  sourceMessageIdHash: Sha256Schema,
+  commandIdHash: Sha256Schema,
+  eventIdHash: Sha256Schema,
+  evidenceIdHash: Sha256Schema,
+  objectionEvidenceIdHash: Sha256Schema.nullable(),
+  intent: z.enum(["PURCHASE_READY", "PRICE_OBJECTION", "OTHER"]),
+  reasonCode: ExactBoundedIdSchema.nullable(),
+  observedAt: z.string().datetime(),
+  evidenceHash: Sha256Schema,
+}).strict().superRefine((value, context) => {
+  if (value.intent === "PRICE_OBJECTION") {
+    if (value.objectionEvidenceIdHash === null || value.reasonCode === null) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["objectionEvidenceIdHash"], message: "price objection requires exact objection evidence" });
+    }
+  } else if (value.objectionEvidenceIdHash !== null || value.reasonCode !== null) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["intent"], message: "non-objection transition cannot carry objection authority" });
+  }
+});
+export type NegotiationTransitionEvidenceV1 = z.infer<
+  typeof NegotiationTransitionEvidenceV1Schema
+>;
+
+export function negotiationTransitionEvidenceHashPreimageV1(
+  input: z.input<typeof NegotiationTransitionEvidenceV1Schema>,
+): string {
+  const { evidenceHash: _evidenceHash, ...evidence } =
+    NegotiationTransitionEvidenceV1Schema.parse(input);
+  return `NEGOTIATION_TRANSITION_EVIDENCE_V1\n${canonicalJsonV1(evidence)}`;
+}
+
 export const CartMutationBatchEvidenceV1Schema = z.object({
   schemaVersion: z.literal(1),
   contractVersion: z.literal("CART_MUTATION_BATCH_EVIDENCE_V1"),

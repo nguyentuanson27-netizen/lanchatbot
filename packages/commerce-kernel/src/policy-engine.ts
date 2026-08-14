@@ -63,6 +63,8 @@ export interface ShopPolicyEvaluationInput {
   /** Raw structured evidence; callers cannot select CAUTIOUS directly. */
   readonly closingEvidence: ClosingEvidence;
   readonly now: Date;
+  /** Authoritative commit clock for policy/POS freshness; `now` remains artifact time. */
+  readonly authorizationNow?: Date;
 }
 
 export interface AuthorizedPolicyAdjustment {
@@ -138,9 +140,10 @@ export function deriveClosingCustomerState(rawEvidence: unknown): ClosingCustome
 /** Deterministic shop-wide policy; only fresh identity-bound POS evidence enters totals. */
 export function evaluateShopPolicy(input: ShopPolicyEvaluationInput): ShopPolicyEvaluation {
   const policy = PolicyBundleV1Schema.parse(input.policy);
+  const authorizationNow = input.authorizationNow ?? input.now;
   if (policy.status !== "ACTIVE") return blocked("POLICY_NOT_ACTIVE");
-  if (input.now.getTime() < Date.parse(policy.effectiveAt)) return blocked("POLICY_NOT_EFFECTIVE");
-  if (policy.effectiveUntil !== null && input.now.getTime() >= Date.parse(policy.effectiveUntil)) {
+  if (authorizationNow.getTime() < Date.parse(policy.effectiveAt)) return blocked("POLICY_NOT_EFFECTIVE");
+  if (policy.effectiveUntil !== null && authorizationNow.getTime() >= Date.parse(policy.effectiveUntil)) {
     return blocked("POLICY_EXPIRED");
   }
   if (input.lines.length === 0) return blocked("CART_EMPTY");
@@ -170,10 +173,10 @@ export function evaluateShopPolicy(input: ShopPolicyEvaluationInput): ShopPolicy
       evidence.parentProductId !== line.parentProductId ||
       evidence.offerKind !== line.offerKind
     ) return blocked("PRICE_EVIDENCE_IDENTITY_MISMATCH");
-    if (Date.parse(evidence.observedAt) > input.now.getTime() + MAX_FUTURE_CLOCK_SKEW_MS) {
+    if (Date.parse(evidence.observedAt) > authorizationNow.getTime() + MAX_FUTURE_CLOCK_SKEW_MS) {
       return blocked("POS_PRICE_FROM_FUTURE");
     }
-    if (Date.parse(evidence.expiresAt) <= input.now.getTime()) return blocked("POS_PRICE_STALE");
+    if (Date.parse(evidence.expiresAt) <= authorizationNow.getTime()) return blocked("POS_PRICE_STALE");
     if (evidence.unitPriceVnd === null) return blocked("POS_PRICE_MISSING");
     const nextCount = parentProductUnitCount + line.quantity;
     const lineTotal = evidence.unitPriceVnd * line.quantity;

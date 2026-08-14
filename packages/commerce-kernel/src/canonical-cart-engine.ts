@@ -183,6 +183,7 @@ function evaluatedCart(input: {
   readonly customerState: ClosingCustomerState;
   readonly readyForConfirmation: boolean;
   readonly now: Date;
+  readonly authorizationNow?: Date;
 }): Extract<CanonicalCartDecisionV2, { status: "BLOCKED" }> | CartV1 {
   const priceLines = canonicalCartPolicyLinesV2(input.lines, input.shopId);
   if (priceLines === null) {
@@ -200,6 +201,7 @@ function evaluatedCart(input: {
       lines: priceLines,
       closingEvidence: closingEvidence(input.customerState),
       now: input.now,
+      ...(input.authorizationNow === undefined ? {} : { authorizationNow: input.authorizationNow }),
     });
   } catch {
     return {
@@ -256,6 +258,7 @@ export function createCanonicalCartV2(input: {
   readonly shopId: string;
   readonly policy: PolicyBundleV1;
   readonly now: Date;
+  readonly authorizationNow?: Date;
 }): CanonicalCartCreationV2 {
   if (
     !Number.isFinite(input.now.getTime()) ||
@@ -302,6 +305,7 @@ export function createCanonicalCartV2(input: {
     customerState: "READY",
     readyForConfirmation: false,
     now: input.now,
+    ...(input.authorizationNow === undefined ? {} : { authorizationNow: input.authorizationNow }),
   });
   if (!("schemaVersion" in evaluated)) {
     return {
@@ -325,6 +329,7 @@ export function applyCanonicalCartDecisionV2(input: {
   readonly customerState: ClosingCustomerState;
   readonly readyForConfirmation?: boolean;
   readonly now: Date;
+  readonly authorizationNow?: Date;
 }): CanonicalCartDecisionV2 {
   const parsed = CartV1Schema.safeParse(input.cart);
   if (!parsed.success) throw new Error("CANONICAL_CART_INVALID");
@@ -363,6 +368,7 @@ export function applyCanonicalCartDecisionV2(input: {
     customerState: input.customerState,
     readyForConfirmation: input.readyForConfirmation === true,
     now: input.now,
+    ...(input.authorizationNow === undefined ? {} : { authorizationNow: input.authorizationNow }),
   });
   if (!("schemaVersion" in next)) return next;
   return { status: "APPLIED", cart: next, previousVersion: cart.revision, nextVersion };

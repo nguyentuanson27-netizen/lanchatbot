@@ -7,14 +7,21 @@ import {
   cartMutationAuthorityBindingHashPreimageV1,
   cartMutationBatchEvidenceHashPreimageV1,
   cartMutationReceiptHashPreimageV1,
+  cartOpenEvidenceHashPreimageV1,
   deterministicEffectReadinessHashPreimageV1,
   effectBindingHashPreimageV1,
+  negotiationTransitionEvidenceHashPreimageV1,
   PolicyBundleV1Schema,
   type CartOfferBindingV1,
   type CartV1,
   type DeterministicEffectReadinessV1,
 } from "@lana/contracts";
-import { applyCanonicalCartDecisionV2 } from "@lana/commerce-kernel";
+import {
+  applyCanonicalCartDecisionV2,
+  canonicalCartPolicyLinesV2,
+  canonicalNegotiationEventFingerprintV1,
+  createCanonicalCartV2,
+} from "@lana/commerce-kernel";
 import { LocalEnvelopeCipher } from "./envelope-cipher.js";
 import {
   PostgresRealtimeRuntimeStore,
@@ -1048,6 +1055,11 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
   it("enforces exact cart-mutation authority, claims, payload and locked-state binding", async () => {
     const calls: string[] = [];
     let lockedSalesRow: Record<string, unknown> | null = null;
+    let transactionClock = new Date("2026-08-13T03:00:00.000Z");
+    let runtimePolicyPinRow: Readonly<{
+      bundle_hash: string;
+      bundle: Record<string, unknown>;
+    }> | null = null;
     const sourceMessageId = "mid-cart-mutation";
     const sourceMessageIdHash = rawSha256(sourceMessageId);
     const policyMetadata = {
@@ -1102,7 +1114,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         if (sql.includes("SELECT routing_owner")) {
           return { rowCount: 1, rows: [{
             routing_owner: "APP", app_send_enabled: true, kill_switch: false,
-            transaction_now: new Date("2026-08-13T03:00:00.000Z"),
+            transaction_now: transactionClock,
           }] };
         }
         if (sql.includes("SELECT conversation_owner")) {
@@ -1116,6 +1128,11 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         }
         if (sql.includes("SELECT state_revision")) {
           return { rowCount: 1, rows: [lockedSalesRow ?? { state_revision: "2" }] };
+        }
+        if (sql.includes("FROM runtime_policy_pins")) {
+          return runtimePolicyPinRow === null
+            ? { rowCount: 0, rows: [] }
+            : { rowCount: 1, rows: [runtimePolicyPinRow] };
         }
         return { rowCount: 1, rows: [] };
       },
@@ -1385,7 +1402,20 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       ...commitInput,
       salesCyclePlan: {
         ...commitInput.salesCyclePlan,
-        state: { revision: 3, cart: { value: exactCart } },
+        state: {
+          revision: 3,
+          stage: "CART_OPEN",
+          cart: { value: exactCart, expiresAt: "2026-08-14T03:00:00.000Z" },
+          commerceContext: {
+            shopId: "LANA",
+            policyRef: {
+              id: policy.policyBundleId,
+              version: policy.policyVersion,
+              contentHash: `sha256:${sha256(policy)}`,
+            },
+          },
+          negotiation: { customerState: "READY" },
+        },
         cartMutationBatchEvidence: mutationBatchEvidence,
         effectReadiness: [sealReadinessV1({
           schemaVersion: 1,
@@ -1434,6 +1464,471 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       cart_expires_at: salesExpiresAt,
       expires_at: salesExpiresAt,
     };
+
+    const mutationLockedSalesRow = lockedSalesRow;
+    const openCommandId = "sales:event-2:cart-open";
+    const openPolicyRef = replayContext.policyRef;
+    const openDraft = {
+      identity: {
+        cartId: "10000000-0000-4000-8000-000000000041",
+        salesEpisodeId: "10000000-0000-4000-8000-000000000042",
+        customerProfileId: "10000000-0000-4000-8000-000000000043",
+      },
+      lines: [{ ...exactLine, quantity: 1, lineTotalVnd: 699_000 }],
+      shopId: "LANA",
+      policyRef: openPolicyRef,
+    };
+    const openReplay = createCanonicalCartV2({
+      identity: openDraft.identity,
+      lines: openDraft.lines,
+      shopId: openDraft.shopId,
+      policy,
+      now,
+      authorizationNow: transactionClock,
+    });
+    expect(openReplay.status).toBe("CREATED");
+    if (openReplay.status !== "CREATED") throw new Error("TEST_CART_OPEN_REPLAY_FAILED");
+    const openCart = openReplay.cart;
+    const openPolicyLines = canonicalCartPolicyLinesV2(openCart.lines, "LANA");
+    expect(openPolicyLines).not.toBeNull();
+    if (openPolicyLines === null) throw new Error("TEST_CART_OPEN_POLICY_LINES_FAILED");
+    const openEventId = `${openCommandId}:ready`;
+    const openNegotiation = {
+      schemaVersion: 2 as const,
+      negotiationId: `negotiation:${openCart.cartId}`,
+      cartId: openCart.cartId,
+      cartVersion: openCart.revision,
+      stateVersion: 1,
+      customerState: "READY" as const,
+      consumedObjectionEvidenceIds: [],
+      processedEvents: [{
+        eventId: openEventId,
+        fingerprint: canonicalNegotiationEventFingerprintV1({
+          negotiationId: `negotiation:${openCart.cartId}`,
+          expectedStateVersion: 0,
+          expectedCartVersion: openCart.revision,
+          eventId: openEventId,
+          evidence: {
+            source: "MODEL_INTERPRETATION",
+            intent: "PURCHASE_READY",
+            evidenceId: openEventId,
+            observedAt: now.toISOString(),
+          },
+          cart: { cartId: openCart.cartId, cartVersion: openCart.revision, lines: openPolicyLines },
+        }),
+        resultingStateVersion: 1,
+      }],
+      quote: {
+        policyBundleId: policy.policyBundleId,
+        policyVersion: policy.policyVersion,
+        customerState: "READY" as const,
+        parentProductUnitCount: 1,
+        subtotalVnd: openCart.subtotalVnd,
+        shippingFeeVnd: openCart.shippingFeeVnd,
+        adjustments: openCart.adjustments.map((adjustment) => ({
+          ruleId: adjustment.policyAuthorization.ruleId,
+          kind: adjustment.kind,
+          amountVnd: adjustment.amountVnd,
+          percentageBps: adjustment.percentageBps,
+        })),
+        discountTotalVnd: openCart.discountTotalVnd,
+        grandTotalVnd: openCart.grandTotalVnd,
+      },
+      updatedAt: now.toISOString(),
+    };
+    const openIntent = {
+      ...canonicalIntent,
+      requestedAction: "OPEN_CART" as const,
+      quantity: 1,
+    };
+    const openDraftRef = {
+      id: "cart-draft:mid-cart-mutation",
+      version: "draft-v1",
+      contentHash: `sha256:${sha256(openDraft)}` as const,
+    };
+    const openEvidencePlaceholder = {
+      schemaVersion: 1 as const,
+      contractVersion: "CART_OPEN_EVIDENCE_V1" as const,
+      sourceMessageIdHash,
+      commandIdHash: rawSha256(openCommandId),
+      cartDraftRef: openDraftRef,
+      draft: openDraft,
+      replayContext: { ...replayContext, customerState: null },
+      policyPin: {
+        scopeType: "SALES_EPISODE" as const,
+        scopeId: "sales-episode:df06-test",
+        channel: "PUBLISHED" as const,
+        bundleHash: `sha256:${"7".repeat(64)}` as const,
+      },
+      createdAt: now.toISOString(),
+      evidenceHash: "0".repeat(64),
+    };
+    const openEvidence = {
+      ...openEvidencePlaceholder,
+      evidenceHash: rawSha256(cartOpenEvidenceHashPreimageV1(openEvidencePlaceholder)),
+    };
+    const openCartHash = cartHash(openCart);
+    const openReadiness = sealReadinessV1({
+      schemaVersion: 1,
+      rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1",
+      effect: "CART_OPEN",
+      outcome: "READY",
+      pageId: "page-1",
+      conversationId: commitInput.conversationId,
+      sourceMessageIdHash,
+      conversationRevision: 4,
+      salesCycleRevision: 2,
+      productIds: ["SP-001"],
+      cartId: openCart.cartId,
+      cartVersion: openCart.revision,
+      cartStateHash: openCartHash,
+      orderPreviewId: null,
+      orderPreviewHash: null,
+      buyingIntentHash: sha256(openIntent),
+      deterministicEvidenceHash: null,
+      claimSetHash: sha256(claims),
+      protectedClaimTypes: [],
+      checkedAt: now.toISOString(),
+      expiresAt: "2026-08-13T03:01:00.000Z",
+      reasonCodes: [],
+      authorization: "NONE",
+    }, { offerBindings: canonicalCartOfferBindingsV1(openCart.lines) });
+    const openState = {
+      revision: 3,
+      stage: "CART_OPEN",
+      cart: { value: openCart, expiresAt: salesExpiresAt.toISOString() },
+      commerceContext: { shopId: "LANA", policyRef: openPolicyRef },
+      negotiation: openNegotiation,
+    };
+    const openPlan = {
+      ...commitInput,
+      salesCyclePlan: {
+        expectedRevision: 2,
+        readinessContractVersion: "DF06_EFFECT_READINESS_V1" as const,
+        sourceMessageIdHash,
+        canonicalBuyingIntent: openIntent,
+        state: openState,
+        cartExpiresAt: salesExpiresAt,
+        expiresAt: salesExpiresAt,
+        events: [{
+          commandId: openCommandId,
+          commandKind: "CART_OPENED" as const,
+          outcome: "APPLIED" as const,
+          stateRevisionBefore: 2,
+          stateRevisionAfter: 3,
+          stageBefore: "SIZE_RECOMMENDED",
+          stageAfter: "CART_OPEN",
+          cartId: openCart.cartId,
+          cartVersion: openCart.revision,
+          reasonCode: null,
+          occurredAt: now,
+        }],
+        effectClaimSets: [{ effect: "CART_OPEN" as const, claims }],
+        effectReadiness: [openReadiness],
+        cartOpenEvidence: openEvidence,
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    const emptyCartLockedBundle = cipher.encryptJson({
+      revision: 2,
+      stage: "SIZE_RECOMMENDED",
+      cart: null,
+      commerceContext: null,
+      negotiation: null,
+    }, `lana:sales-cycle:v1:page-1:${commitInput.conversationId}`, salesExpiresAt);
+    lockedSalesRow = {
+      ...mutationLockedSalesRow,
+      state_ciphertext: emptyCartLockedBundle.ciphertext,
+      state_nonce: emptyCartLockedBundle.nonce,
+      state_auth_tag: emptyCartLockedBundle.authTag,
+      state_encrypted_dek: emptyCartLockedBundle.encryptedDek,
+      state_key_ref: emptyCartLockedBundle.keyRef,
+    };
+    runtimePolicyPinRow = {
+      bundle_hash: openEvidence.policyPin.bundleHash,
+      bundle: { policy },
+    };
+    await expect(store.commit(openPlan, now)).resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    await expect(store.commit({
+      ...openPlan,
+      salesCyclePlan: {
+        ...openPlan.salesCyclePlan,
+        events: openPlan.salesCyclePlan.events.map((event) => ({
+          ...event,
+          cartId: "10000000-0000-4000-8000-000000000099",
+        })),
+      },
+    }, now)).rejects.toThrow("CART_OPEN_EVENT_BINDING_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const forgedOpenCart = {
+      ...openCart,
+      createdAt: "2026-08-13T03:00:01.000Z",
+      updatedAt: "2026-08-13T03:00:01.000Z",
+    };
+    await expect(store.commit({
+      ...openPlan,
+      salesCyclePlan: {
+        ...openPlan.salesCyclePlan,
+        state: {
+          ...openState,
+          cart: { value: forgedOpenCart, expiresAt: salesExpiresAt.toISOString() },
+        },
+        effectReadiness: [resealReadinessV1(openReadiness, {
+          cartStateHash: cartHash(forgedOpenCart),
+        })],
+      },
+    }, now)).rejects.toThrow("CART_OPEN_FULL_REPLAY_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const expiringPolicy = PolicyBundleV1Schema.parse({
+      ...policy,
+      policyVersion: "df06-test-expiring",
+      effectiveUntil: "2026-08-13T03:00:30.000Z",
+    });
+    const expiringPolicyRef = {
+      id: expiringPolicy.policyBundleId,
+      version: expiringPolicy.policyVersion,
+      contentHash: `sha256:${sha256(expiringPolicy)}` as const,
+    };
+    const expiringDraft = {
+      ...openDraft,
+      policyRef: expiringPolicyRef,
+    };
+    const expiringDraftRef = {
+      ...openDraftRef,
+      version: "draft-expiring-v1",
+      contentHash: `sha256:${sha256(expiringDraft)}` as const,
+    };
+    const expiringEvidencePlaceholder = {
+      ...openEvidencePlaceholder,
+      cartDraftRef: expiringDraftRef,
+      draft: expiringDraft,
+      replayContext: {
+        ...openEvidencePlaceholder.replayContext,
+        policyRef: expiringPolicyRef,
+        policyBundle: expiringPolicy,
+      },
+      policyPin: {
+        ...openEvidencePlaceholder.policyPin,
+        bundleHash: `sha256:${"8".repeat(64)}` as const,
+      },
+      evidenceHash: "0".repeat(64),
+    };
+    const expiringEvidence = {
+      ...expiringEvidencePlaceholder,
+      evidenceHash: rawSha256(cartOpenEvidenceHashPreimageV1(expiringEvidencePlaceholder)),
+    };
+    transactionClock = new Date("2026-08-13T03:00:45.000Z");
+    runtimePolicyPinRow = {
+      bundle_hash: expiringEvidence.policyPin.bundleHash,
+      bundle: { policy: expiringPolicy },
+    };
+    await expect(store.commit({
+      ...openPlan,
+      salesCyclePlan: {
+        ...openPlan.salesCyclePlan,
+        state: {
+          ...openState,
+          commerceContext: { shopId: "LANA", policyRef: expiringPolicyRef },
+        },
+        cartOpenEvidence: expiringEvidence,
+      },
+    }, now)).rejects.toThrow("CART_OPEN_FULL_REPLAY_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+    transactionClock = now;
+
+    const negotiationQuote = (
+      cart: CartV1,
+      customerState: "HESITANT" | "CAUTIOUS",
+    ) => ({
+      policyBundleId: policy.policyBundleId,
+      policyVersion: policy.policyVersion,
+      customerState,
+      parentProductUnitCount: cart.lines.reduce((total, line) => total + line.quantity, 0),
+      subtotalVnd: cart.subtotalVnd,
+      shippingFeeVnd: cart.shippingFeeVnd,
+      adjustments: cart.adjustments.map((adjustment) => ({
+        ruleId: adjustment.policyAuthorization.ruleId,
+        kind: adjustment.kind,
+        amountVnd: adjustment.amountVnd,
+        percentageBps: adjustment.percentageBps,
+      })),
+      discountTotalVnd: cart.discountTotalVnd,
+      grandTotalVnd: cart.grandTotalVnd,
+    });
+    const hesitantReplay = applyCanonicalCartDecisionV2({
+      cart: openCart,
+      expectedCartVersion: openCart.revision,
+      mutation: null,
+      shopId: "LANA",
+      policy,
+      customerState: "HESITANT",
+      now,
+      authorizationNow: transactionClock,
+    });
+    const cautiousReplay = applyCanonicalCartDecisionV2({
+      cart: openCart,
+      expectedCartVersion: openCart.revision,
+      mutation: null,
+      shopId: "LANA",
+      policy,
+      customerState: "CAUTIOUS",
+      now,
+      authorizationNow: transactionClock,
+    });
+    expect(hesitantReplay.status).toBe("APPLIED");
+    expect(cautiousReplay.status).toBe("APPLIED");
+    if (hesitantReplay.status !== "APPLIED" || cautiousReplay.status !== "APPLIED") {
+      throw new Error("TEST_NEGOTIATION_REPLAY_FAILED");
+    }
+    const negotiationCommandId = "sales:event-2:price-objection";
+    const negotiationEvidenceId = `inbound:${sourceMessageId}`;
+    const negotiationFingerprint = canonicalNegotiationEventFingerprintV1({
+      negotiationId: openNegotiation.negotiationId,
+      expectedStateVersion: openNegotiation.stateVersion,
+      expectedCartVersion: openCart.revision,
+      eventId: negotiationEvidenceId,
+      evidence: {
+        source: "MODEL_INTERPRETATION",
+        intent: "PRICE_OBJECTION",
+        evidenceId: negotiationEvidenceId,
+        objectionEvidenceId: negotiationEvidenceId,
+        reasonCode: "PRICE_TOO_HIGH",
+        observedAt: now.toISOString(),
+      },
+      cart: { cartId: openCart.cartId, cartVersion: openCart.revision, lines: openPolicyLines },
+    });
+    const negotiationEvidencePlaceholder = {
+      schemaVersion: 1 as const,
+      contractVersion: "NEGOTIATION_TRANSITION_EVIDENCE_V1" as const,
+      sourceMessageIdHash,
+      commandIdHash: rawSha256(negotiationCommandId),
+      eventIdHash: rawSha256(negotiationEvidenceId),
+      evidenceIdHash: rawSha256(negotiationEvidenceId),
+      objectionEvidenceIdHash: rawSha256(negotiationEvidenceId),
+      intent: "PRICE_OBJECTION" as const,
+      reasonCode: "PRICE_TOO_HIGH",
+      observedAt: now.toISOString(),
+      evidenceHash: "0".repeat(64),
+    };
+    const negotiationEvidence = {
+      ...negotiationEvidencePlaceholder,
+      evidenceHash: rawSha256(
+        negotiationTransitionEvidenceHashPreimageV1(negotiationEvidencePlaceholder),
+      ),
+    };
+    const negotiationEvent = {
+      commandId: negotiationCommandId,
+      commandKind: "NEGOTIATION_EVENT" as const,
+      outcome: "APPLIED" as const,
+      stateRevisionBefore: 3,
+      stateRevisionAfter: 4,
+      stageBefore: "CART_OPEN",
+      stageAfter: "CART_OPEN",
+      cartId: openCart.cartId,
+      cartVersion: hesitantReplay.cart.revision,
+      reasonCode: null,
+      negotiationTransitionEvidence: negotiationEvidence,
+      occurredAt: now,
+    };
+    const nextNegotiation = {
+      ...openNegotiation,
+      cartVersion: hesitantReplay.cart.revision,
+      stateVersion: openNegotiation.stateVersion + 1,
+      customerState: "HESITANT" as const,
+      consumedObjectionEvidenceIds: [negotiationEvidenceId],
+      processedEvents: [...openNegotiation.processedEvents, {
+        eventId: negotiationEvidenceId,
+        fingerprint: negotiationFingerprint,
+        resultingStateVersion: openNegotiation.stateVersion + 1,
+      }],
+      quote: negotiationQuote(hesitantReplay.cart, "HESITANT"),
+      updatedAt: now.toISOString(),
+    };
+    const negotiationReadiness = sealReadinessV1({
+      ...openReadiness,
+      effect: "CART_READY",
+      cartVersion: hesitantReplay.cart.revision,
+      cartStateHash: cartHash(hesitantReplay.cart),
+      buyingIntentHash: null,
+    }, { offerBindings: canonicalCartOfferBindingsV1(hesitantReplay.cart.lines) });
+    const { cartOpenEvidence: _cartOpenEvidence, ...openPlanWithoutCartOpenEvidence } =
+      openPlan.salesCyclePlan;
+    const negotiationPlan = {
+      ...openPlan,
+      salesCyclePlan: {
+        ...openPlanWithoutCartOpenEvidence,
+        expectedRevision: 3,
+        state: {
+          ...openState,
+          revision: 4,
+          cart: { value: hesitantReplay.cart, expiresAt: salesExpiresAt.toISOString() },
+          negotiation: nextNegotiation,
+        },
+        events: [negotiationEvent],
+        effectClaimSets: [{ effect: "CART_READY" as const, claims }],
+        effectReadiness: [resealReadinessV1(negotiationReadiness, {
+          salesCycleRevision: 3,
+        })],
+        cartReplayContext: { ...replayContext, customerState: "HESITANT" as const },
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    const openLockedBundle = cipher.encryptJson(openState,
+      `lana:sales-cycle:v1:page-1:${commitInput.conversationId}`, salesExpiresAt);
+    lockedSalesRow = {
+      ...mutationLockedSalesRow,
+      state_revision: "3",
+      state_ciphertext: openLockedBundle.ciphertext,
+      state_nonce: openLockedBundle.nonce,
+      state_auth_tag: openLockedBundle.authTag,
+      state_encrypted_dek: openLockedBundle.encryptedDek,
+      state_key_ref: openLockedBundle.keyRef,
+    };
+    await expect(store.commit(negotiationPlan, now)).resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    await expect(store.commit({
+      ...negotiationPlan,
+      salesCyclePlan: {
+        ...negotiationPlan.salesCyclePlan,
+        events: negotiationPlan.salesCyclePlan.events.map((event) => ({
+          ...event,
+          cartVersion: event.cartVersion + 1,
+        })),
+      },
+    }, now)).rejects.toThrow("NEGOTIATION_EVENT_BINDING_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const forgedCautiousNegotiation = {
+      ...nextNegotiation,
+      cartVersion: cautiousReplay.cart.revision,
+      customerState: "CAUTIOUS" as const,
+      quote: negotiationQuote(cautiousReplay.cart, "CAUTIOUS"),
+    };
+    await expect(store.commit({
+      ...negotiationPlan,
+      salesCyclePlan: {
+        ...negotiationPlan.salesCyclePlan,
+        state: {
+          ...negotiationPlan.salesCyclePlan.state,
+          cart: { value: cautiousReplay.cart, expiresAt: salesExpiresAt.toISOString() },
+          negotiation: forgedCautiousNegotiation,
+        },
+        effectReadiness: [resealReadinessV1(
+          negotiationPlan.salesCyclePlan.effectReadiness[0]!,
+          {
+            cartStateHash: cartHash(cautiousReplay.cart),
+          },
+          { offerBindings: canonicalCartOfferBindingsV1(cautiousReplay.cart.lines) },
+        )],
+        cartReplayContext: { ...replayContext, customerState: "CAUTIOUS" as const },
+      },
+    }, now)).rejects.toThrow("NEGOTIATION_TRANSITION_REPLAY_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+    lockedSalesRow = mutationLockedSalesRow;
+    runtimePolicyPinRow = null;
 
     const cartReadyReplay = applyCanonicalCartDecisionV2({
       cart: beforeCart,
@@ -1515,6 +2010,32 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     };
     await expect(store.commit(changedCartWithoutNewReadiness, now))
       .rejects.toThrow("EFFECT_READINESS_CART_STATE_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const mislabeledProtectedState = {
+      ...exactMutation,
+      salesCyclePlan: {
+        expectedRevision: exactMutation.salesCyclePlan.expectedRevision,
+        state: exactMutation.salesCyclePlan.state,
+        cartExpiresAt: exactMutation.salesCyclePlan.cartExpiresAt,
+        expiresAt: exactMutation.salesCyclePlan.expiresAt,
+        events: [{
+          commandId: "sales:event-2:facts",
+          commandKind: "FACTS_PRESENTED" as const,
+          outcome: "APPLIED" as const,
+          stateRevisionBefore: 2,
+          stateRevisionAfter: 3,
+          stageBefore: "CART_OPEN",
+          stageAfter: "CART_OPEN",
+          cartId,
+          cartVersion: exactCart.revision,
+          reasonCode: null,
+          occurredAt: now,
+        }],
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    await expect(store.commit(mislabeledProtectedState, now))
+      .rejects.toThrow("PROTECTED_SALES_STATE_EVENT_MISMATCH");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
     const matchedFact = {

@@ -84,11 +84,16 @@ const policyResolution = {
   mayAffectOutbound: true,
   reasonCodes: [],
   auditWrite: "RECORDED",
-  audit: {},
+  audit: {
+    channel: "PUBLISHED",
+    bundleHash: `sha256:${"a".repeat(64)}`,
+    pinScopeType: "SALES_EPISODE",
+    pinScopeId: `${conversationId}:PUBLISHED`,
+  },
   bundle: {
     schemaVersion: 1,
     bundleId: "runtime-phase3-live",
-    bundleHash: "sha256:test",
+    bundleHash: `sha256:${"a".repeat(64)}`,
     pageId,
     channel: "PUBLISHED",
     sideEffects: "LIVE_OUTBOUND",
@@ -454,6 +459,15 @@ describe("realtime Phase 3 sales cycle", () => {
       expect.objectContaining({ effect: "CART_OPEN", outcome: "READY", authorization: "NONE" }),
       expect.objectContaining({ effect: "PROTECTED_OUTBOUND", outcome: "READY", authorization: "NONE" }),
     ]));
+    expect(opened.plan?.cartOpenEvidence).toMatchObject({
+      contractVersion: "CART_OPEN_EVIDENCE_V1",
+      sourceMessageIdHash: opened.plan?.sourceMessageIdHash,
+      policyPin: {
+        scopeType: "SALES_EPISODE",
+        channel: "PUBLISHED",
+        bundleHash: `sha256:${"a".repeat(64)}`,
+      },
+    });
     state = opened.plan!.state;
 
     const previewed = await evaluateRealtimeSalesCycle(input(
@@ -1027,6 +1041,16 @@ describe("realtime Phase 3 sales cycle", () => {
     });
     expect(hesitant.plan?.effectReadiness).toEqual(expect.arrayContaining([
       expect.objectContaining({ effect: "PROTECTED_OUTBOUND", outcome: "READY" }),
+    ]));
+    expect(hesitant.plan?.events).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        commandKind: "NEGOTIATION_EVENT",
+        negotiationTransitionEvidence: expect.objectContaining({
+          contractVersion: "NEGOTIATION_TRANSITION_EVIDENCE_V1",
+          sourceMessageIdHash: hesitant.plan?.sourceMessageIdHash,
+          intent: "PRICE_OBJECTION",
+        }),
+      }),
     ]));
     expect(hesitant.messages[0]).toMatchObject({ text: expect.stringContaining("giảm 5% và freeship") });
 

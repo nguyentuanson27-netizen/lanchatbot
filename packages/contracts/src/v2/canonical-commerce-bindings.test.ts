@@ -7,6 +7,8 @@ import {
   CanonicalCartStateV1Schema,
   CanonicalProductIdV1Schema,
   CartMutationBatchEvidenceV1Schema,
+  CartOpenEvidenceV1Schema,
+  NegotiationTransitionEvidenceV1Schema,
   EffectBindingV1Schema,
   type CartV1,
 } from "./index.js";
@@ -125,6 +127,73 @@ describe("canonical commerce identifiers", () => {
       nfc.normalize("NFD"), nfc, " P-002 ", "P-003", "P-003",
       ...Array.from({ length: 51 }, (_, index) => `P-${index + 100}`),
     ]));
+  });
+});
+
+describe("cart-open and negotiation transition evidence", () => {
+  const policyRef = { id: "policy-1", version: "v1", contentHash: `sha256:${HASH_D}` };
+  const replayContext = {
+    schemaVersion: 1 as const,
+    contractVersion: "CANONICAL_CART_REPLAY_CONTEXT_V1" as const,
+    shopId: "shop-1",
+    policyRef,
+    policyBundle: POLICY,
+    customerState: null,
+  };
+  const openEvidence = {
+    schemaVersion: 1 as const,
+    contractVersion: "CART_OPEN_EVIDENCE_V1" as const,
+    sourceMessageIdHash: HASH_A,
+    commandIdHash: HASH_B,
+    cartDraftRef: { id: "draft-1", version: "v1", contentHash: `sha256:${HASH_C}` },
+    draft: {
+      identity: {
+        cartId: cart().cartId,
+        salesEpisodeId: cart().salesEpisodeId,
+        customerProfileId: cart().customerProfileId,
+      },
+      lines: cart().lines,
+      shopId: "shop-1",
+      policyRef,
+    },
+    replayContext,
+    policyPin: {
+      scopeType: "SALES_EPISODE" as const,
+      scopeId: "conversation-1:PUBLISHED",
+      channel: "PUBLISHED" as const,
+      bundleHash: `sha256:${HASH_A}`,
+    },
+    createdAt: "2026-08-14T01:00:00.000Z",
+    evidenceHash: HASH_D,
+  };
+
+  it("binds a single canonical seed line to an exact pinned policy", () => {
+    expect(CartOpenEvidenceV1Schema.parse(openEvidence)).toEqual(openEvidence);
+    expect(CartOpenEvidenceV1Schema.safeParse({
+      ...openEvidence,
+      draft: { ...openEvidence.draft, lines: [...openEvidence.draft.lines, ...openEvidence.draft.lines] },
+    }).success).toBe(false);
+  });
+
+  it("requires a price-objection transition to carry current-message-bound objection evidence", () => {
+    const transition = {
+      schemaVersion: 1 as const,
+      contractVersion: "NEGOTIATION_TRANSITION_EVIDENCE_V1" as const,
+      sourceMessageIdHash: HASH_A,
+      commandIdHash: HASH_B,
+      eventIdHash: HASH_C,
+      evidenceIdHash: HASH_C,
+      objectionEvidenceIdHash: HASH_C,
+      intent: "PRICE_OBJECTION" as const,
+      reasonCode: "PRICE_TOO_HIGH",
+      observedAt: "2026-08-14T01:00:00.000Z",
+      evidenceHash: HASH_D,
+    };
+    expect(NegotiationTransitionEvidenceV1Schema.parse(transition)).toEqual(transition);
+    expect(NegotiationTransitionEvidenceV1Schema.safeParse({
+      ...transition,
+      objectionEvidenceIdHash: null,
+    }).success).toBe(false);
   });
 });
 

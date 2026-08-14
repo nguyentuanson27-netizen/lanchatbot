@@ -15,6 +15,10 @@ import {
   cartMutationAuthorityBindingHashPreimageV1,
   cartMutationBatchEvidenceHashPreimageV1,
   cartMutationReceiptHashPreimageV1,
+  cartOpenEvidenceHashPreimageV1,
+  negotiationTransitionEvidenceHashPreimageV1,
+  CartOpenEvidenceV1Schema,
+  NegotiationTransitionEvidenceV1Schema,
   CartMutationAuthorityBindingV1Schema,
   CartMutationBatchEvidenceV1Schema,
   CartMutationReceiptV1Schema,
@@ -25,6 +29,7 @@ import {
   type CanonicalCartMutationPayloadV1,
   type CartMutationActionV1,
   type CartMutationReceiptV1,
+  type CartOpenEvidenceV1,
   type CanonicalCartReplayContextV1,
   type DeterministicConfirmationEvidenceV1,
   type DeterministicEffectReadinessV1,
@@ -702,6 +707,7 @@ export async function evaluateRealtimeSalesCycle(
   const effectReadiness: DeterministicEffectReadinessV1[] = [];
   const cartMutationReceipts: CartMutationReceiptV1[] = [];
   let cartReplayContext: CanonicalCartReplayContextV1 | null = null;
+  let cartOpenEvidence: CartOpenEvidenceV1 | null = null;
   let lastReadinessAttempt: DeterministicEffectReadinessV1 | null = null;
   const failedOutput = (
     reasonCode: string,
@@ -759,6 +765,32 @@ export async function evaluateRealtimeSalesCycle(
     });
     if (result.status === "APPLIED" || result.status === "HANDOFF") {
       state = result.state;
+      const negotiationTransitionEvidence = command.kind === "NEGOTIATION_EVENT"
+        ? (() => {
+            const exactEvidenceId = `inbound:${command.sourceMessageId}`;
+            const placeholder = {
+              schemaVersion: 1 as const,
+              contractVersion: "NEGOTIATION_TRANSITION_EVIDENCE_V1" as const,
+              sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+              commandIdHash: createHash("sha256").update(command.commandId, "utf8").digest("hex"),
+              eventIdHash: createHash("sha256").update(exactEvidenceId, "utf8").digest("hex"),
+              evidenceIdHash: createHash("sha256").update(exactEvidenceId, "utf8").digest("hex"),
+              objectionEvidenceIdHash: command.intent === "PRICE_OBJECTION"
+                ? createHash("sha256").update(exactEvidenceId, "utf8").digest("hex")
+                : null,
+              intent: command.intent,
+              reasonCode: command.intent === "PRICE_OBJECTION" ? command.reasonCode : null,
+              observedAt: input.occurredAt,
+              evidenceHash: "0".repeat(64),
+            };
+            return NegotiationTransitionEvidenceV1Schema.parse({
+              ...placeholder,
+              evidenceHash: createHash("sha256")
+                .update(negotiationTransitionEvidenceHashPreimageV1(placeholder), "utf8")
+                .digest("hex"),
+            });
+          })()
+        : null;
       events.push({
         commandId: command.commandId,
         commandKind: command.kind,
@@ -774,6 +806,7 @@ export async function evaluateRealtimeSalesCycle(
         mutationPayloadHash: readinessMutationAction === null || resolvedMutation === undefined
           ? null
           : computeBusinessContentHash(resolvedMutation).replace(/^sha256:/u, ""),
+        ...(negotiationTransitionEvidence === null ? {} : { negotiationTransitionEvidence }),
         occurredAt: input.now,
       });
     }
@@ -979,6 +1012,7 @@ export async function evaluateRealtimeSalesCycle(
       effectClaimSets: [...effectClaimSets].map(([effect, claims]) => ({ effect, claims })),
       ...(effectReadiness.length > 0 ? { effectReadiness } : {}),
       ...(cartMutationBatchEvidence === null ? {} : { cartMutationBatchEvidence }),
+      ...(cartOpenEvidence === null ? {} : { cartOpenEvidence }),
       ...(cartReplayContext === null ? {} : { cartReplayContext }),
     };
   };
@@ -1974,6 +2008,12 @@ export async function evaluateRealtimeSalesCycle(
       version: input.eventKey.slice(-128),
       contentHash: computeBusinessContentHash(draft),
     };
+    const policyPin = input.policyResolution?.audit;
+    if ((bundle.channel !== "CANARY_LIVE" && bundle.channel !== "PUBLISHED") ||
+      policyPin?.pinScopeType !== "SALES_EPISODE" || policyPin.pinScopeId === null ||
+      policyPin.channel !== bundle.channel || policyPin.bundleHash !== bundle.bundleHash) {
+      return failedOutput("CART_OPEN_POLICY_PIN_REQUIRED");
+    }
     references.set(canonicalJson(draftReference), draft);
     const opened = apply({
       kind: "CART_OPENED",
@@ -1982,6 +2022,36 @@ export async function evaluateRealtimeSalesCycle(
       expiresAt: new Date(input.now.getTime() + CART_TTL_MS).toISOString(),
     });
     if (opened.status !== "APPLIED" || !state.cart) return failedOutput("CART_OPEN_FAILED", plan());
+    const cartOpenPlaceholder = {
+      schemaVersion: 1 as const,
+      contractVersion: "CART_OPEN_EVIDENCE_V1" as const,
+      sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+      commandIdHash: createHash("sha256").update(commandId("cart-open"), "utf8").digest("hex"),
+      cartDraftRef: draftReference,
+      draft,
+      replayContext: {
+        schemaVersion: 1 as const,
+        contractVersion: "CANONICAL_CART_REPLAY_CONTEXT_V1" as const,
+        shopId: bundle.policy.shopId,
+        policyRef: policyReference,
+        policyBundle: bundle.policy,
+        customerState: null,
+      },
+      policyPin: {
+        scopeType: "SALES_EPISODE" as const,
+        scopeId: policyPin.pinScopeId,
+        channel: bundle.channel,
+        bundleHash: bundle.bundleHash,
+      },
+      createdAt: input.now.toISOString(),
+      evidenceHash: "0".repeat(64),
+    };
+    cartOpenEvidence = CartOpenEvidenceV1Schema.parse({
+      ...cartOpenPlaceholder,
+      evidenceHash: createHash("sha256")
+        .update(cartOpenEvidenceHashPreimageV1(cartOpenPlaceholder), "utf8")
+        .digest("hex"),
+    });
     const cartOpenReadiness = freshReadiness("CART_OPEN", [selected], state.cart.value);
     if (!acceptReadiness(cartOpenReadiness)) {
       return failedOutput(cartOpenReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
