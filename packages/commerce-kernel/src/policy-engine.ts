@@ -1,4 +1,5 @@
 import {
+  CanonicalProductIdV1Schema,
   PRICE_INVENTORY_FRESH_FOR_SECONDS,
   PolicyBundleV1Schema,
   type PolicyBundleV1,
@@ -12,7 +13,7 @@ const MAX_FUTURE_CLOCK_SKEW_MS = 5 * 60 * 1_000;
 const PosPriceEvidenceSchema = z.object({
   authority: z.literal("PANCAKE_POS"),
   shopId: z.string().trim().min(1).max(128),
-  parentProductId: z.string().trim().min(1).max(128),
+  parentProductId: CanonicalProductIdV1Schema,
   offerKind: z.enum(["DIRECT", "SET", "COMPONENT", "COMBO_3"]),
   sourceVersion: z.string().trim().min(1).max(128),
   observedAt: z.string().datetime(),
@@ -34,7 +35,7 @@ export type PosPriceEvidence = z.infer<typeof PosPriceEvidenceSchema>;
 const PolicyCartLineInputSchema = z.object({
   lineId: z.string().trim().min(1).max(128),
   shopId: z.string().trim().min(1).max(128),
-  parentProductId: z.string().trim().min(1).max(128),
+  parentProductId: CanonicalProductIdV1Schema,
   offerKind: z.enum(["DIRECT", "SET", "COMPONENT", "COMBO_3"]),
   quantity: z.number().int().positive().max(100),
   priceEvidence: PosPriceEvidenceSchema,
@@ -112,11 +113,6 @@ function blocked(
   return { status: "BLOCKED", reasonCode, canQuotePrice: false };
 }
 
-function sameId(left: string, right: string): boolean {
-  return left.trim().normalize("NFC").toUpperCase() ===
-    right.trim().normalize("NFC").toUpperCase();
-}
-
 export function deriveClosingCustomerState(rawEvidence: unknown): ClosingCustomerState | null {
   const parsed = ClosingEvidenceSchema.safeParse(rawEvidence);
   if (!parsed.success) return null;
@@ -169,9 +165,9 @@ export function evaluateShopPolicy(input: ShopPolicyEvaluationInput): ShopPolicy
   for (const line of lines) {
     const evidence = line.priceEvidence;
     if (
-      !sameId(line.shopId, policy.shopId) ||
-      !sameId(evidence.shopId, line.shopId) ||
-      !sameId(evidence.parentProductId, line.parentProductId) ||
+      line.shopId !== policy.shopId ||
+      evidence.shopId !== line.shopId ||
+      evidence.parentProductId !== line.parentProductId ||
       evidence.offerKind !== line.offerKind
     ) return blocked("PRICE_EVIDENCE_IDENTITY_MISMATCH");
     if (Date.parse(evidence.observedAt) > input.now.getTime() + MAX_FUTURE_CLOCK_SKEW_MS) {

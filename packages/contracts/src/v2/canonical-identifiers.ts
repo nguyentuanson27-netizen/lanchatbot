@@ -33,6 +33,12 @@ export function canonicalizeProductIdsV1(input: unknown): Readonly<{
     return { productIds: [], unresolved: true, invalid: true };
   }
 
+  // Reject before reading entries so a hostile oversized scope cannot turn a
+  // fail-closed decision into work proportional to attacker-controlled input.
+  if (input.length > MAX_CANONICAL_PRODUCT_IDS_PER_EFFECT_V1) {
+    return { productIds: [], unresolved: true, invalid: true };
+  }
+
   let invalid = false;
   const canonical: string[] = [];
   for (const candidate of input) {
@@ -53,10 +59,6 @@ export function canonicalizeProductIdsV1(input: unknown): Readonly<{
     left < right ? -1 : left > right ? 1 : 0
   );
   if (productIds.length !== canonical.length) invalid = true;
-  if (productIds.length > MAX_CANONICAL_PRODUCT_IDS_PER_EFFECT_V1) {
-    invalid = true;
-    productIds.length = MAX_CANONICAL_PRODUCT_IDS_PER_EFFECT_V1;
-  }
   return {
     productIds: productIds as CanonicalProductIdV1[],
     unresolved: productIds.length === 0,

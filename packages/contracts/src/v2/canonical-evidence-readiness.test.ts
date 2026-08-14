@@ -249,6 +249,26 @@ describe("DF06 deterministic readiness contract", () => {
     }
   });
 
+  it("rejects an oversized hostile product scope before reading individual entries", () => {
+    let reads = 0;
+    const hostile = new Proxy(
+      Array.from({ length: MAX_READINESS_PRODUCT_IDS_V1 + 1 }, (_, index) => `P-${index}`),
+      {
+        get(target, property, receiver) {
+          if (typeof property === "string" && /^\d+$/u.test(property)) reads += 1;
+          return Reflect.get(target, property, receiver);
+        },
+      },
+    );
+
+    expect(canonicalizeReadinessProductIdsV1(hostile)).toEqual({
+      productIds: [],
+      unresolved: true,
+      invalid: true,
+    });
+    expect(reads).toBe(0);
+  });
+
   it.each([
     ["CART_OPEN", ["PRICE", "STOCK"]],
     ["CART_MUTATION", ["PRICE", "STOCK"]],

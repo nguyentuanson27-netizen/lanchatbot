@@ -4886,9 +4886,9 @@ export class RealtimeRunner {
       protectedClaimOutcome: protectedClaimValidation.outcome,
       protectedClaimValidatedCount: protectedClaimValidation.validatedCount,
       protectedClaimRejectedCount: protectedClaimValidation.rejectedCount,
-      canonicalClaimCount: protectedClaimSet.claims.length,
-      canonicalClaimSetHash: protectedClaimSet.claims.length > 0
-        ? hashProtectedClaimSetV1(protectedClaimSet.claims)
+      canonicalClaimCount: protectedOutboundClaims.length,
+      canonicalClaimSetHash: protectedOutboundClaims.length > 0
+        ? hashProtectedClaimSetV1(protectedOutboundClaims)
         : null,
       protectedClaimReasonCodes: protectedClaimReasonCodes(
         proposalGuardReasonCodes ?? [],

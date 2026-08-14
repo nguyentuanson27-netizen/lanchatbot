@@ -12,6 +12,7 @@ describe("DF06 canonical commerce binding architecture", () => {
     const evaluator = source("../../../packages/business-tools/src/effect-readiness.ts");
     const evidence = source("../../../packages/business-tools/src/canonical-evidence.ts");
     const claims = source("../../../packages/business-tools/src/protected-claims.ts");
+    const commercePolicy = source("../../../packages/commerce-kernel/src/policy-engine.ts");
 
     expect(identifiers).toContain("canonicalizeProductIdsV1");
     expect(identifiers).toContain('.normalize("NFC")');
@@ -22,6 +23,9 @@ describe("DF06 canonical commerce binding architecture", () => {
     expect(evaluator).toContain("canonicalizeReadinessProductIdsV1");
     expect(evidence).toContain("const canonicalJson = canonicalJsonV1");
     expect(claims).toContain("const canonicalJson = canonicalJsonV1");
+    expect(commercePolicy).toContain("CanonicalProductIdV1Schema");
+    expect(commercePolicy).not.toMatch(/parentProductId:\s*z\.string\(\)\.trim\(\)/u);
+    expect(commercePolicy).not.toMatch(/function sameId[\s\S]{0,180}(?:trim|normalize|toUpperCase)/u);
   });
 
   it("keeps cart capacity separate from protected-text aggregation", () => {

@@ -53,6 +53,7 @@ import type {
 } from "@lana/contracts";
 import type { RuntimePolicyResolution, RuntimePolicyResolverPort } from "@lana/chat-runtime";
 import type { RealtimeMediaRecognition } from "./realtime-media-recognition.js";
+import { hashProtectedClaimSetV1 } from "@lana/business-tools";
 
 describe("RealtimeRunner", () => {
   it("uses the approved no-size clarification after a rejected size-claim repair", () => {
@@ -226,6 +227,24 @@ describe("RealtimeRunner", () => {
         "SIZE_RECOMMENDATION_REPAIR_FAILED",
       ]),
     }));
+    const observation = (durableCommitInput as {
+      decisionEvents?: readonly { details?: { decisionObservability?: {
+        protectedClaimValidation: {
+          canonicalClaimCount: number;
+          canonicalClaimSetHash: string | null;
+        };
+      } } }[];
+    }).decisionEvents?.find(({ details }) => details?.decisionObservability)?.details
+      ?.decisionObservability;
+    const committedClaims = (commitInput.metaPlan?.protectedClaims ?? []) as Parameters<
+      typeof hashProtectedClaimSetV1
+    >[0];
+    expect(observation?.protectedClaimValidation).toMatchObject({
+      canonicalClaimCount: committedClaims.length,
+      canonicalClaimSetHash: committedClaims.length > 0
+        ? hashProtectedClaimSetV1(committedClaims)
+        : null,
+    });
   });
   it("accepts one successful E2E size repair only when it binds the verified Size Engine claim", async () => {
     const occurredAt = "2026-08-04T00:00:00.000Z";
