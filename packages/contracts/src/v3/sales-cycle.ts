@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { canonicalJsonV1 } from "../v2/canonical-commerce-bindings.js";
 
 const DateTimeSchema = z.string().datetime();
 const Sha256Schema = z.string().regex(/^sha256:[a-f0-9]{64}$/u);
@@ -141,6 +142,17 @@ export const OrderPreviewV1Schema = z
     }
   });
 export type OrderPreviewV1 = z.infer<typeof OrderPreviewV1Schema>;
+
+export function canonicalOrderPreviewHashPreimageV1(
+  input: Omit<OrderPreviewV1, "previewHash">,
+): string {
+  const parsed = OrderPreviewV1Schema.parse({
+    ...input,
+    previewHash: `sha256:${"0".repeat(64)}`,
+  });
+  const { previewHash: _previewHash, ...artifact } = parsed;
+  return canonicalJsonV1(artifact);
+}
 
 export const SalesIntentV1Schema = z
   .object({

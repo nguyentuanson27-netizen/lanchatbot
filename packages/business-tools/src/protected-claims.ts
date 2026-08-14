@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import {
+  canonicalJsonV1,
   ProtectedClaimV1Schema,
   type BusinessFactEnvelopeV1,
   type CartV1,
@@ -55,14 +56,7 @@ export interface BuildProtectedCartPolicyClaimsV1Input {
   readonly expiresAt: string;
 }
 
-function canonicalJson(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
-  const record = value as Record<string, unknown>;
-  return `{${Object.keys(record).sort().map((key) =>
-    `${JSON.stringify(key)}:${canonicalJson(record[key])}`
-  ).join(",")}}`;
-}
+const canonicalJson = canonicalJsonV1;
 
 function sha256(value: unknown): string {
   return createHash("sha256").update(canonicalJson(value), "utf8").digest("hex");

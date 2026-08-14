@@ -3,6 +3,7 @@ import {
   PosPriceInventoryMetadataV1Schema,
   ProductComponentRoleSchema,
 } from "./product-policy-media.js";
+import { CanonicalProductIdV1Schema } from "./canonical-identifiers.js";
 
 const DateTimeSchema = z.string().datetime();
 const ConfidenceSchema = z.number().min(0).max(1);
@@ -78,7 +79,7 @@ export const CustomerPreferenceV1Schema = z
 
 export const CustomerSizeHistoryV1Schema = z
   .object({
-    productId: z.string().trim().min(1).max(128).nullable(),
+    productId: CanonicalProductIdV1Schema.nullable(),
     componentRole: ProductComponentRoleSchema,
     size: z.string().trim().min(1).max(16),
     outcome: z.enum([
@@ -250,7 +251,7 @@ export type SizeChartV1 = z.infer<typeof SizeChartV1Schema>;
 
 export const ComponentSizeSelectionV1Schema = z
   .object({
-    componentProductId: z.string().trim().min(1).max(128),
+    componentProductId: CanonicalProductIdV1Schema,
     componentRole: ProductComponentRoleSchema,
     size: z.string().trim().min(1).max(16),
   })
@@ -274,7 +275,7 @@ export const SizeRecommendationV1Schema = z
   .object({
     schemaVersion: z.literal(1),
     recommendationId: z.string().uuid(),
-    parentProductId: z.string().trim().min(1).max(128),
+    parentProductId: CanonicalProductIdV1Schema,
     customerProfileId: z.string().uuid(),
     customerProfileRevision: z.number().int().positive(),
     status: SizeRecommendationStatusSchema,
@@ -398,10 +399,10 @@ export const PosPriceAuthorityV1Schema = z
   .object({
     priceFactRef: z.string().trim().min(1).max(256),
     shopId: z.string().trim().min(1).max(128),
-    parentProductId: z.string().trim().min(1).max(128),
-    offerId: z.string().trim().min(1).max(128),
+    parentProductId: CanonicalProductIdV1Schema,
+    offerId: CanonicalProductIdV1Schema,
     offerPriceKind: z.enum(["DIRECT", "SET", "COMPONENT", "COMBO_3"]),
-    componentProductId: z.string().trim().min(1).max(128).nullable(),
+    componentProductId: CanonicalProductIdV1Schema.nullable(),
     metadata: PosPriceInventoryMetadataV1Schema,
   })
   .strict()
@@ -426,7 +427,7 @@ export type PosPriceAuthorityV1 = z.infer<typeof PosPriceAuthorityV1Schema>;
 
 export const CartComponentSelectionV1Schema = z
   .object({
-    componentProductId: z.string().trim().min(1).max(128),
+    componentProductId: CanonicalProductIdV1Schema,
     componentSku: z.string().trim().min(1).max(128),
     componentRole: ProductComponentRoleSchema,
     color: z.string().trim().min(1).max(64).nullable(),
@@ -441,8 +442,8 @@ export type CartComponentSelectionV1 = z.infer<
 export const CartLineV1Schema = z
   .object({
     lineId: z.string().uuid(),
-    parentProductId: z.string().trim().min(1).max(128),
-    offerId: z.string().trim().min(1).max(128),
+    parentProductId: CanonicalProductIdV1Schema,
+    offerId: CanonicalProductIdV1Schema,
     offerKind: z.enum(["DIRECT", "SET", "COMPONENT", "COMBO_3"]),
     quantity: z.number().int().positive().max(20),
     components: z.array(CartComponentSelectionV1Schema).min(1).max(4),

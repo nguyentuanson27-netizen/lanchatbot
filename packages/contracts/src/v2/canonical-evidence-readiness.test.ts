@@ -12,7 +12,6 @@ import {
   validateEffectClaimSemanticsV1,
   type ProtectedClaimV1,
 } from "./canonical-evidence-readiness.js";
-import { MAX_CART_LINES_V1 } from "./customer-size-cart.js";
 
 const HASH = "a".repeat(64);
 const OTHER_HASH = "b".repeat(64);
@@ -184,23 +183,23 @@ describe("DF05 canonical evidence contracts", () => {
 });
 
 describe("DF06 deterministic readiness contract", () => {
-  it("keeps the readiness envelope aligned with the canonical cart capacity", () => {
-    expect(MAX_READINESS_PRODUCT_IDS_V1).toBe(MAX_CART_LINES_V1);
+  it("keeps the technical readiness envelope separate from cart capacity", () => {
+    expect(MAX_READINESS_PRODUCT_IDS_V1).toBeGreaterThan(50);
   });
 
   it.each([
-    [0, 0, true, false, false],
-    [1, 1, false, false, false],
-    [3, 3, false, false, false],
-    [4, 4, false, false, false],
-    [10, 10, false, false, false],
-    [11, 11, false, false, false],
-    [49, 49, false, false, false],
-    [50, 50, false, false, false],
-    [51, 50, false, false, true],
+    [0, 0, true, false],
+    [1, 1, false, false],
+    [3, 3, false, false],
+    [4, 4, false, false],
+    [10, 10, false, false],
+    [11, 11, false, false],
+    [49, 49, false, false],
+    [50, 50, false, false],
+    [51, 51, false, false],
   ] as const)(
-    "canonicalizes product count %i into a bounded deterministic envelope",
-    (count, expectedCount, unresolved, invalid, capacityExceeded) => {
+    "canonicalizes product count %i without applying cart-capacity policy",
+    (count, expectedCount, unresolved, invalid) => {
       const input = Array.from({ length: count }, (_, index) => `P-${String(index).padStart(3, "0")}`);
       const first = canonicalizeReadinessProductIdsV1(input);
       const second = canonicalizeReadinessProductIdsV1(input);
@@ -210,7 +209,6 @@ describe("DF06 deterministic readiness contract", () => {
       expect(first.productIds.length).toBeLessThanOrEqual(MAX_READINESS_PRODUCT_IDS_V1);
       expect(first.unresolved).toBe(unresolved);
       expect(first.invalid).toBe(invalid);
-      expect(first.capacityExceeded).toBe(capacityExceeded);
     },
   );
 
@@ -226,7 +224,6 @@ describe("DF06 deterministic readiness contract", () => {
     expect(() => canonicalizeReadinessProductIdsV1(input)).not.toThrow();
     const result = canonicalizeReadinessProductIdsV1(input);
     expect(result.invalid).toBe(true);
-    expect(result.capacityExceeded).toBe(false);
     expect(result.productIds.length).toBeLessThanOrEqual(MAX_READINESS_PRODUCT_IDS_V1);
   });
 
@@ -237,7 +234,6 @@ describe("DF06 deterministic readiness contract", () => {
         productIds: [],
         unresolved: true,
         invalid: true,
-        capacityExceeded: false,
       });
     },
   );
@@ -250,7 +246,6 @@ describe("DF06 deterministic readiness contract", () => {
       expect(result).toEqual(canonicalizeReadinessProductIdsV1(input));
       expect(result.productIds.length).toBeLessThanOrEqual(MAX_READINESS_PRODUCT_IDS_V1);
       expect(result.invalid).toBe(true);
-      expect(result.capacityExceeded).toBe(count > MAX_READINESS_PRODUCT_IDS_V1);
     }
   });
 
@@ -267,8 +262,8 @@ describe("DF06 deterministic readiness contract", () => {
     expect(validateEffectClaimSemanticsV1({
       effect,
       productIds,
-      cartId: "cart-1",
-      cartVersion: 2,
+      cartId: null,
+      cartVersion: null,
       claims: complete,
     })).toEqual({ missing: false, conflict: false });
     expect(validateEffectClaimSemanticsV1({
@@ -396,14 +391,43 @@ describe("DF06 deterministic readiness contract", () => {
       conversationRevision: 7,
       salesCycleRevision: 3,
       productIds: ["SP-001"],
-      cartId: null,
-      cartVersion: null,
+      cartId: "15f9b215-2085-44f2-8d21-af4244577f5e",
+      cartVersion: 1,
       cartStateHash: HASH,
       orderPreviewId: null,
       orderPreviewHash: null,
       buyingIntentHash: OTHER_HASH,
       deterministicEvidenceHash: null,
       claimSetHash: HASH,
+      binding: {
+        schemaVersion: 1,
+        contractVersion: "EFFECT_BINDING_V1",
+        pageId: "page-1",
+        conversationId: "conversation-1",
+        sourceMessageIdHash: HASH,
+        conversationRevision: 7,
+        salesCycleRevision: 3,
+        productIds: ["SP-001"],
+        cart: {
+          cartId: "15f9b215-2085-44f2-8d21-af4244577f5e",
+          cartRevision: 1,
+          cartStateHash: HASH,
+          offerBindings: [{
+            lineId: "0b884806-7c77-4410-bc47-a3d2bb51c936",
+            productId: "SP-001",
+            offerId: "SP-001-DIRECT",
+            quantity: 1,
+            unitPriceVnd: 1_250_000,
+          priceFactRef: "price-fact-v1",
+          }],
+        },
+        preview: null,
+        claimSetHash: HASH,
+        parentReadinessHash: null,
+        payloadHash: null,
+      },
+      bindingHash: OTHER_HASH,
+      readinessHash: HASH,
       protectedClaimTypes: [],
       checkedAt: "2026-08-13T05:00:00.000Z",
       expiresAt: "2026-08-13T05:00:30.000Z",
@@ -427,8 +451,8 @@ describe("DF06 deterministic readiness contract", () => {
       conversationRevision: 7,
       salesCycleRevision: 3,
       productIds: ["SP-001"],
-      cartId: "cart-1",
-      cartVersion: 2,
+      cartId: null,
+      cartVersion: null,
       cartStateHash: null,
       orderPreviewId: null,
       orderPreviewHash: null,
@@ -497,14 +521,31 @@ describe("DF06 deterministic readiness contract", () => {
       conversationRevision: 7,
       salesCycleRevision: 3,
       productIds: ["SP-001"],
-      cartId: "cart-1",
-      cartVersion: 2,
+      cartId: null,
+      cartVersion: null,
       cartStateHash: null,
-      orderPreviewId: "preview-1",
-      orderPreviewHash: OTHER_HASH,
+      orderPreviewId: null,
+      orderPreviewHash: null,
       buyingIntentHash: null,
       deterministicEvidenceHash: HASH,
       claimSetHash: null,
+      binding: {
+        schemaVersion: 1,
+        contractVersion: "EFFECT_BINDING_V1",
+        pageId: "page-1",
+        conversationId: "conversation-1",
+        sourceMessageIdHash: HASH,
+        conversationRevision: 7,
+        salesCycleRevision: 3,
+        productIds: ["SP-001"],
+        cart: null,
+        preview: null,
+        claimSetHash: null,
+        parentReadinessHash: null,
+        payloadHash: HASH,
+      },
+      bindingHash: OTHER_HASH,
+      readinessHash: HASH,
       protectedClaimTypes: [],
       checkedAt: "2026-08-13T05:00:00.000Z",
       expiresAt: "2026-08-13T05:00:30.000Z",

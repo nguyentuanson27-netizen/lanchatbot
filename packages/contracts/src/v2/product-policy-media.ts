@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CanonicalProductIdV1Schema } from "./canonical-identifiers.js";
 
 export const PRICE_INVENTORY_FRESH_FOR_SECONDS = 48 * 60 * 60;
 export const BOM_FRESH_FOR_SECONDS = 7 * 24 * 60 * 60;
@@ -180,7 +181,7 @@ export type ProductOfferKindV2 = z.infer<typeof ProductOfferKindV2Schema>;
 
 export const ProductIdentityV2Schema = z
   .object({
-    parentProductId: z.string().trim().min(1).max(128),
+    parentProductId: CanonicalProductIdV1Schema,
     shopId: z.string().trim().min(1).max(128),
     brand: z.string().trim().min(1).max(128),
     active: z.boolean(),
@@ -212,7 +213,7 @@ export const ProductContentV1Schema = z
 
 export const BomComponentV1Schema = z
   .object({
-    componentProductId: z.string().trim().min(1).max(128),
+    componentProductId: CanonicalProductIdV1Schema,
     sku: z.string().trim().min(1).max(128),
     role: ProductComponentRoleSchema,
     quantity: z.number().int().positive().max(99),
@@ -319,7 +320,7 @@ export type VndPriceV1 = z.infer<typeof VndPriceV1Schema>;
 
 export const ComponentPriceV1Schema = z
   .object({
-    componentProductId: z.string().trim().min(1).max(128),
+    componentProductId: CanonicalProductIdV1Schema,
     price: VndPriceV1Schema.nullable(),
   })
   .strict();
@@ -354,12 +355,12 @@ export const ProductStockStatusV2Schema = z.enum([
 
 export const ProductVariantInventoryV2Schema = z
   .object({
-    variantId: z.string().trim().min(1).max(128),
+    variantId: CanonicalProductIdV1Schema,
     sku: z.string().trim().min(1).max(128),
     offerKind: ProductOfferKindV2Schema,
     /** Exact POS offer key that produced the row; never inferred from display text. */
     posOfferKey: z.string().trim().min(1).max(128),
-    componentProductId: z.string().trim().min(1).max(128).nullable(),
+    componentProductId: CanonicalProductIdV1Schema.nullable(),
     color: z.string().trim().min(1).max(64).nullable(),
     size: z.string().trim().min(1).max(32).nullable(),
     remainQuantity: z.number().int().nonnegative().nullable(),
@@ -416,7 +417,7 @@ export const CustomerDeliveryEtaV1Schema = z
 
 export const ParentFulfillmentV1Schema = z
   .object({
-    appliesToParentProductId: z.string().trim().min(1).max(128),
+    appliesToParentProductId: CanonicalProductIdV1Schema,
     policyType: FulfillmentPolicyTypeV1Schema,
     canOrderWhenZero: z.boolean(),
     etaToCustomer: CustomerDeliveryEtaV1Schema.nullable(),
@@ -487,7 +488,7 @@ export const ProductMediaAssetV2Schema = z
   .object({
     assetId: z.string().trim().min(1).max(256),
     url: z.string().url(),
-    componentProductId: z.string().trim().min(1).max(128).nullable(),
+    componentProductId: CanonicalProductIdV1Schema.nullable(),
     purposes: z.array(ProductMediaPurposeV2Schema).min(1).max(8),
     view: ProductMediaViewV2Schema,
     sortOrder: z.number().int().nonnegative().max(10_000),
@@ -527,7 +528,7 @@ export const ProductMediaFactsV2Schema = z
 export const ProductFactsV2Schema = z
   .object({
     schemaVersion: z.literal(2),
-    productId: z.string().trim().min(1).max(128),
+    productId: CanonicalProductIdV1Schema,
     identity: ProductIdentityV2Schema,
     content: ProductContentV1Schema,
     bom: ProductBomV1Schema,
@@ -777,7 +778,7 @@ export const MediaSelectionItemV2Schema = z
   .object({
     assetId: z.string().trim().min(1).max(256),
     url: z.string().url(),
-    componentProductId: z.string().trim().min(1).max(128).nullable(),
+    componentProductId: CanonicalProductIdV1Schema.nullable(),
     selectedForPurpose: ProductMediaPurposeV2Schema,
   })
   .strict();
@@ -785,9 +786,9 @@ export const MediaSelectionItemV2Schema = z
 export const MediaSelectionV2Schema = z
   .object({
     schemaVersion: z.literal(2),
-    productId: z.string().trim().min(1).max(128),
+    productId: CanonicalProductIdV1Schema,
     requestedPurposes: z.array(ProductMediaPurposeV2Schema).min(1).max(8),
-    requestedComponentProductIds: z.array(z.string().trim().min(1).max(128)).max(16),
+    requestedComponentProductIds: z.array(CanonicalProductIdV1Schema).max(16),
     maxAssets: z.number().int().min(1).max(4),
     status: MediaSelectionStatusV2Schema,
     selected: z.array(MediaSelectionItemV2Schema).max(4),

@@ -30,6 +30,7 @@ import {
 } from "@lana/business-tools";
 import {
   BusinessFactQueriesV2Schema,
+  canonicalJsonV1,
   type AgentProposalV1,
   type BusinessFactQueriesV2,
   type BusinessFactEnvelopeV1,
@@ -236,14 +237,7 @@ function deterministicUuid(input: string): string {
   ].join("-");
 }
 
-function canonicalJson(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
-  const record = value as Record<string, unknown>;
-  return `{${Object.keys(record).sort().map((key) =>
-    `${JSON.stringify(key)}:${canonicalJson(record[key])}`
-  ).join(",")}}`;
-}
+const canonicalJson = canonicalJsonV1;
 
 function canonicalSha256(value: unknown): string {
   return createHash("sha256").update(canonicalJson(value), "utf8").digest("hex");
@@ -4672,10 +4666,30 @@ export class RealtimeRunner {
             : []
         );
     if (protectedOutboundReadiness !== null) {
-      protectedOutboundReadiness = {
-        ...protectedOutboundReadiness,
-        deterministicEvidenceHash: canonicalSha256(metaMessages),
-      };
+      const salesCart = salesCyclePlan?.state.cart?.value ?? null;
+      const payloadHash = canonicalSha256(metaMessages);
+      protectedOutboundReadiness = evaluateDeterministicEffectReadinessV1({
+        effect: "PROTECTED_OUTBOUND",
+        pageId: claim.pageId,
+        conversationId: record.conversationId,
+        sourceMessageIdHash: protectedOutboundReadiness.sourceMessageIdHash,
+        conversationRevision: record.stateVersion,
+        salesCycleRevision: protectedOutboundReadiness.salesCycleRevision,
+        productIds: protectedOutboundReadiness.productIds,
+        cartId: salesCart?.cartId ?? null,
+        cartVersion: salesCart?.revision ?? null,
+        cartStateHash: protectedOutboundReadiness.cartStateHash,
+        ...(salesCart === null ? {} : { cartLines: salesCart.lines }),
+        orderPreviewId: protectedOutboundReadiness.orderPreviewId,
+        orderPreviewHash: protectedOutboundReadiness.orderPreviewHash,
+        buyingIntent: null,
+        claims: protectedOutboundClaims,
+        protectedClaimTypes: outboundClaimTypes,
+        deterministicEvidenceHash: payloadHash,
+        parentReadinessHash: protectedOutboundReadiness.binding.parentReadinessHash,
+        payloadHash,
+        checkedAt: new Date(),
+      });
     }
     if (outboundClaimTypes.length > 0 && !salesProtectedOutbound) {
       const canonicalEvidence = canonicalDecisionEvidenceForTurn();
@@ -4722,14 +4736,10 @@ export class RealtimeRunner {
         buyingIntent: null,
         claims: protectedOutboundClaims,
         protectedClaimTypes: outboundClaimTypes,
+        deterministicEvidenceHash: canonicalSha256(metaMessages),
+        payloadHash: canonicalSha256(metaMessages),
         checkedAt: new Date(),
       });
-      if (protectedOutboundReadiness.outcome === "READY") {
-        protectedOutboundReadiness = {
-          ...protectedOutboundReadiness,
-          deterministicEvidenceHash: canonicalSha256(metaMessages),
-        };
-      }
       if (protectedOutboundReadiness.outcome !== "READY") {
         metaMessages = [];
         handoffGuardReasonCodes = [...new Set([

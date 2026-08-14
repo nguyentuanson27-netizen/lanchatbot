@@ -135,7 +135,7 @@ function line(quantity: number): CartLineV1 {
     allowComponentSale: false,
     posUnitPriceVnd: 699_000,
     priceAuthority: {
-      priceFactRef: "pos:cb182:set",
+      priceFactRef: "price-v1",
       shopId: "LANA",
       parentProductId: "CB182",
       offerId: "SET",
@@ -473,7 +473,8 @@ describe("realtime Phase 3 sales cycle", () => {
       },
     });
     expect(previewed.plan?.effectReadiness).toEqual(expect.arrayContaining([
-      expect.objectContaining({ effect: "ORDER_PREVIEW", outcome: "READY", authorization: "NONE" }),
+      expect.objectContaining({ effect: "CART_READY", outcome: "READY", authorization: "NONE" }),
+      expect.objectContaining({ effect: "PREVIEW_READY", outcome: "READY", authorization: "NONE" }),
       expect.objectContaining({ effect: "PROTECTED_OUTBOUND", outcome: "READY", authorization: "NONE" }),
     ]));
     expect(previewed.messages[0]).toMatchObject({
@@ -495,7 +496,7 @@ describe("realtime Phase 3 sales cycle", () => {
       plan: {
         state: { stage: "PURCHASE_CONFIRMED" },
         effectReadiness: expect.arrayContaining([
-          expect.objectContaining({ effect: "PURCHASE_CONFIRMATION", outcome: "READY", authorization: "NONE" }),
+          expect.objectContaining({ effect: "PURCHASE_CONFIRMATION_READY", outcome: "READY", authorization: "NONE" }),
           expect.objectContaining({ effect: "PROTECTED_OUTBOUND", outcome: "READY", authorization: "NONE" }),
         ]),
         deterministicConfirmationEvidence: {
@@ -507,8 +508,12 @@ describe("realtime Phase 3 sales cycle", () => {
         },
       },
       protectedOutbound: {
-        claims: [],
-        claimTypes: [],
+        claims: expect.arrayContaining([
+          expect.objectContaining({ type: "PRICE" }),
+          expect.objectContaining({ type: "STOCK" }),
+          expect.objectContaining({ type: "ETA" }),
+        ]),
+        claimTypes: expect.arrayContaining(["PRICE", "STOCK", "ETA"]),
         readiness: {
           effect: "PROTECTED_OUTBOUND",
           outcome: "READY",
@@ -520,6 +525,17 @@ describe("realtime Phase 3 sales cycle", () => {
       kind: "TEXT",
       text: "Em đã ghi nhận xác nhận mua hàng. Nhân viên sẽ kiểm tra và lên đơn cho chị.",
     });
+    const protectedReadiness = confirmed.protectedOutbound!.readiness;
+    const salesParent = confirmed.plan!.effectReadiness!.find(
+      ({ readinessHash }) => readinessHash === protectedReadiness.binding.parentReadinessHash,
+    );
+    expect(salesParent).toMatchObject({
+      effect: "PURCHASE_CONFIRMATION_READY",
+      outcome: "READY",
+    });
+    expect(protectedReadiness.binding.cart).toEqual(salesParent!.binding.cart);
+    expect(protectedReadiness.binding.preview).toEqual(salesParent!.binding.preview);
+    expect(protectedReadiness.binding.claimSetHash).toBe(salesParent!.binding.claimSetHash);
   });
 
   it("uses one authoritative selection snapshot for protected cart text and claims", async () => {
@@ -643,7 +659,7 @@ describe("realtime Phase 3 sales cycle", () => {
             })),
             priceAuthority: {
               ...selectedLine.priceAuthority,
-              priceFactRef: `pos:${query.productId}:set`,
+              priceFactRef: `price-${query.productId}`,
               parentProductId: query.productId,
             },
           },
@@ -700,19 +716,25 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(fourth.plan?.state.cart?.value.lines.map(({ parentProductId }) => parentProductId))
       .toEqual(["PRODUCT-1", "PRODUCT-2", "PRODUCT-3", "PRODUCT-4"]);
     const finalCart = fourth.plan!.state.cart!.value;
-    const mutationEvidence = fourth.plan!.cartMutationEvidence?.[0];
+    const mutationEvidence = fourth.plan!.cartMutationBatchEvidence?.receipts[0];
     expect(mutationEvidence).toMatchObject({
-      authorityVersion: "DETERMINISTIC_CART_MUTATION_EVIDENCE_V1",
-      action: "ADD_LINE",
-      authorityKind: "CANONICAL_BUYING_INTENT",
+      contractVersion: "CART_MUTATION_RECEIPT_V1",
+      authority: {
+        contractVersion: "CART_MUTATION_AUTHORITY_BINDING_V1",
+        action: "ADD_LINE",
+        productId: "PRODUCT-4",
+        offerId: "SET",
+        authorityKind: "CANONICAL_BUYING_INTENT",
+      },
       mutation: {
         kind: "ADD_LINE",
         line: expect.objectContaining({ parentProductId: "PRODUCT-4" }),
       },
       contributor: "DETERMINISTIC_RUNTIME",
-      afterCartStateHash: computeBusinessContentHash(finalCart).replace(/^sha256:/u, ""),
       authorization: "NONE",
     });
+    expect(fourth.plan!.cartMutationBatchEvidence?.finalCartStateHash)
+      .toBe(mutationEvidence?.afterCartStateHash);
     expect(fourth.plan!.effectReadiness?.find(({ effect }) => effect === "CART_MUTATION"))
       .toMatchObject({
         cartVersion: finalCart.revision,
@@ -919,7 +941,13 @@ describe("realtime Phase 3 sales cycle", () => {
       async resolveCartSelection(query) {
         return {
           status: "READY",
-          line: line(query.quantity),
+          line: {
+            ...line(query.quantity),
+            priceAuthority: {
+              ...line(query.quantity).priceAuthority!,
+              priceFactRef: "price-expiring-checkout",
+            },
+          },
           shopId: "LANA",
           versions: {
             price: "price-expiring-checkout",

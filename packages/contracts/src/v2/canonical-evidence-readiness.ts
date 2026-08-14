@@ -3,13 +3,23 @@ import {
   DECISION_BUYING_INTENT_EVIDENCE_CODES_V1,
   DECISION_DIALOGUE_EVIDENCE_CODES_V1,
 } from "./decision-observability.js";
-import { CartLineV1Schema, MAX_CART_LINES_V1 } from "./customer-size-cart.js";
+import { CartLineV1Schema } from "./customer-size-cart.js";
+import {
+  CanonicalProductIdV1Schema,
+  canonicalizeProductIdsV1,
+  MAX_CANONICAL_PRODUCT_IDS_PER_EFFECT_V1,
+} from "./canonical-identifiers.js";
+import {
+  canonicalJsonV1,
+  EffectBindingV1Schema,
+} from "./canonical-commerce-bindings.js";
 import { DETERMINISTIC_READINESS_REASON_CODES_V1 } from "./readiness-reason-codes.js";
 export { DETERMINISTIC_READINESS_REASON_CODES_V1 } from "./readiness-reason-codes.js";
 
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 const BoundedIdSchema = z.string().trim().min(1).max(128);
-export const MAX_READINESS_PRODUCT_IDS_V1 = MAX_CART_LINES_V1;
+/** Technical envelope only; cart capacity is enforced by CartCapacityPolicyV1. */
+export const MAX_READINESS_PRODUCT_IDS_V1 = MAX_CANONICAL_PRODUCT_IDS_PER_EFFECT_V1;
 
 // Single ingress choke point: arbitrary product-ID input becomes a bounded,
 // deterministic envelope; invalidity is data for BLOCKED, never an exception.
@@ -19,30 +29,8 @@ export function canonicalizeReadinessProductIdsV1(
   productIds: readonly string[];
   unresolved: boolean;
   invalid: boolean;
-  capacityExceeded: boolean;
 }> {
-  if (!Array.isArray(input)) {
-    return {
-      productIds: [],
-      unresolved: true,
-      invalid: true,
-      capacityExceeded: false,
-    };
-  }
-  const strings = input.filter((value): value is string => typeof value === "string");
-  const normalized = strings.map((value) => value.trim());
-  const valid = normalized.filter((value) => value.length > 0 && value.length <= 128);
-  const canonical = [...new Set(valid)].sort();
-  return {
-    productIds: canonical.slice(0, MAX_READINESS_PRODUCT_IDS_V1),
-    unresolved: canonical.length === 0,
-    invalid:
-      strings.length !== input.length ||
-      valid.length !== normalized.length ||
-      normalized.some((value, index) => value !== strings[index]) ||
-      canonical.length !== valid.length,
-    capacityExceeded: canonical.length > MAX_READINESS_PRODUCT_IDS_V1,
-  };
+  return canonicalizeProductIdsV1(input);
 }
 
 function uniqueValues(
@@ -102,7 +90,7 @@ export const CanonicalBuyingIntentV1Schema = z.object({
     "PROCEED_TO_PAYMENT",
   ]),
   quantity: z.number().int().min(1).max(20).nullable(),
-  productId: BoundedIdSchema.nullable(),
+  productId: CanonicalProductIdV1Schema.nullable(),
   contributors: z.array(EvidenceContributorV1Schema).max(2),
   sourceMessageIdHash: Sha256Schema,
   evidenceHash: Sha256Schema.nullable(),
@@ -259,8 +247,8 @@ export type DeterministicCartMutationEvidenceV1 = z.infer<
 export const ProtectedClaimScopeV1Schema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("PRODUCT"),
-    productId: BoundedIdSchema,
-    variantId: BoundedIdSchema.nullable(),
+    productId: CanonicalProductIdV1Schema,
+    variantId: CanonicalProductIdV1Schema.nullable(),
   }).strict(),
   z.object({
     kind: z.literal("CART"),
@@ -417,7 +405,9 @@ export function requiredProtectedClaimTypesForEffectV1(
   protectedClaimTypes: readonly ProtectedClaimV1["type"][] = [],
 ): readonly ProtectedClaimV1["type"][] {
   if (effect === "PROTECTED_OUTBOUND") return protectedClaimTypes;
-  if (effect === "CART_OPEN" || effect === "CART_MUTATION") return ["PRICE", "STOCK"];
+  if (effect === "CART_OPEN" || effect === "CART_MUTATION" || effect === "CART_READY") {
+    return ["PRICE", "STOCK"];
+  }
   return ["PRICE", "STOCK", "ETA"];
 }
 
@@ -560,6 +550,11 @@ export const DeterministicEffectReadinessV1Schema = z.object({
     "PROTECTED_OUTBOUND",
     "CART_OPEN",
     "CART_MUTATION",
+    "CART_READY",
+    "PREVIEW_READY",
+    "PURCHASE_CONFIRMATION_READY",
+    // Compatibility-only vocabulary. Transactional DF06 consumers must not
+    // accept these legacy aggregate stages as protected-effect authority.
     "ORDER_PREVIEW",
     "PURCHASE_CONFIRMATION",
   ]),
@@ -569,7 +564,7 @@ export const DeterministicEffectReadinessV1Schema = z.object({
   sourceMessageIdHash: Sha256Schema,
   conversationRevision: z.number().int().nonnegative(),
   salesCycleRevision: z.number().int().nonnegative().nullable(),
-  productIds: z.array(BoundedIdSchema).max(MAX_READINESS_PRODUCT_IDS_V1),
+  productIds: z.array(CanonicalProductIdV1Schema).max(MAX_READINESS_PRODUCT_IDS_V1),
   cartId: BoundedIdSchema.nullable(),
   cartVersion: z.number().int().nonnegative().nullable(),
   cartStateHash: Sha256Schema.nullable().optional().default(null),
@@ -578,6 +573,9 @@ export const DeterministicEffectReadinessV1Schema = z.object({
   buyingIntentHash: Sha256Schema.nullable(),
   deterministicEvidenceHash: Sha256Schema.nullable(),
   claimSetHash: Sha256Schema.nullable(),
+  binding: EffectBindingV1Schema,
+  bindingHash: Sha256Schema,
+  readinessHash: Sha256Schema,
   protectedClaimTypes: z.array(z.enum([
     "PRICE", "STOCK", "SIZE_FIT", "ETA", "SHIPPING_FEE", "FREESHIP",
     "PROMOTION_OFFER", "PRODUCT_MEDIA",
@@ -590,6 +588,42 @@ export const DeterministicEffectReadinessV1Schema = z.object({
   uniqueValues(value.productIds, context, ["productIds"]);
   uniqueValues(value.reasonCodes, context, ["reasonCodes"]);
   uniqueValues(value.protectedClaimTypes, context, ["protectedClaimTypes"]);
+  const expectedBinding = {
+    pageId: value.pageId,
+    conversationId: value.conversationId,
+    sourceMessageIdHash: value.sourceMessageIdHash,
+    conversationRevision: value.conversationRevision,
+    salesCycleRevision: value.salesCycleRevision,
+    productIds: value.productIds,
+    cartId: value.cartId,
+    cartVersion: value.cartVersion,
+    cartStateHash: value.cartStateHash,
+    orderPreviewId: value.orderPreviewId,
+    orderPreviewHash: value.orderPreviewHash,
+    claimSetHash: value.claimSetHash,
+  };
+  const actualBinding = {
+    pageId: value.binding.pageId,
+    conversationId: value.binding.conversationId,
+    sourceMessageIdHash: value.binding.sourceMessageIdHash,
+    conversationRevision: value.binding.conversationRevision,
+    salesCycleRevision: value.binding.salesCycleRevision,
+    productIds: value.binding.productIds,
+    cartId: value.binding.cart?.cartId ?? null,
+    cartVersion: value.binding.cart?.cartRevision ?? null,
+    cartStateHash: value.binding.cart?.cartStateHash ?? null,
+    orderPreviewId: value.binding.preview?.previewId ?? null,
+    orderPreviewHash: value.binding.preview?.previewHash ?? null,
+    claimSetHash: value.binding.claimSetHash,
+  };
+  if (value.outcome === "READY" &&
+    canonicalJsonV1(expectedBinding) !== canonicalJsonV1(actualBinding)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["binding"],
+      message: "readiness compatibility fields must exactly match EffectBindingV1",
+    });
+  }
   if (Date.parse(value.expiresAt) <= Date.parse(value.checkedAt)) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
@@ -625,7 +659,8 @@ export const DeterministicEffectReadinessV1Schema = z.object({
         message: "cart mutation requires typed deterministic command evidence",
       });
     }
-    if (value.effect === "PURCHASE_CONFIRMATION" &&
+    if ((value.effect === "PURCHASE_CONFIRMATION" ||
+      value.effect === "PURCHASE_CONFIRMATION_READY") &&
       value.deterministicEvidenceHash === null) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
@@ -649,7 +684,9 @@ export const DeterministicEffectReadinessV1Schema = z.object({
       message: "blocked readiness requires a deterministic reason",
     });
   }
-  const needsCart = value.effect === "CART_MUTATION" ||
+  const needsCart = value.effect === "CART_OPEN" || value.effect === "CART_MUTATION" ||
+    value.effect === "CART_READY" || value.effect === "PREVIEW_READY" ||
+    value.effect === "PURCHASE_CONFIRMATION_READY" ||
     value.effect === "ORDER_PREVIEW" || value.effect === "PURCHASE_CONFIRMATION";
   if (value.outcome === "READY" && needsCart &&
     (value.cartId === null || value.cartVersion === null)) {
@@ -666,14 +703,36 @@ export const DeterministicEffectReadinessV1Schema = z.object({
       message: "ready cart effects require an exact final-cart state hash",
     });
   }
-  if (value.outcome === "READY" && value.effect === "PURCHASE_CONFIRMATION" &&
+  const needsPreview = value.effect === "PREVIEW_READY" ||
+    value.effect === "PURCHASE_CONFIRMATION_READY" ||
+    value.effect === "PURCHASE_CONFIRMATION";
+  if (value.outcome === "READY" && needsPreview &&
     (value.orderPreviewId === null || value.orderPreviewHash === null)) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
       message: "purchase confirmation requires order preview identity and hash",
     });
   }
+  const needsParent = value.effect === "PREVIEW_READY" ||
+    value.effect === "PURCHASE_CONFIRMATION_READY" ||
+    (value.effect === "PROTECTED_OUTBOUND" && value.binding.cart !== null);
+  if (value.outcome === "READY" && needsParent &&
+    value.binding.parentReadinessHash === null) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["binding", "parentReadinessHash"],
+      message: "layered commerce readiness requires the exact prior readiness artifact",
+    });
+  }
 });
 export type DeterministicEffectReadinessV1 = z.infer<
   typeof DeterministicEffectReadinessV1Schema
 >;
+
+export function deterministicEffectReadinessHashPreimageV1(
+  input: z.input<typeof DeterministicEffectReadinessV1Schema>,
+): string {
+  const parsed = DeterministicEffectReadinessV1Schema.parse(input);
+  const { readinessHash: _readinessHash, ...readiness } = parsed;
+  return `DETERMINISTIC_EFFECT_READINESS_V1\n${canonicalJsonV1(readiness)}`;
+}

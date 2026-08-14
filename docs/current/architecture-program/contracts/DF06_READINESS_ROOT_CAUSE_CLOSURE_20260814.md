@@ -4,32 +4,38 @@ Status: source-only implementation evidence for DF-P3 in Release Train DF-A. It 
 
 ## Invariants
 
-1. `MAX_READINESS_PRODUCT_IDS_V1` equals the canonical `CartV1` line capacity. Readiness does not introduce a second commerce product-count policy.
-2. `canonicalizeReadinessProductIdsV1` is the single product-ID normalization and validation choke point. Arbitrary runtime input returns a bounded deterministic envelope; invalid input is data for `BLOCKED`, never an exception.
-3. A blocked worker path returns no committable mutation plan. It retains no checkout PII, cart-ready event, preview event, or cart mutation.
-4. Every ready cart effect binds the exact final cart SHA-256, exact parent-product and offer set, cart id/revision, required protected claims, and typed deterministic effect evidence.
-5. The database recomputes final-cart claim semantics and mutation transitions against the encrypted prior cart locked inside the transaction. Missing, stale, conflicting, mismatched, incomplete, or forged readiness is rejected.
-6. Protected multi-product outbound uses one fact-set aggregation boundary. It covers every product scope once, and the final Meta payload SHA-256 is bound to the readiness checked by the transaction.
-7. Model evidence alone has authorization `NONE` and cannot authorize cart, order, or protected effects.
+1. Within the DF06 commerce authority/readiness path, `canonicalizeProductIdsV1` is the only untyped product-ID transform. It trims and converts to NFC once. Typed schemas accept exact canonical values and never silently transform authority scope.
+2. `MAX_CART_LINES_V1 = 50` is only a cart-capacity policy. The protected-text/effect envelope has a separate technical bound and never reuses cart capacity.
+3. Every side-effect authority and readiness binds the current `sourceMessageIdHash`. A stale or different message is rejected inside the transaction.
+4. `CartMutationBatchEvidenceV1` defines an atomic N-mutation batch. Every receipt binds its exact action, product, offer, source message, before cart, and after cart; receipts form one contiguous chain and only the final receipt equals the final cart.
+5. `CanonicalCartStateV1` defines the complete cart hash preimage. The database locks the prior encrypted cart, replays the canonical transition under the bound policy, and compares the complete replayed cart to the proposed final cart.
+6. Readiness is layered: `CART_READY` → `PREVIEW_READY` → `PURCHASE_CONFIRMATION_READY`. Every child binds the exact parent readiness and prior artifact.
+7. Commerce Meta output binds its exact claim set and final payload, plus the exact sales parent, cart, offer set, and preview. The outbound claim set may be a semantically validated subset/superset for the rendered text; Meta readiness cannot independently authorize commerce output.
+8. A blocked worker path returns no committable mutation plan and retains no checkout PII, cart-ready event, preview event, or cart mutation.
+9. Model evidence has authorization `NONE` and cannot authorize cart, order, or protected effects.
+
+The current worker emits one receipt per message. The contract and database verifier support an atomic N-receipt batch only when every receipt independently carries approved authority and the complete chain replays to the exact final cart.
+
+The canonical cart reducer and shop-policy evaluator live in the lower-level `@lana/commerce-kernel`. Both the worker-side business facade and database transaction verifier consume that single implementation; the database does not reverse-depend on `@lana/business-tools`.
 
 ## Closure matrix
 
-| Input/boundary | Expected result | Executable evidence |
+| Input or boundary | Required result | Executable evidence |
 |---|---|---|
-| Product counts 0/1/3/4/10/11/49/50/51 | 0 unresolved; 1–50 schema-safe; 51 bounded to 50 and `BLOCKED` | `canonical-evidence-readiness.test.ts`, `effect-readiness.test.ts` |
-| Non-array, non-string, blank, whitespace-normalized, >128-char IDs | Bounded deterministic `BLOCKED`; no throw | `canonical-evidence-readiness.test.ts`, `effect-readiness.test.ts` |
-| Duplicate IDs | Canonicalized once and `BLOCKED` as invalid scope | same table/property-style suites |
-| Missing/stale/cross-product/conflicting claims | `BLOCKED` with registered deterministic reason | `effect-readiness.test.ts`, database runtime tests |
-| Fourth distinct valid product | Allowed when its exact claims and mutation evidence are ready | `realtime-sales-cycle.test.ts` |
-| Fifty-line cart plus product 51 | No throw, no mutation plan, cart remains 50 lines | `realtime-sales-cycle.test.ts` |
-| Checkout readiness blocked or final facts become stale | No plan, no PII, no `CART_READY`, no preview event | `realtime-sales-cycle.test.ts` |
-| Changed offer/quantity/component under the same parent product | Final cart hash mismatch; transaction rejects | `realtime-runtime.test.ts` |
-| Cart mutation with missing marker, wrong authority/action/payload, or forged typed evidence | Transaction rejects; non-protected legacy events remain backward compatible | `realtime-runtime.test.ts` |
-| Cart mutation with a receipt not chained from the locked prior cart | Transaction rejects before the state update | `realtime-runtime.test.ts` |
-| Correct product but wrong offer, unit price, source version, or insufficient aggregate stock | Shared cart-claim choke point flags mismatch; transaction rejects | `canonical-evidence-readiness.test.ts`, `realtime-runtime.test.ts` |
-| `CART_READY`/preview missing required PRICE/STOCK/ETA coverage | Transaction rejects | `realtime-runtime.test.ts` |
-| Multi-product fact reply beyond ten text product references | All product scopes are claimed and readiness-bound; no truncation | `bf02-realtime-runner.test.ts`, `bf08-realtime-runner.integration.test.ts` |
-| Blocked readiness telemetry | Actual registered reason codes persist instead of `NOT_EVALUATED`/empty reasons | `decision-observability.test.ts`, `realtime-sales-cycle.test.ts` |
-| Canonical readiness in the Admin read model | Source-only migration projects `READY`/`BLOCKED` while preserving the bounded PII-safe view and reversible legacy projection | `readiness-observability-migration.test.ts` |
+| Product counts 0/1/3/4/49/50/51 | Generic ingress remains bounded and deterministic; cart effects permit at most 50; 51 is `BLOCKED`; protected text does not inherit the cart limit | contract and business-tools table tests |
+| Non-array, non-string, blank, whitespace-changed, non-NFC, or overlength IDs | One canonicalization attempt, then deterministic `BLOCKED`; no throw | canonical identifier and readiness property-style tests |
+| Duplicate/conflicting IDs | Deterministically canonicalized once and `BLOCKED` as invalid scope | readiness property-style tests |
+| Current message differs from authority/readiness source | Transaction rejects `CURRENT_MESSAGE_BINDING_MISMATCH` | database runtime tests |
+| Fourth valid product | Allowed when its exact claims and mutation evidence are ready | sales-cycle tests |
+| Fifty-line cart plus product 51 | No throw, no mutation plan, cart remains unchanged | sales-cycle tests |
+| Blocked checkout or facts become stale after local evaluation | No plan, PII, `CART_READY`, preview, or cart mutation survives | sales-cycle tests |
+| Atomic N mutation batch | Receipts connect prior after-hash to next before-hash; wrong order, gap, duplicate command, wrong final hash, action, product, or offer is rejected | commerce binding contract and database replay tests |
+| Full cart field changes under an unchanged line/product set | Complete canonical cart hash/replay mismatch; transaction rejects | canonical cart and database replay tests |
+| Missing, stale, conflicting, cross-product, wrong-offer, wrong-price, or insufficient-stock claims | `BLOCKED` before worker mutation or transaction rejection | business-tools and database tests |
+| `CART_READY` with incomplete claim coverage | Transaction rejects `EFFECT_READINESS_CLAIM_MISSING` | database runtime tests |
+| Preview or confirmation with missing/wrong parent artifact | Transaction rejects parent/cart/preview binding mismatch | readiness and database tests |
+| Commerce Meta changes cart, offer, preview, claim set, or sales parent | Transaction rejects `PROTECTED_OUTBOUND_SALES_READINESS_MISMATCH` | worker and database tests |
+| Protected text references 51 valid products | No cart-capacity reason is introduced; the independent technical envelope applies | business-tools tests |
+| Blocked readiness telemetry | Registered readiness reason codes persist instead of `NOT_EVALUATED`/empty reasons | observability and sales-cycle tests |
 
 Rollback is source rollback of the DF-P3 branch/PR plus the reversible `0033` migration source. The migration is not executed here. No authority cutover, routing change, runtime mutation, or deployment is part of this closure.

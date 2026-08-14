@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { CanonicalBuyingIntentV1Schema, ProtectedClaimV1Schema } from "@lana/contracts";
+import {
+  CanonicalBuyingIntentV1Schema,
+  ProtectedClaimV1Schema,
+  type CartLineV1,
+} from "@lana/contracts";
 import { evaluateDeterministicEffectReadinessV1 } from "./effect-readiness.js";
 
 const hash = (character: string) => character.repeat(64);
@@ -12,7 +16,11 @@ const provenance = (type: "PRICE" | "STOCK" | "ETA") => ({
   observedAt: "2026-08-13T02:59:00.000Z",
   expiresAt: "2026-08-13T03:05:00.000Z",
 });
-const scope = { kind: "PRODUCT" as const, productId: "product-1", variantId: null };
+const scope = {
+  kind: "PRODUCT" as const,
+  productId: "product-1",
+  variantId: "product-1-DIRECT",
+};
 const claims = [
   ProtectedClaimV1Schema.parse({ schemaVersion: 1, claimId: "11111111-1111-5111-8111-111111111111", type: "PRICE", scope, provenance: provenance("PRICE"), value: { amountVnd: 120_000, currency: "VND" }, authorization: "NONE" }),
   ProtectedClaimV1Schema.parse({ schemaVersion: 1, claimId: "22222222-2222-5222-8222-222222222222", type: "STOCK", scope, provenance: provenance("STOCK"), value: { status: "IN_STOCK", availableQuantity: 4 }, authorization: "NONE" }),
@@ -25,15 +33,55 @@ const intent = CanonicalBuyingIntentV1Schema.parse({
   reasonCodes: ["DIRECT_PURCHASE_VERB"], evaluatedAt: now.toISOString(),
   authorization: "NONE",
 });
+const cartId = "10000000-0000-4000-8000-000000000001";
+function cartLinesFor(productIds: readonly string[]): CartLineV1[] {
+  return productIds.map((productId, index) => ({
+    lineId: `30000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
+    parentProductId: productId,
+    offerId: `${productId}-DIRECT`,
+    offerKind: "DIRECT",
+    quantity: 1,
+    components: [{
+      componentProductId: productId,
+      componentSku: `${productId}-M`,
+      componentRole: "OTHER",
+      color: null,
+      size: "M",
+      quantity: 1,
+    }],
+    allowMixedSizes: false,
+    allowComponentSale: true,
+    posUnitPriceVnd: 120_000,
+    priceAuthority: {
+      priceFactRef: "pos:PRICE:7",
+      shopId: "shop-1",
+      parentProductId: productId,
+      offerId: `${productId}-DIRECT`,
+      offerPriceKind: "DIRECT",
+      componentProductId: null,
+      metadata: {
+        authority: "PANCAKE_POS",
+        sourceVersion: "pos:PRICE:7",
+        observedAt: "2026-08-13T02:59:00.000Z",
+        expiresAt: "2026-08-15T02:59:00.000Z",
+        freshForSeconds: 172_800,
+        freshnessState: "FRESH",
+      },
+    },
+    lineTotalVnd: 120_000,
+  }));
+}
 const base = {
   effect: "CART_OPEN" as const,
   pageId: "page-1", conversationId: "conversation-1",
   sourceMessageIdHash: hash("d"), conversationRevision: 8,
   salesCycleRevision: 2, productIds: ["product-1"],
-  cartId: null, cartVersion: null, orderPreviewId: null, orderPreviewHash: null,
+  cartId, cartVersion: 1, orderPreviewId: null, orderPreviewHash: null,
   cartStateHash: hash("f"),
+  cartLines: cartLinesFor(["product-1"]),
   buyingIntent: intent, claims, checkedAt: now,
 };
+const { cartLines: _baseCartLines, ...baseWithoutCartLines } = base;
 
 function claimsFor(productIds: readonly string[]) {
   return productIds.flatMap((productId, index) => ([
@@ -41,7 +89,7 @@ function claimsFor(productIds: readonly string[]) {
       schemaVersion: 1,
       claimId: `10000000-0000-5000-8000-${String(index * 2 + 1).padStart(12, "0")}`,
       type: "PRICE",
-      scope: { kind: "PRODUCT", productId, variantId: null },
+      scope: { kind: "PRODUCT", productId, variantId: `${productId}-DIRECT` },
       provenance: provenance("PRICE"),
       value: { amountVnd: 120_000, currency: "VND" },
       authorization: "NONE",
@@ -50,7 +98,7 @@ function claimsFor(productIds: readonly string[]) {
       schemaVersion: 1,
       claimId: `20000000-0000-5000-8000-${String(index * 2 + 2).padStart(12, "0")}`,
       type: "STOCK",
-      scope: { kind: "PRODUCT", productId, variantId: null },
+      scope: { kind: "PRODUCT", productId, variantId: `${productId}-DIRECT` },
       provenance: provenance("STOCK"),
       value: { status: "IN_STOCK", availableQuantity: 4 },
       authorization: "NONE",
@@ -77,14 +125,15 @@ describe("deterministic effect readiness", () => {
       ...base,
       effect: "CART_MUTATION",
       productIds,
-      cartId: "cart-1",
+      cartId,
       cartVersion: 2,
+      cartLines: cartLinesFor(productIds),
       mutationAction: "REMOVE_LINE",
       deterministicEvidenceHash: hash("f"),
       claims: claimsFor(productIds),
     });
     expect(result.outcome).toBe(outcome);
-    expect(result.productIds.length).toBeLessThanOrEqual(50);
+    expect(result.productIds.length).toBe(count);
     if (reason !== null) expect(result.reasonCodes).toContain(reason);
   });
 
@@ -122,8 +171,9 @@ describe("deterministic effect readiness", () => {
     const result = evaluateDeterministicEffectReadinessV1({
       ...base,
       effect: "CART_MUTATION",
-      cartId: "cart-1",
+      cartId,
       cartVersion: 2,
+      cartLines: cartLinesFor(["product-1"]),
       mutationAction: "ADD_LINE",
       deterministicEvidenceHash: hash("f"),
       buyingIntent: modelOnly,
@@ -133,8 +183,9 @@ describe("deterministic effect readiness", () => {
     const wrongAction = evaluateDeterministicEffectReadinessV1({
       ...base,
       effect: "CART_MUTATION",
-      cartId: "cart-1",
+      cartId,
       cartVersion: 2,
+      cartLines: cartLinesFor(["product-1"]),
       mutationAction: "SET_QUANTITY",
       deterministicEvidenceHash: hash("f"),
       buyingIntent: CanonicalBuyingIntentV1Schema.parse({
@@ -150,8 +201,9 @@ describe("deterministic effect readiness", () => {
     const result = evaluateDeterministicEffectReadinessV1({
       ...base,
       effect: "CART_MUTATION",
-      cartId: "cart-1",
+      cartId,
       cartVersion: 2,
+      cartLines: cartLinesFor(["product-1"]),
       mutationAction: "REMOVE_LINE",
       deterministicEvidenceHash: hash("f"),
       buyingIntent: null,
@@ -190,8 +242,9 @@ describe("deterministic effect readiness", () => {
       ...base,
       effect: "CART_MUTATION",
       productIds,
-      cartId: "cart-1",
+      cartId,
       cartVersion: 2,
+      cartLines: cartLinesFor(productIds),
       mutationAction: "ADD_LINE",
       deterministicEvidenceHash: hash("f"),
       claims: claimsFor(productIds),
@@ -213,7 +266,7 @@ describe("deterministic effect readiness", () => {
     expect(atCapacity).toMatchObject({
       outcome: "BLOCKED",
       productIds: fiftyProductIds.sort(),
-      reasonCodes: expect.arrayContaining(["CLAIM_MISSING"]),
+      reasonCodes: expect.arrayContaining(["OFFER_BINDING_MISMATCH"]),
     });
 
     const overCapacity = evaluateDeterministicEffectReadinessV1({
@@ -223,7 +276,7 @@ describe("deterministic effect readiness", () => {
       deterministicEvidenceHash: hash("f"),
     });
     expect(overCapacity.outcome).toBe("BLOCKED");
-    expect(overCapacity.productIds).toHaveLength(50);
+    expect(overCapacity.productIds).toHaveLength(51);
     expect(overCapacity.reasonCodes).toContain("CART_CAPACITY_EXCEEDED");
 
     for (const invalidId of ["", "   ", "x".repeat(129)]) {
@@ -273,20 +326,65 @@ describe("deterministic effect readiness", () => {
     },
   );
 
+  it("bounds hostile mixed and oversized product-ID arrays without throwing", () => {
+    const hostileInputs: readonly unknown[] = [
+      ["product-1", Symbol("id"), 1n, null, undefined, true, {}, []],
+      [...Array.from({ length: 1_001 }, (_, index) => `product-${index}`), ""],
+      ["product-1", " product-1 ", "product-1".normalize("NFD")],
+    ];
+    for (const productIds of hostileInputs) {
+      const evaluate = () => evaluateDeterministicEffectReadinessV1({
+        ...base,
+        effect: "CART_MUTATION",
+        productIds: productIds as readonly string[],
+        deterministicEvidenceHash: hash("f"),
+      });
+      expect(evaluate).not.toThrow();
+      expect(evaluate()).toMatchObject({
+        outcome: "BLOCKED",
+        reasonCodes: expect.arrayContaining(["PRODUCT_SCOPE_INVALID"]),
+      });
+      expect(evaluate().productIds.length).toBeLessThanOrEqual(1_000);
+    }
+  });
+
   it("allows protected outbound without buying intent but still requires product claims", () => {
     const result = evaluateDeterministicEffectReadinessV1({
-      ...base, effect: "PROTECTED_OUTBOUND", buyingIntent: null,
+      ...baseWithoutCartLines, effect: "PROTECTED_OUTBOUND", buyingIntent: null,
+      cartId: null, cartVersion: null, cartStateHash: null,
       protectedClaimTypes: ["PRICE"],
     });
     expect(result.outcome).toBe("READY");
     expect(result.buyingIntentHash).toBeNull();
   });
 
-  it("binds protected outbound to the exact protected claim types", () => {
+  it("does not reuse cart capacity for protected-text aggregation", () => {
+    const productIds = Array.from(
+      { length: 51 },
+      (_, index) => `product-${String(index).padStart(3, "0")}`,
+    );
     const result = evaluateDeterministicEffectReadinessV1({
-      ...base,
+      ...baseWithoutCartLines,
       effect: "PROTECTED_OUTBOUND",
       buyingIntent: null,
+      productIds,
+      cartId: null,
+      cartVersion: null,
+      cartStateHash: null,
+      claims: claimsFor(productIds),
+      protectedClaimTypes: ["PRICE", "STOCK"],
+    });
+
+    expect(result).toMatchObject({ outcome: "READY", productIds });
+    expect(result.reasonCodes).not.toContain("CART_CAPACITY_EXCEEDED");
+  });
+
+  it("binds protected outbound to the exact protected claim types", () => {
+    const result = evaluateDeterministicEffectReadinessV1({
+      ...baseWithoutCartLines,
+      effect: "PROTECTED_OUTBOUND",
+      buyingIntent: null,
+      cartId: null, cartVersion: null, cartStateHash: null,
       protectedClaimTypes: ["ETA"],
     });
     expect(result.outcome).toBe("BLOCKED");
@@ -316,6 +414,8 @@ describe("deterministic effect readiness", () => {
       buyingIntent: null,
       cartId: "10000000-0000-4000-8000-000000000001",
       cartVersion: 2,
+      cartLines: cartLinesFor(["product-1"]),
+      parentReadinessHash: hash("e"),
       claims: [claims[0]!, shipping],
       protectedClaimTypes: ["PRICE", "SHIPPING_FEE"],
     });

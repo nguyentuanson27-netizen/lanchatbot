@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import {
   CanonicalBuyingIntentV1Schema,
   CanonicalDialogueEvidenceV1Schema,
+  canonicalJsonV1,
   type AgentBuyingIntentV1,
   type CanonicalBuyingIntentV1,
   type CanonicalDialogueEvidenceV1,
@@ -26,14 +27,7 @@ function sha256(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
 }
 
-function canonicalJson(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
-  const record = value as Record<string, unknown>;
-  return `{${Object.keys(record).sort().map((key) =>
-    `${JSON.stringify(key)}:${canonicalJson(record[key])}`
-  ).join(",")}}`;
-}
+const canonicalJson = canonicalJsonV1;
 
 function explicitQuantity(text: string): number | null {
   const folded = foldVietnameseForRecall(text)
