@@ -23,6 +23,7 @@ import {
   CartV1Schema,
   DeterministicConfirmationEvidenceV1Schema,
   DeterministicEffectReadinessV1Schema,
+  MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1,
   deterministicEffectReadinessHashPreimageV1,
   effectBindingHashPreimageV1,
   OrderPreviewV1Schema,
@@ -538,7 +539,8 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     ) throw new Error("EFFECT_READINESS_REVISION_MISMATCH");
     const checkedAt = Date.parse(readiness.checkedAt);
     const expiresAt = Date.parse(readiness.expiresAt);
-    if (checkedAt > now.getTime() || expiresAt <= now.getTime()) {
+    if (checkedAt > now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 ||
+      expiresAt <= now.getTime()) {
       throw new Error("EFFECT_READINESS_STALE");
     }
     const claims = claimSets.get(readiness.effect);
@@ -561,7 +563,8 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     if (claimSemantics.missing) throw new Error("EFFECT_READINESS_CLAIM_MISSING");
     if (claimSemantics.conflict) throw new Error("EFFECT_READINESS_CLAIM_CONFLICT");
     if (claims.some((claim) =>
-      Date.parse(claim.provenance.observedAt) > now.getTime() ||
+      Date.parse(claim.provenance.observedAt) >
+        now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 ||
       Date.parse(claim.provenance.expiresAt) <= now.getTime()
     )) {
       throw new Error("EFFECT_READINESS_CLAIM_STALE");
@@ -710,8 +713,8 @@ function validateSalesEffectReadiness<TState, TSalesState>(
       ) ||
       receipt.evidenceHash !== sha256TextV1(cartMutationReceiptHashPreimageV1(receipt)) ||
       receipt.appliedAt !== event.occurredAt.toISOString() ||
-      Date.parse(receipt.appliedAt) > now.getTime() ||
-      Date.parse(receipt.evaluatedAt) > now.getTime()) {
+      Date.parse(receipt.appliedAt) > now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 ||
+      Date.parse(receipt.evaluatedAt) > now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1) {
       throw new Error("CART_MUTATION_RECEIPT_MISMATCH");
     }
     if (receipt.mutation.kind === "ADD_LINE" && (
@@ -979,6 +982,67 @@ function validateLockedCanonicalCartTransitionV1(
       canonicalJsonV1(repriced.state) !== canonicalJsonV1(nextNegotiation)) {
       throw new Error("CART_READY_NEGOTIATION_REPLAY_MISMATCH");
     }
+  }
+}
+
+const MAX_SALES_PROCESSED_COMMAND_IDS_V1 = 100;
+
+export function validateLockedSalesStateEnvelopeV1(
+  plan: Pick<RealtimeSalesCyclePlan<unknown>, "expectedRevision" | "state" | "events">,
+  lockedState: unknown,
+  pageId: string,
+  conversationId: string,
+): void {
+  const record = (value: unknown): Record<string, unknown> =>
+    value !== null && typeof value === "object" ? value as Record<string, unknown> : {};
+  const before = record(lockedState);
+  const after = record(plan.state);
+  const beforeRouting = record(before.routing);
+  const afterRouting = record(after.routing);
+  const beforeProcessed = Array.isArray(before.processedCommandIds)
+    ? before.processedCommandIds
+    : null;
+  const appliedEvents = plan.events.filter(({ outcome }) => outcome === "APPLIED");
+  const mismatch = (): never => {
+    throw new Error("SALES_STATE_ENVELOPE_REPLAY_MISMATCH");
+  };
+
+  if (before.schemaVersion !== 2 || after.schemaVersion !== 2 ||
+    typeof before.conversationKey !== "string" || before.conversationKey.length === 0 ||
+    after.conversationKey !== before.conversationKey ||
+    beforeRouting.pageId !== pageId || beforeRouting.conversationId !== conversationId ||
+    canonicalJsonV1(afterRouting) !== canonicalJsonV1(beforeRouting) ||
+    !Number.isSafeInteger(before.revision) || before.revision !== plan.expectedRevision ||
+    typeof before.stage !== "string" || typeof before.updatedAt !== "string" ||
+    !Number.isFinite(Date.parse(before.updatedAt)) ||
+    beforeProcessed === null || beforeProcessed.length > MAX_SALES_PROCESSED_COMMAND_IDS_V1 ||
+    beforeProcessed.some((value) => typeof value !== "string" || value.length === 0) ||
+    new Set(beforeProcessed).size !== beforeProcessed.length) {
+    mismatch();
+  }
+
+  let expectedRevision = before.revision as number;
+  let expectedStage = before.stage as string;
+  let expectedUpdatedAt = before.updatedAt;
+  let expectedProcessed = [...(beforeProcessed as readonly string[])];
+  for (const event of appliedEvents) {
+    if (event.stateRevisionBefore !== expectedRevision ||
+      event.stateRevisionAfter !== expectedRevision + 1 ||
+      event.stageBefore !== expectedStage ||
+      expectedProcessed.includes(event.commandId)) {
+      mismatch();
+    }
+    expectedRevision = event.stateRevisionAfter;
+    expectedStage = event.stageAfter;
+    expectedUpdatedAt = event.occurredAt.toISOString();
+    expectedProcessed = [...expectedProcessed, event.commandId]
+      .slice(-MAX_SALES_PROCESSED_COMMAND_IDS_V1);
+  }
+
+  if (after.revision !== expectedRevision || after.stage !== expectedStage ||
+    after.updatedAt !== expectedUpdatedAt ||
+    canonicalJsonV1(after.processedCommandIds) !== canonicalJsonV1(expectedProcessed)) {
+    mismatch();
   }
 }
 
@@ -1461,7 +1525,8 @@ function validateMetaEffectReadiness<TState, TSalesState>(
     readiness.conversationRevision !== input.expectedStateVersion ||
     readiness.sourceMessageIdHash !== meta.sourceMessageIdHash ||
     readiness.sourceMessageIdHash !== currentSourceMessageIdHash ||
-    Date.parse(readiness.checkedAt) > now.getTime() || Date.parse(readiness.expiresAt) <= now.getTime()) {
+    Date.parse(readiness.checkedAt) > now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 ||
+    Date.parse(readiness.expiresAt) <= now.getTime()) {
     throw new Error("PROTECTED_OUTBOUND_READINESS_MISMATCH");
   }
   const claims = (meta.protectedClaims ?? []).map((claim) => ProtectedClaimV1Schema.parse(claim));
@@ -1494,7 +1559,8 @@ function validateMetaEffectReadiness<TState, TSalesState>(
     }
   }
   if (claims.some((claim) =>
-    Date.parse(claim.provenance.observedAt) > now.getTime() ||
+    Date.parse(claim.provenance.observedAt) >
+      now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 ||
     Date.parse(claim.provenance.expiresAt) <= now.getTime()
   )) {
     throw new Error("PROTECTED_OUTBOUND_CLAIM_STALE");
@@ -2993,8 +3059,10 @@ export class PostgresRealtimeRuntimeStore {
        ORDER BY receive_sequence DESC`,
       [guard.inboxIds, input.pageId, input.customerHash, guard.leaseToken],
     );
-    if (sources.rowCount !== guard.inboxIds.length ||
-      typeof sources.rows[0]?.source_message_id !== "string" ||
+    if (sources.rowCount !== guard.inboxIds.length) {
+      return { current: false, sourceMessageIdHash: null };
+    }
+    if (typeof sources.rows[0]?.source_message_id !== "string" ||
       sources.rows[0].source_message_id.length === 0) {
       throw new Error("INBOX_BATCH_SOURCE_BINDING_INVALID");
     }
@@ -3315,6 +3383,11 @@ export class PostgresRealtimeRuntimeStore {
     const lockedRow = locked.rows[0];
     if (lockedRow?.state_ciphertext) {
       const lockedState = this.salesCycleRecord<unknown>(lockedRow).state;
+      if (plan.readinessContractVersion === "DF06_EFFECT_READINESS_V1") {
+        validateLockedSalesStateEnvelopeV1(
+          plan as RealtimeSalesCyclePlan<unknown>, lockedState, pageId, conversationId,
+        );
+      }
       validateLockedProtectedSalesStateTransitionV1(
         plan as RealtimeSalesCyclePlan<unknown>, lockedState,
       );

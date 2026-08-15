@@ -10,6 +10,8 @@ import {
   catalogAdvisoryReply,
   continuationProductId,
   currentProductContinuationId,
+  deterministicVertexProposalFallback,
+  enforceProtectedOutboundReadinessV1,
   explicitCustomerBusinessIntent,
   explicitCustomerBusinessIntents,
   explicitCustomerImageIntent,
@@ -56,6 +58,37 @@ import type { RealtimeMediaRecognition } from "./realtime-media-recognition.js";
 import { hashProtectedClaimSetV1 } from "@lana/business-tools";
 
 describe("RealtimeRunner", () => {
+  it("drops the complete commerce output tuple when final protected readiness is blocked", () => {
+    const blocked = enforceProtectedOutboundReadinessV1({
+      messages: [{ kind: "TEXT" as const, text: "Protected sales reply" }],
+      claims: [{ claimId: "claim-1" }],
+      readiness: {
+        outcome: "BLOCKED" as const,
+        reasonCodes: ["CLAIM_STALE"],
+      },
+      salesCyclePlan: { state: { checkoutDraft: { phone: "0900000000" } } },
+      salesDesiredTag: "DA_CHOT_DON" as const,
+    });
+
+    expect(blocked).toEqual({
+      messages: [],
+      claims: [],
+      readiness: {
+        outcome: "BLOCKED",
+        reasonCodes: ["CLAIM_STALE"],
+      },
+      salesCyclePlan: null,
+      salesDesiredTag: null,
+      blockedReasonCodes: ["CLAIM_STALE"],
+    });
+  });
+
+  it("keeps the existing deterministic fallback acknowledgement for a buying hint", () => {
+    expect(deterministicVertexProposalFallback(
+      "chốt 2 set nhé", null, true, new Error("VERTEX_TIMEOUT"),
+    ).proposal).toMatchObject({ action: "REPLY" });
+  });
+
   it("uses the approved no-size clarification after a rejected size-claim repair", () => {
     const fallback = approvedSizeClaimClarification({
       schemaVersion: 1,

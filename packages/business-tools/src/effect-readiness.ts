@@ -7,6 +7,7 @@ import {
   deterministicEffectReadinessHashPreimageV1,
   effectBindingHashPreimageV1,
   MAX_CART_LINES_V1,
+  MAX_EFFECT_READINESS_LIFETIME_MS_V1,
   validateCartEffectClaimSemanticsV1,
   validateEffectClaimSemanticsV1,
   type CanonicalBuyingIntentV1,
@@ -185,7 +186,10 @@ export function evaluateDeterministicEffectReadinessV1(
   const freshExpiries = input.claims
     .map((claim) => Date.parse(claim.provenance.expiresAt))
     .filter((expiry) => Number.isFinite(expiry) && expiry > nowMs);
-  const expiresAtMs = Math.min(nowMs + 60_000, ...freshExpiries);
+  const expiresAtMs = Math.min(
+    nowMs + MAX_EFFECT_READINESS_LIFETIME_MS_V1,
+    ...freshExpiries,
+  );
   const claimSetHash = input.claims.length === 0 ? null : hashProtectedClaimSetV1(input.claims);
   const binding = {
     schemaVersion: 1 as const,

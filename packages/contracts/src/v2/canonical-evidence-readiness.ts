@@ -20,6 +20,10 @@ const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 const BoundedIdSchema = z.string().trim().min(1).max(128);
 /** Technical envelope only; cart capacity is enforced by CartCapacityPolicyV1. */
 export const MAX_READINESS_PRODUCT_IDS_V1 = MAX_CANONICAL_PRODUCT_IDS_PER_EFFECT_V1;
+/** Bounded tolerance for clocks on independent app, POS, and database hosts. */
+export const MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 = 5 * 60 * 1_000;
+/** Readiness is deliberately short-lived and must be re-evaluated near commit. */
+export const MAX_EFFECT_READINESS_LIFETIME_MS_V1 = 60_000;
 
 // Single ingress choke point: arbitrary product-ID input becomes a bounded,
 // deterministic envelope; invalidity is data for BLOCKED, never an exception.

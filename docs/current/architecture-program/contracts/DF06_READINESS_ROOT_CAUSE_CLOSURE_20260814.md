@@ -19,6 +19,12 @@ Status: source-only implementation evidence for DF-P3 in Release Train DF-A. It 
 13. Every applied cart mutation and `CART_READY` transition also replays the locked negotiation ledger through the same pure reprice transition used by the worker. A caller cannot change the concession tier, quote, processed-event chain, or objection ledger independently of the cart transition.
 14. `CHECKOUT_DETAILS_CAPTURED` carries `CheckoutDetailsTransitionEvidenceV1`, binding the current message, command, exact raw patch, prior draft, resulting draft, and apply time. The database replays checkout normalization, preview validation, and purchase-confirmation derivation from locked state with the same shared transition kernel.
 15. Applied sales events form one contiguous stage/revision chain from the locked state to the proposed state. Event labels do not authorize an arbitrary final `stage`, checkout draft, preview, confirmation, or negotiation snapshot.
+16. A versioned DF06 commit locks and validates the complete top-level sales-state envelope. `schemaVersion`, `conversationKey`, `routing`, `processedCommandIds`, `revision`, `stage`, and `updatedAt` are derived from the locked state plus the contiguous applied-event chain; caller-controlled replacements are rejected.
+17. Readiness lifetime remains deliberately bounded to 60 seconds. The database permits at most five minutes of future clock skew for cross-host artifacts, but it never extends an artifact's declared expiry and always re-evaluates authorization against transaction time.
+18. A deterministic buying hint may guide the first Wave 2 reply strategy or error fallback before canonical evidence exists. It has no side-effect authority; cart, order, handoff, and protected effects consume only the canonical buying-intent/readiness boundary.
+19. Final protected commerce readiness is one fail-closed gate over the complete output tuple. `BLOCKED` removes outbound messages and claims, the sales mutation plan, checkout PII, and the requested commerce tag before commit planning.
+
+The clarification payload itself is outside the DF-P3 protected-effect replay scope. When it appears in a versioned plan, its applied event still participates in the exact top-level revision, stage, processed-command, and update-time envelope; it cannot rewrite cart/order/protected artifacts.
 
 The current worker emits one receipt per message. The contract and database verifier support an atomic N-receipt batch only when every receipt independently carries approved authority and the complete chain replays to the exact final cart.
 
@@ -47,7 +53,10 @@ The canonical cart reducer and shop-policy evaluator live in the lower-level `@l
 | Preview or confirmation with missing/wrong parent artifact | Transaction rejects parent/cart/preview binding mismatch | readiness and database tests |
 | Checkout patch, preview recipient/payment, or confirmation identity is forged while its self-declared hash is resealed | DB replays the exact checkout/preview/confirmation transition from locked state and rejects the artifact mismatch | shared transition-kernel and database transaction tests |
 | Proposed sales stage/revision does not equal the contiguous applied-event chain | Transaction rejects `SALES_STAGE_EVENT_CHAIN_MISMATCH` | database runtime tests |
+| Caller replaces top-level conversation identity, routing, processed-command ledger, schema version, revision, stage, or update time | DB derives the exact envelope from locked state plus applied events and rejects `SALES_STATE_ENVELOPE_REPLAY_MISMATCH` | database runtime table tests |
+| Worker/POS timestamp is slightly ahead of DB transaction time | At most five minutes future skew is accepted; declared expiry remains exact and stale artifacts are rejected | database boundary tests |
 | Commerce Meta changes cart, offer, preview, claim set, or sales parent | Transaction rejects `PROTECTED_OUTBOUND_SALES_READINESS_MISMATCH` | worker and database tests |
+| Final protected commerce readiness changes to `BLOCKED` after sales evaluation | Complete commerce tuple is discarded; no outbound, mutation plan, checkout PII, or commerce tag reaches commit planning | worker final-gate tests |
 | Protected text references 51 valid products | No cart-capacity reason is introduced; the independent technical envelope applies | business-tools tests |
 | Blocked readiness telemetry | Registered readiness reason codes persist instead of `NOT_EVALUATED`/empty reasons | observability and sales-cycle tests |
 

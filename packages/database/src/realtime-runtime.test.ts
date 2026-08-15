@@ -31,6 +31,7 @@ import {
 import { LocalEnvelopeCipher } from "./envelope-cipher.js";
 import {
   PostgresRealtimeRuntimeStore,
+  validateLockedSalesStateEnvelopeV1,
   type RealtimeCommitInput,
 } from "./realtime-runtime.js";
 
@@ -50,6 +51,81 @@ function sha256(value: unknown): string {
 function rawSha256(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
 }
+
+describe("DF06 locked sales-state envelope", () => {
+  const occurredAt = new Date("2026-08-15T08:00:00.000Z");
+  const conversationId = "33333333-3333-4333-8333-333333333333";
+  const locked = {
+    schemaVersion: 2,
+    conversationKey: conversationId,
+    routing: { pageId: "page-1", conversationId },
+    revision: 2,
+    stage: "CART_OPEN",
+    processedCommandIds: ["sales:previous"],
+    updatedAt: "2026-08-15T07:59:00.000Z",
+  };
+  const event = {
+    commandId: "sales:current",
+    commandKind: "CART_MUTATED" as const,
+    outcome: "APPLIED" as const,
+    stateRevisionBefore: 2,
+    stateRevisionAfter: 3,
+    stageBefore: "CART_OPEN",
+    stageAfter: "CART_OPEN",
+    cartId: "10000000-0000-4000-8000-000000000001",
+    cartVersion: 2,
+    reasonCode: null,
+    occurredAt,
+  };
+  const exact = {
+    expectedRevision: 2,
+    state: {
+      ...locked,
+      revision: 3,
+      processedCommandIds: ["sales:previous", event.commandId],
+      updatedAt: occurredAt.toISOString(),
+    },
+    events: [event],
+  };
+
+  it("accepts only the canonical identity/idempotency envelope derived from the locked state", () => {
+    expect(() => validateLockedSalesStateEnvelopeV1(
+      exact, locked, "page-1", conversationId,
+    )).not.toThrow();
+  });
+
+  it.each([
+    ["schemaVersion", { schemaVersion: 3 }],
+    ["conversationKey", { conversationKey: "forged-conversation" }],
+    ["routing", { routing: { pageId: "forged-page", conversationId } }],
+    ["revision", { revision: 4 }],
+    ["stage", { stage: "PURCHASE_CONFIRMED" }],
+    ["processedCommandIds", { processedCommandIds: ["sales:current"] }],
+    ["updatedAt", { updatedAt: "2026-08-15T08:00:01.000Z" }],
+  ] as const)("rejects a caller-controlled %s", (_field, mutation) => {
+    expect(() => validateLockedSalesStateEnvelopeV1({
+      ...exact,
+      state: { ...exact.state, ...mutation },
+    }, locked, "page-1", conversationId)).toThrow("SALES_STATE_ENVELOPE_REPLAY_MISMATCH");
+  });
+
+  it("appends applied command IDs in order and preserves the 100-entry cap", () => {
+    const processedCommandIds = Array.from(
+      { length: 100 },
+      (_, index) => `sales:previous:${index}`,
+    );
+    expect(() => validateLockedSalesStateEnvelopeV1({
+      ...exact,
+      state: {
+        ...exact.state,
+        processedCommandIds: [...processedCommandIds.slice(1), event.commandId],
+      },
+    }, {
+      ...locked,
+      processedCommandIds,
+    }, "page-1", conversationId)).not.toThrow();
+  });
+});
 
 function sealReadinessV1(
   input: Omit<
@@ -585,6 +661,50 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       .toBeLessThan(calls.findIndex((sql) => sql.includes("SELECT generation")));
     expect(calls.some((sql) => sql.includes("INSERT INTO meta_outbox"))).toBe(false);
     expect(calls.some((sql) => sql.includes("attempt_count = GREATEST"))).toBe(true);
+  });
+
+  it("returns SUPERSEDED when a current-generation inbox row loses its processing lease before commit", async () => {
+    const calls: string[] = [];
+    const client = {
+      async query(sql: string) {
+        calls.push(sql);
+        if (sql.includes("SELECT routing_owner")) {
+          return { rowCount: 1, rows: [{
+            routing_owner: "APP", app_send_enabled: true, kill_switch: false,
+            transaction_now: new Date("2026-08-13T05:00:00.000Z"),
+          }] };
+        }
+        if (sql.includes("FROM conversation_ingress_heads")) {
+          return { rowCount: 1, rows: [{ generation: "100" }] };
+        }
+        if (sql.includes("FROM webhook_inbox")) return { rowCount: 0, rows: [] };
+        return { rowCount: 1, rows: [] };
+      },
+      release() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = { async connect() { return client; } };
+
+    await expect(store.commit({
+      pageId: "page-1",
+      customerHash: "customer-hash",
+      conversationId: "33333333-3333-4333-8333-333333333333",
+      expectedStateVersion: 2,
+      state: { revision: 3, routingOwner: "APP", conversationOwner: "BOT" },
+      inboxBatchGuard: {
+        generation: 100,
+        leaseToken: "44444444-4444-4444-8444-444444444444",
+        inboxIds: ["55555555-5555-4555-8555-555555555555"],
+      },
+    })).resolves.toMatchObject({
+      stateCommitted: false,
+      inboxBatchStatus: "SUPERSEDED",
+      reasonCodes: ["INBOX_BATCH_SUPERSEDED"],
+    });
+    expect(calls.some((sql) => sql.includes("UPDATE conversations"))).toBe(false);
   });
 
   it("commits the owner CAS, Pancake outbox, immutable event and queue case atomically", async () => {
@@ -1322,6 +1442,21 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     const beforeCartStateHash = cartHash(beforeCart);
     const afterCartStateHash = cartHash(exactCart);
     const evaluatedAt = now.toISOString();
+    const priorProcessedCommandIds = ["sales:event-1:facts"];
+    const salesEnvelope = (
+      revision: number,
+      stage: string,
+      processedCommandIds: readonly string[],
+      updatedAt = evaluatedAt,
+    ) => ({
+      schemaVersion: 2 as const,
+      conversationKey: commitInput.conversationId,
+      routing: { pageId: "page-1", conversationId: commitInput.conversationId },
+      revision,
+      stage,
+      processedCommandIds,
+      updatedAt,
+    });
     const beforeNegotiation = {
       schemaVersion: 2 as const,
       negotiationId: `negotiation:${cartId}`,
@@ -1445,8 +1580,10 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       salesCyclePlan: {
         ...commitInput.salesCyclePlan,
         state: {
-          revision: 3,
-          stage: "CART_OPEN",
+          ...salesEnvelope(3, "CART_OPEN", [
+            ...priorProcessedCommandIds,
+            mutationCommandId,
+          ]),
           cart: { value: exactCart, expiresAt: "2026-08-14T03:00:00.000Z" },
           commerceContext: {
             shopId: "LANA",
@@ -1488,8 +1625,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     };
     const salesExpiresAt = new Date("2026-08-14T03:00:00.000Z");
     const lockedBundle = cipher.encryptJson({
-      revision: 2,
-      stage: "CART_OPEN",
+      ...salesEnvelope(2, "CART_OPEN", priorProcessedCommandIds, beforeCart.updatedAt),
       cart: { value: beforeCart, expiresAt: salesExpiresAt.toISOString() },
       commerceContext: { shopId: "LANA", policyRef: replayContext.policyRef },
       negotiation: beforeNegotiation,
@@ -1510,6 +1646,33 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     await expect(store.commit(exactMutation, now))
       .resolves.toMatchObject({ stateCommitted: true });
     expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    for (const forgedEnvelope of [{
+      conversationKey: "forged-conversation",
+    }, {
+      routing: { pageId: "forged-page", conversationId: commitInput.conversationId },
+    }, {
+      processedCommandIds: [mutationCommandId],
+    }]) {
+      await expect(store.commit({
+        ...exactMutation,
+        salesCyclePlan: {
+          ...exactMutation.salesCyclePlan,
+          state: { ...exactMutation.salesCyclePlan.state, ...forgedEnvelope },
+        },
+      }, now)).rejects.toThrow("SALES_STATE_ENVELOPE_REPLAY_MISMATCH");
+      expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+    }
+
+    transactionClock = new Date("2026-08-13T02:58:00.000Z");
+    await expect(store.commit(exactMutation, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+    transactionClock = new Date("2026-08-13T02:54:59.999Z");
+    await expect(store.commit(exactMutation, now))
+      .rejects.toThrow();
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+    transactionClock = now;
 
     await expect(store.commit({
       ...exactMutation,
@@ -1535,7 +1698,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         ...exactMutation.salesCyclePlan,
         state: { ...exactMutation.salesCyclePlan.state, stage: "PURCHASE_CONFIRMED" },
       },
-    }, now)).rejects.toThrow("SALES_STAGE_EVENT_CHAIN_MISMATCH");
+    }, now)).rejects.toThrow("SALES_STATE_ENVELOPE_REPLAY_MISMATCH");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
     const checkoutCommandId = "sales:event-2:checkout-details";
@@ -1582,8 +1745,10 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         sourceMessageIdHash,
         canonicalBuyingIntent: canonicalIntent,
         state: {
-          revision: 3,
-          stage: "CART_OPEN",
+          ...salesEnvelope(3, "CART_OPEN", [
+            ...priorProcessedCommandIds,
+            checkoutCommandId,
+          ]),
           cart: { value: beforeCart, expiresAt: salesExpiresAt.toISOString() },
           commerceContext: { shopId: "LANA", policyRef: replayContext.policyRef },
           negotiation: beforeNegotiation,
@@ -1756,8 +1921,10 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       authorization: "NONE",
     }, { offerBindings: canonicalCartOfferBindingsV1(openCart.lines) });
     const openState = {
-      revision: 3,
-      stage: "CART_OPEN",
+      ...salesEnvelope(3, "CART_OPEN", [
+        ...priorProcessedCommandIds,
+        openCommandId,
+      ]),
       cart: { value: openCart, expiresAt: salesExpiresAt.toISOString() },
       commerceContext: { shopId: "LANA", policyRef: openPolicyRef },
       negotiation: openNegotiation,
@@ -1791,8 +1958,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       },
     } satisfies RealtimeCommitInput<unknown, unknown>;
     const emptyCartLockedBundle = cipher.encryptJson({
-      revision: 2,
-      stage: "SIZE_RECOMMENDED",
+      ...salesEnvelope(2, "SIZE_RECOMMENDED", priorProcessedCommandIds, beforeCart.updatedAt),
       cart: null,
       commerceContext: null,
       negotiation: null,
@@ -2025,7 +2191,10 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         expectedRevision: 3,
         state: {
           ...openState,
-          revision: 4,
+          ...salesEnvelope(4, "CART_OPEN", [
+            ...openState.processedCommandIds,
+            negotiationEvent.commandId,
+          ]),
           cart: { value: hesitantReplay.cart, expiresAt: salesExpiresAt.toISOString() },
           negotiation: nextNegotiation,
         },
@@ -2185,8 +2354,10 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       salesCyclePlan: {
         ...cartReadyWithMissingStock.salesCyclePlan,
         state: {
-          revision: 3,
-          stage: "CART_OPEN",
+          ...salesEnvelope(3, "CART_OPEN", [
+            ...priorProcessedCommandIds,
+            cartReadyWithMissingStock.salesCyclePlan.events[0]!.commandId,
+          ]),
           cart: { value: readyCart, expiresAt: salesExpiresAt.toISOString() },
           commerceContext: { shopId: "LANA", policyRef: replayContext.policyRef },
           negotiation: readyNegotiation.state,
@@ -2272,9 +2443,12 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         ...exactCartReady.salesCyclePlan,
         state: {
           ...exactCartReady.salesCyclePlan.state,
-          revision: 5,
-          stage: "ORDER_PREVIEW",
-          conversationKey: "page-1:conversation-1",
+          ...salesEnvelope(5, "ORDER_PREVIEW", [
+            ...priorProcessedCommandIds,
+            checkoutPlan.salesCyclePlan.events[0]!.commandId,
+            exactCartReady.salesCyclePlan.events[0]!.commandId,
+            "sales:event-2:preview",
+          ]),
           checkoutDraft: checkoutTransition.draft,
           preview: exactPreview,
         },
@@ -2391,8 +2565,10 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         deterministicConfirmationEvidence: confirmationEvidence,
         state: {
           ...exactPreviewPlan.salesCyclePlan.state,
-          revision: 6,
-          stage: "PURCHASE_CONFIRMED",
+          ...salesEnvelope(6, "PURCHASE_CONFIRMED", [
+            ...exactPreviewPlan.salesCyclePlan.state.processedCommandIds,
+            "sales:event-2:confirm",
+          ]),
           confirmation: exactConfirmation,
         },
         cartExpiresAt: salesExpiresAt,

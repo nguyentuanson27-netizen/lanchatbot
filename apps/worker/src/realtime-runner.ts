@@ -19,6 +19,7 @@ import {
   verifiedImageUrls,
   applyWave2ReplyPolicy,
   decideWave2SalesStrategy,
+  detectBuyingSignal,
   type Wave2StrategyDecision,
   type CatalogFactQuery,
   type CustomerImageIntent,
@@ -1067,6 +1068,46 @@ export function deterministicVertexProposalFallback(
       },
     },
     reasonCode,
+  };
+}
+
+export function enforceProtectedOutboundReadinessV1<
+  TMessage,
+  TClaim,
+  TReadiness extends {
+    readonly outcome: "READY" | "BLOCKED";
+    readonly reasonCodes: readonly string[];
+  },
+  TSalesCyclePlan,
+>(input: {
+  readonly messages: readonly TMessage[];
+  readonly claims: readonly TClaim[];
+  readonly readiness: TReadiness | null;
+  readonly salesCyclePlan: TSalesCyclePlan | null;
+  readonly salesDesiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null;
+}): {
+  readonly messages: readonly TMessage[];
+  readonly claims: readonly TClaim[];
+  readonly readiness: TReadiness | null;
+  readonly salesCyclePlan: TSalesCyclePlan | null;
+  readonly salesDesiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null;
+  readonly blockedReasonCodes: readonly string[];
+} {
+  if (input.readiness === null || input.readiness.outcome === "READY") {
+    return {
+      ...input,
+      blockedReasonCodes: [],
+    };
+  }
+  return {
+    messages: [],
+    claims: [],
+    // Preserve the denial as telemetry evidence. It is never attached to a
+    // Meta plan because only READY readiness can cross that boundary.
+    readiness: input.readiness,
+    salesCyclePlan: null,
+    salesDesiredTag: null,
+    blockedReasonCodes: [...new Set(input.readiness.reasonCodes)],
   };
 }
 
@@ -3190,6 +3231,14 @@ export class RealtimeRunner {
       isBuyingSignal: false,
       reasons: [] as readonly string[],
     };
+    const deterministicBuyingHintForTurn = () => detectBuyingSignal(
+      message.isEcho ? "" : message.text ?? "",
+      {
+        hasProductContext: Boolean(
+          resolvedProduct?.productId ?? nextState.currentProductId,
+        ),
+      },
+    );
     const imageIntent = message.isEcho
       ? null
       : explicitCustomerImageIntent(message.text ?? "");
@@ -3202,7 +3251,7 @@ export class RealtimeRunner {
         text: message.text ?? "",
         salesStage: nextState.salesStage,
         objectionType: event.objectionType,
-        buyingSignal: buyingSignal.isBuyingSignal,
+        buyingSignal: deterministicBuyingHintForTurn().isBuyingSignal,
         hasVerifiedProduct: Boolean(
           resolvedProduct?.productId ?? nextState.currentProductId,
         ),
@@ -3868,7 +3917,7 @@ export class RealtimeRunner {
             const fallback = deterministicVertexProposalFallback(
               message.text ?? "",
               resolvedProduct,
-              buyingSignal.isBuyingSignal,
+              deterministicBuyingHintForTurn().isBuyingSignal,
               error,
             );
             proposal = fallback.proposal;
@@ -4585,7 +4634,7 @@ export class RealtimeRunner {
           deterministicUuid(`${message.eventKey}:attachment:${index}`)
         ),
         productId:
-          businessFacts?.productId ??
+          canonicalEvidence.buyingIntent.productId ??
           resolvedProduct?.productId ??
           nextState.currentProductId,
         offerType:
@@ -4740,13 +4789,26 @@ export class RealtimeRunner {
         payloadHash: canonicalSha256(metaMessages),
         checkedAt: new Date(),
       });
-      if (protectedOutboundReadiness.outcome !== "READY") {
-        metaMessages = [];
-        handoffGuardReasonCodes = [...new Set([
-          ...handoffGuardReasonCodes,
-          ...protectedOutboundReadiness.reasonCodes,
-        ])];
-      }
+    }
+
+    const protectedOutboundGate = enforceProtectedOutboundReadinessV1({
+      messages: metaMessages,
+      claims: protectedOutboundClaims,
+      readiness: protectedOutboundReadiness,
+      salesCyclePlan,
+      salesDesiredTag,
+    });
+    metaMessages = [...protectedOutboundGate.messages];
+    protectedOutboundClaims = [...protectedOutboundGate.claims];
+    protectedOutboundReadiness = protectedOutboundGate.readiness;
+    salesCyclePlan = protectedOutboundGate.salesCyclePlan;
+    salesDesiredTag = protectedOutboundGate.salesDesiredTag;
+    if (protectedOutboundGate.blockedReasonCodes.length > 0) {
+      handoffGuardReasonCodes = [...new Set([
+        ...handoffGuardReasonCodes,
+        ...protectedOutboundGate.blockedReasonCodes,
+      ])];
+      salesProtectedOutbound = null;
     }
 
     const planSeed = [

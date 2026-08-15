@@ -10,6 +10,10 @@ describe("DF05 canonical buying authority wiring", () => {
 
     expect(runner.match(/buildCanonicalDecisionEvidenceV1\(/gu)).toHaveLength(1);
     expect(runner).toContain("canonicalBuyingIntent:");
+    expect(runner).toContain("deterministicBuyingHintForTurn");
+    expect(runner).toMatch(
+      /productId:\s*canonicalEvidence\.buyingIntent\.productId\s*\?\?/u,
+    );
   });
 
   it("does not re-resolve buying intent inside the sales-cycle consumer", () => {
@@ -47,5 +51,13 @@ describe("DF05 canonical buying authority wiring", () => {
     expect(database).toContain("deriveCanonicalNegotiationCustomerStateV1");
     expect(database).toContain("authorizationNow: transactionNow");
     expect(database).not.toContain("customerState: context.customerState");
+  });
+
+  it("enforces one final fail-closed gate for protected commerce output", () => {
+    const runner = readFileSync(new URL("./realtime-runner.ts", import.meta.url), "utf8");
+
+    expect(runner).toContain("enforceProtectedOutboundReadinessV1");
+    expect(runner).toContain("salesCyclePlan = protectedOutboundGate.salesCyclePlan");
+    expect(runner).toContain("salesDesiredTag = protectedOutboundGate.salesDesiredTag");
   });
 });

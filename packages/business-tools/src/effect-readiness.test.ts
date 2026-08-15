@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   CanonicalBuyingIntentV1Schema,
+  MAX_EFFECT_READINESS_LIFETIME_MS_V1,
   ProtectedClaimV1Schema,
   type CartLineV1,
 } from "@lana/contracts";
@@ -143,6 +144,8 @@ describe("deterministic effect readiness", () => {
     expect(result.authorization).toBe("NONE");
     expect(result.buyingIntentHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(result.claimSetHash).toMatch(/^[a-f0-9]{64}$/u);
+    expect(Date.parse(result.expiresAt) - now.getTime())
+      .toBe(MAX_EFFECT_READINESS_LIFETIME_MS_V1);
   });
 
   it("blocks model-only or missing canonical buying intent", () => {
