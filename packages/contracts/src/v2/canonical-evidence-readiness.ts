@@ -25,6 +25,36 @@ export const MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 = 5 * 60 * 1_000;
 /** Readiness is deliberately short-lived and must be re-evaluated near commit. */
 export const MAX_EFFECT_READINESS_LIFETIME_MS_V1 = 60_000;
 
+export const EFFECT_READINESS_TEMPORAL_STATUSES_V1 = [
+  "VALID",
+  "INVALID_TIMESTAMP",
+  "INVALID_INTERVAL",
+  "LIFETIME_EXCEEDED",
+  "FUTURE",
+  "STALE",
+] as const;
+export type EffectReadinessTemporalStatusV1 =
+  typeof EFFECT_READINESS_TEMPORAL_STATUSES_V1[number];
+
+/** Pure transaction-time classification shared by sales and Meta readiness. */
+export function validateEffectReadinessTemporalWindowV1(input: Readonly<{
+  checkedAt: string;
+  expiresAt: string;
+  now: Date;
+}>): EffectReadinessTemporalStatusV1 {
+  const checkedAt = Date.parse(input.checkedAt);
+  const expiresAt = Date.parse(input.expiresAt);
+  const now = input.now.getTime();
+  if (![checkedAt, expiresAt, now].every(Number.isFinite)) return "INVALID_TIMESTAMP";
+  if (expiresAt <= checkedAt) return "INVALID_INTERVAL";
+  if (expiresAt - checkedAt > MAX_EFFECT_READINESS_LIFETIME_MS_V1) {
+    return "LIFETIME_EXCEEDED";
+  }
+  if (checkedAt > now + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1) return "FUTURE";
+  if (expiresAt <= now) return "STALE";
+  return "VALID";
+}
+
 // Single ingress choke point: arbitrary product-ID input becomes a bounded,
 // deterministic envelope; invalidity is data for BLOCKED, never an exception.
 export function canonicalizeReadinessProductIdsV1(

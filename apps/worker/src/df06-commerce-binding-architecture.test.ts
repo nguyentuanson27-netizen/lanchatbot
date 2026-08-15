@@ -75,6 +75,9 @@ describe("DF06 canonical commerce binding architecture", () => {
     expect(database).toContain("validateLockedProtectedSalesArtifactsV1");
     expect(database).toContain("CART_READY_NEGOTIATION_REPLAY_MISMATCH");
     expect(database).toContain("SALES_STAGE_EVENT_CHAIN_MISMATCH");
+    expect(salesContracts).toContain("SALES_STAGE_TRANSITIONS_V1");
+    expect(runtime).toContain("isSalesStageTransitionAllowedV1");
+    expect(database).toContain("isSalesStageTransitionAllowedV1");
     expect(worker).toContain("ClarificationTransitionEvidenceV1Schema");
     expect(database).toContain("ClarificationTransitionEvidenceV1Schema");
     expect(salesContracts).toContain("CLARIFICATION_TRANSITION_EVIDENCE_V1");
@@ -93,6 +96,7 @@ describe("DF06 canonical commerce binding architecture", () => {
     expect(worker).toContain("CART_TTL_MS_V1");
     expect(runtime).toContain("CART_TTL_MS_V1");
     expect(database).toContain("CART_TTL_MS_V1");
+    expect(database).toContain("validateEffectReadinessTemporalWindowV1");
     expect(worker).not.toMatch(/const\s+CART_TTL_MS\s*=/u);
     expect(runtime).not.toMatch(/const\s+CART_TTL_MS\s*=/u);
   });

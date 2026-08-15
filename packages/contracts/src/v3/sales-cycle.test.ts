@@ -11,7 +11,10 @@ import {
   PurchaseConfirmationV1Schema,
   PancakeTagCommandV2Schema,
   STATE_ADVANCING_SALES_OUTCOMES_V1,
+  SALES_CYCLE_COMMAND_KINDS_V1,
+  SalesCycleStageV1Schema,
   VersionedBusinessReferenceV1Schema,
+  isSalesStageTransitionAllowedV1,
   isStateAdvancingSalesOutcomeV1,
   canonicalClarificationStateHashPreimageV1,
   clarificationTransitionEvidenceHashPreimageV1,
@@ -43,6 +46,73 @@ describe("Phase 3 sales-cycle contracts", () => {
     expect(isStateAdvancingSalesOutcomeV1("APPLIED")).toBe(true);
     expect(isStateAdvancingSalesOutcomeV1("HANDOFF")).toBe(true);
     expect(isStateAdvancingSalesOutcomeV1("REJECTED")).toBe(false);
+  });
+
+  it("defines every legal persisted sales-stage transition and rejects the Cartesian complement", () => {
+    const valid = [
+      ["FACTS_PRESENTED", "APPLIED", "DISCOVERY", "FACTS_PRESENTED"],
+      ["FACTS_PRESENTED", "APPLIED", "FACTS_PRESENTED", "FACTS_PRESENTED"],
+      ["MEASUREMENTS_REQUIRED", "APPLIED", "FACTS_PRESENTED", "MEASUREMENTS_REQUIRED"],
+      ["MEASUREMENTS_REQUIRED", "APPLIED", "MEASUREMENTS_REQUIRED", "MEASUREMENTS_REQUIRED"],
+      ["SIZE_RECOMMENDED", "APPLIED", "MEASUREMENTS_REQUIRED", "SIZE_RECOMMENDED"],
+      ["SIZE_RECOMMENDED", "APPLIED", "SIZE_RECOMMENDED", "SIZE_RECOMMENDED"],
+      ["CART_OPENED", "APPLIED", "SIZE_RECOMMENDED", "CART_OPEN"],
+      ["CART_OPENED", "APPLIED", "CART_OPEN", "CART_OPEN"],
+      ["CART_OPENED", "APPLIED", "ORDER_PREVIEW", "CART_OPEN"],
+      ["CART_MUTATED", "APPLIED", "CART_OPEN", "CART_OPEN"],
+      ["CART_MUTATED", "APPLIED", "ORDER_PREVIEW", "CART_OPEN"],
+      ["CART_READY", "APPLIED", "CART_OPEN", "CART_OPEN"],
+      ["CART_READY", "APPLIED", "ORDER_PREVIEW", "CART_OPEN"],
+      ["CHECKOUT_DETAILS_CAPTURED", "APPLIED", "CART_OPEN", "CART_OPEN"],
+      ["CHECKOUT_DETAILS_CAPTURED", "APPLIED", "ORDER_PREVIEW", "CART_OPEN"],
+      ["CLARIFICATION_REQUESTED", "APPLIED", "CART_OPEN", "CART_OPEN"],
+      ["CLARIFICATION_REQUESTED", "APPLIED", "ORDER_PREVIEW", "ORDER_PREVIEW"],
+      ["CLARIFICATION_RESOLVED", "APPLIED", "DISCOVERY", "DISCOVERY"],
+      ["CLARIFICATION_RESOLVED", "APPLIED", "FACTS_PRESENTED", "FACTS_PRESENTED"],
+      ["CLARIFICATION_RESOLVED", "APPLIED", "MEASUREMENTS_REQUIRED", "MEASUREMENTS_REQUIRED"],
+      ["CLARIFICATION_RESOLVED", "APPLIED", "SIZE_RECOMMENDED", "SIZE_RECOMMENDED"],
+      ["CLARIFICATION_RESOLVED", "APPLIED", "CART_OPEN", "CART_OPEN"],
+      ["CLARIFICATION_RESOLVED", "APPLIED", "ORDER_PREVIEW", "ORDER_PREVIEW"],
+      ["NEGOTIATION_EVENT", "APPLIED", "CART_OPEN", "CART_OPEN"],
+      ["NEGOTIATION_EVENT", "APPLIED", "ORDER_PREVIEW", "ORDER_PREVIEW"],
+      ["NEGOTIATION_EVENT", "APPLIED", "ORDER_PREVIEW", "CART_OPEN"],
+      ["PREVIEW_CREATED", "APPLIED", "CART_OPEN", "ORDER_PREVIEW"],
+      ["CONFIRM_PURCHASE", "APPLIED", "ORDER_PREVIEW", "PURCHASE_CONFIRMED"],
+      ["CONFIRM_PURCHASE", "HANDOFF", "ORDER_PREVIEW", "HANDED_OFF"],
+      ["PAYMENT_RECEIPT_RECEIVED", "HANDOFF", "PURCHASE_CONFIRMED", "HANDED_OFF"],
+    ] as const;
+    const validKeys = new Set(valid.map((tuple) => tuple.join("|")));
+    const stages = SalesCycleStageV1Schema.options;
+
+    expect(new Set(SALES_CYCLE_COMMAND_KINDS_V1).size)
+      .toBe(SALES_CYCLE_COMMAND_KINDS_V1.length);
+    for (const commandKind of SALES_CYCLE_COMMAND_KINDS_V1) {
+      for (const outcome of STATE_ADVANCING_SALES_OUTCOMES_V1) {
+        for (const stageBefore of stages) {
+          for (const stageAfter of stages) {
+            expect(isSalesStageTransitionAllowedV1({
+              commandKind,
+              outcome,
+              stageBefore,
+              stageAfter,
+            }), `${commandKind}|${outcome}|${stageBefore}|${stageAfter}`)
+              .toBe(validKeys.has([commandKind, outcome, stageBefore, stageAfter].join("|")));
+          }
+        }
+      }
+    }
+    expect(isSalesStageTransitionAllowedV1({
+      commandKind: "FACTS_PRESENTED",
+      outcome: "APPLIED",
+      stageBefore: "NOT_A_STAGE",
+      stageAfter: "FACTS_PRESENTED",
+    })).toBe(false);
+    expect(isSalesStageTransitionAllowedV1({
+      commandKind: "NOT_A_COMMAND",
+      outcome: "APPLIED",
+      stageBefore: "DISCOVERY",
+      stageAfter: "FACTS_PRESENTED",
+    })).toBe(false);
   });
 
   it("normalizes legacy missing clarification to null and binds the exact transition", () => {

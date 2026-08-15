@@ -28,9 +28,10 @@ import {
   DeterministicConfirmationEvidenceV1Schema,
   DeterministicEffectReadinessV1Schema,
   MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1,
-  MAX_EFFECT_READINESS_LIFETIME_MS_V1,
   CART_TTL_MS_V1,
+  isSalesStageTransitionAllowedV1,
   isStateAdvancingSalesOutcomeV1,
+  SalesCycleStageV1Schema,
   deterministicEffectReadinessHashPreimageV1,
   effectBindingHashPreimageV1,
   OrderPreviewV1Schema,
@@ -38,11 +39,13 @@ import {
   CanonicalBuyingIntentV1Schema,
   ProtectedClaimV1Schema,
   validateCartEffectClaimSemanticsV1,
+  validateEffectReadinessTemporalWindowV1,
   validateEffectClaimSemanticsV1,
   type DecisionObservabilityV1,
   type CartV1,
   type DeterministicEffectReadinessV1,
   type StateAdvancingSalesOutcomeV1,
+  type SalesCycleCommandKindV1,
 } from "@lana/contracts";
 import {
   applyCanonicalCartDecisionV2,
@@ -147,20 +150,7 @@ export interface RealtimeSalesCycleRecord<TState> {
 
 export interface RealtimeSalesCycleEventPlan {
   readonly commandId: string;
-  readonly commandKind:
-    | "FACTS_PRESENTED"
-    | "MEASUREMENTS_REQUIRED"
-    | "SIZE_RECOMMENDED"
-    | "CART_OPENED"
-    | "CART_MUTATED"
-    | "NEGOTIATION_EVENT"
-    | "CART_READY"
-    | "CHECKOUT_DETAILS_CAPTURED"
-    | "CLARIFICATION_REQUESTED"
-    | "CLARIFICATION_RESOLVED"
-    | "PREVIEW_CREATED"
-    | "CONFIRM_PURCHASE"
-    | "PAYMENT_RECEIPT_RECEIVED";
+  readonly commandKind: SalesCycleCommandKindV1;
   readonly outcome: StateAdvancingSalesOutcomeV1;
   readonly stateRevisionBefore: number;
   readonly stateRevisionAfter: number;
@@ -548,13 +538,15 @@ function validateSalesEffectReadiness<TState, TSalesState>(
       readiness.conversationRevision !== input.expectedStateVersion ||
       readiness.salesCycleRevision !== plan.expectedRevision
     ) throw new Error("EFFECT_READINESS_REVISION_MISMATCH");
-    const checkedAt = Date.parse(readiness.checkedAt);
-    const expiresAt = Date.parse(readiness.expiresAt);
-    if (expiresAt - checkedAt > MAX_EFFECT_READINESS_LIFETIME_MS_V1) {
+    const temporalStatus = validateEffectReadinessTemporalWindowV1({
+      checkedAt: readiness.checkedAt,
+      expiresAt: readiness.expiresAt,
+      now,
+    });
+    if (temporalStatus === "LIFETIME_EXCEEDED") {
       throw new Error("EFFECT_READINESS_LIFETIME_INVALID");
     }
-    if (checkedAt > now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 ||
-      expiresAt <= now.getTime()) {
+    if (temporalStatus !== "VALID") {
       throw new Error("EFFECT_READINESS_STALE");
     }
     const claims = claimSets.get(readiness.effect);
@@ -1062,6 +1054,11 @@ export function validateLockedSalesStateEnvelopeV1(
   let expectedUpdatedAt = before.updatedAt;
   let expectedProcessed = [...(beforeProcessed as readonly string[])];
   for (const event of stateAdvancingEvents) {
+    if (!SalesCycleStageV1Schema.safeParse(event.stageBefore).success ||
+      !SalesCycleStageV1Schema.safeParse(event.stageAfter).success ||
+      !isSalesStageTransitionAllowedV1(event)) {
+      throw new Error("SALES_STAGE_EVENT_CHAIN_MISMATCH");
+    }
     if (event.stateRevisionBefore !== expectedRevision ||
       event.stateRevisionAfter !== expectedRevision + 1 ||
       event.stageBefore !== expectedStage ||
@@ -1378,8 +1375,16 @@ function salesStateCartExpiryV1(value: unknown): string | null {
 function validateLockedCartExpiryBindingV1(
   plan: RealtimeSalesCyclePlan<unknown>,
   lockedState: unknown,
+  lockedCartExpiresAt: Date | null,
 ): void {
   const beforeExpiry = salesStateCartExpiryV1(lockedState);
+  const beforeExpiryMs = beforeExpiry === null ? null : Date.parse(beforeExpiry);
+  const lockedColumnExpiryMs = lockedCartExpiresAt?.getTime() ?? null;
+  if ((beforeExpiryMs !== null && !Number.isFinite(beforeExpiryMs)) ||
+    (lockedColumnExpiryMs !== null && !Number.isFinite(lockedColumnExpiryMs)) ||
+    beforeExpiryMs !== lockedColumnExpiryMs) {
+    throw new Error("CART_EXPIRY_BINDING_MISMATCH");
+  }
   const afterExpiry = salesStateCartExpiryV1(plan.state);
   const planExpiry = plan.cartExpiresAt?.toISOString() ?? null;
   if (afterExpiry !== planExpiry) throw new Error("CART_EXPIRY_BINDING_MISMATCH");
@@ -1692,13 +1697,17 @@ function validateMetaEffectReadiness<TState, TSalesState>(
   if (readiness.effect !== "PROTECTED_OUTBOUND" || readiness.outcome !== "READY") {
     throw new Error("PROTECTED_OUTBOUND_READINESS_REQUIRED");
   }
+  const temporalStatus = validateEffectReadinessTemporalWindowV1({
+    checkedAt: readiness.checkedAt,
+    expiresAt: readiness.expiresAt,
+    now,
+  });
   if (currentSourceMessageIdHash === null ||
     readiness.pageId !== input.pageId || readiness.conversationId !== input.conversationId ||
     readiness.conversationRevision !== input.expectedStateVersion ||
     readiness.sourceMessageIdHash !== meta.sourceMessageIdHash ||
     readiness.sourceMessageIdHash !== currentSourceMessageIdHash ||
-    Date.parse(readiness.checkedAt) > now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 ||
-    Date.parse(readiness.expiresAt) <= now.getTime()) {
+    temporalStatus !== "VALID") {
     throw new Error("PROTECTED_OUTBOUND_READINESS_MISMATCH");
   }
   const claims = (meta.protectedClaims ?? []).map((claim) => ProtectedClaimV1Schema.parse(claim));
@@ -3561,7 +3570,7 @@ export class PostgresRealtimeRuntimeStore {
         );
       }
       validateLockedCartExpiryBindingV1(
-        plan as RealtimeSalesCyclePlan<unknown>, lockedState,
+        plan as RealtimeSalesCyclePlan<unknown>, lockedState, lockedRow.cart_expires_at,
       );
       validateLockedProtectedSalesStateTransitionV1(
         plan as RealtimeSalesCyclePlan<unknown>, lockedState,

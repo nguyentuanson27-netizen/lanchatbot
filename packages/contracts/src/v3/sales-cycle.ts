@@ -21,6 +21,24 @@ export const STATE_ADVANCING_SALES_OUTCOMES_V1 = ["APPLIED", "HANDOFF"] as const
 export type StateAdvancingSalesOutcomeV1 =
   typeof STATE_ADVANCING_SALES_OUTCOMES_V1[number];
 
+export const SALES_CYCLE_COMMAND_KINDS_V1 = [
+  "FACTS_PRESENTED",
+  "MEASUREMENTS_REQUIRED",
+  "SIZE_RECOMMENDED",
+  "CART_OPENED",
+  "CART_MUTATED",
+  "NEGOTIATION_EVENT",
+  "CART_READY",
+  "CHECKOUT_DETAILS_CAPTURED",
+  "CLARIFICATION_REQUESTED",
+  "CLARIFICATION_RESOLVED",
+  "PREVIEW_CREATED",
+  "CONFIRM_PURCHASE",
+  "PAYMENT_RECEIPT_RECEIVED",
+] as const;
+export const SalesCycleCommandKindV1Schema = z.enum(SALES_CYCLE_COMMAND_KINDS_V1);
+export type SalesCycleCommandKindV1 = z.infer<typeof SalesCycleCommandKindV1Schema>;
+
 export function isStateAdvancingSalesOutcomeV1(
   value: string,
 ): value is StateAdvancingSalesOutcomeV1 {
@@ -126,6 +144,128 @@ export const SalesCycleStageV1Schema = z.enum([
   "HANDED_OFF",
 ]);
 export type SalesCycleStageV1 = z.infer<typeof SalesCycleStageV1Schema>;
+
+type SalesStageDestinationV1 = SalesCycleStageV1 | "SAME";
+type SalesStageTransitionRuleV1 = Readonly<{
+  outcome: StateAdvancingSalesOutcomeV1;
+  stageBefore: readonly SalesCycleStageV1[];
+  stageAfter: readonly SalesStageDestinationV1[];
+}>;
+
+const NON_TERMINAL_SALES_STAGES_V1 = [
+  "DISCOVERY",
+  "FACTS_PRESENTED",
+  "MEASUREMENTS_REQUIRED",
+  "SIZE_RECOMMENDED",
+  "CART_OPEN",
+  "ORDER_PREVIEW",
+] as const satisfies readonly SalesCycleStageV1[];
+
+/**
+ * The single persisted sales-stage transition authority. Runtime reducers and
+ * database replay consume this table; adding a command kind without a rule is
+ * a compile-time error.
+ */
+export const SALES_STAGE_TRANSITIONS_V1 = {
+  FACTS_PRESENTED: [{
+    outcome: "APPLIED",
+    stageBefore: ["DISCOVERY", "FACTS_PRESENTED"],
+    stageAfter: ["FACTS_PRESENTED"],
+  }],
+  MEASUREMENTS_REQUIRED: [{
+    outcome: "APPLIED",
+    stageBefore: ["FACTS_PRESENTED", "MEASUREMENTS_REQUIRED"],
+    stageAfter: ["MEASUREMENTS_REQUIRED"],
+  }],
+  SIZE_RECOMMENDED: [{
+    outcome: "APPLIED",
+    stageBefore: ["MEASUREMENTS_REQUIRED", "SIZE_RECOMMENDED"],
+    stageAfter: ["SIZE_RECOMMENDED"],
+  }],
+  CART_OPENED: [{
+    outcome: "APPLIED",
+    stageBefore: ["SIZE_RECOMMENDED", "CART_OPEN", "ORDER_PREVIEW"],
+    stageAfter: ["CART_OPEN"],
+  }],
+  CART_MUTATED: [{
+    outcome: "APPLIED",
+    stageBefore: ["CART_OPEN", "ORDER_PREVIEW"],
+    stageAfter: ["CART_OPEN"],
+  }],
+  NEGOTIATION_EVENT: [{
+    outcome: "APPLIED",
+    stageBefore: ["CART_OPEN", "ORDER_PREVIEW"],
+    stageAfter: ["SAME", "CART_OPEN"],
+  }],
+  CART_READY: [{
+    outcome: "APPLIED",
+    stageBefore: ["CART_OPEN", "ORDER_PREVIEW"],
+    stageAfter: ["CART_OPEN"],
+  }],
+  CHECKOUT_DETAILS_CAPTURED: [{
+    outcome: "APPLIED",
+    stageBefore: ["CART_OPEN", "ORDER_PREVIEW"],
+    stageAfter: ["CART_OPEN"],
+  }],
+  CLARIFICATION_REQUESTED: [{
+    outcome: "APPLIED",
+    stageBefore: ["CART_OPEN", "ORDER_PREVIEW"],
+    stageAfter: ["SAME"],
+  }],
+  CLARIFICATION_RESOLVED: [{
+    outcome: "APPLIED",
+    stageBefore: NON_TERMINAL_SALES_STAGES_V1,
+    stageAfter: ["SAME"],
+  }],
+  PREVIEW_CREATED: [{
+    outcome: "APPLIED",
+    stageBefore: ["CART_OPEN"],
+    stageAfter: ["ORDER_PREVIEW"],
+  }],
+  CONFIRM_PURCHASE: [{
+    outcome: "APPLIED",
+    stageBefore: ["ORDER_PREVIEW"],
+    stageAfter: ["PURCHASE_CONFIRMED"],
+  }, {
+    outcome: "HANDOFF",
+    stageBefore: ["ORDER_PREVIEW"],
+    stageAfter: ["HANDED_OFF"],
+  }],
+  PAYMENT_RECEIPT_RECEIVED: [{
+    outcome: "HANDOFF",
+    stageBefore: ["PURCHASE_CONFIRMED"],
+    stageAfter: ["HANDED_OFF"],
+  }],
+} as const satisfies Record<
+  SalesCycleCommandKindV1,
+  readonly SalesStageTransitionRuleV1[]
+>;
+
+export function isSalesStageTransitionAllowedV1(input: Readonly<{
+  commandKind: string;
+  outcome: string;
+  stageBefore: string;
+  stageAfter: string;
+}>): boolean {
+  const commandKind = SalesCycleCommandKindV1Schema.safeParse(input.commandKind);
+  const outcome = z.enum(STATE_ADVANCING_SALES_OUTCOMES_V1).safeParse(input.outcome);
+  const stageBefore = SalesCycleStageV1Schema.safeParse(input.stageBefore);
+  const stageAfter = SalesCycleStageV1Schema.safeParse(input.stageAfter);
+  if (!commandKind.success || !outcome.success || !stageBefore.success || !stageAfter.success) {
+    return false;
+  }
+  const rules: readonly SalesStageTransitionRuleV1[] =
+    SALES_STAGE_TRANSITIONS_V1[commandKind.data];
+  return rules.some((rule) =>
+    rule.outcome === outcome.data &&
+    rule.stageBefore.includes(stageBefore.data) &&
+    rule.stageAfter.some((destination) =>
+      destination === "SAME"
+        ? stageAfter.data === stageBefore.data
+        : stageAfter.data === destination
+    )
+  );
+}
 
 /** Operational PII only. It expires with the 48-hour cart and is never an analytics payload. */
 export const CheckoutRecipientV1Schema = z

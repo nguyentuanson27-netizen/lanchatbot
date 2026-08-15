@@ -6,6 +6,7 @@ import {
   PolicyBundleV1Schema,
   BankTransferPolicyV1Schema,
   SalesIntentV1Schema,
+  isSalesStageTransitionAllowedV1,
   type CartV1,
   type CartLineV1,
   type PolicyBundleV1,
@@ -15,6 +16,7 @@ import {
   type PurchaseConfirmationV1,
   type SalesCycleClarificationReasonV1 as ContractSalesCycleClarificationReasonV1,
   type SalesCycleClarificationStateV1 as ContractSalesCycleClarificationStateV1,
+  type SalesCycleCommandKindV1,
   type SalesCycleStageV1,
   type SalesIntentV1,
   type HandoffDecisionV2,
@@ -343,12 +345,23 @@ function applyCartMutationNegotiation(input: {
 
 function withCommand(
   state: SalesCycleRuntimeState,
+  commandKind: SalesCycleCommandKindV1,
+  outcome: "APPLIED" | "HANDOFF",
   commandId: string,
   now: Date,
   changes: Partial<Omit<SalesCycleRuntimeState, "schemaVersion" | "conversationKey" | "revision" | "processedCommandIds" | "updatedAt">>,
 ): SalesCycleRuntimeState {
   const processedCommandIds = [...state.processedCommandIds, commandId].slice(-MAX_PROCESSED_COMMANDS);
-  return { ...state, ...changes, revision: state.revision + 1, processedCommandIds, updatedAt: now.toISOString() };
+  const next = { ...state, ...changes, revision: state.revision + 1, processedCommandIds, updatedAt: now.toISOString() };
+  if (!isSalesStageTransitionAllowedV1({
+    commandKind,
+    outcome,
+    stageBefore: state.stage,
+    stageAfter: next.stage,
+  })) {
+    throw new Error("SALES_STAGE_TRANSITION_CONTRACT_MISMATCH");
+  }
+  return next;
 }
 
 function revalidationHandoff(value: CheckoutRevalidationV1): CheckoutHandoffReason | null {
@@ -447,7 +460,7 @@ export function applySalesCycleCommand(input: {
       (command.kind === "SIZE_RECOMMENDED" && (state.stage === "MEASUREMENTS_REQUIRED" || state.stage === "SIZE_RECOMMENDED"));
     if (!transitionAllowed) return { status: "REJECTED", state, reasonCode: "SALES_STAGE_TRANSITION_INVALID" };
     const stage = command.kind === "FACTS_PRESENTED" ? "FACTS_PRESENTED" : command.kind === "MEASUREMENTS_REQUIRED" ? "MEASUREMENTS_REQUIRED" : "SIZE_RECOMMENDED";
-    return { status: "APPLIED", state: withCommand(state, command.commandId, now, { stage }), confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
+    return { status: "APPLIED", state: withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage }), confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
   if (command.kind === "CART_OPENED") {
@@ -484,7 +497,7 @@ export function applySalesCycleCommand(input: {
       now,
     });
     if (negotiation.status === "BLOCKED") return { status: "REJECTED", state, reasonCode: `NEGOTIATION_${negotiation.reasonCode}` };
-    const next = withCommand(state, command.commandId, now, { stage: "CART_OPEN", cart: { value: creation.cart, expiresAt: command.expiresAt }, commerceContext: { shopId: draft.shopId, policyRef: draft.policyRef }, negotiation: negotiation.state, checkoutDraft: null, preview: null });
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage: "CART_OPEN", cart: { value: creation.cart, expiresAt: command.expiresAt }, commerceContext: { shopId: draft.shopId, policyRef: draft.policyRef }, negotiation: negotiation.state, checkoutDraft: null, preview: null });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
@@ -503,7 +516,7 @@ export function applySalesCycleCommand(input: {
     if (transition.status === "BLOCKED") {
       return { status: "REJECTED", state, reasonCode: "CHECKOUT_DETAILS_INVALID" };
     }
-    const next = withCommand(state, command.commandId, now, {
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, {
       stage: "CART_OPEN",
       checkoutDraft: transition.draft,
       preview: null,
@@ -530,7 +543,7 @@ export function applySalesCycleCommand(input: {
     if (transition.status === "BLOCKED") {
       return { status: "REJECTED", state, reasonCode: transition.reasonCode };
     }
-    const next = withCommand(state, command.commandId, now, {
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, {
       clarification: transition.clarification,
     });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
@@ -545,7 +558,7 @@ export function applySalesCycleCommand(input: {
     if (transition.status === "BLOCKED") {
       return { status: "REJECTED", state, reasonCode: transition.reasonCode };
     }
-    const next = withCommand(state, command.commandId, now, {
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, {
       clarification: transition.clarification,
     });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
@@ -583,7 +596,7 @@ export function applySalesCycleCommand(input: {
     }
     const negotiation = applyCartMutationNegotiation({ state, cart: cartDecision.cart, commandId: command.commandId, mutationReasonCode: command.kind === "CART_MUTATED" ? command.mutationReasonCode : "OTHER", shopId: state.commerceContext.shopId, policy, now });
     if (negotiation === null) return { status: "REJECTED", state, reasonCode: "NEGOTIATION_REPRICE_BLOCKED" };
-    const next = withCommand(state, command.commandId, now, { stage: "CART_OPEN", cart: { value: cartDecision.cart, expiresAt: state.cart.expiresAt }, negotiation, preview: null });
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage: "CART_OPEN", cart: { value: cartDecision.cart, expiresAt: state.cart.expiresAt }, negotiation, preview: null });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
@@ -605,13 +618,13 @@ export function applySalesCycleCommand(input: {
       return { status, state, reasonCode: `NEGOTIATION_${decision.reasonCode}` };
     }
     if (decision.status === "REPLAYED") {
-      const next = withCommand(state, command.commandId, now, {});
+      const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, {});
       return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
     }
     const repriced = applyCanonicalCartDecisionV2({ cart: state.cart.value, expectedCartVersion: state.cart.value.revision, mutation: null, shopId: state.commerceContext.shopId, policy, customerState: decision.state.customerState, now });
     if (repriced.status === "BLOCKED") return { status: "REJECTED", state, reasonCode: `CART_REPRICE_${repriced.reasonCode}` };
     const negotiation = { ...decision.state, cartVersion: repriced.cart.revision, updatedAt: now.toISOString() };
-    const next = withCommand(state, command.commandId, now, { stage: "CART_OPEN", cart: { value: repriced.cart, expiresAt: state.cart.expiresAt }, negotiation, preview: null });
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage: "CART_OPEN", cart: { value: repriced.cart, expiresAt: state.cart.expiresAt }, negotiation, preview: null });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
@@ -633,7 +646,7 @@ export function applySalesCycleCommand(input: {
           : transition.reasonCode,
       };
     }
-    const next = withCommand(state, command.commandId, now, {
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, {
       stage: "ORDER_PREVIEW",
       preview: transition.preview,
     });
@@ -646,7 +659,7 @@ export function applySalesCycleCommand(input: {
     if (inbound === null || !inbound.attachments.some(({ attachmentId, kind }) => attachmentId === command.attachmentId && (kind === "IMAGE" || kind === "FILE"))) {
       return { status: "REJECTED", state, reasonCode: "PAYMENT_RECEIPT_EVIDENCE_UNTRUSTED" };
     }
-    const next = withCommand(state, command.commandId, now, { stage: "HANDED_OFF" });
+    const next = withCommand(state, command.kind, "HANDOFF", command.commandId, now, { stage: "HANDED_OFF" });
     return { status: "HANDOFF", state: next, reasonCode: "PAYMENT_RECEIPT_REVIEW_REQUIRED", silent: true, desiredPancakeTag: "NHAN_VIEN", handoffDecision: checkoutHandoff("PAYMENT_RECEIPT_REVIEW_REQUIRED", command.commandId, now) };
   }
 
@@ -668,7 +681,7 @@ export function applySalesCycleCommand(input: {
   }
   const validation = CheckoutRevalidationV1Schema.safeParse(rawValidation);
   if (!validation.success) {
-    const next = withCommand(state, command.commandId, now, { stage: "HANDED_OFF", preview: null });
+    const next = withCommand(state, command.kind, "HANDOFF", command.commandId, now, { stage: "HANDED_OFF", preview: null });
     return { status: "HANDOFF", state: next, reasonCode: "POLICY_UNAVAILABLE", silent: true, desiredPancakeTag: "NHAN_VIEN", handoffDecision: checkoutHandoff("POLICY_UNAVAILABLE", command.commandId, now) };
   }
   if (!validation.success || validation.data.cartId !== state.cart.value.cartId || validation.data.cartVersion !== state.cart.value.revision) {
@@ -676,7 +689,7 @@ export function applySalesCycleCommand(input: {
   }
   const handoffReason = revalidationHandoff(validation.data) ?? baselineMismatchHandoff(state.preview.revalidation, validation.data);
   if (handoffReason !== null || !validation.data.eligible) {
-    const next = withCommand(state, command.commandId, now, { stage: "HANDED_OFF", preview: null });
+    const next = withCommand(state, command.kind, "HANDOFF", command.commandId, now, { stage: "HANDED_OFF", preview: null });
     const reason = handoffReason ?? "POLICY_UNAVAILABLE";
     return { status: "HANDOFF", state: next, reasonCode: reason, silent: true, desiredPancakeTag: "NHAN_VIEN", handoffDecision: checkoutHandoff(reason, command.commandId, now) };
   }
@@ -689,7 +702,7 @@ export function applySalesCycleCommand(input: {
     now.getTime() - validationTime > MAX_REVALIDATION_AGE_MS ||
     validationTime > now.getTime() + MAX_FUTURE_CLOCK_SKEW_MS
   ) {
-    const next = withCommand(state, command.commandId, now, { stage: "HANDED_OFF", preview: null });
+    const next = withCommand(state, command.kind, "HANDOFF", command.commandId, now, { stage: "HANDED_OFF", preview: null });
     return { status: "HANDOFF", state: next, reasonCode: "POLICY_UNAVAILABLE", silent: true, desiredPancakeTag: "NHAN_VIEN", handoffDecision: checkoutHandoff("POLICY_UNAVAILABLE", command.commandId, now) };
   }
   let confirmation: PurchaseConfirmationV1;
@@ -709,10 +722,10 @@ export function applySalesCycleCommand(input: {
   }
   const instruction = paymentInstruction(state.preview, now, input.resolveBankTransferPolicy);
   if (state.preview.payment.method === "BANK_TRANSFER" && instruction === null) {
-    const next = withCommand(state, command.commandId, now, { stage: "HANDED_OFF", preview: null });
+    const next = withCommand(state, command.kind, "HANDOFF", command.commandId, now, { stage: "HANDED_OFF", preview: null });
     return { status: "HANDOFF", state: next, reasonCode: "POLICY_UNAVAILABLE", silent: true, desiredPancakeTag: "NHAN_VIEN", handoffDecision: checkoutHandoff("POLICY_UNAVAILABLE", command.commandId, now) };
   }
-  const next = withCommand(state, command.commandId, now, { stage: "PURCHASE_CONFIRMED", confirmation });
+  const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage: "PURCHASE_CONFIRMED", confirmation });
   return { status: "APPLIED", state: next, confirmation, paymentInstruction: instruction, desiredPancakeTag: "DA_CHOT_DON", transferToHuman: true };
 }
 

@@ -8,6 +8,7 @@ import {
   DeterministicEffectReadinessV1Schema,
   MAX_READINESS_PRODUCT_IDS_V1,
   ProtectedClaimV1Schema,
+  validateEffectReadinessTemporalWindowV1,
   validateCartEffectClaimSemanticsV1,
   validateEffectClaimSemanticsV1,
   type ProtectedClaimV1,
@@ -183,6 +184,25 @@ describe("DF05 canonical evidence contracts", () => {
 });
 
 describe("DF06 deterministic readiness contract", () => {
+  it.each([
+    ["2026-08-13T05:00:00.000Z", "2026-08-13T05:01:00.000Z", "VALID"],
+    ["2026-08-13T05:00:00.000Z", "2026-08-13T05:01:00.001Z", "LIFETIME_EXCEEDED"],
+    ["2026-08-13T05:05:00.001Z", "2026-08-13T05:06:00.000Z", "FUTURE"],
+    ["2026-08-13T04:59:00.000Z", "2026-08-13T05:00:00.000Z", "STALE"],
+    ["2026-08-13T05:00:01.000Z", "2026-08-13T05:00:00.001Z", "INVALID_INTERVAL"],
+    ["not-a-time", "2026-08-13T05:01:00.000Z", "INVALID_TIMESTAMP"],
+  ] as const)("classifies readiness window %s -> %s as %s", (
+    checkedAt,
+    expiresAt,
+    expected,
+  ) => {
+    expect(validateEffectReadinessTemporalWindowV1({
+      checkedAt,
+      expiresAt,
+      now: new Date("2026-08-13T05:00:00.000Z"),
+    })).toBe(expected);
+  });
+
   it("keeps the technical readiness envelope separate from cart capacity", () => {
     expect(MAX_READINESS_PRODUCT_IDS_V1).toBeGreaterThan(50);
   });

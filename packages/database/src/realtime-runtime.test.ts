@@ -130,24 +130,26 @@ describe("DF06 locked sales-state envelope", () => {
   });
 
   it("replays a legitimate HANDOFF as a state-advancing transition", () => {
+    const purchaseConfirmed = { ...locked, stage: "PURCHASE_CONFIRMED" };
     const handoffEvent = {
       ...event,
       commandKind: "PAYMENT_RECEIPT_RECEIVED" as const,
       outcome: "HANDOFF" as const,
+      stageBefore: "PURCHASE_CONFIRMED",
       stageAfter: "HANDED_OFF",
       reasonCode: "PAYMENT_RECEIPT_REVIEW_REQUIRED",
     };
     expect(() => validateLockedSalesStateEnvelopeV1({
       ...exact,
       state: {
-        ...locked,
+        ...purchaseConfirmed,
         revision: 3,
         stage: "HANDED_OFF",
         processedCommandIds: ["sales:previous", handoffEvent.commandId],
         updatedAt: occurredAt.toISOString(),
       },
       events: [handoffEvent],
-    }, locked, "page-1", conversationId)).not.toThrow();
+    }, purchaseConfirmed, "page-1", conversationId)).not.toThrow();
   });
 
   it("rejects undeclared top-level state fields instead of silently persisting them", () => {
@@ -555,6 +557,18 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
 
     expect(result.metaOutboxCreated).toBe(1);
     expect(calls.at(-1)?.sql.trim()).toBe("COMMIT");
+
+    await expect(store.commit({
+      ...commitInput,
+      metaPlan: {
+        ...commitInput.metaPlan!,
+        replyPlanId: "10000000-0000-4000-8000-000000000010",
+        responseGroupId: "10000000-0000-4000-8000-000000000011",
+        effectReadiness: resealReadinessV1(commitInput.metaPlan!.effectReadiness!, {
+          expiresAt: new Date(now.getTime() + 60_001).toISOString(),
+        }),
+      },
+    }, now)).rejects.toThrow("PROTECTED_OUTBOUND_READINESS_MISMATCH");
 
     await expect(store.commit({
       ...commitInput,
@@ -1694,6 +1708,34 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       .resolves.toMatchObject({ stateCommitted: true });
     expect(calls.at(-1)?.trim()).toBe("COMMIT");
 
+    const forgedMutationStage = {
+      ...exactMutation,
+      salesCyclePlan: {
+        ...exactMutation.salesCyclePlan,
+        state: {
+          ...exactMutation.salesCyclePlan.state,
+          stage: "HANDED_OFF",
+        },
+        events: exactMutation.salesCyclePlan.events.map((event) => ({
+          ...event,
+          stageAfter: "HANDED_OFF",
+        })),
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    await expect(store.commit(forgedMutationStage, now))
+      .rejects.toThrow("SALES_STAGE_EVENT_CHAIN_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const exactLockedSalesRow = lockedSalesRow;
+    lockedSalesRow = {
+      ...exactLockedSalesRow!,
+      cart_expires_at: new Date(salesExpiresAt.getTime() - 1),
+    };
+    await expect(store.commit(exactMutation, now))
+      .rejects.toThrow("CART_EXPIRY_BINDING_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+    lockedSalesRow = exactLockedSalesRow;
+
     const forgedPreservedExpiry = new Date(salesExpiresAt.getTime() - 1_000);
     await expect(store.commit({
       ...exactMutation,
@@ -1885,6 +1927,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         state_auth_tag: lockedUnprotectedBundle.authTag,
         state_encrypted_dek: lockedUnprotectedBundle.encryptedDek,
         state_key_ref: lockedUnprotectedBundle.keyRef,
+        cart_expires_at: null,
       };
       await expect(store.commit({
         ...commitInput,
@@ -2100,6 +2143,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       state_auth_tag: emptyCartLockedBundle.authTag,
       state_encrypted_dek: emptyCartLockedBundle.encryptedDek,
       state_key_ref: emptyCartLockedBundle.keyRef,
+      cart_expires_at: null,
     };
     runtimePolicyPinRow = {
       bundle_hash: openEvidence.policyPin.bundleHash,
