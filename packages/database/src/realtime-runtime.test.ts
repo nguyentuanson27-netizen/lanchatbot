@@ -1929,7 +1929,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         state_key_ref: lockedUnprotectedBundle.keyRef,
         cart_expires_at: null,
       };
-      await expect(store.commit({
+      const legitimateUnprotectedPlan = {
         ...commitInput,
         salesCyclePlan: {
           expectedRevision: 2,
@@ -1958,8 +1958,28 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           effectClaimSets: [],
           effectReadiness: [],
         },
-      }, now)).resolves.toMatchObject({ stateCommitted: true });
+      } satisfies RealtimeCommitInput<unknown, unknown>;
+      await expect(store.commit(legitimateUnprotectedPlan, now))
+        .resolves.toMatchObject({ stateCommitted: true });
       expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+      if (commandKind === "FACTS_PRESENTED") {
+        await expect(store.commit({
+          ...legitimateUnprotectedPlan,
+          salesCyclePlan: {
+            ...legitimateUnprotectedPlan.salesCyclePlan,
+            state: {
+              ...legitimateUnprotectedPlan.salesCyclePlan.state,
+              stage: "PURCHASE_CONFIRMED",
+            },
+            events: legitimateUnprotectedPlan.salesCyclePlan.events.map((event) => ({
+              ...event,
+              stageAfter: "PURCHASE_CONFIRMED",
+            })),
+          },
+        }, now)).rejects.toThrow("SALES_STAGE_EVENT_CHAIN_MISMATCH");
+        expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+      }
     }
     lockedSalesRow = mutationLockedSalesRow;
     const openCommandId = "sales:event-2:cart-open";
