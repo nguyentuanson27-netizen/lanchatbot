@@ -72,6 +72,72 @@ export const CheckoutPaymentV1Schema = z.discriminatedUnion("method", [
 ]);
 export type CheckoutPaymentV1 = z.infer<typeof CheckoutPaymentV1Schema>;
 
+const BareSha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
+
+export const CheckoutDetailsPatchV1Schema = z.object({
+  fullName: z.string().min(1).max(2_000).optional(),
+  phone: z.string().min(1).max(2_000).optional(),
+  address: z.string().min(1).max(2_000).optional(),
+  paymentMethod: z.enum(["COD", "BANK_TRANSFER"]).optional(),
+}).strict().superRefine((value, context) => {
+  if (Object.keys(value).length === 0) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "checkout transition must carry at least one captured field",
+    });
+  }
+});
+export type CheckoutDetailsPatchV1 = z.infer<typeof CheckoutDetailsPatchV1Schema>;
+
+export const CheckoutDraftV1Schema = z.object({
+  fullName: z.string().min(2).max(160).nullable(),
+  phone: z.string().regex(/^[0-9+][0-9 .()-]{7,24}$/u).nullable(),
+  address: z.string().min(8).max(1_000).nullable(),
+  paymentMethod: z.enum(["COD", "BANK_TRANSFER"]).nullable(),
+  updatedAt: DateTimeSchema,
+}).strict();
+export type CheckoutDraftV1 = z.infer<typeof CheckoutDraftV1Schema>;
+
+export function canonicalCheckoutDraftHashPreimageV1(
+  input: CheckoutDraftV1 | null,
+): string {
+  const draft = input === null ? null : CheckoutDraftV1Schema.parse(input);
+  return `CHECKOUT_DRAFT_V1\n${canonicalJsonV1(draft)}`;
+}
+
+export const CheckoutDetailsTransitionEvidenceV1Schema = z.object({
+  schemaVersion: z.literal(1),
+  contractVersion: z.literal("CHECKOUT_DETAILS_TRANSITION_EVIDENCE_V1"),
+  sourceMessageIdHash: BareSha256Schema,
+  commandIdHash: BareSha256Schema,
+  details: CheckoutDetailsPatchV1Schema,
+  beforeCheckoutDraftHash: BareSha256Schema,
+  afterCheckoutDraftHash: BareSha256Schema,
+  appliedAt: DateTimeSchema,
+  evidenceHash: BareSha256Schema,
+  contributor: z.literal("DETERMINISTIC_RUNTIME"),
+  authorization: z.literal("NONE"),
+}).strict().superRefine((value, context) => {
+  if (value.beforeCheckoutDraftHash === value.afterCheckoutDraftHash) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["afterCheckoutDraftHash"],
+      message: "checkout transition must bind a changed draft",
+    });
+  }
+});
+export type CheckoutDetailsTransitionEvidenceV1 = z.infer<
+  typeof CheckoutDetailsTransitionEvidenceV1Schema
+>;
+
+export function checkoutDetailsTransitionEvidenceHashPreimageV1(
+  input: z.input<typeof CheckoutDetailsTransitionEvidenceV1Schema>,
+): string {
+  const { evidenceHash: _evidenceHash, ...evidence } =
+    CheckoutDetailsTransitionEvidenceV1Schema.parse(input);
+  return `CHECKOUT_DETAILS_TRANSITION_EVIDENCE_V1\n${canonicalJsonV1(evidence)}`;
+}
+
 export const RevalidationStatusV1Schema = z.enum(["MATCHED", "CHANGED", "STALE", "MISSING"]);
 export const RevalidatedFactV1Schema = z
   .object({

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   CART_RETENTION_SECONDS,
   CheckoutPaymentV1Schema,
+  CheckoutDetailsTransitionEvidenceV1Schema,
+  checkoutDetailsTransitionEvidenceHashPreimageV1,
   CheckoutRevalidationV1Schema,
   OrderPreviewV1Schema,
   PurchaseConfirmationV1Schema,
@@ -47,6 +49,32 @@ describe("Phase 3 sales-cycle contracts", () => {
     expect(CheckoutRevalidationV1Schema.safeParse({
       ...revalidation,
       price: { ...fact(), sourceVersionAfter: "v2" },
+    }).success).toBe(false);
+  });
+
+  it("binds checkout PII capture to the current message, exact patch and draft transition", () => {
+    const evidence = {
+      schemaVersion: 1 as const,
+      contractVersion: "CHECKOUT_DETAILS_TRANSITION_EVIDENCE_V1" as const,
+      sourceMessageIdHash: "a".repeat(64),
+      commandIdHash: "b".repeat(64),
+      details: { fullName: "  Nguyen   Van A  ", paymentMethod: "COD" as const },
+      beforeCheckoutDraftHash: "c".repeat(64),
+      afterCheckoutDraftHash: "d".repeat(64),
+      appliedAt: "2026-07-22T05:00:00.000Z",
+      evidenceHash: "e".repeat(64),
+      contributor: "DETERMINISTIC_RUNTIME" as const,
+      authorization: "NONE" as const,
+    };
+    expect(CheckoutDetailsTransitionEvidenceV1Schema.parse(evidence).details.fullName)
+      .toBe("  Nguyen   Van A  ");
+    expect(checkoutDetailsTransitionEvidenceHashPreimageV1({
+      ...evidence,
+      details: { ...evidence.details, fullName: "Nguyen Van B" },
+    })).not.toBe(checkoutDetailsTransitionEvidenceHashPreimageV1(evidence));
+    expect(CheckoutDetailsTransitionEvidenceV1Schema.safeParse({
+      ...evidence,
+      details: {},
     }).success).toBe(false);
   });
 

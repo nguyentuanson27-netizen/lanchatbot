@@ -491,6 +491,14 @@ describe("realtime Phase 3 sales cycle", () => {
       expect.objectContaining({ effect: "PREVIEW_READY", outcome: "READY", authorization: "NONE" }),
       expect.objectContaining({ effect: "PROTECTED_OUTBOUND", outcome: "READY", authorization: "NONE" }),
     ]));
+    expect(previewed.plan?.events.find(({ commandKind }) =>
+      commandKind === "CHECKOUT_DETAILS_CAPTURED"
+    )?.checkoutDetailsTransitionEvidence).toMatchObject({
+      contractVersion: "CHECKOUT_DETAILS_TRANSITION_EVIDENCE_V1",
+      sourceMessageIdHash: previewed.plan?.sourceMessageIdHash,
+      contributor: "DETERMINISTIC_RUNTIME",
+      authorization: "NONE",
+    });
     expect(previewed.messages[0]).toMatchObject({
       kind: "TEXT",
       text: expect.stringContaining("3-6"),
@@ -733,6 +741,7 @@ describe("realtime Phase 3 sales cycle", () => {
     const mutationEvidence = fourth.plan!.cartMutationBatchEvidence?.receipts[0];
     expect(mutationEvidence).toMatchObject({
       contractVersion: "CART_MUTATION_RECEIPT_V1",
+      mutationReasonCode: "LINE_ADDED",
       authority: {
         contractVersion: "CART_MUTATION_AUTHORITY_BINDING_V1",
         action: "ADD_LINE",

@@ -306,6 +306,7 @@ describe("CartMutationBatchEvidenceV1", () => {
       quantity: sequence + 2,
     },
     mutationPayloadHash: HASH_D,
+    mutationReasonCode: "QUANTITY_CHANGED" as const,
     authority: authority("SET_QUANTITY", "ÁO-001", "ÁO-001-DIRECT"),
     beforeCartStateHash: before,
     afterCartStateHash: after,
@@ -363,6 +364,22 @@ describe("CartMutationBatchEvidenceV1", () => {
     ]) {
       expect(cartMutationAuthorityBindingHashPreimageV1(changed)).not.toBe(preimage);
     }
+  });
+
+  it("binds the exact negotiation reprice reason into the mutation receipt", () => {
+    const base = receipt(0, HASH_A, HASH_B);
+    const parsed = CartMutationBatchEvidenceV1Schema.parse({
+      ...batch,
+      finalCartStateHash: HASH_B,
+      receipts: [base],
+    });
+    expect(parsed.receipts[0]?.mutationReasonCode).toBe("QUANTITY_CHANGED");
+    const { mutationReasonCode: _omitted, ...unbound } = base;
+    expect(CartMutationBatchEvidenceV1Schema.safeParse({
+      ...batch,
+      finalCartStateHash: HASH_B,
+      receipts: [unbound],
+    }).success).toBe(false);
   });
 
   it("rejects an add receipt whose authority names a different product or offer", () => {

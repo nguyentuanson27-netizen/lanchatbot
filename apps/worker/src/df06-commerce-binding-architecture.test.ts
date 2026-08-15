@@ -56,4 +56,22 @@ describe("DF06 canonical commerce binding architecture", () => {
     expect(database).toContain("parent.binding.cart");
     expect(database).toContain("parent.binding.preview");
   });
+
+  it("replays every protected sales transition from locked state through shared kernels", () => {
+    const contracts = source("../../../packages/contracts/src/v2/canonical-commerce-bindings.ts");
+    const worker = source("./realtime-sales-cycle.ts");
+    const runtime = source("../../../packages/chat-runtime/src/sales-cycle-runtime.ts");
+    const kernel = source("../../../packages/commerce-kernel/src/protected-sales-transition.ts");
+    const database = source("../../../packages/database/src/realtime-runtime.ts");
+
+    expect(contracts).toContain("mutationReasonCode");
+    expect(worker).toContain("CheckoutDetailsTransitionEvidenceV1Schema");
+    expect(runtime).toContain("replayCanonicalCartRepriceNegotiationV1");
+    expect(kernel).toContain("applyCheckoutDetailsTransitionV1");
+    expect(kernel).toContain("validateOrderPreviewTransitionV1");
+    expect(kernel).toContain("deriveCanonicalPurchaseConfirmationV1");
+    expect(database).toContain("validateLockedProtectedSalesArtifactsV1");
+    expect(database).toContain("CART_READY_NEGOTIATION_REPLAY_MISMATCH");
+    expect(database).toContain("SALES_STAGE_EVENT_CHAIN_MISMATCH");
+  });
 });

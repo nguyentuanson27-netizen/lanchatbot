@@ -16,6 +16,9 @@ Status: source-only implementation evidence for DF-P3 in Release Train DF-A. It 
 10. `CART_OPENED` carries `CartOpenEvidenceV1`: the current buying intent, one exact seed line, cart draft, policy reference, and immutable `SALES_EPISODE` policy pin are bound together. The database reads the pin and independently creates the complete cart and initial negotiation state.
 11. `NEGOTIATION_EVENT` carries `NegotiationTransitionEvidenceV1`. The database derives the next tier from the locked negotiation ledger and exact current-message event; caller-supplied `cartReplayContext.customerState` is only a claim to compare, never authority.
 12. Artifact timestamps preserve the worker decision preimage, while policy and POS freshness authorization use the database `clock_timestamp()` captured inside the commit transaction.
+13. Every applied cart mutation and `CART_READY` transition also replays the locked negotiation ledger through the same pure reprice transition used by the worker. A caller cannot change the concession tier, quote, processed-event chain, or objection ledger independently of the cart transition.
+14. `CHECKOUT_DETAILS_CAPTURED` carries `CheckoutDetailsTransitionEvidenceV1`, binding the current message, command, exact raw patch, prior draft, resulting draft, and apply time. The database replays checkout normalization, preview validation, and purchase-confirmation derivation from locked state with the same shared transition kernel.
+15. Applied sales events form one contiguous stage/revision chain from the locked state to the proposed state. Event labels do not authorize an arbitrary final `stage`, checkout draft, preview, confirmation, or negotiation snapshot.
 
 The current worker emits one receipt per message. The contract and database verifier support an atomic N-receipt batch only when every receipt independently carries approved authority and the complete chain replays to the exact final cart.
 
@@ -34,6 +37,7 @@ The canonical cart reducer and shop-policy evaluator live in the lower-level `@l
 | Blocked checkout or facts become stale after local evaluation | No plan, PII, `CART_READY`, preview, or cart mutation survives | sales-cycle tests |
 | Atomic N mutation batch | Receipts connect prior after-hash to next before-hash; wrong order, gap, duplicate command, wrong final hash, action, product, or offer is rejected | commerce binding contract and database replay tests |
 | Full cart field changes under an unchanged line/product set | Complete canonical cart hash/replay mismatch; transaction rejects | canonical cart and database replay tests |
+| Cart mutation or `CART_READY` carries a forged negotiation tier, quote, or ledger | DB replays negotiation from the locked state and rejects the complete state mismatch | shared transition-kernel and database transaction tests |
 | New cart changes a timestamp/status/total while resealing its self-declared hash | DB recreates the cart from the one-line draft plus pinned policy and rejects `CART_OPEN_FULL_REPLAY_MISMATCH` | cart-open contract, worker, and database transaction tests |
 | Cart-open policy is valid at artifact time but expired at DB transaction time | Canonical replay is blocked using the transaction authorization clock; no state commits | commerce-kernel and database transaction tests |
 | Caller submits one price objection but claims `CAUTIOUS` directly | DB derives `HESITANT` from the locked `READY` ledger and rejects the forged transition | negotiation contract, worker, and database transaction tests |
@@ -41,6 +45,8 @@ The canonical cart reducer and shop-policy evaluator live in the lower-level `@l
 | Missing, stale, conflicting, cross-product, wrong-offer, wrong-price, or insufficient-stock claims | `BLOCKED` before worker mutation or transaction rejection | business-tools and database tests |
 | `CART_READY` with incomplete claim coverage | Transaction rejects `EFFECT_READINESS_CLAIM_MISSING` | database runtime tests |
 | Preview or confirmation with missing/wrong parent artifact | Transaction rejects parent/cart/preview binding mismatch | readiness and database tests |
+| Checkout patch, preview recipient/payment, or confirmation identity is forged while its self-declared hash is resealed | DB replays the exact checkout/preview/confirmation transition from locked state and rejects the artifact mismatch | shared transition-kernel and database transaction tests |
+| Proposed sales stage/revision does not equal the contiguous applied-event chain | Transaction rejects `SALES_STAGE_EVENT_CHAIN_MISMATCH` | database runtime tests |
 | Commerce Meta changes cart, offer, preview, claim set, or sales parent | Transaction rejects `PROTECTED_OUTBOUND_SALES_READINESS_MISMATCH` | worker and database tests |
 | Protected text references 51 valid products | No cart-capacity reason is introduced; the independent technical envelope applies | business-tools tests |
 | Blocked readiness telemetry | Registered readiness reason codes persist instead of `NOT_EVALUATED`/empty reasons | observability and sales-cycle tests |

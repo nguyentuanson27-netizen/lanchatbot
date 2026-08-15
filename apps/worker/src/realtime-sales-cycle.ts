@@ -16,8 +16,11 @@ import {
   cartMutationBatchEvidenceHashPreimageV1,
   cartMutationReceiptHashPreimageV1,
   cartOpenEvidenceHashPreimageV1,
+  canonicalCheckoutDraftHashPreimageV1,
+  checkoutDetailsTransitionEvidenceHashPreimageV1,
   negotiationTransitionEvidenceHashPreimageV1,
   CartOpenEvidenceV1Schema,
+  CheckoutDetailsTransitionEvidenceV1Schema,
   NegotiationTransitionEvidenceV1Schema,
   CartMutationAuthorityBindingV1Schema,
   CartMutationBatchEvidenceV1Schema,
@@ -791,6 +794,33 @@ export async function evaluateRealtimeSalesCycle(
             });
           })()
         : null;
+      const checkoutDetailsTransitionEvidence = command.kind === "CHECKOUT_DETAILS_CAPTURED"
+        ? (() => {
+            const draftHash = (draft: SalesCycleRuntimeState["checkoutDraft"]): string =>
+              createHash("sha256")
+                .update(canonicalCheckoutDraftHashPreimageV1(draft), "utf8")
+                .digest("hex");
+            const placeholder = {
+              schemaVersion: 1 as const,
+              contractVersion: "CHECKOUT_DETAILS_TRANSITION_EVIDENCE_V1" as const,
+              sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+              commandIdHash: createHash("sha256").update(command.commandId, "utf8").digest("hex"),
+              details: command.details,
+              beforeCheckoutDraftHash: draftHash(before.checkoutDraft),
+              afterCheckoutDraftHash: draftHash(state.checkoutDraft),
+              appliedAt: input.now.toISOString(),
+              evidenceHash: "0".repeat(64),
+              contributor: "DETERMINISTIC_RUNTIME" as const,
+              authorization: "NONE" as const,
+            };
+            return CheckoutDetailsTransitionEvidenceV1Schema.parse({
+              ...placeholder,
+              evidenceHash: createHash("sha256")
+                .update(checkoutDetailsTransitionEvidenceHashPreimageV1(placeholder), "utf8")
+                .digest("hex"),
+            });
+          })()
+        : null;
       events.push({
         commandId: command.commandId,
         commandKind: command.kind,
@@ -807,6 +837,9 @@ export async function evaluateRealtimeSalesCycle(
           ? null
           : computeBusinessContentHash(resolvedMutation).replace(/^sha256:/u, ""),
         ...(negotiationTransitionEvidence === null ? {} : { negotiationTransitionEvidence }),
+        ...(checkoutDetailsTransitionEvidence === null
+          ? {}
+          : { checkoutDetailsTransitionEvidence }),
         occurredAt: input.now,
       });
     }
@@ -938,6 +971,11 @@ export async function evaluateRealtimeSalesCycle(
       commandIdHash: createHash("sha256").update(mutationCommandId, "utf8").digest("hex"),
       mutation,
       mutationPayloadHash,
+      mutationReasonCode: action === "ADD_LINE"
+        ? "LINE_ADDED" as const
+        : action === "REMOVE_LINE"
+          ? "LINE_REMOVED" as const
+          : "QUANTITY_CHANGED" as const,
       authority,
       beforeCartStateHash: cartHash(beforeCart),
       afterCartStateHash: cartHash(state.cart.value),

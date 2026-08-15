@@ -172,6 +172,9 @@ importers:
       '@lana/business-tools':
         specifier: workspace:*
         version: link:../business-tools
+      '@lana/commerce-kernel':
+        specifier: workspace:*
+        version: link:../commerce-kernel
       '@lana/contracts':
         specifier: workspace:*
         version: link:../contracts

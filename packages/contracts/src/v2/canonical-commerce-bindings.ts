@@ -199,6 +199,11 @@ export const CartMutationReceiptV1Schema = z.object({
   commandIdHash: Sha256Schema,
   mutation: CanonicalCartMutationPayloadV1Schema,
   mutationPayloadHash: Sha256Schema,
+  mutationReasonCode: z.enum([
+    "LINE_ADDED",
+    "LINE_REMOVED",
+    "QUANTITY_CHANGED",
+  ]),
   authority: CartMutationAuthorityBindingV1Schema,
   beforeCartStateHash: Sha256Schema,
   afterCartStateHash: Sha256Schema,
@@ -217,6 +222,18 @@ export const CartMutationReceiptV1Schema = z.object({
     value.authority.offerId !== value.mutation.line.offerId
   )) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["authority"], message: "receipt authority must bind the exact added product and offer" });
+  }
+  const expectedReason = value.mutation.kind === "ADD_LINE"
+    ? "LINE_ADDED"
+    : value.mutation.kind === "REMOVE_LINE"
+      ? "LINE_REMOVED"
+      : "QUANTITY_CHANGED";
+  if (value.mutationReasonCode !== expectedReason) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["mutationReasonCode"],
+      message: "mutation receipt must bind the exact deterministic reprice reason",
+    });
   }
   if (value.beforeCartStateHash === value.afterCartStateHash) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["afterCartStateHash"], message: "receipt must bind a changed cart" });

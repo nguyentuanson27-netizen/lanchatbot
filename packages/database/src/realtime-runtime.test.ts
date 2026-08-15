@@ -2,12 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
 import {
   canonicalCartOfferBindingsV1,
+  canonicalCheckoutDraftHashPreimageV1,
   canonicalCartStateHashPreimageV1,
   canonicalCartStateV1,
   cartMutationAuthorityBindingHashPreimageV1,
   cartMutationBatchEvidenceHashPreimageV1,
   cartMutationReceiptHashPreimageV1,
   cartOpenEvidenceHashPreimageV1,
+  checkoutDetailsTransitionEvidenceHashPreimageV1,
   deterministicEffectReadinessHashPreimageV1,
   effectBindingHashPreimageV1,
   negotiationTransitionEvidenceHashPreimageV1,
@@ -18,9 +20,13 @@ import {
 } from "@lana/contracts";
 import {
   applyCanonicalCartDecisionV2,
+  applyCheckoutDetailsTransitionV1,
   canonicalCartPolicyLinesV2,
   canonicalNegotiationEventFingerprintV1,
+  computeCanonicalOrderPreviewHashV1,
   createCanonicalCartV2,
+  deriveCanonicalPurchaseConfirmationV1,
+  replayCanonicalCartRepriceNegotiationV1,
 } from "@lana/commerce-kernel";
 import { LocalEnvelopeCipher } from "./envelope-cipher.js";
 import {
@@ -1316,6 +1322,28 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     const beforeCartStateHash = cartHash(beforeCart);
     const afterCartStateHash = cartHash(exactCart);
     const evaluatedAt = now.toISOString();
+    const beforeNegotiation = {
+      schemaVersion: 2 as const,
+      negotiationId: `negotiation:${cartId}`,
+      cartId,
+      cartVersion: beforeCart.revision,
+      stateVersion: 1,
+      customerState: "READY" as const,
+      consumedObjectionEvidenceIds: [],
+      processedEvents: [],
+      quote: {
+        policyBundleId: policy.policyBundleId,
+        policyVersion: policy.policyVersion,
+        customerState: "READY" as const,
+        parentProductUnitCount: 1,
+        subtotalVnd: beforeCart.subtotalVnd,
+        shippingFeeVnd: beforeCart.shippingFeeVnd,
+        adjustments: [],
+        discountTotalVnd: 0,
+        grandTotalVnd: beforeCart.grandTotalVnd,
+      },
+      updatedAt: beforeCart.updatedAt,
+    };
     const mutation = {
       kind: "SET_QUANTITY" as const,
       lineId: mutationLineId,
@@ -1332,6 +1360,19 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       now,
     });
     expect(replayed).toMatchObject({ status: "APPLIED", cart: exactCart });
+    const negotiationLines = canonicalCartPolicyLinesV2(exactCart.lines, "LANA");
+    if (negotiationLines === null) throw new Error("TEST_NEGOTIATION_LINES_INVALID");
+    const repricedNegotiation = replayCanonicalCartRepriceNegotiationV1({
+      state: beforeNegotiation,
+      commandId: mutationCommandId,
+      mutationReasonCode: "QUANTITY_CHANGED",
+      cart: { cartId, cartVersion: exactCart.revision, lines: negotiationLines },
+      policy,
+      occurredAt: now,
+    });
+    if (repricedNegotiation.status !== "APPLIED") {
+      throw new Error("TEST_NEGOTIATION_REPRICE_FAILED");
+    }
     const authorityPlaceholder = {
       schemaVersion: 1 as const,
       contractVersion: "CART_MUTATION_AUTHORITY_BINDING_V1" as const,
@@ -1360,6 +1401,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       beforeCartStateHash,
       afterCartStateHash,
       customerState: "READY" as const,
+      mutationReasonCode: "QUANTITY_CHANGED" as const,
       appliedAt: evaluatedAt,
       evaluatedAt,
       evidenceHash: "0".repeat(64),
@@ -1414,7 +1456,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
               contentHash: `sha256:${sha256(policy)}`,
             },
           },
-          negotiation: { customerState: "READY" },
+          negotiation: repricedNegotiation.state,
         },
         cartMutationBatchEvidence: mutationBatchEvidence,
         effectReadiness: [sealReadinessV1({
@@ -1450,7 +1492,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       stage: "CART_OPEN",
       cart: { value: beforeCart, expiresAt: salesExpiresAt.toISOString() },
       commerceContext: { shopId: "LANA", policyRef: replayContext.policyRef },
-      negotiation: { customerState: "READY" },
+      negotiation: beforeNegotiation,
     }, `lana:sales-cycle:v1:page-1:${commitInput.conversationId}`, salesExpiresAt);
     lockedSalesRow = {
       conversation_id: commitInput.conversationId,
@@ -1464,6 +1506,126 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       cart_expires_at: salesExpiresAt,
       expires_at: salesExpiresAt,
     };
+
+    await expect(store.commit(exactMutation, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    await expect(store.commit({
+      ...exactMutation,
+      salesCyclePlan: {
+        ...exactMutation.salesCyclePlan,
+        state: {
+          ...exactMutation.salesCyclePlan.state,
+          negotiation: {
+            ...repricedNegotiation.state,
+            quote: {
+              ...repricedNegotiation.state.quote,
+              grandTotalVnd: repricedNegotiation.state.quote.grandTotalVnd + 1,
+            },
+          },
+        },
+      },
+    }, now)).rejects.toThrow("CART_MUTATION_TRANSITION_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    await expect(store.commit({
+      ...exactMutation,
+      salesCyclePlan: {
+        ...exactMutation.salesCyclePlan,
+        state: { ...exactMutation.salesCyclePlan.state, stage: "PURCHASE_CONFIRMED" },
+      },
+    }, now)).rejects.toThrow("SALES_STAGE_EVENT_CHAIN_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const checkoutCommandId = "sales:event-2:checkout-details";
+    const checkoutDetails = {
+      fullName: "Khach Hang",
+      phone: "0900000000",
+      address: "Ha Noi city",
+      paymentMethod: "COD" as const,
+    };
+    const checkoutTransition = applyCheckoutDetailsTransitionV1({
+      current: null,
+      details: checkoutDetails,
+      appliedAt: now,
+    });
+    if (checkoutTransition.status !== "APPLIED") {
+      throw new Error("TEST_CHECKOUT_TRANSITION_FAILED");
+    }
+    const checkoutEvidenceDraft = {
+      schemaVersion: 1 as const,
+      contractVersion: "CHECKOUT_DETAILS_TRANSITION_EVIDENCE_V1" as const,
+      sourceMessageIdHash,
+      commandIdHash: rawSha256(checkoutCommandId),
+      details: checkoutDetails,
+      beforeCheckoutDraftHash: rawSha256(canonicalCheckoutDraftHashPreimageV1(null)),
+      afterCheckoutDraftHash: rawSha256(
+        canonicalCheckoutDraftHashPreimageV1(checkoutTransition.draft),
+      ),
+      appliedAt: now.toISOString(),
+      evidenceHash: "0".repeat(64),
+      contributor: "DETERMINISTIC_RUNTIME" as const,
+      authorization: "NONE" as const,
+    };
+    const checkoutEvidence = {
+      ...checkoutEvidenceDraft,
+      evidenceHash: rawSha256(
+        checkoutDetailsTransitionEvidenceHashPreimageV1(checkoutEvidenceDraft),
+      ),
+    };
+    const checkoutPlan = {
+      ...exactMutation,
+      salesCyclePlan: {
+        expectedRevision: 2,
+        readinessContractVersion: "DF06_EFFECT_READINESS_V1" as const,
+        sourceMessageIdHash,
+        canonicalBuyingIntent: canonicalIntent,
+        state: {
+          revision: 3,
+          stage: "CART_OPEN",
+          cart: { value: beforeCart, expiresAt: salesExpiresAt.toISOString() },
+          commerceContext: { shopId: "LANA", policyRef: replayContext.policyRef },
+          negotiation: beforeNegotiation,
+          checkoutDraft: checkoutTransition.draft,
+          preview: null,
+          confirmation: null,
+        },
+        cartExpiresAt: salesExpiresAt,
+        expiresAt: salesExpiresAt,
+        events: [{
+          commandId: checkoutCommandId,
+          commandKind: "CHECKOUT_DETAILS_CAPTURED" as const,
+          outcome: "APPLIED" as const,
+          stateRevisionBefore: 2,
+          stateRevisionAfter: 3,
+          stageBefore: "CART_OPEN",
+          stageAfter: "CART_OPEN",
+          cartId,
+          cartVersion: beforeCart.revision,
+          reasonCode: null,
+          checkoutDetailsTransitionEvidence: checkoutEvidence,
+          occurredAt: now,
+        }],
+        effectClaimSets: [],
+        effectReadiness: [],
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    await expect(store.commit(checkoutPlan, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    await expect(store.commit({
+      ...checkoutPlan,
+      salesCyclePlan: {
+        ...checkoutPlan.salesCyclePlan,
+        state: {
+          ...checkoutPlan.salesCyclePlan.state,
+          checkoutDraft: { ...checkoutTransition.draft, phone: "0911111111" },
+        },
+      },
+    }, now)).rejects.toThrow("PROTECTED_SALES_ARTIFACT_REPLAY_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
     const mutationLockedSalesRow = lockedSalesRow;
     const openCommandId = "sales:event-2:cart-open";
@@ -1994,6 +2156,291 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     await expect(store.commit(cartReadyWithMissingStock, now))
       .rejects.toThrow("EFFECT_READINESS_CLAIM_MISSING");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const etaClaim = {
+      schemaVersion: 1 as const,
+      claimId: "10000000-0000-4000-8000-000000000019",
+      type: "ETA" as const,
+      scope: productScope,
+      provenance: provenance("eta:1", "3".repeat(64)),
+      value: { minDays: 1, maxDays: 2 },
+      authorization: "NONE" as const,
+    };
+    const cartReadyClaims = [...claims, etaClaim];
+    const readyPolicyLines = canonicalCartPolicyLinesV2(readyCart.lines, "LANA");
+    if (readyPolicyLines === null) throw new Error("TEST_CART_READY_LINES_INVALID");
+    const readyNegotiation = replayCanonicalCartRepriceNegotiationV1({
+      state: beforeNegotiation,
+      commandId: cartReadyWithMissingStock.salesCyclePlan.events[0]!.commandId,
+      mutationReasonCode: "OTHER",
+      cart: { cartId, cartVersion: readyCart.revision, lines: readyPolicyLines },
+      policy,
+      occurredAt: now,
+    });
+    if (readyNegotiation.status !== "APPLIED") {
+      throw new Error("TEST_CART_READY_NEGOTIATION_FAILED");
+    }
+    const exactCartReady = {
+      ...cartReadyWithMissingStock,
+      salesCyclePlan: {
+        ...cartReadyWithMissingStock.salesCyclePlan,
+        state: {
+          revision: 3,
+          stage: "CART_OPEN",
+          cart: { value: readyCart, expiresAt: salesExpiresAt.toISOString() },
+          commerceContext: { shopId: "LANA", policyRef: replayContext.policyRef },
+          negotiation: readyNegotiation.state,
+          checkoutDraft: null,
+          preview: null,
+          confirmation: null,
+        },
+        effectClaimSets: [{ effect: "CART_READY" as const, claims: cartReadyClaims }],
+        effectReadiness: cartReadyWithMissingStock.salesCyclePlan.effectReadiness.map((readiness) =>
+          resealReadinessV1(readiness, { claimSetHash: sha256(cartReadyClaims) })
+        ),
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    await expect(store.commit(exactCartReady, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    await expect(store.commit({
+      ...exactCartReady,
+      salesCyclePlan: {
+        ...exactCartReady.salesCyclePlan,
+        state: {
+          ...exactCartReady.salesCyclePlan.state,
+          negotiation: {
+            ...readyNegotiation.state,
+            quote: {
+              ...readyNegotiation.state.quote,
+              grandTotalVnd: readyNegotiation.state.quote.grandTotalVnd + 1,
+            },
+          },
+        },
+      },
+    }, now)).rejects.toThrow("CART_READY_NEGOTIATION_REPLAY_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const matchedPreviewFact = {
+      status: "MATCHED" as const,
+      sourceVersionBefore: "fact-v1",
+      sourceVersionAfter: "fact-v1",
+      checkedAt: evaluatedAt,
+    };
+    const previewArtifact = {
+      schemaVersion: 1 as const,
+      previewId: "10000000-0000-4000-8000-000000000030",
+      cartId,
+      cartVersion: readyCart.revision,
+      stage: "ORDER_PREVIEW" as const,
+      recipient: {
+        fullName: checkoutTransition.draft.fullName!,
+        phone: checkoutTransition.draft.phone!,
+        address: checkoutTransition.draft.address!,
+        retentionClass: "CART_48H_OPERATIONAL" as const,
+      },
+      payment: { method: "COD" as const, bankTransferPolicyRef: null },
+      revalidation: {
+        cartId,
+        cartVersion: readyCart.revision,
+        price: matchedPreviewFact,
+        inventory: matchedPreviewFact,
+        size: matchedPreviewFact,
+        eta: matchedPreviewFact,
+        eligible: true,
+        checkedAt: evaluatedAt,
+      },
+      createdAt: evaluatedAt,
+      expiresAt: "2026-08-13T03:01:00.000Z",
+    };
+    const exactPreview = {
+      ...previewArtifact,
+      previewHash: computeCanonicalOrderPreviewHashV1(previewArtifact),
+    };
+    const cartReadyReadiness = exactCartReady.salesCyclePlan.effectReadiness[0]!;
+    const previewReadiness = resealReadinessV1(cartReadyReadiness, {
+      effect: "PREVIEW_READY",
+      orderPreviewId: exactPreview.previewId,
+      orderPreviewHash: exactPreview.previewHash.replace(/^sha256:/u, ""),
+      buyingIntentHash: null,
+      deterministicEvidenceHash: null,
+    }, { parentReadinessHash: cartReadyReadiness.readinessHash });
+    const exactPreviewPlan = {
+      ...exactCartReady,
+      salesCyclePlan: {
+        ...exactCartReady.salesCyclePlan,
+        state: {
+          ...exactCartReady.salesCyclePlan.state,
+          revision: 5,
+          stage: "ORDER_PREVIEW",
+          conversationKey: "page-1:conversation-1",
+          checkoutDraft: checkoutTransition.draft,
+          preview: exactPreview,
+        },
+        events: [
+          checkoutPlan.salesCyclePlan.events[0]!,
+          {
+            ...exactCartReady.salesCyclePlan.events[0]!,
+            stateRevisionBefore: 3,
+            stateRevisionAfter: 4,
+          },
+          {
+            commandId: "sales:event-2:preview",
+            commandKind: "PREVIEW_CREATED" as const,
+            outcome: "APPLIED" as const,
+            stateRevisionBefore: 4,
+            stateRevisionAfter: 5,
+            stageBefore: "CART_OPEN",
+            stageAfter: "ORDER_PREVIEW",
+            cartId,
+            cartVersion: readyCart.revision,
+            reasonCode: null,
+            occurredAt: now,
+          },
+        ],
+        effectClaimSets: [
+          { effect: "CART_READY" as const, claims: cartReadyClaims },
+          { effect: "PREVIEW_READY" as const, claims: cartReadyClaims },
+        ],
+        effectReadiness: [cartReadyReadiness, previewReadiness],
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    await expect(store.commit(exactPreviewPlan, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    const forgedPreviewArtifact = {
+      ...previewArtifact,
+      recipient: { ...previewArtifact.recipient, phone: "0911111111" },
+    };
+    const forgedPreview = {
+      ...forgedPreviewArtifact,
+      previewHash: computeCanonicalOrderPreviewHashV1(forgedPreviewArtifact),
+    };
+    const forgedPreviewReadiness = resealReadinessV1(previewReadiness, {
+      orderPreviewHash: forgedPreview.previewHash.replace(/^sha256:/u, ""),
+    }, { parentReadinessHash: cartReadyReadiness.readinessHash });
+    await expect(store.commit({
+      ...exactPreviewPlan,
+      salesCyclePlan: {
+        ...exactPreviewPlan.salesCyclePlan,
+        state: { ...exactPreviewPlan.salesCyclePlan.state, preview: forgedPreview },
+        effectReadiness: [cartReadyReadiness, forgedPreviewReadiness],
+      },
+    }, now)).rejects.toThrow("ORDER_PREVIEW_TRANSITION_REPLAY_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const previewLockedBundle = cipher.encryptJson(
+      exactPreviewPlan.salesCyclePlan.state,
+      `lana:sales-cycle:v1:page-1:${commitInput.conversationId}`,
+      salesExpiresAt,
+    );
+    lockedSalesRow = {
+      ...mutationLockedSalesRow,
+      state_revision: "5",
+      state_ciphertext: previewLockedBundle.ciphertext,
+      state_nonce: previewLockedBundle.nonce,
+      state_auth_tag: previewLockedBundle.authTag,
+      state_encrypted_dek: previewLockedBundle.encryptedDek,
+      state_key_ref: previewLockedBundle.keyRef,
+    };
+    const exactConfirmation = deriveCanonicalPurchaseConfirmationV1({
+      conversationKey: exactPreviewPlan.salesCyclePlan.state.conversationKey,
+      cart: readyCart,
+      preview: {
+        previewId: exactPreview.previewId,
+        previewHash: exactPreview.previewHash,
+      },
+      sourceMessageId,
+      confirmedAt: now,
+    });
+    const confirmationEvidence = {
+      schemaVersion: 1 as const,
+      authorityVersion: "DETERMINISTIC_CONFIRMATION_EVIDENCE_V1" as const,
+      classifierVersion: "LEGACY_CONFIRMATION_V1" as const,
+      decision: "CONFIRM" as const,
+      reasonCode: "CONFIRMATION_DETERMINISTIC_MATCH" as const,
+      sourceMessageIdHash,
+      evidenceHash: sha256([
+        sourceMessageIdHash,
+        "LEGACY_CONFIRMATION_V1",
+        "CONFIRM",
+        "CONFIRMATION_DETERMINISTIC_MATCH",
+      ]),
+      evaluatedAt,
+      authorization: "NONE" as const,
+    };
+    const confirmationCartReadiness = resealReadinessV1(cartReadyReadiness, {
+      salesCycleRevision: 5,
+    }, { parentReadinessHash: null });
+    const confirmationPreviewReadiness = resealReadinessV1(previewReadiness, {
+      salesCycleRevision: 5,
+    }, { parentReadinessHash: confirmationCartReadiness.readinessHash });
+    const confirmationReadiness = resealReadinessV1(confirmationPreviewReadiness, {
+      effect: "PURCHASE_CONFIRMATION_READY",
+      deterministicEvidenceHash: sha256(confirmationEvidence),
+    }, { parentReadinessHash: confirmationPreviewReadiness.readinessHash });
+    const exactConfirmationPlan = {
+      ...exactPreviewPlan,
+      salesCyclePlan: {
+        expectedRevision: 5,
+        readinessContractVersion: "DF06_EFFECT_READINESS_V1" as const,
+        sourceMessageIdHash,
+        canonicalBuyingIntent: canonicalIntent,
+        deterministicConfirmationEvidence: confirmationEvidence,
+        state: {
+          ...exactPreviewPlan.salesCyclePlan.state,
+          revision: 6,
+          stage: "PURCHASE_CONFIRMED",
+          confirmation: exactConfirmation,
+        },
+        cartExpiresAt: salesExpiresAt,
+        expiresAt: salesExpiresAt,
+        events: [{
+          commandId: "sales:event-2:confirm",
+          commandKind: "CONFIRM_PURCHASE" as const,
+          outcome: "APPLIED" as const,
+          stateRevisionBefore: 5,
+          stateRevisionAfter: 6,
+          stageBefore: "ORDER_PREVIEW",
+          stageAfter: "PURCHASE_CONFIRMED",
+          cartId,
+          cartVersion: readyCart.revision,
+          reasonCode: null,
+          occurredAt: now,
+        }],
+        effectClaimSets: [
+          { effect: "CART_READY" as const, claims: cartReadyClaims },
+          { effect: "PREVIEW_READY" as const, claims: cartReadyClaims },
+          { effect: "PURCHASE_CONFIRMATION_READY" as const, claims: cartReadyClaims },
+        ],
+        effectReadiness: [
+          confirmationCartReadiness,
+          confirmationPreviewReadiness,
+          confirmationReadiness,
+        ],
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    await expect(store.commit(exactConfirmationPlan, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    await expect(store.commit({
+      ...exactConfirmationPlan,
+      salesCyclePlan: {
+        ...exactConfirmationPlan.salesCyclePlan,
+        state: {
+          ...exactConfirmationPlan.salesCyclePlan.state,
+          confirmation: {
+            ...exactConfirmation,
+            confirmationId: "10000000-0000-4000-8000-000000000099",
+          },
+        },
+      },
+    }, now)).rejects.toThrow("PURCHASE_CONFIRMATION_TRANSITION_REPLAY_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+    lockedSalesRow = mutationLockedSalesRow;
 
     const changedCartWithoutNewReadiness = {
       ...exactMutation,
