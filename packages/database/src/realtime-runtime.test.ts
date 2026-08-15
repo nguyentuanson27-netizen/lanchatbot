@@ -990,11 +990,12 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           occurredAt: now,
         }],
       },
-    }, now)).rejects.toThrow("EFFECT_READINESS_CONTRACT_REQUIRED");
+    } as unknown as Parameters<typeof store.commit>[0], now))
+      .rejects.toThrow("EFFECT_READINESS_CONTRACT_REQUIRED");
     expect(calls.at(-1)?.sql.trim()).toBe("ROLLBACK");
   });
 
-  it("keeps unversioned non-protected sales-cycle events backward compatible", async () => {
+  it("rejects an unversioned plan before it can bypass the sales-state envelope", async () => {
     const calls: string[] = [];
     const client = {
       async query(sql: string) {
@@ -1021,14 +1022,14 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     );
     (store as unknown as { pool: unknown }).pool = { async connect() { return client; } };
     const now = new Date("2026-07-23T03:00:00.000Z");
-    await expect(store.commit({
+    const unversionedPlan = {
       pageId: "page-1", customerHash: "hash",
       conversationId: "33333333-3333-4333-8333-333333333333",
       expectedStateVersion: 4,
       state: { revision: 5, routingOwner: "APP", conversationOwner: "BOT" },
       salesCyclePlan: {
         expectedRevision: 0,
-        state: { revision: 1, stage: "PRODUCT_FIT" },
+        state: { revision: 1, stage: "PRODUCT_FIT", attackerField: true },
         cartExpiresAt: null,
         expiresAt: new Date("2026-07-25T03:00:00.000Z"),
         events: [{
@@ -1038,8 +1039,12 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           cartId: null, cartVersion: null, reasonCode: null, occurredAt: now,
         }],
       },
-    }, now)).resolves.toMatchObject({ stateCommitted: true });
-    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+    };
+    await expect(store.commit(
+      unversionedPlan as unknown as Parameters<typeof store.commit>[0],
+      now,
+    )).rejects.toThrow("EFFECT_READINESS_CONTRACT_REQUIRED");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
   });
 
   it("rejects a stale readiness binding inside the sales commit transaction", async () => {
@@ -3141,13 +3146,15 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       .rejects.toThrow("EFFECT_READINESS_CART_STATE_MISMATCH");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
+    const {
+      cartMutationBatchEvidence: omittedMutationBatchEvidence,
+      ...exactMutationPlanWithoutBatch
+    } = exactMutation.salesCyclePlan;
+    expect(omittedMutationBatchEvidence).toBeDefined();
     const mislabeledProtectedState = {
       ...exactMutation,
       salesCyclePlan: {
-        expectedRevision: exactMutation.salesCyclePlan.expectedRevision,
-        state: exactMutation.salesCyclePlan.state,
-        cartExpiresAt: exactMutation.salesCyclePlan.cartExpiresAt,
-        expiresAt: exactMutation.salesCyclePlan.expiresAt,
+        ...exactMutationPlanWithoutBatch,
         events: [{
           commandId: "sales:event-2:facts",
           commandKind: "FACTS_PRESENTED" as const,
@@ -3164,7 +3171,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       },
     } satisfies RealtimeCommitInput<unknown, unknown>;
     await expect(store.commit(mislabeledProtectedState, now))
-      .rejects.toThrow("PROTECTED_SALES_STATE_EVENT_MISMATCH");
+      .rejects.toThrow("SALES_STAGE_EVENT_CHAIN_MISMATCH");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
     const matchedFact = {

@@ -618,8 +618,7 @@ export function applySalesCycleCommand(input: {
       return { status, state, reasonCode: `NEGOTIATION_${decision.reasonCode}` };
     }
     if (decision.status === "REPLAYED") {
-      const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, {});
-      return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
+      return { status: "DUPLICATE", state, confirmation: state.confirmation };
     }
     const repriced = applyCanonicalCartDecisionV2({ cart: state.cart.value, expectedCartVersion: state.cart.value.revision, mutation: null, shopId: state.commerceContext.shopId, policy, customerState: decision.state.customerState, now });
     if (repriced.status === "BLOCKED") return { status: "REJECTED", state, reasonCode: `CART_REPRICE_${repriced.reasonCode}` };

@@ -1105,6 +1105,7 @@ describe("realtime Phase 3 sales cycle", () => {
       handled: true,
       transferToHuman: false,
       reasonCode: "NEGOTIATION_REPLAY_IGNORED",
+      plan: null,
     });
     expect(state.negotiation?.customerState).toBe("HESITANT");
 

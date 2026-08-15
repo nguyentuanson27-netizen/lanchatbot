@@ -173,7 +173,7 @@ export interface RealtimeSalesCyclePlan<TState> {
   readonly cartExpiresAt: Date | null;
   readonly expiresAt: Date;
   readonly events: readonly RealtimeSalesCycleEventPlan[];
-  readonly readinessContractVersion?: "DF06_EFFECT_READINESS_V1";
+  readonly readinessContractVersion: "DF06_EFFECT_READINESS_V1";
   readonly sourceMessageIdHash?: string;
   readonly canonicalBuyingIntent?: import("@lana/contracts").CanonicalBuyingIntentV1;
   readonly deterministicConfirmationEvidence?: import("@lana/contracts").DeterministicConfirmationEvidenceV1;
@@ -449,14 +449,6 @@ function validateReadinessEnvelopeHashesV1(
   }
 }
 
-function planRequiresEffectReadinessV1(
-  plan: RealtimeSalesCyclePlan<unknown>,
-): boolean {
-  return plan.events.some(({ commandKind, outcome }) =>
-    outcome === "APPLIED" && SALES_EFFECT_BY_COMMAND_V1[commandKind] !== undefined
-  );
-}
-
 function validateSalesEffectReadiness<TState, TSalesState>(
   input: RealtimeCommitInput<TState, TSalesState>,
   now: Date,
@@ -465,10 +457,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
   const plan = input.salesCyclePlan;
   if (!plan) return;
   if (plan.readinessContractVersion !== "DF06_EFFECT_READINESS_V1") {
-    if (planRequiresEffectReadinessV1(plan)) {
-      throw new Error("EFFECT_READINESS_CONTRACT_REQUIRED");
-    }
-    return;
+    throw new Error("EFFECT_READINESS_CONTRACT_REQUIRED");
   }
   const parsed = (plan.effectReadiness ?? []).map((value) =>
     DeterministicEffectReadinessV1Schema.parse(value)
@@ -3564,11 +3553,9 @@ export class PostgresRealtimeRuntimeStore {
     const lockedRow = locked.rows[0];
     if (lockedRow?.state_ciphertext) {
       const lockedState = this.salesCycleRecord<unknown>(lockedRow).state;
-      if (plan.readinessContractVersion === "DF06_EFFECT_READINESS_V1") {
-        validateLockedSalesStateEnvelopeV1(
-          plan as RealtimeSalesCyclePlan<unknown>, lockedState, pageId, conversationId,
-        );
-      }
+      validateLockedSalesStateEnvelopeV1(
+        plan as RealtimeSalesCyclePlan<unknown>, lockedState, pageId, conversationId,
+      );
       validateLockedCartExpiryBindingV1(
         plan as RealtimeSalesCyclePlan<unknown>, lockedState, lockedRow.cart_expires_at,
       );
@@ -3587,10 +3574,8 @@ export class PostgresRealtimeRuntimeStore {
       validateLockedCanonicalCartTransitionV1(
         plan as RealtimeSalesCyclePlan<unknown>, lockedState, now,
       );
-    } else if (plan.readinessContractVersion === "DF06_EFFECT_READINESS_V1" ||
-      plan.events.some(({ commandKind, outcome }) => outcome === "APPLIED" &&
-        SALES_EFFECT_BY_COMMAND_V1[commandKind] !== undefined)) {
-        throw new Error("CART_MUTATION_LOCKED_STATE_REQUIRED");
+    } else {
+      throw new Error("CART_MUTATION_LOCKED_STATE_REQUIRED");
     }
     const nextRevision = this.stateNumber(
       plan.state,

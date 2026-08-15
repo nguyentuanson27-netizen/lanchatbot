@@ -35,6 +35,12 @@ describe("DF05 canonical buying authority wiring", () => {
     );
     expect(runner).toContain('effect: "PROTECTED_OUTBOUND"');
     expect(runner).toContain("protectedClaims: protectedOutboundClaims");
+    expect(database).toContain(
+      'readonly readinessContractVersion: "DF06_EFFECT_READINESS_V1"',
+    );
+    expect(database).not.toContain(
+      'readonly readinessContractVersion?: "DF06_EFFECT_READINESS_V1"',
+    );
     expect(database).toContain('readinessContractVersion !== "DF06_EFFECT_READINESS_V1"');
     expect(database).toContain('throw new Error("EFFECT_READINESS_REQUIRED")');
     expect(database).toContain('NEGOTIATION_EVENT: "CART_READY"');

@@ -195,7 +195,7 @@ export const SALES_STAGE_TRANSITIONS_V1 = {
   NEGOTIATION_EVENT: [{
     outcome: "APPLIED",
     stageBefore: ["CART_OPEN", "ORDER_PREVIEW"],
-    stageAfter: ["SAME", "CART_OPEN"],
+    stageAfter: ["CART_OPEN"],
   }],
   CART_READY: [{
     outcome: "APPLIED",

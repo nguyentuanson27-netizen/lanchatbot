@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { PolicyBundleV1Schema } from "@lana/contracts";
+import {
+  canonicalCartPolicyLinesV2,
+  canonicalNegotiationEventFingerprintV1,
+} from "@lana/commerce-kernel";
 import { applySalesCycleCommand, buildPurchaseConfirmedTagCommand, computeBankTransferPolicyHash, computeBusinessContentHash, computeOrderPreviewHash, createSalesCycleRuntimeState, executePersistedSalesCycleCommand, type SalesCycleRuntimeState, type SalesCycleStateRepositoryV1, type SalesCycleTransactionalEffectsV1, type SalesCycleTrustedPortsV1 } from "./sales-cycle-runtime.js";
 
 const now = new Date("2026-07-22T06:00:00.000Z");
@@ -253,6 +257,74 @@ describe("Phase 3 sales-cycle runtime", () => {
     if (first.status !== "APPLIED") throw new Error(first.status);
     const retry = applySalesCycleCommand({ state: first.state, expectedRevision: first.state.revision, command: { kind: "NEGOTIATION_EVENT", commandId: "different-command", expectedNegotiationVersion: 3, sourceMessageId: "same-meta-mid", intent: "PRICE_OBJECTION", reasonCode: "PRICE_TOO_HIGH" }, now, trustedPorts: trustedPorts() });
     expect(retry).toMatchObject({ status: "REJECTED", reasonCode: "NEGOTIATION_EVENT_ID_COLLISION", state: { negotiation: { customerState: "HESITANT" } } });
+  });
+
+  it("keeps an exact negotiation replay non-state-advancing", () => {
+    const state = addCart();
+    if (state.cart === null || state.negotiation === null || state.commerceContext === null) {
+      throw new Error("expected cart negotiation fixture");
+    }
+    const sourceMessageId = "exact-replayed-inbound";
+    const eventId = `inbound:${sourceMessageId}`;
+    const evidence = {
+      source: "MODEL_INTERPRETATION" as const,
+      intent: "PRICE_OBJECTION" as const,
+      evidenceId: eventId,
+      objectionEvidenceId: eventId,
+      reasonCode: "PRICE_TOO_HIGH",
+      observedAt: now.toISOString(),
+    };
+    const lines = canonicalCartPolicyLinesV2(
+      state.cart.value.lines,
+      state.commerceContext.shopId,
+    );
+    if (lines === null) throw new Error("expected canonical cart policy lines");
+    const replayState: SalesCycleRuntimeState = {
+      ...state,
+      negotiation: {
+        ...state.negotiation,
+        processedEvents: [
+          ...state.negotiation.processedEvents,
+          {
+            eventId,
+            fingerprint: canonicalNegotiationEventFingerprintV1({
+              negotiationId: state.negotiation.negotiationId,
+              expectedStateVersion: state.negotiation.stateVersion,
+              expectedCartVersion: state.cart.value.revision,
+              eventId,
+              evidence,
+              cart: {
+                cartId: state.cart.value.cartId,
+                cartVersion: state.cart.value.revision,
+                lines,
+              },
+            }),
+            resultingStateVersion: state.negotiation.stateVersion,
+          },
+        ],
+      },
+    };
+
+    const replay = applySalesCycleCommand({
+      state: replayState,
+      expectedRevision: replayState.revision,
+      command: {
+        kind: "NEGOTIATION_EVENT",
+        commandId: "exact-replay-command",
+        expectedNegotiationVersion: replayState.negotiation!.stateVersion,
+        sourceMessageId,
+        intent: "PRICE_OBJECTION",
+        reasonCode: "PRICE_TOO_HIGH",
+      },
+      now,
+      trustedPorts: trustedPorts(),
+    });
+
+    expect(replay).toEqual({
+      status: "DUPLICATE",
+      state: replayState,
+      confirmation: replayState.confirmation,
+    });
   });
 
   it("does not treat ok as confirmation outside the order-preview stage", () => {
