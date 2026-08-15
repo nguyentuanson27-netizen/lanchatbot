@@ -307,6 +307,7 @@ export const CartOpenEvidenceV1Schema = z.object({
   replayContext: CanonicalCartReplayContextV1Schema,
   policyPin: RuntimePolicyPinBindingV1Schema,
   createdAt: z.string().datetime(),
+  cartExpiresAt: z.string().datetime(),
   evidenceHash: Sha256Schema,
 }).strict().superRefine((value, context) => {
   if (value.replayContext.customerState !== null) {
@@ -315,6 +316,13 @@ export const CartOpenEvidenceV1Schema = z.object({
   if (value.draft.shopId !== value.replayContext.shopId ||
     canonicalJsonV1(value.draft.policyRef) !== canonicalJsonV1(value.replayContext.policyRef)) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["draft"], message: "cart draft must bind the exact replay shop and policy" });
+  }
+  if (Date.parse(value.cartExpiresAt) <= Date.parse(value.createdAt)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["cartExpiresAt"],
+      message: "cart expiry must follow cart creation",
+    });
   }
 });
 export type CartOpenEvidenceV1 = z.infer<typeof CartOpenEvidenceV1Schema>;

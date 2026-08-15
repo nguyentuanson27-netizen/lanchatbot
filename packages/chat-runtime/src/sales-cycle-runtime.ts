@@ -1,5 +1,6 @@
 import {
   CheckoutRevalidationV1Schema,
+  CART_TTL_MS_V1,
   canonicalJsonV1,
   OrderPreviewV1Schema,
   PolicyBundleV1Schema,
@@ -12,6 +13,8 @@ import {
   type CheckoutDraftV1,
   type OrderPreviewV1,
   type PurchaseConfirmationV1,
+  type SalesCycleClarificationReasonV1 as ContractSalesCycleClarificationReasonV1,
+  type SalesCycleClarificationStateV1 as ContractSalesCycleClarificationStateV1,
   type SalesCycleStageV1,
   type SalesIntentV1,
   type HandoffDecisionV2,
@@ -23,6 +26,7 @@ import {
 } from "@lana/contracts";
 import {
   applyCheckoutDetailsTransitionV1,
+  applySalesClarificationTransitionV1,
   computeCanonicalOrderPreviewHashV1,
   deriveCanonicalPurchaseConfirmationV1,
   replayCanonicalCartRepriceNegotiationV1,
@@ -42,21 +46,11 @@ import {
 import { createHash } from "node:crypto";
 
 const MAX_PROCESSED_COMMANDS = 100;
-const CART_TTL_MS = 48 * 60 * 60 * 1_000;
 const MAX_REVALIDATION_AGE_MS = 60 * 1_000;
 const MAX_FUTURE_CLOCK_SKEW_MS = 5 * 60 * 1_000;
 
-export type SalesCycleClarificationReasonV1 = "CHECKOUT_DETAILS_MISSING";
-
-export interface SalesCycleClarificationStateV1 {
-  readonly reasonCode: SalesCycleClarificationReasonV1;
-  readonly missingFields: readonly string[];
-  readonly productId: string | null;
-  readonly attemptCount: number;
-  readonly maxAttempts: number;
-  readonly askedQuestionFingerprints: readonly string[];
-  readonly lastRequestedAt: string;
-}
+export type SalesCycleClarificationReasonV1 = ContractSalesCycleClarificationReasonV1;
+export type SalesCycleClarificationStateV1 = ContractSalesCycleClarificationStateV1;
 
 export interface SalesCycleRuntimeState {
   readonly schemaVersion: 2;
@@ -464,7 +458,7 @@ export function applySalesCycleCommand(input: {
     if (cartAlive(state, now)) return { status: "REJECTED", state, reasonCode: "CART_ALREADY_OPEN" };
     const expiresAt = Date.parse(command.expiresAt);
     const remainingTtl = expiresAt - now.getTime();
-    if (!Number.isFinite(expiresAt) || remainingTtl <= 0 || remainingTtl > CART_TTL_MS) return { status: "REJECTED", state, reasonCode: "CART_EXPIRY_INVALID" };
+    if (!Number.isFinite(expiresAt) || remainingTtl <= 0 || remainingTtl > CART_TTL_MS_V1) return { status: "REJECTED", state, reasonCode: "CART_EXPIRY_INVALID" };
     let draft: ResolvedCartDraftV1 | null = null;
     try {
       draft = input.trustedPorts?.resolveCartDraft(command.cartDraftRef) ?? null;
@@ -521,55 +515,39 @@ export function applySalesCycleCommand(input: {
     if (state.stage !== "CART_OPEN" && state.stage !== "ORDER_PREVIEW") {
       return { status: "REJECTED", state, reasonCode: "SALES_STAGE_TRANSITION_INVALID" };
     }
-    const missingFields = [...new Set(command.missingFields.map((field) => field.trim()))]
-      .filter(Boolean)
-      .sort();
-    const questionFingerprint = command.questionFingerprint.trim();
-    if (
-      missingFields.length === 0 ||
-      missingFields.some((field) => field.length > 80) ||
-      !Number.isSafeInteger(command.maxAttempts) ||
-      command.maxAttempts < 1 ||
-      command.maxAttempts > 10 ||
-      !/^[a-f0-9]{64}$/u.test(questionFingerprint)
-    ) {
-      return { status: "REJECTED", state, reasonCode: "CLARIFICATION_REQUEST_INVALID" };
-    }
-    const previous = state.clarification ?? null;
-    const sameQuestion =
-      previous?.reasonCode === command.reasonCode &&
-      previous.productId === command.productId &&
-      previous.missingFields.length === missingFields.length &&
-      previous.missingFields.every((field, index) => field === missingFields[index]);
-    const attemptCount = sameQuestion ? previous.attemptCount + 1 : 1;
-    const askedQuestionFingerprints = sameQuestion
-      ? [...previous.askedQuestionFingerprints, questionFingerprint]
-      : [questionFingerprint];
-    if (
-      attemptCount > command.maxAttempts ||
-      (sameQuestion && previous.askedQuestionFingerprints.includes(questionFingerprint))
-    ) {
-      return { status: "REJECTED", state, reasonCode: "CLARIFICATION_RETRY_INVALID" };
+    const transition = applySalesClarificationTransitionV1({
+      current: state.clarification,
+      transition: {
+        kind: "REQUESTED",
+        reasonCode: command.reasonCode,
+        missingFields: [...command.missingFields],
+        productId: command.productId,
+        questionFingerprint: command.questionFingerprint,
+        maxAttempts: command.maxAttempts,
+      },
+      appliedAt: now,
+    });
+    if (transition.status === "BLOCKED") {
+      return { status: "REJECTED", state, reasonCode: transition.reasonCode };
     }
     const next = withCommand(state, command.commandId, now, {
-      clarification: {
-        reasonCode: command.reasonCode,
-        missingFields,
-        productId: command.productId,
-        attemptCount,
-        maxAttempts: command.maxAttempts,
-        askedQuestionFingerprints,
-        lastRequestedAt: now.toISOString(),
-      },
+      clarification: transition.clarification,
     });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
   if (command.kind === "CLARIFICATION_RESOLVED") {
-    if (state.clarification === null || state.clarification === undefined) {
-      return { status: "REJECTED", state, reasonCode: "CLARIFICATION_NOT_ACTIVE" };
+    const transition = applySalesClarificationTransitionV1({
+      current: state.clarification,
+      transition: { kind: "RESOLVED" },
+      appliedAt: now,
+    });
+    if (transition.status === "BLOCKED") {
+      return { status: "REJECTED", state, reasonCode: transition.reasonCode };
     }
-    const next = withCommand(state, command.commandId, now, { clarification: null });
+    const next = withCommand(state, command.commandId, now, {
+      clarification: transition.clarification,
+    });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 

@@ -1025,6 +1025,40 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(persisted.preview).toBeNull();
   });
 
+  it("returns the canonical state-changing plan when confirmation revalidation hands off", async () => {
+    const state = await previewState("confirm-handoff-plan");
+    const changedFacts: BusinessFactsReader = {
+      ...facts,
+      async resolveCartSelection(query, checkedAt) {
+        const selected = await facts.resolveCartSelection!(query, checkedAt);
+        if (selected.status !== "READY") return selected;
+        return {
+          ...selected,
+          versions: { ...selected.versions, inventory: "inventory-v2" },
+        };
+      },
+    };
+
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(state, "ok", "confirm-handoff-plan-final"),
+      facts: changedFacts,
+    });
+
+    expect(output).toMatchObject({
+      transferToHuman: true,
+      desiredTag: "NHAN_VIEN",
+      reasonCode: "STOCK_CHANGED_BEFORE_CONFIRMATION",
+      plan: {
+        state: { stage: "HANDED_OFF", preview: null },
+        events: [{
+          commandKind: "CONFIRM_PURCHASE",
+          outcome: "HANDOFF",
+          stageAfter: "HANDED_OFF",
+        }],
+      },
+    });
+  });
+
   it("stacks 5%, freeship and final 20k while the same evidence cannot escalate twice", async () => {
     let state = createRealtimeSalesState(conversationId, pageId, now);
     const opened = await evaluateRealtimeSalesCycle(input(
@@ -1264,6 +1298,17 @@ describe("realtime Phase 3 sales cycle", () => {
       },
       plan: { state: { clarification: { attemptCount: 1 } } },
     });
+    expect(first.plan?.events.find(({ commandKind }) =>
+      commandKind === "CLARIFICATION_REQUESTED"
+    )?.clarificationTransitionEvidence).toMatchObject({
+      contractVersion: "CLARIFICATION_TRANSITION_EVIDENCE_V1",
+      transition: {
+        kind: "REQUESTED",
+        missingFields: ["FULL_NAME", "ADDRESS"],
+      },
+      contributor: "DETERMINISTIC_RUNTIME",
+      authorization: "NONE",
+    });
 
     const second = await evaluateRealtimeSalesCycle(input(
       first.plan!.state,
@@ -1336,6 +1381,14 @@ describe("realtime Phase 3 sales cycle", () => {
       transferToHuman: false,
       telemetry: { checkoutCompleted: true, checkoutMissingFields: [] },
       plan: { state: { stage: "ORDER_PREVIEW", clarification: null } },
+    });
+    expect(completed.plan?.events.find(({ commandKind }) =>
+      commandKind === "CLARIFICATION_RESOLVED"
+    )?.clarificationTransitionEvidence).toMatchObject({
+      contractVersion: "CLARIFICATION_TRANSITION_EVIDENCE_V1",
+      transition: { kind: "RESOLVED" },
+      contributor: "DETERMINISTIC_RUNTIME",
+      authorization: "NONE",
     });
   });
 

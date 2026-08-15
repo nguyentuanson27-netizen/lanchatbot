@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { PolicyBundleV1Schema } from "@lana/contracts";
 import {
   applyCheckoutDetailsTransitionV1,
+  applySalesClarificationTransitionV1,
   computeCanonicalOrderPreviewHashV1,
   deriveCanonicalPurchaseConfirmationV1,
   replayCanonicalCartRepriceNegotiationV1,
@@ -67,6 +68,41 @@ const policy = PolicyBundleV1Schema.parse({
 });
 
 describe("protected sales transition kernel", () => {
+  it("derives clarification request, retry, and resolution without trusted ports", () => {
+    const request = {
+      kind: "REQUESTED" as const,
+      reasonCode: "CHECKOUT_DETAILS_MISSING" as const,
+      missingFields: ["phone", "address", "phone"],
+      productId: "CB182",
+      questionFingerprint: "a".repeat(64),
+      maxAttempts: 3,
+    };
+    const first = applySalesClarificationTransitionV1({
+      current: undefined,
+      transition: request,
+      appliedAt: now,
+    });
+    expect(first).toMatchObject({
+      status: "APPLIED",
+      clarification: {
+        missingFields: ["address", "phone"],
+        attemptCount: 1,
+        askedQuestionFingerprints: ["a".repeat(64)],
+      },
+    });
+    if (first.status !== "APPLIED") throw new Error("TEST_CLARIFICATION_REQUEST_FAILED");
+    expect(applySalesClarificationTransitionV1({
+      current: first.clarification,
+      transition: { ...request, questionFingerprint: "b".repeat(64) },
+      appliedAt: now,
+    })).toMatchObject({ status: "APPLIED", clarification: { attemptCount: 2 } });
+    expect(applySalesClarificationTransitionV1({
+      current: first.clarification,
+      transition: { kind: "RESOLVED" },
+      appliedAt: now,
+    })).toEqual({ status: "APPLIED", clarification: null });
+  });
+
   it("normalizes and merges an exact checkout patch without trusting proposed state", () => {
     const first = applyCheckoutDetailsTransitionV1({
       current: null,

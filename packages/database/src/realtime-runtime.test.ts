@@ -9,6 +9,8 @@ import {
   cartMutationBatchEvidenceHashPreimageV1,
   cartMutationReceiptHashPreimageV1,
   cartOpenEvidenceHashPreimageV1,
+  canonicalClarificationStateHashPreimageV1,
+  clarificationTransitionEvidenceHashPreimageV1,
   checkoutDetailsTransitionEvidenceHashPreimageV1,
   deterministicEffectReadinessHashPreimageV1,
   effectBindingHashPreimageV1,
@@ -21,6 +23,7 @@ import {
 import {
   applyCanonicalCartDecisionV2,
   applyCheckoutDetailsTransitionV1,
+  applySalesClarificationTransitionV1,
   canonicalCartPolicyLinesV2,
   canonicalNegotiationEventFingerprintV1,
   computeCanonicalOrderPreviewHashV1,
@@ -124,6 +127,34 @@ describe("DF06 locked sales-state envelope", () => {
       ...locked,
       processedCommandIds,
     }, "page-1", conversationId)).not.toThrow();
+  });
+
+  it("replays a legitimate HANDOFF as a state-advancing transition", () => {
+    const handoffEvent = {
+      ...event,
+      commandKind: "PAYMENT_RECEIPT_RECEIVED" as const,
+      outcome: "HANDOFF" as const,
+      stageAfter: "HANDED_OFF",
+      reasonCode: "PAYMENT_RECEIPT_REVIEW_REQUIRED",
+    };
+    expect(() => validateLockedSalesStateEnvelopeV1({
+      ...exact,
+      state: {
+        ...locked,
+        revision: 3,
+        stage: "HANDED_OFF",
+        processedCommandIds: ["sales:previous", handoffEvent.commandId],
+        updatedAt: occurredAt.toISOString(),
+      },
+      events: [handoffEvent],
+    }, locked, "page-1", conversationId)).not.toThrow();
+  });
+
+  it("rejects undeclared top-level state fields instead of silently persisting them", () => {
+    expect(() => validateLockedSalesStateEnvelopeV1({
+      ...exact,
+      state: { ...exact.state, unexpectedAuthority: { allow: true } },
+    }, locked, "page-1", conversationId)).toThrow("SALES_STATE_KEY_INVALID");
   });
 });
 
@@ -1083,6 +1114,22 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     await expect(store.commit(staleSalesCommitInput, now)).rejects.toThrow("EFFECT_READINESS_STALE");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
+    const overlongReadiness = {
+      ...staleSalesCommitInput,
+      salesCyclePlan: {
+        ...staleSalesCommitInput.salesCyclePlan,
+        effectReadiness: staleSalesCommitInput.salesCyclePlan.effectReadiness.map((readiness) =>
+          resealReadinessV1(readiness, {
+            checkedAt: now.toISOString(),
+            expiresAt: new Date(now.getTime() + 60_001).toISOString(),
+          })
+        ),
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    await expect(store.commit(overlongReadiness, now))
+      .rejects.toThrow("EFFECT_READINESS_LIFETIME_INVALID");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
     const wrongSourceMessageIdHash = rawSha256("a-different-current-message");
     const wrongSourceCommitInput = {
       ...staleSalesCommitInput,
@@ -1647,6 +1694,23 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       .resolves.toMatchObject({ stateCommitted: true });
     expect(calls.at(-1)?.trim()).toBe("COMMIT");
 
+    const forgedPreservedExpiry = new Date(salesExpiresAt.getTime() - 1_000);
+    await expect(store.commit({
+      ...exactMutation,
+      salesCyclePlan: {
+        ...exactMutation.salesCyclePlan,
+        state: {
+          ...exactMutation.salesCyclePlan.state,
+          cart: {
+            ...exactMutation.salesCyclePlan.state.cart,
+            expiresAt: forgedPreservedExpiry.toISOString(),
+          },
+        },
+        cartExpiresAt: forgedPreservedExpiry,
+      },
+    }, now)).rejects.toThrow("CART_EXPIRY_BINDING_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
     for (const forgedEnvelope of [{
       conversationKey: "forged-conversation",
     }, {
@@ -1793,6 +1857,68 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
     const mutationLockedSalesRow = lockedSalesRow;
+    for (const [commandKind, stageBefore, stageAfter] of [
+      ["FACTS_PRESENTED", "DISCOVERY", "FACTS_PRESENTED"],
+      ["MEASUREMENTS_REQUIRED", "FACTS_PRESENTED", "MEASUREMENTS_REQUIRED"],
+      ["SIZE_RECOMMENDED", "MEASUREMENTS_REQUIRED", "SIZE_RECOMMENDED"],
+    ] as const) {
+      const commandId = `sales:event-unprotected:${commandKind.toLowerCase()}`;
+      const lockedUnprotectedState = {
+        ...salesEnvelope(2, stageBefore, priorProcessedCommandIds, beforeCart.updatedAt),
+        cart: null,
+        commerceContext: null,
+        negotiation: null,
+        checkoutDraft: null,
+        preview: null,
+        confirmation: null,
+      };
+      const lockedUnprotectedBundle = cipher.encryptJson(
+        lockedUnprotectedState,
+        `lana:sales-cycle:v1:page-1:${commitInput.conversationId}`,
+        salesExpiresAt,
+      );
+      lockedSalesRow = {
+        ...mutationLockedSalesRow,
+        state_revision: "2",
+        state_ciphertext: lockedUnprotectedBundle.ciphertext,
+        state_nonce: lockedUnprotectedBundle.nonce,
+        state_auth_tag: lockedUnprotectedBundle.authTag,
+        state_encrypted_dek: lockedUnprotectedBundle.encryptedDek,
+        state_key_ref: lockedUnprotectedBundle.keyRef,
+      };
+      await expect(store.commit({
+        ...commitInput,
+        salesCyclePlan: {
+          expectedRevision: 2,
+          readinessContractVersion: "DF06_EFFECT_READINESS_V1",
+          sourceMessageIdHash,
+          canonicalBuyingIntent: canonicalIntent,
+          state: {
+            ...lockedUnprotectedState,
+            ...salesEnvelope(3, stageAfter, [...priorProcessedCommandIds, commandId]),
+          },
+          cartExpiresAt: null,
+          expiresAt: salesExpiresAt,
+          events: [{
+            commandId,
+            commandKind,
+            outcome: "APPLIED",
+            stateRevisionBefore: 2,
+            stateRevisionAfter: 3,
+            stageBefore,
+            stageAfter,
+            cartId: null,
+            cartVersion: null,
+            reasonCode: null,
+            occurredAt: now,
+          }],
+          effectClaimSets: [],
+          effectReadiness: [],
+        },
+      }, now)).resolves.toMatchObject({ stateCommitted: true });
+      expect(calls.at(-1)?.trim()).toBe("COMMIT");
+    }
+    lockedSalesRow = mutationLockedSalesRow;
     const openCommandId = "sales:event-2:cart-open";
     const openPolicyRef = replayContext.policyRef;
     const openDraft = {
@@ -1888,6 +2014,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         bundleHash: `sha256:${"7".repeat(64)}` as const,
       },
       createdAt: now.toISOString(),
+      cartExpiresAt: salesExpiresAt.toISOString(),
       evidenceHash: "0".repeat(64),
     };
     const openEvidence = {
@@ -1962,6 +2089,9 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       cart: null,
       commerceContext: null,
       negotiation: null,
+      checkoutDraft: checkoutTransition.draft,
+      preview: null,
+      confirmation: null,
     }, `lana:sales-cycle:v1:page-1:${commitInput.conversationId}`, salesExpiresAt);
     lockedSalesRow = {
       ...mutationLockedSalesRow,
@@ -1977,6 +2107,23 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     };
     await expect(store.commit(openPlan, now)).resolves.toMatchObject({ stateCommitted: true });
     expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    const forgedOpenExpiry = new Date(salesExpiresAt.getTime() - 1_000);
+    await expect(store.commit({
+      ...openPlan,
+      salesCyclePlan: {
+        ...openPlan.salesCyclePlan,
+        state: {
+          ...openPlan.salesCyclePlan.state,
+          cart: {
+            ...openPlan.salesCyclePlan.state.cart,
+            expiresAt: forgedOpenExpiry.toISOString(),
+          },
+        },
+        cartExpiresAt: forgedOpenExpiry,
+      },
+    }, now)).rejects.toThrow("CART_EXPIRY_BINDING_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
     await expect(store.commit({
       ...openPlan,
@@ -2066,6 +2213,198 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     }, now)).rejects.toThrow("CART_OPEN_FULL_REPLAY_MISMATCH");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
     transactionClock = now;
+
+    const clarificationCommandId = "sales:event-2:clarification-requested";
+    const clarificationTransition = {
+      kind: "REQUESTED" as const,
+      reasonCode: "CHECKOUT_DETAILS_MISSING" as const,
+      missingFields: ["FULL_NAME", "ADDRESS"],
+      productId: "SP-001",
+      questionFingerprint: "a".repeat(64),
+      maxAttempts: 3,
+    };
+    const clarificationResult = applySalesClarificationTransitionV1({
+      current: null,
+      transition: clarificationTransition,
+      appliedAt: now,
+    });
+    expect(clarificationResult.status).toBe("APPLIED");
+    if (clarificationResult.status !== "APPLIED") throw new Error("TEST_CLARIFICATION_FAILED");
+    const clarificationEvidencePlaceholder = {
+      schemaVersion: 1 as const,
+      contractVersion: "CLARIFICATION_TRANSITION_EVIDENCE_V1" as const,
+      sourceMessageIdHash,
+      commandIdHash: rawSha256(clarificationCommandId),
+      transition: clarificationTransition,
+      beforeClarificationHash: rawSha256(canonicalClarificationStateHashPreimageV1(null)),
+      afterClarificationHash: rawSha256(
+        canonicalClarificationStateHashPreimageV1(clarificationResult.clarification),
+      ),
+      appliedAt: now.toISOString(),
+      evidenceHash: "0".repeat(64),
+      contributor: "DETERMINISTIC_RUNTIME" as const,
+      authorization: "NONE" as const,
+    };
+    const clarificationEvidence = {
+      ...clarificationEvidencePlaceholder,
+      evidenceHash: rawSha256(
+        clarificationTransitionEvidenceHashPreimageV1(clarificationEvidencePlaceholder),
+      ),
+    };
+    const { cartOpenEvidence: _clarificationOpenEvidence, ...clarificationBasePlan } =
+      openPlan.salesCyclePlan;
+    const clarificationState = {
+      ...openState,
+      ...salesEnvelope(4, "CART_OPEN", [
+        ...openState.processedCommandIds,
+        clarificationCommandId,
+      ]),
+      clarification: clarificationResult.clarification,
+    };
+    const clarificationPlan = {
+      ...openPlan,
+      salesCyclePlan: {
+        ...clarificationBasePlan,
+        expectedRevision: 3,
+        state: clarificationState,
+        events: [{
+          commandId: clarificationCommandId,
+          commandKind: "CLARIFICATION_REQUESTED" as const,
+          outcome: "APPLIED" as const,
+          stateRevisionBefore: 3,
+          stateRevisionAfter: 4,
+          stageBefore: "CART_OPEN",
+          stageAfter: "CART_OPEN",
+          cartId: openCart.cartId,
+          cartVersion: openCart.revision,
+          reasonCode: null,
+          clarificationTransitionEvidence: clarificationEvidence,
+          occurredAt: now,
+        }],
+        effectClaimSets: [],
+        effectReadiness: [],
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    const clarificationOpenLockedBundle = cipher.encryptJson(
+      openState,
+      `lana:sales-cycle:v1:page-1:${commitInput.conversationId}`,
+      salesExpiresAt,
+    );
+    lockedSalesRow = {
+      ...mutationLockedSalesRow,
+      state_revision: "3",
+      state_ciphertext: clarificationOpenLockedBundle.ciphertext,
+      state_nonce: clarificationOpenLockedBundle.nonce,
+      state_auth_tag: clarificationOpenLockedBundle.authTag,
+      state_encrypted_dek: clarificationOpenLockedBundle.encryptedDek,
+      state_key_ref: clarificationOpenLockedBundle.keyRef,
+    };
+    await expect(store.commit(clarificationPlan, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    await expect(store.commit({
+      ...clarificationPlan,
+      salesCyclePlan: {
+        ...clarificationPlan.salesCyclePlan,
+        state: {
+          ...clarificationState,
+          clarification: {
+            ...clarificationResult.clarification,
+            productId: "SP-002",
+          },
+        },
+      },
+    }, now)).rejects.toThrow("PROTECTED_SALES_ARTIFACT_REPLAY_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const resolveCommandId = "sales:event-3:clarification-resolved";
+    const resolveTransition = { kind: "RESOLVED" as const };
+    const resolveResult = applySalesClarificationTransitionV1({
+      current: clarificationResult.clarification,
+      transition: resolveTransition,
+      appliedAt: now,
+    });
+    expect(resolveResult.status).toBe("APPLIED");
+    if (resolveResult.status !== "APPLIED") throw new Error("TEST_CLARIFICATION_RESOLVE_FAILED");
+    const resolveEvidencePlaceholder = {
+      schemaVersion: 1 as const,
+      contractVersion: "CLARIFICATION_TRANSITION_EVIDENCE_V1" as const,
+      sourceMessageIdHash,
+      commandIdHash: rawSha256(resolveCommandId),
+      transition: resolveTransition,
+      beforeClarificationHash: rawSha256(
+        canonicalClarificationStateHashPreimageV1(clarificationResult.clarification),
+      ),
+      afterClarificationHash: rawSha256(canonicalClarificationStateHashPreimageV1(null)),
+      appliedAt: now.toISOString(),
+      evidenceHash: "0".repeat(64),
+      contributor: "DETERMINISTIC_RUNTIME" as const,
+      authorization: "NONE" as const,
+    };
+    const resolveEvidence = {
+      ...resolveEvidencePlaceholder,
+      evidenceHash: rawSha256(
+        clarificationTransitionEvidenceHashPreimageV1(resolveEvidencePlaceholder),
+      ),
+    };
+    const clarificationLockedBundle = cipher.encryptJson(
+      clarificationState,
+      `lana:sales-cycle:v1:page-1:${commitInput.conversationId}`,
+      salesExpiresAt,
+    );
+    lockedSalesRow = {
+      ...mutationLockedSalesRow,
+      state_revision: "4",
+      state_ciphertext: clarificationLockedBundle.ciphertext,
+      state_nonce: clarificationLockedBundle.nonce,
+      state_auth_tag: clarificationLockedBundle.authTag,
+      state_encrypted_dek: clarificationLockedBundle.encryptedDek,
+      state_key_ref: clarificationLockedBundle.keyRef,
+    };
+    const resolvePlan = {
+      ...clarificationPlan,
+      salesCyclePlan: {
+        ...clarificationPlan.salesCyclePlan,
+        expectedRevision: 4,
+        state: {
+          ...clarificationState,
+          ...salesEnvelope(5, "CART_OPEN", [
+            ...clarificationState.processedCommandIds,
+            resolveCommandId,
+          ]),
+          clarification: null,
+        },
+        events: [{
+          commandId: resolveCommandId,
+          commandKind: "CLARIFICATION_RESOLVED" as const,
+          outcome: "APPLIED" as const,
+          stateRevisionBefore: 4,
+          stateRevisionAfter: 5,
+          stageBefore: "CART_OPEN",
+          stageAfter: "CART_OPEN",
+          cartId: openCart.cartId,
+          cartVersion: openCart.revision,
+          reasonCode: null,
+          clarificationTransitionEvidence: resolveEvidence,
+          occurredAt: now,
+        }],
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    await expect(store.commit(resolvePlan, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+    await expect(store.commit({
+      ...resolvePlan,
+      salesCyclePlan: {
+        ...resolvePlan.salesCyclePlan,
+        events: resolvePlan.salesCyclePlan.events.map(({
+          clarificationTransitionEvidence: _omittedClarificationEvidence,
+          ...event
+        }) => event),
+      },
+    }, now)).rejects.toThrow();
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
     const negotiationQuote = (
       cart: CartV1,
@@ -2519,6 +2858,45 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       state_encrypted_dek: previewLockedBundle.encryptedDek,
       state_key_ref: previewLockedBundle.keyRef,
     };
+    const confirmHandoffCommandId = "sales:event-2:confirm-handoff";
+    const exactConfirmationHandoffPlan = {
+      ...exactPreviewPlan,
+      salesCyclePlan: {
+        expectedRevision: 5,
+        readinessContractVersion: "DF06_EFFECT_READINESS_V1" as const,
+        sourceMessageIdHash,
+        canonicalBuyingIntent: canonicalIntent,
+        state: {
+          ...exactPreviewPlan.salesCyclePlan.state,
+          ...salesEnvelope(6, "HANDED_OFF", [
+            ...exactPreviewPlan.salesCyclePlan.state.processedCommandIds,
+            confirmHandoffCommandId,
+          ]),
+          preview: null,
+        },
+        cartExpiresAt: salesExpiresAt,
+        expiresAt: salesExpiresAt,
+        events: [{
+          commandId: confirmHandoffCommandId,
+          commandKind: "CONFIRM_PURCHASE" as const,
+          outcome: "HANDOFF" as const,
+          stateRevisionBefore: 5,
+          stateRevisionAfter: 6,
+          stageBefore: "ORDER_PREVIEW",
+          stageAfter: "HANDED_OFF",
+          cartId,
+          cartVersion: readyCart.revision,
+          reasonCode: "STOCK_CHANGED_BEFORE_CONFIRMATION",
+          occurredAt: now,
+        }],
+        effectClaimSets: [],
+        effectReadiness: [],
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    await expect(store.commit(exactConfirmationHandoffPlan, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
     const exactConfirmation = deriveCanonicalPurchaseConfirmationV1({
       conversationKey: exactPreviewPlan.salesCyclePlan.state.conversationKey,
       cart: readyCart,
@@ -2615,6 +2993,70 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         },
       },
     }, now)).rejects.toThrow("PURCHASE_CONFIRMATION_TRANSITION_REPLAY_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const confirmedLockedBundle = cipher.encryptJson(
+      exactConfirmationPlan.salesCyclePlan.state,
+      `lana:sales-cycle:v1:page-1:${commitInput.conversationId}`,
+      salesExpiresAt,
+    );
+    lockedSalesRow = {
+      ...mutationLockedSalesRow,
+      state_revision: "6",
+      state_ciphertext: confirmedLockedBundle.ciphertext,
+      state_nonce: confirmedLockedBundle.nonce,
+      state_auth_tag: confirmedLockedBundle.authTag,
+      state_encrypted_dek: confirmedLockedBundle.encryptedDek,
+      state_key_ref: confirmedLockedBundle.keyRef,
+    };
+    const receiptCommandId = "sales:event-3:payment-receipt";
+    const paymentReceiptHandoff = {
+      ...exactConfirmationPlan,
+      salesCyclePlan: {
+        expectedRevision: 6,
+        readinessContractVersion: "DF06_EFFECT_READINESS_V1" as const,
+        sourceMessageIdHash,
+        canonicalBuyingIntent: canonicalIntent,
+        state: {
+          ...exactConfirmationPlan.salesCyclePlan.state,
+          ...salesEnvelope(7, "HANDED_OFF", [
+            ...exactConfirmationPlan.salesCyclePlan.state.processedCommandIds,
+            receiptCommandId,
+          ]),
+        },
+        cartExpiresAt: salesExpiresAt,
+        expiresAt: salesExpiresAt,
+        events: [{
+          commandId: receiptCommandId,
+          commandKind: "PAYMENT_RECEIPT_RECEIVED" as const,
+          outcome: "HANDOFF" as const,
+          stateRevisionBefore: 6,
+          stateRevisionAfter: 7,
+          stageBefore: "PURCHASE_CONFIRMED",
+          stageAfter: "HANDED_OFF",
+          cartId,
+          cartVersion: readyCart.revision,
+          reasonCode: "PAYMENT_RECEIPT_REVIEW_REQUIRED",
+          occurredAt: now,
+        }],
+        effectClaimSets: [],
+        effectReadiness: [],
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    await expect(store.commit(paymentReceiptHandoff, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    await expect(store.commit({
+      ...paymentReceiptHandoff,
+      salesCyclePlan: {
+        ...paymentReceiptHandoff.salesCyclePlan,
+        state: {
+          ...paymentReceiptHandoff.salesCyclePlan.state,
+          confirmation: null,
+        },
+      },
+    }, now)).rejects.toThrow("PROTECTED_SALES_STATE_EVENT_MISMATCH");
     expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
     lockedSalesRow = mutationLockedSalesRow;
 

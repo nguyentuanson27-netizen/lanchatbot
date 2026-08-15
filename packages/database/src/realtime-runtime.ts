@@ -3,6 +3,7 @@ import { Pool, type PoolClient } from "pg";
 import {
   canonicalBuyingIntentAuthorizesCartMutationV1,
   canonicalCheckoutDraftHashPreimageV1,
+  canonicalClarificationStateHashPreimageV1,
   canonicalOrderPreviewHashPreimageV1,
   canonicalCartOfferBindingsV1,
   canonicalCartStateHashPreimageV1,
@@ -13,17 +14,23 @@ import {
   cartMutationReceiptHashPreimageV1,
   cartOpenEvidenceHashPreimageV1,
   checkoutDetailsTransitionEvidenceHashPreimageV1,
+  clarificationTransitionEvidenceHashPreimageV1,
   negotiationTransitionEvidenceHashPreimageV1,
   CanonicalCartReplayContextV1Schema,
   CartOpenEvidenceV1Schema,
   CheckoutDetailsTransitionEvidenceV1Schema,
+  ClarificationTransitionEvidenceV1Schema,
   CheckoutDraftV1Schema,
+  SalesCycleClarificationStateV1Schema,
   CartMutationBatchEvidenceV1Schema,
   NegotiationTransitionEvidenceV1Schema,
   CartV1Schema,
   DeterministicConfirmationEvidenceV1Schema,
   DeterministicEffectReadinessV1Schema,
   MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1,
+  MAX_EFFECT_READINESS_LIFETIME_MS_V1,
+  CART_TTL_MS_V1,
+  isStateAdvancingSalesOutcomeV1,
   deterministicEffectReadinessHashPreimageV1,
   effectBindingHashPreimageV1,
   OrderPreviewV1Schema,
@@ -35,10 +42,12 @@ import {
   type DecisionObservabilityV1,
   type CartV1,
   type DeterministicEffectReadinessV1,
+  type StateAdvancingSalesOutcomeV1,
 } from "@lana/contracts";
 import {
   applyCanonicalCartDecisionV2,
   applyCheckoutDetailsTransitionV1,
+  applySalesClarificationTransitionV1,
   canonicalCartPolicyLinesV2,
   canonicalNegotiationEventFingerprintV1,
   createCanonicalCartV2,
@@ -152,7 +161,7 @@ export interface RealtimeSalesCycleEventPlan {
     | "PREVIEW_CREATED"
     | "CONFIRM_PURCHASE"
     | "PAYMENT_RECEIPT_RECEIVED";
-  readonly outcome: "APPLIED" | "HANDOFF";
+  readonly outcome: StateAdvancingSalesOutcomeV1;
   readonly stateRevisionBefore: number;
   readonly stateRevisionAfter: number;
   readonly stageBefore: string;
@@ -164,6 +173,7 @@ export interface RealtimeSalesCycleEventPlan {
   readonly mutationPayloadHash?: string | null;
   readonly negotiationTransitionEvidence?: import("@lana/contracts").NegotiationTransitionEvidenceV1;
   readonly checkoutDetailsTransitionEvidence?: import("@lana/contracts").CheckoutDetailsTransitionEvidenceV1;
+  readonly clarificationTransitionEvidence?: import("@lana/contracts").ClarificationTransitionEvidenceV1;
   readonly occurredAt: Date;
 }
 
@@ -452,8 +462,8 @@ function validateReadinessEnvelopeHashesV1(
 function planRequiresEffectReadinessV1(
   plan: RealtimeSalesCyclePlan<unknown>,
 ): boolean {
-  return plan.events.some(({ commandKind }) =>
-    SALES_EFFECT_BY_COMMAND_V1[commandKind] !== undefined
+  return plan.events.some(({ commandKind, outcome }) =>
+    outcome === "APPLIED" && SALES_EFFECT_BY_COMMAND_V1[commandKind] !== undefined
   );
 }
 
@@ -512,6 +522,7 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     )}`) throw new Error("ORDER_PREVIEW_HASH_MISMATCH");
   }
   const required = new Set(plan.events
+    .filter(({ outcome }) => outcome === "APPLIED")
     .map(({ commandKind }) => SALES_EFFECT_BY_COMMAND_V1[commandKind])
     .filter((effect): effect is DeterministicEffectReadinessV1["effect"] =>
       effect !== undefined
@@ -539,6 +550,9 @@ function validateSalesEffectReadiness<TState, TSalesState>(
     ) throw new Error("EFFECT_READINESS_REVISION_MISMATCH");
     const checkedAt = Date.parse(readiness.checkedAt);
     const expiresAt = Date.parse(readiness.expiresAt);
+    if (expiresAt - checkedAt > MAX_EFFECT_READINESS_LIFETIME_MS_V1) {
+      throw new Error("EFFECT_READINESS_LIFETIME_INVALID");
+    }
     if (checkedAt > now.getTime() + MAX_EFFECT_FUTURE_CLOCK_SKEW_MS_V1 ||
       expiresAt <= now.getTime()) {
       throw new Error("EFFECT_READINESS_STALE");
@@ -986,6 +1000,22 @@ function validateLockedCanonicalCartTransitionV1(
 }
 
 const MAX_SALES_PROCESSED_COMMAND_IDS_V1 = 100;
+const SALES_STATE_TOP_LEVEL_KEYS_V2 = new Set([
+  "schemaVersion",
+  "conversationKey",
+  "routing",
+  "revision",
+  "stage",
+  "cart",
+  "commerceContext",
+  "negotiation",
+  "checkoutDraft",
+  "clarification",
+  "preview",
+  "confirmation",
+  "processedCommandIds",
+  "updatedAt",
+]);
 
 export function validateLockedSalesStateEnvelopeV1(
   plan: Pick<RealtimeSalesCyclePlan<unknown>, "expectedRevision" | "state" | "events">,
@@ -999,10 +1029,16 @@ export function validateLockedSalesStateEnvelopeV1(
   const after = record(plan.state);
   const beforeRouting = record(before.routing);
   const afterRouting = record(after.routing);
+  if (Object.keys(before).some((key) => !SALES_STATE_TOP_LEVEL_KEYS_V2.has(key)) ||
+    Object.keys(after).some((key) => !SALES_STATE_TOP_LEVEL_KEYS_V2.has(key))) {
+    throw new Error("SALES_STATE_KEY_INVALID");
+  }
   const beforeProcessed = Array.isArray(before.processedCommandIds)
     ? before.processedCommandIds
     : null;
-  const appliedEvents = plan.events.filter(({ outcome }) => outcome === "APPLIED");
+  const stateAdvancingEvents = plan.events.filter(({ outcome }) =>
+    isStateAdvancingSalesOutcomeV1(outcome)
+  );
   const mismatch = (): never => {
     throw new Error("SALES_STATE_ENVELOPE_REPLAY_MISMATCH");
   };
@@ -1025,7 +1061,7 @@ export function validateLockedSalesStateEnvelopeV1(
   let expectedStage = before.stage as string;
   let expectedUpdatedAt = before.updatedAt;
   let expectedProcessed = [...(beforeProcessed as readonly string[])];
-  for (const event of appliedEvents) {
+  for (const event of stateAdvancingEvents) {
     if (event.stateRevisionBefore !== expectedRevision ||
       event.stateRevisionAfter !== expectedRevision + 1 ||
       event.stageBefore !== expectedStage ||
@@ -1054,57 +1090,81 @@ function validateLockedProtectedSalesStateTransitionV1(
     value !== null && typeof value === "object" ? value as Record<string, unknown> : {};
   const before = record(lockedState);
   const after = record(plan.state);
-  const appliedEvents = plan.events.filter(({ outcome }) => outcome === "APPLIED");
-  const applied = new Set(appliedEvents.map(({ commandKind }) => commandKind));
+  const stateAdvancingEvents = plan.events.filter(({ outcome }) =>
+    isStateAdvancingSalesOutcomeV1(outcome)
+  );
   const changed = (key: string): boolean =>
     canonicalJsonV1(before[key] ?? null) !== canonicalJsonV1(after[key] ?? null);
-  const beforeCart = before.cart ?? null;
-  const afterCart = after.cart ?? null;
-  const cartOpened = canonicalJsonV1(beforeCart) === canonicalJsonV1(null) &&
-    canonicalJsonV1(afterCart) !== canonicalJsonV1(null);
+  const ownedFields = new Set<string>();
 
   let expectedStage = before.stage;
   let expectedRevision = before.revision;
-  for (const event of appliedEvents) {
+  for (const event of stateAdvancingEvents) {
     if (event.stageBefore !== expectedStage || event.stateRevisionBefore !== expectedRevision) {
       throw new Error("SALES_STAGE_EVENT_CHAIN_MISMATCH");
     }
     expectedStage = event.stageAfter;
     expectedRevision = event.stateRevisionAfter;
+    switch (event.commandKind) {
+      case "FACTS_PRESENTED":
+      case "MEASUREMENTS_REQUIRED":
+      case "SIZE_RECOMMENDED":
+        if (event.outcome !== "APPLIED") {
+          throw new Error("SALES_STATE_OUTCOME_INVALID");
+        }
+        break;
+      case "CART_OPENED":
+        if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
+        ["cart", "commerceContext", "negotiation", "checkoutDraft", "preview"]
+          .forEach((key) => ownedFields.add(key));
+        break;
+      case "CART_MUTATED":
+      case "CART_READY":
+      case "NEGOTIATION_EVENT":
+        if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
+        ["cart", "negotiation", "preview"].forEach((key) => ownedFields.add(key));
+        break;
+      case "CHECKOUT_DETAILS_CAPTURED":
+        if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
+        ["checkoutDraft", "preview"].forEach((key) => ownedFields.add(key));
+        break;
+      case "CLARIFICATION_REQUESTED":
+      case "CLARIFICATION_RESOLVED":
+        if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
+        ownedFields.add("clarification");
+        break;
+      case "PREVIEW_CREATED":
+        if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
+        ownedFields.add("preview");
+        break;
+      case "CONFIRM_PURCHASE":
+        ownedFields.add(event.outcome === "HANDOFF" ? "preview" : "confirmation");
+        break;
+      case "PAYMENT_RECEIPT_RECEIVED":
+        if (event.outcome !== "HANDOFF") throw new Error("SALES_STATE_OUTCOME_INVALID");
+        break;
+      default:
+        event.commandKind satisfies never;
+    }
   }
-  if ((appliedEvents.length === 0 && changed("stage")) ||
-    (appliedEvents.length > 0 &&
+  if ((stateAdvancingEvents.length === 0 && changed("stage")) ||
+    (stateAdvancingEvents.length > 0 &&
       (after.stage !== expectedStage || after.revision !== expectedRevision))) {
     throw new Error("SALES_STAGE_EVENT_CHAIN_MISMATCH");
   }
 
-  if (cartOpened && !applied.has("CART_OPENED")) {
-    throw new Error("PROTECTED_SALES_STATE_EVENT_MISMATCH");
-  }
-  if (changed("cart") && !cartOpened && ![
-    "CART_MUTATED", "CART_READY", "NEGOTIATION_EVENT",
-  ].some((kind) => applied.has(kind as RealtimeSalesCycleEventPlan["commandKind"]))) {
-    throw new Error("PROTECTED_SALES_STATE_EVENT_MISMATCH");
-  }
-  if (changed("commerceContext") && !applied.has("CART_OPENED")) {
-    throw new Error("PROTECTED_SALES_STATE_EVENT_MISMATCH");
-  }
-  if (changed("negotiation") && ![
-    "CART_OPENED", "CART_MUTATED", "CART_READY", "NEGOTIATION_EVENT",
-  ].some((kind) => applied.has(kind as RealtimeSalesCycleEventPlan["commandKind"]))) {
-    throw new Error("PROTECTED_SALES_STATE_EVENT_MISMATCH");
-  }
-  if (changed("checkoutDraft") && !applied.has("CHECKOUT_DETAILS_CAPTURED")) {
-    throw new Error("PROTECTED_SALES_STATE_EVENT_MISMATCH");
-  }
-  if (changed("preview") && !applied.has("PREVIEW_CREATED")) {
-    if (!["CHECKOUT_DETAILS_CAPTURED", "CART_MUTATED", "CART_READY", "NEGOTIATION_EVENT"]
-      .some((kind) => applied.has(kind as RealtimeSalesCycleEventPlan["commandKind"]))) {
+  for (const key of [
+    "cart",
+    "commerceContext",
+    "negotiation",
+    "checkoutDraft",
+    "clarification",
+    "preview",
+    "confirmation",
+  ] as const) {
+    if (changed(key) && !ownedFields.has(key)) {
       throw new Error("PROTECTED_SALES_STATE_EVENT_MISMATCH");
     }
-  }
-  if (changed("confirmation") && !applied.has("CONFIRM_PURCHASE")) {
-    throw new Error("PROTECTED_SALES_STATE_EVENT_MISMATCH");
   }
 }
 
@@ -1120,6 +1180,9 @@ function validateLockedProtectedSalesArtifactsV1(
   let checkoutDraft = locked.checkoutDraft === undefined || locked.checkoutDraft === null
     ? null
     : CheckoutDraftV1Schema.parse(locked.checkoutDraft);
+  let clarification = locked.clarification === undefined || locked.clarification === null
+    ? null
+    : SalesCycleClarificationStateV1Schema.parse(locked.clarification);
   let preview = locked.preview === undefined || locked.preview === null
     ? null
     : OrderPreviewV1Schema.parse(locked.preview);
@@ -1133,8 +1196,10 @@ function validateLockedProtectedSalesArtifactsV1(
     ? null
     : String(record(proposed.cart).expiresAt ?? "");
 
-  for (const event of plan.events.filter(({ outcome }) => outcome === "APPLIED")) {
-    if (event.commandKind === "CHECKOUT_DETAILS_CAPTURED") {
+  for (const event of plan.events) {
+    switch (event.commandKind) {
+    case "CHECKOUT_DETAILS_CAPTURED": {
+      if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
       if (currentSourceMessageIdHash === null) throw new Error("CURRENT_MESSAGE_BINDING_REQUIRED");
       const evidence = CheckoutDetailsTransitionEvidenceV1Schema.parse(
         event.checkoutDetailsTransitionEvidence,
@@ -1163,10 +1228,59 @@ function validateLockedProtectedSalesArtifactsV1(
       }
       checkoutDraft = transition.draft;
       preview = null;
-    } else if (event.commandKind === "CART_MUTATED" || event.commandKind === "CART_READY" ||
-      event.commandKind === "NEGOTIATION_EVENT") {
+      break;
+    }
+    case "CART_OPENED":
+      if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
+      checkoutDraft = null;
       preview = null;
-    } else if (event.commandKind === "PREVIEW_CREATED") {
+      break;
+    case "CLARIFICATION_REQUESTED":
+    case "CLARIFICATION_RESOLVED": {
+      if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
+      if (currentSourceMessageIdHash === null) throw new Error("CURRENT_MESSAGE_BINDING_REQUIRED");
+      const evidence = ClarificationTransitionEvidenceV1Schema.parse(
+        event.clarificationTransitionEvidence,
+      );
+      const beforeHash = sha256TextV1(
+        canonicalClarificationStateHashPreimageV1(clarification),
+      );
+      if (evidence.sourceMessageIdHash !== currentSourceMessageIdHash ||
+        plan.sourceMessageIdHash !== currentSourceMessageIdHash ||
+        evidence.commandIdHash !== sha256TextV1(event.commandId) ||
+        evidence.appliedAt !== event.occurredAt.toISOString() ||
+        evidence.beforeClarificationHash !== beforeHash ||
+        evidence.evidenceHash !== sha256TextV1(
+          clarificationTransitionEvidenceHashPreimageV1(evidence),
+        ) ||
+        (event.commandKind === "CLARIFICATION_REQUESTED" &&
+          evidence.transition.kind !== "REQUESTED") ||
+        (event.commandKind === "CLARIFICATION_RESOLVED" &&
+          evidence.transition.kind !== "RESOLVED")) {
+        throw new Error("CLARIFICATION_TRANSITION_EVIDENCE_MISMATCH");
+      }
+      const transition = applySalesClarificationTransitionV1({
+        current: clarification,
+        transition: evidence.transition,
+        appliedAt: event.occurredAt,
+      });
+      if (transition.status !== "APPLIED" ||
+        evidence.afterClarificationHash !== sha256TextV1(
+          canonicalClarificationStateHashPreimageV1(transition.clarification),
+        )) {
+        throw new Error("CLARIFICATION_TRANSITION_REPLAY_MISMATCH");
+      }
+      clarification = transition.clarification;
+      break;
+    }
+    case "CART_MUTATED":
+    case "CART_READY":
+    case "NEGOTIATION_EVENT":
+      if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
+      preview = null;
+      break;
+    case "PREVIEW_CREATED": {
+      if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
       if (finalCart === null) throw new Error("PREVIEW_TRANSITION_CART_REQUIRED");
       const candidate = OrderPreviewV1Schema.parse(proposed.preview);
       const transition = validateOrderPreviewTransitionV1({
@@ -1182,7 +1296,13 @@ function validateLockedProtectedSalesArtifactsV1(
         throw new Error("ORDER_PREVIEW_TRANSITION_REPLAY_MISMATCH");
       }
       preview = transition.preview;
-    } else if (event.commandKind === "CONFIRM_PURCHASE") {
+      break;
+    }
+    case "CONFIRM_PURCHASE": {
+      if (event.outcome === "HANDOFF") {
+        preview = null;
+        break;
+      }
       if (currentSourceMessageIdHash === null || finalCart === null || preview === null ||
         typeof proposed.conversationKey !== "string") {
         throw new Error("PURCHASE_CONFIRMATION_TRANSITION_REQUIRED");
@@ -1207,6 +1327,18 @@ function validateLockedProtectedSalesArtifactsV1(
         throw new Error("PURCHASE_CONFIRMATION_TRANSITION_REPLAY_MISMATCH");
       }
       confirmation = expected;
+      break;
+    }
+    case "PAYMENT_RECEIPT_RECEIVED":
+      if (event.outcome !== "HANDOFF") throw new Error("SALES_STATE_OUTCOME_INVALID");
+      break;
+    case "FACTS_PRESENTED":
+    case "MEASUREMENTS_REQUIRED":
+    case "SIZE_RECOMMENDED":
+      if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
+      break;
+    default:
+      event.commandKind satisfies never;
     }
   }
 
@@ -1216,10 +1348,14 @@ function validateLockedProtectedSalesArtifactsV1(
   const finalPreview = proposed.preview === undefined || proposed.preview === null
     ? null
     : OrderPreviewV1Schema.parse(proposed.preview);
+  const finalClarification = proposed.clarification === undefined || proposed.clarification === null
+    ? null
+    : SalesCycleClarificationStateV1Schema.parse(proposed.clarification);
   const finalConfirmation = proposed.confirmation === undefined || proposed.confirmation === null
     ? null
     : PurchaseConfirmationV1Schema.parse(proposed.confirmation);
   if (canonicalJsonV1(checkoutDraft) !== canonicalJsonV1(finalCheckoutDraft) ||
+    canonicalJsonV1(clarification) !== canonicalJsonV1(finalClarification) ||
     canonicalJsonV1(preview) !== canonicalJsonV1(finalPreview) ||
     canonicalJsonV1(confirmation) !== canonicalJsonV1(finalConfirmation)) {
     throw new Error("PROTECTED_SALES_ARTIFACT_REPLAY_MISMATCH");
@@ -1228,6 +1364,40 @@ function validateLockedProtectedSalesArtifactsV1(
 
 function salesStateRecordV1(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === "object" ? value as Record<string, unknown> : {};
+}
+
+function salesStateCartExpiryV1(value: unknown): string | null {
+  const cart = salesStateRecordV1(salesStateRecordV1(value).cart);
+  if (cart.value === undefined || cart.value === null) return null;
+  if (typeof cart.expiresAt !== "string" || !Number.isFinite(Date.parse(cart.expiresAt))) {
+    throw new Error("CART_EXPIRY_BINDING_MISMATCH");
+  }
+  return cart.expiresAt;
+}
+
+function validateLockedCartExpiryBindingV1(
+  plan: RealtimeSalesCyclePlan<unknown>,
+  lockedState: unknown,
+): void {
+  const beforeExpiry = salesStateCartExpiryV1(lockedState);
+  const afterExpiry = salesStateCartExpiryV1(plan.state);
+  const planExpiry = plan.cartExpiresAt?.toISOString() ?? null;
+  if (afterExpiry !== planExpiry) throw new Error("CART_EXPIRY_BINDING_MISMATCH");
+
+  const cartOpenEvents = plan.events.filter(({ commandKind, outcome }) =>
+    commandKind === "CART_OPENED" && outcome === "APPLIED"
+  );
+  if (cartOpenEvents.length > 0) {
+    const evidence = CartOpenEvidenceV1Schema.parse(plan.cartOpenEvidence);
+    const createdAt = Date.parse(evidence.createdAt);
+    const expiresAt = Date.parse(evidence.cartExpiresAt);
+    if (cartOpenEvents.length !== 1 || afterExpiry !== evidence.cartExpiresAt ||
+      expiresAt - createdAt > CART_TTL_MS_V1) {
+      throw new Error("CART_EXPIRY_BINDING_MISMATCH");
+    }
+    return;
+  }
+  if (afterExpiry !== beforeExpiry) throw new Error("CART_EXPIRY_BINDING_MISMATCH");
 }
 
 function cartFromSalesStateV1(value: unknown): CartV1 {
@@ -1326,6 +1496,8 @@ async function validateLockedCartOpenTransitionV1(
   if (evidence.sourceMessageIdHash !== plan.sourceMessageIdHash ||
     evidence.commandIdHash !== sha256TextV1(event.commandId) ||
     evidence.createdAt !== event.occurredAt.toISOString() ||
+    evidence.cartExpiresAt !== salesStateCartExpiryV1(plan.state) ||
+    evidence.cartExpiresAt !== plan.cartExpiresAt?.toISOString() ||
     evidence.evidenceHash !== sha256TextV1(cartOpenEvidenceHashPreimageV1(evidence)) ||
     evidence.cartDraftRef.contentHash !== `sha256:${sha256CanonicalV1(evidence.draft)}` ||
     evidence.replayContext.policyRef.contentHash !==
@@ -1995,7 +2167,7 @@ export class PostgresRealtimeRuntimeStore {
       }
 
       const state = createState();
-      const expiresAt = new Date(now.getTime() + 48 * 60 * 60 * 1_000);
+      const expiresAt = new Date(now.getTime() + CART_TTL_MS_V1);
       const encrypted = this.cipher.encryptJson(
         state,
         this.salesCycleAad(pageId, conversationId),
@@ -3360,7 +3532,7 @@ export class PostgresRealtimeRuntimeStore {
     if (
       Number.isNaN(plan.expiresAt.getTime()) ||
       plan.expiresAt.getTime() <= now.getTime() ||
-      plan.expiresAt.getTime() > now.getTime() + 48 * 60 * 60 * 1_000 ||
+      plan.expiresAt.getTime() > now.getTime() + CART_TTL_MS_V1 ||
       (plan.cartExpiresAt !== null &&
         (Number.isNaN(plan.cartExpiresAt.getTime()) ||
           plan.cartExpiresAt.getTime() > plan.expiresAt.getTime()))
@@ -3388,6 +3560,9 @@ export class PostgresRealtimeRuntimeStore {
           plan as RealtimeSalesCyclePlan<unknown>, lockedState, pageId, conversationId,
         );
       }
+      validateLockedCartExpiryBindingV1(
+        plan as RealtimeSalesCyclePlan<unknown>, lockedState,
+      );
       validateLockedProtectedSalesStateTransitionV1(
         plan as RealtimeSalesCyclePlan<unknown>, lockedState,
       );

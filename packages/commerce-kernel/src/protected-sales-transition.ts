@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import {
   CheckoutDetailsPatchV1Schema,
   CheckoutDraftV1Schema,
+  SalesCycleClarificationStateV1Schema,
+  SalesClarificationTransitionV1Schema,
   OrderPreviewV1Schema,
   PurchaseConfirmationV1Schema,
   canonicalOrderPreviewHashPreimageV1,
@@ -9,6 +11,8 @@ import {
   type CheckoutDraftV1,
   type OrderPreviewV1,
   type PurchaseConfirmationV1,
+  type SalesCycleClarificationStateV1,
+  type SalesClarificationTransitionV1,
 } from "@lana/contracts";
 
 function sha256TextV1(value: string): string {
@@ -23,6 +27,69 @@ function deterministicUuidV1(seed: string): string {
 
 function normalizedCheckoutTextV1(value: string | undefined): string | null {
   return value === undefined ? null : value.trim().replace(/\s+/gu, " ");
+}
+
+export type SalesClarificationTransitionResultV1 =
+  | { readonly status: "APPLIED"; readonly clarification: SalesCycleClarificationStateV1 | null }
+  | {
+      readonly status: "BLOCKED";
+      readonly reasonCode:
+        | "CLARIFICATION_REQUEST_INVALID"
+        | "CLARIFICATION_RETRY_INVALID"
+        | "CLARIFICATION_NOT_ACTIVE";
+    };
+
+/** Shared pure clarification reducer; missing legacy state is canonical null. */
+export function applySalesClarificationTransitionV1(input: Readonly<{
+  current: SalesCycleClarificationStateV1 | null | undefined;
+  transition: SalesClarificationTransitionV1;
+  appliedAt: Date;
+}>): SalesClarificationTransitionResultV1 {
+  const current = input.current === null || input.current === undefined
+    ? { success: true as const, data: null }
+    : SalesCycleClarificationStateV1Schema.safeParse(input.current);
+  const transition = SalesClarificationTransitionV1Schema.safeParse(input.transition);
+  if (!current.success || !transition.success || !Number.isFinite(input.appliedAt.getTime())) {
+    return { status: "BLOCKED", reasonCode: "CLARIFICATION_REQUEST_INVALID" };
+  }
+  if (transition.data.kind === "RESOLVED") {
+    return current.data === null
+      ? { status: "BLOCKED", reasonCode: "CLARIFICATION_NOT_ACTIVE" }
+      : { status: "APPLIED", clarification: null };
+  }
+  const missingFields = [...new Set(
+    transition.data.missingFields.map((field) => field.trim()).filter(Boolean),
+  )].sort();
+  if (missingFields.length === 0 || missingFields.some((field) => field.length > 80)) {
+    return { status: "BLOCKED", reasonCode: "CLARIFICATION_REQUEST_INVALID" };
+  }
+  const previous = current.data;
+  const sameQuestion = previous?.reasonCode === transition.data.reasonCode &&
+    previous.productId === transition.data.productId &&
+    previous.missingFields.length === missingFields.length &&
+    previous.missingFields.every((field, index) => field === missingFields[index]);
+  const attemptCount = sameQuestion ? previous.attemptCount + 1 : 1;
+  const askedQuestionFingerprints = sameQuestion
+    ? [...previous.askedQuestionFingerprints, transition.data.questionFingerprint]
+    : [transition.data.questionFingerprint];
+  if (attemptCount > transition.data.maxAttempts ||
+    (sameQuestion && previous.askedQuestionFingerprints.includes(
+      transition.data.questionFingerprint,
+    ))) {
+    return { status: "BLOCKED", reasonCode: "CLARIFICATION_RETRY_INVALID" };
+  }
+  const clarification = SalesCycleClarificationStateV1Schema.safeParse({
+    reasonCode: transition.data.reasonCode,
+    missingFields,
+    productId: transition.data.productId,
+    attemptCount,
+    maxAttempts: transition.data.maxAttempts,
+    askedQuestionFingerprints,
+    lastRequestedAt: input.appliedAt.toISOString(),
+  });
+  return clarification.success
+    ? { status: "APPLIED", clarification: clarification.data }
+    : { status: "BLOCKED", reasonCode: "CLARIFICATION_REQUEST_INVALID" };
 }
 
 export type CheckoutDetailsTransitionResultV1 =

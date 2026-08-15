@@ -1,14 +1,20 @@
 import { describe, expect, it } from "vitest";
 import {
+  CART_TTL_MS_V1,
   CART_RETENTION_SECONDS,
   CheckoutPaymentV1Schema,
+  ClarificationTransitionEvidenceV1Schema,
   CheckoutDetailsTransitionEvidenceV1Schema,
   checkoutDetailsTransitionEvidenceHashPreimageV1,
   CheckoutRevalidationV1Schema,
   OrderPreviewV1Schema,
   PurchaseConfirmationV1Schema,
   PancakeTagCommandV2Schema,
+  STATE_ADVANCING_SALES_OUTCOMES_V1,
   VersionedBusinessReferenceV1Schema,
+  isStateAdvancingSalesOutcomeV1,
+  canonicalClarificationStateHashPreimageV1,
+  clarificationTransitionEvidenceHashPreimageV1,
 } from "./sales-cycle.js";
 
 const fact = (status: "MATCHED" | "CHANGED" | "STALE" | "MISSING" = "MATCHED") => ({
@@ -29,6 +35,46 @@ const revalidation = {
 describe("Phase 3 sales-cycle contracts", () => {
   it("locks cart retention to 48 hours", () => {
     expect(CART_RETENTION_SECONDS).toBe(172_800);
+    expect(CART_TTL_MS_V1).toBe(172_800_000);
+  });
+
+  it("defines one shared state-advancing outcome authority", () => {
+    expect(STATE_ADVANCING_SALES_OUTCOMES_V1).toEqual(["APPLIED", "HANDOFF"]);
+    expect(isStateAdvancingSalesOutcomeV1("APPLIED")).toBe(true);
+    expect(isStateAdvancingSalesOutcomeV1("HANDOFF")).toBe(true);
+    expect(isStateAdvancingSalesOutcomeV1("REJECTED")).toBe(false);
+  });
+
+  it("normalizes legacy missing clarification to null and binds the exact transition", () => {
+    expect(canonicalClarificationStateHashPreimageV1(undefined))
+      .toBe(canonicalClarificationStateHashPreimageV1(null));
+    const evidence = ClarificationTransitionEvidenceV1Schema.parse({
+      schemaVersion: 1,
+      contractVersion: "CLARIFICATION_TRANSITION_EVIDENCE_V1",
+      sourceMessageIdHash: "a".repeat(64),
+      commandIdHash: "b".repeat(64),
+      transition: {
+        kind: "REQUESTED",
+        reasonCode: "CHECKOUT_DETAILS_MISSING",
+        missingFields: ["address", "phone"],
+        productId: "CB182",
+        questionFingerprint: "c".repeat(64),
+        maxAttempts: 3,
+      },
+      beforeClarificationHash: "d".repeat(64),
+      afterClarificationHash: "e".repeat(64),
+      appliedAt: "2026-07-22T05:00:00.000Z",
+      evidenceHash: "f".repeat(64),
+      contributor: "DETERMINISTIC_RUNTIME",
+      authorization: "NONE",
+    });
+    if (evidence.transition.kind !== "REQUESTED") {
+      throw new Error("TEST_CLARIFICATION_TRANSITION_INVALID");
+    }
+    expect(clarificationTransitionEvidenceHashPreimageV1({
+      ...evidence,
+      transition: { ...evidence.transition, maxAttempts: 4 },
+    })).not.toBe(clarificationTransitionEvidenceHashPreimageV1(evidence));
   });
 
   it("requires immutable content-addressed business references", () => {

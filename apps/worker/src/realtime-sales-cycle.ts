@@ -17,10 +17,13 @@ import {
   cartMutationReceiptHashPreimageV1,
   cartOpenEvidenceHashPreimageV1,
   canonicalCheckoutDraftHashPreimageV1,
+  canonicalClarificationStateHashPreimageV1,
   checkoutDetailsTransitionEvidenceHashPreimageV1,
+  clarificationTransitionEvidenceHashPreimageV1,
   negotiationTransitionEvidenceHashPreimageV1,
   CartOpenEvidenceV1Schema,
   CheckoutDetailsTransitionEvidenceV1Schema,
+  ClarificationTransitionEvidenceV1Schema,
   NegotiationTransitionEvidenceV1Schema,
   CartMutationAuthorityBindingV1Schema,
   CartMutationBatchEvidenceV1Schema,
@@ -37,6 +40,8 @@ import {
   type DeterministicConfirmationEvidenceV1,
   type DeterministicEffectReadinessV1,
   MAX_CART_LINES_V1,
+  CART_TTL_MS_V1,
+  isStateAdvancingSalesOutcomeV1,
   type ProtectedClaimV1,
   type BankTransferPolicyV1,
   type CheckoutRevalidationV1,
@@ -78,7 +83,6 @@ import {
   confirmationClarificationAction,
 } from "./confirmation-classifier.js";
 
-const CART_TTL_MS = 48 * 60 * 60 * 1_000;
 const PREVIEW_TTL_MS = 30 * 60 * 1_000;
 const MAX_CHECKOUT_CLARIFICATION_ATTEMPTS = 3;
 
@@ -766,7 +770,7 @@ export async function evaluateRealtimeSalesCycle(
       trustedPorts: ports,
       resolveBankTransferPolicy: bankResolver,
     });
-    if (result.status === "APPLIED" || result.status === "HANDOFF") {
+    if (isStateAdvancingSalesOutcomeV1(result.status)) {
       state = result.state;
       const negotiationTransitionEvidence = command.kind === "NEGOTIATION_EVENT"
         ? (() => {
@@ -821,6 +825,45 @@ export async function evaluateRealtimeSalesCycle(
             });
           })()
         : null;
+      const clarificationTransitionEvidence =
+        command.kind === "CLARIFICATION_REQUESTED" || command.kind === "CLARIFICATION_RESOLVED"
+          ? (() => {
+              const clarificationHash = (
+                clarification: SalesCycleRuntimeState["clarification"],
+              ): string => createHash("sha256")
+                .update(canonicalClarificationStateHashPreimageV1(clarification), "utf8")
+                .digest("hex");
+              const transition = command.kind === "CLARIFICATION_REQUESTED"
+                ? {
+                    kind: "REQUESTED" as const,
+                    reasonCode: command.reasonCode,
+                    missingFields: [...command.missingFields],
+                    productId: command.productId,
+                    questionFingerprint: command.questionFingerprint,
+                    maxAttempts: command.maxAttempts,
+                  }
+                : { kind: "RESOLVED" as const };
+              const placeholder = {
+                schemaVersion: 1 as const,
+                contractVersion: "CLARIFICATION_TRANSITION_EVIDENCE_V1" as const,
+                sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+                commandIdHash: createHash("sha256").update(command.commandId, "utf8").digest("hex"),
+                transition,
+                beforeClarificationHash: clarificationHash(before.clarification),
+                afterClarificationHash: clarificationHash(state.clarification),
+                appliedAt: input.now.toISOString(),
+                evidenceHash: "0".repeat(64),
+                contributor: "DETERMINISTIC_RUNTIME" as const,
+                authorization: "NONE" as const,
+              };
+              return ClarificationTransitionEvidenceV1Schema.parse({
+                ...placeholder,
+                evidenceHash: createHash("sha256")
+                  .update(clarificationTransitionEvidenceHashPreimageV1(placeholder), "utf8")
+                  .digest("hex"),
+              });
+            })()
+          : null;
       events.push({
         commandId: command.commandId,
         commandKind: command.kind,
@@ -840,6 +883,9 @@ export async function evaluateRealtimeSalesCycle(
         ...(checkoutDetailsTransitionEvidence === null
           ? {}
           : { checkoutDetailsTransitionEvidence }),
+        ...(clarificationTransitionEvidence === null
+          ? {}
+          : { clarificationTransitionEvidence }),
         occurredAt: input.now,
       });
     }
@@ -1007,7 +1053,7 @@ export async function evaluateRealtimeSalesCycle(
   const plan = (): RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null => {
     if (events.length === 0) return null;
     const cartExpiry = state.cart ? new Date(state.cart.expiresAt) : null;
-    const expiresAt = cartExpiry ?? new Date(input.now.getTime() + CART_TTL_MS);
+    const expiresAt = cartExpiry ?? new Date(input.now.getTime() + CART_TTL_MS_V1);
     const batchWithPlaceholder = cartMutationReceipts.length === 0
       ? null
       : {
@@ -1053,6 +1099,17 @@ export async function evaluateRealtimeSalesCycle(
       ...(cartOpenEvidence === null ? {} : { cartOpenEvidence }),
       ...(cartReplayContext === null ? {} : { cartReplayContext }),
     };
+  };
+  const handoffStatePlan = (): RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null => {
+    const value = plan();
+    if (value === null) return null;
+    const {
+      deterministicConfirmationEvidence: _confirmationEvidence,
+      effectClaimSets: _effectClaimSets,
+      effectReadiness: _effectReadiness,
+      ...statePlan
+    } = value;
+    return { ...statePlan, effectClaimSets: [], effectReadiness: [] };
   };
 
   const protectedCartReply = async (
@@ -1449,7 +1506,7 @@ export async function evaluateRealtimeSalesCycle(
         sourceMessageId: input.messageId,
       },
     });
-    if (result.status === "HANDOFF") return failedOutput(result.reasonCode);
+    if (result.status === "HANDOFF") return failedOutput(result.reasonCode, handoffStatePlan());
     if (result.status !== "APPLIED" || !result.confirmation) {
       return failedOutput("PURCHASE_CONFIRMATION_REJECTED");
     }
@@ -2057,7 +2114,7 @@ export async function evaluateRealtimeSalesCycle(
       kind: "CART_OPENED",
       commandId: commandId("cart-open"),
       cartDraftRef: draftReference,
-      expiresAt: new Date(input.now.getTime() + CART_TTL_MS).toISOString(),
+      expiresAt: new Date(input.now.getTime() + CART_TTL_MS_V1).toISOString(),
     });
     if (opened.status !== "APPLIED" || !state.cart) return failedOutput("CART_OPEN_FAILED", plan());
     const cartOpenPlaceholder = {
@@ -2082,6 +2139,7 @@ export async function evaluateRealtimeSalesCycle(
         bundleHash: bundle.bundleHash,
       },
       createdAt: input.now.toISOString(),
+      cartExpiresAt: state.cart.expiresAt,
       evidenceHash: "0".repeat(64),
     };
     cartOpenEvidence = CartOpenEvidenceV1Schema.parse({

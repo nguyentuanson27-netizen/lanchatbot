@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { canonicalJsonV1 } from "../v2/canonical-commerce-bindings.js";
+import { CanonicalProductIdV1Schema } from "../v2/canonical-identifiers.js";
 
 const DateTimeSchema = z.string().datetime();
 const Sha256Schema = z.string().regex(/^sha256:[a-f0-9]{64}$/u);
+const BareSha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 
 /** Opaque reference resolved only by a trusted business-data adapter. */
 export const VersionedBusinessReferenceV1Schema = z.object({
@@ -13,6 +15,105 @@ export const VersionedBusinessReferenceV1Schema = z.object({
 export type VersionedBusinessReferenceV1 = z.infer<typeof VersionedBusinessReferenceV1Schema>;
 
 export const CART_RETENTION_SECONDS = 48 * 60 * 60;
+export const CART_TTL_MS_V1 = CART_RETENTION_SECONDS * 1_000;
+
+export const STATE_ADVANCING_SALES_OUTCOMES_V1 = ["APPLIED", "HANDOFF"] as const;
+export type StateAdvancingSalesOutcomeV1 =
+  typeof STATE_ADVANCING_SALES_OUTCOMES_V1[number];
+
+export function isStateAdvancingSalesOutcomeV1(
+  value: string,
+): value is StateAdvancingSalesOutcomeV1 {
+  return (STATE_ADVANCING_SALES_OUTCOMES_V1 as readonly string[]).includes(value);
+}
+
+export const SalesCycleClarificationReasonV1Schema = z.literal(
+  "CHECKOUT_DETAILS_MISSING",
+);
+export type SalesCycleClarificationReasonV1 = z.infer<
+  typeof SalesCycleClarificationReasonV1Schema
+>;
+
+export const SalesCycleClarificationStateV1Schema = z.object({
+  reasonCode: SalesCycleClarificationReasonV1Schema,
+  missingFields: z.array(z.string().min(1).max(80)).min(1).max(10),
+  productId: CanonicalProductIdV1Schema.nullable(),
+  attemptCount: z.number().int().min(1).max(10),
+  maxAttempts: z.number().int().min(1).max(10),
+  askedQuestionFingerprints: z.array(BareSha256Schema).min(1).max(10),
+  lastRequestedAt: DateTimeSchema,
+}).strict().superRefine((value, context) => {
+  if (value.attemptCount > value.maxAttempts ||
+    value.askedQuestionFingerprints.length !== value.attemptCount ||
+    new Set(value.askedQuestionFingerprints).size !== value.askedQuestionFingerprints.length ||
+    [...value.missingFields].sort().some((field, index) => field !== value.missingFields[index]) ||
+    new Set(value.missingFields).size !== value.missingFields.length) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "clarification state must be canonical and internally consistent",
+    });
+  }
+});
+export type SalesCycleClarificationStateV1 = z.infer<
+  typeof SalesCycleClarificationStateV1Schema
+>;
+
+export const SalesClarificationTransitionV1Schema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("REQUESTED"),
+    reasonCode: SalesCycleClarificationReasonV1Schema,
+    missingFields: z.array(z.string().min(1).max(80)).min(1).max(20),
+    productId: CanonicalProductIdV1Schema.nullable(),
+    questionFingerprint: BareSha256Schema,
+    maxAttempts: z.number().int().min(1).max(10),
+  }).strict(),
+  z.object({ kind: z.literal("RESOLVED") }).strict(),
+]);
+export type SalesClarificationTransitionV1 = z.infer<
+  typeof SalesClarificationTransitionV1Schema
+>;
+
+export function canonicalClarificationStateHashPreimageV1(
+  input: SalesCycleClarificationStateV1 | null | undefined,
+): string {
+  const state = input === null || input === undefined
+    ? null
+    : SalesCycleClarificationStateV1Schema.parse(input);
+  return `SALES_CLARIFICATION_STATE_V1\n${canonicalJsonV1(state)}`;
+}
+
+export const ClarificationTransitionEvidenceV1Schema = z.object({
+  schemaVersion: z.literal(1),
+  contractVersion: z.literal("CLARIFICATION_TRANSITION_EVIDENCE_V1"),
+  sourceMessageIdHash: BareSha256Schema,
+  commandIdHash: BareSha256Schema,
+  transition: SalesClarificationTransitionV1Schema,
+  beforeClarificationHash: BareSha256Schema,
+  afterClarificationHash: BareSha256Schema,
+  appliedAt: DateTimeSchema,
+  evidenceHash: BareSha256Schema,
+  contributor: z.literal("DETERMINISTIC_RUNTIME"),
+  authorization: z.literal("NONE"),
+}).strict().superRefine((value, context) => {
+  if (value.beforeClarificationHash === value.afterClarificationHash) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["afterClarificationHash"],
+      message: "clarification transition must bind a changed state",
+    });
+  }
+});
+export type ClarificationTransitionEvidenceV1 = z.infer<
+  typeof ClarificationTransitionEvidenceV1Schema
+>;
+
+export function clarificationTransitionEvidenceHashPreimageV1(
+  input: z.input<typeof ClarificationTransitionEvidenceV1Schema>,
+): string {
+  const { evidenceHash: _evidenceHash, ...evidence } =
+    ClarificationTransitionEvidenceV1Schema.parse(input);
+  return `CLARIFICATION_TRANSITION_EVIDENCE_V1\n${canonicalJsonV1(evidence)}`;
+}
 
 export const SalesCycleStageV1Schema = z.enum([
   "DISCOVERY",
@@ -71,8 +172,6 @@ export const CheckoutPaymentV1Schema = z.discriminatedUnion("method", [
   z.object({ method: z.literal("BANK_TRANSFER"), bankTransferPolicyRef: BankTransferPolicyReferenceV1Schema }).strict(),
 ]);
 export type CheckoutPaymentV1 = z.infer<typeof CheckoutPaymentV1Schema>;
-
-const BareSha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 
 export const CheckoutDetailsPatchV1Schema = z.object({
   fullName: z.string().min(1).max(2_000).optional(),

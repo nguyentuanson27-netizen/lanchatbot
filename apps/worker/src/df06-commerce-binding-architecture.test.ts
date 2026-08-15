@@ -58,6 +58,7 @@ describe("DF06 canonical commerce binding architecture", () => {
   });
 
   it("replays every protected sales transition from locked state through shared kernels", () => {
+    const salesContracts = source("../../../packages/contracts/src/v3/sales-cycle.ts");
     const contracts = source("../../../packages/contracts/src/v2/canonical-commerce-bindings.ts");
     const worker = source("./realtime-sales-cycle.ts");
     const runtime = source("../../../packages/chat-runtime/src/sales-cycle-runtime.ts");
@@ -68,10 +69,31 @@ describe("DF06 canonical commerce binding architecture", () => {
     expect(worker).toContain("CheckoutDetailsTransitionEvidenceV1Schema");
     expect(runtime).toContain("replayCanonicalCartRepriceNegotiationV1");
     expect(kernel).toContain("applyCheckoutDetailsTransitionV1");
+    expect(kernel).toContain("applySalesClarificationTransitionV1");
     expect(kernel).toContain("validateOrderPreviewTransitionV1");
     expect(kernel).toContain("deriveCanonicalPurchaseConfirmationV1");
     expect(database).toContain("validateLockedProtectedSalesArtifactsV1");
     expect(database).toContain("CART_READY_NEGOTIATION_REPLAY_MISMATCH");
     expect(database).toContain("SALES_STAGE_EVENT_CHAIN_MISMATCH");
+    expect(worker).toContain("ClarificationTransitionEvidenceV1Schema");
+    expect(database).toContain("ClarificationTransitionEvidenceV1Schema");
+    expect(salesContracts).toContain("CLARIFICATION_TRANSITION_EVIDENCE_V1");
+  });
+
+  it("shares state-advancing outcome and sales-cart TTL semantics across boundaries", () => {
+    const contracts = source("../../../packages/contracts/src/v3/sales-cycle.ts");
+    const worker = source("./realtime-sales-cycle.ts");
+    const runtime = source("../../../packages/chat-runtime/src/sales-cycle-runtime.ts");
+    const database = source("../../../packages/database/src/realtime-runtime.ts");
+
+    expect(contracts).toContain('STATE_ADVANCING_SALES_OUTCOMES_V1 = ["APPLIED", "HANDOFF"]');
+    expect(contracts).toContain("CART_TTL_MS_V1");
+    expect(worker).toContain("isStateAdvancingSalesOutcomeV1(result.status)");
+    expect(database).toContain("isStateAdvancingSalesOutcomeV1(outcome)");
+    expect(worker).toContain("CART_TTL_MS_V1");
+    expect(runtime).toContain("CART_TTL_MS_V1");
+    expect(database).toContain("CART_TTL_MS_V1");
+    expect(worker).not.toMatch(/const\s+CART_TTL_MS\s*=/u);
+    expect(runtime).not.toMatch(/const\s+CART_TTL_MS\s*=/u);
   });
 });

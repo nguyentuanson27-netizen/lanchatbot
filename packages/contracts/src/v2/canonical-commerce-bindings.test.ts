@@ -3,6 +3,7 @@ import {
   canonicalCartStateHashPreimageV1,
   canonicalizeProductIdsV1,
   canonicalJsonV1,
+  cartOpenEvidenceHashPreimageV1,
   cartMutationAuthorityBindingHashPreimageV1,
   CanonicalCartStateV1Schema,
   CanonicalProductIdV1Schema,
@@ -164,15 +165,25 @@ describe("cart-open and negotiation transition evidence", () => {
       bundleHash: `sha256:${HASH_A}`,
     },
     createdAt: "2026-08-14T01:00:00.000Z",
+    cartExpiresAt: "2026-08-16T01:00:00.000Z",
     evidenceHash: HASH_D,
   };
 
   it("binds a single canonical seed line to an exact pinned policy", () => {
-    expect(CartOpenEvidenceV1Schema.parse(openEvidence)).toEqual(openEvidence);
+    const parsedOpenEvidence = CartOpenEvidenceV1Schema.parse(openEvidence);
+    expect(parsedOpenEvidence).toEqual(openEvidence);
     expect(CartOpenEvidenceV1Schema.safeParse({
       ...openEvidence,
       draft: { ...openEvidence.draft, lines: [...openEvidence.draft.lines, ...openEvidence.draft.lines] },
     }).success).toBe(false);
+    expect(CartOpenEvidenceV1Schema.safeParse({
+      ...openEvidence,
+      cartExpiresAt: undefined,
+    }).success).toBe(false);
+    expect(cartOpenEvidenceHashPreimageV1({
+      ...parsedOpenEvidence,
+      cartExpiresAt: "2026-08-16T00:59:59.000Z",
+    })).not.toBe(cartOpenEvidenceHashPreimageV1(parsedOpenEvidence));
   });
 
   it("requires a price-objection transition to carry current-message-bound objection evidence", () => {
