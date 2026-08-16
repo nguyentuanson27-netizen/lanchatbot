@@ -1,19 +1,25 @@
 import type { VertexShadowModel } from "./vertex.js";
 
+export const BASELINE_MODEL_METHODS = [
+  "generate",
+  "groundWithFacts",
+  "groundDraftWithFacts",
+  "repairSizeClaimDraft",
+  "draftMultiProductClarification",
+  "draftCustomerUrlExplanation",
+  "judgeSalesReply",
+  "judgeSalesReplyV2",
+] as const;
+
+export type BaselineModelMethod = typeof BASELINE_MODEL_METHODS[number];
+
 /**
  * Byte-frozen generation capability shared by realtime and the V1 replay.
  * Candidate-only generation must use a different capability and prompt builder.
  */
 export type BaselineModelCapability = Pick<
   VertexShadowModel,
-  | "generate"
-  | "groundWithFacts"
-  | "groundDraftWithFacts"
-  | "repairSizeClaimDraft"
-  | "draftMultiProductClarification"
-  | "draftCustomerUrlExplanation"
-  | "judgeSalesReply"
-  | "judgeSalesReplyV2"
+  BaselineModelMethod
 >;
 
 export function baselineModelCapability(

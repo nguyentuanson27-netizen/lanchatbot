@@ -1,6 +1,41 @@
 import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import ts from "typescript";
 import { describe, expect, it, vi } from "vitest";
-import { baselineModelCapability } from "./vertex-baseline.js";
+import {
+  BASELINE_MODEL_METHODS,
+  baselineModelCapability,
+} from "./vertex-baseline.js";
+
+function resolvedLocalDependencyGraph(entryFile: string): readonly string[] {
+  const compilerOptions: ts.CompilerOptions = {
+    module: ts.ModuleKind.NodeNext,
+    moduleResolution: ts.ModuleResolutionKind.NodeNext,
+  };
+  const pending = [entryFile];
+  const visited = new Set<string>();
+  while (pending.length > 0) {
+    const current = pending.pop();
+    if (current === undefined || visited.has(current)) continue;
+    visited.add(current);
+    const source = readFileSync(current, "utf8");
+    for (const imported of ts.preProcessFile(source).importedFiles) {
+      if (!imported.fileName.startsWith(".")) continue;
+      const resolved = ts.resolveModuleName(
+        imported.fileName,
+        current,
+        compilerOptions,
+        ts.sys,
+      ).resolvedModule?.resolvedFileName;
+      const normalized = resolved === undefined ? undefined : resolve(resolved);
+      if (normalized !== undefined && normalized.startsWith(dirname(entryFile))) {
+        pending.push(normalized);
+      }
+    }
+  }
+  return [...visited].sort();
+}
 
 describe("baseline model capability", () => {
   it("exposes baseline generation without a Context V2 candidate capability", async () => {
@@ -15,17 +50,14 @@ describe("baseline model capability", () => {
 
     await expect(capability.generate([], "lana-realtime-v1")).resolves.toBe(generated);
     expect(generate).toHaveBeenCalledWith([], "lana-realtime-v1");
-    expect("generateCandidate" in capability).toBe(false);
+    expect(Object.keys(capability).sort()).toEqual([...BASELINE_MODEL_METHODS].sort());
   });
 
-  it("keeps Context V2 imports outside the byte-frozen baseline boundary", () => {
-    const boundarySource = readFileSync(
-      new URL("./vertex-baseline.ts", import.meta.url),
-      "utf8",
-    );
-    const vertexSource = readFileSync(new URL("./vertex.ts", import.meta.url), "utf8");
+  it("resolves no Context V2 module in the complete baseline dependency graph", () => {
+    const entryFile = fileURLToPath(new URL("./vertex-baseline.ts", import.meta.url));
+    const dependencies = resolvedLocalDependencyGraph(entryFile);
 
-    expect(boundarySource).not.toMatch(/context-v2/iu);
-    expect(vertexSource).not.toMatch(/context-v2/iu);
+    expect(dependencies.some((file) => file.endsWith("vertex.ts"))).toBe(true);
+    expect(dependencies.some((file) => /context-v2/iu.test(file))).toBe(false);
   });
 });

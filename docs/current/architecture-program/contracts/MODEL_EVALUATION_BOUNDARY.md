@@ -7,8 +7,11 @@ runtime authority, deployment, side effects, or Gate acceptance.
 Required properties:
 
 1. Realtime generation and the V1 replay use one baseline capability and the
-   same serialized request envelope. The baseline capability does not import,
-   accept, or render Context V2.
+   same serialized request envelope for each baseline method. The baseline
+   capability and its resolved request-builder dependency graph do not import,
+   accept, or render Context V2. Realtime orchestration may import Context V2
+   only to persist a shadow capture; it may not pass Context V2 into this
+   capability or its request builders.
 2. A Context V2 candidate uses a distinct capability whose input requires an
    integrity-valid snapshot. Candidate inputs are never optional and never
    represented by `null` on the baseline path.
