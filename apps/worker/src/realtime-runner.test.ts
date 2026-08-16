@@ -10,6 +10,8 @@ import {
   catalogAdvisoryReply,
   continuationProductId,
   currentProductContinuationId,
+  deterministicVertexProposalFallback,
+  enforceProtectedOutboundReadinessV1,
   explicitCustomerBusinessIntent,
   explicitCustomerBusinessIntents,
   explicitCustomerImageIntent,
@@ -53,8 +55,40 @@ import type {
 } from "@lana/contracts";
 import type { RuntimePolicyResolution, RuntimePolicyResolverPort } from "@lana/chat-runtime";
 import type { RealtimeMediaRecognition } from "./realtime-media-recognition.js";
+import { hashProtectedClaimSetV1 } from "@lana/business-tools";
 
 describe("RealtimeRunner", () => {
+  it("drops the complete commerce output tuple when final protected readiness is blocked", () => {
+    const blocked = enforceProtectedOutboundReadinessV1({
+      messages: [{ kind: "TEXT" as const, text: "Protected sales reply" }],
+      claims: [{ claimId: "claim-1" }],
+      readiness: {
+        outcome: "BLOCKED" as const,
+        reasonCodes: ["CLAIM_STALE"],
+      },
+      salesCyclePlan: { state: { checkoutDraft: { phone: "0900000000" } } },
+      salesDesiredTag: "DA_CHOT_DON" as const,
+    });
+
+    expect(blocked).toEqual({
+      messages: [],
+      claims: [],
+      readiness: {
+        outcome: "BLOCKED",
+        reasonCodes: ["CLAIM_STALE"],
+      },
+      salesCyclePlan: null,
+      salesDesiredTag: null,
+      blockedReasonCodes: ["CLAIM_STALE"],
+    });
+  });
+
+  it("keeps the existing deterministic fallback acknowledgement for a buying hint", () => {
+    expect(deterministicVertexProposalFallback(
+      "chốt 2 set nhé", null, true, new Error("VERTEX_TIMEOUT"),
+    ).proposal).toMatchObject({ action: "REPLY" });
+  });
+
   it("uses the approved no-size clarification after a rejected size-claim repair", () => {
     const fallback = approvedSizeClaimClarification({
       schemaVersion: 1,
@@ -202,7 +236,11 @@ describe("RealtimeRunner", () => {
     expect(complete).toHaveBeenCalledWith(retryClaim.inboxId, retryClaim.leaseToken);
     expect(commit).toHaveBeenCalledOnce();
     const commitInput = durableCommitInput as {
-      metaPlan?: { messages: readonly ({ kind: "TEXT"; text: string } | { kind: "IMAGE"; imageUrl: string })[] };
+      metaPlan?: {
+        messages: readonly ({ kind: "TEXT"; text: string } | { kind: "IMAGE"; imageUrl: string })[];
+        protectedClaimTypes?: readonly string[];
+        protectedClaims?: readonly { type: string }[];
+      };
       decisionEvents?: readonly { eventType: string; reasonCodes: readonly string[] }[];
     };
     const text = (commitInput.metaPlan?.messages ?? [])
@@ -212,6 +250,8 @@ describe("RealtimeRunner", () => {
     expect(text).not.toMatch(/hop size L/iu);
     expect(commitInput.metaPlan?.messages).toContainEqual({ kind: "IMAGE", imageUrl });
     expect(commitInput.metaPlan?.messages.filter((message) => message.kind === "IMAGE")).toHaveLength(1);
+    expect([...new Set(commitInput.metaPlan?.protectedClaims?.map(({ type }) => type) ?? [])].sort())
+      .toEqual([...(commitInput.metaPlan?.protectedClaimTypes ?? [])].sort());
     expect(commitInput.decisionEvents?.filter((event) => event.eventType === "GUARD_BLOCKED")).toHaveLength(1);
     expect(commitInput.decisionEvents).toContainEqual(expect.objectContaining({
       eventType: "GUARD_BLOCKED",
@@ -220,6 +260,24 @@ describe("RealtimeRunner", () => {
         "SIZE_RECOMMENDATION_REPAIR_FAILED",
       ]),
     }));
+    const observation = (durableCommitInput as {
+      decisionEvents?: readonly { details?: { decisionObservability?: {
+        protectedClaimValidation: {
+          canonicalClaimCount: number;
+          canonicalClaimSetHash: string | null;
+        };
+      } } }[];
+    }).decisionEvents?.find(({ details }) => details?.decisionObservability)?.details
+      ?.decisionObservability;
+    const committedClaims = (commitInput.metaPlan?.protectedClaims ?? []) as Parameters<
+      typeof hashProtectedClaimSetV1
+    >[0];
+    expect(observation?.protectedClaimValidation).toMatchObject({
+      canonicalClaimCount: committedClaims.length,
+      canonicalClaimSetHash: committedClaims.length > 0
+        ? hashProtectedClaimSetV1(committedClaims)
+        : null,
+    });
   });
   it("accepts one successful E2E size repair only when it binds the verified Size Engine claim", async () => {
     const occurredAt = "2026-08-04T00:00:00.000Z";

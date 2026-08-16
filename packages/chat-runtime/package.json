@@ -13,14 +13,15 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "pretypecheck": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build",
+    "pretypecheck": "pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "pretest": "pnpm --filter @lana/contracts build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build",
+    "pretest": "pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build && pnpm --filter @lana/business-tools build && pnpm --filter @lana/conversation-engine build",
     "test": "vitest run",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@lana/business-tools": "workspace:*",
+    "@lana/commerce-kernel": "workspace:*",
     "@lana/contracts": "workspace:*",
     "@lana/conversation-engine": "workspace:*"
   }

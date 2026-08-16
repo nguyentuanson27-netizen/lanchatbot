@@ -20,3 +20,6 @@ export * from "./buying-signal.js";
 export * from "./reply-assembler.js";
 export * from "./sales-strategy-v1.js";
 export * from "./vietnamese-text.js";
+export * from "./canonical-evidence.js";
+export * from "./effect-readiness.js";
+export * from "./protected-claims.js";

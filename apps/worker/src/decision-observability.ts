@@ -5,6 +5,7 @@ import {
   DECISION_GUARD_REASON_CODES_V1,
   DECISION_RECONCILIATION_REASON_CODES_V1,
   DECISION_SIDE_EFFECT_REASON_CODES_V1,
+  DETERMINISTIC_READINESS_REASON_CODES_V1,
   DecisionObservabilityV1Schema,
   type DecisionObservabilityV1,
 } from "@lana/contracts";
@@ -34,6 +35,10 @@ const RECONCILIATION_CODES = new Set<string>(
   DECISION_RECONCILIATION_REASON_CODES_V1,
 );
 const SIDE_EFFECT_CODES = new Set<string>(DECISION_SIDE_EFFECT_REASON_CODES_V1);
+const READINESS_CODES = new Set<string>([
+  ...DECISION_GUARD_REASON_CODES_V1,
+  ...DETERMINISTIC_READINESS_REASON_CODES_V1,
+]);
 const PROTECTED_CLAIM_REASON_CODES = new Set<string>([
   "UNAUTHORIZED_PRICE",
   "UNAUTHORIZED_STOCK",
@@ -56,18 +61,23 @@ export function protectedClaimReasonCodes(
 export interface BuildDecisionObservabilityInput {
   readonly dialogueEvidenceCodes: readonly string[];
   readonly dialogueEvidenceSource: DialogueEvidenceSource;
+  readonly dialogueEvidenceHash?: string | null;
   readonly buyingIntent: Readonly<{
+    authorityVersion?: "HYBRID_BUYING_INTENT_V1" | "CANONICAL_BUYING_INTENT_V1";
     decision: BuyingIntent["decision"];
     source: BuyingIntent["source"];
     requestedAction: BuyingIntent["requestedAction"];
     quantity: number | null;
     confidence: number | null;
     reasonCodes: readonly string[];
+    evidenceHash?: string | null;
   }>;
   readonly protectedClaimTypes: readonly ProtectedClaimType[];
   readonly protectedClaimOutcome: ProtectedClaimOutcome;
   readonly protectedClaimValidatedCount: number;
   readonly protectedClaimRejectedCount: number;
+  readonly canonicalClaimCount?: number;
+  readonly canonicalClaimSetHash?: string | null;
   readonly protectedClaimReasonCodes: readonly string[];
   readonly guardOutcome: GuardOutcome;
   readonly guardReasonCodes: readonly string[];
@@ -79,6 +89,8 @@ export interface BuildDecisionObservabilityInput {
   readonly cta: Cta;
   readonly strategyUsesModelEvidence: boolean;
   readonly readinessOutcome: DecisionObservabilityV1["readiness"]["outcome"];
+  readonly readinessRulesetVersion?: DecisionObservabilityV1["readiness"]["rulesetVersion"];
+  readonly readinessReasonCodes?: readonly string[];
   readonly productScope: ProductScope;
   readonly sideEffectTypes: readonly SideEffectType[];
   readonly sideEffectReasonCodes: readonly string[];
@@ -137,6 +149,11 @@ export function buildDecisionObservabilityV1(
     20,
     SIDE_EFFECT_CODES,
   );
+  const readinessReasonCodes = boundedCodes(
+    input.readinessReasonCodes ?? [],
+    20,
+    READINESS_CODES,
+  );
   const claimTypes = sortedUnique(input.protectedClaimTypes).slice(0, 8);
   const sideEffectTypes = sortedUnique(input.sideEffectTypes).slice(0, 8);
   const dialogueEvidenceSource = dialogueCodes.length === 0
@@ -155,11 +172,11 @@ export function buildDecisionObservabilityV1(
       source: dialogueEvidenceSource,
       codes: dialogueCodes,
       evidenceHash: dialogueCodes.length > 0
-        ? evidenceHash([dialogueEvidenceSource, dialogueCodes])
+        ? input.dialogueEvidenceHash ?? evidenceHash([dialogueEvidenceSource, dialogueCodes])
         : null,
     },
     buyingIntent: {
-      authorityVersion: "HYBRID_BUYING_INTENT_V1",
+      authorityVersion: input.buyingIntent.authorityVersion ?? "HYBRID_BUYING_INTENT_V1",
       decision: input.buyingIntent.decision,
       source: input.buyingIntent.source,
       requestedAction: input.buyingIntent.requestedAction,
@@ -167,7 +184,7 @@ export function buildDecisionObservabilityV1(
       confidenceBand: confidenceBand(input.buyingIntent.confidence),
       evidenceReasonCodes: buyingReasonCodes,
       evidenceHash: input.buyingIntent.decision !== "NONE"
-        ? evidenceHash([
+        ? input.buyingIntent.evidenceHash ?? evidenceHash([
             input.buyingIntent.source,
             input.buyingIntent.decision,
             input.buyingIntent.requestedAction,
@@ -182,13 +199,19 @@ export function buildDecisionObservabilityV1(
       claimTypes,
       validatedCount: input.protectedClaimValidatedCount,
       rejectedCount: input.protectedClaimRejectedCount,
+      ...(input.canonicalClaimCount === undefined
+        ? {}
+        : { canonicalClaimCount: input.canonicalClaimCount }),
+      ...(input.canonicalClaimSetHash === undefined
+        ? {}
+        : { canonicalClaimSetHash: input.canonicalClaimSetHash }),
       reasonCodes: protectedClaimReasonCodes,
     },
     readiness: {
-      rulesetVersion: "LEGACY_READINESS_OBSERVATION_V1",
+      rulesetVersion: input.readinessRulesetVersion ?? "LEGACY_READINESS_OBSERVATION_V1",
       outcome: input.readinessOutcome,
       productScope: input.productScope,
-      reasonCodes: [],
+      reasonCodes: readinessReasonCodes,
     },
     phaseBarrier: {
       contractVersion: "LEGACY_PHASE_BARRIER_OBSERVATION_V1",

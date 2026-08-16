@@ -5,6 +5,43 @@ import {
 } from "./decision-observability.js";
 
 describe("DF-P1 decision observability", () => {
+  it("accepts additive DF05/DF06 canonical authority and readiness evidence", () => {
+    const result = buildDecisionObservabilityV1({
+      dialogueEvidenceCodes: ["DIRECT_PURCHASE_VERB"],
+      dialogueEvidenceSource: "DETERMINISTIC_RUNTIME",
+      dialogueEvidenceHash: "1".repeat(64),
+      buyingIntent: {
+        authorityVersion: "CANONICAL_BUYING_INTENT_V1",
+        decision: "COMMITTED", source: "DETERMINISTIC",
+        requestedAction: "OPEN_CART", quantity: 1, confidence: 1,
+        reasonCodes: ["DIRECT_PURCHASE_VERB"], evidenceHash: "2".repeat(64),
+      },
+      protectedClaimTypes: ["PRICE", "STOCK"],
+      protectedClaimOutcome: "VALIDATED", protectedClaimValidatedCount: 2,
+      protectedClaimRejectedCount: 0, protectedClaimReasonCodes: [],
+      canonicalClaimCount: 2, canonicalClaimSetHash: "4".repeat(64),
+      guardOutcome: "ALLOWED", guardReasonCodes: [], guardedPlanHash: "3".repeat(64),
+      phase: "CART_OPEN", phaseSource: "SALES_CYCLE_STAGE_V1",
+      barrier: "NONE", strategy: "NONE", cta: "NONE",
+      strategyUsesModelEvidence: false,
+      readinessOutcome: "BLOCKED",
+      readinessRulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1",
+      readinessReasonCodes: ["CLAIM_STALE"],
+      productScope: "RESOLVED", sideEffectTypes: ["CART"], sideEffectReasonCodes: [],
+    });
+    expect(result.buyingIntent).toMatchObject({
+      authorityVersion: "CANONICAL_BUYING_INTENT_V1", evidenceHash: "2".repeat(64),
+    });
+    expect(result.dialogueEvidence.evidenceHash).toBe("1".repeat(64));
+    expect(result.protectedClaimValidation).toMatchObject({
+      canonicalClaimCount: 2, canonicalClaimSetHash: "4".repeat(64),
+    });
+    expect(result.readiness).toMatchObject({
+      rulesetVersion: "DETERMINISTIC_EFFECT_READINESS_V1", outcome: "BLOCKED",
+      reasonCodes: ["CLAIM_STALE"],
+    });
+  });
+
   it("summarizes current decision inputs without retaining customer/model text", () => {
     const result = buildDecisionObservabilityV1({
       dialogueEvidenceCodes: ["TEXT_OCCASION", "MODEL_BUYING_COMMITTED"],

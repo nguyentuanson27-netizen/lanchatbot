@@ -1,16 +1,22 @@
 import {
   CheckoutRevalidationV1Schema,
+  CART_TTL_MS_V1,
+  canonicalJsonV1,
   OrderPreviewV1Schema,
-  PurchaseConfirmationV1Schema,
   PolicyBundleV1Schema,
   BankTransferPolicyV1Schema,
   SalesIntentV1Schema,
+  isSalesStageTransitionAllowedV1,
   type CartV1,
   type CartLineV1,
   type PolicyBundleV1,
   type CheckoutRevalidationV1,
+  type CheckoutDraftV1,
   type OrderPreviewV1,
   type PurchaseConfirmationV1,
+  type SalesCycleClarificationReasonV1 as ContractSalesCycleClarificationReasonV1,
+  type SalesCycleClarificationStateV1 as ContractSalesCycleClarificationStateV1,
+  type SalesCycleCommandKindV1,
   type SalesCycleStageV1,
   type SalesIntentV1,
   type HandoffDecisionV2,
@@ -20,6 +26,14 @@ import {
   PancakeTagCommandV2Schema,
   type PancakeTagCommandV2,
 } from "@lana/contracts";
+import {
+  applyCheckoutDetailsTransitionV1,
+  applySalesClarificationTransitionV1,
+  computeCanonicalOrderPreviewHashV1,
+  deriveCanonicalPurchaseConfirmationV1,
+  replayCanonicalCartRepriceNegotiationV1,
+  validateOrderPreviewTransitionV1,
+} from "@lana/commerce-kernel";
 import { decideHandoffFallbackV2 } from "@lana/conversation-engine";
 import {
   applyCanonicalCartDecisionV2,
@@ -34,21 +48,11 @@ import {
 import { createHash } from "node:crypto";
 
 const MAX_PROCESSED_COMMANDS = 100;
-const CART_TTL_MS = 48 * 60 * 60 * 1_000;
 const MAX_REVALIDATION_AGE_MS = 60 * 1_000;
 const MAX_FUTURE_CLOCK_SKEW_MS = 5 * 60 * 1_000;
 
-export type SalesCycleClarificationReasonV1 = "CHECKOUT_DETAILS_MISSING";
-
-export interface SalesCycleClarificationStateV1 {
-  readonly reasonCode: SalesCycleClarificationReasonV1;
-  readonly missingFields: readonly string[];
-  readonly productId: string | null;
-  readonly attemptCount: number;
-  readonly maxAttempts: number;
-  readonly askedQuestionFingerprints: readonly string[];
-  readonly lastRequestedAt: string;
-}
+export type SalesCycleClarificationReasonV1 = ContractSalesCycleClarificationReasonV1;
+export type SalesCycleClarificationStateV1 = ContractSalesCycleClarificationStateV1;
 
 export interface SalesCycleRuntimeState {
   readonly schemaVersion: 2;
@@ -60,13 +64,7 @@ export interface SalesCycleRuntimeState {
   readonly commerceContext: { readonly shopId: string; readonly policyRef: VersionedBusinessReferenceV1 } | null;
   readonly negotiation: NegotiationStateV2 | null;
   /** Encrypted at rest by the production adapter; never copied to analytics. */
-  readonly checkoutDraft: {
-    readonly fullName: string | null;
-    readonly phone: string | null;
-    readonly address: string | null;
-    readonly paymentMethod: "COD" | "BANK_TRANSFER" | null;
-    readonly updatedAt: string;
-  } | null;
+  readonly checkoutDraft: CheckoutDraftV1 | null;
   /**
    * Additive Wave 1 state. Old persisted schema-v2 records may omit this
    * property; readers must treat an absent value as null.
@@ -214,15 +212,10 @@ export interface SalesCycleStateRepositoryV1 {
   }): Promise<boolean>;
 }
 
-function canonicalJson(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
-  const record = value as Record<string, unknown>;
-  return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`).join(",")}}`;
-}
+const canonicalJson = canonicalJsonV1;
 
 export function computeOrderPreviewHash(preview: Omit<OrderPreviewV1, "previewHash">): `sha256:${string}` {
-  return `sha256:${createHash("sha256").update(canonicalJson(preview), "utf8").digest("hex")}`;
+  return computeCanonicalOrderPreviewHashV1(preview);
 }
 
 export function computeBankTransferPolicyHash(policy: BankTransferPolicyV1): `sha256:${string}` {
@@ -231,12 +224,6 @@ export function computeBankTransferPolicyHash(policy: BankTransferPolicyV1): `sh
 
 export function computeBusinessContentHash(value: unknown): `sha256:${string}` {
   return `sha256:${createHash("sha256").update(canonicalJson(value), "utf8").digest("hex")}`;
-}
-
-function deterministicUuid(seed: string): string {
-  const hash = createHash("sha256").update(seed, "utf8").digest("hex");
-  const variant = ((Number.parseInt(hash[16]!, 16) & 0x3) | 0x8).toString(16);
-  return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-5${hash.slice(13, 16)}-${variant}${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
 }
 
 function resolveVerifiedCustomerInbound(input: {
@@ -345,28 +332,36 @@ function applyCartMutationNegotiation(input: {
   if (input.state.negotiation === null) return null;
   const snapshot = negotiationSnapshot(input.cart, input.shopId);
   if (snapshot === null) return null;
-  const decision = applyNegotiationEventV2({
-    negotiationId: input.state.negotiation.negotiationId,
+  const decision = replayCanonicalCartRepriceNegotiationV1({
     state: input.state.negotiation,
-    expectedStateVersion: input.state.negotiation.stateVersion,
-    expectedCartVersion: input.state.cart.value.revision,
-    eventId: `${input.commandId}:cart-mutated`,
-    evidence: { source: "RUNTIME", intent: "CART_MUTATED", evidenceId: input.commandId, mutationReasonCode: input.mutationReasonCode, observedAt: input.now.toISOString() },
+    commandId: input.commandId,
+    mutationReasonCode: input.mutationReasonCode,
     cart: snapshot,
     policy: input.policy,
-    now: input.now,
+    occurredAt: input.now,
   });
   return decision.status === "BLOCKED" ? null : decision.state;
 }
 
 function withCommand(
   state: SalesCycleRuntimeState,
+  commandKind: SalesCycleCommandKindV1,
+  outcome: "APPLIED" | "HANDOFF",
   commandId: string,
   now: Date,
   changes: Partial<Omit<SalesCycleRuntimeState, "schemaVersion" | "conversationKey" | "revision" | "processedCommandIds" | "updatedAt">>,
 ): SalesCycleRuntimeState {
   const processedCommandIds = [...state.processedCommandIds, commandId].slice(-MAX_PROCESSED_COMMANDS);
-  return { ...state, ...changes, revision: state.revision + 1, processedCommandIds, updatedAt: now.toISOString() };
+  const next = { ...state, ...changes, revision: state.revision + 1, processedCommandIds, updatedAt: now.toISOString() };
+  if (!isSalesStageTransitionAllowedV1({
+    commandKind,
+    outcome,
+    stageBefore: state.stage,
+    stageAfter: next.stage,
+  })) {
+    throw new Error("SALES_STAGE_TRANSITION_CONTRACT_MISMATCH");
+  }
+  return next;
 }
 
 function revalidationHandoff(value: CheckoutRevalidationV1): CheckoutHandoffReason | null {
@@ -465,7 +460,7 @@ export function applySalesCycleCommand(input: {
       (command.kind === "SIZE_RECOMMENDED" && (state.stage === "MEASUREMENTS_REQUIRED" || state.stage === "SIZE_RECOMMENDED"));
     if (!transitionAllowed) return { status: "REJECTED", state, reasonCode: "SALES_STAGE_TRANSITION_INVALID" };
     const stage = command.kind === "FACTS_PRESENTED" ? "FACTS_PRESENTED" : command.kind === "MEASUREMENTS_REQUIRED" ? "MEASUREMENTS_REQUIRED" : "SIZE_RECOMMENDED";
-    return { status: "APPLIED", state: withCommand(state, command.commandId, now, { stage }), confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
+    return { status: "APPLIED", state: withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage }), confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
   if (command.kind === "CART_OPENED") {
@@ -476,7 +471,7 @@ export function applySalesCycleCommand(input: {
     if (cartAlive(state, now)) return { status: "REJECTED", state, reasonCode: "CART_ALREADY_OPEN" };
     const expiresAt = Date.parse(command.expiresAt);
     const remainingTtl = expiresAt - now.getTime();
-    if (!Number.isFinite(expiresAt) || remainingTtl <= 0 || remainingTtl > CART_TTL_MS) return { status: "REJECTED", state, reasonCode: "CART_EXPIRY_INVALID" };
+    if (!Number.isFinite(expiresAt) || remainingTtl <= 0 || remainingTtl > CART_TTL_MS_V1) return { status: "REJECTED", state, reasonCode: "CART_EXPIRY_INVALID" };
     let draft: ResolvedCartDraftV1 | null = null;
     try {
       draft = input.trustedPorts?.resolveCartDraft(command.cartDraftRef) ?? null;
@@ -502,7 +497,7 @@ export function applySalesCycleCommand(input: {
       now,
     });
     if (negotiation.status === "BLOCKED") return { status: "REJECTED", state, reasonCode: `NEGOTIATION_${negotiation.reasonCode}` };
-    const next = withCommand(state, command.commandId, now, { stage: "CART_OPEN", cart: { value: creation.cart, expiresAt: command.expiresAt }, commerceContext: { shopId: draft.shopId, policyRef: draft.policyRef }, negotiation: negotiation.state, checkoutDraft: null, preview: null });
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage: "CART_OPEN", cart: { value: creation.cart, expiresAt: command.expiresAt }, commerceContext: { shopId: draft.shopId, policyRef: draft.policyRef }, negotiation: negotiation.state, checkoutDraft: null, preview: null });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
@@ -513,29 +508,17 @@ export function applySalesCycleCommand(input: {
     if (!cartAlive(state, now)) {
       return { status: "REJECTED", state, reasonCode: "CART_EXPIRED_OR_MISSING" };
     }
-    const details = command.details;
-    const fullName = details.fullName?.trim().replace(/\s+/gu, " ") ?? null;
-    const phone = details.phone?.trim().replace(/\s+/gu, " ") ?? null;
-    const address = details.address?.trim().replace(/\s+/gu, " ") ?? null;
-    if (
-      (fullName !== null && (fullName.length < 2 || fullName.length > 160)) ||
-      (phone !== null && !/^[0-9+][0-9 .()-]{7,24}$/u.test(phone)) ||
-      (address !== null && (address.length < 8 || address.length > 1_000)) ||
-      (fullName === null && phone === null && address === null && details.paymentMethod === undefined)
-    ) {
+    const transition = applyCheckoutDetailsTransitionV1({
+      current: state.checkoutDraft,
+      details: command.details,
+      appliedAt: now,
+    });
+    if (transition.status === "BLOCKED") {
       return { status: "REJECTED", state, reasonCode: "CHECKOUT_DETAILS_INVALID" };
     }
-    const previous = state.checkoutDraft;
-    const checkoutDraft = {
-      fullName: fullName ?? previous?.fullName ?? null,
-      phone: phone ?? previous?.phone ?? null,
-      address: address ?? previous?.address ?? null,
-      paymentMethod: details.paymentMethod ?? previous?.paymentMethod ?? null,
-      updatedAt: now.toISOString(),
-    };
-    const next = withCommand(state, command.commandId, now, {
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, {
       stage: "CART_OPEN",
-      checkoutDraft,
+      checkoutDraft: transition.draft,
       preview: null,
     });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
@@ -545,55 +528,39 @@ export function applySalesCycleCommand(input: {
     if (state.stage !== "CART_OPEN" && state.stage !== "ORDER_PREVIEW") {
       return { status: "REJECTED", state, reasonCode: "SALES_STAGE_TRANSITION_INVALID" };
     }
-    const missingFields = [...new Set(command.missingFields.map((field) => field.trim()))]
-      .filter(Boolean)
-      .sort();
-    const questionFingerprint = command.questionFingerprint.trim();
-    if (
-      missingFields.length === 0 ||
-      missingFields.some((field) => field.length > 80) ||
-      !Number.isSafeInteger(command.maxAttempts) ||
-      command.maxAttempts < 1 ||
-      command.maxAttempts > 10 ||
-      !/^[a-f0-9]{64}$/u.test(questionFingerprint)
-    ) {
-      return { status: "REJECTED", state, reasonCode: "CLARIFICATION_REQUEST_INVALID" };
-    }
-    const previous = state.clarification ?? null;
-    const sameQuestion =
-      previous?.reasonCode === command.reasonCode &&
-      previous.productId === command.productId &&
-      previous.missingFields.length === missingFields.length &&
-      previous.missingFields.every((field, index) => field === missingFields[index]);
-    const attemptCount = sameQuestion ? previous.attemptCount + 1 : 1;
-    const askedQuestionFingerprints = sameQuestion
-      ? [...previous.askedQuestionFingerprints, questionFingerprint]
-      : [questionFingerprint];
-    if (
-      attemptCount > command.maxAttempts ||
-      (sameQuestion && previous.askedQuestionFingerprints.includes(questionFingerprint))
-    ) {
-      return { status: "REJECTED", state, reasonCode: "CLARIFICATION_RETRY_INVALID" };
-    }
-    const next = withCommand(state, command.commandId, now, {
-      clarification: {
+    const transition = applySalesClarificationTransitionV1({
+      current: state.clarification,
+      transition: {
+        kind: "REQUESTED",
         reasonCode: command.reasonCode,
-        missingFields,
+        missingFields: [...command.missingFields],
         productId: command.productId,
-        attemptCount,
+        questionFingerprint: command.questionFingerprint,
         maxAttempts: command.maxAttempts,
-        askedQuestionFingerprints,
-        lastRequestedAt: now.toISOString(),
       },
+      appliedAt: now,
+    });
+    if (transition.status === "BLOCKED") {
+      return { status: "REJECTED", state, reasonCode: transition.reasonCode };
+    }
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, {
+      clarification: transition.clarification,
     });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
   if (command.kind === "CLARIFICATION_RESOLVED") {
-    if (state.clarification === null || state.clarification === undefined) {
-      return { status: "REJECTED", state, reasonCode: "CLARIFICATION_NOT_ACTIVE" };
+    const transition = applySalesClarificationTransitionV1({
+      current: state.clarification,
+      transition: { kind: "RESOLVED" },
+      appliedAt: now,
+    });
+    if (transition.status === "BLOCKED") {
+      return { status: "REJECTED", state, reasonCode: transition.reasonCode };
     }
-    const next = withCommand(state, command.commandId, now, { clarification: null });
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, {
+      clarification: transition.clarification,
+    });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
@@ -629,7 +596,7 @@ export function applySalesCycleCommand(input: {
     }
     const negotiation = applyCartMutationNegotiation({ state, cart: cartDecision.cart, commandId: command.commandId, mutationReasonCode: command.kind === "CART_MUTATED" ? command.mutationReasonCode : "OTHER", shopId: state.commerceContext.shopId, policy, now });
     if (negotiation === null) return { status: "REJECTED", state, reasonCode: "NEGOTIATION_REPRICE_BLOCKED" };
-    const next = withCommand(state, command.commandId, now, { stage: "CART_OPEN", cart: { value: cartDecision.cart, expiresAt: state.cart.expiresAt }, negotiation, preview: null });
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage: "CART_OPEN", cart: { value: cartDecision.cart, expiresAt: state.cart.expiresAt }, negotiation, preview: null });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
@@ -651,38 +618,37 @@ export function applySalesCycleCommand(input: {
       return { status, state, reasonCode: `NEGOTIATION_${decision.reasonCode}` };
     }
     if (decision.status === "REPLAYED") {
-      const next = withCommand(state, command.commandId, now, {});
-      return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
+      return { status: "DUPLICATE", state, confirmation: state.confirmation };
     }
     const repriced = applyCanonicalCartDecisionV2({ cart: state.cart.value, expectedCartVersion: state.cart.value.revision, mutation: null, shopId: state.commerceContext.shopId, policy, customerState: decision.state.customerState, now });
     if (repriced.status === "BLOCKED") return { status: "REJECTED", state, reasonCode: `CART_REPRICE_${repriced.reasonCode}` };
     const negotiation = { ...decision.state, cartVersion: repriced.cart.revision, updatedAt: now.toISOString() };
-    const next = withCommand(state, command.commandId, now, { stage: "CART_OPEN", cart: { value: repriced.cart, expiresAt: state.cart.expiresAt }, negotiation, preview: null });
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage: "CART_OPEN", cart: { value: repriced.cart, expiresAt: state.cart.expiresAt }, negotiation, preview: null });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
   if (command.kind === "PREVIEW_CREATED") {
-    if (state.stage !== "CART_OPEN") return { status: "REJECTED", state, reasonCode: "SALES_STAGE_TRANSITION_INVALID" };
-    const preview = OrderPreviewV1Schema.safeParse(command.preview);
-    if (!preview.success || state.cart === null || Date.parse(state.cart.expiresAt) <= now.getTime()) {
-      return { status: "REJECTED", state, reasonCode: "PREVIEW_INVALID" };
+    const transition = validateOrderPreviewTransitionV1({
+      stage: state.stage,
+      cart: state.cart?.value ?? null,
+      cartExpiresAt: state.cart?.expiresAt ?? null,
+      checkoutDraft: state.checkoutDraft,
+      preview: command.preview,
+      now,
+    });
+    if (transition.status === "BLOCKED") {
+      return {
+        status: transition.reasonCode === "PREVIEW_CART_VERSION_CONFLICT" ? "CONFLICT" : "REJECTED",
+        state,
+        reasonCode: transition.reasonCode === "PREVIEW_INVALID" && state.stage !== "CART_OPEN"
+          ? "SALES_STAGE_TRANSITION_INVALID"
+          : transition.reasonCode,
+      };
     }
-    if (state.cart.value.status !== "READY_FOR_CONFIRMATION" || preview.data.cartId !== state.cart.value.cartId || preview.data.cartVersion !== state.cart.value.revision) {
-      return { status: "CONFLICT", state, reasonCode: "PREVIEW_CART_VERSION_CONFLICT" };
-    }
-    const { previewHash: _providedHash, ...hashPayload } = preview.data;
-    if (
-      preview.data.previewHash !== computeOrderPreviewHash(hashPayload) ||
-      Date.parse(preview.data.expiresAt) > Date.parse(state.cart.expiresAt) ||
-      state.checkoutDraft === null ||
-      state.checkoutDraft.fullName !== preview.data.recipient.fullName ||
-      state.checkoutDraft.phone !== preview.data.recipient.phone ||
-      state.checkoutDraft.address !== preview.data.recipient.address ||
-      state.checkoutDraft.paymentMethod !== preview.data.payment.method
-    ) {
-      return { status: "REJECTED", state, reasonCode: "PREVIEW_INTEGRITY_INVALID" };
-    }
-    const next = withCommand(state, command.commandId, now, { stage: "ORDER_PREVIEW", preview: preview.data });
+    const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, {
+      stage: "ORDER_PREVIEW",
+      preview: transition.preview,
+    });
     return { status: "APPLIED", state: next, confirmation: null, paymentInstruction: null, desiredPancakeTag: null, transferToHuman: false };
   }
 
@@ -692,7 +658,7 @@ export function applySalesCycleCommand(input: {
     if (inbound === null || !inbound.attachments.some(({ attachmentId, kind }) => attachmentId === command.attachmentId && (kind === "IMAGE" || kind === "FILE"))) {
       return { status: "REJECTED", state, reasonCode: "PAYMENT_RECEIPT_EVIDENCE_UNTRUSTED" };
     }
-    const next = withCommand(state, command.commandId, now, { stage: "HANDED_OFF" });
+    const next = withCommand(state, command.kind, "HANDOFF", command.commandId, now, { stage: "HANDED_OFF" });
     return { status: "HANDOFF", state: next, reasonCode: "PAYMENT_RECEIPT_REVIEW_REQUIRED", silent: true, desiredPancakeTag: "NHAN_VIEN", handoffDecision: checkoutHandoff("PAYMENT_RECEIPT_REVIEW_REQUIRED", command.commandId, now) };
   }
 
@@ -714,7 +680,7 @@ export function applySalesCycleCommand(input: {
   }
   const validation = CheckoutRevalidationV1Schema.safeParse(rawValidation);
   if (!validation.success) {
-    const next = withCommand(state, command.commandId, now, { stage: "HANDED_OFF", preview: null });
+    const next = withCommand(state, command.kind, "HANDOFF", command.commandId, now, { stage: "HANDED_OFF", preview: null });
     return { status: "HANDOFF", state: next, reasonCode: "POLICY_UNAVAILABLE", silent: true, desiredPancakeTag: "NHAN_VIEN", handoffDecision: checkoutHandoff("POLICY_UNAVAILABLE", command.commandId, now) };
   }
   if (!validation.success || validation.data.cartId !== state.cart.value.cartId || validation.data.cartVersion !== state.cart.value.revision) {
@@ -722,7 +688,7 @@ export function applySalesCycleCommand(input: {
   }
   const handoffReason = revalidationHandoff(validation.data) ?? baselineMismatchHandoff(state.preview.revalidation, validation.data);
   if (handoffReason !== null || !validation.data.eligible) {
-    const next = withCommand(state, command.commandId, now, { stage: "HANDED_OFF", preview: null });
+    const next = withCommand(state, command.kind, "HANDOFF", command.commandId, now, { stage: "HANDED_OFF", preview: null });
     const reason = handoffReason ?? "POLICY_UNAVAILABLE";
     return { status: "HANDOFF", state: next, reasonCode: reason, silent: true, desiredPancakeTag: "NHAN_VIEN", handoffDecision: checkoutHandoff(reason, command.commandId, now) };
   }
@@ -735,31 +701,30 @@ export function applySalesCycleCommand(input: {
     now.getTime() - validationTime > MAX_REVALIDATION_AGE_MS ||
     validationTime > now.getTime() + MAX_FUTURE_CLOCK_SKEW_MS
   ) {
-    const next = withCommand(state, command.commandId, now, { stage: "HANDED_OFF", preview: null });
+    const next = withCommand(state, command.kind, "HANDOFF", command.commandId, now, { stage: "HANDED_OFF", preview: null });
     return { status: "HANDOFF", state: next, reasonCode: "POLICY_UNAVAILABLE", silent: true, desiredPancakeTag: "NHAN_VIEN", handoffDecision: checkoutHandoff("POLICY_UNAVAILABLE", command.commandId, now) };
   }
-  const confirmationResult = PurchaseConfirmationV1Schema.safeParse({
-    schemaVersion: 1,
-    confirmationId: deterministicUuid(`purchase-confirmation\u0000${state.cart.value.cartId}\u0000${state.cart.value.revision}\u0000${confirmationInbound.messageId}`),
-    idempotencyKey: `purchase-confirmed:${state.conversationKey}:${state.cart.value.cartId}:${state.cart.value.revision}:${confirmationInbound.messageId}`,
-    cartId: state.cart.value.cartId,
-    cartVersion: state.cart.value.revision,
-    previewId: state.preview.previewId,
-    previewHash: state.preview.previewHash,
-    status: "PURCHASE_CONFIRMED",
-    posOrderId: null,
-    desiredPancakeTag: "DA_CHOT_DON",
-    confirmedAt: now.toISOString(),
-    sourceMessageId: intent.data.sourceMessageId,
-  });
-  if (!confirmationResult.success) return { status: "REJECTED", state, reasonCode: "CONFIRMATION_IDENTITY_INVALID" };
-  const confirmation = confirmationResult.data;
+  let confirmation: PurchaseConfirmationV1;
+  try {
+    confirmation = deriveCanonicalPurchaseConfirmationV1({
+      conversationKey: state.conversationKey,
+      cart: state.cart.value,
+      preview: {
+        previewId: state.preview.previewId,
+        previewHash: state.preview.previewHash as `sha256:${string}`,
+      },
+      sourceMessageId: intent.data.sourceMessageId,
+      confirmedAt: now,
+    });
+  } catch {
+    return { status: "REJECTED", state, reasonCode: "CONFIRMATION_IDENTITY_INVALID" };
+  }
   const instruction = paymentInstruction(state.preview, now, input.resolveBankTransferPolicy);
   if (state.preview.payment.method === "BANK_TRANSFER" && instruction === null) {
-    const next = withCommand(state, command.commandId, now, { stage: "HANDED_OFF", preview: null });
+    const next = withCommand(state, command.kind, "HANDOFF", command.commandId, now, { stage: "HANDED_OFF", preview: null });
     return { status: "HANDOFF", state: next, reasonCode: "POLICY_UNAVAILABLE", silent: true, desiredPancakeTag: "NHAN_VIEN", handoffDecision: checkoutHandoff("POLICY_UNAVAILABLE", command.commandId, now) };
   }
-  const next = withCommand(state, command.commandId, now, { stage: "PURCHASE_CONFIRMED", confirmation });
+  const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage: "PURCHASE_CONFIRMED", confirmation });
   return { status: "APPLIED", state: next, confirmation, paymentInstruction: instruction, desiredPancakeTag: "DA_CHOT_DON", transferToHuman: true };
 }
 

@@ -1,13 +1,48 @@
 import { createHash } from "node:crypto";
 import {
+  buildProtectedCartPolicyClaimsV1,
+  buildProtectedClaimsFromCartSelectionsV1,
+  evaluateDeterministicEffectReadinessV1,
   foldVietnameseForRecall,
-  resolveHybridBuyingSignal,
+  hashCanonicalBuyingIntentV1,
 } from "@lana/business-tools";
 import {
   CheckoutRevalidationV1Schema,
+  canonicalJsonV1,
+  canonicalCartStateHashPreimageV1,
+  canonicalCartStateV1,
+  canonicalBuyingIntentAuthorizesCartMutationV1,
+  cartMutationAuthorityBindingHashPreimageV1,
+  cartMutationBatchEvidenceHashPreimageV1,
+  cartMutationReceiptHashPreimageV1,
+  cartOpenEvidenceHashPreimageV1,
+  canonicalCheckoutDraftHashPreimageV1,
+  canonicalClarificationStateHashPreimageV1,
+  checkoutDetailsTransitionEvidenceHashPreimageV1,
+  clarificationTransitionEvidenceHashPreimageV1,
+  negotiationTransitionEvidenceHashPreimageV1,
+  CartOpenEvidenceV1Schema,
+  CheckoutDetailsTransitionEvidenceV1Schema,
+  ClarificationTransitionEvidenceV1Schema,
+  NegotiationTransitionEvidenceV1Schema,
+  CartMutationAuthorityBindingV1Schema,
+  CartMutationBatchEvidenceV1Schema,
+  CartMutationReceiptV1Schema,
   OrderPreviewV1Schema,
   type AgentSalesSignalsV1,
+  type CanonicalBuyingIntentV1,
   type CartV1,
+  type CanonicalCartMutationPayloadV1,
+  type CartMutationActionV1,
+  type CartMutationReceiptV1,
+  type CartOpenEvidenceV1,
+  type CanonicalCartReplayContextV1,
+  type DeterministicConfirmationEvidenceV1,
+  type DeterministicEffectReadinessV1,
+  MAX_CART_LINES_V1,
+  CART_TTL_MS_V1,
+  isStateAdvancingSalesOutcomeV1,
+  type ProtectedClaimV1,
   type BankTransferPolicyV1,
   type CheckoutRevalidationV1,
   type RevalidatedFactV1,
@@ -48,7 +83,6 @@ import {
   confirmationClarificationAction,
 } from "./confirmation-classifier.js";
 
-const CART_TTL_MS = 48 * 60 * 60 * 1_000;
 const PREVIEW_TTL_MS = 30 * 60 * 1_000;
 const MAX_CHECKOUT_CLARIFICATION_ATTEMPTS = 3;
 
@@ -58,6 +92,7 @@ export interface RealtimeSalesCycleInput {
   readonly customerHash: string;
   readonly state: SalesCycleRuntimeState;
   readonly stateRevision: number;
+  readonly conversationRevision: number;
   readonly text: string;
   readonly messageId: string;
   readonly eventKey: string;
@@ -68,12 +103,15 @@ export interface RealtimeSalesCycleInput {
   readonly offerType: string | null;
   readonly size: string | null;
   readonly color: string | null;
+  readonly canonicalBuyingIntent: CanonicalBuyingIntentV1;
   readonly salesSignals?: AgentSalesSignalsV1 | null;
   readonly shopAlias: string;
   readonly behaviorModeResolution?: RuntimeBehaviorModeResolution;
   readonly policyResolution: RuntimePolicyResolution | null;
   readonly facts: BusinessFactsReader;
   readonly now: Date;
+  /** Production supplies a live clock; deterministic tests may omit it. */
+  readonly effectNow?: () => Date;
 }
 
 export interface RealtimeSalesCycleOutput {
@@ -86,6 +124,12 @@ export interface RealtimeSalesCycleOutput {
   readonly transferToHuman: boolean;
   readonly desiredTag: "NHAN_VIEN" | "DA_CHOT_DON" | null;
   readonly reasonCode: string | null;
+  readonly readinessAttempt?: DeterministicEffectReadinessV1;
+  readonly protectedOutbound?: Readonly<{
+    claims: readonly ProtectedClaimV1[];
+    claimTypes: readonly ProtectedClaimV1["type"][];
+    readiness: DeterministicEffectReadinessV1;
+  }>;
   readonly telemetry?: RealtimeSalesCycleTelemetry;
 }
 
@@ -156,14 +200,7 @@ function asciiFold(value: string): string {
   return foldVietnameseForRecall(value);
 }
 
-function canonicalJson(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
-  const record = value as Record<string, unknown>;
-  return `{${Object.keys(record).sort().map((key) =>
-    `${JSON.stringify(key)}:${canonicalJson(record[key])}`
-  ).join(",")}}`;
-}
+const canonicalJson = canonicalJsonV1;
 
 function version(group: string, values: readonly string[]): string {
   return `${group}:sha256:${createHash("sha256").update(canonicalJson([...values].sort()), "utf8").digest("hex")}`;
@@ -183,46 +220,34 @@ function explicitSize(text: string): string | null {
   return text.toUpperCase().match(/(?:^|[^A-Z])(S|M|L|XL)(?:$|[^A-Z])/u)?.[1] ?? null;
 }
 
-function explicitQuantityValue(text: string): number | null {
-  const folded = asciiFold(text);
-  const match = folded.match(/(?:^|\s)(\d{1,2})\s*(?:set|bo|sp|san pham|mau)(?:\s|$)/u);
-  if (!match?.[1]) return null;
-  const value = Number(match[1]);
-  return Number.isInteger(value) && value >= 1 && value <= 20 ? value : null;
-}
-
 function requestedQuantityValue(
-  text: string,
-  hasProductContext: boolean,
-  salesSignals: AgentSalesSignalsV1 | null | undefined,
+  buyingIntent: CanonicalBuyingIntentV1,
 ): number | null {
-  const deterministic = explicitQuantityValue(text);
-  if (deterministic !== null) return deterministic;
-  return resolveHybridBuyingSignal(
-    text,
-    { hasProductContext },
-    salesSignals?.buyingIntent,
-  ).quantity;
+  return buyingIntent.decision === "COMMITTED" ? buyingIntent.quantity : null;
 }
 
 function requestedQuantity(
-  text: string,
-  hasProductContext: boolean,
-  salesSignals: AgentSalesSignalsV1 | null | undefined,
+  buyingIntent: CanonicalBuyingIntentV1,
 ): number {
-  return requestedQuantityValue(text, hasProductContext, salesSignals) ?? 1;
+  return requestedQuantityValue(buyingIntent) ?? 1;
 }
 
 function purchaseReady(
-  text: string,
-  hasProductContext: boolean,
-  salesSignals: AgentSalesSignalsV1 | null | undefined,
+  buyingIntent: CanonicalBuyingIntentV1,
 ): boolean {
-  return resolveHybridBuyingSignal(
-    text,
-    { hasProductContext },
-    salesSignals?.buyingIntent,
-  ).isBuyingSignal;
+  return buyingIntent.decision === "COMMITTED";
+}
+
+function deterministicMutationIntentReady(
+  buyingIntent: CanonicalBuyingIntentV1,
+  action: "ADD_LINE" | "SET_QUANTITY",
+  productId: string,
+): boolean {
+  return canonicalBuyingIntentAuthorizesCartMutationV1(
+    buyingIntent,
+    action,
+    productId,
+  );
 }
 
 function exactEvidence(text: string, evidenceText: string | null): boolean {
@@ -492,7 +517,7 @@ function trustedInbound(input: RealtimeSalesCycleInput): VerifiedInboundMessageV
   };
 }
 
-function failedOutput(
+function baseFailedOutput(
   reasonCode: string,
   plan: RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null = null,
 ): RealtimeSalesCycleOutput {
@@ -548,6 +573,8 @@ async function currentSelections(
   input: RealtimeSalesCycleInput,
   cart: CartV1,
   address: string,
+  checkedAt: Date = input.now,
+  quantityOverrides: ReadonlyMap<string, number> = new Map(),
 ): Promise<readonly CartSelectionResult[]> {
   if (!input.facts.resolveCartSelection) return [];
   return Promise.all(cart.lines.map((line) => {
@@ -559,11 +586,31 @@ async function currentSelections(
       offerType: line.offerId,
       size: sizes.length === 1 ? sizes[0]! : null,
       color: colors.length === 1 ? colors[0]! : null,
-      quantity: line.quantity,
+      quantity: quantityOverrides.get(line.lineId) ?? line.quantity,
       lineId: line.lineId,
       deliveryAddress: address,
-    }, input.now);
+    }, checkedAt);
   }));
+}
+
+type ReadyCartSelection = Extract<CartSelectionResult, { status: "READY" }>;
+
+function selectionsMatchCartLines(
+  lines: CartV1["lines"],
+  selections: readonly ReadyCartSelection[],
+): boolean {
+  if (lines.length !== selections.length) return false;
+  const byLineId = new Map(selections.map((selection) => [selection.line.lineId, selection.line]));
+  return lines.every((line) => {
+    const selected = byLineId.get(line.lineId);
+    return selected !== undefined &&
+      selected.parentProductId === line.parentProductId &&
+      selected.offerId === line.offerId &&
+      selected.quantity === line.quantity &&
+      selected.posUnitPriceVnd === line.posUnitPriceVnd &&
+      selected.lineTotalVnd === line.lineTotalVnd &&
+      canonicalJson(selected.components) === canonicalJson(line.components);
+  });
 }
 
 function fact(
@@ -664,6 +711,28 @@ export async function evaluateRealtimeSalesCycle(
   }
   let state = initial;
   const events: RealtimeSalesCycleEventPlan[] = [];
+  const effectReadiness: DeterministicEffectReadinessV1[] = [];
+  const cartMutationReceipts: CartMutationReceiptV1[] = [];
+  let cartReplayContext: CanonicalCartReplayContextV1 | null = null;
+  let cartOpenEvidence: CartOpenEvidenceV1 | null = null;
+  let lastReadinessAttempt: DeterministicEffectReadinessV1 | null = null;
+  const failedOutput = (
+    reasonCode: string,
+    failurePlan: RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null = null,
+  ): RealtimeSalesCycleOutput => ({
+    ...baseFailedOutput(reasonCode, failurePlan),
+    ...(lastReadinessAttempt === null ? {} : { readinessAttempt: lastReadinessAttempt }),
+  });
+  const effectClaimSets = new Map<
+    DeterministicEffectReadinessV1["effect"],
+    ReturnType<typeof buildProtectedClaimsFromCartSelectionsV1>
+  >();
+  let deterministicConfirmationEvidence: DeterministicConfirmationEvidenceV1 | null = null;
+  const effectNow = (): Date => {
+    const value = input.effectNow?.() ?? input.now;
+    if (!Number.isFinite(value.getTime())) throw new Error("EFFECT_CLOCK_INVALID");
+    return value;
+  };
   const references = new Map<string, unknown>();
   const inbound = trustedInbound(input);
   let checkoutValidation: CheckoutRevalidationV1 | null = null;
@@ -685,6 +754,14 @@ export async function evaluateRealtimeSalesCycle(
 
   const apply = (command: SalesCycleCommand): SalesCycleRuntimeResult => {
     const before = state;
+    const resolvedMutation = command.kind === "CART_MUTATED"
+      ? references.get(canonicalJson(command.mutationRef)) as ResolvedCartMutationV1 | undefined
+      : undefined;
+    const readinessMutationAction = resolvedMutation?.mutation.kind === "ADD_LINE" ||
+        resolvedMutation?.mutation.kind === "REMOVE_LINE" ||
+        resolvedMutation?.mutation.kind === "SET_QUANTITY"
+      ? resolvedMutation.mutation.kind
+      : null;
     const result = applySalesCycleCommand({
       state,
       expectedRevision: state.revision,
@@ -693,8 +770,100 @@ export async function evaluateRealtimeSalesCycle(
       trustedPorts: ports,
       resolveBankTransferPolicy: bankResolver,
     });
-    if (result.status === "APPLIED" || result.status === "HANDOFF") {
+    if (isStateAdvancingSalesOutcomeV1(result.status)) {
       state = result.state;
+      const negotiationTransitionEvidence = command.kind === "NEGOTIATION_EVENT"
+        ? (() => {
+            const exactEvidenceId = `inbound:${command.sourceMessageId}`;
+            const placeholder = {
+              schemaVersion: 1 as const,
+              contractVersion: "NEGOTIATION_TRANSITION_EVIDENCE_V1" as const,
+              sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+              commandIdHash: createHash("sha256").update(command.commandId, "utf8").digest("hex"),
+              eventIdHash: createHash("sha256").update(exactEvidenceId, "utf8").digest("hex"),
+              evidenceIdHash: createHash("sha256").update(exactEvidenceId, "utf8").digest("hex"),
+              objectionEvidenceIdHash: command.intent === "PRICE_OBJECTION"
+                ? createHash("sha256").update(exactEvidenceId, "utf8").digest("hex")
+                : null,
+              intent: command.intent,
+              reasonCode: command.intent === "PRICE_OBJECTION" ? command.reasonCode : null,
+              observedAt: input.occurredAt,
+              evidenceHash: "0".repeat(64),
+            };
+            return NegotiationTransitionEvidenceV1Schema.parse({
+              ...placeholder,
+              evidenceHash: createHash("sha256")
+                .update(negotiationTransitionEvidenceHashPreimageV1(placeholder), "utf8")
+                .digest("hex"),
+            });
+          })()
+        : null;
+      const checkoutDetailsTransitionEvidence = command.kind === "CHECKOUT_DETAILS_CAPTURED"
+        ? (() => {
+            const draftHash = (draft: SalesCycleRuntimeState["checkoutDraft"]): string =>
+              createHash("sha256")
+                .update(canonicalCheckoutDraftHashPreimageV1(draft), "utf8")
+                .digest("hex");
+            const placeholder = {
+              schemaVersion: 1 as const,
+              contractVersion: "CHECKOUT_DETAILS_TRANSITION_EVIDENCE_V1" as const,
+              sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+              commandIdHash: createHash("sha256").update(command.commandId, "utf8").digest("hex"),
+              details: command.details,
+              beforeCheckoutDraftHash: draftHash(before.checkoutDraft),
+              afterCheckoutDraftHash: draftHash(state.checkoutDraft),
+              appliedAt: input.now.toISOString(),
+              evidenceHash: "0".repeat(64),
+              contributor: "DETERMINISTIC_RUNTIME" as const,
+              authorization: "NONE" as const,
+            };
+            return CheckoutDetailsTransitionEvidenceV1Schema.parse({
+              ...placeholder,
+              evidenceHash: createHash("sha256")
+                .update(checkoutDetailsTransitionEvidenceHashPreimageV1(placeholder), "utf8")
+                .digest("hex"),
+            });
+          })()
+        : null;
+      const clarificationTransitionEvidence =
+        command.kind === "CLARIFICATION_REQUESTED" || command.kind === "CLARIFICATION_RESOLVED"
+          ? (() => {
+              const clarificationHash = (
+                clarification: SalesCycleRuntimeState["clarification"],
+              ): string => createHash("sha256")
+                .update(canonicalClarificationStateHashPreimageV1(clarification), "utf8")
+                .digest("hex");
+              const transition = command.kind === "CLARIFICATION_REQUESTED"
+                ? {
+                    kind: "REQUESTED" as const,
+                    reasonCode: command.reasonCode,
+                    missingFields: [...command.missingFields],
+                    productId: command.productId,
+                    questionFingerprint: command.questionFingerprint,
+                    maxAttempts: command.maxAttempts,
+                  }
+                : { kind: "RESOLVED" as const };
+              const placeholder = {
+                schemaVersion: 1 as const,
+                contractVersion: "CLARIFICATION_TRANSITION_EVIDENCE_V1" as const,
+                sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+                commandIdHash: createHash("sha256").update(command.commandId, "utf8").digest("hex"),
+                transition,
+                beforeClarificationHash: clarificationHash(before.clarification),
+                afterClarificationHash: clarificationHash(state.clarification),
+                appliedAt: input.now.toISOString(),
+                evidenceHash: "0".repeat(64),
+                contributor: "DETERMINISTIC_RUNTIME" as const,
+                authorization: "NONE" as const,
+              };
+              return ClarificationTransitionEvidenceV1Schema.parse({
+                ...placeholder,
+                evidenceHash: createHash("sha256")
+                  .update(clarificationTransitionEvidenceHashPreimageV1(placeholder), "utf8")
+                  .digest("hex"),
+              });
+            })()
+          : null;
       events.push({
         commandId: command.commandId,
         commandKind: command.kind,
@@ -706,6 +875,17 @@ export async function evaluateRealtimeSalesCycle(
         cartId: state.cart?.value.cartId ?? null,
         cartVersion: state.cart?.value.revision ?? null,
         reasonCode: result.status === "HANDOFF" ? result.reasonCode : null,
+        mutationAction: readinessMutationAction,
+        mutationPayloadHash: readinessMutationAction === null || resolvedMutation === undefined
+          ? null
+          : computeBusinessContentHash(resolvedMutation).replace(/^sha256:/u, ""),
+        ...(negotiationTransitionEvidence === null ? {} : { negotiationTransitionEvidence }),
+        ...(checkoutDetailsTransitionEvidence === null
+          ? {}
+          : { checkoutDetailsTransitionEvidence }),
+        ...(clarificationTransitionEvidence === null
+          ? {}
+          : { clarificationTransitionEvidence }),
         occurredAt: input.now,
       });
     }
@@ -713,16 +893,331 @@ export async function evaluateRealtimeSalesCycle(
   };
 
   const commandId = (suffix: string) => `sales:${input.eventKey}:${suffix}`;
+  const setCartReplayContext = (
+    customerState: "READY" | "HESITANT" | "CAUTIOUS",
+  ): void => {
+    cartReplayContext = {
+      schemaVersion: 1 as const,
+      contractVersion: "CANONICAL_CART_REPLAY_CONTEXT_V1",
+      shopId: bundle.policy.shopId,
+      policyRef: policyReference,
+      policyBundle: bundle.policy,
+      customerState,
+    };
+  };
+  const cartHash = (cart: CartV1): string => createHash("sha256")
+    .update(canonicalCartStateHashPreimageV1(canonicalCartStateV1(cart)), "utf8")
+    .digest("hex");
+  const freshReadiness = (
+    effect: DeterministicEffectReadinessV1["effect"],
+    selections: readonly Extract<CartSelectionResult, { status: "READY" }>[],
+    cart: CartV1 | null = null,
+    preview: SalesCycleRuntimeState["preview"] = null,
+    deterministicEvidenceHash: string | null = null,
+    checkedAt: Date = effectNow(),
+    mutationAction: CartMutationActionV1 | null = null,
+    parentReadinessHash: string | null = null,
+    payloadHash: string | null = null,
+  ): DeterministicEffectReadinessV1 => {
+    const claims = buildProtectedClaimsFromCartSelectionsV1(selections.map((selection) => ({
+      productId: selection.line.parentProductId,
+      variantId: selection.line.offerId,
+      priceVnd: selection.line.posUnitPriceVnd!,
+      priceVersion: selection.versions.price,
+      inventoryVersion: selection.versions.inventory,
+      etaVersion: selection.versions.eta,
+      eta: selection.eta,
+      etaExpiresAt: selection.etaExpiresAt,
+      sourceAuthority: selection.sourceAuthority,
+      stockStatus: selection.stockStatus,
+      stockAvailableQuantity: selection.stockAvailableQuantity,
+      observedAt: selection.sourceObservedAt,
+      expiresAt: selection.sourceExpiresAt,
+    })));
+    effectClaimSets.set(effect, claims);
+    return evaluateDeterministicEffectReadinessV1({
+      effect,
+      pageId: input.pageId,
+      conversationId: input.conversationId,
+      sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+      conversationRevision: input.conversationRevision,
+      salesCycleRevision: initial.revision,
+      productIds: selections.map(({ line }) => line.parentProductId),
+      cartId: cart?.cartId ?? null,
+      cartVersion: cart?.revision ?? null,
+      cartStateHash: cart === null
+        ? null
+        : cartHash(cart),
+      ...(cart === null ? {} : { cartLines: cart.lines }),
+      orderPreviewId: preview?.previewId ?? null,
+      orderPreviewHash: preview?.previewHash.replace(/^sha256:/u, "") ?? null,
+      buyingIntent: effect === "CART_OPEN" || (
+        effect === "CART_MUTATION" && mutationAction !== "REMOVE_LINE"
+      )
+        ? input.canonicalBuyingIntent
+        : null,
+      claims,
+      deterministicEvidenceHash,
+      mutationAction,
+      parentReadinessHash,
+      payloadHash,
+      checkedAt,
+    });
+  };
+  const acceptReadiness = (readiness: DeterministicEffectReadinessV1): boolean => {
+    lastReadinessAttempt = readiness;
+    if (readiness.outcome !== "READY") return false;
+    effectReadiness.push(readiness);
+    return true;
+  };
+  const acceptCartMutationReadiness = (
+    action: CartMutationActionV1,
+    mutationCommandId: string,
+    beforeCart: CartV1,
+    selections: readonly ReadyCartSelection[],
+    checkedAt: Date,
+    mutation: CanonicalCartMutationPayloadV1,
+    mutationPayloadHash: string,
+    authorityKind: "CANONICAL_BUYING_INTENT" | "DETERMINISTIC_REMOVE_CLASSIFIER",
+    authorityEvidenceHash: string,
+    customerState: "READY" | "HESITANT" | "CAUTIOUS",
+  ): DeterministicEffectReadinessV1 => {
+    if (!state.cart) {
+      return freshReadiness("CART_MUTATION", selections, null, null, null, checkedAt);
+    }
+    const authorityLine = action === "ADD_LINE"
+      ? mutation.kind === "ADD_LINE" ? mutation.line : null
+      : mutation.kind === "ADD_LINE"
+        ? null
+        : beforeCart.lines.find(({ lineId }) => lineId === mutation.lineId) ?? null;
+    if (authorityLine === null) {
+      return freshReadiness("CART_MUTATION", selections, null, null, null, checkedAt);
+    }
+    const authorityWithPlaceholder = {
+      schemaVersion: 1 as const,
+      contractVersion: "CART_MUTATION_AUTHORITY_BINDING_V1" as const,
+      sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+      action,
+      productId: authorityLine.parentProductId,
+      offerId: authorityLine.offerId,
+      authorityKind,
+      authorityEvidenceHash,
+      bindingHash: "0".repeat(64),
+    };
+    const authority = CartMutationAuthorityBindingV1Schema.parse({
+      ...authorityWithPlaceholder,
+      bindingHash: createHash("sha256")
+        .update(cartMutationAuthorityBindingHashPreimageV1(authorityWithPlaceholder), "utf8")
+        .digest("hex"),
+    });
+    const receiptWithPlaceholder = {
+      schemaVersion: 1 as const,
+      contractVersion: "CART_MUTATION_RECEIPT_V1" as const,
+      sequence: cartMutationReceipts.length,
+      commandIdHash: createHash("sha256").update(mutationCommandId, "utf8").digest("hex"),
+      mutation,
+      mutationPayloadHash,
+      mutationReasonCode: action === "ADD_LINE"
+        ? "LINE_ADDED" as const
+        : action === "REMOVE_LINE"
+          ? "LINE_REMOVED" as const
+          : "QUANTITY_CHANGED" as const,
+      authority,
+      beforeCartStateHash: cartHash(beforeCart),
+      afterCartStateHash: cartHash(state.cart.value),
+      customerState,
+      appliedAt: input.now.toISOString(),
+      evaluatedAt: checkedAt.toISOString(),
+      evidenceHash: "0".repeat(64),
+      contributor: "DETERMINISTIC_RUNTIME" as const,
+      authorization: "NONE" as const,
+    };
+    const receipt = CartMutationReceiptV1Schema.parse({
+      ...receiptWithPlaceholder,
+      evidenceHash: createHash("sha256")
+        .update(cartMutationReceiptHashPreimageV1(receiptWithPlaceholder), "utf8")
+        .digest("hex"),
+    });
+    const readiness = freshReadiness(
+      "CART_MUTATION",
+      selections,
+      state.cart.value,
+      null,
+      receipt.evidenceHash,
+      checkedAt,
+      action,
+    );
+    if (acceptReadiness(readiness)) cartMutationReceipts.push(receipt);
+    return readiness;
+  };
   const plan = (): RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null => {
     if (events.length === 0) return null;
     const cartExpiry = state.cart ? new Date(state.cart.expiresAt) : null;
-    const expiresAt = cartExpiry ?? new Date(input.now.getTime() + CART_TTL_MS);
+    const expiresAt = cartExpiry ?? new Date(input.now.getTime() + CART_TTL_MS_V1);
+    const batchWithPlaceholder = cartMutationReceipts.length === 0
+      ? null
+      : {
+          schemaVersion: 1 as const,
+          contractVersion: "CART_MUTATION_BATCH_EVIDENCE_V1" as const,
+          sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+          initialCartStateHash: cartMutationReceipts[0]!.beforeCartStateHash,
+          finalCartStateHash: cartMutationReceipts.at(-1)!.afterCartStateHash,
+          receipts: cartMutationReceipts,
+          replayContext: {
+            schemaVersion: 1 as const,
+            contractVersion: "CANONICAL_CART_REPLAY_CONTEXT_V1" as const,
+            shopId: bundle.policy.shopId,
+            policyRef: policyReference,
+            policyBundle: bundle.policy,
+            customerState: null,
+          },
+          evidenceHash: "0".repeat(64),
+        };
+    const cartMutationBatchEvidence = batchWithPlaceholder === null
+      ? null
+      : CartMutationBatchEvidenceV1Schema.parse({
+          ...batchWithPlaceholder,
+          evidenceHash: createHash("sha256")
+            .update(cartMutationBatchEvidenceHashPreimageV1(batchWithPlaceholder), "utf8")
+            .digest("hex"),
+        });
     return {
       expectedRevision: initial.revision,
       state,
       cartExpiresAt: cartExpiry,
       expiresAt,
       events,
+      readinessContractVersion: "DF06_EFFECT_READINESS_V1",
+      sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+      canonicalBuyingIntent: input.canonicalBuyingIntent,
+      ...(deterministicConfirmationEvidence
+        ? { deterministicConfirmationEvidence }
+        : {}),
+      effectClaimSets: [...effectClaimSets].map(([effect, claims]) => ({ effect, claims })),
+      ...(effectReadiness.length > 0 ? { effectReadiness } : {}),
+      ...(cartMutationBatchEvidence === null ? {} : { cartMutationBatchEvidence }),
+      ...(cartOpenEvidence === null ? {} : { cartOpenEvidence }),
+      ...(cartReplayContext === null ? {} : { cartReplayContext }),
+    };
+  };
+  const handoffStatePlan = (): RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null => {
+    const value = plan();
+    if (value === null) return null;
+    const {
+      deterministicConfirmationEvidence: _confirmationEvidence,
+      effectClaimSets: _effectClaimSets,
+      effectReadiness: _effectReadiness,
+      ...statePlan
+    } = value;
+    return { ...statePlan, effectClaimSets: [], effectReadiness: [] };
+  };
+
+  const protectedCartReply = async (
+    render: (cart: CartV1, selections: readonly ReadyCartSelection[]) => string,
+    options: Readonly<{
+      selections: readonly ReadyCartSelection[];
+      includeEta?: boolean;
+      telemetry?: RealtimeSalesCycleTelemetry;
+    }>,
+  ): Promise<RealtimeSalesCycleOutput> => {
+    if (!state.cart) return failedOutput("PROTECTED_OUTBOUND_CART_MISSING");
+    if (!selectionsMatchCartLines(state.cart.value.lines, options.selections)) {
+      return failedOutput("PROTECTED_OUTBOUND_CART_SNAPSHOT_CHANGED");
+    }
+    const checkedAt = effectNow();
+    const cartClaimExpiry = new Date(Math.min(
+      Date.parse(state.cart.expiresAt),
+      bundle.policy.effectiveUntil === null
+        ? Number.POSITIVE_INFINITY
+        : Date.parse(bundle.policy.effectiveUntil),
+    )).toISOString();
+    const cartClaims = buildProtectedCartPolicyClaimsV1({
+      cart: state.cart.value,
+      policySourceVersion: `${bundle.policy.policyBundleId}:${bundle.policy.policyVersion}`,
+      policyEvidenceRef: `policy:${policyReference.contentHash}`,
+      expiresAt: cartClaimExpiry,
+    });
+    const allClaims = [
+      ...buildProtectedClaimsFromCartSelectionsV1(options.selections.map((selection) => ({
+        productId: selection.line.parentProductId,
+        variantId: selection.line.offerId,
+        priceVnd: selection.line.posUnitPriceVnd!,
+        priceVersion: selection.versions.price,
+        inventoryVersion: selection.versions.inventory,
+        etaVersion: selection.versions.eta,
+        eta: selection.eta,
+        etaExpiresAt: selection.etaExpiresAt,
+        sourceAuthority: selection.sourceAuthority,
+        stockStatus: selection.stockStatus,
+        stockAvailableQuantity: selection.stockAvailableQuantity,
+        observedAt: selection.sourceObservedAt,
+        expiresAt: selection.sourceExpiresAt,
+      }))),
+      ...cartClaims,
+    ];
+    const claimTypes = [...new Set<ProtectedClaimV1["type"]>([
+      "PRICE",
+      ...cartClaims.map(({ type }) => type),
+      ...(options.includeEta ? ["ETA" as const] : []),
+    ])].sort();
+    const claimTypeSet = new Set(claimTypes);
+    const claims = allClaims.filter(({ type }) => claimTypeSet.has(type));
+    const message = { kind: "TEXT" as const, text: render(state.cart.value, options.selections) };
+    const payloadHash = createHash("sha256")
+      .update(canonicalJson([message]), "utf8")
+      .digest("hex");
+    let parentReadiness = [...effectReadiness].reverse().find((candidate) =>
+      candidate.effect !== "PROTECTED_OUTBOUND" &&
+      candidate.binding.cart?.cartStateHash === cartHash(state.cart!.value)
+    ) ?? null;
+    if (parentReadiness === null) {
+      const cartReady = freshReadiness(
+        "CART_READY",
+        options.selections,
+        state.cart.value,
+        null,
+        null,
+        checkedAt,
+      );
+      if (!acceptReadiness(cartReady)) {
+        return failedOutput(cartReady.reasonCodes[0] ?? "CART_READY_BLOCKED");
+      }
+      parentReadiness = cartReady;
+    }
+    const readiness = evaluateDeterministicEffectReadinessV1({
+      effect: "PROTECTED_OUTBOUND",
+      pageId: input.pageId,
+      conversationId: input.conversationId,
+      sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+      conversationRevision: input.conversationRevision,
+      salesCycleRevision: initial.revision,
+      productIds: state.cart.value.lines.map(({ parentProductId }) => parentProductId),
+      cartId: state.cart.value.cartId,
+      cartVersion: state.cart.value.revision,
+      cartStateHash: cartHash(state.cart.value),
+      cartLines: state.cart.value.lines,
+      orderPreviewId: state.preview?.previewId ?? null,
+      orderPreviewHash: state.preview?.previewHash.replace(/^sha256:/u, "") ?? null,
+      buyingIntent: null,
+      claims,
+      protectedClaimTypes: claimTypes,
+      parentReadinessHash: parentReadiness.readinessHash,
+      payloadHash,
+      checkedAt,
+    });
+    effectClaimSets.set("PROTECTED_OUTBOUND", claims);
+    if (!acceptReadiness(readiness)) {
+      return failedOutput(readiness.reasonCodes[0] ?? "PROTECTED_OUTBOUND_BLOCKED");
+    }
+    return {
+      handled: true,
+      messages: [message],
+      plan: plan(),
+      transferToHuman: false,
+      desiredTag: null,
+      reasonCode: null,
+      protectedOutbound: { claims, claimTypes, readiness },
+      ...(options.telemetry ? { telemetry: options.telemetry } : {}),
     };
   };
 
@@ -910,16 +1405,98 @@ export async function evaluateRealtimeSalesCycle(
   }
 
   if (state.stage === "ORDER_PREVIEW" && confirmationDecision.decision === "CONFIRM") {
+    if (confirmationDecision.source !== "DETERMINISTIC_CLASSIFIER") {
+      return {
+        handled: true,
+        messages: [{ kind: "TEXT", text: "Chị xác nhận rõ giúp em là đồng ý chốt đơn đang xem nhé." }],
+        plan: null,
+        transferToHuman: false,
+        desiredTag: null,
+        reasonCode: "ASK_CONFIRMATION_CLARIFICATION",
+        telemetry: {
+          ...behaviorTelemetry,
+          confirmationAttempted: true,
+          confirmationConfirmed: false,
+          confirmationSource: confirmationDecision.source,
+          confirmationReasonCode: "MODEL_CONFIRMATION_NOT_AUTHORITY",
+          confirmationAction: ASK_CONFIRMATION_CLARIFICATION,
+        },
+      };
+    }
     if (!state.cart || !state.preview || !state.checkoutDraft?.address) {
       return failedOutput("ORDER_PREVIEW_STATE_INVALID", plan());
     }
-    const selections = await currentSelections(input, state.cart.value, state.checkoutDraft.address);
+    const selections = await currentSelections(
+      input, state.cart.value, state.checkoutDraft.address, effectNow(),
+    );
+    const confirmationCheckedAt = effectNow();
     checkoutValidation = revalidation(
       state.cart.value,
       selections,
-      input.now,
+      confirmationCheckedAt,
       state.preview.revalidation,
     ).value;
+    const readySelections = selections.filter((value): value is Extract<CartSelectionResult, { status: "READY" }> =>
+      value.status === "READY"
+    );
+    deterministicConfirmationEvidence = {
+      schemaVersion: 1,
+      authorityVersion: "DETERMINISTIC_CONFIRMATION_EVIDENCE_V1",
+      classifierVersion: behaviorMode === "LEGACY"
+        ? "LEGACY_CONFIRMATION_V1"
+        : "CONFIRMATION_CLASSIFIER_V2",
+      decision: "CONFIRM",
+      reasonCode: "CONFIRMATION_DETERMINISTIC_MATCH",
+      sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+      evidenceHash: createHash("sha256")
+        .update(canonicalJson([
+          input.canonicalBuyingIntent.sourceMessageIdHash,
+          behaviorMode === "LEGACY"
+            ? "LEGACY_CONFIRMATION_V1"
+            : "CONFIRMATION_CLASSIFIER_V2",
+          "CONFIRM",
+          "CONFIRMATION_DETERMINISTIC_MATCH",
+        ]), "utf8")
+        .digest("hex"),
+      evaluatedAt: confirmationCheckedAt.toISOString(),
+      authorization: "NONE",
+    };
+    const cartReadyReadiness = freshReadiness(
+      "CART_READY",
+      readySelections,
+      state.cart.value,
+      null,
+      null,
+      confirmationCheckedAt,
+    );
+    if (!acceptReadiness(cartReadyReadiness)) {
+      return failedOutput(cartReadyReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
+    }
+    const previewReadyReadiness = freshReadiness(
+      "PREVIEW_READY",
+      readySelections,
+      state.cart.value,
+      state.preview,
+      null,
+      confirmationCheckedAt,
+      null,
+      cartReadyReadiness.readinessHash,
+    );
+    if (!acceptReadiness(previewReadyReadiness)) {
+      return failedOutput(previewReadyReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
+    }
+    const confirmationReadiness = freshReadiness(
+      "PURCHASE_CONFIRMATION_READY", readySelections, state.cart.value, state.preview,
+      createHash("sha256")
+        .update(canonicalJson(deterministicConfirmationEvidence), "utf8")
+        .digest("hex"),
+      confirmationCheckedAt,
+      null,
+      previewReadyReadiness.readinessHash,
+    );
+    if (!acceptReadiness(confirmationReadiness)) {
+      return failedOutput(confirmationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
+    }
     const result = apply({
       kind: "CONFIRM_PURCHASE",
       commandId: commandId("confirm"),
@@ -929,10 +1506,11 @@ export async function evaluateRealtimeSalesCycle(
         sourceMessageId: input.messageId,
       },
     });
-    if (result.status === "HANDOFF") return failedOutput(result.reasonCode, plan());
+    if (result.status === "HANDOFF") return failedOutput(result.reasonCode, handoffStatePlan());
     if (result.status !== "APPLIED" || !result.confirmation) {
-      return failedOutput("PURCHASE_CONFIRMATION_REJECTED", plan());
+      return failedOutput("PURCHASE_CONFIRMATION_REJECTED");
     }
+    if (!state.cart) return failedOutput("PURCHASE_CONFIRMATION_CART_MISSING");
     const messages: RealtimeSalesCycleOutput["messages"] = [
       {
         kind: "TEXT",
@@ -945,6 +1523,41 @@ export async function evaluateRealtimeSalesCycle(
           ]
         : []),
     ];
+    const protectedPayloadHash = createHash("sha256")
+      .update(canonicalJson(messages), "utf8")
+      .digest("hex");
+    const confirmationClaims = effectClaimSets.get("PURCHASE_CONFIRMATION_READY") ?? [];
+    const confirmationClaimTypes = [...new Set(
+      confirmationClaims.map(({ type }) => type),
+    )].sort();
+    const protectedOutboundReadiness = evaluateDeterministicEffectReadinessV1({
+      effect: "PROTECTED_OUTBOUND",
+      pageId: input.pageId,
+      conversationId: input.conversationId,
+      sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+      conversationRevision: input.conversationRevision,
+      salesCycleRevision: input.stateRevision,
+      productIds: state.cart?.value.lines.map(({ parentProductId }) => parentProductId) ?? [],
+      cartId: state.cart?.value.cartId ?? null,
+      cartVersion: state.cart?.value.revision ?? null,
+      cartStateHash: state.cart ? cartHash(state.cart.value) : null,
+      ...(state.cart ? { cartLines: state.cart.value.lines } : {}),
+      orderPreviewId: state.preview?.previewId ?? null,
+      orderPreviewHash: state.preview?.previewHash.replace(/^sha256:/u, "") ?? null,
+      buyingIntent: null,
+      claims: confirmationClaims,
+      protectedClaimTypes: confirmationClaimTypes,
+      deterministicEvidenceHash: protectedPayloadHash,
+      parentReadinessHash: confirmationReadiness.readinessHash,
+      payloadHash: protectedPayloadHash,
+      checkedAt: confirmationCheckedAt,
+    });
+    effectClaimSets.set("PROTECTED_OUTBOUND", confirmationClaims);
+    if (!acceptReadiness(protectedOutboundReadiness)) {
+      return failedOutput(
+        protectedOutboundReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED",
+      );
+    }
     return {
       handled: true,
       messages,
@@ -952,6 +1565,11 @@ export async function evaluateRealtimeSalesCycle(
       transferToHuman: true,
       desiredTag: "DA_CHOT_DON",
       reasonCode: "PURCHASE_CONFIRMED",
+      protectedOutbound: {
+        claims: confirmationClaims,
+        claimTypes: confirmationClaimTypes,
+        readiness: protectedOutboundReadiness,
+      },
       telemetry: {
         ...behaviorTelemetry,
         confirmationAttempted: true,
@@ -976,7 +1594,24 @@ export async function evaluateRealtimeSalesCycle(
           reasonCode: null,
         };
       }
+      const selections = await currentSelections(
+        input,
+        state.cart.value,
+        state.checkoutDraft?.address ?? "",
+        effectNow(),
+      );
+      const readySelections = selections.filter((value): value is Extract<CartSelectionResult, { status: "READY" }> =>
+        value.status === "READY" && value.line.lineId !== line.lineId
+      );
+      const remainingLines = state.cart.value.lines.filter(({ lineId }) => lineId !== line.lineId);
+      if (!selectionsMatchCartLines(remainingLines, readySelections)) {
+        return failedOutput("CART_REMOVE_SNAPSHOT_CHANGED", plan());
+      }
+      const beforeCart = state.cart.value;
+      const beforeCustomerState = state.negotiation?.customerState;
+      if (beforeCustomerState === undefined) return failedOutput("NEGOTIATION_STATE_MISSING");
       const resolved = { mutation: { kind: "REMOVE_LINE" as const, lineId: line.lineId } };
+      const mutationPayloadHash = computeBusinessContentHash(resolved).replace(/^sha256:/u, "");
       const reference = {
         id: `cart-mutation:${state.cart.value.cartId}`,
         version: `${state.cart.value.revision + 1}`,
@@ -991,18 +1626,51 @@ export async function evaluateRealtimeSalesCycle(
         mutationReasonCode: "LINE_REMOVED",
       });
       if (result.status !== "APPLIED" || !state.cart) return failedOutput("CART_REMOVE_FAILED", plan());
-      return {
-        handled: true,
-        messages: [{ kind: "TEXT", text: `${cartSummary(state.cart.value)}\nEm đã tính lại ưu đãi theo giỏ mới ạ.` }],
-        plan: plan(),
-        transferToHuman: false,
-        desiredTag: null,
-        reasonCode: null,
-      };
+      const removeReadiness = acceptCartMutationReadiness(
+        "REMOVE_LINE",
+        commandId("remove-line"),
+        beforeCart,
+        readySelections,
+        effectNow(),
+        resolved.mutation,
+        mutationPayloadHash,
+        "DETERMINISTIC_REMOVE_CLASSIFIER",
+        createHash("sha256").update(canonicalJson([
+          "DETERMINISTIC_REMOVE_CLASSIFIER_V1",
+          input.canonicalBuyingIntent.sourceMessageIdHash,
+          mutationPayloadHash,
+        ]), "utf8").digest("hex"),
+        beforeCustomerState,
+      );
+      if (removeReadiness.outcome !== "READY") {
+        return failedOutput(removeReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
+      }
+      return protectedCartReply(
+        (cart) => `${cartSummary(cart)}\nEm đã tính lại ưu đãi theo giỏ mới ạ.`,
+        { selections: readySelections },
+      );
     }
 
     if (priceObjection(input.text)) {
       if (!state.negotiation) return failedOutput("NEGOTIATION_STATE_MISSING", plan());
+      const negotiationSelections = await currentSelections(
+        input, state.cart.value, state.checkoutDraft?.address ?? "", effectNow(),
+      );
+      const readyNegotiationSelections = negotiationSelections.filter(
+        (value): value is ReadyCartSelection => value.status === "READY",
+      );
+      if (readyNegotiationSelections.length !== state.cart.value.lines.length) {
+        const unavailable = negotiationSelections.find(({ status }) => status !== "READY");
+        return failedOutput(
+          unavailable && "reasonCode" in unavailable
+            ? unavailable.reasonCode
+            : "NEGOTIATION_FACTS_UNAVAILABLE",
+          plan(),
+        );
+      }
+      if (!selectionsMatchCartLines(state.cart.value.lines, readyNegotiationSelections)) {
+        return failedOutput("NEGOTIATION_CART_SNAPSHOT_CHANGED", plan());
+      }
       const result = apply({
         kind: "NEGOTIATION_EVENT",
         commandId: commandId("price-objection"),
@@ -1028,57 +1696,107 @@ export async function evaluateRealtimeSalesCycle(
       if (result.status !== "APPLIED" || !state.cart || !state.negotiation) {
         return failedOutput("NEGOTIATION_FAILED", plan());
       }
-      const intro = negotiationOfferText(state.cart.value, state.negotiation.customerState);
-      return {
-        handled: true,
-        messages: [{ kind: "TEXT", text: `${intro}\n${cartSummary(state.cart.value)}` }],
-        plan: plan(),
-        transferToHuman: false,
-        desiredTag: null,
-        reasonCode: null,
-      };
+      setCartReplayContext(state.negotiation.customerState);
+      return protectedCartReply(
+        (cart) => `${negotiationOfferText(cart, state.negotiation!.customerState)}\n${cartSummary(cart)}`,
+        { selections: readyNegotiationSelections },
+      );
     }
 
     const details = checkoutDetails(input.text, input.salesSignals);
     const hasDetails = Object.keys(details).length > 0;
     if (hasDetails) {
+      const prospectiveCheckoutDraft = { ...state.checkoutDraft, ...details };
+      const capturedFields = checkoutCapturedFields(details);
+      const prospectiveMissing = [
+        ...(prospectiveCheckoutDraft.fullName ? [] : ["FULL_NAME" as const]),
+        ...(prospectiveCheckoutDraft.phone ? [] : ["PHONE" as const]),
+        ...(prospectiveCheckoutDraft.address ? [] : ["ADDRESS" as const]),
+        ...(prospectiveCheckoutDraft.paymentMethod ? [] : ["PAYMENT_METHOD" as const]),
+      ];
+      if (prospectiveMissing.length > 0) {
+        const captured = apply({
+          kind: "CHECKOUT_DETAILS_CAPTURED",
+          commandId: commandId("checkout-details"),
+          details,
+        });
+        if (captured.status !== "APPLIED") {
+          return failedOutput("CHECKOUT_DETAILS_REJECTED", plan());
+        }
+        return requestCheckoutClarification(prospectiveMissing, capturedFields);
+      }
+      if (prospectiveCheckoutDraft.paymentMethod === "BANK_TRANSFER" && !bank) {
+        return failedOutput("BANK_TRANSFER_POLICY_UNAVAILABLE");
+      }
+      if (!state.cart) return failedOutput("CHECKOUT_DRAFT_INCOMPLETE");
+      const preflightCheckedAt = effectNow();
+      const selections = await currentSelections(
+        input, state.cart.value, prospectiveCheckoutDraft.address!, preflightCheckedAt,
+      );
+      const readySelections = selections.filter(
+        (value): value is ReadyCartSelection => value.status === "READY",
+      );
+      if (!selectionsMatchCartLines(state.cart.value.lines, readySelections)) {
+        return failedOutput("ORDER_PREVIEW_CART_SNAPSHOT_CHANGED");
+      }
+      const preflightValidation = revalidation(
+        state.cart.value, selections, preflightCheckedAt,
+      );
+      if (!preflightValidation.value.eligible || !preflightValidation.eta) {
+        return failedOutput("CHECKOUT_REVALIDATION_UNAVAILABLE");
+      }
+      const preflightReadiness = freshReadiness(
+        "CART_READY", readySelections, state.cart.value,
+        null, null, preflightCheckedAt,
+      );
+      lastReadinessAttempt = preflightReadiness;
+      if (preflightReadiness.outcome !== "READY") {
+        return failedOutput(
+          preflightReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED",
+        );
+      }
       const captured = apply({
         kind: "CHECKOUT_DETAILS_CAPTURED",
         commandId: commandId("checkout-details"),
         details,
       });
-      if (captured.status !== "APPLIED") return failedOutput("CHECKOUT_DETAILS_REJECTED", plan());
-      const capturedFields = checkoutCapturedFields(details);
-      const missing = missingCheckout(state);
-      if (missing.length > 0) {
-        return requestCheckoutClarification(missing, capturedFields);
-      }
+      if (captured.status !== "APPLIED") return failedOutput("CHECKOUT_DETAILS_REJECTED");
       if (state.clarification) {
         const resolved = apply({
           kind: "CLARIFICATION_RESOLVED",
           commandId: commandId("clarification-resolved"),
         });
         if (resolved.status !== "APPLIED") {
-          return failedOutput("CLARIFICATION_RESOLVE_REJECTED", plan());
+          return failedOutput("CLARIFICATION_RESOLVE_REJECTED");
         }
       }
       if (!state.cart || !state.checkoutDraft?.fullName || !state.checkoutDraft.phone ||
           !state.checkoutDraft.address || !state.checkoutDraft.paymentMethod) {
-        return failedOutput("CHECKOUT_DRAFT_INCOMPLETE", plan());
+        return failedOutput("CHECKOUT_DRAFT_INCOMPLETE");
       }
       if (state.checkoutDraft.paymentMethod === "BANK_TRANSFER" && !bank) {
-        return failedOutput("BANK_TRANSFER_POLICY_UNAVAILABLE", plan());
+        return failedOutput("BANK_TRANSFER_POLICY_UNAVAILABLE");
       }
+      if (!state.negotiation) return failedOutput("NEGOTIATION_STATE_MISSING");
+      setCartReplayContext(state.negotiation.customerState);
       const ready = apply({
         kind: "CART_READY",
         commandId: commandId("cart-ready"),
         expectedCartVersion: state.cart.value.revision,
       });
-      if (ready.status !== "APPLIED" || !state.cart) return failedOutput("CART_READY_REJECTED", plan());
-      const selections = await currentSelections(input, state.cart.value, state.checkoutDraft.address);
-      const checked = revalidation(state.cart.value, selections, input.now);
+      if (ready.status !== "APPLIED" || !state.cart) return failedOutput("CART_READY_REJECTED");
+      const previewCheckedAt = effectNow();
+      const checked = revalidation(state.cart.value, selections, previewCheckedAt);
       if (!checked.value.eligible || !checked.eta) {
-        return failedOutput("CHECKOUT_REVALIDATION_UNAVAILABLE", plan());
+        return failedOutput("CHECKOUT_REVALIDATION_UNAVAILABLE");
+      }
+      const checkedEta = checked.eta;
+      const cartReadyReadiness = freshReadiness(
+        "CART_READY", readySelections, state.cart.value,
+        null, null, previewCheckedAt,
+      );
+      if (!acceptReadiness(cartReadyReadiness)) {
+        return failedOutput(cartReadyReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
       }
       const previewPayload = {
         schemaVersion: 1 as const,
@@ -1096,51 +1814,61 @@ export async function evaluateRealtimeSalesCycle(
           ? { method: "COD" as const, bankTransferPolicyRef: null }
           : { method: "BANK_TRANSFER" as const, bankTransferPolicyRef: bank!.reference },
         revalidation: checked.value,
-        createdAt: input.now.toISOString(),
+        createdAt: previewCheckedAt.toISOString(),
         expiresAt: new Date(Math.min(
           Date.parse(state.cart.expiresAt),
-          input.now.getTime() + PREVIEW_TTL_MS,
+          previewCheckedAt.getTime() + PREVIEW_TTL_MS,
         )).toISOString(),
       };
       const preview = OrderPreviewV1Schema.parse({
         ...previewPayload,
         previewHash: computeOrderPreviewHash(previewPayload),
       });
+      const previewReadiness = freshReadiness(
+        "PREVIEW_READY",
+        readySelections,
+        state.cart.value,
+        preview,
+        null,
+        previewCheckedAt,
+        null,
+        cartReadyReadiness.readinessHash,
+      );
+      if (!acceptReadiness(previewReadiness)) {
+        return failedOutput(previewReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
+      }
       const previewed = apply({
         kind: "PREVIEW_CREATED",
         commandId: commandId("preview"),
         preview,
       });
-      if (previewed.status !== "APPLIED" || !state.cart) return failedOutput("ORDER_PREVIEW_REJECTED", plan());
-      return {
-        handled: true,
-        messages: [{
-          kind: "TEXT",
-          text: `${cartSummary(state.cart.value)}\nNgười nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}\nĐịa chỉ: ${preview.recipient.address}\nThanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}\nDự kiến nhận hàng: ${checked.eta.minDays}-${checked.eta.maxDays} ngày.\nChị xác nhận chốt đơn giúp em nhé.`,
-        }],
-        plan: plan(),
-        transferToHuman: false,
-        desiredTag: null,
-        reasonCode: null,
-        telemetry: {
+      if (previewed.status !== "APPLIED" || !state.cart) return failedOutput("ORDER_PREVIEW_REJECTED");
+      return protectedCartReply(
+        (cart) => `${cartSummary(cart)}\nNgười nhận: ${preview.recipient.fullName} - ${preview.recipient.phone}\nĐịa chỉ: ${preview.recipient.address}\nThanh toán: ${preview.payment.method === "COD" ? "COD" : "Chuyển khoản"}\nDự kiến nhận hàng: ${checkedEta.minDays}-${checkedEta.maxDays} ngày.\nChị xác nhận chốt đơn giúp em nhé.`,
+        { selections: readySelections, includeEta: true, telemetry: {
           checkoutCapturedFields: capturedFields,
           checkoutMissingFields: [],
           checkoutCompleted: true,
           orderPreviewCreated: true,
-        },
-      };
+        } },
+      );
     }
 
     if (
-      purchaseReady(input.text, Boolean(input.productId || state.cart), input.salesSignals) &&
+      purchaseReady(input.canonicalBuyingIntent) &&
       input.productId &&
       state.cart.value.lines.some(({ parentProductId }) => parentProductId === input.productId) &&
-      requestedQuantityValue(input.text, true, input.salesSignals) !== null
+      requestedQuantityValue(input.canonicalBuyingIntent) !== null
     ) {
+      if (!deterministicMutationIntentReady(
+        input.canonicalBuyingIntent,
+        "SET_QUANTITY",
+        input.productId,
+      )) return failedOutput("BUYING_INTENT_MISSING");
       const existing = state.cart.value.lines.find(({ parentProductId }) =>
         parentProductId === input.productId
       )!;
-      const quantity = requestedQuantityValue(input.text, true, input.salesSignals)!;
+      const quantity = requestedQuantityValue(input.canonicalBuyingIntent)!;
       if (quantity === existing.quantity) {
         return {
           handled: true,
@@ -1151,22 +1879,29 @@ export async function evaluateRealtimeSalesCycle(
           reasonCode: "CART_QUANTITY_UNCHANGED",
         };
       }
-      const sizes = [...new Set(existing.components
-        .map(({ size }) => size)
-        .filter((value): value is string => value !== null))];
-      const colors = [...new Set(existing.components
-        .map(({ color }) => color)
-        .filter((value): value is string => value !== null))];
-      const verified = await input.facts.resolveCartSelection({
-        shopAlias: input.shopAlias,
-        productId: existing.parentProductId,
-        offerType: existing.offerId,
-        size: sizes.length === 1 ? sizes[0]! : null,
-        color: colors.length === 1 ? colors[0]! : null,
-        quantity,
-        lineId: existing.lineId,
-      }, input.now);
-      if (verified.status !== "READY") return failedOutput(verified.reasonCode, plan());
+      const selections = await currentSelections(
+        input,
+        state.cart.value,
+        state.checkoutDraft?.address ?? "",
+        effectNow(),
+        new Map([[existing.lineId, quantity]]),
+      );
+      const readySelections = selections.filter(
+        (value): value is ReadyCartSelection => value.status === "READY",
+      );
+      const prospectiveLines = state.cart.value.lines.map((line) => line.lineId === existing.lineId
+        ? {
+            ...line,
+            quantity,
+            lineTotalVnd: line.posUnitPriceVnd === null ? null : line.posUnitPriceVnd * quantity,
+          }
+        : line);
+      if (!selectionsMatchCartLines(prospectiveLines, readySelections)) {
+        return failedOutput("CART_QUANTITY_SNAPSHOT_CHANGED", plan());
+      }
+      const beforeCart = state.cart.value;
+      const beforeCustomerState = state.negotiation?.customerState;
+      if (beforeCustomerState === undefined) return failedOutput("NEGOTIATION_STATE_MISSING");
       const resolved = {
         mutation: {
           kind: "SET_QUANTITY" as const,
@@ -1174,6 +1909,7 @@ export async function evaluateRealtimeSalesCycle(
           quantity,
         },
       };
+      const mutationPayloadHash = computeBusinessContentHash(resolved).replace(/^sha256:/u, "");
       const reference = {
         id: `cart-mutation:${state.cart.value.cartId}`,
         version: `${state.cart.value.revision + 1}`,
@@ -1190,30 +1926,46 @@ export async function evaluateRealtimeSalesCycle(
       if (result.status !== "APPLIED" || !state.cart) {
         return failedOutput("CART_QUANTITY_CHANGE_FAILED", plan());
       }
-      return {
-        handled: true,
-        messages: [{ kind: "TEXT", text: checkoutTemplate(state.cart.value) }],
-        plan: plan(),
-        transferToHuman: false,
-        desiredTag: null,
-        reasonCode: null,
-      };
+      const mutationReadiness = acceptCartMutationReadiness(
+        "SET_QUANTITY",
+        commandId("set-quantity"),
+        beforeCart,
+        readySelections,
+        effectNow(),
+        resolved.mutation,
+        mutationPayloadHash,
+        "CANONICAL_BUYING_INTENT",
+        hashCanonicalBuyingIntentV1(input.canonicalBuyingIntent),
+        beforeCustomerState,
+      );
+      if (mutationReadiness.outcome !== "READY") {
+        return failedOutput(mutationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
+      }
+      return protectedCartReply(checkoutTemplate, { selections: readySelections });
     }
 
     if (
-      purchaseReady(input.text, Boolean(input.productId || state.cart), input.salesSignals) &&
+      purchaseReady(input.canonicalBuyingIntent) &&
       input.productId &&
       !state.cart.value.lines.some(({ parentProductId }) => parentProductId === input.productId)
     ) {
+      if (!deterministicMutationIntentReady(
+        input.canonicalBuyingIntent,
+        "ADD_LINE",
+        input.productId,
+      )) return failedOutput("BUYING_INTENT_MISSING");
+      if (state.cart.value.lines.length >= MAX_CART_LINES_V1) {
+        return failedOutput("CART_CAPACITY_EXCEEDED", plan());
+      }
       const selected = await input.facts.resolveCartSelection({
         shopAlias: input.shopAlias,
         productId: input.productId,
         offerType: input.offerType,
         size: explicitSize(input.text) ?? input.size,
         color: input.color,
-        quantity: requestedQuantity(input.text, true, input.salesSignals),
+        quantity: requestedQuantity(input.canonicalBuyingIntent),
         lineId: deterministicUuid(`${state.cart.value.cartId}:${input.productId}:${input.eventKey}`),
-      }, input.now);
+      }, effectNow());
       if (selected.status !== "READY") {
         if (selected.status === "SIZE_REQUIRED" || selected.status === "COLOR_REQUIRED") {
           const values = selected.status === "SIZE_REQUIRED" ? selected.availableSizes : selected.availableColors;
@@ -1228,7 +1980,21 @@ export async function evaluateRealtimeSalesCycle(
         }
         return failedOutput(selected.reasonCode, plan());
       }
+      const existingSelections = await currentSelections(
+        input, state.cart.value, state.checkoutDraft?.address ?? "", effectNow(),
+      );
+      const readyExistingSelections = existingSelections.filter(
+        (value): value is ReadyCartSelection => value.status === "READY",
+      );
+      if (!selectionsMatchCartLines(state.cart.value.lines, readyExistingSelections)) {
+        return failedOutput("CART_ADD_SNAPSHOT_CHANGED", plan());
+      }
+      const readySelections = [...readyExistingSelections, selected];
+      const beforeCart = state.cart.value;
+      const beforeCustomerState = state.negotiation?.customerState;
+      if (beforeCustomerState === undefined) return failedOutput("NEGOTIATION_STATE_MISSING");
       const resolved = { mutation: { kind: "ADD_LINE" as const, line: selected.line } };
+      const mutationPayloadHash = computeBusinessContentHash(resolved).replace(/^sha256:/u, "");
       const reference = {
         id: `cart-mutation:${state.cart.value.cartId}`,
         version: `${state.cart.value.revision + 1}`,
@@ -1243,14 +2009,22 @@ export async function evaluateRealtimeSalesCycle(
         mutationReasonCode: "LINE_ADDED",
       });
       if (result.status !== "APPLIED" || !state.cart) return failedOutput("CART_ADD_FAILED", plan());
-      return {
-        handled: true,
-        messages: [{ kind: "TEXT", text: checkoutTemplate(state.cart.value) }],
-        plan: plan(),
-        transferToHuman: false,
-        desiredTag: null,
-        reasonCode: null,
-      };
+      const mutationReadiness = acceptCartMutationReadiness(
+        "ADD_LINE",
+        commandId("add-line"),
+        beforeCart,
+        readySelections,
+        effectNow(),
+        resolved.mutation,
+        mutationPayloadHash,
+        "CANONICAL_BUYING_INTENT",
+        hashCanonicalBuyingIntentV1(input.canonicalBuyingIntent),
+        beforeCustomerState,
+      );
+      if (mutationReadiness.outcome !== "READY") {
+        return failedOutput(mutationReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
+      }
+      return protectedCartReply(checkoutTemplate, { selections: readySelections });
     }
 
     if (state.clarification?.reasonCode === "CHECKOUT_DETAILS_MISSING") {
@@ -1270,7 +2044,7 @@ export async function evaluateRealtimeSalesCycle(
   }
 
   if (
-    purchaseReady(input.text, Boolean(input.productId || state.cart), input.salesSignals) &&
+    purchaseReady(input.canonicalBuyingIntent) &&
     input.productId
   ) {
     const selected = await input.facts.resolveCartSelection({
@@ -1279,9 +2053,9 @@ export async function evaluateRealtimeSalesCycle(
       offerType: input.offerType,
       size: explicitSize(input.text) ?? input.size,
       color: input.color,
-      quantity: requestedQuantity(input.text, true, input.salesSignals),
+      quantity: requestedQuantity(input.canonicalBuyingIntent),
       lineId: deterministicUuid(`${input.conversationId}:${input.productId}:${input.eventKey}`),
-    }, input.now);
+    }, effectNow());
     if (selected.status !== "READY") {
       if (selected.status === "SIZE_REQUIRED" || selected.status === "COLOR_REQUIRED") {
         if (state.stage === "DISCOVERY") {
@@ -1329,22 +2103,56 @@ export async function evaluateRealtimeSalesCycle(
       version: input.eventKey.slice(-128),
       contentHash: computeBusinessContentHash(draft),
     };
+    const policyPin = input.policyResolution?.audit;
+    if ((bundle.channel !== "CANARY_LIVE" && bundle.channel !== "PUBLISHED") ||
+      policyPin?.pinScopeType !== "SALES_EPISODE" || policyPin.pinScopeId === null ||
+      policyPin.channel !== bundle.channel || policyPin.bundleHash !== bundle.bundleHash) {
+      return failedOutput("CART_OPEN_POLICY_PIN_REQUIRED");
+    }
     references.set(canonicalJson(draftReference), draft);
     const opened = apply({
       kind: "CART_OPENED",
       commandId: commandId("cart-open"),
       cartDraftRef: draftReference,
-      expiresAt: new Date(input.now.getTime() + CART_TTL_MS).toISOString(),
+      expiresAt: new Date(input.now.getTime() + CART_TTL_MS_V1).toISOString(),
     });
     if (opened.status !== "APPLIED" || !state.cart) return failedOutput("CART_OPEN_FAILED", plan());
-    return {
-      handled: true,
-      messages: [{ kind: "TEXT", text: checkoutTemplate(state.cart.value) }],
-      plan: plan(),
-      transferToHuman: false,
-      desiredTag: null,
-      reasonCode: null,
+    const cartOpenPlaceholder = {
+      schemaVersion: 1 as const,
+      contractVersion: "CART_OPEN_EVIDENCE_V1" as const,
+      sourceMessageIdHash: input.canonicalBuyingIntent.sourceMessageIdHash,
+      commandIdHash: createHash("sha256").update(commandId("cart-open"), "utf8").digest("hex"),
+      cartDraftRef: draftReference,
+      draft,
+      replayContext: {
+        schemaVersion: 1 as const,
+        contractVersion: "CANONICAL_CART_REPLAY_CONTEXT_V1" as const,
+        shopId: bundle.policy.shopId,
+        policyRef: policyReference,
+        policyBundle: bundle.policy,
+        customerState: null,
+      },
+      policyPin: {
+        scopeType: "SALES_EPISODE" as const,
+        scopeId: policyPin.pinScopeId,
+        channel: bundle.channel,
+        bundleHash: bundle.bundleHash,
+      },
+      createdAt: input.now.toISOString(),
+      cartExpiresAt: state.cart.expiresAt,
+      evidenceHash: "0".repeat(64),
     };
+    cartOpenEvidence = CartOpenEvidenceV1Schema.parse({
+      ...cartOpenPlaceholder,
+      evidenceHash: createHash("sha256")
+        .update(cartOpenEvidenceHashPreimageV1(cartOpenPlaceholder), "utf8")
+        .digest("hex"),
+    });
+    const cartOpenReadiness = freshReadiness("CART_OPEN", [selected], state.cart.value);
+    if (!acceptReadiness(cartOpenReadiness)) {
+      return failedOutput(cartOpenReadiness.reasonCodes[0] ?? "EFFECT_READINESS_BLOCKED");
+    }
+    return protectedCartReply(checkoutTemplate, { selections: [selected] });
   }
 
   if (

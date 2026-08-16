@@ -157,6 +157,9 @@ importers:
 
   packages/business-tools:
     dependencies:
+      '@lana/commerce-kernel':
+        specifier: workspace:*
+        version: link:../commerce-kernel
       '@lana/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -169,12 +172,24 @@ importers:
       '@lana/business-tools':
         specifier: workspace:*
         version: link:../business-tools
+      '@lana/commerce-kernel':
+        specifier: workspace:*
+        version: link:../commerce-kernel
       '@lana/contracts':
         specifier: workspace:*
         version: link:../contracts
       '@lana/conversation-engine':
         specifier: workspace:*
         version: link:../conversation-engine
+
+  packages/commerce-kernel:
+    dependencies:
+      '@lana/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      zod:
+        specifier: ^3.25.67
+        version: 3.25.76
 
   packages/contracts:
     dependencies:
@@ -190,6 +205,9 @@ importers:
 
   packages/database:
     dependencies:
+      '@lana/commerce-kernel':
+        specifier: workspace:*
+        version: link:../commerce-kernel
       '@lana/contracts':
         specifier: workspace:*
         version: link:../contracts
