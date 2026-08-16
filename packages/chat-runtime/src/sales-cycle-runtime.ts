@@ -155,6 +155,17 @@ export type SalesCycleRuntimeResult =
   | { readonly status: "CONFLICT" | "REJECTED"; readonly state: SalesCycleRuntimeState; readonly reasonCode: string }
   | { readonly status: "HANDOFF"; readonly state: SalesCycleRuntimeState; readonly reasonCode: CheckoutHandoffReason; readonly silent: true; readonly desiredPancakeTag: "NHAN_VIEN" | null; readonly handoffDecision: HandoffDecisionV2 };
 
+interface ApplySalesCycleCommandInput {
+  readonly state: SalesCycleRuntimeState;
+  readonly expectedRevision: number;
+  readonly command: SalesCycleCommand;
+  readonly now: Date;
+  /** Trusted application port. Commands/model output can carry only a policy reference. */
+  readonly resolveBankTransferPolicy?: BankTransferPolicyResolver;
+  /** Only application adapters may implement these ports; model output never supplies facts or policy payloads. */
+  readonly trustedPorts?: SalesCycleTrustedPortsV1;
+}
+
 export interface PaymentInstruction {
   readonly method: "BANK_TRANSFER";
   readonly policyId: string;
@@ -434,17 +445,7 @@ function checkoutHandoff(reason: CheckoutHandoffReason, commandId: string, now: 
   });
 }
 
-/** Pure CAS state machine. Persistence must commit state and outbox/tag intents atomically. */
-export function applySalesCycleCommand(input: {
-  readonly state: SalesCycleRuntimeState;
-  readonly expectedRevision: number;
-  readonly command: SalesCycleCommand;
-  readonly now: Date;
-  /** Trusted application port. Commands/model output can carry only a policy reference. */
-  readonly resolveBankTransferPolicy?: BankTransferPolicyResolver;
-  /** Only application adapters may implement these ports; model output never supplies facts or policy payloads. */
-  readonly trustedPorts?: SalesCycleTrustedPortsV1;
-}): SalesCycleRuntimeResult {
+function applySalesCycleCommandUnchecked(input: ApplySalesCycleCommandInput): SalesCycleRuntimeResult {
   const { state, command, now } = input;
   if (!Number.isFinite(now.getTime()) || command.commandId.trim() === "") return { status: "REJECTED", state, reasonCode: "COMMAND_INVALID" };
   if (state.processedCommandIds.includes(command.commandId)) return { status: "DUPLICATE", state, confirmation: state.confirmation };
@@ -726,6 +727,22 @@ export function applySalesCycleCommand(input: {
   }
   const next = withCommand(state, command.kind, "APPLIED", command.commandId, now, { stage: "PURCHASE_CONFIRMED", confirmation });
   return { status: "APPLIED", state: next, confirmation, paymentInstruction: instruction, desiredPancakeTag: "DA_CHOT_DON", transferToHuman: true };
+}
+
+/** Pure CAS state machine. Persistence must commit state and outbox/tag intents atomically. */
+export function applySalesCycleCommand(input: ApplySalesCycleCommandInput): SalesCycleRuntimeResult {
+  try {
+    return applySalesCycleCommandUnchecked(input);
+  } catch (error) {
+    if (error instanceof Error && error.message === "SALES_STAGE_TRANSITION_CONTRACT_MISMATCH") {
+      return {
+        status: "REJECTED",
+        state: input.state,
+        reasonCode: "SALES_STAGE_TRANSITION_CONTRACT_MISMATCH",
+      };
+    }
+    throw error;
+  }
 }
 
 /** Executes one command through an atomic repository CAS; losing concurrent commands never emit effects. */

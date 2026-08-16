@@ -18,6 +18,7 @@ import type { BusinessFactsReader } from "./redis-business-facts.js";
 import {
   createRealtimeSalesState,
   evaluateRealtimeSalesCycle,
+  prepareHandoffStatePlanV1,
 } from "./realtime-sales-cycle.js";
 
 const now = new Date("2026-07-23T03:00:00.000Z");
@@ -1057,6 +1058,31 @@ describe("realtime Phase 3 sales cycle", () => {
         }],
       },
     });
+    expect(output.plan?.effectClaimSets).toEqual([]);
+    expect(output.plan?.effectReadiness).toEqual([]);
+
+    const allHandoffPlan = output.plan!;
+    const mixedPlan = {
+      ...allHandoffPlan,
+      events: [
+        {
+          ...allHandoffPlan.events[0]!,
+          commandId: "confirm-handoff-plan-prior-applied",
+          commandKind: "CART_READY" as const,
+          outcome: "APPLIED" as const,
+        },
+        ...allHandoffPlan.events,
+      ],
+      effectClaimSets: [{
+        effect: "CART_READY" as const,
+        claims: [],
+      }],
+      effectReadiness: [{ marker: "must-survive-mixed-plan" }] as unknown as NonNullable<
+        typeof allHandoffPlan.effectReadiness
+      >,
+    };
+
+    expect(prepareHandoffStatePlanV1(mixedPlan)).toBe(mixedPlan);
   });
 
   it("stacks 5%, freeship and final 20k while the same evidence cannot escalate twice", async () => {

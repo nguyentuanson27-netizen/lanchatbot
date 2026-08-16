@@ -133,6 +133,20 @@ export interface RealtimeSalesCycleOutput {
   readonly telemetry?: RealtimeSalesCycleTelemetry;
 }
 
+export function prepareHandoffStatePlanV1<TState>(
+  value: RealtimeSalesCyclePlan<TState> | null,
+): RealtimeSalesCyclePlan<TState> | null {
+  if (value === null) return null;
+  if (value.events.some(({ outcome }) => outcome !== "HANDOFF")) return value;
+  const {
+    deterministicConfirmationEvidence: _confirmationEvidence,
+    effectClaimSets: _effectClaimSets,
+    effectReadiness: _effectReadiness,
+    ...statePlan
+  } = value;
+  return { ...statePlan, effectClaimSets: [], effectReadiness: [] };
+}
+
 export type CheckoutFieldKey =
   | "FULL_NAME"
   | "PHONE"
@@ -1101,15 +1115,7 @@ export async function evaluateRealtimeSalesCycle(
     };
   };
   const handoffStatePlan = (): RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null => {
-    const value = plan();
-    if (value === null) return null;
-    const {
-      deterministicConfirmationEvidence: _confirmationEvidence,
-      effectClaimSets: _effectClaimSets,
-      effectReadiness: _effectReadiness,
-      ...statePlan
-    } = value;
-    return { ...statePlan, effectClaimSets: [], effectReadiness: [] };
+    return prepareHandoffStatePlanV1(plan());
   };
 
   const protectedCartReply = async (
