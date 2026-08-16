@@ -13,6 +13,7 @@ import { SalesCycleStageV1Schema } from "../v3/sales-cycle.js";
 
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 const BoundedReasonCodeSchema = z.string().regex(/^[A-Z0-9][A-Z0-9_.:-]{0,127}$/u);
+const SourceMessagePkSchema = z.string().min(1).max(128);
 
 export const ConversationPhaseV2ValueSchema = z.enum([
   "DISCOVERY",
@@ -107,6 +108,69 @@ const ProductScopeV2Schema = z.enum([
   "AMBIGUOUS",
   "STALE",
 ]);
+export type ProductScopeV2 = z.infer<typeof ProductScopeV2Schema>;
+
+export const FinalTurnEvidenceV2Schema = z.object({
+  schemaVersion: z.literal(2),
+  contractVersion: z.literal("FINAL_TURN_EVIDENCE_V2"),
+  sourceMessagePk: SourceMessagePkSchema,
+  sourceMessageIdHash: Sha256Schema,
+  preTransitionConversationRevision: z.number().int().nonnegative(),
+  finalConversationRevision: z.number().int().positive(),
+  preTransitionSalesCycleRevision: z.number().int().nonnegative().nullable(),
+  finalSalesCycleRevision: z.number().int().nonnegative(),
+}).strict().superRefine((value, context) => {
+  if (value.finalConversationRevision !==
+      value.preTransitionConversationRevision + 1) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["finalConversationRevision"],
+      message: "final conversation revision must be the committed successor",
+    });
+  }
+  if (value.preTransitionSalesCycleRevision !== null &&
+      value.finalSalesCycleRevision < value.preTransitionSalesCycleRevision) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["finalSalesCycleRevision"],
+      message: "final sales-cycle revision cannot precede the locked revision",
+    });
+  }
+});
+export type FinalTurnEvidenceV2 = z.infer<typeof FinalTurnEvidenceV2Schema>;
+
+export const ProductBindingV2Schema = z.object({
+  schemaVersion: z.literal(2),
+  contractVersion: z.literal("PRODUCT_BINDING_V2"),
+  status: ProductScopeV2Schema,
+  productIds: z.array(CanonicalProductIdV1Schema).max(20),
+  catalogVersion: z.string().min(1).max(128).nullable(),
+}).strict().superRefine((value, context) => {
+  const uniqueSorted = [...new Set(value.productIds)].sort();
+  if (JSON.stringify(uniqueSorted) !== JSON.stringify(value.productIds)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["productIds"],
+      message: "product bindings must be unique and canonically sorted",
+    });
+  }
+  const count = value.productIds.length;
+  const valid = value.status === "RESOLVED"
+    ? count > 0
+    : value.status === "AMBIGUOUS"
+      ? count > 1
+      : value.status === "STALE"
+        ? count > 0
+        : count === 0;
+  if (!valid) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["productIds"],
+      message: "product IDs must match the binding status",
+    });
+  }
+});
+export type ProductBindingV2 = z.infer<typeof ProductBindingV2Schema>;
 
 export const ConversationBarriersV2Schema = z.object({
   schemaVersion: z.literal(2),
@@ -194,9 +258,8 @@ export const ContextV2Schema = z.object({
   schemaVersion: z.literal(2),
   contractVersion: z.literal("CONTEXT_V2"),
   authority: z.literal("SHADOW_ONLY"),
-  sourceMessageIdHash: Sha256Schema,
-  conversationRevision: z.number().int().nonnegative(),
-  salesCycleRevision: z.number().int().nonnegative().nullable(),
+  finalTurnEvidence: FinalTurnEvidenceV2Schema,
+  productBinding: ProductBindingV2Schema,
   dialogueEvidence: z.object({
     act: z.enum([
       "QUESTION", "REQUEST", "CORRECTION", "CONFIRMATION", "REJECTION",
@@ -264,14 +327,54 @@ export const ContextV2Schema = z.object({
       message: "verified claim set hash must identify whether claims are present",
     });
   }
-  if (value.phase.salesCycleRevision !== value.salesCycleRevision ||
-      value.barriers.salesCycleRevision !== value.salesCycleRevision ||
-      value.barriers.conversationRevision !== value.conversationRevision) {
+  if (value.phase.salesCycleRevision !==
+        value.finalTurnEvidence.finalSalesCycleRevision ||
+      value.barriers.salesCycleRevision !==
+        value.finalTurnEvidence.finalSalesCycleRevision ||
+      value.barriers.conversationRevision !==
+        value.finalTurnEvidence.finalConversationRevision) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
       message: "Context V2 components must bind the same revisions",
     });
   }
+  if (value.buyingIntent.productId !== null &&
+      !value.productBinding.productIds.includes(value.buyingIntent.productId)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["buyingIntent", "productId"],
+      message: "buying intent product must be present in the final product binding",
+    });
+  }
 });
 export type ContextV2 = z.infer<typeof ContextV2Schema>;
 
+export const ContextV2CaptureV1Schema = z.object({
+  schemaVersion: z.literal(1),
+  contractVersion: z.literal("CONTEXT_V2_CAPTURE_V1"),
+  sourceMessagePk: SourceMessagePkSchema,
+  sourceOccurredAt: z.string().datetime(),
+  status: z.enum(["BUILT", "BLOCKED"]),
+  context: ContextV2Schema.nullable(),
+  contextHash: Sha256Schema.nullable(),
+  reasonCode: BoundedReasonCodeSchema.nullable(),
+}).strict().superRefine((value, context) => {
+  const built = value.status === "BUILT";
+  if (built !== (value.context !== null) ||
+      built !== (value.contextHash !== null) ||
+      built === (value.reasonCode !== null)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "capture status must have exactly one terminal payload shape",
+    });
+  }
+  if (value.context !== null &&
+      (value.contextHash !== value.context.contextHash ||
+       value.sourceMessagePk !== value.context.finalTurnEvidence.sourceMessagePk)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "capture must bind the exact context and source message",
+    });
+  }
+});
+export type ContextV2CaptureV1 = z.infer<typeof ContextV2CaptureV1Schema>;

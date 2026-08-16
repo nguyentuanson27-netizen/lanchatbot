@@ -48,6 +48,8 @@ import {
   type RequestedBusinessFactV2,
   type SizeRecommendationProtectedClaimV1,
   type DeterministicEffectReadinessV1,
+  FinalTurnEvidenceV2Schema,
+  ProductBindingV2Schema,
   type ProtectedClaimV1,
 } from "@lana/contracts";
 import type {
@@ -83,6 +85,7 @@ import type {
   InboxBatchLease,
   RealtimeCommitInput,
   RealtimeCommitResult,
+  ContextV2CapturePlan,
   RealtimeDecisionEventPlan,
   RealtimeInboxBatchGuard,
   RealtimeMetaMessageUnit,
@@ -126,6 +129,10 @@ import type {
   RealtimeMediaRecognitionService,
 } from "./realtime-media-recognition.js";
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
+import {
+  blockedContextV2Capture,
+  buildContextV2Capture,
+} from "./context-v2.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
 import { mapWithBoundedConcurrency } from "./bounded-concurrency.js";
@@ -4914,6 +4921,90 @@ export class RealtimeRunner {
       ...(salesReadinessAttempt === null ? [] : [salesReadinessAttempt]),
       ...(protectedOutboundReadiness === null ? [] : [protectedOutboundReadiness]),
     ];
+    let contextV2CapturePlan: ContextV2CapturePlan | undefined;
+    if (!message.isEcho && triggerMessagePk !== null) {
+      const sourceOccurredAt = new Date(message.occurredAt);
+      const finalCommerceState = salesCyclePlan?.state ?? salesCycleRecord?.state;
+      const candidateProductIds = [...new Set(
+        resolution.products.map(({ productId }) => productId),
+      )].sort();
+      const productBindingStatus =
+        candidateProductIds.length > 1 &&
+          multiProductDecision.disposition !== "CONTINUE"
+          ? "AMBIGUOUS" as const
+          : businessFacts?.status === "STALE" &&
+              businessFacts.productId !== null
+            ? "STALE" as const
+            : observedProductId
+              ? "RESOLVED" as const
+              : protectedClaimValidation.claimTypes.length > 0 ||
+                  salesCyclePlan !== null
+                ? "UNRESOLVED" as const
+                : "NOT_REQUIRED" as const;
+      const productIds = productBindingStatus === "AMBIGUOUS"
+        ? candidateProductIds
+        : productBindingStatus === "RESOLVED"
+          ? [observedProductId!]
+          : productBindingStatus === "STALE"
+            ? [businessFacts!.productId]
+            : [];
+      const finalTurnEvidence = FinalTurnEvidenceV2Schema.safeParse({
+        schemaVersion: 2,
+        contractVersion: "FINAL_TURN_EVIDENCE_V2",
+        sourceMessagePk: triggerMessagePk,
+        sourceMessageIdHash:
+          canonicalEvidence.buyingIntent.sourceMessageIdHash,
+        preTransitionConversationRevision: record.stateVersion,
+        finalConversationRevision: nextState.revision,
+        preTransitionSalesCycleRevision:
+          salesCycleRecord?.stateRevision ?? salesCyclePlan?.expectedRevision ?? null,
+        finalSalesCycleRevision: finalCommerceState?.revision ?? -1,
+      });
+      const productBinding = ProductBindingV2Schema.safeParse({
+        schemaVersion: 2,
+        contractVersion: "PRODUCT_BINDING_V2",
+        status: productBindingStatus,
+        productIds,
+        catalogVersion: resolvedProduct?.catalogVersion ?? null,
+      });
+      const capture = finalCommerceState === undefined
+        ? blockedContextV2Capture({
+            sourceMessagePk: triggerMessagePk,
+            sourceOccurredAt,
+            reasonCode: "CONTEXT_V2_COMMERCE_STATE_UNAVAILABLE",
+          })
+        : !finalTurnEvidence.success
+          ? blockedContextV2Capture({
+              sourceMessagePk: triggerMessagePk,
+              sourceOccurredAt,
+              reasonCode: "CONTEXT_V2_FINAL_TURN_EVIDENCE_INVALID",
+            })
+          : !productBinding.success
+            ? blockedContextV2Capture({
+                sourceMessagePk: triggerMessagePk,
+                sourceOccurredAt,
+                reasonCode: "CONTEXT_V2_PRODUCT_BINDING_INVALID",
+              })
+            : buildContextV2Capture({
+                canonicalEvidence,
+                verifiedClaims: protectedOutboundClaims,
+                finalCommerceState,
+                readiness: readinessObservations,
+                finalTurnEvidence: finalTurnEvidence.data,
+                productBinding: productBinding.data,
+                owner: nextState.conversationOwner,
+                handoffReasonCode:
+                  handoffEventReasonCode ?? salesHandoffReasonCode ?? null,
+                now,
+                sourceOccurredAt,
+              });
+      contextV2CapturePlan = {
+        eventId: deterministicUuid(
+          `lana:context-v2-capture:v1:${triggerMessagePk}`,
+        ),
+        capture,
+      };
+    }
     const decisionObservability = buildDecisionObservabilityV1({
       dialogueEvidenceCodes,
       dialogueEvidenceSource,
@@ -5411,6 +5502,7 @@ export class RealtimeRunner {
         ...(this.options.decisionTelemetryEnabled && decisionEvents.length > 0
           ? { decisionEvents }
           : {}),
+        ...(contextV2CapturePlan ? { contextV2CapturePlan } : {}),
         ...(inboxBatchGuard ? { inboxBatchGuard } : {}),
       },
       new Date(),

@@ -32,3 +32,19 @@ Required properties:
 7. A scored result is inadmissible when request identity, provider-observed
    model identity, corpus/rubric identity, source revision, or pre-registration
    provenance is missing, unknown, stale, or mismatched.
+8. Realtime persists one minimal terminal capture (`BUILT` or `BLOCKED`) in the
+   same transaction as the final turn plan. Capture identity is deterministic
+   from the exact source message primary key; retries cannot create a second
+   terminal identity for the same source message.
+9. Candidate eligibility uses exact `sourceMessagePk` as correctness. A bounded
+   conversation/time range may be added only as a partition-pruning hint and
+   cannot replace or weaken the exact-key predicate.
+10. Capture lookup returns typed outcomes for valid, invalid, blocked,
+    ambiguous, not-yet-terminal, absent-after-deadline, and database-error
+    states. Only a valid built capture may call a candidate model. Database
+    errors are retryable, do not consume a model attempt, and are never mapped
+    to a missing snapshot.
+11. Candidate-worker readiness probes its read-only capture permission before
+    accepting work. A missing capture becomes terminal only after the locked
+    deadline; blocked, invalid, ambiguous, and deadline-expired cases remain in
+    coverage accounting with reason codes.

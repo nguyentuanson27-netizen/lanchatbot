@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  ContextV2CaptureV1Schema,
   ContextV2Schema,
+  FinalTurnEvidenceV2Schema,
+  ProductBindingV2Schema,
   deriveConversationPhaseV2,
   deriveConversationBarriersV2,
   type ContextV2,
@@ -159,9 +162,23 @@ describe("DF09 Context V2 contract", () => {
       schemaVersion: 2,
       contractVersion: "CONTEXT_V2",
       authority: "SHADOW_ONLY",
-      sourceMessageIdHash: hash("a"),
-      conversationRevision: 5,
-      salesCycleRevision: 3,
+      finalTurnEvidence: {
+        schemaVersion: 2,
+        contractVersion: "FINAL_TURN_EVIDENCE_V2",
+        sourceMessagePk: "00000000-0000-4000-8000-000000000099",
+        sourceMessageIdHash: hash("a"),
+        preTransitionConversationRevision: 4,
+        finalConversationRevision: 5,
+        preTransitionSalesCycleRevision: 2,
+        finalSalesCycleRevision: 3,
+      },
+      productBinding: {
+        schemaVersion: 2,
+        contractVersion: "PRODUCT_BINDING_V2",
+        status: "RESOLVED",
+        productIds: ["SD398"],
+        catalogVersion: "catalog:20260816",
+      },
       dialogueEvidence: {
         act: "REQUEST",
         confidenceBand: "HIGH",
@@ -241,5 +258,39 @@ describe("DF09 Context V2 contract", () => {
     };
     expect(ContextV2Schema.parse(context)).toEqual(context);
     expect(JSON.stringify(context)).not.toMatch(/fullName|phone|address|customerText/iu);
+
+    expect(ContextV2CaptureV1Schema.parse({
+      schemaVersion: 1,
+      contractVersion: "CONTEXT_V2_CAPTURE_V1",
+      sourceMessagePk: context.finalTurnEvidence.sourceMessagePk,
+      sourceOccurredAt: "2026-08-16T10:00:00.000Z",
+      status: "BUILT",
+      context,
+      contextHash: context.contextHash,
+      reasonCode: null,
+    }).status).toBe("BUILT");
+  });
+
+  it("rejects mixed-vintage revisions and inconsistent product bindings", () => {
+    const finalTurnEvidence = {
+      schemaVersion: 2,
+      contractVersion: "FINAL_TURN_EVIDENCE_V2",
+      sourceMessagePk: "00000000-0000-4000-8000-000000000099",
+      sourceMessageIdHash: hash("a"),
+      preTransitionConversationRevision: 4,
+      finalConversationRevision: 7,
+      preTransitionSalesCycleRevision: 5,
+      finalSalesCycleRevision: 3,
+    };
+    expect(() => FinalTurnEvidenceV2Schema.parse(
+      finalTurnEvidence,
+    )).toThrow();
+    expect(() => ProductBindingV2Schema.parse({
+      schemaVersion: 2,
+      contractVersion: "PRODUCT_BINDING_V2",
+      status: "RESOLVED",
+      productIds: [],
+      catalogVersion: null,
+    })).toThrow();
   });
 });

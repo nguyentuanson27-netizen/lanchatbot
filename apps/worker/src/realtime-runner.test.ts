@@ -3093,9 +3093,13 @@ describe("RealtimeRunner inbound batching", () => {
       })),
       searchImage: vi.fn(),
     };
-    const recordInboundCustomerMessage = vi.fn(async (input: { providerMessageId: string; enqueueShadowEvaluation?: boolean }) => ({
-      messagePk: `pk-${input.providerMessageId}`,
-    }));
+    let recordedMessageCount = 0;
+    const recordInboundCustomerMessage = vi.fn(async (_input: { providerMessageId: string; enqueueShadowEvaluation?: boolean }) => {
+      recordedMessageCount += 1;
+      return {
+        messagePk: `00000000-0000-4000-8000-${String(recordedMessageCount).padStart(12, "0")}`,
+      };
+    });
     const retryProjection = items.map((entry) => ({
       direction: "INBOUND" as const,
       senderType: "CUSTOMER" as const,
@@ -3152,6 +3156,14 @@ describe("RealtimeRunner inbound batching", () => {
     expect(commit).toHaveBeenCalledOnce();
     const commitInput = commit.mock.calls[0]![0] as {
       inboxBatchGuard?: unknown;
+      contextV2CapturePlan?: {
+        eventId: string;
+        capture: {
+          sourceMessagePk: string;
+          status: string;
+          reasonCode: string | null;
+        };
+      };
       metaPlan?: {
         messages: readonly unknown[];
         replyPlanId: string;
@@ -3162,6 +3174,14 @@ describe("RealtimeRunner inbound batching", () => {
       generation: 9,
       leaseToken: batch.leaseToken,
       inboxIds: batch.inboxIds,
+    });
+    expect(commitInput.contextV2CapturePlan).toMatchObject({
+      eventId: expect.stringMatching(/^[0-9a-f-]{36}$/u),
+      capture: {
+        sourceMessagePk: "00000000-0000-4000-8000-000000000003",
+        status: "BLOCKED",
+        reasonCode: "CONTEXT_V2_COMMERCE_STATE_UNAVAILABLE",
+      },
     });
     expect(commitInput.metaPlan?.messages).toEqual([
       { kind: "TEXT", text: "Em đang hỗ trợ chị đây ạ." },

@@ -32,6 +32,13 @@ export {
   type ShadowEvaluationSummary,
 } from "./shadow-evaluation.js";
 export {
+  inspectContextV2Capture,
+  probeContextV2CaptureRead,
+  type ContextV2CaptureEligibility,
+  type ContextV2CapturePlan,
+  type InspectContextV2CaptureInput,
+} from "./context-v2-capture.js";
+export {
   enqueueMetaOutbox,
   recordVerifiedWebhook,
   reserveMessageIdentity,

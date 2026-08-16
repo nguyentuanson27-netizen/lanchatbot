@@ -361,16 +361,45 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           },
         },
       }],
+      contextV2CapturePlan: {
+        eventId: "10000000-0000-4000-8000-000000000004",
+        capture: {
+          schemaVersion: 1,
+          contractVersion: "CONTEXT_V2_CAPTURE_V1",
+          sourceMessagePk: "10000000-0000-4000-8000-000000000005",
+          sourceOccurredAt: occurredAt.toISOString(),
+          status: "BLOCKED",
+          context: null,
+          contextHash: null,
+          reasonCode: "CONTEXT_V2_COMMERCE_STATE_UNAVAILABLE",
+        },
+      },
     }, occurredAt);
 
     expect(result.decisionEventsCreated).toBe(1);
-    const insert = calls.find((call) => call.sql.includes("INSERT INTO conversation_events"));
+    expect(result.contextV2CaptureCreated).toBe(true);
+    const eventInserts = calls.filter((call) =>
+      call.sql.includes("INSERT INTO conversation_events")
+    );
+    const insert = eventInserts[0];
     expect(insert?.sql).toContain("ON CONFLICT (event_id, occurred_at) DO NOTHING");
     const serialized = JSON.stringify(insert?.values ?? []);
     expect(serialized).not.toContain("0900000000");
     expect(serialized).not.toContain("rawText");
     expect(serialized).toContain("decisionObservability");
     expect(serialized).toContain("HYBRID_BUYING_INTENT_V1");
+    expect(eventInserts[1]?.values).toContain(
+      JSON.stringify({
+        schemaVersion: 1,
+        contractVersion: "CONTEXT_V2_CAPTURE_V1",
+        sourceMessagePk: "10000000-0000-4000-8000-000000000005",
+        sourceOccurredAt: occurredAt.toISOString(),
+        status: "BLOCKED",
+        context: null,
+        contextHash: null,
+        reasonCode: "CONTEXT_V2_COMMERCE_STATE_UNAVAILABLE",
+      }),
+    );
     expect(calls.at(-1)?.sql).toContain("COMMIT");
   });
 
