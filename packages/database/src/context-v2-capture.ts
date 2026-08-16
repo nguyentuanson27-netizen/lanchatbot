@@ -8,8 +8,12 @@ import {
 } from "@lana/contracts";
 
 export interface ContextV2CapturePlan {
-  readonly eventId: string;
   readonly capture: ContextV2CaptureV1;
+}
+
+export interface ContextV2CapturePersistenceResult {
+  readonly created: boolean;
+  readonly reasonCode: "CONTEXT_V2_CAPTURE_WRITE_FAILED" | null;
 }
 
 export type ContextV2CaptureEligibility =
@@ -41,6 +45,54 @@ function validContext(capture: ContextV2CaptureV1): ContextV2 | null {
     : null;
 }
 
+function deterministicCaptureUuid(seed: string): string {
+  const hex = createHash("sha256").update(seed, "utf8").digest("hex").slice(0, 32);
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-8${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+}
+
+function blockedAtCommit(
+  capture: ContextV2CaptureV1,
+  reasonCode:
+    | "CONTEXT_V2_CLAIM_EXPIRED_AT_COMMIT"
+    | "CONTEXT_V2_READINESS_EXPIRED_AT_COMMIT",
+): ContextV2CaptureV1 {
+  return ContextV2CaptureV1Schema.parse({
+    ...capture,
+    status: "BLOCKED",
+    context: null,
+    contextHash: null,
+    reasonCode,
+  });
+}
+
+/** Revalidates candidate-affecting freshness against the database clock. */
+export function prepareContextV2CaptureForCommit(
+  input: ContextV2CaptureV1,
+  transactionNow: Date,
+): ContextV2CaptureV1 {
+  const capture = ContextV2CaptureV1Schema.parse(input);
+  const nowMs = transactionNow.getTime();
+  if (!Number.isFinite(nowMs)) throw new Error("CONTEXT_V2_COMMIT_CLOCK_INVALID");
+  if (capture.status === "BLOCKED" || capture.context === null) return capture;
+  const staleClaim = capture.context.verifiedClaims.some(({ provenance }) => {
+    const observedAt = Date.parse(provenance.observedAt);
+    const expiresAt = Date.parse(provenance.expiresAt);
+    return !Number.isFinite(observedAt) || !Number.isFinite(expiresAt) ||
+      observedAt > nowMs + 5 * 60_000 || expiresAt <= nowMs;
+  });
+  if (staleClaim) {
+    return blockedAtCommit(capture, "CONTEXT_V2_CLAIM_EXPIRED_AT_COMMIT");
+  }
+  const readinessExpiresAt = capture.context.cartReadiness === null
+    ? null
+    : Date.parse(capture.context.cartReadiness.expiresAt);
+  if (readinessExpiresAt !== null &&
+      (!Number.isFinite(readinessExpiresAt) || readinessExpiresAt <= nowMs)) {
+    return blockedAtCommit(capture, "CONTEXT_V2_READINESS_EXPIRED_AT_COMMIT");
+  }
+  return capture;
+}
+
 export async function insertContextV2Capture(
   client: PoolClient,
   identity: Readonly<{
@@ -50,7 +102,12 @@ export async function insertContextV2Capture(
     owner: "BOT" | "HUMAN";
   }>,
   plan: ContextV2CapturePlan,
+  transactionNow: Date,
 ): Promise<boolean> {
+  const capture = prepareContextV2CaptureForCommit(plan.capture, transactionNow);
+  const eventId = deterministicCaptureUuid(
+    `lana:context-v2-capture:v1:${capture.sourceMessagePk}:${canonicalJsonV1(capture)}`,
+  );
   const result = await client.query(
     `INSERT INTO conversation_events (
        event_id, conversation_id, page_id, customer_hash, event_type,
@@ -65,42 +122,47 @@ export async function insertContextV2Capture(
      )
      ON CONFLICT (event_id, occurred_at) DO NOTHING`,
     [
-      plan.eventId,
+      eventId,
       identity.conversationId,
       identity.pageId,
       identity.customerHash,
       identity.owner,
-      JSON.stringify(ContextV2CaptureV1Schema.parse(plan.capture)),
-      plan.capture.sourceOccurredAt,
+      JSON.stringify(capture),
+      capture.sourceOccurredAt,
     ],
   );
-  if (result.rowCount === 1) return true;
-  const existing = await client.query<{
-    conversation_id: string;
-    page_id: string;
-    customer_hash: string;
-    owner: string;
-    capture: unknown;
-  }>(
-    `SELECT conversation_id::text, page_id, customer_hash, owner,
-            event_metadata AS capture
-     FROM conversation_events
-     WHERE event_id = $1::uuid
-       AND occurred_at = $2::timestamptz
-       AND event_type = 'CONTEXT_V2_DERIVED'`,
-    [plan.eventId, plan.capture.sourceOccurredAt],
-  );
-  const row = existing.rows[0];
-  const parsed = ContextV2CaptureV1Schema.safeParse(row?.capture);
-  if (!row || existing.rows.length !== 1 || !parsed.success ||
-      row.conversation_id !== identity.conversationId ||
-      row.page_id !== identity.pageId ||
-      row.customer_hash !== identity.customerHash ||
-      row.owner !== identity.owner ||
-      canonicalJsonV1(parsed.data) !== canonicalJsonV1(plan.capture)) {
-    throw new Error("CONTEXT_V2_CAPTURE_IDEMPOTENCY_CONFLICT");
+  return result.rowCount === 1;
+}
+
+/** Shadow persistence can never abort the enclosing realtime transaction. */
+export async function persistContextV2CaptureFailSoft(
+  client: PoolClient,
+  identity: Parameters<typeof insertContextV2Capture>[1],
+  plan: ContextV2CapturePlan,
+): Promise<ContextV2CapturePersistenceResult> {
+  const savepoint = "context_v2_capture";
+  await client.query(`SAVEPOINT ${savepoint}`);
+  try {
+    const clock = await client.query<{ capture_now: Date }>(
+      "SELECT clock_timestamp() AS capture_now",
+    );
+    const captureNow = clock.rows[0]?.capture_now;
+    if (!(captureNow instanceof Date) || !Number.isFinite(captureNow.getTime())) {
+      throw new Error("CONTEXT_V2_COMMIT_CLOCK_INVALID");
+    }
+    const created = await insertContextV2Capture(
+      client,
+      identity,
+      plan,
+      captureNow,
+    );
+    await client.query(`RELEASE SAVEPOINT ${savepoint}`);
+    return { created, reasonCode: null };
+  } catch {
+    await client.query(`ROLLBACK TO SAVEPOINT ${savepoint}`);
+    await client.query(`RELEASE SAVEPOINT ${savepoint}`);
+    return { created: false, reasonCode: "CONTEXT_V2_CAPTURE_WRITE_FAILED" };
   }
-  return false;
 }
 
 export async function inspectContextV2Capture(

@@ -74,7 +74,7 @@ import {
   type AcquisitionCommitPlan,
 } from "./ad-acquisition.js";
 import {
-  insertContextV2Capture,
+  persistContextV2CaptureFailSoft,
   type ContextV2CapturePlan,
 } from "./context-v2-capture.js";
 
@@ -416,6 +416,9 @@ export interface RealtimeCommitResult {
   readonly handoffEventCreated: boolean;
   readonly decisionEventsCreated?: number;
   readonly contextV2CaptureCreated?: boolean;
+  readonly contextV2CaptureReasonCode?:
+    | "CONTEXT_V2_CAPTURE_WRITE_FAILED"
+    | null;
   readonly sendAuthorized: boolean;
   readonly reasonCodes: readonly string[];
   readonly inboxBatchStatus?: "NOT_REQUESTED" | "COMMITTED" | "SUPERSEDED";
@@ -2449,8 +2452,8 @@ export class PostgresRealtimeRuntimeStore {
       const decisionEventsCreated = input.decisionEvents
         ? await this.insertDecisionEvents(client, input, input.decisionEvents)
         : 0;
-      const contextV2CaptureCreated = input.contextV2CapturePlan
-        ? await insertContextV2Capture(
+      const contextV2CaptureResult = input.contextV2CapturePlan
+        ? await persistContextV2CaptureFailSoft(
             client,
             {
               conversationId: input.conversationId,
@@ -2464,7 +2467,7 @@ export class PostgresRealtimeRuntimeStore {
             },
             input.contextV2CapturePlan,
           )
-        : false;
+        : { created: false, reasonCode: null };
 
       if (input.inboxBatchGuard) {
         await this.completeInboxBatch(
@@ -2481,7 +2484,8 @@ export class PostgresRealtimeRuntimeStore {
         pancakeTagOutboxCreated,
         handoffEventCreated,
         decisionEventsCreated,
-        contextV2CaptureCreated,
+        contextV2CaptureCreated: contextV2CaptureResult.created,
+        contextV2CaptureReasonCode: contextV2CaptureResult.reasonCode,
         sendAuthorized,
         reasonCodes,
         inboxBatchStatus: input.inboxBatchGuard

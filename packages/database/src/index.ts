@@ -32,9 +32,12 @@ export {
   type ShadowEvaluationSummary,
 } from "./shadow-evaluation.js";
 export {
+  persistContextV2CaptureFailSoft,
+  prepareContextV2CaptureForCommit,
   inspectContextV2Capture,
   probeContextV2CaptureRead,
   type ContextV2CaptureEligibility,
+  type ContextV2CapturePersistenceResult,
   type ContextV2CapturePlan,
   type InspectContextV2CaptureInput,
 } from "./context-v2-capture.js";

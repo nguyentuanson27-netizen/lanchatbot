@@ -93,6 +93,13 @@ describe("DF07 ConversationPhaseV2", () => {
       hasConfirmation: false,
       salesCycleRevision: 1,
     })).toThrow("CONVERSATION_PHASE_V2_STATE_INVALID");
+    expect(() => deriveConversationPhaseV2({
+      commerceStage: "DISCOVERY",
+      hasCart: true,
+      hasPreview: true,
+      hasConfirmation: true,
+      salesCycleRevision: 2,
+    })).toThrow("CONVERSATION_PHASE_V2_STATE_INVALID");
   });
 });
 
@@ -105,7 +112,7 @@ describe("DF08 deterministic finite-lifecycle barriers", () => {
       hasActiveClarification: false,
       readiness: {
         outcome: "BLOCKED",
-        reasonCodes: ["EFFECT_READINESS_CLAIM_MISSING"],
+        reasonCodes: ["CLAIM_MISSING"],
       },
       conversationRevision: 3,
       salesCycleRevision: 2,
@@ -153,6 +160,34 @@ describe("DF08 deterministic finite-lifecycle barriers", () => {
       salesCycleRevision: 6,
     };
     expect(deriveConversationBarriersV2(common).active).toEqual([]);
+  });
+
+  it("maps only typed claim failures to the verified-claim barrier", () => {
+    const barrierFor = (reasonCode: string) => deriveConversationBarriersV2({
+      productScope: "RESOLVED",
+      commerceStage: "DISCOVERY",
+      hasCart: false,
+      hasActiveClarification: false,
+      readiness: { outcome: "BLOCKED", reasonCodes: [reasonCode] },
+      conversationRevision: 6,
+      salesCycleRevision: 6,
+    }).active;
+
+    expect(barrierFor("CLAIM_MISSING")).toEqual(["VERIFIED_CLAIMS_UNREADY"]);
+    expect(barrierFor("ARTIFACT_MISSING")).toEqual(["EFFECT_READINESS_BLOCKED"]);
+    expect(barrierFor("POLICY_CHANNEL_ABSENT")).toEqual(["EFFECT_READINESS_BLOCKED"]);
+  });
+
+  it("requires a concrete sales-cycle revision for every barrier snapshot", () => {
+    expect(() => deriveConversationBarriersV2({
+      productScope: "RESOLVED",
+      commerceStage: "DISCOVERY",
+      hasCart: false,
+      hasActiveClarification: false,
+      readiness: { outcome: "READY", reasonCodes: [] },
+      conversationRevision: 6,
+      salesCycleRevision: null as never,
+    })).toThrow();
   });
 });
 

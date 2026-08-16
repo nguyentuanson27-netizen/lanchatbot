@@ -4,6 +4,8 @@ import type { PoolClient } from "pg";
 import { canonicalJsonV1, type ContextV2CaptureV1 } from "@lana/contracts";
 import {
   insertContextV2Capture,
+  persistContextV2CaptureFailSoft,
+  prepareContextV2CaptureForCommit,
   inspectContextV2Capture,
   probeContextV2CaptureRead,
 } from "./context-v2-capture.js";
@@ -93,6 +95,19 @@ function builtCapture(): ContextV2CaptureV1 {
   };
 }
 
+function withContext(
+  capture: ContextV2CaptureV1,
+  updates: Partial<NonNullable<ContextV2CaptureV1["context"]>>,
+): ContextV2CaptureV1 {
+  if (capture.context === null) throw new Error("TEST_CONTEXT_REQUIRED");
+  const { contextHash: _oldHash, ...oldDraft } = capture.context;
+  const draft = { ...oldDraft, ...updates };
+  const contextHash = createHash("sha256")
+    .update(`CONTEXT_V2\n${canonicalJsonV1(draft)}`, "utf8")
+    .digest("hex");
+  return { ...capture, context: { ...draft, contextHash }, contextHash };
+}
+
 function clientWith(rows: readonly unknown[], error?: Error): PoolClient {
   return {
     query: vi.fn(async () => {
@@ -126,15 +141,15 @@ describe("Context V2 exact-message claim gate", () => {
       customerHash: hash("f"),
       owner: "BOT",
     }, {
-      eventId: "00000000-0000-4000-8000-000000000020",
       capture,
-    })).resolves.toBe(true);
+    }, new Date("2026-08-16T10:00:30.000Z"))).resolves.toBe(true);
     const [sql, parameters] = query.mock.calls[0]!;
     expect(sql).toContain("ON CONFLICT (event_id, occurred_at) DO NOTHING");
+    expect(parameters?.[0]).toMatch(/^[0-9a-f-]{36}$/u);
     expect(JSON.parse(String(parameters?.[5]))).toEqual(capture);
   });
 
-  it("accepts only an exact duplicate for the deterministic event identity", async () => {
+  it("uses content-addressed identities so divergent captures become visible", async () => {
     const capture = builtCapture();
     const identity = {
       conversationId: "00000000-0000-4000-8000-000000000010",
@@ -142,34 +157,120 @@ describe("Context V2 exact-message claim gate", () => {
       customerHash: hash("f"),
       owner: "BOT" as const,
     };
-    const plan = {
-      eventId: "00000000-0000-4000-8000-000000000020",
-      capture,
+    const query = vi.fn(async (
+      _sql: string,
+      _parameters?: readonly unknown[],
+    ) => ({ rowCount: 1, rows: [] }));
+    const client = { query } as unknown as PoolClient;
+    await insertContextV2Capture(
+      client,
+      identity,
+      { capture },
+      new Date("2026-08-16T10:00:30.000Z"),
+    );
+    await insertContextV2Capture(
+      client,
+      identity,
+      {
+        capture: {
+          ...capture,
+          status: "BLOCKED",
+          context: null,
+          contextHash: null,
+          reasonCode: "CONTEXT_V2_DIVERGED",
+        },
+      },
+      new Date("2026-08-16T10:00:30.000Z"),
+    );
+    expect(query.mock.calls[0]?.[1]?.[0]).not.toBe(query.mock.calls[1]?.[1]?.[0]);
+  });
+
+  it("terminalizes stale claims and readiness using the transaction clock", () => {
+    const capture = builtCapture();
+    const claim = {
+      schemaVersion: 1 as const,
+      claimId: "00000000-0000-4000-8000-000000000001",
+      type: "PRICE" as const,
+      scope: { kind: "PRODUCT" as const, productId: "SD398", variantId: null },
+      value: { amountVnd: 699_000, currency: "VND" as const },
+      provenance: {
+        authority: "POS_SNAPSHOT" as const,
+        sourceVersion: "pos:1",
+        evidenceRef: "price:SD398",
+        contentHash: hash("1"),
+        observedAt: "2026-08-16T10:00:00.000Z",
+        expiresAt: "2026-08-16T10:00:30.000Z",
+      },
+      authorization: "NONE" as const,
     };
-    const duplicateClient = (existingCapture: unknown) => ({
-      query: vi.fn(async (sql: string) => sql.includes("INSERT INTO")
-        ? { rowCount: 0, rows: [] }
-        : {
+    const withExpiredClaim = withContext(capture, {
+      verifiedClaims: [claim],
+      verifiedClaimTypes: ["PRICE"],
+      verifiedClaimSetHash: hash("9"),
+    });
+    expect(prepareContextV2CaptureForCommit(
+      withExpiredClaim,
+      new Date("2026-08-16T10:00:30.000Z"),
+    )).toMatchObject({
+      status: "BLOCKED",
+      reasonCode: "CONTEXT_V2_CLAIM_EXPIRED_AT_COMMIT",
+    });
+
+    const withExpiredReadiness = withContext(capture, {
+      cartReadiness: {
+        effect: "CART_READY",
+        outcome: "READY",
+        readinessHash: hash("e"),
+        expiresAt: "2026-08-16T10:00:30.000Z",
+      },
+    });
+    expect(prepareContextV2CaptureForCommit(
+      withExpiredReadiness,
+      new Date("2026-08-16T10:00:30.000Z"),
+    )).toMatchObject({
+      status: "BLOCKED",
+      reasonCode: "CONTEXT_V2_READINESS_EXPIRED_AT_COMMIT",
+    });
+  });
+
+  it("rolls back only the shadow savepoint when capture persistence fails", async () => {
+    const statements: string[] = [];
+    const client = {
+      query: vi.fn(async (sql: string) => {
+        statements.push(sql);
+        if (sql.includes("clock_timestamp()")) {
+          return {
             rowCount: 1,
-            rows: [{
-              conversation_id: identity.conversationId,
-              page_id: identity.pageId,
-              customer_hash: identity.customerHash,
-              owner: identity.owner,
-              capture: existingCapture,
-            }],
-          }),
-    }) as unknown as PoolClient;
-    await expect(insertContextV2Capture(
-      duplicateClient(capture),
-      identity,
-      plan,
-    )).resolves.toBe(false);
-    await expect(insertContextV2Capture(
-      duplicateClient({ ...capture, reasonCode: "CONTEXT_V2_DIVERGED" }),
-      identity,
-      plan,
-    )).rejects.toThrow("CONTEXT_V2_CAPTURE_IDEMPOTENCY_CONFLICT");
+            rows: [{ capture_now: new Date("2026-08-16T10:00:30.000Z") }],
+          };
+        }
+        if (sql.includes("INSERT INTO conversation_events")) {
+          throw new Error("permission denied");
+        }
+        return { rowCount: 0, rows: [] };
+      }),
+    } as unknown as PoolClient;
+
+    await expect(persistContextV2CaptureFailSoft(
+      client,
+      {
+        conversationId: "00000000-0000-4000-8000-000000000010",
+        pageId: "page-1",
+        customerHash: hash("f"),
+        owner: "BOT",
+      },
+      { capture: builtCapture() },
+    )).resolves.toEqual({
+      created: false,
+      reasonCode: "CONTEXT_V2_CAPTURE_WRITE_FAILED",
+    });
+    expect(statements).toEqual([
+      "SAVEPOINT context_v2_capture",
+      "SELECT clock_timestamp() AS capture_now",
+      expect.stringContaining("INSERT INTO conversation_events"),
+      "ROLLBACK TO SAVEPOINT context_v2_capture",
+      "RELEASE SAVEPOINT context_v2_capture",
+    ]);
   });
 
   it("uses exact sourceMessagePk for correctness and a time range only for pruning", async () => {

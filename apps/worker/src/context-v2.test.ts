@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { CanonicalDecisionEvidenceV1 } from "@lana/business-tools";
 import type { SalesCycleRuntimeState } from "@lana/chat-runtime";
@@ -174,6 +175,26 @@ function input(): BuildContextV2Input {
 }
 
 describe("DF09 final Context V2 capture", () => {
+  it("keeps the source capture gate default-off and absent from runtime wiring", () => {
+    const runnerSource = readFileSync(
+      new URL("./realtime-runner.ts", import.meta.url),
+      "utf8",
+    );
+    const realtimeServerSource = readFileSync(
+      new URL("./realtime-server.ts", import.meta.url),
+      "utf8",
+    );
+    const phase4ServerSource = readFileSync(
+      new URL("./phase4-server.ts", import.meta.url),
+      "utf8",
+    );
+    expect(runnerSource).toContain(
+      "contextV2CaptureEnabled: options.contextV2CaptureEnabled ?? false",
+    );
+    expect(realtimeServerSource).not.toContain("contextV2CaptureEnabled");
+    expect(phase4ServerSource).not.toContain("contextV2CaptureEnabled");
+  });
+
   it("binds pre-transition readiness to the final committed revisions", () => {
     const context = buildContextV2(input());
     expect(context.finalTurnEvidence).toEqual(finalTurnEvidence());

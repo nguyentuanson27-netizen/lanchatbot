@@ -49,12 +49,19 @@ export interface DeriveConversationPhaseV2Input {
 function assertCommerceArtifacts(
   input: DeriveConversationPhaseV2Input,
 ): void {
-  const invalid =
+  const hierarchyInvalid =
     (input.hasConfirmation && (!input.hasPreview || !input.hasCart)) ||
-    (input.hasPreview && !input.hasCart) ||
-    (input.commerceStage === "ORDER_PREVIEW" && !input.hasPreview) ||
-    (input.commerceStage === "PURCHASE_CONFIRMED" && !input.hasConfirmation) ||
-    (input.commerceStage === "CART_OPEN" && !input.hasCart);
+    (input.hasPreview && !input.hasCart);
+  const stageArtifactsValid = input.commerceStage === "HANDED_OFF"
+    ? true
+    : input.commerceStage === "PURCHASE_CONFIRMED"
+      ? input.hasCart && input.hasPreview && input.hasConfirmation
+      : input.commerceStage === "ORDER_PREVIEW"
+        ? input.hasCart && input.hasPreview && !input.hasConfirmation
+        : input.commerceStage === "CART_OPEN"
+          ? input.hasCart && !input.hasPreview && !input.hasConfirmation
+          : !input.hasCart && !input.hasPreview && !input.hasConfirmation;
+  const invalid = hierarchyInvalid || !stageArtifactsValid;
   if (invalid) throw new Error("CONVERSATION_PHASE_V2_STATE_INVALID");
 }
 
@@ -178,7 +185,7 @@ export const ConversationBarriersV2Schema = z.object({
   active: z.array(ConversationBarrierV2ValueSchema).max(6),
   lifecycle: z.literal("UNTIL_AUTHORITATIVE_STATE_CHANGES"),
   conversationRevision: z.number().int().nonnegative(),
-  salesCycleRevision: z.number().int().nonnegative().nullable(),
+  salesCycleRevision: z.number().int().nonnegative(),
   source: z.literal("CANONICAL_EVIDENCE_AND_COMMERCE_STATE_V1"),
   authority: z.literal("SHADOW_ONLY"),
 }).strict().superRefine((value, context) => {
@@ -204,10 +211,15 @@ export interface DeriveConversationBarriersV2Input {
     reasonCodes: readonly string[];
   }>;
   readonly conversationRevision: number;
-  readonly salesCycleRevision: number | null;
+  readonly salesCycleRevision: number;
 }
 
-const CLAIM_READINESS_CODE = /(?:CLAIM|PRICE|STOCK|SIZE|ETA|POLICY|FACT)/u;
+const CLAIM_BLOCKING_READINESS_CODES = new Set([
+  "CLAIM_MISSING",
+  "CLAIM_STALE",
+  "CLAIM_SCOPE_MISMATCH",
+  "CLAIM_CONFLICT",
+]);
 
 /**
  * Finite barriers are recomputed from the current authoritative snapshot.
@@ -225,7 +237,9 @@ export function deriveConversationBarriersV2(
   }
   if (input.readiness.outcome === "BLOCKED") {
     active.push(
-      input.readiness.reasonCodes.some((code) => CLAIM_READINESS_CODE.test(code))
+      input.readiness.reasonCodes.some((code) =>
+        CLAIM_BLOCKING_READINESS_CODES.has(code)
+      )
         ? "VERIFIED_CLAIMS_UNREADY"
         : "EFFECT_READINESS_BLOCKED",
     );

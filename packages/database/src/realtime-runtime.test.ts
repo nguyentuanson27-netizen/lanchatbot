@@ -244,6 +244,9 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         if (sql.includes("SELECT conversation_owner")) {
           return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
         }
+        if (sql.includes("clock_timestamp() AS capture_now")) {
+          return { rowCount: 1, rows: [{ capture_now: new Date("2026-07-23T05:00:00.000Z") }] };
+        }
         if (sql.includes("UPDATE conversations")) return { rowCount: 1, rows: [] };
         if (sql.includes("INSERT INTO conversation_events")) return { rowCount: 1, rows: [] };
         return { rowCount: 0, rows: [] };
@@ -362,7 +365,6 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         },
       }],
       contextV2CapturePlan: {
-        eventId: "10000000-0000-4000-8000-000000000004",
         capture: {
           schemaVersion: 1,
           contractVersion: "CONTEXT_V2_CAPTURE_V1",
@@ -378,6 +380,11 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
 
     expect(result.decisionEventsCreated).toBe(1);
     expect(result.contextV2CaptureCreated).toBe(true);
+    expect(result.contextV2CaptureReasonCode).toBeNull();
+    expect(calls.some(({ sql }) => sql === "SAVEPOINT context_v2_capture"))
+      .toBe(true);
+    expect(calls.some(({ sql }) => sql === "RELEASE SAVEPOINT context_v2_capture"))
+      .toBe(true);
     const eventInserts = calls.filter((call) =>
       call.sql.includes("INSERT INTO conversation_events")
     );

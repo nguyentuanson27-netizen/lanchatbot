@@ -5,6 +5,7 @@ import {
 } from "@lana/conversation-engine";
 import {
   aiContinuationProductId,
+  advanceContextV2CaptureTrigger,
   approvedSizeClaimClarification,
   catalogAdvisoryIntent,
   catalogAdvisoryReply,
@@ -58,6 +59,18 @@ import type { RealtimeMediaRecognition } from "./realtime-media-recognition.js";
 import { hashProtectedClaimSetV1 } from "@lana/business-tools";
 
 describe("RealtimeRunner", () => {
+  it("retains the exact last inbound capture trigger across trailing echoes", () => {
+    const inbound = advanceContextV2CaptureTrigger(null, {
+      sourceMessagePk: "00000000-0000-4000-8000-000000000003",
+      sourceOccurredAt: new Date("2026-08-16T10:00:00.000Z"),
+      isEcho: false,
+    });
+    expect(advanceContextV2CaptureTrigger(inbound, {
+      sourceMessagePk: "ignored-echo",
+      sourceOccurredAt: new Date("2026-08-16T10:00:05.000Z"),
+      isEcho: true,
+    })).toEqual(inbound);
+  });
   it("drops the complete commerce output tuple when final protected readiness is blocked", () => {
     const blocked = enforceProtectedOutboundReadinessV1({
       messages: [{ kind: "TEXT" as const, text: "Protected sales reply" }],
@@ -3127,6 +3140,7 @@ describe("RealtimeRunner inbound batching", () => {
         sendEnabled: true,
         recordedReplayCaptureEnabled: true,
         recordedReplayPageId: pageId,
+        contextV2CaptureEnabled: true,
       },
       undefined,
       history,
@@ -3157,7 +3171,6 @@ describe("RealtimeRunner inbound batching", () => {
     const commitInput = commit.mock.calls[0]![0] as {
       inboxBatchGuard?: unknown;
       contextV2CapturePlan?: {
-        eventId: string;
         capture: {
           sourceMessagePk: string;
           status: string;
@@ -3176,7 +3189,6 @@ describe("RealtimeRunner inbound batching", () => {
       inboxIds: batch.inboxIds,
     });
     expect(commitInput.contextV2CapturePlan).toMatchObject({
-      eventId: expect.stringMatching(/^[0-9a-f-]{36}$/u),
       capture: {
         sourceMessagePk: "00000000-0000-4000-8000-000000000003",
         status: "BLOCKED",

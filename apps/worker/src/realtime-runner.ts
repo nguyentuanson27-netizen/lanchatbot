@@ -2237,6 +2237,8 @@ export interface RealtimeRunnerOptions {
   readonly decisionAuditV2Enabled?: boolean;
   readonly recordedReplayCaptureEnabled?: boolean;
   readonly recordedReplayPageId?: string;
+  /** Source-only shadow capture gate. No runtime/env wiring exists in DF-B. */
+  readonly contextV2CaptureEnabled?: boolean;
   readonly mediaRecognitionEnabled?: boolean;
   readonly mediaClarificationEnabled?: boolean;
   readonly mediaRecognitionPageIds?: readonly string[];
@@ -2246,6 +2248,29 @@ export interface RealtimeRunnerOptions {
   readonly wave2StrategyEnabled?: boolean;
   readonly adAcquisitionAnalyticsMode?: "OFF" | "SHADOW" | "LIVE";
   readonly adAcquisitionPageIds?: readonly string[];
+}
+
+export interface ContextV2CaptureTrigger {
+  readonly sourceMessagePk: string;
+  readonly sourceOccurredAt: Date;
+}
+
+export function advanceContextV2CaptureTrigger(
+  current: ContextV2CaptureTrigger | null,
+  input: Readonly<{
+    sourceMessagePk: string;
+    sourceOccurredAt: Date;
+    isEcho: boolean;
+  }>,
+): ContextV2CaptureTrigger | null {
+  if (input.isEcho) return current;
+  if (!input.sourceMessagePk || !Number.isFinite(input.sourceOccurredAt.getTime())) {
+    throw new Error("CONTEXT_V2_CAPTURE_TRIGGER_INVALID");
+  }
+  return {
+    sourceMessagePk: input.sourceMessagePk,
+    sourceOccurredAt: input.sourceOccurredAt,
+  };
 }
 
 export interface RuntimeBehaviorModeResolverPort {
@@ -2403,6 +2428,7 @@ export class RealtimeRunner {
       recordedReplayCaptureEnabled:
         options.recordedReplayCaptureEnabled ?? false,
       recordedReplayPageId: options.recordedReplayPageId ?? "",
+      contextV2CaptureEnabled: options.contextV2CaptureEnabled ?? false,
       mediaRecognitionEnabled: options.mediaRecognitionEnabled ?? false,
       mediaClarificationEnabled: options.mediaClarificationEnabled ?? false,
       mediaRecognitionPageIds: [
@@ -2806,7 +2832,7 @@ export class RealtimeRunner {
           )
         : null;
 
-    let triggerMessagePk: string | null = null;
+    let contextV2CaptureTrigger: ContextV2CaptureTrigger | null = null;
     let lastInboundIndex = -1;
     for (let index = 0; index < claims.length; index += 1) {
       if (!claims[index]?.envelope.message.isEcho) lastInboundIndex = index;
@@ -2845,7 +2871,14 @@ export class RealtimeRunner {
             })}\n`,
           );
         }
-        triggerMessagePk = recorded.messagePk;
+        contextV2CaptureTrigger = advanceContextV2CaptureTrigger(
+          contextV2CaptureTrigger,
+          {
+            sourceMessagePk: recorded.messagePk,
+            sourceOccurredAt: new Date(original.occurredAt),
+            isEcho: false,
+          },
+        );
       } else if (original.isEcho && this.canonicalHistory) {
         await this.canonicalHistory.recordOutboundHumanMessage({
           pageId: item.pageId,
@@ -2860,6 +2893,7 @@ export class RealtimeRunner {
         });
       }
     }
+    const triggerMessagePk = contextV2CaptureTrigger?.sourceMessagePk ?? null;
 
     const currentContexts: ShadowContextMessage[] = sourceMessages.map((original) => ({
       direction: original.isEcho ? ("OUTBOUND" as const) : ("INBOUND" as const),
@@ -4922,8 +4956,12 @@ export class RealtimeRunner {
       ...(protectedOutboundReadiness === null ? [] : [protectedOutboundReadiness]),
     ];
     let contextV2CapturePlan: ContextV2CapturePlan | undefined;
-    if (!message.isEcho && triggerMessagePk !== null) {
-      const sourceOccurredAt = new Date(message.occurredAt);
+    if (
+      this.options.contextV2CaptureEnabled &&
+      triggerMessagePk !== null &&
+      contextV2CaptureTrigger !== null
+    ) {
+      const sourceOccurredAt = contextV2CaptureTrigger.sourceOccurredAt;
       const finalCommerceState = salesCyclePlan?.state ?? salesCycleRecord?.state;
       const candidateProductIds = [...new Set(
         resolution.products.map(({ productId }) => productId),
@@ -4967,7 +5005,13 @@ export class RealtimeRunner {
         productIds,
         catalogVersion: resolvedProduct?.catalogVersion ?? null,
       });
-      const capture = finalCommerceState === undefined
+      const capture = message.isEcho
+        ? blockedContextV2Capture({
+            sourceMessagePk: triggerMessagePk,
+            sourceOccurredAt,
+            reasonCode: "CONTEXT_V2_TRAILING_ECHO_TERMINAL",
+          })
+        : finalCommerceState === undefined
         ? blockedContextV2Capture({
             sourceMessagePk: triggerMessagePk,
             sourceOccurredAt,
@@ -4999,9 +5043,6 @@ export class RealtimeRunner {
                 sourceOccurredAt,
               });
       contextV2CapturePlan = {
-        eventId: deterministicUuid(
-          `lana:context-v2-capture:v1:${triggerMessagePk}`,
-        ),
         capture,
       };
     }
