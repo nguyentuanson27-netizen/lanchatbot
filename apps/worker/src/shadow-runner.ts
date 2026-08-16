@@ -12,7 +12,8 @@ import {
 import { BusinessFactEnvelopeV1Schema, type AgentProposalV1, type BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { redactAnalyticsMessage, type ShadowContextMessage, type ShadowEvaluationStore } from "@lana/database";
 import { redactCustomerUrlsForModel } from "./customer-url-policy.js";
-import { VertexShadowError, type VertexShadowModel } from "./vertex.js";
+import { VertexShadowError } from "./vertex.js";
+import type { BaselineModelCapability } from "./vertex-baseline.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 
 export function textSimilarity(left: string, right: string): number {
@@ -64,14 +65,14 @@ export function shouldJudgeV2(
 
 export class Phase4ShadowRunner {
   private readonly store: ShadowEvaluationStore;
-  private readonly model: VertexShadowModel;
+  private readonly model: BaselineModelCapability;
   private readonly options: Required<Phase4ShadowRunnerOptions>;
   private readonly businessFactsReader: BusinessFactsReader | null;
   private readonly productSearch: ProductSearchService | null;
 
   constructor(
     store: ShadowEvaluationStore,
-    model: VertexShadowModel,
+    model: BaselineModelCapability,
     options: Phase4ShadowRunnerOptions,
     businessFactsReader?: BusinessFactsReader,
     productSearch?: ProductSearchService,
@@ -163,7 +164,7 @@ export class Phase4ShadowRunner {
     });
   }
 
-  private factQuery(productId: string, proposal: Awaited<ReturnType<VertexShadowModel["generate"]>>["proposal"]): CatalogFactQuery {
+  private factQuery(productId: string, proposal: Awaited<ReturnType<BaselineModelCapability["generate"]>>["proposal"]): CatalogFactQuery {
     const query = proposal.businessFactQuery;
     return {
       shopAlias: this.options.shopAlias,
@@ -205,7 +206,7 @@ export class Phase4ShadowRunner {
             resolvedProduct !== null &&
             this.options.groundedDraftEnabled &&
             this.options.verifiedFactAssemblerEnabled;
-          let grounded: Awaited<ReturnType<VertexShadowModel["groundDraftWithFacts"]>> | null = null;
+          let grounded: Awaited<ReturnType<BaselineModelCapability["groundDraftWithFacts"]>> | null = null;
           if (useGroundedDraft && resolvedProduct !== null) {
             try {
               grounded = await this.model.groundDraftWithFacts(

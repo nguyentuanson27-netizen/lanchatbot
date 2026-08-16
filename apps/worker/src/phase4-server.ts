@@ -3,6 +3,7 @@ import { PostgresShadowEvaluationStore } from "@lana/database";
 import { assertPhase1EnvironmentSendDisabled } from "./index.js";
 import { Phase4ShadowRunner } from "./shadow-runner.js";
 import { VertexShadowModel, type VertexServiceAccount } from "./vertex.js";
+import { baselineModelCapability } from "./vertex-baseline.js";
 import { RedisBusinessFactsReader } from "./redis-business-facts.js";
 import { ProductSearchService, QdrantStableCatalogSearchAdapter } from "@lana/business-tools";
 
@@ -79,7 +80,7 @@ const store = new PostgresShadowEvaluationStore(databaseUrl, {
   dailyGenerationLimit: boundedInteger("SHADOW_DAILY_GENERATION_LIMIT", 50, 1, 10_000),
   hourlyGenerationLimit: boundedInteger("SHADOW_HOURLY_GENERATION_LIMIT", 10, 1, 1_000),
 });
-const model = new VertexShadowModel({
+const vertexModel = new VertexShadowModel({
   projectId,
   location: process.env.VERTEX_LOCATION?.trim() || credential.region,
   modelName,
@@ -97,7 +98,7 @@ const productSearch = new ProductSearchService(
     baseUrl: required("QDRANT_BASE_URL"),
     apiKey: secretOrEnvironment("QDRANT_API_KEY", "QDRANT_API_KEY_FILE"),
     collection: required("QDRANT_COLLECTION"),
-    embedding: model,
+    embedding: vertexModel,
     expectedDimension: boundedInteger("VERTEX_EMBEDDING_DIMENSION", 1_408, 128, 1_408),
     timeoutMs: boundedInteger("QDRANT_TIMEOUT_MS", 15_000, 1_000, 60_000),
   }),
@@ -115,7 +116,7 @@ const businessFactsReader = new RedisBusinessFactsReader(
 if (!await businessFactsReader.ready()) throw new Error("BUSINESS_FACT_REDIS_NOT_READY");
 const runner = new Phase4ShadowRunner(
   store,
-  model,
+  baselineModelCapability(vertexModel),
   {
     modelName,
     maxAttempts: 3,

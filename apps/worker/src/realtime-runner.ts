@@ -95,7 +95,7 @@ import type { PancakeHandoffAdapter } from "@lana/pancake-handoff";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import type { VerifiedVariantResult } from "./realtime-sales-catalog.js";
 import type { RealtimeGenerationQuota } from "./realtime-quota.js";
-import type { VertexShadowModel } from "./vertex.js";
+import type { BaselineModelCapability } from "./vertex-baseline.js";
 import type { ChatHistoryPort } from "./redis-chat-history.js";
 import {
   aggregateMedia,
@@ -2014,12 +2014,12 @@ export interface RealtimeRuntimePort {
 }
 
 export interface RealtimeModelPort {
-  generate: VertexShadowModel["generate"];
-  groundWithFacts: VertexShadowModel["groundWithFacts"];
-  groundDraftWithFacts?: VertexShadowModel["groundDraftWithFacts"];
-  repairSizeClaimDraft?: VertexShadowModel["repairSizeClaimDraft"];
-  draftMultiProductClarification?: VertexShadowModel["draftMultiProductClarification"];
-  draftCustomerUrlExplanation?: VertexShadowModel["draftCustomerUrlExplanation"];
+  generate: BaselineModelCapability["generate"];
+  groundWithFacts: BaselineModelCapability["groundWithFacts"];
+  groundDraftWithFacts?: BaselineModelCapability["groundDraftWithFacts"];
+  repairSizeClaimDraft?: BaselineModelCapability["repairSizeClaimDraft"];
+  draftMultiProductClarification?: BaselineModelCapability["draftMultiProductClarification"];
+  draftCustomerUrlExplanation?: BaselineModelCapability["draftCustomerUrlExplanation"];
 }
 
 export interface CanonicalChatHistoryPort {

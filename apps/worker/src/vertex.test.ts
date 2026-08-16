@@ -1,4 +1,4 @@
-import { generateKeyPairSync } from "node:crypto";
+import { createHash, generateKeyPairSync } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import {
   buildShadowPrompt,
@@ -100,6 +100,26 @@ function rubricResponse(): Response {
 }
 
 describe("Vertex shadow client", () => {
+  it("pins the complete baseline generation request from d9de77f", async () => {
+    let generationRequest: { url: string; body: string } | null = null;
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      generationRequest = { url, body: String(init?.body ?? "") };
+      return generatedProposalResponse();
+    }) as unknown as typeof fetch;
+
+    await modelWith(fetchMock).generate(context, "prompt-v1");
+
+    const requestHash = createHash("sha256")
+      .update(JSON.stringify(generationRequest), "utf8")
+      .digest("hex");
+    // Frozen from exact source baseline d9de77f283553f7eae8991a06c756908a35199e5.
+    expect(requestHash).toBe("9b9dfc7d9a79a01a2bea28ecd221e1cc40cc8ae9562b02f89a4e7f1ce94f3dbb");
+  });
+
   it("keeps the sales prompt structured and business facts grounded", () => {
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Neu khach chi gui ma san pham: businessFactQuery.intent=PRICE");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("khong hoi nguoc khach muon xem thong tin gi");
