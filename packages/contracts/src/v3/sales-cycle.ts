@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { canonicalJsonV1 } from "../v2/canonical-commerce-bindings.js";
 import { CanonicalProductIdV1Schema } from "../v2/canonical-identifiers.js";
+import type { DeterministicEffectReadinessV1 } from "../v2/canonical-evidence-readiness.js";
 
 const DateTimeSchema = z.string().datetime();
 const Sha256Schema = z.string().regex(/^sha256:[a-f0-9]{64}$/u);
@@ -43,6 +44,46 @@ export function isStateAdvancingSalesOutcomeV1(
   value: string,
 ): value is StateAdvancingSalesOutcomeV1 {
   return (STATE_ADVANCING_SALES_OUTCOMES_V1 as readonly string[]).includes(value);
+}
+
+type PersistedSalesEffectV1 = DeterministicEffectReadinessV1["effect"];
+
+const SALES_EFFECT_BY_COMMAND_V1: Readonly<Partial<Record<
+  SalesCycleCommandKindV1,
+  PersistedSalesEffectV1
+>>> = {
+  CART_OPENED: "CART_OPEN",
+  CART_MUTATED: "CART_MUTATION",
+  CART_READY: "CART_READY",
+  NEGOTIATION_EVENT: "CART_READY",
+  PREVIEW_CREATED: "PREVIEW_READY",
+  CONFIRM_PURCHASE: "PURCHASE_CONFIRMATION_READY",
+};
+
+const PERSISTED_SALES_EFFECT_ORDER_V1 = [
+  "CART_OPEN",
+  "CART_MUTATION",
+  "CART_READY",
+  "PREVIEW_READY",
+  "PURCHASE_CONFIRMATION_READY",
+] as const satisfies readonly PersistedSalesEffectV1[];
+
+/** Effects that still authorize a protected artifact in the proposed final state. */
+export function requiredPersistedSalesEffectsV1(input: Readonly<{
+  events: readonly Readonly<{
+    commandKind: SalesCycleCommandKindV1;
+    outcome: StateAdvancingSalesOutcomeV1;
+  }>[];
+  hasFinalPreview: boolean;
+  hasFinalConfirmation: boolean;
+}>): readonly PersistedSalesEffectV1[] {
+  const required = new Set(input.events
+    .filter(({ outcome }) => outcome === "APPLIED")
+    .map(({ commandKind }) => SALES_EFFECT_BY_COMMAND_V1[commandKind])
+    .filter((effect): effect is PersistedSalesEffectV1 => effect !== undefined));
+  if (!input.hasFinalPreview) required.delete("PREVIEW_READY");
+  if (!input.hasFinalConfirmation) required.delete("PURCHASE_CONFIRMATION_READY");
+  return PERSISTED_SALES_EFFECT_ORDER_V1.filter((effect) => required.has(effect));
 }
 
 export const SalesCycleClarificationReasonV1Schema = z.literal(

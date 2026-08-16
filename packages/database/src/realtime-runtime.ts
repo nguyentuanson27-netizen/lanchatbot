@@ -31,6 +31,7 @@ import {
   CART_TTL_MS_V1,
   isSalesStageTransitionAllowedV1,
   isStateAdvancingSalesOutcomeV1,
+  requiredPersistedSalesEffectsV1,
   SalesCycleStageV1Schema,
   deterministicEffectReadinessHashPreimageV1,
   effectBindingHashPreimageV1,
@@ -46,6 +47,7 @@ import {
   type DeterministicEffectReadinessV1,
   type StateAdvancingSalesOutcomeV1,
   type SalesCycleCommandKindV1,
+  type OrderPreviewV1,
 } from "@lana/contracts";
 import {
   applyCanonicalCartDecisionV2,
@@ -164,6 +166,7 @@ export interface RealtimeSalesCycleEventPlan {
   readonly negotiationTransitionEvidence?: import("@lana/contracts").NegotiationTransitionEvidenceV1;
   readonly checkoutDetailsTransitionEvidence?: import("@lana/contracts").CheckoutDetailsTransitionEvidenceV1;
   readonly clarificationTransitionEvidence?: import("@lana/contracts").ClarificationTransitionEvidenceV1;
+  readonly previewArtifact?: OrderPreviewV1;
   readonly occurredAt: Date;
 }
 
@@ -412,18 +415,6 @@ export interface RealtimeCommitResult {
   readonly inboxBatchStatus?: "NOT_REQUESTED" | "COMMITTED" | "SUPERSEDED";
 }
 
-const SALES_EFFECT_BY_COMMAND_V1: Readonly<Partial<Record<
-  RealtimeSalesCycleEventPlan["commandKind"],
-  DeterministicEffectReadinessV1["effect"]
->>> = {
-  CART_OPENED: "CART_OPEN",
-  CART_MUTATED: "CART_MUTATION",
-  CART_READY: "CART_READY",
-  NEGOTIATION_EVENT: "CART_READY",
-  PREVIEW_CREATED: "PREVIEW_READY",
-  CONFIRM_PURCHASE: "PURCHASE_CONFIRMATION_READY",
-};
-
 function sha256CanonicalV1(value: unknown): string {
   return createHash("sha256").update(canonicalJsonV1(value), "utf8").digest("hex");
 }
@@ -500,12 +491,11 @@ function validateSalesEffectReadiness<TState, TSalesState>(
       canonicalOrderPreviewHashPreimageV1(previewArtifact),
     )}`) throw new Error("ORDER_PREVIEW_HASH_MISMATCH");
   }
-  const required = new Set(plan.events
-    .filter(({ outcome }) => outcome === "APPLIED")
-    .map(({ commandKind }) => SALES_EFFECT_BY_COMMAND_V1[commandKind])
-    .filter((effect): effect is DeterministicEffectReadinessV1["effect"] =>
-      effect !== undefined
-    ));
+  const required = new Set(requiredPersistedSalesEffectsV1({
+    events: plan.events,
+    hasFinalPreview: preview !== undefined,
+    hasFinalConfirmation: state.confirmation !== null && state.confirmation !== undefined,
+  }));
   for (const effect of required) {
     if (!parsed.some((value) => value.effect === effect)) {
       throw new Error("EFFECT_READINESS_REQUIRED");
@@ -1268,7 +1258,7 @@ function validateLockedProtectedSalesArtifactsV1(
     case "PREVIEW_CREATED": {
       if (event.outcome !== "APPLIED") throw new Error("SALES_STATE_OUTCOME_INVALID");
       if (finalCart === null) throw new Error("PREVIEW_TRANSITION_CART_REQUIRED");
-      const candidate = OrderPreviewV1Schema.parse(proposed.preview);
+      const candidate = OrderPreviewV1Schema.parse(event.previewArtifact);
       const transition = validateOrderPreviewTransitionV1({
         stage: event.stageBefore,
         cart: finalCart,

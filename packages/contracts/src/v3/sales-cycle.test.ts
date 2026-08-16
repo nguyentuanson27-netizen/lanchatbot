@@ -16,6 +16,7 @@ import {
   VersionedBusinessReferenceV1Schema,
   isSalesStageTransitionAllowedV1,
   isStateAdvancingSalesOutcomeV1,
+  requiredPersistedSalesEffectsV1,
   canonicalClarificationStateHashPreimageV1,
   clarificationTransitionEvidenceHashPreimageV1,
 } from "./sales-cycle.js";
@@ -46,6 +47,20 @@ describe("Phase 3 sales-cycle contracts", () => {
     expect(isStateAdvancingSalesOutcomeV1("APPLIED")).toBe(true);
     expect(isStateAdvancingSalesOutcomeV1("HANDOFF")).toBe(true);
     expect(isStateAdvancingSalesOutcomeV1("REJECTED")).toBe(false);
+  });
+
+  it("requires readiness only for applied effects that survive the final state", () => {
+    const events = [
+      { commandKind: "CART_READY" as const, outcome: "APPLIED" as const },
+      { commandKind: "PREVIEW_CREATED" as const, outcome: "APPLIED" as const },
+      { commandKind: "CONFIRM_PURCHASE" as const, outcome: "HANDOFF" as const },
+    ];
+
+    expect(requiredPersistedSalesEffectsV1({
+      events,
+      hasFinalPreview: false,
+      hasFinalConfirmation: false,
+    })).toEqual(["CART_READY"]);
   });
 
   it("defines every legal persisted sales-stage transition and rejects the Cartesian complement", () => {

@@ -18,6 +18,7 @@ import type { BusinessFactsReader } from "./redis-business-facts.js";
 import {
   createRealtimeSalesState,
   evaluateRealtimeSalesCycle,
+  prepareHandoffStatePlanV1,
 } from "./realtime-sales-cycle.js";
 
 const now = new Date("2026-07-23T03:00:00.000Z");
@@ -1057,6 +1058,67 @@ describe("realtime Phase 3 sales cycle", () => {
         }],
       },
     });
+    expect(output.plan?.effectClaimSets).toEqual([]);
+    expect(output.plan?.effectReadiness).toEqual([]);
+
+    const allHandoffPlan = output.plan!;
+    const mixedPlan = {
+      ...allHandoffPlan,
+      expectedRevision: allHandoffPlan.expectedRevision - 2,
+      events: [
+        {
+          ...allHandoffPlan.events[0]!,
+          commandId: "confirm-handoff-plan-cart-ready",
+          commandKind: "CART_READY" as const,
+          outcome: "APPLIED" as const,
+          stateRevisionBefore: allHandoffPlan.events[0]!.stateRevisionBefore - 2,
+          stateRevisionAfter: allHandoffPlan.events[0]!.stateRevisionBefore - 1,
+          stageBefore: "CART_OPEN",
+          stageAfter: "CART_OPEN",
+        },
+        {
+          ...allHandoffPlan.events[0]!,
+          commandId: "confirm-handoff-plan-preview",
+          commandKind: "PREVIEW_CREATED" as const,
+          outcome: "APPLIED" as const,
+          stateRevisionBefore: allHandoffPlan.events[0]!.stateRevisionBefore - 1,
+          stateRevisionAfter: allHandoffPlan.events[0]!.stateRevisionBefore,
+          stageBefore: "CART_OPEN",
+          stageAfter: "ORDER_PREVIEW",
+        },
+        ...allHandoffPlan.events,
+      ],
+      deterministicConfirmationEvidence: {
+        schemaVersion: 1 as const,
+        authorityVersion: "DETERMINISTIC_CONFIRMATION_EVIDENCE_V1" as const,
+        classifierVersion: "LEGACY_CONFIRMATION_V1" as const,
+        decision: "CONFIRM" as const,
+        reasonCode: "CONFIRMATION_DETERMINISTIC_MATCH" as const,
+        sourceMessageIdHash: "a".repeat(64),
+        evidenceHash: "b".repeat(64),
+        evaluatedAt: now.toISOString(),
+        authorization: "NONE" as const,
+      },
+      effectClaimSets: [
+        { effect: "CART_READY" as const, claims: [] },
+        { effect: "PREVIEW_READY" as const, claims: [] },
+        { effect: "PURCHASE_CONFIRMATION_READY" as const, claims: [] },
+      ],
+      effectReadiness: [
+        { effect: "CART_READY", marker: "must-survive-mixed-plan" },
+        { effect: "PREVIEW_READY", marker: "must-not-survive-handoff" },
+        { effect: "PURCHASE_CONFIRMATION_READY", marker: "must-not-survive-handoff" },
+      ] as unknown as NonNullable<
+        typeof allHandoffPlan.effectReadiness
+      >,
+    };
+
+    expect(prepareHandoffStatePlanV1(mixedPlan)).toMatchObject({
+      effectClaimSets: [{ effect: "CART_READY" }],
+      effectReadiness: [{ effect: "CART_READY", marker: "must-survive-mixed-plan" }],
+    });
+    expect(prepareHandoffStatePlanV1(mixedPlan))
+      .not.toHaveProperty("deterministicConfirmationEvidence");
   });
 
   it("stacks 5%, freeship and final 20k while the same evidence cannot escalate twice", async () => {

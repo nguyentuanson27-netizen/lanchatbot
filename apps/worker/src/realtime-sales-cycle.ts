@@ -42,6 +42,7 @@ import {
   MAX_CART_LINES_V1,
   CART_TTL_MS_V1,
   isStateAdvancingSalesOutcomeV1,
+  requiredPersistedSalesEffectsV1,
   type ProtectedClaimV1,
   type BankTransferPolicyV1,
   type CheckoutRevalidationV1,
@@ -131,6 +132,39 @@ export interface RealtimeSalesCycleOutput {
     readiness: DeterministicEffectReadinessV1;
   }>;
   readonly telemetry?: RealtimeSalesCycleTelemetry;
+}
+
+export function prepareHandoffStatePlanV1<TState>(
+  value: RealtimeSalesCyclePlan<TState> | null,
+): RealtimeSalesCyclePlan<TState> | null {
+  if (value === null) return null;
+  const state = value.state as Readonly<{
+    cart?: unknown;
+    preview?: unknown;
+    confirmation?: unknown;
+  }>;
+  const requiredEffects = new Set(requiredPersistedSalesEffectsV1({
+    events: value.events,
+    hasFinalPreview: state.preview !== null && state.preview !== undefined,
+    hasFinalConfirmation: state.confirmation !== null && state.confirmation !== undefined,
+  }));
+  const {
+    deterministicConfirmationEvidence,
+    effectClaimSets: _effectClaimSets,
+    effectReadiness: _effectReadiness,
+    ...statePlan
+  } = value;
+  return {
+    ...statePlan,
+    ...(requiredEffects.has("PURCHASE_CONFIRMATION_READY") &&
+        deterministicConfirmationEvidence !== undefined
+      ? { deterministicConfirmationEvidence }
+      : {}),
+    effectClaimSets: (value.effectClaimSets ?? [])
+      .filter(({ effect }) => requiredEffects.has(effect)),
+    effectReadiness: (value.effectReadiness ?? [])
+      .filter(({ effect }) => requiredEffects.has(effect)),
+  };
 }
 
 export type CheckoutFieldKey =
@@ -886,6 +920,9 @@ export async function evaluateRealtimeSalesCycle(
         ...(clarificationTransitionEvidence === null
           ? {}
           : { clarificationTransitionEvidence }),
+        ...(command.kind === "PREVIEW_CREATED" && state.preview !== null
+          ? { previewArtifact: state.preview }
+          : {}),
         occurredAt: input.now,
       });
     }
@@ -1101,15 +1138,7 @@ export async function evaluateRealtimeSalesCycle(
     };
   };
   const handoffStatePlan = (): RealtimeSalesCyclePlan<SalesCycleRuntimeState> | null => {
-    const value = plan();
-    if (value === null) return null;
-    const {
-      deterministicConfirmationEvidence: _confirmationEvidence,
-      effectClaimSets: _effectClaimSets,
-      effectReadiness: _effectReadiness,
-      ...statePlan
-    } = value;
-    return { ...statePlan, effectClaimSets: [], effectReadiness: [] };
+    return prepareHandoffStatePlanV1(plan());
   };
 
   const protectedCartReply = async (

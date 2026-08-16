@@ -2878,6 +2878,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
             cartId,
             cartVersion: readyCart.revision,
             reasonCode: null,
+            previewArtifact: exactPreview,
             occurredAt: now,
           },
         ],
@@ -2908,6 +2909,11 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       salesCyclePlan: {
         ...exactPreviewPlan.salesCyclePlan,
         state: { ...exactPreviewPlan.salesCyclePlan.state, preview: forgedPreview },
+        events: exactPreviewPlan.salesCyclePlan.events.map((event) =>
+          event.commandKind === "PREVIEW_CREATED"
+            ? { ...event, previewArtifact: forgedPreview }
+            : event
+        ),
         effectReadiness: [cartReadyReadiness, forgedPreviewReadiness],
       },
     }, now)).rejects.toThrow("ORDER_PREVIEW_TRANSITION_REPLAY_MISMATCH");
@@ -2918,7 +2924,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       `lana:sales-cycle:v1:page-1:${commitInput.conversationId}`,
       salesExpiresAt,
     );
-    lockedSalesRow = {
+    const previewLockedSalesRow = {
       ...mutationLockedSalesRow,
       state_revision: "5",
       state_ciphertext: previewLockedBundle.ciphertext,
@@ -2927,6 +2933,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       state_encrypted_dek: previewLockedBundle.encryptedDek,
       state_key_ref: previewLockedBundle.keyRef,
     };
+    lockedSalesRow = previewLockedSalesRow;
     const confirmHandoffCommandId = "sales:event-2:confirm-handoff";
     const exactConfirmationHandoffPlan = {
       ...exactPreviewPlan,
@@ -2962,6 +2969,26 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         effectReadiness: [],
       },
     } satisfies RealtimeCommitInput<unknown, unknown>;
+
+    const mixedPreviewHandoffPlan = {
+      ...exactPreviewPlan,
+      salesCyclePlan: {
+        ...exactPreviewPlan.salesCyclePlan,
+        state: exactConfirmationHandoffPlan.salesCyclePlan.state,
+        events: [
+          ...exactPreviewPlan.salesCyclePlan.events,
+          exactConfirmationHandoffPlan.salesCyclePlan.events[0]!,
+        ],
+        effectClaimSets: [{ effect: "CART_READY" as const, claims: cartReadyClaims }],
+        effectReadiness: [cartReadyReadiness],
+      },
+    } satisfies RealtimeCommitInput<unknown, unknown>;
+    lockedSalesRow = mutationLockedSalesRow;
+    await expect(store.commit(mixedPreviewHandoffPlan, now))
+      .resolves.toMatchObject({ stateCommitted: true });
+    expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    lockedSalesRow = previewLockedSalesRow;
     await expect(store.commit(exactConfirmationHandoffPlan, now))
       .resolves.toMatchObject({ stateCommitted: true });
     expect(calls.at(-1)?.trim()).toBe("COMMIT");
