@@ -266,6 +266,7 @@ describe("realtime golden transcripts", () => {
       { kind: "IMAGE", imageUrl: "https://cdn.example/cb182.jpg" },
     ]);
     expect(committed?.decisionEvents?.map((event) => event.eventType)).toEqual([
+      "CONTEXT_V2_DERIVED",
       "PRODUCT_RESOLVED",
       "PRODUCT_MATCHED",
       "PRICE_CARD_SENT",
@@ -398,6 +399,7 @@ describe("realtime golden transcripts", () => {
 
     expect(committed?.metaPlan).toBeUndefined();
     expect(committed?.decisionEvents?.map((event) => event.eventType)).toEqual([
+      "CONTEXT_V2_DERIVED",
       "NO_REPLY",
       "NO_REPLY_SELECTED",
     ]);
