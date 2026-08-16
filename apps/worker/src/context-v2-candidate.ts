@@ -64,7 +64,14 @@ const SYSTEM_INSTRUCTION = [
   "Return only the registered JSON response schema.",
 ].join("\n");
 
-const MODEL_RESOURCE_PATTERN = /^projects\/[A-Za-z0-9._-]{1,128}\/locations\/[A-Za-z0-9._-]{1,64}\/publishers\/google\/models\/[A-Za-z0-9._-]{1,128}$/u;
+export const CONTEXT_V2_CANDIDATE_MODEL_ID = "gemini-3.5-flash-lite";
+export const CONTEXT_V2_CANDIDATE_PROVIDER_VERSION =
+  "gemini-3.5-flash-lite";
+
+const MODEL_RESOURCE_PATTERN = new RegExp(
+  `^projects\\/[A-Za-z0-9._-]{1,128}\\/locations\\/[A-Za-z0-9._-]{1,64}\\/publishers\\/google\\/models\\/${CONTEXT_V2_CANDIDATE_MODEL_ID.replaceAll(".", "\\.")}$`,
+  "u",
+);
 
 function sha256(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
@@ -86,15 +93,29 @@ function candidateClaimScope(
   return { kind: scope.kind };
 }
 
-function candidateClaimValue(
-  claim: ContextV2["verifiedClaims"][number],
-) {
-  if (claim.type !== "SIZE_FIT") return claim.value;
-  return {
-    recommendedSizes: claim.value.recommendedSizes,
-    alternativeSizes: claim.value.alternativeSizes,
-    evidenceBasis: claim.value.evidenceBasis,
-  };
+type ProtectedClaimType = ContextV2["verifiedClaims"][number]["type"];
+
+export const CANDIDATE_CLAIM_VALUE_KEYS = Object.freeze({
+  PRICE: ["amountVnd", "currency"],
+  STOCK: ["status", "availableQuantity"],
+  SIZE_FIT: ["recommendedSizes", "alternativeSizes", "evidenceBasis"],
+  ETA: ["minDays", "maxDays"],
+  SHIPPING_FEE: ["amountVnd", "currency"],
+  FREESHIP: ["eligible"],
+  PROMOTION_OFFER: ["adjustmentId", "amountVnd"],
+  PRODUCT_MEDIA: ["assetId", "assetSha256"],
+} as const satisfies Readonly<Record<ProtectedClaimType, readonly string[]>>);
+
+/** Exhaustive claim-value projection; unregistered fields never cross egress. */
+export function sanitizeCandidateClaimValue(
+  type: ProtectedClaimType,
+  value: object,
+): Readonly<Record<string, unknown>> {
+  const allowedKeys: readonly string[] = CANDIDATE_CLAIM_VALUE_KEYS[type];
+  const input = value as Readonly<Record<string, unknown>>;
+  return Object.freeze(Object.fromEntries(
+    allowedKeys.map((key) => [key, input[key]]),
+  ));
 }
 
 /** The single egress sanitizer for every Context V2 candidate request. */
@@ -109,7 +130,7 @@ export function sanitizeContextV2CandidateInput(context: ContextV2) {
     verifiedClaims: parsed.verifiedClaims.map((claim) => ({
       type: claim.type,
       scope: candidateClaimScope(claim.scope),
-      value: candidateClaimValue(claim),
+      value: sanitizeCandidateClaimValue(claim.type, claim.value),
       provenance: {
         authority: claim.provenance.authority,
         sourceVersion: claim.provenance.sourceVersion,
@@ -249,15 +270,14 @@ export class FetchCandidateVertexTransport implements CandidateVertexTransport {
         reject(new Error("CONTEXT_V2_CANDIDATE_PROVIDER_TIMEOUT"));
       }, Math.max(1_000, Math.min(120_000, this.timeoutMs)));
     });
-    let response: Response;
     try {
-      response = await Promise.race([
+      return await Promise.race([
         (async () => {
           const accessToken = (await this.accessToken()).trim();
           if (!accessToken) {
             throw new Error("CONTEXT_V2_CANDIDATE_ACCESS_TOKEN_MISSING");
           }
-          return this.fetchImpl(request.url, {
+          const response = await this.fetchImpl(request.url, {
             method: "POST",
             headers: {
               authorization: `Bearer ${accessToken}`,
@@ -267,6 +287,21 @@ export class FetchCandidateVertexTransport implements CandidateVertexTransport {
             signal: controller.signal,
             redirect: "error",
           });
+          if (!response.ok) {
+            throw new Error("CONTEXT_V2_CANDIDATE_PROVIDER_FAILED");
+          }
+          const payload = await response.json() as Record<string, unknown>;
+          const responseModelVersion = response.headers.get(
+            "x-vertex-model-version",
+          );
+          const payloadModelVersion = typeof payload.modelVersion === "string"
+            ? payload.modelVersion
+            : null;
+          return {
+            payload,
+            providerModelVersion:
+              responseModelVersion ?? payloadModelVersion,
+          };
         })(),
         timeoutFailure,
       ]);
@@ -278,16 +313,6 @@ export class FetchCandidateVertexTransport implements CandidateVertexTransport {
     } finally {
       clearTimeout(timeout!);
     }
-    if (!response.ok) throw new Error("CONTEXT_V2_CANDIDATE_PROVIDER_FAILED");
-    const payload = await response.json() as Record<string, unknown>;
-    const responseModelVersion = response.headers.get("x-vertex-model-version");
-    const payloadModelVersion = typeof payload.modelVersion === "string"
-      ? payload.modelVersion
-      : null;
-    return {
-      payload,
-      providerModelVersion: responseModelVersion ?? payloadModelVersion,
-    };
   }
 }
 
@@ -338,6 +363,9 @@ export class ContextV2CandidateModel implements ContextV2CandidateModelPort {
     const providerModelVersion = response.providerModelVersion?.trim() ?? "";
     if (!providerModelVersion || providerModelVersion.toLowerCase() === "unknown") {
       throw new Error("CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_UNKNOWN");
+    }
+    if (providerModelVersion !== CONTEXT_V2_CANDIDATE_PROVIDER_VERSION) {
+      throw new Error("CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_MISMATCH");
     }
     let output: ContextV2CandidateOutput;
     try {

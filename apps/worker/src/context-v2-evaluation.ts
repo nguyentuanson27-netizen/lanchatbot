@@ -5,19 +5,41 @@ import type {
   CandidateRequestIdentity,
   ContextV2CandidateModelPort,
 } from "./context-v2-candidate.js";
-import { deriveCandidateRequestIdentity } from "./context-v2-candidate.js";
-import { deriveCandidateRequestContextHash } from "./context-v2-candidate.js";
+import {
+  CONTEXT_V2_CANDIDATE_MODEL_ID,
+  CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
+  deriveCandidateRequestContextHash,
+  deriveCandidateRequestIdentity,
+} from "./context-v2-candidate.js";
 
 export const DF10_GATE_E_PLAN_V1 = Object.freeze({
   schemaVersion: 1 as const,
   contractVersion: "DF10_GATE_E_PLAN_V1" as const,
+  registrationStatus: "DRAFT_UNREGISTERED" as const,
   baseline: "POST_BF_V1" as const,
-  preRegisteredAt: "2026-08-17T00:00:00.000+07:00",
-  population: "FROZEN_POST_GATE_BF_V1_CORPUS" as const,
-  sampling: {
-    contractVersion: "DF10_GATE_E_SAMPLE_V1" as const,
+  candidateModel: {
+    publisher: "google" as const,
+    modelId: CONTEXT_V2_CANDIDATE_MODEL_ID,
+    expectedProviderModelVersion: CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
+  },
+  capturePopulation: {
+    inclusion: "ALL_TERMINAL_CONTEXT_V2_CAPTURES" as const,
+    sampling: "NONE" as const,
+  },
+  scoredCorpus: {
+    name: "FROZEN_POST_GATE_BF_V1_CORPUS" as const,
+    inclusion: "ALL_FROZEN_CORPUS_ITEMS" as const,
+    mandatoryStrata: [
+      "CLAIM_SAFETY",
+      "CONTEXT_INTEGRITY",
+      "SIDE_EFFECT_SAFETY",
+      "MUST_PASS",
+    ] as const,
+  },
+  diagnosticSampling: {
+    contractVersion: "DF10_DIAGNOSTIC_SAMPLE_V1" as const,
     rate: 0.2,
-    salt: "lana-df10-gate-e-v1",
+    salt: "lana-df10-diagnostic-v1",
   },
   rubric: {
     contractVersion: "DF10_GATE_E_RUBRIC_V1" as const,
@@ -33,6 +55,8 @@ export const DF10_GATE_E_PLAN_V1 = Object.freeze({
     claimSafetyMinimum: 1,
     contextIntegrityMinimum: 1,
     sideEffectViolationMaximum: 0,
+  },
+  diagnostics: {
     qualityDeltaMinimum: 0,
   },
 });
@@ -45,13 +69,13 @@ export const DF10_GATE_E_PLAN_ARTIFACT_SHA256 = sha256(
   canonicalJsonV1(DF10_GATE_E_PLAN_V1),
 );
 
-export function selectedForGateE(itemId: string): boolean {
+export function selectedForDiagnosticEvaluation(itemId: string): boolean {
   if (!itemId.trim()) throw new Error("DF10_GATE_E_ITEM_ID_REQUIRED");
   const bucket = Number.parseInt(
-    sha256(`${DF10_GATE_E_PLAN_V1.sampling.salt}:${itemId}`).slice(0, 8),
+    sha256(`${DF10_GATE_E_PLAN_V1.diagnosticSampling.salt}:${itemId}`).slice(0, 8),
     16,
   ) / 0x1_0000_0000;
-  return bucket < DF10_GATE_E_PLAN_V1.sampling.rate;
+  return bucket < DF10_GATE_E_PLAN_V1.diagnosticSampling.rate;
 }
 
 export interface GateERequestRegistration {
@@ -65,45 +89,40 @@ export interface GateERequestRegistrationInput {
   readonly request: BuiltCandidateRequest;
 }
 
-export interface GateEEvaluationManifest {
+export interface DraftEvaluationManifest {
   readonly schemaVersion: 1;
-  readonly contractVersion: "DF10_GATE_E_MANIFEST_V1";
+  readonly contractVersion: "DF10_DRAFT_EVALUATION_MANIFEST_V1";
+  readonly admissibility: "DRAFT_UNREGISTERED";
   readonly planArtifactHash: string;
-  readonly registrationCommit: string;
-  readonly runStartedAt: string;
   readonly corpusHash: string;
   readonly rubricHash: string;
   readonly requests: readonly GateERequestRegistration[];
   readonly manifestHash: string;
 }
 
-export function createGateEEvaluationManifest(input: Readonly<{
-  registrationCommit: string;
-  runStartedAt: Date;
+export function createDraftEvaluationManifest(input: Readonly<{
   corpusHash: string;
   requests: readonly GateERequestRegistrationInput[];
-}>): GateEEvaluationManifest {
-  if (!/^[a-f0-9]{40}$/u.test(input.registrationCommit)) {
-    throw new Error("DF10_PRE_REGISTRATION_COMMIT_INVALID");
-  }
+}>): DraftEvaluationManifest {
   if (!/^[a-f0-9]{64}$/u.test(input.corpusHash)) {
     throw new Error("DF10_CORPUS_HASH_INVALID");
-  }
-  if (input.runStartedAt.getTime() <= Date.parse(DF10_GATE_E_PLAN_V1.preRegisteredAt)) {
-    throw new Error("DF10_RUN_NOT_AFTER_PRE_REGISTRATION");
   }
   const requestInputs = [...input.requests]
     .sort((left, right) => left.corpusItemId.localeCompare(right.corpusItemId));
   if (requestInputs.length === 0 ||
       new Set(requestInputs.map(({ corpusItemId }) => corpusItemId)).size !==
-        requestInputs.length ||
-      requestInputs.some(({ corpusItemId }) => !selectedForGateE(corpusItemId))) {
+        requestInputs.length) {
     throw new Error("DF10_MANIFEST_POPULATION_INVALID");
   }
   const requests = requestInputs.map(({ corpusItemId, request }) => {
     const derived = deriveCandidateRequestIdentity(request);
     if (canonicalJsonV1(derived) !== canonicalJsonV1(request.identity)) {
       throw new Error("DF10_REQUEST_ENVELOPE_IDENTITY_INVALID");
+    }
+    if (!derived.modelResource.endsWith(
+      `/publishers/google/models/${CONTEXT_V2_CANDIDATE_MODEL_ID}`,
+    )) {
+      throw new Error("DF10_REQUEST_MODEL_IDENTITY_MISMATCH");
     }
     return {
       corpusItemId,
@@ -114,10 +133,9 @@ export function createGateEEvaluationManifest(input: Readonly<{
   const rubricHash = sha256(canonicalJsonV1(DF10_GATE_E_PLAN_V1.rubric));
   const draft = {
     schemaVersion: 1 as const,
-    contractVersion: "DF10_GATE_E_MANIFEST_V1" as const,
+    contractVersion: "DF10_DRAFT_EVALUATION_MANIFEST_V1" as const,
+    admissibility: "DRAFT_UNREGISTERED" as const,
     planArtifactHash: DF10_GATE_E_PLAN_ARTIFACT_SHA256,
-    registrationCommit: input.registrationCommit,
-    runStartedAt: input.runStartedAt.toISOString(),
     corpusHash: input.corpusHash,
     rubricHash,
     requests,
@@ -128,7 +146,7 @@ export function createGateEEvaluationManifest(input: Readonly<{
   });
 }
 
-function assertGateEManifestIntegrity(manifest: GateEEvaluationManifest): void {
+function assertDraftManifestIntegrity(manifest: DraftEvaluationManifest): void {
   if (manifest.planArtifactHash !== DF10_GATE_E_PLAN_ARTIFACT_SHA256 ||
       manifest.rubricHash !== sha256(canonicalJsonV1(DF10_GATE_E_PLAN_V1.rubric))) {
     throw new Error("DF10_MANIFEST_PLAN_IDENTITY_INVALID");
@@ -139,18 +157,18 @@ function assertGateEManifestIntegrity(manifest: GateEEvaluationManifest): void {
   }
 }
 
-export function validateScoredCandidateIdentity(input: Readonly<{
-  manifest: GateEEvaluationManifest;
+export function validateDraftCandidateIdentity(input: Readonly<{
+  manifest: DraftEvaluationManifest;
   corpusItemId: string;
   observedRequestIdentity: CandidateRequestIdentity;
   providerModelVersion: string;
 }>): Readonly<{
-  disposition: "IDENTITY_ADMISSIBLE";
+  disposition: "DRAFT_IDENTITY_MATCHED";
   manifestHash: string;
   requestEnvelopeHash: string;
   providerModelVersion: string;
 }> {
-  assertGateEManifestIntegrity(input.manifest);
+  assertDraftManifestIntegrity(input.manifest);
   const entry = input.manifest.requests.find(
     ({ corpusItemId }) => corpusItemId === input.corpusItemId,
   );
@@ -163,8 +181,11 @@ export function validateScoredCandidateIdentity(input: Readonly<{
   if (!providerModelVersion || providerModelVersion.toLowerCase() === "unknown") {
     throw new Error("DF10_PROVIDER_MODEL_IDENTITY_UNKNOWN");
   }
+  if (providerModelVersion !== CONTEXT_V2_CANDIDATE_PROVIDER_VERSION) {
+    throw new Error("DF10_PROVIDER_MODEL_IDENTITY_MISMATCH");
+  }
   return {
-    disposition: "IDENTITY_ADMISSIBLE",
+    disposition: "DRAFT_IDENTITY_MATCHED",
     manifestHash: input.manifest.manifestHash,
     requestEnvelopeHash: input.observedRequestIdentity.requestEnvelopeHash,
     providerModelVersion,
@@ -201,6 +222,7 @@ export interface ContextV2CandidateEvaluationStore {
 
 const NON_RETRYABLE_CANDIDATE_ERRORS = new Set([
   "CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_UNKNOWN",
+  "CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_MISMATCH",
   "CONTEXT_V2_CANDIDATE_RESPONSE_INVALID",
   "CONTEXT_V2_CANDIDATE_RESPONSE_MISSING",
 ]);

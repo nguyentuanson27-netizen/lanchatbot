@@ -138,6 +138,14 @@ export interface PostgresShadowEvaluationOptions {
   readonly contextV2CaptureDeadlineSeconds?: number;
 }
 
+export interface ContextV2CandidateCoverage {
+  readonly denominator: number;
+  readonly scored: number;
+  readonly excludedTerminal: number;
+  readonly pending: number;
+  readonly exclusionReasonCounts: Readonly<Record<string, number>>;
+}
+
 interface ClaimedRow {
   evaluation_id: string;
   source_identity_key: string;
@@ -288,6 +296,94 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
 
   async assertContextV2CaptureReadReady(): Promise<void> {
     await probeContextV2CaptureRead(this.pool);
+  }
+
+  /**
+   * Source-only async producer. One queue row represents one exact inbound
+   * message; duplicate terminal captures remain one evaluation whose claim
+   * gate will classify the source as ambiguous.
+   */
+  async enqueueContextV2CandidateCaptures(limit = 100): Promise<number> {
+    const boundedLimit = Math.max(1, Math.min(1_000, Math.trunc(limit)));
+    const result = await this.pool.query(
+      `WITH terminal_source AS (
+         SELECT DISTINCT ON (message.message_pk)
+           message.message_pk, message.occurred_at AS source_occurred_at,
+           event.conversation_id, event.page_id, event.customer_hash
+         FROM conversation_events event
+         JOIN messages message
+           ON message.conversation_id = event.conversation_id
+          AND message.occurred_at >= event.occurred_at - interval '5 minutes'
+          AND message.occurred_at <= event.occurred_at + interval '5 minutes'
+          AND message.message_pk::text = event.event_metadata->>'sourceMessagePk'
+         WHERE event.event_type = 'CONTEXT_V2_DERIVED'
+           AND event.occurred_at >= now() - interval '6 months'
+           AND event.occurred_at <= now()
+           AND message.direction = 'INBOUND'
+           AND message.sender_type = 'CUSTOMER'
+           AND message.dlp_status = 'PASSED'
+           AND NOT EXISTS (
+             SELECT 1 FROM shadow_evaluations existing
+             WHERE existing.source_identity_key =
+               'context-v2-candidate-v1:' || message.message_pk::text
+           )
+         ORDER BY message.message_pk, event.occurred_at, event.event_id
+         LIMIT $1
+       )
+       INSERT INTO shadow_evaluations (
+         source_identity_key, source_message_pk, source_occurred_at,
+         conversation_id, page_id, customer_hash, prompt_version,
+         next_attempt_at
+       )
+       SELECT 'context-v2-candidate-v1:' || source.message_pk::text,
+              source.message_pk, source.source_occurred_at,
+              source.conversation_id, source.page_id, source.customer_hash,
+              'context-v2-candidate-v1', now()
+       FROM terminal_source source
+       ON CONFLICT (source_identity_key) DO NOTHING`,
+      [boundedLimit],
+    );
+    return result.rowCount ?? 0;
+  }
+
+  async contextV2CandidateCoverage(): Promise<ContextV2CandidateCoverage> {
+    const result = await this.pool.query<{
+      status: string;
+      reason_code: string | null;
+      item_count: string;
+    }>(
+      `SELECT status,
+              CASE WHEN status = 'FAILED_PERMANENT'
+                THEN COALESCE(error_code, 'CONTEXT_V2_TERMINAL_UNCLASSIFIED')
+                ELSE NULL
+              END AS reason_code,
+              count(*)::text AS item_count
+       FROM shadow_evaluations
+       WHERE prompt_version = 'context-v2-candidate-v1'
+       GROUP BY status, reason_code`,
+    );
+    let denominator = 0;
+    let scored = 0;
+    let excludedTerminal = 0;
+    const exclusionReasonCounts: Record<string, number> = {};
+    for (const row of result.rows) {
+      const count = Math.max(0, Number.parseInt(row.item_count, 10) || 0);
+      denominator += count;
+      if (row.status === "COMPLETED") scored += count;
+      else if (row.status === "FAILED_PERMANENT") {
+        excludedTerminal += count;
+        const reasonCode = row.reason_code ?? "CONTEXT_V2_TERMINAL_UNCLASSIFIED";
+        exclusionReasonCounts[reasonCode] =
+          (exclusionReasonCounts[reasonCode] ?? 0) + count;
+      }
+    }
+    return {
+      denominator,
+      scored,
+      excludedTerminal,
+      pending: denominator - scored - excludedTerminal,
+      exclusionReasonCounts: Object.freeze(exclusionReasonCounts),
+    };
   }
 
   async claimContextV2CandidateNext(): Promise<ContextV2CandidateClaim> {

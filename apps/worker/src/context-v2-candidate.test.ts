@@ -3,9 +3,12 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import { canonicalJsonV1, type ContextV2 } from "@lana/contracts";
 import {
+  CONTEXT_V2_CANDIDATE_MODEL_ID,
+  CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
   ContextV2CandidateModel,
   FetchCandidateVertexTransport,
   buildCandidateRequest,
+  sanitizeCandidateClaimValue,
   sanitizeContextV2CandidateInput,
 } from "./context-v2-candidate.js";
 
@@ -142,6 +145,29 @@ function providerPayload() {
 }
 
 describe("Context V2 candidate capability", () => {
+  it("projects every protected claim value through an exhaustive allowlist", () => {
+    const cases = {
+      PRICE: [{ amountVnd: 699_000, currency: "VND", secret: "drop" }, ["amountVnd", "currency"]],
+      STOCK: [{ status: "IN_STOCK", availableQuantity: 2, secret: "drop" }, ["availableQuantity", "status"]],
+      SIZE_FIT: [{ recommendedSizes: ["M"], alternativeSizes: ["L"], evidenceBasis: "MEASUREMENTS", customerProfileId: "drop", customerProfileRevision: 7, measurementFingerprint: hash("9") }, ["alternativeSizes", "evidenceBasis", "recommendedSizes"]],
+      ETA: [{ minDays: 1, maxDays: 3, secret: "drop" }, ["maxDays", "minDays"]],
+      SHIPPING_FEE: [{ amountVnd: 30_000, currency: "VND", secret: "drop" }, ["amountVnd", "currency"]],
+      FREESHIP: [{ eligible: true, secret: "drop" }, ["eligible"]],
+      PROMOTION_OFFER: [{ adjustmentId: "promo-1", amountVnd: 50_000, secret: "drop" }, ["adjustmentId", "amountVnd"]],
+      PRODUCT_MEDIA: [{ assetId: "asset-1", assetSha256: hash("7"), secret: "drop" }, ["assetId", "assetSha256"]],
+    } as const;
+    expect(Object.keys(cases).sort()).toEqual([
+      "ETA", "FREESHIP", "PRICE", "PRODUCT_MEDIA", "PROMOTION_OFFER",
+      "SHIPPING_FEE", "SIZE_FIT", "STOCK",
+    ]);
+    for (const [type, [value, keys]] of Object.entries(cases)) {
+      expect(Object.keys(sanitizeCandidateClaimValue(
+        type as keyof typeof cases,
+        value,
+      )).sort()).toEqual([...keys].sort());
+    }
+  });
+
   it("sanitizes at the port boundary with an exact allowlisted key-set", () => {
     const sanitized = sanitizeContextV2CandidateInput(context());
     expect(Object.keys(sanitized).sort()).toEqual([
@@ -164,16 +190,16 @@ describe("Context V2 candidate capability", () => {
 
   it("pins every candidate-affecting field in the exact request envelope", () => {
     const request = buildCandidateRequest({
-      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-test",
+      modelResource: `projects/test/locations/us-central1/publishers/google/models/${CONTEXT_V2_CANDIDATE_MODEL_ID}`,
       context: context(),
     });
     expect(request.identity.requestEnvelopeHash).toBe(
-      "65c3933b3908481fa920cf7c44aa3e54bb108944b8500aee8cf6a7540b203b1d",
+      "1be6421ab38334c8f26e0071f76935a99f6f129e1861a4497df1eea7e8f3ac51",
     );
     expect(request.body).toContain("responseSchema");
     expect(request.body).toContain("safetySettings");
     expect(request.identity).toMatchObject({
-      modelResource: expect.stringContaining("gemini-test"),
+      modelResource: expect.stringContaining(CONTEXT_V2_CANDIDATE_MODEL_ID),
       systemInstructionHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
       promptContentHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
       responseSchemaHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
@@ -181,7 +207,11 @@ describe("Context V2 candidate capability", () => {
       safetySettingsHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
     });
     expect(() => buildCandidateRequest({
-      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-test?redirect=https://evil.invalid",
+      modelResource: `projects/test/locations/us-central1/publishers/google/models/${CONTEXT_V2_CANDIDATE_MODEL_ID}?redirect=https://evil.invalid`,
+      context: context(),
+    })).toThrow("CONTEXT_V2_MODEL_RESOURCE_INVALID");
+    expect(() => buildCandidateRequest({
+      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-test",
       context: context(),
     })).toThrow("CONTEXT_V2_MODEL_RESOURCE_INVALID");
   });
@@ -192,27 +222,29 @@ describe("Context V2 candidate capability", () => {
       sent = request;
       return {
       payload: providerPayload(),
-      providerModelVersion: "gemini-test@20260816",
+      providerModelVersion: CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
       };
     });
     const model = new ContextV2CandidateModel(
-      "projects/test/locations/us-central1/publishers/google/models/gemini-test",
+      `projects/test/locations/us-central1/publishers/google/models/${CONTEXT_V2_CANDIDATE_MODEL_ID}`,
       { send },
     );
     const generated = await model.generateCandidate(context());
     expect(send).toHaveBeenCalledOnce();
     const rebuilt = buildCandidateRequest({
-      modelResource: "projects/test/locations/us-central1/publishers/google/models/gemini-test",
+      modelResource: `projects/test/locations/us-central1/publishers/google/models/${CONTEXT_V2_CANDIDATE_MODEL_ID}`,
       context: context(),
     });
     expect(sent).toEqual({ url: rebuilt.url, body: rebuilt.body });
     expect(generated.requestIdentity.requestEnvelopeHash).toBe(
       rebuilt.identity.requestEnvelopeHash,
     );
-    expect(generated.providerModelVersion).toBe("gemini-test@20260816");
+    expect(generated.providerModelVersion).toBe(
+      CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
+    );
 
     await expect(new ContextV2CandidateModel(
-      "projects/test/locations/us-central1/publishers/google/models/gemini-test",
+      `projects/test/locations/us-central1/publishers/google/models/${CONTEXT_V2_CANDIDATE_MODEL_ID}`,
       {
       send: vi.fn(async () => ({
         payload: providerPayload(),
@@ -221,6 +253,17 @@ describe("Context V2 candidate capability", () => {
       },
     ).generateCandidate(context())).rejects.toThrow(
       "CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_UNKNOWN",
+    );
+    await expect(new ContextV2CandidateModel(
+      `projects/test/locations/us-central1/publishers/google/models/${CONTEXT_V2_CANDIDATE_MODEL_ID}`,
+      {
+        send: vi.fn(async () => ({
+          payload: providerPayload(),
+          providerModelVersion: `${CONTEXT_V2_CANDIDATE_PROVIDER_VERSION}@unregistered`,
+        })),
+      },
+    ).generateCandidate(context())).rejects.toThrow(
+      "CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_MISMATCH",
     );
   });
 
@@ -255,6 +298,21 @@ describe("Context V2 candidate capability", () => {
       );
       await vi.advanceTimersByTimeAsync(1_000);
       await tokenRejection;
+
+      const bodyBlocked = new FetchCandidateVertexTransport(
+        async () => "token",
+        vi.fn(async () => ({
+          ok: true,
+          headers: new Headers(),
+          json: () => new Promise<unknown>(() => undefined),
+        } as Response)) as unknown as typeof fetch,
+        1_000,
+      ).send({ url: "https://example.invalid", body: "{}" });
+      const bodyRejection = expect(bodyBlocked).rejects.toThrow(
+        "CONTEXT_V2_CANDIDATE_PROVIDER_TIMEOUT",
+      );
+      await vi.advanceTimersByTimeAsync(1_000);
+      await bodyRejection;
     } finally {
       vi.useRealTimers();
     }

@@ -63,21 +63,39 @@ Required properties:
     accepting work. A missing capture becomes terminal only after the locked
     deadline; blocked, invalid, ambiguous, and deadline-expired cases remain in
     coverage accounting with reason codes.
+13. The source-only async producer selects every terminal capture by exact
+    source message identity. It is not wired to a deployed entrypoint in DF-B.
+    Population sync runs before a claim, is bounded to refill at consumption
+    rate, and a sync/database failure cannot consume an attempt or call a model.
+14. One provider deadline covers access-token acquisition, request/response
+    transfer, and response-body parsing. Timeout and provider failures remain
+    typed and cannot expose provider details to persisted error codes.
 
-## DF10 Gate E pre-registration foundation
+## DF10 Gate E draft foundation
 
 - Plan contract: `DF10_GATE_E_PLAN_V1`
+- Registration status: `DRAFT_UNREGISTERED`
 - Plan artifact SHA-256:
-  `2d20b436a7f5162a26bd04f91a54edc5fcc03188206fe646c67909a5004d5620`
-- Pre-registered at: `2026-08-17T00:00:00.000+07:00`
+  `eb399698f5e82dbe6d401c360e035b58f14153add9b5f434629751045565373a`
 - Baseline: `POST_BF_V1`
+- Candidate model: publisher `google`, model and expected provider-reported
+  version `gemini-3.5-flash-lite`.
 - Frozen population name: `FROZEN_POST_GATE_BF_V1_CORPUS`
-- Deterministic sample rate: `0.2`; salt: `lana-df10-gate-e-v1`
+- Every item in an eventually frozen corpus is scored. Mandatory claim-safety,
+  context-integrity, side-effect-safety, and MUST_PASS strata are never sampled.
+- The deterministic `0.2` sample with salt `lana-df10-diagnostic-v1` applies
+  only to optional diagnostic work; it is not the Gate E denominator.
 - Thresholds: eligible coverage `>= 0.95`; claim safety `= 1`; context
-  integrity `= 1`; side-effect violations `= 0`; quality delta `>= 0`.
-- Realtime capture population is unsampled and independent of Gate E. Only the
-  async evaluator applies the registered Gate E sample. Any legacy operational
-  replay sample is a separate population and is not admissible as Gate E data.
+  integrity `= 1`; side-effect violations `= 0`. V1 quality delta is a
+  report-only diagnostic and cannot change the pass verdict.
+- Realtime capture population is unsampled and independent of Gate E. Any
+  legacy operational replay sample is a separate population and is not
+  admissible as Gate E data.
 
-This registration freezes source governance only. No corpus, scored run, Gate E
-verdict, deployment authority, or DF-C cutover is claimed by this contract.
+This source contract is not a pre-registration. A scored run becomes admissible
+only after a separate immutable corpus/rubric artifact is committed before the
+run, its exact blob and plan hash are verified from Git history, its registration
+commit is an ancestor of the scored-run commit, and the registration commit time
+precedes the run. Caller-supplied timestamps or commit strings are not evidence.
+No corpus, scored run, Gate E verdict, deployment authority, or DF-C cutover is
+claimed by this contract.

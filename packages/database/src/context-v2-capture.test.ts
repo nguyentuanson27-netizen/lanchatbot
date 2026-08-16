@@ -344,6 +344,44 @@ function candidateStore(query: ReturnType<typeof vi.fn>) {
 }
 
 describe("async candidate claim state machine", () => {
+  it("populates one candidate queue item per exact terminal source message", async () => {
+    const query = vi.fn(async (sql: string, parameters?: readonly unknown[]) => {
+      expect(sql).toContain("SELECT DISTINCT ON (message.message_pk)");
+      expect(sql).toContain("message.message_pk::text = event.event_metadata->>'sourceMessagePk'");
+      expect(sql).toContain("'context-v2-candidate-v1:' || source.message_pk::text");
+      expect(sql).toContain("message.dlp_status = 'PASSED'");
+      expect(sql).toContain("NOT EXISTS");
+      expect(sql).toContain("event.occurred_at >= now() - interval '6 months'");
+      expect(parameters).toEqual([100]);
+      return { rows: [], rowCount: 2 };
+    });
+    await expect(candidateStore(query).enqueueContextV2CandidateCaptures())
+      .resolves.toBe(2);
+  });
+
+  it("keeps every terminal exclusion in the coverage denominator", async () => {
+    const query = vi.fn(async () => ({
+      rows: [
+        { status: "COMPLETED", reason_code: null, item_count: "7" },
+        { status: "FAILED_PERMANENT", reason_code: "CONTEXT_V2_CAPTURE_AMBIGUOUS", item_count: "2" },
+        { status: "FAILED_PERMANENT", reason_code: "CONTEXT_V2_CAPTURE_SCHEMA_INVALID", item_count: "1" },
+        { status: "PENDING", reason_code: null, item_count: "3" },
+      ],
+      rowCount: 4,
+    }));
+    await expect(candidateStore(query).contextV2CandidateCoverage()).resolves
+      .toEqual({
+        denominator: 13,
+        scored: 7,
+        excludedTerminal: 3,
+        pending: 3,
+        exclusionReasonCounts: {
+          CONTEXT_V2_CAPTURE_AMBIGUOUS: 2,
+          CONTEXT_V2_CAPTURE_SCHEMA_INVALID: 1,
+        },
+      });
+  });
+
   it("recovers expired processing leases before selecting another job", async () => {
     const statements: string[] = [];
     const query = vi.fn(async (sql: string) => {

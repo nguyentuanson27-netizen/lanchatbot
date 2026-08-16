@@ -7,6 +7,7 @@ import type { ContextV2CandidateModelPort } from "./context-v2-candidate.js";
 export interface ContextV2CandidateWorkerStore
   extends ContextV2CandidateEvaluationStore {
   assertContextV2CaptureReadReady(): Promise<void>;
+  enqueueContextV2CandidateCaptures(limit?: number): Promise<number>;
 }
 
 /**
@@ -26,6 +27,7 @@ export class ContextV2CandidateWorker {
 
   async initialize(): Promise<void> {
     await this.store.assertContextV2CaptureReadReady();
+    await this.store.enqueueContextV2CandidateCaptures();
     this.initialized = true;
   }
 
@@ -33,6 +35,9 @@ export class ContextV2CandidateWorker {
     if (!this.initialized) {
       throw new Error("CONTEXT_V2_CANDIDATE_WORKER_NOT_READY");
     }
+    // Refill at the same rate as consumption so polling cannot create an
+    // unbounded pending queue ahead of provider quotas.
+    await this.store.enqueueContextV2CandidateCaptures(1);
     return this.runner.processOne();
   }
 }
