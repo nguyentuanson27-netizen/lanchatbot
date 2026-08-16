@@ -3157,6 +3157,10 @@ describe("RealtimeRunner inbound batching", () => {
         replyPlanId: string;
         responseGroupId: string;
       };
+      decisionEvents?: readonly {
+        eventType: string;
+        details: Readonly<Record<string, unknown>>;
+      }[];
     };
     expect(commitInput.inboxBatchGuard).toEqual({
       generation: 9,
@@ -3168,6 +3172,18 @@ describe("RealtimeRunner inbound batching", () => {
     ]);
     expect(commitInput.metaPlan?.replyPlanId).toMatch(/^[0-9a-f-]{36}$/u);
     expect(commitInput.metaPlan?.responseGroupId).toMatch(/^[0-9a-f-]{36}$/u);
+    expect(commitInput.decisionEvents).toEqual([
+      expect.objectContaining({
+        eventType: "CONTEXT_V2_DERIVED",
+        details: expect.objectContaining({
+          contextV2ShadowStatus: "NOT_AVAILABLE",
+          contextV2SourceMessagePk: `pk-${
+            items[2]!.envelope.message.messageId ??
+            `event:${items[2]!.envelope.message.eventKey}`
+          }`,
+        }),
+      }),
+    ]);
     expect(completeBatch).not.toHaveBeenCalled();
     expect(inbox.complete).not.toHaveBeenCalled();
   });

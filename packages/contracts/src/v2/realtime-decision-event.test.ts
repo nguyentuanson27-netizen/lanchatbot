@@ -116,4 +116,33 @@ describe("RealtimeDecisionEventV1Schema", () => {
       details: { ...validEvent.details, customerPhone: "0900000000" },
     })).toThrow();
   });
+
+  it("isolates Context V2 status to its shadow audit event", () => {
+    expect(RealtimeDecisionEventV1Schema.parse({
+      ...validEvent,
+      eventType: "CONTEXT_V2_DERIVED",
+      details: {
+        ...validEvent.details,
+        contextV2Shadow: null,
+        contextV2ShadowStatus: "NOT_AVAILABLE",
+      },
+    }).details.contextV2ShadowStatus).toBe("NOT_AVAILABLE");
+    expect(() => RealtimeDecisionEventV1Schema.parse({
+      ...validEvent,
+      eventType: "CONTEXT_V2_DERIVED",
+      details: {
+        ...validEvent.details,
+        contextV2Shadow: null,
+        contextV2ShadowStatus: "BUILT",
+      },
+    })).toThrow();
+    expect(() => RealtimeDecisionEventV1Schema.parse({
+      ...validEvent,
+      details: {
+        ...validEvent.details,
+        contextV2Shadow: null,
+        contextV2ShadowStatus: "NOT_AVAILABLE",
+      },
+    })).toThrow();
+  });
 });

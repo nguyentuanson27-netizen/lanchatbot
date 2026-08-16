@@ -4,15 +4,25 @@ import {
 } from "./canonical-identifiers.js";
 import {
   ProtectedClaimTypeV1Schema,
-} from "./decision-observability.js";
-import {
   DECISION_DIALOGUE_EVIDENCE_CODES_V1,
+  MAX_CANONICAL_PROTECTED_CLAIMS_V1,
 } from "./decision-observability.js";
 import { ProtectedClaimV1Schema } from "./canonical-evidence-readiness.js";
-import { SalesCycleStageV1Schema } from "../v3/sales-cycle.js";
 
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 const BoundedReasonCodeSchema = z.string().regex(/^[A-Z0-9][A-Z0-9_.:-]{0,127}$/u);
+
+/** Validation mirror only; canonical commerce state remains the sole owner. */
+export const ContextV2CommerceStageSchema = z.enum([
+  "DISCOVERY",
+  "FACTS_PRESENTED",
+  "MEASUREMENTS_REQUIRED",
+  "SIZE_RECOMMENDED",
+  "CART_OPEN",
+  "ORDER_PREVIEW",
+  "PURCHASE_CONFIRMED",
+  "HANDED_OFF",
+]);
 
 export const ConversationPhaseV2ValueSchema = z.enum([
   "DISCOVERY",
@@ -31,14 +41,14 @@ export const ConversationPhaseV2Schema = z.object({
   contractVersion: z.literal("CONVERSATION_PHASE_V2"),
   phase: ConversationPhaseV2ValueSchema,
   source: z.literal("CANONICAL_COMMERCE_STATE_V1"),
-  sourceStage: SalesCycleStageV1Schema,
+  sourceStage: ContextV2CommerceStageSchema,
   salesCycleRevision: z.number().int().nonnegative(),
   authority: z.literal("SHADOW_ONLY"),
 }).strict();
 export type ConversationPhaseV2 = z.infer<typeof ConversationPhaseV2Schema>;
 
 export interface DeriveConversationPhaseV2Input {
-  readonly commerceStage: z.infer<typeof SalesCycleStageV1Schema>;
+  readonly commerceStage: z.infer<typeof ContextV2CommerceStageSchema>;
   readonly hasCart: boolean;
   readonly hasPreview: boolean;
   readonly hasConfirmation: boolean;
@@ -48,12 +58,21 @@ export interface DeriveConversationPhaseV2Input {
 function assertCommerceArtifacts(
   input: DeriveConversationPhaseV2Input,
 ): void {
-  const invalid =
+  const artifactChainInvalid =
     (input.hasConfirmation && (!input.hasPreview || !input.hasCart)) ||
-    (input.hasPreview && !input.hasCart) ||
-    (input.commerceStage === "ORDER_PREVIEW" && !input.hasPreview) ||
-    (input.commerceStage === "PURCHASE_CONFIRMED" && !input.hasConfirmation) ||
-    (input.commerceStage === "CART_OPEN" && !input.hasCart);
+    (input.hasPreview && !input.hasCart);
+  const exactStageInvalid =
+    (["DISCOVERY", "FACTS_PRESENTED", "MEASUREMENTS_REQUIRED", "SIZE_RECOMMENDED"]
+      .includes(input.commerceStage) &&
+      (input.hasCart || input.hasPreview || input.hasConfirmation)) ||
+    (input.commerceStage === "CART_OPEN" &&
+      (!input.hasCart || input.hasPreview || input.hasConfirmation)) ||
+    (input.commerceStage === "ORDER_PREVIEW" &&
+      (!input.hasCart || !input.hasPreview || input.hasConfirmation)) ||
+    (input.commerceStage === "PURCHASE_CONFIRMED" &&
+      (!input.hasCart || !input.hasPreview || !input.hasConfirmation)) ||
+    (input.commerceStage === "HANDED_OFF" && !input.hasCart);
+  const invalid = artifactChainInvalid || exactStageInvalid;
   if (invalid) throw new Error("CONVERSATION_PHASE_V2_STATE_INVALID");
 }
 
@@ -132,7 +151,7 @@ export type ConversationBarriersV2 = z.infer<
 
 export interface DeriveConversationBarriersV2Input {
   readonly productScope: z.infer<typeof ProductScopeV2Schema>;
-  readonly commerceStage: z.infer<typeof SalesCycleStageV1Schema>;
+  readonly commerceStage: z.infer<typeof ContextV2CommerceStageSchema>;
   readonly hasCart: boolean;
   readonly hasActiveClarification: boolean;
   readonly readiness: Readonly<{
@@ -143,7 +162,12 @@ export interface DeriveConversationBarriersV2Input {
   readonly salesCycleRevision: number | null;
 }
 
-const CLAIM_READINESS_CODE = /(?:CLAIM|PRICE|STOCK|SIZE|ETA|POLICY|FACT)/u;
+const CLAIM_READINESS_REASON_CODES = new Set([
+  "CLAIM_MISSING",
+  "CLAIM_STALE",
+  "CLAIM_SCOPE_MISMATCH",
+  "CLAIM_CONFLICT",
+]);
 
 /**
  * Finite barriers are recomputed from the current authoritative snapshot.
@@ -159,9 +183,15 @@ export function deriveConversationBarriersV2(
       input.productScope === "STALE") {
     active.push("PRODUCT_CONTEXT_UNREADY");
   }
-  if (input.readiness.outcome === "BLOCKED") {
+  const commerceReadinessRequired = input.commerceStage === "CART_OPEN" ||
+    input.commerceStage === "ORDER_PREVIEW" ||
+    input.commerceStage === "PURCHASE_CONFIRMED";
+  if (input.readiness.outcome === "BLOCKED" ||
+      (commerceReadinessRequired && input.readiness.outcome === "NOT_EVALUATED")) {
     active.push(
-      input.readiness.reasonCodes.some((code) => CLAIM_READINESS_CODE.test(code))
+      input.readiness.reasonCodes.some((code) =>
+        CLAIM_READINESS_REASON_CODES.has(code)
+      )
         ? "VERIFIED_CLAIMS_UNREADY"
         : "EFFECT_READINESS_BLOCKED",
     );
@@ -208,7 +238,8 @@ export const ContextV2Schema = z.object({
   }).strict(),
   verifiedClaimSetHash: Sha256Schema.nullable(),
   verifiedClaimTypes: z.array(ProtectedClaimTypeV1Schema).max(8),
-  verifiedClaims: z.array(ProtectedClaimV1Schema).max(32),
+  verifiedClaims: z.array(ProtectedClaimV1Schema)
+    .max(MAX_CANONICAL_PROTECTED_CLAIMS_V1),
   phase: ConversationPhaseV2Schema,
   barriers: ConversationBarriersV2Schema,
   buyingIntent: z.object({
@@ -249,6 +280,14 @@ export const ContextV2Schema = z.object({
   }).strict(),
   contextHash: Sha256Schema,
 }).strict().superRefine((value, context) => {
+  if (new Set(value.verifiedClaims.map(({ claimId }) => claimId)).size !==
+      value.verifiedClaims.length) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["verifiedClaims"],
+      message: "verified claim IDs must be unique",
+    });
+  }
   const claimTypes = [...new Set(value.verifiedClaims.map(({ type }) => type))].sort();
   if (JSON.stringify(claimTypes) !== JSON.stringify([...value.verifiedClaimTypes].sort())) {
     context.addIssue({
@@ -274,4 +313,3 @@ export const ContextV2Schema = z.object({
   }
 });
 export type ContextV2 = z.infer<typeof ContextV2Schema>;
-

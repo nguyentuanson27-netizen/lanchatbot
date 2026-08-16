@@ -1,5 +1,10 @@
 import { createHash } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
+import {
+  ContextV2Schema,
+  canonicalJsonV1,
+  type ContextV2,
+} from "@lana/contracts";
 import { withTransaction } from "./repositories.js";
 
 export interface ShadowContextMessage {
@@ -23,6 +28,7 @@ export interface ShadowEvaluationJob {
   readonly promptVersion: string;
   readonly context: readonly ShadowContextMessage[];
   readonly contextHash: string;
+  readonly contextV2: ContextV2 | null;
   readonly actualOutboundText: string | null;
   readonly actualOutboundCount: number;
 }
@@ -177,6 +183,33 @@ async function actualReply(
   return { text: result.rows[0]?.actual_text ?? null, count: Number(result.rows[0]?.actual_count ?? 0) };
 }
 
+export async function loadContextV2Snapshot(
+  client: PoolClient,
+  conversationId: string,
+  sourceMessagePk: string,
+  sourceOccurredAt: Date,
+): Promise<ContextV2 | null> {
+  const result = await client.query<{ context_v2: unknown }>(
+    `SELECT event_metadata->'contextV2Shadow' AS context_v2
+     FROM conversation_events
+     WHERE conversation_id = $1
+       AND occurred_at = $2::timestamptz
+       AND event_metadata #>> '{contextV2SourceMessagePk}' = $3
+       AND event_metadata #>> '{contextV2ShadowStatus}' = 'BUILT'
+       AND event_metadata #>> '{contextV2Shadow,contractVersion}' = 'CONTEXT_V2'
+     ORDER BY event_id
+     LIMIT 1`,
+    [conversationId, sourceOccurredAt, sourceMessagePk],
+  );
+  const parsed = ContextV2Schema.safeParse(result.rows[0]?.context_v2);
+  if (!parsed.success) return null;
+  const { contextHash, ...draft } = parsed.data;
+  const expectedHash = createHash("sha256")
+    .update(`CONTEXT_V2\n${canonicalJsonV1(draft)}`, "utf8")
+    .digest("hex");
+  return contextHash === expectedHash ? parsed.data : null;
+}
+
 async function claimRow(
   client: PoolClient,
   minimumSourceAgeSeconds: number,
@@ -289,6 +322,12 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
         occurredAt: message.occurred_at.toISOString(),
       }));
       const actual = await actualReply(client, row.conversation_id, row.source_occurred_at);
+      const contextV2 = await loadContextV2Snapshot(
+        client,
+        row.conversation_id,
+        row.source_message_pk,
+        row.source_occurred_at,
+      );
       const contextHash = createHash("sha256").update(JSON.stringify(context)).digest("hex");
       return {
         evaluationId: row.evaluation_id,
@@ -302,6 +341,7 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
         promptVersion: row.prompt_version,
         context,
         contextHash,
+        contextV2,
         actualOutboundText: actual.text,
         actualOutboundCount: actual.count,
       };

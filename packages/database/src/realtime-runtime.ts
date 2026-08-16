@@ -43,6 +43,7 @@ import {
   validateEffectReadinessTemporalWindowV1,
   validateEffectClaimSemanticsV1,
   type DecisionObservabilityV1,
+  type ContextV2,
   type CartV1,
   type DeterministicEffectReadinessV1,
   type StateAdvancingSalesOutcomeV1,
@@ -248,7 +249,8 @@ export interface RealtimeDecisionEventPlan {
     | "NO_REPLY"
     | "NO_REPLY_SELECTED"
     | "WAVE2_STRATEGY_SELECTED"
-    | "WAVE2_BARRIER_DETECTED";
+    | "WAVE2_BARRIER_DETECTED"
+    | "CONTEXT_V2_DERIVED";
   readonly origin: string | null;
   readonly reasonCodes: readonly string[];
   readonly releaseId: string;
@@ -264,6 +266,9 @@ export interface RealtimeDecisionEventPlan {
   readonly occurredAt: Date;
   readonly details: Readonly<{
     decisionObservability?: DecisionObservabilityV1;
+    contextV2Shadow?: ContextV2 | null;
+    contextV2ShadowStatus?: "BUILT" | "NOT_AVAILABLE" | "BLOCKED_INVALID_SOURCE";
+    contextV2SourceMessagePk?: string | null;
     auditSchemaVersion?: 1 | 2;
     stateRevisionBefore?: number;
     stateRevisionAfter?: number;

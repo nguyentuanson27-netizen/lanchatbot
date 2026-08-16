@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { DecisionObservabilityV1Schema } from "./decision-observability.js";
+import { ContextV2Schema } from "./context-v2.js";
 
 export const RealtimeDecisionEventTypeSchema = z.enum([
   "PRODUCT_RESOLVED",
@@ -26,6 +27,7 @@ export const RealtimeDecisionEventTypeSchema = z.enum([
   "NO_REPLY_SELECTED",
   "WAVE2_STRATEGY_SELECTED",
   "WAVE2_BARRIER_DETECTED",
+  "CONTEXT_V2_DERIVED",
 ]);
 
 const BuyingSignalReasonSchema = z.enum([
@@ -131,9 +133,40 @@ export const RealtimeDecisionEventV1Schema = z.object({
       experimentId: z.literal("wave2-stage-playbook-v1"),
       experimentVariant: z.literal("LIVE_100"),
     }).strict().nullable().optional(),
+    contextV2Shadow: ContextV2Schema.nullable().optional(),
+    contextV2ShadowStatus: z.enum([
+      "BUILT",
+      "NOT_AVAILABLE",
+      "BLOCKED_INVALID_SOURCE",
+    ]).optional(),
+    contextV2SourceMessagePk: z.string().uuid().nullable().optional(),
     decisionObservability: DecisionObservabilityV1Schema.optional(),
   }).strict(),
-}).strict();
+}).strict().superRefine((value, context) => {
+  const isContextEvent = value.eventType === "CONTEXT_V2_DERIVED";
+  const status = value.details.contextV2ShadowStatus;
+  const snapshot = value.details.contextV2Shadow;
+  const sourceMessagePk = value.details.contextV2SourceMessagePk;
+  if (!isContextEvent && (
+    status !== undefined || snapshot !== undefined || sourceMessagePk !== undefined
+  )) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["details", "contextV2ShadowStatus"],
+      message: "Context V2 details are isolated to CONTEXT_V2_DERIVED",
+    });
+  }
+  if (isContextEvent && (
+    status === undefined ||
+    (status === "BUILT" ? snapshot == null : snapshot !== null)
+  )) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["details", "contextV2Shadow"],
+      message: "Context V2 status and snapshot must agree",
+    });
+  }
+});
 
 export type RealtimeDecisionEventType = z.infer<typeof RealtimeDecisionEventTypeSchema>;
 export type RealtimeDecisionEventV1 = z.infer<typeof RealtimeDecisionEventV1Schema>;

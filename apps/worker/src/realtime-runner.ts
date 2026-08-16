@@ -49,6 +49,7 @@ import {
   type SizeRecommendationProtectedClaimV1,
   type DeterministicEffectReadinessV1,
   type ProtectedClaimV1,
+  type ContextV2,
 } from "@lana/contracts";
 import type {
   RuntimePolicyChannel,
@@ -126,6 +127,11 @@ import type {
   RealtimeMediaRecognitionService,
 } from "./realtime-media-recognition.js";
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
+import { buildContextV2 } from "./context-v2.js";
+import {
+  CONTEXT_V2_PRE_REGISTERED_THRESHOLDS_V1,
+  shouldSampleContextV2Evaluation,
+} from "./context-v2-evaluation.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
 import { mapWithBoundedConcurrency } from "./bounded-concurrency.js";
@@ -2230,6 +2236,8 @@ export interface RealtimeRunnerOptions {
   readonly decisionAuditV2Enabled?: boolean;
   readonly recordedReplayCaptureEnabled?: boolean;
   readonly recordedReplayPageId?: string;
+  readonly contextV2EvaluationSampleRate?: number;
+  readonly contextV2EvaluationThresholdVersion?: string;
   readonly mediaRecognitionEnabled?: boolean;
   readonly mediaClarificationEnabled?: boolean;
   readonly mediaRecognitionPageIds?: readonly string[];
@@ -2359,6 +2367,12 @@ export class RealtimeRunner {
     if (options.mode === "DRY_RUN" && options.sendEnabled) {
       throw new Error("REALTIME_DRY_RUN_SEND_FORBIDDEN");
     }
+    shouldSampleContextV2Evaluation(
+      "CONTEXT_V2_CONFIGURATION_VALIDATION",
+      options.contextV2EvaluationSampleRate ?? 1,
+      options.contextV2EvaluationThresholdVersion ??
+        CONTEXT_V2_PRE_REGISTERED_THRESHOLDS_V1.contractVersion,
+    );
     this.options = {
       workerId: options.workerId,
       mode: options.mode,
@@ -2396,6 +2410,11 @@ export class RealtimeRunner {
       recordedReplayCaptureEnabled:
         options.recordedReplayCaptureEnabled ?? false,
       recordedReplayPageId: options.recordedReplayPageId ?? "",
+      contextV2EvaluationSampleRate:
+        options.contextV2EvaluationSampleRate ?? 1,
+      contextV2EvaluationThresholdVersion:
+        options.contextV2EvaluationThresholdVersion ??
+          CONTEXT_V2_PRE_REGISTERED_THRESHOLDS_V1.contractVersion,
       mediaRecognitionEnabled: options.mediaRecognitionEnabled ?? false,
       mediaClarificationEnabled: options.mediaClarificationEnabled ?? false,
       mediaRecognitionPageIds: [
@@ -2800,6 +2819,7 @@ export class RealtimeRunner {
         : null;
 
     let triggerMessagePk: string | null = null;
+    let contextV2EvaluationSelected = false;
     let lastInboundIndex = -1;
     for (let index = 0; index < claims.length; index += 1) {
       if (!claims[index]?.envelope.message.isEcho) lastInboundIndex = index;
@@ -2812,7 +2832,12 @@ export class RealtimeRunner {
         const enqueueShadowEvaluation =
           this.options.recordedReplayCaptureEnabled &&
           item.pageId === this.options.recordedReplayPageId &&
-          index === lastInboundIndex;
+          index === lastInboundIndex &&
+          shouldSampleContextV2Evaluation(
+            `${item.pageId}:${original.eventKey}`,
+            this.options.contextV2EvaluationSampleRate,
+            this.options.contextV2EvaluationThresholdVersion,
+          );
         const recorded = await this.canonicalHistory.recordInboundCustomerMessage({
           pageId: item.pageId,
           conversationId: record.conversationId,
@@ -2837,6 +2862,8 @@ export class RealtimeRunner {
               pageId: item.pageId,
             })}\n`,
           );
+        } else if (enqueueShadowEvaluation) {
+          contextV2EvaluationSelected = true;
         }
         triggerMessagePk = recorded.messagePk;
       } else if (original.isEcho && this.canonicalHistory) {
@@ -4914,6 +4941,41 @@ export class RealtimeRunner {
       ...(salesReadinessAttempt === null ? [] : [salesReadinessAttempt]),
       ...(protectedOutboundReadiness === null ? [] : [protectedOutboundReadiness]),
     ];
+    const productScope: BuildDecisionObservabilityInput["productScope"] =
+      canonicalEvidence.buyingIntent.productId !== null || observedProductId
+        ? "RESOLVED"
+        : protectedClaimValidation.claimTypes.length > 0 || salesCyclePlan !== null
+          ? "UNRESOLVED"
+          : "NOT_REQUIRED";
+    let contextV2Shadow: ContextV2 | null = null;
+    let contextV2ShadowStatus:
+      RealtimeDecisionEventPlan["details"]["contextV2ShadowStatus"] =
+      "NOT_AVAILABLE";
+    const contextV2CommerceState = salesCyclePlan?.state ?? salesCycleRecord?.state;
+    if (contextV2CommerceState !== undefined) {
+      try {
+        contextV2Shadow = buildContextV2({
+          canonicalEvidence,
+          verifiedClaims: protectedOutboundClaims,
+          commerceState: contextV2CommerceState,
+          readiness: readinessObservations,
+          productScope,
+          conversationRevision: record.stateVersion,
+          owner: nextState.conversationOwner,
+          handoffReasonCode:
+            handoffEventReasonCode ?? salesHandoffReasonCode ?? null,
+          now,
+          readinessSalesCycleRevision: salesCycleRecord?.stateRevision ??
+            contextV2CommerceState.revision,
+        });
+        contextV2ShadowStatus = "BUILT";
+      } catch {
+        // DF-B is observational until DF-C. Invalid/stale source evidence must
+        // remove only the shadow snapshot and never alter the live plan.
+        contextV2Shadow = null;
+        contextV2ShadowStatus = "BLOCKED_INVALID_SOURCE";
+      }
+    }
     const decisionObservability = buildDecisionObservabilityV1({
       dialogueEvidenceCodes,
       dialogueEvidenceSource,
@@ -4975,11 +5037,7 @@ export class RealtimeRunner {
         ? "DETERMINISTIC_EFFECT_READINESS_V1"
         : "LEGACY_READINESS_OBSERVATION_V1",
       readinessReasonCodes: readinessObservations.flatMap(({ reasonCodes }) => reasonCodes),
-      productScope: observedProductId
-        ? "RESOLVED"
-        : protectedClaimValidation.claimTypes.length > 0 || salesCyclePlan !== null
-          ? "UNRESOLVED"
-          : "NOT_REQUIRED",
+      productScope,
       sideEffectTypes,
       sideEffectReasonCodes: [
         ...handoffGuardReasonCodes,
@@ -5036,6 +5094,13 @@ export class RealtimeRunner {
         occurredAt,
         details: {
           decisionObservability,
+          ...(eventType === "CONTEXT_V2_DERIVED"
+            ? {
+                contextV2Shadow,
+                contextV2ShadowStatus,
+                contextV2SourceMessagePk: triggerMessagePk,
+              }
+            : {}),
           auditSchemaVersion: this.options.decisionAuditV2Enabled ? 2 : 1,
           stateRevisionBefore: state.revision,
           stateRevisionAfter: nextState.revision,
@@ -5149,6 +5214,7 @@ export class RealtimeRunner {
         },
       });
     };
+    pushDecisionEvent("CONTEXT_V2_DERIVED", [contextV2ShadowStatus]);
     if (wave2StrategyDecision) {
       pushDecisionEvent("WAVE2_STRATEGY_SELECTED", [
         wave2StrategyDecision.need,
@@ -5307,6 +5373,13 @@ export class RealtimeRunner {
       metaMessages.length,
       responseGroupId,
     );
+    const persistedDecisionEvents = this.options.decisionTelemetryEnabled
+      ? decisionEvents
+      : contextV2EvaluationSelected
+        ? decisionEvents.filter(({ eventType }) =>
+            eventType === "CONTEXT_V2_DERIVED"
+          )
+        : [];
     const result = await this.runtime.commit(
       {
         pageId: claim.pageId,
@@ -5408,8 +5481,8 @@ export class RealtimeRunner {
               },
             }
           : {}),
-        ...(this.options.decisionTelemetryEnabled && decisionEvents.length > 0
-          ? { decisionEvents }
+        ...(persistedDecisionEvents.length > 0
+          ? { decisionEvents: persistedDecisionEvents }
           : {}),
         ...(inboxBatchGuard ? { inboxBatchGuard } : {}),
       },

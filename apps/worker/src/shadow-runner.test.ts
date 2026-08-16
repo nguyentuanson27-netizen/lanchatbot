@@ -30,12 +30,51 @@ function job(): ShadowEvaluationJob {
       occurredAt: "2026-07-15T00:00:00.000Z",
     }],
     contextHash: "hash",
+    contextV2: null,
     actualOutboundText: "Da set co gia 699k a",
     actualOutboundCount: 1,
   };
 }
 
 describe("Phase 4 shadow runner", () => {
+  it("passes the audited Context V2 snapshot only to the asynchronous second model", async () => {
+    const contextV2 = { contractVersion: "CONTEXT_V2", contextHash: "a".repeat(64) } as never;
+    const store = {
+      claimNext: vi.fn(async () => ({ ...job(), contextV2 })),
+      complete: vi.fn(async () => undefined),
+      fail: vi.fn(async () => undefined),
+    } as unknown as ShadowEvaluationStore;
+    const generate = vi.fn(async () => ({
+      proposal: {
+        schemaVersion: 1 as const,
+        intent: "other",
+        conversationStage: "consulting",
+        productId: null,
+        action: "HANDOFF" as const,
+        reply: "",
+        attachments: [],
+        handoffReason: "BUSINESS_FACT_REQUIRED",
+        businessFactQuery: {
+          intent: "NONE" as const,
+          offerType: null,
+          color: null,
+          size: null,
+          deliveryRegion: null,
+        },
+      },
+      modelVersion: "gemini-test",
+      latencyMs: 1,
+      tokenUsage: {},
+    }));
+    const runner = new Phase4ShadowRunner(
+      store,
+      { generate } as never,
+      { modelName: "gemini-test" },
+    );
+    await expect(runner.processOne()).resolves.toBe(true);
+    expect(generate).toHaveBeenCalledWith(expect.any(Array), job().promptVersion, contextV2);
+  });
+
   it("redacts customer URLs from every shadow model context", async () => {
     const rawUrl = "user@example.com:?token=sentinel";
     const urlJob = {

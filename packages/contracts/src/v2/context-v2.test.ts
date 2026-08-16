@@ -1,14 +1,20 @@
 import { describe, expect, it } from "vitest";
 import {
   ContextV2Schema,
+  ContextV2CommerceStageSchema,
   deriveConversationPhaseV2,
   deriveConversationBarriersV2,
   type ContextV2,
 } from "./context-v2.js";
+import { SalesCycleStageV1Schema } from "../v3/sales-cycle.js";
 
 const hash = (character: string): string => character.repeat(64);
 
 describe("DF07 ConversationPhaseV2", () => {
+  it("mirrors the canonical commerce-stage vocabulary without importing its authority", () => {
+    expect(ContextV2CommerceStageSchema.options)
+      .toEqual(SalesCycleStageV1Schema.options);
+  });
   it.each([
     ["DISCOVERY", false, false, false, "DISCOVERY"],
     ["FACTS_PRESENTED", false, false, false, "PRODUCT_EVALUATION"],
@@ -90,6 +96,22 @@ describe("DF07 ConversationPhaseV2", () => {
       hasConfirmation: false,
       salesCycleRevision: 1,
     })).toThrow("CONVERSATION_PHASE_V2_STATE_INVALID");
+
+    expect(() => deriveConversationPhaseV2({
+      commerceStage: "FACTS_PRESENTED",
+      hasCart: true,
+      hasPreview: false,
+      hasConfirmation: false,
+      salesCycleRevision: 1,
+    })).toThrow("CONVERSATION_PHASE_V2_STATE_INVALID");
+
+    expect(() => deriveConversationPhaseV2({
+      commerceStage: "HANDED_OFF",
+      hasCart: false,
+      hasPreview: false,
+      hasConfirmation: false,
+      salesCycleRevision: 1,
+    })).toThrow("CONVERSATION_PHASE_V2_STATE_INVALID");
   });
 });
 
@@ -102,7 +124,7 @@ describe("DF08 deterministic finite-lifecycle barriers", () => {
       hasActiveClarification: false,
       readiness: {
         outcome: "BLOCKED",
-        reasonCodes: ["EFFECT_READINESS_CLAIM_MISSING"],
+        reasonCodes: ["CLAIM_MISSING"],
       },
       conversationRevision: 3,
       salesCycleRevision: 2,

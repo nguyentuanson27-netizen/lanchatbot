@@ -181,7 +181,11 @@ export class Phase4ShadowRunner {
     if (!job) return false;
     try {
       const modelContext = this.modelContext(job.context);
-      const initial = await this.model.generate(modelContext, job.promptVersion);
+      const initial = await this.model.generate(
+        modelContext,
+        job.promptVersion,
+        job.contextV2,
+      );
       const resolvedProduct = await this.resolveProduct(job.context, initial.proposal);
       const initialProposal = this.productSearch
         ? { ...initial.proposal, productId: resolvedProduct?.productId ?? null }
