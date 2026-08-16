@@ -63,3 +63,21 @@ Required properties:
     accepting work. A missing capture becomes terminal only after the locked
     deadline; blocked, invalid, ambiguous, and deadline-expired cases remain in
     coverage accounting with reason codes.
+
+## DF10 Gate E pre-registration foundation
+
+- Plan contract: `DF10_GATE_E_PLAN_V1`
+- Plan artifact SHA-256:
+  `2d20b436a7f5162a26bd04f91a54edc5fcc03188206fe646c67909a5004d5620`
+- Pre-registered at: `2026-08-17T00:00:00.000+07:00`
+- Baseline: `POST_BF_V1`
+- Frozen population name: `FROZEN_POST_GATE_BF_V1_CORPUS`
+- Deterministic sample rate: `0.2`; salt: `lana-df10-gate-e-v1`
+- Thresholds: eligible coverage `>= 0.95`; claim safety `= 1`; context
+  integrity `= 1`; side-effect violations `= 0`; quality delta `>= 0`.
+- Realtime capture population is unsampled and independent of Gate E. Only the
+  async evaluator applies the registered Gate E sample. Any legacy operational
+  replay sample is a separate population and is not admissible as Gate E data.
+
+This registration freezes source governance only. No corpus, scored run, Gate E
+verdict, deployment authority, or DF-C cutover is claimed by this contract.

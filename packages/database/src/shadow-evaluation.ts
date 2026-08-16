@@ -1,6 +1,11 @@
 import { createHash } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
 import { withTransaction } from "./repositories.js";
+import {
+  inspectContextV2Capture,
+  probeContextV2CaptureRead,
+} from "./context-v2-capture.js";
+import type { ContextV2 } from "@lana/contracts";
 
 export interface ShadowContextMessage {
   readonly direction: "INBOUND" | "OUTBOUND";
@@ -26,6 +31,17 @@ export interface ShadowEvaluationJob {
   readonly actualOutboundText: string | null;
   readonly actualOutboundCount: number;
 }
+
+export type ContextV2CandidateClaim =
+  | { readonly kind: "NONE" }
+  | { readonly kind: "DEFERRED"; readonly reasonCode: string }
+  | { readonly kind: "TERMINAL"; readonly reasonCode: string }
+  | {
+      readonly kind: "CLAIMED";
+      readonly evaluationId: string;
+      readonly claimToken: string;
+      readonly context: ContextV2;
+    };
 
 export interface ShadowComparisonJob {
   readonly evaluationId: string;
@@ -119,6 +135,7 @@ export interface PostgresShadowEvaluationOptions {
   readonly minimumSourceAgeSeconds?: number;
   readonly dailyGenerationLimit?: number;
   readonly hourlyGenerationLimit?: number;
+  readonly contextV2CaptureDeadlineSeconds?: number;
 }
 
 interface ClaimedRow {
@@ -237,6 +254,7 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
   private readonly minimumSourceAgeSeconds: number;
   private readonly dailyGenerationLimit: number;
   private readonly hourlyGenerationLimit: number;
+  private readonly contextV2CaptureDeadlineMs: number;
 
   constructor(connectionString: string, options: PostgresShadowEvaluationOptions = {}) {
     if (!connectionString.trim()) throw new Error("DATABASE_URL_REQUIRED");
@@ -244,6 +262,13 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
     this.minimumSourceAgeSeconds = Math.max(10, Math.min(900, options.minimumSourceAgeSeconds ?? 30));
     this.dailyGenerationLimit = Math.max(1, Math.min(10_000, options.dailyGenerationLimit ?? 50));
     this.hourlyGenerationLimit = Math.max(1, Math.min(1_000, options.hourlyGenerationLimit ?? 10));
+    this.contextV2CaptureDeadlineMs = Math.max(
+      30_000,
+      Math.min(
+        15 * 60_000,
+        (options.contextV2CaptureDeadlineSeconds ?? 300) * 1_000,
+      ),
+    );
   }
 
   async ready(): Promise<boolean> {
@@ -259,6 +284,150 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
 
   async close(): Promise<void> {
     await this.pool.end();
+  }
+
+  async assertContextV2CaptureReadReady(): Promise<void> {
+    await probeContextV2CaptureRead(this.pool);
+  }
+
+  async claimContextV2CandidateNext(): Promise<ContextV2CandidateClaim> {
+    return withTransaction(this.pool, async (client) => {
+      await client.query(
+        `UPDATE shadow_evaluations
+         SET status = CASE
+               WHEN attempt_count >= 3 THEN 'FAILED_PERMANENT'
+               ELSE 'FAILED_RETRYABLE'
+             END,
+             error_code = 'CONTEXT_V2_CANDIDATE_LEASE_EXPIRED',
+             blocked_reason_codes = CASE
+               WHEN attempt_count >= 3
+                 THEN ARRAY['CONTEXT_V2_CANDIDATE_LEASE_EXPIRED']::text[]
+               ELSE blocked_reason_codes
+             END,
+             claim_token = NULL, claimed_at = NULL,
+             next_attempt_at = now(), updated_at = now()
+         WHERE prompt_version = 'context-v2-candidate-v1'
+           AND status = 'PROCESSING'
+           AND claimed_at <= now() - interval '5 minutes'`,
+      );
+      const picked = await client.query<{
+        evaluation_id: string;
+        source_message_pk: string;
+        source_occurred_at: Date;
+        conversation_id: string;
+        transaction_now: Date;
+      }>(
+        `SELECT evaluation_id, source_message_pk, source_occurred_at, conversation_id,
+                clock_timestamp() AS transaction_now
+         FROM shadow_evaluations
+         WHERE status IN ('PENDING', 'FAILED_RETRYABLE')
+           AND prompt_version = 'context-v2-candidate-v1'
+           AND next_attempt_at <= now()
+           AND attempt_count < 3
+         ORDER BY source_occurred_at, evaluation_id
+         FOR UPDATE SKIP LOCKED
+         LIMIT 1`,
+      );
+      const row = picked.rows[0];
+      if (!row) return { kind: "NONE" };
+      const eligibility = await inspectContextV2Capture(client, {
+        conversationId: row.conversation_id,
+        sourceMessagePk: row.source_message_pk,
+        sourceOccurredAt: row.source_occurred_at,
+        now: row.transaction_now,
+        terminalDeadlineMs: this.contextV2CaptureDeadlineMs,
+      });
+      if (eligibility.kind === "DB_ERROR") {
+        throw new Error(eligibility.reasonCode);
+      }
+      if (eligibility.kind === "NOT_TERMINAL") {
+        await client.query(
+          `UPDATE shadow_evaluations
+           SET next_attempt_at = now() + interval '10 seconds', updated_at = now()
+           WHERE evaluation_id = $1
+             AND status IN ('PENDING', 'FAILED_RETRYABLE')`,
+          [row.evaluation_id],
+        );
+        return { kind: "DEFERRED", reasonCode: "CONTEXT_V2_CAPTURE_NOT_TERMINAL" };
+      }
+      if (eligibility.kind !== "BUILT_VALID") {
+        const reasonCode = eligibility.kind === "BLOCKED" ||
+            eligibility.kind === "BUILT_INVALID" ||
+            eligibility.kind === "ABSENT_AFTER_DEADLINE"
+          ? eligibility.reasonCode
+          : "CONTEXT_V2_CAPTURE_AMBIGUOUS";
+        await client.query(
+          `UPDATE shadow_evaluations
+           SET status = 'FAILED_PERMANENT', error_code = $2,
+               blocked_reason_codes = ARRAY[$2]::text[],
+               claim_token = NULL, claimed_at = NULL, updated_at = now()
+           WHERE evaluation_id = $1
+             AND status IN ('PENDING', 'FAILED_RETRYABLE')`,
+          [row.evaluation_id, reasonCode.slice(0, 128)],
+        );
+        return { kind: "TERMINAL", reasonCode };
+      }
+      const claimed = await client.query<{ claim_token: string }>(
+        `UPDATE shadow_evaluations
+         SET status = 'PROCESSING', attempt_count = attempt_count + 1,
+             claimed_at = now(), claim_token = gen_random_uuid(),
+             error_code = NULL, updated_at = now()
+         WHERE evaluation_id = $1
+           AND status IN ('PENDING', 'FAILED_RETRYABLE')
+         RETURNING claim_token`,
+        [row.evaluation_id],
+      );
+      const claimToken = claimed.rows[0]?.claim_token;
+      if (!claimToken) throw new Error("CONTEXT_V2_CANDIDATE_CLAIM_CONFLICT");
+      return {
+        kind: "CLAIMED",
+        evaluationId: row.evaluation_id,
+        claimToken,
+        context: eligibility.context,
+      };
+    });
+  }
+
+  async completeContextV2Candidate(input: Readonly<{
+    evaluationId: string;
+    claimToken: string;
+    output: unknown;
+    providerModelVersion: string;
+    requestIdentity: unknown;
+  }>): Promise<void> {
+    const result = await this.pool.query(
+      `UPDATE shadow_evaluations
+       SET status = 'COMPLETED', completed_at = now(),
+           model_provider = 'VERTEX_AI', model_version = $3,
+           proposal = $4::jsonb, quality_assessment = $5::jsonb,
+           claim_token = NULL, error_code = NULL, updated_at = now()
+       WHERE evaluation_id = $1 AND status = 'PROCESSING' AND claim_token = $2`,
+      [
+        input.evaluationId,
+        input.claimToken,
+        input.providerModelVersion.slice(0, 128),
+        JSON.stringify(input.output),
+        JSON.stringify({ candidateRequestIdentity: input.requestIdentity }),
+      ],
+    );
+    if (result.rowCount !== 1) {
+      throw new Error("CONTEXT_V2_CANDIDATE_COMPLETION_CONFLICT");
+    }
+  }
+
+  async failContextV2Candidate(input: Readonly<{
+    evaluationId: string;
+    claimToken: string;
+    errorCode: string;
+    retryable: boolean;
+  }>): Promise<void> {
+    await this.fail(
+      input.evaluationId,
+      input.claimToken,
+      input.errorCode,
+      input.retryable,
+      3,
+    );
   }
 
   async claimNext(): Promise<ShadowEvaluationJob | null> {
