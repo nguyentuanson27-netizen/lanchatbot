@@ -20,7 +20,11 @@ export type ContextV2CaptureEligibility =
   | { readonly kind: "BUILT_VALID"; readonly context: ContextV2 }
   | { readonly kind: "BUILT_INVALID"; readonly reasonCode: string }
   | { readonly kind: "BLOCKED"; readonly reasonCode: string }
-  | { readonly kind: "AMBIGUOUS"; readonly captureCount: number }
+  | {
+      readonly kind: "AMBIGUOUS";
+      readonly captureCount: number;
+      readonly reasonCode: "CONTEXT_V2_CAPTURE_AMBIGUOUS";
+    }
   | { readonly kind: "NOT_TERMINAL" }
   | { readonly kind: "ABSENT_AFTER_DEADLINE"; readonly reasonCode: "CONTEXT_V2_SNAPSHOT_ABSENT" }
   | { readonly kind: "DB_ERROR"; readonly reasonCode: "CONTEXT_V2_CAPTURE_READ_FAILED" };
@@ -134,7 +138,11 @@ export async function insertContextV2Capture(
   return result.rowCount === 1;
 }
 
-/** Shadow persistence can never abort the enclosing realtime transaction. */
+/**
+ * Isolates ordinary capture-statement failures when savepoint recovery
+ * succeeds. A savepoint recovery failure still propagates because the
+ * enclosing transaction can no longer be treated as healthy.
+ */
 export async function persistContextV2CaptureFailSoft(
   client: PoolClient,
   identity: Parameters<typeof insertContextV2Capture>[1],
@@ -201,7 +209,11 @@ export async function inspectContextV2Capture(
         : { kind: "NOT_TERMINAL" };
     }
     if (result.rows.length !== 1) {
-      return { kind: "AMBIGUOUS", captureCount: result.rows.length };
+      return {
+        kind: "AMBIGUOUS",
+        captureCount: result.rows.length,
+        reasonCode: "CONTEXT_V2_CAPTURE_AMBIGUOUS",
+      };
     }
     const parsed = ContextV2CaptureV1Schema.safeParse(result.rows[0]?.capture);
     if (!parsed.success) {

@@ -290,7 +290,11 @@ describe("Context V2 exact-message claim gate", () => {
     await expect(inspectContextV2Capture(
       clientWith([{ capture }, { capture }]),
       input(),
-    )).resolves.toEqual({ kind: "AMBIGUOUS", captureCount: 2 });
+    )).resolves.toEqual({
+      kind: "AMBIGUOUS",
+      captureCount: 2,
+      reasonCode: "CONTEXT_V2_CAPTURE_AMBIGUOUS",
+    });
   });
 
   it("distinguishes a pending capture from an absent capture after deadline", async () => {

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import {
   AFTER_SALES_HOLDING_REPLY_V2,
@@ -54,9 +55,11 @@ import type {
   CustomerProfileV1,
   ProductFactsV2,
 } from "@lana/contracts";
+import { canonicalJsonV1 } from "@lana/contracts";
 import type { RuntimePolicyResolution, RuntimePolicyResolverPort } from "@lana/chat-runtime";
 import type { RealtimeMediaRecognition } from "./realtime-media-recognition.js";
 import { hashProtectedClaimSetV1 } from "@lana/business-tools";
+import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 
 describe("RealtimeRunner", () => {
   it("retains the exact last inbound capture trigger across trailing echoes", () => {
@@ -3202,6 +3205,138 @@ describe("RealtimeRunner inbound batching", () => {
     expect(commitInput.metaPlan?.responseGroupId).toMatch(/^[0-9a-f-]{36}$/u);
     expect(completeBatch).not.toHaveBeenCalled();
     expect(inbox.complete).not.toHaveBeenCalled();
+  });
+
+  it("builds a hash-valid Context V2 capture from the final realtime commerce snapshot", async () => {
+    const entry = item(34, "chị cần tư vấn");
+    const batch = {
+      pageId,
+      conversationHash,
+      generation: 10,
+      leaseToken: entry.leaseToken,
+      inboxIds: [entry.inboxId],
+      evaluationGroupId: "92596683-42b4-475c-845c-0f2a55ea211e",
+      eventKind: "CUSTOMER" as const,
+      firstReceiveSequence: 34,
+      lastReceiveSequence: 34,
+      attemptCount: 1,
+      items: [entry],
+    };
+    const inbox: RealtimeInboxPort = {
+      claimNext: vi.fn(async () => null),
+      claimNextBatch: vi.fn(async () => batch),
+      complete: vi.fn(async () => true),
+      completeBatch: vi.fn(async () => true),
+      isBatchCurrent: vi.fn(async () => true),
+      retry: vi.fn(async () => true),
+      retryBatch: vi.fn(async () => true),
+      failPermanent: vi.fn(async () => true),
+      failBatchPermanent: vi.fn(async () => true),
+    };
+    const state = createConversationState({
+      conversationId,
+      routingOwner: "APP",
+      now: new Date(occurredAt),
+    });
+    const commerceState = createRealtimeSalesState(
+      conversationId,
+      pageId,
+      new Date(occurredAt),
+    );
+    const commit = vi.fn(async (_input: unknown) => ({
+      stateCommitted: true,
+      metaOutboxCreated: 1,
+      pancakeTagOutboxCreated: false,
+      handoffEventCreated: false,
+      sendAuthorized: true,
+      reasonCodes: [],
+      inboxBatchStatus: "COMMITTED" as const,
+    }));
+    const runtime: RealtimeRuntimePort = {
+      loadOrCreate: vi.fn(async () => ({
+        conversationId,
+        pageId,
+        customerHash: conversationHash,
+        stateVersion: state.revision,
+        state,
+        routingOwner: "APP" as const,
+        appSendEnabled: true,
+        killSwitch: false,
+      })),
+      loadOrCreateSalesCycle: async <TState>() => ({
+        conversationId,
+        pageId,
+        stateRevision: commerceState.revision,
+        state: commerceState as unknown as TState,
+        cartExpiresAt: null,
+        expiresAt: new Date("2026-08-22T02:00:00.000Z"),
+      }),
+      commit,
+      linkProviderConversation: vi.fn(async () => undefined),
+    };
+    const sourceMessagePk = "00000000-0000-4000-8000-000000000034";
+    const runner = new RealtimeRunner(
+      inbox,
+      runtime,
+      replyModel(),
+      { ready: vi.fn(), resolve: vi.fn(), close: vi.fn() },
+      {
+        searchText: vi.fn(async () => ({
+          status: "NOT_FOUND" as const,
+          reasonCode: "NO_CANDIDATES" as const,
+        })),
+        searchImage: vi.fn(),
+      },
+      clearTagObservation(),
+      {
+        workerId: "worker-1",
+        mode: "LIVE",
+        sendEnabled: true,
+        salesCycleEnabled: true,
+        recordedReplayCaptureEnabled: true,
+        recordedReplayPageId: pageId,
+        contextV2CaptureEnabled: true,
+      },
+      undefined,
+      undefined,
+      {
+        recordInboundCustomerMessage: vi.fn(async () => ({ messagePk: sourceMessagePk })),
+        recordOutboundHumanMessage: vi.fn(),
+      },
+    );
+
+    expect(await runner.processOne()).toBe(true);
+    const commitInput = commit.mock.calls[0]![0] as {
+      contextV2CapturePlan?: { capture: Record<string, unknown> & {
+        status: string;
+        reasonCode: string | null;
+        context: Record<string, unknown> & { contextHash: string };
+      } };
+    };
+    const capture = commitInput.contextV2CapturePlan?.capture;
+    expect(capture).toMatchObject({
+      sourceMessagePk,
+      status: "BUILT",
+      reasonCode: null,
+    });
+    const context = capture!.context;
+    const { contextHash, ...contextDraft } = context;
+    expect(contextHash).toBe(createHash("sha256")
+      .update(`CONTEXT_V2\n${canonicalJsonV1(contextDraft)}`, "utf8")
+      .digest("hex"));
+    expect(context).toMatchObject({
+      phase: { salesCycleRevision: commerceState.revision },
+      barriers: {
+        conversationRevision: state.revision + 1,
+        salesCycleRevision: commerceState.revision,
+      },
+      finalTurnEvidence: {
+        preTransitionConversationRevision: state.revision,
+        finalConversationRevision: state.revision + 1,
+        preTransitionSalesCycleRevision: commerceState.revision,
+        finalSalesCycleRevision: commerceState.revision,
+      },
+    });
   });
 
   it("does not separately complete a batch whose atomic commit is superseded", async () => {
