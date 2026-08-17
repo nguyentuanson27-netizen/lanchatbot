@@ -2919,7 +2919,12 @@ describe("RealtimeRunner inbound batching", () => {
     };
   }
 
-  function replyModel(): RealtimeModelPort {
+  function replyModel(buyingIntent?: Readonly<{
+    decision: "COMMITTED";
+    requestedAction: "OPEN_CART";
+    quantity: number;
+    evidenceText: string;
+  }>): RealtimeModelPort {
     return {
       generate: vi.fn(async () => ({
         proposal: {
@@ -2938,6 +2943,24 @@ describe("RealtimeRunner inbound batching", () => {
             size: null,
             deliveryRegion: null,
           },
+          ...(buyingIntent
+            ? {
+                salesSignals: {
+                  checkoutExtraction: {
+                    fullName: { value: null, evidenceText: null, confidence: 0 },
+                    phone: { value: null, evidenceText: null, confidence: 0 },
+                    address: { value: null, evidenceText: null, confidence: 0 },
+                    paymentMethod: { value: null, evidenceText: null, confidence: 0 },
+                  },
+                  purchaseConfirmation: {
+                    decision: "UNCLEAR" as const,
+                    evidenceText: null,
+                    confidence: 0,
+                  },
+                  buyingIntent: { ...buyingIntent, confidence: 0.99 },
+                },
+              }
+            : {}),
         },
         modelVersion: "gemini-test",
         latencyMs: 10,
@@ -3232,7 +3255,7 @@ describe("RealtimeRunner inbound batching", () => {
   });
 
   it("builds a hash-valid Context V2 capture from the final realtime commerce snapshot", async () => {
-    const entry = item(34, "chị cần tư vấn");
+    const entry = item(34, "chốt CB182 size M");
     const batch = {
       pageId,
       conversationHash,
@@ -3299,15 +3322,193 @@ describe("RealtimeRunner inbound batching", () => {
       linkProviderConversation: vi.fn(async () => undefined),
     };
     const sourceMessagePk = "00000000-0000-4000-8000-000000000034";
+    const product = {
+      productId: "CB182",
+      parentProductId: "CB182",
+      canonicalCode: "CB182",
+      aliases: [],
+      title: "Set áo quần Thiên Giao",
+      colors: ["BE"],
+      materials: ["COTTON"],
+      silhouettes: [],
+      occasions: [],
+      imageUrls: [],
+      images: [],
+      catalogVersion: "catalog-v2",
+    };
+    const policyMetadata = {
+      authority: "ADMIN_POLICY" as const,
+      sourceVersion: "context-v2-transition-test",
+      observedAt: occurredAt,
+      expiresAt: null,
+      freshForSeconds: null,
+      freshnessState: "FRESH" as const,
+    };
+    const policyResolution = {
+      status: "RESOLVED",
+      source: "DATABASE",
+      mayAffectOutbound: true,
+      reasonCodes: [],
+      auditWrite: "RECORDED",
+      audit: {
+        channel: "PUBLISHED",
+        bundleHash: `sha256:${"a".repeat(64)}`,
+        pinScopeType: "SALES_EPISODE",
+        pinScopeId: `${conversationId}:PUBLISHED`,
+      },
+      bundle: {
+        schemaVersion: 1,
+        bundleId: "context-v2-transition-test",
+        bundleHash: `sha256:${"a".repeat(64)}`,
+        pageId,
+        channel: "PUBLISHED",
+        sideEffects: "LIVE_OUTBOUND",
+        resolvedAt: occurredAt,
+        policy: {
+          schemaVersion: 1,
+          policyBundleId: `admin-policy:${pageId}`,
+          policyVersion: "context-v2-transition-test",
+          shopId: "LANA",
+          status: "ACTIVE",
+          effectiveAt: occurredAt,
+          effectiveUntil: null,
+          supersedesPolicyVersion: null,
+          scope: "SHOP_WIDE",
+          commerceAuthority: {
+            bomAuthority: "PANCAKE_POS",
+            priceAuthority: "PANCAKE_POS",
+            inventoryAuthority: "PANCAKE_POS",
+            allowGoogleSheetsPriceOverride: false,
+            allowAdminPriceOverride: false,
+            missingPriceBehavior: "DO_NOT_QUOTE",
+            metadata: policyMetadata,
+          },
+          shipping: { defaultFeeVnd: 30_000, scope: "SHOP_WIDE", metadata: policyMetadata },
+          multiItemOffer: {
+            minimumProductCount: 2,
+            discountBps: 500,
+            countingUnit: "PARENT_PRODUCT_UNIT",
+            setAndComboCountAsOne: true,
+            scope: "SHOP_WIDE",
+            metadata: policyMetadata,
+          },
+          negotiation: {
+            secondConcession: { freeShipping: true, fixedDiscountVnd: 0 },
+            finalConcession: { freeShipping: true, fixedDiscountVnd: 20_000 },
+            stacking: {
+              multiItemDiscountWithSecondConcession: true,
+              multiItemDiscountWithFinalConcession: true,
+              deduplicateFreeShipping: true,
+            },
+            scope: "SHOP_WIDE",
+            metadata: policyMetadata,
+          },
+          closing: {
+            customerStates: ["READY", "HESITANT", "CAUTIOUS"],
+            decisionMode: "DETERMINISTIC_POLICY_ONLY",
+            allowUnlistedOffers: false,
+            metadata: policyMetadata,
+          },
+        },
+        versionReferences: [],
+        artifacts: {
+          shopPolicy: {}, offerPolicy: {}, closingStrategy: {}, sizeCharts: {},
+          handoffMatrix: null, paymentPolicy: null,
+        },
+      },
+    } as unknown as RuntimePolicyResolution;
     const runner = new RealtimeRunner(
       inbox,
       runtime,
-      replyModel(),
-      { ready: vi.fn(), resolve: vi.fn(), close: vi.fn() },
+      replyModel({
+        decision: "COMMITTED",
+        requestedAction: "OPEN_CART",
+        quantity: 1,
+        evidenceText: "chốt CB182 size M",
+      }),
+      {
+        ready: vi.fn(async () => true),
+        resolve: vi.fn(async () => ({
+          schemaVersion: 1 as const,
+          status: "OK" as const,
+          source: "POS_SNAPSHOT" as const,
+          observedAt: occurredAt,
+          expiresAt: "2099-01-01T00:00:00.000Z",
+          productId: "CB182",
+          facts: {
+            schemaVersion: 1 as const,
+            productId: "CB182",
+            parentProductId: "CB182",
+            offerType: "SET",
+            listPriceVnd: null,
+            salePriceVnd: 799_000,
+            sizes: ["M"],
+            stockStatus: "IN_STOCK" as const,
+            stockQuantity: 2,
+            deliveryEta: null,
+            fulfillmentPolicy: "READY_STOCK",
+            imageUrls: [],
+          },
+          reasonCode: null,
+        })),
+        resolveCartSelection: vi.fn(async (query: { quantity: number }) => ({
+          status: "READY" as const,
+          line: {
+            lineId: "13000000-0000-4000-8000-000000000001",
+            parentProductId: "CB182",
+            offerId: "SET",
+            offerKind: "SET" as const,
+            quantity: query.quantity,
+            components: [{
+              componentProductId: "CB182",
+              componentSku: "CB182_BE_M",
+              componentRole: "TOP" as const,
+              color: "BE",
+              size: "M",
+              quantity: 1,
+            }],
+            allowMixedSizes: false,
+            allowComponentSale: false,
+            posUnitPriceVnd: 799_000,
+            priceAuthority: {
+              priceFactRef: "price-v1",
+              shopId: "LANA",
+              parentProductId: "CB182",
+              offerId: "SET",
+              offerPriceKind: "SET" as const,
+              componentProductId: null,
+              metadata: {
+                authority: "PANCAKE_POS" as const,
+                sourceVersion: "snapshot-v1",
+                observedAt: occurredAt,
+                expiresAt: "2099-01-01T00:00:00.000Z",
+                freshForSeconds: 60,
+                freshnessState: "FRESH" as const,
+              },
+            },
+            lineTotalVnd: 799_000 * query.quantity,
+          },
+          shopId: "LANA",
+          versions: {
+            price: "price-v1", inventory: "inventory-v1", size: "size-v1", eta: null,
+          },
+          eta: null,
+          etaExpiresAt: null,
+          sourceAuthority: "POS_SNAPSHOT" as const,
+          stockStatus: "IN_STOCK" as const,
+          stockAvailableQuantity: 2,
+          sourceObservedAt: occurredAt,
+          sourceExpiresAt: "2099-01-01T00:00:00.000Z",
+        })),
+        close: vi.fn(async () => undefined),
+      },
       {
         searchText: vi.fn(async () => ({
-          status: "NOT_FOUND" as const,
-          reasonCode: "NO_CANDIDATES" as const,
+          status: "MATCHED" as const,
+          matchKind: "EXACT_CODE" as const,
+          score: 1,
+          gap: null,
+          product,
         })),
         searchImage: vi.fn(),
       },
@@ -3327,16 +3528,28 @@ describe("RealtimeRunner inbound batching", () => {
         recordInboundCustomerMessage: vi.fn(async () => ({ messagePk: sourceMessagePk })),
         recordOutboundHumanMessage: vi.fn(),
       },
+      undefined,
+      { resolve: vi.fn(async () => policyResolution) },
     );
 
     expect(await runner.processOne()).toBe(true);
     const commitInput = commit.mock.calls[0]![0] as {
+      state: { revision: number };
+      salesCyclePlan?: {
+        expectedRevision: number;
+        state: { revision: number };
+      };
       contextV2CapturePlan?: { capture: Record<string, unknown> & {
         status: string;
         reasonCode: string | null;
         context: Record<string, unknown> & { contextHash: string };
       } };
     };
+    expect(commitInput.salesCyclePlan?.expectedRevision).toBe(commerceState.revision);
+    const finalSalesCycleRevision = commitInput.salesCyclePlan!.state.revision;
+    expect(finalSalesCycleRevision).toBeGreaterThan(commerceState.revision);
+    const finalConversationRevision = commitInput.state.revision;
+    expect(finalConversationRevision).toBeGreaterThan(state.revision);
     const capture = commitInput.contextV2CapturePlan?.capture;
     expect(capture).toMatchObject({
       sourceMessagePk,
@@ -3349,16 +3562,16 @@ describe("RealtimeRunner inbound batching", () => {
       .update(`CONTEXT_V2\n${canonicalJsonV1(contextDraft)}`, "utf8")
       .digest("hex"));
     expect(context).toMatchObject({
-      phase: { salesCycleRevision: commerceState.revision },
+      phase: { salesCycleRevision: finalSalesCycleRevision },
       barriers: {
-        conversationRevision: state.revision + 1,
-        salesCycleRevision: commerceState.revision,
+        conversationRevision: finalConversationRevision,
+        salesCycleRevision: finalSalesCycleRevision,
       },
       finalTurnEvidence: {
         preTransitionConversationRevision: state.revision,
-        finalConversationRevision: state.revision + 1,
+        finalConversationRevision,
         preTransitionSalesCycleRevision: commerceState.revision,
-        finalSalesCycleRevision: commerceState.revision,
+        finalSalesCycleRevision,
       },
     });
   });

@@ -328,4 +328,35 @@ describe("DF09 Context V2 contract", () => {
       catalogVersion: null,
     })).toThrow();
   });
+
+  it("rejects a source message identity that is not a database UUID", () => {
+    expect(() => FinalTurnEvidenceV2Schema.parse({
+      schemaVersion: 2,
+      contractVersion: "FINAL_TURN_EVIDENCE_V2",
+      sourceMessagePk: "message-99",
+      sourceMessageIdHash: hash("a"),
+      preTransitionConversationRevision: 4,
+      finalConversationRevision: 5,
+      preTransitionSalesCycleRevision: 2,
+      finalSalesCycleRevision: 3,
+    })).toThrow();
+  });
+
+  it("accepts multi-command final revisions but rejects a non-advancing turn", () => {
+    const evidence = {
+      schemaVersion: 2 as const,
+      contractVersion: "FINAL_TURN_EVIDENCE_V2" as const,
+      sourceMessagePk: "00000000-0000-4000-8000-000000000099",
+      sourceMessageIdHash: hash("a"),
+      preTransitionConversationRevision: 4,
+      finalConversationRevision: 7,
+      preTransitionSalesCycleRevision: 2,
+      finalSalesCycleRevision: 5,
+    };
+    expect(FinalTurnEvidenceV2Schema.parse(evidence)).toEqual(evidence);
+    expect(() => FinalTurnEvidenceV2Schema.parse({
+      ...evidence,
+      finalConversationRevision: evidence.preTransitionConversationRevision,
+    })).toThrow();
+  });
 });

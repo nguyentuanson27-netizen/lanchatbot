@@ -13,7 +13,7 @@ import { SalesCycleStageV1Schema } from "../v3/sales-cycle.js";
 
 const Sha256Schema = z.string().regex(/^[a-f0-9]{64}$/u);
 const BoundedReasonCodeSchema = z.string().regex(/^[A-Z0-9][A-Z0-9_.:-]{0,127}$/u);
-const SourceMessagePkSchema = z.string().min(1).max(128);
+const SourceMessagePkSchema = z.string().uuid();
 
 export const ConversationPhaseV2ValueSchema = z.enum([
   "DISCOVERY",
@@ -127,12 +127,12 @@ export const FinalTurnEvidenceV2Schema = z.object({
   preTransitionSalesCycleRevision: z.number().int().nonnegative().nullable(),
   finalSalesCycleRevision: z.number().int().nonnegative(),
 }).strict().superRefine((value, context) => {
-  if (value.finalConversationRevision !==
-      value.preTransitionConversationRevision + 1) {
+  if (value.finalConversationRevision <=
+      value.preTransitionConversationRevision) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["finalConversationRevision"],
-      message: "final conversation revision must be the committed successor",
+      message: "final conversation revision must advance beyond the locked revision",
     });
   }
   if (value.preTransitionSalesCycleRevision !== null &&

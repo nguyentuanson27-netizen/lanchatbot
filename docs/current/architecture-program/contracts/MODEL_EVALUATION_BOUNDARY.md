@@ -41,6 +41,12 @@ Required properties:
    commit. Claim and readiness freshness are revalidated against the database
    transaction clock immediately before insert; an expired input terminalizes
    as `BLOCKED` and cannot enter candidate evaluation.
+   `sourceMessagePk` is the exact UUID primary key from `messages`. Final-turn
+   evidence binds the locked and authoritative final conversation/sales-cycle
+   revisions. A turn may apply multiple deterministic commands: the final
+   conversation revision must advance beyond its lock, while the final sales
+   revision may remain equal when no sales transition occurs; either final
+   value may advance by more than one and is never synthesized as `locked + 1`.
 9. Capture identity is content-addressed from the exact source message primary
    key and terminal payload. A retry of identical content deduplicates; two
    different terminal payloads for one source key remain visible and make the
