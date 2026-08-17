@@ -2273,6 +2273,21 @@ export function advanceContextV2CaptureTrigger(
   };
 }
 
+export function bindContextV2FinalTurnEvidence(input: Readonly<{
+  sourceMessagePk: string;
+  sourceMessageIdHash: string;
+  preTransitionConversationRevision: number;
+  finalConversationRevision: number;
+  preTransitionSalesCycleRevision: number | null;
+  finalSalesCycleRevision: number;
+}>) {
+  return FinalTurnEvidenceV2Schema.safeParse({
+    schemaVersion: 2,
+    contractVersion: "FINAL_TURN_EVIDENCE_V2",
+    ...input,
+  });
+}
+
 export interface RuntimeBehaviorModeResolverPort {
   resolve(input: {
     readonly resolutionId: string;
@@ -4986,9 +5001,7 @@ export class RealtimeRunner {
           : productBindingStatus === "STALE"
             ? [businessFacts!.productId]
             : [];
-      const finalTurnEvidence = FinalTurnEvidenceV2Schema.safeParse({
-        schemaVersion: 2,
-        contractVersion: "FINAL_TURN_EVIDENCE_V2",
+      const finalTurnEvidence = bindContextV2FinalTurnEvidence({
         sourceMessagePk: triggerMessagePk,
         sourceMessageIdHash:
           canonicalEvidence.buyingIntent.sourceMessageIdHash,

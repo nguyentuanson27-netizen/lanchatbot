@@ -7,6 +7,7 @@ import {
 import {
   aiContinuationProductId,
   advanceContextV2CaptureTrigger,
+  bindContextV2FinalTurnEvidence,
   approvedSizeClaimClarification,
   catalogAdvisoryIntent,
   catalogAdvisoryReply,
@@ -62,6 +63,29 @@ import { hashProtectedClaimSetV1 } from "@lana/business-tools";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 
 describe("RealtimeRunner", () => {
+  it("binds distinct pre-transition and final revisions without temporal skew", () => {
+    expect(bindContextV2FinalTurnEvidence({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000003",
+      sourceMessageIdHash: "a".repeat(64),
+      preTransitionConversationRevision: 8,
+      finalConversationRevision: 9,
+      preTransitionSalesCycleRevision: 12,
+      finalSalesCycleRevision: 13,
+    })).toEqual({
+      success: true,
+      data: {
+        schemaVersion: 2,
+        contractVersion: "FINAL_TURN_EVIDENCE_V2",
+        sourceMessagePk: "00000000-0000-4000-8000-000000000003",
+        sourceMessageIdHash: "a".repeat(64),
+        preTransitionConversationRevision: 8,
+        finalConversationRevision: 9,
+        preTransitionSalesCycleRevision: 12,
+        finalSalesCycleRevision: 13,
+      },
+    });
+  });
+
   it("retains the exact last inbound capture trigger across trailing echoes", () => {
     const inbound = advanceContextV2CaptureTrigger(null, {
       sourceMessagePk: "00000000-0000-4000-8000-000000000003",
