@@ -244,6 +244,9 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
         if (sql.includes("SELECT conversation_owner")) {
           return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
         }
+        if (sql.includes("clock_timestamp() AS capture_now")) {
+          return { rowCount: 1, rows: [{ capture_now: new Date("2026-07-23T05:00:00.000Z") }] };
+        }
         if (sql.includes("UPDATE conversations")) return { rowCount: 1, rows: [] };
         if (sql.includes("INSERT INTO conversation_events")) return { rowCount: 1, rows: [] };
         return { rowCount: 0, rows: [] };
@@ -361,16 +364,49 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           },
         },
       }],
+      contextV2CapturePlan: {
+        capture: {
+          schemaVersion: 1,
+          contractVersion: "CONTEXT_V2_CAPTURE_V1",
+          sourceMessagePk: "10000000-0000-4000-8000-000000000005",
+          sourceOccurredAt: occurredAt.toISOString(),
+          status: "BLOCKED",
+          context: null,
+          contextHash: null,
+          reasonCode: "CONTEXT_V2_COMMERCE_STATE_UNAVAILABLE",
+        },
+      },
     }, occurredAt);
 
     expect(result.decisionEventsCreated).toBe(1);
-    const insert = calls.find((call) => call.sql.includes("INSERT INTO conversation_events"));
+    expect(result.contextV2CaptureCreated).toBe(true);
+    expect(result.contextV2CaptureReasonCode).toBeNull();
+    expect(calls.some(({ sql }) => sql === "SAVEPOINT context_v2_capture"))
+      .toBe(true);
+    expect(calls.some(({ sql }) => sql === "RELEASE SAVEPOINT context_v2_capture"))
+      .toBe(true);
+    const eventInserts = calls.filter((call) =>
+      call.sql.includes("INSERT INTO conversation_events")
+    );
+    const insert = eventInserts[0];
     expect(insert?.sql).toContain("ON CONFLICT (event_id, occurred_at) DO NOTHING");
     const serialized = JSON.stringify(insert?.values ?? []);
     expect(serialized).not.toContain("0900000000");
     expect(serialized).not.toContain("rawText");
     expect(serialized).toContain("decisionObservability");
     expect(serialized).toContain("HYBRID_BUYING_INTENT_V1");
+    expect(eventInserts[1]?.values).toContain(
+      JSON.stringify({
+        schemaVersion: 1,
+        contractVersion: "CONTEXT_V2_CAPTURE_V1",
+        sourceMessagePk: "10000000-0000-4000-8000-000000000005",
+        sourceOccurredAt: occurredAt.toISOString(),
+        status: "BLOCKED",
+        context: null,
+        contextHash: null,
+        reasonCode: "CONTEXT_V2_COMMERCE_STATE_UNAVAILABLE",
+      }),
+    );
     expect(calls.at(-1)?.sql).toContain("COMMIT");
   });
 

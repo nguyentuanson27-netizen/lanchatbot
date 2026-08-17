@@ -73,6 +73,10 @@ import {
   recordInitialReplySendFailed,
   type AcquisitionCommitPlan,
 } from "./ad-acquisition.js";
+import {
+  persistContextV2CaptureFailSoft,
+  type ContextV2CapturePlan,
+} from "./context-v2-capture.js";
 
 export interface MetaOutboxOperatorCancelResult {
   readonly responseGroupId: string;
@@ -395,6 +399,7 @@ export interface RealtimeCommitInput<TState, TSalesState = unknown> {
   readonly handoffAcknowledgementPlan?: RealtimeHandoffAcknowledgementPlan;
   readonly salesCyclePlan?: RealtimeSalesCyclePlan<TSalesState>;
   readonly decisionEvents?: readonly RealtimeDecisionEventPlan[];
+  readonly contextV2CapturePlan?: ContextV2CapturePlan;
   readonly acquisitionPlan?: AcquisitionCommitPlan;
   /**
    * When present, state/outbox and all source inbox rows share one transaction.
@@ -410,6 +415,10 @@ export interface RealtimeCommitResult {
   readonly pancakeTagOutboxCreated: boolean;
   readonly handoffEventCreated: boolean;
   readonly decisionEventsCreated?: number;
+  readonly contextV2CaptureCreated?: boolean;
+  readonly contextV2CaptureReasonCode?:
+    | "CONTEXT_V2_CAPTURE_WRITE_FAILED"
+    | null;
   readonly sendAuthorized: boolean;
   readonly reasonCodes: readonly string[];
   readonly inboxBatchStatus?: "NOT_REQUESTED" | "COMMITTED" | "SUPERSEDED";
@@ -2443,6 +2452,22 @@ export class PostgresRealtimeRuntimeStore {
       const decisionEventsCreated = input.decisionEvents
         ? await this.insertDecisionEvents(client, input, input.decisionEvents)
         : 0;
+      const contextV2CaptureResult = input.contextV2CapturePlan
+        ? await persistContextV2CaptureFailSoft(
+            client,
+            {
+              conversationId: input.conversationId,
+              pageId: input.pageId,
+              customerHash: input.customerHash,
+              owner: this.stateString(
+                input.state,
+                "conversationOwner",
+                ownerBefore,
+              ) as "BOT" | "HUMAN",
+            },
+            input.contextV2CapturePlan,
+          )
+        : { created: false, reasonCode: null };
 
       if (input.inboxBatchGuard) {
         await this.completeInboxBatch(
@@ -2459,6 +2484,8 @@ export class PostgresRealtimeRuntimeStore {
         pancakeTagOutboxCreated,
         handoffEventCreated,
         decisionEventsCreated,
+        contextV2CaptureCreated: contextV2CaptureResult.created,
+        contextV2CaptureReasonCode: contextV2CaptureResult.reasonCode,
         sendAuthorized,
         reasonCodes,
         inboxBatchStatus: input.inboxBatchGuard

@@ -32,3 +32,34 @@ Required properties:
 7. A scored result is inadmissible when request identity, provider-observed
    model identity, corpus/rubric identity, source revision, or pre-registration
    provenance is missing, unknown, stale, or mismatched.
+8. DF-B keeps the source capture gate default-off and has no environment, page,
+   routing, or control-plane activation wiring. When separately authorized and
+   enabled, realtime attempts one minimal terminal capture (`BUILT` or
+   `BLOCKED`) for every exact inbound source message. The successful insert
+   shares the final-turn transaction, but a dedicated savepoint makes capture
+   failure incapable of rolling back conversation state, outbox, or the inbox
+   commit. Claim and readiness freshness are revalidated against the database
+   transaction clock immediately before insert; an expired input terminalizes
+   as `BLOCKED` and cannot enter candidate evaluation.
+   `sourceMessagePk` is the exact UUID primary key from `messages`. Final-turn
+   evidence binds the locked and authoritative final conversation/sales-cycle
+   revisions. A turn may apply multiple deterministic commands: the final
+   conversation revision must advance beyond its lock, while the final sales
+   revision may remain equal when no sales transition occurs; either final
+   value may advance by more than one and is never synthesized as `locked + 1`.
+9. Capture identity is content-addressed from the exact source message primary
+   key and terminal payload. A retry of identical content deduplicates; two
+   different terminal payloads for one source key remain visible and make the
+   source ambiguous instead of being silently tie-broken.
+10. Candidate eligibility uses exact `sourceMessagePk` as correctness. A bounded
+   conversation/time range may be added only as a partition-pruning hint and
+   cannot replace or weaken the exact-key predicate.
+11. Capture lookup returns typed outcomes for valid, invalid, blocked,
+    ambiguous, not-yet-terminal, absent-after-deadline, and database-error
+    states. Only a valid built capture may call a candidate model. Database
+    errors are retryable, do not consume a model attempt, and are never mapped
+    to a missing snapshot.
+12. Candidate-worker readiness probes its read-only capture permission before
+    accepting work. A missing capture becomes terminal only after the locked
+    deadline; blocked, invalid, ambiguous, and deadline-expired cases remain in
+    coverage accounting with reason codes.

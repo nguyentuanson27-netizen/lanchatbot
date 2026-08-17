@@ -48,6 +48,8 @@ import {
   type RequestedBusinessFactV2,
   type SizeRecommendationProtectedClaimV1,
   type DeterministicEffectReadinessV1,
+  FinalTurnEvidenceV2Schema,
+  ProductBindingV2Schema,
   type ProtectedClaimV1,
 } from "@lana/contracts";
 import type {
@@ -83,6 +85,7 @@ import type {
   InboxBatchLease,
   RealtimeCommitInput,
   RealtimeCommitResult,
+  ContextV2CapturePlan,
   RealtimeDecisionEventPlan,
   RealtimeInboxBatchGuard,
   RealtimeMetaMessageUnit,
@@ -126,6 +129,10 @@ import type {
   RealtimeMediaRecognitionService,
 } from "./realtime-media-recognition.js";
 import { buildRealtimeProductFactsV2 } from "./realtime-product-facts-v2.js";
+import {
+  blockedContextV2Capture,
+  buildContextV2Capture,
+} from "./context-v2.js";
 import type { VideoFrameExtraction } from "./video-frame-extractor.js";
 import { evaluateSizeChartEligibility } from "./size-chart-eligibility.js";
 import { mapWithBoundedConcurrency } from "./bounded-concurrency.js";
@@ -2230,6 +2237,8 @@ export interface RealtimeRunnerOptions {
   readonly decisionAuditV2Enabled?: boolean;
   readonly recordedReplayCaptureEnabled?: boolean;
   readonly recordedReplayPageId?: string;
+  /** Source-only shadow capture gate. No runtime/env wiring exists in DF-B. */
+  readonly contextV2CaptureEnabled?: boolean;
   readonly mediaRecognitionEnabled?: boolean;
   readonly mediaClarificationEnabled?: boolean;
   readonly mediaRecognitionPageIds?: readonly string[];
@@ -2239,6 +2248,44 @@ export interface RealtimeRunnerOptions {
   readonly wave2StrategyEnabled?: boolean;
   readonly adAcquisitionAnalyticsMode?: "OFF" | "SHADOW" | "LIVE";
   readonly adAcquisitionPageIds?: readonly string[];
+}
+
+export interface ContextV2CaptureTrigger {
+  readonly sourceMessagePk: string;
+  readonly sourceOccurredAt: Date;
+}
+
+export function advanceContextV2CaptureTrigger(
+  current: ContextV2CaptureTrigger | null,
+  input: Readonly<{
+    sourceMessagePk: string;
+    sourceOccurredAt: Date;
+    isEcho: boolean;
+  }>,
+): ContextV2CaptureTrigger | null {
+  if (input.isEcho) return current;
+  if (!input.sourceMessagePk || !Number.isFinite(input.sourceOccurredAt.getTime())) {
+    throw new Error("CONTEXT_V2_CAPTURE_TRIGGER_INVALID");
+  }
+  return {
+    sourceMessagePk: input.sourceMessagePk,
+    sourceOccurredAt: input.sourceOccurredAt,
+  };
+}
+
+export function bindContextV2FinalTurnEvidence(input: Readonly<{
+  sourceMessagePk: string;
+  sourceMessageIdHash: string;
+  preTransitionConversationRevision: number;
+  finalConversationRevision: number;
+  preTransitionSalesCycleRevision: number | null;
+  finalSalesCycleRevision: number;
+}>) {
+  return FinalTurnEvidenceV2Schema.safeParse({
+    schemaVersion: 2,
+    contractVersion: "FINAL_TURN_EVIDENCE_V2",
+    ...input,
+  });
 }
 
 export interface RuntimeBehaviorModeResolverPort {
@@ -2396,6 +2443,7 @@ export class RealtimeRunner {
       recordedReplayCaptureEnabled:
         options.recordedReplayCaptureEnabled ?? false,
       recordedReplayPageId: options.recordedReplayPageId ?? "",
+      contextV2CaptureEnabled: options.contextV2CaptureEnabled ?? false,
       mediaRecognitionEnabled: options.mediaRecognitionEnabled ?? false,
       mediaClarificationEnabled: options.mediaClarificationEnabled ?? false,
       mediaRecognitionPageIds: [
@@ -2799,7 +2847,7 @@ export class RealtimeRunner {
           )
         : null;
 
-    let triggerMessagePk: string | null = null;
+    let contextV2CaptureTrigger: ContextV2CaptureTrigger | null = null;
     let lastInboundIndex = -1;
     for (let index = 0; index < claims.length; index += 1) {
       if (!claims[index]?.envelope.message.isEcho) lastInboundIndex = index;
@@ -2838,7 +2886,14 @@ export class RealtimeRunner {
             })}\n`,
           );
         }
-        triggerMessagePk = recorded.messagePk;
+        contextV2CaptureTrigger = advanceContextV2CaptureTrigger(
+          contextV2CaptureTrigger,
+          {
+            sourceMessagePk: recorded.messagePk,
+            sourceOccurredAt: new Date(original.occurredAt),
+            isEcho: false,
+          },
+        );
       } else if (original.isEcho && this.canonicalHistory) {
         await this.canonicalHistory.recordOutboundHumanMessage({
           pageId: item.pageId,
@@ -2853,6 +2908,7 @@ export class RealtimeRunner {
         });
       }
     }
+    const triggerMessagePk = contextV2CaptureTrigger?.sourceMessagePk ?? null;
 
     const currentContexts: ShadowContextMessage[] = sourceMessages.map((original) => ({
       direction: original.isEcho ? ("OUTBOUND" as const) : ("INBOUND" as const),
@@ -4914,6 +4970,95 @@ export class RealtimeRunner {
       ...(salesReadinessAttempt === null ? [] : [salesReadinessAttempt]),
       ...(protectedOutboundReadiness === null ? [] : [protectedOutboundReadiness]),
     ];
+    let contextV2CapturePlan: ContextV2CapturePlan | undefined;
+    if (
+      this.options.contextV2CaptureEnabled &&
+      triggerMessagePk !== null &&
+      contextV2CaptureTrigger !== null
+    ) {
+      const sourceOccurredAt = contextV2CaptureTrigger.sourceOccurredAt;
+      const finalCommerceState = salesCyclePlan?.state ?? salesCycleRecord?.state;
+      const candidateProductIds = [...new Set(
+        resolution.products.map(({ productId }) => productId),
+      )].sort();
+      const productBindingStatus =
+        candidateProductIds.length > 1 &&
+          multiProductDecision.disposition !== "CONTINUE"
+          ? "AMBIGUOUS" as const
+          : businessFacts?.status === "STALE" &&
+              businessFacts.productId !== null
+            ? "STALE" as const
+            : observedProductId
+              ? "RESOLVED" as const
+              : protectedClaimValidation.claimTypes.length > 0 ||
+                  salesCyclePlan !== null
+                ? "UNRESOLVED" as const
+                : "NOT_REQUIRED" as const;
+      const productIds = productBindingStatus === "AMBIGUOUS"
+        ? candidateProductIds
+        : productBindingStatus === "RESOLVED"
+          ? [observedProductId!]
+          : productBindingStatus === "STALE"
+            ? [businessFacts!.productId]
+            : [];
+      const finalTurnEvidence = bindContextV2FinalTurnEvidence({
+        sourceMessagePk: triggerMessagePk,
+        sourceMessageIdHash:
+          canonicalEvidence.buyingIntent.sourceMessageIdHash,
+        preTransitionConversationRevision: record.stateVersion,
+        finalConversationRevision: nextState.revision,
+        preTransitionSalesCycleRevision:
+          salesCycleRecord?.stateRevision ?? salesCyclePlan?.expectedRevision ?? null,
+        finalSalesCycleRevision: finalCommerceState?.revision ?? -1,
+      });
+      const productBinding = ProductBindingV2Schema.safeParse({
+        schemaVersion: 2,
+        contractVersion: "PRODUCT_BINDING_V2",
+        status: productBindingStatus,
+        productIds,
+        catalogVersion: resolvedProduct?.catalogVersion ?? null,
+      });
+      const capture = message.isEcho
+        ? blockedContextV2Capture({
+            sourceMessagePk: triggerMessagePk,
+            sourceOccurredAt,
+            reasonCode: "CONTEXT_V2_TRAILING_ECHO_TERMINAL",
+          })
+        : finalCommerceState === undefined
+        ? blockedContextV2Capture({
+            sourceMessagePk: triggerMessagePk,
+            sourceOccurredAt,
+            reasonCode: "CONTEXT_V2_COMMERCE_STATE_UNAVAILABLE",
+          })
+        : !finalTurnEvidence.success
+          ? blockedContextV2Capture({
+              sourceMessagePk: triggerMessagePk,
+              sourceOccurredAt,
+              reasonCode: "CONTEXT_V2_FINAL_TURN_EVIDENCE_INVALID",
+            })
+          : !productBinding.success
+            ? blockedContextV2Capture({
+                sourceMessagePk: triggerMessagePk,
+                sourceOccurredAt,
+                reasonCode: "CONTEXT_V2_PRODUCT_BINDING_INVALID",
+              })
+            : buildContextV2Capture({
+                canonicalEvidence,
+                verifiedClaims: protectedOutboundClaims,
+                finalCommerceState,
+                readiness: readinessObservations,
+                finalTurnEvidence: finalTurnEvidence.data,
+                productBinding: productBinding.data,
+                owner: nextState.conversationOwner,
+                handoffReasonCode:
+                  handoffEventReasonCode ?? salesHandoffReasonCode ?? null,
+                now,
+                sourceOccurredAt,
+              });
+      contextV2CapturePlan = {
+        capture,
+      };
+    }
     const decisionObservability = buildDecisionObservabilityV1({
       dialogueEvidenceCodes,
       dialogueEvidenceSource,
@@ -5411,6 +5556,7 @@ export class RealtimeRunner {
         ...(this.options.decisionTelemetryEnabled && decisionEvents.length > 0
           ? { decisionEvents }
           : {}),
+        ...(contextV2CapturePlan ? { contextV2CapturePlan } : {}),
         ...(inboxBatchGuard ? { inboxBatchGuard } : {}),
       },
       new Date(),

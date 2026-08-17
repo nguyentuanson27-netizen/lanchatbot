@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import {
   AFTER_SALES_HOLDING_REPLY_V2,
@@ -5,6 +6,8 @@ import {
 } from "@lana/conversation-engine";
 import {
   aiContinuationProductId,
+  advanceContextV2CaptureTrigger,
+  bindContextV2FinalTurnEvidence,
   approvedSizeClaimClarification,
   catalogAdvisoryIntent,
   catalogAdvisoryReply,
@@ -53,11 +56,48 @@ import type {
   CustomerProfileV1,
   ProductFactsV2,
 } from "@lana/contracts";
+import { canonicalJsonV1 } from "@lana/contracts";
 import type { RuntimePolicyResolution, RuntimePolicyResolverPort } from "@lana/chat-runtime";
 import type { RealtimeMediaRecognition } from "./realtime-media-recognition.js";
 import { hashProtectedClaimSetV1 } from "@lana/business-tools";
+import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 
 describe("RealtimeRunner", () => {
+  it("binds distinct pre-transition and final revisions without temporal skew", () => {
+    expect(bindContextV2FinalTurnEvidence({
+      sourceMessagePk: "00000000-0000-4000-8000-000000000003",
+      sourceMessageIdHash: "a".repeat(64),
+      preTransitionConversationRevision: 8,
+      finalConversationRevision: 9,
+      preTransitionSalesCycleRevision: 12,
+      finalSalesCycleRevision: 13,
+    })).toEqual({
+      success: true,
+      data: {
+        schemaVersion: 2,
+        contractVersion: "FINAL_TURN_EVIDENCE_V2",
+        sourceMessagePk: "00000000-0000-4000-8000-000000000003",
+        sourceMessageIdHash: "a".repeat(64),
+        preTransitionConversationRevision: 8,
+        finalConversationRevision: 9,
+        preTransitionSalesCycleRevision: 12,
+        finalSalesCycleRevision: 13,
+      },
+    });
+  });
+
+  it("retains the exact last inbound capture trigger across trailing echoes", () => {
+    const inbound = advanceContextV2CaptureTrigger(null, {
+      sourceMessagePk: "00000000-0000-4000-8000-000000000003",
+      sourceOccurredAt: new Date("2026-08-16T10:00:00.000Z"),
+      isEcho: false,
+    });
+    expect(advanceContextV2CaptureTrigger(inbound, {
+      sourceMessagePk: "ignored-echo",
+      sourceOccurredAt: new Date("2026-08-16T10:00:05.000Z"),
+      isEcho: true,
+    })).toEqual(inbound);
+  });
   it("drops the complete commerce output tuple when final protected readiness is blocked", () => {
     const blocked = enforceProtectedOutboundReadinessV1({
       messages: [{ kind: "TEXT" as const, text: "Protected sales reply" }],
@@ -2879,7 +2919,12 @@ describe("RealtimeRunner inbound batching", () => {
     };
   }
 
-  function replyModel(): RealtimeModelPort {
+  function replyModel(buyingIntent?: Readonly<{
+    decision: "COMMITTED";
+    requestedAction: "OPEN_CART";
+    quantity: number;
+    evidenceText: string;
+  }>): RealtimeModelPort {
     return {
       generate: vi.fn(async () => ({
         proposal: {
@@ -2898,6 +2943,24 @@ describe("RealtimeRunner inbound batching", () => {
             size: null,
             deliveryRegion: null,
           },
+          ...(buyingIntent
+            ? {
+                salesSignals: {
+                  checkoutExtraction: {
+                    fullName: { value: null, evidenceText: null, confidence: 0 },
+                    phone: { value: null, evidenceText: null, confidence: 0 },
+                    address: { value: null, evidenceText: null, confidence: 0 },
+                    paymentMethod: { value: null, evidenceText: null, confidence: 0 },
+                  },
+                  purchaseConfirmation: {
+                    decision: "UNCLEAR" as const,
+                    evidenceText: null,
+                    confidence: 0,
+                  },
+                  buyingIntent: { ...buyingIntent, confidence: 0.99 },
+                },
+              }
+            : {}),
         },
         modelVersion: "gemini-test",
         latencyMs: 10,
@@ -3093,9 +3156,13 @@ describe("RealtimeRunner inbound batching", () => {
       })),
       searchImage: vi.fn(),
     };
-    const recordInboundCustomerMessage = vi.fn(async (input: { providerMessageId: string; enqueueShadowEvaluation?: boolean }) => ({
-      messagePk: `pk-${input.providerMessageId}`,
-    }));
+    let recordedMessageCount = 0;
+    const recordInboundCustomerMessage = vi.fn(async (_input: { providerMessageId: string; enqueueShadowEvaluation?: boolean }) => {
+      recordedMessageCount += 1;
+      return {
+        messagePk: `00000000-0000-4000-8000-${String(recordedMessageCount).padStart(12, "0")}`,
+      };
+    });
     const retryProjection = items.map((entry) => ({
       direction: "INBOUND" as const,
       senderType: "CUSTOMER" as const,
@@ -3123,6 +3190,7 @@ describe("RealtimeRunner inbound batching", () => {
         sendEnabled: true,
         recordedReplayCaptureEnabled: true,
         recordedReplayPageId: pageId,
+        contextV2CaptureEnabled: true,
       },
       undefined,
       history,
@@ -3152,6 +3220,13 @@ describe("RealtimeRunner inbound batching", () => {
     expect(commit).toHaveBeenCalledOnce();
     const commitInput = commit.mock.calls[0]![0] as {
       inboxBatchGuard?: unknown;
+      contextV2CapturePlan?: {
+        capture: {
+          sourceMessagePk: string;
+          status: string;
+          reasonCode: string | null;
+        };
+      };
       metaPlan?: {
         messages: readonly unknown[];
         replyPlanId: string;
@@ -3163,6 +3238,13 @@ describe("RealtimeRunner inbound batching", () => {
       leaseToken: batch.leaseToken,
       inboxIds: batch.inboxIds,
     });
+    expect(commitInput.contextV2CapturePlan).toMatchObject({
+      capture: {
+        sourceMessagePk: "00000000-0000-4000-8000-000000000003",
+        status: "BLOCKED",
+        reasonCode: "CONTEXT_V2_COMMERCE_STATE_UNAVAILABLE",
+      },
+    });
     expect(commitInput.metaPlan?.messages).toEqual([
       { kind: "TEXT", text: "Em đang hỗ trợ chị đây ạ." },
     ]);
@@ -3170,6 +3252,328 @@ describe("RealtimeRunner inbound batching", () => {
     expect(commitInput.metaPlan?.responseGroupId).toMatch(/^[0-9a-f-]{36}$/u);
     expect(completeBatch).not.toHaveBeenCalled();
     expect(inbox.complete).not.toHaveBeenCalled();
+  });
+
+  it("builds a hash-valid Context V2 capture from the final realtime commerce snapshot", async () => {
+    const entry = item(34, "chốt CB182 size M");
+    const batch = {
+      pageId,
+      conversationHash,
+      generation: 10,
+      leaseToken: entry.leaseToken,
+      inboxIds: [entry.inboxId],
+      evaluationGroupId: "92596683-42b4-475c-845c-0f2a55ea211e",
+      eventKind: "CUSTOMER" as const,
+      firstReceiveSequence: 34,
+      lastReceiveSequence: 34,
+      attemptCount: 1,
+      items: [entry],
+    };
+    const inbox: RealtimeInboxPort = {
+      claimNext: vi.fn(async () => null),
+      claimNextBatch: vi.fn(async () => batch),
+      complete: vi.fn(async () => true),
+      completeBatch: vi.fn(async () => true),
+      isBatchCurrent: vi.fn(async () => true),
+      retry: vi.fn(async () => true),
+      retryBatch: vi.fn(async () => true),
+      failPermanent: vi.fn(async () => true),
+      failBatchPermanent: vi.fn(async () => true),
+    };
+    const state = createConversationState({
+      conversationId,
+      routingOwner: "APP",
+      now: new Date(occurredAt),
+    });
+    const commerceState = createRealtimeSalesState(
+      conversationId,
+      pageId,
+      new Date(occurredAt),
+    );
+    const commit = vi.fn(async (_input: unknown) => ({
+      stateCommitted: true,
+      metaOutboxCreated: 1,
+      pancakeTagOutboxCreated: false,
+      handoffEventCreated: false,
+      sendAuthorized: true,
+      reasonCodes: [],
+      inboxBatchStatus: "COMMITTED" as const,
+    }));
+    const runtime: RealtimeRuntimePort = {
+      loadOrCreate: vi.fn(async () => ({
+        conversationId,
+        pageId,
+        customerHash: conversationHash,
+        stateVersion: state.revision,
+        state,
+        routingOwner: "APP" as const,
+        appSendEnabled: true,
+        killSwitch: false,
+      })),
+      loadOrCreateSalesCycle: async <TState>() => ({
+        conversationId,
+        pageId,
+        stateRevision: commerceState.revision,
+        state: commerceState as unknown as TState,
+        cartExpiresAt: null,
+        expiresAt: new Date("2026-08-22T02:00:00.000Z"),
+      }),
+      commit,
+      linkProviderConversation: vi.fn(async () => undefined),
+    };
+    const sourceMessagePk = "00000000-0000-4000-8000-000000000034";
+    const product = {
+      productId: "CB182",
+      parentProductId: "CB182",
+      canonicalCode: "CB182",
+      aliases: [],
+      title: "Set áo quần Thiên Giao",
+      colors: ["BE"],
+      materials: ["COTTON"],
+      silhouettes: [],
+      occasions: [],
+      imageUrls: [],
+      images: [],
+      catalogVersion: "catalog-v2",
+    };
+    const policyMetadata = {
+      authority: "ADMIN_POLICY" as const,
+      sourceVersion: "context-v2-transition-test",
+      observedAt: occurredAt,
+      expiresAt: null,
+      freshForSeconds: null,
+      freshnessState: "FRESH" as const,
+    };
+    const policyResolution = {
+      status: "RESOLVED",
+      source: "DATABASE",
+      mayAffectOutbound: true,
+      reasonCodes: [],
+      auditWrite: "RECORDED",
+      audit: {
+        channel: "PUBLISHED",
+        bundleHash: `sha256:${"a".repeat(64)}`,
+        pinScopeType: "SALES_EPISODE",
+        pinScopeId: `${conversationId}:PUBLISHED`,
+      },
+      bundle: {
+        schemaVersion: 1,
+        bundleId: "context-v2-transition-test",
+        bundleHash: `sha256:${"a".repeat(64)}`,
+        pageId,
+        channel: "PUBLISHED",
+        sideEffects: "LIVE_OUTBOUND",
+        resolvedAt: occurredAt,
+        policy: {
+          schemaVersion: 1,
+          policyBundleId: `admin-policy:${pageId}`,
+          policyVersion: "context-v2-transition-test",
+          shopId: "LANA",
+          status: "ACTIVE",
+          effectiveAt: occurredAt,
+          effectiveUntil: null,
+          supersedesPolicyVersion: null,
+          scope: "SHOP_WIDE",
+          commerceAuthority: {
+            bomAuthority: "PANCAKE_POS",
+            priceAuthority: "PANCAKE_POS",
+            inventoryAuthority: "PANCAKE_POS",
+            allowGoogleSheetsPriceOverride: false,
+            allowAdminPriceOverride: false,
+            missingPriceBehavior: "DO_NOT_QUOTE",
+            metadata: policyMetadata,
+          },
+          shipping: { defaultFeeVnd: 30_000, scope: "SHOP_WIDE", metadata: policyMetadata },
+          multiItemOffer: {
+            minimumProductCount: 2,
+            discountBps: 500,
+            countingUnit: "PARENT_PRODUCT_UNIT",
+            setAndComboCountAsOne: true,
+            scope: "SHOP_WIDE",
+            metadata: policyMetadata,
+          },
+          negotiation: {
+            secondConcession: { freeShipping: true, fixedDiscountVnd: 0 },
+            finalConcession: { freeShipping: true, fixedDiscountVnd: 20_000 },
+            stacking: {
+              multiItemDiscountWithSecondConcession: true,
+              multiItemDiscountWithFinalConcession: true,
+              deduplicateFreeShipping: true,
+            },
+            scope: "SHOP_WIDE",
+            metadata: policyMetadata,
+          },
+          closing: {
+            customerStates: ["READY", "HESITANT", "CAUTIOUS"],
+            decisionMode: "DETERMINISTIC_POLICY_ONLY",
+            allowUnlistedOffers: false,
+            metadata: policyMetadata,
+          },
+        },
+        versionReferences: [],
+        artifacts: {
+          shopPolicy: {}, offerPolicy: {}, closingStrategy: {}, sizeCharts: {},
+          handoffMatrix: null, paymentPolicy: null,
+        },
+      },
+    } as unknown as RuntimePolicyResolution;
+    const runner = new RealtimeRunner(
+      inbox,
+      runtime,
+      replyModel({
+        decision: "COMMITTED",
+        requestedAction: "OPEN_CART",
+        quantity: 1,
+        evidenceText: "chốt CB182 size M",
+      }),
+      {
+        ready: vi.fn(async () => true),
+        resolve: vi.fn(async () => ({
+          schemaVersion: 1 as const,
+          status: "OK" as const,
+          source: "POS_SNAPSHOT" as const,
+          observedAt: occurredAt,
+          expiresAt: "2099-01-01T00:00:00.000Z",
+          productId: "CB182",
+          facts: {
+            schemaVersion: 1 as const,
+            productId: "CB182",
+            parentProductId: "CB182",
+            offerType: "SET",
+            listPriceVnd: null,
+            salePriceVnd: 799_000,
+            sizes: ["M"],
+            stockStatus: "IN_STOCK" as const,
+            stockQuantity: 2,
+            deliveryEta: null,
+            fulfillmentPolicy: "READY_STOCK",
+            imageUrls: [],
+          },
+          reasonCode: null,
+        })),
+        resolveCartSelection: vi.fn(async (query: { quantity: number }) => ({
+          status: "READY" as const,
+          line: {
+            lineId: "13000000-0000-4000-8000-000000000001",
+            parentProductId: "CB182",
+            offerId: "SET",
+            offerKind: "SET" as const,
+            quantity: query.quantity,
+            components: [{
+              componentProductId: "CB182",
+              componentSku: "CB182_BE_M",
+              componentRole: "TOP" as const,
+              color: "BE",
+              size: "M",
+              quantity: 1,
+            }],
+            allowMixedSizes: false,
+            allowComponentSale: false,
+            posUnitPriceVnd: 799_000,
+            priceAuthority: {
+              priceFactRef: "price-v1",
+              shopId: "LANA",
+              parentProductId: "CB182",
+              offerId: "SET",
+              offerPriceKind: "SET" as const,
+              componentProductId: null,
+              metadata: {
+                authority: "PANCAKE_POS" as const,
+                sourceVersion: "snapshot-v1",
+                observedAt: occurredAt,
+                expiresAt: "2099-01-01T00:00:00.000Z",
+                freshForSeconds: 60,
+                freshnessState: "FRESH" as const,
+              },
+            },
+            lineTotalVnd: 799_000 * query.quantity,
+          },
+          shopId: "LANA",
+          versions: {
+            price: "price-v1", inventory: "inventory-v1", size: "size-v1", eta: null,
+          },
+          eta: null,
+          etaExpiresAt: null,
+          sourceAuthority: "POS_SNAPSHOT" as const,
+          stockStatus: "IN_STOCK" as const,
+          stockAvailableQuantity: 2,
+          sourceObservedAt: occurredAt,
+          sourceExpiresAt: "2099-01-01T00:00:00.000Z",
+        })),
+        close: vi.fn(async () => undefined),
+      },
+      {
+        searchText: vi.fn(async () => ({
+          status: "MATCHED" as const,
+          matchKind: "EXACT_CODE" as const,
+          score: 1,
+          gap: null,
+          product,
+        })),
+        searchImage: vi.fn(),
+      },
+      clearTagObservation(),
+      {
+        workerId: "worker-1",
+        mode: "LIVE",
+        sendEnabled: true,
+        salesCycleEnabled: true,
+        recordedReplayCaptureEnabled: true,
+        recordedReplayPageId: pageId,
+        contextV2CaptureEnabled: true,
+      },
+      undefined,
+      undefined,
+      {
+        recordInboundCustomerMessage: vi.fn(async () => ({ messagePk: sourceMessagePk })),
+        recordOutboundHumanMessage: vi.fn(),
+      },
+      undefined,
+      { resolve: vi.fn(async () => policyResolution) },
+    );
+
+    expect(await runner.processOne()).toBe(true);
+    const commitInput = commit.mock.calls[0]![0] as {
+      state: { revision: number };
+      salesCyclePlan?: {
+        expectedRevision: number;
+        state: { revision: number };
+      };
+      contextV2CapturePlan?: { capture: Record<string, unknown> & {
+        status: string;
+        reasonCode: string | null;
+        context: Record<string, unknown> & { contextHash: string };
+      } };
+    };
+    expect(commitInput.salesCyclePlan?.expectedRevision).toBe(commerceState.revision);
+    const finalSalesCycleRevision = commitInput.salesCyclePlan!.state.revision;
+    expect(finalSalesCycleRevision).toBeGreaterThan(commerceState.revision);
+    const finalConversationRevision = commitInput.state.revision;
+    expect(finalConversationRevision).toBeGreaterThan(state.revision);
+    const capture = commitInput.contextV2CapturePlan?.capture;
+    expect(capture).toMatchObject({
+      sourceMessagePk,
+      status: "BUILT",
+      reasonCode: null,
+    });
+    const context = capture!.context;
+    const { contextHash, ...contextDraft } = context;
+    expect(contextHash).toBe(createHash("sha256")
+      .update(`CONTEXT_V2\n${canonicalJsonV1(contextDraft)}`, "utf8")
+      .digest("hex"));
+    expect(context).toMatchObject({
+      phase: { salesCycleRevision: finalSalesCycleRevision },
+      barriers: {
+        conversationRevision: finalConversationRevision,
+        salesCycleRevision: finalSalesCycleRevision,
+      },
+      finalTurnEvidence: {
+        preTransitionConversationRevision: state.revision,
+        finalConversationRevision,
+        preTransitionSalesCycleRevision: commerceState.revision,
+        finalSalesCycleRevision,
+      },
+    });
   });
 
   it("does not separately complete a batch whose atomic commit is superseded", async () => {

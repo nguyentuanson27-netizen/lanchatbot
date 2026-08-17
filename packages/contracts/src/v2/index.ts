@@ -8,3 +8,4 @@ export * from "./decision-observability.js";
 export * from "./canonical-identifiers.js";
 export * from "./canonical-commerce-bindings.js";
 export * from "./canonical-evidence-readiness.js";
+export * from "./context-v2.js";
