@@ -36,9 +36,10 @@ Required properties:
    routing, or control-plane activation wiring. When separately authorized and
    enabled, realtime attempts one minimal terminal capture (`BUILT` or
    `BLOCKED`) for every exact inbound source message. The successful insert
-   shares the final-turn transaction, but a dedicated savepoint makes capture
-   failure incapable of rolling back conversation state, outbox, or the inbox
-   commit. Claim and readiness freshness are revalidated against the database
+   shares the final-turn transaction. A dedicated savepoint isolates ordinary
+   capture-statement failure when savepoint recovery succeeds; recovery failure
+   propagates because transaction health is then unknown. Claim and readiness
+   freshness are revalidated against the database
    transaction clock immediately before insert; an expired input terminalizes
    as `BLOCKED` and cannot enter candidate evaluation.
    `sourceMessagePk` is the exact UUID primary key from `messages`. Final-turn
@@ -70,6 +71,19 @@ Required properties:
 14. One provider deadline covers access-token acquisition, request/response
     transfer, and response-body parsing. Timeout and provider failures remain
     typed and cannot expose provider details to persisted error codes.
+15. Legacy replay and Context V2 candidate rows have disjoint queue ownership.
+    Every claim, stale-lease recovery, completion, failure, quota, summary, and
+    coverage query carries an explicit prompt-family owner predicate. Unknown
+    future `context-v2-candidate-*` versions fail closed and cannot fall through
+    to the legacy worker.
+16. An unknown or mismatched provider-reported model version is a run-level
+    configuration block, not an item failure. The exact claimed row is returned
+    to eligibility, its claim attempt is restored, and the worker stops without
+    terminalizing or poisoning the remaining population.
+17. Coverage starts from a direct census of terminal capture sources, not from
+    rows that happened to be enqueued. Missing messages, DLP exclusions,
+    ineligible sender/direction, invalid source keys, and terminal queue states
+    remain in the denominator with explicit reason codes.
 
 ## DF10 Gate E draft foundation
 
