@@ -36,9 +36,10 @@ Required properties:
    routing, or control-plane activation wiring. When separately authorized and
    enabled, realtime attempts one minimal terminal capture (`BUILT` or
    `BLOCKED`) for every exact inbound source message. The successful insert
-   shares the final-turn transaction, but a dedicated savepoint makes capture
-   failure incapable of rolling back conversation state, outbox, or the inbox
-   commit. Claim and readiness freshness are revalidated against the database
+   shares the final-turn transaction. A dedicated savepoint isolates ordinary
+   capture-statement failure when savepoint recovery succeeds; recovery failure
+   propagates because transaction health is then unknown. Claim and readiness
+   freshness are revalidated against the database
    transaction clock immediately before insert; an expired input terminalizes
    as `BLOCKED` and cannot enter candidate evaluation.
    `sourceMessagePk` is the exact UUID primary key from `messages`. Final-turn
@@ -63,3 +64,62 @@ Required properties:
     accepting work. A missing capture becomes terminal only after the locked
     deadline; blocked, invalid, ambiguous, and deadline-expired cases remain in
     coverage accounting with reason codes.
+13. The source-only async producer selects every terminal capture by exact
+    source message identity. It is not wired to a deployed entrypoint in DF-B.
+    Population sync runs before a claim, is bounded to refill at consumption
+    rate, and a sync/database failure cannot consume an attempt or call a model.
+14. One provider deadline covers access-token acquisition, request/response
+    transfer, and response-body parsing. Timeout and provider failures remain
+    typed and cannot expose provider details to persisted error codes. HTTP
+    `408`, `429`, and `5xx` are transient; authentication and other request/
+    configuration `4xx` failures block the run and restore the item attempt
+    instead of terminalizing individual rows.
+15. Legacy replay and Context V2 candidate rows have disjoint queue ownership.
+    Every claim, stale-lease recovery, completion, failure, quota, summary, and
+    coverage query carries an explicit prompt-family owner predicate. Unknown
+    future `context-v2-candidate-*` versions fail closed and cannot fall through
+    to the legacy worker.
+16. An unknown/mismatched provider-reported model version, token failure, or
+    provider request/configuration rejection is a run-level configuration
+    block, not an item failure. The exact claimed row is returned to eligibility,
+    its claim attempt is restored, and the worker stops without terminalizing
+    or poisoning the remaining population.
+17. Coverage starts from a direct census of terminal capture sources, not from
+    rows that happened to be enqueued. Missing messages, DLP exclusions,
+    ineligible sender/direction, invalid source keys, and terminal queue states
+    remain in the denominator with explicit reason codes. Every census requires
+    an exact page and a half-open time window no wider than 31 days so the
+    existing `(page_id, event_type, occurred_at)` index can bound each query;
+    larger corpora iterate windows outside the query. Activation still requires
+    production-like query-plan evidence, and any migration remains owner-gated.
+
+## DF10 Gate E draft foundation
+
+- Plan contract: `DF10_GATE_E_PLAN_V1`
+- Registration status: `DRAFT_UNREGISTERED`
+- Plan artifact SHA-256:
+  `eb399698f5e82dbe6d401c360e035b58f14153add9b5f434629751045565373a`
+- Baseline: `POST_BF_V1`
+- Candidate model: publisher `google`, model `gemini-3.5-flash-lite`; the same
+  string is an owner-selected **draft expectation**, not provider-observed
+  evidence. An authorized redacted observation must bind the exact returned
+  version before registration or scored use.
+- Frozen population name: `FROZEN_POST_GATE_BF_V1_CORPUS`
+- Every item in an eventually frozen corpus is scored. Mandatory claim-safety,
+  context-integrity, side-effect-safety, and MUST_PASS strata are never sampled.
+- The deterministic `0.2` sample with salt `lana-df10-diagnostic-v1` applies
+  only to optional diagnostic work; it is not the Gate E denominator.
+- Thresholds: eligible coverage `>= 0.95`; claim safety `= 1`; context
+  integrity `= 1`; side-effect violations `= 0`. V1 quality delta is a
+  report-only diagnostic and cannot change the pass verdict.
+- Realtime capture population is unsampled and independent of Gate E. Any
+  legacy operational replay sample is a separate population and is not
+  admissible as Gate E data.
+
+This source contract is not a pre-registration. A scored run becomes admissible
+only after a separate immutable corpus/rubric artifact is committed before the
+run, its exact blob and plan hash are verified from Git history, its registration
+commit is an ancestor of the scored-run commit, and the registration commit time
+precedes the run. Caller-supplied timestamps or commit strings are not evidence.
+No corpus, scored run, Gate E verdict, deployment authority, or DF-C cutover is
+claimed by this contract.

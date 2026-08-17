@@ -392,3 +392,25 @@ export const ContextV2CaptureV1Schema = z.object({
   }
 });
 export type ContextV2CaptureV1 = z.infer<typeof ContextV2CaptureV1Schema>;
+
+export const ContextV2CandidateOutputV1Schema = z.object({
+  schemaVersion: z.literal(1),
+  contractVersion: z.literal("CONTEXT_V2_CANDIDATE_OUTPUT_V1"),
+  reply: z.string().min(1).max(4_000),
+  strategy: z.enum([
+    "ANSWER_VERIFIED_FACTS",
+    "ASK_CLARIFICATION",
+    "ADVANCE_CART",
+    "HOLD_POSITION",
+  ]),
+  cta: z.enum([
+    "NONE",
+    "ASK_PRODUCT",
+    "ASK_MEASUREMENTS",
+    "ASK_CHECKOUT_DETAILS",
+    "CONFIRM_CART",
+  ]),
+}).strict();
+export type ContextV2CandidateOutputV1 = z.infer<
+  typeof ContextV2CandidateOutputV1Schema
+>;

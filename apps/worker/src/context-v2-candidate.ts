@@ -1,0 +1,436 @@
+import { createHash } from "node:crypto";
+import {
+  ContextV2CandidateOutputV1Schema,
+  canonicalJsonV1,
+  type ContextV2,
+  type ContextV2CandidateOutputV1,
+} from "@lana/contracts";
+import { parseContextV2WithIntegrity } from "./context-v2.js";
+
+export type ContextV2CandidateOutput = ContextV2CandidateOutputV1;
+
+const RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  additionalProperties: false,
+  required: ["schemaVersion", "contractVersion", "reply", "strategy", "cta"],
+  properties: {
+    schemaVersion: { type: "INTEGER", enum: [1] },
+    contractVersion: {
+      type: "STRING",
+      enum: ["CONTEXT_V2_CANDIDATE_OUTPUT_V1"],
+    },
+    reply: { type: "STRING" },
+    strategy: {
+      type: "STRING",
+      enum: [
+        "ANSWER_VERIFIED_FACTS",
+        "ASK_CLARIFICATION",
+        "ADVANCE_CART",
+        "HOLD_POSITION",
+      ],
+    },
+    cta: {
+      type: "STRING",
+      enum: [
+        "NONE",
+        "ASK_PRODUCT",
+        "ASK_MEASUREMENTS",
+        "ASK_CHECKOUT_DETAILS",
+        "CONFIRM_CART",
+      ],
+    },
+  },
+} as const;
+
+const GENERATION_CONFIG = {
+  temperature: 0,
+  topP: 0.8,
+  maxOutputTokens: 1_024,
+  responseMimeType: "application/json",
+  responseSchema: RESPONSE_SCHEMA,
+} as const;
+
+const SAFETY_SETTINGS = [
+  { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+  { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+  { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+  { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+] as const;
+
+const SYSTEM_INSTRUCTION = [
+  "You are an offline sales-response candidate used only for evaluation.",
+  "Use only the verified claims and canonical state in Context V2.",
+  "Never claim to have sent a message, changed a cart, confirmed an order, or performed any side effect.",
+  "Return only the registered JSON response schema.",
+].join("\n");
+
+export const CONTEXT_V2_CANDIDATE_MODEL_ID = "gemini-3.5-flash-lite";
+// Owner-selected draft expectation, not a provider-observed identity. Gate E
+// remains DRAFT_UNREGISTERED until an authorized redacted observation binds
+// the exact provider value before corpus/rubric registration.
+export const CONTEXT_V2_CANDIDATE_PROVIDER_VERSION =
+  "gemini-3.5-flash-lite";
+
+const MODEL_RESOURCE_PATTERN = new RegExp(
+  `^projects\\/[A-Za-z0-9._-]{1,128}\\/locations\\/[A-Za-z0-9._-]{1,64}\\/publishers\\/google\\/models\\/${CONTEXT_V2_CANDIDATE_MODEL_ID.replaceAll(".", "\\.")}$`,
+  "u",
+);
+
+function sha256(value: string): string {
+  return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function candidateClaimScope(
+  scope: ContextV2["verifiedClaims"][number]["scope"],
+) {
+  if (scope.kind === "PRODUCT") {
+    return {
+      kind: scope.kind,
+      productId: scope.productId,
+      variantId: scope.variantId,
+    };
+  }
+  if (scope.kind === "CART") {
+    return { kind: scope.kind, cartVersion: scope.cartVersion };
+  }
+  return { kind: scope.kind };
+}
+
+type ProtectedClaimType = ContextV2["verifiedClaims"][number]["type"];
+
+export const CANDIDATE_CLAIM_VALUE_KEYS = Object.freeze({
+  PRICE: ["amountVnd", "currency"],
+  STOCK: ["status", "availableQuantity"],
+  SIZE_FIT: ["recommendedSizes", "alternativeSizes", "evidenceBasis"],
+  ETA: ["minDays", "maxDays"],
+  SHIPPING_FEE: ["amountVnd", "currency"],
+  FREESHIP: ["eligible"],
+  PROMOTION_OFFER: ["adjustmentId", "amountVnd"],
+  PRODUCT_MEDIA: ["assetId", "assetSha256"],
+} as const satisfies Readonly<Record<ProtectedClaimType, readonly string[]>>);
+
+/** Exhaustive claim-value projection; unregistered fields never cross egress. */
+export function sanitizeCandidateClaimValue(
+  type: ProtectedClaimType,
+  value: object,
+): Readonly<Record<string, unknown>> {
+  const allowedKeys: readonly string[] = CANDIDATE_CLAIM_VALUE_KEYS[type];
+  const input = value as Readonly<Record<string, unknown>>;
+  return Object.freeze(Object.fromEntries(
+    allowedKeys.map((key) => [key, input[key]]),
+  ));
+}
+
+/** The single egress sanitizer for every Context V2 candidate request. */
+export function sanitizeContextV2CandidateInput(context: ContextV2) {
+  const parsed = parseContextV2WithIntegrity(context);
+  return {
+    schemaVersion: 1 as const,
+    contractVersion: "CONTEXT_V2_CANDIDATE_INPUT_V1" as const,
+    contextHash: parsed.contextHash,
+    productBinding: parsed.productBinding,
+    dialogueEvidence: parsed.dialogueEvidence,
+    verifiedClaims: parsed.verifiedClaims.map((claim) => ({
+      type: claim.type,
+      scope: candidateClaimScope(claim.scope),
+      value: sanitizeCandidateClaimValue(claim.type, claim.value),
+      provenance: {
+        authority: claim.provenance.authority,
+        sourceVersion: claim.provenance.sourceVersion,
+        contentHash: claim.provenance.contentHash,
+        observedAt: claim.provenance.observedAt,
+        expiresAt: claim.provenance.expiresAt,
+      },
+    })),
+    phase: parsed.phase,
+    barriers: parsed.barriers,
+    buyingIntent: parsed.buyingIntent,
+    cartReadiness: parsed.cartReadiness,
+    ownership: {
+      owner: parsed.ownership.owner,
+      handoffActive: parsed.ownership.handoffActive,
+    },
+  };
+}
+
+export interface CandidateRequestIdentity {
+  readonly requestEnvelopeHash: string;
+  readonly modelResource: string;
+  readonly systemInstructionHash: string;
+  readonly promptContentHash: string;
+  readonly responseSchemaHash: string;
+  readonly generationConfigHash: string;
+  readonly safetySettingsHash: string;
+}
+
+export interface BuiltCandidateRequest {
+  readonly url: string;
+  readonly body: string;
+  readonly identity: CandidateRequestIdentity;
+}
+
+export function deriveCandidateRequestIdentity(
+  request: Readonly<{ url: string; body: string }>,
+): CandidateRequestIdentity {
+  const prefix = "https://aiplatform.googleapis.com/v1/";
+  const suffix = ":generateContent";
+  if (!request.url.startsWith(prefix) || !request.url.endsWith(suffix)) {
+    throw new Error("CONTEXT_V2_CANDIDATE_URL_INVALID");
+  }
+  const modelResource = request.url.slice(prefix.length, -suffix.length);
+  const body = JSON.parse(request.body) as {
+    systemInstruction?: { parts?: Array<{ text?: unknown }> };
+    contents?: Array<{ parts?: Array<{ text?: unknown }> }>;
+    generationConfig?: Record<string, unknown>;
+    safetySettings?: unknown;
+  };
+  const systemInstruction = body.systemInstruction?.parts?.[0]?.text;
+  const prompt = body.contents?.[0]?.parts?.[0]?.text;
+  const generationConfig = body.generationConfig;
+  const responseSchema = generationConfig?.responseSchema;
+  if (typeof systemInstruction !== "string" || typeof prompt !== "string" ||
+      generationConfig === undefined || responseSchema === undefined ||
+      body.safetySettings === undefined) {
+    throw new Error("CONTEXT_V2_CANDIDATE_ENVELOPE_INVALID");
+  }
+  return Object.freeze({
+    requestEnvelopeHash: sha256(canonicalJsonV1({
+      url: request.url,
+      body: request.body,
+    })),
+    modelResource,
+    systemInstructionHash: sha256(systemInstruction),
+    promptContentHash: sha256(prompt),
+    responseSchemaHash: sha256(canonicalJsonV1(responseSchema)),
+    generationConfigHash: sha256(canonicalJsonV1(generationConfig)),
+    safetySettingsHash: sha256(canonicalJsonV1(body.safetySettings)),
+  });
+}
+
+export function deriveCandidateRequestContextHash(
+  request: Readonly<{ body: string }>,
+): string {
+  const body = JSON.parse(request.body) as {
+    contents?: Array<{ parts?: Array<{ text?: unknown }> }>;
+  };
+  const prompt = body.contents?.[0]?.parts?.[0]?.text;
+  if (typeof prompt !== "string") {
+    throw new Error("CONTEXT_V2_CANDIDATE_PROMPT_INVALID");
+  }
+  const contextHash = (JSON.parse(prompt) as { contextHash?: unknown }).contextHash;
+  if (typeof contextHash !== "string" || !/^[a-f0-9]{64}$/u.test(contextHash)) {
+    throw new Error("CONTEXT_V2_CANDIDATE_CONTEXT_HASH_INVALID");
+  }
+  return contextHash;
+}
+
+export function buildCandidateRequest(input: Readonly<{
+  modelResource: string;
+  context: ContextV2;
+}>): BuiltCandidateRequest {
+  if (!MODEL_RESOURCE_PATTERN.test(input.modelResource)) {
+    throw new Error("CONTEXT_V2_MODEL_RESOURCE_INVALID");
+  }
+  const sanitized = sanitizeContextV2CandidateInput(input.context);
+  const prompt = canonicalJsonV1(sanitized);
+  const bodyValue = {
+    systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: GENERATION_CONFIG,
+    safetySettings: SAFETY_SETTINGS,
+  };
+  const url = `https://aiplatform.googleapis.com/v1/${input.modelResource}:generateContent`;
+  const body = JSON.stringify(bodyValue);
+  return Object.freeze({
+    url,
+    body,
+    identity: deriveCandidateRequestIdentity({ url, body }),
+  });
+}
+
+export interface CandidateVertexTransport {
+  send(request: Readonly<{ url: string; body: string }>): Promise<Readonly<{
+    payload: unknown;
+    providerModelVersion: string | null;
+  }>>;
+}
+
+export type CandidateProviderFailureScope =
+  | "RETRYABLE_TRANSIENT"
+  | "RUN_BLOCKING_CONFIGURATION";
+
+export class CandidateProviderError extends Error {
+  readonly name = "CandidateProviderError";
+
+  constructor(
+    message:
+      | "CONTEXT_V2_CANDIDATE_PROVIDER_TRANSIENT"
+      | "CONTEXT_V2_CANDIDATE_PROVIDER_CONFIGURATION"
+      | "CONTEXT_V2_CANDIDATE_ACCESS_TOKEN_MISSING",
+    readonly scope: CandidateProviderFailureScope,
+    readonly statusClass: "AUTH" | "4XX" | "5XX" | "OTHER",
+  ) {
+    super(message);
+  }
+}
+
+export class FetchCandidateVertexTransport implements CandidateVertexTransport {
+  constructor(
+    private readonly accessToken: () => Promise<string>,
+    private readonly fetchImpl: typeof fetch = fetch,
+    private readonly timeoutMs = 30_000,
+  ) {}
+
+  async send(request: Readonly<{ url: string; body: string }>) {
+    const controller = new AbortController();
+    let timedOut = false;
+    let timeout: ReturnType<typeof setTimeout>;
+    const timeoutFailure = new Promise<never>((_resolve, reject) => {
+      timeout = setTimeout(() => {
+        timedOut = true;
+        controller.abort("CONTEXT_V2_CANDIDATE_PROVIDER_TIMEOUT");
+        reject(new Error("CONTEXT_V2_CANDIDATE_PROVIDER_TIMEOUT"));
+      }, Math.max(1_000, Math.min(120_000, this.timeoutMs)));
+    });
+    try {
+      return await Promise.race([
+        (async () => {
+          let accessToken: string;
+          try {
+            accessToken = (await this.accessToken()).trim();
+          } catch {
+            throw new CandidateProviderError(
+              "CONTEXT_V2_CANDIDATE_ACCESS_TOKEN_MISSING",
+              "RUN_BLOCKING_CONFIGURATION",
+              "AUTH",
+            );
+          }
+          if (!accessToken) {
+            throw new CandidateProviderError(
+              "CONTEXT_V2_CANDIDATE_ACCESS_TOKEN_MISSING",
+              "RUN_BLOCKING_CONFIGURATION",
+              "AUTH",
+            );
+          }
+          const response = await this.fetchImpl(request.url, {
+            method: "POST",
+            headers: {
+              authorization: `Bearer ${accessToken}`,
+              "content-type": "application/json",
+            },
+            body: request.body,
+            signal: controller.signal,
+            redirect: "error",
+          });
+          if (!response.ok) {
+            const transient = response.status === 408 || response.status === 429 ||
+              response.status >= 500;
+            const statusClass = response.status >= 500
+              ? "5XX" as const
+              : response.status >= 400
+                ? "4XX" as const
+                : "OTHER" as const;
+            throw new CandidateProviderError(
+              transient
+                ? "CONTEXT_V2_CANDIDATE_PROVIDER_TRANSIENT"
+                : "CONTEXT_V2_CANDIDATE_PROVIDER_CONFIGURATION",
+              transient ? "RETRYABLE_TRANSIENT" : "RUN_BLOCKING_CONFIGURATION",
+              statusClass,
+            );
+          }
+          const payload = await response.json() as Record<string, unknown>;
+          const responseModelVersion = response.headers.get(
+            "x-vertex-model-version",
+          );
+          const payloadModelVersion = typeof payload.modelVersion === "string"
+            ? payload.modelVersion
+            : null;
+          return {
+            payload,
+            providerModelVersion:
+              responseModelVersion ?? payloadModelVersion,
+          };
+        })(),
+        timeoutFailure,
+      ]);
+    } catch (error) {
+      if (timedOut) {
+        throw new Error("CONTEXT_V2_CANDIDATE_PROVIDER_TIMEOUT");
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeout!);
+    }
+  }
+}
+
+function candidateText(payload: unknown): string {
+  const record = payload !== null && typeof payload === "object"
+    ? payload as Record<string, unknown>
+    : {};
+  const candidates = Array.isArray(record.candidates) ? record.candidates : [];
+  const first = candidates[0] !== null && typeof candidates[0] === "object"
+    ? candidates[0] as Record<string, unknown>
+    : {};
+  const content = first.content !== null && typeof first.content === "object"
+    ? first.content as Record<string, unknown>
+    : {};
+  const parts = Array.isArray(content.parts) ? content.parts : [];
+  const part = parts[0] !== null && typeof parts[0] === "object"
+    ? parts[0] as Record<string, unknown>
+    : {};
+  if (typeof part.text !== "string") {
+    throw new Error("CONTEXT_V2_CANDIDATE_RESPONSE_MISSING");
+  }
+  return part.text;
+}
+
+export interface ContextV2CandidateModelPort {
+  generateCandidate(context: ContextV2): Promise<Readonly<{
+    output: ContextV2CandidateOutput;
+    providerModelVersion: string;
+    requestIdentity: CandidateRequestIdentity;
+  }>>;
+}
+
+export class ContextV2CandidateModel implements ContextV2CandidateModelPort {
+  constructor(
+    private readonly modelResource: string,
+    private readonly transport: CandidateVertexTransport,
+  ) {}
+
+  async generateCandidate(context: ContextV2) {
+    const request = buildCandidateRequest({
+      modelResource: this.modelResource,
+      context,
+    });
+    const response = await this.transport.send({
+      url: request.url,
+      body: request.body,
+    });
+    const providerModelVersion = response.providerModelVersion?.trim() ?? "";
+    if (!providerModelVersion || providerModelVersion.toLowerCase() === "unknown") {
+      throw new Error("CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_UNKNOWN");
+    }
+    if (providerModelVersion !== CONTEXT_V2_CANDIDATE_PROVIDER_VERSION) {
+      throw new Error("CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_MISMATCH");
+    }
+    let output: ContextV2CandidateOutput;
+    try {
+      output = ContextV2CandidateOutputV1Schema.parse(
+        JSON.parse(candidateText(response.payload)),
+      );
+    } catch (error) {
+      if (error instanceof Error &&
+          error.message === "CONTEXT_V2_CANDIDATE_RESPONSE_MISSING") {
+        throw error;
+      }
+      throw new Error("CONTEXT_V2_CANDIDATE_RESPONSE_INVALID");
+    }
+    return {
+      output,
+      providerModelVersion,
+      requestIdentity: request.identity,
+    };
+  }
+}

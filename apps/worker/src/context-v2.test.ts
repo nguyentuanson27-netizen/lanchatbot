@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { CanonicalDecisionEvidenceV1 } from "@lana/business-tools";
 import type { SalesCycleRuntimeState } from "@lana/chat-runtime";
 import type {
@@ -8,12 +8,18 @@ import type {
   ProductBindingV2,
   ProtectedClaimV1,
 } from "@lana/contracts";
+import { inspectContextV2Capture } from "@lana/database";
 import {
   buildContextV2,
   buildContextV2Capture,
   parseContextV2WithIntegrity,
   type BuildContextV2Input,
 } from "./context-v2.js";
+import {
+  CONTEXT_V2_CANDIDATE_MODEL_ID,
+  CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
+  ContextV2CandidateModel,
+} from "./context-v2-candidate.js";
 
 const hash = (character: string): string => character.repeat(64);
 
@@ -175,6 +181,47 @@ function input(): BuildContextV2Input {
 }
 
 describe("DF09 final Context V2 capture", () => {
+  it("carries one BUILT snapshot through the exact claim gate to candidate egress", async () => {
+    const capture = buildContextV2Capture({
+      ...input(),
+      sourceOccurredAt: new Date("2026-08-16T10:00:00.000Z"),
+    });
+    const client = {
+      query: async () => ({ rows: [{ capture }] }),
+    } as unknown as Parameters<typeof inspectContextV2Capture>[0];
+    const eligibility = await inspectContextV2Capture(client, {
+      conversationId: "00000000-0000-4000-8000-000000000010",
+      sourceMessagePk: finalTurnEvidence().sourceMessagePk,
+      sourceOccurredAt: new Date("2026-08-16T10:00:00.000Z"),
+      now: new Date("2026-08-16T10:00:30.000Z"),
+      terminalDeadlineMs: 5 * 60_000,
+    });
+    expect(eligibility.kind).toBe("BUILT_VALID");
+    if (eligibility.kind !== "BUILT_VALID") throw new Error("TEST_BUILT_REQUIRED");
+    const send = vi.fn(async (request: Readonly<{ url: string; body: string }>) => ({
+      payload: {
+        candidates: [{ content: { parts: [{ text: JSON.stringify({
+          schemaVersion: 1,
+          contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V1",
+          reply: "Ứng viên đánh giá, không gửi khách hàng.",
+          strategy: "HOLD_POSITION",
+          cta: "NONE",
+        }) }] } }],
+      },
+      providerModelVersion: CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
+      request,
+    }));
+    const generated = await new ContextV2CandidateModel(
+      `projects/test/locations/us-central1/publishers/google/models/${CONTEXT_V2_CANDIDATE_MODEL_ID}`,
+      { send },
+    ).generateCandidate(eligibility.context);
+    expect(send).toHaveBeenCalledOnce();
+    expect(generated.requestIdentity.promptContentHash).toMatch(/^[a-f0-9]{64}$/u);
+    expect(JSON.stringify(send.mock.calls[0]?.[0])).not.toContain(
+      finalTurnEvidence().sourceMessagePk,
+    );
+  });
+
   it("keeps the source capture gate default-off and absent from runtime wiring", () => {
     const runnerSource = readFileSync(
       new URL("./realtime-runner.ts", import.meta.url),

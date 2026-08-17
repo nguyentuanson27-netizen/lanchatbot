@@ -23,6 +23,7 @@ export {
 export {
   PostgresShadowEvaluationStore,
   type PostgresShadowEvaluationOptions,
+  type ContextV2CandidateClaim,
   type ShadowComparisonJob,
   type ShadowContextMessage,
   type ShadowEvaluationCompletion,
