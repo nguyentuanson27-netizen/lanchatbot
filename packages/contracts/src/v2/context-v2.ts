@@ -511,3 +511,33 @@ export const ContextV2CandidateOutputV2Schema = z.object({
 export type ContextV2CandidateOutputV2 = z.infer<
   typeof ContextV2CandidateOutputV2Schema
 >;
+
+export const GateEOutputInterpretationV1Schema = z.object({
+  schemaVersion: z.literal(1),
+  contractVersion: z.literal("GATE_E_OUTPUT_INTERPRETATION_V1"),
+  candidateOutputHash: Sha256Schema,
+  claimContentHashes: z.array(Sha256Schema).max(16),
+  clarificationTargets: z.array(
+    ContextV2CandidateClarificationTargetV2Schema,
+  ).max(3),
+  requestedActions: z.array(ContextV2CandidateRequestedActionV2Schema).max(4),
+  claimedEffects: z.array(ContextV2CandidateEffectV2Schema).max(6),
+}).strict().superRefine((value, context) => {
+  for (const [key, entries] of Object.entries({
+    claimContentHashes: value.claimContentHashes,
+    clarificationTargets: value.clarificationTargets,
+    requestedActions: value.requestedActions,
+    claimedEffects: value.claimedEffects,
+  })) {
+    if (new Set(entries).size !== entries.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [key],
+        message: "interpretation classifications must be unique",
+      });
+    }
+  }
+});
+export type GateEOutputInterpretationV1 = z.infer<
+  typeof GateEOutputInterpretationV1Schema
+>;

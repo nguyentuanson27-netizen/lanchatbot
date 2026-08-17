@@ -48,6 +48,7 @@ function priceClaim(index: number, productId = "SD398"): ProtectedClaimV1 {
 }
 
 function sizeClaim(index: number, productId = "SD398"): ProtectedClaimV1 {
+  const measurementFingerprint = sha256(`measurements-${index}`);
   return ProtectedClaimV1Schema.parse({
     schemaVersion: 1,
     claimId: syntheticUuid(200 + index),
@@ -58,10 +59,13 @@ function sizeClaim(index: number, productId = "SD398"): ProtectedClaimV1 {
       alternativeSizes: ["L"],
       customerProfileId: syntheticUuid(900 + index),
       customerProfileRevision: 1,
-      measurementFingerprint: sha256(`measurements-${index}`),
+      measurementFingerprint,
       evidenceBasis: "MEASUREMENTS",
     },
-    provenance: claimProvenance("VERIFIED_SIZE_ENGINE_V1", `size-${index}`),
+    provenance: {
+      ...claimProvenance("VERIFIED_SIZE_ENGINE_V1", `size-${index}`),
+      evidenceRef: `synthetic:measurements:${measurementFingerprint}`,
+    },
     authorization: "NONE",
   });
 }
@@ -198,7 +202,7 @@ function item(input: Omit<GateECorpusItemV1, "source" | "assertions"> & Readonly
       allowedStrategies: input.allowedStrategies,
       allowedCtas: input.allowedCtas,
       claimSafety: "RUNTIME_GUARD_REQUIRED",
-      sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_OMISSION_BACKSTOP",
+      sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_INDEPENDENT_SEMANTIC_INTERPRETER",
       semanticObligations: {
         contextHash: input.context.contextHash,
         productBinding: {
@@ -384,6 +388,7 @@ const frozenRubric: GateERubricV1 = {
   scoring: {
     population: "ALL_FROZEN_CORPUS_ITEMS",
     runtimeClaimGuardRequired: true,
+    independentSemanticInterpreterRequired: true,
     structuredStrategyAndCtaRequired: true,
     outputSchemaRequired: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
   },

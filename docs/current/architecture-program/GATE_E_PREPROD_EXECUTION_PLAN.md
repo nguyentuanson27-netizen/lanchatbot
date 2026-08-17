@@ -39,6 +39,8 @@ Only these fields may leave the observation boundary:
 
 - expected and provider-observed model version;
 - request-envelope SHA-256;
+- exact trusted source revision, fixed freshly fetched trusted ref and governed
+  clean/exact-head execution-boundary identifier;
 - start/end UTC;
 - `MATCH` or `MISMATCH` disposition.
 
@@ -47,6 +49,13 @@ credentials, and provider error detail are never returned or persisted. An
 unknown/missing version aborts. A mismatched version is recorded as a redacted
 mismatch and blocks registration pending an owner-reviewed amendment; it is
 never coerced to the draft expectation.
+
+The repository can prove artifact integrity and that the public observation
+orchestrator enforces this boundary; it cannot cryptographically prove that an
+arbitrary JSON file came from a real provider call. Therefore the observation
+artifact must be produced by that orchestrator and committed through its own
+owner-reviewed registration PR. The reviewed immutable Git artifact is the
+external trust anchor; self-consistent JSON alone is not provider-call proof.
 
 ## 3. Frozen corpus and rubric
 
@@ -58,10 +67,10 @@ corpus or rubric is not registerable.
 
 - Corpus version: `FROZEN_POST_GATE_BF_V1_CORPUS_V1`
 - Corpus canonical SHA-256:
-  `812916f76146a2c011f0852498d3c477a1d8d1a3b1c0923a28b78523c39a7456`
+  `5239116a69f95f42877d839e57c6b06102c18d1c64047ebdc2a8827f26ac384e`
 - Rubric version: `DF10_GATE_E_RUBRIC_V1`
 - Rubric canonical SHA-256:
-  `af3422b7ee8282c5474bfd98dc310af5a4f2867d918141064134b64edd064696`
+  `e76dca95530ce436d50ffc6622dc42a8c16c9b0a2d82cb6a86e582e0b0d51ba1`
 - Population: all 14 frozen items; no scoring sample.
 - Data: controlled PII-free fixtures only; no raw transcript, customer hash,
   phone, address, email, provider payload, token, or credential.
@@ -78,9 +87,14 @@ V2 classifies every text segment as general wording, a verified claim bound to
 an exact evidence content hash, a typed clarification, a typed requested
 action, or a typed effect claim. Per-case obligations bind the exact Context V2
 hash, product binding, required/forbidden claims, clarification/action class
-and forbidden-effect matrix. A conservative omitted-effect detector is a
-fail-closed backstop only; it is not semantic authority. Strategy/CTA remain
-objective assertions. Style-only preferences cannot change the verdict.
+and forbidden-effect matrix. A separate evaluation-only semantic interpreter
+receives customer-facing wording plus sanitized eligible claims, but never
+candidate-authored segment kinds, clarification/action labels or effect
+labels. Scoring requires the interpreter-derived typed claims, requests and
+effects to agree with the frozen case obligations and the candidate
+declarations. Phrase detection is diagnostic telemetry only and cannot decide
+the verdict. Strategy/CTA remain objective assertions. Style-only preferences
+cannot change the verdict.
 
 ## 4. Candidate manifest and identity
 
@@ -94,6 +108,14 @@ The registration manifest binds:
   request-envelope hash;
 - the reviewed candidate source closure and canonical content fingerprint;
 - execution caps below.
+
+The manifest also binds the interpreter's model resource, system instruction,
+input contract, response schema, generation config and safety settings through
+one static policy hash. All calibration probes bind their exact request
+identities and expected-classification hashes. Each dynamic interpretation
+request is derived from the actual candidate-output hash; its full envelope
+hash and the typed interpretation hash are recorded per corpus item. A policy,
+probe or dynamic-envelope mismatch fails before a score is admissible.
 
 The reviewed source closure is the exact path list exported as
 `GATE_E_CANDIDATE_SOURCE_PATHS_V1`. It includes the full non-test source of the
@@ -109,11 +131,18 @@ Before observation, registration, or scoring, the harness must derive rather
 than accept:
 
 1. exact source and registration commits from Git;
-2. corpus/rubric/registration blob IDs using `git rev-parse <commit>:<path>`;
-3. candidate source/content fingerprint from `git show <commit>:<path>`;
+2. corpus/rubric/registration blob IDs using an argv-only
+   `git rev-parse <commit>:<path>` boundary;
+3. candidate source/content fingerprint from argv-only
+   `git show <commit>:<path>`;
 4. ancestry using `git merge-base --is-ancestor`;
-5. commit time using Git commit metadata;
-6. clean worktree and unchanged remote ref before and after the operation.
+5. committer time using `%cI` Git commit metadata;
+6. a freshly fetched `refs/remotes/origin/main`, clean worktree and unchanged
+   trusted ref before and after the operation.
+
+Blob-introduction discovery walks only history reachable from the trusted
+scored revision. Refs, commits and repository-relative paths are strictly
+validated; no shell interpolation or caller-selected ref is accepted.
 
 Registration fails if any blob, canonical hash, request identity, source
 fingerprint, ancestor relation, or time ordering differs. The source
@@ -130,14 +159,21 @@ rubric, clock, candidate output or request identity. It verifies clean exact
 `HEAD == refs/remotes/origin/main`, reads and verifies the registration and
 frozen artifacts internally, builds the exact provider request bytes at the
 send boundary, applies the provider deadline around the entire transport, and
-rechecks clean unchanged refs before and after atomic evidence append.
+rechecks clean unchanged refs after the unfinalized evidence-body append. It
+then appends a separate hash-bound finalization record within the original run
+deadline. The body alone is always `UNFINALIZED_TECHNICAL_EVIDENCE`; only the
+strict verifier pairing that exact body with a clean, same-revision,
+within-deadline finalization may produce `FINALIZED_TRUSTED_EXACT_HEAD`.
+Verdict code receives only the two expected hashes and must retrieve both
+records from the append-only store; caller-supplied self-consistent objects are
+not certification evidence.
 
 ## 6. Cost and isolation caps
 
 | Boundary | Locked maximum |
 |---|---:|
 | Provider identity observation | 1 request |
-| Scored population | 32 requests; current frozen corpus is 14 |
+| Scored population | 32 requests: 4 registered calibration probes + 14 candidate + 14 interpretation calls |
 | Per-request output | 1,024 tokens |
 | Total scored output | 32,768 tokens |
 | Provider deadline | 30 seconds/request, including token/body handling |
@@ -166,7 +202,10 @@ Stop without scoring or Gate acceptance when any of these occurs:
 - any repository step runs and fails;
 - the claim guard, Context integrity, side-effect assertion or MUST_PASS case
   fails;
-- evidence-store write is partial, ambiguous or non-append-only.
+- evidence-store write is partial, ambiguous or non-append-only;
+- semantic-interpreter policy/probe calibration, output hash or actual request
+  identity differs from the registered contract;
+- the unfinalized evidence body has no valid hash-bound terminal finalization.
 
 Rollback is evidence-only: abort the run, retain the immutable failed evidence
 with safe reason codes, make no Gate claim, and leave sales authority `LEGACY`.

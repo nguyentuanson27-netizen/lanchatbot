@@ -10,19 +10,21 @@ import {
   GATE_E_CANDIDATE_SOURCE_PATHS_V1,
   createDraftGateERegistrationBundle,
   createRegisteredGateEManifest,
-  createRedactedProviderObservation,
   deriveGateECandidateContentFingerprint,
   observeGateEProviderIdentity,
   executeGateEScoredRun,
   scoreGateECandidateOutput,
   summarizeGateEScores,
+  verifyStoredGateEEvidenceCertification,
   verifyGateERegistrationProvenance,
   type GateECorpusV1,
   type GateECorpusItemV1,
+  type DraftGateERegistrationBundleV1,
   type GateERubricV1,
   type GateERegistrationArtifactV1,
 } from "./gate-e-registration.js";
 import { deriveCandidateRequestContextHash } from "./context-v2-candidate.js";
+import { GATE_E_INTERPRETATION_PROBES_V1 } from "./gate-e-output-interpreter.js";
 import {
   FROZEN_GATE_E_CORPUS_V1,
   FROZEN_GATE_E_CORPUS_V1_SHA256,
@@ -138,7 +140,7 @@ function corpus(): GateECorpusV1 {
           allowedStrategies: ["ANSWER_VERIFIED_FACTS", "ASK_CLARIFICATION"],
           allowedCtas: ["NONE"],
           claimSafety: "RUNTIME_GUARD_REQUIRED",
-          sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_OMISSION_BACKSTOP",
+          sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_INDEPENDENT_SEMANTIC_INTERPRETER",
           semanticObligations: {
             contextHash: directQuestion.contextHash,
             productBinding: {
@@ -164,7 +166,7 @@ function corpus(): GateECorpusV1 {
           allowedStrategies: ["ASK_CLARIFICATION", "HOLD_POSITION"],
           allowedCtas: ["ASK_MEASUREMENTS", "NONE"],
           claimSafety: "RUNTIME_GUARD_REQUIRED",
-          sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_OMISSION_BACKSTOP",
+          sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_INDEPENDENT_SEMANTIC_INTERPRETER",
           semanticObligations: {
             contextHash: sizeRequest.contextHash,
             productBinding: {
@@ -203,6 +205,7 @@ function rubric(): GateERubricV1 {
     scoring: {
       population: "ALL_FROZEN_CORPUS_ITEMS",
       runtimeClaimGuardRequired: true,
+      independentSemanticInterpreterRequired: true,
       structuredStrategyAndCtaRequired: true,
       outputSchemaRequired: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
     },
@@ -256,6 +259,62 @@ function passingOutput(item: GateECorpusItemV1): ContextV2CandidateOutputV2 {
   };
 }
 
+function observationForDraft(
+  draft: DraftGateERegistrationBundleV1,
+  overrides: Readonly<Record<string, unknown>> = {},
+) {
+  return {
+    schemaVersion: 1 as const,
+    contractVersion: "DF10_GATE_E_PROVIDER_IDENTITY_OBSERVATION_V1" as const,
+    disposition: "PROVIDER_IDENTITY_OBSERVED_MATCH" as const,
+    expectedProviderModelVersion: "gemini-3.5-flash-lite",
+    observedProviderModelVersion: "gemini-3.5-flash-lite",
+    requestEnvelopeHash: draft.requests[0]!.requestIdentity.requestEnvelopeHash,
+    trustedSourceRevision: draft.candidateSourceRevision,
+    trustedRef: "refs/remotes/origin/main" as const,
+    executionBoundary: "CLEAN_TRUSTED_EXACT_HEAD_PROVIDER_CALL_V1" as const,
+    startedAt: "2026-08-17T10:00:00.000Z",
+    completedAt: "2026-08-17T10:00:01.000Z",
+    ...overrides,
+  };
+}
+
+function interpretationFor(
+  output: ContextV2CandidateOutputV2,
+  overrides: Readonly<Record<string, unknown>> = {},
+) {
+  return {
+    schemaVersion: 1 as const,
+    contractVersion: "GATE_E_OUTPUT_INTERPRETATION_V1" as const,
+    candidateOutputHash: hash(canonicalJsonV1(output)),
+    claimContentHashes: output.segments.flatMap((segment) =>
+      segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
+    ),
+    clarificationTargets: output.segments.flatMap((segment) =>
+      segment.kind === "CLARIFICATION" ? [segment.target] : []
+    ),
+    requestedActions: output.segments.flatMap((segment) =>
+      segment.kind === "ACTION_REQUEST" ? [segment.action] : []
+    ),
+    claimedEffects: output.segments.flatMap((segment) =>
+      segment.kind === "EFFECT_CLAIM" ? [segment.effect] : []
+    ),
+    ...overrides,
+  };
+}
+
+function scoreOutput(input: Readonly<{
+  item: GateECorpusItemV1;
+  output: ContextV2CandidateOutputV2;
+  interpretation?: Readonly<Record<string, unknown>>;
+}>) {
+  return scoreGateECandidateOutput({
+    item: input.item,
+    output: input.output,
+    interpretation: interpretationFor(input.output, input.interpretation),
+  });
+}
+
 describe("Gate E immutable registration boundary", () => {
   it("derives the candidate fingerprint from an exact reviewed source closure", async () => {
     expect(GATE_E_CANDIDATE_SOURCE_PATHS_V1).toEqual([
@@ -264,6 +323,8 @@ describe("Gate E immutable registration boundary", () => {
       "apps/worker/src/context-v2-evaluation.ts",
       "apps/worker/src/context-v2.ts",
       "apps/worker/src/gate-e-frozen-artifacts.ts",
+      "apps/worker/src/gate-e-git-reader.ts",
+      "apps/worker/src/gate-e-output-interpreter.ts",
       "apps/worker/src/gate-e-registration-policy.ts",
       "apps/worker/src/gate-e-registration.ts",
       "apps/worker/tsconfig.json",
@@ -371,10 +432,10 @@ describe("Gate E immutable registration boundary", () => {
       "committed-intent-missing-product",
     ]);
     expect(FROZEN_GATE_E_CORPUS_V1_SHA256).toBe(
-      "812916f76146a2c011f0852498d3c477a1d8d1a3b1c0923a28b78523c39a7456",
+      "5239116a69f95f42877d839e57c6b06102c18d1c64047ebdc2a8827f26ac384e",
     );
     expect(FROZEN_GATE_E_RUBRIC_V1_SHA256).toBe(
-      "af3422b7ee8282c5474bfd98dc310af5a4f2867d918141064134b64edd064696",
+      "e76dca95530ce436d50ffc6622dc42a8c16c9b0a2d82cb6a86e582e0b0d51ba1",
     );
     const bundle = createDraftGateERegistrationBundle({
       corpus: FROZEN_GATE_E_CORPUS_V1,
@@ -466,46 +527,42 @@ describe("Gate E immutable registration boundary", () => {
   });
 
   it("records only redacted provider identity and blocks unknown or mismatched versions", () => {
-    const requestIdentity = createDraftGateERegistrationBundle({
+    const draft = createDraftGateERegistrationBundle({
       corpus: FROZEN_GATE_E_CORPUS_V1,
       rubric: FROZEN_GATE_E_RUBRIC_V1,
       modelResource:
         "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
       candidateSourceRevision: "a".repeat(40),
       candidateContentFingerprint: "b".repeat(64),
-    }).requests[0]!.requestIdentity;
-    const observation = createRedactedProviderObservation({
-      expectedProviderModelVersion: "gemini-3.5-flash-lite",
-      observedProviderModelVersion: "gemini-3.5-flash-lite",
-      requestIdentity,
-      startedAt: "2026-08-17T10:00:00.000Z",
-      completedAt: "2026-08-17T10:00:01.000Z",
     });
+    const observation = observationForDraft(draft);
     expect(Object.keys(observation).sort()).toEqual([
       "completedAt",
       "contractVersion",
       "disposition",
+      "executionBoundary",
       "expectedProviderModelVersion",
       "observedProviderModelVersion",
       "requestEnvelopeHash",
       "schemaVersion",
       "startedAt",
+      "trustedRef",
+      "trustedSourceRevision",
     ]);
     expect(JSON.stringify(observation)).not.toMatch(/payload|reply|authorization|token/iu);
-    expect(() => createRedactedProviderObservation({
-      expectedProviderModelVersion: "gemini-3.5-flash-lite",
-      observedProviderModelVersion: "unknown",
-      requestIdentity,
-      startedAt: "2026-08-17T10:00:00.000Z",
-      completedAt: "2026-08-17T10:00:01.000Z",
-    })).toThrow("GATE_E_PROVIDER_IDENTITY_UNKNOWN");
-    expect(createRedactedProviderObservation({
-      expectedProviderModelVersion: "gemini-3.5-flash-lite",
-      observedProviderModelVersion: "gemini-3.5-flash-lite@other",
-      requestIdentity,
-      startedAt: "2026-08-17T10:00:00.000Z",
-      completedAt: "2026-08-17T10:00:01.000Z",
-    }).disposition).toBe("PROVIDER_IDENTITY_OBSERVED_MISMATCH");
+    expect(() => createRegisteredGateEManifest({
+      draft,
+      observation: observationForDraft(draft, {
+        observedProviderModelVersion: "unknown",
+      }) as never,
+    })).toThrow("GATE_E_PROVIDER_OBSERVATION_NOT_REGISTERABLE");
+    expect(() => createRegisteredGateEManifest({
+      draft,
+      observation: observationForDraft(draft, {
+        disposition: "PROVIDER_IDENTITY_OBSERVED_MISMATCH",
+        observedProviderModelVersion: "gemini-3.5-flash-lite@other",
+      }) as never,
+    })).toThrow("GATE_E_PROVIDER_OBSERVATION_NOT_REGISTERABLE");
   });
 
   it("observes identity with exactly one request and never returns provider payload", async () => {
@@ -513,9 +570,15 @@ describe("Gate E immutable registration boundary", () => {
     const modelResource =
       "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite";
     const sourceGit = {
+      refreshTrustedRef: async () => undefined,
+      resolveRef: async () => "a".repeat(40),
+      isWorktreeClean: async () => true,
       readBlob: async (_commit: string, path: string) => `source:${path}`,
       resolveBlobOid: async (_commit: string, path: string) =>
         hash(`blob:${path}`).slice(0, 40),
+      findBlobIntroductionCommit: async () => "a".repeat(40),
+      isAncestor: async () => true,
+      commitTime: async () => "2026-08-17T00:00:00.000Z",
     };
     const sourceProof = await deriveGateECandidateContentFingerprint({
       candidateSourceRevision: "a".repeat(40),
@@ -529,10 +592,6 @@ describe("Gate E immutable registration boundary", () => {
       candidateContentFingerprint: sourceProof.contentFingerprint,
     });
     const calls: Array<Readonly<{ url: string; body: string }>> = [];
-    const times = [
-      new Date("2026-08-17T10:00:00.000Z"),
-      new Date("2026-08-17T10:00:01.000Z"),
-    ];
     const observation = await observeGateEProviderIdentity({
       draft,
       corpus: frozenCorpus,
@@ -548,7 +607,6 @@ describe("Gate E immutable registration boundary", () => {
           };
         },
       },
-      now: () => times.shift()!,
     });
     expect(calls).toHaveLength(1);
     expect(observation.disposition).toBe("PROVIDER_IDENTITY_OBSERVED_MATCH");
@@ -581,6 +639,26 @@ describe("Gate E immutable registration boundary", () => {
       },
       transport: { send: async () => { throw new Error("must-not-call"); } },
     })).rejects.toThrow("GATE_E_PROVIDER_OBSERVATION_SOURCE_MISMATCH");
+
+    let untrustedProviderCalls = 0;
+    await expect(observeGateEProviderIdentity({
+      draft,
+      corpus: frozenCorpus,
+      modelResource,
+      expectedProviderModelVersion: "gemini-3.5-flash-lite",
+      git: {
+        ...sourceGit,
+        resolveRef: async () => "a".repeat(40),
+        isWorktreeClean: async () => false,
+      } as never,
+      transport: {
+        send: async () => {
+          untrustedProviderCalls += 1;
+          throw new Error("must-not-call");
+        },
+      },
+    })).rejects.toThrow("GATE_E_TRUSTED_CHECKOUT_DIRTY");
+    expect(untrustedProviderCalls).toBe(0);
   });
 
   it("binds a matching provider observation into the exact registered manifest", () => {
@@ -593,13 +671,7 @@ describe("Gate E immutable registration boundary", () => {
       candidateSourceRevision: "a".repeat(40),
       candidateContentFingerprint: "b".repeat(64),
     });
-    const observation = createRedactedProviderObservation({
-      expectedProviderModelVersion: "gemini-3.5-flash-lite",
-      observedProviderModelVersion: "gemini-3.5-flash-lite",
-      requestIdentity: draft.requests[0]!.requestIdentity,
-      startedAt: "2026-08-17T10:00:00.000Z",
-      completedAt: "2026-08-17T10:00:01.000Z",
-    });
+    const observation = observationForDraft(draft);
     const manifest = createRegisteredGateEManifest({ draft, observation });
     expect(manifest.registrationStatus).toBe("REGISTERED_FOR_SCORING");
     expect(manifest.providerModelVersion).toBe("gemini-3.5-flash-lite");
@@ -658,6 +730,7 @@ describe("Gate E immutable registration boundary", () => {
     await expect(executeGateEScoredRun({
       registrationPath: "evaluation/gate-e/df10-v1/registration.json",
       git: {
+        refreshTrustedRef: async () => undefined,
         resolveRef: async () => "d".repeat(40),
         isWorktreeClean: async () => false,
         resolveBlobOid: async () => { throw new Error("must-not-read"); },
@@ -683,6 +756,7 @@ describe("Gate E immutable registration boundary", () => {
     await expect(executeGateEScoredRun({
       registrationPath: "evaluation/gate-e/df10-v1/registration.json",
       git: {
+        refreshTrustedRef: async () => undefined,
         resolveRef: async (ref) => ref === "HEAD" ? "d".repeat(40) : "e".repeat(40),
         isWorktreeClean: async () => true,
         resolveBlobOid: async () => { throw new Error("must-not-read"); },
@@ -702,7 +776,7 @@ describe("Gate E immutable registration boundary", () => {
     const verifiedSize = FROZEN_GATE_E_CORPUS_V1.items.find(
       ({ itemId }) => itemId === "bf05-verified-size-eligible",
     )!;
-    expect(scoreGateECandidateOutput({
+    expect(scoreOutput({
       item: verifiedSize,
       output: passingOutput(verifiedSize),
     })).toMatchObject({ disposition: "MUST_PASS", claimSafety: 1, sideEffectViolations: 0 });
@@ -710,7 +784,7 @@ describe("Gate E immutable registration boundary", () => {
     const unverifiedSize = FROZEN_GATE_E_CORPUS_V1.items.find(
       ({ itemId }) => itemId === "bf04-unverified-size-blocked",
     )!;
-    expect(scoreGateECandidateOutput({
+    expect(scoreOutput({
       item: unverifiedSize,
       output: {
         ...passingOutput(unverifiedSize),
@@ -723,7 +797,7 @@ describe("Gate E immutable registration boundary", () => {
       },
     })).toMatchObject({ disposition: "FAILED", claimSafety: 0 });
 
-    expect(scoreGateECandidateOutput({
+    expect(scoreOutput({
       item: verifiedSize,
       output: {
         ...passingOutput(verifiedSize),
@@ -732,6 +806,7 @@ describe("Gate E immutable registration boundary", () => {
           { kind: "GENERAL", text: "Mình đã thêm sản phẩm vào giỏ cho bạn." },
         ],
       },
+      interpretation: { claimedEffects: ["CART_UPDATED"] },
     })).toMatchObject({ disposition: "FAILED", sideEffectViolations: 1 });
   });
 
@@ -740,15 +815,15 @@ describe("Gate E immutable registration boundary", () => {
       ({ itemId }) => itemId === "bf10-no-delivery-side-effect",
     )!;
     const paraphrases = [
-      "Em lên đơn xong cho chị rồi ạ.",
-      "I finished placing the order for you.",
-      "Giỏ hàng của chị được cập nhật xong rồi nhé.",
-      "Your order is confirmed.",
-      "I've sent the message already.",
-    ];
+      ["Em lên đơn xong cho chị rồi ạ.", "ORDER_PLACED"],
+      ["I finished placing the order for you.", "ORDER_PLACED"],
+      ["Giỏ hàng của chị được cập nhật xong rồi nhé.", "CART_UPDATED"],
+      ["Your order is confirmed.", "ORDER_CONFIRMED"],
+      ["I've sent the message already.", "MESSAGE_SENT"],
+    ] as const;
 
-    for (const reply of paraphrases) {
-      expect(scoreGateECandidateOutput({
+    for (const [reply, effect] of paraphrases) {
+      expect(scoreOutput({
         item: noDeliveryEffect,
         output: {
           ...passingOutput(noDeliveryEffect),
@@ -757,13 +832,57 @@ describe("Gate E immutable registration boundary", () => {
             { kind: "GENERAL", text: reply },
           ],
         },
+        interpretation: { claimedEffects: [effect] },
       })).toMatchObject({ disposition: "FAILED", sideEffectViolations: 1 });
     }
   });
 
+  it("does not trust candidate-authored clarification and action labels over wording", () => {
+    const item = FROZEN_GATE_E_CORPUS_V1.items.find(
+      ({ itemId }) => itemId === "bf04-unverified-size-blocked",
+    )!;
+    const output = passingOutput(item);
+    const mislabeled = {
+      ...output,
+      segments: output.segments.map((segment) => segment.kind === "CLARIFICATION"
+        ? { ...segment, text: "Xin chào chị." }
+        : segment.kind === "ACTION_REQUEST"
+          ? { ...segment, text: "Cảm ơn chị." }
+          : segment),
+    } satisfies ContextV2CandidateOutputV2;
+    expect(scoreGateECandidateOutput({
+      item,
+      output: mislabeled,
+      interpretation: interpretationFor(mislabeled, {
+        clarificationTargets: [],
+        requestedActions: [],
+      }),
+    })).toMatchObject({ disposition: "FAILED", contextIntegrity: 0 });
+  });
+
+  it("keeps the runtime size guard authoritative for alternative sizes", () => {
+    const item = FROZEN_GATE_E_CORPUS_V1.items.find(
+      ({ itemId }) => itemId === "bf05-verified-size-eligible",
+    )!;
+    const claim = item.context.verifiedClaims.find(({ type }) => type === "SIZE_FIT")!;
+    const output = passingOutput(item);
+    expect(scoreOutput({
+      item,
+      output: {
+        ...output,
+        segments: output.segments.map((segment) => segment.kind === "VERIFIED_CLAIM"
+          ? {
+              ...segment,
+              text: `Size ${claim.type === "SIZE_FIT" ? claim.value.alternativeSizes[0] : "L"} cũng phù hợp theo bằng chứng đã xác minh.`,
+            }
+          : segment),
+      },
+    })).toMatchObject({ disposition: "MUST_PASS", claimSafety: 1 });
+  });
+
   it("does not let one canned reply satisfy every frozen semantic obligation", () => {
     const scores = FROZEN_GATE_E_CORPUS_V1.items.map((item) =>
-      scoreGateECandidateOutput({
+      scoreOutput({
         item,
         output: {
           ...passingOutput(item),
@@ -798,7 +917,7 @@ describe("Gate E immutable registration boundary", () => {
 
   it("keeps failed and missing items in the Gate E denominator", () => {
     const scores = FROZEN_GATE_E_CORPUS_V1.items.slice(0, -1).map((item) =>
-      scoreGateECandidateOutput({
+      scoreOutput({
         item,
         output: passingOutput(item),
       })
@@ -838,13 +957,7 @@ describe("Gate E immutable registration boundary", () => {
       candidateSourceRevision,
       candidateContentFingerprint: candidateFingerprint.contentFingerprint,
     });
-    const observation = createRedactedProviderObservation({
-      expectedProviderModelVersion: "gemini-3.5-flash-lite",
-      observedProviderModelVersion: "gemini-3.5-flash-lite",
-      requestIdentity: draft.requests[0]!.requestIdentity,
-      startedAt: "2026-08-17T08:00:00.000Z",
-      completedAt: "2026-08-17T08:00:01.000Z",
-    });
+    const observation = observationForDraft(draft);
     const manifest = createRegisteredGateEManifest({ draft, observation });
     const registrationPath = "evaluation/gate-e/df10-v1/registration.json";
     const registration = {
@@ -875,7 +988,19 @@ describe("Gate E immutable registration boundary", () => {
     let active = 0;
     let maximumActive = 0;
     let calls = 0;
-    let appendedHash: string | null = null;
+    const appendedHashes: string[] = [];
+    const interpretations = new Map<string, ReturnType<typeof interpretationFor>>();
+    const probeInterpretations = new Map(
+      GATE_E_INTERPRETATION_PROBES_V1.map((probe) => [
+        probe.input.candidateOutputHash,
+        {
+          schemaVersion: 1 as const,
+          contractVersion: "GATE_E_OUTPUT_INTERPRETATION_V1" as const,
+          candidateOutputHash: probe.input.candidateOutputHash,
+          ...probe.expected,
+        },
+      ]),
+    );
     const artifactBlobs = new Map([
       [registration.corpusPath, registration.corpusBlobOid],
       [registration.rubricPath, registration.rubricBlobOid],
@@ -889,6 +1014,7 @@ describe("Gate E immutable registration boundary", () => {
       [registration.providerObservationPath, JSON.stringify(observation)],
     ]);
     const git = {
+      refreshTrustedRef: async () => undefined,
       resolveRef: async () => scoredRunRevision,
       isWorktreeClean: async () => true,
       resolveBlobOid: async (commit: string, path: string) => {
@@ -912,46 +1038,63 @@ describe("Gate E immutable registration boundary", () => {
         (ancestor === "c".repeat(40) && descendant === scoredRunRevision),
       commitTime: async () => "2026-08-17T09:00:00.000Z",
     };
+    const sendPassing = async (request: Readonly<{ body: string }>) => {
+      active += 1;
+      maximumActive = Math.max(maximumActive, active);
+      calls += 1;
+      await Promise.resolve();
+      const requestBody = JSON.parse(request.body) as {
+        generationConfig: { maxOutputTokens: number };
+        contents: Array<{ parts: Array<{ text: string }> }>;
+      };
+      if (requestBody.generationConfig.maxOutputTokens === 256) {
+        const interpretationInput = JSON.parse(
+          requestBody.contents[0]!.parts[0]!.text,
+        ) as { candidateOutputHash: string };
+        const interpretation = probeInterpretations.get(
+          interpretationInput.candidateOutputHash,
+        ) ?? interpretations.get(interpretationInput.candidateOutputHash);
+        active -= 1;
+        if (!interpretation) throw new Error("missing-test-interpretation");
+        return {
+          payload: { candidates: [{ content: { parts: [{
+            text: JSON.stringify(interpretation),
+          }] } }] },
+          providerModelVersion: "gemini-3.5-flash-lite",
+        };
+      }
+      const item = itemByContext.get(
+        deriveCandidateRequestContextHash({ body: request.body }),
+      )!;
+      const output = passingOutput(item);
+      interpretations.set(hash(canonicalJsonV1(output)), interpretationFor(output));
+      active -= 1;
+      return {
+        payload: { candidates: [{ content: { parts: [{
+          text: JSON.stringify(output),
+        }] } }] },
+        providerModelVersion: "gemini-3.5-flash-lite",
+      };
+    };
     const result = await executeGateEScoredRun({
       registrationPath,
       git,
-      transport: {
-        send: async (request) => {
-          active += 1;
-          maximumActive = Math.max(maximumActive, active);
-          calls += 1;
-          await Promise.resolve();
-          const item = itemByContext.get(
-            deriveCandidateRequestContextHash({ body: request.body }),
-          )!;
-          active -= 1;
-          return {
-            payload: {
-              candidates: [{
-                content: {
-                  parts: [{ text: JSON.stringify(passingOutput(item)) }],
-                },
-              }],
-            },
-            providerModelVersion: "gemini-3.5-flash-lite",
-          };
-        },
-      },
+      transport: { send: sendPassing },
       evidenceStore: {
         appendAtomically: async ({ evidenceHash }) => {
-          appendedHash = evidenceHash;
+          appendedHashes.push(evidenceHash);
           return { disposition: "APPENDED" as const, evidenceHash };
         },
       },
     });
-    expect(calls).toBe(14);
+    expect(calls).toBe(32);
     expect(maximumActive).toBe(1);
     expect(result.summary.disposition).toBe("TECHNICAL_ASSERTIONS_PASS");
     expect(result.items).toHaveLength(14);
     expect(result.items.every((item) =>
       /^[a-f0-9]{64}$/u.test(item.candidateOutputHash)
     )).toBe(true);
-    expect(result.evidenceHash).toBe(appendedHash);
+    expect(appendedHashes).toEqual([result.evidenceHash, result.finalizationHash]);
     expect(result.registrationProvenance.scoredRunRevision).toBe(scoredRunRevision);
     expect(JSON.stringify(result)).not.toMatch(/reply|payload|Mình cần|access.?token/iu);
 
@@ -971,21 +1114,7 @@ describe("Gate E immutable registration boundary", () => {
     await expect(executeGateEScoredRun({
       registrationPath,
       git,
-      transport: {
-        send: async (request) => {
-          const item = itemByContext.get(
-            deriveCandidateRequestContextHash({ body: request.body }),
-          )!;
-          return {
-            payload: {
-              candidates: [{ content: { parts: [{
-                text: JSON.stringify(passingOutput(item)),
-              }] } }],
-            },
-            providerModelVersion: "gemini-3.5-flash-lite",
-          };
-        },
-      },
+      transport: { send: sendPassing },
       evidenceStore: {
         appendAtomically: async () => ({
           disposition: "APPENDED" as const,
@@ -993,6 +1122,39 @@ describe("Gate E immutable registration boundary", () => {
         }),
       },
     })).rejects.toThrow("GATE_E_EVIDENCE_APPEND_MISMATCH");
+
+    let cleanChecks = 0;
+    const orphanedEvidence: Readonly<Record<string, unknown>>[] = [];
+    await expect(executeGateEScoredRun({
+      registrationPath,
+      git: {
+        ...git,
+        isWorktreeClean: async () => {
+          cleanChecks += 1;
+          return cleanChecks < 3;
+        },
+      },
+      transport: { send: sendPassing },
+      evidenceStore: {
+        appendAtomically: async ({ evidenceHash, evidence }) => {
+          orphanedEvidence.push(evidence);
+          return { disposition: "APPENDED" as const, evidenceHash };
+        },
+      },
+    })).rejects.toThrow("GATE_E_TRUSTED_CHECKOUT_CHANGED");
+    expect(orphanedEvidence).toHaveLength(1);
+    expect(orphanedEvidence[0]?.admissibility).toBe(
+      "UNFINALIZED_TECHNICAL_EVIDENCE",
+    );
+    const orphanedBodyHash = hash(canonicalJsonV1(orphanedEvidence[0]!));
+    await expect(verifyStoredGateEEvidenceCertification({
+      evidenceBodyHash: orphanedBodyHash,
+      finalizationHash: "f".repeat(64),
+      evidenceStore: {
+        readByHash: async (evidenceHash) =>
+          evidenceHash === orphanedBodyHash ? orphanedEvidence[0]! : null,
+      },
+    })).rejects.toThrow("GATE_E_EVIDENCE_RECORD_MISSING_OR_MISMATCHED");
 
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-08-18T10:00:00.000Z"));
@@ -1023,6 +1185,113 @@ describe("Gate E immutable registration boundary", () => {
     } finally {
       vi.useRealTimers();
     }
+
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-18T10:00:00.000Z"));
+    try {
+      let signalBodyAppendStarted: (() => void) | undefined;
+      const bodyAppendStarted = new Promise<void>((resolve) => {
+        signalBodyAppendStarted = resolve;
+      });
+      const attemptedRecords: Readonly<Record<string, unknown>>[] = [];
+      const timedOutAfterBody = executeGateEScoredRun({
+        registrationPath,
+        git,
+        transport: { send: sendPassing },
+        evidenceStore: {
+          appendAtomically: async ({ evidence, signal }) => {
+            attemptedRecords.push(evidence);
+            signalBodyAppendStarted?.();
+            return new Promise((_resolve, reject) => {
+              signal?.addEventListener("abort", () => {
+                reject(new Error("store-aborted"));
+              }, { once: true });
+            });
+          },
+        },
+      });
+      const timeoutExpectation = expect(timedOutAfterBody).rejects.toThrow(
+        "GATE_E_RUN_TIMEOUT",
+      );
+      await vi.advanceTimersByTimeAsync(0);
+      await bodyAppendStarted;
+      await vi.advanceTimersByTimeAsync(GATE_E_EXECUTION_CAPS_V1.runTimeoutMs + 1);
+      await timeoutExpectation;
+      expect(attemptedRecords).toHaveLength(1);
+      expect(attemptedRecords[0]?.admissibility).toBe(
+        "UNFINALIZED_TECHNICAL_EVIDENCE",
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("never gives an appended body Gate authority before terminal certification", async () => {
+    const revision = "a".repeat(40);
+    const body = {
+      schemaVersion: 1,
+      contractVersion: "DF10_GATE_E_SCORED_EVIDENCE_BODY_V2",
+      admissibility: "UNFINALIZED_TECHNICAL_EVIDENCE",
+      executionBoundary: "CLEAN_TRUSTED_EXACT_HEAD_REQUEST_BYTES_V1",
+      scoredRunRevision: revision,
+      manifestHash: "b".repeat(64),
+      registrationProvenance: {},
+      startedAt: "2026-08-18T10:00:00.000Z",
+      completedAt: "2026-08-18T10:01:00.000Z",
+      items: [],
+      summary: {},
+    };
+    const finalization = {
+      schemaVersion: 1,
+      contractVersion: "DF10_GATE_E_RUN_FINALIZATION_V1",
+      disposition: "FINALIZED_TRUSTED_EXACT_HEAD",
+      evidenceBodyHash: hash(canonicalJsonV1(body)),
+      scoredRunRevision: revision,
+      trustedRevision: revision,
+      finalClean: true,
+      finalizedAt: "2026-08-18T10:01:01.000Z",
+      runDeadlineAt: "2026-08-18T10:15:00.000Z",
+    };
+    const bodyHash = hash(canonicalJsonV1(body));
+    const finalizationHash = hash(canonicalJsonV1(finalization));
+    const records = new Map<string, Readonly<Record<string, unknown>>>([
+      [bodyHash, body],
+      [finalizationHash, finalization],
+    ]);
+    const evidenceStore = {
+      readByHash: async (evidenceHash: string) => records.get(evidenceHash) ?? null,
+    };
+    expect(await verifyStoredGateEEvidenceCertification({
+      evidenceBodyHash: bodyHash,
+      finalizationHash,
+      evidenceStore,
+    })).toMatchObject({
+      disposition: "FINALIZED_TRUSTED_EXACT_HEAD",
+      evidenceBodyHash: bodyHash,
+    });
+    await expect(verifyStoredGateEEvidenceCertification({
+      evidenceBodyHash: bodyHash,
+      finalizationHash: "f".repeat(64),
+      evidenceStore,
+    })).rejects.toThrow("GATE_E_EVIDENCE_RECORD_MISSING_OR_MISMATCHED");
+
+    const dirtyFinalization = { ...finalization, finalClean: false };
+    const dirtyHash = hash(canonicalJsonV1(dirtyFinalization));
+    records.set(dirtyHash, dirtyFinalization);
+    await expect(verifyStoredGateEEvidenceCertification({
+      evidenceBodyHash: bodyHash,
+      finalizationHash: dirtyHash,
+      evidenceStore,
+    })).rejects.toThrow("GATE_E_EVIDENCE_NOT_FINALIZED");
+
+    const mismatched = { ...finalization, evidenceBodyHash: "c".repeat(64) };
+    const mismatchedHash = hash(canonicalJsonV1(mismatched));
+    records.set(mismatchedHash, mismatched);
+    await expect(verifyStoredGateEEvidenceCertification({
+      evidenceBodyHash: bodyHash,
+      finalizationHash: mismatchedHash,
+      evidenceStore,
+    })).rejects.toThrow("GATE_E_EVIDENCE_FINALIZATION_MISMATCH");
   });
 
   it("derives registration provenance from Git evidence instead of caller assertions", async () => {
@@ -1046,13 +1315,7 @@ describe("Gate E immutable registration boundary", () => {
       candidateSourceRevision,
       candidateContentFingerprint: candidateFingerprint.contentFingerprint,
     });
-    const observation = createRedactedProviderObservation({
-      expectedProviderModelVersion: "gemini-3.5-flash-lite",
-      observedProviderModelVersion: "gemini-3.5-flash-lite",
-      requestIdentity: draft.requests[0]!.requestIdentity,
-      startedAt: "2026-08-17T08:00:00.000Z",
-      completedAt: "2026-08-17T08:00:01.000Z",
-    });
+    const observation = observationForDraft(draft);
     const manifest = createRegisteredGateEManifest({ draft, observation });
     const registration = {
       schemaVersion: 1,

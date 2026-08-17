@@ -54,7 +54,7 @@ function request(): BuiltCandidateRequest {
 describe("DF10 pre-registered evaluation governance", () => {
   it("marks the plan draft-unregistered and limits sampling to diagnostics", () => {
     expect(DF10_GATE_E_PLAN_ARTIFACT_SHA256).toBe(
-      "eb399698f5e82dbe6d401c360e035b58f14153add9b5f434629751045565373a",
+      "1c128ec3483efb2427fdcbbcc321372328bbc7cb0b79d9e107d5fae0f5833be2",
     );
     expect(DF10_GATE_E_PLAN_V1.registrationStatus).toBe("DRAFT_UNREGISTERED");
     expect(DF10_GATE_E_PLAN_V1.scoredCorpus.inclusion).toBe(

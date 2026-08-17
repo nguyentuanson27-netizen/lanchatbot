@@ -367,6 +367,31 @@ describe("Context V2 candidate capability", () => {
     });
   });
 
+  it("classifies caller cancellation as run-level instead of retryable item failure", async () => {
+    const controller = new AbortController();
+    const transport = new FetchCandidateVertexTransport(
+      async () => "token",
+      vi.fn((_url: unknown, init?: RequestInit) => new Promise<Response>(
+        (_resolve, reject) => init?.signal?.addEventListener(
+          "abort",
+          () => reject(new DOMException("aborted", "AbortError")),
+          { once: true },
+        ),
+      )) as unknown as typeof fetch,
+    );
+    const pending = transport.send({
+      url: "https://example.invalid",
+      body: "{}",
+      signal: controller.signal,
+    });
+    controller.abort("owner-cancelled");
+    await expect(pending).rejects.toMatchObject({
+      message: "CONTEXT_V2_CANDIDATE_CALLER_ABORTED",
+      scope: "RUN_BLOCKING_CONFIGURATION",
+      statusClass: "OTHER",
+    });
+  });
+
   it("keeps candidate code outside baseline and live runtime imports", () => {
     const candidateSource = readFileSync(
       new URL("./context-v2-candidate.ts", import.meta.url),

@@ -92,13 +92,33 @@ Required properties:
     existing `(page_id, event_type, occurred_at)` index can bound each query;
     larger corpora iterate windows outside the query. Activation still requires
     production-like query-plan evidence, and any migration remains owner-gated.
+18. Gate E semantic scoring uses a separate evaluation-only interpreter. Its
+    input contains customer-facing wording and sanitized eligible claims but
+    never candidate-authored semantic labels. Its static request policy and
+    exact calibration probes are registered before scoring; dynamic request
+    and interpretation hashes bind each actual candidate output. Phrase
+    detection is diagnostic only and cannot grant a pass.
+19. Trusted Git evidence uses fixed argv without shell interpolation, a freshly
+    fetched `refs/remotes/origin/main`, committer time, byte-exact blob reads,
+    and blob-introduction history reachable from the scored revision. Caller-
+    selected refs, unsafe paths, author time and unrefreshed remote state are
+    not evidence.
+20. Provider observation runs only through the clean exact-head governed
+    boundary and records its trusted revision/ref. Repository validation proves
+    the artifact's integrity, not the external call itself; the separately
+    owner-reviewed immutable observation artifact is the external trust anchor.
+21. A scored evidence body is permanently unfinalized by itself. A second
+    hash-bound record may finalize it only after the post-body trusted-ref and
+    clean-worktree check within the original run deadline. Verdict readers take
+    the expected hashes and retrieve both records from the append-only store;
+    caller-supplied self-consistent objects have no Gate authority.
 
 ## DF10 Gate E draft foundation
 
 - Plan contract: `DF10_GATE_E_PLAN_V1`
 - Registration status: `DRAFT_UNREGISTERED`
 - Plan artifact SHA-256:
-  `eb399698f5e82dbe6d401c360e035b58f14153add9b5f434629751045565373a`
+  `1c128ec3483efb2427fdcbbcc321372328bbc7cb0b79d9e107d5fae0f5833be2`
 - Baseline: `POST_BF_V1`
 - Candidate model: publisher `google`, model `gemini-3.5-flash-lite`; the same
   string is an owner-selected **draft expectation**, not provider-observed
@@ -116,21 +136,22 @@ Required properties:
   legacy operational replay sample is a separate population and is not
   admissible as Gate E data.
 - Draft frozen corpus canonical SHA-256:
-  `812916f76146a2c011f0852498d3c477a1d8d1a3b1c0923a28b78523c39a7456`.
+  `5239116a69f95f42877d839e57c6b06102c18d1c64047ebdc2a8827f26ac384e`.
 - Draft frozen rubric canonical SHA-256:
-  `af3422b7ee8282c5474bfd98dc310af5a4f2867d918141064134b64edd064696`.
+  `e76dca95530ce436d50ffc6622dc42a8c16c9b0a2d82cb6a86e582e0b0d51ba1`.
 - Draft caps: one identity-observation request; at most 32 scored requests,
-  1,024 output tokens/request, 32,768 total output tokens, 30-second provider
-  deadline, 15-minute run deadline, concurrency one, `OFFLINE_NO_PAGE`, and
-  side effects forbidden.
+  currently four registered semantic-calibration probes plus 14 candidate and
+  14 interpretation calls; 1,024 output tokens/request, 32,768 total output
+  tokens, 30-second provider deadline, 15-minute run deadline, concurrency one,
+  `OFFLINE_NO_PAGE`, and side effects forbidden.
 - The governed ordering and abort matrix are defined in
   `../GATE_E_PREPROD_EXECUTION_PLAN.md`. Those source artifacts remain draft
   prerequisites and do not themselves constitute registration.
 - Candidate output V2 binds each text segment to a typed semantic role. Exact
   evidence hashes, product binding, clarification/action targets and effect
-  claims are checked against case-specific frozen obligations. Wording
-  detectors may only reject omitted protected/effect claims; they cannot grant
-  semantic authority or make an item pass.
+  claims are checked against both case-specific frozen obligations and the
+  independently interpreted wording. Candidate-authored labels cannot satisfy
+  an obligation by themselves.
 - The scored-run boundary internally derives Git provenance, frozen artifacts,
   actual request bytes, system time/deadlines and append-only evidence. A
   caller-created proof, alternate corpus/rubric, model port, clock or echoed

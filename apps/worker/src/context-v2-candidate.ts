@@ -344,7 +344,8 @@ export class CandidateProviderError extends Error {
     message:
       | "CONTEXT_V2_CANDIDATE_PROVIDER_TRANSIENT"
       | "CONTEXT_V2_CANDIDATE_PROVIDER_CONFIGURATION"
-      | "CONTEXT_V2_CANDIDATE_ACCESS_TOKEN_MISSING",
+      | "CONTEXT_V2_CANDIDATE_ACCESS_TOKEN_MISSING"
+      | "CONTEXT_V2_CANDIDATE_CALLER_ABORTED",
     readonly scope: CandidateProviderFailureScope,
     readonly statusClass: "AUTH" | "4XX" | "5XX" | "OTHER",
   ) {
@@ -399,6 +400,13 @@ export class FetchCandidateVertexTransport implements CandidateVertexTransport {
               "AUTH",
             );
           }
+          if (request.signal?.aborted) {
+            throw new CandidateProviderError(
+              "CONTEXT_V2_CANDIDATE_CALLER_ABORTED",
+              "RUN_BLOCKING_CONFIGURATION",
+              "OTHER",
+            );
+          }
           const response = await this.fetchImpl(request.url, {
             method: "POST",
             headers: {
@@ -441,6 +449,16 @@ export class FetchCandidateVertexTransport implements CandidateVertexTransport {
         timeoutFailure,
       ]);
     } catch (error) {
+      if (error instanceof CandidateProviderError) {
+        throw error;
+      }
+      if (request.signal?.aborted) {
+        throw new CandidateProviderError(
+          "CONTEXT_V2_CANDIDATE_CALLER_ABORTED",
+          "RUN_BLOCKING_CONFIGURATION",
+          "OTHER",
+        );
+      }
       if (timedOut) {
         throw new Error("CONTEXT_V2_CANDIDATE_PROVIDER_TIMEOUT");
       }

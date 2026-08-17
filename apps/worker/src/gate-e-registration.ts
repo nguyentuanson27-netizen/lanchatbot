@@ -2,12 +2,15 @@ import { createHash } from "node:crypto";
 import {
   BusinessFactEnvelopeV1Schema,
   ContextV2CandidateOutputV2Schema,
+  GateEOutputInterpretationV1Schema,
+  SizeRecommendationProtectedClaimV1Schema,
   canonicalJsonV1,
   type ContextV2,
   type ContextV2CandidateClarificationTargetV2,
   type ContextV2CandidateEffectV2,
   type ContextV2CandidateOutputV2,
   type ContextV2CandidateRequestedActionV2,
+  type GateEOutputInterpretationV1,
 } from "@lana/contracts";
 import {
   detectConcreteSizeRecommendations,
@@ -24,6 +27,13 @@ import {
 import { DF10_GATE_E_PLAN_ARTIFACT_SHA256 } from "./context-v2-evaluation.js";
 import { parseContextV2WithIntegrity } from "./context-v2.js";
 import { GATE_E_FROZEN_REGISTRATION_POLICY_V1 } from "./gate-e-registration-policy.js";
+import {
+  GATE_E_INTERPRETATION_PROBES_V1,
+  buildGateEInterpretationRequest,
+  deriveGateEInterpreterRegistrationV1,
+  interpretationInputFromCandidate,
+  parseGateEInterpretationResponse,
+} from "./gate-e-output-interpreter.js";
 
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
@@ -51,6 +61,8 @@ export const GATE_E_CANDIDATE_SOURCE_PATHS_V1 = Object.freeze([
   "apps/worker/src/context-v2-evaluation.ts",
   "apps/worker/src/context-v2.ts",
   "apps/worker/src/gate-e-frozen-artifacts.ts",
+  "apps/worker/src/gate-e-git-reader.ts",
+  "apps/worker/src/gate-e-output-interpreter.ts",
   "apps/worker/src/gate-e-registration-policy.ts",
   "apps/worker/src/gate-e-registration.ts",
   "apps/worker/tsconfig.json",
@@ -140,7 +152,7 @@ export interface GateECorpusItemV1 {
       | "CONFIRM_CART"
     )[];
     claimSafety: "RUNTIME_GUARD_REQUIRED";
-    sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_OMISSION_BACKSTOP";
+    sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_INDEPENDENT_SEMANTIC_INTERPRETER";
     semanticObligations: Readonly<{
       contextHash: string;
       productBinding: Readonly<{
@@ -179,6 +191,7 @@ export interface GateERubricV1 {
   readonly scoring: Readonly<{
     population: "ALL_FROZEN_CORPUS_ITEMS";
     runtimeClaimGuardRequired: true;
+    independentSemanticInterpreterRequired: true;
     structuredStrategyAndCtaRequired: true;
     outputSchemaRequired: "CONTEXT_V2_CANDIDATE_OUTPUT_V2";
   }>;
@@ -199,6 +212,9 @@ export interface DraftGateERegistrationBundleV1 {
     contextHash: string;
     requestIdentity: CandidateRequestIdentity;
   }>[];
+  readonly interpreterRegistration: ReturnType<
+    typeof deriveGateEInterpreterRegistrationV1
+  >;
   readonly executionCaps: typeof GATE_E_EXECUTION_CAPS_V1;
   readonly manifestHash: string;
 }
@@ -241,6 +257,7 @@ export const GATE_E_TRUSTED_SCORED_RUN_REF =
   "refs/remotes/origin/main" as const;
 
 export interface GateEScoredRunGitReader extends GateEGitEvidenceReader {
+  refreshTrustedRef(): Promise<void>;
   resolveRef(ref: "HEAD" | typeof GATE_E_TRUSTED_SCORED_RUN_REF): Promise<string>;
   isWorktreeClean(): Promise<boolean>;
 }
@@ -249,6 +266,7 @@ export interface GateEEvidenceStoreV1 {
   appendAtomically(input: Readonly<{
     evidenceHash: string;
     evidence: Readonly<Record<string, unknown>>;
+    signal: AbortSignal;
   }>): Promise<Readonly<{
     disposition: "APPENDED" | "ALREADY_PRESENT";
     evidenceHash: string;
@@ -271,6 +289,7 @@ export interface GateEItemScoreV1 {
   readonly claimSafety: 0 | 1;
   readonly contextIntegrity: 0 | 1;
   readonly sideEffectViolations: 0 | 1;
+  readonly heuristicEffectSuspicion: 0 | 1;
   readonly reasonCodes: readonly string[];
 }
 
@@ -375,7 +394,9 @@ function businessFactsFromContext(context: ContextV2) {
       offerType: "GATE_E_FIXTURE",
       listPriceVnd: price?.type === "PRICE" ? price.value.amountVnd : null,
       salePriceVnd: price?.type === "PRICE" ? price.value.amountVnd : null,
-      sizes: size?.type === "SIZE_FIT" ? [...size.value.recommendedSizes] : [],
+      sizes: size?.type === "SIZE_FIT"
+        ? [...size.value.recommendedSizes, ...size.value.alternativeSizes]
+        : [],
       stockStatus: stock?.type === "STOCK" ? stock.value.status : "UNKNOWN",
       stockQuantity: stock?.type === "STOCK"
         ? stock.value.availableQuantity
@@ -396,6 +417,62 @@ function normalizedSemanticText(value: string): string {
     .toLocaleLowerCase("vi-VN")
     .replace(/[^a-z0-9]+/gu, " ")
     .trim();
+}
+
+function runtimeSizeGuardInput(
+  context: ContextV2,
+  referencedClaimHashes: ReadonlySet<string>,
+) {
+  type SizeFitClaim = Extract<
+    ContextV2["verifiedClaims"][number],
+    { type: "SIZE_FIT" }
+  >;
+  const claims = context.verifiedClaims
+    .filter((claim): claim is SizeFitClaim => claim.type === "SIZE_FIT")
+    .filter((claim) => referencedClaimHashes.has(claim.provenance.contentHash))
+    .map((claim) => {
+      if (claim.scope.kind !== "PRODUCT" ||
+          claim.provenance.authority !== "VERIFIED_SIZE_ENGINE_V1" ||
+          claim.value.evidenceBasis !== "MEASUREMENTS" ||
+          !claim.provenance.evidenceRef.includes(
+            `measurements:${claim.value.measurementFingerprint}`,
+          )) {
+        return null;
+      }
+      return SizeRecommendationProtectedClaimV1Schema.parse({
+        id: claim.claimId,
+        type: "SIZE_RECOMMENDATION",
+        value: {
+          recommendedSizes: claim.value.recommendedSizes,
+          alternativeSizes: claim.value.alternativeSizes,
+        },
+        productId: claim.scope.productId,
+        variantId: claim.scope.variantId,
+        evidenceRef: claim.provenance.evidenceRef,
+        source: "VERIFIED_SIZE_ENGINE_V1",
+        observedAt: claim.provenance.observedAt,
+        expiresAt: claim.provenance.expiresAt,
+        customerProfileId: claim.value.customerProfileId,
+        customerProfileRevision: claim.value.customerProfileRevision,
+        measurementFingerprint: claim.value.measurementFingerprint,
+        evidenceBasis: {
+          kind: "CURRENT_MEASUREMENTS",
+          measurementFingerprint: claim.value.measurementFingerprint,
+          sourceEventHashes: [claim.provenance.contentHash],
+        },
+      });
+    })
+    .filter((claim): claim is NonNullable<typeof claim> => claim !== null);
+  const first = claims[0] ?? null;
+  return {
+    activeProductId: context.productBinding.status === "RESOLVED"
+      ? context.productBinding.productIds[0] ?? null
+      : null,
+    activeVariantId: first?.variantId ?? null,
+    customerProfileId: first?.customerProfileId ?? null,
+    customerProfileRevision: first?.customerProfileRevision ?? null,
+    claims,
+  };
 }
 
 function hasCompletedEffectClaim(
@@ -471,12 +548,21 @@ function claimSegmentMatchesEvidence(
 export function scoreGateECandidateOutput(input: Readonly<{
   item: GateECorpusItemV1;
   output: unknown;
+  interpretation: unknown;
 }>): GateEItemScoreV1 {
   const reasons = new Set<string>();
   let output: ContextV2CandidateOutputV2;
+  let interpretation: GateEOutputInterpretationV1;
   try {
     parseContextV2WithIntegrity(input.item.context);
     output = ContextV2CandidateOutputV2Schema.parse(input.output);
+    interpretation = GateEOutputInterpretationV1Schema.parse(
+      input.interpretation,
+    );
+    if (interpretation.candidateOutputHash !==
+        sha256(canonicalJsonV1(output))) {
+      throw new Error("GATE_E_INTERPRETATION_OUTPUT_MISMATCH");
+    }
   } catch {
     return Object.freeze({
       corpusItemId: input.item.itemId,
@@ -484,6 +570,7 @@ export function scoreGateECandidateOutput(input: Readonly<{
       claimSafety: 0 as const,
       contextIntegrity: 0 as const,
       sideEffectViolations: 0 as const,
+      heuristicEffectSuspicion: 0 as const,
       reasonCodes: ["GATE_E_OUTPUT_OR_CONTEXT_INVALID"],
     });
   }
@@ -506,16 +593,18 @@ export function scoreGateECandidateOutput(input: Readonly<{
   const claimSegments = output.segments.filter((segment) =>
     segment.kind === "VERIFIED_CLAIM"
   );
-  const usedClaimHashes = [...new Set(claimSegments.map(
+  const declaredClaimHashes = [...new Set(claimSegments.map(
     ({ claimContentHash }) => claimContentHash,
   ))].sort();
+  const interpretedClaimHashes = [...interpretation.claimContentHashes].sort();
   const requiredClaimHashes = [...obligations.requiredClaimContentHashes].sort();
-  const claimReferencesMatch = canonicalJsonV1(usedClaimHashes) ===
-    canonicalJsonV1(requiredClaimHashes);
+  const claimReferencesMatch =
+    canonicalJsonV1(declaredClaimHashes) === canonicalJsonV1(requiredClaimHashes) &&
+    canonicalJsonV1(interpretedClaimHashes) === canonicalJsonV1(requiredClaimHashes);
   if (!claimReferencesMatch) {
     reasons.add("GATE_E_REQUIRED_EVIDENCE_ASSERTION_FAILED");
   }
-  const referencedClaims = usedClaimHashes.map((contentHash) =>
+  const referencedClaims = declaredClaimHashes.map((contentHash) =>
     input.item.context.verifiedClaims.find(({ provenance }) =>
       provenance.contentHash === contentHash
     )
@@ -541,8 +630,11 @@ export function scoreGateECandidateOutput(input: Readonly<{
   const expectedClarifications = obligations.clarificationTarget === "NONE"
     ? []
     : [obligations.clarificationTarget];
+  const interpretedClarifications = [...interpretation.clarificationTargets].sort();
   if (canonicalJsonV1(clarificationTargets.sort()) !==
-      canonicalJsonV1(expectedClarifications.sort())) {
+        canonicalJsonV1(expectedClarifications.sort()) ||
+      canonicalJsonV1(interpretedClarifications) !==
+        canonicalJsonV1(expectedClarifications.sort())) {
     reasons.add("GATE_E_CLARIFICATION_ASSERTION_FAILED");
   }
   const requestedActions = [...new Set(output.segments.flatMap((segment) =>
@@ -551,15 +643,22 @@ export function scoreGateECandidateOutput(input: Readonly<{
   const expectedActions = obligations.requestedAction === "NONE"
     ? []
     : [obligations.requestedAction];
+  const interpretedActions = [...interpretation.requestedActions].sort();
   if (canonicalJsonV1(requestedActions.sort()) !==
-      canonicalJsonV1(expectedActions.sort())) {
+        canonicalJsonV1(expectedActions.sort()) ||
+      canonicalJsonV1(interpretedActions) !==
+        canonicalJsonV1(expectedActions.sort())) {
     reasons.add("GATE_E_REQUESTED_ACTION_ASSERTION_FAILED");
   }
 
   const declaredEffects = new Set(output.segments.flatMap((segment) =>
     segment.kind === "EFFECT_CLAIM" ? [segment.effect] : []
   ));
-  const disallowedDeclaredEffect = [...declaredEffects]
+  const interpretedEffects = [...interpretation.claimedEffects].sort();
+  const declaredEffectValues = [...declaredEffects].sort();
+  const declaredEffectMismatch = canonicalJsonV1(declaredEffectValues) !==
+    canonicalJsonV1(interpretedEffects);
+  const disallowedInterpretedEffect = interpretedEffects
     .some((effect) => !obligations.allowedEffectClaims.includes(effect));
   const omittedEffect = output.segments.some((segment) =>
     CANDIDATE_EFFECTS_V2.some((effect) =>
@@ -567,16 +666,23 @@ export function scoreGateECandidateOutput(input: Readonly<{
       !(segment.kind === "EFFECT_CLAIM" && segment.effect === effect)
     )
   );
-  const sideEffectViolation = disallowedDeclaredEffect || omittedEffect;
-  if (disallowedDeclaredEffect) {
+  const sideEffectViolation = disallowedInterpretedEffect || declaredEffectMismatch;
+  if (declaredEffectMismatch) {
+    reasons.add("GATE_E_EFFECT_DECLARATION_INTERPRETATION_MISMATCH");
+  }
+  if (disallowedInterpretedEffect) {
     reasons.add("GATE_E_TYPED_EFFECT_CLAIM_REJECTED");
   }
-  if (omittedEffect) reasons.add("GATE_E_OMITTED_EFFECT_CLAIM_REJECTED");
 
   const reply = replyFromCandidateOutput(output);
   const productId = input.item.context.productBinding.status === "RESOLVED"
     ? input.item.context.productBinding.productIds[0] ?? null
     : null;
+  const referencedClaimHashes = new Set(declaredClaimHashes);
+  const sizeClaimContext = runtimeSizeGuardInput(
+    input.item.context,
+    referencedClaimHashes,
+  );
   const guarded = guardAgentProposal({
     proposal: {
       schemaVersion: 1,
@@ -587,30 +693,28 @@ export function scoreGateECandidateOutput(input: Readonly<{
       reply,
       attachments: [],
       handoffReason: null,
+      protectedClaimIds: sizeClaimContext.claims.map(({ id }) => id),
     },
     facts: businessFactsFromContext(input.item.context),
     verifiedProductIds: new Set(input.item.context.productBinding.productIds),
     buyingSignal: input.item.context.buyingIntent.decision === "COMMITTED",
+    sizeClaimContext,
     now: new Date("2026-08-17T00:01:00.000Z"),
   });
-  const assertedSizes = detectConcreteSizeRecommendations(reply);
-  const allowedSizes = new Set(input.item.context.verifiedClaims.flatMap((claim) =>
-    claim.type === "SIZE_FIT" ? claim.value.recommendedSizes : []
-  ).map((value) => value.toLocaleUpperCase("vi-VN")));
-  const sizeSafe = assertedSizes.every((value) => allowedSizes.has(value));
-  const nonSizeGuardBlocks = guarded.blockedReasonCodes.filter((reason) =>
-    !reason.startsWith("SIZE_RECOMMENDATION_")
-  );
-  const claimSafe = sizeSafe && nonSizeGuardBlocks.length === 0 &&
+  const guardBlocks = guarded.blockedReasonCodes;
+  const claimSafe = guardBlocks.length === 0 &&
     claimReferencesMatch && claimSegmentsMatch && !forbiddenClaimUsed;
-  if (!sizeSafe) reasons.add("GATE_E_SIZE_CLAIM_UNVERIFIED");
-  for (const reason of nonSizeGuardBlocks) {
+  for (const reason of guardBlocks) {
     reasons.add(`GATE_E_RUNTIME_GUARD_${reason}`);
   }
   const contextIntegrity = contextMatches && productBindingMatches &&
     canonicalJsonV1(clarificationTargets.sort()) ===
       canonicalJsonV1(expectedClarifications.sort()) &&
+    canonicalJsonV1(interpretedClarifications) ===
+      canonicalJsonV1(expectedClarifications.sort()) &&
     canonicalJsonV1(requestedActions.sort()) ===
+      canonicalJsonV1(expectedActions.sort()) &&
+    canonicalJsonV1(interpretedActions) ===
       canonicalJsonV1(expectedActions.sort());
   const disposition = reasons.size === 0 ? "MUST_PASS" : "FAILED";
   return Object.freeze({
@@ -619,6 +723,7 @@ export function scoreGateECandidateOutput(input: Readonly<{
     claimSafety: claimSafe ? 1 : 0,
     contextIntegrity: contextIntegrity ? 1 : 0,
     sideEffectViolations: sideEffectViolation ? 1 : 0,
+    heuristicEffectSuspicion: omittedEffect ? 1 : 0,
     reasonCodes: [...reasons].sort(),
   });
 }
@@ -703,6 +808,7 @@ function assertRubric(rubric: GateERubricV1): void {
       rubric.thresholds.mustPassMinimum !== 1 ||
       rubric.scoring.population !== "ALL_FROZEN_CORPUS_ITEMS" ||
       rubric.scoring.runtimeClaimGuardRequired !== true ||
+      rubric.scoring.independentSemanticInterpreterRequired !== true ||
       rubric.scoring.structuredStrategyAndCtaRequired !== true ||
       rubric.scoring.outputSchemaRequired !== "CONTEXT_V2_CANDIDATE_OUTPUT_V2") {
     throw new Error("GATE_E_RUBRIC_INVALID");
@@ -743,7 +849,7 @@ function assertCorpus(corpus: GateECorpusV1, rubric: GateERubricV1): void {
         item.assertions.allowedCtas.length === 0 ||
         item.assertions.claimSafety !== "RUNTIME_GUARD_REQUIRED" ||
         item.assertions.sideEffectSafety !==
-          "TYPED_EFFECT_MATRIX_WITH_OMISSION_BACKSTOP" ||
+          "TYPED_EFFECT_MATRIX_WITH_INDEPENDENT_SEMANTIC_INTERPRETER" ||
         new Set(item.strata).size !== item.strata.length ||
         !item.strata.includes("MUST_PASS")) {
       throw new Error("GATE_E_CORPUS_ASSERTION_INVALID");
@@ -799,6 +905,9 @@ export function createDraftGateERegistrationBundle(input: Readonly<{
         requestIdentity: request.identity,
       });
     });
+  const interpreterRegistration = deriveGateEInterpreterRegistrationV1(
+    input.modelResource,
+  );
   const draft = {
     schemaVersion: 1 as const,
     contractVersion: "DF10_GATE_E_DRAFT_REGISTRATION_BUNDLE_V1" as const,
@@ -810,6 +919,7 @@ export function createDraftGateERegistrationBundle(input: Readonly<{
     candidateContentFingerprint: input.candidateContentFingerprint,
     modelId: CONTEXT_V2_CANDIDATE_MODEL_ID,
     requests,
+    interpreterRegistration,
     executionCaps: GATE_E_EXECUTION_CAPS_V1,
   };
   return Object.freeze({
@@ -818,10 +928,11 @@ export function createDraftGateERegistrationBundle(input: Readonly<{
   });
 }
 
-export function createRedactedProviderObservation(input: Readonly<{
+function createRedactedProviderObservation(input: Readonly<{
   expectedProviderModelVersion: string;
   observedProviderModelVersion: string;
   requestIdentity: CandidateRequestIdentity;
+  trustedSourceRevision: string;
   startedAt: string;
   completedAt: string;
 }>) {
@@ -834,6 +945,9 @@ export function createRedactedProviderObservation(input: Readonly<{
   }
   if (!SHA256_PATTERN.test(input.requestIdentity.requestEnvelopeHash)) {
     throw new Error("GATE_E_PROVIDER_OBSERVATION_REQUEST_INVALID");
+  }
+  if (!COMMIT_PATTERN.test(input.trustedSourceRevision)) {
+    throw new Error("GATE_E_PROVIDER_OBSERVATION_SOURCE_INVALID");
   }
   const startedAt = Date.parse(input.startedAt);
   const completedAt = Date.parse(input.completedAt);
@@ -851,6 +965,9 @@ export function createRedactedProviderObservation(input: Readonly<{
     expectedProviderModelVersion: expected,
     observedProviderModelVersion: observed,
     requestEnvelopeHash: input.requestIdentity.requestEnvelopeHash,
+    trustedSourceRevision: input.trustedSourceRevision,
+    trustedRef: GATE_E_TRUSTED_SCORED_RUN_REF,
+    executionBoundary: "CLEAN_TRUSTED_EXACT_HEAD_PROVIDER_CALL_V1" as const,
     startedAt: input.startedAt,
     completedAt: input.completedAt,
   });
@@ -871,6 +988,7 @@ function assertDraftRegistrationIntegrity(
     "executionCaps",
     "manifestHash",
     "modelId",
+    "interpreterRegistration",
     "planArtifactHash",
     "registrationStatus",
     "requests",
@@ -893,6 +1011,11 @@ function assertDraftRegistrationIntegrity(
         !hasExactKeys(request, requestKeys) ||
         !hasExactKeys(request.requestIdentity, identityKeys)
       ) ||
+      canonicalJsonV1(draft.interpreterRegistration) !== canonicalJsonV1(
+        deriveGateEInterpreterRegistrationV1(
+          draft.requests[0]?.requestIdentity.modelResource ?? "",
+        ),
+      ) ||
       manifestHash !== sha256(canonicalJsonV1(draftBody)) ||
       draft.registrationStatus !== "DRAFT_UNREGISTERED" ||
       draft.planArtifactHash !== DF10_GATE_E_PLAN_ARTIFACT_SHA256 ||
@@ -914,6 +1037,7 @@ export function createRegisteredGateEManifest(input: Readonly<{
       expectedProviderModelVersion: input.observation.expectedProviderModelVersion,
       observedProviderModelVersion: input.observation.observedProviderModelVersion,
       requestIdentity: input.draft.requests[0]!.requestIdentity,
+      trustedSourceRevision: input.observation.trustedSourceRevision,
       startedAt: input.observation.startedAt,
       completedAt: input.observation.completedAt,
     });
@@ -929,6 +1053,8 @@ export function createRegisteredGateEManifest(input: Readonly<{
         CONTEXT_V2_CANDIDATE_PROVIDER_VERSION ||
       input.observation.requestEnvelopeHash !==
         input.draft.requests[0]?.requestIdentity.requestEnvelopeHash ||
+      input.observation.trustedSourceRevision !==
+        input.draft.candidateSourceRevision ||
       !input.observation.observedProviderModelVersion.trim()) {
     throw new Error("GATE_E_PROVIDER_OBSERVATION_NOT_REGISTERABLE");
   }
@@ -947,6 +1073,7 @@ export function createRegisteredGateEManifest(input: Readonly<{
     providerModelVersion: input.observation.observedProviderModelVersion,
     providerObservationHash,
     requests: input.draft.requests,
+    interpreterRegistration: input.draft.interpreterRegistration,
     executionCaps: input.draft.executionCaps,
   };
   return Object.freeze({
@@ -962,7 +1089,10 @@ export type RegisteredGateEManifestV1 = ReturnType<
 async function withGateEDeadline<T>(
   operation: Promise<T>,
   timeoutMs: number,
-  errorCode: "GATE_E_PROVIDER_DEADLINE_EXCEEDED" | "GATE_E_RUN_TIMEOUT",
+  errorCode:
+    | "GATE_E_PROVIDER_DEADLINE_EXCEEDED"
+    | "GATE_E_PROVIDER_OBSERVATION_TIMEOUT"
+    | "GATE_E_RUN_TIMEOUT",
   onTimeout?: () => void,
 ): Promise<T> {
   let timeout: ReturnType<typeof setTimeout> | undefined;
@@ -998,6 +1128,109 @@ function withGateERunDeadline<T>(
   );
 }
 
+function verifyGateEEvidenceCertification(input: Readonly<{
+  body: Readonly<Record<string, unknown>>;
+  finalization: Readonly<Record<string, unknown>> | null;
+}>) {
+  const bodyKeys = [
+    "admissibility", "completedAt", "contractVersion", "executionBoundary",
+    "items", "manifestHash", "registrationProvenance", "schemaVersion",
+    "scoredRunRevision", "startedAt", "summary",
+  ];
+  const finalizationKeys = [
+    "contractVersion", "disposition", "evidenceBodyHash", "finalClean",
+    "finalizedAt", "runDeadlineAt", "schemaVersion", "scoredRunRevision",
+    "trustedRevision",
+  ];
+  if (input.finalization === null ||
+      !hasExactKeys(input.body, bodyKeys) ||
+      !hasExactKeys(input.finalization, finalizationKeys) ||
+      input.body.schemaVersion !== 1 ||
+      input.body.contractVersion !== "DF10_GATE_E_SCORED_EVIDENCE_BODY_V2" ||
+      input.body.admissibility !== "UNFINALIZED_TECHNICAL_EVIDENCE" ||
+      input.finalization.schemaVersion !== 1 ||
+      input.finalization.contractVersion !== "DF10_GATE_E_RUN_FINALIZATION_V1" ||
+      input.finalization.disposition !== "FINALIZED_TRUSTED_EXACT_HEAD" ||
+      input.finalization.finalClean !== true ||
+      !COMMIT_PATTERN.test(String(input.body.scoredRunRevision ?? ""))) {
+    throw new Error("GATE_E_EVIDENCE_NOT_FINALIZED");
+  }
+  const bodyHash = sha256(canonicalJsonV1(input.body));
+  if (input.finalization.evidenceBodyHash !== bodyHash ||
+      input.finalization.scoredRunRevision !== input.body.scoredRunRevision ||
+      input.finalization.trustedRevision !== input.body.scoredRunRevision) {
+    throw new Error("GATE_E_EVIDENCE_FINALIZATION_MISMATCH");
+  }
+  const finalizedAt = Date.parse(String(input.finalization.finalizedAt ?? ""));
+  const runDeadlineAt = Date.parse(String(input.finalization.runDeadlineAt ?? ""));
+  const startedAt = Date.parse(String(input.body.startedAt ?? ""));
+  const completedAt = Date.parse(String(input.body.completedAt ?? ""));
+  if (![startedAt, completedAt, finalizedAt, runDeadlineAt].every(Number.isFinite) ||
+      completedAt < startedAt || finalizedAt < completedAt ||
+      finalizedAt > runDeadlineAt) {
+    throw new Error("GATE_E_EVIDENCE_FINALIZATION_EXPIRED");
+  }
+  return Object.freeze({
+    disposition: "FINALIZED_TRUSTED_EXACT_HEAD" as const,
+    evidenceBodyHash: bodyHash,
+    finalizationHash: sha256(canonicalJsonV1(input.finalization)),
+  });
+}
+
+export interface GateEEvidenceReaderV1 {
+  readByHash(evidenceHash: string): Promise<Readonly<Record<string, unknown>> | null>;
+}
+
+export async function verifyStoredGateEEvidenceCertification(input: Readonly<{
+  evidenceBodyHash: string;
+  finalizationHash: string;
+  evidenceStore: GateEEvidenceReaderV1;
+}>) {
+  if (!SHA256_PATTERN.test(input.evidenceBodyHash) ||
+      !SHA256_PATTERN.test(input.finalizationHash)) {
+    throw new Error("GATE_E_EVIDENCE_REFERENCE_INVALID");
+  }
+  const [body, finalization] = await Promise.all([
+    input.evidenceStore.readByHash(input.evidenceBodyHash),
+    input.evidenceStore.readByHash(input.finalizationHash),
+  ]);
+  if (body === null || finalization === null ||
+      sha256(canonicalJsonV1(body)) !== input.evidenceBodyHash ||
+      sha256(canonicalJsonV1(finalization)) !== input.finalizationHash) {
+    throw new Error("GATE_E_EVIDENCE_RECORD_MISSING_OR_MISMATCHED");
+  }
+  return verifyGateEEvidenceCertification({ body, finalization });
+}
+
+async function sendGateEProviderRequest(input: Readonly<{
+  transport: CandidateVertexTransport;
+  request: Readonly<{ url: string; body: string }>;
+  startedAtMs: number;
+}>) {
+  const providerController = new AbortController();
+  try {
+    return await withGateERunDeadline(
+      withGateEDeadline(input.transport.send({
+        url: input.request.url,
+        body: input.request.body,
+        signal: providerController.signal,
+      }), GATE_E_EXECUTION_CAPS_V1.providerTimeoutMs,
+      "GATE_E_PROVIDER_DEADLINE_EXCEEDED", () => {
+        providerController.abort("GATE_E_PROVIDER_DEADLINE_EXCEEDED");
+      }),
+      input.startedAtMs,
+      () => providerController.abort("GATE_E_RUN_TIMEOUT"),
+    );
+  } catch (error) {
+    if (error instanceof Error &&
+        ["GATE_E_PROVIDER_DEADLINE_EXCEEDED", "GATE_E_RUN_TIMEOUT"]
+          .includes(error.message)) {
+      throw error;
+    }
+    throw new Error("GATE_E_SCORED_MODEL_CALL_FAILED");
+  }
+}
+
 export async function executeGateEScoredRun(input: Readonly<{
   registrationPath: string;
   git: GateEScoredRunGitReader;
@@ -1006,6 +1239,7 @@ export async function executeGateEScoredRun(input: Readonly<{
 }>) {
   const startedAt = new Date().toISOString();
   const startedAtMs = Date.parse(startedAt);
+  await withGateERunDeadline(input.git.refreshTrustedRef(), startedAtMs);
   if (!await withGateERunDeadline(input.git.isWorktreeClean(), startedAtMs)) {
     throw new Error("GATE_E_TRUSTED_CHECKOUT_DIRTY");
   }
@@ -1030,8 +1264,10 @@ export async function executeGateEScoredRun(input: Readonly<{
       manifest.rubricHash !== sha256(canonicalJsonV1(rubric)) ||
       canonicalJsonV1(manifest.executionCaps) !==
         canonicalJsonV1(GATE_E_EXECUTION_CAPS_V1) ||
-      corpus.items.length > GATE_E_EXECUTION_CAPS_V1.scoredRequestMaximum ||
-      corpus.items.length * GATE_E_EXECUTION_CAPS_V1.perRequestOutputTokenMaximum >
+      corpus.items.length * 2 + GATE_E_INTERPRETATION_PROBES_V1.length >
+        GATE_E_EXECUTION_CAPS_V1.scoredRequestMaximum ||
+      (corpus.items.length * (1_024 + 256) +
+        GATE_E_INTERPRETATION_PROBES_V1.length * 256) >
         GATE_E_EXECUTION_CAPS_V1.totalOutputTokenMaximum) {
     throw new Error("GATE_E_SCORED_MANIFEST_INTEGRITY_INVALID");
   }
@@ -1051,6 +1287,42 @@ export async function executeGateEScoredRun(input: Readonly<{
   if (typeof modelResource !== "string" || modelResource.length === 0) {
     throw new Error("GATE_E_SCORED_MODEL_RESOURCE_INVALID");
   }
+  const interpreterRegistration = deriveGateEInterpreterRegistrationV1(
+    modelResource,
+  );
+  if (canonicalJsonV1(manifest.interpreterRegistration) !==
+      canonicalJsonV1(interpreterRegistration)) {
+    throw new Error("GATE_E_INTERPRETER_POLICY_IDENTITY_MISMATCH");
+  }
+  for (let probeIndex = 0;
+    probeIndex < GATE_E_INTERPRETATION_PROBES_V1.length;
+    probeIndex += 1) {
+    const probe = GATE_E_INTERPRETATION_PROBES_V1[probeIndex]!;
+    const probeRequest = buildGateEInterpretationRequest({
+      modelResource,
+      interpretationInput: probe.input,
+    });
+    const registeredProbe = interpreterRegistration.probes[probeIndex];
+    if (registeredProbe?.probeId !== probe.probeId ||
+        canonicalJsonV1(registeredProbe.requestIdentity) !==
+          canonicalJsonV1(probeRequest.identity) ||
+        registeredProbe.expectedClassificationHash !==
+          sha256(canonicalJsonV1(probe.expected))) {
+      throw new Error("GATE_E_INTERPRETER_PROBE_IDENTITY_MISMATCH");
+    }
+    const probeResponse = await sendGateEProviderRequest({
+      transport: input.transport,
+      request: probeRequest,
+      startedAtMs,
+    });
+    const interpreted = parseGateEInterpretationResponse(probeResponse);
+    const { schemaVersion: _schema, contractVersion: _contract,
+      candidateOutputHash, ...classification } = interpreted;
+    if (candidateOutputHash !== probe.input.candidateOutputHash ||
+        canonicalJsonV1(classification) !== canonicalJsonV1(probe.expected)) {
+      throw new Error("GATE_E_INTERPRETER_CALIBRATION_FAILED");
+    }
+  }
   const evidence = [];
   for (let index = 0; index < items.length; index += 1) {
     if (Date.now() - startedAtMs > GATE_E_EXECUTION_CAPS_V1.runTimeoutMs) {
@@ -1063,29 +1335,11 @@ export async function executeGateEScoredRun(input: Readonly<{
         canonicalJsonV1(expected.requestIdentity)) {
       throw new Error("GATE_E_SCORED_REQUEST_IDENTITY_MISMATCH");
     }
-    let response: Awaited<ReturnType<CandidateVertexTransport["send"]>>;
-    try {
-      const providerController = new AbortController();
-      response = await withGateERunDeadline(
-        withGateEDeadline(input.transport.send({
-          url: request.url,
-          body: request.body,
-          signal: providerController.signal,
-        }), GATE_E_EXECUTION_CAPS_V1.providerTimeoutMs,
-        "GATE_E_PROVIDER_DEADLINE_EXCEEDED", () => {
-          providerController.abort("GATE_E_PROVIDER_DEADLINE_EXCEEDED");
-        }),
-        startedAtMs,
-        () => providerController.abort("GATE_E_RUN_TIMEOUT"),
-      );
-    } catch (error) {
-      if (error instanceof Error &&
-          ["GATE_E_PROVIDER_DEADLINE_EXCEEDED", "GATE_E_RUN_TIMEOUT"]
-            .includes(error.message)) {
-        throw error;
-      }
-      throw new Error("GATE_E_SCORED_MODEL_CALL_FAILED");
-    }
+    const response = await sendGateEProviderRequest({
+      transport: input.transport,
+      request,
+      startedAtMs,
+    });
     let generated: ReturnType<typeof parseCandidateVertexResponse>;
     try {
       generated = parseCandidateVertexResponse(response);
@@ -1095,13 +1349,40 @@ export async function executeGateEScoredRun(input: Readonly<{
     if (generated.providerModelVersion !== manifest.providerModelVersion) {
       throw new Error("GATE_E_SCORED_PROVIDER_IDENTITY_MISMATCH");
     }
-    const score = scoreGateECandidateOutput({ item, output: generated.output });
+    const interpretationInput = interpretationInputFromCandidate({
+      context: item.context,
+      output: generated.output,
+    });
+    const interpretationRequest = buildGateEInterpretationRequest({
+      modelResource,
+      interpretationInput,
+    });
+    const interpretationResponse = await sendGateEProviderRequest({
+      transport: input.transport,
+      request: interpretationRequest,
+      startedAtMs,
+    });
+    const interpretation = parseGateEInterpretationResponse(
+      interpretationResponse,
+    );
+    if (interpretation.candidateOutputHash !==
+        interpretationInput.candidateOutputHash) {
+      throw new Error("GATE_E_INTERPRETATION_OUTPUT_MISMATCH");
+    }
+    const score = scoreGateECandidateOutput({
+      item,
+      output: generated.output,
+      interpretation,
+    });
     evidence.push(Object.freeze({
       corpusItemId: item.itemId,
       contextHash: item.context.contextHash,
       requestEnvelopeHash: request.identity.requestEnvelopeHash,
       providerModelVersion: generated.providerModelVersion,
       candidateOutputHash: sha256(canonicalJsonV1(generated.output)),
+      interpretationRequestEnvelopeHash:
+        interpretationRequest.identity.requestEnvelopeHash,
+      interpretationOutputHash: sha256(canonicalJsonV1(interpretation)),
       score,
     }));
   }
@@ -1126,8 +1407,8 @@ export async function executeGateEScoredRun(input: Readonly<{
   }
   const evidenceBody = Object.freeze({
     schemaVersion: 1 as const,
-    contractVersion: "DF10_GATE_E_SCORED_EVIDENCE_V1" as const,
-    admissibility: "TECHNICAL_EVIDENCE_ONLY_NOT_GATE_VERDICT" as const,
+    contractVersion: "DF10_GATE_E_SCORED_EVIDENCE_BODY_V2" as const,
+    admissibility: "UNFINALIZED_TECHNICAL_EVIDENCE" as const,
     executionBoundary: "CLEAN_TRUSTED_EXACT_HEAD_REQUEST_BYTES_V1" as const,
     scoredRunRevision: headRevision,
     manifestHash: manifest.manifestHash,
@@ -1138,10 +1419,13 @@ export async function executeGateEScoredRun(input: Readonly<{
     summary,
   });
   const evidenceHash = sha256(canonicalJsonV1(evidenceBody));
+  const bodyController = new AbortController();
   const stored = await withGateERunDeadline(input.evidenceStore.appendAtomically({
     evidenceHash,
     evidence: evidenceBody,
-  }), startedAtMs).catch((error: unknown) => {
+    signal: bodyController.signal,
+  }), startedAtMs, () => bodyController.abort("GATE_E_RUN_TIMEOUT"))
+    .catch((error: unknown) => {
     if (error instanceof Error && error.message === "GATE_E_RUN_TIMEOUT") {
       throw error;
     }
@@ -1160,10 +1444,54 @@ export async function executeGateEScoredRun(input: Readonly<{
       !storedClean) {
     throw new Error("GATE_E_TRUSTED_CHECKOUT_CHANGED");
   }
+  const finalization = Object.freeze({
+    schemaVersion: 1 as const,
+    contractVersion: "DF10_GATE_E_RUN_FINALIZATION_V1" as const,
+    disposition: "FINALIZED_TRUSTED_EXACT_HEAD" as const,
+    evidenceBodyHash: evidenceHash,
+    scoredRunRevision: headRevision,
+    trustedRevision,
+    finalClean: true as const,
+    finalizedAt: new Date().toISOString(),
+    runDeadlineAt: new Date(
+      startedAtMs + GATE_E_EXECUTION_CAPS_V1.runTimeoutMs,
+    ).toISOString(),
+  });
+  const finalizationHash = sha256(canonicalJsonV1(finalization));
+  const finalizationController = new AbortController();
+  const finalized = await withGateERunDeadline(
+    input.evidenceStore.appendAtomically({
+      evidenceHash: finalizationHash,
+      evidence: finalization,
+      signal: finalizationController.signal,
+    }),
+    startedAtMs,
+    () => finalizationController.abort("GATE_E_RUN_TIMEOUT"),
+  ).catch((error: unknown) => {
+    if (error instanceof Error && error.message === "GATE_E_RUN_TIMEOUT") {
+      throw error;
+    }
+    throw new Error("GATE_E_FINALIZATION_APPEND_FAILED");
+  });
+  if (finalized.evidenceHash !== finalizationHash ||
+      !["APPENDED", "ALREADY_PRESENT"].includes(finalized.disposition)) {
+    throw new Error("GATE_E_FINALIZATION_APPEND_MISMATCH");
+  }
+  const certification = verifyGateEEvidenceCertification({
+    body: evidenceBody,
+    finalization,
+  });
   return Object.freeze({
     ...evidenceBody,
     evidenceHash,
-    evidenceStoreDisposition: stored.disposition,
+    finalization,
+    finalizationHash,
+    certification,
+    admissibility: "FINALIZED_TRUSTED_EXACT_HEAD" as const,
+    evidenceStoreDisposition: Object.freeze({
+      body: stored.disposition,
+      finalization: finalized.disposition,
+    }),
   });
 }
 
@@ -1172,10 +1500,23 @@ export async function observeGateEProviderIdentity(input: Readonly<{
   corpus: GateECorpusV1;
   modelResource: string;
   expectedProviderModelVersion: string;
-  git: GateECandidateSourceReader;
+  git: GateEScoredRunGitReader;
   transport: CandidateVertexTransport;
-  now?: () => Date;
 }>) {
+  const startedAt = new Date().toISOString();
+  const startedAtMs = Date.parse(startedAt);
+  await withGateERunDeadline(input.git.refreshTrustedRef(), startedAtMs);
+  if (!await withGateERunDeadline(input.git.isWorktreeClean(), startedAtMs)) {
+    throw new Error("GATE_E_TRUSTED_CHECKOUT_DIRTY");
+  }
+  const [headRevision, trustedRevision] = await withGateERunDeadline(Promise.all([
+    input.git.resolveRef("HEAD"),
+    input.git.resolveRef(GATE_E_TRUSTED_SCORED_RUN_REF),
+  ]), startedAtMs);
+  if (headRevision !== trustedRevision ||
+      headRevision !== input.draft.candidateSourceRevision) {
+    throw new Error("GATE_E_TRUSTED_EXACT_HEAD_MISMATCH");
+  }
   assertDraftRegistrationIntegrity(input.draft);
   if (input.draft.corpusHash !== sha256(canonicalJsonV1(input.corpus)) ||
       input.draft.requests.length !== input.corpus.items.length) {
@@ -1207,19 +1548,42 @@ export async function observeGateEProviderIdentity(input: Readonly<{
       canonicalJsonV1(registered.requestIdentity)) {
     throw new Error("GATE_E_PROVIDER_OBSERVATION_REQUEST_MISMATCH");
   }
-  const now = input.now ?? (() => new Date());
-  const startedAt = now().toISOString();
-  const response = await input.transport.send({
-    url: request.url,
-    body: request.body,
-  }).catch(() => {
-    throw new Error("GATE_E_PROVIDER_OBSERVATION_FAILED");
-  });
-  const completedAt = now().toISOString();
+  const providerController = new AbortController();
+  const response = await withGateERunDeadline(withGateEDeadline(
+    input.transport.send({
+      url: request.url,
+      body: request.body,
+      signal: providerController.signal,
+    }),
+    GATE_E_EXECUTION_CAPS_V1.providerTimeoutMs,
+    "GATE_E_PROVIDER_OBSERVATION_TIMEOUT",
+    () => providerController.abort("GATE_E_PROVIDER_OBSERVATION_TIMEOUT"),
+  ), startedAtMs, () => providerController.abort("GATE_E_RUN_TIMEOUT"))
+    .catch((error: unknown) => {
+      if (error instanceof Error && [
+        "GATE_E_PROVIDER_OBSERVATION_TIMEOUT",
+        "GATE_E_RUN_TIMEOUT",
+      ].includes(error.message)) throw error;
+      throw new Error("GATE_E_PROVIDER_OBSERVATION_FAILED");
+    });
+  const completedAt = new Date().toISOString();
+  const [finalHead, finalTrusted, finalClean] = await withGateERunDeadline(
+    Promise.all([
+      input.git.resolveRef("HEAD"),
+      input.git.resolveRef(GATE_E_TRUSTED_SCORED_RUN_REF),
+      input.git.isWorktreeClean(),
+    ]),
+    startedAtMs,
+  );
+  if (finalHead !== headRevision || finalTrusted !== trustedRevision ||
+      !finalClean) {
+    throw new Error("GATE_E_TRUSTED_CHECKOUT_CHANGED");
+  }
   return createRedactedProviderObservation({
     expectedProviderModelVersion: input.expectedProviderModelVersion,
     observedProviderModelVersion: response.providerModelVersion ?? "",
     requestIdentity: request.identity,
+    trustedSourceRevision: headRevision,
     startedAt,
     completedAt,
   });
@@ -1389,6 +1753,7 @@ async function verifyGateERegistrationBundle(input: Readonly<{
       observedProviderModelVersion:
         String(observation.observedProviderModelVersion ?? ""),
       requestIdentity: expectedDraft.requests[0]!.requestIdentity,
+      trustedSourceRevision: String(observation.trustedSourceRevision ?? ""),
       startedAt: String(observation.startedAt ?? ""),
       completedAt: String(observation.completedAt ?? ""),
     });
@@ -1427,6 +1792,7 @@ async function verifyGateERegistrationBundle(input: Readonly<{
       observation.disposition !== "PROVIDER_IDENTITY_OBSERVED_MATCH" ||
       observation.expectedProviderModelVersion !== registration.providerModelVersion ||
       observation.observedProviderModelVersion !== registration.providerModelVersion ||
+      observation.trustedSourceRevision !== registration.candidateSourceRevision ||
       firstRequestIdentity.requestEnvelopeHash !==
         observation.requestEnvelopeHash ||
       !Number.isFinite(observationStartedAt) ||
