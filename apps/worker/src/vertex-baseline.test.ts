@@ -42,13 +42,15 @@ function importedContextV2Symbols(source: string): readonly string[] {
     if (!ts.isImportDeclaration(statement) || statement.importClause === undefined) {
       continue;
     }
+    const isContractsImport = ts.isStringLiteral(statement.moduleSpecifier) &&
+      statement.moduleSpecifier.text === "@lana/contracts";
+    if (isContractsImport && statement.importClause.name !== undefined) {
+      violations.push(`default:${statement.importClause.name.text}`);
+    }
     const bindings = statement.importClause.namedBindings;
     if (bindings === undefined) continue;
     if (ts.isNamespaceImport(bindings)) {
-      if (
-        ts.isStringLiteral(statement.moduleSpecifier) &&
-        statement.moduleSpecifier.text === "@lana/contracts"
-      ) {
+      if (isContractsImport) {
         violations.push(`namespace:${bindings.name.text}`);
       }
       continue;
@@ -133,9 +135,17 @@ describe("baseline model capability", () => {
     expect(importedContextV2Symbols(
       'import type { ContextV2 as CandidateContext } from "@lana/contracts";',
     )).toEqual(["ContextV2"]);
+    expect(importedContextV2Symbols(
+      'import CandidateContext from "@lana/contracts";',
+    )).toEqual(["default:CandidateContext"]);
+    expect(importedContextV2Symbols(
+      'import CandidateContext from "./candidate-context.js";',
+    )).toEqual([]);
 
     const entryFile = fileURLToPath(new URL("./vertex-baseline.ts", import.meta.url));
     const workerSourceRoot = dirname(entryFile);
+    // Workspace package barrels are trust boundaries. Inspect worker-owned use
+    // sites here; request-envelope pins separately guard runtime behavior.
     for (const dependency of resolvedLocalDependencyGraph(entryFile)) {
       if (!dependency.startsWith(workerSourceRoot)) continue;
       expect(importedContextV2Symbols(readFileSync(dependency, "utf8"))).toEqual([]);
