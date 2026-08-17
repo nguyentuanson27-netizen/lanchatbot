@@ -7,6 +7,16 @@ import {
 } from "./context-v2-capture.js";
 import type { ContextV2 } from "@lana/contracts";
 
+export const CONTEXT_V2_CANDIDATE_PROMPT_VERSION =
+  "context-v2-candidate-v1" as const;
+const CONTEXT_V2_CANDIDATE_SOURCE_PREFIX =
+  `${CONTEXT_V2_CANDIDATE_PROMPT_VERSION}:` as const;
+const LEGACY_EVALUATION_SCOPE_SQL =
+  "prompt_version NOT LIKE 'context-v2-candidate-%'";
+const CONTEXT_V2_CANDIDATE_SCOPE_SQL =
+  `prompt_version = '${CONTEXT_V2_CANDIDATE_PROMPT_VERSION}' AND ` +
+  `source_identity_key LIKE '${CONTEXT_V2_CANDIDATE_SOURCE_PREFIX}%'`;
+
 export interface ShadowContextMessage {
   readonly direction: "INBOUND" | "OUTBOUND";
   readonly senderType: "CUSTOMER" | "BOT" | "HUMAN" | "SYSTEM";
@@ -140,6 +150,8 @@ export interface PostgresShadowEvaluationOptions {
 
 export interface ContextV2CandidateCoverage {
   readonly denominator: number;
+  readonly terminalCaptures: number;
+  readonly enqueued: number;
   readonly scored: number;
   readonly excludedTerminal: number;
   readonly pending: number;
@@ -213,13 +225,15 @@ async function claimRow(
      SET status = CASE WHEN attempt_count >= 3 THEN 'FAILED_PERMANENT' ELSE 'FAILED_RETRYABLE' END,
          next_attempt_at = now(), claimed_at = NULL, claim_token = NULL,
          error_code = 'STALE_PROCESSING_CLAIM', updated_at = now()
-     WHERE status = 'PROCESSING' AND claimed_at < now() - interval '10 minutes'`,
+     WHERE ${LEGACY_EVALUATION_SCOPE_SQL}
+       AND status = 'PROCESSING' AND claimed_at < now() - interval '10 minutes'`,
   );
   const result = await client.query<ClaimedRow>(
     `WITH candidate AS (
        SELECT evaluation_id
        FROM shadow_evaluations
-       WHERE status IN ('PENDING', 'FAILED_RETRYABLE')
+       WHERE ${LEGACY_EVALUATION_SCOPE_SQL}
+          AND status IN ('PENDING', 'FAILED_RETRYABLE')
           AND next_attempt_at <= now()
           AND attempt_count < 3
           AND source_occurred_at <= now() - make_interval(secs => $1)
@@ -232,11 +246,13 @@ async function claimRow(
           AND (
             SELECT count(*) FROM shadow_evaluations generated_today
             WHERE generated_today.attempt_count > 0
+              AND generated_today.prompt_version NOT LIKE 'context-v2-candidate-%'
               AND generated_today.claimed_at >= date_trunc('day', now())
           ) < $2
           AND (
             SELECT count(*) FROM shadow_evaluations generated_hour
             WHERE generated_hour.attempt_count > 0
+              AND generated_hour.prompt_version NOT LIKE 'context-v2-candidate-%'
               AND generated_hour.claimed_at >= date_trunc('hour', now())
           ) < $3
        ORDER BY source_occurred_at, evaluation_id
@@ -248,6 +264,7 @@ async function claimRow(
          claimed_at = now(), claim_token = gen_random_uuid(), error_code = NULL, updated_at = now()
      FROM candidate
      WHERE evaluation.evaluation_id = candidate.evaluation_id
+       AND evaluation.prompt_version NOT LIKE 'context-v2-candidate-%'
      RETURNING evaluation.evaluation_id, evaluation.source_identity_key,
        evaluation.source_message_pk, evaluation.source_occurred_at,
        evaluation.conversation_id, evaluation.page_id,
@@ -335,10 +352,10 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
          conversation_id, page_id, customer_hash, prompt_version,
          next_attempt_at
        )
-       SELECT 'context-v2-candidate-v1:' || source.message_pk::text,
+       SELECT '${CONTEXT_V2_CANDIDATE_SOURCE_PREFIX}' || source.message_pk::text,
               source.message_pk, source.source_occurred_at,
               source.conversation_id, source.page_id, source.customer_hash,
-              'context-v2-candidate-v1', now()
+              '${CONTEXT_V2_CANDIDATE_PROMPT_VERSION}', now()
        FROM terminal_source source
        ON CONFLICT (source_identity_key) DO NOTHING`,
       [boundedLimit],
@@ -348,29 +365,91 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
 
   async contextV2CandidateCoverage(): Promise<ContextV2CandidateCoverage> {
     const result = await this.pool.query<{
-      status: string;
+      category: "SCORED" | "EXCLUDED" | "PENDING";
       reason_code: string | null;
+      enqueued: boolean;
       item_count: string;
     }>(
-      `SELECT status,
-              CASE WHEN status = 'FAILED_PERMANENT'
-                THEN COALESCE(error_code, 'CONTEXT_V2_TERMINAL_UNCLASSIFIED')
-                ELSE NULL
-              END AS reason_code,
-              count(*)::text AS item_count
-       FROM shadow_evaluations
-       WHERE prompt_version = 'context-v2-candidate-v1'
-       GROUP BY status, reason_code`,
+      `WITH capture_events AS (
+         SELECT CASE
+                  WHEN event.event_metadata->>'sourceMessagePk' ~
+                    '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+                    THEN event.event_metadata->>'sourceMessagePk'
+                  ELSE 'event:' || event.event_id::text || ':' ||
+                    extract(epoch FROM event.occurred_at)::text
+                END AS population_key,
+                event.event_metadata->>'sourceMessagePk' AS source_message_pk,
+                event.conversation_id, event.occurred_at
+         FROM conversation_events event
+         WHERE event.event_type = 'CONTEXT_V2_DERIVED'
+           AND event.occurred_at >= now() - interval '6 months'
+           AND event.occurred_at <= now()
+       ), capture_population AS (
+         SELECT population_key, source_message_pk, conversation_id,
+                min(occurred_at) AS first_capture_at,
+                max(occurred_at) AS last_capture_at
+         FROM capture_events
+         GROUP BY population_key, source_message_pk, conversation_id
+       ), classified AS (
+         SELECT evaluation.evaluation_id IS NOT NULL AS enqueued,
+                CASE
+                  WHEN capture.source_message_pk IS NULL OR
+                       capture.population_key LIKE 'event:%'
+                    THEN 'EXCLUDED'
+                  WHEN message.message_pk IS NULL THEN 'EXCLUDED'
+                  WHEN message.direction IS DISTINCT FROM 'INBOUND' THEN 'EXCLUDED'
+                  WHEN message.sender_type IS DISTINCT FROM 'CUSTOMER' THEN 'EXCLUDED'
+                  WHEN message.dlp_status IS DISTINCT FROM 'PASSED' THEN 'EXCLUDED'
+                  WHEN evaluation.status = 'COMPLETED' THEN 'SCORED'
+                  WHEN evaluation.status = 'FAILED_PERMANENT' THEN 'EXCLUDED'
+                  ELSE 'PENDING'
+                END AS category,
+                CASE
+                  WHEN capture.source_message_pk IS NULL OR
+                       capture.population_key LIKE 'event:%'
+                    THEN 'CONTEXT_V2_CAPTURE_SOURCE_PK_INVALID'
+                  WHEN message.message_pk IS NULL
+                    THEN 'CONTEXT_V2_SOURCE_MESSAGE_MISSING'
+                  WHEN message.direction IS DISTINCT FROM 'INBOUND'
+                    THEN 'CONTEXT_V2_SOURCE_DIRECTION_INELIGIBLE'
+                  WHEN message.sender_type IS DISTINCT FROM 'CUSTOMER'
+                    THEN 'CONTEXT_V2_SOURCE_SENDER_INELIGIBLE'
+                  WHEN message.dlp_status IS DISTINCT FROM 'PASSED'
+                    THEN 'CONTEXT_V2_SOURCE_DLP_INELIGIBLE'
+                  WHEN evaluation.status = 'FAILED_PERMANENT'
+                    THEN COALESCE(
+                      evaluation.error_code,
+                      'CONTEXT_V2_TERMINAL_UNCLASSIFIED'
+                    )
+                  ELSE NULL
+                END AS reason_code
+         FROM capture_population capture
+         LEFT JOIN messages message
+           ON message.conversation_id = capture.conversation_id
+          AND message.occurred_at >= capture.first_capture_at - interval '5 minutes'
+          AND message.occurred_at <= capture.last_capture_at + interval '5 minutes'
+          AND message.message_pk::text = capture.source_message_pk
+         LEFT JOIN shadow_evaluations evaluation
+           ON evaluation.source_identity_key =
+             '${CONTEXT_V2_CANDIDATE_SOURCE_PREFIX}' || capture.source_message_pk
+          AND evaluation.prompt_version = '${CONTEXT_V2_CANDIDATE_PROMPT_VERSION}'
+          AND evaluation.source_identity_key LIKE '${CONTEXT_V2_CANDIDATE_SOURCE_PREFIX}%'
+       )
+       SELECT category, reason_code, enqueued, count(*)::text AS item_count
+       FROM classified
+       GROUP BY category, reason_code, enqueued`,
     );
     let denominator = 0;
+    let enqueued = 0;
     let scored = 0;
     let excludedTerminal = 0;
     const exclusionReasonCounts: Record<string, number> = {};
     for (const row of result.rows) {
       const count = Math.max(0, Number.parseInt(row.item_count, 10) || 0);
       denominator += count;
-      if (row.status === "COMPLETED") scored += count;
-      else if (row.status === "FAILED_PERMANENT") {
+      if (row.enqueued) enqueued += count;
+      if (row.category === "SCORED") scored += count;
+      else if (row.category === "EXCLUDED") {
         excludedTerminal += count;
         const reasonCode = row.reason_code ?? "CONTEXT_V2_TERMINAL_UNCLASSIFIED";
         exclusionReasonCounts[reasonCode] =
@@ -379,6 +458,8 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
     }
     return {
       denominator,
+      terminalCaptures: denominator,
+      enqueued,
       scored,
       excludedTerminal,
       pending: denominator - scored - excludedTerminal,
@@ -402,7 +483,7 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
              END,
              claim_token = NULL, claimed_at = NULL,
              next_attempt_at = now(), updated_at = now()
-         WHERE prompt_version = 'context-v2-candidate-v1'
+         WHERE ${CONTEXT_V2_CANDIDATE_SCOPE_SQL}
            AND status = 'PROCESSING'
            AND claimed_at <= now() - interval '5 minutes'`,
       );
@@ -417,7 +498,7 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
                 clock_timestamp() AS transaction_now
          FROM shadow_evaluations
          WHERE status IN ('PENDING', 'FAILED_RETRYABLE')
-           AND prompt_version = 'context-v2-candidate-v1'
+           AND ${CONTEXT_V2_CANDIDATE_SCOPE_SQL}
            AND next_attempt_at <= now()
            AND attempt_count < 3
          ORDER BY source_occurred_at, evaluation_id
@@ -441,6 +522,7 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
           `UPDATE shadow_evaluations
            SET next_attempt_at = now() + interval '10 seconds', updated_at = now()
            WHERE evaluation_id = $1
+             AND ${CONTEXT_V2_CANDIDATE_SCOPE_SQL}
              AND status IN ('PENDING', 'FAILED_RETRYABLE')`,
           [row.evaluation_id],
         );
@@ -458,6 +540,7 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
                blocked_reason_codes = ARRAY[$2]::text[],
                claim_token = NULL, claimed_at = NULL, updated_at = now()
            WHERE evaluation_id = $1
+             AND ${CONTEXT_V2_CANDIDATE_SCOPE_SQL}
              AND status IN ('PENDING', 'FAILED_RETRYABLE')`,
           [row.evaluation_id, reasonCode.slice(0, 128)],
         );
@@ -469,6 +552,7 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
              claimed_at = now(), claim_token = gen_random_uuid(),
              error_code = NULL, updated_at = now()
          WHERE evaluation_id = $1
+           AND ${CONTEXT_V2_CANDIDATE_SCOPE_SQL}
            AND status IN ('PENDING', 'FAILED_RETRYABLE')
          RETURNING claim_token`,
         [row.evaluation_id],
@@ -497,7 +581,9 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
            model_provider = 'VERTEX_AI', model_version = $3,
            proposal = $4::jsonb, quality_assessment = $5::jsonb,
            claim_token = NULL, error_code = NULL, updated_at = now()
-       WHERE evaluation_id = $1 AND status = 'PROCESSING' AND claim_token = $2`,
+       WHERE evaluation_id = $1
+         AND ${CONTEXT_V2_CANDIDATE_SCOPE_SQL}
+         AND status = 'PROCESSING' AND claim_token = $2`,
       [
         input.evaluationId,
         input.claimToken,
@@ -517,13 +603,59 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
     errorCode: string;
     retryable: boolean;
   }>): Promise<void> {
-    await this.fail(
-      input.evaluationId,
-      input.claimToken,
-      input.errorCode,
-      input.retryable,
-      3,
+    const result = await this.pool.query(
+      `UPDATE shadow_evaluations
+       SET status = CASE
+             WHEN NOT $4 OR attempt_count >= 3
+               THEN 'FAILED_PERMANENT'
+             ELSE 'FAILED_RETRYABLE'
+           END,
+           next_attempt_at = CASE
+             WHEN NOT $4 OR attempt_count >= 3 THEN next_attempt_at
+             ELSE now() + make_interval(
+               secs => LEAST(300, CAST(power(2, attempt_count) AS integer))
+             )
+           END,
+           claim_token = NULL, error_code = $3, updated_at = now()
+       WHERE evaluation_id = $1
+         AND ${CONTEXT_V2_CANDIDATE_SCOPE_SQL}
+         AND status = 'PROCESSING' AND claim_token = $2`,
+      [
+        input.evaluationId,
+        input.claimToken,
+        input.errorCode.slice(0, 128),
+        input.retryable,
+      ],
     );
+    if (result.rowCount !== 1) {
+      throw new Error("CONTEXT_V2_CANDIDATE_FAILURE_CONFLICT");
+    }
+  }
+
+  async releaseContextV2CandidateRunBlocked(input: Readonly<{
+    evaluationId: string;
+    claimToken: string;
+    reasonCode: string;
+  }>): Promise<void> {
+    const result = await this.pool.query(
+      `UPDATE shadow_evaluations
+       SET status = 'PENDING',
+           attempt_count = GREATEST(0, attempt_count - 1),
+           next_attempt_at = now() + interval '5 minutes',
+           claim_token = NULL, claimed_at = NULL,
+           error_code = $3, updated_at = now()
+       WHERE evaluation_id = $1
+         AND ${CONTEXT_V2_CANDIDATE_SCOPE_SQL}
+         AND status = 'PROCESSING' AND claim_token = $2`,
+      [
+        input.evaluationId,
+        input.claimToken,
+        input.reasonCode.slice(0, 128),
+      ],
+    );
+    if (result.rowCount !== 1) {
+      throw new Error("CONTEXT_V2_CANDIDATE_RUN_BLOCK_RELEASE_CONFLICT");
+    }
   }
 
   async claimNext(): Promise<ShadowEvaluationJob | null> {
@@ -583,7 +715,8 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
         `WITH candidate AS (
            SELECT evaluation_id
            FROM shadow_evaluations
-           WHERE status = 'AWAITING_ACTUAL' AND next_attempt_at <= now()
+           WHERE ${LEGACY_EVALUATION_SCOPE_SQL}
+             AND status = 'AWAITING_ACTUAL' AND next_attempt_at <= now()
            ORDER BY source_occurred_at, evaluation_id
            FOR UPDATE SKIP LOCKED
            LIMIT 1
@@ -592,6 +725,7 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
          SET claim_token = gen_random_uuid(), updated_at = now()
          FROM candidate
          WHERE evaluation.evaluation_id = candidate.evaluation_id
+           AND evaluation.prompt_version NOT LIKE 'context-v2-candidate-%'
          RETURNING evaluation.evaluation_id, evaluation.claim_token,
            evaluation.conversation_id, evaluation.source_occurred_at,
            evaluation.proposal->>'reply' AS proposal_reply,
@@ -609,7 +743,9 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
                completed_at = CASE WHEN $3 THEN now() ELSE completed_at END,
                next_attempt_at = now() + interval '30 seconds', claim_token = NULL,
                updated_at = now()
-           WHERE evaluation_id = $1 AND claim_token = $2`,
+           WHERE evaluation_id = $1
+             AND ${LEGACY_EVALUATION_SCOPE_SQL}
+             AND claim_token = $2`,
           [row.evaluation_id, row.claim_token, expired],
         );
         return null;
@@ -666,7 +802,9 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
            business_fact_payload = $20::jsonb,
            claim_token = NULL,
            error_code = NULL, updated_at = now()
-       WHERE evaluation_id = $1 AND status = 'PROCESSING' AND claim_token = $21`,
+       WHERE evaluation_id = $1
+         AND ${LEGACY_EVALUATION_SCOPE_SQL}
+         AND status = 'PROCESSING' AND claim_token = $21`,
       [
         evaluationId,
         completion.modelProvider,
@@ -706,7 +844,9 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
        SET status = 'COMPLETED', completed_at = now(), claim_token = NULL,
            actual_outbound_text_redacted = $3, actual_outbound_count = $4,
            text_similarity = $5, quality_assessment = $6::jsonb, updated_at = now()
-       WHERE evaluation_id = $1 AND status = 'AWAITING_ACTUAL' AND claim_token = $2`,
+       WHERE evaluation_id = $1
+         AND ${LEGACY_EVALUATION_SCOPE_SQL}
+         AND status = 'AWAITING_ACTUAL' AND claim_token = $2`,
       [
         job.evaluationId,
         job.claimToken,
@@ -734,7 +874,9 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
              ELSE now() + make_interval(secs => LEAST(300, CAST(power(2, attempt_count) AS integer)))
            END,
            claim_token = NULL, error_code = $2, updated_at = now()
-       WHERE evaluation_id = $1 AND status = 'PROCESSING' AND claim_token = $5`,
+       WHERE evaluation_id = $1
+         AND ${LEGACY_EVALUATION_SCOPE_SQL}
+         AND status = 'PROCESSING' AND claim_token = $5`,
       [evaluationId, errorCode.slice(0, 128), maxAttempts, retryable, claimToken],
     );
     if (result.rowCount !== 1) throw new Error("SHADOW_EVALUATION_FAILURE_CONFLICT");
@@ -772,7 +914,9 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
   }
 
   async summary(pageId?: string): Promise<ShadowEvaluationSummary> {
-    const pageFilter = pageId ? "WHERE page_id = $1" : "";
+    const pageFilter = pageId
+      ? `WHERE ${LEGACY_EVALUATION_SCOPE_SQL} AND page_id = $1`
+      : `WHERE ${LEGACY_EVALUATION_SCOPE_SQL}`;
     const values = pageId ? [pageId] : [];
     const result = await this.pool.query<{
       total: string; pending: string; processing: string; awaiting_actual: string; completed: string;
@@ -829,7 +973,9 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
   async recent(limit: number, pageId?: string): Promise<readonly ShadowEvaluationRecentItem[]> {
     const boundedLimit = Math.max(1, Math.min(100, Math.trunc(limit)));
     const values: unknown[] = pageId ? [pageId, boundedLimit] : [boundedLimit];
-    const where = pageId ? "WHERE page_id = $1" : "";
+    const where = pageId
+      ? `WHERE ${LEGACY_EVALUATION_SCOPE_SQL} AND page_id = $1`
+      : `WHERE ${LEGACY_EVALUATION_SCOPE_SQL}`;
     const limitParameter = pageId ? "$2" : "$1";
     const result = await this.pool.query<{
       evaluation_id: string; conversation_ref: string; status: string;

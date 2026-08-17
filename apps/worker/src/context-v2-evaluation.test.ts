@@ -195,6 +195,7 @@ describe("async Context V2 candidate runner", () => {
       claimContextV2CandidateNext,
       completeContextV2Candidate: vi.fn(),
       failContextV2Candidate: vi.fn(),
+      releaseContextV2CandidateRunBlocked: vi.fn(),
     };
     const worker = new ContextV2CandidateWorker(store, {
       generateCandidate: vi.fn(),
@@ -227,6 +228,7 @@ describe("async Context V2 candidate runner", () => {
       claimContextV2CandidateNext,
       completeContextV2Candidate: vi.fn(),
       failContextV2Candidate: vi.fn(),
+      releaseContextV2CandidateRunBlocked: vi.fn(),
     }, { generateCandidate: vi.fn() });
     await expect(worker.initialize()).rejects.toThrow(
       "CONTEXT_V2_CANDIDATE_QUEUE_WRITE_UNAVAILABLE",
@@ -253,6 +255,7 @@ describe("async Context V2 candidate runner", () => {
       }),
       completeContextV2Candidate: vi.fn(),
       failContextV2Candidate: vi.fn(),
+      releaseContextV2CandidateRunBlocked: vi.fn(),
     }, { generateCandidate: vi.fn() });
     await worker.initialize();
     await worker.processOne();
@@ -272,6 +275,7 @@ describe("async Context V2 candidate runner", () => {
           : { kind, reasonCode: `TEST_${kind}` }),
         completeContextV2Candidate: vi.fn(),
         failContextV2Candidate: vi.fn(),
+        releaseContextV2CandidateRunBlocked: vi.fn(),
       }, model);
       await expect(runner.processOne()).resolves.toBe(kind);
       expect(model.generateCandidate).not.toHaveBeenCalled();
@@ -303,6 +307,7 @@ describe("async Context V2 candidate runner", () => {
       })),
       completeContextV2Candidate,
       failContextV2Candidate: vi.fn(),
+      releaseContextV2CandidateRunBlocked: vi.fn(),
     }, model);
     await expect(runner.processOne()).resolves.toBe("CLAIMED");
     expect(model.generateCandidate).toHaveBeenCalledOnce();
@@ -313,8 +318,6 @@ describe("async Context V2 candidate runner", () => {
 
   it.each([
     ["CONTEXT_V2_CANDIDATE_RESPONSE_INVALID", false],
-    ["CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_UNKNOWN", false],
-    ["CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_MISMATCH", false],
     ["CONTEXT_V2_CANDIDATE_PROVIDER_TIMEOUT", true],
     ["untrusted provider detail", true],
   ] as const)("classifies %s without leaking details or looping", async (
@@ -331,6 +334,7 @@ describe("async Context V2 candidate runner", () => {
       })),
       completeContextV2Candidate: vi.fn(),
       failContextV2Candidate,
+      releaseContextV2CandidateRunBlocked: vi.fn(),
     }, {
       generateCandidate: vi.fn(async () => {
         throw new Error(message);
@@ -345,5 +349,40 @@ describe("async Context V2 candidate runner", () => {
         : message,
       retryable,
     });
+  });
+
+  it.each([
+    "CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_UNKNOWN",
+    "CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_MISMATCH",
+  ])("releases %s without consuming an item attempt and blocks the run", async (
+    message,
+  ) => {
+    const releaseContextV2CandidateRunBlocked = vi.fn(async () => undefined);
+    const failContextV2Candidate = vi.fn();
+    const runner = new ContextV2CandidateRunner({
+      claimContextV2CandidateNext: vi.fn(async () => ({
+        kind: "CLAIMED" as const,
+        evaluationId: "evaluation-1",
+        claimToken: "claim-1",
+        context: {} as ContextV2,
+      })),
+      completeContextV2Candidate: vi.fn(),
+      failContextV2Candidate,
+      releaseContextV2CandidateRunBlocked,
+    }, {
+      generateCandidate: vi.fn(async () => {
+        throw new Error(message);
+      }),
+    });
+
+    await expect(runner.processOne()).rejects.toThrow(
+      "CONTEXT_V2_CANDIDATE_RUN_BLOCKED_MODEL_IDENTITY",
+    );
+    expect(releaseContextV2CandidateRunBlocked).toHaveBeenCalledWith({
+      evaluationId: "evaluation-1",
+      claimToken: "claim-1",
+      reasonCode: message,
+    });
+    expect(failContextV2Candidate).not.toHaveBeenCalled();
   });
 });

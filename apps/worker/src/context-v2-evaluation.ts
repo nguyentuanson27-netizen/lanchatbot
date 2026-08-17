@@ -218,11 +218,19 @@ export interface ContextV2CandidateEvaluationStore {
     errorCode: string;
     retryable: boolean;
   }>): Promise<void>;
+  releaseContextV2CandidateRunBlocked(input: Readonly<{
+    evaluationId: string;
+    claimToken: string;
+    reasonCode: string;
+  }>): Promise<void>;
 }
 
-const NON_RETRYABLE_CANDIDATE_ERRORS = new Set([
+const RUN_BLOCKING_CANDIDATE_ERRORS = new Set([
   "CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_UNKNOWN",
   "CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_MISMATCH",
+]);
+
+const NON_RETRYABLE_CANDIDATE_ERRORS = new Set([
   "CONTEXT_V2_CANDIDATE_RESPONSE_INVALID",
   "CONTEXT_V2_CANDIDATE_RESPONSE_MISSING",
 ]);
@@ -261,6 +269,15 @@ export class ContextV2CandidateRunner {
         requestIdentity: generated.requestIdentity,
       });
     } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      if (RUN_BLOCKING_CANDIDATE_ERRORS.has(message)) {
+        await this.store.releaseContextV2CandidateRunBlocked({
+          evaluationId: claim.evaluationId,
+          claimToken: claim.claimToken,
+          reasonCode: message,
+        });
+        throw new Error("CONTEXT_V2_CANDIDATE_RUN_BLOCKED_MODEL_IDENTITY");
+      }
       const failure = candidateFailure(error);
       await this.store.failContextV2Candidate({
         evaluationId: claim.evaluationId,

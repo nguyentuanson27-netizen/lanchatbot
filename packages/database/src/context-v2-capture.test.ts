@@ -360,24 +360,35 @@ describe("async candidate claim state machine", () => {
   });
 
   it("keeps every terminal exclusion in the coverage denominator", async () => {
-    const query = vi.fn(async () => ({
-      rows: [
-        { status: "COMPLETED", reason_code: null, item_count: "7" },
-        { status: "FAILED_PERMANENT", reason_code: "CONTEXT_V2_CAPTURE_AMBIGUOUS", item_count: "2" },
-        { status: "FAILED_PERMANENT", reason_code: "CONTEXT_V2_CAPTURE_SCHEMA_INVALID", item_count: "1" },
-        { status: "PENDING", reason_code: null, item_count: "3" },
-      ],
-      rowCount: 4,
-    }));
+    const query = vi.fn(async (sql: string) => {
+      expect(sql).toContain("FROM conversation_events event");
+      expect(sql).toContain("LEFT JOIN messages message");
+      expect(sql).toContain("CONTEXT_V2_SOURCE_DLP_INELIGIBLE");
+      expect(sql).toContain("CONTEXT_V2_CAPTURE_SOURCE_PK_INVALID");
+      return {
+        rows: [
+          { category: "SCORED", reason_code: null, enqueued: true, item_count: "7" },
+          { category: "EXCLUDED", reason_code: "CONTEXT_V2_CAPTURE_AMBIGUOUS", enqueued: true, item_count: "2" },
+          { category: "EXCLUDED", reason_code: "CONTEXT_V2_CAPTURE_SCHEMA_INVALID", enqueued: true, item_count: "1" },
+          { category: "EXCLUDED", reason_code: "CONTEXT_V2_SOURCE_DLP_INELIGIBLE", enqueued: false, item_count: "2" },
+          { category: "PENDING", reason_code: null, enqueued: true, item_count: "3" },
+          { category: "PENDING", reason_code: null, enqueued: false, item_count: "1" },
+        ],
+        rowCount: 6,
+      };
+    });
     await expect(candidateStore(query).contextV2CandidateCoverage()).resolves
       .toEqual({
-        denominator: 13,
+        denominator: 16,
+        terminalCaptures: 16,
+        enqueued: 13,
         scored: 7,
-        excludedTerminal: 3,
-        pending: 3,
+        excludedTerminal: 5,
+        pending: 4,
         exclusionReasonCounts: {
           CONTEXT_V2_CAPTURE_AMBIGUOUS: 2,
           CONTEXT_V2_CAPTURE_SCHEMA_INVALID: 1,
+          CONTEXT_V2_SOURCE_DLP_INELIGIBLE: 2,
         },
       });
   });
@@ -480,5 +491,83 @@ describe("async candidate claim state machine", () => {
     expect(query.mock.calls.some(([sql]) =>
       String(sql).includes("attempt_count = attempt_count + 1")
     )).toBe(false);
+  });
+
+  it("releases a run-blocked candidate without consuming its attempt", async () => {
+    const query = vi.fn(async (sql: string, parameters?: readonly unknown[]) => {
+      expect(sql).toContain("attempt_count = GREATEST(0, attempt_count - 1)");
+      expect(sql).toContain("prompt_version = 'context-v2-candidate-v1'");
+      expect(parameters).toEqual([
+        "evaluation-1",
+        "claim-1",
+        "CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_MISMATCH",
+      ]);
+      return { rows: [], rowCount: 1 };
+    });
+    await expect(candidateStore(query).releaseContextV2CandidateRunBlocked({
+      evaluationId: "evaluation-1",
+      claimToken: "claim-1",
+      reasonCode: "CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_MISMATCH",
+    })).resolves.toBeUndefined();
+  });
+
+  it("puts an explicit prompt-owner predicate on every exercised queue mutation", async () => {
+    const mutations: string[] = [];
+    const query = vi.fn(async (sql: string) => {
+      if (/UPDATE shadow_evaluations/u.test(sql)) mutations.push(sql);
+      return { rows: [], rowCount: 1 };
+    });
+    const store = candidateStore(query);
+
+    await store.claimNext();
+    await store.claimComparisonNext();
+    await store.fail("legacy-1", "legacy-token", "TEST", true, 3);
+    await store.complete("legacy-1", "legacy-token", {
+      proposal: null,
+      guardedPlan: null,
+      blockedReasonCodes: [],
+      modelProvider: "test",
+      modelName: "test",
+      modelVersion: "test",
+      latencyMs: 0,
+      tokenUsage: {},
+      textSimilarity: null,
+      inputContextHash: "test",
+      actualOutboundText: null,
+      actualOutboundCount: 0,
+      businessFactAudit: null,
+      businessFactEnvelope: null,
+    });
+    await store.completeComparison({
+      evaluationId: "legacy-1",
+      claimToken: "legacy-token",
+      proposalReply: "",
+      actualOutboundText: "",
+      actualOutboundCount: 0,
+      context: [],
+      proposalSummary: null,
+      guardOutcome: null,
+      businessFactEnvelope: null,
+    }, 0, null);
+    await store.failContextV2Candidate({
+      evaluationId: "candidate-1",
+      claimToken: "candidate-token",
+      errorCode: "TEST",
+      retryable: true,
+    });
+    await store.completeContextV2Candidate({
+      evaluationId: "candidate-1",
+      claimToken: "candidate-token",
+      output: null,
+      providerModelVersion: "test",
+      requestIdentity: null,
+    });
+
+    expect(mutations.length).toBeGreaterThanOrEqual(8);
+    for (const sql of mutations) {
+      expect(sql).toMatch(
+        /prompt_version\s*(?:=\s*'context-v2-candidate-v1'|NOT LIKE\s*'context-v2-candidate-%')/u,
+      );
+    }
   });
 });
