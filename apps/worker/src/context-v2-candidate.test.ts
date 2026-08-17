@@ -22,7 +22,7 @@ function context(): ContextV2 {
     finalTurnEvidence: {
       schemaVersion: 2 as const,
       contractVersion: "FINAL_TURN_EVIDENCE_V2" as const,
-      sourceMessagePk: "opaque-message-pk-1",
+      sourceMessagePk: "11111111-1111-4111-8111-111111111111",
       sourceMessageIdHash: hash("a"),
       preTransitionConversationRevision: 4,
       finalConversationRevision: 5,
@@ -194,7 +194,7 @@ describe("Context V2 candidate capability", () => {
       context: context(),
     });
     expect(request.identity.requestEnvelopeHash).toBe(
-      "1be6421ab38334c8f26e0071f76935a99f6f129e1861a4497df1eea7e8f3ac51",
+      "45c275186bccb75366c1ec3f8b6095e0377d7bd4aa7bd28e1005d392be600064",
     );
     expect(request.body).toContain("responseSchema");
     expect(request.body).toContain("safetySettings");
