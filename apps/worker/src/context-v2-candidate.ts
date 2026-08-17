@@ -1,25 +1,97 @@
 import { createHash } from "node:crypto";
 import {
-  ContextV2CandidateOutputV1Schema,
+  ContextV2CandidateOutputV2Schema,
   canonicalJsonV1,
   type ContextV2,
-  type ContextV2CandidateOutputV1,
+  type ContextV2CandidateOutputV2,
 } from "@lana/contracts";
 import { parseContextV2WithIntegrity } from "./context-v2.js";
 
-export type ContextV2CandidateOutput = ContextV2CandidateOutputV1;
+export type ContextV2CandidateOutput = ContextV2CandidateOutputV2;
 
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
   additionalProperties: false,
-  required: ["schemaVersion", "contractVersion", "reply", "strategy", "cta"],
+  required: [
+    "schemaVersion",
+    "contractVersion",
+    "contextHash",
+    "productBinding",
+    "segments",
+    "strategy",
+    "cta",
+  ],
   properties: {
-    schemaVersion: { type: "INTEGER", enum: [1] },
+    schemaVersion: { type: "INTEGER", enum: [2] },
     contractVersion: {
       type: "STRING",
-      enum: ["CONTEXT_V2_CANDIDATE_OUTPUT_V1"],
+      enum: ["CONTEXT_V2_CANDIDATE_OUTPUT_V2"],
     },
-    reply: { type: "STRING" },
+    contextHash: { type: "STRING" },
+    productBinding: {
+      type: "OBJECT",
+      additionalProperties: false,
+      required: ["status", "productIds"],
+      properties: {
+        status: {
+          type: "STRING",
+          enum: [
+            "RESOLVED",
+            "STALE",
+            "AMBIGUOUS",
+            "UNRESOLVED",
+            "NOT_REQUIRED",
+          ],
+        },
+        productIds: { type: "ARRAY", items: { type: "STRING" } },
+      },
+    },
+    segments: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        additionalProperties: false,
+        required: ["kind", "text"],
+        properties: {
+          kind: {
+            type: "STRING",
+            enum: [
+              "GENERAL",
+              "VERIFIED_CLAIM",
+              "CLARIFICATION",
+              "ACTION_REQUEST",
+              "EFFECT_CLAIM",
+            ],
+          },
+          text: { type: "STRING" },
+          claimContentHash: { type: "STRING" },
+          target: {
+            type: "STRING",
+            enum: ["PRODUCT", "MEASUREMENTS", "CHECKOUT_DETAILS"],
+          },
+          action: {
+            type: "STRING",
+            enum: [
+              "PROVIDE_PRODUCT",
+              "PROVIDE_MEASUREMENTS",
+              "PROVIDE_CHECKOUT_DETAILS",
+              "CONFIRM_CART",
+            ],
+          },
+          effect: {
+            type: "STRING",
+            enum: [
+              "CART_OPENED",
+              "CART_UPDATED",
+              "ORDER_PLACED",
+              "ORDER_CONFIRMED",
+              "MESSAGE_SENT",
+              "DELIVERY_CREATED",
+            ],
+          },
+        },
+      },
+    },
     strategy: {
       type: "STRING",
       enum: [
@@ -61,6 +133,8 @@ const SYSTEM_INSTRUCTION = [
   "You are an offline sales-response candidate used only for evaluation.",
   "Use only the verified claims and canonical state in Context V2.",
   "Never claim to have sent a message, changed a cart, confirmed an order, or performed any side effect.",
+  "Classify every customer-facing text segment by its semantic role; bind verified claims to their exact provenance content hash.",
+  "Echo the exact Context V2 context hash and product binding; never hide a claim or effect inside a GENERAL segment.",
   "Return only the registered JSON response schema.",
 ].join("\n");
 
@@ -249,7 +323,11 @@ export function buildCandidateRequest(input: Readonly<{
 }
 
 export interface CandidateVertexTransport {
-  send(request: Readonly<{ url: string; body: string }>): Promise<Readonly<{
+  send(request: Readonly<{
+    url: string;
+    body: string;
+    signal?: AbortSignal;
+  }>): Promise<Readonly<{
     payload: unknown;
     providerModelVersion: string | null;
   }>>;
@@ -276,13 +354,22 @@ export class CandidateProviderError extends Error {
 
 export class FetchCandidateVertexTransport implements CandidateVertexTransport {
   constructor(
-    private readonly accessToken: () => Promise<string>,
+    private readonly accessToken: (signal: AbortSignal) => Promise<string>,
     private readonly fetchImpl: typeof fetch = fetch,
     private readonly timeoutMs = 30_000,
   ) {}
 
-  async send(request: Readonly<{ url: string; body: string }>) {
+  async send(request: Readonly<{
+    url: string;
+    body: string;
+    signal?: AbortSignal;
+  }>) {
     const controller = new AbortController();
+    const abortFromCaller = () => controller.abort(
+      request.signal?.reason ?? "CONTEXT_V2_CANDIDATE_CALLER_ABORTED",
+    );
+    if (request.signal?.aborted) abortFromCaller();
+    request.signal?.addEventListener("abort", abortFromCaller, { once: true });
     let timedOut = false;
     let timeout: ReturnType<typeof setTimeout>;
     const timeoutFailure = new Promise<never>((_resolve, reject) => {
@@ -297,7 +384,7 @@ export class FetchCandidateVertexTransport implements CandidateVertexTransport {
         (async () => {
           let accessToken: string;
           try {
-            accessToken = (await this.accessToken()).trim();
+            accessToken = (await this.accessToken(controller.signal)).trim();
           } catch {
             throw new CandidateProviderError(
               "CONTEXT_V2_CANDIDATE_ACCESS_TOKEN_MISSING",
@@ -360,6 +447,7 @@ export class FetchCandidateVertexTransport implements CandidateVertexTransport {
       throw error;
     } finally {
       clearTimeout(timeout!);
+      request.signal?.removeEventListener("abort", abortFromCaller);
     }
   }
 }
@@ -393,6 +481,35 @@ export interface ContextV2CandidateModelPort {
   }>>;
 }
 
+export function parseCandidateVertexResponse(response: Readonly<{
+  payload: unknown;
+  providerModelVersion: string | null;
+}>): Readonly<{
+  output: ContextV2CandidateOutput;
+  providerModelVersion: string;
+}> {
+  const providerModelVersion = response.providerModelVersion?.trim() ?? "";
+  if (!providerModelVersion || providerModelVersion.toLowerCase() === "unknown") {
+    throw new Error("CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_UNKNOWN");
+  }
+  if (providerModelVersion !== CONTEXT_V2_CANDIDATE_PROVIDER_VERSION) {
+    throw new Error("CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_MISMATCH");
+  }
+  let output: ContextV2CandidateOutput;
+  try {
+    output = ContextV2CandidateOutputV2Schema.parse(
+      JSON.parse(candidateText(response.payload)),
+    );
+  } catch (error) {
+    if (error instanceof Error &&
+        error.message === "CONTEXT_V2_CANDIDATE_RESPONSE_MISSING") {
+      throw error;
+    }
+    throw new Error("CONTEXT_V2_CANDIDATE_RESPONSE_INVALID");
+  }
+  return Object.freeze({ output, providerModelVersion });
+}
+
 export class ContextV2CandidateModel implements ContextV2CandidateModelPort {
   constructor(
     private readonly modelResource: string,
@@ -408,28 +525,10 @@ export class ContextV2CandidateModel implements ContextV2CandidateModelPort {
       url: request.url,
       body: request.body,
     });
-    const providerModelVersion = response.providerModelVersion?.trim() ?? "";
-    if (!providerModelVersion || providerModelVersion.toLowerCase() === "unknown") {
-      throw new Error("CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_UNKNOWN");
-    }
-    if (providerModelVersion !== CONTEXT_V2_CANDIDATE_PROVIDER_VERSION) {
-      throw new Error("CONTEXT_V2_CANDIDATE_MODEL_IDENTITY_MISMATCH");
-    }
-    let output: ContextV2CandidateOutput;
-    try {
-      output = ContextV2CandidateOutputV1Schema.parse(
-        JSON.parse(candidateText(response.payload)),
-      );
-    } catch (error) {
-      if (error instanceof Error &&
-          error.message === "CONTEXT_V2_CANDIDATE_RESPONSE_MISSING") {
-        throw error;
-      }
-      throw new Error("CONTEXT_V2_CANDIDATE_RESPONSE_INVALID");
-    }
+    const parsed = parseCandidateVertexResponse(response);
     return {
-      output,
-      providerModelVersion,
+      output: parsed.output,
+      providerModelVersion: parsed.providerModelVersion,
       requestIdentity: request.identity,
     };
   }

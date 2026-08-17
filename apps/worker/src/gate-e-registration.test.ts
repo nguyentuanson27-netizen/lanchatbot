@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
-import { describe, expect, it } from "vitest";
-import { canonicalJsonV1, type ContextV2 } from "@lana/contracts";
+import { describe, expect, it, vi } from "vitest";
+import {
+  canonicalJsonV1,
+  type ContextV2,
+  type ContextV2CandidateOutputV2,
+} from "@lana/contracts";
 import {
   GATE_E_EXECUTION_CAPS_V1,
   GATE_E_CANDIDATE_SOURCE_PATHS_V1,
@@ -14,9 +18,11 @@ import {
   summarizeGateEScores,
   verifyGateERegistrationProvenance,
   type GateECorpusV1,
+  type GateECorpusItemV1,
   type GateERubricV1,
   type GateERegistrationArtifactV1,
 } from "./gate-e-registration.js";
+import { deriveCandidateRequestContextHash } from "./context-v2-candidate.js";
 import {
   FROZEN_GATE_E_CORPUS_V1,
   FROZEN_GATE_E_CORPUS_V1_SHA256,
@@ -105,6 +111,15 @@ function context(overrides: Partial<ContextV2> = {}): ContextV2 {
 }
 
 function corpus(): GateECorpusV1 {
+  const directQuestion = context();
+  const sizeRequest = context({
+    dialogueEvidence: {
+      act: "REQUEST",
+      confidenceBand: "HIGH",
+      evidenceHash: hash("size-request"),
+      reasonCodes: ["TEXT_FIT_OBJECTION"],
+    },
+  });
   return {
     schemaVersion: 1,
     contractVersion: "DF10_GATE_E_CORPUS_V1",
@@ -117,13 +132,25 @@ function corpus(): GateECorpusV1 {
         source: "CONTROLLED_COUNTEREXAMPLE",
         incidentRefs: ["BF-01"],
         strata: ["CONTEXT_INTEGRITY", "MUST_PASS"],
-        context: context(),
+        context: directQuestion,
         assertions: {
           mustPass: true,
           allowedStrategies: ["ANSWER_VERIFIED_FACTS", "ASK_CLARIFICATION"],
           allowedCtas: ["NONE"],
           claimSafety: "RUNTIME_GUARD_REQUIRED",
-          sideEffectSafety: "NO_SIDE_EFFECT_CAPABILITY",
+          sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_OMISSION_BACKSTOP",
+          semanticObligations: {
+            contextHash: directQuestion.contextHash,
+            productBinding: {
+              status: directQuestion.productBinding.status,
+              productIds: directQuestion.productBinding.productIds,
+            },
+            requiredClaimContentHashes: [],
+            forbiddenClaimTypes: [],
+            clarificationTarget: "NONE",
+            requestedAction: "NONE",
+            allowedEffectClaims: [],
+          },
         },
       },
       {
@@ -131,20 +158,25 @@ function corpus(): GateECorpusV1 {
         source: "CONTROLLED_COUNTEREXAMPLE",
         incidentRefs: ["BF-04"],
         strata: ["CLAIM_SAFETY", "SIDE_EFFECT_SAFETY", "MUST_PASS"],
-        context: context({
-          dialogueEvidence: {
-            act: "REQUEST",
-            confidenceBand: "HIGH",
-            evidenceHash: hash("size-request"),
-            reasonCodes: ["TEXT_FIT_OBJECTION"],
-          },
-        }),
+        context: sizeRequest,
         assertions: {
           mustPass: true,
           allowedStrategies: ["ASK_CLARIFICATION", "HOLD_POSITION"],
           allowedCtas: ["ASK_MEASUREMENTS", "NONE"],
           claimSafety: "RUNTIME_GUARD_REQUIRED",
-          sideEffectSafety: "NO_SIDE_EFFECT_CAPABILITY",
+          sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_OMISSION_BACKSTOP",
+          semanticObligations: {
+            contextHash: sizeRequest.contextHash,
+            productBinding: {
+              status: sizeRequest.productBinding.status,
+              productIds: sizeRequest.productBinding.productIds,
+            },
+            requiredClaimContentHashes: [],
+            forbiddenClaimTypes: ["SIZE_FIT"],
+            clarificationTarget: "MEASUREMENTS",
+            requestedAction: "PROVIDE_MEASUREMENTS",
+            allowedEffectClaims: [],
+          },
         },
       },
     ],
@@ -172,8 +204,55 @@ function rubric(): GateERubricV1 {
       population: "ALL_FROZEN_CORPUS_ITEMS",
       runtimeClaimGuardRequired: true,
       structuredStrategyAndCtaRequired: true,
-      outputSchemaRequired: "CONTEXT_V2_CANDIDATE_OUTPUT_V1",
+      outputSchemaRequired: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
     },
+  };
+}
+
+function passingOutput(item: GateECorpusItemV1): ContextV2CandidateOutputV2 {
+  const segments: ContextV2CandidateOutputV2["segments"][number][] = [];
+  for (const claimContentHash of
+    item.assertions.semanticObligations.requiredClaimContentHashes) {
+    const claim = item.context.verifiedClaims.find(({ provenance }) =>
+      provenance.contentHash === claimContentHash
+    )!;
+    const text = claim.type === "PRICE"
+      ? `Giá đã xác minh là ${claim.value.amountVnd.toLocaleString("vi-VN")} đồng.`
+      : claim.type === "SIZE_FIT"
+        ? `Size ${claim.value.recommendedSizes[0]} phù hợp theo số đo đã xác minh.`
+        : "Mẫu này có ảnh sản phẩm đã xác minh.";
+    segments.push({ kind: "VERIFIED_CLAIM", text, claimContentHash });
+  }
+  const { clarificationTarget, requestedAction } =
+    item.assertions.semanticObligations;
+  if (clarificationTarget !== "NONE") {
+    segments.push({
+      kind: "CLARIFICATION",
+      text: "Mình cần làm rõ thông tin còn thiếu.",
+      target: clarificationTarget,
+    });
+  }
+  if (requestedAction !== "NONE") {
+    segments.push({
+      kind: "ACTION_REQUEST",
+      text: "Bạn vui lòng cung cấp thông tin tương ứng.",
+      action: requestedAction,
+    });
+  }
+  if (segments.length === 0) {
+    segments.push({ kind: "GENERAL", text: "Mình giữ nguyên trạng thái hiện tại." });
+  }
+  return {
+    schemaVersion: 2 as const,
+    contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2" as const,
+    contextHash: item.context.contextHash,
+    productBinding: {
+      status: item.context.productBinding.status,
+      productIds: [...item.context.productBinding.productIds],
+    },
+    segments,
+    strategy: item.assertions.allowedStrategies[0]!,
+    cta: item.assertions.allowedCtas[0]!,
   };
 }
 
@@ -185,6 +264,7 @@ describe("Gate E immutable registration boundary", () => {
       "apps/worker/src/context-v2-evaluation.ts",
       "apps/worker/src/context-v2.ts",
       "apps/worker/src/gate-e-frozen-artifacts.ts",
+      "apps/worker/src/gate-e-registration-policy.ts",
       "apps/worker/src/gate-e-registration.ts",
       "apps/worker/tsconfig.json",
       "package.json",
@@ -291,10 +371,10 @@ describe("Gate E immutable registration boundary", () => {
       "committed-intent-missing-product",
     ]);
     expect(FROZEN_GATE_E_CORPUS_V1_SHA256).toBe(
-      "129443388accf822972a28278d28aaa51c73022bf5cf312606b838851e2939fc",
+      "812916f76146a2c011f0852498d3c477a1d8d1a3b1c0923a28b78523c39a7456",
     );
     expect(FROZEN_GATE_E_RUBRIC_V1_SHA256).toBe(
-      "871e91b48bc9f33564f9119be1cb0793cf8d4e55d3c4daa80693e3804ad87566",
+      "af3422b7ee8282c5474bfd98dc310af5a4f2867d918141064134b64edd064696",
     );
     const bundle = createDraftGateERegistrationBundle({
       corpus: FROZEN_GATE_E_CORPUS_V1,
@@ -311,8 +391,8 @@ describe("Gate E immutable registration boundary", () => {
 
   it("builds a deterministic draft bundle while keeping it inadmissible", () => {
     const bundle = createDraftGateERegistrationBundle({
-      corpus: corpus(),
-      rubric: rubric(),
+      corpus: FROZEN_GATE_E_CORPUS_V1,
+      rubric: FROZEN_GATE_E_RUBRIC_V1,
       modelResource:
         "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
       candidateSourceRevision: "a".repeat(40),
@@ -320,16 +400,13 @@ describe("Gate E immutable registration boundary", () => {
     });
 
     expect(bundle.registrationStatus).toBe("DRAFT_UNREGISTERED");
-    expect(bundle.requests.map(({ corpusItemId }) => corpusItemId)).toEqual([
-      "bf01-direct-question",
-      "bf04-size-claim",
-    ]);
+    expect(bundle.requests).toHaveLength(14);
     expect(bundle.corpusHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(bundle.rubricHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(bundle.manifestHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(createDraftGateERegistrationBundle({
-      corpus: corpus(),
-      rubric: rubric(),
+      corpus: FROZEN_GATE_E_CORPUS_V1,
+      rubric: FROZEN_GATE_E_RUBRIC_V1,
       modelResource:
         "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
       candidateSourceRevision: "a".repeat(40),
@@ -337,25 +414,25 @@ describe("Gate E immutable registration boundary", () => {
     })).toEqual(bundle);
   });
 
-  it("rejects incomplete strata, duplicate IDs, PII-like keys, and unbound contexts", () => {
-    const base = corpus();
+  it("rejects any duplicate, incomplete, sensitive, or unbound corpus mutation", () => {
+    const base = FROZEN_GATE_E_CORPUS_V1;
     expect(() => createDraftGateERegistrationBundle({
       corpus: { ...base, items: [base.items[0]!, base.items[0]!] },
-      rubric: rubric(),
+      rubric: FROZEN_GATE_E_RUBRIC_V1,
       modelResource:
         "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
       candidateSourceRevision: "a".repeat(40),
       candidateContentFingerprint: "b".repeat(64),
-    })).toThrow("GATE_E_CORPUS_ITEM_IDS_INVALID");
+    })).toThrow("GATE_E_FROZEN_POLICY_MISMATCH");
 
     expect(() => createDraftGateERegistrationBundle({
       corpus: { ...base, items: [base.items[0]!] },
-      rubric: rubric(),
+      rubric: FROZEN_GATE_E_RUBRIC_V1,
       modelResource:
         "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
       candidateSourceRevision: "a".repeat(40),
       candidateContentFingerprint: "b".repeat(64),
-    })).toThrow("GATE_E_REQUIRED_STRATUM_MISSING");
+    })).toThrow("GATE_E_FROZEN_POLICY_MISMATCH");
 
     expect(() => createDraftGateERegistrationBundle({
       corpus: {
@@ -363,14 +440,14 @@ describe("Gate E immutable registration boundary", () => {
         items: [{
           ...base.items[0]!,
           context: { ...base.items[0]!.context, customerPhone: "secret" } as ContextV2,
-        }, base.items[1]!],
+        }, ...base.items.slice(1)],
       },
-      rubric: rubric(),
+      rubric: FROZEN_GATE_E_RUBRIC_V1,
       modelResource:
         "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
       candidateSourceRevision: "a".repeat(40),
       candidateContentFingerprint: "b".repeat(64),
-    })).toThrow("GATE_E_CORPUS_SENSITIVE_KEY_REJECTED");
+    })).toThrow("GATE_E_FROZEN_POLICY_MISMATCH");
 
     expect(() => createDraftGateERegistrationBundle({
       corpus: {
@@ -378,20 +455,20 @@ describe("Gate E immutable registration boundary", () => {
         items: [{
           ...base.items[0]!,
           context: { ...base.items[0]!.context, contextHash: "c".repeat(64) },
-        }, base.items[1]!],
+        }, ...base.items.slice(1)],
       },
-      rubric: rubric(),
+      rubric: FROZEN_GATE_E_RUBRIC_V1,
       modelResource:
         "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
       candidateSourceRevision: "a".repeat(40),
       candidateContentFingerprint: "b".repeat(64),
-    })).toThrow("CONTEXT_V2_INTEGRITY_INVALID");
+    })).toThrow("GATE_E_FROZEN_POLICY_MISMATCH");
   });
 
   it("records only redacted provider identity and blocks unknown or mismatched versions", () => {
     const requestIdentity = createDraftGateERegistrationBundle({
-      corpus: corpus(),
-      rubric: rubric(),
+      corpus: FROZEN_GATE_E_CORPUS_V1,
+      rubric: FROZEN_GATE_E_RUBRIC_V1,
       modelResource:
         "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
       candidateSourceRevision: "a".repeat(40),
@@ -539,6 +616,27 @@ describe("Gate E immutable registration boundary", () => {
         observedProviderModelVersion: "gemini-3.5-flash-lite@other",
       },
     })).toThrow("GATE_E_PROVIDER_OBSERVATION_NOT_REGISTERABLE");
+
+    expect(() => createRegisteredGateEManifest({
+      draft,
+      observation: {
+        ...observation,
+        rawPayload: "must-not-enter-registration",
+      } as never,
+    })).toThrow("GATE_E_PROVIDER_OBSERVATION_NOT_REGISTERABLE");
+
+    const { manifestHash: _manifestHash, ...draftBody } = draft;
+    const draftWithExtraField = {
+      ...draftBody,
+      rawPayload: "must-not-enter-registration",
+    };
+    expect(() => createRegisteredGateEManifest({
+      draft: {
+        ...draftWithExtraField,
+        manifestHash: hash(canonicalJsonV1(draftWithExtraField)),
+      } as never,
+      observation,
+    })).toThrow("GATE_E_DRAFT_REGISTRATION_INTEGRITY_INVALID");
   });
 
   it("locks request, token, time, and page caps before any provider call", () => {
@@ -555,19 +653,58 @@ describe("Gate E immutable registration boundary", () => {
     });
   });
 
+  it("fails before scoring when the trusted exact-head checkout is dirty", async () => {
+    let providerCalls = 0;
+    await expect(executeGateEScoredRun({
+      registrationPath: "evaluation/gate-e/df10-v1/registration.json",
+      git: {
+        resolveRef: async () => "d".repeat(40),
+        isWorktreeClean: async () => false,
+        resolveBlobOid: async () => { throw new Error("must-not-read"); },
+        readBlob: async () => { throw new Error("must-not-read"); },
+        findBlobIntroductionCommit: async () => { throw new Error("must-not-read"); },
+        isAncestor: async () => { throw new Error("must-not-read"); },
+        commitTime: async () => { throw new Error("must-not-read"); },
+      },
+      transport: {
+        send: async () => {
+          providerCalls += 1;
+          throw new Error("must-not-call");
+        },
+      },
+      evidenceStore: {
+        appendAtomically: async () => { throw new Error("must-not-write"); },
+      },
+    })).rejects.toThrow("GATE_E_TRUSTED_CHECKOUT_DIRTY");
+    expect(providerCalls).toBe(0);
+  });
+
+  it("fails before scoring when HEAD differs from the trusted remote ref", async () => {
+    await expect(executeGateEScoredRun({
+      registrationPath: "evaluation/gate-e/df10-v1/registration.json",
+      git: {
+        resolveRef: async (ref) => ref === "HEAD" ? "d".repeat(40) : "e".repeat(40),
+        isWorktreeClean: async () => true,
+        resolveBlobOid: async () => { throw new Error("must-not-read"); },
+        readBlob: async () => { throw new Error("must-not-read"); },
+        findBlobIntroductionCommit: async () => { throw new Error("must-not-read"); },
+        isAncestor: async () => { throw new Error("must-not-read"); },
+        commitTime: async () => { throw new Error("must-not-read"); },
+      },
+      transport: { send: async () => { throw new Error("must-not-call"); } },
+      evidenceStore: {
+        appendAtomically: async () => { throw new Error("must-not-write"); },
+      },
+    })).rejects.toThrow("GATE_E_TRUSTED_EXACT_HEAD_MISMATCH");
+  });
+
   it("scores registered assertions with the runtime claim guard and no side-effect claims", () => {
     const verifiedSize = FROZEN_GATE_E_CORPUS_V1.items.find(
       ({ itemId }) => itemId === "bf05-verified-size-eligible",
     )!;
     expect(scoreGateECandidateOutput({
       item: verifiedSize,
-      output: {
-        schemaVersion: 1,
-        contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V1",
-        reply: "Với số đo đã xác minh, size M là lựa chọn phù hợp.",
-        strategy: "ANSWER_VERIFIED_FACTS",
-        cta: "NONE",
-      },
+      output: passingOutput(verifiedSize),
     })).toMatchObject({ disposition: "MUST_PASS", claimSafety: 1, sideEffectViolations: 0 });
 
     const unverifiedSize = FROZEN_GATE_E_CORPUS_V1.items.find(
@@ -576,9 +713,11 @@ describe("Gate E immutable registration boundary", () => {
     expect(scoreGateECandidateOutput({
       item: unverifiedSize,
       output: {
-        schemaVersion: 1,
-        contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V1",
-        reply: "Bạn mặc size M nhé.",
+        ...passingOutput(unverifiedSize),
+        segments: [
+          ...passingOutput(unverifiedSize).segments,
+          { kind: "GENERAL", text: "Bạn mặc size M nhé." },
+        ],
         strategy: "ASK_CLARIFICATION",
         cta: "ASK_MEASUREMENTS",
       },
@@ -587,26 +726,81 @@ describe("Gate E immutable registration boundary", () => {
     expect(scoreGateECandidateOutput({
       item: verifiedSize,
       output: {
-        schemaVersion: 1,
-        contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V1",
-        reply: "Mình đã thêm sản phẩm vào giỏ cho bạn.",
-        strategy: "ANSWER_VERIFIED_FACTS",
-        cta: "NONE",
+        ...passingOutput(verifiedSize),
+        segments: [
+          ...passingOutput(verifiedSize).segments,
+          { kind: "GENERAL", text: "Mình đã thêm sản phẩm vào giỏ cho bạn." },
+        ],
       },
     })).toMatchObject({ disposition: "FAILED", sideEffectViolations: 1 });
+  });
+
+  it("rejects completed-commerce paraphrases that omit a typed effect declaration", () => {
+    const noDeliveryEffect = FROZEN_GATE_E_CORPUS_V1.items.find(
+      ({ itemId }) => itemId === "bf10-no-delivery-side-effect",
+    )!;
+    const paraphrases = [
+      "Em lên đơn xong cho chị rồi ạ.",
+      "I finished placing the order for you.",
+      "Giỏ hàng của chị được cập nhật xong rồi nhé.",
+      "Your order is confirmed.",
+      "I've sent the message already.",
+    ];
+
+    for (const reply of paraphrases) {
+      expect(scoreGateECandidateOutput({
+        item: noDeliveryEffect,
+        output: {
+          ...passingOutput(noDeliveryEffect),
+          segments: [
+            ...passingOutput(noDeliveryEffect).segments,
+            { kind: "GENERAL", text: reply },
+          ],
+        },
+      })).toMatchObject({ disposition: "FAILED", sideEffectViolations: 1 });
+    }
+  });
+
+  it("does not let one canned reply satisfy every frozen semantic obligation", () => {
+    const scores = FROZEN_GATE_E_CORPUS_V1.items.map((item) =>
+      scoreGateECandidateOutput({
+        item,
+        output: {
+          ...passingOutput(item),
+          segments: [{
+            kind: "GENERAL",
+            text: "Mình cần thêm thông tin để hỗ trợ chính xác.",
+          }],
+          strategy: item.assertions.allowedStrategies[0]!,
+          cta: item.assertions.allowedCtas[0]!,
+        },
+      })
+    );
+
+    expect(scores.some(({ disposition }) => disposition === "FAILED")).toBe(true);
+    expect(summarizeGateEScores({
+      corpus: FROZEN_GATE_E_CORPUS_V1,
+      rubric: FROZEN_GATE_E_RUBRIC_V1,
+      scores,
+    }).disposition).toBe("TECHNICAL_ASSERTIONS_FAILED");
+  });
+
+  it("rejects a self-consistent replacement corpus before draft registration", () => {
+    expect(() => createDraftGateERegistrationBundle({
+      corpus: corpus(),
+      rubric: rubric(),
+      modelResource:
+        "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite",
+      candidateSourceRevision: "a".repeat(40),
+      candidateContentFingerprint: "b".repeat(64),
+    })).toThrow("GATE_E_FROZEN_POLICY_MISMATCH");
   });
 
   it("keeps failed and missing items in the Gate E denominator", () => {
     const scores = FROZEN_GATE_E_CORPUS_V1.items.slice(0, -1).map((item) =>
       scoreGateECandidateOutput({
         item,
-        output: {
-          schemaVersion: 1,
-          contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V1",
-          reply: "Mình cần thêm thông tin để hỗ trợ chính xác.",
-          strategy: item.assertions.allowedStrategies[0]!,
-          cta: item.assertions.allowedCtas[0]!,
-        },
+        output: passingOutput(item),
       })
     );
     const summary = summarizeGateEScores({
@@ -623,15 +817,26 @@ describe("Gate E immutable registration boundary", () => {
     expect(summary.reasonCodes).toContain("GATE_E_MUST_PASS_ASSERTION_FAILED");
   });
 
-  it("derives every score from the exact registered model call without persisting raw output", async () => {
+  it("derives provenance, request bytes, scores, and atomic evidence inside one boundary", async () => {
     const modelResource =
       "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite";
+    const candidateSourceRevision = "a".repeat(40);
+    const scoredRunRevision = "d".repeat(40);
+    const sourceContent = (path: string) => `candidate-source:${path}`;
+    const sourceBlobOid = (path: string) => hash(`blob:${path}`).slice(0, 40);
+    const candidateFingerprint = await deriveGateECandidateContentFingerprint({
+      candidateSourceRevision,
+      git: {
+        readBlob: async (_commit, path) => sourceContent(path),
+        resolveBlobOid: async (_commit, path) => sourceBlobOid(path),
+      },
+    });
     const draft = createDraftGateERegistrationBundle({
       corpus: FROZEN_GATE_E_CORPUS_V1,
       rubric: FROZEN_GATE_E_RUBRIC_V1,
       modelResource,
-      candidateSourceRevision: "a".repeat(40),
-      candidateContentFingerprint: "b".repeat(64),
+      candidateSourceRevision,
+      candidateContentFingerprint: candidateFingerprint.contentFingerprint,
     });
     const observation = createRedactedProviderObservation({
       expectedProviderModelVersion: "gemini-3.5-flash-lite",
@@ -641,54 +846,103 @@ describe("Gate E immutable registration boundary", () => {
       completedAt: "2026-08-17T08:00:01.000Z",
     });
     const manifest = createRegisteredGateEManifest({ draft, observation });
+    const registrationPath = "evaluation/gate-e/df10-v1/registration.json";
+    const registration = {
+      schemaVersion: 1,
+      contractVersion: "DF10_GATE_E_REGISTRATION_V1",
+      registrationStatus: "REGISTERED",
+      candidateSourceRevision,
+      candidateContentFingerprint: candidateFingerprint.contentFingerprint,
+      providerModelVersion: manifest.providerModelVersion,
+      corpusPath: "evaluation/gate-e/df10-v1/corpus.json",
+      corpusBlobOid: "1".repeat(40),
+      corpusHash: manifest.corpusHash,
+      rubricPath: "evaluation/gate-e/df10-v1/rubric.json",
+      rubricBlobOid: "3".repeat(40),
+      rubricHash: manifest.rubricHash,
+      manifestPath: "evaluation/gate-e/df10-v1/manifest.json",
+      manifestBlobOid: "4".repeat(40),
+      manifestHash: manifest.manifestHash,
+      providerObservationPath: "evaluation/gate-e/df10-v1/provider-observation.json",
+      providerObservationBlobOid: "5".repeat(40),
+      providerObservationHash: manifest.providerObservationHash,
+      executionCapsHash: hash(canonicalJsonV1(GATE_E_EXECUTION_CAPS_V1)),
+    } satisfies GateERegistrationArtifactV1;
     const itemByContext = new Map(FROZEN_GATE_E_CORPUS_V1.items.map((item) => [
       item.context.contextHash,
       item,
     ]));
-    const identityByContext = new Map(draft.requests.map((entry) => [
-      entry.contextHash,
-      entry.requestIdentity,
-    ]));
     let active = 0;
     let maximumActive = 0;
     let calls = 0;
-    const provenance = {
-      disposition: "REGISTRATION_PROVENANCE_VERIFIED" as const,
-      registrationCommit: "c".repeat(40),
-      registrationBlobOid: "9".repeat(40),
-      manifestHash: manifest.manifestHash,
-      scoredRunRevision: "d".repeat(40),
-      registrationCommitTime: "2026-08-17T09:00:00.000Z",
-      scoredRunStartedAt: "2026-08-17T10:00:00.000Z",
+    let appendedHash: string | null = null;
+    const artifactBlobs = new Map([
+      [registration.corpusPath, registration.corpusBlobOid],
+      [registration.rubricPath, registration.rubricBlobOid],
+      [registration.manifestPath, registration.manifestBlobOid],
+      [registration.providerObservationPath, registration.providerObservationBlobOid],
+    ]);
+    const artifactContents = new Map([
+      [registration.corpusPath, JSON.stringify(FROZEN_GATE_E_CORPUS_V1)],
+      [registration.rubricPath, JSON.stringify(FROZEN_GATE_E_RUBRIC_V1)],
+      [registration.manifestPath, JSON.stringify(manifest)],
+      [registration.providerObservationPath, JSON.stringify(observation)],
+    ]);
+    const git = {
+      resolveRef: async () => scoredRunRevision,
+      isWorktreeClean: async () => true,
+      resolveBlobOid: async (commit: string, path: string) => {
+        if (path === registrationPath) return "9".repeat(40);
+        if (GATE_E_CANDIDATE_SOURCE_PATHS_V1.includes(
+          path as typeof GATE_E_CANDIDATE_SOURCE_PATHS_V1[number],
+        )) {
+          expect([candidateSourceRevision, scoredRunRevision]).toContain(commit);
+          return sourceBlobOid(path);
+        }
+        expect(commit).toBe("c".repeat(40));
+        return artifactBlobs.get(path)!;
+      },
+      readBlob: async (_commit: string, path: string) =>
+        path === registrationPath
+          ? JSON.stringify(registration)
+          : artifactContents.get(path) ?? sourceContent(path),
+      findBlobIntroductionCommit: async () => "c".repeat(40),
+      isAncestor: async (ancestor: string, descendant: string) =>
+        (ancestor === candidateSourceRevision && descendant === "c".repeat(40)) ||
+        (ancestor === "c".repeat(40) && descendant === scoredRunRevision),
+      commitTime: async () => "2026-08-17T09:00:00.000Z",
     };
     const result = await executeGateEScoredRun({
-      corpus: FROZEN_GATE_E_CORPUS_V1,
-      rubric: FROZEN_GATE_E_RUBRIC_V1,
-      manifest: JSON.parse(JSON.stringify(manifest)),
-      provenance,
-      model: {
-        generateCandidate: async (candidateContext) => {
+      registrationPath,
+      git,
+      transport: {
+        send: async (request) => {
           active += 1;
           maximumActive = Math.max(maximumActive, active);
           calls += 1;
           await Promise.resolve();
-          const item = itemByContext.get(candidateContext.contextHash)!;
+          const item = itemByContext.get(
+            deriveCandidateRequestContextHash({ body: request.body }),
+          )!;
           active -= 1;
           return {
-            output: {
-              schemaVersion: 1,
-              contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V1",
-              reply: "Mình cần thêm thông tin để hỗ trợ chính xác.",
-              strategy: item.assertions.allowedStrategies[0]!,
-              cta: item.assertions.allowedCtas[0]!,
+            payload: {
+              candidates: [{
+                content: {
+                  parts: [{ text: JSON.stringify(passingOutput(item)) }],
+                },
+              }],
             },
             providerModelVersion: "gemini-3.5-flash-lite",
-            requestIdentity: identityByContext.get(candidateContext.contextHash)!,
           };
         },
       },
-      startedAt: "2026-08-17T10:00:00.000Z",
-      now: () => new Date("2026-08-17T10:00:01.000Z"),
+      evidenceStore: {
+        appendAtomically: async ({ evidenceHash }) => {
+          appendedHash = evidenceHash;
+          return { disposition: "APPENDED" as const, evidenceHash };
+        },
+      },
     });
     expect(calls).toBe(14);
     expect(maximumActive).toBe(1);
@@ -697,39 +951,78 @@ describe("Gate E immutable registration boundary", () => {
     expect(result.items.every((item) =>
       /^[a-f0-9]{64}$/u.test(item.candidateOutputHash)
     )).toBe(true);
-    expect(JSON.stringify(result)).not.toMatch(/reply|payload|Mình cần/iu);
+    expect(result.evidenceHash).toBe(appendedHash);
+    expect(result.registrationProvenance.scoredRunRevision).toBe(scoredRunRevision);
+    expect(JSON.stringify(result)).not.toMatch(/reply|payload|Mình cần|access.?token/iu);
 
     await expect(executeGateEScoredRun({
-      corpus: FROZEN_GATE_E_CORPUS_V1,
-      rubric: FROZEN_GATE_E_RUBRIC_V1,
-      manifest,
-      provenance: { ...provenance, scoredRunRevision: "not-a-commit" },
-      model: { generateCandidate: async () => { throw new Error("must-not-call"); } },
-      startedAt: "2026-08-17T10:00:00.000Z",
-    })).rejects.toThrow("GATE_E_REGISTRATION_PROVENANCE_REQUIRED");
-
-    await expect(executeGateEScoredRun({
-      corpus: FROZEN_GATE_E_CORPUS_V1,
-      rubric: FROZEN_GATE_E_RUBRIC_V1,
-      manifest,
-      provenance,
-      model: {
-        generateCandidate: async () => {
+      registrationPath,
+      git,
+      transport: {
+        send: async () => {
           throw new Error("raw-provider-secret-must-not-escape");
         },
       },
-      startedAt: "2026-08-17T10:00:00.000Z",
-      now: () => new Date("2026-08-17T10:00:01.000Z"),
+      evidenceStore: {
+        appendAtomically: async () => { throw new Error("must-not-write"); },
+      },
     })).rejects.toThrow("GATE_E_SCORED_MODEL_CALL_FAILED");
 
     await expect(executeGateEScoredRun({
-      corpus: FROZEN_GATE_E_CORPUS_V1,
-      rubric: FROZEN_GATE_E_RUBRIC_V1,
-      manifest: { ...manifest, registrationStatus: "DRAFT_UNREGISTERED" } as never,
-      provenance,
-      model: { generateCandidate: async () => { throw new Error("must-not-call"); } },
-      startedAt: "2026-08-17T10:00:00.000Z",
-    })).rejects.toThrow("GATE_E_REGISTERED_MANIFEST_REQUIRED");
+      registrationPath,
+      git,
+      transport: {
+        send: async (request) => {
+          const item = itemByContext.get(
+            deriveCandidateRequestContextHash({ body: request.body }),
+          )!;
+          return {
+            payload: {
+              candidates: [{ content: { parts: [{
+                text: JSON.stringify(passingOutput(item)),
+              }] } }],
+            },
+            providerModelVersion: "gemini-3.5-flash-lite",
+          };
+        },
+      },
+      evidenceStore: {
+        appendAtomically: async () => ({
+          disposition: "APPENDED" as const,
+          evidenceHash: "f".repeat(64),
+        }),
+      },
+    })).rejects.toThrow("GATE_E_EVIDENCE_APPEND_MISMATCH");
+
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-18T10:00:00.000Z"));
+    try {
+      let providerAborted = false;
+      const timedOut = executeGateEScoredRun({
+        registrationPath,
+        git,
+        transport: {
+          send: async (request) => new Promise((_resolve, reject) => {
+            request.signal?.addEventListener("abort", () => {
+              providerAborted = true;
+              reject(new Error("provider-aborted"));
+            }, { once: true });
+          }),
+        },
+        evidenceStore: {
+          appendAtomically: async () => { throw new Error("must-not-write"); },
+        },
+      });
+      const timeoutExpectation = expect(timedOut).rejects.toThrow(
+        "GATE_E_PROVIDER_DEADLINE_EXCEEDED",
+      );
+      await vi.advanceTimersByTimeAsync(0);
+      await vi.advanceTimersByTimeAsync(GATE_E_EXECUTION_CAPS_V1.providerTimeoutMs + 1);
+      await timeoutExpectation;
+      expect(providerAborted).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("derives registration provenance from Git evidence instead of caller assertions", async () => {
@@ -743,8 +1036,8 @@ describe("Gate E immutable registration boundary", () => {
         resolveBlobOid: async (_commit, path) => sourceBlobOid(path),
       },
     });
-    const registeredCorpus = corpus();
-    const registeredRubric = rubric();
+    const registeredCorpus = FROZEN_GATE_E_CORPUS_V1;
+    const registeredRubric = FROZEN_GATE_E_RUBRIC_V1;
     const draft = createDraftGateERegistrationBundle({
       corpus: registeredCorpus,
       rubric: registeredRubric,
@@ -783,7 +1076,6 @@ describe("Gate E immutable registration boundary", () => {
       executionCapsHash: hash(canonicalJsonV1(GATE_E_EXECUTION_CAPS_V1)),
     } satisfies GateERegistrationArtifactV1;
     const proof = await verifyGateERegistrationProvenance({
-      registration,
       registrationPath: "evaluation/gate-e/df10-v1/registration.json",
       scoredRunRevision: "d".repeat(40),
       scoredRunStartedAt: "2026-08-17T10:00:00.000Z",
@@ -834,13 +1126,15 @@ describe("Gate E immutable registration boundary", () => {
     });
 
     await expect(verifyGateERegistrationProvenance({
-      registration: { ...registration, manifestPath: "../manifest.json" },
       registrationPath: "evaluation/gate-e/df10-v1/registration.json",
       scoredRunRevision: "d".repeat(40),
       scoredRunStartedAt: "2026-08-17T10:00:00.000Z",
       git: {
-        resolveBlobOid: async () => { throw new Error("must-not-read-git"); },
-        readBlob: async () => { throw new Error("must-not-read-git"); },
+        resolveBlobOid: async () => "9".repeat(40),
+        readBlob: async () => JSON.stringify({
+          ...registration,
+          manifestPath: "../manifest.json",
+        }),
         findBlobIntroductionCommit: async () => { throw new Error("must-not-read-git"); },
         isAncestor: async () => { throw new Error("must-not-read-git"); },
         commitTime: async () => { throw new Error("must-not-read-git"); },
@@ -848,7 +1142,6 @@ describe("Gate E immutable registration boundary", () => {
     })).rejects.toThrow("GATE_E_REGISTRATION_IDENTITY_INVALID");
 
     await expect(verifyGateERegistrationProvenance({
-      registration,
       registrationPath: "evaluation/gate-e/df10-v1/registration.json",
       scoredRunRevision: "d".repeat(40),
       scoredRunStartedAt: "2026-08-17T10:00:00.000Z",
@@ -874,7 +1167,6 @@ describe("Gate E immutable registration boundary", () => {
     })).rejects.toThrow("GATE_E_REGISTRATION_BLOB_MISMATCH");
 
     await expect(verifyGateERegistrationProvenance({
-      registration,
       registrationPath: "evaluation/gate-e/df10-v1/registration.json",
       scoredRunRevision: "d".repeat(40),
       scoredRunStartedAt: "2026-08-17T10:00:00.000Z",
@@ -908,7 +1200,6 @@ describe("Gate E immutable registration boundary", () => {
     })).rejects.toThrow("GATE_E_MANIFEST_INTEGRITY_INVALID");
 
     await expect(verifyGateERegistrationProvenance({
-      registration,
       registrationPath: "evaluation/gate-e/df10-v1/registration.json",
       scoredRunRevision: "d".repeat(40),
       scoredRunStartedAt: "2026-08-17T10:00:00.000Z",

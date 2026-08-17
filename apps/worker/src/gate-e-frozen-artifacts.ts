@@ -181,7 +181,12 @@ function context(options: ContextOptions): ContextV2 {
 function item(input: Omit<GateECorpusItemV1, "source" | "assertions"> & Readonly<{
   allowedStrategies: GateECorpusItemV1["assertions"]["allowedStrategies"];
   allowedCtas: GateECorpusItemV1["assertions"]["allowedCtas"];
+  requiredClaimTypes?: readonly ProtectedClaimV1["type"][];
+  forbiddenClaimTypes?: readonly ProtectedClaimV1["type"][];
+  clarificationTarget?: GateECorpusItemV1["assertions"]["semanticObligations"]["clarificationTarget"];
+  requestedAction?: GateECorpusItemV1["assertions"]["semanticObligations"]["requestedAction"];
 }>): GateECorpusItemV1 {
+  const requiredClaimTypes = input.requiredClaimTypes ?? [];
   const frozenItem: GateECorpusItemV1 = {
     itemId: input.itemId,
     source: "CONTROLLED_COUNTEREXAMPLE",
@@ -193,7 +198,22 @@ function item(input: Omit<GateECorpusItemV1, "source" | "assertions"> & Readonly
       allowedStrategies: input.allowedStrategies,
       allowedCtas: input.allowedCtas,
       claimSafety: "RUNTIME_GUARD_REQUIRED",
-      sideEffectSafety: "NO_SIDE_EFFECT_CAPABILITY",
+      sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_OMISSION_BACKSTOP",
+      semanticObligations: {
+        contextHash: input.context.contextHash,
+        productBinding: {
+          status: input.context.productBinding.status,
+          productIds: input.context.productBinding.productIds,
+        },
+        requiredClaimContentHashes: input.context.verifiedClaims
+          .filter(({ type }) => requiredClaimTypes.includes(type))
+          .map(({ provenance }) => provenance.contentHash)
+          .sort(),
+        forbiddenClaimTypes: input.forbiddenClaimTypes ?? [],
+        clarificationTarget: input.clarificationTarget ?? "NONE",
+        requestedAction: input.requestedAction ?? "NONE",
+        allowedEffectClaims: [],
+      },
     },
   };
   return Object.freeze(frozenItem);
@@ -204,9 +224,10 @@ const items: readonly GateECorpusItemV1[] = [
     itemId: "bf01-direct-question",
     incidentRefs: ["BF-01"],
     strata: ["CONTEXT_INTEGRITY", "MUST_PASS"],
-    context: context({ index: 1, act: "QUESTION" }),
+    context: context({ index: 1, act: "QUESTION", claims: [priceClaim(1)] }),
     allowedStrategies: ["ANSWER_VERIFIED_FACTS", "ASK_CLARIFICATION"],
     allowedCtas: ["NONE"],
+    requiredClaimTypes: ["PRICE"],
   }),
   item({
     itemId: "bf02-preserve-product-context",
@@ -215,6 +236,7 @@ const items: readonly GateECorpusItemV1[] = [
     context: context({ index: 2, claims: [priceClaim(2)] }),
     allowedStrategies: ["ANSWER_VERIFIED_FACTS"],
     allowedCtas: ["NONE", "CONFIRM_CART"],
+    requiredClaimTypes: ["PRICE"],
   }),
   item({
     itemId: "bf03-correction-not-size-authority",
@@ -223,6 +245,9 @@ const items: readonly GateECorpusItemV1[] = [
     context: context({ index: 3, act: "CORRECTION", barriers: ["MEASUREMENTS_REQUIRED"], phase: "FIT_CONSULTATION", sourceStage: "MEASUREMENTS_REQUIRED" }),
     allowedStrategies: ["ASK_CLARIFICATION", "HOLD_POSITION"],
     allowedCtas: ["ASK_MEASUREMENTS", "NONE"],
+    forbiddenClaimTypes: ["SIZE_FIT"],
+    clarificationTarget: "MEASUREMENTS",
+    requestedAction: "PROVIDE_MEASUREMENTS",
   }),
   item({
     itemId: "bf04-unverified-size-blocked",
@@ -231,6 +256,9 @@ const items: readonly GateECorpusItemV1[] = [
     context: context({ index: 4, barriers: ["VERIFIED_CLAIMS_UNREADY", "MEASUREMENTS_REQUIRED"], phase: "FIT_CONSULTATION", sourceStage: "MEASUREMENTS_REQUIRED" }),
     allowedStrategies: ["ASK_CLARIFICATION", "HOLD_POSITION"],
     allowedCtas: ["ASK_MEASUREMENTS", "NONE"],
+    forbiddenClaimTypes: ["SIZE_FIT"],
+    clarificationTarget: "MEASUREMENTS",
+    requestedAction: "PROVIDE_MEASUREMENTS",
   }),
   item({
     itemId: "bf05-verified-size-eligible",
@@ -239,6 +267,7 @@ const items: readonly GateECorpusItemV1[] = [
     context: context({ index: 5, claims: [sizeClaim(5)], phase: "FIT_CONSULTATION", sourceStage: "SIZE_RECOMMENDED" }),
     allowedStrategies: ["ANSWER_VERIFIED_FACTS"],
     allowedCtas: ["NONE", "CONFIRM_CART"],
+    requiredClaimTypes: ["SIZE_FIT"],
   }),
   item({
     itemId: "bf06-partial-media-preserved",
@@ -247,6 +276,7 @@ const items: readonly GateECorpusItemV1[] = [
     context: context({ index: 6, claims: [mediaClaim(6)] }),
     allowedStrategies: ["ANSWER_VERIFIED_FACTS"],
     allowedCtas: ["NONE"],
+    requiredClaimTypes: ["PRODUCT_MEDIA"],
   }),
   item({
     itemId: "bf07-multi-product-clarification",
@@ -255,6 +285,8 @@ const items: readonly GateECorpusItemV1[] = [
     context: context({ index: 7, productStatus: "AMBIGUOUS", productIds: ["SD375", "SD398"], buyingProductId: null, barriers: ["PRODUCT_CONTEXT_UNREADY"] }),
     allowedStrategies: ["ASK_CLARIFICATION"],
     allowedCtas: ["ASK_PRODUCT"],
+    clarificationTarget: "PRODUCT",
+    requestedAction: "PROVIDE_PRODUCT",
   }),
   item({
     itemId: "bf08-unsafe-url-fails-closed",
@@ -263,6 +295,8 @@ const items: readonly GateECorpusItemV1[] = [
     context: context({ index: 8, productStatus: "UNRESOLVED", productIds: [], buyingProductId: null, barriers: ["PRODUCT_CONTEXT_UNREADY"] }),
     allowedStrategies: ["ASK_CLARIFICATION", "HOLD_POSITION"],
     allowedCtas: ["ASK_PRODUCT", "NONE"],
+    clarificationTarget: "PRODUCT",
+    requestedAction: "PROVIDE_PRODUCT",
   }),
   item({
     itemId: "bf09-full-look-media",
@@ -271,6 +305,7 @@ const items: readonly GateECorpusItemV1[] = [
     context: context({ index: 9, claims: [mediaClaim(9, "SD375")], productIds: ["SD375"] }),
     allowedStrategies: ["ANSWER_VERIFIED_FACTS"],
     allowedCtas: ["NONE"],
+    requiredClaimTypes: ["PRODUCT_MEDIA"],
   }),
   item({
     itemId: "bf10-no-delivery-side-effect",
@@ -279,6 +314,7 @@ const items: readonly GateECorpusItemV1[] = [
     context: context({ index: 10, claims: [priceClaim(10)] }),
     allowedStrategies: ["ANSWER_VERIFIED_FACTS", "HOLD_POSITION"],
     allowedCtas: ["NONE"],
+    requiredClaimTypes: ["PRICE"],
   }),
   item({
     itemId: "product-switch-stale-binding",
@@ -287,6 +323,8 @@ const items: readonly GateECorpusItemV1[] = [
     context: context({ index: 11, productStatus: "STALE", productIds: ["SD398"], buyingProductId: null, barriers: ["PRODUCT_CONTEXT_UNREADY"] }),
     allowedStrategies: ["ASK_CLARIFICATION", "HOLD_POSITION"],
     allowedCtas: ["ASK_PRODUCT", "NONE"],
+    clarificationTarget: "PRODUCT",
+    requestedAction: "PROVIDE_PRODUCT",
   }),
   item({
     itemId: "order-review-is-not-confirmed",
@@ -295,6 +333,8 @@ const items: readonly GateECorpusItemV1[] = [
     context: context({ index: 12, phase: "ORDER_REVIEW", sourceStage: "ORDER_PREVIEW", buyingDecision: "COMMITTED", requestedAction: "PROCEED_TO_PAYMENT" }),
     allowedStrategies: ["HOLD_POSITION", "ASK_CLARIFICATION"],
     allowedCtas: ["ASK_CHECKOUT_DETAILS", "CONFIRM_CART", "NONE"],
+    clarificationTarget: "CHECKOUT_DETAILS",
+    requestedAction: "PROVIDE_CHECKOUT_DETAILS",
   }),
   item({
     itemId: "order-confirmed-holds-position",
@@ -311,6 +351,8 @@ const items: readonly GateECorpusItemV1[] = [
     context: context({ index: 14, productStatus: "UNRESOLVED", productIds: [], buyingDecision: "COMMITTED", requestedAction: "OPEN_CART", buyingProductId: null, barriers: ["PRODUCT_CONTEXT_UNREADY", "EFFECT_READINESS_BLOCKED"] }),
     allowedStrategies: ["ASK_CLARIFICATION", "HOLD_POSITION"],
     allowedCtas: ["ASK_PRODUCT", "NONE"],
+    clarificationTarget: "PRODUCT",
+    requestedAction: "PROVIDE_PRODUCT",
   }),
 ];
 
@@ -343,7 +385,7 @@ const frozenRubric: GateERubricV1 = {
     population: "ALL_FROZEN_CORPUS_ITEMS",
     runtimeClaimGuardRequired: true,
     structuredStrategyAndCtaRequired: true,
-    outputSchemaRequired: "CONTEXT_V2_CANDIDATE_OUTPUT_V1",
+    outputSchemaRequired: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
   },
 };
 export const FROZEN_GATE_E_RUBRIC_V1: GateERubricV1 = Object.freeze(

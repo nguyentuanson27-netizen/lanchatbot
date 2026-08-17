@@ -52,13 +52,16 @@ never coerced to the draft expectation.
 
 The source artifact is
 `apps/worker/src/gate-e-frozen-artifacts.ts`.
+Its admissible identities are independently pinned by
+`apps/worker/src/gate-e-registration-policy.ts`; a self-consistent replacement
+corpus or rubric is not registerable.
 
 - Corpus version: `FROZEN_POST_GATE_BF_V1_CORPUS_V1`
 - Corpus canonical SHA-256:
-  `129443388accf822972a28278d28aaa51c73022bf5cf312606b838851e2939fc`
+  `812916f76146a2c011f0852498d3c477a1d8d1a3b1c0923a28b78523c39a7456`
 - Rubric version: `DF10_GATE_E_RUBRIC_V1`
 - Rubric canonical SHA-256:
-  `871e91b48bc9f33564f9119be1cb0793cf8d4e55d3c4daa80693e3804ad87566`
+  `af3422b7ee8282c5474bfd98dc310af5a4f2867d918141064134b64edd064696`
 - Population: all 14 frozen items; no scoring sample.
 - Data: controlled PII-free fixtures only; no raw transcript, customer hash,
   phone, address, email, provider payload, token, or credential.
@@ -70,9 +73,14 @@ with committed intent, and forbidden delivery/cart side-effect claims.
 
 Every item is `MUST_PASS`. Required strata are claim safety, Context V2
 integrity, side-effect safety, and MUST_PASS. The runtime protected-claim guard
-must validate candidate wording during the scored workflow; strategy/CTA and
-the candidate output schema are also objective assertions. Style-only
-preferences cannot change the verdict.
+must validate candidate wording during the scored workflow. Candidate output
+V2 classifies every text segment as general wording, a verified claim bound to
+an exact evidence content hash, a typed clarification, a typed requested
+action, or a typed effect claim. Per-case obligations bind the exact Context V2
+hash, product binding, required/forbidden claims, clarification/action class
+and forbidden-effect matrix. A conservative omitted-effect detector is a
+fail-closed backstop only; it is not semantic authority. Strategy/CTA remain
+objective assertions. Style-only preferences cannot change the verdict.
 
 ## 4. Candidate manifest and identity
 
@@ -114,6 +122,15 @@ revision S; both must equal the registered fingerprint. A registration artifact
 must already be an ancestor of S, and its commit time must precede the run
 start. The scored runner also requires this verified proof and binds it into the
 redacted evidence hash before it can call the model.
+
+The scored runner has one public orchestration boundary. It accepts only the
+registration path plus Git, provider-transport and append-only evidence-store
+capabilities. It does not accept a caller-created proof, manifest, corpus,
+rubric, clock, candidate output or request identity. It verifies clean exact
+`HEAD == refs/remotes/origin/main`, reads and verifies the registration and
+frozen artifacts internally, builds the exact provider request bytes at the
+send boundary, applies the provider deadline around the entire transport, and
+rechecks clean unchanged refs before and after atomic evidence append.
 
 ## 6. Cost and isolation caps
 

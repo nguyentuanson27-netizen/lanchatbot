@@ -132,9 +132,15 @@ function providerPayload() {
       content: {
         parts: [{
           text: JSON.stringify({
-            schemaVersion: 1,
-            contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V1",
-            reply: "Giá đã xác minh là 699.000đ.",
+            schemaVersion: 2,
+            contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
+            contextHash: hash("c"),
+            productBinding: { status: "RESOLVED", productIds: ["SD398"] },
+            segments: [{
+              kind: "VERIFIED_CLAIM",
+              text: "Giá đã xác minh là 699.000đ.",
+              claimContentHash: hash("1"),
+            }],
             strategy: "ANSWER_VERIFIED_FACTS",
             cta: "CONFIRM_CART",
           }),
@@ -194,7 +200,7 @@ describe("Context V2 candidate capability", () => {
       context: context(),
     });
     expect(request.identity.requestEnvelopeHash).toBe(
-      "45c275186bccb75366c1ec3f8b6095e0377d7bd4aa7bd28e1005d392be600064",
+      "916eed91a467cec451368914225edf79175a9f8a25516f04086b391f94708a45",
     );
     expect(request.body).toContain("responseSchema");
     expect(request.body).toContain("safetySettings");
@@ -288,8 +294,12 @@ describe("Context V2 candidate capability", () => {
       await vi.advanceTimersByTimeAsync(1_000);
       await rejection;
 
+      let tokenSignal: AbortSignal | undefined;
       const tokenBlocked = new FetchCandidateVertexTransport(
-        () => new Promise<string>(() => undefined),
+        (signal) => {
+          tokenSignal = signal;
+          return new Promise<string>(() => undefined);
+        },
         vi.fn() as unknown as typeof fetch,
         1_000,
       ).send({ url: "https://example.invalid", body: "{}" });
@@ -298,6 +308,7 @@ describe("Context V2 candidate capability", () => {
       );
       await vi.advanceTimersByTimeAsync(1_000);
       await tokenRejection;
+      expect(tokenSignal?.aborted).toBe(true);
 
       const bodyBlocked = new FetchCandidateVertexTransport(
         async () => "token",

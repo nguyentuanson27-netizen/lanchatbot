@@ -1,10 +1,13 @@
 import { createHash } from "node:crypto";
 import {
   BusinessFactEnvelopeV1Schema,
-  ContextV2CandidateOutputV1Schema,
+  ContextV2CandidateOutputV2Schema,
   canonicalJsonV1,
   type ContextV2,
-  type ContextV2CandidateOutputV1,
+  type ContextV2CandidateClarificationTargetV2,
+  type ContextV2CandidateEffectV2,
+  type ContextV2CandidateOutputV2,
+  type ContextV2CandidateRequestedActionV2,
 } from "@lana/contracts";
 import {
   detectConcreteSizeRecommendations,
@@ -14,12 +17,13 @@ import {
   CONTEXT_V2_CANDIDATE_MODEL_ID,
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
   buildCandidateRequest,
+  parseCandidateVertexResponse,
   type CandidateVertexTransport,
   type CandidateRequestIdentity,
-  type ContextV2CandidateModelPort,
 } from "./context-v2-candidate.js";
 import { DF10_GATE_E_PLAN_ARTIFACT_SHA256 } from "./context-v2-evaluation.js";
 import { parseContextV2WithIntegrity } from "./context-v2.js";
+import { GATE_E_FROZEN_REGISTRATION_POLICY_V1 } from "./gate-e-registration-policy.js";
 
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
@@ -47,6 +51,7 @@ export const GATE_E_CANDIDATE_SOURCE_PATHS_V1 = Object.freeze([
   "apps/worker/src/context-v2-evaluation.ts",
   "apps/worker/src/context-v2.ts",
   "apps/worker/src/gate-e-frozen-artifacts.ts",
+  "apps/worker/src/gate-e-registration-policy.ts",
   "apps/worker/src/gate-e-registration.ts",
   "apps/worker/tsconfig.json",
   "package.json",
@@ -135,7 +140,19 @@ export interface GateECorpusItemV1 {
       | "CONFIRM_CART"
     )[];
     claimSafety: "RUNTIME_GUARD_REQUIRED";
-    sideEffectSafety: "NO_SIDE_EFFECT_CAPABILITY";
+    sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_OMISSION_BACKSTOP";
+    semanticObligations: Readonly<{
+      contextHash: string;
+      productBinding: Readonly<{
+        status: ContextV2["productBinding"]["status"];
+        productIds: readonly string[];
+      }>;
+      requiredClaimContentHashes: readonly string[];
+      forbiddenClaimTypes: readonly ContextV2["verifiedClaims"][number]["type"][];
+      clarificationTarget: ContextV2CandidateClarificationTargetV2 | "NONE";
+      requestedAction: ContextV2CandidateRequestedActionV2 | "NONE";
+      allowedEffectClaims: readonly ContextV2CandidateEffectV2[];
+    }>;
   }>;
 }
 
@@ -163,7 +180,7 @@ export interface GateERubricV1 {
     population: "ALL_FROZEN_CORPUS_ITEMS";
     runtimeClaimGuardRequired: true;
     structuredStrategyAndCtaRequired: true;
-    outputSchemaRequired: "CONTEXT_V2_CANDIDATE_OUTPUT_V1";
+    outputSchemaRequired: "CONTEXT_V2_CANDIDATE_OUTPUT_V2";
   }>;
 }
 
@@ -220,6 +237,24 @@ export interface GateEGitEvidenceReader {
   commitTime(commit: string): Promise<string>;
 }
 
+export const GATE_E_TRUSTED_SCORED_RUN_REF =
+  "refs/remotes/origin/main" as const;
+
+export interface GateEScoredRunGitReader extends GateEGitEvidenceReader {
+  resolveRef(ref: "HEAD" | typeof GATE_E_TRUSTED_SCORED_RUN_REF): Promise<string>;
+  isWorktreeClean(): Promise<boolean>;
+}
+
+export interface GateEEvidenceStoreV1 {
+  appendAtomically(input: Readonly<{
+    evidenceHash: string;
+    evidence: Readonly<Record<string, unknown>>;
+  }>): Promise<Readonly<{
+    disposition: "APPENDED" | "ALREADY_PRESENT";
+    evidenceHash: string;
+  }>>;
+}
+
 export interface GateERegistrationProvenanceProofV1 {
   readonly disposition: "REGISTRATION_PROVENANCE_VERIFIED";
   readonly registrationCommit: string;
@@ -252,6 +287,15 @@ function isSafeGitJsonPath(path: string): boolean {
   return GIT_JSON_PATH_PATTERN.test(path) &&
     !path.startsWith("/") &&
     path.split("/").every((segment) => segment !== "" && segment !== "..");
+}
+
+function hasExactKeys(
+  value: unknown,
+  exactKeys: readonly string[],
+): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value) &&
+    canonicalJsonV1(Object.keys(value).sort()) ===
+      canonicalJsonV1([...exactKeys].sort());
 }
 
 export async function deriveGateECandidateContentFingerprint(input: Readonly<{
@@ -345,27 +389,94 @@ function businessFactsFromContext(context: ContextV2) {
   });
 }
 
-const SIDE_EFFECT_CLAIM_FRAGMENTS_V1 = Object.freeze([
-  "đã thêm vào giỏ",
-  "đã thêm sản phẩm vào giỏ",
-  "đã cập nhật giỏ",
-  "đã xác nhận đơn",
-  "đã đặt hàng",
-  "đã gửi tin",
-  "i added to your cart",
-  "i updated your cart",
-  "your order is confirmed",
-] as const);
+function normalizedSemanticText(value: string): string {
+  return value.normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replaceAll("đ", "d")
+    .toLocaleLowerCase("vi-VN")
+    .replace(/[^a-z0-9]+/gu, " ")
+    .trim();
+}
+
+function hasCompletedEffectClaim(
+  text: string,
+  effect: ContextV2CandidateEffectV2,
+): boolean {
+  const normalized = normalizedSemanticText(text);
+  const completed = [
+    " da ", " xong ", " roi ", " hoan tat ", " finished ", " completed ",
+    " confirmed ", " placed ", " sent ", " updated ", " added ",
+    " opened ", " created ", " scheduled ",
+  ].some((marker) => ` ${normalized} `.includes(marker));
+  if (!completed) return false;
+  if (effect === "CART_OPENED" || effect === "CART_UPDATED") {
+    return (normalized.includes("gio") || normalized.includes("cart")) &&
+      ["them", "cap nhat", "mo", "added", "updated", "opened"]
+        .some((verb) => normalized.includes(verb));
+  }
+  if (effect === "ORDER_PLACED" || effect === "ORDER_CONFIRMED") {
+    return ["len don", "dat hang", "xac nhan don", "placing the order",
+      "placed the order", "order is confirmed", "confirmed the order"]
+      .some((phrase) => normalized.includes(phrase));
+  }
+  if (effect === "MESSAGE_SENT") {
+    return (normalized.includes("tin") || normalized.includes("message")) &&
+      ["gui", "sent"].some((verb) => normalized.includes(verb));
+  }
+  return (normalized.includes("giao hang") || normalized.includes("delivery")) &&
+    ["tao", "book", "created", "scheduled"]
+      .some((verb) => normalized.includes(verb));
+}
+
+function replyFromCandidateOutput(output: ContextV2CandidateOutputV2): string {
+  return output.segments.map(({ text }) => text).join("\n");
+}
+
+const CANDIDATE_EFFECTS_V2 = Object.freeze([
+  "CART_OPENED",
+  "CART_UPDATED",
+  "ORDER_PLACED",
+  "ORDER_CONFIRMED",
+  "MESSAGE_SENT",
+  "DELIVERY_CREATED",
+] as const satisfies readonly ContextV2CandidateEffectV2[]);
+
+function claimSegmentMatchesEvidence(
+  context: ContextV2,
+  claimContentHash: string,
+  text: string,
+): boolean {
+  const claim = context.verifiedClaims.find(({ provenance }) =>
+    provenance.contentHash === claimContentHash
+  );
+  if (!claim) return false;
+  if (claim.type === "PRICE") {
+    const observedAmounts = [...text.matchAll(/\d[\d.,]*/gu)]
+      .map(([value]) => Number(value.replace(/[^0-9]/gu, "")));
+    return observedAmounts.includes(claim.value.amountVnd);
+  }
+  if (claim.type === "SIZE_FIT") {
+    const asserted = new Set(detectConcreteSizeRecommendations(text));
+    return [...claim.value.recommendedSizes, ...claim.value.alternativeSizes]
+      .some((size) => asserted.has(size.toLocaleUpperCase("vi-VN")));
+  }
+  if (claim.type === "PRODUCT_MEDIA") {
+    const normalized = normalizedSemanticText(text);
+    return ["anh", "hinh", "image", "photo"]
+      .some((topic) => normalized.split(" ").includes(topic));
+  }
+  return false;
+}
 
 export function scoreGateECandidateOutput(input: Readonly<{
   item: GateECorpusItemV1;
   output: unknown;
 }>): GateEItemScoreV1 {
   const reasons = new Set<string>();
-  let output: ContextV2CandidateOutputV1;
+  let output: ContextV2CandidateOutputV2;
   try {
     parseContextV2WithIntegrity(input.item.context);
-    output = ContextV2CandidateOutputV1Schema.parse(input.output);
+    output = ContextV2CandidateOutputV2Schema.parse(input.output);
   } catch {
     return Object.freeze({
       corpusItemId: input.item.itemId,
@@ -382,12 +493,87 @@ export function scoreGateECandidateOutput(input: Readonly<{
   if (!input.item.assertions.allowedCtas.includes(output.cta)) {
     reasons.add("GATE_E_CTA_ASSERTION_FAILED");
   }
-  const normalizedReply = output.reply.toLocaleLowerCase("vi-VN");
-  const sideEffectViolation = SIDE_EFFECT_CLAIM_FRAGMENTS_V1.some((fragment) =>
-    normalizedReply.includes(fragment)
-  );
-  if (sideEffectViolation) reasons.add("GATE_E_SIDE_EFFECT_CLAIM_REJECTED");
+  const obligations = input.item.assertions.semanticObligations;
+  const productBindingMatches = canonicalJsonV1(output.productBinding) ===
+    canonicalJsonV1(obligations.productBinding);
+  const contextMatches = output.contextHash === obligations.contextHash &&
+    output.contextHash === input.item.context.contextHash;
+  if (!contextMatches) reasons.add("GATE_E_CONTEXT_HASH_ASSERTION_FAILED");
+  if (!productBindingMatches) {
+    reasons.add("GATE_E_PRODUCT_BINDING_ASSERTION_FAILED");
+  }
 
+  const claimSegments = output.segments.filter((segment) =>
+    segment.kind === "VERIFIED_CLAIM"
+  );
+  const usedClaimHashes = [...new Set(claimSegments.map(
+    ({ claimContentHash }) => claimContentHash,
+  ))].sort();
+  const requiredClaimHashes = [...obligations.requiredClaimContentHashes].sort();
+  const claimReferencesMatch = canonicalJsonV1(usedClaimHashes) ===
+    canonicalJsonV1(requiredClaimHashes);
+  if (!claimReferencesMatch) {
+    reasons.add("GATE_E_REQUIRED_EVIDENCE_ASSERTION_FAILED");
+  }
+  const referencedClaims = usedClaimHashes.map((contentHash) =>
+    input.item.context.verifiedClaims.find(({ provenance }) =>
+      provenance.contentHash === contentHash
+    )
+  );
+  const claimSegmentsMatch = claimSegments.every((segment) =>
+    claimSegmentMatchesEvidence(
+      input.item.context,
+      segment.claimContentHash,
+      segment.text,
+    )
+  );
+  const forbiddenClaimUsed = referencedClaims.some((claim) =>
+    claim !== undefined && obligations.forbiddenClaimTypes.includes(claim.type)
+  );
+  if (!claimSegmentsMatch) {
+    reasons.add("GATE_E_CLAIM_SEGMENT_EVIDENCE_MISMATCH");
+  }
+  if (forbiddenClaimUsed) reasons.add("GATE_E_FORBIDDEN_CLAIM_TYPE_USED");
+
+  const clarificationTargets = [...new Set(output.segments.flatMap((segment) =>
+    segment.kind === "CLARIFICATION" ? [segment.target] : []
+  ))];
+  const expectedClarifications = obligations.clarificationTarget === "NONE"
+    ? []
+    : [obligations.clarificationTarget];
+  if (canonicalJsonV1(clarificationTargets.sort()) !==
+      canonicalJsonV1(expectedClarifications.sort())) {
+    reasons.add("GATE_E_CLARIFICATION_ASSERTION_FAILED");
+  }
+  const requestedActions = [...new Set(output.segments.flatMap((segment) =>
+    segment.kind === "ACTION_REQUEST" ? [segment.action] : []
+  ))];
+  const expectedActions = obligations.requestedAction === "NONE"
+    ? []
+    : [obligations.requestedAction];
+  if (canonicalJsonV1(requestedActions.sort()) !==
+      canonicalJsonV1(expectedActions.sort())) {
+    reasons.add("GATE_E_REQUESTED_ACTION_ASSERTION_FAILED");
+  }
+
+  const declaredEffects = new Set(output.segments.flatMap((segment) =>
+    segment.kind === "EFFECT_CLAIM" ? [segment.effect] : []
+  ));
+  const disallowedDeclaredEffect = [...declaredEffects]
+    .some((effect) => !obligations.allowedEffectClaims.includes(effect));
+  const omittedEffect = output.segments.some((segment) =>
+    CANDIDATE_EFFECTS_V2.some((effect) =>
+      hasCompletedEffectClaim(segment.text, effect) &&
+      !(segment.kind === "EFFECT_CLAIM" && segment.effect === effect)
+    )
+  );
+  const sideEffectViolation = disallowedDeclaredEffect || omittedEffect;
+  if (disallowedDeclaredEffect) {
+    reasons.add("GATE_E_TYPED_EFFECT_CLAIM_REJECTED");
+  }
+  if (omittedEffect) reasons.add("GATE_E_OMITTED_EFFECT_CLAIM_REJECTED");
+
+  const reply = replyFromCandidateOutput(output);
   const productId = input.item.context.productBinding.status === "RESOLVED"
     ? input.item.context.productBinding.productIds[0] ?? null
     : null;
@@ -398,7 +584,7 @@ export function scoreGateECandidateOutput(input: Readonly<{
       conversationStage: input.item.context.phase.phase,
       productId,
       action: "REPLY",
-      reply: output.reply,
+      reply,
       attachments: [],
       handoffReason: null,
     },
@@ -407,7 +593,7 @@ export function scoreGateECandidateOutput(input: Readonly<{
     buyingSignal: input.item.context.buyingIntent.decision === "COMMITTED",
     now: new Date("2026-08-17T00:01:00.000Z"),
   });
-  const assertedSizes = detectConcreteSizeRecommendations(output.reply);
+  const assertedSizes = detectConcreteSizeRecommendations(reply);
   const allowedSizes = new Set(input.item.context.verifiedClaims.flatMap((claim) =>
     claim.type === "SIZE_FIT" ? claim.value.recommendedSizes : []
   ).map((value) => value.toLocaleUpperCase("vi-VN")));
@@ -415,17 +601,23 @@ export function scoreGateECandidateOutput(input: Readonly<{
   const nonSizeGuardBlocks = guarded.blockedReasonCodes.filter((reason) =>
     !reason.startsWith("SIZE_RECOMMENDATION_")
   );
-  const claimSafe = sizeSafe && nonSizeGuardBlocks.length === 0;
+  const claimSafe = sizeSafe && nonSizeGuardBlocks.length === 0 &&
+    claimReferencesMatch && claimSegmentsMatch && !forbiddenClaimUsed;
   if (!sizeSafe) reasons.add("GATE_E_SIZE_CLAIM_UNVERIFIED");
   for (const reason of nonSizeGuardBlocks) {
     reasons.add(`GATE_E_RUNTIME_GUARD_${reason}`);
   }
+  const contextIntegrity = contextMatches && productBindingMatches &&
+    canonicalJsonV1(clarificationTargets.sort()) ===
+      canonicalJsonV1(expectedClarifications.sort()) &&
+    canonicalJsonV1(requestedActions.sort()) ===
+      canonicalJsonV1(expectedActions.sort());
   const disposition = reasons.size === 0 ? "MUST_PASS" : "FAILED";
   return Object.freeze({
     corpusItemId: input.item.itemId,
     disposition,
     claimSafety: claimSafe ? 1 : 0,
-    contextIntegrity: 1,
+    contextIntegrity: contextIntegrity ? 1 : 0,
     sideEffectViolations: sideEffectViolation ? 1 : 0,
     reasonCodes: [...reasons].sort(),
   });
@@ -436,6 +628,7 @@ export function summarizeGateEScores(input: Readonly<{
   rubric: GateERubricV1;
   scores: readonly GateEItemScoreV1[];
 }>) {
+  assertFrozenGateEPolicy(input.corpus, input.rubric);
   assertRubric(input.rubric);
   assertCorpus(input.corpus, input.rubric);
   const scoreIds = input.scores.map(({ corpusItemId }) => corpusItemId);
@@ -511,8 +704,22 @@ function assertRubric(rubric: GateERubricV1): void {
       rubric.scoring.population !== "ALL_FROZEN_CORPUS_ITEMS" ||
       rubric.scoring.runtimeClaimGuardRequired !== true ||
       rubric.scoring.structuredStrategyAndCtaRequired !== true ||
-      rubric.scoring.outputSchemaRequired !== "CONTEXT_V2_CANDIDATE_OUTPUT_V1") {
+      rubric.scoring.outputSchemaRequired !== "CONTEXT_V2_CANDIDATE_OUTPUT_V2") {
     throw new Error("GATE_E_RUBRIC_INVALID");
+  }
+}
+
+function assertFrozenGateEPolicy(
+  corpus: GateECorpusV1,
+  rubric: GateERubricV1,
+): void {
+  const policy = GATE_E_FROZEN_REGISTRATION_POLICY_V1;
+  if (corpus.corpusVersion !== policy.corpusVersion ||
+      rubric.contractVersion !== policy.rubricVersion ||
+      rubric.scoring.outputSchemaRequired !== policy.outputContractVersion ||
+      sha256(canonicalJsonV1(corpus)) !== policy.corpusCanonicalSha256 ||
+      sha256(canonicalJsonV1(rubric)) !== policy.rubricCanonicalSha256) {
+    throw new Error("GATE_E_FROZEN_POLICY_MISMATCH");
   }
 }
 
@@ -535,7 +742,8 @@ function assertCorpus(corpus: GateECorpusV1, rubric: GateERubricV1): void {
         item.assertions.allowedStrategies.length === 0 ||
         item.assertions.allowedCtas.length === 0 ||
         item.assertions.claimSafety !== "RUNTIME_GUARD_REQUIRED" ||
-        item.assertions.sideEffectSafety !== "NO_SIDE_EFFECT_CAPABILITY" ||
+        item.assertions.sideEffectSafety !==
+          "TYPED_EFFECT_MATRIX_WITH_OMISSION_BACKSTOP" ||
         new Set(item.strata).size !== item.strata.length ||
         !item.strata.includes("MUST_PASS")) {
       throw new Error("GATE_E_CORPUS_ASSERTION_INVALID");
@@ -544,6 +752,22 @@ function assertCorpus(corpus: GateECorpusV1, rubric: GateERubricV1): void {
       parseContextV2WithIntegrity(item.context);
     } catch {
       throw new Error("CONTEXT_V2_INTEGRITY_INVALID");
+    }
+    const obligations = item.assertions.semanticObligations;
+    if (obligations.contextHash !== item.context.contextHash ||
+        canonicalJsonV1(obligations.productBinding) !== canonicalJsonV1({
+          status: item.context.productBinding.status,
+          productIds: item.context.productBinding.productIds,
+        }) ||
+        new Set(obligations.requiredClaimContentHashes).size !==
+          obligations.requiredClaimContentHashes.length ||
+        obligations.requiredClaimContentHashes.some((contentHash) =>
+          !item.context.verifiedClaims.some(({ provenance }) =>
+            provenance.contentHash === contentHash
+          )
+        ) ||
+        obligations.allowedEffectClaims.length !== 0) {
+      throw new Error("GATE_E_SEMANTIC_OBLIGATION_INVALID");
     }
   }
 }
@@ -559,6 +783,7 @@ export function createDraftGateERegistrationBundle(input: Readonly<{
       !SHA256_PATTERN.test(input.candidateContentFingerprint)) {
     throw new Error("GATE_E_CANDIDATE_SOURCE_IDENTITY_INVALID");
   }
+  assertFrozenGateEPolicy(input.corpus, input.rubric);
   assertRubric(input.rubric);
   assertCorpus(input.corpus, input.rubric);
   const requests = [...input.corpus.items]
@@ -638,8 +863,37 @@ export type RedactedGateEProviderObservationV1 = ReturnType<
 function assertDraftRegistrationIntegrity(
   draft: DraftGateERegistrationBundleV1,
 ): void {
+  const draftKeys = [
+    "candidateContentFingerprint",
+    "candidateSourceRevision",
+    "contractVersion",
+    "corpusHash",
+    "executionCaps",
+    "manifestHash",
+    "modelId",
+    "planArtifactHash",
+    "registrationStatus",
+    "requests",
+    "rubricHash",
+    "schemaVersion",
+  ];
+  const requestKeys = ["contextHash", "corpusItemId", "requestIdentity"];
+  const identityKeys = [
+    "generationConfigHash",
+    "modelResource",
+    "promptContentHash",
+    "requestEnvelopeHash",
+    "responseSchemaHash",
+    "safetySettingsHash",
+    "systemInstructionHash",
+  ];
   const { manifestHash, ...draftBody } = draft;
-  if (manifestHash !== sha256(canonicalJsonV1(draftBody)) ||
+  if (!hasExactKeys(draft, draftKeys) ||
+      draft.requests.some((request) =>
+        !hasExactKeys(request, requestKeys) ||
+        !hasExactKeys(request.requestIdentity, identityKeys)
+      ) ||
+      manifestHash !== sha256(canonicalJsonV1(draftBody)) ||
       draft.registrationStatus !== "DRAFT_UNREGISTERED" ||
       draft.planArtifactHash !== DF10_GATE_E_PLAN_ARTIFACT_SHA256 ||
       draft.modelId !== CONTEXT_V2_CANDIDATE_MODEL_ID ||
@@ -654,7 +908,21 @@ export function createRegisteredGateEManifest(input: Readonly<{
   observation: RedactedGateEProviderObservationV1;
 }>) {
   assertDraftRegistrationIntegrity(input.draft);
-  if (input.observation.disposition !== "PROVIDER_IDENTITY_OBSERVED_MATCH" ||
+  let canonicalObservation: RedactedGateEProviderObservationV1;
+  try {
+    canonicalObservation = createRedactedProviderObservation({
+      expectedProviderModelVersion: input.observation.expectedProviderModelVersion,
+      observedProviderModelVersion: input.observation.observedProviderModelVersion,
+      requestIdentity: input.draft.requests[0]!.requestIdentity,
+      startedAt: input.observation.startedAt,
+      completedAt: input.observation.completedAt,
+    });
+  } catch {
+    throw new Error("GATE_E_PROVIDER_OBSERVATION_NOT_REGISTERABLE");
+  }
+  if (canonicalJsonV1(input.observation) !==
+        canonicalJsonV1(canonicalObservation) ||
+      input.observation.disposition !== "PROVIDER_IDENTITY_OBSERVED_MATCH" ||
       input.observation.expectedProviderModelVersion !==
         CONTEXT_V2_CANDIDATE_PROVIDER_VERSION ||
       input.observation.observedProviderModelVersion !==
@@ -691,104 +959,211 @@ export type RegisteredGateEManifestV1 = ReturnType<
   typeof createRegisteredGateEManifest
 >;
 
+async function withGateEDeadline<T>(
+  operation: Promise<T>,
+  timeoutMs: number,
+  errorCode: "GATE_E_PROVIDER_DEADLINE_EXCEEDED" | "GATE_E_RUN_TIMEOUT",
+  onTimeout?: () => void,
+): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_resolve, reject) => {
+    timeout = setTimeout(
+      () => {
+        onTimeout?.();
+        reject(new Error(errorCode));
+      },
+      Math.max(1, timeoutMs),
+    );
+  });
+  try {
+    return await Promise.race([operation, deadline]);
+  } finally {
+    if (timeout !== undefined) clearTimeout(timeout);
+  }
+}
+
+function withGateERunDeadline<T>(
+  operation: Promise<T>,
+  startedAtMs: number,
+  onTimeout?: () => void,
+): Promise<T> {
+  const remainingMs = GATE_E_EXECUTION_CAPS_V1.runTimeoutMs -
+    (Date.now() - startedAtMs);
+  if (remainingMs <= 0) return Promise.reject(new Error("GATE_E_RUN_TIMEOUT"));
+  return withGateEDeadline(
+    operation,
+    remainingMs,
+    "GATE_E_RUN_TIMEOUT",
+    onTimeout,
+  );
+}
+
 export async function executeGateEScoredRun(input: Readonly<{
-  corpus: GateECorpusV1;
-  rubric: GateERubricV1;
-  manifest: RegisteredGateEManifestV1;
-  provenance: GateERegistrationProvenanceProofV1;
-  model: ContextV2CandidateModelPort;
-  startedAt: string;
-  now?: () => Date;
+  registrationPath: string;
+  git: GateEScoredRunGitReader;
+  transport: CandidateVertexTransport;
+  evidenceStore: GateEEvidenceStoreV1;
 }>) {
-  if (input.manifest.registrationStatus !== "REGISTERED_FOR_SCORING") {
-    throw new Error("GATE_E_REGISTERED_MANIFEST_REQUIRED");
+  const startedAt = new Date().toISOString();
+  const startedAtMs = Date.parse(startedAt);
+  if (!await withGateERunDeadline(input.git.isWorktreeClean(), startedAtMs)) {
+    throw new Error("GATE_E_TRUSTED_CHECKOUT_DIRTY");
   }
-  const { manifestHash, ...manifestBody } = input.manifest;
-  if (input.provenance.disposition !== "REGISTRATION_PROVENANCE_VERIFIED" ||
-      !COMMIT_PATTERN.test(input.provenance.registrationCommit) ||
-      !COMMIT_PATTERN.test(input.provenance.registrationBlobOid) ||
-      !COMMIT_PATTERN.test(input.provenance.scoredRunRevision) ||
-      input.provenance.manifestHash !== input.manifest.manifestHash ||
-      input.provenance.scoredRunStartedAt !== input.startedAt) {
-    throw new Error("GATE_E_REGISTRATION_PROVENANCE_REQUIRED");
+  const [headRevision, trustedRevision] = await withGateERunDeadline(Promise.all([
+    input.git.resolveRef("HEAD"),
+    input.git.resolveRef(GATE_E_TRUSTED_SCORED_RUN_REF),
+  ]), startedAtMs);
+  if (!COMMIT_PATTERN.test(headRevision) || headRevision !== trustedRevision) {
+    throw new Error("GATE_E_TRUSTED_EXACT_HEAD_MISMATCH");
   }
-  if (manifestHash !== sha256(canonicalJsonV1(manifestBody)) ||
-      input.manifest.corpusHash !== sha256(canonicalJsonV1(input.corpus)) ||
-      input.manifest.rubricHash !== sha256(canonicalJsonV1(input.rubric)) ||
-      canonicalJsonV1(input.manifest.executionCaps) !==
+  const verified = await withGateERunDeadline(verifyGateERegistrationBundle({
+    registrationPath: input.registrationPath,
+    scoredRunRevision: headRevision,
+    scoredRunStartedAt: startedAt,
+    git: input.git,
+  }), startedAtMs);
+  const { corpus, rubric, manifest, proof } = verified;
+  const { manifestHash, ...manifestBody } = manifest;
+  if (manifest.registrationStatus !== "REGISTERED_FOR_SCORING" ||
+      manifestHash !== sha256(canonicalJsonV1(manifestBody)) ||
+      manifest.corpusHash !== sha256(canonicalJsonV1(corpus)) ||
+      manifest.rubricHash !== sha256(canonicalJsonV1(rubric)) ||
+      canonicalJsonV1(manifest.executionCaps) !==
         canonicalJsonV1(GATE_E_EXECUTION_CAPS_V1) ||
-      input.corpus.items.length > GATE_E_EXECUTION_CAPS_V1.scoredRequestMaximum ||
-      input.corpus.items.length *
-        GATE_E_EXECUTION_CAPS_V1.perRequestOutputTokenMaximum >
+      corpus.items.length > GATE_E_EXECUTION_CAPS_V1.scoredRequestMaximum ||
+      corpus.items.length * GATE_E_EXECUTION_CAPS_V1.perRequestOutputTokenMaximum >
         GATE_E_EXECUTION_CAPS_V1.totalOutputTokenMaximum) {
     throw new Error("GATE_E_SCORED_MANIFEST_INTEGRITY_INVALID");
   }
-  assertRubric(input.rubric);
-  assertCorpus(input.corpus, input.rubric);
-  const startedAtMs = Date.parse(input.startedAt);
-  if (!Number.isFinite(startedAtMs)) throw new Error("GATE_E_RUN_TIME_INVALID");
-  const items = [...input.corpus.items]
+  assertFrozenGateEPolicy(corpus, rubric);
+  assertRubric(rubric);
+  assertCorpus(corpus, rubric);
+  const items = [...corpus.items]
     .sort((left, right) => left.itemId.localeCompare(right.itemId));
-  if (input.manifest.requests.length !== items.length ||
-      input.manifest.requests.some((entry, index) =>
+  if (manifest.requests.length !== items.length ||
+      manifest.requests.some((entry, index) =>
         entry.corpusItemId !== items[index]?.itemId ||
         entry.contextHash !== items[index]?.context.contextHash
       )) {
     throw new Error("GATE_E_SCORED_POPULATION_MISMATCH");
   }
-  const now = input.now ?? (() => new Date());
+  const modelResource = manifest.requests[0]?.requestIdentity.modelResource;
+  if (typeof modelResource !== "string" || modelResource.length === 0) {
+    throw new Error("GATE_E_SCORED_MODEL_RESOURCE_INVALID");
+  }
   const evidence = [];
   for (let index = 0; index < items.length; index += 1) {
-    if (now().getTime() - startedAtMs > GATE_E_EXECUTION_CAPS_V1.runTimeoutMs) {
+    if (Date.now() - startedAtMs > GATE_E_EXECUTION_CAPS_V1.runTimeoutMs) {
       throw new Error("GATE_E_RUN_TIMEOUT");
     }
     const item = items[index]!;
-    const expected = input.manifest.requests[index]!;
-    const generated = await input.model.generateCandidate(item.context)
-      .catch(() => {
-        throw new Error("GATE_E_SCORED_MODEL_CALL_FAILED");
-      });
-    if (generated.providerModelVersion !== input.manifest.providerModelVersion ||
-        canonicalJsonV1(generated.requestIdentity) !==
-          canonicalJsonV1(expected.requestIdentity)) {
+    const expected = manifest.requests[index]!;
+    const request = buildCandidateRequest({ modelResource, context: item.context });
+    if (canonicalJsonV1(request.identity) !==
+        canonicalJsonV1(expected.requestIdentity)) {
       throw new Error("GATE_E_SCORED_REQUEST_IDENTITY_MISMATCH");
+    }
+    let response: Awaited<ReturnType<CandidateVertexTransport["send"]>>;
+    try {
+      const providerController = new AbortController();
+      response = await withGateERunDeadline(
+        withGateEDeadline(input.transport.send({
+          url: request.url,
+          body: request.body,
+          signal: providerController.signal,
+        }), GATE_E_EXECUTION_CAPS_V1.providerTimeoutMs,
+        "GATE_E_PROVIDER_DEADLINE_EXCEEDED", () => {
+          providerController.abort("GATE_E_PROVIDER_DEADLINE_EXCEEDED");
+        }),
+        startedAtMs,
+        () => providerController.abort("GATE_E_RUN_TIMEOUT"),
+      );
+    } catch (error) {
+      if (error instanceof Error &&
+          ["GATE_E_PROVIDER_DEADLINE_EXCEEDED", "GATE_E_RUN_TIMEOUT"]
+            .includes(error.message)) {
+        throw error;
+      }
+      throw new Error("GATE_E_SCORED_MODEL_CALL_FAILED");
+    }
+    let generated: ReturnType<typeof parseCandidateVertexResponse>;
+    try {
+      generated = parseCandidateVertexResponse(response);
+    } catch {
+      throw new Error("GATE_E_SCORED_PROVIDER_RESPONSE_INVALID");
+    }
+    if (generated.providerModelVersion !== manifest.providerModelVersion) {
+      throw new Error("GATE_E_SCORED_PROVIDER_IDENTITY_MISMATCH");
     }
     const score = scoreGateECandidateOutput({ item, output: generated.output });
     evidence.push(Object.freeze({
       corpusItemId: item.itemId,
       contextHash: item.context.contextHash,
-      requestEnvelopeHash: generated.requestIdentity.requestEnvelopeHash,
+      requestEnvelopeHash: request.identity.requestEnvelopeHash,
       providerModelVersion: generated.providerModelVersion,
       candidateOutputHash: sha256(canonicalJsonV1(generated.output)),
       score,
     }));
   }
   const summary = summarizeGateEScores({
-    corpus: input.corpus,
-    rubric: input.rubric,
+    corpus,
+    rubric,
     scores: evidence.map(({ score }) => score),
   });
-  const completedAt = now();
+  const completedAt = new Date();
   if (completedAt.getTime() - startedAtMs >
       GATE_E_EXECUTION_CAPS_V1.runTimeoutMs) {
     throw new Error("GATE_E_RUN_TIMEOUT");
   }
-  return Object.freeze({
+  const [finalHead, finalTrusted, finalClean] = await withGateERunDeadline(Promise.all([
+    input.git.resolveRef("HEAD"),
+    input.git.resolveRef(GATE_E_TRUSTED_SCORED_RUN_REF),
+    input.git.isWorktreeClean(),
+  ]), startedAtMs);
+  if (finalHead !== headRevision || finalTrusted !== trustedRevision ||
+      !finalClean) {
+    throw new Error("GATE_E_TRUSTED_CHECKOUT_CHANGED");
+  }
+  const evidenceBody = Object.freeze({
     schemaVersion: 1 as const,
     contractVersion: "DF10_GATE_E_SCORED_EVIDENCE_V1" as const,
     admissibility: "TECHNICAL_EVIDENCE_ONLY_NOT_GATE_VERDICT" as const,
-    manifestHash: input.manifest.manifestHash,
-    registrationProvenance: input.provenance,
-    startedAt: input.startedAt,
+    executionBoundary: "CLEAN_TRUSTED_EXACT_HEAD_REQUEST_BYTES_V1" as const,
+    scoredRunRevision: headRevision,
+    manifestHash: manifest.manifestHash,
+    registrationProvenance: proof,
+    startedAt,
     completedAt: completedAt.toISOString(),
     items: Object.freeze(evidence),
     summary,
-    evidenceHash: sha256(canonicalJsonV1({
-      manifestHash: input.manifest.manifestHash,
-      registrationProvenance: input.provenance,
-      items: evidence,
-      summary,
-    })),
+  });
+  const evidenceHash = sha256(canonicalJsonV1(evidenceBody));
+  const stored = await withGateERunDeadline(input.evidenceStore.appendAtomically({
+    evidenceHash,
+    evidence: evidenceBody,
+  }), startedAtMs).catch((error: unknown) => {
+    if (error instanceof Error && error.message === "GATE_E_RUN_TIMEOUT") {
+      throw error;
+    }
+    throw new Error("GATE_E_EVIDENCE_APPEND_FAILED");
+  });
+  if (stored.evidenceHash !== evidenceHash ||
+      !["APPENDED", "ALREADY_PRESENT"].includes(stored.disposition)) {
+    throw new Error("GATE_E_EVIDENCE_APPEND_MISMATCH");
+  }
+  const [storedHead, storedTrusted, storedClean] = await withGateERunDeadline(Promise.all([
+    input.git.resolveRef("HEAD"),
+    input.git.resolveRef(GATE_E_TRUSTED_SCORED_RUN_REF),
+    input.git.isWorktreeClean(),
+  ]), startedAtMs);
+  if (storedHead !== headRevision || storedTrusted !== trustedRevision ||
+      !storedClean) {
+    throw new Error("GATE_E_TRUSTED_CHECKOUT_CHANGED");
+  }
+  return Object.freeze({
+    ...evidenceBody,
+    evidenceHash,
+    evidenceStoreDisposition: stored.disposition,
   });
 }
 
@@ -850,14 +1225,54 @@ export async function observeGateEProviderIdentity(input: Readonly<{
   });
 }
 
-export async function verifyGateERegistrationProvenance(input: Readonly<{
-  registration: GateERegistrationArtifactV1;
+async function verifyGateERegistrationBundle(input: Readonly<{
   registrationPath: string;
   scoredRunRevision: string;
   scoredRunStartedAt: string;
   git: GateEGitEvidenceReader;
 }>) {
-  const { registration } = input;
+  if (!COMMIT_PATTERN.test(input.scoredRunRevision) ||
+      !isSafeGitJsonPath(input.registrationPath)) {
+    throw new Error("GATE_E_REGISTRATION_IDENTITY_INVALID");
+  }
+  const [registrationBlobOid, registrationContent] = await Promise.all([
+    input.git.resolveBlobOid(input.scoredRunRevision, input.registrationPath),
+    input.git.readBlob(input.scoredRunRevision, input.registrationPath),
+  ]);
+  if (!GIT_OBJECT_ID_PATTERN.test(registrationBlobOid)) {
+    throw new Error("GATE_E_REGISTRATION_BLOB_INVALID");
+  }
+  let registration: GateERegistrationArtifactV1;
+  try {
+    const parsed = JSON.parse(registrationContent) as Record<string, unknown>;
+    const exactKeys = [
+      "candidateContentFingerprint",
+      "candidateSourceRevision",
+      "contractVersion",
+      "corpusBlobOid",
+      "corpusHash",
+      "corpusPath",
+      "executionCapsHash",
+      "manifestBlobOid",
+      "manifestHash",
+      "manifestPath",
+      "providerModelVersion",
+      "providerObservationBlobOid",
+      "providerObservationHash",
+      "providerObservationPath",
+      "registrationStatus",
+      "rubricBlobOid",
+      "rubricHash",
+      "rubricPath",
+      "schemaVersion",
+    ];
+    if (!hasExactKeys(parsed, exactKeys)) {
+      throw new Error("invalid-keys");
+    }
+    registration = parsed as unknown as GateERegistrationArtifactV1;
+  } catch {
+    throw new Error("GATE_E_REGISTRATION_ARTIFACT_INVALID");
+  }
   const artifactPaths = [
     input.registrationPath,
     registration.corpusPath,
@@ -865,9 +1280,10 @@ export async function verifyGateERegistrationProvenance(input: Readonly<{
     registration.manifestPath,
     registration.providerObservationPath,
   ];
-  if (registration.registrationStatus !== "REGISTERED" ||
+  if (registration.schemaVersion !== 1 ||
+      registration.contractVersion !== "DF10_GATE_E_REGISTRATION_V1" ||
+      registration.registrationStatus !== "REGISTERED" ||
       !COMMIT_PATTERN.test(registration.candidateSourceRevision) ||
-      !COMMIT_PATTERN.test(input.scoredRunRevision) ||
       artifactPaths.some((path) => !isSafeGitJsonPath(path)) ||
       [registration.candidateContentFingerprint, registration.corpusHash,
         registration.rubricHash, registration.manifestHash,
@@ -879,22 +1295,6 @@ export async function verifyGateERegistrationProvenance(input: Readonly<{
       registration.providerModelVersion !==
         CONTEXT_V2_CANDIDATE_PROVIDER_VERSION) {
     throw new Error("GATE_E_REGISTRATION_IDENTITY_INVALID");
-  }
-  const [registrationBlobOid, registrationContent] = await Promise.all([
-    input.git.resolveBlobOid(input.scoredRunRevision, input.registrationPath),
-    input.git.readBlob(input.scoredRunRevision, input.registrationPath),
-  ]);
-  if (!GIT_OBJECT_ID_PATTERN.test(registrationBlobOid)) {
-    throw new Error("GATE_E_REGISTRATION_BLOB_INVALID");
-  }
-  let committedRegistration: unknown;
-  try {
-    committedRegistration = JSON.parse(registrationContent);
-  } catch {
-    throw new Error("GATE_E_REGISTRATION_ARTIFACT_INVALID");
-  }
-  if (canonicalJsonV1(committedRegistration) !== canonicalJsonV1(registration)) {
-    throw new Error("GATE_E_REGISTRATION_ARTIFACT_MISMATCH");
   }
   const registrationCommit = await input.git.findBlobIntroductionCommit(
     input.registrationPath,
@@ -944,6 +1344,7 @@ export async function verifyGateERegistrationProvenance(input: Readonly<{
     rubric = JSON.parse(rubricContent) as GateERubricV1;
     manifest = JSON.parse(manifestContent) as Record<string, unknown>;
     observation = JSON.parse(providerObservationContent) as Record<string, unknown>;
+    assertFrozenGateEPolicy(corpus, rubric);
     assertRubric(rubric);
     assertCorpus(corpus, rubric);
   } catch {
@@ -979,13 +1380,35 @@ export async function verifyGateERegistrationProvenance(input: Readonly<{
   } catch {
     throw new Error("GATE_E_MANIFEST_INTEGRITY_INVALID");
   }
+  let expectedObservation: RedactedGateEProviderObservationV1;
+  let expectedRegisteredManifest: RegisteredGateEManifestV1;
+  try {
+    expectedObservation = createRedactedProviderObservation({
+      expectedProviderModelVersion:
+        String(observation.expectedProviderModelVersion ?? ""),
+      observedProviderModelVersion:
+        String(observation.observedProviderModelVersion ?? ""),
+      requestIdentity: expectedDraft.requests[0]!.requestIdentity,
+      startedAt: String(observation.startedAt ?? ""),
+      completedAt: String(observation.completedAt ?? ""),
+    });
+    expectedRegisteredManifest = createRegisteredGateEManifest({
+      draft: expectedDraft,
+      observation: expectedObservation,
+    });
+  } catch {
+    throw new Error("GATE_E_MANIFEST_INTEGRITY_INVALID");
+  }
   const observationStartedAt = typeof observation.startedAt === "string"
     ? Date.parse(observation.startedAt)
     : Number.NaN;
   const observationCompletedAt = typeof observation.completedAt === "string"
     ? Date.parse(observation.completedAt)
     : Number.NaN;
-  if (observedManifestHash !== sha256(canonicalJsonV1(manifestBody)) ||
+  if (canonicalJsonV1(observation) !== canonicalJsonV1(expectedObservation) ||
+      canonicalJsonV1(manifest) !==
+        canonicalJsonV1(expectedRegisteredManifest) ||
+      observedManifestHash !== sha256(canonicalJsonV1(manifestBody)) ||
       observedManifestHash !== registration.manifestHash ||
       sha256(canonicalJsonV1(observation)) !==
         registration.providerObservationHash ||
@@ -1054,7 +1477,7 @@ export async function verifyGateERegistrationProvenance(input: Readonly<{
       committedAt >= runAt) {
     throw new Error("GATE_E_REGISTRATION_TIME_INVALID");
   }
-  return Object.freeze({
+  const proof = Object.freeze({
     disposition: "REGISTRATION_PROVENANCE_VERIFIED" as const,
     registrationCommit,
     registrationBlobOid,
@@ -1063,4 +1486,20 @@ export async function verifyGateERegistrationProvenance(input: Readonly<{
     registrationCommitTime,
     scoredRunStartedAt: input.scoredRunStartedAt,
   });
+  return Object.freeze({
+    proof,
+    registration,
+    corpus,
+    rubric,
+    manifest: manifest as unknown as RegisteredGateEManifestV1,
+  });
+}
+
+export async function verifyGateERegistrationProvenance(input: Readonly<{
+  registrationPath: string;
+  scoredRunRevision: string;
+  scoredRunStartedAt: string;
+  git: GateEGitEvidenceReader;
+}>): Promise<GateERegistrationProvenanceProofV1> {
+  return (await verifyGateERegistrationBundle(input)).proof;
 }

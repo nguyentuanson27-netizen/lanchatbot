@@ -116,9 +116,9 @@ Required properties:
   legacy operational replay sample is a separate population and is not
   admissible as Gate E data.
 - Draft frozen corpus canonical SHA-256:
-  `129443388accf822972a28278d28aaa51c73022bf5cf312606b838851e2939fc`.
+  `812916f76146a2c011f0852498d3c477a1d8d1a3b1c0923a28b78523c39a7456`.
 - Draft frozen rubric canonical SHA-256:
-  `871e91b48bc9f33564f9119be1cb0793cf8d4e55d3c4daa80693e3804ad87566`.
+  `af3422b7ee8282c5474bfd98dc310af5a4f2867d918141064134b64edd064696`.
 - Draft caps: one identity-observation request; at most 32 scored requests,
   1,024 output tokens/request, 32,768 total output tokens, 30-second provider
   deadline, 15-minute run deadline, concurrency one, `OFFLINE_NO_PAGE`, and
@@ -126,6 +126,15 @@ Required properties:
 - The governed ordering and abort matrix are defined in
   `../GATE_E_PREPROD_EXECUTION_PLAN.md`. Those source artifacts remain draft
   prerequisites and do not themselves constitute registration.
+- Candidate output V2 binds each text segment to a typed semantic role. Exact
+  evidence hashes, product binding, clarification/action targets and effect
+  claims are checked against case-specific frozen obligations. Wording
+  detectors may only reject omitted protected/effect claims; they cannot grant
+  semantic authority or make an item pass.
+- The scored-run boundary internally derives Git provenance, frozen artifacts,
+  actual request bytes, system time/deadlines and append-only evidence. A
+  caller-created proof, alternate corpus/rubric, model port, clock or echoed
+  request identity is not scoring authority.
 
 This source contract is not a pre-registration. A scored run becomes admissible
 only after a separate immutable corpus/rubric artifact is committed before the

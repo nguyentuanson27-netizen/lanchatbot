@@ -289,9 +289,11 @@ describe("async Context V2 candidate runner", () => {
     const model = {
       generateCandidate: vi.fn(async () => ({
         output: {
-          schemaVersion: 1 as const,
-          contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V1" as const,
-          reply: "candidate",
+          schemaVersion: 2 as const,
+          contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2" as const,
+          contextHash: "a".repeat(64),
+          productBinding: { status: "RESOLVED" as const, productIds: ["SD398"] },
+          segments: [{ kind: "GENERAL" as const, text: "candidate" }],
           strategy: "HOLD_POSITION" as const,
           cta: "NONE" as const,
         },
