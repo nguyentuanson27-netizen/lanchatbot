@@ -318,6 +318,44 @@ describe("Context V2 candidate capability", () => {
     }
   });
 
+  it.each([
+    [403, "RUN_BLOCKING_CONFIGURATION", "CONTEXT_V2_CANDIDATE_PROVIDER_CONFIGURATION"],
+    [429, "RETRYABLE_TRANSIENT", "CONTEXT_V2_CANDIDATE_PROVIDER_TRANSIENT"],
+    [503, "RETRYABLE_TRANSIENT", "CONTEXT_V2_CANDIDATE_PROVIDER_TRANSIENT"],
+  ] as const)("classifies provider HTTP %s without persisting response details", async (
+    status,
+    scope,
+    message,
+  ) => {
+    const transport = new FetchCandidateVertexTransport(
+      async () => "token",
+      vi.fn(async () => ({ ok: false, status } as Response)) as unknown as typeof fetch,
+    );
+    await expect(transport.send({
+      url: "https://example.invalid",
+      body: "{}",
+    })).rejects.toMatchObject({
+      message,
+      scope,
+      statusClass: status >= 500 ? "5XX" : "4XX",
+    });
+  });
+
+  it("classifies token acquisition failure as run configuration without leaking details", async () => {
+    const transport = new FetchCandidateVertexTransport(
+      async () => { throw new Error("secret credential detail"); },
+      vi.fn() as unknown as typeof fetch,
+    );
+    await expect(transport.send({
+      url: "https://example.invalid",
+      body: "{}",
+    })).rejects.toMatchObject({
+      message: "CONTEXT_V2_CANDIDATE_ACCESS_TOKEN_MISSING",
+      scope: "RUN_BLOCKING_CONFIGURATION",
+      statusClass: "AUTH",
+    });
+  });
+
   it("keeps candidate code outside baseline and live runtime imports", () => {
     const candidateSource = readFileSync(
       new URL("./context-v2-candidate.ts", import.meta.url),

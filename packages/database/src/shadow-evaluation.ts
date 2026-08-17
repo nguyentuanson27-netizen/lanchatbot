@@ -158,6 +158,12 @@ export interface ContextV2CandidateCoverage {
   readonly exclusionReasonCounts: Readonly<Record<string, number>>;
 }
 
+export interface ContextV2CandidateCoverageScope {
+  readonly pageId: string;
+  readonly from: Date;
+  readonly to: Date;
+}
+
 interface ClaimedRow {
   evaluation_id: string;
   source_identity_key: string;
@@ -363,7 +369,18 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
     return result.rowCount ?? 0;
   }
 
-  async contextV2CandidateCoverage(): Promise<ContextV2CandidateCoverage> {
+  async contextV2CandidateCoverage(
+    scope: ContextV2CandidateCoverageScope,
+  ): Promise<ContextV2CandidateCoverage> {
+    const pageId = scope.pageId.trim();
+    const fromMs = scope.from.getTime();
+    const toMs = scope.to.getTime();
+    const maximumWindowMs = 31 * 24 * 60 * 60 * 1_000;
+    if (!pageId || pageId.length > 128 || !Number.isFinite(fromMs) ||
+        !Number.isFinite(toMs) || toMs <= fromMs ||
+        toMs - fromMs > maximumWindowMs) {
+      throw new Error("CONTEXT_V2_COVERAGE_WINDOW_INVALID");
+    }
     const result = await this.pool.query<{
       category: "SCORED" | "EXCLUDED" | "PENDING";
       reason_code: string | null;
@@ -380,10 +397,11 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
                 END AS population_key,
                 event.event_metadata->>'sourceMessagePk' AS source_message_pk,
                 event.conversation_id, event.occurred_at
-         FROM conversation_events event
-         WHERE event.event_type = 'CONTEXT_V2_DERIVED'
-           AND event.occurred_at >= now() - interval '6 months'
-           AND event.occurred_at <= now()
+          FROM conversation_events event
+          WHERE event.event_type = 'CONTEXT_V2_DERIVED'
+            AND event.page_id = $1
+            AND event.occurred_at >= $2
+            AND event.occurred_at < $3
        ), capture_population AS (
          SELECT population_key, source_message_pk, conversation_id,
                 min(occurred_at) AS first_capture_at,
@@ -438,6 +456,7 @@ export class PostgresShadowEvaluationStore implements ShadowEvaluationStore {
        SELECT category, reason_code, enqueued, count(*)::text AS item_count
        FROM classified
        GROUP BY category, reason_code, enqueued`,
+      [pageId, scope.from, scope.to],
     );
     let denominator = 0;
     let enqueued = 0;

@@ -359,12 +359,18 @@ describe("async candidate claim state machine", () => {
       .resolves.toBe(2);
   });
 
-  it("keeps every terminal exclusion in the coverage denominator", async () => {
-    const query = vi.fn(async (sql: string) => {
+  it("keeps every terminal exclusion in a page/time-bounded coverage denominator", async () => {
+    const from = new Date("2026-08-01T00:00:00.000Z");
+    const to = new Date("2026-08-08T00:00:00.000Z");
+    const query = vi.fn(async (sql: string, parameters?: readonly unknown[]) => {
       expect(sql).toContain("FROM conversation_events event");
+      expect(sql).toContain("event.page_id = $1");
+      expect(sql).toContain("event.occurred_at >= $2");
+      expect(sql).toContain("event.occurred_at < $3");
       expect(sql).toContain("LEFT JOIN messages message");
       expect(sql).toContain("CONTEXT_V2_SOURCE_DLP_INELIGIBLE");
       expect(sql).toContain("CONTEXT_V2_CAPTURE_SOURCE_PK_INVALID");
+      expect(parameters).toEqual(["1198992073286645", from, to]);
       return {
         rows: [
           { category: "SCORED", reason_code: null, enqueued: true, item_count: "7" },
@@ -377,7 +383,11 @@ describe("async candidate claim state machine", () => {
         rowCount: 6,
       };
     });
-    await expect(candidateStore(query).contextV2CandidateCoverage()).resolves
+    await expect(candidateStore(query).contextV2CandidateCoverage({
+      pageId: "1198992073286645",
+      from,
+      to,
+    })).resolves
       .toEqual({
         denominator: 16,
         terminalCaptures: 16,
@@ -391,6 +401,16 @@ describe("async candidate claim state machine", () => {
           CONTEXT_V2_SOURCE_DLP_INELIGIBLE: 2,
         },
       });
+  });
+
+  it("rejects an unbounded coverage census before querying", async () => {
+    const query = vi.fn();
+    await expect(candidateStore(query).contextV2CandidateCoverage({
+      pageId: "1198992073286645",
+      from: new Date("2026-01-01T00:00:00.000Z"),
+      to: new Date("2026-08-01T00:00:00.000Z"),
+    })).rejects.toThrow("CONTEXT_V2_COVERAGE_WINDOW_INVALID");
+    expect(query).not.toHaveBeenCalled();
   });
 
   it("recovers expired processing leases before selecting another job", async () => {

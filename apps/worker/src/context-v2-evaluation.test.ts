@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import { canonicalJsonV1, type ContextV2 } from "@lana/contracts";
 import {
+  CandidateProviderError,
   CONTEXT_V2_CANDIDATE_MODEL_ID,
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
   deriveCandidateRequestIdentity,
@@ -384,5 +385,70 @@ describe("async Context V2 candidate runner", () => {
       reasonCode: message,
     });
     expect(failContextV2Candidate).not.toHaveBeenCalled();
+  });
+
+  it("releases a provider configuration failure without consuming the item", async () => {
+    const releaseContextV2CandidateRunBlocked = vi.fn(async () => undefined);
+    const failContextV2Candidate = vi.fn();
+    const runner = new ContextV2CandidateRunner({
+      claimContextV2CandidateNext: vi.fn(async () => ({
+        kind: "CLAIMED" as const,
+        evaluationId: "evaluation-1",
+        claimToken: "claim-1",
+        context: {} as ContextV2,
+      })),
+      completeContextV2Candidate: vi.fn(),
+      failContextV2Candidate,
+      releaseContextV2CandidateRunBlocked,
+    }, {
+      generateCandidate: vi.fn(async () => {
+        throw new CandidateProviderError(
+          "CONTEXT_V2_CANDIDATE_PROVIDER_CONFIGURATION",
+          "RUN_BLOCKING_CONFIGURATION",
+          "4XX",
+        );
+      }),
+    });
+
+    await expect(runner.processOne()).rejects.toThrow(
+      "CONTEXT_V2_CANDIDATE_RUN_BLOCKED_CONFIGURATION",
+    );
+    expect(releaseContextV2CandidateRunBlocked).toHaveBeenCalledWith({
+      evaluationId: "evaluation-1",
+      claimToken: "claim-1",
+      reasonCode: "CONTEXT_V2_CANDIDATE_PROVIDER_CONFIGURATION",
+    });
+    expect(failContextV2Candidate).not.toHaveBeenCalled();
+  });
+
+  it("retries a typed transient provider failure with only its safe code", async () => {
+    const failContextV2Candidate = vi.fn(async () => undefined);
+    const runner = new ContextV2CandidateRunner({
+      claimContextV2CandidateNext: vi.fn(async () => ({
+        kind: "CLAIMED" as const,
+        evaluationId: "evaluation-1",
+        claimToken: "claim-1",
+        context: {} as ContextV2,
+      })),
+      completeContextV2Candidate: vi.fn(),
+      failContextV2Candidate,
+      releaseContextV2CandidateRunBlocked: vi.fn(),
+    }, {
+      generateCandidate: vi.fn(async () => {
+        throw new CandidateProviderError(
+          "CONTEXT_V2_CANDIDATE_PROVIDER_TRANSIENT",
+          "RETRYABLE_TRANSIENT",
+          "5XX",
+        );
+      }),
+    });
+
+    await expect(runner.processOne()).resolves.toBe("CLAIMED");
+    expect(failContextV2Candidate).toHaveBeenCalledWith({
+      evaluationId: "evaluation-1",
+      claimToken: "claim-1",
+      errorCode: "CONTEXT_V2_CANDIDATE_PROVIDER_TRANSIENT",
+      retryable: true,
+    });
   });
 });

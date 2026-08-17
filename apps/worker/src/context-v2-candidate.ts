@@ -65,6 +65,9 @@ const SYSTEM_INSTRUCTION = [
 ].join("\n");
 
 export const CONTEXT_V2_CANDIDATE_MODEL_ID = "gemini-3.5-flash-lite";
+// Owner-selected draft expectation, not a provider-observed identity. Gate E
+// remains DRAFT_UNREGISTERED until an authorized redacted observation binds
+// the exact provider value before corpus/rubric registration.
 export const CONTEXT_V2_CANDIDATE_PROVIDER_VERSION =
   "gemini-3.5-flash-lite";
 
@@ -252,6 +255,25 @@ export interface CandidateVertexTransport {
   }>>;
 }
 
+export type CandidateProviderFailureScope =
+  | "RETRYABLE_TRANSIENT"
+  | "RUN_BLOCKING_CONFIGURATION";
+
+export class CandidateProviderError extends Error {
+  readonly name = "CandidateProviderError";
+
+  constructor(
+    message:
+      | "CONTEXT_V2_CANDIDATE_PROVIDER_TRANSIENT"
+      | "CONTEXT_V2_CANDIDATE_PROVIDER_CONFIGURATION"
+      | "CONTEXT_V2_CANDIDATE_ACCESS_TOKEN_MISSING",
+    readonly scope: CandidateProviderFailureScope,
+    readonly statusClass: "AUTH" | "4XX" | "5XX" | "OTHER",
+  ) {
+    super(message);
+  }
+}
+
 export class FetchCandidateVertexTransport implements CandidateVertexTransport {
   constructor(
     private readonly accessToken: () => Promise<string>,
@@ -273,9 +295,22 @@ export class FetchCandidateVertexTransport implements CandidateVertexTransport {
     try {
       return await Promise.race([
         (async () => {
-          const accessToken = (await this.accessToken()).trim();
+          let accessToken: string;
+          try {
+            accessToken = (await this.accessToken()).trim();
+          } catch {
+            throw new CandidateProviderError(
+              "CONTEXT_V2_CANDIDATE_ACCESS_TOKEN_MISSING",
+              "RUN_BLOCKING_CONFIGURATION",
+              "AUTH",
+            );
+          }
           if (!accessToken) {
-            throw new Error("CONTEXT_V2_CANDIDATE_ACCESS_TOKEN_MISSING");
+            throw new CandidateProviderError(
+              "CONTEXT_V2_CANDIDATE_ACCESS_TOKEN_MISSING",
+              "RUN_BLOCKING_CONFIGURATION",
+              "AUTH",
+            );
           }
           const response = await this.fetchImpl(request.url, {
             method: "POST",
@@ -288,7 +323,20 @@ export class FetchCandidateVertexTransport implements CandidateVertexTransport {
             redirect: "error",
           });
           if (!response.ok) {
-            throw new Error("CONTEXT_V2_CANDIDATE_PROVIDER_FAILED");
+            const transient = response.status === 408 || response.status === 429 ||
+              response.status >= 500;
+            const statusClass = response.status >= 500
+              ? "5XX" as const
+              : response.status >= 400
+                ? "4XX" as const
+                : "OTHER" as const;
+            throw new CandidateProviderError(
+              transient
+                ? "CONTEXT_V2_CANDIDATE_PROVIDER_TRANSIENT"
+                : "CONTEXT_V2_CANDIDATE_PROVIDER_CONFIGURATION",
+              transient ? "RETRYABLE_TRANSIENT" : "RUN_BLOCKING_CONFIGURATION",
+              statusClass,
+            );
           }
           const payload = await response.json() as Record<string, unknown>;
           const responseModelVersion = response.headers.get(

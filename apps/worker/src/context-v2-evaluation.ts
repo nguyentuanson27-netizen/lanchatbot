@@ -6,6 +6,7 @@ import type {
   ContextV2CandidateModelPort,
 } from "./context-v2-candidate.js";
 import {
+  CandidateProviderError,
   CONTEXT_V2_CANDIDATE_MODEL_ID,
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
   deriveCandidateRequestContextHash,
@@ -235,6 +236,27 @@ const NON_RETRYABLE_CANDIDATE_ERRORS = new Set([
   "CONTEXT_V2_CANDIDATE_RESPONSE_MISSING",
 ]);
 
+function runBlockingCandidateFailure(error: unknown): Readonly<{
+  reasonCode: string;
+  runnerErrorCode: string;
+}> | null {
+  const message = error instanceof Error ? error.message : "";
+  if (RUN_BLOCKING_CANDIDATE_ERRORS.has(message)) {
+    return {
+      reasonCode: message,
+      runnerErrorCode: "CONTEXT_V2_CANDIDATE_RUN_BLOCKED_MODEL_IDENTITY",
+    };
+  }
+  if (error instanceof CandidateProviderError &&
+      error.scope === "RUN_BLOCKING_CONFIGURATION") {
+    return {
+      reasonCode: error.message,
+      runnerErrorCode: "CONTEXT_V2_CANDIDATE_RUN_BLOCKED_CONFIGURATION",
+    };
+  }
+  return null;
+}
+
 function candidateFailure(error: unknown): Readonly<{
   errorCode: string;
   retryable: boolean;
@@ -244,7 +266,8 @@ function candidateFailure(error: unknown): Readonly<{
     return { errorCode: message, retryable: false };
   }
   if (message === "CONTEXT_V2_CANDIDATE_PROVIDER_TIMEOUT" ||
-      message === "CONTEXT_V2_CANDIDATE_PROVIDER_FAILED") {
+      (error instanceof CandidateProviderError &&
+        error.scope === "RETRYABLE_TRANSIENT")) {
     return { errorCode: message, retryable: true };
   }
   return { errorCode: "CONTEXT_V2_CANDIDATE_FAILED", retryable: true };
@@ -269,14 +292,14 @@ export class ContextV2CandidateRunner {
         requestIdentity: generated.requestIdentity,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "";
-      if (RUN_BLOCKING_CANDIDATE_ERRORS.has(message)) {
+      const runBlocking = runBlockingCandidateFailure(error);
+      if (runBlocking !== null) {
         await this.store.releaseContextV2CandidateRunBlocked({
           evaluationId: claim.evaluationId,
           claimToken: claim.claimToken,
-          reasonCode: message,
+          reasonCode: runBlocking.reasonCode,
         });
-        throw new Error("CONTEXT_V2_CANDIDATE_RUN_BLOCKED_MODEL_IDENTITY");
+        throw new Error(runBlocking.runnerErrorCode);
       }
       const failure = candidateFailure(error);
       await this.store.failContextV2Candidate({

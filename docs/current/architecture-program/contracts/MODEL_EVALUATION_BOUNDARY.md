@@ -70,20 +70,28 @@ Required properties:
     rate, and a sync/database failure cannot consume an attempt or call a model.
 14. One provider deadline covers access-token acquisition, request/response
     transfer, and response-body parsing. Timeout and provider failures remain
-    typed and cannot expose provider details to persisted error codes.
+    typed and cannot expose provider details to persisted error codes. HTTP
+    `408`, `429`, and `5xx` are transient; authentication and other request/
+    configuration `4xx` failures block the run and restore the item attempt
+    instead of terminalizing individual rows.
 15. Legacy replay and Context V2 candidate rows have disjoint queue ownership.
     Every claim, stale-lease recovery, completion, failure, quota, summary, and
     coverage query carries an explicit prompt-family owner predicate. Unknown
     future `context-v2-candidate-*` versions fail closed and cannot fall through
     to the legacy worker.
-16. An unknown or mismatched provider-reported model version is a run-level
-    configuration block, not an item failure. The exact claimed row is returned
-    to eligibility, its claim attempt is restored, and the worker stops without
-    terminalizing or poisoning the remaining population.
+16. An unknown/mismatched provider-reported model version, token failure, or
+    provider request/configuration rejection is a run-level configuration
+    block, not an item failure. The exact claimed row is returned to eligibility,
+    its claim attempt is restored, and the worker stops without terminalizing
+    or poisoning the remaining population.
 17. Coverage starts from a direct census of terminal capture sources, not from
     rows that happened to be enqueued. Missing messages, DLP exclusions,
     ineligible sender/direction, invalid source keys, and terminal queue states
-    remain in the denominator with explicit reason codes.
+    remain in the denominator with explicit reason codes. Every census requires
+    an exact page and a half-open time window no wider than 31 days so the
+    existing `(page_id, event_type, occurred_at)` index can bound each query;
+    larger corpora iterate windows outside the query. Activation still requires
+    production-like query-plan evidence, and any migration remains owner-gated.
 
 ## DF10 Gate E draft foundation
 
@@ -92,8 +100,10 @@ Required properties:
 - Plan artifact SHA-256:
   `eb399698f5e82dbe6d401c360e035b58f14153add9b5f434629751045565373a`
 - Baseline: `POST_BF_V1`
-- Candidate model: publisher `google`, model and expected provider-reported
-  version `gemini-3.5-flash-lite`.
+- Candidate model: publisher `google`, model `gemini-3.5-flash-lite`; the same
+  string is an owner-selected **draft expectation**, not provider-observed
+  evidence. An authorized redacted observation must bind the exact returned
+  version before registration or scored use.
 - Frozen population name: `FROZEN_POST_GATE_BF_V1_CORPUS`
 - Every item in an eventually frozen corpus is scored. Mandatory claim-safety,
   context-integrity, side-effect-safety, and MUST_PASS strata are never sampled.
