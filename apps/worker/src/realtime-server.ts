@@ -43,6 +43,7 @@ import {
   VertexShadowModel,
   type VertexServiceAccount,
 } from "./vertex.js";
+import { baselineModelCapability } from "./vertex-baseline.js";
 
 import {
   RedisRealtimeMediaRecognitionCache,
@@ -266,7 +267,7 @@ const allowedMediaHostSuffixes = (
   .split(",")
   .map((value) => value.trim())
   .filter(Boolean);
-const model = new VertexShadowModel({
+const vertexModel = new VertexShadowModel({
   projectId: required("VERTEX_PROJECT_ID"),
   location: process.env.VERTEX_LOCATION?.trim() || credential.region,
   modelName: required("VERTEX_MODEL_NAME"),
@@ -308,7 +309,7 @@ const baseProductSearch = new ProductSearchService(
     baseUrl: required("QDRANT_BASE_URL"),
     apiKey: secretOrEnvironment("QDRANT_API_KEY", "QDRANT_API_KEY_FILE"),
     collection: required("QDRANT_COLLECTION"),
-    embedding: model,
+    embedding: vertexModel,
     expectedDimension: boundedInteger(
       "VERTEX_EMBEDDING_DIMENSION",
       1_408,
@@ -696,7 +697,7 @@ const workerId =
 const runner = new RealtimeRunner(
   inbox,
   runtime,
-  model,
+  baselineModelCapability(vertexModel),
   facts,
   productSearch,
   tags,

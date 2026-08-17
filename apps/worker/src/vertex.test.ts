@@ -1,4 +1,4 @@
-import { generateKeyPairSync } from "node:crypto";
+import { createHash, generateKeyPairSync } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import {
   buildShadowPrompt,
@@ -16,6 +16,10 @@ import {
   type VertexFailureEvent,
   type VertexShadowModelOptions,
 } from "./vertex.js";
+import {
+  BASELINE_MODEL_METHODS,
+  type BaselineModelMethod,
+} from "./vertex-baseline.js";
 
 const privateKey = generateKeyPairSync("rsa", {
   modulusLength: 2_048,
@@ -99,7 +103,197 @@ function rubricResponse(): Response {
   }), { status: 200 });
 }
 
+function rubricV2Response(): Response {
+  return new Response(JSON.stringify({
+    modelVersion: "gemini-test-001",
+    candidates: [{ content: { parts: [{ text: JSON.stringify({
+      schemaVersion: 2,
+      intent: "buy",
+      conversationStage: "closing",
+      scores: {
+        relevance: 5,
+        questionResolution: 5,
+        nextStepQuality: 5,
+        naturalness: 5,
+        concision: 5,
+        factGrounding: 5,
+        objectionResolution: 5,
+        salesProgression: 5,
+        ctaStageFit: 5,
+        overall: 5,
+      },
+      strengths: [],
+      weaknesses: [],
+      improvedReply: "",
+      recommendationAction: "KEEP",
+    }) }] } }],
+  }), { status: 200 });
+}
+
+function groundedDraftResponse(): Response {
+  return new Response(JSON.stringify({
+    modelVersion: "gemini-test-001",
+    candidates: [{ content: { parts: [{ text: JSON.stringify({
+      schemaVersion: 1,
+      advisoryText: "",
+      objectionResponse: "",
+      suggestedQuestion: "",
+      suggestedNextStep: "",
+      attachmentImageIndices: [],
+    }) }] } }],
+  }), { status: 200 });
+}
+
+const baselineProposal = {
+  schemaVersion: 1 as const,
+  intent: "price",
+  conversationStage: "consulting",
+  productId: "CB182",
+  action: "REPLY" as const,
+  reply: "Mẫu này có giá 699k ạ.",
+  attachments: [],
+  handoffReason: null,
+  protectedClaimIds: [],
+  businessFactQuery: {
+    intent: "PRICE" as const,
+    offerType: null,
+    color: null,
+    size: null,
+    deliveryRegion: null,
+  },
+};
+
+const baselineFacts = {
+  schemaVersion: 1 as const,
+  status: "OK" as const,
+  source: "POS_SNAPSHOT" as const,
+  observedAt: "2026-07-23T00:00:00.000Z",
+  expiresAt: "2099-07-23T00:00:00.000Z",
+  productId: "CB182",
+  facts: {
+    schemaVersion: 1 as const,
+    productId: "CB182",
+    parentProductId: "CB182",
+    offerType: "SET",
+    listPriceVnd: 799_000,
+    salePriceVnd: 699_000,
+    sizes: ["S", "M"],
+    stockStatus: "IN_STOCK" as const,
+    stockQuantity: 3,
+    deliveryEta: null,
+    fulfillmentPolicy: "READY_STOCK",
+    imageUrls: [],
+  },
+  reasonCode: null,
+};
+
 describe("Vertex shadow client", () => {
+  it("pins every baseline request envelope from d9de77f with an exhaustive fixture", async () => {
+    interface BaselineFixture {
+      readonly invoke: (model: VertexShadowModel) => Promise<unknown>;
+      readonly response: () => Response;
+    }
+    const fixtures: Record<BaselineModelMethod, BaselineFixture> = {
+      generate: {
+        invoke: (model) => model.generate(context, "prompt-v1"),
+        response: generatedProposalResponse,
+      },
+      groundWithFacts: {
+        invoke: (model) => model.groundWithFacts(
+          context,
+          baselineProposal,
+          baselineFacts,
+          "prompt-v1",
+        ),
+        response: generatedProposalResponse,
+      },
+      groundDraftWithFacts: {
+        invoke: (model) => model.groundDraftWithFacts(
+          context,
+          baselineProposal,
+          baselineFacts,
+          { productId: "CB182", materials: ["gấm"] },
+          "prompt-v1",
+        ),
+        response: groundedDraftResponse,
+      },
+      repairSizeClaimDraft: {
+        invoke: (model) => model.repairSizeClaimDraft(
+          context,
+          baselineProposal,
+          ["SIZE_RECOMMENDATION_UNDECLARED"],
+          [],
+          "prompt-v1",
+        ),
+        response: generatedProposalResponse,
+      },
+      draftMultiProductClarification: {
+        invoke: (model) => model.draftMultiProductClarification(
+          ["CB182", "SD398"],
+          "prompt-v1",
+          ["MULTI_PRODUCT_CANDIDATE_OMITTED"],
+        ),
+        response: () => generatedReplyResponse("Chị muốn xem mẫu CB182 hay SD398 trước ạ?"),
+      },
+      draftCustomerUrlExplanation: {
+        invoke: (model) => model.draftCustomerUrlExplanation(
+          "UNSUPPORTED_EXTERNAL",
+          ["CUSTOMER_URL_UNSUPPORTED_EXTERNAL"],
+          "prompt-v1",
+        ),
+        response: () => generatedReplyResponse("Chị gửi mã sản phẩm giúp em ạ."),
+      },
+      judgeSalesReply: {
+        invoke: (model) => model.judgeSalesReply(context, "Mẫu này có giá 699k ạ."),
+        response: rubricResponse,
+      },
+      judgeSalesReplyV2: {
+        invoke: (model) => model.judgeSalesReplyV2(
+          context,
+          "Mẫu này có giá 699k ạ.",
+          baselineFacts,
+          { action: "REPLY", productId: "CB182" },
+          { sendAuthorized: false, blockedReasonCodes: [] },
+        ),
+        response: rubricV2Response,
+      },
+    };
+    const observed = {} as Record<BaselineModelMethod, string>;
+    for (const method of BASELINE_MODEL_METHODS) {
+      let generationRequest: { url: string; body: string } | null = null;
+      const fetchMock = vi.fn(async (
+        input: string | URL | Request,
+        init?: RequestInit,
+      ) => {
+        const url = String(input);
+        if (url.includes("oauth2.googleapis.com")) {
+          return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), {
+            status: 200,
+          });
+        }
+        generationRequest = { url, body: String(init?.body ?? "") };
+        return fixtures[method].response();
+      }) as unknown as typeof fetch;
+
+      await fixtures[method].invoke(modelWith(fetchMock));
+      observed[method] = createHash("sha256")
+        .update(JSON.stringify(generationRequest), "utf8")
+        .digest("hex");
+    }
+
+    // Frozen from exact source baseline d9de77f283553f7eae8991a06c756908a35199e5.
+    expect(observed).toEqual({
+      generate: "9b9dfc7d9a79a01a2bea28ecd221e1cc40cc8ae9562b02f89a4e7f1ce94f3dbb",
+      groundWithFacts: "86a1ebd9d713835af480e42457a46d8755f1c37c4e299d09ce14ffef6b6fb36a",
+      groundDraftWithFacts: "63a94583c26f4f31997a89daac606b2d311ded592f3449d3210527d670ed3072",
+      repairSizeClaimDraft: "e03a55762493ab6c2874ff0eae8c0f90e171052fb67e87bfdb96d48f7bb9aafe",
+      draftMultiProductClarification: "eed16e8dbd463ba7564580609b7ebba2aa151ce84210ed19d21465aa64c420de",
+      draftCustomerUrlExplanation: "98535ebb6169c3720559436265593250cc0228d7fdbb62efa9662f2061db80e4",
+      judgeSalesReply: "be94a69e7f31146e95a51c0e70054837f1609b78cecba20f39f5324757747f68",
+      judgeSalesReplyV2: "d666cad5f2696d3b02b1b99838b5378a51053f70bb22650a25c8f6c71c85fc4f",
+    });
+  });
+
   it("keeps the sales prompt structured and business facts grounded", () => {
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("Neu khach chi gui ma san pham: businessFactQuery.intent=PRICE");
     expect(SHADOW_SYSTEM_INSTRUCTION).toContain("khong hoi nguoc khach muon xem thong tin gi");

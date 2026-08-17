@@ -32,6 +32,7 @@ that explicit verdict.
 | Process/Gate/PR/release/PREPROD evidence or CI-unavailable fallback | `OPERATING_MODE.md` |
 | BF implementation/review | matching BF docs + relevant contracts |
 | Policy-gated behavior | `contracts/BEHAVIOR_CONTROL_PLANE.md` |
+| Model baseline/candidate generation and offline evaluation | `contracts/MODEL_EVALUATION_BOUNDARY.md` |
 | Release/deploy/evidence | `contracts/RELEASE_INTEGRITY.md` |
 | Dataset/package work | `contracts/DATASET_BOUNDARY.md` |
 | DF work after Gate BF | `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + relevant contracts |
