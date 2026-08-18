@@ -202,7 +202,7 @@ function item(input: Omit<GateECorpusItemV1, "source" | "assertions"> & Readonly
       allowedStrategies: input.allowedStrategies,
       allowedCtas: input.allowedCtas,
       claimSafety: "RUNTIME_GUARD_REQUIRED",
-      sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_INDEPENDENT_SEMANTIC_INTERPRETER",
+      sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_REGISTERED_SEMANTIC_INTERPRETER",
       semanticObligations: {
         contextHash: input.context.contextHash,
         productBinding: {
@@ -388,7 +388,9 @@ const frozenRubric: GateERubricV1 = {
   scoring: {
     population: "ALL_FROZEN_CORPUS_ITEMS",
     runtimeClaimGuardRequired: true,
-    independentSemanticInterpreterRequired: true,
+    semanticInterpreterRequired: true,
+    interpreterModelRelationship:
+      "SEPARATE_CALL_SEPARATE_POLICY_SHARED_MODEL_IDENTITY",
     structuredStrategyAndCtaRequired: true,
     outputSchemaRequired: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
   },

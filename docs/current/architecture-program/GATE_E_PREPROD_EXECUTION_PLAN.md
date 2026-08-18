@@ -67,10 +67,10 @@ corpus or rubric is not registerable.
 
 - Corpus version: `FROZEN_POST_GATE_BF_V1_CORPUS_V1`
 - Corpus canonical SHA-256:
-  `5239116a69f95f42877d839e57c6b06102c18d1c64047ebdc2a8827f26ac384e`
+  `e70ce49dbd5a5afae19603342dfd10352bc6b965eebf4f77fe6d4fe1b0c9c4dd`
 - Rubric version: `DF10_GATE_E_RUBRIC_V1`
 - Rubric canonical SHA-256:
-  `e76dca95530ce436d50ffc6622dc42a8c16c9b0a2d82cb6a86e582e0b0d51ba1`
+  `c74a057ef131477da86ff3cfd6c0d1024a0479632bd156ec3fd0e39b1aa3d5ed`
 - Population: all 14 frozen items; no scoring sample.
 - Data: controlled PII-free fixtures only; no raw transcript, customer hash,
   phone, address, email, provider payload, token, or credential.
@@ -87,8 +87,9 @@ V2 classifies every text segment as general wording, a verified claim bound to
 an exact evidence content hash, a typed clarification, a typed requested
 action, or a typed effect claim. Per-case obligations bind the exact Context V2
 hash, product binding, required/forbidden claims, clarification/action class
-and forbidden-effect matrix. A separate evaluation-only semantic interpreter
-receives customer-facing wording plus sanitized eligible claims, but never
+and forbidden-effect matrix. A separate evaluation-only semantic-interpreter
+call and policy receive customer-facing wording plus sanitized eligible claims,
+but use the same registered model identity as the candidate and never receive
 candidate-authored segment kinds, clarification/action labels or effect
 labels. Scoring requires the interpreter-derived typed claims, requests and
 effects to agree with the frozen case obligations and the candidate
@@ -111,8 +112,14 @@ The registration manifest binds:
 
 The manifest also binds the interpreter's model resource, system instruction,
 input contract, response schema, generation config and safety settings through
-one static policy hash. All calibration probes bind their exact request
-identities and expected-classification hashes. Each dynamic interpretation
+one static policy hash. The manifest explicitly records
+`SEPARATE_CALL_SEPARATE_POLICY_SHARED_MODEL_IDENTITY`; it does not claim an
+independent judge model. A closed coverage-domain hash requires positive and
+adversarial-negative calibration for every verdict-bearing effect,
+clarification, requested-action and frozen protected-claim class. All 27
+calibration probes bind their exact coverage, request identities and
+expected-classification hashes. A missing, extra or duplicate coverage token
+fails before any corpus request. Each dynamic interpretation
 request is derived from the actual candidate-output hash; its full envelope
 hash and the typed interpretation hash are recorded per corpus item. A policy,
 probe or dynamic-envelope mismatch fails before a score is admissible.
@@ -153,27 +160,32 @@ start. The scored runner also requires this verified proof and binds it into the
 redacted evidence hash before it can call the model.
 
 The scored runner has one public orchestration boundary. It accepts only the
-registration path plus Git, provider-transport and append-only evidence-store
-capabilities. It does not accept a caller-created proof, manifest, corpus,
+registration path plus Git, provider-transport and deadline-enforcing
+append-only evidence-store capabilities. It does not accept a caller-created proof, manifest, corpus,
 rubric, clock, candidate output or request identity. It verifies clean exact
 `HEAD == refs/remotes/origin/main`, reads and verifies the registration and
 frozen artifacts internally, builds the exact provider request bytes at the
 send boundary, applies the provider deadline around the entire transport, and
 rechecks clean unchanged refs after the unfinalized evidence-body append. It
-then appends a separate hash-bound finalization record within the original run
-deadline. The body alone is always `UNFINALIZED_TECHNICAL_EVIDENCE`; only the
-strict verifier pairing that exact body with a clean, same-revision,
-within-deadline finalization may produce `FINALIZED_TRUSTED_EXACT_HEAD`.
-Verdict code receives only the two expected hashes and must retrieve both
-records from the append-only store; caller-supplied self-consistent objects are
-not certification evidence.
+then asks the store to append a separate hash-bound finalization record with
+`notAfter` equal to the original run deadline. The store must enforce that
+deadline with its own transaction clock in the same atomic commit; abort is
+only an early-cancellation aid. The body alone is always
+`UNFINALIZED_TECHNICAL_EVIDENCE`. Verdict code receives only the two expected
+hashes, retrieves both records plus immutable store transaction metadata, and
+requires the finalization commit time to be within `notAfter`. Store metadata
+is outside the finalization content hash, so no receipt or third-record
+self-reference is created. Caller-supplied self-consistent objects are not
+certification evidence. Scored execution remains blocked until a concrete
+store adapter proves these V2 semantics; a structural port or test fake is not
+durable-store evidence.
 
 ## 6. Cost and isolation caps
 
 | Boundary | Locked maximum |
 |---|---:|
 | Provider identity observation | 1 request |
-| Scored population | 32 requests: 4 registered calibration probes + 14 candidate + 14 interpretation calls |
+| Scored population | 55 requests: 27 registered calibration probes + 14 candidate + 14 interpretation calls |
 | Per-request output | 1,024 tokens |
 | Total scored output | 32,768 tokens |
 | Provider deadline | 30 seconds/request, including token/body handling |
@@ -202,10 +214,12 @@ Stop without scoring or Gate acceptance when any of these occurs:
 - any repository step runs and fails;
 - the claim guard, Context integrity, side-effect assertion or MUST_PASS case
   fails;
-- evidence-store write is partial, ambiguous or non-append-only;
+- evidence-store write is partial, ambiguous, non-append-only, committed after
+  its atomic `notAfter`, or lacks trusted transaction metadata;
 - semantic-interpreter policy/probe calibration, output hash or actual request
   identity differs from the registered contract;
-- the unfinalized evidence body has no valid hash-bound terminal finalization.
+- the unfinalized evidence body has no valid hash-bound terminal finalization;
+- no concrete evidence-store adapter proves transactional deadline enforcement.
 
 Rollback is evidence-only: abort the run, retain the immutable failed evidence
 with safe reason codes, make no Gate claim, and leave sales authority `LEGACY`.

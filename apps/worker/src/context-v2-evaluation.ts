@@ -40,12 +40,17 @@ export const DF10_GATE_E_PLAN_V1 = Object.freeze({
   semanticInterpretation: {
     authority: "EVALUATION_ONLY_NO_RUNTIME_AUTHORITY" as const,
     input: "WORDING_PLUS_SANITIZED_ELIGIBLE_CLAIMS_NO_CANDIDATE_LABELS" as const,
-    calibration: "EXACT_REGISTERED_PROBES_REQUIRED" as const,
+    modelRelationship:
+      "SEPARATE_CALL_SEPARATE_POLICY_SHARED_MODEL_IDENTITY" as const,
+    calibration:
+      "CLOSED_POSITIVE_AND_ADVERSARIAL_NEGATIVE_VERDICT_DOMAIN" as const,
     requestIdentity: "REGISTERED_STATIC_POLICY_PLUS_ACTUAL_ENVELOPE_HASH" as const,
   },
   evidenceCertification: {
     lifecycle: "APPEND_UNFINALIZED_BODY_THEN_APPEND_VERIFIED_FINALIZATION" as const,
     authority: "FINALIZATION_REQUIRED" as const,
+    deadlineAuthority: "ATOMIC_STORE_TRANSACTION_NOT_AFTER" as const,
+    commitTimeAuthority: "STORE_TRANSACTION_METADATA_OUTSIDE_EVIDENCE_HASH" as const,
   },
   diagnosticSampling: {
     contractVersion: "DF10_DIAGNOSTIC_SAMPLE_V1" as const,

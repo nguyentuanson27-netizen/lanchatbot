@@ -2,7 +2,10 @@ import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { canonicalJsonV1 } from "@lana/contracts";
 import {
+  GATE_E_INTERPRETER_MODEL_RELATIONSHIP_V1,
   GATE_E_INTERPRETATION_PROBES_V1,
+  GATE_E_INTERPRETATION_REQUIRED_COVERAGE_V1,
+  assertGateEInterpreterProbeCoverageV1,
   buildGateEInterpretationRequest,
   deriveGateEInterpreterRegistrationV1,
   parseGateEInterpretationResponse,
@@ -17,6 +20,12 @@ const hash = (value: string): string => createHash("sha256")
 describe("Gate E semantic interpreter capability boundary", () => {
   it("registers the static policy and exact calibration requests", () => {
     const registration = deriveGateEInterpreterRegistrationV1(modelResource);
+    expect(registration.interpreterModelRelationship).toBe(
+      GATE_E_INTERPRETER_MODEL_RELATIONSHIP_V1,
+    );
+    expect(registration.coverageDomainHash).toBe(
+      hash(canonicalJsonV1(GATE_E_INTERPRETATION_REQUIRED_COVERAGE_V1)),
+    );
     expect(registration.probes).toHaveLength(GATE_E_INTERPRETATION_PROBES_V1.length);
     for (const [index, probe] of GATE_E_INTERPRETATION_PROBES_V1.entries()) {
       const request = buildGateEInterpretationRequest({
@@ -27,10 +36,48 @@ describe("Gate E semantic interpreter capability boundary", () => {
         probeId: probe.probeId,
         candidateOutputHash: probe.input.candidateOutputHash,
         requestIdentity: request.identity,
+        coverage: probe.coverage,
         expectedClassificationHash: hash(canonicalJsonV1(probe.expected)),
       });
     }
     expect(registration.policyHash).toBe(hash(canonicalJsonV1(registration.policy)));
+  });
+
+  it("closes the positive and adversarial-negative matrix for every verdict class", () => {
+    expect(() => assertGateEInterpreterProbeCoverageV1(
+      GATE_E_INTERPRETATION_PROBES_V1,
+    )).not.toThrow();
+    expect(GATE_E_INTERPRETATION_PROBES_V1.flatMap(({ coverage }) => coverage).sort())
+      .toEqual([...GATE_E_INTERPRETATION_REQUIRED_COVERAGE_V1].sort());
+
+    const missingOne = GATE_E_INTERPRETATION_PROBES_V1.map((probe, index) =>
+      index === 0
+        ? { ...probe, coverage: probe.coverage.slice(1) }
+        : probe
+    );
+    expect(() => assertGateEInterpreterProbeCoverageV1(missingOne))
+      .toThrow("GATE_E_INTERPRETER_COVERAGE_INCOMPLETE");
+
+    const duplicated = [
+      ...GATE_E_INTERPRETATION_PROBES_V1,
+      GATE_E_INTERPRETATION_PROBES_V1[0]!,
+    ];
+    expect(() => assertGateEInterpreterProbeCoverageV1(duplicated))
+      .toThrow("GATE_E_INTERPRETER_COVERAGE_DUPLICATED");
+
+    const coverageSwappedBetweenOppositeExpectations =
+      GATE_E_INTERPRETATION_PROBES_V1.map((probe, index) => {
+        if (index === 0) {
+          return { ...probe, coverage: GATE_E_INTERPRETATION_PROBES_V1[1]!.coverage };
+        }
+        if (index === 1) {
+          return { ...probe, coverage: GATE_E_INTERPRETATION_PROBES_V1[0]!.coverage };
+        }
+        return probe;
+      });
+    expect(() => assertGateEInterpreterProbeCoverageV1(
+      coverageSwappedBetweenOppositeExpectations,
+    )).toThrow("GATE_E_INTERPRETER_COVERAGE_SEMANTICS_INVALID");
   });
 
   it("rejects candidate-authored semantic labels at the interpreter input boundary", () => {

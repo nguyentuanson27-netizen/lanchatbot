@@ -24,7 +24,10 @@ import {
   type GateERegistrationArtifactV1,
 } from "./gate-e-registration.js";
 import { deriveCandidateRequestContextHash } from "./context-v2-candidate.js";
-import { GATE_E_INTERPRETATION_PROBES_V1 } from "./gate-e-output-interpreter.js";
+import {
+  GATE_E_INTERPRETER_MODEL_RELATIONSHIP_V1,
+  GATE_E_INTERPRETATION_PROBES_V1,
+} from "./gate-e-output-interpreter.js";
 import {
   FROZEN_GATE_E_CORPUS_V1,
   FROZEN_GATE_E_CORPUS_V1_SHA256,
@@ -140,7 +143,7 @@ function corpus(): GateECorpusV1 {
           allowedStrategies: ["ANSWER_VERIFIED_FACTS", "ASK_CLARIFICATION"],
           allowedCtas: ["NONE"],
           claimSafety: "RUNTIME_GUARD_REQUIRED",
-          sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_INDEPENDENT_SEMANTIC_INTERPRETER",
+          sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_REGISTERED_SEMANTIC_INTERPRETER",
           semanticObligations: {
             contextHash: directQuestion.contextHash,
             productBinding: {
@@ -166,7 +169,7 @@ function corpus(): GateECorpusV1 {
           allowedStrategies: ["ASK_CLARIFICATION", "HOLD_POSITION"],
           allowedCtas: ["ASK_MEASUREMENTS", "NONE"],
           claimSafety: "RUNTIME_GUARD_REQUIRED",
-          sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_INDEPENDENT_SEMANTIC_INTERPRETER",
+          sideEffectSafety: "TYPED_EFFECT_MATRIX_WITH_REGISTERED_SEMANTIC_INTERPRETER",
           semanticObligations: {
             contextHash: sizeRequest.contextHash,
             productBinding: {
@@ -205,7 +208,8 @@ function rubric(): GateERubricV1 {
     scoring: {
       population: "ALL_FROZEN_CORPUS_ITEMS",
       runtimeClaimGuardRequired: true,
-      independentSemanticInterpreterRequired: true,
+      semanticInterpreterRequired: true,
+      interpreterModelRelationship: GATE_E_INTERPRETER_MODEL_RELATIONSHIP_V1,
       structuredStrategyAndCtaRequired: true,
       outputSchemaRequired: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
     },
@@ -432,10 +436,10 @@ describe("Gate E immutable registration boundary", () => {
       "committed-intent-missing-product",
     ]);
     expect(FROZEN_GATE_E_CORPUS_V1_SHA256).toBe(
-      "5239116a69f95f42877d839e57c6b06102c18d1c64047ebdc2a8827f26ac384e",
+      "e70ce49dbd5a5afae19603342dfd10352bc6b965eebf4f77fe6d4fe1b0c9c4dd",
     );
     expect(FROZEN_GATE_E_RUBRIC_V1_SHA256).toBe(
-      "e76dca95530ce436d50ffc6622dc42a8c16c9b0a2d82cb6a86e582e0b0d51ba1",
+      "c74a057ef131477da86ff3cfd6c0d1024a0479632bd156ec3fd0e39b1aa3d5ed",
     );
     const bundle = createDraftGateERegistrationBundle({
       corpus: FROZEN_GATE_E_CORPUS_V1,
@@ -714,7 +718,7 @@ describe("Gate E immutable registration boundary", () => {
   it("locks request, token, time, and page caps before any provider call", () => {
     expect(GATE_E_EXECUTION_CAPS_V1).toEqual({
       observationRequestMaximum: 1,
-      scoredRequestMaximum: 32,
+      scoredRequestMaximum: 55,
       perRequestOutputTokenMaximum: 1_024,
       totalOutputTokenMaximum: 32_768,
       providerTimeoutMs: 30_000,
@@ -746,7 +750,7 @@ describe("Gate E immutable registration boundary", () => {
         },
       },
       evidenceStore: {
-        appendAtomically: async () => { throw new Error("must-not-write"); },
+        appendBeforeDeadlineAtomically: async () => { throw new Error("must-not-write"); },
       },
     })).rejects.toThrow("GATE_E_TRUSTED_CHECKOUT_DIRTY");
     expect(providerCalls).toBe(0);
@@ -767,7 +771,7 @@ describe("Gate E immutable registration boundary", () => {
       },
       transport: { send: async () => { throw new Error("must-not-call"); } },
       evidenceStore: {
-        appendAtomically: async () => { throw new Error("must-not-write"); },
+        appendBeforeDeadlineAtomically: async () => { throw new Error("must-not-write"); },
       },
     })).rejects.toThrow("GATE_E_TRUSTED_EXACT_HEAD_MISMATCH");
   });
@@ -1081,13 +1085,17 @@ describe("Gate E immutable registration boundary", () => {
       git,
       transport: { send: sendPassing },
       evidenceStore: {
-        appendAtomically: async ({ evidenceHash }) => {
+        appendBeforeDeadlineAtomically: async ({ evidenceHash, notAfter }) => {
           appendedHashes.push(evidenceHash);
-          return { disposition: "APPENDED" as const, evidenceHash };
+          return {
+            disposition: "APPENDED" as const,
+            evidenceHash,
+            committedAt: new Date(Date.parse(notAfter) - 1).toISOString(),
+          };
         },
       },
     });
-    expect(calls).toBe(32);
+    expect(calls).toBe(55);
     expect(maximumActive).toBe(1);
     expect(result.summary.disposition).toBe("TECHNICAL_ASSERTIONS_PASS");
     expect(result.items).toHaveLength(14);
@@ -1107,7 +1115,7 @@ describe("Gate E immutable registration boundary", () => {
         },
       },
       evidenceStore: {
-        appendAtomically: async () => { throw new Error("must-not-write"); },
+        appendBeforeDeadlineAtomically: async () => { throw new Error("must-not-write"); },
       },
     })).rejects.toThrow("GATE_E_SCORED_MODEL_CALL_FAILED");
 
@@ -1116,9 +1124,10 @@ describe("Gate E immutable registration boundary", () => {
       git,
       transport: { send: sendPassing },
       evidenceStore: {
-        appendAtomically: async () => ({
+        appendBeforeDeadlineAtomically: async () => ({
           disposition: "APPENDED" as const,
           evidenceHash: "f".repeat(64),
+          committedAt: new Date().toISOString(),
         }),
       },
     })).rejects.toThrow("GATE_E_EVIDENCE_APPEND_MISMATCH");
@@ -1136,9 +1145,13 @@ describe("Gate E immutable registration boundary", () => {
       },
       transport: { send: sendPassing },
       evidenceStore: {
-        appendAtomically: async ({ evidenceHash, evidence }) => {
+        appendBeforeDeadlineAtomically: async ({ evidenceHash, evidence }) => {
           orphanedEvidence.push(evidence);
-          return { disposition: "APPENDED" as const, evidenceHash };
+          return {
+            disposition: "APPENDED" as const,
+            evidenceHash,
+            committedAt: new Date().toISOString(),
+          };
         },
       },
     })).rejects.toThrow("GATE_E_TRUSTED_CHECKOUT_CHANGED");
@@ -1152,7 +1165,12 @@ describe("Gate E immutable registration boundary", () => {
       finalizationHash: "f".repeat(64),
       evidenceStore: {
         readByHash: async (evidenceHash) =>
-          evidenceHash === orphanedBodyHash ? orphanedEvidence[0]! : null,
+          evidenceHash === orphanedBodyHash
+            ? {
+              evidence: orphanedEvidence[0]!,
+              committedAt: new Date().toISOString(),
+            }
+            : null,
       },
     })).rejects.toThrow("GATE_E_EVIDENCE_RECORD_MISSING_OR_MISMATCHED");
 
@@ -1172,7 +1190,7 @@ describe("Gate E immutable registration boundary", () => {
           }),
         },
         evidenceStore: {
-          appendAtomically: async () => { throw new Error("must-not-write"); },
+          appendBeforeDeadlineAtomically: async () => { throw new Error("must-not-write"); },
         },
       });
       const timeoutExpectation = expect(timedOut).rejects.toThrow(
@@ -1199,7 +1217,7 @@ describe("Gate E immutable registration boundary", () => {
         git,
         transport: { send: sendPassing },
         evidenceStore: {
-          appendAtomically: async ({ evidence, signal }) => {
+          appendBeforeDeadlineAtomically: async ({ evidence, signal }) => {
             attemptedRecords.push(evidence);
             signalBodyAppendStarted?.();
             return new Promise((_resolve, reject) => {
@@ -1224,6 +1242,74 @@ describe("Gate E immutable registration boundary", () => {
     } finally {
       vi.useRealTimers();
     }
+
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-18T10:00:00.000Z"));
+    try {
+      let signalFinalizationAppendStarted: (() => void) | undefined;
+      const finalizationAppendStarted = new Promise<void>((resolve) => {
+        signalFinalizationAppendStarted = resolve;
+      });
+      const lateRecords = new Map<string, Readonly<{
+        evidence: Readonly<Record<string, unknown>>;
+        committedAt: string;
+      }>>();
+      let appendIndex = 0;
+      const timedOutWithLateCommit = executeGateEScoredRun({
+        registrationPath,
+        git,
+        transport: { send: sendPassing },
+        evidenceStore: {
+          appendBeforeDeadlineAtomically: async ({
+            evidenceHash, evidence, notAfter, signal,
+          }) => {
+            appendIndex += 1;
+            if (appendIndex === 1) {
+              const committedAt = new Date().toISOString();
+              lateRecords.set(evidenceHash, { evidence, committedAt });
+              return { disposition: "APPENDED" as const, evidenceHash, committedAt };
+            }
+            signalFinalizationAppendStarted?.();
+            return new Promise((resolve) => {
+              signal.addEventListener("abort", () => {
+                const committedAt = new Date(
+                  Date.parse(notAfter) + 1,
+                ).toISOString();
+                lateRecords.set(evidenceHash, { evidence, committedAt });
+                resolve({
+                  disposition: "APPENDED" as const,
+                  evidenceHash,
+                  committedAt,
+                });
+              }, { once: true });
+            });
+          },
+        },
+      });
+      const timeoutExpectation = expect(timedOutWithLateCommit).rejects.toThrow(
+        "GATE_E_RUN_TIMEOUT",
+      );
+      await vi.advanceTimersByTimeAsync(0);
+      await finalizationAppendStarted;
+      await vi.advanceTimersByTimeAsync(GATE_E_EXECUTION_CAPS_V1.runTimeoutMs + 1);
+      await timeoutExpectation;
+
+      const bodyEntry = [...lateRecords.entries()].find(([, record]) =>
+        record.evidence.contractVersion === "DF10_GATE_E_SCORED_EVIDENCE_BODY_V2"
+      )!;
+      const finalizationEntry = [...lateRecords.entries()].find(([, record]) =>
+        record.evidence.contractVersion === "DF10_GATE_E_RUN_FINALIZATION_V2"
+      )!;
+      await expect(verifyStoredGateEEvidenceCertification({
+        evidenceBodyHash: bodyEntry[0],
+        finalizationHash: finalizationEntry[0],
+        evidenceStore: {
+          readByHash: async (evidenceHash) => lateRecords.get(evidenceHash) ?? null,
+        },
+      })).rejects.toThrow("GATE_E_EVIDENCE_FINALIZATION_EXPIRED");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("never gives an appended body Gate authority before terminal certification", async () => {
@@ -1243,20 +1329,29 @@ describe("Gate E immutable registration boundary", () => {
     };
     const finalization = {
       schemaVersion: 1,
-      contractVersion: "DF10_GATE_E_RUN_FINALIZATION_V1",
+      contractVersion: "DF10_GATE_E_RUN_FINALIZATION_V2",
       disposition: "FINALIZED_TRUSTED_EXACT_HEAD",
       evidenceBodyHash: hash(canonicalJsonV1(body)),
       scoredRunRevision: revision,
       trustedRevision: revision,
       finalClean: true,
-      finalizedAt: "2026-08-18T10:01:01.000Z",
-      runDeadlineAt: "2026-08-18T10:15:00.000Z",
+      preparedAt: "2026-08-18T10:01:01.000Z",
+      notAfter: "2026-08-18T10:15:00.000Z",
     };
     const bodyHash = hash(canonicalJsonV1(body));
     const finalizationHash = hash(canonicalJsonV1(finalization));
-    const records = new Map<string, Readonly<Record<string, unknown>>>([
-      [bodyHash, body],
-      [finalizationHash, finalization],
+    const records = new Map<string, Readonly<{
+      evidence: Readonly<Record<string, unknown>>;
+      committedAt: string;
+    }>>([
+      [bodyHash, {
+        evidence: body,
+        committedAt: "2026-08-18T10:01:00.500Z",
+      }],
+      [finalizationHash, {
+        evidence: finalization,
+        committedAt: "2026-08-18T10:01:02.000Z",
+      }],
     ]);
     const evidenceStore = {
       readByHash: async (evidenceHash: string) => records.get(evidenceHash) ?? null,
@@ -1268,6 +1363,35 @@ describe("Gate E immutable registration boundary", () => {
     })).toMatchObject({
       disposition: "FINALIZED_TRUSTED_EXACT_HEAD",
       evidenceBodyHash: bodyHash,
+      finalizationCommittedAt: "2026-08-18T10:01:02.000Z",
+    });
+
+    records.set(finalizationHash, {
+      evidence: finalization,
+      committedAt: "2026-08-18T10:15:00.001Z",
+    });
+    await expect(verifyStoredGateEEvidenceCertification({
+      evidenceBodyHash: bodyHash,
+      finalizationHash,
+      evidenceStore,
+    })).rejects.toThrow("GATE_E_EVIDENCE_FINALIZATION_EXPIRED");
+    records.set(finalizationHash, {
+      evidence: finalization,
+      committedAt: "2026-08-18T10:01:02.000Z",
+    });
+
+    records.set(bodyHash, {
+      evidence: body,
+      committedAt: "2026-08-18T10:01:03.000Z",
+    });
+    await expect(verifyStoredGateEEvidenceCertification({
+      evidenceBodyHash: bodyHash,
+      finalizationHash,
+      evidenceStore,
+    })).rejects.toThrow("GATE_E_EVIDENCE_COMMIT_ORDER_INVALID");
+    records.set(bodyHash, {
+      evidence: body,
+      committedAt: "2026-08-18T10:01:00.500Z",
     });
     await expect(verifyStoredGateEEvidenceCertification({
       evidenceBodyHash: bodyHash,
@@ -1277,7 +1401,10 @@ describe("Gate E immutable registration boundary", () => {
 
     const dirtyFinalization = { ...finalization, finalClean: false };
     const dirtyHash = hash(canonicalJsonV1(dirtyFinalization));
-    records.set(dirtyHash, dirtyFinalization);
+    records.set(dirtyHash, {
+      evidence: dirtyFinalization,
+      committedAt: "2026-08-18T10:01:02.000Z",
+    });
     await expect(verifyStoredGateEEvidenceCertification({
       evidenceBodyHash: bodyHash,
       finalizationHash: dirtyHash,
@@ -1286,7 +1413,10 @@ describe("Gate E immutable registration boundary", () => {
 
     const mismatched = { ...finalization, evidenceBodyHash: "c".repeat(64) };
     const mismatchedHash = hash(canonicalJsonV1(mismatched));
-    records.set(mismatchedHash, mismatched);
+    records.set(mismatchedHash, {
+      evidence: mismatched,
+      committedAt: "2026-08-18T10:01:02.000Z",
+    });
     await expect(verifyStoredGateEEvidenceCertification({
       evidenceBodyHash: bodyHash,
       finalizationHash: mismatchedHash,

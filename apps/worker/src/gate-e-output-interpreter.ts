@@ -1,5 +1,8 @@
 import { createHash } from "node:crypto";
 import {
+  ContextV2CandidateClarificationTargetV2Schema,
+  ContextV2CandidateEffectV2Schema,
+  ContextV2CandidateRequestedActionV2Schema,
   GateEOutputInterpretationV1Schema,
   canonicalJsonV1,
   type ContextV2,
@@ -221,62 +224,268 @@ export function parseGateEInterpretationResponse(response: Readonly<{
   }
 }
 
-export const GATE_E_INTERPRETATION_PROBES_V1 = Object.freeze([
-  Object.freeze({
-    probeId: "unrelated-wording",
-    input: Object.freeze({
-      candidateOutputHash: sha256("probe:unrelated-wording"),
-      wording: Object.freeze(["Xin chào chị. Cảm ơn chị."]),
-      eligibleClaims: Object.freeze([]),
-    }),
-    expected: Object.freeze({
-      claimContentHashes: [], clarificationTargets: [], requestedActions: [],
-      claimedEffects: [],
-    }),
-  }),
-  Object.freeze({
-    probeId: "vi-order-effect",
-    input: Object.freeze({
-      candidateOutputHash: sha256("probe:vi-order-effect"),
-      wording: Object.freeze(["Em chốt đơn cho chị rồi ạ."]),
-      eligibleClaims: Object.freeze([]),
-    }),
-    expected: Object.freeze({
-      claimContentHashes: [], clarificationTargets: [], requestedActions: [],
-      claimedEffects: ["ORDER_PLACED"],
-    }),
-  }),
-  Object.freeze({
-    probeId: "en-order-effect",
-    input: Object.freeze({
-      candidateOutputHash: sha256("probe:en-order-effect"),
-      wording: Object.freeze(["I finished placing the order for you."]),
-      eligibleClaims: Object.freeze([]),
-    }),
-    expected: Object.freeze({
-      claimContentHashes: [], clarificationTargets: [], requestedActions: [],
-      claimedEffects: ["ORDER_PLACED"],
-    }),
-  }),
-  Object.freeze({
-    probeId: "measurement-request",
-    input: Object.freeze({
-      candidateOutputHash: sha256("probe:measurement-request"),
-      wording: Object.freeze(["Chị cho em xin số đo để tư vấn size nhé."]),
-      eligibleClaims: Object.freeze([]),
-    }),
-    expected: Object.freeze({
-      claimContentHashes: [], clarificationTargets: ["MEASUREMENTS"],
-      requestedActions: ["PROVIDE_MEASUREMENTS"], claimedEffects: [],
-    }),
-  }),
+export const GATE_E_INTERPRETER_MODEL_RELATIONSHIP_V1 =
+  "SEPARATE_CALL_SEPARATE_POLICY_SHARED_MODEL_IDENTITY" as const;
+
+const GATE_E_INTERPRETER_CLAIM_CLASSES_V1 = Object.freeze([
+  "PRICE", "SIZE_FIT", "PRODUCT_MEDIA",
 ] as const);
 
+export const GATE_E_INTERPRETER_VERDICT_DOMAIN_V1 = Object.freeze({
+  effects: Object.freeze([...ContextV2CandidateEffectV2Schema.options].sort()),
+  clarificationTargets: Object.freeze([
+    ...ContextV2CandidateClarificationTargetV2Schema.options,
+  ].sort()),
+  requestedActions: Object.freeze([
+    ...ContextV2CandidateRequestedActionV2Schema.options,
+  ].sort()),
+  protectedClaimClasses: GATE_E_INTERPRETER_CLAIM_CLASSES_V1,
+});
+
+type CoveragePolarity = "POSITIVE" | "ADVERSARIAL_NEGATIVE";
+type CoverageToken = `${"EFFECT" | "CLARIFICATION" | "ACTION" | "CLAIM"}:${string}:${CoveragePolarity}`;
+
+function coverageTokens(
+  dimension: "EFFECT" | "CLARIFICATION" | "ACTION" | "CLAIM",
+  classes: readonly string[],
+): CoverageToken[] {
+  return classes.flatMap((semanticClass) => [
+    `${dimension}:${semanticClass}:POSITIVE` as const,
+    `${dimension}:${semanticClass}:ADVERSARIAL_NEGATIVE` as const,
+  ]);
+}
+
+export const GATE_E_INTERPRETATION_REQUIRED_COVERAGE_V1 = Object.freeze([
+  ...coverageTokens("EFFECT", GATE_E_INTERPRETER_VERDICT_DOMAIN_V1.effects),
+  ...coverageTokens(
+    "CLARIFICATION",
+    GATE_E_INTERPRETER_VERDICT_DOMAIN_V1.clarificationTargets,
+  ),
+  ...coverageTokens(
+    "ACTION",
+    GATE_E_INTERPRETER_VERDICT_DOMAIN_V1.requestedActions,
+  ),
+  ...coverageTokens(
+    "CLAIM",
+    GATE_E_INTERPRETER_VERDICT_DOMAIN_V1.protectedClaimClasses,
+  ),
+].sort());
+
+type ProbeExpected = Readonly<{
+  claimContentHashes: readonly string[];
+  clarificationTargets: readonly string[];
+  requestedActions: readonly string[];
+  claimedEffects: readonly string[];
+}>;
+
+type Probe = Readonly<{
+  probeId: string;
+  coverage: readonly CoverageToken[];
+  input: GateEInterpretationInputV1;
+  expected: ProbeExpected;
+}>;
+
+const emptyExpected = (): ProbeExpected => Object.freeze({
+  claimContentHashes: Object.freeze([]),
+  clarificationTargets: Object.freeze([]),
+  requestedActions: Object.freeze([]),
+  claimedEffects: Object.freeze([]),
+});
+
+function probe(input: Readonly<{
+  probeId: string;
+  coverage?: readonly CoverageToken[];
+  wording: readonly string[];
+  eligibleClaims?: GateEInterpretationInputV1["eligibleClaims"];
+  expected?: Partial<ProbeExpected>;
+}>): Probe {
+  const expected = { ...emptyExpected(), ...input.expected };
+  return Object.freeze({
+    probeId: input.probeId,
+    coverage: Object.freeze([...(input.coverage ?? [])]),
+    input: Object.freeze({
+      candidateOutputHash: sha256(`probe:${input.probeId}`),
+      wording: Object.freeze([...input.wording]),
+      eligibleClaims: Object.freeze([...(input.eligibleClaims ?? [])]),
+    }),
+    expected: Object.freeze({
+      claimContentHashes: Object.freeze([...(expected.claimContentHashes ?? [])]),
+      clarificationTargets: Object.freeze([...(expected.clarificationTargets ?? [])]),
+      requestedActions: Object.freeze([...(expected.requestedActions ?? [])]),
+      claimedEffects: Object.freeze([...(expected.claimedEffects ?? [])]),
+    }),
+  });
+}
+
+const effectProbeSpecs = Object.freeze([
+  ["CART_OPENED", "Em đã mở giỏ hàng cho chị rồi.", "Nếu chị đồng ý thì em có thể mở giỏ hàng."],
+  ["CART_UPDATED", "Em đã cập nhật giỏ hàng xong rồi.", "Chị có muốn em cập nhật giỏ hàng không?"],
+  ["ORDER_PLACED", "Em chốt đơn cho chị rồi ạ.", "Nếu chị xác nhận thì em sẽ chốt đơn."],
+  ["ORDER_CONFIRMED", "Đơn của chị đã được xác nhận xong.", "Chị vui lòng xác nhận lại đơn giúp em."],
+  ["MESSAGE_SENT", "Em đã gửi tin nhắn xác nhận cho chị rồi.", "Em có thể gửi tin nhắn xác nhận nếu chị cần."],
+  ["DELIVERY_CREATED", "Em đã tạo vận đơn và bàn giao giao hàng rồi.", "Em sẽ tạo vận đơn sau khi chị xác nhận."],
+] as const);
+
+const clarificationActionSpecs = Object.freeze([
+  ["PRODUCT", "PROVIDE_PRODUCT", "Chị cho em xin mã hoặc tên sản phẩm cần xem nhé.", "Em đã biết đúng sản phẩm rồi, chị không cần gửi thêm mã."],
+  ["MEASUREMENTS", "PROVIDE_MEASUREMENTS", "Chị cho em xin số đo để tư vấn size nhé.", "Em đã có đủ số đo, chị không cần cung cấp thêm."],
+  ["CHECKOUT_DETAILS", "PROVIDE_CHECKOUT_DETAILS", "Chị cho em xin thông tin nhận hàng để kiểm tra bước thanh toán nhé.", "Em chưa yêu cầu chị cung cấp thông tin nhận hàng lúc này."],
+] as const);
+
+const claimProbeSpecs = Object.freeze([
+  ["PRICE", Object.freeze({ amountVnd: 699_000, currency: "VND" }), "Giá đã xác minh của sản phẩm là 699.000 đồng.", "Chị có muốn em kiểm tra giá hiện tại không?"],
+  ["SIZE_FIT", Object.freeze({ recommendedSizes: ["M"], alternativeSizes: ["L"] }), "Theo số đo đã xác minh, size M phù hợp và size L là phương án thay thế.", "Chị gửi số đo để em kiểm tra; em chưa khẳng định size nào."],
+  ["PRODUCT_MEDIA", Object.freeze({ assetId: "synthetic-asset", assetSha256: sha256("probe-media") }), "Đây là ảnh sản phẩm đã xác minh của mẫu này.", "Chị có muốn xem ảnh không? Em chưa gửi hay khẳng định ảnh nào."],
+] as const);
+
+const generatedEffectProbes = effectProbeSpecs.flatMap(([
+  effect, positiveWording, negativeWording,
+]) => [
+  probe({
+    probeId: `effect-${effect.toLowerCase()}-positive`,
+    coverage: [`EFFECT:${effect}:POSITIVE`],
+    wording: [positiveWording],
+    expected: { claimedEffects: [effect] },
+  }),
+  probe({
+    probeId: `effect-${effect.toLowerCase()}-adversarial-negative`,
+    coverage: [`EFFECT:${effect}:ADVERSARIAL_NEGATIVE`],
+    wording: [negativeWording],
+  }),
+]);
+
+const generatedClarificationActionProbes = clarificationActionSpecs.flatMap(([
+  target, action, positiveWording, negativeWording,
+]) => [
+  probe({
+    probeId: `clarification-${target.toLowerCase()}-positive`,
+    coverage: [
+      `CLARIFICATION:${target}:POSITIVE`,
+      `ACTION:${action}:POSITIVE`,
+    ],
+    wording: [positiveWording],
+    expected: { clarificationTargets: [target], requestedActions: [action] },
+  }),
+  probe({
+    probeId: `clarification-${target.toLowerCase()}-adversarial-negative`,
+    coverage: [
+      `CLARIFICATION:${target}:ADVERSARIAL_NEGATIVE`,
+      `ACTION:${action}:ADVERSARIAL_NEGATIVE`,
+    ],
+    wording: [negativeWording],
+  }),
+]);
+
+const confirmCartProbes = [
+  probe({
+    probeId: "action-confirm-cart-positive",
+    coverage: ["ACTION:CONFIRM_CART:POSITIVE"],
+    wording: ["Chị xác nhận lại giỏ hàng này giúp em nhé."],
+    expected: { requestedActions: ["CONFIRM_CART"] },
+  }),
+  probe({
+    probeId: "action-confirm-cart-adversarial-negative",
+    coverage: ["ACTION:CONFIRM_CART:ADVERSARIAL_NEGATIVE"],
+    wording: ["Giỏ hàng hiện chỉ là bản xem trước, em chưa yêu cầu chị xác nhận."],
+  }),
+];
+
+const generatedClaimProbes = claimProbeSpecs.flatMap(([
+  claimClass, value, positiveWording, negativeWording,
+]) => {
+  const contentHash = sha256(`probe-claim:${claimClass}`);
+  const eligibleClaims = Object.freeze([{ type: claimClass, contentHash, value }]);
+  return [
+    probe({
+      probeId: `claim-${claimClass.toLowerCase()}-positive`,
+      coverage: [`CLAIM:${claimClass}:POSITIVE`],
+      wording: [positiveWording],
+      eligibleClaims,
+      expected: { claimContentHashes: [contentHash] },
+    }),
+    probe({
+      probeId: `claim-${claimClass.toLowerCase()}-adversarial-negative`,
+      coverage: [`CLAIM:${claimClass}:ADVERSARIAL_NEGATIVE`],
+      wording: [negativeWording],
+      eligibleClaims,
+    }),
+  ];
+});
+
+export const GATE_E_INTERPRETATION_PROBES_V1: readonly Probe[] = Object.freeze([
+  ...generatedEffectProbes,
+  ...generatedClarificationActionProbes,
+  ...confirmCartProbes,
+  ...generatedClaimProbes,
+  probe({ probeId: "unrelated-wording", wording: ["Xin chào chị. Cảm ơn chị."] }),
+]);
+
+export function assertGateEInterpreterProbeCoverageV1(
+  probes: readonly Probe[],
+): void {
+  const probeIds = probes.map(({ probeId }) => probeId);
+  const actual = probes.flatMap(({ coverage }) => coverage);
+  if (new Set(probeIds).size !== probeIds.length ||
+      new Set(actual).size !== actual.length) {
+    throw new Error("GATE_E_INTERPRETER_COVERAGE_DUPLICATED");
+  }
+  const expected = [...GATE_E_INTERPRETATION_REQUIRED_COVERAGE_V1].sort();
+  if (canonicalJsonV1([...actual].sort()) !== canonicalJsonV1(expected)) {
+    throw new Error("GATE_E_INTERPRETER_COVERAGE_INCOMPLETE");
+  }
+  for (const current of probes) {
+    const expectedPositive: CoverageToken[] = [
+      ...current.expected.claimedEffects.map(
+        (effect) => `EFFECT:${effect}:POSITIVE` as const,
+      ),
+      ...current.expected.clarificationTargets.map(
+        (target) => `CLARIFICATION:${target}:POSITIVE` as const,
+      ),
+      ...current.expected.requestedActions.map(
+        (action) => `ACTION:${action}:POSITIVE` as const,
+      ),
+    ];
+    for (const contentHash of current.expected.claimContentHashes) {
+      const eligible = current.input.eligibleClaims.find(
+        (claim) => claim.contentHash === contentHash,
+      );
+      if (eligible === undefined ||
+          !GATE_E_INTERPRETER_VERDICT_DOMAIN_V1.protectedClaimClasses
+            .includes(eligible.type as typeof GATE_E_INTERPRETER_CLAIM_CLASSES_V1[number])) {
+        throw new Error("GATE_E_INTERPRETER_COVERAGE_SEMANTICS_INVALID");
+      }
+      expectedPositive.push(`CLAIM:${eligible.type}:POSITIVE`);
+    }
+    const declaredPositive = current.coverage.filter(
+      (token) => token.endsWith(":POSITIVE"),
+    );
+    if (canonicalJsonV1(expectedPositive.sort()) !==
+        canonicalJsonV1([...declaredPositive].sort())) {
+      throw new Error("GATE_E_INTERPRETER_COVERAGE_SEMANTICS_INVALID");
+    }
+    for (const token of current.coverage.filter(
+      (entry) => entry.endsWith(":ADVERSARIAL_NEGATIVE"),
+    )) {
+      const [dimension, semanticClass] = token.split(":");
+      if (dimension === "CLAIM" &&
+          !current.input.eligibleClaims.some(({ type }) => type === semanticClass)) {
+        throw new Error("GATE_E_INTERPRETER_COVERAGE_SEMANTICS_INVALID");
+      }
+    }
+  }
+}
+
 export function deriveGateEInterpreterRegistrationV1(modelResource: string) {
+  assertGateEInterpreterProbeCoverageV1(GATE_E_INTERPRETATION_PROBES_V1);
+  const coverageDomainHash = sha256(canonicalJsonV1(
+    GATE_E_INTERPRETATION_REQUIRED_COVERAGE_V1,
+  ));
   const policy = Object.freeze({
     schemaVersion: 1 as const,
     contractVersion: "GATE_E_INTERPRETER_POLICY_V1" as const,
     modelResource,
+    interpreterModelRelationship: GATE_E_INTERPRETER_MODEL_RELATIONSHIP_V1,
+    coverageDomainHash,
     systemInstructionHash: sha256(SYSTEM_INSTRUCTION),
     generationConfigHash: sha256(canonicalJsonV1(GENERATION_CONFIG)),
     responseSchemaHash: sha256(canonicalJsonV1(RESPONSE_SCHEMA)),
@@ -291,11 +500,14 @@ export function deriveGateEInterpreterRegistrationV1(modelResource: string) {
     return Object.freeze({
       probeId: probe.probeId,
       candidateOutputHash: probe.input.candidateOutputHash,
+      coverage: probe.coverage,
       requestIdentity: request.identity,
       expectedClassificationHash: sha256(canonicalJsonV1(probe.expected)),
     });
   }));
   return Object.freeze({
+    interpreterModelRelationship: GATE_E_INTERPRETER_MODEL_RELATIONSHIP_V1,
+    coverageDomainHash,
     policy,
     policyHash: sha256(canonicalJsonV1(policy)),
     probes,
