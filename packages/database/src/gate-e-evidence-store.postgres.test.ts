@@ -1,4 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { beforeAll, afterAll, describe, expect, it } from "vitest";
 import { canonicalJsonV1 } from "@lana/contracts";
 import { Pool, type PoolClient } from "pg";
@@ -10,6 +12,7 @@ import {
 
 const databaseUrl = process.env.GATE_E_STORE_TEST_DATABASE_URL;
 const postgresDescribe = databaseUrl ? describe.sequential : describe.skip;
+const migrationsDirectory = resolve(import.meta.dirname, "../migrations");
 const sha256 = (value: string): string => createHash("sha256")
   .update(value, "utf8")
   .digest("hex");
@@ -397,6 +400,26 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
         notAfter,
       )).rejects.toThrow(/GATE_E_EVIDENCE_ITEM_SHAPE_INVALID/iu);
 
+      const boundarySource = evidenceBody();
+      const equalBoundary = {
+        ...boundarySource,
+        registrationProvenance: {
+          ...boundarySource.registrationProvenance,
+          registrationCommitTime:
+            boundarySource.registrationProvenance.scoredRunStartedAt,
+        },
+      };
+      await expect(appendRawSql(
+        client,
+        equalBoundary,
+        "BODY",
+        equalBoundary.registrationProvenance.registrationCommit,
+        equalBoundary.manifestHash,
+        equalBoundary.scoredRunRevision,
+        null,
+        notAfter,
+      )).rejects.toThrow(/GATE_E_EVIDENCE_BODY_BINDING_INVALID/iu);
+
       const store = new PostgresGateEEvidenceStoreV2(databaseUrl!);
       try {
         await store.appendBeforeDeadlineAtomically({
@@ -563,6 +586,110 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
       } else {
         process.env.ALLOW_DESTRUCTIVE_MIGRATION_ROLLBACK = previous;
       }
+    }
+  });
+
+  it("rejects any pre-existing Gate E role namespace before granting capability", async () => {
+    const upSql = await readFile(
+      resolve(migrationsDirectory, "0034_gate_e_evidence_store_v2.up.sql"),
+      "utf8",
+    );
+    const memberRole = `gate_e_preexisting_member_${randomBytes(6).toString("hex")}`;
+    const client = await pool.connect();
+    try {
+      await client.query("CREATE ROLE lana_gate_e_evidence_writer NOLOGIN NOINHERIT");
+      await client.query(`CREATE ROLE ${memberRole} LOGIN`);
+      await client.query(`GRANT lana_gate_e_evidence_writer TO ${memberRole}`);
+      await client.query("BEGIN");
+      await expect(client.query(upSql)).rejects.toThrow(
+        /GATE_E_EVIDENCE_ROLE_NAMESPACE_OCCUPIED/iu,
+      );
+      await client.query("ROLLBACK");
+    } finally {
+      await client.query(`REVOKE lana_gate_e_evidence_writer FROM ${memberRole}`)
+        .catch(() => undefined);
+      await client.query(`DROP ROLE IF EXISTS ${memberRole}`).catch(() => undefined);
+      await client.query("DROP ROLE IF EXISTS lana_gate_e_evidence_writer")
+        .catch(() => undefined);
+      await client.query("DROP ROLE IF EXISTS lana_gate_e_evidence_reader")
+        .catch(() => undefined);
+      client.release();
+    }
+  });
+
+  it("rejects rather than adopts a pre-existing Gate E database object", async () => {
+    const upSql = await readFile(
+      resolve(migrationsDirectory, "0034_gate_e_evidence_store_v2.up.sql"),
+      "utf8",
+    );
+    const client = await pool.connect();
+    try {
+      await client.query(
+        "CREATE TABLE public.gate_e_evidence_records_v2 (foreign_owner text)",
+      );
+      await client.query("BEGIN");
+      await expect(client.query(upSql)).rejects.toThrow(/already exists/iu);
+      await client.query("ROLLBACK");
+      const boundary = await client.query<{ role_count: string }>(`
+        SELECT count(*)::text AS role_count
+          FROM pg_roles
+         WHERE rolname IN (
+           'lana_gate_e_evidence_writer',
+           'lana_gate_e_evidence_reader'
+         )
+      `);
+      expect(boundary.rows[0]?.role_count).toBe("0");
+    } finally {
+      await client.query("ROLLBACK").catch(() => undefined);
+      await client.query("DROP TABLE IF EXISTS public.gate_e_evidence_records_v2")
+        .catch(() => undefined);
+      await client.query("DROP ROLE IF EXISTS lana_gate_e_evidence_writer")
+        .catch(() => undefined);
+      await client.query("DROP ROLE IF EXISTS lana_gate_e_evidence_reader")
+        .catch(() => undefined);
+      client.release();
+    }
+  });
+
+  it("keeps every migration 0034 object in public under a non-public search_path", async () => {
+    const upSql = await readFile(
+      resolve(migrationsDirectory, "0034_gate_e_evidence_store_v2.up.sql"),
+      "utf8",
+    );
+    const downSql = await readFile(
+      resolve(migrationsDirectory, "0034_gate_e_evidence_store_v2.down.sql"),
+      "utf8",
+    );
+    const schema = `gate_e_scope_${randomBytes(6).toString("hex")}`;
+    const client = await pool.connect();
+    try {
+      await client.query(`CREATE SCHEMA ${schema}`);
+      await client.query("BEGIN");
+      await client.query(`SET LOCAL search_path TO ${schema}, public`);
+      await client.query(upSql);
+      await client.query("COMMIT");
+      const locations = await client.query<{
+        public_records: string | null;
+        scoped_records: string | null;
+      }>(`
+        SELECT to_regclass('public.gate_e_evidence_records_v2')::text
+                 AS public_records,
+               to_regclass('${schema}.gate_e_evidence_records_v2')::text
+                 AS scoped_records
+      `);
+      expect(locations.rows[0]).toEqual({
+        public_records: "gate_e_evidence_records_v2",
+        scoped_records: null,
+      });
+      await client.query("BEGIN");
+      await client.query(`SET LOCAL search_path TO ${schema}, public`);
+      await client.query(downSql);
+      await client.query("COMMIT");
+    } finally {
+      await client.query("ROLLBACK").catch(() => undefined);
+      await client.query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`)
+        .catch(() => undefined);
+      client.release();
     }
   });
 });

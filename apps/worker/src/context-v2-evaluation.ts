@@ -5,6 +5,7 @@ import type {
   CandidateRequestIdentity,
   ContextV2CandidateModelPort,
 } from "./context-v2-candidate.js";
+import { GATE_E_FULL_POPULATION_POLICY_V1 } from "./gate-e-registration-policy.js";
 import {
   CandidateProviderError,
   CONTEXT_V2_CANDIDATE_MODEL_ID,
@@ -29,7 +30,7 @@ export const DF10_GATE_E_PLAN_V2 = Object.freeze({
   },
   scoredCorpus: {
     name: "FROZEN_POST_GATE_BF_V1_CORPUS" as const,
-    inclusion: "ALL_FROZEN_CORPUS_ITEMS" as const,
+    inclusion: GATE_E_FULL_POPULATION_POLICY_V1.inclusion,
     mandatoryStrata: [
       "CLAIM_SAFETY",
       "CONTEXT_INTEGRITY",
@@ -70,7 +71,8 @@ export const DF10_GATE_E_PLAN_V2 = Object.freeze({
     ],
   },
   thresholds: {
-    eligibleCoverageMinimum: 0.95,
+    eligibleCoverageMinimum:
+      GATE_E_FULL_POPULATION_POLICY_V1.eligibleCoverageMinimum,
     claimSafetyMinimum: 1,
     contextIntegrityMinimum: 1,
     sideEffectViolationMaximum: 0,

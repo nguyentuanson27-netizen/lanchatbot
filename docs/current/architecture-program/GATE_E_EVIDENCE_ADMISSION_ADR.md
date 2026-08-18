@@ -42,6 +42,17 @@ avoiding recursive receipts while the hash-only reader cross-checks both.
   canonical hashes fail before the append boundary.
 - Tables reject UPDATE, DELETE and TRUNCATE. Runtime roles receive only execute
   permission on the hash-scoped append/read functions, never table DML.
+- Migration `0034` owns the Gate E roles, tables, functions and triggers and
+  their complete lifecycle. If either role name already exists, migration fails with
+  `GATE_E_EVIDENCE_ROLE_NAMESPACE_OCCUPIED`; it never adopts a pre-existing
+  role or its current/future membership graph. Any pre-existing owned table,
+  function or trigger likewise makes ordinary `CREATE` fail and rolls back the
+  whole migration; no `IF NOT EXISTS`/`OR REPLACE` adoption preserves foreign
+  ownership or ACLs.
+- All owned tables and functions live explicitly in `public`; caller
+  `search_path` cannot relocate or shadow the Gate E storage boundary.
+- Registration commit time must strictly precede scored-run start time. Equal
+  timestamps are inadmissible, matching the upstream Git provenance verifier.
 
 ## Deadline, rollback, retry and connection ambiguity
 
@@ -54,7 +65,10 @@ If the client loses certainty while issuing `COMMIT`, the adapter returns no
 successful receipt and reports `GATE_E_EVIDENCE_COMMIT_AMBIGUOUS`. A later
 identical retry is the recovery protocol: it either retrieves the one admitted
 record and its original metadata or performs a new deadline-governed append.
-The ambiguous call itself never grants Gate authority.
+The ambiguous call itself never grants Gate authority. If commit succeeds but
+post-commit read-back fails, the adapter likewise returns no receipt; because
+the client is already released, no fictitious rollback is attempted. The same
+identical-retry recovery protocol returns the immutable original `admittedAt`.
 
 ## Options considered
 

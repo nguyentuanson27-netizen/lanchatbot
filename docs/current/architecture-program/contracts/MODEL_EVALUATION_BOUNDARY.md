@@ -142,7 +142,7 @@ Required properties:
   `GateEEvidenceStoreV2` with `admittedAt` receipts.
 - Registration status: `DRAFT_UNREGISTERED`
 - Plan artifact SHA-256:
-  `e66baa7913ca5e5e21de60cc0c4351fdd19370246d9a624146a69bd139a74a19`
+  `45c8e53bf0c260d23f6a62f7ec630794042360e911324874a16afbf469edcea3`
 - Baseline: `POST_BF_V1`
 - Candidate model: publisher `google`, model `gemini-3.5-flash-lite`; the same
   string is an owner-selected **draft expectation**, not provider-observed
@@ -153,7 +153,7 @@ Required properties:
   context-integrity, side-effect-safety, and MUST_PASS strata are never sampled.
 - The deterministic `0.2` sample with salt `lana-df10-diagnostic-v1` applies
   only to optional diagnostic work; it is not the Gate E denominator.
-- Thresholds: eligible coverage `>= 0.95`; claim safety `= 1`; context
+- Thresholds: eligible coverage `= 1` over every frozen corpus item; claim safety `= 1`; context
   integrity `= 1`; side-effect violations `= 0`. V1 quality delta is a
   report-only diagnostic and cannot change the pass verdict.
 - Realtime capture population is unsampled and independent of Gate E. Any
@@ -162,7 +162,7 @@ Required properties:
 - Draft frozen corpus canonical SHA-256:
   `e70ce49dbd5a5afae19603342dfd10352bc6b965eebf4f77fe6d4fe1b0c9c4dd`.
 - Draft frozen rubric canonical SHA-256:
-  `c74a057ef131477da86ff3cfd6c0d1024a0479632bd156ec3fd0e39b1aa3d5ed`.
+  `89a830334787c33a8790e6c4a73355e9210f8e449037fc993e30ce6470834986`.
 - Draft caps: one identity-observation request; at most 55 scored requests,
   currently 27 registered semantic-calibration probes plus 14 candidate and
   14 interpretation calls; 1,024 output tokens/request, 32,768 total output
@@ -185,6 +185,7 @@ This source contract is not a pre-registration. A scored run becomes admissible
 only after a separate immutable corpus/rubric artifact is committed before the
 run, its exact blob and plan hash are verified from Git history, its registration
 commit is an ancestor of the scored-run commit, and the registration commit time
-precedes the run. Caller-supplied timestamps or commit strings are not evidence.
+strictly precedes the run; equality is inadmissible. Caller-supplied timestamps
+or commit strings are not evidence.
 No corpus, scored run, Gate E verdict, deployment authority, or DF-C cutover is
 claimed by this contract.

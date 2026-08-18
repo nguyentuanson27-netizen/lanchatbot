@@ -73,7 +73,7 @@ corpus or rubric is not registerable.
   `e70ce49dbd5a5afae19603342dfd10352bc6b965eebf4f77fe6d4fe1b0c9c4dd`
 - Rubric version: `DF10_GATE_E_RUBRIC_V1`
 - Rubric canonical SHA-256:
-  `c74a057ef131477da86ff3cfd6c0d1024a0479632bd156ec3fd0e39b1aa3d5ed`
+  `89a830334787c33a8790e6c4a73355e9210f8e449037fc993e30ce6470834986`
 - Population: all 14 frozen items; no scoring sample.
 - Data: controlled PII-free fixtures only; no raw transcript, customer hash,
   phone, address, email, provider payload, token, or credential.
@@ -158,8 +158,9 @@ Registration fails if any blob, canonical hash, request identity, source
 fingerprint, ancestor relation, or time ordering differs. The source
 fingerprint is re-derived both at candidate revision P and at scored-run
 revision S; both must equal the registered fingerprint. A registration artifact
-must already be an ancestor of S, and its commit time must precede the run
-start. The scored runner also requires this verified proof and binds it into the
+must already be an ancestor of S, and its commit time must strictly precede the
+run start; equality is inadmissible. The scored runner also requires this
+verified proof and binds it into the
 redacted evidence hash before it can call the model.
 
 The scored runner has one public orchestration boundary. It accepts only the

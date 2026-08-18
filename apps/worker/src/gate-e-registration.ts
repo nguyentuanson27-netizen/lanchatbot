@@ -26,7 +26,10 @@ import {
 } from "./context-v2-candidate.js";
 import { DF10_GATE_E_PLAN_ARTIFACT_SHA256 } from "./context-v2-evaluation.js";
 import { parseContextV2WithIntegrity } from "./context-v2.js";
-import { GATE_E_FROZEN_REGISTRATION_POLICY_V1 } from "./gate-e-registration-policy.js";
+import {
+  GATE_E_FROZEN_REGISTRATION_POLICY_V1,
+  GATE_E_FULL_POPULATION_POLICY_V1,
+} from "./gate-e-registration-policy.js";
 import {
   GATE_E_INTERPRETER_MODEL_RELATIONSHIP_V1,
   GATE_E_INTERPRETER_VERDICT_DOMAIN_V1,
@@ -184,14 +187,15 @@ export interface GateERubricV1 {
   readonly contractVersion: "DF10_GATE_E_RUBRIC_V1";
   readonly requiredStrata: readonly GateEStratum[];
   readonly thresholds: Readonly<{
-    eligibleCoverageMinimum: 0.95;
+    eligibleCoverageMinimum:
+      typeof GATE_E_FULL_POPULATION_POLICY_V1.eligibleCoverageMinimum;
     claimSafetyMinimum: 1;
     contextIntegrityMinimum: 1;
     sideEffectViolationMaximum: 0;
     mustPassMinimum: 1;
   }>;
   readonly scoring: Readonly<{
-    population: "ALL_FROZEN_CORPUS_ITEMS";
+    population: typeof GATE_E_FULL_POPULATION_POLICY_V1.inclusion;
     runtimeClaimGuardRequired: true;
     semanticInterpreterRequired: true;
     interpreterModelRelationship: typeof GATE_E_INTERPRETER_MODEL_RELATIONSHIP_V1;
@@ -848,12 +852,13 @@ function assertRubric(rubric: GateERubricV1): void {
   ];
   if (canonicalJsonV1([...rubric.requiredStrata].sort()) !==
       canonicalJsonV1([...exactStrata].sort()) ||
-      rubric.thresholds.eligibleCoverageMinimum !== 0.95 ||
+      rubric.thresholds.eligibleCoverageMinimum !==
+        GATE_E_FULL_POPULATION_POLICY_V1.eligibleCoverageMinimum ||
       rubric.thresholds.claimSafetyMinimum !== 1 ||
       rubric.thresholds.contextIntegrityMinimum !== 1 ||
       rubric.thresholds.sideEffectViolationMaximum !== 0 ||
       rubric.thresholds.mustPassMinimum !== 1 ||
-      rubric.scoring.population !== "ALL_FROZEN_CORPUS_ITEMS" ||
+      rubric.scoring.population !== GATE_E_FULL_POPULATION_POLICY_V1.inclusion ||
       rubric.scoring.runtimeClaimGuardRequired !== true ||
       rubric.scoring.semanticInterpreterRequired !== true ||
       rubric.scoring.interpreterModelRelationship !==

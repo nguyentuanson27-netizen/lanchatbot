@@ -3,46 +3,25 @@
 -- It is deliberately not represented as a PostgreSQL commit timestamp.
 
 DO $$
-DECLARE
-  gate_role record;
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'lana_gate_e_evidence_writer') THEN
-    CREATE ROLE lana_gate_e_evidence_writer NOLOGIN
-      NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION;
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'lana_gate_e_evidence_reader') THEN
-    CREATE ROLE lana_gate_e_evidence_reader NOLOGIN
-      NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION;
-  END IF;
-
-  FOR gate_role IN
-    SELECT r.*
-      FROM pg_roles r
-     WHERE r.rolname IN (
+  IF EXISTS (
+    SELECT 1 FROM pg_roles
+     WHERE rolname IN (
        'lana_gate_e_evidence_writer',
        'lana_gate_e_evidence_reader'
      )
-  LOOP
-    IF gate_role.rolcanlogin
-       OR gate_role.rolsuper
-       OR gate_role.rolcreatedb
-       OR gate_role.rolcreaterole
-       OR gate_role.rolinherit
-       OR gate_role.rolreplication
-       OR gate_role.rolbypassrls
-       OR EXISTS (
-         SELECT 1
-           FROM pg_auth_members membership
-          WHERE membership.member = gate_role.oid
-       ) THEN
-      RAISE EXCEPTION 'GATE_E_EVIDENCE_ROLE_BOUNDARY_INVALID: %',
-        gate_role.rolname;
-    END IF;
-  END LOOP;
+  ) THEN
+    RAISE EXCEPTION 'GATE_E_EVIDENCE_ROLE_NAMESPACE_OCCUPIED';
+  END IF;
+
+  CREATE ROLE lana_gate_e_evidence_writer NOLOGIN
+    NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION;
+  CREATE ROLE lana_gate_e_evidence_reader NOLOGIN
+    NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION;
 END;
 $$;
 
-CREATE TABLE IF NOT EXISTS gate_e_evidence_records_v2 (
+CREATE TABLE public.gate_e_evidence_records_v2 (
   evidence_hash text PRIMARY KEY CHECK (evidence_hash ~ '^[a-f0-9]{64}$'),
   record_kind text NOT NULL CHECK (record_kind IN ('BODY', 'FINALIZATION')),
   contract_version text NOT NULL CHECK (contract_version IN (
@@ -68,13 +47,13 @@ CREATE TABLE IF NOT EXISTS gate_e_evidence_records_v2 (
   )
 );
 
-CREATE TABLE IF NOT EXISTS gate_e_evidence_admissions_v2 (
+CREATE TABLE public.gate_e_evidence_admissions_v2 (
   evidence_hash text PRIMARY KEY
-    REFERENCES gate_e_evidence_records_v2(evidence_hash) ON DELETE RESTRICT,
+    REFERENCES public.gate_e_evidence_records_v2(evidence_hash) ON DELETE RESTRICT,
   admitted_at timestamptz NOT NULL
 );
 
-CREATE OR REPLACE FUNCTION lana_guard_gate_e_evidence_append_only_v2()
+CREATE FUNCTION public.lana_guard_gate_e_evidence_append_only_v2()
 RETURNS trigger
 LANGUAGE plpgsql
 AS $$
@@ -83,19 +62,15 @@ BEGIN
 END;
 $$;
 
-DROP TRIGGER IF EXISTS gate_e_evidence_records_v2_no_mutation
-  ON gate_e_evidence_records_v2;
 CREATE TRIGGER gate_e_evidence_records_v2_no_mutation
-  BEFORE UPDATE OR DELETE OR TRUNCATE ON gate_e_evidence_records_v2
-  FOR EACH STATEMENT EXECUTE FUNCTION lana_guard_gate_e_evidence_append_only_v2();
+  BEFORE UPDATE OR DELETE OR TRUNCATE ON public.gate_e_evidence_records_v2
+  FOR EACH STATEMENT EXECUTE FUNCTION public.lana_guard_gate_e_evidence_append_only_v2();
 
-DROP TRIGGER IF EXISTS gate_e_evidence_admissions_v2_no_mutation
-  ON gate_e_evidence_admissions_v2;
 CREATE TRIGGER gate_e_evidence_admissions_v2_no_mutation
-  BEFORE UPDATE OR DELETE OR TRUNCATE ON gate_e_evidence_admissions_v2
-  FOR EACH STATEMENT EXECUTE FUNCTION lana_guard_gate_e_evidence_append_only_v2();
+  BEFORE UPDATE OR DELETE OR TRUNCATE ON public.gate_e_evidence_admissions_v2
+  FOR EACH STATEMENT EXECUTE FUNCTION public.lana_guard_gate_e_evidence_append_only_v2();
 
-CREATE OR REPLACE FUNCTION lana_finalize_gate_e_evidence_admission_v2()
+CREATE FUNCTION public.lana_finalize_gate_e_evidence_admission_v2()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -117,7 +92,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION lana_gate_e_has_sensitive_key_v2(p_value jsonb)
+CREATE FUNCTION public.lana_gate_e_has_sensitive_key_v2(p_value jsonb)
 RETURNS boolean
 LANGUAGE plpgsql
 IMMUTABLE
@@ -145,7 +120,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION lana_gate_e_has_exact_keys_v2(
+CREATE FUNCTION public.lana_gate_e_has_exact_keys_v2(
   p_value jsonb,
   p_expected text[]
 )
@@ -161,14 +136,12 @@ AS $$
             FROM unnest(p_expected) AS key)
 $$;
 
-DROP TRIGGER IF EXISTS gate_e_evidence_admission_boundary_v2
-  ON gate_e_evidence_records_v2;
 CREATE CONSTRAINT TRIGGER gate_e_evidence_admission_boundary_v2
-  AFTER INSERT ON gate_e_evidence_records_v2
+  AFTER INSERT ON public.gate_e_evidence_records_v2
   DEFERRABLE INITIALLY DEFERRED
-  FOR EACH ROW EXECUTE FUNCTION lana_finalize_gate_e_evidence_admission_v2();
+  FOR EACH ROW EXECUTE FUNCTION public.lana_finalize_gate_e_evidence_admission_v2();
 
-CREATE OR REPLACE FUNCTION lana_gate_e_append_evidence_v2(
+CREATE FUNCTION public.lana_gate_e_append_evidence_v2(
   p_evidence_hash text,
   p_record_kind text,
   p_contract_version text,
@@ -250,7 +223,7 @@ BEGIN
        OR evidence_json#>>'{registrationProvenance,scoredRunStartedAt}' IS NULL
        OR evidence_json#>>'{registrationProvenance,scoredRunStartedAt}' IS DISTINCT FROM
           evidence_json->>'startedAt'
-       OR (evidence_json#>>'{registrationProvenance,registrationCommitTime}')::timestamptz >
+       OR (evidence_json#>>'{registrationProvenance,registrationCommitTime}')::timestamptz >=
           (evidence_json#>>'{registrationProvenance,scoredRunStartedAt}')::timestamptz
        OR evidence_json->>'startedAt' IS NULL
        OR evidence_json->>'completedAt' IS NULL
@@ -443,7 +416,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION lana_gate_e_read_evidence_by_hash_v2(
+CREATE FUNCTION public.lana_gate_e_read_evidence_by_hash_v2(
   p_evidence_hash text
 )
 RETURNS TABLE (
@@ -472,17 +445,17 @@ AS $$
    WHERE r.evidence_hash = p_evidence_hash
 $$;
 
-REVOKE ALL ON gate_e_evidence_records_v2,
-  gate_e_evidence_admissions_v2 FROM PUBLIC;
-REVOKE ALL ON FUNCTION lana_gate_e_append_evidence_v2(
+REVOKE ALL ON public.gate_e_evidence_records_v2,
+  public.gate_e_evidence_admissions_v2 FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.lana_gate_e_append_evidence_v2(
   text, text, text, text, text, text, text, text, timestamptz
 ) FROM PUBLIC;
-REVOKE ALL ON FUNCTION lana_gate_e_read_evidence_by_hash_v2(text) FROM PUBLIC;
-REVOKE ALL ON FUNCTION lana_gate_e_has_sensitive_key_v2(jsonb) FROM PUBLIC;
-REVOKE ALL ON FUNCTION lana_gate_e_has_exact_keys_v2(jsonb, text[]) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.lana_gate_e_read_evidence_by_hash_v2(text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.lana_gate_e_has_sensitive_key_v2(jsonb) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.lana_gate_e_has_exact_keys_v2(jsonb, text[]) FROM PUBLIC;
 
-GRANT EXECUTE ON FUNCTION lana_gate_e_append_evidence_v2(
+GRANT EXECUTE ON FUNCTION public.lana_gate_e_append_evidence_v2(
   text, text, text, text, text, text, text, text, timestamptz
 ) TO lana_gate_e_evidence_writer;
-GRANT EXECUTE ON FUNCTION lana_gate_e_read_evidence_by_hash_v2(text)
+GRANT EXECUTE ON FUNCTION public.lana_gate_e_read_evidence_by_hash_v2(text)
   TO lana_gate_e_evidence_writer, lana_gate_e_evidence_reader;

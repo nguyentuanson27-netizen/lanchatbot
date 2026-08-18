@@ -204,7 +204,7 @@ export function classifyGateEEvidenceRecordV3(input: Readonly<{
         provenance.scoredRunRevision !== input.evidence.scoredRunRevision ||
         ![registrationCommitTime, scoredRunStartedAt, startedAt, completedAt]
           .every(Number.isFinite) ||
-        registrationCommitTime > scoredRunStartedAt || scoredRunStartedAt !== startedAt ||
+        registrationCommitTime >= scoredRunStartedAt || scoredRunStartedAt !== startedAt ||
         startedAt > completedAt || completedAt > Date.parse(notAfter)) {
       throw new Error("GATE_E_EVIDENCE_BODY_BINDING_INVALID");
     }
@@ -306,7 +306,7 @@ export class PostgresGateEEvidenceStoreV2 {
       let manifestHash = binding.manifestHash;
       if (binding.recordKind === "FINALIZATION") {
         const body = await client.query<GateEEvidenceDatabaseRow>(
-          "SELECT * FROM lana_gate_e_read_evidence_by_hash_v2($1)",
+          "SELECT * FROM public.lana_gate_e_read_evidence_by_hash_v2($1)",
           [binding.evidenceBodyHash],
         );
         if (body.rowCount !== 1 || body.rows[0]?.record_kind !== "BODY" ||
@@ -320,7 +320,7 @@ export class PostgresGateEEvidenceStoreV2 {
         disposition: GateEEvidenceAppendResultV2["disposition"];
         admitted_at: Date | string | null;
       }>(
-        `SELECT * FROM lana_gate_e_append_evidence_v2(
+        `SELECT * FROM public.lana_gate_e_append_evidence_v2(
           $1,$2,$3,$4,$5,$6,$7,$8,$9::timestamptz
         )`,
         [input.evidenceHash, binding.recordKind, binding.contractVersion,
@@ -352,7 +352,7 @@ export class PostgresGateEEvidenceStoreV2 {
         admittedAt: stored.admittedAt,
       });
     } catch (error) {
-      await rollbackQuietly(client);
+      if (!clientReleased) await rollbackQuietly(client);
       const databaseError = error as { code?: string; message?: string };
       if (databaseError.code === "23514" &&
           databaseError.message === "GATE_E_EVIDENCE_DEADLINE_EXPIRED") {
@@ -380,7 +380,7 @@ export class PostgresGateEEvidenceStoreV2 {
       throw new Error("GATE_E_EVIDENCE_REFERENCE_INVALID");
     }
     const result = await this.pool.query<GateEEvidenceDatabaseRow>(
-      "SELECT * FROM lana_gate_e_read_evidence_by_hash_v2($1)",
+      "SELECT * FROM public.lana_gate_e_read_evidence_by_hash_v2($1)",
       [evidenceHash],
     );
     if (result.rowCount === 0) return null;

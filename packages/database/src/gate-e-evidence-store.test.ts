@@ -121,6 +121,17 @@ describe("Gate E durable evidence record classification", () => {
     })).toThrow("GATE_E_EVIDENCE_ITEM_INVALID");
   });
 
+  it("requires the registration commit to strictly predate the scored run", () => {
+    const equalBoundary = structuredClone(body());
+    const provenance = equalBoundary.registrationProvenance as Record<string, unknown>;
+    provenance.registrationCommitTime = provenance.scoredRunStartedAt;
+    expect(() => classifyGateEEvidenceRecordV3({
+      evidenceHash: sha256(canonicalJsonV1(equalBoundary)),
+      evidence: equalBoundary,
+      notAfter: "2026-08-18T10:15:00.000Z",
+    })).toThrow("GATE_E_EVIDENCE_BODY_BINDING_INVALID");
+  });
+
   it("binds FINALIZATION to its body hash and exact run revision", () => {
     const evidenceBody = body();
     const evidenceBodyHash = sha256(canonicalJsonV1(evidenceBody));

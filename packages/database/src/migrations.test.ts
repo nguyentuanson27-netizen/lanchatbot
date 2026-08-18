@@ -347,8 +347,11 @@ describe("database migrations", () => {
       "utf8",
     );
 
-    expect(sql).toContain("CREATE TABLE IF NOT EXISTS gate_e_evidence_records_v2");
-    expect(sql).toContain("CREATE TABLE IF NOT EXISTS gate_e_evidence_admissions_v2");
+    expect(sql).toContain("CREATE TABLE public.gate_e_evidence_records_v2");
+    expect(sql).toContain("CREATE TABLE public.gate_e_evidence_admissions_v2");
+    expect(sql).toContain("GATE_E_EVIDENCE_ROLE_NAMESPACE_OCCUPIED");
+    expect(sql).not.toContain("IF NOT EXISTS (SELECT 1 FROM pg_roles");
+    expect(sql).not.toContain("CREATE OR REPLACE FUNCTION public.lana_gate_e");
     expect(sql).toContain("DEFERRABLE INITIALLY DEFERRED");
     expect(sql).toContain("clock_timestamp()");
     expect(sql).toContain("admitted_at");
@@ -362,8 +365,8 @@ describe("database migrations", () => {
     expect(sql).toContain("lana_gate_e_evidence_reader");
     expect(sql).not.toMatch(/GRANT\s+(?:SELECT|INSERT|UPDATE|DELETE|TRUNCATE)[\s\S]*gate_e_evidence_/iu);
     expect(sql).not.toMatch(/(?:secret|token|password|raw_provider|customer|message)_/iu);
-    expect(down).toContain("DROP TABLE IF EXISTS gate_e_evidence_admissions_v2");
-    expect(down).toContain("DROP TABLE IF EXISTS gate_e_evidence_records_v2");
+    expect(down).toContain("DROP TABLE IF EXISTS public.gate_e_evidence_admissions_v2");
+    expect(down).toContain("DROP TABLE IF EXISTS public.gate_e_evidence_records_v2");
     expect(down).toContain("DROP ROLE IF EXISTS lana_gate_e_evidence_writer");
     expect(down).toContain("DROP ROLE IF EXISTS lana_gate_e_evidence_reader");
 

@@ -241,7 +241,7 @@ function rubric(): GateERubricV1 {
       "MUST_PASS",
     ],
     thresholds: {
-      eligibleCoverageMinimum: 0.95,
+      eligibleCoverageMinimum: 1,
       claimSafetyMinimum: 1,
       contextIntegrityMinimum: 1,
       sideEffectViolationMaximum: 0,
@@ -481,7 +481,7 @@ describe("Gate E immutable registration boundary", () => {
       "e70ce49dbd5a5afae19603342dfd10352bc6b965eebf4f77fe6d4fe1b0c9c4dd",
     );
     expect(FROZEN_GATE_E_RUBRIC_V1_SHA256).toBe(
-      "c74a057ef131477da86ff3cfd6c0d1024a0479632bd156ec3fd0e39b1aa3d5ed",
+      "89a830334787c33a8790e6c4a73355e9210f8e449037fc993e30ce6470834986",
     );
     const bundle = createDraftGateERegistrationBundle({
       corpus: FROZEN_GATE_E_CORPUS_V1,
@@ -962,6 +962,7 @@ describe("Gate E immutable registration boundary", () => {
   });
 
   it("keeps failed and missing items in the Gate E denominator", () => {
+    expect(FROZEN_GATE_E_RUBRIC_V1.thresholds.eligibleCoverageMinimum).toBe(1);
     const scores = FROZEN_GATE_E_CORPUS_V1.items.slice(0, -1).map((item) =>
       scoreOutput({
         item,
