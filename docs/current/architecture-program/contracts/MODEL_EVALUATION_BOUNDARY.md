@@ -121,14 +121,20 @@ Required properties:
     Commit metadata remains outside the evidence content hash, avoiding a
     receipt/third-record recursion. Caller-supplied self-consistent objects have
     no Gate authority. No scored execution is admissible until a concrete store
-    adapter proves this V2 transactional contract.
+    adapter proves this V2 transactional contract. Idempotency is part of the
+    same transaction contract: an existing identical hash returns
+    `ALREADY_PRESENT` with its original transaction commit time, even when the
+    retry arrives after `notAfter`, and must not rewrite the record or its commit metadata.
+    An existing hash with different content returns `HASH_CONFLICT`; only an
+    absent hash may create a new record after the store transaction clock proves
+    the deadline has not expired.
 
 ## DF10 Gate E draft foundation
 
 - Plan contract: `DF10_GATE_E_PLAN_V1`
 - Registration status: `DRAFT_UNREGISTERED`
 - Plan artifact SHA-256:
-  `310eb8746c57a1f1f3e768c65a038dbfb4292371fc218d8a14becf68fb669f92`
+  `0e3731e052869896abf3fe918c6307c1befe14bf80c8df47d66cf906ef2eeffd`
 - Baseline: `POST_BF_V1`
 - Candidate model: publisher `google`, model `gemini-3.5-flash-lite`; the same
   string is an owner-selected **draft expectation**, not provider-observed

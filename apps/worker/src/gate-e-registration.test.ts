@@ -8,6 +8,7 @@ import {
 import {
   GATE_E_EXECUTION_CAPS_V1,
   GATE_E_CANDIDATE_SOURCE_PATHS_V1,
+  assertGateEEvidenceAppendReceiptV2,
   createDraftGateERegistrationBundle,
   createRegisteredGateEManifest,
   deriveGateECandidateContentFingerprint,
@@ -38,6 +39,38 @@ import {
 const hash = (value: string): string => createHash("sha256")
   .update(value, "utf8")
   .digest("hex");
+
+describe("Gate E evidence-store V2 idempotency contract", () => {
+  it("uses the immutable original commit time for an existing identical record", () => {
+    const evidenceHash = "a".repeat(64);
+    const originalCommittedAt = "2026-08-18T10:00:00.000Z";
+    expect(assertGateEEvidenceAppendReceiptV2({
+      result: {
+        disposition: "ALREADY_PRESENT",
+        evidenceHash,
+        originalCommittedAt,
+      },
+      expectedEvidenceHash: evidenceHash,
+      notAfter: "2026-08-18T10:01:00.000Z",
+    })).toEqual({
+      disposition: "ALREADY_PRESENT",
+      originalCommittedAt,
+    });
+  });
+
+  it("rejects an existing-record receipt whose original commit missed the deadline", () => {
+    const evidenceHash = "b".repeat(64);
+    expect(() => assertGateEEvidenceAppendReceiptV2({
+      result: {
+        disposition: "ALREADY_PRESENT",
+        evidenceHash,
+        originalCommittedAt: "2026-08-18T10:01:00.001Z",
+      },
+      expectedEvidenceHash: evidenceHash,
+      notAfter: "2026-08-18T10:01:00.000Z",
+    })).toThrow("GATE_E_EVIDENCE_APPEND_MISMATCH");
+  });
+});
 
 function context(overrides: Partial<ContextV2> = {}): ContextV2 {
   const draft = {
@@ -1090,7 +1123,7 @@ describe("Gate E immutable registration boundary", () => {
           return {
             disposition: "APPENDED" as const,
             evidenceHash,
-            committedAt: new Date(Date.parse(notAfter) - 1).toISOString(),
+            originalCommittedAt: new Date(Date.parse(notAfter) - 1).toISOString(),
           };
         },
       },
@@ -1127,7 +1160,7 @@ describe("Gate E immutable registration boundary", () => {
         appendBeforeDeadlineAtomically: async () => ({
           disposition: "APPENDED" as const,
           evidenceHash: "f".repeat(64),
-          committedAt: new Date().toISOString(),
+          originalCommittedAt: new Date().toISOString(),
         }),
       },
     })).rejects.toThrow("GATE_E_EVIDENCE_APPEND_MISMATCH");
@@ -1150,7 +1183,7 @@ describe("Gate E immutable registration boundary", () => {
           return {
             disposition: "APPENDED" as const,
             evidenceHash,
-            committedAt: new Date().toISOString(),
+            originalCommittedAt: new Date().toISOString(),
           };
         },
       },
@@ -1168,7 +1201,7 @@ describe("Gate E immutable registration boundary", () => {
           evidenceHash === orphanedBodyHash
             ? {
               evidence: orphanedEvidence[0]!,
-              committedAt: new Date().toISOString(),
+              originalCommittedAt: new Date().toISOString(),
             }
             : null,
       },
@@ -1252,7 +1285,7 @@ describe("Gate E immutable registration boundary", () => {
       });
       const lateRecords = new Map<string, Readonly<{
         evidence: Readonly<Record<string, unknown>>;
-        committedAt: string;
+        originalCommittedAt: string;
       }>>();
       let appendIndex = 0;
       const timedOutWithLateCommit = executeGateEScoredRun({
@@ -1266,8 +1299,15 @@ describe("Gate E immutable registration boundary", () => {
             appendIndex += 1;
             if (appendIndex === 1) {
               const committedAt = new Date().toISOString();
-              lateRecords.set(evidenceHash, { evidence, committedAt });
-              return { disposition: "APPENDED" as const, evidenceHash, committedAt };
+              lateRecords.set(evidenceHash, {
+                evidence,
+                originalCommittedAt: committedAt,
+              });
+              return {
+                disposition: "APPENDED" as const,
+                evidenceHash,
+                originalCommittedAt: committedAt,
+              };
             }
             signalFinalizationAppendStarted?.();
             return new Promise((resolve) => {
@@ -1275,11 +1315,14 @@ describe("Gate E immutable registration boundary", () => {
                 const committedAt = new Date(
                   Date.parse(notAfter) + 1,
                 ).toISOString();
-                lateRecords.set(evidenceHash, { evidence, committedAt });
+                lateRecords.set(evidenceHash, {
+                  evidence,
+                  originalCommittedAt: committedAt,
+                });
                 resolve({
                   disposition: "APPENDED" as const,
                   evidenceHash,
-                  committedAt,
+                  originalCommittedAt: committedAt,
                 });
               }, { once: true });
             });
@@ -1342,15 +1385,15 @@ describe("Gate E immutable registration boundary", () => {
     const finalizationHash = hash(canonicalJsonV1(finalization));
     const records = new Map<string, Readonly<{
       evidence: Readonly<Record<string, unknown>>;
-      committedAt: string;
+      originalCommittedAt: string;
     }>>([
       [bodyHash, {
         evidence: body,
-        committedAt: "2026-08-18T10:01:00.500Z",
+        originalCommittedAt: "2026-08-18T10:01:00.500Z",
       }],
       [finalizationHash, {
         evidence: finalization,
-        committedAt: "2026-08-18T10:01:02.000Z",
+        originalCommittedAt: "2026-08-18T10:01:02.000Z",
       }],
     ]);
     const evidenceStore = {
@@ -1368,7 +1411,7 @@ describe("Gate E immutable registration boundary", () => {
 
     records.set(finalizationHash, {
       evidence: finalization,
-      committedAt: "2026-08-18T10:15:00.001Z",
+      originalCommittedAt: "2026-08-18T10:15:00.001Z",
     });
     await expect(verifyStoredGateEEvidenceCertification({
       evidenceBodyHash: bodyHash,
@@ -1377,12 +1420,12 @@ describe("Gate E immutable registration boundary", () => {
     })).rejects.toThrow("GATE_E_EVIDENCE_FINALIZATION_EXPIRED");
     records.set(finalizationHash, {
       evidence: finalization,
-      committedAt: "2026-08-18T10:01:02.000Z",
+      originalCommittedAt: "2026-08-18T10:01:02.000Z",
     });
 
     records.set(bodyHash, {
       evidence: body,
-      committedAt: "2026-08-18T10:01:03.000Z",
+      originalCommittedAt: "2026-08-18T10:01:03.000Z",
     });
     await expect(verifyStoredGateEEvidenceCertification({
       evidenceBodyHash: bodyHash,
@@ -1391,7 +1434,7 @@ describe("Gate E immutable registration boundary", () => {
     })).rejects.toThrow("GATE_E_EVIDENCE_COMMIT_ORDER_INVALID");
     records.set(bodyHash, {
       evidence: body,
-      committedAt: "2026-08-18T10:01:00.500Z",
+      originalCommittedAt: "2026-08-18T10:01:00.500Z",
     });
     await expect(verifyStoredGateEEvidenceCertification({
       evidenceBodyHash: bodyHash,
@@ -1403,7 +1446,7 @@ describe("Gate E immutable registration boundary", () => {
     const dirtyHash = hash(canonicalJsonV1(dirtyFinalization));
     records.set(dirtyHash, {
       evidence: dirtyFinalization,
-      committedAt: "2026-08-18T10:01:02.000Z",
+      originalCommittedAt: "2026-08-18T10:01:02.000Z",
     });
     await expect(verifyStoredGateEEvidenceCertification({
       evidenceBodyHash: bodyHash,
@@ -1415,7 +1458,7 @@ describe("Gate E immutable registration boundary", () => {
     const mismatchedHash = hash(canonicalJsonV1(mismatched));
     records.set(mismatchedHash, {
       evidence: mismatched,
-      committedAt: "2026-08-18T10:01:02.000Z",
+      originalCommittedAt: "2026-08-18T10:01:02.000Z",
     });
     await expect(verifyStoredGateEEvidenceCertification({
       evidenceBodyHash: bodyHash,

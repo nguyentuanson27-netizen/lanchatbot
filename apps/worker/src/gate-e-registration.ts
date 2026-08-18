@@ -275,7 +275,11 @@ export interface GateEEvidenceStoreV2 {
     | Readonly<{
       disposition: "APPENDED" | "ALREADY_PRESENT";
       evidenceHash: string;
-      committedAt: string;
+      /**
+       * Immutable timestamp of the transaction that first stored this hash.
+       * ALREADY_PRESENT must never substitute retry/read time or rewrite it.
+       */
+      originalCommittedAt: string;
     }>
     | Readonly<{
       disposition: "DEADLINE_EXPIRED";
@@ -288,6 +292,31 @@ export interface GateEEvidenceStoreV2 {
       committedAt: null;
     }>
   >;
+}
+
+export function assertGateEEvidenceAppendReceiptV2(input: Readonly<{
+  result: Readonly<{
+    disposition: "APPENDED" | "ALREADY_PRESENT";
+    evidenceHash: string;
+    originalCommittedAt: string;
+  }>;
+  expectedEvidenceHash: string;
+  notAfter: string;
+}>): Readonly<{
+  disposition: "APPENDED" | "ALREADY_PRESENT";
+  originalCommittedAt: string;
+}> {
+  const originalCommittedAt = Date.parse(input.result.originalCommittedAt);
+  const notAfter = Date.parse(input.notAfter);
+  if (input.result.evidenceHash !== input.expectedEvidenceHash ||
+      !Number.isFinite(originalCommittedAt) || !Number.isFinite(notAfter) ||
+      originalCommittedAt > notAfter) {
+    throw new Error("GATE_E_EVIDENCE_APPEND_MISMATCH");
+  }
+  return Object.freeze({
+    disposition: input.result.disposition,
+    originalCommittedAt: input.result.originalCommittedAt,
+  });
 }
 
 export interface GateERegistrationProvenanceProofV1 {
@@ -1225,7 +1254,8 @@ function verifyGateEEvidenceCertification(input: Readonly<{
 export interface GateEEvidenceReaderV2 {
   readByHash(evidenceHash: string): Promise<Readonly<{
     evidence: Readonly<Record<string, unknown>>;
-    committedAt: string;
+    /** Immutable timestamp of the transaction that first stored this hash. */
+    originalCommittedAt: string;
   }> | null>;
 }
 
@@ -1246,14 +1276,14 @@ export async function verifyStoredGateEEvidenceCertification(input: Readonly<{
       sha256(canonicalJsonV1(bodyRecord.evidence)) !== input.evidenceBodyHash ||
       sha256(canonicalJsonV1(finalizationRecord.evidence)) !==
         input.finalizationHash ||
-      !Number.isFinite(Date.parse(bodyRecord.committedAt))) {
+      !Number.isFinite(Date.parse(bodyRecord.originalCommittedAt))) {
     throw new Error("GATE_E_EVIDENCE_RECORD_MISSING_OR_MISMATCHED");
   }
   return verifyGateEEvidenceCertification({
     body: bodyRecord.evidence,
     finalization: finalizationRecord.evidence,
-    bodyCommittedAt: bodyRecord.committedAt,
-    finalizationCommittedAt: finalizationRecord.committedAt,
+    bodyCommittedAt: bodyRecord.originalCommittedAt,
+    finalizationCommittedAt: finalizationRecord.originalCommittedAt,
   });
 }
 
@@ -1497,11 +1527,11 @@ export async function executeGateEScoredRun(input: Readonly<{
   if (stored.disposition === "HASH_CONFLICT") {
     throw new Error("GATE_E_EVIDENCE_APPEND_MISMATCH");
   }
-  if (stored.evidenceHash !== evidenceHash ||
-      !Number.isFinite(Date.parse(stored.committedAt)) ||
-      Date.parse(stored.committedAt) > Date.parse(runDeadlineAt)) {
-    throw new Error("GATE_E_EVIDENCE_APPEND_MISMATCH");
-  }
+  const storedReceipt = assertGateEEvidenceAppendReceiptV2({
+    result: stored,
+    expectedEvidenceHash: evidenceHash,
+    notAfter: runDeadlineAt,
+  });
   const [storedHead, storedTrusted, storedClean] = await withGateERunDeadline(Promise.all([
     input.git.resolveRef("HEAD"),
     input.git.resolveRef(GATE_E_TRUSTED_SCORED_RUN_REF),
@@ -1545,16 +1575,21 @@ export async function executeGateEScoredRun(input: Readonly<{
   if (finalized.disposition === "HASH_CONFLICT") {
     throw new Error("GATE_E_FINALIZATION_APPEND_MISMATCH");
   }
-  if (finalized.evidenceHash !== finalizationHash ||
-      !Number.isFinite(Date.parse(finalized.committedAt)) ||
-      Date.parse(finalized.committedAt) > Date.parse(runDeadlineAt)) {
+  let finalizedReceipt: ReturnType<typeof assertGateEEvidenceAppendReceiptV2>;
+  try {
+    finalizedReceipt = assertGateEEvidenceAppendReceiptV2({
+      result: finalized,
+      expectedEvidenceHash: finalizationHash,
+      notAfter: runDeadlineAt,
+    });
+  } catch {
     throw new Error("GATE_E_FINALIZATION_APPEND_MISMATCH");
   }
   const certification = verifyGateEEvidenceCertification({
     body: evidenceBody,
     finalization,
-    bodyCommittedAt: stored.committedAt,
-    finalizationCommittedAt: finalized.committedAt,
+    bodyCommittedAt: storedReceipt.originalCommittedAt,
+    finalizationCommittedAt: finalizedReceipt.originalCommittedAt,
   });
   return Object.freeze({
     ...evidenceBody,
@@ -1564,8 +1599,8 @@ export async function executeGateEScoredRun(input: Readonly<{
     certification,
     admissibility: "FINALIZED_TRUSTED_EXACT_HEAD" as const,
     evidenceStoreDisposition: Object.freeze({
-      body: stored.disposition,
-      finalization: finalized.disposition,
+      body: storedReceipt.disposition,
+      finalization: finalizedReceipt.disposition,
     }),
   });
 }

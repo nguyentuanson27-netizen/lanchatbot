@@ -51,6 +51,8 @@ export const DF10_GATE_E_PLAN_V1 = Object.freeze({
     authority: "FINALIZATION_REQUIRED" as const,
     deadlineAuthority: "ATOMIC_STORE_TRANSACTION_NOT_AFTER" as const,
     commitTimeAuthority: "STORE_TRANSACTION_METADATA_OUTSIDE_EVIDENCE_HASH" as const,
+    idempotencyAuthority:
+      "ALREADY_PRESENT_RETURNS_ORIGINAL_STORE_COMMIT_METADATA_NO_REWRITE" as const,
   },
   diagnosticSampling: {
     contractVersion: "DF10_DIAGNOSTIC_SAMPLE_V1" as const,

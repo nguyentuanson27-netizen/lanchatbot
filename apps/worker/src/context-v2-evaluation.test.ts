@@ -54,9 +54,12 @@ function request(): BuiltCandidateRequest {
 describe("DF10 pre-registered evaluation governance", () => {
   it("marks the plan draft-unregistered and limits sampling to diagnostics", () => {
     expect(DF10_GATE_E_PLAN_ARTIFACT_SHA256).toBe(
-      "310eb8746c57a1f1f3e768c65a038dbfb4292371fc218d8a14becf68fb669f92",
+      "0e3731e052869896abf3fe918c6307c1befe14bf80c8df47d66cf906ef2eeffd",
     );
     expect(DF10_GATE_E_PLAN_V1.registrationStatus).toBe("DRAFT_UNREGISTERED");
+    expect(DF10_GATE_E_PLAN_V1.evidenceCertification.idempotencyAuthority).toBe(
+      "ALREADY_PRESENT_RETURNS_ORIGINAL_STORE_COMMIT_METADATA_NO_REWRITE",
+    );
     expect(DF10_GATE_E_PLAN_V1.scoredCorpus.inclusion).toBe(
       "ALL_FROZEN_CORPUS_ITEMS",
     );
@@ -74,6 +77,8 @@ describe("DF10 pre-registered evaluation governance", () => {
     expect(contract).toContain(DF10_GATE_E_PLAN_ARTIFACT_SHA256);
     expect(contract).toContain("No corpus, scored run, Gate E");
     expect(contract).toContain("DRAFT_UNREGISTERED");
+    expect(contract).toContain("original transaction commit time");
+    expect(contract).toContain("must not rewrite the record or its commit metadata");
     const itemId = selectedDiagnosticItemId();
     expect(selectedForDiagnosticEvaluation(itemId)).toBe(true);
     expect(selectedForDiagnosticEvaluation(itemId)).toBe(true);

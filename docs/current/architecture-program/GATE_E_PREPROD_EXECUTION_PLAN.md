@@ -178,7 +178,12 @@ is outside the finalization content hash, so no receipt or third-record
 self-reference is created. Caller-supplied self-consistent objects are not
 certification evidence. Scored execution remains blocked until a concrete
 store adapter proves these V2 semantics; a structural port or test fake is not
-durable-store evidence.
+durable-store evidence. For an existing identical hash, `ALREADY_PRESENT`
+returns the original transaction commit time and performs no record or metadata
+rewrite, including on a retry after `notAfter`. Existing conflicting content is
+`HASH_CONFLICT`; the atomic deadline check applies before creating an absent
+record. A concrete adapter must prove these ordering and idempotency properties,
+not only the happy-path append.
 
 ## 6. Cost and isolation caps
 
