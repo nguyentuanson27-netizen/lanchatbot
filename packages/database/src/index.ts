@@ -1,7 +1,13 @@
 export { migrateDownOne, migrateUp, type MigrationResult } from "./migrate.js";
 export {
   PostgresGateEEvidenceStoreV2,
+  PostgresGateERegistrationAnchorStoreV1,
+  assertGateEBodyMatchesRegisteredPopulationV1,
+  assertGateERegisteredPopulationAnchorV1,
   classifyGateEEvidenceRecordV3,
+  type GateEPopulationAnchorAppendResultV1,
+  type GateEPopulationAnchorReadRecordV1,
+  type GateERegisteredPopulationAnchorV1,
   type GateEEvidenceAppendResultV2,
   type GateEEvidenceReadRecordV2,
   type GateEEvidenceRecordBindingV3,

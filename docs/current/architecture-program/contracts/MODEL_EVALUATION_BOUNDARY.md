@@ -1,6 +1,6 @@
 # Durable Contract — Model Evaluation Boundary
 
-**Contract revision:** V2 — DB-authoritative evidence admission boundary
+**Contract revision:** V3 — registered population and DB-authoritative evidence admission
 
 This contract separates the byte-frozen legacy generation baseline from every
 offline or replay candidate. It is source architecture only and never grants
@@ -133,13 +133,27 @@ Required properties:
     An existing hash with different content returns `HASH_CONFLICT`; only an
     absent hash may create a new record after the store transaction clock proves
     the deadline has not expired.
+22. Full-population authority is independent of the evidence BODY. A
+    `GateERegisteredPopulationAnchorV1`, derived only by the governed clean
+    exact-head Git registration boundary, immutably binds the registration
+    commit/blob, manifest/corpus/rubric/plan hashes, sorted unique corpus item
+    IDs and exact population count. Its dedicated registration-writer
+    capability cannot append evidence; evidence writers can only read anchors
+    and append BODY/FINALIZATION records. Before any provider request, the
+    scorer must read and exactly match the registered anchor. Both application
+    classification and the owned SQL append function independently require the
+    BODY's exact item-ID set and denominator to equal that anchor. Missing,
+    corrupt, conflicting, subset, superset or same-count/different-item
+    populations fail closed. FINALIZATION inherits the BODY's anchor binding,
+    and verdict readers verify anchor -> BODY -> FINALIZATION as one chain.
 
 ## DF10 Gate E draft foundation
 
 - Plan contract: `DF10_GATE_E_PLAN_V2`
 - Evidence contracts: `DF10_GATE_E_SCORED_EVIDENCE_BODY_V3` and
   `DF10_GATE_E_RUN_FINALIZATION_V3`; the concrete capability remains
-  `GateEEvidenceStoreV2` with `admittedAt` receipts.
+  `GateEEvidenceStoreV2` with `admittedAt` receipts. Registered population uses
+  `DF10_GATE_E_REGISTERED_POPULATION_ANCHOR_V1` through a disjoint writer port.
 - Registration status: `DRAFT_UNREGISTERED`
 - Plan artifact SHA-256:
   `45c8e53bf0c260d23f6a62f7ec630794042360e911324874a16afbf469edcea3`

@@ -18,6 +18,8 @@ source/tooling PR (this plan; DRAFT_UNREGISTERED)
   -> one redacted provider-identity observation against P
   -> registration PR R binds P + observation + exact corpus/rubric/requests
   -> exact-head review + owner merge authorization for R
+  -> register immutable population anchor from merged R through the dedicated
+     registration-writer capability
   -> scored run S proves R is an ancestor and predates S
   -> append-only redacted evidence + Gate E verdict PR
   -> explicit Gate E acceptance
@@ -163,12 +165,17 @@ run start; equality is inadmissible. The scored runner also requires this
 verified proof and binds it into the
 redacted evidence hash before it can call the model.
 
-The scored runner has one public orchestration boundary. It accepts only the
+Population registration and scoring have disjoint public capabilities. The
+registration boundary derives the exact sorted item-ID population and all
+registration/corpus/rubric/plan hashes from the verified clean exact-head Git
+bundle, then appends the immutable anchor. It cannot append evidence. The
+scored runner accepts only the
 registration path plus Git, provider-transport and deadline-enforcing
 append-only evidence-store capabilities. It does not accept a caller-created proof, manifest, corpus,
 rubric, clock, candidate output or request identity. It verifies clean exact
 `HEAD == refs/remotes/origin/main`, reads and verifies the registration and
-frozen artifacts internally, builds the exact provider request bytes at the
+frozen artifacts internally, and requires the exact registered population
+anchor before the first provider request. It builds the exact provider request bytes at the
 send boundary, applies the provider deadline around the entire transport, and
 rechecks clean unchanged refs after the unfinalized evidence-body append. It
 then asks the store to append a separate hash-bound finalization record with
@@ -177,7 +184,8 @@ deadline with its own DB clock at the final owned pre-commit admission boundary
 in the same atomic transaction; abort is only an early-cancellation aid. The
 body alone is always
 `UNFINALIZED_TECHNICAL_EVIDENCE`. Verdict code receives only the two expected
-hashes, retrieves both records plus immutable `admittedAt` metadata, and
+hashes plus the expected population-anchor hash, retrieves the anchor and both
+records plus immutable `admittedAt` metadata, and
 requires the finalization admission boundary to be within `notAfter`.
 `admittedAt` / `storeBoundaryAt` is a final pre-commit boundary timestamp, not
 exact commit time or post-commit time. Store admission metadata is outside the

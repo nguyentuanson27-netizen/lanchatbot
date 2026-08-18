@@ -4,15 +4,33 @@ import { Pool, type PoolClient } from "pg";
 
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
+const GIT_OBJECT_ID_PATTERN = /^[a-f0-9]{40,64}$/u;
 const MAX_CANONICAL_EVIDENCE_BYTES = 4 * 1024 * 1024;
 const BODY_CONTRACT = "DF10_GATE_E_SCORED_EVIDENCE_BODY_V3" as const;
 const FINALIZATION_CONTRACT = "DF10_GATE_E_RUN_FINALIZATION_V3" as const;
+const POPULATION_ANCHOR_CONTRACT =
+  "DF10_GATE_E_REGISTERED_POPULATION_ANCHOR_V1" as const;
+
+export interface GateERegisteredPopulationAnchorV1 {
+  readonly schemaVersion: 1;
+  readonly contractVersion: typeof POPULATION_ANCHOR_CONTRACT;
+  readonly registrationCommit: string;
+  readonly registrationBlobOid: string;
+  readonly manifestHash: string;
+  readonly corpusHash: string;
+  readonly rubricHash: string;
+  readonly planArtifactHash: string;
+  readonly corpusItemIds: readonly string[];
+  readonly populationCount: number;
+  readonly populationAnchorHash: string;
+}
 
 export type GateEEvidenceRecordBindingV3 = Readonly<{
   recordKind: "BODY" | "FINALIZATION";
   contractVersion: typeof BODY_CONTRACT | typeof FINALIZATION_CONTRACT;
   registrationCommit: string | null;
   manifestHash: string | null;
+  populationAnchorHash: string | null;
   scoredRunRevision: string;
   evidenceBodyHash: string | null;
 }>;
@@ -33,6 +51,17 @@ export interface GateEEvidenceReadRecordV2 {
   readonly evidence: Readonly<Record<string, unknown>>;
   /** DB-authoritative final pre-commit admission boundary; not commit time. */
   readonly admittedAt: string;
+}
+
+export type GateEPopulationAnchorAppendResultV1 = Readonly<{
+  disposition: "APPENDED" | "ALREADY_PRESENT" | "HASH_CONFLICT";
+  populationAnchorHash: string;
+  anchoredAt: string | null;
+}>;
+
+export interface GateEPopulationAnchorReadRecordV1 {
+  readonly populationAnchor: GateERegisteredPopulationAnchorV1;
+  readonly anchoredAt: string;
 }
 
 function sha256(value: string): string {
@@ -73,6 +102,63 @@ function assertNoSensitiveFields(value: unknown): void {
       throw new Error("GATE_E_EVIDENCE_SENSITIVE_FIELD_FORBIDDEN");
     }
     assertNoSensitiveFields(nested);
+  }
+}
+
+export function assertGateERegisteredPopulationAnchorV1(
+  value: GateERegisteredPopulationAnchorV1,
+): GateERegisteredPopulationAnchorV1 {
+  const anchor = record(value, "GATE_E_REGISTERED_POPULATION_ANCHOR_INVALID");
+  const keys = [
+    "contractVersion", "corpusHash", "corpusItemIds", "manifestHash",
+    "planArtifactHash", "populationAnchorHash", "populationCount",
+    "registrationBlobOid", "registrationCommit", "rubricHash", "schemaVersion",
+  ];
+  const { populationAnchorHash, ...anchorBody } = anchor;
+  const itemIds = anchor.corpusItemIds;
+  if (!hasExactKeys(anchor, keys) || anchor.schemaVersion !== 1 ||
+      anchor.contractVersion !== POPULATION_ANCHOR_CONTRACT ||
+      !COMMIT_PATTERN.test(String(anchor.registrationCommit ?? "")) ||
+      !/^[a-f0-9]{40,64}$/u.test(String(anchor.registrationBlobOid ?? "")) ||
+      [anchor.manifestHash, anchor.corpusHash, anchor.rubricHash,
+        anchor.planArtifactHash, populationAnchorHash]
+        .some((hash) => typeof hash !== "string" || !SHA256_PATTERN.test(hash)) ||
+      !Array.isArray(itemIds) || itemIds.length === 0 ||
+      !Number.isSafeInteger(anchor.populationCount) ||
+      anchor.populationCount !== itemIds.length ||
+      itemIds.some((id) => typeof id !== "string" ||
+        !/^[a-z0-9][a-z0-9-]{0,127}$/u.test(id)) ||
+      canonicalJsonV1(itemIds) !== canonicalJsonV1([...itemIds].sort()) ||
+      new Set(itemIds).size !== itemIds.length ||
+      populationAnchorHash !== sha256(canonicalJsonV1(anchorBody))) {
+    throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_INVALID");
+  }
+  assertNoSensitiveFields(anchor);
+  return value;
+}
+
+export function assertGateEBodyMatchesRegisteredPopulationV1(input: Readonly<{
+  evidence: Readonly<Record<string, unknown>>;
+  populationAnchor: GateERegisteredPopulationAnchorV1;
+}>): void {
+  const anchor = assertGateERegisteredPopulationAnchorV1(input.populationAnchor);
+  const items = input.evidence.items;
+  const provenance = record(
+    input.evidence.registrationProvenance,
+    "GATE_E_EVIDENCE_REGISTERED_POPULATION_MISMATCH",
+  );
+  const observedIds = Array.isArray(items)
+    ? items.map((item) => String(record(
+      item,
+      "GATE_E_EVIDENCE_REGISTERED_POPULATION_MISMATCH",
+    ).corpusItemId ?? "")).sort()
+    : [];
+  if (input.evidence.populationAnchorHash !== anchor.populationAnchorHash ||
+      input.evidence.manifestHash !== anchor.manifestHash ||
+      provenance.registrationCommit !== anchor.registrationCommit ||
+      provenance.registrationBlobOid !== anchor.registrationBlobOid ||
+      canonicalJsonV1(observedIds) !== canonicalJsonV1(anchor.corpusItemIds)) {
+    throw new Error("GATE_E_EVIDENCE_REGISTERED_POPULATION_MISMATCH");
   }
 }
 
@@ -161,6 +247,7 @@ export function classifyGateEEvidenceRecordV3(input: Readonly<{
   evidenceHash: string;
   evidence: Readonly<Record<string, unknown>>;
   notAfter: string;
+  populationAnchor?: GateERegisteredPopulationAnchorV1;
 }>): GateEEvidenceRecordBindingV3 {
   if (!SHA256_PATTERN.test(input.evidenceHash) ||
       input.evidenceHash !== sha256(canonicalJsonV1(input.evidence))) {
@@ -176,8 +263,9 @@ export function classifyGateEEvidenceRecordV3(input: Readonly<{
   if (input.evidence.contractVersion === BODY_CONTRACT) {
     const bodyKeys = [
       "admissibility", "completedAt", "contractVersion", "executionBoundary",
-      "items", "manifestHash", "registrationProvenance", "schemaVersion",
-      "scoredRunRevision", "startedAt", "summary",
+      "items", "manifestHash", "populationAnchorHash",
+      "registrationProvenance", "schemaVersion", "scoredRunRevision",
+      "startedAt", "summary",
     ];
     const provenance = record(
       input.evidence.registrationProvenance,
@@ -192,13 +280,16 @@ export function classifyGateEEvidenceRecordV3(input: Readonly<{
     const scoredRunStartedAt = Date.parse(String(provenance.scoredRunStartedAt ?? ""));
     const startedAt = Date.parse(String(input.evidence.startedAt ?? ""));
     const completedAt = Date.parse(String(input.evidence.completedAt ?? ""));
+    if (input.populationAnchor === undefined) {
+      throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_REQUIRED");
+    }
     if (!hasExactKeys(input.evidence, bodyKeys) || input.evidence.schemaVersion !== 1 ||
         input.evidence.admissibility !== "UNFINALIZED_TECHNICAL_EVIDENCE" ||
         !hasExactKeys(provenance, provenanceKeys) ||
         provenance.disposition !== "REGISTRATION_PROVENANCE_VERIFIED" ||
         !COMMIT_PATTERN.test(String(input.evidence.scoredRunRevision ?? "")) ||
         !COMMIT_PATTERN.test(String(provenance.registrationCommit ?? "")) ||
-        !COMMIT_PATTERN.test(String(provenance.registrationBlobOid ?? "")) ||
+        !GIT_OBJECT_ID_PATTERN.test(String(provenance.registrationBlobOid ?? "")) ||
         !SHA256_PATTERN.test(String(input.evidence.manifestHash ?? "")) ||
         provenance.manifestHash !== input.evidence.manifestHash ||
         provenance.scoredRunRevision !== input.evidence.scoredRunRevision ||
@@ -209,11 +300,16 @@ export function classifyGateEEvidenceRecordV3(input: Readonly<{
       throw new Error("GATE_E_EVIDENCE_BODY_BINDING_INVALID");
     }
     assertBodyPopulation(input.evidence);
+    assertGateEBodyMatchesRegisteredPopulationV1({
+      evidence: input.evidence,
+      populationAnchor: input.populationAnchor,
+    });
     return Object.freeze({
       recordKind: "BODY",
       contractVersion: BODY_CONTRACT,
       registrationCommit: String(provenance.registrationCommit),
       manifestHash: String(input.evidence.manifestHash),
+      populationAnchorHash: input.populationAnchor.populationAnchorHash,
       scoredRunRevision: String(input.evidence.scoredRunRevision),
       evidenceBodyHash: null,
     });
@@ -242,6 +338,7 @@ export function classifyGateEEvidenceRecordV3(input: Readonly<{
       contractVersion: FINALIZATION_CONTRACT,
       registrationCommit: null,
       manifestHash: null,
+      populationAnchorHash: null,
       scoredRunRevision: revision,
       evidenceBodyHash,
     });
@@ -256,10 +353,17 @@ interface GateEEvidenceDatabaseRow {
   readonly canonical_evidence: string;
   readonly registration_commit: string;
   readonly manifest_hash: string;
+  readonly population_anchor_hash: string;
   readonly scored_run_revision: string;
   readonly evidence_body_hash: string | null;
   readonly not_after: Date | string;
   readonly admitted_at: Date | string;
+}
+
+interface GateEPopulationAnchorDatabaseRow {
+  readonly population_anchor_hash: string;
+  readonly canonical_anchor: string;
+  readonly anchored_at: Date | string;
 }
 
 function timestamp(value: Date | string): string {
@@ -270,6 +374,121 @@ function timestamp(value: Date | string): string {
 
 async function rollbackQuietly(client: PoolClient): Promise<void> {
   try { await client.query("ROLLBACK"); } catch { /* preserve original failure */ }
+}
+
+function canonicalPopulationAnchorBody(
+  populationAnchor: GateERegisteredPopulationAnchorV1,
+): string {
+  assertGateERegisteredPopulationAnchorV1(populationAnchor);
+  const { populationAnchorHash: _hash, ...anchorBody } = populationAnchor;
+  return canonicalJsonV1(anchorBody);
+}
+
+function populationAnchorFromRow(
+  row: GateEPopulationAnchorDatabaseRow,
+): GateEPopulationAnchorReadRecordV1 {
+  let anchorBody: Readonly<Record<string, unknown>>;
+  try {
+    anchorBody = record(
+      JSON.parse(row.canonical_anchor),
+      "GATE_E_REGISTERED_POPULATION_ANCHOR_CORRUPT",
+    );
+  } catch {
+    throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_CORRUPT");
+  }
+  const populationAnchor = Object.freeze({
+    ...anchorBody,
+    populationAnchorHash: row.population_anchor_hash,
+  }) as unknown as GateERegisteredPopulationAnchorV1;
+  try {
+    assertGateERegisteredPopulationAnchorV1(populationAnchor);
+  } catch {
+    throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_CORRUPT");
+  }
+  if (row.canonical_anchor !== canonicalPopulationAnchorBody(populationAnchor)) {
+    throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_CORRUPT");
+  }
+  return Object.freeze({
+    populationAnchor,
+    anchoredAt: timestamp(row.anchored_at),
+  });
+}
+
+export class PostgresGateERegistrationAnchorStoreV1 {
+  private readonly pool: Pool;
+
+  constructor(connectionString: string, maxPoolSize = 2) {
+    if (!connectionString.trim()) throw new Error("DATABASE_URL_REQUIRED");
+    this.pool = new Pool({ connectionString, max: maxPoolSize });
+    this.pool.on("error", () => undefined);
+  }
+
+  async appendRegisteredPopulationAnchorAtomically(input: Readonly<{
+    populationAnchor: GateERegisteredPopulationAnchorV1;
+    signal: AbortSignal;
+  }>): Promise<GateEPopulationAnchorAppendResultV1> {
+    if (input.signal.aborted) {
+      throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_APPEND_ABORTED");
+    }
+    const canonicalAnchor = canonicalPopulationAnchorBody(input.populationAnchor);
+    const result = await this.pool.query<{
+      disposition: GateEPopulationAnchorAppendResultV1["disposition"];
+      anchored_at: Date | string | null;
+    }>(
+      "SELECT * FROM public.lana_gate_e_register_population_anchor_v1($1,$2)",
+      [input.populationAnchor.populationAnchorHash, canonicalAnchor],
+    );
+    const disposition = result.rows[0]?.disposition;
+    if (disposition !== "APPENDED" && disposition !== "ALREADY_PRESENT" &&
+        disposition !== "HASH_CONFLICT") {
+      throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_RESPONSE_INVALID");
+    }
+    const anchoredAt = result.rows[0]?.anchored_at;
+    if (disposition === "HASH_CONFLICT") {
+      return Object.freeze({
+        disposition,
+        populationAnchorHash: input.populationAnchor.populationAnchorHash,
+        anchoredAt: null,
+      });
+    }
+    if (input.signal.aborted) {
+      throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_APPEND_ABORTED");
+    }
+    const stored = await this.readPopulationAnchorByHash(
+      input.populationAnchor.populationAnchorHash,
+    );
+    if (stored === null ||
+        canonicalJsonV1(stored.populationAnchor) !==
+          canonicalJsonV1(input.populationAnchor) || anchoredAt === null) {
+      throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_READBACK_FAILED");
+    }
+    return Object.freeze({
+      disposition,
+      populationAnchorHash: input.populationAnchor.populationAnchorHash,
+      anchoredAt: stored.anchoredAt,
+    });
+  }
+
+  async readPopulationAnchorByHash(
+    populationAnchorHash: string,
+  ): Promise<GateEPopulationAnchorReadRecordV1 | null> {
+    if (!SHA256_PATTERN.test(populationAnchorHash)) {
+      throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_REFERENCE_INVALID");
+    }
+    const result = await this.pool.query<GateEPopulationAnchorDatabaseRow>(
+      "SELECT * FROM public.lana_gate_e_read_population_anchor_v1($1)",
+      [populationAnchorHash],
+    );
+    if (result.rowCount === 0) return null;
+    if (result.rowCount !== 1 || result.rows.length !== 1) {
+      throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_AMBIGUOUS");
+    }
+    return populationAnchorFromRow(result.rows[0]!);
+  }
+
+  async close(): Promise<void> {
+    await this.pool.end();
+  }
 }
 
 export class PostgresGateEEvidenceStoreV2 {
@@ -290,7 +509,18 @@ export class PostgresGateEEvidenceStoreV2 {
     signal: AbortSignal;
   }>): Promise<GateEEvidenceAppendResultV2> {
     if (input.signal.aborted) throw new Error("GATE_E_EVIDENCE_APPEND_ABORTED");
-    const binding = classifyGateEEvidenceRecordV3(input);
+    const populationAnchorHash = input.evidence.contractVersion === BODY_CONTRACT
+      ? String(input.evidence.populationAnchorHash ?? "")
+      : null;
+    const populationAnchorRecord = populationAnchorHash === null
+      ? null
+      : await this.readPopulationAnchorByHash(populationAnchorHash);
+    if (populationAnchorHash !== null && populationAnchorRecord === null) {
+      throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_REQUIRED");
+    }
+    const binding = classifyGateEEvidenceRecordV3(populationAnchorRecord === null
+      ? input
+      : { ...input, populationAnchor: populationAnchorRecord.populationAnchor });
     const canonicalEvidence = canonicalJsonV1(input.evidence);
     const client = await this.pool.connect();
     let clientReleased = false;
@@ -304,6 +534,7 @@ export class PostgresGateEEvidenceStoreV2 {
       await client.query("BEGIN");
       let registrationCommit = binding.registrationCommit;
       let manifestHash = binding.manifestHash;
+      let boundPopulationAnchorHash = binding.populationAnchorHash;
       if (binding.recordKind === "FINALIZATION") {
         const body = await client.query<GateEEvidenceDatabaseRow>(
           "SELECT * FROM public.lana_gate_e_read_evidence_by_hash_v2($1)",
@@ -315,17 +546,19 @@ export class PostgresGateEEvidenceStoreV2 {
         }
         registrationCommit = body.rows[0].registration_commit;
         manifestHash = body.rows[0].manifest_hash;
+        boundPopulationAnchorHash = body.rows[0].population_anchor_hash;
       }
       const result = await client.query<{
         disposition: GateEEvidenceAppendResultV2["disposition"];
         admitted_at: Date | string | null;
       }>(
         `SELECT * FROM public.lana_gate_e_append_evidence_v2(
-          $1,$2,$3,$4,$5,$6,$7,$8,$9::timestamptz
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10::timestamptz
         )`,
         [input.evidenceHash, binding.recordKind, binding.contractVersion,
           canonicalEvidence, registrationCommit, manifestHash,
-          binding.scoredRunRevision, binding.evidenceBodyHash, input.notAfter],
+          boundPopulationAnchorHash, binding.scoredRunRevision,
+          binding.evidenceBodyHash, input.notAfter],
       );
       const disposition = result.rows[0]?.disposition;
       if (disposition === "DEADLINE_EXPIRED" || disposition === "HASH_CONFLICT") {
@@ -394,11 +627,20 @@ export class PostgresGateEEvidenceStoreV2 {
     } catch {
       throw new Error("GATE_E_EVIDENCE_READER_CORRUPT");
     }
-    const binding = classifyGateEEvidenceRecordV3({
+    const populationAnchorRecord = row.record_kind === "BODY"
+      ? await this.readPopulationAnchorByHash(row.population_anchor_hash)
+      : null;
+    if (row.record_kind === "BODY" && populationAnchorRecord === null) {
+      throw new Error("GATE_E_EVIDENCE_READER_CORRUPT");
+    }
+    const bindingInput = {
       evidenceHash,
       evidence,
       notAfter: timestamp(row.not_after),
-    });
+    };
+    const binding = classifyGateEEvidenceRecordV3(populationAnchorRecord === null
+      ? bindingInput
+      : { ...bindingInput, populationAnchor: populationAnchorRecord.populationAnchor });
     const admittedAt = timestamp(row.admitted_at);
     if (row.canonical_evidence !== canonicalJsonV1(evidence) ||
         row.evidence_hash !== evidenceHash || row.record_kind !== binding.recordKind ||
@@ -408,25 +650,52 @@ export class PostgresGateEEvidenceStoreV2 {
         (binding.registrationCommit !== null &&
           row.registration_commit !== binding.registrationCommit) ||
         (binding.manifestHash !== null && row.manifest_hash !== binding.manifestHash) ||
+        (binding.populationAnchorHash !== null &&
+          row.population_anchor_hash !== binding.populationAnchorHash) ||
         Date.parse(admittedAt) > Date.parse(timestamp(row.not_after))) {
       throw new Error("GATE_E_EVIDENCE_READER_CORRUPT");
     }
     if (binding.recordKind === "FINALIZATION") {
       const body = await this.readByHash(binding.evidenceBodyHash!);
       if (body === null) throw new Error("GATE_E_EVIDENCE_READER_CORRUPT");
+      const finalizationPopulation = await this.readPopulationAnchorByHash(
+        row.population_anchor_hash,
+      );
+      if (finalizationPopulation === null) {
+        throw new Error("GATE_E_EVIDENCE_READER_CORRUPT");
+      }
       const bodyBinding = classifyGateEEvidenceRecordV3({
         evidenceHash: binding.evidenceBodyHash!,
         evidence: body.evidence,
         notAfter: timestamp(row.not_after),
+        populationAnchor: finalizationPopulation.populationAnchor,
       });
       if (bodyBinding.recordKind !== "BODY" ||
           bodyBinding.registrationCommit !== row.registration_commit ||
           bodyBinding.manifestHash !== row.manifest_hash ||
+          bodyBinding.populationAnchorHash !== row.population_anchor_hash ||
           bodyBinding.scoredRunRevision !== row.scored_run_revision) {
         throw new Error("GATE_E_EVIDENCE_READER_CORRUPT");
       }
     }
     return Object.freeze({ evidence, admittedAt });
+  }
+
+  async readPopulationAnchorByHash(
+    populationAnchorHash: string,
+  ): Promise<GateEPopulationAnchorReadRecordV1 | null> {
+    if (!SHA256_PATTERN.test(populationAnchorHash)) {
+      throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_REFERENCE_INVALID");
+    }
+    const result = await this.pool.query<GateEPopulationAnchorDatabaseRow>(
+      "SELECT * FROM public.lana_gate_e_read_population_anchor_v1($1)",
+      [populationAnchorHash],
+    );
+    if (result.rowCount === 0) return null;
+    if (result.rowCount !== 1 || result.rows.length !== 1) {
+      throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_AMBIGUOUS");
+    }
+    return populationAnchorFromRow(result.rows[0]!);
   }
 
   async close(): Promise<void> {

@@ -7,7 +7,9 @@ import { Pool, type PoolClient } from "pg";
 import { migrateDownOne, migrateUp } from "./migrate.js";
 import {
   PostgresGateEEvidenceStoreV2,
+  PostgresGateERegistrationAnchorStoreV1,
   classifyGateEEvidenceRecordV3,
+  type GateERegisteredPopulationAnchorV1,
 } from "./gate-e-evidence-store.js";
 
 const databaseUrl = process.env.GATE_E_STORE_TEST_DATABASE_URL;
@@ -41,7 +43,7 @@ function evidenceBody(seed = randomBytes(8).toString("hex")) {
       reasonCodes: Object.freeze([]),
     }),
   });
-  return Object.freeze({
+  return bindPopulationAnchor(Object.freeze({
     schemaVersion: 1,
     contractVersion: "DF10_GATE_E_SCORED_EVIDENCE_BODY_V3",
     admissibility: "UNFINALIZED_TECHNICAL_EVIDENCE",
@@ -73,6 +75,43 @@ function evidenceBody(seed = randomBytes(8).toString("hex")) {
       mustPass: 1,
       reasonCodes: Object.freeze([]),
     }),
+  }));
+}
+
+function populationAnchorForBody(
+  body: Readonly<Record<string, unknown>>,
+  registeredItemIds?: readonly string[],
+): GateERegisteredPopulationAnchorV1 {
+  const provenance = body.registrationProvenance as Readonly<Record<string, unknown>>;
+  const corpusItemIds = Object.freeze(registeredItemIds === undefined
+    ? (body.items as readonly Readonly<{ corpusItemId: string }>[])
+      .map(({ corpusItemId }) => corpusItemId).sort()
+    : [...registeredItemIds].sort());
+  const manifestHash = String(body.manifestHash);
+  const anchorBody = Object.freeze({
+    schemaVersion: 1 as const,
+    contractVersion: "DF10_GATE_E_REGISTERED_POPULATION_ANCHOR_V1" as const,
+    registrationCommit: String(provenance.registrationCommit),
+    registrationBlobOid: String(provenance.registrationBlobOid),
+    manifestHash,
+    corpusHash: sha256(`corpus:${manifestHash}`),
+    rubricHash: sha256(`rubric:${manifestHash}`),
+    planArtifactHash: sha256(`plan:${manifestHash}`),
+    corpusItemIds,
+    populationCount: corpusItemIds.length,
+  });
+  return Object.freeze({
+    ...anchorBody,
+    populationAnchorHash: sha256(canonicalJsonV1(anchorBody)),
+  });
+}
+
+function bindPopulationAnchor<T extends Readonly<Record<string, unknown>>>(
+  body: T,
+): T & Readonly<{ populationAnchorHash: string }> {
+  return Object.freeze({
+    ...body,
+    populationAnchorHash: populationAnchorForBody(body).populationAnchorHash,
   });
 }
 
@@ -128,7 +167,7 @@ function failedPopulationBody(): Readonly<Record<string, unknown>> {
       "GATE_E_MUST_PASS_ASSERTION_FAILED",
     ],
   };
-  return value;
+  return bindPopulationAnchor(value);
 }
 
 async function appendBodySql(
@@ -137,15 +176,22 @@ async function appendBodySql(
   notAfter: string,
   overrideNotAfter = notAfter,
 ) {
+  const populationAnchor = populationAnchorForBody(body);
   const canonical = canonicalJsonV1(body);
   const evidenceHash = sha256(canonical);
-  const binding = classifyGateEEvidenceRecordV3({ evidenceHash, evidence: body, notAfter });
+  const binding = classifyGateEEvidenceRecordV3({
+    evidenceHash,
+    evidence: body,
+    notAfter,
+    populationAnchor,
+  });
   return client.query<{ disposition: string; admitted_at: Date | null }>(
     `SELECT * FROM lana_gate_e_append_evidence_v2(
-      $1,$2,$3,$4,$5,$6,$7,$8,$9::timestamptz
+      $1,$2,$3,$4,$5,$6,$7,$8,$9,$10::timestamptz
     )`,
     [evidenceHash, binding.recordKind, binding.contractVersion, canonical,
-      binding.registrationCommit, binding.manifestHash, binding.scoredRunRevision,
+      binding.registrationCommit, binding.manifestHash,
+      binding.populationAnchorHash, binding.scoredRunRevision,
       binding.evidenceBodyHash, overrideNotAfter],
   );
 }
@@ -158,34 +204,52 @@ async function appendRawSql(
   manifestHash: string,
   scoredRunRevision: string,
   evidenceBodyHash: string | null,
+  populationAnchorHash: string | null,
   notAfter: string,
 ) {
   const canonical = canonicalJsonV1(evidence);
   return client.query(
     `SELECT * FROM lana_gate_e_append_evidence_v2(
-      $1,$2,$3,$4,$5,$6,$7,$8,$9::timestamptz
+      $1,$2,$3,$4,$5,$6,$7,$8,$9,$10::timestamptz
     )`,
     [sha256(canonical), recordKind, evidence.contractVersion, canonical,
-      registrationCommit, manifestHash, scoredRunRevision, evidenceBodyHash,
-      notAfter],
+      registrationCommit, manifestHash, populationAnchorHash, scoredRunRevision,
+      evidenceBodyHash, notAfter],
   );
 }
 
 postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
   let pool: Pool;
+  let anchorStore: PostgresGateERegistrationAnchorStoreV1;
+
+  const registerPopulationAnchor = async (
+    body: Readonly<Record<string, unknown>>,
+  ) => {
+    const populationAnchor = populationAnchorForBody(body);
+    await expect(anchorStore.appendRegisteredPopulationAnchorAtomically({
+      populationAnchor,
+      signal: new AbortController().signal,
+    })).resolves.toMatchObject({
+      populationAnchorHash: populationAnchor.populationAnchorHash,
+    });
+    return populationAnchor;
+  };
 
   beforeAll(async () => {
     pool = new Pool({ connectionString: databaseUrl!, max: 8 });
     await migrateUp(pool);
+    anchorStore = new PostgresGateERegistrationAnchorStoreV1(databaseUrl!);
   }, 60_000);
 
   afterAll(async () => {
+    await anchorStore.close();
     await pool.end();
   });
 
   it("atomically admits BODY and cross-bound FINALIZATION by DB boundary time", async () => {
     const store = new PostgresGateEEvidenceStoreV2(databaseUrl!);
     const body = evidenceBody();
+    await registerPopulationAnchor(body);
     const bodyHash = sha256(canonicalJsonV1(body));
     const notAfter = new Date(Date.now() + 10_000).toISOString();
     try {
@@ -216,6 +280,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
       });
 
       const otherBody = evidenceBody();
+      await registerPopulationAnchor(otherBody);
       const otherBodyHash = sha256(canonicalJsonV1(otherBody));
       await store.appendBeforeDeadlineAtomically({
         evidenceHash: otherBodyHash,
@@ -243,6 +308,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
           body.manifestHash,
           body.scoredRunRevision,
           bodyHash,
+          body.populationAnchorHash,
           notAfter,
         )).rejects.toThrow(/GATE_E_EVIDENCE_FINALIZATION_BINDING_INVALID/iu);
       } finally {
@@ -257,6 +323,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
     const firstStore = new PostgresGateEEvidenceStoreV2(databaseUrl!);
     const secondStore = new PostgresGateEEvidenceStoreV2(databaseUrl!);
     const body = evidenceBody();
+    await registerPopulationAnchor(body);
     const evidenceHash = sha256(canonicalJsonV1(body));
     const notAfter = new Date(Date.now() + 10_000).toISOString();
     try {
@@ -287,6 +354,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
       }
 
       const conflictingBody = evidenceBody();
+      await registerPopulationAnchor(conflictingBody);
       const firstDeadline = new Date(Date.now() + 10_000).toISOString();
       const secondDeadline = new Date(Date.parse(firstDeadline) + 1_000).toISOString();
       const firstClient = await pool.connect();
@@ -310,6 +378,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
   it("returns immutable original admission metadata on an identical retry after deadline", async () => {
     const store = new PostgresGateEEvidenceStoreV2(databaseUrl!);
     const body = evidenceBody();
+    await registerPopulationAnchor(body);
     const evidenceHash = sha256(canonicalJsonV1(body));
     const notAfter = new Date(Date.now() + 700).toISOString();
     try {
@@ -336,6 +405,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
   it("durably preserves failed items in the full-population denominator", async () => {
     const store = new PostgresGateEEvidenceStoreV2(databaseUrl!);
     const body = failedPopulationBody();
+    await registerPopulationAnchor(body);
     const evidenceHash = sha256(canonicalJsonV1(body));
     try {
       await expect(store.appendBeforeDeadlineAtomically({
@@ -352,8 +422,57 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
     }
   });
 
+  it("rejects a self-consistent scored subset against the independently registered population", async () => {
+    const sourceBody = evidenceBody();
+    const sourceItemId = sourceBody.items[0]!.corpusItemId;
+    const registeredItemIds = [
+      sourceItemId,
+      ...Array.from({ length: 13 }, (_unused, index) =>
+        `gate-e-registered-${index.toString().padStart(2, "0")}`),
+    ];
+    const populationAnchor = populationAnchorForBody(
+      sourceBody,
+      registeredItemIds,
+    );
+    await anchorStore.appendRegisteredPopulationAnchorAtomically({
+      populationAnchor,
+      signal: new AbortController().signal,
+    });
+    const subsetBody = Object.freeze({
+      ...sourceBody,
+      populationAnchorHash: populationAnchor.populationAnchorHash,
+    });
+    const client = await pool.connect();
+    try {
+      await expect(appendRawSql(
+        client,
+        subsetBody,
+        "BODY",
+        subsetBody.registrationProvenance.registrationCommit,
+        subsetBody.manifestHash,
+        subsetBody.scoredRunRevision,
+        null,
+        populationAnchor.populationAnchorHash,
+        new Date(Date.now() + 10_000).toISOString(),
+      )).rejects.toThrow(/GATE_E_EVIDENCE_REGISTERED_POPULATION_MISMATCH/iu);
+      const { populationAnchorHash: _hash, ...validAnchorBody } = populationAnchor;
+      const confusedAnchorBody = {
+        ...validAnchorBody,
+        populationCount: String(validAnchorBody.populationCount),
+      };
+      const confusedCanonical = canonicalJsonV1(confusedAnchorBody);
+      await expect(client.query(
+        "SELECT * FROM lana_gate_e_register_population_anchor_v1($1,$2)",
+        [sha256(confusedCanonical), confusedCanonical],
+      )).rejects.toThrow(/GATE_E_REGISTERED_POPULATION_ANCHOR_INVALID/iu);
+    } finally {
+      client.release();
+    }
+  });
+
   it("rolls back when the final deferred DB-clock boundary misses notAfter", async () => {
     const body = evidenceBody();
+    await registerPopulationAnchor(body);
     const evidenceHash = sha256(canonicalJsonV1(body));
     const notAfter = new Date(Date.now() + 300).toISOString();
     const client = await pool.connect();
@@ -376,6 +495,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
 
   it("guards rollback, append-only tables, and least-privilege roles", async () => {
     const body = evidenceBody();
+    await registerPopulationAnchor(body);
     const hash = sha256(canonicalJsonV1(body));
     const notAfter = new Date(Date.now() + 10_000).toISOString();
     const client = await pool.connect();
@@ -388,6 +508,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
       )).rowCount).toBe(0);
 
       const malformed = structuredClone(evidenceBody());
+      await registerPopulationAnchor(malformed);
       (malformed.items[0]!.score as Record<string, unknown>).claimSafety = "1";
       await expect(appendRawSql(
         client,
@@ -397,10 +518,12 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
         malformed.manifestHash,
         malformed.scoredRunRevision,
         null,
+        malformed.populationAnchorHash,
         notAfter,
       )).rejects.toThrow(/GATE_E_EVIDENCE_ITEM_SHAPE_INVALID/iu);
 
       const boundarySource = evidenceBody();
+      await registerPopulationAnchor(boundarySource);
       const equalBoundary = {
         ...boundarySource,
         registrationProvenance: {
@@ -417,6 +540,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
         equalBoundary.manifestHash,
         equalBoundary.scoredRunRevision,
         null,
+        equalBoundary.populationAnchorHash,
         notAfter,
       )).rejects.toThrow(/GATE_E_EVIDENCE_BODY_BINDING_INVALID/iu);
 
@@ -439,16 +563,30 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
         "TRUNCATE gate_e_evidence_admissions_v2, gate_e_evidence_records_v2",
       ))
         .rejects.toThrow(/append-only/iu);
+      await expect(pool.query(
+        "UPDATE gate_e_registered_population_anchors_v1 SET manifest_hash = manifest_hash WHERE population_anchor_hash = $1",
+        [body.populationAnchorHash],
+      )).rejects.toThrow(/append-only/iu);
 
       await client.query("SET ROLE lana_gate_e_evidence_reader");
       await expect(appendBodySql(client, evidenceBody(), notAfter))
         .rejects.toMatchObject({ code: "42501" });
       await client.query("RESET ROLE");
       await client.query("SET ROLE lana_gate_e_evidence_writer");
+      const roleAnchor = populationAnchorForBody(body);
+      const { populationAnchorHash: roleAnchorHash, ...roleAnchorBody } = roleAnchor;
+      await expect(client.query(
+        "SELECT * FROM lana_gate_e_register_population_anchor_v1($1,$2)",
+        [roleAnchorHash, canonicalJsonV1(roleAnchorBody)],
+      )).rejects.toMatchObject({ code: "42501" });
       await expect(client.query(
         "INSERT INTO gate_e_evidence_admissions_v2 (evidence_hash, admitted_at) VALUES ($1, now())",
         [hash],
       )).rejects.toMatchObject({ code: "42501" });
+      await client.query("RESET ROLE");
+      await client.query("SET ROLE lana_gate_e_registration_writer");
+      await expect(appendBodySql(client, body, notAfter))
+        .rejects.toMatchObject({ code: "42501" });
       await client.query("RESET ROLE");
 
       const roles = await client.query<{
@@ -467,13 +605,14 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
           FROM pg_roles r
           LEFT JOIN pg_auth_members m ON m.member = r.oid
          WHERE r.rolname IN (
+           'lana_gate_e_registration_writer',
            'lana_gate_e_evidence_writer', 'lana_gate_e_evidence_reader'
          )
          GROUP BY r.oid, r.rolcanlogin, r.rolsuper, r.rolcreatedb,
                   r.rolcreaterole, r.rolinherit, r.rolreplication,
                   r.rolbypassrls
       `);
-      expect(roles.rows).toHaveLength(2);
+      expect(roles.rows).toHaveLength(3);
       for (const role of roles.rows) {
         expect(role).toEqual({
           rolcanlogin: false,
@@ -493,8 +632,26 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
   });
 
   it("fails closed on reader corruption and a connection-ambiguous COMMIT", async () => {
+    const anchorCorruptionBody = evidenceBody();
+    const anchorCorruption = await registerPopulationAnchor(anchorCorruptionBody);
+    const anchorCorruptionClient = await pool.connect();
+    await anchorCorruptionClient.query("SET session_replication_role = replica");
+    try {
+      await anchorCorruptionClient.query(
+        "UPDATE gate_e_registered_population_anchors_v1 SET canonical_anchor = '{}' WHERE population_anchor_hash = $1",
+        [anchorCorruption.populationAnchorHash],
+      );
+    } finally {
+      await anchorCorruptionClient.query("SET session_replication_role = origin");
+      anchorCorruptionClient.release();
+    }
+    await expect(anchorStore.readPopulationAnchorByHash(
+      anchorCorruption.populationAnchorHash,
+    )).rejects.toThrow("GATE_E_REGISTERED_POPULATION_ANCHOR_CORRUPT");
+
     const corruptStore = new PostgresGateEEvidenceStoreV2(databaseUrl!);
     const corruptBody = evidenceBody();
+    await registerPopulationAnchor(corruptBody);
     const corruptHash = sha256(canonicalJsonV1(corruptBody));
     const notAfter = new Date(Date.now() + 20_000).toISOString();
     await corruptStore.appendBeforeDeadlineAtomically({
@@ -529,6 +686,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
     ambiguousUrl.searchParams.set("application_name", "gate_e_ambiguity_test");
     const ambiguousStore = new PostgresGateEEvidenceStoreV2(ambiguousUrl.toString());
     const ambiguousBody = evidenceBody();
+    await registerPopulationAnchor(ambiguousBody);
     const ambiguousHash = sha256(canonicalJsonV1(ambiguousBody));
     const pending = ambiguousStore.appendBeforeDeadlineAtomically({
       evidenceHash: ambiguousHash,
@@ -570,11 +728,14 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
         SELECT
           (SELECT count(*) FROM pg_proc
             WHERE proname IN (
+              'lana_gate_e_register_population_anchor_v1',
+              'lana_gate_e_read_population_anchor_v1',
               'lana_gate_e_append_evidence_v2',
               'lana_gate_e_read_evidence_by_hash_v2'
             ))::text AS function_count,
           (SELECT count(*) FROM pg_roles
             WHERE rolname IN (
+              'lana_gate_e_registration_writer',
               'lana_gate_e_evidence_writer',
               'lana_gate_e_evidence_reader'
             ))::text AS role_count
@@ -613,6 +774,8 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
         .catch(() => undefined);
       await client.query("DROP ROLE IF EXISTS lana_gate_e_evidence_reader")
         .catch(() => undefined);
+      await client.query("DROP ROLE IF EXISTS lana_gate_e_registration_writer")
+        .catch(() => undefined);
       client.release();
     }
   });
@@ -634,6 +797,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
         SELECT count(*)::text AS role_count
           FROM pg_roles
          WHERE rolname IN (
+           'lana_gate_e_registration_writer',
            'lana_gate_e_evidence_writer',
            'lana_gate_e_evidence_reader'
          )
@@ -646,6 +810,8 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
       await client.query("DROP ROLE IF EXISTS lana_gate_e_evidence_writer")
         .catch(() => undefined);
       await client.query("DROP ROLE IF EXISTS lana_gate_e_evidence_reader")
+        .catch(() => undefined);
+      await client.query("DROP ROLE IF EXISTS lana_gate_e_registration_writer")
         .catch(() => undefined);
       client.release();
     }

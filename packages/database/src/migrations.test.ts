@@ -349,6 +349,10 @@ describe("database migrations", () => {
 
     expect(sql).toContain("CREATE TABLE public.gate_e_evidence_records_v2");
     expect(sql).toContain("CREATE TABLE public.gate_e_evidence_admissions_v2");
+    expect(sql).toContain("CREATE TABLE public.gate_e_registered_population_anchors_v1");
+    expect(sql).toContain("public.lana_gate_e_register_population_anchor_v1");
+    expect(sql).toContain("lana_gate_e_registration_writer");
+    expect(sql).toContain("REFERENCES public.gate_e_registered_population_anchors_v1");
     expect(sql).toContain("GATE_E_EVIDENCE_ROLE_NAMESPACE_OCCUPIED");
     expect(sql).not.toContain("IF NOT EXISTS (SELECT 1 FROM pg_roles");
     expect(sql).not.toContain("CREATE OR REPLACE FUNCTION public.lana_gate_e");
@@ -367,6 +371,10 @@ describe("database migrations", () => {
     expect(sql).not.toMatch(/(?:secret|token|password|raw_provider|customer|message)_/iu);
     expect(down).toContain("DROP TABLE IF EXISTS public.gate_e_evidence_admissions_v2");
     expect(down).toContain("DROP TABLE IF EXISTS public.gate_e_evidence_records_v2");
+    expect(down).toContain(
+      "DROP TABLE IF EXISTS public.gate_e_registered_population_anchors_v1",
+    );
+    expect(down).toContain("DROP ROLE IF EXISTS lana_gate_e_registration_writer");
     expect(down).toContain("DROP ROLE IF EXISTS lana_gate_e_evidence_writer");
     expect(down).toContain("DROP ROLE IF EXISTS lana_gate_e_evidence_reader");
 

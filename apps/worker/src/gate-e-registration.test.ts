@@ -12,7 +12,9 @@ import {
   createDraftGateERegistrationBundle,
   createRegisteredGateEManifest,
   deriveGateECandidateContentFingerprint,
+  deriveGateERegisteredPopulationAnchorV1,
   observeGateEProviderIdentity,
+  registerGateEPopulationAnchorV1,
   executeGateEScoredRun,
   scoreGateECandidateOutput,
   summarizeGateEScores,
@@ -25,8 +27,12 @@ import {
   type GateERegistrationArtifactV1,
   type GateEEvidenceReaderV2,
   type GateEEvidenceStoreV2,
+  type GateEPopulationAnchorWriterV1,
 } from "./gate-e-registration.js";
-import { PostgresGateEEvidenceStoreV2 } from "@lana/database";
+import {
+  PostgresGateEEvidenceStoreV2,
+  PostgresGateERegistrationAnchorStoreV1,
+} from "@lana/database";
 import { deriveCandidateRequestContextHash } from "./context-v2-candidate.js";
 import {
   GATE_E_INTERPRETER_MODEL_RELATIONSHIP_V1,
@@ -47,6 +53,9 @@ describe("Gate E evidence-store V2 idempotency contract", () => {
   it("keeps the concrete PostgreSQL adapter assignable to both owned ports", () => {
     expectTypeOf<PostgresGateEEvidenceStoreV2>().toMatchTypeOf<
       GateEEvidenceStoreV2 & GateEEvidenceReaderV2
+    >();
+    expectTypeOf<PostgresGateERegistrationAnchorStoreV1>().toMatchTypeOf<
+      GateEPopulationAnchorWriterV1
     >();
   });
 
@@ -792,6 +801,7 @@ describe("Gate E immutable registration boundary", () => {
         },
       },
       evidenceStore: {
+        readPopulationAnchorByHash: async () => null,
         appendBeforeDeadlineAtomically: async () => { throw new Error("must-not-write"); },
       },
     })).rejects.toThrow("GATE_E_TRUSTED_CHECKOUT_DIRTY");
@@ -813,6 +823,7 @@ describe("Gate E immutable registration boundary", () => {
       },
       transport: { send: async () => { throw new Error("must-not-call"); } },
       evidenceStore: {
+        readPopulationAnchorByHash: async () => null,
         appendBeforeDeadlineAtomically: async () => { throw new Error("must-not-write"); },
       },
     })).rejects.toThrow("GATE_E_TRUSTED_EXACT_HEAD_MISMATCH");
@@ -1085,6 +1096,43 @@ describe("Gate E immutable registration boundary", () => {
         (ancestor === "c".repeat(40) && descendant === scoredRunRevision),
       commitTime: async () => "2026-08-17T09:00:00.000Z",
     };
+    const expectedPopulationAnchor = deriveGateERegisteredPopulationAnchorV1({
+      corpus: FROZEN_GATE_E_CORPUS_V1,
+      manifest,
+      proof: {
+        disposition: "REGISTRATION_PROVENANCE_VERIFIED",
+        registrationCommit: "c".repeat(40),
+        registrationBlobOid: "9".repeat(40),
+        manifestHash: manifest.manifestHash,
+        scoredRunRevision,
+        registrationCommitTime: "2026-08-17T09:00:00.000Z",
+        scoredRunStartedAt: "2026-08-18T10:00:00.000Z",
+      },
+    });
+    const registeredPopulation = await registerGateEPopulationAnchorV1({
+      registrationPath,
+      git,
+      populationStore: {
+        appendRegisteredPopulationAnchorAtomically: async ({
+          populationAnchor,
+        }) => ({
+          disposition: "APPENDED" as const,
+          populationAnchorHash: populationAnchor.populationAnchorHash,
+          anchoredAt: "2026-08-17T09:01:00.000Z",
+        }),
+      },
+    });
+    const populationAnchor = registeredPopulation.populationAnchor;
+    expect(populationAnchor.populationAnchorHash).toBe(
+      expectedPopulationAnchor.populationAnchorHash,
+    );
+    const readPopulationAnchorByHash = async (populationAnchorHash: string) =>
+      populationAnchorHash === populationAnchor.populationAnchorHash
+        ? {
+          populationAnchor,
+          anchoredAt: "2026-08-17T09:01:00.000Z",
+        }
+        : null;
     const sendPassing = async (request: Readonly<{ body: string }>) => {
       active += 1;
       maximumActive = Math.max(maximumActive, active);
@@ -1123,11 +1171,30 @@ describe("Gate E immutable registration boundary", () => {
         providerModelVersion: "gemini-3.5-flash-lite",
       };
     };
+    let callsBeforeRegisteredPopulation = 0;
+    await expect(executeGateEScoredRun({
+      registrationPath,
+      git,
+      transport: {
+        send: async () => {
+          callsBeforeRegisteredPopulation += 1;
+          throw new Error("must-not-call");
+        },
+      },
+      evidenceStore: {
+        readPopulationAnchorByHash: async () => null,
+        appendBeforeDeadlineAtomically: async () => {
+          throw new Error("must-not-write");
+        },
+      },
+    })).rejects.toThrow("GATE_E_REGISTERED_POPULATION_ANCHOR_REQUIRED");
+    expect(callsBeforeRegisteredPopulation).toBe(0);
     const result = await executeGateEScoredRun({
       registrationPath,
       git,
       transport: { send: sendPassing },
       evidenceStore: {
+        readPopulationAnchorByHash,
         appendBeforeDeadlineAtomically: async ({ evidenceHash, notAfter }) => {
           appendedHashes.push(evidenceHash);
           return {
@@ -1158,6 +1225,7 @@ describe("Gate E immutable registration boundary", () => {
         },
       },
       evidenceStore: {
+        readPopulationAnchorByHash,
         appendBeforeDeadlineAtomically: async () => { throw new Error("must-not-write"); },
       },
     })).rejects.toThrow("GATE_E_SCORED_MODEL_CALL_FAILED");
@@ -1167,6 +1235,7 @@ describe("Gate E immutable registration boundary", () => {
       git,
       transport: { send: sendPassing },
       evidenceStore: {
+        readPopulationAnchorByHash,
         appendBeforeDeadlineAtomically: async () => ({
           disposition: "APPENDED" as const,
           evidenceHash: "f".repeat(64),
@@ -1188,6 +1257,7 @@ describe("Gate E immutable registration boundary", () => {
       },
       transport: { send: sendPassing },
       evidenceStore: {
+        readPopulationAnchorByHash,
         appendBeforeDeadlineAtomically: async ({ evidenceHash, evidence }) => {
           orphanedEvidence.push(evidence);
           return {
@@ -1206,7 +1276,9 @@ describe("Gate E immutable registration boundary", () => {
     await expect(verifyStoredGateEEvidenceCertification({
       evidenceBodyHash: orphanedBodyHash,
       finalizationHash: "f".repeat(64),
+      populationAnchorHash: populationAnchor.populationAnchorHash,
       evidenceStore: {
+        readPopulationAnchorByHash,
         readByHash: async (evidenceHash) =>
           evidenceHash === orphanedBodyHash
             ? {
@@ -1233,6 +1305,7 @@ describe("Gate E immutable registration boundary", () => {
           }),
         },
         evidenceStore: {
+          readPopulationAnchorByHash,
           appendBeforeDeadlineAtomically: async () => { throw new Error("must-not-write"); },
         },
       });
@@ -1260,6 +1333,7 @@ describe("Gate E immutable registration boundary", () => {
         git,
         transport: { send: sendPassing },
         evidenceStore: {
+          readPopulationAnchorByHash,
           appendBeforeDeadlineAtomically: async ({ evidence, signal }) => {
             attemptedRecords.push(evidence);
             signalBodyAppendStarted?.();
@@ -1303,6 +1377,7 @@ describe("Gate E immutable registration boundary", () => {
         git,
         transport: { send: sendPassing },
         evidenceStore: {
+          readPopulationAnchorByHash,
           appendBeforeDeadlineAtomically: async ({
             evidenceHash, evidence, notAfter, signal,
           }) => {
@@ -1354,9 +1429,11 @@ describe("Gate E immutable registration boundary", () => {
         record.evidence.contractVersion === "DF10_GATE_E_RUN_FINALIZATION_V3"
       )!;
       await expect(verifyStoredGateEEvidenceCertification({
+        populationAnchorHash: populationAnchor.populationAnchorHash,
         evidenceBodyHash: bodyEntry[0],
         finalizationHash: finalizationEntry[0],
         evidenceStore: {
+          readPopulationAnchorByHash,
           readByHash: async (evidenceHash) => lateRecords.get(evidenceHash) ?? null,
         },
       })).rejects.toThrow("GATE_E_EVIDENCE_FINALIZATION_EXPIRED");
@@ -1367,6 +1444,25 @@ describe("Gate E immutable registration boundary", () => {
 
   it("never gives an appended body Gate authority before terminal certification", async () => {
     const revision = "a".repeat(40);
+    const registrationCommit = "c".repeat(40);
+    const registrationBlobOid = "d".repeat(40);
+    const itemId = "gate-e-certification-record";
+    const anchorBody = {
+      schemaVersion: 1 as const,
+      contractVersion: "DF10_GATE_E_REGISTERED_POPULATION_ANCHOR_V1" as const,
+      registrationCommit,
+      registrationBlobOid,
+      manifestHash: "b".repeat(64),
+      corpusHash: "1".repeat(64),
+      rubricHash: "2".repeat(64),
+      planArtifactHash: "3".repeat(64),
+      corpusItemIds: [itemId],
+      populationCount: 1,
+    };
+    const populationAnchor = {
+      ...anchorBody,
+      populationAnchorHash: hash(canonicalJsonV1(anchorBody)),
+    };
     const body = {
       schemaVersion: 1,
       contractVersion: "DF10_GATE_E_SCORED_EVIDENCE_BODY_V3",
@@ -1374,10 +1470,11 @@ describe("Gate E immutable registration boundary", () => {
       executionBoundary: "CLEAN_TRUSTED_EXACT_HEAD_REQUEST_BYTES_V1",
       scoredRunRevision: revision,
       manifestHash: "b".repeat(64),
-      registrationProvenance: {},
+      populationAnchorHash: populationAnchor.populationAnchorHash,
+      registrationProvenance: { registrationCommit, registrationBlobOid },
       startedAt: "2026-08-18T10:00:00.000Z",
       completedAt: "2026-08-18T10:01:00.000Z",
-      items: [],
+      items: [{ corpusItemId: itemId }],
       summary: {},
     };
     const finalization = {
@@ -1407,9 +1504,17 @@ describe("Gate E immutable registration boundary", () => {
       }],
     ]);
     const evidenceStore = {
+      readPopulationAnchorByHash: async (populationAnchorHash: string) =>
+        populationAnchorHash === populationAnchor.populationAnchorHash
+          ? {
+            populationAnchor,
+            anchoredAt: "2026-08-18T09:59:00.000Z",
+          }
+          : null,
       readByHash: async (evidenceHash: string) => records.get(evidenceHash) ?? null,
     };
     expect(await verifyStoredGateEEvidenceCertification({
+      populationAnchorHash: populationAnchor.populationAnchorHash,
       evidenceBodyHash: bodyHash,
       finalizationHash,
       evidenceStore,
@@ -1424,6 +1529,7 @@ describe("Gate E immutable registration boundary", () => {
       admittedAt: "2026-08-18T10:15:00.001Z",
     });
     await expect(verifyStoredGateEEvidenceCertification({
+      populationAnchorHash: populationAnchor.populationAnchorHash,
       evidenceBodyHash: bodyHash,
       finalizationHash,
       evidenceStore,
@@ -1438,6 +1544,7 @@ describe("Gate E immutable registration boundary", () => {
       admittedAt: "2026-08-18T10:01:03.000Z",
     });
     await expect(verifyStoredGateEEvidenceCertification({
+      populationAnchorHash: populationAnchor.populationAnchorHash,
       evidenceBodyHash: bodyHash,
       finalizationHash,
       evidenceStore,
@@ -1447,6 +1554,7 @@ describe("Gate E immutable registration boundary", () => {
       admittedAt: "2026-08-18T10:01:00.500Z",
     });
     await expect(verifyStoredGateEEvidenceCertification({
+      populationAnchorHash: populationAnchor.populationAnchorHash,
       evidenceBodyHash: bodyHash,
       finalizationHash: "f".repeat(64),
       evidenceStore,
@@ -1459,6 +1567,7 @@ describe("Gate E immutable registration boundary", () => {
       admittedAt: "2026-08-18T10:01:02.000Z",
     });
     await expect(verifyStoredGateEEvidenceCertification({
+      populationAnchorHash: populationAnchor.populationAnchorHash,
       evidenceBodyHash: bodyHash,
       finalizationHash: dirtyHash,
       evidenceStore,
@@ -1471,6 +1580,7 @@ describe("Gate E immutable registration boundary", () => {
       admittedAt: "2026-08-18T10:01:02.000Z",
     });
     await expect(verifyStoredGateEEvidenceCertification({
+      populationAnchorHash: populationAnchor.populationAnchorHash,
       evidenceBodyHash: bodyHash,
       finalizationHash: mismatchedHash,
       evidenceStore,

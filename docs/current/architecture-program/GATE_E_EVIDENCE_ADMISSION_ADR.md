@@ -36,14 +36,21 @@ avoiding recursive receipts while the hash-only reader cross-checks both.
   after the deadline; it cannot extend `notAfter` or rewrite metadata.
 - Same hash with different canonical content, binding or deadline is a conflict.
 - BODY and FINALIZATION records bind registration commit, manifest, scored
-  revision, record kind and body hash. FINALIZATION requires its BODY already
-  admitted with the same deadline and identity.
+  revision, registered-population anchor, record kind and body hash.
+  FINALIZATION requires its BODY already admitted with the same deadline and
+  identity.
+- A separate append-only registration table is the population authority. Its
+  canonical anchor binds immutable Git registration provenance and the exact
+  sorted corpus item-ID set. SQL compares BODY IDs and denominators against
+  that row; a self-consistent partial BODY cannot define its own population.
 - Missing/partial population, sensitive keys, raw provider material and invalid
   canonical hashes fail before the append boundary.
-- Tables reject UPDATE, DELETE and TRUNCATE. Runtime roles receive only execute
-  permission on the hash-scoped append/read functions, never table DML.
+- Tables reject UPDATE, DELETE and TRUNCATE. The no-login registration-writer
+  role may register/read population anchors but cannot append evidence. The
+  evidence writer may read anchors and append evidence but cannot register an
+  anchor. The reader is hash-only. No role receives table DML.
 - Migration `0034` owns the Gate E roles, tables, functions and triggers and
-  their complete lifecycle. If either role name already exists, migration fails with
+  their complete lifecycle. If any owned role name already exists, migration fails with
   `GATE_E_EVIDENCE_ROLE_NAMESPACE_OCCUPIED`; it never adopts a pre-existing
   role or its current/future membership graph. Any pre-existing owned table,
   function or trigger likewise makes ordinary `CREATE` fail and rolls back the
@@ -86,7 +93,13 @@ identical-retry recovery protocol returns the immutable original `admittedAt`.
 ## Consequences
 
 Evidence certification versions advance to BODY V3, FINALIZATION V3 and Gate E
-plan V2. Existing V2 evidence shapes are not accepted by this store. Migration
+plan V2, with registered-population anchor V1. Existing V2 evidence shapes are
+not accepted by this store. Migration
 0034 is source-only until separately authorized and applied. The future provider
 location remains `global`; credentials, provider observation, scoring, Gate E
 verdict and DF-C remain outside this decision.
+
+The three no-login capability roles are cluster-wide PostgreSQL objects, so a
+cluster may host only one migration-0034 Gate E store namespace. Multiple
+databases in the same cluster must not each attempt to own these role names;
+deployment must select one governed store database and grant membership there.
