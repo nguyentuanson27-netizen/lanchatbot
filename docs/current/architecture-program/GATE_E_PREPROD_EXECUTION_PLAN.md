@@ -35,6 +35,9 @@ The observation uses the first canonical corpus item after sorting by
 byte-for-byte through its registered `CandidateRequestIdentity`, and sent once
 through `CandidateVertexTransport`.
 
+The future provider resource location is fixed to `global`. This source change
+does not provision credentials, perform observation, or authorize a request.
+
 Only these fields may leave the observation boundary:
 
 - expected and provider-observed model version;
@@ -169,17 +172,20 @@ send boundary, applies the provider deadline around the entire transport, and
 rechecks clean unchanged refs after the unfinalized evidence-body append. It
 then asks the store to append a separate hash-bound finalization record with
 `notAfter` equal to the original run deadline. The store must enforce that
-deadline with its own transaction clock in the same atomic commit; abort is
-only an early-cancellation aid. The body alone is always
+deadline with its own DB clock at the final owned pre-commit admission boundary
+in the same atomic transaction; abort is only an early-cancellation aid. The
+body alone is always
 `UNFINALIZED_TECHNICAL_EVIDENCE`. Verdict code receives only the two expected
-hashes, retrieves both records plus immutable store transaction metadata, and
-requires the finalization commit time to be within `notAfter`. Store metadata
-is outside the finalization content hash, so no receipt or third-record
-self-reference is created. Caller-supplied self-consistent objects are not
+hashes, retrieves both records plus immutable `admittedAt` metadata, and
+requires the finalization admission boundary to be within `notAfter`.
+`admittedAt` / `storeBoundaryAt` is a final pre-commit boundary timestamp, not
+exact commit time or post-commit time. Store admission metadata is outside the
+finalization content hash, so no receipt or third-record self-reference is
+created. Caller-supplied self-consistent objects are not
 certification evidence. Scored execution remains blocked until a concrete
 store adapter proves these V2 semantics; a structural port or test fake is not
 durable-store evidence. For an existing identical hash, `ALREADY_PRESENT`
-returns the original transaction commit time and performs no record or metadata
+returns the original admission metadata and performs no record or metadata
 rewrite, including on a retry after `notAfter`. Existing conflicting content is
 `HASH_CONFLICT`; the atomic deadline check applies before creating an absent
 record. A concrete adapter must prove these ordering and idempotency properties,
@@ -219,8 +225,8 @@ Stop without scoring or Gate acceptance when any of these occurs:
 - any repository step runs and fails;
 - the claim guard, Context integrity, side-effect assertion or MUST_PASS case
   fails;
-- evidence-store write is partial, ambiguous, non-append-only, committed after
-  its atomic `notAfter`, or lacks trusted transaction metadata;
+- evidence-store write is partial, ambiguous, non-append-only, admitted after
+  its atomic `notAfter`, or lacks trusted admission metadata;
 - semantic-interpreter policy/probe calibration, output hash or actual request
   identity differs from the registered contract;
 - the unfinalized evidence body has no valid hash-bound terminal finalization;

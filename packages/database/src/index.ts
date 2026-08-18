@@ -1,5 +1,12 @@
 export { migrateDownOne, migrateUp, type MigrationResult } from "./migrate.js";
 export {
+  PostgresGateEEvidenceStoreV2,
+  classifyGateEEvidenceRecordV3,
+  type GateEEvidenceAppendResultV2,
+  type GateEEvidenceReadRecordV2,
+  type GateEEvidenceRecordBindingV3,
+} from "./gate-e-evidence-store.js";
+export {
   acquisitionEnabled,
   acquisitionEntrySource,
   adAcquisitionConfig,

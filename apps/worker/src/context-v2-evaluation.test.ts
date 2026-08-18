@@ -10,7 +10,7 @@ import {
 } from "./context-v2-candidate.js";
 import {
   ContextV2CandidateRunner,
-  DF10_GATE_E_PLAN_V1,
+  DF10_GATE_E_PLAN_V2,
   DF10_GATE_E_PLAN_ARTIFACT_SHA256,
   createDraftEvaluationManifest,
   selectedForDiagnosticEvaluation,
@@ -54,22 +54,25 @@ function request(): BuiltCandidateRequest {
 describe("DF10 pre-registered evaluation governance", () => {
   it("marks the plan draft-unregistered and limits sampling to diagnostics", () => {
     expect(DF10_GATE_E_PLAN_ARTIFACT_SHA256).toBe(
-      "0e3731e052869896abf3fe918c6307c1befe14bf80c8df47d66cf906ef2eeffd",
+      "e66baa7913ca5e5e21de60cc0c4351fdd19370246d9a624146a69bd139a74a19",
     );
-    expect(DF10_GATE_E_PLAN_V1.registrationStatus).toBe("DRAFT_UNREGISTERED");
-    expect(DF10_GATE_E_PLAN_V1.evidenceCertification.idempotencyAuthority).toBe(
-      "ALREADY_PRESENT_RETURNS_ORIGINAL_STORE_COMMIT_METADATA_NO_REWRITE",
+    expect(DF10_GATE_E_PLAN_V2.registrationStatus).toBe("DRAFT_UNREGISTERED");
+    expect(DF10_GATE_E_PLAN_V2.evidenceCertification.idempotencyAuthority).toBe(
+      "ALREADY_PRESENT_RETURNS_ORIGINAL_ADMISSION_METADATA_NO_REWRITE",
     );
-    expect(DF10_GATE_E_PLAN_V1.scoredCorpus.inclusion).toBe(
+    expect(DF10_GATE_E_PLAN_V2.evidenceCertification.admissionTimeAuthority).toBe(
+      "STORE_BOUNDARY_AT_OUTSIDE_EVIDENCE_HASH_NOT_COMMIT_TIME",
+    );
+    expect(DF10_GATE_E_PLAN_V2.scoredCorpus.inclusion).toBe(
       "ALL_FROZEN_CORPUS_ITEMS",
     );
-    expect(DF10_GATE_E_PLAN_V1.scoredCorpus.mandatoryStrata).toEqual([
+    expect(DF10_GATE_E_PLAN_V2.scoredCorpus.mandatoryStrata).toEqual([
       "CLAIM_SAFETY", "CONTEXT_INTEGRITY", "SIDE_EFFECT_SAFETY", "MUST_PASS",
     ]);
-    expect(DF10_GATE_E_PLAN_V1.thresholds).not.toHaveProperty(
+    expect(DF10_GATE_E_PLAN_V2.thresholds).not.toHaveProperty(
       "qualityDeltaMinimum",
     );
-    expect(DF10_GATE_E_PLAN_V1.diagnostics.qualityDeltaMinimum).toBe(0);
+    expect(DF10_GATE_E_PLAN_V2.diagnostics.qualityDeltaMinimum).toBe(0);
     const contract = readFileSync(new URL(
       "../../../docs/current/architecture-program/contracts/MODEL_EVALUATION_BOUNDARY.md",
       import.meta.url,
@@ -77,8 +80,8 @@ describe("DF10 pre-registered evaluation governance", () => {
     expect(contract).toContain(DF10_GATE_E_PLAN_ARTIFACT_SHA256);
     expect(contract).toContain("No corpus, scored run, Gate E");
     expect(contract).toContain("DRAFT_UNREGISTERED");
-    expect(contract).toContain("original transaction commit time");
-    expect(contract).toContain("must not rewrite the record or its commit metadata");
+    expect(contract).toContain("final owned pre-commit admission boundary");
+    expect(contract).toContain("must not rewrite the record or its admission metadata");
     const itemId = selectedDiagnosticItemId();
     expect(selectedForDiagnosticEvaluation(itemId)).toBe(true);
     expect(selectedForDiagnosticEvaluation(itemId)).toBe(true);

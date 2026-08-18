@@ -276,20 +276,21 @@ export interface GateEEvidenceStoreV2 {
       disposition: "APPENDED" | "ALREADY_PRESENT";
       evidenceHash: string;
       /**
-       * Immutable timestamp of the transaction that first stored this hash.
-       * ALREADY_PRESENT must never substitute retry/read time or rewrite it.
+       * DB-authoritative final pre-commit admission boundary timestamp.
+       * This is not an exact/post-commit timestamp. ALREADY_PRESENT must never
+       * substitute retry/read time or rewrite it.
        */
-      originalCommittedAt: string;
+      admittedAt: string;
     }>
     | Readonly<{
       disposition: "DEADLINE_EXPIRED";
       evidenceHash: string;
-      committedAt: null;
+      admittedAt: null;
     }>
     | Readonly<{
       disposition: "HASH_CONFLICT";
       evidenceHash: string;
-      committedAt: null;
+      admittedAt: null;
     }>
   >;
 }
@@ -298,24 +299,24 @@ export function assertGateEEvidenceAppendReceiptV2(input: Readonly<{
   result: Readonly<{
     disposition: "APPENDED" | "ALREADY_PRESENT";
     evidenceHash: string;
-    originalCommittedAt: string;
+    admittedAt: string;
   }>;
   expectedEvidenceHash: string;
   notAfter: string;
 }>): Readonly<{
   disposition: "APPENDED" | "ALREADY_PRESENT";
-  originalCommittedAt: string;
+  admittedAt: string;
 }> {
-  const originalCommittedAt = Date.parse(input.result.originalCommittedAt);
+  const admittedAt = Date.parse(input.result.admittedAt);
   const notAfter = Date.parse(input.notAfter);
   if (input.result.evidenceHash !== input.expectedEvidenceHash ||
-      !Number.isFinite(originalCommittedAt) || !Number.isFinite(notAfter) ||
-      originalCommittedAt > notAfter) {
+      !Number.isFinite(admittedAt) || !Number.isFinite(notAfter) ||
+      admittedAt > notAfter) {
     throw new Error("GATE_E_EVIDENCE_APPEND_MISMATCH");
   }
   return Object.freeze({
     disposition: input.result.disposition,
-    originalCommittedAt: input.result.originalCommittedAt,
+    admittedAt: input.result.admittedAt,
   });
 }
 
@@ -1194,8 +1195,8 @@ function withGateERunDeadline<T>(
 function verifyGateEEvidenceCertification(input: Readonly<{
   body: Readonly<Record<string, unknown>>;
   finalization: Readonly<Record<string, unknown>> | null;
-  bodyCommittedAt: string | null;
-  finalizationCommittedAt: string | null;
+  bodyAdmittedAt: string | null;
+  finalizationAdmittedAt: string | null;
 }>) {
   const bodyKeys = [
     "admissibility", "completedAt", "contractVersion", "executionBoundary",
@@ -1211,10 +1212,10 @@ function verifyGateEEvidenceCertification(input: Readonly<{
       !hasExactKeys(input.body, bodyKeys) ||
       !hasExactKeys(input.finalization, finalizationKeys) ||
       input.body.schemaVersion !== 1 ||
-      input.body.contractVersion !== "DF10_GATE_E_SCORED_EVIDENCE_BODY_V2" ||
+      input.body.contractVersion !== "DF10_GATE_E_SCORED_EVIDENCE_BODY_V3" ||
       input.body.admissibility !== "UNFINALIZED_TECHNICAL_EVIDENCE" ||
       input.finalization.schemaVersion !== 1 ||
-      input.finalization.contractVersion !== "DF10_GATE_E_RUN_FINALIZATION_V2" ||
+      input.finalization.contractVersion !== "DF10_GATE_E_RUN_FINALIZATION_V3" ||
       input.finalization.disposition !== "FINALIZED_TRUSTED_EXACT_HEAD" ||
       input.finalization.finalClean !== true ||
       !COMMIT_PATTERN.test(String(input.body.scoredRunRevision ?? ""))) {
@@ -1228,34 +1229,35 @@ function verifyGateEEvidenceCertification(input: Readonly<{
   }
   const preparedAt = Date.parse(String(input.finalization.preparedAt ?? ""));
   const notAfter = Date.parse(String(input.finalization.notAfter ?? ""));
-  const bodyCommittedAt = Date.parse(input.bodyCommittedAt ?? "");
-  const committedAt = Date.parse(input.finalizationCommittedAt ?? "");
+  const bodyAdmittedAt = Date.parse(input.bodyAdmittedAt ?? "");
+  const finalizationAdmittedAt = Date.parse(input.finalizationAdmittedAt ?? "");
   const startedAt = Date.parse(String(input.body.startedAt ?? ""));
   const completedAt = Date.parse(String(input.body.completedAt ?? ""));
-  if (![startedAt, completedAt, preparedAt, notAfter, bodyCommittedAt, committedAt]
+  if (![startedAt, completedAt, preparedAt, notAfter, bodyAdmittedAt,
+    finalizationAdmittedAt]
     .every(Number.isFinite) ||
       completedAt < startedAt || preparedAt < completedAt ||
-      preparedAt > notAfter || bodyCommittedAt > notAfter ||
-      committedAt > notAfter) {
+      preparedAt > notAfter || bodyAdmittedAt > notAfter ||
+      finalizationAdmittedAt > notAfter) {
     throw new Error("GATE_E_EVIDENCE_FINALIZATION_EXPIRED");
   }
-  if (bodyCommittedAt > committedAt) {
-    throw new Error("GATE_E_EVIDENCE_COMMIT_ORDER_INVALID");
+  if (bodyAdmittedAt > finalizationAdmittedAt) {
+    throw new Error("GATE_E_EVIDENCE_ADMISSION_ORDER_INVALID");
   }
   return Object.freeze({
     disposition: "FINALIZED_TRUSTED_EXACT_HEAD" as const,
     evidenceBodyHash: bodyHash,
     finalizationHash: sha256(canonicalJsonV1(input.finalization)),
-    bodyCommittedAt: input.bodyCommittedAt!,
-    finalizationCommittedAt: input.finalizationCommittedAt!,
+    bodyAdmittedAt: input.bodyAdmittedAt!,
+    finalizationAdmittedAt: input.finalizationAdmittedAt!,
   });
 }
 
 export interface GateEEvidenceReaderV2 {
   readByHash(evidenceHash: string): Promise<Readonly<{
     evidence: Readonly<Record<string, unknown>>;
-    /** Immutable timestamp of the transaction that first stored this hash. */
-    originalCommittedAt: string;
+    /** DB-authoritative final pre-commit boundary; never exact commit time. */
+    admittedAt: string;
   }> | null>;
 }
 
@@ -1276,14 +1278,15 @@ export async function verifyStoredGateEEvidenceCertification(input: Readonly<{
       sha256(canonicalJsonV1(bodyRecord.evidence)) !== input.evidenceBodyHash ||
       sha256(canonicalJsonV1(finalizationRecord.evidence)) !==
         input.finalizationHash ||
-      !Number.isFinite(Date.parse(bodyRecord.originalCommittedAt))) {
+      !Number.isFinite(Date.parse(bodyRecord.admittedAt)) ||
+      !Number.isFinite(Date.parse(finalizationRecord.admittedAt))) {
     throw new Error("GATE_E_EVIDENCE_RECORD_MISSING_OR_MISMATCHED");
   }
   return verifyGateEEvidenceCertification({
     body: bodyRecord.evidence,
     finalization: finalizationRecord.evidence,
-    bodyCommittedAt: bodyRecord.originalCommittedAt,
-    finalizationCommittedAt: finalizationRecord.originalCommittedAt,
+    bodyAdmittedAt: bodyRecord.admittedAt,
+    finalizationAdmittedAt: finalizationRecord.admittedAt,
   });
 }
 
@@ -1495,7 +1498,7 @@ export async function executeGateEScoredRun(input: Readonly<{
   }
   const evidenceBody = Object.freeze({
     schemaVersion: 1 as const,
-    contractVersion: "DF10_GATE_E_SCORED_EVIDENCE_BODY_V2" as const,
+    contractVersion: "DF10_GATE_E_SCORED_EVIDENCE_BODY_V3" as const,
     admissibility: "UNFINALIZED_TECHNICAL_EVIDENCE" as const,
     executionBoundary: "CLEAN_TRUSTED_EXACT_HEAD_REQUEST_BYTES_V1" as const,
     scoredRunRevision: headRevision,
@@ -1543,7 +1546,7 @@ export async function executeGateEScoredRun(input: Readonly<{
   }
   const finalization = Object.freeze({
     schemaVersion: 1 as const,
-    contractVersion: "DF10_GATE_E_RUN_FINALIZATION_V2" as const,
+    contractVersion: "DF10_GATE_E_RUN_FINALIZATION_V3" as const,
     disposition: "FINALIZED_TRUSTED_EXACT_HEAD" as const,
     evidenceBodyHash: evidenceHash,
     scoredRunRevision: headRevision,
@@ -1588,8 +1591,8 @@ export async function executeGateEScoredRun(input: Readonly<{
   const certification = verifyGateEEvidenceCertification({
     body: evidenceBody,
     finalization,
-    bodyCommittedAt: storedReceipt.originalCommittedAt,
-    finalizationCommittedAt: finalizedReceipt.originalCommittedAt,
+    bodyAdmittedAt: storedReceipt.admittedAt,
+    finalizationAdmittedAt: finalizedReceipt.admittedAt,
   });
   return Object.freeze({
     ...evidenceBody,

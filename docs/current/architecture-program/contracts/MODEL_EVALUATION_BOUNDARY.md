@@ -1,5 +1,7 @@
 # Durable Contract — Model Evaluation Boundary
 
+**Contract revision:** V2 — DB-authoritative evidence admission boundary
+
 This contract separates the byte-frozen legacy generation baseline from every
 offline or replay candidate. It is source architecture only and never grants
 runtime authority, deployment, side effects, or Gate acceptance.
@@ -115,26 +117,32 @@ Required properties:
     hash-bound record may finalize it only after the post-body trusted-ref and
     clean-worktree check. Its append carries the original run deadline as an
     atomic `notAfter` precondition enforced by the store's transaction clock.
-    Abort alone is not proof that a late commit cannot occur. Verdict readers
-    take the expected hashes and retrieve both records plus immutable store
-    commit metadata; a finalization committed after `notAfter` is inadmissible.
-    Commit metadata remains outside the evidence content hash, avoiding a
+    Abort alone is not proof that a late commit cannot occur. The dedicated
+    store uses its DB clock at the final owned pre-commit admission boundary and
+    persists that instant as `admittedAt` / `storeBoundaryAt`. It is not an
+    exact commit time, a post-commit time, or caller time. Verdict readers take
+    the expected hashes and retrieve both records plus immutable admission
+    metadata; a finalization admitted after `notAfter` is inadmissible.
+    Admission metadata remains outside the evidence content hash, avoiding a
     receipt/third-record recursion. Caller-supplied self-consistent objects have
     no Gate authority. No scored execution is admissible until a concrete store
     adapter proves this V2 transactional contract. Idempotency is part of the
     same transaction contract: an existing identical hash returns
-    `ALREADY_PRESENT` with its original transaction commit time, even when the
-    retry arrives after `notAfter`, and must not rewrite the record or its commit metadata.
+    `ALREADY_PRESENT` with its original admission boundary, even when the retry
+    arrives after `notAfter`, and must not rewrite the record or its admission metadata.
     An existing hash with different content returns `HASH_CONFLICT`; only an
     absent hash may create a new record after the store transaction clock proves
     the deadline has not expired.
 
 ## DF10 Gate E draft foundation
 
-- Plan contract: `DF10_GATE_E_PLAN_V1`
+- Plan contract: `DF10_GATE_E_PLAN_V2`
+- Evidence contracts: `DF10_GATE_E_SCORED_EVIDENCE_BODY_V3` and
+  `DF10_GATE_E_RUN_FINALIZATION_V3`; the concrete capability remains
+  `GateEEvidenceStoreV2` with `admittedAt` receipts.
 - Registration status: `DRAFT_UNREGISTERED`
 - Plan artifact SHA-256:
-  `0e3731e052869896abf3fe918c6307c1befe14bf80c8df47d66cf906ef2eeffd`
+  `e66baa7913ca5e5e21de60cc0c4351fdd19370246d9a624146a69bd139a74a19`
 - Baseline: `POST_BF_V1`
 - Candidate model: publisher `google`, model `gemini-3.5-flash-lite`; the same
   string is an owner-selected **draft expectation**, not provider-observed

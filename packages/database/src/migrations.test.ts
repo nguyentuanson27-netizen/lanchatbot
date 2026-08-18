@@ -12,6 +12,13 @@ describe("database migrations", () => {
     expect(ups.sort()).toEqual(downs.sort());
   });
 
+  it("assigns every migration a unique ordered numeric prefix", async () => {
+    const migrations = (await readdir(directory))
+      .filter((name) => name.endsWith(".up.sql"));
+    const prefixes = migrations.map((name) => name.split("_", 1)[0]);
+    expect(new Set(prefixes).size).toBe(prefixes.length);
+  });
+
   it("contains all durable phase-zero tables", async () => {
     const sql = await readFile(resolve(directory, "0001_core.up.sql"), "utf8");
     for (const table of [
@@ -328,6 +335,46 @@ describe("database migrations", () => {
     expect(sql).toContain("TO lana_admin_readonly");
     expect(sql).toContain("TO lana_admin_control_api");
     expect(sql).not.toMatch(/DELETE\s+FROM\s+admin_artifact_versions/iu);
+  });
+
+  it("creates the dedicated append-only Gate E V2 admission boundary", async () => {
+    const sql = await readFile(
+      resolve(directory, "0034_gate_e_evidence_store_v2.up.sql"),
+      "utf8",
+    );
+    const down = await readFile(
+      resolve(directory, "0034_gate_e_evidence_store_v2.down.sql"),
+      "utf8",
+    );
+
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS gate_e_evidence_records_v2");
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS gate_e_evidence_admissions_v2");
+    expect(sql).toContain("DEFERRABLE INITIALLY DEFERRED");
+    expect(sql).toContain("clock_timestamp()");
+    expect(sql).toContain("admitted_at");
+    expect(sql).not.toMatch(/original_committed_at|commit_timestamp/iu);
+    expect(sql).toContain("gate_e evidence is append-only");
+    expect(sql).toContain("BEFORE UPDATE OR DELETE OR TRUNCATE");
+    expect(sql).toContain("lana_gate_e_append_evidence_v2");
+    expect(sql).toContain("lana_gate_e_read_evidence_by_hash_v2");
+    expect(sql).toContain("REVOKE ALL");
+    expect(sql).toContain("lana_gate_e_evidence_writer");
+    expect(sql).toContain("lana_gate_e_evidence_reader");
+    expect(sql).not.toMatch(/GRANT\s+(?:SELECT|INSERT|UPDATE|DELETE|TRUNCATE)[\s\S]*gate_e_evidence_/iu);
+    expect(sql).not.toMatch(/(?:secret|token|password|raw_provider|customer|message)_/iu);
+    expect(down).toContain("DROP TABLE IF EXISTS gate_e_evidence_admissions_v2");
+    expect(down).toContain("DROP TABLE IF EXISTS gate_e_evidence_records_v2");
+    expect(down).toContain("DROP ROLE IF EXISTS lana_gate_e_evidence_writer");
+    expect(down).toContain("DROP ROLE IF EXISTS lana_gate_e_evidence_reader");
+
+    const adapter = await readFile(
+      resolve(import.meta.dirname, "gate-e-evidence-store.ts"),
+      "utf8",
+    );
+    expect(adapter).toContain("lana_gate_e_append_evidence_v2");
+    expect(adapter).toContain("lana_gate_e_read_evidence_by_hash_v2");
+    expect(adapter).not.toContain("gate_e_evidence_records_v2");
+    expect(adapter).not.toContain("gate_e_evidence_admissions_v2");
   });
 });
 describe("r32.2 outbox handoff ordering migration", () => {

@@ -48,3 +48,14 @@ Run retention at least daily and alert when it has not succeeded for 26 hours. B
 - Meta send and Pancake tag use separate Outbox tables.
 - `AMBIGUOUS` Meta sends are not automatically retried.
 - The analytical history contains `customer_hash`, redacted text and hashed provider IDs only.
+
+## Gate E evidence boundary
+
+Migration `0034_gate_e_evidence_store_v2` defines a dedicated source-only,
+append-only evidence store. Application code uses only
+`lana_gate_e_append_evidence_v2` and the hash-scoped
+`lana_gate_e_read_evidence_by_hash_v2`; it has no table DML grant. The persisted
+`admitted_at` value is the database clock sampled at the final owned pre-commit
+admission boundary. It is not an exact or post-commit timestamp. Applying this
+migration, provisioning role membership, observing a provider, running a score
+or accepting Gate E each requires separate authorization.
