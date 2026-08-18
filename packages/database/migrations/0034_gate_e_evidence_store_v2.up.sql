@@ -371,6 +371,9 @@ BEGIN
        OR evidence_json#>>'{summary,contractVersion}' IS DISTINCT FROM
           'DF10_GATE_E_TECHNICAL_SCORE_SUMMARY_V1'
        OR jsonb_typeof(evidence_json#>'{summary,reasonCodes}') <> 'array'
+       OR jsonb_typeof(evidence_json#>'{summary,population}') <> 'number'
+       OR jsonb_typeof(evidence_json#>'{summary,scored}') <> 'number'
+       OR jsonb_typeof(evidence_json#>'{summary,eligibleCoverage}') <> 'number'
        OR evidence_json->>'manifestHash' IS DISTINCT FROM p_manifest_hash
        OR evidence_json->>'populationAnchorHash' IS DISTINCT FROM
           p_population_anchor_hash
@@ -394,16 +397,20 @@ BEGIN
        OR (evidence_json->>'completedAt')::timestamptz > p_not_after
        OR jsonb_typeof(evidence_json->'items') <> 'array'
        OR jsonb_array_length(evidence_json->'items') = 0
-       OR COALESCE(evidence_json#>>'{summary,population}', '')::integer <>
+     ) THEN
+    RAISE EXCEPTION 'GATE_E_EVIDENCE_BODY_BINDING_INVALID';
+  END IF;
+  IF p_record_kind = 'BODY' AND (
+       COALESCE(evidence_json#>>'{summary,population}', '')::integer <>
           registered_population.population_count
        OR COALESCE(evidence_json#>>'{summary,scored}', '')::integer <>
           registered_population.population_count
        OR COALESCE(evidence_json#>>'{summary,eligibleCoverage}', '')::numeric <> 1
        OR (SELECT count(DISTINCT value->>'corpusItemId')
              FROM jsonb_array_elements(evidence_json->'items')) <>
-          jsonb_array_length(evidence_json->'items')
+          registered_population.population_count
      ) THEN
-    RAISE EXCEPTION 'GATE_E_EVIDENCE_BODY_BINDING_INVALID';
+    RAISE EXCEPTION 'GATE_E_EVIDENCE_REGISTERED_POPULATION_MISMATCH';
   END IF;
   IF p_record_kind = 'BODY' THEN
     FOR item IN SELECT value FROM jsonb_array_elements(evidence_json->'items')
