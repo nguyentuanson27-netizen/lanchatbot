@@ -414,3 +414,130 @@ export const ContextV2CandidateOutputV1Schema = z.object({
 export type ContextV2CandidateOutputV1 = z.infer<
   typeof ContextV2CandidateOutputV1Schema
 >;
+
+export const ContextV2CandidateEffectV2Schema = z.enum([
+  "CART_OPENED",
+  "CART_UPDATED",
+  "ORDER_PLACED",
+  "ORDER_CONFIRMED",
+  "MESSAGE_SENT",
+  "DELIVERY_CREATED",
+]);
+export type ContextV2CandidateEffectV2 = z.infer<
+  typeof ContextV2CandidateEffectV2Schema
+>;
+
+export const ContextV2CandidateClarificationTargetV2Schema = z.enum([
+  "PRODUCT",
+  "MEASUREMENTS",
+  "CHECKOUT_DETAILS",
+]);
+export type ContextV2CandidateClarificationTargetV2 = z.infer<
+  typeof ContextV2CandidateClarificationTargetV2Schema
+>;
+
+export const ContextV2CandidateRequestedActionV2Schema = z.enum([
+  "PROVIDE_PRODUCT",
+  "PROVIDE_MEASUREMENTS",
+  "PROVIDE_CHECKOUT_DETAILS",
+  "CONFIRM_CART",
+]);
+export type ContextV2CandidateRequestedActionV2 = z.infer<
+  typeof ContextV2CandidateRequestedActionV2Schema
+>;
+
+export const ContextV2CandidateSemanticSegmentV2Schema = z.discriminatedUnion(
+  "kind",
+  [
+    z.object({
+      kind: z.literal("GENERAL"),
+      text: z.string().min(1).max(1_000),
+    }).strict(),
+    z.object({
+      kind: z.literal("VERIFIED_CLAIM"),
+      text: z.string().min(1).max(1_000),
+      claimContentHash: Sha256Schema,
+    }).strict(),
+    z.object({
+      kind: z.literal("CLARIFICATION"),
+      text: z.string().min(1).max(1_000),
+      target: ContextV2CandidateClarificationTargetV2Schema,
+    }).strict(),
+    z.object({
+      kind: z.literal("ACTION_REQUEST"),
+      text: z.string().min(1).max(1_000),
+      action: ContextV2CandidateRequestedActionV2Schema,
+    }).strict(),
+    z.object({
+      kind: z.literal("EFFECT_CLAIM"),
+      text: z.string().min(1).max(1_000),
+      effect: ContextV2CandidateEffectV2Schema,
+    }).strict(),
+  ],
+);
+export type ContextV2CandidateSemanticSegmentV2 = z.infer<
+  typeof ContextV2CandidateSemanticSegmentV2Schema
+>;
+
+export const ContextV2CandidateOutputV2Schema = z.object({
+  schemaVersion: z.literal(2),
+  contractVersion: z.literal("CONTEXT_V2_CANDIDATE_OUTPUT_V2"),
+  contextHash: Sha256Schema,
+  productBinding: z.object({
+    status: z.enum([
+      "RESOLVED",
+      "STALE",
+      "AMBIGUOUS",
+      "UNRESOLVED",
+      "NOT_REQUIRED",
+    ]),
+    productIds: z.array(z.string().min(1).max(128)).max(16),
+  }).strict(),
+  segments: z.array(ContextV2CandidateSemanticSegmentV2Schema).min(1).max(16),
+  strategy: z.enum([
+    "ANSWER_VERIFIED_FACTS",
+    "ASK_CLARIFICATION",
+    "ADVANCE_CART",
+    "HOLD_POSITION",
+  ]),
+  cta: z.enum([
+    "NONE",
+    "ASK_PRODUCT",
+    "ASK_MEASUREMENTS",
+    "ASK_CHECKOUT_DETAILS",
+    "CONFIRM_CART",
+  ]),
+}).strict();
+export type ContextV2CandidateOutputV2 = z.infer<
+  typeof ContextV2CandidateOutputV2Schema
+>;
+
+export const GateEOutputInterpretationV1Schema = z.object({
+  schemaVersion: z.literal(1),
+  contractVersion: z.literal("GATE_E_OUTPUT_INTERPRETATION_V1"),
+  candidateOutputHash: Sha256Schema,
+  claimContentHashes: z.array(Sha256Schema).max(16),
+  clarificationTargets: z.array(
+    ContextV2CandidateClarificationTargetV2Schema,
+  ).max(3),
+  requestedActions: z.array(ContextV2CandidateRequestedActionV2Schema).max(4),
+  claimedEffects: z.array(ContextV2CandidateEffectV2Schema).max(6),
+}).strict().superRefine((value, context) => {
+  for (const [key, entries] of Object.entries({
+    claimContentHashes: value.claimContentHashes,
+    clarificationTargets: value.clarificationTargets,
+    requestedActions: value.requestedActions,
+    claimedEffects: value.claimedEffects,
+  })) {
+    if (new Set(entries).size !== entries.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [key],
+        message: "interpretation classifications must be unique",
+      });
+    }
+  }
+});
+export type GateEOutputInterpretationV1 = z.infer<
+  typeof GateEOutputInterpretationV1Schema
+>;

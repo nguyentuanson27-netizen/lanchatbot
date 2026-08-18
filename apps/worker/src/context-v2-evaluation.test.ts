@@ -54,9 +54,12 @@ function request(): BuiltCandidateRequest {
 describe("DF10 pre-registered evaluation governance", () => {
   it("marks the plan draft-unregistered and limits sampling to diagnostics", () => {
     expect(DF10_GATE_E_PLAN_ARTIFACT_SHA256).toBe(
-      "eb399698f5e82dbe6d401c360e035b58f14153add9b5f434629751045565373a",
+      "0e3731e052869896abf3fe918c6307c1befe14bf80c8df47d66cf906ef2eeffd",
     );
     expect(DF10_GATE_E_PLAN_V1.registrationStatus).toBe("DRAFT_UNREGISTERED");
+    expect(DF10_GATE_E_PLAN_V1.evidenceCertification.idempotencyAuthority).toBe(
+      "ALREADY_PRESENT_RETURNS_ORIGINAL_STORE_COMMIT_METADATA_NO_REWRITE",
+    );
     expect(DF10_GATE_E_PLAN_V1.scoredCorpus.inclusion).toBe(
       "ALL_FROZEN_CORPUS_ITEMS",
     );
@@ -74,6 +77,8 @@ describe("DF10 pre-registered evaluation governance", () => {
     expect(contract).toContain(DF10_GATE_E_PLAN_ARTIFACT_SHA256);
     expect(contract).toContain("No corpus, scored run, Gate E");
     expect(contract).toContain("DRAFT_UNREGISTERED");
+    expect(contract).toContain("original transaction commit time");
+    expect(contract).toContain("must not rewrite the record or its commit metadata");
     const itemId = selectedDiagnosticItemId();
     expect(selectedForDiagnosticEvaluation(itemId)).toBe(true);
     expect(selectedForDiagnosticEvaluation(itemId)).toBe(true);
@@ -289,9 +294,11 @@ describe("async Context V2 candidate runner", () => {
     const model = {
       generateCandidate: vi.fn(async () => ({
         output: {
-          schemaVersion: 1 as const,
-          contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V1" as const,
-          reply: "candidate",
+          schemaVersion: 2 as const,
+          contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2" as const,
+          contextHash: "a".repeat(64),
+          productBinding: { status: "RESOLVED" as const, productIds: ["SD398"] },
+          segments: [{ kind: "GENERAL" as const, text: "candidate" }],
           strategy: "HOLD_POSITION" as const,
           cta: "NONE" as const,
         },

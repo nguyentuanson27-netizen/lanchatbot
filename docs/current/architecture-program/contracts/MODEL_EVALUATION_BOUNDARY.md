@@ -92,13 +92,49 @@ Required properties:
     existing `(page_id, event_type, occurred_at)` index can bound each query;
     larger corpora iterate windows outside the query. Activation still requires
     production-like query-plan evidence, and any migration remains owner-gated.
+18. Gate E semantic scoring uses a separate evaluation-only interpreter call
+    and policy with the same registered model identity as the candidate. This
+    relationship is manifest data, not an independent-judge claim. Its input
+    contains customer-facing wording and sanitized eligible claims but never
+    candidate-authored semantic labels. A closed coverage matrix requires
+    positive and adversarial-negative registered probes for every reachable
+    effect, clarification, requested-action and frozen protected-claim class;
+    missing, extra or duplicate coverage fails before corpus scoring. Dynamic
+    request and interpretation hashes bind each actual candidate output. Phrase
+    detection is diagnostic only and cannot grant a pass.
+19. Trusted Git evidence uses fixed argv without shell interpolation, a freshly
+    fetched `refs/remotes/origin/main`, committer time, byte-exact blob reads,
+    and blob-introduction history reachable from the scored revision. Caller-
+    selected refs, unsafe paths, author time and unrefreshed remote state are
+    not evidence.
+20. Provider observation runs only through the clean exact-head governed
+    boundary and records its trusted revision/ref. Repository validation proves
+    the artifact's integrity, not the external call itself; the separately
+    owner-reviewed immutable observation artifact is the external trust anchor.
+21. A scored evidence body is permanently unfinalized by itself. A second
+    hash-bound record may finalize it only after the post-body trusted-ref and
+    clean-worktree check. Its append carries the original run deadline as an
+    atomic `notAfter` precondition enforced by the store's transaction clock.
+    Abort alone is not proof that a late commit cannot occur. Verdict readers
+    take the expected hashes and retrieve both records plus immutable store
+    commit metadata; a finalization committed after `notAfter` is inadmissible.
+    Commit metadata remains outside the evidence content hash, avoiding a
+    receipt/third-record recursion. Caller-supplied self-consistent objects have
+    no Gate authority. No scored execution is admissible until a concrete store
+    adapter proves this V2 transactional contract. Idempotency is part of the
+    same transaction contract: an existing identical hash returns
+    `ALREADY_PRESENT` with its original transaction commit time, even when the
+    retry arrives after `notAfter`, and must not rewrite the record or its commit metadata.
+    An existing hash with different content returns `HASH_CONFLICT`; only an
+    absent hash may create a new record after the store transaction clock proves
+    the deadline has not expired.
 
 ## DF10 Gate E draft foundation
 
 - Plan contract: `DF10_GATE_E_PLAN_V1`
 - Registration status: `DRAFT_UNREGISTERED`
 - Plan artifact SHA-256:
-  `eb399698f5e82dbe6d401c360e035b58f14153add9b5f434629751045565373a`
+  `0e3731e052869896abf3fe918c6307c1befe14bf80c8df47d66cf906ef2eeffd`
 - Baseline: `POST_BF_V1`
 - Candidate model: publisher `google`, model `gemini-3.5-flash-lite`; the same
   string is an owner-selected **draft expectation**, not provider-observed
@@ -115,6 +151,27 @@ Required properties:
 - Realtime capture population is unsampled and independent of Gate E. Any
   legacy operational replay sample is a separate population and is not
   admissible as Gate E data.
+- Draft frozen corpus canonical SHA-256:
+  `e70ce49dbd5a5afae19603342dfd10352bc6b965eebf4f77fe6d4fe1b0c9c4dd`.
+- Draft frozen rubric canonical SHA-256:
+  `c74a057ef131477da86ff3cfd6c0d1024a0479632bd156ec3fd0e39b1aa3d5ed`.
+- Draft caps: one identity-observation request; at most 55 scored requests,
+  currently 27 registered semantic-calibration probes plus 14 candidate and
+  14 interpretation calls; 1,024 output tokens/request, 32,768 total output
+  tokens, 30-second provider deadline, 15-minute run deadline, concurrency one,
+  `OFFLINE_NO_PAGE`, and side effects forbidden.
+- The governed ordering and abort matrix are defined in
+  `../GATE_E_PREPROD_EXECUTION_PLAN.md`. Those source artifacts remain draft
+  prerequisites and do not themselves constitute registration.
+- Candidate output V2 binds each text segment to a typed semantic role. Exact
+  evidence hashes, product binding, clarification/action targets and effect
+  claims are checked against both case-specific frozen obligations and the
+  separately interpreted wording. Candidate-authored labels cannot satisfy
+  an obligation by themselves.
+- The scored-run boundary internally derives Git provenance, frozen artifacts,
+  actual request bytes, system time/deadlines and append-only evidence. A
+  caller-created proof, alternate corpus/rubric, model port, clock or echoed
+  request identity is not scoring authority.
 
 This source contract is not a pre-registration. A scored run becomes admissible
 only after a separate immutable corpus/rubric artifact is committed before the

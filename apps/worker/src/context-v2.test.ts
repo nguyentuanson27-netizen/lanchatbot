@@ -201,9 +201,17 @@ describe("DF09 final Context V2 capture", () => {
     const send = vi.fn(async (request: Readonly<{ url: string; body: string }>) => ({
       payload: {
         candidates: [{ content: { parts: [{ text: JSON.stringify({
-          schemaVersion: 1,
-          contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V1",
-          reply: "Ứng viên đánh giá, không gửi khách hàng.",
+          schemaVersion: 2,
+          contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
+          contextHash: eligibility.context.contextHash,
+          productBinding: {
+            status: eligibility.context.productBinding.status,
+            productIds: eligibility.context.productBinding.productIds,
+          },
+          segments: [{
+            kind: "GENERAL",
+            text: "Ứng viên đánh giá, không gửi khách hàng.",
+          }],
           strategy: "HOLD_POSITION",
           cta: "NONE",
         }) }] } }],
