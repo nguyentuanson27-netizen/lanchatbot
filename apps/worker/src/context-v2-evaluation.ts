@@ -5,6 +5,7 @@ import type {
   CandidateRequestIdentity,
   ContextV2CandidateModelPort,
 } from "./context-v2-candidate.js";
+import { GATE_E_FULL_POPULATION_POLICY_V1 } from "./gate-e-registration-policy.js";
 import {
   CandidateProviderError,
   CONTEXT_V2_CANDIDATE_MODEL_ID,
@@ -13,9 +14,9 @@ import {
   deriveCandidateRequestIdentity,
 } from "./context-v2-candidate.js";
 
-export const DF10_GATE_E_PLAN_V1 = Object.freeze({
-  schemaVersion: 1 as const,
-  contractVersion: "DF10_GATE_E_PLAN_V1" as const,
+export const DF10_GATE_E_PLAN_V2 = Object.freeze({
+  schemaVersion: 2 as const,
+  contractVersion: "DF10_GATE_E_PLAN_V2" as const,
   registrationStatus: "DRAFT_UNREGISTERED" as const,
   baseline: "POST_BF_V1" as const,
   candidateModel: {
@@ -29,7 +30,7 @@ export const DF10_GATE_E_PLAN_V1 = Object.freeze({
   },
   scoredCorpus: {
     name: "FROZEN_POST_GATE_BF_V1_CORPUS" as const,
-    inclusion: "ALL_FROZEN_CORPUS_ITEMS" as const,
+    inclusion: GATE_E_FULL_POPULATION_POLICY_V1.inclusion,
     mandatoryStrata: [
       "CLAIM_SAFETY",
       "CONTEXT_INTEGRITY",
@@ -49,10 +50,11 @@ export const DF10_GATE_E_PLAN_V1 = Object.freeze({
   evidenceCertification: {
     lifecycle: "APPEND_UNFINALIZED_BODY_THEN_APPEND_VERIFIED_FINALIZATION" as const,
     authority: "FINALIZATION_REQUIRED" as const,
-    deadlineAuthority: "ATOMIC_STORE_TRANSACTION_NOT_AFTER" as const,
-    commitTimeAuthority: "STORE_TRANSACTION_METADATA_OUTSIDE_EVIDENCE_HASH" as const,
+    deadlineAuthority: "DB_FINAL_PRECOMMIT_ADMISSION_BOUNDARY_NOT_AFTER" as const,
+    admissionTimeAuthority:
+      "STORE_BOUNDARY_AT_OUTSIDE_EVIDENCE_HASH_NOT_COMMIT_TIME" as const,
     idempotencyAuthority:
-      "ALREADY_PRESENT_RETURNS_ORIGINAL_STORE_COMMIT_METADATA_NO_REWRITE" as const,
+      "ALREADY_PRESENT_RETURNS_ORIGINAL_ADMISSION_METADATA_NO_REWRITE" as const,
   },
   diagnosticSampling: {
     contractVersion: "DF10_DIAGNOSTIC_SAMPLE_V1" as const,
@@ -69,7 +71,8 @@ export const DF10_GATE_E_PLAN_V1 = Object.freeze({
     ],
   },
   thresholds: {
-    eligibleCoverageMinimum: 0.95,
+    eligibleCoverageMinimum:
+      GATE_E_FULL_POPULATION_POLICY_V1.eligibleCoverageMinimum,
     claimSafetyMinimum: 1,
     contextIntegrityMinimum: 1,
     sideEffectViolationMaximum: 0,
@@ -84,16 +87,16 @@ function sha256(value: string): string {
 }
 
 export const DF10_GATE_E_PLAN_ARTIFACT_SHA256 = sha256(
-  canonicalJsonV1(DF10_GATE_E_PLAN_V1),
+  canonicalJsonV1(DF10_GATE_E_PLAN_V2),
 );
 
 export function selectedForDiagnosticEvaluation(itemId: string): boolean {
   if (!itemId.trim()) throw new Error("DF10_GATE_E_ITEM_ID_REQUIRED");
   const bucket = Number.parseInt(
-    sha256(`${DF10_GATE_E_PLAN_V1.diagnosticSampling.salt}:${itemId}`).slice(0, 8),
+    sha256(`${DF10_GATE_E_PLAN_V2.diagnosticSampling.salt}:${itemId}`).slice(0, 8),
     16,
   ) / 0x1_0000_0000;
-  return bucket < DF10_GATE_E_PLAN_V1.diagnosticSampling.rate;
+  return bucket < DF10_GATE_E_PLAN_V2.diagnosticSampling.rate;
 }
 
 export interface GateERequestRegistration {
@@ -148,7 +151,7 @@ export function createDraftEvaluationManifest(input: Readonly<{
       requestIdentity: derived,
     };
   });
-  const rubricHash = sha256(canonicalJsonV1(DF10_GATE_E_PLAN_V1.rubric));
+  const rubricHash = sha256(canonicalJsonV1(DF10_GATE_E_PLAN_V2.rubric));
   const draft = {
     schemaVersion: 1 as const,
     contractVersion: "DF10_DRAFT_EVALUATION_MANIFEST_V1" as const,
@@ -166,7 +169,7 @@ export function createDraftEvaluationManifest(input: Readonly<{
 
 function assertDraftManifestIntegrity(manifest: DraftEvaluationManifest): void {
   if (manifest.planArtifactHash !== DF10_GATE_E_PLAN_ARTIFACT_SHA256 ||
-      manifest.rubricHash !== sha256(canonicalJsonV1(DF10_GATE_E_PLAN_V1.rubric))) {
+      manifest.rubricHash !== sha256(canonicalJsonV1(DF10_GATE_E_PLAN_V2.rubric))) {
     throw new Error("DF10_MANIFEST_PLAN_IDENTITY_INVALID");
   }
   const { manifestHash, ...draft } = manifest;

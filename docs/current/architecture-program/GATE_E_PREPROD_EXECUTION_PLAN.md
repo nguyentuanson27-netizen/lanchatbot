@@ -18,6 +18,8 @@ source/tooling PR (this plan; DRAFT_UNREGISTERED)
   -> one redacted provider-identity observation against P
   -> registration PR R binds P + observation + exact corpus/rubric/requests
   -> exact-head review + owner merge authorization for R
+  -> register immutable population anchor from merged R through the dedicated
+     registration-writer capability
   -> scored run S proves R is an ancestor and predates S
   -> append-only redacted evidence + Gate E verdict PR
   -> explicit Gate E acceptance
@@ -34,6 +36,9 @@ The observation uses the first canonical corpus item after sorting by
 `itemId`. The exact request is rebuilt with `buildCandidateRequest`, compared
 byte-for-byte through its registered `CandidateRequestIdentity`, and sent once
 through `CandidateVertexTransport`.
+
+The future provider resource location is fixed to `global`. This source change
+does not provision credentials, perform observation, or authorize a request.
 
 Only these fields may leave the observation boundary:
 
@@ -70,7 +75,7 @@ corpus or rubric is not registerable.
   `e70ce49dbd5a5afae19603342dfd10352bc6b965eebf4f77fe6d4fe1b0c9c4dd`
 - Rubric version: `DF10_GATE_E_RUBRIC_V1`
 - Rubric canonical SHA-256:
-  `c74a057ef131477da86ff3cfd6c0d1024a0479632bd156ec3fd0e39b1aa3d5ed`
+  `89a830334787c33a8790e6c4a73355e9210f8e449037fc993e30ce6470834986`
 - Population: all 14 frozen items; no scoring sample.
 - Data: controlled PII-free fixtures only; no raw transcript, customer hash,
   phone, address, email, provider payload, token, or credential.
@@ -155,31 +160,41 @@ Registration fails if any blob, canonical hash, request identity, source
 fingerprint, ancestor relation, or time ordering differs. The source
 fingerprint is re-derived both at candidate revision P and at scored-run
 revision S; both must equal the registered fingerprint. A registration artifact
-must already be an ancestor of S, and its commit time must precede the run
-start. The scored runner also requires this verified proof and binds it into the
+must already be an ancestor of S, and its commit time must strictly precede the
+run start; equality is inadmissible. The scored runner also requires this
+verified proof and binds it into the
 redacted evidence hash before it can call the model.
 
-The scored runner has one public orchestration boundary. It accepts only the
+Population registration and scoring have disjoint public capabilities. The
+registration boundary derives the exact sorted item-ID population and all
+registration/corpus/rubric/plan hashes from the verified clean exact-head Git
+bundle, then appends the immutable anchor. It cannot append evidence. The
+scored runner accepts only the
 registration path plus Git, provider-transport and deadline-enforcing
 append-only evidence-store capabilities. It does not accept a caller-created proof, manifest, corpus,
 rubric, clock, candidate output or request identity. It verifies clean exact
 `HEAD == refs/remotes/origin/main`, reads and verifies the registration and
-frozen artifacts internally, builds the exact provider request bytes at the
+frozen artifacts internally, and requires the exact registered population
+anchor before the first provider request. It builds the exact provider request bytes at the
 send boundary, applies the provider deadline around the entire transport, and
 rechecks clean unchanged refs after the unfinalized evidence-body append. It
 then asks the store to append a separate hash-bound finalization record with
 `notAfter` equal to the original run deadline. The store must enforce that
-deadline with its own transaction clock in the same atomic commit; abort is
-only an early-cancellation aid. The body alone is always
+deadline with its own DB clock at the final owned pre-commit admission boundary
+in the same atomic transaction; abort is only an early-cancellation aid. The
+body alone is always
 `UNFINALIZED_TECHNICAL_EVIDENCE`. Verdict code receives only the two expected
-hashes, retrieves both records plus immutable store transaction metadata, and
-requires the finalization commit time to be within `notAfter`. Store metadata
-is outside the finalization content hash, so no receipt or third-record
-self-reference is created. Caller-supplied self-consistent objects are not
+hashes plus the expected population-anchor hash, retrieves the anchor and both
+records plus immutable `admittedAt` metadata, and
+requires the finalization admission boundary to be within `notAfter`.
+`admittedAt` / `storeBoundaryAt` is a final pre-commit boundary timestamp, not
+exact commit time or post-commit time. Store admission metadata is outside the
+finalization content hash, so no receipt or third-record self-reference is
+created. Caller-supplied self-consistent objects are not
 certification evidence. Scored execution remains blocked until a concrete
 store adapter proves these V2 semantics; a structural port or test fake is not
 durable-store evidence. For an existing identical hash, `ALREADY_PRESENT`
-returns the original transaction commit time and performs no record or metadata
+returns the original admission metadata and performs no record or metadata
 rewrite, including on a retry after `notAfter`. Existing conflicting content is
 `HASH_CONFLICT`; the atomic deadline check applies before creating an absent
 record. A concrete adapter must prove these ordering and idempotency properties,
@@ -219,8 +234,8 @@ Stop without scoring or Gate acceptance when any of these occurs:
 - any repository step runs and fails;
 - the claim guard, Context integrity, side-effect assertion or MUST_PASS case
   fails;
-- evidence-store write is partial, ambiguous, non-append-only, committed after
-  its atomic `notAfter`, or lacks trusted transaction metadata;
+- evidence-store write is partial, ambiguous, non-append-only, admitted after
+  its atomic `notAfter`, or lacks trusted admission metadata;
 - semantic-interpreter policy/probe calibration, output hash or actual request
   identity differs from the registered contract;
 - the unfinalized evidence body has no valid hash-bound terminal finalization;

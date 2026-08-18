@@ -48,3 +48,24 @@ Run retention at least daily and alert when it has not succeeded for 26 hours. B
 - Meta send and Pancake tag use separate Outbox tables.
 - `AMBIGUOUS` Meta sends are not automatically retried.
 - The analytical history contains `customer_hash`, redacted text and hashed provider IDs only.
+
+## Gate E evidence boundary
+
+Migration `0034_gate_e_evidence_store_v2` defines a dedicated source-only,
+append-only evidence store. Application code uses only
+the population-anchor register/read functions and
+`lana_gate_e_append_evidence_v2` / hash-scoped evidence reader through three
+disjoint no-login roles. The registration writer cannot append evidence; the
+evidence writer cannot register a population; none has table DML. The persisted
+`admitted_at` value is the database clock sampled at the final owned pre-commit
+admission boundary. It is not an exact or post-commit timestamp. The store is
+explicitly rooted in the `public` schema. Migration `0034` creates and owns its
+roles, tables, functions and triggers. It fails on any occupied owned namespace
+instead of adopting pre-existing roles, objects, ownership or ACLs. Applying
+this migration, provisioning role membership, observing a provider, running a
+score or accepting Gate E each requires separate authorization.
+
+PostgreSQL roles are cluster-wide. Migration 0034 therefore supports one owned
+Gate E store namespace per cluster, even when the cluster contains several
+databases. Operators must choose the governed store database and must not apply
+0034 independently in another database on the same cluster.

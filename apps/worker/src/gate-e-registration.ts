@@ -17,6 +17,13 @@ import {
   guardAgentProposal,
 } from "@lana/business-tools";
 import {
+  assertGateEBodyMatchesRegisteredPopulationV1,
+  assertGateERegisteredPopulationAnchorV1,
+  type GateEPopulationAnchorAppendResultV1,
+  type GateEPopulationAnchorReadRecordV1,
+  type GateERegisteredPopulationAnchorV1,
+} from "@lana/database";
+import {
   CONTEXT_V2_CANDIDATE_MODEL_ID,
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
   buildCandidateRequest,
@@ -26,7 +33,10 @@ import {
 } from "./context-v2-candidate.js";
 import { DF10_GATE_E_PLAN_ARTIFACT_SHA256 } from "./context-v2-evaluation.js";
 import { parseContextV2WithIntegrity } from "./context-v2.js";
-import { GATE_E_FROZEN_REGISTRATION_POLICY_V1 } from "./gate-e-registration-policy.js";
+import {
+  GATE_E_FROZEN_REGISTRATION_POLICY_V1,
+  GATE_E_FULL_POPULATION_POLICY_V1,
+} from "./gate-e-registration-policy.js";
 import {
   GATE_E_INTERPRETER_MODEL_RELATIONSHIP_V1,
   GATE_E_INTERPRETER_VERDICT_DOMAIN_V1,
@@ -184,14 +194,15 @@ export interface GateERubricV1 {
   readonly contractVersion: "DF10_GATE_E_RUBRIC_V1";
   readonly requiredStrata: readonly GateEStratum[];
   readonly thresholds: Readonly<{
-    eligibleCoverageMinimum: 0.95;
+    eligibleCoverageMinimum:
+      typeof GATE_E_FULL_POPULATION_POLICY_V1.eligibleCoverageMinimum;
     claimSafetyMinimum: 1;
     contextIntegrityMinimum: 1;
     sideEffectViolationMaximum: 0;
     mustPassMinimum: 1;
   }>;
   readonly scoring: Readonly<{
-    population: "ALL_FROZEN_CORPUS_ITEMS";
+    population: typeof GATE_E_FULL_POPULATION_POLICY_V1.inclusion;
     runtimeClaimGuardRequired: true;
     semanticInterpreterRequired: true;
     interpreterModelRelationship: typeof GATE_E_INTERPRETER_MODEL_RELATIONSHIP_V1;
@@ -265,7 +276,20 @@ export interface GateEScoredRunGitReader extends GateEGitEvidenceReader {
   isWorktreeClean(): Promise<boolean>;
 }
 
-export interface GateEEvidenceStoreV2 {
+export interface GateEPopulationAnchorReaderV1 {
+  readPopulationAnchorByHash(
+    populationAnchorHash: string,
+  ): Promise<GateEPopulationAnchorReadRecordV1 | null>;
+}
+
+export interface GateEPopulationAnchorWriterV1 {
+  appendRegisteredPopulationAnchorAtomically(input: Readonly<{
+    populationAnchor: GateERegisteredPopulationAnchorV1;
+    signal: AbortSignal;
+  }>): Promise<GateEPopulationAnchorAppendResultV1>;
+}
+
+export interface GateEEvidenceStoreV2 extends GateEPopulationAnchorReaderV1 {
   appendBeforeDeadlineAtomically(input: Readonly<{
     evidenceHash: string;
     evidence: Readonly<Record<string, unknown>>;
@@ -276,20 +300,21 @@ export interface GateEEvidenceStoreV2 {
       disposition: "APPENDED" | "ALREADY_PRESENT";
       evidenceHash: string;
       /**
-       * Immutable timestamp of the transaction that first stored this hash.
-       * ALREADY_PRESENT must never substitute retry/read time or rewrite it.
+       * DB-authoritative final pre-commit admission boundary timestamp.
+       * This is not an exact/post-commit timestamp. ALREADY_PRESENT must never
+       * substitute retry/read time or rewrite it.
        */
-      originalCommittedAt: string;
+      admittedAt: string;
     }>
     | Readonly<{
       disposition: "DEADLINE_EXPIRED";
       evidenceHash: string;
-      committedAt: null;
+      admittedAt: null;
     }>
     | Readonly<{
       disposition: "HASH_CONFLICT";
       evidenceHash: string;
-      committedAt: null;
+      admittedAt: null;
     }>
   >;
 }
@@ -298,24 +323,24 @@ export function assertGateEEvidenceAppendReceiptV2(input: Readonly<{
   result: Readonly<{
     disposition: "APPENDED" | "ALREADY_PRESENT";
     evidenceHash: string;
-    originalCommittedAt: string;
+    admittedAt: string;
   }>;
   expectedEvidenceHash: string;
   notAfter: string;
 }>): Readonly<{
   disposition: "APPENDED" | "ALREADY_PRESENT";
-  originalCommittedAt: string;
+  admittedAt: string;
 }> {
-  const originalCommittedAt = Date.parse(input.result.originalCommittedAt);
+  const admittedAt = Date.parse(input.result.admittedAt);
   const notAfter = Date.parse(input.notAfter);
   if (input.result.evidenceHash !== input.expectedEvidenceHash ||
-      !Number.isFinite(originalCommittedAt) || !Number.isFinite(notAfter) ||
-      originalCommittedAt > notAfter) {
+      !Number.isFinite(admittedAt) || !Number.isFinite(notAfter) ||
+      admittedAt > notAfter) {
     throw new Error("GATE_E_EVIDENCE_APPEND_MISMATCH");
   }
   return Object.freeze({
     disposition: input.result.disposition,
-    originalCommittedAt: input.result.originalCommittedAt,
+    admittedAt: input.result.admittedAt,
   });
 }
 
@@ -327,6 +352,99 @@ export interface GateERegistrationProvenanceProofV1 {
   readonly scoredRunRevision: string;
   readonly registrationCommitTime: string;
   readonly scoredRunStartedAt: string;
+}
+
+export function deriveGateERegisteredPopulationAnchorV1(input: Readonly<{
+  corpus: GateECorpusV1;
+  manifest: RegisteredGateEManifestV1;
+  proof: GateERegistrationProvenanceProofV1;
+}>): GateERegisteredPopulationAnchorV1 {
+  const corpusItemIds = Object.freeze(input.corpus.items
+    .map(({ itemId }) => itemId)
+    .sort());
+  const anchorBody = Object.freeze({
+    schemaVersion: 1 as const,
+    contractVersion: "DF10_GATE_E_REGISTERED_POPULATION_ANCHOR_V1" as const,
+    registrationCommit: input.proof.registrationCommit,
+    registrationBlobOid: input.proof.registrationBlobOid,
+    manifestHash: input.manifest.manifestHash,
+    corpusHash: input.manifest.corpusHash,
+    rubricHash: input.manifest.rubricHash,
+    planArtifactHash: input.manifest.planArtifactHash,
+    corpusItemIds,
+    populationCount: corpusItemIds.length,
+  });
+  return assertGateERegisteredPopulationAnchorV1(Object.freeze({
+    ...anchorBody,
+    populationAnchorHash: sha256(canonicalJsonV1(anchorBody)),
+  }));
+}
+
+export async function registerGateEPopulationAnchorV1(input: Readonly<{
+  registrationPath: string;
+  git: GateEScoredRunGitReader;
+  populationStore: GateEPopulationAnchorWriterV1;
+}>) {
+  const startedAt = new Date().toISOString();
+  const startedAtMs = Date.parse(startedAt);
+  await withGateERunDeadline(input.git.refreshTrustedRef(), startedAtMs);
+  if (!await withGateERunDeadline(input.git.isWorktreeClean(), startedAtMs)) {
+    throw new Error("GATE_E_TRUSTED_CHECKOUT_DIRTY");
+  }
+  const [headRevision, trustedRevision] = await withGateERunDeadline(Promise.all([
+    input.git.resolveRef("HEAD"),
+    input.git.resolveRef(GATE_E_TRUSTED_SCORED_RUN_REF),
+  ]), startedAtMs);
+  if (!COMMIT_PATTERN.test(headRevision) || headRevision !== trustedRevision) {
+    throw new Error("GATE_E_TRUSTED_EXACT_HEAD_MISMATCH");
+  }
+  const verified = await withGateERunDeadline(verifyGateERegistrationBundle({
+    registrationPath: input.registrationPath,
+    scoredRunRevision: headRevision,
+    scoredRunStartedAt: startedAt,
+    git: input.git,
+  }), startedAtMs);
+  const populationAnchor = deriveGateERegisteredPopulationAnchorV1({
+    corpus: verified.corpus,
+    manifest: verified.manifest,
+    proof: verified.proof,
+  });
+  const [preWriteHead, preWriteTrusted, preWriteClean] =
+    await withGateERunDeadline(Promise.all([
+      input.git.resolveRef("HEAD"),
+      input.git.resolveRef(GATE_E_TRUSTED_SCORED_RUN_REF),
+      input.git.isWorktreeClean(),
+    ]), startedAtMs);
+  if (preWriteHead !== headRevision || preWriteTrusted !== trustedRevision ||
+      !preWriteClean) {
+    throw new Error("GATE_E_TRUSTED_CHECKOUT_CHANGED");
+  }
+  const controller = new AbortController();
+  const receipt = await withGateERunDeadline(
+    input.populationStore.appendRegisteredPopulationAnchorAtomically({
+      populationAnchor,
+      signal: controller.signal,
+    }),
+    startedAtMs,
+    () => controller.abort("GATE_E_RUN_TIMEOUT"),
+  );
+  if (receipt.disposition === "HASH_CONFLICT" ||
+      receipt.populationAnchorHash !== populationAnchor.populationAnchorHash ||
+      receipt.anchoredAt === null ||
+      !Number.isFinite(Date.parse(receipt.anchoredAt))) {
+    throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_APPEND_MISMATCH");
+  }
+  const [finalHead, finalTrusted, finalClean] =
+    await withGateERunDeadline(Promise.all([
+      input.git.resolveRef("HEAD"),
+      input.git.resolveRef(GATE_E_TRUSTED_SCORED_RUN_REF),
+      input.git.isWorktreeClean(),
+    ]), startedAtMs);
+  if (finalHead !== headRevision || finalTrusted !== trustedRevision ||
+      !finalClean) {
+    throw new Error("GATE_E_TRUSTED_CHECKOUT_CHANGED");
+  }
+  return Object.freeze({ populationAnchor, receipt });
 }
 
 export interface GateEItemScoreV1 {
@@ -847,12 +965,13 @@ function assertRubric(rubric: GateERubricV1): void {
   ];
   if (canonicalJsonV1([...rubric.requiredStrata].sort()) !==
       canonicalJsonV1([...exactStrata].sort()) ||
-      rubric.thresholds.eligibleCoverageMinimum !== 0.95 ||
+      rubric.thresholds.eligibleCoverageMinimum !==
+        GATE_E_FULL_POPULATION_POLICY_V1.eligibleCoverageMinimum ||
       rubric.thresholds.claimSafetyMinimum !== 1 ||
       rubric.thresholds.contextIntegrityMinimum !== 1 ||
       rubric.thresholds.sideEffectViolationMaximum !== 0 ||
       rubric.thresholds.mustPassMinimum !== 1 ||
-      rubric.scoring.population !== "ALL_FROZEN_CORPUS_ITEMS" ||
+      rubric.scoring.population !== GATE_E_FULL_POPULATION_POLICY_V1.inclusion ||
       rubric.scoring.runtimeClaimGuardRequired !== true ||
       rubric.scoring.semanticInterpreterRequired !== true ||
       rubric.scoring.interpreterModelRelationship !==
@@ -1192,15 +1311,17 @@ function withGateERunDeadline<T>(
 }
 
 function verifyGateEEvidenceCertification(input: Readonly<{
+  populationAnchor: GateERegisteredPopulationAnchorV1;
   body: Readonly<Record<string, unknown>>;
   finalization: Readonly<Record<string, unknown>> | null;
-  bodyCommittedAt: string | null;
-  finalizationCommittedAt: string | null;
+  bodyAdmittedAt: string | null;
+  finalizationAdmittedAt: string | null;
 }>) {
   const bodyKeys = [
     "admissibility", "completedAt", "contractVersion", "executionBoundary",
-    "items", "manifestHash", "registrationProvenance", "schemaVersion",
-    "scoredRunRevision", "startedAt", "summary",
+    "items", "manifestHash", "populationAnchorHash",
+    "registrationProvenance", "schemaVersion", "scoredRunRevision",
+    "startedAt", "summary",
   ];
   const finalizationKeys = [
     "contractVersion", "disposition", "evidenceBodyHash", "finalClean",
@@ -1211,15 +1332,19 @@ function verifyGateEEvidenceCertification(input: Readonly<{
       !hasExactKeys(input.body, bodyKeys) ||
       !hasExactKeys(input.finalization, finalizationKeys) ||
       input.body.schemaVersion !== 1 ||
-      input.body.contractVersion !== "DF10_GATE_E_SCORED_EVIDENCE_BODY_V2" ||
+      input.body.contractVersion !== "DF10_GATE_E_SCORED_EVIDENCE_BODY_V3" ||
       input.body.admissibility !== "UNFINALIZED_TECHNICAL_EVIDENCE" ||
       input.finalization.schemaVersion !== 1 ||
-      input.finalization.contractVersion !== "DF10_GATE_E_RUN_FINALIZATION_V2" ||
+      input.finalization.contractVersion !== "DF10_GATE_E_RUN_FINALIZATION_V3" ||
       input.finalization.disposition !== "FINALIZED_TRUSTED_EXACT_HEAD" ||
       input.finalization.finalClean !== true ||
       !COMMIT_PATTERN.test(String(input.body.scoredRunRevision ?? ""))) {
     throw new Error("GATE_E_EVIDENCE_NOT_FINALIZED");
   }
+  assertGateEBodyMatchesRegisteredPopulationV1({
+    evidence: input.body,
+    populationAnchor: input.populationAnchor,
+  });
   const bodyHash = sha256(canonicalJsonV1(input.body));
   if (input.finalization.evidenceBodyHash !== bodyHash ||
       input.finalization.scoredRunRevision !== input.body.scoredRunRevision ||
@@ -1228,62 +1353,72 @@ function verifyGateEEvidenceCertification(input: Readonly<{
   }
   const preparedAt = Date.parse(String(input.finalization.preparedAt ?? ""));
   const notAfter = Date.parse(String(input.finalization.notAfter ?? ""));
-  const bodyCommittedAt = Date.parse(input.bodyCommittedAt ?? "");
-  const committedAt = Date.parse(input.finalizationCommittedAt ?? "");
+  const bodyAdmittedAt = Date.parse(input.bodyAdmittedAt ?? "");
+  const finalizationAdmittedAt = Date.parse(input.finalizationAdmittedAt ?? "");
   const startedAt = Date.parse(String(input.body.startedAt ?? ""));
   const completedAt = Date.parse(String(input.body.completedAt ?? ""));
-  if (![startedAt, completedAt, preparedAt, notAfter, bodyCommittedAt, committedAt]
+  if (![startedAt, completedAt, preparedAt, notAfter, bodyAdmittedAt,
+    finalizationAdmittedAt]
     .every(Number.isFinite) ||
       completedAt < startedAt || preparedAt < completedAt ||
-      preparedAt > notAfter || bodyCommittedAt > notAfter ||
-      committedAt > notAfter) {
+      preparedAt > notAfter || bodyAdmittedAt > notAfter ||
+      finalizationAdmittedAt > notAfter) {
     throw new Error("GATE_E_EVIDENCE_FINALIZATION_EXPIRED");
   }
-  if (bodyCommittedAt > committedAt) {
-    throw new Error("GATE_E_EVIDENCE_COMMIT_ORDER_INVALID");
+  if (bodyAdmittedAt > finalizationAdmittedAt) {
+    throw new Error("GATE_E_EVIDENCE_ADMISSION_ORDER_INVALID");
   }
   return Object.freeze({
     disposition: "FINALIZED_TRUSTED_EXACT_HEAD" as const,
     evidenceBodyHash: bodyHash,
     finalizationHash: sha256(canonicalJsonV1(input.finalization)),
-    bodyCommittedAt: input.bodyCommittedAt!,
-    finalizationCommittedAt: input.finalizationCommittedAt!,
+    bodyAdmittedAt: input.bodyAdmittedAt!,
+    finalizationAdmittedAt: input.finalizationAdmittedAt!,
   });
 }
 
-export interface GateEEvidenceReaderV2 {
+export interface GateEEvidenceReaderV2 extends GateEPopulationAnchorReaderV1 {
   readByHash(evidenceHash: string): Promise<Readonly<{
     evidence: Readonly<Record<string, unknown>>;
-    /** Immutable timestamp of the transaction that first stored this hash. */
-    originalCommittedAt: string;
+    /** DB-authoritative final pre-commit boundary; never exact commit time. */
+    admittedAt: string;
   }> | null>;
 }
 
 export async function verifyStoredGateEEvidenceCertification(input: Readonly<{
+  populationAnchorHash: string;
   evidenceBodyHash: string;
   finalizationHash: string;
   evidenceStore: GateEEvidenceReaderV2;
 }>) {
-  if (!SHA256_PATTERN.test(input.evidenceBodyHash) ||
+  if (!SHA256_PATTERN.test(input.populationAnchorHash) ||
+      !SHA256_PATTERN.test(input.evidenceBodyHash) ||
       !SHA256_PATTERN.test(input.finalizationHash)) {
     throw new Error("GATE_E_EVIDENCE_REFERENCE_INVALID");
   }
-  const [bodyRecord, finalizationRecord] = await Promise.all([
+  const [populationRecord, bodyRecord, finalizationRecord] = await Promise.all([
+    input.evidenceStore.readPopulationAnchorByHash(input.populationAnchorHash),
     input.evidenceStore.readByHash(input.evidenceBodyHash),
     input.evidenceStore.readByHash(input.finalizationHash),
   ]);
-  if (bodyRecord === null || finalizationRecord === null ||
+  if (populationRecord === null || bodyRecord === null ||
+      finalizationRecord === null ||
+      populationRecord.populationAnchor.populationAnchorHash !==
+        input.populationAnchorHash ||
+      !Number.isFinite(Date.parse(populationRecord.anchoredAt)) ||
       sha256(canonicalJsonV1(bodyRecord.evidence)) !== input.evidenceBodyHash ||
       sha256(canonicalJsonV1(finalizationRecord.evidence)) !==
         input.finalizationHash ||
-      !Number.isFinite(Date.parse(bodyRecord.originalCommittedAt))) {
+      !Number.isFinite(Date.parse(bodyRecord.admittedAt)) ||
+      !Number.isFinite(Date.parse(finalizationRecord.admittedAt))) {
     throw new Error("GATE_E_EVIDENCE_RECORD_MISSING_OR_MISMATCHED");
   }
   return verifyGateEEvidenceCertification({
+    populationAnchor: populationRecord.populationAnchor,
     body: bodyRecord.evidence,
     finalization: finalizationRecord.evidence,
-    bodyCommittedAt: bodyRecord.originalCommittedAt,
-    finalizationCommittedAt: finalizationRecord.originalCommittedAt,
+    bodyAdmittedAt: bodyRecord.admittedAt,
+    finalizationAdmittedAt: finalizationRecord.admittedAt,
   });
 }
 
@@ -1370,6 +1505,25 @@ export async function executeGateEScoredRun(input: Readonly<{
         entry.contextHash !== items[index]?.context.contextHash
       )) {
     throw new Error("GATE_E_SCORED_POPULATION_MISMATCH");
+  }
+  const populationAnchor = deriveGateERegisteredPopulationAnchorV1({
+    corpus,
+    manifest,
+    proof,
+  });
+  const storedPopulationAnchor = await withGateERunDeadline(
+    input.evidenceStore.readPopulationAnchorByHash(
+      populationAnchor.populationAnchorHash,
+    ),
+    startedAtMs,
+  );
+  if (storedPopulationAnchor === null) {
+    throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_REQUIRED");
+  }
+  if (canonicalJsonV1(storedPopulationAnchor.populationAnchor) !==
+        canonicalJsonV1(populationAnchor) ||
+      !Number.isFinite(Date.parse(storedPopulationAnchor.anchoredAt))) {
+    throw new Error("GATE_E_REGISTERED_POPULATION_ANCHOR_MISMATCH");
   }
   const modelResource = manifest.requests[0]?.requestIdentity.modelResource;
   if (typeof modelResource !== "string" || modelResource.length === 0) {
@@ -1495,11 +1649,12 @@ export async function executeGateEScoredRun(input: Readonly<{
   }
   const evidenceBody = Object.freeze({
     schemaVersion: 1 as const,
-    contractVersion: "DF10_GATE_E_SCORED_EVIDENCE_BODY_V2" as const,
+    contractVersion: "DF10_GATE_E_SCORED_EVIDENCE_BODY_V3" as const,
     admissibility: "UNFINALIZED_TECHNICAL_EVIDENCE" as const,
     executionBoundary: "CLEAN_TRUSTED_EXACT_HEAD_REQUEST_BYTES_V1" as const,
     scoredRunRevision: headRevision,
     manifestHash: manifest.manifestHash,
+    populationAnchorHash: populationAnchor.populationAnchorHash,
     registrationProvenance: proof,
     startedAt,
     completedAt: completedAt.toISOString(),
@@ -1543,7 +1698,7 @@ export async function executeGateEScoredRun(input: Readonly<{
   }
   const finalization = Object.freeze({
     schemaVersion: 1 as const,
-    contractVersion: "DF10_GATE_E_RUN_FINALIZATION_V2" as const,
+    contractVersion: "DF10_GATE_E_RUN_FINALIZATION_V3" as const,
     disposition: "FINALIZED_TRUSTED_EXACT_HEAD" as const,
     evidenceBodyHash: evidenceHash,
     scoredRunRevision: headRevision,
@@ -1586,10 +1741,11 @@ export async function executeGateEScoredRun(input: Readonly<{
     throw new Error("GATE_E_FINALIZATION_APPEND_MISMATCH");
   }
   const certification = verifyGateEEvidenceCertification({
+    populationAnchor,
     body: evidenceBody,
     finalization,
-    bodyCommittedAt: storedReceipt.originalCommittedAt,
-    finalizationCommittedAt: finalizedReceipt.originalCommittedAt,
+    bodyAdmittedAt: storedReceipt.admittedAt,
+    finalizationAdmittedAt: finalizedReceipt.admittedAt,
   });
   return Object.freeze({
     ...evidenceBody,

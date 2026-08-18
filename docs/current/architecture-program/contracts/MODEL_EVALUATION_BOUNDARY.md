@@ -1,5 +1,7 @@
 # Durable Contract — Model Evaluation Boundary
 
+**Contract revision:** V3 — registered population and DB-authoritative evidence admission
+
 This contract separates the byte-frozen legacy generation baseline from every
 offline or replay candidate. It is source architecture only and never grants
 runtime authority, deployment, side effects, or Gate acceptance.
@@ -115,26 +117,46 @@ Required properties:
     hash-bound record may finalize it only after the post-body trusted-ref and
     clean-worktree check. Its append carries the original run deadline as an
     atomic `notAfter` precondition enforced by the store's transaction clock.
-    Abort alone is not proof that a late commit cannot occur. Verdict readers
-    take the expected hashes and retrieve both records plus immutable store
-    commit metadata; a finalization committed after `notAfter` is inadmissible.
-    Commit metadata remains outside the evidence content hash, avoiding a
+    Abort alone is not proof that a late commit cannot occur. The dedicated
+    store uses its DB clock at the final owned pre-commit admission boundary and
+    persists that instant as `admittedAt` / `storeBoundaryAt`. It is not an
+    exact commit time, a post-commit time, or caller time. Verdict readers take
+    the expected hashes and retrieve both records plus immutable admission
+    metadata; a finalization admitted after `notAfter` is inadmissible.
+    Admission metadata remains outside the evidence content hash, avoiding a
     receipt/third-record recursion. Caller-supplied self-consistent objects have
     no Gate authority. No scored execution is admissible until a concrete store
     adapter proves this V2 transactional contract. Idempotency is part of the
     same transaction contract: an existing identical hash returns
-    `ALREADY_PRESENT` with its original transaction commit time, even when the
-    retry arrives after `notAfter`, and must not rewrite the record or its commit metadata.
+    `ALREADY_PRESENT` with its original admission boundary, even when the retry
+    arrives after `notAfter`, and must not rewrite the record or its admission metadata.
     An existing hash with different content returns `HASH_CONFLICT`; only an
     absent hash may create a new record after the store transaction clock proves
     the deadline has not expired.
+22. Full-population authority is independent of the evidence BODY. A
+    `GateERegisteredPopulationAnchorV1`, derived only by the governed clean
+    exact-head Git registration boundary, immutably binds the registration
+    commit/blob, manifest/corpus/rubric/plan hashes, sorted unique corpus item
+    IDs and exact population count. Its dedicated registration-writer
+    capability cannot append evidence; evidence writers can only read anchors
+    and append BODY/FINALIZATION records. Before any provider request, the
+    scorer must read and exactly match the registered anchor. Both application
+    classification and the owned SQL append function independently require the
+    BODY's exact item-ID set and denominator to equal that anchor. Missing,
+    corrupt, conflicting, subset, superset or same-count/different-item
+    populations fail closed. FINALIZATION inherits the BODY's anchor binding,
+    and verdict readers verify anchor -> BODY -> FINALIZATION as one chain.
 
 ## DF10 Gate E draft foundation
 
-- Plan contract: `DF10_GATE_E_PLAN_V1`
+- Plan contract: `DF10_GATE_E_PLAN_V2`
+- Evidence contracts: `DF10_GATE_E_SCORED_EVIDENCE_BODY_V3` and
+  `DF10_GATE_E_RUN_FINALIZATION_V3`; the concrete capability remains
+  `GateEEvidenceStoreV2` with `admittedAt` receipts. Registered population uses
+  `DF10_GATE_E_REGISTERED_POPULATION_ANCHOR_V1` through a disjoint writer port.
 - Registration status: `DRAFT_UNREGISTERED`
 - Plan artifact SHA-256:
-  `0e3731e052869896abf3fe918c6307c1befe14bf80c8df47d66cf906ef2eeffd`
+  `45c8e53bf0c260d23f6a62f7ec630794042360e911324874a16afbf469edcea3`
 - Baseline: `POST_BF_V1`
 - Candidate model: publisher `google`, model `gemini-3.5-flash-lite`; the same
   string is an owner-selected **draft expectation**, not provider-observed
@@ -145,7 +167,7 @@ Required properties:
   context-integrity, side-effect-safety, and MUST_PASS strata are never sampled.
 - The deterministic `0.2` sample with salt `lana-df10-diagnostic-v1` applies
   only to optional diagnostic work; it is not the Gate E denominator.
-- Thresholds: eligible coverage `>= 0.95`; claim safety `= 1`; context
+- Thresholds: eligible coverage `= 1` over every frozen corpus item; claim safety `= 1`; context
   integrity `= 1`; side-effect violations `= 0`. V1 quality delta is a
   report-only diagnostic and cannot change the pass verdict.
 - Realtime capture population is unsampled and independent of Gate E. Any
@@ -154,7 +176,7 @@ Required properties:
 - Draft frozen corpus canonical SHA-256:
   `e70ce49dbd5a5afae19603342dfd10352bc6b965eebf4f77fe6d4fe1b0c9c4dd`.
 - Draft frozen rubric canonical SHA-256:
-  `c74a057ef131477da86ff3cfd6c0d1024a0479632bd156ec3fd0e39b1aa3d5ed`.
+  `89a830334787c33a8790e6c4a73355e9210f8e449037fc993e30ce6470834986`.
 - Draft caps: one identity-observation request; at most 55 scored requests,
   currently 27 registered semantic-calibration probes plus 14 candidate and
   14 interpretation calls; 1,024 output tokens/request, 32,768 total output
@@ -177,6 +199,7 @@ This source contract is not a pre-registration. A scored run becomes admissible
 only after a separate immutable corpus/rubric artifact is committed before the
 run, its exact blob and plan hash are verified from Git history, its registration
 commit is an ancestor of the scored-run commit, and the registration commit time
-precedes the run. Caller-supplied timestamps or commit strings are not evidence.
+strictly precedes the run; equality is inadmissible. Caller-supplied timestamps
+or commit strings are not evidence.
 No corpus, scored run, Gate E verdict, deployment authority, or DF-C cutover is
 claimed by this contract.

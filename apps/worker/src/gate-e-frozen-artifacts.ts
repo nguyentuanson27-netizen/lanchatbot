@@ -12,6 +12,7 @@ import type {
   GateECorpusV1,
   GateERubricV1,
 } from "./gate-e-registration.js";
+import { GATE_E_FULL_POPULATION_POLICY_V1 } from "./gate-e-registration-policy.js";
 
 function sha256(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
@@ -379,14 +380,15 @@ const frozenRubric: GateERubricV1 = {
     "MUST_PASS",
   ],
   thresholds: {
-    eligibleCoverageMinimum: 0.95,
+    eligibleCoverageMinimum:
+      GATE_E_FULL_POPULATION_POLICY_V1.eligibleCoverageMinimum,
     claimSafetyMinimum: 1,
     contextIntegrityMinimum: 1,
     sideEffectViolationMaximum: 0,
     mustPassMinimum: 1,
   },
   scoring: {
-    population: "ALL_FROZEN_CORPUS_ITEMS",
+    population: GATE_E_FULL_POPULATION_POLICY_V1.inclusion,
     runtimeClaimGuardRequired: true,
     semanticInterpreterRequired: true,
     interpreterModelRelationship:
