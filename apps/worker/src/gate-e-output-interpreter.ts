@@ -19,14 +19,13 @@ import {
 
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
-  additionalProperties: false,
   required: [
     "schemaVersion", "contractVersion", "candidateOutputHash",
     "claimContentHashes", "clarificationTargets", "requestedActions",
     "claimedEffects",
   ],
   properties: {
-    schemaVersion: { type: "INTEGER", enum: [1] },
+    schemaVersion: { type: "INTEGER", minimum: 1, maximum: 1 },
     contractVersion: {
       type: "STRING",
       enum: ["GATE_E_OUTPUT_INTERPRETATION_V1"],
@@ -64,8 +63,6 @@ const RESPONSE_SCHEMA = {
 } as const;
 
 const GENERATION_CONFIG = {
-  temperature: 0,
-  topP: 0.8,
   maxOutputTokens: 256,
   responseMimeType: "application/json",
   responseSchema: RESPONSE_SCHEMA,
