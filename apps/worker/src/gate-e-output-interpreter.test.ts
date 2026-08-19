@@ -43,6 +43,32 @@ describe("Gate E semantic interpreter capability boundary", () => {
     expect(registration.policyHash).toBe(hash(canonicalJsonV1(registration.policy)));
   });
 
+  it("uses only Gemini 3.5 Flash-Lite compatible schema controls", () => {
+    const request = buildGateEInterpretationRequest({
+      modelResource,
+      interpretationInput: GATE_E_INTERPRETATION_PROBES_V1[0]!.input,
+    });
+    const body = JSON.parse(request.body) as {
+      generationConfig: {
+        responseSchema: {
+          additionalProperties?: unknown;
+          properties: { schemaVersion: Record<string, unknown> };
+        };
+        temperature?: unknown;
+        topP?: unknown;
+      };
+    };
+    expect(body.generationConfig.responseSchema.properties.schemaVersion).toEqual({
+      type: "INTEGER",
+      minimum: 1,
+      maximum: 1,
+    });
+    expect(body.generationConfig.responseSchema)
+      .not.toHaveProperty("additionalProperties");
+    expect(body.generationConfig).not.toHaveProperty("temperature");
+    expect(body.generationConfig).not.toHaveProperty("topP");
+  });
+
   it("closes the positive and adversarial-negative matrix for every verdict class", () => {
     expect(() => assertGateEInterpreterProbeCoverageV1(
       GATE_E_INTERPRETATION_PROBES_V1,
