@@ -200,10 +200,40 @@ describe("Context V2 candidate capability", () => {
       context: context(),
     });
     expect(request.identity.requestEnvelopeHash).toBe(
-      "916eed91a467cec451368914225edf79175a9f8a25516f04086b391f94708a45",
+      "1219fa26dbb7516b3721350a8a5b285a81c878bdb6030b2746d25c9f37d6354f",
     );
     expect(request.body).toContain("responseSchema");
     expect(request.body).toContain("safetySettings");
+    const body = JSON.parse(request.body) as {
+      generationConfig: {
+        responseSchema: {
+          additionalProperties?: unknown;
+          properties: {
+            schemaVersion: Record<string, unknown>;
+            productBinding: { additionalProperties?: unknown };
+            segments: {
+              items: { additionalProperties?: unknown };
+            };
+          };
+        };
+        temperature?: unknown;
+        topP?: unknown;
+      };
+    };
+    expect(body.generationConfig.responseSchema.properties.schemaVersion).toEqual({
+      type: "INTEGER",
+      minimum: 2,
+      maximum: 2,
+    });
+    expect(body.generationConfig.responseSchema).not.toHaveProperty(
+      "additionalProperties",
+    );
+    expect(body.generationConfig.responseSchema.properties.productBinding)
+      .not.toHaveProperty("additionalProperties");
+    expect(body.generationConfig.responseSchema.properties.segments.items)
+      .not.toHaveProperty("additionalProperties");
+    expect(body.generationConfig).not.toHaveProperty("temperature");
+    expect(body.generationConfig).not.toHaveProperty("topP");
     expect(request.identity).toMatchObject({
       modelResource: expect.stringContaining(CONTEXT_V2_CANDIDATE_MODEL_ID),
       systemInstructionHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
