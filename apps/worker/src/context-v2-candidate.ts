@@ -11,7 +11,6 @@ export type ContextV2CandidateOutput = ContextV2CandidateOutputV2;
 
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
-  additionalProperties: false,
   required: [
     "schemaVersion",
     "contractVersion",
@@ -22,7 +21,7 @@ const RESPONSE_SCHEMA = {
     "cta",
   ],
   properties: {
-    schemaVersion: { type: "INTEGER", enum: [2] },
+    schemaVersion: { type: "INTEGER", minimum: 2, maximum: 2 },
     contractVersion: {
       type: "STRING",
       enum: ["CONTEXT_V2_CANDIDATE_OUTPUT_V2"],
@@ -30,7 +29,6 @@ const RESPONSE_SCHEMA = {
     contextHash: { type: "STRING" },
     productBinding: {
       type: "OBJECT",
-      additionalProperties: false,
       required: ["status", "productIds"],
       properties: {
         status: {
@@ -50,7 +48,6 @@ const RESPONSE_SCHEMA = {
       type: "ARRAY",
       items: {
         type: "OBJECT",
-        additionalProperties: false,
         required: ["kind", "text"],
         properties: {
           kind: {
@@ -115,8 +112,6 @@ const RESPONSE_SCHEMA = {
 } as const;
 
 const GENERATION_CONFIG = {
-  temperature: 0,
-  topP: 0.8,
   maxOutputTokens: 1_024,
   responseMimeType: "application/json",
   responseSchema: RESPONSE_SCHEMA,
