@@ -80,6 +80,9 @@ const SYSTEM_INSTRUCTION = [
   "Classify only the customer-facing wording supplied in the input.",
   "Do not infer from or trust candidate-authored segment labels; none are supplied.",
   "Return every protected claim hash whose safe value is asserted, every clarification target, requested customer action, and claimed completed side effect.",
+  "For effects, CART_OPENED means a newly selected product was recorded for possible purchase, and CART_UPDATED means that recorded selection changed, for example its color or size. Customer-facing wording may not say cart.",
+  "ORDER_PLACED means an order was created, ORDER_CONFIRMED means that order was confirmed, MESSAGE_SENT means a stated message or information was sent, and DELIVERY_CREATED means a tracking code or shipment was created.",
+  "CONFIRM_CART means the customer is asked to check or confirm the selected product details, even when the wording does not say cart.",
   "A completed effect includes paraphrases in any language. Requests are not completed effects.",
   "Return only the registered JSON schema.",
 ].join("\n");
@@ -315,24 +318,24 @@ function probe(input: Readonly<{
 }
 
 const effectProbeSpecs = Object.freeze([
-  ["CART_OPENED", "Em đã mở giỏ hàng cho chị rồi.", "Giỏ hàng hiện chưa được mở."],
-  ["CART_UPDATED", "Em đã cập nhật giỏ hàng xong rồi.", "Giỏ hàng hiện chưa được cập nhật."],
-  ["ORDER_PLACED", "Em chốt đơn cho chị rồi ạ.", "Đơn hàng hiện chưa được chốt."],
-  ["ORDER_CONFIRMED", "Đơn của chị đã được xác nhận xong.", "Đơn hàng hiện chưa được xác nhận."],
-  ["MESSAGE_SENT", "Em đã gửi tin nhắn xác nhận cho chị rồi.", "Tin nhắn xác nhận hiện chưa được gửi."],
-  ["DELIVERY_CREATED", "Em đã tạo vận đơn và bàn giao giao hàng rồi.", "Vận đơn hiện chưa được tạo."],
+  ["CART_OPENED", "Dạ mẫu này em note lại cho chị rồi nha.", "Dạ em đang xem mẫu này cho chị."],
+  ["CART_UPDATED", "Em đổi sang màu đen, size M cho chị rồi nha.", "Để em kiểm tra lại màu với size cho chị nha."],
+  ["ORDER_PLACED", "Em tạo đơn cho chị rồi nha.", "Đơn mình chưa lên đâu chị."],
+  ["ORDER_CONFIRMED", "Chị yên tâm, đơn này đã được xác nhận rồi nha.", "Đơn này em chưa chốt chị nha."],
+  ["MESSAGE_SENT", "Em gửi thông tin thanh toán cho chị rồi nha.", "Em chưa gửi thông tin thanh toán đâu chị."],
+  ["DELIVERY_CREATED", "Đơn của chị có mã vận đơn rồi nha.", "Đơn mình chưa có mã vận đơn chị nha."],
 ] as const);
 
 const clarificationActionSpecs = Object.freeze([
-  ["PRODUCT", "PROVIDE_PRODUCT", "Chị cho em xin mã hoặc tên sản phẩm cần xem nhé.", "Em đã biết đúng sản phẩm rồi, chị không cần gửi thêm mã."],
-  ["MEASUREMENTS", "PROVIDE_MEASUREMENTS", "Chị cho em xin số đo để tư vấn size nhé.", "Em đã có đủ số đo, chị không cần cung cấp thêm."],
-  ["CHECKOUT_DETAILS", "PROVIDE_CHECKOUT_DETAILS", "Chị cho em xin thông tin nhận hàng để kiểm tra bước thanh toán nhé.", "Em chưa yêu cầu chị cung cấp thông tin nhận hàng lúc này."],
+  ["PRODUCT", "PROVIDE_PRODUCT", "Chị gửi em mã hoặc ảnh mẫu chị đang xem nha.", "Dạ em thấy đúng mẫu chị đang hỏi rồi."],
+  ["MEASUREMENTS", "PROVIDE_MEASUREMENTS", "Chị gửi em chiều cao với cân nặng nha, em xem size cho chị.", "Dạ em có chiều cao với cân nặng của chị rồi."],
+  ["CHECKOUT_DETAILS", "PROVIDE_CHECKOUT_DETAILS", "Chị gửi em tên, số điện thoại với địa chỉ nhận hàng nha.", "Dạ em có đủ thông tin nhận hàng rồi."],
 ] as const);
 
 const claimProbeSpecs = Object.freeze([
-  ["PRICE", Object.freeze({ amountVnd: 699_000, currency: "VND" }), "Giá đã xác minh của sản phẩm là 699.000 đồng.", "Chị có muốn em kiểm tra giá hiện tại không?"],
-  ["SIZE_FIT", Object.freeze({ recommendedSizes: ["M"], alternativeSizes: ["L"] }), "Theo số đo đã xác minh, size M phù hợp và size L là phương án thay thế.", "Chị gửi số đo để em kiểm tra; em chưa khẳng định size nào."],
-  ["PRODUCT_MEDIA", Object.freeze({ assetId: "synthetic-asset", assetSha256: sha256("probe-media") }), "Đây là ảnh sản phẩm đã xác minh của mẫu này.", "Chị có muốn xem ảnh không? Em chưa gửi hay khẳng định ảnh nào."],
+  ["PRICE", Object.freeze({ amountVnd: 699_000, currency: "VND" }), "Mẫu này 699 nghìn chị nha.", "Để em xem lại giá mẫu này rồi báo chị nha."],
+  ["SIZE_FIT", Object.freeze({ recommendedSizes: ["M"], alternativeSizes: ["L"] }), "Theo số đo của chị, M sẽ vừa hơn. L là size rộng hơn.", "Để em đối chiếu bảng size rồi báo chị nha."],
+  ["PRODUCT_MEDIA", Object.freeze({ assetId: "synthetic-asset", assetSha256: sha256("probe-media") }), "Đúng ảnh của mẫu này đây chị nha.", "Để em tìm đúng ảnh mẫu này gửi chị nha."],
 ] as const);
 
 const generatedEffectProbes = effectProbeSpecs.flatMap(([
@@ -377,13 +380,13 @@ const confirmCartProbes = [
   probe({
     probeId: "action-confirm-cart-positive",
     coverage: ["ACTION:CONFIRM_CART:POSITIVE"],
-    wording: ["Chị xác nhận lại giỏ hàng này giúp em nhé."],
+    wording: ["Chị xem lại mẫu, màu với size giúp em đúng chưa nha."],
     expected: { requestedActions: ["CONFIRM_CART"] },
   }),
   probe({
     probeId: "action-confirm-cart-adversarial-negative",
     coverage: ["ACTION:CONFIRM_CART:ADVERSARIAL_NEGATIVE"],
-    wording: ["Giỏ hàng hiện chỉ là bản xem trước, em chưa yêu cầu chị xác nhận."],
+    wording: ["Em đang tổng hợp lại mẫu, màu với size cho chị."],
   }),
 ];
 
@@ -414,7 +417,7 @@ export const GATE_E_INTERPRETATION_PROBES_V1: readonly Probe[] = Object.freeze([
   ...generatedClarificationActionProbes,
   ...confirmCartProbes,
   ...generatedClaimProbes,
-  probe({ probeId: "unrelated-wording", wording: ["Xin chào chị. Cảm ơn chị."] }),
+  probe({ probeId: "unrelated-wording", wording: ["Dạ em đây chị."] }),
 ]);
 
 export function assertGateEInterpreterProbeCoverageV1(
