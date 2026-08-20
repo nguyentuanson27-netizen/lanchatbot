@@ -53,6 +53,7 @@ describe("Gate E semantic interpreter capability boundary", () => {
       interpretationInput: GATE_E_INTERPRETATION_PROBES_V1[0]!.input,
     });
     const body = JSON.parse(request.body) as {
+      systemInstruction: { parts: [{ text: string }] };
       generationConfig: {
         responseSchema: {
           additionalProperties?: unknown;
@@ -85,6 +86,9 @@ describe("Gate E semantic interpreter capability boundary", () => {
         "PROVIDE_CHECKOUT_DETAILS",
         "CONFIRM_SELECTION",
       ]);
+    expect(body.systemInstruction.parts[0].text).toContain(
+      "MEASUREMENTS means asking for the customer's body measurements, such as height or weight; confirming a selected size is not MEASUREMENTS.",
+    );
     expect(body.generationConfig.responseSchema)
       .not.toHaveProperty("additionalProperties");
     expect(body.generationConfig).not.toHaveProperty("temperature");
