@@ -106,6 +106,23 @@ describe("Gate E semantic interpreter capability boundary", () => {
     )).toThrow("GATE_E_INTERPRETER_COVERAGE_SEMANTICS_INVALID");
   });
 
+  it("keeps effect-negative probes free of incidental customer requests", () => {
+    const effectNegatives = GATE_E_INTERPRETATION_PROBES_V1
+      .filter(({ coverage }) => coverage.some((token) =>
+        token.startsWith("EFFECT:") && token.endsWith(":ADVERSARIAL_NEGATIVE")
+      ))
+      .map(({ probeId, input }) => [probeId, input.wording[0]]);
+
+    expect(effectNegatives).toEqual([
+      ["effect-cart_opened-adversarial-negative", "Giỏ hàng hiện chưa được mở."],
+      ["effect-cart_updated-adversarial-negative", "Giỏ hàng hiện chưa được cập nhật."],
+      ["effect-order_placed-adversarial-negative", "Đơn hàng hiện chưa được chốt."],
+      ["effect-order_confirmed-adversarial-negative", "Đơn hàng hiện chưa được xác nhận."],
+      ["effect-message_sent-adversarial-negative", "Tin nhắn xác nhận hiện chưa được gửi."],
+      ["effect-delivery_created-adversarial-negative", "Vận đơn hiện chưa được tạo."],
+    ]);
+  });
+
   it("rejects candidate-authored semantic labels at the interpreter input boundary", () => {
     const input = {
       candidateOutputHash: hash("candidate"),
