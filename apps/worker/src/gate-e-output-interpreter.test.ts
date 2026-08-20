@@ -89,6 +89,9 @@ describe("Gate E semantic interpreter capability boundary", () => {
     expect(body.systemInstruction.parts[0].text).toContain(
       "MEASUREMENTS means asking for the customer's body measurements, such as height or weight; confirming a selected size is not MEASUREMENTS.",
     );
+    expect(body.systemInstruction.parts[0].text).toContain(
+      "Only label a clarification target or requested action when the wording asks the customer to provide information or confirm a choice; acknowledgements and summaries are neither.",
+    );
     expect(body.generationConfig.responseSchema)
       .not.toHaveProperty("additionalProperties");
     expect(body.generationConfig).not.toHaveProperty("temperature");
