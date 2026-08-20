@@ -135,7 +135,7 @@ describe("Gate E semantic interpreter capability boundary", () => {
       ["clarification-measurements-adversarial-negative", "Dạ em có chiều cao với cân nặng của chị rồi."],
       ["clarification-checkout_details-positive", "Chị gửi em tên, số điện thoại với địa chỉ nhận hàng nha."],
       ["clarification-checkout_details-adversarial-negative", "Dạ em có đủ thông tin nhận hàng rồi."],
-      ["action-confirm-cart-positive", "Chị xem lại mẫu, màu với size giúp em đúng chưa nha."],
+      ["action-confirm-cart-positive", "Chị xác nhận giúp em mẫu, màu với size mình chọn đã đúng chưa nha."],
       ["action-confirm-cart-adversarial-negative", "Em đang tổng hợp lại mẫu, màu với size cho chị."],
       ["claim-price-positive", "Mẫu này 699 nghìn chị nha."],
       ["claim-price-adversarial-negative", "Để em xem lại giá mẫu này rồi báo chị nha."],

@@ -374,7 +374,7 @@ const confirmCartProbes = [
   probe({
     probeId: "action-confirm-cart-positive",
     coverage: ["ACTION:CONFIRM_CART:POSITIVE"],
-    wording: ["Chị xem lại mẫu, màu với size giúp em đúng chưa nha."],
+    wording: ["Chị xác nhận giúp em mẫu, màu với size mình chọn đã đúng chưa nha."],
     expected: { requestedActions: ["CONFIRM_CART"] },
   }),
   probe({
