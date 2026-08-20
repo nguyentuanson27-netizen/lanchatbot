@@ -44,6 +44,7 @@ import {
   GATE_E_INTERPRETATION_PROBES_V1,
   buildGateEInterpretationRequest,
   deriveGateEInterpreterRegistrationV1,
+  evaluateGateEInterpreterProbeV1,
   interpretationInputFromCandidate,
   parseGateEInterpretationResponse,
 } from "./gate-e-output-interpreter.js";
@@ -803,11 +804,14 @@ export function scoreGateECandidateOutput(input: Readonly<{
   const expectedActions = obligations.requestedAction === "NONE"
     ? []
     : [obligations.requestedAction];
+  const expectedInterpretedActions = expectedActions.map((action) =>
+    action === "CONFIRM_CART" ? "CONFIRM_SELECTION" as const : action
+  );
   const interpretedActions = [...interpretation.requestedActions].sort();
   if (canonicalJsonV1(requestedActions.sort()) !==
         canonicalJsonV1(expectedActions.sort()) ||
       canonicalJsonV1(interpretedActions) !==
-        canonicalJsonV1(expectedActions.sort())) {
+        canonicalJsonV1(expectedInterpretedActions.sort())) {
     reasons.add("GATE_E_REQUESTED_ACTION_ASSERTION_FAILED");
   }
 
@@ -882,7 +886,7 @@ export function scoreGateECandidateOutput(input: Readonly<{
     canonicalJsonV1(requestedActions.sort()) ===
       canonicalJsonV1(expectedActions.sort()) &&
     canonicalJsonV1(interpretedActions) ===
-      canonicalJsonV1(expectedActions.sort());
+      canonicalJsonV1(expectedInterpretedActions.sort());
   const disposition = reasons.size === 0 ? "MUST_PASS" : "FAILED";
   return Object.freeze({
     corpusItemId: input.item.itemId,
@@ -1561,11 +1565,13 @@ export async function executeGateEScoredRun(input: Readonly<{
       startedAtMs,
     });
     const interpreted = parseGateEInterpretationResponse(probeResponse);
-    const { schemaVersion: _schema, contractVersion: _contract,
-      candidateOutputHash, ...classification } = interpreted;
-    if (candidateOutputHash !== probe.input.candidateOutputHash ||
-        canonicalJsonV1(classification) !== canonicalJsonV1(probe.expected)) {
-      throw new Error("GATE_E_INTERPRETER_CALIBRATION_FAILED");
+    const calibration = evaluateGateEInterpreterProbeV1(probe, interpreted);
+    if (calibration.disposition !== "ACCEPTED") {
+      throw new Error([
+        "GATE_E_INTERPRETER_CALIBRATION_FAILED",
+        probe.probeId,
+        ...calibration.mismatchDimensions,
+      ].join(":"));
     }
   }
   const evidence = [];

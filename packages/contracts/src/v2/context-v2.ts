@@ -459,6 +459,18 @@ export type ContextV2CandidateRequestedActionV2 = z.infer<
   typeof ContextV2CandidateRequestedActionV2Schema
 >;
 
+// The interpreter sees customer wording, so it uses a customer-visible name
+// for selection confirmation instead of the runtime's internal cart label.
+export const GateEOutputInterpretationRequestedActionV1Schema = z.enum([
+  "PROVIDE_PRODUCT",
+  "PROVIDE_MEASUREMENTS",
+  "PROVIDE_CHECKOUT_DETAILS",
+  "CONFIRM_SELECTION",
+]);
+export type GateEOutputInterpretationRequestedActionV1 = z.infer<
+  typeof GateEOutputInterpretationRequestedActionV1Schema
+>;
+
 export const ContextV2CandidateSemanticSegmentV2Schema = z.discriminatedUnion(
   "kind",
   [
@@ -533,7 +545,9 @@ export const GateEOutputInterpretationV1Schema = z.object({
   clarificationTargets: z.array(
     ContextV2CandidateClarificationTargetV2Schema,
   ).max(3),
-  requestedActions: z.array(ContextV2CandidateRequestedActionV2Schema).max(4),
+  requestedActions: z.array(
+    GateEOutputInterpretationRequestedActionV1Schema,
+  ).max(4),
   claimedEffects: z.array(GateEOutputInterpretationEffectV1Schema).max(4),
 }).strict().superRefine((value, context) => {
   for (const [key, entries] of Object.entries({

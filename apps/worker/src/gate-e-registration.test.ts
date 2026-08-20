@@ -349,7 +349,9 @@ function interpretationFor(
       segment.kind === "CLARIFICATION" ? [segment.target] : []
     ),
     requestedActions: output.segments.flatMap((segment) =>
-      segment.kind === "ACTION_REQUEST" ? [segment.action] : []
+      segment.kind === "ACTION_REQUEST"
+        ? [segment.action === "CONFIRM_CART" ? "CONFIRM_SELECTION" : segment.action]
+        : []
     ),
     claimedEffects: output.segments.flatMap((segment) =>
       segment.kind === "EFFECT_CLAIM" ? [segment.effect] : []
@@ -931,6 +933,34 @@ describe("Gate E immutable registration boundary", () => {
     })).toMatchObject({ disposition: "FAILED", contextIntegrity: 0 });
   });
 
+  it("maps internal cart confirmation to customer-visible selection semantics", () => {
+    const base = FROZEN_GATE_E_CORPUS_V1.items.find(
+      ({ itemId }) => itemId === "bf10-no-delivery-side-effect",
+    )!;
+    const item: GateECorpusItemV1 = {
+      ...base,
+      assertions: {
+        ...base.assertions,
+        allowedCtas: [...base.assertions.allowedCtas, "CONFIRM_CART"],
+        semanticObligations: {
+          ...base.assertions.semanticObligations,
+          requestedAction: "CONFIRM_CART",
+        },
+      },
+    };
+    const output = passingOutput(item);
+
+    expect(scoreOutput({ item, output })).toMatchObject({
+      disposition: "MUST_PASS",
+      contextIntegrity: 1,
+    });
+    expect(scoreOutput({
+      item,
+      output,
+      interpretation: { requestedActions: ["PROVIDE_CHECKOUT_DETAILS"] },
+    })).toMatchObject({ disposition: "FAILED", contextIntegrity: 0 });
+  });
+
   it("keeps the runtime size guard authoritative for alternative sizes", () => {
     const item = FROZEN_GATE_E_CORPUS_V1.items.find(
       ({ itemId }) => itemId === "bf05-verified-size-eligible",
@@ -1069,7 +1099,7 @@ describe("Gate E immutable registration boundary", () => {
           schemaVersion: 1 as const,
           contractVersion: "GATE_E_OUTPUT_INTERPRETATION_V1" as const,
           candidateOutputHash: probe.input.candidateOutputHash,
-          ...probe.expected,
+          ...probe.expected.required,
         },
       ]),
     );

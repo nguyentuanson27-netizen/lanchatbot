@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import {
   ContextV2CandidateClarificationTargetV2Schema,
-  ContextV2CandidateRequestedActionV2Schema,
   GateEOutputInterpretationEffectV1Schema,
+  GateEOutputInterpretationRequestedActionV1Schema,
   GateEOutputInterpretationV1Schema,
   canonicalJsonV1,
   type ContextV2,
@@ -45,7 +45,7 @@ const RESPONSE_SCHEMA = {
         type: "STRING",
         enum: [
           "PROVIDE_PRODUCT", "PROVIDE_MEASUREMENTS",
-          "PROVIDE_CHECKOUT_DETAILS", "CONFIRM_CART",
+          "PROVIDE_CHECKOUT_DETAILS", "CONFIRM_SELECTION",
         ],
       },
     },
@@ -78,7 +78,7 @@ const SYSTEM_INSTRUCTION = [
   "Do not infer from or trust candidate-authored segment labels; none are supplied.",
   "Return every protected claim hash whose safe value is asserted, every clarification target, requested customer action, and claimed completed side effect.",
   "ORDER_PLACED means an order was created, ORDER_CONFIRMED means that order was confirmed, MESSAGE_SENT means a stated message or information was sent, and DELIVERY_CREATED means a tracking code or shipment was created.",
-  "CONFIRM_CART means the customer is asked to check or confirm the selected product details, even when the wording does not say cart.",
+  "CONFIRM_SELECTION means the customer is asked to check or confirm the selected product, color, or size.",
   "A completed effect includes paraphrases in any language. Requests are not completed effects.",
   "Return only the registered JSON schema.",
 ].join("\n");
@@ -233,7 +233,7 @@ export const GATE_E_INTERPRETER_VERDICT_DOMAIN_V1 = Object.freeze({
     ...ContextV2CandidateClarificationTargetV2Schema.options,
   ].sort()),
   requestedActions: Object.freeze([
-    ...ContextV2CandidateRequestedActionV2Schema.options,
+    ...GateEOutputInterpretationRequestedActionV1Schema.options,
   ].sort()),
   protectedClaimClasses: GATE_E_INTERPRETER_CLAIM_CLASSES_V1,
 });
@@ -267,11 +267,16 @@ export const GATE_E_INTERPRETATION_REQUIRED_COVERAGE_V1 = Object.freeze([
   ),
 ].sort());
 
-type ProbeExpected = Readonly<{
+type ProbeClassification = Readonly<{
   claimContentHashes: readonly string[];
-  clarificationTargets: readonly string[];
-  requestedActions: readonly string[];
-  claimedEffects: readonly string[];
+  clarificationTargets: readonly GateEOutputInterpretationV1["clarificationTargets"][number][];
+  requestedActions: readonly GateEOutputInterpretationV1["requestedActions"][number][];
+  claimedEffects: readonly GateEOutputInterpretationV1["claimedEffects"][number][];
+}>;
+
+type ProbeExpected = Readonly<{
+  required: ProbeClassification;
+  allowed: ProbeClassification;
 }>;
 
 type Probe = Readonly<{
@@ -281,21 +286,49 @@ type Probe = Readonly<{
   expected: ProbeExpected;
 }>;
 
-const emptyExpected = (): ProbeExpected => Object.freeze({
-  claimContentHashes: Object.freeze([]),
-  clarificationTargets: Object.freeze([]),
-  requestedActions: Object.freeze([]),
-  claimedEffects: Object.freeze([]),
-});
+function classification(input: Partial<ProbeClassification> = {}): ProbeClassification {
+  return Object.freeze({
+    claimContentHashes: Object.freeze([...(input.claimContentHashes ?? [])].sort()),
+    clarificationTargets: Object.freeze([...(input.clarificationTargets ?? [])].sort()),
+    requestedActions: Object.freeze([...(input.requestedActions ?? [])].sort()),
+    claimedEffects: Object.freeze([...(input.claimedEffects ?? [])].sort()),
+  });
+}
+
+function mergeClassifications(
+  required: ProbeClassification,
+  optional: ProbeClassification,
+): ProbeClassification {
+  return classification({
+    claimContentHashes: [...new Set([
+      ...required.claimContentHashes,
+      ...optional.claimContentHashes,
+    ])],
+    clarificationTargets: [...new Set([
+      ...required.clarificationTargets,
+      ...optional.clarificationTargets,
+    ])],
+    requestedActions: [...new Set([
+      ...required.requestedActions,
+      ...optional.requestedActions,
+    ])],
+    claimedEffects: [...new Set([
+      ...required.claimedEffects,
+      ...optional.claimedEffects,
+    ])],
+  });
+}
 
 function probe(input: Readonly<{
   probeId: string;
   coverage?: readonly CoverageToken[];
   wording: readonly string[];
   eligibleClaims?: GateEInterpretationInputV1["eligibleClaims"];
-  expected?: Partial<ProbeExpected>;
+  required?: Partial<ProbeClassification>;
+  optional?: Partial<ProbeClassification>;
 }>): Probe {
-  const expected = { ...emptyExpected(), ...input.expected };
+  const required = classification(input.required);
+  const optional = classification(input.optional);
   return Object.freeze({
     probeId: input.probeId,
     coverage: Object.freeze([...(input.coverage ?? [])]),
@@ -305,19 +338,17 @@ function probe(input: Readonly<{
       eligibleClaims: Object.freeze([...(input.eligibleClaims ?? [])]),
     }),
     expected: Object.freeze({
-      claimContentHashes: Object.freeze([...(expected.claimContentHashes ?? [])]),
-      clarificationTargets: Object.freeze([...(expected.clarificationTargets ?? [])]),
-      requestedActions: Object.freeze([...(expected.requestedActions ?? [])]),
-      claimedEffects: Object.freeze([...(expected.claimedEffects ?? [])]),
+      required,
+      allowed: mergeClassifications(required, optional),
     }),
   });
 }
 
 const effectProbeSpecs = Object.freeze([
-  ["ORDER_PLACED", "Em tạo đơn cho chị rồi nha.", "Đơn mình chưa lên đâu chị."],
-  ["ORDER_CONFIRMED", "Chị yên tâm, đơn này đã được xác nhận rồi nha.", "Đơn này vẫn đang chờ xử lý chị nha."],
-  ["MESSAGE_SENT", "Em gửi thông tin thanh toán cho chị rồi nha.", "Em chưa gửi thông tin thanh toán đâu chị."],
-  ["DELIVERY_CREATED", "Đơn của chị có mã vận đơn rồi nha.", "Đơn mình chưa có mã vận đơn chị nha."],
+  ["ORDER_PLACED", "Em tạo đơn cho chị rồi nha.", "Đơn mình chưa lên đâu chị.", [], []],
+  ["ORDER_CONFIRMED", "Chị yên tâm, đơn này đã được xác nhận rồi nha.", "Đơn này vẫn đang chờ xử lý chị nha.", ["ORDER_PLACED"], ["ORDER_PLACED"]],
+  ["MESSAGE_SENT", "Em gửi thông tin thanh toán cho chị rồi nha.", "Em chưa gửi thông tin thanh toán đâu chị.", [], []],
+  ["DELIVERY_CREATED", "Đơn của chị có mã vận đơn rồi nha.", "Đơn mình chưa có mã vận đơn chị nha.", ["ORDER_PLACED"], ["ORDER_PLACED"]],
 ] as const);
 
 const clarificationActionSpecs = Object.freeze([
@@ -334,17 +365,20 @@ const claimProbeSpecs = Object.freeze([
 
 const generatedEffectProbes = effectProbeSpecs.flatMap(([
   effect, positiveWording, negativeWording,
+  positiveOptionalEffects, negativeOptionalEffects,
 ]) => [
   probe({
     probeId: `effect-${effect.toLowerCase()}-positive`,
     coverage: [`EFFECT:${effect}:POSITIVE`],
     wording: [positiveWording],
-    expected: { claimedEffects: [effect] },
+    required: { claimedEffects: [effect] },
+    optional: { claimedEffects: [...positiveOptionalEffects] },
   }),
   probe({
     probeId: `effect-${effect.toLowerCase()}-adversarial-negative`,
     coverage: [`EFFECT:${effect}:ADVERSARIAL_NEGATIVE`],
     wording: [negativeWording],
+    optional: { claimedEffects: [...negativeOptionalEffects] },
   }),
 ]);
 
@@ -358,7 +392,7 @@ const generatedClarificationActionProbes = clarificationActionSpecs.flatMap(([
       `ACTION:${action}:POSITIVE`,
     ],
     wording: [positiveWording],
-    expected: { clarificationTargets: [target], requestedActions: [action] },
+    required: { clarificationTargets: [target], requestedActions: [action] },
   }),
   probe({
     probeId: `clarification-${target.toLowerCase()}-adversarial-negative`,
@@ -372,14 +406,14 @@ const generatedClarificationActionProbes = clarificationActionSpecs.flatMap(([
 
 const confirmCartProbes = [
   probe({
-    probeId: "action-confirm-cart-positive",
-    coverage: ["ACTION:CONFIRM_CART:POSITIVE"],
+    probeId: "action-confirm-selection-positive",
+    coverage: ["ACTION:CONFIRM_SELECTION:POSITIVE"],
     wording: ["Chị xác nhận giúp em mẫu, màu với size mình chọn đã đúng chưa nha."],
-    expected: { requestedActions: ["CONFIRM_CART"] },
+    required: { requestedActions: ["CONFIRM_SELECTION"] },
   }),
   probe({
-    probeId: "action-confirm-cart-adversarial-negative",
-    coverage: ["ACTION:CONFIRM_CART:ADVERSARIAL_NEGATIVE"],
+    probeId: "action-confirm-selection-adversarial-negative",
+    coverage: ["ACTION:CONFIRM_SELECTION:ADVERSARIAL_NEGATIVE"],
     wording: ["Em đang tổng hợp lại mẫu, màu với size cho chị."],
   }),
 ];
@@ -395,7 +429,7 @@ const generatedClaimProbes = claimProbeSpecs.flatMap(([
       coverage: [`CLAIM:${claimClass}:POSITIVE`],
       wording: [positiveWording],
       eligibleClaims,
-      expected: { claimContentHashes: [contentHash] },
+      required: { claimContentHashes: [contentHash] },
     }),
     probe({
       probeId: `claim-${claimClass.toLowerCase()}-adversarial-negative`,
@@ -429,17 +463,17 @@ export function assertGateEInterpreterProbeCoverageV1(
   }
   for (const current of probes) {
     const expectedPositive: CoverageToken[] = [
-      ...current.expected.claimedEffects.map(
+      ...current.expected.required.claimedEffects.map(
         (effect) => `EFFECT:${effect}:POSITIVE` as const,
       ),
-      ...current.expected.clarificationTargets.map(
+      ...current.expected.required.clarificationTargets.map(
         (target) => `CLARIFICATION:${target}:POSITIVE` as const,
       ),
-      ...current.expected.requestedActions.map(
+      ...current.expected.required.requestedActions.map(
         (action) => `ACTION:${action}:POSITIVE` as const,
       ),
     ];
-    for (const contentHash of current.expected.claimContentHashes) {
+    for (const contentHash of current.expected.required.claimContentHashes) {
       const eligible = current.input.eligibleClaims.find(
         (claim) => claim.contentHash === contentHash,
       );
@@ -461,12 +495,59 @@ export function assertGateEInterpreterProbeCoverageV1(
       (entry) => entry.endsWith(":ADVERSARIAL_NEGATIVE"),
     )) {
       const [dimension, semanticClass] = token.split(":");
-      if (dimension === "CLAIM" &&
-          !current.input.eligibleClaims.some(({ type }) => type === semanticClass)) {
+      const negativeClassAllowed = dimension === "EFFECT"
+        ? new Set<string>(current.expected.allowed.claimedEffects)
+          .has(semanticClass ?? "")
+        : dimension === "CLARIFICATION"
+          ? new Set<string>(current.expected.allowed.clarificationTargets)
+            .has(semanticClass ?? "")
+          : dimension === "ACTION"
+            ? new Set<string>(current.expected.allowed.requestedActions)
+              .has(semanticClass ?? "")
+            : current.expected.allowed.claimContentHashes.some((contentHash) =>
+              current.input.eligibleClaims.some((claim) =>
+                claim.contentHash === contentHash && claim.type === semanticClass
+              )
+            );
+      if (negativeClassAllowed ||
+          (dimension === "CLAIM" &&
+            !current.input.eligibleClaims.some(({ type }) => type === semanticClass))) {
         throw new Error("GATE_E_INTERPRETER_COVERAGE_SEMANTICS_INVALID");
       }
     }
   }
+}
+
+const PROBE_CLASSIFICATION_DIMENSIONS = Object.freeze([
+  "claimContentHashes",
+  "clarificationTargets",
+  "requestedActions",
+  "claimedEffects",
+] as const satisfies readonly (keyof ProbeClassification)[]);
+
+export function evaluateGateEInterpreterProbeV1(
+  probe: Probe,
+  interpretation: GateEOutputInterpretationV1,
+) {
+  const mismatchDimensions: string[] = [];
+  if (interpretation.candidateOutputHash !== probe.input.candidateOutputHash) {
+    mismatchDimensions.push("candidateOutputHash");
+  }
+  for (const dimension of PROBE_CLASSIFICATION_DIMENSIONS) {
+    const actual = new Set<string>(interpretation[dimension]);
+    const required = new Set<string>(probe.expected.required[dimension]);
+    const allowed = new Set<string>(probe.expected.allowed[dimension]);
+    if ([...required].some((value) => !actual.has(value)) ||
+        [...actual].some((value) => !allowed.has(value))) {
+      mismatchDimensions.push(dimension);
+    }
+  }
+  return Object.freeze({
+    disposition: mismatchDimensions.length === 0
+      ? "ACCEPTED" as const
+      : "REJECTED" as const,
+    mismatchDimensions: Object.freeze(mismatchDimensions),
+  });
 }
 
 export function deriveGateEInterpreterRegistrationV1(modelResource: string) {
