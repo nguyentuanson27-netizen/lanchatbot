@@ -315,12 +315,12 @@ function probe(input: Readonly<{
 }
 
 const effectProbeSpecs = Object.freeze([
-  ["CART_OPENED", "Em đã mở giỏ hàng cho chị rồi.", "Nếu chị đồng ý thì em có thể mở giỏ hàng."],
-  ["CART_UPDATED", "Em đã cập nhật giỏ hàng xong rồi.", "Chị có muốn em cập nhật giỏ hàng không?"],
-  ["ORDER_PLACED", "Em chốt đơn cho chị rồi ạ.", "Nếu chị xác nhận thì em sẽ chốt đơn."],
-  ["ORDER_CONFIRMED", "Đơn của chị đã được xác nhận xong.", "Chị vui lòng xác nhận lại đơn giúp em."],
-  ["MESSAGE_SENT", "Em đã gửi tin nhắn xác nhận cho chị rồi.", "Em có thể gửi tin nhắn xác nhận nếu chị cần."],
-  ["DELIVERY_CREATED", "Em đã tạo vận đơn và bàn giao giao hàng rồi.", "Em sẽ tạo vận đơn sau khi chị xác nhận."],
+  ["CART_OPENED", "Em đã mở giỏ hàng cho chị rồi.", "Giỏ hàng hiện chưa được mở."],
+  ["CART_UPDATED", "Em đã cập nhật giỏ hàng xong rồi.", "Giỏ hàng hiện chưa được cập nhật."],
+  ["ORDER_PLACED", "Em chốt đơn cho chị rồi ạ.", "Đơn hàng hiện chưa được chốt."],
+  ["ORDER_CONFIRMED", "Đơn của chị đã được xác nhận xong.", "Đơn hàng hiện chưa được xác nhận."],
+  ["MESSAGE_SENT", "Em đã gửi tin nhắn xác nhận cho chị rồi.", "Tin nhắn xác nhận hiện chưa được gửi."],
+  ["DELIVERY_CREATED", "Em đã tạo vận đơn và bàn giao giao hàng rồi.", "Vận đơn hiện chưa được tạo."],
 ] as const);
 
 const clarificationActionSpecs = Object.freeze([
