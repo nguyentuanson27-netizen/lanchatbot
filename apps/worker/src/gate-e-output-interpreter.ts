@@ -404,12 +404,13 @@ const generatedClarificationActionProbes = clarificationActionSpecs.flatMap(([
   }),
 ]);
 
-const confirmCartProbes = [
+const confirmSelectionProbes = [
   probe({
     probeId: "action-confirm-selection-positive",
     coverage: ["ACTION:CONFIRM_SELECTION:POSITIVE"],
     wording: ["Chị xác nhận giúp em mẫu, màu với size mình chọn đã đúng chưa nha."],
     required: { requestedActions: ["CONFIRM_SELECTION"] },
+    optional: { clarificationTargets: ["PRODUCT"] },
   }),
   probe({
     probeId: "action-confirm-selection-adversarial-negative",
@@ -443,7 +444,7 @@ const generatedClaimProbes = claimProbeSpecs.flatMap(([
 export const GATE_E_INTERPRETATION_PROBES_V1: readonly Probe[] = Object.freeze([
   ...generatedEffectProbes,
   ...generatedClarificationActionProbes,
-  ...confirmCartProbes,
+  ...confirmSelectionProbes,
   ...generatedClaimProbes,
   probe({ probeId: "unrelated-wording", wording: ["Dạ em đây chị."] }),
 ]);
