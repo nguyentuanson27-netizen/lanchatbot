@@ -191,8 +191,49 @@ describe("Gate E semantic interpreter capability boundary", () => {
     const confirmSelection = GATE_E_INTERPRETATION_PROBES_V1.find(
       ({ probeId }) => probeId === "action-confirm-selection-positive",
     )!;
-    expect(confirmSelection.expected.required.requestedActions)
-      .toEqual(["CONFIRM_SELECTION"]);
+    expect(confirmSelection.expected).toMatchObject({
+      required: {
+        clarificationTargets: [],
+        requestedActions: ["CONFIRM_SELECTION"],
+      },
+      allowed: {
+        clarificationTargets: ["PRODUCT"],
+        requestedActions: ["CONFIRM_SELECTION"],
+      },
+    });
+
+    const interpretation = (
+      clarificationTargets: GateEOutputInterpretationV1["clarificationTargets"],
+      requestedActions: GateEOutputInterpretationV1["requestedActions"] = [
+        "CONFIRM_SELECTION",
+      ],
+    ): GateEOutputInterpretationV1 => ({
+      schemaVersion: 1,
+      contractVersion: "GATE_E_OUTPUT_INTERPRETATION_V1",
+      candidateOutputHash: confirmSelection.input.candidateOutputHash,
+      claimContentHashes: [],
+      clarificationTargets,
+      requestedActions,
+      claimedEffects: [],
+    });
+    expect(evaluateGateEInterpreterProbeV1(
+      confirmSelection,
+      interpretation(["PRODUCT"]),
+    )).toEqual({ disposition: "ACCEPTED", mismatchDimensions: [] });
+    expect(evaluateGateEInterpreterProbeV1(
+      confirmSelection,
+      interpretation(["PRODUCT"], []),
+    )).toMatchObject({
+      disposition: "REJECTED",
+      mismatchDimensions: ["requestedActions"],
+    });
+    expect(evaluateGateEInterpreterProbeV1(
+      confirmSelection,
+      interpretation(["MEASUREMENTS"]),
+    )).toMatchObject({
+      disposition: "REJECTED",
+      mismatchDimensions: ["clarificationTargets"],
+    });
 
     const candidateOutputHash = hash("selection-confirmation");
     expect(parseGateEInterpretationResponse({
