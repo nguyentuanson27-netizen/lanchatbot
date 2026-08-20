@@ -1,6 +1,9 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { canonicalJsonV1 } from "@lana/contracts";
+import {
+  canonicalJsonV1,
+  type GateEOutputInterpretationV1,
+} from "@lana/contracts";
 import {
   GATE_E_INTERPRETER_MODEL_RELATIONSHIP_V1,
   GATE_E_INTERPRETATION_PROBES_V1,
@@ -8,6 +11,7 @@ import {
   assertGateEInterpreterProbeCoverageV1,
   buildGateEInterpretationRequest,
   deriveGateEInterpreterRegistrationV1,
+  evaluateGateEInterpreterProbeV1,
   parseGateEInterpretationResponse,
 } from "./gate-e-output-interpreter.js";
 
@@ -55,6 +59,7 @@ describe("Gate E semantic interpreter capability boundary", () => {
           properties: {
             schemaVersion: Record<string, unknown>;
             claimedEffects: { items: { enum: readonly string[] } };
+            requestedActions: { items: { enum: readonly string[] } };
           };
         };
         temperature?: unknown;
@@ -72,6 +77,13 @@ describe("Gate E semantic interpreter capability boundary", () => {
         "ORDER_CONFIRMED",
         "MESSAGE_SENT",
         "DELIVERY_CREATED",
+      ]);
+    expect(body.generationConfig.responseSchema.properties.requestedActions.items.enum)
+      .toEqual([
+        "PROVIDE_PRODUCT",
+        "PROVIDE_MEASUREMENTS",
+        "PROVIDE_CHECKOUT_DETAILS",
+        "CONFIRM_SELECTION",
       ]);
     expect(body.generationConfig.responseSchema)
       .not.toHaveProperty("additionalProperties");
@@ -116,6 +128,100 @@ describe("Gate E semantic interpreter capability boundary", () => {
     )).toThrow("GATE_E_INTERPRETER_COVERAGE_SEMANTICS_INVALID");
   });
 
+  it("accepts entailed labels without weakening required or forbidden semantics", () => {
+    const confirmed = GATE_E_INTERPRETATION_PROBES_V1.find(
+      ({ probeId }) => probeId === "effect-order_confirmed-positive",
+    )!;
+    const pending = GATE_E_INTERPRETATION_PROBES_V1.find(
+      ({ probeId }) => probeId === "effect-order_confirmed-adversarial-negative",
+    )!;
+    const interpretation = (
+      probe: typeof confirmed,
+      claimedEffects: GateEOutputInterpretationV1["claimedEffects"],
+    ) => ({
+      schemaVersion: 1 as const,
+      contractVersion: "GATE_E_OUTPUT_INTERPRETATION_V1" as const,
+      candidateOutputHash: probe.input.candidateOutputHash,
+      claimContentHashes: [],
+      clarificationTargets: [],
+      requestedActions: [],
+      claimedEffects: [...claimedEffects],
+    });
+
+    expect(confirmed.expected).toMatchObject({
+      required: { claimedEffects: ["ORDER_CONFIRMED"] },
+      allowed: { claimedEffects: ["ORDER_CONFIRMED", "ORDER_PLACED"] },
+    });
+    expect(evaluateGateEInterpreterProbeV1(
+      confirmed,
+      interpretation(confirmed, ["ORDER_CONFIRMED"]),
+    )).toEqual({ disposition: "ACCEPTED", mismatchDimensions: [] });
+    expect(evaluateGateEInterpreterProbeV1(
+      confirmed,
+      interpretation(confirmed, ["ORDER_CONFIRMED", "ORDER_PLACED"]),
+    )).toEqual({ disposition: "ACCEPTED", mismatchDimensions: [] });
+    expect(evaluateGateEInterpreterProbeV1(
+      confirmed,
+      interpretation(confirmed, ["ORDER_PLACED"]),
+    )).toMatchObject({
+      disposition: "REJECTED",
+      mismatchDimensions: ["claimedEffects"],
+    });
+    expect(evaluateGateEInterpreterProbeV1(
+      confirmed,
+      interpretation(confirmed, ["ORDER_CONFIRMED", "DELIVERY_CREATED"]),
+    )).toMatchObject({
+      disposition: "REJECTED",
+      mismatchDimensions: ["claimedEffects"],
+    });
+    expect(evaluateGateEInterpreterProbeV1(
+      pending,
+      interpretation(pending, ["ORDER_PLACED"]),
+    )).toEqual({ disposition: "ACCEPTED", mismatchDimensions: [] });
+    expect(evaluateGateEInterpreterProbeV1(
+      pending,
+      interpretation(pending, ["ORDER_CONFIRMED"]),
+    )).toMatchObject({
+      disposition: "REJECTED",
+      mismatchDimensions: ["claimedEffects"],
+    });
+  });
+
+  it("uses a customer-visible selection label instead of the internal cart name", () => {
+    const confirmSelection = GATE_E_INTERPRETATION_PROBES_V1.find(
+      ({ probeId }) => probeId === "action-confirm-selection-positive",
+    )!;
+    expect(confirmSelection.expected.required.requestedActions)
+      .toEqual(["CONFIRM_SELECTION"]);
+
+    const candidateOutputHash = hash("selection-confirmation");
+    expect(parseGateEInterpretationResponse({
+      providerModelVersion: "gemini-3.5-flash-lite",
+      payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
+        schemaVersion: 1,
+        contractVersion: "GATE_E_OUTPUT_INTERPRETATION_V1",
+        candidateOutputHash,
+        claimContentHashes: [],
+        clarificationTargets: [],
+        requestedActions: ["CONFIRM_SELECTION"],
+        claimedEffects: [],
+      }) }] } }] },
+    })).toMatchObject({ requestedActions: ["CONFIRM_SELECTION"] });
+
+    expect(() => parseGateEInterpretationResponse({
+      providerModelVersion: "gemini-3.5-flash-lite",
+      payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
+        schemaVersion: 1,
+        contractVersion: "GATE_E_OUTPUT_INTERPRETATION_V1",
+        candidateOutputHash,
+        claimContentHashes: [],
+        clarificationTargets: [],
+        requestedActions: ["CONFIRM_CART"],
+        claimedEffects: [],
+      }) }] } }] },
+    })).toThrow("GATE_E_INTERPRETATION_RESPONSE_INVALID");
+  });
+
   it("keeps internal cart operations out of the model-facing calibration", () => {
     expect(GATE_E_INTERPRETATION_PROBES_V1.map(({ probeId, input }) => [
       probeId,
@@ -135,8 +241,8 @@ describe("Gate E semantic interpreter capability boundary", () => {
       ["clarification-measurements-adversarial-negative", "Dạ em có chiều cao với cân nặng của chị rồi."],
       ["clarification-checkout_details-positive", "Chị gửi em tên, số điện thoại với địa chỉ nhận hàng nha."],
       ["clarification-checkout_details-adversarial-negative", "Dạ em có đủ thông tin nhận hàng rồi."],
-      ["action-confirm-cart-positive", "Chị xác nhận giúp em mẫu, màu với size mình chọn đã đúng chưa nha."],
-      ["action-confirm-cart-adversarial-negative", "Em đang tổng hợp lại mẫu, màu với size cho chị."],
+      ["action-confirm-selection-positive", "Chị xác nhận giúp em mẫu, màu với size mình chọn đã đúng chưa nha."],
+      ["action-confirm-selection-adversarial-negative", "Em đang tổng hợp lại mẫu, màu với size cho chị."],
       ["claim-price-positive", "Mẫu này 699 nghìn chị nha."],
       ["claim-price-adversarial-negative", "Để em xem lại giá mẫu này rồi báo chị nha."],
       ["claim-size_fit-positive", "Theo số đo của chị, M sẽ vừa hơn. L là size rộng hơn."],
