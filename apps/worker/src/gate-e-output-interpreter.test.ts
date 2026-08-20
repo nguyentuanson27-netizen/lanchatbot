@@ -106,20 +106,38 @@ describe("Gate E semantic interpreter capability boundary", () => {
     )).toThrow("GATE_E_INTERPRETER_COVERAGE_SEMANTICS_INVALID");
   });
 
-  it("keeps effect-negative probes free of incidental customer requests", () => {
-    const effectNegatives = GATE_E_INTERPRETATION_PROBES_V1
-      .filter(({ coverage }) => coverage.some((token) =>
-        token.startsWith("EFFECT:") && token.endsWith(":ADVERSARIAL_NEGATIVE")
-      ))
-      .map(({ probeId, input }) => [probeId, input.wording[0]]);
-
-    expect(effectNegatives).toEqual([
-      ["effect-cart_opened-adversarial-negative", "Giỏ hàng hiện chưa được mở."],
-      ["effect-cart_updated-adversarial-negative", "Giỏ hàng hiện chưa được cập nhật."],
-      ["effect-order_placed-adversarial-negative", "Đơn hàng hiện chưa được chốt."],
-      ["effect-order_confirmed-adversarial-negative", "Đơn hàng hiện chưa được xác nhận."],
-      ["effect-message_sent-adversarial-negative", "Tin nhắn xác nhận hiện chưa được gửi."],
-      ["effect-delivery_created-adversarial-negative", "Vận đơn hiện chưa được tạo."],
+  it("uses natural Messenger wording without exposing hidden cart state", () => {
+    expect(GATE_E_INTERPRETATION_PROBES_V1.map(({ probeId, input }) => [
+      probeId,
+      input.wording[0],
+    ])).toEqual([
+      ["effect-cart_opened-positive", "Dạ mẫu này em note lại cho chị rồi nha."],
+      ["effect-cart_opened-adversarial-negative", "Dạ em đang xem mẫu này cho chị."],
+      ["effect-cart_updated-positive", "Em đổi sang màu đen, size M cho chị rồi nha."],
+      ["effect-cart_updated-adversarial-negative", "Để em kiểm tra lại màu với size cho chị nha."],
+      ["effect-order_placed-positive", "Em tạo đơn cho chị rồi nha."],
+      ["effect-order_placed-adversarial-negative", "Đơn mình chưa lên đâu chị."],
+      ["effect-order_confirmed-positive", "Chị yên tâm, đơn này đã được xác nhận rồi nha."],
+      ["effect-order_confirmed-adversarial-negative", "Đơn này em chưa chốt chị nha."],
+      ["effect-message_sent-positive", "Em gửi thông tin thanh toán cho chị rồi nha."],
+      ["effect-message_sent-adversarial-negative", "Em chưa gửi thông tin thanh toán đâu chị."],
+      ["effect-delivery_created-positive", "Đơn của chị có mã vận đơn rồi nha."],
+      ["effect-delivery_created-adversarial-negative", "Đơn mình chưa có mã vận đơn chị nha."],
+      ["clarification-product-positive", "Chị gửi em mã hoặc ảnh mẫu chị đang xem nha."],
+      ["clarification-product-adversarial-negative", "Dạ em thấy đúng mẫu chị đang hỏi rồi."],
+      ["clarification-measurements-positive", "Chị gửi em chiều cao với cân nặng nha, em xem size cho chị."],
+      ["clarification-measurements-adversarial-negative", "Dạ em có chiều cao với cân nặng của chị rồi."],
+      ["clarification-checkout_details-positive", "Chị gửi em tên, số điện thoại với địa chỉ nhận hàng nha."],
+      ["clarification-checkout_details-adversarial-negative", "Dạ em có đủ thông tin nhận hàng rồi."],
+      ["action-confirm-cart-positive", "Chị xem lại mẫu, màu với size giúp em đúng chưa nha."],
+      ["action-confirm-cart-adversarial-negative", "Em đang tổng hợp lại mẫu, màu với size cho chị."],
+      ["claim-price-positive", "Mẫu này 699 nghìn chị nha."],
+      ["claim-price-adversarial-negative", "Để em xem lại giá mẫu này rồi báo chị nha."],
+      ["claim-size_fit-positive", "Theo số đo của chị, M sẽ vừa hơn. L là size rộng hơn."],
+      ["claim-size_fit-adversarial-negative", "Để em đối chiếu bảng size rồi báo chị nha."],
+      ["claim-product_media-positive", "Đúng ảnh của mẫu này đây chị nha."],
+      ["claim-product_media-adversarial-negative", "Để em tìm đúng ảnh mẫu này gửi chị nha."],
+      ["unrelated-wording", "Dạ em đây chị."],
     ]);
   });
 
