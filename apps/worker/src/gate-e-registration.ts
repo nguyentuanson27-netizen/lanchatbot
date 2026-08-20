@@ -58,7 +58,7 @@ const SENSITIVE_KEY_PATTERN = /^(?:raw(?:message|transcript|payload)|customer(?:
 
 export const GATE_E_EXECUTION_CAPS_V1 = Object.freeze({
   observationRequestMaximum: 1,
-  scoredRequestMaximum: 55,
+  scoredRequestMaximum: 51,
   perRequestOutputTokenMaximum: 1_024,
   totalOutputTokenMaximum: 32_768,
   providerTimeoutMs: 30_000,

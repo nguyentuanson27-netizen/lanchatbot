@@ -769,7 +769,7 @@ describe("Gate E immutable registration boundary", () => {
   it("locks request, token, time, and page caps before any provider call", () => {
     expect(GATE_E_EXECUTION_CAPS_V1).toEqual({
       observationRequestMaximum: 1,
-      scoredRequestMaximum: 55,
+      scoredRequestMaximum: 51,
       perRequestOutputTokenMaximum: 1_024,
       totalOutputTokenMaximum: 32_768,
       providerTimeoutMs: 30_000,
