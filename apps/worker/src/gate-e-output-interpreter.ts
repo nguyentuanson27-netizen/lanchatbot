@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import {
   ContextV2CandidateClarificationTargetV2Schema,
-  ContextV2CandidateEffectV2Schema,
   ContextV2CandidateRequestedActionV2Schema,
+  GateEOutputInterpretationEffectV1Schema,
   GateEOutputInterpretationV1Schema,
   canonicalJsonV1,
   type ContextV2,
@@ -53,10 +53,7 @@ const RESPONSE_SCHEMA = {
       type: "ARRAY",
       items: {
         type: "STRING",
-        enum: [
-          "CART_OPENED", "CART_UPDATED", "ORDER_PLACED",
-          "ORDER_CONFIRMED", "MESSAGE_SENT", "DELIVERY_CREATED",
-        ],
+        enum: [...GateEOutputInterpretationEffectV1Schema.options],
       },
     },
   },
@@ -80,7 +77,6 @@ const SYSTEM_INSTRUCTION = [
   "Classify only the customer-facing wording supplied in the input.",
   "Do not infer from or trust candidate-authored segment labels; none are supplied.",
   "Return every protected claim hash whose safe value is asserted, every clarification target, requested customer action, and claimed completed side effect.",
-  "For effects, CART_OPENED means a newly selected product was recorded for possible purchase, and CART_UPDATED means that recorded selection changed, for example its color or size. Customer-facing wording may not say cart.",
   "ORDER_PLACED means an order was created, ORDER_CONFIRMED means that order was confirmed, MESSAGE_SENT means a stated message or information was sent, and DELIVERY_CREATED means a tracking code or shipment was created.",
   "CONFIRM_CART means the customer is asked to check or confirm the selected product details, even when the wording does not say cart.",
   "A completed effect includes paraphrases in any language. Requests are not completed effects.",
@@ -232,7 +228,7 @@ const GATE_E_INTERPRETER_CLAIM_CLASSES_V1 = Object.freeze([
 ] as const);
 
 export const GATE_E_INTERPRETER_VERDICT_DOMAIN_V1 = Object.freeze({
-  effects: Object.freeze([...ContextV2CandidateEffectV2Schema.options].sort()),
+  effects: Object.freeze([...GateEOutputInterpretationEffectV1Schema.options].sort()),
   clarificationTargets: Object.freeze([
     ...ContextV2CandidateClarificationTargetV2Schema.options,
   ].sort()),
@@ -318,8 +314,6 @@ function probe(input: Readonly<{
 }
 
 const effectProbeSpecs = Object.freeze([
-  ["CART_OPENED", "Dạ mẫu này em note lại cho chị rồi nha.", "Dạ em đang xem mẫu này cho chị."],
-  ["CART_UPDATED", "Em đổi sang màu đen, size M cho chị rồi nha.", "Để em kiểm tra lại màu với size cho chị nha."],
   ["ORDER_PLACED", "Em tạo đơn cho chị rồi nha.", "Đơn mình chưa lên đâu chị."],
   ["ORDER_CONFIRMED", "Chị yên tâm, đơn này đã được xác nhận rồi nha.", "Đơn này em chưa chốt chị nha."],
   ["MESSAGE_SENT", "Em gửi thông tin thanh toán cho chị rồi nha.", "Em chưa gửi thông tin thanh toán đâu chị."],

@@ -52,7 +52,10 @@ describe("Gate E semantic interpreter capability boundary", () => {
       generationConfig: {
         responseSchema: {
           additionalProperties?: unknown;
-          properties: { schemaVersion: Record<string, unknown> };
+          properties: {
+            schemaVersion: Record<string, unknown>;
+            claimedEffects: { items: { enum: readonly string[] } };
+          };
         };
         temperature?: unknown;
         topP?: unknown;
@@ -63,6 +66,13 @@ describe("Gate E semantic interpreter capability boundary", () => {
       minimum: 1,
       maximum: 1,
     });
+    expect(body.generationConfig.responseSchema.properties.claimedEffects.items.enum)
+      .toEqual([
+        "ORDER_PLACED",
+        "ORDER_CONFIRMED",
+        "MESSAGE_SENT",
+        "DELIVERY_CREATED",
+      ]);
     expect(body.generationConfig.responseSchema)
       .not.toHaveProperty("additionalProperties");
     expect(body.generationConfig).not.toHaveProperty("temperature");
@@ -106,15 +116,11 @@ describe("Gate E semantic interpreter capability boundary", () => {
     )).toThrow("GATE_E_INTERPRETER_COVERAGE_SEMANTICS_INVALID");
   });
 
-  it("uses natural Messenger wording without exposing hidden cart state", () => {
+  it("keeps internal cart operations out of the model-facing calibration", () => {
     expect(GATE_E_INTERPRETATION_PROBES_V1.map(({ probeId, input }) => [
       probeId,
       input.wording[0],
     ])).toEqual([
-      ["effect-cart_opened-positive", "Dạ mẫu này em note lại cho chị rồi nha."],
-      ["effect-cart_opened-adversarial-negative", "Dạ em đang xem mẫu này cho chị."],
-      ["effect-cart_updated-positive", "Em đổi sang màu đen, size M cho chị rồi nha."],
-      ["effect-cart_updated-adversarial-negative", "Để em kiểm tra lại màu với size cho chị nha."],
       ["effect-order_placed-positive", "Em tạo đơn cho chị rồi nha."],
       ["effect-order_placed-adversarial-negative", "Đơn mình chưa lên đâu chị."],
       ["effect-order_confirmed-positive", "Chị yên tâm, đơn này đã được xác nhận rồi nha."],
@@ -165,12 +171,25 @@ describe("Gate E semantic interpreter capability boundary", () => {
         claimContentHashes: [],
         clarificationTargets: [],
         requestedActions: [],
-        claimedEffects: ["ORDER_PLACED", "CART_UPDATED"],
+        claimedEffects: ["ORDER_PLACED", "ORDER_CONFIRMED"],
       }) }] } }] },
     })).toMatchObject({
       candidateOutputHash,
-      claimedEffects: ["CART_UPDATED", "ORDER_PLACED"],
+      claimedEffects: ["ORDER_CONFIRMED", "ORDER_PLACED"],
     });
+
+    expect(() => parseGateEInterpretationResponse({
+      providerModelVersion: "gemini-3.5-flash-lite",
+      payload: { candidates: [{ content: { parts: [{ text: JSON.stringify({
+        schemaVersion: 1,
+        contractVersion: "GATE_E_OUTPUT_INTERPRETATION_V1",
+        candidateOutputHash,
+        claimContentHashes: [],
+        clarificationTargets: [],
+        requestedActions: [],
+        claimedEffects: ["CART_UPDATED"],
+      }) }] } }] },
+    })).toThrow("GATE_E_INTERPRETATION_RESPONSE_INVALID");
 
     expect(() => parseGateEInterpretationResponse({
       providerModelVersion: "unknown",

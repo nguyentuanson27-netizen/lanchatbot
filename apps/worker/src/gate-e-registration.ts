@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import {
   BusinessFactEnvelopeV1Schema,
   ContextV2CandidateOutputV2Schema,
+  GateEOutputInterpretationEffectV1Schema,
   GateEOutputInterpretationV1Schema,
   SizeRecommendationProtectedClaimV1Schema,
   canonicalJsonV1,
@@ -673,13 +674,8 @@ function replyFromCandidateOutput(output: ContextV2CandidateOutputV2): string {
   return output.segments.map(({ text }) => text).join("\n");
 }
 
-const CANDIDATE_EFFECTS_V2 = Object.freeze([
-  "CART_OPENED",
-  "CART_UPDATED",
-  "ORDER_PLACED",
-  "ORDER_CONFIRMED",
-  "MESSAGE_SENT",
-  "DELIVERY_CREATED",
+const CUSTOMER_VISIBLE_EFFECTS_V1 = Object.freeze([
+  ...GateEOutputInterpretationEffectV1Schema.options,
 ] as const satisfies readonly ContextV2CandidateEffectV2[]);
 
 function claimSegmentMatchesEvidence(
@@ -819,22 +815,29 @@ export function scoreGateECandidateOutput(input: Readonly<{
     segment.kind === "EFFECT_CLAIM" ? [segment.effect] : []
   ));
   const interpretedEffects = [...interpretation.claimedEffects].sort();
-  const declaredEffectValues = [...declaredEffects].sort();
+  const declaredEffectValues = [...declaredEffects]
+    .filter((effect) => CUSTOMER_VISIBLE_EFFECTS_V1.includes(
+      effect as typeof CUSTOMER_VISIBLE_EFFECTS_V1[number],
+    ))
+    .sort();
   const declaredEffectMismatch = canonicalJsonV1(declaredEffectValues) !==
     canonicalJsonV1(interpretedEffects);
+  const disallowedDeclaredEffect = [...declaredEffects]
+    .some((effect) => !obligations.allowedEffectClaims.includes(effect));
   const disallowedInterpretedEffect = interpretedEffects
     .some((effect) => !obligations.allowedEffectClaims.includes(effect));
   const omittedEffect = output.segments.some((segment) =>
-    CANDIDATE_EFFECTS_V2.some((effect) =>
+    CUSTOMER_VISIBLE_EFFECTS_V1.some((effect) =>
       hasCompletedEffectClaim(segment.text, effect) &&
       !(segment.kind === "EFFECT_CLAIM" && segment.effect === effect)
     )
   );
-  const sideEffectViolation = disallowedInterpretedEffect || declaredEffectMismatch;
+  const sideEffectViolation = disallowedDeclaredEffect ||
+    disallowedInterpretedEffect || declaredEffectMismatch;
   if (declaredEffectMismatch) {
     reasons.add("GATE_E_EFFECT_DECLARATION_INTERPRETATION_MISMATCH");
   }
-  if (disallowedInterpretedEffect) {
+  if (disallowedDeclaredEffect || disallowedInterpretedEffect) {
     reasons.add("GATE_E_TYPED_EFFECT_CLAIM_REJECTED");
   }
 
