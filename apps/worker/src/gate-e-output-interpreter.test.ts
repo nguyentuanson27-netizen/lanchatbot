@@ -124,7 +124,7 @@ describe("Gate E semantic interpreter capability boundary", () => {
       ["effect-order_placed-positive", "Em tạo đơn cho chị rồi nha."],
       ["effect-order_placed-adversarial-negative", "Đơn mình chưa lên đâu chị."],
       ["effect-order_confirmed-positive", "Chị yên tâm, đơn này đã được xác nhận rồi nha."],
-      ["effect-order_confirmed-adversarial-negative", "Đơn này em chưa chốt chị nha."],
+      ["effect-order_confirmed-adversarial-negative", "Đơn này vẫn đang chờ xử lý chị nha."],
       ["effect-message_sent-positive", "Em gửi thông tin thanh toán cho chị rồi nha."],
       ["effect-message_sent-adversarial-negative", "Em chưa gửi thông tin thanh toán đâu chị."],
       ["effect-delivery_created-positive", "Đơn của chị có mã vận đơn rồi nha."],
