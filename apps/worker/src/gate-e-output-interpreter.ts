@@ -80,6 +80,7 @@ const SYSTEM_INSTRUCTION = [
   "PRODUCT means asking the customer to identify a product or confirm selected product details.",
   "MEASUREMENTS means asking for the customer's body measurements, such as height or weight; confirming a selected size is not MEASUREMENTS.",
   "CHECKOUT_DETAILS means asking for recipient name, phone number, or delivery address.",
+  "Only label a clarification target or requested action when the wording asks the customer to provide information or confirm a choice; acknowledgements and summaries are neither.",
   "ORDER_PLACED means an order was created, ORDER_CONFIRMED means that order was confirmed, MESSAGE_SENT means a stated message or information was sent, and DELIVERY_CREATED means a tracking code or shipment was created.",
   "CONFIRM_SELECTION means the customer is asked to check or confirm the selected product, color, or size.",
   "A completed effect includes paraphrases in any language. Requests are not completed effects.",
