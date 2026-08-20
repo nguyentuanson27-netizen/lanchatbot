@@ -860,10 +860,25 @@ describe("Gate E immutable registration boundary", () => {
         ...passingOutput(verifiedSize),
         segments: [
           ...passingOutput(verifiedSize).segments,
-          { kind: "GENERAL", text: "Mình đã thêm sản phẩm vào giỏ cho bạn." },
+          { kind: "GENERAL", text: "Em đổi sang màu đen, size M cho chị rồi nha." },
         ],
       },
-      interpretation: { claimedEffects: ["CART_UPDATED"] },
+    })).toMatchObject({ disposition: "MUST_PASS", sideEffectViolations: 0 });
+
+    expect(scoreOutput({
+      item: verifiedSize,
+      output: {
+        ...passingOutput(verifiedSize),
+        segments: [
+          ...passingOutput(verifiedSize).segments,
+          {
+            kind: "EFFECT_CLAIM",
+            effect: "CART_UPDATED",
+            text: "Em đổi sang màu đen, size M cho chị rồi nha.",
+          },
+        ],
+      },
+      interpretation: { claimedEffects: [] },
     })).toMatchObject({ disposition: "FAILED", sideEffectViolations: 1 });
   });
 
@@ -874,7 +889,6 @@ describe("Gate E immutable registration boundary", () => {
     const paraphrases = [
       ["Em lên đơn xong cho chị rồi ạ.", "ORDER_PLACED"],
       ["I finished placing the order for you.", "ORDER_PLACED"],
-      ["Giỏ hàng của chị được cập nhật xong rồi nhé.", "CART_UPDATED"],
       ["Your order is confirmed.", "ORDER_CONFIRMED"],
       ["I've sent the message already.", "MESSAGE_SENT"],
     ] as const;
@@ -1205,7 +1219,7 @@ describe("Gate E immutable registration boundary", () => {
         },
       },
     });
-    expect(calls).toBe(55);
+    expect(calls).toBe(51);
     expect(maximumActive).toBe(1);
     expect(result.summary.disposition).toBe("TECHNICAL_ASSERTIONS_PASS");
     expect(result.items).toHaveLength(14);

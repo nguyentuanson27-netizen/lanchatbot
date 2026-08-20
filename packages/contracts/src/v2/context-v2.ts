@@ -427,6 +427,19 @@ export type ContextV2CandidateEffectV2 = z.infer<
   typeof ContextV2CandidateEffectV2Schema
 >;
 
+// Cart state is an internal workflow concern. Gate E never asks a model to
+// infer it from a customer-facing reply; the runtime derives it from typed
+// sales-cycle commands and receipts instead.
+export const GateEOutputInterpretationEffectV1Schema = z.enum([
+  "ORDER_PLACED",
+  "ORDER_CONFIRMED",
+  "MESSAGE_SENT",
+  "DELIVERY_CREATED",
+]);
+export type GateEOutputInterpretationEffectV1 = z.infer<
+  typeof GateEOutputInterpretationEffectV1Schema
+>;
+
 export const ContextV2CandidateClarificationTargetV2Schema = z.enum([
   "PRODUCT",
   "MEASUREMENTS",
@@ -521,7 +534,7 @@ export const GateEOutputInterpretationV1Schema = z.object({
     ContextV2CandidateClarificationTargetV2Schema,
   ).max(3),
   requestedActions: z.array(ContextV2CandidateRequestedActionV2Schema).max(4),
-  claimedEffects: z.array(ContextV2CandidateEffectV2Schema).max(6),
+  claimedEffects: z.array(GateEOutputInterpretationEffectV1Schema).max(4),
 }).strict().superRefine((value, context) => {
   for (const [key, entries] of Object.entries({
     claimContentHashes: value.claimContentHashes,
