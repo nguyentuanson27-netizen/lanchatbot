@@ -315,7 +315,7 @@ function probe(input: Readonly<{
 
 const effectProbeSpecs = Object.freeze([
   ["ORDER_PLACED", "Em tạo đơn cho chị rồi nha.", "Đơn mình chưa lên đâu chị."],
-  ["ORDER_CONFIRMED", "Chị yên tâm, đơn này đã được xác nhận rồi nha.", "Đơn này em chưa chốt chị nha."],
+  ["ORDER_CONFIRMED", "Chị yên tâm, đơn này đã được xác nhận rồi nha.", "Đơn này vẫn đang chờ xử lý chị nha."],
   ["MESSAGE_SENT", "Em gửi thông tin thanh toán cho chị rồi nha.", "Em chưa gửi thông tin thanh toán đâu chị."],
   ["DELIVERY_CREATED", "Đơn của chị có mã vận đơn rồi nha.", "Đơn mình chưa có mã vận đơn chị nha."],
 ] as const);
