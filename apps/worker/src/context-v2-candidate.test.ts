@@ -200,7 +200,7 @@ describe("Context V2 candidate capability", () => {
       context: context(),
     });
     expect(request.identity.requestEnvelopeHash).toBe(
-      "8ca1f9d5c3c56a1a602b7a11ec1380e5e99bfe73c4b3016d4e3a9efa20c262ef",
+      "bc634547837d9144ddc7f5b5d3ba44a580c44c5d342355c3aca7b41975a72039",
     );
     expect(request.body).toContain("responseSchema");
     expect(request.body).toContain("safetySettings");
@@ -228,6 +228,12 @@ describe("Context V2 candidate capability", () => {
     expect(instruction).toContain("ORDER_CONFIRMED");
     expect(instruction).toContain("Do not mention an internal cart");
     expect(instruction).toContain("Avoid formal bot phrases");
+    expect(instruction).toContain(
+      "state every eligible PRODUCT_MEDIA claim exactly once",
+    );
+    expect(instruction).toContain(
+      "Do not claim stock, availability, price, delivery",
+    );
     expect(instruction).not.toContain("giỏ hàng");
     expect(body.generationConfig.responseSchema.properties.schemaVersion).toEqual({
       type: "INTEGER",

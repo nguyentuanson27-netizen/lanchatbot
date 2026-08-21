@@ -23,7 +23,11 @@ const PROMOTION_PATTERN = /(?:khuyến\s*mãi|ưu\s*đãi|giảm\s*giá|giảm\s
 const FREESHIP_PATTERN = /\b(?:freeship|free\s*ship|miễn\s+phí\s+(?:giao|ship))\b/iu;
 const SHIP_FEE_PATTERN = /(?:phí\s*(?:ship|giao)|ship)\D{0,12}(?:\d[\d.,]*)\s*(?:k\b|nghìn\b|vnd\b|đ|₫)/iu;
 const ETA_VALUES_PATTERN = /\b(\d+)\s*(?:(?:-|–|đến)\s*(\d+))?\s*(?:ngày|day)\b/giu;
-const ORDER_INFO_REQUEST_PATTERN = /(?:xin|gửi|cho\s+(?:em|shop))[^.!?\n]{0,36}(?:tên|họ\s*tên|số\s*điện\s*thoại|sđt|địa\s*chỉ)|(?:tên|sđt|địa\s*chỉ)[^.!?\n]{0,24}(?:nhận\s*hàng|đặt\s*hàng)/iu;
+const RECIPIENT_NAME_PATTERN = String.raw`tên(?!\s+(?:mẫu|sản\s*phẩm|sp)\b)`;
+const ORDER_INFO_REQUEST_PATTERN = new RegExp(
+  String.raw`(?:xin|gửi|cho\s+(?:em|shop))[^.!?\n]{0,36}(?:${RECIPIENT_NAME_PATTERN}|họ\s*tên|số\s*điện\s*thoại|sđt|địa\s*chỉ)|(?:${RECIPIENT_NAME_PATTERN}|sđt|địa\s*chỉ)[^.!?\n]{0,24}(?:nhận\s*hàng|đặt\s*hàng)`,
+  "iu",
+);
 const SIZE_VALUES = new Set([
   "xxxs",
   "xxs",

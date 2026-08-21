@@ -395,6 +395,32 @@ describe("facts and deterministic policy guard", () => {
     expect(result.blockedReasonCodes).toContain("PREMATURE_ORDER_INFO_REQUEST");
   });
 
+  it("does not mistake a product model name request for order PII", () => {
+    const result = guardAgentProposal({
+      proposal: proposal("Chị gửi em tên mẫu hoặc mã mẫu chị đang xem nha."),
+      facts: null,
+      verifiedProductIds: new Set(["SD396"]),
+      buyingSignal: false,
+      now,
+    });
+    expect(result.blockedReasonCodes).not.toContain(
+      "PREMATURE_ORDER_INFO_REQUEST",
+    );
+  });
+
+  it("still blocks a bare recipient-name request before a buying signal", () => {
+    const result = guardAgentProposal({
+      proposal: proposal(
+        "Chị gửi em tên người nhận, số điện thoại và địa chỉ nhận hàng nha.",
+      ),
+      facts: null,
+      verifiedProductIds: new Set(["SD396"]),
+      buyingSignal: false,
+      now,
+    });
+    expect(result.blockedReasonCodes).toContain("PREMATURE_ORDER_INFO_REQUEST");
+  });
+
   it("does not fabricate a protected-claim rejection for a non-claim guard block", () => {
     const result = guardAgentProposal({
       proposal: proposal("See https://evil.test/x"),
