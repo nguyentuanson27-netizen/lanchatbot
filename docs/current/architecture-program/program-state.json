@@ -72,6 +72,14 @@
   "gateE": {
     "status": "GATE_E_PREPROD_ACCEPTED",
     "decisionRecordedAt": "2026-08-21",
+    "ownerDecision": {
+      "source": "GITHUB_PR_OWNER_COMMENT",
+      "pullRequest": 237,
+      "commentId": 5365583825,
+      "url": "https://github.com/nguyentuanson27-netizen/lanchatbot/pull/237#issuecomment-5365583825",
+      "sourceThreadId": "019ff0ed-3760-7e81-98f4-5e91e8ca35b0",
+      "scope": "DF_C_SOURCE_WORK_ONLY_NO_RUNTIME_ACTIVATION_NO_MERGE_AUTHORIZATION"
+    },
     "scoredMainCommit": "608fee97afd24a064ee39d43f81ea5fca214055c",
     "candidateSourceRevision": "e80cd663a9769ad8c0313c3693f37f32138ca52a",
     "candidateIsVerifiedAncestorOfScoredMain": true,

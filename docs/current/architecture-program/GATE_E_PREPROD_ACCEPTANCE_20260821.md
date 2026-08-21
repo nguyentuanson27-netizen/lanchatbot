@@ -1,6 +1,7 @@
 # Gate E-PREPROD Acceptance — v15
 
 **Status:** `GATE_E_PREPROD_ACCEPTED`
+**Decision authority:** [Owner decision record — PR #237 comment #5365583825](https://github.com/nguyentuanson27-netizen/lanchatbot/pull/237#issuecomment-5365583825)
 **Decision record:** owner decision recorded 2026-08-21
 **Scope:** Governance admission of DF-C source work only; no runtime authority, release, deploy, canary, migration, or Messenger action
 
@@ -10,6 +11,12 @@ The owner accepted Gate E-PREPROD after the single admissible v15 scored run.
 This acceptance advances the active source-work point to `DF-C` / `DF11`. It
 does not make a source merge a deployment authorization and does not activate
 `COMMERCE` authority.
+
+The immutable Owner decision record explicitly authorizes this limited
+source-work transition, identifies the originating Codex task directive, and
+retains the separate merge/deployment/runtime-activation boundaries. The
+technical bindings below support that Owner decision; they do not themselves
+constitute Owner acceptance.
 
 The previous `POST_BF_V1` runtime reconciliation remains an immutable
 historical checkpoint. The accepted BF residuals are unchanged:
