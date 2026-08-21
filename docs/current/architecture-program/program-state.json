@@ -105,7 +105,7 @@
     "authorization": "SOURCE_WORK_ONLY_NO_RUNTIME_ACTIVATION"
   },
   "future": [
-    "DF-11: shadow authority source work",
+    "DF-11: default-off, side-effect-free authority-comparison and COMMERCE-source work; no runtime SHADOW authority",
     "DF-12: missing-commerce signal source work",
     "DF-13: controlled COMMERCE cutover source work only; no activation",
     "UR-00 and later: blocked until DF-13 stability and explicit owner approval"
@@ -118,6 +118,7 @@
     "NO_PAGE_ALLOWLIST_EXPANSION",
     "NO_PREPROD_OR_PRODUCTION_MUTATION_WITHOUT_EXPLICIT_APPROVAL",
     "NO_DF_C_RUNTIME_ACTIVATION_OR_COMMERCE_CUTOVER_WITHOUT_SEPARATE_OWNER_AUTHORIZATION",
+    "NO_DF_C_RUNTIME_SHADOW_AUTHORITY",
     "NO_UR_WORK_BEFORE_DF13_STABILITY_AND_UR00_APPROVAL"
   ]
 }
