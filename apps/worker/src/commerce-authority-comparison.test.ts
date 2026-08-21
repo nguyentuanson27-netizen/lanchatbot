@@ -179,7 +179,7 @@ describe("DF11 commerce authority comparison", () => {
     })).toMatchObject({ status: "MISMATCH", differences: [expectedDifference] });
   });
 
-  it("fails closed for zero, multiple, and asymmetric product scope", () => {
+  it("fails closed for present empty, multiple, and asymmetric product scope", () => {
     const zeroProduct = projectCommerceAuthorityCandidate({
       routing: { pageId, conversationId }, revision: 8, stage: "CART_OPEN",
       cart: { value: { lines: [] } }, hasOrderPreview: false, hasPurchaseConfirmation: false,
@@ -191,9 +191,9 @@ describe("DF11 commerce authority comparison", () => {
     });
     expect(compareCommerceAuthority({
       enabled: true,
-      legacy: { pageId, conversationId, owner: "BOT", stage: "READY_TO_BUY", productId: "CB182" },
+      legacy: { pageId, conversationId, owner: "BOT", stage: "READY_TO_BUY", productId: null },
       commerce: zeroProduct,
-    })).toMatchObject({ status: "MISMATCH", differences: ["PRODUCT_SCOPE_MISMATCH"] });
+    })).toMatchObject({ status: "MISMATCH", differences: ["PRODUCT_SCOPE_UNAVAILABLE"] });
     expect(compareCommerceAuthority({
       enabled: true,
       legacy: { pageId, conversationId, owner: "BOT", stage: "READY_TO_BUY", productId: null },

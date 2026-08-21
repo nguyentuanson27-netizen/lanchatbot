@@ -11,11 +11,12 @@ export interface CommerceAuthorityCandidate {
   readonly revision: number;
   readonly stage: SalesCycleStageV1;
   /**
-   * Retains the distinction between no product and an ambiguous product set so
-   * comparison cannot turn incomplete commerce scope into a false match.
+   * Retains no-cart, present-but-unavailable, and ambiguous product scope so
+   * comparison cannot turn incomplete commerce state into a false match.
    */
   readonly productScope:
     | { readonly kind: "NONE" }
+    | { readonly kind: "UNAVAILABLE" }
     | { readonly kind: "SINGLE"; readonly productId: string }
     | { readonly kind: "AMBIGUOUS" };
   /** Presence-only artifacts; no preview, confirmation, or recipient content is projected. */
@@ -148,9 +149,11 @@ export function projectCommerceAuthorityCandidate(
     conversationId: state.routing.conversationId,
     revision: state.revision,
     stage: state.stage,
-    productScope: productIds.length === 0
+    productScope: state.cart === null
       ? { kind: "NONE" }
-      : productIds.length === 1
+      : productIds.length === 0
+        ? { kind: "UNAVAILABLE" }
+        : productIds.length === 1
         ? { kind: "SINGLE", productId: productIds[0]! }
         : { kind: "AMBIGUOUS" },
     artifacts: {
@@ -200,7 +203,10 @@ export function compareCommerceAuthority(
     differences.push("PHASE_MISMATCH");
   }
   const legacyProductScopeValue = legacyProductScope(input.legacy.productId);
-  if (input.commerce.productScope.kind === "AMBIGUOUS") {
+  if (
+    input.commerce.productScope.kind === "UNAVAILABLE" ||
+    input.commerce.productScope.kind === "AMBIGUOUS"
+  ) {
     differences.push("PRODUCT_SCOPE_UNAVAILABLE");
   } else if (!productScopesMatch(legacyProductScopeValue, input.commerce.productScope)) {
     differences.push("PRODUCT_SCOPE_MISMATCH");
