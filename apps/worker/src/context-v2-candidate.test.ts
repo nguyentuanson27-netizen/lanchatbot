@@ -200,7 +200,7 @@ describe("Context V2 candidate capability", () => {
       context: context(),
     });
     expect(request.identity.requestEnvelopeHash).toBe(
-      "bc634547837d9144ddc7f5b5d3ba44a580c44c5d342355c3aca7b41975a72039",
+      "e9d1afec74ae556eae735adaca36b8d282e15f1cbc87fe763492b11057dc9e64",
     );
     expect(request.body).toContain("responseSchema");
     expect(request.body).toContain("safetySettings");
@@ -229,7 +229,13 @@ describe("Context V2 candidate capability", () => {
     expect(instruction).toContain("Do not mention an internal cart");
     expect(instruction).toContain("Avoid formal bot phrases");
     expect(instruction).toContain(
-      "state every eligible PRODUCT_MEDIA claim exactly once",
+      "state every eligible verified claim exactly once",
+    );
+    expect(instruction).toContain(
+      "eligible PRICE, SIZE_FIT, and PRODUCT_MEDIA claims",
+    );
+    expect(instruction).toContain(
+      "use strategy ASK_CLARIFICATION and CTA ASK_CHECKOUT_DETAILS",
     );
     expect(instruction).toContain(
       "Do not claim stock, availability, price, delivery",
