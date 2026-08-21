@@ -1,4 +1,8 @@
-import type { SalesCycleStageV1 } from "@lana/contracts";
+import {
+  deriveConversationPhaseV2,
+  type ConversationPhaseV2Value,
+  type SalesCycleStageV1,
+} from "@lana/contracts";
 import type { SalesStage } from "@lana/conversation-engine";
 
 export interface CommerceAuthorityCandidate {
@@ -6,8 +10,20 @@ export interface CommerceAuthorityCandidate {
   readonly conversationId: string;
   readonly revision: number;
   readonly stage: SalesCycleStageV1;
-  /** Null when the canonical commerce state does not have one unambiguous cart product. */
-  readonly productId: string | null;
+  /**
+   * Retains the distinction between no product and an ambiguous product set so
+   * comparison cannot turn incomplete commerce scope into a false match.
+   */
+  readonly productScope:
+    | { readonly kind: "NONE" }
+    | { readonly kind: "SINGLE"; readonly productId: string }
+    | { readonly kind: "AMBIGUOUS" };
+  /** Presence-only artifacts; no preview, confirmation, or recipient content is projected. */
+  readonly artifacts: {
+    readonly hasCart: boolean;
+    readonly hasOrderPreview: boolean;
+    readonly hasPurchaseConfirmation: boolean;
+  };
 }
 
 /** The only commerce-state fields that are eligible for comparison telemetry. */
@@ -23,20 +39,19 @@ export interface CommerceAuthorityStateProjectionInput {
       readonly lines: readonly { readonly parentProductId: string }[];
     };
   } | null;
+  readonly hasOrderPreview: boolean;
+  readonly hasPurchaseConfirmation: boolean;
 }
 
-type AuthorityPhase =
-  | "DISCOVERY"
-  | "PRODUCT_CONTEXT"
-  | "READY_TO_BUY"
-  | "ORDER_REVIEW"
-  | "PURCHASE_CONFIRMED"
-  | "HANDED_OFF";
+type AuthorityPhase = ConversationPhaseV2Value;
 
 type ComparisonDifference =
   | "COMMERCE_STATE_UNAVAILABLE"
   | "COMMERCE_SCOPE_MISMATCH"
+  | "LEGACY_PHASE_UNCOMPARABLE"
+  | "COMMERCE_PHASE_UNAVAILABLE"
   | "PHASE_MISMATCH"
+  | "PRODUCT_SCOPE_UNAVAILABLE"
   | "PRODUCT_SCOPE_MISMATCH";
 
 export interface CommerceAuthorityComparison {
@@ -67,41 +82,55 @@ export interface CompareCommerceAuthorityInput {
   readonly commerce: CommerceAuthorityCandidate | null;
 }
 
-function legacyPhase(input: CompareCommerceAuthorityInput["legacy"]): AuthorityPhase {
-  if (input.owner === "HUMAN") return "HANDED_OFF";
-  switch (input.stage) {
-    case "DISCOVERY":
-      return "DISCOVERY";
-    case "PRODUCT_MATCHED":
-    case "FIT_CONSULTING":
-    case "OBJECTION_HANDLING":
-      return "PRODUCT_CONTEXT";
-    case "READY_TO_BUY":
-      return "READY_TO_BUY";
-    case "ORDER_REVIEW":
-      return "ORDER_REVIEW";
-    case "POST_SALE":
-      return "HANDED_OFF";
-  }
-}
-
-function commercePhase(stage: SalesCycleStageV1): AuthorityPhase {
+/**
+ * Legacy ownership is intentionally not a phase input: HUMAN may be a
+ * temporary HUMAN_ECHO, while canonical commerce records handoff separately.
+ */
+function legacyPhase(stage: SalesStage): AuthorityPhase | null {
   switch (stage) {
     case "DISCOVERY":
       return "DISCOVERY";
-    case "FACTS_PRESENTED":
-    case "MEASUREMENTS_REQUIRED":
-    case "SIZE_RECOMMENDED":
-      return "PRODUCT_CONTEXT";
-    case "CART_OPEN":
-      return "READY_TO_BUY";
-    case "ORDER_PREVIEW":
+    case "PRODUCT_MATCHED":
+      return "PRODUCT_EVALUATION";
+    case "FIT_CONSULTING":
+      return "FIT_CONSULTATION";
+    case "OBJECTION_HANDLING":
+      return null;
+    case "READY_TO_BUY":
+      return "CART_ACTIVE";
+    case "ORDER_REVIEW":
       return "ORDER_REVIEW";
-    case "PURCHASE_CONFIRMED":
-      return "PURCHASE_CONFIRMED";
-    case "HANDED_OFF":
-      return "HANDED_OFF";
+    case "POST_SALE":
+      return null;
   }
+}
+
+/** Uses the existing canonical phase contract; handoff retains its artifact-derived phase. */
+function commercePhase(candidate: CommerceAuthorityCandidate): AuthorityPhase | null {
+  try {
+    const { hasCart, hasOrderPreview, hasPurchaseConfirmation } = candidate.artifacts;
+    return deriveConversationPhaseV2({
+      commerceStage: candidate.stage,
+      salesCycleRevision: candidate.revision,
+      hasCart,
+      hasPreview: hasOrderPreview,
+      hasConfirmation: hasPurchaseConfirmation,
+    }).phase;
+  } catch {
+    return null;
+  }
+}
+
+function legacyProductScope(productId: string | null): CommerceAuthorityCandidate["productScope"] {
+  return productId === null ? { kind: "NONE" } : { kind: "SINGLE", productId };
+}
+
+function productScopesMatch(
+  legacy: CommerceAuthorityCandidate["productScope"],
+  commerce: CommerceAuthorityCandidate["productScope"],
+): boolean {
+  return legacy.kind === commerce.kind &&
+    (legacy.kind !== "SINGLE" || commerce.kind === "SINGLE" && legacy.productId === commerce.productId);
 }
 
 /**
@@ -119,7 +148,16 @@ export function projectCommerceAuthorityCandidate(
     conversationId: state.routing.conversationId,
     revision: state.revision,
     stage: state.stage,
-    productId: productIds.length === 1 ? productIds[0]! : null,
+    productScope: productIds.length === 0
+      ? { kind: "NONE" }
+      : productIds.length === 1
+        ? { kind: "SINGLE", productId: productIds[0]! }
+        : { kind: "AMBIGUOUS" },
+    artifacts: {
+      hasCart: state.cart !== null,
+      hasOrderPreview: state.hasOrderPreview,
+      hasPurchaseConfirmation: state.hasPurchaseConfirmation,
+    },
   };
 }
 
@@ -152,14 +190,21 @@ export function compareCommerceAuthority(
     input.legacy.pageId !== input.commerce.pageId ||
     input.legacy.conversationId !== input.commerce.conversationId
   ) differences.push("COMMERCE_SCOPE_MISMATCH");
-  if (legacyPhase(input.legacy) !== commercePhase(input.commerce.stage)) {
+  const legacyPhaseValue = legacyPhase(input.legacy.stage);
+  const commercePhaseValue = commercePhase(input.commerce);
+  if (legacyPhaseValue === null) {
+    differences.push("LEGACY_PHASE_UNCOMPARABLE");
+  } else if (commercePhaseValue === null) {
+    differences.push("COMMERCE_PHASE_UNAVAILABLE");
+  } else if (legacyPhaseValue !== commercePhaseValue) {
     differences.push("PHASE_MISMATCH");
   }
-  if (
-    input.legacy.productId !== null &&
-    input.commerce.productId !== null &&
-    input.legacy.productId !== input.commerce.productId
-  ) differences.push("PRODUCT_SCOPE_MISMATCH");
+  const legacyProductScopeValue = legacyProductScope(input.legacy.productId);
+  if (input.commerce.productScope.kind === "AMBIGUOUS") {
+    differences.push("PRODUCT_SCOPE_UNAVAILABLE");
+  } else if (!productScopesMatch(legacyProductScopeValue, input.commerce.productScope)) {
+    differences.push("PRODUCT_SCOPE_MISMATCH");
+  }
 
   return {
     ...base,
