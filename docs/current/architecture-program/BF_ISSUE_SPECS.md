@@ -243,7 +243,7 @@ Acceptance:
 
 ## 6. Gate BF — Incident remediation
 
-**Current state: GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS.** The original checklist remains the strict technical contract and is not claimed fully satisfied. On 2026-08-13 the owner explicitly accepted: BF-03 as a deferred, non-activatable foundation; BF-04 as `PARTIAL / KNOWN_GAP` with its P0 bypass still open; and BF-10 natural-transition evidence as a pending non-blocking residual. This governance waiver permits DF-A progression and a `POST_BF_V1` comparison anchor; it does not claim the residuals are fixed or authorize deploy/runtime changes.
+**BF disposition: GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS.** The original checklist remains the strict technical contract and is not claimed fully satisfied. On 2026-08-13 the owner explicitly accepted: BF-03 as a deferred, non-activatable foundation; BF-04 as `PARTIAL / KNOWN_GAP` with its P0 bypass still open; and BF-10 natural-transition evidence as a pending non-blocking residual. This historical governance waiver permitted DF-A progression and created a `POST_BF_V1` comparison anchor; it does not claim the residuals are fixed or authorize deploy/runtime changes. Active DF status is now owned by the separate `GATE_E_PREPROD_ACCEPTED` record in `GATE_E_PREPROD_ACCEPTANCE_20260821.md`.
 
 Gate BF passes only when:
 

@@ -3,6 +3,7 @@
 **Purpose:** Keep planning context small while preserving durable contracts and evidence.
 **Status:** Repository planning authority for BF/DF/UR on this branch; never deployment authorization.
 **Operating mode:** `ENGINEERING_PREPROD`; see `OPERATING_MODE.md`.
+**Current program point:** `GATE_E_PREPROD_ACCEPTED`; `DF-C` / `DF11` source work is next. See `GATE_E_PREPROD_ACCEPTANCE_20260821.md`.
 
 ## Default reading order for BF
 
@@ -34,6 +35,7 @@ that explicit verdict.
 | Policy-gated behavior | `contracts/BEHAVIOR_CONTROL_PLANE.md` |
 | Model baseline/candidate generation and offline evaluation | `contracts/MODEL_EVALUATION_BOUNDARY.md` |
 | Gate E registration/evaluation execution | `GATE_E_PREPROD_EXECUTION_PLAN.md` + `GATE_E_EVIDENCE_ADMISSION_ADR.md` + `contracts/MODEL_EVALUATION_BOUNDARY.md` |
+| Gate E accepted / DF-C source work | `GATE_E_PREPROD_ACCEPTANCE_20260821.md` + `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + relevant contracts |
 | Release/deploy/evidence | `contracts/RELEASE_INTEGRITY.md` |
 | Dataset/package work | `contracts/DATASET_BOUNDARY.md` |
 | DF work after Gate BF | `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + relevant contracts |
@@ -51,7 +53,7 @@ that explicit verdict.
 - `FUTURE_BACKLOG.md`: authoritative deferred DF/UR work after Gate BF.
 - `PREPROD_DF_UR_PLAN_AMENDMENT.md`: authoritative on merged `main`; rationale/review contract for PREPROD simplification and future-topology changes.
 - `contracts/`: durable technical invariants.
-- `CURRENT_BASELINE.md` and `program-state.json`: last accepted checkpoint only; fresh runtime evidence wins for live facts.
+- `CURRENT_BASELINE.md`: immutable `POST_BF_V1` runtime comparison checkpoint. `program-state.json` and `GATE_E_PREPROD_ACCEPTANCE_20260821.md` record the later Gate E governance disposition; fresh runtime evidence still wins for live facts.
 - `archive/`: immutable historical context.
 - `incidents/`: accepted incident inputs unless contradictory evidence appears.
 
@@ -62,7 +64,7 @@ that explicit verdict.
 - `ACTIVE_IMPLEMENTATION_PLAN.md` owns active architecture and rollout.
 - `FUTURE_BACKLOG.md` owns deferred DF/UR work and activates after Gate BF.
 - `contracts/` owns durable invariants.
-- CURRENT_BASELINE.md and program-state.json record the latest reconciled checkpoint and its Gate disposition; they never replace fresh runtime evidence.
+- CURRENT_BASELINE.md, program-state.json, and the later Gate E acceptance record preserve reconciled checkpoints and dispositions; they never replace fresh runtime evidence.
 - `archive/` is immutable historical context.
 - `incidents/` preserves accepted incident inputs; diagnosis is not reopened unless contradictory evidence is presented.
 
@@ -86,14 +88,14 @@ At evidence-bearing train/Gate completion:
 ```text
 Completed before the incident track: Release Integrity -> Confirmation -> Dataset Boundary -> R3
 Mode: ENGINEERING_PREPROD; live page role: PREPROD_TEST_PAGE
-Current reconciliation: GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS; POST_BF_V1 recorded
+Current governance: GATE_E_PREPROD_ACCEPTED (v15); POST_BF_V1 remains recorded
 Accepted residuals: BF-03 deferred/non-activatable; BF-04 PARTIAL / KNOWN_GAP; BF-10 natural-terminal evidence pending
 
 Active PREPROD roadmap:
   DF-A: DF-P1..DF-P3 / DF01-06
   -> DF-B: DF-P4..DF-P6 / DF07-10
-  -> Gate E-PREPROD
-  -> DF-C: DF-P7 / DF11-13 / controlled LEGACY -> COMMERCE
+  -> Gate E-PREPROD accepted (v15 evidence)
+  -> DF-C: DF-P7 / DF11-13 source work; controlled LEGACY -> COMMERCE remains a separately authorized future cutover
   -> controlled critical human E2E
   -> Gate F-PREPROD
   -> UR-A: UR-P1..UR-P2 / UR00-03

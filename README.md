@@ -11,7 +11,7 @@
 - Gate BF/E/F/U là engineering/architecture gates, không tự động đồng nghĩa production-ready.
 - Chỉ owner mới có thể chuyển chương trình sang `PRODUCTION_HARDENING` bằng yêu cầu rõ ràng.
 
-**Vị trí chương trình hiện tại:** Gate BF đã được owner chấp nhận với waiver có ghi nhận (`GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS`). BF-04 vẫn là `PARTIAL / KNOWN_GAP`; BF-10 vẫn chưa có natural terminal transition sau cutover; BF-03 giữ nguyên foundation-only/non-activatable. Các residual này không được diễn giải là đã sửa, nhưng không còn chặn DF-A. `POST_BF_V1` neo vào runtime evidence hiện tại và DF-A đã sẵn sàng cho source work; không có deploy nào được suy ra từ quyết định này. Xem [Current reconciliation baseline](docs/current/architecture-program/CURRENT_BASELINE.md) và [active backlog](docs/current/architecture-program/ACTIVE_BACKLOG.md).
+**Vị trí chương trình hiện tại:** Owner đã chấp nhận `GATE_E_PREPROD_ACCEPTED` cho v15; DF-C/DF11 được phép bắt đầu **source work**. Gate E v15 bind một manifest, evidence BODY và FINALIZATION bất biến; xem [Gate E acceptance record](docs/current/architecture-program/GATE_E_PREPROD_ACCEPTANCE_20260821.md). BF-03 vẫn foundation-only/non-activatable, BF-04 vẫn `PARTIAL / KNOWN_GAP`, và BF-10 vẫn thiếu natural terminal transition sau cutover. Các residual không được diễn giải là đã sửa. Runtime vẫn `salesAuthorityMode=LEGACY`, `stateReadMode=LEGACY`; không có deploy, canary hoặc `COMMERCE` activation nào được suy ra từ quyết định này.
 
 Nguồn governance authoritative: [Operating Mode](docs/current/architecture-program/OPERATING_MODE.md). Việc đổi mode không thay đổi verified-claim, side-effect authorization, SSRF, PII/secret, auth, database-safety, authority-transition, rollback hoặc release-integrity invariants.
 

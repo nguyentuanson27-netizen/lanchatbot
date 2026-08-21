@@ -7,9 +7,19 @@ a deployment authorization.
 
 ## Reconciliation verdict
 
-**GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS** — this checkpoint is `POST_BF_V1` and DF-A
-source work may begin. This is a governance acceptance of known residuals, not an
+**GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS** — this checkpoint is `POST_BF_V1` and recorded
+the historical DF-A source-work entry decision. This is a governance acceptance of known residuals, not an
 unqualified technical pass and not a runtime/deploy authorization.
+
+## Later Gate E governance disposition
+
+This `POST_BF_V1` record remains the immutable runtime comparison baseline and is not
+rewritten. The later owner decision `GATE_E_PREPROD_ACCEPTED` records v15 Gate E
+technical acceptance and advances source work to DF-C / DF11. Its exact scored-main,
+candidate, manifest, evidence BODY, FINALIZATION, and admissibility bindings are in
+`GATE_E_PREPROD_ACCEPTANCE_20260821.md`. Runtime remains
+`salesAuthorityMode=LEGACY` and `stateReadMode=LEGACY`; this later governance decision
+does not authorize deployment, canary, or `COMMERCE` activation.
 
 The accepted residuals are:
 

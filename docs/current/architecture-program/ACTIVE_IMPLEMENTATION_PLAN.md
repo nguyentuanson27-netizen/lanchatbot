@@ -1,13 +1,13 @@
 # LANA Chatbot — Revised Bug-Fix Wave Integration Plan
 
-**Status:** Reconciled 2026-08-13; Gate BF is accepted with owner waivers and DF-A source work is eligible.
+**Status:** Historical BF integration plan. Gate BF remains accepted with waivers; the later `GATE_E_PREPROD_ACCEPTED` record advances active source work to DF-C / DF11.
 **Companion source of issue truth:** `ACTIVE_BACKLOG.md` and `CURRENT_BASELINE.md`.
 **Insertion point:** completed incident waves; before any eligible DF release slice
 **Operating mode:** `ENGINEERING_PREPROD`; see `OPERATING_MODE.md`.
 
 ## 1. Decision
 
-The three incident waves have source/release evidence. The owner explicitly accepts the BF-03 deferred deviation, the BF-04 P0 known gap, and pending BF-10 natural-transition evidence for progression. These remain recorded residuals rather than completed technical acceptance. `POST_BF_V1` is anchored to the reconciled PREPROD_TEST_PAGE runtime evidence, so DF-A source work may start.
+The three incident waves have source/release evidence. The owner explicitly accepts the BF-03 deferred deviation, the BF-04 P0 known gap, and pending BF-10 natural-transition evidence for progression. These remain recorded residuals rather than completed technical acceptance. `POST_BF_V1` is anchored to the reconciled PREPROD_TEST_PAGE runtime evidence. The historical DF-A entry condition is complete; active DF status is owned by `GATE_E_PREPROD_ACCEPTANCE_20260821.md` and `FUTURE_BACKLOG.md`.
 
 The existing architecture direction remains valid. The incident track provides immediate containment and correctness fixes; root authority changes remain in DF-05 through DF-13 and State V2 design remains in UR.
 
@@ -121,7 +121,7 @@ Gate BF + post-fix immutable baseline
   -> separately approved destructive UR-X/UR-10
 ```
 
-**Current program point:** all three waves have merged/deployed evidence and the owner has accepted Gate BF with explicit waivers. DF-A is the active source-work train. This decision does not activate a runtime mode, authorize deployment, or close the recorded BF residuals.
+**Historical program point:** all three waves merged/deployed and the owner accepted Gate BF with explicit waivers. The active source-work train is now DF-C / DF11 after `GATE_E_PREPROD_ACCEPTED`; this plan's future-facing DF topology is superseded by `FUTURE_BACKLOG.md` and `PREPROD_DF_UR_PLAN_AMENDMENT.md`. No decision activates a runtime mode, authorizes deployment, or closes the recorded BF residuals.
 
 Each bug remains one focused PR. Adjacent bugs must not share a diff merely because they belong to the same wave. Full verification, immutable release preparation, and authorized test-page deployment occur at the wave/Release Train boundary rather than once per PR.
 
@@ -300,10 +300,11 @@ The ADR must decide the canonical shape for multiple considered products and one
 
 ## 12. Gate BF and definition of done
 
-**Current state: GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS.** The original strict checklist
+**Historical incident state: GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS.** The original strict checklist
 remains the technical contract, but BF-03, BF-04, and BF-10 deviations are explicitly
 recorded in ACTIVE_BACKLOG.md and CURRENT_BASELINE.md. `POST_BF_V1` is a comparison
 anchor for DF work, not proof that those residuals were fixed or authorization to deploy.
+The later `GATE_E_PREPROD_ACCEPTED` governance record starts DF-C / DF11 source work only.
 
 The incident track is complete only when:
 

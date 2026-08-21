@@ -1,18 +1,19 @@
 # Gate E-PREPROD — Registration and Evaluation Execution Plan
 
-**Status:** `DRAFT_UNREGISTERED`
-**Scope:** DF-P6 / DF10 prerequisite before DF-C
+**Status:** `EXECUTED_ACCEPTED_V15_HISTORICAL`
+**Scope:** historical DF-P6 / DF10 execution plan; acceptance provenance before DF-C
 **Baseline:** `POST_BF_V1`
 **Operating mode:** `ENGINEERING_PREPROD`
 
-This plan defines the only admissible ordering for Gate E registration and
-scoring. It does not register the draft artifacts, authorize a provider call,
-claim a scored result, accept Gate E, deploy source, or authorize DF-C.
+This plan defined the only admissible ordering for Gate E registration and scoring.
+That v15 sequence is now accepted and its immutable bindings are recorded in
+`GATE_E_PREPROD_ACCEPTANCE_20260821.md`. The plan does not authorize a new
+provider call, deployment, runtime authority change, or DF-C activation.
 
 ## 1. Immutable ordering
 
 ```text
-source/tooling PR (this plan; DRAFT_UNREGISTERED)
+source/tooling PR (historical draft prerequisite)
   -> exact-head review + owner merge authorization
   -> merged prerequisite commit P
   -> one redacted provider-identity observation against P
@@ -22,8 +23,8 @@ source/tooling PR (this plan; DRAFT_UNREGISTERED)
      registration-writer capability
   -> scored run S proves R is an ancestor and predates S
   -> append-only redacted evidence + Gate E verdict PR
-  -> explicit Gate E acceptance
-  -> only then re-audit DF-C eligibility
+  -> explicit Gate E acceptance (recorded for v15)
+  -> DF-C source-work eligibility (recorded; runtime activation remains separate)
 ```
 
 No scored provider request may occur before the registration artifact is in an
@@ -248,8 +249,8 @@ side-effect-free.
 
 ## 8. Authorization boundaries
 
-This source PR must stop before merge. After exact-head gates and review, the
-smallest owner command is authorization to merge this prerequisite PR. Merge
-does not itself authorize observation. A later explicit command must authorize
-the one-request provider observation against exact merged P. Registration,
-scored run, Gate verdict, Gate acceptance and DF-C remain separate boundaries.
+The historical source PR stopped at merge and each authorization boundary was
+separate. The completed v15 evidence does not authorize a new observation,
+registration, scoring run, deploy, or runtime cutover. DF-C source PRs still
+require their own exact-head verification, independent review, and fresh owner
+merge command.

@@ -147,23 +147,22 @@ Required properties:
     populations fail closed. FINALIZATION inherits the BODY's anchor binding,
     and verdict readers verify anchor -> BODY -> FINALIZATION as one chain.
 
-## DF10 Gate E draft foundation
+## DF10 Gate E v15 evidence record
 
 - Plan contract: `DF10_GATE_E_PLAN_V2`
 - Evidence contracts: `DF10_GATE_E_SCORED_EVIDENCE_BODY_V3` and
   `DF10_GATE_E_RUN_FINALIZATION_V3`; the concrete capability remains
   `GateEEvidenceStoreV2` with `admittedAt` receipts. Registered population uses
   `DF10_GATE_E_REGISTERED_POPULATION_ANCHOR_V1` through a disjoint writer port.
-- Registration status: `DRAFT_UNREGISTERED`
+- Registration status: completed; v15 manifest `REGISTERED_FOR_SCORING` and immutable registration artifact `REGISTERED`.
 - Plan artifact SHA-256:
   `45c8e53bf0c260d23f6a62f7ec630794042360e911324874a16afbf469edcea3`
 - Baseline: `POST_BF_V1`
-- Candidate model: publisher `google`, model `gemini-3.5-flash-lite`; the same
-  string is an owner-selected **draft expectation**, not provider-observed
-  evidence. An authorized redacted observation must bind the exact returned
-  version before registration or scored use.
+- Candidate model: publisher `google`, provider-observed
+  `gemini-3.5-flash-lite` at location `global`; the v15 registered observation
+  precedes the accepted scored use.
 - Frozen population name: `FROZEN_POST_GATE_BF_V1_CORPUS`
-- Every item in an eventually frozen corpus is scored. Mandatory claim-safety,
+- Every item in the frozen corpus is scored. Mandatory claim-safety,
   context-integrity, side-effect-safety, and MUST_PASS strata are never sampled.
 - The deterministic `0.2` sample with salt `lana-df10-diagnostic-v1` applies
   only to optional diagnostic work; it is not the Gate E denominator.
@@ -173,18 +172,26 @@ Required properties:
 - Realtime capture population is unsampled and independent of Gate E. Any
   legacy operational replay sample is a separate population and is not
   admissible as Gate E data.
-- Draft frozen corpus canonical SHA-256:
+- Frozen corpus canonical SHA-256:
   `e70ce49dbd5a5afae19603342dfd10352bc6b965eebf4f77fe6d4fe1b0c9c4dd`.
-- Draft frozen rubric canonical SHA-256:
+- Frozen rubric canonical SHA-256:
   `89a830334787c33a8790e6c4a73355e9210f8e449037fc993e30ce6470834986`.
-- Draft caps: one identity-observation request; at most 55 scored requests,
-  currently 27 registered semantic-calibration probes plus 14 candidate and
-  14 interpretation calls; 1,024 output tokens/request, 32,768 total output
-  tokens, 30-second provider deadline, 15-minute run deadline, concurrency one,
-  `OFFLINE_NO_PAGE`, and side effects forbidden.
-- The governed ordering and abort matrix are defined in
-  `../GATE_E_PREPROD_EXECUTION_PLAN.md`. Those source artifacts remain draft
-  prerequisites and do not themselves constitute registration.
+- Executed v15 record: exactly one scored run, `51` provider requests, `14/14`
+  frozen cases passed, claim safety/Context integrity/coverage `100%`, and
+  side-effect violations `0`. The enforced execution boundary remains
+  `OFFLINE_NO_PAGE` with side effects forbidden.
+- Immutable v15 manifest SHA-256:
+  `48ed2d4a38fa2eea9eea7caadc0529862742c60a06b670e6872208e26893962b`.
+- Immutable evidence BODY SHA-256:
+  `a01ed890b75b4c0dae5a90efe6f28a0e41f86c0c511162b7973b513d61403db1`.
+- Immutable FINALIZATION SHA-256:
+  `21d02772417da44bf9a8709cf10e1f196feca5e3175626bdb39ecaa1147b92f8`;
+  admissibility `FINALIZED_TRUSTED_EXACT_HEAD` with evidence/finalization
+  `APPENDED`.
+- The governed ordering and abort matrix remain defined in
+  `../GATE_E_PREPROD_EXECUTION_PLAN.md`; its v15 execution status and the
+  immutable governance binding are recorded in
+  `../GATE_E_PREPROD_ACCEPTANCE_20260821.md`.
 - Candidate output V2 binds each text segment to a typed semantic role. Exact
   evidence hashes, product binding, clarification/action targets and effect
   claims are checked against both case-specific frozen obligations and the
@@ -195,11 +202,11 @@ Required properties:
   caller-created proof, alternate corpus/rubric, model port, clock or echoed
   request identity is not scoring authority.
 
-This source contract is not a pre-registration. A scored run becomes admissible
-only after a separate immutable corpus/rubric artifact is committed before the
-run, its exact blob and plan hash are verified from Git history, its registration
-commit is an ancestor of the scored-run commit, and the registration commit time
-strictly precedes the run; equality is inadmissible. Caller-supplied timestamps
-or commit strings are not evidence.
-No corpus, scored run, Gate E verdict, deployment authority, or DF-C cutover is
-claimed by this contract.
+For any future scoring run, this contract still requires a separate immutable
+corpus/rubric artifact committed before the run, Git-derived blob and plan-hash
+verification, registration ancestry, and strict registration-before-run time
+ordering. Caller-supplied timestamps or commit strings are not evidence.
+
+The recorded v15 result supports `GATE_E_PREPROD_ACCEPTED` and DF-C source
+work only. This contract does not authorize deployment, a runtime authority
+change, or a DF-C cutover.

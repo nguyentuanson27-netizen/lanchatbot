@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "status": "GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS",
-  "evidenceAsOf": "2026-08-12T10:46:25.822Z",
-  "ownerDecisionAt": "2026-08-13",
+  "status": "GATE_E_PREPROD_ACCEPTED",
+  "evidenceAsOf": "2026-08-21",
+  "ownerDecisionAt": "2026-08-21",
   "operatingMode": "ENGINEERING_PREPROD",
   "livePageRole": "PREPROD_TEST_PAGE",
   "git": {
@@ -59,6 +59,8 @@
   },
   "gateBF": {
     "status": "ACCEPTED_WITH_OWNER_WAIVERS",
+    "reconciliationEvidenceAsOf": "2026-08-12T10:46:25.822Z",
+    "ownerDecisionAt": "2026-08-13",
     "blockers": [],
     "acceptedResiduals": [
       "BF-03 semantic correction behavior is deferred to canonical DF work; foundation remains non-activatable",
@@ -67,16 +69,46 @@
     ],
     "postFixV1Baseline": "POST_BF_V1"
   },
+  "gateE": {
+    "status": "GATE_E_PREPROD_ACCEPTED",
+    "decisionRecordedAt": "2026-08-21",
+    "scoredMainCommit": "608fee97afd24a064ee39d43f81ea5fca214055c",
+    "candidateSourceRevision": "e80cd663a9769ad8c0313c3693f37f32138ca52a",
+    "candidateIsVerifiedAncestorOfScoredMain": true,
+    "technicalDisposition": "TECHNICAL_ASSERTIONS_PASS",
+    "population": {
+      "passed": 14,
+      "total": 14,
+      "claimSafety": "100%",
+      "contextIntegrity": "100%",
+      "coverage": "100%",
+      "sideEffectViolations": 0
+    },
+    "providerRun": {
+      "scoredRuns": 1,
+      "providerRequests": 51,
+      "model": "gemini-3.5-flash-lite",
+      "location": "global",
+      "authentication": "SERVICE_ACCOUNT"
+    },
+    "manifestHash": "48ed2d4a38fa2eea9eea7caadc0529862742c60a06b670e6872208e26893962b",
+    "evidenceBodyHash": "a01ed890b75b4c0dae5a90efe6f28a0e41f86c0c511162b7973b513d61403db1",
+    "finalizationHash": "21d02772417da44bf9a8709cf10e1f196feca5e3175626bdb39ecaa1147b92f8",
+    "admissibility": "FINALIZED_TRUSTED_EXACT_HEAD",
+    "durableEvidence": "EVIDENCE_AND_FINALIZATION_APPENDED",
+    "governanceRecord": "docs/current/architecture-program/GATE_E_PREPROD_ACCEPTANCE_20260821.md"
+  },
   "active": {
-    "track": "DF-A",
-    "nextIssue": "DF-01",
-    "gate": "GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS"
+    "track": "DF-C",
+    "nextIssue": "DF-11",
+    "gate": "GATE_E_PREPROD_ACCEPTED",
+    "authorization": "SOURCE_WORK_ONLY_NO_RUNTIME_ACTIVATION"
   },
   "future": [
-    "DF-A: DF-01..DF-06",
-    "DF-B: DF-07..DF-10",
-    "DF-C: DF-11..DF-13",
-    "UR-A..UR-X"
+    "DF-11: shadow authority source work",
+    "DF-12: missing-commerce signal source work",
+    "DF-13: controlled COMMERCE cutover source work only; no activation",
+    "UR-00 and later: blocked until DF-13 stability and explicit owner approval"
   ],
   "hardStops": [
     "NO_BF_RESIDUAL_MISREPRESENTATION_AS_FIXED",
@@ -84,6 +116,8 @@
     "NO_ADMIN_WEB_OR_ADMIN_SIMULATION_WORKER_RECREATE_WITHOUT_REVIEWED_PER_SERVICE_IMAGE_SELECTION",
     "NO_UNVERIFIED_HOST_SCRIPT_REUSE",
     "NO_PAGE_ALLOWLIST_EXPANSION",
-    "NO_PREPROD_OR_PRODUCTION_MUTATION_WITHOUT_EXPLICIT_APPROVAL"
+    "NO_PREPROD_OR_PRODUCTION_MUTATION_WITHOUT_EXPLICIT_APPROVAL",
+    "NO_DF_C_RUNTIME_ACTIVATION_OR_COMMERCE_CUTOVER_WITHOUT_SEPARATE_OWNER_AUTHORIZATION",
+    "NO_UR_WORK_BEFORE_DF13_STABILITY_AND_UR00_APPROVAL"
   ]
 }
