@@ -1,8 +1,8 @@
 # LANA Chatbot — Active Incident Backlog
 
-**Status:** Reconciled on 2026-08-13; **GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS**.
-**Active track:** DF-A source work is eligible; BF residuals remain recorded and unchanged.
-**Next issue:** DF-01 under the DF-A Release Train contract.
+**Status:** BF reconciliation remains `GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS`; the later Gate E acceptance is recorded separately.
+**Active track:** `GATE_E_PREPROD_ACCEPTED`; DF-C / DF11 source work is eligible. BF residuals remain recorded and unchanged.
+**Next issue:** DF-11 under the DF-C source-work contract; see `GATE_E_PREPROD_ACCEPTANCE_20260821.md`.
 **Exit:** owner acceptance is recorded and `POST_BF_V1` is anchored to the immutable reconciled runtime evidence.
 **Detailed issue contracts:** `BF_ISSUE_SPECS.md`; current disposition is below.
 **Operating mode:** `ENGINEERING_PREPROD`; PRs use focused verification and Release Trains own full verification/deploy preparation.
@@ -69,7 +69,7 @@ Wave C: BF-06 -> BF-07 -> BF-08 -> BF-09
 | BF-09 | Merged and in the realtime artifact | Direct runtime path | Active; bounded full-look mapping |
 | BF-10 | delivery-only r5.6 is live | New path has no observed natural terminal transition | Accepted non-blocking evidence residual; do not mutate historical rows or claim live transition evidence |
 
-**DF_A_READY: READY_FOR_DF_A_SOURCE_WORK.** This is an owner governance decision, not
+**Historical DF_A_READY: READY_FOR_DF_A_SOURCE_WORK.** This was an owner governance decision, not
 a claim that BF-04 is fixed, BF-10 has natural-transition evidence, or a deployment is authorized.
 `POST_BF_V1` uses the immutable r5.7.1 realtime plus r5.6 delivery evidence recorded in
 `CURRENT_BASELINE.md` as its comparison anchor.
@@ -102,7 +102,7 @@ For one BF task, load only:
 - BF-03 has an owner-approved deferred deviation and the canonical foundation-only disposition from PR #158: retained inert primitives and evaluation data have no runtime authority or activation path. Do not revive correction containment; the root dialogue-evidence and writer-demotion obligations remain DF-05/DF-06 and DF-09/DF-11.
 - BF-07 clarifies multiple products; canonical multi-product state remains an UR-00 ADR obligation.
 - DF-09/DF-10 must use the post-Gate-BF V1 baseline, never the known-buggy pre-wave path.
-- Detailed DF-A work is active in `FUTURE_BACKLOG.md`; later trains retain their logical dependencies.
+- Detailed DF-C work is active in `FUTURE_BACKLOG.md`; Gate E v15 provenance and DF11 entry conditions are in `GATE_E_PREPROD_ACCEPTANCE_20260821.md`. Later trains retain their logical dependencies.
 
 ## Gate BF
 
@@ -133,6 +133,7 @@ cannot erase or misrepresent the residuals:
 - [ ] Any test-page deployment evidence and soak are append-only and tied to immutable tags.
 - [ ] An immutable post-fix V1 baseline records model/config, prompt, policy versions, evidence-envelope version, and page scope.
 
-Owner acceptance resumes DF-A source work and creates the `POST_BF_V1` comparison anchor.
-Gate BF is an engineering/architecture gate; it does not declare production readiness or
-authorize `COMMERCE`, State V2, a second page/brand, deployment, or any live mutation.
+The historical Gate BF acceptance resumed DF-A source work and created the `POST_BF_V1`
+comparison anchor. The later Gate E acceptance starts DF-C source work only. Neither Gate
+declares production readiness or authorizes `COMMERCE`, State V2, a second page/brand,
+deployment, or any live mutation.

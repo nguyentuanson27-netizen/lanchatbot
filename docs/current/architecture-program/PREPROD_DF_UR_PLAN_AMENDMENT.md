@@ -291,8 +291,8 @@ These mechanisms are deferred because they are not currently meaningful, not bec
 ```text
 GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS + immutable POST_BF_V1 (recorded)
   -> DF-P1..DF-P6
-  -> Gate E-PREPROD / freeze exact candidate manifest
-  -> DF-P7 / re-derive candidate fingerprint / quiescent LEGACY -> COMMERCE
+  -> Gate E-PREPROD accepted v15 / immutable exact candidate manifest
+  -> DF-P7 source work / later re-derive candidate fingerprint and quiescent LEGACY -> COMMERCE only with separate activation authorization
   -> controlled critical human E2E
   -> Gate F-PREPROD
   -> UR-P1..UR-P3 / quiescent LEGACY -> V2
@@ -312,4 +312,4 @@ Archives, historical manifests, baseline evidence, and past runtime records rema
 
 ## 13. Change boundary
 
-This amendment does not alter the already recorded `GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS` disposition or `POST_BF_V1`, deploy anything, mutate runtime/database/policy/page routing, authorize production hardening, or authorize destructive cleanup. It activates only the documented DF-A source-work plan when merged.
+This amendment does not alter the already recorded `GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS` disposition or `POST_BF_V1`, deploy anything, mutate runtime/database/policy/page routing, authorize production hardening, or authorize destructive cleanup. It initially activated DF-A source work; after the separately recorded `GATE_E_PREPROD_ACCEPTED` v15 decision, it governs DF-C source work without authorizing runtime activation.

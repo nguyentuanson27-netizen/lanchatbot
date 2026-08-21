@@ -1,7 +1,7 @@
 # Deferred Active Backlog — DF and UR
 
 **Activation condition:** Gate BF is passed or explicitly accepted with recorded owner waivers, and the immutable `POST_BF_V1` comparison baseline has been captured.
-**Current status:** **DF-A ACTIVE FOR SOURCE WORK.** On 2026-08-13 the owner accepted Gate BF with recorded BF-03/BF-04/BF-10 deviations. This does not close those residuals or authorize deployment.
+**Current status:** **GATE_E_PREPROD_ACCEPTED; DF-C / DF11 ACTIVE FOR SOURCE WORK.** The v15 immutable evidence bindings are recorded in `GATE_E_PREPROD_ACCEPTANCE_20260821.md`. This does not close BF-03/BF-04/BF-10 residuals, authorize deployment, or activate `COMMERCE`.
 **Default context now:** Do not load this file for BF work except when a BF residual explicitly changes a future contract.
 **Operating mode:** `ENGINEERING_PREPROD`; logical dependencies stay item-level, while full verification and test-page deployment default to Release Train boundaries.
 **Plan rationale:** `PREPROD_DF_UR_PLAN_AMENDMENT.md`.
@@ -74,23 +74,23 @@ Acceptance:
 
 No `>=100` organic/live-pair or production-statistical-confidence requirement in `ENGINEERING_PREPROD`.
 
-## Gate E-PREPROD
+## Gate E-PREPROD — accepted v15
 
-- [ ] Canonical buying intent has one approved authority.
-- [ ] Dialogue evidence is separate from buying intent.
-- [ ] Protected claims have typed verified provenance.
-- [ ] Product-aware readiness is fresh and deterministic before side effects.
-- [ ] Phase/barrier contracts are versioned, deterministic, and PII-safe.
-- [ ] Context V2 and intended consumers are implemented.
-- [ ] Accepted BF incident/counterexample replay passes.
-- [ ] DF-P6 corpus/rubric is frozen before scoring.
-- [ ] Exact `ContextV2CandidateManifest`, candidate content fingerprint, and canonical hash are frozen before scoring.
-- [ ] V2 passes all frozen required safety/factual/side-effect/behavior assertions using that exact candidate manifest.
-- [ ] Evaluation paths are side-effect-free and cost bounded.
+All Gate E requirements were accepted under the immutable v15 record:
+
+- [x] Canonical buying intent, dialogue evidence, protected-claim provenance, readiness, phase/barrier, and Context V2 contracts passed the frozen assertions.
+- [x] BF incident/counterexample corpus and rubric were frozen before scoring.
+- [x] Exact `ContextV2CandidateManifest` and candidate content fingerprint were bound before scoring.
+- [x] All `14/14` frozen required assertions passed: claim safety, Context integrity, and coverage are `100%`; side-effect violations are `0`.
+- [x] Evaluation remained side-effect-free and within the accepted one-run/`51`-request execution record.
+
+The exact scored main, candidate revision, manifest, evidence BODY, FINALIZATION, and `FINALIZED_TRUSTED_EXACT_HEAD` admissibility are immutable in `GATE_E_PREPROD_ACCEPTANCE_20260821.md`.
 
 Not Gate E requirements: runtime SHADOW, organic traffic volume, fixed live pair count, traffic canary, or production statistical confidence.
 
 ### DF-P7 — Direct controlled Commerce authority (DF11-DF13)
+
+Source work begins with DF11. DF11, DF12, and DF13 remain separate focused PR units; this state does not authorize a release, canary, migration, or control-plane activation.
 
 Implement database-backed:
 
@@ -208,8 +208,8 @@ The prior `>=100` pair/non-inferiority idea may be reconsidered against the real
 Gate BF + immutable POST_BF_V1
   -> DF-A: DF-P1..DF-P3
   -> DF-B: DF-P4..DF-P6
-  -> Gate E-PREPROD / freeze candidate manifest
-  -> DF-C: DF-P7 / re-derive candidate fingerprint / quiescent LEGACY -> COMMERCE
+  -> Gate E-PREPROD accepted v15 / immutable candidate-manifest evidence
+  -> DF-C: DF-P7 source work / later re-derive candidate fingerprint and quiescent LEGACY -> COMMERCE only with separate activation authorization
   -> controlled critical human E2E
   -> Gate F-PREPROD
   -> UR-A: UR-P1..UR-P2
