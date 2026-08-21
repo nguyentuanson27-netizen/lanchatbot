@@ -6,6 +6,13 @@ This contract separates the byte-frozen legacy generation baseline from every
 offline or replay candidate. It is source architecture only and never grants
 runtime authority, deployment, side effects, or Gate acceptance.
 
+The original `DF10_GATE_E_PLAN_V2` checkpoint remains
+`DRAFT_UNREGISTERED`: No corpus, scored run, Gate E verdict, deployment
+authority, or DF-C cutover was claimed by that plan at the time it was adopted.
+That historical pre-run checkpoint is preserved for traceability. The later
+v15 evidence record below is a distinct, immutable completion record; it does
+not rewrite the plan or grant runtime authority.
+
 Required properties:
 
 1. Realtime generation and the V1 replay use one baseline capability and the
@@ -154,7 +161,9 @@ Required properties:
   `DF10_GATE_E_RUN_FINALIZATION_V3`; the concrete capability remains
   `GateEEvidenceStoreV2` with `admittedAt` receipts. Registered population uses
   `DF10_GATE_E_REGISTERED_POPULATION_ANCHOR_V1` through a disjoint writer port.
-- Registration status: completed; v15 manifest `REGISTERED_FOR_SCORING` and immutable registration artifact `REGISTERED`.
+- Registration status: the original plan remains `DRAFT_UNREGISTERED`; the
+  separately immutable v15 manifest is `REGISTERED_FOR_SCORING` and its
+  registration artifact is `REGISTERED`.
 - Plan artifact SHA-256:
   `45c8e53bf0c260d23f6a62f7ec630794042360e911324874a16afbf469edcea3`
 - Baseline: `POST_BF_V1`
