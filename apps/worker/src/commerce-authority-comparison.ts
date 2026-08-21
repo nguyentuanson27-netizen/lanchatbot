@@ -1,9 +1,22 @@
 import {
   deriveConversationPhaseV2,
   type ConversationPhaseV2Value,
+  type ProductBindingV2,
   type SalesCycleStageV1,
 } from "@lana/contracts";
 import type { SalesStage } from "@lana/conversation-engine";
+
+type CommerceProductScope =
+  | { readonly kind: "NONE" }
+  | { readonly kind: "UNAVAILABLE" }
+  | { readonly kind: "SINGLE"; readonly productId: string }
+  | { readonly kind: "AMBIGUOUS" };
+
+type CartProductScope =
+  | { readonly kind: "ABSENT" }
+  | { readonly kind: "EMPTY" }
+  | { readonly kind: "SINGLE"; readonly productId: string }
+  | { readonly kind: "AMBIGUOUS" };
 
 export interface CommerceAuthorityCandidate {
   readonly pageId: string;
@@ -11,14 +24,12 @@ export interface CommerceAuthorityCandidate {
   readonly revision: number;
   readonly stage: SalesCycleStageV1;
   /**
-   * Retains no-cart, present-but-unavailable, and ambiguous product scope so
-   * comparison cannot turn incomplete commerce state into a false match.
+   * Canonical product scope from ProductBindingV2. Unavailable and ambiguous
+   * bindings remain explicit so incomplete state cannot turn into a false match.
    */
-  readonly productScope:
-    | { readonly kind: "NONE" }
-    | { readonly kind: "UNAVAILABLE" }
-    | { readonly kind: "SINGLE"; readonly productId: string }
-    | { readonly kind: "AMBIGUOUS" };
+  readonly productScope: CommerceProductScope;
+  /** Cart lines are retained as separate comparison evidence, not product authority. */
+  readonly cartProductScope: CartProductScope;
   /** Presence-only artifacts; no preview, confirmation, or recipient content is projected. */
   readonly artifacts: {
     readonly hasCart: boolean;
@@ -42,6 +53,8 @@ export interface CommerceAuthorityStateProjectionInput {
   } | null;
   readonly hasOrderPreview: boolean;
   readonly hasPurchaseConfirmation: boolean;
+  /** Canonical pre-cart product authority; callers must provide the parsed contract. */
+  readonly productBinding: ProductBindingV2;
 }
 
 type AuthorityPhase = ConversationPhaseV2Value;
@@ -134,6 +147,27 @@ function productScopesMatch(
     (legacy.kind !== "SINGLE" || commerce.kind === "SINGLE" && legacy.productId === commerce.productId);
 }
 
+function productScopeFromCanonicalBinding(
+  binding: ProductBindingV2,
+): CommerceProductScope {
+  if (binding.status === "NOT_REQUIRED") return { kind: "NONE" };
+  if (binding.status === "RESOLVED" && binding.productIds.length === 1) {
+    return { kind: "SINGLE", productId: binding.productIds[0]! };
+  }
+  if (binding.status === "AMBIGUOUS") return { kind: "AMBIGUOUS" };
+  return { kind: "UNAVAILABLE" };
+}
+
+function cartProductScope(
+  cart: CommerceAuthorityStateProjectionInput["cart"],
+): CartProductScope {
+  if (cart === null) return { kind: "ABSENT" };
+  const productIds = [...new Set(cart.value.lines.map(({ parentProductId }) => parentProductId))];
+  if (productIds.length === 0) return { kind: "EMPTY" };
+  if (productIds.length === 1) return { kind: "SINGLE", productId: productIds[0]! };
+  return { kind: "AMBIGUOUS" };
+}
+
 /**
  * Produces the PII-safe comparison projection from canonical commerce state.
  * It never normalizes IDs: a caller must supply canonical identifiers already.
@@ -141,21 +175,13 @@ function productScopesMatch(
 export function projectCommerceAuthorityCandidate(
   state: CommerceAuthorityStateProjectionInput,
 ): CommerceAuthorityCandidate {
-  const productIds = [...new Set(
-    (state.cart?.value.lines ?? []).map(({ parentProductId }) => parentProductId),
-  )];
   return {
     pageId: state.routing.pageId,
     conversationId: state.routing.conversationId,
     revision: state.revision,
     stage: state.stage,
-    productScope: state.cart === null
-      ? { kind: "NONE" }
-      : productIds.length === 0
-        ? { kind: "UNAVAILABLE" }
-        : productIds.length === 1
-        ? { kind: "SINGLE", productId: productIds[0]! }
-        : { kind: "AMBIGUOUS" },
+    productScope: productScopeFromCanonicalBinding(state.productBinding),
+    cartProductScope: cartProductScope(state.cart),
     artifacts: {
       hasCart: state.cart !== null,
       hasOrderPreview: state.hasOrderPreview,

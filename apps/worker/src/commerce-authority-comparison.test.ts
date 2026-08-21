@@ -4,9 +4,23 @@ import {
   projectCommerceAuthorityCandidate,
   type CommerceAuthorityCandidate,
 } from "./commerce-authority-comparison.js";
+import type { ProductBindingV2 } from "@lana/contracts";
 
 const pageId = "1198992073286645";
 const conversationId = "conversation-1";
+
+function productBinding(
+  status: ProductBindingV2["status"],
+  productIds: readonly string[] = [],
+): ProductBindingV2 {
+  return {
+    schemaVersion: 2,
+    contractVersion: "PRODUCT_BINDING_V2",
+    status,
+    productIds: [...productIds],
+    catalogVersion: "catalog-v1",
+  };
+}
 
 function commerceCandidate(
   overrides: Partial<CommerceAuthorityCandidate> = {},
@@ -17,6 +31,7 @@ function commerceCandidate(
     revision: 4,
     stage: "CART_OPEN",
     productScope: { kind: "SINGLE", productId: "CB182" },
+    cartProductScope: { kind: "SINGLE", productId: "CB182" },
     artifacts: {
       hasCart: true,
       hasOrderPreview: false,
@@ -123,16 +138,19 @@ describe("DF11 commerce authority comparison", () => {
     ["discovery", "BOT", "DISCOVERY", commerceCandidate({
       stage: "DISCOVERY",
       productScope: { kind: "NONE" },
+      cartProductScope: { kind: "ABSENT" },
       artifacts: { hasCart: false, hasOrderPreview: false, hasPurchaseConfirmation: false },
     })],
     ["product evaluation", "BOT", "PRODUCT_MATCHED", commerceCandidate({
       stage: "FACTS_PRESENTED",
-      productScope: { kind: "NONE" },
+      productScope: { kind: "SINGLE", productId: "CB182" },
+      cartProductScope: { kind: "ABSENT" },
       artifacts: { hasCart: false, hasOrderPreview: false, hasPurchaseConfirmation: false },
     })],
     ["fit consultation", "BOT", "FIT_CONSULTING", commerceCandidate({
       stage: "SIZE_RECOMMENDED",
-      productScope: { kind: "NONE" },
+      productScope: { kind: "SINGLE", productId: "CB182" },
+      cartProductScope: { kind: "ABSENT" },
       artifacts: { hasCart: false, hasOrderPreview: false, hasPurchaseConfirmation: false },
     })],
     ["cart active", "BOT", "READY_TO_BUY", commerceCandidate()],
@@ -156,15 +174,18 @@ describe("DF11 commerce authority comparison", () => {
     ["legacy objection handling", "BOT", "OBJECTION_HANDLING", commerceCandidate({
       stage: "FACTS_PRESENTED",
       productScope: { kind: "NONE" },
+      cartProductScope: { kind: "ABSENT" },
       artifacts: { hasCart: false, hasOrderPreview: false, hasPurchaseConfirmation: false },
     }), "LEGACY_PHASE_UNCOMPARABLE"],
     ["legacy post-sale", "HUMAN", "POST_SALE", commerceCandidate({
       stage: "PURCHASE_CONFIRMED",
+      cartProductScope: { kind: "SINGLE", productId: "CB182" },
       artifacts: { hasCart: true, hasOrderPreview: true, hasPurchaseConfirmation: true },
     }), "LEGACY_PHASE_UNCOMPARABLE"],
     ["product evaluation versus fit consultation", "BOT", "PRODUCT_MATCHED", commerceCandidate({
       stage: "SIZE_RECOMMENDED",
-      productScope: { kind: "NONE" },
+      productScope: { kind: "SINGLE", productId: "CB182" },
+      cartProductScope: { kind: "ABSENT" },
       artifacts: { hasCart: false, hasOrderPreview: false, hasPurchaseConfirmation: false },
     }), "PHASE_MISMATCH"],
     ["invalid commerce artifacts", "BOT", "READY_TO_BUY", commerceCandidate({
@@ -183,11 +204,13 @@ describe("DF11 commerce authority comparison", () => {
     const zeroProduct = projectCommerceAuthorityCandidate({
       routing: { pageId, conversationId }, revision: 8, stage: "CART_OPEN",
       cart: { value: { lines: [] } }, hasOrderPreview: false, hasPurchaseConfirmation: false,
+      productBinding: productBinding("UNRESOLVED"),
     });
     const multiProduct = projectCommerceAuthorityCandidate({
       routing: { pageId, conversationId }, revision: 8, stage: "CART_OPEN",
       cart: { value: { lines: [{ parentProductId: "CB182" }, { parentProductId: "CB183" }] } },
       hasOrderPreview: false, hasPurchaseConfirmation: false,
+      productBinding: productBinding("AMBIGUOUS", ["CB182", "CB183"]),
     });
     expect(compareCommerceAuthority({
       enabled: true,
@@ -206,6 +229,41 @@ describe("DF11 commerce authority comparison", () => {
     })).toMatchObject({ status: "MISMATCH", differences: ["PRODUCT_SCOPE_MISMATCH"] });
   });
 
+  it("uses resolved canonical product binding before cart creation", () => {
+    const sameProduct = projectCommerceAuthorityCandidate({
+      routing: { pageId, conversationId }, revision: 8, stage: "FACTS_PRESENTED",
+      cart: null, hasOrderPreview: false, hasPurchaseConfirmation: false,
+      productBinding: productBinding("RESOLVED", ["CB182"]),
+    });
+    const otherProduct = projectCommerceAuthorityCandidate({
+      routing: { pageId, conversationId }, revision: 8, stage: "FACTS_PRESENTED",
+      cart: null, hasOrderPreview: false, hasPurchaseConfirmation: false,
+      productBinding: productBinding("RESOLVED", ["CB183"]),
+    });
+    const legacy = { pageId, conversationId, owner: "BOT" as const, stage: "PRODUCT_MATCHED" as const, productId: "CB182" };
+    expect(compareCommerceAuthority({ enabled: true, legacy, commerce: sameProduct }))
+      .toMatchObject({ status: "MATCH", differences: [] });
+    expect(compareCommerceAuthority({ enabled: true, legacy, commerce: otherProduct }))
+      .toMatchObject({ status: "MISMATCH", differences: ["PRODUCT_SCOPE_MISMATCH"] });
+  });
+
+  it.each([
+    ["unresolved", productBinding("UNRESOLVED")],
+    ["ambiguous", productBinding("AMBIGUOUS", ["CB182", "CB183"])],
+    ["stale", productBinding("STALE", ["CB182"])],
+  ] as const)("fails closed for %s canonical product binding", (_name, binding) => {
+    const commerce = projectCommerceAuthorityCandidate({
+      routing: { pageId, conversationId }, revision: 8, stage: "FACTS_PRESENTED",
+      cart: null, hasOrderPreview: false, hasPurchaseConfirmation: false,
+      productBinding: binding,
+    });
+    expect(compareCommerceAuthority({
+      enabled: true,
+      legacy: { pageId, conversationId, owner: "BOT", stage: "PRODUCT_MATCHED", productId: "CB182" },
+      commerce,
+    })).toMatchObject({ status: "MISMATCH", differences: ["PRODUCT_SCOPE_UNAVAILABLE"] });
+  });
+
   it("projects only authority-relevant commerce state and never checkout recipient data", () => {
     expect(projectCommerceAuthorityCandidate({
       routing: { pageId, conversationId },
@@ -214,12 +272,14 @@ describe("DF11 commerce authority comparison", () => {
       cart: { value: { lines: [{ parentProductId: "CB182" }] } },
       hasOrderPreview: true,
       hasPurchaseConfirmation: false,
+      productBinding: productBinding("RESOLVED", ["CB182"]),
     })).toEqual({
       pageId,
       conversationId,
       revision: 8,
       stage: "ORDER_PREVIEW",
       productScope: { kind: "SINGLE", productId: "CB182" },
+      cartProductScope: { kind: "SINGLE", productId: "CB182" },
       artifacts: { hasCart: true, hasOrderPreview: true, hasPurchaseConfirmation: false },
     });
   });
