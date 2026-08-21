@@ -699,9 +699,11 @@ function claimSegmentMatchesEvidence(
       .some((size) => asserted.has(size.toLocaleUpperCase("vi-VN")));
   }
   if (claim.type === "PRODUCT_MEDIA") {
-    const normalized = normalizedSemanticText(text);
-    return ["anh", "hinh", "image", "photo"]
-      .some((topic) => normalized.split(" ").includes(topic));
+    // The exact content hash proves which governed asset the candidate bound.
+    // Whether the natural wording actually refers to that asset is checked by
+    // the separately registered semantic interpreter. Requiring a tiny list of
+    // image nouns here made valid conversational Vietnamese fail lexically.
+    return true;
   }
   return false;
 }
@@ -759,11 +761,18 @@ export function scoreGateECandidateOutput(input: Readonly<{
   ))].sort();
   const interpretedClaimHashes = [...interpretation.claimContentHashes].sort();
   const requiredClaimHashes = [...obligations.requiredClaimContentHashes].sort();
-  const claimReferencesMatch =
-    canonicalJsonV1(declaredClaimHashes) === canonicalJsonV1(requiredClaimHashes) &&
-    canonicalJsonV1(interpretedClaimHashes) === canonicalJsonV1(requiredClaimHashes);
-  if (!claimReferencesMatch) {
-    reasons.add("GATE_E_REQUIRED_EVIDENCE_ASSERTION_FAILED");
+  const requiredClaimHashesJson = canonicalJsonV1(requiredClaimHashes);
+  const candidateClaimReferencesMatch =
+    canonicalJsonV1(declaredClaimHashes) === requiredClaimHashesJson;
+  const interpreterClaimReferencesMatch =
+    canonicalJsonV1(interpretedClaimHashes) === requiredClaimHashesJson;
+  const claimReferencesMatch = candidateClaimReferencesMatch &&
+    interpreterClaimReferencesMatch;
+  if (!candidateClaimReferencesMatch) {
+    reasons.add("GATE_E_CANDIDATE_REQUIRED_EVIDENCE_DECLARATION_MISMATCH");
+  }
+  if (!interpreterClaimReferencesMatch) {
+    reasons.add("GATE_E_INTERPRETER_REQUIRED_EVIDENCE_MISMATCH");
   }
   const referencedClaims = declaredClaimHashes.map((contentHash) =>
     input.item.context.verifiedClaims.find(({ provenance }) =>
@@ -792,11 +801,16 @@ export function scoreGateECandidateOutput(input: Readonly<{
     ? []
     : [obligations.clarificationTarget];
   const interpretedClarifications = [...interpretation.clarificationTargets].sort();
+  const expectedClarificationsJson = canonicalJsonV1(
+    expectedClarifications.sort(),
+  );
   if (canonicalJsonV1(clarificationTargets.sort()) !==
-        canonicalJsonV1(expectedClarifications.sort()) ||
-      canonicalJsonV1(interpretedClarifications) !==
-        canonicalJsonV1(expectedClarifications.sort())) {
-    reasons.add("GATE_E_CLARIFICATION_ASSERTION_FAILED");
+      expectedClarificationsJson) {
+    reasons.add("GATE_E_CANDIDATE_CLARIFICATION_DECLARATION_MISMATCH");
+  }
+  if (canonicalJsonV1(interpretedClarifications) !==
+      expectedClarificationsJson) {
+    reasons.add("GATE_E_INTERPRETER_CLARIFICATION_MISMATCH");
   }
   const requestedActions = [...new Set(output.segments.flatMap((segment) =>
     segment.kind === "ACTION_REQUEST" ? [segment.action] : []
@@ -809,10 +823,12 @@ export function scoreGateECandidateOutput(input: Readonly<{
   );
   const interpretedActions = [...interpretation.requestedActions].sort();
   if (canonicalJsonV1(requestedActions.sort()) !==
-        canonicalJsonV1(expectedActions.sort()) ||
-      canonicalJsonV1(interpretedActions) !==
-        canonicalJsonV1(expectedInterpretedActions.sort())) {
-    reasons.add("GATE_E_REQUESTED_ACTION_ASSERTION_FAILED");
+      canonicalJsonV1(expectedActions.sort())) {
+    reasons.add("GATE_E_CANDIDATE_REQUESTED_ACTION_DECLARATION_MISMATCH");
+  }
+  if (canonicalJsonV1(interpretedActions) !==
+      canonicalJsonV1(expectedInterpretedActions.sort())) {
+    reasons.add("GATE_E_INTERPRETER_REQUESTED_ACTION_MISMATCH");
   }
 
   const declaredEffects = new Set(output.segments.flatMap((segment) =>
@@ -841,8 +857,11 @@ export function scoreGateECandidateOutput(input: Readonly<{
   if (declaredEffectMismatch) {
     reasons.add("GATE_E_EFFECT_DECLARATION_INTERPRETATION_MISMATCH");
   }
-  if (disallowedDeclaredEffect || disallowedInterpretedEffect) {
-    reasons.add("GATE_E_TYPED_EFFECT_CLAIM_REJECTED");
+  if (disallowedDeclaredEffect) {
+    reasons.add("GATE_E_CANDIDATE_EFFECT_NOT_ALLOWED");
+  }
+  if (disallowedInterpretedEffect) {
+    reasons.add("GATE_E_INTERPRETER_EFFECT_NOT_ALLOWED");
   }
 
   const reply = replyFromCandidateOutput(output);

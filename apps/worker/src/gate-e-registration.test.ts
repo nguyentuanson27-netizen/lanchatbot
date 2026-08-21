@@ -981,6 +981,99 @@ describe("Gate E immutable registration boundary", () => {
     })).toMatchObject({ disposition: "MUST_PASS", claimSafety: 1 });
   });
 
+  it("accepts natural product-media wording through exact evidence binding", () => {
+    const item = FROZEN_GATE_E_CORPUS_V1.items.find(
+      ({ itemId }) => itemId === "bf06-partial-media-preserved",
+    )!;
+    const output = passingOutput(item);
+    const naturalOutput: ContextV2CandidateOutputV2 = {
+      ...output,
+      segments: output.segments.map((segment) =>
+        segment.kind === "VERIFIED_CLAIM"
+          ? { ...segment, text: "Em gửi chị mẫu này để mình xem kỹ hơn nha." }
+          : segment
+      ),
+    };
+
+    expect(scoreOutput({ item, output: naturalOutput })).toMatchObject({
+      disposition: "MUST_PASS",
+      claimSafety: 1,
+    });
+  });
+
+  it("separates candidate declarations from interpreter observations", () => {
+    const item = FROZEN_GATE_E_CORPUS_V1.items.find(
+      ({ itemId }) => itemId === "bf04-unverified-size-blocked",
+    )!;
+    const declared = passingOutput(item);
+    const interpreterMismatch = scoreOutput({
+      item,
+      output: declared,
+      interpretation: { clarificationTargets: [], requestedActions: [] },
+    });
+    expect(interpreterMismatch.reasonCodes).toEqual(expect.arrayContaining([
+      "GATE_E_INTERPRETER_CLARIFICATION_MISMATCH",
+      "GATE_E_INTERPRETER_REQUESTED_ACTION_MISMATCH",
+    ]));
+    expect(interpreterMismatch.reasonCodes).not.toEqual(expect.arrayContaining([
+      "GATE_E_CANDIDATE_CLARIFICATION_DECLARATION_MISMATCH",
+      "GATE_E_CANDIDATE_REQUESTED_ACTION_DECLARATION_MISMATCH",
+    ]));
+
+    const undeclared: ContextV2CandidateOutputV2 = {
+      ...declared,
+      segments: [{ kind: "GENERAL", text: "Dạ em đang kiểm tra thêm cho chị." }],
+    };
+    const candidateMismatch = scoreGateECandidateOutput({
+      item,
+      output: undeclared,
+      interpretation: interpretationFor(undeclared, {
+        clarificationTargets: ["MEASUREMENTS"],
+        requestedActions: ["PROVIDE_MEASUREMENTS"],
+      }),
+    });
+    expect(candidateMismatch.reasonCodes).toEqual(expect.arrayContaining([
+      "GATE_E_CANDIDATE_CLARIFICATION_DECLARATION_MISMATCH",
+      "GATE_E_CANDIDATE_REQUESTED_ACTION_DECLARATION_MISMATCH",
+    ]));
+    expect(candidateMismatch.reasonCodes).not.toEqual(expect.arrayContaining([
+      "GATE_E_INTERPRETER_CLARIFICATION_MISMATCH",
+      "GATE_E_INTERPRETER_REQUESTED_ACTION_MISMATCH",
+    ]));
+
+    const mediaItem = FROZEN_GATE_E_CORPUS_V1.items.find(
+      ({ itemId }) => itemId === "bf06-partial-media-preserved",
+    )!;
+    const mediaOutput = passingOutput(mediaItem);
+    const evidenceMismatch = scoreOutput({
+      item: mediaItem,
+      output: mediaOutput,
+      interpretation: { claimContentHashes: [] },
+    });
+    expect(evidenceMismatch.reasonCodes).toContain(
+      "GATE_E_INTERPRETER_REQUIRED_EVIDENCE_MISMATCH",
+    );
+    expect(evidenceMismatch.reasonCodes).not.toContain(
+      "GATE_E_CANDIDATE_REQUIRED_EVIDENCE_DECLARATION_MISMATCH",
+    );
+
+    const effectItem = FROZEN_GATE_E_CORPUS_V1.items.find(
+      ({ itemId }) => itemId === "order-confirmed-holds-position",
+    )!;
+    const effectOutput = passingOutput(effectItem);
+    const effectMismatch = scoreOutput({
+      item: effectItem,
+      output: effectOutput,
+      interpretation: { claimedEffects: ["ORDER_CONFIRMED"] },
+    });
+    expect(effectMismatch.reasonCodes).toContain(
+      "GATE_E_INTERPRETER_EFFECT_NOT_ALLOWED",
+    );
+    expect(effectMismatch.reasonCodes).not.toContain(
+      "GATE_E_CANDIDATE_EFFECT_NOT_ALLOWED",
+    );
+  });
+
   it("does not let one canned reply satisfy every frozen semantic obligation", () => {
     const scores = FROZEN_GATE_E_CORPUS_V1.items.map((item) =>
       scoreOutput({

@@ -200,11 +200,12 @@ describe("Context V2 candidate capability", () => {
       context: context(),
     });
     expect(request.identity.requestEnvelopeHash).toBe(
-      "1219fa26dbb7516b3721350a8a5b285a81c878bdb6030b2746d25c9f37d6354f",
+      "8ca1f9d5c3c56a1a602b7a11ec1380e5e99bfe73c4b3016d4e3a9efa20c262ef",
     );
     expect(request.body).toContain("responseSchema");
     expect(request.body).toContain("safetySettings");
     const body = JSON.parse(request.body) as {
+      systemInstruction: { parts: Array<{ text: string }> };
       generationConfig: {
         responseSchema: {
           additionalProperties?: unknown;
@@ -220,6 +221,14 @@ describe("Context V2 candidate capability", () => {
         topP?: unknown;
       };
     };
+    const instruction = body.systemInstruction.parts[0]!.text;
+    expect(instruction).toContain("PRODUCT_CONTEXT_UNREADY");
+    expect(instruction).toContain("MEASUREMENTS_REQUIRED");
+    expect(instruction).toContain("ORDER_REVIEW");
+    expect(instruction).toContain("ORDER_CONFIRMED");
+    expect(instruction).toContain("Do not mention an internal cart");
+    expect(instruction).toContain("Avoid formal bot phrases");
+    expect(instruction).not.toContain("giỏ hàng");
     expect(body.generationConfig.responseSchema.properties.schemaVersion).toEqual({
       type: "INTEGER",
       minimum: 2,
