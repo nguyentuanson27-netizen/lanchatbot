@@ -328,7 +328,9 @@ function targetPointerMatches(
     observed.version.stateReadMode === "LEGACY";
 }
 
-function isSafeLegacyPointer(observed: RuntimeBehaviorModePointer | null): boolean {
+function isSafeLegacyPointer(
+  observed: RuntimeBehaviorModePointer | null,
+): observed is RuntimeBehaviorModePointer {
   return observed !== null && pointerIsLegacy(observed);
 }
 
@@ -339,15 +341,24 @@ function exactConsumerReadbacks(
   if (values.length !== DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.length) return false;
   const byConsumer = new Map(values.map((value) => [value.consumer, value]));
   if (byConsumer.size !== values.length) return false;
+  const salesAuthorityMode = target.version.salesAuthorityMode;
+  const stateReadMode = target.version.stateReadMode;
+  if ((salesAuthorityMode !== "LEGACY" && salesAuthorityMode !== "COMMERCE") ||
+      (stateReadMode !== "LEGACY" && stateReadMode !== "V2")) {
+    return false;
+  }
+  const authorityBundleHash = salesAuthorityMode === "COMMERCE"
+    ? DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
+    : null;
   return DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.every((consumer) => {
     const value = byConsumer.get(consumer);
     return value?.source === "DATABASE" &&
       value.modeVersionId === target.version.modeVersionId &&
       value.contentHash === target.version.contentHash &&
       value.pointerRevision === target.pointerRevision &&
-      value.salesAuthorityMode === "COMMERCE" &&
-      value.stateReadMode === "LEGACY" &&
-      value.authorityBundleHash === DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
+      value.salesAuthorityMode === salesAuthorityMode &&
+      value.stateReadMode === stateReadMode &&
+      value.authorityBundleHash === authorityBundleHash;
   });
 }
 
@@ -510,6 +521,34 @@ export async function executeCommerceCutover(input: Readonly<{
   }
   if (!targetPointerMatches(activatedPointer, input.preflight.targetPointer)) {
     if (isSafeLegacyPointer(activatedPointer)) {
+      let legacyReadbacks: readonly CommerceAuthorityConsumerReadback[];
+      try {
+        legacyReadbacks = await input.ports.readConsumerAuthorities({
+          fenceToken: held.fenceToken,
+          consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+        });
+      } catch {
+        return {
+          status: "HOLD_RETAINED",
+          sideEffects: "CONTROL_PLANE_ONLY",
+          activationAcknowledgement,
+          reasonCodes: [
+            ...(casMismatch ? ["DF13_POINTER_CAS_MISMATCH"] : []),
+            "DF13_LEGACY_CONSUMER_READBACK_UNAVAILABLE",
+          ],
+        };
+      }
+      if (!exactConsumerReadbacks(legacyReadbacks, activatedPointer)) {
+        return {
+          status: "HOLD_RETAINED",
+          sideEffects: "CONTROL_PLANE_ONLY",
+          activationAcknowledgement,
+          reasonCodes: [
+            ...(casMismatch ? ["DF13_POINTER_CAS_MISMATCH"] : []),
+            "DF13_LEGACY_CONSUMER_READBACK_INCOMPLETE",
+          ],
+        };
+      }
       return releaseAndReturn(input.ports, held.fenceToken, {
         status: "BLOCKED_LEGACY",
         sideEffects: "CONTROL_PLANE_ONLY",

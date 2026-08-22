@@ -85,15 +85,23 @@ function preflightInput() {
 }
 
 function exactReadbacks(target: RuntimeBehaviorModePointer) {
+  const salesAuthorityMode = target.version.salesAuthorityMode === "COMMERCE"
+    ? "COMMERCE" as const
+    : "LEGACY" as const;
+  const stateReadMode = target.version.stateReadMode === "V2"
+    ? "V2" as const
+    : "LEGACY" as const;
   return DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
     consumer,
     source: "DATABASE" as const,
     modeVersionId: target.version.modeVersionId,
     contentHash: target.version.contentHash,
     pointerRevision: target.pointerRevision,
-    salesAuthorityMode: "COMMERCE" as const,
-    stateReadMode: "LEGACY" as const,
-    authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+    salesAuthorityMode,
+    stateReadMode,
+    authorityBundleHash: salesAuthorityMode === "COMMERCE"
+      ? DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
+      : null,
   }));
 }
 
@@ -330,6 +338,39 @@ describe("DF13 commerce cutover contract", () => {
       reasonCodes: ["DF13_POINTER_CAS_MISMATCH", "DF13_ACTIVATION_READBACK_AMBIGUOUS"],
     });
     expect(released).toBe(false);
+  });
+
+  it("releases after CAS mismatch only when every consumer has converged on observed LEGACY", async () => {
+    const input = preflightInput();
+    const legacy = pointer("LEGACY", 6);
+    let readbacks = 0;
+    let released = false;
+    const result = await executeCommerceCutover({
+      preflight: input,
+      ports: ports({
+        async activateCommerce() {
+          return { status: "CAS_MISMATCH" };
+        },
+        async readActivePointer() {
+          return legacy;
+        },
+        async readConsumerAuthorities() {
+          readbacks += 1;
+          return exactReadbacks(legacy);
+        },
+        async releaseAuthorityDependentWork() {
+          released = true;
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "BLOCKED_LEGACY",
+      activationAcknowledgement: "CAS_REJECTED",
+      reasonCodes: ["DF13_POINTER_CAS_MISMATCH", "DF13_ACTIVATION_READBACK_MISMATCH"],
+    });
+    expect(readbacks).toBe(1);
+    expect(released).toBe(true);
   });
 
   it("rolls back and keeps LEGACY when any consumer readback is stale", async () => {
