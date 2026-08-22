@@ -305,6 +305,7 @@ function behaviorResolution(
     confirmationMode,
     salesAuthorityMode: "LEGACY",
     stateReadMode: "LEGACY",
+    authorityBundleHash: null,
     modeVersionId: "30000000-0000-4000-8000-000000000001",
     contentHash: `sha256:${"a".repeat(64)}`,
     pointerRevision: 1,

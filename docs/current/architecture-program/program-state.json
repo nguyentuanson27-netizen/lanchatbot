@@ -108,14 +108,14 @@
   },
   "active": {
     "track": "DF-C",
-    "nextIssue": "DF-12",
+    "nextIssue": "DF-13",
     "gate": "GATE_E_PREPROD_ACCEPTED",
     "authorization": "SOURCE_WORK_ONLY_NO_RUNTIME_ACTIVATION"
   },
   "future": [
-    "DF-11: default-off, side-effect-free authority-comparison and COMMERCE-source work; no runtime SHADOW authority",
-    "DF-12: missing-commerce signal source work",
-    "DF-13: controlled COMMERCE cutover source work only; no activation",
+    "DF-11: merged source-only (PR #238); default-off, side-effect-free authority comparison; no runtime SHADOW authority",
+    "DF-12: merged source-only (PR #239); missing-commerce signal; no runtime activation",
+    "DF-13: COMMERCE version/bundle and cutover source contracts active; 0035 remains a pending non-auto-applied artifact, LEGACY control-plane source remains schema-compatible, dedicated fenced consumer adapter remains required; no migration or activation",
     "UR-00 and later: blocked until DF-13 stability and explicit owner approval"
   ],
   "hardStops": [

@@ -1,7 +1,7 @@
 # Deferred Active Backlog — DF and UR
 
 **Activation condition:** Gate BF is passed or explicitly accepted with recorded owner waivers, and the immutable `POST_BF_V1` comparison baseline has been captured.
-**Current status:** **GATE_E_PREPROD_ACCEPTED; DF-C / DF12 ACTIVE FOR SOURCE WORK.** The v15 immutable evidence bindings are recorded in `GATE_E_PREPROD_ACCEPTANCE_20260821.md`. This does not close BF-03/BF-04/BF-10 residuals, authorize deployment, or activate `COMMERCE`.
+**Current status:** **GATE_E_PREPROD_ACCEPTED; DF11 and DF12 MERGED SOURCE-ONLY; DF-C / DF13 ACTIVE FOR SOURCE WORK.** The v15 immutable evidence bindings are recorded in `GATE_E_PREPROD_ACCEPTANCE_20260821.md`. This does not close BF-03/BF-04/BF-10 residuals, authorize deployment, or activate `COMMERCE`.
 **Default context now:** Do not load this file for BF work except when a BF residual explicitly changes a future contract.
 **Operating mode:** `ENGINEERING_PREPROD`; logical dependencies stay item-level, while full verification and test-page deployment default to Release Train boundaries.
 **Plan rationale:** `PREPROD_DF_UR_PLAN_AMENDMENT.md`.
@@ -110,11 +110,25 @@ Before activation:
 - missing commerce state fails closed;
 - Context V2, derived phase, final reconciliation, and legacy authority demotion switch coherently;
 - no COMMERCE decision consumes legacy `salesStage` as authority;
+- a COMMERCE behavior-mode version persists the exact authority-bundle hash, includes it in its canonical `content_hash`, and every consumer readback proves that same database-resolved version/hash/bundle identity;
 - the immutable release artifact carries the exact Gate-E `ContextV2CandidateManifest` hash and re-derives the candidate projection/content fingerprint from the final artifact;
 - the re-derived fields match Gate E exactly; copying the prior hash is not evidence;
 - any mismatch, unavailable derivation input, or material candidate-identity change since Gate E forces DF-P6 rerun on the final candidate before activation;
 - complete `LEGACY` rollback is ready;
 - the page-scoped quiescent cutover protocol from `contracts/BEHAVIOR_CONTROL_PLANE.md` is verified.
+
+DF13 source boundary: the pending `0035_df13_commerce_behavior_mode` artifact
+lives outside the auto-discovered active migration directory and must not be
+promoted or applied under this track. The COMMERCE version contract is
+source-only; shared LEGACY control-plane reads and version writes remain
+compatible before that schema promotion. The enabled generic behavior-mode
+operator remains LEGACY-only, and the generic version CAS rejects COMMERCE
+targets. A dedicated DF13 adapter must first bind the immutable authority
+identity (mode version, content hash, pointer revision, source, authority/state
+modes, and authority-bundle hash) to all listed authority consumers, durable
+fence ownership, exact consumer readback, activation audit, and rollback before
+a separately authorized cutover command may exist. There is no operator shortcut
+from `LEGACY` to `COMMERCE`.
 
 After explicit owner authorization, activate only on `PREPROD_TEST_PAGE` using that quiescent boundary, verify exact authority revision/hash/source readback across every relevant consumer, then release held eligible work and run the controlled critical human journeys.
 

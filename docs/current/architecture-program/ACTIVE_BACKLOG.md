@@ -1,8 +1,8 @@
 # LANA Chatbot — Active Incident Backlog
 
 **Status:** BF reconciliation remains `GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS`; the later Gate E acceptance is recorded separately.
-**Active track:** `GATE_E_PREPROD_ACCEPTED`; DF-C / DF11 source work is eligible. BF residuals remain recorded and unchanged.
-**Next issue:** DF-11 under the DF-C source-work contract; see `GATE_E_PREPROD_ACCEPTANCE_20260821.md`.
+**Active track:** `GATE_E_PREPROD_ACCEPTED`; DF11 and DF12 are merged source-only, and DF-C / DF13 source work is active. BF residuals remain recorded and unchanged.
+**Next issue:** DF-13 under the DF-C source-work contract; see `GATE_E_PREPROD_ACCEPTANCE_20260821.md`.
 **Exit:** owner acceptance is recorded and `POST_BF_V1` is anchored to the immutable reconciled runtime evidence.
 **Detailed issue contracts:** `BF_ISSUE_SPECS.md`; current disposition is below.
 **Operating mode:** `ENGINEERING_PREPROD`; PRs use focused verification and Release Trains own full verification/deploy preparation.

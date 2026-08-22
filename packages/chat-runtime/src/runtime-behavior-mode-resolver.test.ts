@@ -99,9 +99,35 @@ describe("RuntimeBehaviorModeResolver", () => {
       confirmationMode: "CLARIFY_ONLY", source: "FAIL_SAFE",
     });
     source.value = { ...pointer("V2_ACTIVE"), version: { ...pointer("V2_ACTIVE").version, salesAuthorityMode: "COMMERCE" } };
-    expect(await new RuntimeBehaviorModeResolver(source).resolve(input())).toMatchObject({
+    expect(await new RuntimeBehaviorModeResolver(source, { allowedPageIds: [pageId] }).resolve(input())).toMatchObject({
       confirmationMode: "CLARIFY_ONLY", source: "FAIL_SAFE",
       salesAuthorityMode: "LEGACY",
+    });
+  });
+
+  it("resolves an exact COMMERCE authority bundle only from the database pointer", async () => {
+    const source = new MutableSource();
+    const commerceBundleHash = "a".repeat(64);
+    const payload = {
+      confirmationMode: "V2_ACTIVE" as const,
+      salesAuthorityMode: "COMMERCE" as const,
+      stateReadMode: "LEGACY" as const,
+      authorityBundleHash: commerceBundleHash,
+    };
+    source.value = {
+      ...pointer("V2_ACTIVE"),
+      version: {
+        ...pointer("V2_ACTIVE").version,
+        ...payload,
+        contentHash: behaviorModeContentHash(payload),
+      },
+    };
+
+    expect(await new RuntimeBehaviorModeResolver(source, { allowedPageIds: [pageId] }).resolve(input())).toMatchObject({
+      source: "DATABASE",
+      status: "RESOLVED",
+      salesAuthorityMode: "COMMERCE",
+      authorityBundleHash: commerceBundleHash,
     });
   });
 

@@ -178,12 +178,25 @@ Before activation prove:
 - missing commerce state with committed intent fails closed;
 - Context V2, derived phase, final reconciliation, and legacy regex/`salesStage` authority demotion switch coherently;
 - no COMMERCE decision consumes legacy `salesStage` as authority;
+- a COMMERCE behavior-mode version persists the exact authority-bundle hash, includes it in its canonical `content_hash`, and every consumer readback proves that same database-resolved version/hash/bundle identity;
 - the immutable activation release carries the exact Gate-E `ContextV2CandidateManifest` hash and re-derives its candidate projection/content fingerprint from the final artifact;
 - the re-derived fields match Gate E exactly; copying the prior hash is not accepted as evidence;
 - any mismatch, missing derivation input, or material candidate identity change since Gate E has triggered a DF-P6 rerun on the final candidate;
 - the quiescent cutover protocol is verified;
 - exact control-plane readback works;
 - complete rollback to `LEGACY` works.
+
+The DF13 COMMERCE version schema remains source-only until a separate
+owner-authorized control-plane release. Its pending `0035_df13_commerce_behavior_mode`
+artifact is intentionally outside the auto-discovered active migration directory
+and must not be promoted or applied before that release; shared LEGACY
+control-plane reads and writes remain compatible before the promotion. The
+enabled generic activation operator is LEGACY-only and the generic CAS path
+rejects COMMERCE. A dedicated, fence-bound adapter must bind the immutable
+authority identity (mode version, content hash, pointer revision, source,
+authority/state modes, and authority-bundle hash) to every authority consumer,
+audit/readback, and rollback before any future cutover command is reviewed. This
+plan does not authorize that adapter or a `LEGACY -> COMMERCE` runtime change.
 
 Then, after explicit owner authorization, activate `COMMERCE` only on the `PREPROD_TEST_PAGE` inside the quiescent boundary. Keep all authority-dependent work held until every relevant authority consumer reads back the exact new revision/hash/source, then release held work and run the controlled critical human journeys.
 

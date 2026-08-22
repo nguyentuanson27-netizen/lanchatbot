@@ -10,6 +10,7 @@ export interface RuntimeBehaviorModePayloadRecord {
   readonly confirmationMode: RuntimeConfirmationMode;
   readonly salesAuthorityMode: RuntimeSalesAuthorityMode;
   readonly stateReadMode: RuntimeStateReadMode;
+  readonly authorityBundleHash?: string | null;
 }
 export interface RuntimeBehaviorModeVersionRecord extends RuntimeBehaviorModePayloadRecord {
   readonly schemaVersion: 1;
@@ -52,12 +53,16 @@ function canonicalJson(value: unknown): string {
   return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`).join(",")}}`;
 }
 export function runtimeBehaviorModeContentHash(payload: RuntimeBehaviorModePayloadRecord): string {
-  return `sha256:${createHash("sha256").update(canonicalJson({
+  const canonicalPayload = {
     confirmationMode: payload.confirmationMode,
     salesAuthorityMode: payload.salesAuthorityMode,
     schemaVersion: 1,
     stateReadMode: payload.stateReadMode,
-  }), "utf8").digest("hex")}`;
+    ...(payload.salesAuthorityMode === "COMMERCE"
+      ? { authorityBundleHash: payload.authorityBundleHash ?? null }
+      : {}),
+  };
+  return `sha256:${createHash("sha256").update(canonicalJson(canonicalPayload), "utf8").digest("hex")}`;
 }
 function requiredText(value: string, code: string, maximum = 256): string {
   const normalized = value.trim();
@@ -76,6 +81,7 @@ function versionFromRow(row: Record<string, unknown>): RuntimeBehaviorModeVersio
     confirmationMode: String(row.confirmation_mode) as RuntimeConfirmationMode,
     salesAuthorityMode: String(row.sales_authority_mode) as RuntimeSalesAuthorityMode,
     stateReadMode: String(row.state_read_mode) as RuntimeStateReadMode,
+    authorityBundleHash: row.authority_bundle_hash == null ? null : String(row.authority_bundle_hash),
     contentHash: String(row.content_hash),
     createdBy: String(row.created_by),
     reason: String(row.version_reason),
@@ -105,7 +111,8 @@ export class PostgresRuntimeBehaviorModeStore {
   async loadActiveMode(input: { readonly pageId: string; readonly channel: string }): Promise<RuntimeBehaviorModePointerRecord | null> {
     const result = await this.pool.query(
       `SELECT v.mode_version_id, v.page_id, v.channel, v.schema_version,
-              v.confirmation_mode, v.sales_authority_mode, v.state_read_mode,
+               v.confirmation_mode, v.sales_authority_mode, v.state_read_mode,
+               to_jsonb(v) ->> 'authority_bundle_hash' AS authority_bundle_hash,
               v.content_hash, v.created_by, v.reason AS version_reason, v.created_at,
               p.pointer_revision, p.updated_by, p.reason AS pointer_reason, p.updated_at
        FROM runtime_behavior_mode_pointers p
@@ -122,24 +129,53 @@ export class PostgresRuntimeBehaviorModeStore {
     readonly payload: RuntimeBehaviorModePayloadRecord;
     readonly actor: string; readonly reason: string; readonly now?: Date;
   }): Promise<RuntimeBehaviorModeVersionRecord> {
-    if (input.payload.salesAuthorityMode !== "LEGACY" || input.payload.stateReadMode !== "LEGACY") {
+    if (input.payload.stateReadMode !== "LEGACY" ||
+        (input.payload.salesAuthorityMode !== "LEGACY" && input.payload.salesAuthorityMode !== "COMMERCE")) {
       throw new Error("RUNTIME_BEHAVIOR_NON_CONFIRMATION_TRACK_FORBIDDEN");
+    }
+    const authorityBundleHash = input.payload.authorityBundleHash ?? null;
+    if (input.payload.salesAuthorityMode === "LEGACY" && authorityBundleHash !== null) {
+      throw new Error("RUNTIME_BEHAVIOR_LEGACY_BUNDLE_INVALID");
+    }
+    if (input.payload.salesAuthorityMode === "COMMERCE" &&
+        !/^[a-f0-9]{64}$/u.test(authorityBundleHash ?? "")) {
+      throw new Error("RUNTIME_BEHAVIOR_COMMERCE_BUNDLE_INVALID");
     }
     const now = input.now ?? new Date();
     if (Number.isNaN(now.getTime())) throw new Error("RUNTIME_BEHAVIOR_TIMESTAMP_INVALID");
-    const result = await this.pool.query(
-      `INSERT INTO runtime_behavior_mode_versions (
-         page_id, channel, schema_version, confirmation_mode, sales_authority_mode,
-         state_read_mode, content_hash, created_by, reason, created_at
-       ) VALUES ($1,$2,1,$3,$4,$5,$6,$7,$8,$9)
-       RETURNING mode_version_id, page_id, channel, schema_version,
-         confirmation_mode, sales_authority_mode, state_read_mode,
-         content_hash, created_by, reason AS version_reason, created_at`,
-      [requiredText(input.pageId, "RUNTIME_BEHAVIOR_PAGE_INVALID", 64), requiredText(input.channel, "RUNTIME_BEHAVIOR_CHANNEL_INVALID", 32).toUpperCase(),
-        input.payload.confirmationMode, input.payload.salesAuthorityMode, input.payload.stateReadMode,
-        runtimeBehaviorModeContentHash(input.payload), requiredText(input.actor, "RUNTIME_BEHAVIOR_ACTOR_INVALID"),
-        requiredText(input.reason, "RUNTIME_BEHAVIOR_REASON_INVALID", 500), now],
-    );
+    const values = [
+      requiredText(input.pageId, "RUNTIME_BEHAVIOR_PAGE_INVALID", 64),
+      requiredText(input.channel, "RUNTIME_BEHAVIOR_CHANNEL_INVALID", 32).toUpperCase(),
+      input.payload.confirmationMode,
+      input.payload.salesAuthorityMode,
+      input.payload.stateReadMode,
+      runtimeBehaviorModeContentHash(input.payload),
+      requiredText(input.actor, "RUNTIME_BEHAVIOR_ACTOR_INVALID"),
+      requiredText(input.reason, "RUNTIME_BEHAVIOR_REASON_INVALID", 500),
+      now,
+    ];
+    const result = input.payload.salesAuthorityMode === "LEGACY"
+      ? await this.pool.query(
+        `INSERT INTO runtime_behavior_mode_versions (
+           page_id, channel, schema_version, confirmation_mode, sales_authority_mode,
+           state_read_mode, content_hash, created_by, reason, created_at
+         ) VALUES ($1,$2,1,$3,$4,$5,$6,$7,$8,$9)
+         RETURNING mode_version_id, page_id, channel, schema_version,
+           confirmation_mode, sales_authority_mode, state_read_mode,
+           NULL::text AS authority_bundle_hash, content_hash, created_by,
+           reason AS version_reason, created_at`,
+        values,
+      )
+      : await this.pool.query(
+        `INSERT INTO runtime_behavior_mode_versions (
+           page_id, channel, schema_version, confirmation_mode, sales_authority_mode,
+           state_read_mode, authority_bundle_hash, content_hash, created_by, reason, created_at
+         ) VALUES ($1,$2,1,$3,$4,$5,$6,$7,$8,$9,$10)
+         RETURNING mode_version_id, page_id, channel, schema_version,
+           confirmation_mode, sales_authority_mode, state_read_mode, authority_bundle_hash,
+           content_hash, created_by, reason AS version_reason, created_at`,
+        [...values.slice(0, 5), authorityBundleHash, ...values.slice(5)],
+      );
     return versionFromRow(result.rows[0] as Record<string, unknown>);
   }
 
@@ -160,16 +196,24 @@ export class PostgresRuntimeBehaviorModeStore {
       await client.query("BEGIN");
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [`${pageId}:${channel}`]);
       const targetResult = await client.query(
-        `SELECT mode_version_id, page_id, channel, schema_version, confirmation_mode,
-                sales_authority_mode, state_read_mode, content_hash, created_by,
-                reason AS version_reason, created_at
-         FROM runtime_behavior_mode_versions
-         WHERE mode_version_id = $1 AND page_id = $2 AND channel = $3`,
+        `SELECT v.mode_version_id, v.page_id, v.channel, v.schema_version, v.confirmation_mode,
+                v.sales_authority_mode, v.state_read_mode,
+                to_jsonb(v) ->> 'authority_bundle_hash' AS authority_bundle_hash,
+                v.content_hash, v.created_by, v.reason AS version_reason, v.created_at
+         FROM runtime_behavior_mode_versions v
+         WHERE v.mode_version_id = $1 AND v.page_id = $2 AND v.channel = $3`,
         [targetVersionId, pageId, channel],
       );
       const targetRow = targetResult.rows[0] as Record<string, unknown> | undefined;
       if (!targetRow) throw new Error("RUNTIME_BEHAVIOR_VERSION_NOT_FOUND");
       const target = versionFromRow(targetRow);
+      // COMMERCE can only move through the DF13 cutover path, which acquires
+      // the full authority fence and proves every consumer readback.  Keeping
+      // this generic CAS method legacy-only prevents an operator shortcut
+      // from creating split authority.
+      if (target.salesAuthorityMode === "COMMERCE") {
+        throw new Error("RUNTIME_BEHAVIOR_COMMERCE_CUTOVER_DEDICATED_PATH_REQUIRED");
+      }
       const currentResult = await client.query(
         `SELECT p.active_version_id, p.pointer_revision, v.confirmation_mode AS previous_confirmation_mode
          FROM runtime_behavior_mode_pointers p
