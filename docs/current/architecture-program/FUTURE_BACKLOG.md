@@ -1,7 +1,7 @@
 # Deferred Active Backlog — DF and UR
 
 **Activation condition:** Gate BF is passed or explicitly accepted with recorded owner waivers, and the immutable `POST_BF_V1` comparison baseline has been captured.
-**Current status:** **GATE_E_PREPROD_ACCEPTED; DF-C / DF12 ACTIVE FOR SOURCE WORK.** The v15 immutable evidence bindings are recorded in `GATE_E_PREPROD_ACCEPTANCE_20260821.md`. This does not close BF-03/BF-04/BF-10 residuals, authorize deployment, or activate `COMMERCE`.
+**Current status:** **GATE_E_PREPROD_ACCEPTED; DF11 and DF12 MERGED SOURCE-ONLY; DF-C / DF13 ACTIVE FOR SOURCE WORK.** The v15 immutable evidence bindings are recorded in `GATE_E_PREPROD_ACCEPTANCE_20260821.md`. This does not close BF-03/BF-04/BF-10 residuals, authorize deployment, or activate `COMMERCE`.
 **Default context now:** Do not load this file for BF work except when a BF residual explicitly changes a future contract.
 **Operating mode:** `ENGINEERING_PREPROD`; logical dependencies stay item-level, while full verification and test-page deployment default to Release Train boundaries.
 **Plan rationale:** `PREPROD_DF_UR_PLAN_AMENDMENT.md`.
