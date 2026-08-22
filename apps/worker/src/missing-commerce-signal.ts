@@ -34,6 +34,7 @@ type MissingCommerceSignalStatus =
   | "NOT_COMMITTED"
   | "INVALID_COMMERCE_STATE"
   | "STALE_COMMERCE_STATE"
+  | "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING"
   | "COMMERCE_STATE_PRESENT"
   | "MISSING_COMMERCE_STATE";
 
@@ -49,6 +50,10 @@ type MissingCommerceSignalReason =
   | "COMMERCE_STATE_INVALID"
   | "COMMERCE_STATE_INTENT_FINGERPRINT_MISMATCH"
   | "COMMERCE_PRODUCT_BINDING_UNREADY"
+  | "COMMITTED_INTENT_PRODUCT_UNAVAILABLE"
+  | "COMMERCE_PRODUCT_BINDING_NOT_RESOLVED"
+  | "COMMERCE_PRODUCT_BINDING_CARDINALITY_UNPROVABLE"
+  | "COMMERCE_PRODUCT_BINDING_MISMATCH"
   | "COMMERCE_STATE_PRESENT"
   | "MISSING_COMMERCE_STATE_FOR_COMMITTED_INTENT";
 
@@ -142,6 +147,17 @@ function parseCommerceReadinessCandidate(value: unknown): CommerceReadinessCandi
   };
 }
 
+/** A resolved binding must prove exactly one product before it can be trusted. */
+function hasEmptyResolvedProductBinding(value: unknown): boolean {
+  const candidate = record(value);
+  const canonicalContent = candidate === null ? null : record(candidate.canonicalContent);
+  const productBinding = canonicalContent === null
+    ? null
+    : record(canonicalContent.productBinding);
+  return productBinding?.status === "RESOLVED" &&
+    Array.isArray(productBinding.productIds) && productBinding.productIds.length === 0;
+}
+
 function canonicalContentFingerprint(value: object): string {
   return createHash("sha256")
     .update(`COMMERCE_READINESS_CANONICAL_CONTENT_V1\n${canonicalJsonV1(value)}`, "utf8")
@@ -211,6 +227,15 @@ export function evaluateMissingCommerceSignal(
   }
   const commerce = parseCommerceReadinessCandidate(input.commerce);
   if (commerce === null) {
+    if (hasEmptyResolvedProductBinding(input.commerce)) {
+      return signal(
+        "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
+        "BLOCK_COMMERCE_CUTOVER",
+        ["COMMERCE_PRODUCT_BINDING_CARDINALITY_UNPROVABLE"],
+        canonicalIntentFingerprint,
+        null,
+      );
+    }
     return signal(
       "INVALID_COMMERCE_STATE",
       "BLOCK_COMMERCE_CUTOVER",
@@ -229,6 +254,15 @@ export function evaluateMissingCommerceSignal(
       commerceContentFingerprint,
     );
   }
+  if (buyingIntent.data.productId === null) {
+    return signal(
+      "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
+      "BLOCK_COMMERCE_CUTOVER",
+      ["COMMITTED_INTENT_PRODUCT_UNAVAILABLE"],
+      canonicalIntentFingerprint,
+      commerceContentFingerprint,
+    );
+  }
   if (commerce.canonicalContent.productBinding.status === "STALE" ||
       commerce.canonicalContent.productBinding.status === "UNRESOLVED" ||
       commerce.canonicalContent.productBinding.status === "AMBIGUOUS") {
@@ -236,6 +270,34 @@ export function evaluateMissingCommerceSignal(
       "STALE_COMMERCE_STATE",
       "BLOCK_COMMERCE_CUTOVER",
       ["COMMERCE_PRODUCT_BINDING_UNREADY"],
+      canonicalIntentFingerprint,
+      commerceContentFingerprint,
+    );
+  }
+  if (commerce.canonicalContent.productBinding.status !== "RESOLVED") {
+    return signal(
+      "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
+      "BLOCK_COMMERCE_CUTOVER",
+      ["COMMERCE_PRODUCT_BINDING_NOT_RESOLVED"],
+      canonicalIntentFingerprint,
+      commerceContentFingerprint,
+    );
+  }
+  const boundProductIds = commerce.canonicalContent.productBinding.productIds;
+  if (boundProductIds.length !== 1) {
+    return signal(
+      "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
+      "BLOCK_COMMERCE_CUTOVER",
+      ["COMMERCE_PRODUCT_BINDING_CARDINALITY_UNPROVABLE"],
+      canonicalIntentFingerprint,
+      commerceContentFingerprint,
+    );
+  }
+  if (boundProductIds[0] !== buyingIntent.data.productId) {
+    return signal(
+      "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
+      "BLOCK_COMMERCE_CUTOVER",
+      ["COMMERCE_PRODUCT_BINDING_MISMATCH"],
       canonicalIntentFingerprint,
       commerceContentFingerprint,
     );

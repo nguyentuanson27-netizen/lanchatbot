@@ -158,6 +158,114 @@ describe("DF12 missing-commerce signal", () => {
     });
   });
 
+  it.each([
+    ["a different resolved product", ["CB183"], "COMMERCE_PRODUCT_BINDING_MISMATCH"],
+    ["multiple resolved products", ["CB182", "CB183"], "COMMERCE_PRODUCT_BINDING_CARDINALITY_UNPROVABLE"],
+  ] as const)("fails closed for %s", (_name, productIds, reasonCode) => {
+    const commerce = commerceCandidate({
+      canonicalContent: {
+        ...commerceCandidate().canonicalContent,
+        productBinding: {
+          schemaVersion: 2,
+          contractVersion: "PRODUCT_BINDING_V2",
+          status: "RESOLVED",
+          productIds: [...productIds],
+          catalogVersion: "catalog-v1",
+        },
+      },
+    });
+
+    expect(evaluateMissingCommerceSignal({
+      enabled: true,
+      buyingIntent: buyingIntent(),
+      commerce,
+    })).toMatchObject({
+      status: "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
+      activeAuthority: "LEGACY",
+      sideEffects: "DISABLED",
+      futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
+      commerceContentFingerprint: fingerprint(commerce),
+      reasonCodes: [reasonCode],
+    });
+  });
+
+  it("fails closed when committed canonical intent has no concrete product identity", () => {
+    const intent = buyingIntent({ productId: null });
+    const commerce = commerceCandidate({
+      canonicalContent: {
+        ...commerceCandidate().canonicalContent,
+        buyingIntent: intent,
+      },
+    });
+
+    expect(evaluateMissingCommerceSignal({ enabled: true, buyingIntent: intent, commerce }))
+      .toMatchObject({
+        status: "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
+        activeAuthority: "LEGACY",
+        sideEffects: "DISABLED",
+        futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
+        commerceContentFingerprint: fingerprint(commerce),
+        reasonCodes: ["COMMITTED_INTENT_PRODUCT_UNAVAILABLE"],
+      });
+  });
+
+  it("fails closed when a committed intent has a NOT_REQUIRED product binding", () => {
+    const commerce = commerceCandidate({
+      canonicalContent: {
+        ...commerceCandidate().canonicalContent,
+        productBinding: {
+          schemaVersion: 2,
+          contractVersion: "PRODUCT_BINDING_V2",
+          status: "NOT_REQUIRED",
+          productIds: [],
+          catalogVersion: null,
+        },
+      },
+    });
+
+    expect(evaluateMissingCommerceSignal({
+      enabled: true,
+      buyingIntent: buyingIntent(),
+      commerce,
+    })).toMatchObject({
+      status: "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
+      activeAuthority: "LEGACY",
+      sideEffects: "DISABLED",
+      futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
+      commerceContentFingerprint: fingerprint(commerce),
+      reasonCodes: ["COMMERCE_PRODUCT_BINDING_NOT_RESOLVED"],
+    });
+  });
+
+  it("fails closed with a product-cardinality reason for an empty resolved binding", () => {
+    const commerce = {
+      ...commerceCandidate(),
+      canonicalContent: {
+        ...commerceCandidate().canonicalContent,
+        productBinding: {
+          schemaVersion: 2,
+          contractVersion: "PRODUCT_BINDING_V2",
+          status: "RESOLVED",
+          productIds: [],
+          catalogVersion: "catalog-v1",
+        },
+      },
+    };
+
+    expect(evaluateMissingCommerceSignal({
+      enabled: true,
+      buyingIntent: buyingIntent(),
+      commerce,
+    })).toMatchObject({
+      status: "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
+      activeAuthority: "LEGACY",
+      sideEffects: "DISABLED",
+      futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
+      commerceContentFingerprint: null,
+      reasonCodes: ["COMMERCE_PRODUCT_BINDING_CARDINALITY_UNPROVABLE"],
+    });
+  });
+
   it("fails closed when canonical buying-intent evidence is malformed", () => {
     expect(evaluateMissingCommerceSignal({
       enabled: true,
