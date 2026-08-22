@@ -73,8 +73,6 @@ function preflightInput() {
       gateECandidateSourceRevision:
         GATE_E_PREPROD_V15_BINDING.candidateSourceRevision,
       activationReleaseRevision: "a".repeat(40),
-      rederivedCandidateContentFingerprint:
-        GATE_E_PREPROD_V15_BINDING.candidateContentFingerprint,
     },
     missingCommerceSignal: readinessSignal(),
     authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
@@ -103,6 +101,9 @@ function ports(overrides: Partial<CommerceCutoverPorts> = {}): CommerceCutoverPo
   const target = pointer("COMMERCE", 6);
   const legacy = pointer("LEGACY", 7);
   return {
+    async rederiveCandidateBinding() {
+      return { status: "MATCHED", reasonCodes: [] };
+    },
     async holdAuthorityDependentWork() {
       return { status: "HELD", fenceToken: "fence-1" };
     },
@@ -132,6 +133,9 @@ function ports(overrides: Partial<CommerceCutoverPorts> = {}): CommerceCutoverPo
 describe("DF13 commerce cutover contract", () => {
   it("fails closed when the activation artifact cannot re-derive Gate E candidate content", async () => {
     await expect(rederiveDf13CandidateBinding({
+      gateEManifestHash: GATE_E_PREPROD_V15_BINDING.manifestHash,
+      gateECandidateSourceRevision:
+        GATE_E_PREPROD_V15_BINDING.candidateSourceRevision,
       activationReleaseRevision: "a".repeat(40),
       git: {
         async readBlob() {
@@ -162,7 +166,10 @@ describe("DF13 commerce cutover contract", () => {
   });
 
   it("prepares only a coherent one-authority COMMERCE bundle", () => {
-    expect(assessCommerceCutoverPreflight(preflightInput())).toMatchObject({
+    expect(assessCommerceCutoverPreflight(preflightInput(), {
+      status: "MATCHED",
+      reasonCodes: [],
+    })).toMatchObject({
       status: "PREPARED_NO_ACTIVATION",
       targetAuthority: "COMMERCE",
       currentAuthority: "LEGACY",
@@ -174,6 +181,29 @@ describe("DF13 commerce cutover contract", () => {
         legacySalesStage: "DEMOTED_TELEMETRY_ONLY",
       },
     });
+  });
+
+  it("blocks a copied Gate E fingerprint when the activation artifact cannot be re-derived", async () => {
+    const input = preflightInput();
+    let held = false;
+    const result = await executeCommerceCutover({
+      preflight: input,
+      ports: ports({
+        async rederiveCandidateBinding() {
+          throw new Error("activation artifact unavailable");
+        },
+        async holdAuthorityDependentWork() {
+          held = true;
+          return { status: "HELD", fenceToken: "unexpected" };
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "BLOCKED_LEGACY",
+      reasonCodes: ["DF13_GATE_E_CANDIDATE_REDERIVATION_UNAVAILABLE"],
+    });
+    expect(held).toBe(false);
   });
 
   it("fails closed before fencing when DF12 readiness is missing or unsafe", async () => {
@@ -278,9 +308,8 @@ describe("DF13 commerce cutover contract", () => {
     expect(activations).toBe(1);
   });
 
-  it("rejects a concurrent CAS result without trying a second activation", async () => {
+  it("retains the fence on CAS mismatch until the observed authority is reconciled", async () => {
     const input = preflightInput();
-    let readbacks = 0;
     let released = false;
     const result = await executeCommerceCutover({
       preflight: input,
@@ -288,18 +317,19 @@ describe("DF13 commerce cutover contract", () => {
         async activateCommerce() {
           return { status: "CAS_MISMATCH" };
         },
-        async readConsumerAuthorities() {
-          readbacks += 1;
-          return exactReadbacks(input.targetPointer);
+        async readActivePointer() {
+          return pointer("COMMERCE", 99);
         },
         async releaseAuthorityDependentWork() {
           released = true;
         },
       }),
     });
-    expect(result).toMatchObject({ status: "BLOCKED_LEGACY", reasonCodes: ["DF13_POINTER_CAS_MISMATCH"] });
-    expect(readbacks).toBe(0);
-    expect(released).toBe(true);
+    expect(result).toMatchObject({
+      status: "HOLD_RETAINED",
+      reasonCodes: ["DF13_POINTER_CAS_MISMATCH", "DF13_ACTIVATION_READBACK_AMBIGUOUS"],
+    });
+    expect(released).toBe(false);
   });
 
   it("rolls back and keeps LEGACY when any consumer readback is stale", async () => {

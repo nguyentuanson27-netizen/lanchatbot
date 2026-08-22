@@ -64,6 +64,16 @@ export interface Df13CandidateBindingInput {
   readonly rederivedCandidateContentFingerprint: string;
 }
 
+/**
+ * The activation caller can identify an immutable release, but it cannot
+ * supply the content fingerprint that proves the release still matches Gate E.
+ */
+export interface Df13CandidateBindingRequest {
+  readonly gateEManifestHash: string;
+  readonly gateECandidateSourceRevision: string;
+  readonly activationReleaseRevision: string;
+}
+
 export type Df13CandidateBindingValidation =
   | Readonly<{ status: "MATCHED"; reasonCodes: readonly [] }>
   | Readonly<{ status: "MISMATCH"; reasonCodes: readonly string[] }>;
@@ -97,8 +107,7 @@ export function validateDf13CandidateBinding(
     : { status: "MISMATCH", reasonCodes };
 }
 
-export async function rederiveDf13CandidateBinding(input: Readonly<{
-  readonly activationReleaseRevision: string;
+export async function rederiveDf13CandidateBinding(input: Df13CandidateBindingRequest & Readonly<{
   readonly git: GateECandidateSourceReader;
 }>): Promise<Df13CandidateBindingValidation & Readonly<{
   activationReleaseRevision: string;
@@ -119,9 +128,8 @@ export async function rederiveDf13CandidateBinding(input: Readonly<{
     });
     return {
       ...validateDf13CandidateBinding({
-        gateEManifestHash: GATE_E_PREPROD_V15_BINDING.manifestHash,
-        gateECandidateSourceRevision:
-          GATE_E_PREPROD_V15_BINDING.candidateSourceRevision,
+        gateEManifestHash: input.gateEManifestHash,
+        gateECandidateSourceRevision: input.gateECandidateSourceRevision,
         activationReleaseRevision: input.activationReleaseRevision,
         rederivedCandidateContentFingerprint: proof.contentFingerprint,
       }),
@@ -143,7 +151,7 @@ export interface CommerceCutoverPreflightInput {
   readonly channel: string;
   readonly currentPointer: RuntimeBehaviorModePointer;
   readonly targetPointer: RuntimeBehaviorModePointer;
-  readonly candidate: Df13CandidateBindingInput;
+  readonly candidate: Df13CandidateBindingRequest;
   readonly missingCommerceSignal: MissingCommerceSignal;
   readonly authorityBundleHash: string;
   readonly verification: Readonly<{
@@ -198,6 +206,7 @@ function readinessSatisfied(signal: MissingCommerceSignal): boolean {
  */
 export function assessCommerceCutoverPreflight(
   input: CommerceCutoverPreflightInput,
+  candidateBinding: Df13CandidateBindingValidation,
 ): CommerceCutoverPreflight {
   const reasonCodes: string[] = [];
   if (input.pageId !== PREPROD_TEST_PAGE_ID || input.channel !== "MESSENGER") {
@@ -214,7 +223,7 @@ export function assessCommerceCutoverPreflight(
   if (!pointerIsTargetCommerce(input.targetPointer, input)) {
     reasonCodes.push("DF13_TARGET_AUTHORITY_INVALID");
   }
-  reasonCodes.push(...validateDf13CandidateBinding(input.candidate).reasonCodes);
+  reasonCodes.push(...candidateBinding.reasonCodes);
   if (!readinessSatisfied(input.missingCommerceSignal)) {
     reasonCodes.push("DF13_MISSING_COMMERCE_SIGNAL_UNSATISFIED");
   }
@@ -252,6 +261,14 @@ export interface CommerceAuthorityConsumerReadback {
 }
 
 export interface CommerceCutoverPorts {
+  /**
+   * Trusted release-integrity boundary. Its production implementation must
+   * call rederiveDf13CandidateBinding against immutable release source, not
+   * return a caller-provided fingerprint.
+   */
+  readonly rederiveCandidateBinding: (
+    input: Df13CandidateBindingRequest,
+  ) => Promise<Df13CandidateBindingValidation>;
   readonly holdAuthorityDependentWork: (input: Readonly<{
     pageId: string;
     channel: string;
@@ -291,7 +308,11 @@ export interface CommerceCutoverPorts {
 export type CommerceCutoverExecution = Readonly<{
   status: "BLOCKED_LEGACY" | "COMMERCE_ACTIVE" | "LEGACY_RESTORED" | "HOLD_RETAINED";
   sideEffects: "NOT_EXECUTED" | "CONTROL_PLANE_ONLY";
-  activationAcknowledgement: "NOT_ATTEMPTED" | "ACKNOWLEDGED" | "LOST_RECONCILED";
+  activationAcknowledgement:
+    | "NOT_ATTEMPTED"
+    | "CAS_REJECTED"
+    | "ACKNOWLEDGED"
+    | "LOST_RECONCILED";
   reasonCodes: readonly string[];
 }>;
 
@@ -406,7 +427,16 @@ export async function executeCommerceCutover(input: Readonly<{
   preflight: CommerceCutoverPreflightInput;
   ports: CommerceCutoverPorts;
 }>): Promise<CommerceCutoverExecution> {
-  const preflight = assessCommerceCutoverPreflight(input.preflight);
+  let candidateBinding: Df13CandidateBindingValidation;
+  try {
+    candidateBinding = await input.ports.rederiveCandidateBinding(input.preflight.candidate);
+  } catch {
+    candidateBinding = {
+      status: "MISMATCH",
+      reasonCodes: ["DF13_GATE_E_CANDIDATE_REDERIVATION_UNAVAILABLE"],
+    };
+  }
+  const preflight = assessCommerceCutoverPreflight(input.preflight, candidateBinding);
   if (preflight.status !== "PREPARED_NO_ACTIVATION") {
     return {
       status: "BLOCKED_LEGACY",
@@ -461,14 +491,8 @@ export async function executeCommerceCutover(input: Readonly<{
   } catch {
     activation = { status: "ACK_LOST" };
   }
-  if (activation.status === "CAS_MISMATCH") {
-    return releaseAndReturn(input.ports, held.fenceToken, {
-      status: "BLOCKED_LEGACY",
-      sideEffects: "NOT_EXECUTED",
-      activationAcknowledgement: "NOT_ATTEMPTED",
-      reasonCodes: ["DF13_POINTER_CAS_MISMATCH"],
-    });
-  }
+  const casMismatch = activation.status === "CAS_MISMATCH";
+  if (casMismatch) activationAcknowledgement = "CAS_REJECTED";
   if (activation.status === "ACK_LOST") activationAcknowledgement = "LOST_RECONCILED";
   let activatedPointer: RuntimeBehaviorModePointer | null;
   try {
@@ -478,23 +502,32 @@ export async function executeCommerceCutover(input: Readonly<{
       status: "HOLD_RETAINED",
       sideEffects: "CONTROL_PLANE_ONLY",
       activationAcknowledgement,
-      reasonCodes: ["DF13_ACTIVATION_READBACK_AMBIGUOUS"],
+      reasonCodes: [
+        ...(casMismatch ? ["DF13_POINTER_CAS_MISMATCH"] : []),
+        "DF13_ACTIVATION_READBACK_AMBIGUOUS",
+      ],
     };
   }
   if (!targetPointerMatches(activatedPointer, input.preflight.targetPointer)) {
     if (isSafeLegacyPointer(activatedPointer)) {
       return releaseAndReturn(input.ports, held.fenceToken, {
         status: "BLOCKED_LEGACY",
-        sideEffects: "NOT_EXECUTED",
-        activationAcknowledgement: "NOT_ATTEMPTED",
-        reasonCodes: ["DF13_ACTIVATION_READBACK_MISMATCH"],
+        sideEffects: "CONTROL_PLANE_ONLY",
+        activationAcknowledgement,
+        reasonCodes: [
+          ...(casMismatch ? ["DF13_POINTER_CAS_MISMATCH"] : []),
+          "DF13_ACTIVATION_READBACK_MISMATCH",
+        ],
       });
     }
     return {
       status: "HOLD_RETAINED",
       sideEffects: "CONTROL_PLANE_ONLY",
       activationAcknowledgement,
-      reasonCodes: ["DF13_ACTIVATION_READBACK_AMBIGUOUS"],
+      reasonCodes: [
+        ...(casMismatch ? ["DF13_POINTER_CAS_MISMATCH"] : []),
+        "DF13_ACTIVATION_READBACK_AMBIGUOUS",
+      ],
     };
   }
   let audit: "EXACT" | "MISSING" | "AMBIGUOUS";
@@ -544,7 +577,7 @@ export async function executeCommerceCutover(input: Readonly<{
     status: "COMMERCE_ACTIVE",
     sideEffects: "CONTROL_PLANE_ONLY",
     activationAcknowledgement,
-    reasonCodes: [],
+    reasonCodes: casMismatch ? ["DF13_POINTER_CAS_MISMATCH_RECONCILED"] : [],
   });
 }
 
@@ -553,7 +586,16 @@ export async function recoverCommerceCutoverAfterInterruption(input: Readonly<{
   preflight: CommerceCutoverPreflightInput;
   ports: CommerceCutoverPorts;
 }>): Promise<CommerceCutoverExecution> {
-  const preflight = assessCommerceCutoverPreflight(input.preflight);
+  let candidateBinding: Df13CandidateBindingValidation;
+  try {
+    candidateBinding = await input.ports.rederiveCandidateBinding(input.preflight.candidate);
+  } catch {
+    candidateBinding = {
+      status: "MISMATCH",
+      reasonCodes: ["DF13_GATE_E_CANDIDATE_REDERIVATION_UNAVAILABLE"],
+    };
+  }
+  const preflight = assessCommerceCutoverPreflight(input.preflight, candidateBinding);
   if (preflight.status !== "PREPARED_NO_ACTIVATION") {
     return {
       status: "BLOCKED_LEGACY",
