@@ -153,7 +153,6 @@ export interface CommerceCutoverPreflightInput {
   readonly targetPointer: RuntimeBehaviorModePointer;
   readonly candidate: Df13CandidateBindingRequest;
   readonly missingCommerceSignal: MissingCommerceSignal;
-  readonly authorityBundleHash: string;
   readonly verification: Readonly<{
     transitionMatrixPassed: boolean;
     bfDfReplayPassed: boolean;
@@ -184,6 +183,8 @@ function pointerIsTargetCommerce(
     pointer.version.confirmationMode === preflight.currentPointer.version.confirmationMode &&
     pointer.version.salesAuthorityMode === "COMMERCE" &&
     pointer.version.stateReadMode === "LEGACY" &&
+    pointer.version.authorityBundleHash ===
+      DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash &&
     pointer.pointerRevision === preflight.currentPointer.pointerRevision + 1;
 }
 
@@ -226,9 +227,6 @@ export function assessCommerceCutoverPreflight(
   reasonCodes.push(...candidateBinding.reasonCodes);
   if (!readinessSatisfied(input.missingCommerceSignal)) {
     reasonCodes.push("DF13_MISSING_COMMERCE_SIGNAL_UNSATISFIED");
-  }
-  if (input.authorityBundleHash !== DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash) {
-    reasonCodes.push("DF13_AUTHORITY_BUNDLE_MISMATCH");
   }
   if (!input.verification.transitionMatrixPassed) {
     reasonCodes.push("DF13_TRANSITION_MATRIX_UNVERIFIED");
@@ -325,7 +323,10 @@ function targetPointerMatches(
     observed.version.modeVersionId === target.version.modeVersionId &&
     observed.version.contentHash === target.version.contentHash &&
     observed.version.salesAuthorityMode === "COMMERCE" &&
-    observed.version.stateReadMode === "LEGACY";
+    observed.version.stateReadMode === "LEGACY" &&
+    observed.version.authorityBundleHash === target.version.authorityBundleHash &&
+    observed.version.authorityBundleHash ===
+      DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
 }
 
 function isSafeLegacyPointer(
@@ -348,8 +349,13 @@ function exactConsumerReadbacks(
     return false;
   }
   const authorityBundleHash = salesAuthorityMode === "COMMERCE"
-    ? DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
+    ? target.version.authorityBundleHash
     : null;
+  if ((salesAuthorityMode === "COMMERCE" &&
+       authorityBundleHash !== DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash) ||
+      (salesAuthorityMode === "LEGACY" && target.version.authorityBundleHash !== null)) {
+    return false;
+  }
   return DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.every((consumer) => {
     const value = byConsumer.get(consumer);
     return value?.source === "DATABASE" &&

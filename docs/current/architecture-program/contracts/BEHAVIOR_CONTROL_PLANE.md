@@ -54,6 +54,14 @@ This quiescent boundary is an atomicity/correctness requirement for direct cutov
 
 Every activation remains page-scoped, CAS-audited, read back from the worker, bounded by the existing propagation contract, and reversible to complete `LEGACY` authority.
 
+The generic control-plane operator is intentionally LEGACY-only. Its generic
+CAS path must reject a COMMERCE target: the only permitted future COMMERCE
+writer is a dedicated DF13 cutover adapter that owns the full quiescent fence,
+the immutable authority-bundle identity, activation-audit reconciliation, and
+exact consumer readbacks. Defining the COMMERCE schema/version contract is not
+permission to apply its migration, introduce that adapter, or activate runtime
+authority.
+
 Offline or controlled legacy/new comparison is verification tooling, not a live authority mode. It must not create protected side effects.
 
 Traffic shadowing, traffic-percentage canaries, long soak, or statistical promotion gates are not durable PREPROD invariants. They may be introduced later by an explicit `PRODUCTION_HARDENING` decision if measured traffic/risk makes them useful.

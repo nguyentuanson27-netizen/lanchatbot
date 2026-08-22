@@ -110,11 +110,21 @@ Before activation:
 - missing commerce state fails closed;
 - Context V2, derived phase, final reconciliation, and legacy authority demotion switch coherently;
 - no COMMERCE decision consumes legacy `salesStage` as authority;
+- a COMMERCE behavior-mode version persists the exact authority-bundle hash, includes it in its canonical `content_hash`, and every consumer readback proves that same database-resolved version/hash/bundle identity;
 - the immutable release artifact carries the exact Gate-E `ContextV2CandidateManifest` hash and re-derives the candidate projection/content fingerprint from the final artifact;
 - the re-derived fields match Gate E exactly; copying the prior hash is not evidence;
 - any mismatch, unavailable derivation input, or material candidate-identity change since Gate E forces DF-P6 rerun on the final candidate before activation;
 - complete `LEGACY` rollback is ready;
 - the page-scoped quiescent cutover protocol from `contracts/BEHAVIOR_CONTROL_PLANE.md` is verified.
+
+DF13 source boundary: migration `0035_df13_commerce_behavior_mode` and the
+COMMERCE version contract are source-only and must not be applied under this
+track. The existing generic behavior-mode operator remains LEGACY-only, and
+the generic version CAS rejects COMMERCE targets. A dedicated DF13 adapter must
+first wire the immutable `SalesAuthoritySnapshot` to all listed authority
+consumers, durable fence ownership, exact consumer readback, activation audit,
+and rollback before a separately authorized cutover command may exist. There
+is no operator shortcut from `LEGACY` to `COMMERCE`.
 
 After explicit owner authorization, activate only on `PREPROD_TEST_PAGE` using that quiescent boundary, verify exact authority revision/hash/source readback across every relevant consumer, then release held eligible work and run the controlled critical human journeys.
 

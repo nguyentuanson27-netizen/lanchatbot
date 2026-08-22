@@ -23,6 +23,9 @@ function pointer(
     confirmationMode: "V2_ACTIVE" as const,
     salesAuthorityMode,
     stateReadMode: "LEGACY" as const,
+    ...(salesAuthorityMode === "COMMERCE"
+      ? { authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash }
+      : { authorityBundleHash: null }),
   };
   return {
     version: {
@@ -75,7 +78,6 @@ function preflightInput() {
       activationReleaseRevision: "a".repeat(40),
     },
     missingCommerceSignal: readinessSignal(),
-    authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
     verification: {
       transitionMatrixPassed: true,
       bfDfReplayPassed: true,
@@ -188,6 +190,25 @@ describe("DF13 commerce cutover contract", () => {
         reconciliation: "COMMERCE_FINAL",
         legacySalesStage: "DEMOTED_TELEMETRY_ONLY",
       },
+    });
+  });
+
+  it("blocks a COMMERCE target whose persisted mode version omits the authority bundle identity", () => {
+    const input = preflightInput();
+    const targetPointer: RuntimeBehaviorModePointer = {
+      ...input.targetPointer,
+      version: {
+        ...input.targetPointer.version,
+        authorityBundleHash: null,
+      },
+    };
+
+    expect(assessCommerceCutoverPreflight({ ...input, targetPointer }, {
+      status: "MATCHED",
+      reasonCodes: [],
+    })).toMatchObject({
+      status: "BLOCKED_LEGACY",
+      reasonCodes: ["DF13_TARGET_AUTHORITY_INVALID"],
     });
   });
 
