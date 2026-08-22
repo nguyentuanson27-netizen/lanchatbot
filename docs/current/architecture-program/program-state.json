@@ -108,7 +108,7 @@
   },
   "active": {
     "track": "DF-C",
-    "nextIssue": "DF-11",
+    "nextIssue": "DF-12",
     "gate": "GATE_E_PREPROD_ACCEPTED",
     "authorization": "SOURCE_WORK_ONLY_NO_RUNTIME_ACTIVATION"
   },
