@@ -7,6 +7,8 @@ export interface RuntimeBehaviorModePayload {
   readonly confirmationMode: ConfirmationBehaviorMode;
   readonly salesAuthorityMode: "LEGACY" | "SHADOW" | "COMMERCE";
   readonly stateReadMode: "LEGACY" | "SHADOW" | "V2";
+  /** Present only for the immutable COMMERCE authority bundle. */
+  readonly authorityBundleHash?: string | null;
 }
 export interface RuntimeBehaviorModeVersion extends RuntimeBehaviorModePayload {
   readonly schemaVersion: 1;
@@ -46,6 +48,7 @@ export interface RuntimeBehaviorModeSourcePort {
   recordResolution?(event: RuntimeBehaviorModeAuditEvent): Promise<void>;
 }
 export interface RuntimeBehaviorModeResolution extends RuntimeBehaviorModePayload {
+  readonly authorityBundleHash: string | null;
   readonly modeVersionId: string | null;
   readonly contentHash: string | null;
   readonly pointerRevision: number | null;
@@ -62,6 +65,7 @@ const FAIL_SAFE: RuntimeBehaviorModePayload = {
   confirmationMode: "CLARIFY_ONLY",
   salesAuthorityMode: "LEGACY",
   stateReadMode: "LEGACY",
+  authorityBundleHash: null,
 };
 function canonicalJson(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
@@ -70,12 +74,16 @@ function canonicalJson(value: unknown): string {
   return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`).join(",")}}`;
 }
 export function behaviorModeContentHash(payload: RuntimeBehaviorModePayload): string {
-  return `sha256:${createHash("sha256").update(canonicalJson({
+  const canonicalPayload = {
     confirmationMode: payload.confirmationMode,
     salesAuthorityMode: payload.salesAuthorityMode,
     schemaVersion: 1,
     stateReadMode: payload.stateReadMode,
-  }), "utf8").digest("hex")}`;
+    ...(payload.salesAuthorityMode === "COMMERCE"
+      ? { authorityBundleHash: payload.authorityBundleHash ?? null }
+      : {}),
+  };
+  return `sha256:${createHash("sha256").update(canonicalJson(canonicalPayload), "utf8").digest("hex")}`;
 }
 interface CachedPointer { readonly pointer: RuntimeBehaviorModePointer; readonly fetchedAtMs: number; }
 
@@ -110,7 +118,17 @@ export class RuntimeBehaviorModeResolver {
     const version = pointer.version;
     if (version.schemaVersion !== 1 || version.pageId !== pageId || version.channel !== channel) throw new Error("RUNTIME_BEHAVIOR_SCOPE_INVALID");
     if (!Number.isInteger(pointer.pointerRevision) || pointer.pointerRevision < 1) throw new Error("RUNTIME_BEHAVIOR_REVISION_INVALID");
-    if (version.salesAuthorityMode !== "LEGACY" || version.stateReadMode !== "LEGACY") throw new Error("RUNTIME_BEHAVIOR_NON_CONFIRMATION_TRACK_ACTIVE");
+    if (version.stateReadMode !== "LEGACY" ||
+        (version.salesAuthorityMode !== "LEGACY" && version.salesAuthorityMode !== "COMMERCE")) {
+      throw new Error("RUNTIME_BEHAVIOR_NON_CONFIRMATION_TRACK_ACTIVE");
+    }
+    if (version.salesAuthorityMode === "COMMERCE" &&
+        !/^[a-f0-9]{64}$/u.test(version.authorityBundleHash ?? "")) {
+      throw new Error("RUNTIME_BEHAVIOR_COMMERCE_BUNDLE_INVALID");
+    }
+    if (version.salesAuthorityMode === "LEGACY" && version.authorityBundleHash != null) {
+      throw new Error("RUNTIME_BEHAVIOR_LEGACY_BUNDLE_INVALID");
+    }
     if (behaviorModeContentHash(version) !== version.contentHash) throw new Error("RUNTIME_BEHAVIOR_HASH_MISMATCH");
     if (Number.isNaN(Date.parse(pointer.updatedAt))) throw new Error("RUNTIME_BEHAVIOR_UPDATED_AT_INVALID");
   }
@@ -173,6 +191,7 @@ export class RuntimeBehaviorModeResolver {
         modeVersionId: null,
         contentHash: null,
         pointerRevision: null,
+        authorityBundleHash: null,
         source: "FAIL_SAFE",
         status: "FALLBACK",
         reasonCodes: [...resolution.reasonCodes, "RUNTIME_BEHAVIOR_AUDIT_FAILED"],
@@ -220,6 +239,7 @@ export class RuntimeBehaviorModeResolver {
     if (!entry) {
       return this.audited(scoped, {
         ...FAIL_SAFE, modeVersionId: null, contentHash: null, pointerRevision: null,
+        authorityBundleHash: null,
         source: "FAIL_SAFE", status: "FALLBACK", reasonCodes: ["RUNTIME_BEHAVIOR_LKG_EXPIRED"],
         pointerUpdatedAt: null, resolvedAt: now.toISOString(), propagationMs: null,
       });
@@ -234,6 +254,7 @@ export class RuntimeBehaviorModeResolver {
         modeVersionId: pointer.version.modeVersionId,
         contentHash: pointer.version.contentHash,
         pointerRevision: pointer.pointerRevision,
+        authorityBundleHash: null,
         source: "FAIL_SAFE",
         status: "REJECTED",
         reasonCodes: ["RUNTIME_BEHAVIOR_ACTIVE_PAGE_NOT_ALLOWED"],
@@ -246,6 +267,7 @@ export class RuntimeBehaviorModeResolver {
       confirmationMode: pointer.version.confirmationMode,
       salesAuthorityMode: pointer.version.salesAuthorityMode,
       stateReadMode: pointer.version.stateReadMode,
+      authorityBundleHash: pointer.version.authorityBundleHash ?? null,
       modeVersionId: pointer.version.modeVersionId,
       contentHash: pointer.version.contentHash,
       pointerRevision: pointer.pointerRevision,
@@ -264,7 +286,7 @@ export function startupBehaviorModeResolution(
   now = new Date(),
 ): RuntimeBehaviorModeResolution {
   return {
-    confirmationMode, salesAuthorityMode: "LEGACY", stateReadMode: "LEGACY",
+    confirmationMode, salesAuthorityMode: "LEGACY", stateReadMode: "LEGACY", authorityBundleHash: null,
     modeVersionId: null, contentHash: null, pointerRevision: null,
     source: "STARTUP_DEFAULT", status: "FALLBACK", reasonCodes: ["RUNTIME_BEHAVIOR_RESOLVER_DISABLED"],
     pointerUpdatedAt: null, resolvedAt: now.toISOString(), propagationMs: null, auditWrite: "NOT_CONFIGURED",

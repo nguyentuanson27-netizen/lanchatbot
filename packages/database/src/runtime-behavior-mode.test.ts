@@ -116,16 +116,86 @@ describe("PostgresRuntimeBehaviorModeStore", () => {
     expect(statements.some((sql) => sql.includes("UPDATE runtime_behavior_mode_pointers"))).toBe(false);
   });
 
-  it("rejects future-track activation before touching the database", async () => {
+  it("rejects future-track version creation before touching the database", async () => {
     const store = new PostgresRuntimeBehaviorModeStore("postgresql://test", 1);
     await expect(store.createVersion({
       pageId,
       channel,
-      payload: { ...payload, salesAuthorityMode: "COMMERCE" },
+      payload: { ...payload, salesAuthorityMode: "SHADOW" },
       actor: "operator",
       reason: "out of scope",
     })).rejects.toThrow("RUNTIME_BEHAVIOR_NON_CONFIRMATION_TRACK_FORBIDDEN");
     expect(mocks.poolQuery).not.toHaveBeenCalled();
+  });
+
+  it("creates an immutable COMMERCE version only with an exact authority bundle hash", async () => {
+    const commercePayload = {
+      confirmationMode: "V2_ACTIVE" as const,
+      salesAuthorityMode: "COMMERCE" as const,
+      stateReadMode: "LEGACY" as const,
+      authorityBundleHash: "a".repeat(64),
+    };
+    mocks.poolQuery.mockResolvedValue({
+      rows: [{
+        ...targetRow,
+        sales_authority_mode: "COMMERCE",
+        authority_bundle_hash: commercePayload.authorityBundleHash,
+        content_hash: runtimeBehaviorModeContentHash(commercePayload),
+      }],
+      rowCount: 1,
+    });
+    const store = new PostgresRuntimeBehaviorModeStore("postgresql://test", 1);
+
+    const version = await store.createVersion({
+      pageId,
+      channel,
+      payload: commercePayload,
+      actor: "operator",
+      reason: "df13 immutable target",
+    });
+
+    expect(version).toMatchObject({
+      salesAuthorityMode: "COMMERCE",
+      authorityBundleHash: commercePayload.authorityBundleHash,
+      contentHash: runtimeBehaviorModeContentHash(commercePayload),
+    });
+    expect(String(mocks.poolQuery.mock.calls[0]?.[0])).toContain("authority_bundle_hash");
+  });
+
+  it("requires the dedicated fenced workflow to activate a stored COMMERCE version", async () => {
+    const commercePayload = {
+      confirmationMode: "V2_ACTIVE" as const,
+      salesAuthorityMode: "COMMERCE" as const,
+      stateReadMode: "LEGACY" as const,
+      authorityBundleHash: "a".repeat(64),
+    };
+    const commerceTarget = {
+      ...targetRow,
+      sales_authority_mode: "COMMERCE",
+      authority_bundle_hash: commercePayload.authorityBundleHash,
+      content_hash: runtimeBehaviorModeContentHash(commercePayload),
+    };
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes("FROM runtime_behavior_mode_versions")) {
+        return { rows: [commerceTarget], rowCount: 1 };
+      }
+      return { rows: [], rowCount: 0 };
+    });
+    const store = new PostgresRuntimeBehaviorModeStore("postgresql://test", 1);
+
+    await expect(store.activateVersion({
+      pageId,
+      channel,
+      targetVersionId,
+      expectedPointerRevision: 7,
+      actor: "operator",
+      reason: "generic activation must not bypass DF13 fence",
+    })).rejects.toThrow("RUNTIME_BEHAVIOR_COMMERCE_CUTOVER_DEDICATED_PATH_REQUIRED");
+
+    const statements = mocks.clientQuery.mock.calls.map(([sql]) => String(sql));
+    expect(statements).toContain("ROLLBACK");
+    expect(statements.some((sql) => sql.includes("FROM runtime_behavior_mode_pointers"))).toBe(false);
+    expect(statements.some((sql) => sql.includes("UPDATE runtime_behavior_mode_pointers"))).toBe(false);
   });
 
   it("fails closed when an idempotency key already belongs to different resolution evidence", async () => {
