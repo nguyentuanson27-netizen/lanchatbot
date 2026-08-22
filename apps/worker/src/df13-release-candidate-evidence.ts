@@ -7,13 +7,11 @@ import {
 } from "./gate-e-registration.js";
 import {
   GATE_E_PREPROD_V15_BINDING,
-} from "./df13-commerce-cutover.js";
-import {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
   DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
 } from "./df13-commerce-authority-contract.js";
 
-export { GATE_E_PREPROD_V15_BINDING } from "./df13-commerce-cutover.js";
+export { GATE_E_PREPROD_V15_BINDING } from "./df13-commerce-authority-contract.js";
 
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
@@ -83,6 +81,10 @@ export type Df13ReleaseCandidateEvidence = Readonly<{
   evidenceHash: string;
 }>;
 
+export type Df13ReleaseCandidateEvidenceValidation =
+  | Readonly<{ status: "MATCHED"; reasonCodes: readonly [] }>
+  | Readonly<{ status: "MISMATCH"; reasonCodes: readonly string[] }>;
+
 function sha256(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
 }
@@ -102,6 +104,121 @@ function buildEvidence(input: Omit<Df13ReleaseCandidateEvidence, "evidenceHash">
     ...input,
     evidenceHash: sha256(canonicalJsonV1(input)),
   });
+}
+
+/**
+ * Validates a source evidence package at the cutover boundary. A release port
+ * may supply the package, but not an unstructured MATCHED assertion: this
+ * deterministic verifier rechecks its exact Gate E binding, immutable
+ * manifest comparison, complete canonical blob projection, authority bundle,
+ * rollback placeholder, and self-hash.
+ */
+export function validateDf13ReleaseCandidateEvidence(
+  evidence: Df13ReleaseCandidateEvidence,
+  request: Readonly<{
+    gateEManifestHash: string;
+    gateECandidateSourceRevision: string;
+    activationReleaseRevision: string;
+  }>,
+): Df13ReleaseCandidateEvidenceValidation {
+  const reasonCodes: string[] = [];
+  const { evidenceHash, ...evidenceBody } = evidence;
+  if (
+    !SHA256_PATTERN.test(evidenceHash) ||
+    evidenceHash !== sha256(canonicalJsonV1(evidenceBody))
+  ) {
+    reasonCodes.push("DF13_RELEASE_EVIDENCE_HASH_INVALID");
+  }
+  if (
+    evidence.contractVersion !== "DF13_RELEASE_CANDIDATE_EVIDENCE_V1" ||
+    evidence.schemaVersion !== 1 ||
+    evidence.status !== "SOURCE_READY_NO_ACTIVATION" ||
+    evidence.sideEffects !== "NOT_EXECUTED" ||
+    evidence.reasonCodes.length !== 0
+  ) {
+    reasonCodes.push("DF13_RELEASE_EVIDENCE_STATUS_INVALID");
+  }
+  if (
+    request.gateEManifestHash !== GATE_E_PREPROD_V15_BINDING.manifestHash ||
+    request.gateECandidateSourceRevision !==
+      GATE_E_PREPROD_V15_BINDING.candidateSourceRevision ||
+    request.activationReleaseRevision !== evidence.activationReleaseRevision ||
+    !COMMIT_PATTERN.test(request.activationReleaseRevision)
+  ) {
+    reasonCodes.push("DF13_RELEASE_EVIDENCE_REQUEST_BINDING_INVALID");
+  }
+  if (!same(evidence.gateE, GATE_E_PREPROD_V15_BINDING)) {
+    reasonCodes.push("DF13_RELEASE_EVIDENCE_GATE_E_BINDING_INVALID");
+  }
+  if (
+    evidence.manifestArtifact.path !== GATE_E_PREPROD_V15_MANIFEST_PATH ||
+    evidence.manifestArtifact.blobOid === null ||
+    !/^[a-f0-9]{40,64}$/u.test(evidence.manifestArtifact.blobOid) ||
+    evidence.manifestArtifact.contentSha256 === null ||
+    !SHA256_PATTERN.test(evidence.manifestArtifact.contentSha256)
+  ) {
+    reasonCodes.push("DF13_RELEASE_EVIDENCE_MANIFEST_IDENTITY_INVALID");
+  }
+  const expectedManifestFields = new Map<string, unknown>([
+    ...Object.entries(GATE_E_PREPROD_V15_MANIFEST_FIELDS),
+    ["manifestHash", GATE_E_PREPROD_V15_BINDING.manifestHash],
+  ]);
+  const comparisons = new Map(
+    evidence.fieldComparisons.map((comparison) => [comparison.field, comparison]),
+  );
+  if (
+    comparisons.size !== expectedManifestFields.size ||
+    evidence.fieldComparisons.length !== expectedManifestFields.size ||
+    [...expectedManifestFields].some(([field, expected]) => {
+      const comparison = comparisons.get(field);
+      return !comparison ||
+        !comparison.matches ||
+        !same(comparison.expected, expected) ||
+        !same(comparison.observed, expected);
+    })
+  ) {
+    reasonCodes.push("DF13_RELEASE_EVIDENCE_MANIFEST_COMPARISON_INVALID");
+  }
+  const projection = evidence.candidateProjection;
+  if (
+    projection === null ||
+    projection.schemaVersion !== 1 ||
+    projection.contractVersion !== "DF10_GATE_E_CANDIDATE_CONTENT_FINGERPRINT_V1" ||
+    projection.candidateSourceRevision !== request.activationReleaseRevision ||
+    projection.entries.length !== GATE_E_CANDIDATE_SOURCE_PATHS_V1.length ||
+    projection.entries.some((entry, index) =>
+      entry.path !== GATE_E_CANDIDATE_SOURCE_PATHS_V1[index] ||
+      !/^[a-f0-9]{40,64}$/u.test(entry.blobOid) ||
+      !SHA256_PATTERN.test(entry.contentSha256)
+    ) ||
+    projection.contentFingerprint !==
+      sha256(canonicalJsonV1(projection.entries)) ||
+    projection.contentFingerprint !==
+      GATE_E_PREPROD_V15_BINDING.candidateContentFingerprint
+  ) {
+    reasonCodes.push("DF13_RELEASE_EVIDENCE_CANDIDATE_PROJECTION_INVALID");
+  }
+  if (
+    evidence.authorityConsumerContract.authorityBundleHash !==
+      DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash ||
+    !same(
+      evidence.authorityConsumerContract.consumers,
+      DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+    ) ||
+    evidence.authorityConsumerContract.authorityIndependentBypassClasses.length !== 0
+  ) {
+    reasonCodes.push("DF13_RELEASE_EVIDENCE_AUTHORITY_BUNDLE_INVALID");
+  }
+  if (
+    evidence.rollback.contractVersion !==
+      "DF13_COMPLETE_LEGACY_ROLLBACK_EVIDENCE_V1" ||
+    evidence.rollback.status !== "REQUIRED_NOT_EXECUTED"
+  ) {
+    reasonCodes.push("DF13_RELEASE_EVIDENCE_ROLLBACK_CONTRACT_INVALID");
+  }
+  return reasonCodes.length === 0
+    ? { status: "MATCHED", reasonCodes: [] }
+    : { status: "MISMATCH", reasonCodes };
 }
 
 function baseEvidence(

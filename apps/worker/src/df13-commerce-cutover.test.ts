@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import type { RuntimeBehaviorModePointer } from "@lana/chat-runtime";
 import type { MissingCommerceSignal } from "./missing-commerce-signal.js";
+import { createGateEScoredRunGitReader } from "./gate-e-git-reader.js";
 import {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
   DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
@@ -12,8 +13,28 @@ import {
   validateDf13CandidateBinding,
   type CommerceCutoverPorts,
 } from "./df13-commerce-cutover.js";
+import {
+  prepareDf13ReleaseCandidateEvidence,
+  type Df13ReleaseCandidateEvidence,
+} from "./df13-release-candidate-evidence.js";
 
 const pageId = "1198992073286645";
+let sourceRevision = "";
+let sourceEvidence: Df13ReleaseCandidateEvidence | null = null;
+
+beforeAll(async () => {
+  const git = createGateEScoredRunGitReader({ cwd: process.cwd() });
+  sourceRevision = await git.resolveRef("HEAD");
+  sourceEvidence = await prepareDf13ReleaseCandidateEvidence({
+    activationReleaseRevision: sourceRevision,
+    git,
+  });
+}, 20_000);
+
+function exactSourceEvidence(): Df13ReleaseCandidateEvidence {
+  if (sourceEvidence === null) throw new Error("TEST_SOURCE_EVIDENCE_UNAVAILABLE");
+  return sourceEvidence;
+}
 
 function pointer(
   salesAuthorityMode: "LEGACY" | "COMMERCE",
@@ -75,7 +96,7 @@ function preflightInput() {
       gateEManifestHash: GATE_E_PREPROD_V15_BINDING.manifestHash,
       gateECandidateSourceRevision:
         GATE_E_PREPROD_V15_BINDING.candidateSourceRevision,
-      activationReleaseRevision: "a".repeat(40),
+      activationReleaseRevision: sourceRevision,
     },
     missingCommerceSignal: readinessSignal(),
     verification: {
@@ -111,8 +132,8 @@ function ports(overrides: Partial<CommerceCutoverPorts> = {}): CommerceCutoverPo
   const target = pointer("COMMERCE", 6);
   const legacy = pointer("LEGACY", 7);
   return {
-    async rederiveCandidateBinding() {
-      return { status: "MATCHED", reasonCodes: [] };
+    async prepareReleaseCandidateEvidence() {
+      return exactSourceEvidence();
     },
     async holdAuthorityDependentWork() {
       return { status: "HELD", fenceToken: "fence-1" };
@@ -218,7 +239,7 @@ describe("DF13 commerce cutover contract", () => {
     const result = await executeCommerceCutover({
       preflight: input,
       ports: ports({
-        async rederiveCandidateBinding() {
+        async prepareReleaseCandidateEvidence() {
           throw new Error("activation artifact unavailable");
         },
         async holdAuthorityDependentWork() {
@@ -231,6 +252,31 @@ describe("DF13 commerce cutover contract", () => {
     expect(result).toMatchObject({
       status: "BLOCKED_LEGACY",
       reasonCodes: ["DF13_GATE_E_CANDIDATE_REDERIVATION_UNAVAILABLE"],
+    });
+    expect(held).toBe(false);
+  });
+
+  it("rejects a release port success assertion without an exact canonical evidence package", async () => {
+    let held = false;
+    const result = await executeCommerceCutover({
+      preflight: preflightInput(),
+      ports: ports({
+        async prepareReleaseCandidateEvidence() {
+          return {
+            ...exactSourceEvidence(),
+            evidenceHash: "f".repeat(64),
+          };
+        },
+        async holdAuthorityDependentWork() {
+          held = true;
+          return { status: "HELD", fenceToken: "unexpected" };
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "BLOCKED_LEGACY",
+      reasonCodes: ["DF13_RELEASE_EVIDENCE_HASH_INVALID"],
     });
     expect(held).toBe(false);
   });

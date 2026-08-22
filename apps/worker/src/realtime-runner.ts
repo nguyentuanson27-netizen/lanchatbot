@@ -2761,6 +2761,21 @@ export class RealtimeRunner {
     await this.commerceAuthorityFence.complete(admission);
   }
 
+  /**
+   * A fence/recovery identity is derived from durable Inbox IDs, never the
+   * per-claim evaluation group UUID. Reclaimed delivery of the same durable
+   * work therefore cannot create a second fence admission identity.
+   */
+  private authorityFenceWorkId(batch: RunnerInboundBatch): string {
+    const inboxIds = [...batch.inboxIds].sort().join(",");
+    return "df13-" + createHash("sha256")
+      .update(
+        batch.pageId + ":" + this.options.behaviorModeChannel + ":" + inboxIds,
+        "utf8",
+      )
+      .digest("hex");
+  }
+
   private async processBatch(
     batch: RunnerInboundBatch,
     knownSuperseded: boolean,
@@ -2827,7 +2842,7 @@ export class RealtimeRunner {
     const authorityAdmission = await this.commerceAuthorityFence.admit({
       pageId: claim.pageId,
       channel: this.options.behaviorModeChannel,
-      workId: batch.evaluationGroupId,
+      workId: this.authorityFenceWorkId(batch),
       resolution: behaviorModeResolution,
     });
     if (authorityAdmission.status === "HELD") {

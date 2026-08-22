@@ -12,11 +12,13 @@ enough: authority-dependent classification, state, Context V2, phase, strategy,
 CTA, final reconciliation, and side-effect planning must be unable to enter the
 worker under `COMMERCE` without the same durable fence admission.
 
-The current `LEGACY` path remains default-off and unchanged. A future COMMERCE
-resolution is rejected before state loading or semantic work unless a dedicated,
-durable fence provider is installed by a separately reviewed release. The
-provider is not configured in current runtime source wiring, so this contract
-cannot create accidental COMMERCE authority.
+The current `LEGACY` path remains default-off and unchanged. This revision has
+neither a durable fence provider nor the all-or-nothing COMMERCE semantic
+dispatcher. A COMMERCE resolution is therefore rejected before state loading or
+semantic work, including when a prospective provider object is passed to the
+adapter. A future source unit must add the dispatcher and its durable provider
+together; provider configuration alone cannot create accidental COMMERCE
+authority or send admitted work through the LEGACY semantic path.
 
 ## Consumer admission
 
@@ -33,19 +35,22 @@ There are no authority-independent bypass classes in this revision. An app echo
 that is recognized as this app's own message exits before it becomes a semantic
 consumer; every other RealtimeRunner batch crosses the adapter.
 
-For COMMERCE, admission requires an exact database-resolved, audit-recorded
-identity. Cache, last-known-good, startup, stale, missing, ambiguous, or
-mismatched identities fail closed. The provider receives the complete fixed
-consumer set and must return the same identity; a partial or substituted
-acknowledgement is rejected.
+For COMMERCE, the future admission contract requires an exact
+database-resolved, audit-recorded identity. Cache, last-known-good, startup,
+stale, missing, ambiguous, or mismatched identities fail closed. The durable
+provider contract receives the complete fixed consumer set and must return the
+same identity; a partial or substituted acknowledgement is rejected. It is not
+invoked by current source because no COMMERCE dispatcher exists.
 
-If the durable fence is held, the Inbox item must be durably deferred under its
-fence token without consuming an attempt or being completed. A completed
-semantic batch releases its admission only through idempotent
-`RELEASED | ALREADY_RELEASED` acknowledgement. Failure to admit, defer, or
-complete remains fenced for recovery; it is never converted to an unfenced
-retry/release. This is the required replay, lost-ACK, concurrency, and
-crash/restart contract for a future provider.
+The future provider must use a stable identity derived from durable Inbox IDs,
+not a per-claim evaluation UUID. If its fence is held, the Inbox item must be
+durably deferred under its fence token without consuming an attempt or being
+completed. A completed semantic batch releases its admission only through
+idempotent `RELEASED | ALREADY_RELEASED` acknowledgement. Failure to admit,
+defer, or complete remains fenced for recovery; it is never converted to an
+unfenced retry/release. These are required replay, lost-ACK, concurrency, and
+crash/restart contracts for the separately reviewed dispatcher/provider unit;
+the current boundary rejects before any such admission can occur.
 
 ## Release-candidate source evidence
 
@@ -66,8 +71,12 @@ every canonical candidate-affecting blob. Its package records:
 The package always declares `sideEffects=NOT_EXECUTED`. A copied manifest hash,
 missing blob, malformed revision, changed candidate fingerprint, or any manifest
 field mismatch returns `BLOCKED`; it cannot be promoted into deployment or
-runtime evidence. The tool does not create an immutable release, inspect a host,
-call a provider, apply migration `0035`, or perform an activation.
+runtime evidence. The cutover executor accepts the complete self-hashed package
+and independently validates its exact request binding, manifest comparisons,
+canonical blob projection, authority bundle, and rollback placeholder; it
+cannot accept a bare port-supplied success assertion. The tool does not create
+an immutable release, inspect a host, call a provider, apply migration `0035`,
+or perform an activation.
 
 ## Activation and rollback boundary
 

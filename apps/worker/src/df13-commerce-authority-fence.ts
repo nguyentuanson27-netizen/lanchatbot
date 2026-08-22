@@ -80,23 +80,6 @@ function validWorkId(value: string): boolean {
   return value.length > 0 && value.length <= 128 && /^[A-Za-z0-9:_-]+$/u.test(value);
 }
 
-function validFenceToken(value: string): boolean {
-  return value.length > 0 && value.length <= 256 && /^[A-Za-z0-9:_-]+$/u.test(value);
-}
-
-function exactIdentity(
-  left: Df13CommerceAuthorityIdentity,
-  right: Df13CommerceAuthorityIdentity,
-): boolean {
-  return left.modeVersionId === right.modeVersionId &&
-    left.contentHash === right.contentHash &&
-    left.pointerRevision === right.pointerRevision &&
-    left.source === right.source &&
-    left.salesAuthorityMode === right.salesAuthorityMode &&
-    left.stateReadMode === right.stateReadMode &&
-    left.authorityBundleHash === right.authorityBundleHash;
-}
-
 function commerceIdentity(
   resolution: RuntimeBehaviorModeResolution,
 ): Df13CommerceAuthorityIdentity | null {
@@ -143,7 +126,10 @@ function safeLegacy(resolution: RuntimeBehaviorModeResolution): boolean {
 /**
  * Real consumer boundary for the entire RealtimeRunner semantic path. A
  * LEGACY resolution stays default-off. COMMERCE cannot enter the runner until
- * a durable fence proves the same immutable authority identity it admitted.
+ * both a durable fence and the separately implemented all-or-nothing COMMERCE
+ * dispatcher prove the same immutable authority identity. This source revision
+ * contains neither dispatcher nor configured provider, so it fails closed
+ * before any prospective fence admission can enter the LEGACY semantic path.
  */
 export class Df13CommerceAuthorityFenceAdapter {
   constructor(private readonly port?: Df13CommerceAuthorityFencePort) {}
@@ -170,38 +156,9 @@ export class Df13CommerceAuthorityFenceAdapter {
     if (!this.port) {
       return { status: "REJECTED", reasonCode: "DF13_FENCE_PROVIDER_REQUIRED" };
     }
-    let result: Awaited<ReturnType<Df13CommerceAuthorityFencePort["admit"]>>;
-    try {
-      result = await this.port.admit({
-        pageId: input.pageId,
-        channel: input.channel,
-        workId: input.workId,
-        consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
-        authority,
-      });
-    } catch {
-      return { status: "REJECTED", reasonCode: "DF13_FENCE_ADMISSION_UNAVAILABLE" };
-    }
-    if (!validFenceToken(result.fenceToken)) {
-      return { status: "REJECTED", reasonCode: "DF13_FENCE_TOKEN_INVALID" };
-    }
-    if (result.status === "HELD") {
-      if (!result.reasonCode) {
-        return { status: "REJECTED", reasonCode: "DF13_FENCE_HOLD_REASON_INVALID" };
-      }
-      return result;
-    }
-    if (!exactIdentity(result.authority, authority)) {
-      return {
-        status: "REJECTED",
-        reasonCode: "DF13_FENCE_ADMISSION_IDENTITY_MISMATCH",
-      };
-    }
     return {
-      status: "COMMERCE_ADMITTED",
-      fenceToken: result.fenceToken,
-      workId: input.workId,
-      authority,
+      status: "REJECTED",
+      reasonCode: "DF13_COMMERCE_CONSUMER_DISPATCHER_REQUIRED",
     };
   }
 

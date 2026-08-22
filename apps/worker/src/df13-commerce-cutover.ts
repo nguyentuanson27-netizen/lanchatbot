@@ -5,30 +5,26 @@ import {
 } from "./gate-e-registration.js";
 import type { MissingCommerceSignal } from "./missing-commerce-signal.js";
 import {
+  validateDf13ReleaseCandidateEvidence,
+  type Df13ReleaseCandidateEvidence,
+} from "./df13-release-candidate-evidence.js";
+import {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
   DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+  GATE_E_PREPROD_V15_BINDING,
   type CommerceAuthorityConsumer,
 } from "./df13-commerce-authority-contract.js";
 
 export {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
   DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+  GATE_E_PREPROD_V15_BINDING,
   type CommerceAuthorityConsumer,
 } from "./df13-commerce-authority-contract.js";
 
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 const PREPROD_TEST_PAGE_ID = "1198992073286645";
-
-export const GATE_E_PREPROD_V15_BINDING = Object.freeze({
-  manifestHash: "48ed2d4a38fa2eea9eea7caadc0529862742c60a06b670e6872208e26893962b",
-  evidenceBodyHash: "a01ed890b75b4c0dae5a90efe6f28a0e41f86c0c511162b7973b513d61403db1",
-  finalizationHash: "21d02772417da44bf9a8709cf10e1f196feca5e3175626bdb39ecaa1147b92f8",
-  evidenceAdmissibility: "FINALIZED_TRUSTED_EXACT_HEAD" as const,
-  durableStoreStatus: "APPENDED" as const,
-  candidateSourceRevision: "e80cd663a9769ad8c0313c3693f37f32138ca52a",
-  candidateContentFingerprint: "86ff34479283895ac97274b9cace946e2926b17bc1ac381d540f2f03a17d977a",
-});
 
 export interface Df13CandidateBindingInput {
   readonly gateEManifestHash: string;
@@ -234,12 +230,13 @@ export interface CommerceAuthorityConsumerReadback {
 export interface CommerceCutoverPorts {
   /**
    * Trusted release-integrity boundary. Its production implementation must
-   * call rederiveDf13CandidateBinding against immutable release source, not
-   * return a caller-provided fingerprint.
+   * call prepareDf13ReleaseCandidateEvidence against immutable release source.
+   * The executor independently validates the complete returned evidence; a
+   * caller cannot substitute an unstructured success assertion.
    */
-  readonly rederiveCandidateBinding: (
+  readonly prepareReleaseCandidateEvidence: (
     input: Df13CandidateBindingRequest,
-  ) => Promise<Df13CandidateBindingValidation>;
+  ) => Promise<Df13ReleaseCandidateEvidence>;
   readonly holdAuthorityDependentWork: (input: Readonly<{
     pageId: string;
     channel: string;
@@ -458,7 +455,13 @@ export async function executeCommerceCutover(input: Readonly<{
 }>): Promise<CommerceCutoverExecution> {
   let candidateBinding: Df13CandidateBindingValidation;
   try {
-    candidateBinding = await input.ports.rederiveCandidateBinding(input.preflight.candidate);
+    const evidence = await input.ports.prepareReleaseCandidateEvidence(
+      input.preflight.candidate,
+    );
+    candidateBinding = validateDf13ReleaseCandidateEvidence(
+      evidence,
+      input.preflight.candidate,
+    );
   } catch {
     candidateBinding = {
       status: "MISMATCH",
@@ -633,7 +636,13 @@ export async function recoverCommerceCutoverAfterInterruption(input: Readonly<{
 }>): Promise<CommerceCutoverExecution> {
   let candidateBinding: Df13CandidateBindingValidation;
   try {
-    candidateBinding = await input.ports.rederiveCandidateBinding(input.preflight.candidate);
+    const evidence = await input.ports.prepareReleaseCandidateEvidence(
+      input.preflight.candidate,
+    );
+    candidateBinding = validateDf13ReleaseCandidateEvidence(
+      evidence,
+      input.preflight.candidate,
+    );
   } catch {
     candidateBinding = {
       status: "MISMATCH",

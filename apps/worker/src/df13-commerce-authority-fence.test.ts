@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from "vitest";
 import type { RuntimeBehaviorModeResolution } from "@lana/chat-runtime";
 import {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
-  DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
 } from "./df13-commerce-cutover.js";
 import {
   Df13CommerceAuthorityFenceAdapter,
@@ -87,68 +86,23 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
     });
   });
 
-  it("binds every authority consumer to one exact database-resolved COMMERCE identity", async () => {
+  it("refuses to call a prospective fence provider until the COMMERCE dispatcher exists", async () => {
     const port = fencePort();
     const adapter = new Df13CommerceAuthorityFenceAdapter(port);
 
-    const admission = await adapter.admit({
+    await expect(adapter.admit({
       pageId,
       channel: "MESSENGER",
       workId: "inbox-1",
       resolution: resolution("COMMERCE"),
+    })).resolves.toEqual({
+      status: "REJECTED",
+      reasonCode: "DF13_COMMERCE_CONSUMER_DISPATCHER_REQUIRED",
     });
-
-    expect(admission).toMatchObject({
-      status: "COMMERCE_ADMITTED",
-      fenceToken: "fence-1",
-      authority: {
-        modeVersionId: "10000000-0000-4000-8000-000000000006",
-        pointerRevision: 6,
-        source: "DATABASE",
-        salesAuthorityMode: "COMMERCE",
-        stateReadMode: "LEGACY",
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
-      },
-    });
-    expect(port.admit).toHaveBeenCalledWith(expect.objectContaining({
-      consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
-      workId: "inbox-1",
-    }));
-
-    await expect(adapter.complete(admission)).resolves.toEqual("RELEASED");
-    expect(port.complete).toHaveBeenCalledWith(expect.objectContaining({
-      fenceToken: "fence-1",
-      workId: "inbox-1",
-    }));
+    expect(port.admit).not.toHaveBeenCalled();
   });
 
-  it("retains a held work item rather than converting it into an unfenced admission", async () => {
-    const port = fencePort({
-      admit: vi.fn(async () => ({
-        status: "HELD" as const,
-        fenceToken: "fence-hold",
-        reasonCode: "DF13_CUTOVER_IN_PROGRESS",
-      })),
-    });
-    const adapter = new Df13CommerceAuthorityFenceAdapter(port);
-
-    const admission = await adapter.admit({
-      pageId,
-      channel: "MESSENGER",
-      workId: "inbox-1",
-      resolution: resolution("COMMERCE"),
-    });
-
-    expect(admission).toEqual({
-      status: "HELD",
-      fenceToken: "fence-hold",
-      reasonCode: "DF13_CUTOVER_IN_PROGRESS",
-    });
-    await expect(adapter.complete(admission)).resolves.toEqual("NOT_APPLICABLE");
-    expect(port.complete).not.toHaveBeenCalled();
-  });
-
-  it("rejects stale, cache-derived, or identity-mismatched COMMERCE acknowledgement", async () => {
+  it("rejects stale or cache-derived COMMERCE before a prospective provider", async () => {
     const cacheAdapter = new Df13CommerceAuthorityFenceAdapter(fencePort());
     await expect(cacheAdapter.admit({
       pageId,
@@ -159,66 +113,35 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
       status: "REJECTED",
       reasonCode: "DF13_COMMERCE_IDENTITY_NOT_DATABASE_RESOLVED",
     });
-
-    const mismatchedAdapter = new Df13CommerceAuthorityFenceAdapter(fencePort({
-      admit: vi.fn(async (input) => ({
-        status: "ADMITTED" as const,
-        fenceToken: "fence-1",
-        authority: { ...input.authority, pointerRevision: input.authority.pointerRevision + 1 },
-      })),
-    }));
-    await expect(mismatchedAdapter.admit({
-      pageId,
-      channel: "MESSENGER",
-      workId: "inbox-1",
-      resolution: resolution("COMMERCE"),
-    })).resolves.toEqual({
-      status: "REJECTED",
-      reasonCode: "DF13_FENCE_ADMISSION_IDENTITY_MISMATCH",
-    });
   });
 
-  it("fails closed when durable admission or completion cannot be proven", async () => {
-    const unavailableAdapter = new Df13CommerceAuthorityFenceAdapter(fencePort({
-      admit: vi.fn(async () => {
-        throw new Error("store unavailable");
-      }),
-    }));
-    await expect(unavailableAdapter.admit({
-      pageId,
-      channel: "MESSENGER",
-      workId: "inbox-1",
-      resolution: resolution("COMMERCE"),
-    })).resolves.toEqual({
-      status: "REJECTED",
-      reasonCode: "DF13_FENCE_ADMISSION_UNAVAILABLE",
-    });
-
+  it("fails closed when a future durable completion acknowledgement is lost", async () => {
     const completionAdapter = new Df13CommerceAuthorityFenceAdapter(fencePort({
       complete: vi.fn(async () => {
         throw new Error("lost acknowledgement");
       }),
     }));
-    const admission = await completionAdapter.admit({
-      pageId,
-      channel: "MESSENGER",
-      workId: "inbox-1",
-      resolution: resolution("COMMERCE"),
-    });
-    await expect(completionAdapter.complete(admission))
+    await expect(completionAdapter.complete({
+      status: "COMMERCE_ADMITTED",
+      fenceToken: "fence-1",
+      workId: "df13-test-work",
+      authority: {
+        modeVersionId: "10000000-0000-4000-8000-000000000006",
+        contentHash: "sha256:" + "c".repeat(64),
+        pointerRevision: 6,
+        source: "DATABASE",
+        salesAuthorityMode: "COMMERCE",
+        stateReadMode: "LEGACY",
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      },
+    }))
       .rejects.toThrow("DF13_FENCE_COMPLETION_UNPROVEN");
   });
 
-  it("holds a RealtimeRunner batch before state, classification, and side-effect planning", async () => {
-    const deferForAuthorityFence = vi.fn(async () => true);
+  it("blocks a configured prospective provider before state, classification, and side-effect planning", async () => {
+    const retry = vi.fn(async () => true);
     const loadOrCreate = vi.fn();
-    const heldAdapter = new Df13CommerceAuthorityFenceAdapter(fencePort({
-      admit: vi.fn(async () => ({
-        status: "HELD" as const,
-        fenceToken: "fence-hold",
-        reasonCode: "DF13_CUTOVER_IN_PROGRESS",
-      })),
-    }));
+    const heldAdapter = new Df13CommerceAuthorityFenceAdapter(fencePort());
     const runner = new RealtimeRunner(
       {
         claimNext: vi.fn(async () => ({
@@ -257,9 +180,8 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
           },
         })),
         complete: vi.fn(async () => true),
-        retry: vi.fn(async () => true),
+        retry,
         failPermanent: vi.fn(async () => true),
-        deferForAuthorityFence,
       },
       {
         loadOrCreate,
@@ -281,11 +203,11 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
     );
 
     await expect(runner.processOne()).resolves.toBe(true);
-    expect(deferForAuthorityFence).toHaveBeenCalledWith(
+    expect(retry).toHaveBeenCalledWith(
       "inbox-1",
       "lease-1",
-      "fence-hold",
-      "DF13_CUTOVER_IN_PROGRESS",
+      "DF13_COMMERCE_CONSUMER_DISPATCHER_REQUIRED",
+      expect.any(Number),
     );
     expect(loadOrCreate).not.toHaveBeenCalled();
   });
