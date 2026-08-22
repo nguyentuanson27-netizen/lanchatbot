@@ -158,6 +158,10 @@ import {
   type BuildDecisionObservabilityInput,
   type ProtectedClaimValidationSummary,
 } from "./decision-observability.js";
+import {
+  Df13CommerceAuthorityFenceAdapter,
+  type Df13CommerceAuthorityFenceAdmission,
+} from "./df13-commerce-authority-fence.js";
 export interface RealtimeInboxPort {
   claimNext(
     workerId: string,
@@ -193,6 +197,21 @@ export interface RealtimeInboxPort {
     batch: InboxBatchLease,
     errorCode: string,
   ): Promise<boolean>;
+  /**
+   * A configured DF13 fence owns this deferral durably while a direct
+   * authority cutover is in progress. It must not consume an inbox attempt.
+   */
+  deferForAuthorityFence?(
+    inboxId: string,
+    leaseToken: string,
+    fenceToken: string,
+    reasonCode: string,
+  ): Promise<boolean>;
+  deferBatchForAuthorityFence?(
+    batch: InboxBatchLease,
+    fenceToken: string,
+    reasonCode: string,
+  ): Promise<boolean>;
 }
 
 interface RunnerInboundBatch extends ClaimedInboundBatch<InboundEnvelopeV1> {
@@ -203,7 +222,8 @@ type BatchCommitStatus =
   | "COMMITTED"
   | "SUPERSEDED"
   | "NOT_REQUESTED"
-  | "INBOX_ONLY";
+  | "INBOX_ONLY"
+  | "AUTHORITY_FENCE_HELD";
 
 function activeMediaPartialResolutionPolicy(
   resolution: RuntimePolicyResolution | null,
@@ -2386,6 +2406,7 @@ export function responseGroupHandoffOrdering(
 
 export class RealtimeRunner {
   private readonly options: Required<RealtimeRunnerOptions>;
+  private readonly commerceAuthorityFence: Df13CommerceAuthorityFenceAdapter;
 
   constructor(
     private readonly inbox: RealtimeInboxPort,
@@ -2402,6 +2423,7 @@ export class RealtimeRunner {
     private readonly policyResolver?: RuntimePolicyResolverPort,
     private readonly mediaRecognition?: RealtimeMediaRecognitionPort,
     private readonly behaviorModeResolver?: RuntimeBehaviorModeResolverPort,
+    commerceAuthorityFence?: Df13CommerceAuthorityFenceAdapter,
   ) {
     if (options.mode === "DRY_RUN" && options.sendEnabled) {
       throw new Error("REALTIME_DRY_RUN_SEND_FORBIDDEN");
@@ -2459,6 +2481,8 @@ export class RealtimeRunner {
       adAcquisitionAnalyticsMode: options.adAcquisitionAnalyticsMode ?? "OFF",
       adAcquisitionPageIds: [...(options.adAcquisitionPageIds ?? [])],
     };
+    this.commerceAuthorityFence = commerceAuthorityFence ??
+      new Df13CommerceAuthorityFenceAdapter();
   }
 
   /**
@@ -2572,7 +2596,11 @@ export class RealtimeRunner {
         return true;
       }
       const status = await this.processBatch(batch, knownSuperseded);
-      if (status === "COMMITTED" || status === "SUPERSEDED") return true;
+      if (
+        status === "COMMITTED" ||
+        status === "SUPERSEDED" ||
+        status === "AUTHORITY_FENCE_HELD"
+      ) return true;
       await this.completeWork(batch, status === "INBOX_ONLY");
       return true;
     } catch (error) {
@@ -2696,6 +2724,43 @@ export class RealtimeRunner {
     }
   }
 
+  private async deferAuthorityFencedWork(
+    batch: RunnerInboundBatch,
+    admission: Extract<Df13CommerceAuthorityFenceAdmission, { status: "HELD" }>,
+  ): Promise<void> {
+    if (batch.nativeBatch) {
+      if (!this.inbox.deferBatchForAuthorityFence) {
+        throw new Error("DF13_FENCE_BATCH_DEFER_PORT_REQUIRED");
+      }
+      if (!await this.inbox.deferBatchForAuthorityFence(
+        this.batchLease(batch),
+        admission.fenceToken,
+        admission.reasonCode,
+      )) {
+        throw new Error("DF13_FENCE_BATCH_DEFER_UNPROVEN");
+      }
+      return;
+    }
+    const claim = batch.items[0];
+    if (!claim || !this.inbox.deferForAuthorityFence) {
+      throw new Error("DF13_FENCE_DEFER_PORT_REQUIRED");
+    }
+    if (!await this.inbox.deferForAuthorityFence(
+      claim.inboxId,
+      claim.leaseToken,
+      admission.fenceToken,
+      admission.reasonCode,
+    )) {
+      throw new Error("DF13_FENCE_DEFER_UNPROVEN");
+    }
+  }
+
+  private async completeAuthorityFencedWork(
+    admission: Df13CommerceAuthorityFenceAdmission,
+  ): Promise<void> {
+    await this.commerceAuthorityFence.complete(admission);
+  }
+
   private async processBatch(
     batch: RunnerInboundBatch,
     knownSuperseded: boolean,
@@ -2746,6 +2811,31 @@ export class RealtimeRunner {
       // app_id is intentionally only a fallback for echoes whose mid cannot be
       // reconciled (for example, a delayed or incomplete Meta callback).
       if (matchesOutbox || matchesCurrentApp) return "NOT_REQUESTED";
+    }
+    const behaviorModeResolution = await this.behaviorModeResolver?.resolve({
+      resolutionId: deterministicUuid(
+        `behavior-mode:${claim.pageId}:${this.options.behaviorModeChannel}:${message.eventKey}`,
+      ),
+      pageId: claim.pageId,
+      channel: this.options.behaviorModeChannel,
+      workerId: this.options.workerId,
+      now,
+    }) ?? startupBehaviorModeResolution(
+      this.options.confirmationStartupMode,
+      now,
+    );
+    const authorityAdmission = await this.commerceAuthorityFence.admit({
+      pageId: claim.pageId,
+      channel: this.options.behaviorModeChannel,
+      workId: batch.evaluationGroupId,
+      resolution: behaviorModeResolution,
+    });
+    if (authorityAdmission.status === "HELD") {
+      await this.deferAuthorityFencedWork(batch, authorityAdmission);
+      return "AUTHORITY_FENCE_HELD";
+    }
+    if (authorityAdmission.status === "REJECTED") {
+      throw new Error(authorityAdmission.reasonCode);
     }
     const record = await this.runtime.loadOrCreate(
       claim.pageId,
@@ -2825,18 +2915,6 @@ export class RealtimeRunner {
     const policyAuditRef = policyResolution?.bundle
       ? runtimePolicyAuditReference(policyResolution.bundle)
       : null;
-    const behaviorModeResolution = await this.behaviorModeResolver?.resolve({
-      resolutionId: deterministicUuid(
-        `behavior-mode:${claim.pageId}:${this.options.behaviorModeChannel}:${message.eventKey}`,
-      ),
-      pageId: claim.pageId,
-      channel: this.options.behaviorModeChannel,
-      workerId: this.options.workerId,
-      now,
-    }) ?? startupBehaviorModeResolution(
-      this.options.confirmationStartupMode,
-      now,
-    );
     const customerProfile =
       this.options.customerProfileEnabled && !knownSuperseded && !message.isEcho
         ? await this.loadAndMergeCustomerProfile(
@@ -3015,7 +3093,10 @@ export class RealtimeRunner {
         tagObservation: observation,
         now,
       });
-      if (applied.status !== "APPLIED") return "INBOX_ONLY";
+      if (applied.status !== "APPLIED") {
+        await this.completeAuthorityFencedWork(authorityAdmission);
+        return "INBOX_ONLY";
+      }
       const result = await this.runtime.commit(
         {
           pageId: batch.pageId,
@@ -3027,6 +3108,7 @@ export class RealtimeRunner {
         },
         now,
       );
+      await this.completeAuthorityFencedWork(authorityAdmission);
       return batchCommitStatus(result);
     }
     const mediaPartialResolutionPolicy =
@@ -3161,7 +3243,10 @@ export class RealtimeRunner {
       tagObservation: observation,
       now,
     });
-    if (applied.status !== "APPLIED") return "INBOX_ONLY";
+    if (applied.status !== "APPLIED") {
+      await this.completeAuthorityFencedWork(authorityAdmission);
+      return "INBOX_ONLY";
+    }
 
     let nextState = applied.state;
     const hasNewCustomerImage = !message.isEcho &&
@@ -3923,6 +4008,7 @@ export class RealtimeRunner {
             },
             now,
           );
+          await this.completeAuthorityFencedWork(authorityAdmission);
           return batchCommitStatus(result);
         }
         if (imageRequest && resolvedProduct) {
@@ -5561,6 +5647,7 @@ export class RealtimeRunner {
       },
       new Date(),
     );
+    await this.completeAuthorityFencedWork(authorityAdmission);
     return batchCommitStatus(result);
   }
 
