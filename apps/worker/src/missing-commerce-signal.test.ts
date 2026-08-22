@@ -56,11 +56,20 @@ function commerceCandidate(
   };
 }
 
-function fingerprint(value: object): string {
+function fingerprint(
+  domain: "CANONICAL_INTENT" | "CANDIDATE",
+  value: object,
+): string {
+  const prefix = domain === "CANONICAL_INTENT"
+    ? "COMMERCE_READINESS_CANONICAL_INTENT_V1"
+    : "COMMERCE_READINESS_CANDIDATE_V1";
   return createHash("sha256")
-    .update(`COMMERCE_READINESS_CANONICAL_CONTENT_V1\n${canonicalJsonV1(value)}`, "utf8")
+    .update(`${prefix}\n${canonicalJsonV1(value)}`, "utf8")
     .digest("hex");
 }
+
+const intentFingerprint = (value: object): string => fingerprint("CANONICAL_INTENT", value);
+const commerceFingerprint = (value: object): string => fingerprint("CANDIDATE", value);
 
 describe("DF12 missing-commerce signal", () => {
   it("is disabled by default and cannot change authority or authorize an action", () => {
@@ -91,7 +100,7 @@ describe("DF12 missing-commerce signal", () => {
         candidateAuthority: "COMMERCE",
         sideEffects: "DISABLED",
         futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
-        canonicalIntentFingerprint: fingerprint(intent),
+        canonicalIntentFingerprint: intentFingerprint(intent),
         commerceContentFingerprint: null,
         reasonCodes: ["MISSING_COMMERCE_STATE_FOR_COMMITTED_INTENT"],
       });
@@ -112,9 +121,9 @@ describe("DF12 missing-commerce signal", () => {
       commerce: null,
     });
 
-    expect(initialSignal.canonicalIntentFingerprint).toBe(fingerprint(initial));
+    expect(initialSignal.canonicalIntentFingerprint).toBe(intentFingerprint(initial));
     expect(initialSignal.canonicalIntentFingerprint).not.toBe(initial.evidenceHash);
-    expect(changedSignal.canonicalIntentFingerprint).toBe(fingerprint(changed));
+    expect(changedSignal.canonicalIntentFingerprint).toBe(intentFingerprint(changed));
     expect(changedSignal.canonicalIntentFingerprint).not.toBe(
       initialSignal.canonicalIntentFingerprint,
     );
@@ -152,9 +161,63 @@ describe("DF12 missing-commerce signal", () => {
       candidateAuthority: "COMMERCE",
       sideEffects: "DISABLED",
       futureCommerceDisposition: "SATISFIED",
-      canonicalIntentFingerprint: fingerprint(buyingIntent()),
-      commerceContentFingerprint: fingerprint(commerce),
+      canonicalIntentFingerprint: intentFingerprint(buyingIntent()),
+      commerceContentFingerprint: commerceFingerprint(commerce),
       reasonCodes: ["COMMERCE_STATE_PRESENT"],
+      });
+  });
+
+  it.each([
+    "OPEN_CART",
+    "ADD_TO_CART",
+    "SET_QUANTITY",
+    "PROCEED_TO_PAYMENT",
+  ] as const)("fails closed when committed %s has no cart artifact", (requestedAction) => {
+    const intent = buyingIntent({ requestedAction });
+    const commerce = commerceCandidate({
+      canonicalContent: {
+        ...commerceCandidate().canonicalContent,
+        buyingIntent: intent,
+        stage: "DISCOVERY",
+        hasCart: false,
+        hasOrderPreview: false,
+        hasPurchaseConfirmation: false,
+      },
+    });
+
+    expect(evaluateMissingCommerceSignal({ enabled: true, buyingIntent: intent, commerce }))
+      .toMatchObject({
+        status: "MISSING_COMMERCE_STATE",
+        activeAuthority: "LEGACY",
+        sideEffects: "DISABLED",
+        futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
+        commerceContentFingerprint: commerceFingerprint(commerce),
+        reasonCodes: ["COMMERCE_CART_ABSENT_FOR_COMMITTED_INTENT"],
+      });
+  });
+
+  it("fails closed when the stage contradicts its commerce artifacts", () => {
+    const commerce = commerceCandidate({
+      canonicalContent: {
+        ...commerceCandidate().canonicalContent,
+        stage: "PURCHASE_CONFIRMED",
+        hasCart: true,
+        hasOrderPreview: true,
+        hasPurchaseConfirmation: false,
+      },
+    });
+
+    expect(evaluateMissingCommerceSignal({
+      enabled: true,
+      buyingIntent: buyingIntent(),
+      commerce,
+    })).toMatchObject({
+      status: "INVALID_COMMERCE_STATE",
+      activeAuthority: "LEGACY",
+      sideEffects: "DISABLED",
+      futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
+      commerceContentFingerprint: commerceFingerprint(commerce),
+      reasonCodes: ["COMMERCE_STAGE_ARTIFACT_INCOHERENT"],
     });
   });
 
@@ -184,7 +247,7 @@ describe("DF12 missing-commerce signal", () => {
       activeAuthority: "LEGACY",
       sideEffects: "DISABLED",
       futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
-      commerceContentFingerprint: fingerprint(commerce),
+      commerceContentFingerprint: commerceFingerprint(commerce),
       reasonCodes: [reasonCode],
     });
   });
@@ -204,7 +267,7 @@ describe("DF12 missing-commerce signal", () => {
         activeAuthority: "LEGACY",
         sideEffects: "DISABLED",
         futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
-        commerceContentFingerprint: fingerprint(commerce),
+        commerceContentFingerprint: commerceFingerprint(commerce),
         reasonCodes: ["COMMITTED_INTENT_PRODUCT_UNAVAILABLE"],
       });
   });
@@ -232,12 +295,12 @@ describe("DF12 missing-commerce signal", () => {
       activeAuthority: "LEGACY",
       sideEffects: "DISABLED",
       futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
-      commerceContentFingerprint: fingerprint(commerce),
+      commerceContentFingerprint: commerceFingerprint(commerce),
       reasonCodes: ["COMMERCE_PRODUCT_BINDING_NOT_RESOLVED"],
     });
   });
 
-  it("fails closed with a product-cardinality reason for an empty resolved binding", () => {
+  it("fails closed as invalid when an empty resolved binding cannot be canonicalized", () => {
     const commerce = {
       ...commerceCandidate(),
       canonicalContent: {
@@ -257,12 +320,12 @@ describe("DF12 missing-commerce signal", () => {
       buyingIntent: buyingIntent(),
       commerce,
     })).toMatchObject({
-      status: "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
+      status: "INVALID_COMMERCE_STATE",
       activeAuthority: "LEGACY",
       sideEffects: "DISABLED",
       futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
       commerceContentFingerprint: null,
-      reasonCodes: ["COMMERCE_PRODUCT_BINDING_CARDINALITY_UNPROVABLE"],
+      reasonCodes: ["COMMERCE_STATE_INVALID"],
     });
   });
 
@@ -315,7 +378,7 @@ describe("DF12 missing-commerce signal", () => {
       activeAuthority: "LEGACY",
       sideEffects: "DISABLED",
       futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
-      commerceContentFingerprint: fingerprint(commerce),
+      commerceContentFingerprint: commerceFingerprint(commerce),
       reasonCodes: ["COMMERCE_STATE_INTENT_FINGERPRINT_MISMATCH"],
     });
   });
@@ -343,7 +406,7 @@ describe("DF12 missing-commerce signal", () => {
       activeAuthority: "LEGACY",
       sideEffects: "DISABLED",
       futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
-      commerceContentFingerprint: fingerprint(commerce),
+      commerceContentFingerprint: commerceFingerprint(commerce),
       reasonCodes: ["COMMERCE_PRODUCT_BINDING_UNREADY"],
     });
   });

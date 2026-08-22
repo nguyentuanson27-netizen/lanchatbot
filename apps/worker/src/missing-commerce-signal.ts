@@ -4,6 +4,7 @@ import {
   ProductBindingV2Schema,
   SalesCycleStageV1Schema,
   canonicalJsonV1,
+  deriveConversationPhaseV2,
   type CanonicalBuyingIntentV1,
   type ProductBindingV2,
   type SalesCycleStageV1,
@@ -54,6 +55,8 @@ type MissingCommerceSignalReason =
   | "COMMERCE_PRODUCT_BINDING_NOT_RESOLVED"
   | "COMMERCE_PRODUCT_BINDING_CARDINALITY_UNPROVABLE"
   | "COMMERCE_PRODUCT_BINDING_MISMATCH"
+  | "COMMERCE_STAGE_ARTIFACT_INCOHERENT"
+  | "COMMERCE_CART_ABSENT_FOR_COMMITTED_INTENT"
   | "COMMERCE_STATE_PRESENT"
   | "MISSING_COMMERCE_STATE_FOR_COMMITTED_INTENT";
 
@@ -147,21 +150,37 @@ function parseCommerceReadinessCandidate(value: unknown): CommerceReadinessCandi
   };
 }
 
-/** A resolved binding must prove exactly one product before it can be trusted. */
-function hasEmptyResolvedProductBinding(value: unknown): boolean {
-  const candidate = record(value);
-  const canonicalContent = candidate === null ? null : record(candidate.canonicalContent);
-  const productBinding = canonicalContent === null
-    ? null
-    : record(canonicalContent.productBinding);
-  return productBinding?.status === "RESOLVED" &&
-    Array.isArray(productBinding.productIds) && productBinding.productIds.length === 0;
+function fingerprint(
+  domain: "COMMERCE_READINESS_CANONICAL_INTENT_V1" | "COMMERCE_READINESS_CANDIDATE_V1",
+  value: object,
+): string {
+  return createHash("sha256")
+    .update(`${domain}\n${canonicalJsonV1(value)}`, "utf8")
+    .digest("hex");
 }
 
-function canonicalContentFingerprint(value: object): string {
-  return createHash("sha256")
-    .update(`COMMERCE_READINESS_CANONICAL_CONTENT_V1\n${canonicalJsonV1(value)}`, "utf8")
-    .digest("hex");
+function canonicalIntentFingerprint(value: CanonicalBuyingIntentV1): string {
+  return fingerprint("COMMERCE_READINESS_CANONICAL_INTENT_V1", value);
+}
+
+function commerceCandidateFingerprint(value: CommerceReadinessCandidate): string {
+  return fingerprint("COMMERCE_READINESS_CANDIDATE_V1", value);
+}
+
+/** Reuse the phase contract so readiness cannot accept an incoherent commerce state. */
+function commerceArtifactsAreCoherent(candidate: CommerceReadinessCandidate): boolean {
+  try {
+    deriveConversationPhaseV2({
+      commerceStage: candidate.canonicalContent.stage,
+      hasCart: candidate.canonicalContent.hasCart,
+      hasPreview: candidate.canonicalContent.hasOrderPreview,
+      hasConfirmation: candidate.canonicalContent.hasPurchaseConfirmation,
+      salesCycleRevision: candidate.revision,
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function signal(
@@ -206,13 +225,13 @@ export function evaluateMissingCommerceSignal(
       null,
     );
   }
-  const canonicalIntentFingerprint = canonicalContentFingerprint(buyingIntent.data);
+  const intentFingerprint = canonicalIntentFingerprint(buyingIntent.data);
   if (buyingIntent.data.decision !== "COMMITTED") {
     return signal(
       "NOT_COMMITTED",
       "NOT_REQUIRED",
       ["CANONICAL_INTENT_NOT_COMMITTED"],
-      canonicalIntentFingerprint,
+      intentFingerprint,
       null,
     );
   }
@@ -221,36 +240,45 @@ export function evaluateMissingCommerceSignal(
       "MISSING_COMMERCE_STATE",
       "BLOCK_COMMERCE_CUTOVER",
       ["MISSING_COMMERCE_STATE_FOR_COMMITTED_INTENT"],
-      canonicalIntentFingerprint,
+      intentFingerprint,
       null,
     );
   }
   const commerce = parseCommerceReadinessCandidate(input.commerce);
   if (commerce === null) {
-    if (hasEmptyResolvedProductBinding(input.commerce)) {
-      return signal(
-        "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
-        "BLOCK_COMMERCE_CUTOVER",
-        ["COMMERCE_PRODUCT_BINDING_CARDINALITY_UNPROVABLE"],
-        canonicalIntentFingerprint,
-        null,
-      );
-    }
     return signal(
       "INVALID_COMMERCE_STATE",
       "BLOCK_COMMERCE_CUTOVER",
       ["COMMERCE_STATE_INVALID"],
-      canonicalIntentFingerprint,
+      intentFingerprint,
       null,
     );
   }
-  const commerceContentFingerprint = canonicalContentFingerprint(commerce);
-  if (canonicalContentFingerprint(commerce.canonicalContent.buyingIntent) !== canonicalIntentFingerprint) {
+  const commerceContentFingerprint = commerceCandidateFingerprint(commerce);
+  if (canonicalIntentFingerprint(commerce.canonicalContent.buyingIntent) !== intentFingerprint) {
     return signal(
       "STALE_COMMERCE_STATE",
       "BLOCK_COMMERCE_CUTOVER",
       ["COMMERCE_STATE_INTENT_FINGERPRINT_MISMATCH"],
-      canonicalIntentFingerprint,
+      intentFingerprint,
+      commerceContentFingerprint,
+    );
+  }
+  if (!commerceArtifactsAreCoherent(commerce)) {
+    return signal(
+      "INVALID_COMMERCE_STATE",
+      "BLOCK_COMMERCE_CUTOVER",
+      ["COMMERCE_STAGE_ARTIFACT_INCOHERENT"],
+      intentFingerprint,
+      commerceContentFingerprint,
+    );
+  }
+  if (!commerce.canonicalContent.hasCart) {
+    return signal(
+      "MISSING_COMMERCE_STATE",
+      "BLOCK_COMMERCE_CUTOVER",
+      ["COMMERCE_CART_ABSENT_FOR_COMMITTED_INTENT"],
+      intentFingerprint,
       commerceContentFingerprint,
     );
   }
@@ -259,7 +287,7 @@ export function evaluateMissingCommerceSignal(
       "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
       "BLOCK_COMMERCE_CUTOVER",
       ["COMMITTED_INTENT_PRODUCT_UNAVAILABLE"],
-      canonicalIntentFingerprint,
+      intentFingerprint,
       commerceContentFingerprint,
     );
   }
@@ -270,7 +298,7 @@ export function evaluateMissingCommerceSignal(
       "STALE_COMMERCE_STATE",
       "BLOCK_COMMERCE_CUTOVER",
       ["COMMERCE_PRODUCT_BINDING_UNREADY"],
-      canonicalIntentFingerprint,
+      intentFingerprint,
       commerceContentFingerprint,
     );
   }
@@ -279,7 +307,7 @@ export function evaluateMissingCommerceSignal(
       "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
       "BLOCK_COMMERCE_CUTOVER",
       ["COMMERCE_PRODUCT_BINDING_NOT_RESOLVED"],
-      canonicalIntentFingerprint,
+      intentFingerprint,
       commerceContentFingerprint,
     );
   }
@@ -289,7 +317,7 @@ export function evaluateMissingCommerceSignal(
       "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
       "BLOCK_COMMERCE_CUTOVER",
       ["COMMERCE_PRODUCT_BINDING_CARDINALITY_UNPROVABLE"],
-      canonicalIntentFingerprint,
+      intentFingerprint,
       commerceContentFingerprint,
     );
   }
@@ -298,7 +326,7 @@ export function evaluateMissingCommerceSignal(
       "UNVERIFIABLE_COMMERCE_PRODUCT_BINDING",
       "BLOCK_COMMERCE_CUTOVER",
       ["COMMERCE_PRODUCT_BINDING_MISMATCH"],
-      canonicalIntentFingerprint,
+      intentFingerprint,
       commerceContentFingerprint,
     );
   }
@@ -306,7 +334,7 @@ export function evaluateMissingCommerceSignal(
     "COMMERCE_STATE_PRESENT",
     "SATISFIED",
     ["COMMERCE_STATE_PRESENT"],
-    canonicalIntentFingerprint,
+    intentFingerprint,
     commerceContentFingerprint,
   );
 }
