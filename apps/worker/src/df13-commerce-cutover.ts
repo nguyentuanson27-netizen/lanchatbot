@@ -368,6 +368,32 @@ function exactConsumerReadbacks(
   });
 }
 
+type LegacyConsumerConvergence = "EXACT" | "UNAVAILABLE" | "INCOMPLETE";
+
+async function proveExactLegacyConsumerConvergence(input: Readonly<{
+  ports: CommerceCutoverPorts;
+  fenceToken: string;
+  target: RuntimeBehaviorModePointer;
+}>): Promise<LegacyConsumerConvergence> {
+  if (!isSafeLegacyPointer(input.target)) return "INCOMPLETE";
+  let readbacks: readonly CommerceAuthorityConsumerReadback[];
+  try {
+    readbacks = await input.ports.readConsumerAuthorities({
+      fenceToken: input.fenceToken,
+      consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+    });
+  } catch {
+    return "UNAVAILABLE";
+  }
+  return exactConsumerReadbacks(readbacks, input.target) ? "EXACT" : "INCOMPLETE";
+}
+
+function legacyConvergenceReasonCode(convergence: Exclude<LegacyConsumerConvergence, "EXACT">): string {
+  return convergence === "UNAVAILABLE"
+    ? "DF13_LEGACY_CONSUMER_READBACK_UNAVAILABLE"
+    : "DF13_LEGACY_CONSUMER_READBACK_INCOMPLETE";
+}
+
 async function releaseAndReturn(
   ports: CommerceCutoverPorts,
   fenceToken: string,
@@ -424,6 +450,19 @@ async function rollbackOrRetainHold(input: Readonly<{
       sideEffects: "CONTROL_PLANE_ONLY",
       activationAcknowledgement: input.activationAcknowledgement,
       reasonCodes: [input.reasonCode, "DF13_ROLLBACK_UNPROVEN"],
+    };
+  }
+  const convergence = await proveExactLegacyConsumerConvergence({
+    ports: input.ports,
+    fenceToken: input.fenceToken,
+    target: restoredPointer,
+  });
+  if (convergence !== "EXACT") {
+    return {
+      status: "HOLD_RETAINED",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      activationAcknowledgement: input.activationAcknowledgement,
+      reasonCodes: [input.reasonCode, legacyConvergenceReasonCode(convergence)],
     };
   }
   return releaseAndReturn(input.ports, input.fenceToken, {
@@ -527,31 +566,19 @@ export async function executeCommerceCutover(input: Readonly<{
   }
   if (!targetPointerMatches(activatedPointer, input.preflight.targetPointer)) {
     if (isSafeLegacyPointer(activatedPointer)) {
-      let legacyReadbacks: readonly CommerceAuthorityConsumerReadback[];
-      try {
-        legacyReadbacks = await input.ports.readConsumerAuthorities({
-          fenceToken: held.fenceToken,
-          consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
-        });
-      } catch {
+      const convergence = await proveExactLegacyConsumerConvergence({
+        ports: input.ports,
+        fenceToken: held.fenceToken,
+        target: activatedPointer,
+      });
+      if (convergence !== "EXACT") {
         return {
           status: "HOLD_RETAINED",
           sideEffects: "CONTROL_PLANE_ONLY",
           activationAcknowledgement,
           reasonCodes: [
             ...(casMismatch ? ["DF13_POINTER_CAS_MISMATCH"] : []),
-            "DF13_LEGACY_CONSUMER_READBACK_UNAVAILABLE",
-          ],
-        };
-      }
-      if (!exactConsumerReadbacks(legacyReadbacks, activatedPointer)) {
-        return {
-          status: "HOLD_RETAINED",
-          sideEffects: "CONTROL_PLANE_ONLY",
-          activationAcknowledgement,
-          reasonCodes: [
-            ...(casMismatch ? ["DF13_POINTER_CAS_MISMATCH"] : []),
-            "DF13_LEGACY_CONSUMER_READBACK_INCOMPLETE",
+            legacyConvergenceReasonCode(convergence),
           ],
         };
       }
@@ -695,6 +722,19 @@ export async function recoverCommerceCutoverAfterInterruption(input: Readonly<{
     };
   }
   if (isSafeLegacyPointer(observed)) {
+    const convergence = await proveExactLegacyConsumerConvergence({
+      ports: input.ports,
+      fenceToken: held.fenceToken,
+      target: observed,
+    });
+    if (convergence !== "EXACT") {
+      return {
+        status: "HOLD_RETAINED",
+        sideEffects: "NOT_EXECUTED",
+        activationAcknowledgement: "NOT_ATTEMPTED",
+        reasonCodes: [legacyConvergenceReasonCode(convergence)],
+      };
+    }
     return releaseAndReturn(input.ports, held.fenceToken, {
       status: "LEGACY_RESTORED",
       sideEffects: "NOT_EXECUTED",

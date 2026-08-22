@@ -394,10 +394,11 @@ describe("DF13 commerce cutover contract", () => {
     expect(released).toBe(true);
   });
 
-  it("rolls back and keeps LEGACY when any consumer readback is stale", async () => {
+  it("retains the fence after rollback until every consumer converges on LEGACY", async () => {
     const input = preflightInput();
     const legacy = pointer("LEGACY", 7);
     let reads = 0;
+    let released = false;
     const result = await executeCommerceCutover({
       preflight: input,
       ports: ports({
@@ -408,12 +409,16 @@ describe("DF13 commerce cutover contract", () => {
         async readConsumerAuthorities() {
           return [{ ...exactReadbacks(input.targetPointer)[0]!, source: "CACHE" as const }];
         },
+        async releaseAuthorityDependentWork() {
+          released = true;
+        },
       }),
     });
     expect(result).toMatchObject({
-      status: "LEGACY_RESTORED",
-      reasonCodes: ["DF13_CONSUMER_READBACK_INCOMPLETE"],
+      status: "HOLD_RETAINED",
+      reasonCodes: ["DF13_CONSUMER_READBACK_INCOMPLETE", "DF13_LEGACY_CONSUMER_READBACK_INCOMPLETE"],
     });
+    expect(released).toBe(false);
   });
 
   it("rolls back when the CAS activation lacks its append-only audit record", async () => {
@@ -429,6 +434,9 @@ describe("DF13 commerce cutover contract", () => {
         },
         async readActivationAudit() {
           return "MISSING";
+        },
+        async readConsumerAuthorities() {
+          return exactReadbacks(legacy);
         },
       }),
     });
@@ -473,11 +481,39 @@ describe("DF13 commerce cutover contract", () => {
           reads += 1;
           return reads === 1 ? input.targetPointer : legacy;
         },
+        async readConsumerAuthorities() {
+          return exactReadbacks(legacy);
+        },
       }),
     });
     expect(result).toMatchObject({
       status: "LEGACY_RESTORED",
       reasonCodes: ["DF13_INTERRUPTED_CUTOVER_RECOVERED"],
     });
+  });
+
+  it("retains the fence during interrupted recovery until every consumer converges on LEGACY", async () => {
+    const input = preflightInput();
+    const legacy = pointer("LEGACY", 7);
+    let released = false;
+    const result = await recoverCommerceCutoverAfterInterruption({
+      preflight: input,
+      ports: ports({
+        async readActivePointer() {
+          return legacy;
+        },
+        async readConsumerAuthorities() {
+          return [{ ...exactReadbacks(legacy)[0]!, source: "CACHE" as const }];
+        },
+        async releaseAuthorityDependentWork() {
+          released = true;
+        },
+      }),
+    });
+    expect(result).toMatchObject({
+      status: "HOLD_RETAINED",
+      reasonCodes: ["DF13_LEGACY_CONSUMER_READBACK_INCOMPLETE"],
+    });
+    expect(released).toBe(false);
   });
 });
