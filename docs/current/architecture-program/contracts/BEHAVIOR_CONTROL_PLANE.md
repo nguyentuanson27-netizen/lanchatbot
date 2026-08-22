@@ -41,7 +41,9 @@ Because control-plane propagation is bounded rather than instantaneous, a direct
 3. drain or hold all eligible queued events that can observe or consume the changing authority;
 4. CAS-activate the new authority revision;
 5. keep all authority-dependent work held through the propagation interval until every relevant authority consumer reads back the exact new revision/hash/source;
-6. release held work only after that exact readback succeeds.
+6. release held work only after that exact readback succeeds; after rollback or
+   recovery, retain the fence until every relevant consumer instead reads back
+   the exact restored `LEGACY` revision/hash/source.
 
 If quiescence cannot be proven, a relevant consumer does not converge to the exact revision within the reviewed bound, or readback is ambiguous, activation must abort/fail closed and remain or return to complete `LEGACY` authority.
 
@@ -58,9 +60,11 @@ The generic control-plane operator is intentionally LEGACY-only. Its generic
 CAS path must reject a COMMERCE target: the only permitted future COMMERCE
 writer is a dedicated DF13 cutover adapter that owns the full quiescent fence,
 the immutable authority-bundle identity, activation-audit reconciliation, and
-exact consumer readbacks. Defining the COMMERCE schema/version contract is not
-permission to apply its migration, introduce that adapter, or activate runtime
-authority.
+exact consumer readbacks. The pending DF13 `0035` schema artifact is outside
+the active migration directory; shared LEGACY reads and writes remain
+schema-compatible until a separately authorized release promotes and applies it.
+Defining the COMMERCE schema/version contract is not permission to promote or
+apply its migration, introduce that adapter, or activate runtime authority.
 
 Offline or controlled legacy/new comparison is verification tooling, not a live authority mode. It must not create protected side effects.
 

@@ -1,16 +1,23 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 const migration = new URL(
-  "../migrations/0035_df13_commerce_behavior_mode.up.sql",
+  "../pending-migrations/0035_df13_commerce_behavior_mode.up.sql",
   import.meta.url,
 );
 const rollback = new URL(
-  "../migrations/0035_df13_commerce_behavior_mode.down.sql",
+  "../pending-migrations/0035_df13_commerce_behavior_mode.down.sql",
   import.meta.url,
 );
+const activeMigrations = new URL("../migrations/", import.meta.url);
 
 describe("0035 DF13 Commerce behavior-mode source migration", () => {
+  it("remains a pending source artifact rather than an auto-discovered migration", async () => {
+    const activeMigrationNames = await readdir(activeMigrations);
+    expect(activeMigrationNames).not.toContain("0035_df13_commerce_behavior_mode.up.sql");
+    await expect(readFile(migration, "utf8")).resolves.toContain("authority_bundle_hash");
+  });
+
   it("binds COMMERCE authority identity into immutable version content without enabling UR state reads", async () => {
     const sql = await readFile(migration, "utf8");
     expect(sql).toContain("authority_bundle_hash");

@@ -117,14 +117,18 @@ Before activation:
 - complete `LEGACY` rollback is ready;
 - the page-scoped quiescent cutover protocol from `contracts/BEHAVIOR_CONTROL_PLANE.md` is verified.
 
-DF13 source boundary: migration `0035_df13_commerce_behavior_mode` and the
-COMMERCE version contract are source-only and must not be applied under this
-track. The existing generic behavior-mode operator remains LEGACY-only, and
-the generic version CAS rejects COMMERCE targets. A dedicated DF13 adapter must
-first wire the immutable `SalesAuthoritySnapshot` to all listed authority
-consumers, durable fence ownership, exact consumer readback, activation audit,
-and rollback before a separately authorized cutover command may exist. There
-is no operator shortcut from `LEGACY` to `COMMERCE`.
+DF13 source boundary: the pending `0035_df13_commerce_behavior_mode` artifact
+lives outside the auto-discovered active migration directory and must not be
+promoted or applied under this track. The COMMERCE version contract is
+source-only; shared LEGACY control-plane reads and version writes remain
+compatible before that schema promotion. The enabled generic behavior-mode
+operator remains LEGACY-only, and the generic version CAS rejects COMMERCE
+targets. A dedicated DF13 adapter must first bind the immutable authority
+identity (mode version, content hash, pointer revision, source, authority/state
+modes, and authority-bundle hash) to all listed authority consumers, durable
+fence ownership, exact consumer readback, activation audit, and rollback before
+a separately authorized cutover command may exist. There is no operator shortcut
+from `LEGACY` to `COMMERCE`.
 
 After explicit owner authorization, activate only on `PREPROD_TEST_PAGE` using that quiescent boundary, verify exact authority revision/hash/source readback across every relevant consumer, then release held eligible work and run the controlled critical human journeys.
 

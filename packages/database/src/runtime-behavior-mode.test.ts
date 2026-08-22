@@ -91,7 +91,27 @@ describe("PostgresRuntimeBehaviorModeStore", () => {
     expect(pointerLock).toContain("FOR UPDATE OF p");
     expect(pointerLock).not.toMatch(/FOR UPDATE\s*$/u);
     expect(statements.some((sql) => sql.includes("INSERT INTO runtime_behavior_mode_activation_audit"))).toBe(false);
+    const targetLookup = statements.find((sql) => sql.includes("FROM runtime_behavior_mode_versions"));
+    expect(targetLookup).toContain("to_jsonb(v) ->> 'authority_bundle_hash'");
+    expect(targetLookup).not.toContain("v.authority_bundle_hash");
     expect(mocks.release).toHaveBeenCalledOnce();
+  });
+
+  it("loads a LEGACY pointer without requiring the pending 0035 column", async () => {
+    mocks.poolQuery.mockResolvedValue({
+      rows: [{ ...targetRow, pointer_revision: 7, updated_by: "operator", pointer_reason: "legacy", updated_at: updatedAt }],
+      rowCount: 1,
+    });
+    const store = new PostgresRuntimeBehaviorModeStore("postgresql://test", 1);
+
+    await expect(store.loadActiveMode({ pageId, channel })).resolves.toMatchObject({
+      version: { salesAuthorityMode: "LEGACY", authorityBundleHash: null },
+      pointerRevision: 7,
+    });
+
+    const statement = String(mocks.poolQuery.mock.calls[0]?.[0]);
+    expect(statement).toContain("to_jsonb(v) ->> 'authority_bundle_hash'");
+    expect(statement).not.toContain("v.authority_bundle_hash");
   });
 
   it("rolls back stale CAS without writing the pointer", async () => {
@@ -160,6 +180,28 @@ describe("PostgresRuntimeBehaviorModeStore", () => {
       contentHash: runtimeBehaviorModeContentHash(commercePayload),
     });
     expect(String(mocks.poolQuery.mock.calls[0]?.[0])).toContain("authority_bundle_hash");
+  });
+
+  it("creates a LEGACY version without requiring the pending 0035 column", async () => {
+    mocks.poolQuery.mockResolvedValue({ rows: [targetRow], rowCount: 1 });
+    const store = new PostgresRuntimeBehaviorModeStore("postgresql://test", 1);
+
+    await expect(store.createVersion({
+      pageId,
+      channel,
+      payload,
+      actor: "operator",
+      reason: "legacy compatible source",
+      now: updatedAt,
+    })).resolves.toMatchObject({ salesAuthorityMode: "LEGACY", authorityBundleHash: null });
+
+    const [statement, values] = mocks.poolQuery.mock.calls[0] ?? [];
+    const insertedColumns = String(statement).slice(
+      String(statement).indexOf("("),
+      String(statement).indexOf(") VALUES"),
+    );
+    expect(insertedColumns).not.toContain("authority_bundle_hash");
+    expect(values).toHaveLength(9);
   });
 
   it("requires the dedicated fenced workflow to activate a stored COMMERCE version", async () => {

@@ -111,7 +111,8 @@ export class PostgresRuntimeBehaviorModeStore {
   async loadActiveMode(input: { readonly pageId: string; readonly channel: string }): Promise<RuntimeBehaviorModePointerRecord | null> {
     const result = await this.pool.query(
       `SELECT v.mode_version_id, v.page_id, v.channel, v.schema_version,
-               v.confirmation_mode, v.sales_authority_mode, v.state_read_mode, v.authority_bundle_hash,
+               v.confirmation_mode, v.sales_authority_mode, v.state_read_mode,
+               to_jsonb(v) ->> 'authority_bundle_hash' AS authority_bundle_hash,
               v.content_hash, v.created_by, v.reason AS version_reason, v.created_at,
               p.pointer_revision, p.updated_by, p.reason AS pointer_reason, p.updated_at
        FROM runtime_behavior_mode_pointers p
@@ -142,19 +143,39 @@ export class PostgresRuntimeBehaviorModeStore {
     }
     const now = input.now ?? new Date();
     if (Number.isNaN(now.getTime())) throw new Error("RUNTIME_BEHAVIOR_TIMESTAMP_INVALID");
-    const result = await this.pool.query(
-      `INSERT INTO runtime_behavior_mode_versions (
-         page_id, channel, schema_version, confirmation_mode, sales_authority_mode,
-         state_read_mode, authority_bundle_hash, content_hash, created_by, reason, created_at
-       ) VALUES ($1,$2,1,$3,$4,$5,$6,$7,$8,$9,$10)
-       RETURNING mode_version_id, page_id, channel, schema_version,
-         confirmation_mode, sales_authority_mode, state_read_mode, authority_bundle_hash,
-         content_hash, created_by, reason AS version_reason, created_at`,
-      [requiredText(input.pageId, "RUNTIME_BEHAVIOR_PAGE_INVALID", 64), requiredText(input.channel, "RUNTIME_BEHAVIOR_CHANNEL_INVALID", 32).toUpperCase(),
-        input.payload.confirmationMode, input.payload.salesAuthorityMode, input.payload.stateReadMode,
-        authorityBundleHash, runtimeBehaviorModeContentHash(input.payload), requiredText(input.actor, "RUNTIME_BEHAVIOR_ACTOR_INVALID"),
-        requiredText(input.reason, "RUNTIME_BEHAVIOR_REASON_INVALID", 500), now],
-    );
+    const values = [
+      requiredText(input.pageId, "RUNTIME_BEHAVIOR_PAGE_INVALID", 64),
+      requiredText(input.channel, "RUNTIME_BEHAVIOR_CHANNEL_INVALID", 32).toUpperCase(),
+      input.payload.confirmationMode,
+      input.payload.salesAuthorityMode,
+      input.payload.stateReadMode,
+      runtimeBehaviorModeContentHash(input.payload),
+      requiredText(input.actor, "RUNTIME_BEHAVIOR_ACTOR_INVALID"),
+      requiredText(input.reason, "RUNTIME_BEHAVIOR_REASON_INVALID", 500),
+      now,
+    ];
+    const result = input.payload.salesAuthorityMode === "LEGACY"
+      ? await this.pool.query(
+        `INSERT INTO runtime_behavior_mode_versions (
+           page_id, channel, schema_version, confirmation_mode, sales_authority_mode,
+           state_read_mode, content_hash, created_by, reason, created_at
+         ) VALUES ($1,$2,1,$3,$4,$5,$6,$7,$8,$9)
+         RETURNING mode_version_id, page_id, channel, schema_version,
+           confirmation_mode, sales_authority_mode, state_read_mode,
+           NULL::text AS authority_bundle_hash, content_hash, created_by,
+           reason AS version_reason, created_at`,
+        values,
+      )
+      : await this.pool.query(
+        `INSERT INTO runtime_behavior_mode_versions (
+           page_id, channel, schema_version, confirmation_mode, sales_authority_mode,
+           state_read_mode, authority_bundle_hash, content_hash, created_by, reason, created_at
+         ) VALUES ($1,$2,1,$3,$4,$5,$6,$7,$8,$9,$10)
+         RETURNING mode_version_id, page_id, channel, schema_version,
+           confirmation_mode, sales_authority_mode, state_read_mode, authority_bundle_hash,
+           content_hash, created_by, reason AS version_reason, created_at`,
+        [...values.slice(0, 5), authorityBundleHash, ...values.slice(5)],
+      );
     return versionFromRow(result.rows[0] as Record<string, unknown>);
   }
 
@@ -175,11 +196,12 @@ export class PostgresRuntimeBehaviorModeStore {
       await client.query("BEGIN");
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [`${pageId}:${channel}`]);
       const targetResult = await client.query(
-        `SELECT mode_version_id, page_id, channel, schema_version, confirmation_mode,
-                sales_authority_mode, state_read_mode, authority_bundle_hash, content_hash, created_by,
-                reason AS version_reason, created_at
-         FROM runtime_behavior_mode_versions
-         WHERE mode_version_id = $1 AND page_id = $2 AND channel = $3`,
+        `SELECT v.mode_version_id, v.page_id, v.channel, v.schema_version, v.confirmation_mode,
+                v.sales_authority_mode, v.state_read_mode,
+                to_jsonb(v) ->> 'authority_bundle_hash' AS authority_bundle_hash,
+                v.content_hash, v.created_by, v.reason AS version_reason, v.created_at
+         FROM runtime_behavior_mode_versions v
+         WHERE v.mode_version_id = $1 AND v.page_id = $2 AND v.channel = $3`,
         [targetVersionId, pageId, channel],
       );
       const targetRow = targetResult.rows[0] as Record<string, unknown> | undefined;

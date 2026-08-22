@@ -7,6 +7,9 @@ Durable PostgreSQL contracts for the chatbot. No command in this package connect
 - `migrateUp` verifies SHA-256 of every already-applied migration and refuses changed history.
 - Each new migration runs in its own transaction.
 - `schema_migrations` is the authoritative applied-version list.
+- `pending-migrations/` holds source-only artifacts that `migrateUp` does not
+  discover. An owner-authorized release must explicitly promote such an
+  artifact into `migrations/` before it can be applied.
 - Migrations use `IF NOT EXISTS` where PostgreSQL supports it, while the migration ledger prevents accidental partial replay.
 - `messages` and `conversation_events` are range-partitioned on `occurred_at` and start with a default partition. Production operations should call `lana_create_history_partitions(month)` ahead of time and drain the default partition before attaching a range that already has rows.
 - `message_identities` provides global inbound/outbound idempotency because a PostgreSQL partitioned unique key must include its partition key.

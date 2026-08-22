@@ -1,5 +1,6 @@
--- DF13 source-only schema contract. Do not apply this migration without a
--- separately authorized control-plane release.
+-- Pending DF13 schema artifact. It is intentionally outside the active
+-- migration directory and must not be promoted or applied without a separately
+-- authorized control-plane release.
 --
 -- A COMMERCE pointer must identify the complete authority bundle through the
 -- immutable version content hash. UR state reads remain unavailable here.
