@@ -30,6 +30,23 @@ function pointer(mode: "LEGACY" | "V2_SHADOW" | "V2_ACTIVE" | "CLARIFY_ONLY", re
     updatedAt: baseTime,
   };
 }
+
+function commercePointer(revision = 1): RuntimeBehaviorModePointer {
+  const payload = {
+    confirmationMode: "V2_ACTIVE" as const,
+    salesAuthorityMode: "COMMERCE" as const,
+    stateReadMode: "LEGACY" as const,
+    authorityBundleHash: "a".repeat(64),
+  };
+  return {
+    ...pointer("V2_ACTIVE", revision),
+    version: {
+      ...pointer("V2_ACTIVE", revision).version,
+      ...payload,
+      contentHash: behaviorModeContentHash(payload),
+    },
+  };
+}
 class MutableSource implements RuntimeBehaviorModeSourcePort {
   value: RuntimeBehaviorModePointer | null = pointer("LEGACY");
   failure = false;
@@ -102,32 +119,50 @@ describe("RuntimeBehaviorModeResolver", () => {
     expect(await new RuntimeBehaviorModeResolver(source, { allowedPageIds: [pageId] }).resolve(input())).toMatchObject({
       confirmationMode: "CLARIFY_ONLY", source: "FAIL_SAFE",
       salesAuthorityMode: "LEGACY",
+      authorityProvenance: "COMMERCE_POINTER",
+      reasonCodes: ["RUNTIME_BEHAVIOR_LKG_EXPIRED", "RUNTIME_BEHAVIOR_COMMERCE_STALE_AUTHORITY"],
     });
   });
 
-  it("resolves an exact COMMERCE authority bundle only from the database pointer", async () => {
+  it("rejects a COMMERCE pointer unless an explicitly scoped validation-only consumer admits it", async () => {
     const source = new MutableSource();
-    const commerceBundleHash = "a".repeat(64);
-    const payload = {
-      confirmationMode: "V2_ACTIVE" as const,
-      salesAuthorityMode: "COMMERCE" as const,
-      stateReadMode: "LEGACY" as const,
-      authorityBundleHash: commerceBundleHash,
-    };
-    source.value = {
-      ...pointer("V2_ACTIVE"),
-      version: {
-        ...pointer("V2_ACTIVE").version,
-        ...payload,
-        contentHash: behaviorModeContentHash(payload),
-      },
-    };
+    source.value = commercePointer();
 
-    expect(await new RuntimeBehaviorModeResolver(source, { allowedPageIds: [pageId] }).resolve(input())).toMatchObject({
+    expect(await new RuntimeBehaviorModeResolver(source, {
+      allowedPageIds: [pageId],
+    }).resolve(input())).toMatchObject({
+      source: "FAIL_SAFE",
+      status: "REJECTED",
+      salesAuthorityMode: "LEGACY",
+      authorityProvenance: "COMMERCE_POINTER",
+      reasonCodes: ["RUNTIME_BEHAVIOR_COMMERCE_PAGE_NOT_ALLOWED"],
+    });
+
+    expect(await new RuntimeBehaviorModeResolver(source, {
+      allowedPageIds: [pageId],
+      allowedCommercePageIds: [pageId],
+    }).resolve(input())).toMatchObject({
+      source: "FAIL_SAFE",
+      status: "REJECTED",
+      salesAuthorityMode: "LEGACY",
+      authorityProvenance: "COMMERCE_POINTER",
+      reasonCodes: ["RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_UNAVAILABLE"],
+    });
+
+    expect(await new RuntimeBehaviorModeResolver(source, {
+      allowedPageIds: [pageId],
+      allowedCommercePageIds: [pageId],
+      commerceAuthorityConsumer: {
+        async admitCommerceAuthority() {
+          return { status: "ADMITTED" };
+        },
+      },
+    }).resolve(input())).toMatchObject({
       source: "DATABASE",
       status: "RESOLVED",
       salesAuthorityMode: "COMMERCE",
-      authorityBundleHash: commerceBundleHash,
+      authorityProvenance: "COMMERCE_POINTER",
+      authorityBundleHash: "a".repeat(64),
     });
   });
 
@@ -140,6 +175,78 @@ describe("RuntimeBehaviorModeResolver", () => {
     }).resolve(input())).toMatchObject({
       confirmationMode: "CLARIFY_ONLY", source: "FAIL_SAFE", auditWrite: "FAILED",
       reasonCodes: ["RUNTIME_BEHAVIOR_AUDIT_FAILED"],
+    });
+  });
+
+  it("preserves COMMERCE provenance when a validated COMMERCE resolution cannot be audited", async () => {
+    const source = new MutableSource();
+    source.value = commercePointer();
+    source.auditFailure = true;
+
+    expect(await new RuntimeBehaviorModeResolver(source, {
+      allowedPageIds: [pageId],
+      allowedCommercePageIds: [pageId],
+      commerceAuthorityConsumer: {
+        async admitCommerceAuthority() {
+          return { status: "ADMITTED" };
+        },
+      },
+    }).resolve(input())).toMatchObject({
+      confirmationMode: "CLARIFY_ONLY",
+      source: "FAIL_SAFE",
+      auditWrite: "FAILED",
+      salesAuthorityMode: "LEGACY",
+      authorityProvenance: "COMMERCE_POINTER",
+      reasonCodes: ["RUNTIME_BEHAVIOR_COMMERCE_AUDIT_FAILED", "RUNTIME_BEHAVIOR_AUDIT_FAILED"],
+    });
+  });
+
+  it("preserves COMMERCE provenance when confirmation page scope rejects an otherwise admitted COMMERCE pointer", async () => {
+    const source = new MutableSource();
+    source.value = commercePointer();
+
+    expect(await new RuntimeBehaviorModeResolver(source, {
+      allowedPageIds: [],
+      allowedCommercePageIds: [pageId],
+      commerceAuthorityConsumer: {
+        async admitCommerceAuthority() {
+          return { status: "ADMITTED" };
+        },
+      },
+    }).resolve(input())).toMatchObject({
+      confirmationMode: "CLARIFY_ONLY",
+      source: "FAIL_SAFE",
+      status: "REJECTED",
+      authorityProvenance: "COMMERCE_POINTER",
+      reasonCodes: [
+        "RUNTIME_BEHAVIOR_ACTIVE_PAGE_NOT_ALLOWED",
+        "RUNTIME_BEHAVIOR_COMMERCE_CONFIRMATION_PAGE_NOT_ALLOWED",
+      ],
+    });
+  });
+
+  it("preserves COMMERCE provenance after a last-known-good COMMERCE pointer expires", async () => {
+    const source = new MutableSource();
+    source.value = commercePointer();
+    const resolver = new RuntimeBehaviorModeResolver(source, {
+      cacheTtlMs: 100,
+      lastKnownGoodTtlMs: 300_000,
+      allowedPageIds: [pageId],
+      allowedCommercePageIds: [pageId],
+      commerceAuthorityConsumer: {
+        async admitCommerceAuthority() {
+          return { status: "ADMITTED" };
+        },
+      },
+    });
+
+    await resolver.resolve(input());
+    source.failure = true;
+    expect(await resolver.resolve(input(300_001))).toMatchObject({
+      confirmationMode: "CLARIFY_ONLY",
+      source: "FAIL_SAFE",
+      authorityProvenance: "COMMERCE_POINTER",
+      reasonCodes: ["RUNTIME_BEHAVIOR_LKG_EXPIRED", "RUNTIME_BEHAVIOR_COMMERCE_STALE_AUTHORITY"],
     });
   });
 

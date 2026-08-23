@@ -316,6 +316,7 @@ function behaviorResolution(
     resolvedAt: now.toISOString(),
     propagationMs: 0,
     auditWrite: "RECORDED",
+    authorityProvenance: "LEGACY_POINTER",
   };
 }
 

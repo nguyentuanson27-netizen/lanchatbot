@@ -47,6 +47,26 @@ export interface RuntimeBehaviorModeSourcePort {
   loadActiveMode(input: { readonly pageId: string; readonly channel: string }): Promise<RuntimeBehaviorModePointer | null>;
   recordResolution?(event: RuntimeBehaviorModeAuditEvent): Promise<void>;
 }
+export interface CommerceAuthorityConsumerPort {
+  /**
+   * Validation-only boundary for the dedicated Commerce consumer. Calling this
+   * method must not plan or execute a side effect.
+   */
+  admitCommerceAuthority(input: {
+    readonly pageId: string;
+    readonly channel: string;
+    readonly modeVersionId: string;
+    readonly contentHash: string;
+    readonly authorityBundleHash: string;
+    readonly pointerRevision: number;
+    readonly source: "DATABASE" | "CACHE";
+  }): Promise<{ readonly status: "ADMITTED" | "REJECTED" }>;
+}
+export type RuntimeBehaviorModeAuthorityProvenance =
+  | "LEGACY_POINTER"
+  | "COMMERCE_POINTER"
+  | "STARTUP_DEFAULT"
+  | "UNKNOWN";
 export interface RuntimeBehaviorModeResolution extends RuntimeBehaviorModePayload {
   readonly authorityBundleHash: string | null;
   readonly modeVersionId: string | null;
@@ -59,6 +79,11 @@ export interface RuntimeBehaviorModeResolution extends RuntimeBehaviorModePayloa
   readonly resolvedAt: string;
   readonly propagationMs: number | null;
   readonly auditWrite: "RECORDED" | "FAILED" | "NOT_CONFIGURED";
+  /**
+   * Resolver-owned origin retained even when the effective payload falls back
+   * to LEGACY fields. Consumers must not infer origin from fallback fields.
+   */
+  readonly authorityProvenance: RuntimeBehaviorModeAuthorityProvenance;
 }
 
 const FAIL_SAFE: RuntimeBehaviorModePayload = {
@@ -87,10 +112,31 @@ export function behaviorModeContentHash(payload: RuntimeBehaviorModePayload): st
 }
 interface CachedPointer { readonly pointer: RuntimeBehaviorModePointer; readonly fetchedAtMs: number; }
 
+class RuntimeBehaviorModeLoadError extends Error {
+  constructor(
+    readonly authorityProvenance: RuntimeBehaviorModeAuthorityProvenance,
+    cause: unknown,
+  ) {
+    super(cause instanceof Error ? cause.message : "RUNTIME_BEHAVIOR_LOAD_INVALID");
+  }
+}
+
+function authorityProvenanceForPointer(
+  pointer: RuntimeBehaviorModePointer | null | undefined,
+): RuntimeBehaviorModeAuthorityProvenance {
+  return pointer?.version?.salesAuthorityMode === "COMMERCE"
+    ? "COMMERCE_POINTER"
+    : pointer?.version?.salesAuthorityMode === "LEGACY"
+      ? "LEGACY_POINTER"
+      : "UNKNOWN";
+}
+
 export class RuntimeBehaviorModeResolver {
   private readonly cacheTtlMs: number;
   private readonly lastKnownGoodTtlMs: number;
   private readonly allowedPageIds: ReadonlySet<string>;
+  private readonly allowedCommercePageIds: ReadonlySet<string>;
+  private readonly commerceAuthorityConsumer: CommerceAuthorityConsumerPort | undefined;
   private readonly cache = new Map<string, CachedPointer>();
   private readonly lastKnownGood = new Map<string, CachedPointer>();
   private readonly inFlight = new Map<string, Promise<CachedPointer>>();
@@ -101,6 +147,8 @@ export class RuntimeBehaviorModeResolver {
       readonly cacheTtlMs?: number;
       readonly lastKnownGoodTtlMs?: number;
       readonly allowedPageIds?: readonly string[];
+      readonly allowedCommercePageIds?: readonly string[];
+      readonly commerceAuthorityConsumer?: CommerceAuthorityConsumerPort;
     } = {},
   ) {
     this.cacheTtlMs = options.cacheTtlMs ?? 5_000;
@@ -108,6 +156,8 @@ export class RuntimeBehaviorModeResolver {
     if (this.cacheTtlMs < 0 || this.cacheTtlMs > 5_000) throw new Error("RUNTIME_BEHAVIOR_CACHE_TTL_INVALID");
     if (this.lastKnownGoodTtlMs < 0 || this.lastKnownGoodTtlMs > 300_000) throw new Error("RUNTIME_BEHAVIOR_LKG_TTL_INVALID");
     this.allowedPageIds = new Set(options.allowedPageIds ?? []);
+    this.allowedCommercePageIds = new Set(options.allowedCommercePageIds ?? []);
+    this.commerceAuthorityConsumer = options.commerceAuthorityConsumer;
   }
 
   invalidate(pageId: string, channel: string): void {
@@ -140,26 +190,60 @@ export class RuntimeBehaviorModeResolver {
     const pending = (async () => {
       const pointer = await this.source.loadActiveMode({ pageId, channel });
       if (!pointer) throw new Error("RUNTIME_BEHAVIOR_POINTER_MISSING");
-      this.validate(pointer, pageId, channel);
-      const previous = this.lastKnownGood.get(key)?.pointer;
-      if (previous && pointer.pointerRevision < previous.pointerRevision) {
-        throw new Error("RUNTIME_BEHAVIOR_POINTER_REVISION_REGRESSION");
+      const authorityProvenance = authorityProvenanceForPointer(pointer);
+      try {
+        this.validate(pointer, pageId, channel);
+        const previous = this.lastKnownGood.get(key)?.pointer;
+        if (previous && pointer.pointerRevision < previous.pointerRevision) {
+          throw new Error("RUNTIME_BEHAVIOR_POINTER_REVISION_REGRESSION");
+        }
+        if (
+          previous
+          && pointer.pointerRevision === previous.pointerRevision
+          && (
+            pointer.version.modeVersionId !== previous.version.modeVersionId
+            || pointer.version.contentHash !== previous.version.contentHash
+          )
+        ) throw new Error("RUNTIME_BEHAVIOR_POINTER_REVISION_CONFLICT");
+        const entry = { pointer, fetchedAtMs: nowMs };
+        this.cache.set(key, entry);
+        this.lastKnownGood.set(key, entry);
+        return entry;
+      } catch (error) {
+        throw new RuntimeBehaviorModeLoadError(authorityProvenance, error);
       }
-      if (
-        previous
-        && pointer.pointerRevision === previous.pointerRevision
-        && (
-          pointer.version.modeVersionId !== previous.version.modeVersionId
-          || pointer.version.contentHash !== previous.version.contentHash
-        )
-      ) throw new Error("RUNTIME_BEHAVIOR_POINTER_REVISION_CONFLICT");
-      const entry = { pointer, fetchedAtMs: nowMs };
-      this.cache.set(key, entry);
-      this.lastKnownGood.set(key, entry);
-      return entry;
     })();
     this.inFlight.set(key, pending);
     try { return await pending; } finally { this.inFlight.delete(key); }
+  }
+
+  private async commerceRejectionReason(
+    pointer: RuntimeBehaviorModePointer,
+    source: BehaviorModeResolutionSource,
+  ): Promise<string | null> {
+    if (source !== "DATABASE" && source !== "CACHE") {
+      return "RUNTIME_BEHAVIOR_COMMERCE_STALE_AUTHORITY";
+    }
+    if (!this.allowedCommercePageIds.has(pointer.version.pageId)) {
+      return "RUNTIME_BEHAVIOR_COMMERCE_PAGE_NOT_ALLOWED";
+    }
+    if (!this.commerceAuthorityConsumer) {
+      return "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_UNAVAILABLE";
+    }
+    try {
+      const admission = await this.commerceAuthorityConsumer.admitCommerceAuthority({
+        pageId: pointer.version.pageId,
+        channel: pointer.version.channel,
+        modeVersionId: pointer.version.modeVersionId,
+        contentHash: pointer.version.contentHash,
+        authorityBundleHash: pointer.version.authorityBundleHash!,
+        pointerRevision: pointer.pointerRevision,
+        source,
+      });
+      return admission.status === "ADMITTED" ? null : "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_REJECTED";
+    } catch {
+      return "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_REJECTED";
+    }
   }
 
   private async audited(
@@ -194,10 +278,17 @@ export class RuntimeBehaviorModeResolver {
         authorityBundleHash: null,
         source: "FAIL_SAFE",
         status: "FALLBACK",
-        reasonCodes: [...resolution.reasonCodes, "RUNTIME_BEHAVIOR_AUDIT_FAILED"],
+        reasonCodes: [
+          ...resolution.reasonCodes,
+          ...(resolution.authorityProvenance === "COMMERCE_POINTER"
+            ? ["RUNTIME_BEHAVIOR_COMMERCE_AUDIT_FAILED"]
+            : []),
+          "RUNTIME_BEHAVIOR_AUDIT_FAILED",
+        ],
         pointerUpdatedAt: null,
         resolvedAt: resolution.resolvedAt,
         propagationMs: null,
+        authorityProvenance: resolution.authorityProvenance,
         auditWrite: "FAILED",
       };
     }
@@ -218,6 +309,7 @@ export class RuntimeBehaviorModeResolver {
     const key = `${input.pageId}:${channel}`;
     const cached = this.cache.get(key);
     let entry: CachedPointer | null = null;
+    let failedAuthorityProvenance: RuntimeBehaviorModeAuthorityProvenance = "UNKNOWN";
     let source: BehaviorModeResolutionSource = "DATABASE";
     let reasonCodes: readonly string[] = [];
     const cacheAgeMs = cached ? nowMs - cached.fetchedAtMs : null;
@@ -226,7 +318,10 @@ export class RuntimeBehaviorModeResolver {
       source = "CACHE";
     } else {
       try { entry = await this.load(input.pageId, channel, nowMs); }
-      catch {
+      catch (error) {
+        if (error instanceof RuntimeBehaviorModeLoadError) {
+          failedAuthorityProvenance = error.authorityProvenance;
+        }
         const lkg = this.lastKnownGood.get(key);
         const lkgAgeMs = lkg ? nowMs - lkg.fetchedAtMs : null;
         if (lkg && lkgAgeMs !== null && lkgAgeMs >= 0 && lkgAgeMs <= this.lastKnownGoodTtlMs) {
@@ -237,14 +332,42 @@ export class RuntimeBehaviorModeResolver {
       }
     }
     if (!entry) {
+      const expiredAuthorityProvenance = authorityProvenanceForPointer(this.lastKnownGood.get(key)?.pointer);
+      const authorityProvenance = expiredAuthorityProvenance === "UNKNOWN"
+        ? failedAuthorityProvenance
+        : expiredAuthorityProvenance;
       return this.audited(scoped, {
         ...FAIL_SAFE, modeVersionId: null, contentHash: null, pointerRevision: null,
         authorityBundleHash: null,
-        source: "FAIL_SAFE", status: "FALLBACK", reasonCodes: ["RUNTIME_BEHAVIOR_LKG_EXPIRED"],
+        source: "FAIL_SAFE", status: "FALLBACK", reasonCodes: [
+          "RUNTIME_BEHAVIOR_LKG_EXPIRED",
+          ...(authorityProvenance === "COMMERCE_POINTER" ? ["RUNTIME_BEHAVIOR_COMMERCE_STALE_AUTHORITY"] : []),
+        ],
         pointerUpdatedAt: null, resolvedAt: now.toISOString(), propagationMs: null,
+        authorityProvenance,
       });
     }
     const pointer = entry.pointer;
+    const authorityProvenance = authorityProvenanceForPointer(pointer);
+    if (authorityProvenance === "COMMERCE_POINTER") {
+      const commerceRejectionReason = await this.commerceRejectionReason(pointer, source);
+      if (commerceRejectionReason) {
+        return this.audited(scoped, {
+          ...FAIL_SAFE,
+          modeVersionId: pointer.version.modeVersionId,
+          contentHash: pointer.version.contentHash,
+          pointerRevision: pointer.pointerRevision,
+          authorityBundleHash: null,
+          source: "FAIL_SAFE",
+          status: "REJECTED",
+          reasonCodes: [...reasonCodes, commerceRejectionReason],
+          pointerUpdatedAt: pointer.updatedAt,
+          resolvedAt: now.toISOString(),
+          propagationMs: Math.max(0, nowMs - Date.parse(pointer.updatedAt)),
+          authorityProvenance,
+        });
+      }
+    }
     if (
       pointer.version.confirmationMode === "V2_ACTIVE"
       && !this.allowedPageIds.has(input.pageId)
@@ -257,10 +380,14 @@ export class RuntimeBehaviorModeResolver {
         authorityBundleHash: null,
         source: "FAIL_SAFE",
         status: "REJECTED",
-        reasonCodes: ["RUNTIME_BEHAVIOR_ACTIVE_PAGE_NOT_ALLOWED"],
+        reasonCodes: [
+          "RUNTIME_BEHAVIOR_ACTIVE_PAGE_NOT_ALLOWED",
+          ...(authorityProvenance === "COMMERCE_POINTER" ? ["RUNTIME_BEHAVIOR_COMMERCE_CONFIRMATION_PAGE_NOT_ALLOWED"] : []),
+        ],
         pointerUpdatedAt: pointer.updatedAt,
         resolvedAt: now.toISOString(),
         propagationMs: Math.max(0, nowMs - Date.parse(pointer.updatedAt)),
+        authorityProvenance,
       });
     }
     return this.audited(scoped, {
@@ -277,6 +404,7 @@ export class RuntimeBehaviorModeResolver {
       pointerUpdatedAt: pointer.updatedAt,
       resolvedAt: now.toISOString(),
       propagationMs: Math.max(0, nowMs - Date.parse(pointer.updatedAt)),
+      authorityProvenance,
     });
   }
 }
@@ -290,5 +418,6 @@ export function startupBehaviorModeResolution(
     modeVersionId: null, contentHash: null, pointerRevision: null,
     source: "STARTUP_DEFAULT", status: "FALLBACK", reasonCodes: ["RUNTIME_BEHAVIOR_RESOLVER_DISABLED"],
     pointerUpdatedAt: null, resolvedAt: now.toISOString(), propagationMs: null, auditWrite: "NOT_CONFIGURED",
+    authorityProvenance: "STARTUP_DEFAULT",
   };
 }
