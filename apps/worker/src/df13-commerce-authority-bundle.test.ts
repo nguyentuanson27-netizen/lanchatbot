@@ -12,6 +12,23 @@ function canonicalHash(value: unknown): string {
 }
 
 describe("DF13 Commerce authority bundle identity", () => {
+  it("freezes every collection participating in the immutable authority identity", () => {
+    expect(Object.isFrozen(DF13_COMMERCE_AUTHORITY_CONSUMERS_V1)).toBe(true);
+    expect(Object.isFrozen(
+      DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V1.authorityIndependentBypassClasses,
+    )).toBe(true);
+    expect(Object.isFrozen(DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V1)).toBe(true);
+    expect(Object.isFrozen(DF13_COMMERCE_AUTHORITY_BUNDLE_V1)).toBe(true);
+
+    const mutableBypassClasses = DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V1
+      .authorityIndependentBypassClasses as unknown as string[];
+    expect(() => {
+      mutableBypassClasses.push("UNREVIEWED_BYPASS");
+    }).toThrow(TypeError);
+    expect(DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V1.authorityIndependentBypassClasses)
+      .toEqual([]);
+  });
+
   it("binds the complete ordered consumer set into the canonical contract hash", () => {
     expect(DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V1.authorityDependentConsumers)
       .toBe(DF13_COMMERCE_AUTHORITY_CONSUMERS_V1);

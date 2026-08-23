@@ -19,6 +19,8 @@ export const DF13_COMMERCE_AUTHORITY_CONSUMERS_V1 = Object.freeze([
 export type CommerceAuthorityConsumer =
   typeof DF13_COMMERCE_AUTHORITY_CONSUMERS_V1[number];
 
+const authorityIndependentBypassClasses = Object.freeze([] as const);
+
 /** Canonical content whose exact bytes define the all-or-nothing authority identity. */
 export const DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V1 = Object.freeze({
   schemaVersion: 1 as const,
@@ -30,7 +32,7 @@ export const DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V1 = Object.freeze({
   cta: "CONTEXT_V2" as const,
   reconciliation: "COMMERCE_FINAL" as const,
   legacySalesStage: "DEMOTED_TELEMETRY_ONLY" as const,
-  authorityIndependentBypassClasses: [] as readonly [],
+  authorityIndependentBypassClasses,
 });
 
 /**
