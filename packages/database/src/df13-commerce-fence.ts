@@ -68,7 +68,10 @@ function requiredScopeId(value: string, code: string): string {
 
 function requiredUuid(value: string, code: string): string {
   if (typeof value !== "string" || !UUID_PATTERN.test(value)) throw new Error(code);
-  return value;
+  // PostgreSQL canonicalizes UUID storage/readback to lowercase. Normalize at
+  // the request boundary so a semantically identical caller spelling cannot
+  // change the re-derived identity fingerprint or strand an expired lease.
+  return value.toLowerCase();
 }
 
 function exactInboxIds(values: readonly string[]): readonly string[] {

@@ -141,6 +141,60 @@ describe("Postgres DF13 Commerce fence store", () => {
     expect(statements.some((sql) => sql.includes("INSERT INTO df13_commerce_authority_fences"))).toBe(false);
   });
 
+  it("reacquires an expired canonical fence when equivalent UUID inputs use uppercase", async () => {
+    const canonicalRequest = {
+      ...request,
+      inboxIds: [
+        "10000000-0000-4000-8000-00000000000a",
+        "10000000-0000-4000-8000-00000000000b",
+      ],
+      authority: { ...request.authority, modeVersionId: "10000000-0000-4000-8000-00000000000f" },
+    };
+    const uppercasedRequest = {
+      ...canonicalRequest,
+      inboxIds: canonicalRequest.inboxIds.map((inboxId) => inboxId.toUpperCase()),
+      authority: { ...canonicalRequest.authority, modeVersionId: canonicalRequest.authority.modeVersionId.toUpperCase() },
+    };
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes("FROM df13_commerce_authority_fences")) {
+        return rowResult([{
+          fence_id: "20000000-0000-4000-8000-000000000001",
+          epoch: "1",
+          completed_at: null,
+          lease_until: new Date("2026-08-23T00:00:00.000Z"),
+          sales_authority_mode: canonicalRequest.authority.salesAuthorityMode,
+          state_read_mode: canonicalRequest.authority.stateReadMode,
+          mode_version_id: canonicalRequest.authority.modeVersionId,
+          content_hash: canonicalRequest.authority.contentHash,
+          pointer_revision: canonicalRequest.authority.pointerRevision,
+          authority_bundle_hash: canonicalRequest.authority.authorityBundleHash,
+          authority_source: canonicalRequest.authority.source,
+          inbox_ids: canonicalRequest.inboxIds,
+          request_fingerprint: df13CommerceFenceRequestFingerprint(canonicalRequest),
+        }]);
+      }
+      if (sql.includes("FROM webhook_inbox")) {
+        return rowResult(canonicalRequest.inboxIds.map((inboxId) => ({ inbox_id: inboxId, page_id: canonicalRequest.pageId })));
+      }
+      if (sql.includes("FROM df13_commerce_authority_fence_claims")) return rowResult();
+      if (sql.includes("UPDATE df13_commerce_authority_fences")) {
+        return rowResult([{ fence_id: "20000000-0000-4000-8000-000000000001", epoch: "2" }]);
+      }
+      if (sql.includes("INSERT INTO df13_commerce_authority_fence_claims")) {
+        return rowResult(canonicalRequest.inboxIds.map((inboxId) => ({ inbox_id: inboxId })));
+      }
+      return rowResult();
+    });
+    const store = new PostgresDf13CommerceFenceStore("postgresql://test");
+
+    await expect(store.acquire(uppercasedRequest, new Date("2026-08-24T00:00:00.000Z"))).resolves.toMatchObject({
+      status: "HELD",
+      lease: { epoch: 2 },
+    });
+    const inboxRead = mocks.clientQuery.mock.calls.find(([sql]) => String(sql).includes("FROM webhook_inbox"));
+    expect(inboxRead?.[1]).toEqual([canonicalRequest.inboxIds]);
+  });
+
   it("parks a changed content identity instead of reusing the work ID with copied authority fields", async () => {
     mocks.clientQuery.mockImplementation(async (sql: string) => {
       if (sql.includes("FROM df13_commerce_authority_fences")) {
