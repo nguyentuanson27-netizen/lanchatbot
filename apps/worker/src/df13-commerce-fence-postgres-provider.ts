@@ -1,7 +1,5 @@
 import type {
   Df13CommerceFenceAcquireResult,
-  Df13CommerceFenceCompletionResult,
-  Df13CommerceFenceLease as DatabaseFenceLease,
   Df13CommerceFenceStoreRequest,
 } from "@lana/database";
 import {
@@ -18,10 +16,6 @@ import type {
 /** The minimal durable boundary; the live runner does not construct this yet. */
 export interface Df13CommerceFenceStorePort {
   acquire(request: Df13CommerceFenceStoreRequest): Promise<Df13CommerceFenceAcquireResult>;
-  complete(input: Readonly<{
-    request: Df13CommerceFenceStoreRequest;
-    lease: DatabaseFenceLease;
-  }>): Promise<Df13CommerceFenceCompletionResult>;
 }
 
 function hasExactConsumerBundle(request: Df13CommerceFenceRequest): boolean {
@@ -66,19 +60,4 @@ export class PostgresDf13CommerceFenceProvider implements Df13CommerceFenceProvi
     return this.store.acquire(mapped.request);
   }
 
-  async complete(input: Readonly<{
-    request: Df13CommerceFenceRequest;
-    lease: Df13CommerceFenceLease;
-  }>): Promise<
-    | Readonly<{ status: "COMPLETED" }>
-    | Readonly<{ status: "ACK_LOST" }>
-    | Readonly<{ status: "STALE" }>
-  > {
-    const mapped = toStoreRequest(input.request);
-    if ("reasonCode" in mapped) return { status: "STALE" };
-    return this.store.complete({
-      request: mapped.request,
-      lease: input.lease,
-    });
-  }
 }

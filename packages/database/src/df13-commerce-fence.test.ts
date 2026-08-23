@@ -16,6 +16,7 @@ import {
   df13CommerceFenceRequestFingerprint,
   PostgresDf13CommerceFenceStore,
 } from "./df13-commerce-fence.js";
+import * as databasePublicApi from "./index.js";
 
 const request = Object.freeze({
   pageId: "1198992073286645",
@@ -44,6 +45,11 @@ describe("Postgres DF13 Commerce fence store", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.connect.mockResolvedValue({ query: mocks.clientQuery, release: mocks.release });
+  });
+
+  it("does not export a free-standing completion API for authority-dependent effects", () => {
+    expect(databasePublicApi).not.toHaveProperty("PostgresDf13CommerceFenceStore");
+    expect(new PostgresDf13CommerceFenceStore("postgresql://test")).not.toHaveProperty("complete");
   });
 
   it("atomically claims every Inbox ID with a fresh opaque token and epoch", async () => {
@@ -191,18 +197,4 @@ describe("Postgres DF13 Commerce fence store", () => {
     expect(mocks.clientQuery.mock.calls.map(([sql]) => String(sql))).toContain("ROLLBACK");
   });
 
-  it("makes stale token/epoch completion ineffective without releasing another holder's claims", async () => {
-    mocks.clientQuery.mockImplementation(async (sql: string) => {
-      if (sql.includes("UPDATE df13_commerce_authority_fences")) return rowResult([], 0);
-      return rowResult();
-    });
-    const store = new PostgresDf13CommerceFenceStore("postgresql://test");
-
-    await expect(store.complete({
-      request,
-      lease: { fenceToken: "10000000-0000-4000-8000-000000000003", epoch: 3 },
-    })).resolves.toEqual({ status: "STALE" });
-    const statements = mocks.clientQuery.mock.calls.map(([sql]) => String(sql));
-    expect(statements.some((sql) => sql.includes("UPDATE df13_commerce_authority_fence_claims"))).toBe(false);
-  });
 });

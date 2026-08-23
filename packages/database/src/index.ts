@@ -1,10 +1,7 @@
 export { migrateDownOne, migrateUp, type MigrationResult } from "./migrate.js";
 export {
-  PostgresDf13CommerceFenceStore,
-  df13CommerceFenceRequestFingerprint,
   type Df13CommerceFenceAcquireResult,
   type Df13CommerceFenceAuthority,
-  type Df13CommerceFenceCompletionResult,
   type Df13CommerceFenceLease,
   type Df13CommerceFenceStoreRequest,
 } from "./df13-commerce-fence.js";

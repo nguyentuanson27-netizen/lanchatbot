@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type {
   Df13CommerceFenceAcquireResult,
-  Df13CommerceFenceCompletionResult,
-  Df13CommerceFenceLease as DatabaseFenceLease,
   Df13CommerceFenceStoreRequest,
 } from "@lana/database";
 import {
@@ -36,9 +34,6 @@ function store(overrides: Partial<Df13CommerceFenceStorePort> = {}): Df13Commerc
   return {
     async acquire(): Promise<Df13CommerceFenceAcquireResult> {
       return { status: "HELD", lease: { fenceToken: "10000000-0000-4000-8000-000000000003", epoch: 4 } };
-    },
-    async complete(): Promise<Df13CommerceFenceCompletionResult> {
-      return { status: "COMPLETED" };
     },
     ...overrides,
   };
@@ -97,28 +92,5 @@ describe("Postgres DF13 Commerce fence provider adapter", () => {
       reasonCode: "DF13_FENCE_SCOPE_INVALID",
     });
     expect(acquired).toBe(false);
-  });
-
-  it("binds completion to the identical canonical request and opaque lease", async () => {
-    let completed: { request: Df13CommerceFenceStoreRequest; lease: DatabaseFenceLease } | undefined;
-    const provider = new PostgresDf13CommerceFenceProvider(store({
-      async complete(value) {
-        completed = value;
-        return { status: "COMPLETED" };
-      },
-    }));
-    const lease = Object.freeze({ fenceToken: "10000000-0000-4000-8000-000000000003", epoch: 4 });
-
-    await expect(provider.complete({ request, lease })).resolves.toEqual({ status: "COMPLETED" });
-    expect(completed).toEqual({
-      request: {
-        pageId: request.pageId,
-        channel: request.channel,
-        workId: request.workId,
-        inboxIds: request.inboxIds,
-        authority: request.authority,
-      },
-      lease,
-    });
   });
 });

@@ -43,17 +43,13 @@ function provider(overrides: Partial<Df13CommerceFenceProvider> = {}): Df13Comme
         lease: Object.freeze({ fenceToken: "fresh-token", epoch: 3 }),
       };
     },
-    async complete() {
-      return { status: "COMPLETED" };
-    },
     ...overrides,
   };
 }
 
-describe("DF13 all-or-nothing Commerce fence dispatcher", () => {
+describe("DF13 Commerce fence admission dispatcher", () => {
   it("leaves the current LEGACY path untouched without contacting the fence provider", async () => {
     let acquired = false;
-    let executed = false;
     const result = await dispatchDf13CommerceAuthorityFence({
       assessment: { status: "LEGACY_ADMITTED" },
       provider: provider({
@@ -62,20 +58,14 @@ describe("DF13 all-or-nothing Commerce fence dispatcher", () => {
           return { status: "PARKED", reasonCode: "unexpected" };
         },
       }),
-      async execute() {
-        executed = true;
-        return { status: "COMMITTED" };
-      },
     });
 
     expect(result).toEqual({ status: "LEGACY_ADMITTED" });
     expect(acquired).toBe(false);
-    expect(executed).toBe(false);
   });
 
-  it("does not invoke a consumer when Commerce admission is deterministically blocked", async () => {
+  it("does not acquire a consumer lease when Commerce admission is deterministically blocked", async () => {
     let acquired = false;
-    let executed = false;
     const result = await dispatchDf13CommerceAuthorityFence({
       assessment: {
         status: "BLOCKED",
@@ -88,10 +78,6 @@ describe("DF13 all-or-nothing Commerce fence dispatcher", () => {
           return { status: "PARKED", reasonCode: "unexpected" };
         },
       }),
-      async execute() {
-        executed = true;
-        return { status: "COMMITTED" };
-      },
     });
 
     expect(result).toEqual({
@@ -100,13 +86,10 @@ describe("DF13 all-or-nothing Commerce fence dispatcher", () => {
       reasonCode: "DF13_FENCE_SCOPE_INVALID",
     });
     expect(acquired).toBe(false);
-    expect(executed).toBe(false);
   });
 
-  it("dispatches only after one lease atomically covers the full immutable request", async () => {
+  it("returns a held immutable request without exposing a side-effect callback or completion ACK", async () => {
     let acquiredRequest: unknown = null;
-    let executedContext: unknown = null;
-    let completedLease: unknown = null;
     const result = await dispatchDf13CommerceAuthorityFence({
       assessment: commerceAssessment,
       provider: provider({
@@ -117,25 +100,18 @@ describe("DF13 all-or-nothing Commerce fence dispatcher", () => {
             lease: Object.freeze({ fenceToken: "fresh-token", epoch: 3 }),
           };
         },
-        async complete(value) {
-          completedLease = value;
-          return { status: "COMPLETED" };
-        },
       }),
-      async execute(context) {
-        executedContext = context;
-        return { status: "COMMITTED" };
-      },
     });
 
-    expect(result).toEqual({ status: "COMMERCE_COMPLETED", epoch: 3 });
+    expect(result).toEqual({
+      status: "COMMERCE_HELD",
+      request,
+      lease: { fenceToken: "fresh-token", epoch: 3 },
+    });
     expect(acquiredRequest).toBe(request);
-    expect(executedContext).toEqual({ request, lease: { fenceToken: "fresh-token", epoch: 3 } });
-    expect(completedLease).toEqual({ request, lease: { fenceToken: "fresh-token", epoch: 3 } });
   });
 
   it("parks the full request without consuming work when any Inbox ID overlaps a live lease", async () => {
-    let executed = false;
     const result = await dispatchDf13CommerceAuthorityFence({
       assessment: commerceAssessment,
       provider: provider({
@@ -143,52 +119,26 @@ describe("DF13 all-or-nothing Commerce fence dispatcher", () => {
           return { status: "PARKED", reasonCode: "DF13_FENCE_OVERLAPPING_LEASE" };
         },
       }),
-      async execute() {
-        executed = true;
-        return { status: "COMMITTED" };
-      },
     });
 
     expect(result).toEqual({
       status: "PARKED",
       reasonCode: "DF13_FENCE_OVERLAPPING_LEASE",
     });
-    expect(executed).toBe(false);
   });
 
-  it("parks an interrupted consumer without completing, retrying, dead-lettering, or publishing", async () => {
-    let completed = false;
+  it("parks an unavailable provider without retrying, dead-lettering, or publishing", async () => {
     const result = await dispatchDf13CommerceAuthorityFence({
       assessment: commerceAssessment,
       provider: provider({
-        async complete() {
-          completed = true;
-          return { status: "COMPLETED" };
-        },
+        async acquire() { throw new Error("provider unavailable"); },
       }),
-      async execute() {
-        throw new Error("consumer crashed");
-      },
     });
 
-    expect(result).toEqual({ status: "PARKED", reasonCode: "DF13_CONSUMER_EXECUTION_UNAVAILABLE" });
-    expect(completed).toBe(false);
+    expect(result).toEqual({ status: "PARKED", reasonCode: "DF13_FENCE_PROVIDER_UNAVAILABLE" });
   });
 
-  it("does not replay a consumer after a lost completion acknowledgement", async () => {
-    let executions = 0;
-    const lostAcknowledgement = await dispatchDf13CommerceAuthorityFence({
-      assessment: commerceAssessment,
-      provider: provider({
-        async complete() {
-          return { status: "ACK_LOST" };
-        },
-      }),
-      async execute() {
-        executions += 1;
-        return { status: "COMMITTED" };
-      },
-    });
+  it("recognizes a completed replay without attempting authority-dependent work", async () => {
     const replay = await dispatchDf13CommerceAuthorityFence({
       assessment: commerceAssessment,
       provider: provider({
@@ -196,33 +146,8 @@ describe("DF13 all-or-nothing Commerce fence dispatcher", () => {
           return { status: "ALREADY_COMPLETED", epoch: 3 };
         },
       }),
-      async execute() {
-        executions += 1;
-        return { status: "COMMITTED" };
-      },
     });
 
-    expect(lostAcknowledgement).toEqual({
-      status: "PARKED",
-      reasonCode: "DF13_FENCE_COMPLETION_ACK_LOST",
-    });
     expect(replay).toEqual({ status: "COMMERCE_ALREADY_COMPLETED", epoch: 3 });
-    expect(executions).toBe(1);
-  });
-
-  it("rejects a stale completion acknowledgement without resuming authority-dependent work", async () => {
-    const result = await dispatchDf13CommerceAuthorityFence({
-      assessment: commerceAssessment,
-      provider: provider({
-        async complete() {
-          return { status: "STALE" };
-        },
-      }),
-      async execute() {
-        return { status: "COMMITTED" };
-      },
-    });
-
-    expect(result).toEqual({ status: "PARKED", reasonCode: "DF13_FENCE_COMPLETION_STALE" });
   });
 });

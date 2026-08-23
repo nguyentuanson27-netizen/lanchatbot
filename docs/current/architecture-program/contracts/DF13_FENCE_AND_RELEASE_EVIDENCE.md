@@ -9,9 +9,9 @@ Absence of proof of COMMERCE authority means the caller keeps the existing
 LEGACY path. Only a positively identified but unusable COMMERCE pointer blocks.
 
 This rule prevents a future COMMERCE gate from changing current LEGACY traffic.
-The pure fence assessment, durable provider, and dispatcher are not wired into
-`RealtimeRunner`; this source unit adds no feature flag, composition-root
-binding, or live authority consumer.
+The pure fence assessment, durable admission provider, and admission dispatcher
+are not wired into `RealtimeRunner`; this source unit adds no feature flag,
+composition-root binding, or live authority consumer.
 
 ## Pure fence assessment
 
@@ -45,10 +45,10 @@ strategy, CTA, final reconciliation, and side-effect planning. A later bypass
 requires a finite enumeration and contract tests proving independence from
 both authorities.
 
-The pure assessment does not acquire or invent a lease. The source-only
-`PostgresDf13CommerceFenceStore`, its one worker adapter, and
-`dispatchDf13CommerceAuthorityFence` together form the next dormant boundary.
-The pending `0036_df13_commerce_authority_fence` schema is intentionally outside
+The pure assessment does not acquire or invent a lease. The source-only durable
+admission store, its one worker adapter, and
+`dispatchDf13CommerceAuthorityFence` form a dormant admission boundary. The
+pending `0036_df13_commerce_authority_fence` schema is intentionally outside
 `migrateUp` discovery and is not applied by this change.
 
 The adapter rejects any direct request whose page/channel is outside
@@ -67,22 +67,26 @@ state authority modes, canonical content hash, bundle hash, source, pointer
 revision, and ordered Inbox IDs.
 
 Every held lease has a new opaque UUID token stored only as a SHA-256 hash and a
-monotonic epoch. Completion atomically requires the exact canonical request,
-token hash, epoch, and unexpired lease before it releases claims. A stale or
-lost acknowledgement is ineffective; a completed replay returns
-`ALREADY_COMPLETED` and cannot run the dispatcher consumer again. An expired
-lease may be recovered only by the same exact request and receives a new epoch,
-so a prior holder cannot complete or release it. Any provider failure, ambiguous
-completion, consumer interruption, crash/restart, or partial write parks work
-without consuming an attempt; it does not complete, retry, dead-letter, or
-publish an effect.
+monotonic epoch. An expired lease may be recovered only by the same exact
+request and receives a new epoch, so a prior holder cannot complete or release
+it. The admission path has no completion, retry, dead-letter, consumer, Inbox
+state, Outbox, or provider-delivery operation.
 
-The dispatcher is deliberately not a live side-effect executor: its `execute`
-callback is a source-level future consumer seam. A later separately reviewed
-default-off wrapper must bind actual authority-dependent commits and their
-Inbox/Outbox transaction to this durable completion boundary; it must not use
-the seam to send or publish independently. Until then no runtime path constructs
-the provider or calls the dispatcher.
+The dispatcher intentionally returns `COMMERCE_HELD` rather than accepting an
+`execute` callback or completion acknowledgement. That prevents a durable or
+external consumer effect from committing before a separate fence-completion
+transaction and then being replayed after a crash or lost acknowledgement.
+The store class is not exported from the database package, and the worker
+adapter exposes acquisition only; no current runtime path can obtain a
+free-standing completion method through this DF13 source boundary.
+
+The next default-off wrapper source unit must introduce one dedicated atomic
+transaction that owns both the complete authority-dependent durable commit and
+the exact token/epoch completion/release. It must prove that a pre-commit
+failure leaves neither consumer writes nor a completed fence, while an ambiguous
+post-commit acknowledgement replays as completed without repeating work. It
+must never use a free side-effect callback or direct send/publish operation.
+Until then no runtime path constructs the provider or calls the dispatcher.
 
 ## Release-candidate source evidence
 
@@ -150,7 +154,8 @@ authorized runtime execution can append actual rollback evidence.
 The remaining implementation order is:
 
 1. integration as a default-off wrapper whose disabled branch delegates to the
-   untouched LEGACY runner path.
+   untouched LEGACY runner path, including the dedicated atomic
+   consumer-commit/fence-completion transaction.
 
 Until both units are reviewed and a separate release/cutover is authorized,
 runtime remains `salesAuthorityMode=LEGACY`, `stateReadMode=LEGACY`.

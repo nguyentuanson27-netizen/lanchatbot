@@ -29,11 +29,6 @@ export type Df13CommerceFenceAcquireResult =
   | Readonly<{ status: "ALREADY_COMPLETED"; epoch: number }>
   | Readonly<{ status: "PARKED"; reasonCode: string }>;
 
-export type Df13CommerceFenceCompletionResult =
-  | Readonly<{ status: "COMPLETED" }>
-  | Readonly<{ status: "ACK_LOST" }>
-  | Readonly<{ status: "STALE" }>;
-
 type FenceRow = {
   fence_id: string;
   epoch: string | number;
@@ -329,69 +324,4 @@ export class PostgresDf13CommerceFenceStore {
     }
   }
 
-  async complete(input: Readonly<{
-    request: Df13CommerceFenceStoreRequest;
-    lease: Df13CommerceFenceLease;
-  }>, now = new Date()): Promise<Df13CommerceFenceCompletionResult> {
-    const request = exactRequest(input.request);
-    if (!UUID_PATTERN.test(input.lease.fenceToken) || !Number.isSafeInteger(input.lease.epoch) || input.lease.epoch < 1) {
-      throw new Error("DF13_FENCE_LEASE_INVALID");
-    }
-    if (Number.isNaN(now.getTime())) throw new Error("DF13_FENCE_TIMESTAMP_INVALID");
-    const fingerprint = fingerprintFromExactRequest(request);
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN");
-      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [
-        `${request.pageId}:${request.channel}:${request.workId}`,
-      ]);
-      const completed = await client.query<{ fence_id: string }>(
-        `UPDATE df13_commerce_authority_fences
-            SET completed_at = $1, token_hash = NULL, lease_until = NULL, updated_at = $1
-          WHERE page_id = $2 AND channel = $3 AND work_id = $4
-            AND request_fingerprint = $5
-            AND sales_authority_mode = $6 AND state_read_mode = $7
-            AND mode_version_id = $8 AND content_hash = $9
-            AND pointer_revision = $10 AND authority_bundle_hash = $11
-            AND authority_source = $12 AND inbox_ids = $13::uuid[]
-            AND epoch = $14 AND token_hash = $15
-            AND completed_at IS NULL AND lease_until >= $1
-          RETURNING fence_id`,
-        [
-          now, request.pageId, request.channel, request.workId, fingerprint,
-          request.authority.salesAuthorityMode, request.authority.stateReadMode,
-          request.authority.modeVersionId, request.authority.contentHash,
-          request.authority.pointerRevision, request.authority.authorityBundleHash,
-          request.authority.source, request.inboxIds, input.lease.epoch,
-          tokenHash(input.lease.fenceToken),
-        ],
-      );
-      const fenceId = completed.rows[0]?.fence_id;
-      if (completed.rowCount !== 1 || !fenceId) {
-        await client.query("ROLLBACK");
-        return { status: "STALE" };
-      }
-      const released = await client.query<{ inbox_id: string }>(
-        `UPDATE df13_commerce_authority_fence_claims
-            SET released_at = $3
-          WHERE fence_id = $1 AND epoch = $2 AND released_at IS NULL
-          RETURNING inbox_id`,
-        [fenceId, input.lease.epoch, now],
-      );
-      if (released.rowCount !== request.inboxIds.length
-        || new Set(released.rows.map((row) => row.inbox_id)).size !== request.inboxIds.length) {
-        throw new Error("DF13_FENCE_CLAIM_INTEGRITY_FAILURE");
-      }
-      await client.query("COMMIT");
-      return { status: "COMPLETED" };
-    } catch {
-      await rollbackQuietly(client);
-      // This deliberately makes an ambiguous post-commit acknowledgement
-      // fail closed. A replay must first observe ALREADY_COMPLETED; it never
-      // retries, dead-letters, or publishes work merely because an ACK is lost.
-      return { status: "ACK_LOST" };
-    } finally {
-      client.release();
-    }
-  }
 }
