@@ -36,6 +36,14 @@ There are no authority-independent bypass classes in this revision. An app echo
 that is recognized as this app's own message exits before it becomes a semantic
 consumer; every other RealtimeRunner batch crosses the adapter.
 
+The default `LEGACY` admission is decided before any prospective `COMMERCE`
+scope validation. It is not constrained by an adapter-only Inbox cardinality
+limit: the current native customer-burst claim can contain more rows than a
+small fixed threshold. The existing database claim's customer-burst behavior is
+outside this source unit; any future database batch bound or chunking change
+must preserve and separately prove sliding-debounce and response-group
+semantics.
+
 For COMMERCE, the future admission contract requires an exact fresh-resolved,
 audit-recorded identity. A bounded resolver cache is equivalent to the pointer
 it just validated and is therefore allowed; last-known-good, startup, stale,
@@ -66,6 +74,14 @@ fenced for recovery; it is never converted to an unfenced retry/release. These
 are required replay, lost-ACK, concurrency, and crash/restart contracts for the
 separately reviewed dispatcher/provider unit; the current boundary blocks
 before any such admission can occur.
+
+If the RealtimeRunner cannot prove that a `HELD` or `BLOCKED` admission was
+durably deferred—because the required port is absent, returns false, or
+throws—it returns the explicit nonterminal `AUTHORITY_DEFER_UNPROVEN` outcome.
+It does not complete, retry, or dead-letter the Inbox lease; the lease remains
+for expiry/recovery. This deliberately favors safety over liveness and is not a
+successful `HELD` acknowledgement. A future dispatcher/provider release must
+configure and prove the durable defer ports before it can activate COMMERCE.
 
 ## Release-candidate source evidence
 

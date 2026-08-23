@@ -96,7 +96,7 @@ function validWorkId(value: string): boolean {
 }
 
 function canonicalInboxIds(values: readonly string[]): readonly string[] | null {
-  if (values.length === 0 || values.length > 100) return null;
+  if (values.length === 0) return null;
   const normalized = [...values].sort();
   if (new Set(normalized).size !== normalized.length) return null;
   return normalized.every((value) =>
@@ -186,6 +186,11 @@ export class Df13CommerceAuthorityFenceAdapter {
     inboxIds: readonly string[];
     resolution: RuntimeBehaviorModeResolution;
   }>): Promise<Df13CommerceAuthorityFenceAdmission> {
+    // LEGACY is the default-off path and has no COMMERCE fence scope. In
+    // particular, the native customer-burst claim is not cardinality-bounded,
+    // so a current LEGACY batch must not be blocked by a prospective COMMERCE
+    // provider's scope validation.
+    if (safeLegacy(input.resolution)) return { status: "LEGACY_ADMITTED" };
     const inboxIds = canonicalInboxIds(input.inboxIds);
     const blockId = authorityBlockId({
       pageId: input.pageId,
@@ -196,7 +201,6 @@ export class Df13CommerceAuthorityFenceAdapter {
     if (!validWorkId(input.workId) || !input.pageId || !input.channel || inboxIds === null) {
       return { status: "BLOCKED", blockId, reasonCode: "DF13_FENCE_SCOPE_INVALID" };
     }
-    if (safeLegacy(input.resolution)) return { status: "LEGACY_ADMITTED" };
     const authority = commerceIdentity(input.resolution);
     if (authority === null) {
       return {

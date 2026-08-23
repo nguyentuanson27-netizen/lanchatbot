@@ -238,7 +238,15 @@ type BatchCommitStatus =
   | "SUPERSEDED"
   | "NOT_REQUESTED"
   | "INBOX_ONLY"
-  | "AUTHORITY_FENCE_HELD";
+  | "AUTHORITY_FENCE_HELD"
+  /**
+   * No durable authority defer acknowledgement was proven. The existing
+   * Inbox lease is deliberately left for expiry/recovery rather than entering
+   * generic retry/dead-letter handling.
+   */
+  | "AUTHORITY_DEFER_UNPROVEN";
+
+type AuthorityDeferralStatus = "DEFERRED" | "UNPROVEN";
 
 function activeMediaPartialResolutionPolicy(
   resolution: RuntimePolicyResolution | null,
@@ -2614,7 +2622,8 @@ export class RealtimeRunner {
       if (
         status === "COMMITTED" ||
         status === "SUPERSEDED" ||
-        status === "AUTHORITY_FENCE_HELD"
+        status === "AUTHORITY_FENCE_HELD" ||
+        status === "AUTHORITY_DEFER_UNPROVEN"
       ) return true;
       await this.completeWork(batch, status === "INBOX_ONLY");
       return true;
@@ -2742,62 +2751,52 @@ export class RealtimeRunner {
   private async deferAuthorityFencedWork(
     batch: RunnerInboundBatch,
     admission: Extract<Df13CommerceAuthorityFenceAdmission, { status: "HELD" }>,
-  ): Promise<void> {
-    if (batch.nativeBatch) {
-      if (!this.inbox.deferBatchForAuthorityFence) {
-        throw new Error("DF13_FENCE_BATCH_DEFER_PORT_REQUIRED");
+  ): Promise<AuthorityDeferralStatus> {
+    try {
+      if (batch.nativeBatch) {
+        if (!this.inbox.deferBatchForAuthorityFence) return "UNPROVEN";
+        return await this.inbox.deferBatchForAuthorityFence(
+          this.batchLease(batch),
+          admission.fenceToken,
+          admission.reasonCode,
+        ) ? "DEFERRED" : "UNPROVEN";
       }
-      if (!await this.inbox.deferBatchForAuthorityFence(
-        this.batchLease(batch),
+      const claim = batch.items[0];
+      if (!claim || !this.inbox.deferForAuthorityFence) return "UNPROVEN";
+      return await this.inbox.deferForAuthorityFence(
+        claim.inboxId,
+        claim.leaseToken,
         admission.fenceToken,
         admission.reasonCode,
-      )) {
-        throw new Error("DF13_FENCE_BATCH_DEFER_UNPROVEN");
-      }
-      return;
-    }
-    const claim = batch.items[0];
-    if (!claim || !this.inbox.deferForAuthorityFence) {
-      throw new Error("DF13_FENCE_DEFER_PORT_REQUIRED");
-    }
-    if (!await this.inbox.deferForAuthorityFence(
-      claim.inboxId,
-      claim.leaseToken,
-      admission.fenceToken,
-      admission.reasonCode,
-    )) {
-      throw new Error("DF13_FENCE_DEFER_UNPROVEN");
+      ) ? "DEFERRED" : "UNPROVEN";
+    } catch {
+      return "UNPROVEN";
     }
   }
 
   private async deferAuthorityBlockedWork(
     batch: RunnerInboundBatch,
     admission: Extract<Df13CommerceAuthorityFenceAdmission, { status: "BLOCKED" }>,
-  ): Promise<void> {
-    if (batch.nativeBatch) {
-      if (!this.inbox.deferBatchForAuthorityBlock) {
-        throw new Error("DF13_AUTHORITY_BLOCK_BATCH_DEFER_PORT_REQUIRED");
+  ): Promise<AuthorityDeferralStatus> {
+    try {
+      if (batch.nativeBatch) {
+        if (!this.inbox.deferBatchForAuthorityBlock) return "UNPROVEN";
+        return await this.inbox.deferBatchForAuthorityBlock(
+          this.batchLease(batch),
+          admission.blockId,
+          admission.reasonCode,
+        ) ? "DEFERRED" : "UNPROVEN";
       }
-      if (!await this.inbox.deferBatchForAuthorityBlock(
-        this.batchLease(batch),
+      const claim = batch.items[0];
+      if (!claim || !this.inbox.deferForAuthorityBlock) return "UNPROVEN";
+      return await this.inbox.deferForAuthorityBlock(
+        claim.inboxId,
+        claim.leaseToken,
         admission.blockId,
         admission.reasonCode,
-      )) {
-        throw new Error("DF13_AUTHORITY_BLOCK_BATCH_DEFER_UNPROVEN");
-      }
-      return;
-    }
-    const claim = batch.items[0];
-    if (!claim || !this.inbox.deferForAuthorityBlock) {
-      throw new Error("DF13_AUTHORITY_BLOCK_DEFER_PORT_REQUIRED");
-    }
-    if (!await this.inbox.deferForAuthorityBlock(
-      claim.inboxId,
-      claim.leaseToken,
-      admission.blockId,
-      admission.reasonCode,
-    )) {
-      throw new Error("DF13_AUTHORITY_BLOCK_DEFER_UNPROVEN");
+      ) ? "DEFERRED" : "UNPROVEN";
+    } catch {
+      return "UNPROVEN";
     }
   }
 
@@ -2895,12 +2894,14 @@ export class RealtimeRunner {
       resolution: behaviorModeResolution,
     });
     if (authorityAdmission.status === "HELD") {
-      await this.deferAuthorityFencedWork(batch, authorityAdmission);
-      return "AUTHORITY_FENCE_HELD";
+      return await this.deferAuthorityFencedWork(batch, authorityAdmission) === "DEFERRED"
+        ? "AUTHORITY_FENCE_HELD"
+        : "AUTHORITY_DEFER_UNPROVEN";
     }
     if (authorityAdmission.status === "BLOCKED") {
-      await this.deferAuthorityBlockedWork(batch, authorityAdmission);
-      return "AUTHORITY_FENCE_HELD";
+      return await this.deferAuthorityBlockedWork(batch, authorityAdmission) === "DEFERRED"
+        ? "AUTHORITY_FENCE_HELD"
+        : "AUTHORITY_DEFER_UNPROVEN";
     }
     const record = await this.runtime.loadOrCreate(
       claim.pageId,

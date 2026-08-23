@@ -74,6 +74,43 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
     })).resolves.toEqual({ status: "LEGACY_ADMITTED" });
   });
 
+  it("admits a LEGACY customer burst larger than the former adapter-only cap", async () => {
+    const adapter = new Df13CommerceAuthorityFenceAdapter();
+    const inboxIds = Array.from({ length: 101 }, (_value, index) => `inbox-${index + 1}`);
+
+    await expect(adapter.admit({
+      pageId,
+      channel: "MESSENGER",
+      workId: "legacy-burst-101",
+      inboxIds,
+      resolution: resolution("LEGACY", {
+        source: "STARTUP_DEFAULT",
+        status: "FALLBACK",
+        auditWrite: "NOT_CONFIGURED",
+        modeVersionId: null,
+        contentHash: null,
+        pointerRevision: null,
+        pointerUpdatedAt: null,
+      }),
+    })).resolves.toEqual({ status: "LEGACY_ADMITTED" });
+  });
+
+  it("does not misclassify a large COMMERCE burst as an invalid fence scope", async () => {
+    const adapter = new Df13CommerceAuthorityFenceAdapter(fencePort());
+    const inboxIds = Array.from({ length: 101 }, (_value, index) => `inbox-${index + 1}`);
+
+    await expect(adapter.admit({
+      pageId,
+      channel: "MESSENGER",
+      workId: "commerce-burst-101",
+      inboxIds,
+      resolution: resolution("COMMERCE"),
+    })).resolves.toMatchObject({
+      status: "BLOCKED",
+      reasonCode: "DF13_COMMERCE_CONSUMER_DISPATCHER_REQUIRED",
+    });
+  });
+
   it("fails closed before every authority consumer when COMMERCE has no durable fence provider", async () => {
     const adapter = new Df13CommerceAuthorityFenceAdapter();
 
@@ -219,6 +256,96 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
       "DF13_COMMERCE_CONSUMER_DISPATCHER_REQUIRED",
     );
     expect(retry).not.toHaveBeenCalled();
+    expect(loadOrCreate).not.toHaveBeenCalled();
+  });
+
+  it("retains a native authority-blocked lease when durable deferral is unavailable", async () => {
+    const retryBatch = vi.fn(async () => true);
+    const failBatchPermanent = vi.fn(async () => true);
+    const completeBatch = vi.fn(async () => true);
+    const loadOrCreate = vi.fn();
+    const inboxId = "inbox-authority-blocked";
+    const batch = {
+      pageId,
+      conversationHash: "customer-hash",
+      generation: 9,
+      leaseToken: "lease-authority-blocked",
+      inboxIds: [inboxId],
+      evaluationGroupId: "authority-blocked-batch",
+      eventKind: "CUSTOMER" as const,
+      firstReceiveSequence: 1,
+      lastReceiveSequence: 1,
+      attemptCount: 5,
+      items: [{
+        inboxId,
+        pageId,
+        eventKey: "meta:1198992073286645:message:authority-blocked",
+        conversationHash: "customer-hash",
+        occurredAt: new Date("2026-08-22T00:00:00.000Z"),
+        receivedAt: new Date("2026-08-22T00:00:00.000Z"),
+        receiveSequence: 1,
+        attemptCount: 5,
+        leaseToken: "lease-authority-blocked",
+        envelope: {
+          schemaVersion: 1 as const,
+          customerSendEnabled: false as const,
+          routing: {
+            mode: "APP" as const,
+            routingOwner: "APP" as const,
+            evaluationOnly: false,
+            reason: "APP_OWNS" as const,
+          },
+          message: {
+            schemaVersion: 1 as const,
+            traceId: "10000000-0000-4000-8000-000000000001",
+            eventKey: "meta:1198992073286645:message:authority-blocked",
+            pageId,
+            messageId: "authority-blocked",
+            senderId: "customer-1",
+            conversationId: "customer-hash",
+            occurredAt: "2026-08-22T00:00:00.000Z",
+            isEcho: false,
+            appId: null,
+            text: "cho chị xem mẫu này",
+            attachments: [],
+          },
+        },
+      }],
+    };
+    const runner = new RealtimeRunner(
+      {
+        claimNext: vi.fn(async () => null),
+        claimNextBatch: vi.fn(async () => batch),
+        complete: vi.fn(async () => true),
+        completeBatch,
+        retry: vi.fn(async () => true),
+        retryBatch,
+        failPermanent: vi.fn(async () => true),
+        failBatchPermanent,
+      },
+      {
+        loadOrCreate,
+        linkProviderConversation: vi.fn(async () => undefined),
+      } as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      { workerId: "worker-1", mode: "LIVE", sendEnabled: false },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { resolve: vi.fn(async () => resolution("COMMERCE")) },
+      new Df13CommerceAuthorityFenceAdapter(),
+    );
+
+    await expect(runner.processOne()).resolves.toBe(true);
+    expect(completeBatch).not.toHaveBeenCalled();
+    expect(retryBatch).not.toHaveBeenCalled();
+    expect(failBatchPermanent).not.toHaveBeenCalled();
     expect(loadOrCreate).not.toHaveBeenCalled();
   });
 });
