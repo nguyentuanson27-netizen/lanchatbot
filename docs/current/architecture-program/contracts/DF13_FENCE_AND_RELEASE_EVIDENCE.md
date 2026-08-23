@@ -78,10 +78,13 @@ before any such admission can occur.
 If the RealtimeRunner cannot prove that a `HELD` or `BLOCKED` admission was
 durably deferred—because the required port is absent, returns false, or
 throws—it returns the explicit nonterminal `AUTHORITY_DEFER_UNPROVEN` outcome.
-It does not complete, retry, or dead-letter the Inbox lease; the lease remains
-for expiry/recovery. This deliberately favors safety over liveness and is not a
-successful `HELD` acknowledgement. A future dispatcher/provider release must
-configure and prove the durable defer ports before it can activate COMMERCE.
+If it cannot prove a post-semantic `COMMERCE_ADMITTED` fence completion, it
+returns `AUTHORITY_FENCE_COMPLETION_UNPROVEN`. Neither outcome completes,
+retries, or dead-letters the Inbox lease; the lease remains for expiry/recovery.
+This deliberately favors safety over liveness and is not a successful `HELD` or
+completion acknowledgement. A future dispatcher/provider release must
+configure and prove the durable defer and completion ports before it can
+activate COMMERCE.
 
 ## Release-candidate source evidence
 

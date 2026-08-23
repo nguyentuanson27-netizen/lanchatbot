@@ -243,10 +243,17 @@ type BatchCommitStatus =
    * No durable authority defer acknowledgement was proven. The existing
    * Inbox lease is deliberately left for expiry/recovery rather than entering
    * generic retry/dead-letter handling.
+  */
+  | "AUTHORITY_DEFER_UNPROVEN"
+  /**
+   * Semantic work completed, but the durable fence-release acknowledgement is
+   * unknown. The Inbox lease remains fenced for recovery rather than entering
+   * generic retry/dead-letter handling.
    */
-  | "AUTHORITY_DEFER_UNPROVEN";
+  | "AUTHORITY_FENCE_COMPLETION_UNPROVEN";
 
 type AuthorityDeferralStatus = "DEFERRED" | "UNPROVEN";
+type AuthorityCompletionStatus = "COMPLETED" | "UNPROVEN";
 
 function activeMediaPartialResolutionPolicy(
   resolution: RuntimePolicyResolution | null,
@@ -2623,7 +2630,8 @@ export class RealtimeRunner {
         status === "COMMITTED" ||
         status === "SUPERSEDED" ||
         status === "AUTHORITY_FENCE_HELD" ||
-        status === "AUTHORITY_DEFER_UNPROVEN"
+        status === "AUTHORITY_DEFER_UNPROVEN" ||
+        status === "AUTHORITY_FENCE_COMPLETION_UNPROVEN"
       ) return true;
       await this.completeWork(batch, status === "INBOX_ONLY");
       return true;
@@ -2802,8 +2810,22 @@ export class RealtimeRunner {
 
   private async completeAuthorityFencedWork(
     admission: Df13CommerceAuthorityFenceAdmission,
-  ): Promise<void> {
-    await this.commerceAuthorityFence.complete(admission);
+  ): Promise<AuthorityCompletionStatus> {
+    try {
+      await this.commerceAuthorityFence.complete(admission);
+      return "COMPLETED";
+    } catch {
+      return "UNPROVEN";
+    }
+  }
+
+  private async finishAuthorityFencedWork(
+    admission: Df13CommerceAuthorityFenceAdmission,
+    status: BatchCommitStatus,
+  ): Promise<BatchCommitStatus> {
+    return await this.completeAuthorityFencedWork(admission) === "COMPLETED"
+      ? status
+      : "AUTHORITY_FENCE_COMPLETION_UNPROVEN";
   }
 
   /**
@@ -3160,8 +3182,7 @@ export class RealtimeRunner {
         now,
       });
       if (applied.status !== "APPLIED") {
-        await this.completeAuthorityFencedWork(authorityAdmission);
-        return "INBOX_ONLY";
+        return this.finishAuthorityFencedWork(authorityAdmission, "INBOX_ONLY");
       }
       const result = await this.runtime.commit(
         {
@@ -3174,8 +3195,10 @@ export class RealtimeRunner {
         },
         now,
       );
-      await this.completeAuthorityFencedWork(authorityAdmission);
-      return batchCommitStatus(result);
+      return this.finishAuthorityFencedWork(
+        authorityAdmission,
+        batchCommitStatus(result),
+      );
     }
     const mediaPartialResolutionPolicy =
       activeMediaPartialResolutionPolicy(policyResolution);
@@ -3310,8 +3333,7 @@ export class RealtimeRunner {
       now,
     });
     if (applied.status !== "APPLIED") {
-      await this.completeAuthorityFencedWork(authorityAdmission);
-      return "INBOX_ONLY";
+      return this.finishAuthorityFencedWork(authorityAdmission, "INBOX_ONLY");
     }
 
     let nextState = applied.state;
@@ -4074,8 +4096,10 @@ export class RealtimeRunner {
             },
             now,
           );
-          await this.completeAuthorityFencedWork(authorityAdmission);
-          return batchCommitStatus(result);
+          return this.finishAuthorityFencedWork(
+            authorityAdmission,
+            batchCommitStatus(result),
+          );
         }
         if (imageRequest && resolvedProduct) {
           proposal = requestedImagesProposal(
@@ -5713,8 +5737,10 @@ export class RealtimeRunner {
       },
       new Date(),
     );
-    await this.completeAuthorityFencedWork(authorityAdmission);
-    return batchCommitStatus(result);
+    return this.finishAuthorityFencedWork(
+      authorityAdmission,
+      batchCommitStatus(result),
+    );
   }
 
   private emptyResolution(): ProductResolution {

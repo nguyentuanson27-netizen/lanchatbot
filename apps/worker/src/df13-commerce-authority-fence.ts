@@ -158,7 +158,8 @@ function commerceIdentity(
 }
 
 function safeLegacy(resolution: RuntimeBehaviorModeResolution): boolean {
-  return resolution.salesAuthorityMode === "LEGACY" &&
+  return resolution.status !== "REJECTED" &&
+    resolution.salesAuthorityMode === "LEGACY" &&
     resolution.stateReadMode === "LEGACY" &&
     resolution.authorityBundleHash === null;
 }
