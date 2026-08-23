@@ -1,6 +1,10 @@
 import type {
   Df13CommerceFenceAcquireResult,
+  Df13CommerceFenceCommitInput,
+  Df13CommerceFenceCommitResult,
+  Df13CommerceRuntimeCommitPort,
   Df13CommerceFenceStoreRequest,
+  RealtimeCommitInput,
 } from "@lana/database";
 import {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
@@ -9,6 +13,9 @@ import {
 import type { Df13CommerceFenceRequest } from "./df13-commerce-authority-fence.js";
 import { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
 import type {
+  Df13CommerceFenceBoundCommitter,
+} from "./df13-commerce-default-off-consumer.js";
+import type {
   Df13CommerceFenceLease,
   Df13CommerceFenceProvider,
 } from "./df13-commerce-fence-dispatcher.js";
@@ -16,6 +23,14 @@ import type {
 /** The minimal durable boundary; the live runner does not construct this yet. */
 export interface Df13CommerceFenceStorePort {
   acquire(request: Df13CommerceFenceStoreRequest): Promise<Df13CommerceFenceAcquireResult>;
+}
+
+/** The durable atomic completion API remains separate from admission. */
+export interface Df13CommerceAtomicFenceStorePort {
+  commitAuthorityDependentWork<TState, TSalesState = unknown>(
+    input: Df13CommerceFenceCommitInput<TState, TSalesState>,
+    runtime: Df13CommerceRuntimeCommitPort,
+  ): Promise<Df13CommerceFenceCommitResult>;
 }
 
 function hasExactConsumerBundle(request: Df13CommerceFenceRequest): boolean {
@@ -60,4 +75,32 @@ export class PostgresDf13CommerceFenceProvider implements Df13CommerceFenceProvi
     return this.store.acquire(mapped.request);
   }
 
+}
+
+/**
+ * Real durable completion adapter for the default-off consumer wrapper. It
+ * repeats both bundle and scope validation at the transaction boundary, then
+ * delegates only to the database API that owns runtime write + completion.
+ * No live composition root constructs this source-only adapter yet.
+ */
+export class PostgresDf13CommerceFenceBoundCommitter<TState, TSalesState = unknown>
+implements Df13CommerceFenceBoundCommitter<TState, TSalesState> {
+  constructor(
+    private readonly store: Df13CommerceAtomicFenceStorePort,
+    private readonly runtime: Df13CommerceRuntimeCommitPort,
+  ) {}
+
+  async commitAuthorityDependentWork(input: Readonly<{
+    request: Df13CommerceFenceRequest;
+    lease: Df13CommerceFenceLease;
+    runtimeCommit: RealtimeCommitInput<TState, TSalesState>;
+  }>): Promise<Df13CommerceFenceCommitResult> {
+    const mapped = toStoreRequest(input.request);
+    if ("reasonCode" in mapped) return { status: "PARKED", reasonCode: mapped.reasonCode };
+    return this.store.commitAuthorityDependentWork({
+      request: mapped.request,
+      lease: input.lease,
+      runtimeCommit: input.runtimeCommit,
+    }, this.runtime);
+  }
 }

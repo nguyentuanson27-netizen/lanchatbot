@@ -9,9 +9,13 @@ Absence of proof of COMMERCE authority means the caller keeps the existing
 LEGACY path. Only a positively identified but unusable COMMERCE pointer blocks.
 
 This rule prevents a future COMMERCE gate from changing current LEGACY traffic.
-The pure fence assessment, durable admission provider, and admission dispatcher
-are not wired into `RealtimeRunner`; this source unit adds no feature flag,
-composition-root binding, or live authority consumer.
+The pure fence assessment, durable admission provider, admission dispatcher,
+and default-off consumer adapter are not wired into `RealtimeRunner`; this
+source unit adds no feature flag, composition-root binding, or live authority
+consumer. The adapter is also the concrete resolver-facing Commerce consumer:
+without separate authorization for the exact page/channel/version/content/
+bundle/revision/source identity it rejects a COMMERCE pointer, rather than
+letting resolution stand on a copied hash or an enable flag.
 
 ## Pure fence assessment
 
@@ -73,20 +77,29 @@ it. The admission path has no completion, retry, dead-letter, consumer, Inbox
 state, Outbox, or provider-delivery operation.
 
 The dispatcher intentionally returns `COMMERCE_HELD` rather than accepting an
-`execute` callback or completion acknowledgement. That prevents a durable or
-external consumer effect from committing before a separate fence-completion
-transaction and then being replayed after a crash or lost acknowledgement.
-The store class is not exported from the database package, and the worker
-adapter exposes acquisition only; no current runtime path can obtain a
-free-standing completion method through this DF13 source boundary.
+`execute` callback or completion acknowledgement. The default-off consumer
+adapter owns the only subsequent source path: when no separate activation
+authority is supplied it delegates directly to the untouched LEGACY consumer;
+a future composition must first admit the exact immutable request (not a
+boolean flag) before it derives a durable runtime plan. That plan is derived
+only after the request is held and passes the same immutable request/token/
+epoch to the dedicated atomic committer. The plan interface contains durable
+state/Outbox input only; it has no direct send, publish, retry, dead-letter, or
+free side-effect callback.
 
-The next default-off wrapper source unit must introduce one dedicated atomic
-transaction that owns both the complete authority-dependent durable commit and
-the exact token/epoch completion/release. It must prove that a pre-commit
-failure leaves neither consumer writes nor a completed fence, while an ambiguous
-post-commit acknowledgement replays as completed without repeating work. It
-must never use a free side-effect callback or direct send/publish operation.
-Until then no runtime path constructs the provider or calls the dispatcher.
+The atomic committer re-checks the fixed scope and whole authority-consumer
+bundle at its own boundary. Its database operation owns the existing durable
+runtime state/Outbox commit, exact Inbox-claim release, and fence completion in
+one transaction. A pre-commit failure rolls all three back; a stale/mismatched
+lease, malformed runtime Inbox set, partial release, or completion-write
+failure fails closed. Lease validity uses the database clock and the final
+completion CAS proves that the lease is still live; expiry while durable work
+is in flight rolls the whole transaction back. If the caller loses the
+post-commit acknowledgement, the next acquisition observes `ALREADY_COMPLETED`
+before any plan is re-derived.
+The store class remains unexported from `@lana/database`; no current runtime
+path constructs either adapter, supplies an activation authority, or calls the
+dispatcher/committer.
 
 ## Release-candidate source evidence
 
@@ -149,16 +162,18 @@ no quiescence, pointer read, activation, rollback, or release operation.
 This source tooling records rollback as `REQUIRED_NOT_EXECUTED`. Only separately
 authorized runtime execution can append actual rollback evidence.
 
-## Remaining source units and hard stops
+## Source completion and hard stops
 
-The remaining implementation order is:
+The source-level default-off wrapper and dedicated atomic
+consumer-commit/fence-completion transaction are complete. This is not a
+runtime integration, release candidate, migration application, deployment,
+canary, cutover, or activation authorization. Operational acceptance must still
+review the exact release candidate, migration state, quiescent cutover evidence,
+consumer readbacks, activation audit, rollback evidence, and controlled human
+journeys under separately approved commands.
 
-1. integration as a default-off wrapper whose disabled branch delegates to the
-   untouched LEGACY runner path, including the dedicated atomic
-   consumer-commit/fence-completion transaction.
-
-Until both units are reviewed and a separate release/cutover is authorized,
-runtime remains `salesAuthorityMode=LEGACY`, `stateReadMode=LEGACY`.
+Until that work is separately authorized and accepted, runtime remains
+`salesAuthorityMode=LEGACY`, `stateReadMode=LEGACY`.
 
 BF-03 remains foundation-only/non-activatable, BF-04 remains `PARTIAL /
 KNOWN_GAP`, and BF-10 natural-terminal evidence remains pending. This contract

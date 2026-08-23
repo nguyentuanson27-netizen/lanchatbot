@@ -2,7 +2,10 @@ export { migrateDownOne, migrateUp, type MigrationResult } from "./migrate.js";
 export {
   type Df13CommerceFenceAcquireResult,
   type Df13CommerceFenceAuthority,
+  type Df13CommerceFenceCommitInput,
+  type Df13CommerceFenceCommitResult,
   type Df13CommerceFenceLease,
+  type Df13CommerceRuntimeCommitPort,
   type Df13CommerceFenceStoreRequest,
 } from "./df13-commerce-fence.js";
 export {

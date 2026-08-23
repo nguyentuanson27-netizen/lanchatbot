@@ -1,5 +1,9 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
+import type {
+  RealtimeCommitInput,
+  RealtimeCommitResult,
+} from "./realtime-runtime.js";
 
 export type Df13CommerceFenceAuthority = Readonly<{
   salesAuthorityMode: "COMMERCE";
@@ -29,6 +33,30 @@ export type Df13CommerceFenceAcquireResult =
   | Readonly<{ status: "ALREADY_COMPLETED"; epoch: number }>
   | Readonly<{ status: "PARKED"; reasonCode: string }>;
 
+/** Durable-only runtime writer usable inside a caller-owned transaction. */
+export interface Df13CommerceRuntimeCommitPort {
+  commitWithinTransaction<TState, TSalesState = unknown>(
+    client: PoolClient,
+    input: RealtimeCommitInput<TState, TSalesState>,
+    now?: Date,
+  ): Promise<RealtimeCommitResult>;
+}
+
+export type Df13CommerceFenceCommitInput<TState, TSalesState = unknown> = Readonly<{
+  request: Df13CommerceFenceStoreRequest;
+  lease: Df13CommerceFenceLease;
+  runtimeCommit: RealtimeCommitInput<TState, TSalesState>;
+}>;
+
+export type Df13CommerceFenceCommitResult =
+  | Readonly<{
+    status: "COMPLETED";
+    epoch: number;
+    runtime: RealtimeCommitResult;
+  }>
+  | Readonly<{ status: "ALREADY_COMPLETED"; epoch: number }>
+  | Readonly<{ status: "PARKED"; reasonCode: string }>;
+
 type FenceRow = {
   fence_id: string;
   epoch: string | number;
@@ -43,6 +71,7 @@ type FenceRow = {
   authority_bundle_hash: string;
   authority_source: string;
   inbox_ids: readonly string[];
+  token_hash?: string | null;
 };
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
@@ -176,6 +205,31 @@ function futureLease(value: Date | string | null, now: Date): boolean {
   return Number.isFinite(expiry) && expiry > now.getTime();
 }
 
+function hasSameInboxIds(
+  values: readonly string[],
+  expected: readonly string[],
+): boolean {
+  if (values.length !== expected.length) return false;
+  try {
+    const normalized = values
+      .map((value) => requiredUuid(value, "DF13_FENCE_RUNTIME_INBOX_BINDING_INVALID"))
+      .sort();
+    return new Set(normalized).size === normalized.length
+      && normalized.every((value, index) => value === expected[index]);
+  } catch {
+    return false;
+  }
+}
+
+function runtimeCommitMatchesFence<TState, TSalesState>(
+  request: Df13CommerceFenceStoreRequest,
+  runtimeCommit: RealtimeCommitInput<TState, TSalesState>,
+): boolean {
+  return runtimeCommit.pageId === request.pageId
+    && runtimeCommit.inboxBatchGuard !== undefined
+    && hasSameInboxIds(runtimeCommit.inboxBatchGuard.inboxIds, request.inboxIds);
+}
+
 async function rollbackQuietly(client: PoolClient): Promise<void> {
   try { await client.query("ROLLBACK"); } catch { /* preserve the original failure */ }
 }
@@ -183,8 +237,10 @@ async function rollbackQuietly(client: PoolClient): Promise<void> {
 /**
  * Dormant, source-level provider for the future DF13 COMMERCE boundary.
  * Its pending schema is deliberately outside `migrateUp` discovery.  It is
- * not constructed by the live runner and never mutates Inbox status, retry
- * counters, dead-letter state, Outbox, or provider-delivery state.
+ * not constructed by the live runner. Admission never mutates Inbox status,
+ * retry counters, dead-letter state, Outbox, or provider-delivery state;
+ * fenced completion can write only the existing durable state/Outbox plan in
+ * its one transaction and never sends or publishes a provider effect.
  */
 export class PostgresDf13CommerceFenceStore {
   private readonly pool: Pool;
@@ -207,7 +263,7 @@ export class PostgresDf13CommerceFenceStore {
       const existingResult = await client.query<FenceRow>(
         `SELECT fence_id, epoch, completed_at, lease_until, request_fingerprint,
                 sales_authority_mode, state_read_mode, mode_version_id, content_hash, pointer_revision,
-                authority_bundle_hash, authority_source, inbox_ids
+                authority_bundle_hash, authority_source, inbox_ids, token_hash
            FROM df13_commerce_authority_fences
           WHERE page_id = $1 AND channel = $2 AND work_id = $3
           FOR UPDATE`,
@@ -321,6 +377,113 @@ export class PostgresDf13CommerceFenceStore {
         && (error as { constraint?: string }).constraint === "df13_commerce_authority_fence_claims_live_inbox_uq") {
         return { status: "PARKED", reasonCode: "DF13_FENCE_OVERLAPPING_LEASE" };
       }
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * The only completion path for a held DF13 request. It runs the existing
+   * durable runtime commit, releases every exact Inbox claim, and records
+   * fence completion in one database transaction. It never sends or publishes
+   * a provider effect; any customer-facing action remains a durable Outbox row.
+   */
+  async commitAuthorityDependentWork<TState, TSalesState = unknown>(
+    input: Df13CommerceFenceCommitInput<TState, TSalesState>,
+    runtime: Df13CommerceRuntimeCommitPort,
+    runtimeNow = new Date(),
+  ): Promise<Df13CommerceFenceCommitResult> {
+    const request = exactRequest(input.request);
+    const epoch = finiteEpoch(input.lease.epoch);
+    const fenceToken = requiredUuid(input.lease.fenceToken, "DF13_FENCE_TOKEN_INVALID");
+    if (epoch === null || Number.isNaN(runtimeNow.getTime())) {
+      throw new Error("DF13_FENCE_COMPLETION_INPUT_INVALID");
+    }
+    const fingerprint = fingerprintFromExactRequest(request);
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [
+        `${request.pageId}:${request.channel}:${request.workId}`,
+      ]);
+      const databaseClock = await client.query<{ now: Date | string }>(
+        "SELECT clock_timestamp() AS now",
+      );
+      const fenceNow = new Date(databaseClock.rows[0]?.now ?? Number.NaN);
+      if (Number.isNaN(fenceNow.getTime())) throw new Error("DF13_FENCE_DATABASE_CLOCK_INVALID");
+      const existingResult = await client.query<FenceRow>(
+        `SELECT fence_id, epoch, completed_at, lease_until, request_fingerprint,
+                sales_authority_mode, state_read_mode, mode_version_id, content_hash, pointer_revision,
+                authority_bundle_hash, authority_source, inbox_ids, token_hash
+           FROM df13_commerce_authority_fences
+          WHERE page_id = $1 AND channel = $2 AND work_id = $3
+          FOR UPDATE`,
+        [request.pageId, request.channel, request.workId],
+      );
+      const existing = existingResult.rows[0];
+      if (!existing) {
+        await client.query("ROLLBACK");
+        return { status: "PARKED", reasonCode: "DF13_FENCE_LEASE_MISSING" };
+      }
+      if (!matchingFenceRow(existing, request, fingerprint)) {
+        await client.query("ROLLBACK");
+        return { status: "PARKED", reasonCode: "DF13_FENCE_IDENTITY_MISMATCH" };
+      }
+      const storedEpoch = finiteEpoch(existing.epoch);
+      if (storedEpoch === null) throw new Error("DF13_FENCE_EPOCH_CORRUPT");
+      if (existing.completed_at != null) {
+        await client.query("COMMIT");
+        return { status: "ALREADY_COMPLETED", epoch: storedEpoch };
+      }
+      if (
+        storedEpoch !== epoch ||
+        !futureLease(existing.lease_until, fenceNow) ||
+        existing.token_hash !== tokenHash(fenceToken)
+      ) {
+        await client.query("ROLLBACK");
+        return { status: "PARKED", reasonCode: "DF13_FENCE_LEASE_STALE" };
+      }
+      if (!runtimeCommitMatchesFence(request, input.runtimeCommit)) {
+        await client.query("ROLLBACK");
+        return { status: "PARKED", reasonCode: "DF13_FENCE_RUNTIME_INBOX_BINDING_INVALID" };
+      }
+
+      const runtimeResult = await runtime.commitWithinTransaction(
+        client,
+        input.runtimeCommit,
+        runtimeNow,
+      );
+      if (!runtimeResult.stateCommitted || runtimeResult.inboxBatchStatus !== "COMMITTED") {
+        throw new Error("DF13_FENCE_RUNTIME_COMMIT_NOT_APPLIED");
+      }
+      const released = await client.query<{ inbox_id: string }>(
+        `UPDATE df13_commerce_authority_fence_claims
+            SET released_at = $4
+          WHERE fence_id = $1 AND epoch = $2
+            AND inbox_id = ANY($3::uuid[]) AND released_at IS NULL
+          RETURNING inbox_id`,
+        [existing.fence_id, epoch, request.inboxIds, fenceNow],
+      );
+      if (
+        released.rowCount !== request.inboxIds.length ||
+        new Set(released.rows.map((row) => row.inbox_id)).size !== request.inboxIds.length
+      ) {
+        throw new Error("DF13_FENCE_CLAIM_RELEASE_INTEGRITY_FAILURE");
+      }
+      const completed = await client.query<{ fence_id: string }>(
+        `UPDATE df13_commerce_authority_fences
+            SET completed_at = $2, token_hash = NULL, lease_until = NULL, updated_at = $2
+          WHERE fence_id = $1 AND epoch = $3 AND token_hash = $4
+            AND completed_at IS NULL AND lease_until > clock_timestamp()
+          RETURNING fence_id`,
+        [existing.fence_id, fenceNow, epoch, tokenHash(fenceToken)],
+      );
+      if (completed.rowCount !== 1) throw new Error("DF13_FENCE_COMPLETION_WRITE_FAILED");
+      await client.query("COMMIT");
+      return Object.freeze({ status: "COMPLETED", epoch, runtime: runtimeResult });
+    } catch (error) {
+      await rollbackQuietly(client);
       throw error;
     } finally {
       client.release();
