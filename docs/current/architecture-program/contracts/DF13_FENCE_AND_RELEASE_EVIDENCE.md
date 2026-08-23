@@ -9,9 +9,9 @@ Absence of proof of COMMERCE authority means the caller keeps the existing
 LEGACY path. Only a positively identified but unusable COMMERCE pointer blocks.
 
 This rule prevents a future COMMERCE gate from changing current LEGACY traffic.
-The pure fence assessment is not wired into `RealtimeRunner`; this source unit
-adds no provider, dispatcher, feature flag, composition-root binding, or live
-authority consumer.
+The pure fence assessment, durable admission provider, and admission dispatcher
+are not wired into `RealtimeRunner`; this source unit adds no feature flag,
+composition-root binding, or live authority consumer.
 
 ## Pure fence assessment
 
@@ -45,14 +45,48 @@ strategy, CTA, final reconciliation, and side-effect planning. A later bypass
 requires a finite enumeration and contract tests proving independence from
 both authorities.
 
-The pure assessment does not acquire or invent a lease. The next focused source
-unit must implement the durable provider and all-or-nothing dispatcher together.
-That provider must atomically claim every Inbox ID, reject overlapping live
-leases, bind acquisition/completion to a fresh opaque token and epoch, make
-stale acknowledgements ineffective, and preserve uncommitted Inbox/Outbox work
-through replay, lost ACK, concurrency, crash, and restart. Provider failure may
-park work without consuming an attempt; it may not complete, retry, dead-letter,
-or publish an effect.
+The pure assessment does not acquire or invent a lease. The source-only durable
+admission store, its one worker adapter, and
+`dispatchDf13CommerceAuthorityFence` form a dormant admission boundary. The
+pending `0036_df13_commerce_authority_fence` schema is intentionally outside
+`migrateUp` discovery and is not applied by this change.
+
+The adapter rejects any direct request whose page/channel is outside
+`DF13_COMMERCE_PREPROD_SCOPE_V1`, even if it carries the expected bundle hash.
+This keeps reviewed page scope at the real durable-consumer boundary rather
+than treating the pure preflight as the only enforcement point.
+
+Before a future consumer may run, the provider takes one transaction-scoped
+advisory lock and row locks every requested Inbox ID, then atomically writes
+one claim for every ID. It rejects changed canonical request identity, missing
+or cross-page Inbox IDs, a concurrent claim, a live lease, malformed input, and
+partial claim writes. It never changes Inbox status/attempts, dead-letter state,
+Outbox, or provider-delivery state. The stored identity is re-derived from every
+canonical field and compared field-by-field on replay, including the sales and
+state authority modes, canonical content hash, bundle hash, source, pointer
+revision, and ordered Inbox IDs.
+
+Every held lease has a new opaque UUID token stored only as a SHA-256 hash and a
+monotonic epoch. An expired lease may be recovered only by the same exact
+request and receives a new epoch, so a prior holder cannot complete or release
+it. The admission path has no completion, retry, dead-letter, consumer, Inbox
+state, Outbox, or provider-delivery operation.
+
+The dispatcher intentionally returns `COMMERCE_HELD` rather than accepting an
+`execute` callback or completion acknowledgement. That prevents a durable or
+external consumer effect from committing before a separate fence-completion
+transaction and then being replayed after a crash or lost acknowledgement.
+The store class is not exported from the database package, and the worker
+adapter exposes acquisition only; no current runtime path can obtain a
+free-standing completion method through this DF13 source boundary.
+
+The next default-off wrapper source unit must introduce one dedicated atomic
+transaction that owns both the complete authority-dependent durable commit and
+the exact token/epoch completion/release. It must prove that a pre-commit
+failure leaves neither consumer writes nor a completed fence, while an ambiguous
+post-commit acknowledgement replays as completed without repeating work. It
+must never use a free side-effect callback or direct send/publish operation.
+Until then no runtime path constructs the provider or calls the dispatcher.
 
 ## Release-candidate source evidence
 
@@ -119,9 +153,9 @@ authorized runtime execution can append actual rollback evidence.
 
 The remaining implementation order is:
 
-1. durable fence provider plus all-or-nothing COMMERCE dispatcher;
-2. integration as a default-off wrapper whose disabled branch delegates to the
-   untouched LEGACY runner path.
+1. integration as a default-off wrapper whose disabled branch delegates to the
+   untouched LEGACY runner path, including the dedicated atomic
+   consumer-commit/fence-completion transaction.
 
 Until both units are reviewed and a separate release/cutover is authorized,
 runtime remains `salesAuthorityMode=LEGACY`, `stateReadMode=LEGACY`.
