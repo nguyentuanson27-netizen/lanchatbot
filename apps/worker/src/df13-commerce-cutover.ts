@@ -10,6 +10,7 @@ import type { MissingCommerceSignal } from "./missing-commerce-signal.js";
 import {
   prepareDf13ReleaseCandidateEvidence,
   validateDf13ReleaseCandidateEvidence,
+  type Df13ReleaseCandidateSourceReader,
 } from "./df13-release-candidate-evidence.js";
 import {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
@@ -17,16 +18,17 @@ import {
   type CommerceAuthorityConsumer,
 } from "./df13-commerce-authority-bundle.js";
 import { GATE_E_PREPROD_V15_BINDING } from "./df13-gate-e-binding.js";
+import { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
 
 export {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
   DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
 } from "./df13-commerce-authority-bundle.js";
+export { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
 export type { CommerceAuthorityConsumer } from "./df13-commerce-authority-bundle.js";
 
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
-const PREPROD_TEST_PAGE_ID = "1198992073286645";
 
 export { GATE_E_PREPROD_V15_BINDING } from "./df13-gate-e-binding.js";
 
@@ -211,7 +213,8 @@ export function assessCommerceCutoverPreflight(
   candidateBinding: Df13CandidateBindingValidation,
 ): CommerceCutoverPreflight {
   const reasonCodes: string[] = [];
-  if (input.pageId !== PREPROD_TEST_PAGE_ID || input.channel !== "MESSENGER") {
+  if (input.pageId !== DF13_COMMERCE_PREPROD_SCOPE_V1.pageId ||
+      input.channel !== DF13_COMMERCE_PREPROD_SCOPE_V1.channel) {
     reasonCodes.push("DF13_PAGE_SCOPE_INVALID");
   }
   if (input.currentPointer.version.pageId !== input.pageId ||
@@ -264,7 +267,7 @@ export interface CommerceCutoverPorts {
    * Fixed immutable-source reader. The executor, not a caller-provided
    * evidence package or success assertion, performs the full re-derivation.
    */
-  readonly releaseCandidateSource: GateECandidateSourceReader;
+  readonly releaseCandidateSource: Df13ReleaseCandidateSourceReader;
   readonly holdAuthorityDependentWork: (input: Readonly<{
     pageId: string;
     channel: string;
@@ -294,6 +297,10 @@ export interface CommerceCutoverPorts {
     fenceToken: string;
     consumers: readonly CommerceAuthorityConsumer[];
   }>) => Promise<readonly CommerceAuthorityConsumerReadback[]>;
+  /**
+   * The acknowledgement is advisory only. Pointer, audit, and consumer
+   * readbacks remain the sole authority to release the fence.
+   */
   readonly rollbackToLegacy: (input: Readonly<{
     expectedPointerRevision: number;
     targetLegacyVersionId: string;
@@ -304,7 +311,12 @@ export interface CommerceCutoverPorts {
 }
 
 export type CommerceCutoverExecution = Readonly<{
-  status: "BLOCKED_LEGACY" | "COMMERCE_ACTIVE" | "LEGACY_RESTORED" | "HOLD_RETAINED";
+  status:
+    | "BLOCKED_LEGACY"
+    | "BLOCKED_AUTHORITY_UNKNOWN"
+    | "COMMERCE_ACTIVE"
+    | "LEGACY_RESTORED"
+    | "HOLD_RETAINED";
   sideEffects: "NOT_EXECUTED" | "CONTROL_PLANE_ONLY";
   activationAcknowledgement:
     | "NOT_ATTEMPTED"
@@ -316,20 +328,21 @@ export type CommerceCutoverExecution = Readonly<{
 
 async function rederiveReleaseCandidateBinding(input: Readonly<{
   candidate: Df13CandidateBindingRequest;
-  releaseCandidateSource: GateECandidateSourceReader;
+  releaseCandidateSource: Df13ReleaseCandidateSourceReader;
 }>): Promise<Df13CandidateBindingValidation> {
-  try {
-    const evidence = await prepareDf13ReleaseCandidateEvidence({
-      activationReleaseRevision: input.candidate.activationReleaseRevision,
-      git: input.releaseCandidateSource,
-    });
-    return validateDf13ReleaseCandidateEvidence(evidence, input.candidate);
-  } catch {
+  const evidence = await prepareDf13ReleaseCandidateEvidence({
+    activationReleaseRevision: input.candidate.activationReleaseRevision,
+    git: input.releaseCandidateSource,
+  });
+  if (evidence.status === "BLOCKED") {
     return {
       status: "MISMATCH",
-      reasonCodes: ["DF13_GATE_E_CANDIDATE_REDERIVATION_UNAVAILABLE"],
+      reasonCodes: evidence.reasonCodes.length > 0
+        ? evidence.reasonCodes
+        : ["DF13_RELEASE_EVIDENCE_STATUS_INVALID"],
     };
   }
+  return validateDf13ReleaseCandidateEvidence(evidence, input.candidate);
 }
 
 function targetPointerMatches(
@@ -356,7 +369,7 @@ function isSafeLegacyPointer(
 function isPreCutoverLegacyPointer(
   observed: RuntimeBehaviorModePointer | null,
   preflight: CommerceCutoverPreflightInput,
-): observed is RuntimeBehaviorModePointer {
+): boolean {
   return isSafeLegacyPointer(observed) &&
     observed.pointerRevision === preflight.currentPointer.pointerRevision &&
     pointerVersionMatches(observed, preflight.currentPointer);
@@ -365,7 +378,7 @@ function isPreCutoverLegacyPointer(
 function isRestoredLegacyPointer(
   observed: RuntimeBehaviorModePointer | null,
   preflight: CommerceCutoverPreflightInput,
-): observed is RuntimeBehaviorModePointer {
+): boolean {
   return isSafeLegacyPointer(observed) &&
     observed.pointerRevision === preflight.targetPointer.pointerRevision + 1 &&
     pointerVersionMatches(observed, preflight.currentPointer);
@@ -482,7 +495,8 @@ async function rollbackOrRetainHold(input: Readonly<{
       reasonCodes: [input.reasonCode, "DF13_ROLLBACK_UNPROVEN"],
     };
   }
-  if (!isRestoredLegacyPointer(restoredPointer, input.preflight)) {
+  if (restoredPointer === null ||
+      !isRestoredLegacyPointer(restoredPointer, input.preflight)) {
     return {
       status: "HOLD_RETAINED",
       sideEffects: "CONTROL_PLANE_ONLY",
@@ -616,7 +630,8 @@ export async function executeCommerceCutover(input: Readonly<{
     };
   }
   if (!targetPointerMatches(activatedPointer, input.preflight.targetPointer)) {
-    if (isPreCutoverLegacyPointer(activatedPointer, input.preflight)) {
+    if (activatedPointer !== null &&
+        isPreCutoverLegacyPointer(activatedPointer, input.preflight)) {
       const convergence = await proveExactLegacyConsumerConvergence({
         ports: input.ports,
         fenceToken: held.fenceToken,
@@ -716,7 +731,7 @@ export async function recoverCommerceCutoverAfterInterruption(input: Readonly<{
   const preflight = assessCommerceCutoverPreflight(input.preflight, candidateBinding);
   if (preflight.status !== "PREPARED_NO_ACTIVATION") {
     return {
-      status: "BLOCKED_LEGACY",
+      status: "BLOCKED_AUTHORITY_UNKNOWN",
       sideEffects: "NOT_EXECUTED",
       activationAcknowledgement: "NOT_ATTEMPTED",
       reasonCodes: preflight.reasonCodes,
@@ -729,7 +744,7 @@ export async function recoverCommerceCutoverAfterInterruption(input: Readonly<{
   });
   if (held.status !== "HELD") {
     return {
-      status: "BLOCKED_LEGACY",
+      status: "BLOCKED_AUTHORITY_UNKNOWN",
       sideEffects: "NOT_EXECUTED",
       activationAcknowledgement: "NOT_ATTEMPTED",
       reasonCodes: ["DF13_RECOVERY_FENCE_NOT_HELD"],
@@ -767,8 +782,7 @@ export async function recoverCommerceCutoverAfterInterruption(input: Readonly<{
       reasonCodes: ["DF13_INTERRUPTED_CUTOVER_STATE_AMBIGUOUS"],
     };
   }
-  if (isPreCutoverLegacyPointer(observed, input.preflight) ||
-      isRestoredLegacyPointer(observed, input.preflight)) {
+  if (observed !== null && isPreCutoverLegacyPointer(observed, input.preflight)) {
     const convergence = await proveExactLegacyConsumerConvergence({
       ports: input.ports,
       fenceToken: held.fenceToken,
@@ -786,7 +800,52 @@ export async function recoverCommerceCutoverAfterInterruption(input: Readonly<{
       status: "LEGACY_RESTORED",
       sideEffects: "NOT_EXECUTED",
       activationAcknowledgement: "NOT_ATTEMPTED",
-      reasonCodes: ["DF13_INTERRUPTED_CUTOVER_ALREADY_LEGACY"],
+      reasonCodes: ["DF13_INTERRUPTED_CUTOVER_NEVER_ACTIVATED"],
+    });
+  }
+  if (observed !== null && isRestoredLegacyPointer(observed, input.preflight)) {
+    let rollbackAudit: "EXACT" | "MISSING" | "AMBIGUOUS";
+    try {
+      rollbackAudit = await input.ports.readActivationAudit({
+        pointerRevision: observed.pointerRevision,
+        modeVersionId: observed.version.modeVersionId,
+        contentHash: observed.version.contentHash,
+      });
+    } catch {
+      rollbackAudit = "AMBIGUOUS";
+    }
+    if (rollbackAudit !== "EXACT") {
+      return {
+        status: "HOLD_RETAINED",
+        sideEffects: "CONTROL_PLANE_ONLY",
+        activationAcknowledgement: "LOST_RECONCILED",
+        reasonCodes: [
+          "DF13_INTERRUPTED_CUTOVER_RECOVERED",
+          "DF13_ROLLBACK_AUDIT_UNPROVEN",
+        ],
+      };
+    }
+    const convergence = await proveExactLegacyConsumerConvergence({
+      ports: input.ports,
+      fenceToken: held.fenceToken,
+      target: observed,
+    });
+    if (convergence !== "EXACT") {
+      return {
+        status: "HOLD_RETAINED",
+        sideEffects: "CONTROL_PLANE_ONLY",
+        activationAcknowledgement: "LOST_RECONCILED",
+        reasonCodes: [
+          "DF13_INTERRUPTED_CUTOVER_RECOVERED",
+          legacyConvergenceReasonCode(convergence),
+        ],
+      };
+    }
+    return releaseAndReturn(input.ports, held.fenceToken, {
+      status: "LEGACY_RESTORED",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      activationAcknowledgement: "LOST_RECONCILED",
+      reasonCodes: ["DF13_INTERRUPTED_CUTOVER_RECOVERED"],
     });
   }
   if (targetPointerMatches(observed, input.preflight.targetPointer)) {

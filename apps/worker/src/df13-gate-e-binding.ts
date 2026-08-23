@@ -7,4 +7,6 @@ export const GATE_E_PREPROD_V15_BINDING = Object.freeze({
   durableStoreStatus: "APPENDED" as const,
   candidateSourceRevision: "e80cd663a9769ad8c0313c3693f37f32138ca52a",
   candidateContentFingerprint: "86ff34479283895ac97274b9cace946e2926b17bc1ac381d540f2f03a17d977a",
+  manifestBlobOid: "e616fc3a02e64117cd2fd54af1b3d7dc1d6852c1",
+  manifestContentSha256: "b787c5d3c05b9db7b2ead57fa9c825e18b642b33eaa053f30ccd8ab59f52141e",
 });

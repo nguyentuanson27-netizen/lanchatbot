@@ -5,8 +5,9 @@ import {
   DF13_AUTHORITY_INDEPENDENT_BYPASS_CLASSES_V1,
   assessDf13CommerceAuthorityFence,
 } from "./df13-commerce-authority-fence.js";
+import { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
 
-const pageId = "1198992073286645";
+const pageId = DF13_COMMERCE_PREPROD_SCOPE_V1.pageId;
 
 function resolution(
   authorityProvenance: RuntimeBehaviorModeResolution["authorityProvenance"],
@@ -117,7 +118,28 @@ describe("DF13 pure Commerce fence admission", () => {
     expect(first).toHaveProperty("blockId", expect.stringMatching(/^df13-block-[a-f0-9]{64}$/u));
   });
 
+  it("uses one block identity for the same invalid inbox multiset in any order", () => {
+    const first = assessDf13CommerceAuthorityFence({
+      pageId,
+      channel: "MESSENGER",
+      workId: "batch-1",
+      inboxIds: ["inbox-b", "inbox-a", "inbox-a"],
+      resolution: resolution("COMMERCE_POINTER"),
+    });
+    const reordered = assessDf13CommerceAuthorityFence({
+      pageId,
+      channel: "MESSENGER",
+      workId: "batch-1",
+      inboxIds: ["inbox-a", "inbox-b", "inbox-a"],
+      resolution: resolution("COMMERCE_POINTER"),
+    });
+
+    expect(first).toMatchObject({ status: "BLOCKED", reasonCode: "DF13_FENCE_SCOPE_INVALID" });
+    expect(reordered).toEqual(first);
+  });
+
   it("does not construct a COMMERCE fence request outside the exact PREPROD page", () => {
+    expect(DF13_COMMERCE_PREPROD_SCOPE_V1.allowedCommercePageIds).toEqual([pageId]);
     expect(assessDf13CommerceAuthorityFence({
       pageId: "9999999999999999",
       channel: "MESSENGER",

@@ -28,7 +28,12 @@ function gitBlobOid(content: string): string {
     .digest("hex");
 }
 
-const sourceReader: GateECandidateSourceReader = {
+const sourceReader: GateECandidateSourceReader & Readonly<{
+  refreshTrustedRef(): Promise<void>;
+  resolveRef(ref: "refs/remotes/origin/main"): Promise<string>;
+}> = {
+  async refreshTrustedRef() {},
+  async resolveRef() { return activationReleaseRevision; },
   readBlob: async (_revision, path) => readSourceFile(path),
   resolveBlobOid: async (_revision, path) => gitBlobOid(await readSourceFile(path)),
 };
@@ -105,6 +110,88 @@ describe("DF13 release-candidate source evidence", () => {
     });
   });
 
+  it("fails closed when the requested revision is not the refreshed trusted release head", async () => {
+    await expect(prepareDf13ReleaseCandidateEvidence({
+      activationReleaseRevision,
+      git: {
+        ...sourceReader,
+        async resolveRef() { return "b".repeat(40); },
+      },
+    })).resolves.toMatchObject({
+      status: "BLOCKED",
+      sideEffects: "NOT_EXECUTED",
+      reasonCodes: ["DF13_ACTIVATION_RELEASE_NOT_TRUSTED_HEAD"],
+    });
+  });
+
+  it("fails closed when the trusted release ref moves during evidence derivation", async () => {
+    let refReads = 0;
+    await expect(prepareDf13ReleaseCandidateEvidence({
+      activationReleaseRevision,
+      git: {
+        ...sourceReader,
+        async resolveRef() {
+          refReads += 1;
+          return refReads === 1 ? activationReleaseRevision : "b".repeat(40);
+        },
+      },
+    })).resolves.toMatchObject({
+      status: "BLOCKED",
+      sideEffects: "NOT_EXECUTED",
+      reasonCodes: ["DF13_TRUSTED_RELEASE_REF_CHANGED"],
+    });
+  });
+
+  it("returns a manifest mismatch instead of throwing when a required field is missing", async () => {
+    await expect(prepareDf13ReleaseCandidateEvidence({
+      activationReleaseRevision,
+      git: {
+        ...sourceReader,
+        async readBlob(revision, path) {
+          const content = await sourceReader.readBlob(revision, path);
+          if (path !== "evaluation/gate-e/df10-v15/manifest.json") return content;
+          const manifest = JSON.parse(content) as Record<string, unknown>;
+          delete manifest.corpusHash;
+          return JSON.stringify(manifest);
+        },
+        async resolveBlobOid(revision, path) {
+          const content = await this.readBlob(revision, path);
+          return gitBlobOid(content);
+        },
+      },
+    })).resolves.toMatchObject({
+      status: "BLOCKED",
+      sideEffects: "NOT_EXECUTED",
+      reasonCodes: [
+        "DF13_GATE_E_MANIFEST_IDENTITY_MISMATCH",
+        "DF13_GATE_E_MANIFEST_FIELD_MISMATCH",
+      ],
+    });
+  });
+
+  it("blocks a semantically identical manifest whose exact blob/content identity changed", async () => {
+    await expect(prepareDf13ReleaseCandidateEvidence({
+      activationReleaseRevision,
+      git: {
+        ...sourceReader,
+        async readBlob(revision, path) {
+          const content = await sourceReader.readBlob(revision, path);
+          return path === "evaluation/gate-e/df10-v15/manifest.json"
+            ? content + " "
+            : content;
+        },
+        async resolveBlobOid(revision, path) {
+          const content = await this.readBlob(revision, path);
+          return gitBlobOid(content);
+        },
+      },
+    })).resolves.toMatchObject({
+      status: "BLOCKED",
+      sideEffects: "NOT_EXECUTED",
+      reasonCodes: ["DF13_GATE_E_MANIFEST_IDENTITY_MISMATCH"],
+    });
+  });
+
   it("rejects self-hash substitution and rollback-contract substitution", async () => {
     const exact = await exactSourceEvidence();
     const request = {
@@ -157,6 +244,46 @@ describe("DF13 release-candidate source evidence", () => {
       reasonCodes: expect.arrayContaining([
         "DF13_RELEASE_EVIDENCE_MANIFEST_COMPARISON_INVALID",
       ]),
+    });
+  });
+
+  it("rejects substituted manifest blob identity even when hashes are well-shaped and self-hash is recomputed", async () => {
+    const { evidenceHash: _evidenceHash, ...body } = await exactSourceEvidence();
+    const substituted = withEvidenceHash({
+      ...body,
+      manifestArtifact: {
+        ...body.manifestArtifact,
+        blobOid: "f".repeat(40),
+        contentSha256: "e".repeat(64),
+      },
+    });
+
+    expect(validateDf13ReleaseCandidateEvidence(substituted, {
+      gateEManifestHash: GATE_E_PREPROD_V15_BINDING.manifestHash,
+      gateECandidateSourceRevision: GATE_E_PREPROD_V15_BINDING.candidateSourceRevision,
+      activationReleaseRevision,
+    })).toMatchObject({
+      status: "MISMATCH",
+      reasonCodes: expect.arrayContaining([
+        "DF13_RELEASE_EVIDENCE_MANIFEST_IDENTITY_INVALID",
+      ]),
+    });
+  });
+
+  it("returns MISMATCH instead of throwing for a malformed nested evidence object", async () => {
+    const { evidenceHash: _evidenceHash, ...body } = await exactSourceEvidence();
+    const malformed = withEvidenceHash({
+      ...body,
+      releaseSource: null as never,
+    });
+
+    expect(validateDf13ReleaseCandidateEvidence(malformed, {
+      gateEManifestHash: GATE_E_PREPROD_V15_BINDING.manifestHash,
+      gateECandidateSourceRevision: GATE_E_PREPROD_V15_BINDING.candidateSourceRevision,
+      activationReleaseRevision,
+    })).toEqual({
+      status: "MISMATCH",
+      reasonCodes: ["DF13_RELEASE_EVIDENCE_MALFORMED"],
     });
   });
 });

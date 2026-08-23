@@ -27,6 +27,12 @@ A positively identified COMMERCE pointer must instead produce exactly one of:
   identity; or
 - `BLOCKED`, containing a deterministic block ID and bounded reason code.
 
+Invalid Inbox-ID multisets retain duplicates and malformed values for evidence,
+but are sorted before block-ID hashing so the same work has one identity
+regardless of caller ordering. `DF13_COMMERCE_PREPROD_SCOPE_V1` is the single
+source for the reviewed page/channel scope; a later wrapper must also inject its
+page list into the generic runtime resolver rather than create another policy.
+
 The immutable identity includes mode-version ID, canonical content hash,
 pointer revision, `DATABASE` or bounded `CACHE` source, `COMMERCE` sales
 authority, `LEGACY` state read, and the single canonical authority-bundle hash.
@@ -50,9 +56,11 @@ or publish an effect.
 
 ## Release-candidate source evidence
 
-`prepareDf13ReleaseCandidateEvidence` reads an exact Git revision through the
-fixed release-source reader. It reads the v15 registered manifest and every
-canonical candidate-affecting blob, then records:
+`prepareDf13ReleaseCandidateEvidence` refreshes the fixed trusted release ref,
+requires its exact resolved commit to equal the requested release revision,
+and rechecks that ref after derivation. It then reads the v15 registered
+manifest and every canonical candidate-affecting blob at that immutable commit,
+recording:
 
 - exact release revision and manifest blob/content identity;
 - Gate E manifest, evidence BODY, FINALIZATION, admissibility, and durable-store
@@ -61,12 +69,16 @@ canonical candidate-affecting blob, then records:
 - the single canonical authority bundle and complete consumer set; and
 - a source-only complete-LEGACY rollback requirement.
 
-The evidence package is recursively frozen and self-hashed. The deterministic
-validator independently checks request binding, self-hash, manifest integrity,
-canonical projection entries, authority bundle, consumer set, and rollback
-contract. A copied hash, caller-supplied success assertion, missing blob,
-malformed revision, changed candidate fingerprint, duplicate/substituted field,
-or unavailable derivation returns `BLOCKED`/`MISMATCH`.
+The evidence package is recursively frozen and self-hashed. Preparation binds
+the refreshed `refs/remotes/origin/main` identity, exact manifest blob OID, raw
+content SHA-256, whole-body manifest self-hash, and canonical candidate
+projection. The deterministic validator checks those immutable bindings plus
+request binding, package self-hash, authority bundle, consumer set, and rollback
+contract. A copied hash, caller-supplied success assertion, untrusted or moving
+release ref, missing blob/field, malformed revision, changed candidate
+fingerprint, duplicate/substituted field, or unavailable derivation returns
+`BLOCKED`/`MISMATCH`; missing manifest fields never reach canonical JSON as
+`undefined`.
 
 The cutover executor invokes preparation and validation itself from its fixed
 source reader before acquiring a fence. The tool never creates a release,
@@ -85,8 +97,11 @@ version/content identity at the next rollback revision, a null/omitted authority
 bundle, canonical content hash, and exact `DATABASE` readback from every listed
 consumer. Stale LEGACY, partial Context V2/phase/reconciliation consumers,
 ambiguous authority, missing readback, or lost acknowledgement retains the
-fence. Recovery that never acquires a fence reports `BLOCKED_LEGACY`; it cannot
-claim a retained lease that does not exist.
+fence. Recovery distinguishes a pre-cutover LEGACY pointer, which has no
+rollback to audit, from an already-restored LEGACY pointer, which requires an
+exact rollback audit before convergence and release. Recovery that never
+acquires a fence reports `BLOCKED_AUTHORITY_UNKNOWN`; it may claim neither a
+retained lease nor a LEGACY authority it has not observed under the fence.
 
 This source tooling records rollback as `REQUIRED_NOT_EXECUTED`. Only separately
 authorized runtime execution can append actual rollback evidence.

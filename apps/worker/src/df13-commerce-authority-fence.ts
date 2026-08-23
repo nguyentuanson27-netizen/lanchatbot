@@ -9,10 +9,9 @@ import {
   DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
   type CommerceAuthorityConsumer,
 } from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
 
 const SCOPE_ID_PATTERN = /^[A-Za-z0-9:_-]+$/u;
-const PREPROD_TEST_PAGE_ID = "1198992073286645";
-const COMMERCE_CHANNEL = "MESSENGER";
 
 /**
  * There is no reviewed authority-independent semantic work in this source
@@ -103,8 +102,8 @@ export function assessDf13CommerceAuthorityFence(input: Readonly<{
 
   const inboxIds = canonicalInboxIds(input.inboxIds);
   if (
-    input.pageId !== PREPROD_TEST_PAGE_ID ||
-    input.channel !== COMMERCE_CHANNEL ||
+    input.pageId !== DF13_COMMERCE_PREPROD_SCOPE_V1.pageId ||
+    input.channel !== DF13_COMMERCE_PREPROD_SCOPE_V1.channel ||
     !validScopeId(input.workId) ||
     inboxIds === null
   ) {
@@ -112,7 +111,11 @@ export function assessDf13CommerceAuthorityFence(input: Readonly<{
     return Object.freeze({
       status: "BLOCKED",
       reasonCode,
-      blockId: authorityBlockId({ ...input, reasonCode }),
+      blockId: authorityBlockId({
+        ...input,
+        inboxIds: [...input.inboxIds].sort(),
+        reasonCode,
+      }),
     });
   }
 
