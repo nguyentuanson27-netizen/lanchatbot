@@ -12,7 +12,8 @@ enough: authority-dependent classification, state, Context V2, phase, strategy,
 CTA, final reconciliation, and side-effect planning must be unable to enter the
 worker under `COMMERCE` without the same durable fence admission.
 
-The current `LEGACY` path remains default-off and unchanged. This revision has
+The prospective `COMMERCE` path remains default-off; the current `LEGACY` path
+is unchanged. This revision has
 neither a durable fence provider nor the all-or-nothing COMMERCE semantic
 dispatcher. A COMMERCE resolution is therefore rejected before state loading or
 semantic work, including when a prospective provider object is passed to the
@@ -27,7 +28,7 @@ The adapter binds one immutable identity to all eight DF13 consumers:
 - mode version ID;
 - canonical behavior-mode content hash;
 - pointer revision;
-- `DATABASE` source;
+- fresh `DATABASE` or bounded five-second `CACHE` source;
 - `COMMERCE` sales authority and `LEGACY` state-read mode;
 - exact DF13 authority-bundle hash.
 
@@ -35,22 +36,36 @@ There are no authority-independent bypass classes in this revision. An app echo
 that is recognized as this app's own message exits before it becomes a semantic
 consumer; every other RealtimeRunner batch crosses the adapter.
 
-For COMMERCE, the future admission contract requires an exact
-database-resolved, audit-recorded identity. Cache, last-known-good, startup,
-stale, missing, ambiguous, or mismatched identities fail closed. The durable
-provider contract receives the complete fixed consumer set and must return the
-same identity; a partial or substituted acknowledgement is rejected. It is not
+For COMMERCE, the future admission contract requires an exact fresh-resolved,
+audit-recorded identity. A bounded resolver cache is equivalent to the pointer
+it just validated and is therefore allowed; last-known-good, startup, stale,
+missing, ambiguous, or mismatched identities fail closed before the consumer
+is consulted. In particular, an LKG COMMERCE pointer is returned as
+`CLARIFY_ONLY`, never as fallback COMMERCE authority. The durable provider
+contract receives the complete fixed consumer set and the same immutable
+identity; a partial or substituted acknowledgement is rejected. It is not
 invoked by current source because no COMMERCE dispatcher exists.
 
-The future provider must use a stable identity derived from durable Inbox IDs,
-not a per-claim evaluation UUID. If its fence is held, the Inbox item must be
-durably deferred under its fence token without consuming an attempt or being
-completed. A completed semantic batch releases its admission only through
-idempotent `RELEASED | ALREADY_RELEASED` acknowledgement. Failure to admit,
-defer, or complete remains fenced for recovery; it is never converted to an
-unfenced retry/release. These are required replay, lost-ACK, concurrency, and
-crash/restart contracts for the separately reviewed dispatcher/provider unit;
-the current boundary rejects before any such admission can occur.
+The future provider must atomically claim every sorted, unique durable Inbox
+row ID under a fresh opaque fence token. A work-ID hash is audit correlation
+only: it cannot authorize `{A}` and `{A,B}` to run concurrently. Any overlap
+with an unexpired lease returns `HELD`; recovery can use `REACQUIRED` only
+after durable lease-expiry proof, with a new token that makes stale holders and
+their completion acknowledgements ineffective. Completion is conditional on
+the exact token, epoch, immutable authority identity, and full Inbox-ID set.
+
+If authority cannot be admitted (including missing provider/dispatcher,
+identity/scope failure, or future provider-unavailable state), the adapter
+returns a deterministic durable `BLOCKED` ID rather than inventing a fence
+token. The Inbox item must be durably blocked under that ID, without consuming
+an attempt, completing the work, or entering generic retry/dead-letter flow.
+`HELD` is reserved for a real provider-held fence token. A completed semantic
+batch releases its admission only through idempotent `RELEASED |
+ALREADY_RELEASED` acknowledgement. Failure to defer or complete remains
+fenced for recovery; it is never converted to an unfenced retry/release. These
+are required replay, lost-ACK, concurrency, and crash/restart contracts for the
+separately reviewed dispatcher/provider unit; the current boundary blocks
+before any such admission can occur.
 
 ## Release-candidate source evidence
 
@@ -71,12 +86,14 @@ every canonical candidate-affecting blob. Its package records:
 The package always declares `sideEffects=NOT_EXECUTED`. A copied manifest hash,
 missing blob, malformed revision, changed candidate fingerprint, or any manifest
 field mismatch returns `BLOCKED`; it cannot be promoted into deployment or
-runtime evidence. The cutover executor accepts the complete self-hashed package
-and independently validates its exact request binding, manifest comparisons,
-canonical blob projection, authority bundle, and rollback placeholder; it
-cannot accept a bare port-supplied success assertion. The tool does not create
-an immutable release, inspect a host, call a provider, apply migration `0035`,
-or perform an activation.
+runtime evidence. The cutover executor owns the invocation of this tooling
+against its fixed `GateECandidateSourceReader`, then independently validates
+the complete self-hashed result and its exact request binding, manifest
+comparisons, canonical blob projection, authority bundle, and rollback
+placeholder. It accepts neither a caller-supplied package nor a bare
+port-supplied success assertion. The tool does not create an immutable release,
+inspect a host, call a provider, apply migration `0035`, or perform an
+activation.
 
 ## Activation and rollback boundary
 

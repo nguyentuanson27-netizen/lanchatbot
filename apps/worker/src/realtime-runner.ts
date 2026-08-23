@@ -212,6 +212,21 @@ export interface RealtimeInboxPort {
     fenceToken: string,
     reasonCode: string,
   ): Promise<boolean>;
+  /**
+   * A COMMERCE authority precondition was not ready, so work is durably
+   * blocked without consuming a retry attempt or claiming a provider fence.
+   */
+  deferForAuthorityBlock?(
+    inboxId: string,
+    leaseToken: string,
+    blockId: string,
+    reasonCode: string,
+  ): Promise<boolean>;
+  deferBatchForAuthorityBlock?(
+    batch: InboxBatchLease,
+    blockId: string,
+    reasonCode: string,
+  ): Promise<boolean>;
 }
 
 interface RunnerInboundBatch extends ClaimedInboundBatch<InboundEnvelopeV1> {
@@ -2755,6 +2770,37 @@ export class RealtimeRunner {
     }
   }
 
+  private async deferAuthorityBlockedWork(
+    batch: RunnerInboundBatch,
+    admission: Extract<Df13CommerceAuthorityFenceAdmission, { status: "BLOCKED" }>,
+  ): Promise<void> {
+    if (batch.nativeBatch) {
+      if (!this.inbox.deferBatchForAuthorityBlock) {
+        throw new Error("DF13_AUTHORITY_BLOCK_BATCH_DEFER_PORT_REQUIRED");
+      }
+      if (!await this.inbox.deferBatchForAuthorityBlock(
+        this.batchLease(batch),
+        admission.blockId,
+        admission.reasonCode,
+      )) {
+        throw new Error("DF13_AUTHORITY_BLOCK_BATCH_DEFER_UNPROVEN");
+      }
+      return;
+    }
+    const claim = batch.items[0];
+    if (!claim || !this.inbox.deferForAuthorityBlock) {
+      throw new Error("DF13_AUTHORITY_BLOCK_DEFER_PORT_REQUIRED");
+    }
+    if (!await this.inbox.deferForAuthorityBlock(
+      claim.inboxId,
+      claim.leaseToken,
+      admission.blockId,
+      admission.reasonCode,
+    )) {
+      throw new Error("DF13_AUTHORITY_BLOCK_DEFER_UNPROVEN");
+    }
+  }
+
   private async completeAuthorityFencedWork(
     admission: Df13CommerceAuthorityFenceAdmission,
   ): Promise<void> {
@@ -2762,9 +2808,11 @@ export class RealtimeRunner {
   }
 
   /**
-   * A fence/recovery identity is derived from durable Inbox IDs, never the
-   * per-claim evaluation group UUID. Reclaimed delivery of the same durable
-   * work therefore cannot create a second fence admission identity.
+   * A fence/recovery audit ID is derived from durable Inbox IDs, never the
+   * per-claim evaluation group UUID. It is not authorization: the future
+   * durable provider must atomically claim every individual Inbox row before
+   * admitting semantic work, which prevents overlap between differently sized
+   * batches with different hashes.
    */
   private authorityFenceWorkId(batch: RunnerInboundBatch): string {
     const inboxIds = [...batch.inboxIds].sort().join(",");
@@ -2843,14 +2891,16 @@ export class RealtimeRunner {
       pageId: claim.pageId,
       channel: this.options.behaviorModeChannel,
       workId: this.authorityFenceWorkId(batch),
+      inboxIds: [...batch.inboxIds].sort(),
       resolution: behaviorModeResolution,
     });
     if (authorityAdmission.status === "HELD") {
       await this.deferAuthorityFencedWork(batch, authorityAdmission);
       return "AUTHORITY_FENCE_HELD";
     }
-    if (authorityAdmission.status === "REJECTED") {
-      throw new Error(authorityAdmission.reasonCode);
+    if (authorityAdmission.status === "BLOCKED") {
+      await this.deferAuthorityBlockedWork(batch, authorityAdmission);
+      return "AUTHORITY_FENCE_HELD";
     }
     const record = await this.runtime.loadOrCreate(
       claim.pageId,

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   RuntimeBehaviorModeResolver,
   behaviorModeContentHash,
@@ -138,20 +138,72 @@ describe("RuntimeBehaviorModeResolver", () => {
       confirmationMode: "CLARIFY_ONLY",
       reasonCodes: ["RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_UNAVAILABLE"],
     });
-    expect(await new RuntimeBehaviorModeResolver(source, {
+    const admitCommerceAuthority = vi.fn(async () => ({ status: "ADMITTED" as const }));
+    const resolver = new RuntimeBehaviorModeResolver(source, {
       allowedPageIds: [pageId],
       allowedCommercePageIds: [pageId],
       commerceAuthorityConsumer: {
-        async admitCommerceAuthority() {
-          return { status: "ADMITTED" } as const;
-        },
+        admitCommerceAuthority,
       },
-    }).resolve(input())).toMatchObject({
+    });
+    expect(await resolver.resolve(input())).toMatchObject({
       source: "DATABASE",
       status: "RESOLVED",
       salesAuthorityMode: "COMMERCE",
       authorityBundleHash: commerceBundleHash,
     });
+    expect(await resolver.resolve(input(1))).toMatchObject({
+      source: "CACHE",
+      status: "RESOLVED",
+      salesAuthorityMode: "COMMERCE",
+      authorityBundleHash: commerceBundleHash,
+    });
+    expect(admitCommerceAuthority).toHaveBeenCalledTimes(2);
+    expect(admitCommerceAuthority).toHaveBeenLastCalledWith(expect.objectContaining({
+      source: "CACHE",
+    }));
+  });
+
+  it("never returns a last-known-good COMMERCE authority after the source is unavailable", async () => {
+    const source = new MutableSource();
+    const commerceBundleHash = "a".repeat(64);
+    const payload = {
+      confirmationMode: "LEGACY" as const,
+      salesAuthorityMode: "COMMERCE" as const,
+      stateReadMode: "LEGACY" as const,
+      authorityBundleHash: commerceBundleHash,
+    };
+    source.value = {
+      ...pointer("LEGACY"),
+      version: {
+        ...pointer("LEGACY").version,
+        ...payload,
+        contentHash: behaviorModeContentHash(payload),
+      },
+    };
+    const admitCommerceAuthority = vi.fn(async () => ({ status: "ADMITTED" as const }));
+    const resolver = new RuntimeBehaviorModeResolver(source, {
+      cacheTtlMs: 100,
+      lastKnownGoodTtlMs: 300_000,
+      allowedPageIds: [pageId],
+      allowedCommercePageIds: [pageId],
+      commerceAuthorityConsumer: { admitCommerceAuthority },
+    });
+
+    expect(await resolver.resolve(input())).toMatchObject({
+      source: "DATABASE",
+      status: "RESOLVED",
+      salesAuthorityMode: "COMMERCE",
+    });
+    source.failure = true;
+    expect(await resolver.resolve(input(101))).toMatchObject({
+      source: "FAIL_SAFE",
+      status: "REJECTED",
+      confirmationMode: "CLARIFY_ONLY",
+      salesAuthorityMode: "LEGACY",
+      reasonCodes: ["RUNTIME_BEHAVIOR_COMMERCE_STALE_AUTHORITY"],
+    });
+    expect(admitCommerceAuthority).toHaveBeenCalledTimes(1);
   });
 
   it("fails safe when the required per-command resolution audit cannot be written", async () => {

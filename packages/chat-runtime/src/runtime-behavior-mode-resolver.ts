@@ -61,6 +61,8 @@ export interface CommerceAuthorityConsumerPort {
     contentHash: string;
     authorityBundleHash: string;
     pointerRevision: number;
+    /** DATABASE or bounded cache only; stale fallback authority is forbidden. */
+    source: "DATABASE" | "CACHE";
   }>): Promise<Readonly<{ status: "ADMITTED" | "REJECTED" }>>;
 }
 export interface RuntimeBehaviorModeResolution extends RuntimeBehaviorModePayload {
@@ -229,8 +231,12 @@ export class RuntimeBehaviorModeResolver {
     pointer: RuntimeBehaviorModePointer,
     pageId: string,
     channel: string,
+    source: BehaviorModeResolutionSource,
   ): Promise<string | null> {
     if (pointer.version.salesAuthorityMode !== "COMMERCE") return null;
+    if (source !== "DATABASE" && source !== "CACHE") {
+      return "RUNTIME_BEHAVIOR_COMMERCE_STALE_AUTHORITY";
+    }
     if (!this.allowedCommercePageIds.has(pageId)) {
       return "RUNTIME_BEHAVIOR_COMMERCE_PAGE_NOT_ALLOWED";
     }
@@ -245,6 +251,7 @@ export class RuntimeBehaviorModeResolver {
         contentHash: pointer.version.contentHash,
         authorityBundleHash: pointer.version.authorityBundleHash!,
         pointerRevision: pointer.pointerRevision,
+        source,
       });
       return admission.status === "ADMITTED"
         ? null
@@ -300,6 +307,7 @@ export class RuntimeBehaviorModeResolver {
       pointer,
       input.pageId,
       channel,
+      source,
     );
     if (commerceRejection) {
       return this.audited(scoped, {

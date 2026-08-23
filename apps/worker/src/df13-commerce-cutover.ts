@@ -8,8 +8,8 @@ import {
 } from "./gate-e-registration.js";
 import type { MissingCommerceSignal } from "./missing-commerce-signal.js";
 import {
+  prepareDf13ReleaseCandidateEvidence,
   validateDf13ReleaseCandidateEvidence,
-  type Df13ReleaseCandidateEvidence,
 } from "./df13-release-candidate-evidence.js";
 import {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
@@ -260,14 +260,10 @@ export interface CommerceAuthorityConsumerReadback {
 
 export interface CommerceCutoverPorts {
   /**
-   * Trusted release-integrity boundary. Its production implementation must
-   * call prepareDf13ReleaseCandidateEvidence against immutable release source.
-   * The executor independently validates the complete returned evidence; a
-   * caller cannot substitute an unstructured success assertion.
+   * Fixed immutable-source reader. The executor, not a caller-provided
+   * evidence package, performs the complete re-derivation and validation.
    */
-  readonly prepareReleaseCandidateEvidence: (
-    input: Df13CandidateBindingRequest,
-  ) => Promise<Df13ReleaseCandidateEvidence>;
+  readonly releaseCandidateSource: GateECandidateSourceReader;
   readonly holdAuthorityDependentWork: (input: Readonly<{
     pageId: string;
     channel: string;
@@ -316,6 +312,24 @@ export type CommerceCutoverExecution = Readonly<{
     | "LOST_RECONCILED";
   reasonCodes: readonly string[];
 }>;
+
+async function rederiveReleaseCandidateBinding(input: Readonly<{
+  candidate: Df13CandidateBindingRequest;
+  releaseCandidateSource: GateECandidateSourceReader;
+}>): Promise<Df13CandidateBindingValidation> {
+  try {
+    const evidence = await prepareDf13ReleaseCandidateEvidence({
+      activationReleaseRevision: input.candidate.activationReleaseRevision,
+      git: input.releaseCandidateSource,
+    });
+    return validateDf13ReleaseCandidateEvidence(evidence, input.candidate);
+  } catch {
+    return {
+      status: "MISMATCH",
+      reasonCodes: ["DF13_GATE_E_CANDIDATE_REDERIVATION_UNAVAILABLE"],
+    };
+  }
+}
 
 function targetPointerMatches(
   observed: RuntimeBehaviorModePointer | null,
@@ -506,21 +520,10 @@ export async function executeCommerceCutover(input: Readonly<{
   preflight: CommerceCutoverPreflightInput;
   ports: CommerceCutoverPorts;
 }>): Promise<CommerceCutoverExecution> {
-  let candidateBinding: Df13CandidateBindingValidation;
-  try {
-    const evidence = await input.ports.prepareReleaseCandidateEvidence(
-      input.preflight.candidate,
-    );
-    candidateBinding = validateDf13ReleaseCandidateEvidence(
-      evidence,
-      input.preflight.candidate,
-    );
-  } catch {
-    candidateBinding = {
-      status: "MISMATCH",
-      reasonCodes: ["DF13_GATE_E_CANDIDATE_REDERIVATION_UNAVAILABLE"],
-    };
-  }
+  const candidateBinding = await rederiveReleaseCandidateBinding({
+    candidate: input.preflight.candidate,
+    releaseCandidateSource: input.ports.releaseCandidateSource,
+  });
   const preflight = assessCommerceCutoverPreflight(input.preflight, candidateBinding);
   if (preflight.status !== "PREPARED_NO_ACTIVATION") {
     return {
@@ -687,21 +690,10 @@ export async function recoverCommerceCutoverAfterInterruption(input: Readonly<{
   preflight: CommerceCutoverPreflightInput;
   ports: CommerceCutoverPorts;
 }>): Promise<CommerceCutoverExecution> {
-  let candidateBinding: Df13CandidateBindingValidation;
-  try {
-    const evidence = await input.ports.prepareReleaseCandidateEvidence(
-      input.preflight.candidate,
-    );
-    candidateBinding = validateDf13ReleaseCandidateEvidence(
-      evidence,
-      input.preflight.candidate,
-    );
-  } catch {
-    candidateBinding = {
-      status: "MISMATCH",
-      reasonCodes: ["DF13_GATE_E_CANDIDATE_REDERIVATION_UNAVAILABLE"],
-    };
-  }
+  const candidateBinding = await rederiveReleaseCandidateBinding({
+    candidate: input.preflight.candidate,
+    releaseCandidateSource: input.ports.releaseCandidateSource,
+  });
   const preflight = assessCommerceCutoverPreflight(input.preflight, candidateBinding);
   if (preflight.status !== "PREPARED_NO_ACTIVATION") {
     return {

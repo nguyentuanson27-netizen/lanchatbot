@@ -45,6 +45,7 @@ function fencePort(
     admit: vi.fn(async (input) => ({
       status: "ADMITTED" as const,
       fenceToken: "fence-1",
+      acquisition: "NEW" as const,
       authority: input.authority,
     })),
     complete: vi.fn(async () => "RELEASED" as const),
@@ -60,6 +61,7 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
       pageId,
       channel: "MESSENGER",
       workId: "inbox-1",
+      inboxIds: ["inbox-1"],
       resolution: resolution("LEGACY", {
         source: "STARTUP_DEFAULT",
         status: "FALLBACK",
@@ -79,9 +81,10 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
       pageId,
       channel: "MESSENGER",
       workId: "inbox-1",
+      inboxIds: ["inbox-1"],
       resolution: resolution("COMMERCE"),
-    })).resolves.toEqual({
-      status: "REJECTED",
+    })).resolves.toMatchObject({
+      status: "BLOCKED",
       reasonCode: "DF13_FENCE_PROVIDER_REQUIRED",
     });
   });
@@ -94,24 +97,26 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
       pageId,
       channel: "MESSENGER",
       workId: "inbox-1",
+      inboxIds: ["inbox-1"],
       resolution: resolution("COMMERCE"),
-    })).resolves.toEqual({
-      status: "REJECTED",
+    })).resolves.toMatchObject({
+      status: "BLOCKED",
       reasonCode: "DF13_COMMERCE_CONSUMER_DISPATCHER_REQUIRED",
     });
     expect(port.admit).not.toHaveBeenCalled();
   });
 
-  it("rejects stale or cache-derived COMMERCE before a prospective provider", async () => {
+  it("permits a bounded cache identity to reach the same default-closed dispatcher boundary", async () => {
     const cacheAdapter = new Df13CommerceAuthorityFenceAdapter(fencePort());
     await expect(cacheAdapter.admit({
       pageId,
       channel: "MESSENGER",
       workId: "inbox-1",
+      inboxIds: ["inbox-1"],
       resolution: resolution("COMMERCE", { source: "CACHE" }),
-    })).resolves.toEqual({
-      status: "REJECTED",
-      reasonCode: "DF13_COMMERCE_IDENTITY_NOT_DATABASE_RESOLVED",
+    })).resolves.toMatchObject({
+      status: "BLOCKED",
+      reasonCode: "DF13_COMMERCE_CONSUMER_DISPATCHER_REQUIRED",
     });
   });
 
@@ -124,7 +129,9 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
     await expect(completionAdapter.complete({
       status: "COMMERCE_ADMITTED",
       fenceToken: "fence-1",
+      acquisition: "NEW",
       workId: "df13-test-work",
+      inboxIds: ["inbox-1"],
       authority: {
         modeVersionId: "10000000-0000-4000-8000-000000000006",
         contentHash: "sha256:" + "c".repeat(64),
@@ -138,8 +145,9 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
       .rejects.toThrow("DF13_FENCE_COMPLETION_UNPROVEN");
   });
 
-  it("blocks a configured prospective provider before state, classification, and side-effect planning", async () => {
+  it("durably blocks a configured prospective provider before state, classification, and side-effect planning", async () => {
     const retry = vi.fn(async () => true);
+    const deferForAuthorityBlock = vi.fn(async () => true);
     const loadOrCreate = vi.fn();
     const heldAdapter = new Df13CommerceAuthorityFenceAdapter(fencePort());
     const runner = new RealtimeRunner(
@@ -182,6 +190,7 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
         complete: vi.fn(async () => true),
         retry,
         failPermanent: vi.fn(async () => true),
+        deferForAuthorityBlock,
       },
       {
         loadOrCreate,
@@ -203,12 +212,13 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
     );
 
     await expect(runner.processOne()).resolves.toBe(true);
-    expect(retry).toHaveBeenCalledWith(
+    expect(deferForAuthorityBlock).toHaveBeenCalledWith(
       "inbox-1",
       "lease-1",
+      expect.stringMatching(/^df13-block-[a-f0-9]{64}$/u),
       "DF13_COMMERCE_CONSUMER_DISPATCHER_REQUIRED",
-      expect.any(Number),
     );
+    expect(retry).not.toHaveBeenCalled();
     expect(loadOrCreate).not.toHaveBeenCalled();
   });
 });

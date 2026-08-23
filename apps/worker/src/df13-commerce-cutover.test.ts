@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   behaviorModeContentHash,
   type RuntimeBehaviorModePointer,
@@ -15,11 +15,13 @@ const validateReleaseEvidence = vi.hoisted(() =>
     reasonCodes: [],
   }))
 );
+const prepareReleaseEvidence = vi.hoisted(() => vi.fn());
 
 vi.mock("./df13-release-candidate-evidence.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./df13-release-candidate-evidence.js")>();
   return {
     ...actual,
+    prepareDf13ReleaseCandidateEvidence: prepareReleaseEvidence,
     validateDf13ReleaseCandidateEvidence: validateReleaseEvidence,
   };
 });
@@ -38,6 +40,17 @@ import {
 
 const pageId = "1198992073286645";
 const preparedEvidence = {} as Df13ReleaseCandidateEvidence;
+const sourceReader = {
+  async readBlob() { return "source"; },
+  async resolveBlobOid() { return "a".repeat(40); },
+};
+
+beforeEach(() => {
+  prepareReleaseEvidence.mockReset();
+  prepareReleaseEvidence.mockResolvedValue(preparedEvidence);
+  validateReleaseEvidence.mockReset();
+  validateReleaseEvidence.mockReturnValue({ status: "MATCHED", reasonCodes: [] });
+});
 
 function pointer(
   salesAuthorityMode: "LEGACY" | "COMMERCE",
@@ -143,9 +156,7 @@ function ports(overrides: Partial<CommerceCutoverPorts> = {}): CommerceCutoverPo
   const target = pointer("COMMERCE", 6);
   const legacy = pointer("LEGACY", 7);
   return {
-    async prepareReleaseCandidateEvidence() {
-      return preparedEvidence;
-    },
+    releaseCandidateSource: sourceReader,
     async holdAuthorityDependentWork() {
       return { status: "HELD", fenceToken: "fence-1" };
     },
@@ -266,12 +277,10 @@ describe("DF13 commerce cutover contract", () => {
   it("blocks a copied Gate E fingerprint when the activation artifact cannot be re-derived", async () => {
     const input = preflightInput();
     let held = false;
+    prepareReleaseEvidence.mockRejectedValueOnce(new Error("activation artifact unavailable"));
     const result = await executeCommerceCutover({
       preflight: input,
       ports: ports({
-        async prepareReleaseCandidateEvidence() {
-          throw new Error("activation artifact unavailable");
-        },
         async holdAuthorityDependentWork() {
           held = true;
           return { status: "HELD", fenceToken: "unexpected" };
@@ -284,6 +293,20 @@ describe("DF13 commerce cutover contract", () => {
       reasonCodes: ["DF13_GATE_E_CANDIDATE_REDERIVATION_UNAVAILABLE"],
     });
     expect(held).toBe(false);
+  });
+
+  it("re-derives release evidence inside the executor from its fixed source reader", async () => {
+    const input = preflightInput();
+    const result = await executeCommerceCutover({
+      preflight: input,
+      ports: ports(),
+    });
+
+    expect(prepareReleaseEvidence).toHaveBeenCalledWith({
+      activationReleaseRevision: input.candidate.activationReleaseRevision,
+      git: sourceReader,
+    });
+    expect(result).toMatchObject({ status: "COMMERCE_ACTIVE" });
   });
 
   it("blocks a release-evidence validation failure before it acquires the fence", async () => {
