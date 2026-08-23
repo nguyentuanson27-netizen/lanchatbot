@@ -1,7 +1,7 @@
 # Deferred Active Backlog — DF and UR
 
 **Activation condition:** Gate BF is passed or explicitly accepted with recorded owner waivers, and the immutable `POST_BF_V1` comparison baseline has been captured.
-**Current status:** **GATE_E_PREPROD_ACCEPTED; DF11 and DF12 MERGED SOURCE-ONLY; DF-C / DF13 ACTIVE FOR SOURCE WORK.** The v15 immutable evidence bindings are recorded in `GATE_E_PREPROD_ACCEPTANCE_20260821.md`. This does not close BF-03/BF-04/BF-10 residuals, authorize deployment, or activate `COMMERCE`.
+**Current status:** **GATE_E_PREPROD_ACCEPTED; DF11–DF13 SOURCE COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING.** The v15 immutable evidence bindings are recorded in `GATE_E_PREPROD_ACCEPTANCE_20260821.md`. DF13 source contracts, the default-off fence-bound consumer, and release-evidence tooling are merged source-only; this does not close BF-03/BF-04/BF-10 residuals, authorize deployment, or activate `COMMERCE`.
 **Default context now:** Do not load this file for BF work except when a BF residual explicitly changes a future contract.
 **Operating mode:** `ENGINEERING_PREPROD`; logical dependencies stay item-level, while full verification and test-page deployment default to Release Train boundaries.
 **Plan rationale:** `PREPROD_DF_UR_PLAN_AMENDMENT.md`.
@@ -124,13 +124,14 @@ source-only; shared LEGACY control-plane reads and version writes remain
 compatible before that schema promotion. The enabled generic behavior-mode
 operator remains LEGACY-only, and the generic version CAS rejects COMMERCE
 targets. The pure fence admission and release-evidence contract bind the
-prospective immutable request without touching the runtime. A dedicated DF13
-provider/dispatcher and default-off consumer wrapper must still bind the immutable authority
+prospective immutable request without touching the runtime. The merged DF13
+provider/dispatcher and default-off consumer wrapper bind the immutable authority
 identity (mode version, content hash, pointer revision, source, authority/state
-modes, and authority-bundle hash) to all listed authority consumers, durable
-fence ownership, exact consumer readback, activation audit, and rollback before
-a separately authorized cutover command may exist. There is no operator shortcut
-from `LEGACY` to `COMMERCE`.
+modes, and authority-bundle hash) to the listed authority consumers and durable
+fence ownership. Operational acceptance must still establish exact consumer
+readback, activation audit, and rollback evidence before a separately authorized
+cutover command may exist. The source adapter is not constructed by the live
+runner, and there is no operator shortcut from `LEGACY` to `COMMERCE`.
 
 After explicit owner authorization, activate only on `PREPROD_TEST_PAGE` using that quiescent boundary, verify exact authority revision/hash/source readback across every relevant consumer, then release held eligible work and run the controlled critical human journeys.
 
