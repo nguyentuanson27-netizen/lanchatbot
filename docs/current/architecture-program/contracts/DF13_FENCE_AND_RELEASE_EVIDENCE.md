@@ -48,14 +48,20 @@ For COMMERCE, the future admission contract requires an exact fresh-resolved,
 audit-recorded identity. A bounded resolver cache is equivalent to the pointer
 it just validated and is therefore allowed; last-known-good, startup, stale,
 missing, ambiguous, or mismatched identities fail closed before the consumer
-is consulted. A resolver `FAIL_SAFE` result is never admitted as semantic
-`LEGACY` work merely because its fail-safe fields say `LEGACY`; this includes
-audit failure, missing/expired LKG, and a rejected COMMERCE pointer. In
+is consulted. The current, LEGACY-only source retains established
+`CLARIFY_ONLY` degradation when a resolver result has effective `LEGACY`
+authority and carries no canonical COMMERCE-rejection reason: this includes an
+audit-write failure, a missing/expired LKG pointer, and a LEGACY V2 page-scope
+rejection. A known COMMERCE pointer rejected for stale authority, page scope,
+or consumer unavailability/rejection is instead marked with a canonical
+COMMERCE-rejection reason and is never admitted as semantic `LEGACY` work. In
 particular, an LKG COMMERCE pointer is returned as `CLARIFY_ONLY`, never as
-fallback COMMERCE authority. The durable provider contract receives the
-complete fixed consumer set and the same immutable identity; a partial or
-substituted acknowledgement is rejected. It is not invoked by current source
-because no COMMERCE dispatcher exists.
+fallback COMMERCE authority. A future COMMERCE dispatcher/cutover must still
+fail closed for missing, stale, ambiguous, or mismatched COMMERCE identity; no
+current LEGACY degradation rule authorizes COMMERCE. The durable provider
+contract receives the complete fixed consumer set and the same immutable
+identity; a partial or substituted acknowledgement is rejected. It is not
+invoked by current source because no COMMERCE dispatcher exists.
 
 The future provider must atomically claim every sorted, unique durable Inbox
 row ID under a fresh opaque fence token. A work-ID hash is audit correlation

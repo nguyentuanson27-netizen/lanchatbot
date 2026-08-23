@@ -1,5 +1,8 @@
 import { createHash } from "node:crypto";
-import type { RuntimeBehaviorModeResolution } from "@lana/chat-runtime";
+import {
+  isCommerceAuthorityRejectionReason,
+  type RuntimeBehaviorModeResolution,
+} from "@lana/chat-runtime";
 import {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
   DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
@@ -152,8 +155,7 @@ function commerceIdentity(
 }
 
 function safeLegacy(resolution: RuntimeBehaviorModeResolution): boolean {
-  return resolution.source !== "FAIL_SAFE" &&
-    resolution.status !== "REJECTED" &&
+  return !resolution.reasonCodes.some(isCommerceAuthorityRejectionReason) &&
     resolution.salesAuthorityMode === "LEGACY" &&
     resolution.stateReadMode === "LEGACY" &&
     resolution.authorityBundleHash === null;

@@ -2621,10 +2621,6 @@ export class RealtimeRunner {
         this.inbox.isBatchCurrent
           ? !(await this.inbox.isBatchCurrent(this.batchLease(batch)))
           : false;
-      if (knownSuperseded) {
-        await this.completeWork(batch, true);
-        return true;
-      }
       const status = await this.processBatch(batch, knownSuperseded);
       if (
         status === "COMMITTED" ||
@@ -2907,6 +2903,14 @@ export class RealtimeRunner {
     }
     if (authorityAdmission.status === "COMMERCE_ADMITTED") {
       return "AUTHORITY_FENCE_DISPATCH_UNAVAILABLE";
+    }
+    // A stale native generation is not authority-independent: it must first
+    // resolve and cross the fence, then may use the existing guarded
+    // inbox-only completion. A prospective COMMERCE admission instead took
+    // the nonterminal path above and cannot complete this batch.
+    if (knownSuperseded) {
+      await this.completeWork(batch, true);
+      return "SUPERSEDED";
     }
     const record = await this.runtime.loadOrCreate(
       claim.pageId,

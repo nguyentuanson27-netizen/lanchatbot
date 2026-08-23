@@ -85,6 +85,28 @@ const FAIL_SAFE: RuntimeBehaviorModePayload = {
   stateReadMode: "LEGACY",
   authorityBundleHash: null,
 };
+
+/**
+ * A COMMERCE pointer that cannot be used must never be mistaken for an
+ * ordinary LEGACY degradation just because its fail-safe payload is LEGACY.
+ * This list is the canonical cross-package marker for that distinction.
+ */
+export const COMMERCE_AUTHORITY_REJECTION_REASONS = [
+  "RUNTIME_BEHAVIOR_COMMERCE_STALE_AUTHORITY",
+  "RUNTIME_BEHAVIOR_COMMERCE_PAGE_NOT_ALLOWED",
+  "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_UNAVAILABLE",
+  "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_REJECTED",
+] as const;
+
+export type CommerceAuthorityRejectionReason =
+  typeof COMMERCE_AUTHORITY_REJECTION_REASONS[number];
+
+export function isCommerceAuthorityRejectionReason(
+  value: string,
+): value is CommerceAuthorityRejectionReason {
+  return (COMMERCE_AUTHORITY_REJECTION_REASONS as readonly string[]).includes(value);
+}
+
 function canonicalJson(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
@@ -232,7 +254,7 @@ export class RuntimeBehaviorModeResolver {
     pageId: string,
     channel: string,
     source: BehaviorModeResolutionSource,
-  ): Promise<string | null> {
+  ): Promise<CommerceAuthorityRejectionReason | null> {
     if (pointer.version.salesAuthorityMode !== "COMMERCE") return null;
     if (source !== "DATABASE" && source !== "CACHE") {
       return "RUNTIME_BEHAVIOR_COMMERCE_STALE_AUTHORITY";

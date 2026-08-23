@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  COMMERCE_AUTHORITY_REJECTION_REASONS,
   RuntimeBehaviorModeResolver,
   behaviorModeContentHash,
   type RuntimeBehaviorModeResolution,
@@ -130,7 +131,34 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
     });
   });
 
-  it("blocks a FAIL_SAFE LEGACY fallback instead of admitting it as semantic LEGACY work", async () => {
+  it("blocks every canonical COMMERCE rejection despite fail-safe LEGACY fields", async () => {
+    const adapter = new Df13CommerceAuthorityFenceAdapter();
+
+    for (const reasonCode of COMMERCE_AUTHORITY_REJECTION_REASONS) {
+      await expect(adapter.admit({
+        pageId,
+        channel: "MESSENGER",
+        workId: `commerce-rejection-${reasonCode}`,
+        inboxIds: ["inbox-1"],
+        resolution: resolution("LEGACY", {
+          confirmationMode: "CLARIFY_ONLY",
+          source: "FAIL_SAFE",
+          status: "REJECTED",
+          reasonCodes: [reasonCode],
+          modeVersionId: null,
+          contentHash: null,
+          pointerRevision: null,
+          pointerUpdatedAt: null,
+          auditWrite: "RECORDED",
+        }),
+      })).resolves.toMatchObject({
+        status: "BLOCKED",
+        reasonCode: "DF13_COMMERCE_IDENTITY_NOT_FRESH_RESOLVED",
+      });
+    }
+  });
+
+  it("admits a FAIL_SAFE LEGACY audit fallback as existing CLARIFY_ONLY degradation", async () => {
     const payload = {
       confirmationMode: "LEGACY" as const,
       salesAuthorityMode: "LEGACY" as const,
@@ -179,10 +207,83 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
       workId: "fail-safe-legacy-fallback",
       inboxIds: ["inbox-1"],
       resolution: failedAudit,
-    })).resolves.toMatchObject({
-      status: "BLOCKED",
-      reasonCode: "DF13_COMMERCE_IDENTITY_NOT_FRESH_RESOLVED",
+    })).resolves.toEqual({ status: "LEGACY_ADMITTED" });
+  });
+
+  it("admits an expired-or-missing LEGACY pointer as existing CLARIFY_ONLY degradation", async () => {
+    const resolver = new RuntimeBehaviorModeResolver({
+      loadActiveMode: vi.fn(async () => null),
     });
+    const missingPointer = await resolver.resolve({
+      resolutionId: "10000000-0000-4000-8000-000000000011",
+      pageId,
+      channel: "MESSENGER",
+      workerId: "worker-1",
+      now: new Date("2026-08-23T00:00:00.000Z"),
+    });
+
+    expect(missingPointer).toMatchObject({
+      source: "FAIL_SAFE",
+      status: "FALLBACK",
+      salesAuthorityMode: "LEGACY",
+      reasonCodes: ["RUNTIME_BEHAVIOR_LKG_EXPIRED"],
+    });
+    await expect(new Df13CommerceAuthorityFenceAdapter().admit({
+      pageId,
+      channel: "MESSENGER",
+      workId: "missing-legacy-pointer",
+      inboxIds: ["inbox-1"],
+      resolution: missingPointer,
+    })).resolves.toEqual({ status: "LEGACY_ADMITTED" });
+  });
+
+  it("admits a LEGACY V2 page-scope rejection as existing CLARIFY_ONLY degradation", async () => {
+    const payload = {
+      confirmationMode: "V2_ACTIVE" as const,
+      salesAuthorityMode: "LEGACY" as const,
+      stateReadMode: "LEGACY" as const,
+      authorityBundleHash: null,
+    };
+    const resolver = new RuntimeBehaviorModeResolver({
+      loadActiveMode: vi.fn(async () => ({
+        version: {
+          schemaVersion: 1 as const,
+          modeVersionId: "10000000-0000-4000-8000-000000000012",
+          pageId,
+          channel: "MESSENGER",
+          contentHash: behaviorModeContentHash(payload),
+          createdBy: "test",
+          reason: "test",
+          createdAt: "2026-08-23T00:00:00.000Z",
+          ...payload,
+        },
+        pointerRevision: 12,
+        updatedBy: "test",
+        reason: "test",
+        updatedAt: "2026-08-23T00:00:00.000Z",
+      })),
+    });
+    const disallowedV2Page = await resolver.resolve({
+      resolutionId: "10000000-0000-4000-8000-000000000013",
+      pageId,
+      channel: "MESSENGER",
+      workerId: "worker-1",
+      now: new Date("2026-08-23T00:00:00.000Z"),
+    });
+
+    expect(disallowedV2Page).toMatchObject({
+      source: "FAIL_SAFE",
+      status: "REJECTED",
+      salesAuthorityMode: "LEGACY",
+      reasonCodes: ["RUNTIME_BEHAVIOR_ACTIVE_PAGE_NOT_ALLOWED"],
+    });
+    await expect(new Df13CommerceAuthorityFenceAdapter().admit({
+      pageId,
+      channel: "MESSENGER",
+      workId: "disallowed-v2-legacy-page",
+      inboxIds: ["inbox-1"],
+      resolution: disallowedV2Page,
+    })).resolves.toEqual({ status: "LEGACY_ADMITTED" });
   });
 
   it("admits a LEGACY customer burst larger than the former adapter-only cap", async () => {
@@ -435,10 +536,12 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
     expect(loadOrCreate).not.toHaveBeenCalled();
   });
 
-  it("keeps an unexpected COMMERCE admission outside the native transaction and terminal paths", async () => {
+  it("keeps a stale native batch with unexpected COMMERCE admission outside terminal and semantic paths", async () => {
     const retryBatch = vi.fn(async () => true);
     const failBatchPermanent = vi.fn(async () => true);
     const completeBatch = vi.fn(async () => true);
+    const deferBatchForAuthorityFence = vi.fn(async () => true);
+    const deferBatchForAuthorityBlock = vi.fn(async () => true);
     const loadOrCreate = vi.fn(async () => {
       throw new Error("must not enter authority-dependent state work");
     });
@@ -517,12 +620,15 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
       {
         claimNext: vi.fn(async () => null),
         claimNextBatch: vi.fn(async () => batch),
+        isBatchCurrent: vi.fn(async () => false),
         complete: vi.fn(async () => true),
         completeBatch,
         retry: vi.fn(async () => true),
         retryBatch,
         failPermanent: vi.fn(async () => true),
         failBatchPermanent,
+        deferBatchForAuthorityFence,
+        deferBatchForAuthorityBlock,
       },
       {
         loadOrCreate,
@@ -554,10 +660,13 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
     );
 
     await expect(runner.processOne()).resolves.toBe(true);
+    expect(unexpectedCommerceAdapter.admit).toHaveBeenCalledTimes(1);
     expect(loadOrCreate).not.toHaveBeenCalled();
     expect(commit).not.toHaveBeenCalled();
     expect(completeBatch).not.toHaveBeenCalled();
     expect(retryBatch).not.toHaveBeenCalled();
     expect(failBatchPermanent).not.toHaveBeenCalled();
+    expect(deferBatchForAuthorityFence).not.toHaveBeenCalled();
+    expect(deferBatchForAuthorityBlock).not.toHaveBeenCalled();
   });
 });
