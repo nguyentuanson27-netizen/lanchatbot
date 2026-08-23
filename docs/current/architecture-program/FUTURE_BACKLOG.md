@@ -123,7 +123,9 @@ promoted or applied under this track. The COMMERCE version contract is
 source-only; shared LEGACY control-plane reads and version writes remain
 compatible before that schema promotion. The enabled generic behavior-mode
 operator remains LEGACY-only, and the generic version CAS rejects COMMERCE
-targets. A dedicated DF13 adapter must first bind the immutable authority
+targets. The pure fence admission and release-evidence contract bind the
+prospective immutable request without touching the runtime. A dedicated DF13
+provider/dispatcher and default-off consumer wrapper must still bind the immutable authority
 identity (mode version, content hash, pointer revision, source, authority/state
 modes, and authority-bundle hash) to all listed authority consumers, durable
 fence ownership, exact consumer readback, activation audit, and rollback before
