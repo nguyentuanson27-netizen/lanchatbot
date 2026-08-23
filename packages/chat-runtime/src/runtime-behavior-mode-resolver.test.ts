@@ -105,25 +105,48 @@ describe("RuntimeBehaviorModeResolver", () => {
     });
   });
 
-  it("resolves an exact COMMERCE authority bundle only from the database pointer", async () => {
+  it("fails safe unless an exact COMMERCE consumer is bound and the page is explicitly allowed", async () => {
     const source = new MutableSource();
     const commerceBundleHash = "a".repeat(64);
     const payload = {
-      confirmationMode: "V2_ACTIVE" as const,
+      confirmationMode: "LEGACY" as const,
       salesAuthorityMode: "COMMERCE" as const,
       stateReadMode: "LEGACY" as const,
       authorityBundleHash: commerceBundleHash,
     };
     source.value = {
-      ...pointer("V2_ACTIVE"),
+      ...pointer("LEGACY"),
       version: {
-        ...pointer("V2_ACTIVE").version,
+        ...pointer("LEGACY").version,
         ...payload,
         contentHash: behaviorModeContentHash(payload),
       },
     };
 
     expect(await new RuntimeBehaviorModeResolver(source, { allowedPageIds: [pageId] }).resolve(input())).toMatchObject({
+      source: "FAIL_SAFE",
+      status: "REJECTED",
+      confirmationMode: "CLARIFY_ONLY",
+      reasonCodes: ["RUNTIME_BEHAVIOR_COMMERCE_PAGE_NOT_ALLOWED"],
+    });
+    expect(await new RuntimeBehaviorModeResolver(source, {
+      allowedPageIds: [pageId],
+      allowedCommercePageIds: [pageId],
+    }).resolve(input())).toMatchObject({
+      source: "FAIL_SAFE",
+      status: "REJECTED",
+      confirmationMode: "CLARIFY_ONLY",
+      reasonCodes: ["RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_UNAVAILABLE"],
+    });
+    expect(await new RuntimeBehaviorModeResolver(source, {
+      allowedPageIds: [pageId],
+      allowedCommercePageIds: [pageId],
+      commerceAuthorityConsumer: {
+        async admitCommerceAuthority() {
+          return { status: "ADMITTED" } as const;
+        },
+      },
+    }).resolve(input())).toMatchObject({
       source: "DATABASE",
       status: "RESOLVED",
       salesAuthorityMode: "COMMERCE",

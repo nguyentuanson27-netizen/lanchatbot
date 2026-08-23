@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { RuntimeBehaviorModePointer } from "@lana/chat-runtime";
+import {
+  behaviorModeContentHash,
+  type RuntimeBehaviorModePointer,
+} from "@lana/chat-runtime";
 import type { MissingCommerceSignal } from "./missing-commerce-signal.js";
 import type {
   Df13ReleaseCandidateEvidence,
@@ -55,7 +58,7 @@ function pointer(
       pageId,
       channel: "MESSENGER",
       ...payload,
-      contentHash: `sha256:${salesAuthorityMode.toLowerCase().padEnd(64, "0")}`,
+      contentHash: behaviorModeContentHash(payload),
       createdBy: "test-operator",
       reason: "test",
       createdAt: "2026-08-22T00:00:00.000Z",
@@ -126,6 +129,14 @@ function exactReadbacks(target: RuntimeBehaviorModePointer) {
       ? DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
       : null,
   }));
+}
+
+function restoredLegacyPointer(input: ReturnType<typeof preflightInput>): RuntimeBehaviorModePointer {
+  return {
+    ...input.currentPointer,
+    pointerRevision: input.targetPointer.pointerRevision + 1,
+    updatedAt: "2026-08-22T00:01:00.000Z",
+  };
 }
 
 function ports(overrides: Partial<CommerceCutoverPorts> = {}): CommerceCutoverPorts {
@@ -221,6 +232,25 @@ describe("DF13 commerce cutover contract", () => {
       version: {
         ...input.targetPointer.version,
         authorityBundleHash: null,
+      },
+    };
+
+    expect(assessCommerceCutoverPreflight({ ...input, targetPointer }, {
+      status: "MATCHED",
+      reasonCodes: [],
+    })).toMatchObject({
+      status: "BLOCKED_LEGACY",
+      reasonCodes: ["DF13_TARGET_AUTHORITY_INVALID"],
+    });
+  });
+
+  it("blocks a COMMERCE target whose content hash is not canonical", () => {
+    const input = preflightInput();
+    const targetPointer: RuntimeBehaviorModePointer = {
+      ...input.targetPointer,
+      version: {
+        ...input.targetPointer.version,
+        contentHash: `sha256:${"f".repeat(64)}`,
       },
     };
 
@@ -407,7 +437,7 @@ describe("DF13 commerce cutover contract", () => {
 
   it("releases after CAS mismatch only when every consumer has converged on observed LEGACY", async () => {
     const input = preflightInput();
-    const legacy = pointer("LEGACY", 6);
+    const legacy = input.currentPointer;
     let readbacks = 0;
     let released = false;
     const result = await executeCommerceCutover({
@@ -440,7 +470,7 @@ describe("DF13 commerce cutover contract", () => {
 
   it("retains the fence after rollback until every consumer converges on LEGACY", async () => {
     const input = preflightInput();
-    const legacy = pointer("LEGACY", 7);
+    const legacy = restoredLegacyPointer(input);
     let reads = 0;
     let released = false;
     const result = await executeCommerceCutover({
@@ -467,7 +497,7 @@ describe("DF13 commerce cutover contract", () => {
 
   it("rolls back when the CAS activation lacks its append-only audit record", async () => {
     const input = preflightInput();
-    const legacy = pointer("LEGACY", 7);
+    const legacy = restoredLegacyPointer(input);
     let reads = 0;
     const result = await executeCommerceCutover({
       preflight: input,
@@ -514,9 +544,37 @@ describe("DF13 commerce cutover contract", () => {
     expect(released).toBe(false);
   });
 
+  it("retains the fence when rollback lands on a different LEGACY version", async () => {
+    const input = preflightInput();
+    const staleLegacy = pointer("LEGACY", 7);
+    let reads = 0;
+    let released = false;
+    const result = await executeCommerceCutover({
+      preflight: input,
+      ports: ports({
+        async readActivePointer() {
+          reads += 1;
+          return reads === 1 ? input.targetPointer : staleLegacy;
+        },
+        async readActivationAudit() {
+          return "MISSING";
+        },
+        async releaseAuthorityDependentWork() {
+          released = true;
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "HOLD_RETAINED",
+      reasonCodes: ["DF13_ACTIVATION_AUDIT_UNPROVEN", "DF13_ROLLBACK_UNPROVEN"],
+    });
+    expect(released).toBe(false);
+  });
+
   it("recovers an interrupted COMMERCE cutover by reacquiring the fence and restoring LEGACY", async () => {
     const input = preflightInput();
-    const legacy = pointer("LEGACY", 7);
+    const legacy = restoredLegacyPointer(input);
     let reads = 0;
     const result = await recoverCommerceCutoverAfterInterruption({
       preflight: input,
@@ -538,7 +596,7 @@ describe("DF13 commerce cutover contract", () => {
 
   it("retains the fence during interrupted recovery until every consumer converges on LEGACY", async () => {
     const input = preflightInput();
-    const legacy = pointer("LEGACY", 7);
+    const legacy = restoredLegacyPointer(input);
     let released = false;
     const result = await recoverCommerceCutoverAfterInterruption({
       preflight: input,
@@ -558,6 +616,62 @@ describe("DF13 commerce cutover contract", () => {
       status: "HOLD_RETAINED",
       reasonCodes: ["DF13_LEGACY_CONSUMER_READBACK_INCOMPLETE"],
     });
+    expect(released).toBe(false);
+  });
+
+  it("accepts a LEGACY pointer that omits the optional authority bundle key", async () => {
+    const input = preflightInput();
+    const { authorityBundleHash: _omittedAuthorityBundleHash, ...versionWithoutAuthorityBundle } =
+      input.currentPointer.version;
+    const currentPointer: RuntimeBehaviorModePointer = {
+      ...input.currentPointer,
+      version: versionWithoutAuthorityBundle,
+    };
+    const withOmittedBundle = { ...input, currentPointer };
+    const result = await recoverCommerceCutoverAfterInterruption({
+      preflight: withOmittedBundle,
+      ports: ports({
+        async readActivePointer() {
+          return currentPointer;
+        },
+        async readConsumerAuthorities() {
+          return exactReadbacks(currentPointer);
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "LEGACY_RESTORED",
+      reasonCodes: ["DF13_INTERRUPTED_CUTOVER_ALREADY_LEGACY"],
+    });
+  });
+
+  it("reports recovery as blocked when the fence was never acquired", async () => {
+    let quiescenceProved = false;
+    let released = false;
+    const result = await recoverCommerceCutoverAfterInterruption({
+      preflight: preflightInput(),
+      ports: ports({
+        async holdAuthorityDependentWork() {
+          return { status: "REJECTED", reasonCode: "lease-unavailable" };
+        },
+        async proveQuiescence() {
+          quiescenceProved = true;
+          return { status: "QUIESCENT", inFlightAuthorityDependentWork: 0, queuedWork: "HELD" };
+        },
+        async releaseAuthorityDependentWork() {
+          released = true;
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "BLOCKED_LEGACY",
+      sideEffects: "NOT_EXECUTED",
+      activationAcknowledgement: "NOT_ATTEMPTED",
+      reasonCodes: ["DF13_RECOVERY_FENCE_NOT_HELD"],
+    });
+    expect(quiescenceProved).toBe(false);
     expect(released).toBe(false);
   });
 });

@@ -1,4 +1,7 @@
-import type { RuntimeBehaviorModePointer } from "@lana/chat-runtime";
+import {
+  behaviorModeContentHash,
+  type RuntimeBehaviorModePointer,
+} from "@lana/chat-runtime";
 import {
   deriveGateECandidateContentFingerprint,
   type GateECandidateSourceReader,
@@ -138,16 +141,44 @@ export type CommerceCutoverPreflight = Readonly<{
   reasonCodes: readonly string[];
 }>;
 
+function normalizedAuthorityBundleHash(pointer: RuntimeBehaviorModePointer): string | null {
+  return pointer.version.authorityBundleHash ?? null;
+}
+
+function pointerHasCanonicalContentHash(pointer: RuntimeBehaviorModePointer): boolean {
+  return behaviorModeContentHash(pointer.version) === pointer.version.contentHash;
+}
+
+function pointerVersionMatches(
+  observed: RuntimeBehaviorModePointer,
+  expected: RuntimeBehaviorModePointer,
+): boolean {
+  return observed.version.schemaVersion === expected.version.schemaVersion &&
+    observed.version.modeVersionId === expected.version.modeVersionId &&
+    observed.version.pageId === expected.version.pageId &&
+    observed.version.channel === expected.version.channel &&
+    observed.version.confirmationMode === expected.version.confirmationMode &&
+    observed.version.salesAuthorityMode === expected.version.salesAuthorityMode &&
+    observed.version.stateReadMode === expected.version.stateReadMode &&
+    normalizedAuthorityBundleHash(observed) === normalizedAuthorityBundleHash(expected) &&
+    observed.version.contentHash === expected.version.contentHash;
+}
+
 function pointerIsLegacy(pointer: RuntimeBehaviorModePointer): boolean {
   return pointer.version.salesAuthorityMode === "LEGACY" &&
-    pointer.version.stateReadMode === "LEGACY";
+    pointer.version.stateReadMode === "LEGACY" &&
+    normalizedAuthorityBundleHash(pointer) === null &&
+    pointerHasCanonicalContentHash(pointer);
 }
 
 function pointerIsTargetCommerce(
   pointer: RuntimeBehaviorModePointer,
   preflight: CommerceCutoverPreflightInput,
 ): boolean {
-  return pointer.version.pageId === preflight.pageId &&
+  return pointerHasCanonicalContentHash(pointer) &&
+    Number.isSafeInteger(pointer.pointerRevision) &&
+    pointer.pointerRevision > 0 &&
+    pointer.version.pageId === preflight.pageId &&
     pointer.version.channel === preflight.channel &&
     pointer.version.confirmationMode === preflight.currentPointer.version.confirmationMode &&
     pointer.version.salesAuthorityMode === "COMMERCE" &&
@@ -268,6 +299,8 @@ export interface CommerceCutoverPorts {
   }>) => Promise<readonly CommerceAuthorityConsumerReadback[]>;
   readonly rollbackToLegacy: (input: Readonly<{
     expectedPointerRevision: number;
+    targetLegacyVersionId: string;
+    targetLegacyContentHash: string;
     fenceToken: string;
   }>) => Promise<Readonly<{ status: "ACKNOWLEDGED" | "ACK_LOST" | "CAS_MISMATCH" }>>;
   readonly releaseAuthorityDependentWork: (input: Readonly<{ fenceToken: string }>) => Promise<void>;
@@ -289,13 +322,13 @@ function targetPointerMatches(
   target: RuntimeBehaviorModePointer,
 ): boolean {
   return observed !== null &&
+    pointerHasCanonicalContentHash(observed) &&
     observed.pointerRevision === target.pointerRevision &&
-    observed.version.modeVersionId === target.version.modeVersionId &&
-    observed.version.contentHash === target.version.contentHash &&
+    pointerVersionMatches(observed, target) &&
     observed.version.salesAuthorityMode === "COMMERCE" &&
     observed.version.stateReadMode === "LEGACY" &&
-    observed.version.authorityBundleHash === target.version.authorityBundleHash &&
-    observed.version.authorityBundleHash ===
+    normalizedAuthorityBundleHash(observed) === normalizedAuthorityBundleHash(target) &&
+    normalizedAuthorityBundleHash(observed) ===
       DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
 }
 
@@ -303,6 +336,24 @@ function isSafeLegacyPointer(
   observed: RuntimeBehaviorModePointer | null,
 ): observed is RuntimeBehaviorModePointer {
   return observed !== null && pointerIsLegacy(observed);
+}
+
+function isPreCutoverLegacyPointer(
+  observed: RuntimeBehaviorModePointer | null,
+  preflight: CommerceCutoverPreflightInput,
+): observed is RuntimeBehaviorModePointer {
+  return isSafeLegacyPointer(observed) &&
+    observed.pointerRevision === preflight.currentPointer.pointerRevision &&
+    pointerVersionMatches(observed, preflight.currentPointer);
+}
+
+function isRestoredLegacyPointer(
+  observed: RuntimeBehaviorModePointer | null,
+  preflight: CommerceCutoverPreflightInput,
+): observed is RuntimeBehaviorModePointer {
+  return isSafeLegacyPointer(observed) &&
+    observed.pointerRevision === preflight.targetPointer.pointerRevision + 1 &&
+    pointerVersionMatches(observed, preflight.currentPointer);
 }
 
 function exactConsumerReadbacks(
@@ -314,16 +365,17 @@ function exactConsumerReadbacks(
   if (byConsumer.size !== values.length) return false;
   const salesAuthorityMode = target.version.salesAuthorityMode;
   const stateReadMode = target.version.stateReadMode;
-  if ((salesAuthorityMode !== "LEGACY" && salesAuthorityMode !== "COMMERCE") ||
+  if (!pointerHasCanonicalContentHash(target) ||
+      (salesAuthorityMode !== "LEGACY" && salesAuthorityMode !== "COMMERCE") ||
       (stateReadMode !== "LEGACY" && stateReadMode !== "V2")) {
     return false;
   }
   const authorityBundleHash = salesAuthorityMode === "COMMERCE"
-    ? target.version.authorityBundleHash
+    ? normalizedAuthorityBundleHash(target)
     : null;
   if ((salesAuthorityMode === "COMMERCE" &&
        authorityBundleHash !== DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash) ||
-      (salesAuthorityMode === "LEGACY" && target.version.authorityBundleHash !== null)) {
+      (salesAuthorityMode === "LEGACY" && normalizedAuthorityBundleHash(target) !== null)) {
     return false;
   }
   return DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.every((consumer) => {
@@ -389,10 +441,11 @@ async function rollbackOrRetainHold(input: Readonly<{
   reasonCode: string;
   activationAcknowledgement: CommerceCutoverExecution["activationAcknowledgement"];
 }>): Promise<CommerceCutoverExecution> {
-  let acknowledgement: Awaited<ReturnType<CommerceCutoverPorts["rollbackToLegacy"]>>;
   try {
-    acknowledgement = await input.ports.rollbackToLegacy({
+    await input.ports.rollbackToLegacy({
       expectedPointerRevision: input.preflight.targetPointer.pointerRevision,
+      targetLegacyVersionId: input.preflight.currentPointer.version.modeVersionId,
+      targetLegacyContentHash: input.preflight.currentPointer.version.contentHash,
       fenceToken: input.fenceToken,
     });
   } catch {
@@ -414,7 +467,7 @@ async function rollbackOrRetainHold(input: Readonly<{
       reasonCodes: [input.reasonCode, "DF13_ROLLBACK_UNPROVEN"],
     };
   }
-  if (!isSafeLegacyPointer(restoredPointer)) {
+  if (!isRestoredLegacyPointer(restoredPointer, input.preflight)) {
     return {
       status: "HOLD_RETAINED",
       sideEffects: "CONTROL_PLANE_ONLY",
@@ -541,7 +594,7 @@ export async function executeCommerceCutover(input: Readonly<{
     };
   }
   if (!targetPointerMatches(activatedPointer, input.preflight.targetPointer)) {
-    if (isSafeLegacyPointer(activatedPointer)) {
+    if (isPreCutoverLegacyPointer(activatedPointer, input.preflight)) {
       const convergence = await proveExactLegacyConsumerConvergence({
         ports: input.ports,
         fenceToken: held.fenceToken,
@@ -665,7 +718,7 @@ export async function recoverCommerceCutoverAfterInterruption(input: Readonly<{
   });
   if (held.status !== "HELD") {
     return {
-      status: "HOLD_RETAINED",
+      status: "BLOCKED_LEGACY",
       sideEffects: "NOT_EXECUTED",
       activationAcknowledgement: "NOT_ATTEMPTED",
       reasonCodes: ["DF13_RECOVERY_FENCE_NOT_HELD"],
@@ -703,7 +756,8 @@ export async function recoverCommerceCutoverAfterInterruption(input: Readonly<{
       reasonCodes: ["DF13_INTERRUPTED_CUTOVER_STATE_AMBIGUOUS"],
     };
   }
-  if (isSafeLegacyPointer(observed)) {
+  if (isPreCutoverLegacyPointer(observed, input.preflight) ||
+      isRestoredLegacyPointer(observed, input.preflight)) {
     const convergence = await proveExactLegacyConsumerConvergence({
       ports: input.ports,
       fenceToken: held.fenceToken,
