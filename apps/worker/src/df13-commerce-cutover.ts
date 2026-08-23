@@ -1,60 +1,29 @@
-import { createHash } from "node:crypto";
 import type { RuntimeBehaviorModePointer } from "@lana/chat-runtime";
-import { canonicalJsonV1 } from "@lana/contracts";
 import {
   deriveGateECandidateContentFingerprint,
   type GateECandidateSourceReader,
 } from "./gate-e-registration.js";
 import type { MissingCommerceSignal } from "./missing-commerce-signal.js";
+import {
+  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
+  DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+  type CommerceAuthorityConsumer,
+} from "./df13-commerce-authority-bundle.js";
+
+export {
+  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
+  DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+} from "./df13-commerce-authority-bundle.js";
+export type { CommerceAuthorityConsumer } from "./df13-commerce-authority-bundle.js";
 
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 const PREPROD_TEST_PAGE_ID = "1198992073286645";
 
-function sha256(value: string): string {
-  return createHash("sha256").update(value, "utf8").digest("hex");
-}
-
 export const GATE_E_PREPROD_V15_BINDING = Object.freeze({
   manifestHash: "48ed2d4a38fa2eea9eea7caadc0529862742c60a06b670e6872208e26893962b",
   candidateSourceRevision: "e80cd663a9769ad8c0313c3693f37f32138ca52a",
   candidateContentFingerprint: "86ff34479283895ac97274b9cace946e2926b17bc1ac381d540f2f03a17d977a",
-});
-
-export const DF13_COMMERCE_AUTHORITY_CONSUMERS_V1 = Object.freeze([
-  "CLASSIFICATION",
-  "COMMERCE_STATE",
-  "CONTEXT_V2",
-  "DERIVED_PHASE",
-  "STRATEGY",
-  "CTA",
-  "FINAL_RECONCILIATION",
-  "SIDE_EFFECT_PLAN",
-] as const);
-
-export type CommerceAuthorityConsumer =
-  typeof DF13_COMMERCE_AUTHORITY_CONSUMERS_V1[number];
-
-const authorityBundle = Object.freeze({
-  schemaVersion: 1 as const,
-  contractVersion: "DF13_COMMERCE_AUTHORITY_BUNDLE_V1" as const,
-  phase: "COMMERCE_DERIVED" as const,
-  context: "CONTEXT_V2" as const,
-  strategy: "CONTEXT_V2" as const,
-  cta: "CONTEXT_V2" as const,
-  reconciliation: "COMMERCE_FINAL" as const,
-  legacySalesStage: "DEMOTED_TELEMETRY_ONLY" as const,
-  authorityIndependentBypassClasses: [] as readonly [],
-});
-
-/**
- * The bundle is intentionally all-or-nothing. A future activation cannot
- * retain the regex sales-stage writer as a second authority, nor selectively
- * retain a legacy Context/phase/reconciliation consumer.
- */
-export const DF13_COMMERCE_AUTHORITY_BUNDLE_V1 = Object.freeze({
-  ...authorityBundle,
-  contractHash: sha256(canonicalJsonV1(authorityBundle)),
 });
 
 export interface Df13CandidateBindingInput {

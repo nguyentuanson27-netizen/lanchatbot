@@ -66,6 +66,22 @@ schema-compatible until a separately authorized release promotes and applies it.
 Defining the COMMERCE schema/version contract is not permission to promote or
 apply its migration, introduce that adapter, or activate runtime authority.
 
+The resolver derives and returns typed authority provenance for every resolution
+and retains it through cache/LKG expiry, page rejection, and audit failure. An
+effective LEGACY-shaped fail-safe from a COMMERCE pointer is therefore not a
+LEGACY authority decision and cannot be admitted by a future Commerce boundary.
+Provenance is not itself persisted. When its audit write succeeds, a refused or
+failed COMMERCE-origin candidate is durably marked by its
+`RUNTIME_BEHAVIOR_COMMERCE_*` reason code on the resolution audit row; a
+successful resolution remains bound by its
+immutable version, content hash, and pointer revision. A first-class provenance
+audit column requires a separately authorized migration and is not part of this
+source contract.
+Commerce itself is default-off: it requires a page-scoped, validation-only
+dedicated consumer boundary to admit the exact resolved identity before any
+future composition root could consume it. This source contract does not bind
+that consumer to the live pipeline or change the active LEGACY runtime.
+
 Offline or controlled legacy/new comparison is verification tooling, not a live authority mode. It must not create protected side effects.
 
 Traffic shadowing, traffic-percentage canaries, long soak, or statistical promotion gates are not durable PREPROD invariants. They may be introduced later by an explicit `PRODUCTION_HARDENING` decision if measured traffic/risk makes them useful.
