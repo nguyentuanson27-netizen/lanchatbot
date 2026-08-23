@@ -50,7 +50,8 @@ export interface RuntimeBehaviorModeSourcePort {
 export interface CommerceAuthorityConsumerPort {
   /**
    * Validation-only boundary for the dedicated Commerce consumer. Calling this
-   * method must not plan or execute a side effect.
+   * method must not plan or execute a side effect and must return within the
+   * resolver-configured bound.
    */
   admitCommerceAuthority(input: {
     readonly pageId: string;
@@ -117,7 +118,8 @@ class RuntimeBehaviorModeLoadError extends Error {
     readonly authorityProvenance: RuntimeBehaviorModeAuthorityProvenance,
     cause: unknown,
   ) {
-    super(cause instanceof Error ? cause.message : "RUNTIME_BEHAVIOR_LOAD_INVALID");
+    super(cause instanceof Error ? cause.message : "RUNTIME_BEHAVIOR_LOAD_INVALID", { cause });
+    this.name = "RuntimeBehaviorModeLoadError";
   }
 }
 
@@ -137,6 +139,7 @@ export class RuntimeBehaviorModeResolver {
   private readonly allowedPageIds: ReadonlySet<string>;
   private readonly allowedCommercePageIds: ReadonlySet<string>;
   private readonly commerceAuthorityConsumer: CommerceAuthorityConsumerPort | undefined;
+  private readonly commerceConsumerTimeoutMs: number;
   private readonly cache = new Map<string, CachedPointer>();
   private readonly lastKnownGood = new Map<string, CachedPointer>();
   private readonly inFlight = new Map<string, Promise<CachedPointer>>();
@@ -149,6 +152,7 @@ export class RuntimeBehaviorModeResolver {
       readonly allowedPageIds?: readonly string[];
       readonly allowedCommercePageIds?: readonly string[];
       readonly commerceAuthorityConsumer?: CommerceAuthorityConsumerPort;
+      readonly commerceConsumerTimeoutMs?: number;
     } = {},
   ) {
     this.cacheTtlMs = options.cacheTtlMs ?? 5_000;
@@ -158,6 +162,12 @@ export class RuntimeBehaviorModeResolver {
     this.allowedPageIds = new Set(options.allowedPageIds ?? []);
     this.allowedCommercePageIds = new Set(options.allowedCommercePageIds ?? []);
     this.commerceAuthorityConsumer = options.commerceAuthorityConsumer;
+    this.commerceConsumerTimeoutMs = options.commerceConsumerTimeoutMs ?? 1_000;
+    if (!Number.isFinite(this.commerceConsumerTimeoutMs)
+        || this.commerceConsumerTimeoutMs < 1
+        || this.commerceConsumerTimeoutMs > 5_000) {
+      throw new Error("RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_TIMEOUT_INVALID");
+    }
   }
 
   invalidate(pageId: string, channel: string): void {
@@ -230,19 +240,34 @@ export class RuntimeBehaviorModeResolver {
     if (!this.commerceAuthorityConsumer) {
       return "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_UNAVAILABLE";
     }
+    let timeout: ReturnType<typeof setTimeout> | undefined;
     try {
-      const admission = await this.commerceAuthorityConsumer.admitCommerceAuthority({
-        pageId: pointer.version.pageId,
-        channel: pointer.version.channel,
-        modeVersionId: pointer.version.modeVersionId,
-        contentHash: pointer.version.contentHash,
-        authorityBundleHash: pointer.version.authorityBundleHash!,
-        pointerRevision: pointer.pointerRevision,
-        source,
-      });
+      const admission = await Promise.race([
+        this.commerceAuthorityConsumer.admitCommerceAuthority({
+          pageId: pointer.version.pageId,
+          channel: pointer.version.channel,
+          modeVersionId: pointer.version.modeVersionId,
+          contentHash: pointer.version.contentHash,
+          authorityBundleHash: pointer.version.authorityBundleHash!,
+          pointerRevision: pointer.pointerRevision,
+          source,
+        }),
+        new Promise<{ readonly status: "TIMEOUT" }>((resolve) => {
+          timeout = setTimeout(
+            () => resolve({ status: "TIMEOUT" }),
+            this.commerceConsumerTimeoutMs,
+          );
+          timeout.unref();
+        }),
+      ]);
+      if (admission.status === "TIMEOUT") {
+        return "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_TIMEOUT";
+      }
       return admission.status === "ADMITTED" ? null : "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_REJECTED";
     } catch {
       return "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_REJECTED";
+    } finally {
+      if (timeout) clearTimeout(timeout);
     }
   }
 
@@ -327,15 +352,23 @@ export class RuntimeBehaviorModeResolver {
         if (lkg && lkgAgeMs !== null && lkgAgeMs >= 0 && lkgAgeMs <= this.lastKnownGoodTtlMs) {
           entry = lkg;
           source = "LAST_KNOWN_GOOD";
-          reasonCodes = ["RUNTIME_BEHAVIOR_SOURCE_UNAVAILABLE"];
+          reasonCodes = [
+            "RUNTIME_BEHAVIOR_SOURCE_UNAVAILABLE",
+            ...(failedAuthorityProvenance === "COMMERCE_POINTER"
+              ? ["RUNTIME_BEHAVIOR_COMMERCE_SOURCE_REFUSED"]
+              : []),
+          ];
         }
       }
     }
     if (!entry) {
       const expiredAuthorityProvenance = authorityProvenanceForPointer(this.lastKnownGood.get(key)?.pointer);
-      const authorityProvenance = expiredAuthorityProvenance === "UNKNOWN"
-        ? failedAuthorityProvenance
-        : expiredAuthorityProvenance;
+      const authorityProvenance = failedAuthorityProvenance === "COMMERCE_POINTER"
+        || expiredAuthorityProvenance === "COMMERCE_POINTER"
+        ? "COMMERCE_POINTER"
+        : failedAuthorityProvenance !== "UNKNOWN"
+          ? failedAuthorityProvenance
+          : expiredAuthorityProvenance;
       return this.audited(scoped, {
         ...FAIL_SAFE, modeVersionId: null, contentHash: null, pointerRevision: null,
         authorityBundleHash: null,

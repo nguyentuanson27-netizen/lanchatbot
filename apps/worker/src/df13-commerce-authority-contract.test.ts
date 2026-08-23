@@ -4,6 +4,9 @@ import {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
   assessDf13CommerceAuthority,
 } from "./df13-commerce-authority-contract.js";
+import {
+  DF13_COMMERCE_AUTHORITY_BUNDLE_V1 as CUTOVER_AUTHORITY_BUNDLE_V1,
+} from "./df13-commerce-cutover.js";
 
 function resolution(
   overrides: Partial<RuntimeBehaviorModeResolution> = {},
@@ -29,6 +32,10 @@ function resolution(
 }
 
 describe("DF13 Commerce authority contract", () => {
+  it("uses the exact same immutable authority bundle instance as cutover", () => {
+    expect(DF13_COMMERCE_AUTHORITY_BUNDLE_V1).toBe(CUTOVER_AUTHORITY_BUNDLE_V1);
+  });
+
   it("admits only a fresh, audited, exact COMMERCE identity to the future Commerce track", () => {
     expect(assessDf13CommerceAuthority(resolution())).toMatchObject({
       status: "COMMERCE_CANDIDATE",
