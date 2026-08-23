@@ -4,7 +4,6 @@ import {
   behaviorModeContentHash,
   type RuntimeBehaviorModeResolution,
 } from "@lana/chat-runtime";
-import { createConversationState } from "@lana/conversation-engine";
 import {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
 } from "./df13-commerce-cutover.js";
@@ -53,7 +52,6 @@ function fencePort(
       acquisition: "NEW" as const,
       authority: input.authority,
     })),
-    complete: vi.fn(async () => "RELEASED" as const),
     ...overrides,
   };
 }
@@ -126,6 +124,61 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
       workId: "rejected-commerce-pointer",
       inboxIds: ["inbox-1"],
       resolution: rejected,
+    })).resolves.toMatchObject({
+      status: "BLOCKED",
+      reasonCode: "DF13_COMMERCE_IDENTITY_NOT_FRESH_RESOLVED",
+    });
+  });
+
+  it("blocks a FAIL_SAFE LEGACY fallback instead of admitting it as semantic LEGACY work", async () => {
+    const payload = {
+      confirmationMode: "LEGACY" as const,
+      salesAuthorityMode: "LEGACY" as const,
+      stateReadMode: "LEGACY" as const,
+      authorityBundleHash: null,
+    };
+    const resolver = new RuntimeBehaviorModeResolver({
+      loadActiveMode: vi.fn(async () => ({
+        version: {
+          schemaVersion: 1 as const,
+          modeVersionId: "10000000-0000-4000-8000-000000000009",
+          pageId,
+          channel: "MESSENGER",
+          contentHash: behaviorModeContentHash(payload),
+          createdBy: "test",
+          reason: "test",
+          createdAt: "2026-08-23T00:00:00.000Z",
+          ...payload,
+        },
+        pointerRevision: 9,
+        updatedBy: "test",
+        reason: "test",
+        updatedAt: "2026-08-23T00:00:00.000Z",
+      })),
+      recordResolution: vi.fn(async () => {
+        throw new Error("audit unavailable");
+      }),
+    });
+    const failedAudit = await resolver.resolve({
+      resolutionId: "10000000-0000-4000-8000-000000000010",
+      pageId,
+      channel: "MESSENGER",
+      workerId: "worker-1",
+      now: new Date("2026-08-23T00:00:00.000Z"),
+    });
+
+    expect(failedAudit).toMatchObject({
+      source: "FAIL_SAFE",
+      status: "FALLBACK",
+      salesAuthorityMode: "LEGACY",
+      reasonCodes: ["RUNTIME_BEHAVIOR_AUDIT_FAILED"],
+    });
+    await expect(new Df13CommerceAuthorityFenceAdapter().admit({
+      pageId,
+      channel: "MESSENGER",
+      workId: "fail-safe-legacy-fallback",
+      inboxIds: ["inbox-1"],
+      resolution: failedAudit,
     })).resolves.toMatchObject({
       status: "BLOCKED",
       reasonCode: "DF13_COMMERCE_IDENTITY_NOT_FRESH_RESOLVED",
@@ -213,31 +266,6 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
       status: "BLOCKED",
       reasonCode: "DF13_COMMERCE_CONSUMER_DISPATCHER_REQUIRED",
     });
-  });
-
-  it("fails closed when a future durable completion acknowledgement is lost", async () => {
-    const completionAdapter = new Df13CommerceAuthorityFenceAdapter(fencePort({
-      complete: vi.fn(async () => {
-        throw new Error("lost acknowledgement");
-      }),
-    }));
-    await expect(completionAdapter.complete({
-      status: "COMMERCE_ADMITTED",
-      fenceToken: "fence-1",
-      acquisition: "NEW",
-      workId: "df13-test-work",
-      inboxIds: ["inbox-1"],
-      authority: {
-        modeVersionId: "10000000-0000-4000-8000-000000000006",
-        contentHash: "sha256:" + "c".repeat(64),
-        pointerRevision: 6,
-        source: "DATABASE",
-        salesAuthorityMode: "COMMERCE",
-        stateReadMode: "LEGACY",
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
-      },
-    }))
-      .rejects.toThrow("DF13_FENCE_COMPLETION_UNPROVEN");
   });
 
   it("durably blocks a configured prospective provider before state, classification, and side-effect planning", async () => {
@@ -407,10 +435,16 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
     expect(loadOrCreate).not.toHaveBeenCalled();
   });
 
-  it("retains an attempt-5 lease when a COMMERCE fence completion acknowledgement is lost", async () => {
-    const retry = vi.fn(async () => true);
-    const failPermanent = vi.fn(async () => true);
-    const complete = vi.fn(async () => true);
+  it("keeps an unexpected COMMERCE admission outside the native transaction and terminal paths", async () => {
+    const retryBatch = vi.fn(async () => true);
+    const failBatchPermanent = vi.fn(async () => true);
+    const completeBatch = vi.fn(async () => true);
+    const loadOrCreate = vi.fn(async () => {
+      throw new Error("must not enter authority-dependent state work");
+    });
+    const commit = vi.fn(async () => {
+      throw new Error("must not publish native outbox work");
+    });
     const admission = {
       status: "COMMERCE_ADMITTED" as const,
       fenceToken: "fence-1",
@@ -427,82 +461,73 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
         authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
       },
     };
-    const completeFence = vi.fn(async () => {
-      throw new Error("lost acknowledgement");
-    });
-    const completionAdapter = {
+    const unexpectedCommerceAdapter = {
       admit: vi.fn(async () => admission),
-      complete: completeFence,
     } as unknown as Df13CommerceAuthorityFenceAdapter;
     const occurredAt = "2026-08-23T00:00:00.000Z";
-    const initial = createConversationState({
-      conversationId: "conversation-completion-unproven",
-      routingOwner: "APP",
-      now: new Date(occurredAt),
-    });
-    const duplicateState = {
-      ...initial,
-      revision: 1,
-      lastFence: 1,
-      lastEvent: {
+    const inboxId = "inbox-completion-unproven";
+    const batch = {
+      pageId,
+      conversationHash: "customer-hash",
+      generation: 11,
+      leaseToken: "lease-completion-unproven",
+      inboxIds: [inboxId],
+      evaluationGroupId: "completion-unproven-batch",
+      eventKind: "CUSTOMER" as const,
+      firstReceiveSequence: 1,
+      lastReceiveSequence: 1,
+      attemptCount: 5,
+      items: [{
+        inboxId,
+        pageId,
         eventKey: "meta:1198992073286645:message:completion-unproven",
-        occurredAt,
+        conversationHash: "customer-hash",
+        occurredAt: new Date(occurredAt),
+        receivedAt: new Date(occurredAt),
         receiveSequence: 1,
-      },
+        attemptCount: 5,
+        leaseToken: "lease-completion-unproven",
+        envelope: {
+          schemaVersion: 1 as const,
+          customerSendEnabled: false as const,
+          routing: {
+            mode: "APP" as const,
+            routingOwner: "APP" as const,
+            evaluationOnly: false,
+            reason: "APP_OWNS" as const,
+          },
+          message: {
+            schemaVersion: 1 as const,
+            traceId: "10000000-0000-4000-8000-000000000001",
+            eventKey: "meta:1198992073286645:message:completion-unproven",
+            pageId,
+            messageId: "completion-unproven",
+            senderId: "customer-1",
+            conversationId: "customer-hash",
+            occurredAt,
+            isEcho: false,
+            appId: null,
+            text: "có được đổi trả không",
+            attachments: [],
+          },
+        },
+      }],
     };
     const runner = new RealtimeRunner(
       {
-        claimNext: vi.fn(async () => ({
-          inboxId: "inbox-completion-unproven",
-          pageId,
-          eventKey: "meta:1198992073286645:message:completion-unproven",
-          conversationHash: "customer-hash",
-          occurredAt: new Date(occurredAt),
-          receivedAt: new Date(occurredAt),
-          receiveSequence: 1,
-          attemptCount: 5,
-          leaseToken: "lease-completion-unproven",
-          envelope: {
-            schemaVersion: 1 as const,
-            customerSendEnabled: false as const,
-            routing: {
-              mode: "APP" as const,
-              routingOwner: "APP" as const,
-              evaluationOnly: false,
-              reason: "APP_OWNS" as const,
-            },
-            message: {
-              schemaVersion: 1 as const,
-              traceId: "10000000-0000-4000-8000-000000000001",
-              eventKey: "meta:1198992073286645:message:completion-unproven",
-              pageId,
-              messageId: "completion-unproven",
-              senderId: "customer-1",
-              conversationId: "customer-hash",
-              occurredAt,
-              isEcho: false,
-              appId: null,
-              text: "có được đổi trả không",
-              attachments: [],
-            },
-          },
-        })),
-        complete,
-        retry,
-        failPermanent,
+        claimNext: vi.fn(async () => null),
+        claimNextBatch: vi.fn(async () => batch),
+        complete: vi.fn(async () => true),
+        completeBatch,
+        retry: vi.fn(async () => true),
+        retryBatch,
+        failPermanent: vi.fn(async () => true),
+        failBatchPermanent,
       },
       {
-        loadOrCreate: vi.fn(async () => ({
-          conversationId: "conversation-completion-unproven",
-          pageId,
-          customerHash: "customer-hash",
-          stateVersion: 1,
-          state: duplicateState,
-          routingOwner: "APP" as const,
-          appSendEnabled: false,
-          killSwitch: false,
-        })),
+        loadOrCreate,
         linkProviderConversation: vi.fn(async () => undefined),
+        commit,
       } as never,
       {} as never,
       {} as never,
@@ -525,13 +550,14 @@ describe("DF13 fence-bound commerce consumer adapter", () => {
       undefined,
       undefined,
       { resolve: vi.fn(async () => resolution("COMMERCE")) },
-      completionAdapter,
+      unexpectedCommerceAdapter,
     );
 
     await expect(runner.processOne()).resolves.toBe(true);
-    expect(completeFence).toHaveBeenCalledOnce();
-    expect(complete).not.toHaveBeenCalled();
-    expect(retry).not.toHaveBeenCalled();
-    expect(failPermanent).not.toHaveBeenCalled();
+    expect(loadOrCreate).not.toHaveBeenCalled();
+    expect(commit).not.toHaveBeenCalled();
+    expect(completeBatch).not.toHaveBeenCalled();
+    expect(retryBatch).not.toHaveBeenCalled();
+    expect(failBatchPermanent).not.toHaveBeenCalled();
   });
 });

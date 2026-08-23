@@ -246,14 +246,14 @@ type BatchCommitStatus =
   */
   | "AUTHORITY_DEFER_UNPROVEN"
   /**
-   * Semantic work completed, but the durable fence-release acknowledgement is
-   * unknown. The Inbox lease remains fenced for recovery rather than entering
-   * generic retry/dead-letter handling.
+   * This source revision has no COMMERCE dispatcher. A forged or future
+   * admission therefore remains held before any state, transaction, outbox, or
+   * terminal Inbox work can occur. A future dispatcher must couple its own
+   * completion acknowledgement atomically to its commit.
    */
-  | "AUTHORITY_FENCE_COMPLETION_UNPROVEN";
+  | "AUTHORITY_FENCE_DISPATCH_UNAVAILABLE";
 
 type AuthorityDeferralStatus = "DEFERRED" | "UNPROVEN";
-type AuthorityCompletionStatus = "COMPLETED" | "UNPROVEN";
 
 function activeMediaPartialResolutionPolicy(
   resolution: RuntimePolicyResolution | null,
@@ -2631,7 +2631,7 @@ export class RealtimeRunner {
         status === "SUPERSEDED" ||
         status === "AUTHORITY_FENCE_HELD" ||
         status === "AUTHORITY_DEFER_UNPROVEN" ||
-        status === "AUTHORITY_FENCE_COMPLETION_UNPROVEN"
+        status === "AUTHORITY_FENCE_DISPATCH_UNAVAILABLE"
       ) return true;
       await this.completeWork(batch, status === "INBOX_ONLY");
       return true;
@@ -2808,26 +2808,6 @@ export class RealtimeRunner {
     }
   }
 
-  private async completeAuthorityFencedWork(
-    admission: Df13CommerceAuthorityFenceAdmission,
-  ): Promise<AuthorityCompletionStatus> {
-    try {
-      await this.commerceAuthorityFence.complete(admission);
-      return "COMPLETED";
-    } catch {
-      return "UNPROVEN";
-    }
-  }
-
-  private async finishAuthorityFencedWork(
-    admission: Df13CommerceAuthorityFenceAdmission,
-    status: BatchCommitStatus,
-  ): Promise<BatchCommitStatus> {
-    return await this.completeAuthorityFencedWork(admission) === "COMPLETED"
-      ? status
-      : "AUTHORITY_FENCE_COMPLETION_UNPROVEN";
-  }
-
   /**
    * A fence/recovery audit ID is derived from durable Inbox IDs, never the
    * per-claim evaluation group UUID. It is not authorization: the future
@@ -2924,6 +2904,9 @@ export class RealtimeRunner {
       return await this.deferAuthorityBlockedWork(batch, authorityAdmission) === "DEFERRED"
         ? "AUTHORITY_FENCE_HELD"
         : "AUTHORITY_DEFER_UNPROVEN";
+    }
+    if (authorityAdmission.status === "COMMERCE_ADMITTED") {
+      return "AUTHORITY_FENCE_DISPATCH_UNAVAILABLE";
     }
     const record = await this.runtime.loadOrCreate(
       claim.pageId,
@@ -3182,7 +3165,7 @@ export class RealtimeRunner {
         now,
       });
       if (applied.status !== "APPLIED") {
-        return this.finishAuthorityFencedWork(authorityAdmission, "INBOX_ONLY");
+        return "INBOX_ONLY";
       }
       const result = await this.runtime.commit(
         {
@@ -3195,10 +3178,7 @@ export class RealtimeRunner {
         },
         now,
       );
-      return this.finishAuthorityFencedWork(
-        authorityAdmission,
-        batchCommitStatus(result),
-      );
+      return batchCommitStatus(result);
     }
     const mediaPartialResolutionPolicy =
       activeMediaPartialResolutionPolicy(policyResolution);
@@ -3333,7 +3313,7 @@ export class RealtimeRunner {
       now,
     });
     if (applied.status !== "APPLIED") {
-      return this.finishAuthorityFencedWork(authorityAdmission, "INBOX_ONLY");
+      return "INBOX_ONLY";
     }
 
     let nextState = applied.state;
@@ -4096,10 +4076,7 @@ export class RealtimeRunner {
             },
             now,
           );
-          return this.finishAuthorityFencedWork(
-            authorityAdmission,
-            batchCommitStatus(result),
-          );
+          return batchCommitStatus(result);
         }
         if (imageRequest && resolvedProduct) {
           proposal = requestedImagesProposal(
@@ -5737,10 +5714,7 @@ export class RealtimeRunner {
       },
       new Date(),
     );
-    return this.finishAuthorityFencedWork(
-      authorityAdmission,
-      batchCommitStatus(result),
-    );
+    return batchCommitStatus(result);
   }
 
   private emptyResolution(): ProductResolution {

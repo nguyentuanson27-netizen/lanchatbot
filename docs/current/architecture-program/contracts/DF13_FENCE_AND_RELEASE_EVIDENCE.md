@@ -48,11 +48,14 @@ For COMMERCE, the future admission contract requires an exact fresh-resolved,
 audit-recorded identity. A bounded resolver cache is equivalent to the pointer
 it just validated and is therefore allowed; last-known-good, startup, stale,
 missing, ambiguous, or mismatched identities fail closed before the consumer
-is consulted. In particular, an LKG COMMERCE pointer is returned as
-`CLARIFY_ONLY`, never as fallback COMMERCE authority. The durable provider
-contract receives the complete fixed consumer set and the same immutable
-identity; a partial or substituted acknowledgement is rejected. It is not
-invoked by current source because no COMMERCE dispatcher exists.
+is consulted. A resolver `FAIL_SAFE` result is never admitted as semantic
+`LEGACY` work merely because its fail-safe fields say `LEGACY`; this includes
+audit failure, missing/expired LKG, and a rejected COMMERCE pointer. In
+particular, an LKG COMMERCE pointer is returned as `CLARIFY_ONLY`, never as
+fallback COMMERCE authority. The durable provider contract receives the
+complete fixed consumer set and the same immutable identity; a partial or
+substituted acknowledgement is rejected. It is not invoked by current source
+because no COMMERCE dispatcher exists.
 
 The future provider must atomically claim every sorted, unique durable Inbox
 row ID under a fresh opaque fence token. A work-ID hash is audit correlation
@@ -68,23 +71,32 @@ returns a deterministic durable `BLOCKED` ID rather than inventing a fence
 token. The Inbox item must be durably blocked under that ID, without consuming
 an attempt, completing the work, or entering generic retry/dead-letter flow.
 `HELD` is reserved for a real provider-held fence token. A completed semantic
-batch releases its admission only through idempotent `RELEASED |
-ALREADY_RELEASED` acknowledgement. Failure to defer or complete remains
-fenced for recovery; it is never converted to an unfenced retry/release. These
-are required replay, lost-ACK, concurrency, and crash/restart contracts for the
-separately reviewed dispatcher/provider unit; the current boundary blocks
-before any such admission can occur.
+batch must be coupled to its admission completion by the future all-or-nothing
+dispatcher/provider. That dispatcher must never publish an outbound effect or
+mark the Inbox batch processed before it can prove the corresponding completion
+record; a lost acknowledgement must preserve both the fence and the uncommitted
+Inbox/outbox effects for recovery. The current adapter intentionally exposes no
+completion operation, so the RealtimeRunner cannot attempt an unsafe
+post-transaction release.
+
+As defence in depth, if an injected or future-edited adapter nevertheless
+returns `COMMERCE_ADMITTED` to this revision, the runner returns the nonterminal
+`AUTHORITY_FENCE_DISPATCH_UNAVAILABLE` outcome before state loading,
+classification, Context V2, phase, strategy, CTA, reconciliation, transaction,
+or side-effect planning. It does not complete, retry, dead-letter, or release
+the Inbox lease. These are required replay, lost-ACK, concurrency, and
+crash/restart contracts for the separately reviewed dispatcher/provider unit;
+the current boundary blocks before any such admission can occur.
 
 If the RealtimeRunner cannot prove that a `HELD` or `BLOCKED` admission was
 durably deferred—because the required port is absent, returns false, or
 throws—it returns the explicit nonterminal `AUTHORITY_DEFER_UNPROVEN` outcome.
-If it cannot prove a post-semantic `COMMERCE_ADMITTED` fence completion, it
-returns `AUTHORITY_FENCE_COMPLETION_UNPROVEN`. Neither outcome completes,
-retries, or dead-letters the Inbox lease; the lease remains for expiry/recovery.
-This deliberately favors safety over liveness and is not a successful `HELD` or
-completion acknowledgement. A future dispatcher/provider release must
-configure and prove the durable defer and completion ports before it can
-activate COMMERCE.
+Neither a failed defer nor the defensive dispatcher-unavailable outcome
+completes, retries, or dead-letters the Inbox lease; it remains for
+expiry/recovery. This deliberately favors safety over liveness and is not a
+successful `HELD` or completion acknowledgement. A future dispatcher/provider
+release must configure and prove its own durable, atomic completion contract
+before it can activate COMMERCE.
 
 ## Release-candidate source evidence
 

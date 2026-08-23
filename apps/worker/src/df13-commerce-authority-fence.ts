@@ -83,12 +83,6 @@ export interface Df13CommerceAuthorityFencePort {
       reasonCode: string;
     }>
   >;
-  complete(input: Readonly<{
-    fenceToken: string;
-    workId: string;
-    inboxIds: readonly string[];
-    authority: Df13CommerceAuthorityIdentity;
-  }>): Promise<"RELEASED" | "ALREADY_RELEASED">;
 }
 
 function validWorkId(value: string): boolean {
@@ -158,7 +152,8 @@ function commerceIdentity(
 }
 
 function safeLegacy(resolution: RuntimeBehaviorModeResolution): boolean {
-  return resolution.status !== "REJECTED" &&
+  return resolution.source !== "FAIL_SAFE" &&
+    resolution.status !== "REJECTED" &&
     resolution.salesAuthorityMode === "LEGACY" &&
     resolution.stateReadMode === "LEGACY" &&
     resolution.authorityBundleHash === null;
@@ -222,25 +217,4 @@ export class Df13CommerceAuthorityFenceAdapter {
     };
   }
 
-  async complete(
-    admission: Df13CommerceAuthorityFenceAdmission,
-  ): Promise<"RELEASED" | "ALREADY_RELEASED" | "NOT_APPLICABLE"> {
-    if (admission.status !== "COMMERCE_ADMITTED") return "NOT_APPLICABLE";
-    if (!this.port) throw new Error("DF13_FENCE_PROVIDER_REQUIRED");
-    let result: "RELEASED" | "ALREADY_RELEASED";
-    try {
-      result = await this.port.complete({
-        fenceToken: admission.fenceToken,
-        workId: admission.workId,
-        inboxIds: admission.inboxIds,
-        authority: admission.authority,
-      });
-    } catch {
-      throw new Error("DF13_FENCE_COMPLETION_UNPROVEN");
-    }
-    if (result !== "RELEASED" && result !== "ALREADY_RELEASED") {
-      throw new Error("DF13_FENCE_COMPLETION_UNPROVEN");
-    }
-    return result;
-  }
 }
