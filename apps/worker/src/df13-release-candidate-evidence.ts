@@ -317,9 +317,10 @@ function compareManifest(manifest: Record<string, unknown>): readonly FieldCompa
 }
 
 /**
- * Builds source-only evidence from immutable Git content. It neither creates a
- * release nor observes a host; copied hashes cannot substitute for re-reading
- * the manifest and every candidate-affecting blob at the requested revision.
+ * Builds source-only evidence from immutable Git content. It refreshes the
+ * fixed trusted Git ref, but neither creates a release nor observes a deployed
+ * runtime host; copied hashes cannot substitute for re-reading the manifest and
+ * every candidate-affecting blob at the requested revision.
  */
 export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
   activationReleaseRevision: string;

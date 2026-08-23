@@ -74,16 +74,18 @@ the refreshed `refs/remotes/origin/main` identity, exact manifest blob OID, raw
 content SHA-256, whole-body manifest self-hash, and canonical candidate
 projection. The deterministic validator checks those immutable bindings plus
 request binding, package self-hash, authority bundle, consumer set, and rollback
-contract. A copied hash, caller-supplied success assertion, untrusted or moving
-release ref, missing blob/field, malformed revision, changed candidate
-fingerprint, duplicate/substituted field, or unavailable derivation returns
+contract. A copied hash, caller-supplied success assertion, untrusted release
+ref, local ref movement during derivation, missing blob/field, malformed
+revision, changed candidate fingerprint, duplicate/substituted field, or
+unavailable derivation returns
 `BLOCKED`/`MISMATCH`; missing manifest fields never reach canonical JSON as
 `undefined`.
 
-The cutover executor invokes preparation and validation itself from its fixed
-source reader before acquiring a fence. The tool never creates a release,
-inspects a host, calls a model provider, applies migration `0035`, or activates
-an authority. `SOURCE_READY_NO_ACTIVATION` is source provenance only.
+The forward cutover executor invokes preparation and validation itself from its
+fixed source reader before acquiring a fence. Evidence preparation refreshes a
+trusted Git ref but never creates a release, inspects a deployed runtime host,
+calls a model provider, applies migration `0035`, or activates an authority.
+`SOURCE_READY_NO_ACTIVATION` is source provenance only.
 
 ## Cutover and rollback evidence
 
@@ -102,6 +104,13 @@ rollback to audit, from an already-restored LEGACY pointer, which requires an
 exact rollback audit before convergence and release. Recovery that never
 acquires a fence reports `BLOCKED_AUTHORITY_UNKNOWN`; it may claim neither a
 retained lease nor a LEGACY authority it has not observed under the fence.
+Recovery validates the immutable scope and rollback-pointer envelope, but does
+not depend on forward-only release freshness, candidate evidence, missing-
+commerce readiness, or activation verification. Those gates authorize only a
+forward transition; they cannot prevent a fenced observation and exact rollback
+of a control plane that may already be serving COMMERCE. A rejected or
+unavailable fence acquisition returns a bounded fail-closed result and performs
+no quiescence, pointer read, activation, rollback, or release operation.
 
 This source tooling records rollback as `REQUIRED_NOT_EXECUTED`. Only separately
 authorized runtime execution can append actual rollback evidence.

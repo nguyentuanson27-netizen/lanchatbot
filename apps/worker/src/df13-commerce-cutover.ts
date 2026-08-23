@@ -144,6 +144,48 @@ export type CommerceCutoverPreflight = Readonly<{
   reasonCodes: readonly string[];
 }>;
 
+function assessCommerceCutoverEnvelope(
+  input: CommerceCutoverPreflightInput,
+): readonly string[] {
+  const reasonCodes: string[] = [];
+  if (input.pageId !== DF13_COMMERCE_PREPROD_SCOPE_V1.pageId ||
+      input.channel !== DF13_COMMERCE_PREPROD_SCOPE_V1.channel) {
+    reasonCodes.push("DF13_PAGE_SCOPE_INVALID");
+  }
+  if (input.currentPointer.version.pageId !== input.pageId ||
+      input.currentPointer.version.channel !== input.channel ||
+      !Number.isSafeInteger(input.currentPointer.pointerRevision) ||
+      input.currentPointer.pointerRevision < 1 ||
+      !Number.isSafeInteger(input.targetPointer.pointerRevision) ||
+      !pointerIsLegacy(input.currentPointer)) {
+    reasonCodes.push("DF13_CURRENT_AUTHORITY_NOT_LEGACY");
+  }
+  if (!pointerIsTargetCommerce(input.targetPointer, input)) {
+    reasonCodes.push("DF13_TARGET_AUTHORITY_INVALID");
+  }
+  return reasonCodes;
+}
+
+function assessCommerceActivationReadiness(
+  input: CommerceCutoverPreflightInput,
+  candidateBinding: Df13CandidateBindingValidation,
+): readonly string[] {
+  const reasonCodes = [...candidateBinding.reasonCodes];
+  if (!readinessSatisfied(input.missingCommerceSignal)) {
+    reasonCodes.push("DF13_MISSING_COMMERCE_SIGNAL_UNSATISFIED");
+  }
+  if (!input.verification.transitionMatrixPassed) {
+    reasonCodes.push("DF13_TRANSITION_MATRIX_UNVERIFIED");
+  }
+  if (!input.verification.bfDfReplayPassed) {
+    reasonCodes.push("DF13_BF_DF_REPLAY_UNVERIFIED");
+  }
+  if (!input.verification.rollbackVerified) {
+    reasonCodes.push("DF13_ROLLBACK_UNVERIFIED");
+  }
+  return reasonCodes;
+}
+
 function pointerIsLegacy(pointer: RuntimeBehaviorModePointer): boolean {
   return pointer.version.salesAuthorityMode === "LEGACY" &&
     pointer.version.stateReadMode === "LEGACY" &&
@@ -212,35 +254,10 @@ export function assessCommerceCutoverPreflight(
   input: CommerceCutoverPreflightInput,
   candidateBinding: Df13CandidateBindingValidation,
 ): CommerceCutoverPreflight {
-  const reasonCodes: string[] = [];
-  if (input.pageId !== DF13_COMMERCE_PREPROD_SCOPE_V1.pageId ||
-      input.channel !== DF13_COMMERCE_PREPROD_SCOPE_V1.channel) {
-    reasonCodes.push("DF13_PAGE_SCOPE_INVALID");
-  }
-  if (input.currentPointer.version.pageId !== input.pageId ||
-      input.currentPointer.version.channel !== input.channel ||
-      !Number.isSafeInteger(input.currentPointer.pointerRevision) ||
-      input.currentPointer.pointerRevision < 1 ||
-      !Number.isSafeInteger(input.targetPointer.pointerRevision) ||
-      !pointerIsLegacy(input.currentPointer)) {
-    reasonCodes.push("DF13_CURRENT_AUTHORITY_NOT_LEGACY");
-  }
-  if (!pointerIsTargetCommerce(input.targetPointer, input)) {
-    reasonCodes.push("DF13_TARGET_AUTHORITY_INVALID");
-  }
-  reasonCodes.push(...candidateBinding.reasonCodes);
-  if (!readinessSatisfied(input.missingCommerceSignal)) {
-    reasonCodes.push("DF13_MISSING_COMMERCE_SIGNAL_UNSATISFIED");
-  }
-  if (!input.verification.transitionMatrixPassed) {
-    reasonCodes.push("DF13_TRANSITION_MATRIX_UNVERIFIED");
-  }
-  if (!input.verification.bfDfReplayPassed) {
-    reasonCodes.push("DF13_BF_DF_REPLAY_UNVERIFIED");
-  }
-  if (!input.verification.rollbackVerified) {
-    reasonCodes.push("DF13_ROLLBACK_UNVERIFIED");
-  }
+  const reasonCodes = [
+    ...assessCommerceCutoverEnvelope(input),
+    ...assessCommerceActivationReadiness(input, candidateBinding),
+  ];
   return {
     status: reasonCodes.length === 0 ? "PREPARED_NO_ACTIVATION" : "BLOCKED_LEGACY",
     currentAuthority: "LEGACY",
@@ -325,6 +342,30 @@ export type CommerceCutoverExecution = Readonly<{
     | "LOST_RECONCILED";
   reasonCodes: readonly string[];
 }>;
+
+type AuthorityFenceAcquisition = Readonly<
+  | { status: "HELD"; fenceToken: string }
+  | { status: "REJECTED" }
+  | { status: "UNAVAILABLE" }
+>;
+
+async function acquireAuthorityFence(input: Readonly<{
+  preflight: CommerceCutoverPreflightInput;
+  ports: CommerceCutoverPorts;
+}>): Promise<AuthorityFenceAcquisition> {
+  try {
+    const result = await input.ports.holdAuthorityDependentWork({
+      pageId: input.preflight.pageId,
+      channel: input.preflight.channel,
+      consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+    });
+    return result.status === "HELD"
+      ? result
+      : { status: "REJECTED" };
+  } catch {
+    return { status: "UNAVAILABLE" };
+  }
+}
 
 async function rederiveReleaseCandidateBinding(input: Readonly<{
   candidate: Df13CandidateBindingRequest;
@@ -566,17 +607,15 @@ export async function executeCommerceCutover(input: Readonly<{
       reasonCodes: preflight.reasonCodes,
     };
   }
-  const held = await input.ports.holdAuthorityDependentWork({
-    pageId: input.preflight.pageId,
-    channel: input.preflight.channel,
-    consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
-  });
+  const held = await acquireAuthorityFence(input);
   if (held.status !== "HELD") {
     return {
       status: "BLOCKED_LEGACY",
       sideEffects: "NOT_EXECUTED",
       activationAcknowledgement: "NOT_ATTEMPTED",
-      reasonCodes: ["DF13_AUTHORITY_FENCE_NOT_HELD"],
+      reasonCodes: [held.status === "UNAVAILABLE"
+        ? "DF13_AUTHORITY_FENCE_ACQUISITION_UNAVAILABLE"
+        : "DF13_AUTHORITY_FENCE_NOT_HELD"],
     };
   }
   let quiescence: Awaited<ReturnType<CommerceCutoverPorts["proveQuiescence"]>>;
@@ -719,35 +758,33 @@ export async function executeCommerceCutover(input: Readonly<{
   });
 }
 
-/** Re-entry after process crash/restart always reacquires the full fence first. */
+/**
+ * Re-entry after process crash/restart validates the immutable rollback
+ * envelope, then reacquires the full fence before observing authority. Forward
+ * release-readiness gates cannot prevent reconciliation back to LEGACY.
+ */
 export async function recoverCommerceCutoverAfterInterruption(input: Readonly<{
   preflight: CommerceCutoverPreflightInput;
   ports: CommerceCutoverPorts;
 }>): Promise<CommerceCutoverExecution> {
-  const candidateBinding = await rederiveReleaseCandidateBinding({
-    candidate: input.preflight.candidate,
-    releaseCandidateSource: input.ports.releaseCandidateSource,
-  });
-  const preflight = assessCommerceCutoverPreflight(input.preflight, candidateBinding);
-  if (preflight.status !== "PREPARED_NO_ACTIVATION") {
+  const recoveryEnvelopeReasonCodes = assessCommerceCutoverEnvelope(input.preflight);
+  if (recoveryEnvelopeReasonCodes.length > 0) {
     return {
       status: "BLOCKED_AUTHORITY_UNKNOWN",
       sideEffects: "NOT_EXECUTED",
       activationAcknowledgement: "NOT_ATTEMPTED",
-      reasonCodes: preflight.reasonCodes,
+      reasonCodes: recoveryEnvelopeReasonCodes,
     };
   }
-  const held = await input.ports.holdAuthorityDependentWork({
-    pageId: input.preflight.pageId,
-    channel: input.preflight.channel,
-    consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
-  });
+  const held = await acquireAuthorityFence(input);
   if (held.status !== "HELD") {
     return {
       status: "BLOCKED_AUTHORITY_UNKNOWN",
       sideEffects: "NOT_EXECUTED",
       activationAcknowledgement: "NOT_ATTEMPTED",
-      reasonCodes: ["DF13_RECOVERY_FENCE_NOT_HELD"],
+      reasonCodes: [held.status === "UNAVAILABLE"
+        ? "DF13_RECOVERY_FENCE_ACQUISITION_UNAVAILABLE"
+        : "DF13_RECOVERY_FENCE_NOT_HELD"],
     };
   }
   let quiescence: Awaited<ReturnType<CommerceCutoverPorts["proveQuiescence"]>>;
