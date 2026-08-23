@@ -39,7 +39,7 @@ that explicit verdict.
 | Release/deploy/evidence | `contracts/RELEASE_INTEGRITY.md` |
 | Dataset/package work | `contracts/DATASET_BOUNDARY.md` |
 | DF work after Gate BF | `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + relevant contracts |
-| Commerce authority | Gate E/F-PREPROD + `contracts/BEHAVIOR_CONTROL_PLANE.md` + relevant contracts |
+| Commerce authority | Gate E/F-PREPROD + `contracts/BEHAVIOR_CONTROL_PLANE.md` + `contracts/DF13_FENCE_AND_RELEASE_EVIDENCE.md` + relevant contracts |
 | State V2 | UR sections / Gate U-PREPROD + `contracts/BEHAVIOR_CONTROL_PLANE.md` + relevant contracts |
 | Production hardening | `OPERATING_MODE.md` + deferred hardening section in `FUTURE_BACKLOG.md` |
 | Historical audit | one relevant completed checkpoint/archive source only as needed |

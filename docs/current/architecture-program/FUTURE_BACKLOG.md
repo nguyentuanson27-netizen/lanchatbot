@@ -123,11 +123,15 @@ promoted or applied under this track. The COMMERCE version contract is
 source-only; shared LEGACY control-plane reads and version writes remain
 compatible before that schema promotion. The enabled generic behavior-mode
 operator remains LEGACY-only, and the generic version CAS rejects COMMERCE
-targets. A dedicated DF13 adapter must first bind the immutable authority
+targets. A dedicated DF13 adapter binds the immutable authority
 identity (mode version, content hash, pointer revision, source, authority/state
-modes, and authority-bundle hash) to all listed authority consumers, durable
-fence ownership, exact consumer readback, activation audit, and rollback before
-a separately authorized cutover command may exist. There is no operator shortcut
+modes, and authority-bundle hash) to all listed authority consumers and durable
+fence ownership. Its source contract is default-closed: exact consumer readback,
+activation audit, and rollback proof remain required before a separately
+authorized cutover command may exist. The current adapter also rejects
+COMMERCE before a prospective fence provider can run it through the LEGACY
+semantic path; a future dispatcher/provider source unit remains required.
+There is no operator shortcut
 from `LEGACY` to `COMMERCE`.
 
 After explicit owner authorization, activate only on `PREPROD_TEST_PAGE` using that quiescent boundary, verify exact authority revision/hash/source readback across every relevant consumer, then release held eligible work and run the controlled critical human journeys.

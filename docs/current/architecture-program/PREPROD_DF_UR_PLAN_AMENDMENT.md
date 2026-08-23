@@ -196,7 +196,9 @@ rejects COMMERCE. A dedicated, fence-bound adapter must bind the immutable
 authority identity (mode version, content hash, pointer revision, source,
 authority/state modes, and authority-bundle hash) to every authority consumer,
 audit/readback, and rollback before any future cutover command is reviewed. This
-plan does not authorize that adapter or a `LEGACY -> COMMERCE` runtime change.
+plan permits source-only implementation and testing of that adapter; it does
+not authorize durable-provider configuration, migration promotion/application,
+or a `LEGACY -> COMMERCE` runtime change.
 
 Then, after explicit owner authorization, activate `COMMERCE` only on the `PREPROD_TEST_PAGE` inside the quiescent boundary. Keep all authority-dependent work held until every relevant authority consumer reads back the exact new revision/hash/source, then release held work and run the controlled critical human journeys.
 

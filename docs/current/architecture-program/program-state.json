@@ -115,7 +115,7 @@
   "future": [
     "DF-11: merged source-only (PR #238); default-off, side-effect-free authority comparison; no runtime SHADOW authority",
     "DF-12: merged source-only (PR #239); missing-commerce signal; no runtime activation",
-    "DF-13: COMMERCE version/bundle and cutover source contracts active; 0035 remains a pending non-auto-applied artifact, LEGACY control-plane source remains schema-compatible, dedicated fenced consumer adapter remains required; no migration or activation",
+    "DF-13: COMMERCE version/bundle, fenced RealtimeRunner consumer adapter, and release-candidate evidence source contracts are default-closed; 0035 remains a pending non-auto-applied artifact, LEGACY control-plane source remains schema-compatible, and both the durable fence provider and all-or-nothing COMMERCE dispatcher remain unconfigured; no migration or activation",
     "UR-00 and later: blocked until DF-13 stability and explicit owner approval"
   ],
   "hardStops": [

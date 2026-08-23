@@ -47,6 +47,24 @@ export interface RuntimeBehaviorModeSourcePort {
   loadActiveMode(input: { readonly pageId: string; readonly channel: string }): Promise<RuntimeBehaviorModePointer | null>;
   recordResolution?(event: RuntimeBehaviorModeAuditEvent): Promise<void>;
 }
+/**
+ * A bound consumer must verify that it can execute the exact immutable
+ * COMMERCE authority bundle before the resolver may return COMMERCE. The
+ * admission check is validation-only; it must neither plan nor execute a
+ * customer-facing side effect.
+ */
+export interface CommerceAuthorityConsumerPort {
+  admitCommerceAuthority(input: Readonly<{
+    pageId: string;
+    channel: string;
+    modeVersionId: string;
+    contentHash: string;
+    authorityBundleHash: string;
+    pointerRevision: number;
+    /** DATABASE or bounded cache only; stale fallback authority is forbidden. */
+    source: "DATABASE" | "CACHE";
+  }>): Promise<Readonly<{ status: "ADMITTED" | "REJECTED" }>>;
+}
 export interface RuntimeBehaviorModeResolution extends RuntimeBehaviorModePayload {
   readonly authorityBundleHash: string | null;
   readonly modeVersionId: string | null;
@@ -67,6 +85,28 @@ const FAIL_SAFE: RuntimeBehaviorModePayload = {
   stateReadMode: "LEGACY",
   authorityBundleHash: null,
 };
+
+/**
+ * A COMMERCE pointer that cannot be used must never be mistaken for an
+ * ordinary LEGACY degradation just because its fail-safe payload is LEGACY.
+ * This list is the canonical cross-package marker for that distinction.
+ */
+export const COMMERCE_AUTHORITY_REJECTION_REASONS = [
+  "RUNTIME_BEHAVIOR_COMMERCE_STALE_AUTHORITY",
+  "RUNTIME_BEHAVIOR_COMMERCE_PAGE_NOT_ALLOWED",
+  "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_UNAVAILABLE",
+  "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_REJECTED",
+] as const;
+
+export type CommerceAuthorityRejectionReason =
+  typeof COMMERCE_AUTHORITY_REJECTION_REASONS[number];
+
+export function isCommerceAuthorityRejectionReason(
+  value: string,
+): value is CommerceAuthorityRejectionReason {
+  return (COMMERCE_AUTHORITY_REJECTION_REASONS as readonly string[]).includes(value);
+}
+
 function canonicalJson(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
@@ -91,6 +131,8 @@ export class RuntimeBehaviorModeResolver {
   private readonly cacheTtlMs: number;
   private readonly lastKnownGoodTtlMs: number;
   private readonly allowedPageIds: ReadonlySet<string>;
+  private readonly allowedCommercePageIds: ReadonlySet<string>;
+  private readonly commerceAuthorityConsumer: CommerceAuthorityConsumerPort | undefined;
   private readonly cache = new Map<string, CachedPointer>();
   private readonly lastKnownGood = new Map<string, CachedPointer>();
   private readonly inFlight = new Map<string, Promise<CachedPointer>>();
@@ -101,6 +143,8 @@ export class RuntimeBehaviorModeResolver {
       readonly cacheTtlMs?: number;
       readonly lastKnownGoodTtlMs?: number;
       readonly allowedPageIds?: readonly string[];
+      readonly allowedCommercePageIds?: readonly string[];
+      readonly commerceAuthorityConsumer?: CommerceAuthorityConsumerPort;
     } = {},
   ) {
     this.cacheTtlMs = options.cacheTtlMs ?? 5_000;
@@ -108,6 +152,8 @@ export class RuntimeBehaviorModeResolver {
     if (this.cacheTtlMs < 0 || this.cacheTtlMs > 5_000) throw new Error("RUNTIME_BEHAVIOR_CACHE_TTL_INVALID");
     if (this.lastKnownGoodTtlMs < 0 || this.lastKnownGoodTtlMs > 300_000) throw new Error("RUNTIME_BEHAVIOR_LKG_TTL_INVALID");
     this.allowedPageIds = new Set(options.allowedPageIds ?? []);
+    this.allowedCommercePageIds = new Set(options.allowedCommercePageIds ?? []);
+    this.commerceAuthorityConsumer = options.commerceAuthorityConsumer;
   }
 
   invalidate(pageId: string, channel: string): void {
@@ -203,6 +249,40 @@ export class RuntimeBehaviorModeResolver {
     }
   }
 
+  private async commerceRejectionReason(
+    pointer: RuntimeBehaviorModePointer,
+    pageId: string,
+    channel: string,
+    source: BehaviorModeResolutionSource,
+  ): Promise<CommerceAuthorityRejectionReason | null> {
+    if (pointer.version.salesAuthorityMode !== "COMMERCE") return null;
+    if (source !== "DATABASE" && source !== "CACHE") {
+      return "RUNTIME_BEHAVIOR_COMMERCE_STALE_AUTHORITY";
+    }
+    if (!this.allowedCommercePageIds.has(pageId)) {
+      return "RUNTIME_BEHAVIOR_COMMERCE_PAGE_NOT_ALLOWED";
+    }
+    if (!this.commerceAuthorityConsumer) {
+      return "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_UNAVAILABLE";
+    }
+    try {
+      const admission = await this.commerceAuthorityConsumer.admitCommerceAuthority({
+        pageId,
+        channel,
+        modeVersionId: pointer.version.modeVersionId,
+        contentHash: pointer.version.contentHash,
+        authorityBundleHash: pointer.version.authorityBundleHash!,
+        pointerRevision: pointer.pointerRevision,
+        source,
+      });
+      return admission.status === "ADMITTED"
+        ? null
+        : "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_REJECTED";
+    } catch {
+      return "RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_UNAVAILABLE";
+    }
+  }
+
   async resolve(input: {
     readonly resolutionId: string;
     readonly pageId: string;
@@ -245,6 +325,27 @@ export class RuntimeBehaviorModeResolver {
       });
     }
     const pointer = entry.pointer;
+    const commerceRejection = await this.commerceRejectionReason(
+      pointer,
+      input.pageId,
+      channel,
+      source,
+    );
+    if (commerceRejection) {
+      return this.audited(scoped, {
+        ...FAIL_SAFE,
+        modeVersionId: pointer.version.modeVersionId,
+        contentHash: pointer.version.contentHash,
+        pointerRevision: pointer.pointerRevision,
+        authorityBundleHash: null,
+        source: "FAIL_SAFE",
+        status: "REJECTED",
+        reasonCodes: [commerceRejection],
+        pointerUpdatedAt: pointer.updatedAt,
+        resolvedAt: now.toISOString(),
+        propagationMs: Math.max(0, nowMs - Date.parse(pointer.updatedAt)),
+      });
+    }
     if (
       pointer.version.confirmationMode === "V2_ACTIVE"
       && !this.allowedPageIds.has(input.pageId)
