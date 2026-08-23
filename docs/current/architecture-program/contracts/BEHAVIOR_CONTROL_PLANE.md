@@ -63,8 +63,9 @@ the immutable authority-bundle identity, activation-audit reconciliation, and
 exact consumer readbacks. The pending DF13 `0035` schema artifact is outside
 the active migration directory; shared LEGACY reads and writes remain
 schema-compatible until a separately authorized release promotes and applies it.
-Defining the COMMERCE schema/version contract is not permission to promote or
-apply its migration, introduce that adapter, or activate runtime authority.
+Defining the COMMERCE schema/version or pure fence/evidence contract is not
+permission to promote or apply its migration, bind a consumer to the live
+pipeline, or activate runtime authority.
 
 The resolver derives and returns typed authority provenance for every resolution
 and retains it through cache/LKG expiry, page rejection, and audit failure. An

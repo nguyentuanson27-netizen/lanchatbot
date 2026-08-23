@@ -1,9 +1,34 @@
-import { describe, expect, it } from "vitest";
-import type { RuntimeBehaviorModePointer } from "@lana/chat-runtime";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  behaviorModeContentHash,
+  type RuntimeBehaviorModePointer,
+} from "@lana/chat-runtime";
 import type { MissingCommerceSignal } from "./missing-commerce-signal.js";
+import type {
+  Df13ReleaseCandidateEvidence,
+  Df13ReleaseCandidateEvidenceValidation,
+} from "./df13-release-candidate-evidence.js";
+
+const validateReleaseEvidence = vi.hoisted(() =>
+  vi.fn<() => Df13ReleaseCandidateEvidenceValidation>(() => ({
+    status: "MATCHED",
+    reasonCodes: [],
+  }))
+);
+const prepareReleaseEvidence = vi.hoisted(() => vi.fn());
+
+vi.mock("./df13-release-candidate-evidence.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./df13-release-candidate-evidence.js")>();
+  return {
+    ...actual,
+    prepareDf13ReleaseCandidateEvidence: prepareReleaseEvidence,
+    validateDf13ReleaseCandidateEvidence: validateReleaseEvidence,
+  };
+});
 import {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
   DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+  DF13_COMMERCE_PREPROD_SCOPE_V1,
   GATE_E_PREPROD_V15_BINDING,
   assessCommerceCutoverPreflight,
   executeCommerceCutover,
@@ -13,7 +38,21 @@ import {
   type CommerceCutoverPorts,
 } from "./df13-commerce-cutover.js";
 
-const pageId = "1198992073286645";
+const pageId = DF13_COMMERCE_PREPROD_SCOPE_V1.pageId;
+const preparedEvidence = {} as Df13ReleaseCandidateEvidence;
+const sourceReader = {
+  async refreshTrustedRef() {},
+  async resolveRef() { return "a".repeat(40); },
+  async readBlob() { return "source"; },
+  async resolveBlobOid() { return "a".repeat(40); },
+};
+
+beforeEach(() => {
+  prepareReleaseEvidence.mockReset();
+  prepareReleaseEvidence.mockResolvedValue(preparedEvidence);
+  validateReleaseEvidence.mockReset();
+  validateReleaseEvidence.mockReturnValue({ status: "MATCHED", reasonCodes: [] });
+});
 
 function pointer(
   salesAuthorityMode: "LEGACY" | "COMMERCE",
@@ -34,7 +73,7 @@ function pointer(
       pageId,
       channel: "MESSENGER",
       ...payload,
-      contentHash: `sha256:${salesAuthorityMode.toLowerCase().padEnd(64, "0")}`,
+      contentHash: behaviorModeContentHash(payload),
       createdBy: "test-operator",
       reason: "test",
       createdAt: "2026-08-22T00:00:00.000Z",
@@ -107,13 +146,19 @@ function exactReadbacks(target: RuntimeBehaviorModePointer) {
   }));
 }
 
+function restoredLegacyPointer(input: ReturnType<typeof preflightInput>): RuntimeBehaviorModePointer {
+  return {
+    ...input.currentPointer,
+    pointerRevision: input.targetPointer.pointerRevision + 1,
+    updatedAt: "2026-08-22T00:01:00.000Z",
+  };
+}
+
 function ports(overrides: Partial<CommerceCutoverPorts> = {}): CommerceCutoverPorts {
   const target = pointer("COMMERCE", 6);
   const legacy = pointer("LEGACY", 7);
   return {
-    async rederiveCandidateBinding() {
-      return { status: "MATCHED", reasonCodes: [] };
-    },
+    releaseCandidateSource: sourceReader,
     async holdAuthorityDependentWork() {
       return { status: "HELD", fenceToken: "fence-1" };
     },
@@ -212,15 +257,36 @@ describe("DF13 commerce cutover contract", () => {
     });
   });
 
+  it("blocks a COMMERCE target whose content hash is not canonical", () => {
+    const input = preflightInput();
+    const targetPointer: RuntimeBehaviorModePointer = {
+      ...input.targetPointer,
+      version: {
+        ...input.targetPointer.version,
+        contentHash: `sha256:${"f".repeat(64)}`,
+      },
+    };
+
+    expect(assessCommerceCutoverPreflight({ ...input, targetPointer }, {
+      status: "MATCHED",
+      reasonCodes: [],
+    })).toMatchObject({
+      status: "BLOCKED_LEGACY",
+      reasonCodes: ["DF13_TARGET_AUTHORITY_INVALID"],
+    });
+  });
+
   it("blocks a copied Gate E fingerprint when the activation artifact cannot be re-derived", async () => {
     const input = preflightInput();
     let held = false;
+    prepareReleaseEvidence.mockResolvedValueOnce({
+      ...preparedEvidence,
+      status: "BLOCKED",
+      reasonCodes: ["DF13_GATE_E_CANDIDATE_REDERIVATION_UNAVAILABLE"],
+    });
     const result = await executeCommerceCutover({
       preflight: input,
       ports: ports({
-        async rederiveCandidateBinding() {
-          throw new Error("activation artifact unavailable");
-        },
         async holdAuthorityDependentWork() {
           held = true;
           return { status: "HELD", fenceToken: "unexpected" };
@@ -233,6 +299,71 @@ describe("DF13 commerce cutover contract", () => {
       reasonCodes: ["DF13_GATE_E_CANDIDATE_REDERIVATION_UNAVAILABLE"],
     });
     expect(held).toBe(false);
+  });
+
+  it("re-derives and validates release evidence inside the executor", async () => {
+    const input = preflightInput();
+    const result = await executeCommerceCutover({ preflight: input, ports: ports() });
+
+    expect(prepareReleaseEvidence).toHaveBeenCalledWith({
+      activationReleaseRevision: input.candidate.activationReleaseRevision,
+      git: sourceReader,
+    });
+    expect(validateReleaseEvidence).toHaveBeenCalledWith(preparedEvidence, input.candidate);
+    expect(result).toMatchObject({ status: "COMMERCE_ACTIVE" });
+  });
+
+  it("blocks invalid release evidence before acquiring the fence", async () => {
+    let held = false;
+    validateReleaseEvidence.mockReturnValueOnce({
+      status: "MISMATCH",
+      reasonCodes: ["DF13_RELEASE_EVIDENCE_HASH_INVALID"],
+    });
+    const result = await executeCommerceCutover({
+      preflight: preflightInput(),
+      ports: ports({
+        async holdAuthorityDependentWork() {
+          held = true;
+          return { status: "HELD", fenceToken: "unexpected" };
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "BLOCKED_LEGACY",
+      reasonCodes: ["DF13_RELEASE_EVIDENCE_HASH_INVALID"],
+    });
+    expect(held).toBe(false);
+  });
+
+  it("returns a bounded LEGACY result when forward fence acquisition rejects", async () => {
+    let quiescenceProved = false;
+    let pointerRead = false;
+    const result = await executeCommerceCutover({
+      preflight: preflightInput(),
+      ports: ports({
+        async holdAuthorityDependentWork() {
+          throw new Error("fence provider unavailable");
+        },
+        async proveQuiescence() {
+          quiescenceProved = true;
+          return { status: "QUIESCENT", inFlightAuthorityDependentWork: 0, queuedWork: "HELD" };
+        },
+        async readActivePointer() {
+          pointerRead = true;
+          return pointer("LEGACY", 5);
+        },
+      }),
+    });
+
+    expect(result).toEqual({
+      status: "BLOCKED_LEGACY",
+      sideEffects: "NOT_EXECUTED",
+      activationAcknowledgement: "NOT_ATTEMPTED",
+      reasonCodes: ["DF13_AUTHORITY_FENCE_ACQUISITION_UNAVAILABLE"],
+    });
+    expect(quiescenceProved).toBe(false);
+    expect(pointerRead).toBe(false);
   });
 
   it("fails closed before fencing when DF12 readiness is missing or unsafe", async () => {
@@ -363,7 +494,7 @@ describe("DF13 commerce cutover contract", () => {
 
   it("releases after CAS mismatch only when every consumer has converged on observed LEGACY", async () => {
     const input = preflightInput();
-    const legacy = pointer("LEGACY", 6);
+    const legacy = input.currentPointer;
     let readbacks = 0;
     let released = false;
     const result = await executeCommerceCutover({
@@ -396,7 +527,7 @@ describe("DF13 commerce cutover contract", () => {
 
   it("retains the fence after rollback until every consumer converges on LEGACY", async () => {
     const input = preflightInput();
-    const legacy = pointer("LEGACY", 7);
+    const legacy = restoredLegacyPointer(input);
     let reads = 0;
     let released = false;
     const result = await executeCommerceCutover({
@@ -423,7 +554,34 @@ describe("DF13 commerce cutover contract", () => {
 
   it("rolls back when the CAS activation lacks its append-only audit record", async () => {
     const input = preflightInput();
-    const legacy = pointer("LEGACY", 7);
+    const legacy = restoredLegacyPointer(input);
+    let reads = 0;
+    let audits = 0;
+    const result = await executeCommerceCutover({
+      preflight: input,
+      ports: ports({
+        async readActivePointer() {
+          reads += 1;
+          return reads === 1 ? input.targetPointer : legacy;
+        },
+        async readActivationAudit() {
+          audits += 1;
+          return audits === 1 ? "MISSING" : "EXACT";
+        },
+        async readConsumerAuthorities() {
+          return exactReadbacks(legacy);
+        },
+      }),
+    });
+    expect(result).toMatchObject({
+      status: "LEGACY_RESTORED",
+      reasonCodes: ["DF13_ACTIVATION_AUDIT_UNPROVEN"],
+    });
+  });
+
+  it("retains the fence when the restored LEGACY pointer lacks an exact audit", async () => {
+    const input = preflightInput();
+    const legacy = restoredLegacyPointer(input);
     let reads = 0;
     const result = await executeCommerceCutover({
       preflight: input,
@@ -440,9 +598,10 @@ describe("DF13 commerce cutover contract", () => {
         },
       }),
     });
+
     expect(result).toMatchObject({
-      status: "LEGACY_RESTORED",
-      reasonCodes: ["DF13_ACTIVATION_AUDIT_UNPROVEN"],
+      status: "HOLD_RETAINED",
+      reasonCodes: ["DF13_ACTIVATION_AUDIT_UNPROVEN", "DF13_ROLLBACK_AUDIT_UNPROVEN"],
     });
   });
 
@@ -470,9 +629,37 @@ describe("DF13 commerce cutover contract", () => {
     expect(released).toBe(false);
   });
 
+  it("retains the fence when rollback lands on a different LEGACY version", async () => {
+    const input = preflightInput();
+    const staleLegacy = pointer("LEGACY", 7);
+    let reads = 0;
+    let released = false;
+    const result = await executeCommerceCutover({
+      preflight: input,
+      ports: ports({
+        async readActivePointer() {
+          reads += 1;
+          return reads === 1 ? input.targetPointer : staleLegacy;
+        },
+        async readActivationAudit() {
+          return "MISSING";
+        },
+        async releaseAuthorityDependentWork() {
+          released = true;
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "HOLD_RETAINED",
+      reasonCodes: ["DF13_ACTIVATION_AUDIT_UNPROVEN", "DF13_ROLLBACK_UNPROVEN"],
+    });
+    expect(released).toBe(false);
+  });
+
   it("recovers an interrupted COMMERCE cutover by reacquiring the fence and restoring LEGACY", async () => {
     const input = preflightInput();
-    const legacy = pointer("LEGACY", 7);
+    const legacy = restoredLegacyPointer(input);
     let reads = 0;
     const result = await recoverCommerceCutoverAfterInterruption({
       preflight: input,
@@ -494,7 +681,7 @@ describe("DF13 commerce cutover contract", () => {
 
   it("retains the fence during interrupted recovery until every consumer converges on LEGACY", async () => {
     const input = preflightInput();
-    const legacy = pointer("LEGACY", 7);
+    const legacy = restoredLegacyPointer(input);
     let released = false;
     const result = await recoverCommerceCutoverAfterInterruption({
       preflight: input,
@@ -512,8 +699,247 @@ describe("DF13 commerce cutover contract", () => {
     });
     expect(result).toMatchObject({
       status: "HOLD_RETAINED",
-      reasonCodes: ["DF13_LEGACY_CONSUMER_READBACK_INCOMPLETE"],
+      reasonCodes: [
+        "DF13_INTERRUPTED_CUTOVER_RECOVERED",
+        "DF13_LEGACY_CONSUMER_READBACK_INCOMPLETE",
+      ],
     });
     expect(released).toBe(false);
+  });
+
+  it.each(["MISSING", "AMBIGUOUS"] as const)(
+    "retains the recovery fence when an already-restored LEGACY pointer has a %s rollback audit",
+    async (rollbackAudit) => {
+      const input = preflightInput();
+      const legacy = restoredLegacyPointer(input);
+      let released = false;
+      let auditReads = 0;
+      const result = await recoverCommerceCutoverAfterInterruption({
+        preflight: input,
+        ports: ports({
+          async readActivePointer() {
+            return legacy;
+          },
+          async readActivationAudit() {
+            auditReads += 1;
+            return rollbackAudit;
+          },
+          async readConsumerAuthorities() {
+            return exactReadbacks(legacy);
+          },
+          async releaseAuthorityDependentWork() {
+            released = true;
+          },
+        }),
+      });
+
+      expect(result).toMatchObject({
+        status: "HOLD_RETAINED",
+        sideEffects: "CONTROL_PLANE_ONLY",
+        activationAcknowledgement: "LOST_RECONCILED",
+        reasonCodes: [
+          "DF13_INTERRUPTED_CUTOVER_RECOVERED",
+          "DF13_ROLLBACK_AUDIT_UNPROVEN",
+        ],
+      });
+      expect(auditReads).toBe(1);
+      expect(released).toBe(false);
+    },
+  );
+
+  it("releases an already-restored LEGACY pointer only after exact audit and convergence", async () => {
+    const input = preflightInput();
+    const legacy = restoredLegacyPointer(input);
+    let released = false;
+    const result = await recoverCommerceCutoverAfterInterruption({
+      preflight: input,
+      ports: ports({
+        async readActivePointer() { return legacy; },
+        async readActivationAudit() { return "EXACT"; },
+        async readConsumerAuthorities() { return exactReadbacks(legacy); },
+        async releaseAuthorityDependentWork() { released = true; },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "LEGACY_RESTORED",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      activationAcknowledgement: "LOST_RECONCILED",
+      reasonCodes: ["DF13_INTERRUPTED_CUTOVER_RECOVERED"],
+    });
+    expect(released).toBe(true);
+  });
+
+  it("accepts a LEGACY pointer that omits the optional authority bundle key", async () => {
+    const input = preflightInput();
+    const { authorityBundleHash: _omitted, ...versionWithoutBundle } =
+      input.currentPointer.version;
+    const currentPointer: RuntimeBehaviorModePointer = {
+      ...input.currentPointer,
+      version: versionWithoutBundle,
+    };
+    let auditReads = 0;
+    const result = await recoverCommerceCutoverAfterInterruption({
+      preflight: { ...input, currentPointer },
+      ports: ports({
+        async readActivePointer() {
+          return currentPointer;
+        },
+        async readConsumerAuthorities() {
+          return exactReadbacks(currentPointer);
+        },
+        async readActivationAudit() {
+          auditReads += 1;
+          return "EXACT";
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "LEGACY_RESTORED",
+      reasonCodes: ["DF13_INTERRUPTED_CUTOVER_NEVER_ACTIVATED"],
+    });
+    expect(auditReads).toBe(0);
+  });
+
+  it("reports authority as unknown when the recovery fence was never acquired", async () => {
+    let quiescenceProved = false;
+    let released = false;
+    const result = await recoverCommerceCutoverAfterInterruption({
+      preflight: preflightInput(),
+      ports: ports({
+        async holdAuthorityDependentWork() {
+          return { status: "REJECTED", reasonCode: "lease-unavailable" };
+        },
+        async proveQuiescence() {
+          quiescenceProved = true;
+          return { status: "QUIESCENT", inFlightAuthorityDependentWork: 0, queuedWork: "HELD" };
+        },
+        async releaseAuthorityDependentWork() {
+          released = true;
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "BLOCKED_AUTHORITY_UNKNOWN",
+      sideEffects: "NOT_EXECUTED",
+      activationAcknowledgement: "NOT_ATTEMPTED",
+      reasonCodes: ["DF13_RECOVERY_FENCE_NOT_HELD"],
+    });
+    expect(quiescenceProved).toBe(false);
+    expect(released).toBe(false);
+  });
+
+  it("returns a bounded unknown-authority result when recovery fence acquisition rejects", async () => {
+    let quiescenceProved = false;
+    let pointerRead = false;
+    const result = await recoverCommerceCutoverAfterInterruption({
+      preflight: preflightInput(),
+      ports: ports({
+        async holdAuthorityDependentWork() {
+          throw new Error("fence provider unavailable");
+        },
+        async proveQuiescence() {
+          quiescenceProved = true;
+          return { status: "QUIESCENT", inFlightAuthorityDependentWork: 0, queuedWork: "HELD" };
+        },
+        async readActivePointer() {
+          pointerRead = true;
+          return pointer("LEGACY", 5);
+        },
+      }),
+    });
+
+    expect(result).toEqual({
+      status: "BLOCKED_AUTHORITY_UNKNOWN",
+      sideEffects: "NOT_EXECUTED",
+      activationAcknowledgement: "NOT_ATTEMPTED",
+      reasonCodes: ["DF13_RECOVERY_FENCE_ACQUISITION_UNAVAILABLE"],
+    });
+    expect(quiescenceProved).toBe(false);
+    expect(pointerRead).toBe(false);
+  });
+
+  it("recovers a live COMMERCE pointer without applying forward release-readiness gates", async () => {
+    const input = preflightInput();
+    const restored = restoredLegacyPointer(input);
+    const recoveryInput = {
+      ...input,
+      missingCommerceSignal: readinessSignal({
+        status: "MISSING_COMMERCE_STATE",
+        futureCommerceDisposition: "BLOCK_COMMERCE_CUTOVER",
+        commerceContentFingerprint: null,
+      }),
+      verification: {
+        transitionMatrixPassed: false,
+        bfDfReplayPassed: false,
+        rollbackVerified: false,
+      },
+    };
+    let pointerReads = 0;
+    let holds = 0;
+    let rollbacks = 0;
+    prepareReleaseEvidence.mockResolvedValueOnce({
+      ...preparedEvidence,
+      status: "BLOCKED",
+      reasonCodes: ["DF13_ACTIVATION_RELEASE_NOT_TRUSTED_HEAD"],
+    });
+
+    const result = await recoverCommerceCutoverAfterInterruption({
+      preflight: recoveryInput,
+      ports: ports({
+        async holdAuthorityDependentWork() {
+          holds += 1;
+          return { status: "HELD", fenceToken: "fence-1" };
+        },
+        async readActivePointer() {
+          pointerReads += 1;
+          return pointerReads === 1 ? input.targetPointer : restored;
+        },
+        async readConsumerAuthorities() {
+          return exactReadbacks(restored);
+        },
+        async rollbackToLegacy() {
+          rollbacks += 1;
+          return { status: "ACKNOWLEDGED" };
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "LEGACY_RESTORED",
+      reasonCodes: ["DF13_INTERRUPTED_CUTOVER_RECOVERED"],
+    });
+    expect(holds).toBe(1);
+    expect(rollbacks).toBe(1);
+    expect(prepareReleaseEvidence).not.toHaveBeenCalled();
+    expect(validateReleaseEvidence).not.toHaveBeenCalled();
+  });
+
+  it("still blocks recovery before fencing when the rollback envelope is invalid", async () => {
+    let held = false;
+    const input = preflightInput();
+    const result = await recoverCommerceCutoverAfterInterruption({
+      preflight: { ...input, pageId: "unreviewed-page" },
+      ports: ports({
+        async holdAuthorityDependentWork() {
+          held = true;
+          return { status: "HELD", fenceToken: "unexpected" };
+        },
+      }),
+    });
+
+    expect(result).toEqual({
+      status: "BLOCKED_AUTHORITY_UNKNOWN",
+      sideEffects: "NOT_EXECUTED",
+      activationAcknowledgement: "NOT_ATTEMPTED",
+      reasonCodes: [
+        "DF13_PAGE_SCOPE_INVALID",
+        "DF13_CURRENT_AUTHORITY_NOT_LEGACY",
+        "DF13_TARGET_AUTHORITY_INVALID",
+      ],
+    });
+    expect(held).toBe(false);
   });
 });
