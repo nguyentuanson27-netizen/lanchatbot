@@ -2256,7 +2256,22 @@ export class PostgresRealtimeRuntimeStore {
     input: RealtimeCommitInput<TState, TSalesState>,
     now = new Date(),
   ): Promise<RealtimeCommitResult> {
-    return withTransaction(this.pool, async (client) => {
+    return withTransaction(this.pool, async (client) =>
+      this.commitWithinTransaction(client, input, now),
+    );
+  }
+
+  /**
+   * Executes the existing durable runtime commit on a caller-owned open
+   * transaction. This is deliberately limited to durable state/outbox work;
+   * it cannot send or publish to a provider. DF13 uses it only to bind a
+   * fenced authority commit and fence completion to the same database commit.
+   */
+  async commitWithinTransaction<TState, TSalesState = unknown>(
+    client: PoolClient,
+    input: RealtimeCommitInput<TState, TSalesState>,
+    now = new Date(),
+  ): Promise<RealtimeCommitResult> {
       // Keep the same lock order as webhook enqueue: pages -> ingress head.
       // Reversing these two locks allows an enqueue and a model commit for the
       // same page/conversation to deadlock under load.
@@ -2492,7 +2507,6 @@ export class PostgresRealtimeRuntimeStore {
           ? "COMMITTED"
           : "NOT_REQUESTED",
       };
-    });
   }
 
   async linkProviderConversation(
