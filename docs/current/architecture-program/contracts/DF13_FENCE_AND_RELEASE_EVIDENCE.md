@@ -8,21 +8,21 @@ release, deployment, canary, runtime mutation, or `LEGACY -> COMMERCE` activatio
 Absence of proof of COMMERCE authority means the caller keeps the existing
 LEGACY path. Only a positively identified but unusable COMMERCE pointer blocks.
 
-This rule prevents a future COMMERCE gate from changing current LEGACY traffic.
-The pure fence assessment, durable admission provider, admission dispatcher,
-and default-off consumer adapter are not wired into `RealtimeRunner`; this
-source unit adds no feature flag, composition-root binding, or live authority
-consumer. The adapter is also the concrete resolver-facing Commerce consumer:
-without separate authorization for the exact page/channel/version/content/
-bundle/revision/source identity it rejects a COMMERCE pointer, rather than
-letting resolution stand on a copied hash or an enable flag.
+This rule prevents a COMMERCE gate from changing current LEGACY traffic. The
+source composition has one resolver-facing Commerce consumer and one matching
+executor instance. Normal startup supplies `LEGACY` input, so its activation
+authority rejects COMMERCE before a fence, state, model, product, or commit
+operation. A separate fresh-process PREPROD input may admit COMMERCE only with
+the exact page/channel/version/content/bundle/revision/DATABASE identity, a
+self-validating immutable release-evidence package, and an exact release-source
+pointer. It never accepts a copied hash or an enable flag.
 
 `RealtimeRunner` applies a single final-authority boundary before loading
 conversation state, invoking the model, searching products, or committing a
 result. A COMMERCE-origin resolver fallback is blocked, never reclassified as a
 LEGACY final authority. A fresh exact COMMERCE identity is likewise blocked
-unless a separately reviewed COMMERCE executor is bound; this default-off source
-composition binds none.
+unless the isolated PREPROD startup supplies the reviewed matching executor and
+immutable input; the normal LEGACY composition remains default-off.
 
 ## Pure fence assessment
 
@@ -104,9 +104,11 @@ completion CAS proves that the lease is still live; expiry while durable work
 is in flight rolls the whole transaction back. If the caller loses the
 post-commit acknowledgement, the next acquisition observes `ALREADY_COMPLETED`
 before any plan is re-derived.
-The store class remains unexported from `@lana/database`; no current runtime
-path constructs either adapter, supplies an activation authority, or calls the
-dispatcher/committer.
+The store class remains unexported from `@lana/database`. The source server
+constructs only its narrow public port; normal LEGACY startup cannot admit or
+acquire COMMERCE. The isolated COMMERCE startup supplies activation authority
+only from the reviewed immutable input and reaches the dispatcher/committer
+only after exact resolver admission.
 
 ## Release-candidate source evidence
 

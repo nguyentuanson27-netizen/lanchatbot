@@ -128,10 +128,12 @@ prospective immutable request without touching the runtime. The merged DF13
 provider/dispatcher and default-off consumer wrapper bind the immutable authority
 identity (mode version, content hash, pointer revision, source, authority/state
 modes, and authority-bundle hash) to the listed authority consumers and durable
-fence ownership. Operational acceptance must still establish exact consumer
-readback, activation audit, and rollback evidence before a separately authorized
-cutover command may exist. The source adapter is not constructed by the live
-runner, and there is no operator shortcut from `LEGACY` to `COMMERCE`.
+fence ownership. The source server has one shared composition seam: normal
+startup stays `LEGACY`, while isolated PREPROD `COMMERCE` startup needs the
+reviewed immutable release package and the same fenced executor. Operational
+acceptance must still establish exact consumer readback, activation audit, and
+rollback evidence before a separately authorized cutover command may exist.
+There is no generic operator shortcut from `LEGACY` to `COMMERCE`.
 
 `RealtimeRunner` now selects one final sales authority before state/model/product
 or commit work. A rejected COMMERCE-origin result cannot fall through to the

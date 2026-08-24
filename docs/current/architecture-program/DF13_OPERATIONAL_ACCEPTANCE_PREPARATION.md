@@ -11,15 +11,18 @@ immutable Release Train evidence and does not authorize a runtime operation.
 DF-C / DF13 source work is complete. This preparation records the exact evidence
 and fail-closed runbook that a separately authorized Release Train must use before
 the first mutating boundary. It does not create an immutable release, inspect a
-runtime host, apply pending migration `0035`, construct the default-off consumer
-in the live runner, change `salesAuthorityMode` or `stateReadMode`, or start UR.
+runtime host, apply pending migration `0035`, change `salesAuthorityMode` or
+`stateReadMode`, or start UR.
 
-`RealtimeRunner` now makes one explicit final-authority selection before any
-conversation-state, model, product, or durable-commit work. An invalid or
-resolver-failed COMMERCE-origin identity is blocked rather than falling through
-to LEGACY. An otherwise exact COMMERCE identity is also blocked until a
-separately reviewed COMMERCE executor is bound; this source change neither
-binds that executor nor permits activation.
+The reviewed source composes one explicit final-authority boundary before any
+conversation-state, model, product, or durable-commit work. The normal startup
+input remains `LEGACY` and delegates to the existing runner unchanged. An
+isolated pre-production `COMMERCE` startup is separately fail-closed: it needs
+the immutable release-evidence package, exact release-source pointer, exact
+DATABASE behavior identity, the dedicated fence executor, and Context V2
+capture. An invalid, resolver-failed, stale, or incomplete COMMERCE identity
+blocks rather than falling through to LEGACY. Wiring this source changes no
+deployed runtime and permits no activation by itself.
 
 The only admissible authority topology remains one direct page-scoped transition:
 
