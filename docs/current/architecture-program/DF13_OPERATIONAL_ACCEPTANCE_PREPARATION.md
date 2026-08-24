@@ -1,6 +1,10 @@
 # DF13 Operational-Acceptance Preparation
 
-**Status:** `PRE_MERGE_SOURCE_PREPARATION`; not an activation, release, deployment, migration, canary, or cutover authorization.
+**Status:** `SOURCE_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING`; not an activation, release, deployment, migration, canary, or cutover authorization.
+
+**Source completion:** DF13 source contracts/tooling merged on `main` through PR #247
+(`a8f6e500a8a33f652f7fd2051a135c3b245c5386`). This source merge is not
+immutable Release Train evidence and does not authorize a runtime operation.
 
 ## Purpose and hard boundary
 
