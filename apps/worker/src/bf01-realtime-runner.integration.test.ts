@@ -559,6 +559,28 @@ describe("BF-01 runner reconciliation", () => {
     expect(harness.commit).not.toHaveBeenCalled();
   });
 
+  it("seals the bound Commerce executor from constructor or reflective replacement", async () => {
+    // The production constructor has fourteen supported inputs. A fifteenth
+    // executor-shaped argument must not be an alternate authority entrypoint.
+    expect(RealtimeRunner.length).toBe(14);
+    const harness = createHarness({ commerce: true });
+    const injectedExecutor = {
+      acquire: vi.fn(),
+      bindFinalizationRuntime: vi.fn(),
+      commitThroughFinalizers: vi.fn(),
+    };
+    const reflected = harness.runner as unknown as { commerceExecutor?: unknown };
+    expect(Reflect.ownKeys(harness.runner)).not.toContain("commerceExecutor");
+    // A caller may create an unrelated public property, but it cannot replace
+    // the native-private authority selected by the composition root.
+    reflected.commerceExecutor = injectedExecutor;
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(injectedExecutor.acquire).not.toHaveBeenCalled();
+    expect(injectedExecutor.commitThroughFinalizers).not.toHaveBeenCalled();
+    expect(harness.commerceCommit).toHaveBeenCalledOnce();
+    expect(harness.commit).not.toHaveBeenCalled();
+  });
+
   it("commits exactly one guarded reply and matching audit hashes for the reported incident", async () => {
     const harness = createHarness();
 

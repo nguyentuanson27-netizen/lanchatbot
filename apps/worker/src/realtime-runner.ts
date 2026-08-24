@@ -2402,7 +2402,7 @@ export function responseGroupHandoffOrdering(
 
 export class RealtimeRunner {
   private readonly options: Required<RealtimeRunnerOptions>;
-  private commerceExecutor: Df13CommerceFinalizingExecutorPort<
+  #commerceExecutor: Df13CommerceFinalizingExecutorPort<
     ConversationState,
     SalesCycleRuntimeState
   > | undefined;
@@ -2422,15 +2422,10 @@ export class RealtimeRunner {
     private readonly policyResolver?: RuntimePolicyResolverPort,
     private readonly mediaRecognition?: RealtimeMediaRecognitionPort,
     private readonly behaviorModeResolver?: RuntimeBehaviorModeResolverPort,
-    commerceExecutor?: Df13CommerceFinalizingExecutorPort<
-      ConversationState,
-      SalesCycleRuntimeState
-    >,
   ) {
     if (options.mode === "DRY_RUN" && options.sendEnabled) {
       throw new Error("REALTIME_DRY_RUN_SEND_FORBIDDEN");
     }
-    this.commerceExecutor = commerceExecutor;
     this.options = {
       workerId: options.workerId,
       mode: options.mode,
@@ -2497,13 +2492,13 @@ export class RealtimeRunner {
       SalesCycleRuntimeState
     >,
   ): void {
-    if (this.commerceExecutor !== undefined && this.commerceExecutor !== commerceExecutor) {
+    if (this.#commerceExecutor !== undefined && this.#commerceExecutor !== commerceExecutor) {
       throw new Error("DF13_COMMERCE_EXECUTOR_REBIND_FORBIDDEN");
     }
-    if (this.commerceExecutor === undefined) {
+    if (this.#commerceExecutor === undefined) {
       commerceExecutor.bindFinalizationRuntime(this.runtime);
     }
-    this.commerceExecutor = commerceExecutor;
+    this.#commerceExecutor = commerceExecutor;
   }
 
   /**
@@ -2816,8 +2811,8 @@ export class RealtimeRunner {
     if (authoritySelection.status === "COMMERCE_SELECTED") {
       // Source-default composition supplies no executor. A COMMERCE pointer
       // therefore remains fail-closed and can never fall through to LEGACY.
-      if (!this.commerceExecutor) throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
-      const acquired = await this.commerceExecutor.acquire({
+      if (!this.#commerceExecutor) throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
+      const acquired = await this.#commerceExecutor.acquire({
         pageId: claim.pageId,
         channel: this.options.behaviorModeChannel,
         workId: deterministicUuid(`df13-commerce:${claim.pageId}:${message.eventKey}`),
@@ -5694,11 +5689,11 @@ export class RealtimeRunner {
         ...(inboxBatchGuard ? { inboxBatchGuard } : {}),
     };
     if (commerceFence !== null) {
-      if (!this.commerceExecutor) throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
+      if (!this.#commerceExecutor) throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
       if (contextV2CapturePlan === undefined) {
         throw new Error("DF13_COMMERCE_CONTEXT_CAPTURE_REQUIRED");
       }
-      const committed = await this.commerceExecutor.commitThroughFinalizers({
+      const committed = await this.#commerceExecutor.commitThroughFinalizers({
         acquired: commerceFence,
         runtimeCommit,
         now: new Date(),
