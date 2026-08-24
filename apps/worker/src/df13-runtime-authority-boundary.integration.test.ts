@@ -3,7 +3,6 @@ import { behaviorModeContentHash, type RuntimeBehaviorModeResolution } from "@la
 import { createConversationState } from "@lana/conversation-engine";
 import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
 import { DF13_COMMERCE_AUTHORITY_CONSUMERS_V1 } from "./df13-commerce-authority-bundle.js";
-import type { Df13CommerceRuntimeExecutorPort } from "./df13-commerce-runtime-executor.js";
 import {
   Df13CommerceRuntimeFinalizationAdapter,
   type Df13CommerceFinalizingExecutorPort,
@@ -130,8 +129,16 @@ function runnerForAuthority(
 
 describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path", () => {
   it("rejects replacing the Commerce executor after the wrapper stack is bound", () => {
-    const first = { acquire: vi.fn(), commitThroughFinalizers: vi.fn() } as unknown as Df13CommerceFinalizingExecutorPort;
-    const second = { acquire: vi.fn(), commitThroughFinalizers: vi.fn() } as unknown as Df13CommerceFinalizingExecutorPort;
+    const first = {
+      acquire: vi.fn(),
+      bindFinalizationRuntime: vi.fn(),
+      commitThroughFinalizers: vi.fn(),
+    } as unknown as Df13CommerceFinalizingExecutorPort;
+    const second = {
+      acquire: vi.fn(),
+      bindFinalizationRuntime: vi.fn(),
+      commitThroughFinalizers: vi.fn(),
+    } as unknown as Df13CommerceFinalizingExecutorPort;
     const { runner } = runnerForAuthority(commerceOriginFailSafe, first);
 
     expect(() => runner.bindDf13CommerceExecutor(second))
@@ -207,7 +214,8 @@ describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path
     }));
     const commerceExecutor = {
       acquire,
-      commit: vi.fn(),
+      bindFinalizationRuntime: vi.fn(),
+      commitThroughFinalizers: vi.fn(),
     } as unknown as Df13CommerceFinalizingExecutorPort;
     const { runner, retry, runtime, model, search } = runnerForAuthority(
       exactCommerce,
@@ -321,7 +329,7 @@ describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path
       groundWithFacts: vi.fn(),
     };
     const retry = vi.fn(async () => true);
-    const commerceExecutor: Df13CommerceRuntimeExecutorPort = { acquire, commit };
+    const commerceExecutor = { acquire, commit };
     const commerceFinalization = new Df13CommerceRuntimeFinalizationAdapter(commerceExecutor);
     const runner = new RealtimeRunner(
       {

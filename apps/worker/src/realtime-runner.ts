@@ -2500,6 +2500,9 @@ export class RealtimeRunner {
     if (this.commerceExecutor !== undefined && this.commerceExecutor !== commerceExecutor) {
       throw new Error("DF13_COMMERCE_EXECUTOR_REBIND_FORBIDDEN");
     }
+    if (this.commerceExecutor === undefined) {
+      commerceExecutor.bindFinalizationRuntime(this.runtime);
+    }
     this.commerceExecutor = commerceExecutor;
   }
 
@@ -5696,7 +5699,6 @@ export class RealtimeRunner {
         throw new Error("DF13_COMMERCE_CONTEXT_CAPTURE_REQUIRED");
       }
       const committed = await this.commerceExecutor.commitThroughFinalizers({
-        runtime: this.runtime,
         acquired: commerceFence,
         runtimeCommit,
         now: new Date(),

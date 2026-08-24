@@ -13,6 +13,7 @@ import type { Df13CommerceFenceProvider } from "./df13-commerce-fence-dispatcher
 import {
   Df13CommerceRuntimeExecutor,
 } from "./df13-commerce-runtime-executor.js";
+import type { RealtimeRuntimePort } from "./realtime-runner.js";
 
 const resolution: RuntimeBehaviorModeResolution = {
   confirmationMode: "LEGACY",
@@ -133,7 +134,7 @@ describe("DF13 Commerce runtime executor", () => {
     expect(ports.fenceProvider.acquire).not.toHaveBeenCalled();
   });
 
-  it("commits a held Commerce plan only through the fence-bound committer", async () => {
+  it("keeps the raw executor unable to commit and exposes completion only through its finalizer", async () => {
     const ports = dependencies();
     const executor = new Df13CommerceRuntimeExecutor(ports);
     const acquired = await executor.acquire(input);
@@ -151,7 +152,19 @@ describe("DF13 Commerce runtime executor", () => {
       },
     } satisfies RealtimeCommitInput<{ revision: number }>;
 
-    await expect(executor.commit({ acquired, runtimeCommit })).resolves.toMatchObject({
+    expect((executor as { readonly commit?: unknown }).commit).toBeUndefined();
+    const finalizer = executor.createFinalizingExecutor();
+    const lowerRuntime = finalizer.wrapRuntime({
+      loadOrCreate: vi.fn(),
+      linkProviderConversation: vi.fn(),
+      commit: vi.fn(),
+    } as unknown as RealtimeRuntimePort);
+    const runnerRuntime = new Proxy(lowerRuntime, {
+      get(target, property) { return Reflect.get(target, property, target); },
+    }) as RealtimeRuntimePort;
+    finalizer.bindFinalizationRuntime(runnerRuntime);
+
+    await expect(finalizer.commitThroughFinalizers({ acquired, runtimeCommit, now: new Date() })).resolves.toMatchObject({
       status: "COMPLETED",
       epoch: 3,
     });

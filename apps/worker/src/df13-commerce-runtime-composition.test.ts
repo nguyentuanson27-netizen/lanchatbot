@@ -78,7 +78,7 @@ describe("DF13 Commerce runtime composition", () => {
       authorityProvenance: "COMMERCE_POINTER",
       reasonCodes: ["RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_REJECTED"],
     });
-    expect(composition.commerceExecutor).toBe(commerceExecutor);
+    expect(composition).not.toHaveProperty("commerceExecutor");
   });
 
   it("preserves a DATABASE LEGACY resolution without calling the Commerce executor", async () => {

@@ -19,6 +19,7 @@ import {
   type Df13CommerceFenceLease,
   type Df13CommerceFenceProvider,
 } from "./df13-commerce-fence-dispatcher.js";
+import { Df13CommerceRuntimeFinalizationAdapter } from "./df13-commerce-runtime-finalization.js";
 import { selectDf13RuntimeAuthority } from "./df13-runtime-authority-boundary.js";
 
 export type Df13CommerceRuntimeAcquireResult =
@@ -31,7 +32,7 @@ export type Df13CommerceRuntimeAcquireResult =
   | Readonly<{ status: "PARKED"; reasonCode: string }>
   | Readonly<{ status: "BLOCKED"; reasonCode: string }>;
 
-export interface Df13CommerceRuntimeExecutorPort<TState = unknown, TSalesState = unknown> {
+export interface Df13CommerceRuntimeExecutorPort {
   acquire(input: Readonly<{
     pageId: string;
     channel: string;
@@ -39,10 +40,6 @@ export interface Df13CommerceRuntimeExecutorPort<TState = unknown, TSalesState =
     inboxIds: readonly string[];
     resolution: RuntimeBehaviorModeResolution;
   }>): Promise<Df13CommerceRuntimeAcquireResult>;
-  commit(input: Readonly<{
-    acquired: Extract<Df13CommerceRuntimeAcquireResult, { status: "HELD" }>;
-    runtimeCommit: RealtimeCommitInput<TState, TSalesState>;
-  }>): Promise<Df13CommerceFenceCommitResult>;
 }
 
 /**
@@ -53,7 +50,7 @@ export interface Df13CommerceRuntimeExecutorPort<TState = unknown, TSalesState =
  * final state/Outbox completion only through the fence-bound transaction.
  */
 export class Df13CommerceRuntimeExecutor<TState, TSalesState = unknown>
-implements Df13CommerceRuntimeExecutorPort<TState, TSalesState>, CommerceAuthorityConsumerPort {
+implements Df13CommerceRuntimeExecutorPort, CommerceAuthorityConsumerPort {
   constructor(private readonly dependencies: Readonly<{
     activationAuthority: Df13CommerceActivationAuthority;
     fenceProvider: Df13CommerceFenceProvider;
@@ -144,10 +141,17 @@ implements Df13CommerceRuntimeExecutorPort<TState, TSalesState>, CommerceAuthori
     });
   }
 
-  async commit(input: Readonly<{
+  createFinalizingExecutor(): Df13CommerceRuntimeFinalizationAdapter<TState, TSalesState> {
+    return new Df13CommerceRuntimeFinalizationAdapter({
+      acquire: this.acquire.bind(this),
+      commit: this.#commitFenced.bind(this),
+    });
+  }
+
+  async #commitFenced(input: Readonly<{
     acquired: Extract<Df13CommerceRuntimeAcquireResult, { status: "HELD" }>;
     runtimeCommit: RealtimeCommitInput<TState, TSalesState>;
-  }>) {
+  }>): Promise<Df13CommerceFenceCommitResult> {
     return this.dependencies.fenceCommitter.commitAuthorityDependentWork({
       request: input.acquired.request,
       lease: input.acquired.lease,

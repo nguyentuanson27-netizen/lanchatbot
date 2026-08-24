@@ -14,7 +14,6 @@ import type { BusinessFactsReader } from "./redis-business-facts.js";
 import type { RealtimeGenerationQuota } from "./realtime-quota.js";
 import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
 import { DF13_COMMERCE_AUTHORITY_CONSUMERS_V1 } from "./df13-commerce-authority-bundle.js";
-import type { Df13CommerceRuntimeExecutorPort } from "./df13-commerce-runtime-executor.js";
 import { Df13CommerceRuntimeFinalizationAdapter } from "./df13-commerce-runtime-finalization.js";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 import {
@@ -417,7 +416,7 @@ function createHarness(input: {
   };
   const resolution = input.commerce ? commerceResolution() : undefined;
   const commerceCommit = vi.fn(async (
-    _input: Parameters<Df13CommerceRuntimeExecutorPort<typeof state, SalesCycleRuntimeState>["commit"]>[0],
+    _input: Readonly<{ runtimeCommit: RealtimeCommitInput<typeof state, SalesCycleRuntimeState> }>,
   ) => ({
     status: "COMPLETED" as const,
     epoch: 1,
@@ -431,10 +430,7 @@ function createHarness(input: {
       inboxBatchStatus: "COMMITTED" as const,
     },
   }));
-  const commerceExecutor: Df13CommerceRuntimeExecutorPort<
-    typeof state,
-    SalesCycleRuntimeState
-  > | undefined = resolution
+  const commerceExecutor = resolution
     ? {
         acquire: vi.fn(async () => ({
           status: "HELD" as const,

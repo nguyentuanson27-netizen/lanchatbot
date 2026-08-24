@@ -102,8 +102,9 @@ describe("DF13 Commerce runtime finalization adapter", () => {
       },
     }) as RealtimeRuntimePort;
 
+    adapter.bindFinalizationRuntime(bf01Runtime);
+
     await expect(adapter.commitThroughFinalizers({
-      runtime: bf01Runtime,
       acquired,
       runtimeCommit,
       now: new Date("2026-08-24T00:00:00.000Z"),
@@ -121,7 +122,17 @@ describe("DF13 Commerce runtime finalization adapter", () => {
     }));
   });
 
-  it("fails closed before any base commit when the composition omitted the finalization runtime", async () => {
+  it("rejects the adapter's lower runtime instead of certifying it as finalizer-complete", () => {
+    const adapter = new Df13CommerceRuntimeFinalizationAdapter({
+      acquire: vi.fn(),
+      commit: vi.fn(),
+    });
+
+    expect(() => adapter.bindFinalizationRuntime(adapter.wrapRuntime(runtimeWith(vi.fn()))))
+      .toThrow("DF13_COMMERCE_FINALIZATION_LOWER_RUNTIME_FORBIDDEN");
+  });
+
+  it("fails closed before any base commit when the runner did not bind a finalization runtime", async () => {
     const baseCommit = vi.fn();
     const fenceCommit = vi.fn();
     const adapter = new Df13CommerceRuntimeFinalizationAdapter({
@@ -130,11 +141,39 @@ describe("DF13 Commerce runtime finalization adapter", () => {
     });
 
     await expect(adapter.commitThroughFinalizers({
-      runtime: runtimeWith(baseCommit),
       acquired,
       runtimeCommit,
       now: new Date("2026-08-24T00:00:00.000Z"),
     })).rejects.toThrow("DF13_COMMERCE_FINALIZATION_ROUTER_UNAVAILABLE");
+
+    expect(baseCommit).not.toHaveBeenCalled();
+    expect(fenceCommit).not.toHaveBeenCalled();
+  });
+
+  it("fails closed before either commit when an intervening wrapper strips the one-shot capability", async () => {
+    const baseCommit = vi.fn();
+    const fenceCommit = vi.fn();
+    const adapter = new Df13CommerceRuntimeFinalizationAdapter({
+      acquire: vi.fn(),
+      commit: fenceCommit,
+    });
+    const lowerRuntime = adapter.wrapRuntime(runtimeWith(baseCommit));
+    const strippingRuntime = new Proxy(lowerRuntime, {
+      get(target, property) {
+        if (property !== "commit") return Reflect.get(target, property, target);
+        return async (
+          input: Parameters<RealtimeRuntimePort["commit"]>[0],
+          now?: Date,
+        ) => target.commit(Object.fromEntries(Object.entries(input)) as never, now);
+      },
+    }) as RealtimeRuntimePort;
+    adapter.bindFinalizationRuntime(strippingRuntime);
+
+    await expect(adapter.commitThroughFinalizers({
+      acquired,
+      runtimeCommit,
+      now: new Date("2026-08-24T00:00:00.000Z"),
+    })).rejects.toThrow("DF13_COMMERCE_FINALIZATION_CAPABILITY_MISSING");
 
     expect(baseCommit).not.toHaveBeenCalled();
     expect(fenceCommit).not.toHaveBeenCalled();
