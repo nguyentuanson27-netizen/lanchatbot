@@ -111,6 +111,29 @@ describe("DF13 Commerce runtime composition", () => {
     expect(admit).not.toHaveBeenCalled();
   });
 
+  it("exposes a runner-only finalization adapter backed by the same Commerce executor", async () => {
+    const source: RuntimeBehaviorModeSourcePort = {
+      loadActiveMode: vi.fn(async () => pointer("LEGACY")),
+    };
+    const commerceExecutor = executor();
+    const acquire = vi.spyOn(commerceExecutor, "acquire").mockResolvedValue({
+      status: "PARKED",
+      reasonCode: "DF13_COMMERCE_FENCE_UNAVAILABLE",
+    });
+    const composition = createDf13CommerceRuntimeComposition({
+      source,
+      confirmationAllowedPageIds: [DF13_COMMERCE_PREPROD_SCOPE_V1.pageId],
+      runtimeAuthorityMode: "LEGACY",
+      cacheTtlMs: 5_000,
+      lastKnownGoodTtlMs: 300_000,
+      commerceExecutor,
+    });
+
+    await expect(composition.commerceFinalizationExecutor.acquire({} as never))
+      .resolves.toMatchObject({ status: "PARKED" });
+    expect(acquire).toHaveBeenCalledOnce();
+  });
+
   it("uses a fresh DATABASE read for every Commerce authority decision after startup", async () => {
     const source: RuntimeBehaviorModeSourcePort = {
       loadActiveMode: vi.fn(async () => pointer("COMMERCE")),

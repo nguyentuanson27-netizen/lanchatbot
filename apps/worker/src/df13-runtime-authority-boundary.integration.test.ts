@@ -4,6 +4,10 @@ import { createConversationState } from "@lana/conversation-engine";
 import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
 import { DF13_COMMERCE_AUTHORITY_CONSUMERS_V1 } from "./df13-commerce-authority-bundle.js";
 import type { Df13CommerceRuntimeExecutorPort } from "./df13-commerce-runtime-executor.js";
+import {
+  Df13CommerceRuntimeFinalizationAdapter,
+  type Df13CommerceFinalizingExecutorPort,
+} from "./df13-commerce-runtime-finalization.js";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 import {
   DryRunClearTagObservationProvider,
@@ -71,7 +75,7 @@ const commerceOriginFailSafe: RuntimeBehaviorModeResolution = {
 
 function runnerForAuthority(
   resolution: RuntimeBehaviorModeResolution,
-  commerceExecutor?: Df13CommerceRuntimeExecutorPort,
+  commerceExecutor?: Df13CommerceFinalizingExecutorPort,
 ): Readonly<{
   runner: RealtimeRunner;
   retry: ReturnType<typeof vi.fn>;
@@ -126,8 +130,8 @@ function runnerForAuthority(
 
 describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path", () => {
   it("rejects replacing the Commerce executor after the wrapper stack is bound", () => {
-    const first = { acquire: vi.fn(), commit: vi.fn() } as unknown as Df13CommerceRuntimeExecutorPort;
-    const second = { acquire: vi.fn(), commit: vi.fn() } as unknown as Df13CommerceRuntimeExecutorPort;
+    const first = { acquire: vi.fn(), commitThroughFinalizers: vi.fn() } as unknown as Df13CommerceFinalizingExecutorPort;
+    const second = { acquire: vi.fn(), commitThroughFinalizers: vi.fn() } as unknown as Df13CommerceFinalizingExecutorPort;
     const { runner } = runnerForAuthority(commerceOriginFailSafe, first);
 
     expect(() => runner.bindDf13CommerceExecutor(second))
@@ -201,10 +205,10 @@ describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path
       status: "PARKED" as const,
       reasonCode: "DF13_COMMERCE_FENCE_UNAVAILABLE",
     }));
-    const commerceExecutor: Df13CommerceRuntimeExecutorPort = {
+    const commerceExecutor = {
       acquire,
       commit: vi.fn(),
-    };
+    } as unknown as Df13CommerceFinalizingExecutorPort;
     const { runner, retry, runtime, model, search } = runnerForAuthority(
       exactCommerce,
       commerceExecutor,
@@ -317,6 +321,8 @@ describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path
       groundWithFacts: vi.fn(),
     };
     const retry = vi.fn(async () => true);
+    const commerceExecutor: Df13CommerceRuntimeExecutorPort = { acquire, commit };
+    const commerceFinalization = new Df13CommerceRuntimeFinalizationAdapter(commerceExecutor);
     const runner = new RealtimeRunner(
       {
         claimNext: vi.fn(async () => ({
@@ -330,7 +336,7 @@ describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path
         retry,
         failPermanent: vi.fn(async () => true),
       },
-      runtime,
+      commerceFinalization.wrapRuntime(runtime),
       model,
       { ready: vi.fn(), resolve: vi.fn(), close: vi.fn() },
       { searchText: vi.fn(), searchImage: vi.fn() },
@@ -355,7 +361,7 @@ describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path
       undefined,
       { resolve: vi.fn(async () => exactCommerce) },
     );
-    runner.bindDf13CommerceExecutor({ acquire, commit });
+    runner.bindDf13CommerceExecutor(commerceFinalization);
 
     expect(await runner.processOne()).toBe(true);
     expect(acquire).toHaveBeenCalledOnce();

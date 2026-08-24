@@ -2,12 +2,21 @@ import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
 import type { AgentProposalV1 } from "@lana/contracts";
+import type { RealtimeCommitInput } from "@lana/database";
 import type {
+  SalesCycleRuntimeState,
+  RuntimeBehaviorModeResolution,
   RuntimePolicyResolution,
   RuntimePolicyResolverPort,
 } from "@lana/chat-runtime";
+import { behaviorModeContentHash } from "@lana/chat-runtime";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import type { RealtimeGenerationQuota } from "./realtime-quota.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_CONSUMERS_V1 } from "./df13-commerce-authority-bundle.js";
+import type { Df13CommerceRuntimeExecutorPort } from "./df13-commerce-runtime-executor.js";
+import { Df13CommerceRuntimeFinalizationAdapter } from "./df13-commerce-runtime-finalization.js";
+import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 import {
   RealtimeRunner,
   type RealtimeInboxPort,
@@ -153,6 +162,32 @@ function policyResolution(): RuntimePolicyResolution {
   };
 }
 
+function commerceResolution(): RuntimeBehaviorModeResolution {
+  const authorityBundleHash = DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
+  return {
+    confirmationMode: "LEGACY",
+    salesAuthorityMode: "COMMERCE",
+    stateReadMode: "LEGACY",
+    authorityBundleHash,
+    modeVersionId: "10000000-0000-4000-8000-000000000011",
+    contentHash: behaviorModeContentHash({
+      confirmationMode: "LEGACY",
+      salesAuthorityMode: "COMMERCE",
+      stateReadMode: "LEGACY",
+      authorityBundleHash,
+    }),
+    pointerRevision: 11,
+    source: "DATABASE",
+    status: "RESOLVED",
+    reasonCodes: [],
+    pointerUpdatedAt: occurredAt,
+    resolvedAt: occurredAt,
+    propagationMs: 0,
+    auditWrite: "RECORDED",
+    authorityProvenance: "COMMERCE_POINTER",
+  };
+}
+
 type RepairMode = "SAFE" | "UNSAFE" | "THROW";
 type InitialMode = "NO_REPLY" | "REPLY";
 
@@ -164,6 +199,7 @@ function createHarness(input: {
   conversationOwner?: "BOT" | "HUMAN";
   blockingTag?: "NHAN_VIEN" | null;
   commitAckLostOnce?: boolean;
+  commerce?: boolean;
 } = {}) {
   const base = createConversationState({
     conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
@@ -239,6 +275,19 @@ function createHarness(input: {
 
   let persistedState = state;
   let persistedStateVersion = state.revision;
+  const commerceState = createRealtimeSalesState(
+    state.conversationId,
+    pageId,
+    new Date(occurredAt),
+  );
+  const loadCommerceSalesCycle = async <TState,>() => ({
+    conversationId: state.conversationId,
+    pageId,
+    stateRevision: commerceState.revision,
+    state: commerceState as unknown as TState,
+    cartExpiresAt: null,
+    expiresAt: new Date("2026-08-09T07:00:00.000Z"),
+  });
   let committed: Parameters<RealtimeRuntimePort["commit"]>[0] | null = null;
   const commit = vi.fn(async (value: Parameters<RealtimeRuntimePort["commit"]>[0]) => {
     committed = value;
@@ -268,6 +317,15 @@ function createHarness(input: {
       appSendEnabled: true,
       killSwitch: false,
     })),
+    ...(input.commerce
+      ? {
+          loadOrCreateSalesCycle: loadCommerceSalesCycle,
+          readLatestContextV2ForCommerce: vi.fn(async () => ({
+            kind: "ABSENT" as const,
+            reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_ABSENT" as const,
+          })),
+        }
+      : {}),
     commit,
     linkProviderConversation: vi.fn(async () => undefined),
   };
@@ -357,10 +415,68 @@ function createHarness(input: {
     reserve,
     close: vi.fn(async () => undefined),
   };
+  const resolution = input.commerce ? commerceResolution() : undefined;
+  const commerceCommit = vi.fn(async (
+    _input: Parameters<Df13CommerceRuntimeExecutorPort<typeof state, SalesCycleRuntimeState>["commit"]>[0],
+  ) => ({
+    status: "COMPLETED" as const,
+    epoch: 1,
+    runtime: {
+      stateCommitted: true,
+      metaOutboxCreated: 1,
+      pancakeTagOutboxCreated: false,
+      handoffEventCreated: false,
+      sendAuthorized: true,
+      reasonCodes: [],
+      inboxBatchStatus: "COMMITTED" as const,
+    },
+  }));
+  const commerceExecutor: Df13CommerceRuntimeExecutorPort<
+    typeof state,
+    SalesCycleRuntimeState
+  > | undefined = resolution
+    ? {
+        acquire: vi.fn(async () => ({
+          status: "HELD" as const,
+          request: {
+            pageId,
+            channel: "MESSENGER",
+            workId: "10000000-0000-4000-8000-000000000012",
+            inboxIds: [claim.inboxId],
+            consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+            authority: {
+              salesAuthorityMode: "COMMERCE" as const,
+              stateReadMode: "LEGACY" as const,
+              modeVersionId: resolution.modeVersionId!,
+              contentHash: resolution.contentHash!,
+              pointerRevision: resolution.pointerRevision!,
+              authorityBundleHash: resolution.authorityBundleHash!,
+              source: "DATABASE" as const,
+            },
+          },
+          lease: {
+            fenceToken: "10000000-0000-4000-8000-000000000013",
+            epoch: 1,
+          },
+        })),
+        commit: commerceCommit,
+      }
+    : undefined;
+  const canonicalHistory = input.commerce
+    ? {
+        recordInboundCustomerMessage: vi.fn(async () => ({
+          messagePk: "10000000-0000-4000-8000-000000000014",
+        })),
+        recordOutboundHumanMessage: vi.fn(async () => undefined),
+      }
+    : undefined;
+  const commerceFinalization = commerceExecutor
+    ? new Df13CommerceRuntimeFinalizationAdapter(commerceExecutor)
+    : undefined;
 
   const runner = new RealtimeRunner(
     inbox,
-    runtime,
+    commerceFinalization ? commerceFinalization.wrapRuntime(runtime) : runtime,
     model,
     facts,
     productSearch,
@@ -374,13 +490,22 @@ function createHarness(input: {
       decisionAuditV2Enabled: true,
       wave2StrategyEnabled: true,
       releaseId: "bf01-test",
+      ...(input.commerce
+        ? {
+            salesCycleEnabled: true,
+            contextV2CaptureEnabled: true,
+          }
+        : {}),
     },
     quota,
     undefined,
-    undefined,
+    canonicalHistory,
     undefined,
     policyResolver,
+    undefined,
+    resolution ? { resolve: vi.fn(async () => resolution) } : undefined,
   );
+  if (commerceFinalization) runner.bindDf13CommerceExecutor(commerceFinalization);
 
   return {
     runner,
@@ -390,11 +515,12 @@ function createHarness(input: {
     retry,
     complete,
     committed: () => committed,
+    commerceCommit,
   };
 }
 
-function committedText(
-  value: Parameters<RealtimeRuntimePort["commit"]>[0] | null,
+function committedText<TState, TSalesState>(
+  value: RealtimeCommitInput<TState, TSalesState> | null | undefined,
 ): string {
   return (value?.metaPlan?.messages ?? [])
     .filter((message): message is { kind: "TEXT"; text: string } =>
@@ -404,16 +530,16 @@ function committedText(
     .join("\n");
 }
 
-function hasBf01Reason(
-  value: Parameters<RealtimeRuntimePort["commit"]>[0] | null,
+function hasBf01Reason<TState, TSalesState>(
+  value: RealtimeCommitInput<TState, TSalesState> | null | undefined,
 ): boolean {
   return (value?.decisionEvents ?? []).some((event) =>
     event.reasonCodes.some((reason) => reason.startsWith("BF01_"))
   );
 }
 
-function unresolvedTerminalNoReplyEvents(
-  value: Parameters<RealtimeRuntimePort["commit"]>[0] | null,
+function unresolvedTerminalNoReplyEvents<TState, TSalesState>(
+  value: RealtimeCommitInput<TState, TSalesState> | null | undefined,
 ) {
   return (value?.decisionEvents ?? []).filter((event) =>
     event.eventType === "NO_REPLY" &&
@@ -423,6 +549,20 @@ function unresolvedTerminalNoReplyEvents(
 }
 
 describe("BF-01 runner reconciliation", () => {
+  it("routes a held Commerce commit through BF01 reconciliation before the fenced transaction", async () => {
+    const harness = createHarness({ commerce: true });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(harness.commerceCommit).toHaveBeenCalledOnce();
+    const committed = harness.commerceCommit.mock.calls[0]?.[0]?.runtimeCommit;
+    expect(committed).toBeDefined();
+    if (!committed) throw new Error("DF13_COMMERCE_TEST_COMMIT_MISSING");
+    expect(committedText(committed)).toBe(safeRepairText);
+    expect(hasBf01Reason(committed)).toBe(true);
+    expect(harness.generate).toHaveBeenCalledTimes(2);
+    expect(harness.commit).not.toHaveBeenCalled();
+  });
+
   it("commits exactly one guarded reply and matching audit hashes for the reported incident", async () => {
     const harness = createHarness();
 

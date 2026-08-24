@@ -872,10 +872,19 @@ const runnerOptions = {
   adAcquisitionAnalyticsMode: adAcquisitionMode,
   adAcquisitionPageIds,
 } as const;
+const commerceFinalizationExecutor = df13CommerceStartupInput.mode === "COMMERCE"
+  ? df13CommerceComposition?.commerceFinalizationExecutor
+  : undefined;
+if (df13CommerceStartupInput.mode === "COMMERCE" && !commerceFinalizationExecutor) {
+  throw new Error("DF13_COMMERCE_FINALIZATION_EXECUTOR_UNAVAILABLE");
+}
+const runtimeForRunner = commerceFinalizationExecutor
+  ? commerceFinalizationExecutor.wrapRuntime(runtime)
+  : runtime;
 const runner = df13CommerceStartupInput.mode === "COMMERCE"
   ? new Bf01Bf02RealtimeRunner(
     inbox,
-    runtime,
+    runtimeForRunner,
     baselineModelCapability(vertexModel),
     facts,
     productSearch,
@@ -891,7 +900,7 @@ const runner = df13CommerceStartupInput.mode === "COMMERCE"
   )
   : new Bf01Bf02RealtimeRunner(
   inbox,
-  runtime,
+  runtimeForRunner,
   baselineModelCapability(vertexModel),
   facts,
   productSearch,
@@ -906,9 +915,7 @@ const runner = df13CommerceStartupInput.mode === "COMMERCE"
   behaviorModeResolver,
 );
 if (df13CommerceStartupInput.mode === "COMMERCE") {
-  const commerceExecutor = df13CommerceComposition?.commerceExecutor;
-  if (!commerceExecutor) throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
-  runner.bindDf13CommerceExecutor(commerceExecutor);
+  runner.bindDf13CommerceExecutor(commerceFinalizationExecutor!);
 }
 const pollMs = boundedInteger(
   "REALTIME_POLL_MS",

@@ -150,8 +150,8 @@ import {
 import { selectDf13RuntimeAuthority } from "./df13-runtime-authority-boundary.js";
 import type {
   Df13CommerceRuntimeAcquireResult,
-  Df13CommerceRuntimeExecutorPort,
 } from "./df13-commerce-runtime-executor.js";
+import type { Df13CommerceFinalizingExecutorPort } from "./df13-commerce-runtime-finalization.js";
 import {
   commerceStrategyStage,
   loadDf13CommerceRuntimeContext,
@@ -2402,7 +2402,7 @@ export function responseGroupHandoffOrdering(
 
 export class RealtimeRunner {
   private readonly options: Required<RealtimeRunnerOptions>;
-  private commerceExecutor: Df13CommerceRuntimeExecutorPort<
+  private commerceExecutor: Df13CommerceFinalizingExecutorPort<
     ConversationState,
     SalesCycleRuntimeState
   > | undefined;
@@ -2422,7 +2422,7 @@ export class RealtimeRunner {
     private readonly policyResolver?: RuntimePolicyResolverPort,
     private readonly mediaRecognition?: RealtimeMediaRecognitionPort,
     private readonly behaviorModeResolver?: RuntimeBehaviorModeResolverPort,
-    commerceExecutor?: Df13CommerceRuntimeExecutorPort<
+    commerceExecutor?: Df13CommerceFinalizingExecutorPort<
       ConversationState,
       SalesCycleRuntimeState
     >,
@@ -2487,12 +2487,12 @@ export class RealtimeRunner {
   }
 
   /**
-   * Binds the fenced Commerce executor through the already-reviewed BF01/BF02
-   * wrapper stack without changing either foundation wrapper. A second,
-   * different executor is rejected rather than silently replacing authority.
+   * Binds the only Commerce port which routes every final input through the
+   * already-reviewed BF01/BF02 runtime commit wrappers before the durable
+   * fence transaction. A second, different authority is rejected.
    */
   bindDf13CommerceExecutor(
-    commerceExecutor: Df13CommerceRuntimeExecutorPort<
+    commerceExecutor: Df13CommerceFinalizingExecutorPort<
       ConversationState,
       SalesCycleRuntimeState
     >,
@@ -5695,9 +5695,11 @@ export class RealtimeRunner {
       if (contextV2CapturePlan === undefined) {
         throw new Error("DF13_COMMERCE_CONTEXT_CAPTURE_REQUIRED");
       }
-      const committed = await this.commerceExecutor.commit({
+      const committed = await this.commerceExecutor.commitThroughFinalizers({
+        runtime: this.runtime,
         acquired: commerceFence,
         runtimeCommit,
+        now: new Date(),
       });
       if (committed.status === "PARKED") throw new Error(committed.reasonCode);
       if (committed.status === "ALREADY_COMPLETED") return "COMMITTED";

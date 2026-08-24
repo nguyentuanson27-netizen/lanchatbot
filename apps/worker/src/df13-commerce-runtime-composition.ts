@@ -3,6 +3,7 @@ import {
   type RuntimeBehaviorModeSourcePort,
 } from "@lana/chat-runtime";
 import type { Df13CommerceRuntimeExecutor } from "./df13-commerce-runtime-executor.js";
+import { Df13CommerceRuntimeFinalizationAdapter } from "./df13-commerce-runtime-finalization.js";
 import { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
 
 /**
@@ -32,8 +33,12 @@ export function createDf13CommerceRuntimeComposition<TState, TSalesState>(input:
     allowedCommercePageIds: [DF13_COMMERCE_PREPROD_SCOPE_V1.pageId],
     commerceAuthorityConsumer: input.commerceExecutor,
   });
+  const commerceFinalizationExecutor = new Df13CommerceRuntimeFinalizationAdapter(
+    input.commerceExecutor,
+  );
   return Object.freeze({
     behaviorModeResolver,
     commerceExecutor: input.commerceExecutor,
+    commerceFinalizationExecutor,
   });
 }
