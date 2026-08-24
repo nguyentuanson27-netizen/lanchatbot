@@ -171,7 +171,7 @@ describe("DF13 default-off fence-bound consumer adapter", () => {
     })).resolves.toEqual({ status: "REJECTED" });
   });
 
-  it("delegates the current LEGACY consumer untouched while disabled", async () => {
+  it("parks an identified COMMERCE request while source activation is disabled instead of delegating it to LEGACY", async () => {
     const legacyConsumer = legacy();
     const fenceProvider = provider();
     const builder = planBuilder();
@@ -186,9 +186,12 @@ describe("DF13 default-off fence-bound consumer adapter", () => {
     await expect(adapter.consume({
       legacyInput: { message: "hello" },
       assessment: commerceAssessment,
-    })).resolves.toEqual({ status: "LEGACY_DELEGATED", result: "LEGACY_RESULT" });
+    })).resolves.toEqual({
+      status: "PARKED",
+      reasonCode: "DF13_COMMERCE_SOURCE_DISABLED",
+    });
 
-    expect(legacyConsumer.consume).toHaveBeenCalledWith({ message: "hello" });
+    expect(legacyConsumer.consume).not.toHaveBeenCalled();
     expect(fenceProvider.acquire).not.toHaveBeenCalled();
     expect(builder.deriveDurableRuntimeCommit).not.toHaveBeenCalled();
     expect(fenceCommitter.commitAuthorityDependentWork).not.toHaveBeenCalled();

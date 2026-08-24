@@ -99,8 +99,9 @@ function validResolverIdentity(
 
 /**
  * Dedicated consumer boundary for the future Commerce path. It is default-off
- * and delegates directly to the supplied LEGACY consumer until a separately
- * approved runtime composition supplies an activation authority. Once enabled,
+ * and delegates directly to the supplied LEGACY consumer only for a positively
+ * identified LEGACY assessment. A COMMERCE assessment stays parked until a
+ * separately approved runtime composition supplies an activation authority. Once enabled,
  * every authority-dependent derivation follows a held full-bundle fence and
  * reaches durable state/outbox only through the atomic committer.
  */
@@ -156,8 +157,8 @@ implements CommerceAuthorityConsumerPort {
     }
     if (authorization.status === "SOURCE_DISABLED") {
       return Object.freeze({
-        status: "LEGACY_DELEGATED" as const,
-        result: await this.dependencies.legacyConsumer.consume(input.legacyInput),
+        status: "PARKED" as const,
+        reasonCode: "DF13_COMMERCE_SOURCE_DISABLED",
       });
     }
     if (authorization.status === "BLOCKED") {
