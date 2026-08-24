@@ -9,7 +9,6 @@ import {
 import type { GroundedReplyDraftV1 } from "@lana/contracts";
 import type { RuntimePolicyResolverPort } from "@lana/chat-runtime";
 import type { ConversationState } from "@lana/conversation-engine";
-import type { Df13CommerceRuntimeExecutorPort } from "./df13-commerce-runtime-executor.js";
 import {
   RealtimeRunner as CoreRealtimeRunner,
   currentProductContinuationId,
@@ -965,7 +964,6 @@ export class RealtimeRunner extends CoreRealtimeRunner {
     policyResolver?: RuntimePolicyResolverPort,
     mediaRecognition?: RealtimeMediaRecognitionPort,
     behaviorModeResolver?: RuntimeBehaviorModeResolverPort,
-    commerceExecutor?: Df13CommerceRuntimeExecutorPort,
   ) {
     const scope = new AsyncLocalStorage<Bf02ExecutionContext>();
     const scopedProductSearch = wrapProductSearch(productSearch, scope);
@@ -984,7 +982,6 @@ export class RealtimeRunner extends CoreRealtimeRunner {
       policyResolver,
       wrapMediaRecognition(mediaRecognition, scope),
       behaviorModeResolver,
-      commerceExecutor,
     );
     this.bf02Scope = scope;
   }

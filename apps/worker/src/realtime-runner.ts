@@ -2402,6 +2402,10 @@ export function responseGroupHandoffOrdering(
 
 export class RealtimeRunner {
   private readonly options: Required<RealtimeRunnerOptions>;
+  private commerceExecutor: Df13CommerceRuntimeExecutorPort<
+    ConversationState,
+    SalesCycleRuntimeState
+  > | undefined;
 
   constructor(
     private readonly inbox: RealtimeInboxPort,
@@ -2418,7 +2422,7 @@ export class RealtimeRunner {
     private readonly policyResolver?: RuntimePolicyResolverPort,
     private readonly mediaRecognition?: RealtimeMediaRecognitionPort,
     private readonly behaviorModeResolver?: RuntimeBehaviorModeResolverPort,
-    private readonly commerceExecutor?: Df13CommerceRuntimeExecutorPort<
+    commerceExecutor?: Df13CommerceRuntimeExecutorPort<
       ConversationState,
       SalesCycleRuntimeState
     >,
@@ -2426,6 +2430,7 @@ export class RealtimeRunner {
     if (options.mode === "DRY_RUN" && options.sendEnabled) {
       throw new Error("REALTIME_DRY_RUN_SEND_FORBIDDEN");
     }
+    this.commerceExecutor = commerceExecutor;
     this.options = {
       workerId: options.workerId,
       mode: options.mode,
@@ -2479,6 +2484,23 @@ export class RealtimeRunner {
       adAcquisitionAnalyticsMode: options.adAcquisitionAnalyticsMode ?? "OFF",
       adAcquisitionPageIds: [...(options.adAcquisitionPageIds ?? [])],
     };
+  }
+
+  /**
+   * Binds the fenced Commerce executor through the already-reviewed BF01/BF02
+   * wrapper stack without changing either foundation wrapper. A second,
+   * different executor is rejected rather than silently replacing authority.
+   */
+  bindDf13CommerceExecutor(
+    commerceExecutor: Df13CommerceRuntimeExecutorPort<
+      ConversationState,
+      SalesCycleRuntimeState
+    >,
+  ): void {
+    if (this.commerceExecutor !== undefined && this.commerceExecutor !== commerceExecutor) {
+      throw new Error("DF13_COMMERCE_EXECUTOR_REBIND_FORBIDDEN");
+    }
+    this.commerceExecutor = commerceExecutor;
   }
 
   /**

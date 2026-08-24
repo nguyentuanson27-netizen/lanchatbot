@@ -93,12 +93,7 @@ function runnerForAuthority(
     searchText: vi.fn(),
     searchImage: vi.fn(),
   };
-  return {
-    retry,
-    runtime,
-    model,
-    search,
-    runner: new RealtimeRunner(
+  const runner = new RealtimeRunner(
       {
         claimNext: vi.fn(async () => claim),
         complete: vi.fn(async () => true),
@@ -118,12 +113,27 @@ function runnerForAuthority(
       undefined,
       undefined,
       { resolve: vi.fn(async () => resolution) },
-      commerceExecutor,
-    ),
+  );
+  if (commerceExecutor) runner.bindDf13CommerceExecutor(commerceExecutor);
+  return {
+    retry,
+    runtime,
+    model,
+    search,
+    runner,
   };
 }
 
 describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path", () => {
+  it("rejects replacing the Commerce executor after the wrapper stack is bound", () => {
+    const first = { acquire: vi.fn(), commit: vi.fn() } as unknown as Df13CommerceRuntimeExecutorPort;
+    const second = { acquire: vi.fn(), commit: vi.fn() } as unknown as Df13CommerceRuntimeExecutorPort;
+    const { runner } = runnerForAuthority(commerceOriginFailSafe, first);
+
+    expect(() => runner.bindDf13CommerceExecutor(second))
+      .toThrow("DF13_COMMERCE_EXECUTOR_REBIND_FORBIDDEN");
+  });
+
   it("blocks a rejected COMMERCE-origin pointer before model, state, or final commit work", async () => {
     const { runner, retry, runtime, model, search } = runnerForAuthority(commerceOriginFailSafe);
 
@@ -344,8 +354,8 @@ describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path
       undefined,
       undefined,
       { resolve: vi.fn(async () => exactCommerce) },
-      { acquire, commit },
     );
+    runner.bindDf13CommerceExecutor({ acquire, commit });
 
     expect(await runner.processOne()).toBe(true);
     expect(acquire).toHaveBeenCalledOnce();

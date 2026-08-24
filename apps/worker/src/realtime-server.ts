@@ -888,7 +888,6 @@ const runner = df13CommerceStartupInput.mode === "COMMERCE"
     runtimePolicyResolver,
     mediaRecognition,
     commerceOnlyBehaviorModeResolver,
-    df13CommerceComposition?.commerceExecutor,
   )
   : new Bf01Bf02RealtimeRunner(
   inbox,
@@ -906,6 +905,11 @@ const runner = df13CommerceStartupInput.mode === "COMMERCE"
   mediaRecognition,
   behaviorModeResolver,
 );
+if (df13CommerceStartupInput.mode === "COMMERCE") {
+  const commerceExecutor = df13CommerceComposition?.commerceExecutor;
+  if (!commerceExecutor) throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
+  runner.bindDf13CommerceExecutor(commerceExecutor);
+}
 const pollMs = boundedInteger(
   "REALTIME_POLL_MS",
   10_000,
