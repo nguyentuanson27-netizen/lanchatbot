@@ -25,6 +25,9 @@ $$;
 DROP TRIGGER IF EXISTS df13_commerce_cutover_fence_identity_guard
   ON df13_commerce_cutover_fences;
 DROP FUNCTION IF EXISTS guard_df13_commerce_cutover_fence_identity();
+DROP TRIGGER IF EXISTS df13_commerce_cutover_fence_insert_identity_guard
+  ON df13_commerce_cutover_fences;
+DROP FUNCTION IF EXISTS guard_df13_commerce_cutover_fence_insert_identity();
 DROP TABLE IF EXISTS df13_commerce_cutover_fences;
 DROP TABLE IF EXISTS df13_commerce_authority_fence_claims;
 DROP TABLE IF EXISTS df13_commerce_authority_fences;

@@ -42,13 +42,13 @@ const DF13_PENDING_COMMERCE_MIGRATION_BINDING_V2 = Object.freeze([
   },
   {
     path: "packages/database/pending-migrations/0036_df13_commerce_authority_fence.up.sql",
-    blobOid: "3dd39b586b806e002823bf2beecc9c0b81adf659",
-    contentSha256: "1cd7983e47d81214d5daf73a2cc113dffb40823219e9059da17eceedbd8c2467",
+    blobOid: "8ad670a2fb61423b13d517473cedd1cd4d712229",
+    contentSha256: "853cdbc475926bedbad33ffc1719a14e13a1aae0dfac4fca28c09eb5814acef8",
   },
   {
     path: "packages/database/pending-migrations/0036_df13_commerce_authority_fence.down.sql",
-    blobOid: "a599d8b2ef3ec22e8236060c3b16f558ffc1ed2c",
-    contentSha256: "0f51c50e72699831784614450b991e24f526abd97dddc91df813973a9f9ca06c",
+    blobOid: "0f1123ef130aefbc6759341d4bc370229f1dd478",
+    contentSha256: "c8e2f56ba2f384cc49f3c9d9a2d76da3a4b4165e90b21726ce723d893a09f1e0",
   },
 ] as const);
 

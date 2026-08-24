@@ -14,6 +14,7 @@ export {
   createDf13CommerceCutoverFencePort,
   type Df13CommerceCutoverFenceAcquireResult,
   type Df13CommerceCutoverFenceLease,
+  type Df13CommerceCutoverFenceObservation,
   type Df13CommerceCutoverFencePort,
   type Df13CommerceCutoverFenceReleaseResult,
   type Df13CommerceCutoverFenceRequest,

@@ -98,10 +98,15 @@ Required rehearsal assertions are:
    mode other than LEGACY;
 4. prove a valid 64-hex COMMERCE bundle is accepted;
 5. prove `0036` records only a full immutable pre-cutover LEGACY and target
-   COMMERCE identity, and that identity fields cannot be mutated after insert;
-6. prove `0036` down refuses while any durable cutover or authority-fence
+   COMMERCE identity, re-read field-by-field from the current durable pointer
+   and immutable versions before insert, and that identity fields cannot be
+   mutated after insert;
+6. prove its immutable operation ID reconciles lost acquire/release ACKs without
+   inserting a second fence, and that lease acquire, recovery, and release use
+   PostgreSQL time rather than a process clock; and
+7. prove `0036` down refuses while any durable cutover or authority-fence
    evidence exists and preserves it; and
-7. in a separate clean disposable database, prove `0036` down succeeds with no
+8. in a separate clean disposable database, prove `0036` down succeeds with no
    fence evidence; then separately prove `0035` down refuses while an immutable
    COMMERCE version exists and otherwise restores the LEGACY-only constraint.
 

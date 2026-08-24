@@ -17,6 +17,7 @@ describe("0036 DF13 Commerce cutover fence", () => {
 
     expect(sql).toContain("CREATE TABLE IF NOT EXISTS df13_commerce_cutover_fences");
     expect(sql).toContain("df13_commerce_cutover_fences_live_scope_uk");
+    expect(sql).toContain("operation_id uuid NOT NULL UNIQUE");
     expect(sql).toContain("pre_cutover_version_id uuid NOT NULL");
     expect(sql).toContain("pre_cutover_content_hash text NOT NULL");
     expect(sql).toContain("target_version_id uuid NOT NULL");
@@ -26,6 +27,9 @@ describe("0036 DF13 Commerce cutover fence", () => {
     expect(sql).toContain("lease_until timestamptz");
     expect(sql).toContain("released_at timestamptz");
     expect(sql).toContain("df13_commerce_cutover_fence_identity_guard");
+    expect(sql).toContain("df13_commerce_cutover_fence_insert_identity_guard");
+    expect(sql).toContain("runtime_behavior_mode_pointers");
+    expect(sql).toContain("runtime_behavior_mode_versions");
     expect(sql).toContain("df13 commerce cutover fence identity is immutable");
     expect(sql).not.toContain("UPDATE runtime_behavior_mode_pointers");
     expect(sql).not.toMatch(/customer_(?:name|phone|address)|payload_ciphertext/iu);
@@ -40,6 +44,8 @@ describe("0036 DF13 Commerce cutover fence", () => {
     expect(cutover).toBeGreaterThanOrEqual(0);
     expect(cutover).toBeLessThan(claims);
     expect(claims).toBeLessThan(workFences);
+    expect(sql).toContain("DROP TRIGGER IF EXISTS df13_commerce_cutover_fence_insert_identity_guard");
+    expect(sql).toContain("DROP FUNCTION IF EXISTS guard_df13_commerce_cutover_fence_insert_identity()");
     expect(sql).not.toContain("DELETE FROM");
     expect(sql).not.toContain("TRUNCATE");
   });

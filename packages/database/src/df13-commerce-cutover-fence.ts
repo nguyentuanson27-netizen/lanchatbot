@@ -7,6 +7,7 @@ const BUNDLE_HASH_PATTERN = /^[a-f0-9]{64}$/u;
 const CHANNEL_PATTERN = /^[A-Z][A-Z0-9_]{0,31}$/u;
 
 export type Df13CommerceCutoverFenceRequest = Readonly<{
+  operationId: string;
   pageId: string;
   channel: string;
   preCutover: Readonly<{
@@ -29,11 +30,20 @@ export type Df13CommerceCutoverFenceLease = Readonly<{
 
 export type Df13CommerceCutoverFenceAcquireResult =
   | Readonly<{ status: "HELD"; lease: Df13CommerceCutoverFenceLease }>
+  | Readonly<{ status: "HELD_RECONCILE_REQUIRED"; fenceId: string; epoch: number }>
+  | Readonly<{ status: "ALREADY_RELEASED"; fenceId: string; epoch: number }>
   | Readonly<{ status: "PARKED"; reasonCode: string }>;
 
 export type Df13CommerceCutoverFenceReleaseResult =
   | Readonly<{ status: "RELEASED" }>
   | Readonly<{ status: "STALE_OR_MISSING" }>;
+
+export type Df13CommerceCutoverFenceObservation =
+  | Readonly<{ status: "HELD"; fenceId: string; epoch: number }>
+  | Readonly<{ status: "EXPIRED_RECOVERY_REQUIRED"; fenceId: string; epoch: number }>
+  | Readonly<{ status: "ALREADY_RELEASED"; fenceId: string; epoch: number }>
+  | Readonly<{ status: "MISSING" }>
+  | Readonly<{ status: "MISMATCH"; reasonCode: string }>;
 
 /**
  * Narrow durable provider for an authority transition.  It owns no generic
@@ -42,12 +52,14 @@ export type Df13CommerceCutoverFenceReleaseResult =
  */
 export interface Df13CommerceCutoverFencePort {
   acquire(input: Df13CommerceCutoverFenceRequest): Promise<Df13CommerceCutoverFenceAcquireResult>;
+  observe(input: Df13CommerceCutoverFenceRequest): Promise<Df13CommerceCutoverFenceObservation>;
   release(input: Df13CommerceCutoverFenceLease): Promise<Df13CommerceCutoverFenceReleaseResult>;
   close(): Promise<void>;
 }
 
 type CutoverFenceRow = {
   fence_id: string;
+  operation_id: string;
   epoch: string | number;
   released_at: Date | string | null;
   lease_until: Date | string | null;
@@ -58,6 +70,23 @@ type CutoverFenceRow = {
   target_content_hash: string;
   target_authority_bundle_hash: string;
   request_fingerprint: string;
+  database_now?: Date | string;
+};
+
+type BehaviorPointerRow = {
+  active_version_id: string;
+  pointer_revision: string | number;
+};
+
+type BehaviorVersionRow = {
+  mode_version_id: string;
+  page_id: string;
+  channel: string;
+  confirmation_mode: string;
+  sales_authority_mode: string;
+  state_read_mode: string;
+  content_hash: string;
+  authority_bundle_hash: string | null;
 };
 
 function canonicalJson(value: unknown): string {
@@ -109,6 +138,7 @@ function requiredRevision(value: number): number {
 
 function exactRequest(input: Df13CommerceCutoverFenceRequest): Df13CommerceCutoverFenceRequest {
   return Object.freeze({
+    operationId: requiredUuid(input.operationId, "DF13_CUTOVER_FENCE_OPERATION_INVALID"),
     pageId: requiredPageId(input.pageId),
     channel: requiredChannel(input.channel),
     preCutover: Object.freeze({
@@ -145,13 +175,74 @@ function leaseState(value: Date | string | null, now: Date): "HELD" | "EXPIRED" 
 }
 
 function rowMatches(row: CutoverFenceRow, request: Df13CommerceCutoverFenceRequest): boolean {
-  return row.pre_cutover_version_id.toLowerCase() === request.preCutover.modeVersionId &&
+  return typeof row.operation_id === "string" &&
+    typeof row.pre_cutover_version_id === "string" &&
+    typeof row.target_version_id === "string" &&
+    row.operation_id.toLowerCase() === request.operationId &&
+    row.pre_cutover_version_id.toLowerCase() === request.preCutover.modeVersionId &&
     row.pre_cutover_content_hash === request.preCutover.contentHash &&
     Number(row.pre_cutover_pointer_revision) === request.preCutover.pointerRevision &&
     row.target_version_id.toLowerCase() === request.target.modeVersionId &&
     row.target_content_hash === request.target.contentHash &&
     row.target_authority_bundle_hash === request.target.authorityBundleHash &&
     row.request_fingerprint === df13CommerceCutoverFenceRequestFingerprint(request);
+}
+
+function databaseTime(value: Date | string | undefined): Date | null {
+  const now = new Date(value ?? Number.NaN);
+  return Number.isNaN(now.getTime()) ? null : now;
+}
+
+async function readDatabaseTime(client: PoolClient): Promise<Date> {
+  const result = await client.query<{ now: Date | string }>("SELECT clock_timestamp() AS now");
+  const now = databaseTime(result.rows[0]?.now);
+  if (now === null) throw new Error("DF13_CUTOVER_FENCE_DATABASE_CLOCK_INVALID");
+  return now;
+}
+
+async function canonicalIdentityMatches(
+  client: PoolClient,
+  request: Df13CommerceCutoverFenceRequest,
+): Promise<boolean> {
+  const pointerResult = await client.query<BehaviorPointerRow>(
+    `SELECT active_version_id, pointer_revision
+       FROM runtime_behavior_mode_pointers
+      WHERE page_id = $1 AND channel = $2
+      FOR UPDATE`,
+    [request.pageId, request.channel],
+  );
+  const pointer = pointerResult.rows[0];
+  if (
+    pointer === undefined ||
+    pointer.active_version_id.toLowerCase() !== request.preCutover.modeVersionId ||
+    Number(pointer.pointer_revision) !== request.preCutover.pointerRevision
+  ) return false;
+  const versionsResult = await client.query<BehaviorVersionRow>(
+    `SELECT mode_version_id, page_id, channel, confirmation_mode,
+            sales_authority_mode, state_read_mode, content_hash, authority_bundle_hash
+       FROM runtime_behavior_mode_versions
+      WHERE mode_version_id = ANY($1::uuid[])
+      FOR KEY SHARE`,
+    [[request.preCutover.modeVersionId, request.target.modeVersionId]],
+  );
+  if (versionsResult.rows.length !== 2) return false;
+  const byId = new Map(versionsResult.rows.map((row) => [row.mode_version_id.toLowerCase(), row]));
+  const preCutover = byId.get(request.preCutover.modeVersionId);
+  const target = byId.get(request.target.modeVersionId);
+  return preCutover !== undefined && target !== undefined &&
+    preCutover.page_id === request.pageId &&
+    preCutover.channel === request.channel &&
+    preCutover.sales_authority_mode === "LEGACY" &&
+    preCutover.state_read_mode === "LEGACY" &&
+    preCutover.authority_bundle_hash === null &&
+    preCutover.content_hash === request.preCutover.contentHash &&
+    target.page_id === request.pageId &&
+    target.channel === request.channel &&
+    target.confirmation_mode === preCutover.confirmation_mode &&
+    target.sales_authority_mode === "COMMERCE" &&
+    target.state_read_mode === "LEGACY" &&
+    target.content_hash === request.target.contentHash &&
+    target.authority_bundle_hash === request.target.authorityBundleHash;
 }
 
 async function rollbackQuietly(client: PoolClient): Promise<void> {
@@ -175,8 +266,7 @@ export class PostgresDf13CommerceCutoverFenceStore implements Df13CommerceCutove
     await this.#pool.end();
   }
 
-  async acquire(input: Df13CommerceCutoverFenceRequest, now = new Date()): Promise<Df13CommerceCutoverFenceAcquireResult> {
-    if (Number.isNaN(now.getTime())) throw new Error("DF13_CUTOVER_FENCE_TIMESTAMP_INVALID");
+  async acquire(input: Df13CommerceCutoverFenceRequest): Promise<Df13CommerceCutoverFenceAcquireResult> {
     const request = exactRequest(input);
     const fingerprint = df13CommerceCutoverFenceRequestFingerprint(request);
     const client = await this.#pool.connect();
@@ -185,8 +275,67 @@ export class PostgresDf13CommerceCutoverFenceStore implements Df13CommerceCutove
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [
         `df13-cutover:${request.pageId}:${request.channel}`,
       ]);
-      const existingResult = await client.query<CutoverFenceRow>(
-        `SELECT fence_id, epoch, released_at, lease_until,
+      const now = await readDatabaseTime(client);
+      const operationResult = await client.query<CutoverFenceRow>(
+        `SELECT fence_id, operation_id, epoch, released_at, lease_until,
+                pre_cutover_version_id, pre_cutover_content_hash, pre_cutover_pointer_revision,
+                target_version_id, target_content_hash, target_authority_bundle_hash,
+                request_fingerprint
+           FROM df13_commerce_cutover_fences
+          WHERE operation_id = $1
+          FOR UPDATE`,
+        [request.operationId],
+      );
+      const operation = operationResult.rows[0];
+      if (operation !== undefined) {
+        if (!rowMatches(operation, request)) {
+          await client.query("ROLLBACK");
+          return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_OPERATION_IDENTITY_MISMATCH" });
+        }
+        const epoch = finiteEpoch(operation.epoch);
+        if (epoch === null) {
+          await client.query("ROLLBACK");
+          return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_EPOCH_INVALID" });
+        }
+        if (operation.released_at !== null) {
+          await client.query("COMMIT");
+          return Object.freeze({ status: "ALREADY_RELEASED", fenceId: operation.fence_id, epoch });
+        }
+        const operationLease = leaseState(operation.lease_until, now);
+        if (operationLease === "INVALID") {
+          await client.query("ROLLBACK");
+          return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_LEASE_INVALID" });
+        }
+        if (operationLease === "HELD") {
+          await client.query("ROLLBACK");
+          return Object.freeze({ status: "HELD_RECONCILE_REQUIRED", fenceId: operation.fence_id, epoch });
+        }
+        const fenceToken = randomUUID();
+        const reacquired = await client.query<{ epoch: string | number }>(
+          `WITH current_clock AS (SELECT clock_timestamp() AS now)
+           UPDATE df13_commerce_cutover_fences AS fence
+              SET epoch = $2, token_hash = $3,
+                  lease_until = current_clock.now + ($4::integer * interval '1 millisecond'),
+                  updated_at = current_clock.now
+             FROM current_clock
+            WHERE fence.fence_id = $1 AND fence.epoch = $5 AND fence.released_at IS NULL
+              AND fence.lease_until <= current_clock.now
+          RETURNING fence.epoch`,
+          [operation.fence_id, epoch + 1, hash(fenceToken), this.#leaseMs, epoch],
+        );
+        if (reacquired.rowCount !== 1) {
+          await client.query("ROLLBACK");
+          return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_CONCURRENCY_CONFLICT" });
+        }
+        await client.query("COMMIT");
+        return Object.freeze({
+          status: "HELD",
+          lease: Object.freeze({ fenceId: operation.fence_id, fenceToken, epoch: epoch + 1 }),
+        });
+      }
+
+      const activeScopeResult = await client.query<CutoverFenceRow>(
+        `SELECT fence_id, operation_id, epoch, released_at, lease_until,
                 pre_cutover_version_id, pre_cutover_content_hash, pre_cutover_pointer_revision,
                 target_version_id, target_content_hash, target_authority_bundle_hash,
                 request_fingerprint
@@ -196,61 +345,29 @@ export class PostgresDf13CommerceCutoverFenceStore implements Df13CommerceCutove
           FOR UPDATE`,
         [request.pageId, request.channel],
       );
-      const existing = existingResult.rows[0];
-      if (existing) {
-        if (!rowMatches(existing, request)) {
-          await client.query("ROLLBACK");
-          return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_IDENTITY_MISMATCH" });
-        }
-        const existingLeaseState = leaseState(existing.lease_until, now);
-        if (existingLeaseState === "INVALID") {
-          await client.query("ROLLBACK");
-          return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_LEASE_INVALID" });
-        }
-        if (existingLeaseState === "HELD") {
-          await client.query("ROLLBACK");
-          return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_ALREADY_HELD" });
-        }
-        const epoch = finiteEpoch(existing.epoch);
-        if (epoch === null) {
-          await client.query("ROLLBACK");
-          return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_EPOCH_INVALID" });
-        }
-        const fenceToken = randomUUID();
-        const reacquired = await client.query<{ epoch: string | number }>(
-          `UPDATE df13_commerce_cutover_fences
-              SET epoch = $2, token_hash = $3,
-                  lease_until = $4 + ($5::integer * interval '1 millisecond'),
-                  updated_at = $4
-            WHERE fence_id = $1 AND epoch = $6 AND released_at IS NULL
-          RETURNING epoch`,
-          [existing.fence_id, epoch + 1, hash(fenceToken), now, this.#leaseMs, epoch],
-        );
-        if (reacquired.rowCount !== 1) {
-          await client.query("ROLLBACK");
-          return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_CONCURRENCY_CONFLICT" });
-        }
-        await client.query("COMMIT");
-        return Object.freeze({
-          status: "HELD",
-          lease: Object.freeze({ fenceId: existing.fence_id, fenceToken, epoch: epoch + 1 }),
-        });
+      if (activeScopeResult.rows[0] !== undefined) {
+        await client.query("ROLLBACK");
+        return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_SCOPE_RECOVERY_REQUIRED" });
+      }
+      if (!await canonicalIdentityMatches(client, request)) {
+        await client.query("ROLLBACK");
+        return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_CANONICAL_IDENTITY_INVALID" });
       }
 
       const fenceId = randomUUID();
       const fenceToken = randomUUID();
       const inserted = await client.query<{ fence_id: string; epoch: string | number }>(
         `INSERT INTO df13_commerce_cutover_fences (
-           fence_id, page_id, channel,
+           fence_id, operation_id, page_id, channel,
            pre_cutover_version_id, pre_cutover_content_hash, pre_cutover_pointer_revision,
            target_version_id, target_content_hash, target_authority_bundle_hash,
            request_fingerprint, epoch, token_hash, lease_until, released_at, created_at, updated_at
          ) VALUES (
-           $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,1,$11,
-           $12 + ($13::integer * interval '1 millisecond'),NULL,$12,$12
+           $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,1,$12,
+           $13 + ($14::integer * interval '1 millisecond'),NULL,$13,$13
          ) RETURNING fence_id, epoch`,
         [
-          fenceId, request.pageId, request.channel,
+          fenceId, request.operationId, request.pageId, request.channel,
           request.preCutover.modeVersionId, request.preCutover.contentHash, request.preCutover.pointerRevision,
           request.target.modeVersionId, request.target.contentHash, request.target.authorityBundleHash,
           fingerprint, hash(fenceToken), now, this.#leaseMs,
@@ -282,6 +399,36 @@ export class PostgresDf13CommerceCutoverFenceStore implements Df13CommerceCutove
     }
   }
 
+  async observe(input: Df13CommerceCutoverFenceRequest): Promise<Df13CommerceCutoverFenceObservation> {
+    const request = exactRequest(input);
+    const result = await this.#pool.query<CutoverFenceRow>(
+      `SELECT fence_id, operation_id, epoch, released_at, lease_until,
+              pre_cutover_version_id, pre_cutover_content_hash, pre_cutover_pointer_revision,
+              target_version_id, target_content_hash, target_authority_bundle_hash,
+              request_fingerprint, clock_timestamp() AS database_now
+         FROM df13_commerce_cutover_fences
+        WHERE operation_id = $1`,
+      [request.operationId],
+    );
+    const row = result.rows[0];
+    if (row === undefined) return Object.freeze({ status: "MISSING" });
+    if (!rowMatches(row, request)) {
+      return Object.freeze({ status: "MISMATCH", reasonCode: "DF13_CUTOVER_FENCE_OPERATION_IDENTITY_MISMATCH" });
+    }
+    const epoch = finiteEpoch(row.epoch);
+    if (epoch === null) return Object.freeze({ status: "MISMATCH", reasonCode: "DF13_CUTOVER_FENCE_EPOCH_INVALID" });
+    if (row.released_at !== null) {
+      return Object.freeze({ status: "ALREADY_RELEASED", fenceId: row.fence_id, epoch });
+    }
+    const now = databaseTime(row.database_now);
+    const state = now === null ? "INVALID" : leaseState(row.lease_until, now);
+    if (state === "HELD") return Object.freeze({ status: "HELD", fenceId: row.fence_id, epoch });
+    if (state === "EXPIRED") {
+      return Object.freeze({ status: "EXPIRED_RECOVERY_REQUIRED", fenceId: row.fence_id, epoch });
+    }
+    return Object.freeze({ status: "MISMATCH", reasonCode: "DF13_CUTOVER_FENCE_LEASE_INVALID" });
+  }
+
   async release(input: Df13CommerceCutoverFenceLease): Promise<Df13CommerceCutoverFenceReleaseResult> {
     const fenceId = requiredUuid(input.fenceId, "DF13_CUTOVER_FENCE_ID_INVALID");
     const fenceToken = requiredUuid(input.fenceToken, "DF13_CUTOVER_FENCE_TOKEN_INVALID");
@@ -289,8 +436,10 @@ export class PostgresDf13CommerceCutoverFenceStore implements Df13CommerceCutove
     if (epoch === null) throw new Error("DF13_CUTOVER_FENCE_EPOCH_INVALID");
     const result = await this.#pool.query(
       `UPDATE df13_commerce_cutover_fences
-          SET token_hash = NULL, lease_until = NULL, released_at = now(), updated_at = now()
+          SET token_hash = NULL, lease_until = NULL,
+              released_at = clock_timestamp(), updated_at = clock_timestamp()
         WHERE fence_id = $1 AND epoch = $2 AND token_hash = $3 AND released_at IS NULL
+          AND lease_until > clock_timestamp()
       RETURNING fence_id`,
       [fenceId, epoch, hash(fenceToken)],
     );
@@ -306,6 +455,7 @@ export function createDf13CommerceCutoverFencePort(
   const store = new PostgresDf13CommerceCutoverFenceStore(connectionString);
   return Object.freeze({
     acquire: store.acquire.bind(store),
+    observe: store.observe.bind(store),
     release: store.release.bind(store),
     close: store.close.bind(store),
   });
