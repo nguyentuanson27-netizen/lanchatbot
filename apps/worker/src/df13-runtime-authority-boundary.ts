@@ -1,4 +1,7 @@
-import type { RuntimeBehaviorModeResolution } from "@lana/chat-runtime";
+import {
+  behaviorModeContentHash,
+  type RuntimeBehaviorModeResolution,
+} from "@lana/chat-runtime";
 import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
 import { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
 
@@ -64,6 +67,7 @@ export function selectDf13RuntimeAuthority(input: Readonly<{
       !UUID_V4_PATTERN.test(resolution.modeVersionId) ||
       !resolution.contentHash ||
       !CONTENT_HASH_PATTERN.test(resolution.contentHash) ||
+      resolution.contentHash !== behaviorModeContentHash(resolution) ||
       typeof pointerRevision !== "number" ||
       !Number.isSafeInteger(pointerRevision) ||
       pointerRevision < 1

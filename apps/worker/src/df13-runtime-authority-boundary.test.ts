@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { RuntimeBehaviorModeResolution } from "@lana/chat-runtime";
+import {
+  behaviorModeContentHash,
+  type RuntimeBehaviorModeResolution,
+} from "@lana/chat-runtime";
 import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
 import { selectDf13RuntimeAuthority } from "./df13-runtime-authority-boundary.js";
 
@@ -36,6 +39,12 @@ describe("DF13 single runtime authority boundary", () => {
   });
 
   it("selects COMMERCE only with the exact fresh DATABASE identity and bundle", () => {
+    const contentHash = behaviorModeContentHash({
+      confirmationMode: "LEGACY",
+      salesAuthorityMode: "COMMERCE",
+      stateReadMode: "LEGACY",
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+    });
     expect(selectDf13RuntimeAuthority({
       pageId: "1198992073286645",
       channel: "MESSENGER",
@@ -44,12 +53,13 @@ describe("DF13 single runtime authority boundary", () => {
       stateReadMode: "LEGACY",
       authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
       authorityProvenance: "COMMERCE_POINTER",
+      contentHash,
       }),
     })).toEqual({
       status: "COMMERCE_SELECTED",
       authority: {
         modeVersionId: "10000000-0000-4000-8000-000000000001",
-        contentHash: `sha256:${"a".repeat(64)}`,
+        contentHash,
         pointerRevision: 8,
         authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
         source: "DATABASE",
@@ -80,6 +90,20 @@ describe("DF13 single runtime authority boundary", () => {
         salesAuthorityMode: "COMMERCE",
         authorityBundleHash: "b".repeat(64),
         authorityProvenance: "COMMERCE_POINTER",
+      }),
+    })).toEqual({
+      status: "BLOCKED",
+      reasonCode: "DF13_RUNTIME_COMMERCE_IDENTITY_INVALID",
+    });
+
+    expect(selectDf13RuntimeAuthority({
+      pageId: "1198992073286645",
+      channel: "MESSENGER",
+      resolution: resolution({
+        salesAuthorityMode: "COMMERCE",
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityProvenance: "COMMERCE_POINTER",
+        contentHash: `sha256:${"c".repeat(64)}`,
       }),
     })).toEqual({
       status: "BLOCKED",
