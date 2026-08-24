@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { guardAgentProposal } from "@lana/business-tools";
 import type { AgentProposalV1 } from "@lana/contracts";
 import type { RuntimePolicyResolverPort } from "@lana/chat-runtime";
+import type { Df13CommerceRuntimeExecutorPort } from "./df13-commerce-runtime-executor.js";
 import type {
   RealtimeCommitInput,
   RealtimeDecisionEventPlan,
@@ -712,6 +713,7 @@ export class RealtimeRunner extends Bf02RealtimeRunner {
     policyResolver?: RuntimePolicyResolverPort,
     mediaRecognition?: RealtimeMediaRecognitionPort,
     behaviorModeResolver?: RuntimeBehaviorModeResolverPort,
+    commerceExecutor?: Df13CommerceRuntimeExecutorPort,
   ) {
     const scope = new AsyncLocalStorage<Bf01ExecutionContext>();
     super(
@@ -729,6 +731,7 @@ export class RealtimeRunner extends Bf02RealtimeRunner {
       wrapPolicyResolver(policyResolver, scope),
       mediaRecognition,
       behaviorModeResolver,
+      commerceExecutor,
     );
     this.bf01Scope = scope;
   }

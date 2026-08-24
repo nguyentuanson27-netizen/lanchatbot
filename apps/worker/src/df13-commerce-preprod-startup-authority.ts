@@ -45,14 +45,32 @@ function hasOnlyKeys(value: Record<string, unknown>, keys: readonly string[]): b
     keys.every((key) => Object.hasOwn(value, key));
 }
 
+function cloneJson(value: unknown): unknown {
+  try {
+    const serialized = JSON.stringify(value);
+    if (serialized === undefined) throw new Error("DF13_COMMERCE_STARTUP_INPUT_INVALID");
+    return JSON.parse(serialized) as unknown;
+  } catch {
+    throw new Error("DF13_COMMERCE_STARTUP_INPUT_INVALID");
+  }
+}
+
+function deepFreeze<T>(value: T): T {
+  if (value === null || typeof value !== "object") return value;
+  for (const nested of Object.values(value as Record<string, unknown>)) {
+    deepFreeze(nested);
+  }
+  return Object.freeze(value);
+}
+
 /** Parses the redacted, immutable startup package before it reaches runtime. */
 export function parseDf13CommercePreprodStartupInput(
   value: unknown,
 ): Df13CommercePreprodStartupInput {
-  const input = record(value);
+  const input = record(cloneJson(value));
   if (!input) throw new Error("DF13_COMMERCE_STARTUP_INPUT_INVALID");
   if (input.mode === "LEGACY" && hasOnlyKeys(input, ["mode"])) {
-    return Object.freeze({ mode: "LEGACY" as const });
+    return deepFreeze({ mode: "LEGACY" as const });
   }
   if (
     input.mode !== "COMMERCE" ||
@@ -63,7 +81,7 @@ export function parseDf13CommercePreprodStartupInput(
   ) {
     throw new Error("DF13_COMMERCE_STARTUP_INPUT_INVALID");
   }
-  return Object.freeze({
+  return deepFreeze({
     mode: "COMMERCE" as const,
     releaseEvidence: input.releaseEvidence as Df13ReleaseCandidateEvidence,
     expectedAuthority: input.expectedAuthority as Parameters<
@@ -152,13 +170,14 @@ function sameIdentity(
 export function createDf13CommercePreprodStartupAuthority(
   input: Df13CommercePreprodStartupInput,
 ): Df13CommerceActivationAuthority {
-  if (input.mode === "LEGACY") return DF13_COMMERCE_SOURCE_ONLY_DISABLED;
-  const packageReason = startupPackageReason(input);
+  const immutableInput = parseDf13CommercePreprodStartupInput(input);
+  if (immutableInput.mode === "LEGACY") return DF13_COMMERCE_SOURCE_ONLY_DISABLED;
+  const packageReason = startupPackageReason(immutableInput);
   const evaluate = (
     identity: Parameters<CommerceAuthorityConsumerPort["admitCommerceAuthority"]>[0],
   ) => {
     if (packageReason !== null) return { status: "BLOCKED" as const, reasonCode: packageReason };
-    if (!exactIdentity(identity) || !sameIdentity(identity, input.expectedAuthority)) {
+    if (!exactIdentity(identity) || !sameIdentity(identity, immutableInput.expectedAuthority)) {
       return { status: "BLOCKED" as const, reasonCode: "DF13_COMMERCE_STARTUP_IDENTITY_INVALID" };
     }
     return { status: "ADMITTED" as const };

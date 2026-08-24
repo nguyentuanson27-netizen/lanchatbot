@@ -93,6 +93,41 @@ describe("DF13 pre-production startup authority", () => {
     })).toThrow("DF13_COMMERCE_STARTUP_INPUT_INVALID");
   });
 
+  it("deep-freezes a copied Commerce startup package before authority validation", async () => {
+    const evidence = await prepareDf13ReleaseCandidateEvidence({
+      activationReleaseRevision: revision,
+      git: reader,
+    });
+    const startupInput = {
+      mode: "COMMERCE" as const,
+      releaseEvidence: JSON.parse(JSON.stringify(evidence)) as typeof evidence,
+      expectedAuthority: { ...identity },
+      releaseSource: {
+        schemaVersion: 1 as const,
+        release: "df13-preprod-test",
+        repository: "https://github.com/nguyentuanson27-netizen/lanchatbot" as const,
+        tag: "df13-preprod-test",
+        commit: revision,
+        createdAt: "2026-08-24T00:00:00.000Z",
+      },
+    };
+    const parsed = parseDf13CommercePreprodStartupInput(startupInput);
+
+    expect(parsed.mode).toBe("COMMERCE");
+    if (parsed.mode !== "COMMERCE") throw new Error("TEST_EXPECTED_COMMERCE");
+    expect(Object.isFrozen(parsed.releaseEvidence)).toBe(true);
+    expect(Object.isFrozen(parsed.expectedAuthority)).toBe(true);
+    expect(Object.isFrozen(parsed.releaseSource)).toBe(true);
+
+    const startup = createDf13CommercePreprodStartupAuthority(startupInput);
+    startupInput.expectedAuthority.contentHash = `sha256:${"b".repeat(64)}`;
+    (startupInput.releaseEvidence as { activationReleaseRevision: string }).activationReleaseRevision = "c".repeat(40);
+
+    await expect(startup.authorizeExactCommerceIdentity(identity)).resolves.toEqual({
+      status: "ADMITTED",
+    });
+  });
+
   it("admits only an exact DATABASE Commerce identity bound to a validated immutable release package", async () => {
     const startup = await authority();
 

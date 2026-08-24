@@ -29,7 +29,7 @@ import {
   DryRunClearTagObservationProvider,
   FailClosedTagObservationProvider,
   PancakeRealtimeTagObservationProvider,
-  RealtimeRunner as LegacyRealtimeRunner,
+  RealtimeRunner as Bf01Bf02RealtimeRunner,
 } from "./bf02-realtime-runner.js";
 import { runRealtimeLoop } from "./realtime-loop.js";
 import { RedisRealtimeGenerationQuota } from "./realtime-quota.js";
@@ -56,7 +56,6 @@ import {
   parseDf13CommercePreprodStartupInput,
 } from "./df13-commerce-preprod-startup-authority.js";
 import { selectDf13RuntimeAuthority } from "./df13-runtime-authority-boundary.js";
-import { RealtimeRunner as CommerceRealtimeRunner } from "./realtime-runner.js";
 
 import {
   RedisRealtimeMediaRecognitionCache,
@@ -874,7 +873,7 @@ const runnerOptions = {
   adAcquisitionPageIds,
 } as const;
 const runner = df13CommerceStartupInput.mode === "COMMERCE"
-  ? new CommerceRealtimeRunner(
+  ? new Bf01Bf02RealtimeRunner(
     inbox,
     runtime,
     baselineModelCapability(vertexModel),
@@ -891,7 +890,7 @@ const runner = df13CommerceStartupInput.mode === "COMMERCE"
     commerceOnlyBehaviorModeResolver,
     df13CommerceComposition?.commerceExecutor,
   )
-  : new LegacyRealtimeRunner(
+  : new Bf01Bf02RealtimeRunner(
   inbox,
   runtime,
   baselineModelCapability(vertexModel),

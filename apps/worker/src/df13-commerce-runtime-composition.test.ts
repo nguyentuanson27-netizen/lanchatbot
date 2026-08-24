@@ -153,4 +153,44 @@ describe("DF13 Commerce runtime composition", () => {
     }).status).toBe("COMMERCE_SELECTED");
     expect(source.loadActiveMode).toHaveBeenCalledTimes(2);
   });
+
+  it("does not coalesce concurrent Commerce authority reads", async () => {
+    const resolvers: Array<(value: RuntimeBehaviorModePointer) => void> = [];
+    const source: RuntimeBehaviorModeSourcePort = {
+      loadActiveMode: vi.fn(() => new Promise<RuntimeBehaviorModePointer>((resolve) => {
+        resolvers.push(resolve);
+      })),
+    };
+    const commerceExecutor = executor({
+      authorizeExactCommerceIdentity: vi.fn(async () => ({ status: "ADMITTED" as const })),
+      authorizeExactCommerceRequest: vi.fn(async () => ({ status: "ADMITTED" as const })),
+    });
+    const composition = createDf13CommerceRuntimeComposition({
+      source,
+      confirmationAllowedPageIds: [DF13_COMMERCE_PREPROD_SCOPE_V1.pageId],
+      runtimeAuthorityMode: "COMMERCE",
+      cacheTtlMs: 5_000,
+      lastKnownGoodTtlMs: 300_000,
+      commerceExecutor,
+    });
+    const resolve = (resolutionId: string) => composition.behaviorModeResolver.resolve({
+      resolutionId,
+      pageId: DF13_COMMERCE_PREPROD_SCOPE_V1.pageId,
+      channel: "MESSENGER",
+      workerId: "realtime-worker-test",
+      now: new Date("2026-08-24T00:00:01.000Z"),
+    });
+
+    const first = resolve("10000000-0000-4000-8000-000000000014");
+    const second = resolve("10000000-0000-4000-8000-000000000015");
+
+    await vi.waitFor(() => expect(resolvers).toHaveLength(2));
+    resolvers.forEach((resolvePointer) => resolvePointer(pointer("COMMERCE")));
+
+    await expect(Promise.all([first, second])).resolves.toEqual([
+      expect.objectContaining({ source: "DATABASE", status: "RESOLVED" }),
+      expect.objectContaining({ source: "DATABASE", status: "RESOLVED" }),
+    ]);
+    expect(source.loadActiveMode).toHaveBeenCalledTimes(2);
+  });
 });

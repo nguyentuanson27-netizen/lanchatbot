@@ -140,6 +140,7 @@ export class RuntimeBehaviorModeResolver {
   private readonly allowedCommercePageIds: ReadonlySet<string>;
   private readonly commerceAuthorityConsumer: CommerceAuthorityConsumerPort | undefined;
   private readonly commerceConsumerTimeoutMs: number;
+  private readonly coalesceInFlight: boolean;
   private readonly cache = new Map<string, CachedPointer>();
   private readonly lastKnownGood = new Map<string, CachedPointer>();
   private readonly inFlight = new Map<string, Promise<CachedPointer>>();
@@ -153,6 +154,11 @@ export class RuntimeBehaviorModeResolver {
       readonly allowedCommercePageIds?: readonly string[];
       readonly commerceAuthorityConsumer?: CommerceAuthorityConsumerPort;
       readonly commerceConsumerTimeoutMs?: number;
+      /**
+       * A dedicated authority process may require a distinct database read
+       * for every turn, including concurrent turns for the same scope.
+       */
+      readonly coalesceInFlight?: boolean;
     } = {},
   ) {
     this.cacheTtlMs = options.cacheTtlMs ?? 5_000;
@@ -162,6 +168,7 @@ export class RuntimeBehaviorModeResolver {
     this.allowedPageIds = new Set(options.allowedPageIds ?? []);
     this.allowedCommercePageIds = new Set(options.allowedCommercePageIds ?? []);
     this.commerceAuthorityConsumer = options.commerceAuthorityConsumer;
+    this.coalesceInFlight = options.coalesceInFlight ?? true;
     this.commerceConsumerTimeoutMs = options.commerceConsumerTimeoutMs ?? 1_000;
     if (!Number.isFinite(this.commerceConsumerTimeoutMs)
         || this.commerceConsumerTimeoutMs < 1
@@ -195,8 +202,10 @@ export class RuntimeBehaviorModeResolver {
 
   private async load(pageId: string, channel: string, nowMs: number): Promise<CachedPointer> {
     const key = `${pageId}:${channel}`;
-    const existing = this.inFlight.get(key);
-    if (existing) return existing;
+    if (this.coalesceInFlight) {
+      const existing = this.inFlight.get(key);
+      if (existing) return existing;
+    }
     const pending = (async () => {
       const pointer = await this.source.loadActiveMode({ pageId, channel });
       if (!pointer) throw new Error("RUNTIME_BEHAVIOR_POINTER_MISSING");
@@ -223,6 +232,7 @@ export class RuntimeBehaviorModeResolver {
         throw new RuntimeBehaviorModeLoadError(authorityProvenance, error);
       }
     })();
+    if (!this.coalesceInFlight) return pending;
     this.inFlight.set(key, pending);
     try { return await pending; } finally { this.inFlight.delete(key); }
   }

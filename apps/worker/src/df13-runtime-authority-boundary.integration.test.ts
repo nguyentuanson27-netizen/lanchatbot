@@ -12,7 +12,7 @@ import {
   type RealtimeModelPort,
   type RealtimeProductSearchPort,
   type RealtimeRuntimePort,
-} from "./realtime-runner.js";
+} from "./bf02-realtime-runner.js";
 
 const occurredAt = "2026-08-24T00:00:00.000Z";
 const claim = {
@@ -123,7 +123,7 @@ function runnerForAuthority(
   };
 }
 
-describe("DF13 authority selection in the actual RealtimeRunner path", () => {
+describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path", () => {
   it("blocks a rejected COMMERCE-origin pointer before model, state, or final commit work", async () => {
     const { runner, retry, runtime, model, search } = runnerForAuthority(commerceOriginFailSafe);
 

@@ -24,6 +24,9 @@ export function createDf13CommerceRuntimeComposition<TState, TSalesState>(input:
     // A cached COMMERCE pointer cannot satisfy the DATABASE-only authority
     // contract. Keep caching for the untouched LEGACY process only.
     cacheTtlMs: input.runtimeAuthorityMode === "COMMERCE" ? 0 : input.cacheTtlMs,
+    // Commerce turns must each obtain their own exact DATABASE read. Sharing
+    // an in-flight lookup would make concurrent turns share authority state.
+    coalesceInFlight: input.runtimeAuthorityMode !== "COMMERCE",
     lastKnownGoodTtlMs: input.lastKnownGoodTtlMs,
     allowedPageIds: input.confirmationAllowedPageIds,
     allowedCommercePageIds: [DF13_COMMERCE_PREPROD_SCOPE_V1.pageId],
