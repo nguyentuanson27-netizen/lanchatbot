@@ -38,6 +38,7 @@ export function selectDf13RuntimeAuthority(input: Readonly<{
   resolution: RuntimeBehaviorModeResolution;
 }>): Df13RuntimeAuthoritySelection {
   const { resolution } = input;
+  const pointerRevision = resolution.pointerRevision;
   if (resolution.authorityProvenance === "COMMERCE_POINTER") {
     if (
       input.pageId !== DF13_COMMERCE_PREPROD_SCOPE_V1.pageId ||
@@ -63,8 +64,9 @@ export function selectDf13RuntimeAuthority(input: Readonly<{
       !UUID_V4_PATTERN.test(resolution.modeVersionId) ||
       !resolution.contentHash ||
       !CONTENT_HASH_PATTERN.test(resolution.contentHash) ||
-      !Number.isSafeInteger(resolution.pointerRevision) ||
-      resolution.pointerRevision < 1
+      typeof pointerRevision !== "number" ||
+      !Number.isSafeInteger(pointerRevision) ||
+      pointerRevision < 1
     ) {
       return Object.freeze({
         status: "BLOCKED" as const,
@@ -76,7 +78,7 @@ export function selectDf13RuntimeAuthority(input: Readonly<{
       authority: Object.freeze({
         modeVersionId: resolution.modeVersionId,
         contentHash: resolution.contentHash,
-        pointerRevision: resolution.pointerRevision,
+        pointerRevision,
         authorityBundleHash: resolution.authorityBundleHash,
         source: "DATABASE" as const,
       }),
