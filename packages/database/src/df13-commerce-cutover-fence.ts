@@ -275,7 +275,6 @@ export class PostgresDf13CommerceCutoverFenceStore implements Df13CommerceCutove
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [
         `df13-cutover:${request.pageId}:${request.channel}`,
       ]);
-      const now = await readDatabaseTime(client);
       const operationResult = await client.query<CutoverFenceRow>(
         `SELECT fence_id, operation_id, epoch, released_at, lease_until,
                 pre_cutover_version_id, pre_cutover_content_hash, pre_cutover_pointer_revision,
@@ -301,7 +300,8 @@ export class PostgresDf13CommerceCutoverFenceStore implements Df13CommerceCutove
           await client.query("COMMIT");
           return Object.freeze({ status: "ALREADY_RELEASED", fenceId: operation.fence_id, epoch });
         }
-        const operationLease = leaseState(operation.lease_until, now);
+        const operationNow = await readDatabaseTime(client);
+        const operationLease = leaseState(operation.lease_until, operationNow);
         if (operationLease === "INVALID") {
           await client.query("ROLLBACK");
           return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_LEASE_INVALID" });
@@ -356,7 +356,11 @@ export class PostgresDf13CommerceCutoverFenceStore implements Df13CommerceCutove
 
       const fenceId = randomUUID();
       const fenceToken = randomUUID();
-      const inserted = await client.query<{ fence_id: string; epoch: string | number }>(
+      const inserted = await client.query<{
+        fence_id: string;
+        epoch: string | number;
+        lease_live: boolean;
+      }>(
         `INSERT INTO df13_commerce_cutover_fences (
            fence_id, operation_id, page_id, channel,
            pre_cutover_version_id, pre_cutover_content_hash, pre_cutover_pointer_revision,
@@ -364,17 +368,23 @@ export class PostgresDf13CommerceCutoverFenceStore implements Df13CommerceCutove
            request_fingerprint, epoch, token_hash, lease_until, released_at, created_at, updated_at
          ) VALUES (
            $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,1,$12,
-           $13 + ($14::integer * interval '1 millisecond'),NULL,$13,$13
-         ) RETURNING fence_id, epoch`,
+           clock_timestamp() + ($13::integer * interval '1 millisecond'),NULL,
+           clock_timestamp(),clock_timestamp()
+         ) RETURNING fence_id, epoch, lease_until > clock_timestamp() AS lease_live`,
         [
           fenceId, request.operationId, request.pageId, request.channel,
           request.preCutover.modeVersionId, request.preCutover.contentHash, request.preCutover.pointerRevision,
           request.target.modeVersionId, request.target.contentHash, request.target.authorityBundleHash,
-          fingerprint, hash(fenceToken), now, this.#leaseMs,
+          fingerprint, hash(fenceToken), this.#leaseMs,
         ],
       );
       const insertedRow = inserted.rows[0];
-      if (!insertedRow || finiteEpoch(insertedRow.epoch) !== 1 || insertedRow.fence_id !== fenceId) {
+      if (
+        !insertedRow ||
+        finiteEpoch(insertedRow.epoch) !== 1 ||
+        insertedRow.fence_id !== fenceId ||
+        insertedRow.lease_live !== true
+      ) {
         await client.query("ROLLBACK");
         return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_INSERT_UNVERIFIABLE" });
       }

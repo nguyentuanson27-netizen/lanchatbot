@@ -30,6 +30,7 @@ describe("0036 DF13 Commerce cutover fence", () => {
     expect(sql).toContain("df13_commerce_cutover_fence_insert_identity_guard");
     expect(sql).toContain("runtime_behavior_mode_pointers");
     expect(sql).toContain("runtime_behavior_mode_versions");
+    expect(sql).toContain("FOR UPDATE;");
     expect(sql).toContain("df13 commerce cutover fence identity is immutable");
     expect(sql).not.toContain("UPDATE runtime_behavior_mode_pointers");
     expect(sql).not.toMatch(/customer_(?:name|phone|address)|payload_ciphertext/iu);

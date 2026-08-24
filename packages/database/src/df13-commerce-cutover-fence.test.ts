@@ -100,7 +100,7 @@ describe("Postgres DF13 Commerce cutover fence store", () => {
       if (sql.includes("WHERE operation_id")) return rowResult();
       if (sql.includes("FROM df13_commerce_cutover_fences")) return rowResult();
       if (sql.includes("INSERT INTO df13_commerce_cutover_fences")) {
-        return rowResult([{ fence_id: values?.[0], epoch: "1" }]);
+        return rowResult([{ fence_id: values?.[0], epoch: "1", lease_live: true }]);
       }
       return rowResult();
     });
@@ -116,7 +116,6 @@ describe("Postgres DF13 Commerce cutover fence store", () => {
     expect(statements).toEqual(expect.arrayContaining([
       "BEGIN",
       expect.stringContaining("pg_advisory_xact_lock"),
-      "SELECT clock_timestamp() AS now",
       expect.stringContaining("FROM runtime_behavior_mode_pointers"),
       expect.stringContaining("FROM runtime_behavior_mode_versions"),
       expect.stringContaining("FROM df13_commerce_cutover_fences"),
@@ -319,7 +318,7 @@ describe("Postgres DF13 Commerce cutover fence store", () => {
       if (sql.includes("WHERE operation_id")) return rowResult();
       if (sql.includes("FROM df13_commerce_cutover_fences")) return rowResult();
       if (sql.includes("INSERT INTO df13_commerce_cutover_fences")) {
-        return rowResult([{ fence_id: values?.[0], epoch: "1" }]);
+        return rowResult([{ fence_id: values?.[0], epoch: "1", lease_live: true }]);
       }
       return rowResult();
     });
@@ -328,9 +327,12 @@ describe("Postgres DF13 Commerce cutover fence store", () => {
     await expect(store.acquire(request)).resolves.toMatchObject({ status: "HELD" });
 
     const statements = mocks.clientQuery.mock.calls.map(([sql]) => String(sql));
-    expect(statements).toContain("SELECT clock_timestamp() AS now");
     expect(statements.some((sql) => sql.includes("FROM runtime_behavior_mode_pointers"))).toBe(true);
     expect(statements.some((sql) => sql.includes("FROM runtime_behavior_mode_versions"))).toBe(true);
+    expect(statements.some((sql) =>
+      sql.includes("lease_until > clock_timestamp() AS lease_live") &&
+      sql.includes("clock_timestamp() +"),
+    )).toBe(true);
   });
 
   it("never releases an expired lease and records the database-time predicate", async () => {
@@ -344,6 +346,51 @@ describe("Postgres DF13 Commerce cutover fence store", () => {
     })).resolves.toEqual({ status: "STALE_OR_MISSING" });
 
     expect(String(mocks.clientQuery.mock.calls[0]?.[0])).toContain("lease_until > clock_timestamp()");
+  });
+
+  it("fails closed instead of returning HELD when the database reports an already-expired inserted lease", async () => {
+    mocks.clientQuery.mockImplementation(async (sql: string, values?: readonly unknown[]) => {
+      if (sql.includes("WHERE operation_id")) return rowResult();
+      if (sql.includes("FROM df13_commerce_cutover_fences")) return rowResult();
+      if (sql.includes("FROM runtime_behavior_mode_pointers")) {
+        return rowResult([{ active_version_id: request.preCutover.modeVersionId, pointer_revision: "3" }]);
+      }
+      if (sql.includes("FROM runtime_behavior_mode_versions")) {
+        return rowResult([
+          {
+            mode_version_id: request.preCutover.modeVersionId,
+            page_id: request.pageId,
+            channel: request.channel,
+            confirmation_mode: "V2_ACTIVE",
+            sales_authority_mode: "LEGACY",
+            state_read_mode: "LEGACY",
+            content_hash: request.preCutover.contentHash,
+            authority_bundle_hash: null,
+          },
+          {
+            mode_version_id: request.target.modeVersionId,
+            page_id: request.pageId,
+            channel: request.channel,
+            confirmation_mode: "V2_ACTIVE",
+            sales_authority_mode: "COMMERCE",
+            state_read_mode: "LEGACY",
+            content_hash: request.target.contentHash,
+            authority_bundle_hash: request.target.authorityBundleHash,
+          },
+        ]);
+      }
+      if (sql.includes("INSERT INTO df13_commerce_cutover_fences")) {
+        return rowResult([{ fence_id: values?.[0], epoch: "1", lease_live: false }]);
+      }
+      return rowResult();
+    });
+    const store = new PostgresDf13CommerceCutoverFenceStore("postgresql://test");
+
+    await expect(store.acquire(request)).resolves.toEqual({
+      status: "PARKED",
+      reasonCode: "DF13_CUTOVER_FENCE_INSERT_UNVERIFIABLE",
+    });
+    expect(mocks.clientQuery.mock.calls.map(([sql]) => String(sql))).toContain("ROLLBACK");
   });
 
   it("does not create a second fence when the same operation replays after a lost acquire acknowledgement", async () => {

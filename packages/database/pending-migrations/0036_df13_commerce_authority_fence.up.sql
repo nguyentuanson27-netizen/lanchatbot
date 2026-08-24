@@ -129,7 +129,7 @@ BEGIN
     INTO pointer_version_id, pointer_revision
     FROM runtime_behavior_mode_pointers AS pointer
    WHERE pointer.page_id = NEW.page_id AND pointer.channel = NEW.channel
-   FOR KEY SHARE;
+   FOR UPDATE;
   IF pointer_version_id IS NULL
      OR pointer_version_id <> NEW.pre_cutover_version_id
      OR pointer_revision <> NEW.pre_cutover_pointer_revision THEN
