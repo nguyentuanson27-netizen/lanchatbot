@@ -4,15 +4,16 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { canonicalJsonV1 } from "@lana/contracts";
 import { describe, expect, it } from "vitest";
-import type { GateECandidateSourceReader } from "./gate-e-registration.js";
 import {
   GATE_E_PREPROD_V15_BINDING,
   prepareDf13ReleaseCandidateEvidence,
   validateDf13ReleaseCandidateEvidence,
   type Df13ReleaseCandidateEvidence,
+  type Df13ReleaseCandidateSourceReader,
 } from "./df13-release-candidate-evidence.js";
 
 const activationReleaseRevision = "a".repeat(40);
+const activationReleaseTreeOid = "b".repeat(40);
 const sourceRoot = fileURLToPath(new URL("../../..", import.meta.url));
 
 async function readSourceFile(path: string): Promise<string> {
@@ -28,12 +29,10 @@ function gitBlobOid(content: string): string {
     .digest("hex");
 }
 
-const sourceReader: GateECandidateSourceReader & Readonly<{
-  refreshTrustedRef(): Promise<void>;
-  resolveRef(ref: "refs/remotes/origin/main"): Promise<string>;
-}> = {
+const sourceReader: Df13ReleaseCandidateSourceReader = {
   async refreshTrustedRef() {},
   async resolveRef() { return activationReleaseRevision; },
+  async resolveTreeOid() { return activationReleaseTreeOid; },
   readBlob: async (_revision, path) => readSourceFile(path),
   resolveBlobOid: async (_revision, path) => gitBlobOid(await readSourceFile(path)),
 };
@@ -65,6 +64,10 @@ describe("DF13 release-candidate source evidence", () => {
       status: "SOURCE_READY_NO_ACTIVATION",
       sideEffects: "NOT_EXECUTED",
       activationReleaseRevision,
+      releaseSource: {
+        resolvedRevision: activationReleaseRevision,
+        treeOid: activationReleaseTreeOid,
+      },
       gateE: {
         manifestHash: GATE_E_PREPROD_V15_BINDING.manifestHash,
         evidenceBodyHash: GATE_E_PREPROD_V15_BINDING.evidenceBodyHash,
@@ -81,6 +84,18 @@ describe("DF13 release-candidate source evidence", () => {
         target: "EXACT_PRE_CUTOVER_LEGACY_POINTER",
         status: "REQUIRED_NOT_EXECUTED",
       },
+      migration: {
+        contractVersion: "DF13_PENDING_BEHAVIOR_MODE_MIGRATION_V1",
+        status: "PENDING_NON_AUTO_APPLIED",
+        artifacts: [
+          {
+            path: "packages/database/pending-migrations/0035_df13_commerce_behavior_mode.up.sql",
+          },
+          {
+            path: "packages/database/pending-migrations/0035_df13_commerce_behavior_mode.down.sql",
+          },
+        ],
+      },
     });
     expect(evidence.reasonCodes).toEqual([]);
     expect(evidence.fieldComparisons.every(({ matches }) => matches)).toBe(true);
@@ -96,6 +111,8 @@ describe("DF13 release-candidate source evidence", () => {
     expect(Object.isFrozen(evidence.fieldComparisons[0])).toBe(true);
     expect(Object.isFrozen(evidence.candidateProjection)).toBe(true);
     expect(Object.isFrozen(evidence.candidateProjection?.entries)).toBe(true);
+    expect(Object.isFrozen(evidence.migration)).toBe(true);
+    expect(Object.isFrozen(evidence.migration.artifacts)).toBe(true);
     expect(Object.isFrozen(evidence.rollback)).toBe(true);
   });
 
@@ -139,6 +156,20 @@ describe("DF13 release-candidate source evidence", () => {
       status: "BLOCKED",
       sideEffects: "NOT_EXECUTED",
       reasonCodes: ["DF13_TRUSTED_RELEASE_REF_CHANGED"],
+    });
+  });
+
+  it("fails closed when the trusted release tree cannot be re-derived", async () => {
+    await expect(prepareDf13ReleaseCandidateEvidence({
+      activationReleaseRevision,
+      git: {
+        ...sourceReader,
+        async resolveTreeOid() { throw new Error("tree missing"); },
+      },
+    })).resolves.toMatchObject({
+      status: "BLOCKED",
+      sideEffects: "NOT_EXECUTED",
+      reasonCodes: ["DF13_RELEASE_TREE_UNAVAILABLE"],
     });
   });
 
@@ -189,6 +220,27 @@ describe("DF13 release-candidate source evidence", () => {
       status: "BLOCKED",
       sideEffects: "NOT_EXECUTED",
       reasonCodes: ["DF13_GATE_E_MANIFEST_IDENTITY_MISMATCH"],
+    });
+  });
+
+  it("fails closed when a pending 0035 migration artifact cannot be re-derived", async () => {
+    await expect(prepareDf13ReleaseCandidateEvidence({
+      activationReleaseRevision,
+      git: {
+        ...sourceReader,
+        async readBlob(revision, path) {
+          if (path.startsWith("packages/database/pending-migrations/0035_")) {
+            throw new Error("artifact missing");
+          }
+          return sourceReader.readBlob(revision, path);
+        },
+      },
+    })).resolves.toMatchObject({
+      status: "BLOCKED",
+      sideEffects: "NOT_EXECUTED",
+      reasonCodes: expect.arrayContaining([
+        "DF13_PENDING_MIGRATION_ARTIFACT_UNAVAILABLE",
+      ]),
     });
   });
 
@@ -266,6 +318,32 @@ describe("DF13 release-candidate source evidence", () => {
       status: "MISMATCH",
       reasonCodes: expect.arrayContaining([
         "DF13_RELEASE_EVIDENCE_MANIFEST_IDENTITY_INVALID",
+      ]),
+    });
+  });
+
+  it("rejects a substituted pending-migration identity even when the package self-hash is recomputed", async () => {
+    const { evidenceHash: _evidenceHash, ...body } = await exactSourceEvidence();
+    const substituted = withEvidenceHash({
+      ...body,
+      migration: {
+        ...body.migration,
+        artifacts: body.migration.artifacts.map((artifact, index) =>
+          index === 0
+            ? { ...artifact, blobOid: "f".repeat(40), contentSha256: "e".repeat(64) }
+            : artifact
+        ),
+      },
+    });
+
+    expect(validateDf13ReleaseCandidateEvidence(substituted, {
+      gateEManifestHash: GATE_E_PREPROD_V15_BINDING.manifestHash,
+      gateECandidateSourceRevision: GATE_E_PREPROD_V15_BINDING.candidateSourceRevision,
+      activationReleaseRevision,
+    })).toMatchObject({
+      status: "MISMATCH",
+      reasonCodes: expect.arrayContaining([
+        "DF13_RELEASE_EVIDENCE_PENDING_MIGRATION_IDENTITY_INVALID",
       ]),
     });
   });

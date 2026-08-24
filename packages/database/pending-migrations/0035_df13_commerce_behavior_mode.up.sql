@@ -27,6 +27,7 @@ ALTER TABLE runtime_behavior_mode_versions
     OR
     (sales_authority_mode = 'COMMERCE'
       AND state_read_mode = 'LEGACY'
+      AND authority_bundle_hash IS NOT NULL
       AND authority_bundle_hash ~ '^[a-f0-9]{64}$')
   );
 

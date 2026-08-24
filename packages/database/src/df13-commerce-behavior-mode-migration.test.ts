@@ -28,6 +28,12 @@ describe("0035 DF13 Commerce behavior-mode source migration", () => {
     expect(sql).not.toContain("state_read_mode IN");
   });
 
+  it("rejects a missing COMMERCE authority bundle instead of accepting SQL CHECK unknown", async () => {
+    const sql = await readFile(migration, "utf8");
+
+    expect(sql).toContain("authority_bundle_hash IS NOT NULL");
+  });
+
   it("has a data-preserving rollback guard rather than silently discarding COMMERCE versions", async () => {
     const sql = await readFile(rollback, "utf8");
     expect(sql).toContain("DF13_COMMERCE_VERSION_ROLLBACK_BLOCKED");

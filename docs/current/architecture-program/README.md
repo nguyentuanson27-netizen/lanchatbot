@@ -3,7 +3,7 @@
 **Purpose:** Keep planning context small while preserving durable contracts and evidence.
 **Status:** Repository planning authority for BF/DF/UR on this branch; never deployment authorization.
 **Operating mode:** `ENGINEERING_PREPROD`; see `OPERATING_MODE.md`.
-**Current program point:** `GATE_E_PREPROD_ACCEPTED`; DF11 and DF12 are merged source-only, and `DF-C` / `DF13` source work is active. See `GATE_E_PREPROD_ACCEPTANCE_20260821.md`.
+**Current program point:** `GATE_E_PREPROD_ACCEPTED`; DF11–DF13 are merged source-only and `DF-C` / `DF13` is `SOURCE_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING`. See `GATE_E_PREPROD_ACCEPTANCE_20260821.md`.
 
 ## Default reading order for BF
 
@@ -36,6 +36,7 @@ that explicit verdict.
 | Model baseline/candidate generation and offline evaluation | `contracts/MODEL_EVALUATION_BOUNDARY.md` |
 | Gate E registration/evaluation execution | `GATE_E_PREPROD_EXECUTION_PLAN.md` + `GATE_E_EVIDENCE_ADMISSION_ADR.md` + `contracts/MODEL_EVALUATION_BOUNDARY.md` |
 | Gate E accepted / DF-C source work | `GATE_E_PREPROD_ACCEPTANCE_20260821.md` + `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + relevant contracts |
+| DF13 operational-acceptance preparation | `DF13_OPERATIONAL_ACCEPTANCE_PREPARATION.md` + `contracts/DF13_FENCE_AND_RELEASE_EVIDENCE.md` + `contracts/RELEASE_INTEGRITY.md` |
 | Release/deploy/evidence | `contracts/RELEASE_INTEGRITY.md` |
 | Dataset/package work | `contracts/DATASET_BOUNDARY.md` |
 | DF work after Gate BF | `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + relevant contracts |
@@ -95,7 +96,7 @@ Active PREPROD roadmap:
   DF-A: DF-P1..DF-P3 / DF01-06
   -> DF-B: DF-P4..DF-P6 / DF07-10
   -> Gate E-PREPROD accepted (v15 evidence)
-  -> DF-C: DF-P7 / DF11-13 source work; controlled LEGACY -> COMMERCE remains a separately authorized future cutover
+  -> DF-C: DF-P7 / DF11-13 source complete; controlled LEGACY -> COMMERCE remains a separately authorized future cutover
   -> controlled critical human E2E
   -> Gate F-PREPROD
   -> UR-A: UR-P1..UR-P2 / UR00-03

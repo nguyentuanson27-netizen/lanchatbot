@@ -43,6 +43,7 @@ const preparedEvidence = {} as Df13ReleaseCandidateEvidence;
 const sourceReader = {
   async refreshTrustedRef() {},
   async resolveRef() { return "a".repeat(40); },
+  async resolveTreeOid() { return "b".repeat(40); },
   async readBlob() { return "source"; },
   async resolveBlobOid() { return "a".repeat(40); },
 };
