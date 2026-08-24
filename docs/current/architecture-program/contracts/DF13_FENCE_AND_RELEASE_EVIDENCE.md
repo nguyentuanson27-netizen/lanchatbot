@@ -17,6 +17,13 @@ without separate authorization for the exact page/channel/version/content/
 bundle/revision/source identity it rejects a COMMERCE pointer, rather than
 letting resolution stand on a copied hash or an enable flag.
 
+`RealtimeRunner` applies a single final-authority boundary before loading
+conversation state, invoking the model, searching products, or committing a
+result. A COMMERCE-origin resolver fallback is blocked, never reclassified as a
+LEGACY final authority. A fresh exact COMMERCE identity is likewise blocked
+unless a separately reviewed COMMERCE executor is bound; this default-off source
+composition binds none.
+
 ## Pure fence assessment
 
 `assessDf13CommerceAuthorityFence` is a side-effect-free pre-provider boundary.

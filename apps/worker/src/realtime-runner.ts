@@ -146,6 +146,7 @@ import {
   type RealtimeSalesCycleOutput,
   type RealtimeSalesCycleTelemetry,
 } from "./realtime-sales-cycle.js";
+import { selectDf13RuntimeAuthority } from "./df13-runtime-authority-boundary.js";
 import {
   classifyPreSalePolicyIntent,
   renderPreSalePolicyReply,
@@ -2747,6 +2748,32 @@ export class RealtimeRunner {
       // reconciled (for example, a delayed or incomplete Meta callback).
       if (matchesOutbox || matchesCurrentApp) return "NOT_REQUESTED";
     }
+    const behaviorModeResolution = await this.behaviorModeResolver?.resolve({
+      resolutionId: deterministicUuid(
+        `behavior-mode:${claim.pageId}:${this.options.behaviorModeChannel}:${message.eventKey}`,
+      ),
+      pageId: claim.pageId,
+      channel: this.options.behaviorModeChannel,
+      workerId: this.options.workerId,
+      now,
+    }) ?? startupBehaviorModeResolution(
+      this.options.confirmationStartupMode,
+      now,
+    );
+    const authoritySelection = selectDf13RuntimeAuthority({
+      pageId: claim.pageId,
+      channel: this.options.behaviorModeChannel,
+      resolution: behaviorModeResolution,
+    });
+    if (authoritySelection.status === "BLOCKED") {
+      throw new Error(authoritySelection.reasonCode);
+    }
+    // The source composition deliberately binds no COMMERCE executor. A fresh
+    // pre-production release can only provide one through a separate reviewed
+    // activation composition; it must never fall through to the LEGACY path.
+    if (authoritySelection.status === "COMMERCE_SELECTED") {
+      throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
+    }
     const record = await this.runtime.loadOrCreate(
       claim.pageId,
       claim.conversationHash,
@@ -2825,18 +2852,6 @@ export class RealtimeRunner {
     const policyAuditRef = policyResolution?.bundle
       ? runtimePolicyAuditReference(policyResolution.bundle)
       : null;
-    const behaviorModeResolution = await this.behaviorModeResolver?.resolve({
-      resolutionId: deterministicUuid(
-        `behavior-mode:${claim.pageId}:${this.options.behaviorModeChannel}:${message.eventKey}`,
-      ),
-      pageId: claim.pageId,
-      channel: this.options.behaviorModeChannel,
-      workerId: this.options.workerId,
-      now,
-    }) ?? startupBehaviorModeResolution(
-      this.options.confirmationStartupMode,
-      now,
-    );
     const customerProfile =
       this.options.customerProfileEnabled && !knownSuperseded && !message.isEcho
         ? await this.loadAndMergeCustomerProfile(
