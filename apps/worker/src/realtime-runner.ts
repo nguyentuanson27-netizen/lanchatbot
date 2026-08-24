@@ -86,6 +86,7 @@ import type {
   RealtimeCommitInput,
   RealtimeCommitResult,
   ContextV2CapturePlan,
+  LatestContextV2ForCommerce,
   RealtimeDecisionEventPlan,
   RealtimeInboxBatchGuard,
   RealtimeMetaMessageUnit,
@@ -1944,6 +1945,11 @@ export interface RealtimeRuntimePort {
     pageId: string,
     providerMessageId: string,
   ): Promise<boolean>;
+  readLatestContextV2ForCommerce?(
+    conversationId: string,
+    now: Date,
+    maximumAgeMs: number,
+  ): Promise<LatestContextV2ForCommerce>;
   loadOrCreate(
     pageId: string,
     customerHash: string,

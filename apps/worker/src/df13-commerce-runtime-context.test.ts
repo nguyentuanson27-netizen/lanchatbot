@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { SalesCycleRuntimeState } from "@lana/chat-runtime";
-import type { ProductBindingV2 } from "@lana/contracts";
+import type { ContextV2, ProductBindingV2 } from "@lana/contracts";
 import {
   buildDf13CommerceRuntimeContext,
   commerceStrategyStage,
+  loadDf13CommerceRuntimeContext,
 } from "./df13-commerce-runtime-context.js";
 
 function state(
@@ -88,5 +89,46 @@ describe("DF13 Commerce runtime context", () => {
       conversationRevision: 12,
       readiness: { outcome: "NOT_EVALUATED", reasonCodes: [] },
     })).toThrow("CONVERSATION_PHASE_V2_STATE_INVALID");
+  });
+
+  it("uses only an exact fresh Context V2 snapshot and rejects a stale Commerce revision", async () => {
+    const snapshot = {
+      contextHash: "a".repeat(64),
+      productBinding,
+      phase: {
+        sourceStage: "FACTS_PRESENTED",
+        salesCycleRevision: 4,
+      },
+      barriers: { salesCycleRevision: 4, conversationRevision: 12 },
+      finalTurnEvidence: { finalSalesCycleRevision: 4, finalConversationRevision: 12 },
+    } as unknown as ContextV2;
+    const runtime = {
+      readLatestContextV2ForCommerce: async () => ({ kind: "READY" as const, context: snapshot }),
+    };
+
+    await expect(loadDf13CommerceRuntimeContext({
+      runtime,
+      conversationId: "conversation-1",
+      commerceState: state(),
+      conversationRevision: 12,
+      now: new Date("2026-08-24T00:00:00.000Z"),
+      maximumAgeMs: 5 * 60_000,
+    })).resolves.toMatchObject({
+      status: "READY",
+      sourceContextHash: "a".repeat(64),
+      context: { authority: "COMMERCE", commerce: { stage: "FACTS_PRESENTED" } },
+    });
+
+    await expect(loadDf13CommerceRuntimeContext({
+      runtime,
+      conversationId: "conversation-1",
+      commerceState: state({ revision: 5 }),
+      conversationRevision: 12,
+      now: new Date("2026-08-24T00:00:00.000Z"),
+      maximumAgeMs: 5 * 60_000,
+    })).resolves.toEqual({
+      status: "BLOCKED",
+      reasonCode: "DF13_COMMERCE_CONTEXT_REVISION_MISMATCH",
+    });
   });
 });

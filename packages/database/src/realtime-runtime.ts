@@ -75,7 +75,9 @@ import {
 } from "./ad-acquisition.js";
 import {
   persistContextV2CaptureFailSoft,
+  readLatestContextV2ForCommerce,
   type ContextV2CapturePlan,
+  type LatestContextV2ForCommerce,
 } from "./context-v2-capture.js";
 
 export interface MetaOutboxOperatorCancelResult {
@@ -1936,6 +1938,24 @@ export class PostgresRealtimeRuntimeStore {
       [pageId, providerMessageId],
     );
     return result.rowCount === 1;
+  }
+
+  /**
+   * A narrow read port for the future COMMERCE executor. It deliberately
+   * returns a reason-coded result rather than falling back to the legacy
+   * conversation snapshot when the newest Context V2 capture is absent,
+   * stale, blocked, malformed, or unavailable.
+   */
+  async readLatestContextV2ForCommerce(
+    conversationId: string,
+    now: Date,
+    maximumAgeMs: number,
+  ): Promise<LatestContextV2ForCommerce> {
+    return readLatestContextV2ForCommerce(this.pool, {
+      conversationId,
+      now,
+      maximumAgeMs,
+    });
   }
 
   async loadOrCreate<TState>(

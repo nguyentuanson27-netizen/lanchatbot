@@ -1,4 +1,5 @@
 import type { SalesCycleRuntimeState } from "@lana/chat-runtime";
+import type { LatestContextV2ForCommerce } from "@lana/database";
 import {
   ProductBindingV2Schema,
   deriveConversationBarriersV2,
@@ -66,6 +67,23 @@ export interface BuildDf13CommerceRuntimeContextInput {
     reasonCodes: readonly string[];
   }>;
 }
+
+export interface Df13CommerceContextV2ReadPort {
+  readLatestContextV2ForCommerce(
+    conversationId: string,
+    now: Date,
+    maximumAgeMs: number,
+  ): Promise<LatestContextV2ForCommerce>;
+}
+
+export type Df13CommerceRuntimeContextLoadResult =
+  | Readonly<{
+    status: "READY";
+    context: Df13CommerceRuntimeContext;
+    /** Exact fresh Context V2 input identity retained for audit/readback. */
+    sourceContextHash: string;
+  }>
+  | Readonly<{ status: "BLOCKED"; reasonCode: string }>;
 
 /**
  * Maps only the canonical Commerce lifecycle into the existing strategy
@@ -142,4 +160,79 @@ export function buildDf13CommerceRuntimeContext(
       conversationRevision: input.conversationRevision,
     }),
   });
+}
+
+function matchesCurrentCommerceSnapshot(
+  context: import("@lana/contracts").ContextV2,
+  state: BuildDf13CommerceRuntimeContextInput["commerceState"],
+  conversationRevision: number,
+): boolean {
+  return context.phase.sourceStage === state.stage &&
+    context.phase.salesCycleRevision === state.revision &&
+    context.barriers.salesCycleRevision === state.revision &&
+    context.barriers.conversationRevision === conversationRevision &&
+    context.finalTurnEvidence.finalSalesCycleRevision === state.revision &&
+    context.finalTurnEvidence.finalConversationRevision === conversationRevision;
+}
+
+/**
+ * Reads the only admissible Context V2 snapshot for a COMMERCE turn. The
+ * supplied reader already verifies capture integrity and expiry; this boundary
+ * additionally proves the snapshot describes the exact currently locked
+ * Commerce/conversation revisions. It never substitutes ConversationState.
+ */
+export async function loadDf13CommerceRuntimeContext(input: Readonly<{
+  runtime: Df13CommerceContextV2ReadPort;
+  conversationId: string;
+  commerceState: BuildDf13CommerceRuntimeContextInput["commerceState"];
+  conversationRevision: number;
+  now: Date;
+  maximumAgeMs: number;
+}>): Promise<Df13CommerceRuntimeContextLoadResult> {
+  let latest: LatestContextV2ForCommerce;
+  try {
+    latest = await input.runtime.readLatestContextV2ForCommerce(
+      input.conversationId,
+      input.now,
+      input.maximumAgeMs,
+    );
+  } catch {
+    return Object.freeze({
+      status: "BLOCKED" as const,
+      reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_READ_FAILED",
+    });
+  }
+  if (latest.kind !== "READY") {
+    return Object.freeze({ status: "BLOCKED" as const, reasonCode: latest.reasonCode });
+  }
+  if (!matchesCurrentCommerceSnapshot(
+    latest.context,
+    input.commerceState,
+    input.conversationRevision,
+  )) {
+    return Object.freeze({
+      status: "BLOCKED" as const,
+      reasonCode: "DF13_COMMERCE_CONTEXT_REVISION_MISMATCH",
+    });
+  }
+  const readiness = latest.context.cartReadiness === null
+    ? { outcome: "NOT_EVALUATED" as const, reasonCodes: [] }
+    : { outcome: "READY" as const, reasonCodes: [] };
+  try {
+    return Object.freeze({
+      status: "READY" as const,
+      context: buildDf13CommerceRuntimeContext({
+        commerceState: input.commerceState,
+        productBinding: latest.context.productBinding,
+        conversationRevision: input.conversationRevision,
+        readiness,
+      }),
+      sourceContextHash: latest.context.contextHash,
+    });
+  } catch {
+    return Object.freeze({
+      status: "BLOCKED" as const,
+      reasonCode: "DF13_COMMERCE_CONTEXT_INVALID",
+    });
+  }
 }
