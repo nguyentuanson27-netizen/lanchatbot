@@ -93,6 +93,33 @@ describe("DF13 single runtime authority boundary", () => {
         salesAuthorityMode: "COMMERCE",
         authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
         authorityProvenance: "COMMERCE_POINTER",
+        source: "CACHE",
+      }),
+    })).toEqual({
+      status: "BLOCKED",
+      reasonCode: "DF13_RUNTIME_COMMERCE_IDENTITY_NOT_ADMISSIBLE",
+    });
+
+    expect(selectDf13RuntimeAuthority({
+      pageId: "unreviewed-page",
+      channel: "MESSENGER",
+      resolution: resolution({
+        salesAuthorityMode: "COMMERCE",
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityProvenance: "COMMERCE_POINTER",
+      }),
+    })).toEqual({
+      status: "BLOCKED",
+      reasonCode: "DF13_RUNTIME_COMMERCE_SCOPE_INVALID",
+    });
+
+    expect(selectDf13RuntimeAuthority({
+      pageId: "1198992073286645",
+      channel: "MESSENGER",
+      resolution: resolution({
+        salesAuthorityMode: "COMMERCE",
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityProvenance: "COMMERCE_POINTER",
         pointerRevision: null,
       }),
     })).toEqual({
