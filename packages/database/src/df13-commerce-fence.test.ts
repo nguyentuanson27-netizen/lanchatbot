@@ -52,6 +52,18 @@ describe("Postgres DF13 Commerce fence store", () => {
     expect(new PostgresDf13CommerceFenceStore("postgresql://test")).not.toHaveProperty("complete");
   });
 
+  it("exports only a narrow runtime port for the reviewed executor composition", () => {
+    const factory = databasePublicApi.createDf13CommerceFenceRuntimePort;
+    expect(factory).toBeTypeOf("function");
+    const port = factory("postgresql://test");
+    expect(port).toEqual(expect.objectContaining({
+      acquire: expect.any(Function),
+      commitAuthorityDependentWork: expect.any(Function),
+      close: expect.any(Function),
+    }));
+    expect(port).not.toHaveProperty("complete");
+  });
+
   it("atomically claims every Inbox ID with a fresh opaque token and epoch", async () => {
     mocks.clientQuery.mockImplementation(async (sql: string) => {
       if (sql.includes("FROM df13_commerce_authority_fences")) return rowResult();

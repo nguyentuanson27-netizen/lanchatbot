@@ -5,6 +5,7 @@ import {
   buildDf13CommerceRuntimeContext,
   commerceStrategyStage,
   loadDf13CommerceRuntimeContext,
+  serializeDf13CommerceAuthorityModelState,
 } from "./df13-commerce-runtime-context.js";
 
 function state(
@@ -130,5 +131,66 @@ describe("DF13 Commerce runtime context", () => {
       status: "BLOCKED",
       reasonCode: "DF13_COMMERCE_CONTEXT_REVISION_MISMATCH",
     });
+  });
+
+  it("bootstraps only a pristine Commerce DISCOVERY context when no snapshot exists", async () => {
+    const runtime = {
+      readLatestContextV2ForCommerce: async () => ({
+        kind: "ABSENT" as const,
+        reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_ABSENT" as const,
+      }),
+    };
+
+    await expect(loadDf13CommerceRuntimeContext({
+      runtime,
+      conversationId: "conversation-1",
+      commerceState: state({ stage: "DISCOVERY", revision: 0 }),
+      conversationRevision: 0,
+      now: new Date("2026-08-24T00:00:00.000Z"),
+      maximumAgeMs: 5 * 60_000,
+    })).resolves.toMatchObject({
+      status: "READY",
+      context: {
+        commerce: { stage: "DISCOVERY" },
+        contextV2: { productBinding: { status: "NOT_REQUIRED", productIds: [] } },
+      },
+      sourceContextHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
+    });
+
+    await expect(loadDf13CommerceRuntimeContext({
+      runtime,
+      conversationId: "conversation-1",
+      commerceState: state(),
+      conversationRevision: 0,
+      now: new Date("2026-08-24T00:00:00.000Z"),
+      maximumAgeMs: 5 * 60_000,
+    })).resolves.toEqual({
+      status: "BLOCKED",
+      reasonCode: "DF13_COMMERCE_CONTEXT_BOOTSTRAP_NOT_PRISTINE",
+    });
+  });
+
+  it("serializes the live Commerce model input without a legacy state or regex stage", () => {
+    const context = buildDf13CommerceRuntimeContext({
+      commerceState: state(),
+      productBinding,
+      conversationRevision: 12,
+      readiness: { outcome: "NOT_EVALUATED", reasonCodes: [] },
+    });
+
+    const serialized = serializeDf13CommerceAuthorityModelState({
+      context,
+      sourceContextHash: "b".repeat(64),
+      customerProfile: { measurements: [{ kind: "HEIGHT_CM", value: 165 }] },
+    });
+
+    expect(serialized).toMatchObject({
+      type: "DF13_COMMERCE_RUNTIME_CONTEXT_V1",
+      authority: "COMMERCE",
+      context,
+      sourceContextHash: "b".repeat(64),
+    });
+    expect(JSON.stringify(serialized)).not.toContain("salesStage");
+    expect(JSON.stringify(serialized)).not.toContain("CONVERSATION_STATE");
   });
 });

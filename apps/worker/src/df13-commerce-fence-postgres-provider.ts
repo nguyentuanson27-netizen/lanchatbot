@@ -20,7 +20,7 @@ import type {
   Df13CommerceFenceProvider,
 } from "./df13-commerce-fence-dispatcher.js";
 
-/** The minimal durable boundary; the live runner does not construct this yet. */
+/** The minimal durable boundary used only by the explicit DF13 composition. */
 export interface Df13CommerceFenceStorePort {
   acquire(request: Df13CommerceFenceStoreRequest): Promise<Df13CommerceFenceAcquireResult>;
 }
@@ -59,8 +59,9 @@ function toStoreRequest(request: Df13CommerceFenceRequest):
 /**
  * The only adapter from the complete worker request to durable fence state.
  * It re-checks the enumerated authority bundle instead of treating a copied
- * bundle hash as sufficient evidence. It remains unreferenced by the live
- * runner until a separately approved default-off integration exists.
+ * bundle hash as sufficient evidence. The default LEGACY startup composition
+ * cannot acquire it; an isolated COMMERCE startup must first pass immutable
+ * release-evidence admission.
  */
 export class PostgresDf13CommerceFenceProvider implements Df13CommerceFenceProvider {
   constructor(private readonly store: Df13CommerceFenceStorePort) {}
@@ -81,7 +82,7 @@ export class PostgresDf13CommerceFenceProvider implements Df13CommerceFenceProvi
  * Real durable completion adapter for the default-off consumer wrapper. It
  * repeats both bundle and scope validation at the transaction boundary, then
  * delegates only to the database API that owns runtime write + completion.
- * No live composition root constructs this source-only adapter yet.
+ * The default LEGACY composition cannot reach this adapter.
  */
 export class PostgresDf13CommerceFenceBoundCommitter<TState, TSalesState = unknown>
 implements Df13CommerceFenceBoundCommitter<TState, TSalesState> {

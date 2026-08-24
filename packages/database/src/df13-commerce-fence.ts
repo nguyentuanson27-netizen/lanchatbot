@@ -57,6 +57,21 @@ export type Df13CommerceFenceCommitResult =
   | Readonly<{ status: "ALREADY_COMPLETED"; epoch: number }>
   | Readonly<{ status: "PARKED"; reasonCode: string }>;
 
+/**
+ * The deliberately narrow production surface for the reviewed DF13 executor.
+ * It exposes neither a generic pointer operation nor a free-standing effect
+ * completion API: callers must still provide an exact fence request and the
+ * atomic runtime commit input at the same boundary.
+ */
+export interface Df13CommerceFenceRuntimePort {
+  acquire(input: Df13CommerceFenceStoreRequest): Promise<Df13CommerceFenceAcquireResult>;
+  commitAuthorityDependentWork<TState, TSalesState = unknown>(
+    input: Df13CommerceFenceCommitInput<TState, TSalesState>,
+    runtime: Df13CommerceRuntimeCommitPort,
+  ): Promise<Df13CommerceFenceCommitResult>;
+  close(): Promise<void>;
+}
+
 type FenceRow = {
   fence_id: string;
   epoch: string | number;
@@ -248,6 +263,10 @@ export class PostgresDf13CommerceFenceStore {
   constructor(connectionString: string, maxPoolSize = 3) {
     if (!connectionString.trim()) throw new Error("DATABASE_URL_REQUIRED");
     this.pool = new Pool({ connectionString, max: maxPoolSize });
+  }
+
+  async close(): Promise<void> {
+    await this.pool.end();
   }
 
   async acquire(input: Df13CommerceFenceStoreRequest, now = new Date()): Promise<Df13CommerceFenceAcquireResult> {
@@ -490,4 +509,20 @@ export class PostgresDf13CommerceFenceStore {
     }
   }
 
+}
+
+/**
+ * Creates the only public database port used by the DF13 realtime
+ * composition. Keeping the concrete store private prevents unrelated code
+ * from treating it as a generic control-plane operator.
+ */
+export function createDf13CommerceFenceRuntimePort(
+  connectionString: string,
+): Df13CommerceFenceRuntimePort {
+  const store = new PostgresDf13CommerceFenceStore(connectionString);
+  return Object.freeze({
+    acquire: store.acquire.bind(store),
+    commitAuthorityDependentWork: store.commitAuthorityDependentWork.bind(store),
+    close: store.close.bind(store),
+  });
 }

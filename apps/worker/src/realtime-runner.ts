@@ -148,6 +148,15 @@ import {
   type RealtimeSalesCycleTelemetry,
 } from "./realtime-sales-cycle.js";
 import { selectDf13RuntimeAuthority } from "./df13-runtime-authority-boundary.js";
+import type {
+  Df13CommerceRuntimeAcquireResult,
+  Df13CommerceRuntimeExecutorPort,
+} from "./df13-commerce-runtime-executor.js";
+import {
+  commerceStrategyStage,
+  loadDf13CommerceRuntimeContext,
+  serializeDf13CommerceAuthorityModelState,
+} from "./df13-commerce-runtime-context.js";
 import {
   classifyPreSalePolicyIntent,
   renderPreSalePolicyReply,
@@ -2244,7 +2253,7 @@ export interface RealtimeRunnerOptions {
   readonly decisionAuditV2Enabled?: boolean;
   readonly recordedReplayCaptureEnabled?: boolean;
   readonly recordedReplayPageId?: string;
-  /** Source-only shadow capture gate. No runtime/env wiring exists in DF-B. */
+  /** Default-off capture gate; isolated DF13 COMMERCE startup enables it. */
   readonly contextV2CaptureEnabled?: boolean;
   readonly mediaRecognitionEnabled?: boolean;
   readonly mediaClarificationEnabled?: boolean;
@@ -2409,6 +2418,10 @@ export class RealtimeRunner {
     private readonly policyResolver?: RuntimePolicyResolverPort,
     private readonly mediaRecognition?: RealtimeMediaRecognitionPort,
     private readonly behaviorModeResolver?: RuntimeBehaviorModeResolverPort,
+    private readonly commerceExecutor?: Df13CommerceRuntimeExecutorPort<
+      ConversationState,
+      SalesCycleRuntimeState
+    >,
   ) {
     if (options.mode === "DRY_RUN" && options.sendEnabled) {
       throw new Error("REALTIME_DRY_RUN_SEND_FORBIDDEN");
@@ -2774,11 +2787,25 @@ export class RealtimeRunner {
     if (authoritySelection.status === "BLOCKED") {
       throw new Error(authoritySelection.reasonCode);
     }
-    // The source composition deliberately binds no COMMERCE executor. A fresh
-    // pre-production release can only provide one through a separate reviewed
-    // activation composition; it must never fall through to the LEGACY path.
+    let commerceFence: Extract<Df13CommerceRuntimeAcquireResult, { status: "HELD" }> | null = null;
     if (authoritySelection.status === "COMMERCE_SELECTED") {
-      throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
+      // Source-default composition supplies no executor. A COMMERCE pointer
+      // therefore remains fail-closed and can never fall through to LEGACY.
+      if (!this.commerceExecutor) throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
+      const acquired = await this.commerceExecutor.acquire({
+        pageId: claim.pageId,
+        channel: this.options.behaviorModeChannel,
+        workId: deterministicUuid(`df13-commerce:${claim.pageId}:${message.eventKey}`),
+        inboxIds: batch.inboxIds,
+        resolution: behaviorModeResolution,
+      });
+      if (acquired.status === "HELD") {
+        commerceFence = acquired;
+      } else if (acquired.status === "ALREADY_COMPLETED") {
+        return "COMMITTED";
+      } else {
+        throw new Error(acquired.reasonCode);
+      }
     }
     const record = await this.runtime.loadOrCreate(
       claim.pageId,
@@ -2821,6 +2848,41 @@ export class RealtimeRunner {
             throw new Error("SALES_CYCLE_RUNTIME_PORT_REQUIRED");
           })()
       : null;
+    const commerceRuntimeContext = commerceFence === null
+      ? null
+      : !salesCycleRecord || !this.runtime.readLatestContextV2ForCommerce
+        ? (() => {
+            throw new Error("DF13_COMMERCE_CONTEXT_READER_REQUIRED");
+          })()
+        : await loadDf13CommerceRuntimeContext({
+            runtime: {
+              readLatestContextV2ForCommerce:
+                this.runtime.readLatestContextV2ForCommerce.bind(this.runtime),
+            },
+            conversationId: record.conversationId,
+            commerceState: salesCycleRecord.state,
+            conversationRevision: record.stateVersion,
+            now,
+            maximumAgeMs: 5 * 60_000,
+          });
+    if (commerceRuntimeContext !== null && commerceRuntimeContext.status === "BLOCKED") {
+      throw new Error(commerceRuntimeContext.reasonCode);
+    }
+    const commerceBoundProductId = commerceRuntimeContext?.status === "READY" &&
+        commerceRuntimeContext.context.contextV2.productBinding.status === "RESOLVED" &&
+        commerceRuntimeContext.context.contextV2.productBinding.productIds.length === 1
+      ? commerceRuntimeContext.context.contextV2.productBinding.productIds[0]!
+      : null;
+    // This is a compatibility projection for the existing conversation record,
+    // never a COMMERCE authority input. Its stage/product originate only from
+    // the exact Context V2 + Commerce snapshot above.
+    const authorityState = commerceRuntimeContext?.status === "READY" && salesCycleRecord
+      ? {
+          ...state,
+          salesStage: commerceStrategyStage(salesCycleRecord.state.stage),
+          currentProductId: commerceBoundProductId,
+        }
+      : state;
     const preSalePolicyIntent = message.isEcho
       ? null
       : classifyPreSalePolicyIntent(message.text ?? "");
@@ -2970,12 +3032,16 @@ export class RealtimeRunner {
       }
       context = [...priorContext, ...currentContexts];
     }
-    const modelContext: ShadowContextMessage[] = [
-      {
-        direction: "INBOUND",
-        senderType: "SYSTEM",
-        messageType: "EVENT",
-        text: JSON.stringify({
+    const authorityModelState = commerceRuntimeContext?.status === "READY"
+      ? serializeDf13CommerceAuthorityModelState({
+          context: commerceRuntimeContext.context,
+          sourceContextHash: commerceRuntimeContext.sourceContextHash,
+          customerProfile:
+            this.options.customerProfileEnabled
+              ? customerProfileSummary(customerProfile)
+              : null,
+        })
+      : {
           type: "CONVERSATION_STATE",
           currentProductId: state.currentProductId,
           consideredVariant: state.consideredVariant,
@@ -2989,7 +3055,13 @@ export class RealtimeRunner {
               : null,
           salesStage: state.salesStage,
           objectionType: state.objectionType,
-        }),
+        };
+    const modelContext: ShadowContextMessage[] = [
+      {
+        direction: "INBOUND",
+        senderType: "SYSTEM",
+        messageType: "EVENT",
+        text: JSON.stringify(authorityModelState),
         attachmentCount: 0,
         occurredAt: now.toISOString(),
       },
@@ -3020,6 +3092,9 @@ export class RealtimeRunner {
         observedName,
         new Date(observation.observedAt),
       ).catch(() => false);
+    }
+    if (commerceFence !== null && knownSuperseded && inboxBatchGuard) {
+      throw new Error("DF13_COMMERCE_SUPERSEDED_RECONCILIATION_REQUIRED");
     }
     if (knownSuperseded && inboxBatchGuard) {
       const event = this.conversationEvent(
@@ -3075,7 +3150,7 @@ export class RealtimeRunner {
     const residualCustomerUrlResolution = approvedCustomerUrlResolution
       ? await this.resolveResidualCustomerUrlProducts(
           message,
-          state,
+          authorityState,
           claim.pageId,
           mediaPartialResolutionPolicy,
         )
@@ -3107,7 +3182,7 @@ export class RealtimeRunner {
       ? this.emptyResolution()
       : combinedCustomerUrlResolution ?? await this.resolveProducts(
           message,
-          state,
+          authorityState,
           claim.pageId,
           mediaPartialResolutionPolicy,
         );
@@ -3173,11 +3248,15 @@ export class RealtimeRunner {
       batch.lastReceiveSequence,
       resolvedProduct?.productId ?? null,
       customerUrlDisposition === "HANDOFF",
+      commerceRuntimeContext?.status === "READY"
+        ? authorityState.salesStage
+        : undefined,
+      commerceRuntimeContext?.status === "READY" ? "NONE" : undefined,
     );
     const applied = applyInboundEvent({
-      state,
-      expectedRevision: state.revision,
-      fence: Math.max(state.lastFence + 1, batch.lastReceiveSequence),
+      state: authorityState,
+      expectedRevision: authorityState.revision,
+      fence: Math.max(authorityState.lastFence + 1, batch.lastReceiveSequence),
       event,
       tagObservation: observation,
       now,
@@ -3185,6 +3264,9 @@ export class RealtimeRunner {
     if (applied.status !== "APPLIED") return "INBOX_ONLY";
 
     let nextState = applied.state;
+    const initialAuthorityStrategyStage = commerceRuntimeContext?.status === "READY" && salesCycleRecord
+      ? commerceStrategyStage(salesCycleRecord.state.stage)
+      : nextState.salesStage;
     const hasNewCustomerImage = !message.isEcho &&
       message.attachments.some((attachment) =>
         attachment.type.toLowerCase() === "image" && Boolean(attachment.url)
@@ -3322,11 +3404,11 @@ export class RealtimeRunner {
     if (
       this.options.wave2StrategyEnabled &&
       !message.isEcho &&
-      nextState.salesStage !== "POST_SALE"
+      initialAuthorityStrategyStage !== "POST_SALE"
     ) {
       wave2StrategyDecision = decideWave2SalesStrategy({
         text: message.text ?? "",
-        salesStage: nextState.salesStage,
+        salesStage: initialAuthorityStrategyStage,
         objectionType: event.objectionType,
         buyingSignal: deterministicBuyingHintForTurn().isBuyingSignal,
         hasVerifiedProduct: Boolean(
@@ -3682,7 +3764,7 @@ export class RealtimeRunner {
         proposal = {
           schemaVersion: 1,
           intent: `catalog_advisory_${advisoryIntent.toLocaleLowerCase("en-US")}`,
-          conversationStage: nextState.salesStage,
+          conversationStage: initialAuthorityStrategyStage,
           productId: resolvedProduct.productId,
           action: "REPLY",
           reply: catalogAdvisoryReply(resolvedProduct, advisoryIntent),
@@ -3747,7 +3829,7 @@ export class RealtimeRunner {
           proposal = {
             schemaVersion: 1,
             intent: "multi_business_fact",
-            conversationStage: nextState.salesStage,
+            conversationStage: initialAuthorityStrategyStage,
             productId: first.productRef.productId,
             action: "REPLY",
             reply,
@@ -3900,7 +3982,7 @@ export class RealtimeRunner {
         } else proposal = {
           schemaVersion: 1,
           intent: "product_media_unavailable",
-          conversationStage: nextState.salesStage,
+          conversationStage: initialAuthorityStrategyStage,
           productId: resolvedProduct?.productId ?? null,
           action: "REPLY",
           reply: imageRequest.customerTextUnits.join("\n"),
@@ -4418,7 +4500,7 @@ export class RealtimeRunner {
         if (this.options.wave2StrategyEnabled && wave2StrategyDecision) {
           wave2StrategyDecision = decideWave2SalesStrategy({
             text: message.text ?? "",
-            salesStage: nextState.salesStage,
+            salesStage: initialAuthorityStrategyStage,
             objectionType: event.objectionType,
             buyingSignal: buyingSignal.isBuyingSignal,
             hasVerifiedProduct: Boolean(
@@ -4634,7 +4716,7 @@ export class RealtimeRunner {
             ctaPolicy: wave2StrategyDecision?.ctaPolicy ?? null,
             imageIntent,
             imageCount: guarded.imageUrls.length,
-            salesStage: nextState.salesStage,
+            salesStage: initialAuthorityStrategyStage,
             buyingSignal: buyingSignal.isBuyingSignal,
             factsVerified: facts?.status === "OK",
             product: resolvedProduct,
@@ -4916,6 +4998,13 @@ export class RealtimeRunner {
       .digest("hex");
     const salesStageBefore = salesCycleRecord?.state.stage ?? null;
     const salesStageAfter = salesCyclePlan?.state.stage ?? salesStageBefore;
+    const finalAuthorityStrategyStage = commerceRuntimeContext?.status === "READY" &&
+        salesStageAfter !== null
+      ? commerceStrategyStage(salesStageAfter)
+      : nextState.salesStage;
+    if (commerceRuntimeContext?.status === "READY") {
+      nextState = { ...nextState, salesStage: finalAuthorityStrategyStage };
+    }
     const guardOutcome: RealtimeDecisionEventPlan["details"]["guardOutcome"] =
       guardedPlanHash === null
         ? "NOT_APPLICABLE"
@@ -5379,7 +5468,7 @@ export class RealtimeRunner {
       pushDecisionEvent("BUYING_SIGNAL_COMMITTED", committedReasons);
       if (
         salesStageAfter === "CART_OPEN" ||
-        nextState.salesStage === "READY_TO_BUY"
+        finalAuthorityStrategyStage === "READY_TO_BUY"
       ) {
         pushDecisionEvent("READY_TO_BUY");
       }
@@ -5473,8 +5562,7 @@ export class RealtimeRunner {
       metaMessages.length,
       responseGroupId,
     );
-    const result = await this.runtime.commit(
-      {
+    const runtimeCommit: RealtimeCommitInput<ConversationState, SalesCycleRuntimeState> = {
         pageId: claim.pageId,
         customerHash: claim.conversationHash,
         conversationId: record.conversationId,
@@ -5579,10 +5667,18 @@ export class RealtimeRunner {
           : {}),
         ...(contextV2CapturePlan ? { contextV2CapturePlan } : {}),
         ...(inboxBatchGuard ? { inboxBatchGuard } : {}),
-      },
-      new Date(),
-    );
-    return batchCommitStatus(result);
+    };
+    if (commerceFence !== null) {
+      if (!this.commerceExecutor) throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
+      const committed = await this.commerceExecutor.commit({
+        acquired: commerceFence,
+        runtimeCommit,
+      });
+      if (committed.status === "PARKED") throw new Error(committed.reasonCode);
+      if (committed.status === "ALREADY_COMPLETED") return "COMMITTED";
+      return batchCommitStatus(committed.runtime);
+    }
+    return batchCommitStatus(await this.runtime.commit(runtimeCommit, new Date()));
   }
 
   private emptyResolution(): ProductResolution {
@@ -6181,6 +6277,8 @@ export class RealtimeRunner {
     receiveSequence: number,
     productId: string | null,
     customerUrlRequiresHandoff = false,
+    commerceDerivedStage?: SalesStage,
+    commerceDerivedObjectionType?: ObjectionType,
   ): InboundConversationEvent {
     const text = (message.text ?? "").toLocaleLowerCase("vi");
     const postSale = isPostSaleRequest(message.text ?? "");
@@ -6199,10 +6297,10 @@ export class RealtimeRunner {
         : humanRequest
           ? "CUSTOMER_REQUESTED_HUMAN"
           : null,
-      requestedSalesStage: this.salesStage(text, productId),
+      requestedSalesStage: commerceDerivedStage ?? this.salesStage(text, productId),
       salesStageTrigger: "NORMAL",
       productId,
-      objectionType: this.objectionType(text),
+      objectionType: commerceDerivedObjectionType ?? this.objectionType(text),
     };
   }
 

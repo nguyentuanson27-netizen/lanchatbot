@@ -1,7 +1,9 @@
+import { createHash } from "node:crypto";
 import type { SalesCycleRuntimeState } from "@lana/chat-runtime";
 import type { LatestContextV2ForCommerce } from "@lana/database";
 import {
   ProductBindingV2Schema,
+  canonicalJsonV1,
   deriveConversationBarriersV2,
   deriveConversationPhaseV2,
   type ProductBindingV2,
@@ -84,6 +86,25 @@ export type Df13CommerceRuntimeContextLoadResult =
     sourceContextHash: string;
   }>
   | Readonly<{ status: "BLOCKED"; reasonCode: string }>;
+
+/** The sole system-message payload for a live COMMERCE model call. */
+export function serializeDf13CommerceAuthorityModelState(input: Readonly<{
+  context: Df13CommerceRuntimeContext;
+  sourceContextHash: string;
+  /** Already minimized by the caller; customer identifiers never belong here. */
+  customerProfile: unknown;
+}>) {
+  if (!/^[a-f0-9]{64}$/u.test(input.sourceContextHash)) {
+    throw new Error("DF13_COMMERCE_CONTEXT_HASH_INVALID");
+  }
+  return Object.freeze({
+    type: "DF13_COMMERCE_RUNTIME_CONTEXT_V1" as const,
+    authority: "COMMERCE" as const,
+    context: input.context,
+    sourceContextHash: input.sourceContextHash,
+    customerProfile: input.customerProfile,
+  });
+}
 
 /**
  * Maps only the canonical Commerce lifecycle into the existing strategy
@@ -175,6 +196,58 @@ function matchesCurrentCommerceSnapshot(
     context.finalTurnEvidence.finalConversationRevision === conversationRevision;
 }
 
+function pristineCommerceDiscovery(
+  state: BuildDf13CommerceRuntimeContextInput["commerceState"],
+): boolean {
+  return state.revision === 0 &&
+    state.stage === "DISCOVERY" &&
+    state.cart === null &&
+    state.preview === null &&
+    state.confirmation === null &&
+    (state.clarification === null || state.clarification === undefined);
+}
+
+function bootstrapCommerceDiscoveryContext(input: Readonly<{
+  conversationId: string;
+  commerceState: BuildDf13CommerceRuntimeContextInput["commerceState"];
+  conversationRevision: number;
+}>): Df13CommerceRuntimeContextLoadResult {
+  if (!pristineCommerceDiscovery(input.commerceState)) {
+    return Object.freeze({
+      status: "BLOCKED" as const,
+      reasonCode: "DF13_COMMERCE_CONTEXT_BOOTSTRAP_NOT_PRISTINE",
+    });
+  }
+  try {
+    const context = buildDf13CommerceRuntimeContext({
+      commerceState: input.commerceState,
+      productBinding: {
+        schemaVersion: 2,
+        contractVersion: "PRODUCT_BINDING_V2",
+        status: "NOT_REQUIRED",
+        productIds: [],
+        catalogVersion: "df13-commerce-bootstrap-v1",
+      },
+      conversationRevision: input.conversationRevision,
+      readiness: { outcome: "NOT_EVALUATED", reasonCodes: [] },
+    });
+    const sourceContextHash = createHash("sha256")
+      .update(canonicalJsonV1({
+        contractVersion: "DF13_COMMERCE_RUNTIME_BOOTSTRAP_V1",
+        conversationId: input.conversationId,
+        commerce: context.commerce,
+        contextV2: context.contextV2,
+      }), "utf8")
+      .digest("hex");
+    return Object.freeze({ status: "READY" as const, context, sourceContextHash });
+  } catch {
+    return Object.freeze({
+      status: "BLOCKED" as const,
+      reasonCode: "DF13_COMMERCE_CONTEXT_BOOTSTRAP_INVALID",
+    });
+  }
+}
+
 /**
  * Reads the only admissible Context V2 snapshot for a COMMERCE turn. The
  * supplied reader already verifies capture integrity and expiry; this boundary
@@ -201,6 +274,9 @@ export async function loadDf13CommerceRuntimeContext(input: Readonly<{
       status: "BLOCKED" as const,
       reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_READ_FAILED",
     });
+  }
+  if (latest.kind === "ABSENT") {
+    return bootstrapCommerceDiscoveryContext(input);
   }
   if (latest.kind !== "READY") {
     return Object.freeze({ status: "BLOCKED" as const, reasonCode: latest.reasonCode });

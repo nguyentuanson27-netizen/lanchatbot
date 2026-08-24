@@ -4,6 +4,8 @@ export {
   type Df13CommerceFenceAuthority,
   type Df13CommerceFenceCommitInput,
   type Df13CommerceFenceCommitResult,
+  createDf13CommerceFenceRuntimePort,
+  type Df13CommerceFenceRuntimePort,
   type Df13CommerceFenceLease,
   type Df13CommerceRuntimeCommitPort,
   type Df13CommerceFenceStoreRequest,
