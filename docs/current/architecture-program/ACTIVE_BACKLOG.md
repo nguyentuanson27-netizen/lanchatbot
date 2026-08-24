@@ -1,8 +1,8 @@
 # LANA Chatbot — Active Incident Backlog
 
 **Status:** BF reconciliation remains `GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS`; the later Gate E acceptance is recorded separately.
-**Active track:** `GATE_E_PREPROD_ACCEPTED`; DF11 and DF12 are merged source-only, and DF-C / DF13 source work is active. BF residuals remain recorded and unchanged.
-**Next issue:** DF-13 under the DF-C source-work contract; see `GATE_E_PREPROD_ACCEPTANCE_20260821.md`.
+**Active track:** `GATE_E_PREPROD_ACCEPTED`; DF11–DF13 are merged source-only, and DF-C is `SOURCE_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING`. BF residuals remain recorded and unchanged.
+**Next issue:** DF-13 operational acceptance under the source/read-only release-evidence contract; see `DF13_OPERATIONAL_ACCEPTANCE_PREPARATION.md`.
 **Exit:** owner acceptance is recorded and `POST_BF_V1` is anchored to the immutable reconciled runtime evidence.
 **Detailed issue contracts:** `BF_ISSUE_SPECS.md`; current disposition is below.
 **Operating mode:** `ENGINEERING_PREPROD`; PRs use focused verification and Release Trains own full verification/deploy preparation.
@@ -102,7 +102,7 @@ For one BF task, load only:
 - BF-03 has an owner-approved deferred deviation and the canonical foundation-only disposition from PR #158: retained inert primitives and evaluation data have no runtime authority or activation path. Do not revive correction containment; the root dialogue-evidence and writer-demotion obligations remain DF-05/DF-06 and DF-09/DF-11.
 - BF-07 clarifies multiple products; canonical multi-product state remains an UR-00 ADR obligation.
 - DF-09/DF-10 must use the post-Gate-BF V1 baseline, never the known-buggy pre-wave path.
-- Detailed DF-C work is active in `FUTURE_BACKLOG.md`; Gate E v15 provenance and DF11 entry conditions are in `GATE_E_PREPROD_ACCEPTANCE_20260821.md`. Later trains retain their logical dependencies.
+- Detailed DF-C operational-acceptance preparation is in `DF13_OPERATIONAL_ACCEPTANCE_PREPARATION.md`; Gate E v15 provenance is in `GATE_E_PREPROD_ACCEPTANCE_20260821.md`. Later trains retain their logical dependencies.
 
 ## Gate BF
 
@@ -134,6 +134,7 @@ cannot erase or misrepresent the residuals:
 - [ ] An immutable post-fix V1 baseline records model/config, prompt, policy versions, evidence-envelope version, and page scope.
 
 The historical Gate BF acceptance resumed DF-A source work and created the `POST_BF_V1`
-comparison anchor. The later Gate E acceptance starts DF-C source work only. Neither Gate
+comparison anchor. The later Gate E acceptance admitted DF-C source work, now source-complete;
+it did not authorize a runtime operation. Neither Gate
 declares production readiness or authorizes `COMMERCE`, State V2, a second page/brand,
 deployment, or any live mutation.
