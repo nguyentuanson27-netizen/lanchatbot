@@ -132,7 +132,9 @@ function command(operation: "PREPARE" | "ACTIVATE" | "RECONCILE" | "ROLLBACK") {
 function ports() {
   const calls = {
     hold: 0,
-    operationIds: [] as string[],
+    durableAcquire: [] as unknown[],
+    durableRelease: 0,
+    releaseSource: 0,
     migrationReadiness: 0,
     activate: 0,
     rollback: 0,
@@ -141,6 +143,22 @@ function ports() {
   const target = pointer("COMMERCE", 6);
   const legacy = pointer("LEGACY", 7);
   const cutover: Df13CommerceOperationalPorts = {
+    durableCutoverFence: {
+      async acquire(input) {
+        calls.durableAcquire.push(input);
+        return {
+          status: "HELD" as const,
+          lease: {
+            fenceId: "10000000-0000-4000-8000-000000000021",
+            fenceToken: "10000000-0000-4000-8000-000000000022",
+            epoch: 1,
+          },
+        };
+      },
+      async observe() { return { status: "MISSING" as const }; },
+      async release() { calls.durableRelease += 1; return { status: "RELEASED" as const }; },
+      async close() {},
+    },
     releaseCandidateSource: {
       async refreshTrustedRef() {},
       async resolveRef() { return releaseRevision; },
@@ -150,8 +168,12 @@ function ports() {
     },
     async holdAuthorityDependentWork(input) {
       calls.hold += 1;
-      calls.operationIds.push(input.operationId);
       return { status: "HELD" as const, fenceToken: "fence-1" };
+    },
+    async releaseAuthorityDependentWork() { calls.release += 1; },
+    async readReleaseSource() {
+      calls.releaseSource += 1;
+      return command("PREPARE").releaseSource;
     },
     async verifyMigrationReadiness() {
       calls.migrationReadiness += 1;
@@ -182,7 +204,6 @@ function ports() {
       calls.rollback += 1;
       return { status: "ACKNOWLEDGED" as const };
     },
-    async releaseAuthorityDependentWork() { calls.release += 1; },
   };
   return { calls, cutover, legacy };
 }
@@ -208,7 +229,7 @@ describe("DF13 operational entrypoint", () => {
       pageId,
       channel: "MESSENGER",
     });
-    expect(calls).toEqual({ hold: 0, operationIds: [], migrationReadiness: 1, activate: 0, rollback: 0, release: 0 });
+    expect(calls).toEqual({ hold: 0, durableAcquire: [], durableRelease: 0, releaseSource: 1, migrationReadiness: 1, activate: 0, rollback: 0, release: 0 });
   });
 
   it("rejects a generic or wrong-scope request before it touches the control plane", async () => {
@@ -221,7 +242,7 @@ describe("DF13 operational entrypoint", () => {
 
     await expect(runDf13CommerceOperationalEntrypoint({ command: invalid, ports: cutover }))
       .resolves.toMatchObject({ status: "BLOCKED", sideEffects: "NOT_EXECUTED" });
-    expect(calls).toEqual({ hold: 0, operationIds: [], migrationReadiness: 0, activate: 0, rollback: 0, release: 0 });
+    expect(calls).toEqual({ hold: 0, durableAcquire: [], durableRelease: 0, releaseSource: 0, migrationReadiness: 0, activate: 0, rollback: 0, release: 0 });
     expect(() => parseDf13CommerceOperationalCommand({ ...command("PREPARE"), operation: "LEGACY" }))
       .toThrow("DF13_OPERATIONAL_COMMAND_INVALID");
   });
@@ -241,10 +262,10 @@ describe("DF13 operational entrypoint", () => {
       sideEffects: "NOT_EXECUTED",
       reasonCodes: ["DF13_GATE_E_CANDIDATE_FINGERPRINT_MISMATCH"],
     });
-    expect(calls).toEqual({ hold: 0, operationIds: [], migrationReadiness: 0, activate: 0, rollback: 0, release: 0 });
+    expect(calls).toEqual({ hold: 0, durableAcquire: [], durableRelease: 0, releaseSource: 1, migrationReadiness: 0, activate: 0, rollback: 0, release: 0 });
   });
 
-  it("converts a malformed nested preflight into a bounded fail-closed result", async () => {
+  it("rejects a malformed nested preflight before it can reach a port", async () => {
     const { calls, cutover } = ports();
     const malformed = {
       ...command("ACTIVATE"),
@@ -257,9 +278,9 @@ describe("DF13 operational entrypoint", () => {
     })).resolves.toMatchObject({
       status: "BLOCKED",
       sideEffects: "NOT_EXECUTED",
-      reasonCodes: ["DF13_OPERATIONAL_PREFLIGHT_INVALID"],
+      reasonCodes: ["DF13_OPERATIONAL_COMMAND_INVALID"],
     });
-    expect(calls).toEqual({ hold: 0, operationIds: [], migrationReadiness: 0, activate: 0, rollback: 0, release: 0 });
+    expect(calls).toEqual({ hold: 0, durableAcquire: [], durableRelease: 0, releaseSource: 0, migrationReadiness: 0, activate: 0, rollback: 0, release: 0 });
   });
 
   it("requires an exact migration-rehearsal evidence readback before activation", async () => {
@@ -280,7 +301,27 @@ describe("DF13 operational entrypoint", () => {
       sideEffects: "NOT_EXECUTED",
       reasonCodes: ["DF13_OPERATIONAL_MIGRATION_READINESS_MISMATCH"],
     });
-    expect(calls).toEqual({ hold: 0, operationIds: [], migrationReadiness: 1, activate: 0, rollback: 0, release: 0 });
+    expect(calls).toEqual({ hold: 0, durableAcquire: [], durableRelease: 0, releaseSource: 1, migrationReadiness: 1, activate: 0, rollback: 0, release: 0 });
+  });
+
+  it("requires field-for-field release-host source readback before forward work", async () => {
+    const { calls, cutover } = ports();
+    const mismatchedSource: Df13CommerceOperationalPorts = {
+      ...cutover,
+      async readReleaseSource() {
+        calls.releaseSource += 1;
+        return { ...command("PREPARE").releaseSource, createdAt: "2026-08-25T00:00:01.000Z" };
+      },
+    };
+
+    await expect(runDf13CommerceOperationalEntrypoint({
+      command: command("ACTIVATE"),
+      ports: mismatchedSource,
+    })).resolves.toMatchObject({
+      status: "BLOCKED",
+      reasonCodes: ["DF13_OPERATIONAL_RELEASE_SOURCE_MISMATCH"],
+    });
+    expect(calls).toEqual({ hold: 0, durableAcquire: [], durableRelease: 0, releaseSource: 1, migrationReadiness: 0, activate: 0, rollback: 0, release: 0 });
   });
 
   it("sends ACTIVATION through the typed cutover contract exactly once", async () => {
@@ -295,9 +336,43 @@ describe("DF13 operational entrypoint", () => {
       sideEffects: "CONTROL_PLANE_ONLY",
     });
     expect(calls.hold).toBe(1);
-    expect(calls.operationIds).toEqual(["10000000-0000-4000-8000-000000000001"]);
+    expect(calls.durableAcquire).toEqual([expect.objectContaining({
+      operationId: "10000000-0000-4000-8000-000000000001",
+      preCutover: expect.objectContaining({ pointerRevision: 5 }),
+      target: expect.objectContaining({ authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash }),
+    })]);
     expect(calls.activate).toBe(1);
     expect(calls.release).toBe(1);
+    expect(calls.durableRelease).toBe(1);
+  });
+
+  it("does not touch the worker hold or CAS when the durable operation fence requires reconciliation", async () => {
+    const { calls, cutover } = ports();
+    const heldElsewhere: Df13CommerceOperationalPorts = {
+      ...cutover,
+      durableCutoverFence: {
+        ...cutover.durableCutoverFence,
+        async acquire() {
+          return {
+            status: "HELD_RECONCILE_REQUIRED" as const,
+            fenceId: "10000000-0000-4000-8000-000000000021",
+            epoch: 1,
+          };
+        },
+      },
+    };
+
+    await expect(runDf13CommerceOperationalEntrypoint({
+      command: command("ACTIVATE"),
+      ports: heldElsewhere,
+    })).resolves.toMatchObject({
+      status: "BLOCKED_LEGACY",
+      sideEffects: "NOT_EXECUTED",
+      reasonCodes: ["DF13_AUTHORITY_FENCE_NOT_HELD"],
+    });
+    expect(calls.hold).toBe(0);
+    expect(calls.activate).toBe(0);
+    expect(calls.durableRelease).toBe(0);
   });
 
   it("routes ROLLBACK only through interruption recovery, never a generic LEGACY writer", async () => {
@@ -314,12 +389,51 @@ describe("DF13 operational entrypoint", () => {
     expect(calls.hold).toBe(1);
     expect(calls.rollback).toBe(1);
     expect(calls.release).toBe(0);
+    expect(calls.releaseSource).toBe(0);
+    expect(calls.migrationReadiness).toBe(0);
+  });
+
+  it("keeps ROLLBACK available when forward release and migration evidence are unavailable", async () => {
+    const { calls, cutover } = ports();
+    prepareReleaseEvidence.mockRejectedValue(new Error("source-unavailable"));
+    const unavailableForwardEvidence: Df13CommerceOperationalPorts = {
+      ...cutover,
+      async readReleaseSource() { throw new Error("host-source-unavailable"); },
+      async verifyMigrationReadiness() { throw new Error("rehearsal-unavailable"); },
+    };
+
+    await expect(runDf13CommerceOperationalEntrypoint({
+      command: command("ROLLBACK"),
+      ports: unavailableForwardEvidence,
+    })).resolves.toMatchObject({
+      operation: "ROLLBACK",
+      status: "HOLD_RETAINED",
+      migrationReadiness: "UNVERIFIED",
+    });
+    expect(calls.hold).toBe(1);
+    expect(calls.durableAcquire).toHaveLength(1);
+    expect(calls.releaseSource).toBe(0);
+    expect(calls.migrationReadiness).toBe(0);
   });
 
   it("emits canonical redacted evidence without retaining unknown input fields", () => {
     expect(() => parseDf13CommerceOperationalCommand({
       ...command("PREPARE"),
       untrustedOperatorNote: "must-not-be-retained",
+    })).toThrow("DF13_OPERATIONAL_COMMAND_INVALID");
+    expect(() => parseDf13CommerceOperationalCommand({
+      ...command("PREPARE"),
+      preflight: { ...command("PREPARE").preflight, untrustedNestedValue: true },
+    })).toThrow("DF13_OPERATIONAL_COMMAND_INVALID");
+    expect(() => parseDf13CommerceOperationalCommand({
+      ...command("PREPARE"),
+      preflight: {
+        ...command("PREPARE").preflight,
+        currentPointer: {
+          ...command("PREPARE").preflight.currentPointer,
+          version: { ...command("PREPARE").preflight.currentPointer.version, untrustedNestedValue: true },
+        },
+      },
     })).toThrow("DF13_OPERATIONAL_COMMAND_INVALID");
   });
 });
