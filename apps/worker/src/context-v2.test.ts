@@ -230,7 +230,7 @@ describe("DF09 final Context V2 capture", () => {
     );
   });
 
-  it("keeps the source capture gate default-off and absent from runtime wiring", () => {
+  it("keeps Context V2 capture default-off for LEGACY and enables it only for an admitted Commerce startup", () => {
     const runnerSource = readFileSync(
       new URL("./realtime-runner.ts", import.meta.url),
       "utf8",
@@ -246,7 +246,9 @@ describe("DF09 final Context V2 capture", () => {
     expect(runnerSource).toContain(
       "contextV2CaptureEnabled: options.contextV2CaptureEnabled ?? false",
     );
-    expect(realtimeServerSource).not.toContain("contextV2CaptureEnabled");
+    expect(realtimeServerSource).toContain(
+      "contextV2CaptureEnabled: df13CommerceStartupInput.mode === \"COMMERCE\"",
+    );
     expect(phase4ServerSource).not.toContain("contextV2CaptureEnabled");
   });
 

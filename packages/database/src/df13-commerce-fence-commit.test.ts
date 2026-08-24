@@ -53,6 +53,7 @@ const runtimeCommit: RealtimeCommitInput<{ revision: number }> = Object.freeze({
     leaseToken: "runtime-inbox-lease",
     inboxIds: [...request.inboxIds].reverse(),
   },
+  contextV2CapturePlan: { capture: { status: "BUILT" } as never },
 });
 
 function rowResult(rows: readonly unknown[] = [], rowCount = rows.length) {
@@ -89,6 +90,8 @@ function runtime(overrides: Partial<Df13CommerceRuntimeCommitPort> = {}): Df13Co
         sendAuthorized: true,
         reasonCodes: [],
         inboxBatchStatus: "COMMITTED",
+        contextV2CaptureCreated: true,
+        contextV2CaptureReasonCode: null,
       };
     },
     ...overrides,

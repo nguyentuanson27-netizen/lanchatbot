@@ -7,6 +7,7 @@ import {
   persistContextV2CaptureFailSoft,
   prepareContextV2CaptureForCommit,
   inspectContextV2Capture,
+  readLatestContextV2ForCommerce,
   probeContextV2CaptureRead,
 } from "./context-v2-capture.js";
 import { PostgresShadowEvaluationStore } from "./shadow-evaluation.js";
@@ -326,6 +327,53 @@ describe("Context V2 exact-message claim gate", () => {
     await expect(probeContextV2CaptureRead(
       clientWith([], new Error("permission denied")),
     )).rejects.toThrow("CONTEXT_V2_CAPTURE_READ_UNAVAILABLE");
+  });
+
+  it("admits only the newest fresh, integrity-valid Context V2 snapshot for a Commerce consumer", async () => {
+    const capture = builtCapture();
+    const client = clientWith([{ capture }]);
+
+    await expect(readLatestContextV2ForCommerce(client, {
+      conversationId: "00000000-0000-4000-8000-000000000010",
+      now: new Date("2026-08-16T10:01:00.000Z"),
+      maximumAgeMs: 5 * 60_000,
+    })).resolves.toEqual({
+      kind: "READY",
+      context: capture.context,
+    });
+
+    const [sql, parameters] = vi.mocked(client.query).mock.calls[0]!;
+    expect(sql).toContain("ORDER BY occurred_at DESC, event_id DESC");
+    expect(sql).toContain("LIMIT 1");
+    expect(parameters).toEqual(["00000000-0000-4000-8000-000000000010"]);
+  });
+
+  it("fails closed instead of falling back to an older Context V2 snapshot", async () => {
+    const blocked = {
+      ...builtCapture(),
+      status: "BLOCKED" as const,
+      context: null,
+      contextHash: null,
+      reasonCode: "CONTEXT_V2_COMMERCE_STATE_UNAVAILABLE",
+    };
+
+    await expect(readLatestContextV2ForCommerce(clientWith([{ capture: blocked }]), {
+      conversationId: "00000000-0000-4000-8000-000000000010",
+      now: new Date("2026-08-16T10:01:00.000Z"),
+      maximumAgeMs: 5 * 60_000,
+    })).resolves.toEqual({
+      kind: "BLOCKED",
+      reasonCode: "CONTEXT_V2_COMMERCE_STATE_UNAVAILABLE",
+    });
+
+    await expect(readLatestContextV2ForCommerce(clientWith([{ capture: builtCapture() }]), {
+      conversationId: "00000000-0000-4000-8000-000000000010",
+      now: new Date("2026-08-16T10:05:00.001Z"),
+      maximumAgeMs: 5 * 60_000,
+    })).resolves.toEqual({
+      kind: "STALE",
+      reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_STALE",
+    });
   });
 });
 

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import {
   ProductSearchService,
@@ -6,13 +7,13 @@ import {
 import {
   LocalEnvelopeCipher,
   PostgresChatHistoryStore,
+  createDf13CommerceFenceRuntimePort,
   PostgresRealtimeInboxStore,
   PostgresRealtimeRuntimeStore,
   PostgresRuntimeBehaviorModeStore,
   PostgresRuntimePolicyStore,
 } from "@lana/database";
 import {
-  RuntimeBehaviorModeResolver,
   RuntimePolicyResolver,
   type RuntimePolicyAuditPort,
   type RuntimePolicyChannel,
@@ -28,7 +29,7 @@ import {
   DryRunClearTagObservationProvider,
   FailClosedTagObservationProvider,
   PancakeRealtimeTagObservationProvider,
-  RealtimeRunner,
+  RealtimeRunner as Bf01Bf02RealtimeRunner,
 } from "./bf02-realtime-runner.js";
 import { runRealtimeLoop } from "./realtime-loop.js";
 import { RedisRealtimeGenerationQuota } from "./realtime-quota.js";
@@ -44,6 +45,17 @@ import {
   type VertexServiceAccount,
 } from "./vertex.js";
 import { baselineModelCapability } from "./vertex-baseline.js";
+import {
+  PostgresDf13CommerceFenceBoundCommitter,
+  PostgresDf13CommerceFenceProvider,
+} from "./df13-commerce-fence-postgres-provider.js";
+import { Df13CommerceRuntimeExecutor } from "./df13-commerce-runtime-executor.js";
+import { createDf13CommerceRuntimeComposition } from "./df13-commerce-runtime-composition.js";
+import {
+  createDf13CommercePreprodStartupAuthority,
+  parseDf13CommercePreprodStartupInput,
+} from "./df13-commerce-preprod-startup-authority.js";
+import { selectDf13RuntimeAuthority } from "./df13-runtime-authority-boundary.js";
 
 import {
   RedisRealtimeMediaRecognitionCache,
@@ -233,18 +245,46 @@ if (behaviorModeEnabled && !behaviorModeDatabaseUrl) {
 const behaviorModeStore = behaviorModeEnabled
   ? new PostgresRuntimeBehaviorModeStore(behaviorModeDatabaseUrl!)
   : undefined;
-const behaviorModeResolver = behaviorModeStore
-  ? new RuntimeBehaviorModeResolver(behaviorModeStore, {
-      cacheTtlMs: boundedInteger(
-        "REALTIME_BEHAVIOR_MODE_CACHE_TTL_MS", 5_000, 100, 5_000,
-      ),
-      lastKnownGoodTtlMs: boundedInteger(
-        "REALTIME_BEHAVIOR_MODE_LKG_TTL_MS", 300_000, 5_000, 300_000,
-      ),
-      allowedPageIds: confirmationCanaryPageIds,
-    })
-  : undefined;
-
+const df13CommerceStartupMode = (
+  process.env.DF13_COMMERCE_PREPROD_STARTUP_MODE ?? "LEGACY"
+).trim().toUpperCase();
+if (df13CommerceStartupMode !== "LEGACY" && df13CommerceStartupMode !== "COMMERCE") {
+  throw new Error("DF13_COMMERCE_PREPROD_STARTUP_MODE_INVALID");
+}
+const df13CommerceStartupInput = df13CommerceStartupMode === "COMMERCE"
+  ? (() => {
+      if (!behaviorModeStore) throw new Error("DF13_COMMERCE_BEHAVIOR_MODE_REQUIRED");
+      try {
+        const parsed = parseDf13CommercePreprodStartupInput(JSON.parse(
+          readFileSync(required("DF13_COMMERCE_PREPROD_STARTUP_FILE"), "utf8"),
+        ) as unknown);
+        if (parsed.mode !== "COMMERCE") {
+          throw new Error("DF13_COMMERCE_STARTUP_INPUT_MODE_INVALID");
+        }
+        return parsed;
+      } catch (error) {
+        if (error instanceof Error && error.message.startsWith("DF13_COMMERCE_")) {
+          throw error;
+        }
+        throw new Error("DF13_COMMERCE_STARTUP_INPUT_INVALID");
+      }
+    })()
+  : parseDf13CommercePreprodStartupInput({ mode: "LEGACY" });
+const df13CommerceStartupAuthority = createDf13CommercePreprodStartupAuthority(
+  df13CommerceStartupInput,
+);
+if (
+  df13CommerceStartupInput.mode === "COMMERCE" &&
+  process.env.SALES_CYCLE_ENABLED !== "true"
+) {
+  throw new Error("DF13_COMMERCE_SALES_CYCLE_REQUIRED");
+}
+if (
+  df13CommerceStartupInput.mode === "COMMERCE" &&
+  process.env.HISTORY_WRITE_ENABLED !== "true"
+) {
+  throw new Error("DF13_COMMERCE_CONTEXT_CAPTURE_REQUIRED");
+}
 const canonicalHistory = process.env.HISTORY_WRITE_ENABLED === "true"
   ? new PostgresChatHistoryStore(databaseUrl, {
       analyticsHashSalt: secretOrEnvironment(
@@ -694,89 +734,178 @@ const tags = pancakeConfigured
     : new FailClosedTagObservationProvider();
 const workerId =
   process.env.REALTIME_WORKER_ID?.trim() || "realtime-worker-1";
-const runner = new RealtimeRunner(
+/**
+ * Both process modes use the same narrow authority boundary.  The default
+ * LEGACY startup input intentionally keeps Commerce source-disabled; a fresh
+ * COMMERCE process can proceed only with its reviewed immutable input.
+ */
+const df13FenceRuntime = behaviorModeStore
+  ? createDf13CommerceFenceRuntimePort(databaseUrl)
+  : undefined;
+const commerceExecutor = df13FenceRuntime
+  ? new Df13CommerceRuntimeExecutor({
+      activationAuthority: df13CommerceStartupAuthority,
+      fenceProvider: new PostgresDf13CommerceFenceProvider(df13FenceRuntime),
+      fenceCommitter: new PostgresDf13CommerceFenceBoundCommitter(
+        df13FenceRuntime,
+        runtime,
+      ),
+    })
+  : undefined;
+const df13CommerceComposition = behaviorModeStore && commerceExecutor
+  ? createDf13CommerceRuntimeComposition({
+      source: behaviorModeStore,
+      confirmationAllowedPageIds: confirmationCanaryPageIds,
+      runtimeAuthorityMode: df13CommerceStartupInput.mode,
+      cacheTtlMs: boundedInteger(
+        "REALTIME_BEHAVIOR_MODE_CACHE_TTL_MS", 5_000, 100, 5_000,
+      ),
+      lastKnownGoodTtlMs: boundedInteger(
+        "REALTIME_BEHAVIOR_MODE_LKG_TTL_MS", 300_000, 5_000, 300_000,
+      ),
+      commerceExecutor,
+    })
+  : undefined;
+const behaviorModeResolver = df13CommerceComposition?.behaviorModeResolver;
+const commerceOnlyBehaviorModeResolver = df13CommerceStartupInput.mode === "COMMERCE"
+  ? {
+      async resolve(input: Parameters<NonNullable<typeof behaviorModeResolver>["resolve"]>[0]) {
+        if (!behaviorModeResolver) throw new Error("DF13_COMMERCE_BEHAVIOR_MODE_REQUIRED");
+        const resolution = await behaviorModeResolver.resolve(input);
+        if (selectDf13RuntimeAuthority({
+          pageId: input.pageId,
+          channel: input.channel,
+          resolution,
+        }).status !== "COMMERCE_SELECTED") {
+          throw new Error("DF13_COMMERCE_STARTUP_AUTHORITY_LOST");
+        }
+        return resolution;
+      },
+    }
+  : undefined;
+if (df13CommerceStartupInput.mode === "COMMERCE") {
+  const startupResolution = await commerceOnlyBehaviorModeResolver!.resolve({
+    resolutionId: randomUUID(),
+    pageId: required("META_PAGE_ID"),
+    channel: process.env.REALTIME_BEHAVIOR_MODE_CHANNEL?.trim().toUpperCase() || "MESSENGER",
+    workerId,
+    now: new Date(),
+  });
+  if (startupResolution.salesAuthorityMode !== "COMMERCE") {
+    throw new Error("DF13_COMMERCE_STARTUP_AUTHORITY_LOST");
+  }
+}
+const runnerOptions = {
+  workerId,
+  mode,
+  sendEnabled,
+  inboxLeaseMs: boundedInteger(
+    "REALTIME_INBOX_LEASE_MS",
+    90_000,
+    10_000,
+    300_000,
+  ),
+  shopAlias:
+    process.env.CATALOG_DEFAULT_SHOP_ALIAS?.trim() || "LANA",
+  employeeTagId: process.env.PANCAKE_EMPLOYEE_TAG_ID?.trim() || "",
+  postSaleTagId:
+    process.env.PANCAKE_POST_SALE_TAG_ID?.trim() || "",
+  closedOrderTagId:
+    process.env.PANCAKE_CLOSED_ORDER_TAG_ID?.trim() || "",
+  salesCycleEnabled:
+    process.env.SALES_CYCLE_ENABLED === "true",
+  imageDelayMs: boundedInteger(
+    "REALTIME_IMAGE_DELAY_MS",
+    500,
+    0,
+    5_000,
+  ),
+  promptVersion:
+    process.env.REALTIME_PROMPT_VERSION?.trim() || "lana-realtime-v1",
+  metaAppId: required("META_APP_ID"),
+  confirmationStartupMode,
+  behaviorModeChannel:
+    process.env.REALTIME_BEHAVIOR_MODE_CHANNEL?.trim().toUpperCase() || "MESSENGER",
+  policyChannel: runtimePolicyChannel,
+  releaseId:
+    process.env.REALTIME_RELEASE_ID?.trim() || "unversioned",
+  decisionTelemetryEnabled:
+    process.env.REALTIME_DECISION_TELEMETRY_ENABLED === "true",
+  buyingSignalGuardEnabled:
+    process.env.REALTIME_BUYING_SIGNAL_GUARD_V1 === "true",
+  groundedDraftEnabled:
+    process.env.REALTIME_GROUNDED_DRAFT_V1 === "true",
+  verifiedFactAssemblerEnabled:
+    process.env.REALTIME_VERIFIED_FACT_ASSEMBLER_V1 === "true",
+  customerProfileEnabled:
+    process.env.REALTIME_CUSTOMER_PROFILE_V1 === "true",
+  verifiedVariantEnabled:
+    process.env.REALTIME_VERIFIED_VARIANT_V2 === "true",
+  contextHistoryLimit: boundedInteger(
+    "REALTIME_CONTEXT_HISTORY_LIMIT",
+    30,
+    1,
+    30,
+  ),
+  multiFactQueryEnabled:
+    process.env.REALTIME_MULTI_FACT_QUERY_V2 === "true",
+  catalogAdvisoryEnabled:
+    process.env.REALTIME_CATALOG_ADVISORY_V1 === "true",
+  decisionAuditV2Enabled:
+    process.env.REALTIME_DECISION_AUDIT_V2 === "true",
+  recordedReplayCaptureEnabled:
+    process.env.REALTIME_RECORDED_REPLAY_CAPTURE_ENABLED === "true",
+  recordedReplayPageId: required("META_PAGE_ID"),
+  contextV2CaptureEnabled: df13CommerceStartupInput.mode === "COMMERCE",
+  mediaRecognitionEnabled: mediaCutoutModeRaw === "LIVE",
+  mediaClarificationEnabled:
+    process.env.REALTIME_MEDIA_CLARIFICATION_ENABLED === "true",
+  mediaRecognitionPageIds,
+  conversationalMessageFormatEnabled:
+    process.env.REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1 === "true",
+  messageGroupingV2Enabled:
+    process.env.REALTIME_MESSAGE_GROUPING_V2 === "true",
+  mediaSelectorV2GuardEnabled:
+    process.env.REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED === "true",
+  wave2StrategyEnabled:
+    process.env.REALTIME_WAVE2_STRATEGY_V1 === "true",
+  adAcquisitionAnalyticsMode: adAcquisitionMode,
+  adAcquisitionPageIds,
+} as const;
+const commerceFinalizationExecutor = df13CommerceStartupInput.mode === "COMMERCE"
+  ? df13CommerceComposition?.commerceFinalizationExecutor
+  : undefined;
+if (df13CommerceStartupInput.mode === "COMMERCE" && !commerceFinalizationExecutor) {
+  throw new Error("DF13_COMMERCE_FINALIZATION_EXECUTOR_UNAVAILABLE");
+}
+const runtimeForRunner = commerceFinalizationExecutor
+  ? commerceFinalizationExecutor.wrapRuntime(runtime)
+  : runtime;
+const runner = df13CommerceStartupInput.mode === "COMMERCE"
+  ? new Bf01Bf02RealtimeRunner(
+    inbox,
+    runtimeForRunner,
+    baselineModelCapability(vertexModel),
+    facts,
+    productSearch,
+    tags,
+    runnerOptions,
+    quota,
+    history,
+    canonicalHistory,
+    videoFrames,
+    runtimePolicyResolver,
+    mediaRecognition,
+    commerceOnlyBehaviorModeResolver,
+  )
+  : new Bf01Bf02RealtimeRunner(
   inbox,
-  runtime,
+  runtimeForRunner,
   baselineModelCapability(vertexModel),
   facts,
   productSearch,
   tags,
-  {
-    workerId,
-    mode,
-    sendEnabled,
-    inboxLeaseMs: boundedInteger(
-      "REALTIME_INBOX_LEASE_MS",
-      90_000,
-      10_000,
-      300_000,
-    ),
-    shopAlias:
-      process.env.CATALOG_DEFAULT_SHOP_ALIAS?.trim() || "LANA",
-    employeeTagId: process.env.PANCAKE_EMPLOYEE_TAG_ID?.trim() || "",
-    postSaleTagId:
-      process.env.PANCAKE_POST_SALE_TAG_ID?.trim() || "",
-    closedOrderTagId:
-      process.env.PANCAKE_CLOSED_ORDER_TAG_ID?.trim() || "",
-    salesCycleEnabled:
-      process.env.SALES_CYCLE_ENABLED === "true",
-    imageDelayMs: boundedInteger(
-      "REALTIME_IMAGE_DELAY_MS",
-      500,
-      0,
-      5_000,
-    ),
-    promptVersion:
-      process.env.REALTIME_PROMPT_VERSION?.trim() || "lana-realtime-v1",
-    metaAppId: required("META_APP_ID"),
-    confirmationStartupMode,
-    behaviorModeChannel:
-      process.env.REALTIME_BEHAVIOR_MODE_CHANNEL?.trim().toUpperCase() || "MESSENGER",
-    policyChannel: runtimePolicyChannel,
-    releaseId:
-      process.env.REALTIME_RELEASE_ID?.trim() || "unversioned",
-    decisionTelemetryEnabled:
-      process.env.REALTIME_DECISION_TELEMETRY_ENABLED === "true",
-    buyingSignalGuardEnabled:
-      process.env.REALTIME_BUYING_SIGNAL_GUARD_V1 === "true",
-    groundedDraftEnabled:
-      process.env.REALTIME_GROUNDED_DRAFT_V1 === "true",
-    verifiedFactAssemblerEnabled:
-      process.env.REALTIME_VERIFIED_FACT_ASSEMBLER_V1 === "true",
-    customerProfileEnabled:
-      process.env.REALTIME_CUSTOMER_PROFILE_V1 === "true",
-    verifiedVariantEnabled:
-      process.env.REALTIME_VERIFIED_VARIANT_V2 === "true",
-    contextHistoryLimit: boundedInteger(
-      "REALTIME_CONTEXT_HISTORY_LIMIT",
-      30,
-      1,
-      30,
-    ),
-    multiFactQueryEnabled:
-      process.env.REALTIME_MULTI_FACT_QUERY_V2 === "true",
-    catalogAdvisoryEnabled:
-      process.env.REALTIME_CATALOG_ADVISORY_V1 === "true",
-    decisionAuditV2Enabled:
-      process.env.REALTIME_DECISION_AUDIT_V2 === "true",
-    recordedReplayCaptureEnabled:
-      process.env.REALTIME_RECORDED_REPLAY_CAPTURE_ENABLED === "true",
-    recordedReplayPageId: required("META_PAGE_ID"),
-    mediaRecognitionEnabled: mediaCutoutModeRaw === "LIVE",
-    mediaClarificationEnabled:
-      process.env.REALTIME_MEDIA_CLARIFICATION_ENABLED === "true",
-    mediaRecognitionPageIds,
-    conversationalMessageFormatEnabled:
-      process.env.REALTIME_CONVERSATIONAL_MESSAGE_FORMAT_V1 === "true",
-    messageGroupingV2Enabled:
-      process.env.REALTIME_MESSAGE_GROUPING_V2 === "true",
-    mediaSelectorV2GuardEnabled:
-      process.env.REALTIME_MEDIA_SELECTOR_V2_GUARD_ENABLED === "true",
-    wave2StrategyEnabled:
-      process.env.REALTIME_WAVE2_STRATEGY_V1 === "true",
-    adAcquisitionAnalyticsMode: adAcquisitionMode,
-    adAcquisitionPageIds,
-  },
+  runnerOptions,
   quota,
   history,
   canonicalHistory,
@@ -785,6 +914,9 @@ const runner = new RealtimeRunner(
   mediaRecognition,
   behaviorModeResolver,
 );
+if (df13CommerceStartupInput.mode === "COMMERCE") {
+  runner.bindDf13CommerceExecutor(commerceFinalizationExecutor!);
+}
 const pollMs = boundedInteger(
   "REALTIME_POLL_MS",
   10_000,
@@ -833,3 +965,4 @@ await history?.close();
 await canonicalHistory?.close();
 await runtimePolicyStore?.close();
 await behaviorModeStore?.close();
+await df13FenceRuntime?.close();
