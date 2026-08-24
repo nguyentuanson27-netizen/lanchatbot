@@ -38,6 +38,26 @@ export interface InspectContextV2CaptureInput {
   readonly pruningWindowMs?: number;
 }
 
+/**
+ * The live COMMERCE consumer reads precisely one newest terminal snapshot. It
+ * never searches backwards for an older "good" snapshot because that would
+ * make an invalid or blocked current state silently authoritative.
+ */
+export type LatestContextV2ForCommerce =
+  | Readonly<{ kind: "READY"; context: ContextV2 }>
+  | Readonly<{ kind: "ABSENT"; reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_ABSENT" }>
+  | Readonly<{ kind: "BLOCKED"; reasonCode: string }>
+  | Readonly<{ kind: "INVALID"; reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_INVALID" }>
+  | Readonly<{ kind: "STALE"; reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_STALE" }>
+  | Readonly<{ kind: "DB_ERROR"; reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_READ_FAILED" }>;
+
+export interface ReadLatestContextV2ForCommerceInput {
+  readonly conversationId: string;
+  readonly now: Date;
+  /** Bounded freshness window supplied by the active COMMERCE execution contract. */
+  readonly maximumAgeMs: number;
+}
+
 function validContext(capture: ContextV2CaptureV1): ContextV2 | null {
   if (capture.status !== "BUILT" || capture.context === null) return null;
   const { contextHash, ...draft } = capture.context;
@@ -47,6 +67,34 @@ function validContext(capture: ContextV2CaptureV1): ContextV2 | null {
   return contextHash === expected && capture.contextHash === expected
     ? capture.context
     : null;
+}
+
+function contextFreshForCommerce(
+  capture: ContextV2CaptureV1,
+  context: ContextV2,
+  input: ReadLatestContextV2ForCommerceInput,
+): boolean {
+  const nowMs = input.now.getTime();
+  const sourceOccurredAt = Date.parse(capture.sourceOccurredAt);
+  if (!Number.isFinite(nowMs) || !Number.isFinite(sourceOccurredAt) ||
+      !Number.isFinite(input.maximumAgeMs) ||
+      input.maximumAgeMs < 1_000 || input.maximumAgeMs > 15 * 60_000) {
+    return false;
+  }
+  if (sourceOccurredAt > nowMs + 5 * 60_000 || nowMs - sourceOccurredAt > input.maximumAgeMs) {
+    return false;
+  }
+  if (context.verifiedClaims.some(({ provenance }) => {
+    const observedAt = Date.parse(provenance.observedAt);
+    const expiresAt = Date.parse(provenance.expiresAt);
+    return !Number.isFinite(observedAt) || !Number.isFinite(expiresAt) ||
+      observedAt > nowMs + 5 * 60_000 || expiresAt <= nowMs;
+  })) return false;
+  if (context.cartReadiness !== null) {
+    const readinessExpiry = Date.parse(context.cartReadiness.expiresAt);
+    if (!Number.isFinite(readinessExpiry) || readinessExpiry <= nowMs) return false;
+  }
+  return true;
 }
 
 function deterministicCaptureUuid(seed: string): string {
@@ -246,6 +294,53 @@ export async function inspectContextV2Capture(
       kind: "DB_ERROR",
       reasonCode: "CONTEXT_V2_CAPTURE_READ_FAILED",
     };
+  }
+}
+
+/**
+ * Reads the sole latest Context V2 capture eligible for the COMMERCE runtime.
+ * The returned context has its capture and internal hashes re-derived, then
+ * every expiry is checked against the caller's supplied clock. A blocked,
+ * malformed or stale latest capture is terminal for this decision; callers
+ * must hold/retry rather than consult an older legacy or Context V2 state.
+ */
+export async function readLatestContextV2ForCommerce(
+  client: Pick<PoolClient, "query">,
+  input: ReadLatestContextV2ForCommerceInput,
+): Promise<LatestContextV2ForCommerce> {
+  try {
+    const result = await client.query<{ capture: unknown }>(
+      `SELECT event_metadata AS capture
+       FROM conversation_events
+       WHERE conversation_id = $1::uuid
+         AND event_type = 'CONTEXT_V2_DERIVED'
+       ORDER BY occurred_at DESC, event_id DESC
+       LIMIT 1`,
+      [input.conversationId],
+    );
+    if (result.rows.length === 0) {
+      return { kind: "ABSENT", reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_ABSENT" };
+    }
+    const parsed = ContextV2CaptureV1Schema.safeParse(result.rows[0]?.capture);
+    if (!parsed.success) {
+      return { kind: "INVALID", reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_INVALID" };
+    }
+    if (parsed.data.status === "BLOCKED") {
+      return {
+        kind: "BLOCKED",
+        reasonCode: parsed.data.reasonCode ?? "CONTEXT_V2_RUNTIME_SNAPSHOT_BLOCKED",
+      };
+    }
+    const context = validContext(parsed.data);
+    if (context === null) {
+      return { kind: "INVALID", reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_INVALID" };
+    }
+    if (!contextFreshForCommerce(parsed.data, context, input)) {
+      return { kind: "STALE", reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_STALE" };
+    }
+    return { kind: "READY", context };
+  } catch {
+    return { kind: "DB_ERROR", reasonCode: "CONTEXT_V2_RUNTIME_SNAPSHOT_READ_FAILED" };
   }
 }
 

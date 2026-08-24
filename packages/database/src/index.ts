@@ -58,11 +58,14 @@ export {
   persistContextV2CaptureFailSoft,
   prepareContextV2CaptureForCommit,
   inspectContextV2Capture,
+  readLatestContextV2ForCommerce,
   probeContextV2CaptureRead,
   type ContextV2CaptureEligibility,
   type ContextV2CapturePersistenceResult,
   type ContextV2CapturePlan,
   type InspectContextV2CaptureInput,
+  type LatestContextV2ForCommerce,
+  type ReadLatestContextV2ForCommerceInput,
 } from "./context-v2-capture.js";
 export {
   enqueueMetaOutbox,
