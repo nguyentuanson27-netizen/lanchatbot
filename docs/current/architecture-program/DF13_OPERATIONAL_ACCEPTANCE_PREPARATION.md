@@ -14,6 +14,13 @@ the first mutating boundary. It does not create an immutable release, inspect a
 runtime host, apply pending migration `0035`, construct the default-off consumer
 in the live runner, change `salesAuthorityMode` or `stateReadMode`, or start UR.
 
+`RealtimeRunner` now makes one explicit final-authority selection before any
+conversation-state, model, product, or durable-commit work. An invalid or
+resolver-failed COMMERCE-origin identity is blocked rather than falling through
+to LEGACY. An otherwise exact COMMERCE identity is also blocked until a
+separately reviewed COMMERCE executor is bound; this source change neither
+binds that executor nor permits activation.
+
 The only admissible authority topology remains one direct page-scoped transition:
 
 ```text

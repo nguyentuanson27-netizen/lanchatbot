@@ -133,6 +133,11 @@ readback, activation audit, and rollback evidence before a separately authorized
 cutover command may exist. The source adapter is not constructed by the live
 runner, and there is no operator shortcut from `LEGACY` to `COMMERCE`.
 
+`RealtimeRunner` now selects one final sales authority before state/model/product
+or commit work. A rejected COMMERCE-origin result cannot fall through to the
+LEGACY pipeline, and an exact COMMERCE identity remains blocked until a reviewed
+COMMERCE executor is bound.
+
 After explicit owner authorization, activate only on `PREPROD_TEST_PAGE` using that quiescent boundary, verify exact authority revision/hash/source readback across every relevant consumer, then release held eligible work and run the controlled critical human journeys.
 
 ## Gate F-PREPROD
