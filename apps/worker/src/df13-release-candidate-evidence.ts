@@ -22,9 +22,28 @@ export const GATE_E_PREPROD_V15_MANIFEST_PATH =
 
 export const DF13_TRUSTED_RELEASE_REF = "refs/remotes/origin/main" as const;
 
+export const DF13_PENDING_BEHAVIOR_MODE_MIGRATION_PATHS_V1 = Object.freeze([
+  "packages/database/pending-migrations/0035_df13_commerce_behavior_mode.up.sql",
+  "packages/database/pending-migrations/0035_df13_commerce_behavior_mode.down.sql",
+] as const);
+
+const DF13_PENDING_BEHAVIOR_MODE_MIGRATION_BINDING_V1 = Object.freeze([
+  {
+    path: "packages/database/pending-migrations/0035_df13_commerce_behavior_mode.up.sql",
+    blobOid: "7d95ecc48c0629ae5f1e882704a30889e2f2fdc1",
+    contentSha256: "51f94dce65d31f53829f96d1166bd131b726ee00557bc952a5489a9fc98762fc",
+  },
+  {
+    path: "packages/database/pending-migrations/0035_df13_commerce_behavior_mode.down.sql",
+    blobOid: "0361ce2b88917a2b2a72e2f2e95fe0c0b8a5713b",
+    contentSha256: "5cf7eaa71826376d913953ff076cf778690532e6a96f2d71d3d1a0bf53afd719",
+  },
+] as const);
+
 export interface Df13ReleaseCandidateSourceReader extends GateECandidateSourceReader {
   refreshTrustedRef(): Promise<void>;
   resolveRef(ref: typeof DF13_TRUSTED_RELEASE_REF): Promise<string>;
+  resolveTreeOid(commit: string): Promise<string>;
 }
 
 const GATE_E_PREPROD_V15_MANIFEST_FIELDS = Object.freeze({
@@ -66,6 +85,12 @@ const MISSING_MANIFEST_FIELD = Object.freeze({
 
 type CandidateProjection = Awaited<ReturnType<typeof deriveGateECandidateContentFingerprint>>;
 
+type PendingMigrationArtifact = Readonly<{
+  path: typeof DF13_PENDING_BEHAVIOR_MODE_MIGRATION_PATHS_V1[number];
+  blobOid: string | null;
+  contentSha256: string | null;
+}>;
+
 export type Df13ReleaseCandidateEvidence = Readonly<{
   schemaVersion: 1;
   contractVersion: "DF13_RELEASE_CANDIDATE_EVIDENCE_V1";
@@ -75,6 +100,7 @@ export type Df13ReleaseCandidateEvidence = Readonly<{
   releaseSource: Readonly<{
     trustedRef: typeof DF13_TRUSTED_RELEASE_REF;
     resolvedRevision: string | null;
+    treeOid: string | null;
   }>;
   gateE: typeof GATE_E_PREPROD_V15_BINDING;
   manifestArtifact: Readonly<{
@@ -88,6 +114,11 @@ export type Df13ReleaseCandidateEvidence = Readonly<{
     authorityBundleHash: string;
     consumers: readonly string[];
     authorityIndependentBypassClasses: readonly [];
+  }>;
+  migration: Readonly<{
+    contractVersion: "DF13_PENDING_BEHAVIOR_MODE_MIGRATION_V1";
+    status: "PENDING_NON_AUTO_APPLIED";
+    artifacts: readonly PendingMigrationArtifact[];
   }>;
   rollback: Readonly<{
     contractVersion: "DF13_COMPLETE_LEGACY_ROLLBACK_EVIDENCE_V1";
@@ -166,7 +197,9 @@ function validateDf13ReleaseCandidateEvidenceUnchecked(
   }
   if (
     evidence.releaseSource.trustedRef !== DF13_TRUSTED_RELEASE_REF ||
-    evidence.releaseSource.resolvedRevision !== evidence.activationReleaseRevision
+    evidence.releaseSource.resolvedRevision !== evidence.activationReleaseRevision ||
+    evidence.releaseSource.treeOid === null ||
+    !BLOB_OID_PATTERN.test(evidence.releaseSource.treeOid)
   ) {
     reasonCodes.push("DF13_RELEASE_EVIDENCE_TRUSTED_SOURCE_INVALID");
   }
@@ -227,6 +260,19 @@ function validateDf13ReleaseCandidateEvidenceUnchecked(
     reasonCodes.push("DF13_RELEASE_EVIDENCE_AUTHORITY_BUNDLE_INVALID");
   }
   if (
+    evidence.migration.contractVersion !== "DF13_PENDING_BEHAVIOR_MODE_MIGRATION_V1" ||
+    evidence.migration.status !== "PENDING_NON_AUTO_APPLIED" ||
+    evidence.migration.artifacts.length !== DF13_PENDING_BEHAVIOR_MODE_MIGRATION_PATHS_V1.length ||
+    evidence.migration.artifacts.some((artifact, index) =>
+      artifact.path !== DF13_PENDING_BEHAVIOR_MODE_MIGRATION_PATHS_V1[index] ||
+      artifact.blobOid !== DF13_PENDING_BEHAVIOR_MODE_MIGRATION_BINDING_V1[index]?.blobOid ||
+      artifact.contentSha256 !==
+        DF13_PENDING_BEHAVIOR_MODE_MIGRATION_BINDING_V1[index]?.contentSha256
+    )
+  ) {
+    reasonCodes.push("DF13_RELEASE_EVIDENCE_PENDING_MIGRATION_IDENTITY_INVALID");
+  }
+  if (
     evidence.rollback.contractVersion !== "DF13_COMPLETE_LEGACY_ROLLBACK_EVIDENCE_V1" ||
     evidence.rollback.target !== "EXACT_PRE_CUTOVER_LEGACY_POINTER" ||
     !same(evidence.rollback.requiredConsumerConvergence, DF13_COMMERCE_AUTHORITY_CONSUMERS_V1) ||
@@ -264,6 +310,7 @@ function baseEvidence(
     releaseSource: {
       trustedRef: DF13_TRUSTED_RELEASE_REF,
       resolvedRevision: null,
+      treeOid: null,
     },
     gateE: GATE_E_PREPROD_V15_BINDING,
     manifestArtifact: {
@@ -276,6 +323,11 @@ function baseEvidence(
       authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
       consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
       authorityIndependentBypassClasses: [],
+    },
+    migration: {
+      contractVersion: "DF13_PENDING_BEHAVIOR_MODE_MIGRATION_V1",
+      status: "PENDING_NON_AUTO_APPLIED",
+      artifacts: [],
     },
     rollback: {
       contractVersion: "DF13_COMPLETE_LEGACY_ROLLBACK_EVIDENCE_V1",
@@ -316,6 +368,26 @@ function compareManifest(manifest: Record<string, unknown>): readonly FieldCompa
   return comparisons;
 }
 
+async function derivePendingMigrationArtifacts(input: Readonly<{
+  activationReleaseRevision: string;
+  git: Df13ReleaseCandidateSourceReader;
+}>): Promise<readonly PendingMigrationArtifact[]> {
+  return Promise.all(DF13_PENDING_BEHAVIOR_MODE_MIGRATION_PATHS_V1.map(async (path) => {
+    const [content, blobOid] = await Promise.all([
+      input.git.readBlob(input.activationReleaseRevision, path),
+      input.git.resolveBlobOid(input.activationReleaseRevision, path),
+    ]);
+    if (!BLOB_OID_PATTERN.test(blobOid)) {
+      throw new Error("DF13_PENDING_MIGRATION_BLOB_IDENTITY_INVALID");
+    }
+    return {
+      path,
+      blobOid,
+      contentSha256: sha256(content),
+    };
+  }));
+}
+
 /**
  * Builds source-only evidence from immutable Git content. It refreshes the
  * fixed trusted Git ref, but neither creates a release nor observes a deployed
@@ -351,6 +423,7 @@ export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
   const releaseSource = {
     trustedRef: DF13_TRUSTED_RELEASE_REF,
     resolvedRevision: COMMIT_PATTERN.test(trustedRevision) ? trustedRevision : null,
+    treeOid: null,
   } as const;
   if (trustedRevision !== input.activationReleaseRevision) {
     return buildEvidence({
@@ -361,6 +434,31 @@ export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
       reasonCodes: ["DF13_ACTIVATION_RELEASE_NOT_TRUSTED_HEAD"],
     });
   }
+  let trustedTreeOid: string;
+  try {
+    trustedTreeOid = await input.git.resolveTreeOid(input.activationReleaseRevision);
+  } catch {
+    return buildEvidence({
+      ...base,
+      releaseSource,
+      status: "BLOCKED",
+      fieldComparisons: [],
+      reasonCodes: ["DF13_RELEASE_TREE_UNAVAILABLE"],
+    });
+  }
+  if (!BLOB_OID_PATTERN.test(trustedTreeOid)) {
+    return buildEvidence({
+      ...base,
+      releaseSource,
+      status: "BLOCKED",
+      fieldComparisons: [],
+      reasonCodes: ["DF13_RELEASE_TREE_INVALID"],
+    });
+  }
+  const releaseSourceWithTree = {
+    ...releaseSource,
+    treeOid: trustedTreeOid,
+  } as const;
 
   let manifestText: string;
   let manifestBlobOid: string;
@@ -372,7 +470,7 @@ export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
   } catch {
     return buildEvidence({
       ...base,
-      releaseSource,
+      releaseSource: releaseSourceWithTree,
       status: "BLOCKED",
       fieldComparisons: [],
       reasonCodes: ["DF13_GATE_E_MANIFEST_UNAVAILABLE"],
@@ -389,7 +487,7 @@ export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
   if (!manifest || !BLOB_OID_PATTERN.test(manifestBlobOid)) {
     return buildEvidence({
       ...base,
-      releaseSource,
+      releaseSource: releaseSourceWithTree,
       status: "BLOCKED",
       manifestArtifact: {
         path: GATE_E_PREPROD_V15_MANIFEST_PATH,
@@ -403,6 +501,7 @@ export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
 
   const fieldComparisons = compareManifest(manifest);
   let candidateProjection: CandidateProjection | null = null;
+  let pendingMigrationArtifacts: readonly PendingMigrationArtifact[] = [];
   const reasonCodes: string[] = [];
   if (manifestBlobOid !== GATE_E_PREPROD_V15_BINDING.manifestBlobOid ||
       manifestContentSha256 !== GATE_E_PREPROD_V15_BINDING.manifestContentSha256) {
@@ -416,6 +515,14 @@ export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
   } catch {
     reasonCodes.push("DF13_GATE_E_CANDIDATE_REDERIVATION_UNAVAILABLE");
   }
+  try {
+    pendingMigrationArtifacts = await derivePendingMigrationArtifacts(input);
+  } catch {
+    reasonCodes.push("DF13_PENDING_MIGRATION_ARTIFACT_UNAVAILABLE");
+  }
+  if (!same(pendingMigrationArtifacts, DF13_PENDING_BEHAVIOR_MODE_MIGRATION_BINDING_V1)) {
+    reasonCodes.push("DF13_PENDING_MIGRATION_ARTIFACT_IDENTITY_MISMATCH");
+  }
   if (
     candidateProjection &&
     candidateProjection.contentFingerprint !== GATE_E_PREPROD_V15_BINDING.candidateContentFingerprint
@@ -423,10 +530,16 @@ export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
     reasonCodes.push("DF13_GATE_E_CANDIDATE_FINGERPRINT_MISMATCH");
   }
   try {
-    const finalTrustedRevision = await input.git.resolveRef(DF13_TRUSTED_RELEASE_REF);
+    const [finalTrustedRevision, finalTrustedTreeOid] = await Promise.all([
+      input.git.resolveRef(DF13_TRUSTED_RELEASE_REF),
+      input.git.resolveTreeOid(input.activationReleaseRevision),
+    ]);
     if (finalTrustedRevision !== trustedRevision ||
         finalTrustedRevision !== input.activationReleaseRevision) {
       reasonCodes.push("DF13_TRUSTED_RELEASE_REF_CHANGED");
+    }
+    if (finalTrustedTreeOid !== trustedTreeOid) {
+      reasonCodes.push("DF13_RELEASE_TREE_CHANGED");
     }
   } catch {
     reasonCodes.push("DF13_TRUSTED_RELEASE_REF_UNAVAILABLE");
@@ -437,7 +550,7 @@ export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
 
   return buildEvidence({
     ...base,
-    releaseSource,
+    releaseSource: releaseSourceWithTree,
     status: reasonCodes.length === 0 ? "SOURCE_READY_NO_ACTIVATION" : "BLOCKED",
     manifestArtifact: {
       path: GATE_E_PREPROD_V15_MANIFEST_PATH,
@@ -446,6 +559,11 @@ export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
     },
     candidateProjection,
     fieldComparisons,
+    migration: {
+      contractVersion: "DF13_PENDING_BEHAVIOR_MODE_MIGRATION_V1",
+      status: "PENDING_NON_AUTO_APPLIED",
+      artifacts: pendingMigrationArtifacts,
+    },
     reasonCodes,
   });
 }
@@ -453,4 +571,5 @@ export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
 export const DF13_RELEASE_CANDIDATE_EVIDENCE_SOURCE_PATHS_V1 = Object.freeze([
   GATE_E_PREPROD_V15_MANIFEST_PATH,
   ...GATE_E_CANDIDATE_SOURCE_PATHS_V1,
+  ...DF13_PENDING_BEHAVIOR_MODE_MIGRATION_PATHS_V1,
 ] as const);

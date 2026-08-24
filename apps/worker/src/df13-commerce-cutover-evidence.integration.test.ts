@@ -40,6 +40,7 @@ function sourceReader(
   return {
     async refreshTrustedRef() {},
     async resolveRef() { return activationReleaseRevision; },
+    async resolveTreeOid() { return "b".repeat(40); },
     async readBlob(_revision, path) { return content(path); },
     async resolveBlobOid(_revision, path) { return gitBlobOid(await content(path)); },
   };
