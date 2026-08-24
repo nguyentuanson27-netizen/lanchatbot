@@ -178,4 +178,29 @@ describe("DF13 Commerce runtime finalization adapter", () => {
     expect(baseCommit).not.toHaveBeenCalled();
     expect(fenceCommit).not.toHaveBeenCalled();
   });
+
+  it("does not expose a mutable executor or sealed runtime through reflection", async () => {
+    const baseCommit = vi.fn();
+    const fenceCommit = vi.fn();
+    const adapter = new Df13CommerceRuntimeFinalizationAdapter({
+      acquire: vi.fn(),
+      commit: fenceCommit,
+    });
+    const reflected = adapter as unknown as {
+      executor?: { commit: (...input: unknown[]) => unknown };
+      finalizationRuntime?: RealtimeRuntimePort;
+    };
+
+    expect(reflected.executor).toBeUndefined();
+    reflected.finalizationRuntime = runtimeWith(baseCommit);
+
+    await expect(adapter.commitThroughFinalizers({
+      acquired,
+      runtimeCommit,
+      now: new Date("2026-08-24T00:00:00.000Z"),
+    })).rejects.toThrow("DF13_COMMERCE_FINALIZATION_ROUTER_UNAVAILABLE");
+
+    expect(baseCommit).not.toHaveBeenCalled();
+    expect(fenceCommit).not.toHaveBeenCalled();
+  });
 });

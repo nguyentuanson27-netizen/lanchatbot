@@ -79,6 +79,11 @@ describe("DF13 Commerce runtime composition", () => {
       reasonCodes: ["RUNTIME_BEHAVIOR_COMMERCE_CONSUMER_REJECTED"],
     });
     expect(composition).not.toHaveProperty("commerceExecutor");
+    const resolver = composition.behaviorModeResolver as unknown as {
+      commerceAuthorityConsumer?: object;
+    };
+    expect(resolver.commerceAuthorityConsumer).not.toBe(commerceExecutor);
+    expect(resolver.commerceAuthorityConsumer).not.toHaveProperty("dependencies");
   });
 
   it("preserves a DATABASE LEGACY resolution without calling the Commerce executor", async () => {

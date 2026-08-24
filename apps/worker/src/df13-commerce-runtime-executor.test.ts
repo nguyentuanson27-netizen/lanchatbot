@@ -89,6 +89,14 @@ describe("DF13 Commerce runtime executor", () => {
     expect(ports.fenceProvider.acquire).not.toHaveBeenCalled();
   });
 
+  it("does not expose fence dependencies to reflective callers", () => {
+    const executor = new Df13CommerceRuntimeExecutor(dependencies());
+    const reflected = executor as unknown as { dependencies?: unknown };
+
+    expect(reflected.dependencies).toBeUndefined();
+    expect(Reflect.ownKeys(executor)).not.toContain("dependencies");
+  });
+
   it("admits only an exact Commerce identity, then holds the full bundle before work starts", async () => {
     const ports = dependencies();
     const executor = new Df13CommerceRuntimeExecutor(ports);

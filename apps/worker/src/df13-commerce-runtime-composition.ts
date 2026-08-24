@@ -1,5 +1,6 @@
 import {
   RuntimeBehaviorModeResolver,
+  type CommerceAuthorityConsumerPort,
   type RuntimeBehaviorModeSourcePort,
 } from "@lana/chat-runtime";
 import type { Df13CommerceRuntimeExecutor } from "./df13-commerce-runtime-executor.js";
@@ -20,6 +21,9 @@ export function createDf13CommerceRuntimeComposition<TState, TSalesState>(input:
   lastKnownGoodTtlMs: number;
   commerceExecutor: Df13CommerceRuntimeExecutor<TState, TSalesState>;
 }>) {
+  const commerceAuthorityConsumer: CommerceAuthorityConsumerPort = Object.freeze({
+    admitCommerceAuthority: input.commerceExecutor.admitCommerceAuthority.bind(input.commerceExecutor),
+  });
   const behaviorModeResolver = new RuntimeBehaviorModeResolver(input.source, {
     // A cached COMMERCE pointer cannot satisfy the DATABASE-only authority
     // contract. Keep caching for the untouched LEGACY process only.
@@ -30,7 +34,7 @@ export function createDf13CommerceRuntimeComposition<TState, TSalesState>(input:
     lastKnownGoodTtlMs: input.lastKnownGoodTtlMs,
     allowedPageIds: input.confirmationAllowedPageIds,
     allowedCommercePageIds: [DF13_COMMERCE_PREPROD_SCOPE_V1.pageId],
-    commerceAuthorityConsumer: input.commerceExecutor,
+    commerceAuthorityConsumer,
   });
   const commerceFinalizationExecutor = input.commerceExecutor.createFinalizingExecutor();
   return Object.freeze({

@@ -60,14 +60,18 @@ export interface Df13CommerceFinalizingExecutorPort<TState = unknown, TSalesStat
  */
 export class Df13CommerceRuntimeFinalizationAdapter<TState = unknown, TSalesState = unknown>
 implements Df13CommerceFinalizingExecutorPort<TState, TSalesState> {
-  private readonly pendingCapabilities = new Set<object>();
-  private readonly lowerRuntimes = new WeakSet<RealtimeRuntimePort>();
-  private finalizationRuntime: RealtimeRuntimePort | undefined;
+  readonly #pendingCapabilities = new Set<object>();
+  readonly #lowerRuntimes = new WeakSet<RealtimeRuntimePort>();
+  readonly #executor: Df13CommerceRuntimeFencePort<TState, TSalesState>;
+  #finalizationRuntime: RealtimeRuntimePort | undefined;
 
-  constructor(private readonly executor: Df13CommerceRuntimeFencePort<TState, TSalesState>) {}
+  constructor(executor: Df13CommerceRuntimeFencePort<TState, TSalesState>) {
+    this.#executor = executor;
+  }
 
-  acquire: Df13CommerceRuntimeFencePort<TState, TSalesState>["acquire"] = (input) =>
-    this.executor.acquire(input);
+  async acquire(input: Parameters<Df13CommerceRuntimeFencePort<TState, TSalesState>["acquire"]>[0]) {
+    return this.#executor.acquire(input);
+  }
 
   wrapRuntime(runtime: RealtimeRuntimePort): RealtimeRuntimePort {
     const adapter = this;
@@ -87,25 +91,25 @@ implements Df13CommerceFinalizingExecutorPort<TState, TSalesState> {
           if (capability === undefined) {
             throw new Error("DF13_COMMERCE_FINALIZATION_CAPABILITY_MISSING");
           }
-          return adapter.commitFinalizedRuntimeInput(capability, decorated);
+          return adapter.#commitFinalizedRuntimeInput(capability, decorated);
         };
       },
     }) as RealtimeRuntimePort;
-    this.lowerRuntimes.add(wrapped);
+    this.#lowerRuntimes.add(wrapped);
     return wrapped;
   }
 
   bindFinalizationRuntime(runtime: RealtimeRuntimePort): void {
-    if (this.lowerRuntimes.has(runtime)) {
+    if (this.#lowerRuntimes.has(runtime)) {
       throw new Error("DF13_COMMERCE_FINALIZATION_LOWER_RUNTIME_FORBIDDEN");
     }
     if (Reflect.get(runtime, DF13_COMMERCE_FINALIZATION_ROUTER) !== this) {
       throw new Error("DF13_COMMERCE_FINALIZATION_ROUTER_UNAVAILABLE");
     }
-    if (this.finalizationRuntime !== undefined && this.finalizationRuntime !== runtime) {
+    if (this.#finalizationRuntime !== undefined && this.#finalizationRuntime !== runtime) {
       throw new Error("DF13_COMMERCE_FINALIZATION_RUNTIME_REBIND_FORBIDDEN");
     }
-    this.finalizationRuntime = runtime;
+    this.#finalizationRuntime = runtime;
   }
 
   async commitThroughFinalizers(input: Readonly<{
@@ -113,7 +117,7 @@ implements Df13CommerceFinalizingExecutorPort<TState, TSalesState> {
     runtimeCommit: RealtimeCommitInput<TState, TSalesState>;
     now: Date;
   }>): Promise<Df13CommerceFenceCommitResult> {
-    const runtime = this.finalizationRuntime;
+    const runtime = this.#finalizationRuntime;
     if (runtime === undefined) {
       throw new Error("DF13_COMMERCE_FINALIZATION_ROUTER_UNAVAILABLE");
     }
@@ -121,7 +125,7 @@ implements Df13CommerceFinalizingExecutorPort<TState, TSalesState> {
       adapter: this,
       acquired: input.acquired,
     });
-    this.pendingCapabilities.add(capability);
+    this.#pendingCapabilities.add(capability);
     const decorated = Object.freeze({
       ...input.runtimeCommit,
       [DF13_COMMERCE_FINALIZATION_CAPABILITY]: capability,
@@ -131,25 +135,25 @@ implements Df13CommerceFinalizingExecutorPort<TState, TSalesState> {
         decorated as unknown as Parameters<RealtimeRuntimePort["commit"]>[0],
         input.now,
       );
-      if (this.pendingCapabilities.has(capability)) {
+      if (this.#pendingCapabilities.has(capability)) {
         throw new Error("DF13_COMMERCE_FINALIZATION_ROUTER_UNAVAILABLE");
       }
       return result as unknown as Df13CommerceFenceCommitResult;
     } finally {
-      this.pendingCapabilities.delete(capability);
+      this.#pendingCapabilities.delete(capability);
     }
   }
 
-  private async commitFinalizedRuntimeInput(
+  async #commitFinalizedRuntimeInput(
     capability: CommerceFinalizationCapability<TState, TSalesState>,
     input: DecoratedRealtimeCommit<TState, TSalesState>,
   ): Promise<Df13CommerceFenceCommitResult> {
-    if (capability.adapter !== this || !this.pendingCapabilities.delete(capability)) {
+    if (capability.adapter !== this || !this.#pendingCapabilities.delete(capability)) {
       throw new Error("DF13_COMMERCE_FINALIZATION_CAPABILITY_INVALID");
     }
     const runtimeCommit = { ...input } as DecoratedRealtimeCommit<TState, TSalesState>;
     Reflect.deleteProperty(runtimeCommit, DF13_COMMERCE_FINALIZATION_CAPABILITY);
-    return this.executor.commit({
+    return this.#executor.commit({
       acquired: capability.acquired,
       runtimeCommit,
     });

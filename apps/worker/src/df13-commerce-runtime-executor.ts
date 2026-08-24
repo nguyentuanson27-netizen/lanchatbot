@@ -51,11 +51,19 @@ export interface Df13CommerceRuntimeExecutorPort {
  */
 export class Df13CommerceRuntimeExecutor<TState, TSalesState = unknown>
 implements Df13CommerceRuntimeExecutorPort, CommerceAuthorityConsumerPort {
-  constructor(private readonly dependencies: Readonly<{
+  readonly #dependencies: Readonly<{
     activationAuthority: Df13CommerceActivationAuthority;
     fenceProvider: Df13CommerceFenceProvider;
     fenceCommitter: Df13CommerceFenceBoundCommitter<TState, TSalesState>;
-  }>) {}
+  }>;
+
+  constructor(dependencies: Readonly<{
+    activationAuthority: Df13CommerceActivationAuthority;
+    fenceProvider: Df13CommerceFenceProvider;
+    fenceCommitter: Df13CommerceFenceBoundCommitter<TState, TSalesState>;
+  }>) {
+    this.#dependencies = dependencies;
+  }
 
   /**
    * The resolver calls this before it returns a COMMERCE resolution to the
@@ -66,7 +74,7 @@ implements Df13CommerceRuntimeExecutorPort, CommerceAuthorityConsumerPort {
     input: Parameters<CommerceAuthorityConsumerPort["admitCommerceAuthority"]>[0],
   ): Promise<{ readonly status: "ADMITTED" | "REJECTED" }> {
     try {
-      const decision = await this.dependencies.activationAuthority
+      const decision = await this.#dependencies.activationAuthority
         .authorizeExactCommerceIdentity(input);
       return { status: decision.status === "ADMITTED" ? "ADMITTED" : "REJECTED" };
     } catch {
@@ -101,11 +109,11 @@ implements Df13CommerceRuntimeExecutorPort, CommerceAuthorityConsumerPort {
     if (assessment.status === "LEGACY_ADMITTED") {
       return Object.freeze({ status: "BLOCKED" as const, reasonCode: "DF13_COMMERCE_AUTHORITY_NOT_SELECTED" });
     }
-    const identityDecision = await this.authorizeIdentity(assessment.request);
+    const identityDecision = await this.#authorizeIdentity(assessment.request);
     if (identityDecision !== null) return identityDecision;
     let requestDecision: Awaited<ReturnType<Df13CommerceActivationAuthority["authorizeExactCommerceRequest"]>>;
     try {
-      requestDecision = await this.dependencies.activationAuthority
+      requestDecision = await this.#dependencies.activationAuthority
         .authorizeExactCommerceRequest(assessment.request);
     } catch {
       return Object.freeze({ status: "PARKED" as const, reasonCode: "DF13_COMMERCE_ACTIVATION_UNAVAILABLE" });
@@ -118,7 +126,7 @@ implements Df13CommerceRuntimeExecutorPort, CommerceAuthorityConsumerPort {
     }
     const dispatched = await dispatchDf13CommerceAuthorityFence({
       assessment,
-      provider: this.dependencies.fenceProvider,
+      provider: this.#dependencies.fenceProvider,
     });
     if (dispatched.status === "COMMERCE_HELD") {
       return Object.freeze({
@@ -152,19 +160,19 @@ implements Df13CommerceRuntimeExecutorPort, CommerceAuthorityConsumerPort {
     acquired: Extract<Df13CommerceRuntimeAcquireResult, { status: "HELD" }>;
     runtimeCommit: RealtimeCommitInput<TState, TSalesState>;
   }>): Promise<Df13CommerceFenceCommitResult> {
-    return this.dependencies.fenceCommitter.commitAuthorityDependentWork({
+    return this.#dependencies.fenceCommitter.commitAuthorityDependentWork({
       request: input.acquired.request,
       lease: input.acquired.lease,
       runtimeCommit: input.runtimeCommit,
     });
   }
 
-  private async authorizeIdentity(
+  async #authorizeIdentity(
     request: Df13CommerceFenceRequest,
   ): Promise<Exclude<Df13CommerceRuntimeAcquireResult, { status: "HELD" | "ALREADY_COMPLETED" }> | null> {
     let decision: Awaited<ReturnType<Df13CommerceActivationAuthority["authorizeExactCommerceIdentity"]>>;
     try {
-      decision = await this.dependencies.activationAuthority
+      decision = await this.#dependencies.activationAuthority
         .authorizeExactCommerceIdentity({
           pageId: request.pageId,
           channel: request.channel,
