@@ -62,3 +62,80 @@ CREATE TABLE IF NOT EXISTS df13_commerce_authority_fence_claims (
 CREATE UNIQUE INDEX IF NOT EXISTS df13_commerce_authority_fence_claims_live_inbox_uq
   ON df13_commerce_authority_fence_claims (inbox_id)
   WHERE released_at IS NULL;
+
+-- A page-scoped release transition must be fenced separately from individual
+-- Inbox batches.  The cutover row is durable and stores both immutable ends of
+-- the one-authority transition, so a lost acknowledgement or process restart
+-- can be reconciled without guessing a pointer or replaying a CAS.
+CREATE TABLE IF NOT EXISTS df13_commerce_cutover_fences (
+  fence_id uuid PRIMARY KEY,
+  page_id text NOT NULL,
+  channel text NOT NULL,
+  pre_cutover_version_id uuid NOT NULL REFERENCES runtime_behavior_mode_versions(mode_version_id),
+  pre_cutover_content_hash text NOT NULL,
+  pre_cutover_pointer_revision bigint NOT NULL,
+  target_version_id uuid NOT NULL REFERENCES runtime_behavior_mode_versions(mode_version_id),
+  target_content_hash text NOT NULL,
+  target_authority_bundle_hash char(64) NOT NULL,
+  request_fingerprint char(64) NOT NULL,
+  epoch bigint NOT NULL,
+  token_hash char(64),
+  lease_until timestamptz,
+  released_at timestamptz,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL,
+  CONSTRAINT df13_commerce_cutover_fences_scope_ck
+    CHECK (length(page_id) BETWEEN 1 AND 64 AND channel ~ '^[A-Z][A-Z0-9_]{0,31}$'),
+  CONSTRAINT df13_commerce_cutover_fences_pre_cutover_content_hash_ck
+    CHECK (pre_cutover_content_hash ~ '^sha256:[a-f0-9]{64}$'),
+  CONSTRAINT df13_commerce_cutover_fences_target_content_hash_ck
+    CHECK (target_content_hash ~ '^sha256:[a-f0-9]{64}$'),
+  CONSTRAINT df13_commerce_cutover_fences_target_bundle_hash_ck
+    CHECK (target_authority_bundle_hash ~ '^[a-f0-9]{64}$'),
+  CONSTRAINT df13_commerce_cutover_fences_fingerprint_ck
+    CHECK (request_fingerprint ~ '^[a-f0-9]{64}$'),
+  CONSTRAINT df13_commerce_cutover_fences_epoch_ck
+    CHECK (pre_cutover_pointer_revision >= 1 AND epoch >= 1),
+  CONSTRAINT df13_commerce_cutover_fences_token_state_ck
+    CHECK (
+      (released_at IS NULL AND token_hash ~ '^[a-f0-9]{64}$' AND lease_until IS NOT NULL)
+      OR
+      (released_at IS NOT NULL AND token_hash IS NULL AND lease_until IS NULL)
+    )
+);
+
+-- Historical fence rows stay immutable evidence; only one live fence may hold
+-- a page/channel while an authority transition is in progress.
+CREATE UNIQUE INDEX IF NOT EXISTS df13_commerce_cutover_fences_live_scope_uk
+  ON df13_commerce_cutover_fences (page_id, channel)
+  WHERE released_at IS NULL;
+
+CREATE OR REPLACE FUNCTION guard_df13_commerce_cutover_fence_identity()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF OLD.page_id IS DISTINCT FROM NEW.page_id
+     OR OLD.channel IS DISTINCT FROM NEW.channel
+     OR OLD.pre_cutover_version_id IS DISTINCT FROM NEW.pre_cutover_version_id
+     OR OLD.pre_cutover_content_hash IS DISTINCT FROM NEW.pre_cutover_content_hash
+     OR OLD.pre_cutover_pointer_revision IS DISTINCT FROM NEW.pre_cutover_pointer_revision
+     OR OLD.target_version_id IS DISTINCT FROM NEW.target_version_id
+     OR OLD.target_content_hash IS DISTINCT FROM NEW.target_content_hash
+     OR OLD.target_authority_bundle_hash IS DISTINCT FROM NEW.target_authority_bundle_hash
+     OR OLD.request_fingerprint IS DISTINCT FROM NEW.request_fingerprint THEN
+    RAISE EXCEPTION 'df13 commerce cutover fence identity is immutable';
+  END IF;
+  IF OLD.released_at IS NOT NULL THEN
+    RAISE EXCEPTION 'df13 commerce cutover fence is already released';
+  END IF;
+  IF NEW.epoch < OLD.epoch THEN
+    RAISE EXCEPTION 'df13 commerce cutover fence epoch cannot decrease';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS df13_commerce_cutover_fence_identity_guard
+  ON df13_commerce_cutover_fences;
+CREATE TRIGGER df13_commerce_cutover_fence_identity_guard
+  BEFORE UPDATE ON df13_commerce_cutover_fences
+  FOR EACH ROW EXECUTE FUNCTION guard_df13_commerce_cutover_fence_identity();

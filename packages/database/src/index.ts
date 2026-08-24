@@ -11,6 +11,14 @@ export {
   type Df13CommerceFenceStoreRequest,
 } from "./df13-commerce-fence.js";
 export {
+  createDf13CommerceCutoverFencePort,
+  type Df13CommerceCutoverFenceAcquireResult,
+  type Df13CommerceCutoverFenceLease,
+  type Df13CommerceCutoverFencePort,
+  type Df13CommerceCutoverFenceReleaseResult,
+  type Df13CommerceCutoverFenceRequest,
+} from "./df13-commerce-cutover-fence.js";
+export {
   PostgresGateEEvidenceStoreV2,
   PostgresGateERegistrationAnchorStoreV1,
   assertGateEBodyMatchesRegisteredPopulationV1,

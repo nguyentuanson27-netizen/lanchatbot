@@ -22,12 +22,14 @@ export const GATE_E_PREPROD_V15_MANIFEST_PATH =
 
 export const DF13_TRUSTED_RELEASE_REF = "refs/remotes/origin/main" as const;
 
-export const DF13_PENDING_BEHAVIOR_MODE_MIGRATION_PATHS_V1 = Object.freeze([
+export const DF13_PENDING_COMMERCE_MIGRATION_PATHS_V2 = Object.freeze([
   "packages/database/pending-migrations/0035_df13_commerce_behavior_mode.up.sql",
   "packages/database/pending-migrations/0035_df13_commerce_behavior_mode.down.sql",
+  "packages/database/pending-migrations/0036_df13_commerce_authority_fence.up.sql",
+  "packages/database/pending-migrations/0036_df13_commerce_authority_fence.down.sql",
 ] as const);
 
-const DF13_PENDING_BEHAVIOR_MODE_MIGRATION_BINDING_V1 = Object.freeze([
+const DF13_PENDING_COMMERCE_MIGRATION_BINDING_V2 = Object.freeze([
   {
     path: "packages/database/pending-migrations/0035_df13_commerce_behavior_mode.up.sql",
     blobOid: "7d95ecc48c0629ae5f1e882704a30889e2f2fdc1",
@@ -37,6 +39,16 @@ const DF13_PENDING_BEHAVIOR_MODE_MIGRATION_BINDING_V1 = Object.freeze([
     path: "packages/database/pending-migrations/0035_df13_commerce_behavior_mode.down.sql",
     blobOid: "0361ce2b88917a2b2a72e2f2e95fe0c0b8a5713b",
     contentSha256: "5cf7eaa71826376d913953ff076cf778690532e6a96f2d71d3d1a0bf53afd719",
+  },
+  {
+    path: "packages/database/pending-migrations/0036_df13_commerce_authority_fence.up.sql",
+    blobOid: "3dd39b586b806e002823bf2beecc9c0b81adf659",
+    contentSha256: "1cd7983e47d81214d5daf73a2cc113dffb40823219e9059da17eceedbd8c2467",
+  },
+  {
+    path: "packages/database/pending-migrations/0036_df13_commerce_authority_fence.down.sql",
+    blobOid: "a599d8b2ef3ec22e8236060c3b16f558ffc1ed2c",
+    contentSha256: "0f51c50e72699831784614450b991e24f526abd97dddc91df813973a9f9ca06c",
   },
 ] as const);
 
@@ -86,7 +98,7 @@ const MISSING_MANIFEST_FIELD = Object.freeze({
 type CandidateProjection = Awaited<ReturnType<typeof deriveGateECandidateContentFingerprint>>;
 
 type PendingMigrationArtifact = Readonly<{
-  path: typeof DF13_PENDING_BEHAVIOR_MODE_MIGRATION_PATHS_V1[number];
+  path: typeof DF13_PENDING_COMMERCE_MIGRATION_PATHS_V2[number];
   blobOid: string | null;
   contentSha256: string | null;
 }>;
@@ -116,7 +128,7 @@ export type Df13ReleaseCandidateEvidence = Readonly<{
     authorityIndependentBypassClasses: readonly [];
   }>;
   migration: Readonly<{
-    contractVersion: "DF13_PENDING_BEHAVIOR_MODE_MIGRATION_V1";
+    contractVersion: "DF13_PENDING_COMMERCE_MIGRATIONS_V2";
     status: "PENDING_NON_AUTO_APPLIED";
     artifacts: readonly PendingMigrationArtifact[];
   }>;
@@ -260,14 +272,14 @@ function validateDf13ReleaseCandidateEvidenceUnchecked(
     reasonCodes.push("DF13_RELEASE_EVIDENCE_AUTHORITY_BUNDLE_INVALID");
   }
   if (
-    evidence.migration.contractVersion !== "DF13_PENDING_BEHAVIOR_MODE_MIGRATION_V1" ||
+    evidence.migration.contractVersion !== "DF13_PENDING_COMMERCE_MIGRATIONS_V2" ||
     evidence.migration.status !== "PENDING_NON_AUTO_APPLIED" ||
-    evidence.migration.artifacts.length !== DF13_PENDING_BEHAVIOR_MODE_MIGRATION_PATHS_V1.length ||
+    evidence.migration.artifacts.length !== DF13_PENDING_COMMERCE_MIGRATION_PATHS_V2.length ||
     evidence.migration.artifacts.some((artifact, index) =>
-      artifact.path !== DF13_PENDING_BEHAVIOR_MODE_MIGRATION_PATHS_V1[index] ||
-      artifact.blobOid !== DF13_PENDING_BEHAVIOR_MODE_MIGRATION_BINDING_V1[index]?.blobOid ||
+      artifact.path !== DF13_PENDING_COMMERCE_MIGRATION_PATHS_V2[index] ||
+      artifact.blobOid !== DF13_PENDING_COMMERCE_MIGRATION_BINDING_V2[index]?.blobOid ||
       artifact.contentSha256 !==
-        DF13_PENDING_BEHAVIOR_MODE_MIGRATION_BINDING_V1[index]?.contentSha256
+        DF13_PENDING_COMMERCE_MIGRATION_BINDING_V2[index]?.contentSha256
     )
   ) {
     reasonCodes.push("DF13_RELEASE_EVIDENCE_PENDING_MIGRATION_IDENTITY_INVALID");
@@ -325,7 +337,7 @@ function baseEvidence(
       authorityIndependentBypassClasses: [],
     },
     migration: {
-      contractVersion: "DF13_PENDING_BEHAVIOR_MODE_MIGRATION_V1",
+      contractVersion: "DF13_PENDING_COMMERCE_MIGRATIONS_V2",
       status: "PENDING_NON_AUTO_APPLIED",
       artifacts: [],
     },
@@ -372,7 +384,7 @@ async function derivePendingMigrationArtifacts(input: Readonly<{
   activationReleaseRevision: string;
   git: Df13ReleaseCandidateSourceReader;
 }>): Promise<readonly PendingMigrationArtifact[]> {
-  return Promise.all(DF13_PENDING_BEHAVIOR_MODE_MIGRATION_PATHS_V1.map(async (path) => {
+  return Promise.all(DF13_PENDING_COMMERCE_MIGRATION_PATHS_V2.map(async (path) => {
     const [content, blobOid] = await Promise.all([
       input.git.readBlob(input.activationReleaseRevision, path),
       input.git.resolveBlobOid(input.activationReleaseRevision, path),
@@ -520,7 +532,7 @@ export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
   } catch {
     reasonCodes.push("DF13_PENDING_MIGRATION_ARTIFACT_UNAVAILABLE");
   }
-  if (!same(pendingMigrationArtifacts, DF13_PENDING_BEHAVIOR_MODE_MIGRATION_BINDING_V1)) {
+  if (!same(pendingMigrationArtifacts, DF13_PENDING_COMMERCE_MIGRATION_BINDING_V2)) {
     reasonCodes.push("DF13_PENDING_MIGRATION_ARTIFACT_IDENTITY_MISMATCH");
   }
   if (
@@ -560,7 +572,7 @@ export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
     candidateProjection,
     fieldComparisons,
     migration: {
-      contractVersion: "DF13_PENDING_BEHAVIOR_MODE_MIGRATION_V1",
+      contractVersion: "DF13_PENDING_COMMERCE_MIGRATIONS_V2",
       status: "PENDING_NON_AUTO_APPLIED",
       artifacts: pendingMigrationArtifacts,
     },
@@ -571,5 +583,5 @@ export async function prepareDf13ReleaseCandidateEvidence(input: Readonly<{
 export const DF13_RELEASE_CANDIDATE_EVIDENCE_SOURCE_PATHS_V1 = Object.freeze([
   GATE_E_PREPROD_V15_MANIFEST_PATH,
   ...GATE_E_CANDIDATE_SOURCE_PATHS_V1,
-  ...DF13_PENDING_BEHAVIOR_MODE_MIGRATION_PATHS_V1,
+  ...DF13_PENDING_COMMERCE_MIGRATION_PATHS_V2,
 ] as const);

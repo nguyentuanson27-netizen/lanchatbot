@@ -71,7 +71,8 @@ the complete ordered path/blob/content-SHA list rather than a copied fingerprint
 - the canonical DF13 authority-bundle hash and all eight consumers:
   classification, commerce state, Context V2, derived phase, strategy, CTA,
   final reconciliation, and side-effect plan;
-- `0035_df13_commerce_behavior_mode` up/down blob and SHA-256 identities; and
+- `0035_df13_commerce_behavior_mode` and
+  `0036_df13_commerce_authority_fence` up/down blob and SHA-256 identities; and
 - the required rollback target: the exact pre-cutover LEGACY pointer with the
   same eight consumer readbacks.
 
@@ -82,27 +83,33 @@ new authorized DF-P6/Gate E evaluation on the final candidate.
 
 ## Pending-migration rehearsal
 
-`0035` remains in `packages/database/pending-migrations/` and is deliberately
-outside automatic migration discovery. A Release Train may test it only in a
-new disposable database with no shared endpoint, persistent volume, host port,
-or production/preprod credential.
+`0035` and `0036` remain in `packages/database/pending-migrations/` and are
+deliberately outside automatic migration discovery. `0036` is the durable,
+page-scoped cutover-fence schema; it is not an Inbox-batch fence substitute. A
+Release Train may test them only in a new disposable database with no shared
+endpoint, persistent volume, host port, or production/preprod credential.
 
 Required rehearsal assertions are:
 
-1. apply the existing `0030` behavior-mode schema and exact `0035` up SQL;
+1. apply the required core schema through the existing `0030` behavior-mode
+   schema, then exact `0035` and `0036` up SQL in order;
 2. prove LEGACY versions still accept a null authority-bundle value;
 3. prove COMMERCE rejects a missing or malformed bundle and every state-read
    mode other than LEGACY;
 4. prove a valid 64-hex COMMERCE bundle is accepted;
-5. prove down refuses while an immutable COMMERCE version exists and preserves
-   that version; and
-6. in a separate clean disposable database, prove down succeeds, removes the
-   bundle column, and restores the LEGACY-only constraint.
+5. prove `0036` records only a full immutable pre-cutover LEGACY and target
+   COMMERCE identity, and that identity fields cannot be mutated after insert;
+6. prove `0036` down refuses while any durable cutover or authority-fence
+   evidence exists and preserves it; and
+7. in a separate clean disposable database, prove `0036` down succeeds with no
+   fence evidence; then separately prove `0035` down refuses while an immutable
+   COMMERCE version exists and otherwise restores the LEGACY-only constraint.
 
-Record exact SQL SHA-256 values, image/runtime identity, isolation properties,
-redacted command log hash, and cleanup confirmation. Never use `migrateUp` to
-discover or promote this pending artifact. Successful disposable rehearsal is
-schema evidence only; it does not authorize applying `0035` anywhere.
+Record exact SQL SHA-256 values for both migrations, image/runtime identity,
+isolation properties, redacted command log hash, and cleanup confirmation.
+Never use `migrateUp` to discover or promote either pending artifact. Successful
+disposable rehearsal is schema evidence only; it does not authorize applying
+`0035` or `0036` anywhere.
 
 ## Quiescent cutover plan
 

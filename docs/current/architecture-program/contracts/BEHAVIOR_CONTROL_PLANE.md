@@ -60,9 +60,10 @@ The generic control-plane operator is intentionally LEGACY-only. Its generic
 CAS path must reject a COMMERCE target: the only permitted future COMMERCE
 writer is a dedicated DF13 cutover adapter that owns the full quiescent fence,
 the immutable authority-bundle identity, activation-audit reconciliation, and
-exact consumer readbacks. The pending DF13 `0035` schema artifact is outside
-the active migration directory; shared LEGACY reads and writes remain
-schema-compatible until a separately authorized release promotes and applies it.
+exact consumer readbacks. The pending DF13 `0035` behavior-mode and `0036`
+durable cutover-fence artifacts are outside the active migration directory;
+shared LEGACY reads and writes remain schema-compatible until a separately
+authorized release promotes and applies them.
 Defining the COMMERCE schema/version or pure fence/evidence contract is not
 permission to promote or apply its migration, bind a consumer to the live
 pipeline, or activate runtime authority.

@@ -147,7 +147,7 @@ unavailable derivation returns
 The forward cutover executor invokes preparation and validation itself from its
 fixed source reader before acquiring a fence. Evidence preparation refreshes a
 trusted Git ref but never creates a release, inspects a deployed runtime host,
-calls a model provider, applies migration `0035`, or activates an authority.
+calls a model provider, applies migration `0035` or `0036`, or activates an authority.
 `SOURCE_READY_NO_ACTIVATION` is source provenance only.
 
 ## Cutover and rollback evidence
