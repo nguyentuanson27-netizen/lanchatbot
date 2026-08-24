@@ -85,7 +85,7 @@ describe("DF13 release-candidate source evidence", () => {
         status: "REQUIRED_NOT_EXECUTED",
       },
       migration: {
-        contractVersion: "DF13_PENDING_BEHAVIOR_MODE_MIGRATION_V1",
+        contractVersion: "DF13_PENDING_COMMERCE_MIGRATIONS_V2",
         status: "PENDING_NON_AUTO_APPLIED",
         artifacts: [
           {
@@ -93,6 +93,12 @@ describe("DF13 release-candidate source evidence", () => {
           },
           {
             path: "packages/database/pending-migrations/0035_df13_commerce_behavior_mode.down.sql",
+          },
+          {
+            path: "packages/database/pending-migrations/0036_df13_commerce_authority_fence.up.sql",
+          },
+          {
+            path: "packages/database/pending-migrations/0036_df13_commerce_authority_fence.down.sql",
           },
         ],
       },
@@ -223,13 +229,13 @@ describe("DF13 release-candidate source evidence", () => {
     });
   });
 
-  it("fails closed when a pending 0035 migration artifact cannot be re-derived", async () => {
+  it("fails closed when any pending DF13 migration artifact cannot be re-derived", async () => {
     await expect(prepareDf13ReleaseCandidateEvidence({
       activationReleaseRevision,
       git: {
         ...sourceReader,
         async readBlob(revision, path) {
-          if (path.startsWith("packages/database/pending-migrations/0035_")) {
+          if (path.startsWith("packages/database/pending-migrations/0036_")) {
             throw new Error("artifact missing");
           }
           return sourceReader.readBlob(revision, path);
