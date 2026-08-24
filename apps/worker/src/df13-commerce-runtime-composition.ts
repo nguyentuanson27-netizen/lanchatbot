@@ -14,12 +14,16 @@ import { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
 export function createDf13CommerceRuntimeComposition<TState, TSalesState>(input: Readonly<{
   source: RuntimeBehaviorModeSourcePort;
   confirmationAllowedPageIds: readonly string[];
+  /** COMMERCE must re-read its exact authority identity for every turn. */
+  runtimeAuthorityMode: "LEGACY" | "COMMERCE";
   cacheTtlMs: number;
   lastKnownGoodTtlMs: number;
   commerceExecutor: Df13CommerceRuntimeExecutor<TState, TSalesState>;
 }>) {
   const behaviorModeResolver = new RuntimeBehaviorModeResolver(input.source, {
-    cacheTtlMs: input.cacheTtlMs,
+    // A cached COMMERCE pointer cannot satisfy the DATABASE-only authority
+    // contract. Keep caching for the untouched LEGACY process only.
+    cacheTtlMs: input.runtimeAuthorityMode === "COMMERCE" ? 0 : input.cacheTtlMs,
     lastKnownGoodTtlMs: input.lastKnownGoodTtlMs,
     allowedPageIds: input.confirmationAllowedPageIds,
     allowedCommercePageIds: [DF13_COMMERCE_PREPROD_SCOPE_V1.pageId],

@@ -24,6 +24,12 @@ LEGACY final authority. A fresh exact COMMERCE identity is likewise blocked
 unless the isolated PREPROD startup supplies the reviewed matching executor and
 immutable input; the normal LEGACY composition remains default-off.
 
+The isolated COMMERCE composition disables pointer caching: startup preflight
+and every authority-dependent turn must resolve the exact identity from
+`DATABASE`; `CACHE`, LKG, and startup values cannot become a final authority.
+An absent Context V2 snapshot may bootstrap only an otherwise pristine Commerce
+`DISCOVERY` conversation at revision zero. Every later absent snapshot blocks.
+
 ## Pure fence assessment
 
 `assessDf13CommerceAuthorityFence` is a side-effect-free pre-provider boundary.
@@ -96,14 +102,15 @@ free side-effect callback.
 
 The atomic committer re-checks the fixed scope and whole authority-consumer
 bundle at its own boundary. Its database operation owns the existing durable
-runtime state/Outbox commit, exact Inbox-claim release, and fence completion in
-one transaction. A pre-commit failure rolls all three back; a stale/mismatched
-lease, malformed runtime Inbox set, partial release, or completion-write
-failure fails closed. Lease validity uses the database clock and the final
-completion CAS proves that the lease is still live; expiry while durable work
-is in flight rolls the whole transaction back. If the caller loses the
-post-commit acknowledgement, the next acquisition observes `ALREADY_COMPLETED`
-before any plan is re-derived.
+runtime state/Outbox commit, required next Context V2 capture, exact
+Inbox-claim release, and fence completion in one transaction. An absent capture
+plan or capture write that does not create its durable event rolls the whole
+transaction back; a stale/mismatched lease, malformed runtime Inbox set,
+partial release, or completion-write failure also fails closed. Lease validity
+uses the database clock and the final completion CAS proves that the lease is
+still live; expiry while durable work is in flight rolls the whole transaction
+back. If the caller loses the post-commit acknowledgement, the next acquisition
+observes `ALREADY_COMPLETED` before any plan is re-derived.
 The store class remains unexported from `@lana/database`. The source server
 constructs only its narrow public port; normal LEGACY startup cannot admit or
 acquire COMMERCE. The isolated COMMERCE startup supplies activation authority
@@ -173,13 +180,14 @@ authorized runtime execution can append actual rollback evidence.
 
 ## Source completion and hard stops
 
-The source-level default-off wrapper and dedicated atomic
-consumer-commit/fence-completion transaction are complete. This is not a
-runtime integration, release candidate, migration application, deployment,
-canary, cutover, or activation authorization. Operational acceptance must still
-review the exact release candidate, migration state, quiescent cutover evidence,
-consumer readbacks, activation audit, rollback evidence, and controlled human
-journeys under separately approved commands.
+The source-level default-off wrapper, isolated startup composition, and
+dedicated atomic consumer-commit/fence-completion transaction are complete.
+This is source integration, not a deployed runtime, release candidate,
+migration application, deployment, canary, cutover, or activation
+authorization. Operational acceptance must still review the exact release
+candidate, migration state, quiescent cutover evidence, consumer readbacks,
+activation audit, rollback evidence, and controlled human journeys under
+separately approved commands.
 
 Until that work is separately authorized and accepted, runtime remains
 `salesAuthorityMode=LEGACY`, `stateReadMode=LEGACY`.

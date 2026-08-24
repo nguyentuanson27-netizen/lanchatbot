@@ -212,6 +212,12 @@ function bootstrapCommerceDiscoveryContext(input: Readonly<{
   commerceState: BuildDf13CommerceRuntimeContextInput["commerceState"];
   conversationRevision: number;
 }>): Df13CommerceRuntimeContextLoadResult {
+  if (input.conversationRevision !== 0) {
+    return Object.freeze({
+      status: "BLOCKED" as const,
+      reasonCode: "DF13_COMMERCE_CONTEXT_BOOTSTRAP_NOT_NEW_CONVERSATION",
+    });
+  }
   if (!pristineCommerceDiscovery(input.commerceState)) {
     return Object.freeze({
       status: "BLOCKED" as const,

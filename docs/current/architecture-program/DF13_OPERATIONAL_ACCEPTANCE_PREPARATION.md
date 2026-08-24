@@ -24,6 +24,14 @@ capture. An invalid, resolver-failed, stale, or incomplete COMMERCE identity
 blocks rather than falling through to LEGACY. Wiring this source changes no
 deployed runtime and permits no activation by itself.
 
+The isolated COMMERCE composition deliberately disables behavior-pointer cache
+for both startup preflight and every turn: each authority decision must be a
+new exact `DATABASE` read. Its sole Context V2 bootstrap is a new conversation
+at revision zero with a pristine Commerce `DISCOVERY` state. Every fenced
+Commerce commit must then persist its next Context V2 capture in the same
+transaction; an absent plan or unsuccessful write rolls back state, Inbox
+completion, and fence completion.
+
 The only admissible authority topology remains one direct page-scoped transition:
 
 ```text
@@ -112,9 +120,11 @@ bundle. A cached, LKG, startup, stale, partial, ambiguous, or copied identity
 is not convergence.
 
 The atomic committer couples durable runtime state/Outbox work, exact
-Inbox-claim release, and fence completion. Lost acknowledgement is recovered as
+Inbox-claim release, the required next Context V2 capture, and fence completion.
+Lost acknowledgement is recovered as
 `ALREADY_COMPLETED`; a lease expiry, replay, stale epoch, concurrency conflict,
-crash/restart, partial completion, or missing consumer readback fails closed
+crash/restart, partial completion, missing Context V2 capture, or missing
+consumer readback fails closed
 and retains or reacquires the fence as required.
 
 ## Monitoring, abort, and exact rollback matrix

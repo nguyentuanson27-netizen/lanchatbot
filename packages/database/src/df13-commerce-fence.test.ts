@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -40,6 +41,43 @@ const request = Object.freeze({
 function rowResult(rows: readonly unknown[] = [], rowCount = rows.length) {
   return { rows, rowCount };
 }
+
+const heldLease = Object.freeze({
+  fenceToken: "10000000-0000-4000-8000-000000000003",
+  epoch: 1,
+});
+
+function heldFenceRow() {
+  return {
+    fence_id: "20000000-0000-4000-8000-000000000001",
+    epoch: "1",
+    completed_at: null,
+    lease_until: new Date("2026-08-25T00:00:00.000Z"),
+    sales_authority_mode: request.authority.salesAuthorityMode,
+    state_read_mode: request.authority.stateReadMode,
+    mode_version_id: request.authority.modeVersionId,
+    content_hash: request.authority.contentHash,
+    pointer_revision: request.authority.pointerRevision,
+    authority_bundle_hash: request.authority.authorityBundleHash,
+    authority_source: request.authority.source,
+    inbox_ids: request.inboxIds,
+    request_fingerprint: df13CommerceFenceRequestFingerprint(request),
+    token_hash: createHash("sha256").update(heldLease.fenceToken, "utf8").digest("hex"),
+  };
+}
+
+const fencedRuntimeCommit = Object.freeze({
+  pageId: request.pageId,
+  customerHash: "customer-hash",
+  conversationId: "10000000-0000-4000-8000-000000000004",
+  expectedStateVersion: 0,
+  state: { revision: 1 },
+  inboxBatchGuard: {
+    generation: 1,
+    leaseToken: "10000000-0000-4000-8000-000000000005",
+    inboxIds: request.inboxIds,
+  },
+});
 
 describe("Postgres DF13 Commerce fence store", () => {
   beforeEach(() => {
@@ -261,6 +299,73 @@ describe("Postgres DF13 Commerce fence store", () => {
 
     await expect(store.acquire(request)).rejects.toThrow("DF13_FENCE_CLAIM_INTEGRITY_FAILURE");
     expect(mocks.clientQuery.mock.calls.map(([sql]) => String(sql))).toContain("ROLLBACK");
+  });
+
+  it("refuses a Commerce completion without the next Context V2 capture plan before runtime state changes", async () => {
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql === "SELECT clock_timestamp() AS now") {
+        return rowResult([{ now: new Date("2026-08-24T00:00:00.000Z") }]);
+      }
+      if (sql.includes("FROM df13_commerce_authority_fences")) {
+        return rowResult([heldFenceRow()]);
+      }
+      return rowResult();
+    });
+    const runtime = {
+      commitWithinTransaction: vi.fn(),
+    };
+    const store = new PostgresDf13CommerceFenceStore("postgresql://test");
+
+    await expect(store.commitAuthorityDependentWork({
+      request,
+      lease: heldLease,
+      runtimeCommit: fencedRuntimeCommit,
+    }, runtime)).resolves.toEqual({
+      status: "PARKED",
+      reasonCode: "DF13_FENCE_CONTEXT_V2_CAPTURE_REQUIRED",
+    });
+    expect(runtime.commitWithinTransaction).not.toHaveBeenCalled();
+    expect(mocks.clientQuery.mock.calls.map(([sql]) => String(sql))).toContain("ROLLBACK");
+  });
+
+  it("rolls back runtime state, Inbox completion, and fence completion when the required Context V2 capture was not written", async () => {
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql === "SELECT clock_timestamp() AS now") {
+        return rowResult([{ now: new Date("2026-08-24T00:00:00.000Z") }]);
+      }
+      if (sql.includes("FROM df13_commerce_authority_fences")) {
+        return rowResult([heldFenceRow()]);
+      }
+      return rowResult();
+    });
+    const runtime = {
+      commitWithinTransaction: vi.fn(async () => ({
+        stateCommitted: true,
+        metaOutboxCreated: 0,
+        pancakeTagOutboxCreated: false,
+        handoffEventCreated: false,
+        contextV2CaptureCreated: false,
+        contextV2CaptureReasonCode: "CONTEXT_V2_CAPTURE_WRITE_FAILED" as const,
+        sendAuthorized: false,
+        reasonCodes: [],
+        inboxBatchStatus: "COMMITTED" as const,
+      })),
+    };
+    const store = new PostgresDf13CommerceFenceStore("postgresql://test");
+
+    await expect(store.commitAuthorityDependentWork({
+      request,
+      lease: heldLease,
+      runtimeCommit: {
+        ...fencedRuntimeCommit,
+        contextV2CapturePlan: { capture: { status: "BUILT" } as never },
+      },
+    }, runtime)).rejects.toThrow("DF13_FENCE_CONTEXT_V2_CAPTURE_NOT_PERSISTED");
+    expect(runtime.commitWithinTransaction).toHaveBeenCalledOnce();
+    const statements = mocks.clientQuery.mock.calls.map(([sql]) => String(sql));
+    expect(statements).toContain("ROLLBACK");
+    expect(statements.some((sql) => sql.includes("UPDATE df13_commerce_authority_fence_claims"))).toBe(false);
+    expect(statements.some((sql) => sql.includes("SET completed_at"))).toBe(false);
   });
 
 });

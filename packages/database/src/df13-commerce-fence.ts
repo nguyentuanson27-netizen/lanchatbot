@@ -467,6 +467,10 @@ export class PostgresDf13CommerceFenceStore {
         await client.query("ROLLBACK");
         return { status: "PARKED", reasonCode: "DF13_FENCE_RUNTIME_INBOX_BINDING_INVALID" };
       }
+      if (input.runtimeCommit.contextV2CapturePlan === undefined) {
+        await client.query("ROLLBACK");
+        return { status: "PARKED", reasonCode: "DF13_FENCE_CONTEXT_V2_CAPTURE_REQUIRED" };
+      }
 
       const runtimeResult = await runtime.commitWithinTransaction(
         client,
@@ -475,6 +479,12 @@ export class PostgresDf13CommerceFenceStore {
       );
       if (!runtimeResult.stateCommitted || runtimeResult.inboxBatchStatus !== "COMMITTED") {
         throw new Error("DF13_FENCE_RUNTIME_COMMIT_NOT_APPLIED");
+      }
+      if (
+        runtimeResult.contextV2CaptureCreated !== true ||
+        runtimeResult.contextV2CaptureReasonCode !== null
+      ) {
+        throw new Error("DF13_FENCE_CONTEXT_V2_CAPTURE_NOT_PERSISTED");
       }
       const released = await client.query<{ inbox_id: string }>(
         `UPDATE df13_commerce_authority_fence_claims

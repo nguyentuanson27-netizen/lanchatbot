@@ -5670,6 +5670,9 @@ export class RealtimeRunner {
     };
     if (commerceFence !== null) {
       if (!this.commerceExecutor) throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
+      if (contextV2CapturePlan === undefined) {
+        throw new Error("DF13_COMMERCE_CONTEXT_CAPTURE_REQUIRED");
+      }
       const committed = await this.commerceExecutor.commit({
         acquired: commerceFence,
         runtimeCommit,

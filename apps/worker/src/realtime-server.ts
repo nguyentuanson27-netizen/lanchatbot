@@ -757,6 +757,7 @@ const df13CommerceComposition = behaviorModeStore && commerceExecutor
   ? createDf13CommerceRuntimeComposition({
       source: behaviorModeStore,
       confirmationAllowedPageIds: confirmationCanaryPageIds,
+      runtimeAuthorityMode: df13CommerceStartupInput.mode,
       cacheTtlMs: boundedInteger(
         "REALTIME_BEHAVIOR_MODE_CACHE_TTL_MS", 5_000, 100, 5_000,
       ),

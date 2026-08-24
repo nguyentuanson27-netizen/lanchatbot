@@ -168,6 +168,18 @@ describe("DF13 Commerce runtime context", () => {
       status: "BLOCKED",
       reasonCode: "DF13_COMMERCE_CONTEXT_BOOTSTRAP_NOT_PRISTINE",
     });
+
+    await expect(loadDf13CommerceRuntimeContext({
+      runtime,
+      conversationId: "conversation-1",
+      commerceState: state({ stage: "DISCOVERY", revision: 0 }),
+      conversationRevision: 1,
+      now: new Date("2026-08-24T00:00:00.000Z"),
+      maximumAgeMs: 5 * 60_000,
+    })).resolves.toEqual({
+      status: "BLOCKED",
+      reasonCode: "DF13_COMMERCE_CONTEXT_BOOTSTRAP_NOT_NEW_CONVERSATION",
+    });
   });
 
   it("serializes the live Commerce model input without a legacy state or regex stage", () => {
