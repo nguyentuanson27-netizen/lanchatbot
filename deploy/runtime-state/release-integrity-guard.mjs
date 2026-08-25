@@ -7,6 +7,10 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import { validateReleaseSource } from './release-source.mjs';
 import { validateServiceEvidence } from './runtime-state.mjs';
 import { assertDf13FirstPreprodComposeContract } from '../df13-first-preprod-compose-contract.mjs';
+// deploy/ is outside the recursive workspace test runner. Import this
+// self-executing regression suite so `pnpm check:release-integrity` (and CI)
+// proves decoy comments or another service cannot weaken the default-off guard.
+import '../df13-first-preprod-compose-contract.test.mjs';
 
 const root = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const runtimeDir = join(root, 'deploy', 'runtime-state');
