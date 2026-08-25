@@ -115,7 +115,7 @@
   "future": [
     "DF-11: merged source-only (PR #238); default-off, side-effect-free authority comparison; no runtime SHADOW authority",
     "DF-12: merged source-only (PR #239); missing-commerce signal; no runtime activation",
-    "DF-13: SOURCE_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING; COMMERCE version/bundle, pure fence admission, release-evidence, cutover contracts, durable provider/dispatcher, and default-off fence-bound consumer source are merged. 0035 remains a pending non-auto-applied artifact, LEGACY control-plane source remains schema-compatible, and no migration, deployment, canary, cutover, or activation is authorized",
+    "DF-13: SOURCE_FOUNDATIONS_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING; COMMERCE version/bundle, pure fence admission, release-evidence, cutover contracts, durable provider/dispatcher, and default-off fence-bound consumer source are merged. The first stopped-process PREPROD exercise still requires a separately reviewed real COMMERCE runtime composition and a narrow non-generic writer. 0035 remains a pending non-auto-applied artifact, LEGACY control-plane source remains schema-compatible, and no migration, deployment, canary, replacement, or activation is authorized",
     "UR-00 and later: blocked until DF-13 stability and explicit owner approval"
   ],
   "hardStops": [

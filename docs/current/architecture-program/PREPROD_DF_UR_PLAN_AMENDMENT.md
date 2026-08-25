@@ -55,6 +55,18 @@ PREPROD therefore uses a **quiescent cutover boundary**, not traffic canary/pinn
 
 If that cannot be proven, activation aborts/fails closed to complete `LEGACY` authority. Narrow episode/cart pinning is only a fallback design option if a future implementation cannot safely quiesce a specific lifecycle; it is not the default PREPROD topology.
 
+### 2.4.1 First DF13 PREPROD exercise: stopped-process replacement
+
+The owner subsequently selected the narrower
+[`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](DF13_PREPROD_FRESH_PROCESS_DECISION.md)
+for the first DF13 exercise. That decision seals admission, gracefully drains
+and reconciles eligible work to zero, then stops the finite process set and
+re-proves zero eligible work before a fresh COMMERCE build starts. It supersedes the in-process
+fence/CAS/propagation mechanism above only
+for that one isolated PREPROD replacement; it does not lower the atomicity
+requirement, permit dual authority, or alter the State V2 or future
+public-production transition contracts.
+
 ### 2.5 Offline evaluation must identify the exact candidate being accepted
 
 After removing live Context-V2 shadow, DF-P6 becomes the primary generative evidence before authority cutover. A result labeled merely “Context V2 PASS” is insufficient if model, generation config, prompt, context/evidence schema, or source changes later.
@@ -73,8 +85,8 @@ This amendment does not waive:
 - SSRF/phishing fail-closed behavior;
 - PII/secrets/auth/authz/least-privilege controls;
 - additive/backward-compatible database discipline;
-- atomicity, idempotency, concurrency, revision/fence protections;
-- exact readback, immutable release identity, bounded propagation, quiescent direct cutover, and complete `LEGACY` rollback.
+- atomicity, idempotency, concurrency, and revision protections; the first DF13 exercise substitutes a proved service stop/drain for a long-lived in-process fence, not for database integrity;
+- exact immutable release identity, a proven stopped-process boundary for the first DF13 exercise (or quiescent direct cutover where applicable), and complete `LEGACY` rollback.
 
 The change is primarily **which evidence mechanism is mandatory at the current stage**, plus simplification of future authority topology from three modes to two.
 
@@ -88,7 +100,7 @@ Review every future requirement as one of:
 
 A reviewer should not argue that shadow/canary/statistical rollout is generally useful; the review question is whether it is required to prove the current PREPROD contract. Conversely, the word “simplification” must never justify skipping a current correctness/security/rollback invariant.
 
-For direct cutover, quiescence and exact revision convergence are `CURRENT_REQUIRED`. For DF-P6, exact candidate identity and activation-release binding are `CURRENT_REQUIRED` provenance.
+For a hot direct cutover, quiescence and exact revision convergence are `CURRENT_REQUIRED`. For the first DF13 stopped-process replacement, sealed admission, verified drain, one fresh authority-consuming process set, and exact LEGACY restart rollback are `CURRENT_REQUIRED`. For DF-P6, exact candidate identity and activation-release binding are `CURRENT_REQUIRED` provenance.
 
 ## 4. PREPROD evidence hierarchy
 
@@ -200,7 +212,7 @@ authority/state modes, and authority-bundle hash) to every authority consumer,
 audit/readback, and rollback before any future cutover command is reviewed. This
 plan does not authorize live composition or a `LEGACY -> COMMERCE` runtime change.
 
-Then, after explicit owner authorization, activate `COMMERCE` only on the `PREPROD_TEST_PAGE` inside the quiescent boundary. Keep all authority-dependent work held until every relevant authority consumer reads back the exact new revision/hash/source, then release held work and run the controlled critical human journeys.
+Then, after explicit owner authorization, run the first `COMMERCE` exercise only on the `PREPROD_TEST_PAGE` by the stopped-process replacement decision: seal admission, gracefully drain and reconcile eligible work to zero, stop the reviewed finite service set, re-prove zero eligible work, then start one fresh COMMERCE build. Run controlled critical human journeys only after its deterministic smoke/integration gates pass. A later hot cutover remains subject to the quiescent boundary above.
 
 ## 6. Gate E-PREPROD
 
@@ -232,7 +244,7 @@ Required:
 - missing commerce state with committed intent fails closed;
 - transition matrix and BF/DF replay pass;
 - immutable release re-derives and matches the exact Gate-E candidate projection/content fingerprint; a carried hash alone is insufficient;
-- direct authority cutover satisfies the page-scoped quiescent boundary and all relevant consumers converge to the exact authority revision before authority-dependent work resumes;
+- the first DF13 PREPROD replacement proves sealed admission, empty eligible work, one fresh COMMERCE service set, and exact LEGACY restart rollback; a later hot authority cutover satisfies the page-scoped quiescent boundary and exact convergence before authority-dependent work resumes;
 - controlled PREPROD critical human journeys pass;
 - exact runtime identity/control-plane readback is verified for the deployed candidate;
 - complete `COMMERCE -> LEGACY` rollback is verified.

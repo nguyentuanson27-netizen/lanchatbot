@@ -56,11 +56,35 @@ This quiescent boundary is an atomicity/correctness requirement for direct cutov
 
 Every activation remains page-scoped, CAS-audited, read back from the worker, bounded by the existing propagation contract, and reversible to complete `LEGACY` authority.
 
+### Narrow first-DF13 PREPROD exception
+
+For the first isolated DF13 PREPROD exercise only,
+[`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](../DF13_PREPROD_FRESH_PROCESS_DECISION.md)
+seals admission, gracefully drains and reconciles eligible work to zero, then
+stops the finite service set and re-proves zero eligible work instead of using
+an in-process hot transition. This is the quiescence evidence: no authority-dependent process
+remains to observe either identity while the exact COMMERCE pointer is recorded
+and one fresh COMMERCE service set starts. Any unknown work, wrong identity,
+incomplete consumer set, or start/readback failure drains/reconciles COMMERCE to
+zero, stops it, restores
+the exact captured LEGACY pointer, and restarts its captured release/configuration.
+
+The exception does not turn the generic operator into a COMMERCE writer. A
+dedicated, non-generic first-PREPROD writer may record only the reviewed exact
+forward or captured exact rollback identity after the drain/stop proof and must
+emit an audit record. It cannot use an environment-only authority flag, accept a
+mutable ref, operate while an authority-consuming service is running, or blind
+replay a lost acknowledgement. State V2, any zero-downtime operation, page
+expansion, and public production remain subject to the ordinary direct cutover
+contract above.
+
 The generic control-plane operator is intentionally LEGACY-only. Its generic
-CAS path must reject a COMMERCE target: the only permitted future COMMERCE
-writer is a dedicated DF13 cutover adapter that owns the full quiescent fence,
-the immutable authority-bundle identity, activation-audit reconciliation, and
-exact consumer readbacks. The pending DF13 `0035` behavior-mode and `0036`
+CAS path must reject a COMMERCE target. The only permitted COMMERCE writers are
+the narrow first-PREPROD writer described above for the isolated stopped-process
+exercise, and a dedicated DF13 hot-cutover adapter that owns the full durable
+quiescent fence, immutable authority-bundle identity, activation-audit
+reconciliation, and exact consumer readbacks for a later hot transition. The
+pending DF13 `0035` behavior-mode and `0036`
 durable cutover-fence artifacts are outside the active migration directory;
 shared LEGACY reads and writes remain schema-compatible until a separately
 authorized release promotes and applies them.

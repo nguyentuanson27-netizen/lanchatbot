@@ -1,0 +1,98 @@
+# DF13 PREPROD Fresh-Process Replacement Decision
+
+**Status:** Proposed on this branch; authoritative only when merged to `main`
+
+**Decision authority:** Owner direction in the DF-C administration task on
+2026-08-25: use the first, simple PREPROD path rather than build a large
+zero-downtime DF13 control plane.
+
+**Scope:** The first controlled `LEGACY -> COMMERCE` exercise on the one
+`PREPROD_TEST_PAGE` only. This is a source-governance decision; it does not
+authorize a merge, tag, deployment, migration, COMMERCE activation, Messenger
+test, routing change, or any production action.
+
+## Decision
+
+For the first DF13 PREPROD exercise, authority replacement is an **isolated
+fresh-process replacement**, not an in-process hot cutover:
+
+```text
+seal admission -> gracefully drain/reconcile eligible queued and in-flight work to zero
+-> stop the finite authority-consuming service set -> re-prove zero eligible work
+-> record the reviewed COMMERCE identity -> start its build as the only authority -> test
+-> on failure, seal/drain/stop/re-prove zero -> restore captured exact LEGACY pointer -> restart LEGACY
+```
+
+The sealed, drained, and stopped process set is the quiescence boundary. No old
+and new authority-consuming process may run together. `Stop` means a graceful
+stop only after all eligible work reaches zero: an in-flight turn must complete
+under LEGACY or abort/reconcile cleanly, and a queued turn must reach an audited
+completed or reconciled failure disposition without deleting state or audit. This
+first exercise has no held
+authority-dependent work class. This removes the need to invent a large runtime
+fence/CAS/readback controller solely to provide zero-downtime behavior in an
+engineering test page with no such requirement.
+
+The process restart is not permission to invent facts or side effects. The
+model-semantics/code-verification boundary, verified-claim/provenance checks,
+SSRF and PII/secret protections, auth, database safety, Inbox/Outbox rules, and
+single final sales authority remain unchanged.
+
+## Required future Release Train protocol
+
+An owner-authorized future train must still fail closed before every mutating
+step:
+
+1. Re-derive the immutable candidate manifest/content fingerprint and verify
+   the exact reviewed source, build, release identity, page and channel.
+2. Capture the exact known-good LEGACY release/configuration, behavior pointer,
+   migration ledger, routing/allowlist and rollback inputs. Do not delete state,
+   audit, Inbox/Outbox, or migration history.
+3. Seal the target page from new authority-dependent work, gracefully drain and
+   reconcile every eligible queued/in-flight item to zero using the current
+   LEGACY service set, then stop that finite set and re-prove zero eligible work.
+   Unknown, non-zero, or stranded work aborts the replacement; the first
+   exercise has no held authority-dependent work class.
+4. Apply only separately approved, additive, checksum-verified migrations. The
+   pending DF13 artifacts remain outside automatic discovery; this decision
+   neither promotes nor applies them.
+5. Start only the reviewed finite service set from an immutable fresh release
+   with the exact COMMERCE identity. All eight authority-dependent consumers
+   start from that one build; no LEGACY/COMMERCE co-authority, regex writer, or
+   partial Context V2/phase/reconciliation consumer is permitted.
+6. Run the pre-registered smoke and integration journeys, including response,
+   state/context, reconciliation, commit/effect guards, restart/crash behavior,
+   and candidate/fingerprint evidence guards. Controlled human journeys still
+   require their own authorization.
+7. On any failed or unknown gate, seal and drain/reconcile COMMERCE work to zero,
+   stop the COMMERCE release, re-prove zero eligible work, and use the narrow writer to restore the exact captured
+   LEGACY behavior version/content identity at the next revision. Reconcile a
+   lost acknowledgement only by durable `DATABASE` readback, then start the
+   exact captured LEGACY release/configuration and re-verify health, zero
+   work, routing/allowlist, behavior identity, and no duplicate effects. Schema
+   rollback is not implied by authority rollback.
+
+The dedicated behavior-mode writer remains non-generic and can only set the
+reviewed exact identity while the process boundary above is proven. A future
+source PR must provide that narrow fresh-start/rollback writer if the existing
+database control-plane API cannot do so. It must not re-open a generic COMMERCE
+operator or an environment-only authority switch.
+
+## Consequences and boundaries
+
+- The rejected Draft PR #252 operational-entrypoint design is not an accepted
+  release path and must not be merged merely to claim operational readiness.
+  Its unmerged source remains traceable; no merged DF11--DF13 source work is
+  discarded or reclassified.
+- The merged default-off source contracts, Gate E v15 binding, missing-commerce
+  signal, Context V2/phase/reconciliation contracts, and pending-migration
+  safeguards remain the foundation for the fresh build.
+- LEGACY remains the exact rollback build/configuration. This decision does not
+  retire, delete, or demote it outside the isolated PREPROD exercise.
+- This exception is limited to the first stopped-process DF13 PREPROD exercise.
+  A future zero-downtime, page-expanded, public-production, or State V2
+  transition must receive its own decision and may require the full durable
+  quiescent cutover contract.
+- Gate F remains pending until the future authorized replacement, verification,
+  and exact rollback evidence exist. UR remains blocked; BF-03, BF-04, BF-10,
+  and the separate `DATABASE_URL` remediation remain unchanged.
