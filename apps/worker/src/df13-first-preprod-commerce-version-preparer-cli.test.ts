@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdtemp, readFile, stat, symlink } from "node:fs/promises";
+import { join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it, vi } from "vitest";
 import { runtimeBehaviorModeContentHash } from "@lana/database";
@@ -8,7 +9,10 @@ import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bun
 import { parseDf13CommercePreprodStartupInput } from "./df13-commerce-preprod-startup-authority.js";
 import {
   executeDf13FirstPreprodCommerceVersionPreparationCli,
+  assertDf13FirstPreprodReleaseSourceAttestation,
   parseDf13FirstPreprodCommerceVersionPreparationJson,
+  resolveDf13FirstPreprodStartupOutputFile,
+  writeDf13FirstPreprodStartupPackage,
 } from "./df13-first-preprod-commerce-version-preparer-cli.js";
 import { createDf13FirstPreprodOperationProof } from "./df13-first-preprod-behavior-writer.js";
 import { prepareDf13ReleaseCandidateEvidence, type Df13ReleaseCandidateSourceReader } from "./df13-release-candidate-evidence.js";
@@ -108,6 +112,7 @@ describe("DF13 first-PREPROD COMMERCE version preparer CLI", () => {
         repository: "https://github.com/nguyentuanson27-netizen/lanchatbot" as const,
         tag: "df13-preprod-test",
         commit: revision,
+        treeOid: "b".repeat(40),
         createdAt: "2026-08-25T00:00:00.000Z",
       },
     };
@@ -144,5 +149,36 @@ describe("DF13 first-PREPROD COMMERCE version preparer CLI", () => {
       expectedAuthority: { modeVersionId: "10000000-0000-4000-8000-000000000002" },
     });
     expect(port.prepareExact).toHaveBeenCalledOnce();
+
+    for (const releaseSource of [
+      { ...operation.releaseSource, release: "main", tag: "main" },
+      { ...operation.releaseSource, tag: "refs/heads/main" },
+      { ...operation.releaseSource, commit: "c".repeat(40) },
+      { ...operation.releaseSource, treeOid: "c".repeat(40) },
+    ]) {
+      await expect(executeDf13FirstPreprodCommerceVersionPreparationCli({ operation: { ...operation, releaseSource }, port }))
+        .rejects.toThrow("DF13_FIRST_PREPROD_PREPARER_RELEASE_SOURCE_MISMATCH");
+    }
+
+    const attested = { ...operation.releaseSource };
+    delete (attested as { treeOid?: string }).treeOid;
+    expect(() => assertDf13FirstPreprodReleaseSourceAttestation(operation.releaseSource, attested)).not.toThrow();
+    expect(() => assertDf13FirstPreprodReleaseSourceAttestation(operation.releaseSource, { ...attested, commit: "c".repeat(40) }))
+      .toThrow("DF13_FIRST_PREPROD_PREPARER_RELEASE_SOURCE_MISMATCH");
+  });
+
+  it("writes a canonical create-once startup package only inside a non-symlink evidence directory", async () => {
+    const evidenceDir = await mkdtemp(join(tmpdir(), "lana-df13-evidence-"));
+    const output = join(evidenceDir, "startup.json");
+    const resolved = await resolveDf13FirstPreprodStartupOutputFile(output, evidenceDir);
+    await writeDf13FirstPreprodStartupPackage(resolved, { z: 1, a: { b: 2 } });
+    expect(await readFile(output, "utf8")).toBe('{"a":{"b":2},"z":1}\n');
+    expect((await stat(output)).mode & 0o222).toBe(0);
+    await expect(writeDf13FirstPreprodStartupPackage(resolved, { z: 2 })).rejects.toMatchObject({ code: "EEXIST" });
+
+    const symlinkParent = `${evidenceDir}-link`;
+    await symlink(evidenceDir, symlinkParent, "junction");
+    await expect(resolveDf13FirstPreprodStartupOutputFile(join(symlinkParent, "blocked.json"), evidenceDir))
+      .rejects.toThrow("DF13_FIRST_PREPROD_PREPARER_OUTPUT_PATH_FORBIDDEN");
   });
 });
