@@ -9,6 +9,7 @@ import {
 } from "./df13-first-preprod-behavior-writer.js";
 
 const PREPARATION_SENTINEL_VERSION_ID = "00000000-0000-4000-8000-000000000001";
+const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 
 export interface Df13FirstPreprodCommerceVersionPreparerPort {
   readCurrent(): Promise<Df13FirstPreprodBehaviorPointerRecord | null>;
@@ -81,7 +82,8 @@ function versionMatchesTarget(
   expectedCurrent: Df13FirstPreprodBehaviorPointerIdentity,
 ): boolean {
   const target = targetFor(expectedCurrent);
-  return version.pageId === expectedCurrent.pageId &&
+  return UUID_V4_PATTERN.test(version.modeVersionId) &&
+    version.pageId === expectedCurrent.pageId &&
     version.channel === expectedCurrent.channel &&
     version.confirmationMode === target.confirmationMode &&
     version.salesAuthorityMode === target.salesAuthorityMode &&

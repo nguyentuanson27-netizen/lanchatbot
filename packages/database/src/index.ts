@@ -171,6 +171,7 @@ export {
   DF13_FIRST_PREPROD_MAX_ZERO_WORK_PROOF_AGE_MS,
   PostgresRuntimeBehaviorModeStore,
   runtimeBehaviorModeContentHash,
+  type Df13FirstPreprodCommerceVersionPreparationInput,
   type Df13FirstPreprodExactPointerActivationInput,
   type RuntimeBehaviorModePayloadRecord,
   type RuntimeBehaviorModePointerRecord,

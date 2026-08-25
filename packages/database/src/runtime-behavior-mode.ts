@@ -51,6 +51,21 @@ export interface Df13FirstPreprodExactPointerActivationInput {
   readonly actor: "DF13_FIRST_PREPROD_WRITER";
   readonly reason: string;
 }
+export interface Df13FirstPreprodCommerceVersionPreparationInput {
+  readonly pageId: string;
+  readonly channel: string;
+  readonly expectedCurrent: Readonly<{
+    modeVersionId: string;
+    contentHash: string;
+    pointerRevision: number;
+  }>;
+  readonly proof: Readonly<{
+    verifiedAt: string;
+    proofHash: string;
+  }>;
+  readonly actor: "DF13_FIRST_PREPROD_WRITER";
+  readonly reason: string;
+}
 export interface RuntimeBehaviorModeResolutionAuditRecord {
   readonly resolutionId: string;
   readonly pageId: string;
@@ -199,6 +214,181 @@ export class PostgresRuntimeBehaviorModeStore {
         [...values.slice(0, 5), authorityBundleHash, ...values.slice(5)],
       );
     return versionFromRow(result.rows[0] as Record<string, unknown>);
+  }
+
+  /**
+   * The first PREPROD COMMERCE version can be prepared only after the same
+   * sealed, stopped and drained proof required by the narrow pointer writer.
+   * This transaction deliberately does not update a pointer: the separate
+   * exact activation operation remains the only authority transition.
+   */
+  async prepareDf13FirstPreprodCommerceVersion(
+    input: Df13FirstPreprodCommerceVersionPreparationInput,
+  ): Promise<RuntimeBehaviorModeVersionRecord> {
+    const pageId = requiredText(input.pageId, "RUNTIME_BEHAVIOR_PAGE_INVALID", 64);
+    const channel = requiredText(input.channel, "RUNTIME_BEHAVIOR_CHANNEL_INVALID", 32).toUpperCase();
+    if (pageId !== "1198992073286645" || channel !== "MESSENGER") {
+      throw new Error("DF13_FIRST_PREPROD_WRITER_SCOPE_INVALID");
+    }
+    if (input.actor !== "DF13_FIRST_PREPROD_WRITER") {
+      throw new Error("DF13_FIRST_PREPROD_WRITER_ACTOR_INVALID");
+    }
+    if (!/^DF13_FIRST_PREPROD_PREPARE:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu
+      .test(input.reason)) {
+      throw new Error("DF13_FIRST_PREPROD_WRITER_REASON_INVALID");
+    }
+    if (!Number.isSafeInteger(input.expectedCurrent.pointerRevision) ||
+        input.expectedCurrent.pointerRevision < 1) {
+      throw new Error("RUNTIME_BEHAVIOR_POINTER_REVISION_INVALID");
+    }
+    const expectedVersionId = requiredText(
+      input.expectedCurrent.modeVersionId,
+      "RUNTIME_BEHAVIOR_VERSION_INVALID",
+      64,
+    );
+    const expectedContentHash = requiredText(
+      input.expectedCurrent.contentHash,
+      "RUNTIME_BEHAVIOR_CONTENT_HASH_INVALID",
+      80,
+    );
+    const proofVerifiedAt = Date.parse(requiredText(
+      input.proof.verifiedAt,
+      "DF13_FIRST_PREPROD_ZERO_WORK_PROOF_INVALID",
+      64,
+    ));
+    if (
+      !Number.isFinite(proofVerifiedAt) ||
+      !/^[a-f0-9]{64}$/u.test(requiredText(
+        input.proof.proofHash,
+        "DF13_FIRST_PREPROD_ZERO_WORK_PROOF_INVALID",
+        64,
+      ))
+    ) {
+      throw new Error("DF13_FIRST_PREPROD_ZERO_WORK_PROOF_INVALID");
+    }
+
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [`${pageId}:${channel}`]);
+      const currentResult = await client.query(
+        `SELECT v.mode_version_id, v.page_id, v.channel, v.schema_version,
+                v.confirmation_mode, v.sales_authority_mode, v.state_read_mode,
+                to_jsonb(v) ->> 'authority_bundle_hash' AS authority_bundle_hash,
+                v.content_hash, v.created_by, v.reason AS version_reason, v.created_at,
+                p.pointer_revision, p.updated_by, p.reason AS pointer_reason, p.updated_at
+         FROM runtime_behavior_mode_pointers p
+         JOIN runtime_behavior_mode_versions v ON v.mode_version_id = p.active_version_id
+         WHERE p.page_id = $1 AND p.channel = $2 FOR UPDATE OF p`,
+        [pageId, channel],
+      );
+      const currentRow = currentResult.rows[0] as Record<string, unknown> | undefined;
+      if (!currentRow) throw new Error("DF13_FIRST_PREPROD_CURRENT_POINTER_MISSING");
+      const current = pointerFromRow(currentRow);
+      if (
+        current.version.modeVersionId !== expectedVersionId ||
+        current.version.contentHash !== expectedContentHash ||
+        current.pointerRevision !== input.expectedCurrent.pointerRevision
+      ) {
+        throw new Error("RUNTIME_BEHAVIOR_POINTER_CAS_MISMATCH");
+      }
+      if (
+        current.version.salesAuthorityMode !== "LEGACY" ||
+        current.version.stateReadMode !== "LEGACY" ||
+        current.version.authorityBundleHash !== null ||
+        current.version.contentHash !== runtimeBehaviorModeContentHash(current.version)
+      ) {
+        throw new Error("DF13_FIRST_PREPROD_AUTHORITY_TRANSITION_INVALID");
+      }
+      const clock = await client.query<{ operation_now: Date }>(
+        "SELECT clock_timestamp() AS operation_now",
+      );
+      const operationNow = clock.rows[0]?.operation_now;
+      if (!(operationNow instanceof Date) || !Number.isFinite(operationNow.getTime())) {
+        throw new Error("DF13_FIRST_PREPROD_ZERO_WORK_PROOF_CLOCK_INVALID");
+      }
+      if (
+        proofVerifiedAt > operationNow.getTime() ||
+        operationNow.getTime() - proofVerifiedAt > DF13_FIRST_PREPROD_MAX_ZERO_WORK_PROOF_AGE_MS
+      ) {
+        throw new Error("DF13_FIRST_PREPROD_ZERO_WORK_PROOF_STALE");
+      }
+      const payload = {
+        confirmationMode: current.version.confirmationMode,
+        salesAuthorityMode: "COMMERCE" as const,
+        stateReadMode: "LEGACY" as const,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      };
+      const contentHash = runtimeBehaviorModeContentHash(payload);
+      const existing = await client.query(
+        `SELECT v.mode_version_id, v.page_id, v.channel, v.schema_version,
+                v.confirmation_mode, v.sales_authority_mode, v.state_read_mode,
+                to_jsonb(v) ->> 'authority_bundle_hash' AS authority_bundle_hash,
+                v.content_hash, v.created_by, v.reason AS version_reason, v.created_at
+         FROM runtime_behavior_mode_versions v
+         WHERE v.page_id = $1 AND v.channel = $2 AND v.content_hash = $3`,
+        [pageId, channel, contentHash],
+      );
+      const existingRow = existing.rows[0] as Record<string, unknown> | undefined;
+      if (existingRow) {
+        const version = versionFromRow(existingRow);
+        if (
+          version.confirmationMode !== payload.confirmationMode ||
+          version.salesAuthorityMode !== payload.salesAuthorityMode ||
+          version.stateReadMode !== payload.stateReadMode ||
+          version.authorityBundleHash !== payload.authorityBundleHash ||
+          version.contentHash !== contentHash ||
+          version.createdBy !== input.actor ||
+          version.reason !== input.reason
+        ) {
+          throw new Error("DF13_FIRST_PREPROD_PREPARATION_IDEMPOTENCY_MISMATCH");
+        }
+        await client.query("COMMIT");
+        return version;
+      }
+      const inserted = await client.query(
+        `INSERT INTO runtime_behavior_mode_versions (
+           page_id, channel, schema_version, confirmation_mode, sales_authority_mode,
+           state_read_mode, authority_bundle_hash, content_hash, created_by, reason, created_at
+         ) VALUES ($1,$2,1,$3,$4,$5,$6,$7,$8,$9,$10)
+         RETURNING mode_version_id, page_id, channel, schema_version,
+           confirmation_mode, sales_authority_mode, state_read_mode, authority_bundle_hash,
+           content_hash, created_by, reason AS version_reason, created_at`,
+        [
+          pageId,
+          channel,
+          payload.confirmationMode,
+          payload.salesAuthorityMode,
+          payload.stateReadMode,
+          payload.authorityBundleHash,
+          contentHash,
+          input.actor,
+          input.reason,
+          operationNow,
+        ],
+      );
+      const row = inserted.rows[0] as Record<string, unknown> | undefined;
+      if (!row) throw new Error("DF13_FIRST_PREPROD_PREPARATION_WRITE_MISSING");
+      const version = versionFromRow(row);
+      if (
+        version.confirmationMode !== payload.confirmationMode ||
+        version.salesAuthorityMode !== payload.salesAuthorityMode ||
+        version.stateReadMode !== payload.stateReadMode ||
+        version.authorityBundleHash !== payload.authorityBundleHash ||
+        version.contentHash !== contentHash ||
+        version.createdBy !== input.actor ||
+        version.reason !== input.reason
+      ) {
+        throw new Error("DF13_FIRST_PREPROD_PREPARATION_WRITE_MISMATCH");
+      }
+      await client.query("COMMIT");
+      return version;
+    } catch (error) {
+      await rollbackQuietly(client);
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async activateVersion(input: {

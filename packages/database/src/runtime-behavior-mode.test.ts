@@ -210,6 +210,85 @@ describe("PostgresRuntimeBehaviorModeStore", () => {
     expect(values).toHaveLength(9);
   });
 
+  it("prepares a first-PREPROD COMMERCE version under the exact LEGACY pointer lock without moving that pointer", async () => {
+    const legacyPayload = {
+      confirmationMode: "V2_ACTIVE" as const,
+      salesAuthorityMode: "LEGACY" as const,
+      stateReadMode: "LEGACY" as const,
+    };
+    const commercePayload = {
+      confirmationMode: "V2_ACTIVE" as const,
+      salesAuthorityMode: "COMMERCE" as const,
+      stateReadMode: "LEGACY" as const,
+      authorityBundleHash: canonicalDf13BundleHash,
+    };
+    const legacyPointer = {
+      ...targetRow,
+      mode_version_id: "10000000-0000-4000-8000-000000000001",
+      confirmation_mode: legacyPayload.confirmationMode,
+      sales_authority_mode: legacyPayload.salesAuthorityMode,
+      state_read_mode: legacyPayload.stateReadMode,
+      content_hash: runtimeBehaviorModeContentHash(legacyPayload),
+      pointer_revision: 3,
+      updated_by: "known-good-release",
+      pointer_reason: "known-good",
+      updated_at: updatedAt,
+    };
+    const prepared = {
+      ...targetRow,
+      mode_version_id: "10000000-0000-4000-8000-000000000004",
+      confirmation_mode: commercePayload.confirmationMode,
+      sales_authority_mode: commercePayload.salesAuthorityMode,
+      state_read_mode: commercePayload.stateReadMode,
+      authority_bundle_hash: commercePayload.authorityBundleHash,
+      content_hash: runtimeBehaviorModeContentHash(commercePayload),
+      created_by: "DF13_FIRST_PREPROD_WRITER",
+      version_reason: "DF13_FIRST_PREPROD_PREPARE:10000000-0000-4000-8000-000000000010",
+    };
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes("clock_timestamp() AS operation_now")) {
+        return { rows: [{ operation_now: new Date("2026-08-25T00:01:00.000Z") }], rowCount: 1 };
+      }
+      if (sql.includes("FROM runtime_behavior_mode_pointers p")) {
+        return { rows: [legacyPointer], rowCount: 1 };
+      }
+      if (sql.includes("SELECT v.mode_version_id") && sql.includes("v.content_hash = $3")) {
+        return { rows: [], rowCount: 0 };
+      }
+      if (sql.includes("INSERT INTO runtime_behavior_mode_versions")) {
+        return { rows: [prepared], rowCount: 1 };
+      }
+      return { rows: [], rowCount: 0 };
+    });
+    const store = new PostgresRuntimeBehaviorModeStore("postgresql://test", 1);
+
+    await expect(store.prepareDf13FirstPreprodCommerceVersion({
+      pageId,
+      channel,
+      expectedCurrent: {
+        modeVersionId: legacyPointer.mode_version_id,
+        contentHash: legacyPointer.content_hash,
+        pointerRevision: 3,
+      },
+      proof: firstPreprodProof,
+      actor: "DF13_FIRST_PREPROD_WRITER",
+      reason: prepared.version_reason,
+    })).resolves.toMatchObject({
+      modeVersionId: prepared.mode_version_id,
+      salesAuthorityMode: "COMMERCE",
+      authorityBundleHash: canonicalDf13BundleHash,
+    });
+
+    const statements = mocks.clientQuery.mock.calls.map(([sql]) => String(sql));
+    expect(statements).toEqual(expect.arrayContaining([
+      "BEGIN",
+      expect.stringContaining("pg_advisory_xact_lock"),
+      expect.stringContaining("FOR UPDATE OF p"),
+      "COMMIT",
+    ]));
+    expect(statements.some((sql) => sql.includes("UPDATE runtime_behavior_mode_pointers"))).toBe(false);
+  });
+
   it("requires the dedicated fenced workflow to activate a stored COMMERCE version", async () => {
     const commercePayload = {
       confirmationMode: "V2_ACTIVE" as const,
