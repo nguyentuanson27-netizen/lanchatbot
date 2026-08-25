@@ -10,8 +10,11 @@ import { parseDf13CommercePreprodStartupInput } from "./df13-commerce-preprod-st
 import {
   executeDf13FirstPreprodCommerceVersionPreparationCli,
   assertDf13FirstPreprodReleaseSourceAttestation,
+  assertDf13FirstPreprodImmutableTag,
   parseDf13FirstPreprodCommerceVersionPreparationJson,
+  redactedDf13FirstPreprodPreparationSummary,
   resolveDf13FirstPreprodStartupOutputFile,
+  safeDf13FirstPreprodPreparationErrorCode,
   writeDf13FirstPreprodStartupPackage,
 } from "./df13-first-preprod-commerce-version-preparer-cli.js";
 import { createDf13FirstPreprodOperationProof } from "./df13-first-preprod-behavior-writer.js";
@@ -132,7 +135,8 @@ describe("DF13 first-PREPROD COMMERCE version preparer CLI", () => {
       })),
     };
 
-    const result = await executeDf13FirstPreprodCommerceVersionPreparationCli({ operation, port });
+    const verifyImmutableReleaseTag = vi.fn(async () => {});
+    const result = await executeDf13FirstPreprodCommerceVersionPreparationCli({ operation, port, verifyImmutableReleaseTag });
 
     expect(result).toMatchObject({
       status: "PREPARED_POINTER_UNCHANGED",
@@ -151,20 +155,38 @@ describe("DF13 first-PREPROD COMMERCE version preparer CLI", () => {
     expect(port.prepareExact).toHaveBeenCalledOnce();
 
     for (const releaseSource of [
-      { ...operation.releaseSource, release: "main", tag: "main" },
       { ...operation.releaseSource, tag: "refs/heads/main" },
       { ...operation.releaseSource, commit: "c".repeat(40) },
       { ...operation.releaseSource, treeOid: "c".repeat(40) },
     ]) {
-      await expect(executeDf13FirstPreprodCommerceVersionPreparationCli({ operation: { ...operation, releaseSource }, port }))
+      await expect(executeDf13FirstPreprodCommerceVersionPreparationCli({ operation: { ...operation, releaseSource }, port, verifyImmutableReleaseTag }))
         .rejects.toThrow("DF13_FIRST_PREPROD_PREPARER_RELEASE_SOURCE_MISMATCH");
     }
+    await expect(executeDf13FirstPreprodCommerceVersionPreparationCli({
+      operation: { ...operation, releaseSource: { ...operation.releaseSource, tag: "main", release: "main" } },
+      port,
+      verifyImmutableReleaseTag: async () => { throw new Error("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH"); },
+    })).rejects.toThrow("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH");
 
     const attested = { ...operation.releaseSource };
     delete (attested as { treeOid?: string }).treeOid;
     expect(() => assertDf13FirstPreprodReleaseSourceAttestation(operation.releaseSource, attested)).not.toThrow();
     expect(() => assertDf13FirstPreprodReleaseSourceAttestation(operation.releaseSource, { ...attested, commit: "c".repeat(40) }))
       .toThrow("DF13_FIRST_PREPROD_PREPARER_RELEASE_SOURCE_MISMATCH");
+    await expect(assertDf13FirstPreprodImmutableTag(operation.releaseSource, "/ignored", async (args) => {
+      if (args[0] === "cat-file") return "tag";
+      return args.at(-1)?.endsWith("^{tree}") ? "b".repeat(40) : revision;
+    })).resolves.toBeUndefined();
+    await expect(assertDf13FirstPreprodImmutableTag({ ...operation.releaseSource, tag: "develop" }, "/ignored", async () => revision))
+      .rejects.toThrow("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH");
+    expect(verifyImmutableReleaseTag).toHaveBeenCalledOnce();
+    const summary = redactedDf13FirstPreprodPreparationSummary(result);
+    expect(summary).not.toContain("startup");
+    expect(summary).toContain("PREPARED_POINTER_UNCHANGED");
+    expect(safeDf13FirstPreprodPreparationErrorCode(new Error("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH")))
+      .toBe("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH");
+    expect(safeDf13FirstPreprodPreparationErrorCode(new Error("unstructured private runtime detail")))
+      .toBe("DF13_FIRST_PREPROD_PREPARER_FAILED");
   });
 
   it("writes a canonical create-once startup package only inside a non-symlink evidence directory", async () => {
@@ -179,6 +201,10 @@ describe("DF13 first-PREPROD COMMERCE version preparer CLI", () => {
     const symlinkParent = `${evidenceDir}-link`;
     await symlink(evidenceDir, symlinkParent, "junction");
     await expect(resolveDf13FirstPreprodStartupOutputFile(join(symlinkParent, "blocked.json"), evidenceDir))
+      .rejects.toThrow("DF13_FIRST_PREPROD_PREPARER_OUTPUT_PATH_FORBIDDEN");
+    await expect(resolveDf13FirstPreprodStartupOutputFile(join(symlinkParent, "blocked.json"), symlinkParent))
+      .rejects.toThrow("DF13_FIRST_PREPROD_PREPARER_OUTPUT_DIR_INVALID");
+    await expect(resolveDf13FirstPreprodStartupOutputFile(join(evidenceDir, "..", "escaped.json"), evidenceDir))
       .rejects.toThrow("DF13_FIRST_PREPROD_PREPARER_OUTPUT_PATH_FORBIDDEN");
   });
 });

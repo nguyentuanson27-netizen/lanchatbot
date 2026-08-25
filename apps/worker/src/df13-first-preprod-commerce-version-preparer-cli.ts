@@ -1,5 +1,7 @@
 import { lstat, readFile, realpath, writeFile } from "node:fs/promises";
+import { execFile as execFileCallback } from "node:child_process";
 import { basename, dirname, resolve } from "node:path";
+import { promisify } from "node:util";
 import { pathToFileURL } from "node:url";
 import { canonicalJsonV1 } from "@lana/contracts";
 import { PostgresRuntimeBehaviorModeStore, runtimeBehaviorModeContentHash } from "@lana/database";
@@ -17,8 +19,9 @@ import type {
 import type { Df13ReleaseCandidateEvidence } from "./df13-release-candidate-evidence.js";
 
 const SENTINEL_VERSION_ID = "00000000-0000-4000-8000-000000000001";
-const IMMUTABLE_RELEASE_TAG = /^(?!main$)(?!master$)(?!head$)(?!refs\/)[a-z0-9][a-z0-9._-]{2,127}$/iu;
 const SAFE_REASON_CODE = /^(?:DF13|RUNTIME_BEHAVIOR)_[A-Z0-9_]+$/u;
+const RELEASE_TAG_NAME = /^[a-z0-9][a-z0-9._-]{2,127}$/iu;
+const execFile = promisify(execFileCallback);
 
 type RawPreparationOperation = Readonly<{
   kind: "PREPARE_COMMERCE";
@@ -118,6 +121,7 @@ function pointer(value: unknown): Df13FirstPreprodBehaviorPointerIdentity {
 }
 
 type PreparedReleaseSource = Df13ReleaseSourcePointer & Readonly<{ treeOid: string }>;
+type Df13FirstPreprodImmutableReleaseTagVerifier = (source: PreparedReleaseSource) => Promise<void>;
 
 function releaseSource(value: unknown): PreparedReleaseSource {
   const record = asRecord(value, "DF13_FIRST_PREPROD_PREPARER_RELEASE_SOURCE_INVALID");
@@ -136,7 +140,7 @@ function releaseSource(value: unknown): PreparedReleaseSource {
 
 function immutableReleaseSource(value: unknown, evidence: Df13ReleaseCandidateEvidence): PreparedReleaseSource {
   const source = releaseSource(value);
-  if (!IMMUTABLE_RELEASE_TAG.test(source.release) || source.release !== source.tag ||
+  if (source.release !== source.tag ||
       source.commit !== evidence.activationReleaseRevision ||
       evidence.releaseSource.resolvedRevision !== source.commit ||
       evidence.releaseSource.treeOid === null || source.treeOid !== evidence.releaseSource.treeOid) {
@@ -157,6 +161,36 @@ function releaseSourceFile(): string {
   const value = index >= 0 ? process.argv[index + 1]?.trim() : "";
   if (!value) throw new Error("DF13_FIRST_PREPROD_PREPARER_RELEASE_SOURCE_FILE_REQUIRED");
   return value;
+}
+
+function releaseGitDirectory(): string {
+  const index = process.argv.indexOf("--release-git-dir");
+  const value = index >= 0 ? process.argv[index + 1]?.trim() : "";
+  if (!value) throw new Error("DF13_FIRST_PREPROD_PREPARER_RELEASE_GIT_DIR_REQUIRED");
+  return value;
+}
+
+export async function assertDf13FirstPreprodImmutableTag(
+  source: PreparedReleaseSource,
+  gitDir: string,
+  run: (args: readonly string[]) => Promise<string> = async (args) =>
+    (await execFile("git", ["-C", gitDir, ...args], { encoding: "utf8" })).stdout.trim(),
+): Promise<void> {
+  if (!RELEASE_TAG_NAME.test(source.tag)) throw new Error("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_INVALID");
+  const ref = `refs/tags/${source.tag}`;
+  try {
+    const [kind, commit, tree] = await Promise.all([
+      run(["cat-file", "-t", ref]),
+      run(["rev-parse", `${ref}^{}`]),
+      run(["rev-parse", `${ref}^{tree}`]),
+    ]);
+    if (kind !== "tag" || commit !== source.commit || tree !== source.treeOid) {
+      throw new Error("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH");
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message === "DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH") throw error;
+    throw new Error("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH");
+  }
 }
 
 export function assertDf13FirstPreprodReleaseSourceAttestation(
@@ -275,11 +309,13 @@ function startupPackage(input: Readonly<{
 export async function executeDf13FirstPreprodCommerceVersionPreparationCli(input: Readonly<{
   operation: RawPreparationOperation;
   port: Df13FirstPreprodCommerceVersionPreparerPort;
+  verifyImmutableReleaseTag: Df13FirstPreprodImmutableReleaseTagVerifier;
 }>) {
   const operation = parseDf13FirstPreprodCommerceVersionPreparationJson(input.operation);
   const expectedCurrent = pointer(operation.expectedCurrent);
   const releaseEvidence = operation.releaseEvidence as Df13ReleaseCandidateEvidence;
   const source = immutableReleaseSource(operation.releaseSource, releaseEvidence);
+  await input.verifyImmutableReleaseTag(source);
   await assertReleaseStartupBinding({ releaseEvidence, expectedCurrent, releaseSource: source });
   const result = await executeDf13FirstPreprodCommerceVersionPreparation({
     proof: proof(operation.proof),
@@ -313,7 +349,12 @@ export async function writeDf13FirstPreprodStartupPackage(output: string, startu
   await writeFile(output, `${canonicalJsonV1(startup)}\n`, { encoding: "utf8", flag: "wx", mode: 0o400 });
 }
 
-function safeErrorCode(error: unknown): string {
+export function redactedDf13FirstPreprodPreparationSummary(result: Awaited<ReturnType<typeof executeDf13FirstPreprodCommerceVersionPreparationCli>>): string {
+  const { startup: _startup, ...summary } = result;
+  return canonicalJsonV1(summary);
+}
+
+export function safeDf13FirstPreprodPreparationErrorCode(error: unknown): string {
   return error instanceof Error && SAFE_REASON_CODE.test(error.message)
     ? error.message
     : "DF13_FIRST_PREPROD_PREPARER_FAILED";
@@ -325,6 +366,7 @@ async function main(): Promise<void> {
   }
   const raw = JSON.parse(await readFile(operationFile(), "utf8")) as unknown;
   const operation = parseDf13FirstPreprodCommerceVersionPreparationJson(raw);
+  const gitDir = releaseGitDirectory();
   assertDf13FirstPreprodReleaseSourceAttestation(
     operation.releaseSource,
     JSON.parse(await readFile(releaseSourceFile(), "utf8")) as unknown,
@@ -334,12 +376,10 @@ async function main(): Promise<void> {
     const result = await executeDf13FirstPreprodCommerceVersionPreparationCli({
       operation,
       port: createDf13FirstPreprodCommerceVersionPreparerPort(store),
+      verifyImmutableReleaseTag: async (source) => assertDf13FirstPreprodImmutableTag(source, gitDir),
     });
     await writeDf13FirstPreprodStartupPackage(await startupOutputFile(), result.startup);
-    process.stdout.write(`${canonicalJsonV1({
-      ...result,
-      startup: undefined,
-    })}\n`);
+    process.stdout.write(`${redactedDf13FirstPreprodPreparationSummary(result)}\n`);
   } finally {
     await store.close();
   }
@@ -347,7 +387,7 @@ async function main(): Promise<void> {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   await main().catch((error: unknown) => {
-    process.stderr.write(`${safeErrorCode(error)}\n`);
+    process.stderr.write(`${safeDf13FirstPreprodPreparationErrorCode(error)}\n`);
     process.exitCode = 1;
   });
 }

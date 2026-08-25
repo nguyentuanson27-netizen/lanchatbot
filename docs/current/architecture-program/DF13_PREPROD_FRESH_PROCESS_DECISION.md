@@ -62,6 +62,10 @@ step:
    pointer. It creates or reconciles one immutable canonical COMMERCE version
    and one create-once startup package, but does **not** move a pointer. The
    generic behavior-mode operator and manual SQL remain prohibited.
+   The invocation must also provide the create-once `.release-source.json`, a
+   local immutable release Git directory, and a non-symlink evidence directory:
+   it re-checks the annotated tag's exact commit and tree before preparation and
+   writes only canonical redacted evidence inside that directory.
 6. Use the narrow behavior writer to make the one exact pointer transition to
    that prepared version. After its exact durable readback, start only the
    reviewed finite service set from an immutable fresh release with the
