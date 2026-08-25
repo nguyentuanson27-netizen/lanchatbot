@@ -1,6 +1,6 @@
 # DF13 Operational-Acceptance Preparation
 
-**Status:** `SOURCE_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING`; not an activation, release, deployment, migration, canary, or cutover authorization.
+**Status:** `SOURCE_FOUNDATIONS_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING`; not an activation, release, deployment, migration, canary, or cutover authorization.
 
 **Source completion:** DF13 source contracts/tooling merged on `main` through PR #247
 (`a8f6e500a8a33f652f7fd2051a135c3b245c5386`). This source merge is not
@@ -83,9 +83,12 @@ the complete ordered path/blob/content-SHA list rather than a copied fingerprint
 - the canonical DF13 authority-bundle hash and all eight consumers:
   classification, commerce state, Context V2, derived phase, strategy, CTA,
   final reconciliation, and side-effect plan;
-- `0035_df13_commerce_behavior_mode` up/down blob and SHA-256 identities;
-  `0036_df13_commerce_authority_fence` remains an additional hot-cutover-only
-  artifact, not a prerequisite of the first stopped-process exercise; and
+- `0035_df13_commerce_behavior_mode` up/down blob and SHA-256 identities; and
+  `0036_df13_commerce_authority_fence` exact blob identities, which the current
+  release-evidence implementation still re-derives as a dormant source artifact.
+  The first stopped-process exercise neither applies nor rehearses `0036`; a
+  future focused source change may split evidence profiles if that binding is no
+  longer desired; and
 - the required rollback target: the exact pre-cutover LEGACY pointer with the
   same eight consumer readbacks.
 
@@ -98,11 +101,12 @@ new authorized DF-P6/Gate E evaluation on the final candidate.
 
 `0035` and `0036` remain in `packages/database/pending-migrations/` and are
 deliberately outside automatic migration discovery. The first stopped-process
-exercise may consider only separately approved `0035`; it does not need or
-apply `0036`. `0036` remains the durable page-scoped hot-cutover-fence schema,
-not an Inbox-batch fence substitute. A Release Train may test either artifact
-only in a new disposable database with no shared endpoint, persistent volume,
-host port, or production/preprod credential.
+exercise may consider only separately approved `0035`; it neither applies nor
+rehearses `0036`. Current evidence tooling nevertheless requires the exact
+`0036` source blobs to be present and re-derived. `0036` remains the durable
+page-scoped hot-cutover-fence schema, not an Inbox-batch fence substitute. A
+Release Train may test either artifact only in a new disposable database with no
+shared endpoint, persistent volume, host port, or production/preprod credential.
 
 Required rehearsal assertions are:
 
@@ -118,9 +122,9 @@ Required rehearsal assertions are:
    before insert, cannot mutate identity fields afterward, reconciles lost
    acquire/release ACKs without a second fence, and uses PostgreSQL time rather
    than a process clock for lease acquire, recovery, and release; and
-7. if `0036` is rehearsed, prove its down SQL refuses while any durable cutover or authority-fence
+6. if `0036` is rehearsed, prove its down SQL refuses while any durable cutover or authority-fence
    evidence exists and preserves it; and
-8. separately prove `0035` down refuses while an immutable COMMERCE version
+7. separately prove `0035` down refuses while an immutable COMMERCE version
    exists and otherwise restores the LEGACY-only constraint. If `0036` is
    rehearsed, prove in a separate clean disposable database that its down SQL
    succeeds with no fence evidence.
@@ -134,10 +138,12 @@ disposable rehearsal is schema evidence only; it does not authorize applying
 ## First PREPROD stopped-process replacement plan
 
 Before the first COMMERCE start, seal new authority-dependent admission for the
-reviewed page/channel and stop the finite service set that can classify, read
-state/context/phase, choose strategy/CTA, reconcile, plan, or execute an
-effect. Prove the eligible queue and in-flight work are empty. Unknown or
-non-empty work aborts before starting the new build.
+reviewed page/channel. Gracefully drain or place eligible queued/in-flight work
+into its reviewed held state using the current LEGACY service set, then stop the
+finite service set that can classify, read state/context/phase, choose
+strategy/CTA, reconcile, plan, or execute an effect. Re-prove the eligible work
+is empty or durably held. Unknown, non-empty, or stranded work aborts before
+starting the new build.
 
 Only after that proof may the dedicated, non-generic DF13 writer record the
 reviewed exact COMMERCE identity. Start one fresh immutable COMMERCE service set
@@ -149,9 +155,10 @@ LKG, startup, stale, partial, ambiguous, or copied identity is not acceptance.
 The fresh service set must preserve atomic durable state/Outbox and Context V2
 capture semantics. A replay, crash/restart, partial completion, missing Context
 V2 capture, missing commerce signal, incomplete consumer, or unexpected effect
-fails closed: stop COMMERCE and restart the exact captured LEGACY
-release/configuration. The stopped-process protocol never issues a second blind
-activation or permits both authorities to work concurrently.
+fails closed: seal/drain or hold COMMERCE work, stop it, restore the exact
+captured LEGACY pointer through the narrow writer, then restart the exact
+captured LEGACY release/configuration. The stopped-process protocol never issues
+a second blind activation or permits both authorities to work concurrently.
 
 ## Monitoring, abort, and exact rollback matrix
 
@@ -159,18 +166,20 @@ activation or permits both authorities to work concurrently.
 |---|---|
 | Any candidate/manifest/blob/fingerprint mismatch, missing commerce signal, or authority ambiguity | Do not start COMMERCE; retain exact LEGACY. |
 | Any eligible work in flight or queued, or an unlisted consumer/bypass | Abort while sealed; do not start COMMERCE. |
-| New build identity/readback is not exact for the one complete consumer set | Stop COMMERCE and restart captured exact LEGACY. |
-| Replay, lost acknowledgement, concurrency conflict, crash/restart, or partial durable commit | Stop COMMERCE; recover only from durable evidence and restart exact LEGACY unless a later owner command directs otherwise. |
+| New build identity/readback is not exact for the one complete consumer set | Stop COMMERCE, restore the captured exact LEGACY pointer, and restart captured LEGACY. |
+| Replay, lost acknowledgement, concurrency conflict, crash/restart, or partial durable commit | Stop COMMERCE; reconcile only by durable readback, restore exact LEGACY, and restart it unless a later owner command directs otherwise. |
 | Health/readiness, queue, SSRF/claim/provenance, PII/secret, auth, or DB-safety evidence unknown or degraded | Fail closed; do not start or keep COMMERCE. |
-| Critical controlled journey fails | Stop COMMERCE and restart the exact captured LEGACY release/configuration. |
+| Critical controlled journey fails | Stop COMMERCE, restore the exact captured LEGACY pointer, and restart the exact captured LEGACY release/configuration. |
 
-Rollback means stopping the COMMERCE service set and restarting the exact
-captured LEGACY release/configuration. Its behavior pointer/version/content
-identity must match the recorded pre-replacement value, with a null/omitted
-authority bundle and canonical LEGACY content hash. The restarted service set
-must read it from `DATABASE` before work resumes. A stale LEGACY pointer,
-partial Context V2/phase/reconciliation state, missing audit, or unknown
-restart outcome is not rollback completion.
+Rollback means sealing and draining/holding COMMERCE work, stopping the COMMERCE
+service set, then using the narrow writer to restore the exact captured LEGACY
+behavior version/content identity at the next revision. The restored pointer
+must have a null/omitted authority bundle and canonical LEGACY content hash, an
+append-only audit, and an exact `DATABASE` readback before the captured LEGACY
+release/configuration starts. A lost acknowledgement is reconciled by that
+durable readback, never a blind replay. A stale LEGACY pointer, partial Context
+V2/phase/reconciliation state, missing audit, or unknown restart outcome is not
+rollback completion.
 
 ## Required authorization sequence
 

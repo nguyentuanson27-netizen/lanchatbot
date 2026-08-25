@@ -7,18 +7,21 @@ release, deployment, canary, runtime mutation, or `LEGACY -> COMMERCE` activatio
 
 The owner-selected
 [`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](../DF13_PREPROD_FRESH_PROCESS_DECISION.md)
-uses a sealed, stopped, and drained process boundary for the first isolated
+uses a sealed, drained/held, and stopped process boundary for the first isolated
 PREPROD replacement. The immutable candidate, exact `DATABASE` identity,
 single-authority, complete-consumer, and exact LEGACY rollback requirements in
 this contract remain in force. The running durable-fence/CAS/propagation
 protocol below remains a future hot-cutover foundation; it is not required to
 create a zero-downtime controller for the first stopped-process exercise.
 
-This exception neither applies `0036` nor treats it as a prerequisite. It does
-not make a generic operator or environment flag a COMMERCE authority writer.
-The first operation still requires a separately reviewed narrow runtime
-composition and writer, an immutable release package, explicit owner release
-authorization, and real operational evidence.
+This exception neither applies nor rehearses `0036`. The current source
+evidence package still binds its exact dormant blobs, so they must be present
+and re-derived even though `0036` is not a runtime execution prerequisite for
+this first exercise. A future focused source change may split that evidence
+profile. The exception does not make a generic operator or environment flag a
+COMMERCE authority writer. The first operation still requires a separately
+reviewed narrow runtime composition and writer, an immutable release package,
+explicit owner release authorization, and real operational evidence.
 
 ## Governing rule
 

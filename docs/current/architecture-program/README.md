@@ -3,7 +3,7 @@
 **Purpose:** Keep planning context small while preserving durable contracts and evidence.
 **Status:** Repository planning authority for BF/DF/UR on this branch; never deployment authorization.
 **Operating mode:** `ENGINEERING_PREPROD`; see `OPERATING_MODE.md`.
-**Current program point:** `GATE_E_PREPROD_ACCEPTED`; DF11–DF13 are merged source-only and `DF-C` / `DF13` is `SOURCE_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING`. See `GATE_E_PREPROD_ACCEPTANCE_20260821.md`.
+**Current program point:** `GATE_E_PREPROD_ACCEPTED`; DF11–DF13 are merged source-only and `DF-C` / `DF13` is `SOURCE_FOUNDATIONS_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING`. See `GATE_E_PREPROD_ACCEPTANCE_20260821.md`.
 
 ## Default reading order for BF
 

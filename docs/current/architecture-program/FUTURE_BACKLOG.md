@@ -128,8 +128,8 @@ prospective immutable request without touching the runtime. The merged DF13
 provider/dispatcher and default-off consumer wrapper remain valid source
 foundations. For the first PREPROD exercise,
 `DF13_PREPROD_FRESH_PROCESS_DECISION.md` replaces an in-process durable-fence
-controller with a sealed, stopped, and drained fresh-process boundary. Normal
-startup stays `LEGACY`; an isolated PREPROD `COMMERCE` startup still needs the
+controller with a sealed, drained/held, and stopped fresh-process boundary.
+Normal startup stays `LEGACY`; an isolated PREPROD `COMMERCE` startup still needs the
 reviewed immutable release package and exact authority identity. Operational
 acceptance must establish stop/drain, one-service-set, smoke/integration, and
 exact LEGACY restart evidence before a separately authorized replacement may

@@ -126,10 +126,11 @@ Before either switch, the replacement path must be proven by its Gate using dete
 
 For the first DF13 exercise only, the owner-selected
 [`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](DF13_PREPROD_FRESH_PROCESS_DECISION.md)
-defines the quiescence implementation: seal admission, stop the reviewed finite
-authority-consuming service set, and prove it drained before a fresh COMMERCE
-process starts. It is not a zero-downtime CAS, it cannot coexist with a LEGACY
-consumer, and it does not authorize deployment by itself. The State V2 and any
+defines the quiescence implementation: seal admission, gracefully drain or hold
+eligible work, stop the reviewed finite authority-consuming service set, and
+re-prove it empty/held before a fresh COMMERCE process starts. It is not a
+zero-downtime controller, it cannot coexist with a LEGACY consumer, and it does
+not authorize deployment by itself. The State V2 and any
 future public-production switch continue to use their separately reviewed
 transition contracts.
 
@@ -145,11 +146,12 @@ Because bounded propagation can temporarily expose different workers to differen
 Only a finite, reviewed class proven by contract tests to be independent of both the old and
 new authority may bypass the fence; absence from the protected-side-effect set is not enough.
 
-For the stopped-process DF13 replacement, a complete process stop plus an empty
-eligible-work proof is the required quiescence evidence; unknown or non-empty
-work aborts before the new build starts. Failure to prove the required boundary
-or exact terminal LEGACY restart state aborts/fails closed to complete `LEGACY`
-authority.
+For the stopped-process DF13 replacement, a graceful drain/hold followed by a
+complete process stop and a re-proved empty/held eligible-work state is the
+required quiescence evidence; unknown, non-empty, or stranded work aborts before
+the new build starts. Failure to prove the required boundary or exact terminal
+LEGACY pointer/readback and restart state aborts/fails closed to complete
+`LEGACY` authority.
 
 A legacy/new comparator may be used offline or in controlled side-effect-free verification. It is verification tooling, not a third authority state.
 
