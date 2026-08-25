@@ -17,18 +17,21 @@ For the first DF13 PREPROD exercise, authority replacement is an **isolated
 fresh-process replacement**, not an in-process hot cutover:
 
 ```text
-seal admission -> gracefully drain/hold eligible queued and in-flight work
--> stop the finite authority-consuming service set -> re-prove empty/held
+seal admission -> gracefully drain/reconcile eligible queued and in-flight work to zero
+-> stop the finite authority-consuming service set -> re-prove zero eligible work
 -> record the reviewed COMMERCE identity -> start its build as the only authority -> test
--> on failure, seal/drain/stop it -> restore captured exact LEGACY pointer -> restart LEGACY
+-> on failure, seal/drain/stop/re-prove zero -> restore captured exact LEGACY pointer -> restart LEGACY
 ```
 
-The sealed, drained/held, and stopped process set is the quiescence boundary.
-No old and new authority-consuming process may run together. `Stop` means a
-graceful stop only after the eligible work proof; it must not strand a queue,
-lease, or in-flight durable commit. This removes the need to invent a large
-runtime fence/CAS/readback controller solely to provide zero-downtime behavior
-in an engineering test page with no such requirement.
+The sealed, drained, and stopped process set is the quiescence boundary. No old
+and new authority-consuming process may run together. `Stop` means a graceful
+stop only after all eligible work reaches zero: an in-flight turn must complete
+under LEGACY or abort/reconcile cleanly, and a queued turn must reach an audited
+completed or reconciled failure disposition without deleting state or audit. This
+first exercise has no held
+authority-dependent work class. This removes the need to invent a large runtime
+fence/CAS/readback controller solely to provide zero-downtime behavior in an
+engineering test page with no such requirement.
 
 The process restart is not permission to invent facts or side effects. The
 model-semantics/code-verification boundary, verified-claim/provenance checks,
@@ -45,11 +48,11 @@ step:
 2. Capture the exact known-good LEGACY release/configuration, behavior pointer,
    migration ledger, routing/allowlist and rollback inputs. Do not delete state,
    audit, Inbox/Outbox, or migration history.
-3. Seal the target page from new authority-dependent work, gracefully drain or
-   place eligible queued/in-flight work into its reviewed held state using the
-   current LEGACY service set, then stop that finite set and re-prove the work is
-   empty or durably held. Unknown, non-empty, or stranded work aborts the
-   replacement.
+3. Seal the target page from new authority-dependent work, gracefully drain and
+   reconcile every eligible queued/in-flight item to zero using the current
+   LEGACY service set, then stop that finite set and re-prove zero eligible work.
+   Unknown, non-zero, or stranded work aborts the replacement; the first
+   exercise has no held authority-dependent work class.
 4. Apply only separately approved, additive, checksum-verified migrations. The
    pending DF13 artifacts remain outside automatic discovery; this decision
    neither promotes nor applies them.
@@ -61,11 +64,11 @@ step:
    state/context, reconciliation, commit/effect guards, restart/crash behavior,
    and candidate/fingerprint evidence guards. Controlled human journeys still
    require their own authorization.
-7. On any failed or unknown gate, seal and drain/hold COMMERCE work, stop the
-   COMMERCE release, and use the narrow writer to restore the exact captured
+7. On any failed or unknown gate, seal and drain/reconcile COMMERCE work to zero,
+   stop the COMMERCE release, re-prove zero eligible work, and use the narrow writer to restore the exact captured
    LEGACY behavior version/content identity at the next revision. Reconcile a
    lost acknowledgement only by durable `DATABASE` readback, then start the
-   exact captured LEGACY release/configuration and re-verify health, empty/held
+   exact captured LEGACY release/configuration and re-verify health, zero
    work, routing/allowlist, behavior identity, and no duplicate effects. Schema
    rollback is not implied by authority rollback.
 

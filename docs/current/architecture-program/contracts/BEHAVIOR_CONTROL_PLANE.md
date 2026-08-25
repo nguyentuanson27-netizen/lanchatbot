@@ -60,12 +60,13 @@ Every activation remains page-scoped, CAS-audited, read back from the worker, bo
 
 For the first isolated DF13 PREPROD exercise only,
 [`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](../DF13_PREPROD_FRESH_PROCESS_DECISION.md)
-seals admission, gracefully drains or holds eligible work, then stops the finite
-service set and re-proves it empty/held instead of using an in-process hot
-transition. This is the quiescence evidence: no authority-dependent process
+seals admission, gracefully drains and reconciles eligible work to zero, then
+stops the finite service set and re-proves zero eligible work instead of using
+an in-process hot transition. This is the quiescence evidence: no authority-dependent process
 remains to observe either identity while the exact COMMERCE pointer is recorded
 and one fresh COMMERCE service set starts. Any unknown work, wrong identity,
-incomplete consumer set, or start/readback failure seals/stops COMMERCE, restores
+incomplete consumer set, or start/readback failure drains/reconciles COMMERCE to
+zero, stops it, restores
 the exact captured LEGACY pointer, and restarts its captured release/configuration.
 
 The exception does not turn the generic operator into a COMMERCE writer. A

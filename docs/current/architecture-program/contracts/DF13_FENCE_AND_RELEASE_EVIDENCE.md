@@ -7,7 +7,7 @@ release, deployment, canary, runtime mutation, or `LEGACY -> COMMERCE` activatio
 
 The owner-selected
 [`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](../DF13_PREPROD_FRESH_PROCESS_DECISION.md)
-uses a sealed, drained/held, and stopped process boundary for the first isolated
+uses a sealed, drained-to-zero, and stopped process boundary for the first isolated
 PREPROD replacement. The immutable candidate, exact `DATABASE` identity,
 single-authority, complete-consumer, and exact LEGACY rollback requirements in
 this contract remain in force. The running durable-fence/CAS/propagation

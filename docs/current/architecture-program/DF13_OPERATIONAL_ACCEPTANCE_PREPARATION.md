@@ -138,12 +138,12 @@ disposable rehearsal is schema evidence only; it does not authorize applying
 ## First PREPROD stopped-process replacement plan
 
 Before the first COMMERCE start, seal new authority-dependent admission for the
-reviewed page/channel. Gracefully drain or place eligible queued/in-flight work
-into its reviewed held state using the current LEGACY service set, then stop the
-finite service set that can classify, read state/context/phase, choose
-strategy/CTA, reconcile, plan, or execute an effect. Re-prove the eligible work
-is empty or durably held. Unknown, non-empty, or stranded work aborts before
-starting the new build.
+reviewed page/channel. Gracefully drain and reconcile every eligible
+queued/in-flight item to zero using the current LEGACY service set, then stop
+the finite service set that can classify, read state/context/phase, choose
+strategy/CTA, reconcile, plan, or execute an effect. Re-prove zero eligible
+work. Unknown, non-zero, or stranded work aborts before starting the new build;
+the first exercise has no held authority-dependent work class.
 
 Only after that proof may the dedicated, non-generic DF13 writer record the
 reviewed exact COMMERCE identity. Start one fresh immutable COMMERCE service set
@@ -155,23 +155,23 @@ LKG, startup, stale, partial, ambiguous, or copied identity is not acceptance.
 The fresh service set must preserve atomic durable state/Outbox and Context V2
 capture semantics. A replay, crash/restart, partial completion, missing Context
 V2 capture, missing commerce signal, incomplete consumer, or unexpected effect
-fails closed: seal/drain or hold COMMERCE work, stop it, restore the exact
+fails closed: seal/drain and reconcile COMMERCE work to zero, stop it, restore the exact
 captured LEGACY pointer through the narrow writer, then restart the exact
 captured LEGACY release/configuration. The stopped-process protocol never issues
 a second blind activation or permits both authorities to work concurrently.
 
 ## Monitoring, abort, and exact rollback matrix
 
-| Condition | Decision before held work is released |
+| Condition | Decision before the replacement continues |
 |---|---|
 | Any candidate/manifest/blob/fingerprint mismatch, missing commerce signal, or authority ambiguity | Do not start COMMERCE; retain exact LEGACY. |
-| Any eligible work in flight or queued, or an unlisted consumer/bypass | Abort while sealed; do not start COMMERCE. |
+| Any eligible work in flight or queued, or an unlisted consumer/bypass | Drain/reconcile to zero under LEGACY or abort while sealed; do not start COMMERCE. |
 | New build identity/readback is not exact for the one complete consumer set | Stop COMMERCE, restore the captured exact LEGACY pointer, and restart captured LEGACY. |
 | Replay, lost acknowledgement, concurrency conflict, crash/restart, or partial durable commit | Stop COMMERCE; reconcile only by durable readback, restore exact LEGACY, and restart it unless a later owner command directs otherwise. |
 | Health/readiness, queue, SSRF/claim/provenance, PII/secret, auth, or DB-safety evidence unknown or degraded | Fail closed; do not start or keep COMMERCE. |
 | Critical controlled journey fails | Stop COMMERCE, restore the exact captured LEGACY pointer, and restart the exact captured LEGACY release/configuration. |
 
-Rollback means sealing and draining/holding COMMERCE work, stopping the COMMERCE
+Rollback means sealing and draining/reconciling COMMERCE work to zero, stopping the COMMERCE
 service set, then using the narrow writer to restore the exact captured LEGACY
 behavior version/content identity at the next revision. The restored pointer
 must have a null/omitted authority bundle and canonical LEGACY content hash, an

@@ -59,9 +59,9 @@ If that cannot be proven, activation aborts/fails closed to complete `LEGACY` au
 
 The owner subsequently selected the narrower
 [`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](DF13_PREPROD_FRESH_PROCESS_DECISION.md)
-for the first DF13 exercise. That decision seals admission, gracefully drains or
-holds eligible work, then stops the finite process set and re-proves it
-empty/held before a fresh COMMERCE build starts. It supersedes the in-process
+for the first DF13 exercise. That decision seals admission, gracefully drains
+and reconciles eligible work to zero, then stops the finite process set and
+re-proves zero eligible work before a fresh COMMERCE build starts. It supersedes the in-process
 fence/CAS/propagation mechanism above only
 for that one isolated PREPROD replacement; it does not lower the atomicity
 requirement, permit dual authority, or alter the State V2 or future
@@ -212,7 +212,7 @@ authority/state modes, and authority-bundle hash) to every authority consumer,
 audit/readback, and rollback before any future cutover command is reviewed. This
 plan does not authorize live composition or a `LEGACY -> COMMERCE` runtime change.
 
-Then, after explicit owner authorization, run the first `COMMERCE` exercise only on the `PREPROD_TEST_PAGE` by the stopped-process replacement decision: seal admission, gracefully drain or hold eligible work, stop the reviewed finite service set, re-prove it empty/held, then start one fresh COMMERCE build. Run controlled critical human journeys only after its deterministic smoke/integration gates pass. A later hot cutover remains subject to the quiescent boundary above.
+Then, after explicit owner authorization, run the first `COMMERCE` exercise only on the `PREPROD_TEST_PAGE` by the stopped-process replacement decision: seal admission, gracefully drain and reconcile eligible work to zero, stop the reviewed finite service set, re-prove zero eligible work, then start one fresh COMMERCE build. Run controlled critical human journeys only after its deterministic smoke/integration gates pass. A later hot cutover remains subject to the quiescent boundary above.
 
 ## 6. Gate E-PREPROD
 

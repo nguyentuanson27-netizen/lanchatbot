@@ -126,9 +126,10 @@ Before either switch, the replacement path must be proven by its Gate using dete
 
 For the first DF13 exercise only, the owner-selected
 [`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](DF13_PREPROD_FRESH_PROCESS_DECISION.md)
-defines the quiescence implementation: seal admission, gracefully drain or hold
-eligible work, stop the reviewed finite authority-consuming service set, and
-re-prove it empty/held before a fresh COMMERCE process starts. It is not a
+defines the quiescence implementation: seal admission, gracefully drain and
+reconcile eligible work to zero, stop the reviewed finite authority-consuming
+service set, and re-prove zero eligible work before a fresh COMMERCE process
+starts. It is not a
 zero-downtime controller, it cannot coexist with a LEGACY consumer, and it does
 not authorize deployment by itself. The State V2 and any
 future public-production switch continue to use their separately reviewed
@@ -146,10 +147,11 @@ Because bounded propagation can temporarily expose different workers to differen
 Only a finite, reviewed class proven by contract tests to be independent of both the old and
 new authority may bypass the fence; absence from the protected-side-effect set is not enough.
 
-For the stopped-process DF13 replacement, a graceful drain/hold followed by a
-complete process stop and a re-proved empty/held eligible-work state is the
-required quiescence evidence; unknown, non-empty, or stranded work aborts before
-the new build starts. Failure to prove the required boundary or exact terminal
+For the stopped-process DF13 replacement, a graceful drain/reconciliation to
+zero followed by a complete process stop and a re-proved zero eligible-work
+state is the required quiescence evidence; unknown, non-zero, or stranded work
+aborts before the new build starts. There is no held authority-dependent work
+class for this first exercise. Failure to prove the required boundary or exact terminal
 LEGACY pointer/readback and restart state aborts/fails closed to complete
 `LEGACY` authority.
 
