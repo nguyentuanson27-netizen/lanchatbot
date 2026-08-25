@@ -56,6 +56,25 @@ This quiescent boundary is an atomicity/correctness requirement for direct cutov
 
 Every activation remains page-scoped, CAS-audited, read back from the worker, bounded by the existing propagation contract, and reversible to complete `LEGACY` authority.
 
+### Narrow first-DF13 PREPROD exception
+
+For the first isolated DF13 PREPROD exercise only,
+[`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](../DF13_PREPROD_FRESH_PROCESS_DECISION.md)
+uses a sealed, stopped, and drained finite service set instead of an in-process
+hot transition. The stop/drain proof is the quiescence evidence: no
+authority-dependent process remains to observe either identity while the exact
+COMMERCE pointer is recorded and one fresh COMMERCE service set starts. Any
+unknown work, wrong identity, incomplete consumer set, or start/readback failure
+aborts to the exact captured LEGACY release/configuration.
+
+The exception does not turn the generic operator into a COMMERCE writer. A
+dedicated, non-generic first-PREPROD writer may record only the reviewed exact
+identity after the stop/drain proof and must emit an audit record. It cannot use
+an environment-only authority flag, accept a mutable ref, or operate while an
+authority-consuming service is running. State V2, any zero-downtime operation,
+page expansion, and public production remain subject to the ordinary direct
+cutover contract above.
+
 The generic control-plane operator is intentionally LEGACY-only. Its generic
 CAS path must reject a COMMERCE target: the only permitted future COMMERCE
 writer is a dedicated DF13 cutover adapter that owns the full quiescent fence,

@@ -73,7 +73,7 @@ Original DF01-DF13 and UR00-UR10 identifiers remain traceable. PREPROD groups th
 |---|---|---|---|
 | `DF-A` | `DF-P1..DF-P3` | DF01-DF06 | Minimum decision telemetry/normalization then canonical evidence/readiness. |
 | `DF-B` | `DF-P4..DF-P6` | DF07-DF10 | Deterministic phase/barrier, Context V2, locked offline/replay evaluation with exact candidate identity. |
-| `DF-C` | `DF-P7` | DF11-DF13 | Release-bound candidate, quiescent direct `LEGACY -> COMMERCE`, readback, critical journeys, rollback. |
+| `DF-C` | `DF-P7` | DF11-DF13 | Release-bound candidate, stopped-process PREPROD `LEGACY -> COMMERCE`, critical journeys, exact LEGACY restart rollback. |
 
 ### UR
 
@@ -122,9 +122,18 @@ sales authority: LEGACY -> COMMERCE
 state read:       LEGACY -> V2
 ```
 
-Before either switch, the replacement path must be proven by its Gate using deterministic/replay/comparator evidence. Activation then requires explicit approval, audited CAS, exact readback, bounded propagation, controlled scenarios, and complete rollback to `LEGACY`.
+Before either switch, the replacement path must be proven by its Gate using deterministic/replay/comparator evidence. Apart from the narrow first-DF13 exception below, activation requires explicit approval, audited CAS, exact readback, bounded propagation, controlled scenarios, and complete rollback to `LEGACY`.
 
-Because bounded propagation can temporarily expose different workers to different revisions, every direct switch must use the page-scoped quiescent cutover contract from `contracts/BEHAVIOR_CONTROL_PLANE.md`:
+For the first DF13 exercise only, the owner-selected
+[`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](DF13_PREPROD_FRESH_PROCESS_DECISION.md)
+defines the quiescence implementation: seal admission, stop the reviewed finite
+authority-consuming service set, and prove it drained before a fresh COMMERCE
+process starts. It is not a zero-downtime CAS, it cannot coexist with a LEGACY
+consumer, and it does not authorize deployment by itself. The State V2 and any
+future public-production switch continue to use their separately reviewed
+transition contracts.
+
+Because bounded propagation can temporarily expose different workers to different revisions, a hot direct switch must use the page-scoped quiescent cutover contract from `contracts/BEHAVIOR_CONTROL_PLANE.md`:
 
 1. hold all new authority-dependent eligible work;
 2. prove no authority-dependent message, read, classification, context/phase/CTA/reconciliation decision, command, cart/order transition, or side-effect plan is in flight;
@@ -136,7 +145,11 @@ Because bounded propagation can temporarily expose different workers to differen
 Only a finite, reviewed class proven by contract tests to be independent of both the old and
 new authority may bypass the fence; absence from the protected-side-effect set is not enough.
 
-Failure to prove quiescence or exact convergence aborts/fails closed to complete `LEGACY` authority.
+For the stopped-process DF13 replacement, a complete process stop plus an empty
+eligible-work proof is the required quiescence evidence; unknown or non-empty
+work aborts before the new build starts. Failure to prove the required boundary
+or exact terminal LEGACY restart state aborts/fails closed to complete `LEGACY`
+authority.
 
 A legacy/new comparator may be used offline or in controlled side-effect-free verification. It is verification tooling, not a third authority state.
 
@@ -167,7 +180,7 @@ The old `>=100` pair/non-inferiority concept is not automatically carried forwar
 - auth/authz/least privilege/audit requirements remain enforced;
 - database changes remain additive/backward-compatible unless separately approved;
 - no partial authority merge or mixed legacy/new field synthesis is allowed;
-- direct authority changes satisfy the quiescent cutover boundary before any authority-dependent work resumes;
+- direct authority changes satisfy their reviewed quiescence boundary before any authority-dependent work resumes; the first DF13 PREPROD exercise uses the explicitly documented stopped-process boundary;
 - evaluated generative candidates retain reproducible manifest and content-fingerprint provenance through activation;
 - readback, bounded propagation and complete `LEGACY` rollback remain required for authority changes;
 - no silent data loss, unsafe fallback, direct VPS source edit, premature retirement or destructive cleanup is authorized;

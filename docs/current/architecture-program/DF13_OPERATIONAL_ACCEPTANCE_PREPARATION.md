@@ -8,29 +8,41 @@ immutable Release Train evidence and does not authorize a runtime operation.
 
 ## Purpose and hard boundary
 
-DF-C / DF13 source work is complete. This preparation records the exact evidence
-and fail-closed runbook that a separately authorized Release Train must use before
-the first mutating boundary. It does not create an immutable release, inspect a
-runtime host, apply pending migration `0035`, change `salesAuthorityMode` or
-`stateReadMode`, or start UR.
+DF-C / DF13 source foundations are complete. This preparation records the exact
+evidence and fail-closed runbook that a separately authorized Release Train must
+use before the first mutating boundary. It does not create an immutable release,
+inspect a runtime host, apply pending migration `0035`, change
+`salesAuthorityMode` or `stateReadMode`, or start UR.
 
-The reviewed source composes one explicit final-authority boundary before any
-conversation-state, model, product, or durable-commit work. The normal startup
-input remains `LEGACY` and delegates to the existing runner unchanged. An
-isolated pre-production `COMMERCE` startup is separately fail-closed: it needs
-the immutable release-evidence package, exact release-source pointer, exact
-DATABASE behavior identity, the dedicated fence executor, and Context V2
-capture. An invalid, resolver-failed, stale, or incomplete COMMERCE identity
-blocks rather than falling through to LEGACY. Wiring this source changes no
-deployed runtime and permits no activation by itself.
+For the first controlled DF13 PREPROD exercise only, the owner-selected
+[`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](DF13_PREPROD_FRESH_PROCESS_DECISION.md)
+supersedes this document's former in-process fence/CAS sequence. That exercise
+uses a sealed, stopped, and drained service set as its quiescence boundary, then
+starts exactly one fresh COMMERCE build. It is not a zero-downtime cutover and
+does not relax immutable candidate, single-authority, safety, or exact LEGACY
+rollback requirements. A later hot transition remains governed by the durable
+fence contract.
 
-The isolated COMMERCE composition deliberately disables behavior-pointer cache
-for both startup preflight and every turn: each authority decision must be a
-new exact `DATABASE` read. Its sole Context V2 bootstrap is a new conversation
-at revision zero with a pristine Commerce `DISCOVERY` state. Every fenced
-Commerce commit must then persist its next Context V2 capture in the same
-transaction; an absent plan or unsuccessful write rolls back state, Inbox
-completion, and fence completion.
+The reviewed source establishes the single-authority, resolver, candidate, and
+consumer contracts before conversation-state, model, product, or durable-commit
+work. Normal startup remains `LEGACY` and delegates to the existing runner
+unchanged. A narrowly scoped follow-up source change must bind the real
+fresh-process COMMERCE composition before an operational train can exist; this
+preparation does not claim that a test wrapper or a generic operator is that
+binding. The COMMERCE start path must require immutable release evidence, an
+exact release-source pointer, and an exact `DATABASE` behavior identity, and
+must block stale, incomplete, or resolver-failed identity rather than falling
+through to LEGACY. None of that source work changes deployed runtime or permits
+activation by itself.
+
+The fresh COMMERCE composition must read the exact behavior identity from
+`DATABASE` at startup and before authority-dependent work; `CACHE`, LKG, and
+startup defaults cannot become a COMMERCE final authority. Its sole Context V2
+bootstrap is a new conversation at revision zero with a pristine Commerce
+`DISCOVERY` state. Every Commerce commit must persist its required next Context
+V2 capture atomically with durable state/Outbox work; an absent plan or failed
+capture blocks the work. These requirements do not reintroduce a running
+LEGACY/COMMERCE co-authority.
 
 The only admissible authority topology remains one direct page-scoped transition:
 
@@ -71,8 +83,9 @@ the complete ordered path/blob/content-SHA list rather than a copied fingerprint
 - the canonical DF13 authority-bundle hash and all eight consumers:
   classification, commerce state, Context V2, derived phase, strategy, CTA,
   final reconciliation, and side-effect plan;
-- `0035_df13_commerce_behavior_mode` and
-  `0036_df13_commerce_authority_fence` up/down blob and SHA-256 identities; and
+- `0035_df13_commerce_behavior_mode` up/down blob and SHA-256 identities;
+  `0036_df13_commerce_authority_fence` remains an additional hot-cutover-only
+  artifact, not a prerequisite of the first stopped-process exercise; and
 - the required rollback target: the exact pre-cutover LEGACY pointer with the
   same eight consumer readbacks.
 
@@ -84,31 +97,33 @@ new authorized DF-P6/Gate E evaluation on the final candidate.
 ## Pending-migration rehearsal
 
 `0035` and `0036` remain in `packages/database/pending-migrations/` and are
-deliberately outside automatic migration discovery. `0036` is the durable,
-page-scoped cutover-fence schema; it is not an Inbox-batch fence substitute. A
-Release Train may test them only in a new disposable database with no shared
-endpoint, persistent volume, host port, or production/preprod credential.
+deliberately outside automatic migration discovery. The first stopped-process
+exercise may consider only separately approved `0035`; it does not need or
+apply `0036`. `0036` remains the durable page-scoped hot-cutover-fence schema,
+not an Inbox-batch fence substitute. A Release Train may test either artifact
+only in a new disposable database with no shared endpoint, persistent volume,
+host port, or production/preprod credential.
 
 Required rehearsal assertions are:
 
 1. apply the required core schema through the existing `0030` behavior-mode
-   schema, then exact `0035` and `0036` up SQL in order;
+   schema, then exact `0035` up SQL;
 2. prove LEGACY versions still accept a null authority-bundle value;
 3. prove COMMERCE rejects a missing or malformed bundle and every state-read
    mode other than LEGACY;
 4. prove a valid 64-hex COMMERCE bundle is accepted;
-5. prove `0036` records only a full immutable pre-cutover LEGACY and target
-   COMMERCE identity, re-read field-by-field from the current durable pointer
-   and immutable versions before insert, and that identity fields cannot be
-   mutated after insert;
-6. prove its immutable operation ID reconciles lost acquire/release ACKs without
-   inserting a second fence, and that lease acquire, recovery, and release use
-   PostgreSQL time rather than a process clock; and
-7. prove `0036` down refuses while any durable cutover or authority-fence
+5. if a future hot-cutover train elects to use `0036`, separately prove it
+   records only a full immutable pre-cutover LEGACY and target COMMERCE identity,
+   re-read field-by-field from the current durable pointer and immutable versions
+   before insert, cannot mutate identity fields afterward, reconciles lost
+   acquire/release ACKs without a second fence, and uses PostgreSQL time rather
+   than a process clock for lease acquire, recovery, and release; and
+7. if `0036` is rehearsed, prove its down SQL refuses while any durable cutover or authority-fence
    evidence exists and preserves it; and
-8. in a separate clean disposable database, prove `0036` down succeeds with no
-   fence evidence; then separately prove `0035` down refuses while an immutable
-   COMMERCE version exists and otherwise restores the LEGACY-only constraint.
+8. separately prove `0035` down refuses while an immutable COMMERCE version
+   exists and otherwise restores the LEGACY-only constraint. If `0036` is
+   rehearsed, prove in a separate clean disposable database that its down SQL
+   succeeds with no fence evidence.
 
 Record exact SQL SHA-256 values for both migrations, image/runtime identity,
 isolation properties, redacted command log hash, and cleanup confirmation.
@@ -116,57 +131,58 @@ Never use `migrateUp` to discover or promote either pending artifact. Successful
 disposable rehearsal is schema evidence only; it does not authorize applying
 `0035` or `0036` anywhere.
 
-## Quiescent cutover plan
+## First PREPROD stopped-process replacement plan
 
-Before any future CAS, acquire the page/channel-scoped DF13 durable fence for
-the exact immutable request. The held consumer set is the whole authority
-surface above. No classification, state, context, phase, strategy, CTA,
-reconciliation, side-effect plan/execution, cart/order transition, queued
-eligible event, or in-flight eligible work may cross the fence.
+Before the first COMMERCE start, seal new authority-dependent admission for the
+reviewed page/channel and stop the finite service set that can classify, read
+state/context/phase, choose strategy/CTA, reconcile, plan, or execute an
+effect. Prove the eligible queue and in-flight work are empty. Unknown or
+non-empty work aborts before starting the new build.
 
-Only after an empty in-flight/eligible-queue proof may the dedicated DF13
-adapter attempt one audited CAS. Keep the fence held through propagation. Every
-consumer must read back the exact database-resolved mode-version ID, canonical
-content hash, pointer revision, source, authority/state modes, and authority
-bundle. A cached, LKG, startup, stale, partial, ambiguous, or copied identity
-is not convergence.
+Only after that proof may the dedicated, non-generic DF13 writer record the
+reviewed exact COMMERCE identity. Start one fresh immutable COMMERCE service set
+and verify the complete eight-consumer surface has that one final authority.
+The target identity must be re-read from `DATABASE` and match version, canonical
+content hash, authority bundle, page/channel, and release evidence. Cached,
+LKG, startup, stale, partial, ambiguous, or copied identity is not acceptance.
 
-The atomic committer couples durable runtime state/Outbox work, exact
-Inbox-claim release, the required next Context V2 capture, and fence completion.
-Lost acknowledgement is recovered as
-`ALREADY_COMPLETED`; a lease expiry, replay, stale epoch, concurrency conflict,
-crash/restart, partial completion, missing Context V2 capture, or missing
-consumer readback fails closed
-and retains or reacquires the fence as required.
+The fresh service set must preserve atomic durable state/Outbox and Context V2
+capture semantics. A replay, crash/restart, partial completion, missing Context
+V2 capture, missing commerce signal, incomplete consumer, or unexpected effect
+fails closed: stop COMMERCE and restart the exact captured LEGACY
+release/configuration. The stopped-process protocol never issues a second blind
+activation or permits both authorities to work concurrently.
 
 ## Monitoring, abort, and exact rollback matrix
 
 | Condition | Decision before held work is released |
 |---|---|
-| Any candidate/manifest/blob/fingerprint mismatch, missing commerce signal, or authority ambiguity | Abort before CAS; remain exact LEGACY. |
-| Any eligible work in flight or queued, or an unlisted consumer/bypass | Do not CAS; retain/abort the fence. |
-| CAS/audit/readback not exactly one expected revision/hash/source/bundle for every consumer within the reviewed propagation bound | Abort or roll back under the fence. |
-| Replay, lost ACK, stale lease/epoch, concurrency conflict, crash/restart, or partial durable commit | Reconcile under the fence; do not derive or execute another plan until the durable outcome is exact. |
-| Health/readiness, queue, SSRF/claim/provenance, PII/secret, auth, or DB-safety evidence unknown or degraded | Fail closed; do not release authority-dependent work. |
-| Critical controlled journey fails | Roll back under the fence to the exact pre-cutover LEGACY pointer. |
+| Any candidate/manifest/blob/fingerprint mismatch, missing commerce signal, or authority ambiguity | Do not start COMMERCE; retain exact LEGACY. |
+| Any eligible work in flight or queued, or an unlisted consumer/bypass | Abort while sealed; do not start COMMERCE. |
+| New build identity/readback is not exact for the one complete consumer set | Stop COMMERCE and restart captured exact LEGACY. |
+| Replay, lost acknowledgement, concurrency conflict, crash/restart, or partial durable commit | Stop COMMERCE; recover only from durable evidence and restart exact LEGACY unless a later owner command directs otherwise. |
+| Health/readiness, queue, SSRF/claim/provenance, PII/secret, auth, or DB-safety evidence unknown or degraded | Fail closed; do not start or keep COMMERCE. |
+| Critical controlled journey fails | Stop COMMERCE and restart the exact captured LEGACY release/configuration. |
 
-Rollback means an audited CAS to the exact pre-cutover LEGACY version/content
-identity at the next pointer revision, with a null/omitted authority bundle and
-canonical LEGACY content hash. The fence remains held until all eight consumers
-read back that exact `DATABASE` identity. Any stale LEGACY pointer, partial
-Context V2/phase/reconciliation state, missing audit, or lost acknowledgement
-is not rollback completion.
+Rollback means stopping the COMMERCE service set and restarting the exact
+captured LEGACY release/configuration. Its behavior pointer/version/content
+identity must match the recorded pre-replacement value, with a null/omitted
+authority bundle and canonical LEGACY content hash. The restarted service set
+must read it from `DATABASE` before work resumes. A stale LEGACY pointer,
+partial Context V2/phase/reconciliation state, missing audit, or unknown
+restart outcome is not rollback completion.
 
 ## Required authorization sequence
 
 1. Merge reviewed source fixes only after an explicit owner merge command.
 2. Re-run this package from the final trusted `origin/main` source and prepare
    immutable Release Train evidence.
-3. Obtain a separate owner command for a named release/migration/cutover
+3. Obtain a separate owner command for a named release/migration/replacement
    boundary; no source PR supplies it.
-4. Only then perform the controlled PREPROD operation and collect real
-   activation/readback/rollback evidence. Controlled human journeys follow
-   successful convergence; Gate F remains unpassed until those records exist.
+4. Only then perform the stopped-process PREPROD operation and collect real
+   start/readback/rollback evidence. Controlled human journeys follow successful
+   smoke and integration verification; Gate F remains unpassed until those
+   records exist.
 
 BF-03 remains foundation-only/non-activatable, BF-04 remains `PARTIAL / KNOWN_GAP`,
 BF-10 natural-terminal evidence remains pending, and the separate `DATABASE_URL`

@@ -3,26 +3,44 @@
 **Status:** Source-only architecture contract. It never authorizes migration,
 release, deployment, canary, runtime mutation, or `LEGACY -> COMMERCE` activation.
 
+## First PREPROD stopped-process scope
+
+The owner-selected
+[`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](../DF13_PREPROD_FRESH_PROCESS_DECISION.md)
+uses a sealed, stopped, and drained process boundary for the first isolated
+PREPROD replacement. The immutable candidate, exact `DATABASE` identity,
+single-authority, complete-consumer, and exact LEGACY rollback requirements in
+this contract remain in force. The running durable-fence/CAS/propagation
+protocol below remains a future hot-cutover foundation; it is not required to
+create a zero-downtime controller for the first stopped-process exercise.
+
+This exception neither applies `0036` nor treats it as a prerequisite. It does
+not make a generic operator or environment flag a COMMERCE authority writer.
+The first operation still requires a separately reviewed narrow runtime
+composition and writer, an immutable release package, explicit owner release
+authorization, and real operational evidence.
+
 ## Governing rule
 
 Absence of proof of COMMERCE authority means the caller keeps the existing
 LEGACY path. Only a positively identified but unusable COMMERCE pointer blocks.
 
 This rule prevents a COMMERCE gate from changing current LEGACY traffic. The
-source composition has one resolver-facing Commerce consumer and one matching
-executor instance. Normal startup supplies `LEGACY` input, so its activation
-authority rejects COMMERCE before a fence, state, model, product, or commit
-operation. A separate fresh-process PREPROD input may admit COMMERCE only with
-the exact page/channel/version/content/bundle/revision/DATABASE identity, a
+source provides the resolver-facing Commerce consumer and matching executor
+contracts. Normal startup supplies `LEGACY` input, so it rejects COMMERCE before
+a fence, state, model, product, or commit operation. The separately reviewed
+fresh-process composition may admit COMMERCE only with the exact
+page/channel/version/content/bundle/revision/`DATABASE` identity, a
 self-validating immutable release-evidence package, and an exact release-source
 pointer. It never accepts a copied hash or an enable flag.
 
-`RealtimeRunner` applies a single final-authority boundary before loading
-conversation state, invoking the model, searching products, or committing a
-result. A COMMERCE-origin resolver fallback is blocked, never reclassified as a
-LEGACY final authority. A fresh exact COMMERCE identity is likewise blocked
-unless the isolated PREPROD startup supplies the reviewed matching executor and
-immutable input; the normal LEGACY composition remains default-off.
+That real `RealtimeRunner` composition must apply a single final-authority
+boundary before loading conversation state, invoking the model, searching
+products, or committing a result. A COMMERCE-origin resolver fallback is
+blocked, never reclassified as a LEGACY final authority. A fresh exact COMMERCE
+identity is likewise blocked unless the isolated PREPROD startup supplies the
+reviewed matching executor and immutable input; the normal LEGACY composition
+remains default-off.
 
 The isolated COMMERCE composition disables pointer caching: startup preflight
 and every authority-dependent turn must resolve the exact identity from
@@ -180,14 +198,16 @@ authorized runtime execution can append actual rollback evidence.
 
 ## Source completion and hard stops
 
-The source-level default-off wrapper, isolated startup composition, and
-dedicated atomic consumer-commit/fence-completion transaction are complete.
-This is source integration, not a deployed runtime, release candidate,
-migration application, deployment, canary, cutover, or activation
+The source-level default-off wrapper, immutable identity, consumer, and durable
+fence foundations are complete. A real fresh-process COMMERCE runtime
+composition and its narrow first-PREPROD writer remain a separately reviewed
+source boundary; a test wrapper, generic operator, or copied input is not that
+boundary. This is source integration, not a deployed runtime, release candidate,
+migration application, deployment, canary, replacement, or activation
 authorization. Operational acceptance must still review the exact release
-candidate, migration state, quiescent cutover evidence, consumer readbacks,
-activation audit, rollback evidence, and controlled human journeys under
-separately approved commands.
+candidate, migration state, stop/drain evidence, consumer readbacks, start
+audit, rollback evidence, and controlled human journeys under separately
+approved commands.
 
 Until that work is separately authorized and accepted, runtime remains
 `salesAuthorityMode=LEGACY`, `stateReadMode=LEGACY`.

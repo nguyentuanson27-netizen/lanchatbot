@@ -114,8 +114,8 @@ Before activation:
 - the immutable release artifact carries the exact Gate-E `ContextV2CandidateManifest` hash and re-derives the candidate projection/content fingerprint from the final artifact;
 - the re-derived fields match Gate E exactly; copying the prior hash is not evidence;
 - any mismatch, unavailable derivation input, or material candidate-identity change since Gate E forces DF-P6 rerun on the final candidate before activation;
-- complete `LEGACY` rollback is ready;
-- the page-scoped quiescent cutover protocol from `contracts/BEHAVIOR_CONTROL_PLANE.md` is verified.
+- complete `LEGACY` restart rollback is ready; and
+- the owner-selected stopped-process boundary in `DF13_PREPROD_FRESH_PROCESS_DECISION.md` is verified for the first PREPROD exercise. A later hot cutover must verify the page-scoped quiescent protocol from `contracts/BEHAVIOR_CONTROL_PLANE.md`.
 
 DF13 source boundary: the pending `0035_df13_commerce_behavior_mode` artifact
 lives outside the auto-discovered active migration directory and must not be
@@ -125,22 +125,22 @@ compatible before that schema promotion. The enabled generic behavior-mode
 operator remains LEGACY-only, and the generic version CAS rejects COMMERCE
 targets. The pure fence admission and release-evidence contract bind the
 prospective immutable request without touching the runtime. The merged DF13
-provider/dispatcher and default-off consumer wrapper bind the immutable authority
-identity (mode version, content hash, pointer revision, source, authority/state
-modes, and authority-bundle hash) to the listed authority consumers and durable
-fence ownership. The source server has one shared composition seam: normal
-startup stays `LEGACY`, while isolated PREPROD `COMMERCE` startup needs the
-reviewed immutable release package and the same fenced executor. Operational
-acceptance must still establish exact consumer readback, activation audit, and
-rollback evidence before a separately authorized cutover command may exist.
-There is no generic operator shortcut from `LEGACY` to `COMMERCE`.
+provider/dispatcher and default-off consumer wrapper remain valid source
+foundations. For the first PREPROD exercise,
+`DF13_PREPROD_FRESH_PROCESS_DECISION.md` replaces an in-process durable-fence
+controller with a sealed, stopped, and drained fresh-process boundary. Normal
+startup stays `LEGACY`; an isolated PREPROD `COMMERCE` startup still needs the
+reviewed immutable release package and exact authority identity. Operational
+acceptance must establish stop/drain, one-service-set, smoke/integration, and
+exact LEGACY restart evidence before a separately authorized replacement may
+exist. There is no generic operator shortcut from `LEGACY` to `COMMERCE`.
 
-`RealtimeRunner` now selects one final sales authority before state/model/product
-or commit work. A rejected COMMERCE-origin result cannot fall through to the
-LEGACY pipeline, and an exact COMMERCE identity remains blocked until a reviewed
-COMMERCE executor is bound.
+The reviewed fresh-process `RealtimeRunner` composition must select one final
+sales authority before state/model/product or commit work. A rejected
+COMMERCE-origin result cannot fall through to the LEGACY pipeline, and an exact
+COMMERCE identity remains blocked until the reviewed COMMERCE executor is bound.
 
-After explicit owner authorization, activate only on `PREPROD_TEST_PAGE` using that quiescent boundary, verify exact authority revision/hash/source readback across every relevant consumer, then release held eligible work and run the controlled critical human journeys.
+After explicit owner authorization, exercise only `PREPROD_TEST_PAGE` using the stopped-process replacement boundary, verify the one fresh COMMERCE service set and its candidate/build identity, then run the controlled critical human journeys. No release may run both authorities together.
 
 ## Gate F-PREPROD
 
@@ -150,7 +150,7 @@ After explicit owner authorization, activate only on `PREPROD_TEST_PAGE` using t
 - [ ] Missing commerce state with committed intent fails closed.
 - [ ] Full transition matrix and BF/DF replay pass.
 - [ ] Activated immutable release re-derives and matches the exact Gate-E candidate projection/content fingerprint; a carried manifest hash alone is insufficient.
-- [ ] Quiescent cutover holds all authority-dependent eligible work, proves no authority-dependent in-flight/queued work can cross the boundary, and releases work only after all relevant consumers read back the exact new revision.
+- [ ] First PREPROD replacement seals admission, proves no authority-dependent in-flight/queued work, runs one fresh COMMERCE service set, and proves exact LEGACY restart rollback. A later hot cutover holds work and proves exact revision convergence before release.
 - [ ] Controlled PREPROD critical human journeys pass.
 - [ ] Exact runtime identity/control-plane readback is verified for the deployed candidate.
 - [ ] Complete `COMMERCE -> LEGACY` rollback is verified.
