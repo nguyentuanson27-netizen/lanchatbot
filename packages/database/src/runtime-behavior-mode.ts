@@ -237,11 +237,15 @@ export class PostgresRuntimeBehaviorModeStore {
         throw new Error("RUNTIME_BEHAVIOR_COMMERCE_CUTOVER_DEDICATED_PATH_REQUIRED");
       }
       const currentResult = await client.query(
-        `SELECT p.active_version_id, p.pointer_revision, v.confirmation_mode AS previous_confirmation_mode
+        `SELECT p.active_version_id, p.pointer_revision, v.confirmation_mode AS previous_confirmation_mode,
+                v.sales_authority_mode AS previous_sales_authority_mode
          FROM runtime_behavior_mode_pointers p
          JOIN runtime_behavior_mode_versions v ON v.mode_version_id = p.active_version_id
          WHERE p.page_id = $1 AND p.channel = $2 FOR UPDATE OF p`, [pageId, channel]);
       const current = currentResult.rows[0] as Record<string, unknown> | undefined;
+      if (current?.previous_sales_authority_mode === "COMMERCE") {
+        throw new Error("RUNTIME_BEHAVIOR_COMMERCE_ROLLBACK_DEDICATED_PATH_REQUIRED");
+      }
       const currentRevision = current ? Number(current.pointer_revision) : 0;
       if (currentRevision !== input.expectedPointerRevision) throw new Error("RUNTIME_BEHAVIOR_POINTER_CAS_MISMATCH");
       const nextRevision = currentRevision + 1;

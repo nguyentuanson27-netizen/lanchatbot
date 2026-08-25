@@ -250,6 +250,40 @@ describe("PostgresRuntimeBehaviorModeStore", () => {
     expect(statements.some((sql) => sql.includes("UPDATE runtime_behavior_mode_pointers"))).toBe(false);
   });
 
+  it("rejects a generic COMMERCE-to-LEGACY pointer change without writing the pointer", async () => {
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes("FROM runtime_behavior_mode_versions")) {
+        return { rows: [targetRow], rowCount: 1 };
+      }
+      if (sql.includes("FROM runtime_behavior_mode_pointers")) {
+        return {
+          rows: [{
+            active_version_id: "10000000-0000-4000-8000-000000000003",
+            pointer_revision: 7,
+            previous_confirmation_mode: "V2_SHADOW",
+            previous_sales_authority_mode: "COMMERCE",
+          }],
+          rowCount: 1,
+        };
+      }
+      return { rows: [], rowCount: 0 };
+    });
+    const store = new PostgresRuntimeBehaviorModeStore("postgresql://test", 1);
+
+    await expect(store.activateVersion({
+      pageId,
+      channel,
+      targetVersionId,
+      expectedPointerRevision: 7,
+      actor: "operator",
+      reason: "generic rollback must not bypass DF13 proof and audit",
+    })).rejects.toThrow("RUNTIME_BEHAVIOR_COMMERCE_ROLLBACK_DEDICATED_PATH_REQUIRED");
+
+    const statements = mocks.clientQuery.mock.calls.map(([sql]) => String(sql));
+    expect(statements).toContain("ROLLBACK");
+    expect(statements.some((sql) => sql.includes("UPDATE runtime_behavior_mode_pointers"))).toBe(false);
+  });
+
   it("admits the exact first-PREPROD COMMERCE pointer only through its non-generic writer", async () => {
     const commercePayload = {
       confirmationMode: "V2_SHADOW" as const,
