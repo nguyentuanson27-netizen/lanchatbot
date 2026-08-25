@@ -56,15 +56,26 @@ step:
 4. Apply only separately approved, additive, checksum-verified migrations. The
    pending DF13 artifacts remain outside automatic discovery; this decision
    neither promotes nor applies them.
-5. Start only the reviewed finite service set from an immutable fresh release
-   with the exact COMMERCE identity. All eight authority-dependent consumers
-   start from that one build; no LEGACY/COMMERCE co-authority, regex writer, or
-   partial Context V2/phase/reconciliation consumer is permitted.
-6. Run the pre-registered smoke and integration journeys, including response,
+5. After the stopped zero-work proof, use only
+   `df13-first-preprod-commerce-version-preparer-cli prepare-commerce` with
+   its exact candidate evidence, release-source identity and captured LEGACY
+   pointer. It creates or reconciles one immutable canonical COMMERCE version
+   and one create-once startup package, but does **not** move a pointer. The
+   generic behavior-mode operator and manual SQL remain prohibited.
+6. Use the narrow behavior writer to make the one exact pointer transition to
+   that prepared version. After its exact durable readback, start only the
+   reviewed finite service set from an immutable fresh release with the
+   corresponding startup package.
+   A mismatch, stale proof, existing target from a different operation, or
+   package-write collision aborts before COMMERCE starts.
+7. All eight authority-dependent consumers start from that one fresh build;
+   no LEGACY/COMMERCE co-authority, regex writer, or partial
+   Context V2/phase/reconciliation consumer is permitted.
+8. Run the pre-registered smoke and integration journeys, including response,
    state/context, reconciliation, commit/effect guards, restart/crash behavior,
    and candidate/fingerprint evidence guards. Controlled human journeys still
    require their own authorization.
-7. On any failed or unknown gate, seal and drain/reconcile COMMERCE work to zero,
+9. On any failed or unknown gate, seal and drain/reconcile COMMERCE work to zero,
    stop the COMMERCE release, re-prove zero eligible work, and use the narrow writer to restore the exact captured
    LEGACY behavior version/content identity at the next revision. Reconcile a
    lost acknowledgement only by durable `DATABASE` readback, then start the
@@ -77,6 +88,13 @@ reviewed exact identity while the process boundary above is proven. It accepts
 only the fixed fresh-start/rollback operation document, re-reads both exact
 database identities inside its pointer transaction, and cannot re-open a
 generic COMMERCE operator or environment-only authority switch.
+
+The preparer is deliberately separate from that writer: preparation creates an
+immutable target under the same exact LEGACY read and zero-work proof while
+leaving the active pointer unchanged. Its create-once startup package binds the
+validated source evidence, release source and post-activation identity. This
+separation gives an interrupted operation a durable reconciliation point without
+creating a second authority path.
 
 ## Consequences and boundaries
 
