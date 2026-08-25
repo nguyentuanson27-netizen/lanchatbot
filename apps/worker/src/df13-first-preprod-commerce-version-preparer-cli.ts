@@ -179,12 +179,12 @@ export async function assertDf13FirstPreprodImmutableTag(
   if (!RELEASE_TAG_NAME.test(source.tag)) throw new Error("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_INVALID");
   const ref = `refs/tags/${source.tag}`;
   try {
-    const [kind, commit, tree] = await Promise.all([
-      run(["cat-file", "-t", ref]),
-      run(["rev-parse", `${ref}^{}`]),
-      run(["rev-parse", `${ref}^{tree}`]),
-    ]);
-    if (kind !== "tag" || commit !== source.commit || tree !== source.treeOid) {
+    const tagObjectOid = await run(["rev-parse", "--verify", ref]);
+    const kind = await run(["cat-file", "-t", tagObjectOid]);
+    const commit = await run(["rev-parse", `${tagObjectOid}^{}`]);
+    const tree = await run(["rev-parse", `${tagObjectOid}^{tree}`]);
+    const observedTagObjectOid = await run(["rev-parse", "--verify", ref]);
+    if (kind !== "tag" || commit !== source.commit || tree !== source.treeOid || observedTagObjectOid !== tagObjectOid) {
       throw new Error("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH");
     }
   } catch (error) {

@@ -1,7 +1,9 @@
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, stat, symlink } from "node:fs/promises";
+import { mkdtemp, readFile, stat, symlink, writeFile } from "node:fs/promises";
+import { execFile as execFileCallback } from "node:child_process";
 import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
+import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it, vi } from "vitest";
 import { runtimeBehaviorModeContentHash } from "@lana/database";
@@ -24,9 +26,14 @@ const revision = "a".repeat(40);
 const root = fileURLToPath(new URL("../../..", import.meta.url));
 const pageId = "1198992073286645";
 const channel = "MESSENGER";
+const execFile = promisify(execFileCallback);
 
 async function file(path: string): Promise<string> {
   return readFile(resolve(root, path), "utf8");
+}
+
+async function git(directory: string, args: readonly string[]): Promise<string> {
+  return (await execFile("git", ["-C", directory, ...args], { encoding: "utf8" })).stdout.trim();
 }
 
 function blobOid(content: string): string {
@@ -173,12 +180,6 @@ describe("DF13 first-PREPROD COMMERCE version preparer CLI", () => {
     expect(() => assertDf13FirstPreprodReleaseSourceAttestation(operation.releaseSource, attested)).not.toThrow();
     expect(() => assertDf13FirstPreprodReleaseSourceAttestation(operation.releaseSource, { ...attested, commit: "c".repeat(40) }))
       .toThrow("DF13_FIRST_PREPROD_PREPARER_RELEASE_SOURCE_MISMATCH");
-    await expect(assertDf13FirstPreprodImmutableTag(operation.releaseSource, "/ignored", async (args) => {
-      if (args[0] === "cat-file") return "tag";
-      return args.at(-1)?.endsWith("^{tree}") ? "b".repeat(40) : revision;
-    })).resolves.toBeUndefined();
-    await expect(assertDf13FirstPreprodImmutableTag({ ...operation.releaseSource, tag: "develop" }, "/ignored", async () => revision))
-      .rejects.toThrow("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH");
     expect(verifyImmutableReleaseTag).toHaveBeenCalledOnce();
     const summary = redactedDf13FirstPreprodPreparationSummary(result);
     expect(summary).not.toContain("startup");
@@ -187,6 +188,48 @@ describe("DF13 first-PREPROD COMMERCE version preparer CLI", () => {
       .toBe("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH");
     expect(safeDf13FirstPreprodPreparationErrorCode(new Error("unstructured private runtime detail")))
       .toBe("DF13_FIRST_PREPROD_PREPARER_FAILED");
+  });
+
+  it("attests one stable annotated tag object and rejects lightweight, branch, and moved refs", async () => {
+    const repository = await mkdtemp(join(tmpdir(), "lana-df13-release-tag-"));
+    await git(repository, ["init", "--quiet"]);
+    await git(repository, ["config", "user.email", "df13-test@example.invalid"]);
+    await git(repository, ["config", "user.name", "DF13 test"]);
+    await writeFile(join(repository, "candidate.txt"), "first\n", "utf8");
+    await git(repository, ["add", "candidate.txt"]);
+    await git(repository, ["commit", "--quiet", "-m", "first"]);
+    const firstCommit = await git(repository, ["rev-parse", "HEAD"]);
+    const firstTree = await git(repository, ["rev-parse", "HEAD^{tree}"]);
+    const tag = "df13-preprod-annotated";
+    await git(repository, ["tag", "-a", tag, "-m", "immutable DF13 candidate", firstCommit]);
+    const source = {
+      schemaVersion: 1 as const,
+      release: tag,
+      repository: "https://github.com/nguyentuanson27-netizen/lanchatbot" as const,
+      tag,
+      commit: firstCommit,
+      treeOid: firstTree,
+      createdAt: "2026-08-25T00:00:00.000Z",
+    };
+    await expect(assertDf13FirstPreprodImmutableTag(source, repository)).resolves.toBeUndefined();
+
+    await git(repository, ["tag", "df13-preprod-lightweight", firstCommit]);
+    await expect(assertDf13FirstPreprodImmutableTag({ ...source, release: "df13-preprod-lightweight", tag: "df13-preprod-lightweight" }, repository))
+      .rejects.toThrow("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH");
+    await git(repository, ["branch", "df13-preprod-branch", firstCommit]);
+    await expect(assertDf13FirstPreprodImmutableTag({ ...source, release: "df13-preprod-branch", tag: "df13-preprod-branch" }, repository))
+      .rejects.toThrow("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH");
+
+    await writeFile(join(repository, "candidate.txt"), "second\n", "utf8");
+    await git(repository, ["commit", "--quiet", "-am", "second"]);
+    const secondCommit = await git(repository, ["rev-parse", "HEAD"]);
+    let refReadCount = 0;
+    await expect(assertDf13FirstPreprodImmutableTag(source, repository, async (args) => {
+      if (args.join(" ") === `rev-parse --verify refs/tags/${tag}` && ++refReadCount === 2) {
+        await git(repository, ["tag", "-f", "-a", tag, "-m", "moved DF13 candidate", secondCommit]);
+      }
+      return git(repository, args);
+    })).rejects.toThrow("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH");
   });
 
   it("writes a canonical create-once startup package only inside a non-symlink evidence directory", async () => {
