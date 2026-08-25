@@ -274,6 +274,10 @@ describe("DF13 first-PREPROD behavior pointer writer", () => {
         modeVersionId: commerce.modeVersionId,
         contentHash: commerce.contentHash,
       },
+      proof: {
+        verifiedAt: operation.proof.verifiedAt,
+        proofHash: operation.proof.proofHash,
+      },
       actor: "DF13_FIRST_PREPROD_WRITER",
       reason: activated.reason,
     });

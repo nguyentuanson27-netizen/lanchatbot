@@ -1,11 +1,13 @@
 import { createHash } from "node:crypto";
-import { runtimeBehaviorModeContentHash } from "@lana/database";
+import {
+  DF13_FIRST_PREPROD_MAX_ZERO_WORK_PROOF_AGE_MS,
+  runtimeBehaviorModeContentHash,
+} from "@lana/database";
 import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
 import { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
 
 const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
-const MAX_ZERO_WORK_PROOF_AGE_MS = 15 * 60 * 1_000;
 
 type Df13ConfirmationMode = "LEGACY" | "V2_SHADOW" | "V2_ACTIVE" | "CLARIFY_ONLY";
 type Df13SalesAuthorityMode = "LEGACY" | "COMMERCE";
@@ -201,7 +203,7 @@ function proofReason(proof: Df13FirstPreprodOperationProof, nowMs: number): stri
   if (
     !Number.isFinite(nowMs) ||
     verifiedAtMs > nowMs ||
-    nowMs - verifiedAtMs > MAX_ZERO_WORK_PROOF_AGE_MS
+    nowMs - verifiedAtMs > DF13_FIRST_PREPROD_MAX_ZERO_WORK_PROOF_AGE_MS
   ) {
     return "DF13_FIRST_PREPROD_ZERO_WORK_PROOF_STALE";
   }

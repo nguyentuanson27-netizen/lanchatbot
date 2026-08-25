@@ -68,6 +68,10 @@ export function createDf13FirstPreprodBehaviorPointerWriterPort(
           modeVersionId: input.target.modeVersionId,
           contentHash: input.target.contentHash,
         },
+        proof: {
+          verifiedAt: input.proof.verifiedAt,
+          proofHash: input.proof.proofHash,
+        },
         actor: input.actor,
         reason: input.reason,
       });

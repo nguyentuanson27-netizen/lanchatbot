@@ -154,7 +154,11 @@ CASes the next revision, and relies on the append-only pointer audit. It never
 uses the generic control-plane CAS and reconciles a lost acknowledgement only
 by the exact durable readback before any retry. The zero-work proof expires
 after 15 minutes and rejects future timestamps, so an old stopped-process
-observation cannot authorize a later pointer change. Start one fresh immutable COMMERCE service set
+observation cannot authorize a later pointer change; the database rechecks that
+proof against its own clock under the pointer lock immediately before CAS.
+Rollback must additionally bind the proposed LEGACY target to the immutable
+forward activation audit's exact previous version, not merely any LEGACY row.
+Start one fresh immutable COMMERCE service set
 and verify the complete eight-consumer surface has that one final authority.
 The target identity must be re-read from `DATABASE` and match version, canonical
 content hash, authority bundle, page/channel, and release evidence. Cached,

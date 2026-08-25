@@ -2494,6 +2494,9 @@ export class RealtimeRunner {
       SalesCycleRuntimeState
     >,
   ): void {
+    if (this.#commerceFreshProcessAuthority !== undefined) {
+      throw new Error("DF13_COMMERCE_FENCE_WITH_FRESH_PROCESS_FORBIDDEN");
+    }
     if (this.#commerceExecutor !== undefined && this.#commerceExecutor !== commerceExecutor) {
       throw new Error("DF13_COMMERCE_EXECUTOR_REBIND_FORBIDDEN");
     }

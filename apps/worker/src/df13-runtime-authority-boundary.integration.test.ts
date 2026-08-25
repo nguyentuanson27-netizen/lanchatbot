@@ -146,6 +146,23 @@ describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path
       .toThrow("DF13_COMMERCE_EXECUTOR_REBIND_FORBIDDEN");
   });
 
+  it("rejects binding the fence executor after fresh-process authority is already bound", () => {
+    const freshAuthority = {
+      admitCommerceAuthority: vi.fn(async () => ({ status: "ADMITTED" as const })),
+      assertExactCommerceAuthority: vi.fn(async () => ({ status: "ADMITTED" as const })),
+    } as Df13CommerceFreshProcessExecutorPort;
+    const fenceExecutor = {
+      acquire: vi.fn(),
+      bindFinalizationRuntime: vi.fn(),
+      commitThroughFinalizers: vi.fn(),
+    } as unknown as Df13CommerceFinalizingExecutorPort;
+    const { runner } = runnerForAuthority(commerceOriginFailSafe);
+
+    runner.bindDf13CommerceFreshProcessAuthority(freshAuthority);
+    expect(() => runner.bindDf13CommerceExecutor(fenceExecutor))
+      .toThrow("DF13_COMMERCE_FENCE_WITH_FRESH_PROCESS_FORBIDDEN");
+  });
+
   it("blocks a rejected COMMERCE-origin pointer before model, state, or final commit work", async () => {
     const { runner, retry, runtime, model, search } = runnerForAuthority(commerceOriginFailSafe);
 

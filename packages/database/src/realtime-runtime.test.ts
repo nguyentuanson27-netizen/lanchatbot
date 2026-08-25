@@ -430,7 +430,7 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
           return { rowCount: 1, rows: [{ capture_now: new Date("2026-08-25T00:00:00.000Z") }] };
         }
         if (sql.includes("UPDATE conversations")) return { rowCount: 1, rows: [] };
-        if (sql.includes("INSERT INTO conversation_events")) return { rowCount: 0, rows: [] };
+        if (sql.includes("INSERT INTO conversation_events")) return { rowCount: 1, rows: [] };
         return { rowCount: 0, rows: [] };
       },
       release() {},

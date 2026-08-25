@@ -2504,12 +2504,13 @@ export class PostgresRealtimeRuntimeStore {
             },
             input.contextV2CapturePlan,
           )
-        : { created: false, reasonCode: null };
+        : { created: false, reasonCode: null, captureStatus: null };
       if (
         input.contextV2CaptureRequired &&
         (input.contextV2CapturePlan === undefined ||
           contextV2CaptureResult.created !== true ||
-          contextV2CaptureResult.reasonCode !== null)
+          contextV2CaptureResult.reasonCode !== null ||
+          contextV2CaptureResult.captureStatus !== "BUILT")
       ) {
         throw new Error("CONTEXT_V2_CAPTURE_REQUIRED");
       }
