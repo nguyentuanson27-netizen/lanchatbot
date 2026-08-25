@@ -150,7 +150,7 @@ describe("PostgresRuntimeBehaviorModeStore", () => {
 
   it("creates an immutable COMMERCE version only with an exact authority bundle hash", async () => {
     const commercePayload = {
-      confirmationMode: "V2_ACTIVE" as const,
+      confirmationMode: "V2_SHADOW" as const,
       salesAuthorityMode: "COMMERCE" as const,
       stateReadMode: "LEGACY" as const,
       authorityBundleHash: "a".repeat(64),
@@ -213,6 +213,7 @@ describe("PostgresRuntimeBehaviorModeStore", () => {
     };
     const commerceTarget = {
       ...targetRow,
+      mode_version_id: "10000000-0000-4000-8000-000000000003",
       sales_authority_mode: "COMMERCE",
       authority_bundle_hash: commercePayload.authorityBundleHash,
       content_hash: runtimeBehaviorModeContentHash(commercePayload),
@@ -238,6 +239,95 @@ describe("PostgresRuntimeBehaviorModeStore", () => {
     expect(statements).toContain("ROLLBACK");
     expect(statements.some((sql) => sql.includes("FROM runtime_behavior_mode_pointers"))).toBe(false);
     expect(statements.some((sql) => sql.includes("UPDATE runtime_behavior_mode_pointers"))).toBe(false);
+  });
+
+  it("admits the exact first-PREPROD COMMERCE pointer only through its non-generic writer", async () => {
+    const commercePayload = {
+      confirmationMode: "V2_SHADOW" as const,
+      salesAuthorityMode: "COMMERCE" as const,
+      stateReadMode: "LEGACY" as const,
+      authorityBundleHash: "a".repeat(64),
+    };
+    const commerceTarget = {
+      ...targetRow,
+      confirmation_mode: commercePayload.confirmationMode,
+      sales_authority_mode: commercePayload.salesAuthorityMode,
+      state_read_mode: commercePayload.stateReadMode,
+      authority_bundle_hash: commercePayload.authorityBundleHash,
+      content_hash: runtimeBehaviorModeContentHash(commercePayload),
+    };
+    const legacyCurrent = {
+      ...targetRow,
+      pointer_revision: 3,
+      updated_by: "legacy-release",
+      pointer_reason: "known good legacy",
+      updated_at: updatedAt,
+    };
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes("FROM runtime_behavior_mode_versions")) {
+        return { rows: [commerceTarget], rowCount: 1 };
+      }
+      if (sql.includes("FROM runtime_behavior_mode_pointers")) {
+        return { rows: [legacyCurrent], rowCount: 1 };
+      }
+      if (sql.includes("UPDATE runtime_behavior_mode_pointers")) {
+        return { rows: [{ updated_at: updatedAt }], rowCount: 1 };
+      }
+      return { rows: [], rowCount: 0 };
+    });
+    const store = new PostgresRuntimeBehaviorModeStore("postgresql://test", 1);
+
+    await expect(store.activateDf13FirstPreprodExactPointer({
+      pageId,
+      channel,
+      operation: "ACTIVATE_COMMERCE",
+      expectedCurrent: {
+        modeVersionId: targetVersionId,
+        contentHash: targetRow.content_hash,
+        pointerRevision: 3,
+      },
+      target: {
+        modeVersionId: commerceTarget.mode_version_id,
+        contentHash: commerceTarget.content_hash,
+      },
+      actor: "DF13_FIRST_PREPROD_WRITER",
+      reason: "DF13_FIRST_PREPROD_ACTIVATE:10000000-0000-4000-8000-000000000010",
+    })).resolves.toMatchObject({
+      pointerRevision: 4,
+      version: {
+        salesAuthorityMode: "COMMERCE",
+        authorityBundleHash: commercePayload.authorityBundleHash,
+      },
+    });
+    const update = mocks.clientQuery.mock.calls.find(([sql]) =>
+      String(sql).includes("UPDATE runtime_behavior_mode_pointers")
+    );
+    expect(update).toBeDefined();
+    expect(update?.[1]).toEqual(expect.arrayContaining([
+      "DF13_FIRST_PREPROD_WRITER",
+      "DF13_FIRST_PREPROD_ACTIVATE:10000000-0000-4000-8000-000000000010",
+    ]));
+  });
+
+  it("rejects any page/channel outside the single first-PREPROD writer scope", async () => {
+    const store = new PostgresRuntimeBehaviorModeStore("postgresql://test", 1);
+    await expect(store.activateDf13FirstPreprodExactPointer({
+      pageId: "another-page",
+      channel,
+      operation: "ACTIVATE_COMMERCE",
+      expectedCurrent: {
+        modeVersionId: targetVersionId,
+        contentHash: targetRow.content_hash,
+        pointerRevision: 3,
+      },
+      target: {
+        modeVersionId: "10000000-0000-4000-8000-000000000003",
+        contentHash: `sha256:${"a".repeat(64)}`,
+      },
+      actor: "DF13_FIRST_PREPROD_WRITER",
+      reason: "DF13_FIRST_PREPROD_ACTIVATE:10000000-0000-4000-8000-000000000010",
+    })).rejects.toThrow("DF13_FIRST_PREPROD_WRITER_SCOPE_INVALID");
+    expect(mocks.connect).not.toHaveBeenCalled();
   });
 
   it("fails closed when an idempotency key already belongs to different resolution evidence", async () => {

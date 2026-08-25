@@ -170,6 +170,7 @@ export {
 export {
   PostgresRuntimeBehaviorModeStore,
   runtimeBehaviorModeContentHash,
+  type Df13FirstPreprodExactPointerActivationInput,
   type RuntimeBehaviorModePayloadRecord,
   type RuntimeBehaviorModePointerRecord,
   type RuntimeBehaviorModeResolutionAuditRecord,
