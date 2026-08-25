@@ -73,10 +73,10 @@ step:
    rollback is not implied by authority rollback.
 
 The dedicated behavior-mode writer remains non-generic and can only set the
-reviewed exact identity while the process boundary above is proven. A future
-source PR must provide that narrow fresh-start/rollback writer if the existing
-database control-plane API cannot do so. It must not re-open a generic COMMERCE
-operator or an environment-only authority switch.
+reviewed exact identity while the process boundary above is proven. It accepts
+only the fixed fresh-start/rollback operation document, re-reads both exact
+database identities inside its pointer transaction, and cannot re-open a
+generic COMMERCE operator or environment-only authority switch.
 
 ## Consequences and boundaries
 

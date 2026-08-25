@@ -26,14 +26,15 @@ fence contract.
 The reviewed source establishes the single-authority, resolver, candidate, and
 consumer contracts before conversation-state, model, product, or durable-commit
 work. Normal startup remains `LEGACY` and delegates to the existing runner
-unchanged. A narrowly scoped follow-up source change must bind the real
-fresh-process COMMERCE composition before an operational train can exist; this
-preparation does not claim that a test wrapper or a generic operator is that
-binding. The COMMERCE start path must require immutable release evidence, an
-exact release-source pointer, and an exact `DATABASE` behavior identity, and
-must block stale, incomplete, or resolver-failed identity rather than falling
-through to LEGACY. None of that source work changes deployed runtime or permits
-activation by itself.
+unchanged. The fresh-process COMMERCE composition is bound at the real
+`RealtimeRunner` server composition, not by a test wrapper: it requires the
+immutable startup evidence, exact release-source pointer, and exact `DATABASE`
+behavior identity, and blocks stale, incomplete, or resolver-failed identity
+rather than falling through to LEGACY. For this stopped-process exercise it
+uses no `0036` hot-cutover fence; the already-proven zero-work process boundary
+is the concurrency boundary. Its direct commit instead requires the Context V2
+capture to persist in the same transaction as durable state/Outbox work. None
+of that source work changes deployed runtime or permits activation by itself.
 
 The fresh COMMERCE composition must read the exact behavior identity from
 `DATABASE` at startup and before authority-dependent work; `CACHE`, LKG, and
@@ -146,7 +147,14 @@ work. Unknown, non-zero, or stranded work aborts before starting the new build;
 the first exercise has no held authority-dependent work class.
 
 Only after that proof may the dedicated, non-generic DF13 writer record the
-reviewed exact COMMERCE identity. Start one fresh immutable COMMERCE service set
+reviewed exact COMMERCE identity. The writer accepts only the fixed page/channel,
+sealed-drained-stopped-zero proof, captured exact current identity, and exact
+forward or rollback target; its database transaction re-reads both identities,
+CASes the next revision, and relies on the append-only pointer audit. It never
+uses the generic control-plane CAS and reconciles a lost acknowledgement only
+by the exact durable readback before any retry. The zero-work proof expires
+after 15 minutes and rejects future timestamps, so an old stopped-process
+observation cannot authorize a later pointer change. Start one fresh immutable COMMERCE service set
 and verify the complete eight-consumer surface has that one final authority.
 The target identity must be re-read from `DATABASE` and match version, canonical
 content hash, authority bundle, page/channel, and release evidence. Cached,
