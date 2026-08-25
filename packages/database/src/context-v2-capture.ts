@@ -14,6 +14,8 @@ export interface ContextV2CapturePlan {
 export interface ContextV2CapturePersistenceResult {
   readonly created: boolean;
   readonly reasonCode: "CONTEXT_V2_CAPTURE_WRITE_FAILED" | null;
+  /** Status after revalidation against this transaction's database clock. */
+  readonly captureStatus: "BUILT" | "BLOCKED" | null;
 }
 
 export type ContextV2CaptureEligibility =
@@ -206,18 +208,23 @@ export async function persistContextV2CaptureFailSoft(
     if (!(captureNow instanceof Date) || !Number.isFinite(captureNow.getTime())) {
       throw new Error("CONTEXT_V2_COMMIT_CLOCK_INVALID");
     }
+    const capture = prepareContextV2CaptureForCommit(plan.capture, captureNow);
     const created = await insertContextV2Capture(
       client,
       identity,
-      plan,
+      { capture },
       captureNow,
     );
     await client.query(`RELEASE SAVEPOINT ${savepoint}`);
-    return { created, reasonCode: null };
+    return { created, reasonCode: null, captureStatus: capture.status };
   } catch {
     await client.query(`ROLLBACK TO SAVEPOINT ${savepoint}`);
     await client.query(`RELEASE SAVEPOINT ${savepoint}`);
-    return { created: false, reasonCode: "CONTEXT_V2_CAPTURE_WRITE_FAILED" };
+    return {
+      created: false,
+      reasonCode: "CONTEXT_V2_CAPTURE_WRITE_FAILED",
+      captureStatus: null,
+    };
   }
 }
 

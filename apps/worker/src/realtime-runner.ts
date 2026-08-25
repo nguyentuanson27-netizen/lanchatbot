@@ -152,6 +152,7 @@ import type {
   Df13CommerceRuntimeAcquireResult,
 } from "./df13-commerce-runtime-executor.js";
 import type { Df13CommerceFinalizingExecutorPort } from "./df13-commerce-runtime-finalization.js";
+import type { Df13CommerceFreshProcessExecutorPort } from "./df13-commerce-fresh-process-executor.js";
 import {
   commerceStrategyStage,
   loadDf13CommerceRuntimeContext,
@@ -2406,6 +2407,7 @@ export class RealtimeRunner {
     ConversationState,
     SalesCycleRuntimeState
   > | undefined;
+  #commerceFreshProcessAuthority: Df13CommerceFreshProcessExecutorPort | undefined;
 
   constructor(
     private readonly inbox: RealtimeInboxPort,
@@ -2492,6 +2494,9 @@ export class RealtimeRunner {
       SalesCycleRuntimeState
     >,
   ): void {
+    if (this.#commerceFreshProcessAuthority !== undefined) {
+      throw new Error("DF13_COMMERCE_FENCE_WITH_FRESH_PROCESS_FORBIDDEN");
+    }
     if (this.#commerceExecutor !== undefined && this.#commerceExecutor !== commerceExecutor) {
       throw new Error("DF13_COMMERCE_EXECUTOR_REBIND_FORBIDDEN");
     }
@@ -2499,6 +2504,26 @@ export class RealtimeRunner {
       commerceExecutor.bindFinalizationRuntime(this.runtime);
     }
     this.#commerceExecutor = commerceExecutor;
+  }
+
+  /**
+   * Binds the first stopped-process PREPROD authority. This intentionally does
+   * not construct the hot-cutover fence executor: the release protocol has
+   * already drained work to zero and stopped the prior authority process.
+   */
+  bindDf13CommerceFreshProcessAuthority(
+    authority: Df13CommerceFreshProcessExecutorPort,
+  ): void {
+    if (this.#commerceExecutor !== undefined) {
+      throw new Error("DF13_COMMERCE_FRESH_PROCESS_WITH_FENCE_FORBIDDEN");
+    }
+    if (
+      this.#commerceFreshProcessAuthority !== undefined &&
+      this.#commerceFreshProcessAuthority !== authority
+    ) {
+      throw new Error("DF13_COMMERCE_FRESH_PROCESS_AUTHORITY_REBIND_FORBIDDEN");
+    }
+    this.#commerceFreshProcessAuthority = authority;
   }
 
   /**
@@ -2808,23 +2833,40 @@ export class RealtimeRunner {
       throw new Error(authoritySelection.reasonCode);
     }
     let commerceFence: Extract<Df13CommerceRuntimeAcquireResult, { status: "HELD" }> | null = null;
+    let commerceFreshProcess = false;
     if (authoritySelection.status === "COMMERCE_SELECTED") {
-      // Source-default composition supplies no executor. A COMMERCE pointer
-      // therefore remains fail-closed and can never fall through to LEGACY.
-      if (!this.#commerceExecutor) throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
-      const acquired = await this.#commerceExecutor.acquire({
-        pageId: claim.pageId,
-        channel: this.options.behaviorModeChannel,
-        workId: deterministicUuid(`df13-commerce:${claim.pageId}:${message.eventKey}`),
-        inboxIds: batch.inboxIds,
-        resolution: behaviorModeResolution,
-      });
-      if (acquired.status === "HELD") {
-        commerceFence = acquired;
-      } else if (acquired.status === "ALREADY_COMPLETED") {
-        return "COMMITTED";
+      if (this.#commerceExecutor) {
+        const acquired = await this.#commerceExecutor.acquire({
+          pageId: claim.pageId,
+          channel: this.options.behaviorModeChannel,
+          workId: deterministicUuid(`df13-commerce:${claim.pageId}:${message.eventKey}`),
+          inboxIds: batch.inboxIds,
+          resolution: behaviorModeResolution,
+        });
+        if (acquired.status === "HELD") {
+          commerceFence = acquired;
+        } else if (acquired.status === "ALREADY_COMPLETED") {
+          return "COMMITTED";
+        } else {
+          throw new Error(acquired.reasonCode);
+        }
+      } else if (this.#commerceFreshProcessAuthority) {
+        const admitted = await this.#commerceFreshProcessAuthority
+          .assertExactCommerceAuthority({
+            pageId: claim.pageId,
+            channel: this.options.behaviorModeChannel,
+            modeVersionId: authoritySelection.authority.modeVersionId,
+            contentHash: authoritySelection.authority.contentHash,
+            authorityBundleHash: authoritySelection.authority.authorityBundleHash,
+            pointerRevision: authoritySelection.authority.pointerRevision,
+            source: authoritySelection.authority.source,
+          });
+        if (admitted.status !== "ADMITTED") throw new Error(admitted.reasonCode);
+        commerceFreshProcess = true;
       } else {
-        throw new Error(acquired.reasonCode);
+        // Source-default composition supplies no executor. A COMMERCE pointer
+        // therefore remains fail-closed and can never fall through to LEGACY.
+        throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
       }
     }
     const record = await this.runtime.loadOrCreate(
@@ -2868,7 +2910,7 @@ export class RealtimeRunner {
             throw new Error("SALES_CYCLE_RUNTIME_PORT_REQUIRED");
           })()
       : null;
-    const commerceRuntimeContext = commerceFence === null
+    const commerceRuntimeContext = !commerceFreshProcess && commerceFence === null
       ? null
       : !salesCycleRecord || !this.runtime.readLatestContextV2ForCommerce
         ? (() => {
@@ -3113,7 +3155,7 @@ export class RealtimeRunner {
         new Date(observation.observedAt),
       ).catch(() => false);
     }
-    if (commerceFence !== null && knownSuperseded && inboxBatchGuard) {
+    if ((commerceFreshProcess || commerceFence !== null) && knownSuperseded && inboxBatchGuard) {
       throw new Error("DF13_COMMERCE_SUPERSEDED_RECONCILIATION_REQUIRED");
     }
     if (knownSuperseded && inboxBatchGuard) {
@@ -5688,6 +5730,9 @@ export class RealtimeRunner {
         ...(contextV2CapturePlan ? { contextV2CapturePlan } : {}),
         ...(inboxBatchGuard ? { inboxBatchGuard } : {}),
     };
+    if (commerceFreshProcess && contextV2CapturePlan === undefined) {
+      throw new Error("DF13_COMMERCE_CONTEXT_CAPTURE_REQUIRED");
+    }
     if (commerceFence !== null) {
       if (!this.#commerceExecutor) throw new Error("DF13_COMMERCE_EXECUTOR_UNAVAILABLE");
       if (contextV2CapturePlan === undefined) {
@@ -5701,6 +5746,19 @@ export class RealtimeRunner {
       if (committed.status === "PARKED") throw new Error(committed.reasonCode);
       if (committed.status === "ALREADY_COMPLETED") return "COMMITTED";
       return batchCommitStatus(committed.runtime);
+    }
+    if (commerceFreshProcess) {
+      const committed = await this.runtime.commit({
+        ...runtimeCommit,
+        contextV2CaptureRequired: true,
+      }, new Date());
+      if (
+        committed.contextV2CaptureCreated !== true ||
+        committed.contextV2CaptureReasonCode !== null
+      ) {
+        throw new Error("DF13_COMMERCE_CONTEXT_CAPTURE_REQUIRED");
+      }
+      return batchCommitStatus(committed);
     }
     return batchCommitStatus(await this.runtime.commit(runtimeCommit, new Date()));
   }

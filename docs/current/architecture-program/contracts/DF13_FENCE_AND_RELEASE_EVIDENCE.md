@@ -19,9 +19,9 @@ evidence package still binds its exact dormant blobs, so they must be present
 and re-derived even though `0036` is not a runtime execution prerequisite for
 this first exercise. A future focused source change may split that evidence
 profile. The exception does not make a generic operator or environment flag a
-COMMERCE authority writer. The first operation still requires a separately
-reviewed narrow runtime composition and writer, an immutable release package,
-explicit owner release authorization, and real operational evidence.
+COMMERCE authority writer. The first operation uses the separately reviewed
+narrow runtime composition and writer, an immutable release package, explicit
+owner release authorization, and real operational evidence.
 
 ## Governing rule
 
@@ -201,11 +201,13 @@ authorized runtime execution can append actual rollback evidence.
 
 ## Source completion and hard stops
 
-The source-level default-off wrapper, immutable identity, consumer, and durable
-fence foundations are complete. A real fresh-process COMMERCE runtime
-composition and its narrow first-PREPROD writer remain a separately reviewed
-source boundary; a test wrapper, generic operator, or copied input is not that
-boundary. This is source integration, not a deployed runtime, release candidate,
+The source-level default-off wrapper, immutable identity, consumer, durable
+fence foundation, real fresh-process `RealtimeRunner` composition, and narrow
+first-PREPROD writer are source boundaries only; a test wrapper, generic
+operator, or copied input is not that boundary. The fresh-process composition
+uses the sealed/drained/stopped process boundary and strict transactional Context
+V2 capture rather than the dormant `0036` hot-cutover fence. This is source
+integration, not a deployed runtime, release candidate,
 migration application, deployment, canary, replacement, or activation
 authorization. Operational acceptance must still review the exact release
 candidate, migration state, stop/drain evidence, consumer readbacks, start

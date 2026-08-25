@@ -187,7 +187,7 @@ describe("Context V2 exact-message claim gate", () => {
     expect(query.mock.calls[0]?.[1]?.[0]).not.toBe(query.mock.calls[1]?.[1]?.[0]);
   });
 
-  it("terminalizes stale claims and readiness using the transaction clock", () => {
+  it("terminalizes stale claims and readiness using the transaction clock", async () => {
     const capture = builtCapture();
     const claim = {
       schemaVersion: 1 as const,
@@ -233,6 +233,24 @@ describe("Context V2 exact-message claim gate", () => {
       status: "BLOCKED",
       reasonCode: "CONTEXT_V2_READINESS_EXPIRED_AT_COMMIT",
     });
+
+    const client = {
+      query: vi.fn(async (sql: string) => {
+        if (sql.includes("clock_timestamp()")) {
+          return { rowCount: 1, rows: [{ capture_now: new Date("2026-08-16T10:00:30.000Z") }] };
+        }
+        return { rowCount: 1, rows: [] };
+      }),
+    } as unknown as PoolClient;
+    await expect(persistContextV2CaptureFailSoft(client, {
+      conversationId: "00000000-0000-4000-8000-000000000010",
+      pageId: "page-1",
+      customerHash: hash("f"),
+      owner: "BOT",
+    }, { capture: withExpiredClaim })).resolves.toMatchObject({
+      created: true,
+      captureStatus: "BLOCKED",
+    });
   });
 
   it("rolls back only the shadow savepoint when capture persistence fails", async () => {
@@ -265,6 +283,7 @@ describe("Context V2 exact-message claim gate", () => {
     )).resolves.toEqual({
       created: false,
       reasonCode: "CONTEXT_V2_CAPTURE_WRITE_FAILED",
+      captureStatus: null,
     });
     expect(statements).toEqual([
       "SAVEPOINT context_v2_capture",

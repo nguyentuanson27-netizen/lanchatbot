@@ -19,10 +19,19 @@ export function createDf13CommerceRuntimeComposition<TState, TSalesState>(input:
   runtimeAuthorityMode: "LEGACY" | "COMMERCE";
   cacheTtlMs: number;
   lastKnownGoodTtlMs: number;
-  commerceExecutor: Df13CommerceRuntimeExecutor<TState, TSalesState>;
+  /** Existing hot-cutover foundation; not used by the first fresh process. */
+  commerceExecutor?: Df13CommerceRuntimeExecutor<TState, TSalesState>;
+  /** Explicit fresh-process authority consumer, bound to the same resolver. */
+  commerceAuthorityConsumer?: CommerceAuthorityConsumerPort;
+  /** Omitted for the stopped-process path: no 0036 fence finalizer is needed. */
+  commerceFinalizationExecutor?: ReturnType<
+    Df13CommerceRuntimeExecutor<TState, TSalesState>["createFinalizingExecutor"]
+  >;
 }>) {
+  const selectedCommerceConsumer = input.commerceAuthorityConsumer ?? input.commerceExecutor;
+  if (!selectedCommerceConsumer) throw new Error("DF13_COMMERCE_AUTHORITY_CONSUMER_REQUIRED");
   const commerceAuthorityConsumer: CommerceAuthorityConsumerPort = Object.freeze({
-    admitCommerceAuthority: input.commerceExecutor.admitCommerceAuthority.bind(input.commerceExecutor),
+    admitCommerceAuthority: selectedCommerceConsumer.admitCommerceAuthority.bind(selectedCommerceConsumer),
   });
   const behaviorModeResolver = new RuntimeBehaviorModeResolver(input.source, {
     // A cached COMMERCE pointer cannot satisfy the DATABASE-only authority
@@ -36,7 +45,8 @@ export function createDf13CommerceRuntimeComposition<TState, TSalesState>(input:
     allowedCommercePageIds: [DF13_COMMERCE_PREPROD_SCOPE_V1.pageId],
     commerceAuthorityConsumer,
   });
-  const commerceFinalizationExecutor = input.commerceExecutor.createFinalizingExecutor();
+  const commerceFinalizationExecutor = input.commerceFinalizationExecutor ??
+    input.commerceExecutor?.createFinalizingExecutor();
   return Object.freeze({
     behaviorModeResolver,
     commerceFinalizationExecutor,

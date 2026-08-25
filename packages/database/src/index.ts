@@ -168,8 +168,10 @@ export {
   type RuntimePolicyDatabasePointerRecord,
 } from "./runtime-policy.js";
 export {
+  DF13_FIRST_PREPROD_MAX_ZERO_WORK_PROOF_AGE_MS,
   PostgresRuntimeBehaviorModeStore,
   runtimeBehaviorModeContentHash,
+  type Df13FirstPreprodExactPointerActivationInput,
   type RuntimeBehaviorModePayloadRecord,
   type RuntimeBehaviorModePointerRecord,
   type RuntimeBehaviorModeResolutionAuditRecord,
@@ -179,6 +181,12 @@ export {
   type RuntimeSalesAuthorityMode,
   type RuntimeStateReadMode,
 } from "./runtime-behavior-mode.js";
+export {
+  DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V1,
+  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
+  DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+  type CommerceAuthorityConsumer,
+} from "./df13-commerce-authority-bundle.js";
 export {
   PostgresSizeChartExtractionStore,
   type SizeChartExtractionLookupInput,
