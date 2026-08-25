@@ -45,6 +45,13 @@ V2 capture atomically with durable state/Outbox work; an absent plan or failed
 capture blocks the work. These requirements do not reintroduce a running
 LEGACY/COMMERCE co-authority.
 
+The Compose boundary keeps this exact default-off shape: its DF13 startup mode
+defaults to `LEGACY`, and its startup-package mount defaults to `/dev/null`.
+Only the later approved Release Train may supply a read-only, immutable package
+at that mount together with explicit `COMMERCE` startup inputs. It must never
+persist a COMMERCE setting in the shared infrastructure environment or treat a
+missing package as an enablement input.
+
 The only admissible authority topology remains one direct page-scoped transition:
 
 ```text

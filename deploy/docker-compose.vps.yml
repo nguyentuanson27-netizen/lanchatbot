@@ -286,6 +286,11 @@ services:
       REALTIME_CONFIRMATION_CANARY_PAGE_IDS: "${REALTIME_CONFIRMATION_CANARY_PAGE_IDS:-}"
       REALTIME_BEHAVIOR_MODE_CACHE_TTL_MS: "5000"
       REALTIME_BEHAVIOR_MODE_LKG_TTL_MS: "300000"
+      # Default-off: a normal release reads no DF13 package.  A fresh
+      # COMMERCE process can start only when the Release Train supplies its
+      # immutable, read-only package through this explicit host mount.
+      DF13_COMMERCE_PREPROD_STARTUP_MODE: "${DF13_COMMERCE_PREPROD_STARTUP_MODE:-LEGACY}"
+      DF13_COMMERCE_PREPROD_STARTUP_FILE: /run/df13/commerce-startup.json
       REALTIME_DATA_KEY_FILE: /run/secrets/realtime_data_key
       REALTIME_DATA_KEY_REF: local-kek-v1
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
@@ -363,6 +368,8 @@ services:
       - pancake_access_token
       - media_worker_key
       - rembg_auth_header
+    volumes:
+      - ${DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE:-/dev/null}:/run/df13/commerce-startup.json:ro
     depends_on:
       postgres:
         condition: service_healthy

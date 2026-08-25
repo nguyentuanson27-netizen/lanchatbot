@@ -6,6 +6,11 @@ import { fileURLToPath } from 'node:url';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { validateReleaseSource } from './release-source.mjs';
 import { validateServiceEvidence } from './runtime-state.mjs';
+import { assertDf13FirstPreprodComposeContract } from '../df13-first-preprod-compose-contract.mjs';
+// deploy/ is outside the recursive workspace test runner. Import this
+// self-executing regression suite so `pnpm check:release-integrity` (and CI)
+// proves decoy comments or another service cannot weaken the default-off guard.
+import '../df13-first-preprod-compose-contract.test.mjs';
 
 const root = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const runtimeDir = join(root, 'deploy', 'runtime-state');
@@ -19,6 +24,7 @@ validateReleaseSource(JSON.parse(readFileSync(join(runtimeDir, '.release-source.
 const inventory = JSON.parse(readFileSync(join(runtimeDir, 'service-inventory.json'), 'utf8'));
 validateServiceEvidence(JSON.parse(readFileSync(join(runtimeDir, 'service-evidence.example.json'), 'utf8')), inventory);
 const composeText = readFileSync(join(root, 'deploy', 'docker-compose.vps.yml'), 'utf8');
+assertDf13FirstPreprodComposeContract(composeText);
 if (!composeText.includes('export REALTIME_BEHAVIOR_MODE_DATABASE_URL="$$(cat')) {
   throw new Error('REALTIME_BEHAVIOR_SECRET_ROOT_BOOTSTRAP_MISSING');
 }
