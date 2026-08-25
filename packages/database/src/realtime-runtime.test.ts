@@ -410,6 +410,64 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     expect(calls.at(-1)?.sql).toContain("COMMIT");
   });
 
+  it("rolls back a required Context V2 capture instead of committing a partial fresh-process turn", async () => {
+    const calls: string[] = [];
+    const client = {
+      async query(sql: string) {
+        calls.push(sql);
+        if (sql.includes("SELECT routing_owner")) {
+          return { rowCount: 1, rows: [{
+            routing_owner: "APP",
+            app_send_enabled: true,
+            kill_switch: false,
+            transaction_now: new Date("2026-08-25T00:00:00.000Z"),
+          }] };
+        }
+        if (sql.includes("SELECT conversation_owner")) {
+          return { rowCount: 1, rows: [{ conversation_owner: "BOT" }] };
+        }
+        if (sql.includes("clock_timestamp() AS capture_now")) {
+          return { rowCount: 1, rows: [{ capture_now: new Date("2026-08-25T00:00:00.000Z") }] };
+        }
+        if (sql.includes("UPDATE conversations")) return { rowCount: 1, rows: [] };
+        if (sql.includes("INSERT INTO conversation_events")) return { rowCount: 0, rows: [] };
+        return { rowCount: 0, rows: [] };
+      },
+      release() {},
+    };
+    const store = new PostgresRealtimeRuntimeStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = {
+      async connect() { return client; },
+      async end() {},
+    };
+
+    await expect(store.commit({
+      pageId: "page-1",
+      customerHash: "a".repeat(64),
+      conversationId: "33333333-3333-4333-8333-333333333333",
+      expectedStateVersion: 0,
+      state: { revision: 1, routingOwner: "APP", conversationOwner: "BOT" },
+      contextV2CaptureRequired: true,
+      contextV2CapturePlan: {
+        capture: {
+          schemaVersion: 1,
+          contractVersion: "CONTEXT_V2_CAPTURE_V1",
+          sourceMessagePk: "10000000-0000-4000-8000-000000000005",
+          sourceOccurredAt: "2026-08-25T00:00:00.000Z",
+          status: "BLOCKED",
+          context: null,
+          contextHash: null,
+          reasonCode: "CONTEXT_V2_COMMERCE_STATE_UNAVAILABLE",
+        },
+      },
+    })).rejects.toThrow("CONTEXT_V2_CAPTURE_REQUIRED");
+    expect(calls).toContain("ROLLBACK");
+    expect(calls).not.toContain("COMMIT");
+  });
+
   it("schedules text immediately and delays image rows in the same ordered plan", async () => {
     const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
     const client = {

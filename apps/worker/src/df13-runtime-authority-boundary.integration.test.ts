@@ -7,6 +7,7 @@ import {
   Df13CommerceRuntimeFinalizationAdapter,
   type Df13CommerceFinalizingExecutorPort,
 } from "./df13-commerce-runtime-finalization.js";
+import type { Df13CommerceFreshProcessExecutorPort } from "./df13-commerce-fresh-process-executor.js";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
 import {
   DryRunClearTagObservationProvider,
@@ -233,6 +234,53 @@ describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path
       claim.inboxId,
       claim.leaseToken,
       "DF13_COMMERCE_FENCE_UNAVAILABLE",
+      expect.any(Number),
+    );
+    expect(runtime.loadOrCreate).not.toHaveBeenCalled();
+    expect(model.generate).not.toHaveBeenCalled();
+    expect(search.searchText).not.toHaveBeenCalled();
+  });
+
+  it("fresh-process Commerce rechecks immutable authority before state or model work without a 0036 fence", async () => {
+    const exactCommerce: RuntimeBehaviorModeResolution = {
+      ...commerceOriginFailSafe,
+      confirmationMode: "LEGACY",
+      salesAuthorityMode: "COMMERCE",
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      contentHash: behaviorModeContentHash({
+        confirmationMode: "LEGACY",
+        salesAuthorityMode: "COMMERCE",
+        stateReadMode: "LEGACY",
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      }),
+      source: "DATABASE",
+      status: "RESOLVED",
+    };
+    const assertExactCommerceAuthority = vi.fn(async () => ({
+      status: "BLOCKED" as const,
+      reasonCode: "DF13_COMMERCE_RELEASE_EVIDENCE_INVALID",
+    }));
+    const freshAuthority = {
+      admitCommerceAuthority: vi.fn(),
+      assertExactCommerceAuthority,
+    } as Df13CommerceFreshProcessExecutorPort;
+    const { runner, retry, runtime, model, search } = runnerForAuthority(exactCommerce);
+    runner.bindDf13CommerceFreshProcessAuthority(freshAuthority);
+
+    expect(await runner.processOne()).toBe(true);
+    expect(assertExactCommerceAuthority).toHaveBeenCalledWith({
+      pageId: claim.pageId,
+      channel: "MESSENGER",
+      modeVersionId: exactCommerce.modeVersionId,
+      contentHash: exactCommerce.contentHash,
+      authorityBundleHash: exactCommerce.authorityBundleHash,
+      pointerRevision: exactCommerce.pointerRevision,
+      source: "DATABASE",
+    });
+    expect(retry).toHaveBeenCalledWith(
+      claim.inboxId,
+      claim.leaseToken,
+      "DF13_COMMERCE_RELEASE_EVIDENCE_INVALID",
       expect.any(Number),
     );
     expect(runtime.loadOrCreate).not.toHaveBeenCalled();

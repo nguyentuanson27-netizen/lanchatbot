@@ -402,6 +402,8 @@ export interface RealtimeCommitInput<TState, TSalesState = unknown> {
   readonly salesCyclePlan?: RealtimeSalesCyclePlan<TSalesState>;
   readonly decisionEvents?: readonly RealtimeDecisionEventPlan[];
   readonly contextV2CapturePlan?: ContextV2CapturePlan;
+  /** COMMERCE fresh-process commits roll back unless this capture persists. */
+  readonly contextV2CaptureRequired?: boolean;
   readonly acquisitionPlan?: AcquisitionCommitPlan;
   /**
    * When present, state/outbox and all source inbox rows share one transaction.
@@ -2503,6 +2505,14 @@ export class PostgresRealtimeRuntimeStore {
             input.contextV2CapturePlan,
           )
         : { created: false, reasonCode: null };
+      if (
+        input.contextV2CaptureRequired &&
+        (input.contextV2CapturePlan === undefined ||
+          contextV2CaptureResult.created !== true ||
+          contextV2CaptureResult.reasonCode !== null)
+      ) {
+        throw new Error("CONTEXT_V2_CAPTURE_REQUIRED");
+      }
 
       if (input.inboxBatchGuard) {
         await this.completeInboxBatch(

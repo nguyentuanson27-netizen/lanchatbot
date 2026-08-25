@@ -50,6 +50,7 @@ import {
   PostgresDf13CommerceFenceProvider,
 } from "./df13-commerce-fence-postgres-provider.js";
 import { Df13CommerceRuntimeExecutor } from "./df13-commerce-runtime-executor.js";
+import { Df13CommerceFreshProcessExecutor } from "./df13-commerce-fresh-process-executor.js";
 import { createDf13CommerceRuntimeComposition } from "./df13-commerce-runtime-composition.js";
 import {
   createDf13CommercePreprodStartupAuthority,
@@ -739,10 +740,10 @@ const workerId =
  * LEGACY startup input intentionally keeps Commerce source-disabled; a fresh
  * COMMERCE process can proceed only with its reviewed immutable input.
  */
-const df13FenceRuntime = behaviorModeStore
+const df13FenceRuntime = behaviorModeStore && df13CommerceStartupInput.mode !== "COMMERCE"
   ? createDf13CommerceFenceRuntimePort(databaseUrl)
   : undefined;
-const commerceExecutor = df13FenceRuntime
+const commerceFenceExecutor = df13FenceRuntime
   ? new Df13CommerceRuntimeExecutor({
       activationAuthority: df13CommerceStartupAuthority,
       fenceProvider: new PostgresDf13CommerceFenceProvider(df13FenceRuntime),
@@ -752,7 +753,13 @@ const commerceExecutor = df13FenceRuntime
       ),
     })
   : undefined;
-const df13CommerceComposition = behaviorModeStore && commerceExecutor
+const commerceFreshProcessExecutor = df13CommerceStartupInput.mode === "COMMERCE"
+  ? new Df13CommerceFreshProcessExecutor({
+      activationAuthority: df13CommerceStartupAuthority,
+    })
+  : undefined;
+const df13CommerceComposition = behaviorModeStore &&
+    (commerceFenceExecutor || commerceFreshProcessExecutor)
   ? createDf13CommerceRuntimeComposition({
       source: behaviorModeStore,
       confirmationAllowedPageIds: confirmationCanaryPageIds,
@@ -763,7 +770,10 @@ const df13CommerceComposition = behaviorModeStore && commerceExecutor
       lastKnownGoodTtlMs: boundedInteger(
         "REALTIME_BEHAVIOR_MODE_LKG_TTL_MS", 300_000, 5_000, 300_000,
       ),
-      commerceExecutor,
+      ...(commerceFenceExecutor ? { commerceExecutor: commerceFenceExecutor } : {}),
+      ...(commerceFreshProcessExecutor
+        ? { commerceAuthorityConsumer: commerceFreshProcessExecutor }
+        : {}),
     })
   : undefined;
 const behaviorModeResolver = df13CommerceComposition?.behaviorModeResolver;
@@ -872,15 +882,10 @@ const runnerOptions = {
   adAcquisitionAnalyticsMode: adAcquisitionMode,
   adAcquisitionPageIds,
 } as const;
-const commerceFinalizationExecutor = df13CommerceStartupInput.mode === "COMMERCE"
-  ? df13CommerceComposition?.commerceFinalizationExecutor
-  : undefined;
-if (df13CommerceStartupInput.mode === "COMMERCE" && !commerceFinalizationExecutor) {
-  throw new Error("DF13_COMMERCE_FINALIZATION_EXECUTOR_UNAVAILABLE");
+if (df13CommerceStartupInput.mode === "COMMERCE" && !commerceFreshProcessExecutor) {
+  throw new Error("DF13_COMMERCE_FRESH_PROCESS_EXECUTOR_UNAVAILABLE");
 }
-const runtimeForRunner = commerceFinalizationExecutor
-  ? commerceFinalizationExecutor.wrapRuntime(runtime)
-  : runtime;
+const runtimeForRunner = runtime;
 const runner = df13CommerceStartupInput.mode === "COMMERCE"
   ? new Bf01Bf02RealtimeRunner(
     inbox,
@@ -915,7 +920,7 @@ const runner = df13CommerceStartupInput.mode === "COMMERCE"
   behaviorModeResolver,
 );
 if (df13CommerceStartupInput.mode === "COMMERCE") {
-  runner.bindDf13CommerceExecutor(commerceFinalizationExecutor!);
+  runner.bindDf13CommerceFreshProcessAuthority(commerceFreshProcessExecutor!);
 }
 const pollMs = boundedInteger(
   "REALTIME_POLL_MS",

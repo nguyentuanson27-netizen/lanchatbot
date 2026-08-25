@@ -10,6 +10,7 @@ import {
   type Df13CommerceActivationAuthority,
 } from "./df13-commerce-default-off-consumer.js";
 import { Df13CommerceRuntimeExecutor } from "./df13-commerce-runtime-executor.js";
+import { Df13CommerceFreshProcessExecutor } from "./df13-commerce-fresh-process-executor.js";
 import { createDf13CommerceRuntimeComposition } from "./df13-commerce-runtime-composition.js";
 import { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
 import { selectDf13RuntimeAuthority } from "./df13-runtime-authority-boundary.js";
@@ -134,7 +135,7 @@ describe("DF13 Commerce runtime composition", () => {
       commerceExecutor,
     });
 
-    await expect(composition.commerceFinalizationExecutor.acquire({} as never))
+    await expect(composition.commerceFinalizationExecutor!.acquire({} as never))
       .resolves.toMatchObject({ status: "PARKED" });
     expect(acquire).toHaveBeenCalledOnce();
   });
@@ -220,5 +221,36 @@ describe("DF13 Commerce runtime composition", () => {
       expect.objectContaining({ source: "DATABASE", status: "RESOLVED" }),
     ]);
     expect(source.loadActiveMode).toHaveBeenCalledTimes(2);
+  });
+
+  it("binds the fresh-process COMMERCE consumer without constructing a 0036 fence finalizer", async () => {
+    const source: RuntimeBehaviorModeSourcePort = {
+      loadActiveMode: vi.fn(async () => pointer("COMMERCE")),
+      recordResolution: vi.fn(async () => undefined),
+    };
+    const freshExecutor = new Df13CommerceFreshProcessExecutor({
+      activationAuthority: {
+        authorizeExactCommerceIdentity: vi.fn(async () => ({ status: "ADMITTED" as const })),
+        authorizeExactCommerceRequest: vi.fn(),
+      },
+    });
+
+    const composition = createDf13CommerceRuntimeComposition({
+      source,
+      confirmationAllowedPageIds: [DF13_COMMERCE_PREPROD_SCOPE_V1.pageId],
+      runtimeAuthorityMode: "COMMERCE",
+      cacheTtlMs: 5_000,
+      lastKnownGoodTtlMs: 300_000,
+      commerceAuthorityConsumer: freshExecutor,
+    });
+
+    await expect(composition.behaviorModeResolver.resolve({
+      resolutionId: "10000000-0000-4000-8000-000000000016",
+      pageId: DF13_COMMERCE_PREPROD_SCOPE_V1.pageId,
+      channel: "MESSENGER",
+      workerId: "realtime-worker-test",
+      now: new Date("2026-08-24T00:00:01.000Z"),
+    })).resolves.toMatchObject({ status: "RESOLVED", source: "DATABASE" });
+    expect(composition.commerceFinalizationExecutor).toBeUndefined();
   });
 });
