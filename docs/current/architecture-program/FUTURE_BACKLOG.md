@@ -205,7 +205,7 @@ Gate U proves State V2 architecture and rollback boundary. Full human E2E is a s
 - [ ] Legacy rollback remains available after the Gate.
 - [ ] UR08/UR09 retirement and UR10 destructive cleanup remain deferred/separately approved.
 
-After Gate U-PREPROD, run the controlled full human E2E on State V2. Failure blocks progression into production hardening.
+After Gate U-PREPROD, run the controlled full human E2E checkpoint on State V2. Failure blocks progression into production hardening.
 
 ## UR08-UR10 — Deferred retirement/cleanup
 
