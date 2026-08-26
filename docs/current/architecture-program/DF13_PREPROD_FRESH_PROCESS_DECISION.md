@@ -48,6 +48,16 @@ step:
 2. Capture the exact known-good LEGACY release/configuration, behavior pointer,
    migration ledger, routing/allowlist and rollback inputs. Do not delete state,
    audit, Inbox/Outbox, or migration history.
+   If `current` is stale while the running Realtime worker is already bound to
+   a known immutable LEGACY release, the only reconciliation path is
+   `deploy/df13-first-preprod-release-reconcile.sh`. It verifies the annotated
+   tag/commit/tree, release-source pointer, worker Compose provenance and image
+   revision, then atomically aligns `current` and captures/verifies/promotes
+   runtime-state. It has no deploy, migration, database-write, or authority-change
+   capability. The reviewed runtime-state capture makes read-only ledger and
+   routing queries to attest the host state; it accepts no caller-supplied
+   database identity. Any capture, verification, promotion, interrupt, or concurrency
+   failure restores the prior `current` pointer and blocks the Release Train.
 3. Seal the target page from new authority-dependent work, gracefully drain and
    reconcile every eligible queued/in-flight item to zero using the current
    LEGACY service set, then stop that finite set and re-prove zero eligible work.
