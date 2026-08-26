@@ -19,12 +19,14 @@ const entrypointSource = readFileSync(entrypoint, "utf8");
 assert.match(entrypointSource, /^#!\/bin\/sh\nset -eu\n/u, "the public operator entrypoint must avoid Bash startup hooks");
 assert.match(entrypointSource, /exec \/usr\/bin\/env -i/u, "the entrypoint must start the body without caller startup state");
 assert.match(entrypointSource, /\/usr\/bin\/bash --noprofile --norc/u, "the entrypoint must use its absolute reviewed non-startup Bash interpreter");
+assert.match(entrypointSource, /git_attestation\(\)/u, "the public wrapper must isolate Git attestation from caller Git environment variables");
+assert.match(entrypointSource, /\/usr\/bin\/env -i PATH="\$TRUSTED_PATH" HOME=\/nonexistent GIT_CONFIG_NOSYSTEM=1 \/usr\/bin\/git/u, "the public wrapper must invoke Git through a minimal clean environment");
 assert.match(source, /^#!\/usr\/bin\/bash\nset -euo pipefail\nset -E\n/u, "the operational entrypoint must use its absolute reviewed interpreter");
 assert.doesNotMatch(source, /\beval\b/u, "reconciliation automation must not evaluate caller input");
 assert.doesNotMatch(source, /DF13_RECONCILE_BOOTSTRAP/u, "the private body must not accept a caller-mintable bootstrap bypass");
 assert.doesNotMatch(entrypointSource, /DF13_RECONCILE_BOOTSTRAP/u, "the public wrapper must not mint a bypass token for its private body");
 assert.match(entrypointSource, /RECONCILIATION_BODY_HASH_MISMATCH/u, "the clean public wrapper must attest the private body before it starts Bash");
-assert.match(entrypointSource, /git -C "\$repository_dir" hash-object -- "\$body_path"/u, "the clean public wrapper must re-hash the body before execution");
+assert.match(entrypointSource, /git_attestation -C "\$repository_dir" hash-object -- "\$body_path"/u, "the clean public wrapper must re-hash the body before execution");
 const bodyIndexMode = spawnSync("git", ["ls-files", "-s", "--", "deploy/df13-first-preprod-release-reconcile.body.sh"], { cwd: resolve(deployDir, ".."), encoding: "utf8" });
 assert.equal(bodyIndexMode.status, 0, bodyIndexMode.stderr);
 assert.match(bodyIndexMode.stdout, /^100644\s/u, "the reconciliation body must remain a non-executable internal release artifact");
@@ -144,9 +146,9 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   copyFileSync(entrypoint, releaseEntrypoint);
   copyFileSync(script, releaseScript);
   let releaseEntrypointSource = readFileSync(releaseEntrypoint, "utf8");
-  const productionWrapperTrustedPath = 'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"\nexport PATH\nreadonly PATH';
+  const productionWrapperTrustedPath = 'TRUSTED_PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"\nPATH="$TRUSTED_PATH"\nexport PATH\nreadonly TRUSTED_PATH PATH\ngit_attestation() {\n  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 /usr/bin/git "$@"\n}';
   assert.ok(releaseEntrypointSource.includes(productionWrapperTrustedPath), "the fixture must begin from the reviewed wrapper command path");
-  releaseEntrypointSource = releaseEntrypointSource.replace(productionWrapperTrustedPath, 'PATH="${DF13_TEST_TRUSTED_PATH:?}"\nexport PATH\nreadonly PATH');
+  releaseEntrypointSource = releaseEntrypointSource.replace(productionWrapperTrustedPath, 'TRUSTED_PATH="${DF13_TEST_TRUSTED_PATH:?}"\nPATH="$TRUSTED_PATH"\nexport PATH\nreadonly TRUSTED_PATH PATH\ngit_attestation() {\n  env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 git "$@"\n}');
   const productionEntrypointPath = '  PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \\';
   assert.ok(releaseEntrypointSource.includes(productionEntrypointPath), "the fixture must begin from the reviewed clean wrapper path");
   releaseEntrypointSource = releaseEntrypointSource.replace(productionEntrypointPath, `  PATH="\${DF13_TEST_TRUSTED_PATH:?}" \\
@@ -218,7 +220,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   if (tamperedReleaseArtifact) writeFileSync(join(release, "deploy", "runtime-state", "capture-current.sh"), "#!/usr/bin/env bash\n# TAMPERED\nexit 0\n");
   writeFileSync(evidence, "{}\n");
   const evidenceSha256 = createHash("sha256").update(readFileSync(evidence)).digest("hex");
-  writeFileSync(join(bin, "git"), `#!/usr/bin/env bash\ncase "$*" in\n  *"cat-file -t"*) printf '%s\\n' tag ;;\n  *"^{commit}"*) printf '%s\\n' '${commit}' ;;\n  *"hash-object"*) if grep -F TAMPERED "\${!#}" >/dev/null; then printf '%s\\n' '${tamperedBlob}'; else printf '%s\\n' '${immutableBlob}'; fi ;;\n  *"rev-parse"*":deploy/"*) printf '%s\\n' '${immutableBlob}' ;;\n  *"rev-parse"*) printf '%s\\n' '${tree}' ;;\n  *) exit 2 ;;\nesac\n`);
+  writeFileSync(join(bin, "git"), `#!/usr/bin/env bash\nif [ "\${GIT_DIR:-}" = "malicious-object-store" ]; then\n  case "$*" in\n    *"cat-file -t"*) printf '%s\\n' tag ;;\n    *"^{commit}"*) printf '%s\\n' '${commit}' ;;\n    *"hash-object"*) printf '%s\\n' '${immutableBlob}' ;;\n    *"rev-parse"*":deploy/"*) printf '%s\\n' '${immutableBlob}' ;;\n    *"rev-parse"*) printf '%s\\n' '${tree}' ;;\n    *) exit 2 ;;\n  esac\n  exit 0\nfi\ncase "$*" in\n  *"cat-file -t"*) printf '%s\\n' tag ;;\n  *"^{commit}"*) printf '%s\\n' '${commit}' ;;\n  *"hash-object"*) if grep -F TAMPERED "\${!#}" >/dev/null; then printf '%s\\n' '${tamperedBlob}'; else printf '%s\\n' '${immutableBlob}'; fi ;;\n  *"rev-parse"*":deploy/"*) printf '%s\\n' '${immutableBlob}' ;;\n  *"rev-parse"*) printf '%s\\n' '${tree}' ;;\n  *) exit 2 ;;\nesac\n`);
   writeFileSync(join(bin, "node"), "#!/usr/bin/env bash\nprintf '%s\\n' node >> \"$DF13_TEST_LOG\"\nif [ \"$1\" = \"--input-type=module\" ]; then grep -F \"\\\"commit\\\":\\\"$DF13_RELEASE_EXPECTED_COMMIT\\\"\" \"$DF13_RELEASE_SOURCE_FILE\" >/dev/null; fi\n");
   writeFileSync(join(bin, "docker"), `#!/usr/bin/env bash\nif [ "$1" = inspect ]; then\n  case "$3" in\n    *config_files*) printf '%s\\n' '${canonicalBashPath(join(release, "deploy", "docker-compose.vps.yml"))}' ;;\n    *Config.Image*) printf '%s\\n' '${image}' ;;\n    *State.Running*) printf '%s\\n' '${running ? "true" : "false"}' ;;\n    *Image*) printf '%s\\n' '${imageId}' ;;\n    *) exit 2 ;;\n  esac\nelif [ "$1" = image ]; then\n  printf '%s\\n' '${commit}'\nelse\n  exit 2\nfi\n`);
   for (const executable of ["git", "node", "docker"]) chmodSync(join(bin, executable), 0o700);
@@ -245,13 +247,13 @@ function harnessEnvironment(harness) {
   };
 }
 
-function harnessCommand(harness) {
-  const env = Object.entries(harnessEnvironment(harness)).map(([name, value]) => `${name}=${quote(value)}`).join(" ");
+function harnessCommand(harness, environment = {}) {
+  const env = Object.entries({ ...harnessEnvironment(harness), ...environment }).map(([name, value]) => `${name}=${quote(value)}`).join(" ");
   return `${env} ${quote(canonicalBashPath(join(harness.release, "deploy", "df13-first-preprod-release-reconcile.sh")))}`;
 }
 
-function runHarness(harness) {
-  return spawnSync(bash, ["-c", harnessCommand(harness)], { encoding: "utf8" });
+function runHarness(harness, environment = {}) {
+  return spawnSync(bash, ["-c", harnessCommand(harness, environment)], { encoding: "utf8" });
 }
 
 function runPublicEntrypoint(harness, environment = {}) {
@@ -547,7 +549,14 @@ try {
       assert.equal(realpathSync(join(tamperedBodyRecovery.appRoot, "current")), realpathSync(tamperedBodyRecovery.release), "the tamper recovery fixture must leave the release pointer pending in its durable journal");
       assert.equal(readFileSync(join(tamperedBodyRecovery.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"known-good-legacy"}\n', "the tamper recovery fixture must retain the prior runtime-state pointer before recovery");
       tamperReconciliationBody(tamperedBodyRecovery);
-      const tamperedRecoveryResult = runHarness(tamperedBodyRecovery);
+      const tamperedRecoveryResult = runHarness(tamperedBodyRecovery, {
+        GIT_DIR: "malicious-object-store",
+        GIT_OBJECT_DIRECTORY: "/malicious/objects",
+        GIT_ALTERNATE_OBJECT_DIRECTORIES: "/malicious/alternates",
+        GIT_CONFIG_COUNT: "1",
+        GIT_CONFIG_KEY_0: "alias.hash-object=!false",
+        GIT_CONFIG_VALUE_0: "ignored",
+      });
       assert.notEqual(tamperedRecoveryResult.status, 0, "a tampered body with a pending journal must fail before recovery");
       assert.ok(!existsSync(tamperedBodyRecovery.tamperedBodyMarker), "a tampered body must never start before the public wrapper verifies its immutable blob");
       assert.equal(realpathSync(join(tamperedBodyRecovery.appRoot, "current")), realpathSync(tamperedBodyRecovery.release), "a rejected tampered body must not restore or otherwise mutate the pending current pointer");

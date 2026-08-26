@@ -51,6 +51,15 @@ assert.equal(databaseInvocation.args.includes(databasePassword), false);
 assert.deepEqual(databaseInvocation.env, { SAFE_PARENT_ENV: 'preserved', PGPASSWORD: databasePassword });
 throws(() => postgresQueryInvocation({ container: 'postgres', user: 'lana_app', database: 'lana_chatbot', password: '', sql: databaseQuery }), 'POSTGRES_PASSWORD_MISSING');
 throws(() => postgresQueryInvocation({ container: 'postgres', user: 'lana_app', database: 'lana_chatbot', password: databasePassword, sql: 'UPDATE pages SET status = \'ACTIVE\'' }), 'POSTGRES_QUERY_NOT_ALLOWLISTED');
+for (const release of ['20260812-unbounded-text-media-guard-r5.7', '20260812-unbounded-text-media-guard-r5.7.1']) {
+  const reviewedBaselineSource = readFileSync(join(here, '..', 'releases', release, 'validate-reviewed-live-baseline.mjs'), 'utf8');
+  const reviewedBaselineQueries = [...reviewedBaselineSource.matchAll(/"(SELECT [^"]+)"/gu)].map((match) => match[1]).filter((sql) => sql.includes("CLOSING_STRATEGY") || sql.includes("jsonb_agg"));
+  assert.equal(reviewedBaselineQueries.length, 2, `the existing ${release} reviewed-baseline queries must remain explicit`);
+  for (const sql of reviewedBaselineQueries) {
+    const invocation = postgresQueryInvocation({ container: 'postgres', user: 'lana_app', database: 'lana_chatbot', password: databasePassword, sql });
+    assert.match(invocation.args.at(-1), /^BEGIN TRANSACTION READ ONLY; SELECT /u, 'existing reviewed-baseline queries must retain the database read-only transaction boundary');
+  }
+}
 assert.equal(digestRows([{ migration: 'b', checksumSha256: '2' }, { migration: 'a', checksumSha256: '1' }], ['migration', 'checksumSha256']).sha256, digestRows([{ migration: 'a', checksumSha256: '1' }, { migration: 'b', checksumSha256: '2' }], ['migration', 'checksumSha256']).sha256);
 
 validateServiceEvidence(serviceEvidenceExample, inventory);
