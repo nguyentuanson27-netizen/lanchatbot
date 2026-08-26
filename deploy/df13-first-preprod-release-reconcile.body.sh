@@ -503,7 +503,7 @@ run_runtime_state_step() {
       sleep 0.05
     done
     exit 1
-  ' bash "$journal_file" "$step_name" "$operation_token" "$@" &
+  ' bash "$journal_file" "$step_name" "$operation_token" "$@" 9>&- &
   step_pid="$!"
   active_step_pid="$step_pid"
   local step_start_ticks="$(process_start_ticks "$step_pid")" || die "HELPER_START_TICKS_UNAVAILABLE"

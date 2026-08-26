@@ -54,6 +54,7 @@ assert.match(source, /mv -Tf /u, "current promotion must be atomic");
 assert.match(source, /readonly DEPLOYMENT_LOCK_FILE=/u, "the global deployment lock must be canonical");
 assert.match(source, /\/proc\/\$\$\/fd\/9/u, "an inherited global deployment lock must be verified, not replaced");
 assert.match(source, /flock -n 9/u, "concurrent release reconciliation must fail closed");
+assert.match(source, /' bash "\$journal_file" "\$step_name" "\$operation_token" "\$@" 9>&- &/u, "a runtime-state helper must close the parent deployment-lock descriptor before it can outlive a crashed reconciler");
 assert.doesNotMatch(source, /df13-release-reconcile\.lock/u, "a separate reconciliation lock would not serialize deployment automation");
 assert.match(source, /trap 'abort_reconciliation 130' INT/u, "an interrupt must restore the prior current pointer and terminate");
 assert.match(source, /trap 'abort_reconciliation 143' TERM/u, "a termination signal must restore the prior current pointer and terminate");
@@ -280,6 +281,16 @@ async function waitForStoppedProcess(pid, timeoutMs = 2_000) {
     await new Promise((resolveWait) => setTimeout(resolveWait, 20));
   }
   throw new Error(`timed out waiting for process ${pid} to stop`);
+}
+
+async function waitForTerminatedOrReapedProcess(pid, timeoutMs = 2_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const status = readProcessStatus(pid);
+    if (status === null || /^State:\s+Z/mu.test(status)) return;
+    await new Promise((resolveWait) => setTimeout(resolveWait, 20));
+  }
+  throw new Error(`timed out waiting for helper process ${pid} to terminate`);
 }
 
 function signalIsPending(status, signalNumber) {
@@ -538,6 +549,25 @@ try {
       if (unrelatedProcess?.pid) {
         try { process.kill(-unrelatedProcess.pid, "SIGKILL"); } catch (error) { if (!error || typeof error !== "object" || !("code" in error) || error.code !== "ESRCH") throw error; }
       }
+    }
+
+    const orphanedLockRecovery = writeHarness({ captureWaits: true });
+    const orphanedLockParent = spawn(bash, ["-c", harnessCommand(orphanedLockRecovery)], { stdio: "ignore" });
+    try {
+      await waitForFile(orphanedLockRecovery.captureStarted);
+      orphanedLockParent.kill("SIGKILL");
+      await waitForChildClose(orphanedLockParent);
+      const orphanedHelperPid = recordedHelperPid(orphanedLockRecovery);
+      assert.ok(orphanedHelperPid > 1, "the orphaned-lock fixture must identify the running journal-bound helper");
+      const helperStatusBeforeRecovery = readProcessStatus(orphanedHelperPid);
+      assert.ok(helperStatusBeforeRecovery !== null && !/^State:\s+Z/mu.test(helperStatusBeforeRecovery), "the recovery regression must begin with a live orphaned helper");
+      const recovered = runHarness(orphanedLockRecovery);
+      assert.notEqual(recovered.status, 0, "a fresh reconciler must acquire the released deployment lock, recover, then block rather than begin a new operation");
+      assert.equal(realpathSync(join(orphanedLockRecovery.appRoot, "current")), realpathSync(orphanedLockRecovery.previous), "orphaned-lock recovery must restore the exact prior current pointer");
+      assert.equal(readFileSync(join(orphanedLockRecovery.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"known-good-legacy"}\n', "orphaned-lock recovery must restore the exact prior runtime-state pointer");
+      await waitForTerminatedOrReapedProcess(orphanedHelperPid);
+    } finally {
+      stopHarnessProcess(orphanedLockRecovery, orphanedLockParent, 0);
     }
 
     const tamperedBodyRecovery = writeHarness({ captureWaits: true });
