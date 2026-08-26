@@ -17,6 +17,7 @@ set -E
 : "${DF13_RELEASE_REALTIME_IMAGE:?DF13_RELEASE_REALTIME_IMAGE is required}"
 : "${DF13_RELEASE_REALTIME_IMAGE_ID:?DF13_RELEASE_REALTIME_IMAGE_ID is required}"
 : "${DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE:?DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE is required}"
+: "${DF13_RUNTIME_STATE_SERVICE_EVIDENCE_SHA256:?DF13_RUNTIME_STATE_SERVICE_EVIDENCE_SHA256 is required}"
 : "${DF13_APP_ROOT:=/opt/lana-chatbot}"
 : "${DF13_REPOSITORY_DIR:=$DF13_APP_ROOT/repository}"
 : "${DF13_REALTIME_CONTAINER:=lana-chatbot-realtime-worker}"
@@ -42,6 +43,26 @@ safe_release_dir() {
   printf '%s\n' "$resolved"
 }
 
+sha256_file() {
+  local digest
+  digest="$(sha256sum -- "$1")" || die "FILE_HASH_UNAVAILABLE"
+  digest="${digest%% *}"
+  [[ "$digest" =~ ^[a-f0-9]{64}$ ]] || die "FILE_HASH_INVALID"
+  printf '%s\n' "$digest"
+}
+
+assert_release_artifact() {
+  local relative_path="$1"
+  local artifact="$release_dir/$relative_path"
+  local expected_blob
+  local actual_blob
+  test -f "$artifact" && test ! -L "$artifact" || die "RELEASE_ARTIFACT_MISSING_OR_SYMLINK:$relative_path"
+  expected_blob="$(git -C "$DF13_REPOSITORY_DIR" rev-parse "${DF13_RELEASE_COMMIT}:${relative_path}")" || die "RELEASE_ARTIFACT_GIT_BLOB_MISSING:$relative_path"
+  actual_blob="$(git hash-object -- "$artifact")" || die "RELEASE_ARTIFACT_HASH_UNAVAILABLE:$relative_path"
+  [[ "$expected_blob" =~ ^[a-f0-9]{40}$ && "$actual_blob" =~ ^[a-f0-9]{40}$ ]] || die "RELEASE_ARTIFACT_HASH_INVALID:$relative_path"
+  test "$actual_blob" = "$expected_blob" || die "RELEASE_FILE_HASH_MISMATCH:$relative_path"
+}
+
 atomic_switch_current() {
   local destination="$1"
   local next="$DF13_APP_ROOT/current.next.$$.df13-reconcile"
@@ -51,7 +72,7 @@ atomic_switch_current() {
   test "$(readlink -f "$DF13_APP_ROOT/current")" = "$destination" || die "CURRENT_SWITCH_READBACK_MISMATCH"
 }
 
-for command_name in docker git node readlink ln mv date flock setsid; do
+for command_name in docker git node readlink ln mv date flock setsid sha256sum cp mktemp rm; do
   require_command "$command_name"
 done
 readonly DEPLOYMENT_LOCK_FILE="$DF13_APP_ROOT/shared/lana-chatbot-deployment.lock"
@@ -75,6 +96,7 @@ esac
 [[ "$DF13_RELEASE_COMMIT" =~ ^[a-f0-9]{40}$ ]] || die "RELEASE_COMMIT_INVALID"
 [[ "$DF13_RELEASE_TREE" =~ ^[a-f0-9]{40}$ ]] || die "RELEASE_TREE_INVALID"
 [[ "$DF13_RELEASE_REALTIME_IMAGE_ID" =~ ^sha256:[a-f0-9]{64}$ ]] || die "REALTIME_IMAGE_ID_INVALID"
+[[ "$DF13_RUNTIME_STATE_SERVICE_EVIDENCE_SHA256" =~ ^[a-f0-9]{64}$ ]] || die "RUNTIME_STATE_EVIDENCE_HASH_INVALID"
 
 release_dir="$(safe_release_dir "$DF13_RELEASE_DIR")"
 previous_release_dir="$(safe_release_dir "$DF13_PREVIOUS_RELEASE_DIR")"
@@ -82,10 +104,24 @@ test "$(basename "$release_dir")" = "$DF13_RELEASE_TAG" || die "RELEASE_TAG_DIRE
 test -L "$DF13_APP_ROOT/current" || die "CURRENT_SYMLINK_MISSING"
 test "$(readlink -f "$DF13_APP_ROOT/current")" = "$previous_release_dir" || die "CURRENT_RELEASE_DRIFT"
 test -s "$DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE" || die "RUNTIME_STATE_EVIDENCE_MISSING"
+test "$(sha256_file "$DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE")" = "$DF13_RUNTIME_STATE_SERVICE_EVIDENCE_SHA256" || die "RUNTIME_STATE_EVIDENCE_HASH_MISMATCH"
 
 test "$(git -C "$DF13_REPOSITORY_DIR" cat-file -t "${DF13_RELEASE_TAG}")" = "tag" || die "RELEASE_TAG_NOT_ANNOTATED"
 test "$(git -C "$DF13_REPOSITORY_DIR" rev-parse "${DF13_RELEASE_TAG}^{commit}")" = "$DF13_RELEASE_COMMIT" || die "RELEASE_TAG_COMMIT_MISMATCH"
 test "$(git -C "$DF13_REPOSITORY_DIR" rev-parse "${DF13_RELEASE_COMMIT}^{tree}")" = "$DF13_RELEASE_TREE" || die "RELEASE_TREE_MISMATCH"
+test "$(readlink -f "$0")" = "$release_dir/deploy/df13-first-preprod-release-reconcile.sh" || die "RECONCILIATION_ENTRYPOINT_RELEASE_MISMATCH"
+for release_artifact in \
+  deploy/df13-first-preprod-release-reconcile.sh \
+  deploy/docker-compose.vps.yml \
+  deploy/runtime-state/release-source.mjs \
+  deploy/runtime-state/capture-current.sh \
+  deploy/runtime-state/verify-current.sh \
+  deploy/runtime-state/promote-current.sh \
+  deploy/runtime-state/runtime-state.mjs \
+  deploy/runtime-state/service-inventory.json \
+  deploy/runtime-state/config-allowlists.json; do
+  assert_release_artifact "$release_artifact"
+done
 node "$release_dir/deploy/runtime-state/release-source.mjs" validate \
   --file "$release_dir/.release-source.json" \
   --release "$DF13_RELEASE_TAG" >/dev/null
@@ -106,16 +142,60 @@ test "$(docker inspect --format '{{.State.Running}}' "$DF13_REALTIME_CONTAINER")
 test "$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$DF13_RELEASE_REALTIME_IMAGE_ID")" = "$DF13_RELEASE_COMMIT" || die "REALTIME_REVISION_MISMATCH"
 
 candidate_id="df13-reconcile-${DF13_RELEASE_TAG}-$(date -u +%Y%m%dT%H%M%SZ)-$$"
-candidate="$DF13_APP_ROOT/runtime-state/candidates/$candidate_id.json"
+runtime_state_root="$DF13_APP_ROOT/runtime-state"
+runtime_state_current="$runtime_state_root/current.json"
+candidate="$runtime_state_root/candidates/$candidate_id.json"
 test ! -e "$candidate" || die "RUNTIME_STATE_CANDIDATE_EXISTS"
+test -f "$runtime_state_current" && test ! -L "$runtime_state_current" || die "RUNTIME_STATE_CURRENT_MISSING_OR_SYMLINK"
+runtime_state_snapshot="$(mktemp "$runtime_state_root/.df13-reconcile-prior.XXXXXX")"
+cp -- "$runtime_state_current" "$runtime_state_snapshot"
+previous_runtime_state_sha256="$(sha256_file "$runtime_state_snapshot")"
+candidate_runtime_state_sha256=""
+runtime_state_may_be_promoted=false
 switched=false
 active_step_pid=""
 
+cleanup_runtime_state_snapshot() {
+  if [ -n "$runtime_state_snapshot" ] && test -e "$runtime_state_snapshot"; then
+    rm -f -- "$runtime_state_snapshot"
+  fi
+  runtime_state_snapshot=""
+}
+
+restore_previous_runtime_state() {
+  if [ "$runtime_state_may_be_promoted" != true ]; then
+    return 0
+  fi
+  local observed_sha256=""
+  if test -e "$runtime_state_current"; then
+    test -f "$runtime_state_current" && test ! -L "$runtime_state_current" || return 1
+    observed_sha256="$(sha256_file "$runtime_state_current")"
+  fi
+  if [ "$observed_sha256" = "$previous_runtime_state_sha256" ]; then
+    runtime_state_may_be_promoted=false
+    return 0
+  fi
+  if [ -n "$observed_sha256" ] && [ "$observed_sha256" != "$candidate_runtime_state_sha256" ]; then
+    return 1
+  fi
+  local restore_next="$runtime_state_current.$$.df13-reconcile-restore"
+  test ! -e "$restore_next" || return 1
+  cp -- "$runtime_state_snapshot" "$restore_next" || return 1
+  mv -Tf "$restore_next" "$runtime_state_current" || return 1
+  test "$(sha256_file "$runtime_state_current")" = "$previous_runtime_state_sha256" || return 1
+  runtime_state_may_be_promoted=false
+}
+
 restore_previous_current() {
   if [ "$switched" = true ]; then
+    if ! restore_previous_runtime_state; then
+      printf '%s\n' "DF13_RELEASE_RECONCILIATION_BLOCKED:RUNTIME_STATE_RECOVERY_AMBIGUOUS" >&2
+      return 1
+    fi
     switched=false
     atomic_switch_current "$previous_release_dir"
   fi
+  cleanup_runtime_state_snapshot
 }
 
 terminate_active_step() {
@@ -129,7 +209,7 @@ terminate_active_step() {
 abort_reconciliation() {
   local exit_code="$1"
   terminate_active_step
-  restore_previous_current
+  restore_previous_current || true
   trap - EXIT INT TERM HUP
   exit "$exit_code"
 }
@@ -162,6 +242,7 @@ run_runtime_state_step env \
   RUNTIME_STATE_CANDIDATE_ID="$candidate_id" \
   RUNTIME_STATE_GIT_DIR="$DF13_REPOSITORY_DIR" \
   "$release_dir/deploy/runtime-state/capture-current.sh"
+candidate_runtime_state_sha256="$(sha256_file "$candidate")"
 
 run_runtime_state_step env \
   RUNTIME_STATE_APP_ROOT="$DF13_APP_ROOT" \
@@ -171,6 +252,7 @@ run_runtime_state_step env \
   RUNTIME_STATE_GIT_DIR="$DF13_REPOSITORY_DIR" \
   "$release_dir/deploy/runtime-state/verify-current.sh"
 
+runtime_state_may_be_promoted=true
 run_runtime_state_step env \
   RUNTIME_STATE_APP_ROOT="$DF13_APP_ROOT" \
   RUNTIME_STATE_ROOT="$DF13_APP_ROOT/runtime-state" \
@@ -178,7 +260,10 @@ run_runtime_state_step env \
   RUNTIME_STATE_CANDIDATE="$candidate" \
   RUNTIME_STATE_GIT_DIR="$DF13_REPOSITORY_DIR" \
   "$release_dir/deploy/runtime-state/promote-current.sh"
+test "$(sha256_file "$runtime_state_current")" = "$candidate_runtime_state_sha256" || die "RUNTIME_STATE_PROMOTION_READBACK_MISMATCH"
+runtime_state_may_be_promoted=false
 
 switched=false
+cleanup_runtime_state_snapshot
 trap - EXIT INT TERM HUP
 printf '%s\n' "DF13_RELEASE_RECONCILIATION_PASS release=$DF13_RELEASE_TAG commit=$DF13_RELEASE_COMMIT tree=$DF13_RELEASE_TREE candidate=$candidate_id"

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { chmodSync, existsSync, mkdtempSync, mkdirSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { chmodSync, copyFileSync, existsSync, mkdtempSync, mkdirSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { spawn, spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
 
@@ -18,6 +19,8 @@ for (const required of ["DF13_RELEASE_DIR", "DF13_RELEASE_TAG", "DF13_RELEASE_CO
 }
 assert.match(source, /cat-file.*\$\{DF13_RELEASE_TAG\}/u, "annotated tag validation is required");
 assert.match(source, /\^\{tree\}/u, "exact release tree validation is required");
+assert.match(source, /hash-object/u, "every executed release artifact must be re-hashed against the immutable commit");
+assert.match(source, /RELEASE_FILE_HASH_MISMATCH/u, "a modified release-local artifact must fail closed");
 assert.match(source, /com\.docker\.compose\.project\.config_files/u, "running worker must be bound to the immutable release compose file");
 assert.match(source, /org\.opencontainers\.image\.revision/u, "running worker revision must be checked");
 assert.match(source, /\.State\.Running/u, "the reconciled realtime worker must be running");
@@ -31,6 +34,8 @@ assert.doesNotMatch(source, /df13-release-reconcile\.lock/u, "a separate reconci
 assert.match(source, /trap 'abort_reconciliation 130' INT/u, "an interrupt must restore the prior current pointer and terminate");
 assert.match(source, /trap 'abort_reconciliation 143' TERM/u, "a termination signal must restore the prior current pointer and terminate");
 assert.match(source, /trap 'abort_reconciliation 129' HUP/u, "a hangup must restore the prior current pointer and terminate");
+assert.match(source, /restore_previous_runtime_state/u, "failed or interrupted runtime-state promotion must restore the exact prior runtime-state pointer");
+assert.match(source, /RUNTIME_STATE_PROMOTION_READBACK_MISMATCH/u, "promotion must be reconciled from a durable readback instead of its exit status alone");
 assert.doesNotMatch(source, /docker compose|psql|sales_authority_mode|COMMERCE/u, "reconciliation must not deploy, alter authority, or expose a direct database operator");
 assert.match(readFileSync(captureCurrent, "utf8"), /runtime-state\.mjs" capture/u, "runtime-state must be captured through the reviewed helper");
 const runtimeStateSource = readFileSync(runtimeStateProgram, "utf8");
@@ -50,6 +55,8 @@ assert.equal(syntax.status, 0, syntax.stderr);
 const commit = "a".repeat(40);
 const tree = "b".repeat(40);
 const imageId = `sha256:${"c".repeat(64)}`;
+const immutableBlob = "d".repeat(40);
+const tamperedBlob = "e".repeat(40);
 const tag = "20260826-df13-reconcile-test";
 const image = "lana-chatbot-app:20260826-df13-reconcile-test";
 const runsPosixHarness = process.platform !== "win32";
@@ -64,7 +71,7 @@ function canonicalBashPath(value) {
   return result.stdout.trim();
 }
 
-function writeHarness({ captureFails = false, captureWaits = false, running = true, sourceCommit = commit } = {}) {
+function writeHarness({ captureFails = false, captureWaits = false, promoteFailsAfterCurrentReplace = false, promoteWaitsAfterCurrentReplace = false, running = true, sourceCommit = commit, tamperedReleaseArtifact = false } = {}) {
   const id = `scenario-${harnessId++}`;
   const appRoot = join(scratch, `${id}-root`);
   const release = join(appRoot, "releases", tag);
@@ -74,6 +81,7 @@ function writeHarness({ captureFails = false, captureWaits = false, running = tr
   const evidence = join(scratch, `${id}-evidence.json`);
   const log = join(scratch, `${id}.log`);
   const captureStarted = join(scratch, `${id}.capture-started`);
+  const promoteStarted = join(scratch, `${id}.promote-started`);
   mkdirSync(join(release, "deploy", "runtime-state"), { recursive: true });
   mkdirSync(join(appRoot, "runtime-state", "candidates"), { recursive: true });
   mkdirSync(join(appRoot, "shared"), { recursive: true });
@@ -81,22 +89,31 @@ function writeHarness({ captureFails = false, captureWaits = false, running = tr
   mkdirSync(repo, { recursive: true });
   mkdirSync(bin, { recursive: true });
   symlinkSync(previous, join(appRoot, "current"));
+  copyFileSync(script, join(release, "deploy", "df13-first-preprod-release-reconcile.sh"));
+  chmodSync(join(release, "deploy", "df13-first-preprod-release-reconcile.sh"), 0o700);
   writeFileSync(join(release, ".release-source.json"), JSON.stringify({ schemaVersion: 1, release: tag, repository: "https://github.com/nguyentuanson27-netizen/lanchatbot", tag, commit: sourceCommit, createdAt: "2026-08-26T00:00:00Z" }));
   writeFileSync(join(release, "deploy", "docker-compose.vps.yml"), "services: {}\n");
+  for (const name of ["release-source.mjs", "runtime-state.mjs", "service-inventory.json", "config-allowlists.json"]) writeFileSync(join(release, "deploy", "runtime-state", name), "{}\n");
+  writeFileSync(join(appRoot, "runtime-state", "current.json"), '{"release":"known-good-legacy"}\n');
   for (const name of ["capture-current.sh", "verify-current.sh", "promote-current.sh"]) {
     const capture = name === "capture-current.sh";
-    const action = capture && captureFails ? "exit 1" : capture ? "mkdir -p \"$RUNTIME_STATE_ROOT/candidates\"; printf '{}' > \"$RUNTIME_STATE_ROOT/candidates/$RUNTIME_STATE_CANDIDATE_ID.json\"" : "";
+    const promote = name === "promote-current.sh";
+    const action = capture && captureFails ? "exit 1" : capture ? "mkdir -p \"$RUNTIME_STATE_ROOT/candidates\"; printf '{\"release\":\"release\"}\\n' > \"$RUNTIME_STATE_ROOT/candidates/$RUNTIME_STATE_CANDIDATE_ID.json\"" : promote ? "cp \"$RUNTIME_STATE_CANDIDATE\" \"$RUNTIME_STATE_ROOT/current.json\"" : "";
     const wait = capture && captureWaits ? "touch \"$DF13_TEST_CAPTURE_STARTED\"; while :; do sleep 1; done" : "";
+    const promoteWait = promote && promoteWaitsAfterCurrentReplace ? "touch \"$DF13_TEST_PROMOTE_STARTED\"; while :; do sleep 1; done" : "";
+    const failAfterPromotion = promote && promoteFailsAfterCurrentReplace ? "exit 1" : "";
     const path = join(release, "deploy", "runtime-state", name);
-    writeFileSync(path, `#!/usr/bin/env bash\nset -euo pipefail\nprintf '%s\\n' '${name}' >> "$DF13_TEST_LOG"\n${wait}\n${action}\n`);
+    writeFileSync(path, `#!/usr/bin/env bash\nset -euo pipefail\nprintf '%s\\n' '${name}' >> "$DF13_TEST_LOG"\n${wait}\n${action}\n${promoteWait}\n${failAfterPromotion}\n`);
     chmodSync(path, 0o700);
   }
+  if (tamperedReleaseArtifact) writeFileSync(join(release, "deploy", "runtime-state", "capture-current.sh"), "#!/usr/bin/env bash\n# TAMPERED\nexit 0\n");
   writeFileSync(evidence, "{}\n");
-  writeFileSync(join(bin, "git"), `#!/usr/bin/env bash\ncase "$*" in\n  *"cat-file -t"*) printf '%s\\n' tag ;;\n  *"^{commit}"*) printf '%s\\n' '${commit}' ;;\n  *"rev-parse"*) printf '%s\\n' '${tree}' ;;\n  *) exit 2 ;;\nesac\n`);
+  const evidenceSha256 = createHash("sha256").update(readFileSync(evidence)).digest("hex");
+  writeFileSync(join(bin, "git"), `#!/usr/bin/env bash\ncase "$*" in\n  *"cat-file -t"*) printf '%s\\n' tag ;;\n  *"^{commit}"*) printf '%s\\n' '${commit}' ;;\n  *"hash-object"*) if grep -F TAMPERED "\${!#}" >/dev/null; then printf '%s\\n' '${tamperedBlob}'; else printf '%s\\n' '${immutableBlob}'; fi ;;\n  *"rev-parse"*":deploy/"*) printf '%s\\n' '${immutableBlob}' ;;\n  *"rev-parse"*) printf '%s\\n' '${tree}' ;;\n  *) exit 2 ;;\nesac\n`);
   writeFileSync(join(bin, "node"), "#!/usr/bin/env bash\nprintf '%s\\n' node >> \"$DF13_TEST_LOG\"\nif [ \"$1\" = \"--input-type=module\" ]; then grep -F \"\\\"commit\\\":\\\"$DF13_RELEASE_EXPECTED_COMMIT\\\"\" \"$DF13_RELEASE_SOURCE_FILE\" >/dev/null; fi\n");
   writeFileSync(join(bin, "docker"), `#!/usr/bin/env bash\nif [ "$1" = inspect ]; then\n  case "$3" in\n    *config_files*) printf '%s\\n' '${canonicalBashPath(join(release, "deploy", "docker-compose.vps.yml"))}' ;;\n    *Config.Image*) printf '%s\\n' '${image}' ;;\n    *State.Running*) printf '%s\\n' '${running ? "true" : "false"}' ;;\n    *Image*) printf '%s\\n' '${imageId}' ;;\n    *) exit 2 ;;\n  esac\nelif [ "$1" = image ]; then\n  printf '%s\\n' '${commit}'\nelse\n  exit 2\nfi\n`);
   for (const executable of ["git", "node", "docker"]) chmodSync(join(bin, executable), 0o700);
-  return { appRoot, release, previous, repo, bin, evidence, log, captureStarted };
+  return { appRoot, release, previous, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted };
 }
 
 function harnessCommand(harness) {
@@ -104,6 +121,7 @@ function harnessCommand(harness) {
     `PATH=${quote(canonicalBashPath(harness.bin))}:$PATH`,
     `DF13_TEST_LOG=${quote(canonicalBashPath(harness.log))}`,
     `DF13_TEST_CAPTURE_STARTED=${quote(canonicalBashPath(harness.captureStarted))}`,
+    `DF13_TEST_PROMOTE_STARTED=${quote(canonicalBashPath(harness.promoteStarted))}`,
     `DF13_APP_ROOT=${quote(canonicalBashPath(harness.appRoot))}`,
     `DF13_REPOSITORY_DIR=${quote(canonicalBashPath(harness.repo))}`,
     `DF13_RELEASE_DIR=${quote(canonicalBashPath(harness.release))}`,
@@ -114,8 +132,9 @@ function harnessCommand(harness) {
     `DF13_RELEASE_REALTIME_IMAGE=${quote(image)}`,
     `DF13_RELEASE_REALTIME_IMAGE_ID=${quote(imageId)}`,
     `DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE=${quote(canonicalBashPath(harness.evidence))}`,
+    `DF13_RUNTIME_STATE_SERVICE_EVIDENCE_SHA256=${quote(harness.evidenceSha256)}`,
   ].join(" ");
-  return `${env} ${quote(toBashPath(script))}`;
+  return `${env} ${quote(canonicalBashPath(join(harness.release, "deploy", "df13-first-preprod-release-reconcile.sh")))}`;
 }
 
 function runHarness(harness) {
@@ -142,9 +161,18 @@ try {
     assert.notEqual(runHarness(mismatchedSource).status, 0, "a mismatched release-source commit must fail closed");
     assert.equal(realpathSync(join(mismatchedSource.appRoot, "current")), realpathSync(mismatchedSource.previous), "source-pointer mismatch must not switch current");
 
+    const tamperedArtifact = writeHarness({ tamperedReleaseArtifact: true });
+    assert.notEqual(runHarness(tamperedArtifact).status, 0, "a modified release-local helper must fail closed");
+    assert.equal(realpathSync(join(tamperedArtifact.appRoot, "current")), realpathSync(tamperedArtifact.previous), "a modified release-local helper must not switch current");
+
     const failing = writeHarness({ captureFails: true });
     assert.notEqual(runHarness(failing).status, 0, "a runtime-state capture failure must fail closed");
     assert.equal(realpathSync(join(failing.appRoot, "current")), realpathSync(failing.previous), "capture failure must restore the previous current pointer");
+
+    const lostAcknowledgement = writeHarness({ promoteFailsAfterCurrentReplace: true });
+    assert.notEqual(runHarness(lostAcknowledgement).status, 0, "a lost promotion acknowledgement must fail closed");
+    assert.equal(realpathSync(join(lostAcknowledgement.appRoot, "current")), realpathSync(lostAcknowledgement.previous), "a lost promotion acknowledgement must restore the prior current pointer");
+    assert.equal(readFileSync(join(lostAcknowledgement.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"known-good-legacy"}\n', "a lost promotion acknowledgement must restore the exact prior runtime-state pointer");
 
     const stopped = writeHarness({ running: false });
     assert.notEqual(runHarness(stopped).status, 0, "a stopped realtime worker must fail closed");
@@ -169,6 +197,15 @@ try {
     const interruptResult = await new Promise((resolveResult) => running.once("close", (code, signal) => resolveResult({ code, signal })));
     assert.notEqual(interruptResult.code, 0, "a signal must terminate reconciliation nonzero after restoration");
     assert.equal(realpathSync(join(interrupted.appRoot, "current")), realpathSync(interrupted.previous), "a signal must restore the previous current pointer");
+
+    const interruptedPromotion = writeHarness({ promoteWaitsAfterCurrentReplace: true });
+    const promoting = spawn(bash, ["-c", harnessCommand(interruptedPromotion)], { stdio: "ignore" });
+    await waitForFile(interruptedPromotion.promoteStarted);
+    promoting.kill("SIGTERM");
+    const promotionInterruptResult = await new Promise((resolveResult) => promoting.once("close", (code, signal) => resolveResult({ code, signal })));
+    assert.notEqual(promotionInterruptResult.code, 0, "an interrupt after runtime-state replacement must terminate reconciliation nonzero");
+    assert.equal(realpathSync(join(interruptedPromotion.appRoot, "current")), realpathSync(interruptedPromotion.previous), "an interrupt after runtime-state replacement must restore the previous current pointer");
+    assert.equal(readFileSync(join(interruptedPromotion.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"known-good-legacy"}\n', "an interrupt after runtime-state replacement must restore the exact prior runtime-state pointer");
   }
 } finally {
   if (scratch) rmSync(scratch, { recursive: true, force: true });
