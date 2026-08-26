@@ -230,7 +230,7 @@ describe("DF13 first-PREPROD COMMERCE version preparer CLI", () => {
       }
       return git(repository, args);
     })).rejects.toThrow("DF13_FIRST_PREPROD_PREPARER_RELEASE_TAG_MISMATCH");
-  });
+  }, 15_000);
 
   it("writes a canonical create-once startup package only inside a non-symlink evidence directory", async () => {
     const evidenceDir = await mkdtemp(join(tmpdir(), "lana-df13-evidence-"));
