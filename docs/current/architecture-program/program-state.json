@@ -113,6 +113,7 @@
     "authorization": "OPERATIONAL_ACCEPTANCE_PENDING_NO_RUNTIME_ACTIVATION"
   },
   "future": [
+    "Anti-Bloat V5: PR #258 merged a proposal only. No durable owner-adoption record or active-state change exists; it cannot alter DF13 operational-acceptance sequencing until recorded separately on merged main.",
     "DF-11: merged source-only (PR #238); default-off, side-effect-free authority comparison; no runtime SHADOW authority",
     "DF-12: merged source-only (PR #239); missing-commerce signal; no runtime activation",
     "DF-13: SOURCE_FOUNDATIONS_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING; COMMERCE version/bundle, pure fence admission, release-evidence, cutover contracts, durable provider/dispatcher, default-off consumer, real fresh-process RealtimeRunner composition, and narrow non-generic writer are source-only. The stopped-process exercise does not use 0036; it requires a sealed/drained/stopped-zero boundary, strict Context V2 capture with each Commerce durable commit, and exact LEGACY pointer restoration. 0035 remains a pending non-auto-applied artifact, LEGACY control-plane source remains schema-compatible, and no migration, deployment, canary, replacement, or activation is authorized",

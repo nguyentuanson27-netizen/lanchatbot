@@ -1,6 +1,6 @@
 # Post-DF Hybrid Execution Plan — Anti-Bloat V5
 
-**Status:** `PROPOSED / OWNER-DECISION-READY` — this document does not itself authorize merge, release, migration, runtime mutation, COMMERCE activation, real-customer traffic, production hardening, or destructive cleanup.
+**Status:** `PROPOSED / OWNER-DECISION-READY` — merged as PR #258, but not adopted into the active program state. This document does not itself authorize release, migration, runtime mutation, COMMERCE activation, real-customer traffic, production hardening, or destructive cleanup.
 **Operating context:** `ENGINEERING_PREPROD` / one `PREPROD_TEST_PAGE`.
 **Primary objective:** activate COMMERCE safely, complete the intended model-vs-code authority split, then iterate sales quality quickly without rebuilding the old architecture/governance program around every tuning cycle.
 
@@ -36,7 +36,8 @@ The plan starts from the current recorded state:
 - first DF13 PREPROD exercise uses stopped/fresh-process replacement;
 - 0035/0036 remain pending DF13 artifacts outside automatic migration discovery;
 - Gate F remains the technical acceptance boundary for the first COMMERCE exercise;
-- UR / State V2 are not on the default post-Gate-F critical path unless a concrete trigger pulls in a narrow slice.
+- the active program point remains `DF-13 Operational Acceptance`; V5 has not changed it; and
+- UR / State V2 are not on the proposed post-Gate-F critical path unless a concrete trigger pulls in a narrow slice.
 
 Target runtime architecture:
 
@@ -94,9 +95,9 @@ These are engineering planning estimates, not repository facts or delivery commi
 
 ### Owner adoption and supersession
 
-If explicitly accepted by the owner, V5 becomes the canonical **post-Gate-F sequencing plan** for this PREPROD program.
+PR #258 published this proposal; merge alone is not V5 adoption. V5 becomes the canonical **post-Gate-F sequencing plan** only when a separate, durable owner-decision record on merged `main` names this document and its reviewed commit/blob, explicitly adopts the sequencing baseline, and records that the active point remains `DF-13 Operational Acceptance` until Gate F is actually accepted.
 
-**Adoption update:** the same adoption PR/change must add a short supersession notice to `FUTURE_BACKLOG.md` and the applicable post-Gate-F sequencing section of `PREPROD_DF_UR_PLAN_AMENDMENT.md`. Preserve existing historical text; do not delete or rewrite prior decisions. The notice must point to this plan as the canonical post-Gate-F sequencing authority once owner acceptance and merge are complete.
+**Adoption update:** that decision record must update the `future` section of `program-state.json` and add matching supersession notices to `FUTURE_BACKLOG.md` and the applicable post-Gate-F sequencing section of `PREPROD_DF_UR_PLAN_AMENDMENT.md`. Preserve historical text; do not rewrite earlier decisions. Until then, V5 is a merged proposal and neither the notices nor this plan change runtime, migration, release, or authorization state.
 
 V5 supersedes only conflicting future sequencing that would otherwise require UR / State V2 / Gate U before model-authority completion and the sales-quality loop. It does **not** supersede:
 
@@ -186,11 +187,9 @@ Only after A0 passes:
 
 #### 0035 / 0036 rule
 
-For the current first PREPROD exercise:
+`0036` is not applied or rehearsed for the stopped-process exercise. `0035` and `0036` remain outside automatic migration discovery; neither is promoted by this plan.
 
-> **Do not promote or apply 0035/0036.**
-
-They remain pending DF13 artifacts outside automatic discovery. Only a separately authorized additive, checksum-verified migration, if any, may be applied. Disposable-database rehearsal is evidence only and does not authorize PREPROD application.
+Before any COMMERCE preparation, preflight must inspect the target's durable ledger and schema. If the target lacks the `0035` COMMERCE schema, the exercise stops before a COMMERCE version is created: the existing `0030` schema admits only `LEGACY` and has no authority-bundle column. `0035` may then be applied only through a separately authorized, additive, checksum-verified Release Train after its disposable-database rehearsal and backup/restore requirements pass. A disposable rehearsal is evidence, not application authority. If the target already has the exact compatible schema, no migration is implied.
 
 ### A2 — First COMMERCE activation
 
@@ -218,9 +217,7 @@ Acceptance:
 
 ### A3 — Gate F + exact rollback
 
-Satisfy **all technical acceptance criteria currently defined by Gate F-PREPROD**, including the full transition matrix and BF/DF replay. Do not invent additional Gate F criteria beyond the current contract.
-
-Current Gate F includes at least:
+Satisfy the complete, closed Gate F-PREPROD checklist in [`FUTURE_BACKLOG.md`](FUTURE_BACKLOG.md#gate-f-preprod), including the full transition matrix and BF/DF replay. V5 creates no additional Gate F criterion; the list below is only a readable index of that canonical checklist.
 
 - COMMERCE FSM authority / derived phase;
 - coherent Context V2, phase, reconciliation, and legacy-authority demotion;
@@ -254,7 +251,7 @@ seal admission
 
 A new source SHA/tag is not assumed either way. Reuse of the same immutable release candidate is allowed only when current release/startup contracts prove that exact reuse is valid after the A0 fix.
 
-**Track A exit:** disposable-DB lifecycle passes; the known preparation blocker is narrowly fixed; 0035/0036 remain unpromoted/unapplied; first activation passes; all current Gate F criteria and human journeys pass; exact LEGACY rollback passes; fresh COMMERCE reactivation passes; final runtime readback is COMMERCE.
+**Track A exit:** disposable-DB lifecycle passes; the known preparation blocker is narrowly fixed; `0036` remains unapplied and `0035`, if required by the target schema, was separately authorized and applied through its governed Release Train; first activation passes; all current Gate F criteria and human journeys pass; exact LEGACY rollback passes; fresh COMMERCE reactivation passes; final runtime readback is COMMERCE.
 
 ---
 
