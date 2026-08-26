@@ -753,6 +753,50 @@ describe("PostgresRuntimeBehaviorModeStore", () => {
     expect(mocks.connect).not.toHaveBeenCalled();
   });
 
+  it("accepts a retry of the same resolution evidence when only observation timing changes", async () => {
+    let insertAttempts = 0;
+    mocks.poolQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes("INSERT INTO runtime_behavior_mode_resolution_audit")) {
+        insertAttempts += 1;
+        return insertAttempts === 1
+          ? { rows: [{ resolution_id: "20000000-0000-4000-8000-000000000002" }], rowCount: 1 }
+          : { rows: [], rowCount: 0 };
+      }
+      if (sql.includes("SELECT 1 FROM runtime_behavior_mode_resolution_audit")) {
+        const comparesVolatileObservation = sql.includes("resolved_at=$13") ||
+          sql.includes("propagation_ms IS NOT DISTINCT FROM $14");
+        return comparesVolatileObservation
+          ? { rows: [], rowCount: 0 }
+          : { rows: [{ exists: 1 }], rowCount: 1 };
+      }
+      return { rows: [], rowCount: 0 };
+    });
+    const store = new PostgresRuntimeBehaviorModeStore("postgresql://test", 1);
+    const evidence = {
+      resolutionId: "20000000-0000-4000-8000-000000000002",
+      pageId,
+      channel,
+      confirmationMode: "V2_ACTIVE" as const,
+      modeVersionId: targetVersionId,
+      contentHash: targetRow.content_hash,
+      pointerRevision: 8,
+      source: "DATABASE" as const,
+      status: "RESOLVED" as const,
+      reasonCodes: [],
+      workerId: "worker-1",
+      pointerUpdatedAt: updatedAt.toISOString(),
+      resolvedAt: updatedAt.toISOString(),
+      propagationMs: 0,
+    };
+
+    await store.recordResolution(evidence);
+    await expect(store.recordResolution({
+      ...evidence,
+      resolvedAt: new Date(updatedAt.getTime() + 5_000).toISOString(),
+      propagationMs: 5_000,
+    })).resolves.toBeUndefined();
+  });
+
   it("fails closed when an idempotency key already belongs to different resolution evidence", async () => {
     mocks.poolQuery
       .mockResolvedValueOnce({ rows: [], rowCount: 0 })
