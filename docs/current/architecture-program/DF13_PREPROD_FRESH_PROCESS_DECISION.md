@@ -64,7 +64,9 @@ step:
    The adjacent `.body.sh` file is a non-executable internal implementation
    artifact; it is never an operator entrypoint. Operators invoke only the
    reviewed wrapper above, which starts the body in its explicit clean
-   environment.
+   environment. Before it starts Bash, that wrapper re-derives the annotated
+   release commit and verifies the body's Git blob; a stale or altered body
+   therefore cannot execute journal recovery or change either durable pointer.
 3. Seal the target page from new authority-dependent work, gracefully drain and
    reconcile every eligible queued/in-flight item to zero using the current
    LEGACY service set, then stop that finite set and re-prove zero eligible work.
