@@ -21,7 +21,11 @@ assert.match(entrypointSource, /exec \/usr\/bin\/env -i/u, "the entrypoint must 
 assert.match(entrypointSource, /\/usr\/bin\/bash --noprofile --norc/u, "the entrypoint must use its absolute reviewed non-startup Bash interpreter");
 assert.match(source, /^#!\/usr\/bin\/bash\nset -euo pipefail\nset -E\n/u, "the operational entrypoint must use its absolute reviewed interpreter");
 assert.doesNotMatch(source, /\beval\b/u, "reconciliation automation must not evaluate caller input");
-assert.match(source, /DF13_RECONCILE_BOOTSTRAP/u, "the body must reject unsupported direct execution");
+assert.doesNotMatch(source, /DF13_RECONCILE_BOOTSTRAP/u, "the private body must not accept a caller-mintable bootstrap bypass");
+assert.doesNotMatch(entrypointSource, /DF13_RECONCILE_BOOTSTRAP/u, "the public wrapper must not mint a bypass token for its private body");
+const bodyIndexMode = spawnSync("git", ["ls-files", "-s", "--", "deploy/df13-first-preprod-release-reconcile.body.sh"], { cwd: resolve(deployDir, ".."), encoding: "utf8" });
+assert.equal(bodyIndexMode.status, 0, bodyIndexMode.stderr);
+assert.match(bodyIndexMode.stdout, /^100644\s/u, "the reconciliation body must remain a non-executable internal release artifact");
 assert.match(source, /trap - DEBUG RETURN ERR EXIT/u, "startup hooks inherited from a caller must be cleared before any release operation");
 assert.match(source, /readonly TRUSTED_PATH="\/usr\/local\/sbin:\/usr\/local\/bin:\/usr\/sbin:\/usr\/bin:\/sbin:\/bin"/u, "release reconciliation must establish a fixed command search path");
 assert.match(source, /unset BASH_ENV ENV CDPATH/u, "the reviewed body must clear noninteractive shell startup variables");
@@ -126,6 +130,19 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   const releaseScript = join(release, "deploy", "df13-first-preprod-release-reconcile.body.sh");
   copyFileSync(entrypoint, releaseEntrypoint);
   copyFileSync(script, releaseScript);
+  let releaseEntrypointSource = readFileSync(releaseEntrypoint, "utf8");
+  const productionEntrypointPath = '  PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \\';
+  assert.ok(releaseEntrypointSource.includes(productionEntrypointPath), "the fixture must begin from the reviewed clean wrapper path");
+  releaseEntrypointSource = releaseEntrypointSource.replace(productionEntrypointPath, `  PATH="\${DF13_TEST_TRUSTED_PATH:?}" \\
+  DF13_TEST_TRUSTED_PATH="\${DF13_TEST_TRUSTED_PATH:?}" \\
+  DF13_TEST_LOG="\${DF13_TEST_LOG:?}" \\
+  DF13_TEST_CAPTURE_STARTED="\${DF13_TEST_CAPTURE_STARTED:?}" \\
+  DF13_TEST_PROMOTE_STARTED="\${DF13_TEST_PROMOTE_STARTED:?}" \\
+  DF13_TEST_RELEASE_LAUNCH_RACE="\${DF13_TEST_RELEASE_LAUNCH_RACE:?}" \\
+  DF13_TEST_SIGNAL_MARKER="\${DF13_TEST_SIGNAL_MARKER:?}" \\
+  DF13_TEST_EVIDENCE_OBSERVED="\${DF13_TEST_EVIDENCE_OBSERVED:?}" \\
+`);
+  writeFileSync(releaseEntrypoint, releaseEntrypointSource);
   let releaseScriptSource = readFileSync(releaseScript, "utf8");
   const productionTrustedPath = 'readonly TRUSTED_PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"';
   assert.ok(releaseScriptSource.includes(productionTrustedPath), "the fixture must begin from the reviewed fixed command path");
@@ -157,7 +174,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   }
   writeFileSync(releaseScript, releaseScriptSource);
   chmodSync(releaseEntrypoint, 0o700);
-  chmodSync(releaseScript, 0o700);
+  chmodSync(releaseScript, 0o600);
   writeFileSync(join(release, ".release-source.json"), JSON.stringify({ schemaVersion: 1, release: tag, repository: "https://github.com/nguyentuanson27-netizen/lanchatbot", tag, commit: sourceCommit, createdAt: "2026-08-26T00:00:00Z" }));
   writeFileSync(join(release, "deploy", "docker-compose.vps.yml"), "services: {}\n");
   for (const name of ["release-source.mjs", "runtime-state.mjs", "service-inventory.json", "config-allowlists.json"]) writeFileSync(join(release, "deploy", "runtime-state", name), "{}\n");
@@ -185,29 +202,39 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   return { appRoot, release, previous, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted, releaseLaunchRace, signalMarker, evidenceObserved };
 }
 
+function harnessEnvironment(harness) {
+  return {
+    PATH: `${canonicalBashPath(harness.bin)}:${process.env.PATH ?? ""}`,
+    DF13_TEST_TRUSTED_PATH: `${canonicalBashPath(harness.bin)}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin`,
+    DF13_TEST_LOG: canonicalBashPath(harness.log),
+    DF13_TEST_CAPTURE_STARTED: canonicalBashPath(harness.captureStarted),
+    DF13_TEST_PROMOTE_STARTED: canonicalBashPath(harness.promoteStarted),
+    DF13_TEST_RELEASE_LAUNCH_RACE: canonicalBashPath(harness.releaseLaunchRace),
+    DF13_TEST_SIGNAL_MARKER: canonicalBashPath(harness.signalMarker),
+    DF13_TEST_EVIDENCE_OBSERVED: canonicalBashPath(harness.evidenceObserved),
+    DF13_RELEASE_COMMIT: commit,
+    DF13_RELEASE_TREE: tree,
+    DF13_RELEASE_REALTIME_IMAGE: image,
+    DF13_RELEASE_REALTIME_IMAGE_ID: imageId,
+    DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE: canonicalBashPath(harness.evidence),
+    DF13_RUNTIME_STATE_SERVICE_EVIDENCE_SHA256: harness.evidenceSha256,
+  };
+}
+
 function harnessCommand(harness) {
-  const env = [
-    `PATH=${quote(canonicalBashPath(harness.bin))}:$PATH`,
-    `DF13_TEST_TRUSTED_PATH=${quote(canonicalBashPath(harness.bin))}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin`,
-    "DF13_RECONCILE_BOOTSTRAP=1",
-    `DF13_TEST_LOG=${quote(canonicalBashPath(harness.log))}`,
-    `DF13_TEST_CAPTURE_STARTED=${quote(canonicalBashPath(harness.captureStarted))}`,
-    `DF13_TEST_PROMOTE_STARTED=${quote(canonicalBashPath(harness.promoteStarted))}`,
-    `DF13_TEST_RELEASE_LAUNCH_RACE=${quote(canonicalBashPath(harness.releaseLaunchRace))}`,
-    `DF13_TEST_SIGNAL_MARKER=${quote(canonicalBashPath(harness.signalMarker))}`,
-    `DF13_TEST_EVIDENCE_OBSERVED=${quote(canonicalBashPath(harness.evidenceObserved))}`,
-    `DF13_RELEASE_COMMIT=${quote(commit)}`,
-    `DF13_RELEASE_TREE=${quote(tree)}`,
-    `DF13_RELEASE_REALTIME_IMAGE=${quote(image)}`,
-    `DF13_RELEASE_REALTIME_IMAGE_ID=${quote(imageId)}`,
-    `DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE=${quote(canonicalBashPath(harness.evidence))}`,
-    `DF13_RUNTIME_STATE_SERVICE_EVIDENCE_SHA256=${quote(harness.evidenceSha256)}`,
-  ].join(" ");
-  return `${env} ${quote(canonicalBashPath(join(harness.release, "deploy", "df13-first-preprod-release-reconcile.body.sh")))}`;
+  const env = Object.entries(harnessEnvironment(harness)).map(([name, value]) => `${name}=${quote(value)}`).join(" ");
+  return `${env} ${quote(canonicalBashPath(join(harness.release, "deploy", "df13-first-preprod-release-reconcile.sh")))}`;
 }
 
 function runHarness(harness) {
   return spawnSync(bash, ["-c", harnessCommand(harness)], { encoding: "utf8" });
+}
+
+function runPublicEntrypoint(harness, environment = {}) {
+  return spawnSync(join(harness.release, "deploy", "df13-first-preprod-release-reconcile.sh"), [], {
+    encoding: "utf8",
+    env: { ...process.env, ...harnessEnvironment(harness), ...environment },
+  });
 }
 
 function readProcessStatus(pid) {
@@ -345,6 +372,14 @@ try {
     assert.equal(result.status, 0, `${result.stderr}\n${result.stdout}`);
     assert.equal(realpathSync(join(successful.appRoot, "current")), realpathSync(successful.release));
     assert.deepEqual(readFileSync(successful.log, "utf8").trim().split("\n"), ["node", "node", "capture-current.sh", "verify-current.sh", "promote-current.sh"]);
+
+    const hostileStartup = writeHarness();
+    const startupHook = join(scratch, "hostile-bash-env.sh");
+    const startupMarker = join(scratch, "hostile-bash-env-ran");
+    writeFileSync(startupHook, `printf '%s\\n' hostile > ${quote(canonicalBashPath(startupMarker))}\n`);
+    const hostileStartupResult = runPublicEntrypoint(hostileStartup, { BASH_ENV: canonicalBashPath(startupHook) });
+    assert.equal(hostileStartupResult.status, 0, `${hostileStartupResult.stderr}\n${hostileStartupResult.stdout}`);
+    assert.ok(!existsSync(startupMarker), "the public wrapper must discard caller BASH_ENV before it starts the private Bash body");
 
     const immutableEvidence = writeHarness({ mutateEvidenceAfterSnapshot: true });
     const immutableEvidenceResult = runHarness(immutableEvidence);

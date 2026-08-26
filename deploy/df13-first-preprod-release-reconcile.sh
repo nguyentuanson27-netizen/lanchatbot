@@ -23,7 +23,6 @@ test -f "$body_path" && test ! -L "$body_path" || {
 }
 exec /usr/bin/env -i \
   PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
-  DF13_RECONCILE_BOOTSTRAP=1 \
   DF13_RELEASE_COMMIT="${DF13_RELEASE_COMMIT:-}" \
   DF13_RELEASE_TREE="${DF13_RELEASE_TREE:-}" \
   DF13_RELEASE_REALTIME_IMAGE="${DF13_RELEASE_REALTIME_IMAGE:-}" \

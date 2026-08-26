@@ -2,11 +2,6 @@
 set -euo pipefail
 set -E
 
-test "${DF13_RECONCILE_BOOTSTRAP:-}" = "1" || {
-  printf '%s\n' "DF13_RELEASE_RECONCILIATION_BLOCKED:RECONCILIATION_BODY_DIRECT_EXECUTION_FORBIDDEN" >&2
-  exit 1
-}
-unset DF13_RECONCILE_BOOTSTRAP
 trap - DEBUG RETURN ERR EXIT
 unset BASH_ENV ENV CDPATH
 unalias -a 2>/dev/null || :
