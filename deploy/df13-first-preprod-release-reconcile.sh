@@ -228,8 +228,26 @@ commit_reconciliation() {
 }
 
 run_runtime_state_step() {
-  setsid "$@" &
-  active_step_pid="$!"
+  # A signal after the helper begins but before its process group is recorded
+  # would leave an unowned helper able to publish runtime state after rollback.
+  # Defer handled signals only across that launch handshake, then fail closed
+  # once the child process group is recorded. The child restores default
+  # dispositions before exec so it never inherits the parent's temporary
+  # deferred handlers.
+  local launch_signal_exit_code=0
+  trap 'launch_signal_exit_code=130' INT
+  trap 'launch_signal_exit_code=143' TERM
+  trap 'launch_signal_exit_code=129' HUP
+  local step_pid=""
+  setsid bash -c 'trap - INT TERM HUP; exec "$@"' bash "$@" &
+  step_pid="$!"
+  active_step_pid="$step_pid"
+  trap 'abort_reconciliation 130' INT
+  trap 'abort_reconciliation 143' TERM
+  trap 'abort_reconciliation 129' HUP
+  if [ "$launch_signal_exit_code" -ne 0 ]; then
+    abort_reconciliation "$launch_signal_exit_code"
+  fi
   local step_status=0
   if wait "$active_step_pid"; then
     step_status=0

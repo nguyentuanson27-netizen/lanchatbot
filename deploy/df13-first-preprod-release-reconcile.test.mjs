@@ -24,7 +24,8 @@ assert.match(source, /RELEASE_FILE_HASH_MISMATCH/u, "a modified release-local ar
 assert.match(source, /com\.docker\.compose\.project\.config_files/u, "running worker must be bound to the immutable release compose file");
 assert.match(source, /org\.opencontainers\.image\.revision/u, "running worker revision must be checked");
 assert.match(source, /\.State\.Running/u, "the reconciled realtime worker must be running");
-assert.match(source, /setsid "\$@"/u, "runtime-state helpers must have an independently terminable process group");
+assert.match(source, /local launch_signal_exit_code=0\n  trap 'launch_signal_exit_code=130' INT\n  trap 'launch_signal_exit_code=143' TERM\n  trap 'launch_signal_exit_code=129' HUP\n  local step_pid=""\n  setsid bash -c 'trap - INT TERM HUP; exec "\$@"' bash "\$@" &\n  step_pid="\$!"\n  active_step_pid="\$step_pid"/u, "runtime-state helpers must defer signals until their process group is recorded");
+assert.match(source, /trap 'abort_reconciliation 130' INT\n  trap 'abort_reconciliation 143' TERM\n  trap 'abort_reconciliation 129' HUP/u, "the parent signal handlers must be restored only after the child process group is recorded");
 assert.match(source, /ln -s /u, "current promotion must create a temporary symlink");
 assert.match(source, /mv -Tf /u, "current promotion must be atomic");
 assert.match(source, /readonly DEPLOYMENT_LOCK_FILE=/u, "the global deployment lock must be canonical");
@@ -59,8 +60,8 @@ const immutableBlob = "d".repeat(40);
 const tamperedBlob = "e".repeat(40);
 const tag = "20260826-df13-reconcile-test";
 const image = "lana-chatbot-app:20260826-df13-reconcile-test";
-const runsPosixHarness = process.platform !== "win32";
-const scratch = runsPosixHarness ? mkdtempSync(join(deployDir, ".df13-release-reconcile-")) : null;
+const runsLinuxHarness = process.platform === "linux";
+const scratch = runsLinuxHarness ? mkdtempSync(join(deployDir, ".df13-release-reconcile-")) : null;
 let harnessId = 0;
 const toBashPath = (value) => value.replaceAll("\\", "/").replace(/^([A-Za-z]):/u, (_, drive) => `/${drive.toLowerCase()}`);
 const quote = (value) => `'${value.replaceAll("'", "'\\''")}'`;
@@ -71,7 +72,7 @@ function canonicalBashPath(value) {
   return result.stdout.trim();
 }
 
-function writeHarness({ captureFails = false, captureWaits = false, promoteFailsAfterCurrentReplace = false, promoteWaitsAfterCurrentReplace = false, signalDuringCommit = false, vulnerableCommitOrdering = false, running = true, sourceCommit = commit, tamperedReleaseArtifact = false } = {}) {
+function writeHarness({ captureFails = false, captureWaits = false, promoteFailsAfterCurrentReplace = false, promoteWaitsAfterCurrentReplace = false, promoteWaitsForLaunchRace = false, signalDuringCommit = false, signalDuringLaunch = false, vulnerableCommitOrdering = false, vulnerableLaunchHandshake = false, running = true, sourceCommit = commit, tamperedReleaseArtifact = false } = {}) {
   const id = `scenario-${harnessId++}`;
   const appRoot = join(scratch, `${id}-root`);
   const release = join(appRoot, "releases", tag);
@@ -82,6 +83,7 @@ function writeHarness({ captureFails = false, captureWaits = false, promoteFails
   const log = join(scratch, `${id}.log`);
   const captureStarted = join(scratch, `${id}.capture-started`);
   const promoteStarted = join(scratch, `${id}.promote-started`);
+  const releaseLaunchRace = join(scratch, `${id}.release-launch-race`);
   const debugEnvironment = join(scratch, `${id}.bash-env`);
   const signalMarker = join(scratch, `${id}.signal-marker`);
   mkdirSync(join(release, "deploy", "runtime-state"), { recursive: true });
@@ -100,6 +102,17 @@ function writeHarness({ captureFails = false, captureWaits = false, promoteFails
     assert.ok(releaseScriptSource.includes(protectedOrdering), "test fixture must derive the vulnerable ordering from the reviewed commit sequence");
     writeFileSync(releaseScript, releaseScriptSource.replace(protectedOrdering, vulnerableOrdering));
   }
+  if (vulnerableLaunchHandshake) {
+    const vulnerableHandshake = `run_runtime_state_step() {\n  setsid bash -c 'trap - INT TERM HUP; exec "$@"' bash "$@" &\n  active_step_pid="$!"\n`;
+    const releaseScriptSource = readFileSync(releaseScript, "utf8");
+    const protectedHandshakeStart = releaseScriptSource.indexOf("run_runtime_state_step() {\n");
+    const protectedHandshakeEnd = releaseScriptSource.indexOf("  local step_status=0\n", protectedHandshakeStart);
+    assert.ok(protectedHandshakeStart >= 0 && protectedHandshakeEnd > protectedHandshakeStart, "test fixture must locate the reviewed signal-masked launch handshake");
+    const protectedHandshake = releaseScriptSource.slice(protectedHandshakeStart, protectedHandshakeEnd);
+    assert.match(protectedHandshake, /launch_signal_exit_code=0/u, "the vulnerable fixture must start from a deferred signal handler");
+    assert.match(protectedHandshake, /active_step_pid="\$step_pid"/u, "the vulnerable fixture must start from a recorded child process group");
+    writeFileSync(releaseScript, releaseScriptSource.replace(protectedHandshake, vulnerableHandshake));
+  }
   chmodSync(releaseScript, 0o700);
   writeFileSync(join(release, ".release-source.json"), JSON.stringify({ schemaVersion: 1, release: tag, repository: "https://github.com/nguyentuanson27-netizen/lanchatbot", tag, commit: sourceCommit, createdAt: "2026-08-26T00:00:00Z" }));
   writeFileSync(join(release, "deploy", "docker-compose.vps.yml"), "services: {}\n");
@@ -111,9 +124,10 @@ function writeHarness({ captureFails = false, captureWaits = false, promoteFails
     const action = capture && captureFails ? "exit 1" : capture ? "mkdir -p \"$RUNTIME_STATE_ROOT/candidates\"; printf '{\"release\":\"release\"}\\n' > \"$RUNTIME_STATE_ROOT/candidates/$RUNTIME_STATE_CANDIDATE_ID.json\"" : promote ? "cp \"$RUNTIME_STATE_CANDIDATE\" \"$RUNTIME_STATE_ROOT/current.json\"" : "";
     const wait = capture && captureWaits ? "touch \"$DF13_TEST_CAPTURE_STARTED\"; while :; do sleep 1; done" : "";
     const promoteWait = promote && promoteWaitsAfterCurrentReplace ? "touch \"$DF13_TEST_PROMOTE_STARTED\"; while :; do sleep 1; done" : "";
+    const launchRaceWait = promote && promoteWaitsForLaunchRace ? "printf '%s\\n' \"$$\" > \"$DF13_TEST_PROMOTE_STARTED\"; while test ! -e \"$DF13_TEST_RELEASE_LAUNCH_RACE\"; do sleep 0.01; done" : "";
     const failAfterPromotion = promote && promoteFailsAfterCurrentReplace ? "exit 1" : "";
     const path = join(release, "deploy", "runtime-state", name);
-    writeFileSync(path, `#!/usr/bin/env bash\nset -euo pipefail\nprintf '%s\\n' '${name}' >> "$DF13_TEST_LOG"\n${wait}\n${action}\n${promoteWait}\n${failAfterPromotion}\n`);
+    writeFileSync(path, `#!/usr/bin/env bash\nset -euo pipefail\nprintf '%s\\n' '${name}' >> "$DF13_TEST_LOG"\n${wait}\n${launchRaceWait}\n${action}\n${promoteWait}\n${failAfterPromotion}\n`);
     chmodSync(path, 0o700);
   }
   if (tamperedReleaseArtifact) writeFileSync(join(release, "deploy", "runtime-state", "capture-current.sh"), "#!/usr/bin/env bash\n# TAMPERED\nexit 0\n");
@@ -124,7 +138,8 @@ function writeHarness({ captureFails = false, captureWaits = false, promoteFails
   writeFileSync(join(bin, "docker"), `#!/usr/bin/env bash\nif [ "$1" = inspect ]; then\n  case "$3" in\n    *config_files*) printf '%s\\n' '${canonicalBashPath(join(release, "deploy", "docker-compose.vps.yml"))}' ;;\n    *Config.Image*) printf '%s\\n' '${image}' ;;\n    *State.Running*) printf '%s\\n' '${running ? "true" : "false"}' ;;\n    *Image*) printf '%s\\n' '${imageId}' ;;\n    *) exit 2 ;;\n  esac\nelif [ "$1" = image ]; then\n  printf '%s\\n' '${commit}'\nelse\n  exit 2\nfi\n`);
   for (const executable of ["git", "node", "docker"]) chmodSync(join(bin, executable), 0o700);
   if (signalDuringCommit) writeFileSync(debugEnvironment, "set -T\ntrap 'if [ \"$BASH_COMMAND\" = \"switched=false\" ] && [ \"${FUNCNAME[0]:-}\" = \"commit_reconciliation\" ] && [ \"${DF13_TEST_SIGNAL_SENT:-}\" != \"1\" ]; then export DF13_TEST_SIGNAL_SENT=1; printf \"%s\\n\" \"$$\" > \"$DF13_TEST_SIGNAL_MARKER\"; kill -STOP \"$$\"; fi' DEBUG\n");
-  return { appRoot, release, previous, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted, signalMarker, debugEnvironment: signalDuringCommit ? debugEnvironment : null };
+  if (signalDuringLaunch) writeFileSync(debugEnvironment, "set -T\ntrap 'if [ \"${FUNCNAME[0]:-}\" = \"run_runtime_state_step\" ] && { [ \"$BASH_COMMAND\" = \"active_step_pid=\\\"\\$step_pid\\\"\" ] || [ \"$BASH_COMMAND\" = \"active_step_pid=\\\"\\$!\\\"\" ]; }; then DF13_TEST_LAUNCH_COUNT=$(( ${DF13_TEST_LAUNCH_COUNT:-0} + 1 )); export DF13_TEST_LAUNCH_COUNT; if [ \"$DF13_TEST_LAUNCH_COUNT\" = \"3\" ] && [ \"${DF13_TEST_SIGNAL_SENT:-}\" != \"1\" ]; then export DF13_TEST_SIGNAL_SENT=1; printf \"%s\\n\" \"$$\" > \"$DF13_TEST_SIGNAL_MARKER\"; kill -STOP \"$$\"; fi; fi' DEBUG\n");
+  return { appRoot, release, previous, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted, releaseLaunchRace, signalMarker, debugEnvironment: signalDuringCommit || signalDuringLaunch ? debugEnvironment : null };
 }
 
 function harnessCommand(harness) {
@@ -133,6 +148,7 @@ function harnessCommand(harness) {
     `DF13_TEST_LOG=${quote(canonicalBashPath(harness.log))}`,
     `DF13_TEST_CAPTURE_STARTED=${quote(canonicalBashPath(harness.captureStarted))}`,
     `DF13_TEST_PROMOTE_STARTED=${quote(canonicalBashPath(harness.promoteStarted))}`,
+    `DF13_TEST_RELEASE_LAUNCH_RACE=${quote(canonicalBashPath(harness.releaseLaunchRace))}`,
     `DF13_TEST_SIGNAL_MARKER=${quote(canonicalBashPath(harness.signalMarker))}`,
     `DF13_APP_ROOT=${quote(canonicalBashPath(harness.appRoot))}`,
     `DF13_REPOSITORY_DIR=${quote(canonicalBashPath(harness.repo))}`,
@@ -154,19 +170,110 @@ function runHarness(harness) {
   return spawnSync(bash, ["-c", harnessCommand(harness)], { encoding: "utf8" });
 }
 
-async function runHarnessWithPendingCommitSignal(harness) {
-  const running = spawn(bash, ["-c", harnessCommand(harness)], { stdio: "ignore" });
+function readProcessStatus(pid) {
   try {
-    await waitForFile(harness.signalMarker);
-    const signalTarget = Number(readFileSync(harness.signalMarker, "utf8").trim());
-    assert.ok(Number.isSafeInteger(signalTarget) && signalTarget > 1, "the commit-window injector must identify a live Bash process");
-    process.kill(signalTarget, "SIGTERM");
-    process.kill(signalTarget, "SIGCONT");
+    return readFileSync(`/proc/${pid}/status`, "utf8");
   } catch (error) {
-    running.kill("SIGKILL");
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") return null;
     throw error;
   }
-  return await new Promise((resolveResult) => running.once("close", (code, signal) => resolveResult({ code, signal })));
+}
+
+async function waitForStoppedProcess(pid, timeoutMs = 2_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const status = readProcessStatus(pid);
+    if (status && /^State:\s+[Tt]/mu.test(status)) return;
+    await new Promise((resolveWait) => setTimeout(resolveWait, 20));
+  }
+  throw new Error(`timed out waiting for process ${pid} to stop`);
+}
+
+function signalIsPending(status, signalNumber) {
+  const signalMask = 1n << BigInt(signalNumber - 1);
+  return ["SigPnd", "ShdPnd"].some((field) => {
+    const match = status.match(new RegExp(`^${field}:\\s+([0-9A-Fa-f]+)$`, "mu"));
+    return match !== null && (BigInt(`0x${match[1]}`) & signalMask) !== 0n;
+  });
+}
+
+async function waitForPendingSignal(pid, signalNumber, timeoutMs = 2_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const status = readProcessStatus(pid);
+    if (status && signalIsPending(status, signalNumber)) return;
+    await new Promise((resolveWait) => setTimeout(resolveWait, 20));
+  }
+  throw new Error(`timed out waiting for signal ${signalNumber} to become pending for process ${pid}`);
+}
+
+async function waitForChildClose(child, timeoutMs = 2_000) {
+  return await new Promise((resolveResult, rejectResult) => {
+    const timeout = setTimeout(() => rejectResult(new Error(`timed out waiting for reconciliation process ${child.pid} to exit`)), timeoutMs);
+    child.once("close", (code, signal) => {
+      clearTimeout(timeout);
+      resolveResult({ code, signal });
+    });
+  });
+}
+
+function recordedHelperPid(harness) {
+  if (!existsSync(harness.promoteStarted)) return 0;
+  const pid = Number(readFileSync(harness.promoteStarted, "utf8").trim());
+  return Number.isSafeInteger(pid) && pid > 1 ? pid : 0;
+}
+
+function stopHarnessProcess(harness, child, signalTarget) {
+  const helperPid = recordedHelperPid(harness);
+  if (helperPid > 1) {
+    try {
+      process.kill(-helperPid, "SIGCONT");
+      process.kill(-helperPid, "SIGKILL");
+    } catch (error) {
+      if (!error || typeof error !== "object" || !("code" in error) || error.code !== "ESRCH") throw error;
+    }
+  }
+  for (const pid of [signalTarget, child.pid]) {
+    if (!Number.isSafeInteger(pid) || pid <= 1) continue;
+    try {
+      process.kill(pid, "SIGCONT");
+    } catch (error) {
+      if (!error || typeof error !== "object" || !("code" in error) || error.code !== "ESRCH") throw error;
+    }
+    try {
+      process.kill(pid, "SIGKILL");
+    } catch (error) {
+      if (!error || typeof error !== "object" || !("code" in error) || error.code !== "ESRCH") throw error;
+    }
+  }
+}
+
+async function runHarnessWithPendingSignal(harness, { requirePendingTerm = false, releaseLaunchRace = "none" } = {}) {
+  const running = spawn(bash, ["-c", harnessCommand(harness)], { stdio: "ignore" });
+  let signalTarget = 0;
+  try {
+    await waitForFile(harness.signalMarker);
+    signalTarget = Number(readFileSync(harness.signalMarker, "utf8").trim());
+    assert.ok(Number.isSafeInteger(signalTarget) && signalTarget > 1, "the signal-window injector must identify a live Bash process");
+    await waitForStoppedProcess(signalTarget);
+    process.kill(signalTarget, "SIGTERM");
+    if (requirePendingTerm) await waitForPendingSignal(signalTarget, 15);
+    process.kill(signalTarget, "SIGCONT");
+    if (releaseLaunchRace === "before-exit") {
+      await waitForFile(harness.promoteStarted);
+      writeFileSync(harness.releaseLaunchRace, "release\n");
+      return await waitForChildClose(running);
+    }
+    const result = await waitForChildClose(running);
+    if (releaseLaunchRace === "after-exit") {
+      await waitForFile(harness.promoteStarted);
+      writeFileSync(harness.releaseLaunchRace, "release\n");
+    }
+    return result;
+  } catch (error) {
+    stopHarnessProcess(harness, running, signalTarget);
+    throw error;
+  }
 }
 
 async function waitForFile(path, timeoutMs = 2_000) {
@@ -177,8 +284,17 @@ async function waitForFile(path, timeoutMs = 2_000) {
   }
 }
 
+async function waitForFileContents(path, expected, timeoutMs = 2_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (existsSync(path) && readFileSync(path, "utf8") === expected) return;
+    await new Promise((resolveWait) => setTimeout(resolveWait, 20));
+  }
+  throw new Error(`timed out waiting for ${path} to equal the expected durable state`);
+}
+
 try {
-  if (runsPosixHarness) {
+  if (runsLinuxHarness) {
     const successful = writeHarness();
     const result = runHarness(successful);
     assert.equal(result.status, 0, `${result.stderr}\n${result.stdout}`);
@@ -236,18 +352,32 @@ try {
     assert.equal(readFileSync(join(interruptedPromotion.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"known-good-legacy"}\n', "an interrupt after runtime-state replacement must restore the exact prior runtime-state pointer");
 
     const signalDuringCommit = writeHarness({ signalDuringCommit: true });
-    const commitSignalResult = await runHarnessWithPendingCommitSignal(signalDuringCommit);
+    const commitSignalResult = await runHarnessWithPendingSignal(signalDuringCommit);
     assert.equal(commitSignalResult.code, 0, "a SIGTERM made pending while commit handling is masked must be discarded");
     assert.ok(existsSync(signalDuringCommit.signalMarker), "the commit-disarm injector must prove it stopped before the vulnerable command boundary");
     assert.equal(realpathSync(join(signalDuringCommit.appRoot, "current")), realpathSync(signalDuringCommit.release), "a signal during commit disarm must not restore only the release pointer");
     assert.equal(readFileSync(join(signalDuringCommit.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"release"}\n', "a signal during commit disarm must retain the matching promoted runtime-state pointer");
 
     const vulnerableSignalDuringCommit = writeHarness({ signalDuringCommit: true, vulnerableCommitOrdering: true });
-    const vulnerableCommitResult = await runHarnessWithPendingCommitSignal(vulnerableSignalDuringCommit);
+    const vulnerableCommitResult = await runHarnessWithPendingSignal(vulnerableSignalDuringCommit, { requirePendingTerm: true });
     assert.notEqual(vulnerableCommitResult.code, 0, "the regression harness must reject the vulnerable commit ordering");
     assert.ok(existsSync(vulnerableSignalDuringCommit.signalMarker), "the vulnerable-ordering run must prove it queued SIGTERM at the same command boundary");
     assert.equal(realpathSync(join(vulnerableSignalDuringCommit.appRoot, "current")), realpathSync(vulnerableSignalDuringCommit.previous), "the vulnerable ordering restores only the release pointer after the injected signal");
     assert.equal(readFileSync(join(vulnerableSignalDuringCommit.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"release"}\n', "the vulnerable ordering demonstrates the split runtime-state pointer the fixed ordering prevents");
+
+    const signalDuringLaunch = writeHarness({ promoteWaitsForLaunchRace: true, signalDuringLaunch: true });
+    const launchSignalResult = await runHarnessWithPendingSignal(signalDuringLaunch, { requirePendingTerm: true });
+    assert.notEqual(launchSignalResult.code, 0, "a signal during the launch handshake must fail closed after the helper process group is recorded");
+    assert.ok(existsSync(signalDuringLaunch.signalMarker), "the launch-handshake injector must stop after the helper starts and before its process group is recorded");
+    assert.equal(realpathSync(join(signalDuringLaunch.appRoot, "current")), realpathSync(signalDuringLaunch.previous), "the launch handshake must restore the exact prior release pointer");
+    assert.equal(readFileSync(join(signalDuringLaunch.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"known-good-legacy"}\n', "the launch handshake must terminate the recorded helper before it can split runtime state");
+
+    const vulnerableSignalDuringLaunch = writeHarness({ promoteWaitsForLaunchRace: true, signalDuringLaunch: true, vulnerableLaunchHandshake: true });
+    const vulnerableLaunchResult = await runHarnessWithPendingSignal(vulnerableSignalDuringLaunch, { requirePendingTerm: true, releaseLaunchRace: "after-exit" });
+    assert.notEqual(vulnerableLaunchResult.code, 0, "the regression harness must reject an unmasked child-launch ordering");
+    await waitForFileContents(join(vulnerableSignalDuringLaunch.appRoot, "runtime-state", "current.json"), '{"release":"release"}\n');
+    assert.equal(realpathSync(join(vulnerableSignalDuringLaunch.appRoot, "current")), realpathSync(vulnerableSignalDuringLaunch.previous), "the vulnerable launch ordering restores the release pointer before its orphaned helper writes runtime state");
+    assert.equal(readFileSync(join(vulnerableSignalDuringLaunch.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"release"}\n', "the vulnerable launch ordering demonstrates the orphaned helper split that the handshake prevents");
   }
 } finally {
   if (scratch) rmSync(scratch, { recursive: true, force: true });
