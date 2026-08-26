@@ -3,28 +3,43 @@ import { createHash } from "node:crypto";
 import { chmodSync, copyFileSync, existsSync, mkdtempSync, mkdirSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { spawn, spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
+import { postgresQueryInvocation } from "./runtime-state/runtime-state.mjs";
 
 const deployDir = resolve(import.meta.dirname);
-const script = resolve(deployDir, "df13-first-preprod-release-reconcile.sh");
+const entrypoint = resolve(deployDir, "df13-first-preprod-release-reconcile.sh");
+const script = resolve(deployDir, "df13-first-preprod-release-reconcile.body.sh");
 const releaseIntegrityGuard = resolve(deployDir, "runtime-state", "release-integrity-guard.mjs");
 const captureCurrent = resolve(deployDir, "runtime-state", "capture-current.sh");
 const runtimeStateProgram = resolve(deployDir, "runtime-state", "runtime-state.mjs");
 
-assert.ok(existsSync(script), "DF13 fresh-process release reconciliation automation is missing");
+assert.ok(existsSync(entrypoint), "DF13 fresh-process release reconciliation entrypoint is missing");
+assert.ok(existsSync(script), "DF13 fresh-process release reconciliation body is missing");
 const source = readFileSync(script, "utf8");
-assert.match(source, /^#!\/usr\/bin\/env bash\nset -euo pipefail\nset -E\n/u);
+const entrypointSource = readFileSync(entrypoint, "utf8");
+assert.match(entrypointSource, /^#!\/bin\/sh\nset -eu\n/u, "the public operator entrypoint must avoid Bash startup hooks");
+assert.match(entrypointSource, /exec \/usr\/bin\/env -i/u, "the entrypoint must start the body without caller startup state");
+assert.match(entrypointSource, /\/usr\/bin\/bash --noprofile --norc/u, "the entrypoint must use its absolute reviewed non-startup Bash interpreter");
+assert.match(source, /^#!\/usr\/bin\/bash\nset -euo pipefail\nset -E\n/u, "the operational entrypoint must use its absolute reviewed interpreter");
 assert.doesNotMatch(source, /\beval\b/u, "reconciliation automation must not evaluate caller input");
-for (const required of ["DF13_RELEASE_DIR", "DF13_RELEASE_TAG", "DF13_RELEASE_COMMIT", "DF13_RELEASE_TREE", "DF13_PREVIOUS_RELEASE_DIR", ".release-source.json", "RELEASE_SOURCE_COMMIT_MISMATCH", "current.next", "runtime-state/capture-current.sh", "runtime-state/verify-current.sh", "runtime-state/promote-current.sh"]) {
+assert.match(source, /DF13_RECONCILE_BOOTSTRAP/u, "the body must reject unsupported direct execution");
+assert.match(source, /trap - DEBUG RETURN ERR EXIT/u, "startup hooks inherited from a caller must be cleared before any release operation");
+assert.match(source, /readonly TRUSTED_PATH="\/usr\/local\/sbin:\/usr\/local\/bin:\/usr\/sbin:\/usr\/bin:\/sbin:\/bin"/u, "release reconciliation must establish a fixed command search path");
+assert.match(source, /unset BASH_ENV ENV CDPATH/u, "the reviewed body must clear noninteractive shell startup variables");
+for (const required of ["DF13_RELEASE_COMMIT", "DF13_RELEASE_TREE", ".release-source.json", "RELEASE_SOURCE_COMMIT_MISMATCH", "current.next", "runtime-state/capture-current.sh", "runtime-state/verify-current.sh", "runtime-state/promote-current.sh"]) {
   assert.match(source, new RegExp(required.replaceAll(".", "\\."), "u"), `missing reconciliation binding: ${required}`);
 }
-assert.match(source, /cat-file.*\$\{DF13_RELEASE_TAG\}/u, "annotated tag validation is required");
+assert.doesNotMatch(source, /DF13_(?:APP_ROOT|REPOSITORY_DIR|REALTIME_CONTAINER|RELEASE_DIR|PREVIOUS_RELEASE_DIR):=/u, "the caller must not select the reconciliation trust root, repository, container, or release directories");
+assert.match(source, /release_dir="\$\(dirname "\$\(dirname "\$script_path"\)"\)"/u, "the target release must derive from the executing reviewed artifact");
+assert.match(source, /repository_dir="\$app_root\/repository"/u, "the repository trust root must derive from the executing release path");
+assert.match(source, /readonly realtime_container="lana-chatbot-realtime-worker"/u, "the reconciled service identity must be fixed by the reviewed contract");
+assert.match(source, /cat-file.*\$\{release_tag\}/u, "annotated tag validation is required");
 assert.match(source, /\^\{tree\}/u, "exact release tree validation is required");
 assert.match(source, /hash-object/u, "every executed release artifact must be re-hashed against the immutable commit");
 assert.match(source, /RELEASE_FILE_HASH_MISMATCH/u, "a modified release-local artifact must fail closed");
 assert.match(source, /com\.docker\.compose\.project\.config_files/u, "running worker must be bound to the immutable release compose file");
 assert.match(source, /org\.opencontainers\.image\.revision/u, "running worker revision must be checked");
 assert.match(source, /\.State\.Running/u, "the reconciled realtime worker must be running");
-assert.match(source, /local launch_signal_exit_code=0\n  trap 'launch_signal_exit_code=130' INT\n  trap 'launch_signal_exit_code=143' TERM\n  trap 'launch_signal_exit_code=129' HUP\n  local step_pid=""\n  setsid bash -c 'trap - INT TERM HUP; exec "\$@"' bash "\$@" &\n  step_pid="\$!"\n  active_step_pid="\$step_pid"/u, "runtime-state helpers must defer signals until their process group is recorded");
+assert.match(source, /local launch_signal_exit_code=0\n  trap 'launch_signal_exit_code=130' INT\n  trap 'launch_signal_exit_code=143' TERM\n  trap 'launch_signal_exit_code=129' HUP\n  local step_pid=""\n  journal_write HELPER_PREPARED "\$step_name" "" ""\n  setsid env -u BASH_ENV -u ENV --default-signal=INT,TERM,HUP "DF13_RECONCILE_HELPER_TOKEN=\$operation_token" \/usr\/bin\/bash --noprofile --norc -c/u, "runtime-state helpers must durably record launch intent, defer signals until their process group is recorded, and explicitly reset child signal dispositions");
 assert.match(source, /trap 'abort_reconciliation 130' INT\n  trap 'abort_reconciliation 143' TERM\n  trap 'abort_reconciliation 129' HUP/u, "the parent signal handlers must be restored only after the child process group is recorded");
 assert.match(source, /ln -s /u, "current promotion must create a temporary symlink");
 assert.match(source, /mv -Tf /u, "current promotion must be atomic");
@@ -35,7 +50,14 @@ assert.doesNotMatch(source, /df13-release-reconcile\.lock/u, "a separate reconci
 assert.match(source, /trap 'abort_reconciliation 130' INT/u, "an interrupt must restore the prior current pointer and terminate");
 assert.match(source, /trap 'abort_reconciliation 143' TERM/u, "a termination signal must restore the prior current pointer and terminate");
 assert.match(source, /trap 'abort_reconciliation 129' HUP/u, "a hangup must restore the prior current pointer and terminate");
-assert.match(source, /restore_previous_runtime_state/u, "failed or interrupted runtime-state promotion must restore the exact prior runtime-state pointer");
+assert.match(source, /restore_runtime_state_from_journal/u, "failed, interrupted, or restarted reconciliation must restore the exact prior runtime-state pointer from its durable journal");
+assert.match(source, /host_boot_id=/u, "the recovery journal must bind helpers to the host boot identity");
+assert.match(source, /helper_start_ticks=/u, "the recovery journal must bind helpers to an exact process start time");
+assert.match(source, /DF13_RECONCILE_HELPER_TOKEN/u, "the recovery journal must bind helpers to a token retained across exec");
+assert.match(source, /service_evidence_snapshot=/u, "the recovery journal must bind an immutable service-evidence snapshot");
+assert.match(source, /test -e "\$journal_file" \|\| test -L "\$journal_file"/u, "a dangling journal symlink must fail closed rather than look absent");
+assert.match(source, /assert_private_regular_file/u, "journal and recovery snapshots must be private regular files");
+assert.match(source, /assert_path_in_parent/u, "journal recovery paths must be canonicalized under their expected parent");
 assert.match(source, /RUNTIME_STATE_PROMOTION_READBACK_MISMATCH/u, "promotion must be reconciled from a durable readback instead of its exit status alone");
 assert.doesNotMatch(source, /docker compose|psql|sales_authority_mode|COMMERCE/u, "reconciliation must not deploy, alter authority, or expose a direct database operator");
 assert.match(readFileSync(captureCurrent, "utf8"), /runtime-state\.mjs" capture/u, "runtime-state must be captured through the reviewed helper");
@@ -47,9 +69,16 @@ const databaseCapture = runtimeStateSource.slice(databaseCaptureStart, databaseC
 assert.match(databaseCapture, /SELECT migration_name/u, "reconciliation must capture the reviewed migration ledger read-only");
 assert.match(databaseCapture, /SELECT page_id/u, "reconciliation must capture the reviewed routing read-only");
 assert.doesNotMatch(databaseCapture, /\b(?:INSERT|UPDATE|DELETE|ALTER|DROP|CREATE)\b/u, "reconciliation must not delegate database mutation");
+const readonlyQuery = "SELECT migration_name, checksum_sha256 FROM schema_migrations ORDER BY migration_name";
+const readonlyInvocation = postgresQueryInvocation({ container: "postgres", user: "reader", database: "lana", password: "secret", sql: readonlyQuery });
+assert.ok(readonlyInvocation.args.includes("PGOPTIONS=-c default_transaction_read_only=on"), "runtime-state database capture must set the session read-only at the server boundary");
+assert.match(readonlyInvocation.args.at(-1), /^BEGIN TRANSACTION READ ONLY; SELECT migration_name, checksum_sha256 FROM schema_migrations ORDER BY migration_name; COMMIT;$/u, "runtime-state database capture must execute its fixed query inside a read-only transaction");
+assert.throws(() => postgresQueryInvocation({ container: "postgres", user: "reader", database: "lana", password: "secret", sql: "UPDATE pages SET status = 'ACTIVE'" }), /POSTGRES_QUERY_NOT_ALLOWLISTED/u, "runtime-state database capture must reject a query outside its fixed read-only allowlist");
 assert.match(readFileSync(releaseIntegrityGuard, "utf8"), /df13-first-preprod-release-reconcile\.test\.mjs/u, "the canonical release-integrity gate must execute this reconciliation contract");
 
 const bash = process.platform === "win32" ? "C:\\Program Files\\Git\\bin\\bash.exe" : "bash";
+const entrySyntax = spawnSync(bash, ["-n", entrypoint], { encoding: "utf8" });
+assert.equal(entrySyntax.status, 0, entrySyntax.stderr);
 const syntax = spawnSync(bash, ["-n", script], { encoding: "utf8" });
 assert.equal(syntax.status, 0, syntax.stderr);
 
@@ -72,20 +101,20 @@ function canonicalBashPath(value) {
   return result.stdout.trim();
 }
 
-function writeHarness({ captureFails = false, captureWaits = false, promoteFailsAfterCurrentReplace = false, promoteWaitsAfterCurrentReplace = false, promoteWaitsForLaunchRace = false, signalDuringCommit = false, signalDuringLaunch = false, vulnerableCommitOrdering = false, vulnerableLaunchHandshake = false, running = true, sourceCommit = commit, tamperedReleaseArtifact = false } = {}) {
+function writeHarness({ captureFails = false, captureWaits = false, mutateEvidenceAfterSnapshot = false, promoteFailsAfterCurrentReplace = false, promoteWaitsAfterCurrentReplace = false, promoteWaitsForLaunchRace = false, signalDuringCommit = false, signalDuringLaunch = false, vulnerableLaunchHandshake = false, running = true, sourceCommit = commit, tamperedReleaseArtifact = false } = {}) {
   const id = `scenario-${harnessId++}`;
   const appRoot = join(scratch, `${id}-root`);
   const release = join(appRoot, "releases", tag);
   const previous = join(appRoot, "releases", "known-good-legacy");
-  const repo = join(scratch, `${id}-repo`);
+  const repo = join(appRoot, "repository");
   const bin = join(scratch, `${id}-bin`);
   const evidence = join(scratch, `${id}-evidence.json`);
   const log = join(scratch, `${id}.log`);
   const captureStarted = join(scratch, `${id}.capture-started`);
   const promoteStarted = join(scratch, `${id}.promote-started`);
   const releaseLaunchRace = join(scratch, `${id}.release-launch-race`);
-  const debugEnvironment = join(scratch, `${id}.bash-env`);
   const signalMarker = join(scratch, `${id}.signal-marker`);
+  const evidenceObserved = join(scratch, `${id}.evidence-observed`);
   mkdirSync(join(release, "deploy", "runtime-state"), { recursive: true });
   mkdirSync(join(appRoot, "runtime-state", "candidates"), { recursive: true });
   mkdirSync(join(appRoot, "shared"), { recursive: true });
@@ -93,26 +122,41 @@ function writeHarness({ captureFails = false, captureWaits = false, promoteFails
   mkdirSync(repo, { recursive: true });
   mkdirSync(bin, { recursive: true });
   symlinkSync(previous, join(appRoot, "current"));
-  const releaseScript = join(release, "deploy", "df13-first-preprod-release-reconcile.sh");
+  const releaseEntrypoint = join(release, "deploy", "df13-first-preprod-release-reconcile.sh");
+  const releaseScript = join(release, "deploy", "df13-first-preprod-release-reconcile.body.sh");
+  copyFileSync(entrypoint, releaseEntrypoint);
   copyFileSync(script, releaseScript);
-  if (vulnerableCommitOrdering) {
-    const protectedOrdering = `  trap '' INT TERM HUP\n  reconciliation_commit_disarmed=true\n  switched=false\n  runtime_state_may_be_promoted=false\n  cleanup_runtime_state_snapshot\n  trap - EXIT INT TERM HUP\n`;
-    const vulnerableOrdering = `  reconciliation_commit_disarmed=true\n  runtime_state_may_be_promoted=false\n  switched=false\n  cleanup_runtime_state_snapshot\n  trap '' INT TERM HUP\n  trap - EXIT INT TERM HUP\n`;
-    const releaseScriptSource = readFileSync(releaseScript, "utf8");
-    assert.ok(releaseScriptSource.includes(protectedOrdering), "test fixture must derive the vulnerable ordering from the reviewed commit sequence");
-    writeFileSync(releaseScript, releaseScriptSource.replace(protectedOrdering, vulnerableOrdering));
+  let releaseScriptSource = readFileSync(releaseScript, "utf8");
+  const productionTrustedPath = 'readonly TRUSTED_PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"';
+  assert.ok(releaseScriptSource.includes(productionTrustedPath), "the fixture must begin from the reviewed fixed command path");
+  releaseScriptSource = releaseScriptSource.replace(productionTrustedPath, 'readonly TRUSTED_PATH="${DF13_TEST_TRUSTED_PATH:?}"');
+  if (signalDuringCommit) {
+    const commitBoundary = '  rm -f -- "$journal_file" "$runtime_state_snapshot" "$service_evidence_snapshot"\n';
+    assert.ok(releaseScriptSource.includes(commitBoundary), "the fixture must locate the reviewed masked commit boundary");
+    releaseScriptSource = releaseScriptSource.replace(commitBoundary, `  printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n  kill -STOP "$$"\n${commitBoundary}`);
+  }
+  if (signalDuringLaunch) {
+    const protectedLaunchBoundary = '  step_pid="$!"\n  active_step_pid="$step_pid"\n';
+    const instrumentedLaunchBoundary = `  step_pid="$!"\n  if [ "\${DF13_TEST_LAUNCH_COUNT:-0}" = "2" ]; then\n    printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n    kill -STOP "$$"\n  fi\n  export DF13_TEST_LAUNCH_COUNT=$(( \${DF13_TEST_LAUNCH_COUNT:-0} + 1 ))\n  active_step_pid="$step_pid"\n`;
+    assert.ok(releaseScriptSource.includes(protectedLaunchBoundary), "the fixture must locate the reviewed launch-recording boundary");
+    releaseScriptSource = releaseScriptSource.replace(protectedLaunchBoundary, instrumentedLaunchBoundary);
+  }
+  if (mutateEvidenceAfterSnapshot) {
+    const evidenceSnapshotBoundary = 'sync -f "$service_evidence_snapshot" || die "RUNTIME_STATE_EVIDENCE_SNAPSHOT_SYNC_FAILED"\n';
+    assert.ok(releaseScriptSource.includes(evidenceSnapshotBoundary), "the fixture must locate the immutable evidence-snapshot boundary");
+    releaseScriptSource = releaseScriptSource.replace(evidenceSnapshotBoundary, `${evidenceSnapshotBoundary}printf '{"replacement":true}\\n' > "$DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE"\n`);
   }
   if (vulnerableLaunchHandshake) {
-    const vulnerableHandshake = `run_runtime_state_step() {\n  setsid bash -c 'trap - INT TERM HUP; exec "$@"' bash "$@" &\n  active_step_pid="$!"\n`;
-    const releaseScriptSource = readFileSync(releaseScript, "utf8");
     const protectedHandshakeStart = releaseScriptSource.indexOf("run_runtime_state_step() {\n");
     const protectedHandshakeEnd = releaseScriptSource.indexOf("  local step_status=0\n", protectedHandshakeStart);
     assert.ok(protectedHandshakeStart >= 0 && protectedHandshakeEnd > protectedHandshakeStart, "test fixture must locate the reviewed signal-masked launch handshake");
     const protectedHandshake = releaseScriptSource.slice(protectedHandshakeStart, protectedHandshakeEnd);
-    assert.match(protectedHandshake, /launch_signal_exit_code=0/u, "the vulnerable fixture must start from a deferred signal handler");
-    assert.match(protectedHandshake, /active_step_pid="\$step_pid"/u, "the vulnerable fixture must start from a recorded child process group");
-    writeFileSync(releaseScript, releaseScriptSource.replace(protectedHandshake, vulnerableHandshake));
+    assert.match(protectedHandshake, /journal_write HELPER_RUNNING/u, "the vulnerable fixture must start from the durable helper journal protocol");
+    const vulnerableHandshake = `run_runtime_state_step() {\n  local step_name="$1"\n  shift\n  setsid env -u BASH_ENV -u ENV --default-signal=INT,TERM,HUP /usr/bin/bash --noprofile --norc -c 'exec "$@"' bash "$@" &\n  if [ "\${DF13_TEST_LAUNCH_COUNT:-0}" = "2" ]; then\n    printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n    kill -STOP "$$"\n  fi\n  export DF13_TEST_LAUNCH_COUNT=$(( \${DF13_TEST_LAUNCH_COUNT:-0} + 1 ))\n  active_step_pid="$!"\n`;
+    releaseScriptSource = releaseScriptSource.replace(protectedHandshake, vulnerableHandshake);
   }
+  writeFileSync(releaseScript, releaseScriptSource);
+  chmodSync(releaseEntrypoint, 0o700);
   chmodSync(releaseScript, 0o700);
   writeFileSync(join(release, ".release-source.json"), JSON.stringify({ schemaVersion: 1, release: tag, repository: "https://github.com/nguyentuanson27-netizen/lanchatbot", tag, commit: sourceCommit, createdAt: "2026-08-26T00:00:00Z" }));
   writeFileSync(join(release, "deploy", "docker-compose.vps.yml"), "services: {}\n");
@@ -121,8 +165,9 @@ function writeHarness({ captureFails = false, captureWaits = false, promoteFails
   for (const name of ["capture-current.sh", "verify-current.sh", "promote-current.sh"]) {
     const capture = name === "capture-current.sh";
     const promote = name === "promote-current.sh";
-    const action = capture && captureFails ? "exit 1" : capture ? "mkdir -p \"$RUNTIME_STATE_ROOT/candidates\"; printf '{\"release\":\"release\"}\\n' > \"$RUNTIME_STATE_ROOT/candidates/$RUNTIME_STATE_CANDIDATE_ID.json\"" : promote ? "cp \"$RUNTIME_STATE_CANDIDATE\" \"$RUNTIME_STATE_ROOT/current.json\"" : "";
-    const wait = capture && captureWaits ? "touch \"$DF13_TEST_CAPTURE_STARTED\"; while :; do sleep 1; done" : "";
+    const captureEvidence = capture && mutateEvidenceAfterSnapshot ? "cat \"$RUNTIME_STATE_SERVICE_EVIDENCE_FILE\" > \"$DF13_TEST_EVIDENCE_OBSERVED\"; " : "";
+    const action = capture && captureFails ? "exit 1" : capture ? `${captureEvidence}mkdir -p \"$RUNTIME_STATE_ROOT/candidates\"; printf '{\"release\":\"release\"}\\n' > \"$RUNTIME_STATE_ROOT/candidates/$RUNTIME_STATE_CANDIDATE_ID.json\"` : promote ? "cp \"$RUNTIME_STATE_CANDIDATE\" \"$RUNTIME_STATE_ROOT/current.json\"" : "";
+    const wait = capture && captureWaits ? "printf '%s\\n' \"$$\" > \"$DF13_TEST_CAPTURE_STARTED\"; while :; do sleep 1; done" : "";
     const promoteWait = promote && promoteWaitsAfterCurrentReplace ? "touch \"$DF13_TEST_PROMOTE_STARTED\"; while :; do sleep 1; done" : "";
     const launchRaceWait = promote && promoteWaitsForLaunchRace ? "printf '%s\\n' \"$$\" > \"$DF13_TEST_PROMOTE_STARTED\"; while test ! -e \"$DF13_TEST_RELEASE_LAUNCH_RACE\"; do sleep 0.01; done" : "";
     const failAfterPromotion = promote && promoteFailsAfterCurrentReplace ? "exit 1" : "";
@@ -137,33 +182,28 @@ function writeHarness({ captureFails = false, captureWaits = false, promoteFails
   writeFileSync(join(bin, "node"), "#!/usr/bin/env bash\nprintf '%s\\n' node >> \"$DF13_TEST_LOG\"\nif [ \"$1\" = \"--input-type=module\" ]; then grep -F \"\\\"commit\\\":\\\"$DF13_RELEASE_EXPECTED_COMMIT\\\"\" \"$DF13_RELEASE_SOURCE_FILE\" >/dev/null; fi\n");
   writeFileSync(join(bin, "docker"), `#!/usr/bin/env bash\nif [ "$1" = inspect ]; then\n  case "$3" in\n    *config_files*) printf '%s\\n' '${canonicalBashPath(join(release, "deploy", "docker-compose.vps.yml"))}' ;;\n    *Config.Image*) printf '%s\\n' '${image}' ;;\n    *State.Running*) printf '%s\\n' '${running ? "true" : "false"}' ;;\n    *Image*) printf '%s\\n' '${imageId}' ;;\n    *) exit 2 ;;\n  esac\nelif [ "$1" = image ]; then\n  printf '%s\\n' '${commit}'\nelse\n  exit 2\nfi\n`);
   for (const executable of ["git", "node", "docker"]) chmodSync(join(bin, executable), 0o700);
-  if (signalDuringCommit) writeFileSync(debugEnvironment, "set -T\ntrap 'if [ \"$BASH_COMMAND\" = \"switched=false\" ] && [ \"${FUNCNAME[0]:-}\" = \"commit_reconciliation\" ] && [ \"${DF13_TEST_SIGNAL_SENT:-}\" != \"1\" ]; then export DF13_TEST_SIGNAL_SENT=1; printf \"%s\\n\" \"$$\" > \"$DF13_TEST_SIGNAL_MARKER\"; kill -STOP \"$$\"; fi' DEBUG\n");
-  if (signalDuringLaunch) writeFileSync(debugEnvironment, "set -T\ntrap 'if [ \"${FUNCNAME[0]:-}\" = \"run_runtime_state_step\" ] && { [ \"$BASH_COMMAND\" = \"active_step_pid=\\\"\\$step_pid\\\"\" ] || [ \"$BASH_COMMAND\" = \"active_step_pid=\\\"\\$!\\\"\" ]; }; then DF13_TEST_LAUNCH_COUNT=$(( ${DF13_TEST_LAUNCH_COUNT:-0} + 1 )); export DF13_TEST_LAUNCH_COUNT; if [ \"$DF13_TEST_LAUNCH_COUNT\" = \"3\" ] && [ \"${DF13_TEST_SIGNAL_SENT:-}\" != \"1\" ]; then export DF13_TEST_SIGNAL_SENT=1; printf \"%s\\n\" \"$$\" > \"$DF13_TEST_SIGNAL_MARKER\"; kill -STOP \"$$\"; fi; fi' DEBUG\n");
-  return { appRoot, release, previous, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted, releaseLaunchRace, signalMarker, debugEnvironment: signalDuringCommit || signalDuringLaunch ? debugEnvironment : null };
+  return { appRoot, release, previous, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted, releaseLaunchRace, signalMarker, evidenceObserved };
 }
 
 function harnessCommand(harness) {
   const env = [
     `PATH=${quote(canonicalBashPath(harness.bin))}:$PATH`,
+    `DF13_TEST_TRUSTED_PATH=${quote(canonicalBashPath(harness.bin))}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin`,
+    "DF13_RECONCILE_BOOTSTRAP=1",
     `DF13_TEST_LOG=${quote(canonicalBashPath(harness.log))}`,
     `DF13_TEST_CAPTURE_STARTED=${quote(canonicalBashPath(harness.captureStarted))}`,
     `DF13_TEST_PROMOTE_STARTED=${quote(canonicalBashPath(harness.promoteStarted))}`,
     `DF13_TEST_RELEASE_LAUNCH_RACE=${quote(canonicalBashPath(harness.releaseLaunchRace))}`,
     `DF13_TEST_SIGNAL_MARKER=${quote(canonicalBashPath(harness.signalMarker))}`,
-    `DF13_APP_ROOT=${quote(canonicalBashPath(harness.appRoot))}`,
-    `DF13_REPOSITORY_DIR=${quote(canonicalBashPath(harness.repo))}`,
-    `DF13_RELEASE_DIR=${quote(canonicalBashPath(harness.release))}`,
-    `DF13_RELEASE_TAG=${quote(tag)}`,
+    `DF13_TEST_EVIDENCE_OBSERVED=${quote(canonicalBashPath(harness.evidenceObserved))}`,
     `DF13_RELEASE_COMMIT=${quote(commit)}`,
     `DF13_RELEASE_TREE=${quote(tree)}`,
-    `DF13_PREVIOUS_RELEASE_DIR=${quote(canonicalBashPath(harness.previous))}`,
     `DF13_RELEASE_REALTIME_IMAGE=${quote(image)}`,
     `DF13_RELEASE_REALTIME_IMAGE_ID=${quote(imageId)}`,
     `DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE=${quote(canonicalBashPath(harness.evidence))}`,
     `DF13_RUNTIME_STATE_SERVICE_EVIDENCE_SHA256=${quote(harness.evidenceSha256)}`,
   ].join(" ");
-  const testEnvironment = harness.debugEnvironment ? `BASH_ENV=${quote(canonicalBashPath(harness.debugEnvironment))} ` : "";
-  return `${testEnvironment}${env} ${quote(canonicalBashPath(join(harness.release, "deploy", "df13-first-preprod-release-reconcile.sh")))}`;
+  return `${env} ${quote(canonicalBashPath(join(harness.release, "deploy", "df13-first-preprod-release-reconcile.body.sh")))}`;
 }
 
 function runHarness(harness) {
@@ -218,8 +258,9 @@ async function waitForChildClose(child, timeoutMs = 2_000) {
 }
 
 function recordedHelperPid(harness) {
-  if (!existsSync(harness.promoteStarted)) return 0;
-  const pid = Number(readFileSync(harness.promoteStarted, "utf8").trim());
+  const started = [harness.promoteStarted, harness.captureStarted].find((path) => existsSync(path));
+  if (!started) return 0;
+  const pid = Number(readFileSync(started, "utf8").trim());
   return Number.isSafeInteger(pid) && pid > 1 ? pid : 0;
 }
 
@@ -293,6 +334,10 @@ async function waitForFileContents(path, expected, timeoutMs = 2_000) {
   throw new Error(`timed out waiting for ${path} to equal the expected durable state`);
 }
 
+function journalPath(harness) {
+  return join(harness.appRoot, "runtime-state", "df13-first-preprod-release-reconcile.journal");
+}
+
 try {
   if (runsLinuxHarness) {
     const successful = writeHarness();
@@ -300,6 +345,18 @@ try {
     assert.equal(result.status, 0, `${result.stderr}\n${result.stdout}`);
     assert.equal(realpathSync(join(successful.appRoot, "current")), realpathSync(successful.release));
     assert.deepEqual(readFileSync(successful.log, "utf8").trim().split("\n"), ["node", "node", "capture-current.sh", "verify-current.sh", "promote-current.sh"]);
+
+    const immutableEvidence = writeHarness({ mutateEvidenceAfterSnapshot: true });
+    const immutableEvidenceResult = runHarness(immutableEvidence);
+    assert.equal(immutableEvidenceResult.status, 0, `${immutableEvidenceResult.stderr}\n${immutableEvidenceResult.stdout}`);
+    assert.equal(readFileSync(immutableEvidence.evidenceObserved, "utf8"), "{}\n", "all runtime-state helpers must receive the checked immutable evidence snapshot, not the caller path after it changes");
+    assert.equal(readFileSync(immutableEvidence.evidence, "utf8"), '{"replacement":true}\n', "the regression fixture must prove the caller evidence path changed after snapshotting");
+
+    const danglingJournal = writeHarness();
+    symlinkSync(join(scratch, "missing-reconciliation-journal"), journalPath(danglingJournal));
+    const danglingJournalResult = runHarness(danglingJournal);
+    assert.notEqual(danglingJournalResult.status, 0, "a dangling reconciliation journal must fail closed");
+    assert.equal(realpathSync(join(danglingJournal.appRoot, "current")), realpathSync(danglingJournal.previous), "a dangling reconciliation journal must not begin a new pointer transition");
 
     const mismatchedSource = writeHarness({ sourceCommit: "d".repeat(40) });
     assert.notEqual(runHarness(mismatchedSource).status, 0, "a mismatched release-source commit must fail closed");
@@ -358,13 +415,6 @@ try {
     assert.equal(realpathSync(join(signalDuringCommit.appRoot, "current")), realpathSync(signalDuringCommit.release), "a signal during commit disarm must not restore only the release pointer");
     assert.equal(readFileSync(join(signalDuringCommit.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"release"}\n', "a signal during commit disarm must retain the matching promoted runtime-state pointer");
 
-    const vulnerableSignalDuringCommit = writeHarness({ signalDuringCommit: true, vulnerableCommitOrdering: true });
-    const vulnerableCommitResult = await runHarnessWithPendingSignal(vulnerableSignalDuringCommit, { requirePendingTerm: true });
-    assert.notEqual(vulnerableCommitResult.code, 0, "the regression harness must reject the vulnerable commit ordering");
-    assert.ok(existsSync(vulnerableSignalDuringCommit.signalMarker), "the vulnerable-ordering run must prove it queued SIGTERM at the same command boundary");
-    assert.equal(realpathSync(join(vulnerableSignalDuringCommit.appRoot, "current")), realpathSync(vulnerableSignalDuringCommit.previous), "the vulnerable ordering restores only the release pointer after the injected signal");
-    assert.equal(readFileSync(join(vulnerableSignalDuringCommit.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"release"}\n', "the vulnerable ordering demonstrates the split runtime-state pointer the fixed ordering prevents");
-
     const signalDuringLaunch = writeHarness({ promoteWaitsForLaunchRace: true, signalDuringLaunch: true });
     const launchSignalResult = await runHarnessWithPendingSignal(signalDuringLaunch, { requirePendingTerm: true });
     assert.notEqual(launchSignalResult.code, 0, "a signal during the launch handshake must fail closed after the helper process group is recorded");
@@ -378,6 +428,65 @@ try {
     await waitForFileContents(join(vulnerableSignalDuringLaunch.appRoot, "runtime-state", "current.json"), '{"release":"release"}\n');
     assert.equal(realpathSync(join(vulnerableSignalDuringLaunch.appRoot, "current")), realpathSync(vulnerableSignalDuringLaunch.previous), "the vulnerable launch ordering restores the release pointer before its orphaned helper writes runtime state");
     assert.equal(readFileSync(join(vulnerableSignalDuringLaunch.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"release"}\n', "the vulnerable launch ordering demonstrates the orphaned helper split that the handshake prevents");
+
+    const hardCrashDuringCapture = writeHarness({ captureWaits: true });
+    const crashingCapture = spawn(bash, ["-c", harnessCommand(hardCrashDuringCapture)], { stdio: "ignore" });
+    let unrelatedProcess = null;
+    try {
+      await waitForFile(hardCrashDuringCapture.captureStarted);
+      crashingCapture.kill("SIGKILL");
+      await waitForChildClose(crashingCapture);
+      assert.equal(realpathSync(join(hardCrashDuringCapture.appRoot, "current")), realpathSync(hardCrashDuringCapture.release), "the test must prove a hard crash can interrupt after current moves but before runtime-state capture");
+      const originalHelperPid = recordedHelperPid(hardCrashDuringCapture);
+      assert.ok(originalHelperPid > 1, "the crash fixture must identify the recorded helper process");
+      process.kill(-originalHelperPid, "SIGKILL");
+      unrelatedProcess = spawn("setsid", ["sleep", "30"], { stdio: "ignore" });
+      const staleJournal = readFileSync(journalPath(hardCrashDuringCapture), "utf8")
+        .replace(/^helper_pid=.*$/mu, `helper_pid=${unrelatedProcess.pid}`);
+      writeFileSync(journalPath(hardCrashDuringCapture), staleJournal);
+      const recovered = runHarness(hardCrashDuringCapture);
+      assert.notEqual(recovered.status, 0, "an interrupted reconciliation must recover its exact prior state then block rather than begin a new operation");
+      assert.equal(realpathSync(join(hardCrashDuringCapture.appRoot, "current")), realpathSync(hardCrashDuringCapture.previous), "hard-crash recovery must restore the exact prior current pointer");
+      assert.equal(readFileSync(join(hardCrashDuringCapture.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"known-good-legacy"}\n', "hard-crash recovery must retain the exact prior runtime-state pointer");
+      assert.doesNotThrow(() => process.kill(unrelatedProcess.pid, 0), "recovery must not signal an unrelated session leader whose reused PID lacks the recorded token");
+    } finally {
+      stopHarnessProcess(hardCrashDuringCapture, crashingCapture, 0);
+      if (unrelatedProcess?.pid) {
+        try { process.kill(-unrelatedProcess.pid, "SIGKILL"); } catch (error) { if (!error || typeof error !== "object" || !("code" in error) || error.code !== "ESRCH") throw error; }
+      }
+    }
+
+    const traversalJournal = writeHarness({ captureWaits: true });
+    const traversalParent = spawn(bash, ["-c", harnessCommand(traversalJournal)], { stdio: "ignore" });
+    try {
+      await waitForFile(traversalJournal.captureStarted);
+      traversalParent.kill("SIGKILL");
+      await waitForChildClose(traversalParent);
+      const outsidePath = `${join(traversalJournal.appRoot, "runtime-state")}/.df13-reconcile-prior.fake/../../outside.json`;
+      const tamperedJournal = readFileSync(journalPath(traversalJournal), "utf8").replace(/^runtime_state_snapshot=.*$/mu, `runtime_state_snapshot=${outsidePath}`);
+      writeFileSync(journalPath(traversalJournal), tamperedJournal);
+      const rejected = runHarness(traversalJournal);
+      assert.notEqual(rejected.status, 0, "a traversal journal path must fail closed");
+      assert.equal(realpathSync(join(traversalJournal.appRoot, "current")), realpathSync(traversalJournal.release), "a traversal journal must not restore from an external path");
+    } finally {
+      stopHarnessProcess(traversalJournal, traversalParent, 0);
+    }
+
+    const hardCrashDuringPromotion = writeHarness({ promoteWaitsAfterCurrentReplace: true });
+    const crashingPromotion = spawn(bash, ["-c", harnessCommand(hardCrashDuringPromotion)], { stdio: "ignore" });
+    try {
+      await waitForFile(hardCrashDuringPromotion.promoteStarted);
+      crashingPromotion.kill("SIGKILL");
+      await waitForChildClose(crashingPromotion);
+      assert.equal(realpathSync(join(hardCrashDuringPromotion.appRoot, "current")), realpathSync(hardCrashDuringPromotion.release), "the test must prove a hard crash can interrupt after the release pointer moves");
+      assert.equal(readFileSync(join(hardCrashDuringPromotion.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"release"}\n', "the test must prove a hard crash can interrupt after runtime-state promotion");
+      const recovered = runHarness(hardCrashDuringPromotion);
+      assert.notEqual(recovered.status, 0, "a post-promotion hard crash must recover then block rather than silently accept split evidence");
+      assert.equal(realpathSync(join(hardCrashDuringPromotion.appRoot, "current")), realpathSync(hardCrashDuringPromotion.previous), "post-promotion hard-crash recovery must restore the exact prior current pointer");
+      assert.equal(readFileSync(join(hardCrashDuringPromotion.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"known-good-legacy"}\n', "post-promotion hard-crash recovery must restore the exact prior runtime-state pointer");
+    } finally {
+      stopHarnessProcess(hardCrashDuringPromotion, crashingPromotion, 0);
+    }
   }
 } finally {
   if (scratch) rmSync(scratch, { recursive: true, force: true });

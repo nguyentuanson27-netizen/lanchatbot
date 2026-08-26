@@ -56,8 +56,11 @@ step:
    runtime-state. It has no deploy, migration, database-write, or authority-change
    capability. The reviewed runtime-state capture makes read-only ledger and
    routing queries to attest the host state; it accepts no caller-supplied
-   database identity. Any capture, verification, promotion, interrupt, or concurrency
-   failure restores the prior `current` pointer and blocks the Release Train.
+   database identity. Its fixed command path and private durable journal bind the
+   exact prior pointers, candidate, immutable evidence snapshot, host boot and
+   isolated-helper identity. An interrupt, crash/restart, verification or
+   concurrency failure terminates only the exact recorded helper, restores the
+   prior `current` and runtime-state pointers, and blocks the Release Train.
 3. Seal the target page from new authority-dependent work, gracefully drain and
    reconcile every eligible queued/in-flight item to zero using the current
    LEGACY service set, then stop that finite set and re-prove zero eligible work.

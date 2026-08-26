@@ -44,11 +44,13 @@ assert.equal(canonicalRows([{ b: 2, a: 1, ignored: 'x' }, { b: 1, a: 2 }], ['a',
 assert.deepEqual(parseDelimitedRows('a\tb\nc\td', ['left', 'right']), [{ left: 'a', right: 'b' }, { left: 'c', right: 'd' }]);
 throws(() => parseDelimitedRows('a|b', ['left', 'right']), 'LIVE_DATABASE_ROW_SHAPE');
 const databasePassword = 'host-only-password-sentinel';
-const databaseInvocation = postgresQueryInvocation({ container: 'postgres', user: 'lana_app', database: 'lana_chatbot', password: databasePassword, sql: 'SELECT 1' }, { SAFE_PARENT_ENV: 'preserved' });
-assert.deepEqual(databaseInvocation.args, ['exec', '--env', 'PGPASSWORD', 'postgres', 'psql', '-X', '-v', 'ON_ERROR_STOP=1', '-U', 'lana_app', '-d', 'lana_chatbot', '-At', '-F', '\t', '-c', 'SELECT 1']);
+const databaseQuery = 'SELECT migration_name, checksum_sha256 FROM schema_migrations ORDER BY migration_name';
+const databaseInvocation = postgresQueryInvocation({ container: 'postgres', user: 'lana_app', database: 'lana_chatbot', password: databasePassword, sql: databaseQuery }, { SAFE_PARENT_ENV: 'preserved' });
+assert.deepEqual(databaseInvocation.args, ['exec', '--env', 'PGPASSWORD', '--env', 'PGOPTIONS=-c default_transaction_read_only=on', 'postgres', 'psql', '-X', '-q', '-v', 'ON_ERROR_STOP=1', '-U', 'lana_app', '-d', 'lana_chatbot', '-At', '-F', '\t', '-c', `BEGIN TRANSACTION READ ONLY; ${databaseQuery}; COMMIT;`]);
 assert.equal(databaseInvocation.args.includes(databasePassword), false);
 assert.deepEqual(databaseInvocation.env, { SAFE_PARENT_ENV: 'preserved', PGPASSWORD: databasePassword });
-throws(() => postgresQueryInvocation({ container: 'postgres', user: 'lana_app', database: 'lana_chatbot', password: '', sql: 'SELECT 1' }), 'POSTGRES_PASSWORD_MISSING');
+throws(() => postgresQueryInvocation({ container: 'postgres', user: 'lana_app', database: 'lana_chatbot', password: '', sql: databaseQuery }), 'POSTGRES_PASSWORD_MISSING');
+throws(() => postgresQueryInvocation({ container: 'postgres', user: 'lana_app', database: 'lana_chatbot', password: databasePassword, sql: 'UPDATE pages SET status = \'ACTIVE\'' }), 'POSTGRES_QUERY_NOT_ALLOWLISTED');
 assert.equal(digestRows([{ migration: 'b', checksumSha256: '2' }, { migration: 'a', checksumSha256: '1' }], ['migration', 'checksumSha256']).sha256, digestRows([{ migration: 'a', checksumSha256: '1' }, { migration: 'b', checksumSha256: '2' }], ['migration', 'checksumSha256']).sha256);
 
 validateServiceEvidence(serviceEvidenceExample, inventory);
