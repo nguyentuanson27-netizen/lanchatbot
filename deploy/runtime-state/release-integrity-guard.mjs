@@ -580,6 +580,11 @@ const dockerfile = readFileSync(join(root, 'deploy', 'Dockerfile'), 'utf8');
 if (!dockerfile.includes('COPY benchmarks ./benchmarks')) {
   throw new Error('DOCKER_BUILD_BENCHMARK_FIXTURES_MISSING');
 }
+for (const requiredEvidenceArtifact of ['COPY docs ./docs', 'COPY evaluation ./evaluation']) {
+  if (!dockerfile.includes(requiredEvidenceArtifact)) {
+    throw new Error(`DOCKER_BUILD_DF13_EVIDENCE_ARTIFACT_MISSING:${requiredEvidenceArtifact}`);
+  }
+}
 if (!dockerfile.includes('RUN apk add --no-cache bash ffmpeg git')) {
   throw new Error('ADMIN_POLICY_RELEASE_BUILD_BASH_MISSING');
 }
