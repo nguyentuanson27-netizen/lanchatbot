@@ -68,6 +68,8 @@ assert.match(source, /RUNTIME_STATE_PROMOTION_READBACK_MISMATCH/u, "promotion mu
 const artifactVerification = source.indexOf("for release_artifact in");
 const recoveryInvocation = source.indexOf("\nrecover_incomplete_reconciliation\n");
 assert.ok(artifactVerification >= 0 && artifactVerification < recoveryInvocation, "body release artifacts must be verified before any incomplete-journal recovery can mutate pointers");
+const priorPointerCapture = source.indexOf('previous_release_dir="$(safe_release_dir "$(readlink -f "$app_root/current")")"');
+assert.ok(priorPointerCapture > recoveryInvocation, "the prior pointer must be captured only after the durable lock and incomplete-journal recovery complete");
 assert.match(source, /test ! -L "\$DEPLOYMENT_LOCK_FILE" \|\| die "DEPLOYMENT_LOCK_SYMLINK"/u, "the durable deployment lock must reject symlinks before opening a descriptor");
 assert.match(source, /exec 9>> "\$DEPLOYMENT_LOCK_FILE"/u, "the durable deployment lock must never truncate its target when it opens a descriptor");
 assert.match(source, /DEPLOYMENT_LOCK_DESCRIPTOR_MISMATCH/u, "the durable deployment lock must verify its opened descriptor remains canonical");
@@ -113,11 +115,12 @@ function canonicalBashPath(value) {
   return result.stdout.trim();
 }
 
-function writeHarness({ captureFails = false, captureWaits = false, mutateEvidenceAfterSnapshot = false, promoteFailsAfterCurrentReplace = false, promoteWaitsAfterCurrentReplace = false, promoteWaitsForLaunchRace = false, signalDuringCommit = false, signalDuringLaunch = false, vulnerableLaunchHandshake = false, running = true, sourceCommit = commit, tamperedReleaseArtifact = false } = {}) {
+function writeHarness({ captureFails = false, captureWaits = false, mutateEvidenceAfterSnapshot = false, promoteFailsAfterCurrentReplace = false, promoteWaitsAfterCurrentReplace = false, promoteWaitsForLaunchRace = false, signalDuringCommit = false, signalDuringLaunch = false, vulnerableLaunchHandshake = false, moveCurrentBeforeLock = false, running = true, sourceCommit = commit, tamperedReleaseArtifact = false } = {}) {
   const id = `scenario-${harnessId++}`;
   const appRoot = join(scratch, `${id}-root`);
   const release = join(appRoot, "releases", tag);
   const previous = join(appRoot, "releases", "known-good-legacy");
+  const concurrent = join(appRoot, "releases", "completed-concurrent-operation");
   const repo = join(appRoot, "repository");
   const bin = join(scratch, `${id}-bin`);
   const evidence = join(scratch, `${id}-evidence.json`);
@@ -132,6 +135,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   mkdirSync(join(appRoot, "runtime-state", "candidates"), { recursive: true });
   mkdirSync(join(appRoot, "shared"), { recursive: true });
   mkdirSync(previous, { recursive: true });
+  mkdirSync(concurrent, { recursive: true });
   mkdirSync(repo, { recursive: true });
   mkdirSync(bin, { recursive: true });
   symlinkSync(previous, join(appRoot, "current"));
@@ -185,6 +189,12 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
     const vulnerableHandshake = `run_runtime_state_step() {\n  local step_name="$1"\n  shift\n  setsid env -u BASH_ENV -u ENV --default-signal=INT,TERM,HUP /usr/bin/bash --noprofile --norc -c 'exec "$@"' bash "$@" &\n  if [ "\${DF13_TEST_LAUNCH_COUNT:-0}" = "2" ]; then\n    printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n    kill -STOP "$$"\n  fi\n  export DF13_TEST_LAUNCH_COUNT=$(( \${DF13_TEST_LAUNCH_COUNT:-0} + 1 ))\n  active_step_pid="$!"\n`;
     releaseScriptSource = releaseScriptSource.replace(protectedHandshake, vulnerableHandshake);
   }
+  if (moveCurrentBeforeLock) {
+    const lockBoundary = 'mkdir -p "$(dirname "$DEPLOYMENT_LOCK_FILE")"\nacquire_deployment_lock\n';
+    assert.ok(releaseScriptSource.includes(lockBoundary), "the concurrent-pointer fixture must locate the reviewed lock boundary");
+    const replacement = `mkdir -p "$(dirname "$DEPLOYMENT_LOCK_FILE")"\nln -s ${quote(canonicalBashPath(concurrent))} "$app_root/current.concurrent.$$.df13-reconcile"\nmv -Tf "$app_root/current.concurrent.$$.df13-reconcile" "$app_root/current"\nacquire_deployment_lock\n`;
+    releaseScriptSource = releaseScriptSource.replace(lockBoundary, replacement);
+  }
   writeFileSync(releaseScript, releaseScriptSource);
   chmodSync(releaseEntrypoint, 0o700);
   chmodSync(releaseScript, 0o600);
@@ -212,7 +222,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   writeFileSync(join(bin, "node"), "#!/usr/bin/env bash\nprintf '%s\\n' node >> \"$DF13_TEST_LOG\"\nif [ \"$1\" = \"--input-type=module\" ]; then grep -F \"\\\"commit\\\":\\\"$DF13_RELEASE_EXPECTED_COMMIT\\\"\" \"$DF13_RELEASE_SOURCE_FILE\" >/dev/null; fi\n");
   writeFileSync(join(bin, "docker"), `#!/usr/bin/env bash\nif [ "$1" = inspect ]; then\n  case "$3" in\n    *config_files*) printf '%s\\n' '${canonicalBashPath(join(release, "deploy", "docker-compose.vps.yml"))}' ;;\n    *Config.Image*) printf '%s\\n' '${image}' ;;\n    *State.Running*) printf '%s\\n' '${running ? "true" : "false"}' ;;\n    *Image*) printf '%s\\n' '${imageId}' ;;\n    *) exit 2 ;;\n  esac\nelif [ "$1" = image ]; then\n  printf '%s\\n' '${commit}'\nelse\n  exit 2\nfi\n`);
   for (const executable of ["git", "node", "docker"]) chmodSync(join(bin, executable), 0o700);
-  return { appRoot, release, previous, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted, releaseLaunchRace, signalMarker, evidenceObserved, tamperedBodyMarker };
+  return { appRoot, release, previous, concurrent, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted, releaseLaunchRace, signalMarker, evidenceObserved, tamperedBodyMarker };
 }
 
 function harnessEnvironment(harness) {
@@ -435,6 +445,11 @@ try {
     const stopped = writeHarness({ running: false });
     assert.notEqual(runHarness(stopped).status, 0, "a stopped realtime worker must fail closed");
     assert.equal(realpathSync(join(stopped.appRoot, "current")), realpathSync(stopped.previous), "a stopped realtime worker must not switch current");
+
+    const concurrentPointer = writeHarness({ captureFails: true, moveCurrentBeforeLock: true });
+    const concurrentPointerResult = runHarness(concurrentPointer);
+    assert.notEqual(concurrentPointerResult.status, 0, "a post-lock capture failure must fail closed after a concurrent pointer move");
+    assert.equal(realpathSync(join(concurrentPointer.appRoot, "current")), realpathSync(concurrentPointer.concurrent), "failure recovery must preserve the pointer that was current when this run acquired the durable lock");
 
     const symlinkedLock = writeHarness();
     const lockTarget = join(scratch, "symlinked-lock-target");

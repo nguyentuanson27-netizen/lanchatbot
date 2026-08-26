@@ -372,8 +372,6 @@ recover_incomplete_reconciliation() {
 [[ "$DF13_RUNTIME_STATE_SERVICE_EVIDENCE_SHA256" =~ ^[a-f0-9]{64}$ ]] || die "RUNTIME_STATE_EVIDENCE_HASH_INVALID"
 
 release_dir="$(safe_release_dir "$release_dir")"
-test -L "$app_root/current" || die "CURRENT_SYMLINK_MISSING"
-previous_release_dir="$(safe_release_dir "$(readlink -f "$app_root/current")")"
 test -s "$DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE" && test ! -L "$DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE" || die "RUNTIME_STATE_EVIDENCE_MISSING_OR_SYMLINK"
 
 test "$(git -C "$repository_dir" cat-file -t "${release_tag}")" = "tag" || die "RELEASE_TAG_NOT_ANNOTATED"
@@ -406,6 +404,8 @@ DF13_RELEASE_EXPECTED_COMMIT="$DF13_RELEASE_COMMIT" \
 mkdir -p "$(dirname "$DEPLOYMENT_LOCK_FILE")"
 acquire_deployment_lock
 recover_incomplete_reconciliation
+test -L "$app_root/current" || die "CURRENT_SYMLINK_MISSING"
+previous_release_dir="$(safe_release_dir "$(readlink -f "$app_root/current")")"
 
 compose_file="$release_dir/deploy/docker-compose.vps.yml"
 test -f "$compose_file" || die "RELEASE_COMPOSE_MISSING"
