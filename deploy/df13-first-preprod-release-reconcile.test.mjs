@@ -23,6 +23,8 @@ assert.match(source, /^#!\/usr\/bin\/bash\nset -euo pipefail\nset -E\n/u, "the o
 assert.doesNotMatch(source, /\beval\b/u, "reconciliation automation must not evaluate caller input");
 assert.doesNotMatch(source, /DF13_RECONCILE_BOOTSTRAP/u, "the private body must not accept a caller-mintable bootstrap bypass");
 assert.doesNotMatch(entrypointSource, /DF13_RECONCILE_BOOTSTRAP/u, "the public wrapper must not mint a bypass token for its private body");
+assert.match(entrypointSource, /RECONCILIATION_BODY_HASH_MISMATCH/u, "the clean public wrapper must attest the private body before it starts Bash");
+assert.match(entrypointSource, /git -C "\$repository_dir" hash-object -- "\$body_path"/u, "the clean public wrapper must re-hash the body before execution");
 const bodyIndexMode = spawnSync("git", ["ls-files", "-s", "--", "deploy/df13-first-preprod-release-reconcile.body.sh"], { cwd: resolve(deployDir, ".."), encoding: "utf8" });
 assert.equal(bodyIndexMode.status, 0, bodyIndexMode.stderr);
 assert.match(bodyIndexMode.stdout, /^100644\s/u, "the reconciliation body must remain a non-executable internal release artifact");
@@ -63,6 +65,12 @@ assert.match(source, /test -e "\$journal_file" \|\| test -L "\$journal_file"/u, 
 assert.match(source, /assert_private_regular_file/u, "journal and recovery snapshots must be private regular files");
 assert.match(source, /assert_path_in_parent/u, "journal recovery paths must be canonicalized under their expected parent");
 assert.match(source, /RUNTIME_STATE_PROMOTION_READBACK_MISMATCH/u, "promotion must be reconciled from a durable readback instead of its exit status alone");
+const artifactVerification = source.indexOf("for release_artifact in");
+const recoveryInvocation = source.indexOf("\nrecover_incomplete_reconciliation\n");
+assert.ok(artifactVerification >= 0 && artifactVerification < recoveryInvocation, "body release artifacts must be verified before any incomplete-journal recovery can mutate pointers");
+assert.match(source, /test ! -L "\$DEPLOYMENT_LOCK_FILE" \|\| die "DEPLOYMENT_LOCK_SYMLINK"/u, "the durable deployment lock must reject symlinks before opening a descriptor");
+assert.match(source, /exec 9>> "\$DEPLOYMENT_LOCK_FILE"/u, "the durable deployment lock must never truncate its target when it opens a descriptor");
+assert.match(source, /DEPLOYMENT_LOCK_DESCRIPTOR_MISMATCH/u, "the durable deployment lock must verify its opened descriptor remains canonical");
 assert.doesNotMatch(source, /docker compose|psql|sales_authority_mode|COMMERCE/u, "reconciliation must not deploy, alter authority, or expose a direct database operator");
 assert.match(readFileSync(captureCurrent, "utf8"), /runtime-state\.mjs" capture/u, "runtime-state must be captured through the reviewed helper");
 const runtimeStateSource = readFileSync(runtimeStateProgram, "utf8");
@@ -119,6 +127,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   const releaseLaunchRace = join(scratch, `${id}.release-launch-race`);
   const signalMarker = join(scratch, `${id}.signal-marker`);
   const evidenceObserved = join(scratch, `${id}.evidence-observed`);
+  const tamperedBodyMarker = join(scratch, `${id}.tampered-body-ran`);
   mkdirSync(join(release, "deploy", "runtime-state"), { recursive: true });
   mkdirSync(join(appRoot, "runtime-state", "candidates"), { recursive: true });
   mkdirSync(join(appRoot, "shared"), { recursive: true });
@@ -131,6 +140,9 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   copyFileSync(entrypoint, releaseEntrypoint);
   copyFileSync(script, releaseScript);
   let releaseEntrypointSource = readFileSync(releaseEntrypoint, "utf8");
+  const productionWrapperTrustedPath = 'PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"\nexport PATH\nreadonly PATH';
+  assert.ok(releaseEntrypointSource.includes(productionWrapperTrustedPath), "the fixture must begin from the reviewed wrapper command path");
+  releaseEntrypointSource = releaseEntrypointSource.replace(productionWrapperTrustedPath, 'PATH="${DF13_TEST_TRUSTED_PATH:?}"\nexport PATH\nreadonly PATH');
   const productionEntrypointPath = '  PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \\';
   assert.ok(releaseEntrypointSource.includes(productionEntrypointPath), "the fixture must begin from the reviewed clean wrapper path");
   releaseEntrypointSource = releaseEntrypointSource.replace(productionEntrypointPath, `  PATH="\${DF13_TEST_TRUSTED_PATH:?}" \\
@@ -141,6 +153,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   DF13_TEST_RELEASE_LAUNCH_RACE="\${DF13_TEST_RELEASE_LAUNCH_RACE:?}" \\
   DF13_TEST_SIGNAL_MARKER="\${DF13_TEST_SIGNAL_MARKER:?}" \\
   DF13_TEST_EVIDENCE_OBSERVED="\${DF13_TEST_EVIDENCE_OBSERVED:?}" \\
+  DF13_TEST_TAMPERED_BODY_MARKER="\${DF13_TEST_TAMPERED_BODY_MARKER:?}" \\
 `);
   writeFileSync(releaseEntrypoint, releaseEntrypointSource);
   let releaseScriptSource = readFileSync(releaseScript, "utf8");
@@ -199,7 +212,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   writeFileSync(join(bin, "node"), "#!/usr/bin/env bash\nprintf '%s\\n' node >> \"$DF13_TEST_LOG\"\nif [ \"$1\" = \"--input-type=module\" ]; then grep -F \"\\\"commit\\\":\\\"$DF13_RELEASE_EXPECTED_COMMIT\\\"\" \"$DF13_RELEASE_SOURCE_FILE\" >/dev/null; fi\n");
   writeFileSync(join(bin, "docker"), `#!/usr/bin/env bash\nif [ "$1" = inspect ]; then\n  case "$3" in\n    *config_files*) printf '%s\\n' '${canonicalBashPath(join(release, "deploy", "docker-compose.vps.yml"))}' ;;\n    *Config.Image*) printf '%s\\n' '${image}' ;;\n    *State.Running*) printf '%s\\n' '${running ? "true" : "false"}' ;;\n    *Image*) printf '%s\\n' '${imageId}' ;;\n    *) exit 2 ;;\n  esac\nelif [ "$1" = image ]; then\n  printf '%s\\n' '${commit}'\nelse\n  exit 2\nfi\n`);
   for (const executable of ["git", "node", "docker"]) chmodSync(join(bin, executable), 0o700);
-  return { appRoot, release, previous, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted, releaseLaunchRace, signalMarker, evidenceObserved };
+  return { appRoot, release, previous, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted, releaseLaunchRace, signalMarker, evidenceObserved, tamperedBodyMarker };
 }
 
 function harnessEnvironment(harness) {
@@ -212,6 +225,7 @@ function harnessEnvironment(harness) {
     DF13_TEST_RELEASE_LAUNCH_RACE: canonicalBashPath(harness.releaseLaunchRace),
     DF13_TEST_SIGNAL_MARKER: canonicalBashPath(harness.signalMarker),
     DF13_TEST_EVIDENCE_OBSERVED: canonicalBashPath(harness.evidenceObserved),
+    DF13_TEST_TAMPERED_BODY_MARKER: canonicalBashPath(harness.tamperedBodyMarker),
     DF13_RELEASE_COMMIT: commit,
     DF13_RELEASE_TREE: tree,
     DF13_RELEASE_REALTIME_IMAGE: image,
@@ -365,6 +379,14 @@ function journalPath(harness) {
   return join(harness.appRoot, "runtime-state", "df13-first-preprod-release-reconcile.journal");
 }
 
+function tamperReconciliationBody(harness) {
+  const bodyPath = join(harness.release, "deploy", "df13-first-preprod-release-reconcile.body.sh");
+  const bodySource = readFileSync(bodyPath, "utf8");
+  const insertion = "set -E\n";
+  assert.ok(bodySource.includes(insertion), "the tamper regression must locate the body startup boundary");
+  writeFileSync(bodyPath, bodySource.replace(insertion, `${insertion}# TAMPERED\nprintf '%s\\n' tampered > "$DF13_TEST_TAMPERED_BODY_MARKER"\n`));
+}
+
 try {
   if (runsLinuxHarness) {
     const successful = writeHarness();
@@ -413,6 +435,16 @@ try {
     const stopped = writeHarness({ running: false });
     assert.notEqual(runHarness(stopped).status, 0, "a stopped realtime worker must fail closed");
     assert.equal(realpathSync(join(stopped.appRoot, "current")), realpathSync(stopped.previous), "a stopped realtime worker must not switch current");
+
+    const symlinkedLock = writeHarness();
+    const lockTarget = join(scratch, "symlinked-lock-target");
+    const symlinkedLockPath = join(symlinkedLock.appRoot, "shared", "lana-chatbot-deployment.lock");
+    writeFileSync(lockTarget, "preserve this unrelated file\n");
+    symlinkSync(lockTarget, symlinkedLockPath);
+    const symlinkedLockResult = runHarness(symlinkedLock);
+    assert.notEqual(symlinkedLockResult.status, 0, "a symlinked deployment lock must fail closed");
+    assert.equal(readFileSync(lockTarget, "utf8"), "preserve this unrelated file\n", "a rejected lock symlink must not truncate or modify its target");
+    assert.equal(realpathSync(join(symlinkedLock.appRoot, "current")), realpathSync(symlinkedLock.previous), "a rejected lock symlink must not switch current");
 
     const contended = writeHarness();
     const lock = canonicalBashPath(join(contended.appRoot, "shared", "lana-chatbot-deployment.lock"));
@@ -489,6 +521,24 @@ try {
       if (unrelatedProcess?.pid) {
         try { process.kill(-unrelatedProcess.pid, "SIGKILL"); } catch (error) { if (!error || typeof error !== "object" || !("code" in error) || error.code !== "ESRCH") throw error; }
       }
+    }
+
+    const tamperedBodyRecovery = writeHarness({ captureWaits: true });
+    const tamperedRecoveryParent = spawn(bash, ["-c", harnessCommand(tamperedBodyRecovery)], { stdio: "ignore" });
+    try {
+      await waitForFile(tamperedBodyRecovery.captureStarted);
+      tamperedRecoveryParent.kill("SIGKILL");
+      await waitForChildClose(tamperedRecoveryParent);
+      assert.equal(realpathSync(join(tamperedBodyRecovery.appRoot, "current")), realpathSync(tamperedBodyRecovery.release), "the tamper recovery fixture must leave the release pointer pending in its durable journal");
+      assert.equal(readFileSync(join(tamperedBodyRecovery.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"known-good-legacy"}\n', "the tamper recovery fixture must retain the prior runtime-state pointer before recovery");
+      tamperReconciliationBody(tamperedBodyRecovery);
+      const tamperedRecoveryResult = runHarness(tamperedBodyRecovery);
+      assert.notEqual(tamperedRecoveryResult.status, 0, "a tampered body with a pending journal must fail before recovery");
+      assert.ok(!existsSync(tamperedBodyRecovery.tamperedBodyMarker), "a tampered body must never start before the public wrapper verifies its immutable blob");
+      assert.equal(realpathSync(join(tamperedBodyRecovery.appRoot, "current")), realpathSync(tamperedBodyRecovery.release), "a rejected tampered body must not restore or otherwise mutate the pending current pointer");
+      assert.equal(readFileSync(join(tamperedBodyRecovery.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"known-good-legacy"}\n', "a rejected tampered body must not mutate the pending runtime-state pointer");
+    } finally {
+      stopHarnessProcess(tamperedBodyRecovery, tamperedRecoveryParent, 0);
     }
 
     const traversalJournal = writeHarness({ captureWaits: true });

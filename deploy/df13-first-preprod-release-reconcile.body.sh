@@ -151,19 +151,26 @@ esac
 readonly repository_dir="$app_root/repository"
 readonly realtime_container="lana-chatbot-realtime-worker"
 readonly DEPLOYMENT_LOCK_FILE="$app_root/shared/lana-chatbot-deployment.lock"
-mkdir -p "$(dirname "$DEPLOYMENT_LOCK_FILE")"
 
 acquire_deployment_lock() {
+  local lock_directory="$(dirname "$DEPLOYMENT_LOCK_FILE")"
+  local resolved_lock=""
+  test ! -L "$DEPLOYMENT_LOCK_FILE" || die "DEPLOYMENT_LOCK_SYMLINK"
+  if test -e "$DEPLOYMENT_LOCK_FILE"; then
+    test -f "$DEPLOYMENT_LOCK_FILE" || die "DEPLOYMENT_LOCK_NOT_REGULAR"
+  fi
+  resolved_lock="$(readlink -f "$DEPLOYMENT_LOCK_FILE")" || die "DEPLOYMENT_LOCK_UNRESOLVED"
+  test "$(dirname "$resolved_lock")" = "$lock_directory" || die "DEPLOYMENT_LOCK_OUTSIDE_SHARED_ROOT"
+  test "$(basename "$resolved_lock")" = "$(basename "$DEPLOYMENT_LOCK_FILE")" || die "DEPLOYMENT_LOCK_OUTSIDE_SHARED_ROOT"
   if test -e "/proc/$$/fd/9" &&
-    test "$(readlink -f "/proc/$$/fd/9")" = "$(readlink -f "$DEPLOYMENT_LOCK_FILE")"; then
+    test "$(readlink -f "/proc/$$/fd/9")" = "$resolved_lock"; then
     flock -n 9 || die "INHERITED_DEPLOYMENT_LOCK_NOT_HELD"
     return
   fi
-  exec 9> "$DEPLOYMENT_LOCK_FILE"
+  exec 9>> "$DEPLOYMENT_LOCK_FILE"
+  test "$(readlink -f "/proc/$$/fd/9")" = "$resolved_lock" || die "DEPLOYMENT_LOCK_DESCRIPTOR_MISMATCH"
   flock -n 9 || die "RELEASE_RECONCILIATION_LOCK_UNAVAILABLE"
 }
-
-acquire_deployment_lock
 
 runtime_state_root="$(readlink -f "$app_root/runtime-state")" || die "RUNTIME_STATE_ROOT_UNRESOLVED"
 test -d "$runtime_state_root" && test ! -L "$runtime_state_root" || die "RUNTIME_STATE_ROOT_INVALID"
@@ -353,8 +360,6 @@ recover_incomplete_reconciliation() {
   die "INCOMPLETE_RECONCILIATION_RECOVERED"
 }
 
-recover_incomplete_reconciliation
-
 : "${DF13_RELEASE_COMMIT:?DF13_RELEASE_COMMIT is required}"
 : "${DF13_RELEASE_TREE:?DF13_RELEASE_TREE is required}"
 : "${DF13_RELEASE_REALTIME_IMAGE:?DF13_RELEASE_REALTIME_IMAGE is required}"
@@ -397,6 +402,10 @@ DF13_RELEASE_EXPECTED_COMMIT="$DF13_RELEASE_COMMIT" \
     const source = JSON.parse(readFileSync(process.env.DF13_RELEASE_SOURCE_FILE, "utf8"));
     if (source.commit !== process.env.DF13_RELEASE_EXPECTED_COMMIT) process.exit(1);
   ' || die "RELEASE_SOURCE_COMMIT_MISMATCH"
+
+mkdir -p "$(dirname "$DEPLOYMENT_LOCK_FILE")"
+acquire_deployment_lock
+recover_incomplete_reconciliation
 
 compose_file="$release_dir/deploy/docker-compose.vps.yml"
 test -f "$compose_file" || die "RELEASE_COMPOSE_MISSING"
