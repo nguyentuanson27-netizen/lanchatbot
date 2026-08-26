@@ -214,6 +214,19 @@ abort_reconciliation() {
   exit "$exit_code"
 }
 
+commit_reconciliation() {
+  # A signal between the two durable pointers would otherwise create split
+  # provenance. Ignore the handled signals only while both commit flags are
+  # disarmed and the snapshot is removed; before this point the rollback traps
+  # restore both pointers, and after it they are already converged.
+  trap '' INT TERM HUP
+  reconciliation_commit_disarmed=true
+  switched=false
+  runtime_state_may_be_promoted=false
+  cleanup_runtime_state_snapshot
+  trap - EXIT INT TERM HUP
+}
+
 run_runtime_state_step() {
   setsid "$@" &
   active_step_pid="$!"
@@ -261,9 +274,5 @@ run_runtime_state_step env \
   RUNTIME_STATE_GIT_DIR="$DF13_REPOSITORY_DIR" \
   "$release_dir/deploy/runtime-state/promote-current.sh"
 test "$(sha256_file "$runtime_state_current")" = "$candidate_runtime_state_sha256" || die "RUNTIME_STATE_PROMOTION_READBACK_MISMATCH"
-runtime_state_may_be_promoted=false
-
-switched=false
-cleanup_runtime_state_snapshot
-trap - EXIT INT TERM HUP
+commit_reconciliation
 printf '%s\n' "DF13_RELEASE_RECONCILIATION_PASS release=$DF13_RELEASE_TAG commit=$DF13_RELEASE_COMMIT tree=$DF13_RELEASE_TREE candidate=$candidate_id"

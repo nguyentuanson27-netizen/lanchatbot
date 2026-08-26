@@ -71,7 +71,7 @@ function canonicalBashPath(value) {
   return result.stdout.trim();
 }
 
-function writeHarness({ captureFails = false, captureWaits = false, promoteFailsAfterCurrentReplace = false, promoteWaitsAfterCurrentReplace = false, running = true, sourceCommit = commit, tamperedReleaseArtifact = false } = {}) {
+function writeHarness({ captureFails = false, captureWaits = false, promoteFailsAfterCurrentReplace = false, promoteWaitsAfterCurrentReplace = false, signalDuringCommit = false, running = true, sourceCommit = commit, tamperedReleaseArtifact = false } = {}) {
   const id = `scenario-${harnessId++}`;
   const appRoot = join(scratch, `${id}-root`);
   const release = join(appRoot, "releases", tag);
@@ -82,6 +82,7 @@ function writeHarness({ captureFails = false, captureWaits = false, promoteFails
   const log = join(scratch, `${id}.log`);
   const captureStarted = join(scratch, `${id}.capture-started`);
   const promoteStarted = join(scratch, `${id}.promote-started`);
+  const debugEnvironment = join(scratch, `${id}.bash-env`);
   mkdirSync(join(release, "deploy", "runtime-state"), { recursive: true });
   mkdirSync(join(appRoot, "runtime-state", "candidates"), { recursive: true });
   mkdirSync(join(appRoot, "shared"), { recursive: true });
@@ -113,7 +114,8 @@ function writeHarness({ captureFails = false, captureWaits = false, promoteFails
   writeFileSync(join(bin, "node"), "#!/usr/bin/env bash\nprintf '%s\\n' node >> \"$DF13_TEST_LOG\"\nif [ \"$1\" = \"--input-type=module\" ]; then grep -F \"\\\"commit\\\":\\\"$DF13_RELEASE_EXPECTED_COMMIT\\\"\" \"$DF13_RELEASE_SOURCE_FILE\" >/dev/null; fi\n");
   writeFileSync(join(bin, "docker"), `#!/usr/bin/env bash\nif [ "$1" = inspect ]; then\n  case "$3" in\n    *config_files*) printf '%s\\n' '${canonicalBashPath(join(release, "deploy", "docker-compose.vps.yml"))}' ;;\n    *Config.Image*) printf '%s\\n' '${image}' ;;\n    *State.Running*) printf '%s\\n' '${running ? "true" : "false"}' ;;\n    *Image*) printf '%s\\n' '${imageId}' ;;\n    *) exit 2 ;;\n  esac\nelif [ "$1" = image ]; then\n  printf '%s\\n' '${commit}'\nelse\n  exit 2\nfi\n`);
   for (const executable of ["git", "node", "docker"]) chmodSync(join(bin, executable), 0o700);
-  return { appRoot, release, previous, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted };
+  if (signalDuringCommit) writeFileSync(debugEnvironment, "trap 'if [ \"$BASH_COMMAND\" = \"reconciliation_commit_disarmed=true\" ]; then kill -TERM \"$$\"; fi' DEBUG\n");
+  return { appRoot, release, previous, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted, debugEnvironment: signalDuringCommit ? debugEnvironment : null };
 }
 
 function harnessCommand(harness) {
@@ -134,7 +136,8 @@ function harnessCommand(harness) {
     `DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE=${quote(canonicalBashPath(harness.evidence))}`,
     `DF13_RUNTIME_STATE_SERVICE_EVIDENCE_SHA256=${quote(harness.evidenceSha256)}`,
   ].join(" ");
-  return `${env} ${quote(canonicalBashPath(join(harness.release, "deploy", "df13-first-preprod-release-reconcile.sh")))}`;
+  const testEnvironment = harness.debugEnvironment ? `BASH_ENV=${quote(canonicalBashPath(harness.debugEnvironment))} ` : "";
+  return `${testEnvironment}${env} ${quote(canonicalBashPath(join(harness.release, "deploy", "df13-first-preprod-release-reconcile.sh")))}`;
 }
 
 function runHarness(harness) {
@@ -206,6 +209,12 @@ try {
     assert.notEqual(promotionInterruptResult.code, 0, "an interrupt after runtime-state replacement must terminate reconciliation nonzero");
     assert.equal(realpathSync(join(interruptedPromotion.appRoot, "current")), realpathSync(interruptedPromotion.previous), "an interrupt after runtime-state replacement must restore the previous current pointer");
     assert.equal(readFileSync(join(interruptedPromotion.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"known-good-legacy"}\n', "an interrupt after runtime-state replacement must restore the exact prior runtime-state pointer");
+
+    const signalDuringCommit = writeHarness({ signalDuringCommit: true });
+    const commitSignalResult = runHarness(signalDuringCommit);
+    assert.equal(commitSignalResult.status, 0, `${commitSignalResult.stderr}\n${commitSignalResult.stdout}`);
+    assert.equal(realpathSync(join(signalDuringCommit.appRoot, "current")), realpathSync(signalDuringCommit.release), "a signal during commit disarm must not restore only the release pointer");
+    assert.equal(readFileSync(join(signalDuringCommit.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"release"}\n', "a signal during commit disarm must retain the matching promoted runtime-state pointer");
   }
 } finally {
   if (scratch) rmSync(scratch, { recursive: true, force: true });
