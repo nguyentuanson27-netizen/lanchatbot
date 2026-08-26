@@ -1,227 +1,528 @@
-# Đề xuất kế hoạch rút gọn sau DF — Activation + Năng lực bán hàng
+# Post-DF Hybrid Execution Plan — Anti-Bloat V5
 
-**Status:** `PROPOSED` — chờ owner review; chưa có hiệu lực governance, chưa authorize merge/release/deploy/activation nào.
-**Ngày:** 2026-08-25
-**Phạm vi:** Thay thế trình tự sau DF-C hiện tại (`Gate F → UR-A/UR-B → Gate U → hardening`) bằng lộ trình rút gọn 5 giai đoạn, đồng thời cắt giảm quy trình máy móc chưa cần thiết cho giai đoạn chưa vận hành.
-**Tài liệu bị ảnh hưởng khi được chấp nhận:** `FUTURE_BACKLOG.md`, `OPERATING_MODE.md`, `PREPROD_DF_UR_PLAN_AMENDMENT.md`, `DF13_OPERATIONAL_ACCEPTANCE_PREPARATION.md`.
-**Không thay đổi:** các invariant an toàn (mục 7), quyết định Gate E v15 đã accept, bằng chứng lịch sử bất biến.
+**Status:** `PROPOSED / OWNER-DECISION-READY` — this document does not itself authorize merge, release, migration, runtime mutation, COMMERCE activation, real-customer traffic, production hardening, or destructive cleanup.
+**Operating context:** `ENGINEERING_PREPROD` / one `PREPROD_TEST_PAGE`.
+**Primary objective:** activate COMMERCE safely, complete the intended model-vs-code authority split, then iterate sales quality quickly without rebuilding the old architecture/governance program around every tuning cycle.
 
 ---
 
-## 1. Bối cảnh và lý do
+## 0. Context, scope, anti-bloat contract, and adoption
 
-### 1.1 Hiện trạng
+### Why this plan exists
 
-- Runtime đang `salesAuthorityMode=LEGACY`, `stateReadMode=LEGACY`: con bot đang chạy vẫn là pipeline cũ (code/regex quyết định câu từ và giai đoạn bán hàng) — chính là con bot đã được xác nhận là kém.
-- DF11–DF13 đã merge source-only. Toàn bộ giá trị của chuỗi DF (trao quyền cho model, hạ bệ regex/`salesStage` authority) dồn vào một công tắc chưa bật: activation `LEGACY → COMMerce`.
-- Lộ trình hiện tại xếp sau activation: Gate F (chu trình gate riêng) → UR-A/UR-B (State V2) → Gate U → production hardening. Track UR tự gắn nhãn "No output change" cho UR-01…05 — không đóng góp năng lực chốt đơn.
-- Không có hạng mục nào trong DF/UR cải thiện **năng lực bán hàng thực** của model (prompt, playbook, chiến lược thương lượng). Kế hoạch hiện tại trao *quyền* cho model nhưng không có giai đoạn nào dạy model *dùng quyền đó cho giỏi*.
+The project needs to move from **architecture construction** to **product learning** without weakening the safety/provenance machinery already built.
 
-### 1.2 Vấn đề cần sửa
+The current PREPROD program has already invested in exact candidate identity, stopped-process authority transition, release/startup evidence, safety guards, readback, and rollback. Those are correctness constraints and stay. What moves out of the default critical path is speculative completeness work that does not yet improve the bot's customer-facing sales capability.
 
-1. **Sai trọng tâm:** 100% effort còn lại là giàn giáo và nghi thức, 0% là năng lực bán hàng — trong khi bot kém là vấn đề đã biết chắc.
-2. **Chi phí quy trình vượt quy mô dự án:** attestation chain, immutable evidence store, Release Train, owner-authorization từng PR nhỏ, 17 file governance tham chiếu chéo — là ceremony cấp production cho một dự án 1 page test, 0 khách, chưa vận hành. Các commit gần nhất sửa lỗi của giàn giáo (attestation race), không phải của bot.
-3. **Cơ chế tái chứng nhận tê liệt việc tinh chỉnh AI:** quy tắc "đổi prompt/model/config → vô hiệu Gate E → chạy lại toàn bộ DF-P6 có nghi thức" biến mỗi lần sửa prompt (việc cần làm hàng ngày ở giai đoạn tới) thành một đợt tái chứng nhận.
+V5 therefore keeps exactly three default Tracks:
 
-### 1.3 Nguyên tắc của kế hoạch mới
+1. **TRACK A — Activate COMMERCE safely**
+2. **TRACK B — Complete model authority**
+3. **TRACK C — Improve sales quality continuously**
 
-- **Không cần vận hành bot để chứng minh bot kém.** Thước đo chất lượng là replay corpus offline trên hội thoại lịch sử, không phải canary sớm.
-- **Bằng chứng rẻ nhất chứng minh được boundary** (giữ nguyên nguyên tắc của PREPROD amendment, áp dụng triệt để hơn — kể cả cho chính bộ máy governance).
-- **Code giới hạn những gì không được làm; model quyết định nói gì và nói thế nào.** Đúng kiến trúc đích §2 của `ACTIVE_IMPLEMENTATION_PLAN.md`; kế hoạch này không nới lỏng nó.
+Everything else is an invariant, bounded artifact, checklist, or trigger-based task.
+
+> **Core principle:** reuse the safety plumbing already built, fix only the concrete activation blocker already proven in current code, make the model genuinely own normal sales strategy and wording, then spend engineering effort on measured sales quality rather than speculative architecture completeness.
+
+### Current repository context to preserve
+
+The plan starts from the current recorded state:
+
+- operating mode: `ENGINEERING_PREPROD`;
+- live page role: `PREPROD_TEST_PAGE`;
+- gate: `GATE_E_PREPROD_ACCEPTED`;
+- runtime sales authority: `LEGACY`;
+- DF13 source foundations complete, operational acceptance/runtime activation pending;
+- first DF13 PREPROD exercise uses stopped/fresh-process replacement;
+- 0035/0036 remain pending DF13 artifacts outside automatic migration discovery;
+- Gate F remains the technical acceptance boundary for the first COMMERCE exercise;
+- UR / State V2 are not on the default post-Gate-F critical path unless a concrete trigger pulls in a narrow slice.
+
+Target runtime architecture:
+
+```text
+sanitized input + verified state/facts
+-> model semantic proposal
+-> model structured claims/actions + normal customer-facing draft
+-> deterministic claim verification
+-> deterministic state/effect reconciliation
+-> bounded model regeneration request or fixed safe fallback
+-> final guard
+-> authorized reply / Outbox / state / handoff effects
+```
+
+The model owns normal conversational semantics, normal sales strategy, and normal customer-facing wording.
+
+Deterministic code owns verified facts/provenance, safety/security/PII, reconciliation, authorization, idempotency, fail-closed behavior, and bounded safe fallback. Deterministic code must not become a second Vietnamese sales copywriter.
+
+### Goals
+
+- **G1 — Minimize time-to-COMMERCE:** use existing DF13 operational plumbing; do not redesign it without a concrete blocker.
+- **G2 — Preserve safety/correctness:** keep exact authority transition, candidate/runtime identity, claim/provenance checks, PII/security, side-effect authorization, readback, and rollback.
+- **G3 — Complete model authority:** COMMERCE being active is insufficient if deterministic code still owns normal strategy/copywriting.
+- **G4 — Maximize product-learning speed:** after authority is correct, enable a small repeatable safety + quality tuning loop.
+
+### Anti-bloat contract
+
+**Default: do not add another Track.** A fourth Track requires proof that a specific current failure blocks G1–G4 and cannot fit inside A/B/C as a checklist, invariant, acceptance criterion, or trigger.
+
+Do not turn rollback evidence, migration sanity, Gate F evidence, replay hashes, Gate-E rerun CLI, promotion evidence, quality judge adapter, or PII readiness into standalone projects.
+
+Trigger-only by default:
+
+- UR / State V2 / Gate U;
+- multi-page expansion;
+- real-customer pilot preparation;
+- production hardening / traffic canary / long soak;
+- broad retention redesign;
+- general replay/evaluator platform work;
+- broad governance redesign;
+- destructive Legacy cleanup.
+
+### Planning estimates
+
+These are engineering planning estimates, not repository facts or delivery commitments, and exclude waiting for owner approvals/runtime access/credentials.
+
+| Track | Planning range | Main uncertainty |
+|---|---:|---|
+| Track A | ~2–4 working days | narrow reactivation fix + disposable-DB proof + authorized runtime exercise |
+| Track B | ~4–10 working days | actual current COMMERCE call graph and amount of mixed deterministic sales/correctness logic |
+| Track C minimum loop | ~2–4 working days | replay adapter integration + quality comparison adapter |
+| Sequential initial target | ~8–18 working days | subject to B1 re-estimate and environment/approval timing |
+
+**B1 timebox:** within 1–2 engineering days, produce the bounded current COMMERCE call graph and KEEP/DEMOTE/SPLIT inventory. Then lock scope and re-estimate. If scope is still unbounded, stop/replan rather than expanding into a repo-wide audit.
+
+### Owner adoption and supersession
+
+If explicitly accepted by the owner, V5 becomes the canonical **post-Gate-F sequencing plan** for this PREPROD program.
+
+**Adoption update:** the same adoption PR/change must add a short supersession notice to `FUTURE_BACKLOG.md` and the applicable post-Gate-F sequencing section of `PREPROD_DF_UR_PLAN_AMENDMENT.md`. Preserve existing historical text; do not delete or rewrite prior decisions. The notice must point to this plan as the canonical post-Gate-F sequencing authority once owner acceptance and merge are complete.
+
+V5 supersedes only conflicting future sequencing that would otherwise require UR / State V2 / Gate U before model-authority completion and the sales-quality loop. It does **not** supersede:
+
+- immutable Gate E evidence or acceptance records;
+- the current Gate F technical contract;
+- DF13 fresh-process operational contracts;
+- release-integrity/provenance requirements;
+- migration correctness rules;
+- security/PII/auth requirements;
+- exact rollback requirements;
+- explicit owner authorization boundaries.
+
+Owner decisions required to adopt V5:
+
+1. adopt V5 as the canonical post-Gate-F sequencing baseline;
+2. defer UR / State V2 from the default critical path until a concrete trigger exists;
+3. authorize the narrow DF13 reactivation compatibility fix after the disposable-DB regression proves the current blocker;
+4. permit minimal operational Gate-E rerun CLI/wiring around the existing runner for materially changed Track B deployment candidates;
+5. permit the lightweight quality loop to reuse existing replay/judge/provenance primitives rather than building new platforms.
 
 ---
 
-## 2. Giai đoạn 1 — Kích hoạt DF13 `LEGACY → COMMERCE` (rút gọn)
+## 1. TRACK A — Activate COMMERCE safely
 
-**Mục tiêu:** Bật pipeline model-dẫn-dắt trên page test `1198992073286645`. Đây là bước duy nhất khiến mục tiêu "trao quyền cho model" chuyển từ source code sang runtime.
+### Objective
 
-**Ước lượng:** 2–4 ngày làm việc (thay vì một chuỗi Release Train nhiều tuần).
+Use the current DF13 first-activation plumbing to:
 
-### 2.1 Trình tự thực hiện
+1. prove/fix the known rollback → fresh-reactivation blocker before touching PREPROD runtime;
+2. activate COMMERCE;
+3. satisfy the current Gate F technical contract;
+4. prove exact rollback to LEGACY;
+5. perform a fresh LEGACY → COMMERCE reactivation;
+6. finish with runtime actually on COMMERCE.
 
-1. **Backup:** backup PostgreSQL, ghi SHA-256; restore-test một lần (giữ — đây là bảo hiểm thật, có migration đi kèm).
-2. **Migration `0035_df13_commerce_behavior_mode`:** chuyển vào thư mục migration active và apply như một migration additive bình thường. Bỏ cơ chế cách ly ngoài auto-discovery và toàn bộ "pending-migration rehearsal".
-3. **Capture rollback target:** ghi lại chính xác release/pointer/config LEGACY hiện tại (giữ — điều kiện để rollback đúng).
-4. **Seal + drain:** chặn inbound mới của page test, xả và đối soát queue (Inbox/Outbox/in-flight) về 0, dừng service set cũ, xác nhận lại 0 work. (Giữ nguyên quyết định stopped-process — đây đã là đường đơn giản.)
-5. **Prepare + start COMMERCE:** dùng `df13-first-preprod-commerce-version-preparer-cli` tạo COMMERCE version + startup package, chuyển pointer bằng behavior writer, khởi động một service set COMMERCE mới từ release có tag.
-6. **Smoke + integration:** chạy bộ smoke/integration journey đã đăng ký (response, state/context, reconciliation, commit/effect guard, restart/crash).
-7. **Diễn tập rollback:** thực hiện trọn một vòng `COMMERCE → LEGACY` (seal/drain/stop → restore pointer → restart LEGACY) rồi bật lại COMMERCE. Rollback phải được chứng minh bằng hành động, không phải trên giấy.
-8. **Ghi nhận:** một entry changelog + cập nhật `program-state.json`. Không viết acceptance record mới.
+Do not redesign DF13.
 
-### 2.2 Phần nghi thức được cắt khỏi runbook hiện tại
+### A0 — Mandatory disposable-DB reactivation proof
 
-| Cắt | Thay bằng |
+Before any real PREPROD Track A runtime mutation, verify the full lifecycle in a disposable isolated database:
+
+```text
+LEGACY
+-> prepare COMMERCE
+-> activate COMMERCE
+-> rollback LEGACY
+-> fresh zero-work proof / fresh operationId / current pointer revision
+-> prepare or reconcile COMMERCE again
+-> activate COMMERCE again
+-> verify exact final COMMERCE identity
+```
+
+#### Known current blocker
+
+Current preparation semantics look up an existing COMMERCE version by canonical `content_hash`. Existing-version reconciliation also compares stored preparation `reason`, while the preparer writes:
+
+```text
+DF13_FIRST_PREPROD_PREPARE:<operationId>
+```
+
+A fresh reactivation operation necessarily has a fresh `operationId`; with an already-created identical COMMERCE version, current code deterministically reaches:
+
+```text
+DF13_FIRST_PREPROD_PREPARATION_IDEMPOTENCY_MISMATCH
+```
+
+Treat this as a known Track A blocker, not a hypothetical edge case.
+
+The regression test must fail on current behavior, then the implementation must make the smallest fix that preserves immutable COMMERCE identity, fresh proof/current-pointer checks, exact auditability, no generic COMMERCE operator, no dual authority, and exact rollback.
+
+The startup package is create-once. Fresh reactivation must prove a safe current-operation package/output path and exact startup binding rather than overwriting a prior package.
+
+The zero-work proof has a maximum age of 15 minutes; every mutating authority transition needs a fresh valid proof.
+
+### A1 — PREPROD preflight
+
+Only after A0 passes:
+
+- lock the exact candidate/release;
+- verify current release/startup evidence;
+- re-read runtime authority/state and current behavior pointer;
+- inspect the live migration ledger;
+- verify exact page/channel scope;
+- verify backup/restore readiness required by the current operational contract;
+- capture exact known-good LEGACY release/config/pointer rollback identity;
+- verify current DF13 candidate/release evidence accepts the intended first-exercise inputs.
+
+#### 0035 / 0036 rule
+
+For the current first PREPROD exercise:
+
+> **Do not promote or apply 0035/0036.**
+
+They remain pending DF13 artifacts outside automatic discovery. Only a separately authorized additive, checksum-verified migration, if any, may be applied. Disposable-database rehearsal is evidence only and does not authorize PREPROD application.
+
+### A2 — First COMMERCE activation
+
+```text
+seal admission
+-> drain/reconcile eligible queued + in-flight work to zero under LEGACY
+-> stop the finite authority-consuming process set
+-> fresh zero-work proof
+-> prepare exact immutable COMMERCE target/startup package
+-> LEGACY -> COMMERCE through the narrow writer
+-> start one fresh COMMERCE authority-consuming service set
+-> smoke/integration verification
+-> exact DATABASE/runtime readback
+```
+
+Acceptance:
+
+- COMMERCE is the only sales authority;
+- no LEGACY/COMMERCE co-authority;
+- exact candidate/release/startup/runtime identity matches;
+- required consumers resolve the same database-backed authority identity;
+- protected claims remain verified/fail-closed;
+- side effects remain explicitly authorized;
+- smoke/integration checks pass.
+
+### A3 — Gate F + exact rollback
+
+Satisfy **all technical acceptance criteria currently defined by Gate F-PREPROD**, including the full transition matrix and BF/DF replay. Do not invent additional Gate F criteria beyond the current contract.
+
+Current Gate F includes at least:
+
+- COMMERCE FSM authority / derived phase;
+- coherent Context V2, phase, reconciliation, and legacy-authority demotion;
+- no COMMERCE decision using legacy `salesStage` as authority;
+- missing COMMERCE state with committed intent failing closed;
+- full transition matrix and BF/DF replay;
+- exact immutable candidate projection/content-fingerprint match;
+- stopped-process single-authority evidence;
+- exact runtime/control-plane readback;
+- controlled PREPROD critical human journeys;
+- complete `COMMERCE -> LEGACY` rollback and exact LEGACY restart/readback.
+
+After rollback, runtime is LEGACY. That completes Gate F rollback evidence, not the final runtime state required by V5.
+
+### A4 — Fresh COMMERCE reactivation
+
+Use the exact lifecycle proven in A0:
+
+```text
+seal admission
+-> drain/reconcile
+-> stop
+-> fresh zero-work proof
+-> re-read current LEGACY pointer/revision
+-> prepare/reconcile exact COMMERCE target under fixed semantics
+-> create fresh current-operation startup package
+-> LEGACY -> COMMERCE
+-> smoke/integration
+-> exact DATABASE/runtime readback
+```
+
+A new source SHA/tag is not assumed either way. Reuse of the same immutable release candidate is allowed only when current release/startup contracts prove that exact reuse is valid after the A0 fix.
+
+**Track A exit:** disposable-DB lifecycle passes; the known preparation blocker is narrowly fixed; 0035/0036 remain unpromoted/unapplied; first activation passes; all current Gate F criteria and human journeys pass; exact LEGACY rollback passes; fresh COMMERCE reactivation passes; final runtime readback is COMMERCE.
+
+---
+
+## 2. TRACK B — Complete model authority
+
+### Objective
+
+Make the current PREPROD COMMERCE response path match the intended architecture:
+
+> **model owns normal strategy + normal wording; code owns facts, safety, reconciliation, authorization, and bounded fallback.**
+
+This is a bounded current-runtime-path refactor, not a repo-wide chatbot audit.
+
+### B1 — Timeboxed current-path inventory
+
+Within 1–2 engineering days inspect only code reachable from:
+
+```text
+accepted inbound customer message
+-> context / verified facts
+-> strategy / proposal construction
+-> model call + structured output
+-> model draft
+-> post-model validation / reconciliation
+-> repair / fallback
+-> final customer-facing reply
+-> requested-effect authorization
+```
+
+Produce the actual current call graph, candidate-affecting files, deterministic-authority inventory, KEEP/DEMOTE/SPLIT classification, implementation slices, and a Track B re-estimate.
+
+Exclude legacy-only paths, admin flows, unrelated workers, future page modes, unreachable utilities, and deterministic logic that cannot affect the current COMMERCE reply/authority path. Inspect outside the boundary only with evidence that code can modify/replace the reply or override normal sales/effect authority.
+
+Do not assume helper names from reviews; locate current call-sites first.
+
+### B2 — Demote only deterministic sales/copywriting authority
+
+**KEEP** deterministic authority for verified facts/claims/provenance, freshness/product scope, state consistency, side-effect authorization, auth/authz, PII/security, idempotency, fail-closed behavior, contradiction reconciliation, and fixed safe fallback.
+
+**DEMOTE** deterministic logic when it selects normal sales strategy instead of the model, writes normal customer-facing sales copy, rewrites a valid model draft for ordinary style/business preference, or hard-codes objection/CTA behavior as conversational authority rather than correctness/safety.
+
+**SPLIT** mixed helpers only enough to preserve the deterministic technical boundary while moving normal conversational authority to the model. No unrelated cleanup.
+
+### B3 — One reproducible side-effect-free replay adapter
+
+Target runtime:
+
+```text
+verified facts/state
+-> model structured strategy + claims + requested effects + normal reply draft
+-> deterministic claim verification
+-> deterministic state/effect reconciliation
+-> bounded model regeneration request OR fixed safe fallback
+-> final guard
+-> authorized reply/effects
+```
+
+Deterministic repair may reject invalid structures, reconcile deterministic conflicts, request bounded model regeneration, and select a fixed safe fallback. It must not compose normal sales wording, rewrite a valid draft for style, splice deterministic sales copy, or replace model strategy for ordinary business preference.
+
+Build **one minimum side-effect-free full-agent replay adapter** and reuse it in Track C. It must cover representative current COMMERCE fixtures, compare before/after authority changes, inspect final replies, prove MUST_PASS safety/correctness, and detect regressions from demoting deterministic strategy/copywriting.
+
+For meaningful comparison pin:
+
+- model/provider-model identity;
+- prompt/template identity;
+- generation configuration;
+- relevant policy/schema/config identity;
+- fixed verified-fact/business fixtures.
+
+Business side effects remain disabled. Do not infer verified fact envelopes from historical transcript text. Do not build a second replay framework. Do not require the full Wave1 population before Track B finishes.
+
+### B3.1 — Minimal Gate-E rerun operationalization for deployment
+
+A materially changed Track B candidate is expected to modify candidate-affecting source covered by current Gate-E fingerprinting. The pre-deploy re-evaluation boundary is therefore a known Track B deployment dependency.
+
+Reuse the existing Gate-E scored-run engine:
+
+```text
+executeGateEScoredRun(...)
+```
+
+Do not rebuild scorer/evidence logic. Add only the minimum operational entrypoint/wiring needed for a selected deployment candidate, such as a CLI/command adapter, registration-path inputs, existing evidence-store wiring, existing provider transport, and redacted result/evidence output.
+
+#### Credential boundary
+
+Do **not** add Vertex service-account credentials to GitHub Actions as part of V5.
+
+Default split:
+
+```text
+GitHub CI
+-> deterministic/unit/integration/replay checks without provider credentials
+
+authorized local/VPS/manual or scheduled evaluation environment
+-> Gate-E provider-backed scored rerun using existing service-account access
+```
+
+Use the current governing Gate-E re-evaluation path. Only if the current contract still blocks the intended lightweight deployment flow **after** minimal operationalization exists may the smallest separately authorized contract/enforcement amendment be proposed. Do not pre-build a new evidence profile or second evaluation authority.
+
+**Track B exit:** bounded call graph/inventory complete; normal strategy and wording are model-owned; deterministic technical boundaries remain; bounded repair is not a copywriter; one reproducible replay adapter passes focused MUST_PASS verification; minimal Gate-E rerun operational path exists; any materially changed selected candidate passes current pre-deploy re-evaluation/provenance before becoming the accepted COMMERCE baseline for Track C.
+
+---
+
+## 3. TRACK C — Improve sales quality continuously
+
+### Objective
+
+```text
+current accepted COMMERCE
+-> new candidate
+-> MUST_PASS safety/correctness
+-> quality comparison
+-> reject or select for deployment
+-> pre-deploy provenance/re-evaluation
+-> deploy
+-> becomes new accepted COMMERCE baseline
+-> repeat
+```
+
+A full LEGACY quality baseline is not mandatory. LEGACY comparison is optional only for a concrete diagnostic/historical need.
+
+### C1 — MUST_PASS first, QUALITY second
+
+A candidate is rejected before quality comparison if it fails any of:
+
+- factual/protected-claim correctness;
+- **no unsupported claims**;
+- no unsafe/unauthorized action or effect;
+- PII/security constraints;
+- fail-closed requirements;
+- required authority/context invariants for the tested path.
+
+Only after MUST_PASS succeeds compare quality on:
+
+- understanding actual customer intent;
+- relevance/usefulness;
+- naturalness;
+- appropriate progress toward the customer's goal/purchase;
+- constructive objection/uncertainty handling;
+- avoidance of unnecessary repetition or pressure.
+
+### C1.1 — Reuse `judgeSalesReplyV2`; do not build a judge platform
+
+Use an offline adapter around existing `judgeSalesReplyV2(...)`. Pin judge provider/model identity, judge prompt/rubric identity, judge generation config, verified-fact fixture identity, accepted/candidate reply identities, and relevant proposal/guard inputs.
+
+Judge output is evaluation evidence only and never authorizes outbound replies or side effects. MUST_PASS remains deterministic and takes precedence over judge scores.
+
+`judgeSalesReplyV2` scores one reply; it is not itself pairwise. Run accepted COMMERCE and candidate replies under the same pinned judge configuration and derive a bounded result such as:
+
+```text
+BETTER
+SAME
+WORSE
++ short reason / score delta
+```
+
+Human review is reserved for calibration samples, ties/near-ties, unexpected regressions, and obvious judge disagreements. Do not require a human to read every replay output every iteration.
+
+### C2 — Reuse B3 replay; fixed dev/validation anchor by default
+
+Reuse the B3 adapter for accepted COMMERCE vs candidate, fixed development/validation fixtures, and new fixtures only from observed failures/new behavior/accepted incidents/material risks.
+
+Primary comparison:
+
+```text
+candidate vs current accepted COMMERCE
+```
+
+Drift guard:
+
+```text
+fixed Commerce-era development/validation reference slice
+```
+
+#### Locked holdout is not part of the default loop
+
+Do **not** require the locked Wave1 holdout for normal Track C iteration. Current full-agent holdout replay is not assumed executable until reproducible recorded fixtures/fact envelopes exist.
+
+Holdout is trigger-only: run a bounded locked-holdout checkpoint only when the required protected/reproducible recorded fixtures exist and the checkpoint is explicitly authorized. Do not create a broad recorded-fixture project merely to satisfy the word “holdout”.
+
+### C3 — Fast tuning loop
+
+Allow rapid iteration on prompt, playbook, objection handling, CTA/question sequencing, model, and generation configuration.
+
+Never bypass verified facts/provenance, unsupported-claim rejection, PII/security, side-effect authorization, fail-closed behavior, or deterministic protected constraints.
+
+```text
+candidate change
+-> deterministic MUST_PASS
+-> B3 side-effect-free replay
+-> pinned judgeSalesReplyV2 quality comparison
+-> human review only where needed
+-> reject OR select for deployment
+```
+
+### C4 — Shared pre-deploy provenance / re-evaluation boundary
+
+Local experiments and candidates not selected for deployment do not require release/promotion ceremony.
+
+A materially changed candidate selected for PREPROD deployment — including a Track B authority-completion candidate — must pass the current shared pre-deploy provenance/re-evaluation boundary.
+
+#### Reuse existing provenance; do not create a second system
+
+Promotion evidence is a lightweight projection/reference over existing candidate-evaluation and release-integrity evidence. Reuse existing fields/tooling wherever already present, including exact Git/source revision, Gate-E candidate identity/fingerprint, prompt/model/config identity, policy/schema/config identity, regression/replay result identity, immutable release/image/source identity, runtime readback, and exact rollback target.
+
+Do not invent a competing promotion-manifest authority when Gate-E/DF13/release-integrity artifacts already own the field. Unknown, partial, stale, or mismatched identity blocks promotion.
+
+The current governing PREPROD contract requires the existing re-evaluation path when a material candidate-identity change invalidates accepted Gate-E evidence until that contract is explicitly amended.
+
+For a materially changed selected deployment candidate:
+
+1. run the current re-evaluation path using the minimal operational entrypoint from Track B;
+2. use existing provenance/release evidence for promotion;
+3. only if the governing contract still creates a concrete unacceptable blocker, make the smallest separately authorized contract/enforcement amendment;
+4. preserve exact candidate identity, reproducibility, and rollback traceability.
+
+Do not proactively redesign governance.
+
+Track C is ongoing. Success means tuning remains fast, MUST_PASS stays stable, quality improves without drift, regressions are caught before deployment, human review is not the per-case bottleneck, replay/judge tooling does not become a platform project, and selected deployment candidates have reproducible pre-deploy provenance using existing evidence authorities.
+
+---
+
+## 4. Trigger-only work
+
+| Trigger | Pull in only this work |
 |---|---|
-| Re-derive candidate manifest/content fingerprint từng field từ artifact cuối | CI xanh trên commit được tag + checksum image |
-| Evidence CLI với thư mục bất biến, `.release-source.json` create-once, annotated-tag re-check | Git tag thường + một dòng ghi SHA trong changelog |
-| Owner phê duyệt tách riêng cho từng bước/PR nhỏ, dừng chờ giữa các bước | **Một phê duyệt duy nhất** cho toàn bộ Giai đoạn 1 (mục 8 — Quyết định cần owner chốt) |
-| Immutable release directory ceremony đầy đủ | Giữ cấu trúc release/symlink hiện có trên VPS, bỏ các bước attestation phụ |
+| measured state race/consistency pain, state representation blocks a real feature, or production/data need requires it | minimum required UR / State V2 slice |
+| owner wants a real-customer pilot | operating-mode authorization + bounded PII/data readiness for the actual pilot |
+| explicit production-hardening decision | traffic/canary/load/soak/SLO/public-production work actually needed |
+| real/new failure is not represented by current replay | add only the fixture/adapter capability needed for that gap |
+| locked holdout is desired and reproducible recorded fixtures now exist | one bounded authorized holdout checkpoint |
+| current Gate-E contract still blocks an already selected deployment after minimal rerun operationalization | one narrow separately authorized contract/enforcement amendment |
+| page/traffic scope expands | only the additional authority/data/operational safeguards required by that expansion |
 
-### 2.3 Tiêu chí hoàn thành Giai đoạn 1
+Do not automatically resurrect full UR, full State V2, Gate U, replay/evaluator platform work, broad governance redesign, production-scale rollout machinery, or destructive Legacy cleanup.
 
-- [ ] COMMERCE là authority duy nhất trên page test; không process LEGACY nào chạy song song.
-- [ ] Smoke/integration pass; các consumer đọc đúng behavior identity từ DATABASE.
-- [ ] Rollback `COMMERCE → LEGACY` đã diễn tập thành công bằng hành động.
-- [ ] Fail-closed hoạt động: thiếu commerce state với committed intent → chặn, không fallback LEGACY.
-
----
-
-## 3. Giai đoạn 2 — Nghiệm thu kiến trúc (Gate F gộp vào activation)
-
-**Mục tiêu:** Xác nhận kiến trúc COMMERCE đứng vững — làm **trong cùng buổi activation**, không mở một chu trình gate riêng với verdict PR/acceptance record.
-
-### 3.1 Checklist (giữ phần cốt lõi của Gate F-PREPROD)
-
-- [ ] Commerce FSM là authority; phase được derive từ state, không từ regex trên text.
-- [ ] Không quyết định COMMERCE nào đọc legacy `salesStage` làm authority; không regex writer.
-- [ ] Transition matrix + BF/DF replay pass.
-- [ ] Missing commerce state fails closed.
-- [ ] Readback runtime identity chính xác.
-- [ ] Rollback `COMMERCE → LEGACY` đã chứng minh (từ Giai đoạn 1).
-
-### 3.2 Phần Gate F được cắt
-
-- Yêu cầu "immutable release re-derives and matches the exact Gate-E candidate projection/content fingerprint field-by-field" → thay bằng: **regression suite (mục 4) pass trên chính commit được deploy**. Suite chạy lại toàn bộ assertion Gate E tự động — bằng chứng mạnh hơn một phép so hash, và không đóng băng khả năng sửa prompt.
-- Chu trình verdict PR + acceptance record + immutable binding riêng cho gate.
-
-Kết quả Giai đoạn 2 ghi thành **một mục trong changelog**, cập nhật `program-state.json` (`status: COMMERCE_ACTIVE_PREPROD`).
+For a future real-customer pilot, bounded readiness covers only the actual planned flow: owner/operating-mode authorization, fields collected, storage, encryption, retention/expiry/deletion, log/telemetry redaction, provider exposure, and authz/least privilege. Pull in only the required data/UR slice if current state is insufficient.
 
 ---
 
-## 4. Giai đoạn 3 — Workstream Năng lực bán hàng (trọng tâm mới, ~80% effort)
-
-**Mục tiêu:** Làm model bán hàng giỏi lên, đo được, không cần khách thật. Đây là hạng mục kế hoạch cũ hoàn toàn thiếu.
-
-### 4.1 Nền đo lường: Replay Regression Suite
-
-1. **Chuyển corpus Gate E thành regression suite chạy trong CI:**
-   - Toàn bộ 14 case + assertion hiện tại chạy tự động trên mỗi PR chạm prompt/playbook/context/output-interpretation.
-   - Chi phí mỗi lần chạy ≈ 51 request Flash-Lite — không đáng kể; bỏ quy tắc "đúng một scored run" và nghi thức đăng ký corpus vào commit bất biến trước khi gọi model.
-   - Đổi prompt/config **không** cần tái chứng nhận; điều kiện duy nhất là suite xanh.
-2. **Mở rộng corpus từ 14 case lên 200–500 case,** rút từ:
-   - 1.955 hội thoại Wave 1 đã khóa (ưu tiên các đoạn: mặc cả, từ chối, do dự, hỏi nhiều sản phẩm, chốt đơn, cung cấp số đo, sau bán);
-   - các incident/counterexample BF đã có;
-   - fixture có chủ đích cho những tình huống regex cũ xử lý tệ nhất.
-   - Dùng dataset-store/dataset-review/benchmark đã xây sẵn — không xây tool mới.
-3. **Hai tầng đánh giá mỗi case:**
-   - `MUST_PASS` (an toàn — giữ nguyên chuẩn Gate E): không bịa giá/tồn/size/ETA, không side-effect trái phép, không lộ PII, fail-closed đúng chỗ. Fail bất kỳ case nào → chặn merge.
-   - `QUALITY` (mới): rubric chấm chất lượng tư vấn/chốt đơn (bám giai đoạn, xử lý từ chối, độ tự nhiên tiếng Việt, dẫn tới CTA hợp lý). Chấm bằng LLM-judge (tận dụng Judge v2 đã có ở Shadow worker) + spot-check tay. Tính điểm tổng để so giữa các phiên bản prompt; không chặn merge, dùng để quyết định phiên bản nào tốt hơn.
-
-### 4.2 Vòng lặp cải thiện
+## Critical path
 
 ```text
-sửa prompt / playbook / chiến lược / context
-  -> chạy replay suite (CI, tự động)
-  -> MUST_PASS 100%? -> so điểm QUALITY với phiên bản trước
-  -> giữ hoặc bỏ thay đổi -> lặp
+TRACK A
+disposable-DB reactivation regression
+-> narrow fix for known preparation blocker
+-> first COMMERCE activation
+-> full current Gate F proof
+-> exact rollback to LEGACY
+-> fresh reactivation to COMMERCE
+
+TRACK B
+1–2 day bounded call-graph inventory
+-> demote deterministic sales/copywriting authority
+-> preserve deterministic fact/safety/effect boundaries
+-> one reproducible side-effect-free replay adapter
+-> minimal CLI/wiring around existing executeGateEScoredRun
+-> current pre-deploy Gate-E re-evaluation for selected material candidate
+-> accepted COMMERCE baseline
+
+TRACK C
+accepted COMMERCE vs candidate
+-> deterministic MUST_PASS
+-> fixed dev/validation replay anchor
+-> pinned judgeSalesReplyV2 quality comparison
+-> reuse existing provenance/re-evaluation boundary
+-> deploy selected candidate
+-> repeat
 ```
 
-- Nhịp mục tiêu: nhiều vòng lặp mỗi ngày (điều cơ chế tái chứng nhận cũ không cho phép).
-- Phạm vi được phép sửa tự do: prompt, playbook giai đoạn, chiến lược thương lượng, cách trình bày offer, câu hỏi nối, lựa chọn model. Phạm vi **không** được sửa trong workstream này: guard deterministic, ranh giới side-effect, fail-closed (thuộc mục 7).
-
-### 4.3 Tiêu chí thoát Giai đoạn 3
-
-- [ ] Corpus ≥ 200 case, phủ đủ các giai đoạn chu trình bán hàng.
-- [ ] `MUST_PASS` 100% ổn định qua ≥ 2 tuần thay đổi liên tục.
-- [ ] Điểm `QUALITY` của pipeline COMMERCE + prompt mới vượt baseline (bot LEGACY replay trên cùng corpus) một cách rõ rệt và ổn định — ngưỡng cụ thể do owner chốt sau khi có số baseline đầu tiên.
-
----
-
-## 5. Giai đoạn 4 — Human E2E và canary khách thật
-
-**Điều kiện vào:** đạt tiêu chí thoát Giai đoạn 3. Không vào sớm hơn — replay là thước đo chính cho đến lúc đó.
-
-1. **Human E2E có kiểm soát** trên page test: đội nội bộ chạy trọn các journey chốt đơn (tư vấn → size → mặc cả → thông tin nhận hàng → preview → confirm → thanh toán → handoff).
-2. **Canary khách thật** trên page test (như mô hình r32.2 đã từng làm): outbound chỉ mở cho page này, quota AI giữ nguyên.
-3. **KPI theo dõi** (dashboard Admin đã có nền): tỷ lệ chốt đơn, tỷ lệ handoff, tỷ lệ sai fact bị guard chặn, drop-off tại order preview, phản hồi tiêu cực.
-4. Hội thoại thật thu được → bổ sung ngược vào corpus (mục 4.1) — vòng lặp năng lực tiếp tục với dữ liệu tốt hơn.
-
-Replay không đo được cảm giác hội thoại và tỷ lệ chốt thực — giai đoạn này là nơi duy nhất trả lời câu đó, và nó nằm đúng chỗ: **sau khi** bot đã chứng minh vượt trội offline.
-
----
-
-## 6. Giai đoạn 5 — Các track bị hoãn và điều kiện mở lại
-
-### 6.1 UR / State V2 + Gate U: `DEFERRED_INDEFINITELY`
-
-- Toàn bộ UR-P1…UR-P3, Gate U, và full human E2E trên State V2 **rút khỏi lộ trình chính**. Lý do: track tự khai "No output change" — giá trị là mã hóa checkout/địa chỉ, retention tách bạch, revision/fence hợp nhất; không đóng góp năng lực chốt đơn.
-- **Điểm xem xét lại duy nhất:** trước khi mở rộng traffic thật vượt page test / vào `PRODUCTION_HARDENING` — vì khi đó dữ liệu checkout/địa chỉ của khách thật mới là đối tượng cần lớp bảo vệ này. Hoặc sớm hơn nếu xuất hiện đau đớn đo được (bug state race, sự cố retention/expiry, yêu cầu pháp lý).
-- UR08–UR10 giữ nguyên deferred/destructive-approval như cũ.
-
-### 6.2 Production hardening
-
-Giữ nguyên định nghĩa hiện tại: chỉ bắt đầu bằng quyết định owner, sau khi Giai đoạn 4 có số liệu thật. Danh mục hardening (SLO, canary %, soak, capacity) giữ nguyên là deferred.
-
----
-
-## 7. Invariant giữ nguyên — không thuộc diện cắt giảm
-
-Các ràng buộc sau đã code xong, chi phí duy trì ≈ 0, là bảo hiểm thật. Kế hoạch này **không** nới lỏng bất kỳ điều nào:
-
-1. Model không tự tạo facts: giá/tồn/size/ETA/phí ship/ưu đãi chỉ từ nguồn deterministic đã xác minh.
-2. Side-effect (cart/order/outbox/handoff/tag) chỉ qua deterministic authorization; model chỉ đề xuất.
-3. Fail-closed: thiếu commerce state với committed intent → chặn, không đoán, không fallback.
-4. PII/secret: không log PII, decision telemetry ẩn danh, SSRF/URL policy, least-privilege DB.
-5. Migration additive/backward-compatible; không down-migration hủy dữ liệu; backup + restore-test khi có migration.
-6. Một sales authority duy nhất tại mọi thời điểm; không LEGACY/COMMERCE đồng thời.
-7. Đường rollback về LEGACY giữ nguyên và đã được diễn tập.
-8. Quota AI theo page; page allowlist chỉ `1198992073286645`.
-
----
-
-## 8. Rút gọn quy trình vận hành repo
-
-### 8.1 Bảng cắt/thay
-
-| # | Hiện tại | Thay bằng | Hiệu lực |
-|---|---|---|---|
-| 1 | Release Train là đơn vị verification/release mặc định | Deploy từ `main` khi cần: `pnpm check` xanh + tag + rollback script. Train chỉ quay lại khi có traffic thật | Ngay |
-| 2 | Attestation chain (fingerprint re-derive, evidence CLI, immutable evidence dir, release-source ceremony) | Git tag + CI xanh + checksum image + backup DB | Ngay |
-| 3 | Owner authorization tách riêng từng PR/bước, dừng chờ giữa các bước | Phê duyệt theo **giai đoạn** (5 giai đoạn của plan này = tối đa 5 lần phê duyệt lớn) | Ngay |
-| 4 | Gate E "one scored run" + tái chứng nhận khi đổi candidate identity | Replay regression suite trong CI; prompt/config đổi tự do miễn suite xanh | Giai đoạn 3 |
-| 5 | Gate F là chu trình riêng (verdict PR, acceptance record, immutable binding) | Checklist gộp vào buổi activation; kết quả = 1 entry changelog | Giai đoạn 1–2 |
-| 6 | Mỗi bước sinh một acceptance/status record bất biến mới | Chỉ cập nhật: changelog + `program-state.json` | Ngay |
-| 7 | 17 file governance active, bảng reading-order bắt buộc | Đóng băng vào `archive/`; giữ sống 3 file: `OPERATING_MODE.md` (rút còn ~1 trang), `program-state.json`, changelog | Sau khi plan được accept |
-| 8 | Migration 0035 cách ly ngoài auto-discovery + rehearsal riêng | Migration additive bình thường, backup trước khi apply | Giai đoạn 1 |
-
-### 8.2 Quy trình PR chuẩn sau rút gọn
-
-```text
-branch từ main -> thay đổi nhỏ, focused
-  -> CI: pnpm check + replay regression suite (nếu chạm prompt/behavior)
-  -> review -> merge
-  -> deploy lên page test khi cần: tag + backup (nếu migration) + smoke + giữ rollback target
-```
-
-Không thay đổi: quy tắc an toàn repository (không commit secret/PII/dump), exact-head review cho thay đổi chạm authority/guard/migration.
-
----
-
-## 9. Lộ trình tổng hợp
-
-```text
-Giai đoạn 1: Activation LEGACY -> COMMERCE trên page test (rút gọn)     ~2-4 ngày
-Giai đoạn 2: Nghiệm thu kiến trúc gộp trong buổi activation             cùng đợt
-Giai đoạn 3: Workstream năng lực bán hàng (corpus + vòng lặp prompt)    liên tục, trọng tâm
-Giai đoạn 4: Human E2E + canary khách thật + KPI                        khi replay vượt baseline
-Giai đoạn 5: UR/State V2 -> chỉ trước khi mở traffic thật; hardening -> theo quyết định owner
-```
-
-So với lộ trình cũ (`activation ceremony -> Gate F -> UR-A -> UR-B -> Gate U -> full E2E -> hardening`): bỏ 2 track + 1 gate khỏi đường chính, thêm 1 workstream năng lực vốn đang thiếu, và mọi bước còn lại đều rẻ đi rõ rệt về nghi thức.
-
----
-
-## 10. Quyết định cần owner chốt khi review
-
-1. **Chấp nhận gộp Gate F vào activation** (mục 3) — hay giữ Gate F là chu trình riêng?
-2. **Chấp nhận hoãn vô thời hạn UR/State V2** với điểm xem xét lại là "trước khi mở traffic thật" (mục 6.1)?
-3. **Chấp nhận thay cơ chế candidate-fingerprint bằng regression suite** (mục 4.1) — đồng nghĩa Gate E v15 trở thành mốc lịch sử, không còn là ràng buộc tái chứng nhận?
-4. **Phê duyệt một lần cho toàn bộ Giai đoạn 1** (backup → 0035 → seal/drain/stop → start COMMERCE → smoke → rollback drill) thay vì phê duyệt từng bước?
-5. **Ngưỡng QUALITY** để thoát Giai đoạn 3 (mục 4.3) — chốt sau khi có số baseline đầu tiên.
-6. **Phạm vi đóng băng tài liệu** (mục 8.1 dòng 7): xác nhận danh sách file chuyển vào `archive/`.
-
----
-
-## 11. Ranh giới của tài liệu này
-
-Tài liệu này là **đề xuất kế hoạch**. Nó không tự cấp quyền merge, tạo release, apply migration, kích hoạt COMMERCE, thay đổi page allowlist, hay sửa bất kỳ bằng chứng lịch sử nào. Mọi hành động trong các giai đoạn trên vẫn cần phê duyệt của owner theo mục 10; sau khi được chấp nhận, các tài liệu ở phần đầu sẽ được cập nhật trong một PR riêng để phản ánh lộ trình mới.
+Everything else must prove a concrete trigger before entering scope.
