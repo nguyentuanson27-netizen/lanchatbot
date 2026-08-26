@@ -1,5 +1,7 @@
 # Deferred Active Backlog — DF and UR
 
+> **Post-Gate-F sequencing supersession notice:** upon explicit owner acceptance and merge of PR #258, `POST_DF_SIMPLIFIED_PLAN_PROPOSAL_20260825.md` becomes the canonical post-Gate-F sequencing authority. The historical DF/UR content below is preserved for traceability and remains authoritative for already-recorded evidence/contracts where not explicitly superseded. In particular, Gate E evidence, the current Gate F technical contract, DF13 operational/release-integrity requirements, security/PII constraints, migration correctness, and exact rollback requirements are not superseded. The old default sequence `Gate F -> UR-A/UR-B -> Gate U -> production hardening` must not be used as the mandatory post-Gate-F execution path after that adoption; UR/State V2/Gate U become trigger-driven as defined by V5.
+
 **Activation condition:** Gate BF is passed or explicitly accepted with recorded owner waivers, and the immutable `POST_BF_V1` comparison baseline has been captured.
 **Current status:** **GATE_E_PREPROD_ACCEPTED; DF11–DF13 SOURCE COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING.** The v15 immutable evidence bindings are recorded in `GATE_E_PREPROD_ACCEPTANCE_20260821.md`. DF13 source contracts, the default-off fence-bound consumer, and release-evidence tooling are merged source-only; this does not close BF-03/BF-04/BF-10 residuals, authorize deployment, or activate `COMMERCE`.
 **Default context now:** Do not load this file for BF work except when a BF residual explicitly changes a future contract.

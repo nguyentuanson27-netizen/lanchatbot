@@ -5,6 +5,8 @@
 **Scope:** Deferred DF/UR architecture execution, evidence, Gate, and authority-transition strategy
 **Non-goals:** changing the recorded Gate BF owner-waiver disposition or `POST_BF_V1`, runtime mutation, deployment authorization, production-readiness claim, destructive cleanup
 
+> **Post-Gate-F sequencing supersession notice:** upon explicit owner acceptance and merge of PR #258, `POST_DF_SIMPLIFIED_PLAN_PROPOSAL_20260825.md` becomes the canonical post-Gate-F sequencing authority. This amendment remains authoritative for the DF/UR safety, evidence, authority-transition, Gate E, Gate F, migration, security, and rollback contracts that V5 explicitly preserves. Its historical post-Gate-F default sequence `Gate F -> UR-P1..UR-P3 -> Gate U -> production hardening` is retained below for traceability but must not be treated as the mandatory execution path after V5 adoption; UR/State V2/Gate U become trigger-driven under V5.
+
 ## 1. Decision
 
 Simplify the post-BF DF/UR program for the environment that actually exists today: one bounded `PREPROD_TEST_PAGE`, low/irregular organic traffic, and overlapping legacy defects that can prevent complete human conversations from reaching the component under test.
@@ -334,6 +336,8 @@ GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS + immutable POST_BF_V1 (recorded)
 ## 12. Source-of-truth and supersession
 
 `FUTURE_BACKLOG.md` and this amendment own post-Gate-BF DF/UR execution when this decision is merged into `main`. Future-facing references in `ACTIVE_IMPLEMENTATION_PLAN.md` to phase/barrier shadow, sampled second live model calls, paired live evaluation, shadow/canary evidence, or three-state authority topology are superseded by this amendment after the recorded Gate BF owner-waiver decision. The accepted BF residuals remain unchanged unless separately reconciled.
+
+Upon explicit owner acceptance and merge of PR #258, the **post-Gate-F sequencing portion** of this source-of-truth statement is further superseded by `POST_DF_SIMPLIFIED_PLAN_PROPOSAL_20260825.md` (Anti-Bloat V5). This does not supersede the current Gate E/Gate F technical/evidence contracts, DF13 operational contracts, release integrity, security/PII, migration correctness, or rollback requirements retained by V5.
 
 Archives, historical manifests, baseline evidence, and past runtime records remain immutable and must not be rewritten to match this later planning decision.
 
