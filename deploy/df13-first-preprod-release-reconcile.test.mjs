@@ -71,7 +71,7 @@ function canonicalBashPath(value) {
   return result.stdout.trim();
 }
 
-function writeHarness({ captureFails = false, captureWaits = false, promoteFailsAfterCurrentReplace = false, promoteWaitsAfterCurrentReplace = false, signalDuringCommit = false, running = true, sourceCommit = commit, tamperedReleaseArtifact = false } = {}) {
+function writeHarness({ captureFails = false, captureWaits = false, promoteFailsAfterCurrentReplace = false, promoteWaitsAfterCurrentReplace = false, signalDuringCommit = false, vulnerableCommitOrdering = false, running = true, sourceCommit = commit, tamperedReleaseArtifact = false } = {}) {
   const id = `scenario-${harnessId++}`;
   const appRoot = join(scratch, `${id}-root`);
   const release = join(appRoot, "releases", tag);
@@ -83,6 +83,7 @@ function writeHarness({ captureFails = false, captureWaits = false, promoteFails
   const captureStarted = join(scratch, `${id}.capture-started`);
   const promoteStarted = join(scratch, `${id}.promote-started`);
   const debugEnvironment = join(scratch, `${id}.bash-env`);
+  const signalMarker = join(scratch, `${id}.signal-marker`);
   mkdirSync(join(release, "deploy", "runtime-state"), { recursive: true });
   mkdirSync(join(appRoot, "runtime-state", "candidates"), { recursive: true });
   mkdirSync(join(appRoot, "shared"), { recursive: true });
@@ -90,8 +91,16 @@ function writeHarness({ captureFails = false, captureWaits = false, promoteFails
   mkdirSync(repo, { recursive: true });
   mkdirSync(bin, { recursive: true });
   symlinkSync(previous, join(appRoot, "current"));
-  copyFileSync(script, join(release, "deploy", "df13-first-preprod-release-reconcile.sh"));
-  chmodSync(join(release, "deploy", "df13-first-preprod-release-reconcile.sh"), 0o700);
+  const releaseScript = join(release, "deploy", "df13-first-preprod-release-reconcile.sh");
+  copyFileSync(script, releaseScript);
+  if (vulnerableCommitOrdering) {
+    const protectedOrdering = `  trap '' INT TERM HUP\n  reconciliation_commit_disarmed=true\n  switched=false\n  runtime_state_may_be_promoted=false\n  cleanup_runtime_state_snapshot\n  trap - EXIT INT TERM HUP\n`;
+    const vulnerableOrdering = `  reconciliation_commit_disarmed=true\n  runtime_state_may_be_promoted=false\n  switched=false\n  cleanup_runtime_state_snapshot\n  trap '' INT TERM HUP\n  trap - EXIT INT TERM HUP\n`;
+    const releaseScriptSource = readFileSync(releaseScript, "utf8");
+    assert.ok(releaseScriptSource.includes(protectedOrdering), "test fixture must derive the vulnerable ordering from the reviewed commit sequence");
+    writeFileSync(releaseScript, releaseScriptSource.replace(protectedOrdering, vulnerableOrdering));
+  }
+  chmodSync(releaseScript, 0o700);
   writeFileSync(join(release, ".release-source.json"), JSON.stringify({ schemaVersion: 1, release: tag, repository: "https://github.com/nguyentuanson27-netizen/lanchatbot", tag, commit: sourceCommit, createdAt: "2026-08-26T00:00:00Z" }));
   writeFileSync(join(release, "deploy", "docker-compose.vps.yml"), "services: {}\n");
   for (const name of ["release-source.mjs", "runtime-state.mjs", "service-inventory.json", "config-allowlists.json"]) writeFileSync(join(release, "deploy", "runtime-state", name), "{}\n");
@@ -114,8 +123,8 @@ function writeHarness({ captureFails = false, captureWaits = false, promoteFails
   writeFileSync(join(bin, "node"), "#!/usr/bin/env bash\nprintf '%s\\n' node >> \"$DF13_TEST_LOG\"\nif [ \"$1\" = \"--input-type=module\" ]; then grep -F \"\\\"commit\\\":\\\"$DF13_RELEASE_EXPECTED_COMMIT\\\"\" \"$DF13_RELEASE_SOURCE_FILE\" >/dev/null; fi\n");
   writeFileSync(join(bin, "docker"), `#!/usr/bin/env bash\nif [ "$1" = inspect ]; then\n  case "$3" in\n    *config_files*) printf '%s\\n' '${canonicalBashPath(join(release, "deploy", "docker-compose.vps.yml"))}' ;;\n    *Config.Image*) printf '%s\\n' '${image}' ;;\n    *State.Running*) printf '%s\\n' '${running ? "true" : "false"}' ;;\n    *Image*) printf '%s\\n' '${imageId}' ;;\n    *) exit 2 ;;\n  esac\nelif [ "$1" = image ]; then\n  printf '%s\\n' '${commit}'\nelse\n  exit 2\nfi\n`);
   for (const executable of ["git", "node", "docker"]) chmodSync(join(bin, executable), 0o700);
-  if (signalDuringCommit) writeFileSync(debugEnvironment, "trap 'if [ \"$BASH_COMMAND\" = \"reconciliation_commit_disarmed=true\" ]; then kill -TERM \"$$\"; fi' DEBUG\n");
-  return { appRoot, release, previous, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted, debugEnvironment: signalDuringCommit ? debugEnvironment : null };
+  if (signalDuringCommit) writeFileSync(debugEnvironment, "set -T\ntrap 'if [ \"$BASH_COMMAND\" = \"switched=false\" ] && [ \"${FUNCNAME[0]:-}\" = \"commit_reconciliation\" ] && [ \"${DF13_TEST_SIGNAL_SENT:-}\" != \"1\" ]; then export DF13_TEST_SIGNAL_SENT=1; printf \"%s\\n\" \"$$\" > \"$DF13_TEST_SIGNAL_MARKER\"; kill -STOP \"$$\"; fi' DEBUG\n");
+  return { appRoot, release, previous, repo, bin, evidence, evidenceSha256, log, captureStarted, promoteStarted, signalMarker, debugEnvironment: signalDuringCommit ? debugEnvironment : null };
 }
 
 function harnessCommand(harness) {
@@ -124,6 +133,7 @@ function harnessCommand(harness) {
     `DF13_TEST_LOG=${quote(canonicalBashPath(harness.log))}`,
     `DF13_TEST_CAPTURE_STARTED=${quote(canonicalBashPath(harness.captureStarted))}`,
     `DF13_TEST_PROMOTE_STARTED=${quote(canonicalBashPath(harness.promoteStarted))}`,
+    `DF13_TEST_SIGNAL_MARKER=${quote(canonicalBashPath(harness.signalMarker))}`,
     `DF13_APP_ROOT=${quote(canonicalBashPath(harness.appRoot))}`,
     `DF13_REPOSITORY_DIR=${quote(canonicalBashPath(harness.repo))}`,
     `DF13_RELEASE_DIR=${quote(canonicalBashPath(harness.release))}`,
@@ -142,6 +152,21 @@ function harnessCommand(harness) {
 
 function runHarness(harness) {
   return spawnSync(bash, ["-c", harnessCommand(harness)], { encoding: "utf8" });
+}
+
+async function runHarnessWithPendingCommitSignal(harness) {
+  const running = spawn(bash, ["-c", harnessCommand(harness)], { stdio: "ignore" });
+  try {
+    await waitForFile(harness.signalMarker);
+    const signalTarget = Number(readFileSync(harness.signalMarker, "utf8").trim());
+    assert.ok(Number.isSafeInteger(signalTarget) && signalTarget > 1, "the commit-window injector must identify a live Bash process");
+    process.kill(signalTarget, "SIGTERM");
+    process.kill(signalTarget, "SIGCONT");
+  } catch (error) {
+    running.kill("SIGKILL");
+    throw error;
+  }
+  return await new Promise((resolveResult) => running.once("close", (code, signal) => resolveResult({ code, signal })));
 }
 
 async function waitForFile(path, timeoutMs = 2_000) {
@@ -211,10 +236,18 @@ try {
     assert.equal(readFileSync(join(interruptedPromotion.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"known-good-legacy"}\n', "an interrupt after runtime-state replacement must restore the exact prior runtime-state pointer");
 
     const signalDuringCommit = writeHarness({ signalDuringCommit: true });
-    const commitSignalResult = runHarness(signalDuringCommit);
-    assert.equal(commitSignalResult.status, 0, `${commitSignalResult.stderr}\n${commitSignalResult.stdout}`);
+    const commitSignalResult = await runHarnessWithPendingCommitSignal(signalDuringCommit);
+    assert.equal(commitSignalResult.code, 0, "a SIGTERM made pending while commit handling is masked must be discarded");
+    assert.ok(existsSync(signalDuringCommit.signalMarker), "the commit-disarm injector must prove it stopped before the vulnerable command boundary");
     assert.equal(realpathSync(join(signalDuringCommit.appRoot, "current")), realpathSync(signalDuringCommit.release), "a signal during commit disarm must not restore only the release pointer");
     assert.equal(readFileSync(join(signalDuringCommit.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"release"}\n', "a signal during commit disarm must retain the matching promoted runtime-state pointer");
+
+    const vulnerableSignalDuringCommit = writeHarness({ signalDuringCommit: true, vulnerableCommitOrdering: true });
+    const vulnerableCommitResult = await runHarnessWithPendingCommitSignal(vulnerableSignalDuringCommit);
+    assert.notEqual(vulnerableCommitResult.code, 0, "the regression harness must reject the vulnerable commit ordering");
+    assert.ok(existsSync(vulnerableSignalDuringCommit.signalMarker), "the vulnerable-ordering run must prove it queued SIGTERM at the same command boundary");
+    assert.equal(realpathSync(join(vulnerableSignalDuringCommit.appRoot, "current")), realpathSync(vulnerableSignalDuringCommit.previous), "the vulnerable ordering restores only the release pointer after the injected signal");
+    assert.equal(readFileSync(join(vulnerableSignalDuringCommit.appRoot, "runtime-state", "current.json"), "utf8"), '{"release":"release"}\n', "the vulnerable ordering demonstrates the split runtime-state pointer the fixed ordering prevents");
   }
 } finally {
   if (scratch) rmSync(scratch, { recursive: true, force: true });
