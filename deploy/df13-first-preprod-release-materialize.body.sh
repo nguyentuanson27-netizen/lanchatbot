@@ -19,8 +19,31 @@ die() {
 require_command() {
   command -v "$1" >/dev/null 2>&1 || die "COMMAND_MISSING:$1"
 }
-git_attestation() {
-  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 /usr/bin/git -c "safe.directory=$repository_dir" "$@"
+readonly DEPLOY_GIT_USER="lana-deploy"
+readonly DEPLOY_GIT_PRIVATE_KEY="/home/lana-deploy/.ssh/lana_chatbot_github_ed25519"
+readonly DEPLOY_GIT_KNOWN_HOSTS="/home/lana-deploy/.ssh/known_hosts"
+readonly DEPLOY_GIT_SSH_COMMAND="/usr/bin/ssh -F /dev/null -i $DEPLOY_GIT_PRIVATE_KEY -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$DEPLOY_GIT_KNOWN_HOSTS"
+assert_deploy_git_identity() {
+  local deploy_uid=""
+  local deploy_file=""
+  deploy_uid="$(/usr/bin/id -u "$DEPLOY_GIT_USER")" || die "MATERIALIZER_DEPLOY_USER_UNAVAILABLE"
+  for deploy_file in "$DEPLOY_GIT_PRIVATE_KEY" "$DEPLOY_GIT_KNOWN_HOSTS"; do
+    test -f "$deploy_file" && test ! -L "$deploy_file" || die "MATERIALIZER_DEPLOY_GIT_IDENTITY_INVALID"
+    test "$(/usr/bin/stat -c '%u:%a' -- "$deploy_file")" = "$deploy_uid:600" || die "MATERIALIZER_DEPLOY_GIT_IDENTITY_INVALID"
+  done
+}
+git_as_deploy() {
+  test "$(/usr/bin/id -u)" -eq 0 || die "MATERIALIZER_ROOT_REQUIRED"
+  assert_deploy_git_identity
+  /usr/sbin/runuser -u "$DEPLOY_GIT_USER" -- /usr/bin/env -i \
+    PATH="$TRUSTED_PATH" HOME="/home/lana-deploy" \
+    GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_COUNT=1 \
+    GIT_CONFIG_KEY_0=core.sshCommand GIT_CONFIG_VALUE_0="$DEPLOY_GIT_SSH_COMMAND" \
+    /usr/bin/git "$@"
+}
+hash_private_file() {
+  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 \
+    /usr/bin/git hash-object --no-filters -- "$1"
 }
 assert_private_regular_file() {
   local candidate="$1"
@@ -137,10 +160,9 @@ create_bootstrap_release_source_pointer() {
   RELEASE_SOURCE_FILE="$staged_release_dir/.release-source.json" \
   RELEASE_SOURCE_TAG="$release_tag" \
   RELEASE_SOURCE_COMMIT="$release_commit" \
-  RELEASE_SOURCE_GIT_DIR="$repository_dir" \
+  RELEASE_SOURCE_OBSERVED_COMMIT="$release_source_observed_commit" \
   node --input-type=module <<'NODE'
 import { lstatSync, readFileSync, writeFileSync } from "node:fs";
-import { execFileSync } from "node:child_process";
 
 const repository = "https://github.com/nguyentuanson27-netizen/lanchatbot";
 const commitPattern = /^[a-f0-9]{40}$/u;
@@ -151,17 +173,15 @@ const fail = (code) => { throw new Error(code); };
 const sourceFile = process.env.RELEASE_SOURCE_FILE;
 const tag = process.env.RELEASE_SOURCE_TAG;
 const commit = process.env.RELEASE_SOURCE_COMMIT;
-const gitDir = process.env.RELEASE_SOURCE_GIT_DIR;
+const observedCommit = process.env.RELEASE_SOURCE_OBSERVED_COMMIT;
 try {
-  if (!sourceFile || !tagPattern.test(tag ?? "") || !commitPattern.test(commit ?? "") || !gitDir) fail("RELEASE_SOURCE_ARGUMENT_INVALID");
+  if (!sourceFile || !tagPattern.test(tag ?? "") || !commitPattern.test(commit ?? "") || observedCommit !== commit) fail("RELEASE_SOURCE_ARGUMENT_INVALID");
   try {
     lstatSync(sourceFile);
     fail("RELEASE_SOURCE_ALREADY_EXISTS");
   } catch (error) {
     if (error?.code !== "ENOENT") throw error;
   }
-  const observedCommit = execFileSync("/usr/bin/git", ["-c", `safe.directory=${gitDir}`, "-C", gitDir, "rev-parse", `${tag}^{commit}`], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
-  if (observedCommit !== commit) fail("RELEASE_SOURCE_GIT_READBACK_MISMATCH");
   const pointer = { schemaVersion: 1, release: tag, repository, tag, commit, createdAt: new Date().toISOString() };
   if (Object.keys(pointer).length !== keys.length || keys.some((key) => !Object.hasOwn(pointer, key)) || !utcPattern.test(pointer.createdAt) || !Number.isFinite(Date.parse(pointer.createdAt))) fail("RELEASE_SOURCE_INVALID");
   writeFileSync(sourceFile, `${JSON.stringify(pointer, null, 2)}\n`, { encoding: "utf8", mode: 0o640, flag: "wx" });
@@ -201,16 +221,18 @@ test ! -e "$materializing_dir" && test ! -L "$materializing_dir" || die "MATERIA
 
 # A remote tag is fetched only into its named ref. Existing divergent tags are
 # rejected by Git; source is then re-attested before extraction.
-git_attestation -C "$repository_dir" fetch --no-tags origin "refs/tags/$release_tag:refs/tags/$release_tag" || die "RELEASE_TAG_FETCH_FAILED"
-test "$(git_attestation -C "$repository_dir" cat-file -t "$release_tag")" = "tag" || die "RELEASE_TAG_NOT_ANNOTATED"
-test "$(git_attestation -C "$repository_dir" rev-parse "${release_tag}^{commit}")" = "$release_commit" || die "RELEASE_TAG_COMMIT_MISMATCH"
-test "$(git_attestation -C "$repository_dir" rev-parse "${release_commit}^{tree}")" = "$release_tree" || die "RELEASE_TAG_TREE_MISMATCH"
+git_as_deploy -C "$repository_dir" fetch --no-tags origin "refs/tags/$release_tag:refs/tags/$release_tag" || die "RELEASE_TAG_FETCH_FAILED"
+test "$(git_as_deploy -C "$repository_dir" cat-file -t "$release_tag")" = "tag" || die "RELEASE_TAG_NOT_ANNOTATED"
+release_source_observed_commit="$(git_as_deploy -C "$repository_dir" rev-parse "${release_tag}^{commit}")" || die "RELEASE_TAG_COMMIT_MISMATCH"
+test "$release_source_observed_commit" = "$release_commit" || die "RELEASE_TAG_COMMIT_MISMATCH"
+test "$(git_as_deploy -C "$repository_dir" rev-parse "${release_commit}^{tree}")" = "$release_tree" || die "RELEASE_TAG_TREE_MISMATCH"
+readonly release_source_observed_commit
 
 mkdir -m 0750 -- "$materializing_dir" || die "MATERIALIZING_DIRECTORY_CREATE_FAILED"
 mkdir -m 0750 -- "$staged_release_dir" || die "STAGED_RELEASE_DIRECTORY_CREATE_FAILED"
-git_attestation -C "$repository_dir" archive --format=tar "$release_commit" | tar -x -f - -C "$staged_release_dir" --no-same-owner --no-same-permissions || die "RELEASE_ARCHIVE_EXTRACT_FAILED"
-test "$(git_attestation -C "$repository_dir" hash-object -- "$staged_release_dir/deploy/df13-first-preprod-release-materialize.sh")" = "$(git_attestation -C "$repository_dir" rev-parse "${release_commit}:deploy/df13-first-preprod-release-materialize.sh")" || die "RELEASE_ENTRYPOINT_HASH_MISMATCH"
-test "$(git_attestation -C "$repository_dir" hash-object -- "$staged_release_dir/deploy/df13-first-preprod-release-materialize.body.sh")" = "$(git_attestation -C "$repository_dir" rev-parse "${release_commit}:deploy/df13-first-preprod-release-materialize.body.sh")" || die "RELEASE_BODY_HASH_MISMATCH"
+git_as_deploy -C "$repository_dir" archive --format=tar "$release_commit" | tar -x -f - -C "$staged_release_dir" --no-same-owner --no-same-permissions || die "RELEASE_ARCHIVE_EXTRACT_FAILED"
+test "$(hash_private_file "$staged_release_dir/deploy/df13-first-preprod-release-materialize.sh")" = "$(git_as_deploy -C "$repository_dir" rev-parse "${release_commit}:deploy/df13-first-preprod-release-materialize.sh")" || die "RELEASE_ENTRYPOINT_HASH_MISMATCH"
+test "$(hash_private_file "$staged_release_dir/deploy/df13-first-preprod-release-materialize.body.sh")" = "$(git_as_deploy -C "$repository_dir" rev-parse "${release_commit}:deploy/df13-first-preprod-release-materialize.body.sh")" || die "RELEASE_BODY_HASH_MISMATCH"
 
 create_bootstrap_release_source_pointer >/dev/null || die "RELEASE_SOURCE_BOOTSTRAP_FAILED"
 test -f "$staged_release_dir/.release-source.json" && test ! -L "$staged_release_dir/.release-source.json" || die "RELEASE_SOURCE_POINTER_MISSING"

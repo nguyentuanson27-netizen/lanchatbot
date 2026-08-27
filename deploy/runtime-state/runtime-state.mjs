@@ -4,9 +4,11 @@ import {
   copyFileSync,
   existsSync,
   fsyncSync,
+  lstatSync,
   mkdirSync,
   openSync,
   readFileSync,
+  realpathSync,
   renameSync,
   rmSync,
   writeFileSync,
@@ -17,6 +19,11 @@ import { execFileSync } from 'node:child_process';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const REPOSITORY = 'https://github.com/nguyentuanson27-netizen/lanchatbot';
+export const DEPLOY_APP_ROOT = '/opt/lana-chatbot';
+export const DEPLOY_REPOSITORY = `${DEPLOY_APP_ROOT}/repository`;
+const DEPLOY_GIT_USER = 'lana-deploy';
+const DEPLOY_GIT_HOME = `/home/${DEPLOY_GIT_USER}`;
+const DEPLOY_GIT_PATH = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
 const A0_MANIFEST = 'deploy/manifests/20260802-r32.2.2-runtime-reconciliation.json';
 const SHA256 = /^[a-f0-9]{64}$/;
 const IMAGE_ID = /^sha256:[a-f0-9]{64}$/;
@@ -35,6 +42,30 @@ const LIVE_DATABASE_READ_QUERIES = new Set([
 function fail(code) { throw new Error(code); }
 function isObject(value) { return value !== null && typeof value === 'object' && !Array.isArray(value); }
 function nonEmpty(value, code) { if (typeof value !== 'string' || !value) fail(code); }
+export function resolveTrustedDeployRepository(gitDir, fileSystem = { lstatSync, realpathSync }) {
+  if (gitDir !== DEPLOY_REPOSITORY) fail('RUNTIME_STATE_REPOSITORY_PATH_MISMATCH');
+  let stat;
+  let resolved;
+  try {
+    stat = fileSystem.lstatSync(DEPLOY_REPOSITORY);
+    resolved = fileSystem.realpathSync(DEPLOY_REPOSITORY);
+  } catch {
+    fail('RUNTIME_STATE_REPOSITORY_UNRESOLVABLE');
+  }
+  if (!stat.isDirectory()) fail('RUNTIME_STATE_REPOSITORY_NOT_DIRECTORY');
+  if (stat.isSymbolicLink()) fail('RUNTIME_STATE_REPOSITORY_SYMLINK');
+  if (resolved !== DEPLOY_REPOSITORY) fail('RUNTIME_STATE_REPOSITORY_REALPATH_MISMATCH');
+  return DEPLOY_REPOSITORY;
+}
+function deployRepositoryGit(gitDir, args) {
+  const repository = resolveTrustedDeployRepository(gitDir);
+  return run('/usr/sbin/runuser', [
+    '-u', DEPLOY_GIT_USER, '--', '/usr/bin/env', '-i',
+    `PATH=${DEPLOY_GIT_PATH}`, `HOME=${DEPLOY_GIT_HOME}`,
+    'GIT_CONFIG_NOSYSTEM=1', 'GIT_CONFIG_GLOBAL=/dev/null',
+    '/usr/bin/git', '-C', repository, ...args,
+  ]);
+}
 function onlyKeys(object, allowed, label) {
   if (!isObject(object)) fail(`${label}_NOT_OBJECT`);
   for (const key of Object.keys(object)) if (!allowed.includes(key)) fail(`${label}_UNKNOWN_FIELD:${key}`);
@@ -199,7 +230,7 @@ function observedService(name, definition, evidence, gitDir) {
   const actualRevision = labels['org.opencontainers.image.revision'] ?? null;
   let expectedRevisionFetched = true;
   if (evidence.revisionRequired && COMMIT.test(evidence.expectedRevision ?? '')) {
-    try { run('git', ['-c', `safe.directory=${gitDir}`, '-C', gitDir, 'cat-file', '-e', `${evidence.expectedRevision}^{commit}`]); } catch { expectedRevisionFetched = false; }
+    try { deployRepositoryGit(gitDir, ['cat-file', '-e', `${evidence.expectedRevision}^{commit}`]); } catch { expectedRevisionFetched = false; }
   }
   const result = attestServiceEvidence({ actualImageId: containerRecord.Image, actualRevision, evidence, expectedRevisionFetched });
   const registryDigest = [...(imageRecord.RepoDigests ?? [])].sort()[0] ?? null;
@@ -263,18 +294,19 @@ export function buildRuntimeState({ candidateId, capturedAt, target, pointer, se
 }
 
 export function captureState({ runtimeRoot, serviceEvidenceFile, candidateId, gitDir, inventory, allowlists, capturedAt = new Date().toISOString() }) {
+  const repository = resolveTrustedDeployRepository(gitDir);
   const target = run('readlink', ['-f', `${runtimeRoot}/current`]);
   if (target !== `/opt/lana-chatbot/releases/${basename(target)}`) fail('CURRENT_TARGET_OUTSIDE_RELEASES');
   const pointerPath = `${target}/.release-source.json`; if (!existsSync(pointerPath)) fail('SOURCE_POINTER_MISSING');
   const pointerFile = readJson(pointerPath); let fetchedCommit = null;
-  try { fetchedCommit = run('git', ['-c', `safe.directory=${gitDir}`, '-C', gitDir, 'rev-parse', `${pointerFile.tag}^{}`]); } catch {}
+  try { fetchedCommit = deployRepositoryGit(repository, ['rev-parse', `${pointerFile.tag}^{}`]); } catch {}
   const pointer = attestSourcePointer(pointerFile, pointerPath, fetchedCommit);
   const evidence = readJson(serviceEvidenceFile); validateServiceEvidence(evidence, inventory);
   const services = {};
   for (const [name, definition] of Object.entries(inventory.services)) {
     if (!definition.required && !evidence.services[name]) continue;
     if (!evidence.services[name]) fail(`SERVICE_EVIDENCE_MISSING:${name}`);
-    services[name] = observedService(name, definition, evidence.services[name], gitDir);
+    services[name] = observedService(name, definition, evidence.services[name], repository);
   }
   const realtime = readJsonFromCommand('docker', ['inspect', inventory.services['realtime-worker'].container])[0];
   const delivery = readJsonFromCommand('docker', ['inspect', inventory.services['delivery-worker'].container])[0];

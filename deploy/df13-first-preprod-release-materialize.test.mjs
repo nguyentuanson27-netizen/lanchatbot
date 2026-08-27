@@ -29,7 +29,12 @@ assert.match(entrypointSource, /^#!\/bin\/sh\nset -eu\n/u, "the public materiali
 assert.match(entrypointSource, /exec \/usr\/bin\/env -i/u, "the public materialization entrypoint must clear caller environment state");
 assert.match(entrypointSource, /\/usr\/bin\/bash --noprofile --norc/u, "the public materialization entrypoint must start the reviewed body without startup files");
 assert.match(entrypointSource, /MATERIALIZER_ENTRYPOINT_HASH_MISMATCH/u, "the public materialization entrypoint must attest itself before extraction");
-assert.match(entrypointSource, /-c "safe\.directory=\$repository_dir"/u, "the public materialization entrypoint must attest the canonical deploy repository even when it is owned by the deploy user");
+assert.doesNotMatch(entrypointSource, /safe\.directory/u, "the public materialization entrypoint must not broaden root Git trust");
+assert.match(entrypointSource, /readonly DEPLOY_GIT_USER="lana-deploy"/u, "the public materialization entrypoint must use the fixed deploy repository owner");
+assert.match(entrypointSource, /\/usr\/sbin\/runuser -u "\$DEPLOY_GIT_USER" -- \/usr\/bin\/env -i/u, "root must delegate repository Git reads to the fixed deploy owner");
+assert.match(entrypointSource, /GIT_CONFIG_KEY_0=core\.sshCommand/u, "the public materialization entrypoint must override an inherited repository SSH command with the fixed deploy-owned identity");
+assert.match(entrypointSource, /\/home\/lana-deploy\/\.ssh\/lana_chatbot_github_ed25519/u, "the public materialization entrypoint must select the fixed deploy-owned read-only identity");
+assert.match(entrypointSource, /-F \/dev\/null -i \$DEPLOY_GIT_PRIVATE_KEY -o IdentitiesOnly=yes -o BatchMode=yes/u, "the public materialization entrypoint must not inherit an operator SSH configuration");
 assert.match(entrypointSource, /copy_attested_blob "\$expected_body_blob" "\$private_body" "MATERIALIZER_BODY"/u, "the public materialization entrypoint must attest its body before extraction");
 assert.match(entrypointSource, /cat-file blob/u, "the public materialization entrypoint must execute immutable Git-blob bytes, not a mutable body pathname");
 assert.doesNotMatch(entrypointSource, /DF13_MATERIALIZER_RELEASE_SOURCE_BOOTSTRAP/u, "the public materialization entrypoint must not execute a separately candidate-selected source-pointer program");
@@ -37,8 +42,13 @@ assert.doesNotMatch(entrypointSource, /hash-object -- "\$body_path"/u, "hashing 
 
 assert.match(bodySource, /^#!\/usr\/bin\/bash\nset -euo pipefail\n/u, "the materialization body must use the reviewed Bash interpreter");
 assert.match(bodySource, /fetch --no-tags origin/u, "materialization must fetch only the named immutable tag");
-assert.match(bodySource, /-c "safe\.directory=\$repository_dir"/u, "the attested materialization body must preserve canonical repository trust after its clean-environment handoff");
-assert.match(bodySource, /safe\.directory=\$\{gitDir\}/u, "the inline release-source bootstrap must attest its fixed repository without inheriting caller Git configuration");
+assert.doesNotMatch(bodySource, /safe\.directory/u, "the materialization body must not bypass Git ownership protection");
+assert.match(bodySource, /readonly DEPLOY_GIT_USER="lana-deploy"/u, "the materialization body must use the fixed deploy repository owner");
+assert.match(bodySource, /\/usr\/sbin\/runuser -u "\$DEPLOY_GIT_USER" -- \/usr\/bin\/env -i/u, "all materializer repository Git operations must run as the deploy owner");
+assert.match(bodySource, /GIT_CONFIG_KEY_0=core\.sshCommand/u, "the materialization body must override any repository-local root SSH command");
+assert.match(bodySource, /\/home\/lana-deploy\/\.ssh\/lana_chatbot_github_ed25519/u, "the materialization body must retain a fixed deploy-owned read-only identity");
+assert.doesNotMatch(bodySource, /execFileSync\("\/usr\/bin\/git"/u, "the root-owned source-pointer bootstrap must not perform Git reads itself");
+assert.match(bodySource, /RELEASE_SOURCE_OBSERVED_COMMIT/u, "the source-pointer bootstrap must consume the immediately attested commit rather than a caller-selected Git directory");
 assert.match(bodySource, /cat-file -t "\$release_tag"/u, "materialization must require an annotated release tag");
 assert.match(bodySource, /\^\{tree\}/u, "materialization must bind the exact release tree");
 assert.match(bodySource, /archive --format=tar "\$release_commit"/u, "materialization must extract the exact reviewed commit");
@@ -98,6 +108,12 @@ if (process.platform === "linux") {
     const sourceRoot = appRoot.replaceAll("\\", "/");
     writeFileSync(entrypointCopy, readFileSync(entrypointCopy, "utf8").replaceAll("/opt/lana-chatbot", sourceRoot));
     writeFileSync(bodyCopy, readFileSync(bodyCopy, "utf8").replaceAll("/opt/lana-chatbot", sourceRoot));
+    for (const fixtureScript of [entrypointCopy, bodyCopy]) {
+      const source = readFileSync(fixtureScript, "utf8");
+      const deployHelper = /readonly DEPLOY_GIT_USER="lana-deploy"\ngit_as_deploy\(\) \{[\s\S]*?\n\}\n(?=hash_private_file\(\))/u;
+      assert.match(source, deployHelper, "the fixture must begin from the reviewed deploy-owner Git boundary");
+      writeFileSync(fixtureScript, source.replace(deployHelper, 'git_as_deploy() {\n  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null /usr/bin/git "$@"\n}\n'));
+    }
     if (bootstrapFails) writeFileSync(bodyCopy, readFileSync(bodyCopy, "utf8").replace("if (JSON.stringify(readback) !== JSON.stringify(pointer)) fail(\"RELEASE_SOURCE_READBACK_MISMATCH\");", "fail(\"RELEASE_SOURCE_READBACK_MISMATCH\");"));
     if (promotionTargetRace) {
       const promotion = "mv -nT -- \"$staged_release_dir\" \"$release_dir\"\n";

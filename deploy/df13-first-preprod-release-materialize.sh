@@ -35,22 +35,43 @@ TRUSTED_PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 PATH="$TRUSTED_PATH"
 export PATH
 readonly TRUSTED_PATH PATH
-git_attestation() {
-  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 /usr/bin/git -c "safe.directory=$repository_dir" "$@"
+readonly DEPLOY_GIT_USER="lana-deploy"
+readonly DEPLOY_GIT_PRIVATE_KEY="/home/lana-deploy/.ssh/lana_chatbot_github_ed25519"
+readonly DEPLOY_GIT_KNOWN_HOSTS="/home/lana-deploy/.ssh/known_hosts"
+readonly DEPLOY_GIT_SSH_COMMAND="/usr/bin/ssh -F /dev/null -i $DEPLOY_GIT_PRIVATE_KEY -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$DEPLOY_GIT_KNOWN_HOSTS"
+assert_deploy_git_identity() {
+  deploy_uid="$(/usr/bin/id -u "$DEPLOY_GIT_USER")" || die "MATERIALIZER_DEPLOY_USER_UNAVAILABLE"
+  for deploy_file in "$DEPLOY_GIT_PRIVATE_KEY" "$DEPLOY_GIT_KNOWN_HOSTS"; do
+    test -f "$deploy_file" && test ! -L "$deploy_file" || die "MATERIALIZER_DEPLOY_GIT_IDENTITY_INVALID"
+    test "$(/usr/bin/stat -c '%u:%a' -- "$deploy_file")" = "$deploy_uid:600" || die "MATERIALIZER_DEPLOY_GIT_IDENTITY_INVALID"
+  done
+}
+git_as_deploy() {
+  test "$(/usr/bin/id -u)" -eq 0 || die "MATERIALIZER_ROOT_REQUIRED"
+  assert_deploy_git_identity
+  /usr/sbin/runuser -u "$DEPLOY_GIT_USER" -- /usr/bin/env -i \
+    PATH="$TRUSTED_PATH" HOME="/home/lana-deploy" \
+    GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_COUNT=1 \
+    GIT_CONFIG_KEY_0=core.sshCommand GIT_CONFIG_VALUE_0="$DEPLOY_GIT_SSH_COMMAND" \
+    /usr/bin/git "$@"
+}
+hash_private_file() {
+  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 \
+    /usr/bin/git hash-object --no-filters -- "$1"
 }
 die() {
   printf '%s\n' "DF13_RELEASE_MATERIALIZATION_BLOCKED:$1" >&2
   exit 1
 }
 test -d "$repository_dir" && test ! -L "$repository_dir" || die "MATERIALIZER_REPOSITORY_INVALID"
-test "$(git_attestation -C "$repository_dir" rev-parse "${release_tag}^{commit}")" = "$release_commit" || die "MATERIALIZER_TAG_COMMIT_MISMATCH"
-test "$(git_attestation -C "$repository_dir" cat-file -t "$release_tag")" = "tag" || die "MATERIALIZER_TAG_NOT_ANNOTATED"
-test "$(git_attestation -C "$repository_dir" rev-parse "${release_commit}^{tree}")" = "$release_tree" || die "MATERIALIZER_TAG_TREE_MISMATCH"
+test "$(git_as_deploy -C "$repository_dir" rev-parse "${release_tag}^{commit}")" = "$release_commit" || die "MATERIALIZER_TAG_COMMIT_MISMATCH"
+test "$(git_as_deploy -C "$repository_dir" cat-file -t "$release_tag")" = "tag" || die "MATERIALIZER_TAG_NOT_ANNOTATED"
+test "$(git_as_deploy -C "$repository_dir" rev-parse "${release_commit}^{tree}")" = "$release_tree" || die "MATERIALIZER_TAG_TREE_MISMATCH"
 
-expected_entrypoint_blob="$(git_attestation -C "$repository_dir" rev-parse "${release_commit}:deploy/df13-first-preprod-release-materialize.sh")" || die "MATERIALIZER_ENTRYPOINT_BLOB_MISSING"
-actual_entrypoint_blob="$(git_attestation -C "$repository_dir" hash-object -- "$script_path")" || die "MATERIALIZER_ENTRYPOINT_HASH_UNAVAILABLE"
+expected_entrypoint_blob="$(git_as_deploy -C "$repository_dir" rev-parse "${release_commit}:deploy/df13-first-preprod-release-materialize.sh")" || die "MATERIALIZER_ENTRYPOINT_BLOB_MISSING"
+actual_entrypoint_blob="$(git_as_deploy -C "$repository_dir" hash-object -- "$script_path")" || die "MATERIALIZER_ENTRYPOINT_HASH_UNAVAILABLE"
 test "$actual_entrypoint_blob" = "$expected_entrypoint_blob" || die "MATERIALIZER_ENTRYPOINT_HASH_MISMATCH"
-expected_body_blob="$(git_attestation -C "$repository_dir" rev-parse "${release_commit}:deploy/df13-first-preprod-release-materialize.body.sh")" || die "MATERIALIZER_BODY_BLOB_MISSING"
+expected_body_blob="$(git_as_deploy -C "$repository_dir" rev-parse "${release_commit}:deploy/df13-first-preprod-release-materialize.body.sh")" || die "MATERIALIZER_BODY_BLOB_MISSING"
 
 shared_dir="$app_root/shared"
 test -d "$shared_dir" && test ! -L "$shared_dir" || die "MATERIALIZER_SHARED_DIRECTORY_INVALID"
@@ -74,9 +95,9 @@ copy_attested_blob() {
   expected_blob="$1"
   destination="$2"
   failure_prefix="$3"
-  git_attestation -C "$repository_dir" cat-file blob "$expected_blob" > "$destination" || die "${failure_prefix}_COPY_FAILED"
+  git_as_deploy -C "$repository_dir" cat-file blob "$expected_blob" > "$destination" || die "${failure_prefix}_COPY_FAILED"
   test -f "$destination" && test ! -L "$destination" || die "${failure_prefix}_PRIVATE_ARTIFACT_INVALID"
-  actual_blob="$(git_attestation -C "$repository_dir" hash-object -- "$destination")" || die "${failure_prefix}_HASH_UNAVAILABLE"
+  actual_blob="$(hash_private_file "$destination")" || die "${failure_prefix}_HASH_UNAVAILABLE"
   test "$actual_blob" = "$expected_blob" || die "${failure_prefix}_HASH_MISMATCH"
   /usr/bin/chmod 0700 -- "$destination" || die "${failure_prefix}_MODE_FAILED"
 }

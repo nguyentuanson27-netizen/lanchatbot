@@ -6,7 +6,7 @@ script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 : "${RUNTIME_STATE_ROOT:=/opt/lana-chatbot/runtime-state}"
 : "${RUNTIME_STATE_APP_ROOT:=/opt/lana-chatbot}"
 : "${RUNTIME_STATE_SERVICE_EVIDENCE_FILE:?versioned service evidence and rollback map is required}"
-: "${RUNTIME_STATE_GIT_DIR:=/opt/lana-chatbot/repository}"
+readonly RUNTIME_STATE_GIT_DIR="/opt/lana-chatbot/repository"
 observed="$(mktemp "${TMPDIR:-/tmp}/lana-runtime-observed.XXXXXX.json")"
 rm -f "$observed"
 trap 'rm -f "$observed"' EXIT
