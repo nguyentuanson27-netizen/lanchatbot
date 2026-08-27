@@ -7,6 +7,7 @@ export type RuntimeSalesAuthorityMode = "LEGACY" | "SHADOW" | "COMMERCE";
 export type RuntimeStateReadMode = "LEGACY" | "SHADOW" | "V2";
 export type RuntimeBehaviorModeSource = "DATABASE" | "CACHE" | "LAST_KNOWN_GOOD" | "STARTUP_DEFAULT" | "FAIL_SAFE";
 export const DF13_FIRST_PREPROD_MAX_ZERO_WORK_PROOF_AGE_MS = 15 * 60_000;
+const DF13_FIRST_PREPROD_PREPARE_REASON_PATTERN = /^DF13_FIRST_PREPROD_PREPARE:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 
 export interface RuntimeBehaviorModePayloadRecord {
   readonly confirmationMode: RuntimeConfirmationMode;
@@ -233,8 +234,7 @@ export class PostgresRuntimeBehaviorModeStore {
     if (input.actor !== "DF13_FIRST_PREPROD_WRITER") {
       throw new Error("DF13_FIRST_PREPROD_WRITER_ACTOR_INVALID");
     }
-    if (!/^DF13_FIRST_PREPROD_PREPARE:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu
-      .test(input.reason)) {
+    if (!DF13_FIRST_PREPROD_PREPARE_REASON_PATTERN.test(input.reason)) {
       throw new Error("DF13_FIRST_PREPROD_WRITER_REASON_INVALID");
     }
     if (!Number.isSafeInteger(input.expectedCurrent.pointerRevision) ||
@@ -339,7 +339,7 @@ export class PostgresRuntimeBehaviorModeStore {
           version.authorityBundleHash !== payload.authorityBundleHash ||
           version.contentHash !== contentHash ||
           version.createdBy !== input.actor ||
-          version.reason !== input.reason
+          !DF13_FIRST_PREPROD_PREPARE_REASON_PATTERN.test(version.reason)
         ) {
           throw new Error("DF13_FIRST_PREPROD_PREPARATION_IDEMPOTENCY_MISMATCH");
         }
