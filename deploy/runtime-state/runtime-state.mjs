@@ -25,6 +25,12 @@ const UTC = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$/;
 function isUtcTimestamp(value) { return typeof value === 'string' && UTC.test(value) && Number.isFinite(Date.parse(value)); }
 const SAFE_KEY = /^[A-Za-z0-9_]+$/;
 const SECRET_NAME = /(SECRET|TOKEN|PASSWORD|PASSWD|API[_-]?KEY|PRIVATE[_-]?KEY|CREDENTIAL)/i;
+const LIVE_DATABASE_READ_QUERIES = new Set([
+  'SELECT migration_name, checksum_sha256 FROM schema_migrations ORDER BY migration_name',
+  'SELECT page_id, status, routing_owner, app_send_enabled, kill_switch FROM pages ORDER BY page_id',
+  "SELECT p.pointer_id, p.revision, v.version_id, v.version_number, v.revision, v.content_hash, COALESCE(v.content->>'replyReconciliationPolicy','OMITTED'), COALESCE(v.content->>'mediaPartialResolutionPolicy','OMITTED'), COALESCE(v.content->>'multiProductResolutionPolicy','OMITTED'), COALESCE(v.content->>'customerUrlPolicy','OMITTED'), (v.content ? 'correctionDialoguePolicy')::int FROM admin_active_pointers p JOIN admin_artifact_versions v ON v.version_id=p.version_id WHERE p.active AND p.page_id='1198992073286645' AND p.channel='PUBLISHED' AND p.artifact_kind='CLOSING_STRATEGY'",
+  "SELECT COALESCE(jsonb_agg(jsonb_build_object('artifactKey', p.artifact_key, 'artifactKind', p.artifact_kind, 'pointerId', p.pointer_id, 'pointerRevision', p.revision, 'versionId', v.version_id, 'versionArtifactKey', v.artifact_key, 'versionArtifactKind', v.artifact_kind, 'versionNumber', v.version_number, 'versionRevision', v.revision, 'contentHash', v.content_hash, 'lifecycle', v.lifecycle) ORDER BY p.artifact_kind, p.artifact_key, p.pointer_id), '[]'::jsonb)::text FROM admin_active_pointers p JOIN admin_artifact_versions v ON v.version_id=p.version_id WHERE p.active AND p.page_id='1198992073286645' AND p.channel='PUBLISHED'",
+]);
 
 function fail(code) { throw new Error(code); }
 function isObject(value) { return value !== null && typeof value === 'object' && !Array.isArray(value); }
@@ -235,8 +241,9 @@ function captureLiveDatabase(inventory) {
 
 export function postgresQueryInvocation({ container, user, database, password, sql }, baseEnvironment = {}) {
   nonEmpty(container, 'POSTGRES_CONTAINER_MISSING'); nonEmpty(user, 'POSTGRES_USER_MISSING'); nonEmpty(database, 'POSTGRES_DB_MISSING'); nonEmpty(password, 'POSTGRES_PASSWORD_MISSING'); nonEmpty(sql, 'POSTGRES_QUERY_MISSING');
+  if (!LIVE_DATABASE_READ_QUERIES.has(sql)) fail('POSTGRES_QUERY_NOT_ALLOWLISTED');
   return {
-    args: ['exec', '--env', 'PGPASSWORD', container, 'psql', '-X', '-v', 'ON_ERROR_STOP=1', '-U', user, '-d', database, '-At', '-F', '\t', '-c', sql],
+    args: ['exec', '--env', 'PGPASSWORD', '--env', 'PGOPTIONS=-c default_transaction_read_only=on', container, 'psql', '-X', '-q', '-v', 'ON_ERROR_STOP=1', '-U', user, '-d', database, '-At', '-F', '\t', '-c', `BEGIN TRANSACTION READ ONLY; ${sql}; COMMIT;`],
     env: { ...baseEnvironment, PGPASSWORD: password },
   };
 }
