@@ -39,7 +39,7 @@ that explicit verdict.
 | DF13 operational-acceptance preparation | `DF13_PREPROD_FRESH_PROCESS_DECISION.md` + `DF13_OPERATIONAL_ACCEPTANCE_PREPARATION.md` + `contracts/DF13_FENCE_AND_RELEASE_EVIDENCE.md` + `contracts/RELEASE_INTEGRITY.md` |
 | Release/deploy/evidence | `contracts/RELEASE_INTEGRITY.md` |
 | Dataset/package work | `contracts/DATASET_BOUNDARY.md` |
-| DF work after Gate BF | `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + relevant contracts |
+| DF work after Gate BF / post-Gate-F sequencing | `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + `V5_OWNER_ADOPTION_20260827.md` + relevant contracts |
 | Commerce authority | Gate E/F-PREPROD + `contracts/BEHAVIOR_CONTROL_PLANE.md` + `contracts/DF13_FENCE_AND_RELEASE_EVIDENCE.md` + relevant contracts |
 | State V2 | UR sections / Gate U-PREPROD + `contracts/BEHAVIOR_CONTROL_PLANE.md` + relevant contracts |
 | Production hardening | `OPERATING_MODE.md` + deferred hardening section in `FUTURE_BACKLOG.md` |
@@ -53,6 +53,7 @@ that explicit verdict.
 - `ACTIVE_IMPLEMENTATION_PLAN.md`: active BF architecture/rollout. Its future-facing DF/UR shadow/canary text is superseded after Gate BF by the files below.
 - `FUTURE_BACKLOG.md`: authoritative deferred DF/UR work after Gate BF.
 - `PREPROD_DF_UR_PLAN_AMENDMENT.md`: authoritative on merged `main`; rationale/review contract for PREPROD simplification and future-topology changes.
+- `V5_OWNER_ADOPTION_20260827.md`: binds the adopted PR #258 plan and makes it canonical for post-Gate-F sequencing only.
 - `DF13_PREPROD_FRESH_PROCESS_DECISION.md`: authoritative on merged `main` for the first stopped-process DF13 PREPROD replacement; it narrowly supersedes the prior hot-cutover mechanism for that exercise only.
 - `contracts/`: durable technical invariants.
 - `CURRENT_BASELINE.md`: immutable `POST_BF_V1` runtime comparison checkpoint. `program-state.json` and `GATE_E_PREPROD_ACCEPTANCE_20260821.md` record the later Gate E governance disposition; fresh runtime evidence still wins for live facts.
@@ -100,10 +101,9 @@ Active PREPROD roadmap:
   -> DF-C: DF-P7 / DF11-13 source complete; first controlled LEGACY -> COMMERCE uses the separately authorized stopped-process PREPROD replacement
   -> controlled critical human E2E
   -> Gate F-PREPROD
-  -> UR-A: UR-P1..UR-P2 / UR00-03
-  -> UR-B: UR-P3 / UR04-07 / controlled LEGACY -> V2
-  -> Gate U-PREPROD
-  -> controlled full human E2E on State V2
+  -> V5 Track B: complete normal model authority
+  -> V5 Track C: bounded safety + sales-quality learning loop
+  -> UR / State V2 / Gate U only when a concrete trigger and separate approval require a narrow slice
   -> explicit owner trigger: PRODUCTION_HARDENING
   -> production-readiness / rollout decision
   -> later UR08 -> UR09 -> UR10 under separate approvals
