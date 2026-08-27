@@ -4,6 +4,7 @@ import { chmodSync, copyFileSync, existsSync, mkdtempSync, mkdirSync, readFileSy
 import { spawn, spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
 import { postgresQueryInvocation, resolveTrustedDeployRepository } from "./runtime-state/runtime-state.mjs";
+import { assertReviewedReleaseFileMode } from "./release-artifact-mode.mjs";
 
 const deployDir = resolve(import.meta.dirname);
 const entrypoint = resolve(deployDir, "df13-first-preprod-release-reconcile.sh");
@@ -35,9 +36,12 @@ assert.doesNotMatch(source, /DF13_RECONCILE_BOOTSTRAP/u, "the private body must 
 assert.doesNotMatch(entrypointSource, /DF13_RECONCILE_BOOTSTRAP/u, "the public wrapper must not mint a bypass token for its private body");
 assert.match(entrypointSource, /RECONCILIATION_BODY_HASH_MISMATCH/u, "the clean public wrapper must attest the private body before it starts Bash");
 assert.match(entrypointSource, /actual_body_blob="\$\(hash_release_file "\$body_path"\)"/u, "the clean public wrapper must re-hash its root-readable release body without granting root repository trust");
-const bodyIndexMode = spawnSync("git", ["ls-files", "-s", "--", "deploy/df13-first-preprod-release-reconcile.body.sh"], { cwd: resolve(deployDir, ".."), encoding: "utf8" });
-assert.equal(bodyIndexMode.status, 0, bodyIndexMode.stderr);
-assert.match(bodyIndexMode.stdout, /^100644\s/u, "the reconciliation body must remain a non-executable internal release artifact");
+assertReviewedReleaseFileMode({
+  repositoryRoot: resolve(deployDir, ".."),
+  relativePath: "deploy/df13-first-preprod-release-reconcile.body.sh",
+  expectedMode: 0o644,
+  label: "reconciliation body",
+});
 assert.match(source, /trap - DEBUG RETURN ERR EXIT/u, "startup hooks inherited from a caller must be cleared before any release operation");
 assert.match(source, /readonly TRUSTED_PATH="\/usr\/local\/sbin:\/usr\/local\/bin:\/usr\/sbin:\/usr\/bin:\/sbin:\/bin"/u, "release reconciliation must establish a fixed command search path");
 assert.match(source, /unset BASH_ENV ENV CDPATH/u, "the reviewed body must clear noninteractive shell startup variables");

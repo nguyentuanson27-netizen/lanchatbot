@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { chmodSync, copyFileSync, existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { spawn, spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
+import { assertReviewedReleaseFileMode } from "./release-artifact-mode.mjs";
 
 const deployDir = resolve(import.meta.dirname);
 const entrypoint = resolve(deployDir, "df13-first-preprod-release-materialize.sh");
@@ -15,14 +16,15 @@ const entrypointSource = readFileSync(entrypoint, "utf8");
 const bodySource = readFileSync(body, "utf8");
 const guardSource = readFileSync(releaseIntegrityGuard, "utf8");
 for (const [relativePath, expectedMode] of [
-  ["deploy/df13-first-preprod-release-materialize.sh", "100755"],
-  ["deploy/df13-first-preprod-release-materialize.body.sh", "100755"],
+  ["deploy/df13-first-preprod-release-materialize.sh", 0o755],
+  ["deploy/df13-first-preprod-release-materialize.body.sh", 0o755],
 ]) {
-  const mode = spawnSync("git", ["ls-files", "--stage", "--", relativePath], {
-    cwd: resolve(deployDir, ".."),
-    encoding: "utf8",
-  }).stdout.trim().split(/\s+/u, 1)[0];
-  assert.equal(mode, expectedMode, `${relativePath} must retain its reviewed immutable-release mode`);
+  assertReviewedReleaseFileMode({
+    repositoryRoot: resolve(deployDir, ".."),
+    relativePath,
+    expectedMode,
+    label: relativePath,
+  });
 }
 
 assert.match(entrypointSource, /^#!\/bin\/sh\nset -eu\n/u, "the public materialization entrypoint must avoid caller Bash startup hooks");
