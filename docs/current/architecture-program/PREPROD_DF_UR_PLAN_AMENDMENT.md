@@ -5,7 +5,7 @@
 **Scope:** Deferred DF/UR architecture execution, evidence, Gate, and authority-transition strategy
 **Non-goals:** changing the recorded Gate BF owner-waiver disposition or `POST_BF_V1`, runtime mutation, deployment authorization, production-readiness claim, destructive cleanup
 
-> **Post-Gate-F sequencing supersession notice:** PR #258 merged the `POST_DF_SIMPLIFIED_PLAN_PROPOSAL_20260825.md` (Anti-Bloat V5) proposal, but no durable owner-adoption record has changed the active program state. Until a separately recorded owner decision on merged `main` adopts V5, this amendment's post-Gate-F sequencing remains current. On that adoption, V5 becomes the canonical post-Gate-F sequencing authority only. This amendment continues to own the DF/UR safety, evidence, authority-transition, Gate E, Gate F, migration, security, and rollback contracts that V5 explicitly preserves; historical text remains for traceability.
+> **Post-Gate-F sequencing supersession notice:** The owner adopted the Anti-Bloat V5 plan from PR #258 in [`V5_OWNER_ADOPTION_20260827.md`](V5_OWNER_ADOPTION_20260827.md). V5 is the canonical post-Gate-F sequencing authority only. This amendment continues to own the DF/UR safety, evidence, authority-transition, Gate E, Gate F, migration, security, and rollback contracts that V5 explicitly preserves; historical text remains for traceability.
 
 ## 1. Decision
 
@@ -337,7 +337,7 @@ GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS + immutable POST_BF_V1 (recorded)
 
 `FUTURE_BACKLOG.md` and this amendment own post-Gate-BF DF/UR execution when this decision is merged into `main`. Future-facing references in `ACTIVE_IMPLEMENTATION_PLAN.md` to phase/barrier shadow, sampled second live model calls, paired live evaluation, shadow/canary evidence, or three-state authority topology are superseded by this amendment after the recorded Gate BF owner-waiver decision. The accepted BF residuals remain unchanged unless separately reconciled.
 
-If a separately recorded owner decision on merged `main` adopts `POST_DF_SIMPLIFIED_PLAN_PROPOSAL_20260825.md` (Anti-Bloat V5), only the **post-Gate-F sequencing portion** of this source-of-truth statement is superseded. V5 adoption does not supersede the current Gate E/Gate F technical/evidence contracts, DF13 operational contracts, release integrity, security/PII, migration correctness, or rollback requirements.
+The owner adoption recorded in [`V5_OWNER_ADOPTION_20260827.md`](V5_OWNER_ADOPTION_20260827.md) supersedes only the **post-Gate-F sequencing portion** of this source-of-truth statement. It does not supersede the current Gate E/Gate F technical/evidence contracts, DF13 operational contracts, release integrity, security/PII, migration correctness, or rollback requirements.
 
 Archives, historical manifests, baseline evidence, and past runtime records remain immutable and must not be rewritten to match this later planning decision.
 

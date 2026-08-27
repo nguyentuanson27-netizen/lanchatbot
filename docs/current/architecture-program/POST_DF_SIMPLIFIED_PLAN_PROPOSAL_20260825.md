@@ -1,6 +1,6 @@
 # Post-DF Hybrid Execution Plan — Anti-Bloat V5
 
-**Status:** `PROPOSED / OWNER-DECISION-READY` — merged as PR #258, but not adopted into the active program state. This document does not itself authorize release, migration, runtime mutation, COMMERCE activation, real-customer traffic, production hardening, or destructive cleanup.
+**Status:** `ADOPTED / ACTIVE_POST_GATE_F_SEQUENCING` — PR #258's reviewed plan content was adopted by [`V5_OWNER_ADOPTION_20260827.md`](V5_OWNER_ADOPTION_20260827.md). The adoption does not itself authorize release, migration, runtime mutation, COMMERCE activation, real-customer traffic, production hardening, or destructive cleanup.
 **Operating context:** `ENGINEERING_PREPROD` / one `PREPROD_TEST_PAGE`.
 **Primary objective:** activate COMMERCE safely, complete the intended model-vs-code authority split, then iterate sales quality quickly without rebuilding the old architecture/governance program around every tuning cycle.
 
@@ -95,9 +95,9 @@ These are engineering planning estimates, not repository facts or delivery commi
 
 ### Owner adoption and supersession
 
-PR #258 published this proposal; merge alone is not V5 adoption. V5 becomes the canonical **post-Gate-F sequencing plan** only when a separate, durable owner-decision record on merged `main` names this document and its reviewed commit/blob, explicitly adopts the sequencing baseline, and records that the active point remains `DF-13 Operational Acceptance` until Gate F is actually accepted.
+PR #258 published this plan. Its reviewed plan-content commit/blob and the owner adoption are recorded in [`V5_OWNER_ADOPTION_20260827.md`](V5_OWNER_ADOPTION_20260827.md), which makes V5 the canonical **post-Gate-F sequencing plan** while preserving the active point as `DF-13 Operational Acceptance` until Gate F is actually accepted.
 
-**Adoption update:** that decision record must update the `future` section of `program-state.json` and add matching supersession notices to `FUTURE_BACKLOG.md` and the applicable post-Gate-F sequencing section of `PREPROD_DF_UR_PLAN_AMENDMENT.md`. Preserve historical text; do not rewrite earlier decisions. Until then, V5 is a merged proposal and neither the notices nor this plan change runtime, migration, release, or authorization state.
+**Adoption update:** the decision record updates the `future` section of `program-state.json` and matching supersession notices in `FUTURE_BACKLOG.md` and `PREPROD_DF_UR_PLAN_AMENDMENT.md`. It preserves historical text and does not change runtime, migration, release, or authorization state.
 
 V5 supersedes only conflicting future sequencing that would otherwise require UR / State V2 / Gate U before model-authority completion and the sales-quality loop. It does **not** supersede:
 
@@ -110,7 +110,7 @@ V5 supersedes only conflicting future sequencing that would otherwise require UR
 - exact rollback requirements;
 - explicit owner authorization boundaries.
 
-Owner decisions required to adopt V5:
+Owner decisions adopted with V5:
 
 1. adopt V5 as the canonical post-Gate-F sequencing baseline;
 2. defer UR / State V2 from the default critical path until a concrete trigger exists;
