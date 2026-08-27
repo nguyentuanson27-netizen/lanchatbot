@@ -37,7 +37,7 @@ assert_deploy_git_identity() {
   for deploy_file in "$DEPLOY_GIT_PRIVATE_KEY" "$DEPLOY_GIT_KNOWN_HOSTS"; do
     test -f "$deploy_file" && test ! -L "$deploy_file" && \
       test "$(/usr/bin/readlink -f -- "$deploy_file")" = "$deploy_file" || die "MATERIALIZER_DEPLOY_GIT_IDENTITY_INVALID"
-    test "$(/usr/bin/stat -c '%u:%a' -- "$deploy_file")" = "$deploy_uid:600" || die "MATERIALIZER_DEPLOY_GIT_IDENTITY_INVALID"
+    test "$(stat -c '%u:%a' -- "$deploy_file")" = "$deploy_uid:600" || die "MATERIALIZER_DEPLOY_GIT_IDENTITY_INVALID"
   done
 }
 git_as_deploy() {
