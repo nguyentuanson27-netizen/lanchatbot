@@ -189,7 +189,7 @@ test "$(git_attestation -C "$repository_dir" hash-object -- "$staged_release_dir
 create_bootstrap_release_source_pointer >/dev/null || die "RELEASE_SOURCE_BOOTSTRAP_FAILED"
 test -f "$staged_release_dir/.release-source.json" && test ! -L "$staged_release_dir/.release-source.json" || die "RELEASE_SOURCE_POINTER_MISSING"
 
-mv -- "$staged_release_dir" "$release_dir" || die "RELEASE_DIRECTORY_PROMOTION_FAILED"
+mv -T -- "$staged_release_dir" "$release_dir" || die "RELEASE_DIRECTORY_PROMOTION_FAILED"
 rmdir -- "$materializing_dir" || die "MATERIALIZING_DIRECTORY_CLEANUP_FAILED"
 trap - HUP INT TERM
 cleanup_private

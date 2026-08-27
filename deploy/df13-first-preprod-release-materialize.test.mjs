@@ -49,6 +49,7 @@ assert.match(bodySource, /flock -n 9/u, "concurrent materialization must fail cl
 assert.match(bodySource, /RELEASE_DIRECTORY_ALREADY_EXISTS/u, "an existing immutable release directory must fail closed");
 assert.match(bodySource, /RELEASE_SOURCE_BOOTSTRAP_FAILED/u, "a missing or invalid source pointer must not be mistaken for a materialized release");
 assert.match(bodySource, /\$materializing_dir\/\$release_tag/u, "the source pointer must be complete in staging before immutable release promotion");
+assert.match(bodySource, /mv -T -- "\$staged_release_dir" "\$release_dir"/u, "promotion must reject a concurrently-created target instead of nesting into it");
 assert.match(bodySource, /flag: "wx"/u, "the source pointer must be created exactly once");
 assert.match(bodySource, /RELEASE_SOURCE_READBACK_MISMATCH/u, "the bootstrap-owned source pointer must validate a full readback");
 assert.doesNotMatch(bodySource, /\bdocker(?:\s+compose)?\b|\bpsql\b|\bmigrate(?:-vps)?\b|\bcurrent\.next\b|\bln -s\b/u, "materialization must not deploy, migrate, change current, or start services");
