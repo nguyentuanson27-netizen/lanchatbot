@@ -21,9 +21,13 @@ const ROOT = dirname(fileURLToPath(import.meta.url));
 const REPOSITORY = 'https://github.com/nguyentuanson27-netizen/lanchatbot';
 export const DEPLOY_APP_ROOT = '/opt/lana-chatbot';
 export const DEPLOY_REPOSITORY = `${DEPLOY_APP_ROOT}/repository`;
-const DEPLOY_GIT_USER = 'lana-deploy';
-const DEPLOY_GIT_HOME = `/home/${DEPLOY_GIT_USER}`;
-const DEPLOY_GIT_PATH = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
+export const DEPLOY_GIT_USER = 'lana-deploy';
+export const DEPLOY_GIT_HOME = `/home/${DEPLOY_GIT_USER}`;
+export const DEPLOY_GIT_SSH_DIRECTORY = `${DEPLOY_GIT_HOME}/.ssh`;
+export const DEPLOY_GIT_PRIVATE_KEY = `${DEPLOY_GIT_SSH_DIRECTORY}/lana_chatbot_github_ed25519`;
+export const DEPLOY_GIT_KNOWN_HOSTS = `${DEPLOY_GIT_SSH_DIRECTORY}/known_hosts`;
+export const DEPLOY_GIT_PATH = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
+export const DEPLOY_GIT_SSH_COMMAND = `/usr/bin/ssh -F /dev/null -i ${DEPLOY_GIT_PRIVATE_KEY} -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=${DEPLOY_GIT_KNOWN_HOSTS}`;
 const A0_MANIFEST = 'deploy/manifests/20260802-r32.2.2-runtime-reconciliation.json';
 const SHA256 = /^[a-f0-9]{64}$/;
 const IMAGE_ID = /^sha256:[a-f0-9]{64}$/;
@@ -57,14 +61,38 @@ export function resolveTrustedDeployRepository(gitDir, fileSystem = { lstatSync,
   if (resolved !== DEPLOY_REPOSITORY) fail('RUNTIME_STATE_REPOSITORY_REALPATH_MISMATCH');
   return DEPLOY_REPOSITORY;
 }
-function deployRepositoryGit(gitDir, args) {
-  const repository = resolveTrustedDeployRepository(gitDir);
-  return run('/usr/sbin/runuser', [
+export function resolveTrustedDeployGitIdentity(fileSystem = { lstatSync, realpathSync }, resolveUserId = (user) => run('/usr/bin/id', ['-u', user])) {
+  let deployUid;
+  try { deployUid = resolveUserId(DEPLOY_GIT_USER); } catch { fail('RUNTIME_STATE_DEPLOY_USER_UNAVAILABLE'); }
+  if (!/^\d+$/u.test(String(deployUid))) fail('RUNTIME_STATE_DEPLOY_USER_UNAVAILABLE');
+  for (const directory of [DEPLOY_GIT_HOME, DEPLOY_GIT_SSH_DIRECTORY]) {
+    let stat;
+    let resolved;
+    try { stat = fileSystem.lstatSync(directory); resolved = fileSystem.realpathSync(directory); } catch { fail(directory === DEPLOY_GIT_HOME ? 'RUNTIME_STATE_DEPLOY_GIT_HOME_INVALID' : 'RUNTIME_STATE_DEPLOY_GIT_SSH_DIRECTORY_INVALID'); }
+    if (!stat.isDirectory() || stat.isSymbolicLink() || resolved !== directory) fail(directory === DEPLOY_GIT_HOME ? 'RUNTIME_STATE_DEPLOY_GIT_HOME_INVALID' : 'RUNTIME_STATE_DEPLOY_GIT_SSH_DIRECTORY_INVALID');
+  }
+  for (const credential of [DEPLOY_GIT_PRIVATE_KEY, DEPLOY_GIT_KNOWN_HOSTS]) {
+    let stat;
+    let resolved;
+    try { stat = fileSystem.lstatSync(credential); resolved = fileSystem.realpathSync(credential); } catch { fail('RUNTIME_STATE_DEPLOY_GIT_IDENTITY_INVALID'); }
+    if (!stat.isFile() || stat.isSymbolicLink() || resolved !== credential || String(stat.uid) !== String(deployUid) || (stat.mode & 0o777) !== 0o600) fail('RUNTIME_STATE_DEPLOY_GIT_IDENTITY_INVALID');
+  }
+  return { home: DEPLOY_GIT_HOME, ssh: DEPLOY_GIT_SSH_DIRECTORY, key: DEPLOY_GIT_PRIVATE_KEY, knownHosts: DEPLOY_GIT_KNOWN_HOSTS };
+}
+export function buildDeployRepositoryGitInvocation(gitDir, args, { fileSystem = { lstatSync, realpathSync }, resolveUserId } = {}) {
+  const repository = resolveTrustedDeployRepository(gitDir, fileSystem);
+  resolveTrustedDeployGitIdentity(fileSystem, resolveUserId);
+  return { command: '/usr/sbin/runuser', args: [
     '-u', DEPLOY_GIT_USER, '--', '/usr/bin/env', '-i',
     `PATH=${DEPLOY_GIT_PATH}`, `HOME=${DEPLOY_GIT_HOME}`,
-    'GIT_CONFIG_NOSYSTEM=1', 'GIT_CONFIG_GLOBAL=/dev/null',
+    'GIT_CONFIG_NOSYSTEM=1', 'GIT_CONFIG_GLOBAL=/dev/null', 'GIT_CONFIG_COUNT=1',
+    'GIT_CONFIG_KEY_0=core.sshCommand', `GIT_CONFIG_VALUE_0=${DEPLOY_GIT_SSH_COMMAND}`,
     '/usr/bin/git', '-C', repository, ...args,
-  ]);
+  ] };
+}
+function deployRepositoryGit(gitDir, args) {
+  const invocation = buildDeployRepositoryGitInvocation(gitDir, args);
+  return run(invocation.command, invocation.args);
 }
 function onlyKeys(object, allowed, label) {
   if (!isObject(object)) fail(`${label}_NOT_OBJECT`);

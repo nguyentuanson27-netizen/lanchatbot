@@ -46,6 +46,8 @@ PATH="$TRUSTED_PATH"
 export PATH
 readonly TRUSTED_PATH PATH
 readonly DEPLOY_GIT_USER="lana-deploy"
+readonly DEPLOY_GIT_HOME="/home/lana-deploy"
+readonly DEPLOY_GIT_SSH_DIRECTORY="/home/lana-deploy/.ssh"
 readonly DEPLOY_GIT_PRIVATE_KEY="/home/lana-deploy/.ssh/lana_chatbot_github_ed25519"
 readonly DEPLOY_GIT_KNOWN_HOSTS="/home/lana-deploy/.ssh/known_hosts"
 readonly DEPLOY_GIT_SSH_COMMAND="/usr/bin/ssh -F /dev/null -i $DEPLOY_GIT_PRIVATE_KEY -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$DEPLOY_GIT_KNOWN_HOSTS"
@@ -54,8 +56,16 @@ assert_deploy_git_identity() {
     printf '%s\n' "DF13_RELEASE_RECONCILIATION_BLOCKED:RECONCILIATION_DEPLOY_USER_UNAVAILABLE" >&2
     exit 1
   }
+  for deploy_directory in "$DEPLOY_GIT_HOME" "$DEPLOY_GIT_SSH_DIRECTORY"; do
+    test -d "$deploy_directory" && test ! -L "$deploy_directory" && \
+      test "$(/usr/bin/readlink -f -- "$deploy_directory")" = "$deploy_directory" || {
+      printf '%s\n' "DF13_RELEASE_RECONCILIATION_BLOCKED:RECONCILIATION_DEPLOY_GIT_IDENTITY_INVALID" >&2
+      exit 1
+    }
+  done
   for deploy_file in "$DEPLOY_GIT_PRIVATE_KEY" "$DEPLOY_GIT_KNOWN_HOSTS"; do
     test -f "$deploy_file" && test ! -L "$deploy_file" && \
+      test "$(/usr/bin/readlink -f -- "$deploy_file")" = "$deploy_file" && \
       test "$(/usr/bin/stat -c '%u:%a' -- "$deploy_file")" = "$deploy_uid:600" || {
       printf '%s\n' "DF13_RELEASE_RECONCILIATION_BLOCKED:RECONCILIATION_DEPLOY_GIT_IDENTITY_INVALID" >&2
       exit 1
@@ -69,7 +79,7 @@ git_as_deploy() {
   }
   assert_deploy_git_identity
   /usr/sbin/runuser -u "$DEPLOY_GIT_USER" -- /usr/bin/env -i \
-    PATH="$TRUSTED_PATH" HOME="/home/lana-deploy" \
+    PATH="$TRUSTED_PATH" HOME="$DEPLOY_GIT_HOME" \
     GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_COUNT=1 \
     GIT_CONFIG_KEY_0=core.sshCommand GIT_CONFIG_VALUE_0="$DEPLOY_GIT_SSH_COMMAND" \
     /usr/bin/git "$@"

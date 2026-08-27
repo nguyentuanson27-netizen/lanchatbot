@@ -8,6 +8,7 @@ import {
   assertGateR,
   attestSourcePointer,
   attestServiceEvidence,
+  buildDeployRepositoryGitInvocation,
   buildRuntimeState,
   canonicalProjection,
   canonicalRows,
@@ -16,6 +17,7 @@ import {
   parseDelimitedRows,
   postgresQueryInvocation,
   promoteVerifiedCandidate,
+  resolveTrustedDeployGitIdentity,
   validateRuntimeState,
   validateServiceEvidence,
   verifyParity,
@@ -29,6 +31,67 @@ const serviceEvidenceExample = JSON.parse(readFileSync(join(here, 'service-evide
 const example = JSON.parse(readFileSync(join(here, 'example.json'), 'utf8'));
 const clone = (value = example) => structuredClone(value);
 const throws = (fn, message) => assert.throws(fn, new RegExp(message));
+
+const deployGitUid = '997';
+const deployGitIdentityPaths = {
+  home: '/home/lana-deploy',
+  ssh: '/home/lana-deploy/.ssh',
+  key: '/home/lana-deploy/.ssh/lana_chatbot_github_ed25519',
+  knownHosts: '/home/lana-deploy/.ssh/known_hosts',
+};
+function deployGitIdentityFs({ invalidPath, resolvedPath, credentialUid = Number(deployGitUid) } = {}) {
+  return {
+    lstatSync(path) {
+      if (path === invalidPath) {
+        return {
+          isDirectory: () => path === deployGitIdentityPaths.home || path === deployGitIdentityPaths.ssh,
+          isFile: () => path === deployGitIdentityPaths.key || path === deployGitIdentityPaths.knownHosts,
+          isSymbolicLink: () => !resolvedPath,
+          uid: credentialUid,
+          mode: 0o100600,
+        };
+      }
+      if (path === deployGitIdentityPaths.home || path === deployGitIdentityPaths.ssh) {
+        return { isDirectory: () => true, isFile: () => false, isSymbolicLink: () => false, uid: Number(deployGitUid), mode: 0o40700 };
+      }
+      if (path === deployGitIdentityPaths.key || path === deployGitIdentityPaths.knownHosts) {
+        return { isDirectory: () => false, isFile: () => true, isSymbolicLink: () => false, uid: credentialUid, mode: 0o100600 };
+      }
+      throw new Error(`unexpected path ${path}`);
+    },
+    realpathSync(path) { return path === invalidPath && resolvedPath ? resolvedPath : path; },
+  };
+}
+const deployGitUserId = () => deployGitUid;
+assert.deepEqual(resolveTrustedDeployGitIdentity(deployGitIdentityFs(), deployGitUserId), deployGitIdentityPaths);
+for (const [path, code] of [
+  [deployGitIdentityPaths.home, 'RUNTIME_STATE_DEPLOY_GIT_HOME_INVALID'],
+  [deployGitIdentityPaths.ssh, 'RUNTIME_STATE_DEPLOY_GIT_SSH_DIRECTORY_INVALID'],
+  [deployGitIdentityPaths.key, 'RUNTIME_STATE_DEPLOY_GIT_IDENTITY_INVALID'],
+  [deployGitIdentityPaths.knownHosts, 'RUNTIME_STATE_DEPLOY_GIT_IDENTITY_INVALID'],
+]) {
+  throws(() => resolveTrustedDeployGitIdentity(deployGitIdentityFs({ invalidPath: path }), deployGitUserId), code);
+  throws(() => resolveTrustedDeployGitIdentity(deployGitIdentityFs({ invalidPath: path, resolvedPath: '/tmp/redirected-credential' }), deployGitUserId), code);
+}
+throws(() => resolveTrustedDeployGitIdentity(deployGitIdentityFs({ credentialUid: 998 }), deployGitUserId), 'RUNTIME_STATE_DEPLOY_GIT_IDENTITY_INVALID');
+const deployGitInvocation = buildDeployRepositoryGitInvocation('/opt/lana-chatbot/repository', ['cat-file', '-e', `${'a'.repeat(40)}^{commit}`], {
+  fileSystem: {
+    lstatSync(path) {
+      if (path === '/opt/lana-chatbot/repository') return { isDirectory: () => true, isSymbolicLink: () => false };
+      return deployGitIdentityFs().lstatSync(path);
+    },
+    realpathSync(path) { return path; },
+  },
+  resolveUserId: deployGitUserId,
+});
+assert.equal(deployGitInvocation.command, '/usr/sbin/runuser');
+assert.deepEqual(deployGitInvocation.args.slice(0, 11), [
+  '-u', 'lana-deploy', '--', '/usr/bin/env', '-i',
+  'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+  'HOME=/home/lana-deploy', 'GIT_CONFIG_NOSYSTEM=1', 'GIT_CONFIG_GLOBAL=/dev/null',
+  'GIT_CONFIG_COUNT=1', 'GIT_CONFIG_KEY_0=core.sshCommand',
+]);
+assert.match(deployGitInvocation.args[11], /^GIT_CONFIG_VALUE_0=\/usr\/bin\/ssh -F \/dev\/null -i \/home\/lana-deploy\/\.ssh\/lana_chatbot_github_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=\/home\/lana-deploy\/\.ssh\/known_hosts$/u);
 
 assert.equal(canonicalProjection({ B: '2', A: '1', UNKNOWN: 'excluded', META_TOKEN: 'excluded' }, ['A', 'B']), 'A=1\nB=2\n');
 assert.equal(digestProjection({ A: '1', B: '2' }, ['B', 'A']).sha256, digestProjection({ B: '2', A: '1', EXTRA: 'ignored' }, ['A', 'B']).sha256);

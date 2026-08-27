@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { chmodSync, copyFileSync, existsSync, mkdtempSync, mkdirSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { chmodSync, copyFileSync, existsSync, mkdtempSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { spawn, spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
 import { postgresQueryInvocation, resolveTrustedDeployRepository } from "./runtime-state/runtime-state.mjs";
@@ -24,6 +24,9 @@ assert.match(entrypointSource, /readonly DEPLOY_APP_ROOT="\/opt\/lana-chatbot"/u
 assert.match(entrypointSource, /\/usr\/sbin\/runuser -u "\$DEPLOY_GIT_USER" -- \/usr\/bin\/env -i/u, "the public wrapper must invoke repository Git through the fixed deploy owner");
 assert.match(entrypointSource, /GIT_CONFIG_KEY_0=core\.sshCommand/u, "the public wrapper must override a repository-local root SSH command with the fixed deploy identity");
 assert.match(entrypointSource, /\/home\/lana-deploy\/\.ssh\/lana_chatbot_github_ed25519/u, "the public wrapper must use only the fixed deploy-owned read-only identity");
+assert.match(entrypointSource, /for deploy_directory in "\$DEPLOY_GIT_HOME" "\$DEPLOY_GIT_SSH_DIRECTORY"/u, "the public wrapper must enumerate the fixed credential parents");
+assert.match(entrypointSource, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_directory"\)" = "\$deploy_directory"/u, "the public wrapper must reject a symlinked credential parent");
+assert.match(entrypointSource, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_file"\)" = "\$deploy_file"/u, "the public wrapper must reject a credential whose parent resolves elsewhere");
 assert.doesNotMatch(entrypointSource, /safe\.directory/u, "the public wrapper must not disable Git ownership protection");
 assert.match(source, /^#!\/usr\/bin\/bash\nset -euo pipefail\nset -E\n/u, "the operational entrypoint must use its absolute reviewed interpreter");
 assert.doesNotMatch(source, /\beval\b/u, "reconciliation automation must not evaluate caller input");
@@ -47,6 +50,9 @@ assert.match(source, /readonly DEPLOY_APP_ROOT="\/opt\/lana-chatbot"/u, "the pri
 assert.match(source, /\/usr\/sbin\/runuser -u "\$DEPLOY_GIT_USER" -- \/usr\/bin\/env -i/u, "the private reconciliation body must use the deploy owner for repository Git operations");
 assert.match(source, /GIT_CONFIG_KEY_0=core\.sshCommand/u, "the private reconciliation body must override a repository-local root SSH command with the fixed deploy identity");
 assert.match(source, /\/home\/lana-deploy\/\.ssh\/lana_chatbot_github_ed25519/u, "the private reconciliation body must use only the fixed deploy-owned read-only identity");
+assert.match(source, /for deploy_directory in "\$DEPLOY_GIT_HOME" "\$DEPLOY_GIT_SSH_DIRECTORY"/u, "the reconciliation body must enumerate the fixed credential parents");
+assert.match(source, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_directory"\)" = "\$deploy_directory"/u, "the reconciliation body must reject a symlinked credential parent");
+assert.match(source, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_file"\)" = "\$deploy_file"/u, "the reconciliation body must reject a credential whose parent resolves elsewhere");
 assert.doesNotMatch(source, /safe\.directory/u, "the private reconciliation body must not disable Git ownership protection");
 assert.match(source, /readonly realtime_container="lana-chatbot-realtime-worker"/u, "the reconciled service identity must be fixed by the reviewed contract");
 assert.match(source, /cat-file.*\$\{release_tag\}/u, "annotated tag validation is required");
@@ -118,6 +124,48 @@ const entrySyntax = spawnSync(bash, ["-n", entrypoint], { encoding: "utf8" });
 assert.equal(entrySyntax.status, 0, entrySyntax.stderr);
 const syntax = spawnSync(bash, ["-n", script], { encoding: "utf8" });
 assert.equal(syntax.status, 0, syntax.stderr);
+
+if (process.platform === "linux") {
+  const identityScratch = mkdtempSync(join(deployDir, ".df13-deploy-git-identity-"));
+  try {
+    const deployHome = join(identityScratch, "home");
+    const deploySsh = join(deployHome, ".ssh");
+    const deployKey = join(deploySsh, "lana_chatbot_github_ed25519");
+    const knownHosts = join(deploySsh, "known_hosts");
+    mkdirSync(deploySsh, { recursive: true });
+    writeFileSync(deployKey, "test-only-key\n");
+    writeFileSync(knownHosts, "github.com test-host-key\n");
+    chmodSync(deployKey, 0o600);
+    chmodSync(knownHosts, 0o600);
+    const runIdentityCheck = (sourceText, label) => {
+      const start = sourceText.indexOf('readonly DEPLOY_GIT_USER="lana-deploy"');
+      const end = sourceText.indexOf('git_as_deploy()');
+      assert.ok(start >= 0 && end > start, `${label} must retain a standalone deploy-Git identity boundary`);
+      const harness = `set -eu\ndie() { exit 91; }\n${sourceText.slice(start, end)
+        .replace('readonly DEPLOY_GIT_USER="lana-deploy"', 'readonly DEPLOY_GIT_USER="$(/usr/bin/id -un)"')
+        .replace('readonly DEPLOY_GIT_HOME="/home/lana-deploy"', 'readonly DEPLOY_GIT_HOME="$DF13_TEST_DEPLOY_HOME"')
+        .replace('readonly DEPLOY_GIT_SSH_DIRECTORY="/home/lana-deploy/.ssh"', 'readonly DEPLOY_GIT_SSH_DIRECTORY="$DF13_TEST_DEPLOY_HOME/.ssh"')
+        .replace('readonly DEPLOY_GIT_PRIVATE_KEY="/home/lana-deploy/.ssh/lana_chatbot_github_ed25519"', 'readonly DEPLOY_GIT_PRIVATE_KEY="$DF13_TEST_DEPLOY_HOME/.ssh/lana_chatbot_github_ed25519"')
+        .replace('readonly DEPLOY_GIT_KNOWN_HOSTS="/home/lana-deploy/.ssh/known_hosts"', 'readonly DEPLOY_GIT_KNOWN_HOSTS="$DF13_TEST_DEPLOY_HOME/.ssh/known_hosts"')}assert_deploy_git_identity\n`;
+      return spawnSync(bash, ["-c", harness], { encoding: "utf8", env: { ...process.env, DF13_TEST_DEPLOY_HOME: deployHome } });
+    };
+    for (const [label, sourceText] of [["reconcile-wrapper", entrypointSource], ["reconcile-body", source]]) {
+      const accepted = runIdentityCheck(sourceText, label);
+      assert.equal(accepted.status, 0, `${label} must accept the exact owner-owned 0600 credential pair: ${accepted.stderr}`);
+    }
+    chmodSync(deployKey, 0o640);
+    for (const [label, sourceText] of [["reconcile-wrapper", entrypointSource], ["reconcile-body", source]]) assert.notEqual(runIdentityCheck(sourceText, label).status, 0, `${label} must reject a non-0600 private key`);
+    chmodSync(deployKey, 0o600);
+    renameSync(deployKey, `${deployKey}.real`);
+    symlinkSync(`${deployKey}.real`, deployKey);
+    for (const [label, sourceText] of [["reconcile-wrapper", entrypointSource], ["reconcile-body", source]]) assert.notEqual(runIdentityCheck(sourceText, label).status, 0, `${label} must reject a symlinked private-key leaf`);
+    renameSync(deploySsh, `${deploySsh}.real`);
+    symlinkSync(`${deploySsh}.real`, deploySsh);
+    for (const [label, sourceText] of [["reconcile-wrapper", entrypointSource], ["reconcile-body", source]]) assert.notEqual(runIdentityCheck(sourceText, label).status, 0, `${label} must reject a symlinked SSH parent`);
+  } finally {
+    rmSync(identityScratch, { recursive: true, force: true });
+  }
+}
 
 const commit = "a".repeat(40);
 const tree = "b".repeat(40);
