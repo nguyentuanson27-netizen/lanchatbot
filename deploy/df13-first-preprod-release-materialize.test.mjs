@@ -49,9 +49,12 @@ assert.match(bodySource, /flock -n 9/u, "concurrent materialization must fail cl
 assert.match(bodySource, /RELEASE_DIRECTORY_ALREADY_EXISTS/u, "an existing immutable release directory must fail closed");
 assert.match(bodySource, /RELEASE_SOURCE_BOOTSTRAP_FAILED/u, "a missing or invalid source pointer must not be mistaken for a materialized release");
 assert.match(bodySource, /\$materializing_dir\/\$release_tag/u, "the source pointer must be complete in staging before immutable release promotion");
-assert.match(bodySource, /mv -T -- "\$staged_release_dir" "\$release_dir"/u, "promotion must reject a concurrently-created target instead of nesting into it");
+assert.match(bodySource, /mv -nT -- "\$staged_release_dir" "\$release_dir"/u, "promotion must not replace a concurrently-created target");
+assert.match(bodySource, /RELEASE_DIRECTORY_PROMOTION_TARGET_EXISTS/u, "promotion must detect no-clobber refusal rather than treating it as success");
 assert.match(bodySource, /flag: "wx"/u, "the source pointer must be created exactly once");
 assert.match(bodySource, /RELEASE_SOURCE_READBACK_MISMATCH/u, "the bootstrap-owned source pointer must validate a full readback");
+assert.match(bodySource, /lock_identity\(\)/u, "the durable deployment lock must bind an inode identity before it is opened");
+assert.match(bodySource, /DEPLOYMENT_LOCK_IDENTITY_MISMATCH/u, "replacement of the lock path must fail closed");
 assert.doesNotMatch(bodySource, /\bdocker(?:\s+compose)?\b|\bpsql\b|\bmigrate(?:-vps)?\b|\bcurrent\.next\b|\bln -s\b/u, "materialization must not deploy, migrate, change current, or start services");
 assert.doesNotMatch(bodySource, /\beval\b/u, "materialization must not evaluate operator input");
 assert.match(guardSource, /df13-first-preprod-release-materialize\.test\.mjs/u, "release-integrity must execute the materialization contract");
@@ -74,7 +77,7 @@ if (process.platform === "linux") {
     return result.stdout.trim();
   }
 
-  function fixture({ bootstrapFails = false, danglingLock = false, existingRelease = false, tamperWorkingTreeBody = false } = {}) {
+  function fixture({ bootstrapFails = false, danglingLock = false, existingRelease = false, tamperWorkingTreeBody = false, promotionTargetRace = false, replaceLockBeforeOpen = false } = {}) {
     const appRoot = join(scratch, `root-${fixtureNumber++}`);
     const repository = join(appRoot, "repository");
     const remote = join(scratch, `${tag}-${fixtureNumber}.remote.git`);
@@ -93,6 +96,16 @@ if (process.platform === "linux") {
     writeFileSync(entrypointCopy, readFileSync(entrypointCopy, "utf8").replaceAll("/opt/lana-chatbot", sourceRoot));
     writeFileSync(bodyCopy, readFileSync(bodyCopy, "utf8").replaceAll("/opt/lana-chatbot", sourceRoot));
     if (bootstrapFails) writeFileSync(bodyCopy, readFileSync(bodyCopy, "utf8").replace("if (JSON.stringify(readback) !== JSON.stringify(pointer)) fail(\"RELEASE_SOURCE_READBACK_MISMATCH\");", "fail(\"RELEASE_SOURCE_READBACK_MISMATCH\");"));
+    if (promotionTargetRace) {
+      const promotion = "mv -nT -- \"$staged_release_dir\" \"$release_dir\"\n";
+      assert.ok(readFileSync(bodyCopy, "utf8").includes(promotion), "the fixture must inject only at the no-replace promotion boundary");
+      writeFileSync(bodyCopy, readFileSync(bodyCopy, "utf8").replace(promotion, `mkdir -- "$release_dir"\n${promotion}`));
+    }
+    if (replaceLockBeforeOpen) {
+      const openLock = "  exec 9>> \"$DEPLOYMENT_LOCK_FILE\"\n";
+      assert.ok(readFileSync(bodyCopy, "utf8").includes(openLock), "the fixture must inject only between lock identity capture and descriptor open");
+      writeFileSync(bodyCopy, readFileSync(bodyCopy, "utf8").replace(openLock, `  mv -- "$DEPLOYMENT_LOCK_FILE" "$DEPLOYMENT_LOCK_FILE.replaced"\n  : > "$DEPLOYMENT_LOCK_FILE"\n${openLock}`));
+    }
     writeFileSync(join(repository, "deploy", "runtime-state", "create-release-source.sh"), `#!/usr/bin/bash\ntouch ${JSON.stringify(candidateHelperMarker)}\n`);
     chmodSync(entrypointCopy, 0o755);
     chmodSync(bodyCopy, 0o755);
@@ -116,6 +129,7 @@ if (process.platform === "linux") {
     }
     const lock = join(shared, "lana-chatbot-deployment.lock");
     if (danglingLock) symlinkSync(join(scratch, "missing-lock-target"), lock);
+    if (replaceLockBeforeOpen) writeFileSync(lock, "canonical\n");
     return { appRoot, repository, releases, shared, release, lock, commit, tree, candidateHelperMarker, tamperedBodyMarker };
   }
 
@@ -161,6 +175,20 @@ if (process.platform === "linux") {
     assert.notEqual(existingResult.status, 0, "an existing immutable release must fail closed");
     assert.match(existingResult.stderr, /RELEASE_DIRECTORY_ALREADY_EXISTS/u);
     assert.equal(readFileSync(join(existing.release, "must-remain"), "utf8"), "immutable\n", "an existing immutable release must remain unchanged");
+
+    const promotionRace = fixture({ promotionTargetRace: true });
+    const promotionRaceResult = run(promotionRace);
+    assert.notEqual(promotionRaceResult.status, 0, "a target created at the promotion boundary must fail closed");
+    assert.match(promotionRaceResult.stderr, /RELEASE_DIRECTORY_PROMOTION_TARGET_EXISTS/u);
+    assert.ok(existsSync(promotionRace.release), "a raced empty target must never be replaced by the staged candidate");
+    assert.ok(!existsSync(join(promotionRace.release, ".release-source.json")), "a raced target must not acquire staged source evidence");
+
+    const lockReplacement = fixture({ replaceLockBeforeOpen: true });
+    const lockReplacementResult = run(lockReplacement);
+    assert.notEqual(lockReplacementResult.status, 0, "replacement of the lock path before descriptor open must fail closed");
+    assert.match(lockReplacementResult.stderr, /DEPLOYMENT_LOCK_IDENTITY_MISMATCH/u);
+    assert.ok(existsSync(`${lockReplacement.lock}.replaced`), "the test must replace the original lock inode before materialization can acquire a descriptor");
+    assert.ok(!existsSync(lockReplacement.release), "a replaced lock path must prevent release publication");
 
     const contended = fixture();
     const ready = join(scratch, "lock-holder-ready");

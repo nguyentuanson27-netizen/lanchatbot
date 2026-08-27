@@ -89,19 +89,44 @@ readonly private_dir private_body_path
 acquire_deployment_lock() {
   local lock_directory="$shared_dir"
   local resolved_lock=""
+  local expected_lock_identity=""
+  local descriptor_lock_identity=""
   test ! -L "$DEPLOYMENT_LOCK_FILE" || die "DEPLOYMENT_LOCK_SYMLINK"
-  if test -e "$DEPLOYMENT_LOCK_FILE"; then
-    test -f "$DEPLOYMENT_LOCK_FILE" || die "DEPLOYMENT_LOCK_NOT_REGULAR"
+  if test ! -e "$DEPLOYMENT_LOCK_FILE"; then
+    (umask 077; set -C; : > "$DEPLOYMENT_LOCK_FILE") 2>/dev/null || :
   fi
+  test ! -L "$DEPLOYMENT_LOCK_FILE" || die "DEPLOYMENT_LOCK_SYMLINK"
+  test -f "$DEPLOYMENT_LOCK_FILE" || die "DEPLOYMENT_LOCK_NOT_REGULAR"
   resolved_lock="$(readlink -f "$DEPLOYMENT_LOCK_FILE")" || die "DEPLOYMENT_LOCK_UNRESOLVED"
   test "$(dirname "$resolved_lock")" = "$lock_directory" || die "DEPLOYMENT_LOCK_OUTSIDE_SHARED_ROOT"
   test "$(basename "$resolved_lock")" = "$(basename "$DEPLOYMENT_LOCK_FILE")" || die "DEPLOYMENT_LOCK_OUTSIDE_SHARED_ROOT"
+  expected_lock_identity="$(lock_identity "$DEPLOYMENT_LOCK_FILE")"
   if test -e "/proc/$$/fd/9" && test "$(readlink -f "/proc/$$/fd/9")" = "$resolved_lock"; then
+    descriptor_lock_identity="$(lock_identity "/proc/$$/fd/9")"
+    test "$descriptor_lock_identity" = "$expected_lock_identity" || die "DEPLOYMENT_LOCK_IDENTITY_MISMATCH"
     flock -n 9 || die "INHERITED_DEPLOYMENT_LOCK_NOT_HELD"
+    readonly deployment_lock_identity="$descriptor_lock_identity"
     return
   fi
   exec 9>> "$DEPLOYMENT_LOCK_FILE"
   test "$(readlink -f "/proc/$$/fd/9")" = "$resolved_lock" || die "DEPLOYMENT_LOCK_DESCRIPTOR_MISMATCH"
+  descriptor_lock_identity="$(lock_identity "/proc/$$/fd/9")"
+  test "$descriptor_lock_identity" = "$expected_lock_identity" || die "DEPLOYMENT_LOCK_IDENTITY_MISMATCH"
+  flock -n 9 || die "RELEASE_MATERIALIZATION_LOCK_UNAVAILABLE"
+  readonly deployment_lock_identity="$descriptor_lock_identity"
+}
+
+lock_identity() {
+  local identity=""
+  identity="$(stat -Lc '%d:%i' -- "$1")" || die "DEPLOYMENT_LOCK_IDENTITY_UNAVAILABLE"
+  [[ "$identity" =~ ^[0-9]+:[0-9]+$ ]] || die "DEPLOYMENT_LOCK_IDENTITY_INVALID"
+  printf '%s\n' "$identity"
+}
+
+verify_deployment_lock() {
+  test ! -L "$DEPLOYMENT_LOCK_FILE" || die "DEPLOYMENT_LOCK_SYMLINK"
+  test "$(lock_identity "$DEPLOYMENT_LOCK_FILE")" = "$deployment_lock_identity" || die "DEPLOYMENT_LOCK_IDENTITY_MISMATCH"
+  test "$(lock_identity "/proc/$$/fd/9")" = "$deployment_lock_identity" || die "DEPLOYMENT_LOCK_IDENTITY_MISMATCH"
   flock -n 9 || die "RELEASE_MATERIALIZATION_LOCK_UNAVAILABLE"
 }
 
@@ -170,6 +195,7 @@ trap cleanup_all EXIT
 trap 'cleanup_all; exit 1' HUP INT TERM
 
 acquire_deployment_lock
+verify_deployment_lock
 test ! -e "$release_dir" && test ! -L "$release_dir" || die "RELEASE_DIRECTORY_ALREADY_EXISTS"
 test ! -e "$materializing_dir" && test ! -L "$materializing_dir" || die "MATERIALIZING_DIRECTORY_EXISTS"
 
@@ -189,7 +215,9 @@ test "$(git_attestation -C "$repository_dir" hash-object -- "$staged_release_dir
 create_bootstrap_release_source_pointer >/dev/null || die "RELEASE_SOURCE_BOOTSTRAP_FAILED"
 test -f "$staged_release_dir/.release-source.json" && test ! -L "$staged_release_dir/.release-source.json" || die "RELEASE_SOURCE_POINTER_MISSING"
 
-mv -T -- "$staged_release_dir" "$release_dir" || die "RELEASE_DIRECTORY_PROMOTION_FAILED"
+verify_deployment_lock
+mv -nT -- "$staged_release_dir" "$release_dir" || die "RELEASE_DIRECTORY_PROMOTION_FAILED"
+test ! -e "$staged_release_dir" && test ! -L "$staged_release_dir" || die "RELEASE_DIRECTORY_PROMOTION_TARGET_EXISTS"
 rmdir -- "$materializing_dir" || die "MATERIALIZING_DIRECTORY_CLEANUP_FAILED"
 trap - HUP INT TERM
 cleanup_private
