@@ -13,6 +13,7 @@ import { assertDf13FirstPreprodComposeContract } from '../df13-first-preprod-com
 import '../df13-first-preprod-compose-contract.test.mjs';
 import '../df13-first-preprod-release-reconcile.test.mjs';
 import '../df13-first-preprod-release-materialize.test.mjs';
+import '../release-artifact-mode.test.mjs';
 
 const root = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const runtimeDir = join(root, 'deploy', 'runtime-state');
