@@ -37,7 +37,7 @@ The plan starts from the current recorded state:
 - 0035/0036 remain pending DF13 artifacts outside automatic migration discovery;
 - Gate F remains the technical acceptance boundary for the first COMMERCE exercise;
 - the active program point remains `DF-13 Operational Acceptance`; V5 has not changed it; and
-- UR / State V2 are not on the proposed post-Gate-F critical path unless a concrete trigger pulls in a narrow slice.
+- UR / State V2 are not on the adopted post-Gate-F critical path unless a concrete trigger pulls in a narrow slice.
 
 Target runtime architecture:
 
