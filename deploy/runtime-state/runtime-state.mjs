@@ -4,9 +4,11 @@ import {
   copyFileSync,
   existsSync,
   fsyncSync,
+  lstatSync,
   mkdirSync,
   openSync,
   readFileSync,
+  realpathSync,
   renameSync,
   rmSync,
   writeFileSync,
@@ -17,6 +19,15 @@ import { execFileSync } from 'node:child_process';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const REPOSITORY = 'https://github.com/nguyentuanson27-netizen/lanchatbot';
+export const DEPLOY_APP_ROOT = '/opt/lana-chatbot';
+export const DEPLOY_REPOSITORY = `${DEPLOY_APP_ROOT}/repository`;
+export const DEPLOY_GIT_USER = 'lana-deploy';
+export const DEPLOY_GIT_HOME = `/home/${DEPLOY_GIT_USER}`;
+export const DEPLOY_GIT_SSH_DIRECTORY = `${DEPLOY_GIT_HOME}/.ssh`;
+export const DEPLOY_GIT_PRIVATE_KEY = `${DEPLOY_GIT_SSH_DIRECTORY}/lana_chatbot_github_ed25519`;
+export const DEPLOY_GIT_KNOWN_HOSTS = `${DEPLOY_GIT_SSH_DIRECTORY}/known_hosts`;
+export const DEPLOY_GIT_PATH = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
+export const DEPLOY_GIT_SSH_COMMAND = `/usr/bin/ssh -F /dev/null -i ${DEPLOY_GIT_PRIVATE_KEY} -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=${DEPLOY_GIT_KNOWN_HOSTS} -o GlobalKnownHostsFile=/dev/null`;
 const A0_MANIFEST = 'deploy/manifests/20260802-r32.2.2-runtime-reconciliation.json';
 const SHA256 = /^[a-f0-9]{64}$/;
 const IMAGE_ID = /^sha256:[a-f0-9]{64}$/;
@@ -35,6 +46,54 @@ const LIVE_DATABASE_READ_QUERIES = new Set([
 function fail(code) { throw new Error(code); }
 function isObject(value) { return value !== null && typeof value === 'object' && !Array.isArray(value); }
 function nonEmpty(value, code) { if (typeof value !== 'string' || !value) fail(code); }
+export function resolveTrustedDeployRepository(gitDir, fileSystem = { lstatSync, realpathSync }) {
+  if (gitDir !== DEPLOY_REPOSITORY) fail('RUNTIME_STATE_REPOSITORY_PATH_MISMATCH');
+  let stat;
+  let resolved;
+  try {
+    stat = fileSystem.lstatSync(DEPLOY_REPOSITORY);
+    resolved = fileSystem.realpathSync(DEPLOY_REPOSITORY);
+  } catch {
+    fail('RUNTIME_STATE_REPOSITORY_UNRESOLVABLE');
+  }
+  if (!stat.isDirectory()) fail('RUNTIME_STATE_REPOSITORY_NOT_DIRECTORY');
+  if (stat.isSymbolicLink()) fail('RUNTIME_STATE_REPOSITORY_SYMLINK');
+  if (resolved !== DEPLOY_REPOSITORY) fail('RUNTIME_STATE_REPOSITORY_REALPATH_MISMATCH');
+  return DEPLOY_REPOSITORY;
+}
+export function resolveTrustedDeployGitIdentity(fileSystem = { lstatSync, realpathSync }, resolveUserId = (user) => run('/usr/bin/id', ['-u', user])) {
+  let deployUid;
+  try { deployUid = resolveUserId(DEPLOY_GIT_USER); } catch { fail('RUNTIME_STATE_DEPLOY_USER_UNAVAILABLE'); }
+  if (!/^\d+$/u.test(String(deployUid))) fail('RUNTIME_STATE_DEPLOY_USER_UNAVAILABLE');
+  for (const directory of [DEPLOY_GIT_HOME, DEPLOY_GIT_SSH_DIRECTORY]) {
+    let stat;
+    let resolved;
+    try { stat = fileSystem.lstatSync(directory); resolved = fileSystem.realpathSync(directory); } catch { fail(directory === DEPLOY_GIT_HOME ? 'RUNTIME_STATE_DEPLOY_GIT_HOME_INVALID' : 'RUNTIME_STATE_DEPLOY_GIT_SSH_DIRECTORY_INVALID'); }
+    if (!stat.isDirectory() || stat.isSymbolicLink() || resolved !== directory) fail(directory === DEPLOY_GIT_HOME ? 'RUNTIME_STATE_DEPLOY_GIT_HOME_INVALID' : 'RUNTIME_STATE_DEPLOY_GIT_SSH_DIRECTORY_INVALID');
+  }
+  for (const credential of [DEPLOY_GIT_PRIVATE_KEY, DEPLOY_GIT_KNOWN_HOSTS]) {
+    let stat;
+    let resolved;
+    try { stat = fileSystem.lstatSync(credential); resolved = fileSystem.realpathSync(credential); } catch { fail('RUNTIME_STATE_DEPLOY_GIT_IDENTITY_INVALID'); }
+    if (!stat.isFile() || stat.isSymbolicLink() || resolved !== credential || String(stat.uid) !== String(deployUid) || (stat.mode & 0o777) !== 0o600) fail('RUNTIME_STATE_DEPLOY_GIT_IDENTITY_INVALID');
+  }
+  return { home: DEPLOY_GIT_HOME, ssh: DEPLOY_GIT_SSH_DIRECTORY, key: DEPLOY_GIT_PRIVATE_KEY, knownHosts: DEPLOY_GIT_KNOWN_HOSTS };
+}
+export function buildDeployRepositoryGitInvocation(gitDir, args, { fileSystem = { lstatSync, realpathSync }, resolveUserId } = {}) {
+  const repository = resolveTrustedDeployRepository(gitDir, fileSystem);
+  resolveTrustedDeployGitIdentity(fileSystem, resolveUserId);
+  return { command: '/usr/sbin/runuser', args: [
+    '-u', DEPLOY_GIT_USER, '--', '/usr/bin/env', '-i',
+    `PATH=${DEPLOY_GIT_PATH}`, `HOME=${DEPLOY_GIT_HOME}`,
+    'GIT_CONFIG_NOSYSTEM=1', 'GIT_CONFIG_GLOBAL=/dev/null', 'GIT_CONFIG_COUNT=1',
+    'GIT_CONFIG_KEY_0=core.sshCommand', `GIT_CONFIG_VALUE_0=${DEPLOY_GIT_SSH_COMMAND}`,
+    '/usr/bin/git', '-C', repository, ...args,
+  ] };
+}
+function deployRepositoryGit(gitDir, args) {
+  const invocation = buildDeployRepositoryGitInvocation(gitDir, args);
+  return run(invocation.command, invocation.args);
+}
 function onlyKeys(object, allowed, label) {
   if (!isObject(object)) fail(`${label}_NOT_OBJECT`);
   for (const key of Object.keys(object)) if (!allowed.includes(key)) fail(`${label}_UNKNOWN_FIELD:${key}`);
@@ -199,7 +258,7 @@ function observedService(name, definition, evidence, gitDir) {
   const actualRevision = labels['org.opencontainers.image.revision'] ?? null;
   let expectedRevisionFetched = true;
   if (evidence.revisionRequired && COMMIT.test(evidence.expectedRevision ?? '')) {
-    try { run('git', ['-C', gitDir, 'cat-file', '-e', `${evidence.expectedRevision}^{commit}`]); } catch { expectedRevisionFetched = false; }
+    try { deployRepositoryGit(gitDir, ['cat-file', '-e', `${evidence.expectedRevision}^{commit}`]); } catch { expectedRevisionFetched = false; }
   }
   const result = attestServiceEvidence({ actualImageId: containerRecord.Image, actualRevision, evidence, expectedRevisionFetched });
   const registryDigest = [...(imageRecord.RepoDigests ?? [])].sort()[0] ?? null;
@@ -263,18 +322,19 @@ export function buildRuntimeState({ candidateId, capturedAt, target, pointer, se
 }
 
 export function captureState({ runtimeRoot, serviceEvidenceFile, candidateId, gitDir, inventory, allowlists, capturedAt = new Date().toISOString() }) {
+  const repository = resolveTrustedDeployRepository(gitDir);
   const target = run('readlink', ['-f', `${runtimeRoot}/current`]);
   if (target !== `/opt/lana-chatbot/releases/${basename(target)}`) fail('CURRENT_TARGET_OUTSIDE_RELEASES');
   const pointerPath = `${target}/.release-source.json`; if (!existsSync(pointerPath)) fail('SOURCE_POINTER_MISSING');
   const pointerFile = readJson(pointerPath); let fetchedCommit = null;
-  try { fetchedCommit = run('git', ['-C', gitDir, 'rev-parse', `${pointerFile.tag}^{}`]); } catch {}
+  try { fetchedCommit = deployRepositoryGit(repository, ['rev-parse', `${pointerFile.tag}^{}`]); } catch {}
   const pointer = attestSourcePointer(pointerFile, pointerPath, fetchedCommit);
   const evidence = readJson(serviceEvidenceFile); validateServiceEvidence(evidence, inventory);
   const services = {};
   for (const [name, definition] of Object.entries(inventory.services)) {
     if (!definition.required && !evidence.services[name]) continue;
     if (!evidence.services[name]) fail(`SERVICE_EVIDENCE_MISSING:${name}`);
-    services[name] = observedService(name, definition, evidence.services[name], gitDir);
+    services[name] = observedService(name, definition, evidence.services[name], repository);
   }
   const realtime = readJsonFromCommand('docker', ['inspect', inventory.services['realtime-worker'].container])[0];
   const delivery = readJsonFromCommand('docker', ['inspect', inventory.services['delivery-worker'].container])[0];

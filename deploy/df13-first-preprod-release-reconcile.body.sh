@@ -27,6 +27,41 @@ require_command() {
   command -v "$1" >/dev/null 2>&1 || die "COMMAND_MISSING:$1"
 }
 
+readonly DEPLOY_GIT_USER="lana-deploy"
+readonly DEPLOY_GIT_HOME="/home/lana-deploy"
+readonly DEPLOY_GIT_SSH_DIRECTORY="/home/lana-deploy/.ssh"
+readonly DEPLOY_GIT_PRIVATE_KEY="/home/lana-deploy/.ssh/lana_chatbot_github_ed25519"
+readonly DEPLOY_GIT_KNOWN_HOSTS="/home/lana-deploy/.ssh/known_hosts"
+readonly DEPLOY_GIT_SSH_COMMAND="/usr/bin/ssh -F /dev/null -i $DEPLOY_GIT_PRIVATE_KEY -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$DEPLOY_GIT_KNOWN_HOSTS -o GlobalKnownHostsFile=/dev/null"
+assert_deploy_git_identity() {
+  local deploy_uid=""
+  local deploy_directory=""
+  local deploy_file=""
+  deploy_uid="$(/usr/bin/id -u "$DEPLOY_GIT_USER")" || die "RECONCILIATION_DEPLOY_USER_UNAVAILABLE"
+  for deploy_directory in "$DEPLOY_GIT_HOME" "$DEPLOY_GIT_SSH_DIRECTORY"; do
+    test -d "$deploy_directory" && test ! -L "$deploy_directory" && \
+      test "$(/usr/bin/readlink -f -- "$deploy_directory")" = "$deploy_directory" || die "RECONCILIATION_DEPLOY_GIT_IDENTITY_INVALID"
+  done
+  for deploy_file in "$DEPLOY_GIT_PRIVATE_KEY" "$DEPLOY_GIT_KNOWN_HOSTS"; do
+    test -f "$deploy_file" && test ! -L "$deploy_file" && \
+      test "$(/usr/bin/readlink -f -- "$deploy_file")" = "$deploy_file" || die "RECONCILIATION_DEPLOY_GIT_IDENTITY_INVALID"
+    test "$(/usr/bin/stat -c '%u:%a' -- "$deploy_file")" = "$deploy_uid:600" || die "RECONCILIATION_DEPLOY_GIT_IDENTITY_INVALID"
+  done
+}
+git_as_deploy() {
+  test "$(/usr/bin/id -u)" -eq 0 || die "RECONCILIATION_ROOT_REQUIRED"
+  assert_deploy_git_identity
+  /usr/sbin/runuser -u "$DEPLOY_GIT_USER" -- /usr/bin/env -i \
+    PATH="$TRUSTED_PATH" HOME="$DEPLOY_GIT_HOME" \
+    GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_COUNT=1 \
+    GIT_CONFIG_KEY_0=core.sshCommand GIT_CONFIG_VALUE_0="$DEPLOY_GIT_SSH_COMMAND" \
+    /usr/bin/git "$@"
+}
+hash_release_file() {
+  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 \
+    /usr/bin/git hash-object --no-filters -- "$1"
+}
+
 safe_release_dir() {
   local candidate="$1"
   local resolved
@@ -119,8 +154,8 @@ assert_release_artifact() {
   local expected_blob
   local actual_blob
   test -f "$artifact" && test ! -L "$artifact" || die "RELEASE_ARTIFACT_MISSING_OR_SYMLINK:$relative_path"
-  expected_blob="$(git -C "$repository_dir" rev-parse "${DF13_RELEASE_COMMIT}:${relative_path}")" || die "RELEASE_ARTIFACT_GIT_BLOB_MISSING:$relative_path"
-  actual_blob="$(git hash-object -- "$artifact")" || die "RELEASE_ARTIFACT_HASH_UNAVAILABLE:$relative_path"
+  expected_blob="$(git_as_deploy -C "$repository_dir" rev-parse "${DF13_RELEASE_COMMIT}:${relative_path}")" || die "RELEASE_ARTIFACT_GIT_BLOB_MISSING:$relative_path"
+  actual_blob="$(hash_release_file "$artifact")" || die "RELEASE_ARTIFACT_HASH_UNAVAILABLE:$relative_path"
   [[ "$expected_blob" =~ ^[a-f0-9]{40}$ && "$actual_blob" =~ ^[a-f0-9]{40}$ ]] || die "RELEASE_ARTIFACT_HASH_INVALID:$relative_path"
   test "$actual_blob" = "$expected_blob" || die "RELEASE_FILE_HASH_MISMATCH:$relative_path"
 }
@@ -142,6 +177,7 @@ script_path="$(readlink -f "$0")" || die "RECONCILIATION_ENTRYPOINT_UNRESOLVED"
 release_dir="$(dirname "$(dirname "$script_path")")"
 releases_dir="$(dirname "$release_dir")"
 app_root="$(dirname "$releases_dir")"
+readonly DEPLOY_APP_ROOT="/opt/lana-chatbot"
 test "$releases_dir" = "$app_root/releases" || die "RECONCILIATION_ENTRYPOINT_OUTSIDE_RELEASES"
 test "$script_path" = "$release_dir/deploy/df13-first-preprod-release-reconcile.body.sh" || die "RECONCILIATION_BODY_RELEASE_MISMATCH"
 release_tag="$(basename "$release_dir")"
@@ -149,6 +185,10 @@ case "$release_tag" in
   *[!A-Za-z0-9._-]*|'') die "RELEASE_TAG_INVALID" ;;
 esac
 readonly repository_dir="$app_root/repository"
+test "$app_root" = "$DEPLOY_APP_ROOT" && \
+  test "$release_dir" = "$DEPLOY_APP_ROOT/releases/$release_tag" && \
+  test "$repository_dir" = "$DEPLOY_APP_ROOT/repository" && \
+  test -d "$repository_dir" && test ! -L "$repository_dir" || die "RECONCILIATION_TRUST_ROOT_INVALID"
 readonly realtime_container="lana-chatbot-realtime-worker"
 readonly DEPLOYMENT_LOCK_FILE="$app_root/shared/lana-chatbot-deployment.lock"
 
@@ -374,9 +414,9 @@ recover_incomplete_reconciliation() {
 release_dir="$(safe_release_dir "$release_dir")"
 test -s "$DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE" && test ! -L "$DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE" || die "RUNTIME_STATE_EVIDENCE_MISSING_OR_SYMLINK"
 
-test "$(git -C "$repository_dir" cat-file -t "${release_tag}")" = "tag" || die "RELEASE_TAG_NOT_ANNOTATED"
-test "$(git -C "$repository_dir" rev-parse "${release_tag}^{commit}")" = "$DF13_RELEASE_COMMIT" || die "RELEASE_TAG_COMMIT_MISMATCH"
-test "$(git -C "$repository_dir" rev-parse "${DF13_RELEASE_COMMIT}^{tree}")" = "$DF13_RELEASE_TREE" || die "RELEASE_TREE_MISMATCH"
+test "$(git_as_deploy -C "$repository_dir" cat-file -t "${release_tag}")" = "tag" || die "RELEASE_TAG_NOT_ANNOTATED"
+test "$(git_as_deploy -C "$repository_dir" rev-parse "${release_tag}^{commit}")" = "$DF13_RELEASE_COMMIT" || die "RELEASE_TAG_COMMIT_MISMATCH"
+test "$(git_as_deploy -C "$repository_dir" rev-parse "${DF13_RELEASE_COMMIT}^{tree}")" = "$DF13_RELEASE_TREE" || die "RELEASE_TREE_MISMATCH"
 for release_artifact in \
   deploy/df13-first-preprod-release-reconcile.sh \
   deploy/df13-first-preprod-release-reconcile.body.sh \
@@ -538,7 +578,6 @@ run_runtime_state_step capture env \
   RUNTIME_STATE_ROOT="$runtime_state_root" \
   RUNTIME_STATE_SERVICE_EVIDENCE_FILE="$service_evidence_snapshot" \
   RUNTIME_STATE_CANDIDATE_ID="$candidate_id" \
-  RUNTIME_STATE_GIT_DIR="$repository_dir" \
   "$release_dir/deploy/runtime-state/capture-current.sh"
 candidate_runtime_state_sha256="$(sha256_file "$candidate")"
 journal_write PREPARED "" "" ""
@@ -548,7 +587,6 @@ run_runtime_state_step verify env \
   RUNTIME_STATE_ROOT="$runtime_state_root" \
   RUNTIME_STATE_SERVICE_EVIDENCE_FILE="$service_evidence_snapshot" \
   RUNTIME_STATE_CANDIDATE="$candidate" \
-  RUNTIME_STATE_GIT_DIR="$repository_dir" \
   "$release_dir/deploy/runtime-state/verify-current.sh"
 
 run_runtime_state_step promote env \
@@ -556,7 +594,6 @@ run_runtime_state_step promote env \
   RUNTIME_STATE_ROOT="$runtime_state_root" \
   RUNTIME_STATE_SERVICE_EVIDENCE_FILE="$service_evidence_snapshot" \
   RUNTIME_STATE_CANDIDATE="$candidate" \
-  RUNTIME_STATE_GIT_DIR="$repository_dir" \
   "$release_dir/deploy/runtime-state/promote-current.sh"
 test "$(sha256_file "$runtime_state_current")" = "$candidate_runtime_state_sha256" || die "RUNTIME_STATE_PROMOTION_READBACK_MISMATCH"
 commit_reconciliation
