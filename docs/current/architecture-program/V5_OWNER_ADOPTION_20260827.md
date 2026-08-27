@@ -18,8 +18,9 @@ The owner adopts the Anti-Bloat V5 plan published in PR #258:
 - reviewed plan-content commit: `2289ea182f5a901cdf642d0ce94cd9472e25326f`;
 - reviewed plan-content blob: `a404f52f09234c8c35b299580e511e4e7fb5561e`.
 
-The proposal text remains historical source evidence. This adoption record, not
-a retrospective rewrite of the proposal, changes its governance status.
+The reviewed plan content at the recorded blob remains historical source
+evidence. This adoption record and the active-document adoption metadata do not
+retrospectively rewrite that reviewed content.
 
 ## Decision
 
