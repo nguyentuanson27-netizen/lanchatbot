@@ -91,7 +91,7 @@ assert.deepEqual(deployGitInvocation.args.slice(0, 11), [
   'HOME=/home/lana-deploy', 'GIT_CONFIG_NOSYSTEM=1', 'GIT_CONFIG_GLOBAL=/dev/null',
   'GIT_CONFIG_COUNT=1', 'GIT_CONFIG_KEY_0=core.sshCommand',
 ]);
-assert.match(deployGitInvocation.args[11], /^GIT_CONFIG_VALUE_0=\/usr\/bin\/ssh -F \/dev\/null -i \/home\/lana-deploy\/\.ssh\/lana_chatbot_github_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=\/home\/lana-deploy\/\.ssh\/known_hosts$/u);
+assert.match(deployGitInvocation.args[11], /^GIT_CONFIG_VALUE_0=\/usr\/bin\/ssh -F \/dev\/null -i \/home\/lana-deploy\/\.ssh\/lana_chatbot_github_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=\/home\/lana-deploy\/\.ssh\/known_hosts -o GlobalKnownHostsFile=\/dev\/null$/u);
 
 assert.equal(canonicalProjection({ B: '2', A: '1', UNKNOWN: 'excluded', META_TOKEN: 'excluded' }, ['A', 'B']), 'A=1\nB=2\n');
 assert.equal(digestProjection({ A: '1', B: '2' }, ['B', 'A']).sha256, digestProjection({ B: '2', A: '1', EXTRA: 'ignored' }, ['A', 'B']).sha256);

@@ -24,6 +24,7 @@ assert.match(entrypointSource, /readonly DEPLOY_APP_ROOT="\/opt\/lana-chatbot"/u
 assert.match(entrypointSource, /\/usr\/sbin\/runuser -u "\$DEPLOY_GIT_USER" -- \/usr\/bin\/env -i/u, "the public wrapper must invoke repository Git through the fixed deploy owner");
 assert.match(entrypointSource, /GIT_CONFIG_KEY_0=core\.sshCommand/u, "the public wrapper must override a repository-local root SSH command with the fixed deploy identity");
 assert.match(entrypointSource, /\/home\/lana-deploy\/\.ssh\/lana_chatbot_github_ed25519/u, "the public wrapper must use only the fixed deploy-owned read-only identity");
+assert.match(entrypointSource, /-o GlobalKnownHostsFile=\/dev\/null/u, "the public wrapper must not inherit global SSH host trust");
 assert.match(entrypointSource, /for deploy_directory in "\$DEPLOY_GIT_HOME" "\$DEPLOY_GIT_SSH_DIRECTORY"/u, "the public wrapper must enumerate the fixed credential parents");
 assert.match(entrypointSource, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_directory"\)" = "\$deploy_directory"/u, "the public wrapper must reject a symlinked credential parent");
 assert.match(entrypointSource, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_file"\)" = "\$deploy_file"/u, "the public wrapper must reject a credential whose parent resolves elsewhere");
@@ -50,6 +51,7 @@ assert.match(source, /readonly DEPLOY_APP_ROOT="\/opt\/lana-chatbot"/u, "the pri
 assert.match(source, /\/usr\/sbin\/runuser -u "\$DEPLOY_GIT_USER" -- \/usr\/bin\/env -i/u, "the private reconciliation body must use the deploy owner for repository Git operations");
 assert.match(source, /GIT_CONFIG_KEY_0=core\.sshCommand/u, "the private reconciliation body must override a repository-local root SSH command with the fixed deploy identity");
 assert.match(source, /\/home\/lana-deploy\/\.ssh\/lana_chatbot_github_ed25519/u, "the private reconciliation body must use only the fixed deploy-owned read-only identity");
+assert.match(source, /-o GlobalKnownHostsFile=\/dev\/null/u, "the private reconciliation body must not inherit global SSH host trust");
 assert.match(source, /for deploy_directory in "\$DEPLOY_GIT_HOME" "\$DEPLOY_GIT_SSH_DIRECTORY"/u, "the reconciliation body must enumerate the fixed credential parents");
 assert.match(source, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_directory"\)" = "\$deploy_directory"/u, "the reconciliation body must reject a symlinked credential parent");
 assert.match(source, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_file"\)" = "\$deploy_file"/u, "the reconciliation body must reject a credential whose parent resolves elsewhere");

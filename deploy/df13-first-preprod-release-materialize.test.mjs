@@ -35,6 +35,7 @@ assert.match(entrypointSource, /\/usr\/sbin\/runuser -u "\$DEPLOY_GIT_USER" -- \
 assert.match(entrypointSource, /GIT_CONFIG_KEY_0=core\.sshCommand/u, "the public materialization entrypoint must override an inherited repository SSH command with the fixed deploy-owned identity");
 assert.match(entrypointSource, /\/home\/lana-deploy\/\.ssh\/lana_chatbot_github_ed25519/u, "the public materialization entrypoint must select the fixed deploy-owned read-only identity");
 assert.match(entrypointSource, /-F \/dev\/null -i \$DEPLOY_GIT_PRIVATE_KEY -o IdentitiesOnly=yes -o BatchMode=yes/u, "the public materialization entrypoint must not inherit an operator SSH configuration");
+assert.match(entrypointSource, /-o GlobalKnownHostsFile=\/dev\/null/u, "the public materialization entrypoint must not inherit global SSH host trust");
 assert.match(entrypointSource, /for deploy_directory in "\$DEPLOY_GIT_HOME" "\$DEPLOY_GIT_SSH_DIRECTORY"/u, "the public materialization entrypoint must enumerate the fixed credential parents");
 assert.match(entrypointSource, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_directory"\)" = "\$deploy_directory"/u, "the public materialization entrypoint must reject a symlinked credential parent");
 assert.match(entrypointSource, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_file"\)" = "\$deploy_file"/u, "the public materialization entrypoint must reject a credential whose parent resolves elsewhere");
@@ -50,6 +51,7 @@ assert.match(bodySource, /readonly DEPLOY_GIT_USER="lana-deploy"/u, "the materia
 assert.match(bodySource, /\/usr\/sbin\/runuser -u "\$DEPLOY_GIT_USER" -- \/usr\/bin\/env -i/u, "all materializer repository Git operations must run as the deploy owner");
 assert.match(bodySource, /GIT_CONFIG_KEY_0=core\.sshCommand/u, "the materialization body must override any repository-local root SSH command");
 assert.match(bodySource, /\/home\/lana-deploy\/\.ssh\/lana_chatbot_github_ed25519/u, "the materialization body must retain a fixed deploy-owned read-only identity");
+assert.match(bodySource, /-o GlobalKnownHostsFile=\/dev\/null/u, "the materialization body must not inherit global SSH host trust");
 assert.match(bodySource, /for deploy_directory in "\$DEPLOY_GIT_HOME" "\$DEPLOY_GIT_SSH_DIRECTORY"/u, "the materialization body must enumerate the fixed credential parents");
 assert.match(bodySource, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_directory"\)" = "\$deploy_directory"/u, "the materialization body must reject a symlinked credential parent");
 assert.match(bodySource, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_file"\)" = "\$deploy_file"/u, "the materialization body must reject a credential whose parent resolves elsewhere");

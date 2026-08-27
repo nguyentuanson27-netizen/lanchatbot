@@ -27,7 +27,7 @@ export const DEPLOY_GIT_SSH_DIRECTORY = `${DEPLOY_GIT_HOME}/.ssh`;
 export const DEPLOY_GIT_PRIVATE_KEY = `${DEPLOY_GIT_SSH_DIRECTORY}/lana_chatbot_github_ed25519`;
 export const DEPLOY_GIT_KNOWN_HOSTS = `${DEPLOY_GIT_SSH_DIRECTORY}/known_hosts`;
 export const DEPLOY_GIT_PATH = '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin';
-export const DEPLOY_GIT_SSH_COMMAND = `/usr/bin/ssh -F /dev/null -i ${DEPLOY_GIT_PRIVATE_KEY} -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=${DEPLOY_GIT_KNOWN_HOSTS}`;
+export const DEPLOY_GIT_SSH_COMMAND = `/usr/bin/ssh -F /dev/null -i ${DEPLOY_GIT_PRIVATE_KEY} -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=${DEPLOY_GIT_KNOWN_HOSTS} -o GlobalKnownHostsFile=/dev/null`;
 const A0_MANIFEST = 'deploy/manifests/20260802-r32.2.2-runtime-reconciliation.json';
 const SHA256 = /^[a-f0-9]{64}$/;
 const IMAGE_ID = /^sha256:[a-f0-9]{64}$/;

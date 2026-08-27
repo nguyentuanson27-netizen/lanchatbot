@@ -40,7 +40,7 @@ readonly DEPLOY_GIT_HOME="/home/lana-deploy"
 readonly DEPLOY_GIT_SSH_DIRECTORY="/home/lana-deploy/.ssh"
 readonly DEPLOY_GIT_PRIVATE_KEY="/home/lana-deploy/.ssh/lana_chatbot_github_ed25519"
 readonly DEPLOY_GIT_KNOWN_HOSTS="/home/lana-deploy/.ssh/known_hosts"
-readonly DEPLOY_GIT_SSH_COMMAND="/usr/bin/ssh -F /dev/null -i $DEPLOY_GIT_PRIVATE_KEY -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$DEPLOY_GIT_KNOWN_HOSTS"
+readonly DEPLOY_GIT_SSH_COMMAND="/usr/bin/ssh -F /dev/null -i $DEPLOY_GIT_PRIVATE_KEY -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$DEPLOY_GIT_KNOWN_HOSTS -o GlobalKnownHostsFile=/dev/null"
 assert_deploy_git_identity() {
   deploy_uid="$(/usr/bin/id -u "$DEPLOY_GIT_USER")" || die "MATERIALIZER_DEPLOY_USER_UNAVAILABLE"
   for deploy_directory in "$DEPLOY_GIT_HOME" "$DEPLOY_GIT_SSH_DIRECTORY"; do
