@@ -21,6 +21,7 @@ assert.match(entrypointSource, /exec \/usr\/bin\/env -i/u, "the entrypoint must 
 assert.match(entrypointSource, /\/usr\/bin\/bash --noprofile --norc/u, "the entrypoint must use its absolute reviewed non-startup Bash interpreter");
 assert.match(entrypointSource, /git_attestation\(\)/u, "the public wrapper must isolate Git attestation from caller Git environment variables");
 assert.match(entrypointSource, /\/usr\/bin\/env -i PATH="\$TRUSTED_PATH" HOME=\/nonexistent GIT_CONFIG_NOSYSTEM=1 \/usr\/bin\/git/u, "the public wrapper must invoke Git through a minimal clean environment");
+assert.match(entrypointSource, /-c "safe\.directory=\$repository_dir"/u, "the public wrapper must trust only its derived deploy repository when root performs release attestation");
 assert.match(source, /^#!\/usr\/bin\/bash\nset -euo pipefail\nset -E\n/u, "the operational entrypoint must use its absolute reviewed interpreter");
 assert.doesNotMatch(source, /\beval\b/u, "reconciliation automation must not evaluate caller input");
 assert.doesNotMatch(source, /DF13_RECONCILE_BOOTSTRAP/u, "the private body must not accept a caller-mintable bootstrap bypass");
@@ -39,6 +40,7 @@ for (const required of ["DF13_RELEASE_COMMIT", "DF13_RELEASE_TREE", ".release-so
 assert.doesNotMatch(source, /DF13_(?:APP_ROOT|REPOSITORY_DIR|REALTIME_CONTAINER|RELEASE_DIR|PREVIOUS_RELEASE_DIR):=/u, "the caller must not select the reconciliation trust root, repository, container, or release directories");
 assert.match(source, /release_dir="\$\(dirname "\$\(dirname "\$script_path"\)"\)"/u, "the target release must derive from the executing reviewed artifact");
 assert.match(source, /repository_dir="\$app_root\/repository"/u, "the repository trust root must derive from the executing release path");
+assert.match(source, /-c "safe\.directory=\$repository_dir"/u, "the private reconciliation body must retain canonical repository trust for exact release verification");
 assert.match(source, /readonly realtime_container="lana-chatbot-realtime-worker"/u, "the reconciled service identity must be fixed by the reviewed contract");
 assert.match(source, /cat-file.*\$\{release_tag\}/u, "annotated tag validation is required");
 assert.match(source, /\^\{tree\}/u, "exact release tree validation is required");
@@ -79,6 +81,7 @@ assert.match(source, /DEPLOYMENT_LOCK_DESCRIPTOR_MISMATCH/u, "the durable deploy
 assert.doesNotMatch(source, /docker compose|psql|sales_authority_mode|COMMERCE/u, "reconciliation must not deploy, alter authority, or expose a direct database operator");
 assert.match(readFileSync(captureCurrent, "utf8"), /runtime-state\.mjs" capture/u, "runtime-state must be captured through the reviewed helper");
 const runtimeStateSource = readFileSync(runtimeStateProgram, "utf8");
+assert.match(runtimeStateSource, /safe\.directory=\$\{gitDir\}/u, "runtime-state capture must attest its explicit repository path when the release operator differs from the repository owner");
 const databaseCaptureStart = runtimeStateSource.indexOf("function captureLiveDatabase");
 const databaseCaptureEnd = runtimeStateSource.indexOf("export function postgresQueryInvocation", databaseCaptureStart);
 assert.notEqual(databaseCaptureStart, -1, "runtime-state database capture is missing");

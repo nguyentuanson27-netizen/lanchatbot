@@ -39,7 +39,7 @@ PATH="$TRUSTED_PATH"
 export PATH
 readonly TRUSTED_PATH PATH
 git_attestation() {
-  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 /usr/bin/git "$@"
+  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 /usr/bin/git -c "safe.directory=$repository_dir" "$@"
 }
 test -d "$repository_dir" && test ! -L "$repository_dir" || {
   printf '%s\n' "DF13_RELEASE_RECONCILIATION_BLOCKED:REPOSITORY_DIRECTORY_INVALID" >&2

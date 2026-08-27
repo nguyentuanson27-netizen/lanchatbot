@@ -199,7 +199,7 @@ function observedService(name, definition, evidence, gitDir) {
   const actualRevision = labels['org.opencontainers.image.revision'] ?? null;
   let expectedRevisionFetched = true;
   if (evidence.revisionRequired && COMMIT.test(evidence.expectedRevision ?? '')) {
-    try { run('git', ['-C', gitDir, 'cat-file', '-e', `${evidence.expectedRevision}^{commit}`]); } catch { expectedRevisionFetched = false; }
+    try { run('git', ['-c', `safe.directory=${gitDir}`, '-C', gitDir, 'cat-file', '-e', `${evidence.expectedRevision}^{commit}`]); } catch { expectedRevisionFetched = false; }
   }
   const result = attestServiceEvidence({ actualImageId: containerRecord.Image, actualRevision, evidence, expectedRevisionFetched });
   const registryDigest = [...(imageRecord.RepoDigests ?? [])].sort()[0] ?? null;
@@ -267,7 +267,7 @@ export function captureState({ runtimeRoot, serviceEvidenceFile, candidateId, gi
   if (target !== `/opt/lana-chatbot/releases/${basename(target)}`) fail('CURRENT_TARGET_OUTSIDE_RELEASES');
   const pointerPath = `${target}/.release-source.json`; if (!existsSync(pointerPath)) fail('SOURCE_POINTER_MISSING');
   const pointerFile = readJson(pointerPath); let fetchedCommit = null;
-  try { fetchedCommit = run('git', ['-C', gitDir, 'rev-parse', `${pointerFile.tag}^{}`]); } catch {}
+  try { fetchedCommit = run('git', ['-c', `safe.directory=${gitDir}`, '-C', gitDir, 'rev-parse', `${pointerFile.tag}^{}`]); } catch {}
   const pointer = attestSourcePointer(pointerFile, pointerPath, fetchedCommit);
   const evidence = readJson(serviceEvidenceFile); validateServiceEvidence(evidence, inventory);
   const services = {};

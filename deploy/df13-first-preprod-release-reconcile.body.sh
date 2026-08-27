@@ -27,6 +27,10 @@ require_command() {
   command -v "$1" >/dev/null 2>&1 || die "COMMAND_MISSING:$1"
 }
 
+git_attestation() {
+  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 /usr/bin/git -c "safe.directory=$repository_dir" "$@"
+}
+
 safe_release_dir() {
   local candidate="$1"
   local resolved
@@ -119,7 +123,7 @@ assert_release_artifact() {
   local expected_blob
   local actual_blob
   test -f "$artifact" && test ! -L "$artifact" || die "RELEASE_ARTIFACT_MISSING_OR_SYMLINK:$relative_path"
-  expected_blob="$(git -C "$repository_dir" rev-parse "${DF13_RELEASE_COMMIT}:${relative_path}")" || die "RELEASE_ARTIFACT_GIT_BLOB_MISSING:$relative_path"
+  expected_blob="$(git_attestation -C "$repository_dir" rev-parse "${DF13_RELEASE_COMMIT}:${relative_path}")" || die "RELEASE_ARTIFACT_GIT_BLOB_MISSING:$relative_path"
   actual_blob="$(git hash-object -- "$artifact")" || die "RELEASE_ARTIFACT_HASH_UNAVAILABLE:$relative_path"
   [[ "$expected_blob" =~ ^[a-f0-9]{40}$ && "$actual_blob" =~ ^[a-f0-9]{40}$ ]] || die "RELEASE_ARTIFACT_HASH_INVALID:$relative_path"
   test "$actual_blob" = "$expected_blob" || die "RELEASE_FILE_HASH_MISMATCH:$relative_path"
@@ -374,9 +378,9 @@ recover_incomplete_reconciliation() {
 release_dir="$(safe_release_dir "$release_dir")"
 test -s "$DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE" && test ! -L "$DF13_RUNTIME_STATE_SERVICE_EVIDENCE_FILE" || die "RUNTIME_STATE_EVIDENCE_MISSING_OR_SYMLINK"
 
-test "$(git -C "$repository_dir" cat-file -t "${release_tag}")" = "tag" || die "RELEASE_TAG_NOT_ANNOTATED"
-test "$(git -C "$repository_dir" rev-parse "${release_tag}^{commit}")" = "$DF13_RELEASE_COMMIT" || die "RELEASE_TAG_COMMIT_MISMATCH"
-test "$(git -C "$repository_dir" rev-parse "${DF13_RELEASE_COMMIT}^{tree}")" = "$DF13_RELEASE_TREE" || die "RELEASE_TREE_MISMATCH"
+test "$(git_attestation -C "$repository_dir" cat-file -t "${release_tag}")" = "tag" || die "RELEASE_TAG_NOT_ANNOTATED"
+test "$(git_attestation -C "$repository_dir" rev-parse "${release_tag}^{commit}")" = "$DF13_RELEASE_COMMIT" || die "RELEASE_TAG_COMMIT_MISMATCH"
+test "$(git_attestation -C "$repository_dir" rev-parse "${DF13_RELEASE_COMMIT}^{tree}")" = "$DF13_RELEASE_TREE" || die "RELEASE_TREE_MISMATCH"
 for release_artifact in \
   deploy/df13-first-preprod-release-reconcile.sh \
   deploy/df13-first-preprod-release-reconcile.body.sh \

@@ -36,7 +36,7 @@ PATH="$TRUSTED_PATH"
 export PATH
 readonly TRUSTED_PATH PATH
 git_attestation() {
-  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 /usr/bin/git "$@"
+  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 /usr/bin/git -c "safe.directory=$repository_dir" "$@"
 }
 die() {
   printf '%s\n' "DF13_RELEASE_MATERIALIZATION_BLOCKED:$1" >&2

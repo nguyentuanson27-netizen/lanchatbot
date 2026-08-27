@@ -20,7 +20,7 @@ require_command() {
   command -v "$1" >/dev/null 2>&1 || die "COMMAND_MISSING:$1"
 }
 git_attestation() {
-  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 /usr/bin/git "$@"
+  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 /usr/bin/git -c "safe.directory=$repository_dir" "$@"
 }
 assert_private_regular_file() {
   local candidate="$1"
@@ -160,7 +160,7 @@ try {
   } catch (error) {
     if (error?.code !== "ENOENT") throw error;
   }
-  const observedCommit = execFileSync("/usr/bin/git", ["-C", gitDir, "rev-parse", `${tag}^{commit}`], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+  const observedCommit = execFileSync("/usr/bin/git", ["-c", `safe.directory=${gitDir}`, "-C", gitDir, "rev-parse", `${tag}^{commit}`], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
   if (observedCommit !== commit) fail("RELEASE_SOURCE_GIT_READBACK_MISMATCH");
   const pointer = { schemaVersion: 1, release: tag, repository, tag, commit, createdAt: new Date().toISOString() };
   if (Object.keys(pointer).length !== keys.length || keys.some((key) => !Object.hasOwn(pointer, key)) || !utcPattern.test(pointer.createdAt) || !Number.isFinite(Date.parse(pointer.createdAt))) fail("RELEASE_SOURCE_INVALID");

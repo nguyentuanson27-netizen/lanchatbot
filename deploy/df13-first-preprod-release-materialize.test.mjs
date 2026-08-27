@@ -29,6 +29,7 @@ assert.match(entrypointSource, /^#!\/bin\/sh\nset -eu\n/u, "the public materiali
 assert.match(entrypointSource, /exec \/usr\/bin\/env -i/u, "the public materialization entrypoint must clear caller environment state");
 assert.match(entrypointSource, /\/usr\/bin\/bash --noprofile --norc/u, "the public materialization entrypoint must start the reviewed body without startup files");
 assert.match(entrypointSource, /MATERIALIZER_ENTRYPOINT_HASH_MISMATCH/u, "the public materialization entrypoint must attest itself before extraction");
+assert.match(entrypointSource, /-c "safe\.directory=\$repository_dir"/u, "the public materialization entrypoint must attest the canonical deploy repository even when it is owned by the deploy user");
 assert.match(entrypointSource, /copy_attested_blob "\$expected_body_blob" "\$private_body" "MATERIALIZER_BODY"/u, "the public materialization entrypoint must attest its body before extraction");
 assert.match(entrypointSource, /cat-file blob/u, "the public materialization entrypoint must execute immutable Git-blob bytes, not a mutable body pathname");
 assert.doesNotMatch(entrypointSource, /DF13_MATERIALIZER_RELEASE_SOURCE_BOOTSTRAP/u, "the public materialization entrypoint must not execute a separately candidate-selected source-pointer program");
@@ -36,6 +37,8 @@ assert.doesNotMatch(entrypointSource, /hash-object -- "\$body_path"/u, "hashing 
 
 assert.match(bodySource, /^#!\/usr\/bin\/bash\nset -euo pipefail\n/u, "the materialization body must use the reviewed Bash interpreter");
 assert.match(bodySource, /fetch --no-tags origin/u, "materialization must fetch only the named immutable tag");
+assert.match(bodySource, /-c "safe\.directory=\$repository_dir"/u, "the attested materialization body must preserve canonical repository trust after its clean-environment handoff");
+assert.match(bodySource, /safe\.directory=\$\{gitDir\}/u, "the inline release-source bootstrap must attest its fixed repository without inheriting caller Git configuration");
 assert.match(bodySource, /cat-file -t "\$release_tag"/u, "materialization must require an annotated release tag");
 assert.match(bodySource, /\^\{tree\}/u, "materialization must bind the exact release tree");
 assert.match(bodySource, /archive --format=tar "\$release_commit"/u, "materialization must extract the exact reviewed commit");
