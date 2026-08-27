@@ -1,4 +1,4 @@
-import { existsSync, lstatSync } from "node:fs";
+import { existsSync, lstatSync, realpathSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { isAbsolute, relative, resolve } from "node:path";
 
@@ -6,33 +6,51 @@ function fail(code) {
   throw new Error(code);
 }
 
-function resolveReleaseFile(repositoryRoot, relativePath) {
+function isOutsideRoot(path) {
+  return path.length === 0 || path === ".." || path.startsWith("../") || path.startsWith("..\\") || isAbsolute(path);
+}
+
+export function resolveTrustedReleaseFilePath({ repositoryRoot, relativePath, fileSystem = { lstatSync, realpathSync } }) {
   if (typeof repositoryRoot !== "string" || repositoryRoot.length === 0) fail("RELEASE_ARTIFACT_REPOSITORY_ROOT_INVALID");
   if (typeof relativePath !== "string" || relativePath.length === 0 || isAbsolute(relativePath)) fail("RELEASE_ARTIFACT_RELATIVE_PATH_INVALID");
-  const root = resolve(repositoryRoot);
+  if (!fileSystem || typeof fileSystem.lstatSync !== "function" || typeof fileSystem.realpathSync !== "function") fail("RELEASE_ARTIFACT_FILE_SYSTEM_INVALID");
+  const configuredRoot = resolve(repositoryRoot);
+  let rootStat;
+  let root;
+  try {
+    rootStat = fileSystem.lstatSync(configuredRoot);
+    root = fileSystem.realpathSync(configuredRoot);
+  } catch {
+    fail("RELEASE_ARTIFACT_REPOSITORY_ROOT_UNTRUSTED");
+  }
+  if (!rootStat.isDirectory() || rootStat.isSymbolicLink() || root !== configuredRoot) fail("RELEASE_ARTIFACT_REPOSITORY_ROOT_UNTRUSTED");
   const filePath = resolve(root, relativePath);
   const pathWithinRoot = relative(root, filePath);
-  if (pathWithinRoot.length === 0 || pathWithinRoot === ".." || pathWithinRoot.startsWith("../") || pathWithinRoot.startsWith("..\\") || isAbsolute(pathWithinRoot)) {
+  if (isOutsideRoot(pathWithinRoot)) {
     fail("RELEASE_ARTIFACT_RELATIVE_PATH_INVALID");
   }
-  return { root, filePath };
+  let file;
+  let resolvedFile;
+  try {
+    file = fileSystem.lstatSync(filePath);
+    resolvedFile = fileSystem.realpathSync(filePath);
+  } catch {
+    fail(`RELEASE_ARTIFACT_FILE_MISSING:${relativePath}`);
+  }
+  if (!file.isFile() || file.isSymbolicLink()) fail(`RELEASE_ARTIFACT_FILE_UNTRUSTED:${relativePath}`);
+  if (isOutsideRoot(relative(root, resolvedFile))) fail(`RELEASE_ARTIFACT_FILE_OUTSIDE_ROOT:${relativePath}`);
+  return { root, filePath: resolvedFile };
 }
 
 function expectedGitMode(expectedMode) {
   return `100${expectedMode.toString(8).padStart(3, "0")}`;
 }
 
-export function assertReviewedReleaseFileMode({ repositoryRoot, relativePath, expectedMode, label }) {
+export function assertReviewedReleaseFileMode({ repositoryRoot, relativePath, expectedMode, label, fileSystem = { lstatSync, realpathSync } }) {
   if (!Number.isInteger(expectedMode) || expectedMode < 0 || expectedMode > 0o777) fail("RELEASE_ARTIFACT_EXPECTED_MODE_INVALID");
   if (typeof label !== "string" || label.length === 0) fail("RELEASE_ARTIFACT_LABEL_INVALID");
-  const { root, filePath } = resolveReleaseFile(repositoryRoot, relativePath);
-  let file;
-  try {
-    file = lstatSync(filePath);
-  } catch {
-    fail(`RELEASE_ARTIFACT_FILE_MISSING:${relativePath}`);
-  }
-  if (!file.isFile() || file.isSymbolicLink()) fail(`RELEASE_ARTIFACT_FILE_UNTRUSTED:${relativePath}`);
+  const { root, filePath } = resolveTrustedReleaseFilePath({ repositoryRoot, relativePath, fileSystem });
+  const file = fileSystem.lstatSync(filePath);
 
   if (existsSync(resolve(root, ".git"))) {
     const indexed = spawnSync("git", ["ls-files", "--stage", "--", relativePath], { cwd: root, encoding: "utf8" });

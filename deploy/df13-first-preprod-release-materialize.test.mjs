@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { chmodSync, copyFileSync, existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { chmodSync, copyFileSync, existsSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, symlinkSync, writeFileSync } from "node:fs";
 import { spawn, spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
 import { assertReviewedReleaseFileMode } from "./release-artifact-mode.mjs";
@@ -62,6 +62,7 @@ assert.match(bodySource, /RELEASE_SOURCE_OBSERVED_COMMIT/u, "the source-pointer 
 assert.match(bodySource, /cat-file -t "\$release_tag"/u, "materialization must require an annotated release tag");
 assert.match(bodySource, /\^\{tree\}/u, "materialization must bind the exact release tree");
 assert.match(bodySource, /archive --format=tar "\$release_commit"/u, "materialization must extract the exact reviewed commit");
+assert.match(bodySource, /\(umask 022; tar -x -f - -C "\$staged_release_dir" --no-same-owner --no-same-permissions\)/u, "materialization must derive reviewed artifact modes independently of the caller umask");
 assert.match(bodySource, /create_bootstrap_release_source_pointer\(\)/u, "materialization must create the source pointer in the attested bootstrap body");
 assert.match(bodySource, /node --input-type=module/u, "source-pointer parsing and readback must run from attested inline bootstrap code");
 assert.doesNotMatch(bodySource, /\$staged_release_dir\/deploy\/runtime-state\/(?:create-release-source\.sh|release-source\.mjs)/u, "materialization must not execute candidate-controlled source-pointer helpers");
@@ -204,8 +205,8 @@ if (process.platform === "linux") {
     return { appRoot, repository, releases, shared, release, lock, commit, tree, candidateHelperMarker, tamperedBodyMarker };
   }
 
-  function run(fixtureState) {
-    return spawnSync(join(fixtureState.repository, "deploy", "df13-first-preprod-release-materialize.sh"), [], {
+  function run(fixtureState, { umask = "022" } = {}) {
+    return spawnSync("bash", ["-c", 'umask "$1"; exec "$2"', "bash", umask, join(fixtureState.repository, "deploy", "df13-first-preprod-release-materialize.sh")], {
       encoding: "utf8",
       env: { ...process.env, DF13_RELEASE_TAG: tag, DF13_RELEASE_COMMIT: fixtureState.commit, DF13_RELEASE_TREE: fixtureState.tree },
     });
@@ -222,6 +223,13 @@ if (process.platform === "linux") {
     assert.ok(!existsSync(successful.candidateHelperMarker), "candidate-controlled create-release-source automation must never execute");
     assert.ok(!existsSync(successful.tamperedBodyMarker), "a mutable working-tree body must never execute after its tag has been attested");
     assert.ok(readdirSync(successful.releases).every((name) => !name.includes(".materializing.")), "a successful promotion must leave no incomplete staging directory");
+    for (const inheritedUmask of ["002", "077"]) {
+      const nonDefaultUmask = fixture();
+      const materialized = run(nonDefaultUmask, { umask: inheritedUmask });
+      assert.equal(materialized.status, 0, `${materialized.stderr}\nmaterialization must not inherit caller umask ${inheritedUmask}`);
+      assert.equal(statSync(join(nonDefaultUmask.release, "deploy", "df13-first-preprod-release-materialize.sh")).mode & 0o777, 0o755, `materialized public entrypoint must have reviewed 0755 mode under caller umask ${inheritedUmask}`);
+      assert.equal(statSync(join(nonDefaultUmask.release, "deploy", "df13-first-preprod-release-materialize.body.sh")).mode & 0o777, 0o755, `materialized private body must have reviewed 0755 mode under caller umask ${inheritedUmask}`);
+    }
     const sourcePointerBytes = readFileSync(join(successful.release, ".release-source.json"), "utf8");
     const repeated = run(successful);
     assert.notEqual(repeated.status, 0, "an immutable release directory must not be overwritten on retry");

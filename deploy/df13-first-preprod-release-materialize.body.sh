@@ -238,7 +238,7 @@ readonly release_source_observed_commit
 
 mkdir -m 0750 -- "$materializing_dir" || die "MATERIALIZING_DIRECTORY_CREATE_FAILED"
 mkdir -m 0750 -- "$staged_release_dir" || die "STAGED_RELEASE_DIRECTORY_CREATE_FAILED"
-git_as_deploy -C "$repository_dir" archive --format=tar "$release_commit" | tar -x -f - -C "$staged_release_dir" --no-same-owner --no-same-permissions || die "RELEASE_ARCHIVE_EXTRACT_FAILED"
+git_as_deploy -C "$repository_dir" archive --format=tar "$release_commit" | (umask 022; tar -x -f - -C "$staged_release_dir" --no-same-owner --no-same-permissions) || die "RELEASE_ARCHIVE_EXTRACT_FAILED"
 test "$(hash_private_file "$staged_release_dir/deploy/df13-first-preprod-release-materialize.sh")" = "$(git_as_deploy -C "$repository_dir" rev-parse "${release_commit}:deploy/df13-first-preprod-release-materialize.sh")" || die "RELEASE_ENTRYPOINT_HASH_MISMATCH"
 test "$(hash_private_file "$staged_release_dir/deploy/df13-first-preprod-release-materialize.body.sh")" = "$(git_as_deploy -C "$repository_dir" rev-parse "${release_commit}:deploy/df13-first-preprod-release-materialize.body.sh")" || die "RELEASE_BODY_HASH_MISMATCH"
 
