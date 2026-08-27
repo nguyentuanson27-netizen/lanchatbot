@@ -356,6 +356,108 @@ describe("PostgresRuntimeBehaviorModeStore", () => {
     expect(statements.some((sql) => sql.includes("UPDATE runtime_behavior_mode_pointers"))).toBe(false);
   });
 
+  it("reuses the canonical COMMERCE version for a fresh reactivation operation without rewriting it", async () => {
+    const legacyPayload = {
+      confirmationMode: "V2_ACTIVE" as const,
+      salesAuthorityMode: "LEGACY" as const,
+      stateReadMode: "LEGACY" as const,
+    };
+    const commercePayload = {
+      confirmationMode: "V2_ACTIVE" as const,
+      salesAuthorityMode: "COMMERCE" as const,
+      stateReadMode: "LEGACY" as const,
+      authorityBundleHash: canonicalDf13BundleHash,
+    };
+    const legacyPointer = {
+      ...targetRow,
+      mode_version_id: "10000000-0000-4000-8000-000000000001",
+      confirmation_mode: legacyPayload.confirmationMode,
+      sales_authority_mode: legacyPayload.salesAuthorityMode,
+      state_read_mode: legacyPayload.stateReadMode,
+      content_hash: runtimeBehaviorModeContentHash(legacyPayload),
+      pointer_revision: 5,
+      updated_at: updatedAt,
+    };
+    const originallyPrepared = {
+      ...targetRow,
+      mode_version_id: "10000000-0000-4000-8000-000000000004",
+      confirmation_mode: commercePayload.confirmationMode,
+      sales_authority_mode: commercePayload.salesAuthorityMode,
+      state_read_mode: commercePayload.stateReadMode,
+      authority_bundle_hash: commercePayload.authorityBundleHash,
+      content_hash: runtimeBehaviorModeContentHash(commercePayload),
+      created_by: "DF13_FIRST_PREPROD_WRITER",
+      version_reason: "DF13_FIRST_PREPROD_PREPARE:10000000-0000-4000-8000-000000000010",
+    };
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes("clock_timestamp() AS operation_now")) {
+        return { rows: [{ operation_now: new Date("2026-08-25T00:01:00.000Z") }], rowCount: 1 };
+      }
+      if (sql.includes("FROM runtime_behavior_mode_pointers p")) return { rows: [legacyPointer], rowCount: 1 };
+      if (sql.includes("WHERE v.page_id = $1 AND v.channel = $2 AND v.content_hash = $3")) {
+        return { rows: [originallyPrepared], rowCount: 1 };
+      }
+      return { rows: [], rowCount: 0 };
+    });
+    const store = new PostgresRuntimeBehaviorModeStore("postgresql://test", 1);
+
+    await expect(store.prepareDf13FirstPreprodCommerceVersion({
+      pageId,
+      channel,
+      expectedCurrent: {
+        modeVersionId: legacyPointer.mode_version_id,
+        contentHash: legacyPointer.content_hash,
+        pointerRevision: 5,
+      },
+      proof: firstPreprodProof,
+      actor: "DF13_FIRST_PREPROD_WRITER",
+      reason: "DF13_FIRST_PREPROD_PREPARE:10000000-0000-4000-8000-000000000011",
+    })).resolves.toMatchObject({
+      modeVersionId: originallyPrepared.mode_version_id,
+      contentHash: originallyPrepared.content_hash,
+      reason: originallyPrepared.version_reason,
+    });
+
+    const statements = mocks.clientQuery.mock.calls.map(([sql]) => String(sql));
+    expect(statements).toContain("COMMIT");
+    expect(statements).not.toContain("ROLLBACK");
+    expect(statements.some((sql) => sql.includes("INSERT INTO runtime_behavior_mode_versions"))).toBe(false);
+    expect(statements.some((sql) => sql.includes("UPDATE runtime_behavior_mode_pointers"))).toBe(false);
+  });
+
+  it("rejects a same-hash COMMERCE version without first-PREPROD preparation provenance", async () => {
+    const legacyPayload = { confirmationMode: "V2_ACTIVE" as const, salesAuthorityMode: "LEGACY" as const, stateReadMode: "LEGACY" as const };
+    const commercePayload = { confirmationMode: "V2_ACTIVE" as const, salesAuthorityMode: "COMMERCE" as const, stateReadMode: "LEGACY" as const, authorityBundleHash: canonicalDf13BundleHash };
+    const legacyPointer = { ...targetRow, mode_version_id: "10000000-0000-4000-8000-000000000001", confirmation_mode: legacyPayload.confirmationMode, sales_authority_mode: legacyPayload.salesAuthorityMode, state_read_mode: legacyPayload.stateReadMode, content_hash: runtimeBehaviorModeContentHash(legacyPayload), pointer_revision: 5, updated_at: updatedAt };
+    const unrelatedCommerceVersion = {
+      ...targetRow,
+      mode_version_id: "10000000-0000-4000-8000-000000000004",
+      confirmation_mode: commercePayload.confirmationMode,
+      sales_authority_mode: commercePayload.salesAuthorityMode,
+      state_read_mode: commercePayload.stateReadMode,
+      authority_bundle_hash: commercePayload.authorityBundleHash,
+      content_hash: runtimeBehaviorModeContentHash(commercePayload),
+      created_by: "DF13_FIRST_PREPROD_WRITER",
+      version_reason: "untracked commerce creation",
+    };
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes("clock_timestamp() AS operation_now")) return { rows: [{ operation_now: new Date("2026-08-25T00:01:00.000Z") }], rowCount: 1 };
+      if (sql.includes("FROM runtime_behavior_mode_pointers p")) return { rows: [legacyPointer], rowCount: 1 };
+      if (sql.includes("WHERE v.page_id = $1 AND v.channel = $2 AND v.content_hash = $3")) return { rows: [unrelatedCommerceVersion], rowCount: 1 };
+      return { rows: [], rowCount: 0 };
+    });
+    const store = new PostgresRuntimeBehaviorModeStore("postgresql://test", 1);
+
+    await expect(store.prepareDf13FirstPreprodCommerceVersion({
+      pageId,
+      channel,
+      expectedCurrent: { modeVersionId: legacyPointer.mode_version_id, contentHash: legacyPointer.content_hash, pointerRevision: 5 },
+      proof: firstPreprodProof,
+      actor: "DF13_FIRST_PREPROD_WRITER",
+      reason: "DF13_FIRST_PREPROD_PREPARE:10000000-0000-4000-8000-000000000011",
+    })).rejects.toThrow("DF13_FIRST_PREPROD_PREPARATION_IDEMPOTENCY_MISMATCH");
+  });
+
   it("fails closed when a same-hash prepared version cannot prove exact replay identity", async () => {
     const legacyPayload = { confirmationMode: "V2_ACTIVE" as const, salesAuthorityMode: "LEGACY" as const, stateReadMode: "LEGACY" as const };
     const commercePayload = { confirmationMode: "V2_ACTIVE" as const, salesAuthorityMode: "COMMERCE" as const, stateReadMode: "LEGACY" as const, authorityBundleHash: canonicalDf13BundleHash };
