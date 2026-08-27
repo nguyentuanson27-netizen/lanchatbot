@@ -220,7 +220,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   const productionWrapperTrustedPath = 'TRUSTED_PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"';
   assert.ok(releaseEntrypointSource.includes(productionWrapperTrustedPath), "the fixture must begin from the reviewed wrapper command path");
   releaseEntrypointSource = releaseEntrypointSource.replace(productionWrapperTrustedPath, 'TRUSTED_PATH="${DF13_TEST_TRUSTED_PATH:?}"');
-  const deployHelper = /readonly DEPLOY_GIT_USER="lana-deploy"\ngit_as_deploy\(\) \{[\s\S]*?\n\}\n(?=hash_release_file\(\))/u;
+  const deployHelper = /readonly DEPLOY_GIT_USER="lana-deploy"\n[\s\S]*?\n\}\n(?=hash_release_file\(\))/u;
   assert.match(releaseEntrypointSource, deployHelper, "the fixture must begin from the reviewed wrapper deploy-owner boundary");
   releaseEntrypointSource = releaseEntrypointSource.replace(deployHelper, 'git_as_deploy() {\n  env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 git "$@"\n}\nhash_release_file() {\n  git hash-object -- "$1"\n}\n');
   const productionEntrypointPath = '  PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \\';

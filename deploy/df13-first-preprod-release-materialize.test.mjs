@@ -158,7 +158,7 @@ if (process.platform === "linux") {
     writeFileSync(bodyCopy, readFileSync(bodyCopy, "utf8").replaceAll("/opt/lana-chatbot", sourceRoot));
     for (const fixtureScript of [entrypointCopy, bodyCopy]) {
       const source = readFileSync(fixtureScript, "utf8");
-      const deployHelper = /readonly DEPLOY_GIT_USER="lana-deploy"\ngit_as_deploy\(\) \{[\s\S]*?\n\}\n(?=hash_private_file\(\))/u;
+      const deployHelper = /readonly DEPLOY_GIT_USER="lana-deploy"\n[\s\S]*?\n\}\n(?=hash_private_file\(\))/u;
       assert.match(source, deployHelper, "the fixture must begin from the reviewed deploy-owner Git boundary");
       writeFileSync(fixtureScript, source.replace(deployHelper, 'git_as_deploy() {\n  /usr/bin/env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null /usr/bin/git "$@"\n}\n'));
     }
