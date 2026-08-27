@@ -171,7 +171,7 @@ if (process.platform === "linux") {
     }
     if (bootstrapFails) writeFileSync(bodyCopy, readFileSync(bodyCopy, "utf8").replace("if (JSON.stringify(readback) !== JSON.stringify(pointer)) fail(\"RELEASE_SOURCE_READBACK_MISMATCH\");", "fail(\"RELEASE_SOURCE_READBACK_MISMATCH\");"));
     if (promotionTargetRace) {
-      const promotion = "mv -nT -- \"$staged_release_dir\" \"$release_dir\"\n";
+      const promotion = "mv -nT -- \"$staged_release_dir\" \"$release_dir\" || die \"RELEASE_DIRECTORY_PROMOTION_FAILED\"\n";
       assert.ok(readFileSync(bodyCopy, "utf8").includes(promotion), "the fixture must inject only at the no-replace promotion boundary");
       writeFileSync(bodyCopy, readFileSync(bodyCopy, "utf8").replace(promotion, `mkdir -- "$release_dir"\n${promotion}`));
     }
