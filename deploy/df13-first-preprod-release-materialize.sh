@@ -87,14 +87,14 @@ cleanup_private() {
   case "$private_dir" in
     "$shared_dir"/.df13-materializer.*)
       if test -d "$private_dir" && test ! -L "$private_dir"; then
-        /usr/bin/rm -rf -- "$private_dir"
+        rm -rf -- "$private_dir"
       fi
       ;;
   esac
 }
 trap cleanup_private 0
 trap 'cleanup_private; exit 1' 1 2 15
-private_dir="$(umask 077; /usr/bin/mktemp -d "$shared_dir/.df13-materializer.XXXXXXXX")" || die "MATERIALIZER_PRIVATE_DIRECTORY_CREATE_FAILED"
+private_dir="$(umask 077; mktemp -d "$shared_dir/.df13-materializer.XXXXXXXX")" || die "MATERIALIZER_PRIVATE_DIRECTORY_CREATE_FAILED"
 test -d "$private_dir" && test ! -L "$private_dir" || die "MATERIALIZER_PRIVATE_DIRECTORY_INVALID"
 test "$(stat -c '%u' -- "$private_dir")" = "$(/usr/bin/id -u)" || die "MATERIALIZER_PRIVATE_DIRECTORY_OWNER_INVALID"
 
@@ -106,7 +106,7 @@ copy_attested_blob() {
   test -f "$destination" && test ! -L "$destination" || die "${failure_prefix}_PRIVATE_ARTIFACT_INVALID"
   actual_blob="$(hash_private_file "$destination")" || die "${failure_prefix}_HASH_UNAVAILABLE"
   test "$actual_blob" = "$expected_blob" || die "${failure_prefix}_HASH_MISMATCH"
-  /usr/bin/chmod 0700 -- "$destination" || die "${failure_prefix}_MODE_FAILED"
+  chmod 0700 -- "$destination" || die "${failure_prefix}_MODE_FAILED"
 }
 
 private_body="$private_dir/materialize.body.sh"
@@ -120,4 +120,4 @@ exec /usr/bin/env -i \
   DF13_MATERIALIZER_APP_ROOT="$app_root" \
   DF13_MATERIALIZER_REPOSITORY_DIR="$repository_dir" \
   DF13_MATERIALIZER_PRIVATE_DIR="$private_dir" \
-  /usr/bin/bash --noprofile --norc "$private_body"
+  /bin/bash --noprofile --norc "$private_body"

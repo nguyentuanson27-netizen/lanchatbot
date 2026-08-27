@@ -29,7 +29,7 @@ for (const [relativePath, expectedMode] of [
 
 assert.match(entrypointSource, /^#!\/bin\/sh\nset -eu\n/u, "the public materialization entrypoint must avoid caller Bash startup hooks");
 assert.match(entrypointSource, /exec \/usr\/bin\/env -i/u, "the public materialization entrypoint must clear caller environment state");
-assert.match(entrypointSource, /\/usr\/bin\/bash --noprofile --norc/u, "the public materialization entrypoint must start the reviewed body without startup files");
+assert.match(entrypointSource, /\/bin\/bash --noprofile --norc/u, "the public materialization entrypoint must start the reviewed body without startup files");
 assert.match(entrypointSource, /MATERIALIZER_ENTRYPOINT_HASH_MISMATCH/u, "the public materialization entrypoint must attest itself before extraction");
 assert.doesNotMatch(entrypointSource, /safe\.directory/u, "the public materialization entrypoint must not broaden root Git trust");
 assert.match(entrypointSource, /readonly DEPLOY_GIT_USER="lana-deploy"/u, "the public materialization entrypoint must use the fixed deploy repository owner");
@@ -41,13 +41,13 @@ assert.match(entrypointSource, /-o GlobalKnownHostsFile=\/dev\/null/u, "the publ
 assert.match(entrypointSource, /for deploy_directory in "\$DEPLOY_GIT_HOME" "\$DEPLOY_GIT_SSH_DIRECTORY"/u, "the public materialization entrypoint must enumerate the fixed credential parents");
 assert.match(entrypointSource, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_directory"\)" = "\$deploy_directory"/u, "the public materialization entrypoint must reject a symlinked credential parent");
 assert.match(entrypointSource, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_file"\)" = "\$deploy_file"/u, "the public materialization entrypoint must reject a credential whose parent resolves elsewhere");
-assert.doesNotMatch(entrypointSource, /\/usr\/bin\/stat/u, "the public materialization entrypoint must use the trusted PATH for stat portability");
+assert.doesNotMatch(entrypointSource, /\/usr\/bin\/(?:stat|mktemp|rm|chmod|bash)/u, "the public materialization entrypoint must use portable trusted command paths");
 assert.match(entrypointSource, /copy_attested_blob "\$expected_body_blob" "\$private_body" "MATERIALIZER_BODY"/u, "the public materialization entrypoint must attest its body before extraction");
 assert.match(entrypointSource, /cat-file blob/u, "the public materialization entrypoint must execute immutable Git-blob bytes, not a mutable body pathname");
 assert.doesNotMatch(entrypointSource, /DF13_MATERIALIZER_RELEASE_SOURCE_BOOTSTRAP/u, "the public materialization entrypoint must not execute a separately candidate-selected source-pointer program");
 assert.doesNotMatch(entrypointSource, /hash-object -- "\$body_path"/u, "hashing a mutable body pathname before reopening it leaves a hash-to-execution race");
 
-assert.match(bodySource, /^#!\/usr\/bin\/bash\nset -euo pipefail\n/u, "the materialization body must use the reviewed Bash interpreter");
+assert.match(bodySource, /^#!\/bin\/bash\nset -euo pipefail\n/u, "the materialization body must use the portable reviewed Bash interpreter");
 assert.match(bodySource, /fetch --no-tags origin/u, "materialization must fetch only the named immutable tag");
 assert.doesNotMatch(bodySource, /safe\.directory/u, "the materialization body must not bypass Git ownership protection");
 assert.match(bodySource, /readonly DEPLOY_GIT_USER="lana-deploy"/u, "the materialization body must use the fixed deploy repository owner");
@@ -58,7 +58,7 @@ assert.match(bodySource, /-o GlobalKnownHostsFile=\/dev\/null/u, "the materializ
 assert.match(bodySource, /for deploy_directory in "\$DEPLOY_GIT_HOME" "\$DEPLOY_GIT_SSH_DIRECTORY"/u, "the materialization body must enumerate the fixed credential parents");
 assert.match(bodySource, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_directory"\)" = "\$deploy_directory"/u, "the materialization body must reject a symlinked credential parent");
 assert.match(bodySource, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_file"\)" = "\$deploy_file"/u, "the materialization body must reject a credential whose parent resolves elsewhere");
-assert.doesNotMatch(bodySource, /\/usr\/bin\/stat/u, "the materialization body must use the trusted PATH for stat portability");
+assert.doesNotMatch(bodySource, /\/usr\/bin\/(?:stat|mktemp|rm|chmod|bash)/u, "the materialization body must use portable trusted command paths");
 assert.doesNotMatch(bodySource, /execFileSync\("\/usr\/bin\/git"/u, "the root-owned source-pointer bootstrap must not perform Git reads itself");
 assert.match(bodySource, /RELEASE_SOURCE_OBSERVED_COMMIT/u, "the source-pointer bootstrap must consume the immediately attested commit rather than a caller-selected Git directory");
 assert.match(bodySource, /cat-file -t "\$release_tag"/u, "materialization must require an annotated release tag");
