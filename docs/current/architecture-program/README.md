@@ -3,7 +3,7 @@
 **Purpose:** Keep planning context small while preserving durable contracts and evidence.
 **Status:** Repository planning authority for BF/DF/UR on this branch; never deployment authorization.
 **Operating mode:** `ENGINEERING_PREPROD`; see `OPERATING_MODE.md`.
-**Current program point:** `GATE_E_PREPROD_ACCEPTED`; DF11–DF13 are merged source-only and `DF-C` / `DF13` is `SOURCE_FOUNDATIONS_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING`. See `GATE_E_PREPROD_ACCEPTANCE_20260821.md`.
+**Current program point:** `GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE`; PREPROD remains on the exact verified COMMERCE release with `stateReadMode=LEGACY`. See `DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md`.
 
 ## Default reading order for BF
 
@@ -37,6 +37,7 @@ that explicit verdict.
 | Gate E registration/evaluation execution | `GATE_E_PREPROD_EXECUTION_PLAN.md` + `GATE_E_EVIDENCE_ADMISSION_ADR.md` + `contracts/MODEL_EVALUATION_BOUNDARY.md` |
 | Gate E accepted / DF-C source work | `GATE_E_PREPROD_ACCEPTANCE_20260821.md` + `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + relevant contracts |
 | DF13 operational-acceptance preparation | `DF13_PREPROD_FRESH_PROCESS_DECISION.md` + `DF13_OPERATIONAL_ACCEPTANCE_PREPARATION.md` + `contracts/DF13_FENCE_AND_RELEASE_EVIDENCE.md` + `contracts/RELEASE_INTEGRITY.md` |
+| DF13 / Gate F accepted runtime | `DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md` + `program-state.json` |
 | Release/deploy/evidence | `contracts/RELEASE_INTEGRITY.md` |
 | Dataset/package work | `contracts/DATASET_BOUNDARY.md` |
 | DF work after Gate BF / post-Gate-F sequencing | `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + `V5_OWNER_ADOPTION_20260827.md` + relevant contracts |
@@ -99,9 +100,9 @@ Active PREPROD roadmap:
   -> DF-B: DF-P4..DF-P6 / DF07-10
   -> Gate E-PREPROD accepted (v15 evidence)
   -> DF-C: DF-P7 / DF11-13 source complete; first controlled LEGACY -> COMMERCE uses the separately authorized stopped-process PREPROD replacement
-  -> controlled critical human E2E
-  -> Gate F-PREPROD
-  -> V5 Track B: complete normal model authority
+  -> controlled critical human E2E (passed)
+  -> Gate F-PREPROD accepted / DF-C complete
+  -> V5 Track B: complete normal model authority (next; not automatically authorized)
   -> V5 Track C: bounded safety + sales-quality learning loop
   -> UR / State V2 / Gate U only when a concrete trigger and separate approval require a narrow slice
   -> explicit owner trigger: PRODUCTION_HARDENING

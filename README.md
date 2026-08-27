@@ -11,7 +11,7 @@
 - Gate BF/E/F/U là engineering/architecture gates, không tự động đồng nghĩa production-ready.
 - Chỉ owner mới có thể chuyển chương trình sang `PRODUCTION_HARDENING` bằng yêu cầu rõ ràng.
 
-**Vị trí chương trình hiện tại:** Owner đã chấp nhận `GATE_E_PREPROD_ACCEPTED` cho v15; DF11–DF13 đã merge **source-only** và DF-C đang `SOURCE_FOUNDATIONS_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING`. Gate E v15 bind một manifest, evidence BODY và FINALIZATION bất biến; xem [Gate E acceptance record](docs/current/architecture-program/GATE_E_PREPROD_ACCEPTANCE_20260821.md). BF-03 vẫn foundation-only/non-activatable, BF-04 vẫn `PARTIAL / KNOWN_GAP`, và BF-10 vẫn thiếu natural terminal transition sau cutover. Các residual không được diễn giải là đã sửa. Runtime vẫn `salesAuthorityMode=LEGACY`, `stateReadMode=LEGACY`; không có deploy, canary hoặc `COMMERCE` activation nào được suy ra từ quyết định này.
+**Vị trí chương trình hiện tại:** `GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE`. PREPROD test page đang chạy exact COMMERCE release với `stateReadMode=LEGACY`; controlled Messenger E2E và exact rollback/reactivation lifecycle đã PASS. Xem [DF13 / Gate F acceptance record](docs/current/architecture-program/DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md). BF-03 vẫn foundation-only/non-activatable, BF-04 vẫn `PARTIAL / KNOWN_GAP`, BF-10 vẫn còn natural-terminal residual, và `DATABASE_URL` remediation vẫn tách riêng; không residual nào được diễn giải là đã sửa. Đây không phải public-production promotion, page expansion, UR/State V2 approval hay quyền xoá LEGACY.
 
 Nguồn governance authoritative: [Operating Mode](docs/current/architecture-program/OPERATING_MODE.md). Việc đổi mode không thay đổi verified-claim, side-effect authorization, SSRF, PII/secret, auth, database-safety, authority-transition, rollback hoặc release-integrity invariants.
 
@@ -182,7 +182,8 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 
 - [Architecture Program — active BF/DF/UR context index](docs/current/architecture-program/README.md) — nguồn định tuyến context gọn; không tự cấp quyền merge hoặc deploy
 - [Operating Mode — ENGINEERING_PREPROD governance](docs/current/architecture-program/OPERATING_MODE.md) — định nghĩa PR/Release Train, Gate semantics, PREPROD_TEST_PAGE và trigger PRODUCTION_HARDENING
-- [DF13 operational-acceptance preparation](docs/current/architecture-program/DF13_OPERATIONAL_ACCEPTANCE_PREPARATION.md) — source/read-only packet và fail-closed boundary; không cấp quyền release, migration hay activation
+- [DF13 / Gate F PREPROD acceptance](docs/current/architecture-program/DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md) — exact COMMERCE runtime, rollback/reactivation và Messenger E2E evidence
+- [DF13 operational-acceptance preparation](docs/current/architecture-program/DF13_OPERATIONAL_ACCEPTANCE_PREPARATION.md) — preparation/runbook retained for traceability
 - [Production baseline và ownership](docs/current/PRODUCTION_BASELINE_20260722.md)
 - [Kế hoạch nâng cấp Realtime Sales Agent](docs/current/REALTIME_AGENT_UPGRADE_PLAN.md)
 - [Kế hoạch triển khai Wave 1 & Wave 2 v1.2](docs/current/WAVE1_WAVE2_IMPLEMENTATION_PLAN_v1.2.md)

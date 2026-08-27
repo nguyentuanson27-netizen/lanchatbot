@@ -1,26 +1,26 @@
 {
   "schemaVersion": 2,
-  "status": "GATE_E_PREPROD_ACCEPTED",
-  "evidenceAsOf": "2026-08-21",
-  "ownerDecisionAt": "2026-08-21",
+  "status": "GATE_F_PREPROD_ACCEPTED_DF_C_COMPLETE",
+  "evidenceAsOf": "2026-08-28",
+  "ownerDecisionAt": "2026-08-28",
   "operatingMode": "ENGINEERING_PREPROD",
   "livePageRole": "PREPROD_TEST_PAGE",
   "git": {
-    "reconciledMainCommit": "7ffa858911efb583ebf214b163843ac12a11766b",
+    "reconciledMainCommit": "abea1fb0c524e9de405c80fda59691a371b85ab8",
     "latestRuntimeEvidencePullRequest": 193,
-    "realtimeReleaseTag": "20260812-unbounded-text-media-guard-r5.7.1",
-    "realtimeReleaseCommit": "92bc150b452f7ef40e52871f16a444a4979a8d8c",
+    "realtimeReleaseTag": "20260828-df13-preprod-commerce-abea1fb",
+    "realtimeReleaseCommit": "abea1fb0c524e9de405c80fda59691a371b85ab8",
     "deliveryReleaseTag": "20260812-bf10-delivery-r5.6",
     "deliveryReleaseCommit": "a5d5066660a2c4365657a6ff99276c259848931d"
   },
   "runtime": {
-    "runtimeStateSha256": "3facb2f3b60840c6bc5dd442640207e882ee1fb0f4bde3b631248ecc67f8aa65",
-    "currentRelease": "20260812-unbounded-text-media-guard-r5.7.1",
-    "migration": "0031_admin_policy_safe_deletion",
+    "runtimeStateSha256": "189b99aa17838b54a48f689e909e1b2c8377205004acfd79846ee88a435d5e72",
+    "currentRelease": "20260828-df13-preprod-commerce-abea1fb",
+    "migration": "0035_df13_commerce_behavior_mode",
     "confirmationMode": "V2_ACTIVE",
-    "salesAuthorityMode": "LEGACY",
+    "salesAuthorityMode": "COMMERCE",
     "stateReadMode": "LEGACY",
-    "behaviorPointerRevision": 3,
+    "behaviorPointerRevision": 6,
     "behaviorSource": "DATABASE",
     "pageAllowlist": [
       "1198992073286645"
@@ -34,9 +34,9 @@
     },
     "services": {
       "realtimeWorker": {
-        "release": "20260812-unbounded-text-media-guard-r5.7.1",
-        "imageId": "sha256:cfb2af1c0a6e54d4a0df5249af24a3ac806fbc31ef2431c5e43471e420af6daf",
-        "revision": "92bc150b452f7ef40e52871f16a444a4979a8d8c"
+        "release": "20260828-df13-preprod-commerce-abea1fb",
+        "imageId": "sha256:ea0b076cfded1b8e10d817c43ba984066c97b2b18bcdff878fa91ed809c42c16",
+        "revision": "abea1fb0c524e9de405c80fda59691a371b85ab8"
       },
       "deliveryWorker": {
         "release": "20260812-bf10-delivery-r5.6",
@@ -106,19 +106,38 @@
     "durableEvidence": "EVIDENCE_AND_FINALIZATION_APPENDED",
     "governanceRecord": "docs/current/architecture-program/GATE_E_PREPROD_ACCEPTANCE_20260821.md"
   },
+  "gateF": {
+    "status": "GATE_F_PREPROD_ACCEPTED",
+    "decisionRecordedAt": "2026-08-28",
+    "sourceThreadId": "019ff0ed-3760-7e81-98f4-5e91e8ca35b0",
+    "scope": "ENGINEERING_PREPROD_PAGE_1198992073286645_MESSENGER_ONLY",
+    "releaseTag": "20260828-df13-preprod-commerce-abea1fb",
+    "releaseCommit": "abea1fb0c524e9de405c80fda59691a371b85ab8",
+    "releaseTree": "c5f8e040240f1ef3ebabdaf5e82bc1da9c2983c4",
+    "candidateFingerprint": "86ff34479283895ac97274b9cace946e2926b17bc1ac381d540f2f03a17d977a",
+    "authorityBundleHash": "e423f3f647dce25cd74501555b73fc69cf66e4138fbfdda6b7e9c471fe89a05c",
+    "behaviorVersion": "c88f3d7a-3c14-49ff-ab07-bcfbf664c643",
+    "behaviorContentHash": "sha256:4900e2469b3f82cf66377a421e006cb11a2ce15eaf997b399ca327577a54be7b",
+    "behaviorPointerRevision": 6,
+    "authoritySource": "DATABASE",
+    "rollbackLifecycle": "COMMERCE_REV4_TO_EXACT_LEGACY_REV5_TO_COMMERCE_REV6_VERIFIED",
+    "messengerE2E": "PASS_NEW_CONVERSATION_CONTEXT_V2_OUTBOX_SENT_ACCEPTED",
+    "runtimeStateSha256": "189b99aa17838b54a48f689e909e1b2c8377205004acfd79846ee88a435d5e72",
+    "governanceRecord": "docs/current/architecture-program/DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md"
+  },
   "active": {
-    "track": "DF-C",
-    "nextIssue": "DF-13 Operational Acceptance",
-    "gate": "GATE_E_PREPROD_ACCEPTED",
-    "authorization": "OPERATIONAL_ACCEPTANCE_PENDING_NO_RUNTIME_ACTIVATION"
+    "track": "POST_DF_V5_TRACK_B",
+    "nextIssue": "Complete normal model authority",
+    "gate": "GATE_F_PREPROD_ACCEPTED",
+    "authorization": "NO_NEXT_TRACK_IMPLEMENTATION_WITHOUT_SEPARATE_OWNER_COMMAND"
   },
   "future": [
-    "Anti-Bloat V5: ADOPTED as the canonical post-Gate-F sequencing baseline by V5_OWNER_ADOPTION_20260827.md; it binds PR #258 merge commit 580b0f5e1793d742be3a7eb50eaf88ee31e1e977 and reviewed plan-content blob a404f52f09234c8c35b299580e511e4e7fb5561e. The active point remains DF-13 Operational Acceptance with no runtime activation.",
+    "Anti-Bloat V5: ADOPTED as the canonical post-Gate-F sequencing baseline by V5_OWNER_ADOPTION_20260827.md; it binds PR #258 merge commit 580b0f5e1793d742be3a7eb50eaf88ee31e1e977 and reviewed plan-content blob a404f52f09234c8c35b299580e511e4e7fb5561e. Gate F is now accepted and the next point is V5 Track B under separate authorization.",
     "Post-Gate-F V5: Track B model authority and Track C bounded quality learning are the default path. UR/State V2, Gate U, multi-page expansion, production hardening, traffic canaries, long soak, and destructive LEGACY cleanup are trigger-only unless separately authorized.",
     "DF-11: merged source-only (PR #238); default-off, side-effect-free authority comparison; no runtime SHADOW authority",
     "DF-12: merged source-only (PR #239); missing-commerce signal; no runtime activation",
-    "DF-13: SOURCE_FOUNDATIONS_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING; COMMERCE version/bundle, pure fence admission, release-evidence, cutover contracts, durable provider/dispatcher, default-off consumer, real fresh-process RealtimeRunner composition, and narrow non-generic writer are source-only. The stopped-process exercise does not use 0036; it requires a sealed/drained/stopped-zero boundary, strict Context V2 capture with each Commerce durable commit, and exact LEGACY pointer restoration. 0035 remains a pending non-auto-applied artifact, LEGACY control-plane source remains schema-compatible, and no migration, deployment, canary, replacement, or activation is authorized",
-    "UR-00 and later: blocked until DF-13 stability and explicit owner approval"
+    "DF-13: GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE; exact stopped-process COMMERCE activation, Context V2 Messenger E2E, exact LEGACY rollback, fresh COMMERCE reactivation, runtime identity and migration 0035 evidence are recorded. Migration 0036 remains pending and unapplied.",
+    "UR-00 and later: trigger-only and blocked until a separate explicit owner approval"
   ],
   "hardStops": [
     "NO_BF_RESIDUAL_MISREPRESENTATION_AS_FIXED",
@@ -127,7 +146,7 @@
     "NO_UNVERIFIED_HOST_SCRIPT_REUSE",
     "NO_PAGE_ALLOWLIST_EXPANSION",
     "NO_PREPROD_OR_PRODUCTION_MUTATION_WITHOUT_EXPLICIT_APPROVAL",
-    "NO_DF_C_RUNTIME_ACTIVATION_OR_COMMERCE_CUTOVER_WITHOUT_SEPARATE_OWNER_AUTHORIZATION",
+    "NO_FURTHER_DF_C_AUTHORITY_MUTATION_OR_ROLLBACK_WITHOUT_SEPARATE_OWNER_AUTHORIZATION",
     "NO_DF_C_RUNTIME_SHADOW_AUTHORITY",
     "NO_UR_WORK_BEFORE_DF13_STABILITY_AND_UR00_APPROVAL"
   ]

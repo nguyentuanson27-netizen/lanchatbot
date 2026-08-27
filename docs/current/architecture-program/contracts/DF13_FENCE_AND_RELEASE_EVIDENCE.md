@@ -217,6 +217,12 @@ approved commands.
 Until that work is separately authorized and accepted, runtime remains
 `salesAuthorityMode=LEGACY`, `stateReadMode=LEGACY`.
 
+That first stopped-process work was later authorized and accepted by
+[`DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md`](../DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md).
+PREPROD therefore now remains on exact `salesAuthorityMode=COMMERCE` with
+`stateReadMode=LEGACY`; this contract still governs future replacement and
+rollback operations and grants no production or page-expansion authority.
+
 BF-03 remains foundation-only/non-activatable, BF-04 remains `PARTIAL /
 KNOWN_GAP`, and BF-10 natural-terminal evidence remains pending. This contract
 does not alter those residuals or the separate `DATABASE_URL` remediation.

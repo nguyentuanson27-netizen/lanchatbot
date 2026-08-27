@@ -1,6 +1,6 @@
 # DF13 Operational-Acceptance Preparation
 
-**Status:** `SOURCE_FOUNDATIONS_COMPLETE / OPERATIONAL_ACCEPTANCE_PENDING`; not an activation, release, deployment, migration, canary, or cutover authorization.
+**Status:** `COMPLETED / SUPERSEDED_BY_DF13_GATE_F_PREPROD_ACCEPTANCE_20260828`; retained as the preparation and rollback contract. See [`DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md`](DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md).
 
 **Source completion:** DF13 source contracts/tooling merged on `main` through PR #247
 (`a8f6e500a8a33f652f7fd2051a135c3b245c5386`). This source merge is not
