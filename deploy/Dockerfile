@@ -13,7 +13,7 @@ COPY evaluation ./evaluation
 COPY deploy ./deploy
 
 RUN pnpm install --frozen-lockfile
-RUN pnpm check
+RUN pnpm -r build
 
 FROM node:22-alpine AS runtime
 
