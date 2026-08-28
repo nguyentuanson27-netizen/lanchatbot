@@ -68,7 +68,7 @@ that explicit verdict.
 -  disposition.
 - `OPERATING_MODE.md` owns current environment classification, PR-versus-Release-Train process, Gate semantics, and the `PRODUCTION_HARDENING` trigger.
 - `BF_ISSUE_SPECS.md` owns detailed BF acceptance criteria.
-- `ACTIVE_IMPLEMENTATION_PLAN.md` owns active architecture/rollout.
+- `ACTIVE_IMPLEMENTATION_PLAN.md` owns active architecture and rollout.
 - `FUTURE_BACKLOG.md` owns deferred DF/UR work and activates after Gate BF.
 - `contracts/` owns durable invariants.
 - CURRENT_BASELINE.md, program-state.json, and the later Gate E acceptance record preserve reconciled checkpoints and dispositions; they never replace fresh runtime evidence.
