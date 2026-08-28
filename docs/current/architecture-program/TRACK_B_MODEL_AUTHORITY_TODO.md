@@ -1,0 +1,138 @@
+# Track B — Execution Checklist
+
+**Status:** `PLAN_ONLY / IMPLEMENTATION REQUIRES SEPARATE OWNER COMMAND`
+
+## Before implementation
+
+- [ ] Receive a separate owner command authorizing Track B implementation; merge of the plan PR is not authorization.
+- [ ] Re-read `AGENTS.md`, `OPERATING_MODE.md`, `program-state.json`, this plan, and relevant contracts from the exact merged `main` head.
+- [ ] Confirm whether PR #269 / `SOLO_PREPROD_MINIMAL` is actually merged; if not, follow current merged governance instead.
+- [ ] Lock the exact implementation head used for B1.
+- [ ] Keep `stateReadMode=LEGACY`; do not start UR/State V2 without a separate evidence-backed approval.
+- [ ] Treat current BF-04 P0 size-claim residual as open until new evidence proves otherwise.
+
+## B1 — Scope / authority / provenance lock
+
+- [ ] Trace exact current COMMERCE hot path from DF13 authority admission to commit/Outbox.
+- [ ] Treat `df13-commerce-runtime-composition.ts` as the existing single COMMERCE composition seam; prove any exception before changing architecture.
+- [ ] Separate already-demoted legacy `salesStage` from current `SalesCycleStageV1` / DF13-context authority.
+- [ ] Classify reachable components as `KEEP`, `SPLIT/REWRITE`, `RETIRE_AFTER_CUTOVER`, or `ROLLBACK_ONLY`.
+- [ ] Lock exact B2.1/B2.2 files and focused tests.
+- [ ] Inventory all authority-affecting candidate source files against `GATE_E_CANDIDATE_SOURCE_PATHS_V1`.
+- [ ] Record which changed/new files require candidate-source/fingerprint re-derivation.
+- [ ] Map BF-04 unverified size-claim bypasses relevant to B2.3d.
+- [ ] Determine whether Track B activation changes authority-bundle payload/hash, behavior pointer/config, migration requirements, or source code only.
+- [ ] Check current CI capability and exact fallback allowed by merged governance.
+- [ ] Re-estimate remaining Track B work from B1 evidence.
+- [ ] Stop/amend plan if a state migration, second permanent runtime/control plane, or materially wider slice is required.
+- [ ] **Checkpoint:** B1 findings reviewed before B2.1.
+
+## B2.1 — Extend existing DF13 seam
+
+- [ ] Extend/reuse DF13 composition/executor/context/finalization; do not add a sibling top-level `CommerceRuntime`.
+- [ ] Add only minimum internal stage interfaces needed for proposal -> verification -> reconciliation -> fallback/finalization.
+- [ ] Preserve existing persistence/queue/authority resolver and LEGACY rollback behavior.
+- [ ] Add focused composition/executor characterization tests.
+- [ ] Run affected-workspace verification required by merged governance.
+- [ ] Produce r31.3 differential evidence for realtime behavior touched by the seam change.
+
+## B2.2 — Model authority
+
+- [ ] Add/normalize structured model proposal: normal semantic/sales intent + draft + claims + requested actions/effects.
+- [ ] Validate model output as untrusted structured input.
+- [ ] Make normal COMMERCE strategy, objection handling, CTA choice, and wording model-owned.
+- [ ] Do not target already-demoted legacy `salesStage` unless B1 proves active authority/rollback need.
+- [ ] Remove/demote current deterministic strategy selection only where B1 proves it still owns normal conversation rather than correctness.
+- [ ] Preserve valid model wording when claims/effects are valid.
+- [ ] Add valid/malformed/adversarial proposal tests.
+- [ ] Differential-test against r31.3 and record intended deviations.
+
+## B2.3a — Protected claim verification
+
+- [ ] Verify price/stock/promo/size/ETA and other protected claims against typed current facts/provenance.
+- [ ] Reject/regenerate unsupported, stale, or mismatched claims.
+- [ ] Keep final text guard as defense-in-depth rather than primary reverse-parser/copy repair.
+- [ ] Preserve verified facts/media on downstream failure per r31.3.
+- [ ] Test protected-claim mismatches, stale provenance, malformed output, PII/security, and facts/media preservation.
+
+## B2.3b — Effect reconciliation
+
+- [ ] Treat model actions/effects as requests only.
+- [ ] Keep deterministic cart/checkout/payment/handoff authorization.
+- [ ] Preserve policy, CAS/version/idempotency/trusted-port and transaction checks.
+- [ ] Remove conversational stage sequencing only where it is not protecting an explicit correctness invariant.
+- [ ] Test duplicate, stale, conflict, unauthorized, protected-transition and transaction failure paths.
+
+## B2.3c — Negotiation split
+
+- [ ] Move normal objection/conversational negotiation direction to model authority.
+- [ ] Keep deterministic monetary limits, policy authorization, arithmetic, evidence freshness, fingerprints and CAS/version/idempotency.
+- [ ] Remove `READY/HESITANT/CAUTIOUS`-style progression as normal sales authority only where B1 proves current reachability.
+- [ ] Test allowed/denied concessions, stale evidence, replay/id collision and money arithmetic.
+
+## B2.3d — Size + deterministic verified-facts fallback
+
+- [ ] Do not activate model-owned size wording until the BF-04 fence precondition is satisfied.
+- [ ] Either close relevant BF-04 bypasses on the migrated path with regression evidence, or prove/fence that Track B cannot emit/authorize that unsafe claim class while leaving BF-04 explicitly open.
+- [ ] Keep verified size computation/provenance deterministic.
+- [ ] Allow model wording only from verified size facts that passed the claim boundary.
+- [ ] Add fixed maximum bounded regeneration.
+- [ ] After exhaustion, use deterministic fallback from verified facts/current safe outputs as required by r31.3.
+- [ ] Ensure fallback is not a second normal sales-strategy/copy pipeline.
+- [ ] Ensure fallback preserves verified facts/media and cannot execute failed/unauthorized effects.
+- [ ] Test BF-04 bypass regressions, size boundaries, regeneration budget, fallback, facts/media preservation and no-effect behavior.
+- [ ] **Checkpoint:** review authority boundary + BF-04 disposition + r31.3 evidence before B2.4.
+
+## B2.4 — Cut obsolete COMMERCE authority reachability
+
+- [ ] Prove active COMMERCE no longer invokes obsolete deterministic normal strategy/objection/CTA/model-rewrite authority.
+- [ ] Do not edit/delete legacy `sales-stage.ts` merely because it is old; require current reachability or rollback evidence.
+- [ ] Preserve recovery/correctness semantics required by r31.3 before disconnecting wrappers.
+- [ ] Preserve code required by proven LEGACY rollback/non-COMMERCE consumers.
+- [ ] Require replacement + consumer migration + rollback review + zero-use proof before destructive deletion.
+- [ ] Run focused COMMERCE, affected rollback-route, and r31.3 differential verification.
+
+## B3 — Full-agent replay
+
+- [ ] Use exactly one side-effect-free full-agent replay adapter for the migrated DF13 path.
+- [ ] Reuse existing evaluation primitives; do not create a second evaluator platform.
+- [ ] Pin model/prompt/config/fact/policy identities needed for reproducibility.
+- [ ] Capture/block all external/state side effects.
+- [ ] Add focused runtime assertions for unsupported/protected claims, PII/security, unauthorized effects, stale/missing facts, malformed model output, verified-facts fallback, and applicable BF-04 size regressions.
+- [ ] Produce r31.3 differential evidence with intentional deviations explicit.
+- [ ] Reuse this adapter for Track C.
+
+## B3.1 — Candidate / Gate-E / activation / PREPROD baseline
+
+- [ ] Freeze final Track B candidate-source set including every new authority-affecting file.
+- [ ] Re-derive candidate fingerprint from exact final registered source set.
+- [ ] Create a separate immutable Track B corpus/rubric artifact for any future Gate-E scored run; do not mutate/relabel accepted v15 artifacts.
+- [ ] Pre-register exact candidate + corpus/rubric/plan identities in required ancestry/time order.
+- [ ] Use existing `executeGateEScoredRun(...)`; do not create a second scored-run implementation.
+- [ ] Keep provider credentials out of GitHub Actions/repository.
+- [ ] Record governed Gate-E evidence for the exact candidate.
+- [ ] From B1, determine whether activation requires authority-bundle/hash change, behavior pointer/config mutation, migration, or source deploy only.
+- [ ] Do not pull migration `0036` into scope unless the exact activation path proves it is required.
+- [ ] Obtain separate owner authorization before any authority/config/database pointer mutation or deploy.
+- [ ] If remote CI starts zero repository steps, treat it as unavailable, not pass; use only exact-head fallback permitted by merged governance.
+- [ ] If owner authorizes deploy: deploy exact merged commit/build only.
+- [ ] Preserve exact previous affected-service release/build/commit and previous authority/config state as rollback identity.
+- [ ] If authority/config changed: perform exact DF13 readback/fence verification.
+- [ ] If deployed: run readiness/smoke/controlled checks and record exact runtime identity.
+- [ ] Identify one accepted COMMERCE PREPROD baseline for Track C.
+
+## Track B completion
+
+- [ ] Normal COMMERCE strategy + wording are model-owned.
+- [ ] Deterministic authority is limited to facts/provenance, protected claims, security/PII, policy, reconciliation/effects, CAS/idempotency and bounded fail-closed recovery.
+- [ ] DF13 remains the single COMMERCE composition/authority seam.
+- [ ] Deterministic fallback is verified-facts based, r31.3-compatible, and not a normal sales copywriter.
+- [ ] BF-04 is either closed with evidence for the migrated path or remains explicitly fenced/open without increased exposure or misrepresentation.
+- [ ] Obsolete deterministic sales authority is unreachable from active COMMERCE or explicitly rollback/non-COMMERCE only.
+- [ ] Full-agent replay passes required safety/correctness assertions without side effects and r31.3 differential evidence is reviewed.
+- [ ] Final candidate identity includes all authority-affecting sources.
+- [ ] Future Gate-E evidence, if used, has a new immutable corpus/rubric + valid registration for the exact candidate.
+- [ ] Required focused tests/checks pass where actually run; zero-step CI is never called pass.
+- [ ] No UR/State V2/admin/multi-page/production-hardening scope creep.
+- [ ] Rollback remains viable until separately closed with evidence.
+- [ ] Owner records Track B completion / Track C start decision.
