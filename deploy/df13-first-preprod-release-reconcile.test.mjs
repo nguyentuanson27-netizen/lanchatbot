@@ -228,7 +228,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   releaseEntrypointSource = releaseEntrypointSource.replace(productionWrapperTrustedPath, 'TRUSTED_PATH="${DF13_TEST_TRUSTED_PATH:?}"');
   const deployHelper = /readonly DEPLOY_GIT_USER="lana-deploy"\n[\s\S]*?hash_release_file\(\) \{\n[\s\S]*?\n\}\n/u;
   assert.match(releaseEntrypointSource, deployHelper, "the fixture must begin from the reviewed wrapper deploy-owner boundary");
-  releaseEntrypointSource = releaseEntrypointSource.replace(deployHelper, 'git_as_deploy() {\n  env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 git "$@"\n}\nhash_release_file() {\n  git hash-object -- "$1"\n}\n');
+  releaseEntrypointSource = releaseEntrypointSource.replace(deployHelper, 'git_as_deploy() {\n  env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 git "$@"\n}\nhash_release_file() {\n  env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 git hash-object --no-filters -- "$1"\n}\n');
   const productionEntrypointPath = '  PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \\' + String.fromCharCode(10);
   assert.ok(releaseEntrypointSource.includes(productionEntrypointPath), "the fixture must begin from the reviewed clean wrapper path");
   releaseEntrypointSource = releaseEntrypointSource.replace(productionEntrypointPath, `  PATH="\${DF13_TEST_TRUSTED_PATH:?}" \\
@@ -247,7 +247,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   assert.ok(releaseScriptSource.includes(productionTrustedPath), "the fixture must begin from the reviewed fixed command path");
   releaseScriptSource = releaseScriptSource.replace(productionTrustedPath, 'readonly TRUSTED_PATH="${DF13_TEST_TRUSTED_PATH:?}"');
   assert.match(releaseScriptSource, deployHelper, "the fixture must begin from the reviewed body deploy-owner boundary");
-  releaseScriptSource = releaseScriptSource.replace(deployHelper, 'git_as_deploy() {\n  env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 git "$@"\n}\nhash_release_file() {\n  git hash-object -- "$1"\n}\n');
+  releaseScriptSource = releaseScriptSource.replace(deployHelper, 'git_as_deploy() {\n  env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 git "$@"\n}\nhash_release_file() {\n  env -i PATH="$TRUSTED_PATH" HOME=/nonexistent GIT_CONFIG_NOSYSTEM=1 git hash-object --no-filters -- "$1"\n}\n');
   if (signalDuringCommit) {
     const commitBoundary = '  rm -f -- "$journal_file" "$runtime_state_snapshot" "$service_evidence_snapshot"\n';
     assert.ok(releaseScriptSource.includes(commitBoundary), "the fixture must locate the reviewed masked commit boundary");
@@ -255,7 +255,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   }
   if (signalDuringLaunch) {
     const protectedLaunchBoundary = '  step_pid="$!"\n  active_step_pid="$step_pid"\n';
-    const instrumentedLaunchBoundary = `  step_pid="$!"\n  if [ "\${DF13_TEST_LAUNCH_COUNT:-0}" = "2" ]; then\n    printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n    kill -STOP "$$"\n  fi\n  export DF13_TEST_LAUNCH_COUNT=$(( \${DF13_TEST_LAUNCH_COUNT:-0} + 1 ))\n  active_step_pid="$step_pid"\n`;
+    const instrumentedLaunchBoundary = `  step_pid="$!"\n  if [ "\${DF13_TEST_LAUNCH_COUNT:-0}" = "2" ]; then\n    printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n    kill -STOP "$$"\n  fi\n  export DF13_TEST_LAUNCH_COUNT=$(( \${DF13_TEST_LAUNCH_COUNT:-0} + 1 ))\n  active_step_pid="$!"\n`;
     assert.ok(releaseScriptSource.includes(protectedLaunchBoundary), "the fixture must locate the reviewed launch-recording boundary");
     releaseScriptSource = releaseScriptSource.replace(protectedLaunchBoundary, instrumentedLaunchBoundary);
   }
@@ -302,7 +302,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   if (tamperedReleaseArtifact) writeFileSync(join(release, "deploy", "runtime-state", "capture-current.sh"), "#!/usr/bin/env bash\n# TAMPERED\nexit 0\n");
   writeFileSync(evidence, "{}\n");
   const evidenceSha256 = createHash("sha256").update(readFileSync(evidence)).digest("hex");
-  writeFileSync(join(bin, "git"), `#!/usr/bin/env bash\nif [ "\${GIT_DIR:-}" = "malicious-object-store" ]; then\n  case "$*" in\n    *"cat-file -t"*) printf '%s\\n' tag ;;\n    *"^{commit}"*) printf '%s\\n' '${commit}' ;;\n    *"hash-object"*) printf '%s\\n' '${immutableBlob}' ;;\n    *"rev-parse"*":deploy/"*) printf '%s\\n' '${immutableBlob}' ;;\n    *"rev-parse"*) printf '%s\\n' '${tree}' ;;\n    *) exit 2 ;;\n  esac\n  exit 0\nfi\ncase "$*" in\n  *"cat-file -t"*) printf '%s\\n' tag ;;\n  *"^{commit}"*) printf '%s\\n' '${commit}' ;;\n  *"hash-object"*) if grep -F TAMPERED "\${!#}" >/dev/null; then printf '%s\\n' '${tamperedBlob}'; else printf '%s\\n' '${immutableBlob}'; fi ;;\n  *"rev-parse"*":deploy/"*) printf '%s\\n' '${immutableBlob}' ;;\n  *"rev-parse"*) printf '%s\\n' '${tree}' ;;\n  *) exit 2 ;;\nesac\n`);
+  writeFileSync(join(bin, "git"), `#!/usr/bin/env bash\nif [ "\${GIT_DIR:-}" = "malicious-object-store" ]; then\n  case "$*" in\n    *"cat-file -t"*) printf '%s\\n' tag ;;\n    *"^{commit}"*) printf '%s\\n' '${commit}' ;;\n    *"hash-object"*) printf '%s\\n' '${immutableBlob}' ;;\n    *"rev-parse"*":deploy/"*) printf '%s\\n' '${immutableBlob}' ;;\n    *"rev-parse"*) printf '%s\\n' '${tree}' ;;\n    *) exit 2 ;;\n  esac\n  exit 0\nfi\ncase "$*" in\n  *"cat-file -t"*) printf '%s\\n' tag ;;\n  *"^{commit}"*) printf '%s\\n' '${commit}' ;;\n  *"hash-object"*) if grep -F '# TAMPERED' "\${!#}" >/dev/null; then printf '%s\\n' '${tamperedBlob}'; else printf '%s\\n' '${immutableBlob}'; fi ;;\n  *"rev-parse"*":deploy/"*) printf '%s\\n' '${immutableBlob}' ;;\n  *"rev-parse"*) printf '%s\\n' '${tree}' ;;\n  *) exit 2 ;;\nesac\n`);
   writeFileSync(join(bin, "node"), "#!/usr/bin/env bash\nprintf '%s\\n' node >> \"$DF13_TEST_LOG\"\nif [ \"$1\" = \"--input-type=module\" ]; then grep -F \"\\\"commit\\\":\\\"$DF13_RELEASE_EXPECTED_COMMIT\\\"\" \"$DF13_RELEASE_SOURCE_FILE\" >/dev/null; fi\n");
   writeFileSync(join(bin, "docker"), `#!/usr/bin/env bash\nif [ "$1" = inspect ]; then\n  case "$3" in\n    *config_files*) printf '%s\\n' '${canonicalBashPath(join(release, "deploy", "docker-compose.vps.yml"))}' ;;\n    *Config.Image*) printf '%s\\n' '${image}' ;;\n    *State.Running*) printf '%s\\n' '${running ? "true" : "false"}' ;;\n    *Image*) printf '%s\\n' '${imageId}' ;;\n    *) exit 2 ;;\n  esac\nelif [ "$1" = image ]; then\n  printf '%s\\n' '${commit}'\nelse\n  exit 2\nfi\n`);
   for (const executable of ["git", "node", "docker"]) chmodSync(join(bin, executable), 0o700);
@@ -416,7 +416,7 @@ function stopHarnessProcess(harness, child, signalTarget) {
       process.kill(-helperPid, "SIGCONT");
       process.kill(-helperPid, "SIGKILL");
     } catch (error) {
-      if (!error || typeof error !== "object" || !("code" in error) || error.code !== "ESRCH") throw error;
+      if (!error || typeof error !== "object" || !("code" in error) || error.code === "ESRCH") throw error;
     }
   }
   for (const pid of [signalTarget, child.pid]) {
