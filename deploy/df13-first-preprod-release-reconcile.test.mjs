@@ -616,15 +616,15 @@ try {
 
     const hardCrashDuringCapture = writeHarness({ captureWaits: true });
     const crashingCapture = spawn(bash, ["-c", harnessCommand(hardCrashDuringCapture)], { stdio: "ignore" });
-    await waitForFile(hardCrashDuringCapture.captureStarted);
-    crashingCapture.kill("SIGKILL");
-    await waitForChildClose(crashingCapture);
-    assert.equal(realpathSync(join(hardCrashDuringCapture.appRoot, "current")), realpathSync(hardCrashDuringCapture.release), "the test must prove a hard crash can interrupt after current moves but before runtime-state capture");
-    const originalHelperPid = recordedHelperPid(hardCrashDuringCapture);
-    assert.ok(originalHelperPid > 1, "the crash fixture must identify the recorded helper process");
-    process.kill(-originalHelperPid, "SIGKILL");
     let unrelatedProcess = null;
     try {
+      await waitForFile(hardCrashDuringCapture.captureStarted);
+      crashingCapture.kill("SIGKILL");
+      await waitForChildClose(crashingCapture);
+      assert.equal(realpathSync(join(hardCrashDuringCapture.appRoot, "current")), realpathSync(hardCrashDuringCapture.release), "the test must prove a hard crash can interrupt after current moves but before runtime-state capture");
+      const originalHelperPid = recordedHelperPid(hardCrashDuringCapture);
+      assert.ok(originalHelperPid > 1, "the crash fixture must identify the recorded helper process");
+      process.kill(-originalHelperPid, "SIGKILL");
       unrelatedProcess = spawn("setsid", ["sleep", "30"], { stdio: "ignore" });
       const staleJournal = readFileSync(journalPath(hardCrashDuringCapture), "utf8")
         .replace(/^helper_pid=.*$/mu, `helper_pid=${unrelatedProcess.pid}`);
