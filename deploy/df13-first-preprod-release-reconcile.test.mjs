@@ -251,7 +251,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   if (signalDuringCommit) {
     const commitBoundary = '  rm -f -- "$journal_file" "$runtime_state_snapshot" "$service_evidence_snapshot"\n';
     assert.ok(releaseScriptSource.includes(commitBoundary), "the fixture must locate the reviewed masked commit boundary");
-    releaseScriptSource = releaseScriptSource.replace(commitBoundary, `  printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n  kill -STOP "$$"\n${commitBoundary}`);
+    releaseScriptSource = releaseScriptSource.replace(commitBoundary, () => `  printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n  kill -STOP "$$"\n${commitBoundary}`);
   }
   if (signalDuringLaunch) {
     const protectedLaunchBoundary = '  step_pid="$!"\n  active_step_pid="$step_pid"\n';
@@ -438,7 +438,7 @@ async function runHarnessWithPendingSignal(harness, { requirePendingTerm = false
   const running = spawn(bash, ["-c", harnessCommand(harness)], { stdio: "ignore" });
   let signalTarget = 0;
   try {
-    const signalDeadline = Date.now() + 10_000;
+    const signalDeadline = Date.now() + 2_000;
     while (Date.now() < signalDeadline) {
       if (existsSync(harness.signalMarker)) {
         const candidate = Number(readFileSync(harness.signalMarker, "utf8").trim());
@@ -616,15 +616,15 @@ try {
 
     const hardCrashDuringCapture = writeHarness({ captureWaits: true });
     const crashingCapture = spawn(bash, ["-c", harnessCommand(hardCrashDuringCapture)], { stdio: "ignore" });
+    await waitForFile(hardCrashDuringCapture.captureStarted);
+    crashingCapture.kill("SIGKILL");
+    await waitForChildClose(crashingCapture);
+    assert.equal(realpathSync(join(hardCrashDuringCapture.appRoot, "current")), realpathSync(hardCrashDuringCapture.release), "the test must prove a hard crash can interrupt after current moves but before runtime-state capture");
+    const originalHelperPid = recordedHelperPid(hardCrashDuringCapture);
+    assert.ok(originalHelperPid > 1, "the crash fixture must identify the recorded helper process");
+    process.kill(-originalHelperPid, "SIGKILL");
     let unrelatedProcess = null;
     try {
-      await waitForFile(hardCrashDuringCapture.captureStarted);
-      crashingCapture.kill("SIGKILL");
-      await waitForChildClose(crashingCapture);
-      assert.equal(realpathSync(join(hardCrashDuringCapture.appRoot, "current")), realpathSync(hardCrashDuringCapture.release), "the test must prove a hard crash can interrupt after current moves but before runtime-state capture");
-      const originalHelperPid = recordedHelperPid(hardCrashDuringCapture);
-      assert.ok(originalHelperPid > 1, "the crash fixture must identify the recorded helper process");
-      process.kill(-originalHelperPid, "SIGKILL");
       unrelatedProcess = spawn("setsid", ["sleep", "30"], { stdio: "ignore" });
       const staleJournal = readFileSync(journalPath(hardCrashDuringCapture), "utf8")
         .replace(/^helper_pid=.*$/mu, `helper_pid=${unrelatedProcess.pid}`);
