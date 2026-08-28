@@ -237,7 +237,6 @@ if (process.platform === "linux") {
     assert.notEqual(repeated.status, 0, "an immutable release directory must not be overwritten on retry");
     assert.match(repeated.stderr, /RELEASE_DIRECTORY_ALREADY_EXISTS/u);
     assert.equal(readFileSync(join(successful.release, ".release-source.json"), "utf8"), sourcePointerBytes, "a rejected retry must preserve the exact first source pointer");
-
     const failedBootstrap = fixture({ bootstrapFails: true });
     const bootstrapResult = run(failedBootstrap);
     assert.notEqual(bootstrapResult.status, 0, "a failed staged source-pointer readback must fail closed");
@@ -260,7 +259,7 @@ if (process.platform === "linux") {
     const promotionRace = fixture({ promotionTargetRace: true });
     const promotionRaceResult = run(promotionRace);
     assert.notEqual(promotionRaceResult.status, 0, "a target created at the promotion boundary must fail closed");
-    assert.match(promotionRaceResult.stderr, /RELEASE_DIRECTORY_PROMOTION_TARGET_EXISTS/u);
+    assert.match(promotionRaceResult.stderr, /RELEASE_DIRECTORY_(?:PROMOTION_TARGET_EXISTS|PROMOTION_FAILED)/u, "mv -n no-clobber skip exit status is platform/version-dependent; either failure must preserve the raced target");
     assert.ok(existsSync(promotionRace.release), "a raced empty target must never be replaced by the staged candidate");
     assert.ok(!existsSync(join(promotionRace.release, ".release-source.json")), "a raced target must not acquire staged source evidence");
 
