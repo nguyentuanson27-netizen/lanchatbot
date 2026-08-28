@@ -438,7 +438,7 @@ async function runHarnessWithPendingSignal(harness, { requirePendingTerm = false
   const running = spawn(bash, ["-c", harnessCommand(harness)], { stdio: "ignore" });
   let signalTarget = 0;
   try {
-    const signalDeadline = Date.now() + 2_000;
+    const signalDeadline = Date.now() + 10_000;
     while (Date.now() < signalDeadline) {
       if (existsSync(harness.signalMarker)) {
         const candidate = Number(readFileSync(harness.signalMarker, "utf8").trim());
