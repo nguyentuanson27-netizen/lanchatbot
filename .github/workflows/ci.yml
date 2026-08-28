@@ -65,21 +65,5 @@ jobs:
       - name: Verify policy transactions on PostgreSQL
         run: pnpm --filter @lana/admin-api test:postgres
 
-      - name: Diagnose reconciliation harness
-        shell: bash
-        run: |
-          node --input-type=module <<'NODE'
-          import { readFileSync, writeFileSync } from "node:fs";
-          const path = "deploy/df13-first-preprod-release-reconcile.test.mjs";
-          let source = readFileSync(path, "utf8");
-          const bodyNeedle = '  let releaseScriptSource = readFileSync(releaseScript, "utf8").replaceAll("/opt/lana-chatbot", sourceRoot);\n';
-          const runNeedle = '    const result = runHarness(successful);\n';
-          if (!source.includes(bodyNeedle) || !source.includes(runNeedle)) throw new Error("reconciliation diagnostic anchors missing");
-          source = source.replace(bodyNeedle, bodyNeedle + '  releaseScriptSource = releaseScriptSource.replace("set -E\\n", "set -E\\nset -x\\n");\n');
-          source = source.replace(runNeedle, runNeedle + '    console.error(result.stderr, result.stdout);\n');
-          writeFileSync(path, source);
-          NODE
-          node deploy/df13-first-preprod-release-reconcile.test.mjs
-
       - name: Run repository checks
         run: pnpm check
