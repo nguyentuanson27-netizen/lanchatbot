@@ -62,23 +62,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Diagnose DF13 reconciliation harness
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -f /tmp/df13-bash-trace.log
-          rm -rf .ci-debug-bin
-          mkdir -p .ci-debug-bin
-          cat > .ci-debug-bin/bash <<'EOF'
-          #!/bin/sh
-          exec /usr/bin/bash -x "$@" 2>>/tmp/df13-bash-trace.log
-          EOF
-          chmod 700 .ci-debug-bin/bash
-          if ! PATH="$PWD/.ci-debug-bin:$PATH" node deploy/df13-first-preprod-release-reconcile.test.mjs; then
-            tail -n 400 /tmp/df13-bash-trace.log || true
-            exit 1
-          fi
-
       - name: Verify policy transactions on PostgreSQL
         run: pnpm --filter @lana/admin-api test:postgres
 
