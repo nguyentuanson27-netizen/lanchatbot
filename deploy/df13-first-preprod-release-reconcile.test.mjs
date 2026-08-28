@@ -438,8 +438,17 @@ async function runHarnessWithPendingSignal(harness, { requirePendingTerm = false
   const running = spawn(bash, ["-c", harnessCommand(harness)], { stdio: "ignore" });
   let signalTarget = 0;
   try {
-    await waitForFile(harness.signalMarker);
-    signalTarget = Number(readFileSync(harness.signalMarker, "utf8").trim());
+    const signalDeadline = Date.now() + 2_000;
+    while (Date.now() < signalDeadline) {
+      if (existsSync(harness.signalMarker)) {
+        const candidate = Number(readFileSync(harness.signalMarker, "utf8").trim());
+        if (Number.isSafeInteger(candidate) && candidate > 1) {
+          signalTarget = candidate;
+          break;
+        }
+      }
+      await new Promise((resolveWait) => setTimeout(resolveWait, 20));
+    }
     assert.ok(Number.isSafeInteger(signalTarget) && signalTarget > 1, "the signal-window injector must identify a live Bash process");
     await waitForStoppedProcess(signalTarget);
     process.kill(signalTarget, "SIGTERM");
