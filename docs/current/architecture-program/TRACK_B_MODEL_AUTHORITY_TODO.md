@@ -11,7 +11,7 @@
 - [ ] Keep `stateReadMode=LEGACY`; do not start UR/State V2 without a separate evidence-backed approval.
 - [ ] Treat current BF-04 P0 size-claim residual as open until new evidence proves otherwise.
 
-## B1 — Scope / authority / provenance lock
+## B1 — Scope / authority / request-identity / provenance lock
 
 - [ ] Trace exact current COMMERCE hot path from DF13 authority admission to commit/Outbox.
 - [ ] Treat `df13-commerce-runtime-composition.ts` as the existing single COMMERCE composition seam; prove any exception before changing architecture.
@@ -20,6 +20,9 @@
 - [ ] Lock exact B2.1/B2.2 files and focused tests.
 - [ ] Inventory all authority-affecting candidate source files against `GATE_E_CANDIDATE_SOURCE_PATHS_V1`.
 - [ ] Record which changed/new files require candidate-source/fingerprint re-derivation.
+- [ ] Prove baseline/candidate generation capabilities do not share prompt builders, request builders, response identity rules, or public generation methods.
+- [ ] Record the regression-pinned baseline request envelope.
+- [ ] Record the full candidate request identity: model resource, system instruction, prompt/content, response schema, generation config, safety settings, and every other provider-affecting field.
 - [ ] Map BF-04 unverified size-claim bypasses relevant to B2.3d.
 - [ ] Determine whether Track B activation changes authority-bundle payload/hash, behavior pointer/config, migration requirements, or source code only.
 - [ ] Check current CI capability and exact fallback allowed by merged governance.
@@ -36,7 +39,7 @@
 - [ ] Run affected-workspace verification required by merged governance.
 - [ ] Produce r31.3 differential evidence for realtime behavior touched by the seam change.
 
-## B2.2 — Model authority
+## B2.2 — Model authority + evaluation-boundary preservation
 
 - [ ] Add/normalize structured model proposal: normal semantic/sales intent + draft + claims + requested actions/effects.
 - [ ] Validate model output as untrusted structured input.
@@ -44,7 +47,11 @@
 - [ ] Do not target already-demoted legacy `salesStage` unless B1 proves active authority/rollback need.
 - [ ] Remove/demote current deterministic strategy selection only where B1 proves it still owns normal conversation rather than correctness.
 - [ ] Preserve valid model wording when claims/effects are valid.
+- [ ] Keep baseline and candidate capabilities separate: no shared prompt builder, request builder, response identity rule, or public generation method.
+- [ ] Bind all changed candidate request fields into candidate request identity, including system instruction, prompt/content, response schema, generation config, safety settings, and other provider-affecting fields.
+- [ ] Do not change the regression-pinned baseline request envelope without explicit approved deviation + realtime differential evidence.
 - [ ] Add valid/malformed/adversarial proposal tests.
+- [ ] Add builder/method-separation and request-identity regression tests/assertions.
 - [ ] Differential-test against r31.3 and record intended deviations.
 
 ## B2.3a — Protected claim verification
@@ -102,23 +109,31 @@
 - [ ] Produce r31.3 differential evidence with intentional deviations explicit.
 - [ ] Reuse this adapter for Track C.
 
-## B3.1 — Candidate / Gate-E / activation / PREPROD baseline
+## B3.1 — Governed Gate-E evidence only
 
 - [ ] Freeze final Track B candidate-source set including every new authority-affecting file.
-- [ ] Re-derive candidate fingerprint from exact final registered source set.
-- [ ] Create a separate immutable Track B corpus/rubric artifact for any future Gate-E scored run; do not mutate/relabel accepted v15 artifacts.
-- [ ] Pre-register exact candidate + corpus/rubric/plan identities in required ancestry/time order.
+- [ ] Freeze final candidate request identity including model resource, system instruction, prompt/content, response schema, generation config, safety settings and every other provider-affecting field.
+- [ ] Re-derive candidate fingerprint/request identity from the exact final registered candidate.
+- [ ] Create a separate immutable Track B corpus/rubric artifact for the future Gate-E scored run; do not mutate/relabel accepted v15 artifacts.
+- [ ] Pre-register exact candidate + request identity + corpus/rubric/plan identities in required ancestry/time order.
 - [ ] Use existing `executeGateEScoredRun(...)`; do not create a second scored-run implementation.
 - [ ] Keep provider credentials out of GitHub Actions/repository.
 - [ ] Record governed Gate-E evidence for the exact candidate.
+- [ ] Prove baseline/candidate builder/method separation still holds.
+- [ ] Do **not** mutate authority/config/database pointers or deploy in B3.1.
+- [ ] **Checkpoint:** exact-candidate evidence accepted before B3.2.
+
+## B3.2 — Separately authorized activation / deploy / readback / smoke
+
+- [ ] Confirm B3.2 uses the exact candidate accepted in B3.1; no post-evidence authority-affecting source/request change is allowed without re-evaluation.
 - [ ] From B1, determine whether activation requires authority-bundle/hash change, behavior pointer/config mutation, migration, or source deploy only.
-- [ ] Do not pull migration `0036` into scope unless the exact activation path proves it is required.
-- [ ] Obtain separate owner authorization before any authority/config/database pointer mutation or deploy.
+- [ ] Do not pull migration `0036` into scope unless the exact activation path proves it is required and it is separately authorized.
+- [ ] Obtain separate owner authorization before each required authority/config/database pointer mutation or deploy scope.
 - [ ] If remote CI starts zero repository steps, treat it as unavailable, not pass; use only exact-head fallback permitted by merged governance.
-- [ ] If owner authorizes deploy: deploy exact merged commit/build only.
+- [ ] If authority/config changes: perform exact DF13 fence/readback verification.
+- [ ] Deploy exact merged commit/build only when authorized.
 - [ ] Preserve exact previous affected-service release/build/commit and previous authority/config state as rollback identity.
-- [ ] If authority/config changed: perform exact DF13 readback/fence verification.
-- [ ] If deployed: run readiness/smoke/controlled checks and record exact runtime identity.
+- [ ] Run applicable readiness/smoke/controlled checks and record exact runtime identity.
 - [ ] Identify one accepted COMMERCE PREPROD baseline for Track C.
 
 ## Track B completion
@@ -126,12 +141,14 @@
 - [ ] Normal COMMERCE strategy + wording are model-owned.
 - [ ] Deterministic authority is limited to facts/provenance, protected claims, security/PII, policy, reconciliation/effects, CAS/idempotency and bounded fail-closed recovery.
 - [ ] DF13 remains the single COMMERCE composition/authority seam.
+- [ ] Baseline/candidate generation capability separation remains intact.
+- [ ] Final candidate identity includes all authority-affecting source files and provider-affecting request fields.
 - [ ] Deterministic fallback is verified-facts based, r31.3-compatible, and not a normal sales copywriter.
 - [ ] BF-04 is either closed with evidence for the migrated path or remains explicitly fenced/open without increased exposure or misrepresentation.
 - [ ] Obsolete deterministic sales authority is unreachable from active COMMERCE or explicitly rollback/non-COMMERCE only.
 - [ ] Full-agent replay passes required safety/correctness assertions without side effects and r31.3 differential evidence is reviewed.
-- [ ] Final candidate identity includes all authority-affecting sources.
-- [ ] Future Gate-E evidence, if used, has a new immutable corpus/rubric + valid registration for the exact candidate.
+- [ ] Future Gate-E evidence uses a new immutable corpus/rubric + valid registration for the exact candidate.
+- [ ] B3.1 evidence is accepted before B3.2 runtime mutation/deploy.
 - [ ] Required focused tests/checks pass where actually run; zero-step CI is never called pass.
 - [ ] No UR/State V2/admin/multi-page/production-hardening scope creep.
 - [ ] Rollback remains viable until separately closed with evidence.
