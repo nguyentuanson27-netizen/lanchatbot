@@ -19,7 +19,7 @@ Tài liệu này áp dụng cho toàn bộ repository La.na Chatbot.
 - `/opt/lana-chatbot/current` là live runtime của `PREPROD_TEST_PAGE`, không phải working tree hay bằng chứng public-production readiness.
 - Không sửa file trực tiếp trong `current` hoặc bất kỳ thư mục `releases/*` nào.
 - Deploy key VPS chỉ có quyền đọc. Không tìm cách đổi thành quyền ghi hoặc đẩy commit từ VPS.
-- Thay đổi mã nguồn phải được commit/push từ môi trường phát triển được ủy quyền, sau đó VPS mới pull theo commit/tag cụ thể.
+- Thay đổi mã nguồn phải được commit/push từ môi trường phát triển được ủy quyền, sau đó VPS mới pull theo commit cụ thể.
 
 ## Quy tắc an toàn live runtime
 
@@ -45,18 +45,26 @@ Tài liệu này áp dụng cho toàn bộ repository La.na Chatbot.
 - Delivery gate phải quyết định một lần cho toàn bộ response group trước sequence 0; blocking tag hoặc kết quả stale, timeout, error hay unverified đều fail-closed và không sequence nào được gửi.
 - Không được chuyển Inbox thành `FAILED_PERMANENT` chỉ vì output model sai schema, malformed hoặc parse lỗi; phải thử deterministic fallback từ verified facts trước.
 
-## Quy trình thay đổi
+## Quy trình thay đổi — SOLO PREPROD MINIMAL (current default)
+
+`DF-C` và `Gate F-PREPROD` đã hoàn thành. `SOLO_PREPROD_MINIMAL` là process profile mặc định cho **mọi công việc trong `ENGINEERING_PREPROD` từ thời điểm này trở đi**, không chỉ V5 Track B/Track C. Profile này tiếp tục có hiệu lực cho đến khi owner đưa ra yêu cầu rõ ràng thay đổi process profile hoặc operating mode.
+
+```text
+branch -> code + focused test -> PR -> exact-head verification -> merge -> deploy exact commit -> smoke
+```
 
 1. Tạo branch từ `main`; không phát triển trực tiếp trên runtime VPS.
 2. Giữ PR nhỏ; chạy focused verification cho contract, consumer và risk boundary bị tác động, cùng các guard secret/PII/security/data phù hợp.
-3. Review exact head và merge từng PR độc lập; merge PR không mặc định tạo tag, manifest hoặc deploy.
-4. Tại Release Train boundary, chạy `pnpm install --frozen-lockfile`, full `pnpm check`, integration/replay và toàn bộ architecture/release-integrity gates áp dụng.
-5. Chỉ sau full train verification mới chuẩn bị immutable tag, manifest, rollback và runtime evidence; deploy `PREPROD_TEST_PAGE` vẫn cần owner authorization rõ ràng.
-6. Trên VPS, fetch tag/commit bằng deploy key read-only và tạo `/opt/lana-chatbot/releases/<tag-or-commit>` mới.
-7. Backup và restore-test trước migration có rủi ro.
-8. Health check, smoke test và controlled test-page verification.
-9. Chỉ đổi symlink `current` sau khi mọi kiểm tra đạt; giữ release trước để rollback.
-10. Không áp `PRODUCTION_HARDENING` hoặc mô tả public-production readiness nếu owner chưa yêu cầu chuyển mode rõ ràng.
+3. Exact PR head phải có verification evidence trước merge. Backend ưu tiên là GitHub-hosted CI hoặc GitHub Actions self-hosted CI chạy canonical checks. Chỉ khi remote CI không start hoặc chạy zero repository steps vì billing/quota/provider outage mới dùng `CI_UNAVAILABLE_FALLBACK` trong `OPERATING_MODE.md`. Self-review diff là đủ cho solo PREPROD; independent exact-head reviewer không phải gate mặc định.
+4. Merge không mặc định deploy.
+5. Khi owner yêu cầu deploy một candidate/commit cụ thể lên `PREPROD_TEST_PAGE`, chính yêu cầu đó là authorization cho deploy đó; không cần Release Train hoặc approval record thứ hai.
+6. PREPROD deploy bình thường cần exact merged commit, release/build identity mới và exact previous release/build/commit **cho từng service bị tác động** để rollback đúng service. Trước activation, lưu các identity này trong một release-local machine-readable record tối thiểu theo `RELEASE_INTEGRITY.md`. Annotated tag, full release manifest, runtime-state promotion và per-file attestation không phải gate mặc định nếu không có risk cụ thể yêu cầu.
+7. Migration, authority-mode switch, routing/page-allowlist change và destructive data action vẫn cần authorization rõ ràng nếu chưa được nêu trong scope hiện tại. Backup trước migration có rủi ro.
+8. Trước activation/switch, chạy các candidate readiness/health check có thể thực hiện mà không cần live traffic. Sau activation, chạy live smoke/readback/controlled test-page verification. Check nào chỉ có nghĩa sau activation thì không bị ép chạy trước. Nếu fail hoặc trạng thái không rõ, dừng mutation tiếp theo và rollback affected service(s) về exact previous identity.
+9. Không áp `PRODUCTION_HARDENING` hoặc mô tả public-production readiness nếu owner chưa yêu cầu chuyển mode rõ ràng.
+10. Không tự kết thúc `SOLO_PREPROD_MINIMAL` khi Track B, Track C hay một roadmap hiện tại hoàn thành; chỉ owner explicit instruction mới thay đổi profile này.
+
+Chi tiết authoritative nằm trong `docs/current/architecture-program/OPERATING_MODE.md` và `docs/current/architecture-program/contracts/RELEASE_INTEGRITY.md`.
 
 ## Khi có mâu thuẫn tài liệu
 
@@ -69,10 +77,13 @@ Tài liệu này áp dụng cho toàn bộ repository La.na Chatbot.
 5. `docs/current/PRODUCTION_BASELINE_20260722.md`.
 6. Tài liệu lịch sử trong `docs/phase*`, `docs/history/` và `docs/current/architecture-program/archive/`.
 
+`program-state.json` hiện ghi `GATE_F_PREPROD_ACCEPTED_DF_C_COMPLETE`; không mở lại DF-C/Gate F chỉ để áp quy trình tối giản cho công việc hiện tại hoặc tương lai. Các checklist DF13/Gate F cũ là lịch sử/evidence trừ khi một thay đổi mới thực sự chạm lại đúng technical invariant của chúng. Roadmap/Track hiện tại không giới hạn thời hạn của `SOLO_PREPROD_MINIMAL`.
+
 ## Runtime-state authorization boundary
 
-- When current live status matters, agents must read generated `/opt/lana-chatbot/runtime-state/current.json`, its immutable history record, the resolved `current` symlink, and the release-local `.release-source.json`; unknown, partial, or mismatched evidence must fail closed.
-- Repository source change: branch, focused verification, review, and merge. Never develop against live runtime.
-- Approved deployment automation: only after explicit owner authorization at a Release Train boundary may it create a new release directory from an immutable GitHub tag/commit, create that new release's `.release-source.json` once before activation, and atomically create, verify, and promote runtime-state records.
-- Manual runtime mutation is prohibited. Coding agents must never edit `current`, an existing release directory, an existing source pointer, runtime-state history, or `current.json` manually.
-- Explicit authorization is required before deploy, migration, restart, symlink change, canary send, routing, or page-allowlist change.
+- When current live status matters, agents must determine the exact running commit/release and exact rollback target from available generated runtime evidence, the resolved `current` release and source identity. Unknown or mismatched live identity fails closed.
+- Repository source change: branch, focused verification, PR, exact-head verification, and merge. Never develop against live runtime.
+- PREPROD deploy requires explicit owner instruction. For the current solo profile, that scoped deploy instruction is the deploy authorization; a second Release Train approval record is not required.
+- Approved PREPROD deployment may create a new release from the exact selected merged commit and switch `current` as part of that deploy only after applicable pre-activation readiness checks. It must preserve a release-local machine-readable rollback record for each affected service, then run post-activation smoke/readback. Tag/manifest/runtime-state promotion ceremony is not required unless a concrete risk requires it.
+- Manual source mutation in `current` or an existing release directory remains prohibited.
+- Migration, authority-mode switch, routing/page-allowlist change, destructive data action, or any mutation outside the requested deploy scope still requires explicit authorization.
