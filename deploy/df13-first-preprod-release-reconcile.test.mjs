@@ -416,7 +416,7 @@ function stopHarnessProcess(harness, child, signalTarget) {
       process.kill(-helperPid, "SIGCONT");
       process.kill(-helperPid, "SIGKILL");
     } catch (error) {
-      if (!error || typeof error !== "object" || !("code" in error) || error.code === "ESRCH") throw error;
+      if (!error || typeof error !== "object" || !("code" in error) || error.code !== "ESRCH") throw error;
     }
   }
   for (const pid of [signalTarget, child.pid]) {
