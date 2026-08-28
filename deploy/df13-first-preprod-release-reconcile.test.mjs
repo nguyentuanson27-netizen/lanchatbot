@@ -255,7 +255,7 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   }
   if (signalDuringLaunch) {
     const protectedLaunchBoundary = '  step_pid="$!"\n  active_step_pid="$step_pid"\n';
-    const instrumentedLaunchBoundary = `  step_pid="$!"\n  if [ "\${DF13_TEST_LAUNCH_COUNT:-0}" = "2" ]; then\n    printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n    kill -STOP "$$"\n  fi\n  export DF13_TEST_LAUNCH_COUNT=$(( \${DF13_TEST_LAUNCH_COUNT:-0} + 1 ))\n  active_step_pid="$!"\n`;
+    const instrumentedLaunchBoundary = `  step_pid="$!"\n  if [ "\${DF13_TEST_LAUNCH_COUNT:-0}" = "2" ]; then\n    printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n    kill -STOP "$$"\n  fi\n  export DF13_TEST_LAUNCH_COUNT=$(( \${DF13_TEST_LAUNCH_COUNT:-0} + 1 ))\n  active_step_pid="$step_pid"\n`;
     assert.ok(releaseScriptSource.includes(protectedLaunchBoundary), "the fixture must locate the reviewed launch-recording boundary");
     releaseScriptSource = releaseScriptSource.replace(protectedLaunchBoundary, instrumentedLaunchBoundary);
   }
