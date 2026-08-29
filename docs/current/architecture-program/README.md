@@ -38,7 +38,7 @@ that explicit verdict.
 | Gate E accepted / DF-C source work | `GATE_E_PREPROD_ACCEPTANCE_20260821.md` + `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + relevant contracts |
 | DF13 operational-acceptance preparation | `DF13_PREPROD_FRESH_PROCESS_DECISION.md` + `DF13_OPERATIONAL_ACCEPTANCE_PREPARATION.md` + `contracts/DF13_FENCE_AND_RELEASE_EVIDENCE.md` + `contracts/RELEASE_INTEGRITY.md` |
 | DF13 / Gate F accepted runtime | `DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md` + `program-state.json` |
-| V5 Track B model-authority implementation | `TRACK_B_MODEL_AUTHORITY_EXECUTION_PLAN.md` + `TRACK_B_MODEL_AUTHORITY_TODO.md` + `V5_OWNER_ADOPTION_20260827.md` + `program-state.json` + `contracts/MODEL_EVALUATION_BOUNDARY.md` + relevant DF13/behavior contracts |
+| V5 Track B model-authority implementation | `TRACK_B_MODEL_AUTHORITY_EXECUTION_PLAN.md` + `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md` + `TRACK_B_MODEL_AUTHORITY_TODO.md` + `V5_OWNER_ADOPTION_20260827.md` + `program-state.json` + `contracts/MODEL_EVALUATION_BOUNDARY.md` + relevant DF13/behavior contracts |
 | Release/deploy/evidence | `contracts/RELEASE_INTEGRITY.md` |
 | Dataset/package work | `contracts/DATASET_BOUNDARY.md` |
 | DF work after Gate BF / post-Gate-F sequencing | `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + `V5_OWNER_ADOPTION_20260827.md` + relevant contracts |
@@ -58,6 +58,7 @@ that explicit verdict.
 - `V5_OWNER_ADOPTION_20260827.md`: binds the adopted PR #258 plan and makes it canonical for post-Gate-F sequencing only.
 - `TRACK_B_MODEL_AUTHORITY_EXECUTION_PLAN.md`: execution-ready refinement for V5 Track B once separately owner-authorized; it narrows implementation/verification details without authorizing implementation, runtime mutation, deployment, or UR/State V2 work.
 - `TRACK_B_MODEL_AUTHORITY_TODO.md`: checklist companion to the Track B execution plan; never evidence by itself.
+- `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`: B1 source-tracing evidence on the exact head; it records current truth and binds the selected generation direction, but authorizes no implementation, runtime mutation or deployment.
 - `DF13_PREPROD_FRESH_PROCESS_DECISION.md`: authoritative on merged `main` for the first stopped-process DF13 PREPROD replacement; it narrowly supersedes the prior hot-cutover mechanism for that exercise only.
 - `contracts/`: durable technical invariants.
 - `CURRENT_BASELINE.md`: immutable `POST_BF_V1` runtime comparison checkpoint. `program-state.json` and `GATE_E_PREPROD_ACCEPTANCE_20260821.md` record the later Gate E governance disposition; fresh runtime evidence still wins for live facts.

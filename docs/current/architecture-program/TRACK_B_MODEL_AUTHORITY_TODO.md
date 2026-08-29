@@ -1,6 +1,8 @@
 # Track B — Execution Checklist
 
-**Status:** `PLAN_ONLY / IMPLEMENTATION REQUIRES SEPARATE OWNER COMMAND`
+**Status:** `B1_FIRST_PASS_DONE / B2 NOT STARTED`
+**B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
+**Selected direction:** promote the Context V2 candidate capability to live COMMERCE generation; baseline stays byte-frozen for LEGACY/V1 replay/rollback.
 
 ## Before implementation
 
@@ -13,19 +15,27 @@
 
 ## B1 — Scope / authority / request-identity / provenance lock
 
-- [ ] Trace exact current COMMERCE hot path from DF13 authority admission to commit/Outbox.
-- [ ] Treat `df13-commerce-runtime-composition.ts` as the existing single COMMERCE composition seam; prove any exception before changing architecture.
+- [x] Trace the generation capability actually serving COMMERCE — it is `BaselineModelCapability`, byte-frozen.
+- [x] Confirm `ContextV2CandidateOutputV2` already carries model-owned segments/strategy/CTA and was scored at Gate E v15.
+- [x] Confirm `df13-commerce-runtime-composition.ts` is admission/fence only; reply orchestration is `RealtimeRunner`.
+- [x] Confirm the authority-bundle payload is declarative — no runtime code reads its fields, only `contractHash`.
+- [x] Map the BF-04 bypass shape (text detector + exemption classifier) and the structured-claim closure direction.
+- [x] Confirm no r31.3 differential harness exists; `shadow-runner.ts` is the reuse target.
+- [x] Confirm canonical self-hosted CI is functional on exact heads.
+- [ ] Resolve whether a valid Context V2 snapshot is available for **every** COMMERCE turn, and design the fail-closed path when it is not. **Highest-risk open item; close before B2.1.**
+- [ ] Trace the effect/commit path in `sales-cycle-runtime.ts` and the commerce-kernel policy/negotiation transitions.
 - [ ] Separate already-demoted legacy `salesStage` from current `SalesCycleStageV1` / DF13-context authority.
 - [ ] Classify reachable components as `KEEP`, `SPLIT/REWRITE`, `RETIRE_AFTER_CUTOVER`, or `ROLLBACK_ONLY`.
 - [ ] Lock exact B2.1/B2.2 files and focused tests.
-- [ ] Inventory all authority-affecting candidate source files against `GATE_E_CANDIDATE_SOURCE_PATHS_V1`.
+- [x] Inventory candidate source coverage — the frozen set contains no `realtime-runner.ts`, no `df13-*`, and nothing from `chat-runtime`/`commerce-kernel`/`conversation-engine`.
+- [ ] Draft the extended candidate-source list covering the live orchestration path.
 - [ ] Record which changed/new files require candidate-source/fingerprint re-derivation.
 - [ ] Prove baseline/candidate generation capabilities do not share prompt builders, request builders, response identity rules, or public generation methods.
 - [ ] Record the regression-pinned baseline request envelope.
 - [ ] Record the full candidate request identity: model resource, system instruction, prompt/content, response schema, generation config, safety settings, and every other provider-affecting field.
 - [ ] Map BF-04 unverified size-claim bypasses relevant to B2.3d.
-- [ ] Determine whether Track B activation changes authority-bundle payload/hash, behavior pointer/config, migration requirements, or source code only.
-- [ ] Check canonical self-hosted CI status (restored by PR #271) and record the exact activation/authorization scope Track B will ask the owner to grant in one instruction.
+- [x] Activation impact determined: provisionally **source-deploy only**, valid while `authorityIndependentBypassClasses` stays empty, the consumer set is unchanged, and the derivation label stays truthful. Re-check in every B2 slice.
+- [ ] Record the exact activation/authorization scope Track B will ask the owner to grant in one instruction (expected: scoped deploy only, no authority mutation).
 - [ ] Re-estimate remaining Track B work from B1 evidence.
 - [ ] Stop/amend plan if a state migration, second permanent runtime/control plane, or materially wider slice is required.
 - [ ] **Checkpoint:** B1 findings reviewed before B2.1.
@@ -41,7 +51,9 @@
 
 ## B2.2 — Model authority + evaluation-boundary preservation
 
-- [ ] Add/normalize structured model proposal: normal semantic/sales intent + draft + claims + requested actions/effects.
+- [ ] Extend `ContextV2CandidateOutputV2` rather than designing a new proposal contract; widen the strategy/CTA enums for objection handling, negotiation and post-sale.
+- [ ] Revise `MODEL_EVALUATION_BOUNDARY.md` §1 so realtime may invoke the candidate capability with an integrity-valid snapshot, while still never passing Context V2 into the baseline capability or its builders.
+- [ ] Do not edit `BaselineModelCapability`; keep prompt/request builders and response identity rules separate.
 - [ ] Validate model output as untrusted structured input.
 - [ ] Make normal COMMERCE strategy, objection handling, CTA choice, and wording model-owned.
 - [ ] Do not target already-demoted legacy `salesStage` unless B1 proves active authority/rollback need.
@@ -101,6 +113,7 @@
 
 ## B3 — Full-agent replay
 
+- [ ] Build the r31.3 runtime differential harness by extending `shadow-runner.ts`; it does not exist today and every B2 slice's required evidence depends on it.
 - [ ] Use exactly one side-effect-free full-agent replay adapter for the migrated DF13 path.
 - [ ] Reuse existing evaluation primitives; do not create a second evaluator platform.
 - [ ] Pin model/prompt/config/fact/policy identities needed for reproducibility.

@@ -1,6 +1,7 @@
 # Track B — Model Authority Execution Plan
 
-**Status:** `PROPOSED / PLAN_ONLY / REVIEW_AMENDED`
+**Status:** `AMENDED_AFTER_B1 / IMPLEMENTATION_DIRECTION_SELECTED`
+**B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md` (traced on `main@5340845`)
 **Program point:** post-Track-A / post-Gate-F, V5 Track B
 **Plan baseline:** `main@bab2fdb4d9f20e74274cd0134234632e26660a2f` (re-synced after PR #269 and PR #271 merged)
 **Active process profile:** `SOLO_PREPROD_MINIMAL` (merged and current default; see `OPERATING_MODE.md`)
@@ -27,7 +28,11 @@ This is an implementation refinement of the adopted V5 Track B direction. It is 
    - `legacySalesStage: "DEMOTED_TELEMETRY_ONLY"`;
    - `strategy: "CONTEXT_V2"`;
    - `cta: "CONTEXT_V2"`.
-4. `apps/worker/src/df13-commerce-runtime-composition.ts` is the existing **single real COMMERCE composition seam** between behavior-pointer authority admission and `RealtimeRunner`. Track B must extend/reuse this seam, not create a sibling top-level `CommerceRuntime`.
+
+   B1 proved no runtime code reads these payload fields; only `contractHash` is consumed. They declare authority topology, and their only mechanical effect is the hash.
+3a. **Selected generation direction (owner decision after B1).** Track B promotes the existing Context V2 candidate capability (`apps/worker/src/context-v2-candidate.ts`) to the live COMMERCE generation path. `BaselineModelCapability` stays byte-frozen and untouched, retained for LEGACY comparison, V1 replay and rollback. Track B does not modify the baseline and does not create a third generation capability.
+3b. B1 proved the live COMMERCE path currently runs on `BaselineModelCapability` (`realtime-server.ts:893,909`; `vertex-baseline.ts:17-19`), and that `ContextV2CandidateOutputV2` (`packages/contracts/src/v2/context-v2.ts:507-535`) already carries model-owned `segments`, `strategy` and `cta`. The plan's `ModelProposal` is that contract, extended — not a new design.
+4. `apps/worker/src/df13-commerce-runtime-composition.ts` is the existing **single real COMMERCE composition seam** between behavior-pointer authority admission and `RealtimeRunner`. Track B must extend/reuse this seam, not create a sibling top-level `CommerceRuntime`. B1 clarifies the precise reading: the DF13 executor performs identity admission, fence assessment, lease dispatch and fence-bound commit only — it does not orchestrate replies. The new stages attach between DF13 admission and the runner's reply orchestration, and `RealtimeRunner` itself is what gets restructured. Do not read "extend the DF13 seam" as putting reply stages inside the fence executor.
 5. Track B leaves `stateReadMode=LEGACY` unchanged unless a later separately approved evidence-backed decision opens a narrow UR/State V2 slice.
 6. BF-04 remains an accepted known residual: P0 unverified size-claim bypasses must not be represented as fixed.
 7. Invariant r31.3 remains binding for realtime work:
@@ -127,6 +132,8 @@ Therefore:
 2. Any new authority-affecting DF13/internal stage file must be included in the candidate-source identity before relying on Gate-E scored evidence for that candidate.
 3. Changes to existing frozen source files make the old candidate fingerprint stale for the changed candidate; re-derive rather than reuse by description.
 4. Updating the candidate-source list itself changes `gate-e-registration.ts`; derive the final candidate identity from the final registered source set.
+5. **The current frozen set does not cover the live orchestration path.** B1 proved `GATE_E_CANDIDATE_SOURCE_PATHS_V1` contains no `realtime-runner.ts`, no `df13-*`, and nothing from `chat-runtime`, `commerce-kernel` or `conversation-engine`. Once the candidate capability serves customers, candidate identity must be extended to cover the orchestration that consumes its output — the runner path, the DF13 stages Track B adds, and the reachable business-tools/commerce-kernel modules proven by B1. Scoring a capability while excluding the code that decides what ships to the customer would describe a component, not the served behavior.
+6. Extending `ContextV2CandidateOutputV2` (strategy/CTA enums are narrower than real sales conversation needs) changes `packages/contracts/src/v2/context-v2.ts`, which is already inside the frozen set, so a new candidate identity follows by construction.
 
 ### 5.2 Baseline/candidate capability separation
 
@@ -137,11 +144,15 @@ The baseline and candidate may share authenticated transport only. They must **n
 - response identity rules;
 - public generation methods.
 
-B2.2 must preserve this separation while introducing the structured `ModelProposal` candidate path. Track B must not simplify the architecture by merging the baseline and candidate generation capabilities into one public builder/method.
+B2.2 must preserve this separation while promoting the candidate path to live COMMERCE generation. Track B must not merge the baseline and candidate capabilities into one public builder/method.
+
+Under the selected direction the separation is preserved by construction: the candidate keeps its own prompt/request builders and response identity rules in `context-v2-candidate.ts`, and the baseline is not edited at all. `MODEL_EVALUATION_BOUNDARY.md` §1 currently says realtime orchestration may import Context V2 *only* to persist a shadow capture. Promoting the candidate to the served path makes realtime a candidate consumer, so **§1 must be revised for the Track B live candidate before B2.2 ships**, stating that realtime may invoke the candidate capability with an integrity-valid snapshot while still never passing Context V2 into the baseline capability or its builders. Treat that contract revision as a B2.2 deliverable, not an afterthought.
 
 ### 5.3 Request-envelope and request-identity pinning
 
-The baseline request envelope remains regression-pinned to its approved source baseline. If Track B intentionally changes the baseline envelope, the change requires the applicable realtime differential evidence and an approved deviation; changing a prompt/version label is not evidence of equivalence.
+The baseline request envelope remains regression-pinned to its approved source baseline. Under the selected direction Track B **does not change it at all**: the baseline capability is not edited, so no approved deviation is required for it. Any proposal that would edit the baseline envelope is out of scope and requires a separate approved deviation plus realtime differential evidence; changing a prompt/version label is never evidence of equivalence.
+
+Realtime differential evidence is still required for every slice — not because the baseline envelope changes, but because the served reply behavior does. See `AGENTS.md:44` and B3.
 
 The candidate request identity must cover every provider-affecting field actually sent, including at least:
 
@@ -420,16 +431,17 @@ Retain deterministic money/policy/concurrency correctness while removing determi
 
 **Goal**
 
-Keep verified size computation/provenance deterministic while allowing the model to word a normal size response **only after the known BF-04 unverified-size-claim bypasses are either closed on the migrated path or explicitly fenced so Track B cannot increase their exposure**.
+Keep verified size computation/provenance deterministic while the model words the normal size response, using the structured claim boundary as the **closure mechanism** for BF-04.
 
-**Hard precondition**
+B1 evidence reframes this slice. BF-04's residual is a property of detecting size recommendations by reading Vietnamese prose: `detectConcreteSizeRecommendations` (`guard.ts:451-470`) drops any mention that `classifySafeExemptionForMention` (`guard.ts:389-394`) classifies as `QUESTION`, `NEGATION`, `CATALOG`, `STOCK` or `NON_CUSTOMER`, and no exemption heuristic over free text is complete. Making a declared, verified, in-scope structured claim the precondition for shipping any size wording removes the detector from the primary path — that closes the bypass class rather than widening it. The text guard remains as defense-in-depth and may only reject, never approve.
 
-Do not activate model-owned size wording if B1/B2.3a cannot prove one of the following:
+**Hard precondition — fail-closed direction**
 
-1. the relevant BF-04 bypasses are closed for the migrated path with regression evidence; or
-2. the migrated path cannot emit/authorize the unsafe size claim class and the residual remains explicitly recorded as not fixed.
+A reply whose text contains a concrete size recommendation with **no** declared, verified, in-scope protected claim must fail closed on the migrated path. The structured boundary is authoritative; the detector runs alongside it and can only reject.
 
-If neither is true, stop B2.3d and amend the plan. Do not hide the residual behind model wording.
+Do not activate model-owned size wording unless that direction is implemented and covered by regression tests. If it cannot be implemented within this slice, stop B2.3d and amend the plan — do not hide the residual behind model wording.
+
+BF-04 may be recorded as closed only with new regression evidence for the migrated path. Absent that evidence it remains an open residual, and no Track B artifact may represent it as fixed.
 
 **Acceptance criteria**
 
@@ -490,9 +502,12 @@ Make obsolete normal deterministic sales-strategy/copy-repair authority unreacha
 
 Provide exactly one reproducible adapter that exercises the migrated DF13 COMMERCE model-proposal -> verifier -> reconciler -> fallback/finalization path without committing state or external effects. Reuse existing evaluation primitives; do not create a second evaluator platform.
 
-**Known integration point**
+**Known integration points**
 
-`apps/worker/src/gate-e-registration.ts` exports `executeGateEScoredRun(...)`. B3 replay may reuse lower-level candidate/evaluation primitives, while B3.1 owns the governed Gate-E scored run.
+- `apps/worker/src/shadow-runner.ts` (447 lines) already replays the baseline capability side-effect-free, with `assembleReply`, `guardAgentProposal` and `textSimilarity`. **Reuse it as the runtime differential harness** rather than building a second replay.
+- `apps/worker/src/gate-e-registration.ts` exports `executeGateEScoredRun(...)`. B3 replay may reuse lower-level candidate/evaluation primitives; B3.1 owns the governed Gate-E scored run.
+
+**Added scope from B1: the r31.3 differential harness does not exist.** `AGENTS.md:44` requires every realtime change to be differential-tested against the r31.3 behavioral baseline, but the repository contains no differential runner — only `apps/worker/src/realtime-r32.2-compatibility-shield.test.ts`. B3 must build that harness by extending `shadow-runner.ts` so it can run the migrated candidate path and the retained baseline path over the same inputs and report the differences. Every B2 slice's required r31.3 evidence depends on this, so B3's harness work is a prerequisite for closing B2 slices, even though the slice is sequenced after them.
 
 **Acceptance criteria**
 
@@ -525,7 +540,7 @@ Produce governed evaluation evidence for the exact Track B candidate. This slice
 
 **Required sequence**
 
-1. Freeze the final Track B candidate-source set, including every new authority-affecting file.
+1. Freeze the final Track B candidate-source set, including every new authority-affecting file **and the live orchestration path** (`realtime-runner.ts`, the DF13 stages Track B adds, and the reachable `chat-runtime`/`commerce-kernel`/`conversation-engine` modules proven by B1). B1 proved none of these are in the current frozen set.
 2. Freeze/pin the final candidate request identity, including model resource, system instruction, prompt/content, response schema, generation configuration, safety settings and other provider-affecting request fields.
 3. Re-derive candidate fingerprint/request identity from the exact final registered candidate.
 4. Create/commit the immutable Track B corpus/rubric artifact required for the future scored run; do not mutate the accepted v15 artifact.
@@ -567,7 +582,12 @@ Activate/deploy the already-evidenced exact Track B candidate under `SOLO_PREPRO
 
 **Required sequence**
 
-1. Use B1 evidence to determine whether activation requires a new DF13 authority-bundle payload/hash, behavior content/pointer identity, migration, or only a source deploy behind the existing authority contract.
+1. **B1 finding — provisionally source-deploy only.** No runtime code reads the authority-bundle payload fields; only `contractHash` is consumed. The payload declares authority topology, and under the selected direction the declaration stays truthful: strategy and CTA still derive from the Context V2 view, now from the candidate output rather than deterministic mapping over the same snapshot. On current evidence Track B therefore needs **no** behavior-version write, no pointer revision and no migration `0036`.
+
+   Three conditions invalidate that and force a bundle change plus an owner-scoped authority mutation. B2.1–B2.4 must each re-check them, and B3.2 must confirm them one final time before deploying:
+   - `authorityIndependentBypassClasses` stops being empty — `df13-release-candidate-evidence.ts:270` hard-fails evidence when it is non-empty, and `DF13_FENCE_AND_RELEASE_EVIDENCE.md:80-84` demands a finite enumeration plus contract tests proving independence from both authorities;
+   - the eight-member consumer set changes;
+   - the derivation label stops being truthful.
 2. Under `SOLO_PREPROD_MINIMAL`, the owner instruction to deploy this candidate/commit to `PREPROD_TEST_PAGE` **is** the authorization for that scoped deploy; no Release Train boundary and no second approval record is required. The owner command must explicitly scope the deploy and any authority-mode/config/pointer mutation that activation requires.
 3. Request additional explicit authorization only for a mutation **outside** that granted scope — an authority-mode switch, migration, routing/page-allowlist change, or destructive data action not named in the deploy instruction. Do not require a second approval merely because the step is a deploy.
 4. Where an authority/config/database pointer mutation is actually performed, execute the existing DF13 fence/readback contract for it.
@@ -650,6 +670,8 @@ This estimate excludes external provider/infrastructure queue or waiting time an
 | B3.2 activation/deploy | 0.5–1 d |
 | **Current planning range** | **~7.5–13.25 working days** |
 
+**Post-B1 re-estimate.** The table below predates B1. B1 removes work (the `ModelProposal` contract and its request-identity machinery already exist and are scored; the baseline needs no approved deviation; activation is provisionally source-deploy only) and adds work (the r31.3 differential harness does not exist and B3 must build it; candidate identity must be widened to the live orchestration path; the Context V2 per-turn snapshot prerequisite is unresolved). Net effect is roughly neutral on the low end and higher on the high end until the snapshot question is closed. Re-derive the table once B1's remaining items in `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md` §10 are complete.
+
 Budget **~8–13 working days** before B1 re-estimation. Do not use the old ~7-day target as a commitment. Gate-E provider waiting is excluded. If BF-04 requires broader remediation or activation requires migration/authority work beyond the bounded DF13 path, stop and re-plan rather than silently absorb it.
 
 ## 11. Main risks and stop conditions
@@ -697,6 +719,10 @@ Stop if a Track B slice requires a Release Train boundary, a second owner-approv
 ### Premature cleanup breaks rollback
 
 Do not physically delete old implementations until replacement exists, consumers are migrated, zero active use is proven, and rollback no longer depends on them.
+
+### Context V2 snapshot is not reliably available per turn
+
+`MODEL_EVALUATION_BOUNDARY.md` §2 requires candidate input to be an integrity-valid snapshot that is never optional and never `null`. Today `contextV2CaptureEnabled` is derived from the COMMERCE startup mode (`realtime-server.ts:869`) and defaults to `false` (`realtime-runner.ts:2468`), so a capture is a best-effort side record. Promoting the candidate to the served path makes a valid snapshot a per-turn prerequisite. Design the fail-closed path for a turn that lacks one. If it cannot be solved inside current persistence/CAS contracts, this is the legacy-state blocker below — stop and record evidence rather than starting UR/State V2 inside Track B. B1 flags this as the highest-risk remaining unknown; close it before B2.1.
 
 ### Legacy state becomes a real blocker
 
