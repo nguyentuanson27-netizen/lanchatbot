@@ -12,29 +12,12 @@ import {
 import { BusinessFactEnvelopeV1Schema, type AgentProposalV1, type BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { redactAnalyticsMessage, type ShadowContextMessage, type ShadowEvaluationStore } from "@lana/database";
 import { redactCustomerUrlsForModel } from "./customer-url-policy.js";
+import { textSimilarity } from "./realtime-reply-differential.js";
 import { VertexShadowError } from "./vertex.js";
 import type { BaselineModelCapability } from "./vertex-baseline.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 
-export function textSimilarity(left: string, right: string): number {
-  const tokens = (value: string): Set<string> => new Set(
-    value
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/gu, "")
-      .toLocaleLowerCase("vi")
-      .replace(/[^\p{L}\p{N}]+/gu, " ")
-      .trim()
-      .split(/\s+/u)
-      .filter((token) => token.length > 1),
-  );
-  const a = tokens(left);
-  const b = tokens(right);
-  if (a.size === 0 && b.size === 0) return 1;
-  if (a.size === 0 || b.size === 0) return 0;
-  let intersection = 0;
-  for (const token of a) if (b.has(token)) intersection += 1;
-  return intersection / (a.size + b.size - intersection);
-}
+export { textSimilarity } from "./realtime-reply-differential.js";
 
 export interface Phase4ShadowRunnerOptions {
   readonly maxAttempts?: number;
