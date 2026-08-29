@@ -30,7 +30,8 @@ This is an implementation refinement of the adopted V5 Track B direction. It is 
    - `cta: "CONTEXT_V2"`.
 
    B1 proved no runtime code reads these payload fields; only `contractHash` is consumed. They declare authority topology, and their only mechanical effect is the hash.
-3a. **Selected generation direction (owner decision after B1).** Track B promotes the existing Context V2 candidate capability (`apps/worker/src/context-v2-candidate.ts`) to the live COMMERCE generation path. `BaselineModelCapability` stays byte-frozen and untouched, retained for LEGACY comparison, V1 replay and rollback. Track B does not modify the baseline and does not create a third generation capability.
+3a. **Selected generation direction (owner decision after B1).** Track B promotes the existing Context V2 candidate capability (`apps/worker/src/context-v2-candidate.ts`) to the live COMMERCE generation path. `BaselineModelCapability` stays byte-frozen and untouched. Track B does not modify the baseline and does not create a third generation capability.
+3a-i. **The baseline also stays live as a per-turn fallback.** `MODEL_EVALUATION_BOUNDARY.md` §11: *"Only a valid built capture may call a candidate model."* A COMMERCE turn whose Context V2 capture is invalid, blocked, ambiguous, not-yet-terminal or absent may not call the candidate, and `AGENTS.md:47` still requires it to answer from verified facts rather than fail permanently. The migrated path is therefore a **two-capability path** with a deterministic selector driven by capture validity, never by model preference. The selector is authority-dependent output and belongs inside the fence. B2.2 must design it; **B2.4 must not remove baseline reachability** — its scope is retiring deterministic sales-strategy and copy-repair authority (`applyWave2ReplyPolicy` and the sales-stage playbooks), not the baseline generation path.
 3b. B1 proved the live COMMERCE path currently runs on `BaselineModelCapability` (`realtime-server.ts:893,909`; `vertex-baseline.ts:17-19`), and that `ContextV2CandidateOutputV2` (`packages/contracts/src/v2/context-v2.ts:507-535`) already carries model-owned `segments`, `strategy` and `cta`. The plan's `ModelProposal` is that contract, extended — not a new design.
 4. `apps/worker/src/df13-commerce-runtime-composition.ts` is the existing **single real COMMERCE composition seam** between behavior-pointer authority admission and `RealtimeRunner`. Track B must extend/reuse this seam, not create a sibling top-level `CommerceRuntime`. B1 clarifies the precise reading: the DF13 executor performs identity admission, fence assessment, lease dispatch and fence-bound commit only — it does not orchestrate replies. The new stages attach between DF13 admission and the runner's reply orchestration, and `RealtimeRunner` itself is what gets restructured. Do not read "extend the DF13 seam" as putting reply stages inside the fence executor.
 5. Track B leaves `stateReadMode=LEGACY` unchanged unless a later separately approved evidence-backed decision opens a narrow UR/State V2 slice.
@@ -148,12 +149,14 @@ B2.2 must preserve this separation while promoting the candidate path to live CO
 
 Under the selected direction the separation is preserved by construction: the candidate keeps its own prompt/request builders and response identity rules in `context-v2-candidate.ts`, and the baseline is not edited at all.
 
-**Blocking contract dependency.** Two clauses of `MODEL_EVALUATION_BOUNDARY.md` currently prohibit the selected direction, and §6 is the harder one:
+**Blocking contract dependency.** Clauses of `MODEL_EVALUATION_BOUNDARY.md` currently prohibit or fail to cover the selected direction, and §6 is the hardest:
 
 - §1 says realtime orchestration may import Context V2 *only* to persist a shadow capture;
 - §6 says offline/replay candidates *"cannot send customer messages, mutate commerce/conversation state, authorize claims, or become a third live semantic authority"*.
 
 Promoting the candidate to the served path does exactly what §6 forbids. The required revision is therefore a **status change, not a clarification**: a capability cannot be both the offline candidate that §6 constrains and the authority that serves customers. The revision must define the promoted capability's new status so it stops being governed as an offline candidate once it serves traffic; keep §6 intact for whatever remains an offline/replay candidate, narrowing it by definition rather than weakening it; keep §1's protection of the baseline unchanged; and carry §2's integrity-valid-snapshot requirement onto the live path as a per-turn precondition.
+
+The revision must additionally state which of §8 and §11–§16 apply to synchronous live invocation. Those clauses govern the candidate as an async queue worker — claims, stale-lease recovery, attempt accounting, locked deadlines, population sync, disjoint prompt-family queue ownership — and §13 records that the async producer is not wired to a deployed entrypoint. Live use is synchronous inside the reply turn, so leaving both readings available is itself a defect. §15 also carries a concrete B2.2 requirement: a Track B candidate prompt-family version must be registered with an explicit owner predicate, because unknown `context-v2-candidate-*` versions fail closed by contract.
 
 Until that revision is merged, the selected direction contradicts a durable contract. It is the first B2.2 deliverable and a blocking dependency — not documentation cleanup.
 
@@ -179,6 +182,8 @@ B2.2 is expected to change the candidate response schema and may change prompt/s
 
 1. The accepted Gate-E v15 corpus/rubric/evidence remains immutable historical evidence.
 2. A future Track B scored run must use a separate immutable corpus/rubric artifact committed before the run, Git-derived blob/plan-hash verification, registration ancestry, and strict registration-before-run ordering.
+2a. **Every class added to the candidate contract costs registered probes.** §18 requires a closed coverage matrix with positive *and* adversarial-negative registered probes for every reachable effect, clarification, requested-action and frozen protected-claim class, and missing, extra or duplicate coverage fails **before** corpus scoring. Widening the strategy/CTA enums therefore multiplies required probes and is the mechanical reason the previous Gate E exercise consumed registration versions v1 to v15. Settle the class list in B3 fixtures before spending a registration round.
+2b. B3 differential evidence and B3.1 Gate-E evidence are **separate populations by contract**: realtime capture population is independent of Gate E and *"not admissible as Gate E data"*. Neither can substitute for the other.
 3. `executeGateEScoredRun(...)` in `apps/worker/src/gate-e-registration.ts` is the existing scored-run integration point. Do not create a second scored-run implementation.
 4. Provider credentials stay outside GitHub Actions and repository contents.
 
@@ -483,6 +488,8 @@ BF-04 may be recorded as closed only with new regression evidence for the migrat
 **Goal**
 
 Make obsolete normal deterministic sales-strategy/copy-repair authority unreachable from the active COMMERCE response path. Do not target files solely because they are old: B1 must prove current reachability and authority first.
+
+**Scope limit proven by B1.** `BaselineModelCapability` and the deterministic verified-facts fallback producers are **not** in scope for removal. Per constraint 3a-i they remain the live path for any turn without a valid Context V2 capture. Removing them would break both `MODEL_EVALUATION_BOUNDARY.md` §11 and the `AGENTS.md:47` fallback invariant.
 
 **Acceptance criteria**
 

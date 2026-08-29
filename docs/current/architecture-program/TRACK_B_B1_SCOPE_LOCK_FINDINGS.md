@@ -3,7 +3,9 @@
 **Status:** `B1_FIRST_PASS / EVIDENCE_ONLY / NO_RUNTIME_MUTATION`
 **Implementation head traced:** `main@53408456ecaac8c8936061c9c3fd8275d6bdb179`
 **Owner command:** Track B implementation authorized separately; this slice performed source tracing only.
-**Direction selected by owner after these findings:** promote the existing Context V2 candidate capability to the live COMMERCE generation path; keep `BaselineModelCapability` byte-frozen for LEGACY comparison/rollback; do not modify the baseline and do not create a third capability.
+**Direction selected by owner after these findings:** promote the existing Context V2 candidate capability to the live COMMERCE generation path; keep `BaselineModelCapability` byte-frozen; do not modify the baseline and do not create a third capability.
+
+**Correction from the second self-review:** the baseline does not merely survive for LEGACY comparison and rollback. `MODEL_EVALUATION_BOUNDARY.md` §11 states *"Only a valid built capture may call a candidate model."* On the live path a turn without a valid capture therefore may not call the candidate at all, so the baseline remains a **live per-turn fallback**. See §2b.
 
 This document records what B1 proved on the exact head. It is evidence, not authorization. No runtime, database, migration, authority or deployment action was performed.
 
@@ -13,7 +15,7 @@ This document records what B1 proved on the exact head. It is evidence, not auth
 
 **Evidence**
 
-- `apps/worker/src/realtime-runner.ts:102` imports `BaselineModelCapability`; the runner's model port (`realtime-runner.ts:2041-2046`) is composed only of baseline methods.
+- `apps/worker/src/realtime-runner.ts:102` imports `BaselineModelCapability`; `RealtimeModelPort` (`realtime-runner.ts:2040-2047`) is composed only of baseline methods — six of the eight, with `generate` and `groundWithFacts` required and four optional.
 - `apps/worker/src/realtime-server.ts:47,893,909` wraps the Vertex model in `baselineModelCapability(...)` for the served runner.
 - `apps/worker/src/vertex-baseline.ts:17-19` states the contract in-source: *"Byte-frozen generation capability shared by realtime and the V1 replay. Candidate-only generation must use a different capability and prompt builder."*
 - The baseline surface is eight public generation methods (`vertex-baseline.ts:3-12`): `generate`, `groundWithFacts`, `groundDraftWithFacts`, `repairSizeClaimDraft`, `draftMultiProductClarification`, `draftCustomerUrlExplanation`, `judgeSalesReply`, `judgeSalesReplyV2`.
@@ -49,6 +51,8 @@ The plan's `ModelProposal` largely exists and has already passed Gate E v15 at 1
 
 **Gap to close in B2.2:** four strategies and five CTAs are narrower than real sales conversation needs (objection handling, negotiation, post-sale). Extending the enums changes `packages/contracts/src/v2/context-v2.ts`, which is inside the frozen candidate-source set, so it produces a new candidate identity by construction.
 
+**Cost of that widening, from §18.** Gate E requires *"a closed coverage matrix ... positive and adversarial-negative registered probes for every reachable effect, clarification, requested-action and frozen protected-claim class; missing, extra or duplicate coverage fails before corpus scoring."* Every class added to the enums therefore costs a matched pair of registered probes, and coverage closure is validated **before** corpus scoring even begins. This is the mechanical reason the Gate E exercise needed registration versions v1 through v15: a coverage matrix that is not exactly closed fails early and repeatedly. Widen the enums deliberately and minimally, and settle the class list in B3 fixtures before spending a registration round.
+
 ---
 
 ## 2a. `MODEL_EVALUATION_BOUNDARY.md` §6 forbids the selected direction as currently written
@@ -67,6 +71,33 @@ Promoting the Context V2 candidate to the live COMMERCE generation path makes it
 4. carry §2's integrity-valid-snapshot requirement onto the live path, where it becomes a per-turn precondition rather than a capture-time property.
 
 Until that revision is merged, the selected direction contradicts a durable contract. Treat it as the first B2.2 deliverable and as a blocking dependency, not as documentation cleanup.
+
+---
+
+## 2b. The baseline stays on the live path as a per-turn fallback
+
+`MODEL_EVALUATION_BOUNDARY.md` §11 is explicit: capture lookup returns typed outcomes for valid, invalid, blocked, ambiguous, not-yet-terminal, absent-after-deadline and database-error states, and **"Only a valid built capture may call a candidate model."** §12 adds that a missing capture becomes terminal only after the locked deadline.
+
+Combined with `AGENTS.md:47` — malformed model output must first attempt a deterministic fallback from verified facts, never a permanent Inbox failure — this means a COMMERCE turn whose Context V2 capture is invalid, blocked, ambiguous, not-yet-terminal or absent still has to answer the customer.
+
+**Consequences the first pass missed:**
+
+1. `BaselineModelCapability` is not retired from the live path by Track B. It remains the generation path for every turn that cannot legally call the candidate. Any statement that the baseline is kept "only for LEGACY comparison and rollback" is wrong.
+2. **B2.4 cannot remove baseline reachability.** Its scope narrows to retiring deterministic *sales-strategy and copy-repair* authority — `applyWave2ReplyPolicy` and the sales-stage playbooks — not the baseline generation path itself.
+3. The live path becomes a two-capability path with an explicit selector. That selector is authority-dependent output and must be inside the fence, and it must be deterministic: capture validity decides, never model preference.
+4. The r31.3 differential in B3 must cover both branches, and the fallback branch must remain byte-comparable with today's behavior, since the baseline envelope is unchanged there.
+
+This is the largest architectural consequence B1 found, and it materially widens B2.2 and narrows B2.4.
+
+---
+
+## 2c. The candidate's governance assumes an async queue worker; live use is synchronous
+
+`MODEL_EVALUATION_BOUNDARY.md` §8 and §11–§16 govern the candidate through a queue: claims, stale-lease recovery, attempt accounting, locked deadlines, population sync, disjoint queue ownership per prompt family, and run-level configuration blocks that return a claimed row to eligibility. §13 states the async producer *"is not wired to a deployed entrypoint in DF-B."*
+
+Live COMMERCE invocation is synchronous inside the reply turn. Most of §8–§16 does not map onto it. The contract revision required by §2a must therefore also state which of those clauses apply to synchronous live use and which are offline-worker-only, rather than leaving both readings available.
+
+§15 carries one concrete requirement into B2.2: candidate prompt families have disjoint queue ownership and *"Unknown future `context-v2-candidate-*` versions fail closed and cannot fall through to the legacy worker."* A Track B candidate version must be registered with an explicit owner predicate, or it fails closed by contract.
 
 ---
 
@@ -94,6 +125,7 @@ This answers the owner's directive to determine rather than assume.
 - **No runtime code branches on any individual payload field.** A grep for reads of `.strategy`, `.cta`, `.context`, `.phase`, `.reconciliation`, `.legacySalesStage` off the bundle returns nothing outside tests; every consumer that makes a decision compares `contractHash` only (`df13-runtime-authority-boundary.ts:65`, `df13-commerce-fence-postgres-provider.ts:39`, `df13-commerce-authority-contract.ts:52`, `df13-commerce-cutover.ts:232,401,446`, `runtime-behavior-mode.ts:594-600`, `df13-commerce-preprod-startup-authority.ts:133`, `df13-release-candidate-evidence.ts:268`).
 - One path does carry the whole frozen object: `df13-commerce-cutover.ts:143,266` embeds `DF13_COMMERCE_AUTHORITY_BUNDLE_V1` into `CommerceCutoverPreparation`. That propagates the payload into cutover-preparation output as declarative evidence; it still does not branch on the fields. `df13-release-candidate-evidence.ts:335-337` records only `contractHash`, the consumer set and the empty bypass list.
 - `contracts/DF13_FENCE_AND_RELEASE_EVIDENCE.md:80-84` describes the fields as the declared consumer set and derivation topology, not as runtime inputs.
+- Independent support from `contracts/BEHAVIOR_CONTROL_PLANE.md`: its quiescent-cutover protocol governs `sales authority: LEGACY -> COMMERCE` and `state read: LEGACY -> V2`. Track B changes neither. That document also defines authority-dependent work as inputs whose *"classification, state read, phase, context, strategy, CTA, reconciliation, or subsequent plan can differ **by authority**"* — LEGACY versus COMMERCE, not one COMMERCE implementation versus another. Track B changes how strategy and CTA are computed **inside** COMMERCE, so it does not create a new authority and does not trigger the cutover protocol.
 
 **Reading**
 
@@ -145,7 +177,9 @@ BF-04 may be recorded as closed only with new regression evidence for the migrat
 
 **Consequence**
 
-The plan assumes r31.3 differential evidence is available per slice. No **reply-behavior** differential runner exists today; what exists is a state-projection comparator and a side-effecting shadow worker. Per the owner's direction, B3 should build the runtime differential harness by reusing `shadow-runner.ts`, and B3.1 remains the governed Gate-E evidence slice. This is scope the current estimate does not carry.
+The plan assumes r31.3 differential evidence is available per slice. No **reply-behavior** differential runner exists today; what exists is a state-projection comparator and a side-effecting shadow worker.
+
+The contract also makes the B3/B3.1 split mandatory rather than stylistic: *"Realtime capture population is unsampled and independent of Gate E. Any legacy operational replay sample is a separate population and is not admissible as Gate E data."* The r31.3 differential runs on the realtime capture population, so its output can never be presented as Gate E evidence, and Gate E's frozen corpus can never stand in for realtime differential evidence. Both are required, separately. Per the owner's direction, B3 should build the runtime differential harness by reusing `shadow-runner.ts`, and B3.1 remains the governed Gate-E evidence slice. This is scope the current estimate does not carry.
 
 ---
 

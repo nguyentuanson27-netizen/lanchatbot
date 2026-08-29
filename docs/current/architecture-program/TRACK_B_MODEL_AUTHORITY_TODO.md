@@ -2,7 +2,7 @@
 
 **Status:** `B1_FIRST_PASS_DONE / B2 NOT STARTED`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
-**Selected direction:** promote the Context V2 candidate capability to live COMMERCE generation; baseline stays byte-frozen for LEGACY/V1 replay/rollback.
+**Selected direction:** promote the Context V2 candidate capability to live COMMERCE generation; baseline stays byte-frozen **and stays on the live path as the per-turn fallback** whenever no valid Context V2 capture exists (`MODEL_EVALUATION_BOUNDARY.md` §11).
 
 ## Before implementation
 
@@ -22,7 +22,7 @@
 - [x] Map the BF-04 bypass shape (text detector + exemption classifier) and the structured-claim closure direction.
 - [x] Confirm no reply-behavior differential runner exists. `shadow-runner.ts` is the reuse target but is queue-driven and writes shadow-evaluation rows, so B3 must extract its comparison core; `commerce-authority-comparison.ts` covers the state half.
 - [x] Confirm canonical self-hosted CI is functional on exact heads.
-- [ ] Resolve whether a valid Context V2 snapshot is available for **every** COMMERCE turn, and design the fail-closed path when it is not. **Highest-risk open item; close before B2.1.**
+- [ ] Design the deterministic capture-validity selector between candidate and baseline. §11 forbids calling the candidate without a valid built capture, and `AGENTS.md:47` forbids failing the turn, so the baseline is the fallback branch. Selector must be deterministic and inside the fence. **Highest-risk open item; close before B2.1.**
 - [ ] Trace the effect/commit path in `sales-cycle-runtime.ts` and the commerce-kernel policy/negotiation transitions.
 - [ ] Separate already-demoted legacy `salesStage` from current `SalesCycleStageV1` / DF13-context authority.
 - [ ] Classify reachable components as `KEEP`, `SPLIT/REWRITE`, `RETIRE_AFTER_CUTOVER`, or `ROLLBACK_ONLY`.
@@ -51,7 +51,9 @@
 
 ## B2.2 — Model authority + evaluation-boundary preservation
 
-- [ ] Extend `ContextV2CandidateOutputV2` rather than designing a new proposal contract; widen the strategy/CTA enums for objection handling, negotiation and post-sale.
+- [ ] Extend `ContextV2CandidateOutputV2` rather than designing a new proposal contract; widen the strategy/CTA enums for objection handling, negotiation and post-sale — **minimally**, since §18 requires a matched positive and adversarial-negative registered probe per reachable class and coverage closure is checked before corpus scoring.
+- [ ] Register the Track B candidate prompt-family version with an explicit owner predicate; unknown `context-v2-candidate-*` versions fail closed (§15).
+- [ ] Design the candidate/baseline selector and cover both branches in tests.
 - [ ] **Blocking:** revise `MODEL_EVALUATION_BOUNDARY.md` §1 **and §6** before B2.2 ships. §6 currently forbids a candidate from sending customer messages or becoming a live semantic authority, which is exactly what promotion does. The revision is a status change for the promoted capability, keeping §6 intact for whatever stays an offline candidate.
 - [ ] Do not edit `BaselineModelCapability`; keep prompt/request builders and response identity rules separate.
 - [ ] Validate model output as untrusted structured input.
@@ -105,6 +107,7 @@
 ## B2.4 — Cut obsolete COMMERCE authority reachability
 
 - [ ] Prove active COMMERCE no longer invokes obsolete deterministic normal strategy/objection/CTA/model-rewrite authority.
+- [ ] Do **not** remove `BaselineModelCapability` or the verified-facts fallback producers from the live path; they serve every turn without a valid capture (§11 + `AGENTS.md:47`).
 - [ ] Do not edit/delete legacy `sales-stage.ts` merely because it is old; require current reachability or rollback evidence.
 - [ ] Preserve recovery/correctness semantics required by r31.3 before disconnecting wrappers.
 - [ ] Preserve code required by proven LEGACY rollback/non-COMMERCE consumers.
