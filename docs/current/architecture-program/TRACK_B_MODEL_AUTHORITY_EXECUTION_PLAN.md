@@ -31,7 +31,8 @@ This is an implementation refinement of the adopted V5 Track B direction. It is 
 
    B1 proved no runtime code reads these payload fields; only `contractHash` is consumed. They declare authority topology, and their only mechanical effect is the hash.
 3a. **Selected generation direction (owner decision after B1).** Track B promotes the existing Context V2 candidate capability (`apps/worker/src/context-v2-candidate.ts`) to the live COMMERCE generation path. `BaselineModelCapability` stays byte-frozen and untouched. Track B does not modify the baseline and does not create a third generation capability.
-3a-i. **The baseline also stays live as a per-turn fallback.** `MODEL_EVALUATION_BOUNDARY.md` §11: *"Only a valid built capture may call a candidate model."* A COMMERCE turn whose Context V2 capture is invalid, blocked, ambiguous, not-yet-terminal or absent may not call the candidate, and `AGENTS.md:47` still requires it to answer from verified facts rather than fail permanently. The migrated path is therefore a **two-capability path** with a deterministic selector driven by capture validity, never by model preference. The selector is authority-dependent output and belongs inside the fence. B2.2 must design it; **B2.4 must not remove baseline reachability** — its scope is retiring deterministic sales-strategy and copy-repair authority (`applyWave2ReplyPolicy` and the sales-stage playbooks), not the baseline generation path.
+3a-i. **A non-valid Context V2 snapshot already blocks; there is no baseline fallback branch.** `DF13_FENCE_AND_RELEASE_EVIDENCE.md:51-52` states that an absent snapshot may bootstrap only a pristine `DISCOVERY` conversation at revision zero and every later absent snapshot blocks, and `loadDf13CommerceRuntimeContext` (`df13-commerce-runtime-context.ts:263-320`) implements exactly that. `MODEL_EVALUATION_BOUNDARY.md` §11 agrees: no valid built capture, no candidate call. The one narrow gap is the revision-zero bootstrap, where the context is **synthesized** (`catalogVersion: "df13-commerce-bootstrap-v1"`) rather than captured and therefore may not qualify as a valid built capture. B2.1 must decide whether that single turn answers deterministically or whether the bootstrap context becomes a real capture.
+3a-ii. **The model-authority direction is already the durable contract.** `contracts/MODEL_CLAIM_BOUNDARY.md` already states that the model decides conversational semantics and drafts the reply while code verifies protected claims and authorizes effects, and it already sanctions model-emitted structured claims and requested actions. Track B closes a drift between contract and implementation; it does not introduce a new authority direction. Any *deviation* from that contract needs justification — restoring it does not.
 3b. B1 proved the live COMMERCE path currently runs on `BaselineModelCapability` (`realtime-server.ts:893,909`; `vertex-baseline.ts:17-19`), and that `ContextV2CandidateOutputV2` (`packages/contracts/src/v2/context-v2.ts:507-535`) already carries model-owned `segments`, `strategy` and `cta`. The plan's `ModelProposal` is that contract, extended — not a new design.
 4. `apps/worker/src/df13-commerce-runtime-composition.ts` is the existing **single real COMMERCE composition seam** between behavior-pointer authority admission and `RealtimeRunner`. Track B must extend/reuse this seam, not create a sibling top-level `CommerceRuntime`. B1 clarifies the precise reading: the DF13 executor performs identity admission, fence assessment, lease dispatch and fence-bound commit only — it does not orchestrate replies. The new stages attach between DF13 admission and the runner's reply orchestration, and `RealtimeRunner` itself is what gets restructured. Do not read "extend the DF13 seam" as putting reply stages inside the fence executor.
 5. Track B leaves `stateReadMode=LEGACY` unchanged unless a later separately approved evidence-backed decision opens a narrow UR/State V2 slice.
@@ -395,7 +396,9 @@ Let the model request bounded actions/effects while deterministic code remains t
 
 **Acceptance criteria**
 
-- model output cannot directly mutate state or execute side effects;
+- model output cannot directly mutate state or execute side effects — `DF06_READINESS_ROOT_CAUSE_CLOSURE_20260814.md` §9: *"Model evidence has authorization `NONE`"*;
+- ambiguity or deterministic/model conflict resolves to the **less aggressive** action and emits evidence, never the more aggressive one (`MODEL_CLAIM_BOUNDARY.md`);
+- every rejection, override, repair and safe fallback carries a reason code (`MODEL_CLAIM_BOUNDARY.md`);
 - policy, expected-version, CAS, idempotency, trusted-port and transaction checks remain deterministic;
 - duplicate, stale-version, conflicting or unauthorized requests fail closed or use the existing deterministic conflict/handoff outcome;
 - normal conversational stage sequencing is not retained merely as a sales-strategy authority;
@@ -461,7 +464,7 @@ BF-04 may be recorded as closed only with new regression evidence for the migrat
 
 - deterministic code produces verified size recommendation facts / needs-more-input / out-of-range signals without normal sales prose authority;
 - model wording can only use verified size facts that passed the protected-claim boundary;
-- invalid model output gets a fixed maximum regeneration count;
+- invalid model output gets **exactly one** bounded repair request, per `MODEL_CLAIM_BOUNDARY.md`: *"A rejected proposal may receive one bounded repair request containing safe reason codes and allowed evidence."* After that bounded failure, use an approved safe clarification or handoff response carrying no unsupported business claim;
 - after exhaustion, deterministic fallback uses verified facts/current safe outputs as required by r31.3, without becoming a second normal sales strategy/copy pipeline;
 - fallback preserves existing verified facts/media and cannot execute a failed/unauthorized protected effect;
 - BF-04 status is updated only if new evidence actually closes it; otherwise it remains a known residual.
@@ -489,7 +492,7 @@ BF-04 may be recorded as closed only with new regression evidence for the migrat
 
 Make obsolete normal deterministic sales-strategy/copy-repair authority unreachable from the active COMMERCE response path. Do not target files solely because they are old: B1 must prove current reachability and authority first.
 
-**Scope limit proven by B1.** `BaselineModelCapability` and the deterministic verified-facts fallback producers are **not** in scope for removal. Per constraint 3a-i they remain the live path for any turn without a valid Context V2 capture. Removing them would break both `MODEL_EVALUATION_BOUNDARY.md` §11 and the `AGENTS.md:47` fallback invariant.
+**Scope refinement proven by B1.** The deterministic verified-facts fallback producers stay: `AGENTS.md:47` requires a deterministic fallback from verified facts when model **output** is malformed, which is a different failure mode from a missing input snapshot. `DF06_READINESS_ROOT_CAUSE_CLOSURE_20260814.md` §18 also protects the **early** deterministic buying hint (`detectBuyingSignal` at `realtime-runner.ts:3455` feeding `decideWave2SalesStrategy` at `3471`) as a legitimate pre-evidence first-reply strategy with no side-effect authority. The retire target is the **post-generation** pair — the second `decideWave2SalesStrategy` at `4563` and `applyWave2ReplyPolicy` at `4581` — which rewrite a model proposal into deterministic strategy and copy.
 
 **Acceptance criteria**
 
@@ -604,7 +607,9 @@ Activate/deploy the already-evidenced exact Track B candidate under `SOLO_PREPRO
    Three conditions invalidate that and force a bundle change plus an owner-scoped authority mutation. B2.1–B2.4 must each re-check them, and B3.2 must confirm them one final time before deploying:
    - `authorityIndependentBypassClasses` stops being empty — `df13-release-candidate-evidence.ts:270` hard-fails evidence when it is non-empty, and `DF13_FENCE_AND_RELEASE_EVIDENCE.md:80-84` demands a finite enumeration plus contract tests proving independence from both authorities;
    - the eight-member consumer set changes;
-   - the derivation label stops being truthful.
+   - the derivation label stops being truthful;
+   - a behavioral switch becomes configurable. `BEHAVIOR_CONTROL_PLANE.md` forbids env-only flags and independent untracked authorities, so a configurable switch would have to become a versioned behavior-mode dimension — which changes the behavior content hash and turns this into an authority mutation. Derive behavior from capture validity, never from a flag.
+   - `MODEL_CLAIM_BOUNDARY.md` says Context V2, final reconciliation, derived phase, deterministic V2 consumers and legacy-regex demotion *"activate atomically under the sales-authority control plane"*. DF-13 already activated the Context V2 consumers under COMMERCE; whether promoting **generation** counts as a further V2-consumer activation is unsettled. B2.1 must settle it rather than assume.
 2. Under `SOLO_PREPROD_MINIMAL`, the owner instruction to deploy this candidate/commit to `PREPROD_TEST_PAGE` **is** the authorization for that scoped deploy; no Release Train boundary and no second approval record is required. The owner command must explicitly scope the deploy and any authority-mode/config/pointer mutation that activation requires.
 3. Request additional explicit authorization only for a mutation **outside** that granted scope — an authority-mode switch, migration, routing/page-allowlist change, or destructive data action not named in the deploy instruction. Do not require a second approval merely because the step is a deploy.
 4. Where an authority/config/database pointer mutation is actually performed, execute the existing DF13 fence/readback contract for it.
@@ -737,9 +742,13 @@ Stop if a Track B slice requires a Release Train boundary, a second owner-approv
 
 Do not physically delete old implementations until replacement exists, consumers are migrated, zero active use is proven, and rollback no longer depends on them.
 
-### Context V2 snapshot is not reliably available per turn
+### Turn latency pushes readiness past its 60-second bound
 
-`MODEL_EVALUATION_BOUNDARY.md` §2 requires candidate input to be an integrity-valid snapshot that is never optional and never `null`. Today `contextV2CaptureEnabled` is derived from the COMMERCE startup mode (`realtime-server.ts:869`) and defaults to `false` (`realtime-runner.ts:2468`), so a capture is a best-effort side record. Promoting the candidate to the served path makes a valid snapshot a per-turn prerequisite. Design the fail-closed path for a turn that lacks one. If it cannot be solved inside current persistence/CAS contracts, this is the legacy-state blocker below — stop and record evidence rather than starting UR/State V2 inside Track B. B1 flags this as the highest-risk remaining unknown; close it before B2.1.
+`DF06_READINESS_ROOT_CAUSE_CLOSURE_20260814.md` §17 bounds readiness lifetime to 60 seconds with fail-closed staleness re-evaluated against transaction time. A synchronous candidate call plus one bounded repair adds provider latency inside the turn. Budget that latency against the 60-second bound in B2.2 and measure it in B3; if a normal turn cannot fit, stop and re-plan rather than extending the bound.
+
+### Context V2 snapshot handling
+
+A non-valid snapshot already blocks under DF13, so no fallback branch is required. The narrow open case is the revision-zero pristine `DISCOVERY` bootstrap, whose context is synthesized rather than captured and may therefore not qualify as a valid built capture under `MODEL_EVALUATION_BOUNDARY.md` §2/§11. Settle it in B2.1: either that turn answers deterministically, or the bootstrap context becomes a real capture. If neither is possible inside current persistence contracts, stop and record evidence rather than starting UR/State V2 inside Track B.
 
 ### Legacy state becomes a real blocker
 

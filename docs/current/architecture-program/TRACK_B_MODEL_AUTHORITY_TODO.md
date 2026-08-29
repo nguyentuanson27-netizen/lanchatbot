@@ -2,7 +2,7 @@
 
 **Status:** `B1_FIRST_PASS_DONE / B2 NOT STARTED`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
-**Selected direction:** promote the Context V2 candidate capability to live COMMERCE generation; baseline stays byte-frozen **and stays on the live path as the per-turn fallback** whenever no valid Context V2 capture exists (`MODEL_EVALUATION_BOUNDARY.md` §11).
+**Selected direction:** promote the Context V2 candidate capability to live COMMERCE generation; baseline stays byte-frozen. A non-valid Context V2 snapshot already blocks under DF13, so there is no baseline fallback branch.
 
 ## Before implementation
 
@@ -22,7 +22,9 @@
 - [x] Map the BF-04 bypass shape (text detector + exemption classifier) and the structured-claim closure direction.
 - [x] Confirm no reply-behavior differential runner exists. `shadow-runner.ts` is the reuse target but is queue-driven and writes shadow-evaluation rows, so B3 must extract its comparison core; `commerce-authority-comparison.ts` covers the state half.
 - [x] Confirm canonical self-hosted CI is functional on exact heads.
-- [ ] Design the deterministic capture-validity selector between candidate and baseline. §11 forbids calling the candidate without a valid built capture, and `AGENTS.md:47` forbids failing the turn, so the baseline is the fallback branch. Selector must be deterministic and inside the fence. **Highest-risk open item; close before B2.1.**
+- [ ] Settle the revision-zero `DISCOVERY` bootstrap: its context is synthesized, not captured, so it may not be a valid built capture under §2/§11. Either the turn answers deterministically or the bootstrap context becomes a real capture. **Highest-risk open item; close before B2.1.**
+- [ ] Settle whether promoting generation counts as a further V2-consumer activation under `MODEL_CLAIM_BOUNDARY.md`'s atomic-activation clause; it is the fourth test of the source-deploy-only conclusion.
+- [ ] Budget synchronous candidate latency plus one bounded repair against the 60-second readiness bound (DF06 §17).
 - [ ] Trace the effect/commit path in `sales-cycle-runtime.ts` and the commerce-kernel policy/negotiation transitions.
 - [ ] Separate already-demoted legacy `salesStage` from current `SalesCycleStageV1` / DF13-context authority.
 - [ ] Classify reachable components as `KEEP`, `SPLIT/REWRITE`, `RETIRE_AFTER_CUTOVER`, or `ROLLBACK_ONLY`.
@@ -97,7 +99,8 @@
 - [ ] Either close relevant BF-04 bypasses on the migrated path with regression evidence, or prove/fence that Track B cannot emit/authorize that unsafe claim class while leaving BF-04 explicitly open.
 - [ ] Keep verified size computation/provenance deterministic.
 - [ ] Allow model wording only from verified size facts that passed the claim boundary.
-- [ ] Add fixed maximum bounded regeneration.
+- [ ] Bounded repair is **exactly one** request (`MODEL_CLAIM_BOUNDARY.md`), then an approved safe clarification or handoff with no unsupported business claim.
+- [ ] Reason-code every rejection, override, repair and safe fallback.
 - [ ] After exhaustion, use deterministic fallback from verified facts/current safe outputs as required by r31.3.
 - [ ] Ensure fallback is not a second normal sales-strategy/copy pipeline.
 - [ ] Ensure fallback preserves verified facts/media and cannot execute failed/unauthorized effects.
@@ -107,7 +110,7 @@
 ## B2.4 — Cut obsolete COMMERCE authority reachability
 
 - [ ] Prove active COMMERCE no longer invokes obsolete deterministic normal strategy/objection/CTA/model-rewrite authority.
-- [ ] Do **not** remove `BaselineModelCapability` or the verified-facts fallback producers from the live path; they serve every turn without a valid capture (§11 + `AGENTS.md:47`).
+- [ ] Keep the verified-facts fallback producers (`AGENTS.md:47`, malformed **output**) and the early pre-evidence buying hint (DF06 §18). Retire only the post-generation rewrite: `decideWave2SalesStrategy` at `realtime-runner.ts:4563` and `applyWave2ReplyPolicy` at `4581`.
 - [ ] Do not edit/delete legacy `sales-stage.ts` merely because it is old; require current reachability or rollback evidence.
 - [ ] Preserve recovery/correctness semantics required by r31.3 before disconnecting wrappers.
 - [ ] Preserve code required by proven LEGACY rollback/non-COMMERCE consumers.
