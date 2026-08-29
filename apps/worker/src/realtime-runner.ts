@@ -102,6 +102,18 @@ import type { RealtimeGenerationQuota } from "./realtime-quota.js";
 import type { BaselineModelCapability } from "./vertex-baseline.js";
 import type { ChatHistoryPort } from "./redis-chat-history.js";
 import {
+  beginRealtimePostGenerationStage,
+  finalizeRealtimePostGenerationReply,
+  groupRealtimeMetaMessagesV2,
+  limitResponseGroupPoliteness,
+  splitRealtimeMetaMessages,
+} from "./realtime-reply-differential.js";
+export {
+  groupRealtimeMetaMessagesV2,
+  limitResponseGroupPoliteness,
+  splitRealtimeMetaMessages,
+} from "./realtime-reply-differential.js";
+import {
   aggregateMedia,
   aggregateVideoFrames,
   decideMediaBatchDisposition,
@@ -538,27 +550,6 @@ export function holdingMessagesForHandoff(
   return decision.customerMessages.map((text) => ({ kind: "TEXT", text }));
 }
 
-const vietnameseSentenceSegmenter = new Intl.Segmenter("vi", {
-  granularity: "sentence",
-});
-
-export function splitRealtimeMetaMessages(
-  messages: readonly RealtimeMetaMessageUnit[],
-): RealtimeMetaMessageUnit[] {
-  return messages.flatMap((message) => {
-    if (message.kind !== "TEXT") return [message];
-    const segments = message.text
-      .split(/\r?\n+/gu)
-      .flatMap((line) => [...vietnameseSentenceSegmenter.segment(line)])
-      .map(({ segment }) => segment.trim())
-      .filter(Boolean);
-    return segments.map((text): RealtimeMetaMessageUnit => ({
-      kind: "TEXT",
-      text,
-    }));
-  });
-}
-
 export function isLegacyUnaccentedProductInfoReply(value: string): boolean {
   const lines = value.replace(/\r\n?/gu, "\n").split("\n");
 
@@ -574,65 +565,6 @@ export function isLegacyUnaccentedProductInfoReply(value: string): boolean {
       )
     );
   });
-}
-
-export function groupRealtimeMetaMessagesV2(
-  messages: readonly RealtimeMetaMessageUnit[],
-  splitProductInfoFollowUp = false,
-): RealtimeMetaMessageUnit[] {
-  if (!splitProductInfoFollowUp) {
-    return limitResponseGroupPoliteness(messages);
-  }
-  let split = false;
-  const grouped = messages.flatMap((message) => {
-    if (split || message.kind !== "TEXT") return [message];
-    const [information, ...followUpParts] = message.text
-      .replace(/\r\n?/gu, "\n")
-      .split(/\n{2,}/gu)
-      .map((part) => part.trim())
-      .filter(Boolean);
-    const followUp = followUpParts.join("\n\n").trim();
-    if (!information || !followUp) return [message];
-    split = true;
-    return [
-      { kind: "TEXT" as const, text: information },
-      { kind: "TEXT" as const, text: followUp },
-    ];
-  });
-  return limitResponseGroupPoliteness(grouped);
-}
-
-// "chị" is a second-person pronoun, not a decorative particle, so it is intentionally
-// excluded — deduplicating it would drop sentence subjects and produce curt replies.
-const RESPONSE_GROUP_POLITENESS_TOKENS = new Set(["nhé", "ạ"]);
-const RESPONSE_GROUP_POLITENESS_TOKEN = /(?<![\p{L}\p{N}_])(nhé|ạ)(?![\p{L}\p{N}_])/giu;
-
-/** Keeps the conversational particles natural by using each at most once per response group. */
-export function limitResponseGroupPoliteness(
-  messages: readonly RealtimeMetaMessageUnit[],
-): RealtimeMetaMessageUnit[] {
-  const used = new Set<string>();
-  const limited: RealtimeMetaMessageUnit[] = [];
-  for (const message of messages) {
-    if (message.kind !== "TEXT") {
-      limited.push(message);
-      continue;
-    }
-    const text = message.text.replace(RESPONSE_GROUP_POLITENESS_TOKEN, (match) => {
-      const token = match.toLocaleLowerCase("vi");
-      if (!RESPONSE_GROUP_POLITENESS_TOKENS.has(token) || !used.has(token)) {
-        used.add(token);
-        return match;
-      }
-      return "";
-    })
-      .replace(/[ \t]+([,.;:!?])/gu, "$1")
-      .replace(/[ \t]{2,}/gu, " ")
-      .replace(/[ \t]*\n[ \t]*/gu, "\n")
-      .trim();
-    if (text) limited.push({ kind: "TEXT", text });
-  }
-  return limited;
 }
 
 export function isResolvedProductCodeOnly(
@@ -4559,6 +4491,10 @@ export class RealtimeRunner {
             };
           }
         }
+        // Every model-backed and deterministic proposal source converges here.
+        // Later Track B slices replace downstream authority behind this seam;
+        // the byte-frozen baseline generation envelope remains upstream.
+        proposal = beginRealtimePostGenerationStage(proposal).proposal;
         if (this.options.wave2StrategyEnabled && wave2StrategyDecision) {
           wave2StrategyDecision = decideWave2SalesStrategy({
             text: message.text ?? "",
@@ -4910,17 +4846,19 @@ export class RealtimeRunner {
     ) {
       metaMessages = [...holdingMessagesForHandoff(message, handoff)];
     }
-    if (this.options.messageGroupingV2Enabled) {
-      metaMessages = groupRealtimeMetaMessagesV2(
-        metaMessages,
-        !salesHandled && (
-          proposal?.intent === "product_info" ||
-          proposal?.businessFactQuery.intent === "PRICE"
-        ),
-      );
-    } else if (this.options.conversationalMessageFormatEnabled) {
-      metaMessages = splitRealtimeMetaMessages(metaMessages);
-    }
+    const postGenerationReply = finalizeRealtimePostGenerationReply({
+      mode: this.options.messageGroupingV2Enabled
+        ? "GROUP_V2"
+        : this.options.conversationalMessageFormatEnabled
+          ? "SPLIT_SENTENCES"
+          : "PRESERVE",
+      messages: metaMessages,
+      splitProductInfoFollowUp: !salesHandled && (
+        proposal?.intent === "product_info" ||
+        proposal?.businessFactQuery.intent === "PRICE"
+      ),
+    });
+    metaMessages = [...postGenerationReply.messages];
 
     let protectedOutboundReadiness: DeterministicEffectReadinessV1 | null =
       salesProtectedOutbound?.readiness ?? null;
