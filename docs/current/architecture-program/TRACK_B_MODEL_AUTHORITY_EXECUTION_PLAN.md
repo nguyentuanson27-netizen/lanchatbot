@@ -204,11 +204,11 @@ Promote `strategyAnalysis` and `salesSignals` from optional advisory input to th
 - `postMediaProofCta` no longer appends post-guard deterministic sales CTA copy;
 - final message grouping/splitting preserves transport shape without deleting valid model politeness wording;
 - the **early** pre-evidence buying hint is retained: `DF06_READINESS_ROOT_CAUSE_CLOSURE_20260814.md` §18 sanctions a deterministic buying hint for the first reply strategy or error fallback before canonical evidence exists, with no side-effect authority;
-- `BaselineModelCapability` and the baseline prompt are unchanged; if evidence shows a prompt change is unavoidable, stop and escalate per §2's ladder rather than editing the envelope inside this slice;
+- `BaselineModelCapability`, baseline prompt and observed serialized request envelope are byte-unchanged; if evidence shows a change is unavoidable, stop Track B incomplete and request a new separately scoped owner architecture decision;
 - model output remains untrusted structured input and is schema-validated;
 - valid model wording survives deterministic validation unchanged except for required safety, fact or effect rejection.
 
-**Verification:** `apps/worker/src/track-b-post-generation-authority.test.ts`, `realtime-runner.test.ts`, `realtime-golden-transcripts.test.ts`, `packages/business-tools/src/sales-strategy-v1.test.ts`, `reply-assembler.test.ts`, plus exact-head r31.3 differential. Tests prove valid model wording ships unmodified and invalid claims/actions are rejected rather than silently rewritten.
+**Verification:** `apps/worker/src/track-b-post-generation-authority.test.ts`, `apps/worker/src/realtime-runner.test.ts`, `apps/worker/src/realtime-golden-transcripts.test.ts`, `packages/business-tools/src/sales-strategy-v1.test.ts`, `packages/business-tools/src/reply-assembler.test.ts`, plus exact-head r31.3 differential. Tests prove valid model wording ships unmodified and invalid claims/actions are rejected rather than silently rewritten.
 
 ---
 

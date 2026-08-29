@@ -182,7 +182,7 @@ Realtime differential evidence and Gate-E evidence remain separate populations. 
 
 ## 7. Focused test map
 
-Three exact new suites are planned: `apps/worker/src/realtime-reply-differential.test.ts` in PR 1 and `apps/worker/src/track-b-post-generation-authority.test.ts` plus `track-b-protected-claim-boundary.test.ts` in their owning PRs. Every other path below already exists.
+Three exact new suites are planned: `apps/worker/src/realtime-reply-differential.test.ts` in PR 1 and `apps/worker/src/track-b-post-generation-authority.test.ts` plus `apps/worker/src/track-b-protected-claim-boundary.test.ts` in their owning PRs. Every other path below already exists.
 
 | Boundary changed | Exact focused verification |
 |---|---|
@@ -190,7 +190,7 @@ Three exact new suites are planned: `apps/worker/src/realtime-reply-differential
 | Baseline proposal strategy authority | `apps/worker/src/track-b-post-generation-authority.test.ts`, `apps/worker/src/realtime-runner.test.ts`, `apps/worker/src/realtime-golden-transcripts.test.ts`, `apps/worker/src/realtime-sales-cycle.test.ts` |
 | Second strategy decision / `applyWave2ReplyPolicy` | `packages/business-tools/src/sales-strategy-v1.test.ts`, `packages/business-tools/src/reply-assembler.test.ts`, `apps/worker/src/track-b-post-generation-authority.test.ts` |
 | `postMediaProofCta` / response-group politeness limiter | `apps/worker/src/realtime-runner.test.ts`, `apps/worker/src/track-b-post-generation-authority.test.ts`, `apps/worker/src/realtime-golden-transcripts.test.ts` |
-| Direct and model-skipping catalog/multi-fact/product/media producers | `apps/worker/src/realtime-runner.test.ts`, `apps/worker/src/unbounded-multi-product-text.test.ts`, `apps/worker/src/realtime-r32.2-compatibility-shield.test.ts`, `apps/worker/src/track-b-post-generation-authority.test.ts` |
+| Direct and model-skipping catalog/multi-fact/product/media/pre-sale producers | `apps/worker/src/realtime-runner.test.ts`, `apps/worker/src/unbounded-multi-product-text.test.ts`, `apps/worker/src/realtime-r32.2-compatibility-shield.test.ts`, `apps/worker/src/pre-sale-policy.test.ts`, `apps/worker/src/track-b-post-generation-authority.test.ts` |
 | Structured protected claims and one-repair budget | `packages/business-tools/src/protected-claims.test.ts`, `packages/business-tools/src/size-claim-guard.test.ts`, `apps/worker/src/track-b-protected-claim-boundary.test.ts`, `apps/worker/src/realtime-runner.test.ts` |
 | Size/BF-04 and verified-facts/media fallback | `packages/business-tools/src/size-claim-guard.test.ts`, `packages/business-tools/src/size-engine.test.ts`, `apps/worker/src/track-b-protected-claim-boundary.test.ts`, `apps/worker/src/realtime-r32.2-compatibility-shield.test.ts` |
 | Pure sales-cycle transition | `packages/chat-runtime/src/sales-cycle-runtime.test.ts`, `packages/chat-runtime/src/sales-cycle-runtime-contract-mismatch.test.ts`, `apps/worker/src/realtime-sales-cycle.test.ts` |
@@ -198,7 +198,7 @@ Three exact new suites are planned: `apps/worker/src/realtime-reply-differential
 | Policy/negotiation/effect readiness | `packages/business-tools/src/policy-engine.test.ts`, `packages/business-tools/src/negotiation-engine-v2.test.ts`, `packages/business-tools/src/effect-readiness.test.ts`, `packages/commerce-kernel/src/protected-sales-transition.test.ts` |
 | Protected-outbound group / DF13 final commit | `apps/worker/src/realtime-sales-cycle.test.ts`, `apps/worker/src/df13-commerce-runtime-executor.test.ts`, `apps/worker/src/df13-commerce-runtime-finalization.test.ts`, `apps/worker/src/df13-commerce-authority-fence.test.ts`, `apps/worker/src/df13-runtime-authority-boundary.integration.test.ts` |
 | Authority identity preparation | `apps/worker/src/df13-commerce-authority-bundle.test.ts`, `apps/worker/src/df13-commerce-authority-contract.test.ts`, `apps/worker/src/df13-first-preprod-behavior-writer.test.ts`, `apps/worker/src/df13-commerce-cutover.test.ts`, `apps/worker/src/df13-runtime-authority-boundary.integration.test.ts` |
-| Baseline envelope / candidate separation | `apps/worker/src/vertex-baseline.test.ts`, `apps/worker/src/context-v2-candidate.test.ts`, `apps/worker/src/context-v2-evaluation.test.ts`, `apps/worker/src/gate-e-registration.test.ts` |
+| Baseline provider-request envelope / DF13 Context V2 SYSTEM projection / candidate separation | `apps/worker/src/vertex.test.ts`, `apps/worker/src/df13-commerce-runtime-context.test.ts`, `apps/worker/src/vertex-baseline.test.ts`, `apps/worker/src/context-v2-candidate.test.ts`, `apps/worker/src/context-v2-evaluation.test.ts`, `apps/worker/src/gate-e-registration.test.ts` |
 
 Each source PR also runs affected-workspace typecheck/build and exact-head canonical repository checks. Gate E is a pre-deploy gate for a deployment-selected candidate, not a merge gate while the candidate stays offline.
 
