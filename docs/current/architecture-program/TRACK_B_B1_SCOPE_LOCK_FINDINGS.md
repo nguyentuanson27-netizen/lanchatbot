@@ -258,6 +258,69 @@ No Track B impact found. The multi-product contract's `SILENT_HANDOFF` above ten
 
 ---
 
+## 9b. The option set put to the owner was incomplete (fourth self-review)
+
+The direction question in this session offered three options: promote the Context V2 candidate to live, edit the baseline capability, or build a third capability. **A fourth option was never offered, and on the evidence it is both cheaper and closer to the adopted plan.** That question was asked before `POST_DF_SIMPLIFIED_PLAN_PROPOSAL_20260825.md`, `MODEL_CLAIM_BOUNDARY.md` and the `AgentProposalV1` schema had been read.
+
+### The baseline already returns a structured model proposal
+
+`AgentProposalV1Schema` (`packages/contracts/src/index.ts:520-557`) — the return shape of the **baseline** capability's `generate` — already carries:
+
+| Field | V5 B3 target element |
+|---|---|
+| `intent`, `conversationStage` | model semantic/sales intent |
+| `strategyAnalysis`, `salesSignals` | model structured strategy |
+| `protectedClaimIds` | structured claim references |
+| `action` (`ReplyActionSchema`), `businessFactQuery` | requested actions/effects |
+| `reply`, `attachments` | normal customer-facing draft |
+
+The schema comment at line 529-530 already states the claim contract: *"Model output may reference a trusted claim ID, but never carries the provenance itself. The runtime supplies and verifies that provenance."*
+
+V5's B3 target runtime is *"model structured strategy + claims + requested effects + normal reply draft"*. That shape already exists, inside the byte-frozen envelope.
+
+### The drift is entirely post-generation
+
+`Wave2StrategyInput.modelAnalysis` (`sales-strategy-v1.ts:99`) is **optional**: the model's own strategy analysis is an optional input to a deterministic decision that then overrides the reply.
+
+`applyWave2ReplyPolicy` (`sales-strategy-v1.ts:568-589`) takes a valid model proposal and returns `{ ...proposal, reply }` where `reply` is the model's prose passed through `limitQuestions(...)` and then concatenated with `ctaText(decision.ctaPolicy)` — deterministic Vietnamese CTA copy.
+
+That is exactly what `MODEL_CLAIM_BOUNDARY.md` prohibits — *"it does not silently remove arbitrary phrases and send the damaged remainder"* — and exactly what V5's B2 defines as DEMOTE: *"rewrites a valid model draft for ordinary style/business preference"* and *"hard-codes objection/CTA behavior as conversational authority rather than correctness/safety"*.
+
+### Option 4 — demote post-generation authority only
+
+Restructure the orchestration after generation and change **no capability**:
+
+- keep the baseline capability and its byte-frozen envelope untouched;
+- keep the Context V2 candidate offline, so `MODEL_EVALUATION_BOUNDARY.md` §6 is never contradicted and no durable-contract revision is needed;
+- demote the second `decideWave2SalesStrategy` (`realtime-runner.ts:4563`) and `applyWave2ReplyPolicy` (`4581`), and the deterministic copy-repair path;
+- promote `strategyAnalysis` / `salesSignals` from optional advisory input to the strategy authority;
+- keep claim verification, effect reconciliation and fail-closed behavior exactly as they are.
+
+**What this avoids compared with the selected option:** no §1/§2/§6 contract revision, no capability status change, no prompt-family registration, no widening of `ContextV2CandidateOutputV2` and therefore no new §18 coverage-matrix probes, and no per-turn snapshot prerequisite. The Gate-E candidate fingerprint still goes stale — `sales-strategy-v1.ts`, `guard.ts` and `reply-assembler.ts` are all in the frozen set — but that was already a known Track B dependency in V5 line 328.
+
+**What it does not deliver:** the Context V2 candidate stays unused in production, so the Gate E v15 evidence continues to describe a capability that never serves customers. If the program's intent is to eventually put that capability live, option 4 defers that rather than resolving it.
+
+### Where the amended plan drifted heavier than adopted V5
+
+V5 C4 orders the deployment work: *(1) run the current re-evaluation path using the minimal operational entrypoint from Track B; (2) use existing provenance/release evidence; (3) **only if** the governing contract still creates a concrete unacceptable blocker, make the smallest separately authorized contract/enforcement amendment.* It adds *"Do not pre-build a new evidence profile or second evaluation authority"* and *"Do not proactively redesign governance."*
+
+V5's B3.1 deliverable is that a *minimal operational rerun path **exists*** — a CLI/command adapter, registration inputs, existing evidence-store and provider transport wiring.
+
+The amended plan's B3.1 instead mandates, up front, freezing the candidate, committing a new immutable corpus/rubric artifact, pre-registering and executing a governed scored run. That inverts V5's order by front-loading step 3. The `MODEL_EVALUATION_BOUNDARY.md` requirement for a fresh corpus on any future scored run is real, but V5 says to reach it through the minimal path first and amend only if genuinely blocked.
+
+Two further divergences from the adopted plan:
+
+- **Estimate.** V5 sets Track B at ~4–10 working days with a 1–2 day B1 timebox. The amended plan says 7.5–13.25 days, budget 8–13, above the adopted range. Divergence from a canonical adopted plan should be stated, not silent.
+- **Taxonomy.** V5 uses KEEP / DEMOTE / SPLIT. The amended plan uses KEEP / SPLIT_REWRITE / RETIRE_AFTER_CUTOVER / ROLLBACK_ONLY.
+
+V5 also adds a B3 constraint the plan does not carry: *"Do not require the full Wave1 population before Track B finishes."*
+
+### Process note
+
+This is the fourth review and the most consequential finding, and it is about how the work was run rather than about the code. A direction question was put to the owner before reading the plan that defines the work, the contract that governs the boundary, and the schema of the object at the centre of it. The three options offered were therefore not the real option set. The recommendation is to re-decide with option 4 on the table; nothing in this document assumes that re-decision has happened.
+
+---
+
 ## 10. What B1 has not yet covered
 
 This pass targeted the axes that determine plan shape. Still open before B2.1 starts:
