@@ -2,7 +2,7 @@
 
 **Status:** `B1_COMPLETE_REVIEW_PENDING / B2 NOT STARTED`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
-**Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` stays byte-frozen; the Context V2 candidate stays offline. Escalation ladder in execution-plan §2.
+**Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` and its observed request envelope stay byte-frozen; the Context V2 candidate stays offline. If that direction proves insufficient, Track B stops incomplete; it has no prompt-edit or candidate-promotion alternative.
 
 ## Before implementation
 
@@ -15,6 +15,7 @@
 ## B1 — Scope lock
 
 - [x] The generation capability serving COMMERCE is `BaselineModelCapability`, byte-frozen.
+- [x] Reconcile the pre-existing contract/source drift: current realtime serializes the admitted DF13 state including its Context V2 projection into baseline model context. `MODEL_EVALUATION_BOUNDARY.md` V4 records that exact frozen envelope while still prohibiting candidate capability/prompt/schema/request-identity imports.
 - [x] `AgentProposalV1` already carries reply, strategyAnalysis, salesSignals, protectedClaimIds, action, businessFactQuery.
 - [x] The baseline prompt already assigns strategy as a model proposal for the app to check.
 - [x] The drift is post-generation: `decideWave2SalesStrategy` at `4563` and `applyWave2ReplyPolicy` at `4581`.
@@ -25,6 +26,7 @@
 - [x] `GATE_E_CANDIDATE_SOURCE_PATHS_V1` covers none of the live orchestration path.
 - [x] Canonical self-hosted CI is functional on exact heads.
 - [x] Trace the effect/commit path in `packages/chat-runtime/src/sales-cycle-runtime.ts` and the commerce-kernel policy/negotiation transitions.
+- [x] Distinguish pure `applySalesCycleCommand`, non-live persisted `executePersistedSalesCycleCommand`, live `evaluateRealtimeSalesCycle`, protected-outbound grouping, `RealtimeCommitInput` and DF13 `commitThroughFinalizers`.
 - [x] Complete the KEEP / DEMOTE / SPLIT classification for every reachable component, using V5's taxonomy.
 - [x] Produce the exact focused-test map per changed boundary.
 - [x] Re-estimate and lock the source-PR decomposition before B2.1.
@@ -45,14 +47,19 @@
 - [ ] Promote `strategyAnalysis` / `salesSignals` from optional advisory input to strategy authority for normal conversation.
 - [ ] Stop `applyWave2ReplyPolicy` rewriting a valid model reply: no `limitQuestions` truncation, no deterministic CTA append on the migrated path.
 - [ ] Stop the second `decideWave2SalesStrategy` call overriding model-proposed strategy.
+- [ ] Stop `postMediaProofCta` appending deterministic post-guard sales CTA copy.
+- [ ] Keep message grouping/splitting but stop `limitResponseGroupPoliteness` deleting valid normal model wording.
 - [ ] Keep the early pre-evidence buying hint (DF06 §18) — it has a contractual basis and no side-effect authority.
-- [ ] Do **not** edit `BaselineModelCapability` or the baseline prompt. If evidence shows a prompt change is unavoidable, stop and escalate per execution-plan §2 rather than editing inside this slice.
+- [ ] Do **not** edit `BaselineModelCapability`, the baseline prompt or the observed serialized request envelope. If evidence shows a change is unavoidable, stop Track B incomplete and request a new separately scoped owner decision.
 - [ ] Validate model output as untrusted structured input.
 - [ ] Test that valid model wording ships unmodified, and that invalid claims/actions are rejected rather than silently rewritten.
 
 ## B2.3a — Claim verification
 
+Locked order: complete B2.3a and B2.3d together in PR 3, then B2.3b and B2.3c together in PR 4.
+
 - [ ] Verify protected claims against typed current facts and provenance.
+- [ ] Split `catalogAdvisoryReply`, `renderPreSalePolicyReply`, `multiFactReply`, `multiProductReply`, `verifiedProductInfoProposal` and its XML helpers, `requestedImagesProposal`, `productInfoLookupProposal`, and `assembleReply`: keep typed facts/media/policy safety; move normal advisory/descriptive/CTA wording.
 - [ ] Reject **undeclared** protected claims (`MODEL_CLAIM_BOUNDARY.md`); size/fit is protected.
 - [ ] Shrink the final text guard to defense-in-depth; it may reject, never approve.
 - [ ] Preserve verified facts and media when later stages fail (r31.3).
@@ -65,6 +72,7 @@
 - [ ] Keep deterministic cart/checkout/payment/handoff authorization, CAS, version, idempotency and trusted-port checks.
 - [ ] Resolve ambiguity or deterministic/model conflict to the **less aggressive** action and emit evidence.
 - [ ] Preserve atomic state and effect-intent behavior.
+- [ ] Split `realtime-sales-cycle.ts` renderers: keep exact transaction/effect facts, policy denials and minimal safe confirmations; move normal objection, negotiation and CTA prose to model authority.
 - [ ] Test duplicate, stale, conflicting, unauthorized and transaction-failure paths.
 
 ## B2.3c — Negotiation split
@@ -137,8 +145,8 @@
 
 - [ ] Normal COMMERCE strategy, objection/CTA choice and wording are model-owned.
 - [ ] Deterministic authority is limited to facts/provenance, protected claims, security/PII, policy, reconciliation/effects, CAS/idempotency and bounded fail-closed recovery.
-- [ ] `BaselineModelCapability` unchanged, or an approved deviation exists via the escalation ladder.
-- [ ] The Context V2 candidate remained offline, or its promotion was separately decided with the §6 status change made first.
+- [ ] `BaselineModelCapability`, baseline prompt and exact observed request envelope remained byte-unchanged.
+- [ ] The Context V2 candidate remained offline/evaluation-only; Track B contains no promotion path.
 - [ ] DF13 remains the single COMMERCE composition/authority seam.
 - [ ] Invalid output is bounded to one repair and cannot execute protected effects.
 - [ ] BF-04 is closed with evidence or remains explicitly fenced without increased exposure or misrepresentation.

@@ -23,7 +23,7 @@ Track B has one current direction:
 
 Earlier revisions of this file analyzed promoting the Context V2 candidate into the live path, including candidate snapshot availability, candidate queue ownership and a live-candidate fallback. That analysis is **RETRACTED / HISTORICAL / NON-NORMATIVE**. It does not describe the selected architecture and must not be used to scope B2 or B3.
 
-Candidate promotion would contradict the current owner direction and `contracts/MODEL_EVALUATION_BOUNDARY.md` §6 unless separately reconsidered under a future authorization. Track B creates no third live generation capability.
+Candidate promotion and baseline-envelope modification are not Track B escalation or completion paths. If the frozen baseline proves insufficient, Track B stops incomplete and a future owner decision may open a different architecture in a different scope. Track B creates no third live generation capability.
 
 ---
 
@@ -37,7 +37,7 @@ Candidate promotion would contradict the current owner direction and `contracts/
 - The baseline returns `AgentProposalV1`, including `strategyAnalysis` and `salesSignals`.
 - `context-v2-candidate.ts` is not imported into the served realtime generation path. It remains offline/evaluation-only.
 
-The Context V2 projection is model input context; it does not turn the baseline output into the candidate output contract.
+This source behavior exposed a pre-existing contradiction with `contracts/MODEL_EVALUATION_BOUNDARY.md` V3 §1, which said Context V2 could not enter the baseline request at all. B1 reconciles the durable contract to current source in V4: the serialized DF13 projection is part of the exact byte-frozen baseline envelope, but the served path still cannot import/call the distinct candidate capability, prompt builder, schema or request-identity path. The projection does not turn baseline output into the candidate output contract, and Track B must not change its bytes.
 
 ### 2.2 Post-generation strategy and copy
 
@@ -59,13 +59,12 @@ DF13 remains the admission/fence/final-commit boundary. Track B must not create 
 
 ### 2.4 State, policy, negotiation and effects
 
-`packages/chat-runtime/src/sales-cycle-runtime.ts` is a pure transition boundary over trusted ports:
+The state runtime has two distinct owners and only one is on the current realtime evaluation path:
 
-1. read and validate current state/context;
-2. derive policy, cart, inbound and revalidation decisions;
-3. produce the next state plus tag/handoff/payment/confirmation intents;
-4. commit through repository compare-and-swap;
-5. emit no effects when CAS loses.
+- `applySalesCycleCommand()` in `packages/chat-runtime/src/sales-cycle-runtime.ts` is the pure state machine over an already supplied state, expected revision, command and trusted ports;
+- `executePersistedSalesCycleCommand()` in the same module is an async repository adapter that reads state, calls the pure function and compare-and-swaps state plus effect intents. It is not called by current realtime orchestration.
+
+The live chain is exact: `RealtimeRunner` calls `evaluateRealtimeSalesCycle()`; `apps/worker/src/realtime-sales-cycle.ts` resolves trusted policy/cart/inbound/revalidation inputs and calls pure `applySalesCycleCommand()`; the returned state/intent plan enters `enforceProtectedOutboundReadinessV1()` with reply and claims as one group; the runner builds one `RealtimeCommitInput`; COMMERCE then calls `commitThroughFinalizers()` on the admitted DF13 executor. Persistence/CAS and the outbox/tag/handoff/payment/confirmation intents occur at that final repository commit boundary, not inside the pure evaluator.
 
 The commerce-kernel policy and negotiation path remains deterministic for limits, arithmetic, freshness, idempotency and authorization. Model evidence may classify intent; it cannot authorize a protected effect. `effect-readiness.ts` validates the whole binding tuple and fails closed with authorization `NONE` on mismatch.
 
@@ -112,13 +111,23 @@ Migration `0036` is not assumed. It is used only if the selected source path pro
 | Pre-generation buying hint | KEEP | Input hint only; no customer-facing copy authority |
 | Post-generation `decideWave2SalesStrategy` | DEMOTE | Must not override valid model strategy for business preference |
 | `applyWave2ReplyPolicy` question limiting and CTA append | DEMOTE | Must not rewrite valid normal model wording |
+| `postMediaProofCta()` | DEMOTE | Post-guard deterministic sales CTA is a second conversational authority |
+| `limitResponseGroupPoliteness()` via `groupRealtimeMetaMessagesV2()` / `splitRealtimeMetaMessages()` | DEMOTE wording rewrite; KEEP message grouping/splitting | Removing particles from valid output is ordinary-copy authority; transport grouping remains |
 | `reply-assembler.ts` | SPLIT | Keep assembly/provenance; remove ordinary-copy repair authority |
 | `guard.ts` protected-claim/security validation | KEEP | Fail closed on unsupported or unsafe content |
 | `guard.ts` arbitrary phrase removal / damaged-remainder shipping | DEMOTE | Reject/repair/fallback instead of silent copy surgery |
-| Verified facts, catalog/media and size-engine calculations | SPLIT | Keep typed facts; model owns normal wording |
-| Deterministic verified-facts fallback | KEEP | Safe fallback, never a second sales-copy pipeline |
+| `catalogAdvisoryReply()` and `renderPreSalePolicyReply()` | SPLIT | Keep verified catalog/policy decision; normal advisory wording becomes model-owned, while fixed deny/handoff safety copy may remain |
+| `multiFactReply()` / `multiProductReply()` | SPLIT | Keep verified multi-fact selection, prices and policy limits; move normal sales wording/CTA |
+| `verifiedProductInfoProposal()` and helpers `xmlMaterialPhrase()`, `xmlFormPhrase()`, `productDescriptionLine()` | SPLIT | Keep typed facts/media/provenance; move descriptive sales prose and follow-up question |
+| Model-skipping `requestedImagesProposal()` / `productInfoLookupProposal()` paths | SPLIT | Keep verified attachment selection and bounded factual/status fallback; no normal CTA/copy authority |
+| Product/media ambiguity clarification, `CUSTOMER_URL_SAFE_FALLBACK_REPLY`, `holdingMessagesForHandoff()` | KEEP bounded safety/clarification | Fixed no-claim clarification or handoff holding copy is correctness/fail-closed fallback, not normal sales authority |
+| `sizeEngineProposal()`, `composeSizeEngineAdvice()`, `withSizeEngineAdvice()`, `withProactiveSizeAdvice()` | SPLIT | Keep verified size computation/provenance; model owns normal wording after claim validation |
+| `approvedSizeClaimClarification()` | KEEP | Approved no-unsupported-claim clarification after the single repair budget |
+| `deterministicVertexProposalFallback()`, `safeStaleProposal()`, `safeModelHandoffFallback()` | KEEP bounded fallback | Verified-facts/status clarification or handoff only; never normal sales strategy/copy pipeline |
+| `assembleReply()` | SPLIT | Preserve fact blocks/provenance and attachment allowlist; remove ordinary-copy repair/surgery |
 | Sales-cycle state machine | KEEP | State consistency and pure transition authority |
 | Commerce policy/negotiation limits and arithmetic | KEEP | Deterministic correctness and less-aggressive conflict resolution |
+| `realtime-sales-cycle.ts` renderers (`negotiationOfferText`, cart/checkout summaries, missing-field clarification and effect-result messages) | SPLIT | Keep exact transaction/effect facts, policy denials and minimal safe confirmations; normal objection, negotiation and CTA prose becomes model-owned |
 | Effect readiness/authorization | KEEP | Whole-tuple fail-closed authorization |
 | Repository CAS/idempotency | KEEP | No effects on lost/stale commit |
 | Protected-outbound whole-group gate | KEEP | Reply/claims/state/effects accept or reject together |
@@ -127,7 +136,7 @@ Migration `0036` is not assumed. It is used only if the selected source path pro
 | Pure reply comparison core to extract in B2.1 | SPLIT / add seam | Side-effect-free r31.3 differential on every realtime PR |
 | Authority bundle/writer/readback/rollback | SPLIT in B3.2 | New truthful identity under separately authorized mutation |
 
-This inventory covers every reachable authority class found in generation, post-generation rewrite, state/policy/negotiation, effect, final commit, replay/evaluation and activation paths. File-local helpers inherit the disposition of the boundary they implement.
+This inventory explicitly covers the reachable deterministic copy/proposal producers, the post-guard CTA, final wording limiter, model-skipping branches, generation, state/policy/negotiation, effect, final commit, replay/evaluation and activation paths. B2.1 characterization owns every named path; an unlisted customer-facing deterministic producer discovered later is a B1 scope defect and stops behavior work until classified.
 
 ---
 
@@ -157,7 +166,7 @@ There is no existing side-effect-free reply-behavior differential harness:
 - `commerce-authority-comparison.ts` compares authority/state projections, not final reply behavior;
 - `shadow-runner.ts` owns queue claims, leases and persistence, so invoking it directly is not side-effect-free.
 
-B2.1 must first extract a pure comparison core plus a thin adapter that can run baseline and changed reply behavior on the same captured input without claiming queue rows, sending messages, committing state or authorizing effects. Every later PR that changes realtime behavior must run that adapter on its exact head; B3 cannot be the first differential run.
+B2.1 must first add `apps/worker/src/realtime-reply-differential.ts` with a pure comparison core plus a thin adapter that can run baseline and changed reply behavior on the same captured input without claiming queue rows, sending messages, committing state or authorizing effects. Its focused suite is `apps/worker/src/realtime-reply-differential.test.ts`. Every later PR that changes realtime behavior must run that adapter on its exact head; B3 cannot be the first differential run.
 
 Required assertions include:
 
@@ -173,19 +182,23 @@ Realtime differential evidence and Gate-E evidence remain separate populations. 
 
 ## 7. Focused test map
 
+Three exact new suites are planned: `apps/worker/src/realtime-reply-differential.test.ts` in PR 1 and `apps/worker/src/track-b-post-generation-authority.test.ts` plus `track-b-protected-claim-boundary.test.ts` in their owning PRs. Every other path below already exists.
+
 | Boundary changed | Exact focused verification |
 |---|---|
-| Pure replay/differential seam | `apps/worker/src/shadow-runner.test.ts`, `commerce-authority-comparison.test.ts`, new side-effect-free adapter tests |
-| Baseline proposal becomes strategy authority | `apps/worker/src/realtime-runner.test.ts`, `realtime-golden-transcripts.test.ts`, `realtime-sales-cycle.test.ts`, r31.3 differential |
-| Strategy/CTA override demotion | `packages/business-tools/src/sales-strategy-v1.test.ts`, `reply-assembler.test.ts`, realtime golden transcripts |
-| Structured protected claims | `packages/business-tools/src/protected-claims.test.ts`, `size-claim-guard.test.ts`, `apps/worker/src/realtime-runner.test.ts` adversarial proposal cases |
-| Size/BF-04 | `packages/business-tools/src/size-claim-guard.test.ts`, `size-engine.test.ts`, malformed/undeclared/stale claim cases |
-| One repair and safe fallback | realtime runner tests for zero/one/two-attempt boundaries, verified-facts/media preservation, Inbox retry semantics |
-| Sales-cycle transition/CAS | `packages/chat-runtime/src/sales-cycle-runtime.test.ts`, `sales-cycle-runtime-contract-mismatch.test.ts` |
-| Policy/negotiation/effect readiness | `packages/business-tools/src/policy-engine.test.ts`, `negotiation-engine-v2.test.ts`, `effect-readiness.test.ts`, plus `packages/commerce-kernel/src/protected-sales-transition.test.ts` |
-| DF13 admission/fence/final commit | `df13-commerce-runtime-executor.test.ts`, `df13-commerce-runtime-finalization.test.ts`, `df13-commerce-authority-fence.test.ts`, `df13-runtime-authority-boundary.integration.test.ts` |
-| Authority identity preparation | `df13-commerce-authority-bundle.test.ts`, `df13-commerce-authority-contract.test.ts`, behavior writer tests, cutover/readback/rollback tests |
-| Candidate fingerprint impact | Gate-E registration/fingerprint tests; governed Gate E only if later selected for deployment |
+| Pure replay/differential seam | `apps/worker/src/realtime-reply-differential.test.ts`, `apps/worker/src/shadow-runner.test.ts`, `apps/worker/src/commerce-authority-comparison.test.ts` |
+| Baseline proposal strategy authority | `apps/worker/src/track-b-post-generation-authority.test.ts`, `apps/worker/src/realtime-runner.test.ts`, `apps/worker/src/realtime-golden-transcripts.test.ts`, `apps/worker/src/realtime-sales-cycle.test.ts` |
+| Second strategy decision / `applyWave2ReplyPolicy` | `packages/business-tools/src/sales-strategy-v1.test.ts`, `packages/business-tools/src/reply-assembler.test.ts`, `apps/worker/src/track-b-post-generation-authority.test.ts` |
+| `postMediaProofCta` / response-group politeness limiter | `apps/worker/src/realtime-runner.test.ts`, `apps/worker/src/track-b-post-generation-authority.test.ts`, `apps/worker/src/realtime-golden-transcripts.test.ts` |
+| Direct and model-skipping catalog/multi-fact/product/media producers | `apps/worker/src/realtime-runner.test.ts`, `apps/worker/src/unbounded-multi-product-text.test.ts`, `apps/worker/src/realtime-r32.2-compatibility-shield.test.ts`, `apps/worker/src/track-b-post-generation-authority.test.ts` |
+| Structured protected claims and one-repair budget | `packages/business-tools/src/protected-claims.test.ts`, `packages/business-tools/src/size-claim-guard.test.ts`, `apps/worker/src/track-b-protected-claim-boundary.test.ts`, `apps/worker/src/realtime-runner.test.ts` |
+| Size/BF-04 and verified-facts/media fallback | `packages/business-tools/src/size-claim-guard.test.ts`, `packages/business-tools/src/size-engine.test.ts`, `apps/worker/src/track-b-protected-claim-boundary.test.ts`, `apps/worker/src/realtime-r32.2-compatibility-shield.test.ts` |
+| Pure sales-cycle transition | `packages/chat-runtime/src/sales-cycle-runtime.test.ts`, `packages/chat-runtime/src/sales-cycle-runtime-contract-mismatch.test.ts`, `apps/worker/src/realtime-sales-cycle.test.ts` |
+| Persisted CAS adapter | `packages/chat-runtime/src/sales-cycle-runtime.test.ts` persisted-command cases; it is characterized separately from current realtime reachability |
+| Policy/negotiation/effect readiness | `packages/business-tools/src/policy-engine.test.ts`, `packages/business-tools/src/negotiation-engine-v2.test.ts`, `packages/business-tools/src/effect-readiness.test.ts`, `packages/commerce-kernel/src/protected-sales-transition.test.ts` |
+| Protected-outbound group / DF13 final commit | `apps/worker/src/realtime-sales-cycle.test.ts`, `apps/worker/src/df13-commerce-runtime-executor.test.ts`, `apps/worker/src/df13-commerce-runtime-finalization.test.ts`, `apps/worker/src/df13-commerce-authority-fence.test.ts`, `apps/worker/src/df13-runtime-authority-boundary.integration.test.ts` |
+| Authority identity preparation | `apps/worker/src/df13-commerce-authority-bundle.test.ts`, `apps/worker/src/df13-commerce-authority-contract.test.ts`, `apps/worker/src/df13-first-preprod-behavior-writer.test.ts`, `apps/worker/src/df13-commerce-cutover.test.ts`, `apps/worker/src/df13-runtime-authority-boundary.integration.test.ts` |
+| Baseline envelope / candidate separation | `apps/worker/src/vertex-baseline.test.ts`, `apps/worker/src/context-v2-candidate.test.ts`, `apps/worker/src/context-v2-evaluation.test.ts`, `apps/worker/src/gate-e-registration.test.ts` |
 
 Each source PR also runs affected-workspace typecheck/build and exact-head canonical repository checks. Gate E is a pre-deploy gate for a deployment-selected candidate, not a merge gate while the candidate stays offline.
 
@@ -202,7 +215,7 @@ The minimal source sequence before any separately authorized activation is:
 5. **B2.4/B3 — reachability and final replay**: eliminate superseded live authority, prove no bypass and run final differential. Estimate `1–1.5 d`.
 6. **Authority identity/deploy preparation source**: new bundle/behavior identity, writer/readback/rollback preparation only; no mutation. Estimate `0.75–1.25 d`.
 
-Estimated remaining source/merge work after B1: `6.5–10.5 engineer-days`. A later authorized deployment/authority mutation adds approximately `0.5–1 day`, excluding queue/provider delay and any separately proven migration.
+The six source ranges sum to `6.25–9.25 engineer-days`; that is the single remaining source/merge estimate. A later governed pre-deploy evaluation adds `0.5–1 day`, and a separately authorized deployment/authority mutation adds another `0.5–1 day`, for `7.25–11.25 engineer-days` including both. Queue/provider delay and any separately proven migration are excluded.
 
 Slices may be combined only when the exact diff stays independently reviewable and no realtime behavior change lands before its r31.3 evidence. They may be split further if BF-04 or authority-writer evidence demands it.
 

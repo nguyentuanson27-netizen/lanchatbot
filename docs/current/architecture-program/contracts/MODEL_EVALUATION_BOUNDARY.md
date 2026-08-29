@@ -1,6 +1,6 @@
 # Durable Contract — Model Evaluation Boundary
 
-**Contract revision:** V3 — registered population and DB-authoritative evidence admission
+**Contract revision:** V4 — exact frozen baseline envelope and candidate separation
 
 This contract separates the byte-frozen legacy generation baseline from every
 offline or replay candidate. It is source architecture only and never grants
@@ -16,11 +16,15 @@ not rewrite the plan or grant runtime authority.
 Required properties:
 
 1. Realtime generation and the V1 replay use one baseline capability and the
-   same serialized request envelope for each baseline method. The baseline
-   capability and its resolved request-builder dependency graph do not import,
-   accept, or render Context V2. Realtime orchestration may import Context V2
-   only to persist a shadow capture; it may not pass Context V2 into this
-   capability or its request builders.
+   same serialized request envelope for each baseline method. On the accepted
+   source baseline, realtime serializes the admitted DF13 authority model state,
+   including its `contextV2` projection, into the SYSTEM model context passed to
+   baseline `generate`. That exact behavior is part of the byte-frozen baseline
+   envelope; it is not a Context V2 candidate call. The baseline capability and
+   its resolved request-builder dependency graph must not import or call the
+   distinct Context V2 candidate capability, candidate prompt builder, candidate
+   response schema, or candidate request-identity path. Realtime may separately
+   persist the integrity-valid Context V2 shadow capture required below.
 2. A Context V2 candidate uses a distinct capability whose input requires an
    integrity-valid snapshot. Candidate inputs are never optional and never
    represented by `null` on the baseline path.

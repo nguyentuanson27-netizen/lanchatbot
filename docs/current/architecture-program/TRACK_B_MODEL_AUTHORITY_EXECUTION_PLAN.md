@@ -52,25 +52,9 @@ final reply
 
 The candidate keeps its value as an **offline research and evaluation artifact**. Track B does not promote it, so `contracts/MODEL_EVALUATION_BOUNDARY.md` §6 is never contradicted and no durable-contract status change is required. A future session must not reopen this as an oversight; it is a decision.
 
-### Escalation ladder if this proves insufficient
+### Stop condition if this direction proves insufficient
 
-Do not pay a contract cost before proving the cheaper step fails.
-
-```text
-1  demote post-generation overrides, no prompt change
-   ↓  only if B3 replay/differential proves the frozen baseline
-      cannot select adequate strategy/CTA without a prompt change
-3' narrowest possible baseline prompt change, through the approved-deviation
-   path that MODEL_EVALUATION_BOUNDARY §4 already contemplates, with the
-   required realtime differential evidence
-   ↓  only if that is still insufficient, or losing the byte-frozen V1
-      comparison anchor is judged unacceptable
-2  promote the Context V2 candidate to live, accepting the §6 status change
-```
-
-Rationale for placing `3'` before `2`: §4 **contemplates** a baseline envelope change and defines its mechanism (approved deviation plus realtime differential evidence). §6 contains a flat prohibition on a candidate becoming a live semantic authority and defines **no** mechanism, so option 2 requires redefining what a candidate is. The counterweight is real and must be weighed at that point: changing the baseline envelope also breaks the byte-frozen V1 comparison anchor that `shadow-runner` depends on, which is the tool B3 relies on.
-
-Options 3 (unscoped baseline edit) and 4 (third capability) remain rejected.
+Baseline prompt/envelope modification, live Context V2 candidate promotion and a third capability are not Track B alternatives. If exact-head differential evidence proves the frozen baseline cannot supply adequate normal strategy/CTA after deterministic demotion, stop Track B incomplete and ask the owner whether to open a separately scoped architecture decision. Do not implement or retain an escalation path inside Track B.
 
 ## 3. Current state and hard constraints
 
@@ -91,8 +75,8 @@ Options 3 (unscoped baseline edit) and 4 (third capability) remain rejected.
 Track B must not expand into:
 
 - UR / State V2 / Gate U, or changing `stateReadMode=LEGACY`;
-- promoting the Context V2 candidate to live generation (deferred to the escalation ladder);
-- editing `BaselineModelCapability` or its request envelope, absent an approved deviation reached through the ladder;
+- promoting the Context V2 candidate to live generation;
+- editing `BaselineModelCapability` or its byte-frozen request envelope;
 - a new top-level COMMERCE runtime/composition beside the DF13 seam;
 - a new persistent behavior mode, parallel control plane, persistence or queue topology;
 - admin/API refactors unrelated to the COMMERCE reply/effect path;
@@ -106,7 +90,7 @@ Track B must not expand into:
 
 ### 5.1 The baseline is not modified
 
-`BaselineModelCapability` and its regression-pinned request envelope are untouched. Realtime does not import or call `context-v2-candidate.ts`; the existing runner does serialize its DF13 runtime context, including the Context V2 projection, into the baseline model context. That existing input does not change the generation capability and does not make the resulting `AgentProposalV1` a Context V2 candidate output. No approved deviation is required for the selected source direction.
+`BaselineModelCapability` and its regression-pinned request envelope are untouched. Realtime does not import or call `context-v2-candidate.ts`; the existing runner serializes admitted DF13 authority state, including the Context V2 projection, into the baseline SYSTEM model context. `MODEL_EVALUATION_BOUNDARY.md` V3 incorrectly prohibited that exact current behavior; B1 reconciles §1 in V4 and freezes the observed envelope. The projection does not make `AgentProposalV1` a candidate output. Track B may neither remove/change that projection nor import the distinct candidate capability, prompt builder, schema or request-identity path.
 
 ### 5.2 Gate-E evidence semantics — an explicit prohibition
 
@@ -150,11 +134,11 @@ B2.2  model owns strategy and wording
         ↓
 B2.3a claim verification as the primary correctness boundary
         ↓
+B2.3d size facts deterministic, wording model-owned, BF-04 closed or fenced
+        ↓
 B2.3b effect reconciliation
         ↓
 B2.3c negotiation policy vs conversational strategy
-        ↓
-B2.3d size facts deterministic, wording model-owned, BF-04 closed or fenced
         ↓
 B2.4  remove obsolete post-generation authority reachability
         ↓
@@ -171,7 +155,7 @@ B3.2  owner-scoped deploy, readback, smoke
       accepted Track B PREPROD baseline  →  Track C
 ```
 
-B2.3 sub-slices may be reordered only if evidence proves a cleaner dependency graph without widening scope or bypassing the BF-04, r31.3 or model-evaluation constraints.
+The locked execution order is B2.3a → B2.3d in PR 3, then B2.3b → B2.3c in PR 4. Changing that grouping requires reviewed evidence and a plan update; no slice may bypass BF-04, r31.3 or model-evaluation constraints.
 
 ---
 
@@ -199,7 +183,7 @@ Create one explicit stage boundary between model generation and final delivery, 
 - no duplicated persistence, queue, behavior-mode topology or authority resolver;
 - LEGACY rollback semantics intact;
 - behavior equivalent except for explicitly characterized internal seam changes;
-- the pure reply-comparison core is extracted from `shadow-runner.ts` without queue claim/completion writes, so r31.3 differential evidence exists before the first behavior-changing PR.
+- the pure reply-comparison core is extracted from `shadow-runner.ts` into `apps/worker/src/realtime-reply-differential.ts` without queue claim/completion writes, with `realtime-reply-differential.test.ts`, so r31.3 differential evidence exists before the first behavior-changing PR.
 
 **Verification:** focused characterization tests; `shadow-runner.test.ts`; affected-workspace typecheck/build under `SOLO_PREPROD_MINIMAL`; r31.3 differential for any realtime behavior touched. Every later realtime PR reuses this adapter on its own exact head rather than waiting until B3.
 
@@ -211,26 +195,30 @@ Create one explicit stage boundary between model generation and final delivery, 
 
 Promote `strategyAnalysis` and `salesSignals` from optional advisory input to the strategy authority for normal conversation. Stop rewriting a valid model reply.
 
-**Likely targets** — `realtime-runner.ts` call sites at `3471`, `4563`, `4581`; `packages/business-tools/src/sales-strategy-v1.ts`.
+**Exact ownership** — keep the early input hint at `realtime-runner.ts:3471`; demote the later decision/rewrite at `4563/4581`, `postMediaProofCta()` at `4777`, and `limitResponseGroupPoliteness()` reached through final grouping at `4914/4922`. Primary source owners are `realtime-runner.ts` and `packages/business-tools/src/sales-strategy-v1.ts`.
 
 **Acceptance criteria**
 
 - `applyWave2ReplyPolicy` no longer rewrites a valid model reply on the migrated path — neither `limitQuestions` truncation nor deterministic CTA append;
 - the second `decideWave2SalesStrategy` call no longer overrides model-proposed strategy for normal conversation;
+- `postMediaProofCta` no longer appends post-guard deterministic sales CTA copy;
+- final message grouping/splitting preserves transport shape without deleting valid model politeness wording;
 - the **early** pre-evidence buying hint is retained: `DF06_READINESS_ROOT_CAUSE_CLOSURE_20260814.md` §18 sanctions a deterministic buying hint for the first reply strategy or error fallback before canonical evidence exists, with no side-effect authority;
 - `BaselineModelCapability` and the baseline prompt are unchanged; if evidence shows a prompt change is unavoidable, stop and escalate per §2's ladder rather than editing the envelope inside this slice;
 - model output remains untrusted structured input and is schema-validated;
 - valid model wording survives deterministic validation unchanged except for required safety, fact or effect rejection.
 
-**Verification:** valid/malformed/unknown-field proposal tests; tests proving valid model wording ships unmodified; tests proving invalid claims or actions are rejected rather than silently rewritten; r31.3 differential evidence with intentional deviations documented.
+**Verification:** `apps/worker/src/track-b-post-generation-authority.test.ts`, `realtime-runner.test.ts`, `realtime-golden-transcripts.test.ts`, `packages/business-tools/src/sales-strategy-v1.test.ts`, `reply-assembler.test.ts`, plus exact-head r31.3 differential. Tests prove valid model wording ships unmodified and invalid claims/actions are rejected rather than silently rewritten.
 
 ---
 
 ### B2.3a — Structured protected claims as the primary correctness boundary
 
-**Size:** M · **Estimate:** 0.75–1.25 d · **Depends on:** B2.2
+**Size:** M · **PR 3 combined estimate (B2.3a/d):** 1.5–2 d · **Depends on:** B2.2
 
 Verify protected claims against typed current facts and provenance so `guard.ts` and reply assembly stop acting as the primary reverse-parser and copy-repair layer.
+
+This slice owns the SPLIT for reachable deterministic fact-to-copy and model-skipping producers: `catalogAdvisoryReply`, `renderPreSalePolicyReply`, `multiFactReply`, `multiProductReply`, `verifiedProductInfoProposal` and its XML description helpers, `requestedImagesProposal`, `productInfoLookupProposal`, and `assembleReply`. Keep typed facts, selected verified media, policy denials and bounded status/safety fallback; normal descriptive, advisory and CTA wording becomes model-owned.
 
 **Acceptance criteria**
 
@@ -241,13 +229,13 @@ Verify protected claims against typed current facts and provenance so `guard.ts`
 - PII/security behavior remains fail-closed, and no mode may restore an unverified business claim (`BEHAVIOR_CONTROL_PLANE.md`);
 - every rejection, override, repair and safe fallback carries a reason code.
 
-**Verification:** price/stock/promo/size/ETA mismatch; stale or missing provenance; adversarial and malformed proposals; PII/security regressions; r31.3 verified-facts and media preservation.
+**Verification:** `apps/worker/src/track-b-protected-claim-boundary.test.ts`, `realtime-runner.test.ts`, `unbounded-multi-product-text.test.ts`, `realtime-r32.2-compatibility-shield.test.ts`, `packages/business-tools/src/protected-claims.test.ts`, `size-claim-guard.test.ts`; include price/stock/promo/size/ETA mismatch, stale/missing provenance, adversarial proposals, PII/security, verified-facts/media preservation and every named model-skipping path.
 
 ---
 
 ### B2.3b — Separate requested effects from deterministic reconciliation
 
-**Size:** M · **Estimate:** 0.75–1.25 d · **Depends on:** B2.3a
+**Size:** M · **PR 4 combined estimate (B2.3b/c):** 1–1.5 d · **Depends on:** B2.3a and B2.3d
 
 **Acceptance criteria**
 
@@ -255,15 +243,16 @@ Verify protected claims against typed current facts and provenance so `guard.ts`
 - policy, expected-version, CAS, idempotency, trusted-port and transaction checks remain deterministic;
 - duplicate, stale-version, conflicting or unauthorized requests fail closed or use the existing deterministic conflict/handoff outcome;
 - ambiguity or deterministic/model conflict resolves to the **less aggressive** action and emits evidence, never the more aggressive one;
-- state and effect atomicity preserved.
+- state and effect atomicity preserved;
+- split current `realtime-sales-cycle.ts` renderers: retain exact transaction/effect facts, policy denial and minimal safe confirmation/clarification; move normal objection, negotiation and CTA prose to model authority.
 
-**Verification:** duplicate/idempotency; stale revision and cart version; unauthorized and malformed effect requests; checkout/payment protected transitions; transaction and CAS failure paths.
+**Verification:** `apps/worker/src/realtime-sales-cycle.test.ts`, `packages/chat-runtime/src/sales-cycle-runtime.test.ts`, `sales-cycle-runtime-contract-mismatch.test.ts`, `packages/business-tools/src/effect-readiness.test.ts`, `negotiation-engine-v2.test.ts`; cover duplicate/idempotency, stale revision/cart version, unauthorized/malformed effects, exact renderer dispositions, checkout/payment transitions, transaction and CAS failures.
 
 ---
 
 ### B2.3c — Split negotiation policy authorization from conversational strategy
 
-**Size:** S/M · **Estimate:** 0.5–1 d · **Depends on:** B2.3b
+**Size:** S/M · **PR 4 combined estimate (B2.3b/c):** 1–1.5 d · **Depends on:** B2.3b
 
 **Acceptance criteria**
 
@@ -278,7 +267,7 @@ Verify protected claims against typed current facts and provenance so `guard.ts`
 
 ### B2.3d — Deterministic size facts, model-owned wording, BF-04 closed or fenced
 
-**Size:** M · **Estimate:** 0.75–1.25 d · **Depends on:** B2.3c
+**Size:** M · **PR 3 combined estimate (B2.3a/d):** 1.5–2 d · **Depends on:** B2.3a
 
 BF-04's residual is a property of detecting size recommendations by reading Vietnamese prose: `detectConcreteSizeRecommendations` (`guard.ts:451-470`) drops any mention that `classifySafeExemptionForMention` (`guard.ts:389-394`) classifies as `QUESTION`, `NEGATION`, `CATALOG`, `STOCK` or `NON_CUSTOMER`, and no exemption heuristic over free text is complete. Making a declared, verified, in-scope claim the precondition for shipping size wording is the closure mechanism, and `MODEL_CLAIM_BOUNDARY.md` already mandates that direction.
 
@@ -304,7 +293,7 @@ BF-04 may be recorded as closed only with new regression evidence for the migrat
 
 ### B2.4 — Remove obsolete post-generation authority from COMMERCE reachability
 
-**Size:** S/M · **Estimate:** 0.5–1 d · **Depends on:** all B2.3 slices
+**Size:** S/M · **PR 5 combined estimate (B2.4/B3):** 1–1.5 d · **Depends on:** all B2.3 slices
 
 Make the obsolete post-generation strategy and copy-repair authority unreachable from the active COMMERCE response path. Prove current reachability first; do not target files because they are old.
 
@@ -328,7 +317,7 @@ Make the obsolete post-generation strategy and copy-repair authority unreachable
 
 ### B3 — Live-path differential and side-effect-free replay
 
-**Size:** M · **Estimate:** 1–1.5 d · **Depends on:** B2.4
+**Size:** M · **PR 5 combined estimate (B2.4/B3):** 1–1.5 d · **Depends on:** B2.4
 
 **This is Track B's primary correctness evidence.** Because the Context V2 candidate stays offline, Gate-E evidence cannot stand in for it.
 
@@ -410,8 +399,8 @@ Track B must define the truthful replacement labels, derive a new canonical bund
 
 1. Active COMMERCE normal strategy, objection/CTA choice and wording are model-owned.
 2. Deterministic code remains authoritative for verified facts/provenance, security/PII, protected claims, policy, effect reconciliation/authorization, CAS/idempotency and fail-closed behavior.
-3. `BaselineModelCapability` and its request envelope are unchanged, or a documented approved deviation exists via the §2 ladder.
-4. The Context V2 candidate remains offline, or its promotion was separately decided with the §6 status change made first.
+3. `BaselineModelCapability` and its exact observed request envelope are byte-unchanged.
+4. The Context V2 candidate remains offline/evaluation-only; Track B contains no candidate-promotion path.
 5. The DF13 composition remains the single COMMERCE authority seam; no second permanent runtime or control plane was created.
 6. Invalid model output is bounded to exactly one repair, cannot execute protected effects, and falls back to verified facts without becoming a sales copywriter.
 7. BF-04 is either closed with evidence for the migrated path or explicitly remains a fenced known residual that Track B does not increase or misrepresent.
@@ -436,27 +425,24 @@ Excludes external provider and infrastructure waiting.
 | Slice | Estimate |
 |---|---:|
 | B1 | complete (review pending) |
-| B2.1 + differential foundation | 1–1.5 d |
-| B2.2 | 1–1.5 d |
-| B2.3a | 0.75–1.25 d |
-| B2.3b | 0.75–1.25 d |
-| B2.3c | 0.5–1 d |
-| B2.3d | 0.75–1.25 d |
-| B2.4 | 0.5–1 d |
-| B3 final replay/evidence | 0.75–1.25 d |
-| authority-bundle source + activation-path preparation | 0.75–1.25 d |
-| **To merge** | **~6.5–10.5 d** |
+| PR 1 — B2.1 seam + differential foundation | 1–1.5 d |
+| PR 2 — B2.2 post-generation authority demotion | 1–1.5 d |
+| PR 3 — B2.3a/d structured claims, BF-04, one repair | 1.5–2 d |
+| PR 4 — B2.3b/c effect + negotiation reconciliation | 1–1.5 d |
+| PR 5 — B2.4/B3 reachability + final replay | 1–1.5 d |
+| PR 6 — authority identity / activation-path source | 0.75–1.25 d |
+| **To merge** | **6.25–9.25 d** |
 | B3.1 (deploy gate only) | 0.5–1 d |
 | B3.2 (owner-authorized deploy + authority mutation) | 0.5–1 d |
-| **Including deploy** | **~7.5–12.5 d** |
+| **Including pre-deploy evaluation and deploy** | **7.25–11.25 d** |
 
-The source range is approximately V5's upper band and may exceed it by half a day because B1 proved two requirements that cannot be deferred: the r31.3 comparison core must exist before the first behavior change, and the authority-bundle/behavior identity must change. Provider/infrastructure waiting remains excluded.
+The source total is the arithmetic sum of the six locked PR ranges and matches the B1 findings. Provider/infrastructure waiting remains excluded.
 
 ### Source-PR decomposition locked by B1
 
 1. **PR B2.1:** explicit post-generation seam plus pure, non-claiming reply-comparison core; characterization only.
-2. **PR B2.2:** make baseline structured strategy/wording authoritative and demote the second deterministic decision/rewrite; exact-head r31.3 differential.
-3. **PR B2.3a/d:** structured protected-claim fail-closed boundary, BF-04 regressions, exactly one repair, verified-facts fallback/preservation.
+2. **PR B2.2:** make baseline structured strategy/wording authoritative; demote the second strategy decision, `applyWave2ReplyPolicy`, `postMediaProofCta` and final politeness deletion; exact-head r31.3 differential.
+3. **PR B2.3a/d:** split every named deterministic fact-to-copy/model-skipping producer; add structured protected-claim fail-closed boundary, BF-04 regressions, exactly one repair and verified-facts fallback/preservation.
 4. **PR B2.3b/c:** effect and negotiation reconciliation proof/changes, keeping policy arithmetic, trusted ports, version/CAS/idempotency and less-aggressive conflict resolution deterministic.
 5. **PR B2.4/B3:** remove obsolete COMMERCE reachability, complete full side-effect-free replay and final r31.3 evidence.
 6. **PR authority identity / deploy preparation:** truthful authority-bundle labels, new bundle/behavior identity and reviewed pointer/CAS/readback/rollback tooling. It may merge as source only; no runtime mutation occurs without a new owner command.
@@ -465,7 +451,7 @@ The source range is approximately V5's upper band and may exceed it by half a da
 
 ### The frozen baseline cannot select adequate strategy or CTA
 
-If B3's differential proves the model does not reliably supply an adequate CTA or strategy once the deterministic override is removed, stop and escalate through §2's ladder — the narrowest baseline prompt change under the §4 approved-deviation path first, not a jump to candidate promotion. Weigh the loss of the byte-frozen V1 comparison anchor explicitly at that point.
+If B3's differential proves the model does not reliably supply an adequate CTA or strategy once deterministic authority is removed, stop Track B incomplete. Baseline-envelope changes and candidate promotion require a new owner-scoped architecture decision outside this plan.
 
 ### Deterministic repair becomes a hidden sales copywriter
 
