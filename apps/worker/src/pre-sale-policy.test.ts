@@ -73,8 +73,22 @@ describe("pre-sale customer-care policy", () => {
 
   it("renders only trusted structured policy values", () => {
     expect(renderPreSalePolicyReply("EXCHANGE_SIZE", bundle)).toContain("15 ngày");
-    expect(renderPreSalePolicyReply("EXCHANGE_SIZE", bundle)).toContain("30.000đ");
     expect(renderPreSalePolicyReply("RETURN_AND_REFUND", bundle)).toContain("1–3 ngày");
+  });
+
+  it.each([
+    "EXCHANGE_AND_RETURN",
+    "EXCHANGE_SIZE",
+    "EXCHANGE_COLOR",
+    "EXCHANGE_MODEL",
+    "RETURN_AND_REFUND",
+    "REFUSED_PARCEL_FEE",
+  ] as const)("does not emit an unbound shipping-fee amount for %s", (intent) => {
+    expect(renderPreSalePolicyReply(intent, bundle)).not.toMatch(/(?:30[.]000đ|100% phí ship)/u);
+  });
+
+  it("retains the exact amount only for the explicitly classified shipping-fee intent", () => {
+    expect(renderPreSalePolicyReply("SHIPPING_FEE", bundle)).toContain("30.000đ");
   });
 
   it("fails closed without a live or approved customer-care policy", () => {

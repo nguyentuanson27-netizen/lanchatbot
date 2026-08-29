@@ -224,14 +224,14 @@ This slice owns the SPLIT for reachable deterministic fact-to-copy and model-ski
 
 **Acceptance criteria**
 
-- price, stock, promotion, size, ETA and other protected claims are checked against typed current provenance — `MODEL_CLAIM_BOUNDARY.md` requires rejecting **undeclared** protected claims, and names size/fit as protected;
+- price, stock, promotion, ETA and other non-size protected claims are checked against exact typed current provenance and product/variant or cart scope — `MODEL_CLAIM_BOUNDARY.md` requires rejecting **undeclared** protected claims; size/fit remains explicitly deferred to B2.3d and this slice does not claim BF-04 closure;
 - unsupported, stale or mismatched claims reject the proposal or enter bounded recovery;
 - the final text guard is defense-in-depth, not primary fact extraction or copy rewriting;
 - verified facts and media already produced upstream are preserved when later stages fail, per r31.3;
 - PII/security behavior remains fail-closed, and no mode may restore an unverified business claim (`BEHAVIOR_CONTROL_PLANE.md`);
 - every rejection, override, repair and safe fallback carries a reason code.
 
-**Verification:** `apps/worker/src/track-b-protected-claim-boundary.test.ts`, `realtime-runner.test.ts`, `unbounded-multi-product-text.test.ts`, `realtime-r32.2-compatibility-shield.test.ts`, `packages/business-tools/src/protected-claims.test.ts`, `size-claim-guard.test.ts`; include price/stock/promo/size/ETA mismatch, stale/missing provenance, adversarial proposals, PII/security, verified-facts/media preservation and every named model-skipping path.
+**Verification:** `apps/worker/src/track-b-protected-claim-boundary.test.ts`, `realtime-runner.test.ts`, `unbounded-multi-product-text.test.ts`, `realtime-r32.2-compatibility-shield.test.ts`, `packages/business-tools/src/protected-claims.test.ts`, `size-claim-guard.test.ts`; include price/stock/promo/ETA mismatch, exact cross-product binding, stale/missing provenance, adversarial proposals, PII/security, verified-facts/media preservation and every named model-skipping path. The r31.3 runner differential must execute the migrated candidate against an immutable snapshot captured from the exact pre-slice head, not two configurations of the current runner.
 
 ---
 

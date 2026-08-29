@@ -15,6 +15,7 @@ import {
   createVerifiedSizeRecommendationClaim,
   selectProductMediaV2,
   guardAgentProposal,
+  detectConcreteSizeRecommendations,
   selectImages,
   verifiedImageUrls,
   applyWave2ReplyPolicy,
@@ -114,6 +115,8 @@ import {
 import {
   authorizeRealtimeProtectedClaimProposal,
   bindRealtimeProtectedClaimProposal,
+  detectRealtimeUndeclaredProtectedClaimTypes,
+  type RealtimeProtectedClaimRequest,
 } from "./realtime-protected-claim-boundary.js";
 export {
   groupRealtimeMetaMessagesV2,
@@ -3292,6 +3295,7 @@ export class RealtimeRunner {
     let businessFacts: BusinessFactEnvelopeV1 | null = null;
     let businessFactEnvelopes: BusinessFactEnvelopeV1[] = [];
     let deterministicProtectedClaimTypes: ProtectedClaimV1["type"][] = [];
+    let deterministicProtectedClaimRequests: RealtimeProtectedClaimRequest[] = [];
     let protectedClaimBindingReasonCodes: readonly string[] = [];
     let handoffGuardReasonCodes: readonly string[] =
       customerUrlDisposition === "HANDOFF" ? customerUrlReasonCodes : [];
@@ -3543,8 +3547,10 @@ export class RealtimeRunner {
         if (reply) {
           if (preSalePolicyIntent === "SHIPPING_FEE") {
             deterministicProtectedClaimTypes = ["SHIPPING_FEE"];
+            deterministicProtectedClaimRequests = [{ type: "SHIPPING_FEE" }];
           } else if (preSalePolicyIntent === "DELIVERY_TIME") {
             deterministicProtectedClaimTypes = ["ETA"];
+            deterministicProtectedClaimRequests = [{ type: "ETA" }];
           }
           if (this.options.mode === "LIVE" && this.options.sendEnabled) {
             metaMessages = [{ kind: "TEXT", text: reply }];
@@ -3787,6 +3793,19 @@ export class RealtimeRunner {
             SIZE: "SIZE_FIT" as const,
             ETA: "ETA" as const,
           })[requestedFact]))].sort();
+          deterministicProtectedClaimRequests = resolutions.flatMap((resolution) =>
+            resolution.product === null
+              ? []
+              : resolution.facts.map(({ requestedFact }) => ({
+                  type: ({
+                    PRICE: "PRICE" as const,
+                    STOCK: "STOCK" as const,
+                    SIZE: "SIZE_FIT" as const,
+                    ETA: "ETA" as const,
+                  })[requestedFact],
+                  productId: resolution.product!.productId,
+                }))
+          );
           const first = multiFactQueries.queries[0]!;
           proposal = {
             schemaVersion: 1,
@@ -3899,7 +3918,13 @@ export class RealtimeRunner {
           allFacts,
           policyResolution,
         );
-        if (reply !== null) deterministicProtectedClaimTypes = ["PRICE"];
+        if (reply !== null) {
+          deterministicProtectedClaimTypes = ["PRICE"];
+          deterministicProtectedClaimRequests = resolution.products.map(({ productId }) => ({
+            type: "PRICE",
+            productId,
+          }));
+        }
         if (!reply) {
           handoffGuardReasonCodes = ["MULTI_PRODUCT_FACT_UNAVAILABLE"];
           const transitioned = applySilentHandoff(
@@ -4562,22 +4587,35 @@ export class RealtimeRunner {
                 expiresAt: new Date(now.getTime() + 60_000).toISOString(),
               })
             : [];
+        const protectedClaimProductId = proposal.productId;
         const boundProtectedClaims = bindRealtimeProtectedClaimProposal({
-          requestedClaimTypes: requestedProtectedClaimTypes(
+          requestedClaims: requestedProtectedClaimTypes(
             proposal.businessFactQuery.intent,
-          ),
-          // Unknown IDs remain the responsibility of the existing size
-          // detector/one-repair path until B2.3d. B2.3a binds only IDs whose
-          // typed evidence is present at this boundary.
-          modelDeclaredClaimIds: (proposal.protectedClaimIds ?? []).filter((claimId) =>
-            typedClaimsForProposal.some(({ claimId: availableId }) =>
-              availableId === claimId
-            )
-          ),
-          deterministicClaimTypes: [
-            ...deterministicProtectedClaimTypes.filter((type) => type !== "SIZE_FIT"),
-            ...(mediaClaims.length > 0 ? ["PRODUCT_MEDIA" as const] : []),
+          ).map((type) => ({
+            type,
+            ...(protectedClaimProductId === null
+              ? {}
+              : { productId: protectedClaimProductId }),
+          })),
+          // B2.3d owns unknown IDs attached to concrete size wording so the
+          // existing exactly-one repair can still run. Everywhere else an
+          // unknown model ID reaches the authorizer and fails closed.
+          modelDeclaredClaimIds:
+            detectConcreteSizeRecommendations(proposal.reply).length > 0
+              ? (proposal.protectedClaimIds ?? []).filter((claimId) =>
+                  typedClaimsForProposal.some(({ claimId: availableId }) =>
+                    availableId === claimId
+                  )
+                )
+              : proposal.protectedClaimIds ?? [],
+          deterministicClaims: [
+            ...deterministicProtectedClaimRequests.filter(({ type }) => type !== "SIZE_FIT"),
+            ...(mediaClaims.length > 0 && proposal.productId !== null
+              ? [{ type: "PRODUCT_MEDIA" as const, productId: proposal.productId }]
+              : []),
           ],
+          defenseObservedClaimTypes:
+            detectRealtimeUndeclaredProtectedClaimTypes(proposal.reply),
           availableClaims: [...typedClaimsForProposal, ...mediaClaims],
           expectedProductIds: expectedProtectedClaimProductIds,
           expectedProductScopes: expectedProtectedClaimProductScopes,
@@ -4587,11 +4625,7 @@ export class RealtimeRunner {
         proposal = {
           ...proposal,
           protectedClaimIds: [...new Set([
-            ...(proposal.protectedClaimIds ?? []).filter((claimId) =>
-              typedClaimsForProposal.some(({ claimId: availableId }) =>
-                availableId === claimId
-              )
-            ),
+            ...(proposal.protectedClaimIds ?? []),
             ...boundProtectedClaims.claimIds,
           ])],
         };
@@ -4731,22 +4765,34 @@ export class RealtimeRunner {
               attachmentUrls: sizeRepairBaseline.attachments.filter((url) =>
                 verifiedAttachmentUrlsForFallback.has(url)
               ),
-              preservedProtectedClaimIds: (sizeRepairBaseline.protectedClaimIds ?? []).filter(
-                (claimId) => claimId !== verifiedSizeClaimForTurn?.id,
-              ),
+              preservedProtectedClaimIds: (sizeRepairBaseline.protectedClaimIds ?? [])
+                .filter((claimId) => [...typedClaimsForProposal, ...mediaClaims]
+                  .some((claim) =>
+                    claim.claimId === claimId && claim.type !== "SIZE_FIT"
+                  )),
               // The independently authorized post-media CTA is constructed
               // after this fallback from the guarded media plan below.
               approvedCta: null,
             });
             if (facts?.status === "OK" && facts.facts !== null) {
+              const fallbackProductId = facts.productId;
+              const fallbackClaimRequests: RealtimeProtectedClaimRequest[] = [
+                ...(facts.facts.salePriceVnd !== null || facts.facts.listPriceVnd !== null
+                  ? [{ type: "PRICE" as const, productId: fallbackProductId }]
+                  : []),
+                { type: "STOCK" as const, productId: fallbackProductId },
+                ...(facts.facts.deliveryEta !== null
+                  ? [{ type: "ETA" as const, productId: fallbackProductId }]
+                  : []),
+              ];
               deterministicProtectedClaimTypes = [...new Set([
                 ...deterministicProtectedClaimTypes,
-                ...(facts.facts.salePriceVnd !== null || facts.facts.listPriceVnd !== null
-                  ? ["PRICE" as const]
-                  : []),
-                "STOCK" as const,
-                ...(facts.facts.deliveryEta !== null ? ["ETA" as const] : []),
+                ...fallbackClaimRequests.map(({ type }) => type),
               ])].sort();
+              deterministicProtectedClaimRequests = [
+                ...deterministicProtectedClaimRequests,
+                ...fallbackClaimRequests,
+              ];
             }
             guarded = enforceProtectedClaimBinding(guardProposal(proposal));
             handoffGuardReasonCodes = [...new Set([
@@ -5029,19 +5075,20 @@ export class RealtimeRunner {
         type !== "SIZE_FIT"
       );
       const finalProtectedClaimBinding = bindRealtimeProtectedClaimProposal({
-        requestedClaimTypes: [],
+        requestedClaims: [],
         modelDeclaredClaimIds: (proposal?.protectedClaimIds ?? []).filter((claimId) =>
           protectedOutboundClaims.some(({ claimId: availableId }) =>
             availableId === claimId
           )
         ),
-        deterministicClaimTypes: deterministicProtectedClaimTypes.filter((type) =>
-          type !== "SIZE_FIT"
-        ).concat(
-          nonSizeOutboundClaimTypes.includes("PRODUCT_MEDIA")
-            ? ["PRODUCT_MEDIA"]
-            : [],
-        ),
+        deterministicClaims: [
+          ...deterministicProtectedClaimRequests.filter(({ type }) =>
+            type !== "SIZE_FIT"
+          ),
+          ...(nonSizeOutboundClaimTypes.includes("PRODUCT_MEDIA") && mediaProductId !== null
+            ? [{ type: "PRODUCT_MEDIA" as const, productId: mediaProductId }]
+            : []),
+        ],
         availableClaims: protectedOutboundClaims,
         expectedProductIds: expectedOutboundProductIds,
         expectedProductScopes: expectedOutboundProductScopes,

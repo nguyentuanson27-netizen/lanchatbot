@@ -2290,7 +2290,7 @@ describe("RealtimeRunner", () => {
       state: expect.objectContaining({ conversationOwner: "BOT" }),
       metaPlan: expect.objectContaining({ messages: [{
         kind: "TEXT",
-        text: expect.stringMatching(/15 ngày.*30\.000đ.*5 ngày/su),
+        text: expect.stringMatching(/15 ngày.*5 ngày/su),
       }] }),
     }), expect.any(Date));
     expect(commit).toHaveBeenCalledWith(expect.not.objectContaining({
@@ -2551,10 +2551,22 @@ describe("RealtimeRunner", () => {
           { label: "SET_2", productId: "CB182" },
         ],
       }),
-      metaPlan: expect.objectContaining({ messages: [{
-        kind: "TEXT",
-        text: "Set 1 - SV921 - giá 699k\nSet 2 - CB182 - giá 759k",
-      }] }),
+      metaPlan: expect.objectContaining({
+        messages: [{
+          kind: "TEXT",
+          text: "Set 1 - SV921 - giá 699k\nSet 2 - CB182 - giá 759k",
+        }],
+        protectedClaims: expect.arrayContaining([
+          expect.objectContaining({
+            type: "PRICE",
+            scope: { kind: "PRODUCT", productId: "SV921", variantId: null },
+          }),
+          expect.objectContaining({
+            type: "PRICE",
+            scope: { kind: "PRODUCT", productId: "CB182", variantId: null },
+          }),
+        ]),
+      }),
     }), expect.any(Date));
 
     const resolvedFacts = [

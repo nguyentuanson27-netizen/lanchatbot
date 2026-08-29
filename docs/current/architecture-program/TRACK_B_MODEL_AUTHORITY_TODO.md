@@ -61,10 +61,12 @@ PR shape: B2.3a lands as one focused PR and B2.3d remains a separate later
 slice. This split does not waive BF-04 or the exactly-one-repair acceptance
 criteria, and it does not authorize merge, deployment or authority mutation.
 
-- [x] Bind the existing structured fact request and verified deterministic
-  producer classifications to exact typed claim IDs, then authorize every
-  non-size claim against current provenance and scope before whole-group
-  delivery. Model evidence retains `authorization: NONE`.
+- [x] Bind each existing structured fact request and verified deterministic
+  producer classification by exact claim type plus product/variant or cart
+  scope to exact typed claim IDs, then authorize every non-size claim against
+  current provenance and scope before whole-group delivery. Type-wide binding
+  across multi-product replies is forbidden. Model evidence retains
+  `authorization: NONE`.
 - [x] Split `catalogAdvisoryReply`, `renderPreSalePolicyReply`,
   `multiFactReply`, `multiProductReply`, `verifiedProductInfoProposal` and its
   XML helpers, `requestedImagesProposal`, `productInfoLookupProposal`, and
@@ -72,7 +74,8 @@ criteria, and it does not authorize merge, deployment or authority mutation.
   fact/media rendering, bounded status/safety text and policy denials; XML
   descriptive synthesis, deterministic multi-item offer copy and normal sales
   CTAs were removed. Structured shipping/ETA output without the required
-  cart/product provenance now fails closed at the whole-group gate.
+  cart/product provenance now fails closed at the whole-group gate; policy FAQ
+  branches no longer emit an exact shipping-fee amount outside that binding.
 - [x] Reject **undeclared non-size** protected claims at the structured
   boundary. Size/fit remains on the existing detector and one-repair path for
   B2.3d; this PR does not claim BF-04 closure.
@@ -84,6 +87,11 @@ criteria, and it does not authorize merge, deployment or authority mutation.
   claim (`BEHAVIOR_CONTROL_PLANE.md`).
 - [x] Reason-code missing, invalid, duplicate, stale, future, undeclared and
   scope-mismatched structured claims.
+- [x] Exercise the migrated live-path claim seam against the immutable
+  r31.3 snapshot captured from exact pre-B2.3a head
+  `89b1bee02109e17b6b3b2a0e714e24d3bdb70a60`; preserve verified fact, claim,
+  effect, commit and whole-group hashes, and block a group carrying a
+  model-declared ID with no typed evidence.
 - [ ] **Checkpoint:** exact B2.3a head has clean self-review, one fixed
   independent Sol High reviewer verdict, and canonical repository CI PASS.
 

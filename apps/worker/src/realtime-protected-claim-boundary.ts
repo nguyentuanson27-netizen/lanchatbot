@@ -150,14 +150,71 @@ export function authorizeRealtimeProtectedClaimProposal(
 }
 
 export interface BindRealtimeProtectedClaimProposalInput {
-  readonly requestedClaimTypes: readonly ProtectedClaimV1["type"][];
+  readonly requestedClaims: readonly RealtimeProtectedClaimRequest[];
   readonly modelDeclaredClaimIds: readonly string[];
-  readonly deterministicClaimTypes: readonly ProtectedClaimV1["type"][];
+  readonly deterministicClaims: readonly RealtimeProtectedClaimRequest[];
+  readonly defenseObservedClaimTypes?: readonly ProtectedClaimV1["type"][];
   readonly availableClaims: readonly unknown[];
   readonly expectedProductIds: readonly string[];
   readonly expectedProductScopes?: RealtimeProtectedClaimAuthorizationInput["expectedProductScopes"];
   readonly expectedCart?: RealtimeProtectedClaimAuthorizationInput["expectedCart"];
   readonly now: Date;
+}
+
+/**
+ * Conservative defense-only detector for known omissions in the legacy text
+ * guard. It can make a proposal fail closed, but it never binds evidence or
+ * authorizes a claim from prose.
+ */
+export function detectRealtimeUndeclaredProtectedClaimTypes(
+  reply: string,
+): readonly ProtectedClaimV1["type"][] {
+  const folded = reply
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .replace(/đ/giu, "d")
+    .toLocaleLowerCase("vi");
+  return /\b(?:mau|san\s+pham|hang)(?:\s+nay)?(?:\s+hien)?\s+van\s+con\b/u.test(folded)
+    ? ["STOCK"]
+    : [];
+}
+
+export interface RealtimeProtectedClaimRequest {
+  readonly type: ProtectedClaimV1["type"];
+  readonly productId?: string;
+  readonly variantId?: string | null;
+  readonly cartId?: string;
+  readonly cartVersion?: number;
+}
+
+function requestKey(request: RealtimeProtectedClaimRequest): string {
+  return JSON.stringify([
+    request.type,
+    request.productId === undefined ? "UNSPECIFIED" : request.productId,
+    request.variantId === undefined
+      ? "UNSPECIFIED"
+      : request.variantId === null ? "NULL" : request.variantId,
+    request.cartId === undefined ? "UNSPECIFIED" : request.cartId,
+    request.cartVersion === undefined ? "UNSPECIFIED" : request.cartVersion,
+  ]);
+}
+
+function claimMatchesRequest(
+  claim: ProtectedClaimV1,
+  request: RealtimeProtectedClaimRequest,
+): boolean {
+  if (claim.type !== request.type) return false;
+  if (request.productId !== undefined) {
+    return claim.scope.kind === "PRODUCT" &&
+      claim.scope.productId === request.productId &&
+      (request.variantId === undefined || claim.scope.variantId === request.variantId);
+  }
+  if (request.cartId !== undefined || request.cartVersion !== undefined) {
+    return claim.scope.kind === "CART" &&
+      claim.scope.cartId === request.cartId &&
+      claim.scope.cartVersion === request.cartVersion;
+  }
+  return true;
 }
 
 /**
@@ -171,9 +228,13 @@ export function bindRealtimeProtectedClaimProposal(
   claimIds: readonly string[];
   reasonCodes: readonly RealtimeProtectedClaimReasonCode[];
 }> {
+  const requests = [...new Map([
+    ...input.requestedClaims,
+    ...input.deterministicClaims,
+  ].map((request) => [requestKey(request), request])).values()];
   const requestedTypes = [...new Set([
-    ...input.requestedClaimTypes,
-    ...input.deterministicClaimTypes,
+    ...requests.map(({ type }) => type),
+    ...(input.defenseObservedClaimTypes ?? []),
   ])];
   const parsedClaims = input.availableClaims.flatMap((candidate) => {
     const parsed = ProtectedClaimV1Schema.safeParse(candidate);
@@ -181,10 +242,12 @@ export function bindRealtimeProtectedClaimProposal(
   });
   const boundIds = new Set(input.modelDeclaredClaimIds);
   const reasons = new Set<RealtimeProtectedClaimReasonCode>();
-  for (const type of requestedTypes) {
-    const candidates = parsedClaims.filter((claim) => claim.type === type);
+  for (const request of requests) {
+    const candidates = parsedClaims.filter((claim) =>
+      claimMatchesRequest(claim, request)
+    );
     if (candidates.length === 0) {
-      reasons.add(`PROTECTED_CLAIM_EVIDENCE_UNAVAILABLE:${type}`);
+      reasons.add(`PROTECTED_CLAIM_EVIDENCE_UNAVAILABLE:${request.type}`);
       continue;
     }
     for (const claim of candidates) boundIds.add(claim.claimId);

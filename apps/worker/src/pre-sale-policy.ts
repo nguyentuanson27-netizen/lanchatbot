@@ -115,23 +115,22 @@ export function renderPreSalePolicyReply(
   const returns = care.returns;
   const supportedActions = exchangeActionLabels(exchange.supportedActions);
   const exchangeBase = `Shop hỗ trợ đổi ${supportedActions} ${exchange.maxExchangesPerOrder} lần trong ${exchange.windowDaysFromReceipt} ngày từ khi nhận hàng; ${exchangeConditions(exchange.requiredConditions)} ạ.`;
-  const exchangeFee = `Phí đổi hai chiều tổng ${money(exchange.totalTwoWayShippingFeeVnd)} nha.`;
 
   switch (intent) {
     case "EXCHANGE_AND_RETURN":
-      return `Shop hỗ trợ đổi ${supportedActions} ${exchange.maxExchangesPerOrder} lần trong ${exchange.windowDaysFromReceipt} ngày; phí hai chiều tổng ${money(exchange.totalTwoWayShippingFeeVnd)} ạ. Hàng giảm từ ${exchange.saleRestriction.discountThresholdBps / 100}% chỉ đổi ${exchangeActionLabels(exchange.saleRestriction.allowedActions)}; trả hàng áp dụng ${returnReasonLabels(returns.eligibleReasons)} trong ${returns.reportingWindowDaysFromReceipt} ngày nha.`;
+      return `Shop hỗ trợ đổi ${supportedActions} ${exchange.maxExchangesPerOrder} lần trong ${exchange.windowDaysFromReceipt} ngày ạ. Hàng giảm từ ${exchange.saleRestriction.discountThresholdBps / 100}% chỉ đổi ${exchangeActionLabels(exchange.saleRestriction.allowedActions)}; trả hàng áp dụng ${returnReasonLabels(returns.eligibleReasons)} trong ${returns.reportingWindowDaysFromReceipt} ngày nha.`;
     case "EXCHANGE_SIZE":
-      return `${exchangeBase} ${exchangeFee}`;
+      return exchangeBase;
     case "EXCHANGE_COLOR":
-      return `${exchangeBase} ${exchangeFee}`;
+      return exchangeBase;
     case "EXCHANGE_MODEL":
-      return `Shop hỗ trợ đổi mẫu ${exchange.maxExchangesPerOrder} lần trong ${exchange.windowDaysFromReceipt} ngày; mẫu mới tính giá niêm yết và bù chênh lệch nếu có ạ. ${exchangeFee}`;
+      return `Shop hỗ trợ đổi mẫu ${exchange.maxExchangesPerOrder} lần trong ${exchange.windowDaysFromReceipt} ngày; mẫu mới tính giá niêm yết và bù chênh lệch nếu có ạ.`;
     case "RETURN_AND_REFUND":
-      return `Shop nhận trả khi ${returnReasonLabels(returns.eligibleReasons)}; mình báo trong ${returns.reportingWindowDaysFromReceipt} ngày từ lúc nhận hàng ạ. Shop chịu ${returns.shopShippingCoveragePercent}% phí ship và hoàn tiền ${returns.refundBusinessDaysMin}–${returns.refundBusinessDaysMax} ngày làm việc sau khi xác nhận lỗi nha.`;
+      return `Shop nhận trả khi ${returnReasonLabels(returns.eligibleReasons)}; mình báo trong ${returns.reportingWindowDaysFromReceipt} ngày từ lúc nhận hàng ạ. Shop hoàn tiền ${returns.refundBusinessDaysMin}–${returns.refundBusinessDaysMax} ngày làm việc sau khi xác nhận lỗi nha.`;
     case "TRY_ON":
       return "Khi nhận hàng, chị được ướm sản phẩm nhưng shop chưa hỗ trợ mặc thử ạ.";
     case "REFUSED_PARCEL_FEE":
-      return `Nếu không nhận hàng, chị hỗ trợ shop ${money(care.inspection.refusedParcelShippingFeeVnd)} phí vận chuyển ạ.`;
+      return "Nếu không nhận hàng, chị sẽ cần hỗ trợ phí vận chuyển theo chính sách của shop ạ.";
     case "SHOPEE_PRICE":
       return "Shopee có voucher và trợ giá riêng từ sàn nên shop không áp dụng mức giá giống hoàn toàn qua inbox được ạ.";
     case "IMAGE_ACCURACY":

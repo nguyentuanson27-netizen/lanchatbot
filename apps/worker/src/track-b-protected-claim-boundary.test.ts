@@ -3,6 +3,7 @@ import { ProtectedClaimV1Schema, type ProtectedClaimV1 } from "@lana/contracts";
 import {
   authorizeRealtimeProtectedClaimProposal,
   bindRealtimeProtectedClaimProposal,
+  detectRealtimeUndeclaredProtectedClaimTypes,
 } from "./realtime-protected-claim-boundary.js";
 
 const NOW = new Date("2026-08-30T03:00:00.000Z");
@@ -43,9 +44,9 @@ describe("Track B B2.3a protected-claim boundary", () => {
     const stock = productClaim("STOCK");
 
     expect(bindRealtimeProtectedClaimProposal({
-      requestedClaimTypes: ["PRICE"],
+      requestedClaims: [{ type: "PRICE", productId: "SKU-1" }],
       modelDeclaredClaimIds: [],
-      deterministicClaimTypes: [],
+      deterministicClaims: [],
       availableClaims: [price, stock],
       expectedProductIds: ["SKU-1"],
       now: NOW,
@@ -175,26 +176,72 @@ describe("Track B B2.3a protected-claim boundary", () => {
 
   it("does not infer or bind a claim from reply text", () => {
     expect(bindRealtimeProtectedClaimProposal({
-      requestedClaimTypes: [],
+      requestedClaims: [],
       modelDeclaredClaimIds: [],
-      deterministicClaimTypes: [],
+      deterministicClaims: [],
       availableClaims: [productClaim("PRICE")],
       expectedProductIds: ["SKU-1"],
       now: NOW,
     })).toEqual({ claimIds: [], reasonCodes: [] });
   });
 
+  it("detects a product-scoped 'vẫn còn' assertion only as a rejection signal", () => {
+    expect(detectRealtimeUndeclaredProtectedClaimTypes(
+      "Mẫu này hiện vẫn còn chị nhé.",
+    )).toEqual(["STOCK"]);
+    expect(bindRealtimeProtectedClaimProposal({
+      requestedClaims: [],
+      modelDeclaredClaimIds: [],
+      deterministicClaims: [],
+      defenseObservedClaimTypes: ["STOCK"],
+      availableClaims: [productClaim("STOCK")],
+      expectedProductIds: ["SKU-1"],
+      now: NOW,
+    })).toEqual({
+      claimIds: [],
+      reasonCodes: ["PROTECTED_CLAIM_UNDECLARED:STOCK"],
+    });
+  });
+
   it("fails closed when a deterministic shipping producer lacks cart-scoped provenance", () => {
     expect(bindRealtimeProtectedClaimProposal({
-      requestedClaimTypes: [],
+      requestedClaims: [],
       modelDeclaredClaimIds: [],
-      deterministicClaimTypes: ["SHIPPING_FEE"],
+      deterministicClaims: [{ type: "SHIPPING_FEE" }],
       availableClaims: [],
       expectedProductIds: [],
       now: NOW,
     })).toEqual({
       claimIds: [],
       reasonCodes: ["PROTECTED_CLAIM_EVIDENCE_UNAVAILABLE:SHIPPING_FEE"],
+    });
+  });
+
+  it("binds only the exact requested fact for each product", () => {
+    const priceA = productClaim("PRICE");
+    const stockA = productClaim("STOCK");
+    const priceB = productClaim("PRICE", {
+      claimId: "33333333-3333-5333-8333-333333333333",
+      scope: { kind: "PRODUCT", productId: "SKU-2", variantId: null },
+    });
+    const stockB = productClaim("STOCK", {
+      claimId: "44444444-4444-5444-8444-444444444444",
+      scope: { kind: "PRODUCT", productId: "SKU-2", variantId: null },
+    });
+
+    expect(bindRealtimeProtectedClaimProposal({
+      requestedClaims: [],
+      modelDeclaredClaimIds: [],
+      deterministicClaims: [
+        { type: "PRICE", productId: "SKU-1" },
+        { type: "STOCK", productId: "SKU-2" },
+      ],
+      availableClaims: [priceA, stockA, priceB, stockB],
+      expectedProductIds: ["SKU-1", "SKU-2"],
+      now: NOW,
+    })).toEqual({
+      claimIds: [PRICE_ID, "44444444-4444-5444-8444-444444444444"],
+      reasonCodes: [],
     });
   });
 });
