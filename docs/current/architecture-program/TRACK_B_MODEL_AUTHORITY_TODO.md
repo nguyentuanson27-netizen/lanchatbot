@@ -1,158 +1,159 @@
 # Track B — Execution Checklist
 
-**Status:** `PLAN_ONLY / IMPLEMENTATION REQUIRES SEPARATE OWNER COMMAND`
+**Status:** `B1_COMPLETE_REVIEW_PENDING / B2 NOT STARTED`
+**B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
+**Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` and its observed request envelope stay byte-frozen; the Context V2 candidate stays offline. If that direction proves insufficient, Track B stops incomplete; it has no prompt-edit or candidate-promotion alternative.
 
 ## Before implementation
 
-- [ ] Receive a separate owner command authorizing Track B implementation; merge of the plan PR is not authorization.
-- [ ] Re-read `AGENTS.md`, `OPERATING_MODE.md`, `program-state.json`, this plan, and relevant contracts from the exact merged `main` head.
-- [ ] Follow `SOLO_PREPROD_MINIMAL` (PR #269, merged and active): `branch -> code + focused verification -> PR -> exact-head verification -> merge -> deploy exact commit -> smoke`. Do not reintroduce Release Train or a second approval record as a default gate.
-- [ ] Lock the exact implementation head used for B1.
-- [ ] Keep `stateReadMode=LEGACY`; do not start UR/State V2 without a separate evidence-backed approval.
-- [ ] Treat current BF-04 P0 size-claim residual as open until new evidence proves otherwise.
+- [x] Bind the 2026-08-29 owner message authorizing Track B **source implementation only** (`sourceThreadId=019ff0ed-3760-7e81-98f4-5e91e8ca35b0`). This does not authorize merge, deploy, migration, authority/pointer mutation, routing, Messenger action or public-production promotion.
+- [x] Re-read `AGENTS.md`, `OPERATING_MODE.md`, `program-state.json`, this plan and the relevant contracts from the exact merged `main` head.
+- [x] Follow `SOLO_PREPROD_MINIMAL`: `branch -> code + focused verification -> PR -> exact-head verification -> merge -> deploy exact commit -> smoke`. Do not reintroduce Release Train or a second approval record.
+- [x] Keep `stateReadMode=LEGACY`; do not start UR/State V2 without a separate evidence-backed approval.
+- [x] Treat the BF-04 P0 size-claim residual as open until new evidence proves otherwise.
 
-## B1 — Scope / authority / request-identity / provenance lock
+## B1 — Scope lock
 
-- [ ] Trace exact current COMMERCE hot path from DF13 authority admission to commit/Outbox.
-- [ ] Treat `df13-commerce-runtime-composition.ts` as the existing single COMMERCE composition seam; prove any exception before changing architecture.
-- [ ] Separate already-demoted legacy `salesStage` from current `SalesCycleStageV1` / DF13-context authority.
-- [ ] Classify reachable components as `KEEP`, `SPLIT/REWRITE`, `RETIRE_AFTER_CUTOVER`, or `ROLLBACK_ONLY`.
-- [ ] Lock exact B2.1/B2.2 files and focused tests.
-- [ ] Inventory all authority-affecting candidate source files against `GATE_E_CANDIDATE_SOURCE_PATHS_V1`.
-- [ ] Record which changed/new files require candidate-source/fingerprint re-derivation.
-- [ ] Prove baseline/candidate generation capabilities do not share prompt builders, request builders, response identity rules, or public generation methods.
-- [ ] Record the regression-pinned baseline request envelope.
-- [ ] Record the full candidate request identity: model resource, system instruction, prompt/content, response schema, generation config, safety settings, and every other provider-affecting field.
-- [ ] Map BF-04 unverified size-claim bypasses relevant to B2.3d.
-- [ ] Determine whether Track B activation changes authority-bundle payload/hash, behavior pointer/config, migration requirements, or source code only.
-- [ ] Check canonical self-hosted CI status (restored by PR #271) and record the exact activation/authorization scope Track B will ask the owner to grant in one instruction.
-- [ ] Re-estimate remaining Track B work from B1 evidence.
-- [ ] Stop/amend plan if a state migration, second permanent runtime/control plane, or materially wider slice is required.
-- [ ] **Checkpoint:** B1 findings reviewed before B2.1.
+- [x] The generation capability serving COMMERCE is `BaselineModelCapability`, byte-frozen.
+- [x] Reconcile the pre-existing contract/source drift: current realtime serializes the admitted DF13 state including its Context V2 projection into baseline model context. `MODEL_EVALUATION_BOUNDARY.md` V4 records that exact frozen envelope while still prohibiting candidate capability/prompt/schema/request-identity imports.
+- [x] `AgentProposalV1` already carries reply, strategyAnalysis, salesSignals, protectedClaimIds, action, businessFactQuery.
+- [x] The baseline prompt already assigns strategy as a model proposal for the app to check.
+- [x] The drift is post-generation: `decideWave2SalesStrategy` at `4563` and `applyWave2ReplyPolicy` at `4581`.
+- [x] `df13-commerce-runtime-composition.ts` is admission/fence only; reply orchestration is `RealtimeRunner`.
+- [x] The authority-bundle payload is declarative — no runtime code branches on its fields, only `contractHash`.
+- [x] BF-04 is a text detector plus exemption classifier; structured claims are the closure mechanism.
+- [x] No reply-behavior differential runner exists. `shadow-runner.ts` is the reuse target but claims jobs and writes shadow-evaluation rows, so its comparison core must be extracted.
+- [x] `GATE_E_CANDIDATE_SOURCE_PATHS_V1` covers none of the live orchestration path.
+- [x] Canonical self-hosted CI is functional on exact heads.
+- [x] Trace the effect/commit path in `packages/chat-runtime/src/sales-cycle-runtime.ts` and the commerce-kernel policy/negotiation transitions.
+- [x] Distinguish pure `applySalesCycleCommand`, non-live persisted `executePersistedSalesCycleCommand`, live `evaluateRealtimeSalesCycle`, protected-outbound grouping, `RealtimeCommitInput` and DF13 `commitThroughFinalizers`.
+- [x] Complete the KEEP / DEMOTE / SPLIT classification for every reachable component, using V5's taxonomy.
+- [x] Produce the exact focused-test map per changed boundary.
+- [x] Re-estimate and lock the source-PR decomposition before B2.1.
+- [x] Resolve bundle semantics: baseline `AgentProposalV1.strategyAnalysis` is not the `CONTEXT_V2_STRATEGY_INPUT_V1` contract, so Track B changes the authority bundle and behavior identity. B3.2 is an owner-scoped authority mutation with pointer/CAS/readback/rollback; `0036` remains conditional on source proof.
+- [ ] **Checkpoint:** B1 residuals closed and independent review has no blocker.
 
-## B2.1 — Extend existing DF13 seam
+## B2.1 — Post-generation seam
 
-- [ ] Extend/reuse DF13 composition/executor/context/finalization; do not add a sibling top-level `CommerceRuntime`.
-- [ ] Add only minimum internal stage interfaces needed for proposal -> verification -> reconciliation -> fallback/finalization.
-- [ ] Preserve existing persistence/queue/authority resolver and LEGACY rollback behavior.
-- [ ] Add focused composition/executor characterization tests.
-- [ ] Run affected-workspace verification required by `SOLO_PREPROD_MINIMAL`.
-- [ ] Produce r31.3 differential evidence for realtime behavior touched by the seam change.
+- [ ] Add one explicit stage boundary between model generation and final delivery inside `RealtimeRunner`.
+- [ ] Reuse the DF13 composition/executor/context/finalization owners; no sibling top-level runtime.
+- [ ] Preserve existing persistence, queue, authority resolver and LEGACY rollback behavior.
+- [ ] Add focused characterization tests.
+- [ ] Extract the side-effect-free reply comparison core from `shadow-runner.ts` in this first source PR, before any behavior-changing slice.
+- [ ] Produce r31.3 differential evidence for realtime behavior touched by the seam change; no later realtime PR may wait until B3 for its first differential.
 
-## B2.2 — Model authority + evaluation-boundary preservation
+## B2.2 — Model owns strategy and wording
 
-- [ ] Add/normalize structured model proposal: normal semantic/sales intent + draft + claims + requested actions/effects.
+- [ ] Promote `strategyAnalysis` / `salesSignals` from optional advisory input to strategy authority for normal conversation.
+- [ ] Stop `applyWave2ReplyPolicy` rewriting a valid model reply: no `limitQuestions` truncation, no deterministic CTA append on the migrated path.
+- [ ] Stop the second `decideWave2SalesStrategy` call overriding model-proposed strategy.
+- [ ] Stop `postMediaProofCta` appending deterministic post-guard sales CTA copy.
+- [ ] Keep message grouping/splitting but stop `limitResponseGroupPoliteness` deleting valid normal model wording.
+- [ ] Keep the early pre-evidence buying hint (DF06 §18) — it has a contractual basis and no side-effect authority.
+- [ ] Do **not** edit `BaselineModelCapability`, the baseline prompt or the observed serialized request envelope. If evidence shows a change is unavoidable, stop Track B incomplete and request a new separately scoped owner decision.
 - [ ] Validate model output as untrusted structured input.
-- [ ] Make normal COMMERCE strategy, objection handling, CTA choice, and wording model-owned.
-- [ ] Do not target already-demoted legacy `salesStage` unless B1 proves active authority/rollback need.
-- [ ] Remove/demote current deterministic strategy selection only where B1 proves it still owns normal conversation rather than correctness.
-- [ ] Preserve valid model wording when claims/effects are valid.
-- [ ] Keep baseline and candidate capabilities separate: no shared prompt builder, request builder, response identity rule, or public generation method.
-- [ ] Bind all changed candidate request fields into candidate request identity, including system instruction, prompt/content, response schema, generation config, safety settings, and other provider-affecting fields.
-- [ ] Do not change the regression-pinned baseline request envelope without explicit approved deviation + realtime differential evidence.
-- [ ] Add valid/malformed/adversarial proposal tests.
-- [ ] Add builder/method-separation and request-identity regression tests/assertions.
-- [ ] Differential-test against r31.3 and record intended deviations.
+- [ ] Test that valid model wording ships unmodified, and that invalid claims/actions are rejected rather than silently rewritten.
 
-## B2.3a — Protected claim verification
+## B2.3a — Claim verification
 
-- [ ] Verify price/stock/promo/size/ETA and other protected claims against typed current facts/provenance.
-- [ ] Reject/regenerate unsupported, stale, or mismatched claims.
-- [ ] Keep final text guard as defense-in-depth rather than primary reverse-parser/copy repair.
-- [ ] Preserve verified facts/media on downstream failure per r31.3.
-- [ ] Test protected-claim mismatches, stale provenance, malformed output, PII/security, and facts/media preservation.
+Locked order: complete B2.3a and B2.3d together in PR 3, then B2.3b and B2.3c together in PR 4.
+
+- [ ] Verify protected claims against typed current facts and provenance.
+- [ ] Split `catalogAdvisoryReply`, `renderPreSalePolicyReply`, `multiFactReply`, `multiProductReply`, `verifiedProductInfoProposal` and its XML helpers, `requestedImagesProposal`, `productInfoLookupProposal`, and `assembleReply`: keep typed facts/media/policy safety; move normal advisory/descriptive/CTA wording.
+- [ ] Reject **undeclared** protected claims (`MODEL_CLAIM_BOUNDARY.md`); size/fit is protected.
+- [ ] Shrink the final text guard to defense-in-depth; it may reject, never approve.
+- [ ] Preserve verified facts and media when later stages fail (r31.3).
+- [ ] No mode may restore an unverified business claim (`BEHAVIOR_CONTROL_PLANE.md`).
+- [ ] Reason-code every rejection, override, repair and safe fallback.
 
 ## B2.3b — Effect reconciliation
 
-- [ ] Treat model actions/effects as requests only.
-- [ ] Keep deterministic cart/checkout/payment/handoff authorization.
-- [ ] Preserve policy, CAS/version/idempotency/trusted-port and transaction checks.
-- [ ] Remove conversational stage sequencing only where it is not protecting an explicit correctness invariant.
-- [ ] Test duplicate, stale, conflict, unauthorized, protected-transition and transaction failure paths.
+- [ ] Treat model actions and effects as requests only; model evidence has authorization `NONE` (DF06 §9).
+- [ ] Keep deterministic cart/checkout/payment/handoff authorization, CAS, version, idempotency and trusted-port checks.
+- [ ] Resolve ambiguity or deterministic/model conflict to the **less aggressive** action and emit evidence.
+- [ ] Preserve atomic state and effect-intent behavior.
+- [ ] Split `realtime-sales-cycle.ts` renderers: keep exact transaction/effect facts, policy denials and minimal safe confirmations; move normal objection, negotiation and CTA prose to model authority.
+- [ ] Test duplicate, stale, conflicting, unauthorized and transaction-failure paths.
 
 ## B2.3c — Negotiation split
 
-- [ ] Move normal objection/conversational negotiation direction to model authority.
-- [ ] Keep deterministic monetary limits, policy authorization, arithmetic, evidence freshness, fingerprints and CAS/version/idempotency.
-- [ ] Remove `READY/HESITANT/CAUTIOUS`-style progression as normal sales authority only where B1 proves current reachability.
-- [ ] Test allowed/denied concessions, stale evidence, replay/id collision and money arithmetic.
+- [ ] Move normal objection and conversational negotiation direction to model authority.
+- [ ] Keep deterministic monetary limits, policy ceilings, arithmetic, freshness, fingerprints and CAS/version/idempotency.
+- [ ] Remove `READY/HESITANT/CAUTIOUS` progression as normal conversational authority where it still affects the active path.
+- [ ] Test allowed and denied concessions, and stale/replay cases.
 
-## B2.3d — Size + deterministic verified-facts fallback
+## B2.3d — Size and bounded repair
 
-- [ ] Do not activate model-owned size wording until the BF-04 fence precondition is satisfied.
-- [ ] Either close relevant BF-04 bypasses on the migrated path with regression evidence, or prove/fence that Track B cannot emit/authorize that unsafe claim class while leaving BF-04 explicitly open.
-- [ ] Keep verified size computation/provenance deterministic.
-- [ ] Allow model wording only from verified size facts that passed the claim boundary.
-- [ ] Add fixed maximum bounded regeneration.
-- [ ] After exhaustion, use deterministic fallback from verified facts/current safe outputs as required by r31.3.
-- [ ] Ensure fallback is not a second normal sales-strategy/copy pipeline.
-- [ ] Ensure fallback preserves verified facts/media and cannot execute failed/unauthorized effects.
-- [ ] Test BF-04 bypass regressions, size boundaries, regeneration budget, fallback, facts/media preservation and no-effect behavior.
-- [ ] **Checkpoint:** review authority boundary + BF-04 disposition + r31.3 evidence before B2.4.
+- [ ] Keep verified size computation and provenance deterministic.
+- [ ] Make normal size wording model-owned, using only claims that passed the protected-claim boundary.
+- [ ] Fail closed when reply text contains a concrete size recommendation with no declared, verified, in-scope claim.
+- [ ] Bounded repair is **exactly one** request (`MODEL_CLAIM_BOUNDARY.md`), then an approved safe clarification or handoff carrying no unsupported business claim.
+- [ ] Deterministic fallback from verified facts as r31.3 requires; never a second sales-copy pipeline.
+- [ ] Prove the fallback preserves verified facts and media and executes no failed or unauthorized effect.
+- [ ] Add explicit BF-04 bypass regressions for the migrated path.
+- [ ] **Checkpoint:** authority boundary, BF-04 disposition and r31.3 evidence reviewed before B2.4.
 
-## B2.4 — Cut obsolete COMMERCE authority reachability
+## B2.4 — Cut obsolete post-generation reachability
 
-- [ ] Prove active COMMERCE no longer invokes obsolete deterministic normal strategy/objection/CTA/model-rewrite authority.
-- [ ] Do not edit/delete legacy `sales-stage.ts` merely because it is old; require current reachability or rollback evidence.
-- [ ] Preserve recovery/correctness semantics required by r31.3 before disconnecting wrappers.
-- [ ] Preserve code required by proven LEGACY rollback/non-COMMERCE consumers.
-- [ ] Require replacement + consumer migration + rollback review + zero-use proof before destructive deletion.
-- [ ] Run focused COMMERCE, affected rollback-route, and r31.3 differential verification.
+- [ ] Prove active COMMERCE no longer invokes obsolete post-generation strategy, objection/CTA playbook or model-rewrite authority.
+- [ ] Keep the verified-facts fallback producers (`AGENTS.md:47`, malformed **output**) and the early buying hint (DF06 §18).
+- [ ] Do not edit `sales-stage.ts`; it is already demoted to telemetry under COMMERCE.
+- [ ] Extract still-needed recovery/correctness semantics before disconnecting wrappers.
+- [ ] Require replacement, consumer migration, rollback review and zero-use proof before any destructive deletion.
 
-## B3 — Full-agent replay
+## B3 — Live-path differential and replay
 
-- [ ] Use exactly one side-effect-free full-agent replay adapter for the migrated DF13 path.
-- [ ] Reuse existing evaluation primitives; do not create a second evaluator platform.
-- [ ] Pin model/prompt/config/fact/policy identities needed for reproducibility.
-- [ ] Capture/block all external/state side effects.
-- [ ] Add focused runtime assertions for unsupported/protected claims, PII/security, unauthorized effects, stale/missing facts, malformed model output, verified-facts fallback, and applicable BF-04 size regressions.
-- [ ] Produce r31.3 differential evidence with intentional deviations explicit.
-- [ ] Reuse this adapter for Track C.
+- [ ] Complete and reuse the pure comparison core introduced in B2.1; it must claim no queue rows and create no side effects.
+- [ ] Reuse `commerce-authority-comparison.ts` for the state half of the differential.
+- [ ] Replay the live baseline path before versus after demotion on the same inputs and report differences.
+- [ ] Pin model/provider-model identity, prompt/template identity, generation config, policy/schema/config identity and fixed fact fixtures.
+- [ ] Cover unsupported and protected claims, PII/security, unauthorized effects, stale or missing facts, malformed output, the single-repair budget, verified-facts fallback and BF-04 size regressions.
+- [ ] Prove no customer message and no state mutation can occur.
+- [ ] Do not build a second replay framework; do not require the full Wave1 population.
+- [ ] Reuse the adapter for Track C.
 
-## B3.1 — Governed Gate-E evidence only
+## Merge boundary
 
-- [ ] Freeze final Track B candidate-source set including every new authority-affecting file.
-- [ ] Freeze final candidate request identity including model resource, system instruction, prompt/content, response schema, generation config, safety settings and every other provider-affecting field.
-- [ ] Re-derive candidate fingerprint/request identity from the exact final registered candidate.
-- [ ] Create a separate immutable Track B corpus/rubric artifact for the future Gate-E scored run; do not mutate/relabel accepted v15 artifacts.
-- [ ] Pre-register exact candidate + request identity + corpus/rubric/plan identities in required ancestry/time order.
-- [ ] Use existing `executeGateEScoredRun(...)`; do not create a second scored-run implementation.
-- [ ] Keep provider credentials out of GitHub Actions/repository.
-- [ ] Record governed Gate-E evidence for the exact candidate.
-- [ ] Prove baseline/candidate builder/method separation still holds.
-- [ ] Do **not** mutate authority/config/database pointers or deploy in B3.1.
-- [ ] **Checkpoint:** exact-candidate evidence accepted before B3.2.
+- [ ] Focused tests pass.
+- [ ] r31.3 differential evidence reviewed, intentional deviations documented.
+- [ ] Side-effect-free replay passes required assertions.
+- [ ] Exact-head canonical CI run is green; a zero-step run is unavailable, not a pass.
+- [ ] No artifact states or implies that a Gate-E candidate PASS accepts the live runtime.
 
-## B3.2 — Separately authorized activation / deploy / readback / smoke
+## B3.1 — Pre-deploy re-evaluation (deploy gate only)
 
-- [ ] Confirm B3.2 uses the exact candidate accepted in B3.1; no post-evidence authority-affecting source/request change is allowed without re-evaluation.
-- [ ] From B1, determine whether activation requires authority-bundle/hash change, behavior pointer/config mutation, migration, or source deploy only.
-- [ ] Ask the owner for **one** deploy instruction that explicitly scopes the deploy and every authority/config mutation activation requires; that instruction is the authorization for that scope.
-- [ ] Request additional authorization only for a mutation outside that granted scope (authority-mode switch, migration, routing/page-allowlist, destructive data action not named in the instruction).
-- [ ] Do not require a Release Train, a second approval record, tag/manifest ceremony, or runtime-state promotion as a default gate.
-- [ ] Do not pull migration `0036` into scope unless the exact activation path proves it is required and it falls inside the authorized scope.
-- [ ] Verify the exact head on a functioning canonical CI run; if a remote run starts zero repository steps, treat it as unavailable, not pass, and use only `CI_UNAVAILABLE_FALLBACK` bound to that head.
-- [ ] If authority/config changes: perform exact DF13 fence/readback verification.
-- [ ] Deploy exact merged commit/build only when authorized.
-- [ ] Preserve exact previous affected-service release/build/commit and previous authority/config state as rollback identity.
-- [ ] Run applicable readiness/smoke/controlled checks and record exact runtime identity.
+- [ ] Only for a candidate selected for PREPROD deployment; local and unmerged candidates need no promotion ceremony.
+- [ ] Provide the minimal operational entrypoint around the existing runner; reuse `executeGateEScoredRun(...)` and do not rebuild scorer or evidence logic.
+- [ ] Run the current governing re-evaluation path for the exact candidate.
+- [ ] Use existing provenance and release evidence; do not invent a competing promotion manifest.
+- [ ] Keep provider credentials out of GitHub Actions and the repository; run the provider-backed rerun in an authorized local/VPS/manual or scheduled environment.
+- [ ] Only if the governing contract still creates a concrete unacceptable blocker, propose the smallest separately authorized amendment. Do not pre-build a new evidence profile.
+- [ ] Do not mutate authority, config or database pointers and do not deploy in this slice.
+
+## B3.2 — Owner-scoped deploy
+
+- [ ] Treat deployment as an authority-bundle/behavior identity mutation; do not claim source-deploy-only.
+- [ ] Produce the new canonical bundle hash and behavior content identity from source, plus the exact previous bundle/version/hash/revision/source rollback identity.
+- [ ] Ask the owner for one instruction explicitly authorizing the deploy **and** authority/pointer mutation; the current source-work authorization is insufficient.
+- [ ] Use the reviewed page-scoped pointer/CAS/readback/rollback path. Apply migration `0036` only if source evidence proves that exact path requires it and the owner separately authorizes it.
+- [ ] Deploy only the exact merged commit/build for affected services.
+- [ ] Preserve the exact previous affected-service release/build/commit as the release-local rollback identity.
+- [ ] Run pre-activation readiness, then post-activation readback, smoke and controlled test-page checks.
 - [ ] Identify one accepted COMMERCE PREPROD baseline for Track C.
 
 ## Track B completion
 
-- [ ] Normal COMMERCE strategy + wording are model-owned.
+- [ ] Normal COMMERCE strategy, objection/CTA choice and wording are model-owned.
 - [ ] Deterministic authority is limited to facts/provenance, protected claims, security/PII, policy, reconciliation/effects, CAS/idempotency and bounded fail-closed recovery.
+- [ ] `BaselineModelCapability`, baseline prompt and exact observed request envelope remained byte-unchanged.
+- [ ] The Context V2 candidate remained offline/evaluation-only; Track B contains no promotion path.
 - [ ] DF13 remains the single COMMERCE composition/authority seam.
-- [ ] Baseline/candidate generation capability separation remains intact.
-- [ ] Final candidate identity includes all authority-affecting source files and provider-affecting request fields.
-- [ ] Deterministic fallback is verified-facts based, r31.3-compatible, and not a normal sales copywriter.
-- [ ] BF-04 is either closed with evidence for the migrated path or remains explicitly fenced/open without increased exposure or misrepresentation.
-- [ ] Obsolete deterministic sales authority is unreachable from active COMMERCE or explicitly rollback/non-COMMERCE only.
-- [ ] Full-agent replay passes required safety/correctness assertions without side effects and r31.3 differential evidence is reviewed.
-- [ ] Future Gate-E evidence uses a new immutable corpus/rubric + valid registration for the exact candidate.
-- [ ] B3.1 evidence is accepted before B3.2 runtime mutation/deploy.
-- [ ] Every authority/config mutation was inside an explicitly scoped owner instruction, or separately authorized when outside it.
-- [ ] Required focused tests/checks pass on a functioning canonical CI run where claimed; zero-step CI is never called pass.
+- [ ] Invalid output is bounded to one repair and cannot execute protected effects.
+- [ ] BF-04 is closed with evidence or remains explicitly fenced without increased exposure or misrepresentation.
+- [ ] Obsolete post-generation authority is unreachable from active COMMERCE.
+- [ ] Live-path differential and replay evidence reviewed.
+- [ ] No Gate-E result represented as live-runtime acceptance.
+- [ ] Any deployed candidate passed the pre-deploy re-evaluation boundary.
 - [ ] No UR/State V2/admin/multi-page/production-hardening scope creep.
 - [ ] Rollback remains viable until separately closed with evidence.
-- [ ] Owner records Track B completion / Track C start decision.
+- [ ] Owner records Track B completion and Track C start.
