@@ -19,7 +19,7 @@ concurrency:
 jobs:
   check:
     name: pnpm check
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, Linux, X64, lana-ci]
     timeout-minutes: 30
     services:
       postgres:
@@ -29,7 +29,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
-          - 5432:5432
+          - "127.0.0.1:55432:5432"
         options: >-
           --health-cmd "pg_isready -U postgres -d lana_policy_test"
           --health-interval 5s
@@ -37,8 +37,8 @@ jobs:
           --health-retries 12
     env:
       CI: true
-      POLICY_STORE_TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/lana_policy_test
-      GATE_E_STORE_TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/lana_policy_test
+      POLICY_STORE_TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:55432/lana_policy_test
+      GATE_E_STORE_TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:55432/lana_policy_test
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
