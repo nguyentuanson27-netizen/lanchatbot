@@ -51,6 +51,25 @@ The plan's `ModelProposal` largely exists and has already passed Gate E v15 at 1
 
 ---
 
+## 2a. `MODEL_EVALUATION_BOUNDARY.md` §6 forbids the selected direction as currently written
+
+**This is the hardest constraint found, and it is stronger than §1 or §2.**
+
+> 6. Offline/replay candidates are side-effect-free verification tools. They cannot send customer messages, mutate commerce/conversation state, authorize claims, or **become a third live semantic authority**.
+
+Promoting the Context V2 candidate to the live COMMERCE generation path makes it do exactly what §6 prohibits: send customer messages and act as a live semantic authority.
+
+**Consequence.** The contract revision required before B2.2 is not a clarification of §1 — it is a status change. A capability cannot be simultaneously "the offline candidate" that §6 constrains and the authority that serves customers. The revision must:
+
+1. define the promoted capability's new status explicitly, so it stops being governed as an offline candidate once it serves traffic;
+2. preserve §6 unchanged for whatever remains an offline/replay candidate after the promotion, so the prohibition is narrowed by definition rather than weakened;
+3. keep §1's protection of the baseline intact — realtime still must never pass Context V2 into `BaselineModelCapability` or its request builders;
+4. carry §2's integrity-valid-snapshot requirement onto the live path, where it becomes a per-turn precondition rather than a capture-time property.
+
+Until that revision is merged, the selected direction contradicts a durable contract. Treat it as the first B2.2 deliverable and as a blocking dependency, not as documentation cleanup.
+
+---
+
 ## 3. Gate-E candidate identity does not cover the live orchestration path
 
 **Evidence** — `GATE_E_CANDIDATE_SOURCE_PATHS_V1` (`apps/worker/src/gate-e-registration.ts:72`) contains, from `apps/worker/src`, only: `context-v2-candidate.ts`, `context-v2-evaluation.ts`, `context-v2.ts`, `gate-e-frozen-artifacts.ts`, `gate-e-git-reader.ts`, `gate-e-output-interpreter.ts`, `gate-e-registration-policy.ts`, `gate-e-registration.ts`, plus workspace manifests, `packages/business-tools/src/*`, `packages/contracts/src/*` and `pnpm-lock.yaml`.
@@ -72,7 +91,8 @@ This answers the owner's directive to determine rather than assume.
 **Evidence**
 
 - The payload (`packages/database/src/df13-commerce-authority-bundle.ts:30-41`) declares `phase: COMMERCE_DERIVED`, `context/strategy/cta: CONTEXT_V2`, `reconciliation: COMMERCE_FINAL`, `legacySalesStage: DEMOTED_TELEMETRY_ONLY`, an empty `authorityIndependentBypassClasses`, and the eight-member consumer set.
-- **No runtime code reads any payload field.** A grep for reads of `.strategy`, `.cta`, `.context`, `.phase`, `.reconciliation`, `.legacySalesStage` off the bundle returns nothing outside tests; every consumer uses `contractHash` only (`df13-runtime-authority-boundary.ts:65`, `df13-commerce-fence-postgres-provider.ts:39`, `df13-commerce-authority-contract.ts:52`, `df13-commerce-cutover.ts:232,401,446`, `runtime-behavior-mode.ts:594-600`, `df13-commerce-preprod-startup-authority.ts:133`, `df13-release-candidate-evidence.ts:268`).
+- **No runtime code branches on any individual payload field.** A grep for reads of `.strategy`, `.cta`, `.context`, `.phase`, `.reconciliation`, `.legacySalesStage` off the bundle returns nothing outside tests; every consumer that makes a decision compares `contractHash` only (`df13-runtime-authority-boundary.ts:65`, `df13-commerce-fence-postgres-provider.ts:39`, `df13-commerce-authority-contract.ts:52`, `df13-commerce-cutover.ts:232,401,446`, `runtime-behavior-mode.ts:594-600`, `df13-commerce-preprod-startup-authority.ts:133`, `df13-release-candidate-evidence.ts:268`).
+- One path does carry the whole frozen object: `df13-commerce-cutover.ts:143,266` embeds `DF13_COMMERCE_AUTHORITY_BUNDLE_V1` into `CommerceCutoverPreparation`. That propagates the payload into cutover-preparation output as declarative evidence; it still does not branch on the fields. `df13-release-candidate-evidence.ts:335-337` records only `contractHash`, the consumer set and the empty bypass list.
 - `contracts/DF13_FENCE_AND_RELEASE_EVIDENCE.md:80-84` describes the fields as the declared consumer set and derivation topology, not as runtime inputs.
 
 **Reading**
@@ -119,11 +139,13 @@ BF-04 may be recorded as closed only with new regression evidence for the migrat
 
 - `AGENTS.md:44` requires every realtime change to be differential-tested against the r31.3 behavioral baseline.
 - A repository-wide search for `r31.3` / behavioral-baseline tooling in `apps` and `packages` returns exactly one file: `apps/worker/src/realtime-r32.2-compatibility-shield.test.ts`. There is no differential runner.
-- The closest existing mechanism is `apps/worker/src/shadow-runner.ts` (447 lines), which already replays the **baseline** capability with `assembleReply` and `guardAgentProposal` and computes `textSimilarity`.
+- The closest existing mechanism is `apps/worker/src/shadow-runner.ts` (447 lines). `Phase4ShadowRunner` replays the **baseline** capability with `assembleReply` and `guardAgentProposal` and computes `textSimilarity`.
+- **`shadow-runner.ts` is not side-effect-free as it stands.** It is a queue-driven worker: `store.claimNext()` (181), `store.complete(...)` (320), `store.fail(...)` (347), `store.claimComparisonNext()` (353), `store.completeComparison(...)` (365, 436). It never sends customer messages and never mutates commerce/conversation state, but it does claim jobs and persist shadow-evaluation rows. B3 must extract its comparison core, or run it in a mode that neither claims nor completes jobs, before it can serve as the side-effect-free differential harness.
+- A separate comparator already exists for **state**, not for reply content: `apps/worker/src/commerce-authority-comparison.ts` (246 lines) compares LEGACY and COMMERCE projections of stage, phase, product scope and cart scope. It is a reuse point for the state half of the differential; it says nothing about reply wording.
 
 **Consequence**
 
-The plan assumes r31.3 differential evidence is available per slice. It is not tooling that exists today. Per the owner's direction, B3 should build the runtime differential harness by reusing `shadow-runner.ts`, and B3.1 remains the governed Gate-E evidence slice. This is scope the current estimate does not carry.
+The plan assumes r31.3 differential evidence is available per slice. No **reply-behavior** differential runner exists today; what exists is a state-projection comparator and a side-effecting shadow worker. Per the owner's direction, B3 should build the runtime differential harness by reusing `shadow-runner.ts`, and B3.1 remains the governed Gate-E evidence slice. This is scope the current estimate does not carry.
 
 ---
 

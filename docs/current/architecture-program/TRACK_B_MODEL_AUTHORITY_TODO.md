@@ -20,7 +20,7 @@
 - [x] Confirm `df13-commerce-runtime-composition.ts` is admission/fence only; reply orchestration is `RealtimeRunner`.
 - [x] Confirm the authority-bundle payload is declarative — no runtime code reads its fields, only `contractHash`.
 - [x] Map the BF-04 bypass shape (text detector + exemption classifier) and the structured-claim closure direction.
-- [x] Confirm no r31.3 differential harness exists; `shadow-runner.ts` is the reuse target.
+- [x] Confirm no reply-behavior differential runner exists. `shadow-runner.ts` is the reuse target but is queue-driven and writes shadow-evaluation rows, so B3 must extract its comparison core; `commerce-authority-comparison.ts` covers the state half.
 - [x] Confirm canonical self-hosted CI is functional on exact heads.
 - [ ] Resolve whether a valid Context V2 snapshot is available for **every** COMMERCE turn, and design the fail-closed path when it is not. **Highest-risk open item; close before B2.1.**
 - [ ] Trace the effect/commit path in `sales-cycle-runtime.ts` and the commerce-kernel policy/negotiation transitions.
@@ -52,7 +52,7 @@
 ## B2.2 — Model authority + evaluation-boundary preservation
 
 - [ ] Extend `ContextV2CandidateOutputV2` rather than designing a new proposal contract; widen the strategy/CTA enums for objection handling, negotiation and post-sale.
-- [ ] Revise `MODEL_EVALUATION_BOUNDARY.md` §1 so realtime may invoke the candidate capability with an integrity-valid snapshot, while still never passing Context V2 into the baseline capability or its builders.
+- [ ] **Blocking:** revise `MODEL_EVALUATION_BOUNDARY.md` §1 **and §6** before B2.2 ships. §6 currently forbids a candidate from sending customer messages or becoming a live semantic authority, which is exactly what promotion does. The revision is a status change for the promoted capability, keeping §6 intact for whatever stays an offline candidate.
 - [ ] Do not edit `BaselineModelCapability`; keep prompt/request builders and response identity rules separate.
 - [ ] Validate model output as untrusted structured input.
 - [ ] Make normal COMMERCE strategy, objection handling, CTA choice, and wording model-owned.

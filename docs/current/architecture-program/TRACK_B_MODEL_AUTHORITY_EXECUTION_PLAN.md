@@ -146,7 +146,16 @@ The baseline and candidate may share authenticated transport only. They must **n
 
 B2.2 must preserve this separation while promoting the candidate path to live COMMERCE generation. Track B must not merge the baseline and candidate capabilities into one public builder/method.
 
-Under the selected direction the separation is preserved by construction: the candidate keeps its own prompt/request builders and response identity rules in `context-v2-candidate.ts`, and the baseline is not edited at all. `MODEL_EVALUATION_BOUNDARY.md` §1 currently says realtime orchestration may import Context V2 *only* to persist a shadow capture. Promoting the candidate to the served path makes realtime a candidate consumer, so **§1 must be revised for the Track B live candidate before B2.2 ships**, stating that realtime may invoke the candidate capability with an integrity-valid snapshot while still never passing Context V2 into the baseline capability or its builders. Treat that contract revision as a B2.2 deliverable, not an afterthought.
+Under the selected direction the separation is preserved by construction: the candidate keeps its own prompt/request builders and response identity rules in `context-v2-candidate.ts`, and the baseline is not edited at all.
+
+**Blocking contract dependency.** Two clauses of `MODEL_EVALUATION_BOUNDARY.md` currently prohibit the selected direction, and §6 is the harder one:
+
+- §1 says realtime orchestration may import Context V2 *only* to persist a shadow capture;
+- §6 says offline/replay candidates *"cannot send customer messages, mutate commerce/conversation state, authorize claims, or become a third live semantic authority"*.
+
+Promoting the candidate to the served path does exactly what §6 forbids. The required revision is therefore a **status change, not a clarification**: a capability cannot be both the offline candidate that §6 constrains and the authority that serves customers. The revision must define the promoted capability's new status so it stops being governed as an offline candidate once it serves traffic; keep §6 intact for whatever remains an offline/replay candidate, narrowing it by definition rather than weakening it; keep §1's protection of the baseline unchanged; and carry §2's integrity-valid-snapshot requirement onto the live path as a per-turn precondition.
+
+Until that revision is merged, the selected direction contradicts a durable contract. It is the first B2.2 deliverable and a blocking dependency — not documentation cleanup.
 
 ### 5.3 Request-envelope and request-identity pinning
 
@@ -504,10 +513,11 @@ Provide exactly one reproducible adapter that exercises the migrated DF13 COMMER
 
 **Known integration points**
 
-- `apps/worker/src/shadow-runner.ts` (447 lines) already replays the baseline capability side-effect-free, with `assembleReply`, `guardAgentProposal` and `textSimilarity`. **Reuse it as the runtime differential harness** rather than building a second replay.
+- `apps/worker/src/shadow-runner.ts` (447 lines) replays the baseline capability with `assembleReply`, `guardAgentProposal` and `textSimilarity`. **Reuse it as the runtime differential harness** rather than building a second replay — but note it is *not* side-effect-free as it stands: `Phase4ShadowRunner` is queue-driven and calls `store.claimNext` (181), `store.complete` (320), `store.fail` (347), `store.claimComparisonNext` (353) and `store.completeComparison` (365, 436). It sends no customer messages and mutates no commerce/conversation state, but it claims jobs and persists shadow-evaluation rows. B3 must extract its comparison core, or run it in a non-claiming mode, before it satisfies the side-effect-free requirement.
+- `apps/worker/src/commerce-authority-comparison.ts` (246 lines) already compares LEGACY and COMMERCE projections of stage, phase, product scope and cart scope. Reuse it for the state half of the differential; it says nothing about reply wording.
 - `apps/worker/src/gate-e-registration.ts` exports `executeGateEScoredRun(...)`. B3 replay may reuse lower-level candidate/evaluation primitives; B3.1 owns the governed Gate-E scored run.
 
-**Added scope from B1: the r31.3 differential harness does not exist.** `AGENTS.md:44` requires every realtime change to be differential-tested against the r31.3 behavioral baseline, but the repository contains no differential runner — only `apps/worker/src/realtime-r32.2-compatibility-shield.test.ts`. B3 must build that harness by extending `shadow-runner.ts` so it can run the migrated candidate path and the retained baseline path over the same inputs and report the differences. Every B2 slice's required r31.3 evidence depends on this, so B3's harness work is a prerequisite for closing B2 slices, even though the slice is sequenced after them.
+**Added scope from B1: no reply-behavior differential runner exists.** `AGENTS.md:44` requires every realtime change to be differential-tested against the r31.3 behavioral baseline, but the repository contains no differential runner — only `apps/worker/src/realtime-r32.2-compatibility-shield.test.ts`. B3 must build that harness by extending `shadow-runner.ts` so it can run the migrated candidate path and the retained baseline path over the same inputs and report the differences. Every B2 slice's required r31.3 evidence depends on this, so B3's harness work is a prerequisite for closing B2 slices, even though the slice is sequenced after them.
 
 **Acceptance criteria**
 
