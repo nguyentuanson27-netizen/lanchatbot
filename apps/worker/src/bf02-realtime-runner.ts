@@ -453,11 +453,8 @@ function reconciliationCandidate(
     details.guardReasonCodes.length > 0 ||
     details.outboundMessageCount !== 0
   ) return false;
-  if (semanticIntent !== null) return true;
-  const observedStrategy = details.decisionObservability?.strategyCta.strategy;
-  return observedStrategy !== undefined
-    ? observedStrategy === "STRATEGY_ASK_CLARIFY"
-    : details.wave2Strategy?.recommendedStrategy === "STRATEGY_ASK_CLARIFY";
+  return semanticIntent !== null ||
+    details.wave2Strategy?.recommendedStrategy === "STRATEGY_ASK_CLARIFY";
 }
 
 export function bf01ReconciliationTarget(

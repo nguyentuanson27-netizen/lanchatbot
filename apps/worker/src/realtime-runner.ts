@@ -3374,6 +3374,7 @@ export class RealtimeRunner {
     };
     let verifiedSizeClaimForTurn: SizeRecommendationProtectedClaimV1 | null = null;
     let wave2StrategyDecision: Wave2StrategyDecision | null = null;
+    let preGenerationWave2StrategyDecision: Wave2StrategyDecision | null = null;
     let modelStrategyAnalysis: Wave2ModelAnalysis | null = null;
     let multiFactAudit: NonNullable<
       RealtimeDecisionEventPlan["details"]["factQueryResults"]
@@ -3428,6 +3429,7 @@ export class RealtimeRunner {
         requestedProof: requestedProofForImageIntent(imageIntent),
         modelAnalysis: null,
       });
+      preGenerationWave2StrategyDecision = wave2StrategyDecision;
     }
     const catalogSnapshot =
       resolvedProduct && this.factsReader.readCatalogSnapshot
@@ -4532,9 +4534,7 @@ export class RealtimeRunner {
               modelAnalysis: candidate.strategyAnalysis ?? null,
             });
             return {
-              proposal: applyWave2ReplyPolicy(candidate, strategyDecision, {
-                wordingAuthority: "LEGACY_DETERMINISTIC",
-              }),
+              proposal: applyWave2ReplyPolicy(candidate, strategyDecision),
               strategyDecision,
             };
           },
@@ -5283,6 +5283,12 @@ export class RealtimeRunner {
       ],
       safeFallbackPlanned: customerUrlSafeFallbackPlanned,
     });
+    // The byte-locked BF01 wrapper still reads this legacy-shaped field for
+    // fail-closed NO_REPLY reconciliation. On the model-authoritative path it
+    // receives only the retained pre-generation hint; it never rewrites normal
+    // model wording or replaces the structured strategy observation above.
+    const bf01CompatibilityStrategyDecision = wave2StrategyDecision ??
+      (modelStrategyAnalysis === null ? null : preGenerationWave2StrategyDecision);
     const modelTelemetry = resolveExplicitModelTelemetry({
       modelCalled,
       hasProviderUsage: hasModelTokenUsage,
@@ -5404,21 +5410,21 @@ export class RealtimeRunner {
           modelPath: modelTelemetry.path,
           modelErrorClass: modelTelemetry.errorClass,
           buyingSignalOverride,
-          wave2Strategy: wave2StrategyDecision
+          wave2Strategy: bf01CompatibilityStrategyDecision
             ? {
-                rulesetVersion: wave2StrategyDecision.rulesetVersion,
-                need: wave2StrategyDecision.need,
-                barrier: wave2StrategyDecision.barrier,
-                decisionFactor: wave2StrategyDecision.decisionFactor,
+                rulesetVersion: bf01CompatibilityStrategyDecision.rulesetVersion,
+                need: bf01CompatibilityStrategyDecision.need,
+                barrier: bf01CompatibilityStrategyDecision.barrier,
+                decisionFactor: bf01CompatibilityStrategyDecision.decisionFactor,
                 recommendedStrategy:
-                  wave2StrategyDecision.recommendedStrategy,
-                ctaPolicy: wave2StrategyDecision.ctaPolicy,
-                confidence: wave2StrategyDecision.confidence,
-                evidence: wave2StrategyDecision.evidence,
+                  bf01CompatibilityStrategyDecision.recommendedStrategy,
+                ctaPolicy: bf01CompatibilityStrategyDecision.ctaPolicy,
+                confidence: bf01CompatibilityStrategyDecision.confidence,
+                evidence: bf01CompatibilityStrategyDecision.evidence,
                 experimentId:
-                  wave2StrategyDecision.experiment.experimentId,
+                  bf01CompatibilityStrategyDecision.experiment.experimentId,
                 experimentVariant:
-                  wave2StrategyDecision.experiment.variant,
+                  bf01CompatibilityStrategyDecision.experiment.variant,
               }
             : null,
           checkoutCapturedFields: salesTelemetry?.checkoutCapturedFields ?? [],

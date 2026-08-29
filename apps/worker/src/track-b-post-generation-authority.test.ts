@@ -100,19 +100,25 @@ describe("Track B B2.2 post-generation model authority", () => {
   });
 
   it("ships valid model wording without deterministic question truncation or CTA append", () => {
-    const shipped = applyWave2ReplyPolicy(modelProposal, deterministicDecision, {
-      wordingAuthority: "MODEL",
+    const applyLegacyDeterministic = vi.fn((proposal: AgentProposalV1) => ({
+      proposal: applyWave2ReplyPolicy(proposal, deterministicDecision),
+      strategyDecision: deterministicDecision,
+    }));
+    const shipped = resolveRealtimePostGenerationAuthority({
+      runtimeAuthority: "COMMERCE_SELECTED",
+      proposal: modelProposal,
+      modelStrategyAnalysis: modelProposal.strategyAnalysis ?? null,
+      applyLegacyDeterministic,
     });
 
-    expect(shipped).toBe(modelProposal);
-    expect(shipped.reply).toBe(modelProposal.reply);
-    expect((shipped.reply.match(/\?/gu) ?? [])).toHaveLength(2);
+    expect(shipped.proposal).toBe(modelProposal);
+    expect(shipped.proposal.reply).toBe(modelProposal.reply);
+    expect((shipped.proposal.reply.match(/\?/gu) ?? [])).toHaveLength(2);
+    expect(applyLegacyDeterministic).not.toHaveBeenCalled();
   });
 
   it("retains the deterministic reply policy for LEGACY rollback", () => {
-    const shipped = applyWave2ReplyPolicy(modelProposal, deterministicDecision, {
-      wordingAuthority: "LEGACY_DETERMINISTIC",
-    });
+    const shipped = applyWave2ReplyPolicy(modelProposal, deterministicDecision);
 
     expect(shipped.reply).not.toBe(modelProposal.reply);
     expect((shipped.reply.match(/\?/gu) ?? [])).toHaveLength(1);

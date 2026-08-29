@@ -98,24 +98,6 @@ describe("BF-01 reply reconciliation target", () => {
     expect(target()?.reasonCode).toBe("BF01_ASK_CLARIFY_NO_REPLY_RECONCILED");
   });
 
-  it("uses the model-authoritative strategy observation when legacy Wave2 is absent", () => {
-    const event = wave2Event({
-      details: {
-        ...wave2Event().details,
-        decisionObservability: {
-          strategyCta: { strategy: "STRATEGY_ASK_CLARIFY" },
-        } as never,
-        wave2Strategy: {
-          ...wave2Event().details.wave2Strategy!,
-          recommendedStrategy: "STRATEGY_CLOSE",
-        },
-      },
-    });
-    expect(target({ event })?.reasonCode).toBe(
-      "BF01_ASK_CLARIFY_NO_REPLY_RECONCILED",
-    );
-  });
-
   it("does not bypass a blocked guard", () => {
     const event = wave2Event({
       details: {
@@ -141,18 +123,6 @@ describe("BF-01 reply reconciliation target", () => {
           ...wave2Event().details.wave2Strategy!,
           recommendedStrategy: "STRATEGY_CLOSE",
         },
-      },
-    });
-    expect(target({ event })).toBeNull();
-  });
-
-  it("does not let legacy Wave2 override a model-authoritative non-clarification", () => {
-    const event = wave2Event({
-      details: {
-        ...wave2Event().details,
-        decisionObservability: {
-          strategyCta: { strategy: "STRATEGY_CLOSE" },
-        } as never,
       },
     });
     expect(target({ event })).toBeNull();
