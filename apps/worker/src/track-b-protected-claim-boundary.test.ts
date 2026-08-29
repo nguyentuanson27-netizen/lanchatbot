@@ -185,10 +185,13 @@ describe("Track B B2.3a protected-claim boundary", () => {
     })).toEqual({ claimIds: [], reasonCodes: [] });
   });
 
-  it("detects a product-scoped 'vẫn còn' assertion only as a rejection signal", () => {
-    expect(detectRealtimeUndeclaredProtectedClaimTypes(
-      "Mẫu này hiện vẫn còn chị nhé.",
-    )).toEqual(["STOCK"]);
+  it.each([
+    "Mẫu này hiện vẫn còn chị nhé.",
+    "Mẫu này còn chị nhé.",
+    "Sản phẩm này còn ạ.",
+    "Hàng hiện còn chị nhé.",
+  ])("detects product-subject stock wording only as a rejection signal: %s", (reply) => {
+    expect(detectRealtimeUndeclaredProtectedClaimTypes(reply)).toEqual(["STOCK"]);
     expect(bindRealtimeProtectedClaimProposal({
       requestedClaims: [],
       modelDeclaredClaimIds: [],

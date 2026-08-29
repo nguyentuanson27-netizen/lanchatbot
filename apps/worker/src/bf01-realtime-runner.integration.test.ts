@@ -773,8 +773,10 @@ describe("BF-01 runner reconciliation", () => {
     );
   });
 
-  it("blocks an undeclared contextual stock assertion missed by the legacy text guard", async () => {
-    const modelReply = "Mẫu này hiện vẫn còn chị nhé.";
+  it.each([
+    "Mẫu này hiện vẫn còn chị nhé.",
+    "Mẫu này còn chị nhé.",
+  ])("blocks an undeclared contextual stock assertion as a whole live group: %s", async (modelReply) => {
     const harness = createHarness({
       commerce: true,
       initialMode: "REPLY",

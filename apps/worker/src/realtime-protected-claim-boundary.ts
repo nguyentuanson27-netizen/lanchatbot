@@ -174,7 +174,7 @@ export function detectRealtimeUndeclaredProtectedClaimTypes(
     .replace(/[\u0300-\u036f]/gu, "")
     .replace(/đ/giu, "d")
     .toLocaleLowerCase("vi");
-  return /\b(?:mau|san\s+pham|hang)(?:\s+nay)?(?:\s+hien)?\s+van\s+con\b/u.test(folded)
+  return /\b(?:mau|san\s+pham|hang)(?:\s+nay)?(?:\s+hien)?(?:\s+van)?\s+con\b/u.test(folded)
     ? ["STOCK"]
     : [];
 }
