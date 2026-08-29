@@ -204,6 +204,7 @@ function createHarness(input: {
   commerce?: boolean;
   initialReply?: string;
   initialFactIntent?: AgentProposalV1["businessFactQuery"]["intent"];
+  initialProtectedClaimIds?: readonly string[];
 } = {}) {
   const base = createConversationState({
     conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
@@ -340,11 +341,13 @@ function createHarness(input: {
     if (generate.mock.calls.length === 1) {
       switch (input.initialMode ?? "NO_REPLY") {
         case "REPLY":
-          return modelResult(proposal(
+          return modelResult({ ...proposal(
             "REPLY",
             input.initialReply ?? existingReplyText,
             input.initialFactIntent ?? "NONE",
-          ));
+          ), protectedClaimIds: input.initialProtectedClaimIds === undefined
+            ? undefined
+            : [...input.initialProtectedClaimIds] });
         case "NO_REPLY":
           return modelResult(proposal("NO_REPLY"));
       }
@@ -644,31 +647,16 @@ function unresolvedTerminalNoReplyEvents<TState, TSalesState>(
 }
 
 describe("BF-01 runner reconciliation", () => {
-  it("runs B2.2 r31.3 differential through pre-B2.2 and migrated COMMERCE commits", async () => {
+  it("runs B2.3a r31.3 differential against the captured pre-B2.3a exact-head snapshot", async () => {
     const capturedInput = {
       customerText: "Mẫu SD398 giá bao nhiêu, có size M hay L?",
       modelReply:
         "Mẫu SD398 giá 1.199.000đ chị nhé. Chị muốn chọn size M hay L? Chị thích form ôm hay suông?",
       factIntent: "PRICE" as const,
     };
-    const runCaptured = async (
+    const runCandidate = async (
       capture: Readonly<typeof capturedInput>,
-      migrated: boolean,
     ): Promise<RealtimeReplySnapshot> => {
-      const originalResolver =
-        realtimeReplyDifferential.resolveRealtimePostGenerationAuthority;
-      const resolverSpy = migrated ? null : vi.spyOn(
-        realtimeReplyDifferential,
-        "resolveRealtimePostGenerationAuthority",
-      ).mockImplementation(((input) => originalResolver({
-        ...input,
-        runtimeAuthority: "LEGACY_SELECTED",
-      })) as typeof originalResolver);
-      const wordingSpy = migrated ? null : vi.spyOn(
-        realtimeReplyDifferential,
-        "postGenerationWordingAuthority",
-      ).mockReturnValue("LEGACY_DETERMINISTIC");
-      try {
         const harness = createHarness({
           commerce: true,
           initialMode: "REPLY",
@@ -677,10 +665,16 @@ describe("BF-01 runner reconciliation", () => {
           initialFactIntent: capture.factIntent,
         });
         expect(await harness.runner.processOne()).toBe(true);
-        if (resolverSpy) expect(resolverSpy).toHaveBeenCalledOnce();
-        if (wordingSpy) expect(wordingSpy).toHaveBeenCalledOnce();
         const commit = harness.commerceCommit.mock.calls[0]?.[0]?.runtimeCommit;
         if (!commit) throw new Error("TRACK_B_B22_CAPTURED_COMMIT_MISSING");
+        const exactClaims = commit.metaPlan?.protectedClaims ?? [];
+        expect(exactClaims.length).toBeGreaterThan(0);
+        expect(exactClaims.every(({ authorization }) =>
+          authorization === "NONE"
+        )).toBe(true);
+        expect(exactClaims.map(({ claimId }) => claimId)).toEqual([
+          ...new Set(exactClaims.map(({ claimId }) => claimId)),
+        ]);
         const rawResult = harness.commerceCommit.mock.results[0];
         if (!rawResult || rawResult.type !== "return") {
           throw new Error("TRACK_B_B22_CAPTURED_COMMIT_RESULT_MISSING");
@@ -691,78 +685,110 @@ describe("BF-01 runner reconciliation", () => {
           result,
           inboxCommitted: harness.complete.mock.calls.length === 1,
         });
-      } finally {
-        wordingSpy?.mockRestore();
-        resolverSpy?.mockRestore();
-      }
     };
 
-    const observedSnapshots: RealtimeReplySnapshot[] = [];
+    // Immutable capture produced by exact pre-B2.3a head
+    // 89b1bee02109e17b6b3b2a0e714e24d3bdb70a60 for capturedInput above.
+    const preB23aBaseline: RealtimeReplySnapshot = {
+      messages: [{ kind: "TEXT", text: capturedInput.modelReply }],
+      strategyHash: "28f64d412aa3b9b39aaa67463039f5a466eb539408b5a8df48cdaf187e1336ed",
+      verifiedFactHashes: ["a0729ee1acaa2436299b46f6e046eaaa0561f3152ab27463d55cc850d8431da6"],
+      verifiedMediaUrls: [],
+      protectedClaimHashes: ["30fb4cce7bccfcc904b7f2d35673bd49985ebb2b54771f66002d88ad703994f3"],
+      effectAuthorizationHashes: ["319ff1eb352e3c9df42b7de78445a4ca8dfac01019424f7f6f793019dddc0c4a"],
+      commitOutcome: "COMMITTED",
+      generationOutcome: "VALID",
+      inboxOutcome: "COMMITTED",
+      protectedOutbound: {
+        required: true,
+        groupId: "37a4d2be-f544-5ec8-86c5-8e2e04faff77",
+        plannedMessageCount: 1,
+        deliveredMessageCount: 1,
+      },
+    };
+    const candidateSnapshots: RealtimeReplySnapshot[] = [];
     const result = await realtimeReplyDifferential.runRealtimeReplyDifferential({
       capturedInput,
-      baseline: async (capture) => {
-        const snapshot = await runCaptured(capture, false);
-        observedSnapshots.push(snapshot);
-        return snapshot;
-      },
+      baseline: async () => preB23aBaseline,
       candidate: async (capture) => {
-        const snapshot = await runCaptured(capture, true);
-        observedSnapshots.push(snapshot);
+        const snapshot = await runCandidate(capture);
+        candidateSnapshots.push(snapshot);
         return snapshot;
       },
-      permittedDifferences: [{
-        code: "OUTBOUND_MESSAGES_CHANGED",
-        reasonCode: "TRACK_B_MODEL_WORDING_AUTHORITY",
-      }, {
-        code: "STRATEGY_CHANGED",
-        reasonCode: "TRACK_B_MODEL_STRATEGY_AUTHORITY",
-      }],
+      permittedDifferences: [],
     });
 
-    expect(result.differences).toEqual([
-      {
-        code: "OUTBOUND_MESSAGES_CHANGED",
-        disposition: "INTENTIONAL",
-        reasonCode: "TRACK_B_MODEL_WORDING_AUTHORITY",
-      },
-      {
-        code: "STRATEGY_CHANGED",
-        disposition: "INTENTIONAL",
-        reasonCode: "TRACK_B_MODEL_STRATEGY_AUTHORITY",
-      },
-    ]);
+    expect(result.differences).toEqual([]);
     expect(result).toMatchObject({
-      status: "INTENTIONAL_DIFFERENCE",
+      status: "MATCH",
       sideEffects: "DISABLED",
     });
-    const [baselineSnapshot, candidateSnapshot] = observedSnapshots;
-    if (baselineSnapshot === undefined || candidateSnapshot === undefined) {
-      throw new Error("TRACK_B_B22_RUNNER_SNAPSHOTS_MISSING");
+    const candidateSnapshot = candidateSnapshots[0];
+    if (candidateSnapshot === undefined) {
+      throw new Error("TRACK_B_B23A_CANDIDATE_SNAPSHOT_MISSING");
     }
-    expect(baselineSnapshot.verifiedFactHashes.length).toBeGreaterThan(0);
-    expect(baselineSnapshot.protectedClaimHashes.length).toBeGreaterThan(0);
-    expect(baselineSnapshot.effectAuthorizationHashes.length).toBeGreaterThan(0);
-    expect(baselineSnapshot).toMatchObject({
+    expect(preB23aBaseline.verifiedFactHashes.length).toBeGreaterThan(0);
+    expect(preB23aBaseline.protectedClaimHashes.length).toBeGreaterThan(0);
+    expect(preB23aBaseline.effectAuthorizationHashes.length).toBeGreaterThan(0);
+    expect(preB23aBaseline).toMatchObject({
       commitOutcome: "COMMITTED",
       inboxOutcome: "COMMITTED",
       protectedOutbound: { required: true },
     });
     expect(candidateSnapshot).toMatchObject({
-      verifiedFactHashes: baselineSnapshot.verifiedFactHashes,
-      protectedClaimHashes: baselineSnapshot.protectedClaimHashes,
-      effectAuthorizationHashes: baselineSnapshot.effectAuthorizationHashes,
+      verifiedFactHashes: preB23aBaseline.verifiedFactHashes,
+      protectedClaimHashes: preB23aBaseline.protectedClaimHashes,
+      effectAuthorizationHashes: preB23aBaseline.effectAuthorizationHashes,
       commitOutcome: "COMMITTED",
       inboxOutcome: "COMMITTED",
       protectedOutbound: {
         required: true,
-        groupId: baselineSnapshot.protectedOutbound.groupId,
-        plannedMessageCount: baselineSnapshot.protectedOutbound.plannedMessageCount,
-        deliveredMessageCount: baselineSnapshot.protectedOutbound.deliveredMessageCount,
+        groupId: preB23aBaseline.protectedOutbound.groupId,
+        plannedMessageCount: preB23aBaseline.protectedOutbound.plannedMessageCount,
+        deliveredMessageCount: preB23aBaseline.protectedOutbound.deliveredMessageCount,
       },
     });
     expect(candidateSnapshot.protectedOutbound.plannedMessageCount).toBeGreaterThan(0);
     expect(candidateSnapshot.protectedOutbound.deliveredMessageCount).toBe(
       candidateSnapshot.protectedOutbound.plannedMessageCount,
+    );
+  });
+
+  it("blocks the whole live-path group for a model-declared claim without typed evidence", async () => {
+    const missingClaimId = "55555555-5555-5555-8555-555555555555";
+    const modelReply = "Mẫu này có thiết kế thanh lịch chị nhé.";
+    const harness = createHarness({
+      commerce: true,
+      initialMode: "REPLY",
+      initialReply: modelReply,
+      initialProtectedClaimIds: [missingClaimId],
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    const commit = harness.commerceCommit.mock.calls[0]?.[0]?.runtimeCommit;
+    expect(commit).toBeDefined();
+    expect(committedText(commit)).not.toContain(modelReply);
+    expect(commit?.decisionEvents?.flatMap(({ reasonCodes }) => reasonCodes)).toContain(
+      `PROTECTED_CLAIM_EVIDENCE_MISSING:${missingClaimId}`,
+    );
+  });
+
+  it.each([
+    "Mẫu này hiện vẫn còn chị nhé.",
+    "Mẫu này còn chị nhé.",
+  ])("blocks an undeclared contextual stock assertion as a whole live group: %s", async (modelReply) => {
+    const harness = createHarness({
+      commerce: true,
+      initialMode: "REPLY",
+      initialReply: modelReply,
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    const commit = harness.commerceCommit.mock.calls[0]?.[0]?.runtimeCommit;
+    expect(commit).toBeDefined();
+    expect(committedText(commit)).not.toContain(modelReply);
+    expect(commit?.decisionEvents?.flatMap(({ reasonCodes }) => reasonCodes)).toContain(
+      "PROTECTED_CLAIM_UNDECLARED:STOCK",
     );
   });
 

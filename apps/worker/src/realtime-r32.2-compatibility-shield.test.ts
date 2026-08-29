@@ -161,16 +161,14 @@ describe("r32.2 Compatibility First regression shield", () => {
     expect(new Set(Object.values(ALLOWED_R32_2_DEVIATIONS)).size).toBe(6);
   });
 
-  it("preserves the verified quote, CTA, image, and two-bubble product-info form", () => {
+  it("preserves verified quote/media while B2.3a removes XML copy and deterministic CTA", () => {
     const proposal = verifiedProductInfoProposal(product, facts, []);
     expect(proposal).not.toBeNull();
     expect(proposal?.reply).toBe([
       "Áo dài Dao Phụng (mã SD398) hiện có giá 1.199.000đ.",
-      "Chất liệu: ren họa tiết hoa chìm phối tơ ống",
-      "Form dáng: suông rộng",
+      "Chất liệu: REN, TƠ ỐNG",
+      "Form dáng: SUÔNG, ỐNG RỘNG",
       "Size: M, L, XL",
-      "",
-      "Chị cao và nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?",
     ].join("\n"));
     expect(proposal?.attachments).toEqual(["https://cdn.example/sd398.jpg"]);
 
@@ -182,14 +180,10 @@ describe("r32.2 Compatibility First regression shield", () => {
         kind: "TEXT",
         text: [
           "Áo dài Dao Phụng (mã SD398) hiện có giá 1.199.000đ.",
-          "Chất liệu: ren họa tiết hoa chìm phối tơ ống",
-          "Form dáng: suông rộng",
+          "Chất liệu: REN, TƠ ỐNG",
+          "Form dáng: SUÔNG, ỐNG RỘNG",
           "Size: M, L, XL",
         ].join("\n"),
-      },
-      {
-        kind: "TEXT",
-        text: "Chị cao và nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?",
       },
       { kind: "IMAGE", imageUrl: "https://cdn.example/sd398.jpg" },
     ]);

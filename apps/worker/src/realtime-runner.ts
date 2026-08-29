@@ -15,6 +15,7 @@ import {
   createVerifiedSizeRecommendationClaim,
   selectProductMediaV2,
   guardAgentProposal,
+  detectConcreteSizeRecommendations,
   selectImages,
   verifiedImageUrls,
   applyWave2ReplyPolicy,
@@ -62,7 +63,6 @@ import type {
   SalesCycleRuntimeState,
 } from "@lana/chat-runtime";
 import {
-  decideRuntimeMultiItemOffer,
   outboundRuntimePolicy,
   runtimePolicyAuditReference,
   startupBehaviorModeResolution,
@@ -112,6 +112,12 @@ import {
   resolveRealtimePostGenerationAuthority,
   type PostGenerationWordingAuthority,
 } from "./realtime-reply-differential.js";
+import {
+  authorizeRealtimeProtectedClaimProposal,
+  bindRealtimeProtectedClaimProposal,
+  detectRealtimeUndeclaredProtectedClaimTypes,
+  type RealtimeProtectedClaimRequest,
+} from "./realtime-protected-claim-boundary.js";
 export {
   groupRealtimeMetaMessagesV2,
   limitResponseGroupPoliteness,
@@ -592,18 +598,10 @@ function naturalList(values: readonly string[]): string {
   return `${values.slice(0, -1).join(", ")} và ${values.at(-1)}`;
 }
 
-function compactMaterial(product: StableProductDocument): string {
-  const materials = product.materials
-    .map((value) => value.trim().toLocaleLowerCase("vi"))
-    .filter(Boolean)
-    .slice(0, 2);
-  return materials.length > 0 ? naturalList(materials) : "đang cập nhật";
-}
-
 export function multiProductReply(
   products: readonly StableProductDocument[],
   facts: readonly BusinessFactEnvelopeV1[],
-  policyResolution: RuntimePolicyResolution | null = null,
+  _policyResolution: RuntimePolicyResolution | null = null,
 ): string | null {
   const lines: string[] = [];
   for (let index = 0; index < products.length; index += 1) {
@@ -612,33 +610,9 @@ export function multiProductReply(
     if (!product || fact?.status !== "OK" || !fact.facts) return null;
     const price = fact.facts.salePriceVnd ?? fact.facts.listPriceVnd;
     if (price === null) return null;
-    lines.push(
-      `Set ${index + 1} - ${product.productId} - giá ${shortPrice(price)} - chất ${compactMaterial(product)}`,
-    );
+    lines.push(`Set ${index + 1} - ${product.productId} - giá ${shortPrice(price)}`);
   }
-  const policy = outboundRuntimePolicy(policyResolution);
-  const offer = policy
-    ? decideRuntimeMultiItemOffer(policy, products.length)
-    : null;
-  if (offer) lines.push(offer.message);
-  lines.push(
-    "Chị chọn set mình thích và gửi em chiều cao, cân nặng để em tư vấn size phù hợp nhé.",
-  );
   return lines.join("\n");
-}
-
-function hasBodyProfile(context: readonly ShadowContextMessage[]): boolean {
-  const text = context
-    .filter((message) => message.senderType === "CUSTOMER")
-    .map((message) => message.text)
-    .join(" ")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/gu, "")
-    .replace(/[\u0111\u0110]/gu, "d")
-    .toLowerCase();
-  const hasHeight = /\b(?:chieu\s*cao|cao)\s*[:=]?\s*(?:1[45-8]\d|1[.,][45-8]\d|[45-8]\d)\b/u.test(text);
-  const hasWeight = /\b(?:can\s*nang|nang)\s*[:=]?\s*(?:3\d|4\d|5\d|6\d|7\d|8\d|9\d)\b/u.test(text);
-  return hasHeight && hasWeight;
 }
 
 function compactXmlDescription(value: string | undefined): string {
@@ -799,8 +773,8 @@ export function productDescriptionLine(
 export function verifiedProductInfoProposal(
   product: StableProductDocument,
   facts: BusinessFactEnvelopeV1,
-  context: readonly ShadowContextMessage[],
-  profile: CustomerProfileV1 | null = null,
+  _context: readonly ShadowContextMessage[],
+  _profile: CustomerProfileV1 | null = null,
   productFactsV2: ProductFactsV2 | null = null,
   now = new Date(),
   _conversationalMessageFormatEnabled = false,
@@ -810,9 +784,8 @@ export function verifiedProductInfoProposal(
   const price = facts.facts.salePriceVnd ?? facts.facts.listPriceVnd;
   if (price === null) return null;
   const displayName = productDisplayName(product);
-  const description = compactXmlDescription(product.descriptionXml);
-  const material = xmlMaterialPhrase(product, description);
-  const form = xmlFormPhrase(product, description);
+  const material = product.materials.map((value) => value.trim()).filter(Boolean);
+  const form = product.silhouettes.map((value) => value.trim()).filter(Boolean);
   const displayNameContainsCode = normalizedVietnamese(displayName)
     .replace(/[^a-z0-9]+/gu, "")
     .includes(normalizedVietnamese(product.productId).replace(/[^a-z0-9]+/gu, ""));
@@ -821,27 +794,12 @@ export function verifiedProductInfoProposal(
     : `${sentenceCase(displayName)} (mã ${product.productId})`;
   const informationLines = [
     `${heading} hiện có giá ${new Intl.NumberFormat("vi-VN").format(price)}đ.`,
-    ...(material ? [`Chất liệu: ${material}`] : []),
-    ...(form ? [`Form dáng: ${form}`] : []),
+    ...(material.length > 0 ? [`Chất liệu: ${material.join(", ")}`] : []),
+    ...(form.length > 0 ? [`Form dáng: ${form.join(", ")}`] : []),
     ...(facts.facts.sizes.length > 0
       ? [`Size: ${facts.facts.sizes.join(", ")}`]
       : []),
   ];
-  const measurementKinds = new Set(
-    profile?.measurements.map(({ kind }) => kind) ?? [],
-  );
-  const hasHeight = measurementKinds.has("HEIGHT_CM");
-  const hasWeight = measurementKinds.has("WEIGHT_KG");
-  const hasCompleteMeasurements = profile !== null
-    ? profileHasBodyMeasurements(profile)
-    : hasBodyProfile(context);
-  const followUp = hasCompleteMeasurements
-    ? null
-    : hasHeight
-      ? "Chị nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?"
-      : hasWeight
-        ? "Chị cao khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?"
-        : "Chị cao và nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?";
   const v2Overview = productFactsV2
     ? selectProductMediaV2({
         product: productFactsV2,
@@ -867,7 +825,9 @@ export function verifiedProductInfoProposal(
     conversationStage: "PRODUCT_MATCHED",
     productId: product.productId,
     action: "REPLY",
-    reply: [informationLines.join("\n"), followUp].filter(Boolean).join("\n\n"),
+    // This model-skipping branch is a verified-facts recovery form only. It
+    // must not choose advisory wording or append a sales CTA.
+    reply: informationLines.join("\n"),
     attachments: mediaSelectorV2Authoritative
       ? v2Images
       : v2Images.length > 0
@@ -1295,6 +1255,17 @@ export interface MultiFactResolution {
   }[];
 }
 
+function requestedProtectedClaimTypes(
+  intent: AgentProposalV1["businessFactQuery"]["intent"],
+): readonly ProtectedClaimV1["type"][] {
+  if (intent === "PRICE") return ["PRICE"];
+  if (intent === "STOCK") return ["STOCK"];
+  if (intent === "ETA") return ["ETA"];
+  // SIZE_FIT remains on the existing size boundary until the separately
+  // scoped B2.3d one-repair/BF-04 slice.
+  return [];
+}
+
 export async function resolveBusinessFactQueriesBounded(
   queries: BusinessFactQueriesV2,
   products: readonly StableProductDocument[],
@@ -1492,7 +1463,6 @@ export function multiFactReply(
     );
   }
   if (lines.length === 0) return null;
-  lines.push("Chị chọn mẫu và size muốn lấy để em kiểm tra đúng biến thể nhé.");
   return lines.join("\n");
 }
 
@@ -1513,20 +1483,6 @@ export function catalogAdvisoryIntent(value: string): CatalogAdvisoryIntent | nu
   return null;
 }
 
-function explicitXmlAdvisory(
-  product: StableProductDocument,
-  intent: CatalogAdvisoryIntent,
-): string | null {
-  const description = compactXmlDescription(product.descriptionXml);
-  const pattern = {
-    COLORS: /(?:màu|màu sắc)\s*[:\-]?\s*([^.!?]{2,80})/iu,
-    MATERIALS: /(?:chất liệu|được may từ|may từ)\s*[:\-]?\s*([^.!?]{2,100})/iu,
-    SILHOUETTES: /(?:form|dáng|kiểu dáng)\s*[:\-]?\s*([^.!?]{2,100})/iu,
-    OCCASIONS: /(?:phù hợp|thích hợp)\s+(?:cho|để)?\s*([^.!?]{2,100})/iu,
-  }[intent];
-  return description.match(pattern)?.[1]?.trim().slice(0, 100) ?? null;
-}
-
 export function catalogAdvisoryReply(
   product: StableProductDocument,
   intent: CatalogAdvisoryIntent,
@@ -1537,19 +1493,16 @@ export function catalogAdvisoryReply(
     SILHOUETTES: product.silhouettes,
     OCCASIONS: product.occasions,
   }[intent].map((value) => value.trim()).filter(Boolean);
-  const fallback = structured.length === 0
-    ? explicitXmlAdvisory(product, intent)
-    : null;
   const label = {
     COLORS: "Màu",
     MATERIALS: "Chất liệu",
     SILHOUETTES: "Form dáng",
     OCCASIONS: "Dịp mặc",
   }[intent];
-  const answer = structured.length > 0
-    ? structured.join(", ")
-    : fallback ?? "đang được cập nhật";
-  return `${label} của ${productDisplayName(product)}: ${answer}. Chị cần em kiểm tra thêm giá hay size không?`;
+  const answer = structured.length > 0 ? structured.join(", ") : "đang được cập nhật";
+  // Exact catalog rendering is a bounded verified fallback, not a second
+  // conversational strategy/CTA owner.
+  return `${label} của ${productDisplayName(product)}: ${answer}.`;
 }
 
 const MEASUREMENT_LABELS: Readonly<Record<MeasurementKind, string>> = {
@@ -3342,6 +3295,8 @@ export class RealtimeRunner {
     let businessFacts: BusinessFactEnvelopeV1 | null = null;
     let businessFactEnvelopes: BusinessFactEnvelopeV1[] = [];
     let deterministicProtectedClaimTypes: ProtectedClaimV1["type"][] = [];
+    let deterministicProtectedClaimRequests: RealtimeProtectedClaimRequest[] = [];
+    let protectedClaimBindingReasonCodes: readonly string[] = [];
     let handoffGuardReasonCodes: readonly string[] =
       customerUrlDisposition === "HANDOFF" ? customerUrlReasonCodes : [];
     let sizeAdviceRequiresHandoff = false;
@@ -3590,6 +3545,13 @@ export class RealtimeRunner {
           outboundRuntimePolicy(policyResolution),
         );
         if (reply) {
+          if (preSalePolicyIntent === "SHIPPING_FEE") {
+            deterministicProtectedClaimTypes = ["SHIPPING_FEE"];
+            deterministicProtectedClaimRequests = [{ type: "SHIPPING_FEE" }];
+          } else if (preSalePolicyIntent === "DELIVERY_TIME") {
+            deterministicProtectedClaimTypes = ["ETA"];
+            deterministicProtectedClaimRequests = [{ type: "ETA" }];
+          }
           if (this.options.mode === "LIVE" && this.options.sendEnabled) {
             metaMessages = [{ kind: "TEXT", text: reply }];
           }
@@ -3831,6 +3793,19 @@ export class RealtimeRunner {
             SIZE: "SIZE_FIT" as const,
             ETA: "ETA" as const,
           })[requestedFact]))].sort();
+          deterministicProtectedClaimRequests = resolutions.flatMap((resolution) =>
+            resolution.product === null
+              ? []
+              : resolution.facts.map(({ requestedFact }) => ({
+                  type: ({
+                    PRICE: "PRICE" as const,
+                    STOCK: "STOCK" as const,
+                    SIZE: "SIZE_FIT" as const,
+                    ETA: "ETA" as const,
+                  })[requestedFact],
+                  productId: resolution.product!.productId,
+                }))
+          );
           const first = multiFactQueries.queries[0]!;
           proposal = {
             schemaVersion: 1,
@@ -3943,7 +3918,13 @@ export class RealtimeRunner {
           allFacts,
           policyResolution,
         );
-        if (reply !== null) deterministicProtectedClaimTypes = ["PRICE"];
+        if (reply !== null) {
+          deterministicProtectedClaimTypes = ["PRICE"];
+          deterministicProtectedClaimRequests = resolution.products.map(({ productId }) => ({
+            type: "PRICE",
+            productId,
+          }));
+        }
         if (!reply) {
           handoffGuardReasonCodes = ["MULTI_PRODUCT_FACT_UNAVAILABLE"];
           const transitioned = applySilentHandoff(
@@ -4040,9 +4021,10 @@ export class RealtimeRunner {
             imageRequest.images,
             imageRequest.intent,
           );
-          if (mediaSelectorV2GuardActive && imageRequest.mediaSelectorV2) {
-            guardVerifiedAttachmentUrls = new Set(imageRequest.images);
-          }
+          // The bounded image resolver already selected these exact URLs for
+          // this request. Carry that typed selection into both the guard and
+          // the structured PRODUCT_MEDIA claim boundary.
+          guardVerifiedAttachmentUrls = new Set(imageRequest.images);
         } else if (directProductInfo && resolvedProduct) {
           proposal = productInfoLookupProposal(resolvedProduct);
         } else {
@@ -4572,6 +4554,88 @@ export class RealtimeRunner {
             ],
           };
         }
+        const expectedProtectedClaimProductIds = [...new Set([
+          ...businessFactEnvelopes.map(({ productId }) => productId),
+          ...(proposal.productId === null ? [] : [proposal.productId]),
+        ])].sort();
+        const expectedProtectedClaimProductScopes =
+          expectedProtectedClaimProductIds.map((productId) => ({
+            productId,
+            variantId: activeVerifiedVariant?.parentProductId === productId
+              ? activeVerifiedVariant.selectedVariantId
+              : null,
+          }));
+        const typedClaimsForProposal = buildProtectedClaimsFromVerifiedFactSetV1({
+          facts: businessFactEnvelopes,
+          sizeClaim: verifiedSizeClaimForTurn,
+          expectedSizeProductId: activeSizeProductId,
+        }).claims;
+        const verifiedMediaUrls = guardVerifiedAttachmentUrls ?? (
+          facts?.status === "OK" && facts.facts !== null
+            ? new Set(facts.facts.imageUrls)
+            : new Set<string>()
+        );
+        const mediaClaims =
+          proposal.productId !== null &&
+          proposal.attachments.length > 0 &&
+          proposal.attachments.every((url) => verifiedMediaUrls.has(url))
+            ? buildProtectedMediaClaimsV1({
+                productId: proposal.productId,
+                imageUrls: proposal.attachments,
+                sourceVersion: `MEDIA_SELECTOR_V2:${proposal.productId}`,
+                observedAt: now.toISOString(),
+                expiresAt: new Date(now.getTime() + 60_000).toISOString(),
+              })
+            : [];
+        const protectedClaimProductId = proposal.productId;
+        const boundProtectedClaims = bindRealtimeProtectedClaimProposal({
+          requestedClaims: requestedProtectedClaimTypes(
+            proposal.businessFactQuery.intent,
+          ).map((type) => ({
+            type,
+            ...(protectedClaimProductId === null
+              ? {}
+              : { productId: protectedClaimProductId }),
+          })),
+          // B2.3d owns unknown IDs attached to concrete size wording so the
+          // existing exactly-one repair can still run. Everywhere else an
+          // unknown model ID reaches the authorizer and fails closed.
+          modelDeclaredClaimIds:
+            detectConcreteSizeRecommendations(proposal.reply).length > 0
+              ? (proposal.protectedClaimIds ?? []).filter((claimId) =>
+                  typedClaimsForProposal.some(({ claimId: availableId }) =>
+                    availableId === claimId
+                  )
+                )
+              : proposal.protectedClaimIds ?? [],
+          deterministicClaims: [
+            ...deterministicProtectedClaimRequests.filter(({ type }) => type !== "SIZE_FIT"),
+            ...(mediaClaims.length > 0 && proposal.productId !== null
+              ? [{ type: "PRODUCT_MEDIA" as const, productId: proposal.productId }]
+              : []),
+          ],
+          defenseObservedClaimTypes:
+            detectRealtimeUndeclaredProtectedClaimTypes(proposal.reply),
+          availableClaims: [...typedClaimsForProposal, ...mediaClaims],
+          expectedProductIds: expectedProtectedClaimProductIds,
+          expectedProductScopes: expectedProtectedClaimProductScopes,
+          now,
+        });
+        protectedClaimBindingReasonCodes = boundProtectedClaims.reasonCodes;
+        proposal = {
+          ...proposal,
+          protectedClaimIds: [...new Set([
+            ...(proposal.protectedClaimIds ?? []),
+            ...boundProtectedClaims.claimIds,
+          ])],
+        };
+        const protectedClaimIdsPreservedAcrossSizeRepair = new Set(
+          (proposal.protectedClaimIds ?? []).filter((claimId) =>
+            [...typedClaimsForProposal, ...mediaClaims].some((claim) =>
+              claim.claimId === claimId && claim.type !== "SIZE_FIT"
+            )
+          ),
+        );
         const guardProposal = (
           candidate: AgentProposalV1,
           candidateFacts: BusinessFactEnvelopeV1 | null = facts,
@@ -4596,7 +4660,23 @@ export class RealtimeRunner {
           },
           now,
         });
-        let guarded = guardProposal(proposal);
+        const enforceProtectedClaimBinding = (
+          candidate: ReturnType<typeof guardAgentProposal>,
+        ): ReturnType<typeof guardAgentProposal> =>
+          protectedClaimBindingReasonCodes.length === 0
+            ? candidate
+            : {
+            ...candidate,
+            action: "HANDOFF",
+            textUnits: [],
+            imageUrls: [],
+            handoffReason: "BUSINESS_POLICY_GUARD",
+            blockedReasonCodes: [...new Set([
+              ...candidate.blockedReasonCodes,
+              ...protectedClaimBindingReasonCodes,
+            ])].sort(),
+          };
+        let guarded = enforceProtectedClaimBinding(guardProposal(proposal));
         const guardedPlanHashFor = (value: typeof guarded): string =>
           createHash("sha256").update(JSON.stringify({
             action: value.action,
@@ -4642,11 +4722,15 @@ export class RealtimeRunner {
               );
               proposal = {
                 ...repair.proposal,
+                protectedClaimIds: [...new Set([
+                  ...(repair.proposal.protectedClaimIds ?? []),
+                  ...protectedClaimIdsPreservedAcrossSizeRepair,
+                ])],
                 salesSignals: proposal.salesSignals ?? repair.proposal.salesSignals,
                 strategyAnalysis:
                   proposal.strategyAnalysis ?? repair.proposal.strategyAnalysis,
               };
-              guarded = guardProposal(proposal);
+              guarded = enforceProtectedClaimBinding(guardProposal(proposal));
               repaired =
                 !hasSizeRecommendationBlock(guarded.blockedReasonCodes) &&
                 (guarded.action === "REPLY" ||
@@ -4681,14 +4765,36 @@ export class RealtimeRunner {
               attachmentUrls: sizeRepairBaseline.attachments.filter((url) =>
                 verifiedAttachmentUrlsForFallback.has(url)
               ),
-              preservedProtectedClaimIds: (sizeRepairBaseline.protectedClaimIds ?? []).filter(
-                (claimId) => claimId !== verifiedSizeClaimForTurn?.id,
-              ),
+              preservedProtectedClaimIds: (sizeRepairBaseline.protectedClaimIds ?? [])
+                .filter((claimId) => [...typedClaimsForProposal, ...mediaClaims]
+                  .some((claim) =>
+                    claim.claimId === claimId && claim.type !== "SIZE_FIT"
+                  )),
               // The independently authorized post-media CTA is constructed
               // after this fallback from the guarded media plan below.
               approvedCta: null,
             });
-            guarded = guardProposal(proposal);
+            if (facts?.status === "OK" && facts.facts !== null) {
+              const fallbackProductId = facts.productId;
+              const fallbackClaimRequests: RealtimeProtectedClaimRequest[] = [
+                ...(facts.facts.salePriceVnd !== null || facts.facts.listPriceVnd !== null
+                  ? [{ type: "PRICE" as const, productId: fallbackProductId }]
+                  : []),
+                { type: "STOCK" as const, productId: fallbackProductId },
+                ...(facts.facts.deliveryEta !== null
+                  ? [{ type: "ETA" as const, productId: fallbackProductId }]
+                  : []),
+              ];
+              deterministicProtectedClaimTypes = [...new Set([
+                ...deterministicProtectedClaimTypes,
+                ...fallbackClaimRequests.map(({ type }) => type),
+              ])].sort();
+              deterministicProtectedClaimRequests = [
+                ...deterministicProtectedClaimRequests,
+                ...fallbackClaimRequests,
+              ];
+            }
+            guarded = enforceProtectedClaimBinding(guardProposal(proposal));
             handoffGuardReasonCodes = [...new Set([
               ...handoffGuardReasonCodes,
               "SIZE_RECOMMENDATION_REPAIR_FAILED",
@@ -4710,7 +4816,7 @@ export class RealtimeRunner {
               nextState.currentProductId,
             ),
           );
-          guarded = guardProposal(proposal, null);
+          guarded = enforceProtectedClaimBinding(guardProposal(proposal, null));
           guardedPlanHash = guardedPlanHashFor(guarded);
         }
         if (guarded.action === "HANDOFF") {
@@ -4943,6 +5049,12 @@ export class RealtimeRunner {
       const mediaProductId = expectedOutboundProductIds.length === 1
         ? expectedOutboundProductIds[0]!
         : null;
+      const expectedOutboundProductScopes = expectedOutboundProductIds.map((productId) => ({
+        productId,
+        variantId: nextState.verifiedVariant?.parentProductId === productId
+          ? nextState.verifiedVariant.selectedVariantId
+          : null,
+      }));
       if (mediaProductId !== null && outboundClaimTypes.includes("PRODUCT_MEDIA")) {
         protectedOutboundClaims = [
           ...protectedOutboundClaims,
@@ -4959,6 +5071,57 @@ export class RealtimeRunner {
       protectedOutboundClaims = protectedOutboundClaims.filter(({ type }) =>
         outboundClaimTypeSet.has(type)
       );
+      const nonSizeOutboundClaimTypes = outboundClaimTypes.filter((type) =>
+        type !== "SIZE_FIT"
+      );
+      const finalProtectedClaimBinding = bindRealtimeProtectedClaimProposal({
+        requestedClaims: [],
+        modelDeclaredClaimIds: (proposal?.protectedClaimIds ?? []).filter((claimId) =>
+          protectedOutboundClaims.some(({ claimId: availableId }) =>
+            availableId === claimId
+          )
+        ),
+        deterministicClaims: [
+          ...deterministicProtectedClaimRequests.filter(({ type }) =>
+            type !== "SIZE_FIT"
+          ),
+          ...(nonSizeOutboundClaimTypes.includes("PRODUCT_MEDIA") && mediaProductId !== null
+            ? [{ type: "PRODUCT_MEDIA" as const, productId: mediaProductId }]
+            : []),
+        ],
+        availableClaims: protectedOutboundClaims,
+        expectedProductIds: expectedOutboundProductIds,
+        expectedProductScopes: expectedOutboundProductScopes,
+        now,
+      });
+      const finalProtectedClaimAuthorization =
+        authorizeRealtimeProtectedClaimProposal({
+          declaredClaimIds: finalProtectedClaimBinding.claimIds,
+          observedClaimTypes: nonSizeOutboundClaimTypes,
+          availableClaims: protectedOutboundClaims,
+          expectedProductIds: expectedOutboundProductIds,
+          expectedProductScopes: expectedOutboundProductScopes,
+          now,
+        });
+      const structuredClaimReasonCodes = [...new Set([
+        ...finalProtectedClaimBinding.reasonCodes,
+        ...finalProtectedClaimAuthorization.reasonCodes,
+      ])].sort();
+      if (structuredClaimReasonCodes.length > 0) {
+        handoffGuardReasonCodes = [...new Set([
+          ...handoffGuardReasonCodes,
+          ...structuredClaimReasonCodes,
+        ])];
+        protectedOutboundClaims = [];
+      } else {
+        const declaredSizeClaimIds = new Set(proposal?.protectedClaimIds ?? []);
+        protectedOutboundClaims = [
+          ...finalProtectedClaimAuthorization.claims,
+          ...protectedOutboundClaims.filter((claim) =>
+            claim.type === "SIZE_FIT" && declaredSizeClaimIds.has(claim.claimId)
+          ),
+        ];
+      }
       protectedOutboundReadiness = evaluateDeterministicEffectReadinessV1({
         effect: "PROTECTED_OUTBOUND",
         pageId: claim.pageId,
