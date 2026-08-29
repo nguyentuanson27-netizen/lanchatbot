@@ -138,4 +138,19 @@ describe("Track B B2.2 post-generation model authority", () => {
       { kind: "TEXT", text: "Chị xem thêm ảnh nhé ạ." },
     ]);
   });
+
+  it("keeps normal model advice in one outbound unit when follow-up splitting is off", () => {
+    expect(finalizeRealtimePostGenerationReply({
+      mode: "GROUP_V2",
+      wordingAuthority: "MODEL",
+      splitProductInfoFollowUp: false,
+      messages: [{
+        kind: "TEXT",
+        text: "Mẫu này hợp đi làm ạ.\n\nChị thích form ôm hay suông nhé?",
+      }],
+    }).messages).toEqual([{
+      kind: "TEXT",
+      text: "Mẫu này hợp đi làm ạ.\n\nChị thích form ôm hay suông nhé?",
+    }]);
+  });
 });

@@ -60,8 +60,10 @@ export function groupRealtimeMetaMessagesV2(
   splitProductInfoFollowUp = false,
   wordingAuthority: PostGenerationWordingAuthority = "LEGACY_DETERMINISTIC",
 ): RealtimeMetaMessageUnit[] {
-  if (!splitProductInfoFollowUp && wordingAuthority === "LEGACY_DETERMINISTIC") {
-    return limitResponseGroupPoliteness(messages);
+  if (!splitProductInfoFollowUp) {
+    return wordingAuthority === "MODEL"
+      ? [...messages]
+      : limitResponseGroupPoliteness(messages);
   }
   let split = false;
   const grouped = messages.flatMap((message) => {
