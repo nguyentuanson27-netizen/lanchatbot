@@ -12,6 +12,7 @@
     }
   },
   "scripts": {
+    "prebuild": "pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build",
     "build": "tsc -p tsconfig.json",
     "pretypecheck": "pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
