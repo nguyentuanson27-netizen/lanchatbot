@@ -5,11 +5,12 @@
 ## Operating mode hiện tại
 
 - Mode: `ENGINEERING_PREPROD`.
+- Process profile mặc định: `SOLO_PREPROD_MINIMAL`; tiếp tục có hiệu lực cho đến khi owner explicit thay đổi process profile hoặc operating mode.
 - Live page `1198992073286645` được định nghĩa là `PREPROD_TEST_PAGE`, không phải public production.
-- PR nhỏ là đơn vị thay đổi, focused verification và exact-head review.
-- Release Train là đơn vị mặc định chạy full verification, chuẩn bị immutable release và deploy test page khi owner cấp quyền rõ ràng.
+- PR nhỏ + focused verification là đơn vị thay đổi mặc định; self-review đủ cho solo PREPROD, independent exact-head review chỉ là risk-triggered.
+- Release Train không phải mặc định; chỉ dùng khi owner/risk boundary chọn rõ hoặc khi chuyển sang hardening cần ceremony mạnh hơn.
 - Gate BF/E/F/U là engineering/architecture gates, không tự động đồng nghĩa production-ready.
-- Chỉ owner mới có thể chuyển chương trình sang `PRODUCTION_HARDENING` bằng yêu cầu rõ ràng.
+- Chỉ owner mới có thể thay đổi process profile hoặc chuyển operating mode, bao gồm `PRODUCTION_HARDENING`.
 
 **Vị trí chương trình hiện tại:** `GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE`. PREPROD test page đang chạy exact COMMERCE release với `stateReadMode=LEGACY`; controlled Messenger E2E và exact rollback/reactivation lifecycle đã PASS. Xem [DF13 / Gate F acceptance record](docs/current/architecture-program/DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md). BF-03 vẫn foundation-only/non-activatable, BF-04 vẫn `PARTIAL / KNOWN_GAP`, BF-10 vẫn còn natural-terminal residual, và `DATABASE_URL` remediation vẫn tách riêng; không residual nào được diễn giải là đã sửa. Đây không phải public-production promotion, page expansion, UR/State V2 approval hay quyền xoá LEGACY.
 
@@ -18,14 +19,14 @@ Nguồn governance authoritative: [Operating Mode](docs/current/architecture-pro
 ## Nguồn chuẩn
 
 - Repository: `github.com/nguyentuanson27-netizen/lanchatbot`.
-- Current runtime identity is generated on the VPS; inspect `/opt/lana-chatbot/runtime-state/current.json`, the `current` symlink, and the release-local `.release-source.json` together.
+- Exact running source được xác định từ resolved `current` release và release-local source identity; generated runtime-state/history là supporting evidence khi còn current. Unknown hoặc mismatched live identity phải fail closed.
 - Page canary duy nhất: `1198992073286645`.
 - Meta reply: app gửi trực tiếp qua Meta Send API.
 - Pancake: chỉ quan sát/gắn tag và hỗ trợ handoff; không gửi reply cho khách.
 
-Không sửa source trực tiếp trong `/opt/lana-chatbot/current`. Thay đổi source phải đi qua branch, focused verification, exact-head review và merge. Chỉ Release Train được owner cấp quyền deploy mới tiếp tục qua immutable tag và thư mục release mới trên VPS; source-only PR không mặc định tạo release hoặc chạm live runtime.
+Không sửa source trực tiếp trong `/opt/lana-chatbot/current`. Thay đổi source mặc định đi qua `branch -> focused verification -> PR -> exact-head verification -> merge`; backend verification theo [Operating Mode](docs/current/architecture-program/OPERATING_MODE.md). Merge không tự deploy. Khi owner yêu cầu deploy một commit/candidate cụ thể lên `PREPROD_TEST_PAGE`, chính yêu cầu đó là authorization cho scoped deploy. Deploy phải dùng exact merged commit, release/build identity mới, và giữ exact previous release/build/commit cho từng service bị tác động trong một release-local machine-readable record tối thiểu; nếu authority/config boundary thay đổi, record đó cũng giữ exact previous authority/config identity. Release Train/tag/full manifest/runtime-state promotion không phải gate mặc định nếu không có risk cụ thể yêu cầu.
 
-Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/lana-chatbot/repository`. Agent phải đọc `AGENTS.md` trước khi thao tác; working tree này không phải live runtime. User `lana-deploy` có deploy key GitHub read-only chỉ cho repository này; được phép `fetch` tag/commit nhưng không được push.
+Khi chạy coding agent trực tiếp trên VPS, hãy bắt đầu tại `/opt/lana-chatbot/repository`. Agent phải đọc `AGENTS.md` trước khi thao tác; working tree này không phải live runtime. User `lana-deploy` có deploy key GitHub read-only chỉ cho repository này; được phép `fetch` commit nhưng không được push.
 
 ## Snapshot runtime lịch sử ngày 2026-08-01
 
@@ -158,15 +159,17 @@ Không dùng credential live trong môi trường phát triển. Chỉ copy `.en
 
 ## Quy trình release
 
+Trong `ENGINEERING_PREPROD`, `SOLO_PREPROD_MINIMAL` là mặc định cho đến khi owner explicit đổi profile/mode:
+
 1. Tạo branch từ `main`.
-2. Giữ PR nhỏ, thay đổi code/migration theo hướng additive/backward-compatible và chạy focused verification theo phạm vi/rủi ro.
-3. Exact-head review rồi merge `main`; mỗi PR không mặc định là một release hoặc một lần deploy.
-4. Gom các PR đã review theo Release Train và logical dependencies.
-5. Tại train boundary, chạy frozen install, full `pnpm check`, integration/replay, security/data và architecture/release-integrity gates.
-6. Sau full train verification và owner authorization, tạo immutable tag/manifest, build release mới vào `/opt/lana-chatbot/releases/<tag-or-commit>`.
-7. Backup/restore-test nếu có migration.
-8. Controlled verification trên `PREPROD_TEST_PAGE` `1198992073286645`.
-9. Chỉ đổi symlink `current` sau khi health/smoke/readback đạt; giữ exact rollback target.
+2. Giữ PR nhỏ và chạy focused verification theo contract/risk boundary bị tác động.
+3. Exact PR head phải có verification evidence theo [Operating Mode](docs/current/architecture-program/OPERATING_MODE.md) rồi mới merge `main`; independent exact-head review là risk-triggered, không phải gate mặc định.
+4. Merge không tự deploy. Khi owner yêu cầu deploy candidate/commit cụ thể lên `PREPROD_TEST_PAGE`, chính yêu cầu đó là scoped deploy authorization.
+5. Deploy exact merged commit vào release/build mới cho các service bị tác động; trước activation lưu selected source commit, new release/build identity và exact previous release/build/commit **cho từng affected service** trong một release-local machine-readable record tối thiểu. Nếu authority/config boundary thay đổi, record đó cũng lưu exact previous authority/config identity.
+6. Backup trước migration có rủi ro; migration/authority switch/routing/page-allowlist/destructive data action ngoài scope deploy vẫn cần authorization riêng.
+7. Trước activation/switch, chạy candidate readiness/health check có ý nghĩa khi chưa phục vụ live traffic. Sau activation, chạy live health/smoke/readback/controlled check; check chỉ có nghĩa sau activation không bị ép chạy trước. Fail hoặc unknown thì dừng mutation tiếp theo và rollback affected service(s) về đúng previous identity.
+
+Release Train, annotated tag/full manifest, runtime-state promotion ceremony và exhaustive attestation chỉ dùng khi một risk boundary cụ thể yêu cầu, khi owner chọn rõ, hoặc trong profile/hardening khác.
 
 Không recreate toàn bộ compose khi chỉ cần cập nhật một service; các service production hiện dùng nhiều image digest khác nhau.
 
@@ -181,7 +184,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 ## Tài liệu
 
 - [Architecture Program — active BF/DF/UR context index](docs/current/architecture-program/README.md) — nguồn định tuyến context gọn; không tự cấp quyền merge hoặc deploy
-- [Operating Mode — ENGINEERING_PREPROD governance](docs/current/architecture-program/OPERATING_MODE.md) — định nghĩa PR/Release Train, Gate semantics, PREPROD_TEST_PAGE và trigger PRODUCTION_HARDENING
+- [Operating Mode — ENGINEERING_PREPROD governance](docs/current/architecture-program/OPERATING_MODE.md) — định nghĩa `SOLO_PREPROD_MINIMAL`, Gate semantics, PREPROD_TEST_PAGE và trigger thay đổi process/mode
 - [DF13 / Gate F PREPROD acceptance](docs/current/architecture-program/DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md) — exact COMMERCE runtime, rollback/reactivation và Messenger E2E evidence
 - [DF13 operational-acceptance preparation](docs/current/architecture-program/DF13_OPERATIONAL_ACCEPTANCE_PREPARATION.md) — preparation/runbook retained for traceability
 - [Production baseline và ownership](docs/current/PRODUCTION_BASELINE_20260722.md)
@@ -220,4 +223,4 @@ Các tài liệu `docs/phase*` là hồ sơ thiết kế/lịch sử. Khi mâu t
 
 ## Generated runtime state
 
-Do not update this README to record a current release. Live runtime status comes from `/opt/lana-chatbot/runtime-state/current.json`, its immutable history record, the resolved `/opt/lana-chatbot/current` symlink, and the release-local `.release-source.json`. The generated record must pass source, service, migration, routing, config-digest, and readback parity; the append-only A0 reconciliation artifact is `deploy/manifests/20260802-r32.2.2-runtime-reconciliation.json`.
+Do not update this README to record a current release. For live status, resolve the exact running commit/release and rollback target from the resolved `/opt/lana-chatbot/current` release, release-local `.release-source.json`, and any available generated runtime-state/history evidence (`/opt/lana-chatbot/runtime-state/current.json` and its immutable history record). Under `SOLO_PREPROD_MINIMAL`, runtime-state promotion/reconciliation is not a default deploy gate; when generated runtime-state is relied on as authority it must pass source/service/migration/routing/config/readback parity. Unknown or mismatched live identity fails closed. The A0 reconciliation artifact `deploy/manifests/20260802-r32.2.2-runtime-reconciliation.json` remains historical evidence.
