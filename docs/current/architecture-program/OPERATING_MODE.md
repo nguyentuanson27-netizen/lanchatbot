@@ -72,6 +72,8 @@ The `SOLO_PREPROD_MINIMAL` profile remains the default after any Track/Gate comp
 
 Remote CI is preferred. The fallback below is allowed only when the attempted remote backend cannot start or executes zero repository steps because of an external condition such as billing, quota, runner/provider outage, or service failure. It is forbidden when a repository command ran and failed, when the cause is ambiguous, or when a run was cancelled to avoid a result.
 
+Because the canonical backend now runs on a self-hosted runner this project owns, `runner/provider outage` is not self-declarable. A self-hosted runner that is offline, unregistered, misconfigured, or saturated does **not** qualify; restore the runner and re-run the canonical checks instead. The two cases are distinguishable in the provider's own record — a provider failure completes the job having executed zero repository steps, while an unavailable self-hosted runner leaves the job queued and never started — so an eligible fallback requires the former, evidenced independently of the operator's own assertion. A self-hosted host that also serves live product traffic being unavailable is a reason to stop and diagnose, not a reason to relax verification.
+
 For an eligible fallback:
 
 1. record the exact remote PR head/base and the unavailable remote run/provider evidence;
