@@ -21,6 +21,7 @@ import {
   decideWave2SalesStrategy,
   detectBuyingSignal,
   type Wave2StrategyDecision,
+  type Wave2ModelAnalysis,
   type CatalogFactQuery,
   type CustomerImageIntent,
   type ImageSelectionPurpose,
@@ -107,6 +108,9 @@ import {
   groupRealtimeMetaMessagesV2,
   limitResponseGroupPoliteness,
   splitRealtimeMetaMessages,
+  postGenerationWordingAuthority,
+  resolveRealtimePostGenerationAuthority,
+  type PostGenerationWordingAuthority,
 } from "./realtime-reply-differential.js";
 export {
   groupRealtimeMetaMessagesV2,
@@ -1798,6 +1802,7 @@ function hasSizeRecommendationBlock(reasonCodes: readonly string[]): boolean {
   return reasonCodes.some((reason) => reason.startsWith("SIZE_RECOMMENDATION_"));
 }
 export interface PostMediaProofCtaInput {
+  readonly wordingAuthority: PostGenerationWordingAuthority;
   readonly ctaPolicy: Wave2StrategyDecision["ctaPolicy"] | null;
   readonly imageIntent: CustomerImageIntent | null;
   readonly imageCount: number;
@@ -1813,6 +1818,7 @@ export interface PostMediaProofCtaInput {
 export function postMediaProofCta(
   input: PostMediaProofCtaInput,
 ): string | null {
+  if (input.wordingAuthority === "MODEL") return null;
   if (
     input.ctaPolicy !== "POST_MEDIA_CLOSE" ||
     (input.imageIntent !== "DETAIL" && input.imageIntent !== "FEEDBACK") ||
@@ -2764,6 +2770,9 @@ export class RealtimeRunner {
     if (authoritySelection.status === "BLOCKED") {
       throw new Error(authoritySelection.reasonCode);
     }
+    const wordingAuthority = postGenerationWordingAuthority(
+      authoritySelection.status,
+    );
     let commerceFence: Extract<Df13CommerceRuntimeAcquireResult, { status: "HELD" }> | null = null;
     let commerceFreshProcess = false;
     if (authoritySelection.status === "COMMERCE_SELECTED") {
@@ -3365,6 +3374,7 @@ export class RealtimeRunner {
     };
     let verifiedSizeClaimForTurn: SizeRecommendationProtectedClaimV1 | null = null;
     let wave2StrategyDecision: Wave2StrategyDecision | null = null;
+    let modelStrategyAnalysis: Wave2ModelAnalysis | null = null;
     let multiFactAudit: NonNullable<
       RealtimeDecisionEventPlan["details"]["factQueryResults"]
     > = [];
@@ -4492,30 +4502,47 @@ export class RealtimeRunner {
           }
         }
         // Every model-backed and deterministic proposal source converges here.
-        // Later Track B slices replace downstream authority behind this seam;
-        // the byte-frozen baseline generation envelope remains upstream.
+        // Track B selects downstream authority behind this seam while the
+        // byte-frozen baseline generation envelope remains upstream.
         proposal = beginRealtimePostGenerationStage(proposal).proposal;
-        if (this.options.wave2StrategyEnabled && wave2StrategyDecision) {
-          wave2StrategyDecision = decideWave2SalesStrategy({
-            text: message.text ?? "",
-            salesStage: initialAuthorityStrategyStage,
-            objectionType: event.objectionType,
-            buyingSignal: buyingSignal.isBuyingSignal,
-            hasVerifiedProduct: Boolean(
-              resolvedProduct?.productId ?? nextState.currentProductId,
-            ),
-            resolvedProductCount: Math.max(
-              resolution.products.length,
-              resolvedProduct ? 1 : 0,
-            ),
-            hasMeasurements:
-              (customerProfile?.measurements.length ?? 0) > 0 ||
-              hasCustomerMeasurementSignal(message.text ?? ""),
-            requestedProof: requestedProofForImageIntent(imageIntent),
-            modelAnalysis: proposal.strategyAnalysis ?? null,
-          });
-          proposal = applyWave2ReplyPolicy(proposal, wave2StrategyDecision);
-        }
+        const postGenerationAuthority = resolveRealtimePostGenerationAuthority({
+          runtimeAuthority: authoritySelection.status,
+          proposal,
+          modelStrategyAnalysis: proposal.strategyAnalysis ?? null,
+          applyLegacyDeterministic: (candidate) => {
+            if (!this.options.wave2StrategyEnabled || !wave2StrategyDecision) {
+              return { proposal: candidate, strategyDecision: wave2StrategyDecision };
+            }
+            const strategyDecision = decideWave2SalesStrategy({
+              text: message.text ?? "",
+              salesStage: initialAuthorityStrategyStage,
+              objectionType: event.objectionType,
+              buyingSignal: buyingSignal.isBuyingSignal,
+              hasVerifiedProduct: Boolean(
+                resolvedProduct?.productId ?? nextState.currentProductId,
+              ),
+              resolvedProductCount: Math.max(
+                resolution.products.length,
+                resolvedProduct ? 1 : 0,
+              ),
+              hasMeasurements:
+                (customerProfile?.measurements.length ?? 0) > 0 ||
+                hasCustomerMeasurementSignal(message.text ?? ""),
+              requestedProof: requestedProofForImageIntent(imageIntent),
+              modelAnalysis: candidate.strategyAnalysis ?? null,
+            });
+            return {
+              proposal: applyWave2ReplyPolicy(candidate, strategyDecision, {
+                wordingAuthority: "LEGACY_DETERMINISTIC",
+              }),
+              strategyDecision,
+            };
+          },
+        });
+        proposal = postGenerationAuthority.proposal;
+        modelStrategyAnalysis = postGenerationAuthority.modelStrategyAnalysis;
+        wave2StrategyDecision =
+          postGenerationAuthority.deterministicStrategyDecision;
         const verifiedProductIds = new Set<string>();
         if (resolvedProduct) verifiedProductIds.add(resolvedProduct.productId);
         if (facts?.status === "OK") verifiedProductIds.add(facts.productId);
@@ -4711,6 +4738,7 @@ export class RealtimeRunner {
             guarded.action === "ASK_PRODUCT_SELECTION")
         ) {
           const postMediaCta = postMediaProofCta({
+            wordingAuthority,
             ctaPolicy: wave2StrategyDecision?.ctaPolicy ?? null,
             imageIntent,
             imageCount: guarded.imageUrls.length,
@@ -4853,6 +4881,9 @@ export class RealtimeRunner {
           ? "SPLIT_SENTENCES"
           : "PRESERVE",
       messages: metaMessages,
+      wordingAuthority: !salesHandled
+        ? wordingAuthority
+        : "LEGACY_DETERMINISTIC",
       splitProductInfoFollowUp: !salesHandled && (
         proposal?.intent === "product_info" ||
         proposal?.businessFactQuery.intent === "PRICE"
@@ -5021,10 +5052,12 @@ export class RealtimeRunner {
     const canonicalEvidence = canonicalDecisionEvidenceForTurn();
     const dialogueEvidenceCodes = [
       ...canonicalEvidence.dialogueEvidence.reasonCodes,
+      ...(modelStrategyAnalysis?.evidence ?? []),
       ...(wave2StrategyDecision?.evidence ?? []),
     ];
     const strategyUsesModelEvidence =
-      wave2StrategyDecision?.evidence.includes("MODEL_ANALYSIS_ACCEPTED") ?? false;
+      modelStrategyAnalysis !== null ||
+      (wave2StrategyDecision?.evidence.includes("MODEL_ANALYSIS_ACCEPTED") ?? false);
     const modelDialogueEvidence =
       canonicalEvidence.dialogueEvidence.contributors.includes(
         "MODEL_STRUCTURED_OUTPUT",
@@ -5169,6 +5202,12 @@ export class RealtimeRunner {
         capture,
       };
     }
+    const observedStrategyBarrier =
+      modelStrategyAnalysis?.barrier ?? wave2StrategyDecision?.barrier ?? null;
+    const observedStrategy =
+      modelStrategyAnalysis?.recommendedStrategy ??
+      wave2StrategyDecision?.recommendedStrategy ??
+      null;
     const decisionObservability = buildDecisionObservabilityV1({
       dialogueEvidenceCodes,
       dialogueEvidenceSource,
@@ -5217,9 +5256,11 @@ export class RealtimeRunner {
       phaseSource: salesStageAfter === null
         ? "LEGACY_CONVERSATION_STAGE_V1"
         : "SALES_CYCLE_STAGE_V1",
-      barrier: wave2StrategyDecision?.barrier ?? "NOT_EVALUATED",
-      strategy: wave2StrategyDecision?.recommendedStrategy ?? "NONE",
-      cta: wave2StrategyDecision?.ctaPolicy ?? "NONE",
+      barrier: observedStrategyBarrier ?? "NOT_EVALUATED",
+      strategy: observedStrategy ?? "NONE",
+      cta: modelStrategyAnalysis !== null
+        ? "NONE"
+        : wave2StrategyDecision?.ctaPolicy ?? "NONE",
       strategyUsesModelEvidence,
       readinessOutcome: readinessObservations.length > 0
         ? readinessObservations.every(({ outcome }) => outcome === "READY")
@@ -5415,6 +5456,20 @@ export class RealtimeRunner {
         pushDecisionEvent("WAVE2_BARRIER_DETECTED", [
           wave2StrategyDecision.barrier,
           wave2StrategyDecision.decisionFactor,
+        ]);
+      }
+    } else if (modelStrategyAnalysis) {
+      pushDecisionEvent("WAVE2_STRATEGY_SELECTED", [
+        modelStrategyAnalysis.need,
+        modelStrategyAnalysis.barrier,
+        modelStrategyAnalysis.recommendedStrategy,
+        "MODEL_STRUCTURED_OUTPUT",
+      ]);
+      if (modelStrategyAnalysis.barrier !== "NONE") {
+        pushDecisionEvent("WAVE2_BARRIER_DETECTED", [
+          modelStrategyAnalysis.barrier,
+          modelStrategyAnalysis.decisionFactor,
+          "MODEL_STRUCTURED_OUTPUT",
         ]);
       }
     }
@@ -5654,10 +5709,10 @@ export class RealtimeRunner {
                 buyingCommitted: (buyingSignal.isBuyingSignal || salesTelemetry?.orderPreviewCreated === true) &&
                   !acquisitionDecision.buyingNegated,
                 purchaseConfirmed: salesTelemetry?.confirmationConfirmed === true && !acquisitionDecision.buyingNegated,
-                firstPlaybook: wave2StrategyDecision?.recommendedStrategy ?? null,
+                firstPlaybook: observedStrategy,
                 firstBarrier:
-                  wave2StrategyDecision?.barrier && wave2StrategyDecision.barrier !== "NONE"
-                    ? wave2StrategyDecision.barrier
+                  observedStrategyBarrier !== null && observedStrategyBarrier !== "NONE"
+                    ? observedStrategyBarrier
                     : null,
               },
             }

@@ -72,6 +72,23 @@ describe("Wave 2 sales strategy v1", () => {
     expect((rewritten.reply.match(/\?/gu) ?? []).length).toBe(1);
   });
 
+  it("leaves model-authoritative wording byte-identical", () => {
+    const modelProposal = {
+      ...proposal,
+      reply: "C thích mẫu nào? C muốn màu gì? C cần mặc dịp nào?",
+    };
+    const decision = decideWave2SalesStrategy({
+      ...baseInput,
+      text: "nhiều quá chị không biết chọn mẫu nào",
+      objectionType: "NEED_COMPARE",
+      resolvedProductCount: 3,
+    });
+
+    expect(applyWave2ReplyPolicy(modelProposal, decision, {
+      wordingAuthority: "MODEL",
+    })).toBe(modelProposal);
+  });
+
   it("adds proactive size CTA without requesting order PII", () => {
     const decision = decideWave2SalesStrategy(baseInput);
     const rewritten = applyWave2ReplyPolicy(proposal, decision);

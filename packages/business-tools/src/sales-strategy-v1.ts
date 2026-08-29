@@ -568,7 +568,11 @@ function limitQuestions(text: string, maximumQuestions: 0 | 1): string {
 export function applyWave2ReplyPolicy(
   proposal: AgentProposalV1,
   decision: Wave2StrategyDecision,
+  options: Readonly<{
+    wordingAuthority?: "MODEL" | "LEGACY_DETERMINISTIC";
+  }> = {},
 ): AgentProposalV1 {
+  if (options.wordingAuthority === "MODEL") return proposal;
   if (
     (proposal.action !== "REPLY" &&
       proposal.action !== "ASK_PRODUCT_SELECTION") ||
