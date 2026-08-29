@@ -1,11 +1,11 @@
 # Track B — Model Authority Execution Plan
 
-**Status:** `AMENDED_AFTER_B1 / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
-**Plan baseline:** `main@bab2fdb4d9f20e74274cd0134234632e26660a2f`, re-synced after PR #269 and PR #271 merged
+**Status:** `B1_COMPLETE_REVIEW_PENDING / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
+**Plan baseline:** `main@53408456ecaac8c8936061c9c3fd8275d6bdb179`, including merged PR #269, PR #270 and PR #271 process/plan truth
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Active process profile:** `SOLO_PREPROD_MINIMAL` (merged and current default; see `OPERATING_MODE.md`)
 **Environment:** `ENGINEERING_PREPROD`, one bounded `PREPROD_TEST_PAGE`
-**Authorization:** merging this plan does **not** authorize implementation, authority mutation, migration, deployment, or live testing. `program-state.json` requires a separate owner command before the next Track implementation.
+**Authorization:** the owner message dated 2026-08-29 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorizes Track B **source implementation only**. It does not authorize merge, tag/release, migration, authority/pointer mutation, deployment, routing/control-plane/VPS mutation, Messenger action, public-production promotion, or UR/State V2 work.
 
 ## 1. Purpose
 
@@ -76,7 +76,7 @@ Options 3 (unscoped baseline edit) and 4 (third capability) remain rejected.
 
 1. Track A / DF-C / Gate F are complete and are not reopened by this plan.
 2. Current accepted runtime remains `salesAuthorityMode=COMMERCE`, `stateReadMode=LEGACY`. Track B changes neither.
-3. `packages/database/src/df13-commerce-authority-bundle.ts` records `legacySalesStage: "DEMOTED_TELEMETRY_ONLY"`, `strategy: "CONTEXT_V2"`, `cta: "CONTEXT_V2"`. B1 proved no runtime code branches on these payload fields; only `contractHash` is consumed. They declare authority topology and their only mechanical effect is the hash.
+3. `packages/database/src/df13-commerce-authority-bundle.ts` records `legacySalesStage: "DEMOTED_TELEMETRY_ONLY"`, `strategy: "CONTEXT_V2"`, `cta: "CONTEXT_V2"`. B1 proved no runtime code branches on the individual fields; runtime admission consumes `contractHash`. The fields remain governance claims, however, and the selected baseline-output authority makes the current strategy/CTA labels untruthful. B3.2 must derive a new payload, hash and behavior identity.
 4. `apps/worker/src/df13-commerce-runtime-composition.ts` is the single real COMMERCE composition seam. B1 clarified that the DF13 executor performs identity admission, fence assessment, lease dispatch and fence-bound commit only — it does not orchestrate replies. `RealtimeRunner` (`realtime-runner.ts:2404`) is what gets restructured. Do not put reply stages inside the fence executor.
 5. Track B leaves `stateReadMode=LEGACY` unchanged unless a later separately approved evidence-backed decision opens a narrow UR/State V2 slice.
 6. BF-04 remains an accepted known residual: P0 unverified size-claim bypasses must not be represented as fixed.
@@ -106,7 +106,7 @@ Track B must not expand into:
 
 ### 5.1 The baseline is not modified
 
-`BaselineModelCapability` and its regression-pinned request envelope are untouched. `MODEL_EVALUATION_BOUNDARY.md` §1 remains satisfied exactly as today: realtime imports Context V2 only to persist a capture and to read a stored snapshot, and never passes it into the baseline capability or its request builders. No approved deviation is required.
+`BaselineModelCapability` and its regression-pinned request envelope are untouched. Realtime does not import or call `context-v2-candidate.ts`; the existing runner does serialize its DF13 runtime context, including the Context V2 projection, into the baseline model context. That existing input does not change the generation capability and does not make the resulting `AgentProposalV1` a Context V2 candidate output. No approved deviation is required for the selected source direction.
 
 ### 5.2 Gate-E evidence semantics — an explicit prohibition
 
@@ -140,11 +140,11 @@ Do not pre-build a new evidence profile, a second evaluation authority, or a red
 ## 6. Execution dependency graph
 
 ```text
-separate owner command authorizes Track B implementation
+2026-08-29 owner message authorizes Track B source implementation only
         ↓
-B1  scope lock (first pass complete; residual items in the findings doc §10)
+B1  scope lock complete; independent review pending
         ↓
-B2.1  post-generation seam inside RealtimeRunner
+B2.1  post-generation seam + side-effect-free differential foundation
         ↓
 B2.2  model owns strategy and wording
         ↓
@@ -179,17 +179,17 @@ B2.3 sub-slices may be reordered only if evidence proves a cleaner dependency gr
 
 ### B1 — Scope lock
 
-**Status:** first pass complete. Findings and residual items are in `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`; §10 lists what remains, principally the effect/commit path in `packages/chat-runtime/src/sales-cycle-runtime.ts`, the full KEEP/DEMOTE/SPLIT classification and the exact focused-test map.
+**Status:** complete, pending independent review. `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md` contains the closed call graph, effect/commit trace, authority-bundle disposition, KEEP/DEMOTE/SPLIT inventory, focused-test map and source-PR decomposition.
 
 V5 taxonomy applies: **KEEP** deterministic authority for verified facts/claims/provenance, freshness/product scope, state consistency, side-effect authorization, auth/authz, PII/security, idempotency, fail-closed behavior, contradiction reconciliation and fixed safe fallback. **DEMOTE** deterministic logic that selects normal sales strategy instead of the model, writes normal customer-facing sales copy, rewrites a valid model draft for ordinary style or business preference, or hard-codes objection/CTA behavior as conversational authority rather than correctness. **SPLIT** mixed helpers only enough to preserve the deterministic technical boundary. No unrelated cleanup.
 
-**Checkpoint:** close the residual §10 items and re-estimate before B2.1.
+**Checkpoint:** independent review must report no blocker before B2.1 begins.
 
 ---
 
 ### B2.1 — Introduce an explicit post-generation seam in RealtimeRunner
 
-**Size:** S/M · **Estimate:** 0.5–0.75 d · **Depends on:** B1 residuals closed
+**Size:** M · **Estimate:** 1–1.5 d · **Depends on:** B1 residuals closed
 
 Create one explicit stage boundary between model generation and final delivery, so proposal handling stops being interleaved with copy production. Reuse the DF13 composition/executor/context/finalization owners; do not add a sibling top-level runtime.
 
@@ -198,9 +198,10 @@ Create one explicit stage boundary between model generation and final delivery, 
 - COMMERCE continues through the single DF13 authority/composition seam;
 - no duplicated persistence, queue, behavior-mode topology or authority resolver;
 - LEGACY rollback semantics intact;
-- behavior equivalent except for explicitly characterized internal seam changes.
+- behavior equivalent except for explicitly characterized internal seam changes;
+- the pure reply-comparison core is extracted from `shadow-runner.ts` without queue claim/completion writes, so r31.3 differential evidence exists before the first behavior-changing PR.
 
-**Verification:** focused characterization tests; affected-workspace typecheck/build under `SOLO_PREPROD_MINIMAL`; r31.3 differential for any realtime behavior touched.
+**Verification:** focused characterization tests; `shadow-runner.test.ts`; affected-workspace typecheck/build under `SOLO_PREPROD_MINIMAL`; r31.3 differential for any realtime behavior touched. Every later realtime PR reuses this adapter on its own exact head rather than waiting until B3.
 
 ---
 
@@ -331,7 +332,7 @@ Make the obsolete post-generation strategy and copy-repair authority unreachable
 
 **This is Track B's primary correctness evidence.** Because the Context V2 candidate stays offline, Gate-E evidence cannot stand in for it.
 
-Build one reproducible adapter that replays the **live baseline path** before and after demotion, with effects disabled or captured.
+Complete the reproducible adapter whose pure comparison foundation is extracted in B2.1. It replays the **live baseline path** before and after demotion, with effects disabled or captured.
 
 **Integration points**
 
@@ -389,25 +390,19 @@ Track B modifies `sales-strategy-v1.ts`, `guard.ts` and `reply-assembler.ts`, wh
 
 ### B3.2 — Owner-scoped deploy, readback and smoke
 
-**Size:** S · **Estimate:** 0.5 d · **Depends on:** B3.1 evidence accepted, plus one owner deploy instruction
+**Size:** S/M · **Estimate:** 0.5–1 d · **Depends on:** B3.1 evidence accepted, plus one owner deploy-and-authority-mutation instruction
 
-**Activation impact — B1 finding.** Provisionally **source-deploy only**: no behavior-version write, no pointer revision, no migration `0036`. The authority-bundle declaration `strategy/cta: CONTEXT_V2` stays truthful because strategy and CTA still derive from the Context V2 view of state; only the component that proposes them changes. `BEHAVIOR_CONTROL_PLANE.md` scopes authority-dependence to LEGACY versus COMMERCE, not to one COMMERCE implementation versus another, so the quiescent cutover protocol is not triggered.
+**Activation impact — B1 closed finding.** This is an **authority-bundle and behavior-identity mutation**, not source-deploy-only. Context V2 gives its strategy and CTA consumers explicit contract identities (`CONTEXT_V2_STRATEGY_INPUT_V1` and `CONTEXT_V2_CTA_INPUT_V1`). The selected live proposal instead comes from the byte-frozen baseline `AgentProposalV1.strategyAnalysis` / `salesSignals` contract. Source contains no contract equating those identities. Keeping `strategy/cta: CONTEXT_V2` after that proposal becomes normal authority would therefore make the bundle declaration misleading.
 
-Five conditions invalidate that and would require an authority mutation. Re-check each in every B2 slice and once more here:
-
-- `authorityIndependentBypassClasses` stops being empty — `df13-release-candidate-evidence.ts:270` hard-fails evidence when it is non-empty;
-- the eight-member consumer set changes;
-- the derivation label stops being truthful;
-- a behavioral switch becomes configurable — `BEHAVIOR_CONTROL_PLANE.md` forbids env-only flags and untracked authorities, so a configurable switch would become a versioned behavior-mode dimension and change the behavior content hash. Derive behavior from evidence, never from a flag;
-- promoting the change counts as a further V2-consumer activation under `MODEL_CLAIM_BOUNDARY.md`'s atomic-activation clause. Settle this rather than assume it.
+Track B must define the truthful replacement labels, derive a new canonical bundle hash and behavior content identity, and keep the fixed consumer set and empty bypass set unless separately justified. A configurable env-only switch remains forbidden. The changed identity requires a reviewed page-scoped pointer/CAS/readback/rollback path. Migration `0036` is not automatic: use it only if the chosen mutation path proves it is required and the owner separately authorizes it.
 
 **Required sequence**
 
-1. Under `SOLO_PREPROD_MINIMAL`, the owner instruction to deploy this candidate/commit to `PREPROD_TEST_PAGE` **is** the authorization for that scoped deploy. No Release Train boundary and no second approval record.
-2. Request additional authorization only for a mutation **outside** that granted scope. Do not require a second approval merely because the step is a deploy.
-3. Deploy only the exact merged commit/build for affected services.
-4. Preserve the exact previous affected-service release/build/commit as the release-local rollback identity required by `RELEASE_INTEGRITY.md`.
-5. Run pre-activation readiness checks, then post-activation readback, smoke and controlled test-page checks. Failed or unknown runtime state stops further mutation and rolls back.
+1. Stop until the owner explicitly authorizes both the exact deploy and the authority/pointer mutation. The current source-work message is not that authorization.
+2. Bind the exact new bundle hash, behavior version/content hash/revision/source and the exact previous bundle/version/content hash/revision/source before mutation.
+3. Use the reviewed page-scoped pointer writer with expected revision/CAS, exact `DATABASE` readback from the full consumer set, and a reversible exact previous identity. No manual SQL or env-only authority selector.
+4. Deploy only the exact merged commit/build for affected services and preserve the exact previous affected-service release/build/commit in the release-local rollback record required by `RELEASE_INTEGRITY.md`.
+5. Run meaningful pre-activation readiness, then post-activation authority readback, smoke and controlled test-page checks. Failed or unknown runtime state stops further mutation and restores the exact previous authority and affected-service identities.
 
 ---
 
@@ -440,21 +435,31 @@ Excludes external provider and infrastructure waiting.
 
 | Slice | Estimate |
 |---|---:|
-| B1 residuals | 0.25–0.5 d |
-| B2.1 | 0.5–0.75 d |
+| B1 | complete (review pending) |
+| B2.1 + differential foundation | 1–1.5 d |
 | B2.2 | 1–1.5 d |
 | B2.3a | 0.75–1.25 d |
 | B2.3b | 0.75–1.25 d |
 | B2.3c | 0.5–1 d |
 | B2.3d | 0.75–1.25 d |
 | B2.4 | 0.5–1 d |
-| B3 | 1–1.5 d |
-| **To merge** | **~6–10 d** |
+| B3 final replay/evidence | 0.75–1.25 d |
+| authority-bundle source + activation-path preparation | 0.75–1.25 d |
+| **To merge** | **~6.5–10.5 d** |
 | B3.1 (deploy gate only) | 0.5–1 d |
-| B3.2 (deploy only) | 0.5 d |
-| **Including deploy** | **~7–11.5 d** |
+| B3.2 (owner-authorized deploy + authority mutation) | 0.5–1 d |
+| **Including deploy** | **~7.5–12.5 d** |
 
-The merge-path range now sits inside V5's adopted `~4–10 working day` band at its upper half. The selected direction removed the contract revision, prompt-family registration, enum widening with its `§18` probe pairs, the per-turn snapshot prerequisite, the revision-zero bootstrap question and the readiness-latency risk that pushed the previous estimate to 13.25 days. Re-derive after the B1 residuals close.
+The source range is approximately V5's upper band and may exceed it by half a day because B1 proved two requirements that cannot be deferred: the r31.3 comparison core must exist before the first behavior change, and the authority-bundle/behavior identity must change. Provider/infrastructure waiting remains excluded.
+
+### Source-PR decomposition locked by B1
+
+1. **PR B2.1:** explicit post-generation seam plus pure, non-claiming reply-comparison core; characterization only.
+2. **PR B2.2:** make baseline structured strategy/wording authoritative and demote the second deterministic decision/rewrite; exact-head r31.3 differential.
+3. **PR B2.3a/d:** structured protected-claim fail-closed boundary, BF-04 regressions, exactly one repair, verified-facts fallback/preservation.
+4. **PR B2.3b/c:** effect and negotiation reconciliation proof/changes, keeping policy arithmetic, trusted ports, version/CAS/idempotency and less-aggressive conflict resolution deterministic.
+5. **PR B2.4/B3:** remove obsolete COMMERCE reachability, complete full side-effect-free replay and final r31.3 evidence.
+6. **PR authority identity / deploy preparation:** truthful authority-bundle labels, new bundle/behavior identity and reviewed pointer/CAS/readback/rollback tooling. It may merge as source only; no runtime mutation occurs without a new owner command.
 
 ## 11. Main risks and stop conditions
 
@@ -484,7 +489,7 @@ Stop if implementation creates a sibling top-level COMMERCE runtime, new persist
 
 ### Activation turns out to require an authority mutation
 
-Stop before runtime mutation if any of B3.2's five conditions trips. Do not improvise a database or authority mutation at deploy time.
+The identity change is known, not conditional. Stop before runtime mutation unless the exact new/previous bundle and behavior identities, writer/CAS/readback path, rollback path and owner authorization are all present. Do not improvise a database or authority mutation at deploy time.
 
 ### CI cannot produce exact-head evidence
 

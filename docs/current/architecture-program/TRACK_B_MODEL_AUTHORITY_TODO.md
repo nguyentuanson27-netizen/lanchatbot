@@ -1,16 +1,16 @@
 # Track B — Execution Checklist
 
-**Status:** `B1_FIRST_PASS_DONE / B2 NOT STARTED`
+**Status:** `B1_COMPLETE_REVIEW_PENDING / B2 NOT STARTED`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` stays byte-frozen; the Context V2 candidate stays offline. Escalation ladder in execution-plan §2.
 
 ## Before implementation
 
-- [ ] Receive a separate owner command authorizing Track B implementation; merging the plan is not authorization.
-- [ ] Re-read `AGENTS.md`, `OPERATING_MODE.md`, `program-state.json`, this plan and the relevant contracts from the exact merged `main` head.
-- [ ] Follow `SOLO_PREPROD_MINIMAL`: `branch -> code + focused verification -> PR -> exact-head verification -> merge -> deploy exact commit -> smoke`. Do not reintroduce Release Train or a second approval record.
-- [ ] Keep `stateReadMode=LEGACY`; do not start UR/State V2 without a separate evidence-backed approval.
-- [ ] Treat the BF-04 P0 size-claim residual as open until new evidence proves otherwise.
+- [x] Bind the 2026-08-29 owner message authorizing Track B **source implementation only** (`sourceThreadId=019ff0ed-3760-7e81-98f4-5e91e8ca35b0`). This does not authorize merge, deploy, migration, authority/pointer mutation, routing, Messenger action or public-production promotion.
+- [x] Re-read `AGENTS.md`, `OPERATING_MODE.md`, `program-state.json`, this plan and the relevant contracts from the exact merged `main` head.
+- [x] Follow `SOLO_PREPROD_MINIMAL`: `branch -> code + focused verification -> PR -> exact-head verification -> merge -> deploy exact commit -> smoke`. Do not reintroduce Release Train or a second approval record.
+- [x] Keep `stateReadMode=LEGACY`; do not start UR/State V2 without a separate evidence-backed approval.
+- [x] Treat the BF-04 P0 size-claim residual as open until new evidence proves otherwise.
 
 ## B1 — Scope lock
 
@@ -24,11 +24,12 @@
 - [x] No reply-behavior differential runner exists. `shadow-runner.ts` is the reuse target but claims jobs and writes shadow-evaluation rows, so its comparison core must be extracted.
 - [x] `GATE_E_CANDIDATE_SOURCE_PATHS_V1` covers none of the live orchestration path.
 - [x] Canonical self-hosted CI is functional on exact heads.
-- [ ] Trace the effect/commit path in `packages/chat-runtime/src/sales-cycle-runtime.ts` and the commerce-kernel policy/negotiation transitions.
-- [ ] Complete the KEEP / DEMOTE / SPLIT classification for every reachable component, using V5's taxonomy.
-- [ ] Produce the exact focused-test map per changed boundary.
-- [ ] Re-estimate before B2.1.
-- [ ] **Checkpoint:** B1 residuals closed and reviewed.
+- [x] Trace the effect/commit path in `packages/chat-runtime/src/sales-cycle-runtime.ts` and the commerce-kernel policy/negotiation transitions.
+- [x] Complete the KEEP / DEMOTE / SPLIT classification for every reachable component, using V5's taxonomy.
+- [x] Produce the exact focused-test map per changed boundary.
+- [x] Re-estimate and lock the source-PR decomposition before B2.1.
+- [x] Resolve bundle semantics: baseline `AgentProposalV1.strategyAnalysis` is not the `CONTEXT_V2_STRATEGY_INPUT_V1` contract, so Track B changes the authority bundle and behavior identity. B3.2 is an owner-scoped authority mutation with pointer/CAS/readback/rollback; `0036` remains conditional on source proof.
+- [ ] **Checkpoint:** B1 residuals closed and independent review has no blocker.
 
 ## B2.1 — Post-generation seam
 
@@ -36,7 +37,8 @@
 - [ ] Reuse the DF13 composition/executor/context/finalization owners; no sibling top-level runtime.
 - [ ] Preserve existing persistence, queue, authority resolver and LEGACY rollback behavior.
 - [ ] Add focused characterization tests.
-- [ ] Produce r31.3 differential evidence for realtime behavior touched by the seam change.
+- [ ] Extract the side-effect-free reply comparison core from `shadow-runner.ts` in this first source PR, before any behavior-changing slice.
+- [ ] Produce r31.3 differential evidence for realtime behavior touched by the seam change; no later realtime PR may wait until B3 for its first differential.
 
 ## B2.2 — Model owns strategy and wording
 
@@ -93,7 +95,7 @@
 
 ## B3 — Live-path differential and replay
 
-- [ ] Extract the comparison core from `shadow-runner.ts`, or run it in a non-claiming mode, so it creates no side effects.
+- [ ] Complete and reuse the pure comparison core introduced in B2.1; it must claim no queue rows and create no side effects.
 - [ ] Reuse `commerce-authority-comparison.ts` for the state half of the differential.
 - [ ] Replay the live baseline path before versus after demotion on the same inputs and report differences.
 - [ ] Pin model/provider-model identity, prompt/template identity, generation config, policy/schema/config identity and fixed fact fixtures.
@@ -122,9 +124,10 @@
 
 ## B3.2 — Owner-scoped deploy
 
-- [ ] Re-check the five conditions that would turn this into an authority mutation (execution-plan B3.2).
-- [ ] Ask the owner for one deploy instruction that explicitly scopes the deploy; that instruction is the authorization.
-- [ ] Request additional authorization only for a mutation outside that scope.
+- [ ] Treat deployment as an authority-bundle/behavior identity mutation; do not claim source-deploy-only.
+- [ ] Produce the new canonical bundle hash and behavior content identity from source, plus the exact previous bundle/version/hash/revision/source rollback identity.
+- [ ] Ask the owner for one instruction explicitly authorizing the deploy **and** authority/pointer mutation; the current source-work authorization is insufficient.
+- [ ] Use the reviewed page-scoped pointer/CAS/readback/rollback path. Apply migration `0036` only if source evidence proves that exact path requires it and the owner separately authorizes it.
 - [ ] Deploy only the exact merged commit/build for affected services.
 - [ ] Preserve the exact previous affected-service release/build/commit as the release-local rollback identity.
 - [ ] Run pre-activation readiness, then post-activation readback, smoke and controlled test-page checks.
