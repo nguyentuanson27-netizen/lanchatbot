@@ -29,17 +29,17 @@ Existing evidence/runtime-state tooling may still be used for diagnosis or when 
 
 ## 2. Explicit Release Train / production-hardening profile
 
-When a Release Train is explicitly selected, or a later production-hardening decision requires stronger release provenance, the stricter rules below apply to that train without relaxation:
+When a Release Train is explicitly selected, or a later production-hardening decision requires stronger release provenance, the stricter rules below apply to that train without relaxation. Selecting a Release Train also makes the full canonical `pnpm check` plus every applicable integration/replay/security/data/release-integrity gate mandatory at the train boundary; the focused/risk-scoped verification of §1 does not satisfy it:
 
 1. GitHub `main` and immutable fetched tags are the only source-code authority.
 2. Never edit application source in `/opt/lana-chatbot/current` or a VPS release directory.
 3. Every release starts from a clean GitHub commit and uses a new immutable release directory.
-4. Candidate runtime-state must pass schema and live parity before current-state/symlink promotion when runtime-state promotion is part of the selected release protocol.
-5. Runtime evidence records the source commit and every service/config/migration/authority identity required by the changed risk boundary.
+4. Candidate runtime-state must pass schema and live parity before current-state/symlink promotion.
+5. Runtime evidence records full source commit, tag provenance, per-service image identity, migration digest, config/routing digests, behavior-mode readback, page allowlist, health/readiness, UID/restarts, and rollback targets.
 6. Unknown, partial, mixed, stale, or mismatched attestation blocks promotion.
 7. Runtime-state and append-only evidence may record observations; they must not invent missing historical evidence.
 8. README prose is not a live runtime manifest.
-9. Rollback identity is per service when multiple services are included in the selected train. A shared image variable is not proof that every service currently runs the same image.
+9. Rollback identity is per service. A shared image variable is not proof that every service currently runs the same image.
 10. Production secrets stay outside repository evidence, logs, and prompts.
 
 ## 3. Current residual enforcement — mandatory in every profile
