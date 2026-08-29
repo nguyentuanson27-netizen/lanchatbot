@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
-import type { AgentProposalV1 } from "@lana/contracts";
-import type { RealtimeCommitInput } from "@lana/database";
+import { canonicalJsonV1, type AgentProposalV1 } from "@lana/contracts";
+import type { RealtimeCommitInput, RealtimeCommitResult } from "@lana/database";
 import type {
   SalesCycleRuntimeState,
   RuntimeBehaviorModeResolution,
@@ -16,6 +16,8 @@ import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bun
 import { DF13_COMMERCE_AUTHORITY_CONSUMERS_V1 } from "./df13-commerce-authority-bundle.js";
 import { Df13CommerceRuntimeFinalizationAdapter } from "./df13-commerce-runtime-finalization.js";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
+import * as realtimeReplyDifferential from "./realtime-reply-differential.js";
+import type { RealtimeReplySnapshot } from "./realtime-reply-differential.js";
 import {
   RealtimeRunner,
   type RealtimeInboxPort,
@@ -72,6 +74,7 @@ function guardedClarificationPlanHash(text: string): string {
 function proposal(
   action: AgentProposalV1["action"],
   reply = "",
+  factIntent: AgentProposalV1["businessFactQuery"]["intent"] = "NONE",
 ): AgentProposalV1 {
   return {
     schemaVersion: 1,
@@ -83,7 +86,7 @@ function proposal(
     attachments: [],
     handoffReason: null,
     businessFactQuery: {
-      intent: "NONE",
+      intent: factIntent,
       offerType: null,
       color: null,
       size: null,
@@ -199,6 +202,8 @@ function createHarness(input: {
   blockingTag?: "NHAN_VIEN" | null;
   commitAckLostOnce?: boolean;
   commerce?: boolean;
+  initialReply?: string;
+  initialFactIntent?: AgentProposalV1["businessFactQuery"]["intent"];
 } = {}) {
   const base = createConversationState({
     conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
@@ -335,7 +340,11 @@ function createHarness(input: {
     if (generate.mock.calls.length === 1) {
       switch (input.initialMode ?? "NO_REPLY") {
         case "REPLY":
-          return modelResult(proposal("REPLY", existingReplyText));
+          return modelResult(proposal(
+            "REPLY",
+            input.initialReply ?? existingReplyText,
+            input.initialFactIntent ?? "NONE",
+          ));
         case "NO_REPLY":
           return modelResult(proposal("NO_REPLY"));
       }
@@ -526,6 +535,96 @@ function committedText<TState, TSalesState>(
     .join("\n");
 }
 
+function committedSnapshot<TState, TSalesState>(input: {
+  readonly commit: RealtimeCommitInput<TState, TSalesState>;
+  readonly result: RealtimeCommitResult;
+  readonly inboxCommitted: boolean;
+}): RealtimeReplySnapshot {
+  const messages = input.commit.metaPlan?.messages ?? [];
+  const events = input.commit.decisionEvents ?? [];
+  const strategy = events
+    .map(({ details }) => details.decisionObservability?.strategyCta ?? null)
+    .find((value) => value !== null) ?? null;
+  const verifiedFactHashes = [...new Set(events.flatMap((event) => [
+    ...(event.details.factQueryResults ?? [])
+      .filter(({ status }) => status === "OK")
+      .map((fact) => sha256(canonicalJsonV1(fact))),
+    ...(event.details.factsSourceVersion
+      ? [sha256(canonicalJsonV1({
+          productId: event.productId,
+          factsStatus: event.details.factsStatus,
+          factsSourceVersion: event.details.factsSourceVersion,
+        }))]
+      : []),
+  ]))].sort();
+  const protectedClaims = input.commit.metaPlan?.protectedClaims ?? [];
+  const effectReadiness = [
+    ...(input.commit.metaPlan?.effectReadiness
+      ? [input.commit.metaPlan.effectReadiness]
+      : []),
+    ...(input.commit.salesCyclePlan?.effectReadiness ?? []),
+  ];
+  const effectAuthorizationHashes = effectReadiness.map((readiness) => sha256(
+    canonicalJsonV1({
+      schemaVersion: readiness.schemaVersion,
+      rulesetVersion: readiness.rulesetVersion,
+      effect: readiness.effect,
+      outcome: readiness.outcome,
+      pageId: readiness.pageId,
+      conversationId: readiness.conversationId,
+      sourceMessageIdHash: readiness.sourceMessageIdHash,
+      conversationRevision: readiness.conversationRevision,
+      salesCycleRevision: readiness.salesCycleRevision,
+      productIds: readiness.productIds,
+      cartId: readiness.cartId,
+      cartVersion: readiness.cartVersion,
+      cartStateHash: readiness.cartStateHash,
+      orderPreviewId: readiness.orderPreviewId,
+      orderPreviewHash: readiness.orderPreviewHash,
+      buyingIntentHash: readiness.buyingIntentHash,
+      // PROTECTED_OUTBOUND binds this hash to the rendered plan, whose wording
+      // is compared separately. Transactional effects retain the exact hash.
+      deterministicEvidenceHash: readiness.effect === "PROTECTED_OUTBOUND"
+        ? "BOUND_TO_PERMITTED_OUTBOUND_MESSAGES"
+        : readiness.deterministicEvidenceHash,
+      claimSetHash: readiness.claimSetHash,
+      protectedClaimTypes: readiness.protectedClaimTypes,
+      reasonCodes: readiness.reasonCodes,
+      authorization: readiness.authorization,
+    }),
+  )).sort();
+  const generationValid = events.some(({ details }) =>
+    details.modelCalled && details.modelPath === "model" && details.modelErrorClass === null
+  );
+  return {
+    messages,
+    strategyHash: strategy === null ? null : sha256(canonicalJsonV1(strategy)),
+    verifiedFactHashes,
+    verifiedMediaUrls: messages.flatMap((message) =>
+      message.kind === "IMAGE" ? [message.imageUrl] : []
+    ),
+    protectedClaimHashes: protectedClaims
+      .map((claim) => sha256(canonicalJsonV1(claim)))
+      .sort(),
+    effectAuthorizationHashes,
+    commitOutcome:
+      input.result.stateCommitted && input.result.sendAuthorized
+        ? "COMMITTED"
+        : input.result.reasonCodes.join("|") || "NOT_COMMITTED",
+    generationOutcome: generationValid ? "VALID" : "FAILED",
+    inboxOutcome:
+      input.inboxCommitted || input.result.inboxBatchStatus === "COMMITTED"
+        ? "COMMITTED"
+        : "RETRYABLE",
+    protectedOutbound: {
+      required: protectedClaims.length > 0 || effectAuthorizationHashes.length > 0,
+      groupId: input.commit.metaPlan?.responseGroupId ?? null,
+      plannedMessageCount: messages.length,
+      deliveredMessageCount: input.result.metaOutboxCreated,
+    },
+  };
+}
+
 function hasBf01Reason<TState, TSalesState>(
   value: RealtimeCommitInput<TState, TSalesState> | null | undefined,
 ): boolean {
@@ -545,6 +644,128 @@ function unresolvedTerminalNoReplyEvents<TState, TSalesState>(
 }
 
 describe("BF-01 runner reconciliation", () => {
+  it("runs B2.2 r31.3 differential through pre-B2.2 and migrated COMMERCE commits", async () => {
+    const capturedInput = {
+      customerText: "Mẫu SD398 giá bao nhiêu, có size M hay L?",
+      modelReply:
+        "Mẫu SD398 giá 1.199.000đ chị nhé. Chị muốn chọn size M hay L? Chị thích form ôm hay suông?",
+      factIntent: "PRICE" as const,
+    };
+    const runCaptured = async (
+      capture: Readonly<typeof capturedInput>,
+      migrated: boolean,
+    ): Promise<RealtimeReplySnapshot> => {
+      const originalResolver =
+        realtimeReplyDifferential.resolveRealtimePostGenerationAuthority;
+      const resolverSpy = migrated ? null : vi.spyOn(
+        realtimeReplyDifferential,
+        "resolveRealtimePostGenerationAuthority",
+      ).mockImplementation(((input) => originalResolver({
+        ...input,
+        runtimeAuthority: "LEGACY_SELECTED",
+      })) as typeof originalResolver);
+      const wordingSpy = migrated ? null : vi.spyOn(
+        realtimeReplyDifferential,
+        "postGenerationWordingAuthority",
+      ).mockReturnValue("LEGACY_DETERMINISTIC");
+      try {
+        const harness = createHarness({
+          commerce: true,
+          initialMode: "REPLY",
+          customerText: capture.customerText,
+          initialReply: capture.modelReply,
+          initialFactIntent: capture.factIntent,
+        });
+        expect(await harness.runner.processOne()).toBe(true);
+        if (resolverSpy) expect(resolverSpy).toHaveBeenCalledOnce();
+        if (wordingSpy) expect(wordingSpy).toHaveBeenCalledOnce();
+        const commit = harness.commerceCommit.mock.calls[0]?.[0]?.runtimeCommit;
+        if (!commit) throw new Error("TRACK_B_B22_CAPTURED_COMMIT_MISSING");
+        const rawResult = harness.commerceCommit.mock.results[0];
+        if (!rawResult || rawResult.type !== "return") {
+          throw new Error("TRACK_B_B22_CAPTURED_COMMIT_RESULT_MISSING");
+        }
+        const result = (await rawResult.value).runtime;
+        return committedSnapshot({
+          commit,
+          result,
+          inboxCommitted: harness.complete.mock.calls.length === 1,
+        });
+      } finally {
+        wordingSpy?.mockRestore();
+        resolverSpy?.mockRestore();
+      }
+    };
+
+    const observedSnapshots: RealtimeReplySnapshot[] = [];
+    const result = await realtimeReplyDifferential.runRealtimeReplyDifferential({
+      capturedInput,
+      baseline: async (capture) => {
+        const snapshot = await runCaptured(capture, false);
+        observedSnapshots.push(snapshot);
+        return snapshot;
+      },
+      candidate: async (capture) => {
+        const snapshot = await runCaptured(capture, true);
+        observedSnapshots.push(snapshot);
+        return snapshot;
+      },
+      permittedDifferences: [{
+        code: "OUTBOUND_MESSAGES_CHANGED",
+        reasonCode: "TRACK_B_MODEL_WORDING_AUTHORITY",
+      }, {
+        code: "STRATEGY_CHANGED",
+        reasonCode: "TRACK_B_MODEL_STRATEGY_AUTHORITY",
+      }],
+    });
+
+    expect(result.differences).toEqual([
+      {
+        code: "OUTBOUND_MESSAGES_CHANGED",
+        disposition: "INTENTIONAL",
+        reasonCode: "TRACK_B_MODEL_WORDING_AUTHORITY",
+      },
+      {
+        code: "STRATEGY_CHANGED",
+        disposition: "INTENTIONAL",
+        reasonCode: "TRACK_B_MODEL_STRATEGY_AUTHORITY",
+      },
+    ]);
+    expect(result).toMatchObject({
+      status: "INTENTIONAL_DIFFERENCE",
+      sideEffects: "DISABLED",
+    });
+    const [baselineSnapshot, candidateSnapshot] = observedSnapshots;
+    if (baselineSnapshot === undefined || candidateSnapshot === undefined) {
+      throw new Error("TRACK_B_B22_RUNNER_SNAPSHOTS_MISSING");
+    }
+    expect(baselineSnapshot.verifiedFactHashes.length).toBeGreaterThan(0);
+    expect(baselineSnapshot.protectedClaimHashes.length).toBeGreaterThan(0);
+    expect(baselineSnapshot.effectAuthorizationHashes.length).toBeGreaterThan(0);
+    expect(baselineSnapshot).toMatchObject({
+      commitOutcome: "COMMITTED",
+      inboxOutcome: "COMMITTED",
+      protectedOutbound: { required: true },
+    });
+    expect(candidateSnapshot).toMatchObject({
+      verifiedFactHashes: baselineSnapshot.verifiedFactHashes,
+      protectedClaimHashes: baselineSnapshot.protectedClaimHashes,
+      effectAuthorizationHashes: baselineSnapshot.effectAuthorizationHashes,
+      commitOutcome: "COMMITTED",
+      inboxOutcome: "COMMITTED",
+      protectedOutbound: {
+        required: true,
+        groupId: baselineSnapshot.protectedOutbound.groupId,
+        plannedMessageCount: baselineSnapshot.protectedOutbound.plannedMessageCount,
+        deliveredMessageCount: baselineSnapshot.protectedOutbound.deliveredMessageCount,
+      },
+    });
+    expect(candidateSnapshot.protectedOutbound.plannedMessageCount).toBeGreaterThan(0);
+    expect(candidateSnapshot.protectedOutbound.deliveredMessageCount).toBe(
+      candidateSnapshot.protectedOutbound.plannedMessageCount,
+    );
+  });
+
   it("routes a held Commerce commit through BF01 reconciliation before the fenced transaction", async () => {
     const harness = createHarness({ commerce: true });
 

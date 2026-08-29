@@ -58,9 +58,12 @@ export function limitResponseGroupPoliteness(
 export function groupRealtimeMetaMessagesV2(
   messages: readonly RealtimeMetaMessageUnit[],
   splitProductInfoFollowUp = false,
+  wordingAuthority: PostGenerationWordingAuthority = "LEGACY_DETERMINISTIC",
 ): RealtimeMetaMessageUnit[] {
   if (!splitProductInfoFollowUp) {
-    return limitResponseGroupPoliteness(messages);
+    return wordingAuthority === "MODEL"
+      ? [...messages]
+      : limitResponseGroupPoliteness(messages);
   }
   let split = false;
   const grouped = messages.flatMap((message) => {
@@ -78,7 +81,58 @@ export function groupRealtimeMetaMessagesV2(
       { kind: "TEXT" as const, text: followUp },
     ];
   });
-  return limitResponseGroupPoliteness(grouped);
+  return wordingAuthority === "MODEL"
+    ? grouped
+    : limitResponseGroupPoliteness(grouped);
+}
+
+export type PostGenerationWordingAuthority = "MODEL" | "LEGACY_DETERMINISTIC";
+
+export function postGenerationWordingAuthority(
+  runtimeAuthority: "COMMERCE_SELECTED" | "LEGACY_SELECTED",
+): PostGenerationWordingAuthority {
+  return runtimeAuthority === "COMMERCE_SELECTED"
+    ? "MODEL"
+    : "LEGACY_DETERMINISTIC";
+}
+
+export function resolveRealtimePostGenerationAuthority<
+  TProposal,
+  TModelStrategy,
+  TDeterministicStrategy,
+>(input: Readonly<{
+  runtimeAuthority: "COMMERCE_SELECTED" | "LEGACY_SELECTED";
+  proposal: TProposal;
+  modelStrategyAnalysis: TModelStrategy | null;
+  applyLegacyDeterministic: (proposal: TProposal) => Readonly<{
+    proposal: TProposal;
+    strategyDecision: TDeterministicStrategy | null;
+  }>;
+}>): Readonly<{
+  wordingAuthority: PostGenerationWordingAuthority;
+  strategyAuthority: "MODEL_STRUCTURED_OUTPUT" | "LEGACY_DETERMINISTIC";
+  proposal: TProposal;
+  modelStrategyAnalysis: TModelStrategy | null;
+  deterministicStrategyDecision: TDeterministicStrategy | null;
+}> {
+  const wordingAuthority = postGenerationWordingAuthority(input.runtimeAuthority);
+  if (wordingAuthority === "MODEL") {
+    return {
+      wordingAuthority,
+      strategyAuthority: "MODEL_STRUCTURED_OUTPUT",
+      proposal: input.proposal,
+      modelStrategyAnalysis: input.modelStrategyAnalysis,
+      deterministicStrategyDecision: null,
+    };
+  }
+  const legacy = input.applyLegacyDeterministic(input.proposal);
+  return {
+    wordingAuthority,
+    strategyAuthority: "LEGACY_DETERMINISTIC",
+    proposal: legacy.proposal,
+    modelStrategyAnalysis: null,
+    deterministicStrategyDecision: legacy.strategyDecision,
+  };
 }
 
 export type RealtimePostGenerationMode =
@@ -107,6 +161,7 @@ export interface RealtimePostGenerationReplyInput {
   readonly mode: RealtimePostGenerationMode;
   readonly messages: readonly RealtimeMetaMessageUnit[];
   readonly splitProductInfoFollowUp?: boolean;
+  readonly wordingAuthority?: PostGenerationWordingAuthority;
 }
 
 export interface RealtimePostGenerationReply {
@@ -127,6 +182,7 @@ export function finalizeRealtimePostGenerationReply(
     ? groupRealtimeMetaMessagesV2(
         input.messages,
         input.splitProductInfoFollowUp ?? false,
+        input.wordingAuthority ?? "LEGACY_DETERMINISTIC",
       )
     : input.mode === "SPLIT_SENTENCES"
       ? splitRealtimeMetaMessages(input.messages)
