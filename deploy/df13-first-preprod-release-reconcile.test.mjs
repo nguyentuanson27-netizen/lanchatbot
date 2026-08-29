@@ -58,7 +58,7 @@ assert.match(source, /\/home\/lana-deploy\/\.ssh\/lana_chatbot_github_ed25519/u,
 assert.match(source, /-o GlobalKnownHostsFile=\/dev\/null/u, "the private reconciliation body must not inherit global SSH host trust");
 assert.match(source, /for deploy_directory in "\$DEPLOY_GIT_HOME" "\$DEPLOY_GIT_SSH_DIRECTORY"/u, "the reconciliation body must enumerate the fixed credential parents");
 assert.match(source, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_directory"\)" = "\$deploy_directory"/u, "the reconciliation body must reject a symlinked credential parent");
-assert.match(source, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_file"\)" = "\$deploy_file"/u, "the reconciliation body must reject a credential whose parent resolves elsewhere");
+assert.match(source, /\$\((?:\/usr\/bin\/)?readlink -f -- "\$deploy_file"\)" = "\$deploy_file"/u, "the private reconciliation body must reject a credential whose parent resolves elsewhere");
 assert.doesNotMatch(source, /safe\.directory/u, "the private reconciliation body must not disable Git ownership protection");
 assert.match(source, /readonly realtime_container="lana-chatbot-realtime-worker"/u, "the reconciled service identity must be fixed by the reviewed contract");
 assert.match(source, /cat-file.*\$\{release_tag\}/u, "annotated tag validation is required");
@@ -251,13 +251,13 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
   if (signalDuringCommit) {
     const commitBoundary = '  rm -f -- "$journal_file" "$runtime_state_snapshot" "$service_evidence_snapshot"\n';
     assert.ok(releaseScriptSource.includes(commitBoundary), "the fixture must locate the reviewed masked commit boundary");
-    releaseScriptSource = releaseScriptSource.replace(commitBoundary, `  printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n  kill -STOP "$$"\n${commitBoundary}`);
+    releaseScriptSource = releaseScriptSource.replace(commitBoundary, () => `  printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n  kill -STOP "$$"\n${commitBoundary}`);
   }
   if (signalDuringLaunch) {
     const protectedLaunchBoundary = '  step_pid="$!"\n  active_step_pid="$step_pid"\n';
     const instrumentedLaunchBoundary = `  step_pid="$!"\n  if [ "\${DF13_TEST_LAUNCH_COUNT:-0}" = "2" ]; then\n    printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n    kill -STOP "$$"\n  fi\n  export DF13_TEST_LAUNCH_COUNT=$(( \${DF13_TEST_LAUNCH_COUNT:-0} + 1 ))\n  active_step_pid="$step_pid"\n`;
     assert.ok(releaseScriptSource.includes(protectedLaunchBoundary), "the fixture must locate the reviewed launch-recording boundary");
-    releaseScriptSource = releaseScriptSource.replace(protectedLaunchBoundary, instrumentedLaunchBoundary);
+    releaseScriptSource = releaseScriptSource.replace(protectedLaunchBoundary, () => instrumentedLaunchBoundary);
   }
   if (mutateEvidenceAfterSnapshot) {
     const evidenceSnapshotBoundary = 'sync -f "$service_evidence_snapshot" || die "RUNTIME_STATE_EVIDENCE_SNAPSHOT_SYNC_FAILED"\n';
@@ -271,13 +271,13 @@ function writeHarness({ captureFails = false, captureWaits = false, mutateEviden
     const protectedHandshake = releaseScriptSource.slice(protectedHandshakeStart, protectedHandshakeEnd);
     assert.match(protectedHandshake, /journal_write HELPER_RUNNING/u, "the vulnerable fixture must start from the durable helper journal protocol");
     const vulnerableHandshake = `run_runtime_state_step() {\n  local step_name="$1"\n  shift\n  setsid env -u BASH_ENV -u ENV --default-signal=INT,TERM,HUP /usr/bin/bash --noprofile --norc -c 'exec "$@"' bash "$@" &\n  if [ "\${DF13_TEST_LAUNCH_COUNT:-0}" = "2" ]; then\n    printf '%s\\n' "$$" > "$DF13_TEST_SIGNAL_MARKER"\n    kill -STOP "$$"\n  fi\n  export DF13_TEST_LAUNCH_COUNT=$(( \${DF13_TEST_LAUNCH_COUNT:-0} + 1 ))\n  active_step_pid="$!"\n`;
-    releaseScriptSource = releaseScriptSource.replace(protectedHandshake, vulnerableHandshake);
+    releaseScriptSource = releaseScriptSource.replace(protectedHandshake, () => vulnerableHandshake);
   }
   if (moveCurrentBeforeLock) {
     const lockBoundary = 'mkdir -p "$(dirname "$DEPLOYMENT_LOCK_FILE")"\nacquire_deployment_lock\n';
     assert.ok(releaseScriptSource.includes(lockBoundary), "the concurrent-pointer fixture must locate the reviewed lock boundary");
     const replacement = `mkdir -p "$(dirname "$DEPLOYMENT_LOCK_FILE")"\nln -s ${quote(canonicalBashPath(concurrent))} "$app_root/current.concurrent.$$.df13-reconcile"\nmv -Tf "$app_root/current.concurrent.$$.df13-reconcile" "$app_root/current"\nacquire_deployment_lock\n`;
-    releaseScriptSource = releaseScriptSource.replace(lockBoundary, replacement);
+    releaseScriptSource = releaseScriptSource.replace(lockBoundary, () => replacement);
   }
   writeFileSync(releaseScript, releaseScriptSource);
   chmodSync(releaseEntrypoint, 0o700);
@@ -438,7 +438,7 @@ async function runHarnessWithPendingSignal(harness, { requirePendingTerm = false
   const running = spawn(bash, ["-c", harnessCommand(harness)], { stdio: "ignore" });
   let signalTarget = 0;
   try {
-    const signalDeadline = Date.now() + 10_000;
+    const signalDeadline = Date.now() + 2_000;
     while (Date.now() < signalDeadline) {
       if (existsSync(harness.signalMarker)) {
         const candidate = Number(readFileSync(harness.signalMarker, "utf8").trim());
