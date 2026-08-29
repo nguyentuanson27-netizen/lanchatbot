@@ -1082,7 +1082,7 @@ describe("RealtimeRunner", () => {
     )).toEqual(["PRICE", "STOCK", "SIZE", "ETA"]);
   });
 
-  it("answers catalog advisory only from structured fields or an explicit XML clause", () => {
+  it("renders only structured catalog facts without XML-derived advisory copy", () => {
     const product = {
       productId: "CB182",
       parentProductId: "CB182",
@@ -1099,12 +1099,13 @@ describe("RealtimeRunner", () => {
       catalogVersion: "catalog-v2",
     };
     expect(catalogAdvisoryIntent("mẫu này chất vải gì")).toBe("MATERIALS");
-    expect(catalogAdvisoryReply(product, "MATERIALS")).toContain("lụa mềm");
+    expect(catalogAdvisoryReply(product, "MATERIALS")).toContain("đang được cập nhật");
+    expect(catalogAdvisoryReply(product, "MATERIALS")).not.toContain("lụa mềm");
     expect(catalogAdvisoryReply(product, "COLORS")).toContain("BE");
     expect(catalogAdvisoryReply(product, "OCCASIONS")).toContain("đang được cập nhật");
   });
 
-  it("builds the mandatory verified product-info form without calling the model", () => {
+  it("builds a verified-facts product form without XML copy or deterministic CTA", () => {
     const proposal = verifiedProductInfoProposal(
       {
         productId: "SD398",
@@ -1154,11 +1155,9 @@ describe("RealtimeRunner", () => {
     });
     expect(proposal?.reply).toBe([
       "Áo dài Dao Phụng (mã SD398) hiện có giá 1.199.000đ.",
-      "Chất liệu: ren họa tiết hoa chìm phối tơ ống",
-      "Form dáng: suông rộng",
+      "Chất liệu: REN, TƠ ỐNG",
+      "Form dáng: SUÔNG, ỐNG RỘNG",
       "Size: M, L, XL",
-      "",
-      "Chị cao và nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?",
     ].join("\n"));
   });
 
@@ -1659,7 +1658,7 @@ describe("RealtimeRunner", () => {
     );
   });
 
-  it("routes a product-code request through verified facts and emits the two-bubble product form", async () => {
+  it("routes a product-code request through a one-bubble verified-facts recovery form", async () => {
     const occurredAt = "2026-07-19T02:00:00.000Z";
     const state = createConversationState({
       conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
@@ -1802,12 +1801,11 @@ describe("RealtimeRunner", () => {
             kind: "TEXT",
             text: [
               "Set váy Quỳnh Dao (mã SV695) hiện có giá 770.000đ.",
-              "Chất liệu: lụa mềm",
-              "Form dáng: chiết eo",
+              "Chất liệu: LỤA",
+              "Form dáng: CHIẾT EO",
               "Size: M, L, XL",
             ].join("\n"),
           },
-          { kind: "TEXT", text: "Chị cao và nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?" },
           { kind: "IMAGE", imageUrl },
         ],
         imageDelayMs: 500,
@@ -2472,7 +2470,7 @@ describe("RealtimeRunner", () => {
     expect(complete).toHaveBeenCalledOnce();
   });
 
-  it("keeps image order, deduplicates products and sends the compact multi-product reply", async () => {
+  it("keeps image order and sends only exact multi-product facts without deterministic CTA", async () => {
     const occurredAt = "2026-07-21T02:00:00.000Z";
     const state = createConversationState({
       conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
@@ -2555,7 +2553,7 @@ describe("RealtimeRunner", () => {
       }),
       metaPlan: expect.objectContaining({ messages: [{
         kind: "TEXT",
-        text: "Set 1 - SV921 - giá 699k - chất ren gấm\nSet 2 - CB182 - giá 759k - chất lụa mềm\nChị chọn set mình thích và gửi em chiều cao, cân nặng để em tư vấn size phù hợp nhé.",
+        text: "Set 1 - SV921 - giá 699k\nSet 2 - CB182 - giá 759k",
       }] }),
     }), expect.any(Date));
 
@@ -2579,8 +2577,8 @@ describe("RealtimeRunner", () => {
     expect(multiProductReply([sv921, cb182], resolvedFacts, shadowPolicy)).toBe(
       multiProductReply([sv921, cb182], resolvedFacts),
     );
-    expect(multiProductReply([sv921, cb182], resolvedFacts, livePolicy)).toContain(
-      "Ưu đãi từ 2 sản phẩm: giảm 5%",
+    expect(multiProductReply([sv921, cb182], resolvedFacts, livePolicy)).toBe(
+      multiProductReply([sv921, cb182], resolvedFacts),
     );
 
     const partialCommit = vi.fn(async () => ({

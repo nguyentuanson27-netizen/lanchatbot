@@ -1,6 +1,6 @@
 # Track B — Execution Checklist
 
-**Status:** `B1_COMPLETE_REVIEW_PENDING / B2 NOT STARTED`
+**Status:** `B2.2_MERGED / B2.3A_SOURCE_IN_PROGRESS`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` and its observed request envelope stay byte-frozen; the Context V2 candidate stays offline. If that direction proves insufficient, Track B stops incomplete; it has no prompt-edit or candidate-promotion alternative.
 
@@ -31,40 +31,61 @@
 - [x] Produce the exact focused-test map per changed boundary.
 - [x] Re-estimate and lock the source-PR decomposition before B2.1.
 - [x] Resolve bundle semantics: baseline `AgentProposalV1.strategyAnalysis` is not the `CONTEXT_V2_STRATEGY_INPUT_V1` contract, so Track B changes the authority bundle and behavior identity. B3.2 is an owner-scoped authority mutation with pointer/CAS/readback/rollback; `0036` remains conditional on source proof.
-- [ ] **Checkpoint:** B1 residuals closed and independent review has no blocker.
+- [x] **Checkpoint:** B1 residuals closed, independently reviewed and merged in PR #272.
 
 ## B2.1 — Post-generation seam
 
-- [ ] Add one explicit stage boundary between model generation and final delivery inside `RealtimeRunner`.
-- [ ] Reuse the DF13 composition/executor/context/finalization owners; no sibling top-level runtime.
-- [ ] Preserve existing persistence, queue, authority resolver and LEGACY rollback behavior.
-- [ ] Add focused characterization tests.
-- [ ] Extract the side-effect-free reply comparison core from `shadow-runner.ts` in this first source PR, before any behavior-changing slice.
-- [ ] Produce r31.3 differential evidence for realtime behavior touched by the seam change; no later realtime PR may wait until B3 for its first differential.
+- [x] Add one explicit stage boundary between model generation and final delivery inside `RealtimeRunner`.
+- [x] Reuse the DF13 composition/executor/context/finalization owners; no sibling top-level runtime.
+- [x] Preserve existing persistence, queue, authority resolver and LEGACY rollback behavior.
+- [x] Add focused characterization tests.
+- [x] Extract the side-effect-free reply comparison core from `shadow-runner.ts` in this first source PR, before any behavior-changing slice.
+- [x] Produce r31.3 differential evidence for realtime behavior touched by the seam change; no later realtime PR may wait until B3 for its first differential.
 
 ## B2.2 — Model owns strategy and wording
 
-- [ ] Promote `strategyAnalysis` / `salesSignals` from optional advisory input to strategy authority for normal conversation.
-- [ ] Stop `applyWave2ReplyPolicy` rewriting a valid model reply: no `limitQuestions` truncation, no deterministic CTA append on the migrated path.
-- [ ] Stop the second `decideWave2SalesStrategy` call overriding model-proposed strategy.
-- [ ] Stop `postMediaProofCta` appending deterministic post-guard sales CTA copy.
-- [ ] Keep message grouping/splitting but stop `limitResponseGroupPoliteness` deleting valid normal model wording.
-- [ ] Keep the early pre-evidence buying hint (DF06 §18) — it has a contractual basis and no side-effect authority.
-- [ ] Do **not** edit `BaselineModelCapability`, the baseline prompt or the observed serialized request envelope. If evidence shows a change is unavoidable, stop Track B incomplete and request a new separately scoped owner decision.
-- [ ] Validate model output as untrusted structured input.
-- [ ] Test that valid model wording ships unmodified, and that invalid claims/actions are rejected rather than silently rewritten.
+- [x] Promote `strategyAnalysis` / `salesSignals` from optional advisory input to strategy authority for normal conversation.
+- [x] Stop `applyWave2ReplyPolicy` rewriting a valid model reply: no `limitQuestions` truncation, no deterministic CTA append on the migrated path.
+- [x] Stop the second `decideWave2SalesStrategy` call overriding model-proposed strategy.
+- [x] Stop `postMediaProofCta` appending deterministic post-guard sales CTA copy.
+- [x] Keep message grouping/splitting but stop `limitResponseGroupPoliteness` deleting valid normal model wording.
+- [x] Keep the early pre-evidence buying hint (DF06 §18) — it has a contractual basis and no side-effect authority.
+- [x] Do **not** edit `BaselineModelCapability`, the baseline prompt or the observed serialized request envelope. If evidence shows a change is unavoidable, stop Track B incomplete and request a new separately scoped owner decision.
+- [x] Validate model output as untrusted structured input.
+- [x] Test that valid model wording ships unmodified, and that invalid claims/actions are rejected rather than silently rewritten.
 
 ## B2.3a — Claim verification
 
-Locked order: complete B2.3a and B2.3d together in PR 3, then B2.3b and B2.3c together in PR 4.
+The 2026-08-30 owner source-work instruction supersedes the earlier combined
+PR shape: B2.3a lands as one focused PR and B2.3d remains a separate later
+slice. This split does not waive BF-04 or the exactly-one-repair acceptance
+criteria, and it does not authorize merge, deployment or authority mutation.
 
-- [ ] Verify protected claims against typed current facts and provenance.
-- [ ] Split `catalogAdvisoryReply`, `renderPreSalePolicyReply`, `multiFactReply`, `multiProductReply`, `verifiedProductInfoProposal` and its XML helpers, `requestedImagesProposal`, `productInfoLookupProposal`, and `assembleReply`: keep typed facts/media/policy safety; move normal advisory/descriptive/CTA wording.
-- [ ] Reject **undeclared** protected claims (`MODEL_CLAIM_BOUNDARY.md`); size/fit is protected.
-- [ ] Shrink the final text guard to defense-in-depth; it may reject, never approve.
-- [ ] Preserve verified facts and media when later stages fail (r31.3).
-- [ ] No mode may restore an unverified business claim (`BEHAVIOR_CONTROL_PLANE.md`).
-- [ ] Reason-code every rejection, override, repair and safe fallback.
+- [x] Bind the existing structured fact request and verified deterministic
+  producer classifications to exact typed claim IDs, then authorize every
+  non-size claim against current provenance and scope before whole-group
+  delivery. Model evidence retains `authorization: NONE`.
+- [x] Split `catalogAdvisoryReply`, `renderPreSalePolicyReply`,
+  `multiFactReply`, `multiProductReply`, `verifiedProductInfoProposal` and its
+  XML helpers, `requestedImagesProposal`, `productInfoLookupProposal`, and
+  `assembleReply`: model-skipping paths now retain only exact verified
+  fact/media rendering, bounded status/safety text and policy denials; XML
+  descriptive synthesis, deterministic multi-item offer copy and normal sales
+  CTAs were removed. Structured shipping/ETA output without the required
+  cart/product provenance now fails closed at the whole-group gate.
+- [x] Reject **undeclared non-size** protected claims at the structured
+  boundary. Size/fit remains on the existing detector and one-repair path for
+  B2.3d; this PR does not claim BF-04 closure.
+- [x] Keep the final text guard as defense-in-depth: its observations may only
+  reject; exact typed claim authorization is required for delivery.
+- [x] Preserve verified facts and media when the existing size repair falls
+  back, and retain whole-group delivery under r31.3.
+- [x] Keep incident/behavior mode unable to restore an unverified business
+  claim (`BEHAVIOR_CONTROL_PLANE.md`).
+- [x] Reason-code missing, invalid, duplicate, stale, future, undeclared and
+  scope-mismatched structured claims.
+- [ ] **Checkpoint:** exact B2.3a head has clean self-review, one fixed
+  independent Sol High reviewer verdict, and canonical repository CI PASS.
 
 ## B2.3b — Effect reconciliation
 

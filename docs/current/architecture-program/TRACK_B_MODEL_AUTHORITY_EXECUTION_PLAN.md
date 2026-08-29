@@ -1,11 +1,11 @@
 # Track B — Model Authority Execution Plan
 
-**Status:** `B1_COMPLETE_REVIEW_PENDING / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
-**Plan baseline:** `main@53408456ecaac8c8936061c9c3fd8275d6bdb179`, including merged PR #269, PR #270 and PR #271 process/plan truth
+**Status:** `B2.2_MERGED / B2.3A_SOURCE_IN_PROGRESS / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
+**Plan baseline:** `main@89b1bee02109e17b6b3b2a0e714e24d3bdb70a60`, including reviewed B2.2 head `851ead7cfd807f58eca6612da31fdcf3a9391e92`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Active process profile:** `SOLO_PREPROD_MINIMAL` (merged and current default; see `OPERATING_MODE.md`)
 **Environment:** `ENGINEERING_PREPROD`, one bounded `PREPROD_TEST_PAGE`
-**Authorization:** the owner message dated 2026-08-29 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorizes Track B **source implementation only**. It does not authorize merge, tag/release, migration, authority/pointer mutation, deployment, routing/control-plane/VPS mutation, Messenger action, public-production promotion, or UR/State V2 work.
+**Authorization:** the owner messages dated 2026-08-29 and 2026-08-30 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorize Track B **source implementation only** and split B2.3a from B2.3d. They do not authorize merge, tag/release, migration, authority/pointer mutation, deployment, routing/control-plane/VPS mutation, Messenger action, public-production promotion, or UR/State V2 work.
 
 ## 1. Purpose
 
@@ -155,7 +155,9 @@ B3.2  owner-scoped deploy, readback, smoke
       accepted Track B PREPROD baseline  →  Track C
 ```
 
-The locked execution order is B2.3a → B2.3d in PR 3, then B2.3b → B2.3c in PR 4. Changing that grouping requires reviewed evidence and a plan update; no slice may bypass BF-04, r31.3 or model-evaluation constraints.
+The 2026-08-30 owner instruction supersedes the earlier combined PR shape:
+B2.3a is one focused PR, followed by a separate B2.3d PR, then B2.3b and
+B2.3c. The split does not waive BF-04, r31.3 or model-evaluation constraints.
 
 ---
 
@@ -163,7 +165,7 @@ The locked execution order is B2.3a → B2.3d in PR 3, then B2.3b → B2.3c in P
 
 ### B1 — Scope lock
 
-**Status:** complete, pending independent review. `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md` contains the closed call graph, effect/commit trace, authority-bundle disposition, KEEP/DEMOTE/SPLIT inventory, focused-test map and source-PR decomposition.
+**Status:** complete and merged in PR #272 (`main@11ae2be565d7855457cdedef5986759824909004`). `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md` contains the closed call graph, effect/commit trace, authority-bundle disposition, KEEP/DEMOTE/SPLIT inventory, focused-test map and source-PR decomposition.
 
 V5 taxonomy applies: **KEEP** deterministic authority for verified facts/claims/provenance, freshness/product scope, state consistency, side-effect authorization, auth/authz, PII/security, idempotency, fail-closed behavior, contradiction reconciliation and fixed safe fallback. **DEMOTE** deterministic logic that selects normal sales strategy instead of the model, writes normal customer-facing sales copy, rewrites a valid model draft for ordinary style or business preference, or hard-codes objection/CTA behavior as conversational authority rather than correctness. **SPLIT** mixed helpers only enough to preserve the deterministic technical boundary. No unrelated cleanup.
 
@@ -214,7 +216,7 @@ Promote `strategyAnalysis` and `salesSignals` from optional advisory input to th
 
 ### B2.3a — Structured protected claims as the primary correctness boundary
 
-**Size:** M · **PR 3 combined estimate (B2.3a/d):** 1.5–2 d · **Depends on:** B2.2
+**Size:** M · **Depends on:** B2.2 · **PR shape:** focused B2.3a only per 2026-08-30 owner instruction
 
 Verify protected claims against typed current facts and provenance so `guard.ts` and reply assembly stop acting as the primary reverse-parser and copy-repair layer.
 
@@ -267,7 +269,7 @@ This slice owns the SPLIT for reachable deterministic fact-to-copy and model-ski
 
 ### B2.3d — Deterministic size facts, model-owned wording, BF-04 closed or fenced
 
-**Size:** M · **PR 3 combined estimate (B2.3a/d):** 1.5–2 d · **Depends on:** B2.3a
+**Size:** M · **Depends on:** B2.3a · **PR shape:** separate later B2.3d; BF-04 remains open until then
 
 BF-04's residual is a property of detecting size recommendations by reading Vietnamese prose: `detectConcreteSizeRecommendations` (`guard.ts:451-470`) drops any mention that `classifySafeExemptionForMention` (`guard.ts:389-394`) classifies as `QUESTION`, `NEGATION`, `CATALOG`, `STOCK` or `NON_CUSTOMER`, and no exemption heuristic over free text is complete. Making a declared, verified, in-scope claim the precondition for shipping size wording is the closure mechanism, and `MODEL_CLAIM_BOUNDARY.md` already mandates that direction.
 
@@ -427,7 +429,7 @@ Excludes external provider and infrastructure waiting.
 | B1 | complete (review pending) |
 | PR 1 — B2.1 seam + differential foundation | 1–1.5 d |
 | PR 2 — B2.2 post-generation authority demotion | 1–1.5 d |
-| PR 3 — B2.3a/d structured claims, BF-04, one repair | 1.5–2 d |
+| B2.3a + B2.3d across two focused PRs — structured claims, then BF-04/one repair | 1.5–2 d combined |
 | PR 4 — B2.3b/c effect + negotiation reconciliation | 1–1.5 d |
 | PR 5 — B2.4/B3 reachability + final replay | 1–1.5 d |
 | PR 6 — authority identity / activation-path source | 0.75–1.25 d |
@@ -442,10 +444,11 @@ The source total is the arithmetic sum of the six locked PR ranges and matches t
 
 1. **PR B2.1:** explicit post-generation seam plus pure, non-claiming reply-comparison core; characterization only.
 2. **PR B2.2:** make baseline structured strategy/wording authoritative; demote the second strategy decision, `applyWave2ReplyPolicy`, `postMediaProofCta` and final politeness deletion; exact-head r31.3 differential.
-3. **PR B2.3a/d:** split every named deterministic fact-to-copy/model-skipping producer; add structured protected-claim fail-closed boundary, BF-04 regressions, exactly one repair and verified-facts fallback/preservation.
-4. **PR B2.3b/c:** effect and negotiation reconciliation proof/changes, keeping policy arithmetic, trusted ports, version/CAS/idempotency and less-aggressive conflict resolution deterministic.
-5. **PR B2.4/B3:** remove obsolete COMMERCE reachability, complete full side-effect-free replay and final r31.3 evidence.
-6. **PR authority identity / deploy preparation:** truthful authority-bundle labels, new bundle/behavior identity and reviewed pointer/CAS/readback/rollback tooling. It may merge as source only; no runtime mutation occurs without a new owner command.
+3. **PR B2.3a:** split every named deterministic fact-to-copy/model-skipping producer and add the non-size structured protected-claim fail-closed boundary with verified-facts/media preservation.
+4. **PR B2.3d:** close or explicitly fence BF-04, make size wording depend on a declared verified claim, and retain exactly one bounded repair.
+5. **PR B2.3b/c:** effect and negotiation reconciliation proof/changes, keeping policy arithmetic, trusted ports, version/CAS/idempotency and less-aggressive conflict resolution deterministic.
+6. **PR B2.4/B3:** remove obsolete COMMERCE reachability, complete full side-effect-free replay and final r31.3 evidence.
+7. **PR authority identity / deploy preparation:** truthful authority-bundle labels, new bundle/behavior identity and reviewed pointer/CAS/readback/rollback tooling. It may merge as source only; no runtime mutation occurs without a new owner command.
 
 ## 11. Main risks and stop conditions
 

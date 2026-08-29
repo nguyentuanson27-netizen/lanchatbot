@@ -254,14 +254,10 @@ describe("realtime golden transcripts", () => {
         kind: "TEXT",
         text: [
           "Set váy CB182 hiện có giá 699.000đ.",
-          "Chất liệu: gấm",
-          "Form dáng: suông",
+          "Chất liệu: GẤM",
+          "Form dáng: SUÔNG",
           "Size: S, M, L",
         ].join("\n"),
-      },
-      {
-        kind: "TEXT",
-        text: "Chị cao và nặng khoảng bao nhiêu để em tư vấn size phù hợp cho mẫu này?",
       },
       { kind: "IMAGE", imageUrl: "https://cdn.example/cb182.jpg" },
     ]);

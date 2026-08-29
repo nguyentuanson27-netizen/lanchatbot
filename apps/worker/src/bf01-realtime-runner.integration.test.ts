@@ -644,7 +644,7 @@ function unresolvedTerminalNoReplyEvents<TState, TSalesState>(
 }
 
 describe("BF-01 runner reconciliation", () => {
-  it("runs B2.2 r31.3 differential through pre-B2.2 and migrated COMMERCE commits", async () => {
+  it("runs B2.2/B2.3a r31.3 differential through the migrated COMMERCE claim boundary", async () => {
     const capturedInput = {
       customerText: "Mẫu SD398 giá bao nhiêu, có size M hay L?",
       modelReply:
@@ -681,6 +681,14 @@ describe("BF-01 runner reconciliation", () => {
         if (wordingSpy) expect(wordingSpy).toHaveBeenCalledOnce();
         const commit = harness.commerceCommit.mock.calls[0]?.[0]?.runtimeCommit;
         if (!commit) throw new Error("TRACK_B_B22_CAPTURED_COMMIT_MISSING");
+        const exactClaims = commit.metaPlan?.protectedClaims ?? [];
+        expect(exactClaims.length).toBeGreaterThan(0);
+        expect(exactClaims.every(({ authorization }) =>
+          authorization === "NONE"
+        )).toBe(true);
+        expect(exactClaims.map(({ claimId }) => claimId)).toEqual([
+          ...new Set(exactClaims.map(({ claimId }) => claimId)),
+        ]);
         const rawResult = harness.commerceCommit.mock.results[0];
         if (!rawResult || rawResult.type !== "return") {
           throw new Error("TRACK_B_B22_CAPTURED_COMMIT_RESULT_MISSING");
