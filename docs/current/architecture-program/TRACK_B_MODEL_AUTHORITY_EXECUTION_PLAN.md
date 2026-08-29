@@ -2,7 +2,8 @@
 
 **Status:** `PROPOSED / PLAN_ONLY / REVIEW_AMENDED`
 **Program point:** post-Track-A / post-Gate-F, V5 Track B
-**Plan baseline:** `main@3dde67234a732bae2a50e93cdf3f2892202e4207`
+**Plan baseline:** `main@bab2fdb4d9f20e74274cd0134234632e26660a2f` (re-synced after PR #269 and PR #271 merged)
+**Active process profile:** `SOLO_PREPROD_MINIMAL` (merged and current default; see `OPERATING_MODE.md`)
 **Environment:** `ENGINEERING_PREPROD`, one bounded `PREPROD_TEST_PAGE`
 **Authorization:** merging this plan does **not** authorize Track B implementation, authority mutation, migration, deployment, or live testing. `program-state.json` currently requires a separate owner command before the next Track implementation.
 
@@ -33,8 +34,9 @@ This is an implementation refinement of the adopted V5 Track B direction. It is 
    - preserve verified facts/media when downstream model/size/enrichment fails;
    - differential-test realtime changes against the r31.3 behavioral baseline, with intentional differences explicitly justified;
    - do not mark Inbox permanently failed solely because model output is malformed/schema-invalid; first attempt deterministic fallback from verified facts.
-8. PR #269 / `SOLO_PREPROD_MINIMAL` is still pending at this plan revision. Before any implementation PR is verified, merged, activated, or deployed, re-read the process actually merged on `main`. Do not treat PR #269 text as active governance until merged.
+8. `SOLO_PREPROD_MINIMAL` (PR #269) is **merged and active**. It is the default process profile for all work while `ENGINEERING_PREPROD` remains active, and only an explicit owner instruction changes the profile or operating mode; completing a Track, roadmap, or Gate does not expire it. Its default flow is `branch -> code + focused verification -> PR -> exact-head verification -> merge -> deploy exact commit -> smoke`. Track B must follow this profile rather than reintroducing Release Train ceremony, and must still re-read the governance actually merged on `main` at implementation time instead of relying on this plan revision.
 9. Existing Gate E/F evidence is historical/current evidence for its exact candidate and scope. Track B must not relabel stale candidate fingerprints, request identities, corpus/rubric hashes, authority hashes, or scored evidence as proof for a changed candidate.
+10. PR #271 restored the canonical self-hosted CI backend. Exact-head verification therefore uses a functioning GitHub-hosted or GitHub Actions self-hosted CI run of the canonical checks; `CI_UNAVAILABLE_FALLBACK` applies only when remote CI cannot start or executes zero repository steps because of an external provider condition.
 
 ## 3. Target runtime shape
 
@@ -189,7 +191,7 @@ B3.1 freeze candidate/request identity/corpus -> pre-register -> Gate-E scored e
         ↓
 checkpoint: evidence accepted for exact candidate
         ↓
-B3.2 separately authorized activation/deploy/readback/smoke
+B3.2 owner-scoped activation/deploy/readback/smoke
         ↓
 accepted Track B PREPROD baseline
         ↓
@@ -238,7 +240,7 @@ Refresh the prior audit against the exact implementation head immediately before
 - candidate-source/fingerprint impact list;
 - BF-04 size-claim bypass map for every B2.3d-relevant path;
 - activation impact: whether Track B changes authority-bundle payload, behavior pointer/config identity, migration requirements, or only source behavior behind an existing authority identity;
-- current CI capability/status and the verification fallback allowed by **merged** governance.
+- current canonical CI capability/status on the self-hosted backend, and the exact activation/authorization scope Track B will need to request from the owner in one instruction.
 
 **Acceptance criteria**
 
@@ -281,7 +283,7 @@ Reuse the existing DF13 composition/executor boundary and introduce only the min
 **Verification**
 
 - focused composition/executor characterization tests;
-- affected workspace typecheck/build checks required by merged governance;
+- affected workspace typecheck/build checks required by `SOLO_PREPROD_MINIMAL`;
 - r31.3 differential check for realtime behavior touched by the seam change.
 
 ---
@@ -553,38 +555,41 @@ Produce governed evaluation evidence for the exact Track B candidate. This slice
 
 ---
 
-### B3.2 — Separately authorized authority activation, exact deploy, readback, and smoke
+### B3.2 — Owner-scoped activation, exact deploy, readback, and smoke
 
 **Size:** M  
 **Estimate:** 0.5–1 working day, excluding external infrastructure/provider waiting  
-**Depends on:** accepted B3.1 evidence + separate owner authorization for each required runtime mutation/deploy scope
+**Depends on:** accepted B3.1 evidence + one owner deploy instruction that explicitly scopes the deploy and any authority/config mutation it requires
 
 **Goal**
 
-Activate/deploy the already-evidenced exact Track B candidate under the process actually merged on `main`. Keep authority mutation and deployment explicitly separate from Gate-E scoring.
+Activate/deploy the already-evidenced exact Track B candidate under `SOLO_PREPROD_MINIMAL`. Keep authority mutation and deployment explicitly separate from Gate-E scoring, without reintroducing approval ceremony that the current profile removed.
 
 **Required sequence**
 
 1. Use B1 evidence to determine whether activation requires a new DF13 authority-bundle payload/hash, behavior content/pointer identity, migration, or only a source deploy behind the existing authority contract.
-2. If an authority/config/database pointer mutation is required, obtain separate owner authorization and execute the existing DF13 fence/readback contract.
-3. Migration `0036` is not automatically in scope; include it only if the exact activation path proves it is required and that migration is separately authorized.
-4. Under merged governance, deploy only the exact merged commit/build for affected services.
-5. Preserve the exact previous affected-service release/build/commit and previous authority/config state as rollback identity.
-6. Run applicable readiness, post-activation readback, smoke, and controlled test-page checks.
+2. Under `SOLO_PREPROD_MINIMAL`, the owner instruction to deploy this candidate/commit to `PREPROD_TEST_PAGE` **is** the authorization for that scoped deploy; no Release Train boundary and no second approval record is required. The owner command must explicitly scope the deploy and any authority-mode/config/pointer mutation that activation requires.
+3. Request additional explicit authorization only for a mutation **outside** that granted scope — an authority-mode switch, migration, routing/page-allowlist change, or destructive data action not named in the deploy instruction. Do not require a second approval merely because the step is a deploy.
+4. Where an authority/config/database pointer mutation is actually performed, execute the existing DF13 fence/readback contract for it.
+5. Migration `0036` is not automatically in scope; include it only if the exact activation path proves it is required and it falls inside the authorized scope.
+6. Deploy only the exact merged commit/build for affected services.
+7. Preserve the exact previous affected-service release/build/commit and previous authority/config state as the release-local rollback identity required by `RELEASE_INTEGRITY.md`.
+8. Run applicable pre-activation readiness checks, then post-activation readback, smoke, and controlled test-page checks. Failed or unknown runtime state stops further mutation and rolls back to the exact previous affected-service identity.
 
 **Acceptance criteria**
 
 - B3.2 uses the exact candidate accepted in B3.1; no post-evidence authority-affecting source/request change is silently introduced;
-- any authority/config/database mutation has explicit owner authorization and exact post-mutation identity/readback;
+- the owner deploy instruction explicitly scopes the deploy and every authority/config mutation performed under it; only a mutation outside that scope carries its own separate authorization, and every mutation has exact post-mutation identity/readback;
+- no Release Train, second owner-approval record, tag/manifest ceremony, or runtime-state promotion is reintroduced as a default gate;
 - source merge alone does not imply runtime activation or Track B completion;
-- remote CI that starts zero repository steps is treated as unavailable, not pass; only fallback explicitly allowed by merged governance may substitute;
+- exact-head verification comes from a functioning CI run of the canonical checks; a remote run that starts zero repository steps is unavailable, not pass, and only `CI_UNAVAILABLE_FALLBACK` bound to the exact head may substitute;
 - exact runtime identity and rollback identity are recorded where deployment actually occurs;
 - one exact accepted PREPROD COMMERCE baseline is recorded for Track C.
 
 **Verification**
 
 - final candidate/evidence identity comparison before activation;
-- focused/local/remote checks required by merged governance;
+- focused/remote exact-head checks required by `SOLO_PREPROD_MINIMAL`;
 - authority/config readback only if changed;
 - exact runtime identity + readiness/smoke only if owner-authorized deploy actually occurs;
 - rollback target/readiness confirmation for each affected service/authority state.
@@ -606,8 +611,8 @@ Track B is complete only when all of the following are true:
 9. Final Track B candidate identity includes all authority-affecting source files and all provider-affecting request identity fields; stale Gate-E identities are not reused.
 10. Any Gate-E scored run uses a separately committed immutable corpus/rubric artifact and valid pre-registration for the exact candidate.
 11. B3.1 evidence is accepted before B3.2 authority mutation/deploy begins.
-12. Any authority/config mutation is separately owner-authorized and has exact readback/rollback identity.
-13. Required focused tests/checks pass on the exact implementation heads where claimed; a CI job that executes zero repository steps is not a pass.
+12. Every authority/config mutation is inside an explicitly scoped owner deploy instruction, or separately authorized when it falls outside that scope, and has exact readback/rollback identity.
+13. Required focused tests/checks pass on the exact implementation heads where claimed, from a functioning canonical CI run; a CI job that executes zero repository steps is not a pass.
 14. No unrelated UR/State V2/admin/multi-page/production-hardening work was pulled into Track B.
 15. One exact accepted PREPROD COMMERCE baseline is recorded for Track C.
 16. Final owner decision records Track B completion / Track C start; source merge alone is not completion evidence.
@@ -675,15 +680,19 @@ Stop if authority-affecting source files or provider-affecting request fields ar
 
 ### Evidence and activation get mixed
 
-Stop if a Gate-E scored-run/evidence slice also writes authority/config/database pointers, deploys runtime, or performs live activation. B3.1 is evidence-only; B3.2 owns separately authorized activation/deploy.
+Stop if a Gate-E scored-run/evidence slice also writes authority/config/database pointers, deploys runtime, or performs live activation. B3.1 is evidence-only; B3.2 owns the owner-scoped activation/deploy.
 
 ### Activation path is unclear
 
 Stop before runtime mutation if B1 cannot determine whether authority bundle, behavior pointer/config, migration, or simple source deployment is required. Do not improvise a database/authority mutation in B3.2.
 
-### CI executes zero repository steps
+### CI cannot produce exact-head evidence
 
-Treat as unavailable, not pass. Use only the exact-head fallback allowed by merged governance; otherwise stop merge/ship verification.
+The canonical self-hosted backend is restored, so a functioning CI run of the canonical checks is the expected verification. A remote run that starts zero repository steps is unavailable, not pass: use only `CI_UNAVAILABLE_FALLBACK` bound to the exact head, and otherwise stop merge/ship verification.
+
+### Removed process ceremony is reintroduced
+
+Stop if a Track B slice requires a Release Train boundary, a second owner-approval record, tag/manifest attestation, or runtime-state promotion as a default gate. `SOLO_PREPROD_MINIMAL` removed these; they return only when a concrete current risk or an explicit owner instruction requires them.
 
 ### Premature cleanup breaks rollback
 
@@ -704,7 +713,7 @@ Each implementation PR must:
 - preserve business/security/data correctness and backward compatibility unless an explicit migration decision says otherwise;
 - preserve baseline/candidate model-evaluation separation and complete request identity;
 - avoid duplicated business logic, dead code and unrelated refactors;
-- include appropriate focused lint/type/build/integration checks for the changed boundary under merged governance;
+- include appropriate focused lint/type/build/integration checks for the changed boundary under `SOLO_PREPROD_MINIMAL`;
 - account for candidate provenance when authority-affecting source/request changes;
 - document changed contract/current truth that future work depends on;
 - preserve an explicit rollback target for deployed runtime/authority changes;

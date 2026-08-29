@@ -6,7 +6,7 @@
 
 - [ ] Receive a separate owner command authorizing Track B implementation; merge of the plan PR is not authorization.
 - [ ] Re-read `AGENTS.md`, `OPERATING_MODE.md`, `program-state.json`, this plan, and relevant contracts from the exact merged `main` head.
-- [ ] Confirm whether PR #269 / `SOLO_PREPROD_MINIMAL` is actually merged; if not, follow current merged governance instead.
+- [ ] Follow `SOLO_PREPROD_MINIMAL` (PR #269, merged and active): `branch -> code + focused verification -> PR -> exact-head verification -> merge -> deploy exact commit -> smoke`. Do not reintroduce Release Train or a second approval record as a default gate.
 - [ ] Lock the exact implementation head used for B1.
 - [ ] Keep `stateReadMode=LEGACY`; do not start UR/State V2 without a separate evidence-backed approval.
 - [ ] Treat current BF-04 P0 size-claim residual as open until new evidence proves otherwise.
@@ -25,7 +25,7 @@
 - [ ] Record the full candidate request identity: model resource, system instruction, prompt/content, response schema, generation config, safety settings, and every other provider-affecting field.
 - [ ] Map BF-04 unverified size-claim bypasses relevant to B2.3d.
 - [ ] Determine whether Track B activation changes authority-bundle payload/hash, behavior pointer/config, migration requirements, or source code only.
-- [ ] Check current CI capability and exact fallback allowed by merged governance.
+- [ ] Check canonical self-hosted CI status (restored by PR #271) and record the exact activation/authorization scope Track B will ask the owner to grant in one instruction.
 - [ ] Re-estimate remaining Track B work from B1 evidence.
 - [ ] Stop/amend plan if a state migration, second permanent runtime/control plane, or materially wider slice is required.
 - [ ] **Checkpoint:** B1 findings reviewed before B2.1.
@@ -36,7 +36,7 @@
 - [ ] Add only minimum internal stage interfaces needed for proposal -> verification -> reconciliation -> fallback/finalization.
 - [ ] Preserve existing persistence/queue/authority resolver and LEGACY rollback behavior.
 - [ ] Add focused composition/executor characterization tests.
-- [ ] Run affected-workspace verification required by merged governance.
+- [ ] Run affected-workspace verification required by `SOLO_PREPROD_MINIMAL`.
 - [ ] Produce r31.3 differential evidence for realtime behavior touched by the seam change.
 
 ## B2.2 — Model authority + evaluation-boundary preservation
@@ -127,9 +127,11 @@
 
 - [ ] Confirm B3.2 uses the exact candidate accepted in B3.1; no post-evidence authority-affecting source/request change is allowed without re-evaluation.
 - [ ] From B1, determine whether activation requires authority-bundle/hash change, behavior pointer/config mutation, migration, or source deploy only.
-- [ ] Do not pull migration `0036` into scope unless the exact activation path proves it is required and it is separately authorized.
-- [ ] Obtain separate owner authorization before each required authority/config/database pointer mutation or deploy scope.
-- [ ] If remote CI starts zero repository steps, treat it as unavailable, not pass; use only exact-head fallback permitted by merged governance.
+- [ ] Ask the owner for **one** deploy instruction that explicitly scopes the deploy and every authority/config mutation activation requires; that instruction is the authorization for that scope.
+- [ ] Request additional authorization only for a mutation outside that granted scope (authority-mode switch, migration, routing/page-allowlist, destructive data action not named in the instruction).
+- [ ] Do not require a Release Train, a second approval record, tag/manifest ceremony, or runtime-state promotion as a default gate.
+- [ ] Do not pull migration `0036` into scope unless the exact activation path proves it is required and it falls inside the authorized scope.
+- [ ] Verify the exact head on a functioning canonical CI run; if a remote run starts zero repository steps, treat it as unavailable, not pass, and use only `CI_UNAVAILABLE_FALLBACK` bound to that head.
 - [ ] If authority/config changes: perform exact DF13 fence/readback verification.
 - [ ] Deploy exact merged commit/build only when authorized.
 - [ ] Preserve exact previous affected-service release/build/commit and previous authority/config state as rollback identity.
@@ -149,7 +151,8 @@
 - [ ] Full-agent replay passes required safety/correctness assertions without side effects and r31.3 differential evidence is reviewed.
 - [ ] Future Gate-E evidence uses a new immutable corpus/rubric + valid registration for the exact candidate.
 - [ ] B3.1 evidence is accepted before B3.2 runtime mutation/deploy.
-- [ ] Required focused tests/checks pass where actually run; zero-step CI is never called pass.
+- [ ] Every authority/config mutation was inside an explicitly scoped owner instruction, or separately authorized when outside it.
+- [ ] Required focused tests/checks pass on a functioning canonical CI run where claimed; zero-step CI is never called pass.
 - [ ] No UR/State V2/admin/multi-page/production-hardening scope creep.
 - [ ] Rollback remains viable until separately closed with evidence.
 - [ ] Owner records Track B completion / Track C start decision.
