@@ -3,7 +3,7 @@
 **Status:** `B1_FIRST_PASS / EVIDENCE_ONLY / NO_RUNTIME_MUTATION`
 **Implementation head traced:** `main@53408456ecaac8c8936061c9c3fd8275d6bdb179`
 **Owner command:** Track B implementation authorized separately; this slice performed source tracing only.
-**Direction selected by owner after these findings:** promote the existing Context V2 candidate capability to the live COMMERCE generation path; keep `BaselineModelCapability` byte-frozen; do not modify the baseline and do not create a third capability.
+**Direction selected by owner after these findings, superseding an earlier selection:** demote post-generation deterministic authority only. No generation capability changes. `BaselineModelCapability` stays byte-frozen and the Context V2 candidate stays offline as a research and evaluation artifact. Owner ranking `1 > 2 >>> 3 > 4`; the escalation ladder and its rationale are in §2 of the execution plan.
 
 **Retracted in the third self-review.** The second pass concluded the baseline stays live as a per-turn fallback. That was wrong; see §2b for the retraction and what replaces it.
 
@@ -286,7 +286,9 @@ V5's B3 target runtime is *"model structured strategy + claims + requested effec
 
 That is exactly what `MODEL_CLAIM_BOUNDARY.md` prohibits — *"it does not silently remove arbitrary phrases and send the damaged remainder"* — and exactly what V5's B2 defines as DEMOTE: *"rewrites a valid model draft for ordinary style/business preference"* and *"hard-codes objection/CTA behavior as conversational authority rather than correctness/safety"*.
 
-### Option 4 — demote post-generation authority only
+### The missing option — demote post-generation authority only
+
+It was absent from the three offered here. In the owner's final ranking it became **option 1**, the selected direction; the numbering in the execution plan is the owner's, not this section's discovery order.
 
 Restructure the orchestration after generation and change **no capability**:
 
@@ -298,7 +300,7 @@ Restructure the orchestration after generation and change **no capability**:
 
 **What this avoids compared with the selected option:** no §1/§2/§6 contract revision, no capability status change, no prompt-family registration, no widening of `ContextV2CandidateOutputV2` and therefore no new §18 coverage-matrix probes, and no per-turn snapshot prerequisite. The Gate-E candidate fingerprint still goes stale — `sales-strategy-v1.ts`, `guard.ts` and `reply-assembler.ts` are all in the frozen set — but that was already a known Track B dependency in V5 line 328.
 
-**What it does not deliver:** the Context V2 candidate stays unused in production, so the Gate E v15 evidence continues to describe a capability that never serves customers. If the program's intent is to eventually put that capability live, option 4 defers that rather than resolving it.
+**What it does not deliver:** the Context V2 candidate stays unused in production, so the Gate E v15 evidence continues to describe a capability that never serves customers. If the program's intent is to eventually put that capability live, this option defers that rather than resolving it. The owner accepted that deferral explicitly; see "Decision taken" below.
 
 ### Where the amended plan drifted heavier than adopted V5
 
@@ -315,9 +317,27 @@ Two further divergences from the adopted plan:
 
 V5 also adds a B3 constraint the plan does not carry: *"Do not require the full Wave1 population before Track B finishes."*
 
+### Decision taken
+
+The owner re-decided with the full option set and selected this option, ranking `1 > 2 >>> 3 > 4`. Two premises were verified before the decision was accepted:
+
+- `AgentProposalV1` already carries the fields the target requires (above);
+- the baseline prompt already assigns the division of labour. `vertex.ts:254` — *"strategyAnalysis chi phan loai need, barrier, decisionFactor va strategy **de app kiem tra**"*; `vertex.ts:327` — *"strategy chi la de xuat va khong duoc vuot guard deterministic"*; `vertex.ts:264` — *"Model chi cung cap evidence buyingIntent; app va guard deterministic moi duoc quyet dinh"*.
+
+The prompt constrains model strategy from overriding the **guard**, which is a correctness boundary. It never licenses rewriting model wording for style, so the current overrides exceed the prompt as well as the contract.
+
+One further datum lowers the perceived risk: the deterministic CTA is appended only when `questionCount(limited) === 0` (`sales-strategy-v1.ts:583-586`). The model normally supplies its own question or CTA, so the deterministic append is a backstop rather than the primary source.
+
+**Recorded so a later session does not reopen it:** the Context V2 candidate remaining outside production is an accepted consequence, not an oversight. It keeps its value as an offline research and evaluation artifact. Promotion is deferred to the escalation ladder in execution-plan §2 and is reached only if the frozen baseline is proven unable to select adequate strategy or CTA.
+
+Two amendments were made to the owner's proposal during review, both recorded in the execution plan:
+
+1. **Escalation ladder.** The owner's stop condition went from option 1 straight to option 2. `MODEL_EVALUATION_BOUNDARY.md` §4 *contemplates* a baseline envelope change and defines its mechanism, while §6 states a flat prohibition with no mechanism. A narrowly scoped baseline prompt change under §4 is therefore inserted between them, with the loss of the byte-frozen V1 comparison anchor weighed explicitly at that point.
+2. **Gate-E leaves the merge path, not the deploy path.** The trigger for pre-deploy re-evaluation is a change to candidate-affecting source, not a change of capability. Track B modifies `sales-strategy-v1.ts`, `guard.ts` and `reply-assembler.ts`, all inside the frozen set, so V5 line 328's deployment dependency still applies. V5 C4 exempts candidates not selected for deployment, so the boundary is a deploy gate.
+
 ### Process note
 
-This is the fourth review and the most consequential finding, and it is about how the work was run rather than about the code. A direction question was put to the owner before reading the plan that defines the work, the contract that governs the boundary, and the schema of the object at the centre of it. The three options offered were therefore not the real option set. The recommendation is to re-decide with option 4 on the table; nothing in this document assumes that re-decision has happened.
+A direction question was put to the owner before reading the plan that defines the work, the contract that governs the boundary, and the schema of the object at the centre of it. The three options offered were therefore not the real option set. The correction cost four review passes.
 
 ---
 
