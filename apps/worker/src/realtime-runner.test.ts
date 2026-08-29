@@ -1405,6 +1405,11 @@ describe("RealtimeRunner", () => {
 
   it("rehydrates SD375 before creating TEXT then three bounded full-look IMAGE units", async () => {
     const occurredAt = "2026-07-29T02:27:12.000Z";
+    // Media assets stay fresh for MEDIA_FRESH_FOR_SECONDS after observedAt, so the
+    // selector only returns the bounded full look while the clock is pinned to the turn.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-29T02:28:12.000Z"));
+    try {
     const state = createConversationState({
       conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
       routingOwner: "APP",
@@ -1625,6 +1630,9 @@ describe("RealtimeRunner", () => {
         ],
       }),
     }), expect.any(Date));
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("keeps the verified product type when the title only contains type and code", () => {
