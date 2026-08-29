@@ -171,6 +171,8 @@ export interface RealtimeReplySnapshot {
   readonly inboxOutcome: "COMMITTED" | "RETRYABLE" | "FAILED_PERMANENT";
   readonly protectedOutbound: {
     readonly required: boolean;
+    /** Stable response-group identity derived from the captured turn. */
+    readonly groupId: string | null;
     readonly plannedMessageCount: number;
     readonly deliveredMessageCount: number;
   };
@@ -184,11 +186,16 @@ export type RealtimeReplyDifferenceCode =
   | "PROTECTED_CLAIMS_CHANGED"
   | "EFFECT_AUTHORIZATION_CHANGED"
   | "COMMIT_OUTCOME_CHANGED"
+  | "PROTECTED_OUTBOUND_CONTRACT_CHANGED"
   | "PROTECTED_OUTBOUND_PARTIAL_DELIVERY"
   | "GENERATION_FAILURE_PERMANENT_INBOX_FAILURE";
 
+export type PermittableRealtimeReplyDifferenceCode =
+  | "OUTBOUND_MESSAGES_CHANGED"
+  | "STRATEGY_CHANGED";
+
 export interface PermittedRealtimeReplyDifference {
-  readonly code: RealtimeReplyDifferenceCode;
+  readonly code: PermittableRealtimeReplyDifferenceCode;
   /** A reviewed contract/deviation reason code; free-form prose is not sufficient. */
   readonly reasonCode: string;
 }
@@ -215,7 +222,29 @@ function sameSet(left: readonly string[], right: readonly string[]): boolean {
   return sameOrderedValues([...new Set(left)].sort(), [...new Set(right)].sort());
 }
 
+function protectedOutboundMetadataValid(snapshot: RealtimeReplySnapshot): boolean {
+  const delivery = snapshot.protectedOutbound;
+  return Number.isSafeInteger(delivery.plannedMessageCount) &&
+    Number.isSafeInteger(delivery.deliveredMessageCount) &&
+    delivery.plannedMessageCount >= 0 &&
+    delivery.deliveredMessageCount >= 0 &&
+    delivery.deliveredMessageCount <= delivery.plannedMessageCount &&
+    delivery.plannedMessageCount === snapshot.messages.length &&
+    (!delivery.required || (delivery.groupId?.trim().length ?? 0) > 0);
+}
+
+function hasPartialProtectedDelivery(snapshot: RealtimeReplySnapshot): boolean {
+  const { deliveredMessageCount, plannedMessageCount } = snapshot.protectedOutbound;
+  return deliveredMessageCount !== 0 && deliveredMessageCount !== plannedMessageCount;
+}
+
 const NON_PERMITTABLE_INVARIANTS = new Set<RealtimeReplyDifferenceCode>([
+  "VERIFIED_FACTS_CHANGED",
+  "VERIFIED_MEDIA_CHANGED",
+  "PROTECTED_CLAIMS_CHANGED",
+  "EFFECT_AUTHORIZATION_CHANGED",
+  "COMMIT_OUTCOME_CHANGED",
+  "PROTECTED_OUTBOUND_CONTRACT_CHANGED",
   "PROTECTED_OUTBOUND_PARTIAL_DELIVERY",
   "GENERATION_FAILURE_PERMANENT_INBOX_FAILURE",
 ]);
@@ -225,7 +254,7 @@ export function compareRealtimeReplySnapshots(input: {
   readonly candidate: RealtimeReplySnapshot;
   readonly permittedDifferences?: readonly PermittedRealtimeReplyDifference[];
 }): RealtimeReplyDifferentialResult {
-  const permitted = new Map<RealtimeReplyDifferenceCode, string>();
+  const permitted = new Map<PermittableRealtimeReplyDifferenceCode, string>();
   for (const difference of input.permittedDifferences ?? []) {
     const reasonCode = difference.reasonCode.trim();
     if (!reasonCode) throw new Error("REALTIME_DIFFERENTIAL_REASON_CODE_REQUIRED");
@@ -257,11 +286,23 @@ export function compareRealtimeReplySnapshots(input: {
   if (input.baseline.commitOutcome !== input.candidate.commitOutcome) {
     codes.push("COMMIT_OUTCOME_CHANGED");
   }
+  const baselineDelivery = input.baseline.protectedOutbound;
   const delivery = input.candidate.protectedOutbound;
+  const protectedInEither = baselineDelivery.required || delivery.required;
   if (
-    delivery.required &&
-    delivery.deliveredMessageCount !== 0 &&
-    delivery.deliveredMessageCount !== delivery.plannedMessageCount
+    baselineDelivery.required !== delivery.required ||
+    protectedInEither && (
+      baselineDelivery.groupId !== delivery.groupId ||
+      !protectedOutboundMetadataValid(input.baseline) ||
+      !protectedOutboundMetadataValid(input.candidate)
+    )
+  ) {
+    codes.push("PROTECTED_OUTBOUND_CONTRACT_CHANGED");
+  }
+  if (
+    protectedInEither &&
+    (hasPartialProtectedDelivery(input.baseline) ||
+      hasPartialProtectedDelivery(input.candidate))
   ) {
     codes.push("PROTECTED_OUTBOUND_PARTIAL_DELIVERY");
   }
@@ -273,7 +314,9 @@ export function compareRealtimeReplySnapshots(input: {
   }
 
   const differences = codes.map((code): RealtimeReplyDifference => {
-    const reasonCode = permitted.get(code) ?? null;
+    const reasonCode = code === "OUTBOUND_MESSAGES_CHANGED" || code === "STRATEGY_CHANGED"
+      ? permitted.get(code) ?? null
+      : null;
     const intentional = reasonCode !== null && !NON_PERMITTABLE_INVARIANTS.has(code);
     return {
       code,

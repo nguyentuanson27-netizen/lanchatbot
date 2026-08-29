@@ -26,6 +26,7 @@ function snapshot(
     inboxOutcome: "COMMITTED",
     protectedOutbound: {
       required: true,
+      groupId: "response-group-turn-1",
       plannedMessageCount: 2,
       deliveredMessageCount: 2,
     },
@@ -105,6 +106,7 @@ describe("realtime reply differential", () => {
         inboxOutcome: "FAILED_PERMANENT",
         protectedOutbound: {
           required: true,
+          groupId: "response-group-turn-1",
           plannedMessageCount: 2,
           deliveredMessageCount: 1,
         },
@@ -125,11 +127,13 @@ describe("realtime reply differential", () => {
       .toBe(true);
   });
 
-  it("requires every intentional wording difference to carry a non-empty reason code", () => {
+  it("requires every intentional wording or strategy difference to carry a reason code", () => {
     const candidate = snapshot({
       messages: [{ kind: "TEXT", text: "Mẫu SV695 giá 770.000đ chị nhé." }],
+      strategyHash: "strategy-model-owned",
       protectedOutbound: {
         required: true,
+        groupId: "response-group-turn-1",
         plannedMessageCount: 1,
         deliveredMessageCount: 1,
       },
@@ -141,6 +145,9 @@ describe("realtime reply differential", () => {
       permittedDifferences: [{
         code: "OUTBOUND_MESSAGES_CHANGED",
         reasonCode: "TRACK_B_MODEL_WORDING_AUTHORITY",
+      }, {
+        code: "STRATEGY_CHANGED",
+        reasonCode: "TRACK_B_MODEL_STRATEGY_AUTHORITY",
       }],
     })).toMatchObject({
       status: "INTENTIONAL_DIFFERENCE",
@@ -148,6 +155,10 @@ describe("realtime reply differential", () => {
         code: "OUTBOUND_MESSAGES_CHANGED",
         disposition: "INTENTIONAL",
         reasonCode: "TRACK_B_MODEL_WORDING_AUTHORITY",
+      }, {
+        code: "STRATEGY_CHANGED",
+        disposition: "INTENTIONAL",
+        reasonCode: "TRACK_B_MODEL_STRATEGY_AUTHORITY",
       }],
     });
 
@@ -157,8 +168,96 @@ describe("realtime reply differential", () => {
       permittedDifferences: [{
         code: "OUTBOUND_MESSAGES_CHANGED",
         reasonCode: "   ",
+      }, {
+        code: "STRATEGY_CHANGED",
+        reasonCode: "TRACK_B_MODEL_STRATEGY_AUTHORITY",
       }],
     })).toThrowError("REALTIME_DIFFERENTIAL_REASON_CODE_REQUIRED");
+  });
+
+  it("cannot bypass whole-group delivery by downgrading candidate protection", () => {
+    const result = compareRealtimeReplySnapshots({
+      baseline: snapshot(),
+      candidate: snapshot({
+        protectedOutbound: {
+          required: false,
+          groupId: null,
+          plannedMessageCount: 2,
+          deliveredMessageCount: 1,
+        },
+      }),
+    });
+
+    expect(result.status).toBe("VIOLATION");
+    expect(result.differences).toEqual(expect.arrayContaining([
+      {
+        code: "PROTECTED_OUTBOUND_CONTRACT_CHANGED",
+        disposition: "VIOLATION",
+        reasonCode: null,
+      },
+      {
+        code: "PROTECTED_OUTBOUND_PARTIAL_DELIVERY",
+        disposition: "VIOLATION",
+        reasonCode: null,
+      },
+    ]));
+
+    expect(compareRealtimeReplySnapshots({
+      baseline: snapshot(),
+      candidate: snapshot({
+        protectedOutbound: {
+          required: true,
+          groupId: "different-response-group",
+          plannedMessageCount: 2,
+          deliveredMessageCount: 2,
+        },
+      }),
+    }).differences).toContainEqual({
+      code: "PROTECTED_OUTBOUND_CONTRACT_CHANGED",
+      disposition: "VIOLATION",
+      reasonCode: null,
+    });
+
+    expect(compareRealtimeReplySnapshots({
+      baseline: snapshot(),
+      candidate: snapshot({
+        protectedOutbound: {
+          required: true,
+          groupId: "response-group-turn-1",
+          plannedMessageCount: 1,
+          deliveredMessageCount: 1,
+        },
+      }),
+    }).differences).toContainEqual({
+      code: "PROTECTED_OUTBOUND_CONTRACT_CHANGED",
+      disposition: "VIOLATION",
+      reasonCode: null,
+    });
+  });
+
+  it("never permits protected facts, effects, or commit outcomes to diverge in B2.1", () => {
+    const protectedDifference = [{
+      code: "VERIFIED_FACTS_CHANGED",
+      reasonCode: "ARBITRARY",
+    }] as unknown as NonNullable<
+      Parameters<typeof compareRealtimeReplySnapshots>[0]["permittedDifferences"]
+    >;
+    const result = compareRealtimeReplySnapshots({
+      baseline: snapshot(),
+      candidate: snapshot({
+        verifiedFactHashes: [],
+        effectAuthorizationHashes: ["effect-unauthorized"],
+        commitOutcome: "CONFLICT",
+      }),
+      permittedDifferences: protectedDifference,
+    });
+
+    expect(result.status).toBe("VIOLATION");
+    expect(result.differences).toEqual(expect.arrayContaining([
+      { code: "VERIFIED_FACTS_CHANGED", disposition: "VIOLATION", reasonCode: null },
+      { code: "EFFECT_AUTHORIZATION_CHANGED", disposition: "VIOLATION", reasonCode: null },
+      { code: "COMMIT_OUTCOME_CHANGED", disposition: "VIOLATION", reasonCode: null },
+    ]));
   });
 
   it("keeps the extracted shadow similarity calculation deterministic", () => {
