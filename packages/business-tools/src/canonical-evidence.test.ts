@@ -72,6 +72,99 @@ describe("DF05 canonical decision evidence", () => {
     );
   });
 
+  it("preserves a corroborated model action request without granting authorization", () => {
+    const text = "chốt 2 set mẫu này";
+    const result = buildCanonicalDecisionEvidenceV1({
+      text,
+      sourceMessageId: "mid.124-hybrid",
+      productId: "SP-001",
+      modelBuyingIntent: {
+        decision: "COMMITTED",
+        requestedAction: "SET_QUANTITY",
+        quantity: 2,
+        evidenceText: text,
+        confidence: 0.99,
+      },
+      evaluatedAt: new Date("2026-08-13T05:00:00.000Z"),
+    });
+
+    expect(result.buyingIntent).toMatchObject({
+      decision: "COMMITTED",
+      requestedAction: "SET_QUANTITY",
+      quantity: 2,
+      contributors: ["DETERMINISTIC_RUNTIME", "MODEL_STRUCTURED_OUTPUT"],
+      reasonCodes: ["DIRECT_PURCHASE_VERB", "MODEL_BUYING_COMMITTED"],
+      authorization: "NONE",
+    });
+    expect(result.dialogueEvidence.reasonCodes).toEqual([
+      "DIRECT_PURCHASE_VERB",
+      "MODEL_BUYING_COMMITTED",
+    ]);
+  });
+
+  it.each([
+    { text: "chốt mẫu này", requestedAction: "SET_QUANTITY" as const, quantity: 2 },
+    { text: "chốt 2 set mẫu này", requestedAction: "SET_QUANTITY" as const, quantity: 3 },
+    { text: "chốt mẫu này", requestedAction: "ADD_TO_CART" as const, quantity: 3 },
+    { text: "chốt 2 set mẫu này", requestedAction: "ADD_TO_CART" as const, quantity: 3 },
+  ])("rejects a model quantity not proven by exact customer evidence", ({
+    text,
+    requestedAction,
+    quantity,
+  }) => {
+    const result = buildCanonicalDecisionEvidenceV1({
+      text,
+      sourceMessageId: `mid.quantity-mismatch-${quantity}`,
+      productId: "SP-001",
+      modelBuyingIntent: {
+        decision: "COMMITTED",
+        requestedAction,
+        quantity,
+        evidenceText: text,
+        confidence: 0.99,
+      },
+      evaluatedAt: new Date("2026-08-13T05:00:00.000Z"),
+    });
+
+    expect(result.buyingIntent).toMatchObject({
+      requestedAction,
+      quantity: null,
+      authorization: "NONE",
+      reasonCodes: expect.arrayContaining(["MODEL_REQUEST_EVIDENCE_MISMATCH"]),
+    });
+    expect(result.dialogueEvidence.reasonCodes).not.toContain(
+      "MODEL_REQUEST_EVIDENCE_MISMATCH",
+    );
+  });
+
+  it("fails closed to a less aggressive decision when model and deterministic intent conflict", () => {
+    const text = "chốt mẫu này";
+    const result = buildCanonicalDecisionEvidenceV1({
+      text,
+      sourceMessageId: "mid.124-conflict",
+      productId: "SP-001",
+      modelBuyingIntent: {
+        decision: "NEGATED",
+        requestedAction: "NONE",
+        quantity: null,
+        evidenceText: text,
+        confidence: 0.99,
+      },
+      evaluatedAt: new Date("2026-08-13T05:00:00.000Z"),
+    });
+
+    expect(result.buyingIntent).toMatchObject({
+      decision: "NEGATED",
+      requestedAction: "NONE",
+      quantity: null,
+      productId: null,
+      contributors: ["MODEL_STRUCTURED_OUTPUT"],
+      reasonCodes: ["MODEL_BUYING_NEGATED", "MODEL_DETERMINISTIC_CONFLICT_LESS_AGGRESSIVE"],
+      authorization: "NONE",
+    });
+    expect(result.dialogueEvidence.reasonCodes).toEqual([]);
+  });
+
   it("keeps an unresolved committed request observable but unscoped", () => {
     const result = buildCanonicalDecisionEvidenceV1({
       text: "chốt mẫu này",

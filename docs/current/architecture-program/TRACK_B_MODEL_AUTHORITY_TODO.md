@@ -1,6 +1,6 @@
 # Track B — Execution Checklist
 
-**Status:** `B2.2_MERGED / B2.3A_SOURCE_IN_PROGRESS`
+**Status:** `B2.3A_MERGED / B2.3B_SOURCE_IN_PROGRESS`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` and its observed request envelope stay byte-frozen; the Context V2 candidate stays offline. If that direction proves insufficient, Track B stops incomplete; it has no prompt-edit or candidate-promotion alternative.
 
@@ -92,17 +92,19 @@ criteria, and it does not authorize merge, deployment or authority mutation.
   `89b1bee02109e17b6b3b2a0e714e24d3bdb70a60`; preserve verified fact, claim,
   effect, commit and whole-group hashes, and block a group carrying a
   model-declared ID with no typed evidence.
-- [ ] **Checkpoint:** exact B2.3a head has clean self-review, one fixed
+- [x] **Checkpoint:** exact B2.3a head has clean self-review, one fixed
   independent Sol High reviewer verdict, and canonical repository CI PASS.
 
 ## B2.3b — Effect reconciliation
 
-- [ ] Treat model actions and effects as requests only; model evidence has authorization `NONE` (DF06 §9).
-- [ ] Keep deterministic cart/checkout/payment/handoff authorization, CAS, version, idempotency and trusted-port checks.
-- [ ] Resolve ambiguity or deterministic/model conflict to the **less aggressive** action and emit evidence.
-- [ ] Preserve atomic state and effect-intent behavior.
-- [ ] Split `realtime-sales-cycle.ts` renderers: keep exact transaction/effect facts, policy denials and minimal safe confirmations; move normal objection, negotiation and CTA prose to model authority.
-- [ ] Test duplicate, stale, conflicting, unauthorized and transaction-failure paths.
+- [x] Treat the existing structured model action as a request only; model evidence retains `authorization: NONE` (DF06 §9) and a model-only request cannot pass readiness.
+- [x] Preserve deterministic cart/checkout/payment/handoff authorization and the existing transaction-time CAS, version, idempotency, fence, policy and trusted-port checks; bind cart-open, ADD default-one/explicit quantity and SET quantity to the exact payload again in final database verification.
+- [x] Resolve deterministic/model conflict to the **less aggressive** action and emit `MODEL_*` conflict evidence codes.
+- [x] Preserve atomic state and effect-intent behavior; no new persistence, commit or side-effect port is introduced.
+- [x] Record the renderer disposition: exact transaction/effect facts, policy denials and minimal safe confirmations stay deterministic; negotiation prose remains deferred to B2.3c and is not changed by this focused slice.
+- [x] Exercise exact action and quantity-evidence mismatch, model-only authorization, adversarial resealed cart-open/ADD/SET quantity mismatch at the database transaction boundary, positive corroborated mutation, duplicate/stale/CAS/idempotency/transaction invariants and side-effect-free r31.3 live-sales-cycle replays pinned to pre-B2.3b `933a227a0ff08702e87ea697d7284d7024f74dbf`.
+- [x] Keep B2.3b conflict/mismatch codes in canonical buying-intent provenance without widening the migration-frozen dialogue/admin allowlist; assert the historical Gate-E identity fails closed for changed Track B source pending B3.1 re-evaluation.
+- [x] **Checkpoint:** reviewed source head `97e4a1f1cee8dffd07519454260c0f5d28fe87a9` had clean self-review, the fixed independent Sol High reviewer returned APPROVE with no Required/P0/P1/P2, and canonical repository CI run `33291355341` passed all repository steps. This docs-only closure must retain those source bytes and pass its own exact-head CI before merge readiness.
 
 ## B2.3c — Negotiation split
 

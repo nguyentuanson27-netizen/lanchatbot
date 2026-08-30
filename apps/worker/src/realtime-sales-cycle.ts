@@ -276,11 +276,13 @@ function deterministicMutationIntentReady(
   buyingIntent: CanonicalBuyingIntentV1,
   action: "ADD_LINE" | "SET_QUANTITY",
   productId: string,
+  quantity: number,
 ): boolean {
   return canonicalBuyingIntentAuthorizesCartMutationV1(
     buyingIntent,
     action,
     productId,
+    quantity,
   );
 }
 
@@ -955,6 +957,7 @@ export async function evaluateRealtimeSalesCycle(
     mutationAction: CartMutationActionV1 | null = null,
     parentReadinessHash: string | null = null,
     payloadHash: string | null = null,
+    mutationQuantity: number | null = null,
   ): DeterministicEffectReadinessV1 => {
     const claims = buildProtectedClaimsFromCartSelectionsV1(selections.map((selection) => ({
       productId: selection.line.parentProductId,
@@ -996,6 +999,7 @@ export async function evaluateRealtimeSalesCycle(
       claims,
       deterministicEvidenceHash,
       mutationAction,
+      mutationQuantity,
       parentReadinessHash,
       payloadHash,
       checkedAt,
@@ -1083,6 +1087,13 @@ export async function evaluateRealtimeSalesCycle(
       receipt.evidenceHash,
       checkedAt,
       action,
+      null,
+      null,
+      mutation.kind === "ADD_LINE"
+        ? mutation.line.quantity
+        : mutation.kind === "SET_QUANTITY"
+          ? mutation.quantity
+          : null,
     );
     if (acceptReadiness(readiness)) cartMutationReceipts.push(receipt);
     return readiness;
@@ -1893,6 +1904,7 @@ export async function evaluateRealtimeSalesCycle(
         input.canonicalBuyingIntent,
         "SET_QUANTITY",
         input.productId,
+        requestedQuantityValue(input.canonicalBuyingIntent)!,
       )) return failedOutput("BUYING_INTENT_MISSING");
       const existing = state.cart.value.lines.find(({ parentProductId }) =>
         parentProductId === input.productId
@@ -1982,6 +1994,7 @@ export async function evaluateRealtimeSalesCycle(
         input.canonicalBuyingIntent,
         "ADD_LINE",
         input.productId,
+        requestedQuantity(input.canonicalBuyingIntent),
       )) return failedOutput("BUYING_INTENT_MISSING");
       if (state.cart.value.lines.length >= MAX_CART_LINES_V1) {
         return failedOutput("CART_CAPACITY_EXCEEDED", plan());

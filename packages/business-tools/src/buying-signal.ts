@@ -7,7 +7,11 @@ export type BuyingSignalReason =
   | "CONFIRMED_SIZE"
   | "CONFIRMED_COLOR"
   | "COMPONENT_SELECTION"
-  | "MODEL_BUYING_COMMITTED";
+  | "MODEL_BUYING_COMMITTED"
+  | "MODEL_BUYING_NEGATED"
+  | "MODEL_BUYING_CONSIDERING"
+  | "MODEL_DETERMINISTIC_CONFLICT_LESS_AGGRESSIVE"
+  | "MODEL_REQUEST_EVIDENCE_MISMATCH";
 
 export interface BuyingSignalContext {
   readonly hasProductContext?: boolean;
@@ -133,6 +137,64 @@ export function resolveHybridBuyingSignal(
   modelSignal: AgentBuyingIntentV1 | null | undefined = null,
 ): HybridBuyingSignalDetection {
   const deterministic = detectBuyingSignal(value, context);
+  const matchedModelSignal =
+    context.hasProductContext === true &&
+    modelSignal !== null &&
+    modelSignal !== undefined &&
+    exactEvidence(value, modelSignal.evidenceText);
+  const usableModelSignal = matchedModelSignal && modelSignal.confidence >= 0.9;
+  if (matchedModelSignal && modelSignal.decision === "NEGATED") {
+    return {
+      isBuyingSignal: false,
+      reasons: deterministic.isBuyingSignal
+        ? ["MODEL_BUYING_NEGATED", "MODEL_DETERMINISTIC_CONFLICT_LESS_AGGRESSIVE"]
+        : ["MODEL_BUYING_NEGATED"],
+      decision: "NEGATED",
+      source: "MODEL_STRUCTURED_OUTPUT",
+      quantity: null,
+    };
+  }
+  if (matchedModelSignal && modelSignal.decision === "CONSIDERING") {
+    return {
+      isBuyingSignal: false,
+      reasons: deterministic.isBuyingSignal
+        ? ["MODEL_BUYING_CONSIDERING", "MODEL_DETERMINISTIC_CONFLICT_LESS_AGGRESSIVE"]
+        : ["MODEL_BUYING_CONSIDERING"],
+      decision: "CONSIDERING",
+      source: "MODEL_STRUCTURED_OUTPUT",
+      quantity: null,
+    };
+  }
+  if (
+    deterministic.isBuyingSignal &&
+    usableModelSignal &&
+    modelSignal.decision === "COMMITTED" &&
+    modelSignal.requestedAction === "OPEN_CART"
+  ) {
+    return {
+      ...deterministic,
+      decision: "COMMITTED",
+      source: "DETERMINISTIC",
+      quantity: null,
+    };
+  }
+  if (
+    usableModelSignal &&
+    modelSignal.decision === "COMMITTED" &&
+    validCommittedAction(modelSignal.requestedAction) &&
+    !informationQuestion(value)
+  ) {
+    return {
+      isBuyingSignal: true,
+      reasons: [...new Set([
+        ...deterministic.reasons,
+        "MODEL_BUYING_COMMITTED" as const,
+      ])].sort(),
+      decision: "COMMITTED",
+      source: "MODEL_STRUCTURED_OUTPUT",
+      quantity: modelSignal.quantity,
+    };
+  }
   if (deterministic.isBuyingSignal) {
     return {
       ...deterministic,
@@ -141,13 +203,6 @@ export function resolveHybridBuyingSignal(
       quantity: null,
     };
   }
-
-  const usableModelSignal =
-    context.hasProductContext === true &&
-    modelSignal !== null &&
-    modelSignal !== undefined &&
-    modelSignal.confidence >= 0.9 &&
-    exactEvidence(value, modelSignal.evidenceText);
   if (!usableModelSignal) {
     return {
       isBuyingSignal: false,
@@ -158,24 +213,6 @@ export function resolveHybridBuyingSignal(
     };
   }
 
-  if (modelSignal.decision === "NEGATED") {
-    return {
-      isBuyingSignal: false,
-      reasons: [],
-      decision: "NEGATED",
-      source: "MODEL_STRUCTURED_OUTPUT",
-      quantity: null,
-    };
-  }
-  if (modelSignal.decision === "CONSIDERING") {
-    return {
-      isBuyingSignal: false,
-      reasons: [],
-      decision: "CONSIDERING",
-      source: "MODEL_STRUCTURED_OUTPUT",
-      quantity: null,
-    };
-  }
   if (
     modelSignal.decision !== "COMMITTED" ||
     !validCommittedAction(modelSignal.requestedAction) ||

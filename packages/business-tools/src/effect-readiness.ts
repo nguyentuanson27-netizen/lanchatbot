@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import {
   canonicalCartOfferBindingsV1,
+  canonicalBuyingIntentAuthorizesCartOpenV1,
   canonicalBuyingIntentAuthorizesCartMutationV1,
   canonicalizeReadinessProductIdsV1,
   DeterministicEffectReadinessV1Schema,
@@ -39,6 +40,7 @@ export interface EvaluateDeterministicEffectReadinessV1Input {
   readonly parentReadinessHash?: string | null;
   readonly payloadHash?: string | null;
   readonly mutationAction?: "ADD_LINE" | "REMOVE_LINE" | "SET_QUANTITY" | null;
+  readonly mutationQuantity?: number | null;
   readonly checkedAt: Date;
 }
 
@@ -69,6 +71,15 @@ export function evaluateDeterministicEffectReadinessV1(
       !productIds.includes(input.buyingIntent.productId)
     ) {
       reasons.add("BUYING_INTENT_SCOPE_MISMATCH");
+    } else if (input.effect === "CART_OPEN") {
+      const seedLine = input.cartLines?.find(({ parentProductId }) =>
+        parentProductId === input.buyingIntent?.productId
+      );
+      if (seedLine === undefined || !canonicalBuyingIntentAuthorizesCartOpenV1(
+        input.buyingIntent,
+        seedLine.parentProductId,
+        seedLine.quantity,
+      )) reasons.add("BUYING_INTENT_SCOPE_MISMATCH");
     }
   }
   if (
@@ -82,6 +93,7 @@ export function evaluateDeterministicEffectReadinessV1(
       input.buyingIntent,
       input.mutationAction,
       input.buyingIntent.productId,
+      input.mutationQuantity ?? -1,
     )
   ) reasons.add("BUYING_INTENT_SCOPE_MISMATCH");
   if (input.effect === "CART_MUTATION" && !input.deterministicEvidenceHash) {

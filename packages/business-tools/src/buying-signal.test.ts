@@ -105,7 +105,7 @@ describe("buying-signal detection", () => {
     }).isBuyingSignal).toBe(false);
   });
 
-  it("keeps an explicit deterministic commitment even if model evidence disagrees", () => {
+  it("resolves deterministic/model conflict to the less aggressive model rejection", () => {
     expect(resolveHybridBuyingSignal("chốt mẫu này", { hasProductContext: true }, {
       decision: "NEGATED",
       requestedAction: "NONE",
@@ -113,9 +113,57 @@ describe("buying-signal detection", () => {
       evidenceText: "chốt mẫu này",
       confidence: 0.99,
     })).toMatchObject({
+      isBuyingSignal: false,
+      reasons: ["MODEL_BUYING_NEGATED", "MODEL_DETERMINISTIC_CONFLICT_LESS_AGGRESSIVE"],
+      decision: "NEGATED",
+      source: "MODEL_STRUCTURED_OUTPUT",
+    });
+  });
+
+  it("treats a lower-confidence exact conflict as ambiguity and still avoids escalation", () => {
+    expect(resolveHybridBuyingSignal("chốt mẫu này", { hasProductContext: true }, {
+      decision: "CONSIDERING",
+      requestedAction: "NONE",
+      quantity: null,
+      evidenceText: "chốt mẫu này",
+      confidence: 0.55,
+    })).toMatchObject({
+      isBuyingSignal: false,
+      reasons: ["MODEL_BUYING_CONSIDERING", "MODEL_DETERMINISTIC_CONFLICT_LESS_AGGRESSIVE"],
+      decision: "CONSIDERING",
+      source: "MODEL_STRUCTURED_OUTPUT",
+    });
+  });
+
+  it("retains a structured requested action when deterministic evidence corroborates commitment", () => {
+    expect(resolveHybridBuyingSignal("chốt 2 set mẫu này", { hasProductContext: true }, {
+      decision: "COMMITTED",
+      requestedAction: "SET_QUANTITY",
+      quantity: 2,
+      evidenceText: "chốt 2 set mẫu này",
+      confidence: 0.99,
+    })).toEqual({
       isBuyingSignal: true,
+      reasons: ["DIRECT_PURCHASE_VERB", "MODEL_BUYING_COMMITTED"],
+      decision: "COMMITTED",
+      source: "MODEL_STRUCTURED_OUTPUT",
+      quantity: 2,
+    });
+  });
+
+  it("keeps the existing deterministic identity when the model only echoes OPEN_CART", () => {
+    expect(resolveHybridBuyingSignal("chốt mẫu này", { hasProductContext: true }, {
+      decision: "COMMITTED",
+      requestedAction: "OPEN_CART",
+      quantity: null,
+      evidenceText: "chốt mẫu này",
+      confidence: 0.99,
+    })).toEqual({
+      isBuyingSignal: true,
+      reasons: ["DIRECT_PURCHASE_VERB"],
       decision: "COMMITTED",
       source: "DETERMINISTIC",
+      quantity: null,
     });
   });
 });

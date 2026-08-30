@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  canonicalBuyingIntentAuthorizesCartMutationV1,
+  canonicalBuyingIntentAuthorizesCartOpenV1,
   canonicalizeReadinessProductIdsV1,
   CanonicalBuyingIntentV1Schema,
   CanonicalDialogueEvidenceV1Schema,
@@ -92,6 +94,54 @@ describe("DF05 canonical evidence contracts", () => {
       ...intent,
       authorization: "CART_OPEN",
     }).success).toBe(false);
+  });
+
+  it("requires exact action, product, and quantity binding for cart mutations", () => {
+    const base = CanonicalBuyingIntentV1Schema.parse({
+      schemaVersion: 1,
+      authorityVersion: "CANONICAL_BUYING_INTENT_V1",
+      decision: "COMMITTED",
+      requestedAction: "OPEN_CART",
+      quantity: 2,
+      productId: "SP-001",
+      contributors: ["DETERMINISTIC_RUNTIME"],
+      sourceMessageIdHash: HASH,
+      evidenceHash: OTHER_HASH,
+      reasonCodes: ["DIRECT_PURCHASE_VERB"],
+      evaluatedAt: "2026-08-13T05:00:00.000Z",
+      authorization: "NONE",
+    });
+    expect(canonicalBuyingIntentAuthorizesCartMutationV1(base, "SET_QUANTITY", "SP-001", 2))
+      .toBe(false);
+
+    const hybridOpen = CanonicalBuyingIntentV1Schema.parse({
+      ...base,
+      contributors: ["DETERMINISTIC_RUNTIME", "MODEL_STRUCTURED_OUTPUT"],
+      reasonCodes: ["DIRECT_PURCHASE_VERB", "MODEL_BUYING_COMMITTED"],
+    });
+    expect(canonicalBuyingIntentAuthorizesCartMutationV1(hybridOpen, "SET_QUANTITY", "SP-001", 2))
+      .toBe(false);
+    const hybridSet = CanonicalBuyingIntentV1Schema.parse({
+      ...hybridOpen,
+      requestedAction: "SET_QUANTITY",
+    });
+    expect(canonicalBuyingIntentAuthorizesCartMutationV1(hybridSet, "SET_QUANTITY", "SP-001", 2))
+      .toBe(true);
+    expect(canonicalBuyingIntentAuthorizesCartMutationV1(hybridSet, "SET_QUANTITY", "SP-001", 3))
+      .toBe(false);
+    expect(canonicalBuyingIntentAuthorizesCartMutationV1(hybridSet, "ADD_LINE", "SP-001", 2))
+      .toBe(false);
+    const hybridAdd = CanonicalBuyingIntentV1Schema.parse({
+      ...hybridOpen,
+      requestedAction: "ADD_TO_CART",
+      quantity: null,
+    });
+    expect(canonicalBuyingIntentAuthorizesCartMutationV1(hybridAdd, "ADD_LINE", "SP-001", 1))
+      .toBe(true);
+    expect(canonicalBuyingIntentAuthorizesCartMutationV1(hybridAdd, "ADD_LINE", "SP-001", 2))
+      .toBe(false);
+    expect(canonicalBuyingIntentAuthorizesCartOpenV1(base, "SP-001", 2)).toBe(true);
+    expect(canonicalBuyingIntentAuthorizesCartOpenV1(base, "SP-001", 1)).toBe(false);
   });
 
   it("does not allow non-committed intent to carry action, quantity, or product scope", () => {

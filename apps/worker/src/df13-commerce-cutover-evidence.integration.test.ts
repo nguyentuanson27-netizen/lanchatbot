@@ -142,13 +142,14 @@ function ports(
 }
 
 describe("DF13 cutover release-evidence seam", () => {
-  it("executes the real evidence prepare/validate path before the source-only cutover protocol", async () => {
+  it("fails closed before the cutover protocol when historical Gate E evidence is stale", async () => {
     await expect(executeCommerceCutover({
       preflight: preflightInput(),
       ports: ports(sourceReader()),
     })).resolves.toMatchObject({
-      status: "COMMERCE_ACTIVE",
-      sideEffects: "CONTROL_PLANE_ONLY",
+      status: "BLOCKED_LEGACY",
+      sideEffects: "NOT_EXECUTED",
+      reasonCodes: ["DF13_GATE_E_CANDIDATE_FINGERPRINT_MISMATCH"],
     });
   });
 
@@ -168,6 +169,7 @@ describe("DF13 cutover release-evidence seam", () => {
       sideEffects: "NOT_EXECUTED",
       reasonCodes: [
         "DF13_GATE_E_MANIFEST_IDENTITY_MISMATCH",
+        "DF13_GATE_E_CANDIDATE_FINGERPRINT_MISMATCH",
         "DF13_GATE_E_MANIFEST_FIELD_MISMATCH",
       ],
     });

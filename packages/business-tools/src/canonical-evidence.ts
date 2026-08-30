@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import {
   CanonicalBuyingIntentV1Schema,
   CanonicalDialogueEvidenceV1Schema,
+  DECISION_DIALOGUE_EVIDENCE_CODES_V1,
   canonicalJsonV1,
   type AgentBuyingIntentV1,
   type CanonicalBuyingIntentV1,
@@ -28,6 +29,7 @@ function sha256(value: string): string {
 }
 
 const canonicalJson = canonicalJsonV1;
+const observableDialogueCodes = new Set<string>(DECISION_DIALOGUE_EVIDENCE_CODES_V1);
 
 function explicitQuantity(text: string): number | null {
   const folded = foldVietnameseForRecall(text)
@@ -133,9 +135,25 @@ export function buildCanonicalDecisionEvidenceV1(
       ? input.modelBuyingIntent?.requestedAction ?? "OPEN_CART"
       : "OPEN_CART"
     : "NONE";
+  const observedQuantity = explicitQuantity(input.text);
+  const modelQuantityMismatch =
+    decision === "COMMITTED" &&
+    resolved.source === "MODEL_STRUCTURED_OUTPUT" &&
+    (
+      requestedAction === "SET_QUANTITY" && observedQuantity === null ||
+      input.modelBuyingIntent?.quantity !== null &&
+        input.modelBuyingIntent?.quantity !== observedQuantity
+    );
   const quantity = decision === "COMMITTED"
-    ? explicitQuantity(input.text) ?? resolved.quantity
+    ? modelQuantityMismatch
+      ? null
+      : observedQuantity
     : null;
+  const reasonCodes = observed
+    ? modelQuantityMismatch
+      ? [...resolved.reasons, "MODEL_REQUEST_EVIDENCE_MISMATCH" as const]
+      : resolved.reasons
+    : [];
   const buyingIntent = CanonicalBuyingIntentV1Schema.parse({
     schemaVersion: 1,
     authorityVersion: "CANONICAL_BUYING_INTENT_V1",
@@ -152,11 +170,11 @@ export function buildCanonicalDecisionEvidenceV1(
           requestedAction,
           quantity,
           input.productId,
-          resolved.reasons,
+          reasonCodes,
           contributors,
         ]))
       : null,
-    reasonCodes: observed ? resolved.reasons : [],
+    reasonCodes,
     evaluatedAt: input.evaluatedAt.toISOString(),
     authorization: "NONE",
   });
@@ -180,9 +198,9 @@ export function buildCanonicalDecisionEvidenceV1(
       normalizedTextHash,
       act,
       dialogueContributors,
-      resolved.reasons,
+      reasonCodes.filter((code) => observableDialogueCodes.has(code)),
     ])),
-    reasonCodes: resolved.reasons,
+    reasonCodes: reasonCodes.filter((code) => observableDialogueCodes.has(code)),
     authorization: "NONE",
   });
   return { dialogueEvidence, buyingIntent };

@@ -184,15 +184,29 @@ export function canonicalBuyingIntentAuthorizesCartMutationV1(
   intent: CanonicalBuyingIntentV1,
   action: "ADD_LINE" | "SET_QUANTITY",
   productId: string,
+  quantity: number,
 ): boolean {
   const requestedActions: readonly CanonicalBuyingIntentV1["requestedAction"][] =
-    action === "ADD_LINE"
-      ? ["ADD_TO_CART", "OPEN_CART"]
-      : ["SET_QUANTITY", "OPEN_CART"];
+    action === "ADD_LINE" ? ["ADD_TO_CART"] : ["SET_QUANTITY"];
   return intent.decision === "COMMITTED" &&
     intent.contributors.includes("DETERMINISTIC_RUNTIME") &&
     intent.productId === productId &&
-    requestedActions.includes(intent.requestedAction);
+    requestedActions.includes(intent.requestedAction) &&
+    (action === "ADD_LINE"
+      ? (intent.quantity ?? 1) === quantity
+      : intent.quantity !== null && intent.quantity === quantity);
+}
+
+export function canonicalBuyingIntentAuthorizesCartOpenV1(
+  intent: CanonicalBuyingIntentV1,
+  productId: string,
+  quantity: number,
+): boolean {
+  return intent.decision === "COMMITTED" &&
+    intent.contributors.includes("DETERMINISTIC_RUNTIME") &&
+    intent.productId === productId &&
+    (intent.requestedAction === "OPEN_CART" || intent.requestedAction === "ADD_TO_CART") &&
+    (intent.quantity ?? 1) === quantity;
 }
 
 export const DeterministicConfirmationEvidenceV1Schema = z.object({

@@ -45,18 +45,25 @@ describe("DF13 release-candidate evidence CLI", () => {
     ])).toThrow("DF13_RELEASE_CANDIDATE_EVIDENCE_CLI_ARGUMENTS_INVALID");
   });
 
-  it("re-derives and self-validates source-only evidence without an activation path", async () => {
+  it("reports stale historical Gate E evidence without an activation path", async () => {
     await expect(runDf13ReleaseCandidateEvidenceCli({
       activationReleaseRevision,
       git: sourceReader,
     })).resolves.toMatchObject({
-      status: "SOURCE_READY_NO_ACTIVATION",
+      status: "BLOCKED",
       sideEffects: "NOT_EXECUTED",
-      validation: { status: "MATCHED", reasonCodes: [] },
+      validation: {
+        status: "MISMATCH",
+        reasonCodes: expect.arrayContaining([
+          "DF13_RELEASE_EVIDENCE_STATUS_INVALID",
+          "DF13_RELEASE_EVIDENCE_CANDIDATE_PROJECTION_INVALID",
+        ]),
+      },
       evidence: {
         activationReleaseRevision,
-        status: "SOURCE_READY_NO_ACTIVATION",
+        status: "BLOCKED",
         sideEffects: "NOT_EXECUTED",
+        reasonCodes: ["DF13_GATE_E_CANDIDATE_FINGERPRINT_MISMATCH"],
         releaseSource: {
           treeOid: "b".repeat(40),
         },
