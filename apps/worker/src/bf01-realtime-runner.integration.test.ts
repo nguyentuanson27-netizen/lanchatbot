@@ -1,7 +1,11 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import { createConversationState } from "@lana/conversation-engine";
-import { canonicalJsonV1, type AgentProposalV1 } from "@lana/contracts";
+import {
+  canonicalJsonV1,
+  type AgentProposalV1,
+  type CustomerProfileV1,
+} from "@lana/contracts";
 import type { RealtimeCommitInput, RealtimeCommitResult } from "@lana/database";
 import type {
   SalesCycleRuntimeState,
@@ -164,6 +168,111 @@ function policyResolution(): RuntimePolicyResolution {
   };
 }
 
+function sizePolicyResolution(): RuntimePolicyResolution {
+  const base = policyResolution();
+  if (base.status !== "RESOLVED") throw new Error("BF04_POLICY_FIXTURE_INVALID");
+  const resolved = {
+    ...base,
+    bundle: {
+      ...base.bundle!,
+      versionReferences: [{
+        artifactKey: "ao-dai-dress",
+        artifactKind: "SIZE_CHART",
+        lifecycle: "PUBLISHED",
+      }],
+      artifacts: {
+        ...base.bundle!.artifacts,
+        sizeCharts: {
+          "ao-dai-dress": {
+            chart: {
+              schemaVersion: 1,
+              reference: {
+                chartId: "ao-dai-dress",
+                version: "1",
+                source: "IMAGE_EXTRACTION",
+                sourceArtifactRef: "https://cdn.example/ao-dai-size.jpg",
+                sourceContentSha256: "d".repeat(64),
+                verificationStatus: "VERIFIED",
+                verifiedByRef: "admin:owner",
+                verifiedAt: occurredAt,
+              },
+              brand: "LANA",
+              category: "AO_DAI",
+              componentRole: "DRESS",
+              boundaryPolicy: "REQUIRE_HUMAN_REVIEW",
+              bands: [{
+                size: "M",
+                ranges: [
+                  { kind: "HEIGHT_CM", minInclusive: 155, maxInclusive: 168 },
+                  { kind: "WEIGHT_KG", minInclusive: 50, maxInclusive: 57 },
+                ],
+                note: null,
+              }],
+            },
+            scope: {
+              level: "COMPONENT",
+              parentProductIds: ["SD398"],
+              categories: ["AO_DAI"],
+              componentRole: "DRESS",
+              forms: [],
+              materials: [],
+            },
+            extraction: {
+              measurementBasis: "BODY",
+              confidence: 1,
+              extractorVersion: "fixture",
+            },
+            sourceMetadata: {
+              sourceReference: "https://cdn.example/ao-dai-size.jpg",
+            },
+          },
+        },
+      },
+    },
+  };
+  return resolved as unknown as RuntimePolicyResolution;
+}
+
+function sizeProfile(): CustomerProfileV1 {
+  return {
+    schemaVersion: 1,
+    profileId: "30709206-8f96-4a1b-9311-6f03ef4dd8b2",
+    customerKey: {
+      namespace: "lana-customer-v1",
+      algorithm: "HMAC_SHA256",
+      digest: "a".repeat(64),
+    },
+    revision: 2,
+    measurements: [
+      {
+        kind: "HEIGHT_CM",
+        value: 160,
+        provenance: {
+          source: "CUSTOMER_MESSAGE",
+          sourceEventHash: "b".repeat(64),
+          observedAt: occurredAt,
+          confidence: 1,
+        },
+      },
+      {
+        kind: "WEIGHT_KG",
+        value: 53,
+        provenance: {
+          source: "CUSTOMER_MESSAGE",
+          sourceEventHash: "c".repeat(64),
+          observedAt: occurredAt,
+          confidence: 1,
+        },
+      },
+    ],
+    fitPreference: null,
+    preferences: { colors: [], styles: [], materials: [] },
+    sizeHistory: [],
+    createdAt: occurredAt,
+    updatedAt: occurredAt,
+  };
+}
+
 function commerceResolution(): RuntimeBehaviorModeResolution {
   const authorityBundleHash = DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
   return {
@@ -205,6 +314,8 @@ function createHarness(input: {
   initialReply?: string;
   initialFactIntent?: AgentProposalV1["businessFactQuery"]["intent"];
   initialProtectedClaimIds?: readonly string[];
+  sizeFixture?: boolean;
+  sizeRepairMode?: "VALID" | "INVALID" | "THROW";
 } = {}) {
   const base = createConversationState({
     conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
@@ -311,7 +422,7 @@ function createHarness(input: {
       inboxBatchStatus: "NOT_REQUESTED" as const,
     };
   });
-  const runtime: RealtimeRuntimePort = {
+  const runtime = {
     loadOrCreate: vi.fn(async () => ({
       conversationId: state.conversationId,
       pageId,
@@ -322,6 +433,19 @@ function createHarness(input: {
       appSendEnabled: true,
       killSwitch: false,
     })),
+    ...(input.sizeFixture
+      ? {
+          loadOrCreateCustomerProfile: vi.fn(async () => ({
+            pageId,
+            customerHash: conversationHash,
+            revision: sizeProfile().revision,
+            profile: sizeProfile(),
+            fieldEvidence: {},
+            expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+          })),
+          compareAndSwapCustomerProfile: vi.fn(async () => true),
+        }
+      : {}),
     ...(input.commerce
       ? {
           loadOrCreateSalesCycle: loadCommerceSalesCycle,
@@ -333,7 +457,7 @@ function createHarness(input: {
       : {}),
     commit,
     linkProviderConversation: vi.fn(async () => undefined),
-  };
+  } as unknown as RealtimeRuntimePort;
 
   const generate = vi.fn(async (
     _context: Parameters<RealtimeModelPort["generate"]>[0],
@@ -361,9 +485,35 @@ function createHarness(input: {
     }
     return modelResult(proposal("REPLY", safeRepairText));
   });
+  const repairSizeClaimDraft = vi.fn(async (
+    _context: Parameters<NonNullable<RealtimeModelPort["repairSizeClaimDraft"]>>[0],
+    initial: AgentProposalV1,
+    _reasonCodes: readonly string[],
+    trustedClaims: Parameters<NonNullable<RealtimeModelPort["repairSizeClaimDraft"]>>[3],
+  ) => {
+    if (input.sizeRepairMode === "THROW") {
+      throw new Error("BF04_SIZE_REPAIR_TEST_FAILURE");
+    }
+    if (input.sizeRepairMode === "INVALID") {
+      return modelResult({
+        ...initial,
+        reply: "Chị chắc chắn hợp size XL.",
+        protectedClaimIds: [
+          ...trustedClaims.map(({ id }) => id),
+          "55555555-5555-4555-8555-555555555555",
+        ],
+      });
+    }
+    return modelResult({
+      ...initial,
+      reply: "Theo số đo đã xác minh, chị hợp size M; chị thích mặc ôm hay thoải mái hơn?",
+      protectedClaimIds: trustedClaims.map(({ id }) => id),
+    });
+  });
   const model: RealtimeModelPort = {
     generate,
     groundWithFacts: vi.fn(async (_context, initial) => modelResult(initial)),
+    ...(input.sizeFixture ? { repairSizeClaimDraft } : {}),
   };
 
   const productSearch: RealtimeProductSearchPort = {
@@ -417,7 +567,9 @@ function createHarness(input: {
     })),
   };
   const policyResolver: RuntimePolicyResolverPort = {
-    resolve: vi.fn(async () => policyResolution()),
+    resolve: vi.fn(async () => input.sizeFixture
+      ? sizePolicyResolution()
+      : policyResolution()),
   };
 
   const quotaResults = [...(input.quotaResults ?? [true, true])];
@@ -497,6 +649,7 @@ function createHarness(input: {
       decisionTelemetryEnabled: true,
       decisionAuditV2Enabled: true,
       wave2StrategyEnabled: true,
+      customerProfileEnabled: input.sizeFixture ?? false,
       releaseId: "bf01-test",
       ...(input.commerce
         ? {
@@ -518,6 +671,7 @@ function createHarness(input: {
   return {
     runner,
     generate,
+    repairSizeClaimDraft,
     reserve,
     commit,
     retry,
@@ -752,6 +906,106 @@ describe("BF-01 runner reconciliation", () => {
     expect(candidateSnapshot.protectedOutbound.deliveredMessageCount).toBe(
       candidateSnapshot.protectedOutbound.plannedMessageCount,
     );
+  });
+
+  it("replays the B2.3d COMMERCE size boundary through r31.3 without safety drift", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(occurredAt));
+    try {
+    const capturedInput = {
+      customerText: "Tư vấn size cho chị mẫu SD398",
+      initialReply: "Theo số đo, chị hợp size M.",
+    };
+    const runLivePath = async (
+      capture: Readonly<typeof capturedInput>,
+    ): Promise<RealtimeReplySnapshot> => {
+      const harness = createHarness({
+        commerce: true,
+        sizeFixture: true,
+        initialMode: "REPLY",
+        customerText: capture.customerText,
+        initialReply: capture.initialReply,
+        initialFactIntent: "SIZE",
+      });
+      expect(await harness.runner.processOne()).toBe(true);
+      const commit = harness.commerceCommit.mock.calls[0]?.[0]?.runtimeCommit;
+      if (!commit) throw new Error("TRACK_B_B23D_COMMIT_MISSING");
+      const rawResult = harness.commerceCommit.mock.results[0];
+      if (!rawResult || rawResult.type !== "return") {
+        throw new Error("TRACK_B_B23D_COMMERCE_COMMIT_RESULT_MISSING");
+      }
+      const result = (await rawResult.value).runtime;
+      expect(harness.repairSizeClaimDraft).toHaveBeenCalledOnce();
+      expect(committedText(commit)).toContain("chị hợp size M");
+      expect(commit.decisionEvents?.flatMap(({ reasonCodes }) => reasonCodes))
+        .toEqual(expect.arrayContaining([
+          "SIZE_RECOMMENDATION_UNDECLARED",
+          "SIZE_RECOMMENDATION_REPAIRED",
+        ]));
+      expect(commit.metaPlan?.protectedClaims?.filter(({ type }) => type === "SIZE_FIT"))
+        .toHaveLength(1);
+      return committedSnapshot({
+        commit,
+        result,
+        inboxCommitted: harness.complete.mock.calls.length === 1,
+      });
+    };
+
+    const snapshots: RealtimeReplySnapshot[] = [];
+    const result = await realtimeReplyDifferential.runRealtimeReplyDifferential({
+      capturedInput,
+      baseline: async (capture) => runLivePath(capture),
+      candidate: async (capture) => {
+        const snapshot = await runLivePath(capture);
+        snapshots.push(snapshot);
+        return snapshot;
+      },
+      permittedDifferences: [],
+    });
+
+    expect(result.sideEffects).toBe("DISABLED");
+    expect(result.status).toBe("MATCH");
+    expect(result.differences).toEqual([]);
+    expect(snapshots[0]).toMatchObject({
+      commitOutcome: "COMMITTED",
+      inboxOutcome: "COMMITTED",
+      protectedOutbound: { required: true },
+    });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("caps an invalid COMMERCE size repair at one and commits only safe fallback", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(occurredAt));
+    try {
+    const harness = createHarness({
+      commerce: true,
+      sizeFixture: true,
+      sizeRepairMode: "INVALID",
+      initialMode: "REPLY",
+      customerText: "Tư vấn size cho chị mẫu SD398",
+      initialReply: "Theo số đo, chị hợp size XL.",
+      initialFactIntent: "SIZE",
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    expect(harness.repairSizeClaimDraft).toHaveBeenCalledOnce();
+    const commit = harness.commerceCommit.mock.calls[0]?.[0]?.runtimeCommit;
+    expect(commit).toBeDefined();
+    expect(committedText(commit)).not.toMatch(/hợp size (?:M|XL)/iu);
+    expect((commit?.metaPlan?.protectedClaims ?? []).some(({ type }) => type === "SIZE_FIT"))
+      .toBe(false);
+    expect(commit?.decisionEvents?.flatMap(({ reasonCodes }) => reasonCodes))
+      .toEqual(expect.arrayContaining([
+        "SIZE_RECOMMENDATION_REPAIR_FAILED",
+        "SIZE_RECOMMENDATION_VALUE_MISMATCH",
+        "PROTECTED_CLAIM_EVIDENCE_MISSING:55555555-5555-4555-8555-555555555555",
+      ]));
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("blocks the whole live-path group for a model-declared claim without typed evidence", async () => {

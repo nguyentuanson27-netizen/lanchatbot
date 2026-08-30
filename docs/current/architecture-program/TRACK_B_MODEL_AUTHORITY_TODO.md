@@ -117,13 +117,14 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 
 ## B2.3d — Size and bounded repair
 
-- [ ] Keep verified size computation and provenance deterministic.
-- [ ] Make normal size wording model-owned, using only claims that passed the protected-claim boundary.
-- [ ] Fail closed when reply text contains a concrete size recommendation with no declared, verified, in-scope claim.
-- [ ] Bounded repair is **exactly one** request (`MODEL_CLAIM_BOUNDARY.md`), then an approved safe clarification or handoff carrying no unsupported business claim.
-- [ ] Deterministic fallback from verified facts as r31.3 requires; never a second sales-copy pipeline.
-- [ ] Prove the fallback preserves verified facts and media and executes no failed or unauthorized effect.
-- [ ] Add explicit BF-04 bypass regressions for the migrated path.
+- [x] Keep verified size computation and provenance deterministic.
+- [x] Make normal COMMERCE size wording model-owned, using only claims that passed the protected-claim boundary; retain deterministic prose only for explicit LEGACY rollback.
+- [x] Fail closed when reply text contains a concrete size recommendation with no declared, verified, in-scope claim. Other protected claim IDs do not count as a `SIZE_FIT` declaration.
+- [x] Bounded repair is **exactly one** request (`MODEL_CLAIM_BOUNDARY.md`), then an approved safe clarification or handoff carrying no unsupported business claim.
+- [x] Deterministic fallback from verified facts as r31.3 requires; never a second sales-copy pipeline.
+- [x] Prove the fallback preserves verified facts and media and executes no failed or unauthorized effect; repaired declarations are rebound so unknown IDs remain fail-closed.
+- [x] Add explicit BF-04 migrated-path regressions for undeclared and mismatched values, invalid repair, single-repair cap, safe fallback, exact `SIZE_FIT` outbound authorization and deterministic r31.3 replay.
+- [ ] **Source disposition:** `BF04_SOURCE_CLOSURE_CANDIDATE`; independent review and exact-head CI are still required. Do not rewrite deployed/operational BF-04 status from this source PR.
 - [ ] **Checkpoint:** authority boundary, BF-04 disposition and r31.3 evidence reviewed before B2.4.
 
 ## B2.4 — Cut obsolete post-generation reachability

@@ -296,7 +296,7 @@ describe("RealtimeRunner", () => {
     expect(commitInput.decisionEvents).toContainEqual(expect.objectContaining({
       eventType: "GUARD_BLOCKED",
       reasonCodes: expect.arrayContaining([
-        "SIZE_RECOMMENDATION_MISSING_PROVENANCE",
+        "SIZE_RECOMMENDATION_UNDECLARED",
         "SIZE_RECOMMENDATION_REPAIR_FAILED",
       ]),
     }));

@@ -127,14 +127,14 @@
   },
   "active": {
     "track": "POST_DF_V5_TRACK_B",
-    "nextIssue": "Track B B2.3c focused negotiation split source implementation",
+    "nextIssue": "Track B B2.3d focused size-claim and bounded-repair source implementation",
     "gate": "GATE_F_PREPROD_ACCEPTED",
     "authorization": "TRACK_B_SOURCE_IMPLEMENTATION_AUTHORIZED_NO_MERGE_DEPLOY_OR_ACTIVATION",
     "authorizationDecision": {
       "source": "CODEX_OWNER_MESSAGE",
       "sourceThreadId": "019ff0ed-3760-7e81-98f4-5e91e8ca35b0",
       "decisionAt": "2026-08-30",
-      "scope": "TRACK_B_SOURCE_IMPLEMENTATION_INCLUDING_FOCUSED_B2_3C_ONLY_NO_MERGE_DEPLOY_TAG_RELEASE_MIGRATION_AUTHORITY_POINTER_ROUTING_MESSENGER_OR_PUBLIC_PRODUCTION_MUTATION"
+      "scope": "TRACK_B_SOURCE_IMPLEMENTATION_INCLUDING_FOCUSED_B2_3D_ONLY_NO_MERGE_DEPLOY_TAG_RELEASE_MIGRATION_AUTHORITY_POINTER_ROUTING_MESSENGER_OR_PUBLIC_PRODUCTION_MUTATION"
     }
   },
   "future": [

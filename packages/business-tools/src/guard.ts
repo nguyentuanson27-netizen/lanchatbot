@@ -468,6 +468,20 @@ export function detectConcreteSizeRecommendations(
   });
   return [...result].sort();
 }
+
+/**
+ * Observes every concrete size token on a migrated size turn. This detector
+ * is reject-only and cannot bind evidence or authorize size semantics.
+ */
+export function detectSizeClaimTokensRejectOnly(text: string): readonly string[] {
+  const tokens = tokenizeSizeText(normalizedVietnameseForGuard(text));
+  return [...new Set(
+    discoverSizeMentions(tokens).flatMap(({ sizes }) =>
+      sizes.map((size) => size.toLocaleUpperCase("vi-VN"))
+    ),
+  )].sort();
+}
+
 function sizeClaimReason(
   claim: SizeRecommendationProtectedClaimV1,
   input: GuardInput,
@@ -513,11 +527,10 @@ function validateSizeRecommendations(
   const declared = new Set(proposal.protectedClaimIds ?? []);
   const claims = context?.claims ?? [];
   const declaredClaims = claims.filter((claim) => declared.has(claim.id));
-  if (declaredClaims.length === 0) return [
-    declared.size === 0
-      ? "SIZE_RECOMMENDATION_UNDECLARED"
-      : "SIZE_RECOMMENDATION_MISSING_PROVENANCE",
-  ];
+  // Other protected claim IDs (price, stock, media, etc.) do not constitute a
+  // declaration of SIZE_FIT. The structured boundary must match an exact
+  // trusted size claim before any concrete size value can be emitted.
+  if (declaredClaims.length === 0) return ["SIZE_RECOMMENDATION_UNDECLARED"];
   const reasons = new Set<string>();
   for (const size of assertedSizes) {
     const eligible = declaredClaims.some((claim) => {
@@ -740,7 +753,12 @@ export function guardAgentProposal(input: GuardInput): GuardResult {
     }
   }
 
-  const assertedSizes = detectConcreteSizeRecommendations(text);
+  // Text observation is defense-in-depth and reject-only. It never binds a
+  // claim or supplies size semantics; exact typed provenance remains the sole
+  // authorization source.
+  const assertedSizes = input.sizeClaimTextMode === "STRUCTURED_REJECT_ONLY"
+    ? detectSizeClaimTokensRejectOnly(text)
+    : detectConcreteSizeRecommendations(text);
   const sizeClaimReasons = validateSizeRecommendations(
     proposal,
     input,

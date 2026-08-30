@@ -260,6 +260,8 @@ export interface GuardInput {
     customerProfileRevision: number | null;
     claims: readonly SizeRecommendationProtectedClaimV1[];
   };
+  /** Selects conservative reject-only observation for the migrated size path. */
+  sizeClaimTextMode?: "LEGACY_SEMANTIC" | "STRUCTURED_REJECT_ONLY";
   now: Date;
 }
 

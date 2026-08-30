@@ -1,11 +1,11 @@
 # Track B — Model Authority Execution Plan
 
-**Status:** `B2.3B_MERGED / B2.3C_SOURCE_IN_PROGRESS / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
-**Plan baseline:** `main@8591ed9fa5522f9ea50259fa3bf086efddb93cc8`, including reviewed B2.3b head `05d6a83105aa336ef1f4dc07ce35ab4eb0a327ac`
+**Status:** `B2.3C_MERGED / B2.3D_SOURCE_CLOSURE_CANDIDATE / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
+**Plan baseline:** `main@78a03fe599202c6e275300af33622cb16ab80769`, including reviewed B2.3c head `ae714485bfe63aff61c22d966fb22ab7aaa5d69e`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Active process profile:** `SOLO_PREPROD_MINIMAL` (merged and current default; see `OPERATING_MODE.md`)
 **Environment:** `ENGINEERING_PREPROD`, one bounded `PREPROD_TEST_PAGE`
-**Authorization:** the owner messages dated 2026-08-29 and 2026-08-30 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorize Track B **source implementation only**, split B2.3a from B2.3d, and explicitly sequence focused B2.3b then B2.3c PRs. They do not authorize merge, tag/release, migration, authority/pointer mutation, deployment, routing/control-plane/VPS mutation, Messenger action, public-production promotion, or UR/State V2 work.
+**Authorization:** the owner messages dated 2026-08-29 and 2026-08-30 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorize Track B **source implementation only**, including the focused B2.3d slice after B2.3c. They do not authorize merge, tag/release, migration, authority/pointer mutation, deployment, routing/control-plane/VPS mutation, Messenger action, public-production promotion, or UR/State V2 work.
 
 ## 1. Purpose
 
@@ -331,7 +331,7 @@ it. This source evidence does not authorize B3.2 bundle/pointer activation.
 
 ### B2.3d — Deterministic size facts, model-owned wording, BF-04 closed or fenced
 
-**Size:** M · **Depends on:** B2.3a · **PR shape:** separate later B2.3d; BF-04 remains open until then
+**Size:** M · **Depends on:** B2.3a · **PR shape:** focused B2.3d only; no B3 or activation
 
 BF-04's residual is a property of detecting size recommendations by reading Vietnamese prose: `detectConcreteSizeRecommendations` (`guard.ts:451-470`) drops any mention that `classifySafeExemptionForMention` (`guard.ts:389-394`) classifies as `QUESTION`, `NEGATION`, `CATALOG`, `STOCK` or `NON_CUSTOMER`, and no exemption heuristic over free text is complete. Making a declared, verified, in-scope claim the precondition for shipping size wording is the closure mechanism, and `MODEL_CLAIM_BOUNDARY.md` already mandates that direction.
 
@@ -340,6 +340,15 @@ BF-04's residual is a property of detecting size recommendations by reading Viet
 A reply whose text contains a concrete size recommendation with **no** declared, verified, in-scope protected claim must fail closed. The structured boundary is authoritative; the detector runs alongside it and may only reject, never approve. If that cannot be implemented in this slice, stop and amend rather than hiding the residual behind model wording.
 
 BF-04 may be recorded as closed only with new regression evidence for the migrated path.
+
+The B2.3d source branch now supplies that closure candidate: COMMERCE no longer
+receives deterministic size prose or an automatically declared size claim; an
+exact typed Size Engine claim must be declared by the bounded model proposal or
+its single repair, and the final whole-group authorizer validates `SIZE_FIT`
+alongside the other protected claims. The prose detector remains reject-only.
+This is **source evidence only** pending independent review and exact-head CI;
+it is not deployment or operational-acceptance evidence, so the deployed
+`program-state.json` BF-04 disposition remains unchanged.
 
 **Acceptance criteria**
 
