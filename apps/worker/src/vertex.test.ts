@@ -10,6 +10,7 @@ import {
   SIZE_CLAIM_REPAIR_SYSTEM_INSTRUCTION,
   SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
   SHADOW_SYSTEM_INSTRUCTION,
+  structuredVertexGenerationIdentity,
   vertexGenerateEndpoint,
   vertexPredictEndpoint,
   VertexShadowModel,
@@ -188,6 +189,41 @@ const baselineFacts = {
 };
 
 describe("Vertex shadow client", () => {
+  it("exposes defensive identity copies for both executed structured requests", () => {
+    const first = structuredVertexGenerationIdentity();
+    const second = structuredVertexGenerationIdentity();
+
+    expect(first).toMatchObject({
+      structuredAgent: {
+        temperature: 0.2,
+        maxOutputTokens: 1_024,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "OBJECT",
+          required: expect.arrayContaining(["schemaVersion", "strategyAnalysis"]),
+        },
+      },
+      structuredGroundedDraft: {
+        temperature: 0.2,
+        maxOutputTokens: 768,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "OBJECT",
+          required: expect.arrayContaining([
+            "schemaVersion",
+            "advisoryText",
+            "attachmentImageIndices",
+          ]),
+        },
+      },
+    });
+    expect(first).not.toBe(second);
+    expect(first.structuredAgent.responseSchema)
+      .not.toBe(second.structuredAgent.responseSchema);
+    expect(first.structuredGroundedDraft.responseSchema)
+      .not.toBe(second.structuredGroundedDraft.responseSchema);
+  });
+
   it("pins every baseline request envelope from d9de77f with an exhaustive fixture", async () => {
     interface BaselineFixture {
       readonly invoke: (model: VertexShadowModel) => Promise<unknown>;

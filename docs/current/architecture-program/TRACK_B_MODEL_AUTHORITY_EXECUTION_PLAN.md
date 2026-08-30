@@ -464,7 +464,8 @@ evidence separates the configured provider model from the deterministic fixture
 model and binds the unchanged live-path source revision, baseline, grounded,
 grounded-draft, size-repair and customer-URL-explanation prompts, the accepted
 grounded-draft and verified-fact-assembler runner flags, customer-URL policy,
-generation config, policy/schema, complete business fixtures,
+the exact structured-agent and structured-grounded-draft generation configs and
+Vertex response schemas, policy/schema, complete business fixtures,
 case inputs, risk assertions and expected state projections. The live-path
 fixtures cover unsupported and protected claims, PII/security, unauthorized
 effects, stale and missing facts, malformed generation, the one-repair cap,

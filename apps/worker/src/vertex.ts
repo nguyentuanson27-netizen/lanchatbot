@@ -598,6 +598,31 @@ const CUSTOMER_URL_EXPLANATION_RESPONSE_SCHEMA = {
   },
 };
 
+const STRUCTURED_AGENT_GENERATION_CONFIG = Object.freeze({
+  temperature: 0.2,
+  maxOutputTokens: 1_024,
+  responseMimeType: "application/json",
+} as const);
+
+const STRUCTURED_GROUNDED_DRAFT_GENERATION_CONFIG = Object.freeze({
+  temperature: 0.2,
+  maxOutputTokens: 768,
+  responseMimeType: "application/json",
+} as const);
+
+export function structuredVertexGenerationIdentity() {
+  return structuredClone({
+    structuredAgent: {
+      ...STRUCTURED_AGENT_GENERATION_CONFIG,
+      responseSchema: AGENT_RESPONSE_SCHEMA,
+    },
+    structuredGroundedDraft: {
+      ...STRUCTURED_GROUNDED_DRAFT_GENERATION_CONFIG,
+      responseSchema: GROUNDED_DRAFT_RESPONSE_SCHEMA,
+    },
+  });
+}
+
 function safeJson(text: string): unknown {
   const cleaned = text.trim().replace(/^```(?:json)?\s*/iu, "").replace(/\s*```$/u, "");
   try {
@@ -826,9 +851,7 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
           systemInstruction: { parts: [{ text: systemInstruction }] },
           contents: [{ role: "user", parts: [{ text: userPrompt }] }],
           generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 1_024,
-            responseMimeType: "application/json",
+            ...STRUCTURED_AGENT_GENERATION_CONFIG,
             responseSchema,
           },
         }),
@@ -893,9 +916,7 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
               systemInstruction: { parts: [{ text: GROUNDED_DRAFT_SYSTEM_INSTRUCTION }] },
               contents: [{ role: "user", parts: [{ text: userPrompt }] }],
               generationConfig: {
-                temperature: 0.2,
-                maxOutputTokens: 768,
-                responseMimeType: "application/json",
+                ...STRUCTURED_GROUNDED_DRAFT_GENERATION_CONFIG,
                 responseSchema: GROUNDED_DRAFT_RESPONSE_SCHEMA,
               },
             }),

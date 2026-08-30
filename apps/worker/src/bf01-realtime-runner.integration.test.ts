@@ -20,6 +20,7 @@ import {
   GROUNDED_SYSTEM_INSTRUCTION,
   SHADOW_SYSTEM_INSTRUCTION,
   SIZE_CLAIM_REPAIR_SYSTEM_INSTRUCTION,
+  structuredVertexGenerationIdentity,
 } from "./vertex.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import type { RealtimeGenerationQuota } from "./realtime-quota.js";
@@ -1225,6 +1226,7 @@ describe("BF-01 runner reconciliation", () => {
         expectedStateComparison: expectedStateComparisonFor(capturedInput),
         riskAssertions: riskAssertionsFor(riskClasses),
       });
+      const structuredGenerationIdentity = structuredVertexGenerationIdentity();
       const identity: TrackBReplayIdentity = {
         modelProvider: "VERTEX_AI",
         configuredProviderModel: "gemini-3.5-flash-lite",
@@ -1240,12 +1242,7 @@ describe("BF-01 runner reconciliation", () => {
           customerUrlExplanation: CUSTOMER_URL_EXPLANATION_SYSTEM_INSTRUCTION,
         })),
         generationConfigHash: sha256(canonicalJsonV1({
-          modelGeneration: {
-            temperature: 0.2,
-            maxOutputTokens: 1_024,
-            responseMimeType: "application/json",
-            responseSchemaContract: "AgentProposalV1Schema",
-          },
+          modelGeneration: structuredGenerationIdentity,
           runnerFeatures: {
             groundedDraftEnabled: true,
             verifiedFactAssemblerEnabled: true,
@@ -1263,8 +1260,17 @@ describe("BF-01 runner reconciliation", () => {
           },
         })),
         schemaIdentityHash: sha256(canonicalJsonV1({
-          contract: "AgentProposalV1Schema",
-          schemaVersion: 1,
+          structuredAgent: {
+            runtimeContract: "AgentProposalV1Schema",
+            schemaVersion: 1,
+            vertexResponseSchema: structuredGenerationIdentity.structuredAgent.responseSchema,
+          },
+          structuredGroundedDraft: {
+            runtimeContract: "GroundedReplyDraftV1Schema",
+            schemaVersion: 1,
+            vertexResponseSchema:
+              structuredGenerationIdentity.structuredGroundedDraft.responseSchema,
+          },
         })),
         behaviorContentHash: behaviorModeContentHash({
           confirmationMode: "LEGACY",
