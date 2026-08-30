@@ -316,6 +316,7 @@ function createHarness(input: {
   initialProtectedClaimIds?: readonly string[];
   sizeFixture?: boolean;
   sizeRepairMode?: "VALID" | "INVALID" | "THROW";
+  sizeRepairReply?: string;
 } = {}) {
   const base = createConversationState({
     conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
@@ -506,7 +507,8 @@ function createHarness(input: {
     }
     return modelResult({
       ...initial,
-      reply: "Theo số đo đã xác minh, chị hợp size M; chị thích mặc ôm hay thoải mái hơn?",
+      reply: input.sizeRepairReply ??
+        "Theo số đo đã xác minh, chị hợp size M; chị thích mặc ôm hay thoải mái hơn?",
       protectedClaimIds: trustedClaims.map(({ id }) => id),
     });
   });
@@ -801,6 +803,96 @@ function unresolvedTerminalNoReplyEvents<TState, TSalesState>(
 }
 
 describe("BF-01 runner reconciliation", () => {
+  it("replays B2.4 COMMERCE model wording through the actual runner finalizer", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(occurredAt));
+    try {
+      const capturedInput = {
+        customerText: "Tư vấn size cho chị mẫu SD398",
+        modelReply: "Theo số đo, chị hợp size M.",
+        repairedReply:
+          "Theo số đo đã xác minh, chị hợp size M nhé ạ. Chị thích mặc ôm nhé ạ?",
+      };
+      const snapshots: RealtimeReplySnapshot[] = [];
+      const runLivePath = async (
+        capture: Readonly<typeof capturedInput>,
+      ): Promise<RealtimeReplySnapshot> => {
+        const harness = createHarness({
+          commerce: true,
+          initialMode: "REPLY",
+          customerText: capture.customerText,
+          initialReply: capture.modelReply,
+          initialFactIntent: "SIZE",
+          sizeFixture: true,
+          sizeRepairMode: "VALID",
+          sizeRepairReply: capture.repairedReply,
+        });
+        expect(await harness.runner.processOne()).toBe(true);
+        const commit = harness.commerceCommit.mock.calls[0]?.[0]?.runtimeCommit;
+        if (!commit) throw new Error("TRACK_B_B24_CAPTURED_COMMIT_MISSING");
+        const rawResult = harness.commerceCommit.mock.results[0];
+        if (!rawResult || rawResult.type !== "return") {
+          throw new Error("TRACK_B_B24_CAPTURED_COMMIT_RESULT_MISSING");
+        }
+        expect(harness.repairSizeClaimDraft).toHaveBeenCalledOnce();
+        expect(committedText(commit)).toBe(capture.repairedReply);
+        expect(commit.metaPlan?.protectedClaims?.filter(({ type }) =>
+          type === "SIZE_FIT"
+        )).toHaveLength(1);
+        return committedSnapshot({
+          commit,
+          result: (await rawResult.value).runtime,
+          inboxCommitted: harness.complete.mock.calls.length === 1,
+        });
+      };
+
+      // Immutable capture from exact pre-B2.4 main
+      // a89a50cb52183a3ffc4f3d7bd313ea675564c07b for capturedInput above.
+      const preB24Baseline: RealtimeReplySnapshot = {
+        messages: [{ kind: "TEXT", text: capturedInput.repairedReply }],
+        strategyHash: "28f64d412aa3b9b39aaa67463039f5a466eb539408b5a8df48cdaf187e1336ed",
+        verifiedFactHashes: [
+          "a0729ee1acaa2436299b46f6e046eaaa0561f3152ab27463d55cc850d8431da6",
+        ],
+        verifiedMediaUrls: [],
+        protectedClaimHashes: [
+          "95011f74a0e3fb0cbdd01bc90c7eee3891c231c0c7bdb73bbf4fe3467c3e757e",
+        ],
+        effectAuthorizationHashes: [
+          "e63dd65848b724c639bb06bbfb11ad86692d9e9871749e62aa7afb8df40dc873",
+        ],
+        commitOutcome: "COMMITTED",
+        generationOutcome: "VALID",
+        inboxOutcome: "COMMITTED",
+        protectedOutbound: {
+          required: true,
+          groupId: "37a4d2be-f544-5ec8-86c5-8e2e04faff77",
+          plannedMessageCount: 1,
+          deliveredMessageCount: 1,
+        },
+      };
+      const differential = await realtimeReplyDifferential.runRealtimeReplyDifferential({
+        capturedInput,
+        baseline: async () => preB24Baseline,
+        candidate: async (capture) => {
+          const snapshot = await runLivePath(capture);
+          snapshots.push(snapshot);
+          return snapshot;
+        },
+      });
+
+      expect(differential).toEqual({
+        contractVersion: "REALTIME_REPLY_DIFFERENTIAL_V1",
+        status: "MATCH",
+        sideEffects: "DISABLED",
+        differences: [],
+      });
+      expect(snapshots).toEqual([preB24Baseline]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("retains B2.3a claim containment while exposing the later B2.3d safe-fallback delta", async () => {
     const capturedInput = {
       customerText: "Mẫu SD398 giá bao nhiêu, có size M hay L?",

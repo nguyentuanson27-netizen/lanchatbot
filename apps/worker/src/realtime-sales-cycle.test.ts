@@ -23,8 +23,7 @@ import {
   type ModelNegotiationProposalV1,
 } from "./realtime-sales-cycle.js";
 import {
-  finalizeRealtimePostGenerationReply,
-  resolveRealtimeDeliveryWordingAuthority,
+  finalizeModelOwnedRealtimePostGenerationReply,
   runRealtimeReplyDifferential,
   type RealtimeReplySnapshot,
 } from "./realtime-reply-differential.js";
@@ -2000,15 +1999,9 @@ describe("realtime Phase 3 sales cycle", () => {
             "Em hiểu ạ. Em kiểm tra mức hỗ trợ phù hợp nhé ạ.",
           ),
         });
-        const delivered = finalizeRealtimePostGenerationReply({
+        const delivered = finalizeModelOwnedRealtimePostGenerationReply({
           mode: "GROUP_V2",
           messages: output.messages,
-          wordingAuthority: resolveRealtimeDeliveryWordingAuthority({
-            runtimeWordingAuthority: "MODEL",
-            salesHandled: output.handled,
-            salesWordingAuthority:
-              output.wordingAuthority ?? "LEGACY_DETERMINISTIC",
-          }),
         });
         const snapshot = {
           ...salesCycleSnapshot(

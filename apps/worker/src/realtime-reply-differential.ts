@@ -88,18 +88,6 @@ export function groupRealtimeMetaMessagesV2(
 
 export type PostGenerationWordingAuthority = "MODEL" | "LEGACY_DETERMINISTIC";
 
-export function resolveRealtimeDeliveryWordingAuthority(input: Readonly<{
-  runtimeWordingAuthority: PostGenerationWordingAuthority;
-  salesHandled: boolean;
-  salesWordingAuthority: PostGenerationWordingAuthority;
-}>): PostGenerationWordingAuthority {
-  if (!input.salesHandled) return input.runtimeWordingAuthority;
-  return input.runtimeWordingAuthority === "MODEL" &&
-      input.salesWordingAuthority === "MODEL"
-    ? "MODEL"
-    : "LEGACY_DETERMINISTIC";
-}
-
 export function postGenerationWordingAuthority(
   runtimeAuthority: "COMMERCE_SELECTED" | "LEGACY_SELECTED",
 ): PostGenerationWordingAuthority {
@@ -108,38 +96,48 @@ export function postGenerationWordingAuthority(
     : "LEGACY_DETERMINISTIC";
 }
 
-export function resolveRealtimePostGenerationAuthority<
-  TProposal,
-  TModelStrategy,
-  TDeterministicStrategy,
->(input: Readonly<{
-  runtimeAuthority: "COMMERCE_SELECTED" | "LEGACY_SELECTED";
+/** COMMERCE exposes no callback capable of invoking legacy strategy/copy authority. */
+export function resolveCommercePostGenerationAuthority<TProposal, TModelStrategy>(
+  input: Readonly<{
+    proposal: TProposal;
+    modelStrategyAnalysis: TModelStrategy | null;
+  }>,
+): Readonly<{
+  wordingAuthority: "MODEL";
+  strategyAuthority: "MODEL_STRUCTURED_OUTPUT";
   proposal: TProposal;
   modelStrategyAnalysis: TModelStrategy | null;
+  deterministicStrategyDecision: null;
+}> {
+  return {
+    wordingAuthority: "MODEL",
+    strategyAuthority: "MODEL_STRUCTURED_OUTPUT",
+    proposal: input.proposal,
+    modelStrategyAnalysis: input.modelStrategyAnalysis,
+    deterministicStrategyDecision: null,
+  };
+}
+
+/** Preserves the pre-Track-B strategy/copy path for explicit LEGACY rollback. */
+export function resolveLegacyPostGenerationAuthority<
+  TProposal,
+  TDeterministicStrategy,
+>(input: Readonly<{
+  proposal: TProposal;
   applyLegacyDeterministic: (proposal: TProposal) => Readonly<{
     proposal: TProposal;
     strategyDecision: TDeterministicStrategy | null;
   }>;
 }>): Readonly<{
-  wordingAuthority: PostGenerationWordingAuthority;
-  strategyAuthority: "MODEL_STRUCTURED_OUTPUT" | "LEGACY_DETERMINISTIC";
+  wordingAuthority: "LEGACY_DETERMINISTIC";
+  strategyAuthority: "LEGACY_DETERMINISTIC";
   proposal: TProposal;
-  modelStrategyAnalysis: TModelStrategy | null;
+  modelStrategyAnalysis: null;
   deterministicStrategyDecision: TDeterministicStrategy | null;
 }> {
-  const wordingAuthority = postGenerationWordingAuthority(input.runtimeAuthority);
-  if (wordingAuthority === "MODEL") {
-    return {
-      wordingAuthority,
-      strategyAuthority: "MODEL_STRUCTURED_OUTPUT",
-      proposal: input.proposal,
-      modelStrategyAnalysis: input.modelStrategyAnalysis,
-      deterministicStrategyDecision: null,
-    };
-  }
   const legacy = input.applyLegacyDeterministic(input.proposal);
   return {
-    wordingAuthority,
+    wordingAuthority: "LEGACY_DETERMINISTIC",
     strategyAuthority: "LEGACY_DETERMINISTIC",
     proposal: legacy.proposal,
     modelStrategyAnalysis: null,
@@ -204,6 +202,31 @@ export function finalizeRealtimePostGenerationReply(
     stage: "POST_GENERATION",
     messages,
   };
+}
+
+type AuthoritySpecificPostGenerationReplyInput = Omit<
+  RealtimePostGenerationReplyInput,
+  "wordingAuthority"
+>;
+
+/** Active COMMERCE shaping: transport-only, with no wording-rewrite option. */
+export function finalizeModelOwnedRealtimePostGenerationReply(
+  input: AuthoritySpecificPostGenerationReplyInput,
+): RealtimePostGenerationReply {
+  return finalizeRealtimePostGenerationReply({
+    ...input,
+    wordingAuthority: "MODEL",
+  });
+}
+
+/** Explicit rollback route retaining legacy wording cleanup. */
+export function finalizeLegacyRealtimePostGenerationReply(
+  input: AuthoritySpecificPostGenerationReplyInput,
+): RealtimePostGenerationReply {
+  return finalizeRealtimePostGenerationReply({
+    ...input,
+    wordingAuthority: "LEGACY_DETERMINISTIC",
+  });
 }
 
 export function textSimilarity(left: string, right: string): number {
