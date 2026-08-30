@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { CONTEXT_V2_CANDIDATE_MODEL_ID } from "./context-v2-candidate.js";
+import { parseGateEOperationalInvocation } from "./gate-e-operational-cli.js";
 import {
   buildGateEOperationalRegistration,
   gateEDatabaseUrlForRole,
@@ -10,6 +11,38 @@ import {
 const REPOSITORY_ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 
 describe("Gate E operational boundary", () => {
+  it("parses only the exact options owned by each command", () => {
+    const invocation = parseGateEOperationalInvocation([
+      "score",
+      "--registration-path",
+      "evaluation/gate-e/track-b/registration.json",
+      "--credential-file",
+      "C:/secure/vertex.json",
+    ]);
+    expect(invocation.command).toBe("score");
+    expect(Object.fromEntries(invocation.options)).toEqual({
+      "--registration-path": "evaluation/gate-e/track-b/registration.json",
+      "--credential-file": "C:/secure/vertex.json",
+    });
+  });
+
+  it.each([
+    [["score", "--database-url", "postgresql://wrong"],
+      "GATE_E_OPERATIONAL_OPTION_INVALID:--database-url"],
+    [["register-anchor", "--credential-file", "vertex.json"],
+      "GATE_E_OPERATIONAL_OPTION_INVALID:--credential-file"],
+    [["score", "--registration-path", "one.json", "--registration-path", "two.json"],
+      "GATE_E_OPERATIONAL_OPTION_DUPLICATE:--registration-path"],
+    [["score", "--registration-path"],
+      "GATE_E_OPERATIONAL_OPTION_VALUE_INVALID:--registration-path"],
+    [["score", "--registration-path", "--credential-file", "vertex.json"],
+      "GATE_E_OPERATIONAL_OPTION_VALUE_INVALID:--registration-path"],
+    [["emit-rubric", "unexpected"],
+      "GATE_E_OPERATIONAL_OPTION_INVALID:unexpected"],
+  ] as const)("rejects malformed or command-inapplicable argv %#", (argv, error) => {
+    expect(() => parseGateEOperationalInvocation(argv)).toThrow(error);
+  });
+
   it("binds the approved Vertex resource without accepting path injection", () => {
     expect(gateEModelResource("lana-preprod_1")).toBe(
       `projects/lana-preprod_1/locations/global/publishers/google/models/${CONTEXT_V2_CANDIDATE_MODEL_ID}`,
