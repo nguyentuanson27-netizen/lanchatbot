@@ -16,17 +16,26 @@ describe("Gate E operational boundary", () => {
 
   it("accepts the exact standard and Lana-managed Vertex credential shapes", () => {
     expect(parseGateEVertexCredential({
+      type: "service_account",
       client_email: "gate-e@example.test",
       private_key: privateKey,
     })).toEqual({ email: "gate-e@example.test", privateKey });
-    expect(parseGateEVertexCredential([{
+    const managed = {
       type: "googleApi",
       data: {
         email: "gate-e@example.test",
         privateKey,
         region: "global",
       },
-    }])).toEqual({ email: "gate-e@example.test", privateKey });
+    };
+    expect(parseGateEVertexCredential(managed)).toEqual({
+      email: "gate-e@example.test",
+      privateKey,
+    });
+    expect(parseGateEVertexCredential([managed])).toEqual({
+      email: "gate-e@example.test",
+      privateKey,
+    });
   });
 
   it("rejects ambiguous or invalid credential shapes", () => {
@@ -34,8 +43,14 @@ describe("Gate E operational boundary", () => {
       [],
       [{ type: "googleApi", data: {} }],
       [{ type: "other", data: { email: "gate-e@example.test", privateKey } }],
-      [{ client_email: "gate-e@example.test", private_key: "not-a-key" }],
-      [{ client_email: "gate-e@example.test", private_key: privateKey }, {}],
+      [{ type: "service_account", client_email: "gate-e@example.test",
+        private_key: privateKey }],
+      { type: "other", client_email: "gate-e@example.test", private_key: privateKey },
+      { type: "googleApi", data: { email: "gate-e@example.test", privateKey } },
+      { type: "service_account", client_email: "gate-e@example.test",
+        private_key: "not-a-key" },
+      [{ type: "googleApi", data: { email: "gate-e@example.test", privateKey,
+        region: "global" } }, {}],
     ];
     for (const credential of invalid) {
       expect(() => parseGateEVertexCredential(credential)).toThrow(

@@ -93,17 +93,27 @@ export function parseGateEVertexCredential(value: unknown): Readonly<{
   email: string;
   privateKey: string;
 }> {
-  const root = Array.isArray(value) && value.length === 1 ? value[0] : value;
+  if (Array.isArray(value) && value.length !== 1) {
+    throw new Error("GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
+  }
+  const fromArray = Array.isArray(value);
+  const root = fromArray ? value[0] : value;
   const parsed = record(root, "GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
-  const wrapped = parsed.type === "googleApi"
-    ? record(parsed.data, "GATE_E_OPERATIONAL_CREDENTIAL_INVALID")
-    : null;
-  const email = wrapped === null
-    ? typeof parsed.client_email === "string" ? parsed.client_email : ""
-    : typeof wrapped.email === "string" ? wrapped.email : "";
-  const privateKey = wrapped === null
-    ? typeof parsed.private_key === "string" ? parsed.private_key : ""
-    : typeof wrapped.privateKey === "string" ? wrapped.privateKey : "";
+  let email = "";
+  let privateKey = "";
+  if (!fromArray && parsed.type === "service_account") {
+    email = typeof parsed.client_email === "string" ? parsed.client_email : "";
+    privateKey = typeof parsed.private_key === "string" ? parsed.private_key : "";
+  } else if (parsed.type === "googleApi") {
+    const wrapped = record(parsed.data, "GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
+    if (typeof wrapped.region !== "string" || !wrapped.region.trim()) {
+      throw new Error("GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
+    }
+    email = typeof wrapped.email === "string" ? wrapped.email : "";
+    privateKey = typeof wrapped.privateKey === "string" ? wrapped.privateKey : "";
+  } else {
+    throw new Error("GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
+  }
   if (!email.includes("@") || !privateKey.includes("PRIVATE KEY")) {
     throw new Error("GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
   }
