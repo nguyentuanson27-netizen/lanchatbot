@@ -1,11 +1,11 @@
 # Track B — Model Authority Execution Plan
 
-**Status:** `B2.4_MERGED / B3_SOURCE_IN_PROGRESS / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
-**Plan baseline:** `main@c22d0a5181e1e4e67401bf00b79ce9f49cbb663d`, including reviewed B2.4 head `0221c37d239003e8c737cfc0d37962e2064dbf49`
+**Status:** `B2.4_MERGED / B3.1_OPERATIONAL_ENTRYPOINT_IN_PROGRESS / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
+**Plan baseline:** `main@4a5869f63d260091776da8236f1584f2c7e49bb5`, including reviewed B3 live-path replay head `104ee2f483e912532a77ef17b2dfe2c3878aebee`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Active process profile:** `SOLO_PREPROD_MINIMAL` (merged and current default; see `OPERATING_MODE.md`)
 **Environment:** `ENGINEERING_PREPROD`, one bounded `PREPROD_TEST_PAGE`
-**Authorization:** the owner messages dated 2026-08-29 and 2026-08-30 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorize Track B **source implementation**. The latest process update also authorizes normal merge of a focused Track B source PR only after clean exact-head self-review, the PR's fixed independent Sol High reviewer returns final no-blockers/approve, canonical exact-head CI runs real repository steps and passes, and the reviewed remote head/base/mergeability are reverified. This does not authorize tag/release, migration, authority-bundle/pointer/CAS mutation, deployment, routing/control-plane/VPS mutation, Messenger action, operational acceptance, public-production promotion, or UR/State V2 work.
+**Authorization:** the owner messages dated 2026-08-29 and 2026-08-30 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorize Track B source implementation and normal merge of a focused source PR only after clean exact-head self-review, that PR's fixed independent Sol High reviewer returns final no-blockers/approve, canonical exact-head CI runs real repository steps and passes, and the reviewed remote head/base/mergeability are reverified. The authoritative 2026-08-31 owner instruction additionally authorizes the B3 operational path in `ENGINEERING_PREPROD`: exact-candidate Gate E, exact verified release/deploy of affected services, separately governed page-scoped authority-bundle/behavior CAS and readback, bounded canary/smoke, owner-controlled Messenger E2E only for page `1198992073286645`, and rollback rehearsal. It does **not** authorize migration `0036` without a separate decision, public production, page expansion, UR/State V2, LEGACY deletion or unrelated routing/control-plane changes.
 
 ## 1. Purpose
 
@@ -513,7 +513,7 @@ Track B modifies `sales-strategy-v1.ts`, `guard.ts` and `reply-assembler.ts`, wh
 
 ### B3.2 — Owner-scoped deploy, readback and smoke
 
-**Size:** S/M · **Estimate:** 0.5–1 d · **Depends on:** B3.1 evidence accepted, plus one owner deploy-and-authority-mutation instruction
+**Size:** S/M · **Estimate:** 0.5–1 d · **Depends on:** B3.1 evidence accepted and the active 2026-08-31 owner operational authorization
 
 **Activation impact — B1 closed finding.** This is an **authority-bundle and behavior-identity mutation**, not source-deploy-only. Context V2 gives its strategy and CTA consumers explicit contract identities (`CONTEXT_V2_STRATEGY_INPUT_V1` and `CONTEXT_V2_CTA_INPUT_V1`). The selected live proposal instead comes from the byte-frozen baseline `AgentProposalV1.strategyAnalysis` / `salesSignals` contract. Source contains no contract equating those identities. Keeping `strategy/cta: CONTEXT_V2` after that proposal becomes normal authority would therefore make the bundle declaration misleading.
 
@@ -521,7 +521,7 @@ Track B must define the truthful replacement labels, derive a new canonical bund
 
 **Required sequence**
 
-1. Stop until the owner explicitly authorizes both the exact deploy and the authority/pointer mutation. The current source-work message is not that authorization.
+1. Bind execution to the 2026-08-31 owner authorization for `ENGINEERING_PREPROD`; stop on any scope mismatch or ungranted boundary. Migration `0036` still requires a separate owner decision if source/target audit proves it necessary.
 2. Bind the exact new bundle hash, behavior version/content hash/revision/source and the exact previous bundle/version/content hash/revision/source before mutation.
 3. Use the reviewed page-scoped pointer writer with expected revision/CAS, exact `DATABASE` readback from the full consumer set, and a reversible exact previous identity. No manual SQL or env-only authority selector.
 4. Deploy only the exact merged commit/build for affected services and preserve the exact previous affected-service release/build/commit in the release-local rollback record required by `RELEASE_INTEGRITY.md`.

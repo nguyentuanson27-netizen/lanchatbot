@@ -1,12 +1,13 @@
 # Track B — Execution Checklist
 
-**Status:** `B2.4_MERGED / B3_SOURCE_IN_PROGRESS`
+**Status:** `B2.4_MERGED / B3.1_OPERATIONAL_ENTRYPOINT_IN_PROGRESS`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` and its observed request envelope stay byte-frozen; the Context V2 candidate stays offline. If that direction proves insufficient, Track B stops incomplete; it has no prompt-edit or candidate-promotion alternative.
 
 ## Before implementation
 
 - [x] Bind the owner source-work authorization (`sourceThreadId=019ff0ed-3760-7e81-98f4-5e91e8ca35b0`). The 2026-08-30 process update permits normal merge of focused Track B source PRs only after clean self-review, final no-blockers from that PR's fixed Sol High reviewer, real exact-head canonical CI PASS and immediate remote-head/base/mergeability revalidation. It does not authorize deploy, tag/release, migration, authority/pointer/CAS mutation, routing, Messenger action, operational acceptance or public-production promotion.
+- [x] Bind the authoritative 2026-08-31 owner operational authorization to `ENGINEERING_PREPROD`: B3.1 Gate E, exact affected-service release/deploy, separately governed page-scoped authority/behavior CAS, bounded canary/smoke, owner-controlled Messenger E2E only for page `1198992073286645`, and rollback rehearsal. Migration `0036`, public production, page expansion, UR/State V2, LEGACY deletion and unrelated routing/control-plane changes remain outside this authorization.
 - [x] Re-read `AGENTS.md`, `OPERATING_MODE.md`, `program-state.json`, this plan and the relevant contracts from the exact merged `main` head.
 - [x] Follow `SOLO_PREPROD_MINIMAL`: `branch -> code + focused verification -> PR -> exact-head verification -> merge -> deploy exact commit -> smoke`. Do not reintroduce Release Train or a second approval record.
 - [x] Keep `stateReadMode=LEGACY`; do not start UR/State V2 without a separate evidence-backed approval.
@@ -160,8 +161,8 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 
 ## B3.1 — Pre-deploy re-evaluation (deploy gate only)
 
-- [ ] Only for a candidate selected for PREPROD deployment; local and unmerged candidates need no promotion ceremony.
-- [ ] Provide the minimal operational entrypoint around the existing runner; reuse `executeGateEScoredRun(...)` and do not rebuild scorer or evidence logic.
+- [x] The owner selected the exact final merged Track B candidate for PREPROD deployment; rederive its identity from fresh `origin/main` after every required source PR merge. Local and unmerged candidates receive no promotion ceremony.
+- [ ] Merge the focused minimal operational entrypoint around the existing runner; reuse `executeGateEScoredRun(...)` and do not rebuild scorer or evidence logic. Source implementation is in progress and is not operational evidence before reviewed exact-head merge.
 - [ ] Run the current governing re-evaluation path for the exact candidate.
 - [ ] Use existing provenance and release evidence; do not invent a competing promotion manifest.
 - [ ] Keep provider credentials out of GitHub Actions and the repository; run the provider-backed rerun in an authorized local/VPS/manual or scheduled environment.
@@ -172,7 +173,7 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 
 - [ ] Treat deployment as an authority-bundle/behavior identity mutation; do not claim source-deploy-only.
 - [ ] Produce the new canonical bundle hash and behavior content identity from source, plus the exact previous bundle/version/hash/revision/source rollback identity.
-- [ ] Ask the owner for one instruction explicitly authorizing the deploy **and** authority/pointer mutation; the current source-work authorization is insufficient.
+- [x] Bind the 2026-08-31 owner instruction authorizing exact affected-service deploy and separately governed authority/pointer mutation in `ENGINEERING_PREPROD`; migration `0036` remains separately gated.
 - [ ] Use the reviewed page-scoped pointer/CAS/readback/rollback path. Apply migration `0036` only if source evidence proves that exact path requires it and the owner separately authorizes it.
 - [ ] Deploy only the exact merged commit/build for affected services.
 - [ ] Preserve the exact previous affected-service release/build/commit as the release-local rollback identity.
