@@ -445,7 +445,7 @@ Complete the reproducible adapter whose pure comparison foundation is extracted 
 
 **B3 source disposition:** `track-b-live-path-replay.ts` is a thin reusable
 adapter over the B2.1 reply comparator and the existing commerce-authority
-state comparator. It has no queue, delivery, persistence, provider or protected-
+state comparator. It has no queue, delivery, persistence, provider or protected
 effect port. Each capture records operational queue claims, customer sends,
 durable state mutations and protected effects and fails closed if any count is
 non-zero; in-memory commit plans remain comparison-only evidence. The corpus
@@ -455,10 +455,19 @@ identities. One immutable capture from exact pre-B2.4
 `a89a50cb52183a3ffc4f3d7bd313ea675564c07b` is replayed through the current
 `RealtimeRunner`; verified facts, protected claims, effect authorization,
 commit and whole-group delivery must match rather than being reclassified as
-permitted changes. The remaining live-path fixtures cover unsupported and
-protected claims, PII/security, unauthorized effects, stale facts, malformed
-generation, the one-repair cap, verified-facts fallback and BF-04 size. This is
-source verification only; it is not Gate-E, deploy or operational evidence.
+permitted changes. Every risk label is paired with an executable, reason-coded
+postcondition; a label without its assertion is rejected before replay. The
+commerce state comparison is built from each capture's actual commit plan or
+loaded unchanged state and is checked against an exact expected PII-safe state
+projection, so current-vs-current execution cannot hide state drift. Identity
+evidence separates the configured provider model from the deterministic fixture
+model and binds the unchanged live-path source revision, both baseline and
+size-repair prompts, generation config, policy/schema, complete business fixtures,
+case inputs, risk assertions and expected state projections. The live-path
+fixtures cover unsupported and protected claims, PII/security, unauthorized
+effects, stale and missing facts, malformed generation, the one-repair cap,
+verified-facts fallback and BF-04 size. This is source verification only; it is
+not Gate-E, deploy or operational evidence.
 
 ---
 

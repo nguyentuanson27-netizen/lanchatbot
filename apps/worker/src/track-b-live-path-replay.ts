@@ -29,8 +29,10 @@ export type TrackBReplayRiskClass =
 
 export interface TrackBReplayIdentity {
   readonly modelProvider: string;
-  readonly providerModel: string;
+  readonly configuredProviderModel: string;
+  readonly fixtureModelVersion: string;
   readonly capability: "BASELINE_MODEL_CAPABILITY";
+  readonly livePathSourceRevision: string;
   readonly promptVersion: string;
   readonly promptTemplateHash: string;
   readonly generationConfigHash: string;
@@ -54,31 +56,46 @@ export interface TrackBReplaySideEffectCapture {
   readonly capturedCommitPlans: number;
 }
 
-export interface TrackBReplayObservation {
+export interface TrackBReplayObservation<TEvidence = unknown> {
   readonly reply: RealtimeReplySnapshot;
   readonly sideEffects: TrackBReplaySideEffectCapture;
+  /** PII-safe projection derived from this exact capture's commit plan. */
+  readonly stateComparison: CompareCommerceAuthorityInput;
+  readonly evidence: TEvidence;
 }
 
-type StateDifferenceCode = CommerceAuthorityComparison["differences"][number];
+type StateDifferenceCode =
+  | CommerceAuthorityComparison["differences"][number]
+  | "STATE_PROJECTION_CHANGED";
 
 export interface PermittedTrackBStateDifference {
   readonly code: StateDifferenceCode;
   readonly reasonCode: string;
 }
 
-export interface TrackBLivePathReplayCase<TInput> {
+export interface TrackBRiskAssertion<TEvidence> {
+  readonly riskClass: TrackBReplayRiskClass;
+  readonly assertionCode: string;
+  readonly evaluate: (input: Readonly<{
+    baseline: TrackBReplayObservation<TEvidence>;
+    candidate: TrackBReplayObservation<TEvidence>;
+  }>) => boolean;
+}
+
+export interface TrackBLivePathReplayCase<TInput, TEvidence = unknown> {
   readonly caseId: string;
   readonly riskClasses: readonly TrackBReplayRiskClass[];
   readonly capturedInput: TInput;
   readonly baseline: (
     capture: Readonly<TInput>,
-  ) => TrackBReplayObservation | Promise<TrackBReplayObservation>;
+  ) => TrackBReplayObservation<TEvidence> | Promise<TrackBReplayObservation<TEvidence>>;
   readonly candidate: (
     capture: Readonly<TInput>,
-  ) => TrackBReplayObservation | Promise<TrackBReplayObservation>;
+  ) => TrackBReplayObservation<TEvidence> | Promise<TrackBReplayObservation<TEvidence>>;
   readonly permittedReplyDifferences?: readonly PermittedRealtimeReplyDifference[];
-  readonly stateComparison: CompareCommerceAuthorityInput;
   readonly permittedStateDifferences?: readonly PermittedTrackBStateDifference[];
+  readonly expectedStateComparison: CompareCommerceAuthorityInput;
+  readonly riskAssertions: readonly TrackBRiskAssertion<TEvidence>[];
 }
 
 interface TrackBStateDifference {
@@ -101,6 +118,11 @@ interface TrackBReplayCaseResult {
     readonly reasonCodes: readonly string[];
     readonly capturedCommitPlans: number;
   };
+  readonly riskAssertions: readonly {
+    readonly riskClass: TrackBReplayRiskClass;
+    readonly assertionCode: string;
+    readonly status: "PASS" | "VIOLATION";
+  }[];
 }
 
 export interface TrackBLivePathReplayResult {
@@ -109,6 +131,7 @@ export interface TrackBLivePathReplayResult {
   readonly sideEffects: "DISABLED";
   readonly identity: TrackBReplayIdentity;
   readonly identityHash: string;
+  readonly captureSetHash: string;
   readonly coverage: {
     readonly complete: boolean;
     readonly coveredRiskClasses: readonly TrackBReplayRiskClass[];
@@ -118,6 +141,7 @@ export interface TrackBLivePathReplayResult {
 }
 
 const SHA256_IDENTITY = /^(?:sha256:)?[a-f0-9]{64}$/u;
+const GIT_REVISION = /^[a-f0-9]{40}$/u;
 const REQUIRED_RISK_CLASSES = new Set<string>(
   TRACK_B_REPLAY_REQUIRED_RISK_CLASSES,
 );
@@ -132,12 +156,16 @@ function validateIdentity(identity: TrackBReplayIdentity): void {
   }
   for (const field of [
     "modelProvider",
-    "providerModel",
+    "configuredProviderModel",
+    "fixtureModelVersion",
     "promptVersion",
   ] as const) {
     if (!identity[field].trim()) {
       throw new Error(`TRACK_B_REPLAY_IDENTITY_${field.toUpperCase()}_REQUIRED`);
     }
+  }
+  if (!GIT_REVISION.test(identity.livePathSourceRevision)) {
+    throw new Error("TRACK_B_REPLAY_IDENTITY_SOURCE_REVISION_INVALID");
   }
   for (const field of [
     "promptTemplateHash",
@@ -190,10 +218,13 @@ function sideEffectResult(
   };
 }
 
-function stateResult<TInput>(
-  replayCase: TrackBLivePathReplayCase<TInput>,
+function stateResult<TInput, TEvidence>(
+  replayCase: TrackBLivePathReplayCase<TInput, TEvidence>,
+  baselineObservation: TrackBReplayObservation<TEvidence>,
+  candidateObservation: TrackBReplayObservation<TEvidence>,
 ): TrackBReplayCaseResult["state"] {
-  const comparison = compareCommerceAuthority(replayCase.stateComparison);
+  const baseline = compareCommerceAuthority(baselineObservation.stateComparison);
+  const candidate = compareCommerceAuthority(candidateObservation.stateComparison);
   const permitted = new Map<StateDifferenceCode, string>();
   for (const difference of replayCase.permittedStateDifferences ?? []) {
     const reasonCode = difference.reasonCode.trim();
@@ -203,7 +234,17 @@ function stateResult<TInput>(
     }
     permitted.set(difference.code, reasonCode);
   }
-  const differences = comparison.differences.map((code): TrackBStateDifference => {
+  const codes = [...new Set<StateDifferenceCode>([
+    ...baseline.differences,
+    ...candidate.differences,
+    ...(canonicalJsonV1(baselineObservation.stateComparison) ===
+          canonicalJsonV1(candidateObservation.stateComparison) &&
+        canonicalJsonV1(replayCase.expectedStateComparison) ===
+          canonicalJsonV1(candidateObservation.stateComparison)
+      ? []
+      : ["STATE_PROJECTION_CHANGED" as const]),
+  ])];
+  const differences = codes.map((code): TrackBStateDifference => {
     const reasonCode = permitted.get(code) ?? null;
     return {
       code,
@@ -216,7 +257,7 @@ function stateResult<TInput>(
       ? "VIOLATION"
       : differences.length > 0
         ? "INTENTIONAL_DIFFERENCE"
-        : comparison.status === "MATCH"
+        : baseline.status === "MATCH" && candidate.status === "MATCH"
           ? "MATCH"
           : "VIOLATION",
     differences,
@@ -228,9 +269,9 @@ function stateResult<TInput>(
  * state comparator. Callers supply capture-only executions; this function has
  * no queue, delivery, persistence, model-provider, or protected-effect port.
  */
-export async function runTrackBLivePathReplay<TInput>(input: {
+export async function runTrackBLivePathReplay<TInput, TEvidence>(input: {
   readonly identity: TrackBReplayIdentity;
-  readonly cases: readonly TrackBLivePathReplayCase<TInput>[];
+  readonly cases: readonly TrackBLivePathReplayCase<TInput, TEvidence>[];
 }): Promise<TrackBLivePathReplayResult> {
   validateIdentity(input.identity);
   const covered = new Set<TrackBReplayRiskClass>();
@@ -248,13 +289,25 @@ export async function runTrackBLivePathReplay<TInput>(input: {
       }
       covered.add(riskClass);
     }
+    const asserted = new Set(replayCase.riskAssertions.map(({ riskClass }) => riskClass));
+    if (replayCase.riskClasses.some((riskClass) => !asserted.has(riskClass))) {
+      throw new Error("TRACK_B_REPLAY_RISK_ASSERTION_REQUIRED");
+    }
+    for (const assertion of replayCase.riskAssertions) {
+      if (!assertion.assertionCode.trim()) {
+        throw new Error("TRACK_B_REPLAY_ASSERTION_CODE_REQUIRED");
+      }
+      if (!replayCase.riskClasses.includes(assertion.riskClass)) {
+        throw new Error("TRACK_B_REPLAY_ASSERTION_RISK_UNDECLARED");
+      }
+    }
   }
 
   for (const replayCase of input.cases) {
     const caseId = replayCase.caseId.trim();
     const observations: {
-      baseline?: TrackBReplayObservation;
-      candidate?: TrackBReplayObservation;
+      baseline?: TrackBReplayObservation<TEvidence>;
+      candidate?: TrackBReplayObservation<TEvidence>;
     } = {};
     const reply = await runRealtimeReplyDifferential({
       capturedInput: replayCase.capturedInput,
@@ -273,22 +326,40 @@ export async function runTrackBLivePathReplay<TInput>(input: {
     if (observations.baseline === undefined || observations.candidate === undefined) {
       throw new Error("TRACK_B_REPLAY_OBSERVATION_MISSING");
     }
-    const state = stateResult(replayCase);
-    const sideEffects = sideEffectResult(
-      observations.baseline.sideEffects,
-      observations.candidate.sideEffects,
+    const baselineObservation = observations.baseline;
+    const candidateObservation = observations.candidate;
+    const state = stateResult(
+      replayCase,
+      baselineObservation,
+      candidateObservation,
     );
+    const sideEffects = sideEffectResult(
+      baselineObservation.sideEffects,
+      candidateObservation.sideEffects,
+    );
+    const riskAssertions = replayCase.riskAssertions.map((assertion) => ({
+      riskClass: assertion.riskClass,
+      assertionCode: assertion.assertionCode,
+      status: assertion.evaluate({
+        baseline: baselineObservation,
+        candidate: candidateObservation,
+      })
+        ? "PASS" as const
+        : "VIOLATION" as const,
+    }));
     cases.push({
       caseId,
       riskClasses: [...replayCase.riskClasses],
       status: reply.status === "VIOLATION" ||
           state.status === "VIOLATION" ||
-          sideEffects.status === "VIOLATION"
+          sideEffects.status === "VIOLATION" ||
+          riskAssertions.some(({ status }) => status === "VIOLATION")
         ? "VIOLATION"
         : "PASS",
       reply,
       state,
       sideEffects,
+      riskAssertions,
     });
   }
 
@@ -298,6 +369,18 @@ export async function runTrackBLivePathReplay<TInput>(input: {
   const missingRiskClasses = TRACK_B_REPLAY_REQUIRED_RISK_CLASSES.filter(
     (riskClass) => !covered.has(riskClass),
   );
+  const captureSetHash = sha256(canonicalJsonV1(input.cases.map((replayCase) => ({
+    caseId: replayCase.caseId.trim(),
+    riskClasses: replayCase.riskClasses,
+    capturedInput: replayCase.capturedInput,
+    assertions: replayCase.riskAssertions.map(({ riskClass, assertionCode }) => ({
+      riskClass,
+      assertionCode,
+    })),
+    permittedReplyDifferences: replayCase.permittedReplyDifferences ?? [],
+    permittedStateDifferences: replayCase.permittedStateDifferences ?? [],
+    expectedStateComparison: replayCase.expectedStateComparison,
+  }))));
   return {
     contractVersion: "TRACK_B_LIVE_PATH_REPLAY_V1",
     status: missingRiskClasses.length > 0 ||
@@ -306,7 +389,8 @@ export async function runTrackBLivePathReplay<TInput>(input: {
       : "PASS",
     sideEffects: "DISABLED",
     identity: Object.freeze({ ...input.identity }),
-    identityHash: sha256(canonicalJsonV1(input.identity)),
+    identityHash: sha256(canonicalJsonV1({ identity: input.identity, captureSetHash })),
+    captureSetHash,
     coverage: {
       complete: missingRiskClasses.length === 0,
       coveredRiskClasses,

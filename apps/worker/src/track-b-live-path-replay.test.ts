@@ -19,8 +19,10 @@ function sha256(value: string): string {
 function identity(): TrackBReplayIdentity {
   return {
     modelProvider: "VERTEX_AI",
-    providerModel: "gemini-3.5-flash-lite",
+    configuredProviderModel: "gemini-3.5-flash-lite",
+    fixtureModelVersion: "track-b-replay-fixture-v1",
     capability: "BASELINE_MODEL_CAPABILITY",
+    livePathSourceRevision: "a".repeat(40),
     promptVersion: "lana-realtime-v1",
     promptTemplateHash: sha256("byte-frozen-baseline-prompt"),
     generationConfigHash: sha256("byte-frozen-generation-config"),
@@ -55,9 +57,36 @@ function snapshot(
   };
 }
 
+function stateComparison() {
+  return {
+    enabled: true as const,
+    legacy: {
+      pageId,
+      conversationId,
+      owner: "BOT" as const,
+      stage: "PRODUCT_MATCHED" as const,
+      productId: "SD398",
+    },
+    commerce: {
+      pageId,
+      conversationId,
+      revision: 4,
+      stage: "FACTS_PRESENTED" as const,
+      productScope: { kind: "SINGLE" as const, productId: "SD398" },
+      cartProductScope: { kind: "ABSENT" as const },
+      artifacts: {
+        hasCart: false,
+        hasOrderPreview: false,
+        hasPurchaseConfirmation: false,
+      },
+    },
+  };
+}
+
 function observation(
   reply: RealtimeReplySnapshot = snapshot(),
   sideEffects: Partial<TrackBReplayObservation["sideEffects"]> = {},
+  state = stateComparison(),
 ): TrackBReplayObservation {
   return {
     reply,
@@ -69,42 +98,30 @@ function observation(
       capturedCommitPlans: 1,
       ...sideEffects,
     },
+    stateComparison: state,
+    evidence: {},
   };
 }
 
 function replayCase(
   overrides: Partial<TrackBLivePathReplayCase<{ customerText: string }>> = {},
 ): TrackBLivePathReplayCase<{ customerText: string }> {
+  const riskClasses = overrides.riskClasses ?? [
+    ...TRACK_B_REPLAY_REQUIRED_RISK_CLASSES,
+  ];
   return {
     caseId: "full-required-corpus",
-    riskClasses: [...TRACK_B_REPLAY_REQUIRED_RISK_CLASSES],
     capturedInput: { customerText: "Mẫu SD398 giá bao nhiêu?" },
     baseline: async () => observation(),
     candidate: async () => observation(),
-    stateComparison: {
-      enabled: true,
-      legacy: {
-        pageId,
-        conversationId,
-        owner: "BOT",
-        stage: "PRODUCT_MATCHED",
-        productId: "SD398",
-      },
-      commerce: {
-        pageId,
-        conversationId,
-        revision: 4,
-        stage: "FACTS_PRESENTED",
-        productScope: { kind: "SINGLE", productId: "SD398" },
-        cartProductScope: { kind: "ABSENT" },
-        artifacts: {
-          hasCart: false,
-          hasOrderPreview: false,
-          hasPurchaseConfirmation: false,
-        },
-      },
-    },
+    expectedStateComparison: stateComparison(),
     ...overrides,
+    riskClasses,
+    riskAssertions: overrides.riskAssertions ?? riskClasses.map((riskClass) => ({
+      riskClass,
+      assertionCode: `ASSERT_${riskClass}`,
+      evaluate: () => true,
+    })),
   };
 }
 
@@ -141,9 +158,19 @@ describe("Track B B3 live-path replay", () => {
       }],
     });
     expect(result.identityHash).toMatch(/^[a-f0-9]{64}$/u);
+    expect(result.captureSetHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(baseline).toHaveBeenCalledOnce();
     expect(candidate).toHaveBeenCalledOnce();
     expect(baseline.mock.calls[0]![0]).not.toBe(candidate.mock.calls[0]![0]);
+
+    const changedCapture = await runTrackBLivePathReplay({
+      identity: identity(),
+      cases: [replayCase({
+        capturedInput: { customerText: "Mẫu SD398 còn hàng không?" },
+      })],
+    });
+    expect(changedCapture.captureSetHash).not.toBe(result.captureSetHash);
+    expect(changedCapture.identityHash).not.toBe(result.identityHash);
   });
 
   it("fails closed when the corpus omits a required risk class", async () => {
@@ -196,14 +223,13 @@ describe("Track B B3 live-path replay", () => {
     const unreviewed = await runTrackBLivePathReplay({
       identity: identity(),
       cases: [replayCase({
-        candidate: async () => observation(changed),
-        stateComparison: {
-          ...replayCase().stateComparison,
+        candidate: async () => observation(changed, {}, {
+          ...stateComparison(),
           commerce: {
-            ...replayCase().stateComparison.commerce!,
+            ...stateComparison().commerce,
             productScope: { kind: "SINGLE", productId: "OTHER" },
           },
-        },
+        }),
       })],
     });
     expect(unreviewed.status).toBe("VIOLATION");
@@ -211,20 +237,22 @@ describe("Track B B3 live-path replay", () => {
     const reviewed = await runTrackBLivePathReplay({
       identity: identity(),
       cases: [replayCase({
-        candidate: async () => observation(changed),
+        candidate: async () => observation(changed, {}, {
+          ...stateComparison(),
+          commerce: {
+            ...stateComparison().commerce,
+            productScope: { kind: "SINGLE", productId: "OTHER" },
+          },
+        }),
         permittedReplyDifferences: [{
           code: "OUTBOUND_MESSAGES_CHANGED",
           reasonCode: "TRACK_B_MODEL_OWNS_NORMAL_WORDING",
         }],
-        stateComparison: {
-          ...replayCase().stateComparison,
-          commerce: {
-            ...replayCase().stateComparison.commerce!,
-            productScope: { kind: "SINGLE", productId: "OTHER" },
-          },
-        },
         permittedStateDifferences: [{
           code: "PRODUCT_SCOPE_MISMATCH",
+          reasonCode: "TRACK_B_FIXED_ADVERSARIAL_SCOPE_FIXTURE",
+        }, {
+          code: "STATE_PROJECTION_CHANGED",
           reasonCode: "TRACK_B_FIXED_ADVERSARIAL_SCOPE_FIXTURE",
         }],
       })],
@@ -239,6 +267,10 @@ describe("Track B B3 live-path replay", () => {
           status: "INTENTIONAL_DIFFERENCE",
           differences: [{
             code: "PRODUCT_SCOPE_MISMATCH",
+            disposition: "INTENTIONAL",
+            reasonCode: "TRACK_B_FIXED_ADVERSARIAL_SCOPE_FIXTURE",
+          }, {
+            code: "STATE_PROJECTION_CHANGED",
             disposition: "INTENTIONAL",
             reasonCode: "TRACK_B_FIXED_ADVERSARIAL_SCOPE_FIXTURE",
           }],
@@ -272,5 +304,61 @@ describe("Track B B3 live-path replay", () => {
         riskClasses: ["UNKNOWN" as typeof TRACK_B_REPLAY_REQUIRED_RISK_CLASSES[number]],
       })],
     })).rejects.toThrowError("TRACK_B_REPLAY_RISK_CLASS_INVALID");
+  });
+
+  it("requires and evaluates a postcondition for every declared risk", async () => {
+    await expect(runTrackBLivePathReplay({
+      identity: identity(),
+      cases: [replayCase({
+        riskClasses: ["PROTECTED_CLAIM"],
+        riskAssertions: [],
+      })],
+    })).rejects.toThrowError("TRACK_B_REPLAY_RISK_ASSERTION_REQUIRED");
+
+    const result = await runTrackBLivePathReplay({
+      identity: identity(),
+      cases: [replayCase({
+        riskClasses: ["PROTECTED_CLAIM"],
+        riskAssertions: [{
+          riskClass: "PROTECTED_CLAIM",
+          assertionCode: "ASSERT_UNSUPPORTED_CLAIM_REJECTED",
+          evaluate: () => false,
+        }],
+      })],
+    });
+    expect(result).toMatchObject({
+      status: "VIOLATION",
+      cases: [{
+        status: "VIOLATION",
+        riskAssertions: [{
+          assertionCode: "ASSERT_UNSUPPORTED_CLAIM_REJECTED",
+          status: "VIOLATION",
+        }],
+      }],
+    });
+
+    const changedState = {
+      ...stateComparison(),
+      commerce: {
+        ...stateComparison().commerce,
+        revision: 99,
+      },
+    };
+    const sameRegressedState = await runTrackBLivePathReplay({
+      identity: identity(),
+      cases: [replayCase({
+        baseline: async () => observation(snapshot(), {}, changedState),
+        candidate: async () => observation(snapshot(), {}, changedState),
+      })],
+    });
+    expect(sameRegressedState).toMatchObject({
+      status: "VIOLATION",
+      cases: [{
+        state: {
+          status: "VIOLATION",
+          differences: [{ code: "STATE_PROJECTION_CHANGED" }],
+        },
+      }],
+    });
   });
 });
