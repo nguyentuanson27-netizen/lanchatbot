@@ -186,9 +186,13 @@ export function canonicalBuyingIntentAuthorizesCartMutationV1(
   productId: string,
 ): boolean {
   const requestedActions: readonly CanonicalBuyingIntentV1["requestedAction"][] =
-    action === "ADD_LINE"
-      ? ["ADD_TO_CART", "OPEN_CART"]
-      : ["SET_QUANTITY", "OPEN_CART"];
+    intent.contributors.includes("MODEL_STRUCTURED_OUTPUT")
+      ? action === "ADD_LINE"
+        ? ["ADD_TO_CART"]
+        : ["SET_QUANTITY"]
+      : action === "ADD_LINE"
+        ? ["ADD_TO_CART", "OPEN_CART"]
+        : ["SET_QUANTITY", "OPEN_CART"];
   return intent.decision === "COMMITTED" &&
     intent.contributors.includes("DETERMINISTIC_RUNTIME") &&
     intent.productId === productId &&

@@ -20,6 +20,10 @@ import {
   evaluateRealtimeSalesCycle,
   prepareHandoffStatePlanV1,
 } from "./realtime-sales-cycle.js";
+import {
+  runRealtimeReplyDifferential,
+  type RealtimeReplySnapshot,
+} from "./realtime-reply-differential.js";
 
 const now = new Date("2026-07-23T03:00:00.000Z");
 const pageId = "1198992073286645";
@@ -403,6 +407,69 @@ describe("realtime Phase 3 sales cycle", () => {
     });
     expect(output.transferToHuman).toBe(true);
     expect(output.plan?.state.cart ?? null).toBeNull();
+  });
+
+  it.each(["SET_QUANTITY", "PROCEED_TO_PAYMENT"] as const)(
+    "does not open a cart when the corroborated model request is %s",
+    async (requestedAction) => {
+      const text = requestedAction === "SET_QUANTITY"
+        ? "chốt 2 set mẫu này"
+        : "chốt mẫu này và thanh toán luôn";
+      const state = createRealtimeSalesState(conversationId, pageId, now);
+      const modelBuyingIntent: AgentBuyingIntentV1 = {
+        decision: "COMMITTED",
+        requestedAction,
+        quantity: requestedAction === "SET_QUANTITY" ? 2 : null,
+        evidenceText: text,
+        confidence: 0.99,
+      };
+      const output = await evaluateRealtimeSalesCycle({
+        ...input(state, text, `event-action-mismatch-${requestedAction}`),
+        canonicalBuyingIntent: canonicalBuyingIntent(text, modelBuyingIntent),
+        salesSignals: signals({ buyingIntent: modelBuyingIntent }),
+      });
+
+      expect(output).toMatchObject({
+        handled: true,
+        transferToHuman: true,
+        reasonCode: "BUYING_INTENT_SCOPE_MISMATCH",
+      });
+      expect(output.plan?.state.cart ?? null).toBeNull();
+      expect(output.readinessAttempt).toMatchObject({
+        effect: "CART_OPEN",
+        outcome: "BLOCKED",
+        reasonCodes: expect.arrayContaining(["BUYING_INTENT_SCOPE_MISMATCH"]),
+        authorization: "NONE",
+      });
+    },
+  );
+
+  it("does not let a model-only quantity inflate a corroborated ADD_TO_CART request", async () => {
+    const text = "chốt mẫu này";
+    const modelBuyingIntent: AgentBuyingIntentV1 = {
+      decision: "COMMITTED",
+      requestedAction: "ADD_TO_CART",
+      quantity: 3,
+      evidenceText: text,
+      confidence: 0.99,
+    };
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(
+        createRealtimeSalesState(conversationId, pageId, now),
+        text,
+        "event-add-quantity-unproven",
+      ),
+      canonicalBuyingIntent: canonicalBuyingIntent(text, modelBuyingIntent),
+      salesSignals: signals({ buyingIntent: modelBuyingIntent }),
+    });
+
+    expect(output.plan?.canonicalBuyingIntent).toMatchObject({
+      requestedAction: "ADD_TO_CART",
+      quantity: null,
+      reasonCodes: expect.arrayContaining(["MODEL_REQUEST_EVIDENCE_MISMATCH"]),
+      authorization: "NONE",
+    });
+    expect(output.plan?.state.cart?.value.lines[0]?.quantity).toBe(1);
   });
 
   it.each([
@@ -809,6 +876,177 @@ describe("realtime Phase 3 sales cycle", () => {
     expect(add.plan).toBeNull();
     expect(add.transferToHuman).toBe(true);
     expect(state.cart!.value).toEqual(initialCart);
+  });
+
+  it("uses a corroborated model request as semantics while deterministic readiness authorizes the exact mutation", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "event-hybrid-exact-open",
+    ));
+    const state = opened.plan!.state;
+    const text = "chốt 2 set mẫu này";
+    const modelBuyingIntent: AgentBuyingIntentV1 = {
+      decision: "COMMITTED",
+      requestedAction: "SET_QUANTITY",
+      quantity: 2,
+      evidenceText: text,
+      confidence: 0.99,
+    };
+
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(state, text, "event-hybrid-exact-set"),
+      canonicalBuyingIntent: canonicalBuyingIntent(text, modelBuyingIntent),
+      salesSignals: signals({ buyingIntent: modelBuyingIntent }),
+    });
+
+    expect(output).toMatchObject({
+      handled: true,
+      transferToHuman: false,
+      plan: {
+        canonicalBuyingIntent: {
+          requestedAction: "SET_QUANTITY",
+          contributors: ["DETERMINISTIC_RUNTIME", "MODEL_STRUCTURED_OUTPUT"],
+          authorization: "NONE",
+        },
+        state: { cart: { value: { lines: [{ quantity: 2 }] } } },
+        cartMutationBatchEvidence: {
+          receipts: [{
+            mutation: { kind: "SET_QUANTITY", quantity: 2 },
+            authority: {
+              action: "SET_QUANTITY",
+              authorityKind: "CANONICAL_BUYING_INTENT",
+            },
+            contributor: "DETERMINISTIC_RUNTIME",
+            authorization: "NONE",
+          }],
+        },
+      },
+    });
+    expect(output.plan?.effectReadiness).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        effect: "CART_MUTATION",
+        outcome: "READY",
+        authorization: "NONE",
+      }),
+      expect.objectContaining({
+        effect: "PROTECTED_OUTBOUND",
+        outcome: "READY",
+        authorization: "NONE",
+      }),
+    ]));
+  });
+
+  it("does not mutate quantity when the structured value lacks exact customer evidence", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "event-hybrid-quantity-open",
+    ));
+    const state = opened.plan!.state;
+    const text = "chốt mẫu này";
+    const modelBuyingIntent: AgentBuyingIntentV1 = {
+      decision: "COMMITTED",
+      requestedAction: "SET_QUANTITY",
+      quantity: 2,
+      evidenceText: text,
+      confidence: 0.99,
+    };
+
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(state, text, "event-hybrid-quantity-missing"),
+      canonicalBuyingIntent: canonicalBuyingIntent(text, modelBuyingIntent),
+      salesSignals: signals({ buyingIntent: modelBuyingIntent }),
+    });
+
+    expect(output.plan?.state.cart?.value.lines[0]?.quantity ?? state.cart!.value.lines[0]!.quantity)
+      .toBe(1);
+    expect(output.plan?.effectReadiness ?? []).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ effect: "CART_MUTATION", outcome: "READY" }),
+    ]));
+  });
+
+  it("r31.3 replays the live sales-cycle effect seam without changing the established cart-open transaction", async () => {
+    const capturedInput = {
+      text: "chốt CB182 size M",
+      eventKey: "event-open",
+    } as const;
+    // Immutable capture from exact pre-B2.3b source at
+    // 933a227a0ff08702e87ea697d7284d7024f74dbf for capturedInput above.
+    const preB23bBaseline: RealtimeReplySnapshot = {
+      messages: [{
+        kind: "TEXT",
+        text: "CB182 size M ×1: 699.000đ\nTạm tính: 699.000đ\nPhí ship: 30.000đ\nTổng: 729.000đ\nChị gửi giúp em các thông tin nhận hàng:\nTên:\nSĐT:\nĐịa chỉ:\nThanh toán: COD hoặc chuyển khoản nhé.",
+      }],
+      strategyHash: null,
+      verifiedFactHashes: [
+        "107bb35375d5b6d050ff7c5008303aa1c53102647d28edc5432df57fa030f747",
+        "891937cb335016e9c7074c3781dcb1364e0c660733a8889bbeae83e6aa759be6",
+      ],
+      verifiedMediaUrls: [],
+      protectedClaimHashes: [
+        "e91f4c6407e0c3571df99c21976020751adf98391be0bc04f40e8457bd320ce9",
+        "f3a046a0b90ef7a6509d1aaddaf1bc9876110d3ee073c904da341825cf16dff4",
+      ],
+      effectAuthorizationHashes: [
+        "71568f7152f2c4da4a7de1e1e90498da5bdfc1c25d08ad40d313ed6ea0c318a2",
+        "c179e963dfa5694d37b3175de750416ca312e52b6c7769c7664d83b76c91f894",
+      ],
+      commitOutcome: "COMMITTABLE",
+      generationOutcome: "VALID",
+      inboxOutcome: "COMMITTED",
+      protectedOutbound: {
+        required: true,
+        groupId: "sales-cycle:event-open",
+        plannedMessageCount: 1,
+        deliveredMessageCount: 1,
+      },
+    };
+    const result = await runRealtimeReplyDifferential({
+      capturedInput,
+      baseline: async () => preB23bBaseline,
+      candidate: async (capture): Promise<RealtimeReplySnapshot> => {
+        const output = await evaluateRealtimeSalesCycle(input(
+          createRealtimeSalesState(conversationId, pageId, now),
+          capture.text,
+          capture.eventKey,
+        ));
+        const claims = output.protectedOutbound?.claims ?? [];
+        const readiness = output.plan?.effectReadiness ?? [];
+        return {
+          messages: output.messages,
+          strategyHash: null,
+          verifiedFactHashes: claims.map(({ provenance }) => provenance.contentHash).sort(),
+          verifiedMediaUrls: output.messages.flatMap((message) =>
+            message.kind === "IMAGE" ? [message.imageUrl] : []
+          ),
+          protectedClaimHashes: readiness
+            .flatMap(({ claimSetHash }) => claimSetHash === null ? [] : [claimSetHash])
+            .sort(),
+          effectAuthorizationHashes: readiness.map(({ readinessHash }) => readinessHash).sort(),
+          commitOutcome: output.plan === null ? "BLOCKED" : "COMMITTABLE",
+          generationOutcome: "VALID",
+          inboxOutcome: output.plan === null ? "RETRYABLE" : "COMMITTED",
+          protectedOutbound: {
+            required: output.protectedOutbound !== undefined,
+            groupId: output.protectedOutbound === undefined
+              ? null
+              : `sales-cycle:${capture.eventKey}`,
+            plannedMessageCount: output.messages.length,
+            deliveredMessageCount: output.messages.length,
+          },
+        };
+      },
+      permittedDifferences: [],
+    });
+
+    expect(result).toEqual({
+      contractVersion: "REALTIME_REPLY_DIFFERENTIAL_V1",
+      status: "MATCH",
+      sideEffects: "DISABLED",
+      differences: [],
+    });
+    expect(preB23bBaseline.effectAuthorizationHashes.length).toBeGreaterThan(0);
   });
 
   it("fails closed before readiness when a valid fifty-line cart adds product fifty-one", async () => {

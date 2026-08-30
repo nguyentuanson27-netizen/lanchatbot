@@ -133,9 +133,25 @@ export function buildCanonicalDecisionEvidenceV1(
       ? input.modelBuyingIntent?.requestedAction ?? "OPEN_CART"
       : "OPEN_CART"
     : "NONE";
+  const observedQuantity = explicitQuantity(input.text);
+  const modelQuantityMismatch =
+    decision === "COMMITTED" &&
+    resolved.source === "MODEL_STRUCTURED_OUTPUT" &&
+    (
+      requestedAction === "SET_QUANTITY" && observedQuantity === null ||
+      input.modelBuyingIntent?.quantity !== null &&
+        input.modelBuyingIntent?.quantity !== observedQuantity
+    );
   const quantity = decision === "COMMITTED"
-    ? explicitQuantity(input.text) ?? resolved.quantity
+    ? modelQuantityMismatch
+      ? null
+      : observedQuantity
     : null;
+  const reasonCodes = observed
+    ? modelQuantityMismatch
+      ? [...resolved.reasons, "MODEL_REQUEST_EVIDENCE_MISMATCH" as const]
+      : resolved.reasons
+    : [];
   const buyingIntent = CanonicalBuyingIntentV1Schema.parse({
     schemaVersion: 1,
     authorityVersion: "CANONICAL_BUYING_INTENT_V1",
@@ -152,11 +168,11 @@ export function buildCanonicalDecisionEvidenceV1(
           requestedAction,
           quantity,
           input.productId,
-          resolved.reasons,
+          reasonCodes,
           contributors,
         ]))
       : null,
-    reasonCodes: observed ? resolved.reasons : [],
+    reasonCodes,
     evaluatedAt: input.evaluatedAt.toISOString(),
     authorization: "NONE",
   });
@@ -180,9 +196,9 @@ export function buildCanonicalDecisionEvidenceV1(
       normalizedTextHash,
       act,
       dialogueContributors,
-      resolved.reasons,
+      reasonCodes,
     ])),
-    reasonCodes: resolved.reasons,
+    reasonCodes,
     authorization: "NONE",
   });
   return { dialogueEvidence, buyingIntent };

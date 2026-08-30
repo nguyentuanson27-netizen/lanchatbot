@@ -1,11 +1,11 @@
 # Track B — Model Authority Execution Plan
 
-**Status:** `B2.2_MERGED / B2.3A_SOURCE_IN_PROGRESS / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
-**Plan baseline:** `main@89b1bee02109e17b6b3b2a0e714e24d3bdb70a60`, including reviewed B2.2 head `851ead7cfd807f58eca6612da31fdcf3a9391e92`
+**Status:** `B2.3A_MERGED / B2.3B_SOURCE_IN_PROGRESS / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
+**Plan baseline:** `main@933a227a0ff08702e87ea697d7284d7024f74dbf`, including reviewed B2.3a head `68219fe7ea364c891b3603d1ce284f63ea8af1f9`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Active process profile:** `SOLO_PREPROD_MINIMAL` (merged and current default; see `OPERATING_MODE.md`)
 **Environment:** `ENGINEERING_PREPROD`, one bounded `PREPROD_TEST_PAGE`
-**Authorization:** the owner messages dated 2026-08-29 and 2026-08-30 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorize Track B **source implementation only** and split B2.3a from B2.3d. They do not authorize merge, tag/release, migration, authority/pointer mutation, deployment, routing/control-plane/VPS mutation, Messenger action, public-production promotion, or UR/State V2 work.
+**Authorization:** the owner messages dated 2026-08-29 and 2026-08-30 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorize Track B **source implementation only**, split B2.3a from B2.3d, and explicitly sequence a focused B2.3b PR after B2.3a. They do not authorize merge, tag/release, migration, authority/pointer mutation, deployment, routing/control-plane/VPS mutation, Messenger action, public-production promotion, or UR/State V2 work.
 
 ## 1. Purpose
 
@@ -134,11 +134,11 @@ B2.2  model owns strategy and wording
         ↓
 B2.3a claim verification as the primary correctness boundary
         ↓
-B2.3d size facts deterministic, wording model-owned, BF-04 closed or fenced
-        ↓
 B2.3b effect reconciliation
         ↓
 B2.3c negotiation policy vs conversational strategy
+        ↓
+B2.3d size facts deterministic, wording model-owned, BF-04 closed or fenced
         ↓
 B2.4  remove obsolete post-generation authority reachability
         ↓
@@ -155,9 +155,10 @@ B3.2  owner-scoped deploy, readback, smoke
       accepted Track B PREPROD baseline  →  Track C
 ```
 
-The 2026-08-30 owner instruction supersedes the earlier combined PR shape:
-B2.3a is one focused PR, followed by a separate B2.3d PR, then B2.3b and
-B2.3c. The split does not waive BF-04, r31.3 or model-evaluation constraints.
+The 2026-08-30 owner instructions supersede the earlier combined PR shape:
+B2.3a and B2.3b are focused PRs in that order; B2.3c and the separate B2.3d
+slice remain later work. The split does not waive BF-04, r31.3 or
+model-evaluation constraints.
 
 ---
 
@@ -237,7 +238,7 @@ This slice owns the SPLIT for reachable deterministic fact-to-copy and model-ski
 
 ### B2.3b — Separate requested effects from deterministic reconciliation
 
-**Size:** M · **PR 4 combined estimate (B2.3b/c):** 1–1.5 d · **Depends on:** B2.3a and B2.3d
+**Size:** M · **Combined estimate with later B2.3c:** 1–1.5 d · **Depends on:** B2.3a · **PR shape:** focused B2.3b only per 2026-08-30 owner instruction
 
 **Acceptance criteria**
 
@@ -246,9 +247,23 @@ This slice owns the SPLIT for reachable deterministic fact-to-copy and model-ski
 - duplicate, stale-version, conflicting or unauthorized requests fail closed or use the existing deterministic conflict/handoff outcome;
 - ambiguity or deterministic/model conflict resolves to the **less aggressive** action and emits evidence, never the more aggressive one;
 - state and effect atomicity preserved;
-- split current `realtime-sales-cycle.ts` renderers: retain exact transaction/effect facts, policy denial and minimal safe confirmation/clarification; move normal objection, negotiation and CTA prose to model authority.
+- classify the current `realtime-sales-cycle.ts` renderers and retain exact transaction/effect facts, policy denial and minimal safe confirmation/clarification; normal negotiation prose is a B2.3c boundary and is not changed in this focused PR.
 
 **Verification:** `apps/worker/src/realtime-sales-cycle.test.ts`, `packages/chat-runtime/src/sales-cycle-runtime.test.ts`, `sales-cycle-runtime-contract-mismatch.test.ts`, `packages/business-tools/src/effect-readiness.test.ts`, `negotiation-engine-v2.test.ts`; cover duplicate/idempotency, stale revision/cart version, unauthorized/malformed effects, exact renderer dispositions, checkout/payment transitions, transaction and CAS failures.
+
+**B2.3b source disposition:** the byte-frozen `salesSignals.buyingIntent.requestedAction`
+field is the structured request seam. A model-only request remains observable
+with `authorization: NONE`; it cannot authorize an effect. When exact
+deterministic commitment evidence corroborates a specific model request, the
+canonical intent preserves that action while readiness requires the exact
+action/product binding and model-proposed quantities require exact customer-text
+evidence. A deterministic/model conflict resolves to the less
+aggressive decision and carries explicit reason codes. The database/DF13 final
+transaction continues to revalidate freshness, expected versions, CAS,
+idempotency, fence/policy and trusted ports before atomic state/effect commit.
+The existing sales-cycle renderers in this slice are transaction facts, policy
+denials and minimal safe confirmations/clarifications; negotiation prose remains
+explicitly deferred to B2.3c, so this PR does not move or rewrite that prose.
 
 ---
 
@@ -426,13 +441,13 @@ Excludes external provider and infrastructure waiting.
 
 | Slice | Estimate |
 |---|---:|
-| B1 | complete (review pending) |
+| B1 | complete, reviewed and merged |
 | PR 1 — B2.1 seam + differential foundation | 1–1.5 d |
 | PR 2 — B2.2 post-generation authority demotion | 1–1.5 d |
-| B2.3a + B2.3d across two focused PRs — structured claims, then BF-04/one repair | 1.5–2 d combined |
-| PR 4 — B2.3b/c effect + negotiation reconciliation | 1–1.5 d |
-| PR 5 — B2.4/B3 reachability + final replay | 1–1.5 d |
-| PR 6 — authority identity / activation-path source | 0.75–1.25 d |
+| B2.3a + later B2.3d across two focused PRs — structured claims, then BF-04/one repair | 1.5–2 d combined |
+| B2.3b + B2.3c across two focused PRs — effect, then negotiation reconciliation | 1–1.5 d combined |
+| B2.4/B3 reachability + final replay | 1–1.5 d |
+| Authority identity / activation-path source | 0.75–1.25 d |
 | **To merge** | **6.25–9.25 d** |
 | B3.1 (deploy gate only) | 0.5–1 d |
 | B3.2 (owner-authorized deploy + authority mutation) | 0.5–1 d |
@@ -445,10 +460,11 @@ The source total is the arithmetic sum of the six locked PR ranges and matches t
 1. **PR B2.1:** explicit post-generation seam plus pure, non-claiming reply-comparison core; characterization only.
 2. **PR B2.2:** make baseline structured strategy/wording authoritative; demote the second strategy decision, `applyWave2ReplyPolicy`, `postMediaProofCta` and final politeness deletion; exact-head r31.3 differential.
 3. **PR B2.3a:** split every named deterministic fact-to-copy/model-skipping producer and add the non-size structured protected-claim fail-closed boundary with verified-facts/media preservation.
-4. **PR B2.3d:** close or explicitly fence BF-04, make size wording depend on a declared verified claim, and retain exactly one bounded repair.
-5. **PR B2.3b/c:** effect and negotiation reconciliation proof/changes, keeping policy arithmetic, trusted ports, version/CAS/idempotency and less-aggressive conflict resolution deterministic.
-6. **PR B2.4/B3:** remove obsolete COMMERCE reachability, complete full side-effect-free replay and final r31.3 evidence.
-7. **PR authority identity / deploy preparation:** truthful authority-bundle labels, new bundle/behavior identity and reviewed pointer/CAS/readback/rollback tooling. It may merge as source only; no runtime mutation occurs without a new owner command.
+4. **PR B2.3b:** preserve the structured model effect request only when deterministic evidence corroborates it; retain exact-action readiness and transaction-time reconciliation.
+5. **PR B2.3c:** separate conversational negotiation from deterministic policy arithmetic, limits and authorization.
+6. **PR B2.3d:** close or explicitly fence BF-04, make size wording depend on a declared verified claim, and retain exactly one bounded repair.
+7. **PR B2.4/B3:** remove obsolete COMMERCE reachability, complete full side-effect-free replay and final r31.3 evidence.
+8. **PR authority identity / deploy preparation:** truthful authority-bundle labels, new bundle/behavior identity and reviewed pointer/CAS/readback/rollback tooling. It may merge as source only; no runtime mutation occurs without a new owner command.
 
 ## 11. Main risks and stop conditions
 

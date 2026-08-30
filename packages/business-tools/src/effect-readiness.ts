@@ -69,6 +69,12 @@ export function evaluateDeterministicEffectReadinessV1(
       !productIds.includes(input.buyingIntent.productId)
     ) {
       reasons.add("BUYING_INTENT_SCOPE_MISMATCH");
+    } else if (
+      input.effect === "CART_OPEN" &&
+      input.buyingIntent.requestedAction !== "OPEN_CART" &&
+      input.buyingIntent.requestedAction !== "ADD_TO_CART"
+    ) {
+      reasons.add("BUYING_INTENT_SCOPE_MISMATCH");
     }
   }
   if (

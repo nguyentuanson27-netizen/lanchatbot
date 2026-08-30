@@ -164,6 +164,25 @@ describe("deterministic effect readiness", () => {
     expect(modelOnly.reasonCodes).toContain("BUYING_INTENT_MISSING");
   });
 
+  it.each(["SET_QUANTITY", "PROCEED_TO_PAYMENT"] as const)(
+    "blocks a %s request from authorizing CART_OPEN",
+    (requestedAction) => {
+      const result = evaluateDeterministicEffectReadinessV1({
+        ...base,
+        buyingIntent: CanonicalBuyingIntentV1Schema.parse({
+          ...intent,
+          requestedAction,
+          contributors: ["DETERMINISTIC_RUNTIME", "MODEL_STRUCTURED_OUTPUT"],
+          reasonCodes: ["DIRECT_PURCHASE_VERB", "MODEL_BUYING_COMMITTED"],
+        }),
+      });
+
+      expect(result.outcome).toBe("BLOCKED");
+      expect(result.reasonCodes).toContain("BUYING_INTENT_SCOPE_MISMATCH");
+      expect(result.authorization).toBe("NONE");
+    },
+  );
+
   it("blocks model-only authority for add or quantity cart mutations", () => {
     const modelOnly = CanonicalBuyingIntentV1Schema.parse({
       ...intent,
@@ -198,6 +217,24 @@ describe("deterministic effect readiness", () => {
     });
     expect(wrongAction.outcome).toBe("BLOCKED");
     expect(wrongAction.reasonCodes).toContain("BUYING_INTENT_SCOPE_MISMATCH");
+
+    const hybridGenericAction = evaluateDeterministicEffectReadinessV1({
+      ...base,
+      effect: "CART_MUTATION",
+      cartId,
+      cartVersion: 2,
+      cartLines: cartLinesFor(["product-1"]),
+      mutationAction: "SET_QUANTITY",
+      deterministicEvidenceHash: hash("f"),
+      buyingIntent: CanonicalBuyingIntentV1Schema.parse({
+        ...intent,
+        requestedAction: "OPEN_CART",
+        contributors: ["DETERMINISTIC_RUNTIME", "MODEL_STRUCTURED_OUTPUT"],
+        reasonCodes: ["DIRECT_PURCHASE_VERB", "MODEL_BUYING_COMMITTED"],
+      }),
+    });
+    expect(hybridGenericAction.outcome).toBe("BLOCKED");
+    expect(hybridGenericAction.reasonCodes).toContain("BUYING_INTENT_SCOPE_MISMATCH");
   });
 
   it("allows deterministic removal authority without buying intent", () => {

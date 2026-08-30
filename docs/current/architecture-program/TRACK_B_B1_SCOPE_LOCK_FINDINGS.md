@@ -211,10 +211,11 @@ The minimal source sequence before any separately authorized activation is:
 1. **B2.1 — seam and differential foundation**: characterization plus pure side-effect-free r31.3 comparator. Estimate `1–1.5 d`.
 2. **B2.2 — strategy authority/demotion**: baseline proposal owns normal strategy; remove post-generation strategy/CTA override. Estimate `1–1.5 d`.
 3. **B2.3a — structured non-size claims**: typed per-claim provenance authorization and model-skipping producer split in one focused PR, per the 2026-08-30 owner instruction.
-4. **B2.3d — BF-04 and one repair**: size protected-claim closure/fence, exactly one repair and verified-facts fallback. B2.3a and B2.3d retain the earlier combined `1.5–2 d` estimate.
-5. **B2.3b/c — effect negotiation**: model proposes, deterministic policy authorizes, whole-group delivery preserved. Estimate `1–1.5 d`.
-6. **B2.4/B3 — reachability and final replay**: eliminate superseded live authority, prove no bypass and run final differential. Estimate `1–1.5 d`.
-7. **Authority identity/deploy preparation source**: new bundle/behavior identity, writer/readback/rollback preparation only; no mutation. Estimate `0.75–1.25 d`.
+4. **B2.3b — effect reconciliation**: model proposes a structured action, deterministic exact-action readiness and transaction-time reconciliation authorize it. Focused separately by the later 2026-08-30 owner instruction.
+5. **B2.3c — negotiation split**: conversational negotiation is separated from deterministic monetary/policy authorization. B2.3b and B2.3c retain the earlier combined `1–1.5 d` estimate.
+6. **B2.3d — BF-04 and one repair**: size protected-claim closure/fence, exactly one repair and verified-facts fallback. B2.3a and B2.3d retain the earlier combined `1.5–2 d` estimate.
+7. **B2.4/B3 — reachability and final replay**: eliminate superseded live authority, prove no bypass and run final differential. Estimate `1–1.5 d`.
+8. **Authority identity/deploy preparation source**: new bundle/behavior identity, writer/readback/rollback preparation only; no mutation. Estimate `0.75–1.25 d`.
 
 The six source ranges sum to `6.25–9.25 engineer-days`; that is the single remaining source/merge estimate. A later governed pre-deploy evaluation adds `0.5–1 day`, and a separately authorized deployment/authority mutation adds another `0.5–1 day`, for `7.25–11.25 engineer-days` including both. Queue/provider delay and any separately proven migration are excluded.
 
