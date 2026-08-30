@@ -1,12 +1,12 @@
 # Track B — Execution Checklist
 
-**Status:** `B2.3D_MERGED / B2.4_SOURCE_IN_PROGRESS`
+**Status:** `B2.4_MERGED / B3_SOURCE_IN_PROGRESS`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` and its observed request envelope stay byte-frozen; the Context V2 candidate stays offline. If that direction proves insufficient, Track B stops incomplete; it has no prompt-edit or candidate-promotion alternative.
 
 ## Before implementation
 
-- [x] Bind the 2026-08-29 owner message authorizing Track B **source implementation only** (`sourceThreadId=019ff0ed-3760-7e81-98f4-5e91e8ca35b0`). This does not authorize merge, deploy, migration, authority/pointer mutation, routing, Messenger action or public-production promotion.
+- [x] Bind the owner source-work authorization (`sourceThreadId=019ff0ed-3760-7e81-98f4-5e91e8ca35b0`). The 2026-08-30 process update permits normal merge of focused Track B source PRs only after clean self-review, final no-blockers from that PR's fixed Sol High reviewer, real exact-head canonical CI PASS and immediate remote-head/base/mergeability revalidation. It does not authorize deploy, tag/release, migration, authority/pointer/CAS mutation, routing, Messenger action, operational acceptance or public-production promotion.
 - [x] Re-read `AGENTS.md`, `OPERATING_MODE.md`, `program-state.json`, this plan and the relevant contracts from the exact merged `main` head.
 - [x] Follow `SOLO_PREPROD_MINIMAL`: `branch -> code + focused verification -> PR -> exact-head verification -> merge -> deploy exact commit -> smoke`. Do not reintroduce Release Train or a second approval record.
 - [x] Keep `stateReadMode=LEGACY`; do not start UR/State V2 without a separate evidence-backed approval.
@@ -137,18 +137,18 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 - [x] Preserve structured claim/size repair, negotiation/effect reconciliation, whole-group delivery and DF13 commit/fence semantics before disconnecting wrappers.
 - [x] Retain rather than delete legacy helpers because explicit LEGACY rollback and rollback tests remain proven consumers.
 - [x] Execute the B2.4 r31.3 capture through the actual `RealtimeRunner` against immutable pre-B2.4 `main@a89a50cb52183a3ffc4f3d7bd313ea675564c07b`; preserve deliberately cleanup-sensitive model wording plus verified facts, protected claims, effect authorization, commit and whole-group delivery, while retaining invalid-repair/fallback and LEGACY rollback evidence.
-- [ ] **Checkpoint:** exact B2.4 source head passes clean self-review, fixed independent review and canonical exact-head CI.
+- [x] **Checkpoint:** PR #279 merged reviewed B2.4 head `0221c37d239003e8c737cfc0d37962e2064dbf49` as `c22d0a5181e1e4e67401bf00b79ce9f49cbb663d` after fixed-reviewer no-blockers and canonical CI run `33310735157`, job `99255238013` PASS.
 
 ## B3 — Live-path differential and replay
 
-- [ ] Complete and reuse the pure comparison core introduced in B2.1; it must claim no queue rows and create no side effects.
-- [ ] Reuse `commerce-authority-comparison.ts` for the state half of the differential.
-- [ ] Replay the live baseline path before versus after demotion on the same inputs and report differences.
-- [ ] Pin model/provider-model identity, prompt/template identity, generation config, policy/schema/config identity and fixed fact fixtures.
-- [ ] Cover unsupported and protected claims, PII/security, unauthorized effects, stale or missing facts, malformed output, the single-repair budget, verified-facts fallback and BF-04 size regressions.
-- [ ] Prove no customer message and no state mutation can occur.
-- [ ] Do not build a second replay framework; do not require the full Wave1 population.
-- [ ] Reuse the adapter for Track C.
+- [x] Complete and reuse the pure comparison core introduced in B2.1; the B3 adapter exposes no queue, delivery, persistence, provider or protected-effect port.
+- [x] Reuse `commerce-authority-comparison.ts` for the state half of the differential.
+- [x] Replay the immutable exact pre-B2.4 live capture versus the current live path on the same input and report differences without permitting claim/effect drift; derive state comparison from the executed commit/loaded state, take product scope only from the BUILT canonical Context V2 capture binding (fail closed when blocked/absent), and require the exact expected PII-safe projection per capture.
+- [x] Pin configured provider-model separately from the deterministic fixture model and bind the unchanged live-path source revision, baseline, grounded, grounded-draft, size-repair and customer-URL-explanation prompts, accepted grounded-draft and verified-fact-assembler runner flags, customer-URL policy, exact structured-agent and structured-grounded-draft generation configs and Vertex response schemas, policy/schema/config, complete business fixtures, captured inputs, risk assertions and expected state projections.
+- [x] Cover unsupported and protected claims, PII/security, unauthorized effects, stale and missing facts, malformed output, the single-repair budget, verified-facts fallback and BF-04 size regressions; reject a risk label that lacks an executable reason-coded postcondition.
+- [x] Prove capture-only execution records zero customer messages, durable state mutations, queue claims and protected effects.
+- [x] Do not build a second replay framework; do not require the full Wave1 population.
+- [x] Keep the adapter generic and reusable by Track C.
 
 ## Merge boundary
 

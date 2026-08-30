@@ -14,14 +14,32 @@ import type {
   RuntimePolicyResolverPort,
 } from "@lana/chat-runtime";
 import { behaviorModeContentHash } from "@lana/chat-runtime";
+import {
+  CUSTOMER_URL_EXPLANATION_SYSTEM_INSTRUCTION,
+  GROUNDED_DRAFT_SYSTEM_INSTRUCTION,
+  GROUNDED_SYSTEM_INSTRUCTION,
+  SHADOW_SYSTEM_INSTRUCTION,
+  SIZE_CLAIM_REPAIR_SYSTEM_INSTRUCTION,
+  structuredVertexGenerationIdentity,
+} from "./vertex.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import type { RealtimeGenerationQuota } from "./realtime-quota.js";
 import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
 import { DF13_COMMERCE_AUTHORITY_CONSUMERS_V1 } from "./df13-commerce-authority-bundle.js";
 import { Df13CommerceRuntimeFinalizationAdapter } from "./df13-commerce-runtime-finalization.js";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
+import {
+  compareCommerceAuthority,
+  projectCommerceAuthorityCandidate,
+} from "./commerce-authority-comparison.js";
 import * as realtimeReplyDifferential from "./realtime-reply-differential.js";
 import type { RealtimeReplySnapshot } from "./realtime-reply-differential.js";
+import {
+  runTrackBLivePathReplay,
+  type TrackBLivePathReplayCase,
+  type TrackBReplayIdentity,
+  type TrackBReplayObservation,
+} from "./track-b-live-path-replay.js";
 import {
   RealtimeRunner,
   type RealtimeInboxPort,
@@ -37,6 +55,7 @@ const conversationHash = "meta:v1:bf01-customer";
 const fallbackText = "Chị muốn em làm rõ phần nào để em trả lời đúng ý chị?";
 const safeRepairText = "Chị muốn em làm rõ biến thể nào của mẫu này để em trả lời đúng ý chị?";
 const existingReplyText = "Chị muốn em nói rõ phần biến thể nào của mẫu này?";
+const fixtureModelVersion = "bf01-test-model";
 
 const product = {
   productId: "SD398",
@@ -107,10 +126,39 @@ function proposal(
   };
 }
 
+function buyingIntentSignals(
+  requestedAction: NonNullable<
+    NonNullable<AgentProposalV1["salesSignals"]>["buyingIntent"]
+  >["requestedAction"],
+  evidenceText: string,
+): NonNullable<AgentProposalV1["salesSignals"]> {
+  const textField = { value: null, evidenceText: null, confidence: 0 } as const;
+  return {
+    checkoutExtraction: {
+      fullName: textField,
+      phone: textField,
+      address: textField,
+      paymentMethod: textField,
+    },
+    purchaseConfirmation: {
+      decision: "UNCLEAR",
+      evidenceText: null,
+      confidence: 0,
+    },
+    buyingIntent: {
+      decision: "COMMITTED",
+      requestedAction,
+      quantity: null,
+      evidenceText,
+      confidence: 0.9,
+    },
+  };
+}
+
 function modelResult(value: AgentProposalV1) {
   return {
     proposal: value,
-    modelVersion: "bf01-test-model",
+    modelVersion: fixtureModelVersion,
     latencyMs: 5,
     tokenUsage: {
       promptTokenCount: 12,
@@ -120,7 +168,7 @@ function modelResult(value: AgentProposalV1) {
   };
 }
 
-function policyResolution(): RuntimePolicyResolution {
+function policyResolution(input: { readonly customerUrlPolicyEnabled?: boolean } = {}): RuntimePolicyResolution {
   return {
     status: "RESOLVED",
     source: "DATABASE",
@@ -159,6 +207,9 @@ function policyResolution(): RuntimePolicyResolution {
         closingStrategy: {
           replyReconciliationPolicy: "CLARIFY_RECONCILED_V1",
           replyReconciliationFallbackText: fallbackText,
+          ...(input.customerUrlPolicyEnabled
+            ? { customerUrlPolicy: "CLASSIFIED_ALLOWLIST_V1" as const }
+            : {}),
         } as never,
         sizeCharts: {},
         handoffMatrix: null,
@@ -312,11 +363,17 @@ function createHarness(input: {
   commitAckLostOnce?: boolean;
   commerce?: boolean;
   initialReply?: string;
+  initialRequestedAction?: NonNullable<
+    NonNullable<AgentProposalV1["salesSignals"]>["buyingIntent"]
+  >["requestedAction"];
   initialFactIntent?: AgentProposalV1["businessFactQuery"]["intent"];
   initialProtectedClaimIds?: readonly string[];
   sizeFixture?: boolean;
   sizeRepairMode?: "VALID" | "INVALID" | "THROW";
   sizeRepairReply?: string;
+  initialGenerateMode?: "VALID" | "THROW";
+  factsMode?: "OK" | "STALE" | "NOT_FOUND";
+  liveGroundedConfig?: boolean;
 } = {}) {
   const base = createConversationState({
     conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
@@ -464,15 +521,27 @@ function createHarness(input: {
     _context: Parameters<RealtimeModelPort["generate"]>[0],
   ) => {
     if (generate.mock.calls.length === 1) {
+      if (input.initialGenerateMode === "THROW") {
+        throw new Error("TRACK_B_B3_MALFORMED_GENERATION_FIXTURE");
+      }
       switch (input.initialMode ?? "NO_REPLY") {
         case "REPLY":
           return modelResult({ ...proposal(
             "REPLY",
             input.initialReply ?? existingReplyText,
             input.initialFactIntent ?? "NONE",
-          ), protectedClaimIds: input.initialProtectedClaimIds === undefined
-            ? undefined
-            : [...input.initialProtectedClaimIds] });
+          ),
+          ...(input.initialRequestedAction === undefined
+            ? {}
+            : {
+                salesSignals: buyingIntentSignals(
+                  input.initialRequestedAction,
+                  input.customerText ?? "có biến thể gì nữa",
+                ),
+              }),
+          protectedClaimIds: input.initialProtectedClaimIds === undefined
+              ? undefined
+              : [...input.initialProtectedClaimIds] });
         case "NO_REPLY":
           return modelResult(proposal("NO_REPLY"));
       }
@@ -512,9 +581,46 @@ function createHarness(input: {
       protectedClaimIds: trustedClaims.map(({ id }) => id),
     });
   });
+  const groundWithFacts = vi.fn(async (
+    _context: Parameters<RealtimeModelPort["groundWithFacts"]>[0],
+    initial: AgentProposalV1,
+  ) => modelResult(initial));
+  const groundDraftWithFacts = vi.fn(async () => ({
+    draft: {
+      schemaVersion: 1 as const,
+      advisoryText: "",
+      objectionResponse: "",
+      suggestedQuestion: "",
+      suggestedNextStep: "",
+      attachmentImageIndices: [],
+    },
+    modelVersion: fixtureModelVersion,
+    latencyMs: 5,
+    tokenUsage: {},
+  }));
+  const draftCustomerUrlExplanation = vi.fn(async () => modelResult({
+    schemaVersion: 1,
+    intent: "customer_url_unsupported",
+    conversationStage: "DISCOVERY",
+    productId: null,
+    action: "REPLY",
+    reply: "I cannot safely open that link. Please send the product code or an image so I can check it.",
+    attachments: [],
+    handoffReason: null,
+    businessFactQuery: {
+      intent: "NONE",
+      offerType: null,
+      color: null,
+      size: null,
+      deliveryRegion: null,
+    },
+  }));
   const model: RealtimeModelPort = {
     generate,
-    groundWithFacts: vi.fn(async (_context, initial) => modelResult(initial)),
+    groundWithFacts,
+    ...(input.liveGroundedConfig
+      ? { groundDraftWithFacts, draftCustomerUrlExplanation }
+      : {}),
     ...(input.sizeFixture ? { repairSizeClaimDraft } : {}),
   };
 
@@ -531,31 +637,49 @@ function createHarness(input: {
       reasonCode: "NO_CANDIDATES" as const,
     })),
   };
+  const resolvedFactStatuses: Array<"OK" | "STALE" | "NOT_FOUND"> = [];
   const facts = {
     ready: vi.fn(async () => true),
-    resolve: vi.fn(async () => ({
-      schemaVersion: 1 as const,
-      status: "OK" as const,
-      source: "POS_SNAPSHOT" as const,
-      observedAt: occurredAt,
-      expiresAt: "2099-01-01T00:00:00.000Z",
-      productId: "SD398",
-      facts: {
-        schemaVersion: 1 as const,
-        productId: "SD398",
-        parentProductId: "SD398",
-        offerType: "AO_DAI",
-        listPriceVnd: null,
-        salePriceVnd: 1_199_000,
-        sizes: ["M", "L"],
-        stockStatus: "IN_STOCK" as const,
-        stockQuantity: 2,
-        deliveryEta: { minDays: 1, maxDays: 2 },
-        fulfillmentPolicy: "READY_STOCK",
-        imageUrls: [],
-      },
-      reasonCode: null,
-    })),
+    resolve: vi.fn(async () => {
+      const status = input.factsMode ?? "OK";
+      resolvedFactStatuses.push(status);
+      return status === "STALE" || status === "NOT_FOUND"
+        ? {
+          schemaVersion: 1 as const,
+          status,
+          source: "POS_SNAPSHOT" as const,
+          observedAt: occurredAt,
+          expiresAt: occurredAt,
+          productId: "SD398",
+          facts: null,
+          reasonCode: status === "STALE"
+            ? "BUSINESS_FACT_STALE"
+            : "BUSINESS_FACT_NOT_FOUND",
+        }
+      : {
+          schemaVersion: 1 as const,
+          status: "OK" as const,
+          source: "POS_SNAPSHOT" as const,
+          observedAt: occurredAt,
+          expiresAt: "2099-01-01T00:00:00.000Z",
+          productId: "SD398",
+          facts: {
+            schemaVersion: 1 as const,
+            productId: "SD398",
+            parentProductId: "SD398",
+            offerType: "AO_DAI",
+            listPriceVnd: null,
+            salePriceVnd: 1_199_000,
+            sizes: ["M", "L"],
+            stockStatus: "IN_STOCK" as const,
+            stockQuantity: 2,
+            deliveryEta: { minDays: 1, maxDays: 2 },
+            fulfillmentPolicy: "READY_STOCK",
+            imageUrls: [],
+          },
+          reasonCode: null,
+        };
+    }),
     close: vi.fn(async () => undefined),
   } as unknown as BusinessFactsReader;
   const tags: RealtimeTagObservationProvider = {
@@ -571,7 +695,9 @@ function createHarness(input: {
   const policyResolver: RuntimePolicyResolverPort = {
     resolve: vi.fn(async () => input.sizeFixture
       ? sizePolicyResolution()
-      : policyResolution()),
+      : policyResolution({
+        customerUrlPolicyEnabled: input.liveGroundedConfig === true,
+      })),
   };
 
   const quotaResults = [...(input.quotaResults ?? [true, true])];
@@ -651,6 +777,12 @@ function createHarness(input: {
       decisionTelemetryEnabled: true,
       decisionAuditV2Enabled: true,
       wave2StrategyEnabled: true,
+      ...(input.liveGroundedConfig
+        ? {
+            groundedDraftEnabled: true,
+            verifiedFactAssemblerEnabled: true,
+          }
+        : {}),
       customerProfileEnabled: input.sizeFixture ?? false,
       releaseId: "bf01-test",
       ...(input.commerce
@@ -673,6 +805,9 @@ function createHarness(input: {
   return {
     runner,
     generate,
+    groundWithFacts,
+    groundDraftWithFacts,
+    draftCustomerUrlExplanation,
     repairSizeClaimDraft,
     reserve,
     commit,
@@ -680,6 +815,8 @@ function createHarness(input: {
     complete,
     committed: () => committed,
     commerceCommit,
+    commerceState,
+    resolvedFactStatuses,
   };
 }
 
@@ -784,6 +921,76 @@ function committedSnapshot<TState, TSalesState>(input: {
   };
 }
 
+type TrackBRunnerEvidence = Readonly<{
+  finalText: string;
+  factStatuses: readonly ("OK" | "STALE" | "NOT_FOUND")[];
+  sizeRepairAttempts: number;
+  cartMutationReady: boolean;
+  groundWithFactsCalls: number;
+  groundDraftWithFactsCalls: number;
+  customerUrlExplanationCalls: number;
+}>;
+
+function capturedStateComparison<TState, TSalesState>(
+  commit: RealtimeCommitInput<TState, TSalesState>,
+  unchangedCommerceState: SalesCycleRuntimeState,
+) {
+  const legacy = commit.state as Readonly<{
+    conversationOwner: "BOT" | "HUMAN";
+    salesStage: ReturnType<typeof createConversationState>["salesStage"];
+    currentProductId: string | null;
+  }>;
+  const commerce = (commit.salesCyclePlan?.state ?? unchangedCommerceState) as
+    SalesCycleRuntimeState;
+  const capture = commit.contextV2CapturePlan?.capture;
+  const canonicalProductBinding = capture?.status === "BUILT" &&
+      capture.context !== null
+    ? capture.context.productBinding
+    : null;
+  return {
+    enabled: true as const,
+    legacy: {
+      pageId: commit.pageId,
+      conversationId: commit.conversationId,
+      owner: legacy.conversationOwner,
+      stage: legacy.salesStage,
+      productId: legacy.currentProductId,
+    },
+    commerce: canonicalProductBinding === null
+      ? null
+      : projectCommerceAuthorityCandidate({
+          routing: commerce.routing,
+          revision: commerce.revision,
+          stage: commerce.stage,
+          cart: commerce.cart,
+          hasOrderPreview: commerce.preview !== null,
+          hasPurchaseConfirmation: commerce.confirmation !== null,
+          productBinding: canonicalProductBinding,
+        }),
+  };
+}
+
+function replayEvidence<TState, TSalesState>(input: {
+  readonly commit: RealtimeCommitInput<TState, TSalesState>;
+  readonly factStatuses: readonly ("OK" | "STALE" | "NOT_FOUND")[];
+  readonly sizeRepairAttempts: number;
+  readonly groundWithFactsCalls: number;
+  readonly groundDraftWithFactsCalls: number;
+  readonly customerUrlExplanationCalls: number;
+}): TrackBRunnerEvidence {
+  return {
+    finalText: committedText(input.commit),
+    factStatuses: [...input.factStatuses],
+    sizeRepairAttempts: input.sizeRepairAttempts,
+    groundWithFactsCalls: input.groundWithFactsCalls,
+    groundDraftWithFactsCalls: input.groundDraftWithFactsCalls,
+    customerUrlExplanationCalls: input.customerUrlExplanationCalls,
+    cartMutationReady: (input.commit.salesCyclePlan?.effectReadiness ?? []).some(
+      ({ effect, outcome }) => effect === "CART_MUTATION" && outcome === "READY",
+    ),
+  };
+}
+
 function hasBf01Reason<TState, TSalesState>(
   value: RealtimeCommitInput<TState, TSalesState> | null | undefined,
 ): boolean {
@@ -803,6 +1010,565 @@ function unresolvedTerminalNoReplyEvents<TState, TSalesState>(
 }
 
 describe("BF-01 runner reconciliation", () => {
+  it("runs the complete B3 corpus through one capture-only live-path adapter", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(occurredAt));
+    try {
+      type Capture = {
+        readonly customerText: string;
+        readonly initialReply: string;
+        readonly initialRequestedAction?: NonNullable<
+          NonNullable<AgentProposalV1["salesSignals"]>["buyingIntent"]
+        >["requestedAction"];
+        readonly initialFactIntent?: AgentProposalV1["businessFactQuery"]["intent"];
+        readonly sizeFixture?: boolean;
+        readonly sizeRepairMode?: "VALID" | "INVALID";
+        readonly sizeRepairReply?: string;
+        readonly initialGenerateMode?: "VALID" | "THROW";
+        readonly factsMode?: "OK" | "STALE" | "NOT_FOUND";
+        readonly expectedOwner?: "BOT" | "HUMAN";
+        readonly expectedProductId?: string | null;
+        readonly expectedCommerceProductScope?: "UNAVAILABLE";
+      };
+      const failureSnapshot = (): RealtimeReplySnapshot => ({
+        messages: [],
+        strategyHash: null,
+        verifiedFactHashes: [],
+        verifiedMediaUrls: [],
+        protectedClaimHashes: [],
+        effectAuthorizationHashes: [],
+        commitOutcome: "NOT_COMMITTED",
+        generationOutcome: "FAILED",
+        inboxOutcome: "RETRYABLE",
+        protectedOutbound: {
+          required: false,
+          groupId: null,
+          plannedMessageCount: 0,
+          deliveredMessageCount: 0,
+        },
+      });
+      const runCapturedPath = async (
+        capture: Readonly<Capture>,
+      ): Promise<TrackBReplayObservation<TrackBRunnerEvidence>> => {
+        const harness = createHarness({
+          commerce: true,
+          liveGroundedConfig: true,
+          initialMode: "REPLY",
+          customerText: capture.customerText,
+          initialReply: capture.initialReply,
+          ...(capture.initialRequestedAction === undefined
+            ? {}
+            : { initialRequestedAction: capture.initialRequestedAction }),
+          initialFactIntent: capture.initialFactIntent ?? "NONE",
+          sizeFixture: capture.sizeFixture ?? false,
+          ...(capture.sizeRepairMode === undefined
+            ? {}
+            : { sizeRepairMode: capture.sizeRepairMode }),
+          ...(capture.sizeRepairReply === undefined
+            ? {}
+            : { sizeRepairReply: capture.sizeRepairReply }),
+          ...(capture.initialGenerateMode === undefined
+            ? {}
+            : { initialGenerateMode: capture.initialGenerateMode }),
+          ...(capture.factsMode === undefined
+            ? {}
+            : { factsMode: capture.factsMode }),
+        });
+        expect(await harness.runner.processOne()).toBe(true);
+        const commit = harness.commerceCommit.mock.calls[0]?.[0]?.runtimeCommit;
+        const rawResult = harness.commerceCommit.mock.results[0];
+        if (!commit || !rawResult || rawResult.type !== "return") {
+          expect(harness.retry).toHaveBeenCalledOnce();
+          return {
+            reply: failureSnapshot(),
+            sideEffects: {
+              queueClaims: 0,
+              customerMessages: 0,
+              stateMutations: 0,
+              protectedEffects: 0,
+              capturedCommitPlans: 0,
+            },
+            stateComparison: {
+              enabled: true,
+              legacy: {
+                pageId,
+                conversationId: conversationHash,
+                owner: "BOT",
+                stage: "PRODUCT_MATCHED",
+                productId: "SD398",
+              },
+              commerce: null,
+            },
+            evidence: {
+              finalText: "",
+              factStatuses: harness.resolvedFactStatuses,
+              sizeRepairAttempts: harness.repairSizeClaimDraft.mock.calls.length,
+              cartMutationReady: false,
+              groundWithFactsCalls: harness.groundWithFacts.mock.calls.length,
+              groundDraftWithFactsCalls: harness.groundDraftWithFacts.mock.calls.length,
+              customerUrlExplanationCalls:
+                harness.draftCustomerUrlExplanation.mock.calls.length,
+            },
+          };
+        }
+        return {
+          reply: committedSnapshot({
+            commit,
+            result: (await rawResult.value).runtime,
+            inboxCommitted: harness.complete.mock.calls.length === 1,
+          }),
+          sideEffects: {
+            queueClaims: 0,
+            customerMessages: 0,
+            stateMutations: 0,
+            protectedEffects: 0,
+            capturedCommitPlans: 1,
+          },
+          stateComparison: capturedStateComparison(commit, harness.commerceState),
+          evidence: replayEvidence({
+            commit,
+            factStatuses: harness.resolvedFactStatuses,
+            sizeRepairAttempts: harness.repairSizeClaimDraft.mock.calls.length,
+            groundWithFactsCalls: harness.groundWithFacts.mock.calls.length,
+            groundDraftWithFactsCalls: harness.groundDraftWithFacts.mock.calls.length,
+            customerUrlExplanationCalls:
+              harness.draftCustomerUrlExplanation.mock.calls.length,
+          }),
+        };
+      };
+      const candidateSnapshots = new Map<string, RealtimeReplySnapshot>();
+      const expectedStateComparisonFor = (capture: Readonly<Capture>) => {
+        const productId = capture.expectedProductId === undefined
+          ? "SD398"
+          : capture.expectedProductId;
+        return {
+          enabled: true as const,
+          legacy: {
+            pageId,
+            conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
+            owner: capture.expectedOwner ?? "BOT",
+            stage: "DISCOVERY" as const,
+            productId,
+          },
+          commerce: {
+            pageId,
+            conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
+            revision: 0,
+            stage: "DISCOVERY" as const,
+            productScope: capture.expectedCommerceProductScope === "UNAVAILABLE"
+              ? { kind: "UNAVAILABLE" as const }
+              : productId === null
+                ? { kind: "NONE" as const }
+                : { kind: "SINGLE" as const, productId },
+            cartProductScope: { kind: "ABSENT" as const },
+            artifacts: {
+              hasCart: false,
+              hasOrderPreview: false,
+              hasPurchaseConfirmation: false,
+            },
+          },
+        };
+      };
+      const riskAssertionsFor = (
+        riskClasses: TrackBLivePathReplayCase<
+          Capture,
+          TrackBRunnerEvidence
+        >["riskClasses"],
+      ): TrackBLivePathReplayCase<Capture, TrackBRunnerEvidence>["riskAssertions"] =>
+        riskClasses.map((riskClass) => ({
+          riskClass,
+          assertionCode: `TRACK_B_B3_${riskClass}_POSTCONDITION`,
+          evaluate: ({ candidate }) => {
+            const { reply, evidence } = candidate;
+            switch (riskClass) {
+              case "UNSUPPORTED_OUTPUT":
+              case "PROTECTED_CLAIM":
+                return !/còn(?: hàng)?(?: không)?|còn chị/iu.test(evidence.finalText);
+              case "PII_SECURITY":
+                return evidence.customerUrlExplanationCalls === 1 &&
+                  !/https?:\/\/|example\.com|external-product|token|secret/iu.test(
+                    evidence.finalText,
+                  );
+              case "UNAUTHORIZED_EFFECT":
+                return evidence.groundDraftWithFactsCalls === 1 &&
+                  evidence.groundWithFactsCalls === 0 &&
+                  evidence.cartMutationReady === false;
+              case "STALE_OR_MISSING_FACTS":
+                return evidence.factStatuses.some((status) =>
+                  status === "STALE" || status === "NOT_FOUND"
+                ) && evidence.groundWithFactsCalls === 0 &&
+                  evidence.groundDraftWithFactsCalls === 0 &&
+                  !/1\.199\.000|còn hàng/iu.test(evidence.finalText);
+              case "MALFORMED_OUTPUT":
+                return reply.generationOutcome === "FAILED" &&
+                  reply.inboxOutcome === "COMMITTED";
+              case "SINGLE_REPAIR_BUDGET":
+                return evidence.sizeRepairAttempts === 1;
+              case "VERIFIED_FACTS_FALLBACK":
+                return reply.verifiedFactHashes.length > 0 &&
+                  !/hợp size (?:M|XL)/iu.test(evidence.finalText);
+              case "BF04_SIZE":
+                return evidence.sizeRepairAttempts === 1 &&
+                  !/hợp size (?:M|XL)/iu.test(evidence.finalText);
+            }
+          },
+        }));
+      const sameCommerceCase = (
+        caseId: string,
+        riskClasses: TrackBLivePathReplayCase<
+          Capture,
+          TrackBRunnerEvidence
+        >["riskClasses"],
+        capturedInput: Capture,
+      ): TrackBLivePathReplayCase<Capture, TrackBRunnerEvidence> => ({
+        caseId,
+        riskClasses,
+        capturedInput,
+        baseline: (capture) => runCapturedPath(capture),
+        candidate: async (capture) => {
+          const observed = await runCapturedPath(capture);
+          candidateSnapshots.set(caseId, observed.reply);
+          return observed;
+        },
+        expectedStateComparison: expectedStateComparisonFor(capturedInput),
+        ...(capturedInput.expectedCommerceProductScope === "UNAVAILABLE"
+          ? {
+              permittedStateDifferences: [{
+                code: "PRODUCT_SCOPE_UNAVAILABLE" as const,
+                reasonCode:
+                  "TRACK_B_B3_CANONICAL_PRODUCT_BINDING_STALE_FAIL_CLOSED",
+              }],
+            }
+          : {}),
+        riskAssertions: riskAssertionsFor(riskClasses),
+      });
+      const structuredGenerationIdentity = structuredVertexGenerationIdentity();
+      const identity: TrackBReplayIdentity = {
+        modelProvider: "VERTEX_AI",
+        configuredProviderModel: "gemini-3.5-flash-lite",
+        fixtureModelVersion,
+        capability: "BASELINE_MODEL_CAPABILITY",
+        livePathSourceRevision: "c22d0a5181e1e4e67401bf00b79ce9f49cbb663d",
+        promptVersion: "lana-realtime-v1",
+        promptTemplateHash: sha256(canonicalJsonV1({
+          baseline: SHADOW_SYSTEM_INSTRUCTION,
+          groundedProposal: GROUNDED_SYSTEM_INSTRUCTION,
+          groundedDraft: GROUNDED_DRAFT_SYSTEM_INSTRUCTION,
+          sizeRepair: SIZE_CLAIM_REPAIR_SYSTEM_INSTRUCTION,
+          customerUrlExplanation: CUSTOMER_URL_EXPLANATION_SYSTEM_INSTRUCTION,
+        })),
+        generationConfigHash: sha256(canonicalJsonV1({
+          modelGeneration: structuredGenerationIdentity,
+          runnerFeatures: {
+            groundedDraftEnabled: true,
+            verifiedFactAssemblerEnabled: true,
+            customerUrlExplanationPort: true,
+          },
+        })),
+        policyIdentityHash: sha256(canonicalJsonV1({
+          bundleId: "runtime:bf01-test",
+          bundleHash: `sha256:${"a".repeat(64)}`,
+          policyVersion: "bf01-test",
+          closingStrategy: {
+            customerUrlPolicy: "CLASSIFIED_ALLOWLIST_V1",
+            replyReconciliationPolicy: "CLARIFY_RECONCILED_V1",
+            replyReconciliationFallbackText: fallbackText,
+          },
+        })),
+        schemaIdentityHash: sha256(canonicalJsonV1({
+          structuredAgent: {
+            runtimeContract: "AgentProposalV1Schema",
+            schemaVersion: 1,
+            vertexResponseSchema: structuredGenerationIdentity.structuredAgent.responseSchema,
+          },
+          structuredGroundedDraft: {
+            runtimeContract: "GroundedReplyDraftV1Schema",
+            schemaVersion: 1,
+            vertexResponseSchema:
+              structuredGenerationIdentity.structuredGroundedDraft.responseSchema,
+          },
+        })),
+        behaviorContentHash: behaviorModeContentHash({
+          confirmationMode: "LEGACY",
+          salesAuthorityMode: "COMMERCE",
+          stateReadMode: "LEGACY",
+          authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        }),
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        factFixtureHash: sha256(canonicalJsonV1({
+          product,
+          observedAt: occurredAt,
+          okFacts: {
+            productId: "SD398",
+            price: 1_199_000,
+            sizes: ["M", "L"],
+            stockStatus: "IN_STOCK",
+            stockQuantity: 2,
+            deliveryEta: { minDays: 1, maxDays: 2 },
+          },
+          negativeFactModes: ["STALE", "NOT_FOUND"],
+          sizeProfile: sizeProfile(),
+          sizePolicy: sizePolicyResolution(),
+        })),
+      };
+      const preB24StateComparison = expectedStateComparisonFor({
+        customerText: "Tư vấn size cho chị mẫu SD398",
+        initialReply: "Theo số đo, chị hợp size M.",
+      });
+      const cases: TrackBLivePathReplayCase<Capture, TrackBRunnerEvidence>[] = [
+        {
+          caseId: "pre-b24-versus-current-live-path",
+          riskClasses: [],
+          capturedInput: {
+            customerText: "Tư vấn size cho chị mẫu SD398",
+            initialReply: "Theo số đo, chị hợp size M.",
+            initialFactIntent: "SIZE",
+            sizeFixture: true,
+            sizeRepairMode: "VALID",
+            sizeRepairReply:
+              "Theo số đo đã xác minh, chị hợp size M nhé ạ. Chị thích mặc ôm nhé ạ?",
+          },
+          // Immutable capture from exact pre-B2.4 main
+          // a89a50cb52183a3ffc4f3d7bd313ea675564c07b for this input.
+          baseline: async () => ({
+            reply: {
+              messages: [{
+                kind: "TEXT",
+                text:
+                  "Theo số đo đã xác minh, chị hợp size M nhé ạ. Chị thích mặc ôm nhé ạ?",
+              }],
+              strategyHash:
+                "28f64d412aa3b9b39aaa67463039f5a466eb539408b5a8df48cdaf187e1336ed",
+              verifiedFactHashes: [
+                "a0729ee1acaa2436299b46f6e046eaaa0561f3152ab27463d55cc850d8431da6",
+              ],
+              verifiedMediaUrls: [],
+              protectedClaimHashes: [
+                "95011f74a0e3fb0cbdd01bc90c7eee3891c231c0c7bdb73bbf4fe3467c3e757e",
+              ],
+              effectAuthorizationHashes: [
+                "e63dd65848b724c639bb06bbfb11ad86692d9e9871749e62aa7afb8df40dc873",
+              ],
+              commitOutcome: "COMMITTED",
+              generationOutcome: "VALID",
+              inboxOutcome: "COMMITTED",
+              protectedOutbound: {
+                required: true,
+                groupId: "37a4d2be-f544-5ec8-86c5-8e2e04faff77",
+                plannedMessageCount: 1,
+                deliveredMessageCount: 1,
+              },
+            },
+            sideEffects: {
+              queueClaims: 0,
+              customerMessages: 0,
+              stateMutations: 0,
+              protectedEffects: 0,
+              capturedCommitPlans: 0,
+            },
+            stateComparison: preB24StateComparison,
+            evidence: {
+              finalText:
+                "Theo số đo đã xác minh, chị hợp size M nhé ạ. Chị thích mặc ôm nhé ạ?",
+              factStatuses: ["OK"],
+              sizeRepairAttempts: 1,
+              cartMutationReady: false,
+              groundWithFactsCalls: 0,
+              groundDraftWithFactsCalls: 0,
+              customerUrlExplanationCalls: 0,
+            },
+          }),
+          candidate: async (capture) => {
+            const observed = await runCapturedPath(capture);
+            expect(observed.stateComparison).toEqual(preB24StateComparison);
+            candidateSnapshots.set("pre-b24-versus-current-live-path", observed.reply);
+            return observed;
+          },
+          expectedStateComparison: preB24StateComparison,
+          riskAssertions: [],
+        },
+        sameCommerceCase(
+          "unsupported-protected-claim",
+          ["UNSUPPORTED_OUTPUT", "PROTECTED_CLAIM"],
+          {
+            customerText: "Mẫu SD398 còn hàng không?",
+            initialReply: "Mẫu này còn chị nhé.",
+            expectedOwner: "HUMAN",
+          },
+        ),
+        sameCommerceCase("pii-security", ["PII_SECURITY"], {
+          customerText: "Xem giúp chị https://example.com/external-product",
+          initialReply: "Chị gửi mã sản phẩm để em kiểm tra nhé.",
+          expectedProductId: null,
+        }),
+        sameCommerceCase("unauthorized-effect", ["UNAUTHORIZED_EFFECT"], {
+          customerText: "Mẫu SD398 còn hàng không?",
+          initialReply: "Mẫu SD398 hiện còn hàng.",
+          initialRequestedAction: "ADD_TO_CART",
+          initialFactIntent: "STOCK",
+        }),
+        sameCommerceCase("stale-facts", ["STALE_OR_MISSING_FACTS"], {
+          customerText: "Mẫu SD398 còn hàng không?",
+          initialReply: "Mẫu SD398 hiện còn hàng.",
+          initialFactIntent: "STOCK",
+          factsMode: "STALE",
+          expectedOwner: "HUMAN",
+          expectedCommerceProductScope: "UNAVAILABLE",
+        }),
+        sameCommerceCase("missing-facts", ["STALE_OR_MISSING_FACTS"], {
+          customerText: "Mẫu SD398 còn hàng không?",
+          initialReply: "Mẫu SD398 hiện còn hàng.",
+          initialFactIntent: "STOCK",
+          factsMode: "NOT_FOUND",
+          expectedOwner: "HUMAN",
+        }),
+        sameCommerceCase("malformed-output", ["MALFORMED_OUTPUT"], {
+          customerText: "Mẫu SD398 giá bao nhiêu?",
+          initialReply: "",
+          initialGenerateMode: "THROW",
+        }),
+        sameCommerceCase(
+          "single-repair-and-verified-fallback",
+          ["SINGLE_REPAIR_BUDGET", "VERIFIED_FACTS_FALLBACK", "BF04_SIZE"],
+          {
+            customerText: "Tư vấn size cho chị mẫu SD398",
+            initialReply: "Theo số đo, chị hợp size XL.",
+            initialFactIntent: "SIZE",
+            sizeFixture: true,
+            sizeRepairMode: "INVALID",
+          },
+        ),
+      ];
+
+      const result = await runTrackBLivePathReplay({ identity, cases });
+
+      expect(result).toMatchObject({
+        contractVersion: "TRACK_B_LIVE_PATH_REPLAY_V1",
+        status: "PASS",
+        sideEffects: "DISABLED",
+        coverage: { complete: true, missingRiskClasses: [] },
+      });
+      expect(result.cases).toHaveLength(cases.length);
+      expect(result.cases.every(({ status }) => status === "PASS")).toBe(true);
+      expect(result.cases.every(({ sideEffects }) => sideEffects.status === "NONE"))
+        .toBe(true);
+      expect(result.cases.find(({ caseId }) => caseId === "malformed-output"))
+        .toMatchObject({
+          reply: { status: "MATCH" },
+          sideEffects: { capturedCommitPlans: 2 },
+        });
+      expect(candidateSnapshots.get("malformed-output")).toMatchObject({
+        generationOutcome: "FAILED",
+        inboxOutcome: "COMMITTED",
+      });
+      expect(JSON.stringify(candidateSnapshots.get("pii-security")?.messages))
+        .not.toMatch(/https?:\/\/|example\.com|external-product|token|secret/iu);
+      expect(JSON.stringify(
+        candidateSnapshots.get("single-repair-and-verified-fallback")?.messages,
+      )).not.toMatch(/hợp size (?:M|XL)/iu);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("fails B3 state evidence when canonical product binding drifts behind unchanged LEGACY state", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(occurredAt));
+    try {
+      const harness = createHarness({
+        commerce: true,
+        liveGroundedConfig: true,
+        initialMode: "REPLY",
+        customerText: "Mẫu SD398 còn hàng không?",
+        initialReply: "Mẫu SD398 hiện còn hàng.",
+        initialFactIntent: "STOCK",
+      });
+      expect(await harness.runner.processOne()).toBe(true);
+      const commit = harness.commerceCommit.mock.calls[0]?.[0]?.runtimeCommit;
+      expect(commit).toBeDefined();
+      if (!commit) throw new Error("TRACK_B_B3_COMMIT_REQUIRED");
+      const capture = commit.contextV2CapturePlan?.capture;
+      expect(capture).toMatchObject({
+        status: "BUILT",
+        context: {
+          productBinding: { status: "RESOLVED", productIds: ["SD398"] },
+        },
+      });
+      if (capture?.status !== "BUILT" || capture.context === null) {
+        throw new Error("TRACK_B_B3_BUILT_CONTEXT_REQUIRED");
+      }
+      const { contextHash: _originalContextHash, ...contextDraft } = capture.context;
+      const driftedContextDraft = {
+        ...contextDraft,
+        productBinding: {
+          ...capture.context.productBinding,
+          status: "RESOLVED" as const,
+          productIds: ["SD399"],
+        },
+      };
+      const driftedContextHash = sha256(
+        `CONTEXT_V2\n${canonicalJsonV1(driftedContextDraft)}`,
+      );
+      const driftedCommit = {
+        ...commit,
+        contextV2CapturePlan: {
+          capture: {
+            ...capture,
+            contextHash: driftedContextHash,
+            context: {
+              ...driftedContextDraft,
+              contextHash: driftedContextHash,
+            },
+          },
+        },
+      };
+      const comparisonInput = capturedStateComparison(
+        driftedCommit,
+        harness.commerceState,
+      );
+
+      expect(comparisonInput.legacy.productId).toBe("SD398");
+      expect(comparisonInput.commerce?.productScope).toEqual({
+        kind: "SINGLE",
+        productId: "SD399",
+      });
+      expect(compareCommerceAuthority(comparisonInput)).toMatchObject({
+        status: "MISMATCH",
+        differences: expect.arrayContaining(["PRODUCT_SCOPE_MISMATCH"]),
+      });
+
+      const blockedComparisonInput = capturedStateComparison({
+        ...commit,
+        contextV2CapturePlan: {
+          capture: {
+            schemaVersion: 1,
+            contractVersion: "CONTEXT_V2_CAPTURE_V1",
+            sourceMessagePk: capture.sourceMessagePk,
+            sourceOccurredAt: capture.sourceOccurredAt,
+            status: "BLOCKED",
+            context: null,
+            contextHash: null,
+            reasonCode: "CONTEXT_V2_PRODUCT_BINDING_INVALID",
+          },
+        },
+      }, harness.commerceState);
+      const { contextV2CapturePlan: _capturePlan, ...commitWithoutCapture } = commit;
+      const absentComparisonInput = capturedStateComparison(
+        commitWithoutCapture,
+        harness.commerceState,
+      );
+      for (const unavailable of [blockedComparisonInput, absentComparisonInput]) {
+        expect(unavailable.commerce).toBeNull();
+        expect(compareCommerceAuthority(unavailable)).toMatchObject({
+          status: "COMMERCE_STATE_UNAVAILABLE",
+          differences: ["COMMERCE_STATE_UNAVAILABLE"],
+        });
+      }
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("replays B2.4 COMMERCE model wording through the actual runner finalizer", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(occurredAt));
