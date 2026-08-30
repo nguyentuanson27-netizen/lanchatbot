@@ -302,6 +302,35 @@ function signals(input: {
   };
 }
 
+function salesCycleSnapshot(
+  output: Awaited<ReturnType<typeof evaluateRealtimeSalesCycle>>,
+  eventKey: string,
+): RealtimeReplySnapshot {
+  const claims = output.protectedOutbound?.claims ?? [];
+  const readiness = output.plan?.effectReadiness ?? [];
+  return {
+    messages: output.messages,
+    strategyHash: null,
+    verifiedFactHashes: claims.map(({ provenance }) => provenance.contentHash).sort(),
+    verifiedMediaUrls: output.messages.flatMap((message) =>
+      message.kind === "IMAGE" ? [message.imageUrl] : []
+    ),
+    protectedClaimHashes: readiness
+      .flatMap(({ claimSetHash }) => claimSetHash === null ? [] : [claimSetHash])
+      .sort(),
+    effectAuthorizationHashes: readiness.map(({ readinessHash }) => readinessHash).sort(),
+    commitOutcome: output.plan === null ? "BLOCKED" : "COMMITTABLE",
+    generationOutcome: "VALID",
+    inboxOutcome: output.plan === null ? "RETRYABLE" : "COMMITTED",
+    protectedOutbound: {
+      required: output.protectedOutbound !== undefined,
+      groupId: output.protectedOutbound === undefined ? null : `sales-cycle:${eventKey}`,
+      plannedMessageCount: output.messages.length,
+      deliveredMessageCount: output.messages.length,
+    },
+  };
+}
+
 function behaviorResolution(
   confirmationMode: RuntimeBehaviorModeResolution["confirmationMode"],
 ): RuntimeBehaviorModeResolution {
@@ -778,6 +807,13 @@ describe("realtime Phase 3 sales cycle", () => {
       turn: number,
     ) => {
       const text = `chốt ${productId} size M`;
+      const modelBuyingIntent: AgentBuyingIntentV1 = {
+        decision: "COMMITTED",
+        requestedAction: "ADD_TO_CART",
+        quantity: null,
+        evidenceText: text,
+        confidence: 0.99,
+      };
       return {
         ...input(state, text, `event-product-${turn}`),
         productId,
@@ -785,9 +821,10 @@ describe("realtime Phase 3 sales cycle", () => {
           text,
           sourceMessageId: `mid:${text}`,
           productId,
-          modelBuyingIntent: null,
+          modelBuyingIntent,
           evaluatedAt: now,
         }).buyingIntent,
+        salesSignals: signals({ buyingIntent: modelBuyingIntent }),
         facts: multiProductFacts,
       };
     };
@@ -966,6 +1003,39 @@ describe("realtime Phase 3 sales cycle", () => {
     ]));
   });
 
+  it("does not let a corroborated OPEN_CART request cross-authorize SET_QUANTITY", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "event-open-action-open",
+    ));
+    const state = opened.plan!.state;
+    const text = "chốt 2 set mẫu này";
+    const modelBuyingIntent: AgentBuyingIntentV1 = {
+      decision: "COMMITTED",
+      requestedAction: "OPEN_CART",
+      quantity: 2,
+      evidenceText: text,
+      confidence: 0.99,
+    };
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(state, text, "event-open-action-set"),
+      canonicalBuyingIntent: canonicalBuyingIntent(text, modelBuyingIntent),
+      salesSignals: signals({ buyingIntent: modelBuyingIntent }),
+    });
+
+    expect(output).toMatchObject({
+      handled: true,
+      transferToHuman: true,
+      reasonCode: "BUYING_INTENT_MISSING",
+    });
+    expect(output.plan?.state.cart?.value.lines[0]?.quantity ?? state.cart!.value.lines[0]!.quantity)
+      .toBe(1);
+    expect(output.plan?.effectReadiness ?? []).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ effect: "CART_MUTATION", outcome: "READY" }),
+    ]));
+  });
+
   it("r31.3 replays the live sales-cycle effect seam without changing the established cart-open transaction", async () => {
     const capturedInput = {
       text: "chốt CB182 size M",
@@ -1011,31 +1081,7 @@ describe("realtime Phase 3 sales cycle", () => {
           capture.text,
           capture.eventKey,
         ));
-        const claims = output.protectedOutbound?.claims ?? [];
-        const readiness = output.plan?.effectReadiness ?? [];
-        return {
-          messages: output.messages,
-          strategyHash: null,
-          verifiedFactHashes: claims.map(({ provenance }) => provenance.contentHash).sort(),
-          verifiedMediaUrls: output.messages.flatMap((message) =>
-            message.kind === "IMAGE" ? [message.imageUrl] : []
-          ),
-          protectedClaimHashes: readiness
-            .flatMap(({ claimSetHash }) => claimSetHash === null ? [] : [claimSetHash])
-            .sort(),
-          effectAuthorizationHashes: readiness.map(({ readinessHash }) => readinessHash).sort(),
-          commitOutcome: output.plan === null ? "BLOCKED" : "COMMITTABLE",
-          generationOutcome: "VALID",
-          inboxOutcome: output.plan === null ? "RETRYABLE" : "COMMITTED",
-          protectedOutbound: {
-            required: output.protectedOutbound !== undefined,
-            groupId: output.protectedOutbound === undefined
-              ? null
-              : `sales-cycle:${capture.eventKey}`,
-            plannedMessageCount: output.messages.length,
-            deliveredMessageCount: output.messages.length,
-          },
-        };
+        return salesCycleSnapshot(output, capture.eventKey);
       },
       permittedDifferences: [],
     });
@@ -1047,6 +1093,209 @@ describe("realtime Phase 3 sales cycle", () => {
       differences: [],
     });
     expect(preB23bBaseline.effectAuthorizationHashes.length).toBeGreaterThan(0);
+  });
+
+  it("r31.3 characterizes every changed B2.3b request-reconciliation branch against pre-head snapshots", async () => {
+    const baselines: Record<string, RealtimeReplySnapshot> = {
+      set: {
+        messages: [{ kind: "TEXT", text: "CB182 size M ×2: 1.398.000đ\nTạm tính: 1.398.000đ\nƯu đãi: -69.900đ\nPhí ship: 30.000đ\nTổng: 1.358.100đ\nChị gửi giúp em các thông tin nhận hàng:\nTên:\nSĐT:\nĐịa chỉ:\nThanh toán: COD hoặc chuyển khoản nhé." }],
+        strategyHash: null,
+        verifiedFactHashes: [
+          "107bb35375d5b6d050ff7c5008303aa1c53102647d28edc5432df57fa030f747",
+          "891937cb335016e9c7074c3781dcb1364e0c660733a8889bbeae83e6aa759be6",
+          "a12f9d42540b8d1dfdb1abfb2344e62c2417595acb67b9f6b15fe5ff53140e7e",
+        ],
+        verifiedMediaUrls: [],
+        protectedClaimHashes: [
+          "9c52d8aee18542e61dc3db584227c0c32a15d8bdccf056b6782f14a551b4af51",
+          "e91f4c6407e0c3571df99c21976020751adf98391be0bc04f40e8457bd320ce9",
+        ],
+        effectAuthorizationHashes: [
+          "67be78c56c3c9a38a5c22a859bb215c7181498d245df19ff63e308e00056a9ec",
+          "bee3c8ac848f9a6fc2182a7be5edfb64dd69a9abc8f52f08ca84af6e23e9c66f",
+        ],
+        commitOutcome: "COMMITTABLE", generationOutcome: "VALID", inboxOutcome: "COMMITTED",
+        protectedOutbound: {
+          required: true, groupId: "sales-cycle:capture-set",
+          plannedMessageCount: 1, deliveredMessageCount: 1,
+        },
+      },
+      actionMismatch: {
+        messages: [{ kind: "TEXT", text: "CB182 size M ×2: 1.398.000đ\nTạm tính: 1.398.000đ\nƯu đãi: -69.900đ\nPhí ship: 30.000đ\nTổng: 1.358.100đ\nChị gửi giúp em các thông tin nhận hàng:\nTên:\nSĐT:\nĐịa chỉ:\nThanh toán: COD hoặc chuyển khoản nhé." }],
+        strategyHash: null,
+        verifiedFactHashes: [
+          "107bb35375d5b6d050ff7c5008303aa1c53102647d28edc5432df57fa030f747",
+          "891937cb335016e9c7074c3781dcb1364e0c660733a8889bbeae83e6aa759be6",
+          "9419a42329092926f38685009fa8d26a20b5e5fa4a4b910229b46d0afc6d178f",
+        ],
+        verifiedMediaUrls: [],
+        protectedClaimHashes: [
+          "25c204386d11069c032fe589a855f2c864c1c52db61afa04b5616be343fd9c16",
+          "e91f4c6407e0c3571df99c21976020751adf98391be0bc04f40e8457bd320ce9",
+        ],
+        effectAuthorizationHashes: [
+          "1e9c02af363e3cfbe6621c3483aa888ec6b6a2b5e65d79646b41de59eebc1ba4",
+          "a64763526cd45248f6f0ce98362b46a4fe6a286f2fabe33690fb17edda6365e6",
+        ],
+        commitOutcome: "COMMITTABLE", generationOutcome: "VALID", inboxOutcome: "COMMITTED",
+        protectedOutbound: {
+          required: true, groupId: "sales-cycle:capture-action-mismatch",
+          plannedMessageCount: 1, deliveredMessageCount: 1,
+        },
+      },
+      quantityMismatch: {
+        messages: [], strategyHash: null, verifiedFactHashes: [], verifiedMediaUrls: [],
+        protectedClaimHashes: [], effectAuthorizationHashes: [], commitOutcome: "BLOCKED",
+        generationOutcome: "VALID", inboxOutcome: "RETRYABLE",
+        protectedOutbound: {
+          required: false, groupId: null, plannedMessageCount: 0, deliveredMessageCount: 0,
+        },
+      },
+      conflict: {
+        messages: [{ kind: "TEXT", text: "CB182 size M ×1: 699.000đ\nTạm tính: 699.000đ\nPhí ship: 30.000đ\nTổng: 729.000đ\nChị gửi giúp em các thông tin nhận hàng:\nTên:\nSĐT:\nĐịa chỉ:\nThanh toán: COD hoặc chuyển khoản nhé." }],
+        strategyHash: null,
+        verifiedFactHashes: [
+          "107bb35375d5b6d050ff7c5008303aa1c53102647d28edc5432df57fa030f747",
+          "891937cb335016e9c7074c3781dcb1364e0c660733a8889bbeae83e6aa759be6",
+        ],
+        verifiedMediaUrls: [],
+        protectedClaimHashes: [
+          "d10b3d0c93511b818a7a9a33a6dcd92d49d90410c1c7620619e063133df1dc12",
+          "e91f4c6407e0c3571df99c21976020751adf98391be0bc04f40e8457bd320ce9",
+        ],
+        effectAuthorizationHashes: [
+          "6b85d78c84d8c29654dff36b3462903aae8cbe7bbb299b48f99e02b9e5be8c4e",
+          "daf4dee816f55692d5553d5de90329874be058b255d5821f2ad467244ff3b992",
+        ],
+        commitOutcome: "COMMITTABLE", generationOutcome: "VALID", inboxOutcome: "COMMITTED",
+        protectedOutbound: {
+          required: true, groupId: "sales-cycle:capture-conflict",
+          plannedMessageCount: 1, deliveredMessageCount: 1,
+        },
+      },
+    };
+    const open = async (eventKey: string) => (await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      eventKey,
+    ))).plan!.state;
+    const runCandidate = async (
+      state: ReturnType<typeof createRealtimeSalesState>,
+      text: string,
+      eventKey: string,
+      buyingIntent: AgentBuyingIntentV1,
+    ) => salesCycleSnapshot(await evaluateRealtimeSalesCycle({
+      ...input(state, text, eventKey),
+      canonicalBuyingIntent: canonicalBuyingIntent(text, buyingIntent),
+      salesSignals: signals({ buyingIntent }),
+    }), eventKey);
+    const setText = "chốt 2 set mẫu này";
+    const setIntent: AgentBuyingIntentV1 = {
+      decision: "COMMITTED", requestedAction: "SET_QUANTITY", quantity: 2,
+      evidenceText: setText, confidence: 0.99,
+    };
+    const captures = [{
+      name: "set", baseline: baselines.set!,
+      candidate: async () => runCandidate(
+        await open("capture-set-open"), setText, "capture-set", setIntent,
+      ),
+      permittedDifferences: [],
+    }, {
+      name: "actionMismatch", baseline: baselines.actionMismatch!,
+      candidate: () => runCandidate(
+        createRealtimeSalesState(conversationId, pageId, now),
+        setText, "capture-action-mismatch", setIntent,
+      ),
+      permittedDifferences: [{
+        code: "OUTBOUND_MESSAGES_CHANGED" as const,
+        reasonCode: "B2_3B_UNAUTHORIZED_ACTION_FAIL_CLOSED",
+      }],
+    }, {
+      name: "quantityMismatch", baseline: baselines.quantityMismatch!,
+      candidate: async () => runCandidate(
+        await open("capture-quantity-open"), "chốt mẫu này", "capture-quantity-mismatch",
+        { ...setIntent, evidenceText: "chốt mẫu này" },
+      ),
+      permittedDifferences: [],
+    }, {
+      name: "conflict", baseline: baselines.conflict!,
+      candidate: () => runCandidate(
+        createRealtimeSalesState(conversationId, pageId, now),
+        "chốt mẫu này", "capture-conflict",
+        {
+          decision: "NEGATED", requestedAction: "NONE", quantity: null,
+          evidenceText: "chốt mẫu này", confidence: 0.99,
+        },
+      ),
+      permittedDifferences: [{
+        code: "OUTBOUND_MESSAGES_CHANGED" as const,
+        reasonCode: "B2_3B_LESS_AGGRESSIVE_CONFLICT",
+      }],
+    }];
+
+    for (const capture of captures) {
+      const candidates: RealtimeReplySnapshot[] = [];
+      const result = await runRealtimeReplyDifferential({
+        capturedInput: { name: capture.name },
+        baseline: async () => capture.baseline,
+        candidate: async () => {
+          const candidate = await capture.candidate();
+          candidates.push(candidate);
+          return candidate;
+        },
+        permittedDifferences: capture.permittedDifferences,
+      });
+      const candidate = candidates[0]!;
+      expect(result.sideEffects).toBe("DISABLED");
+      if (capture.name === "quantityMismatch") {
+        expect(result.status).toBe("MATCH");
+      } else if (capture.name === "set") {
+        expect(result.status).toBe("VIOLATION");
+        expect(result.differences.map(({ code }) => code)).toEqual([
+          "EFFECT_AUTHORIZATION_CHANGED",
+        ]);
+        expect(candidate).toMatchObject({
+          messages: capture.baseline.messages,
+          verifiedFactHashes: capture.baseline.verifiedFactHashes,
+          protectedClaimHashes: capture.baseline.protectedClaimHashes,
+          commitOutcome: "COMMITTABLE",
+          protectedOutbound: capture.baseline.protectedOutbound,
+        });
+      } else {
+        expect(result.status).toBe("VIOLATION");
+        expect(result.differences.map(({ code }) => code)).toEqual(
+          capture.name === "actionMismatch"
+            ? [
+                "OUTBOUND_MESSAGES_CHANGED",
+                "VERIFIED_FACTS_CHANGED",
+                "PROTECTED_CLAIMS_CHANGED",
+                "EFFECT_AUTHORIZATION_CHANGED",
+                "COMMIT_OUTCOME_CHANGED",
+                "PROTECTED_OUTBOUND_CONTRACT_CHANGED",
+              ]
+            : [
+                "OUTBOUND_MESSAGES_CHANGED",
+                "VERIFIED_FACTS_CHANGED",
+                "PROTECTED_CLAIMS_CHANGED",
+                "EFFECT_AUTHORIZATION_CHANGED",
+                "PROTECTED_OUTBOUND_CONTRACT_CHANGED",
+              ],
+        );
+        expect(result.differences[0]).toMatchObject({
+          code: "OUTBOUND_MESSAGES_CHANGED",
+          disposition: "INTENTIONAL",
+        });
+        expect(result.differences.slice(1).every(({ disposition }) =>
+          disposition === "VIOLATION"
+        )).toBe(true);
+        expect(candidate).toMatchObject({
+          messages: [], verifiedFactHashes: [], protectedClaimHashes: [],
+          effectAuthorizationHashes: [],
+          commitOutcome: capture.name === "actionMismatch" ? "BLOCKED" : "COMMITTABLE",
+          protectedOutbound: { required: false, plannedMessageCount: 0, deliveredMessageCount: 0 },
+        });
+      }
+    }
   });
 
   it("fails closed before readiness when a valid fifty-line cart adds product fifty-one", async () => {
@@ -1089,6 +1338,13 @@ describe("realtime Phase 3 sales cycle", () => {
       cart: { ...openedState.cart!, value: cart },
     };
     const text = "chốt PRODUCT-51 size M";
+    const modelBuyingIntent: AgentBuyingIntentV1 = {
+      decision: "COMMITTED",
+      requestedAction: "ADD_TO_CART",
+      quantity: null,
+      evidenceText: text,
+      confidence: 0.99,
+    };
 
     const output = await evaluateRealtimeSalesCycle({
       ...input(atCapacity, text, "event-capacity-51"),
@@ -1097,9 +1353,10 @@ describe("realtime Phase 3 sales cycle", () => {
         text,
         sourceMessageId: `mid:${text}`,
         productId: "PRODUCT-51",
-        modelBuyingIntent: null,
+        modelBuyingIntent,
         evaluatedAt: now,
       }).buyingIntent,
+      salesSignals: signals({ buyingIntent: modelBuyingIntent }),
     });
 
     expect(output).toMatchObject({

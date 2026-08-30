@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
 import {
+  canonicalBuyingIntentAuthorizesCartOpenV1,
   canonicalBuyingIntentAuthorizesCartMutationV1,
   canonicalCheckoutDraftHashPreimageV1,
   canonicalClarificationStateHashPreimageV1,
@@ -734,6 +735,11 @@ function validateSalesEffectReadiness<TState, TSalesState>(
         buyingIntent,
         receipt.authority.action,
         receipt.authority.productId,
+        receipt.mutation.kind === "ADD_LINE"
+          ? receipt.mutation.line.quantity
+          : receipt.mutation.kind === "SET_QUANTITY"
+            ? receipt.mutation.quantity
+            : -1,
       ) || receipt.authority.authorityEvidenceHash !== intentHash
     ) {
       throw new Error("CART_MUTATION_AUTHORITY_MISMATCH");
@@ -1499,11 +1505,11 @@ async function validateLockedCartOpenTransitionV1(
     evidence.cartDraftRef.contentHash !== `sha256:${sha256CanonicalV1(evidence.draft)}` ||
     evidence.replayContext.policyRef.contentHash !==
       `sha256:${sha256CanonicalV1(evidence.replayContext.policyBundle)}` ||
-    buyingIntent.decision !== "COMMITTED" ||
-    !buyingIntent.contributors.includes("DETERMINISTIC_RUNTIME") ||
-    buyingIntent.productId !== seedLine.parentProductId ||
-    !(buyingIntent.requestedAction === "OPEN_CART" ||
-      buyingIntent.requestedAction === "ADD_TO_CART")) {
+    !canonicalBuyingIntentAuthorizesCartOpenV1(
+      buyingIntent,
+      seedLine.parentProductId,
+      seedLine.quantity,
+    )) {
     throw new Error("CART_OPEN_EVIDENCE_MISMATCH");
   }
   const locked = salesStateRecordV1(lockedState);

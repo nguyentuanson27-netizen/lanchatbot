@@ -98,11 +98,11 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 ## B2.3b — Effect reconciliation
 
 - [x] Treat the existing structured model action as a request only; model evidence retains `authorization: NONE` (DF06 §9) and a model-only request cannot pass readiness.
-- [x] Preserve deterministic cart/checkout/payment/handoff authorization and the existing transaction-time CAS, version, idempotency, fence, policy and trusted-port checks.
+- [x] Preserve deterministic cart/checkout/payment/handoff authorization and the existing transaction-time CAS, version, idempotency, fence, policy and trusted-port checks; bind cart-open, ADD default-one/explicit quantity and SET quantity to the exact payload again in final database verification.
 - [x] Resolve deterministic/model conflict to the **less aggressive** action and emit `MODEL_*` conflict evidence codes.
 - [x] Preserve atomic state and effect-intent behavior; no new persistence, commit or side-effect port is introduced.
 - [x] Record the renderer disposition: exact transaction/effect facts, policy denials and minimal safe confirmations stay deterministic; negotiation prose remains deferred to B2.3c and is not changed by this focused slice.
-- [x] Exercise exact action and quantity-evidence mismatch, model-only authorization, positive corroborated mutation, duplicate/stale/CAS/idempotency/transaction invariants and a side-effect-free r31.3 live-sales-cycle replay pinned to pre-B2.3b `933a227a0ff08702e87ea697d7284d7024f74dbf`.
+- [x] Exercise exact action and quantity-evidence mismatch, model-only authorization, adversarial resealed cart-open/ADD/SET quantity mismatch at the database transaction boundary, positive corroborated mutation, duplicate/stale/CAS/idempotency/transaction invariants and side-effect-free r31.3 live-sales-cycle replays pinned to pre-B2.3b `933a227a0ff08702e87ea697d7284d7024f74dbf`.
 - [ ] **Checkpoint:** exact B2.3b head has clean self-review, one fixed independent Sol High reviewer verdict, and canonical repository CI PASS.
 
 ## B2.3c — Negotiation split

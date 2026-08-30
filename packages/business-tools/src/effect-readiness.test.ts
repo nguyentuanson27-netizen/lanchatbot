@@ -183,6 +183,19 @@ describe("deterministic effect readiness", () => {
     },
   );
 
+  it("blocks cart open when its seed quantity differs from canonical intent", () => {
+    const result = evaluateDeterministicEffectReadinessV1({
+      ...base,
+      buyingIntent: CanonicalBuyingIntentV1Schema.parse({
+        ...intent,
+        quantity: 2,
+      }),
+    });
+
+    expect(result.outcome).toBe("BLOCKED");
+    expect(result.reasonCodes).toContain("BUYING_INTENT_SCOPE_MISMATCH");
+  });
+
   it("blocks model-only authority for add or quantity cart mutations", () => {
     const modelOnly = CanonicalBuyingIntentV1Schema.parse({
       ...intent,
@@ -197,6 +210,7 @@ describe("deterministic effect readiness", () => {
       cartVersion: 2,
       cartLines: cartLinesFor(["product-1"]),
       mutationAction: "ADD_LINE",
+      mutationQuantity: 1,
       deterministicEvidenceHash: hash("f"),
       buyingIntent: modelOnly,
     });
@@ -209,6 +223,7 @@ describe("deterministic effect readiness", () => {
       cartVersion: 2,
       cartLines: cartLinesFor(["product-1"]),
       mutationAction: "SET_QUANTITY",
+      mutationQuantity: 1,
       deterministicEvidenceHash: hash("f"),
       buyingIntent: CanonicalBuyingIntentV1Schema.parse({
         ...intent,
@@ -225,6 +240,7 @@ describe("deterministic effect readiness", () => {
       cartVersion: 2,
       cartLines: cartLinesFor(["product-1"]),
       mutationAction: "SET_QUANTITY",
+      mutationQuantity: 1,
       deterministicEvidenceHash: hash("f"),
       buyingIntent: CanonicalBuyingIntentV1Schema.parse({
         ...intent,
@@ -286,13 +302,43 @@ describe("deterministic effect readiness", () => {
       cartVersion: 2,
       cartLines: cartLinesFor(productIds),
       mutationAction: "ADD_LINE",
+      mutationQuantity: 1,
       deterministicEvidenceHash: hash("f"),
       claims: claimsFor(productIds),
+      buyingIntent: CanonicalBuyingIntentV1Schema.parse({
+        ...intent,
+        requestedAction: "ADD_TO_CART",
+      }),
     });
 
     expect(result.outcome).toBe("READY");
     expect(result.productIds).toEqual(productIds);
     expect(result.reasonCodes).toEqual([]);
+  });
+
+  it.each([
+    ["ADD_LINE", "ADD_TO_CART"],
+    ["SET_QUANTITY", "SET_QUANTITY"],
+  ] as const)("blocks %s when the mutation quantity differs from canonical intent", (
+    mutationAction,
+    requestedAction,
+  ) => {
+    const result = evaluateDeterministicEffectReadinessV1({
+      ...base,
+      effect: "CART_MUTATION",
+      cartVersion: 2,
+      mutationAction,
+      mutationQuantity: 2,
+      deterministicEvidenceHash: hash("f"),
+      buyingIntent: CanonicalBuyingIntentV1Schema.parse({
+        ...intent,
+        requestedAction,
+        quantity: 1,
+      }),
+    });
+
+    expect(result.outcome).toBe("BLOCKED");
+    expect(result.reasonCodes).toContain("BUYING_INTENT_SCOPE_MISMATCH");
   });
 
   it("bounds oversized blocked readiness without throwing", () => {

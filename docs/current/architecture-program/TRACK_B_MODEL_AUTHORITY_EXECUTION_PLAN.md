@@ -257,13 +257,23 @@ with `authorization: NONE`; it cannot authorize an effect. When exact
 deterministic commitment evidence corroborates a specific model request, the
 canonical intent preserves that action while readiness requires the exact
 action/product binding and model-proposed quantities require exact customer-text
-evidence. A deterministic/model conflict resolves to the less
+evidence. Cross-action `OPEN_CART` compatibility no longer authorizes ADD or
+SET mutations; default-one ADD and every explicit quantity are rebound to the
+actual cart-open seed or mutation payload both in worker readiness and in the
+final database transaction verifier. A deterministic/model conflict resolves to the less
 aggressive decision and carries explicit reason codes. The database/DF13 final
 transaction continues to revalidate freshness, expected versions, CAS,
 idempotency, fence/policy and trusted ports before atomic state/effect commit.
 The existing sales-cycle renderers in this slice are transaction facts, policy
 denials and minimal safe confirmations/clarifications; negotiation prose remains
 explicitly deferred to B2.3c, so this PR does not move or rewrite that prose.
+The r31.3 evidence includes immutable pre-head captures for corroborated SET,
+action mismatch, quantity-evidence mismatch and deterministic/model conflict.
+The comparator truthfully reports the newly blocked unsafe baseline effects as
+non-permittable authorization/claim/commit deltas; the positive SET case
+preserves wording, facts, claims, commit and whole-group delivery while exposing
+the expected new effect-authorization identity. These are source-only safety
+changes and do not authorize the B3.2 bundle/pointer mutation.
 
 ---
 

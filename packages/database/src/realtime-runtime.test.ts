@@ -1807,6 +1807,117 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
       .resolves.toMatchObject({ stateCommitted: true });
     expect(calls.at(-1)?.trim()).toBe("COMMIT");
 
+    const mismatchedSetIntent = { ...canonicalIntent, quantity: 3 };
+    const mismatchedSetAuthorityDraft = {
+      ...authority,
+      authorityEvidenceHash: sha256(mismatchedSetIntent),
+      bindingHash: "0".repeat(64),
+    };
+    const mismatchedSetAuthority = {
+      ...mismatchedSetAuthorityDraft,
+      bindingHash: rawSha256(
+        cartMutationAuthorityBindingHashPreimageV1(mismatchedSetAuthorityDraft),
+      ),
+    };
+    const mismatchedSetReceiptDraft = {
+      ...mutationEvidence,
+      authority: mismatchedSetAuthority,
+      evidenceHash: "0".repeat(64),
+    };
+    const mismatchedSetReceipt = {
+      ...mismatchedSetReceiptDraft,
+      evidenceHash: rawSha256(cartMutationReceiptHashPreimageV1(mismatchedSetReceiptDraft)),
+    };
+    const mismatchedSetBatchDraft = {
+      ...mutationBatchEvidence,
+      receipts: [mismatchedSetReceipt],
+      evidenceHash: "0".repeat(64),
+    };
+    const mismatchedSetBatch = {
+      ...mismatchedSetBatchDraft,
+      evidenceHash: rawSha256(
+        cartMutationBatchEvidenceHashPreimageV1(mismatchedSetBatchDraft),
+      ),
+    };
+    await expect(store.commit({
+      ...exactMutation,
+      salesCyclePlan: {
+        ...exactMutation.salesCyclePlan,
+        canonicalBuyingIntent: mismatchedSetIntent,
+        cartMutationBatchEvidence: mismatchedSetBatch,
+        effectReadiness: exactMutation.salesCyclePlan.effectReadiness.map((readiness) =>
+          resealReadinessV1(readiness, {
+            buyingIntentHash: sha256(mismatchedSetIntent),
+            deterministicEvidenceHash: mismatchedSetReceipt.evidenceHash,
+          })
+        ),
+      },
+    }, now)).rejects.toThrow("CART_MUTATION_AUTHORITY_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
+    const mismatchedAddIntent = {
+      ...canonicalIntent,
+      requestedAction: "ADD_TO_CART" as const,
+      quantity: 3,
+    };
+    const mismatchedAddMutation = { kind: "ADD_LINE" as const, line: exactLine };
+    const mismatchedAddPayloadHash = sha256({ mutation: mismatchedAddMutation });
+    const mismatchedAddAuthorityDraft = {
+      ...authority,
+      action: "ADD_LINE" as const,
+      authorityEvidenceHash: sha256(mismatchedAddIntent),
+      bindingHash: "0".repeat(64),
+    };
+    const mismatchedAddAuthority = {
+      ...mismatchedAddAuthorityDraft,
+      bindingHash: rawSha256(
+        cartMutationAuthorityBindingHashPreimageV1(mismatchedAddAuthorityDraft),
+      ),
+    };
+    const mismatchedAddReceiptDraft = {
+      ...mutationEvidence,
+      mutation: mismatchedAddMutation,
+      mutationPayloadHash: mismatchedAddPayloadHash,
+      mutationReasonCode: "LINE_ADDED" as const,
+      authority: mismatchedAddAuthority,
+      evidenceHash: "0".repeat(64),
+    };
+    const mismatchedAddReceipt = {
+      ...mismatchedAddReceiptDraft,
+      evidenceHash: rawSha256(cartMutationReceiptHashPreimageV1(mismatchedAddReceiptDraft)),
+    };
+    const mismatchedAddBatchDraft = {
+      ...mutationBatchEvidence,
+      receipts: [mismatchedAddReceipt],
+      evidenceHash: "0".repeat(64),
+    };
+    const mismatchedAddBatch = {
+      ...mismatchedAddBatchDraft,
+      evidenceHash: rawSha256(
+        cartMutationBatchEvidenceHashPreimageV1(mismatchedAddBatchDraft),
+      ),
+    };
+    await expect(store.commit({
+      ...exactMutation,
+      salesCyclePlan: {
+        ...exactMutation.salesCyclePlan,
+        canonicalBuyingIntent: mismatchedAddIntent,
+        events: exactMutation.salesCyclePlan.events.map((event) => ({
+          ...event,
+          mutationAction: "ADD_LINE" as const,
+          mutationPayloadHash: mismatchedAddPayloadHash,
+        })),
+        cartMutationBatchEvidence: mismatchedAddBatch,
+        effectReadiness: exactMutation.salesCyclePlan.effectReadiness.map((readiness) =>
+          resealReadinessV1(readiness, {
+            buyingIntentHash: sha256(mismatchedAddIntent),
+            deterministicEvidenceHash: mismatchedAddReceipt.evidenceHash,
+          })
+        ),
+      },
+    }, now)).rejects.toThrow("CART_MUTATION_AUTHORITY_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
+
     const forgedMutationStage = {
       ...exactMutation,
       salesCyclePlan: {
@@ -2270,6 +2381,21 @@ describe("PostgresRealtimeRuntimeStore handoff commit", () => {
     };
     await expect(store.commit(openPlan, now)).resolves.toMatchObject({ stateCommitted: true });
     expect(calls.at(-1)?.trim()).toBe("COMMIT");
+
+    const mismatchedOpenIntent = { ...openIntent, quantity: 2 };
+    await expect(store.commit({
+      ...openPlan,
+      salesCyclePlan: {
+        ...openPlan.salesCyclePlan,
+        canonicalBuyingIntent: mismatchedOpenIntent,
+        effectReadiness: openPlan.salesCyclePlan.effectReadiness.map((readiness) =>
+          resealReadinessV1(readiness, {
+            buyingIntentHash: sha256(mismatchedOpenIntent),
+          })
+        ),
+      },
+    }, now)).rejects.toThrow("CART_OPEN_EVIDENCE_MISMATCH");
+    expect(calls.at(-1)?.trim()).toBe("ROLLBACK");
 
     const forgedOpenExpiry = new Date(salesExpiresAt.getTime() - 1_000);
     await expect(store.commit({
