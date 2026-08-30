@@ -403,6 +403,16 @@ reconciliation, whole-group delivery and DF13 commit/fence paths remain intact.
 No helper is physically deleted because LEGACY rollback and focused rollback
 tests remain current consumers.
 
+The r31.3 acceptance capture now executes this selection through the actual
+`RealtimeRunner`, not only through the extracted finalizer. It pins an immutable
+snapshot from pre-B2.4 `main@a89a50cb52183a3ffc4f3d7bd313ea675564c07b`
+whose bounded size repair deliberately contains wording that the LEGACY
+politeness cleanup would change. The COMMERCE candidate preserves that wording
+byte-for-byte while matching the pinned verified-fact, protected-claim,
+effect-authorization, commit and whole-group delivery snapshot. Existing
+invalid-repair/safe-fallback coverage and explicit LEGACY rollback coverage
+remain part of the focused suite.
+
 **Verification:** exact call-graph reachability sweep; focused COMMERCE tests proving new path selection; affected rollback-route tests; zero-use evidence before any deletion; r31.3 differential for the final migrated path.
 
 ---

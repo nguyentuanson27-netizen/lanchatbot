@@ -112,7 +112,6 @@ import {
   postGenerationWordingAuthority,
   resolveCommercePostGenerationAuthority,
   resolveLegacyPostGenerationAuthority,
-  type PostGenerationWordingAuthority,
   type RealtimePostGenerationMode,
 } from "./realtime-reply-differential.js";
 import {

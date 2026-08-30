@@ -136,6 +136,7 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 - [x] Do not edit `sales-stage.ts`; it remains telemetry-only under COMMERCE.
 - [x] Preserve structured claim/size repair, negotiation/effect reconciliation, whole-group delivery and DF13 commit/fence semantics before disconnecting wrappers.
 - [x] Retain rather than delete legacy helpers because explicit LEGACY rollback and rollback tests remain proven consumers.
+- [x] Execute the B2.4 r31.3 capture through the actual `RealtimeRunner` against immutable pre-B2.4 `main@a89a50cb52183a3ffc4f3d7bd313ea675564c07b`; preserve deliberately cleanup-sensitive model wording plus verified facts, protected claims, effect authorization, commit and whole-group delivery, while retaining invalid-repair/fallback and LEGACY rollback evidence.
 - [ ] **Checkpoint:** exact B2.4 source head passes clean self-review, fixed independent review and canonical exact-head CI.
 
 ## B3 — Live-path differential and replay
