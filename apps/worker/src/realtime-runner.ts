@@ -3860,7 +3860,8 @@ export class RealtimeRunner {
             customerProfile &&
             resolutions.length === 1 &&
             resolutions[0]!.product !== null &&
-            first.requestedFacts.includes("SIZE")
+            first.requestedFacts.includes("SIZE") &&
+            authoritySelection.status === "LEGACY_SELECTED"
           ) {
             const sizeComposition = composeSizeEngineAdvice(
               proposal,
@@ -4220,7 +4221,10 @@ export class RealtimeRunner {
             this.options.customerProfileEnabled &&
             customerProfile
           ) {
-            if (profileHasBodyMeasurements(customerProfile)) {
+            if (
+              profileHasBodyMeasurements(customerProfile) &&
+              authoritySelection.status === "LEGACY_SELECTED"
+            ) {
               const sizeComposition = composeSizeEngineAdvice(
                 deterministicProductInfo,
                 resolvedProduct,
@@ -4397,7 +4401,8 @@ export class RealtimeRunner {
             baseVerifiedFallback &&
             this.options.customerProfileEnabled &&
             customerProfile &&
-            profileHasBodyMeasurements(customerProfile)
+            profileHasBodyMeasurements(customerProfile) &&
+            authoritySelection.status === "LEGACY_SELECTED"
           ) {
             const sizeComposition = composeSizeEngineAdvice(
               baseVerifiedFallback,
@@ -4440,7 +4445,8 @@ export class RealtimeRunner {
           this.options.customerProfileEnabled &&
           customerProfile &&
           resolvedProduct &&
-          proposal.businessFactQuery.intent === "SIZE"
+          proposal.businessFactQuery.intent === "SIZE" &&
+          authoritySelection.status === "LEGACY_SELECTED"
         ) {
           const sizeComposition = composeSizeEngineAdvice(
             proposal,
@@ -4549,7 +4555,13 @@ export class RealtimeRunner {
                 now,
               )
             : null;
-        if (verifiedSizeClaimForTurn) {
+        // Preserve the rollback authority exactly. COMMERCE requires the
+        // model's bounded proposal (or its single repair) to declare the
+        // verified size claim itself.
+        if (
+          verifiedSizeClaimForTurn &&
+          authoritySelection.status === "LEGACY_SELECTED"
+        ) {
           proposal = {
             ...proposal,
             protectedClaimIds: [
@@ -4593,40 +4605,35 @@ export class RealtimeRunner {
                 expiresAt: new Date(now.getTime() + 60_000).toISOString(),
               })
             : [];
-        const protectedClaimProductId = proposal.productId;
-        const boundProtectedClaims = bindRealtimeProtectedClaimProposal({
+        const bindProtectedClaimCandidate = (
+          candidate: AgentProposalV1,
+        ) => bindRealtimeProtectedClaimProposal({
           requestedClaims: requestedProtectedClaimTypes(
-            proposal.businessFactQuery.intent,
+            candidate.businessFactQuery.intent,
           ).map((type) => ({
             type,
-            ...(protectedClaimProductId === null
+            ...(candidate.productId === null
               ? {}
-              : { productId: protectedClaimProductId }),
+              : { productId: candidate.productId }),
           })),
-          // B2.3d owns unknown IDs attached to concrete size wording so the
-          // existing exactly-one repair can still run. Everywhere else an
-          // unknown model ID reaches the authorizer and fails closed.
-          modelDeclaredClaimIds:
-            detectConcreteSizeRecommendations(proposal.reply).length > 0
-              ? (proposal.protectedClaimIds ?? []).filter((claimId) =>
-                  typedClaimsForProposal.some(({ claimId: availableId }) =>
-                    availableId === claimId
-                  )
-                )
-              : proposal.protectedClaimIds ?? [],
+          // Unknown IDs remain visible to the authorizer. A size failure can
+          // still receive its one repair, but B2.3a whole-group containment is
+          // never weakened by silently dropping another unsupported claim.
+          modelDeclaredClaimIds: candidate.protectedClaimIds ?? [],
           deterministicClaims: [
             ...deterministicProtectedClaimRequests.filter(({ type }) => type !== "SIZE_FIT"),
-            ...(mediaClaims.length > 0 && proposal.productId !== null
-              ? [{ type: "PRODUCT_MEDIA" as const, productId: proposal.productId }]
+            ...(mediaClaims.length > 0 && candidate.productId !== null
+              ? [{ type: "PRODUCT_MEDIA" as const, productId: candidate.productId }]
               : []),
           ],
           defenseObservedClaimTypes:
-            detectRealtimeUndeclaredProtectedClaimTypes(proposal.reply),
+            detectRealtimeUndeclaredProtectedClaimTypes(candidate.reply),
           availableClaims: [...typedClaimsForProposal, ...mediaClaims],
           expectedProductIds: expectedProtectedClaimProductIds,
           expectedProductScopes: expectedProtectedClaimProductScopes,
           now,
         });
+        const boundProtectedClaims = bindProtectedClaimCandidate(proposal);
         protectedClaimBindingReasonCodes = boundProtectedClaims.reasonCodes;
         proposal = {
           ...proposal,
@@ -4664,6 +4671,10 @@ export class RealtimeRunner {
             customerProfileRevision: customerProfile?.revision ?? null,
             claims: verifiedSizeClaimForTurn ? [verifiedSizeClaimForTurn] : [],
           },
+          sizeClaimTextMode:
+            authoritySelection.status === "COMMERCE_SELECTED"
+              ? "STRUCTURED_REJECT_ONLY"
+              : "LEGACY_SEMANTIC",
           now,
         });
         const enforceProtectedClaimBinding = (
@@ -4736,7 +4747,20 @@ export class RealtimeRunner {
                 strategyAnalysis:
                   proposal.strategyAnalysis ?? repair.proposal.strategyAnalysis,
               };
+              const repairedProtectedClaims = bindProtectedClaimCandidate(proposal);
+              protectedClaimBindingReasonCodes = repairedProtectedClaims.reasonCodes;
+              proposal = {
+                ...proposal,
+                protectedClaimIds: [...new Set([
+                  ...(proposal.protectedClaimIds ?? []),
+                  ...repairedProtectedClaims.claimIds,
+                ])],
+              };
               guarded = enforceProtectedClaimBinding(guardProposal(proposal));
+              handoffGuardReasonCodes = [...new Set([
+                ...handoffGuardReasonCodes,
+                ...guarded.blockedReasonCodes,
+              ])];
               repaired =
                 !hasSizeRecommendationBlock(guarded.blockedReasonCodes) &&
                 (guarded.action === "REPLY" ||
@@ -4800,6 +4824,15 @@ export class RealtimeRunner {
                 ...fallbackClaimRequests,
               ];
             }
+            const fallbackProtectedClaims = bindProtectedClaimCandidate(proposal);
+            protectedClaimBindingReasonCodes = fallbackProtectedClaims.reasonCodes;
+            proposal = {
+              ...proposal,
+              protectedClaimIds: [...new Set([
+                ...(proposal.protectedClaimIds ?? []),
+                ...fallbackProtectedClaims.claimIds,
+              ])],
+            };
             guarded = enforceProtectedClaimBinding(guardProposal(proposal));
             handoffGuardReasonCodes = [...new Set([
               ...handoffGuardReasonCodes,
@@ -5092,9 +5125,6 @@ export class RealtimeRunner {
       protectedOutboundClaims = protectedOutboundClaims.filter(({ type }) =>
         outboundClaimTypeSet.has(type)
       );
-      const nonSizeOutboundClaimTypes = outboundClaimTypes.filter((type) =>
-        type !== "SIZE_FIT"
-      );
       const finalProtectedClaimBinding = bindRealtimeProtectedClaimProposal({
         requestedClaims: [],
         modelDeclaredClaimIds: (proposal?.protectedClaimIds ?? []).filter((claimId) =>
@@ -5103,10 +5133,8 @@ export class RealtimeRunner {
           )
         ),
         deterministicClaims: [
-          ...deterministicProtectedClaimRequests.filter(({ type }) =>
-            type !== "SIZE_FIT"
-          ),
-          ...(nonSizeOutboundClaimTypes.includes("PRODUCT_MEDIA") && mediaProductId !== null
+          ...deterministicProtectedClaimRequests,
+          ...(outboundClaimTypes.includes("PRODUCT_MEDIA") && mediaProductId !== null
             ? [{ type: "PRODUCT_MEDIA" as const, productId: mediaProductId }]
             : []),
         ],
@@ -5118,7 +5146,7 @@ export class RealtimeRunner {
       const finalProtectedClaimAuthorization =
         authorizeRealtimeProtectedClaimProposal({
           declaredClaimIds: finalProtectedClaimBinding.claimIds,
-          observedClaimTypes: nonSizeOutboundClaimTypes,
+          observedClaimTypes: outboundClaimTypes,
           availableClaims: protectedOutboundClaims,
           expectedProductIds: expectedOutboundProductIds,
           expectedProductScopes: expectedOutboundProductScopes,
@@ -5135,13 +5163,7 @@ export class RealtimeRunner {
         ])];
         protectedOutboundClaims = [];
       } else {
-        const declaredSizeClaimIds = new Set(proposal?.protectedClaimIds ?? []);
-        protectedOutboundClaims = [
-          ...finalProtectedClaimAuthorization.claims,
-          ...protectedOutboundClaims.filter((claim) =>
-            claim.type === "SIZE_FIT" && declaredSizeClaimIds.has(claim.claimId)
-          ),
-        ];
+        protectedOutboundClaims = [...finalProtectedClaimAuthorization.claims];
       }
       protectedOutboundReadiness = evaluateDeterministicEffectReadinessV1({
         effect: "PROTECTED_OUTBOUND",

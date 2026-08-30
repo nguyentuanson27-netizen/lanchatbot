@@ -65,6 +65,7 @@ function guard(reply: string, claim: SizeRecommendationProtectedClaimV1 | null, 
   customerProfileId?: string | null;
   customerProfileRevision?: number | null;
   declared?: boolean;
+  structuredRejectOnly?: boolean;
 } = {}) {
   return guardAgentProposal({
     proposal: proposal(reply, claim && overrides.declared !== false ? [claim.id] : []),
@@ -77,6 +78,9 @@ function guard(reply: string, claim: SizeRecommendationProtectedClaimV1 | null, 
       customerProfileRevision: overrides.customerProfileRevision ?? 7,
       claims: claim ? [claim] : [],
     },
+    ...(overrides.structuredRejectOnly
+      ? { sizeClaimTextMode: "STRUCTURED_REJECT_ONLY" as const }
+      : {}),
     now,
   });
 }
@@ -313,6 +317,39 @@ describe("BF-04 size recommendation detector", () => {
 });
 
 describe("BF-04 verified size claims", () => {
+  it.each([
+    "Chị có hợp size L không?",
+    "Mẫu còn size L ở kho.",
+    "Size: S/M/L.",
+    "Người mẫu mặc size S.",
+    "Em chưa thể tư vấn size L khi thiếu số đo.",
+  ])("uses every size token only as a reject-only signal on a migrated size turn: %s", (reply) => {
+    const result = guard(reply, null, { structuredRejectOnly: true });
+    expect(result).toMatchObject({ action: "HANDOFF", textUnits: [] });
+    expect(result.blockedReasonCodes).toContain("SIZE_RECOMMENDATION_UNDECLARED");
+    expect(result.protectedClaimValidation?.claimTypes).toContain("SIZE_FIT");
+  });
+
+  it("requires exact verified values even in question or catalog phrasing on a migrated size turn", () => {
+    expect(guard("Chị có hợp size XL không?", verifiedClaim(), {
+      structuredRejectOnly: true,
+    })).toMatchObject({
+      action: "HANDOFF",
+      blockedReasonCodes: ["SIZE_RECOMMENDATION_VALUE_MISMATCH"],
+    });
+    expect(guard("Size: M/L.", verifiedClaim(), {
+      structuredRejectOnly: true,
+    })).toMatchObject({ action: "REPLY", blockedReasonCodes: [] });
+  });
+
+  it("does not let a question mark erase an affirmative measurement basis", () => {
+    expect(detectConcreteSizeRecommendations("Theo số đo chị size L?")).toEqual(["L"]);
+    expect(guard("Theo số đo chị size L?", null)).toMatchObject({
+      action: "HANDOFF",
+      blockedReasonCodes: ["SIZE_RECOMMENDATION_UNDECLARED"],
+    });
+  });
+
   it("blocks SD398: size L cannot emit without a declared Size Engine claim", () => {
     const result = guard("Theo số đo, chị hợp size L.", null);
     expect(result).toMatchObject({
