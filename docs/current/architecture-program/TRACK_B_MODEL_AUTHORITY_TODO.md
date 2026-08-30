@@ -113,7 +113,7 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 - [x] Retain `READY/HESITANT/CAUTIOUS` only as the monetary-policy ledger; it no longer selects normal COMMERCE negotiation prose. Preserve the deterministic renderer and text-authorizing classifier only on explicit LEGACY rollback; COMMERCE text matching is rejection-only.
 - [x] Test allowed and denied proposals/concessions, malformed, undeclared, out-of-scope and unbound proposals, replay/idempotency, preserved arithmetic and no-side-effect rejection.
 - [x] Exercise the live sales-cycle boundary against the immutable r31.3 capture from pre-B2.3c `8591ed9fa5522f9ea50259fa3bf086efddb93cc8`; preserve fact/claim/commit/whole-group invariants and expose the payload-bound readiness-hash delta.
-- [ ] **Checkpoint:** exact B2.3c head has clean self-review, the fixed independent Sol High reviewer reports no Required/P0/P1/P2, and exact-head canonical repository CI passes.
+- [x] **Checkpoint:** reviewed source head `c87aa3eb3941f1fd555ba160bbc9c92661476cf7` had clean self-review, the fixed independent Sol High reviewer returned APPROVE with no Required/P0/P1/P2, and canonical repository CI run `33295354299` job `99219132217` passed all repository steps. This docs-only closure must retain those source bytes and pass its own exact-head CI before merge readiness.
 
 ## B2.3d — Size and bounded repair
 
