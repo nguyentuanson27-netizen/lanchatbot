@@ -16,7 +16,6 @@ import {
   selectProductMediaV2,
   guardAgentProposal,
   detectConcreteSizeRecommendations,
-  detectSizeClaimTokensRejectOnly,
   selectImages,
   verifiedImageUrls,
   applyWave2ReplyPolicy,
@@ -424,6 +423,20 @@ function hasSizeOnlyContinuationSignal(value: string): boolean {
     .trim();
   return /^(?:(?:size|sz|co)\s*)?(?:xxxs|xxs|xs|s|m|l|xl|xxl|xxxl|3[4-9]|4\d|50)(?:\s+(?:nha|nhe|a|em|chi))?$/iu
     .test(text);
+}
+
+/** Deterministic inbound signal for a size-consultation turn, not model output. */
+export function hasSizeConsultationSignal(value: string): boolean {
+  if (hasCustomerMeasurementSignal(value) || hasSizeOnlyContinuationSignal(value)) {
+    return true;
+  }
+  const text = asciiFold(value);
+  return /\b(?:tu van|chon|de xuat|goi y)\s+(?:giup\s+)?(?:chi\s+)?(?:ve\s+)?(?:size|sz|co)\b/u
+    .test(text) ||
+    /\b(?:size|sz|co)\b[^.!?\n]{0,32}\b(?:nao|hop|vua|chat|rong|nen mac|nen chon)\b/u
+      .test(text) ||
+    /\b(?:hop|vua|chat|rong|nen mac|nen chon)\b[^.!?\n]{0,32}\b(?:size|sz|co)\b/u
+      .test(text);
 }
 
 function hasColorContinuationSignal(value: string): boolean {
@@ -4178,6 +4191,9 @@ export class RealtimeRunner {
         businessFacts = facts;
         businessFactEnvelopes = facts === null ? [] : [facts];
         const explicitIntent = explicitCustomerBusinessIntent(message.text ?? "");
+        const deterministicSizeConsultation = hasSizeConsultationSignal(
+          message.text ?? "",
+        );
         if (facts?.status === "STALE") {
           proposal = staleFactsRequireHandoff(message.text ?? "", facts)
             ? {
@@ -4608,7 +4624,6 @@ export class RealtimeRunner {
             : [];
         const bindProtectedClaimCandidate = (
           candidate: AgentProposalV1,
-          allowUnknownSizeIdsForRepair: boolean,
         ) => bindRealtimeProtectedClaimProposal({
           requestedClaims: requestedProtectedClaimTypes(
             candidate.businessFactQuery.intent,
@@ -4618,22 +4633,10 @@ export class RealtimeRunner {
               ? {}
               : { productId: candidate.productId }),
           })),
-          // B2.3d owns unknown IDs attached to concrete size wording so the
-          // existing exactly-one repair can still run. Everywhere else an
-          // unknown model ID reaches the authorizer and fails closed.
-          modelDeclaredClaimIds:
-            allowUnknownSizeIdsForRepair &&
-              (authoritySelection.status === "COMMERCE_SELECTED" &&
-                  (verifiedSizeClaimForTurn !== null ||
-                    candidate.businessFactQuery.intent === "SIZE")
-                ? detectSizeClaimTokensRejectOnly(candidate.reply)
-                : detectConcreteSizeRecommendations(candidate.reply)).length > 0
-              ? (candidate.protectedClaimIds ?? []).filter((claimId) =>
-                  typedClaimsForProposal.some(({ claimId: availableId }) =>
-                    availableId === claimId
-                  )
-                )
-              : candidate.protectedClaimIds ?? [],
+          // Unknown IDs remain visible to the authorizer. A size failure can
+          // still receive its one repair, but B2.3a whole-group containment is
+          // never weakened by silently dropping another unsupported claim.
+          modelDeclaredClaimIds: candidate.protectedClaimIds ?? [],
           deterministicClaims: [
             ...deterministicProtectedClaimRequests.filter(({ type }) => type !== "SIZE_FIT"),
             ...(mediaClaims.length > 0 && candidate.productId !== null
@@ -4647,7 +4650,7 @@ export class RealtimeRunner {
           expectedProductScopes: expectedProtectedClaimProductScopes,
           now,
         });
-        const boundProtectedClaims = bindProtectedClaimCandidate(proposal, true);
+        const boundProtectedClaims = bindProtectedClaimCandidate(proposal);
         protectedClaimBindingReasonCodes = boundProtectedClaims.reasonCodes;
         proposal = {
           ...proposal,
@@ -4687,8 +4690,7 @@ export class RealtimeRunner {
           },
           sizeClaimTextMode:
             authoritySelection.status === "COMMERCE_SELECTED" &&
-              (verifiedSizeClaimForTurn !== null ||
-                candidate.businessFactQuery.intent === "SIZE")
+              deterministicSizeConsultation
               ? "STRUCTURED_REJECT_ONLY"
               : "LEGACY_SEMANTIC",
           now,
@@ -4763,10 +4765,7 @@ export class RealtimeRunner {
                 strategyAnalysis:
                   proposal.strategyAnalysis ?? repair.proposal.strategyAnalysis,
               };
-              const repairedProtectedClaims = bindProtectedClaimCandidate(
-                proposal,
-                false,
-              );
+              const repairedProtectedClaims = bindProtectedClaimCandidate(proposal);
               protectedClaimBindingReasonCodes = repairedProtectedClaims.reasonCodes;
               proposal = {
                 ...proposal,
@@ -4843,10 +4842,7 @@ export class RealtimeRunner {
                 ...fallbackClaimRequests,
               ];
             }
-            const fallbackProtectedClaims = bindProtectedClaimCandidate(
-              proposal,
-              false,
-            );
+            const fallbackProtectedClaims = bindProtectedClaimCandidate(proposal);
             protectedClaimBindingReasonCodes = fallbackProtectedClaims.reasonCodes;
             proposal = {
               ...proposal,

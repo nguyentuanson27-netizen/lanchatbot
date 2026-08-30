@@ -123,7 +123,7 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 - [x] Bounded repair is **exactly one** request (`MODEL_CLAIM_BOUNDARY.md`), then an approved safe clarification or handoff carrying no unsupported business claim.
 - [x] Deterministic fallback from verified facts as r31.3 requires; never a second sales-copy pipeline.
 - [x] Prove the fallback preserves verified facts and media and executes no failed or unauthorized effect; repaired declarations are rebound so unknown IDs remain fail-closed.
-- [x] Add explicit BF-04 migrated-path regressions for undeclared and mismatched values, invalid repair, single-repair cap, safe fallback, exact `SIZE_FIT` outbound authorization and deterministic r31.3 replay.
+- [x] Add explicit BF-04 migrated-path regressions for undeclared and mismatched values, missing profile plus model-intent mismatch, invalid repair, single-repair cap, safe fallback and exact `SIZE_FIT` outbound authorization. Exercise the COMMERCE live path against the immutable pre-B2.3d `78a03fe599202c6e275300af33622cb16ab80769` r31.3 capture: verified facts, claims, commit and whole-group invariants remain stable; model-owned wording/strategy and the payload-bound effect-authorization hash are exposed as the exact expected delta.
 - [ ] **Source disposition:** `BF04_SOURCE_CLOSURE_CANDIDATE`; independent review and exact-head CI are still required. Do not rewrite deployed/operational BF-04 status from this source PR.
 - [ ] **Checkpoint:** authority boundary, BF-04 disposition and r31.3 evidence reviewed before B2.4.
 

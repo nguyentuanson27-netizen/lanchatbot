@@ -951,25 +951,68 @@ describe("BF-01 runner reconciliation", () => {
       });
     };
 
+    // Immutable capture from exact pre-B2.3d source at
+    // 78a03fe599202c6e275300af33622cb16ab80769 for capturedInput above.
+    const preB23dBaseline: RealtimeReplySnapshot = {
+      messages: [{
+        kind: "TEXT",
+        text: "Theo số đo, chị hợp size M.\n\nTheo số đo mới nhất, chị hợp váy size M. Độ tin cậy 82% theo bảng size đã xác minh. Em giữ size này cho mình nha.",
+      }],
+      strategyHash: "27058acb03108a4695570e1a20ddb67c6e8e2b762ef1a1c5f6f2ef36d76d9385",
+      verifiedFactHashes: [
+        "a0729ee1acaa2436299b46f6e046eaaa0561f3152ab27463d55cc850d8431da6",
+      ],
+      verifiedMediaUrls: [],
+      protectedClaimHashes: [
+        "95011f74a0e3fb0cbdd01bc90c7eee3891c231c0c7bdb73bbf4fe3467c3e757e",
+      ],
+      effectAuthorizationHashes: [
+        "ccfb11272e7d5b377ee779ad3ef9298a974c8ad7c54531749e9932af1da838a5",
+      ],
+      commitOutcome: "COMMITTED",
+      generationOutcome: "VALID",
+      inboxOutcome: "COMMITTED",
+      protectedOutbound: {
+        required: true,
+        groupId: "37a4d2be-f544-5ec8-86c5-8e2e04faff77",
+        plannedMessageCount: 1,
+        deliveredMessageCount: 1,
+      },
+    };
     const snapshots: RealtimeReplySnapshot[] = [];
     const result = await realtimeReplyDifferential.runRealtimeReplyDifferential({
       capturedInput,
-      baseline: async (capture) => runLivePath(capture),
+      baseline: async () => preB23dBaseline,
       candidate: async (capture) => {
         const snapshot = await runLivePath(capture);
         snapshots.push(snapshot);
         return snapshot;
       },
-      permittedDifferences: [],
+      permittedDifferences: [
+        {
+          code: "OUTBOUND_MESSAGES_CHANGED",
+          reasonCode: "B2_3D_MODEL_SIZE_WORDING",
+        },
+        {
+          code: "STRATEGY_CHANGED",
+          reasonCode: "B2_3D_MODEL_SIZE_SEMANTICS",
+        },
+      ],
     });
 
     expect(result.sideEffects).toBe("DISABLED");
-    expect(result.status).toBe("MATCH");
-    expect(result.differences).toEqual([]);
+    expect(result.status).toBe("VIOLATION");
+    expect(result.differences.map(({ code }) => code)).toEqual([
+      "OUTBOUND_MESSAGES_CHANGED",
+      "STRATEGY_CHANGED",
+      "EFFECT_AUTHORIZATION_CHANGED",
+    ]);
     expect(snapshots[0]).toMatchObject({
+      verifiedFactHashes: preB23dBaseline.verifiedFactHashes,
+      protectedClaimHashes: preB23dBaseline.protectedClaimHashes,
       commitOutcome: "COMMITTED",
       inboxOutcome: "COMMITTED",
-      protectedOutbound: { required: true },
+      protectedOutbound: preB23dBaseline.protectedOutbound,
     });
     } finally {
       vi.useRealTimers();
@@ -1006,6 +1049,24 @@ describe("BF-01 runner reconciliation", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("fails closed from deterministic size-consult evidence when profile and model intent are missing", async () => {
+    const harness = createHarness({
+      commerce: true,
+      sizeFixture: false,
+      initialMode: "REPLY",
+      customerText: "Tư vấn size cho chị mẫu SD398",
+      initialReply: "Theo số đo chị size L?",
+      initialFactIntent: "NONE",
+    });
+
+    expect(await harness.runner.processOne()).toBe(true);
+    const commit = harness.commerceCommit.mock.calls[0]?.[0]?.runtimeCommit;
+    expect(commit).toBeDefined();
+    expect(committedText(commit)).not.toContain("size L");
+    expect(commit?.decisionEvents?.flatMap(({ reasonCodes }) => reasonCodes))
+      .toContain("SIZE_RECOMMENDATION_UNDECLARED");
   });
 
   it("blocks the whole live-path group for a model-declared claim without typed evidence", async () => {

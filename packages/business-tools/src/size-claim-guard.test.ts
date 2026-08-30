@@ -342,6 +342,14 @@ describe("BF-04 verified size claims", () => {
     })).toMatchObject({ action: "REPLY", blockedReasonCodes: [] });
   });
 
+  it("does not let a question mark erase an affirmative measurement basis", () => {
+    expect(detectConcreteSizeRecommendations("Theo số đo chị size L?")).toEqual(["L"]);
+    expect(guard("Theo số đo chị size L?", null)).toMatchObject({
+      action: "HANDOFF",
+      blockedReasonCodes: ["SIZE_RECOMMENDATION_UNDECLARED"],
+    });
+  });
+
   it("blocks SD398: size L cannot emit without a declared Size Engine claim", () => {
     const result = guard("Theo số đo, chị hợp size L.", null);
     expect(result).toMatchObject({

@@ -25,6 +25,7 @@ import {
   isPreSalePolicyQuestion,
   FailClosedTagObservationProvider,
   hasCustomerMeasurementSignal,
+  hasSizeConsultationSignal,
   holdingMessagesForHandoff,
   inboxRetryDelaySeconds,
   modelHandoffPermitted,
@@ -1057,6 +1058,14 @@ describe("RealtimeRunner", () => {
     expect(explicitCustomerBusinessIntent("sv695 còn size M không")).toBe("SIZE");
     expect(explicitCustomerBusinessIntent("mẫu này còn hàng không")).toBe("STOCK");
     expect(explicitCustomerBusinessIntent("bao lâu thì nhận hàng")).toBe("ETA");
+  });
+
+  it("derives the migrated size-consult boundary from customer evidence, not model intent", () => {
+    expect(hasSizeConsultationSignal("Tư vấn size cho chị mẫu SD398")).toBe(true);
+    expect(hasSizeConsultationSignal("Chị cao 160cm nặng 53kg")).toBe(true);
+    expect(hasSizeConsultationSignal("Chị hợp size nào?")).toBe(true);
+    expect(hasSizeConsultationSignal("Mẫu còn size M hay L?")).toBe(false);
+    expect(hasSizeConsultationSignal("Mẫu có size S/M/L")).toBe(false);
   });
 
   it("detects only the legacy unaccented product-info reply", () => {

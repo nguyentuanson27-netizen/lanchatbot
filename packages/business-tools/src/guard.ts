@@ -403,6 +403,12 @@ function classifySafeExemptionForMention(
     scope.sentenceStart,
     scope.sentenceEnd,
   );
+  // A question mark cannot erase an affirmative recommendation basis. This
+  // remains reject-only; it only prevents a known exemption bypass.
+  if (
+    /\b(?:theo|dua\s+tren)\s+so\s+do\b|\b(?:tuong\s+ung|thuoc|roi\s+vao|xep|nen\s+chon|de\s+xuat|phu\s+hop\s+nhat)\b/u
+      .test(beforeMention.slice(-64))
+  ) return null;
   if (
     isPureSizeQuestion(
       local,
