@@ -93,24 +93,28 @@ export function parseGateEVertexCredential(value: unknown): Readonly<{
   email: string;
   privateKey: string;
 }> {
-  if (Array.isArray(value) && value.length !== 1) {
+  if (Array.isArray(value)) {
     throw new Error("GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
   }
-  const fromArray = Array.isArray(value);
-  const root = fromArray ? value[0] : value;
-  const parsed = record(root, "GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
+  const parsed = record(value, "GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
   let email = "";
   let privateKey = "";
-  if (!fromArray && parsed.type === "service_account") {
+  if (parsed.type === "service_account" &&
+      !Object.hasOwn(parsed, "email") &&
+      !Object.hasOwn(parsed, "privateKey") &&
+      !Object.hasOwn(parsed, "region") &&
+      !Object.hasOwn(parsed, "data")) {
     email = typeof parsed.client_email === "string" ? parsed.client_email : "";
     privateKey = typeof parsed.private_key === "string" ? parsed.private_key : "";
-  } else if (parsed.type === "googleApi") {
-    const wrapped = record(parsed.data, "GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
-    if (typeof wrapped.region !== "string" || !wrapped.region.trim()) {
+  } else if (!Object.hasOwn(parsed, "type") &&
+      !Object.hasOwn(parsed, "client_email") &&
+      !Object.hasOwn(parsed, "private_key") &&
+      !Object.hasOwn(parsed, "data")) {
+    if (typeof parsed.region !== "string" || !parsed.region.trim()) {
       throw new Error("GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
     }
-    email = typeof wrapped.email === "string" ? wrapped.email : "";
-    privateKey = typeof wrapped.privateKey === "string" ? wrapped.privateKey : "";
+    email = typeof parsed.email === "string" ? parsed.email : "";
+    privateKey = typeof parsed.privateKey === "string" ? parsed.privateKey : "";
   } else {
     throw new Error("GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
   }

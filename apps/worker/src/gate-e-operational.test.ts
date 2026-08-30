@@ -21,18 +21,11 @@ describe("Gate E operational boundary", () => {
       private_key: privateKey,
     })).toEqual({ email: "gate-e@example.test", privateKey });
     const managed = {
-      type: "googleApi",
-      data: {
-        email: "gate-e@example.test",
-        privateKey,
-        region: "global",
-      },
-    };
-    expect(parseGateEVertexCredential(managed)).toEqual({
       email: "gate-e@example.test",
       privateKey,
-    });
-    expect(parseGateEVertexCredential([managed])).toEqual({
+      region: "global",
+    };
+    expect(parseGateEVertexCredential(managed)).toEqual({
       email: "gate-e@example.test",
       privateKey,
     });
@@ -47,6 +40,11 @@ describe("Gate E operational boundary", () => {
         private_key: privateKey }],
       { type: "other", client_email: "gate-e@example.test", private_key: privateKey },
       { type: "googleApi", data: { email: "gate-e@example.test", privateKey } },
+      { type: "service_account", client_email: "gate-e@example.test",
+        private_key: privateKey, email: "gate-e@example.test" },
+      { email: "gate-e@example.test", privateKey, region: "global",
+        client_email: "gate-e@example.test" },
+      { email: "gate-e@example.test", privateKey },
       { type: "service_account", client_email: "gate-e@example.test",
         private_key: "not-a-key" },
       [{ type: "googleApi", data: { email: "gate-e@example.test", privateKey,
