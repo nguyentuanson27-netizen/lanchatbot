@@ -89,24 +89,37 @@ export function gateEDatabaseUrlForRole(
   return parsed.toString();
 }
 
+export function parseGateEVertexCredential(value: unknown): Readonly<{
+  email: string;
+  privateKey: string;
+}> {
+  const root = Array.isArray(value) && value.length === 1 ? value[0] : value;
+  const parsed = record(root, "GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
+  const wrapped = parsed.type === "googleApi"
+    ? record(parsed.data, "GATE_E_OPERATIONAL_CREDENTIAL_INVALID")
+    : null;
+  const email = wrapped === null
+    ? typeof parsed.client_email === "string" ? parsed.client_email : ""
+    : typeof wrapped.email === "string" ? wrapped.email : "";
+  const privateKey = wrapped === null
+    ? typeof parsed.private_key === "string" ? parsed.private_key : ""
+    : typeof wrapped.privateKey === "string" ? wrapped.privateKey : "";
+  if (!email.includes("@") || !privateKey.includes("PRIVATE KEY")) {
+    throw new Error("GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
+  }
+  return Object.freeze({ email, privateKey });
+}
+
 async function accessTokenFromServiceAccountFile(
   credentialFile: string,
   signal: AbortSignal,
 ): Promise<string> {
-  let email: string;
-  let privateKey: string;
   let assertion: string;
   try {
-    const parsed = record(
+    const credential = parseGateEVertexCredential(
       JSON.parse(await readFile(credentialFile, "utf8")) as unknown,
-      "GATE_E_OPERATIONAL_CREDENTIAL_INVALID",
     );
-    email = typeof parsed.client_email === "string" ? parsed.client_email : "";
-    privateKey = typeof parsed.private_key === "string" ? parsed.private_key : "";
-    if (!email.includes("@") || !privateKey.includes("PRIVATE KEY")) {
-      throw new Error("GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
-    }
-    assertion = createServiceAccountAssertion({ email, privateKey }, Date.now());
+    assertion = createServiceAccountAssertion(credential, Date.now());
   } catch {
     throw new Error("GATE_E_OPERATIONAL_CREDENTIAL_INVALID");
   }
