@@ -1,11 +1,11 @@
 # Track B — Model Authority Execution Plan
 
-**Status:** `B2.3C_MERGED / B2.3D_SOURCE_CLOSURE_CANDIDATE / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
-**Plan baseline:** `main@78a03fe599202c6e275300af33622cb16ab80769`, including reviewed B2.3c head `ae714485bfe63aff61c22d966fb22ab7aaa5d69e`
+**Status:** `B2.3D_MERGED / B2.4_SOURCE_IN_PROGRESS / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
+**Plan baseline:** `main@a89a50cb52183a3ffc4f3d7bd313ea675564c07b`, including reviewed B2.3d head `1ec597f3d81aa208fdf7e90f17cf7ac022bd6717`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Active process profile:** `SOLO_PREPROD_MINIMAL` (merged and current default; see `OPERATING_MODE.md`)
 **Environment:** `ENGINEERING_PREPROD`, one bounded `PREPROD_TEST_PAGE`
-**Authorization:** the owner messages dated 2026-08-29 and 2026-08-30 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorize Track B **source implementation only**, including the focused B2.3d slice after B2.3c. They do not authorize merge, tag/release, migration, authority/pointer mutation, deployment, routing/control-plane/VPS mutation, Messenger action, public-production promotion, or UR/State V2 work.
+**Authorization:** the owner messages dated 2026-08-29 and 2026-08-30 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorize Track B **source implementation only**, including the focused B2.4 slice after merged B2.3d. They do not authorize merge, tag/release, migration, authority/pointer mutation, deployment, routing/control-plane/VPS mutation, Messenger action, public-production promotion, or UR/State V2 work.
 
 ## 1. Purpose
 
@@ -386,6 +386,22 @@ Make the obsolete post-generation strategy and copy-repair authority unreachable
 - correctness and recovery semantics required by r31.3 are preserved in explicit stages before wrappers are disconnected;
 - LEGACY rollback and non-COMMERCE consumers remain intact;
 - physical deletion only after replacement, consumer migration, rollback review and zero-use proof.
+
+**Current source trace:** `RealtimeRunner` now branches immediately after the
+explicit post-generation seam. `COMMERCE_SELECTED` calls
+`resolveCommercePostGenerationAuthority`, whose input surface has no legacy
+strategy/rewrite callback; only `LEGACY_SELECTED` can call
+`resolveLegacyPostGenerationAuthority`, which contains the second
+`decideWave2SalesStrategy` plus `applyWave2ReplyPolicy` callback. The post-media
+CTA helper is named and called as `legacyPostMediaProofCta` only inside the
+LEGACY wording branch. Final delivery uses runtime authority directly: every
+COMMERCE response, including deterministic transaction facts/confirmations,
+uses the transport-only finalizer; only LEGACY can reach the politeness cleanup.
+The early pre-generation strategy hint,
+verified-facts/size fallback, structured guard/repair, negotiation/effect
+reconciliation, whole-group delivery and DF13 commit/fence paths remain intact.
+No helper is physically deleted because LEGACY rollback and focused rollback
+tests remain current consumers.
 
 **Verification:** exact call-graph reachability sweep; focused COMMERCE tests proving new path selection; affected rollback-route tests; zero-use evidence before any deletion; r31.3 differential for the final migrated path.
 

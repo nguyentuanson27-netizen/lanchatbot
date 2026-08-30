@@ -1,6 +1,6 @@
 # Track B — Execution Checklist
 
-**Status:** `B2.3B_MERGED / B2.3C_SOURCE_IN_PROGRESS`
+**Status:** `B2.3D_MERGED / B2.4_SOURCE_IN_PROGRESS`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` and its observed request envelope stay byte-frozen; the Context V2 candidate stays offline. If that direction proves insufficient, Track B stops incomplete; it has no prompt-edit or candidate-promotion alternative.
 
@@ -124,16 +124,19 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 - [x] Deterministic fallback from verified facts as r31.3 requires; never a second sales-copy pipeline.
 - [x] Prove the fallback preserves verified facts and media and executes no failed or unauthorized effect; repaired declarations are rebound so unknown IDs remain fail-closed.
 - [x] Add explicit BF-04 COMMERCE regressions for undeclared and mismatched values, non-size inbound plus missing profile/model-intent mismatch, invalid repair, single-repair cap, safe fallback and exact `SIZE_FIT` outbound authorization. The conservative fence applies to every COMMERCE proposal, not a finite inbound/model-intent vocabulary. Exercise the live path against the immutable pre-B2.3d `78a03fe599202c6e275300af33622cb16ab80769` r31.3 capture: verified facts, claims, commit and whole-group invariants remain stable; model-owned wording/strategy and the payload-bound effect-authorization hash are exposed as the exact expected delta. The older pre-B2.3a catalog-size capture now explicitly records the B2.3d safe-fallback claim/effect delta while retaining B2.3a whole-group containment.
-- [ ] **Source disposition:** `BF04_SOURCE_CLOSURE_CANDIDATE`; independent review and exact-head CI are still required. Do not rewrite deployed/operational BF-04 status from this source PR.
-- [ ] **Checkpoint:** authority boundary, BF-04 disposition and r31.3 evidence reviewed before B2.4.
+- [x] **Source disposition:** `BF04_SOURCE_CLOSURE_CANDIDATE`; exact B2.3d head `1ec597f3d81aa208fdf7e90f17cf7ac022bd6717` was independently approved and canonical CI passed before merge commit `a89a50cb52183a3ffc4f3d7bd313ea675564c07b`. Deployed/operational BF-04 status remains unchanged.
+- [x] **Checkpoint:** authority boundary, BF-04 disposition and r31.3 evidence reviewed before B2.4.
 
 ## B2.4 — Cut obsolete post-generation reachability
 
-- [ ] Prove active COMMERCE no longer invokes obsolete post-generation strategy, objection/CTA playbook or model-rewrite authority.
-- [ ] Keep the verified-facts fallback producers (`AGENTS.md:47`, malformed **output**) and the early buying hint (DF06 §18).
-- [ ] Do not edit `sales-stage.ts`; it is already demoted to telemetry under COMMERCE.
-- [ ] Extract still-needed recovery/correctness semantics before disconnecting wrappers.
-- [ ] Require replacement, consumer migration, rollback review and zero-use proof before any destructive deletion.
+- [x] Split post-generation strategy APIs by authority: COMMERCE receives no legacy callback; only the explicit LEGACY route can invoke the second `decideWave2SalesStrategy` and `applyWave2ReplyPolicy`.
+- [x] Make the post-media CTA rollback-only by name and call-site; COMMERCE does not invoke the helper and rely on an internal `null` return.
+- [x] Split final delivery APIs and bind selection directly to runtime authority: every active COMMERCE response has no wording-authority option and cannot reach `limitResponseGroupPoliteness`; LEGACY retains the cleanup.
+- [x] Keep the verified-facts fallback producers (`AGENTS.md:47`, malformed **output**) and the early buying hint (DF06 §18).
+- [x] Do not edit `sales-stage.ts`; it remains telemetry-only under COMMERCE.
+- [x] Preserve structured claim/size repair, negotiation/effect reconciliation, whole-group delivery and DF13 commit/fence semantics before disconnecting wrappers.
+- [x] Retain rather than delete legacy helpers because explicit LEGACY rollback and rollback tests remain proven consumers.
+- [ ] **Checkpoint:** exact B2.4 source head passes clean self-review, fixed independent review and canonical exact-head CI.
 
 ## B3 — Live-path differential and replay
 

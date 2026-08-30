@@ -5,9 +5,11 @@ import {
 } from "@lana/business-tools";
 import type { AgentProposalV1 } from "@lana/contracts";
 import {
-  finalizeRealtimePostGenerationReply,
+  finalizeLegacyRealtimePostGenerationReply,
+  finalizeModelOwnedRealtimePostGenerationReply,
   postGenerationWordingAuthority,
-  resolveRealtimePostGenerationAuthority,
+  resolveCommercePostGenerationAuthority,
+  resolveLegacyPostGenerationAuthority,
 } from "./realtime-reply-differential.js";
 
 const modelProposal: AgentProposalV1 = {
@@ -48,7 +50,7 @@ const deterministicDecision = decideWave2SalesStrategy({
   modelAnalysis: modelProposal.strategyAnalysis ?? null,
 });
 
-describe("Track B B2.2 post-generation model authority", () => {
+describe("Track B B2.4 post-generation authority reachability", () => {
   it("selects model wording only for admitted COMMERCE and preserves LEGACY rollback", () => {
     expect(postGenerationWordingAuthority("COMMERCE_SELECTED")).toBe("MODEL");
     expect(postGenerationWordingAuthority("LEGACY_SELECTED")).toBe(
@@ -62,12 +64,12 @@ describe("Track B B2.2 post-generation model authority", () => {
       strategyDecision: deterministicDecision,
     }));
 
-    expect(resolveRealtimePostGenerationAuthority({
-      runtimeAuthority: "COMMERCE_SELECTED",
+    const adversarialCommerceInput = {
       proposal: modelProposal,
       modelStrategyAnalysis: modelProposal.strategyAnalysis ?? null,
       applyLegacyDeterministic,
-    })).toEqual({
+    };
+    expect(resolveCommercePostGenerationAuthority(adversarialCommerceInput)).toEqual({
       wordingAuthority: "MODEL",
       strategyAuthority: "MODEL_STRUCTURED_OUTPUT",
       proposal: modelProposal,
@@ -84,10 +86,8 @@ describe("Track B B2.2 post-generation model authority", () => {
       strategyDecision: deterministicDecision,
     }));
 
-    expect(resolveRealtimePostGenerationAuthority({
-      runtimeAuthority: "LEGACY_SELECTED",
+    expect(resolveLegacyPostGenerationAuthority({
       proposal: modelProposal,
-      modelStrategyAnalysis: modelProposal.strategyAnalysis ?? null,
       applyLegacyDeterministic,
     })).toEqual({
       wordingAuthority: "LEGACY_DETERMINISTIC",
@@ -104,11 +104,9 @@ describe("Track B B2.2 post-generation model authority", () => {
       proposal: applyWave2ReplyPolicy(proposal, deterministicDecision),
       strategyDecision: deterministicDecision,
     }));
-    const shipped = resolveRealtimePostGenerationAuthority({
-      runtimeAuthority: "COMMERCE_SELECTED",
+    const shipped = resolveCommercePostGenerationAuthority({
       proposal: modelProposal,
       modelStrategyAnalysis: modelProposal.strategyAnalysis ?? null,
-      applyLegacyDeterministic,
     });
 
     expect(shipped.proposal).toBe(modelProposal);
@@ -125,9 +123,8 @@ describe("Track B B2.2 post-generation model authority", () => {
   });
 
   it("keeps grouping shape without deleting valid model politeness", () => {
-    expect(finalizeRealtimePostGenerationReply({
+    expect(finalizeModelOwnedRealtimePostGenerationReply({
       mode: "GROUP_V2",
-      wordingAuthority: "MODEL",
       splitProductInfoFollowUp: true,
       messages: [{
         kind: "TEXT",
@@ -140,9 +137,8 @@ describe("Track B B2.2 post-generation model authority", () => {
   });
 
   it("keeps normal model advice in one outbound unit when follow-up splitting is off", () => {
-    expect(finalizeRealtimePostGenerationReply({
+    expect(finalizeModelOwnedRealtimePostGenerationReply({
       mode: "GROUP_V2",
-      wordingAuthority: "MODEL",
       splitProductInfoFollowUp: false,
       messages: [{
         kind: "TEXT",
@@ -152,5 +148,36 @@ describe("Track B B2.2 post-generation model authority", () => {
       kind: "TEXT",
       text: "Mẫu này hợp đi làm ạ.\n\nChị thích form ôm hay suông nhé?",
     }]);
+  });
+
+  it("keeps deterministic wording cleanup reachable only through the LEGACY finalizer", () => {
+    const messages = [{
+      kind: "TEXT" as const,
+      text: "Chị xem mẫu này nhé ạ. Chị chọn giúp em nhé ạ.",
+    }];
+
+    expect(finalizeModelOwnedRealtimePostGenerationReply({
+      mode: "GROUP_V2",
+      messages,
+    }).messages).toEqual(messages);
+    expect(finalizeLegacyRealtimePostGenerationReply({
+      mode: "GROUP_V2",
+      messages,
+    }).messages).toEqual([{
+      kind: "TEXT",
+      text: "Chị xem mẫu này nhé ạ. Chị chọn giúp em.",
+    }]);
+  });
+
+  it("does not expose a COMMERCE delivery fallback to legacy copy cleanup", () => {
+    const commerceSalesMessages = [{
+      kind: "TEXT" as const,
+      text: "Giỏ hàng đã cập nhật nhé ạ. Tổng tiền đã xác minh nhé ạ.",
+    }];
+
+    expect(finalizeModelOwnedRealtimePostGenerationReply({
+      mode: "GROUP_V2",
+      messages: commerceSalesMessages,
+    }).messages).toEqual(commerceSalesMessages);
   });
 });

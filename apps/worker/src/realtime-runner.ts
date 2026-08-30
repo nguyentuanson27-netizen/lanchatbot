@@ -104,14 +104,16 @@ import type { BaselineModelCapability } from "./vertex-baseline.js";
 import type { ChatHistoryPort } from "./redis-chat-history.js";
 import {
   beginRealtimePostGenerationStage,
-  finalizeRealtimePostGenerationReply,
+  finalizeLegacyRealtimePostGenerationReply,
+  finalizeModelOwnedRealtimePostGenerationReply,
   groupRealtimeMetaMessagesV2,
   limitResponseGroupPoliteness,
   splitRealtimeMetaMessages,
   postGenerationWordingAuthority,
-  resolveRealtimeDeliveryWordingAuthority,
-  resolveRealtimePostGenerationAuthority,
+  resolveCommercePostGenerationAuthority,
+  resolveLegacyPostGenerationAuthority,
   type PostGenerationWordingAuthority,
+  type RealtimePostGenerationMode,
 } from "./realtime-reply-differential.js";
 import {
   authorizeRealtimeProtectedClaimProposal,
@@ -1757,8 +1759,7 @@ function verifiedSizeRecommendationClaimForGuard(
 function hasSizeRecommendationBlock(reasonCodes: readonly string[]): boolean {
   return reasonCodes.some((reason) => reason.startsWith("SIZE_RECOMMENDATION_"));
 }
-export interface PostMediaProofCtaInput {
-  readonly wordingAuthority: PostGenerationWordingAuthority;
+export interface LegacyPostMediaProofCtaInput {
   readonly ctaPolicy: Wave2StrategyDecision["ctaPolicy"] | null;
   readonly imageIntent: CustomerImageIntent | null;
   readonly imageCount: number;
@@ -1771,10 +1772,9 @@ export interface PostMediaProofCtaInput {
   readonly now: Date;
 }
 
-export function postMediaProofCta(
-  input: PostMediaProofCtaInput,
+export function legacyPostMediaProofCta(
+  input: LegacyPostMediaProofCtaInput,
 ): string | null {
-  if (input.wordingAuthority === "MODEL") return null;
   if (
     input.ctaPolicy !== "POST_MEDIA_CLOSE" ||
     (input.imageIntent !== "DETAIL" && input.imageIntent !== "FEEDBACK") ||
@@ -3309,8 +3309,6 @@ export class RealtimeRunner {
     let salesTelemetry: RealtimeSalesCycleTelemetry | null = null;
     let salesProtectedOutbound: RealtimeSalesCycleOutput["protectedOutbound"] | null = null;
     let salesReadinessAttempt: DeterministicEffectReadinessV1 | null = null;
-    let salesWordingAuthority: PostGenerationWordingAuthority =
-      "LEGACY_DETERMINISTIC";
     let modelNegotiationProposal: ModelNegotiationProposalV1 | null = null;
     let buyingSignalOverride = false;
     let modelCalled = false;
@@ -4501,38 +4499,45 @@ export class RealtimeRunner {
         // Track B selects downstream authority behind this seam while the
         // byte-frozen baseline generation envelope remains upstream.
         proposal = beginRealtimePostGenerationStage(proposal).proposal;
-        const postGenerationAuthority = resolveRealtimePostGenerationAuthority({
-          runtimeAuthority: authoritySelection.status,
-          proposal,
-          modelStrategyAnalysis: proposal.strategyAnalysis ?? null,
-          applyLegacyDeterministic: (candidate) => {
-            if (!this.options.wave2StrategyEnabled || !wave2StrategyDecision) {
-              return { proposal: candidate, strategyDecision: wave2StrategyDecision };
-            }
-            const strategyDecision = decideWave2SalesStrategy({
-              text: message.text ?? "",
-              salesStage: initialAuthorityStrategyStage,
-              objectionType: event.objectionType,
-              buyingSignal: buyingSignal.isBuyingSignal,
-              hasVerifiedProduct: Boolean(
-                resolvedProduct?.productId ?? nextState.currentProductId,
-              ),
-              resolvedProductCount: Math.max(
-                resolution.products.length,
-                resolvedProduct ? 1 : 0,
-              ),
-              hasMeasurements:
-                (customerProfile?.measurements.length ?? 0) > 0 ||
-                hasCustomerMeasurementSignal(message.text ?? ""),
-              requestedProof: requestedProofForImageIntent(imageIntent),
-              modelAnalysis: candidate.strategyAnalysis ?? null,
-            });
-            return {
-              proposal: applyWave2ReplyPolicy(candidate, strategyDecision),
-              strategyDecision,
-            };
-          },
-        });
+        const postGenerationAuthority =
+          authoritySelection.status === "COMMERCE_SELECTED"
+            ? resolveCommercePostGenerationAuthority({
+                proposal,
+                modelStrategyAnalysis: proposal.strategyAnalysis ?? null,
+              })
+            : resolveLegacyPostGenerationAuthority({
+                proposal,
+                applyLegacyDeterministic: (candidate) => {
+                  if (!this.options.wave2StrategyEnabled || !wave2StrategyDecision) {
+                    return {
+                      proposal: candidate,
+                      strategyDecision: wave2StrategyDecision,
+                    };
+                  }
+                  const strategyDecision = decideWave2SalesStrategy({
+                    text: message.text ?? "",
+                    salesStage: initialAuthorityStrategyStage,
+                    objectionType: event.objectionType,
+                    buyingSignal: buyingSignal.isBuyingSignal,
+                    hasVerifiedProduct: Boolean(
+                      resolvedProduct?.productId ?? nextState.currentProductId,
+                    ),
+                    resolvedProductCount: Math.max(
+                      resolution.products.length,
+                      resolvedProduct ? 1 : 0,
+                    ),
+                    hasMeasurements:
+                      (customerProfile?.measurements.length ?? 0) > 0 ||
+                      hasCustomerMeasurementSignal(message.text ?? ""),
+                    requestedProof: requestedProofForImageIntent(imageIntent),
+                    modelAnalysis: candidate.strategyAnalysis ?? null,
+                  });
+                  return {
+                    proposal: applyWave2ReplyPolicy(candidate, strategyDecision),
+                    strategyDecision,
+                  };
+                },
+              });
         proposal = postGenerationAuthority.proposal;
         modelStrategyAnalysis = postGenerationAuthority.modelStrategyAnalysis;
         wave2StrategyDecision =
@@ -4882,19 +4887,22 @@ export class RealtimeRunner {
           (guarded.action === "REPLY" ||
             guarded.action === "ASK_PRODUCT_SELECTION")
         ) {
-          const postMediaCta = postMediaProofCta({
-            wordingAuthority,
-            ctaPolicy: wave2StrategyDecision?.ctaPolicy ?? null,
-            imageIntent,
-            imageCount: guarded.imageUrls.length,
-            salesStage: initialAuthorityStrategyStage,
-            buyingSignal: buyingSignal.isBuyingSignal,
-            factsVerified: facts?.status === "OK",
-            product: resolvedProduct,
-            profile: this.options.customerProfileEnabled ? customerProfile : null,
-            policyResolution,
-            now,
-          });
+          const postMediaCta = wordingAuthority === "LEGACY_DETERMINISTIC"
+            ? legacyPostMediaProofCta({
+                ctaPolicy: wave2StrategyDecision?.ctaPolicy ?? null,
+                imageIntent,
+                imageCount: guarded.imageUrls.length,
+                salesStage: initialAuthorityStrategyStage,
+                buyingSignal: buyingSignal.isBuyingSignal,
+                factsVerified: facts?.status === "OK",
+                product: resolvedProduct,
+                profile: this.options.customerProfileEnabled
+                  ? customerProfile
+                  : null,
+                policyResolution,
+                now,
+              })
+            : null;
           metaMessages = [
             ...guarded.textUnits.map(
               (text): RealtimeMetaMessageUnit => ({ kind: "TEXT", text }),
@@ -5003,7 +5011,6 @@ export class RealtimeRunner {
       salesTelemetry = sales.telemetry ?? null;
       salesProtectedOutbound = sales.protectedOutbound ?? null;
       salesReadinessAttempt = sales.readinessAttempt ?? null;
-      salesWordingAuthority = sales.wordingAuthority ?? "LEGACY_DETERMINISTIC";
       if (sales.handled) {
         metaMessages = this.options.mode === "LIVE" && this.options.sendEnabled
           ? [...sales.messages]
@@ -5032,23 +5039,23 @@ export class RealtimeRunner {
     ) {
       metaMessages = [...holdingMessagesForHandoff(message, handoff)];
     }
-    const postGenerationReply = finalizeRealtimePostGenerationReply({
-      mode: this.options.messageGroupingV2Enabled
+    const postGenerationReplyMode: RealtimePostGenerationMode =
+      this.options.messageGroupingV2Enabled
         ? "GROUP_V2"
         : this.options.conversationalMessageFormatEnabled
           ? "SPLIT_SENTENCES"
-          : "PRESERVE",
+          : "PRESERVE";
+    const postGenerationReplyInput = {
+      mode: postGenerationReplyMode,
       messages: metaMessages,
-      wordingAuthority: resolveRealtimeDeliveryWordingAuthority({
-        runtimeWordingAuthority: wordingAuthority,
-        salesHandled,
-        salesWordingAuthority,
-      }),
       splitProductInfoFollowUp: !salesHandled && (
         proposal?.intent === "product_info" ||
         proposal?.businessFactQuery.intent === "PRICE"
       ),
-    });
+    };
+    const postGenerationReply = wordingAuthority === "MODEL"
+      ? finalizeModelOwnedRealtimePostGenerationReply(postGenerationReplyInput)
+      : finalizeLegacyRealtimePostGenerationReply(postGenerationReplyInput);
     metaMessages = [...postGenerationReply.messages];
 
     let protectedOutboundReadiness: DeterministicEffectReadinessV1 | null =
