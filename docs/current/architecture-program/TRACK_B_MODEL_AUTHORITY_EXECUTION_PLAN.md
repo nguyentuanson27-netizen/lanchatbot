@@ -458,8 +458,11 @@ commit and whole-group delivery must match rather than being reclassified as
 permitted changes. Every risk label is paired with an executable, reason-coded
 postcondition; a label without its assertion is rejected before replay. The
 commerce state comparison is built from each capture's actual commit plan or
-loaded unchanged state and is checked against an exact expected PII-safe state
-projection, so current-vs-current execution cannot hide state drift. Identity
+loaded unchanged state, takes product scope only from the BUILT canonical
+Context V2 capture product binding, and fails closed when that binding is
+blocked or absent. It is checked against an exact expected PII-safe state
+projection, so current-vs-current execution or unchanged LEGACY product state
+cannot hide canonical product-binding drift. Identity
 evidence separates the configured provider model from the deterministic fixture
 model and binds the unchanged live-path source revision, baseline, grounded,
 grounded-draft, size-repair and customer-URL-explanation prompts, the accepted

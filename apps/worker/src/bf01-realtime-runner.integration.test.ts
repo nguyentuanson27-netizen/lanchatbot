@@ -28,7 +28,10 @@ import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bun
 import { DF13_COMMERCE_AUTHORITY_CONSUMERS_V1 } from "./df13-commerce-authority-bundle.js";
 import { Df13CommerceRuntimeFinalizationAdapter } from "./df13-commerce-runtime-finalization.js";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
-import { projectCommerceAuthorityCandidate } from "./commerce-authority-comparison.js";
+import {
+  compareCommerceAuthority,
+  projectCommerceAuthorityCandidate,
+} from "./commerce-authority-comparison.js";
 import * as realtimeReplyDifferential from "./realtime-reply-differential.js";
 import type { RealtimeReplySnapshot } from "./realtime-reply-differential.js";
 import {
@@ -939,6 +942,11 @@ function capturedStateComparison<TState, TSalesState>(
   }>;
   const commerce = (commit.salesCyclePlan?.state ?? unchangedCommerceState) as
     SalesCycleRuntimeState;
+  const capture = commit.contextV2CapturePlan?.capture;
+  const canonicalProductBinding = capture?.status === "BUILT" &&
+      capture.context !== null
+    ? capture.context.productBinding
+    : null;
   return {
     enabled: true as const,
     legacy: {
@@ -948,20 +956,16 @@ function capturedStateComparison<TState, TSalesState>(
       stage: legacy.salesStage,
       productId: legacy.currentProductId,
     },
-    commerce: projectCommerceAuthorityCandidate({
+    commerce: canonicalProductBinding === null
+      ? null
+      : projectCommerceAuthorityCandidate({
           routing: commerce.routing,
           revision: commerce.revision,
           stage: commerce.stage,
           cart: commerce.cart,
           hasOrderPreview: commerce.preview !== null,
           hasPurchaseConfirmation: commerce.confirmation !== null,
-          productBinding: {
-            schemaVersion: 2,
-            contractVersion: "PRODUCT_BINDING_V2",
-            status: legacy.currentProductId === null ? "NOT_REQUIRED" : "RESOLVED",
-            productIds: legacy.currentProductId === null ? [] : [legacy.currentProductId],
-            catalogVersion: product.catalogVersion,
-          },
+          productBinding: canonicalProductBinding,
         }),
   };
 }
@@ -1024,6 +1028,7 @@ describe("BF-01 runner reconciliation", () => {
         readonly factsMode?: "OK" | "STALE" | "NOT_FOUND";
         readonly expectedOwner?: "BOT" | "HUMAN";
         readonly expectedProductId?: string | null;
+        readonly expectedCommerceProductScope?: "UNAVAILABLE";
       };
       const failureSnapshot = (): RealtimeReplySnapshot => ({
         messages: [],
@@ -1150,9 +1155,11 @@ describe("BF-01 runner reconciliation", () => {
             conversationId: "43820fd4-daa7-4917-9835-a38cb55120e5",
             revision: 0,
             stage: "DISCOVERY" as const,
-            productScope: productId === null
-              ? { kind: "NONE" as const }
-              : { kind: "SINGLE" as const, productId },
+            productScope: capture.expectedCommerceProductScope === "UNAVAILABLE"
+              ? { kind: "UNAVAILABLE" as const }
+              : productId === null
+                ? { kind: "NONE" as const }
+                : { kind: "SINGLE" as const, productId },
             cartProductScope: { kind: "ABSENT" as const },
             artifacts: {
               hasCart: false,
@@ -1224,6 +1231,15 @@ describe("BF-01 runner reconciliation", () => {
           return observed;
         },
         expectedStateComparison: expectedStateComparisonFor(capturedInput),
+        ...(capturedInput.expectedCommerceProductScope === "UNAVAILABLE"
+          ? {
+              permittedStateDifferences: [{
+                code: "PRODUCT_SCOPE_UNAVAILABLE" as const,
+                reasonCode:
+                  "TRACK_B_B3_CANONICAL_PRODUCT_BINDING_STALE_FAIL_CLOSED",
+              }],
+            }
+          : {}),
         riskAssertions: riskAssertionsFor(riskClasses),
       });
       const structuredGenerationIdentity = structuredVertexGenerationIdentity();
@@ -1397,6 +1413,7 @@ describe("BF-01 runner reconciliation", () => {
           initialFactIntent: "STOCK",
           factsMode: "STALE",
           expectedOwner: "HUMAN",
+          expectedCommerceProductScope: "UNAVAILABLE",
         }),
         sameCommerceCase("missing-facts", ["STALE_OR_MISSING_FACTS"], {
           customerText: "Mẫu SD398 còn hàng không?",
@@ -1449,6 +1466,104 @@ describe("BF-01 runner reconciliation", () => {
       expect(JSON.stringify(
         candidateSnapshots.get("single-repair-and-verified-fallback")?.messages,
       )).not.toMatch(/hợp size (?:M|XL)/iu);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("fails B3 state evidence when canonical product binding drifts behind unchanged LEGACY state", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(occurredAt));
+    try {
+      const harness = createHarness({
+        commerce: true,
+        liveGroundedConfig: true,
+        initialMode: "REPLY",
+        customerText: "Mẫu SD398 còn hàng không?",
+        initialReply: "Mẫu SD398 hiện còn hàng.",
+        initialFactIntent: "STOCK",
+      });
+      expect(await harness.runner.processOne()).toBe(true);
+      const commit = harness.commerceCommit.mock.calls[0]?.[0]?.runtimeCommit;
+      expect(commit).toBeDefined();
+      if (!commit) throw new Error("TRACK_B_B3_COMMIT_REQUIRED");
+      const capture = commit.contextV2CapturePlan?.capture;
+      expect(capture).toMatchObject({
+        status: "BUILT",
+        context: {
+          productBinding: { status: "RESOLVED", productIds: ["SD398"] },
+        },
+      });
+      if (capture?.status !== "BUILT" || capture.context === null) {
+        throw new Error("TRACK_B_B3_BUILT_CONTEXT_REQUIRED");
+      }
+      const { contextHash: _originalContextHash, ...contextDraft } = capture.context;
+      const driftedContextDraft = {
+        ...contextDraft,
+        productBinding: {
+          ...capture.context.productBinding,
+          status: "RESOLVED" as const,
+          productIds: ["SD399"],
+        },
+      };
+      const driftedContextHash = sha256(
+        `CONTEXT_V2\n${canonicalJsonV1(driftedContextDraft)}`,
+      );
+      const driftedCommit = {
+        ...commit,
+        contextV2CapturePlan: {
+          capture: {
+            ...capture,
+            contextHash: driftedContextHash,
+            context: {
+              ...driftedContextDraft,
+              contextHash: driftedContextHash,
+            },
+          },
+        },
+      };
+      const comparisonInput = capturedStateComparison(
+        driftedCommit,
+        harness.commerceState,
+      );
+
+      expect(comparisonInput.legacy.productId).toBe("SD398");
+      expect(comparisonInput.commerce?.productScope).toEqual({
+        kind: "SINGLE",
+        productId: "SD399",
+      });
+      expect(compareCommerceAuthority(comparisonInput)).toMatchObject({
+        status: "MISMATCH",
+        differences: expect.arrayContaining(["PRODUCT_SCOPE_MISMATCH"]),
+      });
+
+      const blockedComparisonInput = capturedStateComparison({
+        ...commit,
+        contextV2CapturePlan: {
+          capture: {
+            schemaVersion: 1,
+            contractVersion: "CONTEXT_V2_CAPTURE_V1",
+            sourceMessagePk: capture.sourceMessagePk,
+            sourceOccurredAt: capture.sourceOccurredAt,
+            status: "BLOCKED",
+            context: null,
+            contextHash: null,
+            reasonCode: "CONTEXT_V2_PRODUCT_BINDING_INVALID",
+          },
+        },
+      }, harness.commerceState);
+      const { contextV2CapturePlan: _capturePlan, ...commitWithoutCapture } = commit;
+      const absentComparisonInput = capturedStateComparison(
+        commitWithoutCapture,
+        harness.commerceState,
+      );
+      for (const unavailable of [blockedComparisonInput, absentComparisonInput]) {
+        expect(unavailable.commerce).toBeNull();
+        expect(compareCommerceAuthority(unavailable)).toMatchObject({
+          status: "COMMERCE_STATE_UNAVAILABLE",
+          differences: ["COMMERCE_STATE_UNAVAILABLE"],
+        });
+      }
     } finally {
       vi.useRealTimers();
     }
