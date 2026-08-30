@@ -1,11 +1,11 @@
 # Track B — Model Authority Execution Plan
 
-**Status:** `B2.3A_MERGED / B2.3B_SOURCE_IN_PROGRESS / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
-**Plan baseline:** `main@933a227a0ff08702e87ea697d7284d7024f74dbf`, including reviewed B2.3a head `68219fe7ea364c891b3603d1ce284f63ea8af1f9`
+**Status:** `B2.3B_MERGED / B2.3C_SOURCE_IN_PROGRESS / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
+**Plan baseline:** `main@8591ed9fa5522f9ea50259fa3bf086efddb93cc8`, including reviewed B2.3b head `05d6a83105aa336ef1f4dc07ce35ab4eb0a327ac`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Active process profile:** `SOLO_PREPROD_MINIMAL` (merged and current default; see `OPERATING_MODE.md`)
 **Environment:** `ENGINEERING_PREPROD`, one bounded `PREPROD_TEST_PAGE`
-**Authorization:** the owner messages dated 2026-08-29 and 2026-08-30 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorize Track B **source implementation only**, split B2.3a from B2.3d, and explicitly sequence a focused B2.3b PR after B2.3a. They do not authorize merge, tag/release, migration, authority/pointer mutation, deployment, routing/control-plane/VPS mutation, Messenger action, public-production promotion, or UR/State V2 work.
+**Authorization:** the owner messages dated 2026-08-29 and 2026-08-30 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorize Track B **source implementation only**, split B2.3a from B2.3d, and explicitly sequence focused B2.3b then B2.3c PRs. They do not authorize merge, tag/release, migration, authority/pointer mutation, deployment, routing/control-plane/VPS mutation, Messenger action, public-production promotion, or UR/State V2 work.
 
 ## 1. Purpose
 
@@ -298,6 +298,34 @@ validator. A fresh candidate evaluation remains the B3.1 pre-deploy dependency.
 - out-of-policy concessions cannot execute and cannot be legitimized by wording.
 
 **Verification:** allowed and denied concession boundaries; stale evidence and version; replay, id-collision and idempotency; preserved money arithmetic.
+
+**B2.3c source disposition:** COMMERCE derives one bounded internal negotiation
+proposal only from the already schema-valid `strategyAnalysis`, the exact
+source-message identity and the final protected-claim guard result. The model
+proposal carries conversational direction and guarded wording but deliberately
+accepts no protected-claim wording and carries no discount, quote, tier or
+effect field; the post-transition cart renderer supplies the exact authorized
+money and offer facts. `evaluateRealtimeSalesCycle`
+revalidates that binding, then the existing trusted inbound, policy,
+negotiation ledger, quote arithmetic, freshness, fingerprint, CAS/version and
+effect-readiness owners remain the only path to a concession or commit.
+`READY/HESITANT/CAUTIOUS` is therefore retained solely as a deterministic
+monetary-policy ledger and no longer selects COMMERCE negotiation prose. The
+accepted sales-cycle result carries its model wording authority through the
+shared post-generation finalizer, so grouping cannot re-run the legacy
+politeness deletion. The consumer also validates the exact proposal shape
+before reading any field, making malformed inputs fail closed.
+The legacy text matcher and `negotiationOfferText` remain reachable only for the
+explicit LEGACY rollback; on COMMERCE the matcher is rejection-only and cannot
+authorize strategy or an effect.
+
+The exact pre-slice r31.3 capture is pinned to
+`8591ed9fa5522f9ea50259fa3bf086efddb93cc8`. It preserves verified facts,
+protected claims, commit outcome and whole-group shape. Model wording and
+strategy are intentional differences; the protected-outbound readiness hash
+also changes because it binds the changed payload, so the comparator truthfully
+reports that non-permittable authorization-identity delta rather than masking
+it. This source evidence does not authorize B3.2 bundle/pointer activation.
 
 ---
 

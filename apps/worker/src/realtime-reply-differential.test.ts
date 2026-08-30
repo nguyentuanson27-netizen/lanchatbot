@@ -3,6 +3,7 @@ import {
   beginRealtimePostGenerationStage,
   compareRealtimeReplySnapshots,
   finalizeRealtimePostGenerationReply,
+  resolveRealtimeDeliveryWordingAuthority,
   runRealtimeReplyDifferential,
   textSimilarity,
   type RealtimeReplySnapshot,
@@ -35,6 +36,19 @@ function snapshot(
 }
 
 describe("realtime reply differential", () => {
+  it("preserves sales model wording only when runtime and sales authorities agree", () => {
+    expect(resolveRealtimeDeliveryWordingAuthority({
+      runtimeWordingAuthority: "MODEL",
+      salesHandled: true,
+      salesWordingAuthority: "MODEL",
+    })).toBe("MODEL");
+    expect(resolveRealtimeDeliveryWordingAuthority({
+      runtimeWordingAuthority: "LEGACY_DETERMINISTIC",
+      salesHandled: true,
+      salesWordingAuthority: "MODEL",
+    })).toBe("LEGACY_DETERMINISTIC");
+  });
+
   it("marks the proposal transition without changing the frozen baseline proposal", () => {
     const proposal = {
       reply: "Mẫu SV695 hiện có giá 770.000đ.",

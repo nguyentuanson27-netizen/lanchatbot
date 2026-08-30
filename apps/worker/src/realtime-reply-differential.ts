@@ -88,6 +88,18 @@ export function groupRealtimeMetaMessagesV2(
 
 export type PostGenerationWordingAuthority = "MODEL" | "LEGACY_DETERMINISTIC";
 
+export function resolveRealtimeDeliveryWordingAuthority(input: Readonly<{
+  runtimeWordingAuthority: PostGenerationWordingAuthority;
+  salesHandled: boolean;
+  salesWordingAuthority: PostGenerationWordingAuthority;
+}>): PostGenerationWordingAuthority {
+  if (!input.salesHandled) return input.runtimeWordingAuthority;
+  return input.runtimeWordingAuthority === "MODEL" &&
+      input.salesWordingAuthority === "MODEL"
+    ? "MODEL"
+    : "LEGACY_DETERMINISTIC";
+}
+
 export function postGenerationWordingAuthority(
   runtimeAuthority: "COMMERCE_SELECTED" | "LEGACY_SELECTED",
 ): PostGenerationWordingAuthority {

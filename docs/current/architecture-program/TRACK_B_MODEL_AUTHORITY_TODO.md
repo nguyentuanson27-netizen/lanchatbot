@@ -1,6 +1,6 @@
 # Track B — Execution Checklist
 
-**Status:** `B2.3A_MERGED / B2.3B_SOURCE_IN_PROGRESS`
+**Status:** `B2.3B_MERGED / B2.3C_SOURCE_IN_PROGRESS`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` and its observed request envelope stay byte-frozen; the Context V2 candidate stays offline. If that direction proves insufficient, Track B stops incomplete; it has no prompt-edit or candidate-promotion alternative.
 
@@ -108,10 +108,12 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 
 ## B2.3c — Negotiation split
 
-- [ ] Move normal objection and conversational negotiation direction to model authority.
-- [ ] Keep deterministic monetary limits, policy ceilings, arithmetic, freshness, fingerprints and CAS/version/idempotency.
-- [ ] Remove `READY/HESITANT/CAUTIOUS` progression as normal conversational authority where it still affects the active path.
-- [ ] Test allowed and denied concessions, and stale/replay cases.
+- [x] Move normal objection and conversational negotiation direction to a bounded model proposal built only after the final proposal/claim guard on COMMERCE; reject protected-claim wording at this pre-transition seam and append exact post-transition cart facts deterministically.
+- [x] Keep deterministic monetary limits, policy ceilings, arithmetic, freshness, trusted inbound identity, fingerprints and CAS/version/idempotency; the model proposal has no monetary/effect field.
+- [x] Retain `READY/HESITANT/CAUTIOUS` only as the monetary-policy ledger; it no longer selects normal COMMERCE negotiation prose. Preserve the deterministic renderer and text-authorizing classifier only on explicit LEGACY rollback; COMMERCE text matching is rejection-only.
+- [x] Test allowed and denied proposals/concessions, malformed, undeclared, out-of-scope and unbound proposals, replay/idempotency, preserved arithmetic and no-side-effect rejection.
+- [x] Exercise the live sales-cycle boundary against the immutable r31.3 capture from pre-B2.3c `8591ed9fa5522f9ea50259fa3bf086efddb93cc8`; preserve fact/claim/commit/whole-group invariants and expose the payload-bound readiness-hash delta.
+- [x] **Checkpoint:** reviewed source head `c87aa3eb3941f1fd555ba160bbc9c92661476cf7` had clean self-review, the fixed independent Sol High reviewer returned APPROVE with no Required/P0/P1/P2, and canonical repository CI run `33295354299` job `99219132217` passed all repository steps. This docs-only closure must retain those source bytes and pass its own exact-head CI before merge readiness.
 
 ## B2.3d — Size and bounded repair
 
