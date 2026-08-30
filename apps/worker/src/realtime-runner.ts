@@ -425,20 +425,6 @@ function hasSizeOnlyContinuationSignal(value: string): boolean {
     .test(text);
 }
 
-/** Deterministic inbound signal for a size-consultation turn, not model output. */
-export function hasSizeConsultationSignal(value: string): boolean {
-  if (hasCustomerMeasurementSignal(value) || hasSizeOnlyContinuationSignal(value)) {
-    return true;
-  }
-  const text = asciiFold(value);
-  return /\b(?:tu van|chon|de xuat|goi y)\s+(?:giup\s+)?(?:chi\s+)?(?:ve\s+)?(?:size|sz|co)\b/u
-    .test(text) ||
-    /\b(?:size|sz|co)\b[^.!?\n]{0,32}\b(?:nao|hop|vua|chat|rong|nen mac|nen chon)\b/u
-      .test(text) ||
-    /\b(?:hop|vua|chat|rong|nen mac|nen chon)\b[^.!?\n]{0,32}\b(?:size|sz|co)\b/u
-      .test(text);
-}
-
 function hasColorContinuationSignal(value: string): boolean {
   const text = asciiFold(value)
     .trim()
@@ -4191,9 +4177,6 @@ export class RealtimeRunner {
         businessFacts = facts;
         businessFactEnvelopes = facts === null ? [] : [facts];
         const explicitIntent = explicitCustomerBusinessIntent(message.text ?? "");
-        const deterministicSizeConsultation = hasSizeConsultationSignal(
-          message.text ?? "",
-        );
         if (facts?.status === "STALE") {
           proposal = staleFactsRequireHandoff(message.text ?? "", facts)
             ? {
@@ -4689,8 +4672,7 @@ export class RealtimeRunner {
             claims: verifiedSizeClaimForTurn ? [verifiedSizeClaimForTurn] : [],
           },
           sizeClaimTextMode:
-            authoritySelection.status === "COMMERCE_SELECTED" &&
-              deterministicSizeConsultation
+            authoritySelection.status === "COMMERCE_SELECTED"
               ? "STRUCTURED_REJECT_ONLY"
               : "LEGACY_SEMANTIC",
           now,

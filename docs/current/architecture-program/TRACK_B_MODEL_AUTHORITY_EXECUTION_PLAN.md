@@ -345,7 +345,10 @@ The B2.3d source branch now supplies that closure candidate: COMMERCE no longer
 receives deterministic size prose or an automatically declared size claim; an
 exact typed Size Engine claim must be declared by the bounded model proposal or
 its single repair, and the final whole-group authorizer validates `SIZE_FIT`
-alongside the other protected claims. The prose detector remains reject-only.
+alongside the other protected claims. Every COMMERCE proposal uses the
+conservative size-token fence independent of inbound or model intent; the
+prose detector remains reject-only and explicit LEGACY rollback retains its
+prior semantic exemptions.
 This is **source evidence only** pending independent review and exact-head CI;
 it is not deployment or operational-acceptance evidence, so the deployed
 `program-state.json` BF-04 disposition remains unchanged.

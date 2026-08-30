@@ -801,7 +801,7 @@ function unresolvedTerminalNoReplyEvents<TState, TSalesState>(
 }
 
 describe("BF-01 runner reconciliation", () => {
-  it("runs B2.3a r31.3 differential against the captured pre-B2.3a exact-head snapshot", async () => {
+  it("retains B2.3a claim containment while exposing the later B2.3d safe-fallback delta", async () => {
     const capturedInput = {
       customerText: "Mẫu SD398 giá bao nhiêu, có size M hay L?",
       modelReply:
@@ -869,12 +869,19 @@ describe("BF-01 runner reconciliation", () => {
         candidateSnapshots.push(snapshot);
         return snapshot;
       },
-      permittedDifferences: [],
+      permittedDifferences: [{
+        code: "OUTBOUND_MESSAGES_CHANGED",
+        reasonCode: "B2_3D_UNDECLARED_SIZE_SAFE_FALLBACK",
+      }],
     });
 
-    expect(result.differences).toEqual([]);
+    expect(result.differences.map(({ code }) => code)).toEqual([
+      "OUTBOUND_MESSAGES_CHANGED",
+      "PROTECTED_CLAIMS_CHANGED",
+      "EFFECT_AUTHORIZATION_CHANGED",
+    ]);
     expect(result).toMatchObject({
-      status: "MATCH",
+      status: "VIOLATION",
       sideEffects: "DISABLED",
     });
     const candidateSnapshot = candidateSnapshots[0];
@@ -891,8 +898,6 @@ describe("BF-01 runner reconciliation", () => {
     });
     expect(candidateSnapshot).toMatchObject({
       verifiedFactHashes: preB23aBaseline.verifiedFactHashes,
-      protectedClaimHashes: preB23aBaseline.protectedClaimHashes,
-      effectAuthorizationHashes: preB23aBaseline.effectAuthorizationHashes,
       commitOutcome: "COMMITTED",
       inboxOutcome: "COMMITTED",
       protectedOutbound: {
@@ -902,6 +907,13 @@ describe("BF-01 runner reconciliation", () => {
         deliveredMessageCount: preB23aBaseline.protectedOutbound.deliveredMessageCount,
       },
     });
+    expect(candidateSnapshot.messages).toEqual([{
+      kind: "TEXT",
+      text: "Em đã tìm thấy mẫu SD398. Chị muốn xem giá, size, tình trạng hàng hay thời gian giao dự kiến?",
+    }]);
+    expect(candidateSnapshot.protectedClaimHashes).toEqual(expect.arrayContaining(
+      [...preB23aBaseline.protectedClaimHashes],
+    ));
     expect(candidateSnapshot.protectedOutbound.plannedMessageCount).toBeGreaterThan(0);
     expect(candidateSnapshot.protectedOutbound.deliveredMessageCount).toBe(
       candidateSnapshot.protectedOutbound.plannedMessageCount,
@@ -1051,14 +1063,19 @@ describe("BF-01 runner reconciliation", () => {
     }
   });
 
-  it("fails closed from deterministic size-consult evidence when profile and model intent are missing", async () => {
+  it.each([
+    "Căn cứ số đo, chị size L nhé?",
+    "Căn cứ số đo, em tư vấn chị size L nhé?",
+    "Với số đo này thì em tư vấn size L nhé?",
+    "Xét số đo của chị, size L nhé?",
+  ])("fails closed on COMMERCE size semantics independent of inbound/model intent: %s", async (modelReply) => {
     const harness = createHarness({
       commerce: true,
       sizeFixture: false,
       initialMode: "REPLY",
-      customerText: "Tư vấn size cho chị mẫu SD398",
-      initialReply: "Theo số đo chị size L?",
-      initialFactIntent: "NONE",
+      customerText: "Mẫu SD398 giá bao nhiêu?",
+      initialReply: modelReply,
+      initialFactIntent: "PRICE",
     });
 
     expect(await harness.runner.processOne()).toBe(true);
