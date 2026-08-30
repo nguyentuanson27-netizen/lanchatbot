@@ -22,6 +22,23 @@ import {
 import { createDf13FirstPreprodOperationProof } from "./df13-first-preprod-behavior-writer.js";
 import { prepareDf13ReleaseCandidateEvidence, type Df13ReleaseCandidateSourceReader } from "./df13-release-candidate-evidence.js";
 
+const validateReleaseEvidence = vi.hoisted(() => vi.fn(() => ({
+  status: "MATCHED" as const,
+  reasonCodes: [] as const,
+})));
+
+// This unit suite exercises preparation after evidence admission. The real
+// evidence seam remains fail-closed for the stale Track B candidate identity.
+vi.mock("./df13-release-candidate-evidence.js", async (importOriginal) => {
+  const actual = await importOriginal<
+    typeof import("./df13-release-candidate-evidence.js")
+  >();
+  return {
+    ...actual,
+    validateDf13ReleaseCandidateEvidence: validateReleaseEvidence,
+  };
+});
+
 const revision = "a".repeat(40);
 const root = fileURLToPath(new URL("../../..", import.meta.url));
 const pageId = "1198992073286645";

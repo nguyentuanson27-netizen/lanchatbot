@@ -250,7 +250,7 @@ describe("r32.2 Compatibility First regression shield", () => {
     expect(applyWave2ReplyPolicy(handoff, committed)).toEqual(handoff);
   });
 
-  it("keeps deterministic buying intent stronger than model disagreement", () => {
+  it("records the reviewed B2.3b less-aggressive conflict delta", () => {
     expect(resolveHybridBuyingSignal(
       "chốt mẫu này",
       { hasProductContext: true },
@@ -262,9 +262,13 @@ describe("r32.2 Compatibility First regression shield", () => {
         confidence: 0.99,
       },
     )).toMatchObject({
-      isBuyingSignal: true,
-      decision: "COMMITTED",
-      source: "DETERMINISTIC",
+      isBuyingSignal: false,
+      decision: "NEGATED",
+      source: "MODEL_STRUCTURED_OUTPUT",
+      reasons: [
+        "MODEL_BUYING_NEGATED",
+        "MODEL_DETERMINISTIC_CONFLICT_LESS_AGGRESSIVE",
+      ],
     });
     expect(resolveHybridBuyingSignal(
       "mẫu này giá bao nhiêu?",

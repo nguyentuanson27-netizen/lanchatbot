@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import {
   CanonicalBuyingIntentV1Schema,
   CanonicalDialogueEvidenceV1Schema,
+  DECISION_DIALOGUE_EVIDENCE_CODES_V1,
   canonicalJsonV1,
   type AgentBuyingIntentV1,
   type CanonicalBuyingIntentV1,
@@ -28,6 +29,7 @@ function sha256(value: string): string {
 }
 
 const canonicalJson = canonicalJsonV1;
+const observableDialogueCodes = new Set<string>(DECISION_DIALOGUE_EVIDENCE_CODES_V1);
 
 function explicitQuantity(text: string): number | null {
   const folded = foldVietnameseForRecall(text)
@@ -196,9 +198,9 @@ export function buildCanonicalDecisionEvidenceV1(
       normalizedTextHash,
       act,
       dialogueContributors,
-      reasonCodes,
+      reasonCodes.filter((code) => observableDialogueCodes.has(code)),
     ])),
-    reasonCodes,
+    reasonCodes: reasonCodes.filter((code) => observableDialogueCodes.has(code)),
     authorization: "NONE",
   });
   return { dialogueEvidence, buyingIntent };

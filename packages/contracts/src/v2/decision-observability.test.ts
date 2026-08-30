@@ -77,6 +77,32 @@ describe("DecisionObservabilityV1Schema", () => {
       .toEqual(validObservability);
   });
 
+  it("keeps B2.3b conflict provenance in buying intent without widening the deployed dialogue view", () => {
+    expect(DecisionObservabilityV1Schema.parse({
+      ...validObservability,
+      buyingIntent: {
+        ...validObservability.buyingIntent,
+        decision: "NEGATED",
+        requestedAction: "NONE",
+        quantity: null,
+        evidenceReasonCodes: [
+          "MODEL_BUYING_NEGATED",
+          "MODEL_DETERMINISTIC_CONFLICT_LESS_AGGRESSIVE",
+        ],
+      },
+    }).buyingIntent.evidenceReasonCodes).toEqual([
+      "MODEL_BUYING_NEGATED",
+      "MODEL_DETERMINISTIC_CONFLICT_LESS_AGGRESSIVE",
+    ]);
+    expect(() => DecisionObservabilityV1Schema.parse({
+      ...validObservability,
+      dialogueEvidence: {
+        ...validObservability.dialogueEvidence,
+        codes: ["MODEL_DETERMINISTIC_CONFLICT_LESS_AGGRESSIVE"],
+      },
+    })).toThrow();
+  });
+
   it("rejects raw customer or model text at every strict boundary", () => {
     expect(() => DecisionObservabilityV1Schema.parse({
       ...validObservability,

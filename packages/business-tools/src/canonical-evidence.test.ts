@@ -96,6 +96,10 @@ describe("DF05 canonical decision evidence", () => {
       reasonCodes: ["DIRECT_PURCHASE_VERB", "MODEL_BUYING_COMMITTED"],
       authorization: "NONE",
     });
+    expect(result.dialogueEvidence.reasonCodes).toEqual([
+      "DIRECT_PURCHASE_VERB",
+      "MODEL_BUYING_COMMITTED",
+    ]);
   });
 
   it.each([
@@ -128,6 +132,9 @@ describe("DF05 canonical decision evidence", () => {
       authorization: "NONE",
       reasonCodes: expect.arrayContaining(["MODEL_REQUEST_EVIDENCE_MISMATCH"]),
     });
+    expect(result.dialogueEvidence.reasonCodes).not.toContain(
+      "MODEL_REQUEST_EVIDENCE_MISMATCH",
+    );
   });
 
   it("fails closed to a less aggressive decision when model and deterministic intent conflict", () => {
@@ -155,6 +162,7 @@ describe("DF05 canonical decision evidence", () => {
       reasonCodes: ["MODEL_BUYING_NEGATED", "MODEL_DETERMINISTIC_CONFLICT_LESS_AGGRESSIVE"],
       authorization: "NONE",
     });
+    expect(result.dialogueEvidence.reasonCodes).toEqual([]);
   });
 
   it("keeps an unresolved committed request observable but unscoped", () => {

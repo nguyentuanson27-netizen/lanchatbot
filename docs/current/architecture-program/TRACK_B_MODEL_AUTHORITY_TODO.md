@@ -103,6 +103,7 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 - [x] Preserve atomic state and effect-intent behavior; no new persistence, commit or side-effect port is introduced.
 - [x] Record the renderer disposition: exact transaction/effect facts, policy denials and minimal safe confirmations stay deterministic; negotiation prose remains deferred to B2.3c and is not changed by this focused slice.
 - [x] Exercise exact action and quantity-evidence mismatch, model-only authorization, adversarial resealed cart-open/ADD/SET quantity mismatch at the database transaction boundary, positive corroborated mutation, duplicate/stale/CAS/idempotency/transaction invariants and side-effect-free r31.3 live-sales-cycle replays pinned to pre-B2.3b `933a227a0ff08702e87ea697d7284d7024f74dbf`.
+- [x] Keep B2.3b conflict/mismatch codes in canonical buying-intent provenance without widening the migration-frozen dialogue/admin allowlist; assert the historical Gate-E identity fails closed for changed Track B source pending B3.1 re-evaluation.
 - [ ] **Checkpoint:** exact B2.3b head has clean self-review, one fixed independent Sol High reviewer verdict, and canonical repository CI PASS.
 
 ## B2.3c — Negotiation split

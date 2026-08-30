@@ -274,6 +274,15 @@ non-permittable authorization/claim/commit deltas; the positive SET case
 preserves wording, facts, claims, commit and whole-group delivery while exposing
 the expected new effect-authorization identity. These are source-only safety
 changes and do not authorize the B3.2 bundle/pointer mutation.
+The four B2.3b model conflict/mismatch codes remain canonical buying-intent
+provenance only. They are deliberately not added to the dialogue-evidence
+registry because deployed admin views 0032/0033 carry the frozen dialogue
+allowlist and this source slice neither rewrites an applied migration nor adds a
+new migration. The historical Gate-E binding is likewise left immutable: real
+release-evidence and cutover integration tests now assert that changed Track B
+source fails closed with `DF13_GATE_E_CANDIDATE_FINGERPRINT_MISMATCH`; downstream
+startup/preparer unit tests isolate post-admission behavior with a mocked
+validator. A fresh candidate evaluation remains the B3.1 pre-deploy dependency.
 
 ---
 

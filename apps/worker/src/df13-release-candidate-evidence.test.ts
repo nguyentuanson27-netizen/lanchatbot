@@ -56,12 +56,12 @@ function withEvidenceHash(
 }
 
 describe("DF13 release-candidate source evidence", () => {
-  it("re-derives the exact Gate E projection without claiming runtime activation", async () => {
+  it("fails closed when Track B source no longer matches the historical Gate E candidate", async () => {
     const evidence = await exactSourceEvidence();
 
     expect(evidence).toMatchObject({
       contractVersion: "DF13_RELEASE_CANDIDATE_EVIDENCE_V1",
-      status: "SOURCE_READY_NO_ACTIVATION",
+      status: "BLOCKED",
       sideEffects: "NOT_EXECUTED",
       activationReleaseRevision,
       releaseSource: {
@@ -77,7 +77,9 @@ describe("DF13 release-candidate source evidence", () => {
       },
       candidateProjection: {
         candidateSourceRevision: activationReleaseRevision,
-        contentFingerprint: GATE_E_PREPROD_V15_BINDING.candidateContentFingerprint,
+        contentFingerprint: expect.not.stringMatching(
+          GATE_E_PREPROD_V15_BINDING.candidateContentFingerprint,
+        ),
       },
       rollback: {
         contractVersion: "DF13_COMPLETE_LEGACY_ROLLBACK_EVIDENCE_V1",
@@ -103,7 +105,9 @@ describe("DF13 release-candidate source evidence", () => {
         ],
       },
     });
-    expect(evidence.reasonCodes).toEqual([]);
+    expect(evidence.reasonCodes).toEqual([
+      "DF13_GATE_E_CANDIDATE_FINGERPRINT_MISMATCH",
+    ]);
     expect(evidence.fieldComparisons.every(({ matches }) => matches)).toBe(true);
     expect(evidence.evidenceHash).toMatch(/^[a-f0-9]{64}$/u);
   });
@@ -161,7 +165,10 @@ describe("DF13 release-candidate source evidence", () => {
     })).resolves.toMatchObject({
       status: "BLOCKED",
       sideEffects: "NOT_EXECUTED",
-      reasonCodes: ["DF13_TRUSTED_RELEASE_REF_CHANGED"],
+      reasonCodes: [
+        "DF13_GATE_E_CANDIDATE_FINGERPRINT_MISMATCH",
+        "DF13_TRUSTED_RELEASE_REF_CHANGED",
+      ],
     });
   });
 
@@ -201,6 +208,7 @@ describe("DF13 release-candidate source evidence", () => {
       sideEffects: "NOT_EXECUTED",
       reasonCodes: [
         "DF13_GATE_E_MANIFEST_IDENTITY_MISMATCH",
+        "DF13_GATE_E_CANDIDATE_FINGERPRINT_MISMATCH",
         "DF13_GATE_E_MANIFEST_FIELD_MISMATCH",
       ],
     });
@@ -225,7 +233,10 @@ describe("DF13 release-candidate source evidence", () => {
     })).resolves.toMatchObject({
       status: "BLOCKED",
       sideEffects: "NOT_EXECUTED",
-      reasonCodes: ["DF13_GATE_E_MANIFEST_IDENTITY_MISMATCH"],
+      reasonCodes: [
+        "DF13_GATE_E_MANIFEST_IDENTITY_MISMATCH",
+        "DF13_GATE_E_CANDIDATE_FINGERPRINT_MISMATCH",
+      ],
     });
   });
 

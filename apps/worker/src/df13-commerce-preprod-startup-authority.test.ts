@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
 import {
   createDf13CommercePreprodStartupAuthority,
@@ -13,6 +13,23 @@ import {
   type Df13ReleaseCandidateSourceReader,
 } from "./df13-release-candidate-evidence.js";
 import { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
+
+const validateReleaseEvidence = vi.hoisted(() => vi.fn(() => ({
+  status: "MATCHED" as const,
+  reasonCodes: [] as const,
+})));
+
+// This unit suite isolates startup-package admission. The real evidence seam
+// separately asserts that the changed Track B source fails closed as stale.
+vi.mock("./df13-release-candidate-evidence.js", async (importOriginal) => {
+  const actual = await importOriginal<
+    typeof import("./df13-release-candidate-evidence.js")
+  >();
+  return {
+    ...actual,
+    validateDf13ReleaseCandidateEvidence: validateReleaseEvidence,
+  };
+});
 
 const revision = "a".repeat(40);
 const root = fileURLToPath(new URL("../../..", import.meta.url));
