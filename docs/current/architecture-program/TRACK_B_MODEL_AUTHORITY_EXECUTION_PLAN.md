@@ -311,7 +311,11 @@ negotiation ledger, quote arithmetic, freshness, fingerprint, CAS/version and
 effect-readiness owners remain the only path to a concession or commit.
 `READY/HESITANT/CAUTIOUS` is therefore retained solely as a deterministic
 monetary-policy ledger and no longer selects COMMERCE negotiation prose. The
-legacy text matcher and `negotiationOfferText` remain reachable only for the
+accepted sales-cycle result carries its model wording authority through the
+shared post-generation finalizer, so grouping cannot re-run the legacy
+politeness deletion. The consumer also validates the exact proposal shape
+before reading any field, making malformed inputs fail closed.
+The legacy text matcher and `negotiationOfferText` remain reachable only for the
 explicit LEGACY rollback; on COMMERCE the matcher is rejection-only and cannot
 authorize strategy or an effect.
 

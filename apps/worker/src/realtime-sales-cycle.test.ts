@@ -20,8 +20,11 @@ import {
   evaluateRealtimeSalesCycle,
   buildGuardedModelNegotiationProposalV1,
   prepareHandoffStatePlanV1,
+  type ModelNegotiationProposalV1,
 } from "./realtime-sales-cycle.js";
 import {
+  finalizeRealtimePostGenerationReply,
+  resolveRealtimeDeliveryWordingAuthority,
   runRealtimeReplyDifferential,
   type RealtimeReplySnapshot,
 } from "./realtime-reply-differential.js";
@@ -1728,6 +1731,7 @@ describe("realtime Phase 3 sales cycle", () => {
 
     expect(output).toMatchObject({
       handled: true,
+      wordingAuthority: "MODEL",
       transferToHuman: false,
       plan: { state: { negotiation: { customerState: "HESITANT" } } },
     });
@@ -1885,6 +1889,13 @@ describe("realtime Phase 3 sales cycle", () => {
       name: "unbound provenance",
       proposal: priceNegotiationProposal("different-message-id"),
     },
+    {
+      name: "malformed wording",
+      proposal: {
+        ...priceNegotiationProposal("mid-model-negotiation-rejected"),
+        wording: null,
+      },
+    },
   ])("fails closed with no negotiation side effect for $name COMMERCE proposals", async ({ name, proposal }) => {
     const opened = await evaluateRealtimeSalesCycle(input(
       createRealtimeSalesState(conversationId, pageId, now),
@@ -1899,7 +1910,7 @@ describe("realtime Phase 3 sales cycle", () => {
     const output = await evaluateRealtimeSalesCycle({
       ...currentInput,
       behaviorModeResolution: behaviorResolution("LEGACY", "COMMERCE"),
-      negotiationProposal: proposal,
+      negotiationProposal: proposal as ModelNegotiationProposalV1 | null,
     });
 
     expect(output.handled).toBe(true);
@@ -1986,11 +1997,24 @@ describe("realtime Phase 3 sales cycle", () => {
           behaviorModeResolution: behaviorResolution("LEGACY", "COMMERCE"),
           negotiationProposal: priceNegotiationProposal(
             currentInput.messageId,
-            "Em hiểu mình đang cân nhắc ngân sách; em kiểm tra mức hỗ trợ phù hợp nhé.",
+            "Em hiểu ạ. Em kiểm tra mức hỗ trợ phù hợp nhé ạ.",
           ),
         });
+        const delivered = finalizeRealtimePostGenerationReply({
+          mode: "GROUP_V2",
+          messages: output.messages,
+          wordingAuthority: resolveRealtimeDeliveryWordingAuthority({
+            runtimeWordingAuthority: "MODEL",
+            salesHandled: output.handled,
+            salesWordingAuthority:
+              output.wordingAuthority ?? "LEGACY_DETERMINISTIC",
+          }),
+        });
         const snapshot = {
-          ...salesCycleSnapshot(output, capture.objectionEventKey),
+          ...salesCycleSnapshot(
+            { ...output, messages: delivered.messages },
+            capture.objectionEventKey,
+          ),
           strategyHash: "MODEL_STRATEGY_ANSWER_OBJECTION",
         };
         candidates.push(snapshot);
@@ -2010,6 +2034,7 @@ describe("realtime Phase 3 sales cycle", () => {
       "EFFECT_AUTHORIZATION_CHANGED",
     ]);
     expect(candidates[0]).toMatchObject({
+      messages: [{ text: expect.stringContaining("Em hiểu ạ. Em kiểm tra mức hỗ trợ phù hợp nhé ạ.") }],
       verifiedFactHashes: baseline.verifiedFactHashes,
       protectedClaimHashes: baseline.protectedClaimHashes,
       commitOutcome: baseline.commitOutcome,

@@ -169,6 +169,8 @@ export function buildGuardedModelNegotiationProposalV1(input: Readonly<{
 
 export interface RealtimeSalesCycleOutput {
   readonly handled: boolean;
+  /** Final delivery may preserve model wording only for an accepted proposal. */
+  readonly wordingAuthority?: "MODEL" | "LEGACY_DETERMINISTIC";
   readonly messages: readonly (
     | { readonly kind: "TEXT"; readonly text: string }
     | { readonly kind: "IMAGE"; readonly imageUrl: string }
@@ -422,18 +424,33 @@ function acceptedModelNegotiationProposal(
   input: RealtimeSalesCycleInput,
 ): ModelNegotiationProposalV1 | null {
   if (input.behaviorModeResolution?.salesAuthorityMode !== "COMMERCE") return null;
-  const proposal = input.negotiationProposal;
+  const candidate: unknown = input.negotiationProposal;
+  if (typeof candidate !== "object" || candidate === null || Array.isArray(candidate)) {
+    return null;
+  }
+  const record = candidate as Record<string, unknown>;
+  const expectedKeys = [
+    "contractVersion",
+    "decision",
+    "guardEvidence",
+    "protectedClaims",
+    "sourceMessageId",
+    "strategyAnalysis",
+    "wording",
+  ];
   if (
-    proposal === null || proposal === undefined ||
-    proposal.contractVersion !== "MODEL_NEGOTIATION_PROPOSAL_V1" ||
-    proposal.decision !== "ANSWER_PRICE_OBJECTION" ||
-    proposal.guardEvidence !== "VERIFIED_PROPOSAL_GUARD" ||
-    proposal.protectedClaims !== "NONE" ||
-    proposal.sourceMessageId !== input.messageId ||
-    proposal.wording.length < 1 || proposal.wording.length > 2_000 ||
-    proposal.wording !== proposal.wording.trim()
+    Object.keys(record).sort().join("\u0000") !== expectedKeys.sort().join("\u0000") ||
+    record.contractVersion !== "MODEL_NEGOTIATION_PROPOSAL_V1" ||
+    record.decision !== "ANSWER_PRICE_OBJECTION" ||
+    record.guardEvidence !== "VERIFIED_PROPOSAL_GUARD" ||
+    record.protectedClaims !== "NONE" ||
+    typeof record.sourceMessageId !== "string" ||
+    record.sourceMessageId !== input.messageId ||
+    typeof record.wording !== "string" ||
+    record.wording.length < 1 || record.wording.length > 2_000 ||
+    record.wording !== record.wording.trim()
   ) return null;
-  const strategy = AgentStrategyAnalysisV1Schema.safeParse(proposal.strategyAnalysis);
+  const strategy = AgentStrategyAnalysisV1Schema.safeParse(record.strategyAnalysis);
   if (
     !strategy.success ||
     strategy.data.need !== "NEED_BUDGET" ||
@@ -443,7 +460,15 @@ function acceptedModelNegotiationProposal(
     strategy.data.confidence < 0.85 ||
     !strategy.data.evidence.includes("TEXT_PRICE_OBJECTION")
   ) return null;
-  return { ...proposal, strategyAnalysis: strategy.data };
+  return {
+    contractVersion: "MODEL_NEGOTIATION_PROPOSAL_V1",
+    decision: "ANSWER_PRICE_OBJECTION",
+    guardEvidence: "VERIFIED_PROPOSAL_GUARD",
+    protectedClaims: "NONE",
+    sourceMessageId: record.sourceMessageId,
+    wording: record.wording,
+    strategyAnalysis: strategy.data,
+  };
 }
 
 function removeItem(text: string): boolean {
@@ -1830,10 +1855,13 @@ export async function evaluateRealtimeSalesCycle(
         return failedOutput("NEGOTIATION_FAILED", plan());
       }
       setCartReplayContext(state.negotiation.customerState);
-      return protectedCartReply(
+      const reply = await protectedCartReply(
         (cart) => `${modelNegotiation?.wording ?? negotiationOfferText(cart, state.negotiation!.customerState)}\n${cartSummary(cart)}`,
         { selections: readyNegotiationSelections },
       );
+      return modelNegotiation === null
+        ? reply
+        : { ...reply, wordingAuthority: "MODEL" };
     }
 
     const details = checkoutDetails(input.text, input.salesSignals);
