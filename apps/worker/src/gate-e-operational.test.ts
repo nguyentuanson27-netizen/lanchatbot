@@ -6,11 +6,57 @@ import {
   buildGateEOperationalRegistration,
   gateEDatabaseUrlForRole,
   gateEModelResource,
+  parseGateEVertexCredential,
 } from "./gate-e-operational.js";
 
 const REPOSITORY_ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 
 describe("Gate E operational boundary", () => {
+  const privateKey = "-----BEGIN PRIVATE KEY-----\ntest\n-----END PRIVATE KEY-----";
+
+  it("accepts the exact standard and Lana-managed Vertex credential shapes", () => {
+    expect(parseGateEVertexCredential({
+      type: "service_account",
+      client_email: "gate-e@example.test",
+      private_key: privateKey,
+    })).toEqual({ email: "gate-e@example.test", privateKey });
+    const managed = {
+      email: "gate-e@example.test",
+      privateKey,
+      region: "global",
+    };
+    expect(parseGateEVertexCredential(managed)).toEqual({
+      email: "gate-e@example.test",
+      privateKey,
+    });
+  });
+
+  it("rejects ambiguous or invalid credential shapes", () => {
+    const invalid: readonly unknown[] = [
+      [],
+      [{ type: "googleApi", data: {} }],
+      [{ type: "other", data: { email: "gate-e@example.test", privateKey } }],
+      [{ type: "service_account", client_email: "gate-e@example.test",
+        private_key: privateKey }],
+      { type: "other", client_email: "gate-e@example.test", private_key: privateKey },
+      { type: "googleApi", data: { email: "gate-e@example.test", privateKey } },
+      { type: "service_account", client_email: "gate-e@example.test",
+        private_key: privateKey, email: "gate-e@example.test" },
+      { email: "gate-e@example.test", privateKey, region: "global",
+        client_email: "gate-e@example.test" },
+      { email: "gate-e@example.test", privateKey },
+      { type: "service_account", client_email: "gate-e@example.test",
+        private_key: "not-a-key" },
+      [{ type: "googleApi", data: { email: "gate-e@example.test", privateKey,
+        region: "global" } }, {}],
+    ];
+    for (const credential of invalid) {
+      expect(() => parseGateEVertexCredential(credential)).toThrow(
+        "GATE_E_OPERATIONAL_CREDENTIAL_INVALID",
+      );
+    }
+  });
+
   it("parses only the exact options owned by each command", () => {
     const invocation = parseGateEOperationalInvocation([
       "score",
