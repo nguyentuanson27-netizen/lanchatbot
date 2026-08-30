@@ -461,8 +461,10 @@ commerce state comparison is built from each capture's actual commit plan or
 loaded unchanged state and is checked against an exact expected PII-safe state
 projection, so current-vs-current execution cannot hide state drift. Identity
 evidence separates the configured provider model from the deterministic fixture
-model and binds the unchanged live-path source revision, both baseline and
-size-repair prompts, generation config, policy/schema, complete business fixtures,
+model and binds the unchanged live-path source revision, baseline, grounded,
+grounded-draft, size-repair and customer-URL-explanation prompts, the accepted
+grounded-draft and verified-fact-assembler runner flags, customer-URL policy,
+generation config, policy/schema, complete business fixtures,
 case inputs, risk assertions and expected state projections. The live-path
 fixtures cover unsupported and protected claims, PII/security, unauthorized
 effects, stale and missing facts, malformed generation, the one-repair cap,
