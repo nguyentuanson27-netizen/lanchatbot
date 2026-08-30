@@ -127,18 +127,18 @@
   },
   "active": {
     "track": "POST_DF_V5_TRACK_B",
-    "nextIssue": "Track B B2.4 focused obsolete post-generation authority reachability removal",
+    "nextIssue": "Track B B3 focused live-path differential and side-effect-free replay",
     "gate": "GATE_F_PREPROD_ACCEPTED",
-    "authorization": "TRACK_B_SOURCE_IMPLEMENTATION_AUTHORIZED_NO_MERGE_DEPLOY_OR_ACTIVATION",
+    "authorization": "TRACK_B_FOCUSED_SOURCE_IMPLEMENTATION_AND_GATED_SOURCE_MERGE_AUTHORIZED_NO_DEPLOY_OR_ACTIVATION",
     "authorizationDecision": {
       "source": "CODEX_OWNER_MESSAGE",
       "sourceThreadId": "019ff0ed-3760-7e81-98f4-5e91e8ca35b0",
       "decisionAt": "2026-08-30",
-      "scope": "TRACK_B_SOURCE_IMPLEMENTATION_INCLUDING_FOCUSED_B2_4_ONLY_NO_MERGE_DEPLOY_TAG_RELEASE_MIGRATION_AUTHORITY_POINTER_ROUTING_MESSENGER_OR_PUBLIC_PRODUCTION_MUTATION"
+      "scope": "TRACK_B_FOCUSED_SOURCE_IMPLEMENTATION_AND_NORMAL_SOURCE_PR_MERGE_ONLY_AFTER_CLEAN_SELF_REVIEW_FIXED_SOL_HIGH_REVIEWER_NO_BLOCKERS_REAL_EXACT_HEAD_CANONICAL_CI_PASS_AND_REMOTE_HEAD_REVALIDATION_NO_DEPLOY_TAG_RELEASE_MIGRATION_AUTHORITY_POINTER_CAS_ROUTING_MESSENGER_OPERATIONAL_ACCEPTANCE_OR_PUBLIC_PRODUCTION_MUTATION"
     }
   },
   "future": [
-    "Anti-Bloat V5: ADOPTED as the canonical post-Gate-F sequencing baseline by V5_OWNER_ADOPTION_20260827.md; it binds PR #258 merge commit 580b0f5e1793d742be3a7eb50eaf88ee31e1e977 and reviewed plan-content blob a404f52f09234c8c35b299580e511e4e7fb5561e. Gate F is accepted; the 2026-08-29 owner message authorizes Track B source implementation only, while merge, deployment and authority mutation remain separately gated.",
+    "Anti-Bloat V5: ADOPTED as the canonical post-Gate-F sequencing baseline by V5_OWNER_ADOPTION_20260827.md; it binds PR #258 merge commit 580b0f5e1793d742be3a7eb50eaf88ee31e1e977 and reviewed plan-content blob a404f52f09234c8c35b299580e511e4e7fb5561e. Gate F is accepted; the 2026-08-29/30 owner messages authorize Track B source implementation and gated normal merge of focused source PRs, while deployment and authority mutation remain separately gated.",
     "Post-Gate-F V5: Track B model authority and Track C bounded quality learning are the default path. UR/State V2, Gate U, multi-page expansion, production hardening, traffic canaries, long soak, and destructive LEGACY cleanup are trigger-only unless separately authorized.",
     "DF-11: merged source-only (PR #238); default-off, side-effect-free authority comparison; no runtime SHADOW authority",
     "DF-12: merged source-only (PR #239); missing-commerce signal; no runtime activation",

@@ -1,11 +1,11 @@
 # Track B — Model Authority Execution Plan
 
-**Status:** `B2.3D_MERGED / B2.4_SOURCE_IN_PROGRESS / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
-**Plan baseline:** `main@a89a50cb52183a3ffc4f3d7bd313ea675564c07b`, including reviewed B2.3d head `1ec597f3d81aa208fdf7e90f17cf7ac022bd6717`
+**Status:** `B2.4_MERGED / B3_SOURCE_IN_PROGRESS / DIRECTION_SELECTED_POST_GENERATION_DEMOTION`
+**Plan baseline:** `main@c22d0a5181e1e4e67401bf00b79ce9f49cbb663d`, including reviewed B2.4 head `0221c37d239003e8c737cfc0d37962e2064dbf49`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Active process profile:** `SOLO_PREPROD_MINIMAL` (merged and current default; see `OPERATING_MODE.md`)
 **Environment:** `ENGINEERING_PREPROD`, one bounded `PREPROD_TEST_PAGE`
-**Authorization:** the owner messages dated 2026-08-29 and 2026-08-30 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorize Track B **source implementation only**, including the focused B2.4 slice after merged B2.3d. They do not authorize merge, tag/release, migration, authority/pointer mutation, deployment, routing/control-plane/VPS mutation, Messenger action, public-production promotion, or UR/State V2 work.
+**Authorization:** the owner messages dated 2026-08-29 and 2026-08-30 in Codex task `019ff0ed-3760-7e81-98f4-5e91e8ca35b0` authorize Track B **source implementation**. The latest process update also authorizes normal merge of a focused Track B source PR only after clean exact-head self-review, the PR's fixed independent Sol High reviewer returns final no-blockers/approve, canonical exact-head CI runs real repository steps and passes, and the reviewed remote head/base/mergeability are reverified. This does not authorize tag/release, migration, authority-bundle/pointer/CAS mutation, deployment, routing/control-plane/VPS mutation, Messenger action, operational acceptance, public-production promotion, or UR/State V2 work.
 
 ## 1. Purpose
 
@@ -124,9 +124,9 @@ Do not pre-build a new evidence profile, a second evaluation authority, or a red
 ## 6. Execution dependency graph
 
 ```text
-2026-08-29 owner message authorizes Track B source implementation only
+2026-08-29/30 owner messages authorize Track B source work and gated source-PR merge
         ↓
-B1  scope lock complete; independent review pending
+B1  scope lock merged
         ↓
 B2.1  post-generation seam + side-effect-free differential foundation
         ↓
@@ -442,6 +442,23 @@ Complete the reproducible adapter whose pure comparison foundation is extracted 
 - replay cannot mutate customer or runtime state or send Meta messages — `BEHAVIOR_CONTROL_PLANE.md`: *"Offline or controlled legacy/new comparison is verification tooling, not a live authority mode. It must not create protected side effects."*;
 - r31.3 differential output is produced and intentional deviations are explicit;
 - the adapter is reusable by Track C; do not build a second replay framework, and do not require the full Wave1 population before Track B finishes.
+
+**B3 source disposition:** `track-b-live-path-replay.ts` is a thin reusable
+adapter over the B2.1 reply comparator and the existing commerce-authority
+state comparator. It has no queue, delivery, persistence, provider or protected-
+effect port. Each capture records operational queue claims, customer sends,
+durable state mutations and protected effects and fails closed if any count is
+non-zero; in-memory commit plans remain comparison-only evidence. The corpus
+pins baseline capability, configured provider/model, prompt/template,
+generation config, policy/schema, behavior/authority-bundle and fact-fixture
+identities. One immutable capture from exact pre-B2.4
+`a89a50cb52183a3ffc4f3d7bd313ea675564c07b` is replayed through the current
+`RealtimeRunner`; verified facts, protected claims, effect authorization,
+commit and whole-group delivery must match rather than being reclassified as
+permitted changes. The remaining live-path fixtures cover unsupported and
+protected claims, PII/security, unauthorized effects, stale facts, malformed
+generation, the one-repair cap, verified-facts fallback and BF-04 size. This is
+source verification only; it is not Gate-E, deploy or operational evidence.
 
 ---
 
