@@ -18,6 +18,7 @@ import type { BusinessFactsReader } from "./redis-business-facts.js";
 import {
   createRealtimeSalesState,
   evaluateRealtimeSalesCycle,
+  buildGuardedModelNegotiationProposalV1,
   prepareHandoffStatePlanV1,
 } from "./realtime-sales-cycle.js";
 import {
@@ -333,10 +334,11 @@ function salesCycleSnapshot(
 
 function behaviorResolution(
   confirmationMode: RuntimeBehaviorModeResolution["confirmationMode"],
+  salesAuthorityMode: RuntimeBehaviorModeResolution["salesAuthorityMode"] = "LEGACY",
 ): RuntimeBehaviorModeResolution {
   return {
     confirmationMode,
-    salesAuthorityMode: "LEGACY",
+    salesAuthorityMode,
     stateReadMode: "LEGACY",
     authorityBundleHash: null,
     modeVersionId: "30000000-0000-4000-8000-000000000001",
@@ -351,6 +353,27 @@ function behaviorResolution(
     auditWrite: "RECORDED",
     authorityProvenance: "LEGACY_POINTER",
   };
+}
+
+function priceNegotiationProposal(
+  sourceMessageId: string,
+  wording = "Em hiểu mình đang cân nhắc ngân sách; em kiểm tra mức hỗ trợ phù hợp nhé.",
+) {
+  return buildGuardedModelNegotiationProposalV1({
+    sourceMessageId,
+    wordingUnits: [wording],
+    action: "REPLY",
+    guardReasonCodes: [],
+    protectedClaimTypes: [],
+    strategyAnalysis: {
+      need: "NEED_BUDGET" as const,
+      barrier: "BARRIER_PRICE" as const,
+      decisionFactor: "BUDGET" as const,
+      recommendedStrategy: "STRATEGY_ANSWER_OBJECTION" as const,
+      confidence: 0.99,
+      evidence: ["TEXT_PRICE_OBJECTION" as const],
+    },
+  })!;
 }
 
 async function previewState(eventPrefix: string) {
@@ -1682,6 +1705,316 @@ describe("realtime Phase 3 sales cycle", () => {
     });
     expect(cautious.messages[0]).toMatchObject({ text: expect.stringContaining("giảm thêm 20.000đ") });
     expect(cautious.messages[0]).not.toMatchObject({ text: expect.stringContaining("20k") });
+  });
+
+  it("lets a guarded model proposal own price-objection direction and wording on COMMERCE", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "model-negotiation-open",
+    ));
+    const eventKey = "model-negotiation-objection";
+    const currentInput = input(
+      opened.plan!.state,
+      "Ngân sách của chị đang hơi căng",
+      eventKey,
+    );
+    const wording = "Em hiểu mình đang cân nhắc ngân sách; em kiểm tra mức hỗ trợ phù hợp nhé.";
+    const output = await evaluateRealtimeSalesCycle({
+      ...currentInput,
+      behaviorModeResolution: behaviorResolution("LEGACY", "COMMERCE"),
+      negotiationProposal: priceNegotiationProposal(currentInput.messageId, wording),
+    });
+
+    expect(output).toMatchObject({
+      handled: true,
+      transferToHuman: false,
+      plan: { state: { negotiation: { customerState: "HESITANT" } } },
+    });
+    expect(output.messages[0]).toMatchObject({
+      kind: "TEXT",
+      text: expect.stringMatching(new RegExp(`^${wording}`)),
+    });
+    expect(output.plan?.state.cart?.value.adjustments).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: "FREE_SHIPPING", amountVnd: 30_000 }),
+    ]));
+    expect(priceNegotiationProposal(currentInput.messageId)).not.toHaveProperty("discount");
+  });
+
+  it("does not create a negotiation proposal when deterministic claim guarding rejects wording", () => {
+    const strategyAnalysis = priceNegotiationProposal("unused").strategyAnalysis;
+    expect(buildGuardedModelNegotiationProposalV1({
+      sourceMessageId: "mid-rejected-price-claim",
+      wordingUnits: ["Em giảm 90% cho chị."],
+      action: "REPLY",
+      guardReasonCodes: ["PRICE_CLAIM_VALUE_MISMATCH"],
+      protectedClaimTypes: ["PRICE"],
+      strategyAnalysis,
+    })).toBeNull();
+    expect(buildGuardedModelNegotiationProposalV1({
+      sourceMessageId: "mid-verified-price-claim",
+      wordingUnits: ["Giá hiện tại là 699.000đ."],
+      action: "REPLY",
+      guardReasonCodes: [],
+      protectedClaimTypes: ["PRICE"],
+      strategyAnalysis,
+    })).toBeNull();
+  });
+
+  it("keeps model-directed negotiation replay idempotent without a second concession", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "model-negotiation-replay-open",
+    ));
+    const firstInput = input(
+      opened.plan!.state,
+      "Ngân sách của chị đang hơi căng",
+      "model-negotiation-replay-first",
+    );
+    const first = await evaluateRealtimeSalesCycle({
+      ...firstInput,
+      behaviorModeResolution: behaviorResolution("LEGACY", "COMMERCE"),
+      negotiationProposal: priceNegotiationProposal(firstInput.messageId),
+    });
+    const retryInput = {
+      ...input(
+        first.plan!.state,
+        firstInput.text,
+        "model-negotiation-replay-retry",
+      ),
+      messageId: firstInput.messageId,
+    };
+    const retry = await evaluateRealtimeSalesCycle({
+      ...retryInput,
+      behaviorModeResolution: behaviorResolution("LEGACY", "COMMERCE"),
+      negotiationProposal: priceNegotiationProposal(retryInput.messageId),
+    });
+
+    expect(retry).toMatchObject({
+      handled: true,
+      messages: [],
+      plan: null,
+      reasonCode: "NEGOTIATION_REPLAY_IGNORED",
+    });
+    expect(first.plan!.state.negotiation?.customerState).toBe("HESITANT");
+    expect(first.plan!.state.cart?.value.discountTotalVnd).toBe(30_000);
+  });
+
+  it("rejects model-directed negotiation when trusted inbound provenance is stale", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "model-negotiation-stale-open",
+    ));
+    const currentInput = {
+      ...input(
+        opened.plan!.state,
+        "Ngân sách của chị đang hơi căng",
+        "model-negotiation-stale",
+      ),
+      occurredAt: "2026-07-23T02:59:59.000Z",
+    };
+    const output = await evaluateRealtimeSalesCycle({
+      ...currentInput,
+      behaviorModeResolution: behaviorResolution("LEGACY", "COMMERCE"),
+      negotiationProposal: priceNegotiationProposal(currentInput.messageId),
+    });
+
+    expect(output).toMatchObject({
+      handled: true,
+      messages: [],
+      plan: null,
+      reasonCode: "NEGOTIATION_FAILED",
+    });
+    expect(opened.plan!.state.negotiation?.customerState).toBe("READY");
+    expect(opened.plan!.state.cart?.value.discountTotalVnd).toBe(0);
+  });
+
+  it("does not let model wording execute a concession denied by current policy", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "model-negotiation-policy-open",
+    ));
+    const currentInput = input(
+      opened.plan!.state,
+      "Ngân sách của chị đang hơi căng",
+      "model-negotiation-policy-denied",
+    );
+    const deniedPolicyResolution = {
+      ...policyResolution,
+      bundle: {
+        ...policyResolution.bundle!,
+        policy: { ...policyResolution.bundle!.policy, status: "INACTIVE" as const },
+      },
+    } as unknown as RuntimePolicyResolution;
+    const output = await evaluateRealtimeSalesCycle({
+      ...currentInput,
+      policyResolution: deniedPolicyResolution,
+      behaviorModeResolution: behaviorResolution("LEGACY", "COMMERCE"),
+      negotiationProposal: priceNegotiationProposal(currentInput.messageId),
+    });
+
+    expect(output).toMatchObject({
+      handled: true,
+      messages: [],
+      plan: null,
+      reasonCode: "NEGOTIATION_FAILED",
+    });
+    expect(opened.plan!.state.negotiation?.customerState).toBe("READY");
+    expect(opened.plan!.state.cart?.value.discountTotalVnd).toBe(0);
+  });
+
+  it.each([
+    {
+      name: "undeclared",
+      proposal: null,
+    },
+    {
+      name: "out-of-scope strategy",
+      proposal: {
+        ...priceNegotiationProposal("mid-model-negotiation-rejected"),
+        strategyAnalysis: {
+          ...priceNegotiationProposal("unused").strategyAnalysis,
+          barrier: "BARRIER_FIT" as const,
+        },
+      },
+    },
+    {
+      name: "unbound provenance",
+      proposal: priceNegotiationProposal("different-message-id"),
+    },
+  ])("fails closed with no negotiation side effect for $name COMMERCE proposals", async ({ name, proposal }) => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      `model-negotiation-${name}-open`,
+    ));
+    const currentInput = input(
+      opened.plan!.state,
+      "đắt quá",
+      "model-negotiation-rejected",
+    );
+    const output = await evaluateRealtimeSalesCycle({
+      ...currentInput,
+      behaviorModeResolution: behaviorResolution("LEGACY", "COMMERCE"),
+      negotiationProposal: proposal,
+    });
+
+    expect(output.handled).toBe(true);
+    expect(output.plan).toBeNull();
+    expect(output.messages).toEqual([]);
+    expect(output.reasonCode).toBe("MODEL_NEGOTIATION_PROPOSAL_REJECTED");
+    expect(opened.plan!.state.negotiation?.customerState).toBe("READY");
+    expect(opened.plan!.state.cart?.value.discountTotalVnd).toBe(0);
+  });
+
+  it("keeps the legacy regex rollback path isolated from COMMERCE", async () => {
+    const opened = await evaluateRealtimeSalesCycle(input(
+      createRealtimeSalesState(conversationId, pageId, now),
+      "chốt CB182 size M",
+      "legacy-negotiation-open",
+    ));
+    const output = await evaluateRealtimeSalesCycle({
+      ...input(opened.plan!.state, "đắt quá, bớt giá giúp chị", "legacy-negotiation"),
+      behaviorModeResolution: behaviorResolution("LEGACY", "LEGACY"),
+    });
+
+    expect(output).toMatchObject({
+      handled: true,
+      plan: { state: { negotiation: { customerState: "HESITANT" } } },
+    });
+    expect(output.messages[0]).toMatchObject({
+      text: expect.stringContaining("Em hỗ trợ freeship cho giỏ này."),
+    });
+  });
+
+  it("r31.3 characterizes B2.3c against the immutable pre-head negotiation capture", async () => {
+    // Immutable capture from exact pre-B2.3c source at
+    // 8591ed9fa5522f9ea50259fa3bf086efddb93cc8.
+    const baseline: RealtimeReplySnapshot = {
+      messages: [{
+        kind: "TEXT",
+        text: "Em hỗ trợ freeship cho giỏ này.\nCB182 size M ×1: 699.000đ\nTạm tính: 699.000đ\nƯu đãi: -30.000đ\nPhí ship: Freeship\nTổng: 699.000đ",
+      }],
+      strategyHash: null,
+      verifiedFactHashes: [
+        "107bb35375d5b6d050ff7c5008303aa1c53102647d28edc5432df57fa030f747",
+        "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b",
+      ],
+      verifiedMediaUrls: [],
+      protectedClaimHashes: [
+        "e91f4c6407e0c3571df99c21976020751adf98391be0bc04f40e8457bd320ce9",
+        "ebe9db09b0eaa16dbf24314f6be557f0762984564de5937db0d0d15f8048efcc",
+      ],
+      effectAuthorizationHashes: [
+        "0189ec7c3a126f18244379ef1762384b624c8767738549b7ef3dcf8d7cbe5aee",
+        "d763d78bf7095f66c3bfc12fa794886e457f17ea4ed7c95a745c966550fee2d4",
+      ],
+      commitOutcome: "COMMITTABLE",
+      generationOutcome: "VALID",
+      inboxOutcome: "COMMITTED",
+      protectedOutbound: {
+        required: true,
+        groupId: "sales-cycle:b23c-capture-objection",
+        plannedMessageCount: 1,
+        deliveredMessageCount: 1,
+      },
+    };
+    const candidates: RealtimeReplySnapshot[] = [];
+    const result = await runRealtimeReplyDifferential({
+      capturedInput: {
+        openEventKey: "b23c-capture-open",
+        objectionEventKey: "b23c-capture-objection",
+        text: "đắt quá",
+      },
+      baseline: async () => baseline,
+      candidate: async (capture) => {
+        const opened = await evaluateRealtimeSalesCycle(input(
+          createRealtimeSalesState(conversationId, pageId, now),
+          "chốt CB182 size M",
+          capture.openEventKey,
+        ));
+        const currentInput = input(
+          opened.plan!.state,
+          capture.text,
+          capture.objectionEventKey,
+        );
+        const output = await evaluateRealtimeSalesCycle({
+          ...currentInput,
+          behaviorModeResolution: behaviorResolution("LEGACY", "COMMERCE"),
+          negotiationProposal: priceNegotiationProposal(
+            currentInput.messageId,
+            "Em hiểu mình đang cân nhắc ngân sách; em kiểm tra mức hỗ trợ phù hợp nhé.",
+          ),
+        });
+        const snapshot = {
+          ...salesCycleSnapshot(output, capture.objectionEventKey),
+          strategyHash: "MODEL_STRATEGY_ANSWER_OBJECTION",
+        };
+        candidates.push(snapshot);
+        return snapshot;
+      },
+      permittedDifferences: [
+        { code: "OUTBOUND_MESSAGES_CHANGED", reasonCode: "B2_3C_MODEL_NEGOTIATION_WORDING" },
+        { code: "STRATEGY_CHANGED", reasonCode: "B2_3C_MODEL_NEGOTIATION_DIRECTION" },
+      ],
+    });
+
+    expect(result.sideEffects).toBe("DISABLED");
+    expect(result.status).toBe("VIOLATION");
+    expect(result.differences.map(({ code }) => code)).toEqual([
+      "OUTBOUND_MESSAGES_CHANGED",
+      "STRATEGY_CHANGED",
+      "EFFECT_AUTHORIZATION_CHANGED",
+    ]);
+    expect(candidates[0]).toMatchObject({
+      verifiedFactHashes: baseline.verifiedFactHashes,
+      protectedClaimHashes: baseline.protectedClaimHashes,
+      commitOutcome: baseline.commitOutcome,
+      protectedOutbound: baseline.protectedOutbound,
+    });
   });
 
   it("extracts label-less checkout details from model evidence and keeps deterministic guards", async () => {

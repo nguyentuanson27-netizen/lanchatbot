@@ -25,11 +25,13 @@ import {
   CheckoutDetailsTransitionEvidenceV1Schema,
   ClarificationTransitionEvidenceV1Schema,
   NegotiationTransitionEvidenceV1Schema,
+  AgentStrategyAnalysisV1Schema,
   CartMutationAuthorityBindingV1Schema,
   CartMutationBatchEvidenceV1Schema,
   CartMutationReceiptV1Schema,
   OrderPreviewV1Schema,
   type AgentSalesSignalsV1,
+  type AgentStrategyAnalysisV1,
   type CanonicalBuyingIntentV1,
   type CartV1,
   type CanonicalCartMutationPayloadV1,
@@ -106,6 +108,11 @@ export interface RealtimeSalesCycleInput {
   readonly color: string | null;
   readonly canonicalBuyingIntent: CanonicalBuyingIntentV1;
   readonly salesSignals?: AgentSalesSignalsV1 | null;
+  /**
+   * Guarded post-generation proposal. COMMERCE may use this for conversational
+   * negotiation semantics and wording; it never carries a monetary request.
+   */
+  readonly negotiationProposal?: ModelNegotiationProposalV1 | null;
   readonly shopAlias: string;
   readonly behaviorModeResolution?: RuntimeBehaviorModeResolution;
   readonly policyResolution: RuntimePolicyResolution | null;
@@ -113,6 +120,51 @@ export interface RealtimeSalesCycleInput {
   readonly now: Date;
   /** Production supplies a live clock; deterministic tests may omit it. */
   readonly effectNow?: () => Date;
+}
+
+export interface ModelNegotiationProposalV1 {
+  readonly contractVersion: "MODEL_NEGOTIATION_PROPOSAL_V1";
+  readonly decision: "ANSWER_PRICE_OBJECTION";
+  readonly wording: string;
+  readonly sourceMessageId: string;
+  readonly guardEvidence: "VERIFIED_PROPOSAL_GUARD";
+  readonly protectedClaims: "NONE";
+  readonly strategyAnalysis: AgentStrategyAnalysisV1;
+}
+
+export function buildGuardedModelNegotiationProposalV1(input: Readonly<{
+  sourceMessageId: string;
+  wordingUnits: readonly string[];
+  action: "REPLY" | "ASK_PRODUCT_SELECTION" | "HANDOFF" | "NO_REPLY";
+  guardReasonCodes: readonly string[];
+  protectedClaimTypes: readonly string[];
+  strategyAnalysis: AgentStrategyAnalysisV1 | null | undefined;
+}>): ModelNegotiationProposalV1 | null {
+  const strategy = AgentStrategyAnalysisV1Schema.safeParse(input.strategyAnalysis);
+  const wording = input.wordingUnits.join("\n");
+  if (
+    input.action !== "REPLY" ||
+    input.guardReasonCodes.length > 0 ||
+    input.protectedClaimTypes.length > 0 ||
+    !strategy.success ||
+    strategy.data.need !== "NEED_BUDGET" ||
+    strategy.data.barrier !== "BARRIER_PRICE" ||
+    strategy.data.decisionFactor !== "BUDGET" ||
+    strategy.data.recommendedStrategy !== "STRATEGY_ANSWER_OBJECTION" ||
+    strategy.data.confidence < 0.85 ||
+    !strategy.data.evidence.includes("TEXT_PRICE_OBJECTION") ||
+    input.sourceMessageId.trim().length < 1 || input.sourceMessageId.length > 256 ||
+    wording.trim().length < 1 || wording.length > 2_000 || wording !== wording.trim()
+  ) return null;
+  return {
+    contractVersion: "MODEL_NEGOTIATION_PROPOSAL_V1",
+    decision: "ANSWER_PRICE_OBJECTION",
+    wording,
+    sourceMessageId: input.sourceMessageId,
+    guardEvidence: "VERIFIED_PROPOSAL_GUARD",
+    protectedClaims: "NONE",
+    strategyAnalysis: strategy.data,
+  };
 }
 
 export interface RealtimeSalesCycleOutput {
@@ -364,6 +416,34 @@ function confirmation(
 
 function priceObjection(text: string): boolean {
   return /(đắt|dat qua|giá cao|gia cao|bớt giá|bot gia|giảm thêm|giam them|fix giá|fix gia|ưu đãi thêm|uu dai them)/iu.test(text);
+}
+
+function acceptedModelNegotiationProposal(
+  input: RealtimeSalesCycleInput,
+): ModelNegotiationProposalV1 | null {
+  if (input.behaviorModeResolution?.salesAuthorityMode !== "COMMERCE") return null;
+  const proposal = input.negotiationProposal;
+  if (
+    proposal === null || proposal === undefined ||
+    proposal.contractVersion !== "MODEL_NEGOTIATION_PROPOSAL_V1" ||
+    proposal.decision !== "ANSWER_PRICE_OBJECTION" ||
+    proposal.guardEvidence !== "VERIFIED_PROPOSAL_GUARD" ||
+    proposal.protectedClaims !== "NONE" ||
+    proposal.sourceMessageId !== input.messageId ||
+    proposal.wording.length < 1 || proposal.wording.length > 2_000 ||
+    proposal.wording !== proposal.wording.trim()
+  ) return null;
+  const strategy = AgentStrategyAnalysisV1Schema.safeParse(proposal.strategyAnalysis);
+  if (
+    !strategy.success ||
+    strategy.data.need !== "NEED_BUDGET" ||
+    strategy.data.barrier !== "BARRIER_PRICE" ||
+    strategy.data.decisionFactor !== "BUDGET" ||
+    strategy.data.recommendedStrategy !== "STRATEGY_ANSWER_OBJECTION" ||
+    strategy.data.confidence < 0.85 ||
+    !strategy.data.evidence.includes("TEXT_PRICE_OBJECTION")
+  ) return null;
+  return { ...proposal, strategyAnalysis: strategy.data };
 }
 
 function removeItem(text: string): boolean {
@@ -1691,7 +1771,20 @@ export async function evaluateRealtimeSalesCycle(
       );
     }
 
-    if (priceObjection(input.text)) {
+    const modelNegotiation = acceptedModelNegotiationProposal(input);
+    if (
+      input.behaviorModeResolution?.salesAuthorityMode === "COMMERCE" &&
+      modelNegotiation === null &&
+      priceObjection(input.text)
+    ) {
+      // Legacy text matching is rejection-only on COMMERCE: it can contain an
+      // undeclared proposal, but can never authorize strategy or an effect.
+      return failedOutput("MODEL_NEGOTIATION_PROPOSAL_REJECTED");
+    }
+    const legacyNegotiation =
+      input.behaviorModeResolution?.salesAuthorityMode !== "COMMERCE" &&
+      priceObjection(input.text);
+    if (modelNegotiation !== null || legacyNegotiation) {
       if (!state.negotiation) return failedOutput("NEGOTIATION_STATE_MISSING", plan());
       const negotiationSelections = await currentSelections(
         input, state.cart.value, state.checkoutDraft?.address ?? "", effectNow(),
@@ -1738,7 +1831,7 @@ export async function evaluateRealtimeSalesCycle(
       }
       setCartReplayContext(state.negotiation.customerState);
       return protectedCartReply(
-        (cart) => `${negotiationOfferText(cart, state.negotiation!.customerState)}\n${cartSummary(cart)}`,
+        (cart) => `${modelNegotiation?.wording ?? negotiationOfferText(cart, state.negotiation!.customerState)}\n${cartSummary(cart)}`,
         { selections: readyNegotiationSelections },
       );
     }

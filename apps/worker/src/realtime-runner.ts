@@ -166,6 +166,8 @@ import { sizeChartTarget } from "./size-chart-target.js";
 import {
   createRealtimeSalesState,
   evaluateRealtimeSalesCycle,
+  buildGuardedModelNegotiationProposalV1,
+  type ModelNegotiationProposalV1,
   type RealtimeSalesCycleOutput,
   type RealtimeSalesCycleTelemetry,
 } from "./realtime-sales-cycle.js";
@@ -3306,6 +3308,7 @@ export class RealtimeRunner {
     let salesTelemetry: RealtimeSalesCycleTelemetry | null = null;
     let salesProtectedOutbound: RealtimeSalesCycleOutput["protectedOutbound"] | null = null;
     let salesReadinessAttempt: DeterministicEffectReadinessV1 | null = null;
+    let modelNegotiationProposal: ModelNegotiationProposalV1 | null = null;
     let buyingSignalOverride = false;
     let modelCalled = false;
     let modelVersion: string | null = null;
@@ -4872,6 +4875,17 @@ export class RealtimeRunner {
           ];
         }
         proposalGuardReasonCodes = [...guarded.blockedReasonCodes];
+        modelNegotiationProposal = wordingAuthority === "MODEL"
+          ? buildGuardedModelNegotiationProposalV1({
+              sourceMessageId: message.messageId ?? message.eventKey,
+              wordingUnits: guarded.textUnits,
+              action: guarded.action,
+              guardReasonCodes: guarded.blockedReasonCodes,
+              protectedClaimTypes:
+                guarded.protectedClaimValidation?.claimTypes ?? [],
+              strategyAnalysis: proposal.strategyAnalysis,
+            })
+          : null;
         if (guarded.protectedClaimValidation) {
           protectedClaimValidation = guarded.protectedClaimValidation;
         }
@@ -4940,6 +4954,7 @@ export class RealtimeRunner {
           nextState.consideredVariant.color,
         canonicalBuyingIntent: canonicalEvidence.buyingIntent,
         salesSignals: proposal?.salesSignals ?? null,
+        negotiationProposal: modelNegotiationProposal,
         shopAlias: this.options.shopAlias,
         policyResolution,
         behaviorModeResolution,
