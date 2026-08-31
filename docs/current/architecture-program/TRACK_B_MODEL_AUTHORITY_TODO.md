@@ -162,7 +162,9 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 ## B3.1 — Pre-deploy re-evaluation (deploy gate only)
 
 - [x] The owner selected the exact final merged Track B candidate for PREPROD deployment; rederive its identity from fresh `origin/main` after every required source PR merge. Local and unmerged candidates receive no promotion ceremony.
-- [ ] Merge the focused minimal operational entrypoint around the existing runner; reuse `executeGateEScoredRun(...)` and do not rebuild scorer or evidence logic. Source implementation is in progress and is not operational evidence before reviewed exact-head merge.
+- [x] Merge the focused operational entrypoint and PREPROD credential-shape correction in PRs #281/#282. Final entrypoint main is `9b9533641b275403923f7c037247199a0ec760ae`; this is source readiness, not Gate-E acceptance.
+- [x] Observe provider identity once against clean exact main `9b9533641b275403923f7c037247199a0ec760ae`: model/version matched `gemini-3.5-flash-lite`, request envelope `b07e16598466a411ca5e64bc2f83d179c5c348849ffa1d5307083ad85f0c8f7b`, candidate fingerprint `cddaa90c358e14747f46b7e5c76ca203bee8fb80a7e8ed4d70d917bb6a7ac7dd`. The first pre-OAuth credential-parse failure consumed no provider model request and produced no evidence claim.
+- [ ] Merge and anchor the immutable `evaluation/gate-e/track-b-v16` registration bundle before any scored provider request.
 - [ ] Run the current governing re-evaluation path for the exact candidate.
 - [ ] Use existing provenance and release evidence; do not invent a competing promotion manifest.
 - [ ] Keep provider credentials out of GitHub Actions and the repository; run the provider-backed rerun in an authorized local/VPS/manual or scheduled environment.
