@@ -44,3 +44,30 @@ export const DF13_COMMERCE_AUTHORITY_BUNDLE_V1 = Object.freeze({
   ...DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V1,
   contractHash: sha256(canonicalJsonV1(DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V1)),
 });
+
+/**
+ * Track B keeps the DF13 consumer/fence topology unchanged while replacing
+ * the two governance labels whose semantics moved to the byte-frozen baseline
+ * AgentProposalV1 output. V1 remains exported as the exact PREPROD rollback
+ * identity; it must never be silently relabelled or re-hashed.
+ */
+export const DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V2 = Object.freeze({
+  schemaVersion: 1 as const,
+  contractVersion: "DF13_COMMERCE_AUTHORITY_BUNDLE_V2" as const,
+  authorityDependentConsumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+  phase: "COMMERCE_DERIVED" as const,
+  context: "CONTEXT_V2" as const,
+  strategy: "AGENT_PROPOSAL_V1_STRATEGY_ANALYSIS" as const,
+  cta: "AGENT_PROPOSAL_V1_SALES_SIGNALS" as const,
+  reconciliation: "COMMERCE_FINAL" as const,
+  legacySalesStage: "DEMOTED_TELEMETRY_ONLY" as const,
+  authorityIndependentBypassClasses,
+});
+
+export const DF13_COMMERCE_AUTHORITY_BUNDLE_V2 = Object.freeze({
+  ...DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V2,
+  contractHash: sha256(canonicalJsonV1(DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V2)),
+});
+
+export const DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE =
+  DF13_COMMERCE_AUTHORITY_BUNDLE_V2;

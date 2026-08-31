@@ -184,10 +184,19 @@ export {
 } from "./runtime-behavior-mode.js";
 export {
   DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V1,
+  DF13_COMMERCE_AUTHORITY_BUNDLE_PAYLOAD_V2,
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
+  DF13_COMMERCE_AUTHORITY_BUNDLE_V2,
+  DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE,
   DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
   type CommerceAuthorityConsumer,
 } from "./df13-commerce-authority-bundle.js";
+export {
+  PostgresTrackBCommerceAuthorityWriter,
+  type TrackBCommerceFenceLease,
+  type TrackBCommerceIdentity,
+  type TrackBCommercePointerMutationInput,
+} from "./track-b-commerce-authority-writer.js";
 export {
   PostgresSizeChartExtractionStore,
   type SizeChartExtractionLookupInput,

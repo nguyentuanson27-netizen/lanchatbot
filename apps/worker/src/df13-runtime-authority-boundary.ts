@@ -2,7 +2,7 @@ import {
   behaviorModeContentHash,
   type RuntimeBehaviorModeResolution,
 } from "@lana/chat-runtime";
-import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE } from "./df13-commerce-authority-bundle.js";
 import { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
 
 const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
@@ -62,7 +62,7 @@ export function selectDf13RuntimeAuthority(input: Readonly<{
     if (
       resolution.salesAuthorityMode !== "COMMERCE" ||
       resolution.stateReadMode !== "LEGACY" ||
-      resolution.authorityBundleHash !== DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash ||
+      resolution.authorityBundleHash !== DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash ||
       !resolution.modeVersionId ||
       !UUID_V4_PATTERN.test(resolution.modeVersionId) ||
       !resolution.contentHash ||

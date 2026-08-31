@@ -4,7 +4,7 @@ import {
   type RuntimeBehaviorModePointer,
   type RuntimeBehaviorModeSourcePort,
 } from "@lana/chat-runtime";
-import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE } from "./df13-commerce-authority-bundle.js";
 import {
   DF13_COMMERCE_SOURCE_ONLY_DISABLED,
   type Df13CommerceActivationAuthority,
@@ -21,7 +21,7 @@ function pointer(authority: "LEGACY" | "COMMERCE"): RuntimeBehaviorModePointer {
     salesAuthorityMode: authority,
     stateReadMode: "LEGACY" as const,
     authorityBundleHash: authority === "COMMERCE"
-      ? DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
+      ? DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash
       : null,
   };
   return {

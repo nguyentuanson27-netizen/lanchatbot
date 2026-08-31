@@ -1,7 +1,7 @@
 import type { RuntimeBehaviorModeResolution } from "@lana/chat-runtime";
-import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE } from "./df13-commerce-authority-bundle.js";
 
-export { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
+export { DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE } from "./df13-commerce-authority-bundle.js";
 
 export interface Df13CommerceAuthorityIdentity {
   readonly salesAuthorityMode: "COMMERCE";
@@ -49,7 +49,7 @@ export function assessDf13CommerceAuthority(
     || typeof resolution.pointerRevision !== "number"
     || !Number.isInteger(resolution.pointerRevision)
     || resolution.pointerRevision < 1
-    || resolution.authorityBundleHash !== DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
+    || resolution.authorityBundleHash !== DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash
     || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(resolution.modeVersionId)
     || !/^sha256:[a-f0-9]{64}$/u.test(resolution.contentHash)
   ) {

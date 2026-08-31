@@ -7,7 +7,7 @@ import type {
   RealtimeCommitInput,
 } from "@lana/database";
 import {
-  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
+  DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE,
   DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
 } from "./df13-commerce-authority-bundle.js";
 import type { Df13CommerceFenceRequest } from "./df13-commerce-authority-fence.js";
@@ -36,7 +36,7 @@ export interface Df13CommerceAtomicFenceStorePort {
 function hasExactConsumerBundle(request: Df13CommerceFenceRequest): boolean {
   return request.consumers.length === DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.length
     && request.consumers.every((consumer, index) => consumer === DF13_COMMERCE_AUTHORITY_CONSUMERS_V1[index])
-    && request.authority.authorityBundleHash === DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
+    && request.authority.authorityBundleHash === DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash;
 }
 
 function toStoreRequest(request: Df13CommerceFenceRequest):

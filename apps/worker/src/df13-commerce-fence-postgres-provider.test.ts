@@ -14,7 +14,7 @@ import {
   type Df13CommerceAtomicFenceStorePort,
   type Df13CommerceFenceStorePort,
 } from "./df13-commerce-fence-postgres-provider.js";
-import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1, DF13_COMMERCE_AUTHORITY_CONSUMERS_V1 } from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE, DF13_COMMERCE_AUTHORITY_CONSUMERS_V1 } from "./df13-commerce-authority-bundle.js";
 import type { Df13CommerceFenceRequest } from "./df13-commerce-authority-fence.js";
 
 const request: Df13CommerceFenceRequest = Object.freeze({
@@ -32,7 +32,7 @@ const request: Df13CommerceFenceRequest = Object.freeze({
     modeVersionId: "10000000-0000-4000-8000-000000000006",
     contentHash: `sha256:${"c".repeat(64)}`,
     pointerRevision: 6,
-    authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+    authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
     source: "DATABASE",
   }),
 });

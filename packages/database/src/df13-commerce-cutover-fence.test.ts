@@ -19,6 +19,11 @@ import {
   df13CommerceCutoverFenceRequestFingerprint,
   PostgresDf13CommerceCutoverFenceStore,
 } from "./df13-commerce-cutover-fence.js";
+import {
+  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
+  DF13_COMMERCE_AUTHORITY_BUNDLE_V2,
+} from "./df13-commerce-authority-bundle.js";
+import { runtimeBehaviorModeContentHash } from "./runtime-behavior-mode.js";
 import * as databasePublicApi from "./index.js";
 
 const request = Object.freeze({
@@ -33,7 +38,7 @@ const request = Object.freeze({
   target: Object.freeze({
     modeVersionId: "10000000-0000-4000-8000-000000000002",
     contentHash: `sha256:${"b".repeat(64)}`,
-    authorityBundleHash: "c".repeat(64),
+    authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
   }),
 });
 
@@ -136,6 +141,156 @@ describe("Postgres DF13 Commerce cutover fence store", () => {
       df13CommerceCutoverFenceRequestFingerprint(request),
     ]));
     expect(mocks.release).toHaveBeenCalledOnce();
+  });
+
+  it("acquires the Track B V1-to-V2 replacement fence without permitting a third bundle", async () => {
+    const currentContentHash = runtimeBehaviorModeContentHash({
+      confirmationMode: "V2_ACTIVE",
+      salesAuthorityMode: "COMMERCE",
+      stateReadMode: "LEGACY",
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+    });
+    const targetContentHash = runtimeBehaviorModeContentHash({
+      confirmationMode: "V2_ACTIVE",
+      salesAuthorityMode: "COMMERCE",
+      stateReadMode: "LEGACY",
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+    });
+    const replacementRequest = {
+      ...request,
+      preCutover: { ...request.preCutover, contentHash: currentContentHash },
+      target: {
+        ...request.target,
+        contentHash: targetContentHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+      },
+    };
+    mocks.clientQuery.mockImplementation(async (sql: string, values?: readonly unknown[]) => {
+      if (sql.includes("WHERE operation_id")) return rowResult();
+      if (sql.includes("FROM df13_commerce_cutover_fences")) return rowResult();
+      if (sql.includes("FROM runtime_behavior_mode_pointers")) {
+        return rowResult([{
+          active_version_id: replacementRequest.preCutover.modeVersionId,
+          pointer_revision: replacementRequest.preCutover.pointerRevision,
+        }]);
+      }
+      if (sql.includes("FROM runtime_behavior_mode_versions")) {
+        return rowResult([
+          {
+            mode_version_id: replacementRequest.preCutover.modeVersionId,
+            page_id: replacementRequest.pageId,
+            channel: replacementRequest.channel,
+            confirmation_mode: "V2_ACTIVE",
+            sales_authority_mode: "COMMERCE",
+            state_read_mode: "LEGACY",
+            content_hash: replacementRequest.preCutover.contentHash,
+            authority_bundle_hash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+          },
+          {
+            mode_version_id: replacementRequest.target.modeVersionId,
+            page_id: replacementRequest.pageId,
+            channel: replacementRequest.channel,
+            confirmation_mode: "V2_ACTIVE",
+            sales_authority_mode: "COMMERCE",
+            state_read_mode: "LEGACY",
+            content_hash: replacementRequest.target.contentHash,
+            authority_bundle_hash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+          },
+        ]);
+      }
+      if (sql.includes("INSERT INTO df13_commerce_cutover_fences")) {
+        return rowResult([{ fence_id: values?.[0], epoch: "1", lease_live: true }]);
+      }
+      return rowResult();
+    });
+    const store = new PostgresDf13CommerceCutoverFenceStore("postgresql://test");
+
+    await expect(store.acquire(replacementRequest)).resolves.toMatchObject({ status: "HELD" });
+
+    const unknownBundleRequest = {
+      ...replacementRequest,
+      operationId: "10000000-0000-4000-8000-000000000011",
+      target: { ...replacementRequest.target, authorityBundleHash: "f".repeat(64) },
+    };
+    await expect(store.acquire(unknownBundleRequest)).resolves.toEqual({
+      status: "PARKED",
+      reasonCode: "DF13_CUTOVER_FENCE_CANONICAL_IDENTITY_INVALID",
+    });
+
+    const outOfScopeRequest = {
+      ...replacementRequest,
+      operationId: "10000000-0000-4000-8000-000000000013",
+      pageId: "another-page",
+    };
+    await expect(store.acquire(outOfScopeRequest)).rejects.toThrow(
+      "DF13_CUTOVER_FENCE_PAGE_INVALID",
+    );
+  });
+
+  it("acquires a separate exact V2-to-V1 rollback fence", async () => {
+    const v1ContentHash = runtimeBehaviorModeContentHash({
+      confirmationMode: "V2_ACTIVE",
+      salesAuthorityMode: "COMMERCE",
+      stateReadMode: "LEGACY",
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+    });
+    const v2ContentHash = runtimeBehaviorModeContentHash({
+      confirmationMode: "V2_ACTIVE",
+      salesAuthorityMode: "COMMERCE",
+      stateReadMode: "LEGACY",
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+    });
+    const rollbackRequest = {
+      ...request,
+      operationId: "10000000-0000-4000-8000-000000000012",
+      preCutover: { ...request.preCutover, contentHash: v2ContentHash },
+      target: {
+        ...request.target,
+        contentHash: v1ContentHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      },
+    };
+    mocks.clientQuery.mockImplementation(async (sql: string, values?: readonly unknown[]) => {
+      if (sql.includes("WHERE operation_id")) return rowResult();
+      if (sql.includes("FROM df13_commerce_cutover_fences")) return rowResult();
+      if (sql.includes("FROM runtime_behavior_mode_pointers")) {
+        return rowResult([{
+          active_version_id: rollbackRequest.preCutover.modeVersionId,
+          pointer_revision: rollbackRequest.preCutover.pointerRevision,
+        }]);
+      }
+      if (sql.includes("FROM runtime_behavior_mode_versions")) {
+        return rowResult([
+          {
+            mode_version_id: rollbackRequest.preCutover.modeVersionId,
+            page_id: rollbackRequest.pageId,
+            channel: rollbackRequest.channel,
+            confirmation_mode: "V2_ACTIVE",
+            sales_authority_mode: "COMMERCE",
+            state_read_mode: "LEGACY",
+            content_hash: rollbackRequest.preCutover.contentHash,
+            authority_bundle_hash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+          },
+          {
+            mode_version_id: rollbackRequest.target.modeVersionId,
+            page_id: rollbackRequest.pageId,
+            channel: rollbackRequest.channel,
+            confirmation_mode: "V2_ACTIVE",
+            sales_authority_mode: "COMMERCE",
+            state_read_mode: "LEGACY",
+            content_hash: rollbackRequest.target.contentHash,
+            authority_bundle_hash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+          },
+        ]);
+      }
+      if (sql.includes("INSERT INTO df13_commerce_cutover_fences")) {
+        return rowResult([{ fence_id: values?.[0], epoch: "1", lease_live: true }]);
+      }
+      return rowResult();
+    });
+    const store = new PostgresDf13CommerceCutoverFenceStore("postgresql://test");
+
+    await expect(store.acquire(rollbackRequest)).resolves.toMatchObject({ status: "HELD" });
   });
 
   it("fails closed when an active scope carries a copied target identity", async () => {
