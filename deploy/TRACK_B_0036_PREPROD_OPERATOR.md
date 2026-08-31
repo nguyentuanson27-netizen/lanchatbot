@@ -12,6 +12,16 @@ realtime release and exact behavior pointer revision 6. A changed target fails
 before backup or DDL. The observed non-secret preflight record is retained and
 must match again immediately before apply.
 
+ACL comparison uses PostgreSQL privilege semantics rather than raw `relacl` or
+`proacl` storage. PostgreSQL restore may canonicalize a redundant explicit
+owner-only ACL to its equivalent null/default representation. The comparison
+expands owner privileges through `acldefault`, preserves explicit
+revocations, and hashes canonical owner, grantee, grantor, privilege and grant
+option rows in deterministic order. Role names remain exact; the same-cluster
+rehearsal does not permit implicit role mapping. This makes an explicit
+owner-only ACL equivalent to PostgreSQL's null/default representation without
+normalizing away PUBLIC, extra, missing or delegated privileges.
+
 Run only from a clean worktree whose `HEAD` and fetched `origin/main` both equal
 the supplied `SOURCE_REVISION`:
 

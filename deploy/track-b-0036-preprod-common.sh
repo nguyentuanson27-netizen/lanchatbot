@@ -15,8 +15,8 @@ readonly EXPECTED_LEDGER_COUNT="35"
 readonly EXPECTED_LEDGER_SHA256="6d09d35d80ce763a4b2913f762c803bcb72a71523d30f10d1004371f503ee42c"
 readonly EXPECTED_ROLE_STATE_SHA256="7aed840e198c02a47fbae39578d4ca88c7a26dcd6d03be5b8909dfc474b0c6bb"
 readonly EXPECTED_ROLE_MEMBERSHIP_SHA256="c6935a1f7e3950b60e4cd869435b569c3591853f00477b8feeaeb625da7fdb4c"
-readonly EXPECTED_RELATION_ACL_SHA256="0d783a12f4816bb7e0f110e9bc014106b4364f7ef2d99bc291a0f68dff53733d"
-readonly EXPECTED_FUNCTION_ACL_SHA256="ad7739b47a7570b70342c825ba885a8abf877c00d95f4cd53b2bf2404bc6a7c9"
+readonly EXPECTED_RELATION_ACL_SHA256="bc2f202eb93d2f1e78c5594b0c7026694a95bfdd48a754171b5cce6a0bddd211"
+readonly EXPECTED_FUNCTION_ACL_SHA256="9be2a85b3160a192fd802ec1cd6f782d837720d523cb525d38de4fe2d1e779c9"
 readonly EXPECTED_EXTENSIONS_SHA256="b025b21b2d90b87fa0165593faf27543989fd4cd42b3d0061d8c4dfd3c240cd9"
 readonly EXPECTED_PREVIOUS_MIGRATION="0035_df13_commerce_behavior_mode"
 readonly EXPECTED_PREVIOUS_MIGRATION_SHA256="51f94dce65d31f53829f96d1166bd131b726ee00557bc952a5489a9fc98762fc"
@@ -37,6 +37,8 @@ script_dir="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_ROOT="${SOURCE_ROOT:-$(CDPATH= cd -- "$script_dir/.." && pwd)}"
 MIGRATION_UP="$SOURCE_ROOT/packages/database/pending-migrations/0036_df13_commerce_authority_fence.up.sql"
 MIGRATION_DOWN="$SOURCE_ROOT/packages/database/pending-migrations/0036_df13_commerce_authority_fence.down.sql"
+RELATION_ACL_QUERY="$SOURCE_ROOT/deploy/track-b-0036-relation-acl-canonical.sql"
+FUNCTION_ACL_QUERY="$SOURCE_ROOT/deploy/track-b-0036-function-acl-canonical.sql"
 readonly EVIDENCE_DIR="$APP_ROOT/backups/20260831-track-b-0036-preprod"
 BACKUP_FILE="$EVIDENCE_DIR/lana_chatbot_pre_0036.dump"
 BACKUP_SHA256_FILE="$BACKUP_FILE.sha256"
@@ -72,6 +74,17 @@ database_copy_sha256_named() {
     psql -X -At -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$1" -c "COPY ($2) TO STDOUT WITH (FORMAT csv)" |
       sha256sum | awk "{print \$1}"
   ' sh "$database" "$query"
+}
+
+database_sql_file_sha256_named() {
+  local database="$1"
+  local sql_file="$2"
+  test -s "$sql_file" || die "canonical ACL query missing"
+  docker exec -i "$POSTGRES_CONTAINER" sh -ceu '
+    export PGPASSWORD="$POSTGRES_PASSWORD"
+    psql -X -At -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$1" -f - |
+      sha256sum | awk "{print \$1}"
+  ' sh "$database" < "$sql_file"
 }
 
 database_stream() {
@@ -145,8 +158,8 @@ observed_target_record() {
     "POINTER=$(database_query "SELECT p.pointer_revision || '|' || v.mode_version_id || '|' || v.sales_authority_mode || '|' || v.state_read_mode || '|' || v.authority_bundle_hash || '|' || v.content_hash FROM runtime_behavior_mode_pointers p JOIN runtime_behavior_mode_versions v ON v.mode_version_id=p.active_version_id WHERE p.page_id='$EXPECTED_PAGE_ID' AND p.channel='$EXPECTED_CHANNEL'")" \
     "ROLE_STATE_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT rolname,rolsuper,rolinherit,rolcreaterole,rolcreatedb,rolcanlogin,rolreplication,rolbypassrls,rolconnlimit FROM pg_roles WHERE left(rolname,3) <> chr(112)||chr(103)||chr(95) ORDER BY rolname")" \
     "ROLE_MEMBERSHIP_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT member_role.rolname,granted_role.rolname,m.admin_option FROM pg_auth_members m JOIN pg_roles member_role ON member_role.oid=m.member JOIN pg_roles granted_role ON granted_role.oid=m.roleid ORDER BY 1,2,3")" \
-    "RELATION_ACL_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT c.relkind,c.relname,r.rolname,coalesce(c.relacl::text,chr(45)) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_roles r ON r.oid=c.relowner WHERE n.nspname=current_schema() ORDER BY 1,2,3,4")" \
-    "FUNCTION_ACL_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT p.proname,pg_get_function_identity_arguments(p.oid),r.rolname,coalesce(p.proacl::text,chr(45)) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_roles r ON r.oid=p.proowner WHERE n.nspname=current_schema() ORDER BY 1,2,3,4")" \
+    "RELATION_ACL_SHA256=$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$RELATION_ACL_QUERY")" \
+    "FUNCTION_ACL_SHA256=$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$FUNCTION_ACL_QUERY")" \
     "EXTENSIONS_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT extname,extversion FROM pg_extension ORDER BY extname")" \
     "MIGRATION_0036_OBJECTS=$(database_query "SELECT count(*) FROM (VALUES (to_regclass('public.df13_commerce_authority_fences')),(to_regclass('public.df13_commerce_authority_fence_claims')),(to_regclass('public.df13_commerce_cutover_fences'))) AS objects(value) WHERE value IS NOT NULL")"
 }
@@ -183,8 +196,8 @@ verify_restored_baseline_named() {
   test "$(database_copy_sha256_named "$database" "SELECT page_id,status,routing_owner,app_send_enabled,kill_switch FROM pages ORDER BY page_id")" = "$EXPECTED_PAGE_SET_SHA256" || die "restored page set mismatch"
   test "$(database_query_named "$database" "SELECT count(*) FROM schema_migrations")" = "$EXPECTED_LEDGER_COUNT" || die "restored ledger count mismatch"
   test "$(database_copy_sha256_named "$database" "SELECT migration_name,checksum_sha256 FROM schema_migrations ORDER BY migration_name")" = "$EXPECTED_LEDGER_SHA256" || die "restored full ledger mismatch"
-  test "$(database_copy_sha256_named "$database" "SELECT c.relkind,c.relname,r.rolname,coalesce(c.relacl::text,chr(45)) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_roles r ON r.oid=c.relowner WHERE n.nspname=current_schema() ORDER BY 1,2,3,4")" = "$EXPECTED_RELATION_ACL_SHA256" || die "restored relation owner/ACL mismatch"
-  test "$(database_copy_sha256_named "$database" "SELECT p.proname,pg_get_function_identity_arguments(p.oid),r.rolname,coalesce(p.proacl::text,chr(45)) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_roles r ON r.oid=p.proowner WHERE n.nspname=current_schema() ORDER BY 1,2,3,4")" = "$EXPECTED_FUNCTION_ACL_SHA256" || die "restored function owner/ACL mismatch"
+  test "$(database_sql_file_sha256_named "$database" "$RELATION_ACL_QUERY")" = "$EXPECTED_RELATION_ACL_SHA256" || die "restored canonical relation owner/ACL mismatch"
+  test "$(database_sql_file_sha256_named "$database" "$FUNCTION_ACL_QUERY")" = "$EXPECTED_FUNCTION_ACL_SHA256" || die "restored canonical function owner/ACL mismatch"
   test "$(database_copy_sha256_named "$database" "SELECT rolname,rolsuper,rolinherit,rolcreaterole,rolcreatedb,rolcanlogin,rolreplication,rolbypassrls,rolconnlimit FROM pg_roles WHERE left(rolname,3) <> chr(112)||chr(103)||chr(95) ORDER BY rolname")" = "$EXPECTED_ROLE_STATE_SHA256" || die "restored role attributes mismatch"
   test "$(database_copy_sha256_named "$database" "SELECT member_role.rolname,granted_role.rolname,m.admin_option FROM pg_auth_members m JOIN pg_roles member_role ON member_role.oid=m.member JOIN pg_roles granted_role ON granted_role.oid=m.roleid ORDER BY 1,2,3")" = "$EXPECTED_ROLE_MEMBERSHIP_SHA256" || die "restored role memberships mismatch"
   test "$(database_copy_sha256_named "$database" "SELECT extname,extversion FROM pg_extension ORDER BY extname")" = "$EXPECTED_EXTENSIONS_SHA256" || die "restored extensions mismatch"
