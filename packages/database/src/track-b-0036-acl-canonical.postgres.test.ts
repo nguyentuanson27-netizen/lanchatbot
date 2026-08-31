@@ -60,7 +60,7 @@ postgresDescribe("Track B 0036 canonical ACL comparison", () => {
       const implicit = await canonicalRows(client, relationAclSql);
       expect(implicit.some((row) => row.includes('[\"OWNER\", \"r\", \"acl_target\", \"postgres\"]')))
         .toBe(true);
-      expect(implicit.some((row) => row.includes('[\"PRIVILEGE\", \"r\", \"acl_target\", \"postgres\", \"postgres\", \"SELECT\", false]')))
+      expect(implicit.some((row) => row.includes('[\"PRIVILEGE\", \"r\", \"acl_target\", \"ROLE\", \"postgres\", \"postgres\", \"SELECT\", false]')))
         .toBe(true);
 
       await client.query("GRANT ALL PRIVILEGES ON acl_target TO postgres");
@@ -69,7 +69,7 @@ postgresDescribe("Track B 0036 canonical ACL comparison", () => {
       expect(explicit).toEqual(await canonicalRows(client, relationAclSql));
 
       await client.query("REVOKE ALL PRIVILEGES ON acl_target FROM postgres");
-      expect(await canonicalRows(client, relationAclSql)).toEqual(implicit);
+      expect(await canonicalRows(client, relationAclSql)).not.toEqual(implicit);
     });
   });
 
@@ -85,7 +85,7 @@ postgresDescribe("Track B 0036 canonical ACL comparison", () => {
       const delegated = await canonicalRows(client, relationAclSql);
       expect(delegated).not.toEqual(baseline);
       expect(delegated.some((row) => row.includes(
-        `[\"PRIVILEGE\", \"r\", \"acl_target\", \"${roles[1]}\", \"${roles[0]}\", \"SELECT\", false]`,
+        `[\"PRIVILEGE\", \"r\", \"acl_target\", \"ROLE\", \"${roles[1]}\", \"${roles[0]}\", \"SELECT\", false]`,
       ))).toBe(true);
     });
   });
@@ -99,7 +99,7 @@ postgresDescribe("Track B 0036 canonical ACL comparison", () => {
       const granted = await canonicalRows(client, relationAclSql);
       expect(granted).not.toEqual(baseline);
       expect(granted.some((row) => row.includes(
-        `[\"PRIVILEGE\", \"r\", \"acl_target\", \"${roles[0]}\", \"postgres\", \"SELECT\", true]`,
+        `[\"PRIVILEGE\", \"r\", \"acl_target\", \"ROLE\", \"${roles[0]}\", \"postgres\", \"SELECT\", true]`,
       ))).toBe(true);
 
       await client.query(`REVOKE ALL PRIVILEGES ON acl_target FROM ${roles[0]}`);
@@ -109,10 +109,32 @@ postgresDescribe("Track B 0036 canonical ACL comparison", () => {
       const publicGrant = await canonicalRows(client, relationAclSql);
       expect(publicGrant).not.toEqual(baseline);
       expect(publicGrant.some((row) => row.includes(
-        '[\"PRIVILEGE\", \"r\", \"acl_target\", \"PUBLIC\", \"postgres\", \"SELECT\", false]',
+        '[\"PRIVILEGE\", \"r\", \"acl_target\", \"PUBLIC\", \"\", \"postgres\", \"SELECT\", false]',
       ))).toBe(true);
       await client.query("REVOKE SELECT ON acl_target FROM PUBLIC");
       expect(await canonicalRows(client, relationAclSql)).toEqual(baseline);
+    });
+  });
+
+  it("uses PostgreSQL sequence defaults and rejects missing or extra privileges", async () => {
+    await fixture(async ({ client, roles }) => {
+      await client.query("CREATE SEQUENCE acl_sequence");
+      const defaults = await canonicalRows(client, relationAclSql);
+      for (const privilege of ["SELECT", "UPDATE", "USAGE"]) {
+        expect(defaults.some((row) => row.includes(
+          `[\"PRIVILEGE\", \"S\", \"acl_sequence\", \"ROLE\", \"postgres\", \"postgres\", \"${privilege}\", false]`,
+        ))).toBe(true);
+      }
+      await client.query("GRANT ALL PRIVILEGES ON SEQUENCE acl_sequence TO postgres");
+      expect(await canonicalRows(client, relationAclSql)).toEqual(defaults);
+      await client.query("REVOKE SELECT ON SEQUENCE acl_sequence FROM postgres");
+      expect(await canonicalRows(client, relationAclSql)).not.toEqual(defaults);
+      await client.query("GRANT SELECT ON SEQUENCE acl_sequence TO postgres");
+      expect(await canonicalRows(client, relationAclSql)).toEqual(defaults);
+      await client.query(`GRANT USAGE ON SEQUENCE acl_sequence TO ${roles[0]}`);
+      expect(await canonicalRows(client, relationAclSql)).not.toEqual(defaults);
+      await client.query(`REVOKE USAGE ON SEQUENCE acl_sequence FROM ${roles[0]}`);
+      expect(await canonicalRows(client, relationAclSql)).toEqual(defaults);
     });
   });
 
@@ -129,12 +151,61 @@ postgresDescribe("Track B 0036 canonical ACL comparison", () => {
     });
   });
 
+  it("distinguishes pseudo-PUBLIC from a quoted role named PUBLIC", async () => {
+    const suffix = randomBytes(6).toString("hex");
+    const schema = `track_b_acl_public_${suffix}`;
+    const client = await pool.connect();
+    try {
+      expect((await client.query("SELECT count(*)::text AS count FROM pg_roles WHERE rolname='PUBLIC'"))
+        .rows[0]).toEqual({ count: "0" });
+      await client.query(`CREATE ROLE "PUBLIC" NOLOGIN; CREATE SCHEMA ${schema}; SET search_path TO ${schema}`);
+      await client.query("CREATE TABLE acl_target (id bigint PRIMARY KEY)");
+      await client.query("GRANT SELECT ON acl_target TO PUBLIC");
+      await client.query("GRANT UPDATE ON acl_target TO \"PUBLIC\"");
+      const rows = await canonicalRows(client, relationAclSql);
+      expect(rows.some((row) => row.includes(
+        '[\"PRIVILEGE\", \"r\", \"acl_target\", \"PUBLIC\", \"\", \"postgres\", \"SELECT\", false]',
+      ))).toBe(true);
+      expect(rows.some((row) => row.includes(
+        '[\"PRIVILEGE\", \"r\", \"acl_target\", \"ROLE\", \"PUBLIC\", \"postgres\", \"UPDATE\", false]',
+      ))).toBe(true);
+    } finally {
+      await client.query("RESET ROLE").catch(() => undefined);
+      await client.query("RESET search_path").catch(() => undefined);
+      await client.query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`).catch(() => undefined);
+      await client.query('DROP ROLE IF EXISTS "PUBLIC"').catch(() => undefined);
+      client.release();
+    }
+  });
+
+  it("fails closed on unresolved relation and function ACL identities", async () => {
+    await fixture(async ({ client }) => {
+      const unknownOid = 999_999_999;
+      expect((await client.query("SELECT count(*)::text AS count FROM pg_roles WHERE oid=$1", [unknownOid]))
+        .rows[0]).toEqual({ count: "0" });
+      await client.query("CREATE TABLE acl_target (id bigint PRIMARY KEY)");
+      await client.query("CREATE FUNCTION acl_function() RETURNS integer LANGUAGE sql AS 'SELECT 1'");
+      await client.query(`
+        UPDATE pg_class
+           SET relacl = ARRAY[makeaclitem($1::oid, relowner, 'SELECT', false)]
+         WHERE oid = 'acl_target'::regclass
+      `, [unknownOid]);
+      await expect(canonicalRows(client, relationAclSql)).rejects.toThrow(/division by zero/iu);
+      await client.query(`
+        UPDATE pg_proc
+           SET proacl = ARRAY[makeaclitem($1::oid, proowner, 'EXECUTE', false)]
+         WHERE oid = 'acl_function()'::regprocedure
+      `, [unknownOid]);
+      await expect(canonicalRows(client, functionAclSql)).rejects.toThrow(/division by zero/iu);
+    });
+  });
+
   it("normalizes function defaults while preserving PUBLIC and grant-option semantics", async () => {
     await fixture(async ({ client, roles }) => {
       await client.query("CREATE FUNCTION acl_target() RETURNS integer LANGUAGE sql AS 'SELECT 1'");
       const defaults = await canonicalRows(client, functionAclSql);
       expect(defaults.some((row) => row.includes(
-        '[\"PRIVILEGE\", \"acl_target\", \"\", \"PUBLIC\", \"postgres\", \"EXECUTE\", false]',
+        '[\"PRIVILEGE\", \"acl_target\", \"\", \"PUBLIC\", \"\", \"postgres\", \"EXECUTE\", false]',
       ))).toBe(true);
 
       await client.query("REVOKE EXECUTE ON FUNCTION acl_target() FROM PUBLIC");
@@ -146,8 +217,11 @@ postgresDescribe("Track B 0036 canonical ACL comparison", () => {
       await client.query(`GRANT EXECUTE ON FUNCTION acl_target() TO ${roles[0]} WITH GRANT OPTION`);
       const delegated = await canonicalRows(client, functionAclSql);
       expect(delegated.some((row) => row.includes(
-        `[\"PRIVILEGE\", \"acl_target\", \"\", \"${roles[0]}\", \"postgres\", \"EXECUTE\", true]`,
+        `[\"PRIVILEGE\", \"acl_target\", \"\", \"ROLE\", \"${roles[0]}\", \"postgres\", \"EXECUTE\", true]`,
       ))).toBe(true);
+
+      await client.query("REVOKE EXECUTE ON FUNCTION acl_target() FROM postgres");
+      expect(await canonicalRows(client, functionAclSql)).not.toEqual(delegated);
     });
   });
 });

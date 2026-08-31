@@ -15,9 +15,11 @@ must match again immediately before apply.
 ACL comparison uses PostgreSQL privilege semantics rather than raw `relacl` or
 `proacl` storage. PostgreSQL restore may canonicalize a redundant explicit
 owner-only ACL to its equivalent null/default representation. The comparison
-expands owner privileges through `acldefault`, preserves explicit
-revocations, and hashes canonical owner, grantee, grantor, privilege and grant
-option rows in deterministic order. Role names remain exact; the same-cluster
+expands only null ACLs through `acldefault`, preserves explicit
+revocations, uses sequence-specific defaults, and hashes canonical owner,
+grantee kind/name, grantor, privilege and grant option rows in deterministic
+order. Unknown role OIDs abort comparison, and pseudo-PUBLIC is distinct from
+a quoted role named `PUBLIC`. Role names remain exact; the same-cluster
 rehearsal does not permit implicit role mapping. This makes an explicit
 owner-only ACL equivalent to PostgreSQL's null/default representation without
 normalizing away PUBLIC, extra, missing or delegated privileges.
