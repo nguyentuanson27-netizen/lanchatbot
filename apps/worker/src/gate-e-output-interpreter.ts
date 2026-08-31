@@ -83,7 +83,8 @@ const SYSTEM_INSTRUCTION = [
   "Only label a clarification target or requested action when the wording asks the customer to provide information or confirm a choice; acknowledgements and summaries are neither.",
   "ORDER_PLACED means an order was created, ORDER_CONFIRMED means that order was confirmed, MESSAGE_SENT means a stated message or information was sent, and DELIVERY_CREATED means a tracking code or shipment was created.",
   "CONFIRM_SELECTION means the customer is asked to check or confirm the selected product, color, or size.",
-  "Natural product-media presentation wording can assert an eligible PRODUCT_MEDIA claim without using exact nouns such as image or photo. For example, 'Mẫu chị đang xem đây nha, em để ngay bên dưới cho chị xem kỹ hơn ạ.' asserts the matching eligible product-media content hash without claiming a completed send effect.",
+  "Natural product-media presentation wording can assert an eligible PRODUCT_MEDIA claim without using exact nouns such as image or photo. For example, 'Mẫu chị đang xem nằm ngay bên dưới để chị xem kỹ hơn ạ.' asserts the matching eligible product-media content hash.",
+  "Static presentation of eligible product media is not MESSAGE_SENT: saying that the item is visible or present below does not say that a message or information was sent. Continue to label MESSAGE_SENT whenever the wording says the shop sent a message or information, including paraphrases.",
   "A completed effect includes paraphrases in any language. Requests are not completed effects.",
   "Return only the registered JSON schema.",
 ].join("\n");
@@ -364,8 +365,8 @@ const clarificationActionSpecs = Object.freeze([
 
 const claimProbeSpecs = Object.freeze([
   ["PRICE", Object.freeze({ amountVnd: 699_000, currency: "VND" }), "Mẫu này 699 nghìn chị nha.", "Để em xem lại giá mẫu này rồi báo chị nha."],
-  ["SIZE_FIT", Object.freeze({ recommendedSizes: ["M"], alternativeSizes: ["L"] }), "Theo số đo của chị, M sẽ vừa hơn. L là size rộng hơn.", "Để em đối chiếu bảng size rồi báo chị nha."],
-  ["PRODUCT_MEDIA", Object.freeze({ assetId: "synthetic-asset", assetSha256: sha256("probe-media") }), "Mẫu chị đang xem đây nha, em để ngay bên dưới cho chị xem kỹ hơn ạ.", "Để em tìm đúng ảnh mẫu này gửi chị nha."],
+  ["SIZE_FIT", Object.freeze({ recommendedSizes: ["M"], alternativeSizes: ["L"] }), "Theo số đo của chị, size M sẽ vừa hơn. Size L là lựa chọn rộng hơn.", "Để em đối chiếu bảng size rồi báo chị nha."],
+  ["PRODUCT_MEDIA", Object.freeze({ assetId: "synthetic-asset", assetSha256: sha256("probe-media") }), "Mẫu chị đang xem nằm ngay bên dưới để chị xem kỹ hơn ạ.", "Để em tìm đúng ảnh mẫu này gửi chị nha."],
 ] as const);
 
 const generatedEffectProbes = effectProbeSpecs.flatMap(([
