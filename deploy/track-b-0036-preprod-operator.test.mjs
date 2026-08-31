@@ -22,6 +22,30 @@ requireText("track-b-0036-preprod-common.sh", /EXPECTED_LEDGER_SHA256=/u,
   "full migration ledger identity is not pinned");
 requireText("track-b-0036-preprod-common.sh", /EXPECTED_ROLE_STATE_SHA256=/u,
   "database role state is not pinned");
+requireText("track-b-0036-preprod-common.sh", /database_sql_file_sha256_named/u,
+  "canonical ACL query execution is missing");
+requireText("track-b-0036-relation-acl-canonical.sql", /aclexplode[\s\S]*acldefault/u,
+  "relation ACL comparison does not normalize implicit owner privileges");
+requireText("track-b-0036-relation-acl-canonical.sql", /grantor_role[\s\S]*is_grantable/u,
+  "relation ACL comparison omits grantor or grant-option identity");
+requireText("track-b-0036-relation-acl-canonical.sql", /THEN 'PUBLIC' ELSE 'ROLE'/u,
+  "relation ACL comparison omits PUBLIC identity discrimination");
+requireText("track-b-0036-relation-acl-canonical.sql", /relkind = 'S'[\s\S]*THEN 's'::"char"/u,
+  "sequence ACL defaults do not use PostgreSQL sequence semantics");
+requireText("track-b-0036-relation-acl-canonical.sql", /validated_acl[\s\S]*identity_valid[\s\S]*THEN 'PUBLIC' ELSE 'ROLE'/u,
+  "relation ACL comparison does not fail closed or distinguish PUBLIC identity");
+requireText("track-b-0036-function-acl-canonical.sql", /aclexplode[\s\S]*acldefault\('f'/u,
+  "function ACL comparison does not normalize PostgreSQL defaults");
+requireText("track-b-0036-function-acl-canonical.sql", /validated_acl[\s\S]*identity_valid[\s\S]*THEN 'PUBLIC' ELSE 'ROLE'/u,
+  "function ACL comparison does not fail closed or distinguish PUBLIC identity");
+for (const aclQuery of [
+  "track-b-0036-relation-acl-canonical.sql",
+  "track-b-0036-function-acl-canonical.sql",
+]) {
+  if (/UNKNOWN_OID/u.test(source(aclQuery))) {
+    throw new Error(`${aclQuery} serializes an unresolved role instead of failing closed`);
+  }
+}
 requireText("track-b-0036-preprod-common.sh", /flock -n 9/u,
   "global mutation lock is missing");
 requireText("track-b-0036-preprod-common.sh", /readonly EVIDENCE_DIR="\$APP_ROOT\/backups\/20260831-track-b-0036-preprod"/u,
@@ -61,6 +85,8 @@ for (const name of [
   "track-b-0036-preprod-backup-rehearse.sh",
   "track-b-0036-preprod-apply.sh",
   "track-b-0036-preprod-verify.sh",
+  "track-b-0036-relation-acl-canonical.sql",
+  "track-b-0036-function-acl-canonical.sql",
 ]) {
   if (/DATABASE_URL\s*=|postgres(?:ql)?:\/\/|BEGIN (?:RSA|OPENSSH) PRIVATE KEY/iu.test(source(name))) {
     throw new Error(`${name} contains a credential-shaped literal`);
