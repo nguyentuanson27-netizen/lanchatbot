@@ -200,7 +200,7 @@ describe("Context V2 candidate capability", () => {
       context: context(),
     });
     expect(request.identity.requestEnvelopeHash).toBe(
-      "baf6be3765cf896aebe873259d01ba2e6b284090499e18fdc841a860bf99f063",
+      "238dee16dce20a2f177a27b51f4ef3d1eeaf2be505da2a0c724ac1c00acbc416",
     );
     expect(request.body).toContain("responseSchema");
     expect(request.body).toContain("safetySettings");
@@ -238,7 +238,10 @@ describe("Context V2 candidate capability", () => {
       "eligible PRICE, SIZE_FIT, and PRODUCT_MEDIA claims",
     );
     expect(instruction).toContain(
-      "For SIZE_FIT, explicitly state at least one exact supplied recommendation as 'size <token>'",
+      "one standalone affirmative clause that says the customer fits 'size <recommendedSizes[0]>'",
+    );
+    expect(instruction).toContain(
+      "Do not phrase that clause as a question, negation, uncertainty, catalog/list, stock statement",
     );
     expect(instruction).toContain(
       "Mẫu chị đang xem nằm ngay bên dưới để chị xem kỹ hơn ạ.",
