@@ -98,6 +98,9 @@ describe("Gate E semantic interpreter capability boundary", () => {
     expect(body.systemInstruction.parts[0].text).toContain(
       "Only label a clarification target or requested action when the wording asks the customer to provide information or confirm a choice; acknowledgements and summaries are neither.",
     );
+    expect(body.systemInstruction.parts[0].text).toContain(
+      "Requested actions are actions asked of the customer, never actions the shop or assistant promises to perform.",
+    );
     expect(body.generationConfig.responseSchema)
       .not.toHaveProperty("additionalProperties");
     expect(body.generationConfig).not.toHaveProperty("temperature");
@@ -305,6 +308,41 @@ describe("Gate E semantic interpreter capability boundary", () => {
       ["claim-product_media-adversarial-negative", "Để em tìm đúng ảnh mẫu này gửi chị nha."],
       ["unrelated-wording", "Dạ em đây chị."],
     ]);
+  });
+
+  it("keeps a future shop media action outside customer-request semantics", () => {
+    const probe = GATE_E_INTERPRETATION_PROBES_V1.find(
+      ({ probeId }) => probeId === "claim-product_media-adversarial-negative",
+    )!;
+    expect(probe.input.wording).toEqual([
+      "Để em tìm đúng ảnh mẫu này gửi chị nha.",
+    ]);
+    expect(probe.expected).toEqual({
+      required: {
+        claimContentHashes: [],
+        clarificationTargets: [],
+        requestedActions: [],
+        claimedEffects: [],
+      },
+      allowed: {
+        claimContentHashes: [],
+        clarificationTargets: [],
+        requestedActions: [],
+        claimedEffects: [],
+      },
+    });
+    expect(evaluateGateEInterpreterProbeV1(probe, {
+      schemaVersion: 1,
+      contractVersion: "GATE_E_OUTPUT_INTERPRETATION_V1",
+      candidateOutputHash: probe.input.candidateOutputHash,
+      claimContentHashes: [],
+      clarificationTargets: ["PRODUCT"],
+      requestedActions: ["PROVIDE_PRODUCT"],
+      claimedEffects: [],
+    })).toEqual({
+      disposition: "REJECTED",
+      mismatchDimensions: ["clarificationTargets", "requestedActions"],
+    });
   });
 
   it("rejects candidate-authored semantic labels at the interpreter input boundary", () => {

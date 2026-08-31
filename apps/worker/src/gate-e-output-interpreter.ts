@@ -81,6 +81,7 @@ const SYSTEM_INSTRUCTION = [
   "MEASUREMENTS means asking for the customer's body measurements, such as height or weight; confirming a selected size is not MEASUREMENTS.",
   "CHECKOUT_DETAILS means asking for recipient name, phone number, or delivery address.",
   "Only label a clarification target or requested action when the wording asks the customer to provide information or confirm a choice; acknowledgements and summaries are neither.",
+  "Requested actions are actions asked of the customer, never actions the shop or assistant promises to perform. A future shop action such as 'Để em tìm đúng ảnh mẫu này gửi chị nha.' is neither PRODUCT/PROVIDE_PRODUCT nor a completed MESSAGE_SENT effect because it asks the customer for nothing and says nothing was already sent.",
   "ORDER_PLACED means an order was created, ORDER_CONFIRMED means that order was confirmed, MESSAGE_SENT means a stated message or information was sent, and DELIVERY_CREATED means a tracking code or shipment was created.",
   "CONFIRM_SELECTION means the customer is asked to check or confirm the selected product, color, or size.",
   "Natural product-media presentation wording can assert an eligible PRODUCT_MEDIA claim without using exact nouns such as image or photo. For example, 'Mẫu chị đang xem nằm ngay bên dưới để chị xem kỹ hơn ạ.' asserts the matching eligible product-media content hash.",
