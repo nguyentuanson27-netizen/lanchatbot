@@ -14,7 +14,16 @@ import {
 
 const hash = (character: string): string => character.repeat(64);
 
-function context(): ContextV2 {
+function context(
+  productBindingStatus: "RESOLVED" | "STALE" | "AMBIGUOUS" | "UNRESOLVED" =
+    "RESOLVED",
+): ContextV2 {
+  const productIds = productBindingStatus === "UNRESOLVED"
+    ? []
+    : productBindingStatus === "AMBIGUOUS"
+    ? ["SD398", "SD399"]
+    : ["SD398"];
+  const productContextUnready = productBindingStatus !== "RESOLVED";
   const draft = {
     schemaVersion: 2 as const,
     contractVersion: "CONTEXT_V2" as const,
@@ -32,8 +41,8 @@ function context(): ContextV2 {
     productBinding: {
       schemaVersion: 2 as const,
       contractVersion: "PRODUCT_BINDING_V2" as const,
-      status: "RESOLVED" as const,
-      productIds: ["SD398"],
+      status: productBindingStatus,
+      productIds,
       catalogVersion: "catalog:1",
     },
     dialogueEvidence: {
@@ -97,19 +106,28 @@ function context(): ContextV2 {
     barriers: {
       schemaVersion: 2 as const,
       contractVersion: "CONVERSATION_BARRIERS_V2" as const,
-      active: [],
+      active: productContextUnready
+        ? ["PRODUCT_CONTEXT_UNREADY" as const]
+        : [],
       lifecycle: "UNTIL_AUTHORITATIVE_STATE_CHANGES" as const,
       conversationRevision: 5,
       salesCycleRevision: 3,
       source: "CANONICAL_EVIDENCE_AND_COMMERCE_STATE_V1" as const,
       authority: "SHADOW_ONLY" as const,
     },
-    buyingIntent: {
-      decision: "COMMITTED" as const,
-      requestedAction: "OPEN_CART" as const,
-      productId: "SD398",
-      evidenceHash: hash("e"),
-    },
+    buyingIntent: productContextUnready
+      ? {
+          decision: "CONSIDERING" as const,
+          requestedAction: "NONE" as const,
+          productId: null,
+          evidenceHash: hash("e"),
+        }
+      : {
+          decision: "COMMITTED" as const,
+          requestedAction: "OPEN_CART" as const,
+          productId: "SD398",
+          evidenceHash: hash("e"),
+        },
     cartReadiness: null,
     ownership: { owner: "BOT" as const, handoffActive: false, reasonCode: null },
     consumerContractVersions: {
@@ -200,7 +218,7 @@ describe("Context V2 candidate capability", () => {
       context: context(),
     });
     expect(request.identity.requestEnvelopeHash).toBe(
-      "238dee16dce20a2f177a27b51f4ef3d1eeaf2be505da2a0c724ac1c00acbc416",
+      "b7cc42c30f43a17a9ef62f1c54f2d40b4954119b4d3bd16a2773e82d36ee99ae",
     );
     expect(request.body).toContain("responseSchema");
     expect(request.body).toContain("safetySettings");
@@ -285,6 +303,42 @@ describe("Context V2 candidate capability", () => {
       context: context(),
     })).toThrow("CONTEXT_V2_MODEL_RESOURCE_INVALID");
   });
+
+  it.each(["STALE", "AMBIGUOUS", "UNRESOLVED"] as const)(
+    "scopes checkout wording away from %s product-selection responses",
+    (productBindingStatus) => {
+      const body = JSON.parse(buildCandidateRequest({
+        modelResource: `projects/test/locations/us-central1/publishers/google/models/${CONTEXT_V2_CANDIDATE_MODEL_ID}`,
+        context: context(productBindingStatus),
+      }).body) as {
+        systemInstruction: { parts: Array<{ text: string }> };
+        contents: Array<{ parts: Array<{ text: string }> }>;
+      };
+      const instructionLines = body.systemInstruction.parts[0]!.text.split("\n");
+      const productRule = instructionLines.find((line) =>
+        line.startsWith("If PRODUCT_CONTEXT_UNREADY")
+      );
+      const checkoutExampleLines = instructionLines.filter((line) =>
+        line.includes("Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.")
+      );
+      const sanitized = JSON.parse(body.contents[0]!.parts[0]!.text) as {
+        barriers: { active: string[] };
+        productBinding: { status: string };
+      };
+
+      expect(sanitized.productBinding.status).toBe(productBindingStatus);
+      expect(sanitized.barriers.active).toContain("PRODUCT_CONTEXT_UNREADY");
+      expect(productRule).toContain("Chị đang xem mẫu nào vậy ạ?");
+      expect(productRule).toContain("recipient name, phone number, delivery address, payment");
+      expect(checkoutExampleLines).toHaveLength(1);
+      expect(checkoutExampleLines[0]).toMatch(
+        /^Otherwise, if phase is ORDER_REVIEW with sourceStage ORDER_PREVIEW/,
+      );
+      expect(instructionLines).not.toContainEqual(
+        expect.stringMatching(/^Natural tone examples to adapt/),
+      );
+    },
+  );
 
   it("hashes the request immediately before sending and rejects unknown provider identity", async () => {
     let sent: Readonly<{ url: string; body: string }> | undefined;
