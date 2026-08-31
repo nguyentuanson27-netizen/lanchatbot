@@ -200,6 +200,50 @@ postgresDescribe("Track B 0036 canonical ACL comparison", () => {
     });
   });
 
+  it("fails closed on unresolved relation and function owners", async () => {
+    await fixture(async ({ client }) => {
+      const unknownOid = 999_999_999;
+      expect((await client.query("SELECT count(*)::text AS count FROM pg_roles WHERE oid=$1", [unknownOid]))
+        .rows[0]).toEqual({ count: "0" });
+      await client.query("CREATE TABLE acl_target (id bigint PRIMARY KEY)");
+      await client.query("CREATE FUNCTION acl_function() RETURNS integer LANGUAGE sql AS 'SELECT 1'");
+
+      const relationOwner = (await client.query(`
+        UPDATE pg_class
+           SET relowner = $1::oid
+         WHERE oid = 'acl_target'::regclass
+         RETURNING relowner
+      `, [unknownOid])).rows[0]?.relowner;
+      expect(Number(relationOwner)).toBe(unknownOid);
+      try {
+        await expect(canonicalRows(client, relationAclSql)).rejects.toThrow(/division by zero/iu);
+      } finally {
+        await client.query(`
+          UPDATE pg_class
+             SET relowner = (SELECT oid FROM pg_roles WHERE rolname = current_user)
+           WHERE oid = 'acl_target'::regclass
+        `);
+      }
+
+      const functionOwner = (await client.query(`
+        UPDATE pg_proc
+           SET proowner = $1::oid
+         WHERE oid = 'acl_function()'::regprocedure
+         RETURNING proowner
+      `, [unknownOid])).rows[0]?.proowner;
+      expect(Number(functionOwner)).toBe(unknownOid);
+      try {
+        await expect(canonicalRows(client, functionAclSql)).rejects.toThrow(/division by zero/iu);
+      } finally {
+        await client.query(`
+          UPDATE pg_proc
+             SET proowner = (SELECT oid FROM pg_roles WHERE rolname = current_user)
+           WHERE oid = 'acl_function()'::regprocedure
+        `);
+      }
+    });
+  });
+
   it("normalizes function defaults while preserving PUBLIC and grant-option semantics", async () => {
     await fixture(async ({ client, roles }) => {
       await client.query("CREATE FUNCTION acl_target() RETURNS integer LANGUAGE sql AS 'SELECT 1'");

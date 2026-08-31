@@ -11,7 +11,7 @@ WITH relation_objects AS (
          END AS acl_object_kind
     FROM pg_class c
     JOIN pg_namespace n ON n.oid = c.relnamespace
-    JOIN pg_roles owner_role ON owner_role.oid = c.relowner
+    LEFT JOIN pg_roles owner_role ON owner_role.oid = c.relowner
    WHERE n.nspname = current_schema()
 ), acl_entries AS MATERIALIZED (
   SELECT object.relkind,
@@ -31,11 +31,15 @@ WITH relation_objects AS (
     LEFT JOIN pg_roles grantor_role ON grantor_role.oid = acl.grantor
    WHERE object.relkind IN ('r', 'p', 'v', 'm', 'S', 'f')
 ), validated_acl AS MATERIALIZED (
-  SELECT 1 / CASE WHEN count(*) FILTER (
-           WHERE (grantee <> 0 AND grantee_name IS NULL)
-              OR grantor_name IS NULL
-         ) > 0 THEN 0 ELSE 1 END AS identity_valid
-    FROM acl_entries
+  SELECT 1 / CASE WHEN
+           EXISTS (SELECT 1 FROM relation_objects WHERE owner_name IS NULL)
+           OR EXISTS (
+             SELECT 1
+               FROM acl_entries
+              WHERE (grantee <> 0 AND grantee_name IS NULL)
+                 OR grantor_name IS NULL
+           )
+         THEN 0 ELSE 1 END AS identity_valid
 ), canonical_rows AS (
   SELECT relkind::text AS object_kind,
          relname AS object_name,
@@ -47,6 +51,8 @@ WITH relation_objects AS (
          jsonb_build_array('OWNER', relkind::text, relname, owner_name)::text
            AS canonical_acl_row
     FROM relation_objects
+    CROSS JOIN validated_acl validation
+   WHERE validation.identity_valid = 1
   UNION ALL
   SELECT entry.relkind::text,
          entry.relname,

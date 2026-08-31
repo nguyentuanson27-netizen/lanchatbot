@@ -7,7 +7,7 @@ WITH function_objects AS (
          p.proacl
     FROM pg_proc p
     JOIN pg_namespace n ON n.oid = p.pronamespace
-    JOIN pg_roles owner_role ON owner_role.oid = p.proowner
+    LEFT JOIN pg_roles owner_role ON owner_role.oid = p.proowner
    WHERE n.nspname = current_schema()
 ), acl_entries AS MATERIALIZED (
   SELECT object.proname,
@@ -26,11 +26,15 @@ WITH function_objects AS (
     LEFT JOIN pg_roles grantee_role ON grantee_role.oid = acl.grantee
     LEFT JOIN pg_roles grantor_role ON grantor_role.oid = acl.grantor
 ), validated_acl AS MATERIALIZED (
-  SELECT 1 / CASE WHEN count(*) FILTER (
-           WHERE (grantee <> 0 AND grantee_name IS NULL)
-              OR grantor_name IS NULL
-         ) > 0 THEN 0 ELSE 1 END AS identity_valid
-    FROM acl_entries
+  SELECT 1 / CASE WHEN
+           EXISTS (SELECT 1 FROM function_objects WHERE owner_name IS NULL)
+           OR EXISTS (
+             SELECT 1
+               FROM acl_entries
+              WHERE (grantee <> 0 AND grantee_name IS NULL)
+                 OR grantor_name IS NULL
+           )
+         THEN 0 ELSE 1 END AS identity_valid
 ), canonical_rows AS (
   SELECT proname AS object_name,
          identity_arguments,
@@ -43,6 +47,8 @@ WITH function_objects AS (
            'OWNER', proname, identity_arguments, owner_name
          )::text AS canonical_acl_row
     FROM function_objects
+    CROSS JOIN validated_acl validation
+   WHERE validation.identity_valid = 1
   UNION ALL
   SELECT entry.proname,
          entry.identity_arguments,
