@@ -122,16 +122,16 @@ describe("Gate E operational boundary", () => {
       .toThrow("GATE_E_OPERATIONAL_DATABASE_URL_INVALID");
   });
 
-  it("reproduces the committed v15 registration from immutable artifacts", async () => {
-    const actual = await buildGateEOperationalRegistration({
+  it.each([
+    "evaluation/gate-e/df10-v15",
+    "evaluation/gate-e/track-b-v16",
+  ])("fails closed for historical registration %s after candidate identity changes", async (
+    artifactDirectory,
+  ) => {
+    await expect(buildGateEOperationalRegistration({
       cwd: REPOSITORY_ROOT,
-      artifactDirectory: "evaluation/gate-e/df10-v15",
-    });
-    const expected = (await import(
-      "../../../evaluation/gate-e/df10-v15/registration.json",
-      { with: { type: "json" } }
-    )).default;
-    expect(actual).toEqual(expected);
+      artifactDirectory,
+    })).rejects.toThrow("GATE_E_PROVIDER_OBSERVATION_NOT_REGISTERABLE");
   });
 
   it("rejects artifact path traversal before reading files", async () => {
