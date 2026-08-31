@@ -200,7 +200,7 @@ describe("Context V2 candidate capability", () => {
       context: context(),
     });
     expect(request.identity.requestEnvelopeHash).toBe(
-      "5ce4798df558cca5f69e96fd6f12a0150f87bdab307f8170040109c0ed2f1419",
+      "baf6be3765cf896aebe873259d01ba2e6b284090499e18fdc841a860bf99f063",
     );
     expect(request.body).toContain("responseSchema");
     expect(request.body).toContain("safetySettings");
@@ -223,6 +223,9 @@ describe("Context V2 candidate capability", () => {
     };
     const instruction = body.systemInstruction.parts[0]!.text;
     expect(instruction).toContain("PRODUCT_CONTEXT_UNREADY");
+    expect(instruction).toContain(
+      "until the product is resolved, never ask for recipient name, phone number, delivery address, payment, or any other checkout detail",
+    );
     expect(instruction).toContain("MEASUREMENTS_REQUIRED");
     expect(instruction).toContain("ORDER_REVIEW");
     expect(instruction).toContain("ORDER_CONFIRMED");
