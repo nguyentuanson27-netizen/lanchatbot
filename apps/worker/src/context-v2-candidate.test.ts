@@ -200,7 +200,7 @@ describe("Context V2 candidate capability", () => {
       context: context(),
     });
     expect(request.identity.requestEnvelopeHash).toBe(
-      "e9d1afec74ae556eae735adaca36b8d282e15f1cbc87fe763492b11057dc9e64",
+      "5ce4798df558cca5f69e96fd6f12a0150f87bdab307f8170040109c0ed2f1419",
     );
     expect(request.body).toContain("responseSchema");
     expect(request.body).toContain("safetySettings");
@@ -234,6 +234,13 @@ describe("Context V2 candidate capability", () => {
     expect(instruction).toContain(
       "eligible PRICE, SIZE_FIT, and PRODUCT_MEDIA claims",
     );
+    expect(instruction).toContain(
+      "For SIZE_FIT, explicitly state at least one exact supplied recommendation as 'size <token>'",
+    );
+    expect(instruction).toContain(
+      "Mẫu chị đang xem nằm ngay bên dưới để chị xem kỹ hơn ạ.",
+    );
+    expect(instruction).not.toContain("em để ngay bên dưới");
     expect(instruction).toContain(
       "use strategy ASK_CLARIFICATION and CTA ASK_CHECKOUT_DETAILS",
     );

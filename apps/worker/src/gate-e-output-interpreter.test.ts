@@ -82,6 +82,9 @@ describe("Gate E semantic interpreter capability boundary", () => {
     expect(body.systemInstruction.parts[0]!.text).toContain(
       "Natural product-media presentation wording",
     );
+    expect(body.systemInstruction.parts[0]!.text).toContain(
+      "Static presentation of eligible product media is not MESSAGE_SENT",
+    );
     expect(body.generationConfig.responseSchema.properties.requestedActions.items.enum)
       .toEqual([
         "PROVIDE_PRODUCT",
@@ -296,9 +299,9 @@ describe("Gate E semantic interpreter capability boundary", () => {
       ["action-confirm-selection-adversarial-negative", "Em đang tổng hợp lại mẫu, màu với size cho chị."],
       ["claim-price-positive", "Mẫu này 699 nghìn chị nha."],
       ["claim-price-adversarial-negative", "Để em xem lại giá mẫu này rồi báo chị nha."],
-      ["claim-size_fit-positive", "Theo số đo của chị, M sẽ vừa hơn. L là size rộng hơn."],
+      ["claim-size_fit-positive", "Theo số đo của chị, size M sẽ vừa hơn. Size L là lựa chọn rộng hơn."],
       ["claim-size_fit-adversarial-negative", "Để em đối chiếu bảng size rồi báo chị nha."],
-      ["claim-product_media-positive", "Mẫu chị đang xem đây nha, em để ngay bên dưới cho chị xem kỹ hơn ạ."],
+      ["claim-product_media-positive", "Mẫu chị đang xem nằm ngay bên dưới để chị xem kỹ hơn ạ."],
       ["claim-product_media-adversarial-negative", "Để em tìm đúng ảnh mẫu này gửi chị nha."],
       ["unrelated-wording", "Dạ em đây chị."],
     ]);

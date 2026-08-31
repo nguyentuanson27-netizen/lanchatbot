@@ -1,8 +1,8 @@
 # Track B — Execution Checklist
 
-**Status:** `B2.4_MERGED / B3.1_OPERATIONAL_ENTRYPOINT_IN_PROGRESS`
+**Status:** `B2.4_MERGED / B3.1_FAILED_CANDIDATE_REMEDIATION_IN_PROGRESS`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
-**Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` and its observed request envelope stay byte-frozen; the Context V2 candidate stays offline. If that direction proves insufficient, Track B stops incomplete; it has no prompt-edit or candidate-promotion alternative.
+**Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` and its observed request envelope stay byte-frozen; the Context V2 candidate stays offline. The owner-authorized B3.1 remediation may change only the failed offline candidate/interpreter evaluation contract and must create a new candidate identity; it is neither a live prompt alternative nor candidate promotion. If the live direction proves insufficient, Track B stops incomplete.
 
 ## Before implementation
 
@@ -164,8 +164,12 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 - [x] The owner selected the exact final merged Track B candidate for PREPROD deployment; rederive its identity from fresh `origin/main` after every required source PR merge. Local and unmerged candidates receive no promotion ceremony.
 - [x] Merge the focused operational entrypoint and PREPROD credential-shape correction in PRs #281/#282. Final entrypoint main is `9b9533641b275403923f7c037247199a0ec760ae`; this is source readiness, not Gate-E acceptance.
 - [x] Observe provider identity once against clean exact main `9b9533641b275403923f7c037247199a0ec760ae`: model/version matched `gemini-3.5-flash-lite`, request envelope `b07e16598466a411ca5e64bc2f83d179c5c348849ffa1d5307083ad85f0c8f7b`, candidate fingerprint `cddaa90c358e14747f46b7e5c76ca203bee8fb80a7e8ed4d70d917bb6a7ac7dd`. The first pre-OAuth credential-parse failure consumed no provider model request and produced no evidence claim.
-- [ ] Merge and anchor the immutable `evaluation/gate-e/track-b-v16` registration bundle before any scored provider request.
-- [ ] Run the current governing re-evaluation path for the exact candidate.
+- [x] Merge and anchor the immutable `evaluation/gate-e/track-b-v16` registration bundle before any scored provider request. PR #283 merged as `972241e24cf61d0cccf04b3df3a74fc6a0f10cf1`; the immutable registration anchor hash is `ad665e734d5ead9e52523878ce4eda1feb1e669b4e836573c9736baf25a772e0`.
+- [x] Execute exactly one bounded scored run for `track-b-v16`. The admissible exact-head run finalized as `TECHNICAL_ASSERTIONS_FAILED`: immutable evidence hash `ae06604149c6d6042bd09fe9dba94e2f58dcbe39ddc00dfa1d357c162834cb4e`, finalization hash `27c84ba57167273e46d618e637485fb53a4aab59955ea66e3878aa496a1ddb14`. These failed population/scores remain in the denominator and must never be overwritten, relabeled, excluded or reused as a later candidate's evidence.
+- [x] Bind the owner-authorized remediation only to the two observed failures: BF-05 `GATE_E_CLAIM_SEGMENT_EVIDENCE_MISMATCH`; BF-06 `GATE_E_EFFECT_DECLARATION_INTERPRETATION_MISMATCH` plus `GATE_E_INTERPRETER_EFFECT_NOT_ALLOWED` and one side-effect violation. No deploy or activation is admitted by this failed run.
+- [x] Trace the source mismatch without reconstructing provider output: BF-05 allowed a “natural” size phrase while the deterministic evidence matcher accepts only an explicitly recognizable verified size token; BF-06 registered first-person completed placement wording (`em để ngay bên dưới`) as the positive media example even though the same semantic boundary must reject wording interpreted as a completed message effect. Remediation makes both contracts unambiguous while retaining the existing matcher and effect allowlist.
+- [ ] Merge the smallest source remediation without weakening claim/effect authorization, provenance, rubric thresholds, interpreter allowlist or whole-group safety; derive a new candidate identity and immutable registration instead of modifying `track-b-v16`.
+- [ ] Execute the one newly authorized bounded scored run for the new exact candidate. A second failure stops the operational path until a new owner command.
 - [ ] Use existing provenance and release evidence; do not invent a competing promotion manifest.
 - [ ] Keep provider credentials out of GitHub Actions and the repository; run the provider-backed rerun in an authorized local/VPS/manual or scheduled environment.
 - [ ] Only if the governing contract still creates a concrete unacceptable blocker, propose the smallest separately authorized amendment. Do not pre-build a new evidence profile.

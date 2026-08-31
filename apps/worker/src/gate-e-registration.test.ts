@@ -990,7 +990,7 @@ describe("Gate E immutable registration boundary", () => {
       ...output,
       segments: output.segments.map((segment) =>
         segment.kind === "VERIFIED_CLAIM"
-          ? { ...segment, text: "Em gửi chị mẫu này để mình xem kỹ hơn nha." }
+          ? { ...segment, text: "Mẫu chị đang xem nằm ngay bên dưới để chị xem kỹ hơn ạ." }
           : segment
       ),
     };
@@ -998,6 +998,14 @@ describe("Gate E immutable registration boundary", () => {
     expect(scoreOutput({ item, output: naturalOutput })).toMatchObject({
       disposition: "MUST_PASS",
       claimSafety: 1,
+    });
+    expect(scoreOutput({
+      item,
+      output: naturalOutput,
+      interpretation: { claimedEffects: ["MESSAGE_SENT"] },
+    })).toMatchObject({
+      disposition: "FAILED",
+      sideEffectViolations: 1,
     });
   });
 
