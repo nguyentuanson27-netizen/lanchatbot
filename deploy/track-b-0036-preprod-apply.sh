@@ -9,13 +9,7 @@ test "${MIGRATION_AUTHORIZED:-}" = "YES_I_AM_AUTHORIZED" || die "explicit migrat
 require_source_identity
 acquire_mutation_lock
 require_target_identity
-test -s "$BACKUP_FILE" && test -s "$BACKUP_SHA256_FILE" && test -s "$REHEARSAL_MARKER" || die "verified backup/rehearsal evidence missing"
-sha256sum -c "$BACKUP_SHA256_FILE" >/dev/null || die "backup checksum verification failed"
-grep -Fx "SOURCE_REVISION=$SOURCE_REVISION" "$REHEARSAL_MARKER" >/dev/null || die "rehearsal source mismatch"
-grep -Fx "UP_SHA256=$EXPECTED_UP_SHA256" "$REHEARSAL_MARKER" >/dev/null || die "rehearsal up hash mismatch"
-grep -Fx "DOWN_SHA256=$EXPECTED_DOWN_SHA256" "$REHEARSAL_MARKER" >/dev/null || die "rehearsal down hash mismatch"
-grep -Fx "BACKUP_SHA256=$(awk '{print $1}' "$BACKUP_SHA256_FILE")" "$REHEARSAL_MARKER" >/dev/null || die "rehearsal backup hash mismatch"
-grep -Fx "REHEARSAL=UP_DOWN_UP_PASS" "$REHEARSAL_MARKER" >/dev/null || die "rehearsal verdict missing"
+verify_rehearsal_evidence "$EVIDENCE_DIR" "$SOURCE_REVISION"
 
 migration_may_have_committed=0
 rollback_schema() {
@@ -26,11 +20,18 @@ rollback_schema() {
   } | database_stream -v migration_name="$EXPECTED_MIGRATION" -v migration_checksum="$EXPECTED_UP_SHA256" >/dev/null
 }
 on_exit() {
-  local status=$?
+  local status=$? ledger_state
   trap - EXIT HUP INT TERM
   if test "$status" -ne 0 && test "$migration_may_have_committed" = "1"; then
-    if test "$(database_query "SELECT count(*) FROM schema_migrations WHERE migration_name='$EXPECTED_MIGRATION' AND checksum_sha256='$EXPECTED_UP_SHA256'" 2>/dev/null || true)" = "1"; then
-      rollback_schema || printf '%s\n' "TRACK_B_0036_AUTOMATIC_SCHEMA_ROLLBACK_FAILED" >&2
+    ledger_state="$(database_query "SELECT count(*) FROM schema_migrations WHERE migration_name='$EXPECTED_MIGRATION' AND checksum_sha256='$EXPECTED_UP_SHA256'" 2>/dev/null)" || ledger_state="UNAVAILABLE"
+    if test "$ledger_state" = "1"; then
+      perform_verified_schema_rollback "$ROLLBACK_RECORD" || printf '%s\n' "TRACK_B_0036_AUTOMATIC_SCHEMA_ROLLBACK_BLOCKED" >&2
+    elif test "$ledger_state" = "0" && (require_target_identity); then
+      printf '%s\n' "RECOVERY=VERIFIED_TRANSACTION_NOT_COMMITTED" "BACKUP_FILE=$BACKUP_FILE" "BACKUP_SHA256=$(awk '{print $1}' "$BACKUP_SHA256_FILE")" > "$ROLLBACK_RECORD"
+      chmod 600 "$ROLLBACK_RECORD"
+    else
+      write_blocked_schema_recovery "$ROLLBACK_RECORD"
+      printf '%s\n' "TRACK_B_0036_RECOVERY_STATE_AMBIGUOUS" >&2
     fi
   fi
   exit "$status"

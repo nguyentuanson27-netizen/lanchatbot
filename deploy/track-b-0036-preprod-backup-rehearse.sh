@@ -11,6 +11,9 @@ acquire_mutation_lock
 require_target_identity
 test ! -e "$EVIDENCE_DIR" || die "0036 evidence directory already exists"
 install -d -m 0700 "$EVIDENCE_DIR"
+observed_target_record > "$PREFLIGHT_RECORD"
+chmod 600 "$PREFLIGHT_RECORD"
+test "$(cat "$PREFLIGHT_RECORD")" = "$(expected_target_record)" || die "recorded target preflight mismatch"
 
 restore_database="lana_track_b_0036_rehearsal_$$"
 cleanup=1
@@ -44,7 +47,7 @@ docker exec "$POSTGRES_CONTAINER" sh -ceu '
 ' sh "$restore_database"
 docker exec -i "$POSTGRES_CONTAINER" sh -ceu '
   export PGPASSWORD="$POSTGRES_PASSWORD"
-  exec pg_restore --exit-on-error --no-owner --no-privileges -U "$POSTGRES_USER" -d "$1"
+  exec pg_restore --exit-on-error -U "$POSTGRES_USER" -d "$1"
 ' sh "$restore_database" < "$BACKUP_FILE"
 
 restore_query() {
@@ -70,8 +73,8 @@ apply_down() {
   } | restore_stream -v migration_name="$EXPECTED_MIGRATION" -v migration_checksum="$EXPECTED_UP_SHA256" >/dev/null
 }
 
-test "$(restore_query "SELECT migration_name || '|' || checksum_sha256 FROM schema_migrations ORDER BY migration_name DESC LIMIT 1")" = "$EXPECTED_PREVIOUS_MIGRATION|$EXPECTED_PREVIOUS_MIGRATION_SHA256" || die "restored ledger mismatch"
 test "$(restore_query "SELECT split_part(current_setting('server_version'),'.',1)")" = "$EXPECTED_POSTGRES_MAJOR" || die "restored engine mismatch"
+verify_restored_baseline_named "$restore_database"
 
 apply_up
 verify_0036_schema_named "$restore_database"
@@ -169,11 +172,13 @@ rm -f "$down_stdout" "$down_stderr"
 test "$(restore_query "SELECT count(*) FROM df13_commerce_cutover_fences")" = "2" || die "durable fence evidence was not preserved"
 
 backup_sha="$(awk '{print $1}' "$BACKUP_SHA256_FILE")"
+preflight_sha="$(sha256sum "$PREFLIGHT_RECORD" | awk '{print $1}')"
 printf '%s\n' \
   "SOURCE_REVISION=$SOURCE_REVISION" \
   "UP_SHA256=$EXPECTED_UP_SHA256" \
   "DOWN_SHA256=$EXPECTED_DOWN_SHA256" \
   "BACKUP_SHA256=$backup_sha" \
+  "PREFLIGHT_SHA256=$preflight_sha" \
   "REHEARSAL=UP_DOWN_UP_PASS" > "$REHEARSAL_MARKER"
 chmod 600 "$REHEARSAL_MARKER"
 drop_restore

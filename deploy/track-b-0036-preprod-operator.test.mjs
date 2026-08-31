@@ -16,6 +16,12 @@ requireText("track-b-0036-preprod-common.sh", /EXPECTED_DOWN_SHA256="c8e2f56ba2f
   "0036 down checksum is not pinned");
 requireText("track-b-0036-preprod-common.sh", /EXPECTED_POINTER_REVISION="6"/u,
   "pre-migration pointer revision is not pinned");
+requireText("track-b-0036-preprod-common.sh", /EXPECTED_SYSTEM_IDENTIFIER="7662301595202035746"/u,
+  "PostgreSQL cluster system identifier is not pinned");
+requireText("track-b-0036-preprod-common.sh", /EXPECTED_LEDGER_SHA256=/u,
+  "full migration ledger identity is not pinned");
+requireText("track-b-0036-preprod-common.sh", /EXPECTED_ROLE_STATE_SHA256=/u,
+  "database role state is not pinned");
 requireText("track-b-0036-preprod-common.sh", /flock -n 9/u,
   "global mutation lock is missing");
 requireText("track-b-0036-preprod-common.sh", /readonly EVIDENCE_DIR="\$APP_ROOT\/backups\/20260831-track-b-0036-preprod"/u,
@@ -24,6 +30,9 @@ requireText("track-b-0036-preprod-common.sh", /verify_0036_schema_named/u,
   "reusable exact schema readback is missing");
 requireText("track-b-0036-preprod-backup-rehearse.sh", /pg_dump[\s\S]*pg_restore --exit-on-error/u,
   "backup is not restore-tested");
+if (/pg_restore[^\n]*(?:--no-owner|--no-privileges)/u.test(source("track-b-0036-preprod-backup-rehearse.sh"))) {
+  throw new Error("rehearsal discards target ownership or privileges");
+}
 requireText("track-b-0036-preprod-backup-rehearse.sh", /apply_up[\s\S]*apply_down[\s\S]*apply_up/u,
   "up/down/up rehearsal is missing");
 requireText("track-b-0036-preprod-backup-rehearse.sh", /apply_up\s*\nverify_0036_schema_named[\s\S]*apply_down[\s\S]*apply_up[\s\S]*verify_0036_schema_named/u,
@@ -38,6 +47,8 @@ requireText("track-b-0036-preprod-apply.sh", /MIGRATION_AUTHORIZED.*YES_I_AM_AUT
   "explicit migration authorization guard is missing");
 requireText("track-b-0036-preprod-apply.sh", /BEGIN;[\s\S]*INSERT INTO schema_migrations[\s\S]*COMMIT;/u,
   "migration and ledger write are not atomic");
+requireText("track-b-0036-preprod-apply.sh", /perform_verified_schema_rollback/u,
+  "post-apply rollback is not read back");
 requireText("track-b-0036-preprod-common.sh", /df13_commerce_cutover_fences_live_scope_uk/u,
   "exact index readback is missing");
 requireText("track-b-0036-preprod-common.sh", /guard_df13_commerce_cutover_fence_insert_identity/u,

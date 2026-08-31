@@ -12,7 +12,7 @@
     "typecheck": "pnpm -r build && pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "check": "pnpm check:release-integrity && pnpm typecheck && pnpm test && pnpm build",
-    "check:release-integrity": "node deploy/runtime-state/runtime-state.mjs validate --state deploy/runtime-state/example.json && node deploy/runtime-state/test-runtime-state.mjs && node deploy/runtime-state/release-integrity-guard.mjs && node deploy/track-b-0036-preprod-operator.test.mjs && pnpm check:dataset-boundary",
+    "check:release-integrity": "node deploy/runtime-state/runtime-state.mjs validate --state deploy/runtime-state/example.json && node deploy/runtime-state/test-runtime-state.mjs && node deploy/runtime-state/release-integrity-guard.mjs && node deploy/track-b-0036-preprod-operator.test.mjs && bash deploy/track-b-0036-preprod-operator.behavior.test.sh && pnpm check:dataset-boundary",
     "check:dataset-boundary": "node deploy/runtime-state/dataset-boundary-guard.mjs --self-test"
   },
   "devDependencies": {
