@@ -10,6 +10,13 @@ requireText(/T37_UP_SHA256="40b1ef14e3f7b2e037063de1f8d8ff7f804d069f8649115be6c2
 requireText(/T37_DOWN_SHA256="c5b2ea232bf586aeaf1e034c017dbf1d002fda904c4c4e3ebd9daace4ae73ce3"/u, "0037 down hash is not pinned");
 requireText(/T37_POINTER_REVISION="6"/u, "pre-mutation pointer is not pinned");
 requireText(/REALTIME_IMAGE[\s\S]*REALTIME_HEALTH/u, "affected service identity and health are not pinned");
+requireText(
+  /docker inspect --format '\{\{range \.Mounts\}\}\{\{if eq \.Destination "\/var\/lib\/postgresql\/data"\}\}\{\{\.Name\}\}\|\{\{\.Type\}\}\|\{\{\.RW\}\}\{\{end\}\}\{\{end\}\}'/u,
+  "PostgreSQL volume inspect template is not passed to Docker verbatim",
+);
+if (/\.Destination \\"\/var\/lib\/postgresql\/data\\"/u.test(source)) {
+  throw new Error("PostgreSQL volume inspect template contains shell-literal escapes");
+}
 requireText(/t37_require_preflight[\s\S]*exact ENGINEERING_PREPROD pre-0037 target mismatch/u, "exact target preflight is missing");
 requireText(/pg_dump[\s\S]*pg_restore --exit-on-error/u, "backup restore test is missing");
 requireText(/t37_apply_up_named[\s\S]*t37_apply_down_named[\s\S]*t37_apply_up_named/u, "up/down/up rehearsal is missing");
