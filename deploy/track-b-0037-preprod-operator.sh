@@ -21,7 +21,10 @@ readonly T37_V2_CONTENT="sha256:95ead755ea456c1e01c215d2421c2cf23f64fb536168ed49
 readonly T37_POINTER_REVISION="6"
 readonly T37_RELATION_ACL_SHA256="9bd6ea2d3457119de2e96620cd8a83a18f5baf2ec18f24b631c2f02d070a7635"
 readonly T37_FUNCTION_ACL_SHA256="66b943803363c3d050ae05ca25543b097d69543233760fd268f502d632e16034"
-readonly T37_EVIDENCE_DIR="$APP_ROOT/backups/20260901-track-b-0037-preprod"
+readonly T37_PRE_CATALOG_SHA256="ffd731178c5c4231531de973ddf7fb51402f6d2af2eaf98e0e0f3cdd5e77aa6d"
+readonly T37_CATALOG_QUERY="$SOURCE_ROOT/deploy/track-b-0037-catalog-canonical.sql"
+readonly T37_REALTIME_IMAGE_ID="sha256:ea0b076cfded1b8e10d817c43ba984066c97b2b18bcdff878fa91ed809c42c16"
+readonly T37_EVIDENCE_DIR="${T37_EVIDENCE_DIR_OVERRIDE:-$APP_ROOT/backups/20260901-track-b-0037-preprod}"
 readonly T37_BACKUP="$T37_EVIDENCE_DIR/lana_chatbot_pre_0037.dump"
 readonly T37_BACKUP_SHA="$T37_BACKUP.sha256"
 readonly T37_PREFLIGHT="$T37_EVIDENCE_DIR/target-preflight.txt"
@@ -56,6 +59,7 @@ t37_expected_preflight() {
     "POSTGRES_IMAGE_ID=$EXPECTED_POSTGRES_IMAGE_ID" \
     "POSTGRES_VOLUME=$EXPECTED_POSTGRES_VOLUME" \
     "REALTIME_IMAGE=$EXPECTED_REALTIME_IMAGE" \
+    "REALTIME_IMAGE_ID=$T37_REALTIME_IMAGE_ID" \
     "REALTIME_HEALTH=healthy|0" \
     "DATABASE_ENGINE=$EXPECTED_DATABASE|$EXPECTED_POSTGRES_MAJOR" \
     "SYSTEM_IDENTIFIER=$EXPECTED_SYSTEM_IDENTIFIER" \
@@ -70,6 +74,7 @@ t37_expected_preflight() {
     "ROLE_MEMBERSHIP_SHA256=$EXPECTED_ROLE_MEMBERSHIP_SHA256" \
     "RELATION_ACL_SHA256=$T37_RELATION_ACL_SHA256" \
     "FUNCTION_ACL_SHA256=$T37_FUNCTION_ACL_SHA256" \
+    "CATALOG_SHA256=$T37_PRE_CATALOG_SHA256" \
     "EXTENSIONS_SHA256=$EXPECTED_EXTENSIONS_SHA256" \
     "AUTHORITY_FENCES=0|0|0" \
     "CUTOVER_FENCES=0|0"
@@ -81,6 +86,7 @@ t37_observed_preflight() {
     "POSTGRES_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$POSTGRES_CONTAINER")" \
     "POSTGRES_VOLUME=$(docker inspect --format '{{range .Mounts}}{{if eq .Destination \"/var/lib/postgresql/data\"}}{{.Name}}|{{.Type}}|{{.RW}}{{end}}{{end}}' "$POSTGRES_CONTAINER")" \
     "REALTIME_IMAGE=$(docker inspect --format '{{.Config.Image}}' "$REALTIME_CONTAINER")" \
+    "REALTIME_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$REALTIME_CONTAINER")" \
     "REALTIME_HEALTH=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}|{{.RestartCount}}' "$REALTIME_CONTAINER")" \
     "DATABASE_ENGINE=$(database_query "SELECT current_database()||'|'||split_part(current_setting('server_version'),'.',1)")" \
     "SYSTEM_IDENTIFIER=$(database_query "SELECT system_identifier FROM pg_control_system()")" \
@@ -95,13 +101,19 @@ t37_observed_preflight() {
     "ROLE_MEMBERSHIP_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT member_role.rolname,granted_role.rolname,m.admin_option FROM pg_auth_members m JOIN pg_roles member_role ON member_role.oid=m.member JOIN pg_roles granted_role ON granted_role.oid=m.roleid ORDER BY 1,2,3")" \
     "RELATION_ACL_SHA256=$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$RELATION_ACL_QUERY")" \
     "FUNCTION_ACL_SHA256=$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$FUNCTION_ACL_QUERY")" \
+    "CATALOG_SHA256=$(t37_catalog_sha_named "$EXPECTED_DATABASE")" \
     "EXTENSIONS_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT extname,extversion FROM pg_extension ORDER BY extname")" \
     "AUTHORITY_FENCES=$(database_query "SELECT (SELECT count(*) FROM df13_commerce_authority_fences)::text||'|'||(SELECT count(*) FROM df13_commerce_authority_fence_claims)::text||'|'||(SELECT count(*) FROM df13_commerce_authority_fences WHERE completed_at IS NULL AND token_hash IS NOT NULL AND lease_until>clock_timestamp())::text")" \
     "CUTOVER_FENCES=$(database_query "SELECT count(*)::text||'|'||count(*) FILTER (WHERE released_at IS NULL)::text FROM df13_commerce_cutover_fences")"
 }
 
-t37_require_preflight() {
-  test "$(t37_observed_preflight)" = "$(t37_expected_preflight)" || die "exact ENGINEERING_PREPROD pre-0037 target mismatch"
+t37_preflight_matches() { test "$(t37_observed_preflight)" = "$(t37_expected_preflight)"; }
+t37_require_preflight() { t37_preflight_matches || die "exact ENGINEERING_PREPROD pre-0037 target mismatch"; }
+
+t37_catalog_sha_named() {
+  local database="$1"
+  test -s "$T37_CATALOG_QUERY" || die "0037 canonical catalog query missing"
+  database_sql_file_sha256_named "$database" "$T37_CATALOG_QUERY"
 }
 
 t37_apply_up_named() {
@@ -142,6 +154,11 @@ t37_verify_down_named() {
   local database="$1"
   test "$(database_query_named "$database" "SELECT count(*) FROM schema_migrations WHERE migration_name='$T37_MIGRATION'")" = "0" || die "0037 down ledger mismatch"
   test "$(database_query_named "$database" "SELECT count(*) FROM pg_get_functiondef('guard_df13_commerce_cutover_fence_insert_identity()'::regprocedure) AS d WHERE d NOT LIKE '%$T37_V2_BUNDLE%' AND d LIKE '%pre_version.sales_authority_mode <> ''LEGACY''%'")" = "1" || die "0037 down guard readback mismatch"
+  test "$(t37_catalog_sha_named "$database")" = "$T37_PRE_CATALOG_SHA256" || die "0037 down exact catalog mismatch"
+}
+
+t37_marker_post_catalog() {
+  sed -n 's/^POST_CATALOG_SHA256=//p' "$T37_MARKER"
 }
 
 t37_verify_marker() {
@@ -152,7 +169,11 @@ t37_verify_marker() {
   grep -Fx "DOWN_SHA256=$T37_DOWN_SHA256" "$T37_MARKER" >/dev/null || die "0037 rehearsal down mismatch"
   grep -Fx "BACKUP_SHA256=$(awk '{print $1}' "$T37_BACKUP_SHA")" "$T37_MARKER" >/dev/null || die "0037 rehearsal backup mismatch"
   grep -Fx "PREFLIGHT_SHA256=$(sha256sum "$T37_PREFLIGHT" | awk '{print $1}')" "$T37_MARKER" >/dev/null || die "0037 rehearsal preflight mismatch"
+  local post_catalog
+  post_catalog="$(t37_marker_post_catalog)"
+  [[ "$post_catalog" =~ ^[a-f0-9]{64}$ ]] || die "0037 rehearsal catalog identity missing"
   grep -Fx 'REHEARSAL=UP_DOWN_UP_PASS' "$T37_MARKER" >/dev/null || die "0037 rehearsal verdict missing"
+  test "$(cat "$T37_PREFLIGHT")" = "$(t37_expected_preflight)" || die "0037 recorded preflight is not the approved target"
   test "$(t37_observed_preflight)" = "$(cat "$T37_PREFLIGHT")" || die "target changed since 0037 rehearsal"
 }
 
@@ -164,6 +185,7 @@ t37_backup_rehearse() {
   install -d -m 0700 "$T37_EVIDENCE_DIR"
   t37_observed_preflight > "$T37_PREFLIGHT"
   chmod 600 "$T37_PREFLIGHT"
+  test "$(cat "$T37_PREFLIGHT")" = "$(t37_expected_preflight)" || die "0037 recorded preflight mismatch"
   local restore_database="lana_track_b_0037_rehearsal_$$" cleanup=1
   finish() {
     docker exec "$POSTGRES_CONTAINER" sh -ceu 'export PGPASSWORD="$POSTGRES_PASSWORD"; exec dropdb --if-exists --force -U "$POSTGRES_USER" "$1"' sh "$restore_database" >/dev/null 2>&1 || true
@@ -192,6 +214,9 @@ VALUES ('70000000-0000-4000-8000-000000000001','$EXPECTED_PAGE_ID','$EXPECTED_CH
 SQL
   t37_apply_up_named "$restore_database"
   t37_verify_up_named "$restore_database"
+  local post_catalog_sha
+  post_catalog_sha="$(t37_catalog_sha_named "$restore_database")"
+  test "$post_catalog_sha" != "$T37_PRE_CATALOG_SHA256" || die "0037 up did not change the exact guard catalog"
 
   local concurrent_first="$T37_EVIDENCE_DIR/concurrent-first.err"
   local concurrent_second="$T37_EVIDENCE_DIR/concurrent-second.err"
@@ -241,6 +266,7 @@ SQL
   t37_apply_up_named "$restore_database"
   cat "$T37_UP" | database_stream_named "$restore_database" >/dev/null
   t37_verify_up_named "$restore_database"
+  test "$(t37_catalog_sha_named "$restore_database")" = "$post_catalog_sha" || die "0037 repeated up catalog mismatch"
 
   printf '%s\n' \
     "SOURCE_REVISION=$SOURCE_REVISION" \
@@ -248,6 +274,7 @@ SQL
     "DOWN_SHA256=$T37_DOWN_SHA256" \
     "BACKUP_SHA256=$(awk '{print $1}' "$T37_BACKUP_SHA")" \
     "PREFLIGHT_SHA256=$(sha256sum "$T37_PREFLIGHT" | awk '{print $1}')" \
+    "POST_CATALOG_SHA256=$post_catalog_sha" \
     'REHEARSAL=UP_DOWN_UP_PASS' > "$T37_MARKER"
   chmod 600 "$T37_MARKER"
   cleanup=0
@@ -259,10 +286,50 @@ SQL
 t37_verify_live() {
   t37_source_identity
   t37_verify_up_named "$EXPECTED_DATABASE"
+  test "$(t37_catalog_sha_named "$EXPECTED_DATABASE")" = "$(t37_marker_post_catalog)" || die "0037 live exact catalog mismatch"
   test "$(database_query "SELECT count(*) FROM schema_migrations")" = "37" || die "0037 live ledger count mismatch"
   test "$(t37_pointer)" = "$T37_POINTER_REVISION|$T37_V1_VERSION|COMMERCE|LEGACY|$T37_V1_BUNDLE|$T37_V1_CONTENT" || die "0037 changed behavior pointer"
   test "$(database_query "SELECT count(*) FROM df13_commerce_cutover_fences WHERE released_at IS NULL")" = "0" || die "0037 live fence is not empty"
   printf '%s\n' 'TRACK_B_0037_PREPROD_SCHEMA_VERIFIED'
+}
+
+t37_recovery_observed() {
+  printf '%s\n' \
+    "OBSERVED_LEDGER_0037=$(database_query "SELECT count(*) FROM schema_migrations WHERE migration_name='$T37_MIGRATION' AND checksum_sha256='$T37_UP_SHA256'" 2>/dev/null || printf UNAVAILABLE)" \
+    "OBSERVED_POINTER=$(t37_pointer 2>/dev/null || printf UNAVAILABLE)" \
+    "OBSERVED_LIVE_CUTOVER_FENCES=$(database_query "SELECT count(*) FROM df13_commerce_cutover_fences WHERE released_at IS NULL" 2>/dev/null || printf UNAVAILABLE)" \
+    "OBSERVED_CATALOG_SHA256=$(t37_catalog_sha_named "$EXPECTED_DATABASE" 2>/dev/null || printf UNAVAILABLE)"
+}
+
+t37_write_recovery() {
+  local disposition="$1"
+  {
+    printf '%s\n' "RECOVERY=$disposition" "BACKUP_FILE=$T37_BACKUP" \
+      "BACKUP_SHA256=$(awk '{print $1}' "$T37_BACKUP_SHA" 2>/dev/null || printf UNAVAILABLE)"
+    t37_recovery_observed
+  } > "$T37_ROLLBACK"
+  chmod 600 "$T37_ROLLBACK"
+}
+
+t37_recover_failed_apply() {
+  local ledger pointer live_fences
+  ledger="$(database_query "SELECT count(*) FROM schema_migrations WHERE migration_name='$T37_MIGRATION' AND checksum_sha256='$T37_UP_SHA256'" 2>/dev/null || printf UNAVAILABLE)"
+  if test "$ledger" = "0" && t37_preflight_matches; then
+    t37_write_recovery 'VERIFIED_TRANSACTION_NOT_COMMITTED'
+    return 0
+  fi
+  pointer="$(t37_pointer 2>/dev/null || printf UNAVAILABLE)"
+  live_fences="$(database_query "SELECT count(*) FROM df13_commerce_cutover_fences WHERE released_at IS NULL" 2>/dev/null || printf UNAVAILABLE)"
+  if test "$ledger" = "1" &&
+     test "$pointer" = "$T37_POINTER_REVISION|$T37_V1_VERSION|COMMERCE|LEGACY|$T37_V1_BUNDLE|$T37_V1_CONTENT" &&
+     test "$live_fences" = "0"; then
+    if t37_apply_down_named "$EXPECTED_DATABASE" && t37_preflight_matches; then
+      t37_write_recovery 'VERIFIED_PRE_0037'
+      return 0
+    fi
+  fi
+  t37_write_recovery 'BLOCKED_MANUAL_RESTORE_REQUIRED'
+  return 1
 }
 
 t37_apply_live() {
@@ -276,16 +343,7 @@ t37_apply_live() {
     local status=$?
     trap - EXIT HUP INT TERM
     if test "$status" -ne 0 && test "$may_have_committed" = "1"; then
-      if test "$(database_query "SELECT count(*) FROM schema_migrations WHERE migration_name='$T37_MIGRATION' AND checksum_sha256='$T37_UP_SHA256'" 2>/dev/null || printf UNAVAILABLE)" = "1" &&
-         test "$(t37_pointer 2>/dev/null || printf UNAVAILABLE)" = "$T37_POINTER_REVISION|$T37_V1_VERSION|COMMERCE|LEGACY|$T37_V1_BUNDLE|$T37_V1_CONTENT" &&
-         test "$(database_query "SELECT count(*) FROM df13_commerce_cutover_fences WHERE released_at IS NULL" 2>/dev/null || printf UNAVAILABLE)" = "0"; then
-        t37_apply_down_named "$EXPECTED_DATABASE"
-        t37_require_preflight
-        printf '%s\n' 'RECOVERY=VERIFIED_PRE_0037' > "$T37_ROLLBACK"
-      else
-        printf '%s\n' 'RECOVERY=BLOCKED_MANUAL_RESTORE_REQUIRED' > "$T37_ROLLBACK"
-      fi
-      chmod 600 "$T37_ROLLBACK"
+      t37_recover_failed_apply || true
     fi
     exit "$status"
   }
@@ -298,10 +356,12 @@ t37_apply_live() {
   printf '%s\n' 'TRACK_B_0037_PREPROD_APPLY_PASS'
 }
 
-case "${1:-}" in
-  preflight) t37_source_identity; t37_require_preflight; printf '%s\n' 'TRACK_B_0037_PREFLIGHT_PASS' ;;
-  backup-rehearse) t37_backup_rehearse ;;
-  apply) t37_apply_live ;;
-  verify) t37_verify_live ;;
-  *) die "usage: $0 {preflight|backup-rehearse|apply|verify}" ;;
-esac
+if test "${BASH_SOURCE[0]}" = "$0"; then
+  case "${1:-}" in
+    preflight) t37_source_identity; t37_require_preflight; printf '%s\n' 'TRACK_B_0037_PREFLIGHT_PASS' ;;
+    backup-rehearse) t37_backup_rehearse ;;
+    apply) t37_apply_live ;;
+    verify) t37_verify_live ;;
+    *) die "usage: $0 {preflight|backup-rehearse|apply|verify}" ;;
+  esac
+fi

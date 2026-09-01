@@ -22,7 +22,11 @@ requireText(/base tables missing[\s\S]*base indexes missing[\s\S]*base triggers 
 requireText(/role attributes drift[\s\S]*role memberships drift[\s\S]*extensions drift/u, "role and extension parity are not verified");
 requireText(/MIGRATION_AUTHORIZED[\s\S]*YES_I_AM_AUTHORIZED/u, "explicit migration authorization guard is missing");
 requireText(/BEGIN;[\s\S]*INSERT INTO schema_migrations[\s\S]*COMMIT;/u, "migration and ledger are not atomic");
-requireText(/RECOVERY=VERIFIED_PRE_0037[\s\S]*RECOVERY=BLOCKED_MANUAL_RESTORE_REQUIRED/u, "fail-closed recovery states are missing");
+requireText(/VERIFIED_PRE_0037/u, "verified pre-0037 recovery state is missing");
+requireText(/BLOCKED_MANUAL_RESTORE_REQUIRED/u, "blocked manual-restore recovery state is missing");
+requireText(/VERIFIED_TRANSACTION_NOT_COMMITTED/u, "definitely uncommitted recovery is not distinguished");
+requireText(/T37_PRE_CATALOG_SHA256="[a-f0-9]{64}"[\s\S]*POST_CATALOG_SHA256/u, "canonical pre/post catalog identity is not bound");
+requireText(/REALTIME_IMAGE_ID/u, "immutable realtime image identity is not pinned");
 requireText(/SOURCE_REVISION[\s\S]*refs\/remotes\/origin\/main[\s\S]*status --porcelain/u, "exact clean source identity is missing");
 if (/DATABASE_URL\s*=|postgres(?:ql)?:\/\/|BEGIN (?:RSA|OPENSSH) PRIVATE KEY/iu.test(source)) {
   throw new Error("0037 operator contains credential-shaped material");
