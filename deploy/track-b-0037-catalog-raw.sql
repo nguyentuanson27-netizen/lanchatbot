@@ -10,7 +10,7 @@ WITH function_identity AS (
       'volatility', p.provolatile,
       'owner', owner_role.rolname,
       'comment', obj_description(p.oid, 'pg_proc')
-    ) AS identity
+    )::text AS identity
   FROM pg_proc p
   JOIN pg_namespace n ON n.oid = p.pronamespace
   JOIN pg_roles owner_role ON owner_role.oid = p.proowner
@@ -28,7 +28,7 @@ WITH function_identity AS (
       'enabled', trigger.tgenabled,
       'function', function_ns.nspname || '.' || function_proc.proname || '(' || pg_get_function_identity_arguments(function_proc.oid) || ')',
       'internal', trigger.tgisinternal
-    ) AS identity
+    )::text AS identity
   FROM pg_trigger trigger
   JOIN pg_class table_class ON table_class.oid = trigger.tgrelid
   JOIN pg_namespace table_ns ON table_ns.oid = table_class.relnamespace
@@ -48,7 +48,7 @@ WITH function_identity AS (
       'ready', index.indisready,
       'unique', index.indisunique,
       'valid', index.indisvalid
-    ) AS identity
+    )::text AS identity
   FROM pg_index index
   JOIN pg_class index_class ON index_class.oid = index.indexrelid
   JOIN pg_namespace index_ns ON index_ns.oid = index_class.relnamespace
@@ -65,14 +65,11 @@ WITH function_identity AS (
     table_ns.nspname || '.' || table_class.relname || '.' || constraint_row.conname AS object_name,
     jsonb_build_object(
       'definition', pg_get_constraintdef(constraint_row.oid, false),
-      'checkNodeTree', CASE WHEN constraint_row.contype = 'c' THEN constraint_row.conbin::text ELSE NULL END,
       'deferred', constraint_row.condeferred,
       'deferrable', constraint_row.condeferrable,
-      'owningSchema', table_ns.nspname,
-      'owningTable', table_class.relname,
       'type', constraint_row.contype,
       'validated', constraint_row.convalidated
-    ) AS identity
+    )::text AS identity
   FROM pg_constraint constraint_row
   JOIN pg_class table_class ON table_class.oid = constraint_row.conrelid
   JOIN pg_namespace table_ns ON table_ns.oid = table_class.relnamespace
@@ -89,10 +86,6 @@ WITH function_identity AS (
   UNION ALL SELECT * FROM index_identity
   UNION ALL SELECT * FROM constraint_identity
 )
-SELECT jsonb_build_object(
-  'objectKind', object_kind,
-  'objectName', object_name,
-  'identity', identity
-)::text
+SELECT object_kind, object_name, identity
 FROM catalog_identity
 ORDER BY object_kind, object_name;

@@ -9,7 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "tsc -p tsconfig.json && node --test dist/*.test.js",
     "pretest:postgres": "pnpm --filter @lana/contracts build && pnpm --filter @lana/database build && pnpm --filter @lana/dataset-store build",
-    "test:postgres": "tsc -p tsconfig.json && node --test dist/policy-store.postgres-spec.js",
+    "test:postgres": "tsc -p tsconfig.json && node --test dist/policy-store.postgres-spec.js dist/track-b-0037-catalog.postgres-spec.js",
     "lint": "tsc -p tsconfig.json --noEmit",
     "start": "node dist/server.js"
   },

@@ -28,7 +28,7 @@ export const TRACK_B_REQUIRED_MIGRATION_ARTIFACTS = Object.freeze([
   }),
   Object.freeze({
     path: "packages/database/pending-migrations/0037_track_b_commerce_authority_replacement.down.sql",
-    contentSha256: "c5b2ea232bf586aeaf1e034c017dbf1d002fda904c4c4e3ebd9daace4ae73ce3",
+    contentSha256: "070b2b793af7d6b6c33399531f47240cd9b5aa29d3dc12fe12ae0870acce57a7",
   }),
 ] as const);
 
