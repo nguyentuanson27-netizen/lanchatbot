@@ -7,7 +7,9 @@ import {
 } from "./df13-commerce-authority-bundle.js";
 import {
   executeTrackBCommerceAuthorityMutation,
+  recoverTrackBCommerceAuthorityMutationAfterInterruption,
   createTrackBReleaseLocalRollbackRecord,
+  TRACK_B_AUTHORITY_DEPENDENT_CLAIMS_V1,
   type TrackBCommerceAuthorityMutationPorts,
 } from "./track-b-commerce-authority-activation.js";
 import type { TrackBReleaseCandidateEvidence } from "./track-b-release-candidate-evidence.js";
@@ -118,8 +120,19 @@ function ports(overrides: Partial<TrackBCommerceAuthorityMutationPorts> = {}): T
         epoch: 1,
       },
     })),
-    proveQuiescence: vi.fn(async () => ({
+    proveAdmissionHeld: vi.fn(async ({ lease }) => ({
+      status: "HELD" as const,
+      source: "DATABASE" as const,
+      pageId,
+      channel,
+      fenceId: lease.fenceId,
+      epoch: lease.epoch,
+      released: false,
+      guardedClaims: TRACK_B_AUTHORITY_DEPENDENT_CLAIMS_V1,
+    })),
+    stopSourceAndProveQuiescence: vi.fn(async ({ sourceService }) => ({
       status: "QUIESCENT" as const,
+      observedStoppedService: sourceService,
       activeInbox: 0,
       activeMetaOutbox: 0,
       activePancakeOutbox: 0,
@@ -127,16 +140,56 @@ function ports(overrides: Partial<TrackBCommerceAuthorityMutationPorts> = {}): T
       queuedAuthorityDependentWork: 0,
       admission: "HELD" as const,
     })),
-    replaceAffectedServices: vi.fn(async ({ sourceService, targetService }) => ({
-      status: "READY" as const,
-      admission: "HELD" as const,
+    stageAffectedService: vi.fn(async ({ sourceService, targetService }) => ({
+      status: "STAGED_STOPPED" as const,
+      admission: "NON_ADMITTING" as const,
       observedSourceService: sourceService,
-      observedService: targetService,
+      stagedService: targetService,
     })),
+    discardStagedService: vi.fn(async () => ({ status: "DISCARDED" as const })),
     mutateExactPointer: vi.fn(async () => ({ status: "ACKNOWLEDGED" as const })),
     readActivePointer: vi.fn(async () => target),
+    startStagedService: vi.fn(async ({ stagedService }) => ({
+      status: "HEALTHY" as const,
+      admission: "HELD" as const,
+      observedService: stagedService,
+    })),
+    restorePreviousService: vi.fn(async ({ previousService }) => ({
+      status: "HEALTHY" as const,
+      admission: "HELD" as const,
+      observedService: previousService,
+    })),
+    readRuntimeAuthority: vi.fn(async ({ service, pointer, lease }) => ({
+      status: "EXACT" as const,
+      service,
+      modeVersionId: pointer.version.modeVersionId,
+      contentHash: pointer.version.contentHash,
+      pointerRevision: pointer.pointerRevision,
+      authorityBundleHash: pointer.version.authorityBundleHash ?? null,
+      fenceId: lease.fenceId,
+      admission: "HELD" as const,
+    })),
+    readReleasedRuntimeAuthority: vi.fn(async ({ service, pointer, fenceId, epoch }) => ({
+      status: "EXACT" as const,
+      service,
+      modeVersionId: pointer.version.modeVersionId,
+      contentHash: pointer.version.contentHash,
+      pointerRevision: pointer.pointerRevision,
+      authorityBundleHash: pointer.version.authorityBundleHash ?? null,
+      fenceId,
+      epoch,
+      admission: "OPEN" as const,
+    })),
     readActivationAudit: vi.fn(async () => "EXACT" as const),
     readConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
+      consumer,
+      source: "DATABASE" as const,
+      modeVersionId: target.version.modeVersionId,
+      contentHash: target.version.contentHash,
+      pointerRevision: target.pointerRevision,
+      authorityBundleHash: target.version.authorityBundleHash ?? null,
+    }))),
+    readReleasedConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
       consumer,
       source: "DATABASE" as const,
       modeVersionId: target.version.modeVersionId,
@@ -167,11 +220,23 @@ describe("Track B Commerce authority mutation", () => {
       reasonCodes: [],
     });
     expect(mutationPorts.acquireFence).toHaveBeenCalledOnce();
-    expect(mutationPorts.proveQuiescence).toHaveBeenCalledTimes(2);
-    expect(mutationPorts.replaceAffectedServices).toHaveBeenCalledOnce();
+    expect(mutationPorts.proveAdmissionHeld).toHaveBeenCalledOnce();
+    expect(mutationPorts.stopSourceAndProveQuiescence).toHaveBeenCalledOnce();
+    expect(mutationPorts.stageAffectedService).toHaveBeenCalledOnce();
     expect(mutationPorts.mutateExactPointer).toHaveBeenCalledOnce();
-    expect(vi.mocked(mutationPorts.replaceAffectedServices).mock.invocationCallOrder[0])
+    expect(mutationPorts.startStagedService).toHaveBeenCalledOnce();
+    expect(vi.mocked(mutationPorts.stageAffectedService).mock.invocationCallOrder[0])
+      .toBeLessThan(vi.mocked(mutationPorts.acquireFence).mock.invocationCallOrder[0] ?? 0);
+    expect(vi.mocked(mutationPorts.acquireFence).mock.invocationCallOrder[0])
+      .toBeLessThan(vi.mocked(mutationPorts.proveAdmissionHeld).mock.invocationCallOrder[0] ?? 0);
+    expect(vi.mocked(mutationPorts.proveAdmissionHeld).mock.invocationCallOrder[0])
+      .toBeLessThan(vi.mocked(mutationPorts.stopSourceAndProveQuiescence).mock.invocationCallOrder[0] ?? 0);
+    expect(vi.mocked(mutationPorts.stopSourceAndProveQuiescence).mock.invocationCallOrder[0])
       .toBeLessThan(vi.mocked(mutationPorts.mutateExactPointer).mock.invocationCallOrder[0] ?? 0);
+    expect(vi.mocked(mutationPorts.mutateExactPointer).mock.invocationCallOrder[0])
+      .toBeLessThan(vi.mocked(mutationPorts.startStagedService).mock.invocationCallOrder[0] ?? 0);
+    expect(vi.mocked(mutationPorts.startStagedService).mock.invocationCallOrder[0])
+      .toBeLessThan(vi.mocked(mutationPorts.readRuntimeAuthority).mock.invocationCallOrder[0] ?? 0);
     expect(mutationPorts.readActivationAudit).toHaveBeenCalledWith({
       pointerRevision: 7,
       previousVersionId: previous.version.modeVersionId,
@@ -182,6 +247,59 @@ describe("Track B Commerce authority mutation", () => {
       reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001",
     });
     expect(mutationPorts.releaseFence).toHaveBeenCalledOnce();
+  });
+
+  it("discards the stopped target and releases the fence before stopping source when admission is not proven", async () => {
+    const mutationPorts = ports({
+      proveAdmissionHeld: vi.fn(async () => ({
+        status: "AMBIGUOUS" as const, source: "DATABASE" as const,
+        pageId: null, channel: null, fenceId: null, epoch: null, released: null,
+        guardedClaims: [],
+      })),
+    });
+
+    await expect(executeTrackBCommerceAuthorityMutation({
+      operationId: "40000000-0000-4000-8000-000000000011",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({
+      status: "BLOCKED_PREVIOUS",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_ADMISSION_NOT_HELD"],
+    });
+    expect(mutationPorts.stopSourceAndProveQuiescence).not.toHaveBeenCalled();
+    expect(mutationPorts.mutateExactPointer).not.toHaveBeenCalled();
+    expect(mutationPorts.discardStagedService).toHaveBeenCalledOnce();
+    expect(mutationPorts.releaseFence).toHaveBeenCalledOnce();
+  });
+
+  it("allows durably queued held work while requiring every in-flight class to drain", async () => {
+    const mutationPorts = ports({
+      stopSourceAndProveQuiescence: vi.fn(async ({ sourceService }) => ({
+        status: "QUIESCENT" as const,
+        observedStoppedService: sourceService,
+        activeInbox: 0,
+        activeMetaOutbox: 0,
+        activePancakeOutbox: 0,
+        inFlightAuthorityDependentWork: 0,
+        queuedAuthorityDependentWork: 4,
+        admission: "HELD" as const,
+      })),
+    });
+
+    await expect(executeTrackBCommerceAuthorityMutation({
+      operationId: "40000000-0000-4000-8000-000000000012",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toMatchObject({ status: "TARGET_ACTIVE" });
   });
 
   it("supports a separately fenced exact rollback to the recorded V1 identity", async () => {
@@ -212,16 +330,29 @@ describe("Track B Commerce authority mutation", () => {
     });
   });
 
-  it("retains the fence and never reports success when one consumer is stale", async () => {
+  it("restores exact prior authority and service when one target consumer is stale", async () => {
+    const restored = { ...previous, pointerRevision: 8 };
     const mutationPorts = ports({
-      readConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.slice(1).map((consumer) => ({
-        consumer,
-        source: "DATABASE" as const,
-        modeVersionId: target.version.modeVersionId,
-        contentHash: target.version.contentHash,
-        pointerRevision: target.pointerRevision,
-        authorityBundleHash: target.version.authorityBundleHash ?? null,
-      }))),
+      readActivePointer: vi.fn()
+        .mockResolvedValueOnce(target)
+        .mockResolvedValueOnce(restored),
+      readConsumerAuthorities: vi.fn()
+        .mockResolvedValueOnce(DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.slice(1).map((consumer) => ({
+          consumer,
+          source: "DATABASE" as const,
+          modeVersionId: target.version.modeVersionId,
+          contentHash: target.version.contentHash,
+          pointerRevision: target.pointerRevision,
+          authorityBundleHash: target.version.authorityBundleHash ?? null,
+        })))
+        .mockResolvedValueOnce(DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
+          consumer,
+          source: "DATABASE" as const,
+          modeVersionId: restored.version.modeVersionId,
+          contentHash: restored.version.contentHash,
+          pointerRevision: restored.pointerRevision,
+          authorityBundleHash: restored.version.authorityBundleHash ?? null,
+        }))),
     });
 
     await expect(executeTrackBCommerceAuthorityMutation({
@@ -233,11 +364,11 @@ describe("Track B Commerce authority mutation", () => {
       releaseEvidence,
       ports: mutationPorts,
     })).resolves.toEqual({
-      status: "HOLD_RETAINED",
+      status: "PREVIOUS_RESTORED",
       sideEffects: "CONTROL_PLANE_ONLY",
       reasonCodes: ["TRACK_B_B3_2_CONSUMER_READBACK_INCOMPLETE"],
     });
-    expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+    expect(mutationPorts.releaseFence).toHaveBeenCalledOnce();
   });
 
   it("rejects activation before the fence when exact release evidence is absent", async () => {
@@ -258,13 +389,13 @@ describe("Track B Commerce authority mutation", () => {
     expect(mutationPorts.acquireFence).not.toHaveBeenCalled();
   });
 
-  it("retains the fence when the exact replacement release is not proven", async () => {
+  it("refuses cleanup when the staged service identity is ambiguous", async () => {
     const mutationPorts = ports({
-      replaceAffectedServices: vi.fn(async () => ({
-        status: "READY" as const,
-        admission: "HELD" as const,
+      stageAffectedService: vi.fn(async () => ({
+        status: "STAGED_STOPPED" as const,
+        admission: "NON_ADMITTING" as const,
         observedSourceService: rollbackRecord.previousService,
-        observedService: { ...rollbackRecord.targetService, releaseRevision: "f".repeat(40) },
+        stagedService: { ...rollbackRecord.targetService, releaseRevision: "f".repeat(40) },
       })),
     });
 
@@ -279,22 +410,26 @@ describe("Track B Commerce authority mutation", () => {
     })).resolves.toEqual({
       status: "HOLD_RETAINED",
       sideEffects: "CONTROL_PLANE_ONLY",
-      reasonCodes: ["TRACK_B_B3_2_SERVICE_REPLACEMENT_UNPROVEN"],
+      reasonCodes: [
+        "TRACK_B_B3_2_SERVICE_STAGING_UNPROVEN",
+        "TRACK_B_B3_2_STAGED_SERVICE_IDENTITY_AMBIGUOUS",
+      ],
     });
+    expect(mutationPorts.acquireFence).not.toHaveBeenCalled();
     expect(mutationPorts.mutateExactPointer).not.toHaveBeenCalled();
-    expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+    expect(mutationPorts.discardStagedService).not.toHaveBeenCalled();
   });
 
-  it("retains the fence when the recorded source service is not the deployed source", async () => {
+  it("rejects a staged operation when the deployed source identity is not exact", async () => {
     const mutationPorts = ports({
-      replaceAffectedServices: vi.fn(async ({ targetService }) => ({
-        status: "READY" as const,
-        admission: "HELD" as const,
+      stageAffectedService: vi.fn(async ({ targetService }) => ({
+        status: "STAGED_STOPPED" as const,
+        admission: "NON_ADMITTING" as const,
         observedSourceService: {
           ...rollbackRecord.previousService,
           runtimeConfigHash: "f".repeat(64),
         },
-        observedService: targetService,
+        stagedService: targetService,
       })),
     });
 
@@ -308,7 +443,7 @@ describe("Track B Commerce authority mutation", () => {
       ports: mutationPorts,
     });
 
-    expect(result.reasonCodes).toEqual(["TRACK_B_B3_2_SERVICE_REPLACEMENT_UNPROVEN"]);
+    expect(result.reasonCodes).toEqual(["TRACK_B_B3_2_SERVICE_STAGING_UNPROVEN"]);
     expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
   });
 
@@ -340,8 +475,227 @@ describe("Track B Commerce authority mutation", () => {
     expect(mutationPorts.acquireFence).not.toHaveBeenCalled();
   });
 
-  it("retains the fence when replacement succeeded but pointer CAS did not", async () => {
-    const mutationPorts = ports({ readActivePointer: vi.fn(async () => previous) });
+  it("discards the staged target and releases the fence when pointer CAS did not happen", async () => {
+    const mutationPorts = ports({
+      readActivePointer: vi.fn(async () => previous),
+      readConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
+        consumer,
+        source: "DATABASE" as const,
+        modeVersionId: previous.version.modeVersionId,
+        contentHash: previous.version.contentHash,
+        pointerRevision: previous.pointerRevision,
+        authorityBundleHash: previous.version.authorityBundleHash ?? null,
+      }))),
+    });
+
+    await expect(executeTrackBCommerceAuthorityMutation({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({
+      status: "BLOCKED_PREVIOUS",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_POINTER_NOT_MUTATED"],
+    });
+    expect(mutationPorts.discardStagedService).toHaveBeenCalledOnce();
+    expect(mutationPorts.restorePreviousService).toHaveBeenCalledOnce();
+    expect(vi.mocked(mutationPorts.restorePreviousService).mock.invocationCallOrder[0])
+      .toBeLessThan(vi.mocked(mutationPorts.releaseFence).mock.invocationCallOrder[0] ?? 0);
+    expect(mutationPorts.releaseFence).toHaveBeenCalledOnce();
+    expect(mutationPorts.startStagedService).not.toHaveBeenCalled();
+  });
+
+  it("rolls authority back before restoring the prior service when target start fails", async () => {
+    const restored = { ...previous, pointerRevision: 8 };
+    const readActivePointer = vi.fn()
+      .mockResolvedValueOnce(target)
+      .mockResolvedValueOnce(restored);
+    const mutationPorts = ports({
+      readActivePointer,
+      startStagedService: vi.fn(async () => ({
+        status: "BLOCKED" as const,
+        admission: "HELD" as const,
+        observedService: null,
+      })),
+      readConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
+        consumer,
+        source: "DATABASE" as const,
+        modeVersionId: restored.version.modeVersionId,
+        contentHash: restored.version.contentHash,
+        pointerRevision: restored.pointerRevision,
+        authorityBundleHash: restored.version.authorityBundleHash ?? null,
+      }))),
+      readRuntimeAuthority: vi.fn(async ({ service, pointer, lease }) => ({
+        status: "EXACT" as const,
+        service,
+        modeVersionId: pointer.version.modeVersionId,
+        contentHash: pointer.version.contentHash,
+        pointerRevision: pointer.pointerRevision,
+        authorityBundleHash: pointer.version.authorityBundleHash ?? null,
+        fenceId: lease.fenceId,
+        admission: "HELD" as const,
+      })),
+    });
+
+    await expect(executeTrackBCommerceAuthorityMutation({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({
+      status: "PREVIOUS_RESTORED",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_TARGET_START_FAILED"],
+    });
+    expect(mutationPorts.mutateExactPointer).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(mutationPorts.mutateExactPointer).mock.invocationCallOrder[1])
+      .toBeLessThan(vi.mocked(mutationPorts.restorePreviousService).mock.invocationCallOrder[0] ?? 0);
+    expect(mutationPorts.releaseFence).toHaveBeenCalledOnce();
+  });
+
+  it("retains the fence when post-CAS rollback pointer identity is ambiguous", async () => {
+    const readActivePointer = vi.fn()
+      .mockResolvedValueOnce(target)
+      .mockResolvedValueOnce(null);
+    const mutationPorts = ports({
+      readActivePointer,
+      startStagedService: vi.fn(async () => ({
+        status: "BLOCKED" as const,
+        admission: "HELD" as const,
+        observedService: null,
+      })),
+    });
+
+    const result = await executeTrackBCommerceAuthorityMutation({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    });
+
+    expect(result.status).toBe("HOLD_RETAINED");
+    expect(result.reasonCodes).toContain("TRACK_B_B3_2_ROLLBACK_POINTER_AMBIGUOUS");
+    expect(mutationPorts.restorePreviousService).not.toHaveBeenCalled();
+    expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+  });
+
+  it("discards the stopped staged target when fence acquisition is unavailable", async () => {
+    const mutationPorts = ports({ acquireFence: vi.fn(async () => { throw new Error("unavailable"); }) });
+
+    const result = await executeTrackBCommerceAuthorityMutation({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    });
+
+    expect(result.reasonCodes).toEqual(["TRACK_B_B3_2_FENCE_ACQUISITION_UNAVAILABLE"]);
+    expect(mutationPorts.discardStagedService).toHaveBeenCalledOnce();
+    expect(mutationPorts.stopSourceAndProveQuiescence).not.toHaveBeenCalled();
+    expect(mutationPorts.mutateExactPointer).not.toHaveBeenCalled();
+  });
+
+  it("retains the fence on an ambiguous stopped-source or quiescence proof", async () => {
+    const mutationPorts = ports({
+      stopSourceAndProveQuiescence: vi.fn(async () => ({
+        status: "BUSY" as const,
+        observedStoppedService: null,
+        activeInbox: 0,
+        activeMetaOutbox: 0,
+        activePancakeOutbox: 0,
+        inFlightAuthorityDependentWork: 0,
+        queuedAuthorityDependentWork: 1,
+        admission: "UNCONTROLLED" as const,
+      })),
+    });
+
+    const result = await executeTrackBCommerceAuthorityMutation({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    });
+
+    expect(result).toEqual({
+      status: "HOLD_RETAINED",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_QUIESCENCE_UNPROVEN"],
+    });
+    expect(mutationPorts.mutateExactPointer).not.toHaveBeenCalled();
+    expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+  });
+
+  it("rolls back when target runtime authority readback is not exact", async () => {
+    const restored = { ...previous, pointerRevision: 8 };
+    const mutationPorts = ports({
+      readActivePointer: vi.fn().mockResolvedValueOnce(target).mockResolvedValueOnce(restored),
+      readRuntimeAuthority: vi.fn()
+        .mockResolvedValueOnce({
+          status: "AMBIGUOUS" as const,
+          service: rollbackRecord.targetService,
+          modeVersionId: null,
+          contentHash: null,
+          pointerRevision: null,
+          authorityBundleHash: null,
+          fenceId: null,
+          admission: "HELD" as const,
+        })
+        .mockImplementationOnce(async ({ service, pointer, lease }) => ({
+          status: "EXACT" as const,
+          service,
+          modeVersionId: pointer.version.modeVersionId,
+          contentHash: pointer.version.contentHash,
+          pointerRevision: pointer.pointerRevision,
+          authorityBundleHash: pointer.version.authorityBundleHash ?? null,
+          fenceId: lease.fenceId,
+          admission: "HELD" as const,
+        })),
+      readConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
+        consumer,
+        source: "DATABASE" as const,
+        modeVersionId: restored.version.modeVersionId,
+        contentHash: restored.version.contentHash,
+        pointerRevision: restored.pointerRevision,
+        authorityBundleHash: restored.version.authorityBundleHash ?? null,
+      }))),
+    });
+
+    await expect(executeTrackBCommerceAuthorityMutation({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toMatchObject({
+      status: "PREVIOUS_RESTORED",
+      reasonCodes: ["TRACK_B_B3_2_RUNTIME_READBACK_UNPROVEN"],
+    });
+    expect(mutationPorts.restorePreviousService).toHaveBeenCalledOnce();
+    expect(mutationPorts.releaseFence).toHaveBeenCalledOnce();
+  });
+
+  it("retains the exact target and fence when fence release is ambiguous", async () => {
+    const mutationPorts = ports({
+      releaseFence: vi.fn(async () => ({ status: "STALE_OR_MISSING" as const })),
+    });
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
@@ -354,8 +708,285 @@ describe("Track B Commerce authority mutation", () => {
     })).resolves.toEqual({
       status: "HOLD_RETAINED",
       sideEffects: "CONTROL_PLANE_ONLY",
-      reasonCodes: ["TRACK_B_B3_2_POINTER_NOT_MUTATED_AFTER_REPLACEMENT"],
+      reasonCodes: ["TRACK_B_B3_2_FENCE_RELEASE_UNPROVEN"],
     });
+    expect(mutationPorts.mutateExactPointer).toHaveBeenCalledOnce();
+  });
+
+  it("refuses pre-CAS release when the prior service cannot be restored exactly", async () => {
+    const mutationPorts = ports({
+      readActivePointer: vi.fn(async () => previous),
+      restorePreviousService: vi.fn(async () => ({
+        status: "BLOCKED" as const,
+        admission: "HELD" as const,
+        observedService: null,
+      })),
+    });
+
+    const result = await executeTrackBCommerceAuthorityMutation({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    });
+
+    expect(result.status).toBe("HOLD_RETAINED");
+    expect(result.reasonCodes).toContain("TRACK_B_B3_2_PRE_CAS_SERVICE_RESTORE_AMBIGUOUS");
     expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+  });
+
+  it("recovers an interrupted pre-CAS stopped service before releasing the fence", async () => {
+    const mutationPorts = ports({
+      readActivePointer: vi.fn(async () => previous),
+      readConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
+        consumer,
+        source: "DATABASE" as const,
+        modeVersionId: previous.version.modeVersionId,
+        contentHash: previous.version.contentHash,
+        pointerRevision: previous.pointerRevision,
+        authorityBundleHash: previous.version.authorityBundleHash ?? null,
+      }))),
+    });
+
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({
+      status: "BLOCKED_PREVIOUS",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_INTERRUPTED_BEFORE_CAS"],
+    });
+    expect(mutationPorts.stageAffectedService).not.toHaveBeenCalled();
+    expect(mutationPorts.restorePreviousService).toHaveBeenCalledOnce();
+    expect(mutationPorts.discardStagedService).toHaveBeenCalledOnce();
+    expect(mutationPorts.releaseFence).toHaveBeenCalledOnce();
+  });
+
+  it("retains an interrupted operation without touching service or pointer when database admission is ambiguous", async () => {
+    const mutationPorts = ports({
+      proveAdmissionHeld: vi.fn(async () => ({
+        status: "AMBIGUOUS" as const, source: "DATABASE" as const,
+        pageId: null, channel: null, fenceId: null, epoch: null, released: null,
+        guardedClaims: [],
+      })),
+    });
+
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({
+      status: "HOLD_RETAINED",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_RECOVERY_ADMISSION_NOT_HELD"],
+    });
+    expect(mutationPorts.readActivePointer).not.toHaveBeenCalled();
+    expect(mutationPorts.restorePreviousService).not.toHaveBeenCalled();
+    expect(mutationPorts.mutateExactPointer).not.toHaveBeenCalled();
+    expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+  });
+
+  it("reconciles a committed forward fence release whose acknowledgement was lost", async () => {
+    const mutationPorts = ports({
+      acquireFence: vi.fn(async () => ({
+        status: "ALREADY_RELEASED" as const,
+        fenceId: "20000000-0000-4000-8000-000000000001",
+        epoch: 1,
+      })),
+    });
+
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({
+      status: "TARGET_ACTIVE",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_RELEASE_ACK_RECONCILED"],
+    });
+    expect(mutationPorts.proveAdmissionHeld).not.toHaveBeenCalled();
+    expect(mutationPorts.readReleasedRuntimeAuthority).toHaveBeenCalledOnce();
+    expect(mutationPorts.readReleasedConsumerAuthorities).toHaveBeenCalledOnce();
+    expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+  });
+
+  it("reconciles a committed pre-CAS release to the exact previous runtime", async () => {
+    const mutationPorts = ports({
+      acquireFence: vi.fn(async () => ({
+        status: "ALREADY_RELEASED" as const,
+        fenceId: "20000000-0000-4000-8000-000000000001",
+        epoch: 1,
+      })),
+      readActivePointer: vi.fn(async () => previous),
+      readReleasedConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
+        consumer,
+        source: "DATABASE" as const,
+        modeVersionId: previous.version.modeVersionId,
+        contentHash: previous.version.contentHash,
+        pointerRevision: previous.pointerRevision,
+        authorityBundleHash: previous.version.authorityBundleHash ?? null,
+      }))),
+    });
+
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toMatchObject({
+      status: "BLOCKED_PREVIOUS",
+      reasonCodes: ["TRACK_B_B3_2_RELEASE_ACK_RECONCILED"],
+    });
+    expect(mutationPorts.readActivationAudit).not.toHaveBeenCalled();
+  });
+
+  it("reconciles a committed explicit rollback release to exact V1", async () => {
+    const rollbackPointer = { ...previous, pointerRevision: 8 };
+    const mutationPorts = ports({
+      acquireFence: vi.fn(async () => ({
+        status: "ALREADY_RELEASED" as const,
+        fenceId: "20000000-0000-4000-8000-000000000001",
+        epoch: 2,
+      })),
+      readActivePointer: vi.fn(async () => rollbackPointer),
+      readReleasedConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
+        consumer,
+        source: "DATABASE" as const,
+        modeVersionId: rollbackPointer.version.modeVersionId,
+        contentHash: rollbackPointer.version.contentHash,
+        pointerRevision: rollbackPointer.pointerRevision,
+        authorityBundleHash: rollbackPointer.version.authorityBundleHash ?? null,
+      }))),
+    });
+
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000002",
+      direction: "ROLLBACK_TRACK_B",
+      previous: target,
+      target: rollbackPointer,
+      rollbackRecord,
+      ports: mutationPorts,
+    })).resolves.toMatchObject({
+      status: "PREVIOUS_RESTORED",
+      reasonCodes: ["TRACK_B_B3_2_RELEASE_ACK_RECONCILED"],
+    });
+  });
+
+  it("reports released ambiguity without falsely claiming that admission is held", async () => {
+    const mutationPorts = ports({
+      acquireFence: vi.fn(async () => ({
+        status: "ALREADY_RELEASED" as const,
+        fenceId: "20000000-0000-4000-8000-000000000001",
+        epoch: 1,
+      })),
+      readActivePointer: vi.fn(async () => null),
+    });
+
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({
+      status: "RELEASED_AMBIGUOUS",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_RELEASED_POINTER_AMBIGUOUS"],
+    });
+  });
+
+  it("reverses an interrupted exact post-CAS pointer before restoring service", async () => {
+    const restored = { ...previous, pointerRevision: 8 };
+    const mutationPorts = ports({
+      readActivePointer: vi.fn().mockResolvedValueOnce(target).mockResolvedValueOnce(restored),
+      readConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
+        consumer,
+        source: "DATABASE" as const,
+        modeVersionId: restored.version.modeVersionId,
+        contentHash: restored.version.contentHash,
+        pointerRevision: restored.pointerRevision,
+        authorityBundleHash: restored.version.authorityBundleHash ?? null,
+      }))),
+    });
+
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({
+      status: "PREVIOUS_RESTORED",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_INTERRUPTED_AFTER_CAS"],
+    });
+    expect(mutationPorts.stageAffectedService).not.toHaveBeenCalled();
+    expect(mutationPorts.mutateExactPointer).toHaveBeenCalledOnce();
+    expect(mutationPorts.restorePreviousService).toHaveBeenCalledOnce();
+    expect(mutationPorts.releaseFence).toHaveBeenCalledOnce();
+  });
+
+  it("symmetrically restores the V2 target if an explicit rollback service start fails", async () => {
+    const rollbackPointer = { ...previous, pointerRevision: 8 };
+    const reactivated = { ...target, pointerRevision: 9 };
+    const mutationPorts = ports({
+      readActivePointer: vi.fn().mockResolvedValueOnce(rollbackPointer).mockResolvedValueOnce(reactivated),
+      startStagedService: vi.fn(async () => ({
+        status: "BLOCKED" as const,
+        admission: "HELD" as const,
+        observedService: null,
+      })),
+      readConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
+        consumer,
+        source: "DATABASE" as const,
+        modeVersionId: reactivated.version.modeVersionId,
+        contentHash: reactivated.version.contentHash,
+        pointerRevision: reactivated.pointerRevision,
+        authorityBundleHash: reactivated.version.authorityBundleHash ?? null,
+      }))),
+    });
+
+    await expect(executeTrackBCommerceAuthorityMutation({
+      operationId: "40000000-0000-4000-8000-000000000002",
+      direction: "ROLLBACK_TRACK_B",
+      previous: target,
+      target: rollbackPointer,
+      rollbackRecord,
+      ports: mutationPorts,
+    })).resolves.toEqual({
+      status: "TARGET_ACTIVE",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_TARGET_START_FAILED"],
+    });
+    expect(mutationPorts.mutateExactPointer).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(mutationPorts.mutateExactPointer).mock.calls[1]?.[0]).toMatchObject({
+      direction: "ACTIVATE_TRACK_B",
+      previous: rollbackPointer,
+      target: reactivated,
+    });
+    expect(mutationPorts.releaseFence).toHaveBeenCalledOnce();
   });
 });

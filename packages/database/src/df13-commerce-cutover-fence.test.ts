@@ -128,6 +128,13 @@ describe("Postgres DF13 Commerce cutover fence store", () => {
       expect.stringContaining("INSERT INTO df13_commerce_cutover_fences"),
       "COMMIT",
     ]));
+    const advisoryValues = mocks.clientQuery.mock.calls
+      .filter(([sql]) => String(sql).includes("pg_advisory_xact_lock"))
+      .map(([, values]) => values?.[0]);
+    expect(advisoryValues).toEqual([
+      "df13-cutover-admission-migration",
+      `df13-cutover:${request.pageId}:${request.channel}`,
+    ]);
     const insert = mocks.clientQuery.mock.calls.find(([sql]) =>
       String(sql).includes("INSERT INTO df13_commerce_cutover_fences"),
     );

@@ -16,6 +16,9 @@ const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}
 const CONTENT_HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const BUNDLE_HASH_PATTERN = /^[a-f0-9]{64}$/u;
 const PREPARE_REASON_PATTERN = /^TRACK_B_B3_2_PREPARE:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
+const ADMISSION_MIGRATION_NAME = "0038_track_b_commerce_admission_gate";
+const ADMISSION_MIGRATION_HASH = "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140";
+const ADMISSION_FUNCTION_SOURCE_HASH = "d083f18d4a62cf313af3baba8c3a145225e9ee7852e4192119b158d34c8ac5ba";
 
 export type TrackBCommerceIdentity = Readonly<{
   modeVersionId: string;
@@ -39,6 +42,23 @@ export type TrackBCommercePointerMutationInput = Readonly<{
   lease: TrackBCommerceFenceLease;
   actor: "TRACK_B_B3_2_WRITER";
   reason: string;
+}>;
+
+export const TRACK_B_COMMERCE_ADMISSION_CLAIMS_V1 = Object.freeze([
+  "webhook_inbox:PROCESSING",
+  "meta_outbox:SENDING",
+  "pancake_tag_outbox:APPLYING",
+] as const);
+
+export type TrackBCommerceAdmissionReadbackRecord = Readonly<{
+  status: "HELD" | "AMBIGUOUS";
+  source: "DATABASE";
+  pageId: string | null;
+  channel: string | null;
+  fenceId: string | null;
+  epoch: number | null;
+  released: boolean | null;
+  guardedClaims: readonly string[];
 }>;
 
 type Row = Record<string, unknown>;
@@ -155,14 +175,109 @@ function pointerSelect(): string {
 /** Page-scoped source writer for the one Track B COMMERCE identity replacement. */
 export class PostgresTrackBCommerceAuthorityWriter {
   readonly #pool: Pool;
+  readonly #admissionSchema: string;
 
-  constructor(connectionString: string) {
+  constructor(connectionString: string, options: Readonly<{ admissionSchema?: string }> = {}) {
     if (!connectionString.trim()) throw new Error("DATABASE_URL_REQUIRED");
+    const admissionSchema = options.admissionSchema ?? "public";
+    if (!/^[a-z][a-z0-9_]{0,62}$/u.test(admissionSchema)) {
+      throw new Error("TRACK_B_B3_2_ADMISSION_SCHEMA_INVALID");
+    }
+    this.#admissionSchema = admissionSchema;
     this.#pool = new Pool({ connectionString, max: 1 });
   }
 
   async close(): Promise<void> {
     await this.#pool.end();
+  }
+
+  async readAdmissionHold(input: Readonly<{
+    pageId: string;
+    channel: string;
+    lease: TrackBCommerceFenceLease;
+  }>): Promise<TrackBCommerceAdmissionReadbackRecord> {
+    requiredScope(input.pageId, input.channel);
+    const lease = {
+      fenceId: requiredUuid(input.lease.fenceId, "TRACK_B_B3_2_FENCE_ID_INVALID"),
+      fenceToken: requiredUuid(input.lease.fenceToken, "TRACK_B_B3_2_FENCE_TOKEN_INVALID"),
+      epoch: requiredRevision(input.lease.epoch),
+    };
+    const ambiguous: TrackBCommerceAdmissionReadbackRecord = {
+      status: "AMBIGUOUS", source: "DATABASE", pageId: null, channel: null,
+      fenceId: null, epoch: null, released: null, guardedClaims: [],
+    };
+    const qualifiedFence = `"${this.#admissionSchema}".df13_commerce_cutover_fences`;
+    const qualifiedLedger = `"${this.#admissionSchema}".schema_migrations`;
+    const client = await this.#pool.connect();
+    try {
+      await client.query("BEGIN READ ONLY");
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [
+        `df13-cutover:${PAGE_ID}:${CHANNEL}`,
+      ]);
+      const fenceResult = await client.query(
+        `SELECT fence_id, page_id, channel, epoch, released_at
+           FROM ${qualifiedFence}
+          WHERE fence_id=$1 AND page_id=$2 AND channel=$3 AND epoch=$4
+            AND token_hash=$5 AND released_at IS NULL`,
+        [lease.fenceId, PAGE_ID, CHANNEL, lease.epoch, hashToken(lease.fenceToken)],
+      );
+      const triggerResult = await client.query(
+        `SELECT c.relname AS table_name, t.tgenabled, t.tgtype,
+                t.tgqual, t.tgattr::text AS trigger_columns, t.tgnargs,
+                p.proname AS function_name, p.prosrc, p.proconfig,
+                pn.nspname AS function_schema, l.lanname AS language_name,
+                p.prorettype = 'pg_catalog.trigger'::pg_catalog.regtype AS returns_trigger
+           FROM pg_trigger t
+           JOIN pg_class c ON c.oid=t.tgrelid
+           JOIN pg_namespace n ON n.oid=c.relnamespace
+           JOIN pg_proc p ON p.oid=t.tgfoid
+           JOIN pg_namespace pn ON pn.oid=p.pronamespace
+           JOIN pg_language l ON l.oid=p.prolang
+          WHERE n.nspname=$1 AND NOT t.tgisinternal
+            AND (c.relname,t.tgname) IN (
+              ('webhook_inbox','track_b_cutover_admission_webhook_inbox'),
+              ('meta_outbox','track_b_cutover_admission_meta_outbox'),
+              ('pancake_tag_outbox','track_b_cutover_admission_pancake_tag_outbox')
+            )`,
+        [this.#admissionSchema],
+      );
+      const ledgerResult = await client.query(
+        `SELECT checksum_sha256 FROM ${qualifiedLedger} WHERE migration_name=$1`,
+        [ADMISSION_MIGRATION_NAME],
+      );
+      const fence = fenceResult.rows[0] as Row | undefined;
+      const tables = new Set(triggerResult.rows.filter((row: Row) =>
+        row.tgenabled === "A" && Number(row.tgtype) === 19 &&
+        row.tgqual === null && row.trigger_columns === "" && Number(row.tgnargs) === 0 &&
+        row.function_name === "guard_track_b_cutover_admission" &&
+        row.function_schema === this.#admissionSchema &&
+        row.language_name === "plpgsql" && row.returns_trigger === true &&
+        createHash("sha256").update(String(row.prosrc), "utf8").digest("hex") ===
+          ADMISSION_FUNCTION_SOURCE_HASH &&
+        Array.isArray(row.proconfig) && row.proconfig.length === 1 &&
+        row.proconfig[0] === "search_path=pg_catalog"
+      ).map((row: Row) => String(row.table_name)));
+      const exactTables = ["webhook_inbox", "meta_outbox", "pancake_tag_outbox"];
+      if (fenceResult.rows.length !== 1 || !fence || triggerResult.rows.length !== 3 ||
+          tables.size !== 3 || !exactTables.every((table) => tables.has(table)) ||
+          ledgerResult.rows.length !== 1 ||
+          (ledgerResult.rows[0] as Row | undefined)?.checksum_sha256 !== ADMISSION_MIGRATION_HASH) {
+        await client.query("COMMIT");
+        return ambiguous;
+      }
+      await client.query("COMMIT");
+      return {
+        status: "HELD", source: "DATABASE", pageId: String(fence.page_id),
+        channel: String(fence.channel), fenceId: String(fence.fence_id).toLowerCase(),
+        epoch: Number(fence.epoch), released: false,
+        guardedClaims: TRACK_B_COMMERCE_ADMISSION_CLAIMS_V1,
+      };
+    } catch (error) {
+      await rollbackQuietly(client);
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async prepareTarget(input: Readonly<{
@@ -263,6 +378,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
     if (!new RegExp(`^TRACK_B_B3_2_${reasonOperation}:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`, "iu").test(input.reason)) {
       throw new Error("TRACK_B_B3_2_WRITER_REASON_INVALID");
     }
+    const operationId = input.reason.slice(input.reason.indexOf(":") + 1).toLowerCase();
     const expectedCurrent = {
       modeVersionId: requiredUuid(input.expectedCurrent.modeVersionId, "TRACK_B_B3_2_VERSION_INVALID"),
       contentHash: requiredContentHash(input.expectedCurrent.contentHash),
@@ -316,10 +432,11 @@ export class PostgresTrackBCommerceAuthorityWriter {
         !canonicalCommerceVersion(targetVersion, expectedTargetBundle) ||
         targetVersion.confirmationMode !== current.version.confirmationMode
       ) throw new Error("TRACK_B_B3_2_TARGET_IDENTITY_INVALID");
-      if (!forward) {
+      const verifyPriorTransitionAudit = async (): Promise<void> => {
+        const priorOperation = forward ? "ROLLBACK" : "ACTIVATE";
         if (
           current.updatedBy !== "TRACK_B_B3_2_WRITER" ||
-          !/^TRACK_B_B3_2_ACTIVATE:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(current.reason)
+          !new RegExp(`^TRACK_B_B3_2_${priorOperation}:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`, "iu").test(current.reason)
         ) throw new Error("TRACK_B_B3_2_ROLLBACK_IDENTITY_MISMATCH");
         const auditResult = await client.query(
           `SELECT previous_version_id, new_version_id, new_pointer_revision, actor, reason
@@ -341,23 +458,38 @@ export class PostgresTrackBCommerceAuthorityWriter {
           String(audit.actor ?? "") !== current.updatedBy ||
           String(audit.reason ?? "") !== current.reason
         ) throw new Error("TRACK_B_B3_2_ROLLBACK_IDENTITY_MISMATCH");
-      }
+      };
+      if (!forward) await verifyPriorTransitionAudit();
       const fenceResult = await client.query(
-        `SELECT operation_id
+        `SELECT operation_id,
+                (pre_cutover_version_id=$9 AND pre_cutover_content_hash=$10
+                 AND pre_cutover_pointer_revision=$13
+                 AND target_version_id=$6 AND target_content_hash=$7
+                 AND target_authority_bundle_hash=$14) AS inverse_lease
            FROM df13_commerce_cutover_fences
           WHERE fence_id=$1 AND epoch=$2 AND token_hash=$3
             AND released_at IS NULL AND lease_until > clock_timestamp()
-            AND page_id=$4 AND channel=$5
-            AND pre_cutover_version_id=$6 AND pre_cutover_content_hash=$7
-            AND pre_cutover_pointer_revision=$8
-            AND target_version_id=$9 AND target_content_hash=$10
-            AND target_authority_bundle_hash=$11
+            AND page_id=$4 AND channel=$5 AND operation_id=$12
+            AND (
+              (pre_cutover_version_id=$6 AND pre_cutover_content_hash=$7
+               AND pre_cutover_pointer_revision=$8
+               AND target_version_id=$9 AND target_content_hash=$10
+               AND target_authority_bundle_hash=$11)
+              OR
+              (pre_cutover_version_id=$9 AND pre_cutover_content_hash=$10
+               AND pre_cutover_pointer_revision=$13
+               AND target_version_id=$6 AND target_content_hash=$7
+               AND target_authority_bundle_hash=$14)
+            )
           FOR UPDATE`,
         [lease.fenceId, lease.epoch, hashToken(lease.fenceToken), PAGE_ID, CHANNEL,
           expectedCurrent.modeVersionId, expectedCurrent.contentHash, expectedCurrent.pointerRevision,
-          target.modeVersionId, target.contentHash, target.authorityBundleHash],
+          target.modeVersionId, target.contentHash, target.authorityBundleHash, operationId,
+          expectedCurrent.pointerRevision - 1, expectedCurrent.authorityBundleHash],
       );
       if (fenceResult.rows.length !== 1) throw new Error("TRACK_B_B3_2_FENCE_LEASE_INVALID");
+      const inverseLease = (fenceResult.rows[0] as Row | undefined)?.inverse_lease === true;
+      if (forward && inverseLease) await verifyPriorTransitionAudit();
       const nextRevision = current.pointerRevision + 1;
       const clockResult = await client.query<{ operation_now: Date }>(
         "SELECT clock_timestamp() AS operation_now",

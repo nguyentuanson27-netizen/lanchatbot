@@ -521,11 +521,12 @@ Track B must define the truthful replacement labels, derive a new canonical bund
 
 **Required sequence**
 
-1. Bind execution to the 2026-08-31 owner authorization for `ENGINEERING_PREPROD`; stop on any scope mismatch or ungranted boundary. Migration `0036` still requires a separate owner decision if source/target audit proves it necessary.
+1. Bind execution to the owner authorization for `ENGINEERING_PREPROD`; stop on any scope mismatch or ungranted boundary. Migrations `0036` and `0037` are applied/verified there. Pending migration `0038` is source-only and requires separate owner authorization for backup rehearsal or live apply.
 2. Bind the exact new bundle hash, behavior version/content hash/revision/source and the exact previous bundle/version/content hash/revision/source before mutation.
-3. Use the reviewed page-scoped pointer writer with expected revision/CAS, exact `DATABASE` readback from the full consumer set, and a reversible exact previous identity. No manual SQL or env-only authority selector.
-4. Deploy only the exact merged commit/build for affected services and preserve the exact previous affected-service release/build/commit in the release-local rollback record required by `RELEASE_INTEGRITY.md`.
-5. Run meaningful pre-activation readiness, then post-activation authority readback, smoke and controlled test-page checks. Failed or unknown runtime state stops further mutation and restores the exact previous authority and affected-service identities.
+3. Persist the self-hashed release-local prior/target service and authority record, stage the exact target stopped/non-admitting, acquire the reviewed durable page fence, prove the database admission gate is `HELD` for every reachable claim transition, stop the exact source service and prove zero in-flight authority-dependent work, then use the reviewed pointer writer for the exact CAS. Durably queued/held work may remain and is recorded; it is not in-flight authority. No manual SQL or env-only authority selector.
+4. Start the exact staged target only after exact CAS/readback. While the fence remains held, prove its service/image/config identity, runtime authority, activation audit and exact `DATABASE` readback from the full consumer set. Fence release has no service-start capability.
+5. Before-CAS failure restores the exact prior service when it was stopped, discards the staged target and releases only after exact prior runtime/consumer readback. Post-CAS failure reverses the exact CAS, restores the exact prior service and releases only after the same readback. Ambiguity retains the fence.
+6. Run meaningful pre-activation readiness, then post-activation authority readback, smoke and controlled test-page checks. Failed or unknown runtime state stops further mutation and restores the exact previous authority and affected-service identities.
 
 ---
 

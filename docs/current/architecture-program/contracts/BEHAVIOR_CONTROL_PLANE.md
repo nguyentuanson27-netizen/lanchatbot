@@ -56,6 +56,68 @@ This quiescent boundary is an atomicity/correctness requirement for direct cutov
 
 Every activation remains page-scoped, CAS-audited, read back from the worker, bounded by the existing propagation contract, and reversible to complete `LEGACY` authority.
 
+### Track B COMMERCE authority-bundle replacement
+
+The bounded `COMMERCE/V1 -> COMMERCE/V2` Track B replacement uses one explicit
+stopped-service mutation protocol:
+
+```text
+persist exact release-local rollback identity
+-> stage exact target service stopped/non-admitting
+-> acquire the durable page fence
+-> prove DATABASE admission HELD for every authority-dependent claim transition
+-> stop the exact source service and prove zero in-flight authority-dependent work
+-> exact pointer CAS and DATABASE readback
+-> start the exact staged target
+-> exact runtime, activation-audit and full-consumer DATABASE readback
+-> release the fence
+```
+
+Staging cannot start the target. Fence release cannot start or replace a
+service. Pending migration `0038_track_b_commerce_admission_gate` supplies the
+atomic database admission boundary for `webhook_inbox -> PROCESSING`,
+`meta_outbox -> SENDING`, and `pancake_tag_outbox -> APPLYING`. The source trace
+finds no other independent live authority-dependent claim: the Inbox
+conversation-head lease is acquired in the same transaction and is rolled
+back/cleared when the Inbox claim is not returned, while per-work DF13 fences
+are downstream of that claim. A matching unreleased page/channel fence blocks
+new or replacement leases even after its lease expires; inserts remain durable
+and existing leases may complete. Installation/removal serializes with fence
+acquisition, and down refuses while any unreleased fence exists. The migration
+depends on `0036/0037`; its source hashes are up
+`9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140` and down
+`5dd292a169a5ecce5f21896bf8e11f1d7727a34a55758c92b8abc98f3de64d9a`.
+Source review/merge does not authorize rehearsal or live apply.
+
+Quiescence counts every claimed/in-flight class at zero. Durably queued rows may
+remain or grow while admission is held; they are recorded in evidence but are
+not required to be zero because no worker may claim them before exact release.
+An admission-suppressed Inbox batch restores the speculative conversation-head
+attempt count together with its lease, so held polling cannot consume retry
+budget or poison queued work.
+
+The CAS writer accepts only the recorded prior and target authority
+identities and exact live lease; a post-CAS recovery may reuse that same
+unreleased forward lease only to reverse the exact audited transition at the
+next pointer revision. A separately requested rollback obtains its own exact
+reverse fence.
+
+Before CAS failure handling must leave the pointer at the recorded prior
+identity, discard the staged target, restore and read back the exact prior
+service if it was stopped, and only then release the fence. After CAS failure
+handling must CAS back to the recorded prior authority, restore/start the exact
+prior service, prove runtime plus full-consumer convergence, and only then
+release the fence. Unknown pointer, fence, stopped-service, staged-service,
+runtime, audit or consumer identity retains the fence and fails closed. This
+protocol does not authorize deployment or pointer mutation by itself.
+
+If exact fence release commits but its acknowledgement is lost, re-entry uses
+the durable `ALREADY_RELEASED` fence identity and reconciles exact pointer,
+service/runtime, audit when a CAS occurred, and all DATABASE consumers. It may
+report the exact target active, exact prior untouched, or exact prior restored;
+otherwise it reports released-state ambiguity and never claims a hold that no
+longer exists.
+
 ### Narrow first-DF13 PREPROD exception
 
 For the first isolated DF13 PREPROD exercise only,

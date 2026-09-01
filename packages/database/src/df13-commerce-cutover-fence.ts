@@ -293,6 +293,9 @@ export class PostgresDf13CommerceCutoverFenceStore implements Df13CommerceCutove
     try {
       await client.query("BEGIN");
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [
+        "df13-cutover-admission-migration",
+      ]);
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [
         `df13-cutover:${request.pageId}:${request.channel}`,
       ]);
       const operationResult = await client.query<CutoverFenceRow>(

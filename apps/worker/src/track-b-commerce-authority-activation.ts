@@ -5,6 +5,7 @@ import type {
   Df13CommerceCutoverFenceLease,
   Df13CommerceCutoverFenceRequest,
 } from "@lana/database";
+import { TRACK_B_COMMERCE_ADMISSION_CLAIMS_V1 } from "@lana/database";
 import {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
   DF13_COMMERCE_AUTHORITY_BUNDLE_V2,
@@ -66,14 +67,35 @@ export type TrackBCommerceConsumerReadback = Readonly<{
   authorityBundleHash: string | null;
 }>;
 
+export const TRACK_B_AUTHORITY_DEPENDENT_CLAIMS_V1 = TRACK_B_COMMERCE_ADMISSION_CLAIMS_V1;
+
+export type TrackBCommerceAdmissionReadback = Readonly<{
+  status: "HELD" | "AMBIGUOUS";
+  source: "DATABASE";
+  pageId: string | null;
+  channel: string | null;
+  fenceId: string | null;
+  epoch: number | null;
+  released: boolean | null;
+  guardedClaims: readonly string[];
+}>;
+
 export interface TrackBCommerceAuthorityMutationPorts {
   readPersistedRollbackRecord(recordHash: string): Promise<TrackBReleaseLocalRollbackRecord | null>;
   acquireFence(request: Df13CommerceCutoverFenceRequest): Promise<Readonly<
     | { status: "HELD"; lease: Df13CommerceCutoverFenceLease }
-    | { status: "HELD_RECONCILE_REQUIRED" | "ALREADY_RELEASED" | "PARKED"; reasonCode?: string }
+    | { status: "ALREADY_RELEASED"; fenceId: string; epoch: number }
+    | { status: "HELD_RECONCILE_REQUIRED" | "PARKED"; reasonCode?: string }
   >>;
-  proveQuiescence(input: Readonly<{ lease: Df13CommerceCutoverFenceLease }>): Promise<Readonly<{
+  proveAdmissionHeld(input: Readonly<{
+    lease: Df13CommerceCutoverFenceLease;
+  }>): Promise<TrackBCommerceAdmissionReadback>;
+  stopSourceAndProveQuiescence(input: Readonly<{
+    lease: Df13CommerceCutoverFenceLease;
+    sourceService: TrackBServiceReleaseIdentity;
+  }>): Promise<Readonly<{
     status: "QUIESCENT" | "BUSY";
+    observedStoppedService: TrackBServiceReleaseIdentity | null;
     activeInbox: number;
     activeMetaOutbox: number;
     activePancakeOutbox: number;
@@ -81,17 +103,19 @@ export interface TrackBCommerceAuthorityMutationPorts {
     queuedAuthorityDependentWork: number;
     admission: "HELD" | "UNCONTROLLED";
   }>>;
-  replaceAffectedServices(input: Readonly<{
+  stageAffectedService(input: Readonly<{
     direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
-    lease: Df13CommerceCutoverFenceLease;
     sourceService: TrackBServiceReleaseIdentity;
     targetService: TrackBServiceReleaseIdentity;
   }>): Promise<Readonly<{
-    status: "READY" | "BLOCKED";
-    admission: "HELD" | "UNCONTROLLED";
+    status: "STAGED_STOPPED" | "BLOCKED";
+    admission: "NON_ADMITTING" | "UNCONTROLLED";
     observedSourceService: TrackBServiceReleaseIdentity | null;
-    observedService: TrackBServiceReleaseIdentity | null;
+    stagedService: TrackBServiceReleaseIdentity | null;
   }>>;
+  discardStagedService(input: Readonly<{
+    stagedService: TrackBServiceReleaseIdentity;
+  }>): Promise<Readonly<{ status: "DISCARDED" | "AMBIGUOUS" }>>;
   mutateExactPointer(input: Readonly<{
     direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
     previous: RuntimeBehaviorModePointer;
@@ -99,6 +123,54 @@ export interface TrackBCommerceAuthorityMutationPorts {
     lease: Df13CommerceCutoverFenceLease;
   }>): Promise<Readonly<{ status: "ACKNOWLEDGED" | "ACK_LOST" | "CAS_MISMATCH" }>>;
   readActivePointer(): Promise<RuntimeBehaviorModePointer | null>;
+  startStagedService(input: Readonly<{
+    direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+    lease: Df13CommerceCutoverFenceLease;
+    stagedService: TrackBServiceReleaseIdentity;
+  }>): Promise<Readonly<{
+    status: "HEALTHY" | "BLOCKED";
+    admission: "HELD" | "UNCONTROLLED";
+    observedService: TrackBServiceReleaseIdentity | null;
+  }>>;
+  restorePreviousService(input: Readonly<{
+    lease: Df13CommerceCutoverFenceLease;
+    failedService: TrackBServiceReleaseIdentity;
+    previousService: TrackBServiceReleaseIdentity;
+  }>): Promise<Readonly<{
+    status: "HEALTHY" | "BLOCKED";
+    admission: "HELD" | "UNCONTROLLED";
+    observedService: TrackBServiceReleaseIdentity | null;
+  }>>;
+  readRuntimeAuthority(input: Readonly<{
+    lease: Df13CommerceCutoverFenceLease;
+    service: TrackBServiceReleaseIdentity;
+    pointer: RuntimeBehaviorModePointer;
+  }>): Promise<Readonly<{
+    status: "EXACT" | "AMBIGUOUS";
+    service: TrackBServiceReleaseIdentity | null;
+    modeVersionId: string | null;
+    contentHash: string | null;
+    pointerRevision: number | null;
+    authorityBundleHash: string | null;
+    fenceId: string | null;
+    admission: "HELD" | "UNCONTROLLED";
+  }>>;
+  readReleasedRuntimeAuthority(input: Readonly<{
+    fenceId: string;
+    epoch: number;
+    service: TrackBServiceReleaseIdentity;
+    pointer: RuntimeBehaviorModePointer;
+  }>): Promise<Readonly<{
+    status: "EXACT" | "AMBIGUOUS";
+    service: TrackBServiceReleaseIdentity | null;
+    modeVersionId: string | null;
+    contentHash: string | null;
+    pointerRevision: number | null;
+    authorityBundleHash: string | null;
+    fenceId: string | null;
+    epoch: number | null;
+    admission: "OPEN" | "AMBIGUOUS";
+  }>>;
   readActivationAudit(input: Readonly<{
     pointerRevision: number;
     previousVersionId: string;
@@ -112,13 +184,18 @@ export interface TrackBCommerceAuthorityMutationPorts {
     lease: Df13CommerceCutoverFenceLease;
     consumers: readonly CommerceAuthorityConsumer[];
   }>): Promise<readonly TrackBCommerceConsumerReadback[]>;
+  readReleasedConsumerAuthorities(input: Readonly<{
+    fenceId: string;
+    epoch: number;
+    consumers: readonly CommerceAuthorityConsumer[];
+  }>): Promise<readonly TrackBCommerceConsumerReadback[]>;
   releaseFence(lease: Df13CommerceCutoverFenceLease): Promise<Readonly<{
     status: "RELEASED" | "STALE_OR_MISSING";
   }>>;
 }
 
 export type TrackBCommerceAuthorityMutationResult = Readonly<{
-  status: "BLOCKED_PREVIOUS" | "TARGET_ACTIVE" | "PREVIOUS_RESTORED" | "HOLD_RETAINED";
+  status: "BLOCKED_PREVIOUS" | "TARGET_ACTIVE" | "PREVIOUS_RESTORED" | "HOLD_RETAINED" | "RELEASED_AMBIGUOUS";
   sideEffects: "NOT_EXECUTED" | "CONTROL_PLANE_ONLY";
   reasonCodes: readonly string[];
 }>;
@@ -225,31 +302,320 @@ function exactConsumerReadbacks(
   });
 }
 
-async function releaseBeforeMutation(
-  ports: TrackBCommerceAuthorityMutationPorts,
+function exactAdmissionReadback(
+  value: TrackBCommerceAdmissionReadback,
   lease: Df13CommerceCutoverFenceLease,
-  reasonCode: string,
-): Promise<TrackBCommerceAuthorityMutationResult> {
+): boolean {
+  return value.status === "HELD" && value.source === "DATABASE" &&
+    value.pageId === DF13_COMMERCE_PREPROD_SCOPE_V1.pageId &&
+    value.channel === DF13_COMMERCE_PREPROD_SCOPE_V1.channel &&
+    value.fenceId === lease.fenceId && value.epoch === lease.epoch &&
+    value.released === false &&
+    canonicalJsonV1([...value.guardedClaims].sort()) ===
+      canonicalJsonV1([...TRACK_B_AUTHORITY_DEPENDENT_CLAIMS_V1].sort());
+}
+
+function exactService(
+  observed: TrackBServiceReleaseIdentity | null,
+  expected: TrackBServiceReleaseIdentity,
+): boolean {
+  return observed !== null && canonicalJsonV1(observed) === canonicalJsonV1(expected);
+}
+
+function exactQuiescence(
+  value: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["stopSourceAndProveQuiescence"]>>,
+  expectedStoppedService: TrackBServiceReleaseIdentity,
+): boolean {
+  return value.status === "QUIESCENT" && value.admission === "HELD" &&
+    exactService(value.observedStoppedService, expectedStoppedService) &&
+    value.activeInbox === 0 && value.activeMetaOutbox === 0 &&
+    value.activePancakeOutbox === 0 && value.inFlightAuthorityDependentWork === 0 &&
+    Number.isSafeInteger(value.queuedAuthorityDependentWork) &&
+    value.queuedAuthorityDependentWork >= 0;
+}
+
+function exactRuntimeReadback(
+  value: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["readRuntimeAuthority"]>>,
+  service: TrackBServiceReleaseIdentity,
+  pointer: RuntimeBehaviorModePointer,
+  lease: Df13CommerceCutoverFenceLease,
+): boolean {
+  return value.status === "EXACT" && value.admission === "HELD" &&
+    exactService(value.service, service) && value.fenceId === lease.fenceId &&
+    value.modeVersionId === pointer.version.modeVersionId &&
+    value.contentHash === pointer.version.contentHash &&
+    value.pointerRevision === pointer.pointerRevision &&
+    value.authorityBundleHash === pointer.version.authorityBundleHash;
+}
+
+function exactReleasedRuntimeReadback(
+  value: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["readReleasedRuntimeAuthority"]>>,
+  service: TrackBServiceReleaseIdentity,
+  pointer: RuntimeBehaviorModePointer,
+  fence: Readonly<{ fenceId: string; epoch: number }>,
+): boolean {
+  return value.status === "EXACT" && value.admission === "OPEN" &&
+    exactService(value.service, service) && value.fenceId === fence.fenceId &&
+    value.epoch === fence.epoch && value.modeVersionId === pointer.version.modeVersionId &&
+    value.contentHash === pointer.version.contentHash &&
+    value.pointerRevision === pointer.pointerRevision &&
+    value.authorityBundleHash === pointer.version.authorityBundleHash;
+}
+
+async function reconcileReleasedTerminal(input: Readonly<{
+  ports: TrackBCommerceAuthorityMutationPorts;
+  operationId: string;
+  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  previous: RuntimeBehaviorModePointer;
+  target: RuntimeBehaviorModePointer;
+  previousService: TrackBServiceReleaseIdentity;
+  targetService: TrackBServiceReleaseIdentity;
+  fence: Readonly<{ fenceId: string; epoch: number }>;
+}>): Promise<TrackBCommerceAuthorityMutationResult> {
+  let observed: RuntimeBehaviorModePointer | null;
+  try { observed = await input.ports.readActivePointer(); } catch { observed = null; }
+  const restored = { ...input.previous, pointerRevision: input.target.pointerRevision + 1 };
+  const terminal = pointerMatches(observed, input.target)
+    ? { pointer: input.target, service: input.targetService, audit: input.direction,
+        status: input.direction === "ACTIVATE_TRACK_B" ? "TARGET_ACTIVE" as const : "PREVIOUS_RESTORED" as const }
+    : pointerMatches(observed, input.previous)
+      ? { pointer: input.previous, service: input.previousService, audit: null,
+          status: "BLOCKED_PREVIOUS" as const }
+      : pointerMatches(observed, restored)
+        ? { pointer: restored, service: input.previousService,
+            audit: input.direction === "ACTIVATE_TRACK_B" ? "ROLLBACK_TRACK_B" as const : "ACTIVATE_TRACK_B" as const,
+            status: input.direction === "ACTIVATE_TRACK_B" ? "PREVIOUS_RESTORED" as const : "TARGET_ACTIVE" as const }
+        : null;
+  if (terminal === null) {
+    return { status: "RELEASED_AMBIGUOUS", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      "TRACK_B_B3_2_RELEASED_POINTER_AMBIGUOUS",
+    ] };
+  }
   try {
-    const released = await ports.releaseFence(lease);
-    if (released.status === "RELEASED") {
-      return { status: "BLOCKED_PREVIOUS", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [reasonCode] };
+    const runtime = await input.ports.readReleasedRuntimeAuthority({
+      ...input.fence, service: terminal.service, pointer: terminal.pointer,
+    });
+    if (!exactReleasedRuntimeReadback(runtime, terminal.service, terminal.pointer, input.fence)) {
+      throw new Error("released runtime mismatch");
     }
-  } catch { /* retain the hold */ }
+    if (terminal.audit !== null) {
+      const auditPrevious = terminal.audit === input.direction ? input.previous : input.target;
+      if (!await exactAudit({
+        ports: input.ports, operationId: input.operationId, direction: terminal.audit,
+        previous: auditPrevious, target: terminal.pointer,
+      })) throw new Error("released audit mismatch");
+    }
+    const consumers = await input.ports.readReleasedConsumerAuthorities({
+      ...input.fence, consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+    });
+    if (!exactConsumerReadbacks(consumers, terminal.pointer)) throw new Error("released consumer mismatch");
+  } catch {
+    return { status: "RELEASED_AMBIGUOUS", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      "TRACK_B_B3_2_RELEASED_TERMINAL_READBACK_UNPROVEN",
+    ] };
+  }
+  return { status: terminal.status, sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+    "TRACK_B_B3_2_RELEASE_ACK_RECONCILED",
+  ] };
+}
+
+async function discardAndReleaseBeforeCas(input: Readonly<{
+  ports: TrackBCommerceAuthorityMutationPorts;
+  stagedService: TrackBServiceReleaseIdentity;
+  lease?: Df13CommerceCutoverFenceLease;
+  reasonCode: string;
+}>): Promise<TrackBCommerceAuthorityMutationResult> {
+  try {
+    const discarded = await input.ports.discardStagedService({ stagedService: input.stagedService });
+    if (discarded.status !== "DISCARDED") throw new Error("discard ambiguous");
+  } catch {
+    return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      input.reasonCode, "TRACK_B_B3_2_STAGED_SERVICE_DISCARD_UNPROVEN",
+    ] };
+  }
+  if (input.lease) {
+    try {
+      const released = await input.ports.releaseFence(input.lease);
+      if (released.status !== "RELEASED") throw new Error("release ambiguous");
+    } catch {
+      return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+        input.reasonCode, "TRACK_B_B3_2_FENCE_RELEASE_UNPROVEN",
+      ] };
+    }
+  }
+  return { status: "BLOCKED_PREVIOUS", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [input.reasonCode] };
+}
+
+async function exactAudit(input: Readonly<{
+  ports: TrackBCommerceAuthorityMutationPorts;
+  operationId: string;
+  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  previous: RuntimeBehaviorModePointer;
+  target: RuntimeBehaviorModePointer;
+}>): Promise<boolean> {
+  try {
+    return await input.ports.readActivationAudit({
+      pointerRevision: input.target.pointerRevision,
+      previousVersionId: input.previous.version.modeVersionId,
+      previousContentHash: input.previous.version.contentHash,
+      targetVersionId: input.target.version.modeVersionId,
+      targetContentHash: input.target.version.contentHash,
+      actor: "TRACK_B_B3_2_WRITER",
+      reason: `TRACK_B_B3_2_${input.direction === "ACTIVATE_TRACK_B" ? "ACTIVATE" : "ROLLBACK"}:${input.operationId.toLowerCase()}`,
+    }) === "EXACT";
+  } catch { return false; }
+}
+
+async function recoverBeforeCas(input: Readonly<{
+  ports: TrackBCommerceAuthorityMutationPorts;
+  lease: Df13CommerceCutoverFenceLease;
+  pointer: RuntimeBehaviorModePointer;
+  stagedService: TrackBServiceReleaseIdentity;
+  priorService: TrackBServiceReleaseIdentity;
+  reasonCode: string;
+}>): Promise<TrackBCommerceAuthorityMutationResult> {
+  let current: RuntimeBehaviorModePointer | null;
+  try { current = await input.ports.readActivePointer(); } catch { current = null; }
+  if (!pointerMatches(current, input.pointer)) {
+    return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      input.reasonCode, "TRACK_B_B3_2_PRE_CAS_POINTER_AMBIGUOUS",
+    ] };
+  }
+  let restored: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["restorePreviousService"]>>;
+  try {
+    restored = await input.ports.restorePreviousService({
+      lease: input.lease,
+      failedService: input.stagedService,
+      previousService: input.priorService,
+    });
+  } catch {
+    return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      input.reasonCode, "TRACK_B_B3_2_PRE_CAS_SERVICE_RESTORE_UNAVAILABLE",
+    ] };
+  }
+  if (restored.status !== "HEALTHY" || restored.admission !== "HELD" ||
+      !exactService(restored.observedService, input.priorService)) {
+    return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      input.reasonCode, "TRACK_B_B3_2_PRE_CAS_SERVICE_RESTORE_AMBIGUOUS",
+    ] };
+  }
+  try {
+    const runtime = await input.ports.readRuntimeAuthority({
+      lease: input.lease, service: input.priorService, pointer: input.pointer,
+    });
+    if (!exactRuntimeReadback(runtime, input.priorService, input.pointer, input.lease)) {
+      throw new Error("runtime mismatch");
+    }
+    const consumers = await input.ports.readConsumerAuthorities({
+      lease: input.lease, consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+    });
+    if (!exactConsumerReadbacks(consumers, input.pointer)) throw new Error("consumer mismatch");
+  } catch {
+    return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      input.reasonCode, "TRACK_B_B3_2_PRE_CAS_READBACK_UNPROVEN",
+    ] };
+  }
+  return discardAndReleaseBeforeCas({
+    ports: input.ports, stagedService: input.stagedService, lease: input.lease,
+    reasonCode: input.reasonCode,
+  });
+}
+
+async function recoverAfterCas(input: Readonly<{
+  ports: TrackBCommerceAuthorityMutationPorts;
+  operationId: string;
+  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  lease: Df13CommerceCutoverFenceLease;
+  active: RuntimeBehaviorModePointer;
+  prior: RuntimeBehaviorModePointer;
+  failedService: TrackBServiceReleaseIdentity;
+  priorService: TrackBServiceReleaseIdentity;
+  reasonCode: string;
+}>): Promise<TrackBCommerceAuthorityMutationResult> {
+  const reverseDirection = input.direction === "ACTIVATE_TRACK_B" ? "ROLLBACK_TRACK_B" : "ACTIVATE_TRACK_B";
+  const restored = { ...input.prior, pointerRevision: input.active.pointerRevision + 1 };
+  try {
+    await input.ports.mutateExactPointer({
+      direction: reverseDirection,
+      previous: input.active,
+      target: restored,
+      lease: input.lease,
+    });
+  } catch { /* exact readback reconciles acknowledgement loss */ }
+  let pointer: RuntimeBehaviorModePointer | null;
+  try { pointer = await input.ports.readActivePointer(); } catch { pointer = null; }
+  if (!pointerMatches(pointer, restored)) {
+    return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      input.reasonCode, "TRACK_B_B3_2_ROLLBACK_POINTER_AMBIGUOUS",
+    ] };
+  }
+  return completeRestoredServiceRecovery({ ...input, reverseDirection, restored });
+}
+
+async function completeRestoredServiceRecovery(input: Readonly<{
+  ports: TrackBCommerceAuthorityMutationPorts;
+  operationId: string;
+  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  reverseDirection: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  lease: Df13CommerceCutoverFenceLease;
+  active: RuntimeBehaviorModePointer;
+  restored: RuntimeBehaviorModePointer;
+  failedService: TrackBServiceReleaseIdentity;
+  priorService: TrackBServiceReleaseIdentity;
+  reasonCode: string;
+}>): Promise<TrackBCommerceAuthorityMutationResult> {
+  let service: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["restorePreviousService"]>>;
+  try {
+    service = await input.ports.restorePreviousService({
+      lease: input.lease,
+      failedService: input.failedService,
+      previousService: input.priorService,
+    });
+  } catch {
+    return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      input.reasonCode, "TRACK_B_B3_2_ROLLBACK_SERVICE_UNAVAILABLE",
+    ] };
+  }
+  if (service.status !== "HEALTHY" || service.admission !== "HELD" ||
+      !exactService(service.observedService, input.priorService)) {
+    return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      input.reasonCode, "TRACK_B_B3_2_ROLLBACK_SERVICE_AMBIGUOUS",
+    ] };
+  }
+  try {
+    const runtime = await input.ports.readRuntimeAuthority({
+      lease: input.lease, service: input.priorService, pointer: input.restored,
+    });
+    if (!exactRuntimeReadback(runtime, input.priorService, input.restored, input.lease)) throw new Error("runtime mismatch");
+    if (!await exactAudit({
+      ports: input.ports, operationId: input.operationId, direction: input.reverseDirection,
+      previous: input.active, target: input.restored,
+    })) throw new Error("audit mismatch");
+    const consumers = await input.ports.readConsumerAuthorities({
+      lease: input.lease, consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
+    });
+    if (!exactConsumerReadbacks(consumers, input.restored)) throw new Error("consumer mismatch");
+  } catch {
+    return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      input.reasonCode, "TRACK_B_B3_2_ROLLBACK_READBACK_UNPROVEN",
+    ] };
+  }
+  try {
+    const released = await input.ports.releaseFence(input.lease);
+    if (released.status !== "RELEASED") throw new Error("release mismatch");
+  } catch {
+    return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      input.reasonCode, "TRACK_B_B3_2_FENCE_RELEASE_UNPROVEN",
+    ] };
+  }
   return {
-    status: "HOLD_RETAINED",
+    status: input.direction === "ACTIVATE_TRACK_B" ? "PREVIOUS_RESTORED" : "TARGET_ACTIVE",
     sideEffects: "CONTROL_PLANE_ONLY",
-    reasonCodes: [reasonCode, "TRACK_B_B3_2_FENCE_RELEASE_UNPROVEN"],
+    reasonCodes: [input.reasonCode],
   };
 }
 
-/**
- * Side-effect-free outside the behavior control plane. Activation and rollback
- * use separate immutable 0036 fence records. The exact affected-service release
- * is replaced only after admission is held and quiescence is proven, then
- * quiescence is re-proved before CAS. A failed replacement or post-CAS readback
- * never resumes authority-dependent work.
- */
+/** Explicit STAGE_STOPPED -> fence -> quiescence -> CAS -> START_TARGET protocol. */
 export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
   operationId: string;
   direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
@@ -285,6 +651,31 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
       reasonCodes: ["TRACK_B_B3_2_ROLLBACK_RECORD_UNAVAILABLE"],
     };
   }
+  const expectedService = input.direction === "ACTIVATE_TRACK_B"
+    ? input.rollbackRecord.targetService : input.rollbackRecord.previousService;
+  const expectedSourceService = input.direction === "ACTIVATE_TRACK_B"
+    ? input.rollbackRecord.previousService : input.rollbackRecord.targetService;
+  let staged: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["stageAffectedService"]>>;
+  try {
+    staged = await input.ports.stageAffectedService({
+      direction: input.direction, sourceService: expectedSourceService, targetService: expectedService,
+    });
+  } catch {
+    return { status: "BLOCKED_PREVIOUS", sideEffects: "NOT_EXECUTED", reasonCodes: ["TRACK_B_B3_2_SERVICE_STAGING_UNAVAILABLE"] };
+  }
+  if (staged.status !== "STAGED_STOPPED" || staged.admission !== "NON_ADMITTING" ||
+      !exactService(staged.observedSourceService, expectedSourceService) ||
+      !exactService(staged.stagedService, expectedService)) {
+    if (!exactService(staged.stagedService, expectedService)) {
+      return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+        "TRACK_B_B3_2_SERVICE_STAGING_UNPROVEN",
+        "TRACK_B_B3_2_STAGED_SERVICE_IDENTITY_AMBIGUOUS",
+      ] };
+    }
+    return discardAndReleaseBeforeCas({
+      ports: input.ports, stagedService: expectedService, reasonCode: "TRACK_B_B3_2_SERVICE_STAGING_UNPROVEN",
+    });
+  }
   const fenceRequest: Df13CommerceCutoverFenceRequest = {
     operationId: input.operationId,
     pageId: DF13_COMMERCE_PREPROD_SCOPE_V1.pageId,
@@ -304,94 +695,39 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
   try {
     acquired = await input.ports.acquireFence(fenceRequest);
   } catch {
-    return {
-      status: "BLOCKED_PREVIOUS",
-      sideEffects: "NOT_EXECUTED",
-      reasonCodes: ["TRACK_B_B3_2_FENCE_ACQUISITION_UNAVAILABLE"],
-    };
+    return discardAndReleaseBeforeCas({ ports: input.ports, stagedService: expectedService,
+      reasonCode: "TRACK_B_B3_2_FENCE_ACQUISITION_UNAVAILABLE" });
   }
   if (acquired.status !== "HELD") {
-    return {
-      status: "BLOCKED_PREVIOUS",
-      sideEffects: "NOT_EXECUTED",
-      reasonCodes: ["TRACK_B_B3_2_FENCE_NOT_HELD"],
-    };
+    return discardAndReleaseBeforeCas({ ports: input.ports, stagedService: expectedService,
+      reasonCode: "TRACK_B_B3_2_FENCE_NOT_HELD" });
   }
-  let quiescence: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["proveQuiescence"]>>;
+  let admission: TrackBCommerceAdmissionReadback;
   try {
-    quiescence = await input.ports.proveQuiescence({ lease: acquired.lease });
+    admission = await input.ports.proveAdmissionHeld({ lease: acquired.lease });
   } catch {
-    return releaseBeforeMutation(input.ports, acquired.lease, "TRACK_B_B3_2_QUIESCENCE_UNAVAILABLE");
+    return discardAndReleaseBeforeCas({ ports: input.ports, lease: acquired.lease,
+      stagedService: expectedService, reasonCode: "TRACK_B_B3_2_ADMISSION_READBACK_UNAVAILABLE" });
   }
-  if (
-    quiescence.status !== "QUIESCENT" ||
-    quiescence.admission !== "HELD" ||
-    quiescence.activeInbox !== 0 ||
-    quiescence.activeMetaOutbox !== 0 ||
-    quiescence.activePancakeOutbox !== 0 ||
-    quiescence.inFlightAuthorityDependentWork !== 0 ||
-    quiescence.queuedAuthorityDependentWork !== 0
-  ) {
-    return releaseBeforeMutation(input.ports, acquired.lease, "TRACK_B_B3_2_QUIESCENCE_UNPROVEN");
+  if (!exactAdmissionReadback(admission, acquired.lease)) {
+    return discardAndReleaseBeforeCas({ ports: input.ports, lease: acquired.lease,
+      stagedService: expectedService, reasonCode: "TRACK_B_B3_2_ADMISSION_NOT_HELD" });
   }
-  let replacement: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["replaceAffectedServices"]>>;
-  const expectedService = input.direction === "ACTIVATE_TRACK_B"
-    ? input.rollbackRecord.targetService
-    : input.rollbackRecord.previousService;
-  const expectedSourceService = input.direction === "ACTIVATE_TRACK_B"
-    ? input.rollbackRecord.previousService
-    : input.rollbackRecord.targetService;
+  let quiescence: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["stopSourceAndProveQuiescence"]>>;
   try {
-    replacement = await input.ports.replaceAffectedServices({
-      direction: input.direction,
+    quiescence = await input.ports.stopSourceAndProveQuiescence({
       lease: acquired.lease,
       sourceService: expectedSourceService,
-      targetService: expectedService,
     });
   } catch {
-    return {
-      status: "HOLD_RETAINED",
-      sideEffects: "CONTROL_PLANE_ONLY",
-      reasonCodes: ["TRACK_B_B3_2_SERVICE_REPLACEMENT_UNAVAILABLE"],
-    };
+    return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      "TRACK_B_B3_2_QUIESCENCE_UNAVAILABLE",
+    ] };
   }
-  if (
-    replacement.status !== "READY" ||
-    replacement.admission !== "HELD" ||
-    replacement.observedSourceService === null ||
-    canonicalJsonV1(replacement.observedSourceService) !== canonicalJsonV1(expectedSourceService) ||
-    replacement.observedService === null ||
-    canonicalJsonV1(replacement.observedService) !== canonicalJsonV1(expectedService)
-  ) {
-    return {
-      status: "HOLD_RETAINED",
-      sideEffects: "CONTROL_PLANE_ONLY",
-      reasonCodes: ["TRACK_B_B3_2_SERVICE_REPLACEMENT_UNPROVEN"],
-    };
-  }
-  try {
-    quiescence = await input.ports.proveQuiescence({ lease: acquired.lease });
-  } catch {
-    return {
-      status: "HOLD_RETAINED",
-      sideEffects: "CONTROL_PLANE_ONLY",
-      reasonCodes: ["TRACK_B_B3_2_POST_REPLACEMENT_QUIESCENCE_UNAVAILABLE"],
-    };
-  }
-  if (
-    quiescence.status !== "QUIESCENT" ||
-    quiescence.admission !== "HELD" ||
-    quiescence.activeInbox !== 0 ||
-    quiescence.activeMetaOutbox !== 0 ||
-    quiescence.activePancakeOutbox !== 0 ||
-    quiescence.inFlightAuthorityDependentWork !== 0 ||
-    quiescence.queuedAuthorityDependentWork !== 0
-  ) {
-    return {
-      status: "HOLD_RETAINED",
-      sideEffects: "CONTROL_PLANE_ONLY",
-      reasonCodes: ["TRACK_B_B3_2_POST_REPLACEMENT_QUIESCENCE_UNPROVEN"],
-    };
+  if (!exactQuiescence(quiescence, expectedSourceService)) {
+    return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      "TRACK_B_B3_2_QUIESCENCE_UNPROVEN",
+    ] };
   }
   try {
     await input.ports.mutateExactPointer({
@@ -413,11 +749,9 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
   }
   if (!pointerMatches(observed, input.target)) {
     if (pointerMatches(observed, input.previous)) {
-      return {
-        status: "HOLD_RETAINED",
-        sideEffects: "CONTROL_PLANE_ONLY",
-        reasonCodes: ["TRACK_B_B3_2_POINTER_NOT_MUTATED_AFTER_REPLACEMENT"],
-      };
+      return recoverBeforeCas({ ports: input.ports, lease: acquired.lease, pointer: input.previous,
+        stagedService: expectedService, priorService: expectedSourceService,
+        reasonCode: "TRACK_B_B3_2_POINTER_NOT_MUTATED" });
     }
     return {
       status: "HOLD_RETAINED",
@@ -425,26 +759,35 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
       reasonCodes: ["TRACK_B_B3_2_POINTER_READBACK_AMBIGUOUS"],
     };
   }
-  let audit: "EXACT" | "MISSING" | "AMBIGUOUS";
+  let started: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["startStagedService"]>>;
   try {
-    audit = await input.ports.readActivationAudit({
-      pointerRevision: input.target.pointerRevision,
-      previousVersionId: input.previous.version.modeVersionId,
-      previousContentHash: input.previous.version.contentHash,
-      targetVersionId: input.target.version.modeVersionId,
-      targetContentHash: input.target.version.contentHash,
-      actor: "TRACK_B_B3_2_WRITER",
-      reason: `TRACK_B_B3_2_${input.direction === "ACTIVATE_TRACK_B" ? "ACTIVATE" : "ROLLBACK"}:${input.operationId.toLowerCase()}`,
+    started = await input.ports.startStagedService({
+      direction: input.direction, lease: acquired.lease, stagedService: expectedService,
     });
   } catch {
-    audit = "AMBIGUOUS";
+    started = { status: "BLOCKED", admission: "HELD", observedService: null };
   }
-  if (audit !== "EXACT") {
-    return {
-      status: "HOLD_RETAINED",
-      sideEffects: "CONTROL_PLANE_ONLY",
-      reasonCodes: ["TRACK_B_B3_2_ACTIVATION_AUDIT_UNPROVEN"],
-    };
+  if (started.status !== "HEALTHY" || started.admission !== "HELD" ||
+      !exactService(started.observedService, expectedService)) {
+    return recoverAfterCas({ ports: input.ports, operationId: input.operationId, direction: input.direction,
+      lease: acquired.lease, active: input.target, prior: input.previous, failedService: expectedService,
+      priorService: expectedSourceService, reasonCode: "TRACK_B_B3_2_TARGET_START_FAILED" });
+  }
+  try {
+    const runtime = await input.ports.readRuntimeAuthority({
+      lease: acquired.lease, service: expectedService, pointer: input.target,
+    });
+    if (!exactRuntimeReadback(runtime, expectedService, input.target, acquired.lease)) throw new Error("runtime mismatch");
+  } catch {
+    return recoverAfterCas({ ports: input.ports, operationId: input.operationId, direction: input.direction,
+      lease: acquired.lease, active: input.target, prior: input.previous, failedService: expectedService,
+      priorService: expectedSourceService, reasonCode: "TRACK_B_B3_2_RUNTIME_READBACK_UNPROVEN" });
+  }
+  if (!await exactAudit({ ports: input.ports, operationId: input.operationId, direction: input.direction,
+    previous: input.previous, target: input.target })) {
+    return recoverAfterCas({ ports: input.ports, operationId: input.operationId, direction: input.direction,
+      lease: acquired.lease, active: input.target, prior: input.previous, failedService: expectedService,
+      priorService: expectedSourceService, reasonCode: "TRACK_B_B3_2_ACTIVATION_AUDIT_UNPROVEN" });
   }
   let readbacks: readonly TrackBCommerceConsumerReadback[];
   try {
@@ -453,18 +796,14 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
       consumers: DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
     });
   } catch {
-    return {
-      status: "HOLD_RETAINED",
-      sideEffects: "CONTROL_PLANE_ONLY",
-      reasonCodes: ["TRACK_B_B3_2_CONSUMER_READBACK_UNAVAILABLE"],
-    };
+    return recoverAfterCas({ ports: input.ports, operationId: input.operationId, direction: input.direction,
+      lease: acquired.lease, active: input.target, prior: input.previous, failedService: expectedService,
+      priorService: expectedSourceService, reasonCode: "TRACK_B_B3_2_CONSUMER_READBACK_UNAVAILABLE" });
   }
   if (!exactConsumerReadbacks(readbacks, input.target)) {
-    return {
-      status: "HOLD_RETAINED",
-      sideEffects: "CONTROL_PLANE_ONLY",
-      reasonCodes: ["TRACK_B_B3_2_CONSUMER_READBACK_INCOMPLETE"],
-    };
+    return recoverAfterCas({ ports: input.ports, operationId: input.operationId, direction: input.direction,
+      lease: acquired.lease, active: input.target, prior: input.previous, failedService: expectedService,
+      priorService: expectedSourceService, reasonCode: "TRACK_B_B3_2_CONSUMER_READBACK_INCOMPLETE" });
   }
   try {
     const released = await input.ports.releaseFence(acquired.lease);
@@ -481,4 +820,129 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
     sideEffects: "CONTROL_PLANE_ONLY",
     reasonCodes: [],
   };
+}
+
+/** Re-entry path after an interrupted operation; it always converges to the recorded prior identity. */
+export async function recoverTrackBCommerceAuthorityMutationAfterInterruption(input: Readonly<{
+  operationId: string;
+  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  previous: RuntimeBehaviorModePointer;
+  target: RuntimeBehaviorModePointer;
+  rollbackRecord: TrackBReleaseLocalRollbackRecord;
+  releaseEvidence?: TrackBReleaseCandidateEvidence;
+  ports: TrackBCommerceAuthorityMutationPorts;
+}>): Promise<TrackBCommerceAuthorityMutationResult> {
+  if (!exactEnvelope(input)) {
+    return { status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [
+      "TRACK_B_B3_2_RECOVERY_ENVELOPE_INVALID",
+    ] };
+  }
+  try {
+    const persisted = await input.ports.readPersistedRollbackRecord(input.rollbackRecord.recordHash);
+    if (persisted === null || canonicalJsonV1(persisted) !== canonicalJsonV1(input.rollbackRecord)) {
+      throw new Error("rollback record mismatch");
+    }
+  } catch {
+    return { status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [
+      "TRACK_B_B3_2_RECOVERY_ROLLBACK_RECORD_UNPROVEN",
+    ] };
+  }
+  const failedService = input.direction === "ACTIVATE_TRACK_B"
+    ? input.rollbackRecord.targetService : input.rollbackRecord.previousService;
+  const priorService = input.direction === "ACTIVATE_TRACK_B"
+    ? input.rollbackRecord.previousService : input.rollbackRecord.targetService;
+  const request: Df13CommerceCutoverFenceRequest = {
+    operationId: input.operationId,
+    pageId: DF13_COMMERCE_PREPROD_SCOPE_V1.pageId,
+    channel: DF13_COMMERCE_PREPROD_SCOPE_V1.channel,
+    preCutover: {
+      modeVersionId: input.previous.version.modeVersionId,
+      contentHash: input.previous.version.contentHash,
+      pointerRevision: input.previous.pointerRevision,
+    },
+    target: {
+      modeVersionId: input.target.version.modeVersionId,
+      contentHash: input.target.version.contentHash,
+      authorityBundleHash: input.target.version.authorityBundleHash ?? "",
+    },
+  };
+  let acquired: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["acquireFence"]>>;
+  try { acquired = await input.ports.acquireFence(request); } catch {
+    return { status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [
+      "TRACK_B_B3_2_RECOVERY_FENCE_UNAVAILABLE",
+    ] };
+  }
+  if (acquired.status === "ALREADY_RELEASED") {
+    return reconcileReleasedTerminal({
+      ports: input.ports,
+      operationId: input.operationId,
+      direction: input.direction,
+      previous: input.previous,
+      target: input.target,
+      previousService: priorService,
+      targetService: failedService,
+      fence: { fenceId: acquired.fenceId, epoch: acquired.epoch },
+    });
+  }
+  if (acquired.status !== "HELD") {
+    return { status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [
+      "TRACK_B_B3_2_RECOVERY_FENCE_NOT_HELD",
+    ] };
+  }
+  try {
+    const admission = await input.ports.proveAdmissionHeld({ lease: acquired.lease });
+    if (!exactAdmissionReadback(admission, acquired.lease)) {
+      return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+        "TRACK_B_B3_2_RECOVERY_ADMISSION_NOT_HELD",
+      ] };
+    }
+  } catch {
+    return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      "TRACK_B_B3_2_RECOVERY_ADMISSION_READBACK_UNAVAILABLE",
+    ] };
+  }
+  let observed: RuntimeBehaviorModePointer | null;
+  try { observed = await input.ports.readActivePointer(); } catch { observed = null; }
+  if (pointerMatches(observed, input.previous)) {
+    return recoverBeforeCas({
+      ports: input.ports,
+      lease: acquired.lease,
+      pointer: input.previous,
+      stagedService: failedService,
+      priorService,
+      reasonCode: "TRACK_B_B3_2_INTERRUPTED_BEFORE_CAS",
+    });
+  }
+  if (pointerMatches(observed, input.target)) {
+    return recoverAfterCas({
+      ports: input.ports,
+      operationId: input.operationId,
+      direction: input.direction,
+      lease: acquired.lease,
+      active: input.target,
+      prior: input.previous,
+      failedService,
+      priorService,
+      reasonCode: "TRACK_B_B3_2_INTERRUPTED_AFTER_CAS",
+    });
+  }
+  const restored = { ...input.previous, pointerRevision: input.target.pointerRevision + 1 };
+  if (pointerMatches(observed, restored)) {
+    const reverseDirection = input.direction === "ACTIVATE_TRACK_B" ? "ROLLBACK_TRACK_B" : "ACTIVATE_TRACK_B";
+    return completeRestoredServiceRecovery({
+      ports: input.ports,
+      operationId: input.operationId,
+      direction: input.direction,
+      reverseDirection,
+      lease: acquired.lease,
+      active: input.target,
+      restored,
+      failedService,
+      priorService,
+      reasonCode: "TRACK_B_B3_2_INTERRUPTED_AFTER_ROLLBACK_CAS",
+    });
+  }
+  return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+    "TRACK_B_B3_2_INTERRUPTED_POINTER_AMBIGUOUS",
+  ] };
 }

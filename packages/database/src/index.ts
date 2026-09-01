@@ -193,6 +193,8 @@ export {
 } from "./df13-commerce-authority-bundle.js";
 export {
   PostgresTrackBCommerceAuthorityWriter,
+  TRACK_B_COMMERCE_ADMISSION_CLAIMS_V1,
+  type TrackBCommerceAdmissionReadbackRecord,
   type TrackBCommerceFenceLease,
   type TrackBCommerceIdentity,
   type TrackBCommercePointerMutationInput,

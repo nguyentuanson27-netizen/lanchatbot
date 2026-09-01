@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -28,6 +29,16 @@ const targetVersionId = "10000000-0000-4000-8000-000000000002";
 const fenceId = "20000000-0000-4000-8000-000000000001";
 const fenceToken = "30000000-0000-4000-8000-000000000001";
 const updatedAt = new Date("2026-08-31T12:00:00.000Z");
+const admissionMigration = readFileSync(new URL(
+  "../pending-migrations/0038_track_b_commerce_admission_gate.up.sql",
+  import.meta.url,
+), "utf8");
+const admissionFunctionMarker = "RETURNS trigger LANGUAGE plpgsql SET search_path = pg_catalog AS $$";
+const admissionFunctionStart = admissionMigration.indexOf(admissionFunctionMarker) + admissionFunctionMarker.length;
+const admissionFunctionSource = admissionMigration.slice(
+  admissionFunctionStart,
+  admissionMigration.indexOf("$$;", admissionFunctionStart),
+);
 const v1ContentHash = runtimeBehaviorModeContentHash({
   confirmationMode: "V2_ACTIVE",
   salesAuthorityMode: "COMMERCE",
@@ -85,10 +96,122 @@ function result(rows: readonly unknown[] = [], rowCount = rows.length) {
   return { rows, rowCount };
 }
 
+function admissionTrigger(tableName: string, overrides: Record<string, unknown> = {}) {
+  return {
+    table_name: tableName,
+    tgenabled: "A",
+    tgtype: 19,
+    tgqual: null,
+    trigger_columns: "",
+    tgnargs: 0,
+    function_name: "guard_track_b_cutover_admission",
+    function_schema: "public",
+    language_name: "plpgsql",
+    returns_trigger: true,
+    prosrc: admissionFunctionSource,
+    proconfig: ["search_path=pg_catalog"],
+    ...overrides,
+  };
+}
+
 describe("Postgres Track B Commerce authority writer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.connect.mockResolvedValue({ query: mocks.clientQuery, release: mocks.release });
+  });
+
+  it("rejects an ambiguous or injectable admission schema", () => {
+    expect(() => new PostgresTrackBCommerceAuthorityWriter("postgresql://test", {
+      admissionSchema: 'public".df13_commerce_cutover_fences; SELECT 1; --',
+    })).toThrow("TRACK_B_B3_2_ADMISSION_SCHEMA_INVALID");
+  });
+
+  it("proves the exact unreleased fence and all database admission guards", async () => {
+    mocks.clientQuery.mockImplementation(async (sql: string, values?: readonly unknown[]) => {
+      if (sql.includes('FROM "public".df13_commerce_cutover_fences')) {
+        expect(sql).toContain('FROM "public".df13_commerce_cutover_fences');
+        expect(values).toEqual([
+          fenceId, pageId, channel, 1,
+          createHash("sha256").update(fenceToken, "utf8").digest("hex"),
+        ]);
+        expect(sql).toContain("released_at IS NULL");
+        expect(sql).not.toContain("lease_until");
+        return result([{ fence_id: fenceId, page_id: pageId, channel, epoch: 1, released_at: null }]);
+      }
+      if (sql.includes("FROM pg_trigger")) return result([
+        admissionTrigger("webhook_inbox"),
+        admissionTrigger("meta_outbox"),
+        admissionTrigger("pancake_tag_outbox"),
+      ]);
+      if (sql.includes('FROM "public".schema_migrations')) {
+        expect(sql).toContain('FROM "public".schema_migrations');
+        expect(values).toEqual(["0038_track_b_commerce_admission_gate"]);
+        return result([{
+          checksum_sha256: "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140",
+        }]);
+      }
+      return result();
+    });
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+
+    await expect(store.readAdmissionHold({
+      pageId, channel, lease: { fenceId, fenceToken, epoch: 1 },
+    })).resolves.toEqual({
+      status: "HELD", source: "DATABASE", pageId, channel, fenceId, epoch: 1,
+      released: false,
+      guardedClaims: [
+        "webhook_inbox:PROCESSING",
+        "meta_outbox:SENDING",
+        "pancake_tag_outbox:APPLYING",
+      ],
+    });
+  });
+
+  it("fails the admission proof closed when any guarded transition is absent", async () => {
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes('FROM "public".df13_commerce_cutover_fences')) {
+        return result([{ fence_id: fenceId, page_id: pageId, channel, epoch: 1, released_at: null }]);
+      }
+      if (sql.includes("FROM pg_trigger")) return result([
+        admissionTrigger("webhook_inbox"),
+        admissionTrigger("meta_outbox"),
+      ]);
+      if (sql.includes('FROM "public".schema_migrations')) return result([{
+        checksum_sha256: "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140",
+      }]);
+      return result();
+    });
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+
+    await expect(store.readAdmissionHold({
+      pageId, channel, lease: { fenceId, fenceToken, epoch: 1 },
+    })).resolves.toMatchObject({ status: "AMBIGUOUS", guardedClaims: [] });
+  });
+
+  it.each([
+    ["a WHEN predicate", { tgqual: "{CONST :constvalue false}" }],
+    ["an UPDATE OF column list", { trigger_columns: "2" }],
+    ["trigger arguments", { tgnargs: 1 }],
+  ])("fails admission proof closed for %s", async (_label, triggerOverride) => {
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes('FROM "public".df13_commerce_cutover_fences')) {
+        return result([{ fence_id: fenceId, page_id: pageId, channel, epoch: 1, released_at: null }]);
+      }
+      if (sql.includes("FROM pg_trigger")) return result([
+        admissionTrigger("webhook_inbox", triggerOverride),
+        admissionTrigger("meta_outbox"),
+        admissionTrigger("pancake_tag_outbox"),
+      ]);
+      if (sql.includes('FROM "public".schema_migrations')) return result([{
+        checksum_sha256: "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140",
+      }]);
+      return result();
+    });
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+
+    await expect(store.readAdmissionHold({
+      pageId, channel, lease: { fenceId, fenceToken, epoch: 1 },
+    })).resolves.toMatchObject({ status: "AMBIGUOUS", guardedClaims: [] });
   });
 
   it("prepares one immutable V2 behavior identity from the exact active V1 pointer", async () => {
@@ -285,6 +408,138 @@ describe("Postgres Track B Commerce authority writer", () => {
       actor: "TRACK_B_B3_2_WRITER",
       reason: "TRACK_B_B3_2_ROLLBACK:40000000-0000-4000-8000-000000000002",
     })).resolves.toMatchObject({ pointerRevision: 8, version: { modeVersionId: previousVersionId } });
+  });
+
+  it("uses the still-held exact forward lease for immediate post-CAS recovery", async () => {
+    const current = {
+      ...pointerRow({
+        versionId: targetVersionId,
+        contentHash: v2ContentHash,
+        bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+        revision: 7,
+      }),
+      updated_by: "TRACK_B_B3_2_WRITER",
+      pointer_reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001",
+    };
+    const target = versionRow({
+      versionId: previousVersionId,
+      contentHash: v1ContentHash,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      createdBy: "DF13_FIRST_PREPROD_WRITER",
+      reason: "DF13_FIRST_PREPROD_PREPARE:40000000-0000-4000-8000-000000000099",
+    });
+    let exactInverseLeaseObserved = false;
+    mocks.clientQuery.mockImplementation(async (sql: string, values?: readonly unknown[]) => {
+      if (sql.includes("clock_timestamp() AS operation_now")) return result([{ operation_now: updatedAt }]);
+      if (sql.includes("FROM runtime_behavior_mode_versions v") && sql.includes("WHERE v.mode_version_id")) return result([target]);
+      if (sql.includes("FROM runtime_behavior_mode_pointers p")) return result([current]);
+      if (sql.includes("FROM runtime_behavior_mode_activation_audit")) {
+        return result([{
+          previous_version_id: previousVersionId,
+          new_version_id: targetVersionId,
+          new_pointer_revision: 7,
+          actor: current.updated_by,
+          reason: current.pointer_reason,
+        }]);
+      }
+      if (sql.includes("FROM df13_commerce_cutover_fences")) {
+        exactInverseLeaseObserved = sql.includes("pre_cutover_version_id=$9") &&
+          values?.[5] === targetVersionId && values?.[6] === v2ContentHash && values?.[7] === 7 &&
+          values?.[8] === previousVersionId && values?.[9] === v1ContentHash &&
+          values?.[12] === 6 &&
+          values?.[13] === DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash;
+        return exactInverseLeaseObserved
+          ? result([{ operation_id: "40000000-0000-4000-8000-000000000001", inverse_lease: true }])
+          : result();
+      }
+      if (sql.includes("UPDATE runtime_behavior_mode_pointers")) return result([{ updated_at: updatedAt }]);
+      return result();
+    });
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+
+    await expect(store.mutateExactPointer({
+      pageId,
+      channel,
+      operation: "ROLLBACK_TRACK_B",
+      expectedCurrent: {
+        modeVersionId: targetVersionId,
+        contentHash: v2ContentHash,
+        pointerRevision: 7,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+      },
+      target: {
+        modeVersionId: previousVersionId,
+        contentHash: v1ContentHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      },
+      lease: { fenceId, fenceToken, epoch: 1 },
+      actor: "TRACK_B_B3_2_WRITER",
+      reason: "TRACK_B_B3_2_ROLLBACK:40000000-0000-4000-8000-000000000001",
+    })).resolves.toMatchObject({ pointerRevision: 8, version: { modeVersionId: previousVersionId } });
+    expect(exactInverseLeaseObserved).toBe(true);
+  });
+
+  it("uses the still-held exact reverse lease to recover a failed rollback symmetrically", async () => {
+    const current = {
+      ...pointerRow({
+        versionId: previousVersionId,
+        contentHash: v1ContentHash,
+        bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        revision: 8,
+      }),
+      updated_by: "TRACK_B_B3_2_WRITER",
+      pointer_reason: "TRACK_B_B3_2_ROLLBACK:40000000-0000-4000-8000-000000000002",
+    };
+    const target = versionRow({
+      versionId: targetVersionId,
+      contentHash: v2ContentHash,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+    });
+    let oppositeAuditObserved = false;
+    mocks.clientQuery.mockImplementation(async (sql: string, values?: readonly unknown[]) => {
+      if (sql.includes("clock_timestamp() AS operation_now")) return result([{ operation_now: updatedAt }]);
+      if (sql.includes("FROM runtime_behavior_mode_versions v") && sql.includes("WHERE v.mode_version_id")) return result([target]);
+      if (sql.includes("FROM runtime_behavior_mode_pointers p")) return result([current]);
+      if (sql.includes("FROM runtime_behavior_mode_activation_audit")) {
+        oppositeAuditObserved = true;
+        return result([{
+          previous_version_id: targetVersionId,
+          new_version_id: previousVersionId,
+          new_pointer_revision: 8,
+          actor: current.updated_by,
+          reason: current.pointer_reason,
+        }]);
+      }
+      if (sql.includes("FROM df13_commerce_cutover_fences")) {
+        return values?.[12] === 7 && values?.[13] === DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
+          ? result([{ operation_id: "40000000-0000-4000-8000-000000000002", inverse_lease: true }])
+          : result();
+      }
+      if (sql.includes("UPDATE runtime_behavior_mode_pointers")) return result([{ updated_at: updatedAt }]);
+      return result();
+    });
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+
+    await expect(store.mutateExactPointer({
+      pageId,
+      channel,
+      operation: "ACTIVATE_TRACK_B",
+      expectedCurrent: {
+        modeVersionId: previousVersionId,
+        contentHash: v1ContentHash,
+        pointerRevision: 8,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      },
+      target: {
+        modeVersionId: targetVersionId,
+        contentHash: v2ContentHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+      },
+      lease: { fenceId, fenceToken, epoch: 1 },
+      actor: "TRACK_B_B3_2_WRITER",
+      reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000002",
+    })).resolves.toMatchObject({ pointerRevision: 9, version: { modeVersionId: targetVersionId } });
+    expect(oppositeAuditObserved).toBe(true);
   });
 
   it("rejects rollback when the forward audit names a different previous identity", async () => {
