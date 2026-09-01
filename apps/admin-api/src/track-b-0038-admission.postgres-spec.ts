@@ -18,6 +18,8 @@ const upPath = resolve(repositoryRoot,
   "packages/database/pending-migrations/0038_track_b_commerce_admission_gate.up.sql");
 const downPath = resolve(repositoryRoot,
   "packages/database/pending-migrations/0038_track_b_commerce_admission_gate.down.sql");
+const replacementUpPath = resolve(repositoryRoot,
+  "packages/database/pending-migrations/0037_track_b_commerce_authority_replacement.up.sql");
 const pageId = "1198992073286645";
 const otherPageId = "1198992073286646";
 
@@ -49,13 +51,15 @@ test("0038 atomically holds Track B claims, permits drain, isolates pages, and r
   skip: databaseUrl ? false : "POLICY_STORE_TEST_DATABASE_URL is not configured",
 }, async () => {
   assert.ok(databaseUrl);
-  const [upSql, downSql] = await Promise.all([
+  const [upSql, downSql, replacementUpSql] = await Promise.all([
     readFile(upPath, "utf8"),
     readFile(downPath, "utf8"),
+    readFile(replacementUpPath, "utf8"),
   ]);
   const client = new Client({ connectionString: databaseUrl });
   const contender = new Client({ connectionString: databaseUrl });
   const schema = `track_b_0038_${process.pid}`;
+  const shadowSchema = `${schema}_shadow`;
   await Promise.all([client.connect(), contender.connect()]);
   try {
     await client.query(`CREATE SCHEMA ${schema}`);
@@ -73,6 +77,14 @@ test("0038 atomically holds Track B claims, permits drain, isolates pages, and r
       );
       CREATE TABLE schema_migrations (
         migration_name text PRIMARY KEY, checksum_sha256 text NOT NULL
+      );
+      CREATE TABLE runtime_behavior_mode_versions (
+        mode_version_id uuid PRIMARY KEY, page_id text, channel text,
+        confirmation_mode text, sales_authority_mode text, state_read_mode text,
+        content_hash text, authority_bundle_hash text
+      );
+      CREATE TABLE runtime_behavior_mode_pointers (
+        page_id text, channel text, active_version_id uuid, pointer_revision bigint
       );
       CREATE TABLE webhook_inbox (
         inbox_id uuid PRIMARY KEY, page_id text NOT NULL, status text NOT NULL,
@@ -100,11 +112,34 @@ test("0038 atomically holds Track B claims, permits drain, isolates pages, and r
         operation_id uuid PRIMARY KEY, page_id text NOT NULL, status text NOT NULL,
         lease_owner text, lease_token uuid, lease_until timestamptz
       );
-      CREATE FUNCTION guard_df13_commerce_cutover_fence_insert_identity()
-      RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NEW; END $$;
-      COMMENT ON FUNCTION guard_df13_commerce_cutover_fence_insert_identity() IS
-        'Exact 0036 first cutover plus Track B V1-to-V2 replacement and V2-to-V1 rollback guard; never moves a pointer.';
     `);
+    await client.query(replacementUpSql);
+    await assert.rejects(client.query(upSql), /0038 requires exact applied migrations 0036 and 0037/u);
+    await client.query(
+      `INSERT INTO schema_migrations (migration_name,checksum_sha256) VALUES
+       ('0036_df13_commerce_authority_fence','${"0".repeat(64)}'),
+       ('0037_track_b_commerce_authority_replacement',
+        '40b1ef14e3f7b2e037063de1f8d8ff7f804d069f8649115be6c29b1b56399c20')`,
+    );
+    await assert.rejects(client.query(upSql), /0038 requires exact applied migrations 0036 and 0037/u);
+    await client.query(
+      `UPDATE schema_migrations SET checksum_sha256=CASE migration_name
+         WHEN '0036_df13_commerce_authority_fence' THEN
+           'd709617e10554a0186b9233a404ef7faadfdf3576ba3c133efe51a56c2214425'
+         ELSE '${"0".repeat(64)}' END`,
+    );
+    await assert.rejects(client.query(upSql), /0038 requires exact applied migrations 0036 and 0037/u);
+    await client.query(
+      `UPDATE schema_migrations SET checksum_sha256=
+       '40b1ef14e3f7b2e037063de1f8d8ff7f804d069f8649115be6c29b1b56399c20'
+       WHERE migration_name='0037_track_b_commerce_authority_replacement'`,
+    );
+    await client.query(`
+      CREATE OR REPLACE FUNCTION guard_df13_commerce_cutover_fence_insert_identity()
+      RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RETURN NEW; END $$
+    `);
+    await assert.rejects(client.query(upSql), /0038 requires exact 0037 replacement guard identity/u);
+    await client.query(replacementUpSql);
     await client.query(upSql);
     const installed = await client.query(
       `SELECT count(*)::int AS exact_count
@@ -123,11 +158,16 @@ test("0038 atomically holds Track B claims, permits drain, isolates pages, and r
       [schema],
     );
     assert.equal(installed.rows[0]?.exact_count, 3);
-    await client.query(
-      `INSERT INTO schema_migrations (migration_name,checksum_sha256)
-       VALUES ('0038_track_b_commerce_admission_gate',
-               '7d1f3f8916e0a7ba63502d4fc7e2b794e20b65ac833a8c84776012cf80be56ca')`,
-    );
+    await client.query(`CREATE SCHEMA ${shadowSchema}`);
+    await client.query(`
+      CREATE TABLE ${shadowSchema}.schema_migrations (
+        migration_name text PRIMARY KEY, checksum_sha256 text NOT NULL
+      );
+      CREATE TABLE ${shadowSchema}.df13_commerce_cutover_fences (
+        fence_id uuid PRIMARY KEY, page_id text, channel text, epoch bigint,
+        token_hash text, released_at timestamptz
+      );
+    `);
 
     const ids = {
       inbox: "10000000-0000-4000-8000-000000000001",
@@ -148,12 +188,42 @@ test("0038 atomically holds Track B claims, permits drain, isolates pages, and r
     await insertWork(client, "pancake_tag_outbox", "operation_id", ids.drainingPancake, pageId, "APPLYING");
     await insertWork(client, "webhook_inbox", "inbox_id", ids.changedSearchPath, pageId, "QUEUED");
     const fenceToken = "30000000-0000-4000-8000-000000000001";
+    const fenceTokenHash = createHash("sha256").update(fenceToken, "utf8").digest("hex");
+    await client.query(
+      `INSERT INTO ${shadowSchema}.schema_migrations VALUES
+       ('0038_track_b_commerce_admission_gate','9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140')`,
+    );
+    await client.query(
+      `INSERT INTO ${shadowSchema}.df13_commerce_cutover_fences
+         (fence_id,page_id,channel,epoch,token_hash,released_at)
+       VALUES ('20000000-0000-4000-8000-000000000001',$1,'MESSENGER',1,$2,NULL)`,
+      [pageId, fenceTokenHash],
+    );
+
+    const shadowUrl = new URL(databaseUrl);
+    shadowUrl.searchParams.set("options", `-c search_path=${shadowSchema},${schema},public`);
+    const shadowWriter = new PostgresTrackBCommerceAuthorityWriter(shadowUrl.toString(), {
+      admissionSchema: schema,
+    });
+    try {
+      assert.equal((await shadowWriter.readAdmissionHold({
+        pageId, channel: "MESSENGER",
+        lease: { fenceId: "20000000-0000-4000-8000-000000000001", fenceToken, epoch: 1 },
+      })).status, "AMBIGUOUS");
+    } finally {
+      await shadowWriter.close();
+    }
+
+    await client.query(
+      `INSERT INTO schema_migrations (migration_name,checksum_sha256)
+       VALUES ('0038_track_b_commerce_admission_gate','9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140')`,
+    );
     await client.query(
       `INSERT INTO df13_commerce_cutover_fences
          (fence_id,page_id,channel,epoch,token_hash,lease_until,released_at)
        VALUES ('20000000-0000-4000-8000-000000000001',$1,'MESSENGER',1,$2,
                clock_timestamp()-interval '1 minute',NULL)`,
-      [pageId, createHash("sha256").update(fenceToken, "utf8").digest("hex")],
+      [pageId, fenceTokenHash],
     );
 
     const storeUrl = new URL(databaseUrl);
@@ -184,6 +254,39 @@ test("0038 atomically holds Track B claims, permits drain, isolates pages, and r
           "pancake_tag_outbox:APPLYING",
         ],
       });
+      const restoreInboxTrigger = async (): Promise<void> => {
+        await client.query(`
+          DROP TRIGGER IF EXISTS track_b_cutover_admission_webhook_inbox ON webhook_inbox;
+          CREATE TRIGGER track_b_cutover_admission_webhook_inbox
+            BEFORE UPDATE ON webhook_inbox FOR EACH ROW
+            EXECUTE FUNCTION guard_track_b_cutover_admission();
+          ALTER TABLE webhook_inbox ENABLE ALWAYS TRIGGER track_b_cutover_admission_webhook_inbox;
+        `);
+      };
+      await client.query(`
+        DROP TRIGGER track_b_cutover_admission_webhook_inbox ON webhook_inbox;
+        CREATE TRIGGER track_b_cutover_admission_webhook_inbox
+          BEFORE UPDATE ON webhook_inbox FOR EACH ROW WHEN (false)
+          EXECUTE FUNCTION guard_track_b_cutover_admission();
+        ALTER TABLE webhook_inbox ENABLE ALWAYS TRIGGER track_b_cutover_admission_webhook_inbox;
+      `);
+      assert.equal((await authorityWriter.readAdmissionHold({
+        pageId, channel: "MESSENGER",
+        lease: { fenceId: "20000000-0000-4000-8000-000000000001", fenceToken, epoch: 1 },
+      })).status, "AMBIGUOUS");
+      await restoreInboxTrigger();
+      await client.query(`
+        DROP TRIGGER track_b_cutover_admission_webhook_inbox ON webhook_inbox;
+        CREATE TRIGGER track_b_cutover_admission_webhook_inbox
+          BEFORE UPDATE OF updated_at ON webhook_inbox FOR EACH ROW
+          EXECUTE FUNCTION guard_track_b_cutover_admission();
+        ALTER TABLE webhook_inbox ENABLE ALWAYS TRIGGER track_b_cutover_admission_webhook_inbox;
+      `);
+      assert.equal((await authorityWriter.readAdmissionHold({
+        pageId, channel: "MESSENGER",
+        lease: { fenceId: "20000000-0000-4000-8000-000000000001", fenceToken, epoch: 1 },
+      })).status, "AMBIGUOUS");
+      await restoreInboxTrigger();
     } finally {
       await authorityWriter.close();
     }
@@ -298,6 +401,7 @@ test("0038 atomically holds Track B claims, permits drain, isolates pages, and r
   } finally {
     try { await client.query("ROLLBACK"); } catch { /* no active transaction */ }
     await client.query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);
+    await client.query(`DROP SCHEMA IF EXISTS ${shadowSchema} CASCADE`);
     await Promise.all([client.end(), contender.end()]);
   }
 });

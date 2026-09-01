@@ -3,6 +3,9 @@
 -- does not move a behavior pointer, and does not release or create a cutover fence.
 
 DO $$
+DECLARE
+  dependency_schema text := current_schema();
+  replacement_guard_hash text;
 BEGIN
   PERFORM pg_advisory_xact_lock(hashtextextended(
     'df13-cutover-admission-migration', 0
@@ -10,15 +13,38 @@ BEGIN
   PERFORM pg_advisory_xact_lock(hashtextextended(
     'df13-cutover:1198992073286645:MESSENGER', 0
   ));
-  IF to_regclass('df13_commerce_cutover_fences') IS NULL
+  IF to_regclass('schema_migrations') IS NULL
+     OR NOT EXISTS (
+       SELECT 1 FROM schema_migrations
+        WHERE migration_name = '0036_df13_commerce_authority_fence'
+          AND checksum_sha256 = 'd709617e10554a0186b9233a404ef7faadfdf3576ba3c133efe51a56c2214425'
+     )
+     OR NOT EXISTS (
+       SELECT 1 FROM schema_migrations
+        WHERE migration_name = '0037_track_b_commerce_authority_replacement'
+          AND checksum_sha256 = '40b1ef14e3f7b2e037063de1f8d8ff7f804d069f8649115be6c29b1b56399c20'
+     )
+     OR to_regclass('df13_commerce_cutover_fences') IS NULL
      OR to_regclass('webhook_inbox') IS NULL
      OR to_regclass('meta_outbox') IS NULL
      OR to_regclass('pancake_tag_outbox') IS NULL
-     OR to_regprocedure('guard_df13_commerce_cutover_fence_insert_identity()') IS NULL
-     OR coalesce(obj_description(
-       to_regprocedure('guard_df13_commerce_cutover_fence_insert_identity()'), 'pg_proc'
-     ), '') NOT LIKE '%Track B V1-to-V2%' THEN
+     OR to_regprocedure('guard_df13_commerce_cutover_fence_insert_identity()') IS NULL THEN
     RAISE EXCEPTION '0038 requires exact applied migrations 0036 and 0037';
+  END IF;
+  SELECT encode(public.digest(p.prosrc, 'sha256'), 'hex')
+    INTO replacement_guard_hash
+    FROM pg_catalog.pg_proc AS p
+    JOIN pg_catalog.pg_namespace AS n ON n.oid=p.pronamespace
+    JOIN pg_catalog.pg_language AS l ON l.oid=p.prolang
+   WHERE n.nspname=dependency_schema
+     AND p.proname='guard_df13_commerce_cutover_fence_insert_identity'
+     AND p.pronargs=0
+     AND p.prorettype='pg_catalog.trigger'::pg_catalog.regtype
+     AND p.proconfig IS NULL
+     AND l.lanname='plpgsql';
+  IF replacement_guard_hash IS DISTINCT FROM
+       'c72ab14e75111ce7f216e516a6f2edc86cfd4bf53d50d9c2359d064f20bdd4e3' THEN
+    RAISE EXCEPTION '0038 requires exact 0037 replacement guard identity';
   END IF;
   IF EXISTS (
     SELECT 1

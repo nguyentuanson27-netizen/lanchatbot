@@ -96,17 +96,21 @@ function result(rows: readonly unknown[] = [], rowCount = rows.length) {
   return { rows, rowCount };
 }
 
-function admissionTrigger(tableName: string) {
+function admissionTrigger(tableName: string, overrides: Record<string, unknown> = {}) {
   return {
     table_name: tableName,
     tgenabled: "A",
     tgtype: 19,
+    tgqual: null,
+    trigger_columns: "",
+    tgnargs: 0,
     function_name: "guard_track_b_cutover_admission",
     function_schema: "public",
     language_name: "plpgsql",
     returns_trigger: true,
     prosrc: admissionFunctionSource,
     proconfig: ["search_path=pg_catalog"],
+    ...overrides,
   };
 }
 
@@ -116,9 +120,16 @@ describe("Postgres Track B Commerce authority writer", () => {
     mocks.connect.mockResolvedValue({ query: mocks.clientQuery, release: mocks.release });
   });
 
+  it("rejects an ambiguous or injectable admission schema", () => {
+    expect(() => new PostgresTrackBCommerceAuthorityWriter("postgresql://test", {
+      admissionSchema: 'public".df13_commerce_cutover_fences; SELECT 1; --',
+    })).toThrow("TRACK_B_B3_2_ADMISSION_SCHEMA_INVALID");
+  });
+
   it("proves the exact unreleased fence and all database admission guards", async () => {
     mocks.clientQuery.mockImplementation(async (sql: string, values?: readonly unknown[]) => {
-      if (sql.includes("FROM df13_commerce_cutover_fences")) {
+      if (sql.includes('FROM "public".df13_commerce_cutover_fences')) {
+        expect(sql).toContain('FROM "public".df13_commerce_cutover_fences');
         expect(values).toEqual([
           fenceId, pageId, channel, 1,
           createHash("sha256").update(fenceToken, "utf8").digest("hex"),
@@ -132,10 +143,11 @@ describe("Postgres Track B Commerce authority writer", () => {
         admissionTrigger("meta_outbox"),
         admissionTrigger("pancake_tag_outbox"),
       ]);
-      if (sql.includes("FROM schema_migrations")) {
+      if (sql.includes('FROM "public".schema_migrations')) {
+        expect(sql).toContain('FROM "public".schema_migrations');
         expect(values).toEqual(["0038_track_b_commerce_admission_gate"]);
         return result([{
-          checksum_sha256: "7d1f3f8916e0a7ba63502d4fc7e2b794e20b65ac833a8c84776012cf80be56ca",
+          checksum_sha256: "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140",
         }]);
       }
       return result();
@@ -157,15 +169,41 @@ describe("Postgres Track B Commerce authority writer", () => {
 
   it("fails the admission proof closed when any guarded transition is absent", async () => {
     mocks.clientQuery.mockImplementation(async (sql: string) => {
-      if (sql.includes("FROM df13_commerce_cutover_fences")) {
+      if (sql.includes('FROM "public".df13_commerce_cutover_fences')) {
         return result([{ fence_id: fenceId, page_id: pageId, channel, epoch: 1, released_at: null }]);
       }
       if (sql.includes("FROM pg_trigger")) return result([
         admissionTrigger("webhook_inbox"),
         admissionTrigger("meta_outbox"),
       ]);
-      if (sql.includes("FROM schema_migrations")) return result([{
-        checksum_sha256: "7d1f3f8916e0a7ba63502d4fc7e2b794e20b65ac833a8c84776012cf80be56ca",
+      if (sql.includes('FROM "public".schema_migrations')) return result([{
+        checksum_sha256: "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140",
+      }]);
+      return result();
+    });
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+
+    await expect(store.readAdmissionHold({
+      pageId, channel, lease: { fenceId, fenceToken, epoch: 1 },
+    })).resolves.toMatchObject({ status: "AMBIGUOUS", guardedClaims: [] });
+  });
+
+  it.each([
+    ["a WHEN predicate", { tgqual: "{CONST :constvalue false}" }],
+    ["an UPDATE OF column list", { trigger_columns: "2" }],
+    ["trigger arguments", { tgnargs: 1 }],
+  ])("fails admission proof closed for %s", async (_label, triggerOverride) => {
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes('FROM "public".df13_commerce_cutover_fences')) {
+        return result([{ fence_id: fenceId, page_id: pageId, channel, epoch: 1, released_at: null }]);
+      }
+      if (sql.includes("FROM pg_trigger")) return result([
+        admissionTrigger("webhook_inbox", triggerOverride),
+        admissionTrigger("meta_outbox"),
+        admissionTrigger("pancake_tag_outbox"),
+      ]);
+      if (sql.includes('FROM "public".schema_migrations')) return result([{
+        checksum_sha256: "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140",
       }]);
       return result();
     });

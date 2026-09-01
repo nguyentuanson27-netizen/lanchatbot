@@ -19,6 +19,11 @@ describe("0038 Track B Commerce admission gate", () => {
     expect(sql).toContain("Applying it requires separate owner authorization");
     expect(sql).toContain("pg_advisory_xact_lock");
     expect(sql).toContain("df13-cutover-admission-migration");
+    expect(sql).toContain("0036_df13_commerce_authority_fence");
+    expect(sql).toContain("d709617e10554a0186b9233a404ef7faadfdf3576ba3c133efe51a56c2214425");
+    expect(sql).toContain("0037_track_b_commerce_authority_replacement");
+    expect(sql).toContain("40b1ef14e3f7b2e037063de1f8d8ff7f804d069f8649115be6c29b1b56399c20");
+    expect(sql).toContain("c72ab14e75111ce7f216e516a6f2edc86cfd4bf53d50d9c2359d064f20bdd4e3");
     expect(sql).toContain("df13-cutover:");
     expect(sql).toContain("released_at IS NULL");
     expect(sql).not.toContain("lease_until >");

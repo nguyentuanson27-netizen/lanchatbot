@@ -17,7 +17,7 @@ const CONTENT_HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const BUNDLE_HASH_PATTERN = /^[a-f0-9]{64}$/u;
 const PREPARE_REASON_PATTERN = /^TRACK_B_B3_2_PREPARE:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const ADMISSION_MIGRATION_NAME = "0038_track_b_commerce_admission_gate";
-const ADMISSION_MIGRATION_HASH = "7d1f3f8916e0a7ba63502d4fc7e2b794e20b65ac833a8c84776012cf80be56ca";
+const ADMISSION_MIGRATION_HASH = "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140";
 const ADMISSION_FUNCTION_SOURCE_HASH = "d083f18d4a62cf313af3baba8c3a145225e9ee7852e4192119b158d34c8ac5ba";
 
 export type TrackBCommerceIdentity = Readonly<{
@@ -206,6 +206,8 @@ export class PostgresTrackBCommerceAuthorityWriter {
       status: "AMBIGUOUS", source: "DATABASE", pageId: null, channel: null,
       fenceId: null, epoch: null, released: null, guardedClaims: [],
     };
+    const qualifiedFence = `"${this.#admissionSchema}".df13_commerce_cutover_fences`;
+    const qualifiedLedger = `"${this.#admissionSchema}".schema_migrations`;
     const client = await this.#pool.connect();
     try {
       await client.query("BEGIN READ ONLY");
@@ -214,13 +216,14 @@ export class PostgresTrackBCommerceAuthorityWriter {
       ]);
       const fenceResult = await client.query(
         `SELECT fence_id, page_id, channel, epoch, released_at
-           FROM df13_commerce_cutover_fences
+           FROM ${qualifiedFence}
           WHERE fence_id=$1 AND page_id=$2 AND channel=$3 AND epoch=$4
             AND token_hash=$5 AND released_at IS NULL`,
         [lease.fenceId, PAGE_ID, CHANNEL, lease.epoch, hashToken(lease.fenceToken)],
       );
       const triggerResult = await client.query(
         `SELECT c.relname AS table_name, t.tgenabled, t.tgtype,
+                t.tgqual, t.tgattr::text AS trigger_columns, t.tgnargs,
                 p.proname AS function_name, p.prosrc, p.proconfig,
                 pn.nspname AS function_schema, l.lanname AS language_name,
                 p.prorettype = 'pg_catalog.trigger'::pg_catalog.regtype AS returns_trigger
@@ -239,12 +242,13 @@ export class PostgresTrackBCommerceAuthorityWriter {
         [this.#admissionSchema],
       );
       const ledgerResult = await client.query(
-        `SELECT checksum_sha256 FROM schema_migrations WHERE migration_name=$1`,
+        `SELECT checksum_sha256 FROM ${qualifiedLedger} WHERE migration_name=$1`,
         [ADMISSION_MIGRATION_NAME],
       );
       const fence = fenceResult.rows[0] as Row | undefined;
       const tables = new Set(triggerResult.rows.filter((row: Row) =>
         row.tgenabled === "A" && Number(row.tgtype) === 19 &&
+        row.tgqual === null && row.trigger_columns === "" && Number(row.tgnargs) === 0 &&
         row.function_name === "guard_track_b_cutover_admission" &&
         row.function_schema === this.#admissionSchema &&
         row.language_name === "plpgsql" && row.returns_trigger === true &&

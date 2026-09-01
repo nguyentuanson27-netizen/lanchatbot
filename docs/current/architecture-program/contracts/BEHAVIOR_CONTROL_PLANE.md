@@ -85,7 +85,7 @@ new or replacement leases even after its lease expires; inserts remain durable
 and existing leases may complete. Installation/removal serializes with fence
 acquisition, and down refuses while any unreleased fence exists. The migration
 depends on `0036/0037`; its source hashes are up
-`7d1f3f8916e0a7ba63502d4fc7e2b794e20b65ac833a8c84776012cf80be56ca` and down
+`9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140` and down
 `5dd292a169a5ecce5f21896bf8e11f1d7727a34a55758c92b8abc98f3de64d9a`.
 Source review/merge does not authorize rehearsal or live apply.
 
