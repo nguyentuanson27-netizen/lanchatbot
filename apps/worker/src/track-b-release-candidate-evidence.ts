@@ -30,6 +30,14 @@ export const TRACK_B_REQUIRED_MIGRATION_ARTIFACTS = Object.freeze([
     path: "packages/database/pending-migrations/0037_track_b_commerce_authority_replacement.down.sql",
     contentSha256: "070b2b793af7d6b6c33399531f47240cd9b5aa29d3dc12fe12ae0870acce57a7",
   }),
+  Object.freeze({
+    path: "packages/database/pending-migrations/0038_track_b_commerce_admission_gate.up.sql",
+    contentSha256: "7d1f3f8916e0a7ba63502d4fc7e2b794e20b65ac833a8c84776012cf80be56ca",
+  }),
+  Object.freeze({
+    path: "packages/database/pending-migrations/0038_track_b_commerce_admission_gate.down.sql",
+    contentSha256: "5dd292a169a5ecce5f21896bf8e11f1d7727a34a55758c92b8abc98f3de64d9a",
+  }),
 ] as const);
 
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;

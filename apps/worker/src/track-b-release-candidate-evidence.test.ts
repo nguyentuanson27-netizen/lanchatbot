@@ -164,4 +164,30 @@ describe("Track B release candidate evidence", () => {
       reasonCodes: ["TRACK_B_RELEASE_MIGRATION_IDENTITY_INVALID"],
     });
   });
+
+  it("rejects a substituted 0038 admission artifact even when the evidence hash is recomputed", async () => {
+    const valid = await evidence();
+    const { evidenceHash: _discarded, ...body } = valid;
+    const substitutedBody = {
+      ...body,
+      migration: {
+        ...body.migration,
+        artifacts: body.migration.artifacts.map((artifact) =>
+          artifact.path.endsWith("0038_track_b_commerce_admission_gate.up.sql")
+            ? { ...artifact, contentSha256: "f".repeat(64) }
+            : artifact),
+      },
+    };
+    const substituted = {
+      ...substitutedBody,
+      evidenceHash: hash(substitutedBody),
+    } as TrackBReleaseCandidateEvidence;
+
+    expect(validateTrackBReleaseCandidateEvidence(substituted, {
+      activationReleaseRevision: valid.activationReleaseRevision,
+    })).toEqual({
+      status: "MISMATCH",
+      reasonCodes: ["TRACK_B_RELEASE_MIGRATION_IDENTITY_INVALID"],
+    });
+  });
 });
