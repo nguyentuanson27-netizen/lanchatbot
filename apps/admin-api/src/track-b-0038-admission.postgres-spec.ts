@@ -1,10 +1,16 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { Client } from "pg";
+import {
+  LocalEnvelopeCipher,
+  PostgresRealtimeInboxStore,
+  PostgresTrackBCommerceAuthorityWriter,
+} from "@lana/database";
 
 const databaseUrl = process.env.POLICY_STORE_TEST_DATABASE_URL;
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -60,12 +66,31 @@ test("0038 atomically holds Track B claims, permits drain, isolates pages, and r
         fence_id uuid PRIMARY KEY,
         page_id text NOT NULL,
         channel text NOT NULL,
+        epoch bigint NOT NULL DEFAULT 1,
+        token_hash text,
         lease_until timestamptz,
         released_at timestamptz
       );
+      CREATE TABLE schema_migrations (
+        migration_name text PRIMARY KEY, checksum_sha256 text NOT NULL
+      );
       CREATE TABLE webhook_inbox (
         inbox_id uuid PRIMARY KEY, page_id text NOT NULL, status text NOT NULL,
-        lease_owner text, lease_token uuid, lease_until timestamptz
+        event_key text NOT NULL DEFAULT 'event', conversation_hash text NOT NULL DEFAULT 'conversation',
+        provider_occurred_at timestamptz, received_at timestamptz NOT NULL DEFAULT now(),
+        receive_sequence bigint NOT NULL DEFAULT 1, attempt_count integer NOT NULL DEFAULT 0,
+        next_attempt_at timestamptz, event_kind text NOT NULL DEFAULT 'CUSTOMER',
+        evaluation_group_id uuid, lease_owner text, lease_token uuid, lease_until timestamptz,
+        payload_ciphertext bytea, payload_nonce bytea, payload_auth_tag bytea,
+        payload_encrypted_dek bytea, payload_key_ref text, payload_expires_at timestamptz,
+        updated_at timestamptz NOT NULL DEFAULT now()
+      );
+      CREATE TABLE conversation_ingress_heads (
+        page_id text NOT NULL, conversation_hash text NOT NULL, generation bigint NOT NULL,
+        last_customer_receive_sequence bigint, quiet_until timestamptz, next_attempt_at timestamptz,
+        attempt_count integer NOT NULL DEFAULT 0, lease_owner text, lease_token uuid,
+        lease_until timestamptz, updated_at timestamptz NOT NULL DEFAULT now(),
+        PRIMARY KEY (page_id,conversation_hash)
       );
       CREATE TABLE meta_outbox (
         outbox_id uuid PRIMARY KEY, page_id text NOT NULL, status text NOT NULL,
@@ -98,6 +123,11 @@ test("0038 atomically holds Track B claims, permits drain, isolates pages, and r
       [schema],
     );
     assert.equal(installed.rows[0]?.exact_count, 3);
+    await client.query(
+      `INSERT INTO schema_migrations (migration_name,checksum_sha256)
+       VALUES ('0038_track_b_commerce_admission_gate',
+               '7d1f3f8916e0a7ba63502d4fc7e2b794e20b65ac833a8c84776012cf80be56ca')`,
+    );
 
     const ids = {
       inbox: "10000000-0000-4000-8000-000000000001",
@@ -117,12 +147,46 @@ test("0038 atomically holds Track B claims, permits drain, isolates pages, and r
     await insertWork(client, "meta_outbox", "outbox_id", ids.drainingMeta, pageId, "SENDING");
     await insertWork(client, "pancake_tag_outbox", "operation_id", ids.drainingPancake, pageId, "APPLYING");
     await insertWork(client, "webhook_inbox", "inbox_id", ids.changedSearchPath, pageId, "QUEUED");
+    const fenceToken = "30000000-0000-4000-8000-000000000001";
     await client.query(
       `INSERT INTO df13_commerce_cutover_fences
-         (fence_id,page_id,channel,lease_until,released_at)
-       VALUES ('20000000-0000-4000-8000-000000000001',$1,'MESSENGER',clock_timestamp()-interval '1 minute',NULL)`,
-      [pageId],
+         (fence_id,page_id,channel,epoch,token_hash,lease_until,released_at)
+       VALUES ('20000000-0000-4000-8000-000000000001',$1,'MESSENGER',1,$2,
+               clock_timestamp()-interval '1 minute',NULL)`,
+      [pageId, createHash("sha256").update(fenceToken, "utf8").digest("hex")],
     );
+
+    const storeUrl = new URL(databaseUrl);
+    storeUrl.searchParams.set("options", `-c search_path=${schema},public`);
+    const authorityWriter = new PostgresTrackBCommerceAuthorityWriter(storeUrl.toString(), {
+      admissionSchema: schema,
+    });
+    try {
+      assert.deepEqual(await authorityWriter.readAdmissionHold({
+        pageId,
+        channel: "MESSENGER",
+        lease: {
+          fenceId: "20000000-0000-4000-8000-000000000001",
+          fenceToken,
+          epoch: 1,
+        },
+      }), {
+        status: "HELD",
+        source: "DATABASE",
+        pageId,
+        channel: "MESSENGER",
+        fenceId: "20000000-0000-4000-8000-000000000001",
+        epoch: 1,
+        released: false,
+        guardedClaims: [
+          "webhook_inbox:PROCESSING",
+          "meta_outbox:SENDING",
+          "pancake_tag_outbox:APPLYING",
+        ],
+      });
+    } finally {
+      await authorityWriter.close();
+    }
 
     // New inbound remains durably queued, including under an expired-but-unreleased fence.
     const durable = await client.query(
@@ -148,6 +212,39 @@ test("0038 atomically holds Track B claims, permits drain, isolates pages, and r
     );
     assert.equal(changedPathClaim.rowCount, 0);
     await configure(contender, schema);
+
+    // Exercise the actual batch-claim store twice. Admission-held polls must not
+    // consume the conversation head's retry budget.
+    await client.query(
+      `INSERT INTO conversation_ingress_heads
+         (page_id,conversation_hash,generation,last_customer_receive_sequence,quiet_until,attempt_count)
+       VALUES ($1,'held-conversation',1,10,clock_timestamp()-interval '1 second',3)`,
+      [pageId],
+    );
+    await client.query(
+      `INSERT INTO webhook_inbox
+         (inbox_id,page_id,status,event_key,conversation_hash,receive_sequence,event_kind,attempt_count)
+       VALUES ('10000000-0000-4000-8000-000000000010',$1,'QUEUED','held-event',
+               'held-conversation',10,'CUSTOMER',0)`,
+      [pageId],
+    );
+    const inboxStore = new PostgresRealtimeInboxStore(
+      storeUrl.toString(),
+      new LocalEnvelopeCipher("00".repeat(32), "track-b-0038-test-key"),
+    );
+    try {
+      assert.equal(await inboxStore.claimNextBatch("held-worker", 30_000), null);
+      assert.equal(await inboxStore.claimNextBatch("held-worker", 30_000), null);
+    } finally {
+      await inboxStore.close();
+    }
+    const heldHead = await client.query(
+      `SELECT attempt_count,lease_owner,lease_token,lease_until
+         FROM conversation_ingress_heads WHERE conversation_hash='held-conversation'`,
+    );
+    assert.deepEqual(heldHead.rows[0], {
+      attempt_count: 3, lease_owner: null, lease_token: null, lease_until: null,
+    });
 
     // Existing leases can complete and drain; only acquisition/lease replacement is blocked.
     assert.equal((await client.query(
@@ -180,7 +277,7 @@ test("0038 atomically holds Track B claims, permits drain, isolates pages, and r
     await client.query("COMMIT");
     assert.equal(await blockedClaim, 0);
 
-    await assert.rejects(client.query(downSql), /0038 down requires no unreleased Track B cutover fence/u);
+    await assert.rejects(client.query(downSql), /0038 down requires zero unreleased cutover fences/u);
     assert.equal(await claim(client, "webhook_inbox", "inbox_id", ids.inbox, "PROCESSING"), 0,
       "failed down must leave the guard installed");
     await client.query("UPDATE df13_commerce_cutover_fences SET released_at=clock_timestamp()");

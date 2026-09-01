@@ -92,6 +92,9 @@ Source review/merge does not authorize rehearsal or live apply.
 Quiescence counts every claimed/in-flight class at zero. Durably queued rows may
 remain or grow while admission is held; they are recorded in evidence but are
 not required to be zero because no worker may claim them before exact release.
+An admission-suppressed Inbox batch restores the speculative conversation-head
+attempt count together with its lease, so held polling cannot consume retry
+budget or poison queued work.
 
 The CAS writer accepts only the recorded prior and target authority
 identities and exact live lease; a post-CAS recovery may reuse that same
@@ -107,6 +110,13 @@ prior service, prove runtime plus full-consumer convergence, and only then
 release the fence. Unknown pointer, fence, stopped-service, staged-service,
 runtime, audit or consumer identity retains the fence and fails closed. This
 protocol does not authorize deployment or pointer mutation by itself.
+
+If exact fence release commits but its acknowledgement is lost, re-entry uses
+the durable `ALREADY_RELEASED` fence identity and reconciles exact pointer,
+service/runtime, audit when a CAS occurred, and all DATABASE consumers. It may
+report the exact target active, exact prior untouched, or exact prior restored;
+otherwise it reports released-state ambiguity and never claims a hold that no
+longer exists.
 
 ### Narrow first-DF13 PREPROD exception
 

@@ -18,6 +18,42 @@ function input(eventKind: "CUSTOMER" | "APP_ECHO" | "PAGE_ECHO" = "CUSTOMER") {
 }
 
 describe("PostgresRealtimeInboxStore debounce enqueue", () => {
+  it("restores the speculative ingress-head attempt when admission holds every Inbox row", async () => {
+    const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
+    const client = {
+      async query(sql: string, values: readonly unknown[] = []) {
+        calls.push({ sql, values });
+        if (sql.includes("LEFT JOIN LATERAL")) return {
+          rowCount: 1,
+          rows: [{
+            page_id: "page-1", conversation_hash: "meta:v1:customer-hash",
+            generation: "42", last_customer_receive_sequence: "7",
+            page_echo_receive_sequence: null, attempt_count: 3,
+          }],
+        };
+        if (sql.includes("UPDATE webhook_inbox AS inbox")) return { rowCount: 0, rows: [] };
+        return { rowCount: 1, rows: [] };
+      },
+      release: vi.fn(),
+    };
+    const store = new PostgresRealtimeInboxStore(
+      "postgresql://unused:unused@localhost:5432/unused",
+      new LocalEnvelopeCipher("00".repeat(32), "test-key-v1"),
+    );
+    (store as unknown as { pool: unknown }).pool = {
+      async query() { return { rowCount: 0, rows: [] }; },
+      async connect() { return client; },
+      async end() {},
+    };
+
+    await expect(store.claimNextBatch("worker-1", 30_000)).resolves.toBeNull();
+
+    const cleanup = calls.find((call) =>
+      call.sql.includes("attempt_count = $4") && call.sql.includes("lease_token = $3"),
+    );
+    expect(cleanup?.values[3]).toBe(3);
+  });
+
   it("advances the customer generation and five-second quiet clock only after a new inbox row", async () => {
     const calls: Array<{ sql: string; values: readonly unknown[] }> = [];
     const client = {

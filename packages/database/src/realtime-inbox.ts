@@ -497,9 +497,10 @@ export class PostgresRealtimeInboxStore {
         await client.query(
           `UPDATE conversation_ingress_heads
            SET lease_owner = NULL, lease_token = NULL, lease_until = NULL,
+               attempt_count = $4,
                updated_at = now()
            WHERE page_id = $1 AND conversation_hash = $2 AND lease_token = $3`,
-          [candidate.page_id, candidate.conversation_hash, leaseToken],
+          [candidate.page_id, candidate.conversation_hash, leaseToken, candidate.attempt_count],
         );
         return null;
       }

@@ -169,8 +169,27 @@ function ports(overrides: Partial<TrackBCommerceAuthorityMutationPorts> = {}): T
       fenceId: lease.fenceId,
       admission: "HELD" as const,
     })),
+    readReleasedRuntimeAuthority: vi.fn(async ({ service, pointer, fenceId, epoch }) => ({
+      status: "EXACT" as const,
+      service,
+      modeVersionId: pointer.version.modeVersionId,
+      contentHash: pointer.version.contentHash,
+      pointerRevision: pointer.pointerRevision,
+      authorityBundleHash: pointer.version.authorityBundleHash ?? null,
+      fenceId,
+      epoch,
+      admission: "OPEN" as const,
+    })),
     readActivationAudit: vi.fn(async () => "EXACT" as const),
     readConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
+      consumer,
+      source: "DATABASE" as const,
+      modeVersionId: target.version.modeVersionId,
+      contentHash: target.version.contentHash,
+      pointerRevision: target.pointerRevision,
+      authorityBundleHash: target.version.authorityBundleHash ?? null,
+    }))),
+    readReleasedConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
       consumer,
       source: "DATABASE" as const,
       modeVersionId: target.version.modeVersionId,
@@ -777,6 +796,124 @@ describe("Track B Commerce authority mutation", () => {
     expect(mutationPorts.restorePreviousService).not.toHaveBeenCalled();
     expect(mutationPorts.mutateExactPointer).not.toHaveBeenCalled();
     expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+  });
+
+  it("reconciles a committed forward fence release whose acknowledgement was lost", async () => {
+    const mutationPorts = ports({
+      acquireFence: vi.fn(async () => ({
+        status: "ALREADY_RELEASED" as const,
+        fenceId: "20000000-0000-4000-8000-000000000001",
+        epoch: 1,
+      })),
+    });
+
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({
+      status: "TARGET_ACTIVE",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_RELEASE_ACK_RECONCILED"],
+    });
+    expect(mutationPorts.proveAdmissionHeld).not.toHaveBeenCalled();
+    expect(mutationPorts.readReleasedRuntimeAuthority).toHaveBeenCalledOnce();
+    expect(mutationPorts.readReleasedConsumerAuthorities).toHaveBeenCalledOnce();
+    expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+  });
+
+  it("reconciles a committed pre-CAS release to the exact previous runtime", async () => {
+    const mutationPorts = ports({
+      acquireFence: vi.fn(async () => ({
+        status: "ALREADY_RELEASED" as const,
+        fenceId: "20000000-0000-4000-8000-000000000001",
+        epoch: 1,
+      })),
+      readActivePointer: vi.fn(async () => previous),
+      readReleasedConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
+        consumer,
+        source: "DATABASE" as const,
+        modeVersionId: previous.version.modeVersionId,
+        contentHash: previous.version.contentHash,
+        pointerRevision: previous.pointerRevision,
+        authorityBundleHash: previous.version.authorityBundleHash ?? null,
+      }))),
+    });
+
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toMatchObject({
+      status: "BLOCKED_PREVIOUS",
+      reasonCodes: ["TRACK_B_B3_2_RELEASE_ACK_RECONCILED"],
+    });
+    expect(mutationPorts.readActivationAudit).not.toHaveBeenCalled();
+  });
+
+  it("reconciles a committed explicit rollback release to exact V1", async () => {
+    const rollbackPointer = { ...previous, pointerRevision: 8 };
+    const mutationPorts = ports({
+      acquireFence: vi.fn(async () => ({
+        status: "ALREADY_RELEASED" as const,
+        fenceId: "20000000-0000-4000-8000-000000000001",
+        epoch: 2,
+      })),
+      readActivePointer: vi.fn(async () => rollbackPointer),
+      readReleasedConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
+        consumer,
+        source: "DATABASE" as const,
+        modeVersionId: rollbackPointer.version.modeVersionId,
+        contentHash: rollbackPointer.version.contentHash,
+        pointerRevision: rollbackPointer.pointerRevision,
+        authorityBundleHash: rollbackPointer.version.authorityBundleHash ?? null,
+      }))),
+    });
+
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000002",
+      direction: "ROLLBACK_TRACK_B",
+      previous: target,
+      target: rollbackPointer,
+      rollbackRecord,
+      ports: mutationPorts,
+    })).resolves.toMatchObject({
+      status: "PREVIOUS_RESTORED",
+      reasonCodes: ["TRACK_B_B3_2_RELEASE_ACK_RECONCILED"],
+    });
+  });
+
+  it("reports released ambiguity without falsely claiming that admission is held", async () => {
+    const mutationPorts = ports({
+      acquireFence: vi.fn(async () => ({
+        status: "ALREADY_RELEASED" as const,
+        fenceId: "20000000-0000-4000-8000-000000000001",
+        epoch: 1,
+      })),
+      readActivePointer: vi.fn(async () => null),
+    });
+
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({
+      status: "RELEASED_AMBIGUOUS",
+      sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_RELEASED_POINTER_AMBIGUOUS"],
+    });
   });
 
   it("reverses an interrupted exact post-CAS pointer before restoring service", async () => {

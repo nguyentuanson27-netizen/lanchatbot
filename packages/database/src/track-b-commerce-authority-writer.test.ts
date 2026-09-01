@@ -132,9 +132,12 @@ describe("Postgres Track B Commerce authority writer", () => {
         admissionTrigger("meta_outbox"),
         admissionTrigger("pancake_tag_outbox"),
       ]);
-      if (sql.includes("FROM schema_migrations")) return result([{
-        checksum_sha256: "7d1f3f8916e0a7ba63502d4fc7e2b794e20b65ac833a8c84776012cf80be56ca",
-      }]);
+      if (sql.includes("FROM schema_migrations")) {
+        expect(values).toEqual(["0038_track_b_commerce_admission_gate"]);
+        return result([{
+          checksum_sha256: "7d1f3f8916e0a7ba63502d4fc7e2b794e20b65ac833a8c84776012cf80be56ca",
+        }]);
+      }
       return result();
     });
     const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");

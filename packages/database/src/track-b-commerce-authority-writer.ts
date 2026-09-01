@@ -16,7 +16,7 @@ const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}
 const CONTENT_HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const BUNDLE_HASH_PATTERN = /^[a-f0-9]{64}$/u;
 const PREPARE_REASON_PATTERN = /^TRACK_B_B3_2_PREPARE:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
-const ADMISSION_MIGRATION_NAME = "0038_track_b_commerce_admission_gate.up.sql";
+const ADMISSION_MIGRATION_NAME = "0038_track_b_commerce_admission_gate";
 const ADMISSION_MIGRATION_HASH = "7d1f3f8916e0a7ba63502d4fc7e2b794e20b65ac833a8c84776012cf80be56ca";
 const ADMISSION_FUNCTION_SOURCE_HASH = "d083f18d4a62cf313af3baba8c3a145225e9ee7852e4192119b158d34c8ac5ba";
 
@@ -175,9 +175,15 @@ function pointerSelect(): string {
 /** Page-scoped source writer for the one Track B COMMERCE identity replacement. */
 export class PostgresTrackBCommerceAuthorityWriter {
   readonly #pool: Pool;
+  readonly #admissionSchema: string;
 
-  constructor(connectionString: string) {
+  constructor(connectionString: string, options: Readonly<{ admissionSchema?: string }> = {}) {
     if (!connectionString.trim()) throw new Error("DATABASE_URL_REQUIRED");
+    const admissionSchema = options.admissionSchema ?? "public";
+    if (!/^[a-z][a-z0-9_]{0,62}$/u.test(admissionSchema)) {
+      throw new Error("TRACK_B_B3_2_ADMISSION_SCHEMA_INVALID");
+    }
+    this.#admissionSchema = admissionSchema;
     this.#pool = new Pool({ connectionString, max: 1 });
   }
 
@@ -224,12 +230,13 @@ export class PostgresTrackBCommerceAuthorityWriter {
            JOIN pg_proc p ON p.oid=t.tgfoid
            JOIN pg_namespace pn ON pn.oid=p.pronamespace
            JOIN pg_language l ON l.oid=p.prolang
-          WHERE n.nspname='public' AND NOT t.tgisinternal
+          WHERE n.nspname=$1 AND NOT t.tgisinternal
             AND (c.relname,t.tgname) IN (
               ('webhook_inbox','track_b_cutover_admission_webhook_inbox'),
               ('meta_outbox','track_b_cutover_admission_meta_outbox'),
               ('pancake_tag_outbox','track_b_cutover_admission_pancake_tag_outbox')
             )`,
+        [this.#admissionSchema],
       );
       const ledgerResult = await client.query(
         `SELECT checksum_sha256 FROM schema_migrations WHERE migration_name=$1`,
@@ -238,7 +245,8 @@ export class PostgresTrackBCommerceAuthorityWriter {
       const fence = fenceResult.rows[0] as Row | undefined;
       const tables = new Set(triggerResult.rows.filter((row: Row) =>
         row.tgenabled === "A" && Number(row.tgtype) === 19 &&
-        row.function_name === "guard_track_b_cutover_admission" && row.function_schema === "public" &&
+        row.function_name === "guard_track_b_cutover_admission" &&
+        row.function_schema === this.#admissionSchema &&
         row.language_name === "plpgsql" && row.returns_trigger === true &&
         createHash("sha256").update(String(row.prosrc), "utf8").digest("hex") ===
           ADMISSION_FUNCTION_SOURCE_HASH &&
