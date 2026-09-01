@@ -91,7 +91,7 @@ t37_observed_preflight() {
   printf '%s\n' \
     "HOST_MACHINE_ID_SHA256=$(sha256sum /etc/machine-id | awk '{print $1}')" \
     "POSTGRES_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$POSTGRES_CONTAINER")" \
-    "POSTGRES_VOLUME=$(docker inspect --format '{{range .Mounts}}{{if eq .Destination \"/var/lib/postgresql/data\"}}{{.Name}}|{{.Type}}|{{.RW}}{{end}}{{end}}' "$POSTGRES_CONTAINER")" \
+    "POSTGRES_VOLUME=$(docker inspect --format '{{range .Mounts}}{{if eq .Destination "/var/lib/postgresql/data"}}{{.Name}}|{{.Type}}|{{.RW}}{{end}}{{end}}' "$POSTGRES_CONTAINER")" \
     "REALTIME_IMAGE=$(docker inspect --format '{{.Config.Image}}' "$REALTIME_CONTAINER")" \
     "REALTIME_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$REALTIME_CONTAINER")" \
     "REALTIME_HEALTH=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}|{{.RestartCount}}' "$REALTIME_CONTAINER")" \
