@@ -8,7 +8,7 @@ source "$script_dir/track-b-0036-preprod-common.sh"
 
 readonly T37_MIGRATION="0037_track_b_commerce_authority_replacement"
 readonly T37_UP_SHA256="40b1ef14e3f7b2e037063de1f8d8ff7f804d069f8649115be6c29b1b56399c20"
-readonly T37_DOWN_SHA256="c5b2ea232bf586aeaf1e034c017dbf1d002fda904c4c4e3ebd9daace4ae73ce3"
+readonly T37_DOWN_SHA256="070b2b793af7d6b6c33399531f47240cd9b5aa29d3dc12fe12ae0870acce57a7"
 readonly T37_UP="$SOURCE_ROOT/packages/database/pending-migrations/$T37_MIGRATION.up.sql"
 readonly T37_DOWN="$SOURCE_ROOT/packages/database/pending-migrations/$T37_MIGRATION.down.sql"
 readonly T37_LEDGER_COUNT="36"
@@ -22,7 +22,9 @@ readonly T37_POINTER_REVISION="6"
 readonly T37_RELATION_ACL_SHA256="9bd6ea2d3457119de2e96620cd8a83a18f5baf2ec18f24b631c2f02d070a7635"
 readonly T37_FUNCTION_ACL_SHA256="66b943803363c3d050ae05ca25543b097d69543233760fd268f502d632e16034"
 readonly T37_PRE_CATALOG_SHA256="ffd731178c5c4231531de973ddf7fb51402f6d2af2eaf98e0e0f3cdd5e77aa6d"
+readonly T37_RAW_CATALOG_QUERY="$SOURCE_ROOT/deploy/track-b-0037-catalog-raw.sql"
 readonly T37_CATALOG_QUERY="$SOURCE_ROOT/deploy/track-b-0037-catalog-canonical.sql"
+readonly T37_CATALOG_CANONICALIZER="$SOURCE_ROOT/deploy/track-b-0037-check-canonicalizer.mjs"
 readonly T37_REALTIME_IMAGE_ID="sha256:ea0b076cfded1b8e10d817c43ba984066c97b2b18bcdff878fa91ed809c42c16"
 if test "${BASH_SOURCE[0]}" != "$0" && test "${TRACK_B_0037_OPERATOR_TEST_MODE:-}" = 'YES'; then
   : "${TRACK_B_0037_TEST_EVIDENCE_DIR:?test evidence directory is required}"
@@ -39,6 +41,7 @@ readonly T37_ROLLBACK="$T37_EVIDENCE_DIR/rollback-status.txt"
 
 require_common_tools
 require_command sed
+require_command node
 
 t37_source_identity() {
   : "${SOURCE_REVISION:?SOURCE_REVISION is required}"
@@ -108,7 +111,7 @@ t37_observed_preflight() {
     "ROLE_MEMBERSHIP_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT member_role.rolname,granted_role.rolname,m.admin_option FROM pg_auth_members m JOIN pg_roles member_role ON member_role.oid=m.member JOIN pg_roles granted_role ON granted_role.oid=m.roleid ORDER BY 1,2,3")" \
     "RELATION_ACL_SHA256=$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$RELATION_ACL_QUERY")" \
     "FUNCTION_ACL_SHA256=$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$FUNCTION_ACL_QUERY")" \
-    "CATALOG_SHA256=$(t37_catalog_sha_named "$EXPECTED_DATABASE")" \
+    "CATALOG_SHA256=$(t37_raw_catalog_sha_named "$EXPECTED_DATABASE")" \
     "EXTENSIONS_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT extname,extversion FROM pg_extension ORDER BY extname")" \
     "AUTHORITY_FENCES=$(database_query "SELECT (SELECT count(*) FROM df13_commerce_authority_fences)::text||'|'||(SELECT count(*) FROM df13_commerce_authority_fence_claims)::text||'|'||(SELECT count(*) FROM df13_commerce_authority_fences WHERE completed_at IS NULL AND token_hash IS NOT NULL AND lease_until>clock_timestamp())::text")" \
     "CUTOVER_FENCES=$(database_query "SELECT count(*)::text||'|'||count(*) FILTER (WHERE released_at IS NULL)::text FROM df13_commerce_cutover_fences")"
@@ -117,10 +120,22 @@ t37_observed_preflight() {
 t37_preflight_matches() { test "$(t37_observed_preflight)" = "$(t37_expected_preflight)"; }
 t37_require_preflight() { t37_preflight_matches || die "exact ENGINEERING_PREPROD pre-0037 target mismatch"; }
 
+t37_raw_catalog_sha_named() {
+  local database="$1"
+  test -s "$T37_RAW_CATALOG_QUERY" || die "0037 raw catalog query missing"
+  database_sql_file_sha256_named "$database" "$T37_RAW_CATALOG_QUERY"
+}
+
 t37_catalog_sha_named() {
   local database="$1"
   test -s "$T37_CATALOG_QUERY" || die "0037 canonical catalog query missing"
-  database_sql_file_sha256_named "$database" "$T37_CATALOG_QUERY"
+  test -s "$T37_CATALOG_CANONICALIZER" || die "0037 CHECK canonicalizer missing"
+  docker exec -i "$POSTGRES_CONTAINER" sh -ceu '
+    export PGPASSWORD="$POSTGRES_PASSWORD"
+    exec psql -X -At -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$1" -f -
+  ' sh "$database" < "$T37_CATALOG_QUERY" |
+    node "$T37_CATALOG_CANONICALIZER" |
+    sha256sum | awk '{print $1}'
 }
 
 t37_apply_up_named() {
@@ -137,7 +152,10 @@ t37_apply_down_named() {
   {
     printf '%s\n' 'BEGIN;'
     cat "$T37_DOWN"
-    printf '%s\n' "DELETE FROM schema_migrations WHERE migration_name=:'migration_name' AND checksum_sha256=:'migration_checksum';" 'COMMIT;'
+    printf '%s\n' \
+      'COMMENT ON FUNCTION guard_df13_commerce_cutover_fence_insert_identity() IS NULL;' \
+      "DELETE FROM schema_migrations WHERE migration_name=:'migration_name' AND checksum_sha256=:'migration_checksum';" \
+      'COMMIT;'
   } | database_stream_named "$database" -v migration_name="$T37_MIGRATION" -v migration_checksum="$T37_UP_SHA256" >/dev/null
 }
 
@@ -158,10 +176,15 @@ t37_verify_up_named() {
 }
 
 t37_verify_down_named() {
-  local database="$1"
+  local database="$1" expected_catalog_sha="$2"
+  [[ "$expected_catalog_sha" =~ ^[a-f0-9]{64}$ ]] || die "0037 expected down catalog identity missing"
   test "$(database_query_named "$database" "SELECT count(*) FROM schema_migrations WHERE migration_name='$T37_MIGRATION'")" = "0" || die "0037 down ledger mismatch"
   test "$(database_query_named "$database" "SELECT count(*) FROM pg_get_functiondef('guard_df13_commerce_cutover_fence_insert_identity()'::regprocedure) AS d WHERE d NOT LIKE '%$T37_V2_BUNDLE%' AND d LIKE '%pre_version.sales_authority_mode <> ''LEGACY''%'")" = "1" || die "0037 down guard readback mismatch"
-  test "$(t37_catalog_sha_named "$database")" = "$T37_PRE_CATALOG_SHA256" || die "0037 down exact catalog mismatch"
+  test "$(t37_catalog_sha_named "$database")" = "$expected_catalog_sha" || die "0037 down exact catalog mismatch"
+}
+
+t37_marker_pre_catalog() {
+  sed -n 's/^PRE_CATALOG_SHA256=//p' "$T37_MARKER"
 }
 
 t37_marker_post_catalog() {
@@ -176,12 +199,40 @@ t37_verify_marker() {
   grep -Fx "DOWN_SHA256=$T37_DOWN_SHA256" "$T37_MARKER" >/dev/null || die "0037 rehearsal down mismatch"
   grep -Fx "BACKUP_SHA256=$(awk '{print $1}' "$T37_BACKUP_SHA")" "$T37_MARKER" >/dev/null || die "0037 rehearsal backup mismatch"
   grep -Fx "PREFLIGHT_SHA256=$(sha256sum "$T37_PREFLIGHT" | awk '{print $1}')" "$T37_MARKER" >/dev/null || die "0037 rehearsal preflight mismatch"
-  local post_catalog
+  local pre_catalog post_catalog
+  pre_catalog="$(t37_marker_pre_catalog)"
   post_catalog="$(t37_marker_post_catalog)"
+  [[ "$pre_catalog" =~ ^[a-f0-9]{64}$ ]] || die "0037 rehearsal pre-catalog identity missing"
   [[ "$post_catalog" =~ ^[a-f0-9]{64}$ ]] || die "0037 rehearsal catalog identity missing"
   grep -Fx 'REHEARSAL=UP_DOWN_UP_PASS' "$T37_MARKER" >/dev/null || die "0037 rehearsal verdict missing"
   test "$(cat "$T37_PREFLIGHT")" = "$(t37_expected_preflight)" || die "0037 recorded preflight is not the approved target"
   test "$(t37_observed_preflight)" = "$(cat "$T37_PREFLIGHT")" || die "target changed since 0037 rehearsal"
+  test "$(t37_catalog_sha_named "$EXPECTED_DATABASE")" = "$pre_catalog" || die "0037 canonical pre-catalog changed since rehearsal"
+}
+
+t37_cleanup_evidence_target_is_exact() {
+  if test "$T37_EVIDENCE_DIR" = "$APP_ROOT/backups/20260901-track-b-0037-preprod"; then
+    return 0
+  fi
+  test "${TRACK_B_0037_OPERATOR_TEST_MODE:-}" = 'YES' || return 1
+  test "$T37_EVIDENCE_DIR" = "${TRACK_B_0037_TEST_EVIDENCE_DIR:-}" || return 1
+  case "$T37_EVIDENCE_DIR" in
+    /tmp/tmp.*/evidence) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+t37_finish_rehearsal() {
+  local restore_database="$1" cleanup_evidence="$2"
+  [[ "$restore_database" =~ ^lana_track_b_0037_rehearsal_[0-9]+$ ]] || die "refusing ambiguous 0037 rehearsal database cleanup"
+  case "$cleanup_evidence" in 0|1) ;; *) die "invalid 0037 evidence cleanup disposition" ;; esac
+  docker exec "$POSTGRES_CONTAINER" sh -ceu 'export PGPASSWORD="$POSTGRES_PASSWORD"; exec dropdb --if-exists --force -U "$POSTGRES_USER" "$1"' sh "$restore_database" >/dev/null
+  test "$(database_query "SELECT count(*) FROM pg_database WHERE datname='$restore_database'")" = "0" || die "0037 rehearsal database cleanup unverified"
+  if test "$cleanup_evidence" = "1"; then
+    t37_cleanup_evidence_target_is_exact || die "refusing ambiguous 0037 evidence cleanup"
+    rm -rf -- "$T37_EVIDENCE_DIR"
+    test ! -e "$T37_EVIDENCE_DIR" || die "0037 evidence cleanup unverified"
+  fi
 }
 
 t37_backup_rehearse() {
@@ -193,12 +244,11 @@ t37_backup_rehearse() {
   t37_observed_preflight > "$T37_PREFLIGHT"
   chmod 600 "$T37_PREFLIGHT"
   test "$(cat "$T37_PREFLIGHT")" = "$(t37_expected_preflight)" || die "0037 recorded preflight mismatch"
+  local pre_catalog_sha
+  pre_catalog_sha="$(t37_catalog_sha_named "$EXPECTED_DATABASE")"
+  [[ "$pre_catalog_sha" =~ ^[a-f0-9]{64}$ ]] || die "0037 canonical pre-catalog identity missing"
   local restore_database="lana_track_b_0037_rehearsal_$$" cleanup=1
-  finish() {
-    docker exec "$POSTGRES_CONTAINER" sh -ceu 'export PGPASSWORD="$POSTGRES_PASSWORD"; exec dropdb --if-exists --force -U "$POSTGRES_USER" "$1"' sh "$restore_database" >/dev/null 2>&1 || true
-    if test "$cleanup" = "1"; then rm -rf -- "$T37_EVIDENCE_DIR"; fi
-  }
-  trap finish EXIT HUP INT TERM
+  trap "t37_finish_rehearsal '$restore_database' '1'" EXIT HUP INT TERM
   docker exec "$POSTGRES_CONTAINER" sh -ceu 'export PGPASSWORD="$POSTGRES_PASSWORD"; exec pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "$T37_BACKUP"
   test -s "$T37_BACKUP" || die "0037 backup is empty"
   chmod 600 "$T37_BACKUP"
@@ -211,6 +261,7 @@ t37_backup_rehearse() {
   test "$(database_copy_sha256_named "$restore_database" "SELECT migration_name,checksum_sha256 FROM schema_migrations ORDER BY migration_name")" = "$T37_LEDGER_SHA256" || die "0037 restored ledger mismatch"
   test "$(database_sql_file_sha256_named "$restore_database" "$RELATION_ACL_QUERY")" = "$T37_RELATION_ACL_SHA256" || die "0037 restored relation ACL mismatch"
   test "$(database_sql_file_sha256_named "$restore_database" "$FUNCTION_ACL_QUERY")" = "$T37_FUNCTION_ACL_SHA256" || die "0037 restored function ACL mismatch"
+  test "$(t37_catalog_sha_named "$restore_database")" = "$pre_catalog_sha" || die "0037 restored canonical catalog mismatch"
   test "$(database_copy_sha256_named "$restore_database" "SELECT rolname,rolsuper,rolinherit,rolcreaterole,rolcreatedb,rolcanlogin,rolreplication,rolbypassrls,rolconnlimit FROM pg_roles WHERE left(rolname,3) <> chr(112)||chr(103)||chr(95) ORDER BY rolname")" = "$EXPECTED_ROLE_STATE_SHA256" || die "0037 restored role attributes mismatch"
   test "$(database_copy_sha256_named "$restore_database" "SELECT member_role.rolname,granted_role.rolname,m.admin_option FROM pg_auth_members m JOIN pg_roles member_role ON member_role.oid=m.member JOIN pg_roles granted_role ON granted_role.oid=m.roleid ORDER BY 1,2,3")" = "$EXPECTED_ROLE_MEMBERSHIP_SHA256" || die "0037 restored role memberships mismatch"
   test "$(database_copy_sha256_named "$restore_database" "SELECT extname,extversion FROM pg_extension ORDER BY extname")" = "$EXPECTED_EXTENSIONS_SHA256" || die "0037 restored extensions mismatch"
@@ -269,7 +320,7 @@ SQL
   if t37_apply_down_named "$restore_database" >/dev/null 2>&1; then die "0037 down erased a live fence"; fi
   database_query_named "$restore_database" "UPDATE df13_commerce_cutover_fences SET token_hash=NULL,lease_until=NULL,released_at=clock_timestamp(),updated_at=clock_timestamp() WHERE fence_id='70000000-0000-4000-8000-000000000014'" >/dev/null
   t37_apply_down_named "$restore_database"
-  t37_verify_down_named "$restore_database"
+  t37_verify_down_named "$restore_database" "$pre_catalog_sha"
   t37_apply_up_named "$restore_database"
   cat "$T37_UP" | database_stream_named "$restore_database" >/dev/null
   t37_verify_up_named "$restore_database"
@@ -281,11 +332,12 @@ SQL
     "DOWN_SHA256=$T37_DOWN_SHA256" \
     "BACKUP_SHA256=$(awk '{print $1}' "$T37_BACKUP_SHA")" \
     "PREFLIGHT_SHA256=$(sha256sum "$T37_PREFLIGHT" | awk '{print $1}')" \
+    "PRE_CATALOG_SHA256=$pre_catalog_sha" \
     "POST_CATALOG_SHA256=$post_catalog_sha" \
     'REHEARSAL=UP_DOWN_UP_PASS' > "$T37_MARKER"
   chmod 600 "$T37_MARKER"
   cleanup=0
-  finish
+  t37_finish_rehearsal "$restore_database" "$cleanup"
   trap - EXIT HUP INT TERM
   printf '%s\n' 'TRACK_B_0037_BACKUP_REHEARSAL_PASS'
 }

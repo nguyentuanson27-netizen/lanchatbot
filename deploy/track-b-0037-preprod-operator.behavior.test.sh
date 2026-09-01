@@ -19,6 +19,7 @@ mkdir -p "$T37_EVIDENCE_DIR"
 printf '%s\n' 'backup fixture' > "$T37_BACKUP"
 sha256sum "$T37_BACKUP" > "$T37_BACKUP_SHA"
 SOURCE_REVISION="$(printf 'a%.0s' {1..40})"
+t37_catalog_sha_named() { printf '%s\n' "$(printf 'a%.0s' {1..64})"; }
 
 t37_expected_preflight() { printf '%s\n' 'TARGET=ENGINEERING_PREPROD' 'POINTER=V1'; }
 t37_observed_preflight() { t37_expected_preflight; }
@@ -38,6 +39,7 @@ printf '%s\n' \
   "DOWN_SHA256=$T37_DOWN_SHA256" \
   "BACKUP_SHA256=$(awk '{print $1}' "$T37_BACKUP_SHA")" \
   "PREFLIGHT_SHA256=$(sha256sum "$T37_PREFLIGHT" | awk '{print $1}')" \
+  "PRE_CATALOG_SHA256=$(printf 'a%.0s' {1..64})" \
   "POST_CATALOG_SHA256=$(printf 'b%.0s' {1..64})" \
   'REHEARSAL=UP_DOWN_UP_PASS' > "$T37_MARKER"
 t37_verify_marker
@@ -49,8 +51,25 @@ if (t37_verify_marker) >/dev/null 2>&1; then
 fi
 t37_expected_preflight > "$T37_PREFLIGHT"
 
+if (t37_verify_down_named 'fixture' 'not-a-sha256') >/dev/null 2>&1; then
+  printf '%s\n' 'invalid rollback catalog identity was accepted' >&2
+  exit 1
+fi
+database_query_named() {
+  case "$2" in
+    *schema_migrations*) printf '%s\n' '0' ;;
+    *pg_get_functiondef*) printf '%s\n' '1' ;;
+    *) return 1 ;;
+  esac
+}
+t37_catalog_sha_named() { printf '%s\n' "$(printf 'c%.0s' {1..64})"; }
+if (t37_verify_down_named 'fixture' "$(printf 'a%.0s' {1..64})") >/dev/null 2>&1; then
+  printf '%s\n' 'rollback catalog mismatch was accepted' >&2
+  exit 1
+fi
+t37_catalog_sha_named() { printf '%s\n' "$(printf 'a%.0s' {1..64})"; }
+
 t37_pointer() { printf '%s\n' "$T37_POINTER_REVISION|$T37_V1_VERSION|COMMERCE|LEGACY|$T37_V1_BUNDLE|$T37_V1_CONTENT"; }
-t37_catalog_sha_named() { printf '%s\n' "$T37_PRE_CATALOG_SHA256"; }
 t37_observed_preflight() { t37_expected_preflight; }
 database_query() {
   case "$1" in
@@ -94,5 +113,29 @@ if (
   printf '%s\n' 'live catalog mismatch was accepted' >&2
   exit 1
 fi
+
+cleanup_database='lana_track_b_0037_rehearsal_4242'
+docker() { printf '%s\n' "$*" > "$test_root/cleanup-docker.args"; }
+database_query() {
+  case "$1" in
+    *pg_database*) printf '%s\n' '0' ;;
+    *) return 1 ;;
+  esac
+}
+t37_finish_rehearsal "$cleanup_database" 1
+test ! -e "$T37_EVIDENCE_DIR"
+grep -F -- "$cleanup_database" "$test_root/cleanup-docker.args" >/dev/null
+mkdir -p "$T37_EVIDENCE_DIR"
+TRACK_B_0037_TEST_EVIDENCE_DIR="$test_root/other"
+if t37_cleanup_evidence_target_is_exact; then
+  printf '%s\n' 'broad rehearsal evidence cleanup target was accepted' >&2
+  exit 1
+fi
+TRACK_B_0037_TEST_EVIDENCE_DIR="$T37_EVIDENCE_DIR"
+if (t37_finish_rehearsal 'lana_chatbot' 1) >/dev/null 2>&1; then
+  printf '%s\n' 'broad rehearsal database cleanup target was accepted' >&2
+  exit 1
+fi
+test -d "$T37_EVIDENCE_DIR"
 
 printf '%s\n' 'Track B 0037 PREPROD operator behavior test: PASS'

@@ -40,8 +40,11 @@ describe("0037 Track B Commerce authority replacement guard", () => {
     expect(sql).toContain("pre_version.authority_bundle_hash IS NOT NULL");
     expect(sql).toContain("c88f3d7a-3c14-49ff-ab07-bcfbf664c643");
     expect(sql).toContain(v1);
-    expect(sql).toContain("active_version.sales_authority_mode <> 'COMMERCE'");
-    expect(sql).toContain("active_version.state_read_mode <> 'LEGACY'");
+    expect(sql).toContain("SELECT version.*, pointer.pointer_revision AS active_revision");
+    expect(sql).toContain("INTO active");
+    expect(sql).toContain("active.active_revision < 6");
+    expect(sql).toContain("active.sales_authority_mode <> 'COMMERCE'");
+    expect(sql).toContain("active.state_read_mode <> 'LEGACY'");
     expect(sql).toContain("released_at IS NULL");
     expect(sql).toContain("0037 down requires the exact Track B V1 authority to be restored");
     expect(sql).toContain("0037 down requires no live Track B cutover fence");

@@ -3,25 +3,24 @@
 
 DO $$
 DECLARE
-  active_version runtime_behavior_mode_versions%ROWTYPE;
-  active_revision bigint;
+  active record;
 BEGIN
-  SELECT version, pointer.pointer_revision
-    INTO active_version, active_revision
+  SELECT version.*, pointer.pointer_revision AS active_revision
+    INTO active
     FROM runtime_behavior_mode_pointers AS pointer
     JOIN runtime_behavior_mode_versions AS version
       ON version.mode_version_id = pointer.active_version_id
    WHERE pointer.page_id = '1198992073286645'
      AND pointer.channel = 'MESSENGER'
    FOR UPDATE OF pointer;
-  IF active_version.mode_version_id IS NULL
-     OR active_version.mode_version_id <> 'c88f3d7a-3c14-49ff-ab07-bcfbf664c643'::uuid
-     OR active_revision < 6
-     OR active_version.page_id <> '1198992073286645'
-     OR active_version.channel <> 'MESSENGER'
-     OR active_version.sales_authority_mode <> 'COMMERCE'
-     OR active_version.state_read_mode <> 'LEGACY'
-     OR active_version.authority_bundle_hash <>
+  IF active.mode_version_id IS NULL
+     OR active.mode_version_id <> 'c88f3d7a-3c14-49ff-ab07-bcfbf664c643'::uuid
+     OR active.active_revision < 6
+     OR active.page_id <> '1198992073286645'
+     OR active.channel <> 'MESSENGER'
+     OR active.sales_authority_mode <> 'COMMERCE'
+     OR active.state_read_mode <> 'LEGACY'
+     OR active.authority_bundle_hash <>
        'e423f3f647dce25cd74501555b73fc69cf66e4138fbfdda6b7e9c471fe89a05c' THEN
     RAISE EXCEPTION '0037 down requires the exact Track B V1 authority to be restored';
   END IF;

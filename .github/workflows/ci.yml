@@ -65,5 +65,11 @@ jobs:
       - name: Verify policy transactions on PostgreSQL
         run: pnpm --filter @lana/admin-api test:postgres
 
+      - name: Verify Track B 0037 migration operator
+        run: |
+          node deploy/track-b-0037-preprod-operator.test.mjs
+          node --test deploy/track-b-0037-check-canonicalizer.test.mjs
+          bash deploy/track-b-0037-preprod-operator.behavior.test.sh
+
       - name: Run repository checks
         run: pnpm check
