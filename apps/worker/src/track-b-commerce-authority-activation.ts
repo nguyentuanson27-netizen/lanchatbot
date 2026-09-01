@@ -1,3 +1,5 @@
+import { canonicalJsonV1 } from "@lana/contracts";
+import { createHash } from "node:crypto";
 import { behaviorModeContentHash, type RuntimeBehaviorModePointer } from "@lana/chat-runtime";
 import type {
   Df13CommerceCutoverFenceLease,
@@ -17,6 +19,43 @@ import {
 
 const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
+const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
+
+export type TrackBServiceReleaseIdentity = Readonly<{
+  service: "realtime-worker";
+  releaseRevision: string;
+  buildId: string;
+  imageId: string;
+  runtimeConfigHash: string;
+}>;
+
+export type TrackBReleaseLocalRollbackRecord = Readonly<{
+  schemaVersion: 1;
+  contractVersion: "TRACK_B_RELEASE_LOCAL_ROLLBACK_RECORD_V1";
+  selectedSourceCommit: string;
+  previousService: TrackBServiceReleaseIdentity;
+  targetService: TrackBServiceReleaseIdentity;
+  previousAuthority: Readonly<{ modeVersionId: string; contentHash: string; bundleHash: string }>;
+  targetAuthority: Readonly<{ modeVersionId: string; contentHash: string; bundleHash: string }>;
+  recordHash: string;
+}>;
+
+function sha256(value: string): string {
+  return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function exactKeys(value: object, keys: readonly string[]): boolean {
+  return canonicalJsonV1(Object.keys(value).sort()) === canonicalJsonV1([...keys].sort());
+}
+
+export function createTrackBReleaseLocalRollbackRecord(input: Omit<TrackBReleaseLocalRollbackRecord, "schemaVersion" | "contractVersion" | "recordHash">): TrackBReleaseLocalRollbackRecord {
+  const body = {
+    schemaVersion: 1 as const,
+    contractVersion: "TRACK_B_RELEASE_LOCAL_ROLLBACK_RECORD_V1" as const,
+    ...input,
+  };
+  return Object.freeze({ ...body, recordHash: sha256(canonicalJsonV1(body)) });
+}
 
 export type TrackBCommerceConsumerReadback = Readonly<{
   consumer: CommerceAuthorityConsumer;
@@ -28,6 +67,7 @@ export type TrackBCommerceConsumerReadback = Readonly<{
 }>;
 
 export interface TrackBCommerceAuthorityMutationPorts {
+  readPersistedRollbackRecord(recordHash: string): Promise<TrackBReleaseLocalRollbackRecord | null>;
   acquireFence(request: Df13CommerceCutoverFenceRequest): Promise<Readonly<
     | { status: "HELD"; lease: Df13CommerceCutoverFenceLease }
     | { status: "HELD_RECONCILE_REQUIRED" | "ALREADY_RELEASED" | "PARKED"; reasonCode?: string }
@@ -44,11 +84,13 @@ export interface TrackBCommerceAuthorityMutationPorts {
   replaceAffectedServices(input: Readonly<{
     direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
     lease: Df13CommerceCutoverFenceLease;
-    targetReleaseRevision: string;
+    sourceService: TrackBServiceReleaseIdentity;
+    targetService: TrackBServiceReleaseIdentity;
   }>): Promise<Readonly<{
     status: "READY" | "BLOCKED";
     admission: "HELD" | "UNCONTROLLED";
-    observedReleaseRevision: string | null;
+    observedSourceService: TrackBServiceReleaseIdentity | null;
+    observedService: TrackBServiceReleaseIdentity | null;
   }>>;
   mutateExactPointer(input: Readonly<{
     direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
@@ -100,7 +142,7 @@ function exactEnvelope(input: Readonly<{
   direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
   previous: RuntimeBehaviorModePointer;
   target: RuntimeBehaviorModePointer;
-  targetReleaseRevision: string;
+  rollbackRecord: TrackBReleaseLocalRollbackRecord;
   releaseEvidence?: TrackBReleaseCandidateEvidence;
 }>): boolean {
   const previousBundle = input.direction === "ACTIVATE_TRACK_B"
@@ -109,12 +151,43 @@ function exactEnvelope(input: Readonly<{
   const targetBundle = input.direction === "ACTIVATE_TRACK_B"
     ? DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash
     : DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
-  const releaseIsExact = COMMIT_PATTERN.test(input.targetReleaseRevision) && (
+  const expectedService = input.direction === "ACTIVATE_TRACK_B"
+    ? input.rollbackRecord.targetService
+    : input.rollbackRecord.previousService;
+  const { recordHash, ...recordBody } = input.rollbackRecord;
+  const recordPreAuthority = input.direction === "ACTIVATE_TRACK_B"
+    ? input.rollbackRecord.previousAuthority
+    : input.rollbackRecord.targetAuthority;
+  const recordTargetAuthority = input.direction === "ACTIVATE_TRACK_B"
+    ? input.rollbackRecord.targetAuthority
+    : input.rollbackRecord.previousAuthority;
+  const serviceIdentityValid = [input.rollbackRecord.previousService, input.rollbackRecord.targetService].every((service) =>
+    service.service === "realtime-worker" && COMMIT_PATTERN.test(service.releaseRevision) &&
+    SHA256_PATTERN.test(service.buildId) && SHA256_PATTERN.test(service.imageId) &&
+    SHA256_PATTERN.test(service.runtimeConfigHash)
+  );
+  const recordIsExact = input.rollbackRecord.schemaVersion === 1 &&
+    input.rollbackRecord.contractVersion === "TRACK_B_RELEASE_LOCAL_ROLLBACK_RECORD_V1" &&
+    exactKeys(input.rollbackRecord, ["schemaVersion", "contractVersion", "selectedSourceCommit", "previousService", "targetService", "previousAuthority", "targetAuthority", "recordHash"]) &&
+    exactKeys(input.rollbackRecord.previousService, ["service", "releaseRevision", "buildId", "imageId", "runtimeConfigHash"]) &&
+    exactKeys(input.rollbackRecord.targetService, ["service", "releaseRevision", "buildId", "imageId", "runtimeConfigHash"]) &&
+    exactKeys(input.rollbackRecord.previousAuthority, ["modeVersionId", "contentHash", "bundleHash"]) &&
+    exactKeys(input.rollbackRecord.targetAuthority, ["modeVersionId", "contentHash", "bundleHash"]) &&
+    SHA256_PATTERN.test(recordHash) && recordHash === sha256(canonicalJsonV1(recordBody)) &&
+    COMMIT_PATTERN.test(input.rollbackRecord.selectedSourceCommit) && serviceIdentityValid &&
+    input.rollbackRecord.targetService.releaseRevision === input.rollbackRecord.selectedSourceCommit &&
+    recordPreAuthority.modeVersionId === input.previous.version.modeVersionId &&
+    recordPreAuthority.contentHash === input.previous.version.contentHash &&
+    recordPreAuthority.bundleHash === previousBundle &&
+    recordTargetAuthority.modeVersionId === input.target.version.modeVersionId &&
+    recordTargetAuthority.contentHash === input.target.version.contentHash &&
+    recordTargetAuthority.bundleHash === targetBundle;
+  const releaseIsExact = recordIsExact && (
     input.direction === "ROLLBACK_TRACK_B"
       ? input.releaseEvidence === undefined
       : input.releaseEvidence !== undefined &&
         validateTrackBReleaseCandidateEvidence(input.releaseEvidence, {
-          activationReleaseRevision: input.targetReleaseRevision,
+          activationReleaseRevision: expectedService.releaseRevision,
         }).status === "MATCHED"
   );
   return releaseIsExact &&
@@ -182,7 +255,7 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
   direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
   previous: RuntimeBehaviorModePointer;
   target: RuntimeBehaviorModePointer;
-  targetReleaseRevision: string;
+  rollbackRecord: TrackBReleaseLocalRollbackRecord;
   releaseEvidence?: TrackBReleaseCandidateEvidence;
   ports: TrackBCommerceAuthorityMutationPorts;
 }>): Promise<TrackBCommerceAuthorityMutationResult> {
@@ -191,6 +264,25 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
       status: "BLOCKED_PREVIOUS",
       sideEffects: "NOT_EXECUTED",
       reasonCodes: ["TRACK_B_B3_2_MUTATION_ENVELOPE_INVALID"],
+    };
+  }
+  try {
+    const persistedRecord = await input.ports.readPersistedRollbackRecord(
+      input.rollbackRecord.recordHash,
+    );
+    if (persistedRecord === null ||
+        canonicalJsonV1(persistedRecord) !== canonicalJsonV1(input.rollbackRecord)) {
+      return {
+        status: "BLOCKED_PREVIOUS",
+        sideEffects: "NOT_EXECUTED",
+        reasonCodes: ["TRACK_B_B3_2_ROLLBACK_RECORD_NOT_PERSISTED"],
+      };
+    }
+  } catch {
+    return {
+      status: "BLOCKED_PREVIOUS",
+      sideEffects: "NOT_EXECUTED",
+      reasonCodes: ["TRACK_B_B3_2_ROLLBACK_RECORD_UNAVAILABLE"],
     };
   }
   const fenceRequest: Df13CommerceCutoverFenceRequest = {
@@ -243,11 +335,18 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
     return releaseBeforeMutation(input.ports, acquired.lease, "TRACK_B_B3_2_QUIESCENCE_UNPROVEN");
   }
   let replacement: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["replaceAffectedServices"]>>;
+  const expectedService = input.direction === "ACTIVATE_TRACK_B"
+    ? input.rollbackRecord.targetService
+    : input.rollbackRecord.previousService;
+  const expectedSourceService = input.direction === "ACTIVATE_TRACK_B"
+    ? input.rollbackRecord.previousService
+    : input.rollbackRecord.targetService;
   try {
     replacement = await input.ports.replaceAffectedServices({
       direction: input.direction,
       lease: acquired.lease,
-      targetReleaseRevision: input.targetReleaseRevision,
+      sourceService: expectedSourceService,
+      targetService: expectedService,
     });
   } catch {
     return {
@@ -259,7 +358,10 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
   if (
     replacement.status !== "READY" ||
     replacement.admission !== "HELD" ||
-    replacement.observedReleaseRevision !== input.targetReleaseRevision
+    replacement.observedSourceService === null ||
+    canonicalJsonV1(replacement.observedSourceService) !== canonicalJsonV1(expectedSourceService) ||
+    replacement.observedService === null ||
+    canonicalJsonV1(replacement.observedService) !== canonicalJsonV1(expectedService)
   ) {
     return {
       status: "HOLD_RETAINED",
@@ -311,7 +413,11 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
   }
   if (!pointerMatches(observed, input.target)) {
     if (pointerMatches(observed, input.previous)) {
-      return releaseBeforeMutation(input.ports, acquired.lease, "TRACK_B_B3_2_POINTER_NOT_MUTATED");
+      return {
+        status: "HOLD_RETAINED",
+        sideEffects: "CONTROL_PLANE_ONLY",
+        reasonCodes: ["TRACK_B_B3_2_POINTER_NOT_MUTATED_AFTER_REPLACEMENT"],
+      };
     }
     return {
       status: "HOLD_RETAINED",

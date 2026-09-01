@@ -3,7 +3,11 @@ import { canonicalJsonV1 } from "@lana/contracts";
 import {
   deriveGateECandidateContentFingerprint,
   GATE_E_CANDIDATE_SOURCE_PATHS_V1,
+  verifyGateERegistrationProvenance,
+  verifyStoredGateEEvidenceCertification,
+  type GateEEvidenceReaderV2,
   type GateECandidateSourceReader,
+  type GateEGitEvidenceReader,
 } from "./gate-e-registration.js";
 import {
   DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
@@ -14,6 +18,8 @@ import { TRACK_B_GATE_E_V22_BINDING } from "./df13-gate-e-binding.js";
 
 export const TRACK_B_GATE_E_V22_MANIFEST_PATH =
   "evaluation/gate-e/track-b-v22/manifest.json" as const;
+export const TRACK_B_GATE_E_V22_REGISTRATION_PATH =
+  "evaluation/gate-e/track-b-v22/registration.json" as const;
 export const TRACK_B_TRUSTED_RELEASE_REF = "refs/remotes/origin/main" as const;
 export const TRACK_B_REQUIRED_MIGRATION_ARTIFACTS = Object.freeze([
   Object.freeze({
@@ -22,7 +28,7 @@ export const TRACK_B_REQUIRED_MIGRATION_ARTIFACTS = Object.freeze([
   }),
   Object.freeze({
     path: "packages/database/pending-migrations/0037_track_b_commerce_authority_replacement.down.sql",
-    contentSha256: "6b01671bca2a9dcb570ec8cf3efff065991e0457539cd834f0d7cd1a0acc23d5",
+    contentSha256: "c5b2ea232bf586aeaf1e034c017dbf1d002fda904c4c4e3ebd9daace4ae73ce3",
   }),
 ] as const);
 
@@ -30,7 +36,28 @@ const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const OBJECT_PATTERN = /^[a-f0-9]{40,64}$/u;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 
-export interface TrackBReleaseCandidateSourceReader extends GateECandidateSourceReader {
+const TRACK_B_GATE_E_V22_MANIFEST_FIELDS = Object.freeze({
+  candidateSourceRevision: TRACK_B_GATE_E_V22_BINDING.candidateSourceRevision,
+  candidateContentFingerprint: TRACK_B_GATE_E_V22_BINDING.candidateContentFingerprint,
+  manifestHash: TRACK_B_GATE_E_V22_BINDING.manifestHash,
+  modelId: "gemini-3.5-flash-lite",
+  providerModelVersion: "gemini-3.5-flash-lite",
+  providerObservationHash: "a9b8d35f07802754fd228d7dd0fb262bbf689467618fe05d43bd34cc9a70f091",
+  corpusHash: "e70ce49dbd5a5afae19603342dfd10352bc6b965eebf4f77fe6d4fe1b0c9c4dd",
+  rubricHash: "89a830334787c33a8790e6c4a73355e9210f8e449037fc993e30ce6470834986",
+  planArtifactHash: "45c8e53bf0c260d23f6a62f7ec630794042360e911324874a16afbf469edcea3",
+  interpreterPolicyHash: "50575db31121ec72839cda10a2bd1bf50f1e0aa86c77c587af6e05e7267c72e3",
+  firstRequestEnvelopeHash: "5758574b2dfdf1b8b88db65ecee858780fb5ceeb50d7f997cd1c1418a720a9af",
+});
+
+type ManifestFieldComparison = Readonly<{
+  field: keyof typeof TRACK_B_GATE_E_V22_MANIFEST_FIELDS;
+  expected: string;
+  observed: string | null;
+  matches: boolean;
+}>;
+
+export interface TrackBReleaseCandidateSourceReader extends GateECandidateSourceReader, GateEGitEvidenceReader {
   refreshTrustedRef(): Promise<void>;
   resolveRef(ref: typeof TRACK_B_TRUSTED_RELEASE_REF): Promise<string>;
   resolveTreeOid(commit: string): Promise<string>;
@@ -53,6 +80,16 @@ export type TrackBReleaseCandidateEvidence = Readonly<{
     blobOid: string | null;
     contentSha256: string | null;
   }>;
+  manifestFieldComparisons: readonly ManifestFieldComparison[];
+  gateECertification: Readonly<{
+    status: "VERIFIED_DURABLE";
+    populationAnchorHash: string;
+    evidenceBodyHash: string;
+    finalizationHash: string;
+    bodyAdmittedAt: string;
+    finalizationAdmittedAt: string;
+  }> | null;
+  registrationProvenance: Awaited<ReturnType<typeof verifyGateERegistrationProvenance>> | null;
   candidateProjection: Awaited<ReturnType<typeof deriveGateECandidateContentFingerprint>> | null;
   candidateContentFingerprint: string | null;
   migration: Readonly<{
@@ -119,6 +156,9 @@ function baseEvidence(activationReleaseRevision: string): Omit<
       blobOid: null,
       contentSha256: null,
     },
+    manifestFieldComparisons: [],
+    gateECertification: null,
+    registrationProvenance: null,
     candidateProjection: null,
     candidateContentFingerprint: null,
     migration: {
@@ -169,6 +209,39 @@ export function validateTrackBReleaseCandidateEvidence(
       evidence.manifestArtifact.contentSha256 !== TRACK_B_GATE_E_V22_BINDING.manifestContentSha256 ||
       evidence.candidateContentFingerprint !== TRACK_B_GATE_E_V22_BINDING.candidateContentFingerprint
     ) reasonCodes.push("TRACK_B_RELEASE_CANDIDATE_IDENTITY_INVALID");
+    if (
+      evidence.manifestFieldComparisons.length !== Object.keys(TRACK_B_GATE_E_V22_MANIFEST_FIELDS).length ||
+      new Set(evidence.manifestFieldComparisons.map(({ field }) => field)).size !==
+        Object.keys(TRACK_B_GATE_E_V22_MANIFEST_FIELDS).length ||
+      evidence.manifestFieldComparisons.some((comparison) =>
+        TRACK_B_GATE_E_V22_MANIFEST_FIELDS[comparison.field] !== comparison.expected ||
+        comparison.observed !== comparison.expected ||
+        comparison.matches !== true
+      )
+    ) reasonCodes.push("TRACK_B_RELEASE_MANIFEST_FIELDS_INVALID");
+    if (
+      evidence.gateECertification === null ||
+      evidence.gateECertification.status !== "VERIFIED_DURABLE" ||
+      evidence.gateECertification.populationAnchorHash !== TRACK_B_GATE_E_V22_BINDING.populationAnchorHash ||
+      evidence.gateECertification.evidenceBodyHash !== TRACK_B_GATE_E_V22_BINDING.evidenceBodyHash ||
+      evidence.gateECertification.finalizationHash !== TRACK_B_GATE_E_V22_BINDING.finalizationHash ||
+      !Number.isFinite(Date.parse(evidence.gateECertification.bodyAdmittedAt)) ||
+      !Number.isFinite(Date.parse(evidence.gateECertification.finalizationAdmittedAt)) ||
+      Date.parse(evidence.gateECertification.bodyAdmittedAt) >
+        Date.parse(evidence.gateECertification.finalizationAdmittedAt)
+    ) reasonCodes.push("TRACK_B_RELEASE_GATE_E_CERTIFICATION_INVALID");
+    if (
+      evidence.registrationProvenance === null ||
+      evidence.registrationProvenance.disposition !== "REGISTRATION_PROVENANCE_VERIFIED" ||
+      evidence.registrationProvenance.manifestHash !== TRACK_B_GATE_E_V22_BINDING.manifestHash ||
+      !OBJECT_PATTERN.test(evidence.registrationProvenance.registrationBlobOid) ||
+      !COMMIT_PATTERN.test(evidence.registrationProvenance.registrationCommit) ||
+      evidence.registrationProvenance.scoredRunRevision !== request.activationReleaseRevision ||
+      !Number.isFinite(Date.parse(evidence.registrationProvenance.registrationCommitTime)) ||
+      !Number.isFinite(Date.parse(evidence.registrationProvenance.scoredRunStartedAt)) ||
+      Date.parse(evidence.registrationProvenance.registrationCommitTime) >
+        Date.parse(evidence.registrationProvenance.scoredRunStartedAt)
+    ) reasonCodes.push("TRACK_B_RELEASE_REGISTRATION_PROVENANCE_INVALID");
     const projection = evidence.candidateProjection;
     if (
       projection === null ||
@@ -213,6 +286,7 @@ export function validateTrackBReleaseCandidateEvidence(
 export async function prepareTrackBReleaseCandidateEvidence(input: Readonly<{
   activationReleaseRevision: string;
   git: TrackBReleaseCandidateSourceReader;
+  evidenceStore: GateEEvidenceReaderV2;
 }>): Promise<TrackBReleaseCandidateEvidence> {
   const base = baseEvidence(input.activationReleaseRevision);
   const reasonCodes: string[] = [];
@@ -235,6 +309,7 @@ export async function prepareTrackBReleaseCandidateEvidence(input: Readonly<{
   }
   let manifestBlobOid: string | null = null;
   let manifestContentSha256: string | null = null;
+  let manifestFieldComparisons: readonly ManifestFieldComparison[] = [];
   try {
     const [text, oid] = await Promise.all([
       input.git.readBlob(input.activationReleaseRevision, TRACK_B_GATE_E_V22_MANIFEST_PATH),
@@ -242,6 +317,41 @@ export async function prepareTrackBReleaseCandidateEvidence(input: Readonly<{
     ]);
     manifestBlobOid = oid;
     manifestContentSha256 = sha256(text);
+    const parsed = JSON.parse(text) as Record<string, unknown>;
+    const { manifestHash: parsedManifestHash, ...manifestBody } = parsed;
+    if (parsedManifestHash !== sha256(canonicalJsonV1(manifestBody))) {
+      reasonCodes.push("TRACK_B_RELEASE_MANIFEST_SELF_HASH_INVALID");
+    }
+    const interpreter = parsed.interpreterRegistration as Record<string, unknown> | undefined;
+    const requests = parsed.requests as readonly Record<string, unknown>[] | undefined;
+    const requestIdentity = requests?.[0]?.requestIdentity as Record<string, unknown> | undefined;
+    const observed: Record<keyof typeof TRACK_B_GATE_E_V22_MANIFEST_FIELDS, unknown> = {
+      candidateSourceRevision: parsed.candidateSourceRevision,
+      candidateContentFingerprint: parsed.candidateContentFingerprint,
+      manifestHash: parsed.manifestHash,
+      modelId: parsed.modelId,
+      providerModelVersion: parsed.providerModelVersion,
+      providerObservationHash: parsed.providerObservationHash,
+      corpusHash: parsed.corpusHash,
+      rubricHash: parsed.rubricHash,
+      planArtifactHash: parsed.planArtifactHash,
+      interpreterPolicyHash: interpreter?.policyHash,
+      firstRequestEnvelopeHash: requestIdentity?.requestEnvelopeHash,
+    };
+    manifestFieldComparisons = Object.entries(TRACK_B_GATE_E_V22_MANIFEST_FIELDS).map(
+      ([field, expected]) => {
+        const value = observed[field as keyof typeof observed];
+        return Object.freeze({
+          field: field as keyof typeof TRACK_B_GATE_E_V22_MANIFEST_FIELDS,
+          expected,
+          observed: typeof value === "string" ? value : null,
+          matches: value === expected,
+        });
+      },
+    );
+    if (manifestFieldComparisons.some((comparison) => !comparison.matches)) {
+      reasonCodes.push("TRACK_B_RELEASE_MANIFEST_FIELDS_MISMATCH");
+    }
   } catch {
     reasonCodes.push("TRACK_B_RELEASE_MANIFEST_UNAVAILABLE");
   }
@@ -264,6 +374,37 @@ export async function prepareTrackBReleaseCandidateEvidence(input: Readonly<{
   }
   if (candidateContentFingerprint !== TRACK_B_GATE_E_V22_BINDING.candidateContentFingerprint) {
     reasonCodes.push("TRACK_B_RELEASE_CANDIDATE_FINGERPRINT_MISMATCH");
+  }
+  let gateECertification: TrackBReleaseCandidateEvidence["gateECertification"] = null;
+  let registrationProvenance: TrackBReleaseCandidateEvidence["registrationProvenance"] = null;
+  try {
+    const scoredRunStartedAt = await input.git.commitTime(input.activationReleaseRevision);
+    registrationProvenance = await verifyGateERegistrationProvenance({
+      registrationPath: TRACK_B_GATE_E_V22_REGISTRATION_PATH,
+      scoredRunRevision: input.activationReleaseRevision,
+      scoredRunStartedAt,
+      git: input.git,
+    });
+  } catch {
+    reasonCodes.push("TRACK_B_RELEASE_REGISTRATION_REDERIVATION_UNAVAILABLE");
+  }
+  try {
+    const certification = await verifyStoredGateEEvidenceCertification({
+      populationAnchorHash: TRACK_B_GATE_E_V22_BINDING.populationAnchorHash,
+      evidenceBodyHash: TRACK_B_GATE_E_V22_BINDING.evidenceBodyHash,
+      finalizationHash: TRACK_B_GATE_E_V22_BINDING.finalizationHash,
+      evidenceStore: input.evidenceStore,
+    });
+    gateECertification = {
+      status: "VERIFIED_DURABLE",
+      populationAnchorHash: TRACK_B_GATE_E_V22_BINDING.populationAnchorHash,
+      evidenceBodyHash: certification.evidenceBodyHash,
+      finalizationHash: certification.finalizationHash,
+      bodyAdmittedAt: certification.bodyAdmittedAt,
+      finalizationAdmittedAt: certification.finalizationAdmittedAt,
+    };
+  } catch {
+    reasonCodes.push("TRACK_B_RELEASE_GATE_E_CERTIFICATION_UNAVAILABLE");
   }
   const migrationArtifacts: Array<TrackBReleaseCandidateEvidence["migration"]["artifacts"][number]> = [];
   for (const expected of TRACK_B_REQUIRED_MIGRATION_ARTIFACTS) {
@@ -303,6 +444,9 @@ export async function prepareTrackBReleaseCandidateEvidence(input: Readonly<{
       blobOid: manifestBlobOid,
       contentSha256: manifestContentSha256,
     },
+    manifestFieldComparisons,
+    gateECertification,
+    registrationProvenance,
     candidateProjection,
     candidateContentFingerprint,
     migration: {

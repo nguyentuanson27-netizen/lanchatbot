@@ -33,11 +33,18 @@ describe("0037 Track B Commerce authority replacement guard", () => {
     expect(sql).not.toMatch(/DELETE\s+FROM|TRUNCATE/iu);
   });
 
-  it("restores the exact legacy-only 0036 guard without deleting durable evidence", async () => {
+  it("restores 0036 only after exact V1 readback and zero live fence", async () => {
     const sql = await readFile(down, "utf8");
 
     expect(sql).toContain("pre_version.sales_authority_mode <> 'LEGACY'");
     expect(sql).toContain("pre_version.authority_bundle_hash IS NOT NULL");
+    expect(sql).toContain("c88f3d7a-3c14-49ff-ab07-bcfbf664c643");
+    expect(sql).toContain(v1);
+    expect(sql).toContain("active_version.sales_authority_mode <> 'COMMERCE'");
+    expect(sql).toContain("active_version.state_read_mode <> 'LEGACY'");
+    expect(sql).toContain("released_at IS NULL");
+    expect(sql).toContain("0037 down requires the exact Track B V1 authority to be restored");
+    expect(sql).toContain("0037 down requires no live Track B cutover fence");
     expect(sql).not.toContain(v2);
     expect(sql).not.toContain("DROP TABLE");
     expect(sql).not.toMatch(/DELETE\s+FROM|TRUNCATE/iu);

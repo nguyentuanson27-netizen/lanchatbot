@@ -1,6 +1,41 @@
 -- Roll back only the 0037 guard semantics. Durable fence evidence and all
 -- behavior versions/pointers remain untouched.
 
+DO $$
+DECLARE
+  active_version runtime_behavior_mode_versions%ROWTYPE;
+  active_revision bigint;
+BEGIN
+  SELECT version, pointer.pointer_revision
+    INTO active_version, active_revision
+    FROM runtime_behavior_mode_pointers AS pointer
+    JOIN runtime_behavior_mode_versions AS version
+      ON version.mode_version_id = pointer.active_version_id
+   WHERE pointer.page_id = '1198992073286645'
+     AND pointer.channel = 'MESSENGER'
+   FOR UPDATE OF pointer;
+  IF active_version.mode_version_id IS NULL
+     OR active_version.mode_version_id <> 'c88f3d7a-3c14-49ff-ab07-bcfbf664c643'::uuid
+     OR active_revision < 6
+     OR active_version.page_id <> '1198992073286645'
+     OR active_version.channel <> 'MESSENGER'
+     OR active_version.sales_authority_mode <> 'COMMERCE'
+     OR active_version.state_read_mode <> 'LEGACY'
+     OR active_version.authority_bundle_hash <>
+       'e423f3f647dce25cd74501555b73fc69cf66e4138fbfdda6b7e9c471fe89a05c' THEN
+    RAISE EXCEPTION '0037 down requires the exact Track B V1 authority to be restored';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM df13_commerce_cutover_fences
+     WHERE page_id = '1198992073286645'
+       AND channel = 'MESSENGER'
+       AND released_at IS NULL
+  ) THEN
+    RAISE EXCEPTION '0037 down requires no live Track B cutover fence';
+  END IF;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION guard_df13_commerce_cutover_fence_insert_identity()
 RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE

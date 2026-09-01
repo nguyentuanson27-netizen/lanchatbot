@@ -13,6 +13,7 @@ export const GATE_E_PREPROD_V15_BINDING = Object.freeze({
 
 /** Immutable Track B v22 evidence accepted for the B3 operational path. */
 export const TRACK_B_GATE_E_V22_BINDING = Object.freeze({
+  populationAnchorHash: "32e54c647b05f0044cfd7ffaf8593a514119de41a6e4ec377f3c8b6800fd6696",
   manifestHash: "3cb70725d079ae36ccec59e2ff886f1e08fed77bd4b3d49a0dddaf380ddae432",
   evidenceBodyHash: "639c0eec9f929c1458148fdc3ef60c49ee88ea22205ec240def85e9a377eced1",
   finalizationHash: "9af67aec9b2ed8569a010c1a93efcc2a5ed491c83f675e9eb8c7db1cc8517064",
