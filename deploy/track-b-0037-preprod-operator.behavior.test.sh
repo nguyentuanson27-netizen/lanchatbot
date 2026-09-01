@@ -11,7 +11,8 @@ cleanup() {
 }
 trap cleanup EXIT HUP INT TERM
 
-export T37_EVIDENCE_DIR_OVERRIDE="$test_root/evidence"
+export TRACK_B_0037_OPERATOR_TEST_MODE=YES
+export TRACK_B_0037_TEST_EVIDENCE_DIR="$test_root/evidence"
 # shellcheck source=track-b-0037-preprod-operator.sh
 source "$script_dir/track-b-0037-preprod-operator.sh"
 mkdir -p "$T37_EVIDENCE_DIR"
@@ -41,6 +42,7 @@ printf '%s\n' \
   'REHEARSAL=UP_DOWN_UP_PASS' > "$T37_MARKER"
 t37_verify_marker
 printf '%s\n' 'POINTER=DRIFT' > "$T37_PREFLIGHT"
+sed -i "s/^PREFLIGHT_SHA256=.*/PREFLIGHT_SHA256=$(sha256sum "$T37_PREFLIGHT" | awk '{print $1}')/" "$T37_MARKER"
 if (t37_verify_marker) >/dev/null 2>&1; then
   printf '%s\n' 'recorded unauthorized preflight was accepted' >&2
   exit 1
@@ -65,20 +67,22 @@ grep -Fx "BACKUP_SHA256=$(awk '{print $1}' "$T37_BACKUP_SHA")" "$T37_ROLLBACK" >
 
 TEST_LEDGER_STATE=1
 t37_apply_down_named() { return 1; }
-if t37_recover_failed_apply >/dev/null 2>&1; then
-  printf '%s\n' 'rollback-command failure was reported as verified' >&2
-  exit 1
-fi
+t37_recover_failed_apply
 grep -Fx 'RECOVERY=BLOCKED_MANUAL_RESTORE_REQUIRED' "$T37_ROLLBACK" >/dev/null
 grep -Fx 'OBSERVED_LEDGER_0037=1' "$T37_ROLLBACK" >/dev/null
 
 t37_apply_down_named() { return 0; }
 t37_preflight_matches() { return 1; }
+t37_recover_failed_apply
+grep -Fx 'RECOVERY=BLOCKED_MANUAL_RESTORE_REQUIRED' "$T37_ROLLBACK" >/dev/null
+
+TEST_LEDGER_STATE=0
+t37_preflight_matches() { return 0; }
+t37_write_recovery() { return 9; }
 if t37_recover_failed_apply >/dev/null 2>&1; then
-  printf '%s\n' 'rollback-readback failure was reported as verified' >&2
+  printf '%s\n' 'recovery-record write failure was swallowed' >&2
   exit 1
 fi
-grep -Fx 'RECOVERY=BLOCKED_MANUAL_RESTORE_REQUIRED' "$T37_ROLLBACK" >/dev/null
 
 if (
   t37_source_identity() { return 0; }

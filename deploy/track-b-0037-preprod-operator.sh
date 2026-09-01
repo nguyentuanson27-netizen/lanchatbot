@@ -24,7 +24,13 @@ readonly T37_FUNCTION_ACL_SHA256="66b943803363c3d050ae05ca25543b097d69543233760f
 readonly T37_PRE_CATALOG_SHA256="ffd731178c5c4231531de973ddf7fb51402f6d2af2eaf98e0e0f3cdd5e77aa6d"
 readonly T37_CATALOG_QUERY="$SOURCE_ROOT/deploy/track-b-0037-catalog-canonical.sql"
 readonly T37_REALTIME_IMAGE_ID="sha256:ea0b076cfded1b8e10d817c43ba984066c97b2b18bcdff878fa91ed809c42c16"
-readonly T37_EVIDENCE_DIR="${T37_EVIDENCE_DIR_OVERRIDE:-$APP_ROOT/backups/20260901-track-b-0037-preprod}"
+if test "${BASH_SOURCE[0]}" != "$0" && test "${TRACK_B_0037_OPERATOR_TEST_MODE:-}" = 'YES'; then
+  : "${TRACK_B_0037_TEST_EVIDENCE_DIR:?test evidence directory is required}"
+  T37_EVIDENCE_DIR="$TRACK_B_0037_TEST_EVIDENCE_DIR"
+else
+  T37_EVIDENCE_DIR="$APP_ROOT/backups/20260901-track-b-0037-preprod"
+fi
+readonly T37_EVIDENCE_DIR
 readonly T37_BACKUP="$T37_EVIDENCE_DIR/lana_chatbot_pre_0037.dump"
 readonly T37_BACKUP_SHA="$T37_BACKUP.sha256"
 readonly T37_PREFLIGHT="$T37_EVIDENCE_DIR/target-preflight.txt"
@@ -32,6 +38,7 @@ readonly T37_MARKER="$T37_EVIDENCE_DIR/rehearsal.ok"
 readonly T37_ROLLBACK="$T37_EVIDENCE_DIR/rollback-status.txt"
 
 require_common_tools
+require_command sed
 
 t37_source_identity() {
   : "${SOURCE_REVISION:?SOURCE_REVISION is required}"
@@ -303,20 +310,22 @@ t37_recovery_observed() {
 
 t37_write_recovery() {
   local disposition="$1"
-  {
+  if ! {
     printf '%s\n' "RECOVERY=$disposition" "BACKUP_FILE=$T37_BACKUP" \
       "BACKUP_SHA256=$(awk '{print $1}' "$T37_BACKUP_SHA" 2>/dev/null || printf UNAVAILABLE)"
     t37_recovery_observed
-  } > "$T37_ROLLBACK"
-  chmod 600 "$T37_ROLLBACK"
+  } > "$T37_ROLLBACK"; then
+    return 1
+  fi
+  chmod 600 "$T37_ROLLBACK" || return 1
 }
 
 t37_recover_failed_apply() {
   local ledger pointer live_fences
   ledger="$(database_query "SELECT count(*) FROM schema_migrations WHERE migration_name='$T37_MIGRATION' AND checksum_sha256='$T37_UP_SHA256'" 2>/dev/null || printf UNAVAILABLE)"
   if test "$ledger" = "0" && t37_preflight_matches; then
-    t37_write_recovery 'VERIFIED_TRANSACTION_NOT_COMMITTED'
-    return 0
+    if t37_write_recovery 'VERIFIED_TRANSACTION_NOT_COMMITTED'; then return 0; fi
+    return 1
   fi
   pointer="$(t37_pointer 2>/dev/null || printf UNAVAILABLE)"
   live_fences="$(database_query "SELECT count(*) FROM df13_commerce_cutover_fences WHERE released_at IS NULL" 2>/dev/null || printf UNAVAILABLE)"
@@ -324,11 +333,11 @@ t37_recover_failed_apply() {
      test "$pointer" = "$T37_POINTER_REVISION|$T37_V1_VERSION|COMMERCE|LEGACY|$T37_V1_BUNDLE|$T37_V1_CONTENT" &&
      test "$live_fences" = "0"; then
     if t37_apply_down_named "$EXPECTED_DATABASE" && t37_preflight_matches; then
-      t37_write_recovery 'VERIFIED_PRE_0037'
-      return 0
+      if t37_write_recovery 'VERIFIED_PRE_0037'; then return 0; fi
+      return 1
     fi
   fi
-  t37_write_recovery 'BLOCKED_MANUAL_RESTORE_REQUIRED'
+  if t37_write_recovery 'BLOCKED_MANUAL_RESTORE_REQUIRED'; then return 0; fi
   return 1
 }
 
@@ -343,7 +352,9 @@ t37_apply_live() {
     local status=$?
     trap - EXIT HUP INT TERM
     if test "$status" -ne 0 && test "$may_have_committed" = "1"; then
-      t37_recover_failed_apply || true
+      if ! t37_recover_failed_apply; then
+        printf '%s\n' 'TRACK_B_0037_RECOVERY_EVIDENCE_WRITE_FAILED' >&2
+      fi
     fi
     exit "$status"
   }

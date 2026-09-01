@@ -27,6 +27,9 @@ requireText(/BLOCKED_MANUAL_RESTORE_REQUIRED/u, "blocked manual-restore recovery
 requireText(/VERIFIED_TRANSACTION_NOT_COMMITTED/u, "definitely uncommitted recovery is not distinguished");
 requireText(/T37_PRE_CATALOG_SHA256="[a-f0-9]{64}"[\s\S]*POST_CATALOG_SHA256/u, "canonical pre/post catalog identity is not bound");
 requireText(/REALTIME_IMAGE_ID/u, "immutable realtime image identity is not pinned");
+requireText(/BASH_SOURCE\[0\][\s\S]*TRACK_B_0037_OPERATOR_TEST_MODE/u, "test evidence seam is not source-only");
+if (/T37_EVIDENCE_DIR_OVERRIDE/u.test(source)) throw new Error("executable evidence directory override remains reachable");
+requireText(/TRACK_B_0037_RECOVERY_EVIDENCE_WRITE_FAILED/u, "recovery evidence write failure is not surfaced");
 requireText(/SOURCE_REVISION[\s\S]*refs\/remotes\/origin\/main[\s\S]*status --porcelain/u, "exact clean source identity is missing");
 if (/DATABASE_URL\s*=|postgres(?:ql)?:\/\/|BEGIN (?:RSA|OPENSSH) PRIVATE KEY/iu.test(source)) {
   throw new Error("0037 operator contains credential-shaped material");
