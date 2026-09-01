@@ -24,7 +24,7 @@ import {
 } from "./vertex.js";
 import type { BusinessFactsReader } from "./redis-business-facts.js";
 import type { RealtimeGenerationQuota } from "./realtime-quota.js";
-import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE } from "./df13-commerce-authority-bundle.js";
 import { DF13_COMMERCE_AUTHORITY_CONSUMERS_V1 } from "./df13-commerce-authority-bundle.js";
 import { Df13CommerceRuntimeFinalizationAdapter } from "./df13-commerce-runtime-finalization.js";
 import { createRealtimeSalesState } from "./realtime-sales-cycle.js";
@@ -325,7 +325,7 @@ function sizeProfile(): CustomerProfileV1 {
 }
 
 function commerceResolution(): RuntimeBehaviorModeResolution {
-  const authorityBundleHash = DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
+  const authorityBundleHash = DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash;
   return {
     confirmationMode: "LEGACY",
     salesAuthorityMode: "COMMERCE",
@@ -1292,9 +1292,9 @@ describe("BF-01 runner reconciliation", () => {
           confirmationMode: "LEGACY",
           salesAuthorityMode: "COMMERCE",
           stateReadMode: "LEGACY",
-          authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+          authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
         }),
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
         factFixtureHash: sha256(canonicalJsonV1({
           product,
           observedAt: occurredAt,

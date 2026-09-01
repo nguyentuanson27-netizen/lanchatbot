@@ -3,7 +3,7 @@ import {
   behaviorModeContentHash,
   type RuntimeBehaviorModeResolution,
 } from "@lana/chat-runtime";
-import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE } from "./df13-commerce-authority-bundle.js";
 import { selectDf13RuntimeAuthority } from "./df13-runtime-authority-boundary.js";
 
 function resolution(overrides: Partial<RuntimeBehaviorModeResolution> = {}): RuntimeBehaviorModeResolution {
@@ -43,7 +43,7 @@ describe("DF13 single runtime authority boundary", () => {
       confirmationMode: "LEGACY",
       salesAuthorityMode: "COMMERCE",
       stateReadMode: "LEGACY",
-      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
     });
     expect(selectDf13RuntimeAuthority({
       pageId: "1198992073286645",
@@ -51,7 +51,7 @@ describe("DF13 single runtime authority boundary", () => {
       resolution: resolution({
       salesAuthorityMode: "COMMERCE",
       stateReadMode: "LEGACY",
-      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
       authorityProvenance: "COMMERCE_POINTER",
       contentHash,
       }),
@@ -61,7 +61,7 @@ describe("DF13 single runtime authority boundary", () => {
         modeVersionId: "10000000-0000-4000-8000-000000000001",
         contentHash,
         pointerRevision: 8,
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
         source: "DATABASE",
       },
     });
@@ -101,7 +101,7 @@ describe("DF13 single runtime authority boundary", () => {
       channel: "MESSENGER",
       resolution: resolution({
         salesAuthorityMode: "COMMERCE",
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
         authorityProvenance: "COMMERCE_POINTER",
         contentHash: `sha256:${"c".repeat(64)}`,
       }),
@@ -115,7 +115,7 @@ describe("DF13 single runtime authority boundary", () => {
       channel: "MESSENGER",
       resolution: resolution({
         salesAuthorityMode: "COMMERCE",
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
         authorityProvenance: "COMMERCE_POINTER",
         source: "CACHE",
       }),
@@ -129,7 +129,7 @@ describe("DF13 single runtime authority boundary", () => {
       channel: "MESSENGER",
       resolution: resolution({
         salesAuthorityMode: "COMMERCE",
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
         authorityProvenance: "COMMERCE_POINTER",
       }),
     })).toEqual({
@@ -142,7 +142,7 @@ describe("DF13 single runtime authority boundary", () => {
       channel: "MESSENGER",
       resolution: resolution({
         salesAuthorityMode: "COMMERCE",
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
         authorityProvenance: "COMMERCE_POINTER",
         pointerRevision: null,
       }),

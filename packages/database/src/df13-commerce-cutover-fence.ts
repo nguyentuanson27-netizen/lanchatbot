@@ -1,5 +1,9 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
+import {
+  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
+  DF13_COMMERCE_AUTHORITY_BUNDLE_V2,
+} from "./df13-commerce-authority-bundle.js";
 
 const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const CONTENT_HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
@@ -229,20 +233,36 @@ async function canonicalIdentityMatches(
   const byId = new Map(versionsResult.rows.map((row) => [row.mode_version_id.toLowerCase(), row]));
   const preCutover = byId.get(request.preCutover.modeVersionId);
   const target = byId.get(request.target.modeVersionId);
-  return preCutover !== undefined && target !== undefined &&
-    preCutover.page_id === request.pageId &&
-    preCutover.channel === request.channel &&
+  if (preCutover === undefined || target === undefined) return false;
+  if (
+    preCutover.page_id !== request.pageId ||
+    preCutover.channel !== request.channel ||
+    preCutover.state_read_mode !== "LEGACY" ||
+    preCutover.content_hash !== request.preCutover.contentHash ||
+    target.page_id !== request.pageId ||
+    target.channel !== request.channel ||
+    target.confirmation_mode !== preCutover.confirmation_mode ||
+    target.sales_authority_mode !== "COMMERCE" ||
+    target.state_read_mode !== "LEGACY" ||
+    target.content_hash !== request.target.contentHash ||
+    target.authority_bundle_hash !== request.target.authorityBundleHash
+  ) return false;
+  const firstCommerceCutover =
     preCutover.sales_authority_mode === "LEGACY" &&
-    preCutover.state_read_mode === "LEGACY" &&
     preCutover.authority_bundle_hash === null &&
-    preCutover.content_hash === request.preCutover.contentHash &&
-    target.page_id === request.pageId &&
-    target.channel === request.channel &&
-    target.confirmation_mode === preCutover.confirmation_mode &&
-    target.sales_authority_mode === "COMMERCE" &&
-    target.state_read_mode === "LEGACY" &&
-    target.content_hash === request.target.contentHash &&
-    target.authority_bundle_hash === request.target.authorityBundleHash;
+    target.authority_bundle_hash === DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
+  const trackBScope = request.pageId === "1198992073286645" && request.channel === "MESSENGER";
+  const trackBReplacement =
+    trackBScope &&
+    preCutover.sales_authority_mode === "COMMERCE" &&
+    preCutover.authority_bundle_hash === DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash &&
+    target.authority_bundle_hash === DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash;
+  const trackBRollback =
+    trackBScope &&
+    preCutover.sales_authority_mode === "COMMERCE" &&
+    preCutover.authority_bundle_hash === DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash &&
+    target.authority_bundle_hash === DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
+  return firstCommerceCutover || trackBReplacement || trackBRollback;
 }
 
 async function rollbackQuietly(client: PoolClient): Promise<void> {

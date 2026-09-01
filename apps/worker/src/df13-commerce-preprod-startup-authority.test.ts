@@ -3,7 +3,10 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it, vi } from "vitest";
-import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
+import {
+  DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE,
+  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
+} from "./df13-commerce-authority-bundle.js";
 import {
   createDf13CommercePreprodStartupAuthority,
   parseDf13CommercePreprodStartupInput,
@@ -13,8 +16,13 @@ import {
   type Df13ReleaseCandidateSourceReader,
 } from "./df13-release-candidate-evidence.js";
 import { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
+import type { TrackBReleaseCandidateEvidence } from "./track-b-release-candidate-evidence.js";
 
 const validateReleaseEvidence = vi.hoisted(() => vi.fn(() => ({
+  status: "MATCHED" as const,
+  reasonCodes: [] as const,
+})));
+const validateTrackBReleaseEvidence = vi.hoisted(() => vi.fn(() => ({
   status: "MATCHED" as const,
   reasonCodes: [] as const,
 })));
@@ -28,6 +36,15 @@ vi.mock("./df13-release-candidate-evidence.js", async (importOriginal) => {
   return {
     ...actual,
     validateDf13ReleaseCandidateEvidence: validateReleaseEvidence,
+  };
+});
+vi.mock("./track-b-release-candidate-evidence.js", async (importOriginal) => {
+  const actual = await importOriginal<
+    typeof import("./track-b-release-candidate-evidence.js")
+  >();
+  return {
+    ...actual,
+    validateTrackBReleaseCandidateEvidence: validateTrackBReleaseEvidence,
   };
 });
 
@@ -81,6 +98,35 @@ const identity = {
   authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
   source: "DATABASE" as const,
 };
+
+const trackBIdentity = {
+  ...identity,
+  authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
+};
+
+const trackBEvidence = {
+  schemaVersion: 1,
+  contractVersion: "TRACK_B_RELEASE_CANDIDATE_EVIDENCE_V1",
+  status: "SOURCE_READY_NO_ACTIVATION",
+  sideEffects: "NOT_EXECUTED",
+  activationReleaseRevision: revision,
+  releaseSource: {
+    trustedRef: "refs/remotes/origin/main",
+    resolvedRevision: revision,
+    treeOid: "b".repeat(40),
+  },
+  gateE: {},
+  manifestArtifact: {},
+  candidateContentFingerprint: "c".repeat(64),
+  authorityMutation: {
+    previousBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+    targetBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
+    consumers: [],
+    authorityIndependentBypassClasses: [],
+  },
+  reasonCodes: [],
+  evidenceHash: "d".repeat(64),
+} as unknown as TrackBReleaseCandidateEvidence;
 
 describe("DF13 pre-production startup authority", () => {
   it("accepts only the closed Commerce startup-package shape", async () => {
@@ -159,6 +205,54 @@ describe("DF13 pre-production startup authority", () => {
       ...identity,
       source: "CACHE",
     })).resolves.toMatchObject({ status: "BLOCKED" });
+  });
+
+  it("admits the active Track B bundle only with matching Track B release evidence", async () => {
+    const startup = createDf13CommercePreprodStartupAuthority({
+      mode: "COMMERCE",
+      releaseEvidence: trackBEvidence,
+      expectedAuthority: trackBIdentity,
+      releaseSource: {
+        schemaVersion: 1,
+        release: "track-b-preprod-test",
+        repository: "https://github.com/nguyentuanson27-netizen/lanchatbot",
+        tag: "track-b-preprod-test",
+        commit: revision,
+        createdAt: "2026-08-31T00:00:00.000Z",
+      },
+    });
+
+    await expect(startup.authorizeExactCommerceIdentity(trackBIdentity)).resolves.toEqual({
+      status: "ADMITTED",
+    });
+    expect(validateTrackBReleaseEvidence).toHaveBeenCalledWith(trackBEvidence, {
+      activationReleaseRevision: revision,
+    });
+  });
+
+  it("rejects the active Track B bundle when paired with historical DF13 evidence", async () => {
+    const evidence = await prepareDf13ReleaseCandidateEvidence({
+      activationReleaseRevision: revision,
+      git: reader,
+    });
+    const startup = createDf13CommercePreprodStartupAuthority({
+      mode: "COMMERCE",
+      releaseEvidence: evidence,
+      expectedAuthority: trackBIdentity,
+      releaseSource: {
+        schemaVersion: 1,
+        release: "track-b-preprod-test",
+        repository: "https://github.com/nguyentuanson27-netizen/lanchatbot",
+        tag: "track-b-preprod-test",
+        commit: revision,
+        createdAt: "2026-08-31T00:00:00.000Z",
+      },
+    });
+
+    await expect(startup.authorizeExactCommerceIdentity(trackBIdentity)).resolves.toEqual({
+      status: "BLOCKED",
+      reasonCode: "DF13_COMMERCE_RELEASE_AUTHORITY_MISMATCH",
+    });
   });
 
   it("leaves source default-off without a COMMERCE startup package", async () => {

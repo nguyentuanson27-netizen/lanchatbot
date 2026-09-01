@@ -5,12 +5,19 @@ import {
   type Df13CommerceActivationAuthority,
 } from "./df13-commerce-default-off-consumer.js";
 import type { Df13CommerceFenceRequest } from "./df13-commerce-authority-fence.js";
-import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
+import {
+  DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE,
+  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
+} from "./df13-commerce-authority-bundle.js";
 import {
   validateDf13ReleaseCandidateEvidence,
   type Df13ReleaseCandidateEvidence,
 } from "./df13-release-candidate-evidence.js";
 import { DF13_COMMERCE_PREPROD_SCOPE_V1 } from "./df13-commerce-scope.js";
+import {
+  validateTrackBReleaseCandidateEvidence,
+  type TrackBReleaseCandidateEvidence,
+} from "./track-b-release-candidate-evidence.js";
 
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
@@ -29,7 +36,7 @@ export type Df13CommercePreprodStartupInput =
   | Readonly<{ mode: "LEGACY" }>
   | Readonly<{
     mode: "COMMERCE";
-    releaseEvidence: Df13ReleaseCandidateEvidence;
+    releaseEvidence: Df13ReleaseCandidateEvidence | TrackBReleaseCandidateEvidence;
     expectedAuthority: Parameters<CommerceAuthorityConsumerPort["admitCommerceAuthority"]>[0];
     releaseSource: Df13ReleaseSourcePointer;
   }>;
@@ -83,7 +90,8 @@ export function parseDf13CommercePreprodStartupInput(
   }
   return deepFreeze({
     mode: "COMMERCE" as const,
-    releaseEvidence: input.releaseEvidence as Df13ReleaseCandidateEvidence,
+    releaseEvidence: input.releaseEvidence as
+      Df13ReleaseCandidateEvidence | TrackBReleaseCandidateEvidence,
     expectedAuthority: input.expectedAuthority as Parameters<
       CommerceAuthorityConsumerPort["admitCommerceAuthority"]
     >[0],
@@ -93,7 +101,7 @@ export function parseDf13CommercePreprodStartupInput(
 
 function sourcePointerMatches(
   source: Df13ReleaseSourcePointer,
-  evidence: Df13ReleaseCandidateEvidence,
+  evidence: Df13ReleaseCandidateEvidence | TrackBReleaseCandidateEvidence,
 ): boolean {
   return source.schemaVersion === 1 &&
     source.repository === "https://github.com/nguyentuanson27-netizen/lanchatbot" &&
@@ -109,17 +117,28 @@ function startupPackageReason(
   input: Exclude<Df13CommercePreprodStartupInput, { mode: "LEGACY" }>,
 ): string | null {
   const evidence = input.releaseEvidence;
-  const validation = validateDf13ReleaseCandidateEvidence(evidence, {
-    activationReleaseRevision: evidence.activationReleaseRevision,
-    gateEManifestHash: GATE_E_PREPROD_V15_BINDING.manifestHash,
-    gateECandidateSourceRevision: GATE_E_PREPROD_V15_BINDING.candidateSourceRevision,
-  });
+  const trackB = evidence.contractVersion === "TRACK_B_RELEASE_CANDIDATE_EVIDENCE_V1";
+  const validation = trackB
+    ? validateTrackBReleaseCandidateEvidence(evidence, {
+      activationReleaseRevision: evidence.activationReleaseRevision,
+    })
+    : validateDf13ReleaseCandidateEvidence(evidence, {
+      activationReleaseRevision: evidence.activationReleaseRevision,
+      gateEManifestHash: GATE_E_PREPROD_V15_BINDING.manifestHash,
+      gateECandidateSourceRevision: GATE_E_PREPROD_V15_BINDING.candidateSourceRevision,
+    });
   if (validation.status !== "MATCHED") return "DF13_COMMERCE_RELEASE_EVIDENCE_INVALID";
   if (!sourcePointerMatches(input.releaseSource, evidence)) {
     return "DF13_COMMERCE_RELEASE_SOURCE_MISMATCH";
   }
   if (!exactIdentity(input.expectedAuthority)) {
     return "DF13_COMMERCE_EXPECTED_AUTHORITY_INVALID";
+  }
+  const expectedBundleHash = trackB
+    ? DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash
+    : DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
+  if (input.expectedAuthority.authorityBundleHash !== expectedBundleHash) {
+    return "DF13_COMMERCE_RELEASE_AUTHORITY_MISMATCH";
   }
   return null;
 }
@@ -130,7 +149,8 @@ function exactIdentity(
   return input.pageId === DF13_COMMERCE_PREPROD_SCOPE_V1.pageId &&
     input.channel === DF13_COMMERCE_PREPROD_SCOPE_V1.channel &&
     input.source === "DATABASE" &&
-    input.authorityBundleHash === DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash &&
+    (input.authorityBundleHash === DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash ||
+      input.authorityBundleHash === DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash) &&
     UUID_V4_PATTERN.test(input.modeVersionId) &&
     CONTENT_HASH_PATTERN.test(input.contentHash) &&
     Number.isSafeInteger(input.pointerRevision) && input.pointerRevision >= 1;

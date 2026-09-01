@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { RuntimeBehaviorModeResolution } from "@lana/chat-runtime";
-import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE } from "./df13-commerce-authority-bundle.js";
 import {
   DF13_AUTHORITY_INDEPENDENT_BYPASS_CLASSES_V1,
   assessDf13CommerceAuthorityFence,
@@ -19,7 +19,7 @@ function resolution(
     salesAuthorityMode: commerce ? "COMMERCE" : "LEGACY",
     stateReadMode: "LEGACY",
     authorityBundleHash: commerce
-      ? DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
+      ? DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash
       : null,
     modeVersionId: commerce
       ? "10000000-0000-4000-8000-000000000006"
@@ -74,10 +74,10 @@ describe("DF13 pure Commerce fence admission", () => {
         channel: "MESSENGER",
         workId: "batch-1",
         inboxIds: ["inbox-a", "inbox-b"],
-        consumers: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.authorityDependentConsumers,
+        consumers: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.authorityDependentConsumers,
         authority: {
           source: "DATABASE",
-          authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+          authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
         },
       },
     });

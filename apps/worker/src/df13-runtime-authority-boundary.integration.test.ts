@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { behaviorModeContentHash, type RuntimeBehaviorModeResolution } from "@lana/chat-runtime";
 import { createConversationState } from "@lana/conversation-engine";
-import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE } from "./df13-commerce-authority-bundle.js";
 import { DF13_COMMERCE_AUTHORITY_CONSUMERS_V1 } from "./df13-commerce-authority-bundle.js";
 import {
   Df13CommerceRuntimeFinalizationAdapter,
@@ -185,12 +185,12 @@ describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path
       ...commerceOriginFailSafe,
       confirmationMode: "LEGACY",
       salesAuthorityMode: "COMMERCE",
-      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
       contentHash: behaviorModeContentHash({
         confirmationMode: "LEGACY",
         salesAuthorityMode: "COMMERCE",
         stateReadMode: "LEGACY",
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
       }),
       source: "DATABASE",
       status: "RESOLVED",
@@ -216,12 +216,12 @@ describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path
       ...commerceOriginFailSafe,
       confirmationMode: "LEGACY",
       salesAuthorityMode: "COMMERCE",
-      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
       contentHash: behaviorModeContentHash({
         confirmationMode: "LEGACY",
         salesAuthorityMode: "COMMERCE",
         stateReadMode: "LEGACY",
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
       }),
       source: "DATABASE",
       status: "RESOLVED",
@@ -263,12 +263,12 @@ describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path
       ...commerceOriginFailSafe,
       confirmationMode: "LEGACY",
       salesAuthorityMode: "COMMERCE",
-      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
       contentHash: behaviorModeContentHash({
         confirmationMode: "LEGACY",
         salesAuthorityMode: "COMMERCE",
         stateReadMode: "LEGACY",
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
       }),
       source: "DATABASE",
       status: "RESOLVED",
@@ -310,12 +310,12 @@ describe("DF13 authority selection in the deployed BF01/BF02 RealtimeRunner path
       ...commerceOriginFailSafe,
       confirmationMode: "LEGACY",
       salesAuthorityMode: "COMMERCE",
-      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
       contentHash: behaviorModeContentHash({
         confirmationMode: "LEGACY",
         salesAuthorityMode: "COMMERCE",
         stateReadMode: "LEGACY",
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
       }),
       source: "DATABASE",
       status: "RESOLVED",

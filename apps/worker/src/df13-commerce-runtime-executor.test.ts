@@ -4,7 +4,7 @@ import {
   type RuntimeBehaviorModeResolution,
 } from "@lana/chat-runtime";
 import type { RealtimeCommitInput, RealtimeCommitResult } from "@lana/database";
-import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE } from "./df13-commerce-authority-bundle.js";
 import type {
   Df13CommerceActivationAuthority,
   Df13CommerceFenceBoundCommitter,
@@ -19,13 +19,13 @@ const resolution: RuntimeBehaviorModeResolution = {
   confirmationMode: "LEGACY",
   salesAuthorityMode: "COMMERCE",
   stateReadMode: "LEGACY",
-  authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+  authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
   modeVersionId: "10000000-0000-4000-8000-000000000001",
   contentHash: behaviorModeContentHash({
     confirmationMode: "LEGACY",
     salesAuthorityMode: "COMMERCE",
     stateReadMode: "LEGACY",
-    authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+    authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
   }),
   pointerRevision: 7,
   source: "DATABASE",

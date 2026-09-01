@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { RuntimeBehaviorModeResolution } from "@lana/chat-runtime";
 import {
-  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
+  DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE,
   assessDf13CommerceAuthority,
 } from "./df13-commerce-authority-contract.js";
 import {
@@ -15,7 +15,7 @@ function resolution(
     confirmationMode: "V2_ACTIVE",
     salesAuthorityMode: "COMMERCE",
     stateReadMode: "LEGACY",
-    authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+    authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash,
     modeVersionId: "10000000-0000-4000-8000-000000000001",
     contentHash: `sha256:${"a".repeat(64)}`,
     pointerRevision: 1,
@@ -32,8 +32,11 @@ function resolution(
 }
 
 describe("DF13 Commerce authority contract", () => {
-  it("uses the exact same immutable authority bundle instance as cutover", () => {
-    expect(DF13_COMMERCE_AUTHORITY_BUNDLE_V1).toBe(CUTOVER_AUTHORITY_BUNDLE_V1);
+  it("uses the truthful Track B bundle while preserving the first-cutover V1 identity", () => {
+    expect(DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractVersion)
+      .toBe("DF13_COMMERCE_AUTHORITY_BUNDLE_V2");
+    expect(DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash)
+      .not.toBe(CUTOVER_AUTHORITY_BUNDLE_V1.contractHash);
   });
 
   it("admits only a fresh, audited, exact COMMERCE identity to the future Commerce track", () => {
