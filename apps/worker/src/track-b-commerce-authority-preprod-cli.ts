@@ -26,7 +26,8 @@ import {
   validateTrackBReleaseCandidateEvidence,
   type TrackBReleaseCandidateEvidence,
 } from "./track-b-release-candidate-evidence.js";
-import { parseDf13CommercePreprodStartupInput } from "./df13-commerce-preprod-startup-authority.js";
+import { createDf13CommercePreprodStartupAuthority,
+  parseDf13CommercePreprodStartupInput } from "./df13-commerce-preprod-startup-authority.js";
 import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
 
 const DATABASE_SECRET_FILE = "/opt/lana-chatbot/shared/secrets/runtime_behavior_mode_database_url";
@@ -370,6 +371,11 @@ export async function validateTrackBPreprodStartupArtifacts(packet: TrackBPrepro
     ? packet.rollbackRecord.targetService.releaseRevision : sourceService.releaseRevision;
   if (source.releaseSource.commit !== sourceReleaseRevision) {
     throw new Error("TRACK_B_B3_2_SOURCE_STARTUP_PACKAGE_MISMATCH");
+  }
+  const sourceAdmission = await createDf13CommercePreprodStartupAuthority(source)
+    .authorizeExactCommerceIdentity(source.expectedAuthority);
+  if (sourceAdmission.status !== "ADMITTED") {
+    throw new Error("TRACK_B_B3_2_SOURCE_STARTUP_PACKAGE_NOT_ADMITTED");
   }
   if (operationTarget.mode !== "COMMERCE" || recovery.mode !== "COMMERCE" ||
       canonicalJsonV1(operationTarget.releaseEvidence) !== canonicalJsonV1(recovery.releaseEvidence)) {

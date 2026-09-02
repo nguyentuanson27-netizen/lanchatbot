@@ -12,7 +12,10 @@ import { createTrackBPreprodOperationStartupPackages, parseTrackBPreprodBuildInp
 
 vi.mock("./track-b-release-candidate-evidence.js", async (importOriginal) => ({
   ...await importOriginal<typeof import("./track-b-release-candidate-evidence.js")>(),
-  validateTrackBReleaseCandidateEvidence: vi.fn(() => ({ status: "MATCHED", reasonCodes: [] })),
+  validateTrackBReleaseCandidateEvidence: vi.fn((evidence: Record<string, unknown>) =>
+    evidence.invalid === true
+      ? { status: "MISMATCH", reasonCodes: ["TEST_INVALID_EVIDENCE"] }
+      : { status: "MATCHED", reasonCodes: [] }),
 }));
 
 function pointer(versionId: string, revision: number, authorityBundleHash: string) {
@@ -58,7 +61,9 @@ function packet() {
     operationTargetStartupPackageHash: "b".repeat(64),
     recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/recovery.json",
     recoveryStartupPackageHash: "c".repeat(64),
-    releaseEvidence: { activationReleaseRevision: "5".repeat(40) },
+    releaseEvidence: { contractVersion: "TRACK_B_RELEASE_CANDIDATE_EVIDENCE_V1",
+      activationReleaseRevision: "5".repeat(40),
+      releaseSource: { resolvedRevision: "5".repeat(40) } },
   };
   return { ...body, packetHash: createHash("sha256")
     .update(canonicalJsonV1(body), "utf8").digest("hex") };
@@ -207,6 +212,33 @@ describe("Track B PREPROD operator packet boundary", () => {
     ]);
     const reader = async (path: string) => artifacts.get(path);
     await expect(validateTrackBPreprodStartupArtifacts(bound, reader)).resolves.toBeUndefined();
+    const bindSource = (changedSource: unknown) => {
+      const changedBody = { ...body, sourceStartupPackageHash: canonicalHash(changedSource) };
+      artifacts.set(bound.sourceStartupPackageFile, changedSource);
+      return parseTrackBPreprodOperationPacket({ ...changedBody,
+        packetHash: canonicalHash(changedBody) });
+    };
+    const invalidTrackBSource = { ...source,
+      releaseEvidence: { ...(source.releaseEvidence as object), invalid: true } };
+    await expect(validateTrackBPreprodStartupArtifacts(bindSource(invalidTrackBSource), reader))
+      .rejects.toThrow("TRACK_B_B3_2_SOURCE_STARTUP_PACKAGE_NOT_ADMITTED");
+    const { authorityTransition: _transition, ...sourceWithoutTransition } = source;
+    const missingTransitionSource = { ...sourceWithoutTransition,
+      releaseEvidence: { ...(source.releaseEvidence as Record<string, unknown>),
+        activationReleaseRevision: activation.rollbackRecord.previousService.releaseRevision,
+        releaseSource: { resolvedRevision: activation.rollbackRecord.previousService.releaseRevision } },
+      releaseSource: { ...source.releaseSource,
+        commit: activation.rollbackRecord.previousService.releaseRevision } };
+    await expect(validateTrackBPreprodStartupArtifacts(bindSource(missingTransitionSource), reader))
+      .rejects.toThrow("TRACK_B_B3_2_SOURCE_STARTUP_PACKAGE_NOT_ADMITTED");
+    const wrongTransitionSource = { ...source, authorityTransition: "UNREVIEWED_TRANSITION" };
+    await expect(validateTrackBPreprodStartupArtifacts(bindSource(wrongTransitionSource), reader))
+      .rejects.toThrow("DF13_COMMERCE_STARTUP_INPUT_INVALID");
+    const invalidHistoricalSource = { ...sourceWithoutTransition,
+      releaseEvidence: { contractVersion: "DF13_RELEASE_CANDIDATE_EVIDENCE_V1" } };
+    await expect(validateTrackBPreprodStartupArtifacts(bindSource(invalidHistoricalSource), reader))
+      .rejects.toThrow();
+    artifacts.set(bound.sourceStartupPackageFile, source);
     for (const path of artifacts.keys()) {
       const original = artifacts.get(path);
       artifacts.set(path, { ...(original as object), drift: true });
