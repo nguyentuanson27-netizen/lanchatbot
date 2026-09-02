@@ -34,6 +34,7 @@ const COMMIT = /^[a-f0-9]{40}$/u;
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const COMPOSE_FILE = "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml";
 const PROJECT_DIRECTORY = "/opt/lana-chatbot/current/deploy";
+const COMPOSE_ENV_FILE = "/opt/lana-chatbot/shared/.env.infrastructure";
 const REPOSITORY_ROOT = "/opt/lana-chatbot/repository";
 const DOCKERFILE = "/opt/lana-chatbot/repository/deploy/Dockerfile";
 const STARTUP_ROOT = "/opt/lana-chatbot/releases/track-b";
@@ -356,6 +357,24 @@ export class DockerComposeTrackBPreprodServiceController {
     return identityFromInspect(value, expected, this.#labelPolicy);
   }
 
+  #composeEnvironment(expected: TrackBServiceReleaseIdentity, mode: "COMMERCE"):
+    Record<string, string> {
+    return {
+      REALTIME_IMAGE: this.#imageReference,
+      ...(this.#labelPolicy === "EXACT_ALL"
+        ? { REALTIME_RELEASE_ID: expected.releaseRevision }
+        : {}),
+      DF13_COMMERCE_PREPROD_STARTUP_MODE: mode,
+      DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE: this.#startupPackageFile,
+    };
+  }
+
+  #composeArgs(...tail: readonly string[]): readonly string[] {
+    return ["compose", "--env-file", COMPOSE_ENV_FILE,
+      "--project-directory", this.#projectDirectory,
+      "-f", this.#composeFile, ...tail];
+  }
+
   async #inspectContainer(expected: TrackBServiceReleaseIdentity, verifyRuntime: boolean,
     container = CONTAINER): Promise<Readonly<{
     identity: TrackBServiceReleaseIdentity;
@@ -425,6 +444,8 @@ export class DockerComposeTrackBPreprodServiceController {
     if (!validService(target) || this.#expectedImageId !== target.imageId) return null;
     const image = await this.#inspectImage(target);
     if (!image) return null;
+    await this.#run("docker", this.#composeArgs("config", "--quiet"),
+      this.#composeEnvironment(target, "COMMERCE"));
     const existing = await this.#stagedContainerId();
     if (existing !== "") return await this.#inspectStaged(target) ?? "AMBIGUOUS";
     try {
@@ -462,15 +483,8 @@ export class DockerComposeTrackBPreprodServiceController {
     if (!await this.#inspectStaged(expected)) return null;
     await this.#run("docker", ["rm", STAGED_CONTAINER], {});
     if (await this.#stagedContainerId() !== "") return null;
-    const environment = {
-      REALTIME_IMAGE: this.#imageReference,
-      REALTIME_RELEASE_ID: expected.releaseRevision,
-      DF13_COMMERCE_PREPROD_STARTUP_MODE: mode,
-      DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE: this.#startupPackageFile,
-    };
-    await this.#run("docker", ["compose", "--project-directory", this.#projectDirectory,
-      "-f", this.#composeFile, "up", "-d", "--no-deps", "--force-recreate",
-      "realtime-worker"], environment);
+    await this.#run("docker", this.#composeArgs("up", "-d", "--no-deps", "--force-recreate",
+      "realtime-worker"), this.#composeEnvironment(expected, mode));
     const deadline = Date.now() + this.#health.timeoutMs;
     let observed = await this.inspectRunning(expected);
     while (observed === null && Date.now() < deadline) {

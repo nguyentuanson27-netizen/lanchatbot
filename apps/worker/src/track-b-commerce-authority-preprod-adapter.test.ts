@@ -217,7 +217,38 @@ describe("Track B PREPROD Docker service boundary", () => {
     await expect(controller.stage(previousService, targetService)).resolves.toEqual(targetService);
     expect(run.mock.calls.some(([, args]) => args[0] === "create" && args.includes("--network") &&
       args.includes("none"))).toBe(true);
-    expect(run.mock.calls.some(([, args]) => args[0] === "compose")).toBe(false);
+    expect(run.mock.calls.some(([, args]) => args[0] === "compose" &&
+      args.includes("config") && args.includes("--quiet") &&
+      args.includes("/opt/lana-chatbot/shared/.env.infrastructure"))).toBe(true);
+    expect(run.mock.calls.some(([, args]) => args[0] === "compose" && args.includes("up"))).toBe(false);
+  });
+
+  it("refuses to stage when the exact PREPROD compose environment is incomplete", async () => {
+    const run = vi.fn(async (_command: string, args: readonly string[]) => {
+      if (args[0] === "image") return JSON.stringify({
+        Id: `sha256:${targetService.imageId}`,
+        Config: { Labels: {
+          "org.opencontainers.image.revision": targetService.releaseRevision,
+          "com.lana.build-id": targetService.buildId,
+          "com.lana.runtime-config-hash": targetService.runtimeConfigHash,
+        } },
+      });
+      if (args[0] === "compose" && args.includes("config")) {
+        throw new Error("COMPOSE_REQUIRED_VARIABLE_MISSING");
+      }
+      return "";
+    });
+    const controller = new DockerComposeTrackBPreprodServiceController({
+      composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
+      projectDirectory: "/opt/lana-chatbot/current/deploy",
+      startupPackageFile: "/opt/lana-chatbot/releases/track-b/commerce-startup.json",
+      imageReference: "lana-chatbot-app:track-b-target",
+      expectedImageId: targetService.imageId,
+      run,
+    });
+    await expect(controller.stage(previousService, targetService))
+      .rejects.toThrow("COMPOSE_REQUIRED_VARIABLE_MISSING");
+    expect(run.mock.calls.some(([, args]) => args[0] === "create")).toBe(false);
   });
 
   it("starts only the exact realtime target through compose with non-secret environment", async () => {
@@ -263,7 +294,8 @@ describe("Track B PREPROD Docker service boundary", () => {
     await expect(controller.start(targetService, "COMMERCE")).resolves.toEqual(targetService);
     expect(calls.find(({ args }) => args[0] === "compose")).toEqual({
       command: "docker",
-      args: ["compose", "--project-directory", "/opt/lana-chatbot/current/deploy", "-f",
+      args: ["compose", "--env-file", "/opt/lana-chatbot/shared/.env.infrastructure",
+        "--project-directory", "/opt/lana-chatbot/current/deploy", "-f",
         "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml", "up", "-d", "--no-deps",
         "--force-recreate", "realtime-worker"],
       env: {
@@ -385,7 +417,8 @@ describe("Track B PREPROD Docker service boundary", () => {
 
 describe("Track B PREPROD mutation adapter", () => {
   it("recovers an exact stopped V1 source before CAS and releases only after runtime and consumers converge", async () => {
-    const priorConfig = { ...targetRuntimeConfig, REALTIME_RELEASE_ID: previousService.releaseRevision };
+    const priorConfig = { ...targetRuntimeConfig,
+      REALTIME_RELEASE_ID: "20260828-df13-preprod-commerce-abea1fb" };
     const priorRuntimeConfigHash = trackBRuntimeConfigHashV1(priorConfig);
     const prior = { ...previousService, runtimeConfigHash: priorRuntimeConfigHash,
       buildId: trackBLegacyBuildIdV1({ sourceCommit: previousService.releaseRevision,
@@ -402,7 +435,7 @@ describe("Track B PREPROD mutation adapter", () => {
         contentHash: target.version.contentHash, bundleHash: target.version.authorityBundleHash } });
     let main = { identity: prior, status: "running" };
     let staged: TrackBServiceReleaseIdentity | null = null;
-    const composeStartupFiles: string[] = [];
+    const composeCalls: Array<{ args: readonly string[]; env: Record<string, string> }> = [];
     const run = vi.fn(async (_command: string, args: readonly string[], env: Record<string, string>) => {
       const tag = String(args.at(-1));
       const expected = tag.includes("previous") ? prior : targetService;
@@ -416,7 +449,8 @@ describe("Track B PREPROD mutation adapter", () => {
       if (args[0] === "rm") { staged = null; return "staged-id"; }
       if (args[0] === "stop") { main = { ...main, status: "exited" }; return "container"; }
       if (args[0] === "compose") {
-        composeStartupFiles.push(env.DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE ?? "");
+        if (args.includes("config")) return "";
+        composeCalls.push({ args, env });
         main = { identity: prior, status: "running" }; return "";
       }
       if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
@@ -479,7 +513,14 @@ describe("Track B PREPROD mutation adapter", () => {
       reasonCodes: ["TRACK_B_B3_2_POINTER_NOT_MUTATED"],
     });
     expect(main).toEqual({ identity: prior, status: "running" });
-    expect(composeStartupFiles).toEqual(["/opt/lana-chatbot/releases/track-b/prior-rev6.json"]);
+    expect(composeCalls).toHaveLength(1);
+    expect(composeCalls[0]?.args).toContain("/opt/lana-chatbot/shared/.env.infrastructure");
+    expect(composeCalls[0]?.env).toMatchObject({
+      REALTIME_IMAGE: "lana-chatbot-app:track-b-previous",
+      DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE:
+        "/opt/lana-chatbot/releases/track-b/prior-rev6.json",
+    });
+    expect(composeCalls[0]?.env).not.toHaveProperty("REALTIME_RELEASE_ID");
     expect(database.proveRuntimeResolution).toHaveBeenCalledWith({ pointer: previous,
       notBefore: expect.any(String) });
     expect(readConsumers).toHaveBeenCalledTimes(1);
@@ -506,7 +547,10 @@ describe("Track B PREPROD mutation adapter", () => {
       if (args[0] === "create") { staged = expected; return "staged-id"; }
       if (args[0] === "rm") { staged = null; return "staged-id"; }
       if (args[0] === "stop") { main = { ...main, status: "exited" }; return "container"; }
-      if (args[0] === "compose") { main = { identity: prior, status: "running" }; return ""; }
+      if (args[0] === "compose") {
+        if (args.includes("config")) return "";
+        main = { identity: prior, status: "running" }; return "";
+      }
       if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
         .map((key) => priorConfig[key]).join("\n");
       const stagedInspect = args.at(-1) === "lana-chatbot-track-b-staged-realtime-worker";
