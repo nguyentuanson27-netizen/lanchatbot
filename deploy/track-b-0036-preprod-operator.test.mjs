@@ -24,6 +24,13 @@ requireText("track-b-0036-preprod-common.sh", /EXPECTED_ROLE_STATE_SHA256=/u,
   "database role state is not pinned");
 requireText("track-b-0036-preprod-common.sh", /database_sql_file_sha256_named/u,
   "canonical ACL query execution is missing");
+requireText("track-b-0036-preprod-common.sh", /database_copy_sha256_named\(\)[\s\S]*output_file="\$\(mktemp\)"[\s\S]*psql[^\n]+> "\$output_file"[\s\S]*test -s "\$output_file"/u,
+  "database COPY identity hashing is not producer-status-safe and nonempty");
+requireText("track-b-0036-preprod-common.sh", /database_sql_file_sha256_named\(\)[\s\S]*output_file="\$\(mktemp\)"[\s\S]*psql[^\n]+> "\$output_file"[\s\S]*test -s "\$output_file"/u,
+  "database SQL-file identity hashing is not producer-status-safe and nonempty");
+if (/psql[^\n]*\|\s*sha256sum/u.test(source("track-b-0036-preprod-common.sh"))) {
+  throw new Error("database identity hashing still permits a producer failure to be hidden by a pipeline");
+}
 requireText("track-b-0036-relation-acl-canonical.sql", /aclexplode[\s\S]*acldefault/u,
   "relation ACL comparison does not normalize implicit owner privileges");
 requireText("track-b-0036-relation-acl-canonical.sql", /grantor_role[\s\S]*is_grantable/u,

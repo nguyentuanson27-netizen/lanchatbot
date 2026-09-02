@@ -71,8 +71,13 @@ database_copy_sha256_named() {
   local query="$2"
   docker exec "$POSTGRES_CONTAINER" sh -ceu '
     export PGPASSWORD="$POSTGRES_PASSWORD"
-    psql -X -At -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$1" -c "COPY ($2) TO STDOUT WITH (FORMAT csv)" |
-      sha256sum | awk "{print \$1}"
+    output_file="$(mktemp)"
+    cleanup() { rm -f -- "$output_file"; }
+    trap cleanup EXIT
+    psql -X -At -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$1" -c "COPY ($2) TO STDOUT WITH (FORMAT csv)" > "$output_file"
+    test -s "$output_file" || { printf "%s\n" "database identity query returned no rows" >&2; exit 1; }
+    digest="$(sha256sum "$output_file")"
+    printf "%s\n" "${digest%% *}"
   ' sh "$database" "$query"
 }
 
@@ -82,8 +87,13 @@ database_sql_file_sha256_named() {
   test -s "$sql_file" || die "canonical ACL query missing"
   docker exec -i "$POSTGRES_CONTAINER" sh -ceu '
     export PGPASSWORD="$POSTGRES_PASSWORD"
-    psql -X -At -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$1" -f - |
-      sha256sum | awk "{print \$1}"
+    output_file="$(mktemp)"
+    cleanup() { rm -f -- "$output_file"; }
+    trap cleanup EXIT
+    psql -X -At -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$1" -f - > "$output_file"
+    test -s "$output_file" || { printf "%s\n" "database identity query returned no rows" >&2; exit 1; }
+    digest="$(sha256sum "$output_file")"
+    printf "%s\n" "${digest%% *}"
   ' sh "$database" < "$sql_file"
 }
 

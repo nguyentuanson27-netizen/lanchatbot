@@ -72,4 +72,46 @@ grep -Fx 'RECOVERY=BLOCKED_MANUAL_RESTORE_REQUIRED' "$rollback_blocked" >/dev/nu
 grep -Fx "BACKUP_FILE=$BACKUP_FILE" "$rollback_blocked" >/dev/null
 grep -Fx 'OBSERVED_0036_OBJECTS=1' "$rollback_blocked" >/dev/null
 
+mock_bin="$test_root/mock-bin"
+mkdir -p "$mock_bin"
+printf '%s\n' \
+  '#!/usr/bin/env sh' \
+  'case "${FAKE_PSQL_MODE:-row}" in' \
+  '  fail) exit 23 ;;' \
+  '  empty) exit 0 ;;' \
+  '  row) printf "%s\n" row ;;' \
+  '  *) exit 24 ;;' \
+  'esac' > "$mock_bin/psql"
+chmod +x "$mock_bin/psql"
+
+docker() {
+  test "$1" = exec || return 90
+  shift
+  if test "${1:-}" = -i; then shift; fi
+  test "$1" = "$POSTGRES_CONTAINER" || return 91
+  shift
+  POSTGRES_PASSWORD=test POSTGRES_USER=test PATH="$mock_bin:$PATH" command "$@"
+}
+
+hash_sql="$test_root/hash.sql"
+printf '%s\n' 'SELECT 1;' > "$hash_sql"
+for hash_mode in fail empty; do
+  FAKE_PSQL_MODE="$hash_mode"
+  export FAKE_PSQL_MODE
+  if database_copy_sha256_named fixture 'SELECT 1' >/dev/null 2>&1; then
+    printf '%s\n' "COPY hashing accepted psql mode: $hash_mode" >&2
+    exit 1
+  fi
+  if database_sql_file_sha256_named fixture "$hash_sql" >/dev/null 2>&1; then
+    printf '%s\n' "SQL-file hashing accepted psql mode: $hash_mode" >&2
+    exit 1
+  fi
+done
+
+FAKE_PSQL_MODE=row
+export FAKE_PSQL_MODE
+expected_row_sha="$(printf '%s\n' row | sha256sum | awk '{print $1}')"
+test "$(database_copy_sha256_named fixture 'SELECT 1')" = "$expected_row_sha"
+test "$(database_sql_file_sha256_named fixture "$hash_sql")" = "$expected_row_sha"
+
 printf '%s\n' 'Track B 0036 PREPROD operator behavior test: PASS'
