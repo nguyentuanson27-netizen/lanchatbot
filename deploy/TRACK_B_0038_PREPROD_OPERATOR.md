@@ -43,7 +43,7 @@ and rehearsal marker before the atomic migration+ledger transaction. If
 post-apply verification fails and the exact prior pointer plus zero unreleased
 fences are proven, it attempts the reviewed down path only after proving the
 complete rehearsed post-apply ledger, function/trigger catalog, ACL, role,
-extension and `0037` dependency identity, then records
+extension, exact zero-total fence state and `0037` dependency identity, then records
 `VERIFIED_PRE_0038`; otherwise it records
 `BLOCKED_MANUAL_RESTORE_REQUIRED` and stops. Credentials remain in the existing
 container secret environment or a scoped process environment and are never

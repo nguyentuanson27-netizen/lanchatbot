@@ -52,6 +52,7 @@ if (t38_verify_marker) >/dev/null 2>&1; then
 fi
 
 t38_pointer() { printf '%s\n' "$T38_POINTER_REVISION|$T38_V1_VERSION|COMMERCE|LEGACY|$T38_V1_BUNDLE|$T38_V1_CONTENT"; }
+t38_cutover_fence_state() { printf '%s\n' "${TEST_CUTOVER_FENCES:-0|0}"; }
 t38_preflight_matches() { return 0; }
 database_query() {
   case "$1" in
@@ -82,6 +83,14 @@ t38_post_apply_identity_matches() { return 1; }
 t38_preflight_matches() { return 1; }
 t38_recover_failed_apply
 grep -Fx 'RECOVERY=BLOCKED_MANUAL_RESTORE_REQUIRED' "$T38_ROLLBACK" >/dev/null
+
+t38_post_apply_identity_matches() { return 0; }
+t38_preflight_matches() { return 0; }
+TEST_CUTOVER_FENCES='1|0'
+t38_recover_failed_apply
+grep -Fx 'RECOVERY=BLOCKED_MANUAL_RESTORE_REQUIRED' "$T38_ROLLBACK" >/dev/null
+test ! -e "$test_root/down-called"
+TEST_CUTOVER_FENCES='0|0'
 
 cleanup_database='lana_track_b_0038_rehearsal_4242'
 cleanup_token='10000000-0000-4000-8000-000000000001'

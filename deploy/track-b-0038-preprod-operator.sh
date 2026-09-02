@@ -50,6 +50,9 @@ t38_source_identity() {
 }
 
 t38_pointer() { t37_pointer; }
+t38_cutover_fence_state() {
+  database_query "SELECT count(*)::text||'|'||count(*) FILTER (WHERE released_at IS NULL)::text FROM df13_commerce_cutover_fences"
+}
 t38_ledger_sha_named() {
   database_copy_sha256_named "$1" "SELECT migration_name,checksum_sha256 FROM schema_migrations ORDER BY migration_name"
 }
@@ -109,7 +112,7 @@ t38_observed_preflight() {
     "FUNCTION_ACL_SHA256=$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$FUNCTION_ACL_QUERY")" \
     "EXTENSIONS_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT extname,extversion FROM pg_extension ORDER BY extname")" \
     "AUTHORITY_FENCES=$(database_query "SELECT (SELECT count(*) FROM df13_commerce_authority_fences)::text||'|'||(SELECT count(*) FROM df13_commerce_authority_fence_claims)::text||'|'||(SELECT count(*) FROM df13_commerce_authority_fences WHERE completed_at IS NULL AND token_hash IS NOT NULL AND lease_until>clock_timestamp())::text")" \
-    "CUTOVER_FENCES=$(database_query "SELECT count(*)::text||'|'||count(*) FILTER (WHERE released_at IS NULL)::text FROM df13_commerce_cutover_fences")" \
+    "CUTOVER_FENCES=$(t38_cutover_fence_state)" \
     "INFLIGHT_CLAIMS=$(database_query "SELECT (SELECT count(*) FROM webhook_inbox WHERE page_id='$EXPECTED_PAGE_ID' AND status='PROCESSING')::text||'|'||(SELECT count(*) FROM meta_outbox WHERE page_id='$EXPECTED_PAGE_ID' AND status='SENDING')::text||'|'||(SELECT count(*) FROM pancake_tag_outbox WHERE page_id='$EXPECTED_PAGE_ID' AND status='APPLYING')::text")" \
     "REHEARSAL_OWNER_MARKERS=$(database_query "SELECT count(*) FROM pg_namespace WHERE nspname='track_b_0038_operator_owner'")" \
     "MIGRATION_0038=$(database_query "SELECT (SELECT count(*) FROM schema_migrations WHERE migration_name='$T38_MIGRATION')::text||'|'||(SELECT count(*) FROM pg_trigger WHERE tgname LIKE 'track_b_cutover_admission_%' AND NOT tgisinternal)::text||'|'||(SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname='guard_track_b_cutover_admission')::text")"
@@ -307,7 +310,7 @@ t38_verify_live() {
   test "$(t38_ledger_sha_named "$EXPECTED_DATABASE")" = "$T38_POST_LEDGER_SHA256" || die "0038 live exact ledger mismatch"
   test "$(t38_ledger_sha_named "$EXPECTED_DATABASE")" = "$(t38_marker_post_ledger)" || die "0038 live ledger identity mismatch"
   test "$(t38_pointer)" = "$T38_POINTER_REVISION|$T38_V1_VERSION|COMMERCE|LEGACY|$T38_V1_BUNDLE|$T38_V1_CONTENT" || die "0038 changed behavior pointer"
-  test "$(database_query "SELECT count(*)::text||'|'||count(*) FILTER (WHERE released_at IS NULL)::text FROM df13_commerce_cutover_fences")" = '0|0' || die "0038 changed cutover fence state"
+  test "$(t38_cutover_fence_state)" = '0|0' || die "0038 changed cutover fence state"
   test "$(t38_catalog_sha_named "$EXPECTED_DATABASE")" = "$(t38_marker_post_catalog)" || die "0038 live trigger catalog mismatch"
   test "$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$RELATION_ACL_QUERY")" = "$T37_RELATION_ACL_SHA256" || die "0038 live relation ACL mismatch"
   test "$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$FUNCTION_ACL_QUERY")" = "$(t38_marker_post_function_acl)" || die "0038 live function ACL mismatch"
@@ -322,7 +325,7 @@ t38_write_recovery() {
   printf '%s\n' "RECOVERY=$disposition" "BACKUP_FILE=$T38_BACKUP" \
     "OBSERVED_LEDGER_0038=$(database_query "SELECT count(*) FROM schema_migrations WHERE migration_name='$T38_MIGRATION' AND checksum_sha256='$T38_UP_SHA256'" 2>/dev/null || printf UNAVAILABLE)" \
     "OBSERVED_POINTER=$(t38_pointer 2>/dev/null || printf UNAVAILABLE)" \
-    "OBSERVED_LIVE_CUTOVER_FENCES=$(database_query "SELECT count(*) FROM df13_commerce_cutover_fences WHERE released_at IS NULL" 2>/dev/null || printf UNAVAILABLE)" > "$T38_ROLLBACK" || return 1
+    "OBSERVED_CUTOVER_FENCES=$(t38_cutover_fence_state 2>/dev/null || printf UNAVAILABLE)" > "$T38_ROLLBACK" || return 1
   chmod 600 "$T38_ROLLBACK"
 }
 t38_post_apply_identity_matches() {
@@ -330,7 +333,7 @@ t38_post_apply_identity_matches() {
   test "$(database_query "SELECT count(*) FROM schema_migrations" 2>/dev/null)" = 38 || return 1
   test "$(t38_ledger_sha_named "$EXPECTED_DATABASE" 2>/dev/null)" = "$T38_POST_LEDGER_SHA256" || return 1
   test "$(t38_pointer 2>/dev/null)" = "$T38_POINTER_REVISION|$T38_V1_VERSION|COMMERCE|LEGACY|$T38_V1_BUNDLE|$T38_V1_CONTENT" || return 1
-  test "$(database_query "SELECT count(*) FROM df13_commerce_cutover_fences WHERE released_at IS NULL" 2>/dev/null)" = 0 || return 1
+  test "$(t38_cutover_fence_state 2>/dev/null)" = '0|0' || return 1
   test "$(t38_catalog_sha_named "$EXPECTED_DATABASE" 2>/dev/null)" = "$(t38_marker_post_catalog)" || return 1
   test "$(t37_catalog_sha_named "$EXPECTED_DATABASE" 2>/dev/null)" = "$(t37_marker_post_catalog)" || return 1
   test "$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$RELATION_ACL_QUERY" 2>/dev/null)" = "$T37_RELATION_ACL_SHA256" || return 1
@@ -340,12 +343,12 @@ t38_post_apply_identity_matches() {
   test "$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT extname,extversion FROM pg_extension ORDER BY extname" 2>/dev/null)" = "$EXPECTED_EXTENSIONS_SHA256" || return 1
 }
 t38_recover_failed_apply() {
-  local ledger pointer live_fences
+  local ledger pointer cutover_fences
   ledger="$(database_query "SELECT count(*) FROM schema_migrations WHERE migration_name='$T38_MIGRATION' AND checksum_sha256='$T38_UP_SHA256'" 2>/dev/null || printf UNAVAILABLE)"
   if test "$ledger" = 0 && t38_preflight_matches; then t38_write_recovery VERIFIED_TRANSACTION_NOT_COMMITTED; return; fi
   pointer="$(t38_pointer 2>/dev/null || printf UNAVAILABLE)"
-  live_fences="$(database_query "SELECT count(*) FROM df13_commerce_cutover_fences WHERE released_at IS NULL" 2>/dev/null || printf UNAVAILABLE)"
-  if test "$ledger" = 1 && test "$live_fences" = 0 && test "$pointer" = "$T38_POINTER_REVISION|$T38_V1_VERSION|COMMERCE|LEGACY|$T38_V1_BUNDLE|$T38_V1_CONTENT" && t38_post_apply_identity_matches; then
+  cutover_fences="$(t38_cutover_fence_state 2>/dev/null || printf UNAVAILABLE)"
+  if test "$ledger" = 1 && test "$cutover_fences" = '0|0' && test "$pointer" = "$T38_POINTER_REVISION|$T38_V1_VERSION|COMMERCE|LEGACY|$T38_V1_BUNDLE|$T38_V1_CONTENT" && t38_post_apply_identity_matches; then
     if t38_apply_down_named "$EXPECTED_DATABASE" && t38_preflight_matches; then t38_write_recovery VERIFIED_PRE_0038; return; fi
   fi
   t38_write_recovery BLOCKED_MANUAL_RESTORE_REQUIRED
@@ -356,6 +359,7 @@ t38_apply_live() {
   acquire_mutation_lock
   t38_require_preflight
   t38_verify_marker
+  t37_verify_live >/dev/null
   local may_have_committed=0
   recover() { local status=$?; trap - EXIT HUP INT TERM; if test "$status" -ne 0 && test "$may_have_committed" = 1; then t38_recover_failed_apply || printf '%s\n' TRACK_B_0038_RECOVERY_EVIDENCE_WRITE_FAILED >&2; fi; exit "$status"; }
   trap recover EXIT HUP INT TERM

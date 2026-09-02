@@ -43,6 +43,8 @@ requireText(/restored extensions mismatch[\s\S]*up changed extensions[\s\S]*live
 requireText(/prosecdef[\s\S]*proleakproof[\s\S]*provolatile[\s\S]*proparallel[\s\S]*pg_get_functiondef/u, "function behavior identity is incomplete");
 requireText(/unexpected prefixed trigger dependency[\s\S]*unexpected function trigger dependency/u, "unexpected trigger dependencies are not rejected");
 requireText(/t38_post_apply_identity_matches[\s\S]*t38_apply_down_named/u, "recovery down is not gated by complete post-apply identity");
+requireText(/cutover_fences[\s\S]*'0\|0'[\s\S]*t38_post_apply_identity_matches/u, "recovery down does not require exact zero total fences");
+requireText(/t38_verify_marker[\s\S]*t37_verify_live[\s\S]*may_have_committed=0/u, "live apply does not revalidate exact 0037 state before DDL");
 
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const migrationRow = (directory, filename) => {
