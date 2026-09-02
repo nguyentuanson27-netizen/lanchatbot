@@ -412,6 +412,8 @@ export class DockerComposeTrackBPreprodServiceController {
       const runtimeConfig = Object.fromEntries(
         TRACK_B_RUNTIME_CONFIG_KEYS_V1.map((key, index) => [key, lines[index] ?? ""]),
       ) as Record<(typeof TRACK_B_RUNTIME_CONFIG_KEYS_V1)[number], string>;
+      if (this.#runtimeReleaseId !== null &&
+          runtimeConfig.REALTIME_RELEASE_ID !== this.#runtimeReleaseId) return null;
       if (trackBRuntimeConfigHashV1(runtimeConfig) !== expected.runtimeConfigHash) return null;
     }
     return { identity, status: value.State.Status,

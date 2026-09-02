@@ -266,7 +266,8 @@ describe("Track B PREPROD operator packet boundary", () => {
       [bound.legacyStartupPackageFile!, legacy],
     ]);
     const reader = async (path: string) => artifacts.get(path);
-    await expect(validateTrackBPreprodStartupArtifacts(bound, reader)).resolves.toBeUndefined();
+    await expect(validateTrackBPreprodStartupArtifacts(bound, reader))
+      .resolves.toBe("20260828-df13-preprod-commerce-1111111");
     const bindSource = (changedSource: unknown) => {
       const changedBody = { ...body, sourceStartupPackageHash: canonicalHash(changedSource) };
       artifacts.set(bound.sourceStartupPackageFile, changedSource);
@@ -320,6 +321,16 @@ describe("Track B PREPROD operator packet boundary", () => {
       packetHash: canonicalHash(legacyDriftBody) });
     await expect(validateTrackBPreprodStartupArtifacts(legacyDriftPacket, reader))
       .rejects.toThrow("TRACK_B_B3_2_LEGACY_RUNTIME_RELEASE_ID_MISMATCH");
+    artifacts.set(bound.legacyStartupPackageFile!, legacy);
+    let legacyReads = 0;
+    const changingReader = async (path: string) => {
+      if (path !== bound.legacyStartupPackageFile) return artifacts.get(path);
+      legacyReads += 1;
+      return legacyReads === 1 ? legacy : substitutedLegacy;
+    };
+    await expect(validateTrackBPreprodStartupArtifacts(bound, changingReader))
+      .resolves.toBe("20260828-df13-preprod-commerce-1111111");
+    expect(legacyReads).toBe(1);
     const substituted = { ...body,
       sourceStartupPackageFile: "/opt/lana-chatbot/releases/track-b/substituted.json" };
     expect(() => parseTrackBPreprodOperationPacket({ ...substituted,

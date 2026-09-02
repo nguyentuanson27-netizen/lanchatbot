@@ -374,7 +374,7 @@ function startupMatchesPointer(value: ReturnType<typeof parseDf13CommercePreprod
 }
 
 export async function validateTrackBPreprodStartupArtifacts(packet: TrackBPreprodOperationPacket,
-  reader: (path: string) => Promise<unknown> = readJson): Promise<void> {
+  reader: (path: string) => Promise<unknown> = readJson): Promise<string> {
   const [sourceRaw, operationTargetRaw, recoveryRaw, boundLegacyRaw] = await Promise.all([
     reader(packet.sourceStartupPackageFile), reader(packet.operationTargetStartupPackageFile),
     reader(packet.recoveryStartupPackageFile),
@@ -414,7 +414,7 @@ export async function validateTrackBPreprodStartupArtifacts(packet: TrackBPrepro
         DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash) {
     throw new Error("TRACK_B_B3_2_LEGACY_STARTUP_PACKAGE_INVALID");
   }
-  trackBLegacyRuntimeReleaseIdV1(legacyStartup,
+  const legacyRuntimeReleaseId = trackBLegacyRuntimeReleaseIdV1(legacyStartup,
     packet.rollbackRecord.previousService.releaseRevision);
   if ((await createDf13CommercePreprodStartupAuthority(legacyStartup)
     .authorizeExactCommerceIdentity(legacyStartup.expectedAuthority)).status !== "ADMITTED") {
@@ -438,6 +438,7 @@ export async function validateTrackBPreprodStartupArtifacts(packet: TrackBPrepro
       canonicalJsonV1(recovery) !== canonicalJsonV1(expected.recovery)) {
     throw new Error("TRACK_B_B3_2_GENERATED_STARTUP_PACKAGE_MISMATCH");
   }
+  return legacyRuntimeReleaseId;
 }
 
 async function databaseUrl(): Promise<string> {
@@ -612,14 +613,7 @@ async function build(inputPath: string): Promise<void> {
 
 async function runPacket(packetPath: string, recovery: boolean): Promise<void> {
   const packet = parseTrackBPreprodOperationPacket(await readJson(resolve(packetPath)));
-  await validateTrackBPreprodStartupArtifacts(packet);
-  const legacyStartup = parseDf13CommercePreprodStartupInput(await readJson(
-    packet.legacyStartupPackageFile ?? packet.sourceStartupPackageFile));
-  if (legacyStartup.mode !== "COMMERCE") {
-    throw new Error("TRACK_B_B3_2_LEGACY_STARTUP_PACKAGE_INVALID");
-  }
-  const legacyRuntimeReleaseId = trackBLegacyRuntimeReleaseIdV1(
-    legacyStartup, packet.rollbackRecord.previousService.releaseRevision);
+  const legacyRuntimeReleaseId = await validateTrackBPreprodStartupArtifacts(packet);
   const database = new TrackBPostgresPreprodDatabaseBoundary(await databaseUrl(), packet.operationId);
   const common = {
     composeFile: TRACK_B_PREPROD_FIXED_SCOPE.composeFile,
