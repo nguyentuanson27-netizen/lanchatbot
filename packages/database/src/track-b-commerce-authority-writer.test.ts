@@ -6,11 +6,16 @@ const mocks = vi.hoisted(() => ({
   clientQuery: vi.fn(),
   poolQuery: vi.fn(),
   connect: vi.fn(),
+  poolOn: vi.fn(),
   release: vi.fn(),
 }));
 
 vi.mock("pg", () => ({
   Pool: class {
+    on(event: string, listener: (...args: unknown[]) => void) {
+      mocks.poolOn(event, listener);
+      return this;
+    }
     connect() { return mocks.connect(); }
     query(sql: string, values?: readonly unknown[]) { return mocks.poolQuery(sql, values); }
     end() { return Promise.resolve(); }
@@ -122,6 +127,12 @@ describe("Postgres Track B Commerce authority writer", () => {
     mocks.poolQuery.mockImplementation((sql: string, values?: readonly unknown[]) =>
       mocks.clientQuery(sql, values));
     mocks.connect.mockResolvedValue({ query: mocks.clientQuery, release: mocks.release });
+  });
+
+  it("registers an idle-client error listener without weakening operation failures", () => {
+    const writer = new PostgresTrackBCommerceAuthorityWriter("postgres://test");
+    expect(writer).toBeDefined();
+    expect(mocks.poolOn).toHaveBeenCalledWith("error", expect.any(Function));
   });
 
   it("reads one exact historical V1 version for governed rollback preparation", async () => {
