@@ -127,14 +127,14 @@
   },
   "active": {
     "track": "POST_DF_V5_TRACK_B",
-    "nextIssue": "Track B B3.2 source-only migration 0038 admission gate and corrected cutover integration",
+    "nextIssue": "Track B B3.2 concrete ENGINEERING_PREPROD mutation adapter and governed activation",
     "gate": "GATE_F_PREPROD_ACCEPTED",
-    "authorization": "TRACK_B_B3_2_MIGRATION_0038_SOURCE_ONLY_AUTHORIZED",
+    "authorization": "TRACK_B_B3_2_CONCRETE_PREPROD_ADAPTER_AND_ACTIVATION_AUTHORIZED",
     "authorizationDecision": {
       "source": "CODEX_OWNER_MESSAGE",
       "sourceThreadId": "019ff0ed-3760-7e81-98f4-5e91e8ca35b0",
-      "decisionAt": "2026-09-01",
-      "scope": "SOURCE_ONLY_PENDING_MIGRATION_0038_PAGE_CHANNEL_SCOPED_ATOMIC_ADMISSION_GUARD_AND_B3_2_STAGE_FENCE_ADMISSION_QUIESCENCE_CAS_START_FULL_READBACK_RECOVERY_INTEGRATION;_FOCUSED_SOURCE_PR_REQUIRES_CLEAN_SELF_REVIEW_ONE_FIXED_SOL_HIGH_REVIEWER_NO_BLOCKERS_REAL_EXACT_HEAD_CANONICAL_CI_PASS_AND_REMOTE_HEAD_REVALIDATION;STOP_AFTER_SOURCE_MERGE;NO_LIVE_BACKUP_REHEARSAL_0038_APPLY_DEPLOY_FENCE_POINTER_CAS_MESSENGER_CANARY_RUNTIME_OR_CONTROL_PLANE_MUTATION"
+      "decisionAt": "2026-09-02",
+      "scope": "IMPLEMENT_REVIEW_AND_MERGE_CONCRETE_EXECUTABLE_TRACK_B_B3_2_ENGINEERING_PREPROD_ADAPTER_FOR_PAGE_1198992073286645_MESSENGER;_AFTER_EXACT_HEAD_REVIEW_AND_CI_REDERIVE_GATE_E_V22_RELEASE_PACKET_AND_USE_ONLY_REVIEWED_ADAPTER_FOR_STAGE_FENCE_ADMISSION_QUIESCENCE_CAS_START_FULL_READBACK_RECOVERY;_THEN_BOUNDED_CANARY_MESSENGER_ROLLBACK_REACTIVATION_AND_GOVERNANCE;_NO_PUBLIC_PRODUCTION_PAGE_EXPANSION_UR_STATE_V2_LEGACY_DELETION_UNRELATED_CONTROL_PLANE_OR_CREDENTIAL_REMEDIATION"
     }
   },
   "future": [
@@ -142,7 +142,7 @@
     "Post-Gate-F V5: Track B model authority and Track C bounded quality learning are the default path. UR/State V2, Gate U, multi-page expansion, production hardening, traffic canaries, long soak, and destructive LEGACY cleanup are trigger-only unless separately authorized.",
     "DF-11: merged source-only (PR #238); default-off, side-effect-free authority comparison; no runtime SHADOW authority",
     "DF-12: merged source-only (PR #239); missing-commerce signal; no runtime activation",
-    "DF-13: GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE; exact stopped-process COMMERCE activation, Context V2 Messenger E2E, exact LEGACY rollback, fresh COMMERCE reactivation, runtime identity and migration 0035 evidence are recorded. Migrations 0036 and 0037 are applied and verified in ENGINEERING_PREPROD; migration 0038 remains pending source-only and separately gated for rehearsal/apply.",
+    "DF-13: GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE; exact stopped-process COMMERCE activation, Context V2 Messenger E2E, exact LEGACY rollback, fresh COMMERCE reactivation, runtime identity and migration 0035 evidence are recorded. Migrations 0036, 0037, and 0038 are applied and verified in ENGINEERING_PREPROD. The Track B V1-to-V2 service/pointer activation remains pending the concrete reviewed adapter and its exact operational gates.",
     "UR-00 and later: trigger-only and blocked until a separate explicit owner approval"
   ],
   "hardStops": [

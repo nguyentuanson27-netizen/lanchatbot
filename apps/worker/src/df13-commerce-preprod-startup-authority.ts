@@ -39,6 +39,7 @@ export type Df13CommercePreprodStartupInput =
     releaseEvidence: Df13ReleaseCandidateEvidence | TrackBReleaseCandidateEvidence;
     expectedAuthority: Parameters<CommerceAuthorityConsumerPort["admitCommerceAuthority"]>[0];
     releaseSource: Df13ReleaseSourcePointer;
+    authorityTransition?: "ROLLBACK_TRACK_B";
   }>;
 
 function record(value: unknown): Record<string, unknown> | null {
@@ -81,11 +82,17 @@ export function parseDf13CommercePreprodStartupInput(
   }
   if (
     input.mode !== "COMMERCE" ||
-    !hasOnlyKeys(input, ["mode", "releaseEvidence", "expectedAuthority", "releaseSource"]) ||
+    !(hasOnlyKeys(input, ["mode", "releaseEvidence", "expectedAuthority", "releaseSource"]) ||
+      hasOnlyKeys(input, ["mode", "releaseEvidence", "expectedAuthority", "releaseSource",
+        "authorityTransition"])) ||
     record(input.releaseEvidence) === null ||
     record(input.expectedAuthority) === null ||
     record(input.releaseSource) === null
   ) {
+    throw new Error("DF13_COMMERCE_STARTUP_INPUT_INVALID");
+  }
+  if (input.authorityTransition !== undefined &&
+      input.authorityTransition !== "ROLLBACK_TRACK_B") {
     throw new Error("DF13_COMMERCE_STARTUP_INPUT_INVALID");
   }
   return deepFreeze({
@@ -96,6 +103,8 @@ export function parseDf13CommercePreprodStartupInput(
       CommerceAuthorityConsumerPort["admitCommerceAuthority"]
     >[0],
     releaseSource: input.releaseSource as Df13ReleaseSourcePointer,
+    ...(input.authorityTransition === "ROLLBACK_TRACK_B"
+      ? { authorityTransition: "ROLLBACK_TRACK_B" as const } : {}),
   });
 }
 
@@ -135,8 +144,14 @@ function startupPackageReason(
     return "DF13_COMMERCE_EXPECTED_AUTHORITY_INVALID";
   }
   const expectedBundleHash = trackB
-    ? DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash
+    ? input.authorityTransition === "ROLLBACK_TRACK_B"
+      ? DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
+      : DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash
     : DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
+  if (input.authorityTransition !== undefined &&
+      (!trackB || input.authorityTransition !== "ROLLBACK_TRACK_B")) {
+    return "DF13_COMMERCE_RELEASE_AUTHORITY_MISMATCH";
+  }
   if (input.expectedAuthority.authorityBundleHash !== expectedBundleHash) {
     return "DF13_COMMERCE_RELEASE_AUTHORITY_MISMATCH";
   }

@@ -127,6 +127,7 @@ export interface TrackBCommerceAuthorityMutationPorts {
     direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
     lease: Df13CommerceCutoverFenceLease;
     stagedService: TrackBServiceReleaseIdentity;
+    pointer: RuntimeBehaviorModePointer;
   }>): Promise<Readonly<{
     status: "HEALTHY" | "BLOCKED";
     admission: "HELD" | "UNCONTROLLED";
@@ -136,6 +137,7 @@ export interface TrackBCommerceAuthorityMutationPorts {
     lease: Df13CommerceCutoverFenceLease;
     failedService: TrackBServiceReleaseIdentity;
     previousService: TrackBServiceReleaseIdentity;
+    pointer: RuntimeBehaviorModePointer;
   }>): Promise<Readonly<{
     status: "HEALTHY" | "BLOCKED";
     admission: "HELD" | "UNCONTROLLED";
@@ -283,6 +285,17 @@ function exactEnvelope(input: Readonly<{
     input.previous.version.contentHash === behaviorModeContentHash(input.previous.version) &&
     input.target.version.contentHash === behaviorModeContentHash(input.target.version) &&
     input.target.pointerRevision === input.previous.pointerRevision + 1;
+}
+
+export function validateTrackBCommerceAuthorityMutationEnvelope(input: Readonly<{
+  operationId: string;
+  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  previous: RuntimeBehaviorModePointer;
+  target: RuntimeBehaviorModePointer;
+  rollbackRecord: TrackBReleaseLocalRollbackRecord;
+  releaseEvidence?: TrackBReleaseCandidateEvidence;
+}>): boolean {
+  try { return exactEnvelope(input); } catch { return false; }
 }
 
 function exactConsumerReadbacks(
@@ -487,6 +500,7 @@ async function recoverBeforeCas(input: Readonly<{
       lease: input.lease,
       failedService: input.stagedService,
       previousService: input.priorService,
+      pointer: input.pointer,
     });
   } catch {
     return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
@@ -570,6 +584,7 @@ async function completeRestoredServiceRecovery(input: Readonly<{
       lease: input.lease,
       failedService: input.failedService,
       previousService: input.priorService,
+      pointer: input.restored,
     });
   } catch {
     return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
@@ -666,6 +681,11 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
   if (staged.status !== "STAGED_STOPPED" || staged.admission !== "NON_ADMITTING" ||
       !exactService(staged.observedSourceService, expectedSourceService) ||
       !exactService(staged.stagedService, expectedService)) {
+    if (staged.status === "BLOCKED" && staged.stagedService === null) {
+      return { status: "BLOCKED_PREVIOUS", sideEffects: "NOT_EXECUTED", reasonCodes: [
+        "TRACK_B_B3_2_SERVICE_STAGING_UNPROVEN",
+      ] };
+    }
     if (!exactService(staged.stagedService, expectedService)) {
       return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
         "TRACK_B_B3_2_SERVICE_STAGING_UNPROVEN",
@@ -763,6 +783,7 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
   try {
     started = await input.ports.startStagedService({
       direction: input.direction, lease: acquired.lease, stagedService: expectedService,
+      pointer: input.target,
     });
   } catch {
     started = { status: "BLOCKED", admission: "HELD", observedService: null };
