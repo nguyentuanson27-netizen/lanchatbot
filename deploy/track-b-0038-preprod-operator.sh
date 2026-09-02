@@ -11,6 +11,8 @@ readonly T38_UP_SHA256="9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733
 readonly T38_DOWN_SHA256="5dd292a169a5ecce5f21896bf8e11f1d7727a34a55758c92b8abc98f3de64d9a"
 readonly T38_PREVIOUS_MIGRATION="0037_track_b_commerce_authority_replacement"
 readonly T38_PREVIOUS_SHA256="40b1ef14e3f7b2e037063de1f8d8ff7f804d069f8649115be6c29b1b56399c20"
+readonly T38_PRE_LEDGER_SHA256="012d49a74043e6425e1f26ba874ff1cd458ae83684e6013fbda9aff73bcbc0ce"
+readonly T38_POST_LEDGER_SHA256="f320a6892ff6a1b10aa1283e35577e673af78099357a1a2b8f791d35bbeed9be"
 readonly T38_UP="$SOURCE_ROOT/packages/database/pending-migrations/$T38_MIGRATION.up.sql"
 readonly T38_DOWN="$SOURCE_ROOT/packages/database/pending-migrations/$T38_MIGRATION.down.sql"
 readonly T38_POINTER_REVISION="$T37_POINTER_REVISION"
@@ -52,7 +54,7 @@ t38_ledger_sha_named() {
   database_copy_sha256_named "$1" "SELECT migration_name,checksum_sha256 FROM schema_migrations ORDER BY migration_name"
 }
 t38_catalog_sha_named() {
-  database_copy_sha256_named "$1" "SELECT n.nspname,c.relname,t.tgname,t.tgenabled,t.tgtype,t.tgqual::text,t.tgattr::text,t.tgnargs,p.proname,p.prosrc,p.proconfig::text,l.lanname,pg_get_triggerdef(t.oid,false) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_proc p ON p.oid=t.tgfoid JOIN pg_language l ON l.oid=p.prolang WHERE n.nspname='public' AND t.tgname LIKE 'track_b_cutover_admission_%' AND NOT t.tgisinternal ORDER BY c.relname,t.tgname"
+  database_copy_sha256_named "$1" "SELECT pn.nspname,p.proname,p.pronargs,p.pronargdefaults,p.prorettype::regtype::text,p.proargtypes::text,p.proallargtypes::text,p.proargmodes::text,p.proargnames::text,p.prokind,p.prosecdef,p.proleakproof,p.proisstrict,p.proretset,p.provolatile,p.proparallel,p.procost,p.prorows,p.proconfig::text,p.proacl::text,p.protrftypes::text,p.prosupport::regproc::text,p.prosrc,p.probin,p.prosqlbody::text,l.lanname,pg_get_userbyid(p.proowner),pg_get_function_identity_arguments(p.oid),pg_get_function_result(p.oid),pg_get_functiondef(p.oid),obj_description(p.oid,'pg_proc'),tn.nspname,c.relname,t.tgname,t.tgenabled,t.tgtype,t.tgqual::text,t.tgattr::text,t.tgnargs,t.tgisinternal,pg_get_triggerdef(t.oid,false) FROM pg_proc p JOIN pg_namespace pn ON pn.oid=p.pronamespace JOIN pg_language l ON l.oid=p.prolang LEFT JOIN pg_trigger t ON t.tgfoid=p.oid LEFT JOIN pg_class c ON c.oid=t.tgrelid LEFT JOIN pg_namespace tn ON tn.oid=c.relnamespace WHERE pn.nspname='public' AND p.proname='guard_track_b_cutover_admission' ORDER BY p.proname,pg_get_function_identity_arguments(p.oid),tn.nspname,c.relname,t.tgname"
 }
 
 t38_expected_preflight() {
@@ -69,6 +71,7 @@ t38_expected_preflight() {
     "PAGE_SET_SHA256=$EXPECTED_PAGE_SET_SHA256" \
     "PREPROD_PAGE=1" \
     "LEDGER_COUNT=37" \
+    "LEDGER_SHA256=$T38_PRE_LEDGER_SHA256" \
     "LATEST_LEDGER=$T38_PREVIOUS_MIGRATION|$T38_PREVIOUS_SHA256" \
     "POINTER=$T38_POINTER_REVISION|$T38_V1_VERSION|COMMERCE|LEGACY|$T38_V1_BUNDLE|$T38_V1_CONTENT" \
     "ROLE_STATE_SHA256=$EXPECTED_ROLE_STATE_SHA256" \
@@ -79,6 +82,7 @@ t38_expected_preflight() {
     "AUTHORITY_FENCES=0|0|0" \
     "CUTOVER_FENCES=0|0" \
     "INFLIGHT_CLAIMS=0|0|0" \
+    "REHEARSAL_OWNER_MARKERS=0" \
     "MIGRATION_0038=0|0|0"
 }
 
@@ -96,6 +100,7 @@ t38_observed_preflight() {
     "PAGE_SET_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT page_id,status,routing_owner,app_send_enabled,kill_switch FROM pages ORDER BY page_id")" \
     "PREPROD_PAGE=$(database_query "SELECT count(*) FROM pages WHERE page_id='$EXPECTED_PAGE_ID' AND status='ACTIVE' AND routing_owner='APP' AND app_send_enabled AND NOT kill_switch")" \
     "LEDGER_COUNT=$(database_query "SELECT count(*) FROM schema_migrations")" \
+    "LEDGER_SHA256=$(t38_ledger_sha_named "$EXPECTED_DATABASE")" \
     "LATEST_LEDGER=$(database_query "SELECT migration_name||'|'||checksum_sha256 FROM schema_migrations ORDER BY migration_name DESC LIMIT 1")" \
     "POINTER=$(t38_pointer)" \
     "ROLE_STATE_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT rolname,rolsuper,rolinherit,rolcreaterole,rolcreatedb,rolcanlogin,rolreplication,rolbypassrls,rolconnlimit FROM pg_roles WHERE left(rolname,3) <> chr(112)||chr(103)||chr(95) ORDER BY rolname")" \
@@ -106,6 +111,7 @@ t38_observed_preflight() {
     "AUTHORITY_FENCES=$(database_query "SELECT (SELECT count(*) FROM df13_commerce_authority_fences)::text||'|'||(SELECT count(*) FROM df13_commerce_authority_fence_claims)::text||'|'||(SELECT count(*) FROM df13_commerce_authority_fences WHERE completed_at IS NULL AND token_hash IS NOT NULL AND lease_until>clock_timestamp())::text")" \
     "CUTOVER_FENCES=$(database_query "SELECT count(*)::text||'|'||count(*) FILTER (WHERE released_at IS NULL)::text FROM df13_commerce_cutover_fences")" \
     "INFLIGHT_CLAIMS=$(database_query "SELECT (SELECT count(*) FROM webhook_inbox WHERE page_id='$EXPECTED_PAGE_ID' AND status='PROCESSING')::text||'|'||(SELECT count(*) FROM meta_outbox WHERE page_id='$EXPECTED_PAGE_ID' AND status='SENDING')::text||'|'||(SELECT count(*) FROM pancake_tag_outbox WHERE page_id='$EXPECTED_PAGE_ID' AND status='APPLYING')::text")" \
+    "REHEARSAL_OWNER_MARKERS=$(database_query "SELECT count(*) FROM pg_namespace WHERE nspname='track_b_0038_operator_owner'")" \
     "MIGRATION_0038=$(database_query "SELECT (SELECT count(*) FROM schema_migrations WHERE migration_name='$T38_MIGRATION')::text||'|'||(SELECT count(*) FROM pg_trigger WHERE tgname LIKE 'track_b_cutover_admission_%' AND NOT tgisinternal)::text||'|'||(SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname='guard_track_b_cutover_admission')::text")"
 }
 t38_preflight_matches() { test "$(t38_observed_preflight)" = "$(t38_expected_preflight)"; }
@@ -126,7 +132,10 @@ t38_verify_up_named() {
   local database="$1"
   test "$(database_query_named "$database" "SELECT count(*) FROM schema_migrations WHERE migration_name='$T38_MIGRATION' AND checksum_sha256='$T38_UP_SHA256'")" = 1 || die "0038 ledger readback mismatch"
   test "$(database_query_named "$database" "SELECT count(*) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_proc p ON p.oid=t.tgfoid JOIN pg_namespace pn ON pn.oid=p.pronamespace WHERE n.nspname='public' AND c.relname IN ('webhook_inbox','meta_outbox','pancake_tag_outbox') AND t.tgname='track_b_cutover_admission_'||c.relname AND t.tgenabled='A' AND t.tgtype=19 AND t.tgqual IS NULL AND t.tgattr::text='' AND t.tgnargs=0 AND pn.nspname='public' AND p.proname='guard_track_b_cutover_admission' AND p.proconfig=ARRAY['search_path=pg_catalog']::text[] AND NOT t.tgisinternal")" = 3 || die "0038 trigger identity ENABLE ALWAYS readback mismatch"
-  test "$(database_query_named "$database" "SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_language l ON l.oid=p.prolang WHERE n.nspname='public' AND p.proname='guard_track_b_cutover_admission' AND p.pronargs=0 AND p.prorettype='pg_catalog.trigger'::regtype AND l.lanname='plpgsql' AND encode(public.digest(p.prosrc,'sha256'),'hex')='d083f18d4a62cf313af3baba8c3a145225e9ee7852e4192119b158d34c8ac5ba'")" = 1 || die "0038 function catalog identity mismatch"
+  test "$(database_query_named "$database" "SELECT count(*) FROM pg_trigger WHERE tgname LIKE 'track_b_cutover_admission_%' AND NOT tgisinternal")" = 3 || die "0038 unexpected prefixed trigger dependency"
+  test "$(database_query_named "$database" "SELECT count(*) FROM pg_trigger t JOIN pg_proc p ON p.oid=t.tgfoid JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname='guard_track_b_cutover_admission' AND NOT t.tgisinternal")" = 3 || die "0038 unexpected function trigger dependency"
+  test "$(database_query_named "$database" "SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_language l ON l.oid=p.prolang WHERE n.nspname='public' AND p.proname='guard_track_b_cutover_admission' AND p.pronargs=0 AND p.pronargdefaults=0 AND p.prorettype='pg_catalog.trigger'::regtype AND p.prokind='f' AND NOT p.prosecdef AND NOT p.proleakproof AND NOT p.proisstrict AND NOT p.proretset AND p.provolatile='v' AND p.proparallel='u' AND p.proconfig=ARRAY['search_path=pg_catalog']::text[] AND p.proacl IS NULL AND l.lanname='plpgsql' AND encode(public.digest(p.prosrc,'sha256'),'hex')='d083f18d4a62cf313af3baba8c3a145225e9ee7852e4192119b158d34c8ac5ba'")" = 1 || die "0038 function catalog identity mismatch"
+  test "$(database_query_named "$database" "SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname='guard_track_b_cutover_admission'")" = 1 || die "0038 unexpected function overload"
   test "$(database_query_named "$database" "SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace JOIN pg_roles r ON r.oid=p.proowner WHERE n.nspname='public' AND p.proname='guard_track_b_cutover_admission' AND r.rolname='lana_app'")" = 1 || die "0038 function owner mismatch"
   test "$(database_query_named "$database" "SELECT count(*) FROM df13_commerce_cutover_fences WHERE released_at IS NULL")" = 0 || die "0038 unexpected unreleased fence"
 }
@@ -168,9 +177,11 @@ t38_cleanup_evidence_target_is_exact() {
   case "$T38_EVIDENCE_DIR" in /tmp/tmp.*/evidence) return 0 ;; *) return 1 ;; esac
 }
 t38_finish_rehearsal() {
-  local restore_database="$1" cleanup_evidence="$2"
+  local restore_database="$1" cleanup_evidence="$2" owner_token="$3"
   [[ "$restore_database" =~ ^lana_track_b_0038_rehearsal_[0-9]+$ ]] || die "refusing ambiguous 0038 rehearsal database cleanup"
+  [[ "$owner_token" =~ ^[0-9a-f-]{36}$ ]] || die "refusing missing 0038 rehearsal ownership identity"
   case "$cleanup_evidence" in 0|1) ;; *) die "invalid 0038 evidence cleanup disposition" ;; esac
+  test "$(database_query_named "$restore_database" "SELECT count(*) FROM track_b_0038_operator_owner.run_identity WHERE token='$owner_token'")" = 1 || die "refusing unowned 0038 rehearsal database cleanup"
   docker exec "$POSTGRES_CONTAINER" sh -ceu 'export PGPASSWORD="$POSTGRES_PASSWORD"; exec dropdb --if-exists --force -U "$POSTGRES_USER" "$1"' sh "$restore_database" >/dev/null
   test "$(database_query "SELECT count(*) FROM pg_database WHERE datname='$restore_database'")" = 0 || die "0038 rehearsal database cleanup unverified"
   if test "$cleanup_evidence" = 1; then
@@ -178,6 +189,13 @@ t38_finish_rehearsal() {
     rm -rf -- "$T38_EVIDENCE_DIR"
     test ! -e "$T38_EVIDENCE_DIR" || die "0038 evidence cleanup unverified"
   fi
+}
+t38_abort_rehearsal() {
+  local status=$? restore_database="$1" owner_token="$2"
+  trap - EXIT HUP INT TERM
+  t38_finish_rehearsal "$restore_database" 1 "$owner_token"
+  test "$status" -ne 0 || status=1
+  exit "$status"
 }
 
 t38_backup_rehearse() {
@@ -190,13 +208,15 @@ t38_backup_rehearse() {
   t38_observed_preflight > "$T38_PREFLIGHT"
   chmod 600 "$T38_PREFLIGHT"
   test "$(cat "$T38_PREFLIGHT")" = "$(t38_expected_preflight)" || die "0038 recorded preflight mismatch"
-  local pre_ledger_sha pre_catalog_sha pre_relation_acl pre_function_acl restore_database cleanup=1
+  local pre_ledger_sha pre_catalog_sha pre_relation_acl pre_function_acl restore_database owner_token cleanup=1
   pre_ledger_sha="$(t38_ledger_sha_named "$EXPECTED_DATABASE")"
+  test "$pre_ledger_sha" = "$T38_PRE_LEDGER_SHA256" || die "0038 exact pre-ledger mismatch"
   pre_catalog_sha="$(t37_catalog_sha_named "$EXPECTED_DATABASE")"
   pre_relation_acl="$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$RELATION_ACL_QUERY")"
   pre_function_acl="$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$FUNCTION_ACL_QUERY")"
   restore_database="lana_track_b_0038_rehearsal_$$"
-  trap "t38_finish_rehearsal '$restore_database' '1'" EXIT HUP INT TERM
+  owner_token="$(node -e 'process.stdout.write(require("node:crypto").randomUUID())')"
+  [[ "$owner_token" =~ ^[0-9a-f-]{36}$ ]] || die "0038 rehearsal ownership identity generation failed"
   docker exec "$POSTGRES_CONTAINER" sh -ceu 'export PGPASSWORD="$POSTGRES_PASSWORD"; exec pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "$T38_BACKUP"
   test -s "$T38_BACKUP" || die "0038 backup is empty"
   chmod 600 "$T38_BACKUP"
@@ -204,6 +224,8 @@ t38_backup_rehearse() {
   chmod 600 "$T38_BACKUP_SHA"
   docker exec -i "$POSTGRES_CONTAINER" pg_restore --list < "$T38_BACKUP" >/dev/null
   docker exec "$POSTGRES_CONTAINER" sh -ceu 'export PGPASSWORD="$POSTGRES_PASSWORD"; exec createdb -U "$POSTGRES_USER" "$1"' sh "$restore_database"
+  database_query_named "$restore_database" "CREATE SCHEMA track_b_0038_operator_owner; CREATE TABLE track_b_0038_operator_owner.run_identity(token text PRIMARY KEY); INSERT INTO track_b_0038_operator_owner.run_identity(token) VALUES ('$owner_token')" >/dev/null
+  trap "t38_abort_rehearsal '$restore_database' '$owner_token'" EXIT HUP INT TERM
   docker exec -i "$POSTGRES_CONTAINER" sh -ceu 'export PGPASSWORD="$POSTGRES_PASSWORD"; exec pg_restore --exit-on-error -U "$POSTGRES_USER" -d "$1"' sh "$restore_database" < "$T38_BACKUP"
   test "$(t38_ledger_sha_named "$restore_database")" = "$pre_ledger_sha" || die "0038 restored ledger mismatch"
   test "$(t37_catalog_sha_named "$restore_database")" = "$pre_catalog_sha" || die "0038 restored catalog mismatch"
@@ -239,6 +261,7 @@ t38_backup_rehearse() {
   post_ledger_sha="$(t38_ledger_sha_named "$restore_database")"
   [[ "$post_catalog_sha" =~ ^[a-f0-9]{64}$ ]] || die "0038 post catalog identity missing"
   [[ "$post_function_acl" =~ ^[a-f0-9]{64}$ ]] || die "0038 post function ACL identity missing"
+  test "$post_ledger_sha" = "$T38_POST_LEDGER_SHA256" || die "0038 exact post-ledger mismatch"
   printf '%s\n' \
     "SOURCE_REVISION=$SOURCE_REVISION" "UP_SHA256=$T38_UP_SHA256" "DOWN_SHA256=$T38_DOWN_SHA256" \
     "BACKUP_SHA256=$(awk '{print $1}' "$T38_BACKUP_SHA")" \
@@ -248,7 +271,7 @@ t38_backup_rehearse() {
     'REHEARSAL=UP_DOWN_UP_PASS' > "$T38_MARKER"
   chmod 600 "$T38_MARKER"
   cleanup=0
-  t38_finish_rehearsal "$restore_database" "$cleanup"
+  t38_finish_rehearsal "$restore_database" "$cleanup" "$owner_token"
   trap - EXIT HUP INT TERM
   printf '%s\n' 'TRACK_B_0038_BACKUP_REHEARSAL_PASS'
 }
@@ -256,7 +279,7 @@ t38_backup_rehearse() {
 t38_marker_post_catalog() { sed -n 's/^POST_CATALOG_SHA256=//p' "$T38_MARKER"; }
 t38_marker_post_function_acl() { sed -n 's/^POST_FUNCTION_ACL_SHA256=//p' "$T38_MARKER"; }
 t38_marker_post_ledger() { sed -n 's/^POST_LEDGER_SHA256=//p' "$T38_MARKER"; }
-t38_verify_marker() {
+t38_verify_marker_artifacts() {
   test -s "$T38_BACKUP" && test -s "$T38_BACKUP_SHA" && test -s "$T38_PREFLIGHT" && test -s "$T38_MARKER" || die "0038 rehearsal evidence missing"
   sha256sum -c "$T38_BACKUP_SHA" >/dev/null || die "0038 backup checksum mismatch"
   grep -Fx "SOURCE_REVISION=$SOURCE_REVISION" "$T38_MARKER" >/dev/null || die "0038 rehearsal source mismatch"
@@ -268,14 +291,20 @@ t38_verify_marker() {
   [[ "$(t38_marker_post_catalog)" =~ ^[a-f0-9]{64}$ ]] || die "0038 rehearsal catalog identity missing"
   [[ "$(t38_marker_post_function_acl)" =~ ^[a-f0-9]{64}$ ]] || die "0038 rehearsal function ACL identity missing"
   [[ "$(t38_marker_post_ledger)" =~ ^[a-f0-9]{64}$ ]] || die "0038 rehearsal ledger identity missing"
+  test "$(t38_marker_post_ledger)" = "$T38_POST_LEDGER_SHA256" || die "0038 rehearsal exact ledger mismatch"
   test "$(cat "$T38_PREFLIGHT")" = "$(t38_expected_preflight)" || die "0038 recorded preflight is not approved target"
+}
+t38_verify_marker() {
+  t38_verify_marker_artifacts
   test "$(t38_observed_preflight)" = "$(cat "$T38_PREFLIGHT")" || die "target changed since 0038 rehearsal"
 }
 
 t38_verify_live() {
   t38_source_identity
+  t38_verify_marker_artifacts
   t38_verify_up_named "$EXPECTED_DATABASE"
   test "$(database_query "SELECT count(*) FROM schema_migrations")" = 38 || die "0038 live ledger count mismatch"
+  test "$(t38_ledger_sha_named "$EXPECTED_DATABASE")" = "$T38_POST_LEDGER_SHA256" || die "0038 live exact ledger mismatch"
   test "$(t38_ledger_sha_named "$EXPECTED_DATABASE")" = "$(t38_marker_post_ledger)" || die "0038 live ledger identity mismatch"
   test "$(t38_pointer)" = "$T38_POINTER_REVISION|$T38_V1_VERSION|COMMERCE|LEGACY|$T38_V1_BUNDLE|$T38_V1_CONTENT" || die "0038 changed behavior pointer"
   test "$(database_query "SELECT count(*)::text||'|'||count(*) FILTER (WHERE released_at IS NULL)::text FROM df13_commerce_cutover_fences")" = '0|0' || die "0038 changed cutover fence state"
@@ -296,13 +325,27 @@ t38_write_recovery() {
     "OBSERVED_LIVE_CUTOVER_FENCES=$(database_query "SELECT count(*) FROM df13_commerce_cutover_fences WHERE released_at IS NULL" 2>/dev/null || printf UNAVAILABLE)" > "$T38_ROLLBACK" || return 1
   chmod 600 "$T38_ROLLBACK"
 }
+t38_post_apply_identity_matches() {
+  (t38_verify_marker_artifacts) >/dev/null 2>&1 || return 1
+  test "$(database_query "SELECT count(*) FROM schema_migrations" 2>/dev/null)" = 38 || return 1
+  test "$(t38_ledger_sha_named "$EXPECTED_DATABASE" 2>/dev/null)" = "$T38_POST_LEDGER_SHA256" || return 1
+  test "$(t38_pointer 2>/dev/null)" = "$T38_POINTER_REVISION|$T38_V1_VERSION|COMMERCE|LEGACY|$T38_V1_BUNDLE|$T38_V1_CONTENT" || return 1
+  test "$(database_query "SELECT count(*) FROM df13_commerce_cutover_fences WHERE released_at IS NULL" 2>/dev/null)" = 0 || return 1
+  test "$(t38_catalog_sha_named "$EXPECTED_DATABASE" 2>/dev/null)" = "$(t38_marker_post_catalog)" || return 1
+  test "$(t37_catalog_sha_named "$EXPECTED_DATABASE" 2>/dev/null)" = "$(t37_marker_post_catalog)" || return 1
+  test "$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$RELATION_ACL_QUERY" 2>/dev/null)" = "$T37_RELATION_ACL_SHA256" || return 1
+  test "$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$FUNCTION_ACL_QUERY" 2>/dev/null)" = "$(t38_marker_post_function_acl)" || return 1
+  test "$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT rolname,rolsuper,rolinherit,rolcreaterole,rolcreatedb,rolcanlogin,rolreplication,rolbypassrls,rolconnlimit FROM pg_roles WHERE left(rolname,3) <> chr(112)||chr(103)||chr(95) ORDER BY rolname" 2>/dev/null)" = "$EXPECTED_ROLE_STATE_SHA256" || return 1
+  test "$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT member_role.rolname,granted_role.rolname,m.admin_option FROM pg_auth_members m JOIN pg_roles member_role ON member_role.oid=m.member JOIN pg_roles granted_role ON granted_role.oid=m.roleid ORDER BY 1,2,3" 2>/dev/null)" = "$EXPECTED_ROLE_MEMBERSHIP_SHA256" || return 1
+  test "$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT extname,extversion FROM pg_extension ORDER BY extname" 2>/dev/null)" = "$EXPECTED_EXTENSIONS_SHA256" || return 1
+}
 t38_recover_failed_apply() {
   local ledger pointer live_fences
   ledger="$(database_query "SELECT count(*) FROM schema_migrations WHERE migration_name='$T38_MIGRATION' AND checksum_sha256='$T38_UP_SHA256'" 2>/dev/null || printf UNAVAILABLE)"
   if test "$ledger" = 0 && t38_preflight_matches; then t38_write_recovery VERIFIED_TRANSACTION_NOT_COMMITTED; return; fi
   pointer="$(t38_pointer 2>/dev/null || printf UNAVAILABLE)"
   live_fences="$(database_query "SELECT count(*) FROM df13_commerce_cutover_fences WHERE released_at IS NULL" 2>/dev/null || printf UNAVAILABLE)"
-  if test "$ledger" = 1 && test "$live_fences" = 0 && test "$pointer" = "$T38_POINTER_REVISION|$T38_V1_VERSION|COMMERCE|LEGACY|$T38_V1_BUNDLE|$T38_V1_CONTENT"; then
+  if test "$ledger" = 1 && test "$live_fences" = 0 && test "$pointer" = "$T38_POINTER_REVISION|$T38_V1_VERSION|COMMERCE|LEGACY|$T38_V1_BUNDLE|$T38_V1_CONTENT" && t38_post_apply_identity_matches; then
     if t38_apply_down_named "$EXPECTED_DATABASE" && t38_preflight_matches; then t38_write_recovery VERIFIED_PRE_0038; return; fi
   fi
   t38_write_recovery BLOCKED_MANUAL_RESTORE_REQUIRED

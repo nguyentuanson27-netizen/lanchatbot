@@ -40,7 +40,7 @@ printf '%s\n' \
   "PREFLIGHT_SHA256=$(sha256sum "$T38_PREFLIGHT" | awk '{print $1}')" \
   "POST_CATALOG_SHA256=$(printf 'b%.0s' {1..64})" \
   "POST_FUNCTION_ACL_SHA256=$(printf 'c%.0s' {1..64})" \
-  "POST_LEDGER_SHA256=$(printf 'd%.0s' {1..64})" \
+  "POST_LEDGER_SHA256=$T38_POST_LEDGER_SHA256" \
   'REHEARSAL=UP_DOWN_UP_PASS' > "$T38_MARKER"
 t38_catalog_sha_named() { printf '%s\n' "$(printf 'b%.0s' {1..64})"; }
 t38_verify_marker
@@ -66,24 +66,39 @@ t38_recover_failed_apply
 grep -Fx 'RECOVERY=VERIFIED_TRANSACTION_NOT_COMMITTED' "$T38_ROLLBACK" >/dev/null
 
 TEST_LEDGER_STATE=1
-t38_apply_down_named() { return 1; }
+t38_apply_down_named() { printf '%s\n' called > "$test_root/down-called"; return 0; }
 t38_recover_failed_apply
 grep -Fx 'RECOVERY=BLOCKED_MANUAL_RESTORE_REQUIRED' "$T38_ROLLBACK" >/dev/null
+test ! -e "$test_root/down-called"
 
-t38_apply_down_named() { return 0; }
+t38_post_apply_identity_matches() { return 0; }
+t38_preflight_matches() { return 0; }
+t38_recover_failed_apply
+grep -Fx 'RECOVERY=VERIFIED_PRE_0038' "$T38_ROLLBACK" >/dev/null
+test -e "$test_root/down-called"
+rm -f -- "$test_root/down-called"
+
+t38_post_apply_identity_matches() { return 1; }
 t38_preflight_matches() { return 1; }
 t38_recover_failed_apply
 grep -Fx 'RECOVERY=BLOCKED_MANUAL_RESTORE_REQUIRED' "$T38_ROLLBACK" >/dev/null
 
 cleanup_database='lana_track_b_0038_rehearsal_4242'
+cleanup_token='10000000-0000-4000-8000-000000000001'
 docker() { printf '%s\n' "$*" > "$test_root/cleanup-docker.args"; }
+database_query_named() {
+  case "$2" in
+    *track_b_0038_operator_owner.run_identity*) printf '%s\n' "${TEST_OWNER_COUNT:-1}" ;;
+    *) return 1 ;;
+  esac
+}
 database_query() {
   case "$1" in
     *pg_database*) printf '%s\n' '0' ;;
     *) return 1 ;;
   esac
 }
-t38_finish_rehearsal "$cleanup_database" 1
+t38_finish_rehearsal "$cleanup_database" 1 "$cleanup_token"
 test ! -e "$T38_EVIDENCE_DIR"
 grep -F -- "$cleanup_database" "$test_root/cleanup-docker.args" >/dev/null
 mkdir -p "$T38_EVIDENCE_DIR"
@@ -93,10 +108,16 @@ if t38_cleanup_evidence_target_is_exact; then
   exit 1
 fi
 TRACK_B_0038_TEST_EVIDENCE_DIR="$T38_EVIDENCE_DIR"
-if (t38_finish_rehearsal 'lana_chatbot' 1) >/dev/null 2>&1; then
+if (t38_finish_rehearsal 'lana_chatbot' 1 "$cleanup_token") >/dev/null 2>&1; then
   printf '%s\n' 'broad rehearsal database cleanup target was accepted' >&2
   exit 1
 fi
+TEST_OWNER_COUNT=0
+if (t38_finish_rehearsal "$cleanup_database" 0 "$cleanup_token") >/dev/null 2>&1; then
+  printf '%s\n' 'unowned rehearsal database cleanup was accepted' >&2
+  exit 1
+fi
+TEST_OWNER_COUNT=1
 
 docker() { printf '%s\n' '10.0.0.2' '10.0.0.3'; }
 if (t38_postgres_host) >/dev/null 2>&1; then
