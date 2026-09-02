@@ -71,5 +71,10 @@ jobs:
           node --test deploy/track-b-0037-check-canonicalizer.test.mjs
           bash deploy/track-b-0037-preprod-operator.behavior.test.sh
 
+      - name: Verify Track B 0038 migration operator
+        run: |
+          node deploy/track-b-0038-preprod-operator.test.mjs
+          bash deploy/track-b-0038-preprod-operator.behavior.test.sh
+
       - name: Run repository checks
         run: pnpm check
