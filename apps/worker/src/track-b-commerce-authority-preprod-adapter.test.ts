@@ -113,6 +113,22 @@ describe("Track B PREPROD rollback record store", () => {
 });
 
 describe("Track B PREPROD Docker service boundary", () => {
+  it("requires a valid explicit runtime release id for a legacy OCI-only service", () => {
+    const common = {
+      composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
+      projectDirectory: "/opt/lana-chatbot/current/deploy",
+      startupPackageFile: "/opt/lana-chatbot/shared/df13/previous.json",
+      imageReference: "lana-chatbot-app:track-b-previous",
+      expectedImageId: previousService.imageId,
+      labelPolicy: "OCI_REVISION_ONLY" as const,
+    };
+    expect(() => new DockerComposeTrackBPreprodServiceController(common))
+      .toThrow("TRACK_B_B3_2_RUNTIME_RELEASE_ID_INVALID");
+    expect(() => new DockerComposeTrackBPreprodServiceController({ ...common,
+      runtimeReleaseId: "invalid release id" }))
+      .toThrow("TRACK_B_B3_2_RUNTIME_RELEASE_ID_INVALID");
+  });
+
   it("removes an inherited release override for legacy recovery but pins an exact target", () => {
     const inherited = { PATH: "safe", REALTIME_RELEASE_ID: "stale-operator-value" };
     expect(trackBCommandEnvironmentV1(inherited, {
@@ -145,6 +161,7 @@ describe("Track B PREPROD Docker service boundary", () => {
       projectDirectory: "/opt/lana-chatbot/current/deploy",
       startupPackageFile: "/opt/lana-chatbot/shared/df13/previous.json",
       imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: expected.imageId,
+      runtimeReleaseId: "20260828-df13-preprod-commerce-1111111",
       labelPolicy: "OCI_REVISION_ONLY", run,
     });
     await expect(controller.inspectRunning(expected)).resolves.toEqual(expected);
@@ -483,6 +500,7 @@ describe("Track B PREPROD mutation adapter", () => {
     const currentPriorController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/prior-rev6.json",
       imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+      runtimeReleaseId: "20260828-df13-preprod-commerce-1111111",
       labelPolicy: "OCI_REVISION_ONLY" });
     const targetController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/target-rev7.json",
@@ -490,6 +508,7 @@ describe("Track B PREPROD mutation adapter", () => {
     const reversePriorController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/prior-rev8.json",
       imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+      runtimeReleaseId: "20260828-df13-preprod-commerce-1111111",
       labelPolicy: "OCI_REVISION_ONLY" });
     const service = new TrackBPreprodServicePairController({ previousIdentity: prior,
       targetIdentity: targetService, previous: currentPriorController, target: targetController,
@@ -534,7 +553,8 @@ describe("Track B PREPROD mutation adapter", () => {
       DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE:
         "/opt/lana-chatbot/releases/track-b/prior-rev6.json",
     });
-    expect(composeCalls[0]?.env).not.toHaveProperty("REALTIME_RELEASE_ID");
+    expect(composeCalls[0]?.env).toHaveProperty("REALTIME_RELEASE_ID",
+      "20260828-df13-preprod-commerce-1111111");
     expect(database.proveRuntimeResolution).toHaveBeenCalledWith({ pointer: previous,
       notBefore: expect.any(String) });
     expect(readConsumers).toHaveBeenCalledTimes(1);
@@ -581,6 +601,7 @@ describe("Track B PREPROD mutation adapter", () => {
     const previousController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback.json",
       imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+      runtimeReleaseId: "20260828-df13-preprod-commerce-1111111",
       labelPolicy: "OCI_REVISION_ONLY" });
     const targetController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",

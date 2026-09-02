@@ -8,6 +8,7 @@ import { TRACK_B_RUNTIME_CONFIG_KEYS_V1 } from "./track-b-commerce-authority-pre
 import { createTrackBPreprodOperationStartupPackages, parseTrackBPreprodBuildInput,
   parseTrackBPreprodOperationPacket,
   parseTrackBPreprodPrepareInput,
+  trackBLegacyRuntimeReleaseIdV1,
   validateTrackBPreprodStartupArtifacts } from "./track-b-commerce-authority-preprod-cli.js";
 
 vi.mock("./track-b-release-candidate-evidence.js", async (importOriginal) => ({
@@ -16,6 +17,11 @@ vi.mock("./track-b-release-candidate-evidence.js", async (importOriginal) => ({
     evidence.invalid === true
       ? { status: "MISMATCH", reasonCodes: ["TEST_INVALID_EVIDENCE"] }
       : { status: "MATCHED", reasonCodes: [] }),
+}));
+
+vi.mock("./df13-release-candidate-evidence.js", async (importOriginal) => ({
+  ...await importOriginal<typeof import("./df13-release-candidate-evidence.js")>(),
+  validateDf13ReleaseCandidateEvidence: vi.fn(() => ({ status: "MATCHED", reasonCodes: [] })),
 }));
 
 function pointer(versionId: string, revision: number, authorityBundleHash: string) {
@@ -69,7 +75,50 @@ function packet() {
     .update(canonicalJsonV1(body), "utf8").digest("hex") };
 }
 
+function legacyStartup(activation: ReturnType<typeof packet>):
+  Parameters<typeof trackBLegacyRuntimeReleaseIdV1>[0] {
+  const revision = activation.rollbackRecord.previousService.releaseRevision;
+  return {
+    mode: "COMMERCE" as const,
+    releaseEvidence: {
+      contractVersion: "DF13_RELEASE_CANDIDATE_EVIDENCE_V1",
+      activationReleaseRevision: revision,
+      releaseSource: { resolvedRevision: revision },
+    },
+    expectedAuthority: {
+      pageId: "1198992073286645",
+      channel: "MESSENGER" as const,
+      modeVersionId: activation.previous.version.modeVersionId,
+      contentHash: activation.previous.version.contentHash,
+      pointerRevision: activation.previous.pointerRevision,
+      authorityBundleHash: activation.previous.version.authorityBundleHash,
+      source: "DATABASE" as const,
+    },
+    releaseSource: {
+      schemaVersion: 1 as const,
+      release: "20260828-df13-preprod-commerce-1111111",
+      repository: "https://github.com/nguyentuanson27-netizen/lanchatbot" as const,
+      tag: "20260828-df13-preprod-commerce-1111111",
+      commit: revision,
+      createdAt: "2026-08-28T00:00:00.000Z",
+    },
+  } as unknown as Parameters<typeof trackBLegacyRuntimeReleaseIdV1>[0];
+}
+
 describe("Track B PREPROD operator packet boundary", () => {
+  it("derives the exact legacy runtime release id from immutable evidence-bound startup content", () => {
+    const activation = packet();
+    const startup = legacyStartup(activation);
+    const revision = activation.rollbackRecord.previousService.releaseRevision;
+    expect(trackBLegacyRuntimeReleaseIdV1(startup, revision))
+      .toBe("20260828-df13-preprod-commerce-1111111");
+    expect(() => trackBLegacyRuntimeReleaseIdV1({ ...startup,
+      releaseSource: { ...startup.releaseSource, tag: "substituted-release" } }, revision))
+      .toThrow("TRACK_B_B3_2_LEGACY_RUNTIME_RELEASE_ID_MISMATCH");
+    expect(() => trackBLegacyRuntimeReleaseIdV1(startup, "2".repeat(40)))
+      .toThrow("TRACK_B_B3_2_LEGACY_RUNTIME_RELEASE_ID_MISMATCH");
+  });
+
   it("accepts a fixed-scope build input only with the exact non-secret runtime projection", () => {
     const runtimeConfig = Object.fromEntries(TRACK_B_RUNTIME_CONFIG_KEYS_V1.map((key) => [key, "pinned"]));
     expect(parseTrackBPreprodBuildInput({ schemaVersion: 1, environment: "ENGINEERING_PREPROD",
@@ -126,7 +175,9 @@ describe("Track B PREPROD operator packet boundary", () => {
       previous: activation.target, target: rollbackTarget, releaseEvidence: null,
       sourceStartupPackageFile: activation.operationTargetStartupPackageFile,
       operationTargetStartupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-v1.json",
-      recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-recovery-v2.json" };
+      recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-recovery-v2.json",
+      legacyStartupPackageFile: activation.sourceStartupPackageFile,
+      legacyStartupPackageHash: "e".repeat(64) };
     const rollback = { ...body, packetHash: createHash("sha256")
       .update(canonicalJsonV1(body), "utf8").digest("hex") };
     expect(parseTrackBPreprodOperationPacket(rollback)).toMatchObject({
@@ -199,16 +250,20 @@ describe("Track B PREPROD operator packet boundary", () => {
         pointerRevision: activation.previous.pointerRevision } };
     const canonicalHash = (value: unknown) => createHash("sha256")
       .update(canonicalJsonV1(value), "utf8").digest("hex");
+    const legacy = legacyStartup(activation);
     const { packetHash: _old, ...base } = activation;
     const body = { ...base, sourceStartupPackageHash: canonicalHash(source),
       operationTargetStartupPackageHash: canonicalHash(packages.operationTarget),
-      recoveryStartupPackageHash: canonicalHash(packages.recovery) };
+      recoveryStartupPackageHash: canonicalHash(packages.recovery),
+      legacyStartupPackageFile: "/opt/lana-chatbot/shared/df13/legacy/commerce-startup-v2.json",
+      legacyStartupPackageHash: canonicalHash(legacy) };
     const bound = parseTrackBPreprodOperationPacket({ ...body,
       packetHash: canonicalHash(body) });
     const artifacts = new Map<string, unknown>([
       [bound.sourceStartupPackageFile, source],
       [bound.operationTargetStartupPackageFile, packages.operationTarget],
       [bound.recoveryStartupPackageFile, packages.recovery],
+      [bound.legacyStartupPackageFile!, legacy],
     ]);
     const reader = async (path: string) => artifacts.get(path);
     await expect(validateTrackBPreprodStartupArtifacts(bound, reader)).resolves.toBeUndefined();
@@ -256,6 +311,15 @@ describe("Track B PREPROD operator packet boundary", () => {
       packetHash: canonicalHash(semanticBody) });
     await expect(validateTrackBPreprodStartupArtifacts(semanticPacket, reader))
       .rejects.toThrow("TRACK_B_B3_2_GENERATED_STARTUP_PACKAGE_MISMATCH");
+    artifacts.set(bound.operationTargetStartupPackageFile, packages.operationTarget);
+    const substitutedLegacy = { ...legacy,
+      releaseSource: { ...legacy.releaseSource, tag: "substituted-release" } };
+    artifacts.set(bound.legacyStartupPackageFile!, substitutedLegacy);
+    const legacyDriftBody = { ...body, legacyStartupPackageHash: canonicalHash(substitutedLegacy) };
+    const legacyDriftPacket = parseTrackBPreprodOperationPacket({ ...legacyDriftBody,
+      packetHash: canonicalHash(legacyDriftBody) });
+    await expect(validateTrackBPreprodStartupArtifacts(legacyDriftPacket, reader))
+      .rejects.toThrow("TRACK_B_B3_2_LEGACY_RUNTIME_RELEASE_ID_MISMATCH");
     const substituted = { ...body,
       sourceStartupPackageFile: "/opt/lana-chatbot/releases/track-b/substituted.json" };
     expect(() => parseTrackBPreprodOperationPacket({ ...substituted,
