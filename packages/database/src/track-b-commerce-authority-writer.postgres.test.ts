@@ -74,7 +74,14 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
       previousContentHash]);
     await pool.query(`INSERT INTO runtime_behavior_mode_pointers (
       page_id,channel,active_version_id,pointer_revision,updated_by,reason,updated_at
-    ) VALUES ($1,$2,$3,6,'fixture','fixture',clock_timestamp())`, [pageId, channel, previousVersionId]);
+    ) VALUES ($1,$2,$3,1,'fixture','fixture revision 1',clock_timestamp())`,
+    [pageId, channel, previousVersionId]);
+    for (let revision = 2; revision <= 6; revision += 1) {
+      await pool.query(`UPDATE runtime_behavior_mode_pointers
+        SET pointer_revision=$3,updated_by='fixture',reason=$4
+        WHERE page_id=$1 AND channel=$2`,
+      [pageId, channel, revision, `fixture revision ${revision}`]);
+    }
     writer = new PostgresTrackBCommerceAuthorityWriter(databaseUrl);
     operationId = randomUUID();
     const prepared = await writer.prepareTarget({ pageId, channel,
