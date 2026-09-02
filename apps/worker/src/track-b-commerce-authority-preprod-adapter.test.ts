@@ -16,6 +16,7 @@ import {
   TrackBPreprodServicePairController,
   createTrackBCommerceAuthorityPreprodAdapter,
   trackBBuildIdV1,
+  trackBCommandEnvironmentV1,
   trackBLegacyBuildIdV1,
   trackBRuntimeConfigHashV1,
 } from "./track-b-commerce-authority-preprod-adapter.js";
@@ -112,6 +113,19 @@ describe("Track B PREPROD rollback record store", () => {
 });
 
 describe("Track B PREPROD Docker service boundary", () => {
+  it("removes an inherited release override for legacy recovery but pins an exact target", () => {
+    const inherited = { PATH: "safe", REALTIME_RELEASE_ID: "stale-operator-value" };
+    expect(trackBCommandEnvironmentV1(inherited, {
+      REALTIME_IMAGE: "lana-chatbot-app:track-b-previous",
+    })).toEqual({ PATH: "safe", REALTIME_IMAGE: "lana-chatbot-app:track-b-previous" });
+    expect(trackBCommandEnvironmentV1(inherited, {
+      REALTIME_IMAGE: "lana-chatbot-app:track-b-target",
+      REALTIME_RELEASE_ID: targetService.releaseRevision,
+    })).toEqual({ PATH: "safe", REALTIME_IMAGE: "lana-chatbot-app:track-b-target",
+      REALTIME_RELEASE_ID: targetService.releaseRevision });
+    expect(inherited.REALTIME_RELEASE_ID).toBe("stale-operator-value");
+  });
+
   it("derives the unlabeled prior build identity from exact observed OCI, image and safe config", async () => {
     const config = { ...targetRuntimeConfig, REALTIME_RELEASE_ID: previousService.releaseRevision };
     const runtimeConfigHash = trackBRuntimeConfigHashV1(config);

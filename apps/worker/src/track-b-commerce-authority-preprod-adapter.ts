@@ -209,6 +209,17 @@ export type TrackBServiceCommandRunner = (
   environment: Readonly<Record<string, string>>,
 ) => Promise<string>;
 
+export function trackBCommandEnvironmentV1(
+  inherited: Readonly<NodeJS.ProcessEnv>,
+  overrides: Readonly<Record<string, string>>,
+): NodeJS.ProcessEnv {
+  const environment = { ...inherited, ...overrides };
+  if (!Object.hasOwn(overrides, "REALTIME_RELEASE_ID")) {
+    delete environment.REALTIME_RELEASE_ID;
+  }
+  return environment;
+}
+
 export class TrackBPreprodImageBuilder {
   readonly #run: TrackBServiceCommandRunner;
 
@@ -263,7 +274,7 @@ async function defaultRunner(
 ): Promise<string> {
   const result = await execFile(command, [...args], {
     encoding: "utf8",
-    env: { ...process.env, ...environment },
+    env: trackBCommandEnvironmentV1(process.env, environment),
     windowsHide: true,
     maxBuffer: 1024 * 1024,
   });
