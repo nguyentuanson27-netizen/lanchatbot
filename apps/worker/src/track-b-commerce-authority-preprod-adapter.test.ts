@@ -2,8 +2,10 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
+import { behaviorModeContentHash } from "@lana/chat-runtime";
 import {
   createTrackBReleaseLocalRollbackRecord,
+  executeTrackBCommerceAuthorityMutation,
   type TrackBServiceReleaseIdentity,
 } from "./track-b-commerce-authority-activation.js";
 import {
@@ -17,6 +19,13 @@ import {
   trackBLegacyBuildIdV1,
   trackBRuntimeConfigHashV1,
 } from "./track-b-commerce-authority-preprod-adapter.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
+  DF13_COMMERCE_AUTHORITY_BUNDLE_V2 } from "./df13-commerce-authority-bundle.js";
+
+vi.mock("./track-b-release-candidate-evidence.js", async (importOriginal) => ({
+  ...await importOriginal<typeof import("./track-b-release-candidate-evidence.js")>(),
+  validateTrackBReleaseCandidateEvidence: vi.fn(() => ({ status: "MATCHED", reasonCodes: [] })),
+}));
 
 const targetRuntimeConfig = Object.assign(
   Object.fromEntries(TRACK_B_RUNTIME_CONFIG_KEYS_V1.map((key) => [key, "false"])), {
@@ -51,6 +60,16 @@ const targetService: TrackBServiceReleaseIdentity = {
   imageId: "7".repeat(64),
   runtimeConfigHash: trackBRuntimeConfigHashV1(targetRuntimeConfig),
 };
+
+function pointer(modeVersionId: string, pointerRevision: number, authorityBundleHash: string) {
+  const payload = { confirmationMode: "V2_ACTIVE" as const, salesAuthorityMode: "COMMERCE" as const,
+    stateReadMode: "LEGACY" as const, authorityBundleHash };
+  return { version: { schemaVersion: 1 as const, modeVersionId,
+    pageId: "1198992073286645", channel: "MESSENGER", ...payload,
+    contentHash: behaviorModeContentHash(payload), createdBy: "operator", reason: "prepared",
+    createdAt: "2026-09-02T00:00:00.000Z" }, pointerRevision,
+  updatedBy: "operator", reason: "active", updatedAt: "2026-09-02T00:00:00.000Z" };
+}
 const rollbackRecord = createTrackBReleaseLocalRollbackRecord({
   selectedSourceCommit: targetService.releaseRevision,
   previousService,
@@ -365,6 +384,108 @@ describe("Track B PREPROD Docker service boundary", () => {
 });
 
 describe("Track B PREPROD mutation adapter", () => {
+  it("recovers an exact stopped V1 source before CAS and releases only after runtime and consumers converge", async () => {
+    const priorConfig = { ...targetRuntimeConfig, REALTIME_RELEASE_ID: previousService.releaseRevision };
+    const priorRuntimeConfigHash = trackBRuntimeConfigHashV1(priorConfig);
+    const prior = { ...previousService, runtimeConfigHash: priorRuntimeConfigHash,
+      buildId: trackBLegacyBuildIdV1({ sourceCommit: previousService.releaseRevision,
+        imageId: previousService.imageId, runtimeConfigHash: priorRuntimeConfigHash }) };
+    const previous = pointer("10000000-0000-4000-8000-000000000001", 6,
+      DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash);
+    const target = pointer("10000000-0000-4000-8000-000000000002", 7,
+      DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash);
+    const record = createTrackBReleaseLocalRollbackRecord({ selectedSourceCommit: targetService.releaseRevision,
+      previousService: prior, targetService,
+      previousAuthority: { modeVersionId: previous.version.modeVersionId,
+        contentHash: previous.version.contentHash, bundleHash: previous.version.authorityBundleHash },
+      targetAuthority: { modeVersionId: target.version.modeVersionId,
+        contentHash: target.version.contentHash, bundleHash: target.version.authorityBundleHash } });
+    let main = { identity: prior, status: "running" };
+    let staged: TrackBServiceReleaseIdentity | null = null;
+    const composeStartupFiles: string[] = [];
+    const run = vi.fn(async (_command: string, args: readonly string[], env: Record<string, string>) => {
+      const tag = String(args.at(-1));
+      const expected = tag.includes("previous") ? prior : targetService;
+      if (args[0] === "image") return JSON.stringify({ Id: `sha256:${expected.imageId}`,
+        Config: { Labels: { "org.opencontainers.image.revision": expected.releaseRevision,
+          ...(expected === targetService ? { "com.lana.build-id": expected.buildId,
+            "com.lana.runtime-config-hash": expected.runtimeConfigHash } : {}) } } });
+      if (args[0] === "ps") return String(args[3]).includes("track-b-staged")
+        ? staged ? "staged-id" : "" : "main-id";
+      if (args[0] === "create") { staged = expected; return "staged-id"; }
+      if (args[0] === "rm") { staged = null; return "staged-id"; }
+      if (args[0] === "stop") { main = { ...main, status: "exited" }; return "container"; }
+      if (args[0] === "compose") {
+        composeStartupFiles.push(env.DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE ?? "");
+        main = { identity: prior, status: "running" }; return "";
+      }
+      if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
+        .map((key) => priorConfig[key]).join("\n");
+      const stagedInspect = args.at(-1) === "lana-chatbot-track-b-staged-realtime-worker";
+      const observed = stagedInspect ? staged : main.identity;
+      return JSON.stringify({ Image: `sha256:${observed?.imageId}`, RestartCount: 0,
+        State: { Status: stagedInspect ? "created" : main.status, Health: { Status: "healthy" } },
+        Config: { Labels: { "org.opencontainers.image.revision": observed?.releaseRevision,
+          ...(observed === targetService ? { "com.lana.build-id": observed.buildId,
+            "com.lana.runtime-config-hash": observed.runtimeConfigHash } : {}),
+          ...(stagedInspect ? { "com.lana.track-b.stage": "TRACK_B_B3_2_STOPPED_NON_ADMITTING" } : {}) } } });
+    });
+    const common = { composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
+      projectDirectory: "/opt/lana-chatbot/current/deploy", run };
+    const currentPriorController = new DockerComposeTrackBPreprodServiceController({ ...common,
+      startupPackageFile: "/opt/lana-chatbot/releases/track-b/prior-rev6.json",
+      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+      labelPolicy: "OCI_REVISION_ONLY" });
+    const targetController = new DockerComposeTrackBPreprodServiceController({ ...common,
+      startupPackageFile: "/opt/lana-chatbot/releases/track-b/target-rev7.json",
+      imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId });
+    const reversePriorController = new DockerComposeTrackBPreprodServiceController({ ...common,
+      startupPackageFile: "/opt/lana-chatbot/releases/track-b/prior-rev8.json",
+      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+      labelPolicy: "OCI_REVISION_ONLY" });
+    const service = new TrackBPreprodServicePairController({ previousIdentity: prior,
+      targetIdentity: targetService, previous: currentPriorController, target: targetController,
+      startRoutes: [
+        { identity: prior, pointer: previous, controller: currentPriorController },
+        { identity: targetService, pointer: target, controller: targetController },
+        { identity: prior, pointer: { ...previous, pointerRevision: 8 }, controller: reversePriorController },
+      ] });
+    const lease = { fenceId: "20000000-0000-4000-8000-000000000001",
+      fenceToken: "30000000-0000-4000-8000-000000000001", epoch: 1 };
+    const releaseFence = vi.fn(async () => ({ status: "RELEASED" as const }));
+    const database = { acquireFence: vi.fn(async () => ({ status: "HELD" as const, lease })),
+      releaseFence, readAdmissionHold: vi.fn(async () => ({ status: "HELD" as const,
+        source: "DATABASE" as const, pageId: "1198992073286645", channel: "MESSENGER",
+        fenceId: lease.fenceId, epoch: 1, released: false,
+        guardedClaims: ["webhook_inbox:PROCESSING", "meta_outbox:SENDING",
+          "pancake_tag_outbox:APPLYING"] })),
+      readQuiescence: vi.fn(async () => ({ activeInbox: 0, activeMetaOutbox: 0,
+        activePancakeOutbox: 0, inFlightAuthorityDependentWork: 0,
+        queuedAuthorityDependentWork: 0 })),
+      mutateExactPointer: vi.fn(async () => ({ status: "CAS_MISMATCH" as const })),
+      readActivePointer: vi.fn(async () => previous), readActivationAudit: vi.fn(),
+      proveRuntimeResolution: vi.fn(async () => "EXACT" as const), readExactVersion: vi.fn() };
+    const ports = createTrackBCommerceAuthorityPreprodAdapter({ database, service,
+      rollbackStore: { read: vi.fn(async () => record), persist: vi.fn() },
+      quiescence: { timeoutMs: 10, pollMs: 1, wait: async () => undefined } });
+    const readConsumers = vi.fn(ports.readConsumerAuthorities);
+    const observedPorts = { ...ports, readConsumerAuthorities: readConsumers };
+    await expect(executeTrackBCommerceAuthorityMutation({ operationId:
+      "40000000-0000-4000-8000-000000000001", direction: "ACTIVATE_TRACK_B", previous,
+    target, rollbackRecord: record, releaseEvidence: {
+      activationReleaseRevision: targetService.releaseRevision } as never,
+    ports: observedPorts })).resolves.toEqual({
+      status: "BLOCKED_PREVIOUS", sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_POINTER_NOT_MUTATED"],
+    });
+    expect(main).toEqual({ identity: prior, status: "running" });
+    expect(composeStartupFiles).toEqual(["/opt/lana-chatbot/releases/track-b/prior-rev6.json"]);
+    expect(database.proveRuntimeResolution).toHaveBeenCalledWith({ pointer: previous,
+      notBefore: expect.any(String) });
+    expect(readConsumers).toHaveBeenCalledTimes(1);
+    expect(releaseFence).toHaveBeenCalledWith(lease);
+  });
+
   it("restages and restarts the exact prior service through concrete controllers after target failure", async () => {
     const priorConfig = { ...targetRuntimeConfig, REALTIME_RELEASE_ID: previousService.releaseRevision };
     const priorRuntimeConfigHash = trackBRuntimeConfigHashV1(priorConfig);
@@ -399,15 +520,22 @@ describe("Track B PREPROD mutation adapter", () => {
     });
     const common = { composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
       projectDirectory: "/opt/lana-chatbot/current/deploy", run };
+    const previousController = new DockerComposeTrackBPreprodServiceController({ ...common,
+      startupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback.json",
+      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+      labelPolicy: "OCI_REVISION_ONLY" });
+    const targetController = new DockerComposeTrackBPreprodServiceController({ ...common,
+      startupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",
+      imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId });
+    const recoveryPointer = { pointerRevision: 8 } as never;
     const service = new TrackBPreprodServicePairController({ previousIdentity: prior,
       targetIdentity: targetService,
-      previous: new DockerComposeTrackBPreprodServiceController({ ...common,
-        startupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback.json",
-        imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
-        labelPolicy: "OCI_REVISION_ONLY" }),
-      target: new DockerComposeTrackBPreprodServiceController({ ...common,
-        startupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",
-        imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId }) });
+      previous: previousController, target: targetController,
+      startRoutes: [
+        { identity: prior, pointer: { pointerRevision: 6 } as never, controller: previousController },
+        { identity: targetService, pointer: { pointerRevision: 7 } as never, controller: targetController },
+        { identity: prior, pointer: recoveryPointer, controller: previousController },
+      ] });
     const held = { status: "HELD" as const, source: "DATABASE" as const,
       pageId: "1198992073286645", channel: "MESSENGER", fenceId:
         "20000000-0000-4000-8000-000000000001", epoch: 1, released: false,
@@ -421,7 +549,7 @@ describe("Track B PREPROD mutation adapter", () => {
       quiescence: { timeoutMs: 1, pollMs: 1, wait: async () => undefined } });
     await expect(adapter.restorePreviousService({ lease: { fenceId: held.fenceId,
       fenceToken: "30000000-0000-4000-8000-000000000001", epoch: 1 },
-    failedService: targetService, previousService: prior })).resolves.toEqual({
+    failedService: targetService, previousService: prior, pointer: recoveryPointer })).resolves.toEqual({
       status: "HEALTHY", admission: "HELD", observedService: prior });
     expect(main).toEqual({ identity: prior, status: "running" });
   });
@@ -448,11 +576,13 @@ describe("Track B PREPROD mutation adapter", () => {
       quiescence: { timeoutMs: 1, pollMs: 1, wait: async () => undefined } });
     await expect(adapter.restorePreviousService({ lease: { fenceId: held.fenceId,
       fenceToken: "30000000-0000-4000-8000-000000000001", epoch: 1 },
-    failedService: targetService, previousService })).resolves.toEqual({
+    failedService: targetService, previousService,
+    pointer: { pointerRevision: 8 } as never })).resolves.toEqual({
       status: "HEALTHY", admission: "HELD", observedService: previousService });
     expect(service.stop).not.toHaveBeenCalled();
     expect(service.stage).toHaveBeenCalledWith(targetService, previousService);
-    expect(service.start).toHaveBeenCalledWith(previousService, "COMMERCE");
+    expect(service.start).toHaveBeenCalledWith(previousService, "COMMERCE",
+      { pointerRevision: 8 });
   });
 
   it("proves admission through the 0038 database boundary and bounded zero-work quiescence", async () => {

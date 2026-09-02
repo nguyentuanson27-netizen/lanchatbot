@@ -486,12 +486,22 @@ export class TrackBPreprodServicePairController implements TrackBPreprodServiceB
   readonly #targetIdentity: TrackBServiceReleaseIdentity;
   readonly #previous: DockerComposeTrackBPreprodServiceController;
   readonly #target: DockerComposeTrackBPreprodServiceController;
+  readonly #startRoutes: readonly Readonly<{
+    identity: TrackBServiceReleaseIdentity;
+    pointer: RuntimeBehaviorModePointer;
+    controller: DockerComposeTrackBPreprodServiceController;
+  }>[];
 
   constructor(input: Readonly<{
     previousIdentity: TrackBServiceReleaseIdentity;
     targetIdentity: TrackBServiceReleaseIdentity;
     previous: DockerComposeTrackBPreprodServiceController;
     target: DockerComposeTrackBPreprodServiceController;
+    startRoutes: readonly Readonly<{
+      identity: TrackBServiceReleaseIdentity;
+      pointer: RuntimeBehaviorModePointer;
+      controller: DockerComposeTrackBPreprodServiceController;
+    }>[];
   }>) {
     if (!validService(input.previousIdentity) || !validService(input.targetIdentity) ||
         exactService(input.previousIdentity, input.targetIdentity)) {
@@ -501,6 +511,18 @@ export class TrackBPreprodServicePairController implements TrackBPreprodServiceB
     this.#targetIdentity = input.targetIdentity;
     this.#previous = input.previous;
     this.#target = input.target;
+    if (input.startRoutes.length < 3 || input.startRoutes.some((route) =>
+      (!exactService(route.identity, input.previousIdentity) &&
+       !exactService(route.identity, input.targetIdentity)) || route.pointer.pointerRevision < 1)) {
+      throw new Error("TRACK_B_B3_2_SERVICE_START_ROUTES_INVALID");
+    }
+    const routeKeys = new Set(input.startRoutes.map((route) => canonicalJsonV1({
+      identity: route.identity, pointer: route.pointer,
+    })));
+    if (routeKeys.size !== input.startRoutes.length) {
+      throw new Error("TRACK_B_B3_2_SERVICE_START_ROUTES_INVALID");
+    }
+    this.#startRoutes = Object.freeze([...input.startRoutes]);
   }
 
   #controller(identity: TrackBServiceReleaseIdentity) {
@@ -514,8 +536,12 @@ export class TrackBPreprodServicePairController implements TrackBPreprodServiceB
   }
   async discard(target: TrackBServiceReleaseIdentity) { return this.#controller(target).discard(target); }
   async stop(expected: TrackBServiceReleaseIdentity) { return this.#controller(expected).stop(expected); }
-  async start(expected: TrackBServiceReleaseIdentity, mode: "COMMERCE") {
-    return this.#controller(expected).start(expected, mode);
+  async start(expected: TrackBServiceReleaseIdentity, mode: "COMMERCE",
+    pointer: RuntimeBehaviorModePointer) {
+    const route = this.#startRoutes.find((candidate) => exactService(candidate.identity, expected) &&
+      canonicalJsonV1(candidate.pointer) === canonicalJsonV1(pointer));
+    if (!route) throw new Error("TRACK_B_B3_2_SERVICE_START_ROUTE_UNKNOWN");
+    return route.controller.start(expected, mode);
   }
   async inspectRunning(expected: TrackBServiceReleaseIdentity) {
     return this.#controller(expected).inspectRunning(expected);
@@ -556,7 +582,8 @@ export interface TrackBPreprodServiceBoundary {
   stage(source: TrackBServiceReleaseIdentity, target: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | "AMBIGUOUS" | null>;
   discard(target: TrackBServiceReleaseIdentity): Promise<"DISCARDED" | "AMBIGUOUS">;
   stop(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null>;
-  start(expected: TrackBServiceReleaseIdentity, mode: "COMMERCE"): Promise<TrackBServiceReleaseIdentity | null>;
+  start(expected: TrackBServiceReleaseIdentity, mode: "COMMERCE",
+    pointer: RuntimeBehaviorModePointer): Promise<TrackBServiceReleaseIdentity | null>;
   inspectRunning(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null>;
   inspectPresent(expected: TrackBServiceReleaseIdentity):
     Promise<TrackBServiceReleaseIdentity | "ABSENT" | "AMBIGUOUS">;
@@ -611,41 +638,35 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
       return { status: await input.service.discard(stagedService) };
     },
     async mutateExactPointer(mutation) {
-      const result = await input.database.mutateExactPointer(mutation);
-      if (result.status === "ACKNOWLEDGED" || result.status === "ACK_LOST") {
-        lastStartedPointer = mutation.target;
-      }
-      return result;
+      return input.database.mutateExactPointer(mutation);
     },
     readActivePointer: input.database.readActivePointer.bind(input.database),
-    async startStagedService({ lease, stagedService }) {
+    async startStagedService({ lease, stagedService, pointer }) {
       const admission = await scopeAdmission(lease);
       if (admission.status !== "HELD") return { status: "BLOCKED", admission: "UNCONTROLLED", observedService: null };
       lastStartedAt = new Date().toISOString();
-      const observed = await input.service.start(stagedService, "COMMERCE");
+      const observed = await input.service.start(stagedService, "COMMERCE", pointer);
       return { status: observed ? "HEALTHY" as const : "BLOCKED" as const,
         admission: "HELD" as const, observedService: observed };
     },
-    async restorePreviousService({ lease, failedService, previousService }) {
+    async restorePreviousService({ lease, failedService, previousService, pointer }) {
       const admission = await scopeAdmission(lease);
       if (admission.status !== "HELD") return { status: "BLOCKED", admission: "UNCONTROLLED", observedService: null };
       const failed = await input.service.inspectPresent(failedService);
-      if (failed === "AMBIGUOUS") {
+      const prior = await input.service.inspectPresent(previousService);
+      const failedExact = failed !== "ABSENT" && failed !== "AMBIGUOUS";
+      const priorExact = prior !== "ABSENT" && prior !== "AMBIGUOUS";
+      if ((failedExact && priorExact) || (!failedExact && !priorExact &&
+          (failed === "AMBIGUOUS" || prior === "AMBIGUOUS"))) {
         return { status: "BLOCKED", admission: "HELD", observedService: null };
       }
-      const prior = failed === "ABSENT"
-        ? await input.service.inspectPresent(previousService) : "ABSENT";
-      if (prior === "AMBIGUOUS") {
-        return { status: "BLOCKED", admission: "HELD", observedService: null };
-      }
-      if (failed === "ABSENT") {
+      if (!failedExact) {
         const discarded = await input.service.discard(failedService);
         if (discarded !== "DISCARDED") {
           return { status: "BLOCKED", admission: "HELD", observedService: null };
         }
       }
-      const serviceToStop = failed !== "ABSENT"
-        ? failedService : prior !== "ABSENT" ? previousService : null;
+      const serviceToStop = failedExact ? failedService : priorExact ? previousService : null;
       if (serviceToStop !== null && !await input.service.stop(serviceToStop)) {
         return { status: "BLOCKED", admission: "HELD", observedService: null };
       }
@@ -654,7 +675,7 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
         return { status: "BLOCKED", admission: "HELD", observedService: null };
       }
       lastStartedAt = new Date().toISOString();
-      const observed = await input.service.start(previousService, "COMMERCE");
+      const observed = await input.service.start(previousService, "COMMERCE", pointer);
       return { status: observed ? "HEALTHY" as const : "BLOCKED" as const,
         admission: "HELD" as const, observedService: observed };
     },
@@ -664,6 +685,7 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
       const proof = lastStartedAt === null ? "MISSING" :
         await input.database.proveRuntimeResolution({ pointer, notBefore: lastStartedAt });
       const exact = admission.status === "HELD" && exactService(observedService, service) && proof === "EXACT";
+      if (exact) lastStartedPointer = pointer;
       return { status: exact ? "EXACT" : "AMBIGUOUS", service: observedService,
         modeVersionId: exact ? pointer.version.modeVersionId : null,
         contentHash: exact ? pointer.version.contentHash : null,

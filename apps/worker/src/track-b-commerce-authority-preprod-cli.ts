@@ -83,8 +83,9 @@ export type TrackBPreprodOperationPacket = Readonly<{
   targetImageTag: string;
   releaseTag: string;
   releaseCreatedAt: string;
-  previousStartupPackageFile: string;
-  targetStartupPackageFile: string;
+  sourceStartupPackageFile: string;
+  operationTargetStartupPackageFile: string;
+  recoveryStartupPackageFile: string;
   releaseEvidence: TrackBReleaseCandidateEvidence | null;
   packetHash: string;
 }>;
@@ -215,8 +216,8 @@ export function parseTrackBPreprodOperationPacket(value: unknown): TrackBPreprod
   if (!exactKeys(packet, ["schemaVersion", "contractVersion", "environment", "pageId", "channel",
     "operationId", "direction", "previous", "target", "rollbackRecord", "previousImageTag", "targetImageTag",
     "releaseTag", "releaseCreatedAt",
-    "previousStartupPackageFile",
-    "targetStartupPackageFile", "releaseEvidence", "packetHash"]) ||
+    "sourceStartupPackageFile", "operationTargetStartupPackageFile",
+    "recoveryStartupPackageFile", "releaseEvidence", "packetHash"]) ||
       packet.schemaVersion !== 1 || packet.contractVersion !== "TRACK_B_B3_2_PREPROD_OPERATION_PACKET_V1" ||
       packet.environment !== "ENGINEERING_PREPROD" || packet.pageId !== TRACK_B_PREPROD_FIXED_SCOPE.pageId ||
       packet.channel !== "MESSENGER" || typeof packet.operationId !== "string" ||
@@ -226,8 +227,10 @@ export function parseTrackBPreprodOperationPacket(value: unknown): TrackBPreprod
       !SHA256.test(packet.packetHash)) throw new Error("TRACK_B_B3_2_OPERATION_PACKET_INVALID");
   const { packetHash, ...body } = packet;
   if (hash(body) !== packetHash) throw new Error("TRACK_B_B3_2_OPERATION_PACKET_HASH_MISMATCH");
-  previousStartupPath(packet.previousStartupPackageFile);
-  startupPath(packet.targetStartupPackageFile);
+  if (packet.direction === "ACTIVATE_TRACK_B") previousStartupPath(packet.sourceStartupPackageFile);
+  else startupPath(packet.sourceStartupPackageFile);
+  startupPath(packet.operationTargetStartupPackageFile);
+  startupPath(packet.recoveryStartupPackageFile);
   imageTag(packet.previousImageTag);
   imageTag(packet.targetImageTag);
   releaseTag(packet.releaseTag);
@@ -454,10 +457,10 @@ async function prepare(inputPath: string): Promise<void> {
       targetImageTag: input.targetImageTag,
       releaseTag: input.releaseTag,
       releaseCreatedAt: input.releaseCreatedAt,
-      previousStartupPackageFile: input.direction === "ACTIVATE_TRACK_B"
-        ? input.recoveryStartupPackageFile : operationTargetStartupPath,
-      targetStartupPackageFile: input.direction === "ACTIVATE_TRACK_B"
-        ? operationTargetStartupPath : input.recoveryStartupPackageFile,
+      sourceStartupPackageFile: input.direction === "ACTIVATE_TRACK_B"
+        ? input.previousStartupPackageFile : input.targetStartupPackageFile,
+      operationTargetStartupPackageFile: operationTargetStartupPath,
+      recoveryStartupPackageFile: input.recoveryStartupPackageFile,
       releaseEvidence: input.direction === "ACTIVATE_TRACK_B" ? input.releaseEvidence : null,
     };
     const packet = { ...body, packetHash: hash(body) };
@@ -487,19 +490,41 @@ async function runPacket(packetPath: string, recovery: boolean): Promise<void> {
     projectDirectory: TRACK_B_PREPROD_FIXED_SCOPE.projectDirectory,
   };
   const previousController = new DockerComposeTrackBPreprodServiceController({ ...common,
-    startupPackageFile: packet.previousStartupPackageFile,
+    startupPackageFile: packet.direction === "ACTIVATE_TRACK_B"
+      ? packet.sourceStartupPackageFile : packet.operationTargetStartupPackageFile,
     imageReference: packet.previousImageTag,
     expectedImageId: packet.rollbackRecord.previousService.imageId,
     labelPolicy: "OCI_REVISION_ONLY" });
   const targetController = new DockerComposeTrackBPreprodServiceController({ ...common,
-    startupPackageFile: packet.targetStartupPackageFile,
+    startupPackageFile: packet.direction === "ACTIVATE_TRACK_B"
+      ? packet.operationTargetStartupPackageFile : packet.sourceStartupPackageFile,
     imageReference: packet.targetImageTag,
     expectedImageId: packet.rollbackRecord.targetService.imageId });
+  const recoveryController = new DockerComposeTrackBPreprodServiceController({ ...common,
+    startupPackageFile: packet.recoveryStartupPackageFile,
+    imageReference: packet.direction === "ACTIVATE_TRACK_B"
+      ? packet.previousImageTag : packet.targetImageTag,
+    expectedImageId: packet.direction === "ACTIVATE_TRACK_B"
+      ? packet.rollbackRecord.previousService.imageId : packet.rollbackRecord.targetService.imageId,
+    ...(packet.direction === "ACTIVATE_TRACK_B" ? { labelPolicy: "OCI_REVISION_ONLY" as const } : {}),
+  });
+  const sourceIdentity = packet.direction === "ACTIVATE_TRACK_B"
+    ? packet.rollbackRecord.previousService : packet.rollbackRecord.targetService;
+  const operationTargetIdentity = packet.direction === "ACTIVATE_TRACK_B"
+    ? packet.rollbackRecord.targetService : packet.rollbackRecord.previousService;
+  const sourceController = packet.direction === "ACTIVATE_TRACK_B" ? previousController : targetController;
+  const operationTargetController = packet.direction === "ACTIVATE_TRACK_B" ? targetController : previousController;
+  const recoveryPointer = { ...packet.previous, pointerRevision: packet.target.pointerRevision + 1 };
   const service = new TrackBPreprodServicePairController({
     previousIdentity: packet.rollbackRecord.previousService,
     targetIdentity: packet.rollbackRecord.targetService,
     previous: previousController,
     target: targetController,
+    startRoutes: [
+      { identity: sourceIdentity, pointer: packet.previous, controller: sourceController },
+      { identity: operationTargetIdentity, pointer: packet.target, controller: operationTargetController },
+      { identity: sourceIdentity, pointer: recoveryPointer, controller: recoveryController },
+    ],
   });
   const rollbackStore = new ReleaseLocalRollbackRecordStore(ROLLBACK_ROOT);
   const ports = createTrackBCommerceAuthorityPreprodAdapter({ database, service, rollbackStore,

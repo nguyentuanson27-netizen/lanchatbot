@@ -127,6 +127,7 @@ export interface TrackBCommerceAuthorityMutationPorts {
     direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
     lease: Df13CommerceCutoverFenceLease;
     stagedService: TrackBServiceReleaseIdentity;
+    pointer: RuntimeBehaviorModePointer;
   }>): Promise<Readonly<{
     status: "HEALTHY" | "BLOCKED";
     admission: "HELD" | "UNCONTROLLED";
@@ -136,6 +137,7 @@ export interface TrackBCommerceAuthorityMutationPorts {
     lease: Df13CommerceCutoverFenceLease;
     failedService: TrackBServiceReleaseIdentity;
     previousService: TrackBServiceReleaseIdentity;
+    pointer: RuntimeBehaviorModePointer;
   }>): Promise<Readonly<{
     status: "HEALTHY" | "BLOCKED";
     admission: "HELD" | "UNCONTROLLED";
@@ -498,6 +500,7 @@ async function recoverBeforeCas(input: Readonly<{
       lease: input.lease,
       failedService: input.stagedService,
       previousService: input.priorService,
+      pointer: input.pointer,
     });
   } catch {
     return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
@@ -581,6 +584,7 @@ async function completeRestoredServiceRecovery(input: Readonly<{
       lease: input.lease,
       failedService: input.failedService,
       previousService: input.priorService,
+      pointer: input.restored,
     });
   } catch {
     return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
@@ -779,6 +783,7 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
   try {
     started = await input.ports.startStagedService({
       direction: input.direction, lease: acquired.lease, stagedService: expectedService,
+      pointer: input.target,
     });
   } catch {
     started = { status: "BLOCKED", admission: "HELD", observedService: null };

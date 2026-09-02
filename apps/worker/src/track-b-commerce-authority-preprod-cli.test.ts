@@ -51,8 +51,9 @@ function packet() {
     targetImageTag: "lana-chatbot-app:track-b-target",
     releaseTag: "track-b-v22-release",
     releaseCreatedAt: "2026-09-02T00:00:00.000Z",
-    previousStartupPackageFile: "/opt/lana-chatbot/releases/track-b/previous.json",
-    targetStartupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",
+    sourceStartupPackageFile: "/opt/lana-chatbot/releases/track-b/previous.json",
+    operationTargetStartupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",
+    recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/recovery.json",
     releaseEvidence: { activationReleaseRevision: "5".repeat(40) },
   };
   return { ...body, packetHash: createHash("sha256")
@@ -91,7 +92,7 @@ describe("Track B PREPROD operator packet boundary", () => {
     expect(() => parseTrackBPreprodOperationPacket({ ...packet(), operationId:
       "20000000-0000-4000-8000-000000000001" }))
       .toThrow("TRACK_B_B3_2_OPERATION_PACKET_HASH_MISMATCH");
-    const { packetHash: _old, ...body } = { ...packet(), targetStartupPackageFile:
+    const { packetHash: _old, ...body } = { ...packet(), operationTargetStartupPackageFile:
       "/opt/lana-chatbot/releases/track-b/../secrets.json" };
     const changed = { ...body, packetHash: createHash("sha256")
       .update(canonicalJsonV1(body), "utf8").digest("hex") };
@@ -114,7 +115,9 @@ describe("Track B PREPROD operator packet boundary", () => {
     const { packetHash: _old, ...activationBody } = activation;
     const body = { ...activationBody, direction: "ROLLBACK_TRACK_B",
       previous: activation.target, target: rollbackTarget, releaseEvidence: null,
-      previousStartupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-v1.json" };
+      sourceStartupPackageFile: activation.operationTargetStartupPackageFile,
+      operationTargetStartupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-v1.json",
+      recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-recovery-v2.json" };
     const rollback = { ...body, packetHash: createHash("sha256")
       .update(canonicalJsonV1(body), "utf8").digest("hex") };
     expect(parseTrackBPreprodOperationPacket(rollback)).toMatchObject({
@@ -133,8 +136,8 @@ describe("Track B PREPROD operator packet boundary", () => {
       previousImageTag: activationPacket.previousImageTag,
       targetImageTag: activationPacket.targetImageTag, releaseTag: activationPacket.releaseTag,
       releaseCreatedAt: activationPacket.releaseCreatedAt,
-      previousStartupPackageFile: activationPacket.previousStartupPackageFile,
-      targetStartupPackageFile: activationPacket.targetStartupPackageFile,
+      previousStartupPackageFile: activationPacket.sourceStartupPackageFile,
+      targetStartupPackageFile: activationPacket.operationTargetStartupPackageFile,
       rollbackRecordHash: null,
       recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/recovery.json",
       releaseEvidence: activationPacket.releaseEvidence };
