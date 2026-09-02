@@ -384,7 +384,7 @@ describe("Track B PREPROD Docker service boundary", () => {
     await expect(controller.inspectRunning(targetService)).resolves.toBeNull();
   });
 
-  it("can stop the exact failed target by image identity even when runtime config readback failed", async () => {
+  it("can stop an exact restarting service by image identity before reviewed recovery", async () => {
     let stopped = false;
     const run = vi.fn(async (_command: string, args: readonly string[]) => {
       if (args[0] === "image") return JSON.stringify({ Id: `sha256:${targetService.imageId}`,
@@ -393,7 +393,7 @@ describe("Track B PREPROD Docker service boundary", () => {
           "com.lana.runtime-config-hash": targetService.runtimeConfigHash } } });
       if (args[0] === "stop") { stopped = true; return "lana-chatbot-realtime-worker"; }
       return JSON.stringify({ Image: `sha256:${targetService.imageId}`, RestartCount: 0,
-        State: { Status: stopped ? "exited" : "running", Health: { Status: "unhealthy" } },
+        State: { Status: stopped ? "exited" : "restarting", Health: { Status: "unhealthy" } },
         Config: { Labels: { "org.opencontainers.image.revision": targetService.releaseRevision,
           "com.lana.build-id": targetService.buildId,
           "com.lana.runtime-config-hash": targetService.runtimeConfigHash } } });
