@@ -185,6 +185,9 @@ export class PostgresTrackBCommerceAuthorityWriter {
     }
     this.#admissionSchema = admissionSchema;
     this.#pool = new Pool({ connectionString, max: 1 });
+    // pg emits idle-client failures on the pool. Keep the process alive while
+    // individual in-flight operations continue to reject fail-closed.
+    this.#pool.on("error", () => undefined);
   }
 
   async close(): Promise<void> {
