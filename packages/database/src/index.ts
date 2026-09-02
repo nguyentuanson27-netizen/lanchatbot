@@ -12,6 +12,7 @@ export {
 } from "./df13-commerce-fence.js";
 export {
   createDf13CommerceCutoverFencePort,
+  PostgresDf13CommerceCutoverFenceStore,
   type Df13CommerceCutoverFenceAcquireResult,
   type Df13CommerceCutoverFenceLease,
   type Df13CommerceCutoverFenceObservation,

@@ -191,6 +191,137 @@ export class PostgresTrackBCommerceAuthorityWriter {
     await this.#pool.end();
   }
 
+  async readOperationalQuiescence(input: Readonly<{
+    pageId: string;
+    channel: string;
+  }>): Promise<Readonly<{
+    activeInbox: number;
+    activeMetaOutbox: number;
+    activePancakeOutbox: number;
+    inFlightAuthorityDependentWork: number;
+    queuedAuthorityDependentWork: number;
+  }>> {
+    requiredScope(input.pageId, input.channel);
+    const result = await this.#pool.query(
+      `SELECT
+         (SELECT count(*) FROM webhook_inbox WHERE page_id=$1 AND status='PROCESSING') AS active_inbox,
+         (SELECT count(*) FROM meta_outbox WHERE page_id=$1 AND status='SENDING') AS active_meta_outbox,
+         (SELECT count(*) FROM pancake_tag_outbox WHERE page_id=$1 AND status='APPLYING') AS active_pancake_outbox,
+         (SELECT count(*) FROM webhook_inbox WHERE page_id=$1
+           AND status IN ('VERIFIED','QUEUED','FAILED_RETRYABLE')) AS queued_inbox,
+         (SELECT count(*) FROM meta_outbox WHERE page_id=$1
+           AND status IN ('PENDING','RETRYABLE')) AS queued_meta_outbox,
+         (SELECT count(*) FROM pancake_tag_outbox WHERE page_id=$1
+           AND status IN ('PENDING','RETRYABLE')) AS queued_pancake_outbox`,
+      [PAGE_ID],
+    );
+    const row = result.rows[0] as Row | undefined;
+    const count = (name: string): number => {
+      const value = Number(row?.[name]);
+      if (!Number.isSafeInteger(value) || value < 0) {
+        throw new Error("TRACK_B_B3_2_QUIESCENCE_READBACK_INVALID");
+      }
+      return value;
+    };
+    const activeInbox = count("active_inbox");
+    const activeMetaOutbox = count("active_meta_outbox");
+    const activePancakeOutbox = count("active_pancake_outbox");
+    const queuedInbox = count("queued_inbox");
+    const queuedMetaOutbox = count("queued_meta_outbox");
+    const queuedPancakeOutbox = count("queued_pancake_outbox");
+    return Object.freeze({
+      activeInbox,
+      activeMetaOutbox,
+      activePancakeOutbox,
+      inFlightAuthorityDependentWork: activeInbox + activeMetaOutbox + activePancakeOutbox,
+      queuedAuthorityDependentWork: queuedInbox + queuedMetaOutbox + queuedPancakeOutbox,
+    });
+  }
+
+  async readExactActivationAudit(input: Readonly<{
+    pageId: string;
+    channel: string;
+    pointerRevision: number;
+    previousVersionId: string;
+    previousContentHash: string;
+    targetVersionId: string;
+    targetContentHash: string;
+    actor: "TRACK_B_B3_2_WRITER";
+    reason: string;
+  }>): Promise<"EXACT" | "MISSING" | "AMBIGUOUS"> {
+    requiredScope(input.pageId, input.channel);
+    const result = await this.#pool.query(
+      `SELECT
+         count(*) FILTER (WHERE audit.previous_version_id=$4 AND audit.new_version_id=$5
+           AND previous.content_hash=$6 AND target.content_hash=$7
+           AND audit.actor=$8 AND audit.reason=$9)::text AS exact_count,
+         count(*) FILTER (WHERE NOT (audit.previous_version_id=$4 AND audit.new_version_id=$5
+           AND previous.content_hash=$6 AND target.content_hash=$7
+           AND audit.actor=$8 AND audit.reason=$9))::text AS conflicting_count
+         FROM runtime_behavior_mode_activation_audit AS audit
+         JOIN runtime_behavior_mode_versions AS previous
+           ON previous.mode_version_id=audit.previous_version_id
+         JOIN runtime_behavior_mode_versions AS target
+           ON target.mode_version_id=audit.new_version_id
+        WHERE audit.page_id=$1 AND audit.channel=$2 AND audit.new_pointer_revision=$3`,
+      [PAGE_ID, CHANNEL, requiredRevision(input.pointerRevision),
+        requiredUuid(input.previousVersionId, "TRACK_B_B3_2_VERSION_INVALID"),
+        requiredUuid(input.targetVersionId, "TRACK_B_B3_2_VERSION_INVALID"),
+        requiredContentHash(input.previousContentHash), requiredContentHash(input.targetContentHash),
+        input.actor, input.reason],
+    );
+    const row = result.rows[0] as Row | undefined;
+    const exactCount = Number(row?.exact_count);
+    const conflictingCount = Number(row?.conflicting_count);
+    if (!Number.isSafeInteger(exactCount) || !Number.isSafeInteger(conflictingCount) ||
+        exactCount < 0 || conflictingCount < 0) return "AMBIGUOUS";
+    return exactCount === 1 && conflictingCount === 0
+      ? "EXACT" : exactCount === 0 && conflictingCount === 0 ? "MISSING" : "AMBIGUOUS";
+  }
+
+  async readExactRuntimeResolution(input: Readonly<{
+    pageId: string;
+    channel: string;
+    modeVersionId: string;
+    contentHash: string;
+    pointerRevision: number;
+    authorityBundleHash: string;
+    workerId: string;
+    notBefore: string;
+  }>): Promise<"EXACT" | "MISSING" | "AMBIGUOUS"> {
+    requiredScope(input.pageId, input.channel);
+    const notBefore = new Date(input.notBefore);
+    if (!Number.isFinite(notBefore.getTime()) || input.workerId !== "realtime-worker-1") {
+      throw new Error("TRACK_B_B3_2_RUNTIME_READBACK_INPUT_INVALID");
+    }
+    const result = await this.#pool.query(
+      `SELECT
+         count(*) FILTER (WHERE audit.mode_version_id=$3 AND audit.content_hash=$4
+           AND audit.pointer_revision=$5 AND version.authority_bundle_hash=$7
+           AND audit.source='DATABASE' AND audit.status='RESOLVED'
+           AND audit.reason_codes='{}'::text[])::text AS exact_count,
+         count(*) FILTER (WHERE NOT (audit.mode_version_id=$3 AND audit.content_hash=$4
+           AND audit.pointer_revision=$5 AND version.authority_bundle_hash=$7
+           AND audit.source='DATABASE' AND audit.status='RESOLVED'
+           AND audit.reason_codes='{}'::text[]))::text AS conflicting_count
+         FROM runtime_behavior_mode_resolution_audit AS audit
+         JOIN runtime_behavior_mode_versions AS version
+           ON version.mode_version_id=audit.mode_version_id
+        WHERE audit.page_id=$1 AND audit.channel=$2 AND audit.worker_id=$6
+          AND audit.resolved_at >= $8`,
+      [PAGE_ID, CHANNEL,
+        requiredUuid(input.modeVersionId, "TRACK_B_B3_2_VERSION_INVALID"),
+        requiredContentHash(input.contentHash), requiredRevision(input.pointerRevision),
+        input.workerId, requiredBundleHash(input.authorityBundleHash), notBefore],
+    );
+    const exactCount = Number((result.rows[0] as Row | undefined)?.exact_count);
+    const conflictingCount = Number((result.rows[0] as Row | undefined)?.conflicting_count);
+    if (!Number.isSafeInteger(exactCount) || !Number.isSafeInteger(conflictingCount) ||
+        exactCount < 0 || conflictingCount < 0) return "AMBIGUOUS";
+    return exactCount >= 1 && conflictingCount === 0
+      ? "EXACT" : exactCount === 0 && conflictingCount === 0 ? "MISSING" : "AMBIGUOUS";
+  }
+
   async readAdmissionHold(input: Readonly<{
     pageId: string;
     channel: string;

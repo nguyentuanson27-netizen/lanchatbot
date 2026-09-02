@@ -420,6 +420,33 @@ describe("Track B Commerce authority mutation", () => {
     expect(mutationPorts.discardStagedService).not.toHaveBeenCalled();
   });
 
+  it("reports a clean pre-fence block when no target service was staged", async () => {
+    const mutationPorts = ports({
+      stageAffectedService: vi.fn(async () => ({
+        status: "BLOCKED" as const,
+        admission: "UNCONTROLLED" as const,
+        observedSourceService: rollbackRecord.previousService,
+        stagedService: null,
+      })),
+    });
+
+    await expect(executeTrackBCommerceAuthorityMutation({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B",
+      previous,
+      target,
+      rollbackRecord,
+      releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({
+      status: "BLOCKED_PREVIOUS",
+      sideEffects: "NOT_EXECUTED",
+      reasonCodes: ["TRACK_B_B3_2_SERVICE_STAGING_UNPROVEN"],
+    });
+    expect(mutationPorts.acquireFence).not.toHaveBeenCalled();
+    expect(mutationPorts.discardStagedService).not.toHaveBeenCalled();
+  });
+
   it("rejects a staged operation when the deployed source identity is not exact", async () => {
     const mutationPorts = ports({
       stageAffectedService: vi.fn(async ({ targetService }) => ({

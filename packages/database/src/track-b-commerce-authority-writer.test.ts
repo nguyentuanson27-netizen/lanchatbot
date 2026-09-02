@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   clientQuery: vi.fn(),
+  poolQuery: vi.fn(),
   connect: vi.fn(),
   release: vi.fn(),
 }));
@@ -11,6 +12,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("pg", () => ({
   Pool: class {
     connect() { return mocks.connect(); }
+    query(sql: string, values?: readonly unknown[]) { return mocks.poolQuery(sql, values); }
     end() { return Promise.resolve(); }
   },
 }));
@@ -117,7 +119,84 @@ function admissionTrigger(tableName: string, overrides: Record<string, unknown> 
 describe("Postgres Track B Commerce authority writer", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.poolQuery.mockImplementation((sql: string, values?: readonly unknown[]) =>
+      mocks.clientQuery(sql, values));
     mocks.connect.mockResolvedValue({ query: mocks.clientQuery, release: mocks.release });
+  });
+
+  it("reads exact page-scoped in-flight and queued authority work for quiescence", async () => {
+    mocks.clientQuery.mockImplementation(async (sql: string, values?: readonly unknown[]) => {
+      expect(sql).toContain("webhook_inbox");
+      expect(sql).toContain("meta_outbox");
+      expect(sql).toContain("pancake_tag_outbox");
+      expect(sql).toContain("status='PROCESSING'");
+      expect(sql).toContain("status='SENDING'");
+      expect(sql).toContain("status='APPLYING'");
+      expect(values).toEqual([pageId]);
+      return result([{
+        active_inbox: "0", active_meta_outbox: "0", active_pancake_outbox: "0",
+        queued_inbox: "4", queued_meta_outbox: "2", queued_pancake_outbox: "1",
+      }]);
+    });
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+    await expect(store.readOperationalQuiescence({ pageId, channel })).resolves.toEqual({
+      activeInbox: 0, activeMetaOutbox: 0, activePancakeOutbox: 0,
+      inFlightAuthorityDependentWork: 0, queuedAuthorityDependentWork: 7,
+    });
+  });
+
+  it("fails quiescence readback closed on missing, negative, or unsafe counts", async () => {
+    mocks.clientQuery.mockResolvedValue(result([{ active_inbox: "NaN", active_meta_outbox: "0",
+      active_pancake_outbox: "0", queued_inbox: "0", queued_meta_outbox: "0",
+      queued_pancake_outbox: "0" }]));
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+    await expect(store.readOperationalQuiescence({ pageId, channel }))
+      .rejects.toThrow("TRACK_B_B3_2_QUIESCENCE_READBACK_INVALID");
+  });
+
+  it("proves exactly one activation audit and one fresh startup DATABASE resolution", async () => {
+    mocks.clientQuery.mockImplementation(async (sql: string, values?: readonly unknown[]) => {
+      if (sql.includes("runtime_behavior_mode_activation_audit")) {
+        expect(values).toEqual([pageId, channel, 7, previousVersionId, targetVersionId,
+          v1ContentHash, v2ContentHash, "TRACK_B_B3_2_WRITER",
+          "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001"]);
+        return result([{ exact_count: "1", conflicting_count: "0" }]);
+      }
+      if (sql.includes("runtime_behavior_mode_resolution_audit")) {
+        expect(values?.slice(0, 7)).toEqual([
+          pageId, channel, targetVersionId, v2ContentHash, 7,
+          "realtime-worker-1", DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+        ]);
+        return result([{ exact_count: "1", conflicting_count: "0" }]);
+      }
+      return result();
+    });
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+    await expect(store.readExactActivationAudit({ pageId, channel, pointerRevision: 7,
+      previousVersionId, previousContentHash: v1ContentHash, targetVersionId,
+      targetContentHash: v2ContentHash, actor: "TRACK_B_B3_2_WRITER",
+      reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001",
+    })).resolves.toBe("EXACT");
+    await expect(store.readExactRuntimeResolution({ pageId, channel,
+      modeVersionId: targetVersionId, contentHash: v2ContentHash, pointerRevision: 7,
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+      workerId: "realtime-worker-1", notBefore: "2026-09-02T00:00:00.000Z",
+    })).resolves.toBe("EXACT");
+  });
+
+  it("rejects an extra conflicting activation audit or runtime resolution", async () => {
+    mocks.clientQuery.mockResolvedValue(result([{ exact_count: "1", conflicting_count: "1" }]));
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+    await expect(store.readExactActivationAudit({ pageId, channel, pointerRevision: 7,
+      previousVersionId, previousContentHash: v1ContentHash, targetVersionId,
+      targetContentHash: v2ContentHash, actor: "TRACK_B_B3_2_WRITER",
+      reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001",
+    })).resolves.toBe("AMBIGUOUS");
+    await expect(store.readExactRuntimeResolution({ pageId, channel,
+      modeVersionId: targetVersionId, contentHash: v2ContentHash, pointerRevision: 7,
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+      workerId: "realtime-worker-1", notBefore: "2026-09-02T00:00:00.000Z",
+    })).resolves.toBe("AMBIGUOUS");
   });
 
   it("rejects an ambiguous or injectable admission schema", () => {

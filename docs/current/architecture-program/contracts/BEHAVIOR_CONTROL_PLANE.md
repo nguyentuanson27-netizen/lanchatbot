@@ -74,7 +74,7 @@ persist exact release-local rollback identity
 ```
 
 Staging cannot start the target. Fence release cannot start or replace a
-service. Pending migration `0038_track_b_commerce_admission_gate` supplies the
+service. Applied and verified migration `0038_track_b_commerce_admission_gate` supplies the
 atomic database admission boundary for `webhook_inbox -> PROCESSING`,
 `meta_outbox -> SENDING`, and `pancake_tag_outbox -> APPLYING`. The source trace
 finds no other independent live authority-dependent claim: the Inbox
@@ -87,7 +87,7 @@ acquisition, and down refuses while any unreleased fence exists. The migration
 depends on `0036/0037`; its source hashes are up
 `9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140` and down
 `5dd292a169a5ecce5f21896bf8e11f1d7727a34a55758c92b8abc98f3de64d9a`.
-Source review/merge does not authorize rehearsal or live apply.
+Its governed ENGINEERING_PREPROD rehearsal, live apply, and exact readback are complete. This database state does not itself authorize a service deployment or pointer mutation.
 
 Quiescence counts every claimed/in-flight class at zero. Durably queued rows may
 remain or grow while admission is held; they are recorded in evidence but are

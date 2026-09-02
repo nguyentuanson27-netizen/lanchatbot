@@ -285,6 +285,17 @@ function exactEnvelope(input: Readonly<{
     input.target.pointerRevision === input.previous.pointerRevision + 1;
 }
 
+export function validateTrackBCommerceAuthorityMutationEnvelope(input: Readonly<{
+  operationId: string;
+  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  previous: RuntimeBehaviorModePointer;
+  target: RuntimeBehaviorModePointer;
+  rollbackRecord: TrackBReleaseLocalRollbackRecord;
+  releaseEvidence?: TrackBReleaseCandidateEvidence;
+}>): boolean {
+  try { return exactEnvelope(input); } catch { return false; }
+}
+
 function exactConsumerReadbacks(
   values: readonly TrackBCommerceConsumerReadback[],
   target: RuntimeBehaviorModePointer,
@@ -666,6 +677,11 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
   if (staged.status !== "STAGED_STOPPED" || staged.admission !== "NON_ADMITTING" ||
       !exactService(staged.observedSourceService, expectedSourceService) ||
       !exactService(staged.stagedService, expectedService)) {
+    if (staged.status === "BLOCKED" && staged.stagedService === null) {
+      return { status: "BLOCKED_PREVIOUS", sideEffects: "NOT_EXECUTED", reasonCodes: [
+        "TRACK_B_B3_2_SERVICE_STAGING_UNPROVEN",
+      ] };
+    }
     if (!exactService(staged.stagedService, expectedService)) {
       return { status: "HOLD_RETAINED", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
         "TRACK_B_B3_2_SERVICE_STAGING_UNPROVEN",
