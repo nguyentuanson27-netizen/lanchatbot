@@ -39,12 +39,15 @@ requireText(/t38_abort_rehearsal[\s\S]*trap - EXIT HUP INT TERM[\s\S]*exit "\$st
 requireText(/TRACK_B_0038_BACKUP_REHEARSAL_PASS[\s\S]*TRACK_B_0038_PREPROD_APPLY_PASS/u, "success boundaries are missing");
 requireText(/POLICY_STORE_TEST_DATABASE_URL="\$database_url"/u, "PostgreSQL acceptance does not use scoped environment injection");
 requireText(/ambiguous PostgreSQL container network identity/u, "ambiguous PostgreSQL network identity is not rejected");
-requireText(/restored extensions mismatch[\s\S]*up changed extensions[\s\S]*live extensions drift/u, "extension parity is incomplete");
+requireText(/restored extensions mismatch[\s\S]*up changed extensions/u, "restore/repeated-up extension parity is incomplete");
+requireText(/EXTENSIONS_SHA256=\$EXPECTED_EXTENSIONS_SHA256/u, "postflight extension parity is incomplete");
 requireText(/prosecdef[\s\S]*proleakproof[\s\S]*provolatile[\s\S]*proparallel[\s\S]*pg_get_functiondef/u, "function behavior identity is incomplete");
 requireText(/unexpected prefixed trigger dependency[\s\S]*unexpected function trigger dependency/u, "unexpected trigger dependencies are not rejected");
 requireText(/t38_post_apply_identity_matches[\s\S]*t38_apply_down_named/u, "recovery down is not gated by complete post-apply identity");
 requireText(/cutover_fences[\s\S]*'0\|0'[\s\S]*t38_post_apply_identity_matches/u, "recovery down does not require exact zero total fences");
 requireText(/t38_verify_marker[\s\S]*t37_verify_live[\s\S]*may_have_committed=0/u, "live apply does not revalidate exact 0037 state before DDL");
+requireText(/t38_expected_postflight[\s\S]*PAGE_COUNT[\s\S]*PAGE_SET_SHA256[\s\S]*AUTHORITY_FENCES=0\|0\|0[\s\S]*INFLIGHT_CLAIMS=0\|0\|0[\s\S]*CATALOG_0038_SHA256/u, "exact postflight target record is incomplete");
+requireText(/t38_verify_live[\s\S]*t38_postflight_matches[\s\S]*t38_post_apply_identity_matches[\s\S]*t38_postflight_matches/u, "success and recovery do not share exact postflight identity");
 
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const migrationRow = (directory, filename) => {

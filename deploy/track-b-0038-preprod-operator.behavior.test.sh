@@ -31,6 +31,28 @@ if (
   exit 1
 fi
 
+(
+  t38_expected_postflight() { printf '%s\n' 'PAGE_SET=exact' 'AUTHORITY_FENCES=0|0|0'; }
+  t38_observed_postflight() { t38_expected_postflight; }
+  t38_postflight_matches
+)
+if (
+  t38_expected_postflight() { printf '%s\n' 'PAGE_SET=exact' 'AUTHORITY_FENCES=0|0|0'; }
+  t38_observed_postflight() { printf '%s\n' 'PAGE_SET=drift' 'AUTHORITY_FENCES=0|0|0'; }
+  t38_postflight_matches
+) >/dev/null 2>&1; then
+  printf '%s\n' 'postflight page-set drift was accepted' >&2
+  exit 1
+fi
+if (
+  t38_expected_postflight() { printf '%s\n' 'PAGE_SET=exact' 'AUTHORITY_FENCES=0|0|0'; }
+  t38_observed_postflight() { printf '%s\n' 'PAGE_SET=exact' 'AUTHORITY_FENCES=1|0|0'; }
+  t38_postflight_matches
+) >/dev/null 2>&1; then
+  printf '%s\n' 'postflight authority-fence drift was accepted' >&2
+  exit 1
+fi
+
 t38_expected_preflight > "$T38_PREFLIGHT"
 printf '%s\n' \
   "SOURCE_REVISION=$SOURCE_REVISION" \

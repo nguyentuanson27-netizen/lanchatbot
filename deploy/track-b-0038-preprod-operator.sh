@@ -120,6 +120,69 @@ t38_observed_preflight() {
 t38_preflight_matches() { test "$(t38_observed_preflight)" = "$(t38_expected_preflight)"; }
 t38_require_preflight() { t38_preflight_matches || die "exact ENGINEERING_PREPROD pre-0038 target mismatch"; }
 
+t38_expected_postflight() {
+  printf '%s\n' \
+    "HOST_MACHINE_ID_SHA256=$EXPECTED_HOST_MACHINE_ID_SHA256" \
+    "POSTGRES_IMAGE_ID=$EXPECTED_POSTGRES_IMAGE_ID" \
+    "POSTGRES_VOLUME=$EXPECTED_POSTGRES_VOLUME" \
+    "REALTIME_IMAGE=$EXPECTED_REALTIME_IMAGE" \
+    "REALTIME_IMAGE_ID=$T37_REALTIME_IMAGE_ID" \
+    "REALTIME_HEALTH=healthy|0" \
+    "DATABASE_ENGINE=$EXPECTED_DATABASE|$EXPECTED_POSTGRES_MAJOR" \
+    "SYSTEM_IDENTIFIER=$EXPECTED_SYSTEM_IDENTIFIER" \
+    "PAGE_COUNT=$EXPECTED_PAGE_COUNT" \
+    "PAGE_SET_SHA256=$EXPECTED_PAGE_SET_SHA256" \
+    "PREPROD_PAGE=1" \
+    "LEDGER_COUNT=38" \
+    "LEDGER_SHA256=$T38_POST_LEDGER_SHA256" \
+    "LATEST_LEDGER=$T38_MIGRATION|$T38_UP_SHA256" \
+    "POINTER=$T38_POINTER_REVISION|$T38_V1_VERSION|COMMERCE|LEGACY|$T38_V1_BUNDLE|$T38_V1_CONTENT" \
+    "ROLE_STATE_SHA256=$EXPECTED_ROLE_STATE_SHA256" \
+    "ROLE_MEMBERSHIP_SHA256=$EXPECTED_ROLE_MEMBERSHIP_SHA256" \
+    "RELATION_ACL_SHA256=$T37_RELATION_ACL_SHA256" \
+    "FUNCTION_ACL_SHA256=$(t38_marker_post_function_acl)" \
+    "EXTENSIONS_SHA256=$EXPECTED_EXTENSIONS_SHA256" \
+    "AUTHORITY_FENCES=0|0|0" \
+    "CUTOVER_FENCES=0|0" \
+    "INFLIGHT_CLAIMS=0|0|0" \
+    "REHEARSAL_OWNER_MARKERS=0" \
+    "MIGRATION_0038=1|3|1" \
+    "CATALOG_0037_SHA256=$(t37_marker_post_catalog)" \
+    "CATALOG_0038_SHA256=$(t38_marker_post_catalog)"
+}
+
+t38_observed_postflight() {
+  printf '%s\n' \
+    "HOST_MACHINE_ID_SHA256=$(sha256sum /etc/machine-id | awk '{print $1}')" \
+    "POSTGRES_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$POSTGRES_CONTAINER")" \
+    "POSTGRES_VOLUME=$(docker inspect --format '{{range .Mounts}}{{if eq .Destination "/var/lib/postgresql/data"}}{{.Name}}|{{.Type}}|{{.RW}}{{end}}{{end}}' "$POSTGRES_CONTAINER")" \
+    "REALTIME_IMAGE=$(docker inspect --format '{{.Config.Image}}' "$REALTIME_CONTAINER")" \
+    "REALTIME_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$REALTIME_CONTAINER")" \
+    "REALTIME_HEALTH=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}|{{.RestartCount}}' "$REALTIME_CONTAINER")" \
+    "DATABASE_ENGINE=$(database_query "SELECT current_database()||'|'||split_part(current_setting('server_version'),'.',1)")" \
+    "SYSTEM_IDENTIFIER=$(database_query "SELECT system_identifier FROM pg_control_system()")" \
+    "PAGE_COUNT=$(database_query "SELECT count(*) FROM pages")" \
+    "PAGE_SET_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT page_id,status,routing_owner,app_send_enabled,kill_switch FROM pages ORDER BY page_id")" \
+    "PREPROD_PAGE=$(database_query "SELECT count(*) FROM pages WHERE page_id='$EXPECTED_PAGE_ID' AND status='ACTIVE' AND routing_owner='APP' AND app_send_enabled AND NOT kill_switch")" \
+    "LEDGER_COUNT=$(database_query "SELECT count(*) FROM schema_migrations")" \
+    "LEDGER_SHA256=$(t38_ledger_sha_named "$EXPECTED_DATABASE")" \
+    "LATEST_LEDGER=$(database_query "SELECT migration_name||'|'||checksum_sha256 FROM schema_migrations ORDER BY migration_name DESC LIMIT 1")" \
+    "POINTER=$(t38_pointer)" \
+    "ROLE_STATE_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT rolname,rolsuper,rolinherit,rolcreaterole,rolcreatedb,rolcanlogin,rolreplication,rolbypassrls,rolconnlimit FROM pg_roles WHERE left(rolname,3) <> chr(112)||chr(103)||chr(95) ORDER BY rolname")" \
+    "ROLE_MEMBERSHIP_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT member_role.rolname,granted_role.rolname,m.admin_option FROM pg_auth_members m JOIN pg_roles member_role ON member_role.oid=m.member JOIN pg_roles granted_role ON granted_role.oid=m.roleid ORDER BY 1,2,3")" \
+    "RELATION_ACL_SHA256=$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$RELATION_ACL_QUERY")" \
+    "FUNCTION_ACL_SHA256=$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$FUNCTION_ACL_QUERY")" \
+    "EXTENSIONS_SHA256=$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT extname,extversion FROM pg_extension ORDER BY extname")" \
+    "AUTHORITY_FENCES=$(database_query "SELECT (SELECT count(*) FROM df13_commerce_authority_fences)::text||'|'||(SELECT count(*) FROM df13_commerce_authority_fence_claims)::text||'|'||(SELECT count(*) FROM df13_commerce_authority_fences WHERE completed_at IS NULL AND token_hash IS NOT NULL AND lease_until>clock_timestamp())::text")" \
+    "CUTOVER_FENCES=$(t38_cutover_fence_state)" \
+    "INFLIGHT_CLAIMS=$(database_query "SELECT (SELECT count(*) FROM webhook_inbox WHERE page_id='$EXPECTED_PAGE_ID' AND status='PROCESSING')::text||'|'||(SELECT count(*) FROM meta_outbox WHERE page_id='$EXPECTED_PAGE_ID' AND status='SENDING')::text||'|'||(SELECT count(*) FROM pancake_tag_outbox WHERE page_id='$EXPECTED_PAGE_ID' AND status='APPLYING')::text")" \
+    "REHEARSAL_OWNER_MARKERS=$(database_query "SELECT count(*) FROM pg_namespace WHERE nspname='track_b_0038_operator_owner'")" \
+    "MIGRATION_0038=$(database_query "SELECT (SELECT count(*) FROM schema_migrations WHERE migration_name='$T38_MIGRATION' AND checksum_sha256='$T38_UP_SHA256')::text||'|'||(SELECT count(*) FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND t.tgname LIKE 'track_b_cutover_admission_%' AND NOT t.tgisinternal)::text||'|'||(SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname='guard_track_b_cutover_admission')::text")" \
+    "CATALOG_0037_SHA256=$(t37_catalog_sha_named "$EXPECTED_DATABASE")" \
+    "CATALOG_0038_SHA256=$(t38_catalog_sha_named "$EXPECTED_DATABASE")"
+}
+t38_postflight_matches() { test "$(t38_observed_postflight)" = "$(t38_expected_postflight)"; }
+
 t38_apply_up_named() {
   local database="$1"
   { printf '%s\n' 'BEGIN;'; cat "$T38_UP"; printf '%s\n' "INSERT INTO schema_migrations(migration_name,checksum_sha256) VALUES (:'migration_name',:'migration_checksum');" 'COMMIT;'; } |
@@ -306,17 +369,7 @@ t38_verify_live() {
   t38_source_identity
   t38_verify_marker_artifacts
   t38_verify_up_named "$EXPECTED_DATABASE"
-  test "$(database_query "SELECT count(*) FROM schema_migrations")" = 38 || die "0038 live ledger count mismatch"
-  test "$(t38_ledger_sha_named "$EXPECTED_DATABASE")" = "$T38_POST_LEDGER_SHA256" || die "0038 live exact ledger mismatch"
-  test "$(t38_ledger_sha_named "$EXPECTED_DATABASE")" = "$(t38_marker_post_ledger)" || die "0038 live ledger identity mismatch"
-  test "$(t38_pointer)" = "$T38_POINTER_REVISION|$T38_V1_VERSION|COMMERCE|LEGACY|$T38_V1_BUNDLE|$T38_V1_CONTENT" || die "0038 changed behavior pointer"
-  test "$(t38_cutover_fence_state)" = '0|0' || die "0038 changed cutover fence state"
-  test "$(t38_catalog_sha_named "$EXPECTED_DATABASE")" = "$(t38_marker_post_catalog)" || die "0038 live trigger catalog mismatch"
-  test "$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$RELATION_ACL_QUERY")" = "$T37_RELATION_ACL_SHA256" || die "0038 live relation ACL mismatch"
-  test "$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$FUNCTION_ACL_QUERY")" = "$(t38_marker_post_function_acl)" || die "0038 live function ACL mismatch"
-  test "$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT rolname,rolsuper,rolinherit,rolcreaterole,rolcreatedb,rolcanlogin,rolreplication,rolbypassrls,rolconnlimit FROM pg_roles WHERE left(rolname,3) <> chr(112)||chr(103)||chr(95) ORDER BY rolname")" = "$EXPECTED_ROLE_STATE_SHA256" || die "0038 live role attributes drift"
-  test "$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT member_role.rolname,granted_role.rolname,m.admin_option FROM pg_auth_members m JOIN pg_roles member_role ON member_role.oid=m.member JOIN pg_roles granted_role ON granted_role.oid=m.roleid ORDER BY 1,2,3")" = "$EXPECTED_ROLE_MEMBERSHIP_SHA256" || die "0038 live role memberships drift"
-  test "$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT extname,extversion FROM pg_extension ORDER BY extname")" = "$EXPECTED_EXTENSIONS_SHA256" || die "0038 live extensions drift"
+  t38_postflight_matches || die "exact ENGINEERING_PREPROD post-0038 target mismatch"
   printf '%s\n' 'TRACK_B_0038_PREPROD_SCHEMA_VERIFIED'
 }
 
@@ -330,17 +383,7 @@ t38_write_recovery() {
 }
 t38_post_apply_identity_matches() {
   (t38_verify_marker_artifacts) >/dev/null 2>&1 || return 1
-  test "$(database_query "SELECT count(*) FROM schema_migrations" 2>/dev/null)" = 38 || return 1
-  test "$(t38_ledger_sha_named "$EXPECTED_DATABASE" 2>/dev/null)" = "$T38_POST_LEDGER_SHA256" || return 1
-  test "$(t38_pointer 2>/dev/null)" = "$T38_POINTER_REVISION|$T38_V1_VERSION|COMMERCE|LEGACY|$T38_V1_BUNDLE|$T38_V1_CONTENT" || return 1
-  test "$(t38_cutover_fence_state 2>/dev/null)" = '0|0' || return 1
-  test "$(t38_catalog_sha_named "$EXPECTED_DATABASE" 2>/dev/null)" = "$(t38_marker_post_catalog)" || return 1
-  test "$(t37_catalog_sha_named "$EXPECTED_DATABASE" 2>/dev/null)" = "$(t37_marker_post_catalog)" || return 1
-  test "$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$RELATION_ACL_QUERY" 2>/dev/null)" = "$T37_RELATION_ACL_SHA256" || return 1
-  test "$(database_sql_file_sha256_named "$EXPECTED_DATABASE" "$FUNCTION_ACL_QUERY" 2>/dev/null)" = "$(t38_marker_post_function_acl)" || return 1
-  test "$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT rolname,rolsuper,rolinherit,rolcreaterole,rolcreatedb,rolcanlogin,rolreplication,rolbypassrls,rolconnlimit FROM pg_roles WHERE left(rolname,3) <> chr(112)||chr(103)||chr(95) ORDER BY rolname" 2>/dev/null)" = "$EXPECTED_ROLE_STATE_SHA256" || return 1
-  test "$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT member_role.rolname,granted_role.rolname,m.admin_option FROM pg_auth_members m JOIN pg_roles member_role ON member_role.oid=m.member JOIN pg_roles granted_role ON granted_role.oid=m.roleid ORDER BY 1,2,3" 2>/dev/null)" = "$EXPECTED_ROLE_MEMBERSHIP_SHA256" || return 1
-  test "$(database_copy_sha256_named "$EXPECTED_DATABASE" "SELECT extname,extversion FROM pg_extension ORDER BY extname" 2>/dev/null)" = "$EXPECTED_EXTENSIONS_SHA256" || return 1
+  (t38_postflight_matches) >/dev/null 2>&1 || return 1
 }
 t38_recover_failed_apply() {
   local ledger pointer cutover_fences

@@ -13,9 +13,10 @@ The operator pins the reviewed migration hashes:
 - down: `5dd292a169a5ecce5f21896bf8e11f1d7727a34a55758c92b8abc98f3de64d9a`
 
 It also pins the exact applied `0037` dependency, host/cluster/database/page,
-PostgreSQL volume and image, realtime image and health, the exact full migration ledger,
-roles/memberships/ACLs, V1 pointer, empty fence state, and zero in-flight claim
-state. Unknown or changed identity fails before backup or DDL.
+PostgreSQL volume and image, realtime image and health, the exact full
+migration ledger, roles/memberships/ACLs, V1 pointer, empty fence state, and
+zero in-flight claim state. Unknown or changed identity fails before backup or
+DDL.
 
 `backup-rehearse` creates a new custom-format backup and checksum, restores it
 to one narrowly named disposable database, verifies restore catalog/ACL/role
@@ -42,9 +43,10 @@ The apply boundary repeats exact preflight and verifies the immutable backup
 and rehearsal marker before the atomic migration+ledger transaction. If
 post-apply verification fails and the exact prior pointer plus zero unreleased
 fences are proven, it attempts the reviewed down path only after proving the
-complete rehearsed post-apply ledger, function/trigger catalog, ACL, role,
-extension, exact zero-total fence state and `0037` dependency identity, then records
-`VERIFIED_PRE_0038`; otherwise it records
+complete rehearsed post-apply target record: host/cluster/database/page,
+ledger, function/trigger catalog, ACL, role, extension, authority/in-flight
+state, exact zero-total fence state and `0037` dependency identity. Only then
+does it record `VERIFIED_PRE_0038`; otherwise it records
 `BLOCKED_MANUAL_RESTORE_REQUIRED` and stops. Credentials remain in the existing
 container secret environment or a scoped process environment and are never
 printed or persisted in evidence.
