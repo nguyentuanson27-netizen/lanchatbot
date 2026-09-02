@@ -230,6 +230,27 @@ describe("DF13 pre-production startup authority", () => {
     });
   });
 
+  it("admits V1 only through an explicit Track B rollback startup package", async () => {
+    const releaseSource = { schemaVersion: 1 as const, release: "track-b-rollback-test",
+      repository: "https://github.com/nguyentuanson27-netizen/lanchatbot" as const,
+      tag: "track-b-rollback-test", commit: revision, createdAt: "2026-09-02T00:00:00.000Z" };
+    const rollback = createDf13CommercePreprodStartupAuthority({ mode: "COMMERCE",
+      releaseEvidence: trackBEvidence, expectedAuthority: identity, releaseSource,
+      authorityTransition: "ROLLBACK_TRACK_B" });
+    await expect(rollback.authorizeExactCommerceIdentity(identity)).resolves.toEqual({
+      status: "ADMITTED",
+    });
+    const missingTransition = createDf13CommercePreprodStartupAuthority({ mode: "COMMERCE",
+      releaseEvidence: trackBEvidence, expectedAuthority: identity, releaseSource });
+    await expect(missingTransition.authorizeExactCommerceIdentity(identity)).resolves.toEqual({
+      status: "BLOCKED", reasonCode: "DF13_COMMERCE_RELEASE_AUTHORITY_MISMATCH",
+    });
+    expect(() => parseDf13CommercePreprodStartupInput({
+      mode: "COMMERCE", releaseEvidence: trackBEvidence, expectedAuthority: identity,
+      releaseSource, authorityTransition: "UNREVIEWED_TRANSITION",
+    })).toThrow("DF13_COMMERCE_STARTUP_INPUT_INVALID");
+  });
+
   it("rejects the active Track B bundle when paired with historical DF13 evidence", async () => {
     const evidence = await prepareDf13ReleaseCandidateEvidence({
       activationReleaseRevision: revision,

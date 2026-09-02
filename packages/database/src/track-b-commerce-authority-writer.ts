@@ -238,6 +238,20 @@ export class PostgresTrackBCommerceAuthorityWriter {
     });
   }
 
+  async readExactVersion(input: Readonly<{
+    pageId: string;
+    channel: string;
+    modeVersionId: string;
+  }>) {
+    requiredScope(input.pageId, input.channel);
+    const result = await this.#pool.query(
+      versionSelect("WHERE v.mode_version_id=$1 AND v.page_id=$2 AND v.channel=$3"),
+      [requiredUuid(input.modeVersionId, "TRACK_B_B3_2_VERSION_INVALID"), PAGE_ID, CHANNEL],
+    );
+    if (result.rows.length !== 1) return null;
+    return version(result.rows[0] as Row);
+  }
+
   async readExactActivationAudit(input: Readonly<{
     pageId: string;
     channel: string;

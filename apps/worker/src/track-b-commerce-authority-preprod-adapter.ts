@@ -237,6 +237,12 @@ export class TrackBPreprodImageBuilder {
       "--label", `com.lana.build-id=${buildId}`,
       "--label", `com.lana.runtime-config-hash=${runtimeConfigHash}`,
       "-t", input.imageReference, "-f", DOCKERFILE, REPOSITORY_ROOT], {});
+    const postStatus = await this.#run("git", ["-C", REPOSITORY_ROOT, "status", "--porcelain"], {});
+    const postCommit = await this.#run("git", ["-C", REPOSITORY_ROOT, "rev-parse", "HEAD"], {});
+    const postTree = await this.#run("git", ["-C", REPOSITORY_ROOT, "rev-parse", "HEAD^{tree}"], {});
+    if (postStatus !== "" || postCommit !== input.sourceCommit || postTree !== input.sourceTree) {
+      throw new Error("TRACK_B_B3_2_BUILD_SOURCE_DRIFT");
+    }
     const value = parseOne(await this.#run("docker", ["image", "inspect", "--format", "{{json .}}",
       input.imageReference], {}), "TRACK_B_B3_2_IMAGE_INSPECT_INVALID");
     const imageId = String(value.Id ?? "").replace(/^sha256:/u, "");
@@ -383,6 +389,11 @@ export class DockerComposeTrackBPreprodServiceController {
       `name=^/${STAGED_CONTAINER}$`, "--format", "{{.ID}}"], {})).trim();
   }
 
+  async #mainContainerId(): Promise<string> {
+    return (await this.#run("docker", ["ps", "-a", "--filter",
+      `name=^/${CONTAINER}$`, "--format", "{{.ID}}"], {})).trim();
+  }
+
   async #inspectStaged(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null> {
     const observed = await this.#inspectContainer(expected, false, STAGED_CONTAINER);
     if (observed === null || !["created", "exited"].includes(observed.status)) return null;
@@ -403,21 +414,28 @@ export class DockerComposeTrackBPreprodServiceController {
     return this.#inspectImage(expected);
   }
 
-  async inspectPresent(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null> {
-    return (await this.#inspectContainer(expected, false))?.identity ?? null;
+  async inspectPresent(expected: TrackBServiceReleaseIdentity):
+    Promise<TrackBServiceReleaseIdentity | "ABSENT" | "AMBIGUOUS"> {
+    if (await this.#mainContainerId() === "") return "ABSENT";
+    return (await this.#inspectContainer(expected, false))?.identity ?? "AMBIGUOUS";
   }
 
-  async stage(_source: TrackBServiceReleaseIdentity, target: TrackBServiceReleaseIdentity) {
+  async stage(_source: TrackBServiceReleaseIdentity, target: TrackBServiceReleaseIdentity):
+    Promise<TrackBServiceReleaseIdentity | "AMBIGUOUS" | null> {
     if (!validService(target) || this.#expectedImageId !== target.imageId) return null;
     const image = await this.#inspectImage(target);
     if (!image) return null;
     const existing = await this.#stagedContainerId();
-    if (existing === "") {
+    if (existing !== "") return await this.#inspectStaged(target) ?? "AMBIGUOUS";
+    try {
       await this.#run("docker", ["create", "--name", STAGED_CONTAINER, "--network", "none",
         "--label", `com.lana.track-b.stage=${STAGED_LABEL}`, "--entrypoint", "/bin/true",
         this.#imageReference], {});
+    } catch (error) {
+      const reconciled = await this.#stagedContainerId();
+      if (reconciled === "") throw error;
     }
-    return this.#inspectStaged(target);
+    return await this.#inspectStaged(target) ?? "AMBIGUOUS";
   }
 
   async discard(target: TrackBServiceReleaseIdentity): Promise<"DISCARDED" | "AMBIGUOUS"> {
@@ -530,15 +548,18 @@ export interface TrackBPreprodDatabaseBoundary {
     pointer: RuntimeBehaviorModePointer;
     notBefore: string;
   }): Promise<"EXACT" | "MISSING" | "AMBIGUOUS">;
+  readExactVersion(input: { pageId: string; channel: string; modeVersionId: string }):
+    Promise<RuntimeBehaviorModePointer["version"] | null>;
 }
 
 export interface TrackBPreprodServiceBoundary {
-  stage(source: TrackBServiceReleaseIdentity, target: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null>;
+  stage(source: TrackBServiceReleaseIdentity, target: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | "AMBIGUOUS" | null>;
   discard(target: TrackBServiceReleaseIdentity): Promise<"DISCARDED" | "AMBIGUOUS">;
   stop(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null>;
   start(expected: TrackBServiceReleaseIdentity, mode: "COMMERCE"): Promise<TrackBServiceReleaseIdentity | null>;
   inspectRunning(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null>;
-  inspectPresent(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null>;
+  inspectPresent(expected: TrackBServiceReleaseIdentity):
+    Promise<TrackBServiceReleaseIdentity | "ABSENT" | "AMBIGUOUS">;
 }
 
 export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
@@ -579,6 +600,10 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
           observedSourceService: source, stagedService: null };
       }
       const staged = await input.service.stage(sourceService, targetService);
+      if (staged === "AMBIGUOUS") {
+        return { status: "BLOCKED", admission: "UNCONTROLLED",
+          observedSourceService: source, stagedService: targetService };
+      }
       return { status: staged ? "STAGED_STOPPED" : "BLOCKED", admission: staged ? "NON_ADMITTING" : "UNCONTROLLED",
         observedSourceService: source, stagedService: staged } as const;
     },
@@ -605,10 +630,29 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
       const admission = await scopeAdmission(lease);
       if (admission.status !== "HELD") return { status: "BLOCKED", admission: "UNCONTROLLED", observedService: null };
       const failed = await input.service.inspectPresent(failedService);
-      const prior = failed ? null : await input.service.inspectPresent(previousService);
-      if (!failed && !prior) return { status: "BLOCKED", admission: "HELD", observedService: null };
-      const stopped = await input.service.stop(failed ? failedService : previousService);
-      if (!stopped) return { status: "BLOCKED", admission: "HELD", observedService: null };
+      if (failed === "AMBIGUOUS") {
+        return { status: "BLOCKED", admission: "HELD", observedService: null };
+      }
+      const prior = failed === "ABSENT"
+        ? await input.service.inspectPresent(previousService) : "ABSENT";
+      if (prior === "AMBIGUOUS") {
+        return { status: "BLOCKED", admission: "HELD", observedService: null };
+      }
+      if (failed === "ABSENT") {
+        const discarded = await input.service.discard(failedService);
+        if (discarded !== "DISCARDED") {
+          return { status: "BLOCKED", admission: "HELD", observedService: null };
+        }
+      }
+      const serviceToStop = failed !== "ABSENT"
+        ? failedService : prior !== "ABSENT" ? previousService : null;
+      if (serviceToStop !== null && !await input.service.stop(serviceToStop)) {
+        return { status: "BLOCKED", admission: "HELD", observedService: null };
+      }
+      const staged = await input.service.stage(failedService, previousService);
+      if (!exactService(staged === "AMBIGUOUS" ? null : staged, previousService)) {
+        return { status: "BLOCKED", admission: "HELD", observedService: null };
+      }
       lastStartedAt = new Date().toISOString();
       const observed = await input.service.start(previousService, "COMMERCE");
       return { status: observed ? "HEALTHY" as const : "BLOCKED" as const,
@@ -702,6 +746,9 @@ export class TrackBPostgresPreprodDatabaseBoundary implements TrackBPreprodDatab
   }
   readQuiescence(input: { pageId: string; channel: string }) {
     return this.#writer.readOperationalQuiescence(input);
+  }
+  readExactVersion(input: { pageId: string; channel: string; modeVersionId: string }) {
+    return this.#writer.readExactVersion(input);
   }
   readActivePointer() { return this.#mode.loadActiveMode({ pageId: PAGE_ID, channel: CHANNEL }); }
 

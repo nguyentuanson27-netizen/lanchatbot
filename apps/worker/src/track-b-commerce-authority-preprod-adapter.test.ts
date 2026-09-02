@@ -11,6 +11,7 @@ import {
   ReleaseLocalRollbackRecordStore,
   TRACK_B_RUNTIME_CONFIG_KEYS_V1,
   TrackBPreprodImageBuilder,
+  TrackBPreprodServicePairController,
   createTrackBCommerceAuthorityPreprodAdapter,
   trackBBuildIdV1,
   trackBLegacyBuildIdV1,
@@ -146,6 +147,20 @@ describe("Track B PREPROD Docker service boundary", () => {
     expect(build).toContain("--pull=false");
     expect(build).toContain(`/opt/lana-chatbot/repository`);
     expect(JSON.stringify(mutableCalls)).not.toMatch(/password|token|secret/i);
+  });
+
+  it("fails a build when the clean source tree drifts during Docker build", async () => {
+    let built = false;
+    const run = vi.fn(async (command: string, args: readonly string[]) => {
+      if (command === "docker") { built = true; return ""; }
+      if (args.includes("status")) return built ? " M apps/worker/src/realtime-runner.ts" : "";
+      if (args.at(-1) === "HEAD") return targetService.releaseRevision;
+      return "9".repeat(40);
+    });
+    await expect(new TrackBPreprodImageBuilder(run).build({
+      sourceCommit: targetService.releaseRevision, sourceTree: "9".repeat(40),
+      imageReference: "lana-chatbot-app:track-b-target", runtimeConfig: targetRuntimeConfig,
+    })).rejects.toThrow("TRACK_B_B3_2_BUILD_SOURCE_DRIFT");
   });
 
   it("stages by proving an exact local image without starting a container", async () => {
@@ -304,6 +319,32 @@ describe("Track B PREPROD Docker service boundary", () => {
       ["stop", "--time", "30", "lana-chatbot-realtime-worker"], {});
   });
 
+  it("marks a partially created but unprovable stage ambiguous for reviewed cleanup", async () => {
+    let created = false;
+    const run = vi.fn(async (_command: string, args: readonly string[]) => {
+      if (args[0] === "image") return JSON.stringify({ Id: `sha256:${targetService.imageId}`,
+        Config: { Labels: { "org.opencontainers.image.revision": targetService.releaseRevision,
+          "com.lana.build-id": targetService.buildId,
+          "com.lana.runtime-config-hash": targetService.runtimeConfigHash } } });
+      if (args[0] === "ps") return created ? "staged-id" : "";
+      if (args[0] === "create") { created = true; return "staged-id"; }
+      return JSON.stringify({ Image: `sha256:${targetService.imageId}`,
+        State: { Status: "created" }, Config: { Labels: {
+          "org.opencontainers.image.revision": targetService.releaseRevision,
+          "com.lana.build-id": targetService.buildId,
+          "com.lana.runtime-config-hash": targetService.runtimeConfigHash,
+          "com.lana.track-b.stage": "WRONG",
+        } } });
+    });
+    const controller = new DockerComposeTrackBPreprodServiceController({
+      composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
+      projectDirectory: "/opt/lana-chatbot/current/deploy",
+      startupPackageFile: "/opt/lana-chatbot/releases/track-b/commerce-startup.json",
+      imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId, run,
+    });
+    await expect(controller.stage(previousService, targetService)).resolves.toBe("AMBIGUOUS");
+  });
+
   it("refuses non-PREPROD paths and non-digest images", () => {
     const base = {
       projectDirectory: "/opt/lana-chatbot/current/deploy",
@@ -324,6 +365,96 @@ describe("Track B PREPROD Docker service boundary", () => {
 });
 
 describe("Track B PREPROD mutation adapter", () => {
+  it("restages and restarts the exact prior service through concrete controllers after target failure", async () => {
+    const priorConfig = { ...targetRuntimeConfig, REALTIME_RELEASE_ID: previousService.releaseRevision };
+    const priorRuntimeConfigHash = trackBRuntimeConfigHashV1(priorConfig);
+    const prior = { ...previousService, runtimeConfigHash: priorRuntimeConfigHash,
+      buildId: trackBLegacyBuildIdV1({ sourceCommit: previousService.releaseRevision,
+        imageId: previousService.imageId, runtimeConfigHash: priorRuntimeConfigHash }) };
+    let main = { identity: targetService, status: "running" };
+    let staged: TrackBServiceReleaseIdentity | null = null;
+    const run = vi.fn(async (_command: string, args: readonly string[], env: Record<string, string>) => {
+      const tag = String(args.at(-1));
+      const expected = tag.includes("previous") ? prior : targetService;
+      if (args[0] === "image") return JSON.stringify({ Id: `sha256:${expected.imageId}`,
+        Config: { Labels: { "org.opencontainers.image.revision": expected.releaseRevision,
+          ...(expected === targetService ? { "com.lana.build-id": expected.buildId,
+            "com.lana.runtime-config-hash": expected.runtimeConfigHash } : {}) } } });
+      if (args[0] === "ps") return String(args[3]).includes("track-b-staged")
+        ? staged ? "staged-id" : "" : "main-id";
+      if (args[0] === "create") { staged = expected; return "staged-id"; }
+      if (args[0] === "rm") { staged = null; return "staged-id"; }
+      if (args[0] === "stop") { main = { ...main, status: "exited" }; return "container"; }
+      if (args[0] === "compose") { main = { identity: prior, status: "running" }; return ""; }
+      if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
+        .map((key) => priorConfig[key]).join("\n");
+      const stagedInspect = args.at(-1) === "lana-chatbot-track-b-staged-realtime-worker";
+      const observed = stagedInspect ? staged : main.identity;
+      return JSON.stringify({ Image: `sha256:${observed?.imageId}`, RestartCount: 0,
+        State: { Status: stagedInspect ? "created" : main.status, Health: { Status: "healthy" } },
+        Config: { Labels: { "org.opencontainers.image.revision": observed?.releaseRevision,
+          ...(observed === targetService ? { "com.lana.build-id": observed.buildId,
+            "com.lana.runtime-config-hash": observed.runtimeConfigHash } : {}),
+          ...(stagedInspect ? { "com.lana.track-b.stage": "TRACK_B_B3_2_STOPPED_NON_ADMITTING" } : {}) } } });
+    });
+    const common = { composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
+      projectDirectory: "/opt/lana-chatbot/current/deploy", run };
+    const service = new TrackBPreprodServicePairController({ previousIdentity: prior,
+      targetIdentity: targetService,
+      previous: new DockerComposeTrackBPreprodServiceController({ ...common,
+        startupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback.json",
+        imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+        labelPolicy: "OCI_REVISION_ONLY" }),
+      target: new DockerComposeTrackBPreprodServiceController({ ...common,
+        startupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",
+        imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId }) });
+    const held = { status: "HELD" as const, source: "DATABASE" as const,
+      pageId: "1198992073286645", channel: "MESSENGER", fenceId:
+        "20000000-0000-4000-8000-000000000001", epoch: 1, released: false,
+      guardedClaims: ["webhook_inbox:PROCESSING", "meta_outbox:SENDING",
+        "pancake_tag_outbox:APPLYING"] };
+    const adapter = createTrackBCommerceAuthorityPreprodAdapter({ service,
+      database: { acquireFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
+        readQuiescence: vi.fn(), mutateExactPointer: vi.fn(), readActivePointer: vi.fn(),
+        readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn() },
+      rollbackStore: { read: vi.fn(), persist: vi.fn() },
+      quiescence: { timeoutMs: 1, pollMs: 1, wait: async () => undefined } });
+    await expect(adapter.restorePreviousService({ lease: { fenceId: held.fenceId,
+      fenceToken: "30000000-0000-4000-8000-000000000001", epoch: 1 },
+    failedService: targetService, previousService: prior })).resolves.toEqual({
+      status: "HEALTHY", admission: "HELD", observedService: prior });
+    expect(main).toEqual({ identity: prior, status: "running" });
+  });
+
+  it("restores the exact prior image when a failed start leaves no main container", async () => {
+    const service = {
+      inspectPresent: vi.fn(async () => "ABSENT" as const),
+      discard: vi.fn(async () => "DISCARDED" as const),
+      stop: vi.fn(),
+      stage: vi.fn(async () => previousService),
+      start: vi.fn(async () => previousService),
+      inspectRunning: vi.fn(),
+    };
+    const held = { status: "HELD" as const, source: "DATABASE" as const,
+      pageId: "1198992073286645", channel: "MESSENGER", fenceId:
+        "20000000-0000-4000-8000-000000000001", epoch: 1, released: false,
+      guardedClaims: ["webhook_inbox:PROCESSING", "meta_outbox:SENDING",
+        "pancake_tag_outbox:APPLYING"] };
+    const adapter = createTrackBCommerceAuthorityPreprodAdapter({ service,
+      database: { acquireFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
+        readQuiescence: vi.fn(), mutateExactPointer: vi.fn(), readActivePointer: vi.fn(),
+        readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn() },
+      rollbackStore: { read: vi.fn(), persist: vi.fn() },
+      quiescence: { timeoutMs: 1, pollMs: 1, wait: async () => undefined } });
+    await expect(adapter.restorePreviousService({ lease: { fenceId: held.fenceId,
+      fenceToken: "30000000-0000-4000-8000-000000000001", epoch: 1 },
+    failedService: targetService, previousService })).resolves.toEqual({
+      status: "HEALTHY", admission: "HELD", observedService: previousService });
+    expect(service.stop).not.toHaveBeenCalled();
+    expect(service.stage).toHaveBeenCalledWith(targetService, previousService);
+    expect(service.start).toHaveBeenCalledWith(previousService, "COMMERCE");
+  });
+
   it("proves admission through the 0038 database boundary and bounded zero-work quiescence", async () => {
     const database = {
       acquireFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => ({
@@ -340,7 +471,7 @@ describe("Track B PREPROD mutation adapter", () => {
         .mockResolvedValueOnce({ activeInbox: 0, activeMetaOutbox: 0, activePancakeOutbox: 0,
           inFlightAuthorityDependentWork: 0, queuedAuthorityDependentWork: 3 }),
       mutateExactPointer: vi.fn(), readActivePointer: vi.fn(), readActivationAudit: vi.fn(),
-      proveRuntimeResolution: vi.fn(),
+      proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn(),
     };
     const service = {
       stage: vi.fn(), discard: vi.fn(), stop: vi.fn(async () => previousService),
@@ -379,7 +510,7 @@ describe("Track B PREPROD mutation adapter", () => {
         activePancakeOutbox: 0, inFlightAuthorityDependentWork: 1,
       queuedAuthorityDependentWork: 9 })), mutateExactPointer: vi.fn(),
       readActivePointer: vi.fn(), readActivationAudit: vi.fn(),
-      proveRuntimeResolution: vi.fn(),
+      proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn(),
     };
     const adapter = createTrackBCommerceAuthorityPreprodAdapter({
       database,

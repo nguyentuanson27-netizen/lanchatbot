@@ -5,7 +5,9 @@ import { behaviorModeContentHash } from "@lana/chat-runtime";
 import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1, DF13_COMMERCE_AUTHORITY_BUNDLE_V2 } from "./df13-commerce-authority-bundle.js";
 import { createTrackBReleaseLocalRollbackRecord } from "./track-b-commerce-authority-activation.js";
 import { TRACK_B_RUNTIME_CONFIG_KEYS_V1 } from "./track-b-commerce-authority-preprod-adapter.js";
-import { parseTrackBPreprodBuildInput, parseTrackBPreprodOperationPacket } from "./track-b-commerce-authority-preprod-cli.js";
+import { createTrackBPreprodOperationStartupPackages, parseTrackBPreprodBuildInput,
+  parseTrackBPreprodOperationPacket,
+  parseTrackBPreprodPrepareInput } from "./track-b-commerce-authority-preprod-cli.js";
 
 vi.mock("./track-b-release-candidate-evidence.js", async (importOriginal) => ({
   ...await importOriginal<typeof import("./track-b-release-candidate-evidence.js")>(),
@@ -43,6 +45,7 @@ function packet() {
     pageId: "1198992073286645",
     channel: "MESSENGER",
     operationId: "10000000-0000-4000-8000-000000000001",
+    direction: "ACTIVATE_TRACK_B",
     previous, target, rollbackRecord,
     previousImageTag: "lana-chatbot-app:track-b-previous",
     targetImageTag: "lana-chatbot-app:track-b-target",
@@ -102,5 +105,71 @@ describe("Track B PREPROD operator packet boundary", () => {
       .update(canonicalJsonV1(body), "utf8").digest("hex") };
     expect(() => parseTrackBPreprodOperationPacket(changed))
       .toThrow("TRACK_B_B3_2_OPERATION_PACKET_ENVELOPE_INVALID");
+  });
+
+  it("accepts a governed V2-to-V1 rollback packet and requires a distinct rollback startup path", () => {
+    const activation = packet();
+    const rollbackTarget = { ...activation.previous,
+      pointerRevision: activation.target.pointerRevision + 1 };
+    const { packetHash: _old, ...activationBody } = activation;
+    const body = { ...activationBody, direction: "ROLLBACK_TRACK_B",
+      previous: activation.target, target: rollbackTarget, releaseEvidence: null,
+      previousStartupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-v1.json" };
+    const rollback = { ...body, packetHash: createHash("sha256")
+      .update(canonicalJsonV1(body), "utf8").digest("hex") };
+    expect(parseTrackBPreprodOperationPacket(rollback)).toMatchObject({
+      direction: "ROLLBACK_TRACK_B", previous: activation.target, target: rollbackTarget,
+      releaseEvidence: null,
+    });
+  });
+
+  it("requires exact rollback version and generated startup inputs only for rollback preparation", () => {
+    const activationPacket = packet();
+    const common = { schemaVersion: 1, environment: "ENGINEERING_PREPROD",
+      pageId: "1198992073286645", channel: "MESSENGER",
+      operationId: "10000000-0000-4000-8000-000000000001",
+      previousService: activationPacket.rollbackRecord.previousService,
+      targetService: activationPacket.rollbackRecord.targetService,
+      previousImageTag: activationPacket.previousImageTag,
+      targetImageTag: activationPacket.targetImageTag, releaseTag: activationPacket.releaseTag,
+      releaseCreatedAt: activationPacket.releaseCreatedAt,
+      previousStartupPackageFile: activationPacket.previousStartupPackageFile,
+      targetStartupPackageFile: activationPacket.targetStartupPackageFile,
+      rollbackRecordHash: null,
+      recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/recovery.json",
+      releaseEvidence: activationPacket.releaseEvidence };
+    const rollback = { ...common, direction: "ROLLBACK_TRACK_B",
+      rollbackRecordHash: activationPacket.rollbackRecord.recordHash,
+      rollbackTargetVersionId: activationPacket.previous.version.modeVersionId,
+      rollbackStartupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-v1.json" };
+    expect(parseTrackBPreprodPrepareInput(rollback)).toMatchObject({ direction: "ROLLBACK_TRACK_B",
+      rollbackTargetVersionId: activationPacket.previous.version.modeVersionId });
+    expect(() => parseTrackBPreprodPrepareInput({ ...rollback, rollbackTargetVersionId: null }))
+      .toThrow("TRACK_B_B3_2_OPERATOR_SCOPE_INVALID");
+    expect(() => parseTrackBPreprodPrepareInput({ ...rollback, rollbackRecordHash: null }))
+      .toThrow("TRACK_B_B3_2_OPERATOR_SCOPE_INVALID");
+  });
+
+  it("pins fresh post-reversal startup revisions for symmetric recovery", () => {
+    const activation = packet();
+    const common = { previous: activation.previous, target: activation.target,
+      releaseEvidence: activation.releaseEvidence as never, releaseTag: activation.releaseTag,
+      releaseCreatedAt: activation.releaseCreatedAt,
+      targetServiceRevision: activation.rollbackRecord.targetService.releaseRevision };
+    const forward = createTrackBPreprodOperationStartupPackages({ ...common,
+      direction: "ACTIVATE_TRACK_B" });
+    expect(forward.recovery).toMatchObject({ authorityTransition: "ROLLBACK_TRACK_B",
+      expectedAuthority: { modeVersionId: activation.previous.version.modeVersionId,
+        pointerRevision: activation.target.pointerRevision + 1 } });
+    const rollbackTarget = { ...activation.previous,
+      pointerRevision: activation.target.pointerRevision + 1 };
+    const reverse = createTrackBPreprodOperationStartupPackages({ ...common,
+      direction: "ROLLBACK_TRACK_B", previous: activation.target, target: rollbackTarget });
+    expect(reverse.operationTarget).toMatchObject({ authorityTransition: "ROLLBACK_TRACK_B",
+      expectedAuthority: { pointerRevision: rollbackTarget.pointerRevision } });
+    expect(reverse.recovery).not.toHaveProperty("authorityTransition");
+    expect(reverse.recovery).toMatchObject({ expectedAuthority: {
+      modeVersionId: activation.target.version.modeVersionId,
+      pointerRevision: rollbackTarget.pointerRevision + 1 } });
   });
 });

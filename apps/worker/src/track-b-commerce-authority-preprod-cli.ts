@@ -12,6 +12,7 @@ import {
   TrackBPreprodImageBuilder,
   TrackBPostgresPreprodDatabaseBoundary,
   TrackBPreprodServicePairController,
+  trackBBuildIdV1,
 } from "./track-b-commerce-authority-preprod-adapter.js";
 import {
   createTrackBReleaseLocalRollbackRecord,
@@ -26,6 +27,7 @@ import {
   type TrackBReleaseCandidateEvidence,
 } from "./track-b-release-candidate-evidence.js";
 import { parseDf13CommercePreprodStartupInput } from "./df13-commerce-preprod-startup-authority.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1 } from "./df13-commerce-authority-bundle.js";
 
 const DATABASE_SECRET_FILE = "/opt/lana-chatbot/shared/secrets/runtime_behavior_mode_database_url";
 const OPERATION_ROOT = "/opt/lana-chatbot/releases/track-b/operations";
@@ -39,6 +41,7 @@ type PrepareInput = Readonly<{
   pageId: "1198992073286645";
   channel: "MESSENGER";
   operationId: string;
+  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
   previousService: TrackBServiceReleaseIdentity;
   targetService: TrackBServiceReleaseIdentity;
   previousImageTag: string;
@@ -47,6 +50,10 @@ type PrepareInput = Readonly<{
   releaseCreatedAt: string;
   previousStartupPackageFile: string;
   targetStartupPackageFile: string;
+  rollbackRecordHash: string | null;
+  rollbackTargetVersionId: string | null;
+  rollbackStartupPackageFile: string | null;
+  recoveryStartupPackageFile: string;
   releaseEvidence: TrackBReleaseCandidateEvidence;
 }>;
 
@@ -68,6 +75,7 @@ export type TrackBPreprodOperationPacket = Readonly<{
   pageId: "1198992073286645";
   channel: "MESSENGER";
   operationId: string;
+  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
   previous: RuntimeBehaviorModePointer;
   target: RuntimeBehaviorModePointer;
   rollbackRecord: TrackBReleaseLocalRollbackRecord;
@@ -77,7 +85,7 @@ export type TrackBPreprodOperationPacket = Readonly<{
   releaseCreatedAt: string;
   previousStartupPackageFile: string;
   targetStartupPackageFile: string;
-  releaseEvidence: TrackBReleaseCandidateEvidence;
+  releaseEvidence: TrackBReleaseCandidateEvidence | null;
   packetHash: string;
 }>;
 
@@ -135,15 +143,25 @@ function instant(value: unknown): string {
   return new Date(value).toISOString();
 }
 
-function parsePrepareInput(value: unknown): PrepareInput {
+export function parseTrackBPreprodPrepareInput(value: unknown): PrepareInput {
   const input = object(value);
-  if (!exactKeys(input, ["schemaVersion", "environment", "pageId", "channel", "operationId",
+  if (!exactKeys(input, ["schemaVersion", "environment", "pageId", "channel", "operationId", "direction",
     "previousService", "targetService", "previousImageTag", "targetImageTag",
     "releaseTag", "releaseCreatedAt",
     "previousStartupPackageFile", "targetStartupPackageFile",
-    "releaseEvidence"]) || input.schemaVersion !== 1 || input.environment !== "ENGINEERING_PREPROD" ||
+    "rollbackRecordHash", "rollbackTargetVersionId", "rollbackStartupPackageFile",
+    "recoveryStartupPackageFile", "releaseEvidence"]) ||
+      input.schemaVersion !== 1 || input.environment !== "ENGINEERING_PREPROD" ||
       input.pageId !== TRACK_B_PREPROD_FIXED_SCOPE.pageId || input.channel !== "MESSENGER" ||
-      typeof input.operationId !== "string" || !UUID_V4.test(input.operationId)) {
+      typeof input.operationId !== "string" || !UUID_V4.test(input.operationId) ||
+      !["ACTIVATE_TRACK_B", "ROLLBACK_TRACK_B"].includes(String(input.direction)) ||
+      (input.direction === "ACTIVATE_TRACK_B" &&
+        (input.rollbackRecordHash !== null || input.rollbackTargetVersionId !== null ||
+         input.rollbackStartupPackageFile !== null)) ||
+      (input.direction === "ROLLBACK_TRACK_B" &&
+        (typeof input.rollbackRecordHash !== "string" || !SHA256.test(input.rollbackRecordHash) ||
+         typeof input.rollbackTargetVersionId !== "string" || !UUID_V4.test(input.rollbackTargetVersionId) ||
+         typeof input.rollbackStartupPackageFile !== "string"))) {
     throw new Error("TRACK_B_B3_2_OPERATOR_SCOPE_INVALID");
   }
   return {
@@ -152,6 +170,7 @@ function parsePrepareInput(value: unknown): PrepareInput {
     pageId: TRACK_B_PREPROD_FIXED_SCOPE.pageId,
     channel: "MESSENGER",
     operationId: input.operationId.toLowerCase(),
+    direction: input.direction as PrepareInput["direction"],
     previousService: input.previousService as TrackBServiceReleaseIdentity,
     targetService: input.targetService as TrackBServiceReleaseIdentity,
     previousImageTag: imageTag(input.previousImageTag),
@@ -160,6 +179,11 @@ function parsePrepareInput(value: unknown): PrepareInput {
     releaseCreatedAt: instant(input.releaseCreatedAt),
     previousStartupPackageFile: previousStartupPath(input.previousStartupPackageFile),
     targetStartupPackageFile: startupPath(input.targetStartupPackageFile),
+    rollbackRecordHash: input.rollbackRecordHash as string | null,
+    rollbackTargetVersionId: input.rollbackTargetVersionId as string | null,
+    rollbackStartupPackageFile: input.rollbackStartupPackageFile === null
+      ? null : startupPath(input.rollbackStartupPackageFile),
+    recoveryStartupPackageFile: startupPath(input.recoveryStartupPackageFile),
     releaseEvidence: input.releaseEvidence as TrackBReleaseCandidateEvidence,
   };
 }
@@ -189,14 +213,16 @@ export function parseTrackBPreprodBuildInput(value: unknown): BuildInput {
 export function parseTrackBPreprodOperationPacket(value: unknown): TrackBPreprodOperationPacket {
   const packet = object(value);
   if (!exactKeys(packet, ["schemaVersion", "contractVersion", "environment", "pageId", "channel",
-    "operationId", "previous", "target", "rollbackRecord", "previousImageTag", "targetImageTag",
+    "operationId", "direction", "previous", "target", "rollbackRecord", "previousImageTag", "targetImageTag",
     "releaseTag", "releaseCreatedAt",
     "previousStartupPackageFile",
     "targetStartupPackageFile", "releaseEvidence", "packetHash"]) ||
       packet.schemaVersion !== 1 || packet.contractVersion !== "TRACK_B_B3_2_PREPROD_OPERATION_PACKET_V1" ||
       packet.environment !== "ENGINEERING_PREPROD" || packet.pageId !== TRACK_B_PREPROD_FIXED_SCOPE.pageId ||
       packet.channel !== "MESSENGER" || typeof packet.operationId !== "string" ||
-      !UUID_V4.test(packet.operationId) || typeof packet.packetHash !== "string" ||
+      !UUID_V4.test(packet.operationId) ||
+      !["ACTIVATE_TRACK_B", "ROLLBACK_TRACK_B"].includes(String(packet.direction)) ||
+      typeof packet.packetHash !== "string" ||
       !SHA256.test(packet.packetHash)) throw new Error("TRACK_B_B3_2_OPERATION_PACKET_INVALID");
   const { packetHash, ...body } = packet;
   if (hash(body) !== packetHash) throw new Error("TRACK_B_B3_2_OPERATION_PACKET_HASH_MISMATCH");
@@ -208,11 +234,12 @@ export function parseTrackBPreprodOperationPacket(value: unknown): TrackBPreprod
   instant(packet.releaseCreatedAt);
   if (!validateTrackBCommerceAuthorityMutationEnvelope({
     operationId: packet.operationId,
-    direction: "ACTIVATE_TRACK_B",
+    direction: packet.direction as TrackBPreprodOperationPacket["direction"],
     previous: packet.previous as RuntimeBehaviorModePointer,
     target: packet.target as RuntimeBehaviorModePointer,
     rollbackRecord: packet.rollbackRecord as TrackBReleaseLocalRollbackRecord,
-    releaseEvidence: packet.releaseEvidence as TrackBReleaseCandidateEvidence,
+    ...(packet.releaseEvidence === null ? {} :
+      { releaseEvidence: packet.releaseEvidence as TrackBReleaseCandidateEvidence }),
   })) throw new Error("TRACK_B_B3_2_OPERATION_PACKET_ENVELOPE_INVALID");
   return packet as unknown as TrackBPreprodOperationPacket;
 }
@@ -257,6 +284,48 @@ function pointerWithTarget(previous: RuntimeBehaviorModePointer, version: Runtim
   };
 }
 
+export function createTrackBPreprodOperationStartupPackages(input: Readonly<{
+  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  previous: RuntimeBehaviorModePointer;
+  target: RuntimeBehaviorModePointer;
+  releaseEvidence: TrackBReleaseCandidateEvidence;
+  releaseTag: string;
+  releaseCreatedAt: string;
+  targetServiceRevision: string;
+}>) {
+  const startupPackage = (authority: RuntimeBehaviorModePointer,
+    transition?: "ROLLBACK_TRACK_B") => ({
+      mode: "COMMERCE" as const,
+      releaseEvidence: input.releaseEvidence,
+      expectedAuthority: {
+        pageId: TRACK_B_PREPROD_FIXED_SCOPE.pageId,
+        channel: "MESSENGER" as const,
+        modeVersionId: authority.version.modeVersionId,
+        contentHash: authority.version.contentHash,
+        pointerRevision: authority.pointerRevision,
+        authorityBundleHash: authority.version.authorityBundleHash,
+        source: "DATABASE" as const,
+      },
+      releaseSource: {
+        schemaVersion: 1 as const,
+        release: input.releaseTag,
+        repository: "https://github.com/nguyentuanson27-netizen/lanchatbot" as const,
+        tag: input.releaseTag,
+        commit: input.targetServiceRevision,
+        createdAt: input.releaseCreatedAt,
+      },
+      ...(transition ? { authorityTransition: transition } : {}),
+    });
+  const operationTarget = startupPackage(input.target,
+    input.direction === "ROLLBACK_TRACK_B" ? "ROLLBACK_TRACK_B" : undefined);
+  const recovery = startupPackage({ ...input.previous,
+    pointerRevision: input.target.pointerRevision + 1 },
+  input.direction === "ACTIVATE_TRACK_B" ? "ROLLBACK_TRACK_B" : undefined);
+  parseDf13CommercePreprodStartupInput(operationTarget);
+  parseDf13CommercePreprodStartupInput(recovery);
+  return Object.freeze({ operationTarget, recovery });
+}
+
 async function databaseUrl(): Promise<string> {
   const value = (await readFile(DATABASE_SECRET_FILE, "utf8")).trim();
   if (!value) throw new Error("TRACK_B_B3_2_DATABASE_CREDENTIAL_UNAVAILABLE");
@@ -264,7 +333,7 @@ async function databaseUrl(): Promise<string> {
 }
 
 async function prepare(inputPath: string): Promise<void> {
-  const input = parsePrepareInput(await readJson(resolve(inputPath)));
+  const input = parseTrackBPreprodPrepareInput(await readJson(resolve(inputPath)));
   const controllerInput = {
     composeFile: TRACK_B_PREPROD_FIXED_SCOPE.composeFile,
     projectDirectory: TRACK_B_PREPROD_FIXED_SCOPE.projectDirectory,
@@ -278,73 +347,97 @@ async function prepare(inputPath: string): Promise<void> {
     ...controllerInput, startupPackageFile: input.targetStartupPackageFile,
     imageReference: input.targetImageTag, expectedImageId: input.targetService.imageId,
   });
-  if (await previousController.inspectRunning(input.previousService) === null ||
-      await targetController.inspectImageAvailable(input.targetService) === null) {
+  const currentController = input.direction === "ACTIVATE_TRACK_B" ? previousController : targetController;
+  const currentService = input.direction === "ACTIVATE_TRACK_B" ? input.previousService : input.targetService;
+  const stagedController = input.direction === "ACTIVATE_TRACK_B" ? targetController : previousController;
+  const stagedService = input.direction === "ACTIVATE_TRACK_B" ? input.targetService : input.previousService;
+  if (await currentController.inspectRunning(currentService) === null ||
+      await stagedController.inspectImageAvailable(stagedService) === null) {
     throw new Error("TRACK_B_B3_2_SERVICE_PREFLIGHT_UNPROVEN");
   }
   const database = new TrackBPostgresPreprodDatabaseBoundary(await databaseUrl(), input.operationId);
   try {
     const previous = await database.readActivePointer();
     if (previous === null) throw new Error("TRACK_B_B3_2_PREVIOUS_POINTER_MISSING");
-    const previousStartup = parseDf13CommercePreprodStartupInput(
-      await readJson(input.previousStartupPackageFile),
+    const currentStartup = parseDf13CommercePreprodStartupInput(
+      await readJson(input.direction === "ACTIVATE_TRACK_B"
+        ? input.previousStartupPackageFile : input.targetStartupPackageFile),
     );
-    if (previousStartup.mode !== "COMMERCE" ||
-        previousStartup.releaseSource.commit !== input.previousService.releaseRevision ||
-        previousStartup.expectedAuthority.pageId !== input.pageId ||
-        previousStartup.expectedAuthority.channel !== input.channel ||
-        previousStartup.expectedAuthority.modeVersionId !== previous.version.modeVersionId ||
-        previousStartup.expectedAuthority.contentHash !== previous.version.contentHash ||
-        previousStartup.expectedAuthority.pointerRevision !== previous.pointerRevision ||
-        previousStartup.expectedAuthority.authorityBundleHash !== previous.version.authorityBundleHash ||
-        previousStartup.expectedAuthority.source !== "DATABASE") {
+    const currentStartupReleaseRevision = currentStartup.mode === "COMMERCE" &&
+      currentStartup.authorityTransition === "ROLLBACK_TRACK_B"
+      ? input.targetService.releaseRevision
+      : currentService.releaseRevision;
+    if (currentStartup.mode !== "COMMERCE" ||
+        currentStartup.releaseSource.commit !== currentStartupReleaseRevision ||
+        currentStartup.expectedAuthority.pageId !== input.pageId ||
+        currentStartup.expectedAuthority.channel !== input.channel ||
+        currentStartup.expectedAuthority.modeVersionId !== previous.version.modeVersionId ||
+        currentStartup.expectedAuthority.contentHash !== previous.version.contentHash ||
+        currentStartup.expectedAuthority.pointerRevision !== previous.pointerRevision ||
+        currentStartup.expectedAuthority.authorityBundleHash !== previous.version.authorityBundleHash ||
+        currentStartup.expectedAuthority.source !== "DATABASE") {
       throw new Error("TRACK_B_B3_2_PREVIOUS_STARTUP_PACKAGE_MISMATCH");
     }
-    const version = await database.prepareTarget(previous);
+    const version = input.direction === "ACTIVATE_TRACK_B"
+      ? await database.prepareTarget(previous)
+      : await database.readExactVersion({ pageId: input.pageId, channel: input.channel,
+        modeVersionId: input.rollbackTargetVersionId! });
+    if (version === null || (input.direction === "ROLLBACK_TRACK_B" &&
+        version.authorityBundleHash !== DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash)) {
+      throw new Error("TRACK_B_B3_2_ROLLBACK_TARGET_INVALID");
+    }
     const target = pointerWithTarget(previous, version);
-    const rollbackRecord = createTrackBReleaseLocalRollbackRecord({
-      selectedSourceCommit: input.targetService.releaseRevision,
-      previousService: input.previousService,
-      targetService: input.targetService,
-      previousAuthority: {
-        modeVersionId: previous.version.modeVersionId,
-        contentHash: previous.version.contentHash,
-        bundleHash: previous.version.authorityBundleHash ?? "",
-      },
-      targetAuthority: {
-        modeVersionId: target.version.modeVersionId,
-        contentHash: target.version.contentHash,
-        bundleHash: target.version.authorityBundleHash ?? "",
-      },
-    });
+    const rollbackStore = new ReleaseLocalRollbackRecordStore(ROLLBACK_ROOT);
+    const rollbackRecord = input.direction === "ACTIVATE_TRACK_B"
+      ? createTrackBReleaseLocalRollbackRecord({
+        selectedSourceCommit: input.targetService.releaseRevision,
+        previousService: input.previousService,
+        targetService: input.targetService,
+        previousAuthority: { modeVersionId: previous.version.modeVersionId,
+          contentHash: previous.version.contentHash,
+          bundleHash: previous.version.authorityBundleHash ?? "" },
+        targetAuthority: { modeVersionId: target.version.modeVersionId,
+          contentHash: target.version.contentHash,
+          bundleHash: target.version.authorityBundleHash ?? "" },
+      })
+      : await rollbackStore.read(input.rollbackRecordHash!);
+    if (rollbackRecord === null || (input.direction === "ROLLBACK_TRACK_B" &&
+        (canonicalJsonV1(rollbackRecord.previousService) !== canonicalJsonV1(input.previousService) ||
+         canonicalJsonV1(rollbackRecord.targetService) !== canonicalJsonV1(input.targetService) ||
+         rollbackRecord.previousAuthority.modeVersionId !== target.version.modeVersionId ||
+         rollbackRecord.previousAuthority.contentHash !== target.version.contentHash ||
+         rollbackRecord.previousAuthority.bundleHash !== target.version.authorityBundleHash ||
+         rollbackRecord.targetAuthority.modeVersionId !== previous.version.modeVersionId ||
+         rollbackRecord.targetAuthority.contentHash !== previous.version.contentHash ||
+         rollbackRecord.targetAuthority.bundleHash !== previous.version.authorityBundleHash))) {
+      throw new Error("TRACK_B_B3_2_ROLLBACK_RECORD_MISMATCH");
+    }
     const validation = validateTrackBReleaseCandidateEvidence(input.releaseEvidence, {
       activationReleaseRevision: rollbackRecord.selectedSourceCommit,
     });
     if (validation.status !== "MATCHED") throw new Error("TRACK_B_B3_2_RELEASE_EVIDENCE_INVALID");
-    const targetStartupPackage = {
-      mode: "COMMERCE" as const,
+    const expectedBuildId = trackBBuildIdV1({ sourceCommit: input.targetService.releaseRevision,
+      sourceTree: input.releaseEvidence.releaseSource.treeOid ?? "", runtimeConfigHash:
+        input.targetService.runtimeConfigHash });
+    if (expectedBuildId !== input.targetService.buildId) {
+      throw new Error("TRACK_B_B3_2_TARGET_BUILD_ID_MISMATCH");
+    }
+    const operationTargetStartupPath = input.direction === "ACTIVATE_TRACK_B"
+      ? input.targetStartupPackageFile : input.rollbackStartupPackageFile!;
+    if (input.recoveryStartupPackageFile === operationTargetStartupPath) {
+      throw new Error("TRACK_B_B3_2_STARTUP_PACKAGE_PATH_CONFLICT");
+    }
+    const startupPackages = createTrackBPreprodOperationStartupPackages({
+      direction: input.direction,
+      previous,
+      target,
       releaseEvidence: input.releaseEvidence,
-      expectedAuthority: {
-        pageId: input.pageId,
-        channel: input.channel,
-        modeVersionId: target.version.modeVersionId,
-        contentHash: target.version.contentHash,
-        pointerRevision: target.pointerRevision,
-        authorityBundleHash: target.version.authorityBundleHash,
-        source: "DATABASE" as const,
-      },
-      releaseSource: {
-        schemaVersion: 1 as const,
-        release: input.releaseTag,
-        repository: "https://github.com/nguyentuanson27-netizen/lanchatbot" as const,
-        tag: input.releaseTag,
-        commit: input.targetService.releaseRevision,
-        createdAt: input.releaseCreatedAt,
-      },
-    };
-    parseDf13CommercePreprodStartupInput(targetStartupPackage);
-    await persistExclusive(input.targetStartupPackageFile, targetStartupPackage);
-    const rollbackStore = new ReleaseLocalRollbackRecordStore(ROLLBACK_ROOT);
+      releaseTag: input.releaseTag,
+      releaseCreatedAt: input.releaseCreatedAt,
+      targetServiceRevision: input.targetService.releaseRevision,
+    });
+    await persistExclusive(operationTargetStartupPath, startupPackages.operationTarget);
+    await persistExclusive(input.recoveryStartupPackageFile, startupPackages.recovery);
     await rollbackStore.persist(rollbackRecord);
     const body = {
       schemaVersion: 1 as const,
@@ -353,6 +446,7 @@ async function prepare(inputPath: string): Promise<void> {
       pageId: TRACK_B_PREPROD_FIXED_SCOPE.pageId,
       channel: "MESSENGER" as const,
       operationId: input.operationId,
+      direction: input.direction,
       previous,
       target,
       rollbackRecord,
@@ -360,9 +454,11 @@ async function prepare(inputPath: string): Promise<void> {
       targetImageTag: input.targetImageTag,
       releaseTag: input.releaseTag,
       releaseCreatedAt: input.releaseCreatedAt,
-      previousStartupPackageFile: input.previousStartupPackageFile,
-      targetStartupPackageFile: input.targetStartupPackageFile,
-      releaseEvidence: input.releaseEvidence,
+      previousStartupPackageFile: input.direction === "ACTIVATE_TRACK_B"
+        ? input.recoveryStartupPackageFile : operationTargetStartupPath,
+      targetStartupPackageFile: input.direction === "ACTIVATE_TRACK_B"
+        ? operationTargetStartupPath : input.recoveryStartupPackageFile,
+      releaseEvidence: input.direction === "ACTIVATE_TRACK_B" ? input.releaseEvidence : null,
     };
     const packet = { ...body, packetHash: hash(body) };
     await mkdir(OPERATION_ROOT, { recursive: true, mode: 0o700 });
@@ -413,8 +509,9 @@ async function runPacket(packetPath: string, recovery: boolean): Promise<void> {
     const execute = recovery ? recoverTrackBCommerceAuthorityMutationAfterInterruption :
       executeTrackBCommerceAuthorityMutation;
     const result = await execute({ operationId: packet.operationId,
-      direction: "ACTIVATE_TRACK_B", previous: packet.previous, target: packet.target,
-      rollbackRecord: packet.rollbackRecord, releaseEvidence: packet.releaseEvidence, ports });
+      direction: packet.direction, previous: packet.previous, target: packet.target,
+      rollbackRecord: packet.rollbackRecord, ports,
+      ...(packet.releaseEvidence === null ? {} : { releaseEvidence: packet.releaseEvidence }) });
     process.stdout.write(`${JSON.stringify({ status: result.status, reasonCodes: result.reasonCodes,
       operationId: packet.operationId, packetHash: packet.packetHash })}\n`);
     if (result.status !== "TARGET_ACTIVE" && result.status !== "PREVIOUS_RESTORED") process.exitCode = 2;
@@ -423,8 +520,8 @@ async function runPacket(packetPath: string, recovery: boolean): Promise<void> {
 
 async function main() {
   const [command, path, extra] = process.argv.slice(2);
-  if (extra !== undefined || !path || !["build", "prepare", "activate", "recover"].includes(command ?? "")) {
-    throw new Error("usage: track-b-authority:preprod <build|prepare|activate|recover> <exact-json-path>");
+  if (extra !== undefined || !path || !["build", "prepare", "execute", "recover"].includes(command ?? "")) {
+    throw new Error("usage: track-b-authority:preprod <build|prepare|execute|recover> <exact-json-path>");
   }
   if (command === "build") await build(path);
   else if (command === "prepare") await prepare(path);

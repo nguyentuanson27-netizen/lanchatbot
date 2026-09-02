@@ -124,6 +124,18 @@ describe("Postgres Track B Commerce authority writer", () => {
     mocks.connect.mockResolvedValue({ query: mocks.clientQuery, release: mocks.release });
   });
 
+  it("reads one exact historical V1 version for governed rollback preparation", async () => {
+    mocks.clientQuery.mockResolvedValue(result([pointerRow({ versionId: previousVersionId,
+      contentHash: v1ContentHash, bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      revision: 6 })]));
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+    await expect(store.readExactVersion({ pageId, channel, modeVersionId: previousVersionId }))
+      .resolves.toMatchObject({ modeVersionId: previousVersionId,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        contentHash: v1ContentHash });
+    expect(mocks.clientQuery.mock.calls[0]?.[1]).toEqual([previousVersionId, pageId, channel]);
+  });
+
   it("reads exact page-scoped in-flight and queued authority work for quiescence", async () => {
     mocks.clientQuery.mockImplementation(async (sql: string, values?: readonly unknown[]) => {
       expect(sql).toContain("webhook_inbox");

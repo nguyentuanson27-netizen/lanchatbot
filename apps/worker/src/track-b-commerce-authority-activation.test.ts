@@ -447,6 +447,25 @@ describe("Track B Commerce authority mutation", () => {
     expect(mutationPorts.discardStagedService).not.toHaveBeenCalled();
   });
 
+  it("routes a partially staged target through exact cleanup instead of reporting NOT_EXECUTED", async () => {
+    const mutationPorts = ports({
+      stageAffectedService: vi.fn(async ({ sourceService, targetService }) => ({
+        status: "BLOCKED" as const, admission: "UNCONTROLLED" as const,
+        observedSourceService: sourceService, stagedService: targetService,
+      })),
+    });
+    await expect(executeTrackBCommerceAuthorityMutation({ operationId:
+      "40000000-0000-4000-8000-000000000001", direction: "ACTIVATE_TRACK_B", previous,
+    target, rollbackRecord, releaseEvidence, ports: mutationPorts })).resolves.toEqual({
+      status: "BLOCKED_PREVIOUS", sideEffects: "CONTROL_PLANE_ONLY",
+      reasonCodes: ["TRACK_B_B3_2_SERVICE_STAGING_UNPROVEN"],
+    });
+    expect(mutationPorts.discardStagedService).toHaveBeenCalledWith({
+      stagedService: rollbackRecord.targetService,
+    });
+    expect(mutationPorts.acquireFence).not.toHaveBeenCalled();
+  });
+
   it("rejects a staged operation when the deployed source identity is not exact", async () => {
     const mutationPorts = ports({
       stageAffectedService: vi.fn(async ({ targetService }) => ({
