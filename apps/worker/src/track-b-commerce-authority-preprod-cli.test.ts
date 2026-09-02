@@ -7,7 +7,8 @@ import { createTrackBReleaseLocalRollbackRecord } from "./track-b-commerce-autho
 import { TRACK_B_RUNTIME_CONFIG_KEYS_V1 } from "./track-b-commerce-authority-preprod-adapter.js";
 import { createTrackBPreprodOperationStartupPackages, parseTrackBPreprodBuildInput,
   parseTrackBPreprodOperationPacket,
-  parseTrackBPreprodPrepareInput } from "./track-b-commerce-authority-preprod-cli.js";
+  parseTrackBPreprodPrepareInput,
+  validateTrackBPreprodStartupArtifacts } from "./track-b-commerce-authority-preprod-cli.js";
 
 vi.mock("./track-b-release-candidate-evidence.js", async (importOriginal) => ({
   ...await importOriginal<typeof import("./track-b-release-candidate-evidence.js")>(),
@@ -52,8 +53,11 @@ function packet() {
     releaseTag: "track-b-v22-release",
     releaseCreatedAt: "2026-09-02T00:00:00.000Z",
     sourceStartupPackageFile: "/opt/lana-chatbot/releases/track-b/previous.json",
+    sourceStartupPackageHash: "a".repeat(64),
     operationTargetStartupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",
+    operationTargetStartupPackageHash: "b".repeat(64),
     recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/recovery.json",
+    recoveryStartupPackageHash: "c".repeat(64),
     releaseEvidence: { activationReleaseRevision: "5".repeat(40) },
   };
   return { ...body, packetHash: createHash("sha256")
@@ -174,5 +178,55 @@ describe("Track B PREPROD operator packet boundary", () => {
     expect(reverse.recovery).toMatchObject({ expectedAuthority: {
       modeVersionId: activation.target.version.modeVersionId,
       pointerRevision: rollbackTarget.pointerRevision + 1 } });
+  });
+
+  it("binds and revalidates all startup package contents before execution", async () => {
+    const activation = packet();
+    const packages = createTrackBPreprodOperationStartupPackages({ direction: "ACTIVATE_TRACK_B",
+      previous: activation.previous, target: activation.target,
+      releaseEvidence: activation.releaseEvidence as never, releaseTag: activation.releaseTag,
+      releaseCreatedAt: activation.releaseCreatedAt,
+      targetServiceRevision: activation.rollbackRecord.targetService.releaseRevision });
+    const source = { ...packages.recovery,
+      expectedAuthority: { ...packages.recovery.expectedAuthority,
+        modeVersionId: activation.previous.version.modeVersionId,
+        contentHash: activation.previous.version.contentHash,
+        pointerRevision: activation.previous.pointerRevision } };
+    const canonicalHash = (value: unknown) => createHash("sha256")
+      .update(canonicalJsonV1(value), "utf8").digest("hex");
+    const { packetHash: _old, ...base } = activation;
+    const body = { ...base, sourceStartupPackageHash: canonicalHash(source),
+      operationTargetStartupPackageHash: canonicalHash(packages.operationTarget),
+      recoveryStartupPackageHash: canonicalHash(packages.recovery) };
+    const bound = parseTrackBPreprodOperationPacket({ ...body,
+      packetHash: canonicalHash(body) });
+    const artifacts = new Map<string, unknown>([
+      [bound.sourceStartupPackageFile, source],
+      [bound.operationTargetStartupPackageFile, packages.operationTarget],
+      [bound.recoveryStartupPackageFile, packages.recovery],
+    ]);
+    const reader = async (path: string) => artifacts.get(path);
+    await expect(validateTrackBPreprodStartupArtifacts(bound, reader)).resolves.toBeUndefined();
+    for (const path of artifacts.keys()) {
+      const original = artifacts.get(path);
+      artifacts.set(path, { ...(original as object), drift: true });
+      await expect(validateTrackBPreprodStartupArtifacts(bound, reader))
+        .rejects.toThrow("TRACK_B_B3_2_STARTUP_PACKAGE_CONTENT_MISMATCH");
+      artifacts.set(path, original);
+    }
+    const semanticDrift = { ...packages.operationTarget,
+      expectedAuthority: { ...packages.operationTarget.expectedAuthority,
+        pointerRevision: packages.operationTarget.expectedAuthority.pointerRevision + 1 } };
+    artifacts.set(bound.operationTargetStartupPackageFile, semanticDrift);
+    const semanticBody = { ...body,
+      operationTargetStartupPackageHash: canonicalHash(semanticDrift) };
+    const semanticPacket = parseTrackBPreprodOperationPacket({ ...semanticBody,
+      packetHash: canonicalHash(semanticBody) });
+    await expect(validateTrackBPreprodStartupArtifacts(semanticPacket, reader))
+      .rejects.toThrow("TRACK_B_B3_2_GENERATED_STARTUP_PACKAGE_MISMATCH");
+    const substituted = { ...body,
+      sourceStartupPackageFile: "/opt/lana-chatbot/releases/track-b/substituted.json" };
+    expect(() => parseTrackBPreprodOperationPacket({ ...substituted,
+      packetHash: bound.packetHash })).toThrow("TRACK_B_B3_2_OPERATION_PACKET_HASH_MISMATCH");
   });
 });

@@ -84,8 +84,11 @@ export type TrackBPreprodOperationPacket = Readonly<{
   releaseTag: string;
   releaseCreatedAt: string;
   sourceStartupPackageFile: string;
+  sourceStartupPackageHash: string;
   operationTargetStartupPackageFile: string;
+  operationTargetStartupPackageHash: string;
   recoveryStartupPackageFile: string;
+  recoveryStartupPackageHash: string;
   releaseEvidence: TrackBReleaseCandidateEvidence | null;
   packetHash: string;
 }>;
@@ -216,13 +219,17 @@ export function parseTrackBPreprodOperationPacket(value: unknown): TrackBPreprod
   if (!exactKeys(packet, ["schemaVersion", "contractVersion", "environment", "pageId", "channel",
     "operationId", "direction", "previous", "target", "rollbackRecord", "previousImageTag", "targetImageTag",
     "releaseTag", "releaseCreatedAt",
-    "sourceStartupPackageFile", "operationTargetStartupPackageFile",
-    "recoveryStartupPackageFile", "releaseEvidence", "packetHash"]) ||
+    "sourceStartupPackageFile", "sourceStartupPackageHash",
+    "operationTargetStartupPackageFile", "operationTargetStartupPackageHash",
+    "recoveryStartupPackageFile", "recoveryStartupPackageHash", "releaseEvidence", "packetHash"]) ||
       packet.schemaVersion !== 1 || packet.contractVersion !== "TRACK_B_B3_2_PREPROD_OPERATION_PACKET_V1" ||
       packet.environment !== "ENGINEERING_PREPROD" || packet.pageId !== TRACK_B_PREPROD_FIXED_SCOPE.pageId ||
       packet.channel !== "MESSENGER" || typeof packet.operationId !== "string" ||
       !UUID_V4.test(packet.operationId) ||
       !["ACTIVATE_TRACK_B", "ROLLBACK_TRACK_B"].includes(String(packet.direction)) ||
+      !SHA256.test(String(packet.sourceStartupPackageHash)) ||
+      !SHA256.test(String(packet.operationTargetStartupPackageHash)) ||
+      !SHA256.test(String(packet.recoveryStartupPackageHash)) ||
       typeof packet.packetHash !== "string" ||
       !SHA256.test(packet.packetHash)) throw new Error("TRACK_B_B3_2_OPERATION_PACKET_INVALID");
   const { packetHash, ...body } = packet;
@@ -327,6 +334,61 @@ export function createTrackBPreprodOperationStartupPackages(input: Readonly<{
   parseDf13CommercePreprodStartupInput(operationTarget);
   parseDf13CommercePreprodStartupInput(recovery);
   return Object.freeze({ operationTarget, recovery });
+}
+
+function startupMatchesPointer(value: ReturnType<typeof parseDf13CommercePreprodStartupInput>,
+  pointer: RuntimeBehaviorModePointer): boolean {
+  return value.mode === "COMMERCE" && value.expectedAuthority.pageId === TRACK_B_PREPROD_FIXED_SCOPE.pageId &&
+    value.expectedAuthority.channel === "MESSENGER" &&
+    value.expectedAuthority.modeVersionId === pointer.version.modeVersionId &&
+    value.expectedAuthority.contentHash === pointer.version.contentHash &&
+    value.expectedAuthority.pointerRevision === pointer.pointerRevision &&
+    value.expectedAuthority.authorityBundleHash === pointer.version.authorityBundleHash &&
+    value.expectedAuthority.source === "DATABASE";
+}
+
+export async function validateTrackBPreprodStartupArtifacts(packet: TrackBPreprodOperationPacket,
+  reader: (path: string) => Promise<unknown> = readJson): Promise<void> {
+  const [sourceRaw, operationTargetRaw, recoveryRaw] = await Promise.all([
+    reader(packet.sourceStartupPackageFile), reader(packet.operationTargetStartupPackageFile),
+    reader(packet.recoveryStartupPackageFile),
+  ]);
+  if (hash(sourceRaw) !== packet.sourceStartupPackageHash ||
+      hash(operationTargetRaw) !== packet.operationTargetStartupPackageHash ||
+      hash(recoveryRaw) !== packet.recoveryStartupPackageHash) {
+    throw new Error("TRACK_B_B3_2_STARTUP_PACKAGE_CONTENT_MISMATCH");
+  }
+  const source = parseDf13CommercePreprodStartupInput(sourceRaw);
+  const operationTarget = parseDf13CommercePreprodStartupInput(operationTargetRaw);
+  const recovery = parseDf13CommercePreprodStartupInput(recoveryRaw);
+  if (!startupMatchesPointer(source, packet.previous) || source.mode !== "COMMERCE") {
+    throw new Error("TRACK_B_B3_2_SOURCE_STARTUP_PACKAGE_MISMATCH");
+  }
+  const sourceService = packet.direction === "ACTIVATE_TRACK_B"
+    ? packet.rollbackRecord.previousService : packet.rollbackRecord.targetService;
+  const sourceReleaseRevision = source.authorityTransition === "ROLLBACK_TRACK_B"
+    ? packet.rollbackRecord.targetService.releaseRevision : sourceService.releaseRevision;
+  if (source.releaseSource.commit !== sourceReleaseRevision) {
+    throw new Error("TRACK_B_B3_2_SOURCE_STARTUP_PACKAGE_MISMATCH");
+  }
+  if (operationTarget.mode !== "COMMERCE" || recovery.mode !== "COMMERCE" ||
+      canonicalJsonV1(operationTarget.releaseEvidence) !== canonicalJsonV1(recovery.releaseEvidence)) {
+    throw new Error("TRACK_B_B3_2_GENERATED_STARTUP_PACKAGE_MISMATCH");
+  }
+  const evidence = operationTarget.releaseEvidence as TrackBReleaseCandidateEvidence;
+  if (validateTrackBReleaseCandidateEvidence(evidence, {
+    activationReleaseRevision: packet.rollbackRecord.targetService.releaseRevision,
+  }).status !== "MATCHED") {
+    throw new Error("TRACK_B_B3_2_GENERATED_STARTUP_PACKAGE_MISMATCH");
+  }
+  const expected = createTrackBPreprodOperationStartupPackages({ direction: packet.direction,
+    previous: packet.previous, target: packet.target, releaseEvidence: evidence,
+    releaseTag: packet.releaseTag, releaseCreatedAt: packet.releaseCreatedAt,
+    targetServiceRevision: packet.rollbackRecord.targetService.releaseRevision });
+  if (canonicalJsonV1(operationTarget) !== canonicalJsonV1(expected.operationTarget) ||
+      canonicalJsonV1(recovery) !== canonicalJsonV1(expected.recovery)) {
+    throw new Error("TRACK_B_B3_2_GENERATED_STARTUP_PACKAGE_MISMATCH");
+  }
 }
 
 async function databaseUrl(): Promise<string> {
@@ -459,8 +521,11 @@ async function prepare(inputPath: string): Promise<void> {
       releaseCreatedAt: input.releaseCreatedAt,
       sourceStartupPackageFile: input.direction === "ACTIVATE_TRACK_B"
         ? input.previousStartupPackageFile : input.targetStartupPackageFile,
+      sourceStartupPackageHash: hash(currentStartup),
       operationTargetStartupPackageFile: operationTargetStartupPath,
+      operationTargetStartupPackageHash: hash(startupPackages.operationTarget),
       recoveryStartupPackageFile: input.recoveryStartupPackageFile,
+      recoveryStartupPackageHash: hash(startupPackages.recovery),
       releaseEvidence: input.direction === "ACTIVATE_TRACK_B" ? input.releaseEvidence : null,
     };
     const packet = { ...body, packetHash: hash(body) };
@@ -484,6 +549,7 @@ async function build(inputPath: string): Promise<void> {
 
 async function runPacket(packetPath: string, recovery: boolean): Promise<void> {
   const packet = parseTrackBPreprodOperationPacket(await readJson(resolve(packetPath)));
+  await validateTrackBPreprodStartupArtifacts(packet);
   const database = new TrackBPostgresPreprodDatabaseBoundary(await databaseUrl(), packet.operationId);
   const common = {
     composeFile: TRACK_B_PREPROD_FIXED_SCOPE.composeFile,
