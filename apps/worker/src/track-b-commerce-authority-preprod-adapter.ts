@@ -488,7 +488,7 @@ export class DockerComposeTrackBPreprodServiceController {
   async stop(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null> {
     const observed = await this.#inspectContainer(expected, false);
     if (!observed) return null;
-    if (observed.status === "running") {
+    if (observed.status === "running" || observed.status === "restarting") {
       await this.#run("docker", ["stop", "--time", "30", CONTAINER], {});
     } else if (observed.status !== "exited") return null;
     const value = parseOne(await this.#run("docker", [
