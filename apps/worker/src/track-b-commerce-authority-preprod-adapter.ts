@@ -323,6 +323,7 @@ export class DockerComposeTrackBPreprodServiceController {
   readonly #startupPackageFile: string;
   readonly #imageReference: string;
   readonly #expectedImageId: string;
+  readonly #runtimeReleaseId: string | null;
   readonly #run: TrackBServiceCommandRunner;
   readonly #labelPolicy: "EXACT_ALL" | "OCI_REVISION_ONLY";
   readonly #health: Readonly<{ timeoutMs: number; pollMs: number; wait: (milliseconds: number) => Promise<void> }>;
@@ -333,6 +334,7 @@ export class DockerComposeTrackBPreprodServiceController {
     startupPackageFile: string;
     imageReference: string;
     expectedImageId: string;
+    runtimeReleaseId?: string;
     run?: TrackBServiceCommandRunner;
     labelPolicy?: "EXACT_ALL" | "OCI_REVISION_ONLY";
     health?: Readonly<{ timeoutMs: number; pollMs: number; wait: (milliseconds: number) => Promise<void> }>;
@@ -350,11 +352,17 @@ export class DockerComposeTrackBPreprodServiceController {
         !SHA256.test(input.expectedImageId)) {
       throw new Error("TRACK_B_B3_2_IMAGE_REFERENCE_INVALID");
     }
+    if ((input.runtimeReleaseId !== undefined &&
+         !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/u.test(input.runtimeReleaseId)) ||
+        (labelPolicy === "OCI_REVISION_ONLY" && input.runtimeReleaseId === undefined)) {
+      throw new Error("TRACK_B_B3_2_RUNTIME_RELEASE_ID_INVALID");
+    }
     this.#composeFile = input.composeFile;
     this.#projectDirectory = input.projectDirectory;
     this.#startupPackageFile = input.startupPackageFile;
     this.#imageReference = input.imageReference;
     this.#expectedImageId = input.expectedImageId;
+    this.#runtimeReleaseId = input.runtimeReleaseId ?? null;
     this.#run = input.run ?? defaultRunner;
     this.#labelPolicy = labelPolicy;
     this.#health = input.health ?? { timeoutMs: 120_000, pollMs: 1_000,
@@ -372,9 +380,7 @@ export class DockerComposeTrackBPreprodServiceController {
     Record<string, string> {
     return {
       REALTIME_IMAGE: this.#imageReference,
-      ...(this.#labelPolicy === "EXACT_ALL"
-        ? { REALTIME_RELEASE_ID: expected.releaseRevision }
-        : {}),
+      REALTIME_RELEASE_ID: this.#runtimeReleaseId ?? expected.releaseRevision,
       DF13_COMMERCE_PREPROD_STARTUP_MODE: mode,
       DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE: this.#startupPackageFile,
     };
@@ -406,6 +412,8 @@ export class DockerComposeTrackBPreprodServiceController {
       const runtimeConfig = Object.fromEntries(
         TRACK_B_RUNTIME_CONFIG_KEYS_V1.map((key, index) => [key, lines[index] ?? ""]),
       ) as Record<(typeof TRACK_B_RUNTIME_CONFIG_KEYS_V1)[number], string>;
+      if (this.#runtimeReleaseId !== null &&
+          runtimeConfig.REALTIME_RELEASE_ID !== this.#runtimeReleaseId) return null;
       if (trackBRuntimeConfigHashV1(runtimeConfig) !== expected.runtimeConfigHash) return null;
     }
     return { identity, status: value.State.Status,

@@ -113,6 +113,22 @@ describe("Track B PREPROD rollback record store", () => {
 });
 
 describe("Track B PREPROD Docker service boundary", () => {
+  it("requires a valid explicit runtime release id for a legacy OCI-only service", () => {
+    const common = {
+      composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
+      projectDirectory: "/opt/lana-chatbot/current/deploy",
+      startupPackageFile: "/opt/lana-chatbot/shared/df13/previous.json",
+      imageReference: "lana-chatbot-app:track-b-previous",
+      expectedImageId: previousService.imageId,
+      labelPolicy: "OCI_REVISION_ONLY" as const,
+    };
+    expect(() => new DockerComposeTrackBPreprodServiceController(common))
+      .toThrow("TRACK_B_B3_2_RUNTIME_RELEASE_ID_INVALID");
+    expect(() => new DockerComposeTrackBPreprodServiceController({ ...common,
+      runtimeReleaseId: "invalid release id" }))
+      .toThrow("TRACK_B_B3_2_RUNTIME_RELEASE_ID_INVALID");
+  });
+
   it("removes an inherited release override for legacy recovery but pins an exact target", () => {
     const inherited = { PATH: "safe", REALTIME_RELEASE_ID: "stale-operator-value" };
     expect(trackBCommandEnvironmentV1(inherited, {
@@ -127,7 +143,8 @@ describe("Track B PREPROD Docker service boundary", () => {
   });
 
   it("derives the unlabeled prior build identity from exact observed OCI, image and safe config", async () => {
-    const config = { ...targetRuntimeConfig, REALTIME_RELEASE_ID: previousService.releaseRevision };
+    const runtimeReleaseId = "20260828-df13-preprod-commerce-1111111";
+    const config = { ...targetRuntimeConfig, REALTIME_RELEASE_ID: runtimeReleaseId };
     const runtimeConfigHash = trackBRuntimeConfigHashV1(config);
     const expected = { ...previousService, runtimeConfigHash,
       buildId: trackBLegacyBuildIdV1({ sourceCommit: previousService.releaseRevision,
@@ -145,10 +162,20 @@ describe("Track B PREPROD Docker service boundary", () => {
       projectDirectory: "/opt/lana-chatbot/current/deploy",
       startupPackageFile: "/opt/lana-chatbot/shared/df13/previous.json",
       imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: expected.imageId,
+      runtimeReleaseId,
       labelPolicy: "OCI_REVISION_ONLY", run,
     });
     await expect(controller.inspectRunning(expected)).resolves.toEqual(expected);
     await expect(controller.inspectRunning({ ...expected, buildId: "f".repeat(64) })).resolves.toBeNull();
+    const mismatchedReleaseController = new DockerComposeTrackBPreprodServiceController({
+      composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
+      projectDirectory: "/opt/lana-chatbot/current/deploy",
+      startupPackageFile: "/opt/lana-chatbot/shared/df13/previous.json",
+      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: expected.imageId,
+      runtimeReleaseId: "20260828-df13-preprod-commerce-deadbee",
+      labelPolicy: "OCI_REVISION_ONLY", run,
+    });
+    await expect(mismatchedReleaseController.inspectRunning(expected)).resolves.toBeNull();
   });
 
   it("builds only a clean exact source tree and reads back all immutable image labels", async () => {
@@ -448,6 +475,7 @@ describe("Track B PREPROD mutation adapter", () => {
       targetAuthority: { modeVersionId: target.version.modeVersionId,
         contentHash: target.version.contentHash, bundleHash: target.version.authorityBundleHash } });
     let main = { identity: prior, status: "running" };
+    let mainRuntimeConfig = priorConfig;
     let staged: TrackBServiceReleaseIdentity | null = null;
     const composeCalls: Array<{ args: readonly string[]; env: Record<string, string> }> = [];
     const run = vi.fn(async (_command: string, args: readonly string[], env: Record<string, string>) => {
@@ -465,10 +493,11 @@ describe("Track B PREPROD mutation adapter", () => {
       if (args[0] === "compose") {
         if (args.includes("config")) return "";
         composeCalls.push({ args, env });
+        mainRuntimeConfig = { ...priorConfig, REALTIME_RELEASE_ID: env.REALTIME_RELEASE_ID ?? "" };
         main = { identity: prior, status: "running" }; return "";
       }
       if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
-        .map((key) => priorConfig[key]).join("\n");
+        .map((key) => mainRuntimeConfig[key]).join("\n");
       const stagedInspect = args.at(-1) === "lana-chatbot-track-b-staged-realtime-worker";
       const observed = stagedInspect ? staged : main.identity;
       return JSON.stringify({ Image: `sha256:${observed?.imageId}`, RestartCount: 0,
@@ -483,6 +512,7 @@ describe("Track B PREPROD mutation adapter", () => {
     const currentPriorController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/prior-rev6.json",
       imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+      runtimeReleaseId: "20260828-df13-preprod-commerce-abea1fb",
       labelPolicy: "OCI_REVISION_ONLY" });
     const targetController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/target-rev7.json",
@@ -490,6 +520,7 @@ describe("Track B PREPROD mutation adapter", () => {
     const reversePriorController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/prior-rev8.json",
       imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+      runtimeReleaseId: "20260828-df13-preprod-commerce-abea1fb",
       labelPolicy: "OCI_REVISION_ONLY" });
     const service = new TrackBPreprodServicePairController({ previousIdentity: prior,
       targetIdentity: targetService, previous: currentPriorController, target: targetController,
@@ -534,7 +565,8 @@ describe("Track B PREPROD mutation adapter", () => {
       DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE:
         "/opt/lana-chatbot/releases/track-b/prior-rev6.json",
     });
-    expect(composeCalls[0]?.env).not.toHaveProperty("REALTIME_RELEASE_ID");
+    expect(composeCalls[0]?.env).toHaveProperty("REALTIME_RELEASE_ID",
+      "20260828-df13-preprod-commerce-abea1fb");
     expect(database.proveRuntimeResolution).toHaveBeenCalledWith({ pointer: previous,
       notBefore: expect.any(String) });
     expect(readConsumers).toHaveBeenCalledTimes(1);
@@ -542,12 +574,14 @@ describe("Track B PREPROD mutation adapter", () => {
   });
 
   it("restages and restarts the exact prior service through concrete controllers after target failure", async () => {
-    const priorConfig = { ...targetRuntimeConfig, REALTIME_RELEASE_ID: previousService.releaseRevision };
+    const runtimeReleaseId = "20260828-df13-preprod-commerce-1111111";
+    const priorConfig = { ...targetRuntimeConfig, REALTIME_RELEASE_ID: runtimeReleaseId };
     const priorRuntimeConfigHash = trackBRuntimeConfigHashV1(priorConfig);
     const prior = { ...previousService, runtimeConfigHash: priorRuntimeConfigHash,
       buildId: trackBLegacyBuildIdV1({ sourceCommit: previousService.releaseRevision,
         imageId: previousService.imageId, runtimeConfigHash: priorRuntimeConfigHash }) };
     let main = { identity: targetService, status: "running" };
+    let mainRuntimeConfig = targetRuntimeConfig;
     let staged: TrackBServiceReleaseIdentity | null = null;
     const run = vi.fn(async (_command: string, args: readonly string[], env: Record<string, string>) => {
       const tag = String(args.at(-1));
@@ -563,10 +597,11 @@ describe("Track B PREPROD mutation adapter", () => {
       if (args[0] === "stop") { main = { ...main, status: "exited" }; return "container"; }
       if (args[0] === "compose") {
         if (args.includes("config")) return "";
+        mainRuntimeConfig = { ...priorConfig, REALTIME_RELEASE_ID: env.REALTIME_RELEASE_ID ?? "" };
         main = { identity: prior, status: "running" }; return "";
       }
       if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
-        .map((key) => priorConfig[key]).join("\n");
+        .map((key) => mainRuntimeConfig[key]).join("\n");
       const stagedInspect = args.at(-1) === "lana-chatbot-track-b-staged-realtime-worker";
       const observed = stagedInspect ? staged : main.identity;
       return JSON.stringify({ Image: `sha256:${observed?.imageId}`, RestartCount: 0,
@@ -581,6 +616,7 @@ describe("Track B PREPROD mutation adapter", () => {
     const previousController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback.json",
       imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+      runtimeReleaseId,
       labelPolicy: "OCI_REVISION_ONLY" });
     const targetController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",
