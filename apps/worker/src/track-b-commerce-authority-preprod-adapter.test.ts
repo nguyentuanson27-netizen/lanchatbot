@@ -184,6 +184,35 @@ describe("Track B PREPROD Docker service boundary", () => {
     await expect(mismatchedReleaseController.inspectRunning(expected)).resolves.toBeNull();
   });
 
+  it("refuses a running service when its exact startup artifact cannot be read", async () => {
+    const startupPackageFile = "/opt/lana-chatbot/releases/track-b/__test-unbound-startup.json";
+    const run = vi.fn(async (_command: string, args: readonly string[]) => {
+      if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
+        .map((key) => targetRuntimeConfig[key]).join("\n");
+      if (args[0] === "image") return JSON.stringify({ Id: `sha256:${targetService.imageId}`,
+        Config: { Labels: {
+          "org.opencontainers.image.revision": targetService.releaseRevision,
+          "com.lana.build-id": targetService.buildId,
+          "com.lana.runtime-config-hash": targetService.runtimeConfigHash,
+        } } });
+      return JSON.stringify({ Image: `sha256:${targetService.imageId}`, RestartCount: 0,
+        State: { Status: "running", Health: { Status: "healthy" } },
+        Config: { Env: [`DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE=${startupPackageFile}`], Labels: {
+          "org.opencontainers.image.revision": targetService.releaseRevision,
+          "com.lana.build-id": targetService.buildId,
+          "com.lana.runtime-config-hash": targetService.runtimeConfigHash,
+        } } });
+    });
+    const controller = new DockerComposeTrackBPreprodServiceController({
+      composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
+      projectDirectory: "/opt/lana-chatbot/current/deploy",
+      startupPackageFile, startupPackageHash: "a".repeat(64),
+      imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId, run,
+    });
+
+    await expect(controller.inspectRunning(targetService)).resolves.toBeNull();
+  });
+
   it("builds only a clean exact source tree and reads back all immutable image labels", async () => {
     const sourceTree = "9".repeat(40);
     const buildId = trackBBuildIdV1({ sourceCommit: targetService.releaseRevision, sourceTree,
@@ -546,7 +575,8 @@ describe("Track B PREPROD mutation adapter", () => {
         queuedAuthorityDependentWork: 0 })),
       mutateExactPointer: vi.fn(async () => ({ status: "CAS_MISMATCH" as const })),
       readActivePointer: vi.fn(async () => previous), readActivationAudit: vi.fn(),
-      proveRuntimeResolution: vi.fn(async () => "EXACT" as const), readExactVersion: vi.fn() };
+      proveRuntimeResolution: vi.fn(async () => "EXACT" as const), readExactVersion: vi.fn(),
+      readTrackBV2LkgSchemaCompatibility: vi.fn() };
     const ports = createTrackBCommerceAuthorityPreprodAdapter({ database, service,
       rollbackStore: { read: vi.fn(async () => record), persist: vi.fn() },
       quiescence: { timeoutMs: 10, pollMs: 1, wait: async () => undefined } });
@@ -640,7 +670,8 @@ describe("Track B PREPROD mutation adapter", () => {
     const adapter = createTrackBCommerceAuthorityPreprodAdapter({ service,
       database: { acquireFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
         readQuiescence: vi.fn(), mutateExactPointer: vi.fn(), readActivePointer: vi.fn(),
-        readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn() },
+        readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn(),
+        readTrackBV2LkgSchemaCompatibility: vi.fn() },
       rollbackStore: { read: vi.fn(), persist: vi.fn() },
       quiescence: { timeoutMs: 1, pollMs: 1, wait: async () => undefined } });
     await expect(adapter.restorePreviousService({ lease: { fenceId: held.fenceId,
@@ -667,7 +698,8 @@ describe("Track B PREPROD mutation adapter", () => {
     const adapter = createTrackBCommerceAuthorityPreprodAdapter({ service,
       database: { acquireFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
         readQuiescence: vi.fn(), mutateExactPointer: vi.fn(), readActivePointer: vi.fn(),
-        readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn() },
+        readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn(),
+        readTrackBV2LkgSchemaCompatibility: vi.fn() },
       rollbackStore: { read: vi.fn(), persist: vi.fn() },
       quiescence: { timeoutMs: 1, pollMs: 1, wait: async () => undefined } });
     await expect(adapter.restorePreviousService({ lease: { fenceId: held.fenceId,
@@ -698,6 +730,7 @@ describe("Track B PREPROD mutation adapter", () => {
           inFlightAuthorityDependentWork: 0, queuedAuthorityDependentWork: 3 }),
       mutateExactPointer: vi.fn(), readActivePointer: vi.fn(), readActivationAudit: vi.fn(),
       proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn(),
+      readTrackBV2LkgSchemaCompatibility: vi.fn(),
     };
     const service = {
       stage: vi.fn(), discard: vi.fn(), stop: vi.fn(async () => previousService),
@@ -737,6 +770,7 @@ describe("Track B PREPROD mutation adapter", () => {
       queuedAuthorityDependentWork: 9 })), mutateExactPointer: vi.fn(),
       readActivePointer: vi.fn(), readActivationAudit: vi.fn(),
       proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn(),
+      readTrackBV2LkgSchemaCompatibility: vi.fn(),
     };
     const adapter = createTrackBCommerceAuthorityPreprodAdapter({
       database,

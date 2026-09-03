@@ -43,9 +43,11 @@ Because control-plane propagation is bounded rather than instantaneous, a direct
 5. keep all authority-dependent work held through the propagation interval until every relevant authority consumer reads back the exact new revision/hash/source;
 6. release held work only after that exact readback succeeds; after rollback or
    recovery, retain the fence until every relevant consumer instead reads back
-   the exact restored `LEGACY` revision/hash/source.
+   the exact recorded rollback revision/hash/source. The historical DF13
+   LEGACY-to-COMMERCE exercise restored `LEGACY`; Track B B3.2 instead restores
+   only its exact compatible last-known-good `COMMERCE/V2` identity.
 
-If quiescence cannot be proven, a relevant consumer does not converge to the exact revision within the reviewed bound, or readback is ambiguous, activation must abort/fail closed and remain or return to complete `LEGACY` authority.
+If quiescence cannot be proven, a relevant consumer does not converge to the exact revision within the reviewed bound, or readback is ambiguous, activation must abort/fail closed and retain or restore the exact recorded rollback authority. The historical DF13 exercise retained or restored complete `LEGACY`; Track B B3.2 must retain its fence and never select V1/LEGACY.
 
 Authority-dependent work includes non-side-effecting inputs whose classification, state read,
 phase, context, strategy, CTA, reconciliation, or subsequent plan can differ by authority.
@@ -103,7 +105,9 @@ next pointer revision. A separately requested rollback obtains its own exact
 reverse fence and may target only an exact compatible last-known-good V2 release.
 That identity binds source commit/tree, image digest/tag/build labels, runtime-config
 hash, behavior pointer revision/version/bundle, startup hash, durable Gate E
-certification and migrations-through-0038 schema compatibility. Missing, stale,
+certification and database-derived migrations-through-0039 schema compatibility.
+The compatibility hash proves the applied 0036--0039 ledger checksums, exact 0039
+fence-guard source and exact 0038 admission-guard/trigger identities. Missing, stale,
 ambiguous or incompatible LKG evidence fails closed; it never falls back to V1.
 
 Before CAS failure handling must leave the pointer at the recorded currently accepted V2

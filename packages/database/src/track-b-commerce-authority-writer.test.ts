@@ -46,6 +46,17 @@ const admissionFunctionSource = admissionMigration.slice(
   admissionFunctionStart,
   admissionMigration.indexOf("$$;", admissionFunctionStart),
 );
+const v2LkgMigration = readFileSync(new URL(
+  "../pending-migrations/0039_track_b_v2_lkg_cutover_fence.up.sql",
+  import.meta.url,
+), "utf8");
+const v2LkgFunctionMarker = "RETURNS trigger LANGUAGE plpgsql AS $$";
+const v2LkgFunctionStart = v2LkgMigration.lastIndexOf(v2LkgFunctionMarker) +
+  v2LkgFunctionMarker.length;
+const v2LkgFunctionSource = v2LkgMigration.slice(
+  v2LkgFunctionStart,
+  v2LkgMigration.indexOf("$$;", v2LkgFunctionStart),
+);
 const v1ContentHash = runtimeBehaviorModeContentHash({
   confirmationMode: "V2_ACTIVE",
   salesAuthorityMode: "COMMERCE",
@@ -316,6 +327,73 @@ describe("Postgres Track B Commerce authority writer", () => {
     })).resolves.toMatchObject({ status: "AMBIGUOUS", guardedClaims: [] });
   });
 
+  it("derives V2 LKG schema compatibility only from the exact database ledger and guards", async () => {
+    const migrationRows = [
+      ["0036_df13_commerce_authority_fence", "d709617e10554a0186b9233a404ef7faadfdf3576ba3c133efe51a56c2214425"],
+      ["0037_track_b_commerce_authority_replacement", "40b1ef14e3f7b2e037063de1f8d8ff7f804d069f8649115be6c29b1b56399c20"],
+      ["0038_track_b_commerce_admission_gate", "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140"],
+      ["0039_track_b_v2_lkg_cutover_fence", "f9bb37c95ba77b6947958442cc223f5f4583d43cba4591de5abfaed002e068ca"],
+    ].map(([migration_name, checksum_sha256]) => ({ migration_name, checksum_sha256 }));
+    const guard = (prosrc: string, proconfig: readonly string[] | null) => ({
+      prosrc, proconfig, function_schema: "public", language_name: "plpgsql", returns_trigger: true,
+    });
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes('FROM "public".schema_migrations')) return result(migrationRows);
+      if (sql.includes("guard_df13_commerce_cutover_fence_insert_identity")) {
+        return result([guard(v2LkgFunctionSource, null)]);
+      }
+      if (sql.includes("guard_track_b_cutover_admission") && !sql.includes("pg_trigger")) {
+        return result([guard(admissionFunctionSource, ["search_path=pg_catalog"])]);
+      }
+      if (sql.includes("FROM pg_catalog.pg_trigger")) return result([
+        admissionTrigger("webhook_inbox"), admissionTrigger("meta_outbox"),
+        admissionTrigger("pancake_tag_outbox"),
+      ]);
+      return result();
+    });
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+
+    await expect(store.readTrackBV2LkgSchemaCompatibility()).resolves.toMatchObject({
+      status: "EXACT", source: "DATABASE", migrationSchemaHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
+    });
+
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes('FROM "public".schema_migrations')) return result(migrationRows.slice(0, 3));
+      if (sql.includes("guard_df13_commerce_cutover_fence_insert_identity")) {
+        return result([guard(v2LkgFunctionSource, null)]);
+      }
+      if (sql.includes("guard_track_b_cutover_admission") && !sql.includes("pg_trigger")) {
+        return result([guard(admissionFunctionSource, ["search_path=pg_catalog"])]);
+      }
+      if (sql.includes("FROM pg_catalog.pg_trigger")) return result([
+        admissionTrigger("webhook_inbox"), admissionTrigger("meta_outbox"),
+        admissionTrigger("pancake_tag_outbox"),
+      ]);
+      return result();
+    });
+    await expect(store.readTrackBV2LkgSchemaCompatibility()).resolves.toEqual({
+      status: "AMBIGUOUS", source: "DATABASE", migrationSchemaHash: null,
+    });
+
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes('FROM "public".schema_migrations')) return result(migrationRows);
+      if (sql.includes("guard_df13_commerce_cutover_fence_insert_identity")) {
+        return result([guard(`${v2LkgFunctionSource}\n-- tampered`, null)]);
+      }
+      if (sql.includes("guard_track_b_cutover_admission") && !sql.includes("pg_trigger")) {
+        return result([guard(admissionFunctionSource, ["search_path=pg_catalog"])]);
+      }
+      if (sql.includes("FROM pg_catalog.pg_trigger")) return result([
+        admissionTrigger("webhook_inbox"), admissionTrigger("meta_outbox"),
+        admissionTrigger("pancake_tag_outbox"),
+      ]);
+      return result();
+    });
+    await expect(store.readTrackBV2LkgSchemaCompatibility()).resolves.toEqual({
+      status: "AMBIGUOUS", source: "DATABASE", migrationSchemaHash: null,
+    });
+  });
+
   it("prepares one immutable candidate V2 identity from the exact active V2 pointer", async () => {
     const current = pointerRow({
       versionId: previousVersionId,
@@ -356,6 +434,50 @@ describe("Postgres Track B Commerce authority writer", () => {
     expect(mocks.clientQuery.mock.calls.some(([sql]) =>
       String(sql).includes("UPDATE runtime_behavior_mode_pointers")
     )).toBe(false);
+  });
+
+  it("reuses only the exact current V2 identity when the content-hash uniqueness key already owns it", async () => {
+    const current = pointerRow({
+      versionId: previousVersionId,
+      contentHash: v2ContentHash,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+      revision: 6,
+    });
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes("FROM runtime_behavior_mode_pointers p")) return result([current]);
+      if (sql.includes("WHERE v.page_id = $1 AND v.channel = $2 AND v.content_hash = $3")) {
+        return result([{ ...current, version_reason: "fixture", created_by: "different-writer" }]);
+      }
+      return result();
+    });
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+
+    await expect(store.prepareTarget({
+      pageId, channel,
+      expectedCurrent: {
+        modeVersionId: previousVersionId, contentHash: v2ContentHash, pointerRevision: 6,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+      },
+      actor: "TRACK_B_B3_2_WRITER",
+      reason: "TRACK_B_B3_2_PREPARE:40000000-0000-4000-8000-000000000001",
+    })).resolves.toMatchObject({ modeVersionId: previousVersionId });
+
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes("FROM runtime_behavior_mode_pointers p")) return result([current]);
+      if (sql.includes("WHERE v.page_id = $1 AND v.channel = $2 AND v.content_hash = $3")) {
+        return result([{ ...current, mode_version_id: targetVersionId }]);
+      }
+      return result();
+    });
+    await expect(store.prepareTarget({
+      pageId, channel,
+      expectedCurrent: {
+        modeVersionId: previousVersionId, contentHash: v2ContentHash, pointerRevision: 6,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+      },
+      actor: "TRACK_B_B3_2_WRITER",
+      reason: "TRACK_B_B3_2_PREPARE:40000000-0000-4000-8000-000000000001",
+    })).rejects.toThrow("TRACK_B_B3_2_PREPARATION_IDEMPOTENCY_MISMATCH");
   });
 
   it("activates V2 only while the exact durable lease and pointer CAS are held", async () => {

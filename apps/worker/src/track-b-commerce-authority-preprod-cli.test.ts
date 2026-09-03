@@ -10,6 +10,7 @@ import { createTrackBReleaseLocalRollbackRecord } from "./track-b-commerce-autho
 import { TRACK_B_RUNTIME_CONFIG_KEYS_V1 } from "./track-b-commerce-authority-preprod-adapter.js";
 import { createTrackBPreprodOperationStartupPackages, parseTrackBPreprodBuildInput,
   parseTrackBPreprodOperationPacket, parseTrackBPreprodPrepareInput,
+  matchesTrackBOperationTargetStartupBaseline,
   persistTrackBPreprodRuntimeStartupArtifact,
   validateTrackBPreprodStartupArtifacts,
   validateTrackBV2LastKnownGoodSelection } from "./track-b-commerce-authority-preprod-cli.js";
@@ -216,8 +217,24 @@ describe("Track B PREPROD V2/LKG operator boundary", () => {
     }
   });
 
+  it("permits only a prior exact LKG startup when rollback derives a later CAS revision", () => {
+    const lkg = pointer("10000000-0000-4000-8000-000000000001", 6);
+    const rollbackTarget = { ...lkg, pointerRevision: 8 };
+    const lkgStartup = startup(lkgService, lkg, lkgEvidence);
+
+    expect(matchesTrackBOperationTargetStartupBaseline({
+      direction: "ROLLBACK_TO_LKG_V2", startup: lkgStartup, target: rollbackTarget,
+    })).toBe(true);
+    expect(matchesTrackBOperationTargetStartupBaseline({
+      direction: "ACTIVATE_V2_CANDIDATE", startup: lkgStartup, target: rollbackTarget,
+    })).toBe(false);
+    expect(matchesTrackBOperationTargetStartupBaseline({
+      direction: "ROLLBACK_TO_LKG_V2", startup: lkgStartup, target: lkg,
+    })).toBe(false);
+  });
+
   it("requires exact fixed-scope prepare and build inputs", () => {
-    const prepare = { schemaVersion: 2, environment: "ENGINEERING_PREPROD",
+    const prepare = { schemaVersion: 3, environment: "ENGINEERING_PREPROD",
       pageId: "1198992073286645", channel: "MESSENGER",
       operationId: "10000000-0000-4000-8000-000000000001", direction: "ACTIVATE_V2_CANDIDATE",
       candidateService, lastKnownGoodService: lkgService, candidateImageTag: "lana:v2-candidate",
@@ -227,11 +244,13 @@ describe("Track B PREPROD V2/LKG operator boundary", () => {
       operationTargetStartupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",
       recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/recovery.json",
       candidateReleaseEvidence: candidateEvidence, lastKnownGoodReleaseEvidence: lkgEvidence,
-      migrationSchemaHash: "b".repeat(64), lastKnownGoodRecordHash: null };
+      lastKnownGoodRecordHash: null };
     expect(parseTrackBPreprodPrepareInput(prepare).direction).toBe("ACTIVATE_V2_CANDIDATE");
     expect(() => parseTrackBPreprodPrepareInput({ ...prepare, direction: "ROLLBACK_TRACK_B" })).toThrow();
     expect(() => parseTrackBPreprodPrepareInput({ ...prepare, direction: "ROLLBACK_TO_LKG_V2",
       lastKnownGoodRecordHash: null })).toThrow();
+    expect(() => parseTrackBPreprodPrepareInput({ ...prepare,
+      migrationSchemaHash: "b".repeat(64) })).toThrow("TRACK_B_B3_2_OPERATOR_SCOPE_INVALID");
     const runtimeConfig = Object.fromEntries(TRACK_B_RUNTIME_CONFIG_KEYS_V1.map((key) => [key, "false"]));
     expect(parseTrackBPreprodBuildInput({ schemaVersion: 1, environment: "ENGINEERING_PREPROD",
       pageId: "1198992073286645", channel: "MESSENGER", sourceCommit: "1".repeat(40),

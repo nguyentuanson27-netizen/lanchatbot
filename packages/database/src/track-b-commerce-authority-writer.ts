@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { canonicalJsonV1 } from "@lana/contracts";
 import { Pool, type PoolClient } from "pg";
 import { DF13_COMMERCE_AUTHORITY_BUNDLE_V2 } from "./df13-commerce-authority-bundle.js";
 import {
@@ -13,9 +14,21 @@ const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}
 const CONTENT_HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const BUNDLE_HASH_PATTERN = /^[a-f0-9]{64}$/u;
 const PREPARE_REASON_PATTERN = /^TRACK_B_B3_2_PREPARE:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
+const TRACK_B_V2_LKG_SCHEMA_MIGRATIONS = Object.freeze([
+  Object.freeze({ name: "0036_df13_commerce_authority_fence", checksum: "d709617e10554a0186b9233a404ef7faadfdf3576ba3c133efe51a56c2214425" }),
+  Object.freeze({ name: "0037_track_b_commerce_authority_replacement", checksum: "40b1ef14e3f7b2e037063de1f8d8ff7f804d069f8649115be6c29b1b56399c20" }),
+  Object.freeze({ name: "0038_track_b_commerce_admission_gate", checksum: "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140" }),
+  Object.freeze({ name: "0039_track_b_v2_lkg_cutover_fence", checksum: "f9bb37c95ba77b6947958442cc223f5f4583d43cba4591de5abfaed002e068ca" }),
+] as const);
 const ADMISSION_MIGRATION_NAME = "0038_track_b_commerce_admission_gate";
-const ADMISSION_MIGRATION_HASH = "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140";
+const ADMISSION_MIGRATION_HASH = TRACK_B_V2_LKG_SCHEMA_MIGRATIONS[2].checksum;
 const ADMISSION_FUNCTION_SOURCE_HASH = "d083f18d4a62cf313af3baba8c3a145225e9ee7852e4192119b158d34c8ac5ba";
+const V2_LKG_FENCE_GUARD_SOURCE_HASH = "28ec7165520b614e7a40ac2e80fc781ec6fdeef2ae08b3fd82ff995e20c73ddc";
+const TRACK_B_COMMERCE_ADMISSION_TABLES_V1 = Object.freeze([
+  "meta_outbox",
+  "pancake_tag_outbox",
+  "webhook_inbox",
+] as const);
 
 export type TrackBCommerceIdentity = Readonly<{
   modeVersionId: string;
@@ -56,6 +69,12 @@ export type TrackBCommerceAdmissionReadbackRecord = Readonly<{
   epoch: number | null;
   released: boolean | null;
   guardedClaims: readonly string[];
+}>;
+
+export type TrackBV2LkgSchemaCompatibilityReadback = Readonly<{
+  status: "EXACT" | "AMBIGUOUS";
+  source: "DATABASE";
+  migrationSchemaHash: string | null;
 }>;
 
 type Row = Record<string, unknown>;
@@ -142,6 +161,21 @@ function exactIdentity(
 
 function hashToken(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function schemaCompatibilityHash(input: Readonly<{
+  migrations: readonly Readonly<{ name: string; checksum: string }>[];
+  cutoverFenceGuardSourceHash: string;
+  admissionGuardSourceHash: string;
+  admissionTriggerTables: readonly string[];
+}>): string {
+  return createHash("sha256").update(JSON.stringify({
+    contractVersion: "TRACK_B_B3_2_V2_LKG_SCHEMA_COMPATIBILITY_V1",
+    migrations: input.migrations,
+    cutoverFenceGuardSourceHash: input.cutoverFenceGuardSourceHash,
+    admissionGuardSourceHash: input.admissionGuardSourceHash,
+    admissionTriggerTables: input.admissionTriggerTables,
+  }), "utf8").digest("hex");
 }
 
 async function rollbackQuietly(client: PoolClient): Promise<void> {
@@ -336,6 +370,118 @@ export class PostgresTrackBCommerceAuthorityWriter {
       ? "EXACT" : exactCount === 0 && conflictingCount === 0 ? "MISSING" : "AMBIGUOUS";
   }
 
+  async readTrackBV2LkgSchemaCompatibility(): Promise<TrackBV2LkgSchemaCompatibilityReadback> {
+    const ambiguous: TrackBV2LkgSchemaCompatibilityReadback = {
+      status: "AMBIGUOUS", source: "DATABASE", migrationSchemaHash: null,
+    };
+    const qualifiedLedger = `"${this.#admissionSchema}".schema_migrations`;
+    const client = await this.#pool.connect();
+    try {
+      await client.query("BEGIN READ ONLY");
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [
+        `df13-cutover:${PAGE_ID}:${CHANNEL}`,
+      ]);
+      const [ledgerResult, fenceGuardResult, admissionGuardResult, triggerResult] = await Promise.all([
+        client.query(
+          `SELECT migration_name, checksum_sha256
+             FROM ${qualifiedLedger}
+            WHERE migration_name = ANY($1::text[])
+            ORDER BY migration_name`,
+          [TRACK_B_V2_LKG_SCHEMA_MIGRATIONS.map((migration) => migration.name)],
+        ),
+        client.query(
+          `SELECT p.prosrc, p.proconfig, n.nspname AS function_schema,
+                  l.lanname AS language_name,
+                  p.prorettype = 'pg_catalog.trigger'::pg_catalog.regtype AS returns_trigger
+             FROM pg_catalog.pg_proc AS p
+             JOIN pg_catalog.pg_namespace AS n ON n.oid=p.pronamespace
+             JOIN pg_catalog.pg_language AS l ON l.oid=p.prolang
+            WHERE n.nspname=$1 AND p.proname='guard_df13_commerce_cutover_fence_insert_identity'
+              AND p.pronargs=0`,
+          [this.#admissionSchema],
+        ),
+        client.query(
+          `SELECT p.prosrc, p.proconfig, n.nspname AS function_schema,
+                  l.lanname AS language_name,
+                  p.prorettype = 'pg_catalog.trigger'::pg_catalog.regtype AS returns_trigger
+             FROM pg_catalog.pg_proc AS p
+             JOIN pg_catalog.pg_namespace AS n ON n.oid=p.pronamespace
+             JOIN pg_catalog.pg_language AS l ON l.oid=p.prolang
+            WHERE n.nspname=$1 AND p.proname='guard_track_b_cutover_admission'
+              AND p.pronargs=0`,
+          [this.#admissionSchema],
+        ),
+        client.query(
+          `SELECT c.relname AS table_name, t.tgenabled, t.tgtype,
+                  t.tgqual, t.tgattr::text AS trigger_columns, t.tgnargs,
+                  p.proname AS function_name, p.prosrc, p.proconfig,
+                  n.nspname AS function_schema, l.lanname AS language_name,
+                  p.prorettype = 'pg_catalog.trigger'::pg_catalog.regtype AS returns_trigger
+             FROM pg_catalog.pg_trigger AS t
+             JOIN pg_catalog.pg_class AS c ON c.oid=t.tgrelid
+             JOIN pg_catalog.pg_namespace AS n ON n.oid=c.relnamespace
+             JOIN pg_catalog.pg_proc AS p ON p.oid=t.tgfoid
+             JOIN pg_catalog.pg_language AS l ON l.oid=p.prolang
+            WHERE n.nspname=$1 AND NOT t.tgisinternal
+              AND (c.relname,t.tgname) IN (
+                ('webhook_inbox','track_b_cutover_admission_webhook_inbox'),
+                ('meta_outbox','track_b_cutover_admission_meta_outbox'),
+                ('pancake_tag_outbox','track_b_cutover_admission_pancake_tag_outbox')
+              )`,
+          [this.#admissionSchema],
+        ),
+      ]);
+      const migrations = ledgerResult.rows.map((row: Row) => ({
+        name: String(row.migration_name), checksum: String(row.checksum_sha256),
+      }));
+      const exactLedger = migrations.length === TRACK_B_V2_LKG_SCHEMA_MIGRATIONS.length &&
+        TRACK_B_V2_LKG_SCHEMA_MIGRATIONS.every((expected) => migrations.some((actual) =>
+          actual.name === expected.name && actual.checksum === expected.checksum));
+      const exactFunction = (rows: readonly Row[], sourceHash: string,
+        expectedProconfig: readonly string[] | null): boolean => rows.length === 1 &&
+          rows[0]?.function_schema === this.#admissionSchema &&
+          rows[0]?.language_name === "plpgsql" && rows[0]?.returns_trigger === true &&
+          createHash("sha256").update(String(rows[0]?.prosrc), "utf8").digest("hex") === sourceHash &&
+          (expectedProconfig === null
+            ? rows[0]?.proconfig === null
+            : Array.isArray(rows[0]?.proconfig) &&
+              canonicalJsonV1(rows[0]?.proconfig) === canonicalJsonV1(expectedProconfig));
+      const fenceGuard = fenceGuardResult.rows as Row[];
+      const admissionGuard = admissionGuardResult.rows as Row[];
+      const triggerTables = triggerResult.rows.filter((row: Row) =>
+        row.tgenabled === "A" && Number(row.tgtype) === 19 && row.tgqual === null &&
+        row.trigger_columns === "" && Number(row.tgnargs) === 0 &&
+        row.function_name === "guard_track_b_cutover_admission" &&
+        row.function_schema === this.#admissionSchema && row.language_name === "plpgsql" &&
+        row.returns_trigger === true &&
+        createHash("sha256").update(String(row.prosrc), "utf8").digest("hex") ===
+          ADMISSION_FUNCTION_SOURCE_HASH && Array.isArray(row.proconfig) &&
+        canonicalJsonV1(row.proconfig) === canonicalJsonV1(["search_path=pg_catalog"])
+      ).map((row: Row) => String(row.table_name)).sort();
+      const exactTriggers = triggerResult.rows.length === TRACK_B_COMMERCE_ADMISSION_TABLES_V1.length &&
+        canonicalJsonV1(triggerTables) === canonicalJsonV1(TRACK_B_COMMERCE_ADMISSION_TABLES_V1);
+      if (!exactLedger || !exactFunction(fenceGuard, V2_LKG_FENCE_GUARD_SOURCE_HASH, null) ||
+          !exactFunction(admissionGuard, ADMISSION_FUNCTION_SOURCE_HASH,
+            ["search_path=pg_catalog"]) || !exactTriggers) {
+        await client.query("COMMIT");
+        return ambiguous;
+      }
+      const migrationSchemaHash = schemaCompatibilityHash({
+        migrations,
+        cutoverFenceGuardSourceHash: V2_LKG_FENCE_GUARD_SOURCE_HASH,
+        admissionGuardSourceHash: ADMISSION_FUNCTION_SOURCE_HASH,
+        admissionTriggerTables: triggerTables,
+      });
+      await client.query("COMMIT");
+      return { status: "EXACT", source: "DATABASE", migrationSchemaHash };
+    } catch (error) {
+      await rollbackQuietly(client);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async readAdmissionHold(input: Readonly<{
     pageId: string;
     channel: string;
@@ -474,8 +620,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
         if (
           !canonicalCommerceVersion(existing, DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash) ||
           existing.confirmationMode !== current.version.confirmationMode ||
-          existing.createdBy !== input.actor ||
-          !PREPARE_REASON_PATTERN.test(existing.reason)
+          existing.modeVersionId.toLowerCase() !== current.version.modeVersionId.toLowerCase()
         ) throw new Error("TRACK_B_B3_2_PREPARATION_IDEMPOTENCY_MISMATCH");
         await client.query("COMMIT");
         return existing;

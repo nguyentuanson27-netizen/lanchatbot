@@ -45,6 +45,7 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
       "0036_df13_commerce_authority_fence",
       "0037_track_b_commerce_authority_replacement",
       "0038_track_b_commerce_admission_gate",
+      "0039_track_b_v2_lkg_cutover_fence",
     ]) {
       const sql = await readFile(resolve(import.meta.dirname, `../pending-migrations/${name}.up.sql`), "utf8");
       const checksum = createHash("sha256").update(sql).digest("hex");
@@ -58,6 +59,33 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
         await pool.query("ROLLBACK");
         throw error;
       }
+    }
+    const v2LkgDown = await readFile(resolve(import.meta.dirname,
+      "../pending-migrations/0039_track_b_v2_lkg_cutover_fence.down.sql"), "utf8");
+    await pool.query("BEGIN");
+    try {
+      await pool.query(v2LkgDown);
+      await pool.query("DELETE FROM schema_migrations WHERE migration_name=$1", [
+        "0039_track_b_v2_lkg_cutover_fence",
+      ]);
+      await pool.query("COMMIT");
+    } catch (error) {
+      await pool.query("ROLLBACK");
+      throw error;
+    }
+    const v2LkgUp = await readFile(resolve(import.meta.dirname,
+      "../pending-migrations/0039_track_b_v2_lkg_cutover_fence.up.sql"), "utf8");
+    await pool.query("BEGIN");
+    try {
+      await pool.query(v2LkgUp);
+      await pool.query("INSERT INTO schema_migrations (migration_name, checksum_sha256) VALUES ($1,$2)", [
+        "0039_track_b_v2_lkg_cutover_fence",
+        createHash("sha256").update(v2LkgUp).digest("hex"),
+      ]);
+      await pool.query("COMMIT");
+    } catch (error) {
+      await pool.query("ROLLBACK");
+      throw error;
     }
     previousVersionId = randomUUID();
     previousContentHash = runtimeBehaviorModeContentHash({ confirmationMode: "V2_ACTIVE",
@@ -87,6 +115,7 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
       actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_PREPARE:${operationId}` });
     targetVersionId = prepared.modeVersionId;
     targetContentHash = prepared.contentHash;
+    expect(targetVersionId).toBe(previousVersionId);
     fence = new PostgresDf13CommerceCutoverFenceStore(databaseUrl, 60_000);
   }, 120_000);
 

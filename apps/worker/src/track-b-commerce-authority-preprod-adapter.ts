@@ -285,7 +285,7 @@ type DockerInspect = {
   Image?: unknown;
   RestartCount?: unknown;
   State?: { Status?: unknown; Health?: { Status?: unknown } };
-  Config?: { Image?: unknown; Labels?: Record<string, unknown> };
+  Config?: { Image?: unknown; Labels?: Record<string, unknown>; Env?: unknown };
 };
 
 function parseOne(output: string, code: string): DockerInspect {
@@ -322,6 +322,7 @@ export class DockerComposeTrackBPreprodServiceController {
   readonly #startupPackageFile: string;
   readonly #imageReference: string;
   readonly #expectedImageId: string;
+  readonly #startupPackageHash: string | null;
   readonly #runtimeReleaseId: string | null;
   readonly #run: TrackBServiceCommandRunner;
   readonly #labelPolicy: "EXACT_ALL" | "OCI_REVISION_ONLY";
@@ -333,6 +334,7 @@ export class DockerComposeTrackBPreprodServiceController {
     startupPackageFile: string;
     imageReference: string;
     expectedImageId: string;
+    startupPackageHash?: string;
     runtimeReleaseId?: string;
     run?: TrackBServiceCommandRunner;
     labelPolicy?: "EXACT_ALL" | "OCI_REVISION_ONLY";
@@ -348,7 +350,8 @@ export class DockerComposeTrackBPreprodServiceController {
       throw new Error("TRACK_B_B3_2_SERVICE_SCOPE_INVALID");
     }
     if (!/^[a-z0-9][a-z0-9._/-]{0,127}:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/u.test(input.imageReference) ||
-        !SHA256.test(input.expectedImageId)) {
+        !SHA256.test(input.expectedImageId) ||
+        (input.startupPackageHash !== undefined && !SHA256.test(input.startupPackageHash))) {
       throw new Error("TRACK_B_B3_2_IMAGE_REFERENCE_INVALID");
     }
     if ((input.runtimeReleaseId !== undefined &&
@@ -361,6 +364,7 @@ export class DockerComposeTrackBPreprodServiceController {
     this.#startupPackageFile = input.startupPackageFile;
     this.#imageReference = input.imageReference;
     this.#expectedImageId = input.expectedImageId;
+    this.#startupPackageHash = input.startupPackageHash ?? null;
     this.#runtimeReleaseId = input.runtimeReleaseId ?? null;
     this.#run = input.run ?? defaultRunner;
     this.#labelPolicy = labelPolicy;
@@ -403,6 +407,19 @@ export class DockerComposeTrackBPreprodServiceController {
     ], {}), "TRACK_B_B3_2_CONTAINER_INSPECT_INVALID");
     const identity = identityFromInspect(value, expected, this.#labelPolicy);
     if (!identity || typeof value.State?.Status !== "string") return null;
+    if (this.#startupPackageHash !== null) {
+      const environment = value.Config?.Env;
+      if (!Array.isArray(environment) ||
+          !environment.includes(`DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE=${this.#startupPackageFile}`)) {
+        return null;
+      }
+      let startup: unknown;
+      try { startup = JSON.parse(await readFile(this.#startupPackageFile, "utf8")) as unknown; } catch {
+        return null;
+      }
+      if (createHash("sha256").update(canonicalJsonV1(startup), "utf8").digest("hex") !==
+          this.#startupPackageHash) return null;
+    }
     if (verifyRuntime && value.State.Status === "running") {
       const output = await this.#run("docker", ["exec", container, "printenv",
         ...TRACK_B_RUNTIME_CONFIG_KEYS_V1], {});
@@ -606,6 +623,11 @@ export interface TrackBPreprodDatabaseBoundary {
     pointer: RuntimeBehaviorModePointer;
     notBefore: string;
   }): Promise<"EXACT" | "MISSING" | "AMBIGUOUS">;
+  readTrackBV2LkgSchemaCompatibility(): Promise<{
+    status: "EXACT" | "AMBIGUOUS";
+    source: "DATABASE";
+    migrationSchemaHash: string | null;
+  }>;
   readExactVersion(input: { pageId: string; channel: string; modeVersionId: string }):
     Promise<RuntimeBehaviorModePointer["version"] | null>;
 }
@@ -872,6 +894,10 @@ export class TrackBPostgresPreprodDatabaseBoundary implements TrackBPreprodDatab
       workerId: "realtime-worker-1",
       notBefore: input.notBefore,
     });
+  }
+
+  readTrackBV2LkgSchemaCompatibility() {
+    return this.#writer.readTrackBV2LkgSchemaCompatibility();
   }
 }
 

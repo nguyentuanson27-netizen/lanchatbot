@@ -36,11 +36,11 @@ const OPERATION_ROOT = "/opt/lana-chatbot/releases/track-b/operations";
 const ROLLBACK_ROOT = "/opt/lana-chatbot/releases/track-b/rollback-records";
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const SHA256 = /^[a-f0-9]{64}$/u;
-type CommerceStartup = Exclude<ReturnType<typeof parseDf13CommercePreprodStartupInput>,
+export type CommerceStartup = Exclude<ReturnType<typeof parseDf13CommercePreprodStartupInput>,
   { mode: "LEGACY" }>;
 
 type PrepareInput = Readonly<{
-  schemaVersion: 2;
+  schemaVersion: 3;
   environment: "ENGINEERING_PREPROD";
   pageId: "1198992073286645";
   channel: "MESSENGER";
@@ -56,7 +56,6 @@ type PrepareInput = Readonly<{
   recoveryStartupPackageFile: string;
   candidateReleaseEvidence: TrackBReleaseCandidateEvidence;
   lastKnownGoodReleaseEvidence: TrackBReleaseCandidateEvidence;
-  migrationSchemaHash: string;
   lastKnownGoodRecordHash: string | null;
 }>;
 
@@ -142,20 +141,19 @@ export function parseTrackBPreprodPrepareInput(value: unknown): PrepareInput {
     "candidateService", "lastKnownGoodService", "candidateImageTag", "lastKnownGoodImageTag",
     "candidateStartupPackageFile", "lastKnownGoodStartupPackageFile",
     "operationTargetStartupPackageFile", "recoveryStartupPackageFile",
-    "candidateReleaseEvidence", "lastKnownGoodReleaseEvidence", "migrationSchemaHash",
+    "candidateReleaseEvidence", "lastKnownGoodReleaseEvidence",
     "lastKnownGoodRecordHash"]) ||
-      input.schemaVersion !== 2 || input.environment !== "ENGINEERING_PREPROD" ||
+      input.schemaVersion !== 3 || input.environment !== "ENGINEERING_PREPROD" ||
       input.pageId !== TRACK_B_PREPROD_FIXED_SCOPE.pageId || input.channel !== "MESSENGER" ||
       typeof input.operationId !== "string" || !UUID_V4.test(input.operationId) ||
       !["ACTIVATE_V2_CANDIDATE", "ROLLBACK_TO_LKG_V2"].includes(String(input.direction)) ||
-      typeof input.migrationSchemaHash !== "string" || !SHA256.test(input.migrationSchemaHash) ||
       (input.direction === "ACTIVATE_V2_CANDIDATE" && input.lastKnownGoodRecordHash !== null) ||
       (input.direction === "ROLLBACK_TO_LKG_V2" &&
         (typeof input.lastKnownGoodRecordHash !== "string" || !SHA256.test(input.lastKnownGoodRecordHash)))) {
     throw new Error("TRACK_B_B3_2_OPERATOR_SCOPE_INVALID");
   }
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     environment: "ENGINEERING_PREPROD",
     pageId: TRACK_B_PREPROD_FIXED_SCOPE.pageId,
     channel: "MESSENGER",
@@ -171,7 +169,6 @@ export function parseTrackBPreprodPrepareInput(value: unknown): PrepareInput {
     recoveryStartupPackageFile: startupPath(input.recoveryStartupPackageFile),
     candidateReleaseEvidence: input.candidateReleaseEvidence as TrackBReleaseCandidateEvidence,
     lastKnownGoodReleaseEvidence: input.lastKnownGoodReleaseEvidence as TrackBReleaseCandidateEvidence,
-    migrationSchemaHash: input.migrationSchemaHash,
     lastKnownGoodRecordHash: input.lastKnownGoodRecordHash as string | null,
   };
 }
@@ -302,6 +299,29 @@ function pointerWithTarget(previous: RuntimeBehaviorModePointer, version: Runtim
     reason: "PRE_CAS_EXPECTATION_ONLY",
     updatedAt: previous.updatedAt,
   };
+}
+
+/**
+ * A rollback's immutable LKG startup proves the previously accepted release.
+ * Its historical pointer revision intentionally precedes the new forward CAS
+ * revision encoded in the generated operation-target startup artifact.
+ */
+export function matchesTrackBOperationTargetStartupBaseline(input: Readonly<{
+  direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
+  startup: CommerceStartup;
+  target: RuntimeBehaviorModePointer;
+}>): boolean {
+  const expected = input.startup.expectedAuthority;
+  const immutableIdentityMatches = input.startup.mode === "COMMERCE" &&
+    expected.modeVersionId === input.target.version.modeVersionId &&
+    expected.contentHash === input.target.version.contentHash &&
+    expected.authorityBundleHash === input.target.version.authorityBundleHash &&
+    expected.source === "DATABASE";
+  if (!immutableIdentityMatches) return false;
+  return input.direction === "ACTIVATE_V2_CANDIDATE"
+    ? expected.pointerRevision === input.target.pointerRevision
+    : Number.isSafeInteger(expected.pointerRevision) && expected.pointerRevision >= 1 &&
+      expected.pointerRevision < input.target.pointerRevision;
 }
 
 export function createTrackBPreprodOperationStartupPackages(input: Readonly<{
@@ -458,45 +478,19 @@ async function prepare(inputPath: string): Promise<void> {
     if (expectedBuildId !== service.buildId) throw new Error("TRACK_B_B3_2_BUILD_ID_MISMATCH");
   }
   const rollbackStore = new ReleaseLocalRollbackRecordStore(ROLLBACK_ROOT);
-  if (input.direction === "ROLLBACK_TO_LKG_V2") {
-    const accepted = await rollbackStore.read(input.lastKnownGoodRecordHash!);
-    const suppliedIdentity = (role: "candidate" | "lastKnownGood",
-      startup: CommerceStartup): TrackBV2RollbackReleaseIdentity => {
-      const candidate = role === "candidate";
-      const evidence = candidate ? input.candidateReleaseEvidence : input.lastKnownGoodReleaseEvidence;
-      return {
-        service: candidate ? input.candidateService : input.lastKnownGoodService,
-        sourceTree: evidence.releaseSource.treeOid ?? "",
-        imageTag: candidate ? input.candidateImageTag : input.lastKnownGoodImageTag,
-        startupPackageHash: hash(startup),
-        authority: {
-          pointerRevision: startup.expectedAuthority.pointerRevision,
-          modeVersionId: startup.expectedAuthority.modeVersionId,
-          contentHash: startup.expectedAuthority.contentHash,
-          bundleHash: startup.expectedAuthority.authorityBundleHash,
-        },
-        gateEEvidence: evidence,
-        migrationSchemaHash: input.migrationSchemaHash,
-      };
-    };
-    if (!validateTrackBV2LastKnownGoodSelection({ accepted,
-      acceptedRecordHash: input.lastKnownGoodRecordHash!,
-      candidate: suppliedIdentity("candidate", candidateStartup),
-      lastKnownGood: suppliedIdentity("lastKnownGood", lastKnownGoodStartup) })) {
-      throw new Error("TRACK_B_B3_2_LKG_SELECTION_UNPROVEN");
-    }
-  }
   const controllerInput = {
     composeFile: TRACK_B_PREPROD_FIXED_SCOPE.composeFile,
     projectDirectory: TRACK_B_PREPROD_FIXED_SCOPE.projectDirectory,
   };
   const candidateController = new DockerComposeTrackBPreprodServiceController({
     ...controllerInput, startupPackageFile: input.candidateStartupPackageFile,
-    imageReference: input.candidateImageTag, expectedImageId: input.candidateService.imageId,
+    startupPackageHash: hash(candidateStartup), imageReference: input.candidateImageTag,
+    expectedImageId: input.candidateService.imageId,
   });
   const lastKnownGoodController = new DockerComposeTrackBPreprodServiceController({
     ...controllerInput, startupPackageFile: input.lastKnownGoodStartupPackageFile,
-    imageReference: input.lastKnownGoodImageTag, expectedImageId: input.lastKnownGoodService.imageId,
+    startupPackageHash: hash(lastKnownGoodStartup), imageReference: input.lastKnownGoodImageTag,
+    expectedImageId: input.lastKnownGoodService.imageId,
   });
   const currentController = input.direction === "ACTIVATE_V2_CANDIDATE"
     ? lastKnownGoodController : candidateController;
@@ -528,6 +522,44 @@ async function prepare(inputPath: string): Promise<void> {
         currentStartup.expectedAuthority.source !== "DATABASE") {
       throw new Error("TRACK_B_B3_2_PREVIOUS_STARTUP_PACKAGE_MISMATCH");
     }
+    const schemaCompatibility = await database.readTrackBV2LkgSchemaCompatibility();
+    const migrationSchemaHash = schemaCompatibility.migrationSchemaHash;
+    if (schemaCompatibility.status !== "EXACT" || schemaCompatibility.source !== "DATABASE" ||
+        migrationSchemaHash === null) {
+      throw new Error("TRACK_B_B3_2_SCHEMA_COMPATIBILITY_UNPROVEN");
+    }
+    if (await database.proveRuntimeResolution({ pointer: previous,
+      notBefore: previous.updatedAt }) !== "EXACT") {
+      throw new Error("TRACK_B_B3_2_CURRENT_LKG_RUNTIME_UNPROVEN");
+    }
+    const suppliedIdentity = (role: "candidate" | "lastKnownGood",
+      startup: CommerceStartup): TrackBV2RollbackReleaseIdentity => {
+      const candidate = role === "candidate";
+      const evidence = candidate ? input.candidateReleaseEvidence : input.lastKnownGoodReleaseEvidence;
+      return {
+        service: candidate ? input.candidateService : input.lastKnownGoodService,
+        sourceTree: evidence.releaseSource.treeOid ?? "",
+        imageTag: candidate ? input.candidateImageTag : input.lastKnownGoodImageTag,
+        startupPackageHash: hash(startup),
+        authority: {
+          pointerRevision: startup.expectedAuthority.pointerRevision,
+          modeVersionId: startup.expectedAuthority.modeVersionId,
+          contentHash: startup.expectedAuthority.contentHash,
+          bundleHash: startup.expectedAuthority.authorityBundleHash,
+        },
+        gateEEvidence: evidence,
+        migrationSchemaHash,
+      };
+    };
+    if (input.direction === "ROLLBACK_TO_LKG_V2") {
+      const accepted = await rollbackStore.read(input.lastKnownGoodRecordHash!);
+      if (!validateTrackBV2LastKnownGoodSelection({ accepted,
+        acceptedRecordHash: input.lastKnownGoodRecordHash!,
+        candidate: suppliedIdentity("candidate", candidateStartup),
+        lastKnownGood: suppliedIdentity("lastKnownGood", lastKnownGoodStartup) })) {
+        throw new Error("TRACK_B_B3_2_LKG_SELECTION_UNPROVEN");
+      }
+    }
     const targetBaselineStartup = input.direction === "ACTIVATE_V2_CANDIDATE"
       ? candidateStartup : lastKnownGoodStartup;
     const version = input.direction === "ACTIVATE_V2_CANDIDATE"
@@ -539,6 +571,10 @@ async function prepare(inputPath: string): Promise<void> {
       throw new Error("TRACK_B_B3_2_V2_TARGET_INVALID");
     }
     const target = pointerWithTarget(previous, version);
+    if (!matchesTrackBOperationTargetStartupBaseline({ direction: input.direction,
+      startup: targetBaselineStartup, target })) {
+      throw new Error("TRACK_B_B3_2_TARGET_STARTUP_PACKAGE_MISMATCH");
+    }
     const operationTargetStartupPath = input.operationTargetStartupPackageFile;
     if (input.recoveryStartupPackageFile === operationTargetStartupPath) {
       throw new Error("TRACK_B_B3_2_STARTUP_PACKAGE_PATH_CONFLICT");
@@ -576,7 +612,7 @@ async function prepare(inputPath: string): Promise<void> {
           modeVersionId: authority.version.modeVersionId, contentHash: authority.version.contentHash,
           bundleHash: authority.version.authorityBundleHash ?? "" },
         gateEEvidence: evidence,
-        migrationSchemaHash: input.migrationSchemaHash,
+        migrationSchemaHash,
       };
     };
     const rollbackRecord = createTrackBReleaseLocalRollbackRecord({
@@ -640,15 +676,20 @@ async function runPacket(packetPath: string, recovery: boolean): Promise<void> {
   const candidateController = new DockerComposeTrackBPreprodServiceController({ ...common,
     startupPackageFile: packet.direction === "ACTIVATE_V2_CANDIDATE"
       ? packet.operationTargetStartupPackageFile : packet.sourceStartupPackageFile,
+    startupPackageHash: packet.direction === "ACTIVATE_V2_CANDIDATE"
+      ? packet.operationTargetStartupPackageHash : packet.sourceStartupPackageHash,
     imageReference: packet.candidateImageTag,
     expectedImageId: packet.rollbackRecord.candidate.service.imageId });
   const lastKnownGoodController = new DockerComposeTrackBPreprodServiceController({ ...common,
     startupPackageFile: packet.direction === "ACTIVATE_V2_CANDIDATE"
       ? packet.sourceStartupPackageFile : packet.operationTargetStartupPackageFile,
+    startupPackageHash: packet.direction === "ACTIVATE_V2_CANDIDATE"
+      ? packet.sourceStartupPackageHash : packet.operationTargetStartupPackageHash,
     imageReference: packet.lastKnownGoodImageTag,
     expectedImageId: packet.rollbackRecord.lastKnownGood.service.imageId });
   const recoveryController = new DockerComposeTrackBPreprodServiceController({ ...common,
     startupPackageFile: packet.recoveryStartupPackageFile,
+    startupPackageHash: packet.recoveryStartupPackageHash,
     imageReference: packet.direction === "ACTIVATE_V2_CANDIDATE"
       ? packet.lastKnownGoodImageTag : packet.candidateImageTag,
     expectedImageId: packet.direction === "ACTIVATE_V2_CANDIDATE"
