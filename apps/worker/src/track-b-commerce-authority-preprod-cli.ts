@@ -151,7 +151,7 @@ export function trackBLegacyRuntimeReleaseIdV1(
   return source.release;
 }
 
-export function createTrackBLegacyRecoveryStartupV1(
+export function createTrackBLegacyCompatibleStartupV1(
   legacyStartup: CommerceStartup,
   generatedRecovery: CommerceStartup,
   previousServiceRevision: string,
@@ -439,6 +439,7 @@ export async function validateTrackBPreprodStartupArtifacts(packet: TrackBPrepro
   reader: (path: string) => Promise<unknown> = readJson): Promise<Readonly<{
     legacyRuntimeReleaseId: string;
     legacyStartup: CommerceStartup;
+    operationTargetStartup: CommerceStartup;
     recoveryStartup: CommerceStartup;
   }>> {
   const [sourceRaw, operationTargetRaw, recoveryRaw, boundLegacyRaw] = await Promise.all([
@@ -504,7 +505,8 @@ export async function validateTrackBPreprodStartupArtifacts(packet: TrackBPrepro
       canonicalJsonV1(recovery) !== canonicalJsonV1(expected.recovery)) {
     throw new Error("TRACK_B_B3_2_GENERATED_STARTUP_PACKAGE_MISMATCH");
   }
-  return Object.freeze({ legacyRuntimeReleaseId, legacyStartup, recoveryStartup: recovery });
+  return Object.freeze({ legacyRuntimeReleaseId, legacyStartup,
+    operationTargetStartup: operationTarget, recoveryStartup: recovery });
 }
 
 async function databaseUrl(): Promise<string> {
@@ -683,9 +685,10 @@ async function runPacket(packetPath: string, recovery: boolean): Promise<void> {
   const packet = parseTrackBPreprodOperationPacket(await readJson(resolve(packetPath)));
   const validatedStartups = await validateTrackBPreprodStartupArtifacts(packet);
   const legacyRuntimeReleaseId = validatedStartups.legacyRuntimeReleaseId;
+  let operationTargetStartupPackageFile = packet.operationTargetStartupPackageFile;
   let recoveryStartupPackageFile = packet.recoveryStartupPackageFile;
   if (packet.direction === "ACTIVATE_TRACK_B") {
-    const legacyRecovery = createTrackBLegacyRecoveryStartupV1(validatedStartups.legacyStartup,
+    const legacyRecovery = createTrackBLegacyCompatibleStartupV1(validatedStartups.legacyStartup,
       validatedStartups.recoveryStartup, packet.rollbackRecord.previousService.releaseRevision);
     if ((await createDf13CommercePreprodStartupAuthority(legacyRecovery)
       .authorizeExactCommerceIdentity(legacyRecovery.expectedAuthority)).status !== "ADMITTED") {
@@ -693,6 +696,16 @@ async function runPacket(packetPath: string, recovery: boolean): Promise<void> {
     }
     recoveryStartupPackageFile = `${OPERATION_ROOT}/${packet.operationId}.legacy-recovery-${hash(legacyRecovery)}.json`;
     await persistTrackBPreprodRuntimeStartupArtifact(recoveryStartupPackageFile, legacyRecovery);
+  } else {
+    const legacyTarget = createTrackBLegacyCompatibleStartupV1(validatedStartups.legacyStartup,
+      validatedStartups.operationTargetStartup,
+      packet.rollbackRecord.previousService.releaseRevision);
+    if ((await createDf13CommercePreprodStartupAuthority(legacyTarget)
+      .authorizeExactCommerceIdentity(legacyTarget.expectedAuthority)).status !== "ADMITTED") {
+      throw new Error("TRACK_B_B3_2_LEGACY_ROLLBACK_STARTUP_INVALID");
+    }
+    operationTargetStartupPackageFile = `${OPERATION_ROOT}/${packet.operationId}.legacy-target-${hash(legacyTarget)}.json`;
+    await persistTrackBPreprodRuntimeStartupArtifact(operationTargetStartupPackageFile, legacyTarget);
   }
   const database = new TrackBPostgresPreprodDatabaseBoundary(await databaseUrl(), packet.operationId);
   const common = {
@@ -701,7 +714,7 @@ async function runPacket(packetPath: string, recovery: boolean): Promise<void> {
   };
   const previousController = new DockerComposeTrackBPreprodServiceController({ ...common,
     startupPackageFile: packet.direction === "ACTIVATE_TRACK_B"
-      ? packet.sourceStartupPackageFile : packet.operationTargetStartupPackageFile,
+      ? packet.sourceStartupPackageFile : operationTargetStartupPackageFile,
     imageReference: packet.previousImageTag,
     expectedImageId: packet.rollbackRecord.previousService.imageId,
     runtimeReleaseId: legacyRuntimeReleaseId,

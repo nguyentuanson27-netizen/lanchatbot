@@ -8,7 +8,7 @@ import { behaviorModeContentHash } from "@lana/chat-runtime";
 import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1, DF13_COMMERCE_AUTHORITY_BUNDLE_V2 } from "./df13-commerce-authority-bundle.js";
 import { createTrackBReleaseLocalRollbackRecord } from "./track-b-commerce-authority-activation.js";
 import { TRACK_B_RUNTIME_CONFIG_KEYS_V1 } from "./track-b-commerce-authority-preprod-adapter.js";
-import { createTrackBLegacyRecoveryStartupV1,
+import { createTrackBLegacyCompatibleStartupV1,
   createTrackBPreprodOperationStartupPackages, parseTrackBPreprodBuildInput,
   parseTrackBPreprodOperationPacket,
   parseTrackBPreprodPrepareInput,
@@ -300,8 +300,8 @@ describe("Track B PREPROD operator packet boundary", () => {
       releaseCreatedAt: activation.releaseCreatedAt,
       targetServiceRevision: activation.rollbackRecord.targetService.releaseRevision });
     const generatedRecovery = generated.recovery as unknown as
-      Parameters<typeof createTrackBLegacyRecoveryStartupV1>[1];
-    const recovery = createTrackBLegacyRecoveryStartupV1(legacy, generatedRecovery,
+      Parameters<typeof createTrackBLegacyCompatibleStartupV1>[1];
+    const recovery = createTrackBLegacyCompatibleStartupV1(legacy, generatedRecovery,
       activation.rollbackRecord.previousService.releaseRevision);
     expect(Object.keys(recovery).sort()).toEqual([
       "expectedAuthority", "mode", "releaseEvidence", "releaseSource",
@@ -310,7 +310,24 @@ describe("Track B PREPROD operator packet boundary", () => {
     expect(recovery.releaseEvidence).toEqual(legacy.releaseEvidence);
     expect(recovery.releaseSource).toEqual(legacy.releaseSource);
     expect(recovery.expectedAuthority).toEqual(generated.recovery.expectedAuthority);
-    expect(() => createTrackBLegacyRecoveryStartupV1({ ...legacy,
+    const rollbackTarget = { ...activation.previous,
+      pointerRevision: activation.target.pointerRevision + 1 };
+    const rollback = createTrackBPreprodOperationStartupPackages({ direction: "ROLLBACK_TRACK_B",
+      previous: activation.target, target: rollbackTarget,
+      releaseEvidence: activation.releaseEvidence as never, releaseTag: activation.releaseTag,
+      releaseCreatedAt: activation.releaseCreatedAt,
+      targetServiceRevision: activation.rollbackRecord.targetService.releaseRevision });
+    const legacyTarget = createTrackBLegacyCompatibleStartupV1(legacy,
+      rollback.operationTarget as unknown as
+        Parameters<typeof createTrackBLegacyCompatibleStartupV1>[1],
+      activation.rollbackRecord.previousService.releaseRevision);
+    expect(Object.keys(legacyTarget).sort()).toEqual([
+      "expectedAuthority", "mode", "releaseEvidence", "releaseSource",
+    ]);
+    expect(legacyTarget).not.toHaveProperty("authorityTransition");
+    expect(legacyTarget.expectedAuthority).toEqual(rollback.operationTarget.expectedAuthority);
+    expect(legacyTarget.releaseEvidence).toEqual(legacy.releaseEvidence);
+    expect(() => createTrackBLegacyCompatibleStartupV1({ ...legacy,
       releaseSource: { ...legacy.releaseSource, tag: "substituted-release" } },
     generatedRecovery, activation.rollbackRecord.previousService.releaseRevision))
       .toThrow("TRACK_B_B3_2_LEGACY_RUNTIME_RELEASE_ID_MISMATCH");
@@ -349,6 +366,7 @@ describe("Track B PREPROD operator packet boundary", () => {
     await expect(validateTrackBPreprodStartupArtifacts(bound, reader))
       .resolves.toMatchObject({
         legacyRuntimeReleaseId: "20260828-df13-preprod-commerce-1111111",
+        operationTargetStartup: packages.operationTarget,
       });
     const bindSource = (changedSource: unknown) => {
       const changedBody = { ...body, sourceStartupPackageHash: canonicalHash(changedSource) };
