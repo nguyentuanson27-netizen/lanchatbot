@@ -224,6 +224,7 @@ describe("Track B PREPROD operator packet boundary", () => {
       targetImageTag: activationPacket.targetImageTag, releaseTag: activationPacket.releaseTag,
       releaseCreatedAt: activationPacket.releaseCreatedAt,
       previousStartupPackageFile: activationPacket.sourceStartupPackageFile,
+      legacyStartupPackageFile: "/opt/lana-chatbot/shared/df13/legacy/commerce-startup-v2.json",
       targetStartupPackageFile: activationPacket.operationTargetStartupPackageFile,
       rollbackRecordHash: null,
       recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/recovery.json",
@@ -237,6 +238,33 @@ describe("Track B PREPROD operator packet boundary", () => {
     expect(() => parseTrackBPreprodPrepareInput({ ...rollback, rollbackTargetVersionId: null }))
       .toThrow("TRACK_B_B3_2_OPERATOR_SCOPE_INVALID");
     expect(() => parseTrackBPreprodPrepareInput({ ...rollback, rollbackRecordHash: null }))
+      .toThrow("TRACK_B_B3_2_OPERATOR_SCOPE_INVALID");
+  });
+
+  it("binds the current V1 source separately from immutable legacy startup evidence", () => {
+    const activationPacket = packet();
+    const input = {
+      schemaVersion: 1, environment: "ENGINEERING_PREPROD",
+      pageId: "1198992073286645", channel: "MESSENGER",
+      operationId: "10000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_TRACK_B", previousService: activationPacket.rollbackRecord.previousService,
+      targetService: activationPacket.rollbackRecord.targetService,
+      previousImageTag: activationPacket.previousImageTag,
+      targetImageTag: activationPacket.targetImageTag,
+      releaseTag: activationPacket.releaseTag, releaseCreatedAt: activationPacket.releaseCreatedAt,
+      previousStartupPackageFile: "/opt/lana-chatbot/releases/track-b/reactivated-v1.json",
+      legacyStartupPackageFile: "/opt/lana-chatbot/shared/df13/legacy/commerce-startup-v2.json",
+      targetStartupPackageFile: activationPacket.operationTargetStartupPackageFile,
+      rollbackRecordHash: null, rollbackTargetVersionId: null, rollbackStartupPackageFile: null,
+      recoveryStartupPackageFile: activationPacket.recoveryStartupPackageFile,
+      releaseEvidence: activationPacket.releaseEvidence,
+    };
+    expect(parseTrackBPreprodPrepareInput(input)).toMatchObject({
+      previousStartupPackageFile: input.previousStartupPackageFile,
+      legacyStartupPackageFile: input.legacyStartupPackageFile,
+    });
+    const { legacyStartupPackageFile: _legacy, ...missingLegacy } = input;
+    expect(() => parseTrackBPreprodPrepareInput(missingLegacy))
       .toThrow("TRACK_B_B3_2_OPERATOR_SCOPE_INVALID");
   });
 

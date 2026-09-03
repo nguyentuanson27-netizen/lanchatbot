@@ -53,6 +53,7 @@ type PrepareInput = Readonly<{
   releaseTag: string;
   releaseCreatedAt: string;
   previousStartupPackageFile: string;
+  legacyStartupPackageFile: string;
   targetStartupPackageFile: string;
   rollbackRecordHash: string | null;
   rollbackTargetVersionId: string | null;
@@ -202,7 +203,7 @@ export function parseTrackBPreprodPrepareInput(value: unknown): PrepareInput {
   if (!exactKeys(input, ["schemaVersion", "environment", "pageId", "channel", "operationId", "direction",
     "previousService", "targetService", "previousImageTag", "targetImageTag",
     "releaseTag", "releaseCreatedAt",
-    "previousStartupPackageFile", "targetStartupPackageFile",
+    "previousStartupPackageFile", "legacyStartupPackageFile", "targetStartupPackageFile",
     "rollbackRecordHash", "rollbackTargetVersionId", "rollbackStartupPackageFile",
     "recoveryStartupPackageFile", "releaseEvidence"]) ||
       input.schemaVersion !== 1 || input.environment !== "ENGINEERING_PREPROD" ||
@@ -232,6 +233,7 @@ export function parseTrackBPreprodPrepareInput(value: unknown): PrepareInput {
     releaseTag: releaseTag(input.releaseTag),
     releaseCreatedAt: instant(input.releaseCreatedAt),
     previousStartupPackageFile: previousStartupPath(input.previousStartupPackageFile),
+    legacyStartupPackageFile: previousStartupPath(input.legacyStartupPackageFile),
     targetStartupPackageFile: startupPath(input.targetStartupPackageFile),
     rollbackRecordHash: input.rollbackRecordHash as string | null,
     rollbackTargetVersionId: input.rollbackTargetVersionId as string | null,
@@ -513,15 +515,15 @@ async function databaseUrl(): Promise<string> {
 
 async function prepare(inputPath: string): Promise<void> {
   const input = parseTrackBPreprodPrepareInput(await readJson(resolve(inputPath)));
-  const parsedPreviousStartup = parseDf13CommercePreprodStartupInput(
-    await readJson(input.previousStartupPackageFile));
-  if (parsedPreviousStartup.mode !== "COMMERCE") {
+  const parsedLegacyStartup = parseDf13CommercePreprodStartupInput(
+    await readJson(input.legacyStartupPackageFile));
+  if (parsedLegacyStartup.mode !== "COMMERCE") {
     throw new Error("TRACK_B_B3_2_LEGACY_STARTUP_PACKAGE_INVALID");
   }
   const legacyRuntimeReleaseId = trackBLegacyRuntimeReleaseIdV1(
-    parsedPreviousStartup, input.previousService.releaseRevision);
-  if ((await createDf13CommercePreprodStartupAuthority(parsedPreviousStartup)
-    .authorizeExactCommerceIdentity(parsedPreviousStartup.expectedAuthority)).status !== "ADMITTED") {
+    parsedLegacyStartup, input.previousService.releaseRevision);
+  if ((await createDf13CommercePreprodStartupAuthority(parsedLegacyStartup)
+    .authorizeExactCommerceIdentity(parsedLegacyStartup.expectedAuthority)).status !== "ADMITTED") {
     throw new Error("TRACK_B_B3_2_LEGACY_STARTUP_PACKAGE_INVALID");
   }
   const controllerInput = {
@@ -654,8 +656,8 @@ async function prepare(inputPath: string): Promise<void> {
       operationTargetStartupPackageHash: hash(startupPackages.operationTarget),
       recoveryStartupPackageFile: input.recoveryStartupPackageFile,
       recoveryStartupPackageHash: hash(startupPackages.recovery),
-      legacyStartupPackageFile: input.previousStartupPackageFile,
-      legacyStartupPackageHash: hash(parsedPreviousStartup),
+      legacyStartupPackageFile: input.legacyStartupPackageFile,
+      legacyStartupPackageHash: hash(parsedLegacyStartup),
       releaseEvidence: input.direction === "ACTIVATE_TRACK_B" ? input.releaseEvidence : null,
     };
     const packet = { ...body, packetHash: hash(body) };
