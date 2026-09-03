@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
+import { chmod, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { canonicalJsonV1 } from "@lana/contracts";
 import { behaviorModeContentHash } from "@lana/chat-runtime";
 import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1, DF13_COMMERCE_AUTHORITY_BUNDLE_V2 } from "./df13-commerce-authority-bundle.js";
@@ -9,6 +12,7 @@ import { createTrackBLegacyRecoveryStartupV1,
   createTrackBPreprodOperationStartupPackages, parseTrackBPreprodBuildInput,
   parseTrackBPreprodOperationPacket,
   parseTrackBPreprodPrepareInput,
+  persistTrackBPreprodRuntimeStartupArtifact,
   trackBLegacyRuntimeReleaseIdV1,
   validateTrackBPreprodStartupArtifacts } from "./track-b-commerce-authority-preprod-cli.js";
 
@@ -107,6 +111,28 @@ function legacyStartup(activation: ReturnType<typeof packet>):
 }
 
 describe("Track B PREPROD operator packet boundary", () => {
+  it("persists runtime startup artifacts read-only for the unprivileged container process", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "track-b-startup-mode-"));
+    const path = join(directory, "startup.json");
+    const value = { mode: "COMMERCE", expectedAuthority: { pointerRevision: 8 } };
+    try {
+      await persistTrackBPreprodRuntimeStartupArtifact(path, value);
+      expect((await stat(path)).mode & 0o777).toBe(0o444);
+      expect(JSON.parse(await readFile(path, "utf8"))).toEqual(value);
+
+      await chmod(path, 0o600);
+      await writeFile(path, `${canonicalJsonV1(value)}\n`);
+      await persistTrackBPreprodRuntimeStartupArtifact(path, value);
+      expect((await stat(path)).mode & 0o777).toBe(0o444);
+
+      await expect(persistTrackBPreprodRuntimeStartupArtifact(path,
+        { ...value, mode: "LEGACY" }))
+        .rejects.toThrow("TRACK_B_B3_2_OPERATION_PACKET_CONFLICT");
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
   it("derives the exact legacy runtime release id from immutable evidence-bound startup content", () => {
     const activation = packet();
     const startup = legacyStartup(activation);
