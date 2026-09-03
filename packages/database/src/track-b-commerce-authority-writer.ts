@@ -1,9 +1,6 @@
 import { createHash } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
-import {
-  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
-  DF13_COMMERCE_AUTHORITY_BUNDLE_V2,
-} from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_V2 } from "./df13-commerce-authority-bundle.js";
 import {
   runtimeBehaviorModeContentHash,
   type RuntimeBehaviorModePointerRecord,
@@ -36,7 +33,7 @@ export type TrackBCommerceFenceLease = Readonly<{
 export type TrackBCommercePointerMutationInput = Readonly<{
   pageId: string;
   channel: string;
-  operation: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  operation: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
   expectedCurrent: TrackBCommerceIdentity;
   target: Omit<TrackBCommerceIdentity, "pointerRevision">;
   lease: TrackBCommerceFenceLease;
@@ -444,7 +441,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
       pointerRevision: requiredRevision(input.expectedCurrent.pointerRevision),
       authorityBundleHash: requiredBundleHash(input.expectedCurrent.authorityBundleHash),
     };
-    if (expectedCurrent.authorityBundleHash !== DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash) {
+    if (expectedCurrent.authorityBundleHash !== DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash) {
       throw new Error("TRACK_B_B3_2_PREVIOUS_BUNDLE_INVALID");
     }
     const client = await this.#pool.connect();
@@ -458,7 +455,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
       if (
         current.pointerRevision !== expectedCurrent.pointerRevision ||
         !exactIdentity(current.version, expectedCurrent) ||
-        !canonicalCommerceVersion(current.version, DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash)
+        !canonicalCommerceVersion(current.version, DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash)
       ) throw new Error("TRACK_B_B3_2_POINTER_CAS_MISMATCH");
       const payload = {
         confirmationMode: current.version.confirmationMode,
@@ -522,7 +519,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
   ): Promise<RuntimeBehaviorModePointerRecord> {
     requiredScope(input.pageId, input.channel);
     if (input.actor !== "TRACK_B_B3_2_WRITER") throw new Error("TRACK_B_B3_2_WRITER_ACTOR_INVALID");
-    const reasonOperation = input.operation === "ACTIVATE_TRACK_B" ? "ACTIVATE" : "ROLLBACK";
+    const reasonOperation = input.operation;
     if (!new RegExp(`^TRACK_B_B3_2_${reasonOperation}:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`, "iu").test(input.reason)) {
       throw new Error("TRACK_B_B3_2_WRITER_REASON_INVALID");
     }
@@ -543,13 +540,9 @@ export class PostgresTrackBCommerceAuthorityWriter {
       fenceToken: requiredUuid(input.lease.fenceToken, "TRACK_B_B3_2_FENCE_TOKEN_INVALID"),
       epoch: requiredRevision(input.lease.epoch),
     };
-    const forward = input.operation === "ACTIVATE_TRACK_B";
-    const expectedPreviousBundle = forward
-      ? DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
-      : DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash;
-    const expectedTargetBundle = forward
-      ? DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash
-      : DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
+    const expectedPreviousBundle = DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash;
+    const expectedTargetBundle = DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash;
+    const forward = input.operation === "ACTIVATE_V2_CANDIDATE";
     if (
       expectedCurrent.authorityBundleHash !== expectedPreviousBundle ||
       target.authorityBundleHash !== expectedTargetBundle
@@ -581,7 +574,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
         targetVersion.confirmationMode !== current.version.confirmationMode
       ) throw new Error("TRACK_B_B3_2_TARGET_IDENTITY_INVALID");
       const verifyPriorTransitionAudit = async (): Promise<void> => {
-        const priorOperation = forward ? "ROLLBACK" : "ACTIVATE";
+        const priorOperation = forward ? "ROLLBACK_TO_LKG_V2" : "ACTIVATE_V2_CANDIDATE";
         if (
           current.updatedBy !== "TRACK_B_B3_2_WRITER" ||
           !new RegExp(`^TRACK_B_B3_2_${priorOperation}:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`, "iu").test(current.reason)

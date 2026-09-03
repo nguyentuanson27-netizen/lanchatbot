@@ -39,7 +39,7 @@ export type Df13CommercePreprodStartupInput =
     releaseEvidence: Df13ReleaseCandidateEvidence | TrackBReleaseCandidateEvidence;
     expectedAuthority: Parameters<CommerceAuthorityConsumerPort["admitCommerceAuthority"]>[0];
     releaseSource: Df13ReleaseSourcePointer;
-    authorityTransition?: "ROLLBACK_TRACK_B";
+    authorityTransition?: "ROLLBACK_TO_LKG_V2";
   }>;
 
 function record(value: unknown): Record<string, unknown> | null {
@@ -92,7 +92,7 @@ export function parseDf13CommercePreprodStartupInput(
     throw new Error("DF13_COMMERCE_STARTUP_INPUT_INVALID");
   }
   if (input.authorityTransition !== undefined &&
-      input.authorityTransition !== "ROLLBACK_TRACK_B") {
+      input.authorityTransition !== "ROLLBACK_TO_LKG_V2") {
     throw new Error("DF13_COMMERCE_STARTUP_INPUT_INVALID");
   }
   return deepFreeze({
@@ -103,8 +103,8 @@ export function parseDf13CommercePreprodStartupInput(
       CommerceAuthorityConsumerPort["admitCommerceAuthority"]
     >[0],
     releaseSource: input.releaseSource as Df13ReleaseSourcePointer,
-    ...(input.authorityTransition === "ROLLBACK_TRACK_B"
-      ? { authorityTransition: "ROLLBACK_TRACK_B" as const } : {}),
+    ...(input.authorityTransition === "ROLLBACK_TO_LKG_V2"
+      ? { authorityTransition: "ROLLBACK_TO_LKG_V2" as const } : {}),
   });
 }
 
@@ -144,12 +144,10 @@ function startupPackageReason(
     return "DF13_COMMERCE_EXPECTED_AUTHORITY_INVALID";
   }
   const expectedBundleHash = trackB
-    ? input.authorityTransition === "ROLLBACK_TRACK_B"
-      ? DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
-      : DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash
+    ? DF13_COMMERCE_AUTHORITY_BUNDLE_ACTIVE.contractHash
     : DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
   if (input.authorityTransition !== undefined &&
-      (!trackB || input.authorityTransition !== "ROLLBACK_TRACK_B")) {
+      (!trackB || input.authorityTransition !== "ROLLBACK_TO_LKG_V2")) {
     return "DF13_COMMERCE_RELEASE_AUTHORITY_MISMATCH";
   }
   if (input.expectedAuthority.authorityBundleHash !== expectedBundleHash) {

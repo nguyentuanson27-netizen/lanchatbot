@@ -54,11 +54,11 @@ may bypass the fence; merely being outside the protected-side-effect set is insu
 
 This quiescent boundary is an atomicity/correctness requirement for direct cutover. It is not a traffic canary, SHADOW stage, or percentage rollout. Episode/cart pinning is not a default PREPROD invariant; it may be introduced later only if the implementation cannot prove a safe quiescent boundary for a specific authority-sensitive lifecycle.
 
-Every activation remains page-scoped, CAS-audited, read back from the worker, bounded by the existing propagation contract, and reversible to complete `LEGACY` authority.
+Every activation remains page-scoped, CAS-audited and read back from the worker. Historical DF13 evidence retains its exact `LEGACY` rollback record, but Track B must never select V1/LEGACY as a rollback target.
 
 ### Track B COMMERCE authority-bundle replacement
 
-The bounded `COMMERCE/V1 -> COMMERCE/V2` Track B replacement uses one explicit
+The bounded `COMMERCE/V2 -> candidate COMMERCE/V2` Track B replacement uses one explicit
 stopped-service mutation protocol:
 
 ```text
@@ -96,17 +96,21 @@ An admission-suppressed Inbox batch restores the speculative conversation-head
 attempt count together with its lease, so held polling cannot consume retry
 budget or poison queued work.
 
-The CAS writer accepts only the recorded prior and target authority
+The CAS writer accepts only the recorded currently accepted V2 and target V2 authority
 identities and exact live lease; a post-CAS recovery may reuse that same
 unreleased forward lease only to reverse the exact audited transition at the
 next pointer revision. A separately requested rollback obtains its own exact
-reverse fence.
+reverse fence and may target only an exact compatible last-known-good V2 release.
+That identity binds source commit/tree, image digest/tag/build labels, runtime-config
+hash, behavior pointer revision/version/bundle, startup hash, durable Gate E
+certification and migrations-through-0038 schema compatibility. Missing, stale,
+ambiguous or incompatible LKG evidence fails closed; it never falls back to V1.
 
-Before CAS failure handling must leave the pointer at the recorded prior
+Before CAS failure handling must leave the pointer at the recorded currently accepted V2
 identity, discard the staged target, restore and read back the exact prior
 service if it was stopped, and only then release the fence. After CAS failure
-handling must CAS back to the recorded prior authority, restore/start the exact
-prior service, prove runtime plus full-consumer convergence, and only then
+handling must CAS back to the recorded LKG V2 authority, restore/start the exact
+LKG V2 service, prove runtime plus full-consumer convergence, and only then
 release the fence. Unknown pointer, fence, stopped-service, staged-service,
 runtime, audit or consumer identity retains the fence and fails closed. This
 protocol does not authorize deployment or pointer mutation by itself.

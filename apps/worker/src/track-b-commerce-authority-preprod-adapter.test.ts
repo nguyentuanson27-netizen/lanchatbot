@@ -61,6 +61,10 @@ const targetService: TrackBServiceReleaseIdentity = {
   imageId: "7".repeat(64),
   runtimeConfigHash: trackBRuntimeConfigHashV1(targetRuntimeConfig),
 };
+const candidateEvidence = { activationReleaseRevision: targetService.releaseRevision,
+  releaseSource: { treeOid: "8".repeat(40) } } as never;
+const lkgEvidence = { activationReleaseRevision: previousService.releaseRevision,
+  releaseSource: { treeOid: "9".repeat(40) } } as never;
 
 function pointer(modeVersionId: string, pointerRevision: number, authorityBundleHash: string) {
   const payload = { confirmationMode: "V2_ACTIVE" as const, salesAuthorityMode: "COMMERCE" as const,
@@ -72,19 +76,19 @@ function pointer(modeVersionId: string, pointerRevision: number, authorityBundle
   updatedBy: "operator", reason: "active", updatedAt: "2026-09-02T00:00:00.000Z" };
 }
 const rollbackRecord = createTrackBReleaseLocalRollbackRecord({
-  selectedSourceCommit: targetService.releaseRevision,
-  previousService,
-  targetService,
-  previousAuthority: {
-    modeVersionId: "10000000-0000-4000-8000-000000000001",
-    contentHash: `sha256:${"9".repeat(64)}`,
-    bundleHash: "a".repeat(64),
-  },
-  targetAuthority: {
-    modeVersionId: "10000000-0000-4000-8000-000000000002",
-    contentHash: `sha256:${"b".repeat(64)}`,
-    bundleHash: "c".repeat(64),
-  },
+  candidate: { service: targetService, sourceTree: "8".repeat(40), imageTag: "lana:v2-candidate",
+    startupPackageHash: "a".repeat(64), authority: { pointerRevision: 7,
+      modeVersionId: "10000000-0000-4000-8000-000000000002",
+      contentHash: `sha256:${"b".repeat(64)}`,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash },
+    gateEEvidence: candidateEvidence, migrationSchemaHash: "c".repeat(64) },
+  lastKnownGood: { service: previousService, sourceTree: "9".repeat(40), imageTag: "lana:v2-lkg",
+    startupPackageHash: "d".repeat(64), authority: { pointerRevision: 6,
+      modeVersionId: "10000000-0000-4000-8000-000000000001",
+      contentHash: `sha256:${"9".repeat(64)}`,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash },
+    gateEEvidence: lkgEvidence, migrationSchemaHash: "c".repeat(64) },
+  lastKnownGoodSelection: { source: "CURRENT_ACCEPTED_V2", priorRecordHash: null },
 });
 
 describe("Track B PREPROD rollback record store", () => {
@@ -103,7 +107,9 @@ describe("Track B PREPROD rollback record store", () => {
     await store.persist(rollbackRecord);
     await expect(store.persist({
       ...rollbackRecord,
-      previousService: { ...previousService, buildId: "d".repeat(64) },
+      lastKnownGood: { ...rollbackRecord.lastKnownGood,
+        service: { ...previousService, buildId: "d".repeat(64) } },
+      lastKnownGoodSelection: rollbackRecord.lastKnownGoodSelection,
     })).rejects.toThrow("TRACK_B_B3_2_ROLLBACK_RECORD_INVALID");
     await writeFile(join(directory, `${"f".repeat(64)}.json`), "{}\n", "utf8");
     await expect(store.read("f".repeat(64))).rejects.toThrow(
@@ -457,23 +463,24 @@ describe("Track B PREPROD Docker service boundary", () => {
 });
 
 describe("Track B PREPROD mutation adapter", () => {
-  it("recovers an exact stopped V1 source before CAS and releases only after runtime and consumers converge", async () => {
+  it("recovers an exact stopped LKG V2 source before CAS and releases only after convergence", async () => {
     const priorConfig = { ...targetRuntimeConfig,
-      REALTIME_RELEASE_ID: "20260828-df13-preprod-commerce-abea1fb" };
+      REALTIME_RELEASE_ID: previousService.releaseRevision };
     const priorRuntimeConfigHash = trackBRuntimeConfigHashV1(priorConfig);
-    const prior = { ...previousService, runtimeConfigHash: priorRuntimeConfigHash,
-      buildId: trackBLegacyBuildIdV1({ sourceCommit: previousService.releaseRevision,
-        imageId: previousService.imageId, runtimeConfigHash: priorRuntimeConfigHash }) };
+    const prior = { ...previousService, runtimeConfigHash: priorRuntimeConfigHash };
     const previous = pointer("10000000-0000-4000-8000-000000000001", 6,
-      DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash);
+      DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash);
     const target = pointer("10000000-0000-4000-8000-000000000002", 7,
       DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash);
-    const record = createTrackBReleaseLocalRollbackRecord({ selectedSourceCommit: targetService.releaseRevision,
-      previousService: prior, targetService,
-      previousAuthority: { modeVersionId: previous.version.modeVersionId,
-        contentHash: previous.version.contentHash, bundleHash: previous.version.authorityBundleHash },
-      targetAuthority: { modeVersionId: target.version.modeVersionId,
-        contentHash: target.version.contentHash, bundleHash: target.version.authorityBundleHash } });
+    const record = createTrackBReleaseLocalRollbackRecord({
+      candidate: { ...rollbackRecord.candidate, service: targetService,
+        authority: { pointerRevision: target.pointerRevision, modeVersionId: target.version.modeVersionId,
+          contentHash: target.version.contentHash, bundleHash: target.version.authorityBundleHash } },
+      lastKnownGood: { ...rollbackRecord.lastKnownGood, service: prior,
+        authority: { pointerRevision: previous.pointerRevision, modeVersionId: previous.version.modeVersionId,
+          contentHash: previous.version.contentHash, bundleHash: previous.version.authorityBundleHash } },
+      lastKnownGoodSelection: rollbackRecord.lastKnownGoodSelection,
+    });
     let main = { identity: prior, status: "running" };
     let mainRuntimeConfig = priorConfig;
     let staged: TrackBServiceReleaseIdentity | null = null;
@@ -483,8 +490,8 @@ describe("Track B PREPROD mutation adapter", () => {
       const expected = tag.includes("previous") ? prior : targetService;
       if (args[0] === "image") return JSON.stringify({ Id: `sha256:${expected.imageId}`,
         Config: { Labels: { "org.opencontainers.image.revision": expected.releaseRevision,
-          ...(expected === targetService ? { "com.lana.build-id": expected.buildId,
-            "com.lana.runtime-config-hash": expected.runtimeConfigHash } : {}) } } });
+          "com.lana.build-id": expected.buildId,
+          "com.lana.runtime-config-hash": expected.runtimeConfigHash } } });
       if (args[0] === "ps") return String(args[3]).includes("track-b-staged")
         ? staged ? "staged-id" : "" : "main-id";
       if (args[0] === "create") { staged = expected; return "staged-id"; }
@@ -503,25 +510,21 @@ describe("Track B PREPROD mutation adapter", () => {
       return JSON.stringify({ Image: `sha256:${observed?.imageId}`, RestartCount: 0,
         State: { Status: stagedInspect ? "created" : main.status, Health: { Status: "healthy" } },
         Config: { Labels: { "org.opencontainers.image.revision": observed?.releaseRevision,
-          ...(observed === targetService ? { "com.lana.build-id": observed.buildId,
-            "com.lana.runtime-config-hash": observed.runtimeConfigHash } : {}),
+          "com.lana.build-id": observed?.buildId,
+          "com.lana.runtime-config-hash": observed?.runtimeConfigHash,
           ...(stagedInspect ? { "com.lana.track-b.stage": "TRACK_B_B3_2_STOPPED_NON_ADMITTING" } : {}) } } });
     });
     const common = { composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
       projectDirectory: "/opt/lana-chatbot/current/deploy", run };
     const currentPriorController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/prior-rev6.json",
-      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
-      runtimeReleaseId: "20260828-df13-preprod-commerce-abea1fb",
-      labelPolicy: "OCI_REVISION_ONLY" });
+      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId });
     const targetController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/target-rev7.json",
       imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId });
     const reversePriorController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/prior-rev8.json",
-      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
-      runtimeReleaseId: "20260828-df13-preprod-commerce-abea1fb",
-      labelPolicy: "OCI_REVISION_ONLY" });
+      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId });
     const service = new TrackBPreprodServicePairController({ previousIdentity: prior,
       targetIdentity: targetService, previous: currentPriorController, target: targetController,
       startRoutes: [
@@ -550,9 +553,8 @@ describe("Track B PREPROD mutation adapter", () => {
     const readConsumers = vi.fn(ports.readConsumerAuthorities);
     const observedPorts = { ...ports, readConsumerAuthorities: readConsumers };
     await expect(executeTrackBCommerceAuthorityMutation({ operationId:
-      "40000000-0000-4000-8000-000000000001", direction: "ACTIVATE_TRACK_B", previous,
-    target, rollbackRecord: record, releaseEvidence: {
-      activationReleaseRevision: targetService.releaseRevision } as never,
+      "40000000-0000-4000-8000-000000000001", direction: "ACTIVATE_V2_CANDIDATE", previous,
+    target, rollbackRecord: record, releaseEvidence: record.candidate.gateEEvidence,
     ports: observedPorts })).resolves.toEqual({
       status: "BLOCKED_PREVIOUS", sideEffects: "CONTROL_PLANE_ONLY",
       reasonCodes: ["TRACK_B_B3_2_POINTER_NOT_MUTATED"],
@@ -566,7 +568,7 @@ describe("Track B PREPROD mutation adapter", () => {
         "/opt/lana-chatbot/releases/track-b/prior-rev6.json",
     });
     expect(composeCalls[0]?.env).toHaveProperty("REALTIME_RELEASE_ID",
-      "20260828-df13-preprod-commerce-abea1fb");
+      previousService.releaseRevision);
     expect(database.proveRuntimeResolution).toHaveBeenCalledWith({ pointer: previous,
       notBefore: expect.any(String) });
     expect(readConsumers).toHaveBeenCalledTimes(1);

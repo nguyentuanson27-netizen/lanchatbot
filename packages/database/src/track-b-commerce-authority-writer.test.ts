@@ -182,7 +182,7 @@ describe("Postgres Track B Commerce authority writer", () => {
       if (sql.includes("runtime_behavior_mode_activation_audit")) {
         expect(values).toEqual([pageId, channel, 7, previousVersionId, targetVersionId,
           v1ContentHash, v2ContentHash, "TRACK_B_B3_2_WRITER",
-          "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001"]);
+          "TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:40000000-0000-4000-8000-000000000001"]);
         return result([{ exact_count: "1", conflicting_count: "0" }]);
       }
       if (sql.includes("runtime_behavior_mode_resolution_audit")) {
@@ -198,7 +198,7 @@ describe("Postgres Track B Commerce authority writer", () => {
     await expect(store.readExactActivationAudit({ pageId, channel, pointerRevision: 7,
       previousVersionId, previousContentHash: v1ContentHash, targetVersionId,
       targetContentHash: v2ContentHash, actor: "TRACK_B_B3_2_WRITER",
-      reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001",
+      reason: "TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:40000000-0000-4000-8000-000000000001",
     })).resolves.toBe("EXACT");
     await expect(store.readExactRuntimeResolution({ pageId, channel,
       modeVersionId: targetVersionId, contentHash: v2ContentHash, pointerRevision: 7,
@@ -213,7 +213,7 @@ describe("Postgres Track B Commerce authority writer", () => {
     await expect(store.readExactActivationAudit({ pageId, channel, pointerRevision: 7,
       previousVersionId, previousContentHash: v1ContentHash, targetVersionId,
       targetContentHash: v2ContentHash, actor: "TRACK_B_B3_2_WRITER",
-      reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001",
+      reason: "TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:40000000-0000-4000-8000-000000000001",
     })).resolves.toBe("AMBIGUOUS");
     await expect(store.readExactRuntimeResolution({ pageId, channel,
       modeVersionId: targetVersionId, contentHash: v2ContentHash, pointerRevision: 7,
@@ -316,11 +316,11 @@ describe("Postgres Track B Commerce authority writer", () => {
     })).resolves.toMatchObject({ status: "AMBIGUOUS", guardedClaims: [] });
   });
 
-  it("prepares one immutable V2 behavior identity from the exact active V1 pointer", async () => {
+  it("prepares one immutable candidate V2 identity from the exact active V2 pointer", async () => {
     const current = pointerRow({
       versionId: previousVersionId,
-      contentHash: v1ContentHash,
-      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      contentHash: v2ContentHash,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       revision: 6,
     });
     const target = versionRow({
@@ -342,9 +342,9 @@ describe("Postgres Track B Commerce authority writer", () => {
       channel,
       expectedCurrent: {
         modeVersionId: previousVersionId,
-        contentHash: v1ContentHash,
+        contentHash: v2ContentHash,
         pointerRevision: 6,
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       },
       actor: "TRACK_B_B3_2_WRITER",
       reason: "TRACK_B_B3_2_PREPARE:40000000-0000-4000-8000-000000000001",
@@ -361,8 +361,8 @@ describe("Postgres Track B Commerce authority writer", () => {
   it("activates V2 only while the exact durable lease and pointer CAS are held", async () => {
     const current = pointerRow({
       versionId: previousVersionId,
-      contentHash: v1ContentHash,
-      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      contentHash: v2ContentHash,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       revision: 6,
     });
     const target = versionRow({
@@ -392,12 +392,12 @@ describe("Postgres Track B Commerce authority writer", () => {
     await expect(store.mutateExactPointer({
       pageId,
       channel,
-      operation: "ACTIVATE_TRACK_B",
+      operation: "ACTIVATE_V2_CANDIDATE",
       expectedCurrent: {
         modeVersionId: previousVersionId,
-        contentHash: v1ContentHash,
+        contentHash: v2ContentHash,
         pointerRevision: 6,
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       },
       target: {
         modeVersionId: targetVersionId,
@@ -406,15 +406,15 @@ describe("Postgres Track B Commerce authority writer", () => {
       },
       lease: { fenceId, fenceToken, epoch: 1 },
       actor: "TRACK_B_B3_2_WRITER",
-      reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001",
+      reason: "TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:40000000-0000-4000-8000-000000000001",
     })).resolves.toMatchObject({ pointerRevision: 7, version: { modeVersionId: targetVersionId } });
   });
 
   it("fails closed before CAS when the durable lease cannot be proven", async () => {
     const current = pointerRow({
       versionId: previousVersionId,
-      contentHash: v1ContentHash,
-      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      contentHash: v2ContentHash,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       revision: 6,
     });
     const target = versionRow({
@@ -433,12 +433,12 @@ describe("Postgres Track B Commerce authority writer", () => {
     await expect(store.mutateExactPointer({
       pageId,
       channel,
-      operation: "ACTIVATE_TRACK_B",
+      operation: "ACTIVATE_V2_CANDIDATE",
       expectedCurrent: {
         modeVersionId: previousVersionId,
-        contentHash: v1ContentHash,
+        contentHash: v2ContentHash,
         pointerRevision: 6,
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       },
       target: {
         modeVersionId: targetVersionId,
@@ -447,14 +447,14 @@ describe("Postgres Track B Commerce authority writer", () => {
       },
       lease: { fenceId, fenceToken, epoch: 1 },
       actor: "TRACK_B_B3_2_WRITER",
-      reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001",
+      reason: "TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:40000000-0000-4000-8000-000000000001",
     })).rejects.toThrow("TRACK_B_B3_2_FENCE_LEASE_INVALID");
     expect(mocks.clientQuery.mock.calls.some(([sql]) =>
       String(sql).includes("UPDATE runtime_behavior_mode_pointers")
     )).toBe(false);
   });
 
-  it("rolls back only to the exact V1 identity recorded by the forward activation audit", async () => {
+  it("rolls back only to the exact certified LKG V2 identity recorded by the forward audit", async () => {
     const current = {
       ...pointerRow({
         versionId: targetVersionId,
@@ -463,12 +463,12 @@ describe("Postgres Track B Commerce authority writer", () => {
         revision: 7,
       }),
       updated_by: "TRACK_B_B3_2_WRITER",
-      pointer_reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001",
+      pointer_reason: "TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:40000000-0000-4000-8000-000000000001",
     };
     const target = versionRow({
       versionId: previousVersionId,
-      contentHash: v1ContentHash,
-      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      contentHash: v2ContentHash,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       createdBy: "DF13_FIRST_PREPROD_WRITER",
       reason: "DF13_FIRST_PREPROD_PREPARE:40000000-0000-4000-8000-000000000099",
     });
@@ -494,7 +494,7 @@ describe("Postgres Track B Commerce authority writer", () => {
     await expect(store.mutateExactPointer({
       pageId,
       channel,
-      operation: "ROLLBACK_TRACK_B",
+      operation: "ROLLBACK_TO_LKG_V2",
       expectedCurrent: {
         modeVersionId: targetVersionId,
         contentHash: v2ContentHash,
@@ -503,12 +503,12 @@ describe("Postgres Track B Commerce authority writer", () => {
       },
       target: {
         modeVersionId: previousVersionId,
-        contentHash: v1ContentHash,
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        contentHash: v2ContentHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       },
       lease: { fenceId, fenceToken, epoch: 1 },
       actor: "TRACK_B_B3_2_WRITER",
-      reason: "TRACK_B_B3_2_ROLLBACK:40000000-0000-4000-8000-000000000002",
+      reason: "TRACK_B_B3_2_ROLLBACK_TO_LKG_V2:40000000-0000-4000-8000-000000000002",
     })).resolves.toMatchObject({ pointerRevision: 8, version: { modeVersionId: previousVersionId } });
   });
 
@@ -521,12 +521,12 @@ describe("Postgres Track B Commerce authority writer", () => {
         revision: 7,
       }),
       updated_by: "TRACK_B_B3_2_WRITER",
-      pointer_reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001",
+      pointer_reason: "TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:40000000-0000-4000-8000-000000000001",
     };
     const target = versionRow({
       versionId: previousVersionId,
-      contentHash: v1ContentHash,
-      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      contentHash: v2ContentHash,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       createdBy: "DF13_FIRST_PREPROD_WRITER",
       reason: "DF13_FIRST_PREPROD_PREPARE:40000000-0000-4000-8000-000000000099",
     });
@@ -547,7 +547,7 @@ describe("Postgres Track B Commerce authority writer", () => {
       if (sql.includes("FROM df13_commerce_cutover_fences")) {
         exactInverseLeaseObserved = sql.includes("pre_cutover_version_id=$9") &&
           values?.[5] === targetVersionId && values?.[6] === v2ContentHash && values?.[7] === 7 &&
-          values?.[8] === previousVersionId && values?.[9] === v1ContentHash &&
+          values?.[8] === previousVersionId && values?.[9] === v2ContentHash &&
           values?.[12] === 6 &&
           values?.[13] === DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash;
         return exactInverseLeaseObserved
@@ -562,7 +562,7 @@ describe("Postgres Track B Commerce authority writer", () => {
     await expect(store.mutateExactPointer({
       pageId,
       channel,
-      operation: "ROLLBACK_TRACK_B",
+      operation: "ROLLBACK_TO_LKG_V2",
       expectedCurrent: {
         modeVersionId: targetVersionId,
         contentHash: v2ContentHash,
@@ -571,12 +571,12 @@ describe("Postgres Track B Commerce authority writer", () => {
       },
       target: {
         modeVersionId: previousVersionId,
-        contentHash: v1ContentHash,
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        contentHash: v2ContentHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       },
       lease: { fenceId, fenceToken, epoch: 1 },
       actor: "TRACK_B_B3_2_WRITER",
-      reason: "TRACK_B_B3_2_ROLLBACK:40000000-0000-4000-8000-000000000001",
+      reason: "TRACK_B_B3_2_ROLLBACK_TO_LKG_V2:40000000-0000-4000-8000-000000000001",
     })).resolves.toMatchObject({ pointerRevision: 8, version: { modeVersionId: previousVersionId } });
     expect(exactInverseLeaseObserved).toBe(true);
   });
@@ -585,12 +585,12 @@ describe("Postgres Track B Commerce authority writer", () => {
     const current = {
       ...pointerRow({
         versionId: previousVersionId,
-        contentHash: v1ContentHash,
-        bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        contentHash: v2ContentHash,
+        bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
         revision: 8,
       }),
       updated_by: "TRACK_B_B3_2_WRITER",
-      pointer_reason: "TRACK_B_B3_2_ROLLBACK:40000000-0000-4000-8000-000000000002",
+      pointer_reason: "TRACK_B_B3_2_ROLLBACK_TO_LKG_V2:40000000-0000-4000-8000-000000000002",
     };
     const target = versionRow({
       versionId: targetVersionId,
@@ -613,7 +613,7 @@ describe("Postgres Track B Commerce authority writer", () => {
         }]);
       }
       if (sql.includes("FROM df13_commerce_cutover_fences")) {
-        return values?.[12] === 7 && values?.[13] === DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
+        return values?.[12] === 7 && values?.[13] === DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash
           ? result([{ operation_id: "40000000-0000-4000-8000-000000000002", inverse_lease: true }])
           : result();
       }
@@ -625,12 +625,12 @@ describe("Postgres Track B Commerce authority writer", () => {
     await expect(store.mutateExactPointer({
       pageId,
       channel,
-      operation: "ACTIVATE_TRACK_B",
+      operation: "ACTIVATE_V2_CANDIDATE",
       expectedCurrent: {
         modeVersionId: previousVersionId,
-        contentHash: v1ContentHash,
+        contentHash: v2ContentHash,
         pointerRevision: 8,
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       },
       target: {
         modeVersionId: targetVersionId,
@@ -639,7 +639,7 @@ describe("Postgres Track B Commerce authority writer", () => {
       },
       lease: { fenceId, fenceToken, epoch: 1 },
       actor: "TRACK_B_B3_2_WRITER",
-      reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000002",
+      reason: "TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:40000000-0000-4000-8000-000000000002",
     })).resolves.toMatchObject({ pointerRevision: 9, version: { modeVersionId: targetVersionId } });
     expect(oppositeAuditObserved).toBe(true);
   });
@@ -653,12 +653,12 @@ describe("Postgres Track B Commerce authority writer", () => {
         revision: 7,
       }),
       updated_by: "TRACK_B_B3_2_WRITER",
-      pointer_reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001",
+      pointer_reason: "TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:40000000-0000-4000-8000-000000000001",
     };
     const target = versionRow({
       versionId: previousVersionId,
-      contentHash: v1ContentHash,
-      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      contentHash: v2ContentHash,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
     });
     mocks.clientQuery.mockImplementation(async (sql: string) => {
       if (sql.includes("FROM runtime_behavior_mode_versions v") && sql.includes("WHERE v.mode_version_id")) return result([target]);
@@ -679,7 +679,7 @@ describe("Postgres Track B Commerce authority writer", () => {
     await expect(store.mutateExactPointer({
       pageId,
       channel,
-      operation: "ROLLBACK_TRACK_B",
+      operation: "ROLLBACK_TO_LKG_V2",
       expectedCurrent: {
         modeVersionId: targetVersionId,
         contentHash: v2ContentHash,
@@ -688,12 +688,12 @@ describe("Postgres Track B Commerce authority writer", () => {
       },
       target: {
         modeVersionId: previousVersionId,
-        contentHash: v1ContentHash,
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        contentHash: v2ContentHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       },
       lease: { fenceId, fenceToken, epoch: 1 },
       actor: "TRACK_B_B3_2_WRITER",
-      reason: "TRACK_B_B3_2_ROLLBACK:40000000-0000-4000-8000-000000000002",
+      reason: "TRACK_B_B3_2_ROLLBACK_TO_LKG_V2:40000000-0000-4000-8000-000000000002",
     })).rejects.toThrow("TRACK_B_B3_2_ROLLBACK_IDENTITY_MISMATCH");
     expect(mocks.clientQuery.mock.calls.some(([sql]) =>
       String(sql).includes("UPDATE runtime_behavior_mode_pointers")

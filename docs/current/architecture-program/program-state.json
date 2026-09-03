@@ -127,14 +127,14 @@
   },
   "active": {
     "track": "POST_DF_V5_TRACK_B",
-    "nextIssue": "Track B B3.2 concrete ENGINEERING_PREPROD mutation adapter and governed activation",
+    "nextIssue": "Track B B3.2 V2-to-last-known-good-V2 source replacement, then separately governed evidence closure",
     "gate": "GATE_F_PREPROD_ACCEPTED",
-    "authorization": "TRACK_B_B3_2_CONCRETE_PREPROD_ADAPTER_AND_ACTIVATION_AUTHORIZED",
+    "authorization": "TRACK_B_B3_2_V2_LKG_REPLACEMENT_SOURCE_ONLY",
     "authorizationDecision": {
       "source": "CODEX_OWNER_MESSAGE",
       "sourceThreadId": "019ff0ed-3760-7e81-98f4-5e91e8ca35b0",
-      "decisionAt": "2026-09-02",
-      "scope": "IMPLEMENT_REVIEW_AND_MERGE_CONCRETE_EXECUTABLE_TRACK_B_B3_2_ENGINEERING_PREPROD_ADAPTER_FOR_PAGE_1198992073286645_MESSENGER;_AFTER_EXACT_HEAD_REVIEW_AND_CI_REDERIVE_GATE_E_V22_RELEASE_PACKET_AND_USE_ONLY_REVIEWED_ADAPTER_FOR_STAGE_FENCE_ADMISSION_QUIESCENCE_CAS_START_FULL_READBACK_RECOVERY;_THEN_BOUNDED_CANARY_MESSENGER_ROLLBACK_REACTIVATION_AND_GOVERNANCE;_NO_PUBLIC_PRODUCTION_PAGE_EXPANSION_UR_STATE_V2_LEGACY_DELETION_UNRELATED_CONTROL_PLANE_OR_CREDENTIAL_REMEDIATION"
+      "decisionAt": "2026-09-03",
+      "scope": "CLOSE_PR_310_AS_SUPERSEDED;_IMPLEMENT_REVIEW_AND_MERGE_NEW_SOURCE_DOCS_PR_REPLACING_TRACK_B_V1_ROLLBACK_WITH_EXACT_COMPATIBLE_LAST_KNOWN_GOOD_V2;_KEEP_CURRENT_V2_UNCHANGED;_NO_PREPROD_RUNTIME_POINTER_FENCE_DATABASE_MESSENGER_ROUTING_OR_CONTROL_PLANE_MUTATION"
     }
   },
   "future": [
@@ -142,7 +142,8 @@
     "Post-Gate-F V5: Track B model authority and Track C bounded quality learning are the default path. UR/State V2, Gate U, multi-page expansion, production hardening, traffic canaries, long soak, and destructive LEGACY cleanup are trigger-only unless separately authorized.",
     "DF-11: merged source-only (PR #238); default-off, side-effect-free authority comparison; no runtime SHADOW authority",
     "DF-12: merged source-only (PR #239); missing-commerce signal; no runtime activation",
-    "DF-13: GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE; exact stopped-process COMMERCE activation, Context V2 Messenger E2E, exact LEGACY rollback, fresh COMMERCE reactivation, runtime identity and migration 0035 evidence are recorded. Migrations 0036, 0037, and 0038 are applied and verified in ENGINEERING_PREPROD. The Track B V1-to-V2 service/pointer activation remains pending the concrete reviewed adapter and its exact operational gates.",
+    "DF-13: GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE; its historical LEGACY rollback evidence remains immutable. Migrations 0036, 0037, and 0038 are applied and verified in ENGINEERING_PREPROD. Track B now requires V2-to-exact-compatible-last-known-good-V2 rollback and never selects V1; current V2 must receive a fresh readback before it can be bound as the initial LKG baseline.",
+    "Track C routing handoff only: C0/C1.1/C2/C3 Terra High; C1 MUST_PASS and C4 Sol High; hard bug or semantic drift Sol High; one fixed independent Sol High reviewer per source PR. Track C is not authorized and will be created by the administration task only after genuine TRACK_B_COMPLETE.",
     "UR-00 and later: trigger-only and blocked until a separate explicit owner approval"
   ],
   "hardStops": [

@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { behaviorModeContentHash, type RuntimeBehaviorModePointer } from "@lana/chat-runtime";
 import {
-  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
   DF13_COMMERCE_AUTHORITY_BUNDLE_V2,
   DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
 } from "./df13-commerce-authority-bundle.js";
@@ -10,6 +9,7 @@ import {
   recoverTrackBCommerceAuthorityMutationAfterInterruption,
   createTrackBReleaseLocalRollbackRecord,
   TRACK_B_AUTHORITY_DEPENDENT_CLAIMS_V1,
+  validateTrackBCommerceAuthorityMutationEnvelope,
   type TrackBCommerceAuthorityMutationPorts,
 } from "./track-b-commerce-authority-activation.js";
 import type { TrackBReleaseCandidateEvidence } from "./track-b-release-candidate-evidence.js";
@@ -62,36 +62,12 @@ function pointer(input: Readonly<{
 const previous = pointer({
   versionId: "10000000-0000-4000-8000-000000000001",
   revision: 6,
-  bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+  bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
 });
 const target = pointer({
   versionId: "10000000-0000-4000-8000-000000000002",
   revision: 7,
   bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
-});
-
-const rollbackRecord = createTrackBReleaseLocalRollbackRecord({
-  selectedSourceCommit: targetReleaseRevision,
-  previousService: {
-    service: "realtime-worker",
-    releaseRevision: previousReleaseRevision,
-    buildId: "1".repeat(64), imageId: "2".repeat(64), runtimeConfigHash: "3".repeat(64),
-  },
-  targetService: {
-    service: "realtime-worker",
-    releaseRevision: targetReleaseRevision,
-    buildId: "4".repeat(64), imageId: "5".repeat(64), runtimeConfigHash: "6".repeat(64),
-  },
-  previousAuthority: {
-    modeVersionId: previous.version.modeVersionId,
-    contentHash: previous.version.contentHash,
-    bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
-  },
-  targetAuthority: {
-    modeVersionId: target.version.modeVersionId,
-    contentHash: target.version.contentHash,
-    bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
-  },
 });
 
 const releaseEvidence = {
@@ -101,13 +77,56 @@ const releaseEvidence = {
   sideEffects: "NOT_EXECUTED",
   activationReleaseRevision: targetReleaseRevision,
   releaseSource: { trustedRef: "refs/remotes/origin/main", resolvedRevision: targetReleaseRevision, treeOid: "b".repeat(40) },
-  gateE: {},
-  manifestArtifact: {},
-  candidateContentFingerprint: "c".repeat(64),
-  authorityMutation: {},
-  reasonCodes: [],
-  evidenceHash: "d".repeat(64),
+  gateE: {}, manifestArtifact: {}, candidateContentFingerprint: "c".repeat(64),
+  authorityMutation: {}, reasonCodes: [], evidenceHash: "d".repeat(64),
 } as unknown as TrackBReleaseCandidateEvidence;
+const lkgReleaseEvidence = {
+  ...releaseEvidence,
+  activationReleaseRevision: previousReleaseRevision,
+  releaseSource: { ...releaseEvidence.releaseSource, resolvedRevision: previousReleaseRevision,
+    treeOid: "a".repeat(40) },
+  evidenceHash: "e".repeat(64),
+} as unknown as TrackBReleaseCandidateEvidence;
+const previousService = {
+    service: "realtime-worker",
+    releaseRevision: previousReleaseRevision,
+    buildId: "1".repeat(64), imageId: "2".repeat(64), runtimeConfigHash: "3".repeat(64),
+  } as const;
+const targetService = {
+    service: "realtime-worker",
+    releaseRevision: targetReleaseRevision,
+    buildId: "4".repeat(64), imageId: "5".repeat(64), runtimeConfigHash: "6".repeat(64),
+  } as const;
+const rollbackRecord = createTrackBReleaseLocalRollbackRecord({
+  candidate: { service: targetService, sourceTree: "b".repeat(40), imageTag: "lana:v2-candidate",
+    startupPackageHash: "7".repeat(64), authority: { pointerRevision: target.pointerRevision,
+      modeVersionId: target.version.modeVersionId, contentHash: target.version.contentHash,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash }, gateEEvidence: releaseEvidence,
+    migrationSchemaHash: "8".repeat(64) },
+  lastKnownGood: { service: previousService, sourceTree: "a".repeat(40), imageTag: "lana:v2-lkg",
+    startupPackageHash: "9".repeat(64), authority: { pointerRevision: previous.pointerRevision,
+      modeVersionId: previous.version.modeVersionId, contentHash: previous.version.contentHash,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash }, gateEEvidence: lkgReleaseEvidence,
+    migrationSchemaHash: "8".repeat(64) },
+  lastKnownGoodSelection: { source: "CURRENT_ACCEPTED_V2", priorRecordHash: null },
+});
+
+function lkgRollbackRecord(targetPointer: RuntimeBehaviorModePointer) {
+  return createTrackBReleaseLocalRollbackRecord({
+    candidate: { ...rollbackRecord.candidate, authority: {
+      pointerRevision: target.pointerRevision, modeVersionId: target.version.modeVersionId,
+      contentHash: target.version.contentHash, bundleHash: target.version.authorityBundleHash ?? "",
+    } },
+    lastKnownGood: { ...rollbackRecord.lastKnownGood, authority: {
+      pointerRevision: targetPointer.pointerRevision,
+      modeVersionId: targetPointer.version.modeVersionId,
+      contentHash: targetPointer.version.contentHash,
+      bundleHash: targetPointer.version.authorityBundleHash ?? "",
+    } },
+    lastKnownGoodSelection: { source: "PRIOR_ACCEPTED_V2_RECORD",
+      priorRecordHash: rollbackRecord.recordHash },
+  });
+}
 
 function ports(overrides: Partial<TrackBCommerceAuthorityMutationPorts> = {}): TrackBCommerceAuthorityMutationPorts {
   return {
@@ -208,7 +227,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -244,7 +263,7 @@ describe("Track B Commerce authority mutation", () => {
       targetVersionId: target.version.modeVersionId,
       targetContentHash: target.version.contentHash,
       actor: "TRACK_B_B3_2_WRITER",
-      reason: "TRACK_B_B3_2_ACTIVATE:40000000-0000-4000-8000-000000000001",
+      reason: "TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:40000000-0000-4000-8000-000000000001",
     });
     expect(mutationPorts.releaseFence).toHaveBeenCalledOnce();
   });
@@ -260,7 +279,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000011",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -293,7 +312,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000012",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -302,9 +321,11 @@ describe("Track B Commerce authority mutation", () => {
     })).resolves.toMatchObject({ status: "TARGET_ACTIVE" });
   });
 
-  it("supports a separately fenced exact rollback to the recorded V1 identity", async () => {
+  it("supports a separately fenced exact rollback to the recorded LKG V2 identity", async () => {
     const restored = { ...previous, pointerRevision: 8 };
+    const reverseRecord = lkgRollbackRecord(restored);
     const mutationPorts = ports({
+      readPersistedRollbackRecord: vi.fn(async () => reverseRecord),
       readActivePointer: vi.fn(async () => restored),
       readConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
         consumer,
@@ -318,10 +339,11 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000002",
-      direction: "ROLLBACK_TRACK_B",
+      direction: "ROLLBACK_TO_LKG_V2",
       previous: target,
       target: restored,
-      rollbackRecord,
+      rollbackRecord: reverseRecord,
+      releaseEvidence: lkgReleaseEvidence,
       ports: mutationPorts,
     })).resolves.toEqual({
       status: "PREVIOUS_RESTORED",
@@ -357,7 +379,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -376,7 +398,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -389,19 +411,32 @@ describe("Track B Commerce authority mutation", () => {
     expect(mutationPorts.acquireFence).not.toHaveBeenCalled();
   });
 
+  it("rejects a release identity whose source tree is not its certified tree", () => {
+    const changed = createTrackBReleaseLocalRollbackRecord({
+      candidate: { ...rollbackRecord.candidate, sourceTree: "f".repeat(40) },
+      lastKnownGood: rollbackRecord.lastKnownGood,
+      lastKnownGoodSelection: rollbackRecord.lastKnownGoodSelection,
+    });
+    expect(validateTrackBCommerceAuthorityMutationEnvelope({
+      operationId: "40000000-0000-4000-8000-000000000001",
+      direction: "ACTIVATE_V2_CANDIDATE", previous, target,
+      rollbackRecord: changed, releaseEvidence,
+    })).toBe(false);
+  });
+
   it("refuses cleanup when the staged service identity is ambiguous", async () => {
     const mutationPorts = ports({
       stageAffectedService: vi.fn(async () => ({
         status: "STAGED_STOPPED" as const,
         admission: "NON_ADMITTING" as const,
-        observedSourceService: rollbackRecord.previousService,
-        stagedService: { ...rollbackRecord.targetService, releaseRevision: "f".repeat(40) },
+        observedSourceService: rollbackRecord.lastKnownGood.service,
+        stagedService: { ...rollbackRecord.candidate.service, releaseRevision: "f".repeat(40) },
       })),
     });
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -425,14 +460,14 @@ describe("Track B Commerce authority mutation", () => {
       stageAffectedService: vi.fn(async () => ({
         status: "BLOCKED" as const,
         admission: "UNCONTROLLED" as const,
-        observedSourceService: rollbackRecord.previousService,
+        observedSourceService: rollbackRecord.lastKnownGood.service,
         stagedService: null,
       })),
     });
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -455,13 +490,13 @@ describe("Track B Commerce authority mutation", () => {
       })),
     });
     await expect(executeTrackBCommerceAuthorityMutation({ operationId:
-      "40000000-0000-4000-8000-000000000001", direction: "ACTIVATE_TRACK_B", previous,
+      "40000000-0000-4000-8000-000000000001", direction: "ACTIVATE_V2_CANDIDATE", previous,
     target, rollbackRecord, releaseEvidence, ports: mutationPorts })).resolves.toEqual({
       status: "BLOCKED_PREVIOUS", sideEffects: "CONTROL_PLANE_ONLY",
       reasonCodes: ["TRACK_B_B3_2_SERVICE_STAGING_UNPROVEN"],
     });
     expect(mutationPorts.discardStagedService).toHaveBeenCalledWith({
-      stagedService: rollbackRecord.targetService,
+      stagedService: rollbackRecord.candidate.service,
     });
     expect(mutationPorts.acquireFence).not.toHaveBeenCalled();
   });
@@ -472,7 +507,7 @@ describe("Track B Commerce authority mutation", () => {
         status: "STAGED_STOPPED" as const,
         admission: "NON_ADMITTING" as const,
         observedSourceService: {
-          ...rollbackRecord.previousService,
+          ...rollbackRecord.lastKnownGood.service,
           runtimeConfigHash: "f".repeat(64),
         },
         stagedService: targetService,
@@ -481,7 +516,7 @@ describe("Track B Commerce authority mutation", () => {
 
     const result = await executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -495,23 +530,24 @@ describe("Track B Commerce authority mutation", () => {
 
   it("rejects an unrecorded rollback build before acquiring the fence", async () => {
     const restored = { ...previous, pointerRevision: 8 };
+    const recorded = lkgRollbackRecord(restored);
     const substituted = createTrackBReleaseLocalRollbackRecord({
-      selectedSourceCommit: rollbackRecord.selectedSourceCommit,
-      previousService: { ...rollbackRecord.previousService, buildId: "f".repeat(64) },
-      targetService: rollbackRecord.targetService,
-      previousAuthority: rollbackRecord.previousAuthority,
-      targetAuthority: rollbackRecord.targetAuthority,
+      candidate: recorded.candidate,
+      lastKnownGood: { ...recorded.lastKnownGood,
+        service: { ...recorded.lastKnownGood.service, buildId: "f".repeat(64) } },
+      lastKnownGoodSelection: recorded.lastKnownGoodSelection,
     });
     const mutationPorts = ports({
-      readPersistedRollbackRecord: vi.fn(async () => rollbackRecord),
+      readPersistedRollbackRecord: vi.fn(async () => recorded),
     });
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000002",
-      direction: "ROLLBACK_TRACK_B",
+      direction: "ROLLBACK_TO_LKG_V2",
       previous: target,
       target: restored,
       rollbackRecord: substituted,
+      releaseEvidence: lkgReleaseEvidence,
       ports: mutationPorts,
     })).resolves.toEqual({
       status: "BLOCKED_PREVIOUS",
@@ -536,7 +572,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -589,7 +625,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -621,7 +657,7 @@ describe("Track B Commerce authority mutation", () => {
 
     const result = await executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -640,7 +676,7 @@ describe("Track B Commerce authority mutation", () => {
 
     const result = await executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -670,7 +706,7 @@ describe("Track B Commerce authority mutation", () => {
 
     const result = await executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -694,7 +730,7 @@ describe("Track B Commerce authority mutation", () => {
       readRuntimeAuthority: vi.fn()
         .mockResolvedValueOnce({
           status: "AMBIGUOUS" as const,
-          service: rollbackRecord.targetService,
+          service: rollbackRecord.candidate.service,
           modeVersionId: null,
           contentHash: null,
           pointerRevision: null,
@@ -724,7 +760,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -745,7 +781,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -771,7 +807,7 @@ describe("Track B Commerce authority mutation", () => {
 
     const result = await executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -799,7 +835,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -827,7 +863,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -855,7 +891,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -892,7 +928,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -905,8 +941,9 @@ describe("Track B Commerce authority mutation", () => {
     expect(mutationPorts.readActivationAudit).not.toHaveBeenCalled();
   });
 
-  it("reconciles a committed explicit rollback release to exact V1", async () => {
+  it("reconciles a committed explicit rollback release to exact LKG V2", async () => {
     const rollbackPointer = { ...previous, pointerRevision: 8 };
+    const reverseRecord = lkgRollbackRecord(rollbackPointer);
     const mutationPorts = ports({
       acquireFence: vi.fn(async () => ({
         status: "ALREADY_RELEASED" as const,
@@ -914,6 +951,7 @@ describe("Track B Commerce authority mutation", () => {
         epoch: 2,
       })),
       readActivePointer: vi.fn(async () => rollbackPointer),
+      readPersistedRollbackRecord: vi.fn(async () => reverseRecord),
       readReleasedConsumerAuthorities: vi.fn(async () => DF13_COMMERCE_AUTHORITY_CONSUMERS_V1.map((consumer) => ({
         consumer,
         source: "DATABASE" as const,
@@ -926,10 +964,11 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
       operationId: "40000000-0000-4000-8000-000000000002",
-      direction: "ROLLBACK_TRACK_B",
+      direction: "ROLLBACK_TO_LKG_V2",
       previous: target,
       target: rollbackPointer,
-      rollbackRecord,
+      rollbackRecord: reverseRecord,
+      releaseEvidence: lkgReleaseEvidence,
       ports: mutationPorts,
     })).resolves.toMatchObject({
       status: "PREVIOUS_RESTORED",
@@ -949,7 +988,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -978,7 +1017,7 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
       operationId: "40000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous,
       target,
       rollbackRecord,
@@ -997,9 +1036,11 @@ describe("Track B Commerce authority mutation", () => {
 
   it("symmetrically restores the V2 target if an explicit rollback service start fails", async () => {
     const rollbackPointer = { ...previous, pointerRevision: 8 };
+    const reverseRecord = lkgRollbackRecord(rollbackPointer);
     const reactivated = { ...target, pointerRevision: 9 };
     const mutationPorts = ports({
       readActivePointer: vi.fn().mockResolvedValueOnce(rollbackPointer).mockResolvedValueOnce(reactivated),
+      readPersistedRollbackRecord: vi.fn(async () => reverseRecord),
       startStagedService: vi.fn(async () => ({
         status: "BLOCKED" as const,
         admission: "HELD" as const,
@@ -1017,10 +1058,11 @@ describe("Track B Commerce authority mutation", () => {
 
     await expect(executeTrackBCommerceAuthorityMutation({
       operationId: "40000000-0000-4000-8000-000000000002",
-      direction: "ROLLBACK_TRACK_B",
+      direction: "ROLLBACK_TO_LKG_V2",
       previous: target,
       target: rollbackPointer,
-      rollbackRecord,
+      rollbackRecord: reverseRecord,
+      releaseEvidence: lkgReleaseEvidence,
       ports: mutationPorts,
     })).resolves.toEqual({
       status: "TARGET_ACTIVE",
@@ -1029,7 +1071,7 @@ describe("Track B Commerce authority mutation", () => {
     });
     expect(mutationPorts.mutateExactPointer).toHaveBeenCalledTimes(2);
     expect(vi.mocked(mutationPorts.mutateExactPointer).mock.calls[1]?.[0]).toMatchObject({
-      direction: "ACTIVATE_TRACK_B",
+      direction: "ACTIVATE_V2_CANDIDATE",
       previous: rollbackPointer,
       target: reactivated,
     });

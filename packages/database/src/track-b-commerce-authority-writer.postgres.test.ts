@@ -4,10 +4,7 @@ import { resolve } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Pool } from "pg";
 import { migrateUp } from "./migrate.js";
-import {
-  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
-  DF13_COMMERCE_AUTHORITY_BUNDLE_V2,
-} from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_V2 } from "./df13-commerce-authority-bundle.js";
 import { PostgresDf13CommerceCutoverFenceStore } from "./df13-commerce-cutover-fence.js";
 import type { Df13CommerceCutoverFenceLease } from "./df13-commerce-cutover-fence.js";
 import { runtimeBehaviorModeContentHash } from "./runtime-behavior-mode.js";
@@ -65,12 +62,12 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
     previousVersionId = randomUUID();
     previousContentHash = runtimeBehaviorModeContentHash({ confirmationMode: "V2_ACTIVE",
       salesAuthorityMode: "COMMERCE", stateReadMode: "LEGACY",
-      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash });
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash });
     await pool.query(`INSERT INTO runtime_behavior_mode_versions (
       mode_version_id,page_id,channel,schema_version,confirmation_mode,sales_authority_mode,
       state_read_mode,authority_bundle_hash,content_hash,created_by,reason,created_at
     ) VALUES ($1,$2,$3,1,'V2_ACTIVE','COMMERCE','LEGACY',$4,$5,'fixture','fixture',clock_timestamp())`,
-    [previousVersionId, pageId, channel, DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+    [previousVersionId, pageId, channel, DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       previousContentHash]);
     await pool.query(`INSERT INTO runtime_behavior_mode_pointers (
       page_id,channel,active_version_id,pointer_revision,updated_by,reason,updated_at
@@ -86,7 +83,7 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
     operationId = randomUUID();
     const prepared = await writer.prepareTarget({ pageId, channel,
       expectedCurrent: { modeVersionId: previousVersionId, contentHash: previousContentHash,
-        pointerRevision: 6, authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash },
+        pointerRevision: 6, authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash },
       actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_PREPARE:${operationId}` });
     targetVersionId = prepared.modeVersionId;
     targetContentHash = prepared.contentHash;
@@ -123,12 +120,12 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
   });
 
   it("proves exact activation audit and fresh DATABASE startup resolution on real PostgreSQL", async () => {
-    await writer.mutateExactPointer({ pageId, channel, operation: "ACTIVATE_TRACK_B",
+    await writer.mutateExactPointer({ pageId, channel, operation: "ACTIVATE_V2_CANDIDATE",
       expectedCurrent: { modeVersionId: previousVersionId, contentHash: previousContentHash,
-        pointerRevision: 6, authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash },
+        pointerRevision: 6, authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash },
       target: { modeVersionId: targetVersionId, contentHash: targetContentHash,
         authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash },
-      lease, actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_ACTIVATE:${operationId}` });
+      lease, actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:${operationId}` });
     const resolvedAt = new Date();
     await pool.query(`INSERT INTO runtime_behavior_mode_resolution_audit (
       resolution_id,page_id,channel,confirmation_mode,mode_version_id,content_hash,
@@ -138,7 +135,7 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
       resolvedAt]);
     await expect(writer.readExactActivationAudit({ pageId, channel, pointerRevision: 7,
       previousVersionId, previousContentHash, targetVersionId, targetContentHash,
-      actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_ACTIVATE:${operationId}` }))
+      actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:${operationId}` }))
       .resolves.toBe("EXACT");
     await expect(writer.readExactRuntimeResolution({ pageId, channel,
       modeVersionId: targetVersionId, contentHash: targetContentHash, pointerRevision: 7,

@@ -7,7 +7,6 @@ import type {
 } from "@lana/database";
 import { TRACK_B_COMMERCE_ADMISSION_CLAIMS_V1 } from "@lana/database";
 import {
-  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
   DF13_COMMERCE_AUTHORITY_BUNDLE_V2,
   DF13_COMMERCE_AUTHORITY_CONSUMERS_V1,
   type CommerceAuthorityConsumer,
@@ -30,14 +29,30 @@ export type TrackBServiceReleaseIdentity = Readonly<{
   runtimeConfigHash: string;
 }>;
 
+export type TrackBV2RollbackReleaseIdentity = Readonly<{
+  service: TrackBServiceReleaseIdentity;
+  sourceTree: string;
+  imageTag: string;
+  startupPackageHash: string;
+  authority: Readonly<{
+    pointerRevision: number;
+    modeVersionId: string;
+    contentHash: string;
+    bundleHash: string;
+  }>;
+  gateEEvidence: TrackBReleaseCandidateEvidence;
+  migrationSchemaHash: string;
+}>;
+
 export type TrackBReleaseLocalRollbackRecord = Readonly<{
-  schemaVersion: 1;
-  contractVersion: "TRACK_B_RELEASE_LOCAL_ROLLBACK_RECORD_V1";
-  selectedSourceCommit: string;
-  previousService: TrackBServiceReleaseIdentity;
-  targetService: TrackBServiceReleaseIdentity;
-  previousAuthority: Readonly<{ modeVersionId: string; contentHash: string; bundleHash: string }>;
-  targetAuthority: Readonly<{ modeVersionId: string; contentHash: string; bundleHash: string }>;
+  schemaVersion: 2;
+  contractVersion: "TRACK_B_RELEASE_LOCAL_ROLLBACK_RECORD_V2_LKG";
+  candidate: TrackBV2RollbackReleaseIdentity;
+  lastKnownGood: TrackBV2RollbackReleaseIdentity;
+  lastKnownGoodSelection: Readonly<{
+    source: "CURRENT_ACCEPTED_V2" | "PRIOR_ACCEPTED_V2_RECORD";
+    priorRecordHash: string | null;
+  }>;
   recordHash: string;
 }>;
 
@@ -51,8 +66,8 @@ function exactKeys(value: object, keys: readonly string[]): boolean {
 
 export function createTrackBReleaseLocalRollbackRecord(input: Omit<TrackBReleaseLocalRollbackRecord, "schemaVersion" | "contractVersion" | "recordHash">): TrackBReleaseLocalRollbackRecord {
   const body = {
-    schemaVersion: 1 as const,
-    contractVersion: "TRACK_B_RELEASE_LOCAL_ROLLBACK_RECORD_V1" as const,
+    schemaVersion: 2 as const,
+    contractVersion: "TRACK_B_RELEASE_LOCAL_ROLLBACK_RECORD_V2_LKG" as const,
     ...input,
   };
   return Object.freeze({ ...body, recordHash: sha256(canonicalJsonV1(body)) });
@@ -104,7 +119,7 @@ export interface TrackBCommerceAuthorityMutationPorts {
     admission: "HELD" | "UNCONTROLLED";
   }>>;
   stageAffectedService(input: Readonly<{
-    direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+    direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
     sourceService: TrackBServiceReleaseIdentity;
     targetService: TrackBServiceReleaseIdentity;
   }>): Promise<Readonly<{
@@ -117,14 +132,14 @@ export interface TrackBCommerceAuthorityMutationPorts {
     stagedService: TrackBServiceReleaseIdentity;
   }>): Promise<Readonly<{ status: "DISCARDED" | "AMBIGUOUS" }>>;
   mutateExactPointer(input: Readonly<{
-    direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+    direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
     previous: RuntimeBehaviorModePointer;
     target: RuntimeBehaviorModePointer;
     lease: Df13CommerceCutoverFenceLease;
   }>): Promise<Readonly<{ status: "ACKNOWLEDGED" | "ACK_LOST" | "CAS_MISMATCH" }>>;
   readActivePointer(): Promise<RuntimeBehaviorModePointer | null>;
   startStagedService(input: Readonly<{
-    direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+    direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
     lease: Df13CommerceCutoverFenceLease;
     stagedService: TrackBServiceReleaseIdentity;
     pointer: RuntimeBehaviorModePointer;
@@ -218,57 +233,63 @@ function pointerMatches(left: RuntimeBehaviorModePointer | null, right: RuntimeB
 
 function exactEnvelope(input: Readonly<{
   operationId: string;
-  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
   previous: RuntimeBehaviorModePointer;
   target: RuntimeBehaviorModePointer;
   rollbackRecord: TrackBReleaseLocalRollbackRecord;
   releaseEvidence?: TrackBReleaseCandidateEvidence;
 }>): boolean {
-  const previousBundle = input.direction === "ACTIVATE_TRACK_B"
-    ? DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
-    : DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash;
-  const targetBundle = input.direction === "ACTIVATE_TRACK_B"
-    ? DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash
-    : DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
-  const expectedService = input.direction === "ACTIVATE_TRACK_B"
-    ? input.rollbackRecord.targetService
-    : input.rollbackRecord.previousService;
+  const previousBundle = DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash;
+  const targetBundle = DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash;
+  const sourceIdentity = input.direction === "ACTIVATE_V2_CANDIDATE"
+    ? input.rollbackRecord.lastKnownGood : input.rollbackRecord.candidate;
+  const targetIdentity = input.direction === "ACTIVATE_V2_CANDIDATE"
+    ? input.rollbackRecord.candidate : input.rollbackRecord.lastKnownGood;
+  const expectedService = targetIdentity.service;
   const { recordHash, ...recordBody } = input.rollbackRecord;
-  const recordPreAuthority = input.direction === "ACTIVATE_TRACK_B"
-    ? input.rollbackRecord.previousAuthority
-    : input.rollbackRecord.targetAuthority;
-  const recordTargetAuthority = input.direction === "ACTIVATE_TRACK_B"
-    ? input.rollbackRecord.targetAuthority
-    : input.rollbackRecord.previousAuthority;
-  const serviceIdentityValid = [input.rollbackRecord.previousService, input.rollbackRecord.targetService].every((service) =>
-    service.service === "realtime-worker" && COMMIT_PATTERN.test(service.releaseRevision) &&
-    SHA256_PATTERN.test(service.buildId) && SHA256_PATTERN.test(service.imageId) &&
-    SHA256_PATTERN.test(service.runtimeConfigHash)
-  );
-  const recordIsExact = input.rollbackRecord.schemaVersion === 1 &&
-    input.rollbackRecord.contractVersion === "TRACK_B_RELEASE_LOCAL_ROLLBACK_RECORD_V1" &&
-    exactKeys(input.rollbackRecord, ["schemaVersion", "contractVersion", "selectedSourceCommit", "previousService", "targetService", "previousAuthority", "targetAuthority", "recordHash"]) &&
-    exactKeys(input.rollbackRecord.previousService, ["service", "releaseRevision", "buildId", "imageId", "runtimeConfigHash"]) &&
-    exactKeys(input.rollbackRecord.targetService, ["service", "releaseRevision", "buildId", "imageId", "runtimeConfigHash"]) &&
-    exactKeys(input.rollbackRecord.previousAuthority, ["modeVersionId", "contentHash", "bundleHash"]) &&
-    exactKeys(input.rollbackRecord.targetAuthority, ["modeVersionId", "contentHash", "bundleHash"]) &&
+  const identityIsExact = (identity: TrackBV2RollbackReleaseIdentity) =>
+    exactKeys(identity, ["service", "sourceTree", "imageTag", "startupPackageHash", "authority", "gateEEvidence", "migrationSchemaHash"]) &&
+    exactKeys(identity.service, ["service", "releaseRevision", "buildId", "imageId", "runtimeConfigHash"]) &&
+    exactKeys(identity.authority, ["pointerRevision", "modeVersionId", "contentHash", "bundleHash"]) &&
+    identity.service.service === "realtime-worker" && COMMIT_PATTERN.test(identity.service.releaseRevision) &&
+    COMMIT_PATTERN.test(identity.sourceTree) &&
+    identity.sourceTree === identity.gateEEvidence.releaseSource.treeOid &&
+    SHA256_PATTERN.test(identity.service.buildId) &&
+    SHA256_PATTERN.test(identity.service.imageId) && SHA256_PATTERN.test(identity.service.runtimeConfigHash) &&
+    SHA256_PATTERN.test(identity.startupPackageHash) && SHA256_PATTERN.test(identity.migrationSchemaHash) &&
+    /^[a-z0-9][a-z0-9._/-]{0,127}:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/u.test(identity.imageTag) &&
+    Number.isSafeInteger(identity.authority.pointerRevision) && identity.authority.pointerRevision >= 0 &&
+    identity.authority.bundleHash === DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash &&
+    validateTrackBReleaseCandidateEvidence(identity.gateEEvidence, {
+      activationReleaseRevision: identity.service.releaseRevision,
+    }).status === "MATCHED";
+  const recordIsExact = input.rollbackRecord.schemaVersion === 2 &&
+    input.rollbackRecord.contractVersion === "TRACK_B_RELEASE_LOCAL_ROLLBACK_RECORD_V2_LKG" &&
+    exactKeys(input.rollbackRecord, ["schemaVersion", "contractVersion", "candidate", "lastKnownGood", "lastKnownGoodSelection", "recordHash"]) &&
+    exactKeys(input.rollbackRecord.lastKnownGoodSelection, ["source", "priorRecordHash"]) &&
+    ((input.direction === "ACTIVATE_V2_CANDIDATE" &&
+      input.rollbackRecord.lastKnownGoodSelection.source === "CURRENT_ACCEPTED_V2" &&
+      input.rollbackRecord.lastKnownGoodSelection.priorRecordHash === null) ||
+     (input.direction === "ROLLBACK_TO_LKG_V2" &&
+      input.rollbackRecord.lastKnownGoodSelection.source === "PRIOR_ACCEPTED_V2_RECORD" &&
+      typeof input.rollbackRecord.lastKnownGoodSelection.priorRecordHash === "string" &&
+      SHA256_PATTERN.test(input.rollbackRecord.lastKnownGoodSelection.priorRecordHash))) &&
     SHA256_PATTERN.test(recordHash) && recordHash === sha256(canonicalJsonV1(recordBody)) &&
-    COMMIT_PATTERN.test(input.rollbackRecord.selectedSourceCommit) && serviceIdentityValid &&
-    input.rollbackRecord.targetService.releaseRevision === input.rollbackRecord.selectedSourceCommit &&
-    recordPreAuthority.modeVersionId === input.previous.version.modeVersionId &&
-    recordPreAuthority.contentHash === input.previous.version.contentHash &&
-    recordPreAuthority.bundleHash === previousBundle &&
-    recordTargetAuthority.modeVersionId === input.target.version.modeVersionId &&
-    recordTargetAuthority.contentHash === input.target.version.contentHash &&
-    recordTargetAuthority.bundleHash === targetBundle;
-  const releaseIsExact = recordIsExact && (
-    input.direction === "ROLLBACK_TRACK_B"
-      ? input.releaseEvidence === undefined
-      : input.releaseEvidence !== undefined &&
-        validateTrackBReleaseCandidateEvidence(input.releaseEvidence, {
-          activationReleaseRevision: expectedService.releaseRevision,
-        }).status === "MATCHED"
-  );
+    identityIsExact(input.rollbackRecord.candidate) && identityIsExact(input.rollbackRecord.lastKnownGood) &&
+    input.rollbackRecord.candidate.migrationSchemaHash === input.rollbackRecord.lastKnownGood.migrationSchemaHash &&
+    sourceIdentity.authority.pointerRevision === input.previous.pointerRevision &&
+    sourceIdentity.authority.modeVersionId === input.previous.version.modeVersionId &&
+    sourceIdentity.authority.contentHash === input.previous.version.contentHash &&
+    sourceIdentity.authority.bundleHash === previousBundle &&
+    targetIdentity.authority.pointerRevision === input.target.pointerRevision &&
+    targetIdentity.authority.modeVersionId === input.target.version.modeVersionId &&
+    targetIdentity.authority.contentHash === input.target.version.contentHash &&
+    targetIdentity.authority.bundleHash === targetBundle;
+  const releaseIsExact = recordIsExact && input.releaseEvidence !== undefined &&
+    canonicalJsonV1(input.releaseEvidence) === canonicalJsonV1(targetIdentity.gateEEvidence) &&
+    validateTrackBReleaseCandidateEvidence(input.releaseEvidence, {
+      activationReleaseRevision: expectedService.releaseRevision,
+    }).status === "MATCHED";
   return releaseIsExact &&
     UUID_V4_PATTERN.test(input.operationId) &&
     input.previous.version.pageId === DF13_COMMERCE_PREPROD_SCOPE_V1.pageId &&
@@ -289,7 +310,7 @@ function exactEnvelope(input: Readonly<{
 
 export function validateTrackBCommerceAuthorityMutationEnvelope(input: Readonly<{
   operationId: string;
-  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
   previous: RuntimeBehaviorModePointer;
   target: RuntimeBehaviorModePointer;
   rollbackRecord: TrackBReleaseLocalRollbackRecord;
@@ -378,7 +399,7 @@ function exactReleasedRuntimeReadback(
 async function reconcileReleasedTerminal(input: Readonly<{
   ports: TrackBCommerceAuthorityMutationPorts;
   operationId: string;
-  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
   previous: RuntimeBehaviorModePointer;
   target: RuntimeBehaviorModePointer;
   previousService: TrackBServiceReleaseIdentity;
@@ -390,14 +411,14 @@ async function reconcileReleasedTerminal(input: Readonly<{
   const restored = { ...input.previous, pointerRevision: input.target.pointerRevision + 1 };
   const terminal = pointerMatches(observed, input.target)
     ? { pointer: input.target, service: input.targetService, audit: input.direction,
-        status: input.direction === "ACTIVATE_TRACK_B" ? "TARGET_ACTIVE" as const : "PREVIOUS_RESTORED" as const }
+        status: input.direction === "ACTIVATE_V2_CANDIDATE" ? "TARGET_ACTIVE" as const : "PREVIOUS_RESTORED" as const }
     : pointerMatches(observed, input.previous)
       ? { pointer: input.previous, service: input.previousService, audit: null,
           status: "BLOCKED_PREVIOUS" as const }
       : pointerMatches(observed, restored)
         ? { pointer: restored, service: input.previousService,
-            audit: input.direction === "ACTIVATE_TRACK_B" ? "ROLLBACK_TRACK_B" as const : "ACTIVATE_TRACK_B" as const,
-            status: input.direction === "ACTIVATE_TRACK_B" ? "PREVIOUS_RESTORED" as const : "TARGET_ACTIVE" as const }
+            audit: input.direction === "ACTIVATE_V2_CANDIDATE" ? "ROLLBACK_TO_LKG_V2" as const : "ACTIVATE_V2_CANDIDATE" as const,
+            status: input.direction === "ACTIVATE_V2_CANDIDATE" ? "PREVIOUS_RESTORED" as const : "TARGET_ACTIVE" as const }
         : null;
   if (terminal === null) {
     return { status: "RELEASED_AMBIGUOUS", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
@@ -462,7 +483,7 @@ async function discardAndReleaseBeforeCas(input: Readonly<{
 async function exactAudit(input: Readonly<{
   ports: TrackBCommerceAuthorityMutationPorts;
   operationId: string;
-  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
   previous: RuntimeBehaviorModePointer;
   target: RuntimeBehaviorModePointer;
 }>): Promise<boolean> {
@@ -474,7 +495,7 @@ async function exactAudit(input: Readonly<{
       targetVersionId: input.target.version.modeVersionId,
       targetContentHash: input.target.version.contentHash,
       actor: "TRACK_B_B3_2_WRITER",
-      reason: `TRACK_B_B3_2_${input.direction === "ACTIVATE_TRACK_B" ? "ACTIVATE" : "ROLLBACK"}:${input.operationId.toLowerCase()}`,
+      reason: `TRACK_B_B3_2_${input.direction === "ACTIVATE_V2_CANDIDATE" ? "ACTIVATE_V2_CANDIDATE" : "ROLLBACK_TO_LKG_V2"}:${input.operationId.toLowerCase()}`,
     }) === "EXACT";
   } catch { return false; }
 }
@@ -538,7 +559,7 @@ async function recoverBeforeCas(input: Readonly<{
 async function recoverAfterCas(input: Readonly<{
   ports: TrackBCommerceAuthorityMutationPorts;
   operationId: string;
-  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
   lease: Df13CommerceCutoverFenceLease;
   active: RuntimeBehaviorModePointer;
   prior: RuntimeBehaviorModePointer;
@@ -546,7 +567,8 @@ async function recoverAfterCas(input: Readonly<{
   priorService: TrackBServiceReleaseIdentity;
   reasonCode: string;
 }>): Promise<TrackBCommerceAuthorityMutationResult> {
-  const reverseDirection = input.direction === "ACTIVATE_TRACK_B" ? "ROLLBACK_TRACK_B" : "ACTIVATE_TRACK_B";
+  const reverseDirection = input.direction === "ACTIVATE_V2_CANDIDATE"
+    ? "ROLLBACK_TO_LKG_V2" : "ACTIVATE_V2_CANDIDATE";
   const restored = { ...input.prior, pointerRevision: input.active.pointerRevision + 1 };
   try {
     await input.ports.mutateExactPointer({
@@ -569,8 +591,8 @@ async function recoverAfterCas(input: Readonly<{
 async function completeRestoredServiceRecovery(input: Readonly<{
   ports: TrackBCommerceAuthorityMutationPorts;
   operationId: string;
-  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
-  reverseDirection: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
+  reverseDirection: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
   lease: Df13CommerceCutoverFenceLease;
   active: RuntimeBehaviorModePointer;
   restored: RuntimeBehaviorModePointer;
@@ -624,7 +646,7 @@ async function completeRestoredServiceRecovery(input: Readonly<{
     ] };
   }
   return {
-    status: input.direction === "ACTIVATE_TRACK_B" ? "PREVIOUS_RESTORED" : "TARGET_ACTIVE",
+    status: input.direction === "ACTIVATE_V2_CANDIDATE" ? "PREVIOUS_RESTORED" : "TARGET_ACTIVE",
     sideEffects: "CONTROL_PLANE_ONLY",
     reasonCodes: [input.reasonCode],
   };
@@ -633,7 +655,7 @@ async function completeRestoredServiceRecovery(input: Readonly<{
 /** Explicit STAGE_STOPPED -> fence -> quiescence -> CAS -> START_TARGET protocol. */
 export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
   operationId: string;
-  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
   previous: RuntimeBehaviorModePointer;
   target: RuntimeBehaviorModePointer;
   rollbackRecord: TrackBReleaseLocalRollbackRecord;
@@ -666,10 +688,10 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
       reasonCodes: ["TRACK_B_B3_2_ROLLBACK_RECORD_UNAVAILABLE"],
     };
   }
-  const expectedService = input.direction === "ACTIVATE_TRACK_B"
-    ? input.rollbackRecord.targetService : input.rollbackRecord.previousService;
-  const expectedSourceService = input.direction === "ACTIVATE_TRACK_B"
-    ? input.rollbackRecord.previousService : input.rollbackRecord.targetService;
+  const expectedService = input.direction === "ACTIVATE_V2_CANDIDATE"
+    ? input.rollbackRecord.candidate.service : input.rollbackRecord.lastKnownGood.service;
+  const expectedSourceService = input.direction === "ACTIVATE_V2_CANDIDATE"
+    ? input.rollbackRecord.lastKnownGood.service : input.rollbackRecord.candidate.service;
   let staged: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["stageAffectedService"]>>;
   try {
     staged = await input.ports.stageAffectedService({
@@ -837,7 +859,7 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
     };
   }
   return {
-    status: input.direction === "ACTIVATE_TRACK_B" ? "TARGET_ACTIVE" : "PREVIOUS_RESTORED",
+    status: input.direction === "ACTIVATE_V2_CANDIDATE" ? "TARGET_ACTIVE" : "PREVIOUS_RESTORED",
     sideEffects: "CONTROL_PLANE_ONLY",
     reasonCodes: [],
   };
@@ -846,7 +868,7 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
 /** Re-entry path after an interrupted operation; it always converges to the recorded prior identity. */
 export async function recoverTrackBCommerceAuthorityMutationAfterInterruption(input: Readonly<{
   operationId: string;
-  direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
   previous: RuntimeBehaviorModePointer;
   target: RuntimeBehaviorModePointer;
   rollbackRecord: TrackBReleaseLocalRollbackRecord;
@@ -868,10 +890,10 @@ export async function recoverTrackBCommerceAuthorityMutationAfterInterruption(in
       "TRACK_B_B3_2_RECOVERY_ROLLBACK_RECORD_UNPROVEN",
     ] };
   }
-  const failedService = input.direction === "ACTIVATE_TRACK_B"
-    ? input.rollbackRecord.targetService : input.rollbackRecord.previousService;
-  const priorService = input.direction === "ACTIVATE_TRACK_B"
-    ? input.rollbackRecord.previousService : input.rollbackRecord.targetService;
+  const failedService = input.direction === "ACTIVATE_V2_CANDIDATE"
+    ? input.rollbackRecord.candidate.service : input.rollbackRecord.lastKnownGood.service;
+  const priorService = input.direction === "ACTIVATE_V2_CANDIDATE"
+    ? input.rollbackRecord.lastKnownGood.service : input.rollbackRecord.candidate.service;
   const request: Df13CommerceCutoverFenceRequest = {
     operationId: input.operationId,
     pageId: DF13_COMMERCE_PREPROD_SCOPE_V1.pageId,
@@ -949,7 +971,8 @@ export async function recoverTrackBCommerceAuthorityMutationAfterInterruption(in
   }
   const restored = { ...input.previous, pointerRevision: input.target.pointerRevision + 1 };
   if (pointerMatches(observed, restored)) {
-    const reverseDirection = input.direction === "ACTIVATE_TRACK_B" ? "ROLLBACK_TRACK_B" : "ACTIVATE_TRACK_B";
+    const reverseDirection = input.direction === "ACTIVATE_V2_CANDIDATE"
+      ? "ROLLBACK_TO_LKG_V2" : "ACTIVATE_V2_CANDIDATE";
     return completeRestoredServiceRecovery({
       ports: input.ports,
       operationId: input.operationId,

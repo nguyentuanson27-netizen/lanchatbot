@@ -125,19 +125,18 @@ function validService(value: TrackBServiceReleaseIdentity): boolean {
 }
 
 function validRecord(value: TrackBReleaseLocalRollbackRecord): boolean {
-  if (!value || value.schemaVersion !== 1 ||
-      value.contractVersion !== "TRACK_B_RELEASE_LOCAL_ROLLBACK_RECORD_V1" ||
-      !SHA256.test(value.recordHash) || !COMMIT.test(value.selectedSourceCommit) ||
-      !validService(value.previousService) || !validService(value.targetService) ||
-      value.targetService.releaseRevision !== value.selectedSourceCommit) return false;
-  const rebuilt = createTrackBReleaseLocalRollbackRecord({
-    selectedSourceCommit: value.selectedSourceCommit,
-    previousService: value.previousService,
-    targetService: value.targetService,
-    previousAuthority: value.previousAuthority,
-    targetAuthority: value.targetAuthority,
-  });
-  return canonicalJsonV1(rebuilt) === canonicalJsonV1(value);
+  try {
+    if (!value || value.schemaVersion !== 2 ||
+        value.contractVersion !== "TRACK_B_RELEASE_LOCAL_ROLLBACK_RECORD_V2_LKG" ||
+        !SHA256.test(value.recordHash) || !validService(value.candidate.service) ||
+        !validService(value.lastKnownGood.service)) return false;
+    const rebuilt = createTrackBReleaseLocalRollbackRecord({
+      candidate: value.candidate,
+      lastKnownGood: value.lastKnownGood,
+      lastKnownGoodSelection: value.lastKnownGoodSelection,
+    });
+    return canonicalJsonV1(rebuilt) === canonicalJsonV1(value);
+  } catch { return false; }
 }
 
 export class ReleaseLocalRollbackRecordStore {
@@ -593,7 +592,7 @@ export interface TrackBPreprodDatabaseBoundary {
     inFlightAuthorityDependentWork: number; queuedAuthorityDependentWork: number;
   }>;
   mutateExactPointer(input: {
-    direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+    direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
     previous: RuntimeBehaviorModePointer;
     target: RuntimeBehaviorModePointer;
     lease: Df13CommerceCutoverFenceLease;
@@ -823,7 +822,7 @@ export class TrackBPostgresPreprodDatabaseBoundary implements TrackBPreprodDatab
   }
 
   async mutateExactPointer(input: {
-    direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+    direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
     previous: RuntimeBehaviorModePointer;
     target: RuntimeBehaviorModePointer;
     lease: Df13CommerceCutoverFenceLease;
@@ -845,7 +844,7 @@ export class TrackBPostgresPreprodDatabaseBoundary implements TrackBPreprodDatab
         },
         lease: input.lease,
         actor: "TRACK_B_B3_2_WRITER",
-        reason: `TRACK_B_B3_2_${input.direction === "ACTIVATE_TRACK_B" ? "ACTIVATE" : "ROLLBACK"}:${this.#operationId}`,
+        reason: `TRACK_B_B3_2_${input.direction}:${this.#operationId}`,
       });
       return { status: "ACKNOWLEDGED" };
     } catch (error) {
