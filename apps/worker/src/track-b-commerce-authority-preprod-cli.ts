@@ -35,6 +35,8 @@ const OPERATION_ROOT = "/opt/lana-chatbot/releases/track-b/operations";
 const ROLLBACK_ROOT = "/opt/lana-chatbot/releases/track-b/rollback-records";
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const SHA256 = /^[a-f0-9]{64}$/u;
+type CommerceStartup = Exclude<ReturnType<typeof parseDf13CommercePreprodStartupInput>,
+  { mode: "LEGACY" }>;
 
 type PrepareInput = Readonly<{
   schemaVersion: 1;
@@ -129,7 +131,7 @@ function previousStartupPath(value: unknown): string {
 }
 
 export function trackBLegacyRuntimeReleaseIdV1(
-  startup: Exclude<ReturnType<typeof parseDf13CommercePreprodStartupInput>, { mode: "LEGACY" }>,
+  startup: CommerceStartup,
   releaseRevision: string,
 ): string {
   const source = startup.releaseSource;
@@ -138,11 +140,38 @@ export function trackBLegacyRuntimeReleaseIdV1(
       source.commit !== releaseRevision ||
       startup.releaseEvidence.activationReleaseRevision !== releaseRevision ||
       startup.releaseEvidence.releaseSource.resolvedRevision !== releaseRevision ||
+      startup.expectedAuthority.authorityBundleHash !==
+        DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash ||
       source.release !== source.tag ||
       !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/u.test(source.release)) {
     throw new Error("TRACK_B_B3_2_LEGACY_RUNTIME_RELEASE_ID_MISMATCH");
   }
   return source.release;
+}
+
+export function createTrackBLegacyRecoveryStartupV1(
+  legacyStartup: CommerceStartup,
+  generatedRecovery: CommerceStartup,
+  previousServiceRevision: string,
+): CommerceStartup {
+  trackBLegacyRuntimeReleaseIdV1(legacyStartup, previousServiceRevision);
+  if (generatedRecovery.authorityTransition !== "ROLLBACK_TRACK_B" ||
+      generatedRecovery.releaseEvidence.contractVersion !== "TRACK_B_RELEASE_CANDIDATE_EVIDENCE_V1" ||
+      generatedRecovery.expectedAuthority.pageId !== legacyStartup.expectedAuthority.pageId ||
+      generatedRecovery.expectedAuthority.channel !== legacyStartup.expectedAuthority.channel ||
+      generatedRecovery.expectedAuthority.source !== "DATABASE" ||
+      generatedRecovery.expectedAuthority.authorityBundleHash !==
+        DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash) {
+    throw new Error("TRACK_B_B3_2_LEGACY_RECOVERY_STARTUP_INVALID");
+  }
+  const parsed = parseDf13CommercePreprodStartupInput({
+    ...legacyStartup,
+    expectedAuthority: generatedRecovery.expectedAuthority,
+  });
+  if (parsed.mode !== "COMMERCE") {
+    throw new Error("TRACK_B_B3_2_LEGACY_RECOVERY_STARTUP_INVALID");
+  }
+  return parsed;
 }
 
 function imageTag(value: unknown): string {
@@ -374,7 +403,11 @@ function startupMatchesPointer(value: ReturnType<typeof parseDf13CommercePreprod
 }
 
 export async function validateTrackBPreprodStartupArtifacts(packet: TrackBPreprodOperationPacket,
-  reader: (path: string) => Promise<unknown> = readJson): Promise<string> {
+  reader: (path: string) => Promise<unknown> = readJson): Promise<Readonly<{
+    legacyRuntimeReleaseId: string;
+    legacyStartup: CommerceStartup;
+    recoveryStartup: CommerceStartup;
+  }>> {
   const [sourceRaw, operationTargetRaw, recoveryRaw, boundLegacyRaw] = await Promise.all([
     reader(packet.sourceStartupPackageFile), reader(packet.operationTargetStartupPackageFile),
     reader(packet.recoveryStartupPackageFile),
@@ -438,7 +471,7 @@ export async function validateTrackBPreprodStartupArtifacts(packet: TrackBPrepro
       canonicalJsonV1(recovery) !== canonicalJsonV1(expected.recovery)) {
     throw new Error("TRACK_B_B3_2_GENERATED_STARTUP_PACKAGE_MISMATCH");
   }
-  return legacyRuntimeReleaseId;
+  return Object.freeze({ legacyRuntimeReleaseId, legacyStartup, recoveryStartup: recovery });
 }
 
 async function databaseUrl(): Promise<string> {
@@ -613,7 +646,19 @@ async function build(inputPath: string): Promise<void> {
 
 async function runPacket(packetPath: string, recovery: boolean): Promise<void> {
   const packet = parseTrackBPreprodOperationPacket(await readJson(resolve(packetPath)));
-  const legacyRuntimeReleaseId = await validateTrackBPreprodStartupArtifacts(packet);
+  const validatedStartups = await validateTrackBPreprodStartupArtifacts(packet);
+  const legacyRuntimeReleaseId = validatedStartups.legacyRuntimeReleaseId;
+  let recoveryStartupPackageFile = packet.recoveryStartupPackageFile;
+  if (packet.direction === "ACTIVATE_TRACK_B") {
+    const legacyRecovery = createTrackBLegacyRecoveryStartupV1(validatedStartups.legacyStartup,
+      validatedStartups.recoveryStartup, packet.rollbackRecord.previousService.releaseRevision);
+    if ((await createDf13CommercePreprodStartupAuthority(legacyRecovery)
+      .authorizeExactCommerceIdentity(legacyRecovery.expectedAuthority)).status !== "ADMITTED") {
+      throw new Error("TRACK_B_B3_2_LEGACY_RECOVERY_STARTUP_INVALID");
+    }
+    recoveryStartupPackageFile = `${OPERATION_ROOT}/${packet.operationId}.legacy-recovery-${hash(legacyRecovery)}.json`;
+    await persistExclusive(recoveryStartupPackageFile, legacyRecovery);
+  }
   const database = new TrackBPostgresPreprodDatabaseBoundary(await databaseUrl(), packet.operationId);
   const common = {
     composeFile: TRACK_B_PREPROD_FIXED_SCOPE.composeFile,
@@ -632,7 +677,7 @@ async function runPacket(packetPath: string, recovery: boolean): Promise<void> {
     imageReference: packet.targetImageTag,
     expectedImageId: packet.rollbackRecord.targetService.imageId });
   const recoveryController = new DockerComposeTrackBPreprodServiceController({ ...common,
-    startupPackageFile: packet.recoveryStartupPackageFile,
+    startupPackageFile: recoveryStartupPackageFile,
     imageReference: packet.direction === "ACTIVATE_TRACK_B"
       ? packet.previousImageTag : packet.targetImageTag,
     expectedImageId: packet.direction === "ACTIVATE_TRACK_B"
