@@ -1,5 +1,6 @@
 import { canonicalJsonV1 } from "@lana/contracts";
 import { createHash, randomUUID } from "node:crypto";
+import { constants } from "node:fs";
 import { mkdir, open, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { RuntimeBehaviorModePointer } from "@lana/chat-runtime";
@@ -313,20 +314,39 @@ async function readJson(path: string): Promise<unknown> {
   return JSON.parse(await readFile(path, "utf8")) as unknown;
 }
 
-async function persistExclusive(path: string, value: unknown): Promise<void> {
+async function persistExclusive(path: string, value: unknown, mode = 0o600): Promise<void> {
   await mkdir(dirname(path), { recursive: true, mode: 0o700 });
+  const payload = `${canonicalJsonV1(value)}\n`;
   let handle;
+  let created = false;
   try {
-    handle = await open(path, "wx", 0o600);
-    await handle.writeFile(`${canonicalJsonV1(value)}\n`, "utf8");
-    await handle.sync();
+    handle = await open(path, constants.O_CREAT | constants.O_EXCL | constants.O_RDWR |
+      constants.O_NOFOLLOW, mode);
+    created = true;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-    const existing = await readJson(path);
-    if (canonicalJsonV1(existing) !== canonicalJsonV1(value)) {
-      throw new Error("TRACK_B_B3_2_OPERATION_PACKET_CONFLICT");
+    handle = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW);
+  }
+  try {
+    if (created) {
+      await handle.writeFile(payload, "utf8");
+      await handle.sync();
+    } else {
+      const existing = JSON.parse(await handle.readFile("utf8")) as unknown;
+      if (canonicalJsonV1(existing) !== canonicalJsonV1(value)) {
+        throw new Error("TRACK_B_B3_2_OPERATION_PACKET_CONFLICT");
+      }
     }
-  } finally { await handle?.close(); }
+    await handle.chmod(mode);
+    try { await handle.sync(); } catch (error) {
+      if (process.platform !== "win32" ||
+          (error as NodeJS.ErrnoException).code !== "EPERM") throw error;
+    }
+    const metadata = await handle.stat();
+    if (!metadata.isFile() || (metadata.mode & 0o777) !== mode) {
+      throw new Error("TRACK_B_B3_2_OPERATION_ARTIFACT_MODE_MISMATCH");
+    }
+  } finally { await handle.close(); }
   const directory = await open(dirname(path), "r");
   try {
     try { await directory.sync(); } catch (error) {
@@ -334,9 +354,20 @@ async function persistExclusive(path: string, value: unknown): Promise<void> {
       if (code !== "EPERM" && code !== "ENOTSUP" && code !== "EINVAL") throw error;
     }
   } finally { await directory.close(); }
-  if (canonicalJsonV1(await readJson(path)) !== canonicalJsonV1(value)) {
-    throw new Error("TRACK_B_B3_2_OPERATION_PACKET_READBACK_MISMATCH");
-  }
+  const readback = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW);
+  try {
+    const metadata = await readback.stat();
+    const persisted = JSON.parse(await readback.readFile("utf8")) as unknown;
+    if (!metadata.isFile() || (metadata.mode & 0o777) !== mode ||
+        canonicalJsonV1(persisted) !== canonicalJsonV1(value)) {
+      throw new Error("TRACK_B_B3_2_OPERATION_PACKET_READBACK_MISMATCH");
+    }
+  } finally { await readback.close(); }
+}
+
+export async function persistTrackBPreprodRuntimeStartupArtifact(path: string,
+  value: unknown): Promise<void> {
+  await persistExclusive(path, value, 0o444);
 }
 
 function pointerWithTarget(previous: RuntimeBehaviorModePointer, version: RuntimeBehaviorModePointer["version"]): RuntimeBehaviorModePointer {
@@ -596,8 +627,10 @@ async function prepare(inputPath: string): Promise<void> {
       releaseCreatedAt: input.releaseCreatedAt,
       targetServiceRevision: input.targetService.releaseRevision,
     });
-    await persistExclusive(operationTargetStartupPath, startupPackages.operationTarget);
-    await persistExclusive(input.recoveryStartupPackageFile, startupPackages.recovery);
+    await persistTrackBPreprodRuntimeStartupArtifact(operationTargetStartupPath,
+      startupPackages.operationTarget);
+    await persistTrackBPreprodRuntimeStartupArtifact(input.recoveryStartupPackageFile,
+      startupPackages.recovery);
     await rollbackStore.persist(rollbackRecord);
     const body = {
       schemaVersion: 1 as const,
@@ -657,7 +690,7 @@ async function runPacket(packetPath: string, recovery: boolean): Promise<void> {
       throw new Error("TRACK_B_B3_2_LEGACY_RECOVERY_STARTUP_INVALID");
     }
     recoveryStartupPackageFile = `${OPERATION_ROOT}/${packet.operationId}.legacy-recovery-${hash(legacyRecovery)}.json`;
-    await persistExclusive(recoveryStartupPackageFile, legacyRecovery);
+    await persistTrackBPreprodRuntimeStartupArtifact(recoveryStartupPackageFile, legacyRecovery);
   }
   const database = new TrackBPostgresPreprodDatabaseBoundary(await databaseUrl(), packet.operationId);
   const common = {
