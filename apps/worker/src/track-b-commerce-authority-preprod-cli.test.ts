@@ -12,6 +12,7 @@ import { createTrackBPreprodOperationStartupPackages, parseTrackBPreprodBuildInp
   parseTrackBPreprodOperationPacket, parseTrackBPreprodPrepareInput,
   matchesTrackBOperationTargetStartupBaseline,
   persistTrackBPreprodRuntimeStartupArtifact,
+  proveFreshTrackBInitialLkgRuntime,
   validateTrackBPreprodStartupArtifacts,
   validateTrackBV2LastKnownGoodSelection } from "./track-b-commerce-authority-preprod-cli.js";
 
@@ -105,6 +106,17 @@ function packet(direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2" = "ACT
 }
 
 describe("Track B PREPROD V2/LKG operator boundary", () => {
+  it("requires an exact runtime audit after a database-clock watermark rather than after pointer age", async () => {
+    const current = pointer("10000000-0000-4000-8000-000000000001", 6);
+    const database = { readDatabaseClock: vi.fn(async () => "2026-09-03T02:00:00.000Z"),
+      proveRuntimeResolution: vi.fn(async (): Promise<"EXACT" | "MISSING" | "AMBIGUOUS"> => "MISSING") };
+    await expect(proveFreshTrackBInitialLkgRuntime({ database, pointer: current })).resolves.toBe("MISSING");
+    expect(database.proveRuntimeResolution).toHaveBeenCalledWith({ pointer: current,
+      notBefore: "2026-09-03T02:00:00.000Z" });
+    database.proveRuntimeResolution.mockResolvedValueOnce("EXACT");
+    await expect(proveFreshTrackBInitialLkgRuntime({ database, pointer: current })).resolves.toBe("EXACT");
+  });
+
   it("persists immutable startup artifacts read-only", async () => {
     const directory = await mkdtemp(join(tmpdir(), "track-b-startup-"));
     const path = join(directory, "startup.json");

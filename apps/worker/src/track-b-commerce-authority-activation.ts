@@ -97,6 +97,10 @@ export type TrackBCommerceAdmissionReadback = Readonly<{
 
 export interface TrackBCommerceAuthorityMutationPorts {
   readPersistedRollbackRecord(recordHash: string): Promise<TrackBReleaseLocalRollbackRecord | null>;
+  proveSchemaCompatibility(input: Readonly<{
+    candidateMigrationSchemaHash: string;
+    lastKnownGoodMigrationSchemaHash: string;
+  }>): Promise<"EXACT" | "AMBIGUOUS">;
   acquireFence(request: Df13CommerceCutoverFenceRequest): Promise<Readonly<
     | { status: "HELD"; lease: Df13CommerceCutoverFenceLease }
     | { status: "ALREADY_RELEASED"; fenceId: string; epoch: number }
@@ -396,6 +400,19 @@ function exactReleasedRuntimeReadback(
     value.authorityBundleHash === pointer.version.authorityBundleHash;
 }
 
+async function exactRecordedSchemaCompatibility(input: Readonly<{
+  ports: TrackBCommerceAuthorityMutationPorts;
+  rollbackRecord: TrackBReleaseLocalRollbackRecord;
+}>): Promise<boolean> {
+  const candidateMigrationSchemaHash = input.rollbackRecord.candidate.migrationSchemaHash;
+  const lastKnownGoodMigrationSchemaHash = input.rollbackRecord.lastKnownGood.migrationSchemaHash;
+  return candidateMigrationSchemaHash === lastKnownGoodMigrationSchemaHash &&
+    await input.ports.proveSchemaCompatibility({
+      candidateMigrationSchemaHash,
+      lastKnownGoodMigrationSchemaHash,
+    }) === "EXACT";
+}
+
 async function reconcileReleasedTerminal(input: Readonly<{
   ports: TrackBCommerceAuthorityMutationPorts;
   operationId: string;
@@ -688,6 +705,17 @@ export async function executeTrackBCommerceAuthorityMutation(input: Readonly<{
       reasonCodes: ["TRACK_B_B3_2_ROLLBACK_RECORD_UNAVAILABLE"],
     };
   }
+  try {
+    if (!await exactRecordedSchemaCompatibility(input)) {
+      return { status: "BLOCKED_PREVIOUS", sideEffects: "NOT_EXECUTED", reasonCodes: [
+        "TRACK_B_B3_2_SCHEMA_COMPATIBILITY_UNPROVEN",
+      ] };
+    }
+  } catch {
+    return { status: "BLOCKED_PREVIOUS", sideEffects: "NOT_EXECUTED", reasonCodes: [
+      "TRACK_B_B3_2_SCHEMA_COMPATIBILITY_UNPROVEN",
+    ] };
+  }
   const expectedService = input.direction === "ACTIVATE_V2_CANDIDATE"
     ? input.rollbackRecord.candidate.service : input.rollbackRecord.lastKnownGood.service;
   const expectedSourceService = input.direction === "ACTIVATE_V2_CANDIDATE"
@@ -888,6 +916,17 @@ export async function recoverTrackBCommerceAuthorityMutationAfterInterruption(in
   } catch {
     return { status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [
       "TRACK_B_B3_2_RECOVERY_ROLLBACK_RECORD_UNPROVEN",
+    ] };
+  }
+  try {
+    if (!await exactRecordedSchemaCompatibility(input)) {
+      return { status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [
+        "TRACK_B_B3_2_RECOVERY_SCHEMA_COMPATIBILITY_UNPROVEN",
+      ] };
+    }
+  } catch {
+    return { status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [
+      "TRACK_B_B3_2_RECOVERY_SCHEMA_COMPATIBILITY_UNPROVEN",
     ] };
   }
   const failedService = input.direction === "ACTIVATE_V2_CANDIDATE"

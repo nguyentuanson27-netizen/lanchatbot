@@ -14,6 +14,7 @@ import {
   TrackBPostgresPreprodDatabaseBoundary,
   TrackBPreprodServicePairController,
   trackBBuildIdV1,
+  type TrackBPreprodDatabaseBoundary,
 } from "./track-b-commerce-authority-preprod-adapter.js";
 import {
   createTrackBReleaseLocalRollbackRecord,
@@ -446,6 +447,14 @@ async function databaseUrl(): Promise<string> {
   return value;
 }
 
+export async function proveFreshTrackBInitialLkgRuntime(input: Readonly<{
+  database: Pick<TrackBPreprodDatabaseBoundary, "readDatabaseClock" | "proveRuntimeResolution">;
+  pointer: RuntimeBehaviorModePointer;
+}>): Promise<"EXACT" | "MISSING" | "AMBIGUOUS"> {
+  const notBefore = await input.database.readDatabaseClock();
+  return input.database.proveRuntimeResolution({ pointer: input.pointer, notBefore });
+}
+
 async function prepare(inputPath: string): Promise<void> {
   const input = parseTrackBPreprodPrepareInput(await readJson(resolve(inputPath)));
   const [candidateStartupRaw, lastKnownGoodStartupRaw] = await Promise.all([
@@ -528,8 +537,7 @@ async function prepare(inputPath: string): Promise<void> {
         migrationSchemaHash === null) {
       throw new Error("TRACK_B_B3_2_SCHEMA_COMPATIBILITY_UNPROVEN");
     }
-    if (await database.proveRuntimeResolution({ pointer: previous,
-      notBefore: previous.updatedAt }) !== "EXACT") {
+    if (await proveFreshTrackBInitialLkgRuntime({ database, pointer: previous }) !== "EXACT") {
       throw new Error("TRACK_B_B3_2_CURRENT_LKG_RUNTIME_UNPROVEN");
     }
     const suppliedIdentity = (role: "candidate" | "lastKnownGood",

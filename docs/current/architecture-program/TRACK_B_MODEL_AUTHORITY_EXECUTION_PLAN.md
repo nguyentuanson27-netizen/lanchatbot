@@ -553,7 +553,7 @@ The concrete built operator is `node apps/worker/dist/track-b-commerce-authority
 15. One exact accepted PREPROD COMMERCE V2 baseline is recorded as the initial Track B LKG V2 for Track C.
 16. Final owner decision records Track B completion; source merge alone is not completion evidence. The administration task separately validates the handoff and owns any Track C task creation.
 
-Track C handoff data only: C0/C1.1/C2/C3 use Terra High, C1 MUST_PASS and C4 use Sol High, hard bugs or semantic drift escalate to Sol High, and each source PR retains one fixed independent Sol High reviewer. This does not authorize Track C work. After genuine `TRACK_B_COMPLETE`, this implementation task reports the exact checkpoint to the administration task and stops; the administration task owns creation of any new Track C task.
+Track C handoff data only: C0/C1.1/C2/C3 use Terra High, C1 MUST_PASS and C4 use Sol High, hard bugs or semantic drift escalate to Sol High, and each source PR retains one fixed independent Sol High reviewer. Each actionable reviewer finding records severity/invariant, reachable evidence, root cause, the smallest contract-correct remediation direction, non-weakened boundaries, proving tests, and any compatibility or owner-decision impact; final no-blocker verdicts explicitly confirm those root causes are closed by the reviewed head. This does not authorize Track C work. After genuine `TRACK_B_COMPLETE`, this implementation task reports the exact checkpoint to the administration task and stops; the administration task owns creation of any new Track C task.
 
 ## 9. State V2 / UR decision rule
 

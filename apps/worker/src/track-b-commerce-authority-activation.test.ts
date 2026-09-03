@@ -131,6 +131,7 @@ function lkgRollbackRecord(targetPointer: RuntimeBehaviorModePointer) {
 function ports(overrides: Partial<TrackBCommerceAuthorityMutationPorts> = {}): TrackBCommerceAuthorityMutationPorts {
   return {
     readPersistedRollbackRecord: vi.fn(async () => rollbackRecord),
+    proveSchemaCompatibility: vi.fn(async () => "EXACT" as const),
     acquireFence: vi.fn(async () => ({
       status: "HELD" as const,
       lease: {
@@ -266,6 +267,26 @@ describe("Track B Commerce authority mutation", () => {
       reason: "TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:40000000-0000-4000-8000-000000000001",
     });
     expect(mutationPorts.releaseFence).toHaveBeenCalledOnce();
+  });
+
+  it("blocks before staging when the live schema no longer matches both recorded V2 identities", async () => {
+    const mutationPorts = ports({
+      proveSchemaCompatibility: vi.fn(async () => "AMBIGUOUS" as const),
+    });
+    await expect(executeTrackBCommerceAuthorityMutation({
+      operationId: "40000000-0000-4000-8000-000000000003",
+      direction: "ACTIVATE_V2_CANDIDATE", previous, target, rollbackRecord, releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({ status: "BLOCKED_PREVIOUS", sideEffects: "NOT_EXECUTED", reasonCodes: [
+      "TRACK_B_B3_2_SCHEMA_COMPATIBILITY_UNPROVEN",
+    ] });
+    expect(mutationPorts.proveSchemaCompatibility).toHaveBeenCalledWith({
+      candidateMigrationSchemaHash: rollbackRecord.candidate.migrationSchemaHash,
+      lastKnownGoodMigrationSchemaHash: rollbackRecord.lastKnownGood.migrationSchemaHash,
+    });
+    expect(mutationPorts.stageAffectedService).not.toHaveBeenCalled();
+    expect(mutationPorts.acquireFence).not.toHaveBeenCalled();
+    expect(mutationPorts.mutateExactPointer).not.toHaveBeenCalled();
   });
 
   it("discards the stopped target and releases the fence before stopping source when admission is not proven", async () => {
@@ -877,6 +898,24 @@ describe("Track B Commerce authority mutation", () => {
     expect(mutationPorts.readActivePointer).not.toHaveBeenCalled();
     expect(mutationPorts.restorePreviousService).not.toHaveBeenCalled();
     expect(mutationPorts.mutateExactPointer).not.toHaveBeenCalled();
+    expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+  });
+
+  it("retains recovery hold without mutation or release when recorded schema compatibility has drifted", async () => {
+    const mutationPorts = ports({
+      proveSchemaCompatibility: vi.fn(async () => "AMBIGUOUS" as const),
+    });
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000004",
+      direction: "ACTIVATE_V2_CANDIDATE", previous, target, rollbackRecord, releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({ status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [
+      "TRACK_B_B3_2_RECOVERY_SCHEMA_COMPATIBILITY_UNPROVEN",
+    ] });
+    expect(mutationPorts.acquireFence).not.toHaveBeenCalled();
+    expect(mutationPorts.stageAffectedService).not.toHaveBeenCalled();
+    expect(mutationPorts.mutateExactPointer).not.toHaveBeenCalled();
+    expect(mutationPorts.restorePreviousService).not.toHaveBeenCalled();
     expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
   });
 

@@ -370,6 +370,15 @@ export class PostgresTrackBCommerceAuthorityWriter {
       ? "EXACT" : exactCount === 0 && conflictingCount === 0 ? "MISSING" : "AMBIGUOUS";
   }
 
+  async readDatabaseClock(): Promise<string> {
+    const result = await this.#pool.query("SELECT clock_timestamp() AS operation_now");
+    const observed = (result.rows[0] as Row | undefined)?.operation_now;
+    if (!(observed instanceof Date) || Number.isNaN(observed.getTime())) {
+      throw new Error("TRACK_B_B3_2_DATABASE_CLOCK_INVALID");
+    }
+    return observed.toISOString();
+  }
+
   async readTrackBV2LkgSchemaCompatibility(): Promise<TrackBV2LkgSchemaCompatibilityReadback> {
     const ambiguous: TrackBV2LkgSchemaCompatibilityReadback = {
       status: "AMBIGUOUS", source: "DATABASE", migrationSchemaHash: null,
@@ -390,7 +399,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
           [TRACK_B_V2_LKG_SCHEMA_MIGRATIONS.map((migration) => migration.name)],
         ),
         client.query(
-          `SELECT p.prosrc, p.proconfig, n.nspname AS function_schema,
+          `SELECT p.oid AS function_oid, p.prosrc, p.proconfig, n.nspname AS function_schema,
                   l.lanname AS language_name,
                   p.prorettype = 'pg_catalog.trigger'::pg_catalog.regtype AS returns_trigger
              FROM pg_catalog.pg_proc AS p
@@ -401,7 +410,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
           [this.#admissionSchema],
         ),
         client.query(
-          `SELECT p.prosrc, p.proconfig, n.nspname AS function_schema,
+          `SELECT p.oid AS function_oid, p.prosrc, p.proconfig, n.nspname AS function_schema,
                   l.lanname AS language_name,
                   p.prorettype = 'pg_catalog.trigger'::pg_catalog.regtype AS returns_trigger
              FROM pg_catalog.pg_proc AS p
@@ -414,15 +423,16 @@ export class PostgresTrackBCommerceAuthorityWriter {
         client.query(
           `SELECT c.relname AS table_name, t.tgenabled, t.tgtype,
                   t.tgqual, t.tgattr::text AS trigger_columns, t.tgnargs,
-                  p.proname AS function_name, p.prosrc, p.proconfig,
-                  n.nspname AS function_schema, l.lanname AS language_name,
+                  p.oid AS function_oid, p.proname AS function_name, p.prosrc, p.proconfig,
+                  pn.nspname AS function_schema, l.lanname AS language_name,
                   p.prorettype = 'pg_catalog.trigger'::pg_catalog.regtype AS returns_trigger
              FROM pg_catalog.pg_trigger AS t
              JOIN pg_catalog.pg_class AS c ON c.oid=t.tgrelid
-             JOIN pg_catalog.pg_namespace AS n ON n.oid=c.relnamespace
+             JOIN pg_catalog.pg_namespace AS tn ON tn.oid=c.relnamespace
              JOIN pg_catalog.pg_proc AS p ON p.oid=t.tgfoid
+             JOIN pg_catalog.pg_namespace AS pn ON pn.oid=p.pronamespace
              JOIN pg_catalog.pg_language AS l ON l.oid=p.prolang
-            WHERE n.nspname=$1 AND NOT t.tgisinternal
+            WHERE tn.nspname=$1 AND NOT t.tgisinternal
               AND (c.relname,t.tgname) IN (
                 ('webhook_inbox','track_b_cutover_admission_webhook_inbox'),
                 ('meta_outbox','track_b_cutover_admission_meta_outbox'),
@@ -438,31 +448,35 @@ export class PostgresTrackBCommerceAuthorityWriter {
         TRACK_B_V2_LKG_SCHEMA_MIGRATIONS.every((expected) => migrations.some((actual) =>
           actual.name === expected.name && actual.checksum === expected.checksum));
       const exactFunction = (rows: readonly Row[], sourceHash: string,
-        expectedProconfig: readonly string[] | null): boolean => rows.length === 1 &&
-          rows[0]?.function_schema === this.#admissionSchema &&
-          rows[0]?.language_name === "plpgsql" && rows[0]?.returns_trigger === true &&
-          createHash("sha256").update(String(rows[0]?.prosrc), "utf8").digest("hex") === sourceHash &&
-          (expectedProconfig === null
-            ? rows[0]?.proconfig === null
-            : Array.isArray(rows[0]?.proconfig) &&
-              canonicalJsonV1(rows[0]?.proconfig) === canonicalJsonV1(expectedProconfig));
-      const fenceGuard = fenceGuardResult.rows as Row[];
-      const admissionGuard = admissionGuardResult.rows as Row[];
+        expectedProconfig: readonly string[] | null): Row | null => {
+        const row = rows.length === 1 ? rows[0] : undefined;
+        if (row === undefined || row.function_schema !== this.#admissionSchema ||
+            row.language_name !== "plpgsql" || row.returns_trigger !== true ||
+            !Number.isSafeInteger(Number(row.function_oid)) || Number(row.function_oid) <= 0 ||
+            createHash("sha256").update(String(row.prosrc), "utf8").digest("hex") !== sourceHash ||
+            (expectedProconfig === null
+              ? row.proconfig !== null
+              : !Array.isArray(row.proconfig) ||
+                canonicalJsonV1(row.proconfig) !== canonicalJsonV1(expectedProconfig))) return null;
+        return row;
+      };
+      const fenceGuard = exactFunction(fenceGuardResult.rows as Row[], V2_LKG_FENCE_GUARD_SOURCE_HASH, null);
+      const admissionGuard = exactFunction(admissionGuardResult.rows as Row[], ADMISSION_FUNCTION_SOURCE_HASH,
+        ["search_path=pg_catalog"]);
       const triggerTables = triggerResult.rows.filter((row: Row) =>
         row.tgenabled === "A" && Number(row.tgtype) === 19 && row.tgqual === null &&
         row.trigger_columns === "" && Number(row.tgnargs) === 0 &&
         row.function_name === "guard_track_b_cutover_admission" &&
         row.function_schema === this.#admissionSchema && row.language_name === "plpgsql" &&
-        row.returns_trigger === true &&
+        row.returns_trigger === true && admissionGuard !== null &&
+        Number(row.function_oid) === Number(admissionGuard.function_oid) &&
         createHash("sha256").update(String(row.prosrc), "utf8").digest("hex") ===
           ADMISSION_FUNCTION_SOURCE_HASH && Array.isArray(row.proconfig) &&
         canonicalJsonV1(row.proconfig) === canonicalJsonV1(["search_path=pg_catalog"])
       ).map((row: Row) => String(row.table_name)).sort();
       const exactTriggers = triggerResult.rows.length === TRACK_B_COMMERCE_ADMISSION_TABLES_V1.length &&
         canonicalJsonV1(triggerTables) === canonicalJsonV1(TRACK_B_COMMERCE_ADMISSION_TABLES_V1);
-      if (!exactLedger || !exactFunction(fenceGuard, V2_LKG_FENCE_GUARD_SOURCE_HASH, null) ||
-          !exactFunction(admissionGuard, ADMISSION_FUNCTION_SOURCE_HASH,
-            ["search_path=pg_catalog"]) || !exactTriggers) {
+      if (!exactLedger || fenceGuard === null || admissionGuard === null || !exactTriggers) {
         await client.query("COMMIT");
         return ambiguous;
       }

@@ -41,6 +41,7 @@ const STARTUP_ROOT = "/opt/lana-chatbot/releases/track-b";
 const CONTAINER = "lana-chatbot-realtime-worker";
 const STAGED_CONTAINER = "lana-chatbot-track-b-staged-realtime-worker";
 const STAGED_LABEL = "TRACK_B_B3_2_STOPPED_NON_ADMITTING";
+const COMMERCE_STARTUP_CONTAINER_FILE = "/run/df13/commerce-startup.json";
 
 export const TRACK_B_RUNTIME_CONFIG_KEYS_V1 = Object.freeze([
   "APP_SEND_ENABLED",
@@ -286,7 +287,13 @@ type DockerInspect = {
   RestartCount?: unknown;
   State?: { Status?: unknown; Health?: { Status?: unknown } };
   Config?: { Image?: unknown; Labels?: Record<string, unknown>; Env?: unknown };
+  Mounts?: unknown;
 };
+
+function objectRecord(value: unknown): Record<string, unknown> | null {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown> : null;
+}
 
 function parseOne(output: string, code: string): DockerInspect {
   let parsed: unknown;
@@ -325,6 +332,7 @@ export class DockerComposeTrackBPreprodServiceController {
   readonly #startupPackageHash: string | null;
   readonly #runtimeReleaseId: string | null;
   readonly #run: TrackBServiceCommandRunner;
+  readonly #readStartupPackage: (path: string) => Promise<unknown>;
   readonly #labelPolicy: "EXACT_ALL" | "OCI_REVISION_ONLY";
   readonly #health: Readonly<{ timeoutMs: number; pollMs: number; wait: (milliseconds: number) => Promise<void> }>;
 
@@ -337,6 +345,7 @@ export class DockerComposeTrackBPreprodServiceController {
     startupPackageHash?: string;
     runtimeReleaseId?: string;
     run?: TrackBServiceCommandRunner;
+    readStartupPackage?: (path: string) => Promise<unknown>;
     labelPolicy?: "EXACT_ALL" | "OCI_REVISION_ONLY";
     health?: Readonly<{ timeoutMs: number; pollMs: number; wait: (milliseconds: number) => Promise<void> }>;
   }>) {
@@ -367,6 +376,8 @@ export class DockerComposeTrackBPreprodServiceController {
     this.#startupPackageHash = input.startupPackageHash ?? null;
     this.#runtimeReleaseId = input.runtimeReleaseId ?? null;
     this.#run = input.run ?? defaultRunner;
+    this.#readStartupPackage = input.readStartupPackage ?? (async (path) =>
+      JSON.parse(await readFile(path, "utf8")) as unknown);
     this.#labelPolicy = labelPolicy;
     this.#health = input.health ?? { timeoutMs: 120_000, pollMs: 1_000,
       wait: (milliseconds) => new Promise((resolveWait) => setTimeout(resolveWait, milliseconds)) };
@@ -395,6 +406,25 @@ export class DockerComposeTrackBPreprodServiceController {
       "-f", this.#composeFile, ...tail];
   }
 
+  async #hasExactStartupBind(value: DockerInspect): Promise<boolean> {
+    if (!Array.isArray(value.Mounts)) return false;
+    const mounts = value.Mounts.map(objectRecord);
+    if (mounts.some((mount) => mount === null)) return false;
+    const startupMounts = mounts.filter((mount) => mount?.Destination === COMMERCE_STARTUP_CONTAINER_FILE ||
+      mount?.Source === this.#startupPackageFile);
+    if (startupMounts.length !== 1) return false;
+    const mount = startupMounts[0];
+    if (mount === undefined || mount === null || mount.Type !== "bind" ||
+        mount.Source !== this.#startupPackageFile ||
+        mount.Destination !== COMMERCE_STARTUP_CONTAINER_FILE || mount.RW !== false) {
+      return false;
+    }
+    let startup: unknown;
+    try { startup = await this.#readStartupPackage(this.#startupPackageFile); } catch { return false; }
+    return createHash("sha256").update(canonicalJsonV1(startup), "utf8").digest("hex") ===
+      this.#startupPackageHash;
+  }
+
   async #inspectContainer(expected: TrackBServiceReleaseIdentity, verifyRuntime: boolean,
     container = CONTAINER): Promise<Readonly<{
     identity: TrackBServiceReleaseIdentity;
@@ -407,19 +437,7 @@ export class DockerComposeTrackBPreprodServiceController {
     ], {}), "TRACK_B_B3_2_CONTAINER_INSPECT_INVALID");
     const identity = identityFromInspect(value, expected, this.#labelPolicy);
     if (!identity || typeof value.State?.Status !== "string") return null;
-    if (this.#startupPackageHash !== null) {
-      const environment = value.Config?.Env;
-      if (!Array.isArray(environment) ||
-          !environment.includes(`DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE=${this.#startupPackageFile}`)) {
-        return null;
-      }
-      let startup: unknown;
-      try { startup = JSON.parse(await readFile(this.#startupPackageFile, "utf8")) as unknown; } catch {
-        return null;
-      }
-      if (createHash("sha256").update(canonicalJsonV1(startup), "utf8").digest("hex") !==
-          this.#startupPackageHash) return null;
-    }
+    if (this.#startupPackageHash !== null && container === CONTAINER && !await this.#hasExactStartupBind(value)) return null;
     if (verifyRuntime && value.State.Status === "running") {
       const output = await this.#run("docker", ["exec", container, "printenv",
         ...TRACK_B_RUNTIME_CONFIG_KEYS_V1], {});
@@ -623,6 +641,7 @@ export interface TrackBPreprodDatabaseBoundary {
     pointer: RuntimeBehaviorModePointer;
     notBefore: string;
   }): Promise<"EXACT" | "MISSING" | "AMBIGUOUS">;
+  readDatabaseClock(): Promise<string>;
   readTrackBV2LkgSchemaCompatibility(): Promise<{
     status: "EXACT" | "AMBIGUOUS";
     source: "DATABASE";
@@ -655,6 +674,12 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
     input.database.readAdmissionHold({ pageId: PAGE_ID, channel: CHANNEL, lease });
   const ports: TrackBCommerceAuthorityMutationPorts = {
     readPersistedRollbackRecord: input.rollbackStore.read.bind(input.rollbackStore),
+    async proveSchemaCompatibility({ candidateMigrationSchemaHash, lastKnownGoodMigrationSchemaHash }) {
+      if (candidateMigrationSchemaHash !== lastKnownGoodMigrationSchemaHash) return "AMBIGUOUS";
+      const observed = await input.database.readTrackBV2LkgSchemaCompatibility();
+      return observed.status === "EXACT" && observed.source === "DATABASE" &&
+        observed.migrationSchemaHash === candidateMigrationSchemaHash ? "EXACT" : "AMBIGUOUS";
+    },
     acquireFence: input.database.acquireFence.bind(input.database),
     proveAdmissionHeld: ({ lease }) => scopeAdmission(lease),
     async stopSourceAndProveQuiescence({ lease, sourceService }) {
@@ -894,6 +919,10 @@ export class TrackBPostgresPreprodDatabaseBoundary implements TrackBPreprodDatab
       workerId: "realtime-worker-1",
       notBefore: input.notBefore,
     });
+  }
+
+  readDatabaseClock() {
+    return this.#writer.readDatabaseClock();
   }
 
   readTrackBV2LkgSchemaCompatibility() {

@@ -124,6 +124,7 @@ function admissionTrigger(tableName: string, overrides: Record<string, unknown> 
     tgnargs: 0,
     function_name: "guard_track_b_cutover_admission",
     function_schema: "public",
+    function_oid: 4242,
     language_name: "plpgsql",
     returns_trigger: true,
     prosrc: admissionFunctionSource,
@@ -233,6 +234,16 @@ describe("Postgres Track B Commerce authority writer", () => {
     })).resolves.toBe("AMBIGUOUS");
   });
 
+  it("derives a freshness watermark from the database clock and rejects an invalid clock value", async () => {
+    const watermark = new Date("2026-09-03T01:02:03.456Z");
+    mocks.clientQuery.mockResolvedValueOnce(result([{ operation_now: watermark }]));
+    const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
+    await expect(store.readDatabaseClock()).resolves.toBe(watermark.toISOString());
+    expect(mocks.clientQuery).toHaveBeenCalledWith("SELECT clock_timestamp() AS operation_now", undefined);
+    mocks.clientQuery.mockResolvedValueOnce(result([{ operation_now: "not-a-date" }]));
+    await expect(store.readDatabaseClock()).rejects.toThrow("TRACK_B_B3_2_DATABASE_CLOCK_INVALID");
+  });
+
   it("rejects an ambiguous or injectable admission schema", () => {
     expect(() => new PostgresTrackBCommerceAuthorityWriter("postgresql://test", {
       admissionSchema: 'public".df13_commerce_cutover_fences; SELECT 1; --',
@@ -334,8 +345,9 @@ describe("Postgres Track B Commerce authority writer", () => {
       ["0038_track_b_commerce_admission_gate", "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140"],
       ["0039_track_b_v2_lkg_cutover_fence", "f9bb37c95ba77b6947958442cc223f5f4583d43cba4591de5abfaed002e068ca"],
     ].map(([migration_name, checksum_sha256]) => ({ migration_name, checksum_sha256 }));
-    const guard = (prosrc: string, proconfig: readonly string[] | null) => ({
+    const guard = (prosrc: string, proconfig: readonly string[] | null, function_oid = 4242) => ({
       prosrc, proconfig, function_schema: "public", language_name: "plpgsql", returns_trigger: true,
+      function_oid,
     });
     mocks.clientQuery.mockImplementation(async (sql: string) => {
       if (sql.includes('FROM "public".schema_migrations')) return result(migrationRows);
@@ -355,6 +367,28 @@ describe("Postgres Track B Commerce authority writer", () => {
 
     await expect(store.readTrackBV2LkgSchemaCompatibility()).resolves.toMatchObject({
       status: "EXACT", source: "DATABASE", migrationSchemaHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
+    });
+
+    mocks.clientQuery.mockImplementation(async (sql: string) => {
+      if (sql.includes('FROM "public".schema_migrations')) return result(migrationRows);
+      if (sql.includes("guard_df13_commerce_cutover_fence_insert_identity")) {
+        return result([guard(v2LkgFunctionSource, null)]);
+      }
+      if (sql.includes("guard_track_b_cutover_admission") && !sql.includes("pg_trigger")) {
+        return result([guard(admissionFunctionSource, ["search_path=pg_catalog"])]);
+      }
+      if (sql.includes("FROM pg_catalog.pg_trigger")) {
+        expect(sql).toContain("JOIN pg_catalog.pg_namespace AS pn ON pn.oid=p.pronamespace");
+        return result([
+          admissionTrigger("webhook_inbox"),
+          admissionTrigger("meta_outbox", { function_oid: 4243, function_schema: "track_b_clone" }),
+          admissionTrigger("pancake_tag_outbox"),
+        ]);
+      }
+      return result();
+    });
+    await expect(store.readTrackBV2LkgSchemaCompatibility()).resolves.toEqual({
+      status: "AMBIGUOUS", source: "DATABASE", migrationSchemaHash: null,
     });
 
     mocks.clientQuery.mockImplementation(async (sql: string) => {

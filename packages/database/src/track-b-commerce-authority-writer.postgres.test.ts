@@ -155,13 +155,24 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
       target: { modeVersionId: targetVersionId, contentHash: targetContentHash,
         authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash },
       lease, actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:${operationId}` });
-    const resolvedAt = new Date();
+    const watermark = await writer.readDatabaseClock();
+    const staleResolvedAt = new Date(new Date(watermark).getTime() - 1);
     await pool.query(`INSERT INTO runtime_behavior_mode_resolution_audit (
       resolution_id,page_id,channel,confirmation_mode,mode_version_id,content_hash,
       pointer_revision,source,status,reason_codes,worker_id,pointer_updated_at,resolved_at,propagation_ms
     ) VALUES ($1,$2,$3,'V2_ACTIVE',$4,$5,7,'DATABASE','RESOLVED','{}','realtime-worker-1',
       clock_timestamp(),$6,0)`, [randomUUID(), pageId, channel, targetVersionId, targetContentHash,
-      resolvedAt]);
+      staleResolvedAt]);
+    await expect(writer.readExactRuntimeResolution({ pageId, channel,
+      modeVersionId: targetVersionId, contentHash: targetContentHash, pointerRevision: 7,
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+      workerId: "realtime-worker-1", notBefore: watermark })).resolves.toBe("MISSING");
+    await pool.query(`INSERT INTO runtime_behavior_mode_resolution_audit (
+      resolution_id,page_id,channel,confirmation_mode,mode_version_id,content_hash,
+      pointer_revision,source,status,reason_codes,worker_id,pointer_updated_at,resolved_at,propagation_ms
+    ) VALUES ($1,$2,$3,'V2_ACTIVE',$4,$5,7,'DATABASE','RESOLVED','{}','realtime-worker-1',
+      clock_timestamp(),clock_timestamp(),0)`, [randomUUID(), pageId, channel, targetVersionId,
+      targetContentHash]);
     await expect(writer.readExactActivationAudit({ pageId, channel, pointerRevision: 7,
       previousVersionId, previousContentHash, targetVersionId, targetContentHash,
       actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:${operationId}` }))
@@ -169,7 +180,30 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
     await expect(writer.readExactRuntimeResolution({ pageId, channel,
       modeVersionId: targetVersionId, contentHash: targetContentHash, pointerRevision: 7,
       authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
-      workerId: "realtime-worker-1", notBefore: new Date(resolvedAt.getTime() - 1_000).toISOString() }))
+      workerId: "realtime-worker-1", notBefore: watermark }))
       .resolves.toBe("EXACT");
+  });
+
+  it("rejects an admission trigger rebound to an otherwise identical guard in another schema", async () => {
+    await expect(writer.readTrackBV2LkgSchemaCompatibility()).resolves.toMatchObject({
+      status: "EXACT", source: "DATABASE", migrationSchemaHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
+    });
+    await pool.query("CREATE SCHEMA track_b_clone");
+    const sourceResult = await pool.query(
+      "SELECT pg_get_functiondef('public.guard_track_b_cutover_admission()'::regprocedure) AS definition",
+    );
+    const source = String(sourceResult.rows[0]?.definition ?? "");
+    const clone = source.replace("FUNCTION public.guard_track_b_cutover_admission()",
+      "FUNCTION track_b_clone.guard_track_b_cutover_admission()");
+    if (clone === source) throw new Error("fixture guard clone source unavailable");
+    await pool.query(clone);
+    await pool.query("DROP TRIGGER track_b_cutover_admission_meta_outbox ON meta_outbox");
+    await pool.query(`CREATE TRIGGER track_b_cutover_admission_meta_outbox
+      BEFORE UPDATE ON meta_outbox
+      FOR EACH ROW EXECUTE FUNCTION track_b_clone.guard_track_b_cutover_admission()`);
+    await pool.query("ALTER TABLE meta_outbox ENABLE ALWAYS TRIGGER track_b_cutover_admission_meta_outbox");
+    await expect(writer.readTrackBV2LkgSchemaCompatibility()).resolves.toEqual({
+      status: "AMBIGUOUS", source: "DATABASE", migrationSchemaHash: null,
+    });
   });
 });

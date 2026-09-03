@@ -19,8 +19,8 @@ Current durable mode dimensions:
 
 ```text
 confirmation: V2_ACTIVE; emergency CLARIFY_ONLY
-sales authority: LEGACY; future COMMERCE
-state read: LEGACY; future V2
+sales authority: COMMERCE/V2; current Track B runtime baseline
+state read: LEGACY; future V2 remains out of scope
 ```
 
 ## Authority transition contract
@@ -126,7 +126,11 @@ report the exact target active, exact prior untouched, or exact prior restored;
 otherwise it reports released-state ambiguity and never claims a hold that no
 longer exists.
 
-### Narrow first-DF13 PREPROD exception
+### Historical narrow first-DF13 PREPROD exception (not the current Track B path)
+
+The following first-exercise exception is retained only as historical DF13
+evidence. Its LEGACY rollback and generic-operator language is not normative
+for the current Track B COMMERCE/V2 baseline or its V2-to-V2 LKG recovery.
 
 For the first isolated DF13 PREPROD exercise only,
 [`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](../DF13_PREPROD_FRESH_PROCESS_DECISION.md)
@@ -154,10 +158,11 @@ the narrow first-PREPROD writer described above for the isolated stopped-process
 exercise, and a dedicated DF13 hot-cutover adapter that owns the full durable
 quiescent fence, immutable authority-bundle identity, activation-audit
 reconciliation, and exact consumer readbacks for a later hot transition. The
-pending DF13 `0035` behavior-mode and `0036`
-durable cutover-fence artifacts are outside the active migration directory;
-shared LEGACY reads and writes remain schema-compatible until a separately
-authorized release promotes and applies them.
+pre-Track-B description of pending DF13 `0035` behavior-mode and `0036`
+durable-cutover-fence artifacts is historical context, not a current
+migration-ledger assertion. Historical evidence remains retained; fresh
+governed database readback is the only authority for current operational state
+or any future mutation.
 Defining the COMMERCE schema/version or pure fence/evidence contract is not
 permission to promote or apply its migration, bind a consumer to the live
 pipeline, or activate runtime authority.
@@ -176,7 +181,8 @@ source contract.
 Commerce itself is default-off: it requires a page-scoped, validation-only
 dedicated consumer boundary to admit the exact resolved identity before any
 future composition root could consume it. This source contract does not bind
-that consumer to the live pipeline or change the active LEGACY runtime.
+that consumer to the live pipeline or change the historical active LEGACY
+runtime described by this exception.
 
 Offline or controlled legacy/new comparison is verification tooling, not a live authority mode. It must not create protected side effects.
 
