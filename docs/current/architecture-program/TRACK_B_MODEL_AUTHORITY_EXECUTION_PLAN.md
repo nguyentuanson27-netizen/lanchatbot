@@ -1,6 +1,6 @@
 # Track B — Model Authority Execution Plan
 
-**Status:** `B2.4_MERGED / B3.1_V22_GATE_E_PASS / MIGRATIONS_0036_0037_0038_VERIFIED / B3.2_V2_LKG_SOURCE_REPLACEMENT_IN_PROGRESS`
+**Status:** `B2.4_MERGED / B3.1_V22_GATE_E_PASS / MIGRATIONS_0036_0037_0038_VERIFIED / B3.2_V2_LKG_SOURCE_MERGED / MIGRATION_0039_OPERATOR_IN_PROGRESS`
 **Plan baseline:** `main@4a5869f63d260091776da8236f1584f2c7e49bb5`, including reviewed B3 live-path replay head `104ee2f483e912532a77ef17b2dfe2c3878aebee`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Active process profile:** `SOLO_PREPROD_MINIMAL` (merged and current default; see `OPERATING_MODE.md`)
@@ -523,7 +523,7 @@ Track B must define the truthful replacement labels, derive a new canonical bund
 
 **Required sequence**
 
-1. Bind execution to the owner authorization for `ENGINEERING_PREPROD`; stop on any scope mismatch or ungranted boundary. Migrations `0036`, `0037`, and `0038` are applied and exactly read back there. Pending migration `0039` is a separately governed V2-LKG guard prerequisite and is not applied by the current source-only phase. The executable B3.2 adapter remains a separately reviewed source boundary before any service, fence, or pointer mutation.
+1. Bind execution to the owner authorization for `ENGINEERING_PREPROD`; stop on any scope mismatch or ungranted boundary. Migrations `0036`, `0037`, and `0038` are applied and exactly read back there. Pending migration `0039` is a separately governed V2-LKG guard prerequisite. Its live apply requires the focused reviewed operator, a fresh backup, complete isolated `up -> down -> up` rehearsal and exact readback before any B3.2 service, fence or pointer mutation. The executable B3.2 adapter merged in PR #311; that source result alone is not operational acceptance.
 2. Bind the exact candidate V2 bundle, behavior version/content hash/revision/source and one exact compatible last-known-good V2 release before mutation. V1/LEGACY is not a Track B rollback target.
 3. Persist the self-hashed release-local candidate/LKG record, including both releases' source commit/tree, image digest/tag/build labels, runtime-config hash, behavior pointer revision/version/bundle, startup hash, Gate E certification and a database-derived migrations-through-0039 schema compatibility hash. Before an initial `CURRENT_ACCEPTED_V2` LKG record, prove the currently running service mounts the exact startup artifact hash and has a fresh exact DATABASE runtime-resolution readback for the active pointer. Then stage the exact target stopped/non-admitting, acquire the reviewed durable page fence, prove the database admission gate is `HELD` for every reachable claim transition, stop the exact source service and prove zero in-flight authority-dependent work, and use the reviewed pointer writer for the exact CAS. Durably queued/held work may remain and is recorded; it is not in-flight authority. No manual SQL or env-only authority selector.
 4. Start the exact staged target only after exact CAS/readback. While the fence remains held, prove its service/image/config identity, runtime authority, activation audit and exact `DATABASE` readback from the full consumer set. Fence release has no service-start capability.
