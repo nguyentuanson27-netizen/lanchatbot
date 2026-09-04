@@ -7,7 +7,7 @@ import { migrateUp } from "./migrate.js";
 import { PostgresDf13CommerceCutoverFenceStore } from "./df13-commerce-cutover-fence.js";
 import { PostgresTrackBCommerceAuthorityWriter } from "./track-b-commerce-authority-writer.js";
 
-const baseUrl = process.env.POLICY_STORE_TEST_DATABASE_URL ?? process.env.GATE_E_STORE_TEST_DATABASE_URL;
+const baseUrl = process.env.TRACK_B_OPERATOR_ROLE_TEST_DATABASE_URL;
 const postgresDescribe = baseUrl ? describe.sequential : describe.skip;
 const role = "lana_track_b_authority_operator";
 const page = "1198992073286645";
