@@ -63,6 +63,25 @@ postgresDescribe("0040 Track B operator PostgreSQL boundary", () => {
     expect(visible.rows).toEqual([{ page_id: page, status: "RECEIVED" }]);
   });
 
+  it("preserves the exact 0039 schema identity and rejects trigger configuration drift", async () => {
+    const writer = new PostgresTrackBCommerceAuthorityWriter(operatorUrl.toString(), { restrictedOperator: true });
+    await expect(writer.readTrackBV2LkgSchemaCompatibility()).resolves.toMatchObject({
+      status: "EXACT", source: "DATABASE", migrationSchemaHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
+    });
+    try {
+      await pool.query("ALTER FUNCTION public.guard_df13_commerce_cutover_fence_insert_identity() SET search_path=pg_catalog,public");
+      await expect(writer.readTrackBV2LkgSchemaCompatibility()).resolves.toEqual({
+        status: "AMBIGUOUS", source: "DATABASE", migrationSchemaHash: null,
+      });
+    } finally {
+      await pool.query("ALTER FUNCTION public.guard_df13_commerce_cutover_fence_insert_identity() RESET search_path");
+      await writer.close();
+    }
+    const restored = new PostgresTrackBCommerceAuthorityWriter(operatorUrl.toString(), { restrictedOperator: true });
+    await expect(restored.readTrackBV2LkgSchemaCompatibility()).resolves.toMatchObject({ status: "EXACT" });
+    await restored.close();
+  });
+
   it("executes the fixed-scope acquire, CAS, reverse-CAS, and release lifecycle", async () => {
     const operationId = "40000000-0000-4000-8000-000000000010";
     const versionId = "40000000-0000-4000-8000-000000000012";

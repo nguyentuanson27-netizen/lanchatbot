@@ -10,8 +10,6 @@ REVOKE ALL ON FUNCTION track_b_operator_acquire_fence(uuid,uuid,uuid,text,bigint
 DROP FUNCTION track_b_operator_cas_pointer(uuid,bigint,text,uuid,text,bigint,uuid,text,text,text);
 DROP FUNCTION track_b_operator_release_fence(uuid,bigint,text);
 DROP FUNCTION track_b_operator_acquire_fence(uuid,uuid,uuid,text,bigint,text,text,text,integer);
-ALTER FUNCTION public.guard_df13_commerce_cutover_fence_insert_identity()
-  RESET search_path;
 DROP POLICY track_b_operator_scope ON pancake_tag_outbox;
 DROP POLICY track_b_existing_access ON pancake_tag_outbox;
 DROP POLICY track_b_operator_scope ON meta_outbox;

@@ -22,12 +22,6 @@ BEGIN
   END IF;
 END $$;
 
--- The 0039 trigger deliberately had no fixed search_path. Calls originating
--- from the restricted SECURITY DEFINER surface inherit pg_catalog-only unless
--- the trigger pins the canonical schema itself.
-ALTER FUNCTION public.guard_df13_commerce_cutover_fence_insert_identity()
-  SET search_path = pg_catalog, public;
-
 DO $$
 BEGIN
   EXECUTE format('GRANT CONNECT ON DATABASE %I TO lana_track_b_authority_operator', current_database());
@@ -116,6 +110,11 @@ BEGIN
       AND v.confirmation_mode='V2_ACTIVE' AND v.sales_authority_mode='COMMERCE'
       AND v.state_read_mode='LEGACY' AND v.authority_bundle_hash=v2_bundle
   ) THEN RETURN QUERY SELECT 'PARKED'::text, NULL::uuid, NULL::bigint; RETURN; END IF;
+  -- Preserve the exact 0039 trigger identity while giving its legacy,
+  -- unqualified catalog references the canonical schema for this statement.
+  -- The operator has no CREATE privilege and every referenced relation already
+  -- exists, so this cannot introduce an operator-controlled resolution path.
+  PERFORM pg_catalog.set_config('search_path','pg_catalog, public',true);
   INSERT INTO public.df13_commerce_cutover_fences(
     fence_id,operation_id,page_id,channel,pre_cutover_version_id,pre_cutover_content_hash,
     pre_cutover_pointer_revision,target_version_id,target_content_hash,target_authority_bundle_hash,
@@ -124,6 +123,7 @@ BEGIN
     requested_content_hash,requested_revision,requested_version_id,requested_content_hash,requested_bundle,
     requested_fingerprint,1,requested_token_hash,clock_timestamp()+(requested_lease_ms*interval '1 millisecond'),
     NULL,clock_timestamp(),clock_timestamp());
+  PERFORM pg_catalog.set_config('search_path','pg_catalog',true);
   RETURN QUERY SELECT 'HELD'::text, requested_fence_id, 1::bigint;
 END $$;
 

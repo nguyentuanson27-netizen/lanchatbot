@@ -20,8 +20,8 @@ describe("0040 Track B operator role boundary", () => {
     expect(sql).toContain("page_id='1198992073286645' AND channel='MESSENGER'");
     expect(sql).toContain("SECURITY DEFINER");
     expect(sql).toContain("SET search_path = pg_catalog");
-    expect(sql).toContain("ALTER FUNCTION public.guard_df13_commerce_cutover_fence_insert_identity()");
-    expect(sql).toContain("SET search_path = pg_catalog, public");
+    expect(sql).toContain("pg_catalog.set_config('search_path','pg_catalog, public',true)");
+    expect(sql).toContain("pg_catalog.set_config('search_path','pg_catalog',true)");
     expect(sql).toContain("TRACK_B_OPERATOR_CAS_NOT_QUIESCENT");
     expect(sql).toContain("GRANT EXECUTE ON FUNCTION track_b_operator_cas_pointer");
     expect(sql).not.toMatch(/GRANT\s+(?:INSERT|UPDATE|DELETE|TRUNCATE)\s+ON/iu);
@@ -35,7 +35,6 @@ describe("0040 Track B operator role boundary", () => {
     expect(sql).toContain("0040 down requires zero unreleased cutover fences");
     expect(sql).toContain("0040 down requires deprovisioned NOLOGIN operator role");
     expect(sql).toContain("REVOKE CONNECT ON DATABASE");
-    expect(sql).toContain("RESET search_path");
     expect(sql).not.toMatch(/DROP ROLE|DROP OWNED/iu);
   });
 
