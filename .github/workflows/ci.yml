@@ -81,5 +81,8 @@ jobs:
           node deploy/track-b-0039-preprod-operator.test.mjs
           bash deploy/track-b-0039-preprod-operator.behavior.test.sh
 
+      - name: Verify Track B 0040 operator boundary
+        run: bash deploy/track-b-0040-preprod-operator.behavior.test.sh
+
       - name: Run repository checks
         run: pnpm check

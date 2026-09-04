@@ -1,7 +1,9 @@
 import { createHash } from "node:crypto";
+import { execFile } from "node:child_process";
 import { chmod, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { promisify } from "node:util";
 import { describe, expect, it, vi } from "vitest";
 import { canonicalJsonV1 } from "@lana/contracts";
 import { behaviorModeContentHash } from "@lana/chat-runtime";
@@ -107,6 +109,20 @@ function packet(direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2" = "ACT
 }
 
 describe("Track B PREPROD V2/LKG operator boundary", () => {
+  it("uses the dedicated operator credential rather than the realtime reader credential", async () => {
+    const source = await readFile(new URL("./track-b-commerce-authority-preprod-cli.ts", import.meta.url), "utf8");
+    expect(source).toContain("/opt/lana-chatbot/shared/secrets/track_b_authority_operator_database_url");
+    expect(source).not.toContain("/opt/lana-chatbot/shared/secrets/runtime_behavior_mode_database_url");
+    expect(source).toContain("import.meta.url === pathToFileURL(resolve(process.argv[1])).href");
+  });
+  it("can be imported in a production-like process without invoking the CLI main", async () => {
+    const built = new URL("../dist/track-b-commerce-authority-preprod-cli.js", import.meta.url);
+    const result = await promisify(execFile)(process.execPath,
+      ["--input-type=module", "-e", "await import(process.env.TRACK_B_IMPORT_URL)"] ,
+      { env: { ...process.env, NODE_ENV: "production", TRACK_B_IMPORT_URL: built.href } });
+    expect(result.stdout).toBe("");
+    expect(result.stderr).toBe("");
+  });
   const postgresInspection = (address = "172.18.0.2") => ({
     Name: "/lana-chatbot-postgres",
     State: { Running: true, Health: { Status: "healthy" } },
