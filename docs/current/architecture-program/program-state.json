@@ -127,14 +127,14 @@
   },
   "active": {
     "track": "POST_DF_V5_TRACK_B",
-    "nextIssue": "Track B B3.2 V2-to-last-known-good-V2 replacement PR adds pending 0039 guarded same-identity V2 cutover, then separately governed evidence closure",
+    "nextIssue": "Track B migration 0039 exact PREPROD operator review/merge, then fresh backup/rehearsal/apply and V2-to-last-known-good-V2 evidence closure",
     "gate": "GATE_F_PREPROD_ACCEPTED",
-    "authorization": "TRACK_B_B3_2_V2_LKG_REPLACEMENT_SOURCE_ONLY",
+    "authorization": "TRACK_B_B3_2_ENGINEERING_PREPROD_OPERATIONAL_COMPLETION",
     "authorizationDecision": {
       "source": "CODEX_OWNER_MESSAGE",
       "sourceThreadId": "019ff0ed-3760-7e81-98f4-5e91e8ca35b0",
-      "decisionAt": "2026-09-03",
-      "scope": "CLOSE_PR_310_AS_SUPERSEDED;_IMPLEMENT_REVIEW_AND_MERGE_NEW_SOURCE_DOCS_PR_REPLACING_TRACK_B_V1_ROLLBACK_WITH_EXACT_COMPATIBLE_LAST_KNOWN_GOOD_V2;_KEEP_CURRENT_V2_UNCHANGED;_NO_PREPROD_RUNTIME_POINTER_FENCE_DATABASE_MESSENGER_ROUTING_OR_CONTROL_PLANE_MUTATION"
+      "decisionAt": "2026-09-04",
+      "scope": "ENGINEERING_PREPROD_PAGE_1198992073286645_ONLY;_BIND_CURRENT_ACCEPTED_V2_AS_INITIAL_LKG;_REHEARSE_AND_APPLY_PINNED_0039_THROUGH_REVIEWED_OPERATOR;_EXERCISE_V2_TO_EXACT_LKG_V2_ROLLBACK_AND_REACTIVATION;_BOUNDED_CANARY_AND_OWNER_CONTROLLED_MESSENGER_E2E;_GOVERNANCE_ACCEPTANCE_ONLY_AFTER_ALL_GATES;_NO_TRACK_C_START"
     }
   },
   "future": [
