@@ -220,16 +220,23 @@ async function appendRawSql(
 
 postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
   let pool: Pool;
-  let anchorStore: PostgresGateERegistrationAnchorStoreV1;
+  let anchorStore: PostgresGateERegistrationAnchorStoreV1 | undefined;
+
+  const requireAnchorStore = () => {
+    if (!anchorStore) throw new Error("GATE_E_TEST_ANCHOR_STORE_UNAVAILABLE");
+    return anchorStore;
+  };
 
   const registerPopulationAnchor = async (
     body: Readonly<Record<string, unknown>>,
   ) => {
     const populationAnchor = populationAnchorForBody(body);
-    await expect(anchorStore.appendRegisteredPopulationAnchorAtomically({
-      populationAnchor,
-      signal: new AbortController().signal,
-    })).resolves.toMatchObject({
+    await expect(
+      requireAnchorStore().appendRegisteredPopulationAnchorAtomically({
+        populationAnchor,
+        signal: new AbortController().signal,
+      }),
+    ).resolves.toMatchObject({
       populationAnchorHash: populationAnchor.populationAnchorHash,
     });
     return populationAnchor;
@@ -242,7 +249,33 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
   }, 60_000);
 
   afterAll(async () => {
-    await anchorStore.close();
+    await anchorStore?.close();
+    const cleanupState = await pool.query<{
+      ledger_count: string;
+      table_count: string;
+      function_count: string;
+      role_count: string;
+    }>(`SELECT
+      (SELECT count(*) FROM schema_migrations WHERE migration_name='0034_gate_e_evidence_store_v2' AND checksum_sha256='d5869161bccb5b74a6dc7fdd05b918901a06a1d7d4e84bca716f46d32f228eaa')::text AS ledger_count,
+      (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relname IN ('gate_e_registered_population_anchors_v1','gate_e_evidence_records_v2','gate_e_evidence_admissions_v2'))::text AS table_count,
+      (SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.proname IN ('lana_guard_gate_e_evidence_append_only_v2','lana_finalize_gate_e_evidence_admission_v2','lana_gate_e_has_sensitive_key_v2','lana_gate_e_has_exact_keys_v2','lana_gate_e_register_population_anchor_v1','lana_gate_e_read_population_anchor_v1','lana_gate_e_append_evidence_v2','lana_gate_e_read_evidence_by_hash_v2'))::text AS function_count,
+      (SELECT count(*) FROM pg_roles WHERE rolname IN ('lana_gate_e_registration_writer','lana_gate_e_evidence_writer','lana_gate_e_evidence_reader'))::text AS role_count`);
+    const state = cleanupState.rows[0];
+    const absent = state?.ledger_count === "0"
+      && state.table_count === "0"
+      && state.function_count === "0"
+      && state.role_count === "0";
+    const exactApplied = state?.ledger_count === "1"
+      && state.table_count === "3"
+      && state.function_count === "8"
+      && state.role_count === "3";
+    if (!absent && !exactApplied) {
+      throw new Error("GATE_E_TEST_CLEANUP_STATE_AMBIGUOUS");
+    }
+    if (absent) {
+      await pool.end();
+      return;
+    }
     const downSql = await readFile(
       resolve(migrationsDirectory, "0034_gate_e_evidence_store_v2.down.sql"),
       "utf8",
@@ -251,7 +284,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
     try {
       await pool.query(downSql);
       await pool.query(
-        "DELETE FROM schema_migrations WHERE migration_name='0034_gate_e_evidence_store_v2'",
+        "DELETE FROM schema_migrations WHERE migration_name='0034_gate_e_evidence_store_v2' AND checksum_sha256='d5869161bccb5b74a6dc7fdd05b918901a06a1d7d4e84bca716f46d32f228eaa'",
       );
       await pool.query("COMMIT");
     } catch (error) {
@@ -449,7 +482,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
       sourceBody,
       registeredItemIds,
     );
-    await anchorStore.appendRegisteredPopulationAnchorAtomically({
+    await requireAnchorStore().appendRegisteredPopulationAnchorAtomically({
       populationAnchor,
       signal: new AbortController().signal,
     });
@@ -660,7 +693,7 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
       await anchorCorruptionClient.query("SET session_replication_role = origin");
       anchorCorruptionClient.release();
     }
-    await expect(anchorStore.readPopulationAnchorByHash(
+    await expect(requireAnchorStore().readPopulationAnchorByHash(
       anchorCorruption.populationAnchorHash,
     )).rejects.toThrow("GATE_E_REGISTERED_POPULATION_ANCHOR_CORRUPT");
 
