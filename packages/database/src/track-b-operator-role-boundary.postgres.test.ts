@@ -114,6 +114,8 @@ postgresDescribe("0040 Track B operator PostgreSQL boundary", () => {
     const versionId = "40000000-0000-4000-8000-000000000012";
     const contentHash = "sha256:95ead755ea456c1e01c215d2421c2cf23f64fb536168ed49d5729bc4ec91f394";
     const bundle = "56b94f7a2e07e80fe8b2983a75b46caa78c2d48f3bd4081d4a88d8f40d2325b8";
+    await pool.query("INSERT INTO runtime_behavior_mode_versions(mode_version_id,page_id,channel,schema_version,confirmation_mode,sales_authority_mode,state_read_mode,authority_bundle_hash,content_hash,created_by,reason,created_at) VALUES($1,$2,'MESSENGER',1,'V2_ACTIVE','COMMERCE','LEGACY',$3,$4,'fixture','fixture',now()) ON CONFLICT (mode_version_id) DO NOTHING", [versionId, page, bundle, contentHash]);
+    await pool.query("INSERT INTO runtime_behavior_mode_pointers(page_id,channel,active_version_id,pointer_revision,updated_by,reason,updated_at) VALUES($1,'MESSENGER',$2,4,'fixture','fixture',now()) ON CONFLICT (page_id,channel) DO UPDATE SET active_version_id=EXCLUDED.active_version_id,pointer_revision=EXCLUDED.pointer_revision,updated_by=EXCLUDED.updated_by,reason=EXCLUDED.reason,updated_at=EXCLUDED.updated_at", [page, versionId]);
     const canonical = `{"channel":"MESSENGER","operationId":"${operationId}","pageId":"${page}","preCutover":{"contentHash":"${contentHash}","modeVersionId":"${versionId}","pointerRevision":4},"schemaVersion":1,"target":{"authorityBundleHash":"${bundle}","contentHash":"${contentHash}","modeVersionId":"${versionId}"}}`;
     const fingerprint = createHash("sha256").update(canonical).digest("hex");
     const oldHash = "d".repeat(64); const newHash = "e".repeat(64);

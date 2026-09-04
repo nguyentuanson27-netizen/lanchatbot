@@ -22,6 +22,12 @@ BEGIN
   END IF;
 END $$;
 
+-- The 0039 trigger deliberately had no fixed search_path. Calls originating
+-- from the restricted SECURITY DEFINER surface inherit pg_catalog-only unless
+-- the trigger pins the canonical schema itself.
+ALTER FUNCTION public.guard_df13_commerce_cutover_fence_insert_identity()
+  SET search_path = pg_catalog, public;
+
 DO $$
 BEGIN
   EXECUTE format('GRANT CONNECT ON DATABASE %I TO lana_track_b_authority_operator', current_database());
