@@ -25,7 +25,6 @@ postgresDescribe("0040 Track B operator PostgreSQL boundary", () => {
     admin = new Pool({ connectionString: adminUrl.toString(), max: 1 });
     await admin.query("SELECT pg_advisory_lock(hashtextextended('track-b-0040-test-role',0))");
     await admin.query(`DROP ROLE IF EXISTS ${role}`);
-    await admin.query(`CREATE ROLE ${role} NOLOGIN NOSUPERUSER NOINHERIT NOCREATEROLE NOCREATEDB NOREPLICATION NOBYPASSRLS`);
     await admin.query(`CREATE DATABASE ${databaseName}`);
     const testUrl = new URL(parsed); testUrl.pathname = `/${databaseName}`;
     operatorUrl = new URL(testUrl);
@@ -36,6 +35,7 @@ postgresDescribe("0040 Track B operator PostgreSQL boundary", () => {
       await pool.query(sql);
       await pool.query("INSERT INTO schema_migrations(migration_name,checksum_sha256) VALUES($1,$2)", [name, createHash("sha256").update(sql).digest("hex")]);
     }
+    await admin.query(`CREATE ROLE ${role} NOLOGIN NOSUPERUSER NOINHERIT NOCREATEROLE NOCREATEDB NOREPLICATION NOBYPASSRLS`);
     const sql = await readFile(resolve(import.meta.dirname, "../pending-migrations/0040_track_b_operator_role_boundary.up.sql"), "utf8");
     await pool.query(sql);
     await pool.query("INSERT INTO schema_migrations(migration_name,checksum_sha256) VALUES($1,$2)", ["0040_track_b_operator_role_boundary", createHash("sha256").update(sql).digest("hex")]);
