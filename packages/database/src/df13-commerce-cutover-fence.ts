@@ -276,14 +276,16 @@ async function rollbackQuietly(client: PoolClient): Promise<void> {
 export class PostgresDf13CommerceCutoverFenceStore implements Df13CommerceCutoverFencePort {
   readonly #pool: Pool;
   readonly #leaseMs: number;
+  readonly #restrictedOperator: boolean;
 
-  constructor(connectionString: string, leaseMs = 60_000) {
+  constructor(connectionString: string, leaseMs = 60_000, restrictedOperator = false) {
     if (!connectionString.trim()) throw new Error("DATABASE_URL_REQUIRED");
     if (!Number.isSafeInteger(leaseMs) || leaseMs < 10_000 || leaseMs > 300_000) {
       throw new Error("DF13_CUTOVER_FENCE_LEASE_INVALID");
     }
     this.#pool = new Pool({ connectionString, max: 2 });
     this.#leaseMs = leaseMs;
+    this.#restrictedOperator = restrictedOperator;
   }
 
   async close(): Promise<void> {
@@ -293,6 +295,28 @@ export class PostgresDf13CommerceCutoverFenceStore implements Df13CommerceCutove
   async acquire(input: Df13CommerceCutoverFenceRequest): Promise<Df13CommerceCutoverFenceAcquireResult> {
     const request = exactRequest(input);
     const fingerprint = df13CommerceCutoverFenceRequestFingerprint(request);
+    if (this.#restrictedOperator) {
+      const fenceId = randomUUID();
+      const fenceToken = randomUUID();
+      const result = await this.#pool.query<{ result_status: string; result_fence_id: string | null; result_epoch: string | number | null }>(
+        "SELECT * FROM track_b_operator_acquire_fence($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+        [fenceId, request.operationId, request.preCutover.modeVersionId, request.preCutover.contentHash,
+          request.preCutover.pointerRevision, request.target.authorityBundleHash, fingerprint,
+          hash(fenceToken), this.#leaseMs],
+      );
+      const row = result.rows[0];
+      const epoch = row?.result_epoch === null || row?.result_epoch === undefined ? null : finiteEpoch(row.result_epoch);
+      if (row?.result_status === "HELD" && row.result_fence_id && epoch !== null) {
+        return Object.freeze({ status: "HELD", lease: Object.freeze({ fenceId: row.result_fence_id, fenceToken, epoch }) });
+      }
+      if (row?.result_status === "ALREADY_RELEASED" && row.result_fence_id && epoch !== null) {
+        return Object.freeze({ status: "ALREADY_RELEASED", fenceId: row.result_fence_id, epoch });
+      }
+      if (row?.result_status === "HELD_RECONCILE_REQUIRED" && row.result_fence_id && epoch !== null) {
+        return Object.freeze({ status: "HELD_RECONCILE_REQUIRED", fenceId: row.result_fence_id, epoch });
+      }
+      return Object.freeze({ status: "PARKED", reasonCode: "DF13_CUTOVER_FENCE_CANONICAL_IDENTITY_INVALID" });
+    }
     const client = await this.#pool.connect();
     try {
       await client.query("BEGIN");
@@ -471,6 +495,15 @@ export class PostgresDf13CommerceCutoverFenceStore implements Df13CommerceCutove
     const fenceToken = requiredUuid(input.fenceToken, "DF13_CUTOVER_FENCE_TOKEN_INVALID");
     const epoch = finiteEpoch(input.epoch);
     if (epoch === null) throw new Error("DF13_CUTOVER_FENCE_EPOCH_INVALID");
+    if (this.#restrictedOperator) {
+      const result = await this.#pool.query<{ released: boolean }>(
+        "SELECT track_b_operator_release_fence($1,$2,$3) AS released",
+        [fenceId, epoch, hash(fenceToken)],
+      );
+      return result.rows[0]?.released === true
+        ? Object.freeze({ status: "RELEASED" })
+        : Object.freeze({ status: "STALE_OR_MISSING" });
+    }
     const result = await this.#pool.query(
       `UPDATE df13_commerce_cutover_fences
           SET token_hash = NULL, lease_until = NULL,

@@ -81,5 +81,10 @@ jobs:
           node deploy/track-b-0039-preprod-operator.test.mjs
           bash deploy/track-b-0039-preprod-operator.behavior.test.sh
 
+      - name: Verify Track B 0040 operator boundary
+        run: |
+          TRACK_B_OPERATOR_ROLE_TEST_DATABASE_URL="$POLICY_STORE_TEST_DATABASE_URL" pnpm --filter @lana/database exec vitest run src/track-b-operator-role-boundary.postgres.test.ts
+          bash deploy/track-b-0040-preprod-operator.behavior.test.sh
+
       - name: Run repository checks
         run: pnpm check

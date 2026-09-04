@@ -4,6 +4,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { constants } from "node:fs";
 import { mkdir, open, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import type { RuntimeBehaviorModePointer } from "@lana/chat-runtime";
 import {
@@ -34,7 +35,7 @@ import {
 import { createDf13CommercePreprodStartupAuthority,
   parseDf13CommercePreprodStartupInput } from "./df13-commerce-preprod-startup-authority.js";
 
-const DATABASE_SECRET_FILE = "/opt/lana-chatbot/shared/secrets/runtime_behavior_mode_database_url";
+const DATABASE_SECRET_FILE = "/opt/lana-chatbot/shared/secrets/track_b_authority_operator_database_url";
 const execFile = promisify(execFileCallback);
 const POSTGRES_CONTAINER = "lana-chatbot-postgres";
 const OPERATION_ROOT = "/opt/lana-chatbot/releases/track-b/operations";
@@ -811,7 +812,9 @@ async function main() {
   else await runPacket(path, command === "recover");
 }
 
-if (process.env.NODE_ENV !== "test") {
+const invokedAsEntrypoint = typeof process.argv[1] === "string" &&
+  import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
+if (process.env.NODE_ENV !== "test" && invokedAsEntrypoint) {
   main().catch((error: unknown) => {
     const code = error instanceof Error && /^TRACK_B_[A-Z0-9_]+$/u.test(error.message)
       ? error.message : "TRACK_B_B3_2_OPERATOR_FAILED";

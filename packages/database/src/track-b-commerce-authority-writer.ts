@@ -193,7 +193,7 @@ function versionSelect(where: string): string {
            ${where}`;
 }
 
-function pointerSelect(): string {
+function pointerSelect(locking = true): string {
   return `SELECT v.mode_version_id, v.page_id, v.channel, v.schema_version,
                  v.confirmation_mode, v.sales_authority_mode, v.state_read_mode,
                  to_jsonb(v) ->> 'authority_bundle_hash' AS authority_bundle_hash,
@@ -202,21 +202,26 @@ function pointerSelect(): string {
             FROM runtime_behavior_mode_pointers p
             JOIN runtime_behavior_mode_versions v ON v.mode_version_id = p.active_version_id
            WHERE p.page_id = $1 AND p.channel = $2
-           FOR UPDATE OF p`;
+           ${locking ? "FOR UPDATE OF p" : ""}`;
 }
 
 /** Page-scoped source writer for the one Track B COMMERCE identity replacement. */
 export class PostgresTrackBCommerceAuthorityWriter {
   readonly #pool: Pool;
   readonly #admissionSchema: string;
+  readonly #restrictedOperator: boolean;
 
-  constructor(connectionString: string, options: Readonly<{ admissionSchema?: string }> = {}) {
+  constructor(connectionString: string, options: Readonly<{
+    admissionSchema?: string;
+    restrictedOperator?: boolean;
+  }> = {}) {
     if (!connectionString.trim()) throw new Error("DATABASE_URL_REQUIRED");
     const admissionSchema = options.admissionSchema ?? "public";
     if (!/^[a-z][a-z0-9_]{0,62}$/u.test(admissionSchema)) {
       throw new Error("TRACK_B_B3_2_ADMISSION_SCHEMA_INVALID");
     }
     this.#admissionSchema = admissionSchema;
+    this.#restrictedOperator = options.restrictedOperator === true;
     this.#pool = new Pool({ connectionString, max: 1 });
     // pg emits idle-client failures on the pool. Keep the process alive while
     // individual in-flight operations continue to reject fail-closed.
@@ -611,7 +616,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
     try {
       await client.query("BEGIN");
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [`${PAGE_ID}:${CHANNEL}`]);
-      const currentResult = await client.query(pointerSelect(), [PAGE_ID, CHANNEL]);
+      const currentResult = await client.query(pointerSelect(!this.#restrictedOperator), [PAGE_ID, CHANNEL]);
       const currentRow = currentResult.rows[0] as Row | undefined;
       if (!currentRow) throw new Error("TRACK_B_B3_2_CURRENT_POINTER_MISSING");
       const current = pointer(currentRow);
@@ -641,6 +646,9 @@ export class PostgresTrackBCommerceAuthorityWriter {
         ) throw new Error("TRACK_B_B3_2_PREPARATION_IDEMPOTENCY_MISMATCH");
         await client.query("COMMIT");
         return existing;
+      }
+      if (this.#restrictedOperator) {
+        throw new Error("TRACK_B_B3_2_OPERATOR_NEW_VERSION_NOT_REVIEWED");
       }
       const clockResult = await client.query<{ operation_now: Date }>(
         "SELECT clock_timestamp() AS operation_now",
@@ -709,6 +717,24 @@ export class PostgresTrackBCommerceAuthorityWriter {
       expectedCurrent.authorityBundleHash !== expectedPreviousBundle ||
       target.authorityBundleHash !== expectedTargetBundle
     ) throw new Error("TRACK_B_B3_2_AUTHORITY_TRANSITION_INVALID");
+
+    if (this.#restrictedOperator) {
+      const result = await this.#pool.query<{ updated_at: Date | string }>(
+        "SELECT track_b_operator_cas_pointer($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) AS updated_at",
+        [lease.fenceId, lease.epoch, hashToken(lease.fenceToken), expectedCurrent.modeVersionId,
+          expectedCurrent.contentHash, expectedCurrent.pointerRevision, target.modeVersionId,
+          target.contentHash, input.actor, input.reason],
+      );
+      const readback = await this.#pool.query(pointerSelect(false), [PAGE_ID, CHANNEL]);
+      const row = readback.rows[0] as Row | undefined;
+      if (!row) throw new Error("TRACK_B_B3_2_CURRENT_POINTER_MISSING");
+      const observed = pointer(row);
+      if (observed.pointerRevision !== expectedCurrent.pointerRevision + 1 ||
+          !exactIdentity(observed.version, target) || result.rows.length !== 1) {
+        throw new Error("TRACK_B_B3_2_POINTER_CAS_MISMATCH");
+      }
+      return observed;
+    }
 
     const client = await this.#pool.connect();
     try {

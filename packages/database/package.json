@@ -17,7 +17,7 @@
     "pretypecheck": "pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "pretest": "pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build",
-    "test": "vitest run",
+    "test": "vitest run --no-file-parallelism",
     "prelint": "pnpm --filter @lana/contracts build && pnpm --filter @lana/commerce-kernel build",
     "lint": "tsc -p tsconfig.json --noEmit",
     "migrate": "node dist/migrate.js up"

@@ -880,8 +880,8 @@ export class TrackBPostgresPreprodDatabaseBoundary implements TrackBPreprodDatab
   constructor(connectionString: string, operationId: string) {
     if (!UUID_V4.test(operationId)) throw new Error("TRACK_B_B3_2_OPERATION_ID_INVALID");
     this.#operationId = operationId.toLowerCase();
-    this.#fence = new PostgresDf13CommerceCutoverFenceStore(connectionString);
-    this.#writer = new PostgresTrackBCommerceAuthorityWriter(connectionString);
+    this.#fence = new PostgresDf13CommerceCutoverFenceStore(connectionString, 60_000, true);
+    this.#writer = new PostgresTrackBCommerceAuthorityWriter(connectionString, { restrictedOperator: true });
     this.#mode = new PostgresRuntimeBehaviorModeStore(connectionString, 1);
   }
 

@@ -127,14 +127,14 @@
   },
   "active": {
     "track": "POST_DF_V5_TRACK_B",
-    "nextIssue": "Track B migration 0039 exact PREPROD operator review/merge, then fresh backup/rehearsal/apply and V2-to-last-known-good-V2 evidence closure",
+    "nextIssue": "Track B dedicated least-privilege operator boundary via pending 0040, then durable current-V2 LKG binding, canary and governance closure",
     "gate": "GATE_F_PREPROD_ACCEPTED",
     "authorization": "TRACK_B_B3_2_ENGINEERING_PREPROD_OPERATIONAL_COMPLETION",
     "authorizationDecision": {
       "source": "CODEX_OWNER_MESSAGE",
       "sourceThreadId": "019ff0ed-3760-7e81-98f4-5e91e8ca35b0",
       "decisionAt": "2026-09-04",
-      "scope": "ENGINEERING_PREPROD_PAGE_1198992073286645_ONLY;_BIND_CURRENT_ACCEPTED_V2_AS_INITIAL_LKG;_REHEARSE_AND_APPLY_PINNED_0039_THROUGH_REVIEWED_OPERATOR;_EXERCISE_V2_TO_EXACT_LKG_V2_ROLLBACK_AND_REACTIVATION;_BOUNDED_CANARY_AND_OWNER_CONTROLLED_MESSENGER_E2E;_GOVERNANCE_ACCEPTANCE_ONLY_AFTER_ALL_GATES;_NO_TRACK_C_START"
+      "scope": "ENGINEERING_PREPROD_PAGE_1198992073286645_ONLY;_CREATE_DEDICATED_LEAST_PRIVILEGE_TRACK_B_OPERATOR_ROLE_AND_UNMOUNTED_SECRET;_BIND_CURRENT_ACCEPTED_V2_AS_INITIAL_LKG;_COMPLETE_REQUIRED_ROLLBACK_EVIDENCE;_BOUNDED_CANARY_AND_OWNER_CONTROLLED_MESSENGER_E2E;_GOVERNANCE_ACCEPTANCE_ONLY_AFTER_ALL_GATES;_NO_TRACK_C_START"
     }
   },
   "future": [
@@ -142,7 +142,7 @@
     "Post-Gate-F V5: Track B model authority and Track C bounded quality learning are the default path. UR/State V2, Gate U, multi-page expansion, production hardening, traffic canaries, long soak, and destructive LEGACY cleanup are trigger-only unless separately authorized.",
     "DF-11: merged source-only (PR #238); default-off, side-effect-free authority comparison; no runtime SHADOW authority",
     "DF-12: merged source-only (PR #239); missing-commerce signal; no runtime activation",
-    "DF-13: GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE; its historical LEGACY rollback evidence remains immutable. Migrations 0036, 0037, and 0038 are applied and verified in ENGINEERING_PREPROD. Pending 0039 is a source-only, separately governed prerequisite for page-scoped same-identity V2 LKG cutover and remains unapplied. Track B now requires V2-to-exact-compatible-last-known-good-V2 rollback and never selects V1; current V2 must receive fresh mounted-startup, DATABASE-runtime and schema-compatibility readback before it can be bound as the initial LKG baseline.",
+    "DF-13: GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE; its historical LEGACY rollback evidence remains immutable. Migrations 0036 through 0039 are applied and verified in ENGINEERING_PREPROD. Pending 0040 is the separately reviewed least-privilege operator-role prerequisite and does not change model authority. Track B rollback never selects V1; current V2 must receive fresh mounted-startup, DATABASE-runtime and schema-compatibility readback before durable initial-LKG binding.",
     "Track C routing handoff only: C0/C1.1/C2/C3 Terra High; C1 MUST_PASS and C4 Sol High; hard bug or semantic drift Sol High; one fixed independent Sol High reviewer per source PR. Track C is not authorized and will be created by the administration task only after genuine TRACK_B_COMPLETE.",
     "UR-00 and later: trigger-only and blocked until a separate explicit owner approval"
   ],
