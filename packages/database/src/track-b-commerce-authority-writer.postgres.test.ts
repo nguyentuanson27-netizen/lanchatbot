@@ -4,10 +4,7 @@ import { resolve } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Pool } from "pg";
 import { migrateUp } from "./migrate.js";
-import {
-  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
-  DF13_COMMERCE_AUTHORITY_BUNDLE_V2,
-} from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_V2 } from "./df13-commerce-authority-bundle.js";
 import { PostgresDf13CommerceCutoverFenceStore } from "./df13-commerce-cutover-fence.js";
 import type { Df13CommerceCutoverFenceLease } from "./df13-commerce-cutover-fence.js";
 import { runtimeBehaviorModeContentHash } from "./runtime-behavior-mode.js";
@@ -48,6 +45,7 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
       "0036_df13_commerce_authority_fence",
       "0037_track_b_commerce_authority_replacement",
       "0038_track_b_commerce_admission_gate",
+      "0039_track_b_v2_lkg_cutover_fence",
     ]) {
       const sql = await readFile(resolve(import.meta.dirname, `../pending-migrations/${name}.up.sql`), "utf8");
       const checksum = createHash("sha256").update(sql).digest("hex");
@@ -62,15 +60,42 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
         throw error;
       }
     }
+    const v2LkgDown = await readFile(resolve(import.meta.dirname,
+      "../pending-migrations/0039_track_b_v2_lkg_cutover_fence.down.sql"), "utf8");
+    await pool.query("BEGIN");
+    try {
+      await pool.query(v2LkgDown);
+      await pool.query("DELETE FROM schema_migrations WHERE migration_name=$1", [
+        "0039_track_b_v2_lkg_cutover_fence",
+      ]);
+      await pool.query("COMMIT");
+    } catch (error) {
+      await pool.query("ROLLBACK");
+      throw error;
+    }
+    const v2LkgUp = await readFile(resolve(import.meta.dirname,
+      "../pending-migrations/0039_track_b_v2_lkg_cutover_fence.up.sql"), "utf8");
+    await pool.query("BEGIN");
+    try {
+      await pool.query(v2LkgUp);
+      await pool.query("INSERT INTO schema_migrations (migration_name, checksum_sha256) VALUES ($1,$2)", [
+        "0039_track_b_v2_lkg_cutover_fence",
+        createHash("sha256").update(v2LkgUp).digest("hex"),
+      ]);
+      await pool.query("COMMIT");
+    } catch (error) {
+      await pool.query("ROLLBACK");
+      throw error;
+    }
     previousVersionId = randomUUID();
     previousContentHash = runtimeBehaviorModeContentHash({ confirmationMode: "V2_ACTIVE",
       salesAuthorityMode: "COMMERCE", stateReadMode: "LEGACY",
-      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash });
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash });
     await pool.query(`INSERT INTO runtime_behavior_mode_versions (
       mode_version_id,page_id,channel,schema_version,confirmation_mode,sales_authority_mode,
       state_read_mode,authority_bundle_hash,content_hash,created_by,reason,created_at
     ) VALUES ($1,$2,$3,1,'V2_ACTIVE','COMMERCE','LEGACY',$4,$5,'fixture','fixture',clock_timestamp())`,
-    [previousVersionId, pageId, channel, DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+    [previousVersionId, pageId, channel, DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       previousContentHash]);
     await pool.query(`INSERT INTO runtime_behavior_mode_pointers (
       page_id,channel,active_version_id,pointer_revision,updated_by,reason,updated_at
@@ -86,10 +111,11 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
     operationId = randomUUID();
     const prepared = await writer.prepareTarget({ pageId, channel,
       expectedCurrent: { modeVersionId: previousVersionId, contentHash: previousContentHash,
-        pointerRevision: 6, authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash },
+        pointerRevision: 6, authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash },
       actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_PREPARE:${operationId}` });
     targetVersionId = prepared.modeVersionId;
     targetContentHash = prepared.contentHash;
+    expect(targetVersionId).toBe(previousVersionId);
     fence = new PostgresDf13CommerceCutoverFenceStore(databaseUrl, 60_000);
   }, 120_000);
 
@@ -123,27 +149,103 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
   });
 
   it("proves exact activation audit and fresh DATABASE startup resolution on real PostgreSQL", async () => {
-    await writer.mutateExactPointer({ pageId, channel, operation: "ACTIVATE_TRACK_B",
+    await writer.mutateExactPointer({ pageId, channel, operation: "ACTIVATE_V2_CANDIDATE",
       expectedCurrent: { modeVersionId: previousVersionId, contentHash: previousContentHash,
-        pointerRevision: 6, authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash },
+        pointerRevision: 6, authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash },
       target: { modeVersionId: targetVersionId, contentHash: targetContentHash,
         authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash },
-      lease, actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_ACTIVATE:${operationId}` });
-    const resolvedAt = new Date();
+      lease, actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:${operationId}` });
+    const watermark = await writer.readDatabaseClock();
+    await pool.query(`INSERT INTO runtime_behavior_mode_resolution_audit (
+      resolution_id,page_id,channel,confirmation_mode,mode_version_id,content_hash,
+      pointer_revision,source,status,reason_codes,worker_id,pointer_updated_at,resolved_at,propagation_ms,created_at
+    ) VALUES ($1,$2,$3,'V2_ACTIVE',$4,$5,7,'DATABASE','RESOLVED','{}','realtime-worker-1',
+      clock_timestamp(),$6::timestamptz + interval '1 hour',0,
+      $6::timestamptz - interval '0.000001 seconds')`, [randomUUID(), pageId, channel,
+      targetVersionId, targetContentHash, watermark]);
+    await expect(writer.readExactRuntimeResolution({ pageId, channel,
+      modeVersionId: targetVersionId, contentHash: targetContentHash, pointerRevision: 7,
+      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
+      workerId: "realtime-worker-1", notBefore: watermark })).resolves.toBe("MISSING");
     await pool.query(`INSERT INTO runtime_behavior_mode_resolution_audit (
       resolution_id,page_id,channel,confirmation_mode,mode_version_id,content_hash,
       pointer_revision,source,status,reason_codes,worker_id,pointer_updated_at,resolved_at,propagation_ms
     ) VALUES ($1,$2,$3,'V2_ACTIVE',$4,$5,7,'DATABASE','RESOLVED','{}','realtime-worker-1',
-      clock_timestamp(),$6,0)`, [randomUUID(), pageId, channel, targetVersionId, targetContentHash,
-      resolvedAt]);
+      clock_timestamp(),clock_timestamp(),0)`, [randomUUID(), pageId, channel, targetVersionId,
+      targetContentHash]);
     await expect(writer.readExactActivationAudit({ pageId, channel, pointerRevision: 7,
       previousVersionId, previousContentHash, targetVersionId, targetContentHash,
-      actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_ACTIVATE:${operationId}` }))
+      actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:${operationId}` }))
       .resolves.toBe("EXACT");
     await expect(writer.readExactRuntimeResolution({ pageId, channel,
       modeVersionId: targetVersionId, contentHash: targetContentHash, pointerRevision: 7,
       authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
-      workerId: "realtime-worker-1", notBefore: new Date(resolvedAt.getTime() - 1_000).toISOString() }))
+      workerId: "realtime-worker-1", notBefore: watermark }))
       .resolves.toBe("EXACT");
+  });
+
+  it("preserves exact released-fence observation when a permitted 0039 down makes schema compatibility stale", async () => {
+    const request = { operationId, pageId, channel,
+      preCutover: { modeVersionId: previousVersionId, contentHash: previousContentHash,
+        pointerRevision: 6 },
+      target: { modeVersionId: targetVersionId, contentHash: targetContentHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash } };
+    await expect(fence.release(lease)).resolves.toEqual({ status: "RELEASED" });
+    const down = await readFile(resolve(import.meta.dirname,
+      "../pending-migrations/0039_track_b_v2_lkg_cutover_fence.down.sql"), "utf8");
+    await pool.query("BEGIN");
+    try {
+      await pool.query(down);
+      await pool.query("DELETE FROM schema_migrations WHERE migration_name=$1", [
+        "0039_track_b_v2_lkg_cutover_fence",
+      ]);
+      await pool.query("COMMIT");
+    } catch (error) {
+      await pool.query("ROLLBACK");
+      throw error;
+    }
+    await expect(fence.observe(request)).resolves.toMatchObject({
+      status: "ALREADY_RELEASED", fenceId: lease.fenceId, epoch: lease.epoch,
+    });
+    await expect(writer.readTrackBV2LkgSchemaCompatibility()).resolves.toEqual({
+      status: "AMBIGUOUS", source: "DATABASE", migrationSchemaHash: null,
+    });
+
+    const up = await readFile(resolve(import.meta.dirname,
+      "../pending-migrations/0039_track_b_v2_lkg_cutover_fence.up.sql"), "utf8");
+    await pool.query("BEGIN");
+    try {
+      await pool.query(up);
+      await pool.query("INSERT INTO schema_migrations (migration_name, checksum_sha256) VALUES ($1,$2)", [
+        "0039_track_b_v2_lkg_cutover_fence", createHash("sha256").update(up).digest("hex"),
+      ]);
+      await pool.query("COMMIT");
+    } catch (error) {
+      await pool.query("ROLLBACK");
+      throw error;
+    }
+  });
+
+  it("rejects an admission trigger rebound to an otherwise identical guard in another schema", async () => {
+    await expect(writer.readTrackBV2LkgSchemaCompatibility()).resolves.toMatchObject({
+      status: "EXACT", source: "DATABASE", migrationSchemaHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
+    });
+    await pool.query("CREATE SCHEMA track_b_clone");
+    const sourceResult = await pool.query(
+      "SELECT pg_get_functiondef('public.guard_track_b_cutover_admission()'::regprocedure) AS definition",
+    );
+    const source = String(sourceResult.rows[0]?.definition ?? "");
+    const clone = source.replace("FUNCTION public.guard_track_b_cutover_admission()",
+      "FUNCTION track_b_clone.guard_track_b_cutover_admission()");
+    if (clone === source) throw new Error("fixture guard clone source unavailable");
+    await pool.query(clone);
+    await pool.query("DROP TRIGGER track_b_cutover_admission_meta_outbox ON meta_outbox");
+    await pool.query(`CREATE TRIGGER track_b_cutover_admission_meta_outbox
+      BEFORE UPDATE ON meta_outbox
+      FOR EACH ROW EXECUTE FUNCTION track_b_clone.guard_track_b_cutover_admission()`);
+    await pool.query("ALTER TABLE meta_outbox ENABLE ALWAYS TRIGGER track_b_cutover_admission_meta_outbox");
+    await expect(writer.readTrackBV2LkgSchemaCompatibility()).resolves.toEqual({
+      status: "AMBIGUOUS", source: "DATABASE", migrationSchemaHash: null,
+    });
   });
 });

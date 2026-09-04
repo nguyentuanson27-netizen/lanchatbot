@@ -19,8 +19,8 @@ Current durable mode dimensions:
 
 ```text
 confirmation: V2_ACTIVE; emergency CLARIFY_ONLY
-sales authority: LEGACY; future COMMERCE
-state read: LEGACY; future V2
+sales authority: COMMERCE/V2; current Track B runtime baseline
+state read: LEGACY; future V2 remains out of scope
 ```
 
 ## Authority transition contract
@@ -43,9 +43,11 @@ Because control-plane propagation is bounded rather than instantaneous, a direct
 5. keep all authority-dependent work held through the propagation interval until every relevant authority consumer reads back the exact new revision/hash/source;
 6. release held work only after that exact readback succeeds; after rollback or
    recovery, retain the fence until every relevant consumer instead reads back
-   the exact restored `LEGACY` revision/hash/source.
+   the exact recorded rollback revision/hash/source. The historical DF13
+   LEGACY-to-COMMERCE exercise restored `LEGACY`; Track B B3.2 instead restores
+   only its exact compatible last-known-good `COMMERCE/V2` identity.
 
-If quiescence cannot be proven, a relevant consumer does not converge to the exact revision within the reviewed bound, or readback is ambiguous, activation must abort/fail closed and remain or return to complete `LEGACY` authority.
+If quiescence cannot be proven, a relevant consumer does not converge to the exact revision within the reviewed bound, or readback is ambiguous, activation must abort/fail closed and retain or restore the exact recorded rollback authority. The historical DF13 exercise retained or restored complete `LEGACY`; Track B B3.2 must retain its fence and never select V1/LEGACY.
 
 Authority-dependent work includes non-side-effecting inputs whose classification, state read,
 phase, context, strategy, CTA, reconciliation, or subsequent plan can differ by authority.
@@ -54,11 +56,11 @@ may bypass the fence; merely being outside the protected-side-effect set is insu
 
 This quiescent boundary is an atomicity/correctness requirement for direct cutover. It is not a traffic canary, SHADOW stage, or percentage rollout. Episode/cart pinning is not a default PREPROD invariant; it may be introduced later only if the implementation cannot prove a safe quiescent boundary for a specific authority-sensitive lifecycle.
 
-Every activation remains page-scoped, CAS-audited, read back from the worker, bounded by the existing propagation contract, and reversible to complete `LEGACY` authority.
+Every activation remains page-scoped, CAS-audited and read back from the worker. Historical DF13 evidence retains its exact `LEGACY` rollback record, but Track B must never select V1/LEGACY as a rollback target.
 
 ### Track B COMMERCE authority-bundle replacement
 
-The bounded `COMMERCE/V1 -> COMMERCE/V2` Track B replacement uses one explicit
+The bounded `COMMERCE/V2 -> candidate COMMERCE/V2` Track B replacement uses one explicit
 stopped-service mutation protocol:
 
 ```text
@@ -96,18 +98,35 @@ An admission-suppressed Inbox batch restores the speculative conversation-head
 attempt count together with its lease, so held polling cannot consume retry
 budget or poison queued work.
 
-The CAS writer accepts only the recorded prior and target authority
+The CAS writer accepts only the recorded currently accepted V2 and target V2 authority
 identities and exact live lease; a post-CAS recovery may reuse that same
 unreleased forward lease only to reverse the exact audited transition at the
 next pointer revision. A separately requested rollback obtains its own exact
-reverse fence.
+reverse fence and may target only an exact compatible last-known-good V2 release.
+That identity binds source commit/tree, image digest/tag/build labels, runtime-config
+hash, behavior pointer revision/version/bundle, startup hash, durable Gate E
+certification and database-derived migrations-through-0039 schema compatibility.
+The compatibility hash proves the applied 0036--0039 ledger checksums, exact 0039
+fence-guard source and exact 0038 admission-guard/trigger identities. Missing, stale,
+ambiguous or incompatible LKG evidence fails closed; it never falls back to V1.
+The initial current-LKG proof latches one full-precision database-clock watermark
+after exact running-service and mounted-startup proof, then permits at most 120
+read-only probes one second apart for a matching runtime resolution received by
+the database after that same watermark. It compares database-authored audit
+`created_at`, never the worker-authored `resolved_at` or host time. `AMBIGUOUS`
+fails immediately and an all-`MISSING` window fails closed; the operator neither
+generates customer traffic nor restarts the service to manufacture evidence.
 
-Before CAS failure handling must leave the pointer at the recorded prior
+Before CAS failure handling must leave the pointer at the recorded currently accepted V2
 identity, discard the staged target, restore and read back the exact prior
 service if it was stopped, and only then release the fence. After CAS failure
-handling must CAS back to the recorded prior authority, restore/start the exact
-prior service, prove runtime plus full-consumer convergence, and only then
-release the fence. Unknown pointer, fence, stopped-service, staged-service,
+handling must CAS back to the recorded LKG V2 authority, restore/start the exact
+LKG V2 service, prove runtime plus full-consumer convergence, and only then
+release the fence. Service inspection and stop routing must bind both the exact
+service release and the pointer-selected mounted startup artifact; re-entry may
+accept only one exact canonical service-plus-mount match across eligible V2
+controllers. A service-only match, zero matches or multiple matches is ambiguous
+and cannot release the fence. Unknown pointer, fence, stopped-service, staged-service,
 runtime, audit or consumer identity retains the fence and fails closed. This
 protocol does not authorize deployment or pointer mutation by itself.
 
@@ -116,9 +135,17 @@ the durable `ALREADY_RELEASED` fence identity and reconciles exact pointer,
 service/runtime, audit when a CAS occurred, and all DATABASE consumers. It may
 report the exact target active, exact prior untouched, or exact prior restored;
 otherwise it reports released-state ambiguity and never claims a hold that no
-longer exists.
+longer exists. If schema compatibility has drifted, recovery first uses the
+read-only exact fence observation: an exact unreleased fence may report retained,
+an exact released fence may run only released-state reconciliation, and a
+missing/mismatched/unreadable fence reports neutral `FENCE_STATE_UNKNOWN` without
+acquire/reacquire, service, pointer, staging, or release mutation.
 
-### Narrow first-DF13 PREPROD exception
+### Historical narrow first-DF13 PREPROD exception (not the current Track B path)
+
+The following first-exercise exception is retained only as historical DF13
+evidence. Its LEGACY rollback and generic-operator language is not normative
+for the current Track B COMMERCE/V2 baseline or its V2-to-V2 LKG recovery.
 
 For the first isolated DF13 PREPROD exercise only,
 [`DF13_PREPROD_FRESH_PROCESS_DECISION.md`](../DF13_PREPROD_FRESH_PROCESS_DECISION.md)
@@ -146,10 +173,11 @@ the narrow first-PREPROD writer described above for the isolated stopped-process
 exercise, and a dedicated DF13 hot-cutover adapter that owns the full durable
 quiescent fence, immutable authority-bundle identity, activation-audit
 reconciliation, and exact consumer readbacks for a later hot transition. The
-pending DF13 `0035` behavior-mode and `0036`
-durable cutover-fence artifacts are outside the active migration directory;
-shared LEGACY reads and writes remain schema-compatible until a separately
-authorized release promotes and applies them.
+pre-Track-B description of pending DF13 `0035` behavior-mode and `0036`
+durable-cutover-fence artifacts is historical context, not a current
+migration-ledger assertion. Historical evidence remains retained; fresh
+governed database readback is the only authority for current operational state
+or any future mutation.
 Defining the COMMERCE schema/version or pure fence/evidence contract is not
 permission to promote or apply its migration, bind a consumer to the live
 pipeline, or activate runtime authority.
@@ -168,7 +196,8 @@ source contract.
 Commerce itself is default-off: it requires a page-scoped, validation-only
 dedicated consumer boundary to admit the exact resolved identity before any
 future composition root could consume it. This source contract does not bind
-that consumer to the live pipeline or change the active LEGACY runtime.
+that consumer to the live pipeline or change the historical active LEGACY
+runtime described by this exception.
 
 Offline or controlled legacy/new comparison is verification tooling, not a live authority mode. It must not create protected side effects.
 

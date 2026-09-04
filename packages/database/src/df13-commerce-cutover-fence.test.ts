@@ -234,27 +234,21 @@ describe("Postgres DF13 Commerce cutover fence store", () => {
     );
   });
 
-  it("acquires a separate exact V2-to-V1 rollback fence", async () => {
-    const v1ContentHash = runtimeBehaviorModeContentHash({
-      confirmationMode: "V2_ACTIVE",
-      salesAuthorityMode: "COMMERCE",
-      stateReadMode: "LEGACY",
-      authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
-    });
+  it("acquires the page-scoped V2 LKG service cutover fence for one exact V2 identity", async () => {
     const v2ContentHash = runtimeBehaviorModeContentHash({
       confirmationMode: "V2_ACTIVE",
       salesAuthorityMode: "COMMERCE",
       stateReadMode: "LEGACY",
       authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
     });
-    const rollbackRequest = {
+    const v2LkgRequest = {
       ...request,
       operationId: "10000000-0000-4000-8000-000000000012",
       preCutover: { ...request.preCutover, contentHash: v2ContentHash },
       target: {
-        ...request.target,
-        contentHash: v1ContentHash,
-        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+        modeVersionId: request.preCutover.modeVersionId,
+        contentHash: v2ContentHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       },
     };
     mocks.clientQuery.mockImplementation(async (sql: string, values?: readonly unknown[]) => {
@@ -262,31 +256,21 @@ describe("Postgres DF13 Commerce cutover fence store", () => {
       if (sql.includes("FROM df13_commerce_cutover_fences")) return rowResult();
       if (sql.includes("FROM runtime_behavior_mode_pointers")) {
         return rowResult([{
-          active_version_id: rollbackRequest.preCutover.modeVersionId,
-          pointer_revision: rollbackRequest.preCutover.pointerRevision,
+          active_version_id: v2LkgRequest.preCutover.modeVersionId,
+          pointer_revision: v2LkgRequest.preCutover.pointerRevision,
         }]);
       }
       if (sql.includes("FROM runtime_behavior_mode_versions")) {
         return rowResult([
           {
-            mode_version_id: rollbackRequest.preCutover.modeVersionId,
-            page_id: rollbackRequest.pageId,
-            channel: rollbackRequest.channel,
+            mode_version_id: v2LkgRequest.preCutover.modeVersionId,
+            page_id: v2LkgRequest.pageId,
+            channel: v2LkgRequest.channel,
             confirmation_mode: "V2_ACTIVE",
             sales_authority_mode: "COMMERCE",
             state_read_mode: "LEGACY",
-            content_hash: rollbackRequest.preCutover.contentHash,
+            content_hash: v2LkgRequest.preCutover.contentHash,
             authority_bundle_hash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
-          },
-          {
-            mode_version_id: rollbackRequest.target.modeVersionId,
-            page_id: rollbackRequest.pageId,
-            channel: rollbackRequest.channel,
-            confirmation_mode: "V2_ACTIVE",
-            sales_authority_mode: "COMMERCE",
-            state_read_mode: "LEGACY",
-            content_hash: rollbackRequest.target.contentHash,
-            authority_bundle_hash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
           },
         ]);
       }
@@ -297,7 +281,21 @@ describe("Postgres DF13 Commerce cutover fence store", () => {
     });
     const store = new PostgresDf13CommerceCutoverFenceStore("postgresql://test");
 
-    await expect(store.acquire(rollbackRequest)).resolves.toMatchObject({ status: "HELD" });
+    await expect(store.acquire(v2LkgRequest)).resolves.toMatchObject({ status: "HELD" });
+
+    const v1Fallback = {
+      ...v2LkgRequest,
+      operationId: "10000000-0000-4000-8000-000000000014",
+      target: {
+        ...v2LkgRequest.target,
+        modeVersionId: request.target.modeVersionId,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash,
+      },
+    };
+    await expect(store.acquire(v1Fallback)).resolves.toEqual({
+      status: "PARKED",
+      reasonCode: "DF13_CUTOVER_FENCE_CANONICAL_IDENTITY_INVALID",
+    });
   });
 
   it("fails closed when an active scope carries a copied target identity", async () => {

@@ -1,423 +1,304 @@
-import { describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
 import { chmod, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { describe, expect, it, vi } from "vitest";
 import { canonicalJsonV1 } from "@lana/contracts";
 import { behaviorModeContentHash } from "@lana/chat-runtime";
-import { DF13_COMMERCE_AUTHORITY_BUNDLE_V1, DF13_COMMERCE_AUTHORITY_BUNDLE_V2 } from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_V2 } from "./df13-commerce-authority-bundle.js";
 import { createTrackBReleaseLocalRollbackRecord } from "./track-b-commerce-authority-activation.js";
 import { TRACK_B_RUNTIME_CONFIG_KEYS_V1 } from "./track-b-commerce-authority-preprod-adapter.js";
-import { createTrackBLegacyRecoveryStartupV1,
-  createTrackBPreprodOperationStartupPackages, parseTrackBPreprodBuildInput,
-  parseTrackBPreprodOperationPacket,
-  parseTrackBPreprodPrepareInput,
+import { createTrackBPreprodOperationStartupPackages, parseTrackBPreprodBuildInput,
+  parseTrackBPreprodOperationPacket, parseTrackBPreprodPrepareInput,
+  matchesTrackBOperationTargetStartupBaseline,
   persistTrackBPreprodRuntimeStartupArtifact,
-  trackBLegacyRuntimeReleaseIdV1,
-  validateTrackBPreprodStartupArtifacts } from "./track-b-commerce-authority-preprod-cli.js";
+  proveFreshTrackBInitialLkgRuntime,
+  validateTrackBPreprodStartupArtifacts,
+  validateTrackBV2LastKnownGoodSelection } from "./track-b-commerce-authority-preprod-cli.js";
 
 vi.mock("./track-b-release-candidate-evidence.js", async (importOriginal) => ({
   ...await importOriginal<typeof import("./track-b-release-candidate-evidence.js")>(),
   validateTrackBReleaseCandidateEvidence: vi.fn((evidence: Record<string, unknown>) =>
-    evidence.invalid === true
-      ? { status: "MISMATCH", reasonCodes: ["TEST_INVALID_EVIDENCE"] }
+    evidence.invalid === true ? { status: "MISMATCH", reasonCodes: ["TEST_INVALID"] }
       : { status: "MATCHED", reasonCodes: [] }),
 }));
 
-vi.mock("./df13-release-candidate-evidence.js", async (importOriginal) => ({
-  ...await importOriginal<typeof import("./df13-release-candidate-evidence.js")>(),
-  validateDf13ReleaseCandidateEvidence: vi.fn(() => ({ status: "MATCHED", reasonCodes: [] })),
-}));
+function hash(value: unknown) {
+  return createHash("sha256").update(canonicalJsonV1(value), "utf8").digest("hex");
+}
 
-function pointer(versionId: string, revision: number, authorityBundleHash: string) {
+function pointer(versionId: string, revision: number) {
   const payload = { confirmationMode: "V2_ACTIVE" as const, salesAuthorityMode: "COMMERCE" as const,
-    stateReadMode: "LEGACY" as const, authorityBundleHash };
+    stateReadMode: "LEGACY" as const, authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash };
   return { version: { schemaVersion: 1 as const, modeVersionId: versionId,
     pageId: "1198992073286645", channel: "MESSENGER", ...payload,
     contentHash: behaviorModeContentHash(payload), createdBy: "operator", reason: "prepared",
-    createdAt: "2026-09-02T00:00:00.000Z" }, pointerRevision: revision,
-  updatedBy: "operator", reason: "active", updatedAt: "2026-09-02T00:00:00.000Z" };
+    createdAt: "2026-09-03T00:00:00.000Z" }, pointerRevision: revision,
+  updatedBy: "operator", reason: "active", updatedAt: "2026-09-03T00:00:00.000Z" };
 }
 
-function packet() {
-  const previous = pointer("10000000-0000-4000-8000-000000000001", 6,
-    DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash);
-  const target = pointer("10000000-0000-4000-8000-000000000002", 7,
-    DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash);
-  const rollbackRecord = createTrackBReleaseLocalRollbackRecord({ selectedSourceCommit: "5".repeat(40),
-    previousService: { service: "realtime-worker", releaseRevision: "1".repeat(40),
-      buildId: "2".repeat(64), imageId: "3".repeat(64), runtimeConfigHash: "4".repeat(64) },
-    targetService: { service: "realtime-worker", releaseRevision: "5".repeat(40),
-      buildId: "6".repeat(64), imageId: "7".repeat(64), runtimeConfigHash: "8".repeat(64) },
-    previousAuthority: { modeVersionId: previous.version.modeVersionId,
-      contentHash: previous.version.contentHash, bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash },
-    targetAuthority: { modeVersionId: target.version.modeVersionId,
-      contentHash: target.version.contentHash, bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash } });
-  const body = {
-    schemaVersion: 1,
-    contractVersion: "TRACK_B_B3_2_PREPROD_OPERATION_PACKET_V1",
-    environment: "ENGINEERING_PREPROD",
-    pageId: "1198992073286645",
-    channel: "MESSENGER",
-    operationId: "10000000-0000-4000-8000-000000000001",
-    direction: "ACTIVATE_TRACK_B",
-    previous, target, rollbackRecord,
-    previousImageTag: "lana-chatbot-app:track-b-previous",
-    targetImageTag: "lana-chatbot-app:track-b-target",
-    releaseTag: "track-b-v22-release",
-    releaseCreatedAt: "2026-09-02T00:00:00.000Z",
-    sourceStartupPackageFile: "/opt/lana-chatbot/releases/track-b/previous.json",
-    sourceStartupPackageHash: "a".repeat(64),
-    operationTargetStartupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",
-    operationTargetStartupPackageHash: "b".repeat(64),
-    recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/recovery.json",
-    recoveryStartupPackageHash: "c".repeat(64),
-    releaseEvidence: { contractVersion: "TRACK_B_RELEASE_CANDIDATE_EVIDENCE_V1",
-      activationReleaseRevision: "5".repeat(40),
-      releaseSource: { resolvedRevision: "5".repeat(40) } },
-  };
-  return { ...body, packetHash: createHash("sha256")
-    .update(canonicalJsonV1(body), "utf8").digest("hex") };
-}
+const lkgService = { service: "realtime-worker" as const, releaseRevision: "1".repeat(40),
+  buildId: "2".repeat(64), imageId: "3".repeat(64), runtimeConfigHash: "4".repeat(64) };
+const candidateService = { service: "realtime-worker" as const, releaseRevision: "5".repeat(40),
+  buildId: "6".repeat(64), imageId: "7".repeat(64), runtimeConfigHash: "8".repeat(64) };
+const lkgEvidence = { contractVersion: "TRACK_B_RELEASE_CANDIDATE_EVIDENCE_V1",
+  activationReleaseRevision: lkgService.releaseRevision,
+  releaseSource: { resolvedRevision: lkgService.releaseRevision, treeOid: "9".repeat(40) } } as never;
+const candidateEvidence = { contractVersion: "TRACK_B_RELEASE_CANDIDATE_EVIDENCE_V1",
+  activationReleaseRevision: candidateService.releaseRevision,
+  releaseSource: { resolvedRevision: candidateService.releaseRevision, treeOid: "a".repeat(40) } } as never;
 
-function legacyStartup(activation: ReturnType<typeof packet>):
-  Parameters<typeof trackBLegacyRuntimeReleaseIdV1>[0] {
-  const revision = activation.rollbackRecord.previousService.releaseRevision;
-  return {
-    mode: "COMMERCE" as const,
-    releaseEvidence: {
-      contractVersion: "DF13_RELEASE_CANDIDATE_EVIDENCE_V1",
-      activationReleaseRevision: revision,
-      releaseSource: { resolvedRevision: revision },
-    },
-    expectedAuthority: {
-      pageId: "1198992073286645",
-      channel: "MESSENGER" as const,
-      modeVersionId: activation.previous.version.modeVersionId,
-      contentHash: activation.previous.version.contentHash,
-      pointerRevision: activation.previous.pointerRevision,
-      authorityBundleHash: activation.previous.version.authorityBundleHash,
-      source: "DATABASE" as const,
-    },
-    releaseSource: {
-      schemaVersion: 1 as const,
-      release: "20260828-df13-preprod-commerce-1111111",
+function startup(service: typeof lkgService, authority: ReturnType<typeof pointer>, evidence: never) {
+  return { mode: "COMMERCE" as const, releaseEvidence: evidence,
+    expectedAuthority: { pageId: "1198992073286645", channel: "MESSENGER" as const,
+      modeVersionId: authority.version.modeVersionId, contentHash: authority.version.contentHash,
+      pointerRevision: authority.pointerRevision, authorityBundleHash: authority.version.authorityBundleHash,
+      source: "DATABASE" as const },
+    releaseSource: { schemaVersion: 1 as const, release: `track-b-${service.releaseRevision.slice(0, 8)}`,
       repository: "https://github.com/nguyentuanson27-netizen/lanchatbot" as const,
-      tag: "20260828-df13-preprod-commerce-1111111",
-      commit: revision,
-      createdAt: "2026-08-28T00:00:00.000Z",
-    },
-  } as unknown as Parameters<typeof trackBLegacyRuntimeReleaseIdV1>[0];
+      tag: `track-b-${service.releaseRevision.slice(0, 8)}`, commit: service.releaseRevision,
+      createdAt: "2026-09-03T00:00:00.000Z" } };
 }
 
-describe("Track B PREPROD operator packet boundary", () => {
-  it("persists runtime startup artifacts read-only for the unprivileged container process", async () => {
-    const directory = await mkdtemp(join(tmpdir(), "track-b-startup-mode-"));
+function packet(direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2" = "ACTIVATE_V2_CANDIDATE") {
+  const lkgBase = pointer("10000000-0000-4000-8000-000000000001", 6);
+  const candidateBase = pointer("10000000-0000-4000-8000-000000000002", 7);
+  const previous = direction === "ACTIVATE_V2_CANDIDATE" ? lkgBase : candidateBase;
+  const target = direction === "ACTIVATE_V2_CANDIDATE" ? candidateBase : { ...lkgBase, pointerRevision: 8 };
+  const source = startup(direction === "ACTIVATE_V2_CANDIDATE" ? lkgService : candidateService,
+    previous, direction === "ACTIVATE_V2_CANDIDATE" ? lkgEvidence : candidateEvidence);
+  const generated = createTrackBPreprodOperationStartupPackages({ direction, previous, target,
+    releaseEvidence: direction === "ACTIVATE_V2_CANDIDATE" ? candidateEvidence : lkgEvidence,
+    recoveryReleaseEvidence: direction === "ACTIVATE_V2_CANDIDATE" ? lkgEvidence : candidateEvidence,
+    targetReleaseSource: startup(direction === "ACTIVATE_V2_CANDIDATE" ? candidateService : lkgService,
+      target, direction === "ACTIVATE_V2_CANDIDATE" ? candidateEvidence : lkgEvidence).releaseSource,
+    recoveryReleaseSource: source.releaseSource });
+  const rollbackRecord = createTrackBReleaseLocalRollbackRecord({
+    candidate: { service: candidateService, sourceTree: "a".repeat(40), imageTag: "lana:v2-candidate",
+      startupPackageHash: hash(direction === "ACTIVATE_V2_CANDIDATE" ? generated.operationTarget : source),
+      authority: { pointerRevision: candidateBase.pointerRevision,
+        modeVersionId: candidateBase.version.modeVersionId, contentHash: candidateBase.version.contentHash,
+        bundleHash: candidateBase.version.authorityBundleHash }, gateEEvidence: candidateEvidence,
+      migrationSchemaHash: "b".repeat(64) },
+    lastKnownGood: { service: lkgService, sourceTree: "9".repeat(40), imageTag: "lana:v2-lkg",
+      startupPackageHash: hash(direction === "ROLLBACK_TO_LKG_V2" ? generated.operationTarget : source),
+      authority: { pointerRevision: direction === "ROLLBACK_TO_LKG_V2" ? 8 : lkgBase.pointerRevision,
+        modeVersionId: lkgBase.version.modeVersionId, contentHash: lkgBase.version.contentHash,
+        bundleHash: lkgBase.version.authorityBundleHash }, gateEEvidence: lkgEvidence,
+      migrationSchemaHash: "b".repeat(64) },
+    lastKnownGoodSelection: direction === "ACTIVATE_V2_CANDIDATE"
+      ? { source: "CURRENT_ACCEPTED_V2" as const, priorRecordHash: null }
+      : { source: "PRIOR_ACCEPTED_V2_RECORD" as const, priorRecordHash: "c".repeat(64) },
+  });
+  const body = { schemaVersion: 2 as const, contractVersion: "TRACK_B_B3_2_PREPROD_OPERATION_PACKET_V2_LKG" as const,
+    environment: "ENGINEERING_PREPROD" as const, pageId: "1198992073286645" as const,
+    channel: "MESSENGER" as const, operationId: "10000000-0000-4000-8000-000000000001",
+    direction, previous, target, rollbackRecord, candidateImageTag: "lana:v2-candidate",
+    lastKnownGoodImageTag: "lana:v2-lkg",
+    sourceStartupPackageFile: "/opt/lana-chatbot/releases/track-b/source.json",
+    sourceStartupPackageHash: hash(source),
+    operationTargetStartupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",
+    operationTargetStartupPackageHash: hash(generated.operationTarget),
+    recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/recovery.json",
+    recoveryStartupPackageHash: hash(generated.recovery),
+    releaseEvidence: direction === "ACTIVATE_V2_CANDIDATE" ? candidateEvidence : lkgEvidence };
+  return { value: { ...body, packetHash: hash(body) }, source, generated };
+}
+
+describe("Track B PREPROD V2/LKG operator boundary", () => {
+  it("latches one database-native watermark and polls until a fresh exact runtime audit arrives", async () => {
+    const current = pointer("10000000-0000-4000-8000-000000000001", 6);
+    const watermark = "2026-09-03T02:00:00.123456+00";
+    const database = { readDatabaseClock: vi.fn(async () => watermark),
+      proveRuntimeResolution: vi.fn()
+        .mockResolvedValueOnce("MISSING" as const)
+        .mockResolvedValueOnce("MISSING" as const)
+        .mockResolvedValueOnce("EXACT" as const) };
+    const wait = vi.fn(async () => undefined);
+    await expect(proveFreshTrackBInitialLkgRuntime({ database, pointer: current,
+      freshness: { maximumAttempts: 3, pollMs: 1, wait } })).resolves.toBe("EXACT");
+    expect(database.readDatabaseClock).toHaveBeenCalledOnce();
+    expect(database.proveRuntimeResolution).toHaveBeenCalledTimes(3);
+    expect(database.proveRuntimeResolution).toHaveBeenNthCalledWith(1, { pointer: current, notBefore: watermark });
+    expect(database.proveRuntimeResolution).toHaveBeenNthCalledWith(2, { pointer: current, notBefore: watermark });
+    expect(database.proveRuntimeResolution).toHaveBeenNthCalledWith(3, { pointer: current, notBefore: watermark });
+    expect(wait).toHaveBeenCalledTimes(2);
+  });
+
+  it("fails closed on a bounded all-missing observation and stops immediately on ambiguity", async () => {
+    const current = pointer("10000000-0000-4000-8000-000000000001", 6);
+    const timeoutDatabase = { readDatabaseClock: vi.fn(async () => "2026-09-03T02:00:00.123456+00"),
+      proveRuntimeResolution: vi.fn(async (): Promise<"EXACT" | "MISSING" | "AMBIGUOUS"> => "MISSING") };
+    const timeoutWait = vi.fn(async () => undefined);
+    await expect(proveFreshTrackBInitialLkgRuntime({ database: timeoutDatabase, pointer: current,
+      freshness: { maximumAttempts: 2, pollMs: 1, wait: timeoutWait } })).resolves.toBe("MISSING");
+    expect(timeoutDatabase.readDatabaseClock).toHaveBeenCalledOnce();
+    expect(timeoutDatabase.proveRuntimeResolution).toHaveBeenCalledTimes(2);
+    expect(timeoutWait).toHaveBeenCalledOnce();
+
+    const ambiguousDatabase = { readDatabaseClock: vi.fn(async () => "2026-09-03T02:00:00.123456+00"),
+      proveRuntimeResolution: vi.fn(async (): Promise<"EXACT" | "MISSING" | "AMBIGUOUS"> => "AMBIGUOUS") };
+    const ambiguousWait = vi.fn(async () => undefined);
+    await expect(proveFreshTrackBInitialLkgRuntime({ database: ambiguousDatabase, pointer: current,
+      freshness: { maximumAttempts: 3, pollMs: 1, wait: ambiguousWait } })).resolves.toBe("AMBIGUOUS");
+    expect(ambiguousDatabase.readDatabaseClock).toHaveBeenCalledOnce();
+    expect(ambiguousDatabase.proveRuntimeResolution).toHaveBeenCalledOnce();
+    expect(ambiguousWait).not.toHaveBeenCalled();
+  });
+
+  it("persists immutable startup artifacts read-only", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "track-b-startup-"));
     const path = join(directory, "startup.json");
-    const value = { mode: "COMMERCE", expectedAuthority: { pointerRevision: 8 } };
+    const value = { mode: "COMMERCE" };
     try {
       await persistTrackBPreprodRuntimeStartupArtifact(path, value);
       expect((await stat(path)).mode & 0o777).toBe(0o444);
       expect(JSON.parse(await readFile(path, "utf8"))).toEqual(value);
-
       await chmod(path, 0o600);
       await writeFile(path, `${canonicalJsonV1(value)}\n`);
       await persistTrackBPreprodRuntimeStartupArtifact(path, value);
       expect((await stat(path)).mode & 0o777).toBe(0o444);
-
-      await expect(persistTrackBPreprodRuntimeStartupArtifact(path,
-        { ...value, mode: "LEGACY" }))
+      await expect(persistTrackBPreprodRuntimeStartupArtifact(path, { mode: "LEGACY" }))
         .rejects.toThrow("TRACK_B_B3_2_OPERATION_PACKET_CONFLICT");
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
   });
 
-  it("derives the exact legacy runtime release id from immutable evidence-bound startup content", () => {
-    const activation = packet();
-    const startup = legacyStartup(activation);
-    const revision = activation.rollbackRecord.previousService.releaseRevision;
-    expect(trackBLegacyRuntimeReleaseIdV1(startup, revision))
-      .toBe("20260828-df13-preprod-commerce-1111111");
-    expect(() => trackBLegacyRuntimeReleaseIdV1({ ...startup,
-      releaseSource: { ...startup.releaseSource, tag: "substituted-release" } }, revision))
-      .toThrow("TRACK_B_B3_2_LEGACY_RUNTIME_RELEASE_ID_MISMATCH");
-    expect(() => trackBLegacyRuntimeReleaseIdV1(startup, "2".repeat(40)))
-      .toThrow("TRACK_B_B3_2_LEGACY_RUNTIME_RELEASE_ID_MISMATCH");
+  it("accepts exact V2 candidate and LKG V2 packets in both directions", () => {
+    expect(parseTrackBPreprodOperationPacket(packet().value).direction).toBe("ACTIVATE_V2_CANDIDATE");
+    expect(parseTrackBPreprodOperationPacket(packet("ROLLBACK_TO_LKG_V2").value).direction)
+      .toBe("ROLLBACK_TO_LKG_V2");
   });
 
-  it("accepts a fixed-scope build input only with the exact non-secret runtime projection", () => {
-    const runtimeConfig = Object.fromEntries(TRACK_B_RUNTIME_CONFIG_KEYS_V1.map((key) => [key, "pinned"]));
-    expect(parseTrackBPreprodBuildInput({ schemaVersion: 1, environment: "ENGINEERING_PREPROD",
-      pageId: "1198992073286645", channel: "MESSENGER", sourceCommit: "1".repeat(40),
-      sourceTree: "2".repeat(40), imageTag: "lana-chatbot-app:track-b-target", runtimeConfig }))
-      .toMatchObject({ environment: "ENGINEERING_PREPROD", runtimeConfig });
-    expect(() => parseTrackBPreprodBuildInput({ schemaVersion: 1,
-      environment: "PUBLIC_PRODUCTION", pageId: "1198992073286645", channel: "MESSENGER",
-      sourceCommit: "1".repeat(40), sourceTree: "2".repeat(40),
-      imageTag: "lana-chatbot-app:track-b-target", runtimeConfig }))
-      .toThrow("TRACK_B_B3_2_BUILD_INPUT_INVALID");
-  });
-
-  it("accepts only a self-hashed fixed PREPROD/page/channel packet", () => {
-    expect(parseTrackBPreprodOperationPacket(packet())).toMatchObject({
-      environment: "ENGINEERING_PREPROD", pageId: "1198992073286645", channel: "MESSENGER",
-    });
-  });
-
-  it("rejects public-production scope even with a recomputed hash", () => {
-    const { packetHash: _old, ...body } = { ...packet(), environment: "PUBLIC_PRODUCTION" };
-    const changed = { ...body, packetHash: createHash("sha256")
-      .update(canonicalJsonV1(body), "utf8").digest("hex") };
-    expect(() => parseTrackBPreprodOperationPacket(changed))
-      .toThrow("TRACK_B_B3_2_OPERATION_PACKET_INVALID");
-  });
-
-  it("rejects packet substitution and startup traversal", () => {
-    expect(() => parseTrackBPreprodOperationPacket({ ...packet(), operationId:
-      "20000000-0000-4000-8000-000000000001" }))
-      .toThrow("TRACK_B_B3_2_OPERATION_PACKET_HASH_MISMATCH");
-    const { packetHash: _old, ...body } = { ...packet(), operationTargetStartupPackageFile:
-      "/opt/lana-chatbot/releases/track-b/../secrets.json" };
-    const changed = { ...body, packetHash: createHash("sha256")
-      .update(canonicalJsonV1(body), "utf8").digest("hex") };
-    expect(() => parseTrackBPreprodOperationPacket(changed))
-      .toThrow("TRACK_B_B3_2_STARTUP_PACKAGE_PATH_INVALID");
-  });
-
-  it("rejects a self-hashed packet with an invalid authority envelope before execution", () => {
-    const { packetHash: _old, ...body } = { ...packet(), target: {} };
-    const changed = { ...body, packetHash: createHash("sha256")
-      .update(canonicalJsonV1(body), "utf8").digest("hex") };
-    expect(() => parseTrackBPreprodOperationPacket(changed))
+  it("refuses V1 fallback, stale LKG, schema mismatch and public scope", () => {
+    for (const changed of [{ ...packet().value, direction: "ROLLBACK_TRACK_B" },
+      { ...packet().value, environment: "PUBLIC_PRODUCTION" }]) {
+      expect(() => parseTrackBPreprodOperationPacket(changed)).toThrow();
+    }
+    const base = packet().value;
+    const staleBody = { ...base, rollbackRecord: createTrackBReleaseLocalRollbackRecord({
+      candidate: base.rollbackRecord.candidate,
+      lastKnownGood: { ...base.rollbackRecord.lastKnownGood, migrationSchemaHash: "f".repeat(64) },
+      lastKnownGoodSelection: base.rollbackRecord.lastKnownGoodSelection,
+    }) };
+    const { packetHash: _ignored, ...body } = staleBody;
+    expect(() => parseTrackBPreprodOperationPacket({ ...body, packetHash: hash(body) }))
       .toThrow("TRACK_B_B3_2_OPERATION_PACKET_ENVELOPE_INVALID");
   });
 
-  it("accepts a governed V2-to-V1 rollback packet and requires a distinct rollback startup path", () => {
-    const activation = packet();
-    const rollbackTarget = { ...activation.previous,
-      pointerRevision: activation.target.pointerRevision + 1 };
-    const { packetHash: _old, ...activationBody } = activation;
-    const body = { ...activationBody, direction: "ROLLBACK_TRACK_B",
-      previous: activation.target, target: rollbackTarget, releaseEvidence: null,
-      sourceStartupPackageFile: activation.operationTargetStartupPackageFile,
-      operationTargetStartupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-v1.json",
-      recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-recovery-v2.json",
-      legacyStartupPackageFile: activation.sourceStartupPackageFile,
-      legacyStartupPackageHash: "e".repeat(64) };
-    const rollback = { ...body, packetHash: createHash("sha256")
-      .update(canonicalJsonV1(body), "utf8").digest("hex") };
-    expect(parseTrackBPreprodOperationPacket(rollback)).toMatchObject({
-      direction: "ROLLBACK_TRACK_B", previous: activation.target, target: rollbackTarget,
-      releaseEvidence: null,
-    });
-  });
-
-  it("requires exact rollback version and generated startup inputs only for rollback preparation", () => {
-    const activationPacket = packet();
-    const common = { schemaVersion: 1, environment: "ENGINEERING_PREPROD",
-      pageId: "1198992073286645", channel: "MESSENGER",
-      operationId: "10000000-0000-4000-8000-000000000001",
-      previousService: activationPacket.rollbackRecord.previousService,
-      targetService: activationPacket.rollbackRecord.targetService,
-      previousImageTag: activationPacket.previousImageTag,
-      targetImageTag: activationPacket.targetImageTag, releaseTag: activationPacket.releaseTag,
-      releaseCreatedAt: activationPacket.releaseCreatedAt,
-      previousStartupPackageFile: activationPacket.sourceStartupPackageFile,
-      legacyStartupPackageFile: "/opt/lana-chatbot/shared/df13/legacy/commerce-startup-v2.json",
-      targetStartupPackageFile: activationPacket.operationTargetStartupPackageFile,
-      rollbackRecordHash: null,
-      recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/recovery.json",
-      releaseEvidence: activationPacket.releaseEvidence };
-    const rollback = { ...common, direction: "ROLLBACK_TRACK_B",
-      rollbackRecordHash: activationPacket.rollbackRecord.recordHash,
-      rollbackTargetVersionId: activationPacket.previous.version.modeVersionId,
-      rollbackStartupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-v1.json" };
-    expect(parseTrackBPreprodPrepareInput(rollback)).toMatchObject({ direction: "ROLLBACK_TRACK_B",
-      rollbackTargetVersionId: activationPacket.previous.version.modeVersionId });
-    expect(() => parseTrackBPreprodPrepareInput({ ...rollback, rollbackTargetVersionId: null }))
-      .toThrow("TRACK_B_B3_2_OPERATOR_SCOPE_INVALID");
-    expect(() => parseTrackBPreprodPrepareInput({ ...rollback, rollbackRecordHash: null }))
-      .toThrow("TRACK_B_B3_2_OPERATOR_SCOPE_INVALID");
-  });
-
-  it("binds the current V1 source separately from immutable legacy startup evidence", () => {
-    const activationPacket = packet();
-    const input = {
-      schemaVersion: 1, environment: "ENGINEERING_PREPROD",
-      pageId: "1198992073286645", channel: "MESSENGER",
-      operationId: "10000000-0000-4000-8000-000000000001",
-      direction: "ACTIVATE_TRACK_B", previousService: activationPacket.rollbackRecord.previousService,
-      targetService: activationPacket.rollbackRecord.targetService,
-      previousImageTag: activationPacket.previousImageTag,
-      targetImageTag: activationPacket.targetImageTag,
-      releaseTag: activationPacket.releaseTag, releaseCreatedAt: activationPacket.releaseCreatedAt,
-      previousStartupPackageFile: "/opt/lana-chatbot/releases/track-b/reactivated-v1.json",
-      legacyStartupPackageFile: "/opt/lana-chatbot/shared/df13/legacy/commerce-startup-v2.json",
-      targetStartupPackageFile: activationPacket.operationTargetStartupPackageFile,
-      rollbackRecordHash: null, rollbackTargetVersionId: null, rollbackStartupPackageFile: null,
-      recoveryStartupPackageFile: activationPacket.recoveryStartupPackageFile,
-      releaseEvidence: activationPacket.releaseEvidence,
-    };
-    expect(parseTrackBPreprodPrepareInput(input)).toMatchObject({
-      previousStartupPackageFile: input.previousStartupPackageFile,
-      legacyStartupPackageFile: input.legacyStartupPackageFile,
-    });
-    const { legacyStartupPackageFile: _legacy, ...missingLegacy } = input;
-    expect(() => parseTrackBPreprodPrepareInput(missingLegacy))
-      .toThrow("TRACK_B_B3_2_OPERATOR_SCOPE_INVALID");
-  });
-
-  it("pins fresh post-reversal startup revisions for symmetric recovery", () => {
-    const activation = packet();
-    const common = { previous: activation.previous, target: activation.target,
-      releaseEvidence: activation.releaseEvidence as never, releaseTag: activation.releaseTag,
-      releaseCreatedAt: activation.releaseCreatedAt,
-      targetServiceRevision: activation.rollbackRecord.targetService.releaseRevision };
-    const forward = createTrackBPreprodOperationStartupPackages({ ...common,
-      direction: "ACTIVATE_TRACK_B" });
-    expect(forward.recovery).toMatchObject({ authorityTransition: "ROLLBACK_TRACK_B",
-      expectedAuthority: { modeVersionId: activation.previous.version.modeVersionId,
-        pointerRevision: activation.target.pointerRevision + 1 } });
-    const rollbackTarget = { ...activation.previous,
-      pointerRevision: activation.target.pointerRevision + 1 };
-    const reverse = createTrackBPreprodOperationStartupPackages({ ...common,
-      direction: "ROLLBACK_TRACK_B", previous: activation.target, target: rollbackTarget });
-    expect(reverse.operationTarget).toMatchObject({ authorityTransition: "ROLLBACK_TRACK_B",
-      expectedAuthority: { pointerRevision: rollbackTarget.pointerRevision } });
-    expect(reverse.recovery).not.toHaveProperty("authorityTransition");
-    expect(reverse.recovery).toMatchObject({ expectedAuthority: {
-      modeVersionId: activation.target.version.modeVersionId,
-      pointerRevision: rollbackTarget.pointerRevision + 1 } });
-  });
-
-  it("derives a prior-image-compatible recovery startup from two bound packages", () => {
-    const activation = packet();
-    const legacy = legacyStartup(activation);
-    const generated = createTrackBPreprodOperationStartupPackages({ direction: "ACTIVATE_TRACK_B",
-      previous: activation.previous, target: activation.target,
-      releaseEvidence: activation.releaseEvidence as never, releaseTag: activation.releaseTag,
-      releaseCreatedAt: activation.releaseCreatedAt,
-      targetServiceRevision: activation.rollbackRecord.targetService.releaseRevision });
-    const generatedRecovery = generated.recovery as unknown as
-      Parameters<typeof createTrackBLegacyRecoveryStartupV1>[1];
-    const recovery = createTrackBLegacyRecoveryStartupV1(legacy, generatedRecovery,
-      activation.rollbackRecord.previousService.releaseRevision);
-    expect(Object.keys(recovery).sort()).toEqual([
-      "expectedAuthority", "mode", "releaseEvidence", "releaseSource",
-    ]);
-    expect(recovery).not.toHaveProperty("authorityTransition");
-    expect(recovery.releaseEvidence).toEqual(legacy.releaseEvidence);
-    expect(recovery.releaseSource).toEqual(legacy.releaseSource);
-    expect(recovery.expectedAuthority).toEqual(generated.recovery.expectedAuthority);
-    expect(() => createTrackBLegacyRecoveryStartupV1({ ...legacy,
-      releaseSource: { ...legacy.releaseSource, tag: "substituted-release" } },
-    generatedRecovery, activation.rollbackRecord.previousService.releaseRevision))
-      .toThrow("TRACK_B_B3_2_LEGACY_RUNTIME_RELEASE_ID_MISMATCH");
-  });
-
-  it("binds and revalidates all startup package contents before execution", async () => {
-    const activation = packet();
-    const packages = createTrackBPreprodOperationStartupPackages({ direction: "ACTIVATE_TRACK_B",
-      previous: activation.previous, target: activation.target,
-      releaseEvidence: activation.releaseEvidence as never, releaseTag: activation.releaseTag,
-      releaseCreatedAt: activation.releaseCreatedAt,
-      targetServiceRevision: activation.rollbackRecord.targetService.releaseRevision });
-    const source = { ...packages.recovery,
-      expectedAuthority: { ...packages.recovery.expectedAuthority,
-        modeVersionId: activation.previous.version.modeVersionId,
-        contentHash: activation.previous.version.contentHash,
-        pointerRevision: activation.previous.pointerRevision } };
-    const canonicalHash = (value: unknown) => createHash("sha256")
-      .update(canonicalJsonV1(value), "utf8").digest("hex");
-    const legacy = legacyStartup(activation);
-    const { packetHash: _old, ...base } = activation;
-    const body = { ...base, sourceStartupPackageHash: canonicalHash(source),
-      operationTargetStartupPackageHash: canonicalHash(packages.operationTarget),
-      recoveryStartupPackageHash: canonicalHash(packages.recovery),
-      legacyStartupPackageFile: "/opt/lana-chatbot/shared/df13/legacy/commerce-startup-v2.json",
-      legacyStartupPackageHash: canonicalHash(legacy) };
-    const bound = parseTrackBPreprodOperationPacket({ ...body,
-      packetHash: canonicalHash(body) });
-    const artifacts = new Map<string, unknown>([
-      [bound.sourceStartupPackageFile, source],
-      [bound.operationTargetStartupPackageFile, packages.operationTarget],
-      [bound.recoveryStartupPackageFile, packages.recovery],
-      [bound.legacyStartupPackageFile!, legacy],
-    ]);
-    const reader = async (path: string) => artifacts.get(path);
-    await expect(validateTrackBPreprodStartupArtifacts(bound, reader))
-      .resolves.toMatchObject({
-        legacyRuntimeReleaseId: "20260828-df13-preprod-commerce-1111111",
-      });
-    const bindSource = (changedSource: unknown) => {
-      const changedBody = { ...body, sourceStartupPackageHash: canonicalHash(changedSource) };
-      artifacts.set(bound.sourceStartupPackageFile, changedSource);
-      return parseTrackBPreprodOperationPacket({ ...changedBody,
-        packetHash: canonicalHash(changedBody) });
-    };
-    const invalidTrackBSource = { ...source,
-      releaseEvidence: { ...(source.releaseEvidence as object), invalid: true } };
-    await expect(validateTrackBPreprodStartupArtifacts(bindSource(invalidTrackBSource), reader))
-      .rejects.toThrow("TRACK_B_B3_2_SOURCE_STARTUP_PACKAGE_NOT_ADMITTED");
-    const { authorityTransition: _transition, ...sourceWithoutTransition } = source;
-    const missingTransitionSource = { ...sourceWithoutTransition,
-      releaseEvidence: { ...(source.releaseEvidence as Record<string, unknown>),
-        activationReleaseRevision: activation.rollbackRecord.previousService.releaseRevision,
-        releaseSource: { resolvedRevision: activation.rollbackRecord.previousService.releaseRevision } },
-      releaseSource: { ...source.releaseSource,
-        commit: activation.rollbackRecord.previousService.releaseRevision } };
-    await expect(validateTrackBPreprodStartupArtifacts(bindSource(missingTransitionSource), reader))
-      .rejects.toThrow("TRACK_B_B3_2_SOURCE_STARTUP_PACKAGE_NOT_ADMITTED");
-    const wrongTransitionSource = { ...source, authorityTransition: "UNREVIEWED_TRANSITION" };
-    await expect(validateTrackBPreprodStartupArtifacts(bindSource(wrongTransitionSource), reader))
-      .rejects.toThrow("DF13_COMMERCE_STARTUP_INPUT_INVALID");
-    const invalidHistoricalSource = { ...sourceWithoutTransition,
-      releaseEvidence: { contractVersion: "DF13_RELEASE_CANDIDATE_EVIDENCE_V1" } };
-    await expect(validateTrackBPreprodStartupArtifacts(bindSource(invalidHistoricalSource), reader))
-      .rejects.toThrow();
-    artifacts.set(bound.sourceStartupPackageFile, source);
-    for (const path of artifacts.keys()) {
-      const original = artifacts.get(path);
-      artifacts.set(path, { ...(original as object), drift: true });
-      await expect(validateTrackBPreprodStartupArtifacts(bound, reader))
-        .rejects.toThrow("TRACK_B_B3_2_STARTUP_PACKAGE_CONTENT_MISMATCH");
-      artifacts.set(path, original);
+  it("rejects packet substitution, startup traversal and invalid authority envelopes", () => {
+    expect(() => parseTrackBPreprodOperationPacket({ ...packet().value,
+      operationId: "20000000-0000-4000-8000-000000000001" }))
+      .toThrow("TRACK_B_B3_2_OPERATION_PACKET_HASH_MISMATCH");
+    for (const changed of [
+      { ...packet().value,
+        operationTargetStartupPackageFile: "/opt/lana-chatbot/releases/track-b/../secrets.json" },
+      { ...packet().value, target: {} },
+    ]) {
+      const { packetHash: _old, ...body } = changed;
+      expect(() => parseTrackBPreprodOperationPacket({ ...body, packetHash: hash(body) })).toThrow();
     }
-    const semanticDrift = { ...packages.operationTarget,
-      expectedAuthority: { ...packages.operationTarget.expectedAuthority,
-        pointerRevision: packages.operationTarget.expectedAuthority.pointerRevision + 1 } };
-    artifacts.set(bound.operationTargetStartupPackageFile, semanticDrift);
-    const semanticBody = { ...body,
-      operationTargetStartupPackageHash: canonicalHash(semanticDrift) };
-    const semanticPacket = parseTrackBPreprodOperationPacket({ ...semanticBody,
-      packetHash: canonicalHash(semanticBody) });
-    await expect(validateTrackBPreprodStartupArtifacts(semanticPacket, reader))
-      .rejects.toThrow("TRACK_B_B3_2_GENERATED_STARTUP_PACKAGE_MISMATCH");
-    artifacts.set(bound.operationTargetStartupPackageFile, packages.operationTarget);
-    const substitutedLegacy = { ...legacy,
-      releaseSource: { ...legacy.releaseSource, tag: "substituted-release" } };
-    artifacts.set(bound.legacyStartupPackageFile!, substitutedLegacy);
-    const legacyDriftBody = { ...body, legacyStartupPackageHash: canonicalHash(substitutedLegacy) };
-    const legacyDriftPacket = parseTrackBPreprodOperationPacket({ ...legacyDriftBody,
-      packetHash: canonicalHash(legacyDriftBody) });
-    await expect(validateTrackBPreprodStartupArtifacts(legacyDriftPacket, reader))
-      .rejects.toThrow("TRACK_B_B3_2_LEGACY_RUNTIME_RELEASE_ID_MISMATCH");
-    artifacts.set(bound.legacyStartupPackageFile!, legacy);
-    let legacyReads = 0;
-    const changingReader = async (path: string) => {
-      if (path !== bound.legacyStartupPackageFile) return artifacts.get(path);
-      legacyReads += 1;
-      return legacyReads === 1 ? legacy : substitutedLegacy;
-    };
-    await expect(validateTrackBPreprodStartupArtifacts(bound, changingReader))
-      .resolves.toMatchObject({
-        legacyRuntimeReleaseId: "20260828-df13-preprod-commerce-1111111",
-      });
-    expect(legacyReads).toBe(1);
-    const substituted = { ...body,
-      sourceStartupPackageFile: "/opt/lana-chatbot/releases/track-b/substituted.json" };
-    expect(() => parseTrackBPreprodOperationPacket({ ...substituted,
-      packetHash: bound.packetHash })).toThrow("TRACK_B_B3_2_OPERATION_PACKET_HASH_MISMATCH");
+  });
+
+  it("accepts only the exact immutable certified LKG selection", () => {
+    const accepted = packet().value.rollbackRecord;
+    const exact = { accepted, acceptedRecordHash: accepted.recordHash,
+      candidate: accepted.candidate, lastKnownGood: accepted.lastKnownGood };
+    expect(validateTrackBV2LastKnownGoodSelection(exact)).toBe(true);
+    expect(validateTrackBV2LastKnownGoodSelection({ ...exact, accepted: null })).toBe(false);
+    expect(validateTrackBV2LastKnownGoodSelection({ ...exact,
+      acceptedRecordHash: "f".repeat(64) })).toBe(false);
+    expect(validateTrackBV2LastKnownGoodSelection({ ...exact,
+      lastKnownGood: { ...accepted.lastKnownGood, imageTag: "lana:stale-v2" } })).toBe(false);
+    expect(validateTrackBV2LastKnownGoodSelection({ ...exact,
+      candidate: accepted.lastKnownGood, lastKnownGood: accepted.candidate })).toBe(false);
+  });
+
+  it("binds LKG certification, startup and recovery artifacts exactly", async () => {
+    const fixture = packet("ROLLBACK_TO_LKG_V2");
+    const byPath = new Map<string, unknown>([[fixture.value.sourceStartupPackageFile, fixture.source],
+      [fixture.value.operationTargetStartupPackageFile, fixture.generated.operationTarget],
+      [fixture.value.recoveryStartupPackageFile, fixture.generated.recovery]]);
+    await expect(validateTrackBPreprodStartupArtifacts(fixture.value,
+      async (path) => byPath.get(path))).resolves.toMatchObject({
+      sourceStartup: fixture.source, operationTargetStartup: fixture.generated.operationTarget });
+    await expect(validateTrackBPreprodStartupArtifacts(fixture.value,
+      async (path) => path === fixture.value.operationTargetStartupPackageFile
+        ? { ...fixture.generated.operationTarget, authorityTransition: undefined } : byPath.get(path)))
+      .rejects.toThrow();
+    for (const path of byPath.keys()) {
+      const original = byPath.get(path);
+      byPath.set(path, { ...(original as object), drift: true });
+      await expect(validateTrackBPreprodStartupArtifacts(fixture.value,
+        async (key) => byPath.get(key)))
+        .rejects.toThrow("TRACK_B_B3_2_STARTUP_PACKAGE_CONTENT_MISMATCH");
+      byPath.set(path, original);
+    }
+  });
+
+  it("keeps target and recovery release provenance distinct across both directions", () => {
+    for (const direction of ["ACTIVATE_V2_CANDIDATE", "ROLLBACK_TO_LKG_V2"] as const) {
+      const fixture = packet(direction);
+      const targetRevision = direction === "ACTIVATE_V2_CANDIDATE"
+        ? candidateService.releaseRevision : lkgService.releaseRevision;
+      const recoveryRevision = direction === "ACTIVATE_V2_CANDIDATE"
+        ? lkgService.releaseRevision : candidateService.releaseRevision;
+      expect(fixture.generated.operationTarget.releaseSource.commit).toBe(targetRevision);
+      expect(fixture.generated.recovery.releaseSource.commit).toBe(recoveryRevision);
+      expect(fixture.generated.recovery.expectedAuthority.pointerRevision)
+        .toBe(fixture.value.target.pointerRevision + 1);
+      if (direction === "ROLLBACK_TO_LKG_V2") {
+        expect(fixture.generated.operationTarget.authorityTransition).toBe("ROLLBACK_TO_LKG_V2");
+        expect(fixture.generated.recovery).not.toHaveProperty("authorityTransition");
+      } else {
+        expect(fixture.generated.operationTarget).not.toHaveProperty("authorityTransition");
+        expect(fixture.generated.recovery.authorityTransition).toBe("ROLLBACK_TO_LKG_V2");
+      }
+    }
+  });
+
+  it("permits only a prior exact LKG startup when rollback derives a later CAS revision", () => {
+    const lkg = pointer("10000000-0000-4000-8000-000000000001", 6);
+    const rollbackTarget = { ...lkg, pointerRevision: 8 };
+    const lkgStartup = startup(lkgService, lkg, lkgEvidence);
+
+    expect(matchesTrackBOperationTargetStartupBaseline({
+      direction: "ROLLBACK_TO_LKG_V2", startup: lkgStartup, target: rollbackTarget,
+    })).toBe(true);
+    expect(matchesTrackBOperationTargetStartupBaseline({
+      direction: "ACTIVATE_V2_CANDIDATE", startup: lkgStartup, target: rollbackTarget,
+    })).toBe(false);
+    expect(matchesTrackBOperationTargetStartupBaseline({
+      direction: "ROLLBACK_TO_LKG_V2", startup: lkgStartup, target: lkg,
+    })).toBe(false);
+  });
+
+  it("requires exact fixed-scope prepare and build inputs", () => {
+    const prepare = { schemaVersion: 3, environment: "ENGINEERING_PREPROD",
+      pageId: "1198992073286645", channel: "MESSENGER",
+      operationId: "10000000-0000-4000-8000-000000000001", direction: "ACTIVATE_V2_CANDIDATE",
+      candidateService, lastKnownGoodService: lkgService, candidateImageTag: "lana:v2-candidate",
+      lastKnownGoodImageTag: "lana:v2-lkg",
+      candidateStartupPackageFile: "/opt/lana-chatbot/releases/track-b/candidate.json",
+      lastKnownGoodStartupPackageFile: "/opt/lana-chatbot/releases/track-b/lkg.json",
+      operationTargetStartupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",
+      recoveryStartupPackageFile: "/opt/lana-chatbot/releases/track-b/recovery.json",
+      candidateReleaseEvidence: candidateEvidence, lastKnownGoodReleaseEvidence: lkgEvidence,
+      lastKnownGoodRecordHash: null };
+    expect(parseTrackBPreprodPrepareInput(prepare).direction).toBe("ACTIVATE_V2_CANDIDATE");
+    expect(() => parseTrackBPreprodPrepareInput({ ...prepare, direction: "ROLLBACK_TRACK_B" })).toThrow();
+    expect(() => parseTrackBPreprodPrepareInput({ ...prepare, direction: "ROLLBACK_TO_LKG_V2",
+      lastKnownGoodRecordHash: null })).toThrow();
+    expect(() => parseTrackBPreprodPrepareInput({ ...prepare,
+      migrationSchemaHash: "b".repeat(64) })).toThrow("TRACK_B_B3_2_OPERATOR_SCOPE_INVALID");
+    const runtimeConfig = Object.fromEntries(TRACK_B_RUNTIME_CONFIG_KEYS_V1.map((key) => [key, "false"]));
+    expect(parseTrackBPreprodBuildInput({ schemaVersion: 1, environment: "ENGINEERING_PREPROD",
+      pageId: "1198992073286645", channel: "MESSENGER", sourceCommit: "1".repeat(40),
+      sourceTree: "2".repeat(40), imageTag: "lana:v2", runtimeConfig })).toMatchObject({ imageTag: "lana:v2" });
+    expect(() => parseTrackBPreprodBuildInput({ schemaVersion: 1,
+      environment: "PUBLIC_PRODUCTION", pageId: "1198992073286645", channel: "MESSENGER",
+      sourceCommit: "1".repeat(40), sourceTree: "2".repeat(40), imageTag: "lana:v2",
+      runtimeConfig })).toThrow("TRACK_B_B3_2_BUILD_INPUT_INVALID");
   });
 });

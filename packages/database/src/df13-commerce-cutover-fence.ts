@@ -229,7 +229,8 @@ async function canonicalIdentityMatches(
       FOR KEY SHARE`,
     [[request.preCutover.modeVersionId, request.target.modeVersionId]],
   );
-  if (versionsResult.rows.length !== 2) return false;
+  const expectedVersionCount = request.preCutover.modeVersionId === request.target.modeVersionId ? 1 : 2;
+  if (versionsResult.rows.length !== expectedVersionCount) return false;
   const byId = new Map(versionsResult.rows.map((row) => [row.mode_version_id.toLowerCase(), row]));
   const preCutover = byId.get(request.preCutover.modeVersionId);
   const target = byId.get(request.target.modeVersionId);
@@ -257,12 +258,15 @@ async function canonicalIdentityMatches(
     preCutover.sales_authority_mode === "COMMERCE" &&
     preCutover.authority_bundle_hash === DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash &&
     target.authority_bundle_hash === DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash;
-  const trackBRollback =
+  const trackBV2LkgServiceCutover =
     trackBScope &&
+    preCutover.confirmation_mode === "V2_ACTIVE" &&
     preCutover.sales_authority_mode === "COMMERCE" &&
     preCutover.authority_bundle_hash === DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash &&
-    target.authority_bundle_hash === DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
-  return firstCommerceCutover || trackBReplacement || trackBRollback;
+    target.authority_bundle_hash === DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash &&
+    request.preCutover.modeVersionId === request.target.modeVersionId &&
+    request.preCutover.contentHash === request.target.contentHash;
+  return firstCommerceCutover || trackBReplacement || trackBV2LkgServiceCutover;
 }
 
 async function rollbackQuietly(client: PoolClient): Promise<void> {

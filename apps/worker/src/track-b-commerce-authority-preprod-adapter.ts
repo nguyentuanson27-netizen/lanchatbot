@@ -2,6 +2,7 @@ import { canonicalJsonV1 } from "@lana/contracts";
 import type {
   Df13CommerceCutoverFenceAcquireResult,
   Df13CommerceCutoverFenceLease,
+  Df13CommerceCutoverFenceObservation,
   Df13CommerceCutoverFenceRequest,
 } from "@lana/database";
 import {
@@ -41,6 +42,7 @@ const STARTUP_ROOT = "/opt/lana-chatbot/releases/track-b";
 const CONTAINER = "lana-chatbot-realtime-worker";
 const STAGED_CONTAINER = "lana-chatbot-track-b-staged-realtime-worker";
 const STAGED_LABEL = "TRACK_B_B3_2_STOPPED_NON_ADMITTING";
+const COMMERCE_STARTUP_CONTAINER_FILE = "/run/df13/commerce-startup.json";
 
 export const TRACK_B_RUNTIME_CONFIG_KEYS_V1 = Object.freeze([
   "APP_SEND_ENABLED",
@@ -125,19 +127,18 @@ function validService(value: TrackBServiceReleaseIdentity): boolean {
 }
 
 function validRecord(value: TrackBReleaseLocalRollbackRecord): boolean {
-  if (!value || value.schemaVersion !== 1 ||
-      value.contractVersion !== "TRACK_B_RELEASE_LOCAL_ROLLBACK_RECORD_V1" ||
-      !SHA256.test(value.recordHash) || !COMMIT.test(value.selectedSourceCommit) ||
-      !validService(value.previousService) || !validService(value.targetService) ||
-      value.targetService.releaseRevision !== value.selectedSourceCommit) return false;
-  const rebuilt = createTrackBReleaseLocalRollbackRecord({
-    selectedSourceCommit: value.selectedSourceCommit,
-    previousService: value.previousService,
-    targetService: value.targetService,
-    previousAuthority: value.previousAuthority,
-    targetAuthority: value.targetAuthority,
-  });
-  return canonicalJsonV1(rebuilt) === canonicalJsonV1(value);
+  try {
+    if (!value || value.schemaVersion !== 2 ||
+        value.contractVersion !== "TRACK_B_RELEASE_LOCAL_ROLLBACK_RECORD_V2_LKG" ||
+        !SHA256.test(value.recordHash) || !validService(value.candidate.service) ||
+        !validService(value.lastKnownGood.service)) return false;
+    const rebuilt = createTrackBReleaseLocalRollbackRecord({
+      candidate: value.candidate,
+      lastKnownGood: value.lastKnownGood,
+      lastKnownGoodSelection: value.lastKnownGoodSelection,
+    });
+    return canonicalJsonV1(rebuilt) === canonicalJsonV1(value);
+  } catch { return false; }
 }
 
 export class ReleaseLocalRollbackRecordStore {
@@ -286,8 +287,14 @@ type DockerInspect = {
   Image?: unknown;
   RestartCount?: unknown;
   State?: { Status?: unknown; Health?: { Status?: unknown } };
-  Config?: { Image?: unknown; Labels?: Record<string, unknown> };
+  Config?: { Image?: unknown; Labels?: Record<string, unknown>; Env?: unknown };
+  Mounts?: unknown;
 };
+
+function objectRecord(value: unknown): Record<string, unknown> | null {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown> : null;
+}
 
 function parseOne(output: string, code: string): DockerInspect {
   let parsed: unknown;
@@ -323,8 +330,10 @@ export class DockerComposeTrackBPreprodServiceController {
   readonly #startupPackageFile: string;
   readonly #imageReference: string;
   readonly #expectedImageId: string;
+  readonly #startupPackageHash: string | null;
   readonly #runtimeReleaseId: string | null;
   readonly #run: TrackBServiceCommandRunner;
+  readonly #readStartupPackage: (path: string) => Promise<unknown>;
   readonly #labelPolicy: "EXACT_ALL" | "OCI_REVISION_ONLY";
   readonly #health: Readonly<{ timeoutMs: number; pollMs: number; wait: (milliseconds: number) => Promise<void> }>;
 
@@ -334,8 +343,10 @@ export class DockerComposeTrackBPreprodServiceController {
     startupPackageFile: string;
     imageReference: string;
     expectedImageId: string;
+    startupPackageHash?: string;
     runtimeReleaseId?: string;
     run?: TrackBServiceCommandRunner;
+    readStartupPackage?: (path: string) => Promise<unknown>;
     labelPolicy?: "EXACT_ALL" | "OCI_REVISION_ONLY";
     health?: Readonly<{ timeoutMs: number; pollMs: number; wait: (milliseconds: number) => Promise<void> }>;
   }>) {
@@ -349,7 +360,8 @@ export class DockerComposeTrackBPreprodServiceController {
       throw new Error("TRACK_B_B3_2_SERVICE_SCOPE_INVALID");
     }
     if (!/^[a-z0-9][a-z0-9._/-]{0,127}:[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/u.test(input.imageReference) ||
-        !SHA256.test(input.expectedImageId)) {
+        !SHA256.test(input.expectedImageId) ||
+        (input.startupPackageHash !== undefined && !SHA256.test(input.startupPackageHash))) {
       throw new Error("TRACK_B_B3_2_IMAGE_REFERENCE_INVALID");
     }
     if ((input.runtimeReleaseId !== undefined &&
@@ -362,8 +374,11 @@ export class DockerComposeTrackBPreprodServiceController {
     this.#startupPackageFile = input.startupPackageFile;
     this.#imageReference = input.imageReference;
     this.#expectedImageId = input.expectedImageId;
+    this.#startupPackageHash = input.startupPackageHash ?? null;
     this.#runtimeReleaseId = input.runtimeReleaseId ?? null;
     this.#run = input.run ?? defaultRunner;
+    this.#readStartupPackage = input.readStartupPackage ?? (async (path) =>
+      JSON.parse(await readFile(path, "utf8")) as unknown);
     this.#labelPolicy = labelPolicy;
     this.#health = input.health ?? { timeoutMs: 120_000, pollMs: 1_000,
       wait: (milliseconds) => new Promise((resolveWait) => setTimeout(resolveWait, milliseconds)) };
@@ -392,6 +407,25 @@ export class DockerComposeTrackBPreprodServiceController {
       "-f", this.#composeFile, ...tail];
   }
 
+  async #hasExactStartupBind(value: DockerInspect): Promise<boolean> {
+    if (!Array.isArray(value.Mounts)) return false;
+    const mounts = value.Mounts.map(objectRecord);
+    if (mounts.some((mount) => mount === null)) return false;
+    const startupMounts = mounts.filter((mount) => mount?.Destination === COMMERCE_STARTUP_CONTAINER_FILE ||
+      mount?.Source === this.#startupPackageFile);
+    if (startupMounts.length !== 1) return false;
+    const mount = startupMounts[0];
+    if (mount === undefined || mount === null || mount.Type !== "bind" ||
+        mount.Source !== this.#startupPackageFile ||
+        mount.Destination !== COMMERCE_STARTUP_CONTAINER_FILE || mount.RW !== false) {
+      return false;
+    }
+    let startup: unknown;
+    try { startup = await this.#readStartupPackage(this.#startupPackageFile); } catch { return false; }
+    return createHash("sha256").update(canonicalJsonV1(startup), "utf8").digest("hex") ===
+      this.#startupPackageHash;
+  }
+
   async #inspectContainer(expected: TrackBServiceReleaseIdentity, verifyRuntime: boolean,
     container = CONTAINER): Promise<Readonly<{
     identity: TrackBServiceReleaseIdentity;
@@ -404,6 +438,7 @@ export class DockerComposeTrackBPreprodServiceController {
     ], {}), "TRACK_B_B3_2_CONTAINER_INSPECT_INVALID");
     const identity = identityFromInspect(value, expected, this.#labelPolicy);
     if (!identity || typeof value.State?.Status !== "string") return null;
+    if (this.#startupPackageHash !== null && container === CONTAINER && !await this.#hasExactStartupBind(value)) return null;
     if (verifyRuntime && value.State.Status === "running") {
       const output = await this.#run("docker", ["exec", container, "printenv",
         ...TRACK_B_RUNTIME_CONFIG_KEYS_V1], {});
@@ -546,7 +581,9 @@ export class TrackBPreprodServicePairController implements TrackBPreprodServiceB
     this.#target = input.target;
     if (input.startRoutes.length < 3 || input.startRoutes.some((route) =>
       (!exactService(route.identity, input.previousIdentity) &&
-       !exactService(route.identity, input.targetIdentity)) || route.pointer.pointerRevision < 1)) {
+       !exactService(route.identity, input.targetIdentity)) || route.pointer.pointerRevision < 1) ||
+        !input.startRoutes.some((route) => exactService(route.identity, input.previousIdentity)) ||
+        !input.startRoutes.some((route) => exactService(route.identity, input.targetIdentity))) {
       throw new Error("TRACK_B_B3_2_SERVICE_START_ROUTES_INVALID");
     }
     const routeKeys = new Set(input.startRoutes.map((route) => canonicalJsonV1({
@@ -564,28 +601,69 @@ export class TrackBPreprodServicePairController implements TrackBPreprodServiceB
     throw new Error("TRACK_B_B3_2_SERVICE_IDENTITY_UNKNOWN");
   }
 
+  #routeController(identity: TrackBServiceReleaseIdentity, pointer: RuntimeBehaviorModePointer) {
+    const route = this.#startRoutes.find((candidate) => exactService(candidate.identity, identity) &&
+      canonicalJsonV1(candidate.pointer) === canonicalJsonV1(pointer));
+    if (!route) throw new Error("TRACK_B_B3_2_SERVICE_START_ROUTE_UNKNOWN");
+    return route.controller;
+  }
+
+  #eligibleControllers(identity: TrackBServiceReleaseIdentity) {
+    const controllers = this.#startRoutes
+      .filter((route) => exactService(route.identity, identity))
+      .map((route) => route.controller);
+    return [...new Set(controllers)];
+  }
+
+  async #presentController(identity: TrackBServiceReleaseIdentity,
+    pointer?: RuntimeBehaviorModePointer): Promise<Readonly<{
+      controller: DockerComposeTrackBPreprodServiceController | null;
+      result: TrackBServiceReleaseIdentity | "ABSENT" | "AMBIGUOUS";
+    }>> {
+    const controllers = pointer === undefined
+      ? this.#eligibleControllers(identity)
+      : [this.#routeController(identity, pointer)];
+    const results = await Promise.all(controllers.map(async (controller) => ({
+      controller, result: await controller.inspectPresent(identity),
+    })));
+    const exact = results.filter((result) => exactService(
+      result.result === "ABSENT" || result.result === "AMBIGUOUS" ? null : result.result,
+      identity,
+    ));
+    if (exact.length === 1 && results.every(({ result }) => result !== "ABSENT")) return exact[0]!;
+    return { controller: null,
+      result: results.length > 0 && results.every(({ result }) => result === "ABSENT")
+        ? "ABSENT" : "AMBIGUOUS" };
+  }
+
   async stage(source: TrackBServiceReleaseIdentity, target: TrackBServiceReleaseIdentity) {
     return this.#controller(target).stage(source, target);
   }
   async discard(target: TrackBServiceReleaseIdentity) { return this.#controller(target).discard(target); }
-  async stop(expected: TrackBServiceReleaseIdentity) { return this.#controller(expected).stop(expected); }
+  async stop(expected: TrackBServiceReleaseIdentity, pointer?: RuntimeBehaviorModePointer) {
+    const observed = await this.#presentController(expected, pointer);
+    return observed.controller === null ? null : observed.controller.stop(expected);
+  }
   async start(expected: TrackBServiceReleaseIdentity, mode: "COMMERCE",
     pointer: RuntimeBehaviorModePointer) {
-    const route = this.#startRoutes.find((candidate) => exactService(candidate.identity, expected) &&
-      canonicalJsonV1(candidate.pointer) === canonicalJsonV1(pointer));
-    if (!route) throw new Error("TRACK_B_B3_2_SERVICE_START_ROUTE_UNKNOWN");
-    return route.controller.start(expected, mode);
+    return this.#routeController(expected, pointer).start(expected, mode);
   }
-  async inspectRunning(expected: TrackBServiceReleaseIdentity) {
-    return this.#controller(expected).inspectRunning(expected);
+  async inspectRunning(expected: TrackBServiceReleaseIdentity, pointer?: RuntimeBehaviorModePointer) {
+    const controllers = pointer === undefined
+      ? this.#eligibleControllers(expected)
+      : [this.#routeController(expected, pointer)];
+    const observed = (await Promise.all(controllers.map((controller) =>
+      controller.inspectRunning(expected)))).filter((identity) => exactService(identity, expected));
+    return observed.length === 1 ? observed[0]! : null;
   }
-  async inspectPresent(expected: TrackBServiceReleaseIdentity) {
-    return this.#controller(expected).inspectPresent(expected);
+  async inspectPresent(expected: TrackBServiceReleaseIdentity, pointer?: RuntimeBehaviorModePointer) {
+    return (await this.#presentController(expected, pointer)).result;
   }
 }
 
 export interface TrackBPreprodDatabaseBoundary {
   acquireFence(request: Df13CommerceCutoverFenceRequest): Promise<Df13CommerceCutoverFenceAcquireResult>;
+  observeFence(request: Df13CommerceCutoverFenceRequest): Promise<Df13CommerceCutoverFenceObservation>;
   releaseFence(lease: Df13CommerceCutoverFenceLease): Promise<{ status: "RELEASED" | "STALE_OR_MISSING" }>;
   readAdmissionHold(input: { pageId: string; channel: string; lease: Df13CommerceCutoverFenceLease }): Promise<TrackBCommerceAdmissionReadback>;
   readQuiescence(input: { pageId: string; channel: string }): Promise<{
@@ -593,7 +671,7 @@ export interface TrackBPreprodDatabaseBoundary {
     inFlightAuthorityDependentWork: number; queuedAuthorityDependentWork: number;
   }>;
   mutateExactPointer(input: {
-    direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+    direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
     previous: RuntimeBehaviorModePointer;
     target: RuntimeBehaviorModePointer;
     lease: Df13CommerceCutoverFenceLease;
@@ -607,6 +685,12 @@ export interface TrackBPreprodDatabaseBoundary {
     pointer: RuntimeBehaviorModePointer;
     notBefore: string;
   }): Promise<"EXACT" | "MISSING" | "AMBIGUOUS">;
+  readDatabaseClock(): Promise<string>;
+  readTrackBV2LkgSchemaCompatibility(): Promise<{
+    status: "EXACT" | "AMBIGUOUS";
+    source: "DATABASE";
+    migrationSchemaHash: string | null;
+  }>;
   readExactVersion(input: { pageId: string; channel: string; modeVersionId: string }):
     Promise<RuntimeBehaviorModePointer["version"] | null>;
 }
@@ -614,11 +698,14 @@ export interface TrackBPreprodDatabaseBoundary {
 export interface TrackBPreprodServiceBoundary {
   stage(source: TrackBServiceReleaseIdentity, target: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | "AMBIGUOUS" | null>;
   discard(target: TrackBServiceReleaseIdentity): Promise<"DISCARDED" | "AMBIGUOUS">;
-  stop(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null>;
+  stop(expected: TrackBServiceReleaseIdentity,
+    pointer?: RuntimeBehaviorModePointer): Promise<TrackBServiceReleaseIdentity | null>;
   start(expected: TrackBServiceReleaseIdentity, mode: "COMMERCE",
     pointer: RuntimeBehaviorModePointer): Promise<TrackBServiceReleaseIdentity | null>;
-  inspectRunning(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null>;
-  inspectPresent(expected: TrackBServiceReleaseIdentity):
+  inspectRunning(expected: TrackBServiceReleaseIdentity,
+    pointer?: RuntimeBehaviorModePointer): Promise<TrackBServiceReleaseIdentity | null>;
+  inspectPresent(expected: TrackBServiceReleaseIdentity,
+    pointer?: RuntimeBehaviorModePointer):
     Promise<TrackBServiceReleaseIdentity | "ABSENT" | "AMBIGUOUS">;
 }
 
@@ -634,6 +721,13 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
     input.database.readAdmissionHold({ pageId: PAGE_ID, channel: CHANNEL, lease });
   const ports: TrackBCommerceAuthorityMutationPorts = {
     readPersistedRollbackRecord: input.rollbackStore.read.bind(input.rollbackStore),
+    async proveSchemaCompatibility({ candidateMigrationSchemaHash, lastKnownGoodMigrationSchemaHash }) {
+      if (candidateMigrationSchemaHash !== lastKnownGoodMigrationSchemaHash) return "AMBIGUOUS";
+      const observed = await input.database.readTrackBV2LkgSchemaCompatibility();
+      return observed.status === "EXACT" && observed.source === "DATABASE" &&
+        observed.migrationSchemaHash === candidateMigrationSchemaHash ? "EXACT" : "AMBIGUOUS";
+    },
+    observeFence: input.database.observeFence.bind(input.database),
     acquireFence: input.database.acquireFence.bind(input.database),
     proveAdmissionHeld: ({ lease }) => scopeAdmission(lease),
     async stopSourceAndProveQuiescence({ lease, sourceService }) {
@@ -677,7 +771,7 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
     async startStagedService({ lease, stagedService, pointer }) {
       const admission = await scopeAdmission(lease);
       if (admission.status !== "HELD") return { status: "BLOCKED", admission: "UNCONTROLLED", observedService: null };
-      lastStartedAt = new Date().toISOString();
+      lastStartedAt = await input.database.readDatabaseClock();
       const observed = await input.service.start(stagedService, "COMMERCE", pointer);
       return { status: observed ? "HEALTHY" as const : "BLOCKED" as const,
         admission: "HELD" as const, observedService: observed };
@@ -686,7 +780,7 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
       const admission = await scopeAdmission(lease);
       if (admission.status !== "HELD") return { status: "BLOCKED", admission: "UNCONTROLLED", observedService: null };
       const failed = await input.service.inspectPresent(failedService);
-      const prior = await input.service.inspectPresent(previousService);
+      const prior = await input.service.inspectPresent(previousService, pointer);
       const failedExact = failed !== "ABSENT" && failed !== "AMBIGUOUS";
       const priorExact = prior !== "ABSENT" && prior !== "AMBIGUOUS";
       if ((failedExact && priorExact) || (!failedExact && !priorExact &&
@@ -700,21 +794,22 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
         }
       }
       const serviceToStop = failedExact ? failedService : priorExact ? previousService : null;
-      if (serviceToStop !== null && !await input.service.stop(serviceToStop)) {
+      if (serviceToStop !== null && !await input.service.stop(serviceToStop,
+        exactService(serviceToStop, previousService) ? pointer : undefined)) {
         return { status: "BLOCKED", admission: "HELD", observedService: null };
       }
       const staged = await input.service.stage(failedService, previousService);
       if (!exactService(staged === "AMBIGUOUS" ? null : staged, previousService)) {
         return { status: "BLOCKED", admission: "HELD", observedService: null };
       }
-      lastStartedAt = new Date().toISOString();
+      lastStartedAt = await input.database.readDatabaseClock();
       const observed = await input.service.start(previousService, "COMMERCE", pointer);
       return { status: observed ? "HEALTHY" as const : "BLOCKED" as const,
         admission: "HELD" as const, observedService: observed };
     },
     async readRuntimeAuthority({ lease, service, pointer }) {
       const admission = await scopeAdmission(lease);
-      const observedService = await input.service.inspectRunning(service);
+      const observedService = await input.service.inspectRunning(service, pointer);
       const proof = lastStartedAt === null ? "MISSING" :
         await input.database.proveRuntimeResolution({ pointer, notBefore: lastStartedAt });
       const exact = admission.status === "HELD" && exactService(observedService, service) && proof === "EXACT";
@@ -728,7 +823,7 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
         admission: exact ? "HELD" : "UNCONTROLLED" };
     },
     async readReleasedRuntimeAuthority({ service, pointer, fenceId, epoch }) {
-      const observed = await input.service.inspectRunning(service);
+      const observed = await input.service.inspectRunning(service, pointer);
       const active = await input.database.readActivePointer();
       const pointerExact = active !== null && active.pointerRevision === pointer.pointerRevision &&
         active.version.modeVersionId === pointer.version.modeVersionId &&
@@ -795,6 +890,7 @@ export class TrackBPostgresPreprodDatabaseBoundary implements TrackBPreprodDatab
   }
 
   acquireFence(request: Df13CommerceCutoverFenceRequest) { return this.#fence.acquire(request); }
+  observeFence(request: Df13CommerceCutoverFenceRequest) { return this.#fence.observe(request); }
   releaseFence(lease: Df13CommerceCutoverFenceLease) { return this.#fence.release(lease); }
   readAdmissionHold(input: { pageId: string; channel: string; lease: Df13CommerceCutoverFenceLease }) {
     return this.#writer.readAdmissionHold(input);
@@ -823,7 +919,7 @@ export class TrackBPostgresPreprodDatabaseBoundary implements TrackBPreprodDatab
   }
 
   async mutateExactPointer(input: {
-    direction: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+    direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
     previous: RuntimeBehaviorModePointer;
     target: RuntimeBehaviorModePointer;
     lease: Df13CommerceCutoverFenceLease;
@@ -845,7 +941,7 @@ export class TrackBPostgresPreprodDatabaseBoundary implements TrackBPreprodDatab
         },
         lease: input.lease,
         actor: "TRACK_B_B3_2_WRITER",
-        reason: `TRACK_B_B3_2_${input.direction === "ACTIVATE_TRACK_B" ? "ACTIVATE" : "ROLLBACK"}:${this.#operationId}`,
+        reason: `TRACK_B_B3_2_${input.direction}:${this.#operationId}`,
       });
       return { status: "ACKNOWLEDGED" };
     } catch (error) {
@@ -873,6 +969,14 @@ export class TrackBPostgresPreprodDatabaseBoundary implements TrackBPreprodDatab
       workerId: "realtime-worker-1",
       notBefore: input.notBefore,
     });
+  }
+
+  readDatabaseClock() {
+    return this.#writer.readDatabaseClock();
+  }
+
+  readTrackBV2LkgSchemaCompatibility() {
+    return this.#writer.readTrackBV2LkgSchemaCompatibility();
   }
 }
 

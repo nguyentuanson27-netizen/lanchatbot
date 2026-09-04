@@ -1,8 +1,10 @@
+import { createHash } from "node:crypto";
 import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { behaviorModeContentHash } from "@lana/chat-runtime";
+import { canonicalJsonV1 } from "@lana/contracts";
 import {
   createTrackBReleaseLocalRollbackRecord,
   executeTrackBCommerceAuthorityMutation,
@@ -61,6 +63,10 @@ const targetService: TrackBServiceReleaseIdentity = {
   imageId: "7".repeat(64),
   runtimeConfigHash: trackBRuntimeConfigHashV1(targetRuntimeConfig),
 };
+const candidateEvidence = { activationReleaseRevision: targetService.releaseRevision,
+  releaseSource: { treeOid: "8".repeat(40) } } as never;
+const lkgEvidence = { activationReleaseRevision: previousService.releaseRevision,
+  releaseSource: { treeOid: "9".repeat(40) } } as never;
 
 function pointer(modeVersionId: string, pointerRevision: number, authorityBundleHash: string) {
   const payload = { confirmationMode: "V2_ACTIVE" as const, salesAuthorityMode: "COMMERCE" as const,
@@ -72,19 +78,19 @@ function pointer(modeVersionId: string, pointerRevision: number, authorityBundle
   updatedBy: "operator", reason: "active", updatedAt: "2026-09-02T00:00:00.000Z" };
 }
 const rollbackRecord = createTrackBReleaseLocalRollbackRecord({
-  selectedSourceCommit: targetService.releaseRevision,
-  previousService,
-  targetService,
-  previousAuthority: {
-    modeVersionId: "10000000-0000-4000-8000-000000000001",
-    contentHash: `sha256:${"9".repeat(64)}`,
-    bundleHash: "a".repeat(64),
-  },
-  targetAuthority: {
-    modeVersionId: "10000000-0000-4000-8000-000000000002",
-    contentHash: `sha256:${"b".repeat(64)}`,
-    bundleHash: "c".repeat(64),
-  },
+  candidate: { service: targetService, sourceTree: "8".repeat(40), imageTag: "lana:v2-candidate",
+    startupPackageHash: "a".repeat(64), authority: { pointerRevision: 7,
+      modeVersionId: "10000000-0000-4000-8000-000000000002",
+      contentHash: `sha256:${"b".repeat(64)}`,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash },
+    gateEEvidence: candidateEvidence, migrationSchemaHash: "c".repeat(64) },
+  lastKnownGood: { service: previousService, sourceTree: "9".repeat(40), imageTag: "lana:v2-lkg",
+    startupPackageHash: "d".repeat(64), authority: { pointerRevision: 6,
+      modeVersionId: "10000000-0000-4000-8000-000000000001",
+      contentHash: `sha256:${"9".repeat(64)}`,
+      bundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash },
+    gateEEvidence: lkgEvidence, migrationSchemaHash: "c".repeat(64) },
+  lastKnownGoodSelection: { source: "CURRENT_ACCEPTED_V2", priorRecordHash: null },
 });
 
 describe("Track B PREPROD rollback record store", () => {
@@ -103,7 +109,9 @@ describe("Track B PREPROD rollback record store", () => {
     await store.persist(rollbackRecord);
     await expect(store.persist({
       ...rollbackRecord,
-      previousService: { ...previousService, buildId: "d".repeat(64) },
+      lastKnownGood: { ...rollbackRecord.lastKnownGood,
+        service: { ...previousService, buildId: "d".repeat(64) } },
+      lastKnownGoodSelection: rollbackRecord.lastKnownGoodSelection,
     })).rejects.toThrow("TRACK_B_B3_2_ROLLBACK_RECORD_INVALID");
     await writeFile(join(directory, `${"f".repeat(64)}.json`), "{}\n", "utf8");
     await expect(store.read("f".repeat(64))).rejects.toThrow(
@@ -178,6 +186,88 @@ describe("Track B PREPROD Docker service boundary", () => {
     await expect(mismatchedReleaseController.inspectRunning(expected)).resolves.toBeNull();
   });
 
+  it("refuses a running service when its exact startup artifact cannot be read", async () => {
+    const startupPackageFile = "/opt/lana-chatbot/releases/track-b/__test-unbound-startup.json";
+    const run = vi.fn(async (_command: string, args: readonly string[]) => {
+      if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
+        .map((key) => targetRuntimeConfig[key]).join("\n");
+      if (args[0] === "image") return JSON.stringify({ Id: `sha256:${targetService.imageId}`,
+        Config: { Labels: {
+          "org.opencontainers.image.revision": targetService.releaseRevision,
+          "com.lana.build-id": targetService.buildId,
+          "com.lana.runtime-config-hash": targetService.runtimeConfigHash,
+        } } });
+      return JSON.stringify({ Image: `sha256:${targetService.imageId}`, RestartCount: 0,
+        State: { Status: "running", Health: { Status: "healthy" } },
+        Config: { Env: ["DF13_COMMERCE_PREPROD_STARTUP_FILE=/run/df13/commerce-startup.json"], Labels: {
+          "org.opencontainers.image.revision": targetService.releaseRevision,
+          "com.lana.build-id": targetService.buildId,
+          "com.lana.runtime-config-hash": targetService.runtimeConfigHash,
+        } },
+        Mounts: [{ Type: "bind", Source: startupPackageFile,
+          Destination: "/run/df13/commerce-startup.json", RW: false }] });
+    });
+    const controller = new DockerComposeTrackBPreprodServiceController({
+      composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
+      projectDirectory: "/opt/lana-chatbot/current/deploy",
+      startupPackageFile, startupPackageHash: "a".repeat(64),
+      imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId, run,
+      readStartupPackage: vi.fn(async () => { throw new Error("unreadable"); }),
+    });
+
+    await expect(controller.inspectRunning(targetService)).resolves.toBeNull();
+  });
+
+  it("proves the real Compose read-only startup bind and rejects every ambiguous mount shape", async () => {
+    const startupPackageFile = "/opt/lana-chatbot/releases/track-b/commerce-startup.json";
+    const startup = { schemaVersion: 1, release: "track-b-v2" };
+    const startupPackageHash = createHash("sha256").update(canonicalJsonV1(startup), "utf8").digest("hex");
+    const inspectFor = (mounts: unknown) => JSON.stringify({ Image: `sha256:${targetService.imageId}`,
+      RestartCount: 0, State: { Status: "running", Health: { Status: "healthy" } },
+      Config: { Env: ["DF13_COMMERCE_PREPROD_STARTUP_FILE=/run/df13/commerce-startup.json"], Labels: {
+        "org.opencontainers.image.revision": targetService.releaseRevision,
+        "com.lana.build-id": targetService.buildId,
+        "com.lana.runtime-config-hash": targetService.runtimeConfigHash,
+      } }, Mounts: mounts });
+    const runFor = (mounts: unknown) => vi.fn(async (_command: string, args: readonly string[]) => {
+      if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1.map((key) => targetRuntimeConfig[key]).join("\n");
+      if (args[0] === "image") return JSON.stringify({ Id: `sha256:${targetService.imageId}`,
+        Config: { Labels: { "org.opencontainers.image.revision": targetService.releaseRevision,
+          "com.lana.build-id": targetService.buildId,
+          "com.lana.runtime-config-hash": targetService.runtimeConfigHash } } });
+      return inspectFor(mounts);
+    });
+    const controllerFor = (mounts: unknown) => new DockerComposeTrackBPreprodServiceController({
+      composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
+      projectDirectory: "/opt/lana-chatbot/current/deploy", startupPackageFile,
+      startupPackageHash, imageReference: "lana-chatbot-app:track-b-target",
+      expectedImageId: targetService.imageId, run: runFor(mounts),
+      readStartupPackage: vi.fn(async () => startup),
+    });
+    const exact = [{ Type: "bind", Source: startupPackageFile,
+      Destination: "/run/df13/commerce-startup.json", RW: false }];
+    await expect(controllerFor(exact).inspectRunning(targetService)).resolves.toEqual(targetService);
+    for (const mounts of [
+      [],
+      [...exact, exact[0]],
+      [{ ...exact[0], Source: "/opt/lana-chatbot/releases/track-b/other.json" }],
+      [{ ...exact[0], Destination: "/run/df13/other.json" }],
+      [...exact, { ...exact[0], Destination: "/run/df13/duplicate.json" }],
+      [{ ...exact[0], Type: "volume" }],
+      [{ ...exact[0], RW: true }],
+    ]) {
+      await expect(controllerFor(mounts).inspectRunning(targetService)).resolves.toBeNull();
+    }
+    const mismatchedHash = new DockerComposeTrackBPreprodServiceController({
+      composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
+      projectDirectory: "/opt/lana-chatbot/current/deploy",
+      startupPackageFile, startupPackageHash, imageReference: "lana-chatbot-app:track-b-target",
+      expectedImageId: targetService.imageId, run: runFor(exact),
+      readStartupPackage: vi.fn(async () => ({ ...startup, release: "other" })),
+    });
+    await expect(mismatchedHash.inspectRunning(targetService)).resolves.toBeNull();
+  });
+
   it("builds only a clean exact source tree and reads back all immutable image labels", async () => {
     const sourceTree = "9".repeat(40);
     const buildId = trackBBuildIdV1({ sourceCommit: targetService.releaseRevision, sourceTree,
@@ -224,6 +314,7 @@ describe("Track B PREPROD Docker service boundary", () => {
   });
 
   it("stages by proving an exact local image without starting a container", async () => {
+    const readStartupPackage = vi.fn(async () => { throw new Error("stage must not read runtime bind"); });
     const run = vi.fn(async (command: string, args: readonly string[]) => {
       expect(command).toBe("docker");
       if (args[0] === "ps") return "";
@@ -251,9 +342,10 @@ describe("Track B PREPROD Docker service boundary", () => {
       composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
       projectDirectory: "/opt/lana-chatbot/current/deploy",
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/commerce-startup.json",
+      startupPackageHash: "a".repeat(64),
       imageReference: "lana-chatbot-app:track-b-target",
       expectedImageId: targetService.imageId,
-      run,
+      run, readStartupPackage,
     });
     await expect(controller.stage(previousService, targetService)).resolves.toEqual(targetService);
     expect(run.mock.calls.some(([, args]) => args[0] === "create" && args.includes("--network") &&
@@ -262,6 +354,7 @@ describe("Track B PREPROD Docker service boundary", () => {
       args.includes("config") && args.includes("--quiet") &&
       args.includes("/opt/lana-chatbot/shared/.env.infrastructure"))).toBe(true);
     expect(run.mock.calls.some(([, args]) => args[0] === "compose" && args.includes("up"))).toBe(false);
+    expect(readStartupPackage).not.toHaveBeenCalled();
   });
 
   it("refuses to stage when the exact PREPROD compose environment is incomplete", async () => {
@@ -457,34 +550,43 @@ describe("Track B PREPROD Docker service boundary", () => {
 });
 
 describe("Track B PREPROD mutation adapter", () => {
-  it("recovers an exact stopped V1 source before CAS and releases only after runtime and consumers converge", async () => {
+  it("recovers an exact stopped LKG V2 source before CAS and releases only after convergence", async () => {
     const priorConfig = { ...targetRuntimeConfig,
-      REALTIME_RELEASE_ID: "20260828-df13-preprod-commerce-abea1fb" };
+      REALTIME_RELEASE_ID: previousService.releaseRevision };
     const priorRuntimeConfigHash = trackBRuntimeConfigHashV1(priorConfig);
-    const prior = { ...previousService, runtimeConfigHash: priorRuntimeConfigHash,
-      buildId: trackBLegacyBuildIdV1({ sourceCommit: previousService.releaseRevision,
-        imageId: previousService.imageId, runtimeConfigHash: priorRuntimeConfigHash }) };
+    const prior = { ...previousService, runtimeConfigHash: priorRuntimeConfigHash };
     const previous = pointer("10000000-0000-4000-8000-000000000001", 6,
-      DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash);
+      DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash);
     const target = pointer("10000000-0000-4000-8000-000000000002", 7,
       DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash);
-    const record = createTrackBReleaseLocalRollbackRecord({ selectedSourceCommit: targetService.releaseRevision,
-      previousService: prior, targetService,
-      previousAuthority: { modeVersionId: previous.version.modeVersionId,
-        contentHash: previous.version.contentHash, bundleHash: previous.version.authorityBundleHash },
-      targetAuthority: { modeVersionId: target.version.modeVersionId,
-        contentHash: target.version.contentHash, bundleHash: target.version.authorityBundleHash } });
+    const record = createTrackBReleaseLocalRollbackRecord({
+      candidate: { ...rollbackRecord.candidate, service: targetService,
+        authority: { pointerRevision: target.pointerRevision, modeVersionId: target.version.modeVersionId,
+          contentHash: target.version.contentHash, bundleHash: target.version.authorityBundleHash } },
+      lastKnownGood: { ...rollbackRecord.lastKnownGood, service: prior,
+        authority: { pointerRevision: previous.pointerRevision, modeVersionId: previous.version.modeVersionId,
+          contentHash: previous.version.contentHash, bundleHash: previous.version.authorityBundleHash } },
+      lastKnownGoodSelection: rollbackRecord.lastKnownGoodSelection,
+    });
     let main = { identity: prior, status: "running" };
     let mainRuntimeConfig = priorConfig;
+    let mainStartupPackageFile = "/opt/lana-chatbot/releases/track-b/prior-rev6.json";
     let staged: TrackBServiceReleaseIdentity | null = null;
+    const startupPackages = new Map<string, unknown>([
+      ["/opt/lana-chatbot/releases/track-b/prior-rev6.json", { revision: 6 }],
+      ["/opt/lana-chatbot/releases/track-b/target-rev7.json", { revision: 7 }],
+      ["/opt/lana-chatbot/releases/track-b/prior-rev8.json", { revision: 8 }],
+    ]);
+    const startupHash = (path: string) => createHash("sha256")
+      .update(canonicalJsonV1(startupPackages.get(path)), "utf8").digest("hex");
     const composeCalls: Array<{ args: readonly string[]; env: Record<string, string> }> = [];
     const run = vi.fn(async (_command: string, args: readonly string[], env: Record<string, string>) => {
       const tag = String(args.at(-1));
       const expected = tag.includes("previous") ? prior : targetService;
       if (args[0] === "image") return JSON.stringify({ Id: `sha256:${expected.imageId}`,
         Config: { Labels: { "org.opencontainers.image.revision": expected.releaseRevision,
-          ...(expected === targetService ? { "com.lana.build-id": expected.buildId,
-            "com.lana.runtime-config-hash": expected.runtimeConfigHash } : {}) } } });
+          "com.lana.build-id": expected.buildId,
+          "com.lana.runtime-config-hash": expected.runtimeConfigHash } } });
       if (args[0] === "ps") return String(args[3]).includes("track-b-staged")
         ? staged ? "staged-id" : "" : "main-id";
       if (args[0] === "create") { staged = expected; return "staged-id"; }
@@ -494,6 +596,7 @@ describe("Track B PREPROD mutation adapter", () => {
         if (args.includes("config")) return "";
         composeCalls.push({ args, env });
         mainRuntimeConfig = { ...priorConfig, REALTIME_RELEASE_ID: env.REALTIME_RELEASE_ID ?? "" };
+        mainStartupPackageFile = env.DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE ?? "";
         main = { identity: prior, status: "running" }; return "";
       }
       if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
@@ -502,26 +605,31 @@ describe("Track B PREPROD mutation adapter", () => {
       const observed = stagedInspect ? staged : main.identity;
       return JSON.stringify({ Image: `sha256:${observed?.imageId}`, RestartCount: 0,
         State: { Status: stagedInspect ? "created" : main.status, Health: { Status: "healthy" } },
+        Mounts: stagedInspect ? [] : [{ Type: "bind", Source: mainStartupPackageFile,
+          Destination: "/run/df13/commerce-startup.json", RW: false }],
         Config: { Labels: { "org.opencontainers.image.revision": observed?.releaseRevision,
-          ...(observed === targetService ? { "com.lana.build-id": observed.buildId,
-            "com.lana.runtime-config-hash": observed.runtimeConfigHash } : {}),
+          "com.lana.build-id": observed?.buildId,
+          "com.lana.runtime-config-hash": observed?.runtimeConfigHash,
           ...(stagedInspect ? { "com.lana.track-b.stage": "TRACK_B_B3_2_STOPPED_NON_ADMITTING" } : {}) } } });
     });
     const common = { composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
       projectDirectory: "/opt/lana-chatbot/current/deploy", run };
+    const readStartupPackage = async (path: string) => startupPackages.get(path);
     const currentPriorController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/prior-rev6.json",
+      startupPackageHash: startupHash("/opt/lana-chatbot/releases/track-b/prior-rev6.json"),
       imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
-      runtimeReleaseId: "20260828-df13-preprod-commerce-abea1fb",
-      labelPolicy: "OCI_REVISION_ONLY" });
+      readStartupPackage });
     const targetController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/target-rev7.json",
-      imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId });
+      startupPackageHash: startupHash("/opt/lana-chatbot/releases/track-b/target-rev7.json"),
+      imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId,
+      readStartupPackage });
     const reversePriorController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/prior-rev8.json",
+      startupPackageHash: startupHash("/opt/lana-chatbot/releases/track-b/prior-rev8.json"),
       imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
-      runtimeReleaseId: "20260828-df13-preprod-commerce-abea1fb",
-      labelPolicy: "OCI_REVISION_ONLY" });
+      readStartupPackage });
     const service = new TrackBPreprodServicePairController({ previousIdentity: prior,
       targetIdentity: targetService, previous: currentPriorController, target: targetController,
       startRoutes: [
@@ -533,6 +641,7 @@ describe("Track B PREPROD mutation adapter", () => {
       fenceToken: "30000000-0000-4000-8000-000000000001", epoch: 1 };
     const releaseFence = vi.fn(async () => ({ status: "RELEASED" as const }));
     const database = { acquireFence: vi.fn(async () => ({ status: "HELD" as const, lease })),
+      observeFence: vi.fn(),
       releaseFence, readAdmissionHold: vi.fn(async () => ({ status: "HELD" as const,
         source: "DATABASE" as const, pageId: "1198992073286645", channel: "MESSENGER",
         fenceId: lease.fenceId, epoch: 1, released: false,
@@ -543,16 +652,18 @@ describe("Track B PREPROD mutation adapter", () => {
         queuedAuthorityDependentWork: 0 })),
       mutateExactPointer: vi.fn(async () => ({ status: "CAS_MISMATCH" as const })),
       readActivePointer: vi.fn(async () => previous), readActivationAudit: vi.fn(),
-      proveRuntimeResolution: vi.fn(async () => "EXACT" as const), readExactVersion: vi.fn() };
+      proveRuntimeResolution: vi.fn(async () => "EXACT" as const),
+      readDatabaseClock: vi.fn(async () => "2026-09-03T00:00:00.000000+00"), readExactVersion: vi.fn(),
+      readTrackBV2LkgSchemaCompatibility: vi.fn(async () => ({ status: "EXACT" as const,
+        source: "DATABASE" as const, migrationSchemaHash: record.candidate.migrationSchemaHash })) };
     const ports = createTrackBCommerceAuthorityPreprodAdapter({ database, service,
       rollbackStore: { read: vi.fn(async () => record), persist: vi.fn() },
       quiescence: { timeoutMs: 10, pollMs: 1, wait: async () => undefined } });
     const readConsumers = vi.fn(ports.readConsumerAuthorities);
     const observedPorts = { ...ports, readConsumerAuthorities: readConsumers };
     await expect(executeTrackBCommerceAuthorityMutation({ operationId:
-      "40000000-0000-4000-8000-000000000001", direction: "ACTIVATE_TRACK_B", previous,
-    target, rollbackRecord: record, releaseEvidence: {
-      activationReleaseRevision: targetService.releaseRevision } as never,
+      "40000000-0000-4000-8000-000000000001", direction: "ACTIVATE_V2_CANDIDATE", previous,
+    target, rollbackRecord: record, releaseEvidence: record.candidate.gateEEvidence,
     ports: observedPorts })).resolves.toEqual({
       status: "BLOCKED_PREVIOUS", sideEffects: "CONTROL_PLANE_ONLY",
       reasonCodes: ["TRACK_B_B3_2_POINTER_NOT_MUTATED"],
@@ -566,9 +677,11 @@ describe("Track B PREPROD mutation adapter", () => {
         "/opt/lana-chatbot/releases/track-b/prior-rev6.json",
     });
     expect(composeCalls[0]?.env).toHaveProperty("REALTIME_RELEASE_ID",
-      "20260828-df13-preprod-commerce-abea1fb");
+      previousService.releaseRevision);
     expect(database.proveRuntimeResolution).toHaveBeenCalledWith({ pointer: previous,
-      notBefore: expect.any(String) });
+      notBefore: "2026-09-03T00:00:00.000000+00" });
+    expect(database.readDatabaseClock.mock.invocationCallOrder[0])
+      .toBeLessThan(database.proveRuntimeResolution.mock.invocationCallOrder[0] ?? 0);
     expect(readConsumers).toHaveBeenCalledTimes(1);
     expect(releaseFence).toHaveBeenCalledWith(lease);
   });
@@ -582,7 +695,15 @@ describe("Track B PREPROD mutation adapter", () => {
         imageId: previousService.imageId, runtimeConfigHash: priorRuntimeConfigHash }) };
     let main = { identity: targetService, status: "running" };
     let mainRuntimeConfig = targetRuntimeConfig;
+    let mainStartupPackageFile = "/opt/lana-chatbot/releases/track-b/target.json";
     let staged: TrackBServiceReleaseIdentity | null = null;
+    const startupPackages = new Map<string, unknown>([
+      ["/opt/lana-chatbot/releases/track-b/rollback-current.json", { role: "current-lkg" }],
+      ["/opt/lana-chatbot/releases/track-b/rollback-recovery.json", { role: "reverse-cas-lkg" }],
+      ["/opt/lana-chatbot/releases/track-b/target.json", { role: "candidate" }],
+    ]);
+    const startupHash = (path: string) => createHash("sha256")
+      .update(canonicalJsonV1(startupPackages.get(path)), "utf8").digest("hex");
     const run = vi.fn(async (_command: string, args: readonly string[], env: Record<string, string>) => {
       const tag = String(args.at(-1));
       const expected = tag.includes("previous") ? prior : targetService;
@@ -598,6 +719,7 @@ describe("Track B PREPROD mutation adapter", () => {
       if (args[0] === "compose") {
         if (args.includes("config")) return "";
         mainRuntimeConfig = { ...priorConfig, REALTIME_RELEASE_ID: env.REALTIME_RELEASE_ID ?? "" };
+        mainStartupPackageFile = env.DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE ?? "";
         main = { identity: prior, status: "running" }; return "";
       }
       if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
@@ -606,6 +728,8 @@ describe("Track B PREPROD mutation adapter", () => {
       const observed = stagedInspect ? staged : main.identity;
       return JSON.stringify({ Image: `sha256:${observed?.imageId}`, RestartCount: 0,
         State: { Status: stagedInspect ? "created" : main.status, Health: { Status: "healthy" } },
+        Mounts: stagedInspect ? [] : [{ Type: "bind", Source: mainStartupPackageFile,
+          Destination: "/run/df13/commerce-startup.json", RW: false }],
         Config: { Labels: { "org.opencontainers.image.revision": observed?.releaseRevision,
           ...(observed === targetService ? { "com.lana.build-id": observed.buildId,
             "com.lana.runtime-config-hash": observed.runtimeConfigHash } : {}),
@@ -613,22 +737,33 @@ describe("Track B PREPROD mutation adapter", () => {
     });
     const common = { composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
       projectDirectory: "/opt/lana-chatbot/current/deploy", run };
+    const readStartupPackage = async (path: string) => startupPackages.get(path);
     const previousController = new DockerComposeTrackBPreprodServiceController({ ...common,
-      startupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback.json",
+      startupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-current.json",
+      startupPackageHash: startupHash("/opt/lana-chatbot/releases/track-b/rollback-current.json"),
       imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
-      runtimeReleaseId,
+      runtimeReleaseId, readStartupPackage,
+      labelPolicy: "OCI_REVISION_ONLY" });
+    const recoveryController = new DockerComposeTrackBPreprodServiceController({ ...common,
+      startupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-recovery.json",
+      startupPackageHash: startupHash("/opt/lana-chatbot/releases/track-b/rollback-recovery.json"),
+      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+      runtimeReleaseId, readStartupPackage,
       labelPolicy: "OCI_REVISION_ONLY" });
     const targetController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",
-      imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId });
-    const recoveryPointer = { pointerRevision: 8 } as never;
+      startupPackageHash: startupHash("/opt/lana-chatbot/releases/track-b/target.json"),
+      imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId,
+      readStartupPackage });
+    const recoveryPointer = pointer("10000000-0000-4000-8000-000000000001", 8,
+      DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash);
     const service = new TrackBPreprodServicePairController({ previousIdentity: prior,
       targetIdentity: targetService,
       previous: previousController, target: targetController,
       startRoutes: [
         { identity: prior, pointer: { pointerRevision: 6 } as never, controller: previousController },
         { identity: targetService, pointer: { pointerRevision: 7 } as never, controller: targetController },
-        { identity: prior, pointer: recoveryPointer, controller: previousController },
+        { identity: prior, pointer: recoveryPointer, controller: recoveryController },
       ] });
     const held = { status: "HELD" as const, source: "DATABASE" as const,
       pageId: "1198992073286645", channel: "MESSENGER", fenceId:
@@ -636,9 +771,12 @@ describe("Track B PREPROD mutation adapter", () => {
       guardedClaims: ["webhook_inbox:PROCESSING", "meta_outbox:SENDING",
         "pancake_tag_outbox:APPLYING"] };
     const adapter = createTrackBCommerceAuthorityPreprodAdapter({ service,
-      database: { acquireFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
-        readQuiescence: vi.fn(), mutateExactPointer: vi.fn(), readActivePointer: vi.fn(),
-        readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn() },
+      database: { acquireFence: vi.fn(), observeFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
+        readQuiescence: vi.fn(), mutateExactPointer: vi.fn(),
+        readActivePointer: vi.fn(async () => recoveryPointer),
+        readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(async () => "EXACT" as const),
+        readDatabaseClock: vi.fn(async () => "2026-09-03T00:00:00.000000+00"), readExactVersion: vi.fn(),
+        readTrackBV2LkgSchemaCompatibility: vi.fn() },
       rollbackStore: { read: vi.fn(), persist: vi.fn() },
       quiescence: { timeoutMs: 1, pollMs: 1, wait: async () => undefined } });
     await expect(adapter.restorePreviousService({ lease: { fenceId: held.fenceId,
@@ -646,6 +784,25 @@ describe("Track B PREPROD mutation adapter", () => {
     failedService: targetService, previousService: prior, pointer: recoveryPointer })).resolves.toEqual({
       status: "HEALTHY", admission: "HELD", observedService: prior });
     expect(main).toEqual({ identity: prior, status: "running" });
+    await expect(adapter.readRuntimeAuthority({ lease: { fenceId: held.fenceId,
+      fenceToken: "30000000-0000-4000-8000-000000000001", epoch: 1 },
+    service: prior, pointer: recoveryPointer })).resolves.toMatchObject({
+      status: "EXACT", service: prior, admission: "HELD",
+    });
+    await expect(service.inspectRunning(prior, { pointerRevision: 6 } as never))
+      .resolves.toBeNull();
+    const reentered = createTrackBCommerceAuthorityPreprodAdapter({ service,
+      database: { acquireFence: vi.fn(), observeFence: vi.fn(), releaseFence: vi.fn(),
+        readAdmissionHold: vi.fn(), readQuiescence: vi.fn(), mutateExactPointer: vi.fn(),
+        readActivePointer: vi.fn(async () => recoveryPointer), readActivationAudit: vi.fn(),
+        proveRuntimeResolution: vi.fn(async () => "EXACT" as const), readDatabaseClock: vi.fn(),
+        readExactVersion: vi.fn(), readTrackBV2LkgSchemaCompatibility: vi.fn() },
+      rollbackStore: { read: vi.fn(), persist: vi.fn() },
+      quiescence: { timeoutMs: 1, pollMs: 1, wait: async () => undefined } });
+    await expect(reentered.readReleasedRuntimeAuthority({ service: prior,
+      pointer: recoveryPointer, fenceId: held.fenceId, epoch: 1 })).resolves.toMatchObject({
+      status: "EXACT", service: prior, admission: "OPEN",
+    });
   });
 
   it("restores the exact prior image when a failed start leaves no main container", async () => {
@@ -663,9 +820,11 @@ describe("Track B PREPROD mutation adapter", () => {
       guardedClaims: ["webhook_inbox:PROCESSING", "meta_outbox:SENDING",
         "pancake_tag_outbox:APPLYING"] };
     const adapter = createTrackBCommerceAuthorityPreprodAdapter({ service,
-      database: { acquireFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
+      database: { acquireFence: vi.fn(), observeFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
         readQuiescence: vi.fn(), mutateExactPointer: vi.fn(), readActivePointer: vi.fn(),
-        readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn() },
+        readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(),
+        readDatabaseClock: vi.fn(async () => "2026-09-03T00:00:00.000000+00"), readExactVersion: vi.fn(),
+        readTrackBV2LkgSchemaCompatibility: vi.fn() },
       rollbackStore: { read: vi.fn(), persist: vi.fn() },
       quiescence: { timeoutMs: 1, pollMs: 1, wait: async () => undefined } });
     await expect(adapter.restorePreviousService({ lease: { fenceId: held.fenceId,
@@ -681,7 +840,7 @@ describe("Track B PREPROD mutation adapter", () => {
 
   it("proves admission through the 0038 database boundary and bounded zero-work quiescence", async () => {
     const database = {
-      acquireFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => ({
+      acquireFence: vi.fn(), observeFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => ({
         status: "HELD" as const, source: "DATABASE" as const,
         pageId: "1198992073286645", channel: "MESSENGER",
         fenceId: "20000000-0000-4000-8000-000000000001", epoch: 1,
@@ -695,7 +854,9 @@ describe("Track B PREPROD mutation adapter", () => {
         .mockResolvedValueOnce({ activeInbox: 0, activeMetaOutbox: 0, activePancakeOutbox: 0,
           inFlightAuthorityDependentWork: 0, queuedAuthorityDependentWork: 3 }),
       mutateExactPointer: vi.fn(), readActivePointer: vi.fn(), readActivationAudit: vi.fn(),
-      proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn(),
+      proveRuntimeResolution: vi.fn(),
+      readDatabaseClock: vi.fn(async () => "2026-09-03T00:00:00.000000+00"), readExactVersion: vi.fn(),
+      readTrackBV2LkgSchemaCompatibility: vi.fn(),
     };
     const service = {
       stage: vi.fn(), discard: vi.fn(), stop: vi.fn(async () => previousService),
@@ -729,12 +890,14 @@ describe("Track B PREPROD mutation adapter", () => {
         "webhook_inbox:PROCESSING", "meta_outbox:SENDING", "pancake_tag_outbox:APPLYING",
       ] };
     const database = {
-      acquireFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
+      acquireFence: vi.fn(), observeFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
       readQuiescence: vi.fn(async () => ({ activeInbox: 1, activeMetaOutbox: 0,
         activePancakeOutbox: 0, inFlightAuthorityDependentWork: 1,
       queuedAuthorityDependentWork: 9 })), mutateExactPointer: vi.fn(),
       readActivePointer: vi.fn(), readActivationAudit: vi.fn(),
-      proveRuntimeResolution: vi.fn(), readExactVersion: vi.fn(),
+      proveRuntimeResolution: vi.fn(),
+      readDatabaseClock: vi.fn(async () => "2026-09-03T00:00:00.000000+00"), readExactVersion: vi.fn(),
+      readTrackBV2LkgSchemaCompatibility: vi.fn(),
     };
     const adapter = createTrackBCommerceAuthorityPreprodAdapter({
       database,

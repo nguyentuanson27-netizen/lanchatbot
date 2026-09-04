@@ -1,9 +1,7 @@
 import { createHash } from "node:crypto";
+import { canonicalJsonV1 } from "@lana/contracts";
 import { Pool, type PoolClient } from "pg";
-import {
-  DF13_COMMERCE_AUTHORITY_BUNDLE_V1,
-  DF13_COMMERCE_AUTHORITY_BUNDLE_V2,
-} from "./df13-commerce-authority-bundle.js";
+import { DF13_COMMERCE_AUTHORITY_BUNDLE_V2 } from "./df13-commerce-authority-bundle.js";
 import {
   runtimeBehaviorModeContentHash,
   type RuntimeBehaviorModePointerRecord,
@@ -15,10 +13,24 @@ const CHANNEL = "MESSENGER";
 const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const CONTENT_HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const BUNDLE_HASH_PATTERN = /^[a-f0-9]{64}$/u;
+const DATABASE_TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}[+-]\d{2}(?::?\d{2})?$/u;
+const TIMESTAMPTZ_INPUT_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3,6}(?:Z|[+-]\d{2}(?::?\d{2})?)$/u;
 const PREPARE_REASON_PATTERN = /^TRACK_B_B3_2_PREPARE:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
+const TRACK_B_V2_LKG_SCHEMA_MIGRATIONS = Object.freeze([
+  Object.freeze({ name: "0036_df13_commerce_authority_fence", checksum: "d709617e10554a0186b9233a404ef7faadfdf3576ba3c133efe51a56c2214425" }),
+  Object.freeze({ name: "0037_track_b_commerce_authority_replacement", checksum: "40b1ef14e3f7b2e037063de1f8d8ff7f804d069f8649115be6c29b1b56399c20" }),
+  Object.freeze({ name: "0038_track_b_commerce_admission_gate", checksum: "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140" }),
+  Object.freeze({ name: "0039_track_b_v2_lkg_cutover_fence", checksum: "f9bb37c95ba77b6947958442cc223f5f4583d43cba4591de5abfaed002e068ca" }),
+] as const);
 const ADMISSION_MIGRATION_NAME = "0038_track_b_commerce_admission_gate";
-const ADMISSION_MIGRATION_HASH = "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140";
+const ADMISSION_MIGRATION_HASH = TRACK_B_V2_LKG_SCHEMA_MIGRATIONS[2].checksum;
 const ADMISSION_FUNCTION_SOURCE_HASH = "d083f18d4a62cf313af3baba8c3a145225e9ee7852e4192119b158d34c8ac5ba";
+const V2_LKG_FENCE_GUARD_SOURCE_HASH = "28ec7165520b614e7a40ac2e80fc781ec6fdeef2ae08b3fd82ff995e20c73ddc";
+const TRACK_B_COMMERCE_ADMISSION_TABLES_V1 = Object.freeze([
+  "meta_outbox",
+  "pancake_tag_outbox",
+  "webhook_inbox",
+] as const);
 
 export type TrackBCommerceIdentity = Readonly<{
   modeVersionId: string;
@@ -36,7 +48,7 @@ export type TrackBCommerceFenceLease = Readonly<{
 export type TrackBCommercePointerMutationInput = Readonly<{
   pageId: string;
   channel: string;
-  operation: "ACTIVATE_TRACK_B" | "ROLLBACK_TRACK_B";
+  operation: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2";
   expectedCurrent: TrackBCommerceIdentity;
   target: Omit<TrackBCommerceIdentity, "pointerRevision">;
   lease: TrackBCommerceFenceLease;
@@ -59,6 +71,12 @@ export type TrackBCommerceAdmissionReadbackRecord = Readonly<{
   epoch: number | null;
   released: boolean | null;
   guardedClaims: readonly string[];
+}>;
+
+export type TrackBV2LkgSchemaCompatibilityReadback = Readonly<{
+  status: "EXACT" | "AMBIGUOUS";
+  source: "DATABASE";
+  migrationSchemaHash: string | null;
 }>;
 
 type Row = Record<string, unknown>;
@@ -145,6 +163,21 @@ function exactIdentity(
 
 function hashToken(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
+function schemaCompatibilityHash(input: Readonly<{
+  migrations: readonly Readonly<{ name: string; checksum: string }>[];
+  cutoverFenceGuardSourceHash: string;
+  admissionGuardSourceHash: string;
+  admissionTriggerTables: readonly string[];
+}>): string {
+  return createHash("sha256").update(JSON.stringify({
+    contractVersion: "TRACK_B_B3_2_V2_LKG_SCHEMA_COMPATIBILITY_V1",
+    migrations: input.migrations,
+    cutoverFenceGuardSourceHash: input.cutoverFenceGuardSourceHash,
+    admissionGuardSourceHash: input.admissionGuardSourceHash,
+    admissionTriggerTables: input.admissionTriggerTables,
+  }), "utf8").digest("hex");
 }
 
 async function rollbackQuietly(client: PoolClient): Promise<void> {
@@ -307,8 +340,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
     notBefore: string;
   }>): Promise<"EXACT" | "MISSING" | "AMBIGUOUS"> {
     requiredScope(input.pageId, input.channel);
-    const notBefore = new Date(input.notBefore);
-    if (!Number.isFinite(notBefore.getTime()) || input.workerId !== "realtime-worker-1") {
+    if (!TIMESTAMPTZ_INPUT_PATTERN.test(input.notBefore) || input.workerId !== "realtime-worker-1") {
       throw new Error("TRACK_B_B3_2_RUNTIME_READBACK_INPUT_INVALID");
     }
     const result = await this.#pool.query(
@@ -325,11 +357,11 @@ export class PostgresTrackBCommerceAuthorityWriter {
          JOIN runtime_behavior_mode_versions AS version
            ON version.mode_version_id=audit.mode_version_id
         WHERE audit.page_id=$1 AND audit.channel=$2 AND audit.worker_id=$6
-          AND audit.resolved_at >= $8`,
+          AND audit.created_at >= $8::timestamptz`,
       [PAGE_ID, CHANNEL,
         requiredUuid(input.modeVersionId, "TRACK_B_B3_2_VERSION_INVALID"),
         requiredContentHash(input.contentHash), requiredRevision(input.pointerRevision),
-        input.workerId, requiredBundleHash(input.authorityBundleHash), notBefore],
+        input.workerId, requiredBundleHash(input.authorityBundleHash), input.notBefore],
     );
     const exactCount = Number((result.rows[0] as Row | undefined)?.exact_count);
     const conflictingCount = Number((result.rows[0] as Row | undefined)?.conflicting_count);
@@ -337,6 +369,134 @@ export class PostgresTrackBCommerceAuthorityWriter {
         exactCount < 0 || conflictingCount < 0) return "AMBIGUOUS";
     return exactCount >= 1 && conflictingCount === 0
       ? "EXACT" : exactCount === 0 && conflictingCount === 0 ? "MISSING" : "AMBIGUOUS";
+  }
+
+  async readDatabaseClock(): Promise<string> {
+    const result = await this.#pool.query(
+      "SELECT to_char(clock_timestamp(), 'YYYY-MM-DD\"T\"HH24:MI:SS.USOF') AS operation_now",
+    );
+    const observed = (result.rows[0] as Row | undefined)?.operation_now;
+    if (typeof observed !== "string" || !DATABASE_TIMESTAMP_PATTERN.test(observed)) {
+      throw new Error("TRACK_B_B3_2_DATABASE_CLOCK_INVALID");
+    }
+    return observed;
+  }
+
+  async readTrackBV2LkgSchemaCompatibility(): Promise<TrackBV2LkgSchemaCompatibilityReadback> {
+    const ambiguous: TrackBV2LkgSchemaCompatibilityReadback = {
+      status: "AMBIGUOUS", source: "DATABASE", migrationSchemaHash: null,
+    };
+    const qualifiedLedger = `"${this.#admissionSchema}".schema_migrations`;
+    const client = await this.#pool.connect();
+    try {
+      await client.query("BEGIN READ ONLY");
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [
+        `df13-cutover:${PAGE_ID}:${CHANNEL}`,
+      ]);
+      const [ledgerResult, fenceGuardResult, admissionGuardResult, triggerResult] = await Promise.all([
+        client.query(
+          `SELECT migration_name, checksum_sha256
+             FROM ${qualifiedLedger}
+            WHERE migration_name = ANY($1::text[])
+            ORDER BY migration_name`,
+          [TRACK_B_V2_LKG_SCHEMA_MIGRATIONS.map((migration) => migration.name)],
+        ),
+        client.query(
+          `SELECT p.oid AS function_oid, p.prosrc, p.proconfig, n.nspname AS function_schema,
+                  l.lanname AS language_name,
+                  p.prorettype = 'pg_catalog.trigger'::pg_catalog.regtype AS returns_trigger
+             FROM pg_catalog.pg_proc AS p
+             JOIN pg_catalog.pg_namespace AS n ON n.oid=p.pronamespace
+             JOIN pg_catalog.pg_language AS l ON l.oid=p.prolang
+            WHERE n.nspname=$1 AND p.proname='guard_df13_commerce_cutover_fence_insert_identity'
+              AND p.pronargs=0`,
+          [this.#admissionSchema],
+        ),
+        client.query(
+          `SELECT p.oid AS function_oid, p.prosrc, p.proconfig, n.nspname AS function_schema,
+                  l.lanname AS language_name,
+                  p.prorettype = 'pg_catalog.trigger'::pg_catalog.regtype AS returns_trigger
+             FROM pg_catalog.pg_proc AS p
+             JOIN pg_catalog.pg_namespace AS n ON n.oid=p.pronamespace
+             JOIN pg_catalog.pg_language AS l ON l.oid=p.prolang
+            WHERE n.nspname=$1 AND p.proname='guard_track_b_cutover_admission'
+              AND p.pronargs=0`,
+          [this.#admissionSchema],
+        ),
+        client.query(
+          `SELECT c.relname AS table_name, t.tgenabled, t.tgtype,
+                  t.tgqual, t.tgattr::text AS trigger_columns, t.tgnargs,
+                  p.oid AS function_oid, p.proname AS function_name, p.prosrc, p.proconfig,
+                  pn.nspname AS function_schema, l.lanname AS language_name,
+                  p.prorettype = 'pg_catalog.trigger'::pg_catalog.regtype AS returns_trigger
+             FROM pg_catalog.pg_trigger AS t
+             JOIN pg_catalog.pg_class AS c ON c.oid=t.tgrelid
+             JOIN pg_catalog.pg_namespace AS tn ON tn.oid=c.relnamespace
+             JOIN pg_catalog.pg_proc AS p ON p.oid=t.tgfoid
+             JOIN pg_catalog.pg_namespace AS pn ON pn.oid=p.pronamespace
+             JOIN pg_catalog.pg_language AS l ON l.oid=p.prolang
+            WHERE tn.nspname=$1 AND NOT t.tgisinternal
+              AND (c.relname,t.tgname) IN (
+                ('webhook_inbox','track_b_cutover_admission_webhook_inbox'),
+                ('meta_outbox','track_b_cutover_admission_meta_outbox'),
+                ('pancake_tag_outbox','track_b_cutover_admission_pancake_tag_outbox')
+              )`,
+          [this.#admissionSchema],
+        ),
+      ]);
+      const migrations = ledgerResult.rows.map((row: Row) => ({
+        name: String(row.migration_name), checksum: String(row.checksum_sha256),
+      }));
+      const exactLedger = migrations.length === TRACK_B_V2_LKG_SCHEMA_MIGRATIONS.length &&
+        TRACK_B_V2_LKG_SCHEMA_MIGRATIONS.every((expected) => migrations.some((actual) =>
+          actual.name === expected.name && actual.checksum === expected.checksum));
+      const exactFunction = (rows: readonly Row[], sourceHash: string,
+        expectedProconfig: readonly string[] | null): Row | null => {
+        const row = rows.length === 1 ? rows[0] : undefined;
+        if (row === undefined || row.function_schema !== this.#admissionSchema ||
+            row.language_name !== "plpgsql" || row.returns_trigger !== true ||
+            !Number.isSafeInteger(Number(row.function_oid)) || Number(row.function_oid) <= 0 ||
+            createHash("sha256").update(String(row.prosrc), "utf8").digest("hex") !== sourceHash ||
+            (expectedProconfig === null
+              ? row.proconfig !== null
+              : !Array.isArray(row.proconfig) ||
+                canonicalJsonV1(row.proconfig) !== canonicalJsonV1(expectedProconfig))) return null;
+        return row;
+      };
+      const fenceGuard = exactFunction(fenceGuardResult.rows as Row[], V2_LKG_FENCE_GUARD_SOURCE_HASH, null);
+      const admissionGuard = exactFunction(admissionGuardResult.rows as Row[], ADMISSION_FUNCTION_SOURCE_HASH,
+        ["search_path=pg_catalog"]);
+      const triggerTables = triggerResult.rows.filter((row: Row) =>
+        row.tgenabled === "A" && Number(row.tgtype) === 19 && row.tgqual === null &&
+        row.trigger_columns === "" && Number(row.tgnargs) === 0 &&
+        row.function_name === "guard_track_b_cutover_admission" &&
+        row.function_schema === this.#admissionSchema && row.language_name === "plpgsql" &&
+        row.returns_trigger === true && admissionGuard !== null &&
+        Number(row.function_oid) === Number(admissionGuard.function_oid) &&
+        createHash("sha256").update(String(row.prosrc), "utf8").digest("hex") ===
+          ADMISSION_FUNCTION_SOURCE_HASH && Array.isArray(row.proconfig) &&
+        canonicalJsonV1(row.proconfig) === canonicalJsonV1(["search_path=pg_catalog"])
+      ).map((row: Row) => String(row.table_name)).sort();
+      const exactTriggers = triggerResult.rows.length === TRACK_B_COMMERCE_ADMISSION_TABLES_V1.length &&
+        canonicalJsonV1(triggerTables) === canonicalJsonV1(TRACK_B_COMMERCE_ADMISSION_TABLES_V1);
+      if (!exactLedger || fenceGuard === null || admissionGuard === null || !exactTriggers) {
+        await client.query("COMMIT");
+        return ambiguous;
+      }
+      const migrationSchemaHash = schemaCompatibilityHash({
+        migrations,
+        cutoverFenceGuardSourceHash: V2_LKG_FENCE_GUARD_SOURCE_HASH,
+        admissionGuardSourceHash: ADMISSION_FUNCTION_SOURCE_HASH,
+        admissionTriggerTables: triggerTables,
+      });
+      await client.query("COMMIT");
+      return { status: "EXACT", source: "DATABASE", migrationSchemaHash };
+    } catch (error) {
+      await rollbackQuietly(client);
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async readAdmissionHold(input: Readonly<{
@@ -444,7 +604,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
       pointerRevision: requiredRevision(input.expectedCurrent.pointerRevision),
       authorityBundleHash: requiredBundleHash(input.expectedCurrent.authorityBundleHash),
     };
-    if (expectedCurrent.authorityBundleHash !== DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash) {
+    if (expectedCurrent.authorityBundleHash !== DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash) {
       throw new Error("TRACK_B_B3_2_PREVIOUS_BUNDLE_INVALID");
     }
     const client = await this.#pool.connect();
@@ -458,7 +618,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
       if (
         current.pointerRevision !== expectedCurrent.pointerRevision ||
         !exactIdentity(current.version, expectedCurrent) ||
-        !canonicalCommerceVersion(current.version, DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash)
+        !canonicalCommerceVersion(current.version, DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash)
       ) throw new Error("TRACK_B_B3_2_POINTER_CAS_MISMATCH");
       const payload = {
         confirmationMode: current.version.confirmationMode,
@@ -477,8 +637,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
         if (
           !canonicalCommerceVersion(existing, DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash) ||
           existing.confirmationMode !== current.version.confirmationMode ||
-          existing.createdBy !== input.actor ||
-          !PREPARE_REASON_PATTERN.test(existing.reason)
+          existing.modeVersionId.toLowerCase() !== current.version.modeVersionId.toLowerCase()
         ) throw new Error("TRACK_B_B3_2_PREPARATION_IDEMPOTENCY_MISMATCH");
         await client.query("COMMIT");
         return existing;
@@ -522,7 +681,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
   ): Promise<RuntimeBehaviorModePointerRecord> {
     requiredScope(input.pageId, input.channel);
     if (input.actor !== "TRACK_B_B3_2_WRITER") throw new Error("TRACK_B_B3_2_WRITER_ACTOR_INVALID");
-    const reasonOperation = input.operation === "ACTIVATE_TRACK_B" ? "ACTIVATE" : "ROLLBACK";
+    const reasonOperation = input.operation;
     if (!new RegExp(`^TRACK_B_B3_2_${reasonOperation}:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`, "iu").test(input.reason)) {
       throw new Error("TRACK_B_B3_2_WRITER_REASON_INVALID");
     }
@@ -543,13 +702,9 @@ export class PostgresTrackBCommerceAuthorityWriter {
       fenceToken: requiredUuid(input.lease.fenceToken, "TRACK_B_B3_2_FENCE_TOKEN_INVALID"),
       epoch: requiredRevision(input.lease.epoch),
     };
-    const forward = input.operation === "ACTIVATE_TRACK_B";
-    const expectedPreviousBundle = forward
-      ? DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash
-      : DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash;
-    const expectedTargetBundle = forward
-      ? DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash
-      : DF13_COMMERCE_AUTHORITY_BUNDLE_V1.contractHash;
+    const expectedPreviousBundle = DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash;
+    const expectedTargetBundle = DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash;
+    const forward = input.operation === "ACTIVATE_V2_CANDIDATE";
     if (
       expectedCurrent.authorityBundleHash !== expectedPreviousBundle ||
       target.authorityBundleHash !== expectedTargetBundle
@@ -581,7 +736,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
         targetVersion.confirmationMode !== current.version.confirmationMode
       ) throw new Error("TRACK_B_B3_2_TARGET_IDENTITY_INVALID");
       const verifyPriorTransitionAudit = async (): Promise<void> => {
-        const priorOperation = forward ? "ROLLBACK" : "ACTIVATE";
+        const priorOperation = forward ? "ROLLBACK_TO_LKG_V2" : "ACTIVATE_V2_CANDIDATE";
         if (
           current.updatedBy !== "TRACK_B_B3_2_WRITER" ||
           !new RegExp(`^TRACK_B_B3_2_${priorOperation}:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`, "iu").test(current.reason)
