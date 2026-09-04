@@ -119,7 +119,7 @@ postgresDescribe("0040 Track B operator PostgreSQL boundary", () => {
     await writer.mutateExactPointer({ pageId: page, channel: "MESSENGER", operation: "ACTIVATE_V2_CANDIDATE",
       expectedCurrent: { ...identity, pointerRevision: 3 }, target: { modeVersionId: versionId, contentHash, authorityBundleHash: bundle },
       lease: ambiguous.lease, actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:${ambiguousOperation}` });
-    await pool.query("INSERT INTO runtime_behavior_mode_activation_audit(page_id,channel,previous_version_id,new_version_id,new_pointer_revision,actor,reason,occurred_at) VALUES($1,'MESSENGER',$2,$2,4,'conflict','conflict',now())", [page, versionId]);
+    await pool.query("INSERT INTO runtime_behavior_mode_activation_audit(page_id,channel,previous_version_id,new_version_id,previous_confirmation_mode,new_confirmation_mode,previous_pointer_revision,new_pointer_revision,actor,reason,occurred_at) VALUES($1,'MESSENGER',$2,$2,'V2_ACTIVE','V2_ACTIVE',3,4,'conflict','conflict',now())", [page, versionId]);
     await expect(writer.mutateExactPointer({ pageId: page, channel: "MESSENGER", operation: "ROLLBACK_TO_LKG_V2",
       expectedCurrent: { ...identity, pointerRevision: 4 }, target: { modeVersionId: versionId, contentHash, authorityBundleHash: bundle },
       lease: ambiguous.lease, actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_ROLLBACK_TO_LKG_V2:${ambiguousOperation}` })).rejects.toThrow(/PRIOR_AUDIT_INVALID/u);
