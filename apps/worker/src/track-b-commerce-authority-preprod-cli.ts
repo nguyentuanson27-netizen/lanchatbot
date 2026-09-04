@@ -34,10 +34,15 @@ import {
 } from "./track-b-release-candidate-evidence.js";
 import { createDf13CommercePreprodStartupAuthority,
   parseDf13CommercePreprodStartupInput } from "./df13-commerce-preprod-startup-authority.js";
+import {
+  resolveTrackBPreprodDatabaseUrl,
+  TRACK_B_PREPROD_POSTGRES_CONTAINER,
+} from "./track-b-preprod-database-endpoint.js";
+
+export { resolveTrackBPreprodDatabaseUrl } from "./track-b-preprod-database-endpoint.js";
 
 const DATABASE_SECRET_FILE = "/opt/lana-chatbot/shared/secrets/track_b_authority_operator_database_url";
 const execFile = promisify(execFileCallback);
-const POSTGRES_CONTAINER = "lana-chatbot-postgres";
 const OPERATION_ROOT = "/opt/lana-chatbot/releases/track-b/operations";
 const ROLLBACK_ROOT = "/opt/lana-chatbot/releases/track-b/rollback-records";
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
@@ -447,41 +452,10 @@ export async function validateTrackBPreprodStartupArtifacts(packet: TrackBPrepro
     recoveryStartup: recovery });
 }
 
-export function resolveTrackBPreprodDatabaseUrl(value: string, inspection: unknown): string {
-  let parsed: URL;
-  try { parsed = new URL(value); } catch { throw new Error("TRACK_B_B3_2_DATABASE_CREDENTIAL_INVALID"); }
-  const inspected = object(inspection);
-  const state = object(inspected.State);
-  const health = object(state.Health);
-  const config = object(inspected.Config);
-  const labels = object(config.Labels);
-  const networkSettings = object(inspected.NetworkSettings);
-  const networks = object(networkSettings.Networks);
-  const networkEntries = Object.values(networks).map(object);
-  const address = networkEntries.length === 1 ? networkEntries[0]?.IPAddress : null;
-  const octets = typeof address === "string" && /^\d{1,3}(?:\.\d{1,3}){3}$/u.test(address)
-    ? address.split(".").map(Number) : [];
-  const privateAddress = octets.length === 4 && octets.every((part) => part >= 0 && part <= 255) &&
-    (octets[0] === 10 || (octets[0] === 172 && octets[1]! >= 16 && octets[1]! <= 31) ||
-      (octets[0] === 192 && octets[1] === 168));
-  if (parsed.protocol !== "postgresql:" || parsed.hostname !== "postgres" || parsed.port !== "5432" ||
-      parsed.search !== "" || parsed.hash !== "" ||
-      parsed.username.length === 0 || parsed.password.length === 0 || parsed.pathname !== "/lana_chatbot" ||
-      inspected.Name !== `/${POSTGRES_CONTAINER}` ||
-      state.Running !== true || health.Status !== "healthy" ||
-      labels["com.docker.compose.project"] !== "lana-chatbot" ||
-      labels["com.docker.compose.service"] !== "postgres" || typeof address !== "string" ||
-      !privateAddress) {
-    throw new Error("TRACK_B_B3_2_DATABASE_ENDPOINT_UNPROVEN");
-  }
-  parsed.hostname = address;
-  return parsed.toString();
-}
-
 async function databaseUrl(): Promise<string> {
   const value = (await readFile(DATABASE_SECRET_FILE, "utf8")).trim();
   if (!value) throw new Error("TRACK_B_B3_2_DATABASE_CREDENTIAL_UNAVAILABLE");
-  const inspected = await execFile("docker", ["inspect", POSTGRES_CONTAINER], {
+  const inspected = await execFile("docker", ["inspect", TRACK_B_PREPROD_POSTGRES_CONTAINER], {
     encoding: "utf8", windowsHide: true, maxBuffer: 1024 * 1024,
   });
   let parsed: unknown;

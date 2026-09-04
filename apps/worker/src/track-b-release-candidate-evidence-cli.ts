@@ -3,8 +3,13 @@ import { PostgresGateEEvidenceStoreV2 } from "@lana/database";
 import { execFile } from "node:child_process";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import { createGateEScoredRunGitReader } from "./gate-e-git-reader.js";
 import { gateEDatabaseUrlForRole } from "./gate-e-operational.js";
+import {
+  resolveTrackBPreprodDatabaseUrl,
+  TRACK_B_PREPROD_POSTGRES_CONTAINER,
+} from "./track-b-preprod-database-endpoint.js";
 import type { GateEEvidenceReaderV2 } from "./gate-e-registration.js";
 import {
   prepareTrackBReleaseCandidateEvidence,
@@ -16,6 +21,7 @@ import {
 
 const COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const GIT_OBJECT_PATTERN = /^[a-f0-9]{40,64}$/u;
+const execFileAsync = promisify(execFile);
 
 export type TrackBReleaseCandidateEvidenceCliResult = Readonly<{
   schemaVersion: 1;
@@ -37,6 +43,32 @@ export function parseTrackBReleaseCandidateEvidenceCliArgs(
     !COMMIT_PATTERN.test(activationReleaseRevision)
   ) throw new Error("TRACK_B_RELEASE_CANDIDATE_EVIDENCE_CLI_ARGUMENTS_INVALID");
   return Object.freeze({ activationReleaseRevision });
+}
+
+export function resolveTrackBReleaseCandidateEvidenceDatabaseUrl(
+  databaseUrl: string,
+  inspection: unknown,
+): string {
+  try {
+    return resolveTrackBPreprodDatabaseUrl(databaseUrl, inspection);
+  } catch {
+    throw new Error("TRACK_B_RELEASE_GATE_E_DATABASE_ENDPOINT_UNPROVEN");
+  }
+}
+
+async function resolveGateEEvidenceDatabaseUrl(databaseUrl: string): Promise<string> {
+  let inspection: unknown;
+  try {
+    const inspected = await execFileAsync("docker", ["inspect", TRACK_B_PREPROD_POSTGRES_CONTAINER], {
+      encoding: "utf8",
+      windowsHide: true,
+      maxBuffer: 1024 * 1024,
+    });
+    [inspection] = JSON.parse(inspected.stdout) as unknown[];
+  } catch {
+    throw new Error("TRACK_B_RELEASE_GATE_E_DATABASE_ENDPOINT_UNPROVEN");
+  }
+  return resolveTrackBReleaseCandidateEvidenceDatabaseUrl(databaseUrl, inspection);
 }
 
 export async function runTrackBReleaseCandidateEvidenceCli(input: Readonly<{
@@ -92,8 +124,9 @@ async function main(): Promise<void> {
   );
   const databaseUrl = process.env.DATABASE_URL?.trim() ?? "";
   if (!databaseUrl) throw new Error("TRACK_B_RELEASE_GATE_E_DATABASE_URL_REQUIRED");
+  const resolvedDatabaseUrl = await resolveGateEEvidenceDatabaseUrl(databaseUrl);
   const evidenceStore = new PostgresGateEEvidenceStoreV2(
-    gateEDatabaseUrlForRole(databaseUrl, "evidence"),
+    gateEDatabaseUrlForRole(resolvedDatabaseUrl, "evidence"),
   );
   try {
     const result = await runTrackBReleaseCandidateEvidenceCli({

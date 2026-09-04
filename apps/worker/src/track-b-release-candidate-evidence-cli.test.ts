@@ -7,6 +7,7 @@ import type { GateEEvidenceReaderV2 } from "./gate-e-registration.js";
 import type { TrackBReleaseCandidateSourceReader } from "./track-b-release-candidate-evidence.js";
 import {
   parseTrackBReleaseCandidateEvidenceCliArgs,
+  resolveTrackBReleaseCandidateEvidenceDatabaseUrl,
   runTrackBReleaseCandidateEvidenceCli,
 } from "./track-b-release-candidate-evidence-cli.js";
 
@@ -76,6 +77,37 @@ describe("Track B release-candidate evidence CLI", () => {
       "--ref",
       "main",
     ])).toThrow("TRACK_B_RELEASE_CANDIDATE_EVIDENCE_CLI_ARGUMENTS_INVALID");
+  });
+
+  it("binds host-side Gate E evidence reads to the exact inspected private PostgreSQL endpoint", () => {
+    const resolved = new URL(resolveTrackBReleaseCandidateEvidenceDatabaseUrl(
+      "postgresql://gate-e:encoded%20secret@postgres:5432/lana_chatbot",
+      {
+        Name: "/lana-chatbot-postgres",
+        State: { Running: true, Health: { Status: "healthy" } },
+        Config: { Labels: { "com.docker.compose.project": "lana-chatbot",
+          "com.docker.compose.service": "postgres" } },
+        NetworkSettings: { Networks: { "lana-chatbot-network": { IPAddress: "172.18.0.2" } } },
+      },
+    ));
+
+    expect(resolved.hostname).toBe("172.18.0.2");
+    expect(resolved.username).toBe("gate-e");
+    expect(resolved.password).toBe("encoded%20secret");
+    expect(resolved.pathname).toBe("/lana_chatbot");
+  });
+
+  it("refuses an unproven host endpoint before any Gate E evidence read", () => {
+    expect(() => resolveTrackBReleaseCandidateEvidenceDatabaseUrl(
+      "postgresql://gate-e:value@postgres:5432/lana_chatbot",
+      {
+        Name: "/lana-chatbot-postgres",
+        State: { Running: true, Health: { Status: "unhealthy" } },
+        Config: { Labels: { "com.docker.compose.project": "lana-chatbot",
+          "com.docker.compose.service": "postgres" } },
+        NetworkSettings: { Networks: { "lana-chatbot-network": { IPAddress: "172.18.0.2" } } },
+      },
+    )).toThrow("TRACK_B_RELEASE_GATE_E_DATABASE_ENDPOINT_UNPROVEN");
   });
 
   it("emits a self-validating side-effect-free v22 release packet", async () => {
