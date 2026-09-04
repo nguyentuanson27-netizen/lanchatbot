@@ -110,6 +110,27 @@ describe("Track B release-candidate evidence CLI", () => {
     )).toThrow("TRACK_B_RELEASE_GATE_E_DATABASE_ENDPOINT_UNPROVEN");
   });
 
+  it("wires Docker-proven endpoint resolution into the evidence role before store creation", async () => {
+    const source = await readFile(
+      new URL("./track-b-release-candidate-evidence-cli.ts", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain(
+      'execFileAsync("docker", ["inspect", TRACK_B_PREPROD_POSTGRES_CONTAINER]',
+    );
+    expect(source).toContain(
+      "return resolveTrackBReleaseCandidateEvidenceDatabaseUrl(databaseUrl, inspection);",
+    );
+    expect(source).toContain(
+      "const resolvedDatabaseUrl = await resolveGateEEvidenceDatabaseUrl(databaseUrl);",
+    );
+    expect(source).toMatch(
+      /new PostgresGateEEvidenceStoreV2\(\s*gateEDatabaseUrlForRole\(resolvedDatabaseUrl, "evidence"\),\s*\)/u,
+    );
+    expect(source).not.toContain('gateEDatabaseUrlForRole(databaseUrl, "evidence")');
+  });
+
   it("emits a self-validating side-effect-free v22 release packet", async () => {
     await expect(runTrackBReleaseCandidateEvidenceCli({
       activationReleaseRevision,
