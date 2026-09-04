@@ -570,7 +570,15 @@ describe("Track B PREPROD mutation adapter", () => {
     });
     let main = { identity: prior, status: "running" };
     let mainRuntimeConfig = priorConfig;
+    let mainStartupPackageFile = "/opt/lana-chatbot/releases/track-b/prior-rev6.json";
     let staged: TrackBServiceReleaseIdentity | null = null;
+    const startupPackages = new Map<string, unknown>([
+      ["/opt/lana-chatbot/releases/track-b/prior-rev6.json", { revision: 6 }],
+      ["/opt/lana-chatbot/releases/track-b/target-rev7.json", { revision: 7 }],
+      ["/opt/lana-chatbot/releases/track-b/prior-rev8.json", { revision: 8 }],
+    ]);
+    const startupHash = (path: string) => createHash("sha256")
+      .update(canonicalJsonV1(startupPackages.get(path)), "utf8").digest("hex");
     const composeCalls: Array<{ args: readonly string[]; env: Record<string, string> }> = [];
     const run = vi.fn(async (_command: string, args: readonly string[], env: Record<string, string>) => {
       const tag = String(args.at(-1));
@@ -588,6 +596,7 @@ describe("Track B PREPROD mutation adapter", () => {
         if (args.includes("config")) return "";
         composeCalls.push({ args, env });
         mainRuntimeConfig = { ...priorConfig, REALTIME_RELEASE_ID: env.REALTIME_RELEASE_ID ?? "" };
+        mainStartupPackageFile = env.DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE ?? "";
         main = { identity: prior, status: "running" }; return "";
       }
       if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
@@ -596,6 +605,8 @@ describe("Track B PREPROD mutation adapter", () => {
       const observed = stagedInspect ? staged : main.identity;
       return JSON.stringify({ Image: `sha256:${observed?.imageId}`, RestartCount: 0,
         State: { Status: stagedInspect ? "created" : main.status, Health: { Status: "healthy" } },
+        Mounts: stagedInspect ? [] : [{ Type: "bind", Source: mainStartupPackageFile,
+          Destination: "/run/df13/commerce-startup.json", RW: false }],
         Config: { Labels: { "org.opencontainers.image.revision": observed?.releaseRevision,
           "com.lana.build-id": observed?.buildId,
           "com.lana.runtime-config-hash": observed?.runtimeConfigHash,
@@ -603,15 +614,22 @@ describe("Track B PREPROD mutation adapter", () => {
     });
     const common = { composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
       projectDirectory: "/opt/lana-chatbot/current/deploy", run };
+    const readStartupPackage = async (path: string) => startupPackages.get(path);
     const currentPriorController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/prior-rev6.json",
-      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId });
+      startupPackageHash: startupHash("/opt/lana-chatbot/releases/track-b/prior-rev6.json"),
+      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+      readStartupPackage });
     const targetController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/target-rev7.json",
-      imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId });
+      startupPackageHash: startupHash("/opt/lana-chatbot/releases/track-b/target-rev7.json"),
+      imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId,
+      readStartupPackage });
     const reversePriorController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/prior-rev8.json",
-      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId });
+      startupPackageHash: startupHash("/opt/lana-chatbot/releases/track-b/prior-rev8.json"),
+      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+      readStartupPackage });
     const service = new TrackBPreprodServicePairController({ previousIdentity: prior,
       targetIdentity: targetService, previous: currentPriorController, target: targetController,
       startRoutes: [
@@ -677,7 +695,15 @@ describe("Track B PREPROD mutation adapter", () => {
         imageId: previousService.imageId, runtimeConfigHash: priorRuntimeConfigHash }) };
     let main = { identity: targetService, status: "running" };
     let mainRuntimeConfig = targetRuntimeConfig;
+    let mainStartupPackageFile = "/opt/lana-chatbot/releases/track-b/target.json";
     let staged: TrackBServiceReleaseIdentity | null = null;
+    const startupPackages = new Map<string, unknown>([
+      ["/opt/lana-chatbot/releases/track-b/rollback-current.json", { role: "current-lkg" }],
+      ["/opt/lana-chatbot/releases/track-b/rollback-recovery.json", { role: "reverse-cas-lkg" }],
+      ["/opt/lana-chatbot/releases/track-b/target.json", { role: "candidate" }],
+    ]);
+    const startupHash = (path: string) => createHash("sha256")
+      .update(canonicalJsonV1(startupPackages.get(path)), "utf8").digest("hex");
     const run = vi.fn(async (_command: string, args: readonly string[], env: Record<string, string>) => {
       const tag = String(args.at(-1));
       const expected = tag.includes("previous") ? prior : targetService;
@@ -693,6 +719,7 @@ describe("Track B PREPROD mutation adapter", () => {
       if (args[0] === "compose") {
         if (args.includes("config")) return "";
         mainRuntimeConfig = { ...priorConfig, REALTIME_RELEASE_ID: env.REALTIME_RELEASE_ID ?? "" };
+        mainStartupPackageFile = env.DF13_COMMERCE_PREPROD_STARTUP_HOST_FILE ?? "";
         main = { identity: prior, status: "running" }; return "";
       }
       if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
@@ -701,6 +728,8 @@ describe("Track B PREPROD mutation adapter", () => {
       const observed = stagedInspect ? staged : main.identity;
       return JSON.stringify({ Image: `sha256:${observed?.imageId}`, RestartCount: 0,
         State: { Status: stagedInspect ? "created" : main.status, Health: { Status: "healthy" } },
+        Mounts: stagedInspect ? [] : [{ Type: "bind", Source: mainStartupPackageFile,
+          Destination: "/run/df13/commerce-startup.json", RW: false }],
         Config: { Labels: { "org.opencontainers.image.revision": observed?.releaseRevision,
           ...(observed === targetService ? { "com.lana.build-id": observed.buildId,
             "com.lana.runtime-config-hash": observed.runtimeConfigHash } : {}),
@@ -708,22 +737,33 @@ describe("Track B PREPROD mutation adapter", () => {
     });
     const common = { composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
       projectDirectory: "/opt/lana-chatbot/current/deploy", run };
+    const readStartupPackage = async (path: string) => startupPackages.get(path);
     const previousController = new DockerComposeTrackBPreprodServiceController({ ...common,
-      startupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback.json",
+      startupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-current.json",
+      startupPackageHash: startupHash("/opt/lana-chatbot/releases/track-b/rollback-current.json"),
       imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
-      runtimeReleaseId,
+      runtimeReleaseId, readStartupPackage,
+      labelPolicy: "OCI_REVISION_ONLY" });
+    const recoveryController = new DockerComposeTrackBPreprodServiceController({ ...common,
+      startupPackageFile: "/opt/lana-chatbot/releases/track-b/rollback-recovery.json",
+      startupPackageHash: startupHash("/opt/lana-chatbot/releases/track-b/rollback-recovery.json"),
+      imageReference: "lana-chatbot-app:track-b-previous", expectedImageId: prior.imageId,
+      runtimeReleaseId, readStartupPackage,
       labelPolicy: "OCI_REVISION_ONLY" });
     const targetController = new DockerComposeTrackBPreprodServiceController({ ...common,
       startupPackageFile: "/opt/lana-chatbot/releases/track-b/target.json",
-      imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId });
-    const recoveryPointer = { pointerRevision: 8 } as never;
+      startupPackageHash: startupHash("/opt/lana-chatbot/releases/track-b/target.json"),
+      imageReference: "lana-chatbot-app:track-b-target", expectedImageId: targetService.imageId,
+      readStartupPackage });
+    const recoveryPointer = pointer("10000000-0000-4000-8000-000000000001", 8,
+      DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash);
     const service = new TrackBPreprodServicePairController({ previousIdentity: prior,
       targetIdentity: targetService,
       previous: previousController, target: targetController,
       startRoutes: [
         { identity: prior, pointer: { pointerRevision: 6 } as never, controller: previousController },
         { identity: targetService, pointer: { pointerRevision: 7 } as never, controller: targetController },
-        { identity: prior, pointer: recoveryPointer, controller: previousController },
+        { identity: prior, pointer: recoveryPointer, controller: recoveryController },
       ] });
     const held = { status: "HELD" as const, source: "DATABASE" as const,
       pageId: "1198992073286645", channel: "MESSENGER", fenceId:
@@ -732,8 +772,9 @@ describe("Track B PREPROD mutation adapter", () => {
         "pancake_tag_outbox:APPLYING"] };
     const adapter = createTrackBCommerceAuthorityPreprodAdapter({ service,
       database: { acquireFence: vi.fn(), observeFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
-        readQuiescence: vi.fn(), mutateExactPointer: vi.fn(), readActivePointer: vi.fn(),
-        readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(),
+        readQuiescence: vi.fn(), mutateExactPointer: vi.fn(),
+        readActivePointer: vi.fn(async () => recoveryPointer),
+        readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(async () => "EXACT" as const),
         readDatabaseClock: vi.fn(async () => "2026-09-03T00:00:00.000000+00"), readExactVersion: vi.fn(),
         readTrackBV2LkgSchemaCompatibility: vi.fn() },
       rollbackStore: { read: vi.fn(), persist: vi.fn() },
@@ -743,6 +784,25 @@ describe("Track B PREPROD mutation adapter", () => {
     failedService: targetService, previousService: prior, pointer: recoveryPointer })).resolves.toEqual({
       status: "HEALTHY", admission: "HELD", observedService: prior });
     expect(main).toEqual({ identity: prior, status: "running" });
+    await expect(adapter.readRuntimeAuthority({ lease: { fenceId: held.fenceId,
+      fenceToken: "30000000-0000-4000-8000-000000000001", epoch: 1 },
+    service: prior, pointer: recoveryPointer })).resolves.toMatchObject({
+      status: "EXACT", service: prior, admission: "HELD",
+    });
+    await expect(service.inspectRunning(prior, { pointerRevision: 6 } as never))
+      .resolves.toBeNull();
+    const reentered = createTrackBCommerceAuthorityPreprodAdapter({ service,
+      database: { acquireFence: vi.fn(), observeFence: vi.fn(), releaseFence: vi.fn(),
+        readAdmissionHold: vi.fn(), readQuiescence: vi.fn(), mutateExactPointer: vi.fn(),
+        readActivePointer: vi.fn(async () => recoveryPointer), readActivationAudit: vi.fn(),
+        proveRuntimeResolution: vi.fn(async () => "EXACT" as const), readDatabaseClock: vi.fn(),
+        readExactVersion: vi.fn(), readTrackBV2LkgSchemaCompatibility: vi.fn() },
+      rollbackStore: { read: vi.fn(), persist: vi.fn() },
+      quiescence: { timeoutMs: 1, pollMs: 1, wait: async () => undefined } });
+    await expect(reentered.readReleasedRuntimeAuthority({ service: prior,
+      pointer: recoveryPointer, fenceId: held.fenceId, epoch: 1 })).resolves.toMatchObject({
+      status: "EXACT", service: prior, admission: "OPEN",
+    });
   });
 
   it("restores the exact prior image when a failed start leaves no main container", async () => {

@@ -581,7 +581,9 @@ export class TrackBPreprodServicePairController implements TrackBPreprodServiceB
     this.#target = input.target;
     if (input.startRoutes.length < 3 || input.startRoutes.some((route) =>
       (!exactService(route.identity, input.previousIdentity) &&
-       !exactService(route.identity, input.targetIdentity)) || route.pointer.pointerRevision < 1)) {
+       !exactService(route.identity, input.targetIdentity)) || route.pointer.pointerRevision < 1) ||
+        !input.startRoutes.some((route) => exactService(route.identity, input.previousIdentity)) ||
+        !input.startRoutes.some((route) => exactService(route.identity, input.targetIdentity))) {
       throw new Error("TRACK_B_B3_2_SERVICE_START_ROUTES_INVALID");
     }
     const routeKeys = new Set(input.startRoutes.map((route) => canonicalJsonV1({
@@ -599,23 +601,63 @@ export class TrackBPreprodServicePairController implements TrackBPreprodServiceB
     throw new Error("TRACK_B_B3_2_SERVICE_IDENTITY_UNKNOWN");
   }
 
+  #routeController(identity: TrackBServiceReleaseIdentity, pointer: RuntimeBehaviorModePointer) {
+    const route = this.#startRoutes.find((candidate) => exactService(candidate.identity, identity) &&
+      canonicalJsonV1(candidate.pointer) === canonicalJsonV1(pointer));
+    if (!route) throw new Error("TRACK_B_B3_2_SERVICE_START_ROUTE_UNKNOWN");
+    return route.controller;
+  }
+
+  #eligibleControllers(identity: TrackBServiceReleaseIdentity) {
+    const controllers = this.#startRoutes
+      .filter((route) => exactService(route.identity, identity))
+      .map((route) => route.controller);
+    return [...new Set(controllers)];
+  }
+
+  async #presentController(identity: TrackBServiceReleaseIdentity,
+    pointer?: RuntimeBehaviorModePointer): Promise<Readonly<{
+      controller: DockerComposeTrackBPreprodServiceController | null;
+      result: TrackBServiceReleaseIdentity | "ABSENT" | "AMBIGUOUS";
+    }>> {
+    const controllers = pointer === undefined
+      ? this.#eligibleControllers(identity)
+      : [this.#routeController(identity, pointer)];
+    const results = await Promise.all(controllers.map(async (controller) => ({
+      controller, result: await controller.inspectPresent(identity),
+    })));
+    const exact = results.filter((result) => exactService(
+      result.result === "ABSENT" || result.result === "AMBIGUOUS" ? null : result.result,
+      identity,
+    ));
+    if (exact.length === 1 && results.every(({ result }) => result !== "ABSENT")) return exact[0]!;
+    return { controller: null,
+      result: results.length > 0 && results.every(({ result }) => result === "ABSENT")
+        ? "ABSENT" : "AMBIGUOUS" };
+  }
+
   async stage(source: TrackBServiceReleaseIdentity, target: TrackBServiceReleaseIdentity) {
     return this.#controller(target).stage(source, target);
   }
   async discard(target: TrackBServiceReleaseIdentity) { return this.#controller(target).discard(target); }
-  async stop(expected: TrackBServiceReleaseIdentity) { return this.#controller(expected).stop(expected); }
+  async stop(expected: TrackBServiceReleaseIdentity, pointer?: RuntimeBehaviorModePointer) {
+    const observed = await this.#presentController(expected, pointer);
+    return observed.controller === null ? null : observed.controller.stop(expected);
+  }
   async start(expected: TrackBServiceReleaseIdentity, mode: "COMMERCE",
     pointer: RuntimeBehaviorModePointer) {
-    const route = this.#startRoutes.find((candidate) => exactService(candidate.identity, expected) &&
-      canonicalJsonV1(candidate.pointer) === canonicalJsonV1(pointer));
-    if (!route) throw new Error("TRACK_B_B3_2_SERVICE_START_ROUTE_UNKNOWN");
-    return route.controller.start(expected, mode);
+    return this.#routeController(expected, pointer).start(expected, mode);
   }
-  async inspectRunning(expected: TrackBServiceReleaseIdentity) {
-    return this.#controller(expected).inspectRunning(expected);
+  async inspectRunning(expected: TrackBServiceReleaseIdentity, pointer?: RuntimeBehaviorModePointer) {
+    const controllers = pointer === undefined
+      ? this.#eligibleControllers(expected)
+      : [this.#routeController(expected, pointer)];
+    const observed = (await Promise.all(controllers.map((controller) =>
+      controller.inspectRunning(expected)))).filter((identity) => exactService(identity, expected));
+    return observed.length === 1 ? observed[0]! : null;
   }
-  async inspectPresent(expected: TrackBServiceReleaseIdentity) {
-    return this.#controller(expected).inspectPresent(expected);
+  async inspectPresent(expected: TrackBServiceReleaseIdentity, pointer?: RuntimeBehaviorModePointer) {
+    return (await this.#presentController(expected, pointer)).result;
   }
 }
 
@@ -656,11 +698,14 @@ export interface TrackBPreprodDatabaseBoundary {
 export interface TrackBPreprodServiceBoundary {
   stage(source: TrackBServiceReleaseIdentity, target: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | "AMBIGUOUS" | null>;
   discard(target: TrackBServiceReleaseIdentity): Promise<"DISCARDED" | "AMBIGUOUS">;
-  stop(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null>;
+  stop(expected: TrackBServiceReleaseIdentity,
+    pointer?: RuntimeBehaviorModePointer): Promise<TrackBServiceReleaseIdentity | null>;
   start(expected: TrackBServiceReleaseIdentity, mode: "COMMERCE",
     pointer: RuntimeBehaviorModePointer): Promise<TrackBServiceReleaseIdentity | null>;
-  inspectRunning(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null>;
-  inspectPresent(expected: TrackBServiceReleaseIdentity):
+  inspectRunning(expected: TrackBServiceReleaseIdentity,
+    pointer?: RuntimeBehaviorModePointer): Promise<TrackBServiceReleaseIdentity | null>;
+  inspectPresent(expected: TrackBServiceReleaseIdentity,
+    pointer?: RuntimeBehaviorModePointer):
     Promise<TrackBServiceReleaseIdentity | "ABSENT" | "AMBIGUOUS">;
 }
 
@@ -735,7 +780,7 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
       const admission = await scopeAdmission(lease);
       if (admission.status !== "HELD") return { status: "BLOCKED", admission: "UNCONTROLLED", observedService: null };
       const failed = await input.service.inspectPresent(failedService);
-      const prior = await input.service.inspectPresent(previousService);
+      const prior = await input.service.inspectPresent(previousService, pointer);
       const failedExact = failed !== "ABSENT" && failed !== "AMBIGUOUS";
       const priorExact = prior !== "ABSENT" && prior !== "AMBIGUOUS";
       if ((failedExact && priorExact) || (!failedExact && !priorExact &&
@@ -749,7 +794,8 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
         }
       }
       const serviceToStop = failedExact ? failedService : priorExact ? previousService : null;
-      if (serviceToStop !== null && !await input.service.stop(serviceToStop)) {
+      if (serviceToStop !== null && !await input.service.stop(serviceToStop,
+        exactService(serviceToStop, previousService) ? pointer : undefined)) {
         return { status: "BLOCKED", admission: "HELD", observedService: null };
       }
       const staged = await input.service.stage(failedService, previousService);
@@ -763,7 +809,7 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
     },
     async readRuntimeAuthority({ lease, service, pointer }) {
       const admission = await scopeAdmission(lease);
-      const observedService = await input.service.inspectRunning(service);
+      const observedService = await input.service.inspectRunning(service, pointer);
       const proof = lastStartedAt === null ? "MISSING" :
         await input.database.proveRuntimeResolution({ pointer, notBefore: lastStartedAt });
       const exact = admission.status === "HELD" && exactService(observedService, service) && proof === "EXACT";
@@ -777,7 +823,7 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
         admission: exact ? "HELD" : "UNCONTROLLED" };
     },
     async readReleasedRuntimeAuthority({ service, pointer, fenceId, epoch }) {
-      const observed = await input.service.inspectRunning(service);
+      const observed = await input.service.inspectRunning(service, pointer);
       const active = await input.database.readActivePointer();
       const pointerExact = active !== null && active.pointerRevision === pointer.pointerRevision &&
         active.version.modeVersionId === pointer.version.modeVersionId &&

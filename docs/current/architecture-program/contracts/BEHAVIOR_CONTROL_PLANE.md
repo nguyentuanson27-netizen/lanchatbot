@@ -122,7 +122,11 @@ identity, discard the staged target, restore and read back the exact prior
 service if it was stopped, and only then release the fence. After CAS failure
 handling must CAS back to the recorded LKG V2 authority, restore/start the exact
 LKG V2 service, prove runtime plus full-consumer convergence, and only then
-release the fence. Unknown pointer, fence, stopped-service, staged-service,
+release the fence. Service inspection and stop routing must bind both the exact
+service release and the pointer-selected mounted startup artifact; re-entry may
+accept only one exact canonical service-plus-mount match across eligible V2
+controllers. A service-only match, zero matches or multiple matches is ambiguous
+and cannot release the fence. Unknown pointer, fence, stopped-service, staged-service,
 runtime, audit or consumer identity retains the fence and fails closed. This
 protocol does not authorize deployment or pointer mutation by itself.
 
