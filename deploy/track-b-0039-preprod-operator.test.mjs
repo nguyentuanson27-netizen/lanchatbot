@@ -29,6 +29,7 @@ requireText(/track_b_0039_operator_owner\.run_identity[\s\S]*refusing unowned 00
 requireText(/t39_post_apply_identity_matches[\s\S]*t39_apply_down_named/u, "recovery down is not exact-state gated");
 requireText(/T39_V2_VERSION\|COMMERCE\|LEGACY\|\$T39_V2_BUNDLE\|\$T39_V2_CONTENT/u, "recovery is not bound to V2");
 requireText(/POLICY_STORE_TEST_DATABASE_URL="\$database_url"[\s\S]*track-b-0039-v2-lkg\.postgres-spec\.js/u, "PostgreSQL V2 LKG suite is not invoked safely");
+requireText(/pretest:postgres[\s\S]*@lana\/admin-api build[\s\S]*t39_run_postgres_acceptance/u, "PostgreSQL acceptance build chain is incomplete or out of order");
 requireText(/BLOCKED_MANUAL_RESTORE_REQUIRED/u, "ambiguous recovery does not fail closed");
 
 const rehearsal = source.match(/t39_backup_rehearse\(\) \{([\s\S]*?)\n\}\n\nt39_marker_post_catalog/u)?.[1];

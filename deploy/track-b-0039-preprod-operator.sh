@@ -329,6 +329,7 @@ t39_backup_rehearse() {
 
   t39_apply_up_named "$restore_database"
   t39_verify_up_named "$restore_database"
+  pnpm --filter @lana/admin-api pretest:postgres >/dev/null
   pnpm --filter @lana/admin-api build >/dev/null
   t39_run_postgres_acceptance "$restore_database"
   # The real-PostgreSQL acceptance covers exact same-identity V2 LKG admission,
