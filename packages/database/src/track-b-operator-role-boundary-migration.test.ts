@@ -47,6 +47,9 @@ describe("0040 Track B operator role boundary", () => {
     expect(source).not.toContain("pathToFileURL(process.argv[1]).href");
     expect(source).toContain("FROM runtime_behavior_mode_pointers p JOIN runtime_behavior_mode_versions v");
     expect(source).not.toContain("AS pages FROM pages");
+    expect(source).toContain("t40_require_secret_unmounted");
+    expect(source).toContain("0040 realtime mount readback failed");
+    expect(source).toContain("grep -Fx -- \"$T40_SECRET\"");
     expect(source).not.toMatch(/docker\s+inspect.*password|process\.argv.*password/iu);
   });
 });

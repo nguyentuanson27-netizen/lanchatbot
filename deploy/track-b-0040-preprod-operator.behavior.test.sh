@@ -14,6 +14,27 @@ mkdir -p "$test_root/secrets"
 # shellcheck source=track-b-0040-preprod-operator.sh
 source "$script_dir/track-b-0040-preprod-operator.sh"
 
+DOCKER_MOUNT_MODE=clean
+docker() {
+  test "$1" = inspect
+  case "$DOCKER_MOUNT_MODE" in
+    clean) printf '%s\n' /opt/lana-chatbot/shared/config ;;
+    mounted) printf '%s\n' "$T40_SECRET" ;;
+    failure) return 1 ;;
+    *) return 2 ;;
+  esac
+}
+t40_require_secret_unmounted
+DOCKER_MOUNT_MODE=mounted
+if (t40_require_secret_unmounted) >/dev/null 2>&1; then
+  printf '%s\n' 'mounted operator secret was accepted' >&2; exit 1
+fi
+DOCKER_MOUNT_MODE=failure
+if (t40_require_secret_unmounted) >/dev/null 2>&1; then
+  printf '%s\n' 'failed realtime mount readback was accepted' >&2; exit 1
+fi
+DOCKER_MOUNT_MODE=clean
+
 printf '%s\n' fixture > "$T40_SECRET"
 TEST_EXACT=1 TEST_ANY=1
 database_query() {
