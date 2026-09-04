@@ -13,6 +13,7 @@ import { createTrackBPreprodOperationStartupPackages, parseTrackBPreprodBuildInp
   matchesTrackBOperationTargetStartupBaseline,
   persistTrackBPreprodRuntimeStartupArtifact,
   proveFreshTrackBInitialLkgRuntime,
+  resolveTrackBPreprodDatabaseUrl,
   validateTrackBPreprodStartupArtifacts,
   validateTrackBV2LastKnownGoodSelection } from "./track-b-commerce-authority-preprod-cli.js";
 
@@ -106,6 +107,58 @@ function packet(direction: "ACTIVATE_V2_CANDIDATE" | "ROLLBACK_TO_LKG_V2" = "ACT
 }
 
 describe("Track B PREPROD V2/LKG operator boundary", () => {
+  const postgresInspection = (address = "172.18.0.2") => ({
+    Name: "/lana-chatbot-postgres",
+    State: { Running: true, Health: { Status: "healthy" } },
+    Config: { Labels: { "com.docker.compose.project": "lana-chatbot",
+      "com.docker.compose.service": "postgres" } },
+    NetworkSettings: { Networks: { "lana-chatbot-network": { IPAddress: address } } },
+  });
+
+  it("resolves only the exact healthy Compose PostgreSQL endpoint without changing credentials", () => {
+    const resolved = new URL(resolveTrackBPreprodDatabaseUrl(
+      "postgresql://operator:encoded%20secret@postgres:5432/lana_chatbot",
+      postgresInspection(),
+    ));
+    expect(resolved.hostname).toBe("172.18.0.2");
+    expect(resolved.username).toBe("operator");
+    expect(resolved.password).toBe("encoded%20secret");
+    expect(resolved.pathname).toBe("/lana_chatbot");
+    expect(resolved.search).toBe("");
+  });
+
+  it.each([
+    ["unexpected hostname", "postgresql://operator:value@other:5432/lana_chatbot", postgresInspection()],
+    ["unexpected database", "postgresql://operator:value@postgres:5432/other", postgresInspection()],
+    ["unexpected port", "postgresql://operator:value@postgres:6432/lana_chatbot", postgresInspection()],
+    ["missing credential", "postgresql://postgres:5432/lana_chatbot", postgresInspection()],
+    ["host query override", "postgresql://operator:value@postgres:5432/lana_chatbot?host=203.0.113.9",
+      postgresInspection()],
+    ["port query override", "postgresql://operator:value@postgres:5432/lana_chatbot?port=6432",
+      postgresInspection()],
+    ["user query override", "postgresql://operator:value@postgres:5432/lana_chatbot?user=other",
+      postgresInspection()],
+    ["password query override", "postgresql://operator:value@postgres:5432/lana_chatbot?password=other",
+      postgresInspection()],
+    ["socket query override", "postgresql://operator:value@postgres:5432/lana_chatbot?host=%2Ftmp",
+      postgresInspection()],
+    ["fragment", "postgresql://operator:value@postgres:5432/lana_chatbot#alternate",
+      postgresInspection()],
+    ["wrong project", "postgresql://operator:value@postgres:5432/lana_chatbot",
+      { ...postgresInspection(), Config: { Labels: { "com.docker.compose.project": "other",
+        "com.docker.compose.service": "postgres" } } }],
+    ["unhealthy", "postgresql://operator:value@postgres:5432/lana_chatbot",
+      { ...postgresInspection(), State: { Running: true, Health: { Status: "unhealthy" } } }],
+    ["ambiguous network", "postgresql://operator:value@postgres:5432/lana_chatbot",
+      { ...postgresInspection(), NetworkSettings: { Networks: {
+        first: { IPAddress: "172.18.0.2" }, second: { IPAddress: "172.19.0.2" } } } }],
+    ["public endpoint", "postgresql://operator:value@postgres:5432/lana_chatbot",
+      postgresInspection("203.0.113.2")],
+  ])("fails closed for %s", (_name, value, inspection) => {
+    expect(() => resolveTrackBPreprodDatabaseUrl(value, inspection))
+      .toThrow("TRACK_B_B3_2_DATABASE_ENDPOINT_UNPROVEN");
+  });
+
   it("latches one database-native watermark and polls until a fresh exact runtime audit arrives", async () => {
     const current = pointer("10000000-0000-4000-8000-000000000001", 6);
     const watermark = "2026-09-03T02:00:00.123456+00";

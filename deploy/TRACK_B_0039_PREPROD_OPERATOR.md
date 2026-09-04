@@ -29,6 +29,15 @@ unreleased fence, then verifies the exact final-up catalog and cleanup. A
 run-specific marker is created only after the disposable database is created;
 cleanup refuses to drop a database unless that marker is read back exactly.
 
+The executable B3.2 CLI accepts the secret's Compose-only `postgres` hostname
+only after Docker readback proves one healthy `lana-chatbot-postgres` container
+with the exact project/service labels and one private network endpoint. It then
+uses that endpoint for the host-side database client without logging or
+persisting the credential. URL query parameters and fragments are forbidden so
+the PostgreSQL parser cannot override the proven host, port, user, password, or
+socket; missing, public, unhealthy, cross-project, or multi-network identities
+fail closed.
+
 Run only from the clean exact fetched `origin/main` checkout on the approved
 host:
 
