@@ -15,6 +15,21 @@ const postgresDescribe = baseUrl ? describe.sequential : describe.skip;
 const pageId = "1198992073286645";
 const channel = "MESSENGER";
 
+async function waitForDatabaseClientsToClose(admin: Pool, databaseName: string): Promise<void> {
+  const deadline = Date.now() + 5_000;
+  while (true) {
+    const result = await admin.query<{ active_clients: number }>(
+      `SELECT count(*)::integer AS active_clients
+         FROM pg_stat_activity
+        WHERE datname = $1`,
+      [databaseName],
+    );
+    if (result.rows[0]?.active_clients === 0) return;
+    if (Date.now() >= deadline) throw new Error("TRACK_B_TEST_DATABASE_CLIENTS_DID_NOT_CLOSE");
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 25));
+  }
+}
+
 postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
   const databaseName = `track_b_adapter_${randomBytes(6).toString("hex")}`;
   let admin: Pool;
@@ -124,8 +139,12 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
     await writer?.close();
     await pool?.end();
     if (admin) {
-      await admin.query(`DROP DATABASE IF EXISTS ${databaseName} WITH (FORCE)`);
-      await admin.end();
+      try {
+        await waitForDatabaseClientsToClose(admin, databaseName);
+        await admin.query(`DROP DATABASE IF EXISTS ${databaseName}`);
+      } finally {
+        await admin.end();
+      }
     }
   });
 
