@@ -17,6 +17,7 @@ requireText(/T39_PRE_LEDGER_SHA256="f320a6892ff6a1b10aa1283e35577e673af78099357a
 requireText(/T39_POST_LEDGER_SHA256="abc4239e2b473def1ecd8f6ca31fb505deec1469cb08af41778ef2dc757cfd3b"/u, "post-ledger is not pinned");
 requireText(/T39_POINTER_REVISION="11"[\s\S]*T39_V2_VERSION=[\s\S]*T39_V2_BUNDLE=[\s\S]*T39_V2_CONTENT=/u, "V2 pointer identity is incomplete");
 requireText(/T39_REALTIME_IMAGE=[\s\S]*T39_REALTIME_IMAGE_ID=[\s\S]*T39_REALTIME_REVISION=[\s\S]*T39_RUNTIME_CONFIG_SHA256=[\s\S]*T39_STARTUP_FILE_SHA256=/u, "V2 service identity is incomplete");
+requireText(/index \.Config\.Labels "com\.lana\.runtime-config-hash"/u, "runtime config uses the wrong image label contract");
 requireText(/SOURCE_REVISION[\s\S]*refs\/remotes\/origin\/main[\s\S]*status --porcelain/u, "exact clean source identity is missing");
 requireText(/pg_dump[\s\S]*pg_restore --exit-on-error/u, "backup and isolated restore are missing");
 requireText(/t39_apply_up_named[\s\S]*t39_apply_down_named[\s\S]*t39_apply_up_named/u, "up/down/up rehearsal is missing");

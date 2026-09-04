@@ -63,7 +63,7 @@ t39_runtime_identity() {
   test -n "$startup_source" || die "0039 realtime startup mount missing"
   printf '%s|%s|%s|%s|%s\n' \
     "$(docker inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "$REALTIME_CONTAINER")" \
-    "$(docker inspect --format '{{index .Config.Labels "io.lana.runtime-config-hash"}}' "$REALTIME_CONTAINER")" \
+    "$(docker inspect --format '{{index .Config.Labels "com.lana.runtime-config-hash"}}' "$REALTIME_CONTAINER")" \
     "$(sha256sum "$startup_source" | awk '{print $1}')" \
     "$(docker inspect --format '{{.Config.Image}}' "$REALTIME_CONTAINER")" \
     "$(docker inspect --format '{{.Image}}' "$REALTIME_CONTAINER")"
