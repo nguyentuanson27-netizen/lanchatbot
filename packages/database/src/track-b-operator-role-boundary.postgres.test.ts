@@ -51,6 +51,13 @@ postgresDescribe("0040 Track B operator PostgreSQL boundary", () => {
       await admin.query("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=$1", [databaseName]);
       await admin.query(`DROP DATABASE IF EXISTS ${databaseName}`);
       await admin.query(`DROP ROLE IF EXISTS ${role}`);
+      for (const migrationRole of [
+        "lana_gate_e_registration_writer",
+        "lana_gate_e_evidence_writer",
+        "lana_gate_e_evidence_reader",
+      ]) {
+        await admin.query(`DROP ROLE IF EXISTS ${migrationRole}`);
+      }
       await admin.query("SELECT pg_advisory_unlock(hashtextextended('track-b-0040-test-role',0))");
       await admin.end();
     }
