@@ -2,6 +2,7 @@ import { canonicalJsonV1 } from "@lana/contracts";
 import type {
   Df13CommerceCutoverFenceAcquireResult,
   Df13CommerceCutoverFenceLease,
+  Df13CommerceCutoverFenceObservation,
   Df13CommerceCutoverFenceRequest,
 } from "@lana/database";
 import {
@@ -620,6 +621,7 @@ export class TrackBPreprodServicePairController implements TrackBPreprodServiceB
 
 export interface TrackBPreprodDatabaseBoundary {
   acquireFence(request: Df13CommerceCutoverFenceRequest): Promise<Df13CommerceCutoverFenceAcquireResult>;
+  observeFence(request: Df13CommerceCutoverFenceRequest): Promise<Df13CommerceCutoverFenceObservation>;
   releaseFence(lease: Df13CommerceCutoverFenceLease): Promise<{ status: "RELEASED" | "STALE_OR_MISSING" }>;
   readAdmissionHold(input: { pageId: string; channel: string; lease: Df13CommerceCutoverFenceLease }): Promise<TrackBCommerceAdmissionReadback>;
   readQuiescence(input: { pageId: string; channel: string }): Promise<{
@@ -680,6 +682,7 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
       return observed.status === "EXACT" && observed.source === "DATABASE" &&
         observed.migrationSchemaHash === candidateMigrationSchemaHash ? "EXACT" : "AMBIGUOUS";
     },
+    observeFence: input.database.observeFence.bind(input.database),
     acquireFence: input.database.acquireFence.bind(input.database),
     proveAdmissionHeld: ({ lease }) => scopeAdmission(lease),
     async stopSourceAndProveQuiescence({ lease, sourceService }) {
@@ -723,7 +726,7 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
     async startStagedService({ lease, stagedService, pointer }) {
       const admission = await scopeAdmission(lease);
       if (admission.status !== "HELD") return { status: "BLOCKED", admission: "UNCONTROLLED", observedService: null };
-      lastStartedAt = new Date().toISOString();
+      lastStartedAt = await input.database.readDatabaseClock();
       const observed = await input.service.start(stagedService, "COMMERCE", pointer);
       return { status: observed ? "HEALTHY" as const : "BLOCKED" as const,
         admission: "HELD" as const, observedService: observed };
@@ -753,7 +756,7 @@ export function createTrackBCommerceAuthorityPreprodAdapter(input: Readonly<{
       if (!exactService(staged === "AMBIGUOUS" ? null : staged, previousService)) {
         return { status: "BLOCKED", admission: "HELD", observedService: null };
       }
-      lastStartedAt = new Date().toISOString();
+      lastStartedAt = await input.database.readDatabaseClock();
       const observed = await input.service.start(previousService, "COMMERCE", pointer);
       return { status: observed ? "HEALTHY" as const : "BLOCKED" as const,
         admission: "HELD" as const, observedService: observed };
@@ -841,6 +844,7 @@ export class TrackBPostgresPreprodDatabaseBoundary implements TrackBPreprodDatab
   }
 
   acquireFence(request: Df13CommerceCutoverFenceRequest) { return this.#fence.acquire(request); }
+  observeFence(request: Df13CommerceCutoverFenceRequest) { return this.#fence.observe(request); }
   releaseFence(lease: Df13CommerceCutoverFenceLease) { return this.#fence.release(lease); }
   readAdmissionHold(input: { pageId: string; channel: string; lease: Df13CommerceCutoverFenceLease }) {
     return this.#writer.readAdmissionHold(input);

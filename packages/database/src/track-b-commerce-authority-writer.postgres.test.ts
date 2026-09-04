@@ -156,13 +156,13 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
         authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash },
       lease, actor: "TRACK_B_B3_2_WRITER", reason: `TRACK_B_B3_2_ACTIVATE_V2_CANDIDATE:${operationId}` });
     const watermark = await writer.readDatabaseClock();
-    const staleResolvedAt = new Date(new Date(watermark).getTime() - 1);
     await pool.query(`INSERT INTO runtime_behavior_mode_resolution_audit (
       resolution_id,page_id,channel,confirmation_mode,mode_version_id,content_hash,
-      pointer_revision,source,status,reason_codes,worker_id,pointer_updated_at,resolved_at,propagation_ms
+      pointer_revision,source,status,reason_codes,worker_id,pointer_updated_at,resolved_at,propagation_ms,created_at
     ) VALUES ($1,$2,$3,'V2_ACTIVE',$4,$5,7,'DATABASE','RESOLVED','{}','realtime-worker-1',
-      clock_timestamp(),$6,0)`, [randomUUID(), pageId, channel, targetVersionId, targetContentHash,
-      staleResolvedAt]);
+      clock_timestamp(),$6::timestamptz + interval '1 hour',0,
+      $6::timestamptz - interval '0.000001 seconds')`, [randomUUID(), pageId, channel,
+      targetVersionId, targetContentHash, watermark]);
     await expect(writer.readExactRuntimeResolution({ pageId, channel,
       modeVersionId: targetVersionId, contentHash: targetContentHash, pointerRevision: 7,
       authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
@@ -182,6 +182,48 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
       authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
       workerId: "realtime-worker-1", notBefore: watermark }))
       .resolves.toBe("EXACT");
+  });
+
+  it("preserves exact released-fence observation when a permitted 0039 down makes schema compatibility stale", async () => {
+    const request = { operationId, pageId, channel,
+      preCutover: { modeVersionId: previousVersionId, contentHash: previousContentHash,
+        pointerRevision: 6 },
+      target: { modeVersionId: targetVersionId, contentHash: targetContentHash,
+        authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash } };
+    await expect(fence.release(lease)).resolves.toEqual({ status: "RELEASED" });
+    const down = await readFile(resolve(import.meta.dirname,
+      "../pending-migrations/0039_track_b_v2_lkg_cutover_fence.down.sql"), "utf8");
+    await pool.query("BEGIN");
+    try {
+      await pool.query(down);
+      await pool.query("DELETE FROM schema_migrations WHERE migration_name=$1", [
+        "0039_track_b_v2_lkg_cutover_fence",
+      ]);
+      await pool.query("COMMIT");
+    } catch (error) {
+      await pool.query("ROLLBACK");
+      throw error;
+    }
+    await expect(fence.observe(request)).resolves.toMatchObject({
+      status: "ALREADY_RELEASED", fenceId: lease.fenceId, epoch: lease.epoch,
+    });
+    await expect(writer.readTrackBV2LkgSchemaCompatibility()).resolves.toEqual({
+      status: "AMBIGUOUS", source: "DATABASE", migrationSchemaHash: null,
+    });
+
+    const up = await readFile(resolve(import.meta.dirname,
+      "../pending-migrations/0039_track_b_v2_lkg_cutover_fence.up.sql"), "utf8");
+    await pool.query("BEGIN");
+    try {
+      await pool.query(up);
+      await pool.query("INSERT INTO schema_migrations (migration_name, checksum_sha256) VALUES ($1,$2)", [
+        "0039_track_b_v2_lkg_cutover_fence", createHash("sha256").update(up).digest("hex"),
+      ]);
+      await pool.query("COMMIT");
+    } catch (error) {
+      await pool.query("ROLLBACK");
+      throw error;
+    }
   });
 
   it("rejects an admission trigger rebound to an otherwise identical guard in another schema", async () => {

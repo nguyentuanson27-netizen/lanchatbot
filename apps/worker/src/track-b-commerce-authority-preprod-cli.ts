@@ -37,6 +37,7 @@ const OPERATION_ROOT = "/opt/lana-chatbot/releases/track-b/operations";
 const ROLLBACK_ROOT = "/opt/lana-chatbot/releases/track-b/rollback-records";
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const SHA256 = /^[a-f0-9]{64}$/u;
+const TRACK_B_CURRENT_LKG_RUNTIME_FRESHNESS = Object.freeze({ maximumAttempts: 120, pollMs: 1_000 });
 export type CommerceStartup = Exclude<ReturnType<typeof parseDf13CommercePreprodStartupInput>,
   { mode: "LEGACY" }>;
 
@@ -450,9 +451,27 @@ async function databaseUrl(): Promise<string> {
 export async function proveFreshTrackBInitialLkgRuntime(input: Readonly<{
   database: Pick<TrackBPreprodDatabaseBoundary, "readDatabaseClock" | "proveRuntimeResolution">;
   pointer: RuntimeBehaviorModePointer;
+  freshness?: Readonly<{
+    maximumAttempts: number;
+    pollMs: number;
+    wait: (milliseconds: number) => Promise<void>;
+  }>;
 }>): Promise<"EXACT" | "MISSING" | "AMBIGUOUS"> {
   const notBefore = await input.database.readDatabaseClock();
-  return input.database.proveRuntimeResolution({ pointer: input.pointer, notBefore });
+  const freshness = input.freshness ?? {
+    ...TRACK_B_CURRENT_LKG_RUNTIME_FRESHNESS,
+    wait: (milliseconds: number) => new Promise<void>((resolveWait) => setTimeout(resolveWait, milliseconds)),
+  };
+  if (!Number.isSafeInteger(freshness.maximumAttempts) || freshness.maximumAttempts < 1 ||
+      !Number.isSafeInteger(freshness.pollMs) || freshness.pollMs < 1) {
+    throw new Error("TRACK_B_B3_2_CURRENT_LKG_RUNTIME_OBSERVATION_INVALID");
+  }
+  for (let attempt = 0; attempt < freshness.maximumAttempts; attempt += 1) {
+    const result = await input.database.proveRuntimeResolution({ pointer: input.pointer, notBefore });
+    if (result !== "MISSING" || attempt + 1 === freshness.maximumAttempts) return result;
+    await freshness.wait(freshness.pollMs);
+  }
+  return "MISSING";
 }
 
 async function prepare(inputPath: string): Promise<void> {

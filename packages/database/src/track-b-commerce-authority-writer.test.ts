@@ -198,10 +198,13 @@ describe("Postgres Track B Commerce authority writer", () => {
         return result([{ exact_count: "1", conflicting_count: "0" }]);
       }
       if (sql.includes("runtime_behavior_mode_resolution_audit")) {
+        expect(sql).toContain("audit.created_at >= $8::timestamptz");
+        expect(sql).not.toContain("audit.resolved_at >=");
         expect(values?.slice(0, 7)).toEqual([
           pageId, channel, targetVersionId, v2ContentHash, 7,
           "realtime-worker-1", DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
         ]);
+        expect(values?.[7]).toBe("2026-09-02T00:00:00.000000+00");
         return result([{ exact_count: "1", conflicting_count: "0" }]);
       }
       return result();
@@ -215,7 +218,7 @@ describe("Postgres Track B Commerce authority writer", () => {
     await expect(store.readExactRuntimeResolution({ pageId, channel,
       modeVersionId: targetVersionId, contentHash: v2ContentHash, pointerRevision: 7,
       authorityBundleHash: DF13_COMMERCE_AUTHORITY_BUNDLE_V2.contractHash,
-      workerId: "realtime-worker-1", notBefore: "2026-09-02T00:00:00.000Z",
+      workerId: "realtime-worker-1", notBefore: "2026-09-02T00:00:00.000000+00",
     })).resolves.toBe("EXACT");
   });
 
@@ -234,12 +237,13 @@ describe("Postgres Track B Commerce authority writer", () => {
     })).resolves.toBe("AMBIGUOUS");
   });
 
-  it("derives a freshness watermark from the database clock and rejects an invalid clock value", async () => {
-    const watermark = new Date("2026-09-03T01:02:03.456Z");
+  it("preserves a full-precision database-native freshness watermark and rejects an invalid clock value", async () => {
+    const watermark = "2026-09-03T01:02:03.456789+00";
     mocks.clientQuery.mockResolvedValueOnce(result([{ operation_now: watermark }]));
     const store = new PostgresTrackBCommerceAuthorityWriter("postgresql://test");
-    await expect(store.readDatabaseClock()).resolves.toBe(watermark.toISOString());
-    expect(mocks.clientQuery).toHaveBeenCalledWith("SELECT clock_timestamp() AS operation_now", undefined);
+    await expect(store.readDatabaseClock()).resolves.toBe(watermark);
+    expect(mocks.clientQuery).toHaveBeenCalledWith(
+      "SELECT to_char(clock_timestamp(), 'YYYY-MM-DD\"T\"HH24:MI:SS.USOF') AS operation_now", undefined);
     mocks.clientQuery.mockResolvedValueOnce(result([{ operation_now: "not-a-date" }]));
     await expect(store.readDatabaseClock()).rejects.toThrow("TRACK_B_B3_2_DATABASE_CLOCK_INVALID");
   });

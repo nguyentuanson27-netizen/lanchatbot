@@ -623,6 +623,7 @@ describe("Track B PREPROD mutation adapter", () => {
       fenceToken: "30000000-0000-4000-8000-000000000001", epoch: 1 };
     const releaseFence = vi.fn(async () => ({ status: "RELEASED" as const }));
     const database = { acquireFence: vi.fn(async () => ({ status: "HELD" as const, lease })),
+      observeFence: vi.fn(),
       releaseFence, readAdmissionHold: vi.fn(async () => ({ status: "HELD" as const,
         source: "DATABASE" as const, pageId: "1198992073286645", channel: "MESSENGER",
         fenceId: lease.fenceId, epoch: 1, released: false,
@@ -634,7 +635,7 @@ describe("Track B PREPROD mutation adapter", () => {
       mutateExactPointer: vi.fn(async () => ({ status: "CAS_MISMATCH" as const })),
       readActivePointer: vi.fn(async () => previous), readActivationAudit: vi.fn(),
       proveRuntimeResolution: vi.fn(async () => "EXACT" as const),
-      readDatabaseClock: vi.fn(async () => "2026-09-03T00:00:00.000Z"), readExactVersion: vi.fn(),
+      readDatabaseClock: vi.fn(async () => "2026-09-03T00:00:00.000000+00"), readExactVersion: vi.fn(),
       readTrackBV2LkgSchemaCompatibility: vi.fn(async () => ({ status: "EXACT" as const,
         source: "DATABASE" as const, migrationSchemaHash: record.candidate.migrationSchemaHash })) };
     const ports = createTrackBCommerceAuthorityPreprodAdapter({ database, service,
@@ -660,7 +661,9 @@ describe("Track B PREPROD mutation adapter", () => {
     expect(composeCalls[0]?.env).toHaveProperty("REALTIME_RELEASE_ID",
       previousService.releaseRevision);
     expect(database.proveRuntimeResolution).toHaveBeenCalledWith({ pointer: previous,
-      notBefore: expect.any(String) });
+      notBefore: "2026-09-03T00:00:00.000000+00" });
+    expect(database.readDatabaseClock.mock.invocationCallOrder[0])
+      .toBeLessThan(database.proveRuntimeResolution.mock.invocationCallOrder[0] ?? 0);
     expect(readConsumers).toHaveBeenCalledTimes(1);
     expect(releaseFence).toHaveBeenCalledWith(lease);
   });
@@ -728,10 +731,10 @@ describe("Track B PREPROD mutation adapter", () => {
       guardedClaims: ["webhook_inbox:PROCESSING", "meta_outbox:SENDING",
         "pancake_tag_outbox:APPLYING"] };
     const adapter = createTrackBCommerceAuthorityPreprodAdapter({ service,
-      database: { acquireFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
+      database: { acquireFence: vi.fn(), observeFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
         readQuiescence: vi.fn(), mutateExactPointer: vi.fn(), readActivePointer: vi.fn(),
         readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(),
-        readDatabaseClock: vi.fn(), readExactVersion: vi.fn(),
+        readDatabaseClock: vi.fn(async () => "2026-09-03T00:00:00.000000+00"), readExactVersion: vi.fn(),
         readTrackBV2LkgSchemaCompatibility: vi.fn() },
       rollbackStore: { read: vi.fn(), persist: vi.fn() },
       quiescence: { timeoutMs: 1, pollMs: 1, wait: async () => undefined } });
@@ -757,10 +760,10 @@ describe("Track B PREPROD mutation adapter", () => {
       guardedClaims: ["webhook_inbox:PROCESSING", "meta_outbox:SENDING",
         "pancake_tag_outbox:APPLYING"] };
     const adapter = createTrackBCommerceAuthorityPreprodAdapter({ service,
-      database: { acquireFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
+      database: { acquireFence: vi.fn(), observeFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
         readQuiescence: vi.fn(), mutateExactPointer: vi.fn(), readActivePointer: vi.fn(),
         readActivationAudit: vi.fn(), proveRuntimeResolution: vi.fn(),
-        readDatabaseClock: vi.fn(), readExactVersion: vi.fn(),
+        readDatabaseClock: vi.fn(async () => "2026-09-03T00:00:00.000000+00"), readExactVersion: vi.fn(),
         readTrackBV2LkgSchemaCompatibility: vi.fn() },
       rollbackStore: { read: vi.fn(), persist: vi.fn() },
       quiescence: { timeoutMs: 1, pollMs: 1, wait: async () => undefined } });
@@ -777,7 +780,7 @@ describe("Track B PREPROD mutation adapter", () => {
 
   it("proves admission through the 0038 database boundary and bounded zero-work quiescence", async () => {
     const database = {
-      acquireFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => ({
+      acquireFence: vi.fn(), observeFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => ({
         status: "HELD" as const, source: "DATABASE" as const,
         pageId: "1198992073286645", channel: "MESSENGER",
         fenceId: "20000000-0000-4000-8000-000000000001", epoch: 1,
@@ -791,7 +794,8 @@ describe("Track B PREPROD mutation adapter", () => {
         .mockResolvedValueOnce({ activeInbox: 0, activeMetaOutbox: 0, activePancakeOutbox: 0,
           inFlightAuthorityDependentWork: 0, queuedAuthorityDependentWork: 3 }),
       mutateExactPointer: vi.fn(), readActivePointer: vi.fn(), readActivationAudit: vi.fn(),
-      proveRuntimeResolution: vi.fn(), readDatabaseClock: vi.fn(), readExactVersion: vi.fn(),
+      proveRuntimeResolution: vi.fn(),
+      readDatabaseClock: vi.fn(async () => "2026-09-03T00:00:00.000000+00"), readExactVersion: vi.fn(),
       readTrackBV2LkgSchemaCompatibility: vi.fn(),
     };
     const service = {
@@ -826,12 +830,13 @@ describe("Track B PREPROD mutation adapter", () => {
         "webhook_inbox:PROCESSING", "meta_outbox:SENDING", "pancake_tag_outbox:APPLYING",
       ] };
     const database = {
-      acquireFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
+      acquireFence: vi.fn(), observeFence: vi.fn(), releaseFence: vi.fn(), readAdmissionHold: vi.fn(async () => held),
       readQuiescence: vi.fn(async () => ({ activeInbox: 1, activeMetaOutbox: 0,
         activePancakeOutbox: 0, inFlightAuthorityDependentWork: 1,
       queuedAuthorityDependentWork: 9 })), mutateExactPointer: vi.fn(),
       readActivePointer: vi.fn(), readActivationAudit: vi.fn(),
-      proveRuntimeResolution: vi.fn(), readDatabaseClock: vi.fn(), readExactVersion: vi.fn(),
+      proveRuntimeResolution: vi.fn(),
+      readDatabaseClock: vi.fn(async () => "2026-09-03T00:00:00.000000+00"), readExactVersion: vi.fn(),
       readTrackBV2LkgSchemaCompatibility: vi.fn(),
     };
     const adapter = createTrackBCommerceAuthorityPreprodAdapter({

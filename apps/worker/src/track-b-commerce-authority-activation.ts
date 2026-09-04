@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { behaviorModeContentHash, type RuntimeBehaviorModePointer } from "@lana/chat-runtime";
 import type {
   Df13CommerceCutoverFenceLease,
+  Df13CommerceCutoverFenceObservation,
   Df13CommerceCutoverFenceRequest,
 } from "@lana/database";
 import { TRACK_B_COMMERCE_ADMISSION_CLAIMS_V1 } from "@lana/database";
@@ -101,6 +102,7 @@ export interface TrackBCommerceAuthorityMutationPorts {
     candidateMigrationSchemaHash: string;
     lastKnownGoodMigrationSchemaHash: string;
   }>): Promise<"EXACT" | "AMBIGUOUS">;
+  observeFence(request: Df13CommerceCutoverFenceRequest): Promise<Df13CommerceCutoverFenceObservation>;
   acquireFence(request: Df13CommerceCutoverFenceRequest): Promise<Readonly<
     | { status: "HELD"; lease: Df13CommerceCutoverFenceLease }
     | { status: "ALREADY_RELEASED"; fenceId: string; epoch: number }
@@ -216,7 +218,7 @@ export interface TrackBCommerceAuthorityMutationPorts {
 }
 
 export type TrackBCommerceAuthorityMutationResult = Readonly<{
-  status: "BLOCKED_PREVIOUS" | "TARGET_ACTIVE" | "PREVIOUS_RESTORED" | "HOLD_RETAINED" | "RELEASED_AMBIGUOUS";
+  status: "BLOCKED_PREVIOUS" | "TARGET_ACTIVE" | "PREVIOUS_RESTORED" | "HOLD_RETAINED" | "RELEASED_AMBIGUOUS" | "FENCE_STATE_UNKNOWN";
   sideEffects: "NOT_EXECUTED" | "CONTROL_PLANE_ONLY";
   reasonCodes: readonly string[];
 }>;
@@ -918,17 +920,6 @@ export async function recoverTrackBCommerceAuthorityMutationAfterInterruption(in
       "TRACK_B_B3_2_RECOVERY_ROLLBACK_RECORD_UNPROVEN",
     ] };
   }
-  try {
-    if (!await exactRecordedSchemaCompatibility(input)) {
-      return { status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [
-        "TRACK_B_B3_2_RECOVERY_SCHEMA_COMPATIBILITY_UNPROVEN",
-      ] };
-    }
-  } catch {
-    return { status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [
-      "TRACK_B_B3_2_RECOVERY_SCHEMA_COMPATIBILITY_UNPROVEN",
-    ] };
-  }
   const failedService = input.direction === "ACTIVATE_V2_CANDIDATE"
     ? input.rollbackRecord.candidate.service : input.rollbackRecord.lastKnownGood.service;
   const priorService = input.direction === "ACTIVATE_V2_CANDIDATE"
@@ -948,6 +939,38 @@ export async function recoverTrackBCommerceAuthorityMutationAfterInterruption(in
       authorityBundleHash: input.target.version.authorityBundleHash ?? "",
     },
   };
+  let schemaCompatible: boolean;
+  try { schemaCompatible = await exactRecordedSchemaCompatibility(input); } catch { schemaCompatible = false; }
+  if (!schemaCompatible) {
+    let observed: Df13CommerceCutoverFenceObservation;
+    try { observed = await input.ports.observeFence(request); } catch {
+      return { status: "FENCE_STATE_UNKNOWN", sideEffects: "NOT_EXECUTED", reasonCodes: [
+        "TRACK_B_B3_2_RECOVERY_SCHEMA_COMPATIBILITY_UNPROVEN",
+        "TRACK_B_B3_2_RECOVERY_FENCE_STATE_UNKNOWN",
+      ] };
+    }
+    if (observed.status === "ALREADY_RELEASED") {
+      return reconcileReleasedTerminal({
+        ports: input.ports,
+        operationId: input.operationId,
+        direction: input.direction,
+        previous: input.previous,
+        target: input.target,
+        previousService: priorService,
+        targetService: failedService,
+        fence: { fenceId: observed.fenceId, epoch: observed.epoch },
+      });
+    }
+    if (observed.status === "HELD" || observed.status === "EXPIRED_RECOVERY_REQUIRED") {
+      return { status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [
+        "TRACK_B_B3_2_RECOVERY_SCHEMA_COMPATIBILITY_UNPROVEN",
+      ] };
+    }
+    return { status: "FENCE_STATE_UNKNOWN", sideEffects: "NOT_EXECUTED", reasonCodes: [
+      "TRACK_B_B3_2_RECOVERY_SCHEMA_COMPATIBILITY_UNPROVEN",
+      "TRACK_B_B3_2_RECOVERY_FENCE_STATE_UNKNOWN",
+    ] };
+  }
   let acquired: Awaited<ReturnType<TrackBCommerceAuthorityMutationPorts["acquireFence"]>>;
   try { acquired = await input.ports.acquireFence(request); } catch {
     return { status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [

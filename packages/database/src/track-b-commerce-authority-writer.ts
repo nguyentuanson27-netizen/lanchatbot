@@ -13,6 +13,8 @@ const CHANNEL = "MESSENGER";
 const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const CONTENT_HASH_PATTERN = /^sha256:[a-f0-9]{64}$/u;
 const BUNDLE_HASH_PATTERN = /^[a-f0-9]{64}$/u;
+const DATABASE_TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}[+-]\d{2}(?::?\d{2})?$/u;
+const TIMESTAMPTZ_INPUT_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3,6}(?:Z|[+-]\d{2}(?::?\d{2})?)$/u;
 const PREPARE_REASON_PATTERN = /^TRACK_B_B3_2_PREPARE:[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const TRACK_B_V2_LKG_SCHEMA_MIGRATIONS = Object.freeze([
   Object.freeze({ name: "0036_df13_commerce_authority_fence", checksum: "d709617e10554a0186b9233a404ef7faadfdf3576ba3c133efe51a56c2214425" }),
@@ -338,8 +340,7 @@ export class PostgresTrackBCommerceAuthorityWriter {
     notBefore: string;
   }>): Promise<"EXACT" | "MISSING" | "AMBIGUOUS"> {
     requiredScope(input.pageId, input.channel);
-    const notBefore = new Date(input.notBefore);
-    if (!Number.isFinite(notBefore.getTime()) || input.workerId !== "realtime-worker-1") {
+    if (!TIMESTAMPTZ_INPUT_PATTERN.test(input.notBefore) || input.workerId !== "realtime-worker-1") {
       throw new Error("TRACK_B_B3_2_RUNTIME_READBACK_INPUT_INVALID");
     }
     const result = await this.#pool.query(
@@ -356,11 +357,11 @@ export class PostgresTrackBCommerceAuthorityWriter {
          JOIN runtime_behavior_mode_versions AS version
            ON version.mode_version_id=audit.mode_version_id
         WHERE audit.page_id=$1 AND audit.channel=$2 AND audit.worker_id=$6
-          AND audit.resolved_at >= $8`,
+          AND audit.created_at >= $8::timestamptz`,
       [PAGE_ID, CHANNEL,
         requiredUuid(input.modeVersionId, "TRACK_B_B3_2_VERSION_INVALID"),
         requiredContentHash(input.contentHash), requiredRevision(input.pointerRevision),
-        input.workerId, requiredBundleHash(input.authorityBundleHash), notBefore],
+        input.workerId, requiredBundleHash(input.authorityBundleHash), input.notBefore],
     );
     const exactCount = Number((result.rows[0] as Row | undefined)?.exact_count);
     const conflictingCount = Number((result.rows[0] as Row | undefined)?.conflicting_count);
@@ -371,12 +372,14 @@ export class PostgresTrackBCommerceAuthorityWriter {
   }
 
   async readDatabaseClock(): Promise<string> {
-    const result = await this.#pool.query("SELECT clock_timestamp() AS operation_now");
+    const result = await this.#pool.query(
+      "SELECT to_char(clock_timestamp(), 'YYYY-MM-DD\"T\"HH24:MI:SS.USOF') AS operation_now",
+    );
     const observed = (result.rows[0] as Row | undefined)?.operation_now;
-    if (!(observed instanceof Date) || Number.isNaN(observed.getTime())) {
+    if (typeof observed !== "string" || !DATABASE_TIMESTAMP_PATTERN.test(observed)) {
       throw new Error("TRACK_B_B3_2_DATABASE_CLOCK_INVALID");
     }
-    return observed.toISOString();
+    return observed;
   }
 
   async readTrackBV2LkgSchemaCompatibility(): Promise<TrackBV2LkgSchemaCompatibilityReadback> {

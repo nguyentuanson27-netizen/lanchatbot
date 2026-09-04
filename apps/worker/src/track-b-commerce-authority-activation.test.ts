@@ -132,6 +132,11 @@ function ports(overrides: Partial<TrackBCommerceAuthorityMutationPorts> = {}): T
   return {
     readPersistedRollbackRecord: vi.fn(async () => rollbackRecord),
     proveSchemaCompatibility: vi.fn(async () => "EXACT" as const),
+    observeFence: vi.fn(async () => ({
+      status: "HELD" as const,
+      fenceId: "20000000-0000-4000-8000-000000000001",
+      epoch: 1,
+    })),
     acquireFence: vi.fn(async () => ({
       status: "HELD" as const,
       lease: {
@@ -901,7 +906,7 @@ describe("Track B Commerce authority mutation", () => {
     expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
   });
 
-  it("retains recovery hold without mutation or release when recorded schema compatibility has drifted", async () => {
+  it("retains an observed unreleased recovery fence without mutation or release when recorded schema compatibility has drifted", async () => {
     const mutationPorts = ports({
       proveSchemaCompatibility: vi.fn(async () => "AMBIGUOUS" as const),
     });
@@ -912,11 +917,81 @@ describe("Track B Commerce authority mutation", () => {
     })).resolves.toEqual({ status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [
       "TRACK_B_B3_2_RECOVERY_SCHEMA_COMPATIBILITY_UNPROVEN",
     ] });
+    expect(mutationPorts.observeFence).toHaveBeenCalledOnce();
     expect(mutationPorts.acquireFence).not.toHaveBeenCalled();
     expect(mutationPorts.stageAffectedService).not.toHaveBeenCalled();
     expect(mutationPorts.mutateExactPointer).not.toHaveBeenCalled();
     expect(mutationPorts.restorePreviousService).not.toHaveBeenCalled();
     expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+  });
+
+  it("retains an expired-but-unreleased observed recovery fence under schema drift", async () => {
+    const mutationPorts = ports({
+      proveSchemaCompatibility: vi.fn(async () => "AMBIGUOUS" as const),
+      observeFence: vi.fn(async () => ({
+        status: "EXPIRED_RECOVERY_REQUIRED" as const,
+        fenceId: "20000000-0000-4000-8000-000000000001",
+        epoch: 1,
+      })),
+    });
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000004",
+      direction: "ACTIVATE_V2_CANDIDATE", previous, target, rollbackRecord, releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({ status: "HOLD_RETAINED", sideEffects: "NOT_EXECUTED", reasonCodes: [
+      "TRACK_B_B3_2_RECOVERY_SCHEMA_COMPATIBILITY_UNPROVEN",
+    ] });
+    expect(mutationPorts.acquireFence).not.toHaveBeenCalled();
+    expect(mutationPorts.mutateExactPointer).not.toHaveBeenCalled();
+    expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+  });
+
+  it("reconciles an observed released fence instead of falsely retaining a hold under schema drift", async () => {
+    const mutationPorts = ports({
+      proveSchemaCompatibility: vi.fn(async () => "AMBIGUOUS" as const),
+      observeFence: vi.fn(async () => ({
+        status: "ALREADY_RELEASED" as const,
+        fenceId: "20000000-0000-4000-8000-000000000001",
+        epoch: 1,
+      })),
+    });
+    await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+      operationId: "40000000-0000-4000-8000-000000000004",
+      direction: "ACTIVATE_V2_CANDIDATE", previous, target, rollbackRecord, releaseEvidence,
+      ports: mutationPorts,
+    })).resolves.toEqual({ status: "TARGET_ACTIVE", sideEffects: "CONTROL_PLANE_ONLY", reasonCodes: [
+      "TRACK_B_B3_2_RELEASE_ACK_RECONCILED",
+    ] });
+    expect(mutationPorts.acquireFence).not.toHaveBeenCalled();
+    expect(mutationPorts.stageAffectedService).not.toHaveBeenCalled();
+    expect(mutationPorts.mutateExactPointer).not.toHaveBeenCalled();
+    expect(mutationPorts.restorePreviousService).not.toHaveBeenCalled();
+    expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+  });
+
+  it("reports neutral fence-state unknown without mutation when schema drift lacks an exact fence observation", async () => {
+    for (const observeFence of [
+      vi.fn(async () => ({ status: "MISSING" as const })),
+      vi.fn(async () => ({ status: "MISMATCH" as const, reasonCode: "fixture mismatch" })),
+      vi.fn(async () => { throw new Error("unavailable"); }),
+    ]) {
+      const mutationPorts = ports({
+        proveSchemaCompatibility: vi.fn(async () => "AMBIGUOUS" as const), observeFence,
+      });
+      await expect(recoverTrackBCommerceAuthorityMutationAfterInterruption({
+        operationId: "40000000-0000-4000-8000-000000000004",
+        direction: "ACTIVATE_V2_CANDIDATE", previous, target, rollbackRecord, releaseEvidence,
+        ports: mutationPorts,
+      })).resolves.toEqual({ status: "FENCE_STATE_UNKNOWN", sideEffects: "NOT_EXECUTED", reasonCodes: [
+        "TRACK_B_B3_2_RECOVERY_SCHEMA_COMPATIBILITY_UNPROVEN",
+        "TRACK_B_B3_2_RECOVERY_FENCE_STATE_UNKNOWN",
+      ] });
+      expect(mutationPorts.acquireFence).not.toHaveBeenCalled();
+      expect(mutationPorts.stageAffectedService).not.toHaveBeenCalled();
+      expect(mutationPorts.mutateExactPointer).not.toHaveBeenCalled();
+      expect(mutationPorts.restorePreviousService).not.toHaveBeenCalled();
+      expect(mutationPorts.releaseFence).not.toHaveBeenCalled();
+    }
   });
 
   it("reconciles a committed forward fence release whose acknowledgement was lost", async () => {

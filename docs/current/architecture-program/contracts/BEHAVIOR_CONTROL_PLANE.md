@@ -109,6 +109,13 @@ certification and database-derived migrations-through-0039 schema compatibility.
 The compatibility hash proves the applied 0036--0039 ledger checksums, exact 0039
 fence-guard source and exact 0038 admission-guard/trigger identities. Missing, stale,
 ambiguous or incompatible LKG evidence fails closed; it never falls back to V1.
+The initial current-LKG proof latches one full-precision database-clock watermark
+after exact running-service and mounted-startup proof, then permits at most 120
+read-only probes one second apart for a matching runtime resolution received by
+the database after that same watermark. It compares database-authored audit
+`created_at`, never the worker-authored `resolved_at` or host time. `AMBIGUOUS`
+fails immediately and an all-`MISSING` window fails closed; the operator neither
+generates customer traffic nor restarts the service to manufacture evidence.
 
 Before CAS failure handling must leave the pointer at the recorded currently accepted V2
 identity, discard the staged target, restore and read back the exact prior
@@ -124,7 +131,11 @@ the durable `ALREADY_RELEASED` fence identity and reconciles exact pointer,
 service/runtime, audit when a CAS occurred, and all DATABASE consumers. It may
 report the exact target active, exact prior untouched, or exact prior restored;
 otherwise it reports released-state ambiguity and never claims a hold that no
-longer exists.
+longer exists. If schema compatibility has drifted, recovery first uses the
+read-only exact fence observation: an exact unreleased fence may report retained,
+an exact released fence may run only released-state reconciliation, and a
+missing/mismatched/unreadable fence reports neutral `FENCE_STATE_UNKNOWN` without
+acquire/reacquire, service, pointer, staging, or release mutation.
 
 ### Historical narrow first-DF13 PREPROD exception (not the current Track B path)
 
