@@ -243,6 +243,21 @@ postgresDescribe("Gate E V2 durable PostgreSQL evidence admission", () => {
 
   afterAll(async () => {
     await anchorStore.close();
+    const downSql = await readFile(
+      resolve(migrationsDirectory, "0034_gate_e_evidence_store_v2.down.sql"),
+      "utf8",
+    );
+    await pool.query("BEGIN");
+    try {
+      await pool.query(downSql);
+      await pool.query(
+        "DELETE FROM schema_migrations WHERE migration_name='0034_gate_e_evidence_store_v2'",
+      );
+      await pool.query("COMMIT");
+    } catch (error) {
+      await pool.query("ROLLBACK");
+      throw error;
+    }
     await pool.end();
   });
 

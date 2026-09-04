@@ -142,6 +142,13 @@ postgresDescribe("Track B B3.2 concrete PostgreSQL readback", () => {
       try {
         await waitForDatabaseClientsToClose(admin, databaseName);
         await admin.query(`DROP DATABASE IF EXISTS ${databaseName}`);
+        for (const migrationRole of [
+          "lana_gate_e_registration_writer",
+          "lana_gate_e_evidence_writer",
+          "lana_gate_e_evidence_reader",
+        ]) {
+          await admin.query(`DROP ROLE IF EXISTS ${migrationRole}`);
+        }
       } finally {
         await admin.end();
       }
