@@ -182,6 +182,9 @@ BEGIN
        AND confirmation_mode='V2_ACTIVE' AND sales_authority_mode='COMMERCE' AND state_read_mode='LEGACY'
        AND authority_bundle_hash=v2_bundle AND content_hash=p_target_content_hash
   ) THEN RAISE EXCEPTION 'TRACK_B_OPERATOR_CAS_TARGET_INVALID'; END IF;
+  -- Preserve the legacy pointer guard identity while resolving only its
+  -- pre-existing canonical public relations for this guarded mutation.
+  PERFORM pg_catalog.set_config('search_path','pg_catalog, public',true);
   UPDATE public.runtime_behavior_mode_pointers p
      SET active_version_id=p_target_version_id, pointer_revision=p_expected_revision+1,
          updated_by=p_actor, reason=p_mutation_reason, updated_at=clock_timestamp()
@@ -192,6 +195,7 @@ BEGIN
          AND v.authority_bundle_hash=v2_bundle)
   RETURNING p.updated_at INTO changed_at;
   IF changed_at IS NULL THEN RAISE EXCEPTION 'TRACK_B_OPERATOR_CAS_MISMATCH'; END IF;
+  PERFORM pg_catalog.set_config('search_path','pg_catalog',true);
   RETURN changed_at;
 END $$;
 
