@@ -38,6 +38,13 @@ t40_role_exact_nologin() {
 t40_role_exact_login() {
   test "$(database_query "SELECT count(*) FROM pg_roles WHERE rolname='$T40_ROLE' AND NOT rolsuper AND NOT rolinherit AND NOT rolcreaterole AND NOT rolcreatedb AND rolcanlogin AND NOT rolreplication AND NOT rolbypassrls")" = 1
 }
+t40_require_secret_unmounted() {
+  local mounts
+  mounts="$(docker inspect --format '{{range .Mounts}}{{println .Source}}{{end}}' "$REALTIME_CONTAINER")" || die '0040 realtime mount readback failed'
+  if printf '%s\n' "$mounts" | grep -Fx -- "$T40_SECRET" >/dev/null; then
+    die '0040 operator secret mounted into realtime'
+  fi
+}
 t40_preflight() {
   local role_count
   role_count="$(database_query "SELECT count(*) FROM pg_roles WHERE rolname='$T40_ROLE'")"
@@ -54,7 +61,7 @@ t40_preflight() {
   test "$(database_query "SELECT count(*) FROM schema_migrations WHERE migration_name='$T40_MIGRATION'")" = 0 || die '0040 already applied'
   test "$(database_query "SELECT count(*) FROM df13_commerce_cutover_fences WHERE released_at IS NULL")" = 0 || die '0040 unreleased fence exists'
   test "$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}|{{.RestartCount}}' "$REALTIME_CONTAINER")" = 'healthy|0' || die '0040 realtime unhealthy'
-  test -z "$(docker inspect --format '{{range .Mounts}}{{if eq .Source \"'$T40_SECRET'\"}}{{.Source}}{{end}}{{end}}' "$REALTIME_CONTAINER")" || die '0040 operator secret mounted into realtime'
+  t40_require_secret_unmounted
 }
 t40_create_nologin_role() {
   test "$(database_query "SELECT count(*) FROM pg_roles WHERE rolname='$T40_ROLE'")" = 0 || die '0040 operator role already exists or is ambiguous'
@@ -144,7 +151,7 @@ t40_provision_secret() (
   unset password
   t40_role_exact_login || die '0040 LOGIN role readback mismatch'
   test "$(stat -c '%U|%G|%a' "$T40_SECRET")" = 'root|root|400' || die '0040 secret file ownership mismatch'
-  test -z "$(docker inspect --format '{{range .Mounts}}{{if eq .Source \"'$T40_SECRET'\"}}{{.Source}}{{end}}{{end}}' "$REALTIME_CONTAINER")" || die '0040 secret mounted into realtime'
+  t40_require_secret_unmounted
   (cd "$SOURCE_ROOT" && pnpm --filter @lana/worker build >/dev/null) || die '0040 exact endpoint resolver build failed'
   test -s "$SOURCE_ROOT/apps/worker/dist/track-b-commerce-authority-preprod-cli.js" || die '0040 reviewed endpoint resolver build missing'
   (cd "$SOURCE_ROOT/packages/database" && TRACK_B_RESOLVER_FILE="$SOURCE_ROOT/apps/worker/dist/track-b-commerce-authority-preprod-cli.js" node --input-type=module -e '
