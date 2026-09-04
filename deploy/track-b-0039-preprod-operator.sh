@@ -340,12 +340,11 @@ t39_backup_rehearse() {
   t39_apply_down_named "$restore_database"
   t39_verify_down_named "$restore_database"
   t39_apply_up_named "$restore_database"
-  cat "$T39_UP" | database_stream_named "$restore_database" >/dev/null
   t39_verify_up_named "$restore_database"
   test "$(database_sql_file_sha256_named "$restore_database" "$RELATION_ACL_QUERY")" = "$pre_relation_acl" || die "0039 up changed relation ACL"
   test "$(database_copy_sha256_named "$restore_database" "SELECT rolname,rolsuper,rolinherit,rolcreaterole,rolcreatedb,rolcanlogin,rolreplication,rolbypassrls,rolconnlimit FROM pg_roles WHERE left(rolname,3) <> chr(112)||chr(103)||chr(95) ORDER BY rolname")" = "$EXPECTED_ROLE_STATE_SHA256" || die "0039 up changed role attributes"
   test "$(database_copy_sha256_named "$restore_database" "SELECT member_role.rolname,granted_role.rolname,m.admin_option FROM pg_auth_members m JOIN pg_roles member_role ON member_role.oid=m.member JOIN pg_roles granted_role ON granted_role.oid=m.roleid ORDER BY 1,2,3")" = "$EXPECTED_ROLE_MEMBERSHIP_SHA256" || die "0039 up changed role memberships"
-  test "$(database_copy_sha256_named "$restore_database" "SELECT extname,extversion FROM pg_extension ORDER BY extname")" = "$EXPECTED_EXTENSIONS_SHA256" || die "0039 up changed extensions"
+  test "$(database_copy_sha256_named "$restore_database" "SELECT extname,extversion FROM pg_extension ORDER BY extname")" = "$EXPECTED_EXTENSIONS_SHA256" || die "0039 final up changed extensions"
   local post_catalog_sha post_function_acl post_ledger_sha
   post_catalog_sha="$(t39_catalog_sha_named "$restore_database")"
   post_function_acl="$(database_sql_file_sha256_named "$restore_database" "$FUNCTION_ACL_QUERY")"

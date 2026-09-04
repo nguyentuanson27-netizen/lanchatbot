@@ -128,6 +128,7 @@ test("0039 admits only exact page-scoped same-identity V2 LKG fences and rolls d
       WHERE n.nspname=$1 AND p.proname='guard_df13_commerce_cutover_fence_insert_identity'`, [schema]);
     assert.equal(restored.rows[0]?.hash, "c72ab14e75111ce7f216e516a6f2edc86cfd4bf53d50d9c2359d064f20bdd4e3");
     await client.query(upSql);
+    await assert.rejects(client.query(upSql), /0039 requires exact 0037 replacement guard identity/u);
   } finally {
     try { await client.query("ROLLBACK"); } catch { /* no active transaction */ }
     await client.query(`DROP SCHEMA IF EXISTS ${schema} CASCADE`);

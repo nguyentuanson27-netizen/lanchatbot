@@ -30,6 +30,16 @@ requireText(/T39_V2_VERSION\|COMMERCE\|LEGACY\|\$T39_V2_BUNDLE\|\$T39_V2_CONTENT
 requireText(/POLICY_STORE_TEST_DATABASE_URL="\$database_url"[\s\S]*track-b-0039-v2-lkg\.postgres-spec\.js/u, "PostgreSQL V2 LKG suite is not invoked safely");
 requireText(/BLOCKED_MANUAL_RESTORE_REQUIRED/u, "ambiguous recovery does not fail closed");
 
+const rehearsal = source.match(/t39_backup_rehearse\(\) \{([\s\S]*?)\n\}\n\nt39_marker_post_catalog/u)?.[1];
+if (!rehearsal) throw new Error("backup-rehearse body is missing");
+const migrationCalls = [...rehearsal.matchAll(/t39_apply_(up|down)_named "\$restore_database"/gu)]
+  .map((match) => match[1]);
+// One failed down refusal probe is intentional; the successful sequence is up/down/up.
+if (migrationCalls.join(",") !== "up,down,down,up") {
+  throw new Error(`rehearsal migration calls drifted: ${migrationCalls.join(",")}`);
+}
+if (/cat "\$T39_UP"\s*\|/u.test(rehearsal)) throw new Error("rehearsal contains an ungoverned extra up");
+
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 const migrationRow = (directory, filename) => `${filename.replace(/\.up\.sql$/u, "")},${sha256(readFileSync(join(repositoryRoot, directory, filename)))}\n`;
 const active = readdirSync(join(repositoryRoot, "packages/database/migrations"))

@@ -25,7 +25,7 @@ parity, applies `0039 up -> down -> up`, and runs the reviewed real-PostgreSQL
 0039 acceptance suite against the disposable database. That suite covers exact
 same-identity V2 LKG admission, stale/missing/ambiguous identity refusal,
 page isolation and advisory-lock races. The operator separately proves that down refuses an
-unreleased fence, then verifies exact repeated-up catalog and cleanup. A
+unreleased fence, then verifies the exact final-up catalog and cleanup. A
 run-specific marker is created only after the disposable database is created;
 cleanup refuses to drop a database unless that marker is read back exactly.
 
