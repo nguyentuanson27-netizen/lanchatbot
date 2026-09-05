@@ -1,11 +1,11 @@
 # LANA Chatbot — Active Incident Backlog
 
-**Status:** BF reconciliation remains `GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS`; the later Gate E acceptance is recorded separately.
-**Active track:** `GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE`; exact COMMERCE PREPROD runtime and controlled Messenger E2E are recorded in `DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md`. BF residuals remain recorded and unchanged.
-**Next issue:** V5 Track B model-authority work, only after a separate implementation command. UR/State V2 remains trigger-only and separately approved.
+**Status:** Historical BF reconciliation remains `GATE_BF_ACCEPTED_WITH_OWNER_WAIVERS`; subsequent Track B closure does not rewrite that dated verdict.
+**Active track:** `TRACK_B_COMPLETE`, after `GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE`; exact accepted V2 and initial-LKG evidence are recorded in `TRACK_B_PREPROD_ACCEPTANCE_20260905.md`.
+**Next issue:** Track C requires a separate owner start command. UR/State V2 remains trigger-only and separately approved.
 **Exit:** owner acceptance is recorded and `POST_BF_V1` is anchored to the immutable reconciled runtime evidence.
-**Detailed issue contracts:** `BF_ISSUE_SPECS.md`; current disposition is below.
-**Operating mode:** `ENGINEERING_PREPROD`; PRs use focused verification and Release Trains own full verification/deploy preparation.
+**Detailed issue contracts:** `BF_ISSUE_SPECS.md`; the dated Gate BF disposition and subsequent Track B update are below.
+**Operating mode:** `ENGINEERING_PREPROD` / `SOLO_PREPROD_MINIMAL`; focused source verification, exact changed-boundary pre-activation readback and post-activation smoke apply unless an explicit risk selects a stronger Release Train.
 
 ## Objective
 
@@ -61,7 +61,7 @@ Wave C: BF-06 -> BF-07 -> BF-08 -> BF-09
 | BF-01 | Merged and in the realtime artifact | CLARIFY_RECONCILED_V1 published | Active; no Gate BF blocker recorded |
 | BF-02 | Merged and in the realtime artifact | Direct runtime path | Active; replay evidence retained |
 | BF-03 | PR #158 foundation-safe merge | No adapter, import, policy field, or activation path | Owner-approved deferred deviation; canonical non-activatable disposition; do not revive the heuristic |
-| BF-04 | PR #128 merged; later realtime artifacts contain the code | Direct claim-guard path | **PARTIAL / KNOWN_GAP** P0 bypasses; owner waived it only as a Gate blocker, not as a correctness finding |
+| BF-04 | PR #128 merged; later realtime artifacts contain the code | Direct claim-guard path | **Historical Gate BF:** `PARTIAL / KNOWN_GAP`; the owner waived it only as a Gate blocker. **Subsequent Track B PREPROD:** B2.3d plus accepted Gate E v22 closed the migrated path without changing the historical verdict or claiming public-production acceptance. |
 | BF-05 | Merged and in the realtime artifact | Direct runtime path | Active; eligibility remains fail-closed |
 | BF-06 | Merged and in the realtime artifact | PER_ASSET_V1 published | Active |
 | BF-07 | Merged and in the realtime artifact | CLARIFY_V1 published | Active |
@@ -74,7 +74,7 @@ a claim that BF-04 is fixed, BF-10 has natural-transition evidence, or a deploym
 `POST_BF_V1` uses the immutable r5.7.1 realtime plus r5.6 delivery evidence recorded in
 `CURRENT_BASELINE.md` as its comparison anchor.
 
-Each issue is one focused PR starting from freshly fetched `main`, not the preceding bug branch. PR merge does not imply one release or one deploy. Immutable release preparation, full verification, and any authorized `PREPROD_TEST_PAGE` deployment occur at the applicable Release Train boundary.
+For the historical BF waves, each issue was one focused PR starting from freshly fetched `main`, not the preceding bug branch; PR merge did not imply one release or deploy. Current PREPROD work instead follows `SOLO_PREPROD_MINIMAL`; a Release Train is selected only when a concrete risk requires it.
 
 ## Required per-issue context
 
@@ -98,7 +98,7 @@ For one BF task, load only:
 
 ## Dependencies into later architecture
 
-- BF-04 remains an unresolved safety residual. Its verified-claim design informs DF-05/DF-06, but its known P0 bypasses must not be represented as closed containment. The 2026-08-13 owner waiver permits DF progression only.
+- At Gate BF on 2026-08-13, BF-04 remained an unresolved safety residual and its P0 bypasses could not be represented as closed containment. That historical waiver remains immutable; B2.3d plus accepted Gate E v22 subsequently closed the migrated Track B PREPROD path.
 - BF-03 has an owner-approved deferred deviation and the canonical foundation-only disposition from PR #158: retained inert primitives and evaluation data have no runtime authority or activation path. Do not revive correction containment; the root dialogue-evidence and writer-demotion obligations remain DF-05/DF-06 and DF-09/DF-11.
 - BF-07 clarifies multiple products; canonical multi-product state remains an UR-00 ADR obligation.
 - DF-09/DF-10 must use the post-Gate-BF V1 baseline, never the known-buggy pre-wave path.
@@ -112,7 +112,7 @@ bounded deviations:
 
 - BF-03 semantics are deferred to the canonical DF dialogue-evidence/authority work; the
   foundation-only implementation remains non-activatable.
-- BF-04 remains `PARTIAL / KNOWN_GAP`; its P0 bypass is accepted as an open safety residual.
+- At the dated Gate BF decision, BF-04 remained `PARTIAL / KNOWN_GAP` and its P0 bypass was accepted as an open safety residual. The migrated Track B PREPROD path was subsequently closed by B2.3d plus accepted Gate E v22; this line preserves the earlier waiver rather than asserting the current Track B disposition.
 - BF-10 natural post-cutover evidence remains pending. This is absence of live exercise, not
   a failed runtime condition and not a newly invented mandatory acceptance criterion.
 

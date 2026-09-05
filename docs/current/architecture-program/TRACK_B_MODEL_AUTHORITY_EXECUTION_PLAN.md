@@ -545,7 +545,7 @@ The concrete built operator is `node apps/worker/dist/track-b-commerce-authority
 4. The Context V2 candidate remains offline/evaluation-only; Track B contains no candidate-promotion path.
 5. The DF13 composition remains the single COMMERCE authority seam; no second permanent runtime or control plane was created.
 6. Invalid model output is bounded to exactly one repair, cannot execute protected effects, and falls back to verified facts without becoming a sales copywriter.
-7. BF-04 is either closed with evidence for the migrated path or explicitly remains a fenced known residual that Track B does not increase or misrepresent.
+7. BF-04 is closed with B2.3d and accepted Gate E v22 evidence for the migrated Track B PREPROD path; the historical Gate BF waiver remains traceable and no public-production acceptance is claimed.
 8. Obsolete post-generation authority is unreachable from active COMMERCE, or explicitly retained for a proven rollback or non-COMMERCE consumer.
 9. The live-path differential and side-effect-free replay pass required safety and correctness assertions, and r31.3 differential evidence is reviewed.
 10. No Gate-E result is represented as acceptance of the live runtime.
