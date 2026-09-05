@@ -12,7 +12,7 @@
 - Gate BF/E/F/U là engineering/architecture gates, không tự động đồng nghĩa production-ready.
 - Chỉ owner mới có thể thay đổi process profile hoặc chuyển operating mode, bao gồm `PRODUCTION_HARDENING`.
 
-**Vị trí chương trình hiện tại:** `GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE`. PREPROD test page đang chạy exact COMMERCE release với `stateReadMode=LEGACY`; controlled Messenger E2E và exact rollback/reactivation lifecycle đã PASS. Xem [DF13 / Gate F acceptance record](docs/current/architecture-program/DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md). BF-03 vẫn foundation-only/non-activatable, BF-04 vẫn `PARTIAL / KNOWN_GAP`, BF-10 vẫn còn natural-terminal residual, và `DATABASE_URL` remediation vẫn tách riêng; không residual nào được diễn giải là đã sửa. Đây không phải public-production promotion, page expansion, UR/State V2 approval hay quyền xoá LEGACY.
+**Vị trí chương trình hiện tại:** `TRACK_B_COMPLETE` trên `ENGINEERING_PREPROD` / `PREPROD_TEST_PAGE`, sau `GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE`. PREPROD test page đang chạy exact COMMERCE V2 release với `stateReadMode=LEGACY`; current healthy V2 đã được bind làm initial compatible last-known-good V2 bằng exact pointer/service/image/config/startup và migration/ACL/fence identity theo `SOLO_PREPROD_MINIMAL`. Xem [Track B PREPROD acceptance](docs/current/architecture-program/TRACK_B_PREPROD_ACCEPTANCE_20260905.md) và [DF13 / Gate F acceptance record](docs/current/architecture-program/DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md). BF-03 vẫn foundation-only/non-activatable; BF-04 đã đóng cho Track B PREPROD qua B2.3d và Gate E v22 accepted evidence; BF-10 vẫn còn natural-terminal residual; `DATABASE_URL` remediation vẫn tách riêng. Đây không phải public-production promotion, page expansion, UR/State V2 approval hay quyền xoá LEGACY.
 
 Nguồn governance authoritative: [Operating Mode](docs/current/architecture-program/OPERATING_MODE.md). Việc đổi mode không thay đổi verified-claim, side-effect authorization, SSRF, PII/secret, auth, database-safety, authority-transition, rollback hoặc release-integrity invariants.
 
@@ -186,6 +186,7 @@ Không recreate toàn bộ compose khi chỉ cần cập nhật một service; c
 - [Architecture Program — active BF/DF/UR context index](docs/current/architecture-program/README.md) — nguồn định tuyến context gọn; không tự cấp quyền merge hoặc deploy
 - [Operating Mode — ENGINEERING_PREPROD governance](docs/current/architecture-program/OPERATING_MODE.md) — định nghĩa `SOLO_PREPROD_MINIMAL`, Gate semantics, PREPROD_TEST_PAGE và trigger thay đổi process/mode
 - [DF13 / Gate F PREPROD acceptance](docs/current/architecture-program/DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md) — exact COMMERCE runtime, rollback/reactivation và Messenger E2E evidence
+- [Track B PREPROD acceptance](docs/current/architecture-program/TRACK_B_PREPROD_ACCEPTANCE_20260905.md) — exact current V2/LKG binding, Gate E v22 reuse, migration/ACL/fence readback và `TRACK_B_COMPLETE`
 - [DF13 operational-acceptance preparation](docs/current/architecture-program/DF13_OPERATIONAL_ACCEPTANCE_PREPARATION.md) — preparation/runbook retained for traceability
 - [Production baseline và ownership](docs/current/PRODUCTION_BASELINE_20260722.md)
 - [Kế hoạch nâng cấp Realtime Sales Agent](docs/current/REALTIME_AGENT_UPGRADE_PLAN.md)

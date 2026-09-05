@@ -4,7 +4,7 @@
 **Current mode:** `ENGINEERING_PREPROD`
 **Current process profile:** `SOLO_PREPROD_MINIMAL`
 **Process-profile lifetime:** remains active until an explicit owner instruction changes the process profile or operating mode.
-**Current program point:** `GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE`; active sequencing is V5 Track B unless separately redirected.
+**Current program point:** `TRACK_B_COMPLETE`, after `GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE`; Track C remains owner-start-only and is not authorized by this status.
 **Live page role:** `PREPROD_TEST_PAGE`
 **Approved page:** `1198992073286645`
 
@@ -18,7 +18,7 @@ The connected page is a bounded engineering test environment. It is not public p
 
 `DF-C` and `Gate F-PREPROD` are already complete and accepted. Their recorded activation, rollback and reactivation evidence is historical/current-state evidence, not an unfinished workflow to rerun.
 
-`SOLO_PREPROD_MINIMAL` is the current default process profile for **all work performed while this `ENGINEERING_PREPROD` profile remains active**. V5 Track B/Track C are the current roadmap consumers of this process, not its scope or expiration boundary. Completing a Track, roadmap, or Gate does not change the process profile by itself.
+`SOLO_PREPROD_MINIMAL` is the current default process profile for **all work performed while this `ENGINEERING_PREPROD` profile remains active**. V5 Track B is complete; Track C remains the next owner-start-only roadmap consumer. Neither Track bounds this process profile or changes it by completion alone.
 
 Current evidence strategy must therefore prove the owning technical boundary without pretending PREPROD has production traffic characteristics.
 

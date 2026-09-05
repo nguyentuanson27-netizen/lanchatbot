@@ -1,6 +1,6 @@
 # Track B — Model Authority Execution Plan
 
-**Status:** `B2.4_MERGED / B3.1_V22_GATE_E_PASS / MIGRATIONS_0036_0037_0038_0039_PREPROD_APPLIED_VERIFIED / B3.2_V2_LKG_SOURCE_MERGED / MIGRATION_0040_OPERATOR_SOURCE_IN_PROGRESS`
+**Status:** `TRACK_B_COMPLETE / B3.1_V22_GATE_E_PASS / MIGRATIONS_0036_THROUGH_0040_PREPROD_APPLIED_VERIFIED / INITIAL_COMPATIBLE_LKG_V2_BOUND`
 **Plan baseline:** `main@4a5869f63d260091776da8236f1584f2c7e49bb5`, including reviewed B3 live-path replay head `104ee2f483e912532a77ef17b2dfe2c3878aebee`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Active process profile:** `SOLO_PREPROD_MINIMAL` (merged and current default; see `OPERATING_MODE.md`)
@@ -65,7 +65,7 @@ Baseline prompt/envelope modification, live Context V2 candidate promotion and a
 3. `packages/database/src/df13-commerce-authority-bundle.ts` records `legacySalesStage: "DEMOTED_TELEMETRY_ONLY"`, `strategy: "CONTEXT_V2"`, `cta: "CONTEXT_V2"`. B1 proved no runtime code branches on the individual fields; runtime admission consumes `contractHash`. The fields remain governance claims, however, and the selected baseline-output authority makes the current strategy/CTA labels untruthful. B3.2 must derive a new payload, hash and behavior identity.
 4. `apps/worker/src/df13-commerce-runtime-composition.ts` is the single real COMMERCE composition seam. B1 clarified that the DF13 executor performs identity admission, fence assessment, lease dispatch and fence-bound commit only — it does not orchestrate replies. `RealtimeRunner` (`realtime-runner.ts:2404`) is what gets restructured. Do not put reply stages inside the fence executor.
 5. Track B leaves `stateReadMode=LEGACY` unchanged unless a later separately approved evidence-backed decision opens a narrow UR/State V2 slice.
-6. BF-04 remains an accepted known residual: P0 unverified size-claim bypasses must not be represented as fixed.
+6. BF-04 was an accepted known residual at Gate BF. Track B B2.3d subsequently closed the migrated PREPROD path with structured size provenance, fail-closed authorization, the one-repair cap and accepted Gate E v22 evidence; the historical Gate BF disposition remains immutable rather than being relabeled.
 7. Invariant r31.3 remains binding for realtime work: preserve verified facts/media when downstream model/size/enrichment fails; differential-test realtime changes against the r31.3 behavioral baseline with intentional differences justified; do not mark an Inbox permanently failed solely because model output is malformed — attempt a deterministic fallback from verified facts first.
 8. `contracts/MODEL_CLAIM_BOUNDARY.md` governs the division of authority. Its concrete requirements are carried into the slices below: reject undeclared protected claims; **exactly one** bounded repair request; ambiguity or deterministic/model conflict resolves to the **less aggressive** action; reason-code every rejection, override, repair and safe fallback.
 9. `SOLO_PREPROD_MINIMAL` (PR #269) is merged and active for all `ENGINEERING_PREPROD` work until an explicit owner instruction changes the profile. Its flow is `branch -> code + focused verification -> PR -> exact-head verification -> merge -> deploy exact commit -> smoke`. Do not reintroduce Release Train ceremony.
@@ -351,9 +351,12 @@ alongside the other protected claims. Every COMMERCE proposal uses the
 conservative size-token fence independent of inbound or model intent; the
 prose detector remains reject-only and explicit LEGACY rollback retains its
 prior semantic exemptions.
-This is **source evidence only** pending independent review and exact-head CI;
-it is not deployment or operational-acceptance evidence, so the deployed
-`program-state.json` BF-04 disposition remains unchanged.
+At the B2.3d source checkpoint this was **source evidence only** pending
+independent review and exact-head CI, not deployment or operational-acceptance
+evidence. Those source gates later passed, and accepted Gate E v22 plus exact
+PREPROD runtime evidence subsequently closed the migrated Track B path without
+rewriting the historical Gate BF disposition or claiming public-production
+acceptance.
 
 **Acceptance criteria**
 
@@ -523,9 +526,9 @@ Track B must define the truthful replacement labels, derive a new canonical bund
 
 **Required sequence**
 
-1. Bind execution to the owner authorization for `ENGINEERING_PREPROD`; stop on any scope mismatch or ungranted boundary. Migrations `0036` through `0039` are applied and exactly read back there. Before B3.2 may mutate a fence or pointer, pending migration `0040` must pass reviewed source gates, fresh backup, complete isolated `up -> down -> up`, live apply and exact readback. It separates the B3.2 operator from the realtime read-only role through a dedicated least-privilege page/channel-scoped database role and a root-only credential never mounted into realtime. The executable B3.2 adapter merged in PR #311; that source result alone is not operational acceptance.
+1. Bind execution to the owner authorization for `ENGINEERING_PREPROD`; stop on any scope mismatch or ungranted boundary. Migrations `0036` through `0040` are applied and exactly read back there. Migration `0040` separates the B3.2 operator from the realtime read-only role through a dedicated least-privilege page/channel-scoped database role and a root-only credential never mounted into realtime. The executable B3.2 adapter merged in PR #311; that source result alone was not operational acceptance.
 2. Bind the exact candidate V2 bundle, behavior version/content hash/revision/source and one exact compatible last-known-good V2 release before mutation. V1/LEGACY is not a Track B rollback target.
-3. Persist the self-hashed release-local candidate/LKG record, including both releases' source commit/tree, image digest/tag/build labels, runtime-config hash, behavior pointer revision/version/bundle, startup hash, Gate E certification and a database-derived migrations-through-0039 schema compatibility hash. Before an initial `CURRENT_ACCEPTED_V2` LKG record, prove the currently running service mounts the exact startup artifact hash and has a fresh exact DATABASE runtime-resolution readback for the active pointer. Then stage the exact target stopped/non-admitting, acquire the reviewed durable page fence, prove the database admission gate is `HELD` for every reachable claim transition, stop the exact source service and prove zero in-flight authority-dependent work, and use the reviewed pointer writer for the exact CAS. Durably queued/held work may remain and is recorded; it is not in-flight authority. No manual SQL or env-only authority selector.
+3. Persist the self-hashed release-local candidate/LKG record, including both releases' source commit/tree, image digest/tag/build labels, runtime-config hash, behavior pointer revision/version/bundle, startup hash, Gate E certification and a database-derived migrations-through-0039 schema compatibility hash. For the 2026-09-05 closure of the unchanged current accepted V2 under `SOLO_PREPROD_MINIMAL`, exact active pointer/version/bundle, exact healthy service/image/revision/config, the exact read-only mounted startup artifact, Gate E certification and relevant migration/ACL/fence state were sufficient to bind the initial `CURRENT_ACCEPTED_V2` LKG without manufacturing a newer audit event. For a later actual authority mutation, retain the stricter sequence: stage the exact target stopped/non-admitting, acquire the reviewed durable page fence, prove the database admission gate is `HELD` for every reachable claim transition, stop the exact source service and prove zero in-flight authority-dependent work, use the reviewed pointer writer for the exact CAS, then require post-CAS runtime, activation-audit and full-consumer database readback before release. Durably queued/held work may remain and is recorded; it is not in-flight authority. No manual SQL or env-only authority selector.
 4. Start the exact staged target only after exact CAS/readback. While the fence remains held, prove its service/image/config identity, runtime authority, activation audit and exact `DATABASE` readback from the full consumer set. Fence release has no service-start capability.
 5. Before-CAS failure retains/restores the currently accepted V2 when it was stopped, discards the staged target and releases only after exact runtime/consumer readback. Post-CAS failure reverses the exact CAS to the recorded LKG V2, restores its exact V2 service and releases only after the same readback. Missing, stale, ambiguous or schema-incompatible LKG evidence retains the fence and never falls back to V1.
 6. Run meaningful pre-activation readiness, then post-activation authority readback, smoke and controlled test-page checks. Failed or unknown runtime state stops further mutation and restores the exact previous authority and affected-service identities.

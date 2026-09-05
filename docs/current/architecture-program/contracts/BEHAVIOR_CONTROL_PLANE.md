@@ -109,13 +109,19 @@ certification and database-derived migrations-through-0039 schema compatibility.
 The compatibility hash proves the applied 0036--0039 ledger checksums, exact 0039
 fence-guard source and exact 0038 admission-guard/trigger identities. Missing, stale,
 ambiguous or incompatible LKG evidence fails closed; it never falls back to V1.
-The initial current-LKG proof latches one full-precision database-clock watermark
-after exact running-service and mounted-startup proof, then permits at most 120
-read-only probes one second apart for a matching runtime resolution received by
-the database after that same watermark. It compares database-authored audit
-`created_at`, never the worker-authored `resolved_at` or host time. `AMBIGUOUS`
-fails immediately and an all-`MISSING` window fails closed; the operator neither
-generates customer traffic nor restarts the service to manufacture evidence.
+For the 2026-09-05 `SOLO_PREPROD_MINIMAL` closure of an unchanged, already
+accepted current V2, the initial current-LKG proof may bind exact pointer,
+version and bundle; exact healthy service, image, revision and runtime config;
+the exact read-only mounted startup artifact; durable Gate E certification;
+and the relevant migration, ACL and fence state. When those identities match
+without ambiguity, the runtime is not required to manufacture a newer audit
+event after an arbitrary watermark, generate customer traffic or restart merely
+to close governance. This bounded closure rule does not authorize a pointer or
+service mutation and does not weaken the mutation protocol below. For any later
+actual V2 authority replacement, staging, fence, CAS or start, the operator must
+still obtain the protocol's exact post-CAS runtime, activation-audit and
+full-consumer database readbacks before fence release. Any missing, stale or
+ambiguous identity in the applicable path fails closed.
 
 Before CAS failure handling must leave the pointer at the recorded currently accepted V2
 identity, discard the staged target, restore and read back the exact prior

@@ -1,6 +1,6 @@
 # Track B — Execution Checklist
 
-**Status:** `B2.4_MERGED / B3.1_V22_GATE_E_PASS / MIGRATIONS_0036_0037_0038_0039_PREPROD_APPLIED_VERIFIED / B3.2_V2_LKG_SOURCE_MERGED / MIGRATION_0040_OPERATOR_SOURCE_IN_PROGRESS / CURRENT_V2_UNCHANGED`
+**Status:** `TRACK_B_COMPLETE / B3.1_V22_GATE_E_PASS / MIGRATIONS_0036_THROUGH_0040_PREPROD_APPLIED_VERIFIED / INITIAL_COMPATIBLE_LKG_V2_BOUND`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` and its observed request envelope stay byte-frozen; the Context V2 candidate stays offline. The owner-authorized B3.1 remediation may change only the failed offline candidate/interpreter evaluation contract and must create a new candidate identity; it is neither a live prompt alternative nor candidate promotion. If the live direction proves insufficient, Track B stops incomplete.
 
@@ -13,7 +13,7 @@
 - [x] Re-read `AGENTS.md`, `OPERATING_MODE.md`, `program-state.json`, this plan and the relevant contracts from the exact merged `main` head.
 - [x] Follow `SOLO_PREPROD_MINIMAL`: `branch -> code + focused verification -> PR -> exact-head verification -> merge -> deploy exact commit -> smoke`. Do not reintroduce Release Train or a second approval record.
 - [x] Keep `stateReadMode=LEGACY`; do not start UR/State V2 without a separate evidence-backed approval.
-- [x] Treat the BF-04 P0 size-claim residual as open until new evidence proves otherwise.
+- [x] Treat the BF-04 P0 size-claim residual as open until new evidence proves otherwise; B2.3d and accepted Gate E v22 later supplied that evidence for the migrated Track B PREPROD path without rewriting the historical Gate BF disposition.
 
 ## B1 — Scope lock
 
@@ -127,7 +127,7 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 - [x] Deterministic fallback from verified facts as r31.3 requires; never a second sales-copy pipeline.
 - [x] Prove the fallback preserves verified facts and media and executes no failed or unauthorized effect; repaired declarations are rebound so unknown IDs remain fail-closed.
 - [x] Add explicit BF-04 COMMERCE regressions for undeclared and mismatched values, non-size inbound plus missing profile/model-intent mismatch, invalid repair, single-repair cap, safe fallback and exact `SIZE_FIT` outbound authorization. The conservative fence applies to every COMMERCE proposal, not a finite inbound/model-intent vocabulary. Exercise the live path against the immutable pre-B2.3d `78a03fe599202c6e275300af33622cb16ab80769` r31.3 capture: verified facts, claims, commit and whole-group invariants remain stable; model-owned wording/strategy and the payload-bound effect-authorization hash are exposed as the exact expected delta. The older pre-B2.3a catalog-size capture now explicitly records the B2.3d safe-fallback claim/effect delta while retaining B2.3a whole-group containment.
-- [x] **Source disposition:** `BF04_SOURCE_CLOSURE_CANDIDATE`; exact B2.3d head `1ec597f3d81aa208fdf7e90f17cf7ac022bd6717` was independently approved and canonical CI passed before merge commit `a89a50cb52183a3ffc4f3d7bd313ea675564c07b`. Deployed/operational BF-04 status remains unchanged.
+- [x] **Historical source checkpoint:** exact B2.3d head `1ec597f3d81aa208fdf7e90f17cf7ac022bd6717` was independently approved and canonical CI passed before merge commit `a89a50cb52183a3ffc4f3d7bd313ea675564c07b`, establishing `BF04_SOURCE_CLOSURE_CANDIDATE`. The migrated Track B PREPROD path was subsequently closed by accepted Gate E v22 and exact runtime evidence; this does not claim public-production acceptance.
 - [x] **Checkpoint:** authority boundary, BF-04 disposition and r31.3 evidence reviewed before B2.4.
 
 ## B2.4 — Cut obsolete post-generation reachability
