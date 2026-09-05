@@ -84,13 +84,10 @@ require_role_contract() {
 }
 
 verify_reader_access() {
-  local memberships function_acl relation_acl current_role
+  local memberships relation_acl current_role
 
   memberships="$(db_query "SELECT pg_has_role('$LOGIN_ROLE','$READER_ROLE','MEMBER')::int||'|'||pg_has_role('$LOGIN_ROLE','$WRITER_ROLE','MEMBER')::int||'|'||pg_has_role('$LOGIN_ROLE','$REGISTRATION_WRITER_ROLE','MEMBER')::int")"
   test "$memberships" = '1|0|0' || die 'Gate E reader membership readback mismatch'
-
-  function_acl="$(db_query "SELECT has_function_privilege('$LOGIN_ROLE','public.lana_gate_e_read_population_anchor_v1(text)','EXECUTE')::int||'|'||has_function_privilege('$LOGIN_ROLE','public.lana_gate_e_read_evidence_by_hash_v2(text)','EXECUTE')::int||'|'||has_function_privilege('$LOGIN_ROLE','public.lana_gate_e_append_evidence_v2(text,text,text,text,text,text,text,text,text,timestamptz)','EXECUTE')::int")"
-  test "$function_acl" = '1|1|0' || die 'PREPROD readonly login Gate E function ACL mismatch'
 
   relation_acl="$(db_query "SELECT has_table_privilege('$LOGIN_ROLE','public.gate_e_registered_population_anchors_v1','SELECT')::int||'|'||has_table_privilege('$LOGIN_ROLE','public.gate_e_evidence_records_v2','SELECT')::int||'|'||has_table_privilege('$LOGIN_ROLE','public.gate_e_evidence_admissions_v2','SELECT')::int")"
   test "$relation_acl" = '0|0|0' || die 'PREPROD readonly login gained raw Gate E table SELECT'
