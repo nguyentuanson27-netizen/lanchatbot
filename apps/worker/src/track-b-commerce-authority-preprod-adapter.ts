@@ -307,7 +307,21 @@ function normalizedDockerStartedAt(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const match = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})\.(\d{1,9})Z$/u.exec(value);
   if (!match || !Number.isFinite(Date.parse(value))) return null;
-  return `${match[1]}.${match[2]!.padEnd(6, "0").slice(0, 6)}Z`;
+  const fraction = match[2]!;
+  let microseconds = Number(fraction.slice(0, 6).padEnd(6, "0"));
+  let wholeSecond = Date.parse(`${match[1]}Z`);
+  if (!Number.isFinite(wholeSecond)) return null;
+  // PostgreSQL stores microseconds while Docker reports nanoseconds. Never floor the
+  // lower-bound watermark: doing so could admit an audit written just before start.
+  if (fraction.length > 6 && /[1-9]/u.test(fraction.slice(6))) {
+    microseconds += 1;
+    if (microseconds === 1_000_000) {
+      wholeSecond += 1_000;
+      microseconds = 0;
+    }
+  }
+  const prefix = new Date(wholeSecond).toISOString().slice(0, 19);
+  return `${prefix}.${String(microseconds).padStart(6, "0")}Z`;
 }
 
 function identityFromInspect(value: DockerInspect, expected: TrackBServiceReleaseIdentity,

@@ -230,42 +230,38 @@ describe("Track B PREPROD Docker service boundary", () => {
         "com.lana.build-id": targetService.buildId,
         "com.lana.runtime-config-hash": targetService.runtimeConfigHash,
       } }, Mounts: mounts });
-    const runFor = (mounts: unknown) => vi.fn(async (_command: string, args: readonly string[]) => {
+    const runFor = (mounts: unknown, startedAt?: string) => vi.fn(async (_command: string, args: readonly string[]) => {
       if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1.map((key) => targetRuntimeConfig[key]).join("\n");
       if (args[0] === "image") return JSON.stringify({ Id: `sha256:${targetService.imageId}`,
         Config: { Labels: { "org.opencontainers.image.revision": targetService.releaseRevision,
           "com.lana.build-id": targetService.buildId,
           "com.lana.runtime-config-hash": targetService.runtimeConfigHash } } });
-      return inspectFor(mounts);
+      return inspectFor(mounts, startedAt);
     });
-    const controllerFor = (mounts: unknown) => new DockerComposeTrackBPreprodServiceController({
+    const controllerFor = (mounts: unknown, startedAt?: string) => new DockerComposeTrackBPreprodServiceController({
       composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
       projectDirectory: "/opt/lana-chatbot/current/deploy", startupPackageFile,
       startupPackageHash, imageReference: "lana-chatbot-app:track-b-target",
-      expectedImageId: targetService.imageId, run: runFor(mounts),
+      expectedImageId: targetService.imageId, run: runFor(mounts, startedAt),
       readStartupPackage: vi.fn(async () => startup),
     });
     const exact = [{ Type: "bind", Source: startupPackageFile,
       Destination: "/run/df13/commerce-startup.json", RW: false }];
     await expect(controllerFor(exact).inspectRunning(targetService)).resolves.toEqual(targetService);
     await expect(controllerFor(exact).readRunningStartedAt(targetService))
-      .resolves.toBe("2026-09-03T02:26:18.040539Z");
-    const invalidStartedAt = new DockerComposeTrackBPreprodServiceController({
-      composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
-      projectDirectory: "/opt/lana-chatbot/current/deploy", startupPackageFile,
-      startupPackageHash, imageReference: "lana-chatbot-app:track-b-target",
-      expectedImageId: targetService.imageId,
-      run: vi.fn(async (_command: string, args: readonly string[]) => {
-        if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
-          .map((key) => targetRuntimeConfig[key]).join("\n");
-        if (args[0] === "image") return JSON.stringify({ Id: `sha256:${targetService.imageId}`,
-          Config: { Labels: { "org.opencontainers.image.revision": targetService.releaseRevision,
-            "com.lana.build-id": targetService.buildId,
-            "com.lana.runtime-config-hash": targetService.runtimeConfigHash } } });
-        return inspectFor(exact, "not-a-timestamp");
-      }), readStartupPackage: vi.fn(async () => startup),
-    });
-    await expect(invalidStartedAt.readRunningStartedAt(targetService)).resolves.toBeNull();
+      .resolves.toBe("2026-09-03T02:26:18.040540Z");
+    for (const [startedAt, expected] of [
+      ["2026-09-03T02:26:18.123Z", "2026-09-03T02:26:18.123000Z"],
+      ["2026-09-03T02:26:18.123456Z", "2026-09-03T02:26:18.123456Z"],
+      ["2026-09-03T02:26:18.123456000Z", "2026-09-03T02:26:18.123456Z"],
+      ["2026-09-03T02:26:18.123456001Z", "2026-09-03T02:26:18.123457Z"],
+      ["2026-09-03T23:59:59.999999999Z", "2026-09-04T00:00:00.000000Z"],
+    ] as const) {
+      await expect(controllerFor(exact, startedAt).readRunningStartedAt(targetService))
+        .resolves.toBe(expected);
+    }
+    await expect(controllerFor(exact, "not-a-timestamp").readRunningStartedAt(targetService))
+      .resolves.toBeNull();
     for (const mounts of [
       [],
       [...exact, exact[0]],
