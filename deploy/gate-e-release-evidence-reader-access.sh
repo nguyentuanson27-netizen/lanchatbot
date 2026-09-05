@@ -19,6 +19,7 @@ readonly EXPECTED_SYSTEM_IDENTIFIER='7662301595202035746'
 readonly EXPECTED_PAGE_ID='1198992073286645'
 readonly EXPECTED_PAGE_COUNT='1'
 
+
 die() {
   printf '%s\n' "$*" >&2
   exit 1
@@ -93,6 +94,43 @@ reader_any_membership() {
   db_query "SELECT pg_has_role('$LOGIN_ROLE','$READER_ROLE','MEMBER')::int"
 }
 
+reader_effective_state() {
+  db_query "SELECT pg_has_role('$LOGIN_ROLE','$READER_ROLE','USAGE')::int||'|'||pg_has_role('$LOGIN_ROLE','$READER_ROLE','SET')::int||'|'||pg_has_role('$LOGIN_ROLE','$READER_ROLE','MEMBER WITH ADMIN OPTION')::int"
+}
+
+gate_e_relation_write_acl() {
+  local role="$1"
+  db_query "SELECT has_table_privilege('$role','public.gate_e_registered_population_anchors_v1','INSERT')::int||'|'||has_table_privilege('$role','public.gate_e_registered_population_anchors_v1','UPDATE')::int||'|'||has_table_privilege('$role','public.gate_e_registered_population_anchors_v1','DELETE')::int||'|'||has_table_privilege('$role','public.gate_e_registered_population_anchors_v1','TRUNCATE')::int||'|'||has_table_privilege('$role','public.gate_e_evidence_records_v2','INSERT')::int||'|'||has_table_privilege('$role','public.gate_e_evidence_records_v2','UPDATE')::int||'|'||has_table_privilege('$role','public.gate_e_evidence_records_v2','DELETE')::int||'|'||has_table_privilege('$role','public.gate_e_evidence_records_v2','TRUNCATE')::int||'|'||has_table_privilege('$role','public.gate_e_evidence_admissions_v2','INSERT')::int||'|'||has_table_privilege('$role','public.gate_e_evidence_admissions_v2','UPDATE')::int||'|'||has_table_privilege('$role','public.gate_e_evidence_admissions_v2','DELETE')::int||'|'||has_table_privilege('$role','public.gate_e_evidence_admissions_v2','TRUNCATE')::int"
+}
+
+verify_login_gate_e_readonly_contract() {
+  local edge effective_state mutation_function_acl relation_write_acl
+
+  edge="$(reader_direct_edge_state)"
+  effective_state="$(reader_effective_state)"
+  case "$edge" in
+    '0|||')
+      test "$effective_state" = '0|0|0' ||
+        die 'PREPROD readonly login has unexpected effective Gate E reader capability'
+      ;;
+    '1|0|0|1')
+      test "$effective_state" = '0|1|0' ||
+        die 'PREPROD readonly login Gate E reader capability is not explicit-SET-only'
+      ;;
+    *) die 'Gate E reader direct membership edge options mismatch' ;;
+  esac
+
+  mutation_function_acl="$(db_query "SELECT has_function_privilege('$LOGIN_ROLE','public.lana_gate_e_register_population_anchor_v1(text,text)','EXECUTE')::int")"
+  test "$mutation_function_acl" = 0 ||
+    die 'PREPROD readonly login has mutating Gate E function privilege'
+  test "$(db_query "SELECT has_function_privilege('$LOGIN_ROLE','public.lana_gate_e_append_evidence_v2(text,text,text,text,text,text,text,text,text,timestamptz)','EXECUTE')::int")" = 0 ||
+    die 'PREPROD readonly login already has Gate E append privilege'
+
+  relation_write_acl="$(gate_e_relation_write_acl "$LOGIN_ROLE")"
+  test "$relation_write_acl" = '0|0|0|0|0|0|0|0|0|0|0|0' ||
+    die 'PREPROD readonly login has raw Gate E table write privilege'
+}
+
 require_role_contract() {
   local exact_nologin exact_login function_acl relation_acl dangerous_memberships
 
@@ -106,18 +144,19 @@ require_role_contract() {
   test "$(db_query "SELECT count(*) FROM pg_roles WHERE rolname='$LOGIN_ROLE' AND $exact_login")" = 1 ||
     die 'PREPROD readonly login identity mismatch'
 
-  function_acl="$(db_query "SELECT has_function_privilege('$READER_ROLE','public.lana_gate_e_read_population_anchor_v1(text)','EXECUTE')::int||'|'||has_function_privilege('$READER_ROLE','public.lana_gate_e_read_evidence_by_hash_v2(text)','EXECUTE')::int||'|'||has_function_privilege('$READER_ROLE','public.lana_gate_e_append_evidence_v2(text,text,text,text,text,text,text,text,text,timestamptz)','EXECUTE')::int")"
-  test "$function_acl" = '1|1|0' || die 'Gate E reader function ACL mismatch'
+  function_acl="$(db_query "SELECT has_function_privilege('$READER_ROLE','public.lana_gate_e_read_population_anchor_v1(text)','EXECUTE')::int||'|'||has_function_privilege('$READER_ROLE','public.lana_gate_e_read_evidence_by_hash_v2(text)','EXECUTE')::int||'|'||has_function_privilege('$READER_ROLE','public.lana_gate_e_register_population_anchor_v1(text,text)','EXECUTE')::int||'|'||has_function_privilege('$READER_ROLE','public.lana_gate_e_append_evidence_v2(text,text,text,text,text,text,text,text,text,timestamptz)','EXECUTE')::int")"
+  test "$function_acl" = '1|1|0|0' || die 'Gate E reader function ACL mismatch'
 
   relation_acl="$(db_query "SELECT has_table_privilege('$READER_ROLE','public.gate_e_registered_population_anchors_v1','SELECT')::int||'|'||has_table_privilege('$READER_ROLE','public.gate_e_evidence_records_v2','SELECT')::int||'|'||has_table_privilege('$READER_ROLE','public.gate_e_evidence_admissions_v2','SELECT')::int")"
   test "$relation_acl" = '0|0|0' || die 'Gate E reader has raw table SELECT privilege'
+  test "$(gate_e_relation_write_acl "$READER_ROLE")" = '0|0|0|0|0|0|0|0|0|0|0|0' ||
+    die 'Gate E reader has raw table write privilege'
 
   test "$(db_query "SELECT has_schema_privilege('$READER_ROLE','public','USAGE')::int")" = 1 ||
     die 'Gate E reader schema USAGE missing'
   test "$(db_query "SELECT has_function_privilege('$WRITER_ROLE','public.lana_gate_e_append_evidence_v2(text,text,text,text,text,text,text,text,text,timestamptz)','EXECUTE')::int")" = 1 ||
     die 'Gate E writer append contract mismatch'
-  test "$(db_query "SELECT has_function_privilege('$LOGIN_ROLE','public.lana_gate_e_append_evidence_v2(text,text,text,text,text,text,text,text,text,timestamptz)','EXECUTE')::int")" = 0 ||
-    die 'PREPROD readonly login already has Gate E append privilege'
+  verify_login_gate_e_readonly_contract
 
   dangerous_memberships="$(db_query "SELECT pg_has_role('$LOGIN_ROLE','$WRITER_ROLE','MEMBER')::int||'|'||pg_has_role('$LOGIN_ROLE','$REGISTRATION_WRITER_ROLE','MEMBER')::int")"
   test "$dangerous_memberships" = '0|0' ||
@@ -130,6 +169,8 @@ verify_reader_access() {
   edge="$(reader_direct_edge_state)"
   test "$edge" = '1|0|0|1' || die 'Gate E reader direct membership edge mismatch'
   test "$(reader_any_membership)" = 1 || die 'Gate E reader membership is not effective'
+  test "$(reader_effective_state)" = '0|1|0' ||
+    die 'PREPROD readonly login Gate E reader capability is not explicit-SET-only'
 
   relation_acl="$(db_query "SELECT has_table_privilege('$LOGIN_ROLE','public.gate_e_registered_population_anchors_v1','SELECT')::int||'|'||has_table_privilege('$LOGIN_ROLE','public.gate_e_evidence_records_v2','SELECT')::int||'|'||has_table_privilege('$LOGIN_ROLE','public.gate_e_evidence_admissions_v2','SELECT')::int")"
   test "$relation_acl" = '0|0|0' || die 'PREPROD readonly login gained raw Gate E table SELECT'
