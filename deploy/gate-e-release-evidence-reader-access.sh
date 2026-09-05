@@ -129,11 +129,17 @@ main() {
       printf '%s\n' GATE_E_RELEASE_EVIDENCE_READER_ACCESS_VERIFIED
       ;;
     apply)
+      local granted_reader=0
       if test "$(db_query "SELECT pg_has_role('$LOGIN_ROLE','$READER_ROLE','MEMBER')::int")" = 0; then
         db_query "GRANT $READER_ROLE TO $LOGIN_ROLE" >/dev/null
+        granted_reader=1
       fi
-      require_role_contract
-      verify_reader_access
+      if ! (require_role_contract && verify_reader_access); then
+        if test "$granted_reader" = 1; then
+          db_query "REVOKE $READER_ROLE FROM $LOGIN_ROLE" >/dev/null || true
+        fi
+        die 'Gate E reader access apply verification failed'
+      fi
       printf '%s\n' GATE_E_RELEASE_EVIDENCE_READER_ACCESS_APPLIED
       ;;
     revoke)
