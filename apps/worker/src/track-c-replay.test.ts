@@ -195,6 +195,18 @@ describe("Track C C2 offline replay", () => {
       capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), systemInstruction: "candidate",
     });
     expect(() => validateTrackCOfflineCandidate({
+      capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"),
+      request: { ...request, body: request.body.replace("candidate", "tampered") },
+      providerModelVersion: "gemini-3.5-flash-lite", accepted,
+      output: {
+        schemaVersion: 2, contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
+        contextHash: context.contextHash,
+        productBinding: { status: "NOT_REQUIRED", productIds: [] },
+        segments: [{ kind: "GENERAL", text: "Chị cho em biết mẫu đang xem nhé." }],
+        strategy: "ASK_CLARIFICATION", cta: "ASK_PRODUCT",
+      },
+    })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_REQUEST_MISMATCH");
+    expect(() => validateTrackCOfflineCandidate({
       capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
       providerModelVersion: "gemini-3.5-flash-lite", accepted,
       output: {
@@ -216,6 +228,17 @@ describe("Track C C2 offline replay", () => {
         strategy: "ASK_CLARIFICATION", cta: "ASK_PRODUCT",
       },
     })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_CONTEXT_MISMATCH");
+    expect(() => validateTrackCOfflineCandidate({
+      capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
+      providerModelVersion: "gemini-3.5-flash-lite", accepted,
+      output: {
+        schemaVersion: 2, contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
+        contextHash: context.contextHash,
+        productBinding: { status: "NOT_REQUIRED", productIds: [] },
+        segments: [{ kind: "GENERAL", text: "Mẫu này giá 1.199.000đ nhé chị." }],
+        strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+      },
+    })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_GUARD_FAILED");
   });
   it("retains bounded rationale integrity and distinct material regression clusters", async () => {
     const worseFactGrounding = assessment(3, { scores: { ...assessment(3).scores, factGrounding: 1 }, weaknesses: ["fact grounding"] });
