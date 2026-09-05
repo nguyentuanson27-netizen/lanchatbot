@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { createGateEScoredRunGitReader } from "./gate-e-git-reader.js";
-import { gateEDatabaseUrlForRole } from "./gate-e-operational.js";
+import { gateEReleaseEvidenceReaderDatabaseUrl } from "./track-b-release-gate-e-reader.js";
 import {
   resolveTrackBPreprodDatabaseUrl,
   TRACK_B_PREPROD_POSTGRES_CONTAINER,
@@ -126,7 +126,7 @@ async function main(): Promise<void> {
   if (!databaseUrl) throw new Error("TRACK_B_RELEASE_GATE_E_DATABASE_URL_REQUIRED");
   const resolvedDatabaseUrl = await resolveGateEEvidenceDatabaseUrl(databaseUrl);
   const evidenceStore = new PostgresGateEEvidenceStoreV2(
-    gateEDatabaseUrlForRole(resolvedDatabaseUrl, "evidence"),
+    gateEReleaseEvidenceReaderDatabaseUrl(resolvedDatabaseUrl),
   );
   try {
     const result = await runTrackBReleaseCandidateEvidenceCli({

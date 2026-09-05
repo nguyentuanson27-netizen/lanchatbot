@@ -86,5 +86,8 @@ jobs:
           TRACK_B_OPERATOR_ROLE_TEST_DATABASE_URL="$POLICY_STORE_TEST_DATABASE_URL" pnpm --filter @lana/database exec vitest run src/track-b-operator-role-boundary.postgres.test.ts
           bash deploy/track-b-0040-preprod-operator.behavior.test.sh
 
+      - name: Verify Gate E release-evidence reader access
+        run: bash deploy/gate-e-release-evidence-reader-access.behavior.test.sh
+
       - name: Run repository checks
         run: pnpm check
