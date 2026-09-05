@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GateEEvidenceReaderV2 } from "./gate-e-registration.js";
+import { gateEReleaseEvidenceReaderDatabaseUrl } from "./track-b-release-gate-e-reader.js";
 import type { TrackBReleaseCandidateSourceReader } from "./track-b-release-candidate-evidence.js";
 import {
   parseTrackBReleaseCandidateEvidenceCliArgs,
@@ -65,6 +66,7 @@ describe("Track B release-candidate evidence CLI", () => {
       scoredRunStartedAt: input.scoredRunStartedAt,
     }));
   });
+
   it("accepts only one exact revision option", () => {
     expect(parseTrackBReleaseCandidateEvidenceCliArgs([
       "--revision",
@@ -97,6 +99,18 @@ describe("Track B release-candidate evidence CLI", () => {
     expect(resolved.pathname).toBe("/lana_chatbot");
   });
 
+  it("uses the dedicated Gate E reader role for release-evidence verification", () => {
+    const url = new URL(gateEReleaseEvidenceReaderDatabaseUrl(
+      "postgresql://lana_admin_readonly:redacted@172.18.0.2:5432/lana_chatbot",
+    ));
+
+    expect(url.searchParams.get("options")).toBe("-c role=lana_gate_e_evidence_reader");
+    expect(url.searchParams.get("options")).not.toContain("lana_gate_e_evidence_writer");
+    expect(() => gateEReleaseEvidenceReaderDatabaseUrl(
+      "postgresql://lana_admin_readonly:redacted@172.18.0.2:5432/lana_chatbot?options=unsafe",
+    )).toThrow("TRACK_B_RELEASE_GATE_E_DATABASE_OPTIONS_FORBIDDEN");
+  });
+
   it("refuses an unproven host endpoint before any Gate E evidence read", () => {
     expect(() => resolveTrackBReleaseCandidateEvidenceDatabaseUrl(
       "postgresql://gate-e:value@postgres:5432/lana_chatbot",
@@ -110,7 +124,7 @@ describe("Track B release-candidate evidence CLI", () => {
     )).toThrow("TRACK_B_RELEASE_GATE_E_DATABASE_ENDPOINT_UNPROVEN");
   });
 
-  it("wires Docker-proven endpoint resolution into the evidence role before store creation", async () => {
+  it("wires Docker-proven endpoint resolution into the read-only evidence role before store creation", async () => {
     const source = await readFile(
       new URL("./track-b-release-candidate-evidence-cli.ts", import.meta.url),
       "utf8",
@@ -126,9 +140,26 @@ describe("Track B release-candidate evidence CLI", () => {
       "const resolvedDatabaseUrl = await resolveGateEEvidenceDatabaseUrl(databaseUrl);",
     );
     expect(source).toMatch(
-      /new PostgresGateEEvidenceStoreV2\(\s*gateEDatabaseUrlForRole\(resolvedDatabaseUrl, "evidence"\),\s*\)/u,
+      /new PostgresGateEEvidenceStoreV2\(\s*gateEReleaseEvidenceReaderDatabaseUrl\(resolvedDatabaseUrl\),\s*\)/u,
     );
-    expect(source).not.toContain('gateEDatabaseUrlForRole(databaseUrl, "evidence")');
+    expect(source).not.toContain('gateEDatabaseUrlForRole(resolvedDatabaseUrl, "evidence")');
+  });
+
+  it("keeps PREPROD readonly access reader-only at the operator boundary", async () => {
+    const script = await readFile(
+      resolve(sourceRoot, "deploy/gate-e-release-evidence-reader-access.sh"),
+      "utf8",
+    );
+
+    expect(script).toContain("readonly LOGIN_ROLE='lana_admin_readonly'");
+    expect(script).toContain("readonly READER_ROLE='lana_gate_e_evidence_reader'");
+    expect(script).toContain("readonly WRITER_ROLE='lana_gate_e_evidence_writer'");
+    expect(script).toContain('db_query "GRANT $READER_ROLE TO $LOGIN_ROLE"');
+    expect(script).toContain('db_query "REVOKE $READER_ROLE FROM $LOGIN_ROLE"');
+    expect(script).not.toContain('db_query "GRANT $WRITER_ROLE TO $LOGIN_ROLE"');
+    expect(script).not.toContain('db_query "GRANT $REGISTRATION_WRITER_ROLE TO $LOGIN_ROLE"');
+    expect(script).toContain("PREPROD readonly login has forbidden Gate E writer membership");
+    expect(script).toContain("PREPROD readonly login already has Gate E append privilege");
   });
 
   it("emits a self-validating side-effect-free v22 release packet", async () => {
