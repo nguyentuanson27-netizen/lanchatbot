@@ -41,6 +41,10 @@ import {
   type TrackBReplayObservation,
 } from "./track-b-live-path-replay.js";
 import {
+  TRACK_C_C1_MUST_PASS_POLICY,
+  assertTrackCC1MustPass,
+} from "./track-c-must-pass.js";
+import {
   RealtimeRunner,
   type RealtimeInboxPort,
   type RealtimeModelPort,
@@ -1439,6 +1443,35 @@ describe("BF-01 runner reconciliation", () => {
           },
         ),
       ];
+
+      const c1CaseIds = new Set(
+        TRACK_C_C1_MUST_PASS_POLICY.fixtures.map(({ caseId }) => caseId),
+      );
+      const c1Cases = cases.filter(({ caseId }) => c1CaseIds.has(caseId));
+      const c1Result = await runTrackBLivePathReplay({
+        identity,
+        cases: c1Cases,
+      });
+
+      expect(c1Result).toMatchObject({
+        captureSetHash:
+          "e2341920e60f8d445b193b0931154f81715856c289bde11aeafff623fd383312",
+        status: "PASS",
+        sideEffects: "DISABLED",
+        identity: {
+          factFixtureHash: TRACK_C_C1_MUST_PASS_POLICY.factFixtureHash,
+        },
+        coverage: { complete: true, missingRiskClasses: [] },
+      });
+      expect(c1Result.cases).toHaveLength(7);
+      expect(c1Result.cases.map(({ caseId }) => caseId)).toEqual(
+        TRACK_C_C1_MUST_PASS_POLICY.fixtures.map(({ caseId }) => caseId),
+      );
+      expect(new Set(c1Result.coverage.coveredRiskClasses).size).toBe(9);
+      expect(new Set(c1Result.coverage.coveredRiskClasses)).toEqual(
+        new Set(TRACK_C_C1_MUST_PASS_POLICY.riskPriority),
+      );
+      expect(assertTrackCC1MustPass(c1Result)).toBe(c1Result);
 
       const result = await runTrackBLivePathReplay({ identity, cases });
 
