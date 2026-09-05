@@ -1,6 +1,7 @@
 import { createHash, generateKeyPairSync } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import {
+  buildJudgeSalesReplyV2Request,
   buildShadowPrompt,
   createServiceAccountAssertion,
   GROUNDED_SYSTEM_INSTRUCTION,
@@ -694,12 +695,15 @@ describe("Vertex shadow client", () => {
       reasonCode: null,
     };
 
-    const result = await modelWith(fetchMock).judgeSalesReplyV2(
+    const model = modelWith(fetchMock);
+    const proposalSummary = { action: "REPLY", productId: "CB182" };
+    const guardOutcome = { sendAuthorized: false, blockedReasonCodes: [] };
+    const result = await model.judgeSalesReplyV2(
       context,
       "Dạ mẫu này có giá 699k ạ",
       verifiedFacts,
-      { action: "REPLY", productId: "CB182" },
-      { sendAuthorized: false, blockedReasonCodes: [] },
+      proposalSummary,
+      guardOutcome,
     );
 
     expect(result.schemaVersion).toBe(2);
@@ -710,6 +714,24 @@ describe("Vertex shadow client", () => {
     expect(bodyText).toContain("<UNTRUSTED_ACTUAL_REPLY>");
     expect(bodyText).toContain("salePriceVnd\\\":699000");
     expect(bodyText).toContain("\"enum\":[2]");
+    expect(bodies[0]).toEqual(buildJudgeSalesReplyV2Request(
+      context,
+      "Dạ mẫu này có giá 699k ạ",
+      verifiedFacts,
+      proposalSummary,
+      guardOutcome,
+    ));
+    expect(model.judgeSalesReplyV2Descriptor()).toMatchObject({
+      provider: "VERTEX_AI",
+      model: "gemini-test",
+      promptRubric: {
+        systemInstruction: SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
+        userPromptEnvelope: expect.arrayContaining([
+          expect.objectContaining({ open: "<VERIFIED_FACTS_JSON>" }),
+          expect.objectContaining({ open: "<UNTRUSTED_ACTUAL_REPLY>" }),
+        ]),
+      },
+    });
   });
 
   it("refreshes once and retries generation after a 401", async () => {

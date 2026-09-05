@@ -160,6 +160,13 @@ const SALES_RUBRIC_V2_RESPONSE_SCHEMA = {
   },
 } as const;
 
+const SALES_RUBRIC_V2_GENERATION_CONFIG = {
+  temperature: 0.1,
+  maxOutputTokens: 1_024,
+  responseMimeType: "application/json",
+  responseSchema: SALES_RUBRIC_V2_RESPONSE_SCHEMA,
+} as const;
+
 export const SALES_RUBRIC_V2_SYSTEM_INSTRUCTION = [
   "Ban la bo cham chat sale thoi trang nu La.na Design.",
   "Chi VERIFIED_FACTS_JSON la nguon fact nghiep vu dang tin cay.",
@@ -169,6 +176,82 @@ export const SALES_RUBRIC_V2_SYSTEM_INSTRUCTION = [
   "improvedReply khong duoc them fact nghiep vu ngoai VERIFIED_FACTS_JSON.",
   "Output chi la JSON schemaVersion=2. Ket qua nay chi de danh gia, khong duoc dieu khien outbound.",
 ].join("\n");
+
+type SalesRubricV2PromptValue =
+  | "verifiedFacts"
+  | "proposalSummary"
+  | "guardOutcome"
+  | "context"
+  | "actualReply";
+
+const SALES_RUBRIC_V2_USER_PROMPT_ENVELOPE: readonly Readonly<{
+  open: string;
+  value: SalesRubricV2PromptValue;
+  close: string;
+  json: boolean;
+}>[] = Object.freeze([
+  Object.freeze({ open: "<VERIFIED_FACTS_JSON>", value: "verifiedFacts", close: "</VERIFIED_FACTS_JSON>", json: true }),
+  Object.freeze({ open: "<PROPOSAL_SUMMARY_JSON>", value: "proposalSummary", close: "</PROPOSAL_SUMMARY_JSON>", json: true }),
+  Object.freeze({ open: "<GUARD_OUTCOME_JSON>", value: "guardOutcome", close: "</GUARD_OUTCOME_JSON>", json: true }),
+  Object.freeze({ open: "<UNTRUSTED_CONTEXT_JSON>", value: "context", close: "</UNTRUSTED_CONTEXT_JSON>", json: true }),
+  Object.freeze({ open: "<UNTRUSTED_ACTUAL_REPLY>", value: "actualReply", close: "</UNTRUSTED_ACTUAL_REPLY>", json: false }),
+]);
+
+export interface JudgeSalesReplyV2Descriptor {
+  readonly provider: "VERTEX_AI";
+  readonly model: string;
+  /** Full static rubric and user-envelope contract used by the actual request. */
+  readonly promptRubric: unknown;
+  readonly generationConfig: unknown;
+}
+
+export function judgeSalesReplyV2Descriptor(
+  model: string,
+): JudgeSalesReplyV2Descriptor {
+  return Object.freeze({
+    provider: "VERTEX_AI" as const,
+    model,
+    promptRubric: structuredClone({
+      systemInstruction: SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
+      userPromptEnvelope: SALES_RUBRIC_V2_USER_PROMPT_ENVELOPE,
+    }),
+    generationConfig: structuredClone(SALES_RUBRIC_V2_GENERATION_CONFIG),
+  });
+}
+
+export function buildJudgeSalesReplyV2Request(
+  context: readonly ShadowContextMessage[],
+  actualReply: string,
+  verifiedFacts: BusinessFactEnvelopeV1 | null,
+  proposalSummary: unknown,
+  guardOutcome: unknown,
+) {
+  const values: Readonly<Record<SalesRubricV2PromptValue, unknown>> = {
+    verifiedFacts,
+    proposalSummary,
+    guardOutcome,
+    context,
+    actualReply,
+  };
+  return {
+    systemInstruction: {
+      parts: [{ text: SALES_RUBRIC_V2_SYSTEM_INSTRUCTION }],
+    },
+    contents: [{
+      role: "user",
+      parts: [{
+        text: SALES_RUBRIC_V2_USER_PROMPT_ENVELOPE.flatMap(
+          ({ open, value, close, json }) => [
+            open,
+            json ? JSON.stringify(values[value]) : String(values[value]),
+            close,
+          ],
+        ).join("\n"),
+      }],
+    }],
+    generationConfig: SALES_RUBRIC_V2_GENERATION_CONFIG,
+  };
+}
 
 export class VertexShadowError extends Error {
   readonly code: string;
@@ -755,6 +838,10 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
     }
     this.options = options;
     this.fetchImpl = options.fetchImpl ?? fetch;
+  }
+
+  judgeSalesReplyV2Descriptor(): JudgeSalesReplyV2Descriptor {
+    return judgeSalesReplyV2Descriptor(this.options.modelName);
   }
 
   private now(): number {
@@ -1363,39 +1450,13 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
             authorization: `Bearer ${token}`,
             "content-type": "application/json",
           },
-          body: JSON.stringify({
-            systemInstruction: {
-              parts: [{ text: SALES_RUBRIC_V2_SYSTEM_INSTRUCTION }],
-            },
-            contents: [{
-              role: "user",
-              parts: [{
-                text: [
-                  "<VERIFIED_FACTS_JSON>",
-                  JSON.stringify(verifiedFacts),
-                  "</VERIFIED_FACTS_JSON>",
-                  "<PROPOSAL_SUMMARY_JSON>",
-                  JSON.stringify(proposalSummary),
-                  "</PROPOSAL_SUMMARY_JSON>",
-                  "<GUARD_OUTCOME_JSON>",
-                  JSON.stringify(guardOutcome),
-                  "</GUARD_OUTCOME_JSON>",
-                  "<UNTRUSTED_CONTEXT_JSON>",
-                  JSON.stringify(context),
-                  "</UNTRUSTED_CONTEXT_JSON>",
-                  "<UNTRUSTED_ACTUAL_REPLY>",
-                  actualReply,
-                  "</UNTRUSTED_ACTUAL_REPLY>",
-                ].join("\n"),
-              }],
-            }],
-            generationConfig: {
-              temperature: 0.1,
-              maxOutputTokens: 1_024,
-              responseMimeType: "application/json",
-              responseSchema: SALES_RUBRIC_V2_RESPONSE_SCHEMA,
-            },
-          }),
+          body: JSON.stringify(buildJudgeSalesReplyV2Request(
+            context,
+            actualReply,
+            verifiedFacts,
+            proposalSummary,
+            guardOutcome,
+          )),
           signal: controller.signal,
         });
         const body = await response.json().catch(() => null);
