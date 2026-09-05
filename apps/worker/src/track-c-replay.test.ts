@@ -2,8 +2,15 @@ import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import { canonicalJsonV1, type SalesRubricAssessmentV2 } from "@lana/contracts";
 import type { TrackBLivePathReplayResult } from "./track-b-live-path-replay.js";
+import { buildContextV2Capture } from "./context-v2.js";
+import { buildTrackCOfflineCandidateRequest } from "./track-c-offline-candidate.js";
+import { validateTrackCOfflineCandidate } from "./track-c-offline-candidate-validation.js";
 import { TRACK_C_C1_MUST_PASS_POLICY } from "./track-c-must-pass.js";
-import { runTrackCReplay, type TrackCReplayJudgeEnvelope } from "./track-c-replay.js";
+import {
+  runTrackCReplay,
+  type TrackCOfflineCandidateValidatedEnvelope,
+  type TrackCReplayJudgeEnvelope,
+} from "./track-c-replay.js";
 
 function sha256(value: unknown): string {
   return createHash("sha256").update(canonicalJsonV1(value), "utf8").digest("hex");
@@ -24,6 +31,68 @@ function envelope(caseId: string): TrackCReplayJudgeEnvelope {
     verifiedFacts: null, reply: `reply-${caseId}`,
     proposalSummary: { action: "REPLY" }, guardOutcome: { action: "REPLY", blockedReasonCodes: [] },
   };
+}
+function frozenCapture(caseId: string) {
+  const now = new Date("2026-09-05T00:00:00.000Z");
+  return buildContextV2Capture({
+    canonicalEvidence: {
+      dialogueEvidence: {
+        schemaVersion: 1, contractVersion: "CANONICAL_DIALOGUE_EVIDENCE_V1",
+        act: "REQUEST", contributors: ["DETERMINISTIC_RUNTIME"], confidenceBand: "HIGH",
+        sourceMessageIdHash: "a".repeat(64), evidenceHash: "b".repeat(64),
+        reasonCodes: [], authorization: "NONE",
+      },
+      buyingIntent: {
+        schemaVersion: 1, authorityVersion: "CANONICAL_BUYING_INTENT_V1",
+        decision: "CONSIDERING", requestedAction: "NONE", quantity: null, productId: null,
+        contributors: ["DETERMINISTIC_RUNTIME"], sourceMessageIdHash: "a".repeat(64),
+        evidenceHash: "c".repeat(64), reasonCodes: [], evaluatedAt: now.toISOString(), authorization: "NONE",
+      },
+    },
+    verifiedClaims: [], readiness: [],
+    finalCommerceState: {
+      schemaVersion: 2, conversationKey: caseId,
+      routing: { pageId: "track-c-fixture", conversationId: caseId }, revision: 1,
+      stage: "DISCOVERY", cart: null, commerceContext: null, negotiation: null,
+      checkoutDraft: null, clarification: null, preview: null, confirmation: null,
+      processedCommandIds: [], updatedAt: now.toISOString(),
+    },
+    finalTurnEvidence: {
+      schemaVersion: 2, contractVersion: "FINAL_TURN_EVIDENCE_V2",
+      sourceMessagePk: "00000000-0000-4000-8000-000000000001",
+      sourceMessageIdHash: "a".repeat(64), preTransitionConversationRevision: 0,
+      finalConversationRevision: 1, preTransitionSalesCycleRevision: 0, finalSalesCycleRevision: 1,
+    },
+    productBinding: {
+      schemaVersion: 2, contractVersion: "PRODUCT_BINDING_V2", status: "NOT_REQUIRED",
+      productIds: [], catalogVersion: null,
+    },
+    owner: "BOT", handoffReasonCode: null, now, sourceOccurredAt: now,
+  });
+}
+function offlineCandidate(
+  caseId: string,
+  accepted: TrackCReplayJudgeEnvelope,
+  options: Readonly<{ reply?: string }> = {},
+): TrackCOfflineCandidateValidatedEnvelope {
+  const capture = frozenCapture(caseId);
+  if (capture.status !== "BUILT" || capture.context === null) throw new Error("TEST_CAPTURE_REQUIRED");
+  const request = buildTrackCOfflineCandidateRequest({
+    modelResource: "projects/track-c-fixture/locations/global/publishers/google/models/gemini-3.5-flash-lite",
+    capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"),
+    systemInstruction: "Offline-only Track C test candidate.",
+  });
+  return validateTrackCOfflineCandidate({
+    capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
+    providerModelVersion: "gemini-3.5-flash-lite", accepted,
+    output: {
+      schemaVersion: 2, contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
+      contextHash: capture.context.contextHash,
+      productBinding: { status: "NOT_REQUIRED", productIds: [] },
+      segments: [{ kind: "GENERAL", text: options.reply ?? `offline-candidate-${caseId}` }],
+      strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+    },
+  });
 }
 function passingReplay(): TrackBLivePathReplayResult {
   const cases = TRACK_C_C1_MUST_PASS_POLICY.fixtures.map((fixture) => {
@@ -65,7 +134,11 @@ function replayInput(scores: readonly (readonly [number, number])[] = [], assess
   };
   return { mustPassReplay: passingReplay(), judge, cases: TRACK_C_C1_MUST_PASS_POLICY.fixtures.map(({ caseId }) => {
     const observed = envelope(caseId);
-    return { caseId, judge, accepted: observed, candidate: observed };
+    return {
+      caseId, judge,
+      accepted: { origin: "B3_LIVE_OBSERVATION" as const, quality: observed },
+      candidate: offlineCandidate(caseId, observed),
+    };
   }) };
 }
 
@@ -85,9 +158,64 @@ describe("Track C C2 offline replay", () => {
     expect(input.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
   });
   it("rejects caller-authored envelopes that do not match exact B3 observations", async () => {
-    const input = replayInput(); input.cases[0]!.candidate = { ...input.cases[0]!.candidate, reply: "unbound reply" };
+    const input = replayInput(); input.cases[0]!.accepted = {
+      origin: "B3_LIVE_OBSERVATION",
+      quality: { ...input.cases[0]!.accepted.quality, reply: "unbound reply" },
+    };
     await expect(runTrackCReplay(input)).rejects.toThrow("TRACK_C_C2_B3_ENVELOPE_MISMATCH:unsupported-protected-claim");
     expect(input.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+  });
+  it("accepts a distinct candidate only through its independently guarded offline origin", async () => {
+    const input = replayInput();
+
+    const result = await runTrackCReplay(input);
+
+    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(14);
+    expect(result.cases.every(({ deterministic }) =>
+      deterministic.candidateOrigin === "OFFLINE_CANDIDATE_DETERMINISTICALLY_VALIDATED"
+    )).toBe(true);
+  });
+  it("rejects offline candidate envelope substitution or a guard failure before judge calls", async () => {
+    const substituted = replayInput();
+    substituted.cases[0]!.candidate = {
+      ...substituted.cases[0]!.candidate,
+    };
+    await expect(runTrackCReplay(substituted)).rejects.toThrow(
+      "TRACK_C_C3_OFFLINE_CANDIDATE_GUARD_FAILED",
+    );
+    expect(substituted.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+
+    const guardFailed = replayInput();
+    const accepted = guardFailed.cases[0]!.accepted.quality;
+    const capture = frozenCapture("unsupported-protected-claim");
+    if (capture.status !== "BUILT" || capture.context === null) throw new Error("TEST_CAPTURE_REQUIRED");
+    const context = capture.context;
+    const request = buildTrackCOfflineCandidateRequest({
+      modelResource: "projects/track-c-fixture/locations/global/publishers/google/models/gemini-3.5-flash-lite",
+      capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), systemInstruction: "candidate",
+    });
+    expect(() => validateTrackCOfflineCandidate({
+      capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
+      providerModelVersion: "gemini-3.5-flash-lite", accepted,
+      output: {
+        schemaVersion: 2, contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
+        contextHash: context.contextHash,
+        productBinding: { status: "NOT_REQUIRED", productIds: [] },
+        segments: [{ kind: "EFFECT_CLAIM", text: "Đơn đã đặt xong.", effect: "ORDER_PLACED" }],
+        strategy: "HOLD_POSITION", cta: "NONE",
+      },
+    })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_PROVENANCE_INVALID");
+    expect(() => validateTrackCOfflineCandidate({
+      capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
+      providerModelVersion: "gemini-3.5-flash-lite", accepted,
+      output: {
+        schemaVersion: 2, contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
+        contextHash: "0".repeat(64),
+        productBinding: { status: "NOT_REQUIRED", productIds: [] },
+        segments: [{ kind: "GENERAL", text: "Chị cho em biết mẫu đang xem nhé." }],
+        strategy: "ASK_CLARIFICATION", cta: "ASK_PRODUCT",
+      },
+    })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_CONTEXT_MISMATCH");
   });
   it("retains bounded rationale integrity and distinct material regression clusters", async () => {
     const worseFactGrounding = assessment(3, { scores: { ...assessment(3).scores, factGrounding: 1 }, weaknesses: ["fact grounding"] });

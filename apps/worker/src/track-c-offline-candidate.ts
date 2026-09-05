@@ -17,7 +17,7 @@ function validEvaluationTime(value: Date): boolean {
  * Makes a Context V2 capture admissible for the Track C offline capability.
  * This is evaluation-only: it neither reads a store nor exposes a runtime port.
  */
-function contextFromFrozenCapture(input: Readonly<{
+export function contextFromFrozenTrackCCapture(input: Readonly<{
   capture: unknown;
   evaluationAt: Date;
 }>): ContextV2 {
@@ -77,7 +77,7 @@ export function buildTrackCOfflineCandidateRequest(input: Readonly<{
   }
   const request = buildCandidateRequest({
     modelResource: input.modelResource,
-    context: contextFromFrozenCapture({
+    context: contextFromFrozenTrackCCapture({
       capture: input.capture,
       evaluationAt: input.evaluationAt,
     }),
