@@ -148,10 +148,12 @@ function materialReason(
 
   const recommendationDelta = recommendationRank(candidate.recommendationAction) -
     recommendationRank(accepted.recommendationAction);
-  if (recommendationDelta > 0) return "RECOMMENDATION_IMPROVEMENT";
-  if (recommendationDelta < 0) return "RECOMMENDATION_REGRESSION";
-
   const expectedSign = disposition === "BETTER" ? 1 : -1;
+  if (recommendationDelta * expectedSign > 0) {
+    return disposition === "BETTER"
+      ? "RECOMMENDATION_IMPROVEMENT"
+      : "RECOMMENDATION_REGRESSION";
+  }
   const selected = SCORE_DIMENSIONS.reduce((best, dimension) =>
     scoreDeltas[dimension] * expectedSign > scoreDeltas[best] * expectedSign
       ? dimension

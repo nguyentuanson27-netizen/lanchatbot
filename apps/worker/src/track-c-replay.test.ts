@@ -103,4 +103,21 @@ describe("Track C C2 offline replay", () => {
     expect(first.cases[0]!.quality.rationale.candidateAssessmentHash).not.toBe(first.cases[1]!.quality.rationale.acceptedAssessmentHash);
     expect(first.repeatabilityHash).toBe(second.repeatabilityHash);
   });
+  it("does not label a score regression as recommendation improvement", async () => {
+    const accepted = assessment(4, { recommendationAction: "REWRITE" });
+    const candidate = assessment(3, {
+      scores: { ...assessment(3).scores, factGrounding: 1 },
+      recommendationAction: "KEEP",
+    });
+    const result = await runTrackCReplay(replayInput([], [accepted, candidate]));
+
+    expect(result.cases[0]!.quality).toMatchObject({
+      disposition: "WORSE",
+      reviewReasonCodes: ["UNEXPECTED_REGRESSION", "JUDGE_DISAGREEMENT"],
+      rationale: { materialReasonCode: "SCORE_REGRESSION:factGrounding" },
+    });
+    expect(result.aggregate.materialRegressionClusters[0]).toMatchObject({
+      materialReasonCode: "SCORE_REGRESSION:factGrounding",
+    });
+  });
 });
