@@ -255,13 +255,24 @@ describe("Track B PREPROD Docker service boundary", () => {
       ["2026-09-03T02:26:18.123456Z", "2026-09-03T02:26:18.123456Z"],
       ["2026-09-03T02:26:18.123456000Z", "2026-09-03T02:26:18.123456Z"],
       ["2026-09-03T02:26:18.123456001Z", "2026-09-03T02:26:18.123457Z"],
+      ["2028-02-29T23:59:59.999999000Z", "2028-02-29T23:59:59.999999Z"],
       ["2026-09-03T23:59:59.999999999Z", "2026-09-04T00:00:00.000000Z"],
     ] as const) {
       await expect(controllerFor(exact, startedAt).readRunningStartedAt(targetService))
         .resolves.toBe(expected);
     }
-    await expect(controllerFor(exact, "not-a-timestamp").readRunningStartedAt(targetService))
-      .resolves.toBeNull();
+    for (const invalidStartedAt of [
+      "not-a-timestamp",
+      "2026-02-30T02:00:00.123456789Z",
+      "2026-02-29T02:00:00.123456789Z",
+      "2026-13-01T02:00:00.123456789Z",
+      "2026-01-01T24:00:00.123456789Z",
+      "2026-01-01T02:60:00.123456789Z",
+      "2026-01-01T02:00:60.123456789Z",
+    ]) {
+      await expect(controllerFor(exact, invalidStartedAt).readRunningStartedAt(targetService))
+        .resolves.toBeNull();
+    }
     for (const mounts of [
       [],
       [...exact, exact[0]],

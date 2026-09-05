@@ -306,11 +306,12 @@ function parseOne(output: string, code: string): DockerInspect {
 function normalizedDockerStartedAt(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const match = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})\.(\d{1,9})Z$/u.exec(value);
-  if (!match || !Number.isFinite(Date.parse(value))) return null;
+  if (!match) return null;
   const fraction = match[2]!;
   let microseconds = Number(fraction.slice(0, 6).padEnd(6, "0"));
   let wholeSecond = Date.parse(`${match[1]}Z`);
-  if (!Number.isFinite(wholeSecond)) return null;
+  if (!Number.isFinite(wholeSecond) ||
+      new Date(wholeSecond).toISOString().slice(0, 19) !== match[1]) return null;
   // PostgreSQL stores microseconds while Docker reports nanoseconds. Never floor the
   // lower-bound watermark: doing so could admit an audit written just before start.
   if (fraction.length > 6 && /[1-9]/u.test(fraction.slice(6))) {
