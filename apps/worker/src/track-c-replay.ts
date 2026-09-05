@@ -16,6 +16,7 @@ import {
   type TrackCQualityJudgePort,
   type TrackCQualityReplyInput,
 } from "./track-c-quality-judge.js";
+import { assertTrackCOfflineCandidateValidated } from "./track-c-offline-candidate-validation.js";
 
 const SCORE_DIMENSIONS = Object.freeze([
   "relevance",
@@ -43,12 +44,33 @@ export interface TrackCReplayJudgeEnvelope extends TrackCQualityReplyInput {
   readonly verifiedFacts: BusinessFactEnvelopeV1 | null;
 }
 
+export interface TrackCB3LiveObservationEnvelope {
+  readonly origin: "B3_LIVE_OBSERVATION";
+  readonly quality: TrackCReplayJudgeEnvelope;
+}
+
+export interface TrackCOfflineCandidateValidatedEnvelope {
+  readonly origin: "OFFLINE_CANDIDATE_DETERMINISTICALLY_VALIDATED";
+  readonly quality: TrackCReplayJudgeEnvelope;
+  readonly identity: Readonly<{
+    readonly captureContextHash: string;
+    readonly requestEnvelopeHash: string;
+    readonly responseOutputHash: string;
+    readonly providerModelVersion: string;
+  }>;
+  readonly guard: Readonly<{
+    readonly status: "PASS";
+    readonly sideEffects: "DISABLED";
+    readonly blockedReasonCodes: readonly [];
+  }>;
+}
+
 export interface TrackCReplayCaseInput {
   readonly caseId: string;
   readonly judge: TrackCQualityJudgePort;
   /** Exact B3 observations, retained in memory only for this offline replay. */
-  readonly accepted: TrackCReplayJudgeEnvelope;
-  readonly candidate: TrackCReplayJudgeEnvelope;
+  readonly accepted: TrackCB3LiveObservationEnvelope;
+  readonly candidate: TrackCOfflineCandidateValidatedEnvelope;
   readonly calibrationSample?: boolean;
 }
 
@@ -95,6 +117,8 @@ export interface TrackCReplayResult {
         readonly accepted: string;
         readonly candidate: string;
       }>;
+      readonly acceptedOrigin: "B3_LIVE_OBSERVATION";
+      readonly candidateOrigin: "OFFLINE_CANDIDATE_DETERMINISTICALLY_VALIDATED";
     };
     readonly quality: {
       readonly disposition: "BETTER" | "SAME" | "WORSE";
@@ -196,18 +220,20 @@ function assertObservationBinding(
     throw new Error(`TRACK_C_C2_B3_ENVELOPE_MISSING:${inputCase.caseId}`);
   }
   const actual = Object.freeze({
-    accepted: sha256(inputCase.accepted),
+    accepted: sha256(inputCase.accepted.quality),
     candidate: sha256(inputCase.candidate),
   });
-  if (expected.baseline !== actual.accepted || expected.candidate !== actual.candidate) {
+  if (inputCase.accepted.origin !== "B3_LIVE_OBSERVATION" ||
+      expected.baseline !== actual.accepted) {
     throw new Error(`TRACK_C_C2_B3_ENVELOPE_MISMATCH:${inputCase.caseId}`);
   }
-  if (sha256(inputCase.accepted.context) !== sha256(inputCase.candidate.context)) {
+  const candidate = assertTrackCOfflineCandidateValidated(inputCase.candidate);
+  if (sha256(inputCase.accepted.quality.context) !== sha256(candidate.quality.context)) {
     throw new Error(`TRACK_C_C2_CONTEXT_MISMATCH:${inputCase.caseId}`);
   }
   if (
-    sha256(inputCase.accepted.verifiedFacts) !==
-      sha256(inputCase.candidate.verifiedFacts)
+    sha256(inputCase.accepted.quality.verifiedFacts) !==
+      sha256(candidate.quality.verifiedFacts)
   ) {
     throw new Error(`TRACK_C_C2_VERIFIED_FACTS_MISMATCH:${inputCase.caseId}`);
   }
@@ -269,11 +295,11 @@ export async function runTrackCReplay(
     const judged = await runTrackCQualityComparison({
       mustPassReplay: input.mustPassReplay,
       judge: replayCase.judge,
-      context: replayCase.accepted.context,
-      verifiedFacts: replayCase.accepted.verifiedFacts,
+      context: replayCase.accepted.quality.context,
+      verifiedFacts: replayCase.accepted.quality.verifiedFacts,
       factFixtureHash: input.mustPassReplay.identity.factFixtureHash,
-      accepted: replayCase.accepted,
-      candidate: replayCase.candidate,
+      accepted: replayCase.accepted.quality,
+      candidate: replayCase.candidate.quality,
       ...(replayCase.calibrationSample === undefined
         ? {}
         : { calibrationSample: replayCase.calibrationSample }),
@@ -287,6 +313,8 @@ export async function runTrackCReplay(
           deterministicCase.riskAssertions.map(({ assertionCode }) => assertionCode),
         ),
         qualityEnvelopeHashes,
+        acceptedOrigin: replayCase.accepted.origin,
+        candidateOrigin: replayCase.candidate.origin,
       }),
       quality: Object.freeze({
         disposition: judged.comparison.disposition,

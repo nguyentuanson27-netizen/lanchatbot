@@ -233,3 +233,15 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 - [x] No UR/State V2/admin/multi-page/production-hardening scope creep.
 - [x] V2-to-exact-LKG-V2 recovery remains implemented and tested; the first meaningful distinct-V2 exercise is deferred to Track C/C4, and V1/LEGACY is never selected by Track B.
 - [x] Owner records `TRACK_B_COMPLETE`; the administration task separately validates the handoff and owns any Track C task creation.
+
+## Track C C1/C2 composition boundary
+
+- The frozen accepted side remains the exact `B3_LIVE_OBSERVATION` bound by its
+  existing C1 B3 live-path hash. A distinct offline candidate is never relabeled
+  as that observation or required to share its hash.
+- Before C1.1/C2 judge calls, an `OFFLINE_CANDIDATE_DETERMINISTICALLY_VALIDATED`
+  value must be built in memory from an integrity-valid frozen Context V2 capture,
+  exact candidate request/response identities, the existing deterministic
+  claim/provenance/fact guard, and a side-effects-disabled result. The replay
+  verifies each origin within its own binding and rejects substitution or guard
+  failure; it adds no Gate E interpreter, durable evidence, or runtime authority.
