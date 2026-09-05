@@ -62,6 +62,12 @@ export interface TrackBReplayObservation<TEvidence = unknown> {
   /** PII-safe projection derived from this exact capture's commit plan. */
   readonly stateComparison: CompareCommerceAuthorityInput;
   readonly evidence: TEvidence;
+  /**
+   * Optional, in-memory evaluation envelope from this exact observation. B3
+   * returns only its hash; it never persists this payload or gives it effect
+   * authority. Downstream offline evaluation supplies the matching payload.
+   */
+  readonly qualityEnvelope?: unknown;
 }
 
 type StateDifferenceCode =
@@ -123,6 +129,11 @@ interface TrackBReplayCaseResult {
     readonly assertionCode: string;
     readonly status: "PASS" | "VIOLATION";
   }[];
+  /** Hashes bind an offline quality replay to these exact B3 observations. */
+  readonly qualityEnvelopeHashes?: Readonly<{
+    readonly baseline: string;
+    readonly candidate: string;
+  }>;
 }
 
 export interface TrackBLivePathReplayResult {
@@ -347,6 +358,13 @@ export async function runTrackBLivePathReplay<TInput, TEvidence>(input: {
         ? "PASS" as const
         : "VIOLATION" as const,
     }));
+    const qualityEnvelopeHashes = baselineObservation.qualityEnvelope === undefined ||
+        candidateObservation.qualityEnvelope === undefined
+      ? undefined
+      : Object.freeze({
+          baseline: sha256(canonicalJsonV1(baselineObservation.qualityEnvelope)),
+          candidate: sha256(canonicalJsonV1(candidateObservation.qualityEnvelope)),
+        });
     cases.push({
       caseId,
       riskClasses: [...replayCase.riskClasses],
@@ -360,6 +378,7 @@ export async function runTrackBLivePathReplay<TInput, TEvidence>(input: {
       state,
       sideEffects,
       riskAssertions,
+      ...(qualityEnvelopeHashes === undefined ? {} : { qualityEnvelopeHashes }),
     });
   }
 

@@ -4,7 +4,9 @@ import { createConversationState } from "@lana/conversation-engine";
 import {
   canonicalJsonV1,
   type AgentProposalV1,
+  type BusinessFactEnvelopeV1,
   type CustomerProfileV1,
+  type SalesRubricAssessmentV2,
 } from "@lana/contracts";
 import type { RealtimeCommitInput, RealtimeCommitResult } from "@lana/database";
 import type {
@@ -44,6 +46,7 @@ import {
   TRACK_C_C1_MUST_PASS_POLICY,
   assertTrackCC1MustPass,
 } from "./track-c-must-pass.js";
+import { runTrackCReplay, type TrackCReplayJudgeEnvelope } from "./track-c-replay.js";
 import {
   RealtimeRunner,
   type RealtimeInboxPort,
@@ -1051,6 +1054,71 @@ describe("BF-01 runner reconciliation", () => {
           deliveredMessageCount: 0,
         },
       });
+      const qualityEnvelopeFor = (
+        capture: Readonly<Capture>,
+        finalText: string,
+        resolvedFactStatuses: readonly ("OK" | "STALE" | "NOT_FOUND")[],
+      ): TrackCReplayJudgeEnvelope => {
+        const factStatus = resolvedFactStatuses.at(-1) ?? null;
+        const verifiedFacts: BusinessFactEnvelopeV1 | null = factStatus === null
+          ? null
+          : factStatus === "OK"
+          ? {
+            schemaVersion: 1,
+            status: "OK",
+            source: "POS_SNAPSHOT",
+            observedAt: occurredAt,
+            expiresAt: "2099-01-01T00:00:00.000Z",
+            productId: "SD398",
+            facts: {
+              schemaVersion: 1,
+              productId: "SD398",
+              parentProductId: "SD398",
+              offerType: "AO_DAI",
+              listPriceVnd: null,
+              salePriceVnd: 1_199_000,
+              sizes: ["M", "L"],
+              stockStatus: "IN_STOCK",
+              stockQuantity: 2,
+              deliveryEta: { minDays: 1, maxDays: 2 },
+              fulfillmentPolicy: "READY_STOCK",
+              imageUrls: [],
+            },
+            reasonCode: null,
+          }
+          : {
+            schemaVersion: 1,
+            status: factStatus,
+            source: "POS_SNAPSHOT",
+            observedAt: occurredAt,
+            expiresAt: occurredAt,
+            productId: "SD398",
+            facts: null,
+            reasonCode: factStatus === "STALE"
+              ? "BUSINESS_FACT_STALE"
+              : "BUSINESS_FACT_NOT_FOUND",
+          };
+        return {
+          context: [{
+            direction: "INBOUND",
+            senderType: "CUSTOMER",
+            messageType: "TEXT",
+            text: capture.customerText,
+            attachmentCount: 0,
+            occurredAt,
+          }],
+          verifiedFacts,
+          reply: finalText,
+          proposalSummary: {
+            initialRequestedAction: capture.initialRequestedAction ?? "REPLY",
+            initialFactIntent: capture.initialFactIntent ?? "NONE",
+          },
+          guardOutcome: {
+            protectedEffects: "DISABLED",
+            expectedOwner: capture.expectedOwner ?? "BOT",
+          },
+        };
+      };
       const runCapturedPath = async (
         capture: Readonly<Capture>,
       ): Promise<TrackBReplayObservation<TrackBRunnerEvidence>> => {
@@ -1113,6 +1181,11 @@ describe("BF-01 runner reconciliation", () => {
               customerUrlExplanationCalls:
                 harness.draftCustomerUrlExplanation.mock.calls.length,
             },
+            qualityEnvelope: qualityEnvelopeFor(
+              capture,
+              "",
+              harness.resolvedFactStatuses,
+            ),
           };
         }
         return {
@@ -1138,9 +1211,15 @@ describe("BF-01 runner reconciliation", () => {
             customerUrlExplanationCalls:
               harness.draftCustomerUrlExplanation.mock.calls.length,
           }),
+          qualityEnvelope: qualityEnvelopeFor(
+            capture,
+            committedText(commit),
+            harness.resolvedFactStatuses,
+          ),
         };
       };
       const candidateSnapshots = new Map<string, RealtimeReplySnapshot>();
+      const candidateQualityEnvelopes = new Map<string, TrackCReplayJudgeEnvelope>();
       const expectedStateComparisonFor = (capture: Readonly<Capture>) => {
         const productId = capture.expectedProductId === undefined
           ? "SD398"
@@ -1232,6 +1311,10 @@ describe("BF-01 runner reconciliation", () => {
         candidate: async (capture) => {
           const observed = await runCapturedPath(capture);
           candidateSnapshots.set(caseId, observed.reply);
+          candidateQualityEnvelopes.set(
+            caseId,
+            observed.qualityEnvelope as TrackCReplayJudgeEnvelope,
+          );
           return observed;
         },
         expectedStateComparison: expectedStateComparisonFor(capturedInput),
@@ -1472,6 +1555,58 @@ describe("BF-01 runner reconciliation", () => {
         new Set(TRACK_C_C1_MUST_PASS_POLICY.riskPriority),
       );
       expect(assertTrackCC1MustPass(c1Result)).toBe(c1Result);
+
+      const c2Judge = {
+        judgeSalesReplyV2Descriptor: () => ({
+          provider: "VERTEX_AI" as const,
+          model: fixtureModelVersion,
+          promptRubric: { version: "track-c-c2-b3-integration" },
+          generationConfig: { temperature: 0 },
+        }),
+        judgeSalesReplyV2: async (): Promise<SalesRubricAssessmentV2> => ({
+          schemaVersion: 2,
+          intent: "hoi_gia",
+          conversationStage: "consulting",
+          scores: {
+            relevance: 4,
+            questionResolution: 4,
+            nextStepQuality: 4,
+            naturalness: 4,
+            concision: 4,
+            factGrounding: 4,
+            objectionResolution: 4,
+            salesProgression: 4,
+            ctaStageFit: 4,
+            overall: 4,
+          },
+          strengths: [],
+          weaknesses: [],
+          improvedReply: "",
+          recommendationAction: "KEEP",
+        }),
+      };
+      const c2Result = await runTrackCReplay({
+        mustPassReplay: c1Result,
+        cases: TRACK_C_C1_MUST_PASS_POLICY.fixtures.map(({ caseId }) => {
+          const observed = candidateQualityEnvelopes.get(caseId);
+          expect(observed).toBeDefined();
+          return {
+            caseId,
+            judge: c2Judge,
+            accepted: observed!,
+            candidate: observed!,
+          };
+        }),
+      });
+      expect(c2Result).toMatchObject({
+        sideEffects: "DISABLED",
+        holdout: "NOT_INCLUDED",
+        aggregate: { better: 0, same: 7, worse: 0 },
+      });
+      expect(c2Result.cases.every(({ deterministic }) =>
+        deterministic.qualityEnvelopeHashes.accepted ===
+          deterministic.qualityEnvelopeHashes.candidate
+      )).toBe(true);
 
       const result = await runTrackBLivePathReplay({ identity, cases });
 
