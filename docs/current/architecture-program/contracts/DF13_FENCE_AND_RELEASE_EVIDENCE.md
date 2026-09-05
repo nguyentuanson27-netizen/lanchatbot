@@ -223,6 +223,9 @@ PREPROD therefore now remains on exact `salesAuthorityMode=COMMERCE` with
 `stateReadMode=LEGACY`; this contract still governs future replacement and
 rollback operations and grants no production or page-expansion authority.
 
-BF-03 remains foundation-only/non-activatable, BF-04 remains `PARTIAL /
-KNOWN_GAP`, and BF-10 natural-terminal evidence remains pending. This contract
-does not alter those residuals or the separate `DATABASE_URL` remediation.
+BF-03 remains foundation-only/non-activatable and BF-10 natural-terminal
+evidence remains pending. At the historical Gate F checkpoint BF-04 remained
+`PARTIAL / KNOWN_GAP`; B2.3d plus accepted Gate E v22 subsequently closed the
+migrated Track B PREPROD path without rewriting that historical disposition or
+claiming public-production acceptance. This contract does not alter the
+remaining residuals or the separate `DATABASE_URL` remediation.

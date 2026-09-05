@@ -3,7 +3,7 @@
 **Purpose:** Keep planning context small while preserving durable contracts and evidence.
 **Status:** Repository planning authority for BF/DF/UR on this branch; never deployment authorization.
 **Operating mode:** `ENGINEERING_PREPROD`; see `OPERATING_MODE.md`.
-**Current program point:** `GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE`; PREPROD remains on the exact verified COMMERCE release with `stateReadMode=LEGACY`. See `DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md`.
+**Current program point:** `TRACK_B_COMPLETE`; PREPROD remains on the exact accepted V2 COMMERCE release with `stateReadMode=LEGACY`. See `TRACK_B_PREPROD_ACCEPTANCE_20260905.md`.
 
 ## Default reading order for BF
 
@@ -39,6 +39,7 @@ that explicit verdict.
 | DF13 operational-acceptance preparation | `DF13_PREPROD_FRESH_PROCESS_DECISION.md` + `DF13_OPERATIONAL_ACCEPTANCE_PREPARATION.md` + `contracts/DF13_FENCE_AND_RELEASE_EVIDENCE.md` + `contracts/RELEASE_INTEGRITY.md` |
 | DF13 / Gate F accepted runtime | `DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md` + `program-state.json` |
 | V5 Track B model-authority implementation | `TRACK_B_MODEL_AUTHORITY_EXECUTION_PLAN.md` + `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md` + `TRACK_B_MODEL_AUTHORITY_TODO.md` + `V5_OWNER_ADOPTION_20260827.md` + `program-state.json` + `contracts/MODEL_EVALUATION_BOUNDARY.md` + relevant DF13/behavior contracts |
+| V5 Track B accepted runtime / Track C handoff | `TRACK_B_PREPROD_ACCEPTANCE_20260905.md` + `program-state.json` |
 | Release/deploy/evidence | `contracts/RELEASE_INTEGRITY.md` |
 | Dataset/package work | `contracts/DATASET_BOUNDARY.md` |
 | DF work after Gate BF / post-Gate-F sequencing | `FUTURE_BACKLOG.md` + `PREPROD_DF_UR_PLAN_AMENDMENT.md` + `V5_OWNER_ADOPTION_20260827.md` + relevant contracts |
@@ -56,7 +57,7 @@ that explicit verdict.
 - `FUTURE_BACKLOG.md`: authoritative deferred DF/UR work after Gate BF.
 - `PREPROD_DF_UR_PLAN_AMENDMENT.md`: authoritative on merged `main`; rationale/review contract for PREPROD simplification and future-topology changes.
 - `V5_OWNER_ADOPTION_20260827.md`: binds the adopted PR #258 plan and makes it canonical for post-Gate-F sequencing only.
-- `TRACK_B_MODEL_AUTHORITY_EXECUTION_PLAN.md`: execution-ready refinement for V5 Track B. The 2026-08-29 owner message authorizes Track B source implementation only; it does not authorize merge, runtime mutation, deployment, migration, pointer/routing changes, Messenger action, or UR/State V2 work.
+- `TRACK_B_MODEL_AUTHORITY_EXECUTION_PLAN.md`: completed execution record for V5 Track B. Its historical source-only authorization boundaries remain evidence; final `SOLO_PREPROD_MINIMAL` acceptance and current authority are recorded in `TRACK_B_PREPROD_ACCEPTANCE_20260905.md`.
 - `TRACK_B_MODEL_AUTHORITY_TODO.md`: checklist companion to the Track B execution plan; never evidence by itself.
 - `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`: completed B1 source-tracing evidence on the exact head; it records current authority-bundle impact, the reachable-component inventory, focused-test map and source-PR decomposition, but authorizes no merge, runtime mutation or deployment.
 - `DF13_PREPROD_FRESH_PROCESS_DECISION.md`: authoritative on merged `main` for the first stopped-process DF13 PREPROD replacement; it narrowly supersedes the prior hot-cutover mechanism for that exercise only.
@@ -96,8 +97,8 @@ At evidence-bearing train/Gate completion:
 ```text
 Completed before the incident track: Release Integrity -> Confirmation -> Dataset Boundary -> R3
 Mode: ENGINEERING_PREPROD; live page role: PREPROD_TEST_PAGE
-Current governance: GATE_E_PREPROD_ACCEPTED (v15); POST_BF_V1 remains recorded
-Accepted residuals: BF-03 deferred/non-activatable; BF-04 PARTIAL / KNOWN_GAP; BF-10 natural-terminal evidence pending
+Current governance: TRACK_B_COMPLETE on accepted Gate E v22 / PREPROD V2; historical POST_BF_V1 remains recorded
+Accepted residuals outside Track B: BF-03 deferred/non-activatable; BF-10 natural-terminal evidence pending
 
 Active PREPROD roadmap:
   DF-A: DF-P1..DF-P3 / DF01-06
@@ -106,8 +107,8 @@ Active PREPROD roadmap:
   -> DF-C: DF-P7 / DF11-13 source complete; first controlled LEGACY -> COMMERCE uses the separately authorized stopped-process PREPROD replacement
   -> controlled critical human E2E (passed)
   -> Gate F-PREPROD accepted / DF-C complete
-  -> V5 Track B: source implementation authorized; merge, deploy and authority mutation remain separately gated
-  -> V5 Track C: bounded safety + sales-quality learning loop
+  -> V5 Track B complete on the accepted PREPROD V2 baseline
+  -> V5 Track C: bounded safety + sales-quality learning loop, awaiting separate owner start
   -> UR / State V2 / Gate U only when a concrete trigger and separate approval require a narrow slice
   -> explicit owner trigger: PRODUCTION_HARDENING
   -> production-readiness / rollout decision

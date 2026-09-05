@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "contractVersion": "TRACK_B_INITIAL_LKG_V2_SOLO_PREPROD_MINIMAL_V1",
+  "environment": "ENGINEERING_PREPROD",
+  "pageId": "1198992073286645",
+  "channel": "MESSENGER",
+  "observedAt": "2026-09-05T07:54:33Z",
+  "governanceSource": {
+    "commit": "e31a80da29ca1b37a246dcbc5b8e113a6b8d5d80",
+    "tree": "077fee6d6ceba524449f8977de895af7fe8acec0",
+    "workingTree": "CLEAN"
+  },
+  "service": {
+    "name": "realtime-worker",
+    "release": "track-b-v22-b0aeb8907",
+    "sourceCommit": "b0aeb8907dae4ae2d9051b409ba25fa3f17fd188",
+    "sourceTree": "422d4a2cc77759fcf493f8e717b6cedfe1b76037",
+    "imageTag": "lana-chatbot-app:track-b-b0aeb8907",
+    "imageId": "1c141af18db98d127dfb30c5c70625bc6f27a85d6c5911473339a5cf47277536",
+    "buildId": "5b4c18dd9c1296ed808211b33edfcd76b3254cfa4a9b05a4287de03c957840a0",
+    "runtimeConfigHash": "061a39956252a3ef4c8aed5b4e0694694a7b0768dfc5c05e5c5339bde1b9ce80",
+    "health": "HEALTHY",
+    "restartCount": 0
+  },
+  "startup": {
+    "path": "/opt/lana-chatbot/releases/track-b/startup/1df0d0e8-874e-4636-bcb9-812be630647c-recovery-v2.json",
+    "sha256": "d97f510a9accfba974b7c49f179722529a0a1f6bee6b03fa6f31033ded21d5d1",
+    "mount": "READ_ONLY"
+  },
+  "authority": {
+    "source": "DATABASE",
+    "pointerRevision": 11,
+    "modeVersionId": "ccd021a6-24e3-4a46-87a0-6d63f506cb86",
+    "confirmationMode": "V2_ACTIVE",
+    "salesAuthorityMode": "COMMERCE",
+    "stateReadMode": "LEGACY",
+    "authorityBundleHash": "56b94f7a2e07e80fe8b2983a75b46caa78c2d48f3bd4081d4a88d8f40d2325b8",
+    "contentHash": "sha256:95ead755ea456c1e01c215d2421c2cf23f64fb536168ed49d5729bc4ec91f394"
+  },
+  "gateE": {
+    "version": "v22",
+    "candidateContentFingerprint": "58a4cbb9fb417764c0922c2b2f2012766793b5b4145921c17b1863bca3011331",
+    "candidateSourceRevision": "edb7971bd637ca02abde46d0ec4121e256e2023f",
+    "scoredMainRevision": "c9e8d366c3cfa05a57c5dfc051605204f1154b89",
+    "evidenceBodyHash": "639c0eec9f929c1458148fdc3ef60c49ee88ea22205ec240def85e9a377eced1",
+    "finalizationHash": "9af67aec9b2ed8569a010c1a93efcc2a5ed491c83f675e9eb8c7db1cc8517064",
+    "admissibility": "FINALIZED_TRUSTED_EXACT_HEAD",
+    "certification": "VERIFIED_DURABLE"
+  },
+  "migrations": {
+    "0036_df13_commerce_authority_fence": "d709617e10554a0186b9233a404ef7faadfdf3576ba3c133efe51a56c2214425",
+    "0037_track_b_commerce_authority_replacement": "40b1ef14e3f7b2e037063de1f8d8ff7f804d069f8649115be6c29b1b56399c20",
+    "0038_track_b_commerce_admission_gate": "9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140",
+    "0039_track_b_v2_lkg_cutover_fence": "f9bb37c95ba77b6947958442cc223f5f4583d43cba4591de5abfaed002e068ca",
+    "0040_track_b_operator_role_boundary": "017ac439ae6a7f68ae3a36389bde0a44bcfdd4a0d9c6a793b23f3a8147279438"
+  },
+  "operatorBoundary": {
+    "role": "lana_track_b_authority_operator",
+    "leastPrivilege": "VERIFIED",
+    "runtimeRoleSeparation": "VERIFIED",
+    "secretFileMode": "0400",
+    "secretMountedIntoRealtime": false,
+    "rowLevelScope": "PAGE_1198992073286645_MESSENGER"
+  },
+  "liveState": {
+    "unreleasedFences": 0,
+    "webhookProcessing": 0,
+    "metaOutboxSending": 0,
+    "pancakeTagOutboxApplying": 0,
+    "processSmoke": "PASS",
+    "pointerStartupIdentity": "EXACT"
+  },
+  "selection": {
+    "source": "CURRENT_ACCEPTED_V2",
+    "auditFreshnessRequired": false,
+    "distinctV2RollbackRehearsal": "DEFERRED_TO_TRACK_C_C4_WHEN_TWO_V2_RELEASES_EXIST",
+    "v1Fallback": "FORBIDDEN"
+  },
+  "bindingSha256": "8808956f224aee094c3fa701f595eb6a8cb8c38e18df13d1b6a6dbfa18365217"
+}

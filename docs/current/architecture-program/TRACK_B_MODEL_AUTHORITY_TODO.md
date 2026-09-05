@@ -1,6 +1,6 @@
 # Track B — Execution Checklist
 
-**Status:** `B2.4_MERGED / B3.1_V22_GATE_E_PASS / MIGRATIONS_0036_0037_0038_0039_PREPROD_APPLIED_VERIFIED / B3.2_V2_LKG_SOURCE_MERGED / MIGRATION_0040_OPERATOR_SOURCE_IN_PROGRESS / CURRENT_V2_UNCHANGED`
+**Status:** `TRACK_B_COMPLETE / B3.1_V22_GATE_E_PASS / MIGRATIONS_0036_THROUGH_0040_PREPROD_APPLIED_VERIFIED / INITIAL_COMPATIBLE_LKG_V2_BOUND`
 **B1 evidence:** `TRACK_B_B1_SCOPE_LOCK_FINDINGS.md`
 **Selected direction:** demote post-generation deterministic authority only. `BaselineModelCapability` and its observed request envelope stay byte-frozen; the Context V2 candidate stays offline. The owner-authorized B3.1 remediation may change only the failed offline candidate/interpreter evaluation contract and must create a new candidate identity; it is neither a live prompt alternative nor candidate promotion. If the live direction proves insufficient, Track B stops incomplete.
 
@@ -13,7 +13,7 @@
 - [x] Re-read `AGENTS.md`, `OPERATING_MODE.md`, `program-state.json`, this plan and the relevant contracts from the exact merged `main` head.
 - [x] Follow `SOLO_PREPROD_MINIMAL`: `branch -> code + focused verification -> PR -> exact-head verification -> merge -> deploy exact commit -> smoke`. Do not reintroduce Release Train or a second approval record.
 - [x] Keep `stateReadMode=LEGACY`; do not start UR/State V2 without a separate evidence-backed approval.
-- [x] Treat the BF-04 P0 size-claim residual as open until new evidence proves otherwise.
+- [x] Treat the BF-04 P0 size-claim residual as open until new evidence proves otherwise; B2.3d and accepted Gate E v22 later supplied that evidence for the migrated Track B PREPROD path without rewriting the historical Gate BF disposition.
 
 ## B1 — Scope lock
 
@@ -127,7 +127,7 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 - [x] Deterministic fallback from verified facts as r31.3 requires; never a second sales-copy pipeline.
 - [x] Prove the fallback preserves verified facts and media and executes no failed or unauthorized effect; repaired declarations are rebound so unknown IDs remain fail-closed.
 - [x] Add explicit BF-04 COMMERCE regressions for undeclared and mismatched values, non-size inbound plus missing profile/model-intent mismatch, invalid repair, single-repair cap, safe fallback and exact `SIZE_FIT` outbound authorization. The conservative fence applies to every COMMERCE proposal, not a finite inbound/model-intent vocabulary. Exercise the live path against the immutable pre-B2.3d `78a03fe599202c6e275300af33622cb16ab80769` r31.3 capture: verified facts, claims, commit and whole-group invariants remain stable; model-owned wording/strategy and the payload-bound effect-authorization hash are exposed as the exact expected delta. The older pre-B2.3a catalog-size capture now explicitly records the B2.3d safe-fallback claim/effect delta while retaining B2.3a whole-group containment.
-- [x] **Source disposition:** `BF04_SOURCE_CLOSURE_CANDIDATE`; exact B2.3d head `1ec597f3d81aa208fdf7e90f17cf7ac022bd6717` was independently approved and canonical CI passed before merge commit `a89a50cb52183a3ffc4f3d7bd313ea675564c07b`. Deployed/operational BF-04 status remains unchanged.
+- [x] **Historical source checkpoint:** exact B2.3d head `1ec597f3d81aa208fdf7e90f17cf7ac022bd6717` was independently approved and canonical CI passed before merge commit `a89a50cb52183a3ffc4f3d7bd313ea675564c07b`, establishing `BF04_SOURCE_CLOSURE_CANDIDATE`. The migrated Track B PREPROD path was subsequently closed by accepted Gate E v22 and exact runtime evidence; this does not claim public-production acceptance.
 - [x] **Checkpoint:** authority boundary, BF-04 disposition and r31.3 evidence reviewed before B2.4.
 
 ## B2.4 — Cut obsolete post-generation reachability
@@ -202,34 +202,34 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 
 ## B3.2 — Owner-scoped deploy
 
-- [ ] Treat deployment as an authority-bundle/behavior identity mutation; do not claim source-deploy-only.
+- [x] Treat deployment as an authority-bundle/behavior identity mutation; no new deploy was required for PR #320 or the append-only closure record because neither changed the already accepted runtime/candidate boundary.
 - [x] Derive the truthful V2 bundle payload from source: strategy `AGENT_PROPOSAL_V1_STRATEGY_ANALYSIS`, CTA `AGENT_PROPOSAL_V1_SALES_SIGNALS`, unchanged fixed consumer set and no bypass classes. The canonical V2 bundle hash is `56b94f7a2e07e80fe8b2983a75b46caa78c2d48f3bd4081d4a88d8f40d2325b8`. Historical V1 pointer/bundle evidence remains immutable but is not a Track B rollback target.
 - [x] Bind the 2026-08-31 owner instruction authorizing exact affected-service deploy and separately governed authority/pointer mutation in `ENGINEERING_PREPROD`; migration `0036` remains separately gated.
 - [x] Merge the focused B3.2 source correction in PR #311: immutable v22 evidence and the truthful V2 bundle remain preserved, while the reviewed mutation protocol is corrected to `STAGE_STOPPED -> durable fence -> prove admission HELD -> stop exact source + prove zero in-flight work (queued/held may remain) -> exact CAS/readback -> START_TARGET -> exact runtime/audit/full-consumer readback -> release fence`. Service start is explicit and cannot be hidden in fence release. The self-hashed release-local record is verified before staging. Before-CAS failure restores/readbacks the exact prior service when stopped and discards the target before release; post-CAS failure reverses the exact audited CAS under the still-held lease, restores/readbacks the exact prior service, then releases. Interrupted recovery also requires an exact database admission readback before service or pointer recovery. A lost release acknowledgement is reconciled from the durable released fence plus exact pointer/runtime/audit/consumer state and must report released ambiguity rather than falsely retaining a hold. Any ambiguity before release retains the fence. Reviewed head `b8bbf381b4870a4b41c631c80b28eab12eaff9cd` merged as `ae742d0fdec51333a6cc70b11975231dd4f3a366`; this is source completion only, not deploy, activation or operational acceptance.
 - [x] Resolve the database dependency before activation: migration `0037_track_b_commerce_authority_replacement` passed the governed fresh backup/restore and complete `up -> down -> up` rehearsal, was applied once to the exact approved `ENGINEERING_PREPROD` target, and passed exact live ledger/schema/ACL/role/empty-state readback. At that migration checkpoint the service/pointer still had its recorded V1 identity; that is historical evidence, not current-state authority. The current runtime is V2 and remains untouched until a fresh operational readback binds it as the initial LKG V2.
 - [x] PR #301 merged pending migration `0038_track_b_commerce_admission_gate` as source only at `main@6bc572e3180e75ba0fc10b3859787ffa79b5b66d`. It depends on exact applied `0036/0037` ledger hashes and the exact `0037` replacement-guard function identity, then atomically holds `webhook_inbox -> PROCESSING`, `meta_outbox -> SENDING`, and `pancake_tag_outbox -> APPLYING` for the matching page while any matching `MESSENGER` fence is unreleased, including after lease expiry. New inbound remains durable/queued and existing leases can drain. Installation/removal serialize against fence acquisition, and down refuses unless there are zero unreleased fences. Current source hashes are up `9dcf65e97671777991ad366cdb738ee986b4ee943635a744884c8733f4001140`, down `5dd292a169a5ecce5f21896bf8e11f1d7727a34a55758c92b8abc98f3de64d9a`. Source merge alone did not apply the migration.
 - [x] Use the reviewed `deploy/track-b-0038-preprod-operator.sh` boundary for the owner-authorized exact-main fresh backup, isolated restore, real-PostgreSQL `up -> down -> up` acceptance, live apply and exact readback. Migration `0038` is applied and verified on the approved ENGINEERING_PREPROD target; the operator did not deploy/start/stop services, create/release a fence, move the behavior pointer or send traffic.
-- [x] Merge the replacement `TrackBCommerceAuthorityMutationPorts` PREPROD adapter, self-hashed operation packet and pending `0039_track_b_v2_lkg_cutover_fence` source artifact in PR #311. PR #310 is closed/superseded and excluded from the canonical path. Migration 0039 remains unapplied until its separately reviewed operator completes fresh backup/rehearsal; its hashes are up `f9bb37c95ba77b6947958442cc223f5f4583d43cba4591de5abfaed002e068ca`, down `191e1846a549d99d4c6d4a804fc0148b0458f0fda6944a04e20d48286f7e7301`. It permits only the page-scoped same-version/same-content `COMMERCE/V2_ACTIVE` V2 service cutover under a new pointer revision and removes V1 rollback admission from the current Track B guard without rewriting applied 0037 history. The new record binds candidate V2 and LKG V2 source/tree, image/tag/build/config, pointer/version/bundle, mounted startup hash, a full-precision database-watermarked runtime resolution received by the database within the bounded read-only 120-probe window, Gate E evidence and database-derived migrations-through-0039 compatibility. Schema-drift recovery observes the exact durable fence read-only before reporting retained/released/unknown state and performs no mutation when that state is unknown. Runtime/recovery routing binds service identity plus the pointer-selected startup artifact; re-entry accepts only one exact service-plus-mount match and treats service-only, missing or duplicate matches as ambiguous. Only `ACTIVATE_V2_CANDIDATE` and `ROLLBACK_TO_LKG_V2` are admitted; missing/stale/ambiguous/incompatible LKG fails closed, and no V1 or third-authority fallback exists.
+- [x] Merge the replacement `TrackBCommerceAuthorityMutationPorts` PREPROD adapter, self-hashed operation packet and `0039_track_b_v2_lkg_cutover_fence` source artifact in PR #311. PR #310 is closed/superseded and excluded from the canonical path. Migration 0039 later passed rehearsal/apply/readback with up hash `f9bb37c95ba77b6947958442cc223f5f4583d43cba4591de5abfaed002e068ca` and down hash `191e1846a549d99d4c6d4a804fc0148b0458f0fda6944a04e20d48286f7e7301`. The merged path binds exact candidate/LKG service and authority identities, retains fence/admission/symmetric recovery, admits only `ACTIVATE_V2_CANDIDATE` and `ROLLBACK_TO_LKG_V2`, and never falls back to V1 or a third authority. For the unchanged current-V2 closure, the later `SOLO_PREPROD_MINIMAL` owner correction makes exact pointer/service/image/config/startup plus migration/ACL/fence state sufficient; PR #321's alternative audit-freshness procedure was closed unmerged.
 - [x] Migration 0039 passed its fresh backup, isolated `up -> down -> up` rehearsal, live apply and exact schema/ledger readback on the approved ENGINEERING_PREPROD target. This is database readiness, not Track B operational acceptance.
-- [ ] Close the operator-credential boundary with pending migration 0040 and its reviewed operator: a dedicated least-privilege role, page/channel-restrictive RLS, a root-only secret never mounted into realtime, fresh backup/rehearsal/apply/readback, and unchanged runtime-reader grants. The B3.2 CLI must consume only this dedicated credential. Source merge alone is not migration apply or operational acceptance.
-- [ ] Deploy only the exact merged commit/build for affected services.
-- [ ] Fresh-read the currently accepted V2 and bind its exact compatible release/service/pointer/startup/Gate-E/schema identity as the initial Track B LKG V2 before any later operational mutation.
-- [ ] Run pre-activation readiness, then post-activation readback, smoke and controlled test-page checks.
-- [ ] Identify one accepted COMMERCE PREPROD baseline for Track C.
+- [x] Close the operator-credential boundary with migration 0040 and its reviewed operator: the exact ledger/checksum, dedicated least-privilege role, page/channel RLS, root-owned mode-`0400` secret and realtime separation passed readback. No credential value is recorded.
+- [x] Confirm no deploy is required for the closure-only PR #320 boundary; the affected reader/operator source is exact at main while the already accepted runtime-owning v22 image remains unchanged.
+- [x] Fresh-read and bind the current exact compatible V2 service/pointer/startup/Gate-E/schema identity as initial Track B LKG V2 in `evidence/TRACK_B_INITIAL_LKG_V2_20260905.json` under `SOLO_PREPROD_MINIMAL`.
+- [x] Complete minimal PRE-activation and POST-activation readback: exact migrations/operator ACL, pointer/startup, zero fence/in-flight work, healthy/restart-0 service and process smoke PASS. No duplicate Messenger send was required without a runtime mutation.
+- [x] Record the accepted COMMERCE PREPROD baseline for Track C in `TRACK_B_PREPROD_ACCEPTANCE_20260905.md`.
 
 ## Track B completion
 
-- [ ] Normal COMMERCE strategy, objection/CTA choice and wording are model-owned.
-- [ ] Deterministic authority is limited to facts/provenance, protected claims, security/PII, policy, reconciliation/effects, CAS/idempotency and bounded fail-closed recovery.
-- [ ] `BaselineModelCapability`, baseline prompt and exact observed request envelope remained byte-unchanged.
-- [ ] The Context V2 candidate remained offline/evaluation-only; Track B contains no promotion path.
-- [ ] DF13 remains the single COMMERCE composition/authority seam.
-- [ ] Invalid output is bounded to one repair and cannot execute protected effects.
-- [ ] BF-04 is closed with evidence or remains explicitly fenced without increased exposure or misrepresentation.
-- [ ] Obsolete post-generation authority is unreachable from active COMMERCE.
-- [ ] Live-path differential and replay evidence reviewed.
-- [ ] No Gate-E result represented as live-runtime acceptance.
-- [ ] Any deployed candidate passed the pre-deploy re-evaluation boundary.
-- [ ] No UR/State V2/admin/multi-page/production-hardening scope creep.
-- [ ] V2-to-exact-LKG-V2 rollback remains viable; V1/LEGACY is never selected by Track B.
-- [ ] Owner records Track B completion; the administration task separately validates the handoff and owns any Track C task creation.
+- [x] Normal COMMERCE strategy, objection/CTA choice and wording are model-owned.
+- [x] Deterministic authority is limited to facts/provenance, protected claims, security/PII, policy, reconciliation/effects, CAS/idempotency and bounded fail-closed recovery.
+- [x] `BaselineModelCapability`, baseline prompt and exact observed request envelope remained byte-unchanged.
+- [x] The Context V2 candidate remained offline/evaluation-only; Track B contains no promotion path.
+- [x] DF13 remains the single COMMERCE composition/authority seam.
+- [x] Invalid output is bounded to one repair and cannot execute protected effects.
+- [x] BF-04 source/runtime closure is evidenced by B2.3d plus accepted Gate E v22 without claiming public-production acceptance.
+- [x] Obsolete post-generation authority is unreachable from active COMMERCE.
+- [x] Live-path differential and replay evidence reviewed.
+- [x] No Gate-E result is represented as live-runtime acceptance; fresh runtime identity/readback and smoke are recorded separately.
+- [x] The deployed v22 candidate passed its accepted pre-deploy Gate E boundary; unchanged candidate paths did not trigger a redundant rerun.
+- [x] No UR/State V2/admin/multi-page/production-hardening scope creep.
+- [x] V2-to-exact-LKG-V2 recovery remains implemented and tested; the first meaningful distinct-V2 exercise is deferred to Track C/C4, and V1/LEGACY is never selected by Track B.
+- [x] Owner records `TRACK_B_COMPLETE`; the administration task separately validates the handoff and owns any Track C task creation.

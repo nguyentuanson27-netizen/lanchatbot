@@ -1,26 +1,26 @@
 {
   "schemaVersion": 2,
-  "status": "GATE_F_PREPROD_ACCEPTED_DF_C_COMPLETE",
-  "evidenceAsOf": "2026-08-29",
-  "ownerDecisionAt": "2026-08-28",
+  "status": "TRACK_B_COMPLETE",
+  "evidenceAsOf": "2026-09-05",
+  "ownerDecisionAt": "2026-09-05",
   "operatingMode": "ENGINEERING_PREPROD",
   "livePageRole": "PREPROD_TEST_PAGE",
   "git": {
-    "reconciledMainCommit": "abea1fb0c524e9de405c80fda59691a371b85ab8",
-    "latestRuntimeEvidencePullRequest": 193,
-    "realtimeReleaseTag": "20260828-df13-preprod-commerce-abea1fb",
-    "realtimeReleaseCommit": "abea1fb0c524e9de405c80fda59691a371b85ab8",
+    "reconciledMainCommit": "e31a80da29ca1b37a246dcbc5b8e113a6b8d5d80",
+    "latestRuntimeEvidencePullRequest": 322,
+    "realtimeReleaseTag": "track-b-v22-b0aeb8907",
+    "realtimeReleaseCommit": "b0aeb8907dae4ae2d9051b409ba25fa3f17fd188",
     "deliveryReleaseTag": "20260812-bf10-delivery-r5.6",
     "deliveryReleaseCommit": "a5d5066660a2c4365657a6ff99276c259848931d"
   },
   "runtime": {
-    "runtimeStateSha256": "189b99aa17838b54a48f689e909e1b2c8377205004acfd79846ee88a435d5e72",
-    "currentRelease": "20260828-df13-preprod-commerce-abea1fb",
-    "migration": "0035_df13_commerce_behavior_mode",
+    "runtimeIdentitySource": "docs/current/architecture-program/evidence/TRACK_B_INITIAL_LKG_V2_20260905.json",
+    "currentRelease": "track-b-v22-b0aeb8907",
+    "migration": "0040_track_b_operator_role_boundary",
     "confirmationMode": "V2_ACTIVE",
     "salesAuthorityMode": "COMMERCE",
     "stateReadMode": "LEGACY",
-    "behaviorPointerRevision": 6,
+    "behaviorPointerRevision": 11,
     "behaviorSource": "DATABASE",
     "pageAllowlist": [
       "1198992073286645"
@@ -34,9 +34,9 @@
     },
     "services": {
       "realtimeWorker": {
-        "release": "20260828-df13-preprod-commerce-abea1fb",
-        "imageId": "sha256:ea0b076cfded1b8e10d817c43ba984066c97b2b18bcdff878fa91ed809c42c16",
-        "revision": "abea1fb0c524e9de405c80fda59691a371b85ab8"
+        "release": "track-b-v22-b0aeb8907",
+        "imageId": "sha256:1c141af18db98d127dfb30c5c70625bc6f27a85d6c5911473339a5cf47277536",
+        "revision": "b0aeb8907dae4ae2d9051b409ba25fa3f17fd188"
       },
       "deliveryWorker": {
         "release": "20260812-bf10-delivery-r5.6",
@@ -49,7 +49,7 @@
     "BF-01": "DEPLOYED_AND_ACTIVE_POLICY",
     "BF-02": "DEPLOYED_DIRECT_RUNTIME",
     "BF-03": "OWNER_ACCEPTED_DEFERRED_FOUNDATION_ONLY_NON_ACTIVATABLE",
-    "BF-04": "PARTIAL_KNOWN_GAP_OWNER_WAIVED_FOR_DF_PROGRESSION",
+    "BF-04": "TRACK_B_SOURCE_RUNTIME_CLOSED_GATE_E_V22_ENGINEERING_PREPROD",
     "BF-05": "DEPLOYED_DIRECT_RUNTIME",
     "BF-06": "DEPLOYED_AND_ACTIVE_POLICY",
     "BF-07": "DEPLOYED_AND_ACTIVE_POLICY",
@@ -64,7 +64,7 @@
     "blockers": [],
     "acceptedResiduals": [
       "BF-03 semantic correction behavior is deferred to canonical DF work; foundation remains non-activatable",
-      "BF-04 P0 unverified size-claim bypasses remain open and must not be represented as fixed",
+      "At Gate BF on 2026-08-13, BF-04 P0 unverified size-claim bypasses were open; that historical disposition is preserved, and the migrated Track B ENGINEERING_PREPROD path was subsequently closed by B2.3d plus accepted Gate E v22 evidence",
       "BF-10 has no post-cutover natural SENT_ACCEPTED transition; historical stale terminal fields remain immutable"
     ],
     "postFixV1Baseline": "POST_BF_V1"
@@ -125,16 +125,53 @@
     "runtimeStateSha256": "189b99aa17838b54a48f689e909e1b2c8377205004acfd79846ee88a435d5e72",
     "governanceRecord": "docs/current/architecture-program/DF13_GATE_F_PREPROD_ACCEPTANCE_20260828.md"
   },
+  "trackB": {
+    "status": "TRACK_B_COMPLETE",
+    "decisionRecordedAt": "2026-09-05",
+    "sourceThreadId": "019ff0ed-3760-7e81-98f4-5e91e8ca35b0",
+    "scope": "ENGINEERING_PREPROD_PAGE_1198992073286645_MESSENGER_ONLY",
+    "operatingProfile": "SOLO_PREPROD_MINIMAL",
+    "sourceCommit": "e31a80da29ca1b37a246dcbc5b8e113a6b8d5d80",
+    "sourceTree": "077fee6d6ceba524449f8977de895af7fe8acec0",
+    "candidateSourcePaths": "66_OF_66_UNCHANGED_FROM_GATE_E_V22",
+    "gateE": {
+      "version": "v22",
+      "candidateContentFingerprint": "58a4cbb9fb417764c0922c2b2f2012766793b5b4145921c17b1863bca3011331",
+      "candidateSourceRevision": "edb7971bd637ca02abde46d0ec4121e256e2023f",
+      "evidenceBodyHash": "639c0eec9f929c1458148fdc3ef60c49ee88ea22205ec240def85e9a377eced1",
+      "finalizationHash": "9af67aec9b2ed8569a010c1a93efcc2a5ed491c83f675e9eb8c7db1cc8517064",
+      "admissibility": "FINALIZED_TRUSTED_EXACT_HEAD",
+      "reusedWithoutRerun": true
+    },
+    "initialLastKnownGoodV2": "docs/current/architecture-program/evidence/TRACK_B_INITIAL_LKG_V2_20260905.json",
+    "authority": {
+      "pointerRevision": 11,
+      "modeVersionId": "ccd021a6-24e3-4a46-87a0-6d63f506cb86",
+      "authorityBundleHash": "56b94f7a2e07e80fe8b2983a75b46caa78c2d48f3bd4081d4a88d8f40d2325b8",
+      "contentHash": "sha256:95ead755ea456c1e01c215d2421c2cf23f64fb536168ed49d5729bc4ec91f394",
+      "source": "DATABASE"
+    },
+    "migrations": "0036_THROUGH_0040_APPLIED_EXACT_READBACK",
+    "operatorBoundary": "LEAST_PRIVILEGE_ROLE_RLS_ROOT_ONLY_UNMOUNTED_SECRET_VERIFIED",
+    "terminalRuntime": "HEALTHY_RESTART_0_ZERO_LIVE_FENCE_ZERO_IN_FLIGHT",
+    "rollback": "CURRENT_ACCEPTED_V2_BOUND_AS_INITIAL_LKG;_DISTINCT_V2_EXERCISE_DEFERRED_TO_TRACK_C_C4;_NO_V1_FALLBACK",
+    "governanceRecord": "docs/current/architecture-program/TRACK_B_PREPROD_ACCEPTANCE_20260905.md",
+    "acceptedResiduals": [
+      "OWNER_ACCEPTED_SECRET_EXPOSURE_RESIDUAL remains unrotated and is not repeated",
+      "The first live distinct-V2 rollback exercise is deferred to Track C/C4 when two compatible V2 releases exist",
+      "stateReadMode remains LEGACY and Context V2 remains offline/evaluation-only"
+    ]
+  },
   "active": {
-    "track": "POST_DF_V5_TRACK_B",
-    "nextIssue": "Track B dedicated least-privilege operator boundary via pending 0040, then durable current-V2 LKG binding, canary and governance closure",
-    "gate": "GATE_F_PREPROD_ACCEPTED",
-    "authorization": "TRACK_B_B3_2_ENGINEERING_PREPROD_OPERATIONAL_COMPLETION",
+    "track": "TRACK_B_COMPLETE_AWAITING_TRACK_C_OWNER_START",
+    "nextIssue": "Administration validates Track B handoff; Track C requires a separate owner start command and a new task",
+    "gate": "TRACK_B_COMPLETE",
+    "authorization": "TRACK_C_NOT_AUTHORIZED",
     "authorizationDecision": {
       "source": "CODEX_OWNER_MESSAGE",
       "sourceThreadId": "019ff0ed-3760-7e81-98f4-5e91e8ca35b0",
-      "decisionAt": "2026-09-04",
-      "scope": "ENGINEERING_PREPROD_PAGE_1198992073286645_ONLY;_CREATE_DEDICATED_LEAST_PRIVILEGE_TRACK_B_OPERATOR_ROLE_AND_UNMOUNTED_SECRET;_BIND_CURRENT_ACCEPTED_V2_AS_INITIAL_LKG;_COMPLETE_REQUIRED_ROLLBACK_EVIDENCE;_BOUNDED_CANARY_AND_OWNER_CONTROLLED_MESSENGER_E2E;_GOVERNANCE_ACCEPTANCE_ONLY_AFTER_ALL_GATES;_NO_TRACK_C_START"
+      "decisionAt": "2026-09-05",
+      "scope": "TRACK_B_COMPLETE;_TRACK_C_HANDOFF_DATA_ONLY;_NO_TRACK_C_TASK_OR_EXECUTION_FROM_THIS_TASK"
     }
   },
   "future": [
@@ -142,7 +179,7 @@
     "Post-Gate-F V5: Track B model authority and Track C bounded quality learning are the default path. UR/State V2, Gate U, multi-page expansion, production hardening, traffic canaries, long soak, and destructive LEGACY cleanup are trigger-only unless separately authorized.",
     "DF-11: merged source-only (PR #238); default-off, side-effect-free authority comparison; no runtime SHADOW authority",
     "DF-12: merged source-only (PR #239); missing-commerce signal; no runtime activation",
-    "DF-13: GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE; its historical LEGACY rollback evidence remains immutable. Migrations 0036 through 0039 are applied and verified in ENGINEERING_PREPROD. Pending 0040 is the separately reviewed least-privilege operator-role prerequisite and does not change model authority. Track B rollback never selects V1; current V2 must receive fresh mounted-startup, DATABASE-runtime and schema-compatibility readback before durable initial-LKG binding.",
+    "DF-13: GATE_F_PREPROD_ACCEPTED / DF_C_COMPLETE; its historical LEGACY rollback evidence remains immutable. Migrations 0036 through 0040 are applied and verified in ENGINEERING_PREPROD. Track B is complete on the exact bound initial LKG V2 under SOLO_PREPROD_MINIMAL; rollback never selects V1, and no arbitrary newer runtime audit is required when pointer/service/image/config/startup identity is exact without ambiguity.",
     "Track C routing handoff only: C0/C1.1/C2/C3 Terra High; C1 MUST_PASS and C4 Sol High; hard bug or semantic drift Sol High; one fixed independent Sol High reviewer per source PR. Track C is not authorized and will be created by the administration task only after genuine TRACK_B_COMPLETE.",
     "UR-00 and later: trigger-only and blocked until a separate explicit owner approval"
   ],
@@ -155,6 +192,7 @@
     "NO_PREPROD_OR_PRODUCTION_MUTATION_WITHOUT_EXPLICIT_APPROVAL",
     "NO_FURTHER_DF_C_AUTHORITY_MUTATION_OR_ROLLBACK_WITHOUT_SEPARATE_OWNER_AUTHORIZATION",
     "NO_DF_C_RUNTIME_SHADOW_AUTHORITY",
+    "NO_TRACK_C_WORK_WITHOUT_SEPARATE_OWNER_START",
     "NO_UR_WORK_BEFORE_DF13_STABILITY_AND_UR00_APPROVAL"
   ]
 }
