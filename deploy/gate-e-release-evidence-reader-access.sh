@@ -3,14 +3,21 @@ set -euo pipefail
 set +x
 
 readonly SOURCE_ROOT="${SOURCE_ROOT:-/opt/lana-chatbot/repository}"
-readonly POSTGRES_CONTAINER="${POSTGRES_CONTAINER:-lana-chatbot-postgres}"
-readonly DATABASE_NAME="${DATABASE_NAME:-lana_chatbot}"
+readonly POSTGRES_CONTAINER='lana-chatbot-postgres'
+readonly DATABASE_NAME='lana_chatbot'
 readonly LOGIN_ROLE='lana_admin_readonly'
 readonly READER_ROLE='lana_gate_e_evidence_reader'
 readonly WRITER_ROLE='lana_gate_e_evidence_writer'
 readonly REGISTRATION_WRITER_ROLE='lana_gate_e_registration_writer'
 readonly GATE_E_MIGRATION='0034_gate_e_evidence_store_v2'
 readonly GATE_E_MIGRATION_FILE="$SOURCE_ROOT/packages/database/migrations/$GATE_E_MIGRATION.up.sql"
+readonly EXPECTED_HOST_MACHINE_ID_SHA256='862432ed3b8433b43cee858d3ef8ed54949d2a829b1f77f9b89150d7cd343fde'
+readonly EXPECTED_POSTGRES_IMAGE_ID='sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193'
+readonly EXPECTED_POSTGRES_VOLUME='lana-chatbot-postgres-data|volume|true'
+readonly EXPECTED_POSTGRES_MAJOR='17'
+readonly EXPECTED_SYSTEM_IDENTIFIER='7662301595202035746'
+readonly EXPECTED_PAGE_ID='1198992073286645'
+readonly EXPECTED_PAGE_COUNT='1'
 
 die() {
   printf '%s\n' "$*" >&2
@@ -41,22 +48,56 @@ require_source_identity() {
   test -s "$GATE_E_MIGRATION_FILE" || die 'Gate E migration source missing'
 }
 
-require_database_identity() {
+expected_target_record() {
+  printf '%s\n' \
+    "HOST_MACHINE_ID_SHA256=$EXPECTED_HOST_MACHINE_ID_SHA256" \
+    "POSTGRES_CONTAINER=$POSTGRES_CONTAINER" \
+    "POSTGRES_IMAGE_ID=$EXPECTED_POSTGRES_IMAGE_ID" \
+    "POSTGRES_VOLUME=$EXPECTED_POSTGRES_VOLUME" \
+    "DATABASE_ENGINE=$DATABASE_NAME|$EXPECTED_POSTGRES_MAJOR" \
+    "SYSTEM_IDENTIFIER=$EXPECTED_SYSTEM_IDENTIFIER" \
+    "PAGE_COUNT=$EXPECTED_PAGE_COUNT" \
+    "PREPROD_PAGE=1"
+}
+
+observed_target_record() {
+  printf '%s\n' \
+    "HOST_MACHINE_ID_SHA256=$(sha256sum /etc/machine-id | awk '{print $1}')" \
+    "POSTGRES_CONTAINER=$POSTGRES_CONTAINER" \
+    "POSTGRES_IMAGE_ID=$(docker inspect --format '{{.Image}}' "$POSTGRES_CONTAINER")" \
+    "POSTGRES_VOLUME=$(docker inspect --format '{{range .Mounts}}{{if eq .Destination "/var/lib/postgresql/data"}}{{.Name}}|{{.Type}}|{{.RW}}{{end}}{{end}}' "$POSTGRES_CONTAINER")" \
+    "DATABASE_ENGINE=$(db_query "SELECT current_database()||'|'||split_part(current_setting('server_version'),'.',1)")" \
+    "SYSTEM_IDENTIFIER=$(db_query "SELECT system_identifier FROM pg_control_system()")" \
+    "PAGE_COUNT=$(db_query "SELECT count(*) FROM pages")" \
+    "PREPROD_PAGE=$(db_query "SELECT count(*) FROM pages WHERE page_id='$EXPECTED_PAGE_ID' AND status='ACTIVE' AND routing_owner='APP' AND app_send_enabled AND NOT kill_switch")"
+}
+
+require_preprod_target_identity() {
   local health expected_checksum
   health="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$POSTGRES_CONTAINER")" ||
     die 'Gate E PostgreSQL identity readback failed'
   test "$health" = healthy || die 'Gate E PostgreSQL is not healthy'
+  test "$(observed_target_record)" = "$(expected_target_record)" ||
+    die 'exact ENGINEERING_PREPROD Gate E target mismatch'
 
   expected_checksum="$(sha256sum "$GATE_E_MIGRATION_FILE" | awk '{print $1}')"
   test "$(db_query "SELECT count(*) FROM schema_migrations WHERE migration_name='$GATE_E_MIGRATION' AND checksum_sha256='$expected_checksum'")" = 1 ||
     die 'exact Gate E migration 0034 is not applied'
 }
 
+reader_direct_edge_state() {
+  db_query "SELECT count(*)::text||'|'||coalesce(max(m.admin_option::int)::text,'')||'|'||coalesce(max(m.inherit_option::int)::text,'')||'|'||coalesce(max(m.set_option::int)::text,'') FROM pg_auth_members m JOIN pg_roles granted_role ON granted_role.oid=m.roleid JOIN pg_roles member_role ON member_role.oid=m.member WHERE granted_role.rolname='$READER_ROLE' AND member_role.rolname='$LOGIN_ROLE'"
+}
+
+reader_any_membership() {
+  db_query "SELECT pg_has_role('$LOGIN_ROLE','$READER_ROLE','MEMBER')::int"
+}
+
 require_role_contract() {
   local exact_nologin exact_login function_acl relation_acl dangerous_memberships
 
   exact_nologin="NOT rolsuper AND NOT rolinherit AND NOT rolcreaterole AND NOT rolcreatedb AND NOT rolcanlogin AND NOT rolreplication AND NOT rolbypassrls"
-  exact_login="NOT rolsuper AND NOT rolcreaterole AND NOT rolcreatedb AND rolcanlogin AND NOT rolreplication AND NOT rolbypassrls"
+  exact_login="NOT rolsuper AND rolcreaterole = false AND rolcreatedb = false AND rolcanlogin AND NOT rolreplication AND NOT rolbypassrls"
 
   for role in "$READER_ROLE" "$WRITER_ROLE" "$REGISTRATION_WRITER_ROLE"; do
     test "$(db_query "SELECT count(*) FROM pg_roles WHERE rolname='$role' AND $exact_nologin")" = 1 ||
@@ -84,10 +125,11 @@ require_role_contract() {
 }
 
 verify_reader_access() {
-  local memberships relation_acl current_role
+  local edge relation_acl current_role
 
-  memberships="$(db_query "SELECT pg_has_role('$LOGIN_ROLE','$READER_ROLE','MEMBER')::int||'|'||pg_has_role('$LOGIN_ROLE','$WRITER_ROLE','MEMBER')::int||'|'||pg_has_role('$LOGIN_ROLE','$REGISTRATION_WRITER_ROLE','MEMBER')::int")"
-  test "$memberships" = '1|0|0' || die 'Gate E reader membership readback mismatch'
+  edge="$(reader_direct_edge_state)"
+  test "$edge" = '1|0|0|1' || die 'Gate E reader direct membership edge mismatch'
+  test "$(reader_any_membership)" = 1 || die 'Gate E reader membership is not effective'
 
   relation_acl="$(db_query "SELECT has_table_privilege('$LOGIN_ROLE','public.gate_e_registered_population_anchors_v1','SELECT')::int||'|'||has_table_privilege('$LOGIN_ROLE','public.gate_e_evidence_records_v2','SELECT')::int||'|'||has_table_privilege('$LOGIN_ROLE','public.gate_e_evidence_admissions_v2','SELECT')::int")"
   test "$relation_acl" = '0|0|0' || die 'PREPROD readonly login gained raw Gate E table SELECT'
@@ -100,10 +142,49 @@ verify_reader_access() {
 }
 
 verify_reader_absent() {
-  test "$(db_query "SELECT pg_has_role('$LOGIN_ROLE','$READER_ROLE','MEMBER')::int")" = 0 ||
-    die 'Gate E reader membership rollback mismatch'
+  test "$(reader_direct_edge_state)" = '0|||' ||
+    die 'Gate E reader direct membership rollback mismatch'
+  test "$(reader_any_membership)" = 0 ||
+    die 'indirect Gate E reader membership detected after rollback'
   test "$(db_query "SELECT pg_has_role('$LOGIN_ROLE','$WRITER_ROLE','MEMBER')::int||'|'||pg_has_role('$LOGIN_ROLE','$REGISTRATION_WRITER_ROLE','MEMBER')::int")" = '0|0' ||
     die 'forbidden Gate E writer membership detected after rollback'
+}
+
+apply_reader_access() {
+  local edge granted_reader=0
+  edge="$(reader_direct_edge_state)"
+  case "$edge" in
+    '1|0|0|1') ;;
+    '0|||')
+      test "$(reader_any_membership)" = 0 ||
+        die 'indirect Gate E reader membership blocks direct grant'
+      db_query "GRANT $READER_ROLE TO $LOGIN_ROLE WITH ADMIN FALSE, INHERIT FALSE, SET TRUE" >/dev/null
+      granted_reader=1
+      ;;
+    *) die 'Gate E reader direct membership edge options mismatch' ;;
+  esac
+
+  if ! (require_role_contract && verify_reader_access); then
+    if test "$granted_reader" = 1; then
+      db_query "REVOKE $READER_ROLE FROM $LOGIN_ROLE" >/dev/null || true
+    fi
+    die 'Gate E reader access apply verification failed'
+  fi
+}
+
+revoke_reader_access() {
+  local edge
+  edge="$(reader_direct_edge_state)"
+  case "$edge" in
+    '1|0|0|1') db_query "REVOKE $READER_ROLE FROM $LOGIN_ROLE" >/dev/null ;;
+    '0|||')
+      test "$(reader_any_membership)" = 0 ||
+        die 'indirect Gate E reader membership blocks revoke verification'
+      ;;
+    *) die 'Gate E reader direct membership edge options mismatch before revoke' ;;
+  esac
+  require_role_contract
+  verify_reader_absent
 }
 
 main() {
@@ -117,7 +198,7 @@ main() {
     require_command "$tool"
   done
   require_source_identity
-  require_database_identity
+  require_preprod_target_identity
   require_role_contract
 
   case "$action" in
@@ -126,26 +207,16 @@ main() {
       printf '%s\n' GATE_E_RELEASE_EVIDENCE_READER_ACCESS_VERIFIED
       ;;
     apply)
-      local granted_reader=0
-      if test "$(db_query "SELECT pg_has_role('$LOGIN_ROLE','$READER_ROLE','MEMBER')::int")" = 0; then
-        db_query "GRANT $READER_ROLE TO $LOGIN_ROLE" >/dev/null
-        granted_reader=1
-      fi
-      if ! (require_role_contract && verify_reader_access); then
-        if test "$granted_reader" = 1; then
-          db_query "REVOKE $READER_ROLE FROM $LOGIN_ROLE" >/dev/null || true
-        fi
-        die 'Gate E reader access apply verification failed'
-      fi
+      apply_reader_access
       printf '%s\n' GATE_E_RELEASE_EVIDENCE_READER_ACCESS_APPLIED
       ;;
     revoke)
-      db_query "REVOKE $READER_ROLE FROM $LOGIN_ROLE" >/dev/null
-      require_role_contract
-      verify_reader_absent
+      revoke_reader_access
       printf '%s\n' GATE_E_RELEASE_EVIDENCE_READER_ACCESS_REVOKED
       ;;
   esac
 }
 
-main "$@"
+if test "${BASH_SOURCE[0]}" = "$0"; then
+  main "$@"
+fi

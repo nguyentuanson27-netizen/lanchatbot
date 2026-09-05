@@ -151,13 +151,25 @@ describe("Track B release-candidate evidence CLI", () => {
       "utf8",
     );
 
+    expect(script).toContain("readonly POSTGRES_CONTAINER='lana-chatbot-postgres'");
+    expect(script).toContain("readonly DATABASE_NAME='lana_chatbot'");
     expect(script).toContain("readonly LOGIN_ROLE='lana_admin_readonly'");
     expect(script).toContain("readonly READER_ROLE='lana_gate_e_evidence_reader'");
     expect(script).toContain("readonly WRITER_ROLE='lana_gate_e_evidence_writer'");
-    expect(script).toContain('db_query "GRANT $READER_ROLE TO $LOGIN_ROLE"');
+    expect(script).toContain("readonly EXPECTED_SYSTEM_IDENTIFIER='7662301595202035746'");
+    expect(script).toContain("readonly EXPECTED_PAGE_ID='1198992073286645'");
+    expect(script).toContain("FROM pg_auth_members");
+    expect(script).toContain("m.admin_option");
+    expect(script).toContain("m.inherit_option");
+    expect(script).toContain("m.set_option");
+    expect(script).toContain("test \"$edge\" = '1|0|0|1'");
+    expect(script).toContain(
+      'db_query "GRANT $READER_ROLE TO $LOGIN_ROLE WITH ADMIN FALSE, INHERIT FALSE, SET TRUE"',
+    );
     expect(script).toContain('db_query "REVOKE $READER_ROLE FROM $LOGIN_ROLE"');
     expect(script).not.toContain('db_query "GRANT $WRITER_ROLE TO $LOGIN_ROLE"');
     expect(script).not.toContain('db_query "GRANT $REGISTRATION_WRITER_ROLE TO $LOGIN_ROLE"');
+    expect(script).toContain("exact ENGINEERING_PREPROD Gate E target mismatch");
     expect(script).toContain("PREPROD readonly login has forbidden Gate E writer membership");
     expect(script).toContain("PREPROD readonly login already has Gate E append privilege");
   });
