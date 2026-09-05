@@ -222,8 +222,9 @@ describe("Track B PREPROD Docker service boundary", () => {
     const startupPackageFile = "/opt/lana-chatbot/releases/track-b/commerce-startup.json";
     const startup = { schemaVersion: 1, release: "track-b-v2" };
     const startupPackageHash = createHash("sha256").update(canonicalJsonV1(startup), "utf8").digest("hex");
-    const inspectFor = (mounts: unknown) => JSON.stringify({ Image: `sha256:${targetService.imageId}`,
-      RestartCount: 0, State: { Status: "running", Health: { Status: "healthy" } },
+    const inspectFor = (mounts: unknown, startedAt = "2026-09-03T02:26:18.040539359Z") =>
+      JSON.stringify({ Image: `sha256:${targetService.imageId}`,
+      RestartCount: 0, State: { Status: "running", StartedAt: startedAt, Health: { Status: "healthy" } },
       Config: { Env: ["DF13_COMMERCE_PREPROD_STARTUP_FILE=/run/df13/commerce-startup.json"], Labels: {
         "org.opencontainers.image.revision": targetService.releaseRevision,
         "com.lana.build-id": targetService.buildId,
@@ -247,6 +248,24 @@ describe("Track B PREPROD Docker service boundary", () => {
     const exact = [{ Type: "bind", Source: startupPackageFile,
       Destination: "/run/df13/commerce-startup.json", RW: false }];
     await expect(controllerFor(exact).inspectRunning(targetService)).resolves.toEqual(targetService);
+    await expect(controllerFor(exact).readRunningStartedAt(targetService))
+      .resolves.toBe("2026-09-03T02:26:18.040539Z");
+    const invalidStartedAt = new DockerComposeTrackBPreprodServiceController({
+      composeFile: "/opt/lana-chatbot/current/deploy/docker-compose.vps.yml",
+      projectDirectory: "/opt/lana-chatbot/current/deploy", startupPackageFile,
+      startupPackageHash, imageReference: "lana-chatbot-app:track-b-target",
+      expectedImageId: targetService.imageId,
+      run: vi.fn(async (_command: string, args: readonly string[]) => {
+        if (args[0] === "exec") return TRACK_B_RUNTIME_CONFIG_KEYS_V1
+          .map((key) => targetRuntimeConfig[key]).join("\n");
+        if (args[0] === "image") return JSON.stringify({ Id: `sha256:${targetService.imageId}`,
+          Config: { Labels: { "org.opencontainers.image.revision": targetService.releaseRevision,
+            "com.lana.build-id": targetService.buildId,
+            "com.lana.runtime-config-hash": targetService.runtimeConfigHash } } });
+        return inspectFor(exact, "not-a-timestamp");
+      }), readStartupPackage: vi.fn(async () => startup),
+    });
+    await expect(invalidStartedAt.readRunningStartedAt(targetService)).resolves.toBeNull();
     for (const mounts of [
       [],
       [...exact, exact[0]],

@@ -175,44 +175,55 @@ describe("Track B PREPROD V2/LKG operator boundary", () => {
       .toThrow("TRACK_B_B3_2_DATABASE_ENDPOINT_UNPROVEN");
   });
 
-  it("latches one database-native watermark and polls until a fresh exact runtime audit arrives", async () => {
+  it("anchors initial LKG evidence to the exact running process start and polls for its runtime audit", async () => {
     const current = pointer("10000000-0000-4000-8000-000000000001", 6);
-    const watermark = "2026-09-03T02:00:00.123456+00";
-    const database = { readDatabaseClock: vi.fn(async () => watermark),
-      proveRuntimeResolution: vi.fn()
+    const processStartedAt = "2026-09-03T02:00:00.123456Z";
+    const database = { proveRuntimeResolution: vi.fn()
         .mockResolvedValueOnce("MISSING" as const)
         .mockResolvedValueOnce("MISSING" as const)
         .mockResolvedValueOnce("EXACT" as const) };
     const wait = vi.fn(async () => undefined);
     await expect(proveFreshTrackBInitialLkgRuntime({ database, pointer: current,
+      notBefore: processStartedAt,
       freshness: { maximumAttempts: 3, pollMs: 1, wait } })).resolves.toBe("EXACT");
-    expect(database.readDatabaseClock).toHaveBeenCalledOnce();
     expect(database.proveRuntimeResolution).toHaveBeenCalledTimes(3);
-    expect(database.proveRuntimeResolution).toHaveBeenNthCalledWith(1, { pointer: current, notBefore: watermark });
-    expect(database.proveRuntimeResolution).toHaveBeenNthCalledWith(2, { pointer: current, notBefore: watermark });
-    expect(database.proveRuntimeResolution).toHaveBeenNthCalledWith(3, { pointer: current, notBefore: watermark });
+    expect(database.proveRuntimeResolution).toHaveBeenNthCalledWith(1,
+      { pointer: current, notBefore: processStartedAt });
+    expect(database.proveRuntimeResolution).toHaveBeenNthCalledWith(2,
+      { pointer: current, notBefore: processStartedAt });
+    expect(database.proveRuntimeResolution).toHaveBeenNthCalledWith(3,
+      { pointer: current, notBefore: processStartedAt });
     expect(wait).toHaveBeenCalledTimes(2);
   });
 
   it("fails closed on a bounded all-missing observation and stops immediately on ambiguity", async () => {
     const current = pointer("10000000-0000-4000-8000-000000000001", 6);
-    const timeoutDatabase = { readDatabaseClock: vi.fn(async () => "2026-09-03T02:00:00.123456+00"),
+    const timeoutDatabase = {
       proveRuntimeResolution: vi.fn(async (): Promise<"EXACT" | "MISSING" | "AMBIGUOUS"> => "MISSING") };
     const timeoutWait = vi.fn(async () => undefined);
     await expect(proveFreshTrackBInitialLkgRuntime({ database: timeoutDatabase, pointer: current,
+      notBefore: "2026-09-03T02:00:00.123456Z",
       freshness: { maximumAttempts: 2, pollMs: 1, wait: timeoutWait } })).resolves.toBe("MISSING");
-    expect(timeoutDatabase.readDatabaseClock).toHaveBeenCalledOnce();
     expect(timeoutDatabase.proveRuntimeResolution).toHaveBeenCalledTimes(2);
     expect(timeoutWait).toHaveBeenCalledOnce();
 
-    const ambiguousDatabase = { readDatabaseClock: vi.fn(async () => "2026-09-03T02:00:00.123456+00"),
+    const ambiguousDatabase = {
       proveRuntimeResolution: vi.fn(async (): Promise<"EXACT" | "MISSING" | "AMBIGUOUS"> => "AMBIGUOUS") };
     const ambiguousWait = vi.fn(async () => undefined);
     await expect(proveFreshTrackBInitialLkgRuntime({ database: ambiguousDatabase, pointer: current,
+      notBefore: "2026-09-03T02:00:00.123456Z",
       freshness: { maximumAttempts: 3, pollMs: 1, wait: ambiguousWait } })).resolves.toBe("AMBIGUOUS");
-    expect(ambiguousDatabase.readDatabaseClock).toHaveBeenCalledOnce();
     expect(ambiguousDatabase.proveRuntimeResolution).toHaveBeenCalledOnce();
     expect(ambiguousWait).not.toHaveBeenCalled();
+  });
+
+  it("rejects a missing or non-PostgreSQL-compatible process-start watermark", async () => {
+    const current = pointer("10000000-0000-4000-8000-000000000001", 6);
+    const database = { proveRuntimeResolution: vi.fn() };
+    await expect(proveFreshTrackBInitialLkgRuntime({ database, pointer: current,
+      notBefore: "2026-09-03T02:00:00.123456789Z" }))
+      .rejects.toThrow("TRACK_B_B3_2_CURRENT_LKG_PROCESS_START_INVALID");
+    expect(database.proveRuntimeResolution).not.toHaveBeenCalled();
   });
 
   it("persists immutable startup artifacts read-only", async () => {

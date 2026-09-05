@@ -213,7 +213,7 @@ criteria, and it does not authorize merge, deployment or authority mutation.
 - [x] Migration 0039 passed its fresh backup, isolated `up -> down -> up` rehearsal, live apply and exact schema/ledger readback on the approved ENGINEERING_PREPROD target. This is database readiness, not Track B operational acceptance.
 - [ ] Close the operator-credential boundary with pending migration 0040 and its reviewed operator: a dedicated least-privilege role, page/channel-restrictive RLS, a root-only secret never mounted into realtime, fresh backup/rehearsal/apply/readback, and unchanged runtime-reader grants. The B3.2 CLI must consume only this dedicated credential. Source merge alone is not migration apply or operational acceptance.
 - [ ] Deploy only the exact merged commit/build for affected services.
-- [ ] Fresh-read the currently accepted V2 and bind its exact compatible release/service/pointer/startup/Gate-E/schema identity as the initial Track B LKG V2 before any later operational mutation.
+- [ ] Fresh-read the currently accepted V2 and bind its exact compatible release/service/pointer/startup/Gate-E/schema identity as the initial Track B LKG V2 before any later operational mutation. The initial-LKG runtime proof is anchored to the exact healthy container process start plus its exact mounted startup/image/config identity and requires a matching DATABASE resolution audit at or after that timestamp; it must not require unrelated traffic, fabricate an audit or restart the unfenced source merely to satisfy a prepare-time watermark.
 - [ ] Run pre-activation readiness, then post-activation readback, smoke and controlled test-page checks.
 - [ ] Identify one accepted COMMERCE PREPROD baseline for Track C.
 

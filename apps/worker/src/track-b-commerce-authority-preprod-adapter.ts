@@ -286,7 +286,7 @@ type DockerInspect = {
   Id?: unknown;
   Image?: unknown;
   RestartCount?: unknown;
-  State?: { Status?: unknown; Health?: { Status?: unknown } };
+  State?: { Status?: unknown; StartedAt?: unknown; Health?: { Status?: unknown } };
   Config?: { Image?: unknown; Labels?: Record<string, unknown>; Env?: unknown };
   Mounts?: unknown;
 };
@@ -301,6 +301,13 @@ function parseOne(output: string, code: string): DockerInspect {
   try { parsed = JSON.parse(output); } catch { throw new Error(code); }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error(code);
   return parsed as DockerInspect;
+}
+
+function normalizedDockerStartedAt(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const match = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})\.(\d{1,9})Z$/u.exec(value);
+  if (!match || !Number.isFinite(Date.parse(value))) return null;
+  return `${match[1]}.${match[2]!.padEnd(6, "0").slice(0, 6)}Z`;
 }
 
 function identityFromInspect(value: DockerInspect, expected: TrackBServiceReleaseIdentity,
@@ -431,6 +438,7 @@ export class DockerComposeTrackBPreprodServiceController {
     identity: TrackBServiceReleaseIdentity;
     status: string;
     healthy: boolean;
+    startedAt: string | null;
   }> | null> {
     if (!await this.#inspectImage(expected)) return null;
     const value = parseOne(await this.#run("docker", [
@@ -454,7 +462,8 @@ export class DockerComposeTrackBPreprodServiceController {
     return { identity, status: value.State.Status,
       healthy: value.State.Status === "running" &&
         (value.State.Health === undefined || value.State.Health.Status === "healthy") &&
-        value.RestartCount === 0 };
+        value.RestartCount === 0,
+      startedAt: normalizedDockerStartedAt(value.State.StartedAt) };
   }
 
   async #stagedContainerId(): Promise<string> {
@@ -480,6 +489,11 @@ export class DockerComposeTrackBPreprodServiceController {
   async inspectRunning(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null> {
     const observed = await this.#inspectContainer(expected, true);
     return observed?.healthy ? observed.identity : null;
+  }
+
+  async readRunningStartedAt(expected: TrackBServiceReleaseIdentity): Promise<string | null> {
+    const observed = await this.#inspectContainer(expected, true);
+    return observed?.healthy ? observed.startedAt : null;
   }
 
   async inspectImageAvailable(expected: TrackBServiceReleaseIdentity): Promise<TrackBServiceReleaseIdentity | null> {

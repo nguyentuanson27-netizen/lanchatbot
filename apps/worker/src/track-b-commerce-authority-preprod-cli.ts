@@ -47,6 +47,7 @@ const OPERATION_ROOT = "/opt/lana-chatbot/releases/track-b/operations";
 const ROLLBACK_ROOT = "/opt/lana-chatbot/releases/track-b/rollback-records";
 const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 const SHA256 = /^[a-f0-9]{64}$/u;
+const DATABASE_TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3,6}(?:Z|[+-]\d{2}(?::?\d{2})?)$/u;
 const TRACK_B_CURRENT_LKG_RUNTIME_FRESHNESS = Object.freeze({ maximumAttempts: 120, pollMs: 1_000 });
 export type CommerceStartup = Exclude<ReturnType<typeof parseDf13CommercePreprodStartupInput>,
   { mode: "LEGACY" }>;
@@ -466,15 +467,18 @@ async function databaseUrl(): Promise<string> {
 }
 
 export async function proveFreshTrackBInitialLkgRuntime(input: Readonly<{
-  database: Pick<TrackBPreprodDatabaseBoundary, "readDatabaseClock" | "proveRuntimeResolution">;
+  database: Pick<TrackBPreprodDatabaseBoundary, "proveRuntimeResolution">;
   pointer: RuntimeBehaviorModePointer;
+  notBefore: string;
   freshness?: Readonly<{
     maximumAttempts: number;
     pollMs: number;
     wait: (milliseconds: number) => Promise<void>;
   }>;
 }>): Promise<"EXACT" | "MISSING" | "AMBIGUOUS"> {
-  const notBefore = await input.database.readDatabaseClock();
+  if (!DATABASE_TIMESTAMP.test(input.notBefore)) {
+    throw new Error("TRACK_B_B3_2_CURRENT_LKG_PROCESS_START_INVALID");
+  }
   const freshness = input.freshness ?? {
     ...TRACK_B_CURRENT_LKG_RUNTIME_FRESHNESS,
     wait: (milliseconds: number) => new Promise<void>((resolveWait) => setTimeout(resolveWait, milliseconds)),
@@ -484,7 +488,10 @@ export async function proveFreshTrackBInitialLkgRuntime(input: Readonly<{
     throw new Error("TRACK_B_B3_2_CURRENT_LKG_RUNTIME_OBSERVATION_INVALID");
   }
   for (let attempt = 0; attempt < freshness.maximumAttempts; attempt += 1) {
-    const result = await input.database.proveRuntimeResolution({ pointer: input.pointer, notBefore });
+    const result = await input.database.proveRuntimeResolution({
+      pointer: input.pointer,
+      notBefore: input.notBefore,
+    });
     if (result !== "MISSING" || attempt + 1 === freshness.maximumAttempts) return result;
     await freshness.wait(freshness.pollMs);
   }
@@ -549,6 +556,10 @@ async function prepare(inputPath: string): Promise<void> {
       await stagedController.inspectImageAvailable(stagedService) === null) {
     throw new Error("TRACK_B_B3_2_SERVICE_PREFLIGHT_UNPROVEN");
   }
+  const currentProcessStartedAt = await currentController.readRunningStartedAt(currentService);
+  if (currentProcessStartedAt === null) {
+    throw new Error("TRACK_B_B3_2_CURRENT_LKG_PROCESS_START_UNPROVEN");
+  }
   const database = new TrackBPostgresPreprodDatabaseBoundary(await databaseUrl(), input.operationId);
   try {
     const previous = await database.readActivePointer();
@@ -573,7 +584,8 @@ async function prepare(inputPath: string): Promise<void> {
         migrationSchemaHash === null) {
       throw new Error("TRACK_B_B3_2_SCHEMA_COMPATIBILITY_UNPROVEN");
     }
-    if (await proveFreshTrackBInitialLkgRuntime({ database, pointer: previous }) !== "EXACT") {
+    if (await proveFreshTrackBInitialLkgRuntime({ database, pointer: previous,
+      notBefore: currentProcessStartedAt }) !== "EXACT") {
       throw new Error("TRACK_B_B3_2_CURRENT_LKG_RUNTIME_UNPROVEN");
     }
     const suppliedIdentity = (role: "candidate" | "lastKnownGood",
