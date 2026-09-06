@@ -196,7 +196,13 @@ const SALES_RUBRIC_V2_GENERATION_CONFIG = {
 const TRACK_C_SALES_RUBRIC_V2_GENERATION_CONFIG = {
   maxOutputTokens: 1_024,
   responseMimeType: "application/json",
-  responseSchema: SALES_RUBRIC_V2_RESPONSE_SCHEMA,
+  responseSchema: {
+    ...SALES_RUBRIC_V2_RESPONSE_SCHEMA,
+    properties: {
+      ...SALES_RUBRIC_V2_RESPONSE_SCHEMA.properties,
+      schemaVersion: { type: "INTEGER" },
+    },
+  },
   thinkingConfig: {
     thinkingLevel: "HIGH",
   },

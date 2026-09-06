@@ -1003,6 +1003,7 @@ describe("Vertex shadow client", () => {
       generationConfig: {
         responseSchema: {
           properties: {
+            schemaVersion: unknown;
             scores: { properties: Record<string, unknown> };
           };
         };
@@ -1011,6 +1012,9 @@ describe("Vertex shadow client", () => {
     for (const key of ["temperature", "topP", "topK", "top_p", "top_k"]) {
       expect(generationConfig).not.toHaveProperty(key);
     }
+    expect(generationConfig.responseSchema.properties.schemaVersion).toEqual({
+      type: "INTEGER",
+    });
     expect(Object.keys(generationConfig.responseSchema.properties.scores.properties).sort())
       .toEqual([
         "relevance",
