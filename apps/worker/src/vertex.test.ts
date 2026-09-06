@@ -994,7 +994,7 @@ describe("Vertex shadow client", () => {
     expect(judgeRequest.url).toContain("https://aiplatform.googleapis.com/");
     expect(judgeRequest.body).toMatchObject({
       generationConfig: {
-        maxOutputTokens: 1_024,
+        maxOutputTokens: 2_048,
         responseMimeType: "application/json",
         thinkingConfig: { thinkingLevel: "HIGH" },
       },
