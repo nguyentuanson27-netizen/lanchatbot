@@ -1047,6 +1047,75 @@ describe("Vertex shadow client", () => {
     );
   });
 
+  it("preserves redacted Vertex 400 details for Track C judge evidence", async () => {
+    const actualReply = "Dạ mẫu này có giá 699k ạ.";
+    const failures: VertexFailureEvent[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      return new Response(JSON.stringify({
+        error: {
+          code: 400,
+          status: "INVALID_ARGUMENT",
+          message: `Unsupported field thinkingConfig. customer=${context[0]?.text}; auth=Bearer token; key=${privateKey}`,
+          details: [{
+            "@type": "type.googleapis.com/google.rpc.BadRequest",
+            fieldViolations: [{
+              field: "generationConfig.thinkingConfig.thinkingLevel",
+              description: `Unknown field while scoring ${actualReply}`,
+            }],
+            ignoredProviderPayload: actualReply,
+          }],
+        },
+      }), { status: 400 });
+    }) as unknown as typeof fetch;
+
+    const request = modelWith(fetchMock, {
+      judgeLocation: "global",
+      judgeModelName: "gemini-3.8-flash",
+      logFailure: (event) => failures.push(event),
+    }).judgeSalesReplyV2WithMetrics(
+      context,
+      actualReply,
+      baselineFacts,
+      { action: "REPLY" },
+      { blockedReasonCodes: [] },
+    );
+
+    await expect(request).rejects.toMatchObject({
+      code: "VERTEX_JUDGE_V2_FAILED",
+      providerError: {
+        status: 400,
+        error: {
+          code: 400,
+          status: "INVALID_ARGUMENT",
+          message: "Unsupported field thinkingConfig. customer=[REDACTED]; auth=Bearer [REDACTED]; key=[REDACTED]",
+          details: [{
+            fieldViolations: [{
+              field: "generationConfig.thinkingConfig.thinkingLevel",
+              description: "Unknown field while scoring [REDACTED]",
+            }],
+          }],
+        },
+      },
+    });
+    expect(failures).toEqual([
+      expect.objectContaining({
+        endpoint: "JUDGE",
+        status: 400,
+        errorCode: "VERTEX_JUDGE_V2_FAILED",
+        providerError: expect.objectContaining({ status: 400 }),
+      }),
+    ]);
+    const serializedEvidence = JSON.stringify(failures);
+    expect(serializedEvidence).not.toContain(context[0]?.text);
+    expect(serializedEvidence).not.toContain(actualReply);
+    expect(serializedEvidence).not.toContain("Bearer token");
+    expect(serializedEvidence).not.toContain("PRIVATE KEY");
+    expect(serializedEvidence).not.toContain("ignoredProviderPayload");
+  });
+
   it("clarifies only the three approved Track C rubric dimensions with common anchors", () => {
     const descriptor = modelWith(vi.fn() as unknown as typeof fetch, {
       judgeLocation: "global",

@@ -45,6 +45,22 @@ export interface VertexFailureEvent {
   readonly attempt: number;
   readonly retryable: boolean;
   readonly errorCode: string;
+  readonly providerError?: VertexProviderErrorEvidence;
+}
+
+export interface VertexProviderErrorEvidence {
+  readonly status: number;
+  readonly error: {
+    readonly code: number | string | null;
+    readonly status: string | null;
+    readonly message: string | null;
+    readonly details: readonly {
+      readonly fieldViolations: readonly {
+        readonly field: string | null;
+        readonly description: string | null;
+      }[];
+    }[];
+  };
 }
 
 export interface VertexShadowResult {
@@ -311,12 +327,18 @@ export function buildJudgeSalesReplyV2Request(
 export class VertexShadowError extends Error {
   readonly code: string;
   readonly retryable: boolean;
+  readonly providerError: VertexProviderErrorEvidence | undefined;
 
-  constructor(code: string, retryable: boolean) {
+  constructor(
+    code: string,
+    retryable: boolean,
+    providerError?: VertexProviderErrorEvidence,
+  ) {
     super(code);
     this.name = "VertexShadowError";
     this.code = code;
     this.retryable = retryable;
+    this.providerError = providerError;
   }
 }
 
@@ -328,6 +350,79 @@ function recordValue(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value)
     ? value as Record<string, unknown>
     : {};
+}
+
+function redactedProviderString(
+  value: unknown,
+  sensitiveValues: readonly string[],
+  maximumLength: number,
+): string | null {
+  if (typeof value !== "string") return null;
+  let redacted = value;
+  const values = [...new Set(sensitiveValues.filter((entry) => entry.length > 0))]
+    .sort((left, right) => right.length - left.length);
+  for (const sensitiveValue of values) {
+    redacted = redacted.split(sensitiveValue).join("[REDACTED]");
+  }
+  redacted = redacted
+    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]+/giu, "Bearer [REDACTED]")
+    .replace(
+      /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/giu,
+      "[REDACTED]",
+    );
+  return redacted.slice(0, maximumLength);
+}
+
+function redactedJudgeProviderError(
+  status: number,
+  body: unknown,
+  sensitiveValues: readonly string[],
+): VertexProviderErrorEvidence {
+  const providerError = recordValue(recordValue(body).error);
+  const code = typeof providerError.code === "number" &&
+      Number.isFinite(providerError.code)
+    ? providerError.code
+    : redactedProviderString(providerError.code, sensitiveValues, 128);
+  const details = Array.isArray(providerError.details)
+    ? providerError.details.slice(0, 20).map((rawDetail) => {
+      const detail = recordValue(rawDetail);
+      const fieldViolations = Array.isArray(detail.fieldViolations)
+        ? detail.fieldViolations.slice(0, 50).map((rawViolation) => {
+          const violation = recordValue(rawViolation);
+          return {
+            field: redactedProviderString(
+              violation.field,
+              sensitiveValues,
+              512,
+            ),
+            description: redactedProviderString(
+              violation.description,
+              sensitiveValues,
+              1_000,
+            ),
+          };
+        })
+        : [];
+      return { fieldViolations };
+    })
+    : [];
+  return {
+    status,
+    error: {
+      code,
+      status: redactedProviderString(
+        providerError.status,
+        sensitiveValues,
+        128,
+      ),
+      message: redactedProviderString(
+        providerError.message,
+        sensitiveValues,
+        2_000,
+      ),
+      details,
+    },
+  };
 }
 
 export function createServiceAccountAssertion(
@@ -1555,14 +1650,26 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
           const errorCode = retryable
             ? "VERTEX_JUDGE_V2_RETRYABLE"
             : "VERTEX_JUDGE_V2_FAILED";
+          const providerError = redactedJudgeProviderError(
+            response.status,
+            body,
+            [
+              token,
+              this.options.serviceAccount.email,
+              this.options.serviceAccount.privateKey,
+              actualReply,
+              ...context.map((message) => message.text),
+            ],
+          );
           this.recordFailure({
             endpoint: "JUDGE",
             status: response.status,
             attempt: attempt + 1,
             retryable,
             errorCode,
+            providerError,
           });
-          throw new VertexShadowError(errorCode, retryable);
+          throw new VertexShadowError(errorCode, retryable, providerError);
         }
         const candidate = parseCandidateText(body);
         const parsed = SalesRubricAssessmentV2Schema.safeParse(safeJson(candidate.text));
