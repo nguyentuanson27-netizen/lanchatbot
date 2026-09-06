@@ -7,12 +7,14 @@ Source: `tasks/track-c-quality-loop-improvement-plan.md`
 - [ ] **1. Impact inventory + red tests**
   - [ ] Locate the real Track C `VertexShadowModel` composition/configuration site.
   - [ ] Locate all real `TRACK_C_QUALITY_JUDGE_V1` / `runTrackCQualityComparison(...)` consumers and fixtures.
-  - [ ] Add failing focused tests for V2 contract, exact 3.8 descriptor, `HIGH` request config, calibration removal, metrics preservation, and metrics/identity isolation.
+  - [ ] Add failing focused tests for V2 contract, exact `VERTEX_AI / global / gemini-3.8-flash` descriptor, `HIGH` request config, calibration removal, metrics preservation, and metrics/identity isolation.
+  - [ ] Prove judge `global` binding does not alter the generator/runtime Vertex location or model.
   - [ ] If a real persisted/external V1 consumer exists, stop and document the minimum compatibility requirement; otherwise add no adapter.
 
-- [ ] **2. Slice A — judge 3.8 / V2 / telemetry / review routing**
-  - [ ] Add narrow `judgeModelName` support; keep generator paths on existing `modelName`.
-  - [ ] Bind Track C explicitly to `VERTEX_AI / gemini-3.8-flash` and fail closed before judge invocation on mismatch.
+- [ ] **2. Slice A — judge 3.8 global / V2 / telemetry / review routing**
+  - [ ] Add narrow `judgeLocation` + `judgeModelName` support; keep generator paths on existing `location` / `modelName`.
+  - [ ] Bind Track C explicitly to `VERTEX_AI / global / gemini-3.8-flash` and fail closed before judge invocation on provider/location/model mismatch.
+  - [ ] Make only the V2 judge endpoint use `global`; do not change `VERTEX_LOCATION` or generator/runtime location.
   - [ ] Use structured output + `thinkingLevel: HIGH`; remove `temperature`, `top_p`, `top_k` from the V2 judge request.
   - [ ] Preserve actual prompt/completion/thinking/total usage when returned and measured per-call latency.
   - [ ] Emit `TRACK_C_QUALITY_JUDGE_V2`; remove normal calibration input/reason; retain current threshold and BETTER/SAME/WORSE behavior.
@@ -30,7 +32,7 @@ Source: `tasks/track-c-quality-loop-improvement-plan.md`
   - [ ] Run focused worker Vitest files.
   - [ ] Run worker typecheck, build, and lint.
   - [ ] Run `pnpm check`.
-  - [ ] If already authorized credentials/environment are available, run one provider smoke for exact 3.8 + HIGH request; otherwise record that live-provider smoke was not run.
-  - [ ] Review against DoD and confirm no generator/runtime/DB/deploy/authority/secret-scope change.
+  - [ ] If already authorized credentials/environment are available, run one provider smoke for exact Vertex `global` + 3.8 + HIGH request; otherwise record that live-provider smoke was not run.
+  - [ ] Review against DoD and confirm no generator location/model/runtime/DB/deploy/authority/secret-scope change.
 
-**Anti-bloat:** no judge benchmark, evaluator platform, dashboard, tuning agent, caching/concurrency framework, broad Vertex refactor, speculative V1↔V2 compatibility layer, metrics database, or generator-model change.
+**Anti-bloat:** no judge benchmark, evaluator platform, dashboard, tuning agent, caching/concurrency framework, broad Vertex refactor, speculative V1↔V2 compatibility layer, metrics database, new judge-location env/config subsystem, or generator-model/location change.
