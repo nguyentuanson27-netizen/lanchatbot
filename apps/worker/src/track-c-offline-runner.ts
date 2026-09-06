@@ -169,11 +169,11 @@ function metricsForCase(
     caseId,
     accepted: Object.freeze({
       latencyMs: calls[0].latencyMs,
-      tokenUsage: calls[0].tokenUsage,
+      tokenUsage: Object.freeze({ ...calls[0].tokenUsage }),
     }),
     candidate: Object.freeze({
       latencyMs: calls[1].latencyMs,
-      tokenUsage: calls[1].tokenUsage,
+      tokenUsage: Object.freeze({ ...calls[1].tokenUsage }),
     }),
   });
 }
@@ -210,16 +210,17 @@ export async function runTrackCOfflineQuality(
       recorders.set(caseId, recorder);
       return { caseId, judge: recorder.judge, accepted, candidate };
     }),
-    onCaseComplete: input.onCaseComplete === undefined
-      ? undefined
-      : async (replayCase) => input.onCaseComplete?.(Object.freeze({
+    ...(input.onCaseComplete === undefined ? {} : {
+      onCaseComplete: async (replayCase: TrackCReplayResult["cases"][number]) =>
+        input.onCaseComplete?.(Object.freeze({
         contractVersion: "TRACK_C_OFFLINE_CASE_CHECKPOINT_V1",
         evaluationOnly: true,
         sideEffects: "DISABLED",
         caseId: replayCase.caseId,
-        replay: replayCase,
+        replay: structuredClone(replayCase),
         judgeMetrics: metricsForCase(replayCase.caseId, recorders),
-      })),
+        })),
+    }),
   });
   const judgeMetrics = replay.cases.map(({ caseId }) =>
     metricsForCase(caseId, recorders));

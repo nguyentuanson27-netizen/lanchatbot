@@ -1692,14 +1692,14 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
           throw new VertexShadowError(errorCode, retryable, providerError);
         }
         const candidate = parseCandidateText(body);
-        const parsed = requestContract.compactTrackCResponse
-          ? TrackCJudgeAssessmentSchema.safeParse(safeJson(candidate.text))
-          : SalesRubricAssessmentV2Schema.safeParse(safeJson(candidate.text));
-        if (!parsed.success) {
-          throw new VertexShadowError("VERTEX_RUBRIC_V2_SCHEMA_INVALID", true);
-        }
-        const assessment = requestContract.compactTrackCResponse
-          ? SalesRubricAssessmentV2Schema.parse({
+        const rawAssessment = safeJson(candidate.text);
+        let assessment: SalesRubricAssessmentV2;
+        if (requestContract.compactTrackCResponse) {
+          const parsed = TrackCJudgeAssessmentSchema.safeParse(rawAssessment);
+          if (!parsed.success) {
+            throw new VertexShadowError("VERTEX_RUBRIC_V2_SCHEMA_INVALID", true);
+          }
+          assessment = SalesRubricAssessmentV2Schema.parse({
             schemaVersion: 2,
             intent: "TRACK_C_OFFLINE_QUALITY",
             conversationStage: "BOUND_CONTEXT",
@@ -1708,8 +1708,14 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
             weaknesses: [],
             improvedReply: "",
             recommendationAction: parsed.data.recommendationAction,
-          })
-          : parsed.data;
+          });
+        } else {
+          const parsed = SalesRubricAssessmentV2Schema.safeParse(rawAssessment);
+          if (!parsed.success) {
+            throw new VertexShadowError("VERTEX_RUBRIC_V2_SCHEMA_INVALID", true);
+          }
+          assessment = parsed.data;
+        }
         return {
           assessment,
           latencyMs: Math.max(0, this.now() - started),
