@@ -7,14 +7,14 @@ import { buildTrackCOfflineCandidateRequest } from "./track-c-offline-candidate.
 
 /**
  * One bounded C3 experiment. The generator model/config/schema and all
- * deterministic guards remain unchanged; only the offline candidate
- * system-instruction/playbook is different from the accepted baseline.
+ * deterministic guards remain unchanged; only the offline candidate system
+ * instruction is different from the accepted baseline.
  */
 export const TRACK_C_C3_SALES_QUALITY_CANDIDATE = Object.freeze({
   id: "TRACK_C_C3_SALES_QUALITY_V1" as const,
   primaryHypothesis:
     "Answer the customer intent first, resolve hesitation with verified facts, then use only the smallest stage-fit next step.",
-  materialAxes: Object.freeze(["PROMPT_PLAYBOOK"] as const),
+  materialAxes: Object.freeze(["PROMPT"] as const),
   generatorModel: CONTEXT_V2_CANDIDATE_MODEL_ID,
   providerModelVersion: CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
 });
