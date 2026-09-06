@@ -208,6 +208,44 @@ describe("Track C C2 offline replay", () => {
     expect(JSON.stringify(evidence)).not.toContain("offline-candidate-");
   });
 
+  it("checkpoints every completed case before a later judge failure stops the run", async () => {
+    const input = replayInput();
+    const checkpoints: unknown[] = [];
+    let callIndex = 0;
+    input.judge.judgeSalesReplyV2.mockImplementation(async () => {
+      const index = callIndex++;
+      if (index === 6) throw new Error("TRACK_C_TEST_JUDGE_FAILED");
+      return {
+        assessment: assessment(4),
+        latencyMs: index,
+        tokenUsage: { total: 10 + index },
+      };
+    });
+
+    await expect(runTrackCOfflineQuality({
+      runKind: "CANDIDATE_EVALUATION",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: input.mustPassReplay,
+      judge: input.judge,
+      cases: input.cases.map(({ caseId, accepted, candidate }) => ({
+        caseId,
+        accepted,
+        candidate,
+      })),
+      onCaseComplete: async (checkpoint) => {
+        checkpoints.push(checkpoint);
+      },
+    })).rejects.toThrow("TRACK_C_TEST_JUDGE_FAILED");
+
+    expect(checkpoints).toHaveLength(3);
+    expect(checkpoints).toMatchObject([
+      { caseId: "unsupported-protected-claim" },
+      { caseId: "pii-security" },
+      { caseId: "unauthorized-effect" },
+    ]);
+    expect(JSON.stringify(checkpoints)).not.toContain("offline-candidate-");
+  });
+
   it("labels a v22-versus-v22 run as wiring-only, never as quality improvement evidence", async () => {
     const input = replayInput();
     const cases = input.cases.map(({ caseId, accepted }) => ({
