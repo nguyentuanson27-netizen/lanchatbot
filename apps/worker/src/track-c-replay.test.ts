@@ -13,6 +13,7 @@ import {
 import {
   runTrackCReplay,
   type TrackCOfflineCandidateValidatedEnvelope,
+  type TrackCReplayInput,
   type TrackCReplayJudgeEnvelope,
 } from "./track-c-replay.js";
 
@@ -124,7 +125,10 @@ function passingReplay(): TrackBLivePathReplayResult {
     coverage: { complete: true, coveredRiskClasses: [...TRACK_C_C1_MUST_PASS_POLICY.riskPriority], missingRiskClasses: [] }, cases,
   };
 }
-function replayInput(scores: readonly (readonly [number, number])[] = [], assessments: readonly SalesRubricAssessmentV2[] = []) {
+function replayInput(
+  scores: readonly (readonly [number, number])[] = [],
+  assessments: readonly SalesRubricAssessmentV2[] = [],
+) {
   let scoreIndex = 0;
   const judge = {
     judgeSalesReplyV2Descriptor: vi.fn(() => ({ provider: "VERTEX_AI" as const, location: "global", model: "gemini-3.8-flash",
@@ -140,14 +144,37 @@ function replayInput(scores: readonly (readonly [number, number])[] = [], assess
       };
     }),
   };
-  return { mustPassReplay: passingReplay(), judge, cases: TRACK_C_C1_MUST_PASS_POLICY.fixtures.map(({ caseId }) => {
+  const cases = TRACK_C_C1_MUST_PASS_POLICY.fixtures.map(({ caseId }) => {
     const observed = envelope(caseId);
     return {
       caseId, judge,
       accepted: { origin: "B3_LIVE_OBSERVATION" as const, quality: observed },
       candidate: offlineCandidate(caseId, observed),
     };
-  }) };
+  });
+  const mustPassReplay = passingReplay();
+  const input = {
+    mustPassReplay: {
+      ...mustPassReplay,
+      cases: mustPassReplay.cases.map((replayCase) => {
+        const inputCase = cases.find(({ caseId }) => caseId === replayCase.caseId);
+        if (inputCase === undefined) throw new Error(`TEST_CASE_REQUIRED:${replayCase.caseId}`);
+        const qualityEnvelopeHashes = replayCase.qualityEnvelopeHashes;
+        if (qualityEnvelopeHashes === undefined) throw new Error(`TEST_ENVELOPE_REQUIRED:${replayCase.caseId}`);
+        return {
+          ...replayCase,
+          qualityEnvelopeHashes: {
+            baseline: qualityEnvelopeHashes.baseline,
+            candidate: sha256(inputCase.candidate),
+          },
+        };
+      }),
+    },
+    judge,
+    cases,
+  };
+  input satisfies TrackCReplayInput;
+  return input;
 }
 
 describe("Track C C2 offline replay", () => {
@@ -274,6 +301,28 @@ describe("Track C C2 offline replay", () => {
       quality: { ...input.cases[0]!.accepted.quality, reply: "unbound reply" },
     };
     await expect(runTrackCReplay(input)).rejects.toThrow("TRACK_C_C2_B3_ENVELOPE_MISMATCH:unsupported-protected-claim");
+    expect(input.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+  });
+  it("rejects a stale candidate envelope binding before judge calls", async () => {
+    const input = replayInput();
+    const firstEnvelope = input.mustPassReplay.cases[0]?.qualityEnvelopeHashes;
+    if (firstEnvelope === undefined) throw new Error("TEST_ENVELOPE_REQUIRED");
+    input.mustPassReplay = {
+      ...input.mustPassReplay,
+      cases: input.mustPassReplay.cases.map((replayCase, index) => index === 0
+        ? {
+          ...replayCase,
+          qualityEnvelopeHashes: {
+            baseline: firstEnvelope.baseline,
+            candidate: "f".repeat(64),
+          },
+        }
+        : replayCase),
+    };
+
+    await expect(runTrackCReplay(input)).rejects.toThrow(
+      "TRACK_C_C2_CANDIDATE_ENVELOPE_MISMATCH:unsupported-protected-claim",
+    );
     expect(input.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
   });
   it("accepts a distinct candidate only through its independently guarded offline origin", async () => {

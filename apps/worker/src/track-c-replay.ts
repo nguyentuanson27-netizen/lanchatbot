@@ -226,6 +226,9 @@ function assertObservationBinding(
       expected.baseline !== actual.accepted) {
     throw new Error(`TRACK_C_C2_B3_ENVELOPE_MISMATCH:${inputCase.caseId}`);
   }
+  if (expected.candidate !== actual.candidate) {
+    throw new Error(`TRACK_C_C2_CANDIDATE_ENVELOPE_MISMATCH:${inputCase.caseId}`);
+  }
   const candidate = assertTrackCOfflineCandidateValidated(inputCase.candidate);
   if (sha256(inputCase.accepted.quality.context) !== sha256(candidate.quality.context)) {
     throw new Error(`TRACK_C_C2_CONTEXT_MISMATCH:${inputCase.caseId}`);
