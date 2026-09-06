@@ -1,6 +1,6 @@
 # Track C Quality Loop Improvement Spec — Judge 3.8, Rubric, Review, Telemetry
 
-**Status:** `DRAFT / OWNER REVIEW REQUIRED`
+**Status:** `APPROVED / READY_FOR_PLAN`
 
 **Scope:** Track C offline quality-evaluation loop only. This document does not authorize runtime mutation, generator-model promotion, database changes, provider-credential changes, deployment, or PREPROD/production traffic changes.
 
@@ -37,9 +37,11 @@ Current `main` has:
 
 ## Source / API Constraints
 
-Gemini 3.8 Flash uses model ID `gemini-3.8-flash`, is GA, supports structured outputs, and supports thinking levels `LOW`, `MEDIUM`, and `HIGH` with `MEDIUM` as the default.
+Gemini 3.8 Flash uses model ID `gemini-3.8-flash`, is GA, supports structured outputs, and supports thinking levels `LOW`, `MEDIUM`, and `HIGH` with `MEDIUM` as the provider default.
 
 For Gemini 3.8 Flash on Vertex AI, deprecated sampling parameters including `temperature`, `top_p`, and `top_k` must be stripped rather than used as determinism controls. The judge must pin the model, strict structured response schema, and a supported thinking level.
+
+This spec deliberately selects `HIGH` rather than relying on the provider default because the judge is offline evaluation and the owner prefers maximum evaluator reasoning quality over lower token/latency cost.
 
 Official references checked for this spec:
 
@@ -74,7 +76,7 @@ When this spec is adopted, the governing Track C documentation must be updated s
 4. **No judge benchmark project.** No multi-model leaderboard, holdout platform, or multi-provider evaluator framework.
 5. **No new rubric dimensions.** Only scoring instructions for the three named existing dimensions change.
 6. **Candidate-change discipline is a workflow rule, not a diff engine.**
-7. **Thinking level is explicitly pinned.** Recommended initial value is `MEDIUM`; owner may choose `LOW` before implementation.
+7. **Thinking level is pinned to `HIGH`.** This is an explicit owner decision for the offline judge; do not silently downgrade to `MEDIUM` or `LOW` for cost/latency.
 8. **Runtime metrics are observational evidence, not identity.** Token counts and latency never participate in candidate/judge identity, reproducibility hashes, comparison disposition, review routing, or selection.
 9. **Judge-model migration and rubric clarification are separately observable slices.**
 10. **Contract semantics change explicitly.** Removing calibration from the normal contract and adding metrics requires a new comparison contract version rather than silently changing V1 semantics.
@@ -149,12 +151,12 @@ const SALES_RUBRIC_V2_GENERATION_CONFIG = {
   responseMimeType: "application/json",
   responseSchema: SALES_RUBRIC_V2_RESPONSE_SCHEMA,
   thinkingConfig: {
-    thinkingLevel: "MEDIUM",
+    thinkingLevel: "HIGH",
   },
 } as const;
 ```
 
-`MEDIUM` is the draft recommendation. Implementation must not begin until the owner accepts `MEDIUM` or replaces it with `LOW`.
+`HIGH` is owner-approved and part of the pinned judge generation-config identity. Changing it later is evaluator maintenance and must produce a new generation-config identity; it must not happen as an untracked runtime optimization.
 
 The generation-config hash remains part of judge identity, so the model/config migration creates a new pinned evaluator identity.
 
@@ -201,7 +203,7 @@ Slice A
 comparison contract V2
 + judge config separation
 + explicit/fail-closed Track C gemini-3.8-flash binding
-+ 3.8 generation config
++ 3.8 generation config with thinkingLevel HIGH
 + telemetry plumbing
 + automatic-review routing amendment
 -> focused deterministic tests
@@ -372,7 +374,7 @@ export interface TrackCQualityComparisonResultV2 {
 5. The real Track C composition/configuration path explicitly binds `judgeModelName: "gemini-3.8-flash"`.
 6. Generator `modelName` remains unchanged when only `judgeModelName` changes.
 7. Gemini 3.8 judge request preserves the existing JSON response schema and does not send/rely on `temperature`, `top_p`, or `top_k`.
-8. Judge generation config pins the owner-approved `thinkingLevel`.
+8. Judge generation config pins `thinkingLevel: "HIGH"`.
 9. Slice A can be verified with the existing rubric before Slice B changes rubric wording.
 10. Rubric schema remains V2 with the same ten score fields; tests assert the `4–5 / 2–3 / 0–1` anchors for only `naturalness`, `objectionResolution`, and `ctaStageFit` are present in the judge instruction.
 11. Accepted and candidate still use the same pinned judge descriptor/config.
@@ -387,7 +389,7 @@ export interface TrackCQualityComparisonResultV2 {
 
 A provider-backed smoke check is allowed only in the already-authorized local/VPS/manual evaluation boundary using existing Vertex credentials. It is not a judge benchmark and does not compare multiple judge models.
 
-If run, it should prove only that the exact pinned `gemini-3.8-flash` Vertex `generateContent` request is accepted, returns schema-valid V2 rubric JSON, and exposes whatever usage metadata the provider actually returns.
+If run, it should prove only that the exact pinned `gemini-3.8-flash` Vertex `generateContent` request with `thinkingLevel: "HIGH"` is accepted, returns schema-valid V2 rubric JSON, and exposes whatever usage metadata the provider actually returns.
 
 Prefer doing this after Slice A and before Slice B so provider/API integration is not confounded with rubric wording changes.
 
@@ -401,6 +403,7 @@ Do not add Vertex credentials to GitHub Actions.
 - Track C fails closed unless the exact pinned judge descriptor is present.
 - Accepted and candidate are judged under the same exact judge configuration.
 - Pin provider/model, rubric, generation config, facts/context, and reply identities.
+- Pin judge `thinkingLevel` to `HIGH` unless the owner explicitly amends this spec later.
 - Keep runtime token/latency metrics outside deterministic identity and selection semantics.
 - Treat model output as untrusted and validate it with the existing schema.
 - Keep judge evaluation-only and side effects disabled.
@@ -409,6 +412,7 @@ Do not add Vertex credentials to GitHub Actions.
 
 ### Ask first
 
+- changing judge `thinkingLevel` away from `HIGH`;
 - changing `NEAR_TIE_DELTA`;
 - adding/removing score dimensions;
 - changing candidate-selection semantics beyond `BETTER | SAME | WORSE`;
@@ -438,7 +442,7 @@ The spec is satisfied when implementation evidence proves all of the following:
 2. Actual V1 consumers/fixtures are identified and updated, or a compatibility need is evidenced before any adapter is added.
 3. Track C judge identity is exactly `VERTEX_AI / gemini-3.8-flash` while generator identity/config remains unchanged.
 4. A missing/mismatched Track C judge descriptor fails before either accepted or candidate judge invocation; generic Vertex fallback cannot silently select the generator model for Track C.
-5. The 3.8 judge request uses the strict structured-output schema and owner-approved thinking level without deprecated sampling controls.
+5. The 3.8 judge request uses the strict structured-output schema and `thinkingLevel: "HIGH"` without deprecated sampling controls.
 6. Judge model/config migration has independently reviewable verification before rubric-anchor changes.
 7. The rubric keeps the same ten V2 score dimensions and `0..5` range, with explicit `4–5 / 2–3 / 0–1` anchors only for `naturalness`, `objectionResolution`, and `ctaStageFit` and with their responsibilities kept distinct.
 8. Human-review routing has exactly the three normal automatic reasons: near-tie, regression, and judge disagreement; calibration is manual/explicit evaluator maintenance.
@@ -450,8 +454,11 @@ The spec is satisfied when implementation evidence proves all of the following:
 14. Focused tests, worker typecheck/build/lint, and final repository `pnpm check` pass before implementation is declared complete.
 15. No DB migration, runtime authority mutation, PREPROD deploy, provider-secret expansion, or generator promotion occurs as part of this change.
 
-## Open Question Requiring Owner Confirmation Before `/build`
+## Owner Decisions Locked
 
-**Judge thinking level:** pin `MEDIUM` (recommended for offline quality evaluation) or `LOW` (lower token/latency cost).
+- Judge model: `gemini-3.8-flash`.
+- Judge thinking level: `HIGH`.
+- Generator/runtime model: unchanged by this spec.
+- No judge benchmark project.
 
-All other requirements in this draft are considered specified by the owner's request.
+The specification has no remaining owner decision required before `/plan`.
