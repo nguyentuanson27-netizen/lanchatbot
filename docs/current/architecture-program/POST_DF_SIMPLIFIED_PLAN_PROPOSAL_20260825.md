@@ -408,7 +408,7 @@ WORSE
 + short reason / score delta
 ```
 
-Human review is reserved for calibration samples, ties/near-ties, unexpected regressions, and obvious judge disagreements. Do not require a human to read every replay output every iteration.
+Human review is reserved for ties/near-ties, unexpected regressions, and obvious judge disagreements. Manual evaluator calibration remains an explicit maintenance action outside normal candidate routing. Do not require a human to read every replay output every iteration.
 
 ### C2 — Reuse B3 replay; fixed dev/validation anchor by default
 
@@ -435,6 +435,8 @@ Holdout is trigger-only: run a bounded locked-holdout checkpoint only when the r
 ### C3 — Fast tuning loop
 
 Allow rapid iteration on prompt, playbook, objection handling, CTA/question sequencing, model, and generation configuration.
+
+Each candidate experiment declares one primary hypothesis and normally changes one material tuning axis; at most two material axes may change only when genuinely inseparable. Judge/rubric maintenance is not bundled into a generator candidate comparison.
 
 Never bypass verified facts/provenance, unsupported-claim rejection, PII/security, side-effect authorization, fail-closed behavior, or deterministic protected constraints.
 

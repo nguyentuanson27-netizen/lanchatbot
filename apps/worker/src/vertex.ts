@@ -24,6 +24,9 @@ export interface VertexShadowModelOptions {
   readonly projectId: string;
   readonly location: string;
   readonly modelName: string;
+  /** Optional evaluator-only override; generator methods retain location/modelName. */
+  readonly judgeLocation?: string;
+  readonly judgeModelName?: string;
   readonly serviceAccount: VertexServiceAccount;
   readonly timeoutMs?: number;
   readonly fetchImpl?: typeof fetch;
@@ -61,6 +64,13 @@ export interface VertexGroundedDraftResult {
 export interface VertexPrelabelResult {
   readonly response: PrelabelResponseV1;
   readonly modelVersion: string;
+  readonly latencyMs: number;
+  readonly tokenUsage: Readonly<Record<string, number>>;
+}
+
+/** Evaluation-only result for the offline Track C judge path. */
+export interface VertexJudgeSalesReplyV2Result {
+  readonly assessment: SalesRubricAssessmentV2;
   readonly latencyMs: number;
   readonly tokenUsage: Readonly<Record<string, number>>;
 }
@@ -167,6 +177,15 @@ const SALES_RUBRIC_V2_GENERATION_CONFIG = {
   responseSchema: SALES_RUBRIC_V2_RESPONSE_SCHEMA,
 } as const;
 
+const TRACK_C_SALES_RUBRIC_V2_GENERATION_CONFIG = {
+  maxOutputTokens: 1_024,
+  responseMimeType: "application/json",
+  responseSchema: SALES_RUBRIC_V2_RESPONSE_SCHEMA,
+  thinkingConfig: {
+    thinkingLevel: "HIGH",
+  },
+} as const;
+
 export const SALES_RUBRIC_V2_SYSTEM_INSTRUCTION = [
   "Ban la bo cham chat sale thoi trang nu La.na Design.",
   "Chi VERIFIED_FACTS_JSON la nguon fact nghiep vu dang tin cay.",
@@ -175,6 +194,13 @@ export const SALES_RUBRIC_V2_SYSTEM_INSTRUCTION = [
   "Neu actual reply co gia, ton, size, ETA hoac URL khong nam trong VERIFIED_FACTS_JSON thi factGrounding phai thap.",
   "improvedReply khong duoc them fact nghiep vu ngoai VERIFIED_FACTS_JSON.",
   "Output chi la JSON schemaVersion=2. Ket qua nay chi de danh gia, khong duoc dieu khien outbound.",
+].join("\n");
+
+const TRACK_C_SALES_RUBRIC_V2_SYSTEM_INSTRUCTION = [
+  SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
+  "naturalness: 4–5 la dien dat Messenger tu nhien, truc tiep, khong may moc/lan lap va gon dung muc; 2–3 la de hieu nhung con cong thuc, chung chung hoac hoi lan lap; 0–1 la go gang, may moc, lan lap ro ret hoac khong tu nhien. Chi cham cach dien dat, khong cham fact hoac thoi diem CTA o day.",
+  "objectionResolution: 4–5 la nhan ra va xu ly xay dung dung phan van/lo ngai cua khach bang ho tro huu ich da co can cu; 2–3 la xu ly mot phan hoac bo sot lo ngai/next step quan trong; 0–1 la bo qua, bac bo, tranh cai hoac khong xu ly phan van. Fact khong duoc ho tro van la factGrounding/MUST_PASS, khong phat kep chi vi fact do.",
+  "ctaStageFit: 4–5 la de nghi buoc nho huu ich phu hop stage/thong tin con thieu, hoac dung khong CTA khi khong can; 2–3 la CTA huu ich nhung chung chung, som/muon nhe hoac khop stage yeu; 0–1 la CTA som, lac de, trai guard/stage hoac ep checkout/action. Chi cham do dung luc/phu hop CTA, khong cham phong cach viet chung o day.",
 ].join("\n");
 
 type SalesRubricV2PromptValue =
@@ -199,23 +225,48 @@ const SALES_RUBRIC_V2_USER_PROMPT_ENVELOPE: readonly Readonly<{
 
 export interface JudgeSalesReplyV2Descriptor {
   readonly provider: "VERTEX_AI";
+  readonly location: string;
   readonly model: string;
   /** Full static rubric and user-envelope contract used by the actual request. */
   readonly promptRubric: unknown;
   readonly generationConfig: unknown;
 }
 
+type JudgeSalesReplyV2RequestContract = Readonly<{
+  systemInstruction: string;
+  generationConfig: unknown;
+}>;
+
+function judgeSalesReplyV2RequestContract(
+  location: string,
+  model: string,
+): JudgeSalesReplyV2RequestContract {
+  if (location === "global" && model === "gemini-3.8-flash") {
+    return {
+      systemInstruction: TRACK_C_SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
+      generationConfig: TRACK_C_SALES_RUBRIC_V2_GENERATION_CONFIG,
+    };
+  }
+  return {
+    systemInstruction: SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
+    generationConfig: SALES_RUBRIC_V2_GENERATION_CONFIG,
+  };
+}
+
 export function judgeSalesReplyV2Descriptor(
+  location: string,
   model: string,
 ): JudgeSalesReplyV2Descriptor {
+  const requestContract = judgeSalesReplyV2RequestContract(location, model);
   return Object.freeze({
     provider: "VERTEX_AI" as const,
+    location,
     model,
     promptRubric: structuredClone({
-      systemInstruction: SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
+      systemInstruction: requestContract.systemInstruction,
       userPromptEnvelope: SALES_RUBRIC_V2_USER_PROMPT_ENVELOPE,
     }),
-    generationConfig: structuredClone(SALES_RUBRIC_V2_GENERATION_CONFIG),
+    generationConfig: structuredClone(requestContract.generationConfig),
   });
 }
 
@@ -225,6 +276,10 @@ export function buildJudgeSalesReplyV2Request(
   verifiedFacts: BusinessFactEnvelopeV1 | null,
   proposalSummary: unknown,
   guardOutcome: unknown,
+  requestContract: JudgeSalesReplyV2RequestContract = judgeSalesReplyV2RequestContract(
+    "",
+    "",
+  ),
 ) {
   const values: Readonly<Record<SalesRubricV2PromptValue, unknown>> = {
     verifiedFacts,
@@ -235,7 +290,7 @@ export function buildJudgeSalesReplyV2Request(
   };
   return {
     systemInstruction: {
-      parts: [{ text: SALES_RUBRIC_V2_SYSTEM_INSTRUCTION }],
+      parts: [{ text: requestContract.systemInstruction }],
     },
     contents: [{
       role: "user",
@@ -249,7 +304,7 @@ export function buildJudgeSalesReplyV2Request(
         ).join("\n"),
       }],
     }],
-    generationConfig: SALES_RUBRIC_V2_GENERATION_CONFIG,
+    generationConfig: requestContract.generationConfig,
   };
 }
 
@@ -653,6 +708,7 @@ function parseCandidateText(body: unknown): { text: string; modelVersion: string
   for (const [source, target] of [
     ["promptTokenCount", "prompt"],
     ["candidatesTokenCount", "completion"],
+    ["thoughtsTokenCount", "thinking"],
     ["totalTokenCount", "total"],
   ] as const) {
     const value = usage?.[source];
@@ -826,6 +882,10 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
     if (!options.projectId.trim()) throw new Error("VERTEX_PROJECT_ID_REQUIRED");
     if (!/^[a-z0-9-]+$/u.test(options.location)) throw new Error("VERTEX_LOCATION_INVALID");
     if (!/^[A-Za-z0-9._-]+$/u.test(options.modelName)) throw new Error("VERTEX_MODEL_INVALID");
+    const judgeLocation = options.judgeLocation ?? options.location;
+    const judgeModelName = options.judgeModelName ?? options.modelName;
+    if (!/^[a-z0-9-]+$/u.test(judgeLocation)) throw new Error("VERTEX_JUDGE_LOCATION_INVALID");
+    if (!/^[A-Za-z0-9._-]+$/u.test(judgeModelName)) throw new Error("VERTEX_JUDGE_MODEL_INVALID");
     if (!options.serviceAccount.email.includes("@")) throw new Error("VERTEX_EMAIL_INVALID");
     if (!options.serviceAccount.privateKey.includes("PRIVATE KEY")) throw new Error("VERTEX_PRIVATE_KEY_INVALID");
     const embeddingLocation = options.embeddingLocation ?? "us-central1";
@@ -841,7 +901,18 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
   }
 
   judgeSalesReplyV2Descriptor(): JudgeSalesReplyV2Descriptor {
-    return judgeSalesReplyV2Descriptor(this.options.modelName);
+    return judgeSalesReplyV2Descriptor(
+      this.judgeLocation(),
+      this.judgeModelName(),
+    );
+  }
+
+  private judgeLocation(): string {
+    return this.options.judgeLocation ?? this.options.location;
+  }
+
+  private judgeModelName(): string {
+    return this.options.judgeModelName ?? this.options.modelName;
   }
 
   private now(): number {
@@ -1424,13 +1495,20 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
     throw new VertexShadowError("VERTEX_JUDGE_FAILED", false);
   }
 
-  async judgeSalesReplyV2(
+  async judgeSalesReplyV2WithMetrics(
     context: readonly ShadowContextMessage[],
     actualReply: string,
     verifiedFacts: BusinessFactEnvelopeV1 | null,
     proposalSummary: unknown,
     guardOutcome: unknown,
-  ): Promise<SalesRubricAssessmentV2> {
+  ): Promise<VertexJudgeSalesReplyV2Result> {
+    const started = this.now();
+    const judgeLocation = this.judgeLocation();
+    const judgeModelName = this.judgeModelName();
+    const requestContract = judgeSalesReplyV2RequestContract(
+      judgeLocation,
+      judgeModelName,
+    );
     for (let attempt = 0; attempt < 2; attempt += 1) {
       const token = await this.token();
       const controller = new AbortController();
@@ -1441,8 +1519,8 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
       try {
         const endpoint = vertexGenerateEndpoint(
           this.options.projectId,
-          this.options.location,
-          this.options.modelName,
+          judgeLocation,
+          judgeModelName,
         );
         const response = await this.fetchImpl(endpoint, {
           method: "POST",
@@ -1456,6 +1534,7 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
             verifiedFacts,
             proposalSummary,
             guardOutcome,
+            requestContract,
           )),
           signal: controller.signal,
         });
@@ -1485,13 +1564,16 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
           });
           throw new VertexShadowError(errorCode, retryable);
         }
-        const parsed = SalesRubricAssessmentV2Schema.safeParse(
-          safeJson(parseCandidateText(body).text),
-        );
+        const candidate = parseCandidateText(body);
+        const parsed = SalesRubricAssessmentV2Schema.safeParse(safeJson(candidate.text));
         if (!parsed.success) {
           throw new VertexShadowError("VERTEX_RUBRIC_V2_SCHEMA_INVALID", true);
         }
-        return parsed.data;
+        return {
+          assessment: parsed.data,
+          latencyMs: Math.max(0, this.now() - started),
+          tokenUsage: candidate.tokenUsage,
+        };
       } catch (error) {
         if (error instanceof VertexShadowError) throw error;
         if (error instanceof Error && error.name === "AbortError") {
@@ -1517,6 +1599,23 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
       }
     }
     throw new VertexShadowError("VERTEX_JUDGE_V2_FAILED", false);
+  }
+
+  /** Preserves the accepted baseline judge API outside the Track C port. */
+  async judgeSalesReplyV2(
+    context: readonly ShadowContextMessage[],
+    actualReply: string,
+    verifiedFacts: BusinessFactEnvelopeV1 | null,
+    proposalSummary: unknown,
+    guardOutcome: unknown,
+  ): Promise<SalesRubricAssessmentV2> {
+    return (await this.judgeSalesReplyV2WithMetrics(
+      context,
+      actualReply,
+      verifiedFacts,
+      proposalSummary,
+      guardOutcome,
+    )).assessment;
   }
 
 

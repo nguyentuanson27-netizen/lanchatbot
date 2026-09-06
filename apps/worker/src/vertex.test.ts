@@ -105,9 +105,10 @@ function rubricResponse(): Response {
   }), { status: 200 });
 }
 
-function rubricV2Response(): Response {
+function rubricV2Response(usageMetadata?: Record<string, number>): Response {
   return new Response(JSON.stringify({
     modelVersion: "gemini-test-001",
+    ...(usageMetadata === undefined ? {} : { usageMetadata }),
     candidates: [{ content: { parts: [{ text: JSON.stringify({
       schemaVersion: 2,
       intent: "buy",
@@ -950,5 +951,140 @@ describe("Vertex shadow client", () => {
       { productId: "CB182" },
       "prompt-v2",
     )).rejects.toThrow("GROUNDED_SCHEMA_INVALID");
+  });
+
+  it("pins the offline Track C judge to global Gemini 3.8 with HIGH thinking without moving the generator", async () => {
+    let now = 100;
+    let judgeRequest: { url: string; body: unknown } = { url: "", body: {} };
+    const judgeFetch = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      judgeRequest = { url: String(input), body: JSON.parse(String(init?.body ?? "{}")) };
+      now += 37;
+      return rubricV2Response({
+        promptTokenCount: 101,
+        candidatesTokenCount: 22,
+        thoughtsTokenCount: 8,
+        totalTokenCount: 131,
+      });
+    }) as unknown as typeof fetch;
+    const judgeModel = modelWith(judgeFetch, {
+      judgeLocation: "global",
+      judgeModelName: "gemini-3.8-flash",
+      now: () => now,
+    });
+
+    const result = await judgeModel.judgeSalesReplyV2WithMetrics(
+      context,
+      "Dạ mẫu này có giá 699k ạ.",
+      baselineFacts,
+      { action: "REPLY" },
+      { blockedReasonCodes: [] },
+    );
+
+    expect(judgeModel.judgeSalesReplyV2Descriptor()).toMatchObject({
+      provider: "VERTEX_AI",
+      location: "global",
+      model: "gemini-3.8-flash",
+    });
+    expect(judgeRequest.url).toContain(
+      "/locations/global/publishers/google/models/gemini-3.8-flash:generateContent",
+    );
+    expect(judgeRequest.url).toContain("https://aiplatform.googleapis.com/");
+    expect(judgeRequest.body).toMatchObject({
+      generationConfig: {
+        maxOutputTokens: 1_024,
+        responseMimeType: "application/json",
+        thinkingConfig: { thinkingLevel: "HIGH" },
+      },
+    });
+    const generationConfig = (judgeRequest.body as {
+      generationConfig: {
+        responseSchema: {
+          properties: {
+            scores: { properties: Record<string, unknown> };
+          };
+        };
+      };
+    }).generationConfig;
+    for (const key of ["temperature", "topP", "topK", "top_p", "top_k"]) {
+      expect(generationConfig).not.toHaveProperty(key);
+    }
+    expect(Object.keys(generationConfig.responseSchema.properties.scores.properties).sort())
+      .toEqual([
+        "relevance",
+        "questionResolution",
+        "nextStepQuality",
+        "naturalness",
+        "concision",
+        "factGrounding",
+        "objectionResolution",
+        "salesProgression",
+        "ctaStageFit",
+        "overall",
+      ].sort());
+    expect(result).toMatchObject({
+      assessment: { schemaVersion: 2 },
+      latencyMs: 37,
+      tokenUsage: { prompt: 101, completion: 22, thinking: 8, total: 131 },
+    });
+
+    let generatorUrl = "";
+    const generatorFetch = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      generatorUrl = String(input);
+      return generatedProposalResponse();
+    }) as unknown as typeof fetch;
+    await modelWith(generatorFetch, {
+      judgeLocation: "global",
+      judgeModelName: "gemini-3.8-flash",
+    }).generate(context, "prompt-v1");
+    expect(generatorUrl).toContain(
+      "/locations/us-central1/publishers/google/models/gemini-test:generateContent",
+    );
+  });
+
+  it("clarifies only the three approved Track C rubric dimensions with common anchors", () => {
+    const descriptor = modelWith(vi.fn() as unknown as typeof fetch, {
+      judgeLocation: "global",
+      judgeModelName: "gemini-3.8-flash",
+    }).judgeSalesReplyV2Descriptor();
+    const promptRubric = descriptor.promptRubric as { systemInstruction: string };
+
+    for (const dimension of ["naturalness", "objectionResolution", "ctaStageFit"]) {
+      const instruction = promptRubric.systemInstruction
+        .split("\n")
+        .find((line) => line.startsWith(`${dimension}:`));
+      expect(instruction).toContain("4–5");
+      expect(instruction).toContain("2–3");
+      expect(instruction).toContain("0–1");
+    }
+    expect(promptRubric.systemInstruction).not.toContain("brandTone");
+    expect(promptRubric.systemInstruction).not.toContain("warmth");
+  });
+
+  it("does not fabricate absent Track C judge token usage", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      return rubricV2Response();
+    }) as unknown as typeof fetch;
+
+    const result = await modelWith(fetchMock, {
+      judgeLocation: "global",
+      judgeModelName: "gemini-3.8-flash",
+    }).judgeSalesReplyV2WithMetrics(
+      context,
+      "Dạ mẫu này có giá 699k ạ.",
+      baselineFacts,
+      { action: "REPLY" },
+      { blockedReasonCodes: [] },
+    );
+
+    expect(result.tokenUsage).toEqual({});
   });
 });

@@ -71,7 +71,6 @@ export interface TrackCReplayCaseInput {
   /** Exact B3 observations, retained in memory only for this offline replay. */
   readonly accepted: TrackCB3LiveObservationEnvelope;
   readonly candidate: TrackCOfflineCandidateValidatedEnvelope;
-  readonly calibrationSample?: boolean;
 }
 
 export interface TrackCReplayInput {
@@ -300,9 +299,6 @@ export async function runTrackCReplay(
       factFixtureHash: input.mustPassReplay.identity.factFixtureHash,
       accepted: replayCase.accepted.quality,
       candidate: replayCase.candidate.quality,
-      ...(replayCase.calibrationSample === undefined
-        ? {}
-        : { calibrationSample: replayCase.calibrationSample }),
     });
     cases.push(Object.freeze({
       caseId: replayCase.caseId,

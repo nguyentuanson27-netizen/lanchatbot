@@ -123,13 +123,17 @@ function passingReplay(): TrackBLivePathReplayResult {
 function replayInput(scores: readonly (readonly [number, number])[] = [], assessments: readonly SalesRubricAssessmentV2[] = []) {
   let scoreIndex = 0;
   const judge = {
-    judgeSalesReplyV2Descriptor: vi.fn(() => ({ provider: "VERTEX_AI" as const, model: "gemini-3.5-flash-lite",
-      promptRubric: { version: "v2" }, generationConfig: { temperature: 0.1 } })),
+    judgeSalesReplyV2Descriptor: vi.fn(() => ({ provider: "VERTEX_AI" as const, location: "global", model: "gemini-3.8-flash",
+      promptRubric: { version: "v2" }, generationConfig: { thinkingConfig: { thinkingLevel: "HIGH" } } })),
     judgeSalesReplyV2: vi.fn(async () => {
       const index = scoreIndex++;
-      return assessments[index] ?? assessment(
-        (scores[Math.floor(index / 2)] ?? [4, 4] as const)[index % 2]!,
-      );
+      return {
+        assessment: assessments[index] ?? assessment(
+          (scores[Math.floor(index / 2)] ?? [4, 4] as const)[index % 2]!,
+        ),
+        latencyMs: index,
+        tokenUsage: {},
+      };
     }),
   };
   return { mustPassReplay: passingReplay(), judge, cases: TRACK_C_C1_MUST_PASS_POLICY.fixtures.map(({ caseId }) => {
