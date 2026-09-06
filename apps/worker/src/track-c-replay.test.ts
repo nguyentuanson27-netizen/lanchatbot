@@ -7,8 +7,13 @@ import { buildTrackCOfflineCandidateRequest } from "./track-c-offline-candidate.
 import { validateTrackCOfflineCandidate } from "./track-c-offline-candidate-validation.js";
 import { TRACK_C_C1_MUST_PASS_POLICY } from "./track-c-must-pass.js";
 import {
+  TRACK_C_ACCEPTED_V22_BASELINE,
+  runTrackCOfflineQuality,
+} from "./track-c-offline-runner.js";
+import {
   runTrackCReplay,
   type TrackCOfflineCandidateValidatedEnvelope,
+  type TrackCReplayInput,
   type TrackCReplayJudgeEnvelope,
 } from "./track-c-replay.js";
 
@@ -120,7 +125,10 @@ function passingReplay(): TrackBLivePathReplayResult {
     coverage: { complete: true, coveredRiskClasses: [...TRACK_C_C1_MUST_PASS_POLICY.riskPriority], missingRiskClasses: [] }, cases,
   };
 }
-function replayInput(scores: readonly (readonly [number, number])[] = [], assessments: readonly SalesRubricAssessmentV2[] = []) {
+function replayInput(
+  scores: readonly (readonly [number, number])[] = [],
+  assessments: readonly SalesRubricAssessmentV2[] = [],
+) {
   let scoreIndex = 0;
   const judge = {
     judgeSalesReplyV2Descriptor: vi.fn(() => ({ provider: "VERTEX_AI" as const, location: "global", model: "gemini-3.8-flash",
@@ -136,17 +144,143 @@ function replayInput(scores: readonly (readonly [number, number])[] = [], assess
       };
     }),
   };
-  return { mustPassReplay: passingReplay(), judge, cases: TRACK_C_C1_MUST_PASS_POLICY.fixtures.map(({ caseId }) => {
+  const cases = TRACK_C_C1_MUST_PASS_POLICY.fixtures.map(({ caseId }) => {
     const observed = envelope(caseId);
     return {
       caseId, judge,
       accepted: { origin: "B3_LIVE_OBSERVATION" as const, quality: observed },
       candidate: offlineCandidate(caseId, observed),
     };
-  }) };
+  });
+  const mustPassReplay = passingReplay();
+  const input = {
+    mustPassReplay: {
+      ...mustPassReplay,
+      cases: mustPassReplay.cases.map((replayCase) => {
+        const inputCase = cases.find(({ caseId }) => caseId === replayCase.caseId);
+        if (inputCase === undefined) throw new Error(`TEST_CASE_REQUIRED:${replayCase.caseId}`);
+        const qualityEnvelopeHashes = replayCase.qualityEnvelopeHashes;
+        if (qualityEnvelopeHashes === undefined) throw new Error(`TEST_ENVELOPE_REQUIRED:${replayCase.caseId}`);
+        return {
+          ...replayCase,
+          qualityEnvelopeHashes: {
+            baseline: qualityEnvelopeHashes.baseline,
+            candidate: sha256(inputCase.candidate),
+          },
+        };
+      }),
+    },
+    judge,
+    cases,
+  };
+  input satisfies TrackCReplayInput;
+  return input;
 }
 
 describe("Track C C2 offline replay", () => {
+  it("runs the frozen v22 baseline through MUST_PASS, guarded replay, and V2 judge evidence", async () => {
+    const input = replayInput();
+
+    const evidence = await runTrackCOfflineQuality({
+      runKind: "CANDIDATE_EVALUATION",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: input.mustPassReplay,
+      judge: input.judge,
+      cases: input.cases.map(({ caseId, accepted, candidate }) => ({
+        caseId,
+        accepted,
+        candidate,
+      })),
+    });
+
+    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(14);
+    expect(evidence).toMatchObject({
+      contractVersion: "TRACK_C_OFFLINE_RUNNER_V1",
+      evaluationOnly: true,
+      sideEffects: "DISABLED",
+      runKind: "CANDIDATE_EVALUATION",
+      outcome: "QUALITY_COMPARISON",
+      acceptedBaseline: {
+        release: "track-b-v22-b0aeb8907",
+        sourceCommit: "b0aeb8907dae4ae2d9051b409ba25fa3f17fd188",
+      },
+      candidate: { distinctReplyCaseCount: 7 },
+      replay: { aggregate: { better: 0, same: 7, worse: 0 } },
+    });
+    expect(evidence.judgeMetrics).toHaveLength(7);
+    expect(JSON.stringify(evidence)).not.toContain("offline-candidate-");
+  });
+
+  it("labels a v22-versus-v22 run as wiring-only, never as quality improvement evidence", async () => {
+    const input = replayInput();
+    const cases = input.cases.map(({ caseId, accepted }) => ({
+      caseId,
+      accepted,
+      candidate: offlineCandidate(caseId, accepted.quality, { reply: accepted.quality.reply }),
+    }));
+
+    const evidence = await runTrackCOfflineQuality({
+      runKind: "WIRING_SMOKE",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: input.mustPassReplay,
+      judge: input.judge,
+      cases,
+    });
+
+    expect(evidence).toMatchObject({
+      runKind: "WIRING_SMOKE",
+      outcome: "WIRING_ONLY",
+      candidate: { distinctReplyCaseCount: 0 },
+    });
+    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(14);
+  });
+
+  it("rejects a non-v22 baseline or an unchanged candidate before calling the V2 judge", async () => {
+    const baselineMismatch = replayInput();
+    await expect(runTrackCOfflineQuality({
+      runKind: "CANDIDATE_EVALUATION",
+      acceptedBaseline: { ...TRACK_C_ACCEPTED_V22_BASELINE, release: "other" },
+      mustPassReplay: baselineMismatch.mustPassReplay,
+      judge: baselineMismatch.judge,
+      cases: baselineMismatch.cases.map(({ caseId, accepted, candidate }) => ({
+        caseId, accepted, candidate,
+      })),
+    })).rejects.toThrow("TRACK_C_OFFLINE_RUNNER_BASELINE_MISMATCH");
+    expect(baselineMismatch.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+
+    const unchanged = replayInput();
+    const cases = unchanged.cases.map(({ caseId, accepted }) => ({
+      caseId,
+      accepted,
+      candidate: offlineCandidate(caseId, accepted.quality, { reply: accepted.quality.reply }),
+    }));
+    await expect(runTrackCOfflineQuality({
+      runKind: "CANDIDATE_EVALUATION",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: unchanged.mustPassReplay,
+      judge: unchanged.judge,
+      cases,
+    })).rejects.toThrow("TRACK_C_OFFLINE_RUNNER_CANDIDATE_NOT_DISTINCT");
+    expect(unchanged.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+  });
+
+  it("stops at MUST_PASS before candidate or judge evaluation", async () => {
+    const input = replayInput();
+    await expect(runTrackCOfflineQuality({
+      runKind: "WIRING_SMOKE",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: {
+        ...input.mustPassReplay,
+        sideEffects: "ENABLED",
+      } as unknown as TrackBLivePathReplayResult,
+      judge: input.judge,
+      cases: input.cases.map(({ caseId, accepted, candidate }) => ({
+        caseId, accepted, candidate,
+      })),
+    })).rejects.toThrow("TRACK_C_C1_B3_SIDE_EFFECTS_NOT_DISABLED");
+    expect(input.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+  });
+
   it("replays exactly the frozen seven-case corpus with side effects disabled", async () => {
     const input = replayInput(); const result = await runTrackCReplay(input);
     expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(14);
@@ -167,6 +301,28 @@ describe("Track C C2 offline replay", () => {
       quality: { ...input.cases[0]!.accepted.quality, reply: "unbound reply" },
     };
     await expect(runTrackCReplay(input)).rejects.toThrow("TRACK_C_C2_B3_ENVELOPE_MISMATCH:unsupported-protected-claim");
+    expect(input.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+  });
+  it("rejects a stale candidate envelope binding before judge calls", async () => {
+    const input = replayInput();
+    const firstEnvelope = input.mustPassReplay.cases[0]?.qualityEnvelopeHashes;
+    if (firstEnvelope === undefined) throw new Error("TEST_ENVELOPE_REQUIRED");
+    input.mustPassReplay = {
+      ...input.mustPassReplay,
+      cases: input.mustPassReplay.cases.map((replayCase, index) => index === 0
+        ? {
+          ...replayCase,
+          qualityEnvelopeHashes: {
+            baseline: firstEnvelope.baseline,
+            candidate: "f".repeat(64),
+          },
+        }
+        : replayCase),
+    };
+
+    await expect(runTrackCReplay(input)).rejects.toThrow(
+      "TRACK_C_C2_CANDIDATE_ENVELOPE_MISMATCH:unsupported-protected-claim",
+    );
     expect(input.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
   });
   it("accepts a distinct candidate only through its independently guarded offline origin", async () => {
