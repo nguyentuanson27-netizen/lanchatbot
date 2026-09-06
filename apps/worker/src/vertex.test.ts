@@ -133,6 +133,30 @@ function rubricV2Response(usageMetadata?: Record<string, number>): Response {
   }), { status: 200 });
 }
 
+function compactTrackCRubricV2Response(
+  usageMetadata?: Record<string, number>,
+): Response {
+  return new Response(JSON.stringify({
+    modelVersion: "gemini-test-001",
+    ...(usageMetadata === undefined ? {} : { usageMetadata }),
+    candidates: [{ content: { parts: [{ text: JSON.stringify({
+      scores: {
+        relevance: 5,
+        questionResolution: 5,
+        nextStepQuality: 5,
+        naturalness: 5,
+        concision: 5,
+        factGrounding: 5,
+        objectionResolution: 5,
+        salesProgression: 5,
+        ctaStageFit: 5,
+        overall: 5,
+      },
+      recommendationAction: "KEEP",
+    }) }] } }],
+  }), { status: 200 });
+}
+
 function groundedDraftResponse(): Response {
   return new Response(JSON.stringify({
     modelVersion: "gemini-test-001",
@@ -962,7 +986,7 @@ describe("Vertex shadow client", () => {
       }
       judgeRequest = { url: String(input), body: JSON.parse(String(init?.body ?? "{}")) };
       now += 37;
-      return rubricV2Response({
+      return compactTrackCRubricV2Response({
         promptTokenCount: 101,
         candidatesTokenCount: 22,
         thoughtsTokenCount: 8,
@@ -1002,8 +1026,8 @@ describe("Vertex shadow client", () => {
     const generationConfig = (judgeRequest.body as {
       generationConfig: {
         responseSchema: {
-          properties: {
-            schemaVersion: unknown;
+          required: readonly string[];
+          properties: Record<string, unknown> & {
             scores: { properties: Record<string, unknown> };
           };
         };
@@ -1012,9 +1036,14 @@ describe("Vertex shadow client", () => {
     for (const key of ["temperature", "topP", "topK", "top_p", "top_k"]) {
       expect(generationConfig).not.toHaveProperty(key);
     }
-    expect(generationConfig.responseSchema.properties.schemaVersion).toEqual({
-      type: "INTEGER",
-    });
+    expect(generationConfig.responseSchema.required).toEqual([
+      "scores",
+      "recommendationAction",
+    ]);
+    expect(Object.keys(generationConfig.responseSchema.properties).sort()).toEqual([
+      "recommendationAction",
+      "scores",
+    ]);
     expect(Object.keys(generationConfig.responseSchema.properties.scores.properties).sort())
       .toEqual([
         "relevance",
@@ -1029,7 +1058,14 @@ describe("Vertex shadow client", () => {
         "overall",
       ].sort());
     expect(result).toMatchObject({
-      assessment: { schemaVersion: 2 },
+      assessment: {
+        schemaVersion: 2,
+        intent: "TRACK_C_OFFLINE_QUALITY",
+        conversationStage: "BOUND_CONTEXT",
+        strengths: [],
+        weaknesses: [],
+        improvedReply: "",
+      },
       latencyMs: 37,
       tokenUsage: { prompt: 101, completion: 22, thinking: 8, total: 131 },
     });
@@ -1144,7 +1180,7 @@ describe("Vertex shadow client", () => {
       if (String(input).includes("oauth2.googleapis.com")) {
         return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
       }
-      return rubricV2Response();
+      return compactTrackCRubricV2Response();
     }) as unknown as typeof fetch;
 
     const result = await modelWith(fetchMock, {

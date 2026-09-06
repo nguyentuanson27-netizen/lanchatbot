@@ -186,6 +186,21 @@ const SALES_RUBRIC_V2_RESPONSE_SCHEMA = {
   },
 } as const;
 
+const TRACK_C_SALES_RUBRIC_V2_RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  required: ["scores", "recommendationAction"],
+  properties: {
+    scores: SALES_RUBRIC_V2_RESPONSE_SCHEMA.properties.scores,
+    recommendationAction:
+      SALES_RUBRIC_V2_RESPONSE_SCHEMA.properties.recommendationAction,
+  },
+} as const;
+
+const TrackCJudgeAssessmentSchema = SalesRubricAssessmentV2Schema.pick({
+  scores: true,
+  recommendationAction: true,
+});
+
 const SALES_RUBRIC_V2_GENERATION_CONFIG = {
   temperature: 0.1,
   maxOutputTokens: 1_024,
@@ -196,13 +211,7 @@ const SALES_RUBRIC_V2_GENERATION_CONFIG = {
 const TRACK_C_SALES_RUBRIC_V2_GENERATION_CONFIG = {
   maxOutputTokens: 2_048,
   responseMimeType: "application/json",
-  responseSchema: {
-    ...SALES_RUBRIC_V2_RESPONSE_SCHEMA,
-    properties: {
-      ...SALES_RUBRIC_V2_RESPONSE_SCHEMA.properties,
-      schemaVersion: { type: "INTEGER" },
-    },
-  },
+  responseSchema: TRACK_C_SALES_RUBRIC_V2_RESPONSE_SCHEMA,
   thinkingConfig: {
     thinkingLevel: "HIGH",
   },
@@ -219,10 +228,12 @@ export const SALES_RUBRIC_V2_SYSTEM_INSTRUCTION = [
 ].join("\n");
 
 const TRACK_C_SALES_RUBRIC_V2_SYSTEM_INSTRUCTION = [
-  SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
+  ...SALES_RUBRIC_V2_SYSTEM_INSTRUCTION.split("\n").filter((line) =>
+    !line.startsWith("improvedReply") && !line.startsWith("Output chi la JSON")),
   "naturalness: 4–5 la dien dat Messenger tu nhien, truc tiep, khong may moc/lan lap va gon dung muc; 2–3 la de hieu nhung con cong thuc, chung chung hoac hoi lan lap; 0–1 la go gang, may moc, lan lap ro ret hoac khong tu nhien. Chi cham cach dien dat, khong cham fact hoac thoi diem CTA o day.",
   "objectionResolution: 4–5 la nhan ra va xu ly xay dung dung phan van/lo ngai cua khach bang ho tro huu ich da co can cu; 2–3 la xu ly mot phan hoac bo sot lo ngai/next step quan trong; 0–1 la bo qua, bac bo, tranh cai hoac khong xu ly phan van. Fact khong duoc ho tro van la factGrounding/MUST_PASS, khong phat kep chi vi fact do.",
   "ctaStageFit: 4–5 la de nghi buoc nho huu ich phu hop stage/thong tin con thieu, hoac dung khong CTA khi khong can; 2–3 la CTA huu ich nhung chung chung, som/muon nhe hoac khop stage yeu; 0–1 la CTA som, lac de, trai guard/stage hoac ep checkout/action. Chi cham do dung luc/phu hop CTA, khong cham phong cach viet chung o day.",
+  "Tra ve JSON ngan gon chi gom scores du 10 dimension va recommendationAction. Khong tra schemaVersion, intent, conversationStage, strengths, weaknesses hay improvedReply. Ket qua chi de danh gia, khong dieu khien outbound.",
 ].join("\n");
 
 type SalesRubricV2PromptValue =
@@ -257,6 +268,7 @@ export interface JudgeSalesReplyV2Descriptor {
 type JudgeSalesReplyV2RequestContract = Readonly<{
   systemInstruction: string;
   generationConfig: unknown;
+  compactTrackCResponse: boolean;
 }>;
 
 function judgeSalesReplyV2RequestContract(
@@ -267,11 +279,13 @@ function judgeSalesReplyV2RequestContract(
     return {
       systemInstruction: TRACK_C_SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
       generationConfig: TRACK_C_SALES_RUBRIC_V2_GENERATION_CONFIG,
+      compactTrackCResponse: true,
     };
   }
   return {
     systemInstruction: SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
     generationConfig: SALES_RUBRIC_V2_GENERATION_CONFIG,
+    compactTrackCResponse: false,
   };
 }
 
@@ -1678,12 +1692,26 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
           throw new VertexShadowError(errorCode, retryable, providerError);
         }
         const candidate = parseCandidateText(body);
-        const parsed = SalesRubricAssessmentV2Schema.safeParse(safeJson(candidate.text));
+        const parsed = requestContract.compactTrackCResponse
+          ? TrackCJudgeAssessmentSchema.safeParse(safeJson(candidate.text))
+          : SalesRubricAssessmentV2Schema.safeParse(safeJson(candidate.text));
         if (!parsed.success) {
           throw new VertexShadowError("VERTEX_RUBRIC_V2_SCHEMA_INVALID", true);
         }
+        const assessment = requestContract.compactTrackCResponse
+          ? SalesRubricAssessmentV2Schema.parse({
+            schemaVersion: 2,
+            intent: "TRACK_C_OFFLINE_QUALITY",
+            conversationStage: "BOUND_CONTEXT",
+            scores: parsed.data.scores,
+            strengths: [],
+            weaknesses: [],
+            improvedReply: "",
+            recommendationAction: parsed.data.recommendationAction,
+          })
+          : parsed.data;
         return {
-          assessment: parsed.data,
+          assessment,
           latencyMs: Math.max(0, this.now() - started),
           tokenUsage: candidate.tokenUsage,
         };
