@@ -1,8 +1,18 @@
 # Track C Quality Loop Improvement Spec — Judge 3.8, Rubric, Review, Telemetry
 
-**Status:** `APPROVED / READY_FOR_PLAN`
+**Status:** `IMPLEMENTED / COMPLETE — SEQUENCING DEVIATION RECORDED`
 
 **Scope:** Track C offline quality-evaluation loop only. This document does not authorize runtime mutation, generator-model promotion, database changes, provider-credential changes, deployment, or PREPROD/production traffic changes.
+
+## Implementation Closure
+
+- Implemented by PR #329, merged to `main` as `c2125b3904f3d9b0b609715de95285a6bf61debc`.
+- GitHub CI run #800 completed successfully, including repository `pnpm check`.
+- No pre-existing Track C `VertexShadowModel` composition existed. Owner approved the smallest offline-only composition factory, now exposed through `createTrackCQualityJudge(...)`; runtime/generator composition remains unchanged.
+- V1 comparison consumers were internal Track C consumers only and were updated directly; no V1↔V2 compatibility adapter was added.
+- Slice A and Slice B landed together in PR #329 instead of preserving the planned separately reviewable sequencing. This is a recorded, accepted non-blocking deviation; final focused coverage and repository CI are green.
+- Provider-backed Vertex smoke was not run. It remains optional; no provider credential expansion or provider-backed GitHub Actions job was added.
+- No DB migration, runtime authority mutation, PREPROD deploy, generator promotion, generator model/location change, or new secret scope was part of this implementation.
 
 ## Objective
 
@@ -18,9 +28,9 @@ The change has five bounded goals:
 
 This stays inside the adopted Track C principle: reuse the existing `judgeSalesReplyV2(...)`, B3 replay, deterministic MUST_PASS, and provenance/identity machinery; do not build a second judge/evaluator platform.
 
-## Current Context
+## Pre-implementation Context
 
-Current `main` has:
+At the start of this work, `main` had:
 
 - `TrackCQualityJudgePort` wrapping `judgeSalesReplyV2(...)`;
 - deterministic C1 MUST_PASS asserted before either quality-judge call;
@@ -56,7 +66,7 @@ Official references checked for this spec:
 
 ## Canonical Track C Amendment
 
-The adopted Track C V5 text currently includes calibration samples among cases reserved for human review. This spec intentionally narrows the **normal automatic comparison routing**:
+The adopted Track C V5 text originally included calibration samples among cases reserved for human review. This spec intentionally narrowed the **normal automatic comparison routing**:
 
 ```text
 before
@@ -70,7 +80,7 @@ This is a deliberate source-of-truth amendment, not an implementation detail.
 
 It does **not** prohibit owner-requested/manual calibration when maintaining or changing the evaluator. It only removes calibration from the ordinary candidate-comparison contract.
 
-When this spec is adopted, the governing Track C documentation must be updated so canonical wording and implementation agree.
+PR #329 updated the governing Track C documentation so canonical wording and implementation agree.
 
 ## Assumptions
 
@@ -353,9 +363,9 @@ apps/worker/src/
 └── track-c-quality-judge.test.ts   # MUST_PASS, contract, identity, review, telemetry tests
 ```
 
-During `/plan`, locate the actual Track C composition/configuration site that creates `VertexShadowModel` and actual consumers of `TRACK_C_QUALITY_JUDGE_V1`; do not invent a new config or compatibility subsystem.
+Planning confirmed no pre-existing Track C composition/configuration site. The implementation therefore uses the owner-approved minimal offline-only `createTrackCQualityJudge(...)` composition at the Track C boundary rather than modifying runtime/generator composition.
 
-Documentation must update the governing Track C human-review wording when this spec is adopted. No ADR is required unless implementation discovers a genuinely new architecture decision.
+Documentation updated the governing Track C human-review wording. No ADR was required because no new cross-cutting architecture decision was introduced beyond the owner-approved bounded offline composition clarification.
 
 ## Code Style
 
@@ -468,6 +478,8 @@ The spec is satisfied when implementation evidence proves all of the following:
 14. Focused tests, worker typecheck/build/lint, and final repository `pnpm check` pass before implementation is declared complete.
 15. No DB migration, runtime authority mutation, PREPROD deploy, provider-secret expansion, generator location/model change, or generator promotion occurs as part of this change.
 
+Success criteria 1–5 and 7–15 are implemented and verified by the merged change and CI evidence. Criterion 6's planned ordering was not preserved because Slice A and Slice B landed together in PR #329; this sequencing deviation is explicitly recorded above and accepted as non-blocking rather than rewritten as if the original ordering occurred.
+
 ## Owner Decisions Locked
 
 - Judge model: `gemini-3.8-flash`.
@@ -476,4 +488,4 @@ The spec is satisfied when implementation evidence proves all of the following:
 - Generator/runtime model and location: unchanged by this spec.
 - No judge benchmark project.
 
-The specification has no remaining owner decision required before `/plan`.
+The specification has no remaining owner decision. Implementation is closed on `main`; provider-backed smoke remains optional future verification only.
