@@ -1,21 +1,34 @@
+import { generateKeyPairSync } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import type { SalesRubricAssessmentV2 } from "@lana/contracts";
 import type { TrackBLivePathReplayResult } from "./track-b-live-path-replay.js";
 import { TRACK_C_C1_MUST_PASS_POLICY } from "./track-c-must-pass.js";
 import {
+  createTrackCQualityJudge,
   runTrackCQualityComparison,
+  type TrackCJudgeCallResult,
   type TrackCQualityComparisonInput,
 } from "./track-c-quality-judge.js";
 
-function judgeDescriptor(model = "gemini-3.5-flash-lite") {
+const privateKey = generateKeyPairSync("rsa", {
+  modulusLength: 2_048,
+  privateKeyEncoding: { type: "pkcs8", format: "pem" },
+  publicKeyEncoding: { type: "spki", format: "pem" },
+}).privateKey;
+
+function judgeDescriptor(model = "gemini-3.8-flash") {
   return {
     provider: "VERTEX_AI" as const,
+    location: "global",
     model,
     promptRubric: {
       systemInstruction: "fixed-rubric",
       userPromptEnvelope: ["VERIFIED_FACTS_JSON", "PROPOSAL_SUMMARY_JSON"],
     },
-    generationConfig: { temperature: 0.1, maxOutputTokens: 1_024 },
+    generationConfig: {
+      maxOutputTokens: 1_024,
+      thinkingConfig: { thinkingLevel: "HIGH" },
+    },
   };
 }
 
@@ -44,6 +57,19 @@ function assessment(
     improvedReply: "",
     recommendationAction,
   };
+}
+
+function judgeResult(
+  value: SalesRubricAssessmentV2,
+  latencyMs = 17,
+  tokenUsage: TrackCJudgeCallResult["tokenUsage"] = {
+    prompt: 100,
+    completion: 20,
+    thinking: 5,
+    total: 125,
+  },
+): TrackCJudgeCallResult {
+  return { assessment: value, latencyMs, tokenUsage };
 }
 
 function passingReplay(): TrackBLivePathReplayResult {
@@ -103,8 +129,8 @@ function input(
     judge: {
       judgeSalesReplyV2Descriptor: vi.fn(() => judgeDescriptor()),
       judgeSalesReplyV2: vi.fn()
-        .mockResolvedValueOnce(assessment(3))
-        .mockResolvedValueOnce(assessment(4)),
+        .mockResolvedValueOnce(judgeResult(assessment(3), 11))
+        .mockResolvedValueOnce(judgeResult(assessment(4), 13)),
     },
     context: [{
       direction: "INBOUND",
@@ -133,10 +159,7 @@ function input(
 describe("Track C C1.1 offline quality judge", () => {
   it("requires frozen MUST_PASS before invoking either judge call", async () => {
     const request = input({
-      mustPassReplay: {
-        ...passingReplay(),
-        sideEffects: "ENABLED",
-      } as unknown as TrackBLivePathReplayResult,
+      mustPassReplay: { ...passingReplay(), sideEffects: "ENABLED" } as unknown as TrackBLivePathReplayResult,
     });
 
     await expect(runTrackCQualityComparison(request)).rejects.toThrow(
@@ -146,7 +169,7 @@ describe("Track C C1.1 offline quality judge", () => {
     expect(request.judge.judgeSalesReplyV2Descriptor).not.toHaveBeenCalled();
   });
 
-  it("pins one judge configuration and returns evaluation-only BETTER evidence", async () => {
+  it("pins the Track C V2 judge and returns evaluation-only BETTER evidence", async () => {
     const request = input();
 
     const result = await runTrackCQualityComparison(request);
@@ -170,16 +193,18 @@ describe("Track C C1.1 offline quality judge", () => {
       request.candidate.guardOutcome,
     );
     expect(result).toMatchObject({
-      contractVersion: "TRACK_C_QUALITY_JUDGE_V1",
+      contractVersion: "TRACK_C_QUALITY_JUDGE_V2",
       sideEffects: "DISABLED",
       evaluationOnly: true,
       comparison: { disposition: "BETTER", overallScoreDelta: 1 },
       identity: {
-        mustPass: {
-          captureSetHash: TRACK_C_C1_MUST_PASS_POLICY.captureSetHash,
-        },
-        judge: { provider: "VERTEX_AI", model: "gemini-3.5-flash-lite" },
+        mustPass: { captureSetHash: TRACK_C_C1_MUST_PASS_POLICY.captureSetHash },
+        judge: { provider: "VERTEX_AI", location: "global", model: "gemini-3.8-flash" },
         verifiedFactFixtureHash: TRACK_C_C1_MUST_PASS_POLICY.factFixtureHash,
+      },
+      metrics: {
+        accepted: { latencyMs: 11, tokenUsage: { prompt: 100 } },
+        candidate: { latencyMs: 13, tokenUsage: { completion: 20 } },
       },
     });
     expect(result.identity.judge.promptRubricHash).toMatch(/^[a-f0-9]{64}$/u);
@@ -187,82 +212,141 @@ describe("Track C C1.1 offline quality judge", () => {
     expect(result.identity.accepted.replyHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(result.identity.candidate.replyHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(result.identity.verifiedFactsPayloadHash).toMatch(/^[a-f0-9]{64}$/u);
+    expect(result.metrics.wallClockMs).toEqual(expect.any(Number));
   });
 
-  it("marks ties and score/recommendation disagreement for bounded human review", async () => {
-    const request = input({
+  it("fails closed on any unpinned judge descriptor before either call", async () => {
+    for (const descriptor of [
+      { ...judgeDescriptor(), provider: "OTHER" },
+      { ...judgeDescriptor(), location: "us-central1" },
+      { ...judgeDescriptor(), model: "gemini-other" },
+      { ...judgeDescriptor(), location: undefined },
+    ]) {
+      const request = input({
+        judge: {
+          judgeSalesReplyV2Descriptor: vi.fn(() => descriptor as never),
+          judgeSalesReplyV2: vi.fn(),
+        },
+      });
+
+      await expect(runTrackCQualityComparison(request)).rejects.toThrow(
+        "TRACK_C_C11_JUDGE_IDENTITY_MISMATCH",
+      );
+      expect(request.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+    }
+  });
+
+  it("routes human review only for a near tie, regression, or disagreement", async () => {
+    const tie = await runTrackCQualityComparison(input({
       judge: {
         judgeSalesReplyV2Descriptor: vi.fn(() => judgeDescriptor()),
         judgeSalesReplyV2: vi.fn()
-          .mockResolvedValueOnce(assessment(4, "KEEP"))
-          .mockResolvedValueOnce(assessment(4.1, "REWRITE")),
+          .mockResolvedValueOnce(judgeResult(assessment(4, "KEEP")))
+          .mockResolvedValueOnce(judgeResult(assessment(4.1, "REWRITE"))),
       },
-    });
-
-    const result = await runTrackCQualityComparison(request);
-
-    expect(result.comparison).toMatchObject({
-      disposition: "SAME",
-      requiresHumanReview: true,
-      reviewReasonCodes: expect.arrayContaining([
-        "NEAR_TIE",
-        "JUDGE_DISAGREEMENT",
-      ]),
-    });
-  });
-
-  it("reserves human review for an unexpected quality regression", async () => {
-    const request = input({
+    }));
+    const regression = await runTrackCQualityComparison(input({
       judge: {
         judgeSalesReplyV2Descriptor: vi.fn(() => judgeDescriptor()),
         judgeSalesReplyV2: vi.fn()
-          .mockResolvedValueOnce(assessment(4))
-          .mockResolvedValueOnce(assessment(3)),
+          .mockResolvedValueOnce(judgeResult(assessment(4)))
+          .mockResolvedValueOnce(judgeResult(assessment(3))),
       },
-    });
+    }));
 
-    const result = await runTrackCQualityComparison(request);
-
-    expect(result.comparison).toEqual({
-      disposition: "WORSE",
-      overallScoreDelta: -1,
-      requiresHumanReview: true,
-      reviewReasonCodes: ["UNEXPECTED_REGRESSION"],
-    });
+    expect(tie.comparison.reviewReasonCodes).toEqual([
+      "NEAR_TIE",
+      "JUDGE_DISAGREEMENT",
+    ]);
+    expect(regression.comparison.reviewReasonCodes).toEqual([
+      "UNEXPECTED_REGRESSION",
+    ]);
   });
 
-  it("derives the model identity from the invoked judge and binds the fact payload", async () => {
+  it("does not let telemetry change deterministic identity or review routing", async () => {
+    const first = await runTrackCQualityComparison(input({
+      judge: {
+        judgeSalesReplyV2Descriptor: vi.fn(() => judgeDescriptor()),
+        judgeSalesReplyV2: vi.fn()
+          .mockResolvedValueOnce(judgeResult(assessment(4), 1, { prompt: 1 }))
+          .mockResolvedValueOnce(judgeResult(assessment(4), 2, { total: 2 })),
+      },
+    }));
+    const second = await runTrackCQualityComparison(input({
+      judge: {
+        judgeSalesReplyV2Descriptor: vi.fn(() => judgeDescriptor()),
+        judgeSalesReplyV2: vi.fn()
+          .mockResolvedValueOnce(judgeResult(assessment(4), 999, { thinking: 999 }))
+          .mockResolvedValueOnce(judgeResult(assessment(4), 888, { completion: 888 })),
+      },
+    }));
+
+    expect(first.identity).toEqual(second.identity);
+    expect(first.comparison).toEqual(second.comparison);
+    expect(first.metrics).not.toEqual(second.metrics);
+  });
+
+  it("keeps the verified-facts payload in deterministic identity", async () => {
     const factsA = { products: [{ id: "SQ149", price: 699_000 }] } as unknown as NonNullable<
       TrackCQualityComparisonInput["verifiedFacts"]
     >;
     const factsB = { products: [{ id: "SQ149", price: 799_000 }] } as unknown as NonNullable<
       TrackCQualityComparisonInput["verifiedFacts"]
     >;
-    const resultA = await runTrackCQualityComparison(input({
+    const first = await runTrackCQualityComparison(input({
       verifiedFacts: factsA,
       judge: {
-        judgeSalesReplyV2Descriptor: vi.fn(() => judgeDescriptor("actual-model-a")),
+        judgeSalesReplyV2Descriptor: vi.fn(() => judgeDescriptor()),
         judgeSalesReplyV2: vi.fn()
-          .mockResolvedValueOnce(assessment(3))
-          .mockResolvedValueOnce(assessment(4)),
+          .mockResolvedValueOnce(judgeResult(assessment(4)))
+          .mockResolvedValueOnce(judgeResult(assessment(4))),
       },
     }));
-    const resultB = await runTrackCQualityComparison(input({
+    const second = await runTrackCQualityComparison(input({
       verifiedFacts: factsB,
       judge: {
-        judgeSalesReplyV2Descriptor: vi.fn(() => judgeDescriptor("actual-model-b")),
+        judgeSalesReplyV2Descriptor: vi.fn(() => judgeDescriptor()),
         judgeSalesReplyV2: vi.fn()
-          .mockResolvedValueOnce(assessment(3))
-          .mockResolvedValueOnce(assessment(4)),
+          .mockResolvedValueOnce(judgeResult(assessment(4)))
+          .mockResolvedValueOnce(judgeResult(assessment(4))),
       },
     }));
 
-    expect(resultA.identity.judge.model).toBe("actual-model-a");
-    expect(resultA.identity.verifiedFactFixtureHash).toBe(
-      TRACK_C_C1_MUST_PASS_POLICY.factFixtureHash,
+    expect(first.identity.verifiedFactsPayloadHash).not.toBe(
+      second.identity.verifiedFactsPayloadHash,
     );
-    expect(resultA.identity.verifiedFactsPayloadHash).not.toBe(
-      resultB.identity.verifiedFactsPayloadHash,
-    );
+  });
+
+  it("does not route a caller-supplied legacy calibration flag", async () => {
+    const result = await runTrackCQualityComparison({
+      ...input({
+        judge: {
+          judgeSalesReplyV2Descriptor: vi.fn(() => judgeDescriptor()),
+          judgeSalesReplyV2: vi.fn()
+            .mockResolvedValueOnce(judgeResult(assessment(4)))
+            .mockResolvedValueOnce(judgeResult(assessment(4))),
+        },
+      }),
+      calibrationSample: true,
+    } as unknown as TrackCQualityComparisonInput);
+
+    expect(result.comparison.reviewReasonCodes).toEqual(["NEAR_TIE"]);
+  });
+
+  it("creates an offline-only judge port pinned separately from generator options", () => {
+    const judge = createTrackCQualityJudge({
+      projectId: "test-project",
+      location: "us-central1",
+      modelName: "generator-model",
+      judgeLocation: "europe-west1",
+      judgeModelName: "other-model",
+      serviceAccount: { email: "test@example.iam.gserviceaccount.com", privateKey },
+    });
+
+    expect(judge.judgeSalesReplyV2Descriptor()).toMatchObject({
+      provider: "VERTEX_AI",
+      location: "global",
+      model: "gemini-3.8-flash",
+    });
   });
 });

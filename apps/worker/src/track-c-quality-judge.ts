@@ -7,10 +7,27 @@ import {
 import type { ShadowContextMessage } from "@lana/database";
 import { assertTrackCC1MustPass } from "./track-c-must-pass.js";
 import type { TrackBLivePathReplayResult } from "./track-b-live-path-replay.js";
-import type { JudgeSalesReplyV2Descriptor } from "./vertex.js";
+import {
+  VertexShadowModel,
+  type JudgeSalesReplyV2Descriptor,
+  type VertexShadowModelOptions,
+} from "./vertex.js";
 
 const HASH = /^[a-f0-9]{64}$/u;
 const NEAR_TIE_DELTA = 0.25;
+const TRACK_C_JUDGE_LOCATION = "global";
+const TRACK_C_JUDGE_MODEL = "gemini-3.8-flash";
+
+export interface TrackCJudgeCallResult {
+  readonly assessment: SalesRubricAssessmentV2;
+  readonly latencyMs: number;
+  readonly tokenUsage: Readonly<{
+    readonly prompt?: number;
+    readonly completion?: number;
+    readonly thinking?: number;
+    readonly total?: number;
+  }>;
+}
 
 export interface TrackCQualityJudgePort {
   judgeSalesReplyV2Descriptor(): JudgeSalesReplyV2Descriptor;
@@ -20,7 +37,38 @@ export interface TrackCQualityJudgePort {
     verifiedFacts: BusinessFactEnvelopeV1 | null,
     proposalSummary: unknown,
     guardOutcome: unknown,
-  ): Promise<SalesRubricAssessmentV2>;
+  ): Promise<TrackCJudgeCallResult>;
+}
+
+/**
+ * The only Track C composition: a fresh offline evaluator port that pins the
+ * owner-selected judge without exposing generator methods or runtime wiring.
+ */
+export function createTrackCQualityJudge(
+  options: VertexShadowModelOptions,
+): TrackCQualityJudgePort {
+  const model = new VertexShadowModel({
+    ...options,
+    judgeLocation: TRACK_C_JUDGE_LOCATION,
+    judgeModelName: TRACK_C_JUDGE_MODEL,
+  });
+  const port: TrackCQualityJudgePort = {
+    judgeSalesReplyV2Descriptor: () => model.judgeSalesReplyV2Descriptor(),
+    judgeSalesReplyV2: (
+      context: readonly ShadowContextMessage[],
+      actualReply: string,
+      verifiedFacts: BusinessFactEnvelopeV1 | null,
+      proposalSummary: unknown,
+      guardOutcome: unknown,
+    ) => model.judgeSalesReplyV2WithMetrics(
+      context,
+      actualReply,
+      verifiedFacts,
+      proposalSummary,
+      guardOutcome,
+    ),
+  };
+  return Object.freeze(port);
 }
 
 export interface TrackCQualityReplyInput {
@@ -37,18 +85,15 @@ export interface TrackCQualityComparisonInput {
   readonly factFixtureHash: string;
   readonly accepted: TrackCQualityReplyInput;
   readonly candidate: TrackCQualityReplyInput;
-  /** Calibration is explicit; ordinary replay output does not require review. */
-  readonly calibrationSample?: boolean;
 }
 
 type ReviewReasonCode =
-  | "CALIBRATION_SAMPLE"
   | "NEAR_TIE"
   | "UNEXPECTED_REGRESSION"
   | "JUDGE_DISAGREEMENT";
 
 export interface TrackCQualityComparisonResult {
-  readonly contractVersion: "TRACK_C_QUALITY_JUDGE_V1";
+  readonly contractVersion: "TRACK_C_QUALITY_JUDGE_V2";
   /** This adapter returns evaluation evidence only; it cannot authorize effects. */
   readonly evaluationOnly: true;
   readonly sideEffects: "DISABLED";
@@ -59,6 +104,7 @@ export interface TrackCQualityComparisonResult {
     };
     readonly judge: {
       readonly provider: string;
+      readonly location: string;
       readonly model: string;
       readonly promptRubricHash: string;
       readonly generationConfigHash: string;
@@ -79,6 +125,12 @@ export interface TrackCQualityComparisonResult {
   };
   readonly accepted: SalesRubricAssessmentV2;
   readonly candidate: SalesRubricAssessmentV2;
+  /** Runtime observation only. Never part of deterministic identity. */
+  readonly metrics: {
+    readonly accepted: Omit<TrackCJudgeCallResult, "assessment">;
+    readonly candidate: Omit<TrackCJudgeCallResult, "assessment">;
+    readonly wallClockMs: number;
+  };
   readonly comparison: {
     readonly disposition: "BETTER" | "SAME" | "WORSE";
     readonly overallScoreDelta: number;
@@ -131,11 +183,16 @@ export async function runTrackCQualityComparison(
     throw new Error("TRACK_C_C11_FACT_FIXTURE_MISMATCH");
   }
   const judgeDescriptor = input.judge.judgeSalesReplyV2Descriptor();
-  if (!judgeDescriptor.provider.trim() || !judgeDescriptor.model.trim()) {
-    throw new Error("TRACK_C_C11_JUDGE_IDENTITY_REQUIRED");
+  if (
+    judgeDescriptor.provider !== "VERTEX_AI" ||
+    judgeDescriptor.location !== TRACK_C_JUDGE_LOCATION ||
+    judgeDescriptor.model !== TRACK_C_JUDGE_MODEL
+  ) {
+    throw new Error("TRACK_C_C11_JUDGE_IDENTITY_MISMATCH");
   }
 
-  const [accepted, candidate] = await Promise.all([
+  const started = Date.now();
+  const [acceptedCall, candidateCall] = await Promise.all([
     input.judge.judgeSalesReplyV2(
       input.context,
       input.accepted.reply,
@@ -151,6 +208,8 @@ export async function runTrackCQualityComparison(
       input.candidate.guardOutcome,
     ),
   ]);
+  const accepted = acceptedCall.assessment;
+  const candidate = candidateCall.assessment;
   const overallScoreDelta = candidate.scores.overall - accepted.scores.overall;
   const disposition = overallScoreDelta > NEAR_TIE_DELTA
     ? "BETTER"
@@ -158,14 +217,13 @@ export async function runTrackCQualityComparison(
     ? "WORSE"
     : "SAME";
   const reviewReasonCodes: ReviewReasonCode[] = [];
-  if (input.calibrationSample) reviewReasonCodes.push("CALIBRATION_SAMPLE");
   if (disposition === "SAME") reviewReasonCodes.push("NEAR_TIE");
   if (disposition === "WORSE") reviewReasonCodes.push("UNEXPECTED_REGRESSION");
   if (hasJudgeDisagreement(overallScoreDelta, accepted, candidate)) {
     reviewReasonCodes.push("JUDGE_DISAGREEMENT");
   }
   return {
-    contractVersion: "TRACK_C_QUALITY_JUDGE_V1",
+    contractVersion: "TRACK_C_QUALITY_JUDGE_V2",
     evaluationOnly: true,
     sideEffects: "DISABLED",
     identity: {
@@ -175,6 +233,7 @@ export async function runTrackCQualityComparison(
       },
       judge: {
         provider: judgeDescriptor.provider,
+        location: judgeDescriptor.location,
         model: judgeDescriptor.model,
         promptRubricHash: sha256(judgeDescriptor.promptRubric),
         generationConfigHash: sha256(judgeDescriptor.generationConfig),
@@ -195,6 +254,17 @@ export async function runTrackCQualityComparison(
     },
     accepted,
     candidate,
+    metrics: {
+      accepted: {
+        latencyMs: acceptedCall.latencyMs,
+        tokenUsage: acceptedCall.tokenUsage,
+      },
+      candidate: {
+        latencyMs: candidateCall.latencyMs,
+        tokenUsage: candidateCall.tokenUsage,
+      },
+      wallClockMs: Math.max(0, Date.now() - started),
+    },
     comparison: {
       disposition,
       overallScoreDelta,
