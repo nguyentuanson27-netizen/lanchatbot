@@ -13,8 +13,8 @@ The change has five bounded goals:
 1. Change the Track C quality judge to Vertex AI `gemini-3.8-flash` while leaving the generator/runtime model unchanged.
 2. Clarify the existing rubric for `naturalness`, `objectionResolution`, and `ctaStageFit` without adding new score dimensions.
 3. Establish a process rule that each candidate experiment changes only a small number of material tuning variables so quality deltas remain attributable.
-4. Restrict automatic human-review routing to near-ties, regressions, and judge disagreement.
-5. Record real judge token usage and latency instead of estimating them.
+4. Deliberately amend normal Track C automatic human-review routing so only near-ties, regressions, and judge disagreement route automatically; calibration remains an explicit/manual evaluator-maintenance activity rather than a normal comparison reason.
+5. Record real judge token usage and latency instead of estimating them, while keeping those runtime metrics outside identity/provenance hashes and selection semantics.
 
 This stays inside the adopted Track C principle: reuse the existing `judgeSalesReplyV2(...)`, B3 replay, MUST_PASS, and provenance/identity machinery; do not build a second judge/evaluator platform.
 
@@ -27,6 +27,7 @@ Current `main` has:
 - accepted and candidate replies scored with the same pinned judge descriptor;
 - `BETTER | SAME | WORSE` derived from `overall` delta with `NEAR_TIE_DELTA = 0.25`;
 - human-review reasons currently including `CALIBRATION_SAMPLE`, `NEAR_TIE`, `UNEXPECTED_REGRESSION`, and `JUDGE_DISAGREEMENT`;
+- the adopted Track C text currently reserves human review for calibration samples, ties/near-ties, unexpected regressions, and judge disagreements;
 - the Vertex V2 judge using the same configured `modelName` as other Vertex generation paths;
 - the V2 judge generation config currently including `temperature: 0.1`, `maxOutputTokens: 1024`, JSON MIME type, and the existing response schema;
 - the V2 rubric already scoring `naturalness`, `objectionResolution`, and `ctaStageFit` but without explicit score anchors for those three dimensions;
@@ -38,6 +39,30 @@ Gemini 3.8 Flash uses model ID `gemini-3.8-flash`, is GA, supports structured ou
 
 For Gemini 3.8 Flash, deprecated sampling parameters such as `temperature`, `top_p`, and `top_k` must not be relied upon; the judge configuration must instead pin the model, structured response schema, and a supported thinking level. The current judge-only `temperature: 0.1` therefore cannot simply be carried forward as the determinism control for the new judge.
 
+Official references checked for this spec:
+
+- Google AI for Developers — Gemini 3.8 Flash model page: `https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash`
+- Google AI for Developers — Gemini 3.8 migration/latest-model guidance: `https://ai.google.dev/gemini-api/docs/latest-model`
+- Google AI for Developers — Gemini thinking levels: `https://ai.google.dev/gemini-api/docs/thinking`
+
+## Canonical Track C Amendment
+
+The adopted Track C V5 text currently includes calibration samples among the cases reserved for human review. This spec intentionally narrows the **normal automatic comparison routing**:
+
+```text
+before
+CALIBRATION_SAMPLE | NEAR_TIE | UNEXPECTED_REGRESSION | JUDGE_DISAGREEMENT
+
+after
+NEAR_TIE | UNEXPECTED_REGRESSION | JUDGE_DISAGREEMENT
+```
+
+This is a deliberate source-of-truth amendment, not an implementation detail.
+
+It does **not** prohibit owner-requested/manual calibration when maintaining or changing the evaluator. It only removes `CALIBRATION_SAMPLE` from the normal candidate-comparison contract so ordinary Track C iterations do not automatically route samples for calibration.
+
+When this spec is adopted, the governing Track C documentation must be updated to reflect the narrowed automatic routing so implementation and canonical documentation do not disagree.
+
 ## Assumptions
 
 1. **Generator remains unchanged.** This spec changes only the offline Track C judge. A stronger generator is a future candidate experiment, not Track C infrastructure work.
@@ -47,6 +72,8 @@ For Gemini 3.8 Flash, deprecated sampling parameters such as `temperature`, `top
 5. **No new rubric dimensions.** Only wording/anchors for the three existing dimensions named above may change.
 6. **Candidate-change discipline is a workflow rule, not a new automated diff engine.** No candidate mutation classifier/platform is introduced.
 7. **Thinking level must be explicitly pinned.** Recommended initial value is `MEDIUM` because this is an offline quality judge rather than a latency-critical customer reply. Owner may choose `LOW` before implementation if cost/latency is preferred.
+8. **Runtime metrics are observational evidence, not identity.** Token counts and latency must never participate in candidate identity, judge identity, reproducibility hashes, comparison disposition, or selection decisions.
+9. **Judge-model migration and rubric clarification are separately observable slices.** The model/config migration must be verifiable before rubric wording changes are introduced so behavior changes remain attributable.
 
 ## Tech Stack
 
@@ -63,7 +90,7 @@ No new dependency is required by this spec.
 
 ### 1. Judge model separation
 
-Extend the existing Vertex model configuration with a judge-specific model identity while preserving backward compatibility for existing construction sites.
+Extend the existing Vertex model configuration with a judge-specific model identity while preserving backward compatibility for existing non-Track-C construction sites.
 
 Preferred shape:
 
@@ -81,11 +108,16 @@ Only `judgeSalesReplyV2Descriptor()` and the actual judge request path use `judg
 
 All generator/proposal/draft/prelabel paths continue using `modelName` unchanged.
 
-The Track C configured judge identity must resolve to:
+The fallback exists only to avoid breaking unrelated construction sites. The Track C composition/configuration boundary must explicitly set and verify the expected judge identity; it must not silently inherit the generator model.
+
+For this Track C configuration, the resolved descriptor must be exactly:
 
 ```text
-gemini-3.8-flash
+provider: VERTEX_AI
+model: gemini-3.8-flash
 ```
+
+A missing or mismatched Track C judge configuration must fail focused configuration/contract verification rather than passing through the `modelName` fallback unnoticed.
 
 ### 2. Gemini 3.8 judge generation config
 
@@ -129,7 +161,31 @@ Keep the existing score schema unchanged. Add concise anchors to the existing ju
 
 Do not add `brandTone`, warmth, pressure, emoji, verbosity, or other new dimensions in this slice.
 
-### 4. Candidate experiment discipline
+### 4. Implementation sequencing for attribution
+
+Do not make the judge-model migration and rubric wording change one indistinguishable behavior change.
+
+Implement and verify in this order:
+
+```text
+Slice A
+judge config separation
++ explicit Track C gemini-3.8-flash binding
++ 3.8 generation config
++ telemetry plumbing
++ automatic-review routing amendment
+-> focused deterministic tests
+-> optional authorized provider smoke
+
+Slice B
+rubric anchors for the three existing dimensions only
+-> focused rubric/schema tests
+-> no model/config change in this slice
+```
+
+The slices may live in the same feature branch if desired, but Slice A must have independently reviewable verification before Slice B changes evaluator wording. Do not change generator behavior in either slice.
+
+### 5. Candidate experiment discipline
 
 Document the following Track C operating rule:
 
@@ -141,7 +197,7 @@ Document the following Track C operating rule:
 
 No runtime enforcement or candidate-diff platform is added.
 
-### 5. Human review routing
+### 6. Human review routing
 
 Change the Track C comparison contract so automatic human review is requested only for:
 
@@ -151,9 +207,11 @@ Change the Track C comparison contract so automatic human review is requested on
 
 Remove `CALIBRATION_SAMPLE` as an automatic review reason and remove the optional `calibrationSample` input from the normal comparison path.
 
+Manual/owner-requested evaluator calibration remains allowed outside the normal candidate-comparison routing and does not require a new calibration subsystem.
+
 Do not change `NEAR_TIE_DELTA = 0.25` in this slice.
 
-### 6. Real token and latency telemetry
+### 7. Real token and latency telemetry
 
 The judge call must preserve provider-returned usage metadata and measured latency for both accepted and candidate calls.
 
@@ -178,6 +236,31 @@ Minimum evidence per judge call:
 - Because the two judge calls run in parallel, do not report `accepted.latencyMs + candidate.latencyMs` as wall-clock latency. If aggregate wall time is exposed, measure it around the parallel comparison separately.
 
 Telemetry remains evaluation evidence only and must not contain credentials, raw auth material, or new customer data beyond what the existing evaluation result already carries.
+
+Telemetry must be structurally separated from identity-bearing evidence. If stored on the comparison result, prefer an explicitly non-identity block such as:
+
+```ts
+{
+  // existing deterministic identity-bearing fields
+  metrics: {
+    accepted: { latencyMs, tokenUsage },
+    candidate: { latencyMs, tokenUsage },
+    wallClockMs,
+  },
+}
+```
+
+The following must **not** include `latencyMs`, token usage, or wall-clock measurements:
+
+- candidate identity/hash;
+- accepted baseline identity/hash;
+- judge provider/model/rubric/config identity hashes;
+- replay/capture/facts/context/reply identity hashes;
+- provenance/reproducibility fingerprints;
+- `BETTER | SAME | WORSE` calculation;
+- automatic human-review reason calculation.
+
+Repeated evaluation of the same immutable inputs under the same pinned evaluator may produce different metrics without changing deterministic identity.
 
 ## Commands
 
@@ -225,9 +308,9 @@ apps/worker/src/
 └── track-c-quality-judge.test.ts   # C1-before-judge, identity, review, telemetry tests
 ```
 
-One existing composition/configuration site that creates `VertexShadowModel` will also need to set `judgeModelName: "gemini-3.8-flash"`; locate the real call site during `/plan` rather than inventing a new config subsystem.
+One existing composition/configuration site that creates `VertexShadowModel` will also need to set `judgeModelName: "gemini-3.8-flash"` and expose enough focused verification to prove Track C resolves the exact expected descriptor; locate the real call site during `/plan` rather than inventing a new config subsystem.
 
-Documentation may update the existing Track C section/source-of-truth, but no ADR is required unless implementation discovers a genuinely new architecture decision.
+Documentation must update the governing Track C human-review wording when this spec is adopted because removal of automatic `CALIBRATION_SAMPLE` routing is a deliberate amendment. No ADR is required unless implementation discovers a genuinely new architecture decision.
 
 ## Code Style
 
@@ -243,7 +326,7 @@ export interface TrackCJudgeCallResult {
 }
 ```
 
-Prefer small typed additions over a generic telemetry framework.
+Prefer small typed additions over a generic telemetry framework. Keep runtime metrics in a clearly non-identity structure rather than extending deterministic fingerprint inputs.
 
 ## Testing Strategy
 
@@ -251,22 +334,27 @@ Prefer small typed additions over a generic telemetry framework.
 
 1. C1 MUST_PASS still rejects before descriptor or judge invocation.
 2. Judge descriptor reports `VERTEX_AI` + `gemini-3.8-flash` when judge-specific model configuration is set.
-3. Generator `modelName` remains unchanged when only `judgeModelName` changes.
-4. Gemini 3.8 judge request preserves the existing JSON response schema and does not send/rely on `temperature`.
-5. Judge generation config pins the owner-approved `thinkingLevel`.
-6. Rubric schema remains V2 with the same ten score fields; only the three target dimension instructions are clarified.
-7. Accepted and candidate still use the same pinned judge descriptor/config.
-8. Human review triggers only for near-tie, regression, or judge disagreement.
-9. `CALIBRATION_SAMPLE` no longer appears in the normal comparison contract.
-10. Mock Vertex responses prove real `promptTokenCount`, `candidatesTokenCount`, `thoughtsTokenCount` when present, `totalTokenCount`, and measured latency are retained correctly.
-11. Missing usage metadata does not cause fabricated token numbers.
-12. Evaluation remains side-effect-free and cannot authorize outbound actions.
+3. The real Track C composition/configuration path explicitly binds `judgeModelName: "gemini-3.8-flash"` and focused verification fails if Track C silently falls back to the generator model.
+4. Generator `modelName` remains unchanged when only `judgeModelName` changes.
+5. Gemini 3.8 judge request preserves the existing JSON response schema and does not send/rely on `temperature`, `top_p`, or `top_k`.
+6. Judge generation config pins the owner-approved `thinkingLevel`.
+7. Slice A can be verified with the existing rubric before Slice B changes rubric wording.
+8. Rubric schema remains V2 with the same ten score fields; only the three target dimension instructions are clarified.
+9. Accepted and candidate still use the same pinned judge descriptor/config.
+10. Human review triggers only for near-tie, regression, or judge disagreement.
+11. `CALIBRATION_SAMPLE` and the normal `calibrationSample` input no longer appear in the normal comparison contract; manual evaluator calibration remains possible without automatic routing.
+12. Mock Vertex responses prove real `promptTokenCount`, `candidatesTokenCount`, `thoughtsTokenCount` when present, `totalTokenCount`, and measured latency are retained correctly.
+13. Missing usage metadata does not cause fabricated token numbers.
+14. Tests prove telemetry values are excluded from deterministic identity/fingerprint inputs and do not affect `BETTER | SAME | WORSE` or review-reason selection.
+15. Evaluation remains side-effect-free and cannot authorize outbound actions.
 
 ### Provider-backed verification
 
 A provider-backed smoke check is allowed only in the already-authorized local/VPS/manual evaluation boundary using existing Vertex credentials. It is not a judge benchmark and does not compare multiple judge models.
 
 The smoke check should prove only that the exact pinned `gemini-3.8-flash` request is accepted, returns schema-valid V2 JSON, and exposes the expected usage metadata available from the provider.
+
+If this smoke check is run, prefer doing it after Slice A and before Slice B so a provider/API integration issue is not confounded with rubric changes.
 
 Do not add Vertex credentials to GitHub Actions.
 
@@ -277,9 +365,11 @@ Do not add Vertex credentials to GitHub Actions.
 - C1 deterministic MUST_PASS precedes quality scoring.
 - Accepted and candidate are judged under the same exact judge configuration.
 - Pin provider/model, rubric, generation config, facts/context, and reply identities as existing Track C evidence requires.
+- Keep runtime token/latency metrics outside deterministic identity and selection semantics.
 - Treat model output as untrusted and validate with the existing schema.
 - Keep Track C judge evaluation-only and side-effects disabled.
 - Keep generator/runtime configuration unchanged in this slice.
+- Verify the judge-model migration before changing rubric wording.
 
 ### Ask first
 
@@ -300,6 +390,7 @@ Do not add Vertex credentials to GitHub Actions.
 - automatic candidate promotion/deploy;
 - context-caching work;
 - evaluator dashboard;
+- putting latency/token measurements into deterministic identity or provenance hashes;
 - weakening verified facts/provenance, PII/security, unsupported-claim checks, side-effect authorization, fail-closed behavior, or deterministic MUST_PASS.
 
 ## Success Criteria
@@ -308,14 +399,18 @@ The spec is satisfied when implementation evidence proves all of the following:
 
 1. Track C judge identity is explicitly `VERTEX_AI / gemini-3.8-flash` while generator identity/config remains unchanged.
 2. Judge-specific model configuration is separate enough that future generator candidates do not implicitly change the judge and judge maintenance does not implicitly change the generator.
-3. The 3.8 judge request uses the existing strict structured-output schema and a pinned supported thinking level without relying on deprecated `temperature/top_p/top_k` controls.
-4. The response schema still contains exactly the existing V2 score dimensions; `naturalness`, `objectionResolution`, and `ctaStageFit` have clearer scoring instructions and no extra style dimensions are introduced.
-5. Human-review routing has exactly the three normal reasons: near-tie, regression, and judge disagreement.
-6. Each accepted/candidate judge call records actual latency and provider-returned token usage; no token cost is inferred when provider metadata is absent.
-7. Candidate-experiment documentation states the one-hypothesis / one-primary-axis rule without adding automated mutation-analysis infrastructure.
-8. Existing C1/C2 safety, identity, evaluation-only, and side-effect-disabled invariants remain intact.
-9. Focused tests, worker typecheck/build/lint, and the final repository `pnpm check` pass before implementation is declared complete.
-10. No DB migration, runtime authority mutation, PREPROD deploy, provider-secret expansion, or generator promotion occurs as part of this change.
+3. The actual Track C composition path explicitly binds and verifies `gemini-3.8-flash`; the backward-compatibility fallback cannot silently make Track C use the generator model.
+4. The 3.8 judge request uses the existing strict structured-output schema and a pinned supported thinking level without relying on deprecated `temperature/top_p/top_k` controls.
+5. Judge model/config migration has independently reviewable verification before rubric-anchor changes are introduced.
+6. The response schema still contains exactly the existing V2 score dimensions; `naturalness`, `objectionResolution`, and `ctaStageFit` have clearer scoring instructions and no extra style dimensions are introduced.
+7. Human-review routing has exactly the three normal automatic reasons: near-tie, regression, and judge disagreement; calibration is manual/explicit evaluator maintenance rather than normal automatic routing.
+8. The governing Track C documentation is amended so canonical wording matches the new automatic-review contract.
+9. Each accepted/candidate judge call records actual latency and provider-returned token usage; no token cost is inferred when provider metadata is absent.
+10. Token/latency/wall-clock metrics are excluded from candidate/judge/replay/provenance identity hashes and cannot alter comparison or review-routing decisions.
+11. Candidate-experiment documentation states the one-hypothesis / one-primary-axis rule without adding automated mutation-analysis infrastructure.
+12. Existing C1/C2 safety, identity, evaluation-only, and side-effect-disabled invariants remain intact.
+13. Focused tests, worker typecheck/build/lint, and the final repository `pnpm check` pass before implementation is declared complete.
+14. No DB migration, runtime authority mutation, PREPROD deploy, provider-secret expansion, or generator promotion occurs as part of this change.
 
 ## Open Question Requiring Owner Confirmation Before `/build`
 
