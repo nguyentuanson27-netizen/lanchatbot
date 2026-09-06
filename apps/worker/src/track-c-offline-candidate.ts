@@ -82,10 +82,32 @@ export function buildTrackCOfflineCandidateRequest(input: Readonly<{
       evaluationAt: input.evaluationAt,
     }),
   });
-  const body = JSON.parse(request.body) as Record<string, unknown>;
+  const body = JSON.parse(request.body) as {
+    readonly generationConfig: Readonly<{
+      readonly responseSchema: Readonly<{
+        readonly properties: Readonly<Record<string, unknown>>;
+      }>;
+      readonly [key: string]: unknown;
+    }>;
+    readonly [key: string]: unknown;
+  };
+  const responseProperties = body.generationConfig.responseSchema.properties;
+  const responseSchema = Object.freeze({
+    type: "OBJECT",
+    required: Object.freeze(["segments", "strategy", "cta"]),
+    properties: Object.freeze({
+      segments: responseProperties.segments,
+      strategy: responseProperties.strategy,
+      cta: responseProperties.cta,
+    }),
+  });
   const candidateBody = JSON.stringify({
     ...body,
     systemInstruction: { parts: [{ text: input.systemInstruction }] },
+    generationConfig: {
+      ...body.generationConfig,
+      responseSchema,
+    },
   });
   return Object.freeze({
     url: request.url,

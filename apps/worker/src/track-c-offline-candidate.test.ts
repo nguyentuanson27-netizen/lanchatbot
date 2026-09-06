@@ -182,6 +182,34 @@ describe("Track C offline candidate boundary", () => {
     expect(request.body).not.toContain("fixture:price:SD398");
   });
 
+  it("keeps Context V2 identity out of the model-authored response", () => {
+    const request = buildTrackCOfflineCandidateRequest({
+      modelResource,
+      capture: capture(),
+      evaluationAt: snapshotAt,
+      systemInstruction: candidatePrompt,
+    });
+    const body = JSON.parse(request.body) as {
+      generationConfig: {
+        responseSchema: {
+          required: readonly string[];
+          properties: Readonly<Record<string, unknown>>;
+        };
+      };
+    };
+
+    expect(body.generationConfig.responseSchema.required).toEqual([
+      "segments",
+      "strategy",
+      "cta",
+    ]);
+    expect(Object.keys(body.generationConfig.responseSchema.properties).sort()).toEqual([
+      "cta",
+      "segments",
+      "strategy",
+    ]);
+  });
+
   it.each([
     ["missing", null, snapshotAt, "TRACK_C_OFFLINE_CANDIDATE_CAPTURE_INVALID"],
     ["blocked", { ...capture(), status: "BLOCKED", context: null, contextHash: null, reasonCode: "CONTEXT_V2_BUILD_FAILED" }, snapshotAt, "TRACK_C_OFFLINE_CANDIDATE_CAPTURE_UNAVAILABLE"],

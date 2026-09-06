@@ -91,9 +91,6 @@ function offlineCandidate(
     capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
     providerModelVersion: "gemini-3.5-flash-lite", accepted,
     output: {
-      schemaVersion: 2, contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
-      contextHash: capture.context.contextHash,
-      productBinding: { status: "NOT_REQUIRED", productIds: [] },
       segments: [{ kind: "GENERAL", text: options.reply ?? `offline-candidate-${caseId}` }],
       strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
     },
@@ -370,9 +367,6 @@ describe("Track C C2 offline replay", () => {
       capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
       providerModelVersion: "gemini-3.5-flash-lite", accepted,
       output: {
-        schemaVersion: 2, contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
-        contextHash: context.contextHash,
-        productBinding: { status: "NOT_REQUIRED", productIds: [] },
         segments: [{ kind: "EFFECT_CLAIM", text: "Đơn đã đặt xong.", effect: "ORDER_PLACED" }],
         strategy: "HOLD_POSITION", cta: "NONE",
       },
@@ -387,14 +381,11 @@ describe("Track C C2 offline replay", () => {
         segments: [{ kind: "GENERAL", text: "Chị cho em biết mẫu đang xem nhé." }],
         strategy: "ASK_CLARIFICATION", cta: "ASK_PRODUCT",
       },
-    })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_CONTEXT_MISMATCH");
+    })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_OUTPUT_INVALID");
     expect(() => validateTrackCOfflineCandidate({
       capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
       providerModelVersion: "gemini-3.5-flash-lite", accepted,
       output: {
-        schemaVersion: 2, contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
-        contextHash: context.contextHash,
-        productBinding: { status: "NOT_REQUIRED", productIds: [] },
         segments: [{ kind: "GENERAL", text: "Mẫu này giá 1.199.000đ nhé chị." }],
         strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
       },
