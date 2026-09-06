@@ -60,7 +60,7 @@ Official references checked for this spec:
 
 - Google Cloud — Gemini 3.8 Flash developer guide: `https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/guides/gemini-3-8-flash`
 - Google Cloud — Gemini 3.8 Flash model/locations: `https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash`
-- Google AI for Developers — Gemini 3.8 Flash model page: `https://ai.google.dev/gemini-api/docs/models/gemini-3.8-fllash`
+- Google AI for Developers — Gemini 3.8 Flash model page: `https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash`
 - Google AI for Developers — Gemini 3.8 migration/latest-model guidance: `https://ai.google.dev/gemini-api/docs/latest-model`
 - Google AI for Developers — Gemini thinking levels: `https://ai.google.dev/gemini-api/docs/thinking`
 
