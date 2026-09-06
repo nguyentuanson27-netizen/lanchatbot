@@ -6,12 +6,12 @@ import {
 } from "./track-c-c3-sales-quality-candidate.js";
 
 describe("Track C C3 sales-quality candidate", () => {
-  it("declares one bounded prompt/playbook hypothesis without changing the generator", () => {
+  it("declares one bounded prompt hypothesis without changing the generator", () => {
     expect(TRACK_C_C3_SALES_QUALITY_CANDIDATE).toEqual({
       id: "TRACK_C_C3_SALES_QUALITY_V1",
       primaryHypothesis:
         "Answer the customer intent first, resolve hesitation with verified facts, then use only the smallest stage-fit next step.",
-      materialAxes: ["PROMPT_PLAYBOOK"],
+      materialAxes: ["PROMPT"],
       generatorModel: "gemini-3.5-flash-lite",
       providerModelVersion: "gemini-3.5-flash-lite",
     });
