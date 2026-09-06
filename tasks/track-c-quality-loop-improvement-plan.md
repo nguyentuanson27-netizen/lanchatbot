@@ -1,10 +1,19 @@
 # Track C Quality Loop Improvement — Implementation Plan
 
-**Status:** `READY_FOR_BUILD`
+**Status:** `COMPLETE / PR #329 MERGED`
 
 **Source spec:** `docs/current/architecture-program/TRACK_C_QUALITY_LOOP_IMPROVEMENT_SPEC_20260906.md`
 
 **Implementation principle:** minimum change only. Reuse the current Vertex client, Track C quality adapter, B3 replay, C1 MUST_PASS, existing identity machinery, and current test structure. Do not create a new evaluator platform, telemetry framework, compatibility layer, provider abstraction, or runtime subsystem unless a concrete existing consumer proves it is required.
+
+## Completion record
+
+- Implemented by PR #329, merged as `c2125b3904f3d9b0b609715de95285a6bf61debc`.
+- GitHub CI run #800 completed successfully, including repository `pnpm check`.
+- No persisted/external V1 consumer was found; internal Track C consumers were updated directly and no V1↔V2 adapter was added.
+- No pre-existing Track C `VertexShadowModel` composition existed. Owner approved the smallest offline-only Track C composition factory; runtime/generator composition remains unchanged.
+- Slice A and Slice B landed together in PR #329 rather than as separately reviewable changes. This sequencing deviation is recorded and accepted as non-blocking; final focused coverage and repository CI are green.
+- Provider-backed Vertex smoke was not run. It remains optional and no provider credential/job was added to GitHub Actions.
 
 ## Scope
 
