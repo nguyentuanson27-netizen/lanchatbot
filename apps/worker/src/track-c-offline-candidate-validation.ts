@@ -14,7 +14,10 @@ import {
   deriveCandidateRequestIdentity,
   type BuiltCandidateRequest,
 } from "./context-v2-candidate.js";
-import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
+import {
+  assertTrackCOfflineCandidateEvaluationContext,
+  contextFromFrozenTrackCCapture,
+} from "./track-c-offline-candidate.js";
 import type {
   TrackCOfflineCandidateValidatedEnvelope,
   TrackCReplayJudgeEnvelope,
@@ -105,6 +108,10 @@ export function validateTrackCOfflineCandidate(
       deriveCandidateRequestContextHash(input.request) !== context.contextHash) {
     throw new Error("TRACK_C_C3_OFFLINE_CANDIDATE_REQUEST_MISMATCH");
   }
+  assertTrackCOfflineCandidateEvaluationContext({
+    request: input.request,
+    expected: input.accepted.context,
+  });
   if (input.providerModelVersion !== "gemini-3.5-flash-lite") {
     throw new Error("TRACK_C_C3_OFFLINE_CANDIDATE_PROVIDER_MISMATCH");
   }
