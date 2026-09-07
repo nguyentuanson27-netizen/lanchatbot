@@ -149,6 +149,7 @@ function replayInput(
   scores: readonly (readonly [number, number])[] = [],
   assessments: readonly SalesRubricAssessmentV2[] = [],
   factsByCase: Readonly<Record<string, BusinessFactEnvelopeV1 | null>> = {},
+  qualitySuiteBetter = false,
 ) {
   let scoreIndex = 0;
   const judge = {
@@ -156,6 +157,13 @@ function replayInput(
       promptRubric: { version: "v2" }, generationConfig: { thinkingConfig: { thinkingLevel: "HIGH" } } })),
     judgeSalesReplyV2: vi.fn(async () => {
       const index = scoreIndex++;
+      if (qualitySuiteBetter && index >= 8) {
+        return {
+          assessment: assessment(index % 2 === 0 ? 3 : 4),
+          latencyMs: index,
+          tokenUsage: {},
+        };
+      }
       return {
         assessment: assessments[index] ?? assessment(
           (scores[Math.floor(index / 2)] ?? [4, 4] as const)[index % 2]!,
@@ -199,25 +207,7 @@ function replayInput(
 }
 
 function qualitySuiteInput() {
-  let call = 0;
   return {
-    judge: {
-      judgeSalesReplyV2Descriptor: vi.fn(() => ({
-        provider: "VERTEX_AI" as const,
-        location: "global",
-        model: "gemini-3.7-flash",
-        promptRubric: { version: "v2" },
-        generationConfig: { thinkingConfig: { thinkingLevel: "HIGH" } },
-      })),
-      judgeSalesReplyV2: vi.fn(async () => {
-        const candidate = ++call % 2 === 0;
-        return {
-          assessment: assessment(candidate ? 4 : 3),
-          latencyMs: call,
-          tokenUsage: {},
-        };
-      }),
-    },
     cases: TRACK_C_QUALITY_SUITE_V1.map(({ id }) => ({
       caseId: id,
       accepted: {
@@ -253,7 +243,7 @@ describe("Track C C2 offline replay", () => {
   });
 
   it("runs the frozen v22 baseline through MUST_PASS, guarded replay, and V2 judge evidence", async () => {
-    const input = replayInput();
+    const input = replayInput([], [], {}, true);
 
     const evidence = await runTrackCOfflineQuality({
       runKind: "CANDIDATE_EVALUATION",
@@ -277,7 +267,16 @@ describe("Track C C2 offline replay", () => {
       selectionAuthorized: false,
     });
 
-    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(8);
+    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(108);
+    const firstB3Quality = evidence.replay.cases.find(({ quality }) =>
+      quality.status === "SCORED",
+    )?.quality;
+    if (firstB3Quality?.status !== "SCORED") {
+      throw new Error("TEST_B3_JUDGE_IDENTITY_REQUIRED");
+    }
+    expect(evidence.qualitySuite?.history.cases[0]?.identity.judge).toEqual(
+      firstB3Quality.identity.judge,
+    );
     expect(evidence).toMatchObject({
       contractVersion: "TRACK_C_OFFLINE_RUNNER_V1",
       evaluationOnly: true,
@@ -318,7 +317,7 @@ describe("Track C C2 offline replay", () => {
   });
 
   it("keeps a B3 quality regression out of the owner-approval state", async () => {
-    const input = replayInput([[4, 3], [4, 4], [4, 4], [4, 4]]);
+    const input = replayInput([[4, 3], [4, 4], [4, 4], [4, 4]], [], {}, true);
 
     const evidence = await runTrackCOfflineQuality({
       runKind: "CANDIDATE_EVALUATION",
@@ -342,7 +341,7 @@ describe("Track C C2 offline replay", () => {
   });
 
   it("records correct HUMAN handoffs as N/A and judges only BOT-eligible cases", async () => {
-    const input = replayInput();
+    const input = replayInput([], [], {}, true);
     const evidence = await runTrackCOfflineQuality({
       runKind: "CANDIDATE_EVALUATION",
       acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
@@ -397,7 +396,7 @@ describe("Track C C2 offline replay", () => {
       "malformed-output",
       "single-repair-and-verified-fallback",
     ]);
-    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(8);
+    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(108);
   });
 
   it("emits an exact PII-safe reply pair only for a case requiring human review", async () => {

@@ -218,6 +218,7 @@ export async function runTrackCQualitySuiteGate(
       verifiedFacts: qualitySuiteFactsForJudge(fixture),
       factFixtureHash: QUALITY_SUITE_FIXTURE_SET_HASH,
       factSource: "TRACK_C_QUALITY_SUITE_V1",
+      qualitySuiteFixtureId: fixture.id,
       accepted: current.accepted,
       candidate: current.candidate,
     });

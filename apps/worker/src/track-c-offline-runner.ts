@@ -54,7 +54,7 @@ export interface TrackCOfflineQualityRunInput {
     checkpoint: TrackCOfflineCaseCheckpoint,
   ) => void | Promise<void>;
   /** Mandatory for a candidate evaluation; wiring smoke remains B3-only. */
-  readonly qualitySuite?: Omit<TrackCQualitySuiteGateInput, "mustPassReplay">;
+  readonly qualitySuite?: Omit<TrackCQualitySuiteGateInput, "mustPassReplay" | "judge">;
 }
 
 type JudgeMetrics = Readonly<{
@@ -527,6 +527,7 @@ export async function runTrackCOfflineQuality(
     ? await runTrackCQualitySuiteGate({
       ...input.qualitySuite!,
       mustPassReplay: input.mustPassReplay,
+      judge: input.judge,
     })
     : null;
   const candidateReadiness = qualitySuite === null ? null : Object.freeze({

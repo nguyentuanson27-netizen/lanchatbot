@@ -86,6 +86,8 @@ export interface TrackCQualityComparisonInput {
   readonly factFixtureHash: string;
   /** B3 is default; the 50-case source is fixture-local quality evidence only. */
   readonly factSource?: "B3_MUST_PASS" | "TRACK_C_QUALITY_SUITE_V1";
+  /** Required only for the explicit 50-case fixture-local fact source. */
+  readonly qualitySuiteFixtureId?: string;
   readonly accepted: TrackCQualityReplyInput;
   readonly candidate: TrackCQualityReplyInput;
 }
@@ -155,8 +157,20 @@ function isQualitySuiteFacts(
   return typeof value === "object" && value !== null &&
     "contractVersion" in value &&
     "origin" in value &&
+    "fixtureId" in value &&
+    "facts" in value &&
     value.contractVersion === "TRACK_C_QUALITY_SUITE_FACTS_V1" &&
-    value.origin === "FIXTURE_LOCAL_EVALUATION_ONLY";
+    value.origin === "FIXTURE_LOCAL_EVALUATION_ONLY" &&
+    typeof value.fixtureId === "string" && value.fixtureId.trim().length > 0 &&
+    Array.isArray(value.facts) && value.facts.every((fact) => typeof fact === "string");
+}
+
+function hasQualitySuiteFactMarker(value: JudgeSalesReplyV2Facts): boolean {
+  return typeof value === "object" && value !== null && (
+    ("contractVersion" in value &&
+      value.contractVersion === "TRACK_C_QUALITY_SUITE_FACTS_V1") ||
+    ("origin" in value && value.origin === "FIXTURE_LOCAL_EVALUATION_ONLY")
+  );
 }
 
 function recommendationRank(
@@ -196,13 +210,20 @@ export async function runTrackCQualityComparison(
   const factSource = input.factSource ?? "B3_MUST_PASS";
   if (
     factSource === "B3_MUST_PASS" &&
+    hasQualitySuiteFactMarker(input.verifiedFacts)
+  ) {
+    throw new Error("TRACK_C_C11_FACT_SOURCE_MISMATCH");
+  }
+  if (
+    factSource === "B3_MUST_PASS" &&
     input.factFixtureHash !== input.mustPassReplay.identity.factFixtureHash
   ) {
     throw new Error("TRACK_C_C11_FACT_FIXTURE_MISMATCH");
   }
   if (
     factSource === "TRACK_C_QUALITY_SUITE_V1" &&
-    !isQualitySuiteFacts(input.verifiedFacts)
+    (!isQualitySuiteFacts(input.verifiedFacts) ||
+      input.qualitySuiteFixtureId !== input.verifiedFacts.fixtureId)
   ) {
     throw new Error("TRACK_C_C11_QUALITY_SUITE_FACTS_MISMATCH");
   }
