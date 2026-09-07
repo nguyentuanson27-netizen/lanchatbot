@@ -3,7 +3,11 @@ import { canonicalJsonV1, type BusinessFactEnvelopeV1 } from "@lana/contracts";
 import { redactAnalyticsMessage, type ShadowContextMessage } from "@lana/database";
 import type { TrackBLivePathReplayResult } from "./track-b-live-path-replay.js";
 import { redactCustomerUrlsForModel } from "./customer-url-policy.js";
-import { assertTrackCC1MustPass, TRACK_C_C1_MUST_PASS_POLICY } from "./track-c-must-pass.js";
+import {
+  assertTrackCC1CandidateMustPass,
+  assertTrackCC1MustPass,
+  TRACK_C_C1_MUST_PASS_POLICY,
+} from "./track-c-must-pass.js";
 import {
   assertTrackCOfflineCandidateValidated,
 } from "./track-c-offline-candidate-validation.js";
@@ -59,7 +63,7 @@ export interface TrackCOfflineCaseCheckpoint {
   readonly caseId: string;
   readonly replay: TrackCReplayResult["cases"][number];
   /** Runtime telemetry is review-only and remains outside replay identities. */
-  readonly judgeMetrics: JudgeMetrics;
+  readonly judgeMetrics: JudgeMetrics | null;
   /** Null unless this completed case is routed to human review. */
   readonly humanReview: TrackCOfflineHumanReviewCase | null;
 }
@@ -354,6 +358,7 @@ function humanReviewCase(input: Readonly<{
   readonly recorder: ReturnType<typeof recordingJudge> | undefined;
 }>): TrackCOfflineHumanReviewCase | null {
   const replayCase = input.replay;
+  if (replayCase.quality.status === "HANDOFF_CORRECT") return null;
   if (!replayCase.quality.requiresHumanReview) return null;
   const source = input.source;
   const calls = input.recorder?.calls;
@@ -411,6 +416,7 @@ function humanReviewArtifact(input: Readonly<{
   readonly cases: ReadonlyMap<string, TrackCOfflineHumanReviewCase>;
 }>): TrackCOfflineHumanReviewArtifact {
   const cases = input.replay.cases.flatMap((replayCase) => {
+    if (replayCase.quality.status === "HANDOFF_CORRECT") return [];
     if (!replayCase.quality.requiresHumanReview) return [];
     const review = input.cases.get(replayCase.caseId);
     if (review === undefined) {
@@ -443,7 +449,9 @@ export async function runTrackCOfflineQuality(
   for (const item of input.cases) {
     candidates.set(item.caseId, assertTrackCOfflineCandidateValidated(item.candidate));
   }
+  assertTrackCC1CandidateMustPass(input.mustPassReplay, input.cases);
   const distinctReplyCaseCount = input.cases.filter(({ accepted, candidate }) =>
+    candidate.quality.guardOutcome.expectedOwner === "BOT" &&
     accepted.quality.reply !== candidate.quality.reply
   ).length;
   if (input.runKind === "CANDIDATE_EVALUATION" && distinctReplyCaseCount === 0) {
@@ -456,6 +464,9 @@ export async function runTrackCOfflineQuality(
   const replay = await runTrackCReplay({
     mustPassReplay: candidateBoundReplay(input.mustPassReplay, candidates),
     cases: input.cases.map(({ caseId, accepted, candidate }) => {
+      if (candidate.quality.guardOutcome.expectedOwner === "HUMAN") {
+        return { caseId, judge: input.judge, accepted, candidate };
+      }
       const recorder = recordingJudge(input.judge);
       recorders.set(caseId, recorder);
       return { caseId, judge: recorder.judge, accepted, candidate };
@@ -471,19 +482,22 @@ export async function runTrackCOfflineQuality(
         recorder: recorders.get(replayCase.caseId),
       });
       if (humanReview !== null) humanReviewCases.set(replayCase.caseId, humanReview);
+      const judgeMetrics = replayCase.quality.status === "SCORED"
+        ? metricsForCase(replayCase.caseId, recorders)
+        : null;
       await input.onCaseComplete?.(Object.freeze({
           contractVersion: "TRACK_C_OFFLINE_CASE_CHECKPOINT_V2",
           evaluationOnly: true,
           sideEffects: "DISABLED",
           caseId: replayCase.caseId,
           replay: structuredClone(replayCase),
-          judgeMetrics: metricsForCase(replayCase.caseId, recorders),
+          judgeMetrics,
           humanReview,
       }));
     },
   });
-  const judgeMetrics = replay.cases.map(({ caseId }) =>
-    metricsForCase(caseId, recorders));
+  const judgeMetrics = replay.cases.flatMap(({ caseId, quality }) =>
+    quality.status === "SCORED" ? [metricsForCase(caseId, recorders)] : []);
   return Object.freeze({
     contractVersion: "TRACK_C_OFFLINE_RUNNER_V1",
     evaluationOnly: true,

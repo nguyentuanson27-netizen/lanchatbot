@@ -230,9 +230,11 @@ export const SALES_RUBRIC_V2_SYSTEM_INSTRUCTION = [
 const TRACK_C_SALES_RUBRIC_V2_SYSTEM_INSTRUCTION = [
   ...SALES_RUBRIC_V2_SYSTEM_INSTRUCTION.split("\n").filter((line) =>
     !line.startsWith("improvedReply") && !line.startsWith("Output chi la JSON")),
-  "naturalness: 4–5 la dien dat Messenger tu nhien, truc tiep, khong may moc/lan lap va gon dung muc; 2–3 la de hieu nhung con cong thuc, chung chung hoac hoi lan lap; 0–1 la go gang, may moc, lan lap ro ret hoac khong tu nhien. Chi cham cach dien dat, khong cham fact hoac thoi diem CTA o day.",
+  "naturalness: 4–5 la dien dat Messenger tu nhien, truc tiep, dung ngon ngu cua khach, khong may moc/lan lap va gon dung muc; 2–3 la de hieu nhung con cong thuc, chung chung hoac hoi lan lap; 0–1 la sai ngon ngu cua khach, qua formal/cung, go gang, may moc, lap ma san pham/thong tin khong can, hoac khong tu nhien. Phat cach mo dau kieu Em da tim thay san pham va menu gia / size / ton kho / giao hang khi khach chi hoi mot y. Chi cham cach dien dat, khong cham fact hoac thoi diem CTA o day.",
   "objectionResolution: 4–5 la nhan ra va xu ly xay dung dung phan van/lo ngai cua khach bang ho tro huu ich da co can cu; 2–3 la xu ly mot phan hoac bo sot lo ngai/next step quan trong; 0–1 la bo qua, bac bo, tranh cai hoac khong xu ly phan van. Fact khong duoc ho tro van la factGrounding/MUST_PASS, khong phat kep chi vi fact do.",
   "ctaStageFit: 4–5 la de nghi buoc nho huu ich phu hop stage/thong tin con thieu, hoac dung khong CTA khi khong can; 2–3 la CTA huu ich nhung chung chung, som/muon nhe hoac khop stage yeu; 0–1 la CTA som, lac de, trai guard/stage hoac ep checkout/action. Chi cham do dung luc/phu hop CTA, khong cham phong cach viet chung o day.",
+  "questionResolution va salesProgression la uu tien: tra loi truc tiep du cac y khach hoi truoc, dung context turn truoc, khong hoi lai du lieu khach da cung cap. Chi sau do moi co toi da mot next step nho, tu nhien va can thiet; cau hoi chung chung de keo hoi thoai, bo sot mot y, hoac nhieu cau hoi trong mot reply phai bi tru diem.",
+  "factGrounding la dieu kien nen bat buoc, khong phai diem cong de cuu reply may moc. overall khong phai trung binh co hoc: factGrounding cao khong the bu lai questionResolution, naturalness, salesProgression hoac ctaStageFit thap. Khi reply khong giai quyet dung nhu cau, nghe khong giong sale Viet Nam that, hoac day CTA sai luc thi overall phai thap tuong ung.",
   "Tra ve JSON ngan gon chi gom scores du 10 dimension va recommendationAction. Khong tra schemaVersion, intent, conversationStage, strengths, weaknesses hay improvedReply. Ket qua chi de danh gia, khong dieu khien outbound.",
 ].join("\n");
 
@@ -275,7 +277,7 @@ function judgeSalesReplyV2RequestContract(
   location: string,
   model: string,
 ): JudgeSalesReplyV2RequestContract {
-  if (location === "global" && model === "gemini-3.8-flash") {
+  if (location === "global" && model === "gemini-3.7-flash") {
     return {
       systemInstruction: TRACK_C_SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
       generationConfig: TRACK_C_SALES_RUBRIC_V2_GENERATION_CONFIG,

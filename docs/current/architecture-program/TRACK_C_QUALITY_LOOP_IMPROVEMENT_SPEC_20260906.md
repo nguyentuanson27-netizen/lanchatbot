@@ -1,4 +1,4 @@
-# Track C Quality Loop Improvement Spec — Judge 3.8, Rubric, Review, Telemetry
+# Track C Quality Loop Improvement Spec — Judge 3.7, Rubric, Review, Telemetry
 
 **Status:** `IMPLEMENTED / COMPLETE — SEQUENCING DEVIATION RECORDED`
 
@@ -20,7 +20,7 @@ Improve the existing Track C quality loop without turning it into a general eval
 
 The change has five bounded goals:
 
-1. Change the Track C quality judge to Vertex AI `gemini-3.8-flash` on the `global` endpoint while leaving the generator/runtime model and location unchanged.
+1. Change the Track C quality judge to Vertex AI `gemini-3.7-flash` on the `global` endpoint while leaving the generator/runtime model and location unchanged.
 2. Clarify the existing rubric for `naturalness`, `objectionResolution`, and `ctaStageFit` without adding score dimensions.
 3. Establish a process rule that each candidate experiment changes only a small number of material tuning variables so quality deltas remain attributable.
 4. Deliberately narrow normal automatic human-review routing to near-ties, regressions, and judge disagreement; calibration remains explicit/manual evaluator maintenance.
@@ -41,27 +41,26 @@ At the start of this work, `main` had:
 - human-review reasons currently including `CALIBRATION_SAMPLE`, `NEAR_TIE`, `UNEXPECTED_REGRESSION`, and `JUDGE_DISAGREEMENT`;
 - the adopted Track C text reserving human review for calibration samples, ties/near-ties, unexpected regressions, and judge disagreements;
 - the Vertex V2 judge using the same configured `modelName` and `location` as other Vertex generation paths;
-- `.env.example` currently defaults `VERTEX_LOCATION=us-central1`, so selecting 3.8 on `global` must not reuse the generator location implicitly;
+- `.env.example` currently defaults `VERTEX_LOCATION=us-central1`, so selecting 3.7 on `global` must not reuse the generator location implicitly;
 - the V2 judge generation config currently including `temperature: 0.1`, `maxOutputTokens: 1024`, JSON MIME type, and the existing response schema;
 - the V2 rubric scoring `naturalness`, `objectionResolution`, and `ctaStageFit` on the existing `0..5` scale without explicit anchors for those dimensions;
 - generic Vertex response parsing already able to preserve prompt/completion/total token counts for other generation paths, while `judgeSalesReplyV2(...)` currently returns only `SalesRubricAssessmentV2` and therefore drops judge usage/latency evidence.
 
 ## Source / API Constraints
 
-Gemini 3.8 Flash uses model ID `gemini-3.8-flash`, is GA, supports structured outputs, and supports thinking levels `LOW`, `MEDIUM`, and `HIGH` with `MEDIUM` as the provider default.
+Gemini 3.7 Flash uses model ID `gemini-3.7-flash`, is GA, supports structured outputs, and supports thinking levels `LOW`, `MEDIUM`, and `HIGH` with `MEDIUM` as the provider default.
 
-For Gemini 3.8 Flash on Vertex AI, deprecated sampling parameters including `temperature`, `top_p`, and `top_k` must be stripped rather than used as determinism controls. The judge must pin the model, strict structured response schema, and a supported thinking level.
+For Gemini 3.7 Flash on Vertex AI, deprecated sampling parameters including `temperature`, `top_p`, and `top_k` must be stripped rather than used as determinism controls. The judge must pin the model, strict structured response schema, and a supported thinking level.
 
-Gemini 3.8 Flash supports Vertex AI location `global`; the official REST example uses `https://aiplatform.googleapis.com/v1/projects/.../locations/global/.../gemini-3.8-flash:generateContent`. The owner explicitly selects `global` for this Track C judge. Do not move the generator/runtime Vertex location as part of this change.
+Gemini 3.7 Flash supports Vertex AI location `global`; the official REST example uses `https://aiplatform.googleapis.com/v1/projects/.../locations/global/.../gemini-3.7-flash:generateContent`. The owner explicitly selects `global` for this Track C judge. Do not move the generator/runtime Vertex location as part of this change.
 
 This spec deliberately selects `HIGH` rather than relying on the provider default because the judge is offline evaluation and the owner prefers maximum evaluator reasoning quality over lower token/latency cost.
 
 Official references checked for this spec:
 
-- Google Cloud — Gemini 3.8 Flash developer guide: `https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/guides/gemini-3-8-flash`
-- Google Cloud — Gemini 3.8 Flash model/locations: `https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash`
-- Google AI for Developers — Gemini 3.8 Flash model page: `https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash`
-- Google AI for Developers — Gemini 3.8 migration/latest-model guidance: `https://ai.google.dev/gemini-api/docs/latest-model`
+- Google Cloud — Gemini 3.7 Flash developer guide: `https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/guides/gemini-3-7-flash`
+- Google AI for Developers — Gemini 3.7 Flash model page: `https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash`
+- Google AI for Developers — Gemini 3.7 Flash migration/latest-model guidance: `https://ai.google.dev/gemini-api/docs/latest-model`
 - Google AI for Developers — Gemini thinking levels: `https://ai.google.dev/gemini-api/docs/thinking`
 
 ## Canonical Track C Amendment
@@ -155,14 +154,14 @@ For Track C, the resolved descriptor must be exactly:
 ```text
 provider: VERTEX_AI
 location: global
-model: gemini-3.8-flash
+model: gemini-3.7-flash
 ```
 
 The generic fallbacks exist only for backward compatibility outside this boundary. `runTrackCQualityComparison(...)` or the owning Track C boundary must validate the exact pinned provider/location/model **before invoking either accepted or candidate judge call**. A missing/mismatched descriptor fails closed with a focused Track C error; it must not silently evaluate with the generator model or generator location.
 
-No new environment variable or configuration subsystem is required for this owner-locked Track C choice. Set `judgeLocation: "global"` and `judgeModelName: "gemini-3.8-flash"` at the real Track C composition boundary.
+No new environment variable or configuration subsystem is required for this owner-locked Track C choice. Set `judgeLocation: "global"` and `judgeModelName: "gemini-3.7-flash"` at the real Track C composition boundary.
 
-### 3. Gemini 3.8 judge generation config
+### 3. Gemini 3.7 judge generation config
 
 Keep the current strict JSON response schema, remove deprecated sampling controls, and pin thinking level:
 
@@ -223,8 +222,8 @@ Do not make the judge-model migration and rubric wording change one indistinguis
 Slice A
 comparison contract V2
 + judge location/model separation
-+ explicit/fail-closed Track C global / gemini-3.8-flash binding
-+ 3.8 generation config with thinkingLevel HIGH
++ explicit/fail-closed Track C global / gemini-3.7-flash binding
++ 3.7 generation config with thinkingLevel HIGH
 + telemetry plumbing
 + automatic-review routing amendment
 -> focused deterministic tests
@@ -391,11 +390,11 @@ export interface TrackCQualityComparisonResultV2 {
 1. C1 MUST_PASS still rejects before descriptor or judge invocation.
 2. V2 contract literal is `TRACK_C_QUALITY_JUDGE_V2`; no new result is emitted as V1 with V2 semantics.
 3. `SalesRubricAssessmentV2` schema remains unchanged.
-4. Track C rejects a descriptor whose provider/location/model is not exactly `VERTEX_AI / global / gemini-3.8-flash` before invoking either judge call.
-5. The real Track C composition/configuration path explicitly binds `judgeLocation: "global"` and `judgeModelName: "gemini-3.8-flash"`.
+4. Track C rejects a descriptor whose provider/location/model is not exactly `VERTEX_AI / global / gemini-3.7-flash` before invoking either judge call.
+5. The real Track C composition/configuration path explicitly binds `judgeLocation: "global"` and `judgeModelName: "gemini-3.7-flash"`.
 6. Generator `location` / `modelName` remain unchanged when only `judgeLocation` / `judgeModelName` change.
 7. The V2 judge endpoint uses the global Vertex endpoint while generator/proposal/draft/prelabel requests continue using the existing generator location.
-8. Gemini 3.8 judge request preserves the existing JSON response schema and does not send/rely on `temperature`, `top_p`, or `top_k`.
+8. Gemini 3.7 judge request preserves the existing JSON response schema and does not send/rely on `temperature`, `top_p`, or `top_k`.
 9. Judge generation config pins `thinkingLevel: "HIGH"`.
 10. Slice A can be verified with the existing rubric before Slice B changes rubric wording.
 11. Rubric schema remains V2 with the same ten score fields; tests assert the `4–5 / 2–3 / 0–1` anchors for only `naturalness`, `objectionResolution`, and `ctaStageFit` are present in the judge instruction.
@@ -411,7 +410,7 @@ export interface TrackCQualityComparisonResultV2 {
 
 A provider-backed smoke check is allowed only in the already-authorized local/VPS/manual evaluation boundary using existing Vertex credentials. It is not a judge benchmark and does not compare multiple judge models.
 
-If run, it should prove only that the exact pinned Vertex `global` endpoint request for `gemini-3.8-flash` with `thinkingLevel: "HIGH"` is accepted, returns schema-valid V2 rubric JSON, and exposes whatever usage metadata the provider actually returns.
+If run, it should prove only that the exact pinned Vertex `global` endpoint request for `gemini-3.7-flash` with `thinkingLevel: "HIGH"` is accepted, returns schema-valid V2 rubric JSON, and exposes whatever usage metadata the provider actually returns.
 
 Prefer doing this after Slice A and before Slice B so provider/API integration is not confounded with rubric wording changes.
 
@@ -464,9 +463,9 @@ The spec is satisfied when implementation evidence proves all of the following:
 
 1. Track C comparison/evidence contract is explicitly `TRACK_C_QUALITY_JUDGE_V2`; `SalesRubricAssessmentV2` remains unchanged.
 2. Actual V1 consumers/fixtures are identified and updated, or a compatibility need is evidenced before any adapter is added.
-3. Track C judge identity is exactly `VERTEX_AI / global / gemini-3.8-flash` while generator location/model/config remain unchanged.
+3. Track C judge identity is exactly `VERTEX_AI / global / gemini-3.7-flash` while generator location/model/config remain unchanged.
 4. A missing/mismatched Track C judge descriptor fails before either accepted or candidate judge invocation; generic Vertex fallbacks cannot silently select the generator location/model for Track C.
-5. The 3.8 judge request uses the global Vertex endpoint, strict structured-output schema, and `thinkingLevel: "HIGH"` without deprecated sampling controls.
+5. The 3.7 judge request uses the global Vertex endpoint, strict structured-output schema, and `thinkingLevel: "HIGH"` without deprecated sampling controls.
 6. Judge location/model/config migration has independently reviewable verification before rubric-anchor changes.
 7. The rubric keeps the same ten V2 score dimensions and `0..5` range, with explicit `4–5 / 2–3 / 0–1` anchors only for `naturalness`, `objectionResolution`, and `ctaStageFit` and with their responsibilities kept distinct.
 8. Human-review routing has exactly the three normal automatic reasons: near-tie, regression, and judge disagreement; calibration is manual/explicit evaluator maintenance.
@@ -482,10 +481,36 @@ Success criteria 1–5 and 7–15 are implemented and verified by the merged cha
 
 ## Owner Decisions Locked
 
-- Judge model: `gemini-3.8-flash`.
+- Judge model: `gemini-3.7-flash`.
 - Judge Vertex location: `global`.
 - Judge thinking level: `HIGH`.
 - Generator/runtime model and location: unchanged by this spec.
 - No judge benchmark project.
 
 The specification has no remaining owner decision. Implementation is closed on `main`; provider-backed smoke remains optional future verification only.
+
+## Current C1 ownership and quality-fixture amendment
+
+PR #329 recorded `gemini-3.8-flash` at its historical implementation point.
+The active source of truth is now the owner-directed
+`VERTEX_AI / global / gemini-3.7-flash / HIGH` judge; all current constraints
+in this document use that identity.
+
+- C1 fixture policy pins the B3 `expectedOwner` for every frozen case. For
+  `unsupported-protected-claim`, `stale-facts`, and `missing-facts`, candidate
+  C1 requires `HUMAN`, an empty BOT reply, and a typed `HANDOFF` result.
+- A candidate that changes a HUMAN-owned case to BOT or emits a reply fails
+  before Judge dispatch. Correct handoffs are emitted as `HANDOFF_CORRECT`,
+  with quality scores and deltas `N/A`, and are excluded from quality aggregate
+  and normal automatic human-review routing.
+- Only BOT-owned B3 cases go to the existing Judge V2. Existing claim,
+  provenance, fact, effect, repair, side-effect, frozen-input, and B3 identity
+  checks remain unchanged.
+- `TRACK_C_QUALITY_SUITE_V1` is a separate, readable 50-case PII-safe
+  sales-quality fixture set. It is not a C1 corpus, creates no evaluator
+  platform or persistence, and has no runtime authority.
+- The existing ten-dimension rubric remains unchanged. Its instruction now
+  makes fact grounding a prerequisite and prioritizes direct resolution,
+  natural Vietnamese sales delivery, sales progression, and stage-fit CTA over
+  fact-only or menu-like replies. `overall` remains judge-owned and holistic;
+  it is not a deterministic average.

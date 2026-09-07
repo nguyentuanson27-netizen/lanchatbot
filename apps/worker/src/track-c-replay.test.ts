@@ -42,7 +42,15 @@ function envelope(
     context: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
       text: `Mẫu ${caseId} giá bao nhiêu?`, attachmentCount: 0, occurredAt: "2026-09-05T00:00:00.000Z" }],
     verifiedFacts, reply: `reply-${caseId}`,
-    proposalSummary: { action: "REPLY" }, guardOutcome: { action: "REPLY", blockedReasonCodes: [] },
+    proposalSummary: { action: "REPLY" }, guardOutcome: {
+      expectedOwner: [
+        "unsupported-protected-claim",
+        "stale-facts",
+        "missing-facts",
+      ].includes(caseId) ? "HUMAN" : "BOT",
+      action: "REPLY",
+      blockedReasonCodes: [],
+    },
   };
 }
 function frozenCapture(caseId: string) {
@@ -86,7 +94,7 @@ function frozenCapture(caseId: string) {
 function offlineCandidate(
   caseId: string,
   accepted: TrackCReplayJudgeEnvelope,
-  options: Readonly<{ reply?: string }> = {},
+  options: Readonly<{ reply?: string; output?: unknown }> = {},
 ): TrackCOfflineCandidateValidatedEnvelope {
   const capture = frozenCapture(caseId);
   if (capture.status !== "BUILT" || capture.context === null) throw new Error("TEST_CAPTURE_REQUIRED");
@@ -97,12 +105,17 @@ function offlineCandidate(
     systemInstruction: "Offline-only Track C test candidate.",
   });
   return validateTrackCOfflineCandidate({
+    caseId,
     capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
     providerModelVersion: "gemini-3.5-flash-lite", accepted,
-    output: {
-      segments: [{ kind: "GENERAL", text: options.reply ?? `offline-candidate-${caseId}` }],
-      strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
-    },
+    output: options.output ?? (
+      (accepted.guardOutcome as { expectedOwner?: unknown }).expectedOwner === "HUMAN"
+        ? null
+        : {
+          segments: [{ kind: "GENERAL", text: options.reply ?? `offline-candidate-${caseId}` }],
+          strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
+        }
+    ),
   });
 }
 function passingReplay(): TrackBLivePathReplayResult {
@@ -138,7 +151,7 @@ function replayInput(
 ) {
   let scoreIndex = 0;
   const judge = {
-    judgeSalesReplyV2Descriptor: vi.fn(() => ({ provider: "VERTEX_AI" as const, location: "global", model: "gemini-3.8-flash",
+    judgeSalesReplyV2Descriptor: vi.fn(() => ({ provider: "VERTEX_AI" as const, location: "global", model: "gemini-3.7-flash",
       promptRubric: { version: "v2" }, generationConfig: { thinkingConfig: { thinkingLevel: "HIGH" } } })),
     judgeSalesReplyV2: vi.fn(async () => {
       const index = scoreIndex++;
@@ -185,6 +198,23 @@ function replayInput(
 }
 
 describe("Track C C2 offline replay", () => {
+  it("fails C1 before Judge when a HUMAN-owned B3 candidate emits a BOT reply", async () => {
+    const input = replayInput();
+    const humanCase = input.cases.find(({ caseId }) =>
+      caseId === "unsupported-protected-claim",
+    );
+    if (humanCase === undefined) throw new Error("TEST_HUMAN_CASE_REQUIRED");
+
+    expect(() => offlineCandidate(humanCase.caseId, humanCase.accepted.quality, {
+      output: {
+        segments: [{ kind: "GENERAL", text: "Em sẽ trả lời thay nhân viên." }],
+        strategy: "HOLD_POSITION",
+        cta: "NONE",
+      },
+    })).toThrow("TRACK_C_C1_HUMAN_REPLY_FORBIDDEN:unsupported-protected-claim");
+    expect(input.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+  });
+
   it("runs the frozen v22 baseline through MUST_PASS, guarded replay, and V2 judge evidence", async () => {
     const input = replayInput();
 
@@ -200,7 +230,7 @@ describe("Track C C2 offline replay", () => {
       })),
     });
 
-    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(14);
+    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(8);
     expect(evidence).toMatchObject({
       contractVersion: "TRACK_C_OFFLINE_RUNNER_V1",
       evaluationOnly: true,
@@ -211,15 +241,74 @@ describe("Track C C2 offline replay", () => {
         release: "track-b-v22-b0aeb8907",
         sourceCommit: "b0aeb8907dae4ae2d9051b409ba25fa3f17fd188",
       },
-      candidate: { distinctReplyCaseCount: 7 },
-      replay: { aggregate: { better: 0, same: 7, worse: 0 } },
+      candidate: { distinctReplyCaseCount: 4 },
+      replay: { aggregate: { better: 0, same: 4, worse: 0, handoffCorrect: 3, scoredCaseCount: 4 } },
     });
-    expect(evidence.judgeMetrics).toHaveLength(7);
-    expect(evidence.humanReview.cases).toHaveLength(7);
+    expect(evidence.judgeMetrics).toHaveLength(4);
+    expect(evidence.humanReview.cases).toHaveLength(4);
     expect(evidence.humanReview.cases[0]).toMatchObject({
-      accepted: { reply: "reply-unsupported-protected-claim" },
-      candidate: { reply: "offline-candidate-unsupported-protected-claim" },
+      caseId: "pii-security",
+      accepted: { reply: "reply-pii-security" },
+      candidate: { reply: "offline-candidate-pii-security" },
     });
+  });
+
+  it("records correct HUMAN handoffs as N/A and judges only BOT-eligible cases", async () => {
+    const input = replayInput();
+    const evidence = await runTrackCOfflineQuality({
+      runKind: "CANDIDATE_EVALUATION",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: input.mustPassReplay,
+      judge: input.judge,
+      cases: input.cases.map(({ caseId, accepted, candidate }) => ({ caseId, accepted, candidate })),
+    });
+
+    expect(evidence.replay.cases.filter(({ quality }) => quality.status === "HANDOFF_CORRECT")
+      .map(({ caseId, quality }) => ({ caseId, quality }))).toEqual([
+        {
+          caseId: "unsupported-protected-claim",
+          quality: {
+            status: "HANDOFF_CORRECT",
+            disposition: null,
+            overallScoreDelta: null,
+            requiresHumanReview: false,
+            reviewReasonCodes: [],
+            rationale: null,
+            identity: null,
+          },
+        },
+        {
+          caseId: "stale-facts",
+          quality: {
+            status: "HANDOFF_CORRECT",
+            disposition: null,
+            overallScoreDelta: null,
+            requiresHumanReview: false,
+            reviewReasonCodes: [],
+            rationale: null,
+            identity: null,
+          },
+        },
+        {
+          caseId: "missing-facts",
+          quality: {
+            status: "HANDOFF_CORRECT",
+            disposition: null,
+            overallScoreDelta: null,
+            requiresHumanReview: false,
+            reviewReasonCodes: [],
+            rationale: null,
+            identity: null,
+          },
+        },
+      ]);
+    expect(evidence.judgeMetrics.map(({ caseId }) => caseId)).toEqual([
+      "pii-security",
+      "unauthorized-effect",
+      "malformed-output",
+      "single-repair-and-verified-fallback",
+    ]);
+    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(8);
   });
 
   it("emits an exact PII-safe reply pair only for a case requiring human review", async () => {
@@ -243,7 +332,7 @@ describe("Track C C2 offline replay", () => {
       reasonCode: "FACTS_EXPIRED",
     };
     const input = replayInput([], [accepted, candidate], {
-      "unsupported-protected-claim": staleFacts,
+      "pii-security": staleFacts,
     });
 
     const evidence = await runTrackCOfflineQuality({
@@ -260,20 +349,20 @@ describe("Track C C2 offline replay", () => {
 
     expect(evidence.humanReview.contractVersion).toBe("TRACK_C_OFFLINE_HUMAN_REVIEW_V1");
     expect(evidence.humanReview.cases.find(({ caseId }) =>
-      caseId === "unsupported-protected-claim",
+      caseId === "pii-security",
     )).toMatchObject({
-        caseId: "unsupported-protected-claim",
+        caseId: "pii-security",
         accepted: {
-          reply: "reply-unsupported-protected-claim",
-          replyHash: sha256("reply-unsupported-protected-claim"),
+          reply: "reply-pii-security",
+          replyHash: sha256("reply-pii-security"),
           assessment: {
             scores: accepted.scores,
             recommendationAction: accepted.recommendationAction,
           },
         },
         candidate: {
-          reply: "offline-candidate-unsupported-protected-claim",
-          replyHash: sha256("offline-candidate-unsupported-protected-claim"),
+          reply: "offline-candidate-pii-security",
+          replyHash: sha256("offline-candidate-pii-security"),
           assessment: {
             scores: candidate.scores,
             recommendationAction: candidate.recommendationAction,
@@ -322,10 +411,10 @@ describe("Track C C2 offline replay", () => {
     });
 
     expect(evidence.humanReview.cases.map(({ caseId }) => caseId)).toEqual([
-      "unsupported-protected-claim",
+      "pii-security",
     ]);
     expect(JSON.stringify(evidence.humanReview)).not.toContain(
-      "offline-candidate-pii-security",
+      "offline-candidate-unauthorized-effect",
     );
   });
 
@@ -343,7 +432,7 @@ describe("Track C C2 offline replay", () => {
       recommendationAction: "KEEP",
     });
     const input = replayInput([], [accepted, candidate]);
-    const first = input.cases[0]!;
+    const first = input.cases[1]!;
     first.candidate = offlineCandidate(
       first.caseId,
       first.accepted.quality,
@@ -351,7 +440,7 @@ describe("Track C C2 offline replay", () => {
     );
     input.mustPassReplay = {
       ...input.mustPassReplay,
-      cases: input.mustPassReplay.cases.map((replayCase, index) => index === 0
+      cases: input.mustPassReplay.cases.map((replayCase, index) => index === 1
         ? {
           ...replayCase,
           qualityEnvelopeHashes: {
@@ -373,7 +462,7 @@ describe("Track C C2 offline replay", () => {
         candidate,
       })),
     })).rejects.toThrow(
-      "TRACK_C_OFFLINE_HUMAN_REVIEW_TEXT_NOT_PII_SAFE:unsupported-protected-claim:candidate",
+      "TRACK_C_OFFLINE_HUMAN_REVIEW_TEXT_NOT_PII_SAFE:pii-security:candidate",
     );
   });
 
@@ -406,15 +495,18 @@ describe("Track C C2 offline replay", () => {
       },
     })).rejects.toThrow("TRACK_C_TEST_JUDGE_FAILED");
 
-    expect(checkpoints).toHaveLength(3);
+    expect(checkpoints).toHaveLength(6);
     expect(checkpoints).toMatchObject([
       { caseId: "unsupported-protected-claim" },
       { caseId: "pii-security" },
       { caseId: "unauthorized-effect" },
+      { caseId: "stale-facts" },
+      { caseId: "missing-facts" },
+      { caseId: "malformed-output" },
     ]);
-    expect((checkpoints as Array<{ humanReview: unknown }>).every(
-      ({ humanReview }) => humanReview !== null,
-    )).toBe(true);
+    expect((checkpoints as Array<{ caseId: string; judgeMetrics: unknown }>)[0]).toMatchObject({
+      caseId: "unsupported-protected-claim", judgeMetrics: null,
+    });
   });
 
   it("keeps a routed human-review pair in its checkpoint when a later judge call fails", async () => {
@@ -451,20 +543,21 @@ describe("Track C C2 offline replay", () => {
       },
     })).rejects.toThrow("TRACK_C_TEST_LATE_JUDGE_FAILED");
 
-    expect(checkpoints).toMatchObject([
+    expect(checkpoints.slice(0, 2)).toMatchObject([
       {
         contractVersion: "TRACK_C_OFFLINE_CASE_CHECKPOINT_V2",
         caseId: "unsupported-protected-claim",
-        humanReview: {
-          accepted: { reply: "reply-unsupported-protected-claim" },
-          candidate: { reply: "offline-candidate-unsupported-protected-claim" },
-          verifiedFacts: { payloadHash: sha256(null), status: "NO_FACTS" },
-        },
+        judgeMetrics: null,
+        humanReview: null,
       },
       {
         contractVersion: "TRACK_C_OFFLINE_CASE_CHECKPOINT_V2",
         caseId: "pii-security",
-        humanReview: null,
+        humanReview: {
+          accepted: { reply: "reply-pii-security" },
+          candidate: { reply: "offline-candidate-pii-security" },
+          verifiedFacts: { payloadHash: sha256(null), status: "NO_FACTS" },
+        },
       },
     ]);
   });
@@ -490,7 +583,7 @@ describe("Track C C2 offline replay", () => {
       outcome: "WIRING_ONLY",
       candidate: { distinctReplyCaseCount: 0 },
     });
-    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(14);
+    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(8);
   });
 
   it("rejects a non-v22 baseline or an unchanged candidate before calling the V2 judge", async () => {
@@ -541,16 +634,21 @@ describe("Track C C2 offline replay", () => {
 
   it("replays exactly the frozen seven-case corpus with side effects disabled", async () => {
     const input = replayInput(); const result = await runTrackCReplay(input);
-    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(14);
+    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(8);
     expect(result).toMatchObject({ contractVersion: "TRACK_C_REPLAY_V1", sideEffects: "DISABLED", holdout: "NOT_INCLUDED",
       deterministic: { status: "PASS", caseCount: 7, riskClassCount: 9 },
-      aggregate: { better: 0, same: 7, worse: 0, materialRegressionClusters: [] } });
+      aggregate: {
+        better: 0, same: 4, worse: 0, handoffCorrect: 3, scoredCaseCount: 4,
+        materialRegressionClusters: [],
+      } });
     expect(result.cases.map(({ caseId }) => caseId)).toEqual(TRACK_C_C1_MUST_PASS_POLICY.fixtures.map(({ caseId }) => caseId));
-    expect(result.cases.every(({ quality }) => quality.rationale.materialReasonCode === "NO_MATERIAL_SCORE_DELTA")).toBe(true);
+    expect(result.cases.filter(({ quality }) => quality.status === "SCORED").every(({ quality }) =>
+      quality.status === "SCORED" && quality.rationale.materialReasonCode === "NO_MATERIAL_SCORE_DELTA",
+    )).toBe(true);
   });
   it("rejects a changed corpus before calling the offline judge", async () => {
     const input = replayInput(); input.cases[0]!.caseId = "pre-b24-versus-current-live-path";
-    await expect(runTrackCReplay(input)).rejects.toThrow("TRACK_C_C2_CASE_SET_MISMATCH");
+    await expect(runTrackCReplay(input)).rejects.toThrow("TRACK_C_C1_CANDIDATE_CASE_SET_MISMATCH");
     expect(input.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
   });
   it("rejects caller-authored envelopes that do not match exact B3 observations", async () => {
@@ -588,7 +686,7 @@ describe("Track C C2 offline replay", () => {
 
     const result = await runTrackCReplay(input);
 
-    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(14);
+    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(8);
     expect(result.cases.every(({ deterministic }) =>
       deterministic.candidateOrigin === "OFFLINE_CANDIDATE_DETERMINISTICALLY_VALIDATED"
     )).toBe(true);
@@ -604,8 +702,8 @@ describe("Track C C2 offline replay", () => {
     expect(substituted.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
 
     const guardFailed = replayInput();
-    const accepted = guardFailed.cases[0]!.accepted.quality;
-    const capture = frozenCapture("unsupported-protected-claim");
+    const accepted = guardFailed.cases[1]!.accepted.quality;
+    const capture = frozenCapture("pii-security");
     if (capture.status !== "BUILT" || capture.context === null) throw new Error("TEST_CAPTURE_REQUIRED");
     const context = capture.context;
     const request = buildTrackCOfflineCandidateRequest({
@@ -623,6 +721,7 @@ describe("Track C C2 offline replay", () => {
       systemInstruction: "candidate",
     });
     expect(() => validateTrackCOfflineCandidate({
+      caseId: "pii-security",
       capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"),
       request: mismatchedRequest,
       providerModelVersion: "gemini-3.5-flash-lite", accepted,
@@ -632,6 +731,7 @@ describe("Track C C2 offline replay", () => {
       },
     })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_DIALOGUE_MISMATCH");
     expect(() => validateTrackCOfflineCandidate({
+      caseId: "pii-security",
       capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"),
       request: { ...request, body: request.body.replace("candidate", "tampered") },
       providerModelVersion: "gemini-3.5-flash-lite", accepted,
@@ -644,6 +744,7 @@ describe("Track C C2 offline replay", () => {
       },
     })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_REQUEST_MISMATCH");
     expect(() => validateTrackCOfflineCandidate({
+      caseId: "pii-security",
       capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
       providerModelVersion: "gemini-3.5-flash-lite", accepted,
       output: {
@@ -652,6 +753,7 @@ describe("Track C C2 offline replay", () => {
       },
     })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_PROVENANCE_INVALID");
     expect(() => validateTrackCOfflineCandidate({
+      caseId: "pii-security",
       capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
       providerModelVersion: "gemini-3.5-flash-lite", accepted,
       output: {
@@ -663,6 +765,7 @@ describe("Track C C2 offline replay", () => {
       },
     })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_OUTPUT_INVALID");
     expect(() => validateTrackCOfflineCandidate({
+      caseId: "pii-security",
       capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
       providerModelVersion: "gemini-3.5-flash-lite", accepted,
       output: {
@@ -678,11 +781,18 @@ describe("Track C C2 offline replay", () => {
       assessment(4), assessment(4), assessment(4), assessment(4), assessment(4), assessment(4), assessment(4), assessment(4), assessment(4), assessment(4)]));
     const second = await runTrackCReplay(replayInput([], [assessment(4), worseFactGrounding, sameWithDifferentRationale, assessment(4),
       assessment(4), assessment(4), assessment(4), assessment(4), assessment(4), assessment(4), assessment(4), assessment(4), assessment(4), assessment(4)]));
-    expect(first.aggregate).toEqual({ better: 0, same: 6, worse: 1, materialRegressionClusters: [{
-      caseIds: ["unsupported-protected-claim"], riskClasses: ["PROTECTED_CLAIM", "UNSUPPORTED_OUTPUT"],
+    expect(first.aggregate).toEqual({ better: 0, same: 3, worse: 1, handoffCorrect: 3, scoredCaseCount: 4, materialRegressionClusters: [{
+      caseIds: ["pii-security"], riskClasses: ["PII_SECURITY"],
       materialReasonCode: "SCORE_REGRESSION:factGrounding",
     }] });
-    expect(first.cases[0]!.quality.rationale.candidateAssessmentHash).not.toBe(first.cases[1]!.quality.rationale.acceptedAssessmentHash);
+    const firstScored = first.cases.find(({ quality }) => quality.status === "SCORED");
+    const secondScored = first.cases.filter(({ quality }) => quality.status === "SCORED")[1];
+    if (firstScored?.quality.status !== "SCORED" || secondScored?.quality.status !== "SCORED") {
+      throw new Error("TEST_SCORED_CASES_REQUIRED");
+    }
+    expect(firstScored.quality.rationale.candidateAssessmentHash).not.toBe(
+      secondScored.quality.rationale.acceptedAssessmentHash,
+    );
     expect(first.repeatabilityHash).toBe(second.repeatabilityHash);
   });
   it("does not label a score regression as recommendation improvement", async () => {
@@ -693,7 +803,8 @@ describe("Track C C2 offline replay", () => {
     });
     const result = await runTrackCReplay(replayInput([], [accepted, candidate]));
 
-    expect(result.cases[0]!.quality).toMatchObject({
+    expect(result.cases[1]!.quality).toMatchObject({
+      status: "SCORED",
       disposition: "WORSE",
       reviewReasonCodes: ["UNEXPECTED_REGRESSION", "JUDGE_DISAGREEMENT"],
       rationale: { materialReasonCode: "SCORE_REGRESSION:factGrounding" },

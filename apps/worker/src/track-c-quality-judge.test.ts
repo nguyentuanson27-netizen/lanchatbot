@@ -16,7 +16,7 @@ const privateKey = generateKeyPairSync("rsa", {
   publicKeyEncoding: { type: "spki", format: "pem" },
 }).privateKey;
 
-function judgeDescriptor(model = "gemini-3.8-flash") {
+function judgeDescriptor(model = "gemini-3.7-flash") {
   return {
     provider: "VERTEX_AI" as const,
     location: "global",
@@ -199,7 +199,7 @@ describe("Track C C1.1 offline quality judge", () => {
       comparison: { disposition: "BETTER", overallScoreDelta: 1 },
       identity: {
         mustPass: { captureSetHash: TRACK_C_C1_MUST_PASS_POLICY.captureSetHash },
-        judge: { provider: "VERTEX_AI", location: "global", model: "gemini-3.8-flash" },
+        judge: { provider: "VERTEX_AI", location: "global", model: "gemini-3.7-flash" },
         verifiedFactFixtureHash: TRACK_C_C1_MUST_PASS_POLICY.factFixtureHash,
       },
       metrics: {
@@ -346,7 +346,7 @@ describe("Track C C1.1 offline quality judge", () => {
     expect(judge.judgeSalesReplyV2Descriptor()).toMatchObject({
       provider: "VERTEX_AI",
       location: "global",
-      model: "gemini-3.8-flash",
+      model: "gemini-3.7-flash",
     });
   });
 });

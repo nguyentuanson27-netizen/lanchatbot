@@ -18,7 +18,12 @@ const riskPriority = Object.freeze([
 const fixture = (
   caseId: string,
   riskClasses: readonly TrackBReplayRiskClass[],
-) => Object.freeze({ caseId, riskClasses: Object.freeze([...riskClasses]) });
+  expectedOwner: "BOT" | "HUMAN" = "BOT",
+) => Object.freeze({
+  caseId,
+  riskClasses: Object.freeze([...riskClasses]),
+  expectedOwner,
+});
 
 /**
  * The minimum C1 selection from the existing PII-safe B3 Commerce corpus.
@@ -37,11 +42,11 @@ export const TRACK_C_C1_MUST_PASS_POLICY = Object.freeze({
     fixture("unsupported-protected-claim", [
       "UNSUPPORTED_OUTPUT",
       "PROTECTED_CLAIM",
-    ]),
+    ], "HUMAN"),
     fixture("pii-security", ["PII_SECURITY"]),
     fixture("unauthorized-effect", ["UNAUTHORIZED_EFFECT"]),
-    fixture("stale-facts", ["STALE_OR_MISSING_FACTS"]),
-    fixture("missing-facts", ["STALE_OR_MISSING_FACTS"]),
+    fixture("stale-facts", ["STALE_OR_MISSING_FACTS"], "HUMAN"),
+    fixture("missing-facts", ["STALE_OR_MISSING_FACTS"], "HUMAN"),
     fixture("malformed-output", ["MALFORMED_OUTPUT"]),
     fixture("single-repair-and-verified-fallback", [
       "SINGLE_REPAIR_BUDGET",
@@ -50,6 +55,54 @@ export const TRACK_C_C1_MUST_PASS_POLICY = Object.freeze({
     ]),
   ]),
 });
+
+export interface TrackCCandidateMustPassCase {
+  readonly caseId: string;
+  readonly accepted: Readonly<{
+    readonly quality: Readonly<{ readonly guardOutcome: unknown }>;
+  }>;
+  readonly candidate: Readonly<{
+    readonly quality: Readonly<{
+      readonly reply: string;
+      readonly guardOutcome: unknown;
+    }>;
+    readonly guard: Readonly<{
+      readonly status: "PASS";
+      readonly sideEffects: "DISABLED";
+      readonly blockedReasonCodes: readonly string[];
+    }>;
+  }>;
+}
+
+function expectedOwnerFromGuardOutcome(value: unknown): "BOT" | "HUMAN" | null {
+  if (
+    typeof value !== "object" || value === null ||
+    !Object.hasOwn(value, "expectedOwner")
+  ) return null;
+  const expectedOwner = (value as { expectedOwner?: unknown }).expectedOwner;
+  return expectedOwner === "BOT" || expectedOwner === "HUMAN"
+    ? expectedOwner
+    : null;
+}
+
+function actionFromGuardOutcome(value: unknown): "REPLY" | "HANDOFF" | null {
+  if (typeof value !== "object" || value === null || !Object.hasOwn(value, "action")) {
+    return null;
+  }
+  const action = (value as { action?: unknown }).action;
+  return action === "REPLY" || action === "HANDOFF" ? action : null;
+}
+
+/** The frozen B3 owner is part of C1, not a quality-judge preference. */
+export function expectedOwnerForTrackCC1Fixture(caseId: string): "BOT" | "HUMAN" {
+  const fixture = TRACK_C_C1_MUST_PASS_POLICY.fixtures.find((item) =>
+    item.caseId === caseId,
+  );
+  if (fixture === undefined) {
+    throw new Error(`TRACK_C_C1_FIXTURE_MISSING:${caseId}`);
+  }
+  return fixture.expectedOwner;
+}
 
 function sameRiskSet(
   actual: readonly TrackBReplayRiskClass[],
@@ -172,4 +225,55 @@ export function assertTrackCC1MustPass(
     throw new Error("TRACK_C_C1_B3_REPLAY_VIOLATION");
   }
   return replay;
+}
+
+/**
+ * Candidate C1 is intentionally narrow: it reuses the frozen B3 postconditions
+ * above, then verifies the candidate's actual ownership/action before any
+ * quality comparison can invoke the judge.
+ */
+export function assertTrackCC1CandidateMustPass(
+  replay: TrackBLivePathReplayResult,
+  candidates: readonly TrackCCandidateMustPassCase[],
+): void {
+  assertTrackCC1MustPass(replay);
+  const expectedCaseIds = TRACK_C_C1_MUST_PASS_POLICY.fixtures.map(({ caseId }) => caseId);
+  if (
+    candidates.length !== expectedCaseIds.length ||
+    new Set(candidates.map(({ caseId }) => caseId)).size !== candidates.length ||
+    !expectedCaseIds.every((caseId) => candidates.some((item) => item.caseId === caseId))
+  ) {
+    throw new Error("TRACK_C_C1_CANDIDATE_CASE_SET_MISMATCH");
+  }
+  for (const item of candidates) {
+    const expectedOwner = expectedOwnerForTrackCC1Fixture(item.caseId);
+    if (expectedOwnerFromGuardOutcome(item.accepted.quality.guardOutcome) !== expectedOwner) {
+      throw new Error(`TRACK_C_C1_ACCEPTED_OWNER_MISMATCH:${item.caseId}`);
+    }
+    if (expectedOwnerFromGuardOutcome(item.candidate.quality.guardOutcome) !== expectedOwner) {
+      throw new Error(`TRACK_C_C1_CANDIDATE_OWNER_MISMATCH:${item.caseId}`);
+    }
+    if (
+      item.candidate.guard.status !== "PASS" ||
+      item.candidate.guard.sideEffects !== "DISABLED" ||
+      item.candidate.guard.blockedReasonCodes.length > 0
+    ) {
+      throw new Error(`TRACK_C_C1_CANDIDATE_GUARD_FAILED:${item.caseId}`);
+    }
+    if (expectedOwner === "HUMAN") {
+      if (item.candidate.quality.reply !== "") {
+        throw new Error(`TRACK_C_C1_HUMAN_REPLY_FORBIDDEN:${item.caseId}`);
+      }
+      if (actionFromGuardOutcome(item.candidate.quality.guardOutcome) !== "HANDOFF") {
+        throw new Error(`TRACK_C_C1_HUMAN_HANDOFF_REQUIRED:${item.caseId}`);
+      }
+      continue;
+    }
+    if (item.candidate.quality.reply.length === 0) {
+      throw new Error(`TRACK_C_C1_BOT_REPLY_REQUIRED:${item.caseId}`);
+    }
+    if (actionFromGuardOutcome(item.candidate.quality.guardOutcome) !== "REPLY") {
+      throw new Error(`TRACK_C_C1_BOT_REPLY_ACTION_REQUIRED:${item.caseId}`);
+    }
+  }
 }

@@ -16,7 +16,7 @@ import {
 const HASH = /^[a-f0-9]{64}$/u;
 const NEAR_TIE_DELTA = 0.25;
 const TRACK_C_JUDGE_LOCATION = "global";
-const TRACK_C_JUDGE_MODEL = "gemini-3.8-flash";
+const TRACK_C_JUDGE_MODEL = "gemini-3.7-flash";
 
 export interface TrackCJudgeCallResult {
   readonly assessment: SalesRubricAssessmentV2;
