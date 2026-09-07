@@ -478,6 +478,7 @@ interface ImageRecognitionSearchPort {
   searchCutoutGroups(
     embedding: readonly number[],
     uniqueProductLimit: number,
+    signal: AbortSignal,
   ): Promise<readonly ImageRecognitionHit[]>;
 }
 ```
@@ -492,7 +493,11 @@ The exact type names may follow repository conventions. The required semantics a
 
 - at most one winning image point per normalized `product_id`;
 - ordered by winning retrieval score;
-- winning point evidence is preserved.
+- winning point evidence is preserved;
+- the caller-provided `AbortSignal` is part of the realtime contract and must be passed to the underlying Qdrant HTTP request;
+- parent cancellation/deadline must stop the adapter from awaiting or processing the Qdrant result; an adapter-local timeout may shorten the call but must not allow Qdrant work to outlive the caller's remaining request budget.
+
+Focused adapter verification must prove that aborting the parent signal aborts the in-flight Qdrant `fetch` and propagates cancellation to the caller rather than continuing under an independent timeout.
 
 If SKU A wins because `A-detail-03.jpg` has the highest score for A, the reranker must inspect `A-detail-03.jpg`.
 
@@ -658,7 +663,6 @@ candidateProductIds
 candidateRetrievalRanks
 candidateRetrievalScores
 selectedEvidencePointId
-
 rerankerModel
 rerankerPromptVersion
 rerankerDecision
@@ -881,6 +885,7 @@ The active runtime contract is complete when all of the following are true:
 - the embedding response is read from `embedding.values` and validated as finite 3072D;
 - catalog and customer use the same preprocessing implementation;
 - Qdrant recognition uses grouped query points with `group_by=product_id`, `group_size=1`, `limit=5`, and `exact=true`;
+- realtime Qdrant grouped search honors the caller's cancellation/deadline through the search-port `AbortSignal`, and adapter-local timeout handling cannot extend the call beyond the caller's remaining request budget;
 - the runtime has no second raw-point paging/over-fetch retrieval implementation;
 - the exact winning Qdrant point is preserved as evidence;
 - the reranker receives the winning catalog image, not an unrelated representative image;
@@ -897,27 +902,3 @@ The active runtime contract is complete when all of the following are true:
 - no automatic legacy fallback, A/B, shadow, or dual-recognition path exists;
 - existing URL/SSRF/MIME/size/security controls remain enforced;
 - telemetry does not expose secrets or raw vectors.
-
-## 24. Final architecture decision
-
-The new default image-recognition architecture is:
-
-```text
-CUTOUT-only
-+
-Gemini Embedding 2 / 3072D
-+
-Dedicated Qdrant image-recognition collection
-+
-Exact grouped retrieval by product_id
-+
-Top 5 unique SKUs
-+
-Winning image-point evidence
-+
-Always Gemini reranking
-+
-No recognition-result cache in initial V2
-```
-
-This spec replaces the previous cutout-first/RAW-fallback recognition plan for future implementation work. The previous plan remains historical context only; its RAW fallback, Top 3, threshold-gate, and dual-channel decisions are not V2 requirements.
