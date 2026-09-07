@@ -37,7 +37,7 @@ V2 uses the following decisions as requirements:
 3. Embedding dimension is **3072**.
 4. Catalog and customer queries use the same V2 preprocessing contract.
 5. Qdrant image retrieval uses **exact search**.
-6. Retrieval shortlist is **Top 5 unique SKUs**, not Top 5 image points.
+6. Retrieval shortlist is **Top 5 unique SKUs**, not Top 5 image points; shortlist completeness is defined over eligible SKU groups, not over an arbitrary fixed number of raw image hits.
 7. The exact Qdrant image point that wins for each SKU is preserved as evidence.
 8. Gemini reranking is **contrastive** and may choose any SKU in the supplied Top 5.
 9. Every non-empty candidate set goes through the reranker; V2 has no score-threshold direct-match shortcut.
@@ -162,14 +162,31 @@ MATCHED | AMBIGUOUS | NOT_FOUND | ERROR
 
 ## 5. Catalog image eligibility
 
-V2 indexes catalog images only when they are eligible under the existing Human Gate:
+V2 uses the existing Human Gate semantics for publication eligibility.
+
+New or changed V2 points are publishable only when:
 
 ```text
 REVIEW_STATUS = APPROVED
 ACTIVE = TRUE
 ```
 
-V2 must not index rows that are:
+The publisher action contract is:
+
+```text
+ACTIVE = FALSE
+→ DELETE an existing V2 point if present
+
+ACTIVE = TRUE + REVIEW_STATUS = APPROVED
+→ UPSERT / refresh the V2 point when required
+
+ACTIVE = TRUE + REVIEW_STATUS != APPROVED
+→ HOLD
+```
+
+`HOLD` means the row must not create or update a V2 point. If that image already has a successfully published V2 point from an earlier APPROVED state, V2 preserves the current P2.3C-style HOLD behavior and does not implicitly delete that point merely because the review status is now `PENDING`, `REJECTED`, or `STALE`.
+
+Therefore V2 must not create or update recognition points from rows that are:
 
 - `PENDING`;
 - `REJECTED`;
@@ -177,6 +194,8 @@ V2 must not index rows that are:
 - inactive;
 - `SIZE_GUIDE`;
 - missing a valid usable image URL.
+
+`ACTIVE = FALSE` remains the explicit withdrawal/delete signal for an already published recognition point.
 
 The current model remains:
 
@@ -322,17 +341,80 @@ V2 must never mix vectors from `multimodalembedding@001` with `gemini-embedding-
 
 The image embedding request contains the CUTOUT image. Product contextual text is not included in the V2 image-recognition embedding.
 
-Official model facts checked for this spec on 2026-09-07:
+### 9.1 Vertex REST method and multi-region endpoint
+
+The existing `multimodalembedding@001` adapter contract must **not** be reused by changing only the model name.
+
+`gemini-embedding-2` uses `:embedContent`, not the legacy `:predict` request/response contract.
+
+For the locked United States multi-region location:
+
+```text
+location = us
+service endpoint = https://aiplatform.us.rep.googleapis.com
+```
+
+The current Google REST guide uses the path family:
+
+```text
+POST https://aiplatform.us.rep.googleapis.com/v1/projects/<PROJECT_ID>/locations/us/publishers/google/models/gemini-embedding-2:embedContent
+```
+
+The request must send the prepared CUTOUT PNG as Gemini `Content` inline media, conceptually:
+
+```json
+{
+  "content": {
+    "parts": [
+      {
+        "inlineData": {
+          "mimeType": "image/png",
+          "data": "<base64 CUTOUT PNG>"
+        }
+      }
+    ]
+  }
+}
+```
+
+3072 is the model's default/max output dimensionality. If the implementation explicitly sends an output-dimensionality option, it must use the `EmbedContentConfig.outputDimensionality` contract supported by the selected Vertex REST API version; it must not reuse the legacy `parameters.dimension` field from `multimodalembedding@001`.
+
+The response parser must read:
+
+```text
+response.embedding.values
+```
+
+and reject the response unless it is exactly a finite 3072D numeric vector.
+
+The V2 embedding adapter therefore must not expect:
+
+```text
+instances[].image
+parameters.dimension
+predictions[].imageEmbedding
+```
+
+Those fields belong to the legacy `multimodalembedding@001:predict` contract.
+
+Official model/API facts checked for this spec on 2026-09-07:
 
 - `gemini-embedding-2` is GA;
 - it supports image inputs;
 - default/max output is 3072 dimensions;
-- supported locations include `global`, `us`, and `eu`.
+- supported locations include `global`, `us`, and `eu`;
+- the `us` multi-region hostname is `https://aiplatform.us.rep.googleapis.com`;
+- the embedding method is `:embedContent`;
+- inline media uses `content.parts[].inlineData`;
+- the returned vector is in `embedding.values`.
 
 References:
 
 - https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/embedding-2
 - https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/embeddings/get-multimodal-embeddings
+- https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/locations
+- https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1beta1/projects.locations.publishers.models/embedContent
+- https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/Shared.Types/Content
 
 ## 10. Dedicated Qdrant recognition collection
 
@@ -529,19 +611,38 @@ There is no parallel RAW embedding request.
 
 ## 18. Qdrant exact retrieval
 
-V2 recognition queries only the V2 `image_cutout` vector and must request exact retrieval:
+V2 recognition queries only the V2 `image_cutout` vector and must request exact retrieval.
+
+The preferred and normative V2 retrieval contract is a grouped query so the requested limit is a limit on **unique SKU groups**, not on raw image points:
 
 ```text
+POST /collections/<recognitionCollection>/points/query/groups
 using = image_cutout
+group_by = product_id
+group_size = 1
+limit = 5
 params.exact = true
 filter active = true
 ```
 
-The adapter must preserve the raw image-point identity and payload long enough to build recognition evidence.
+`group_size = 1` retains only the highest-scoring image point for each SKU group. `limit = 5` means at most five groups/SKUs, which directly matches the recognition shortlist requirement.
 
-Qdrant exact-search reference:
+The adapter must request the payload fields needed for product identity and winning-point evidence and must preserve the returned point ID, score, and payload.
+
+If the deployed Qdrant version cannot support the grouped query contract, the fallback implementation must continue retrieving/paging image points until either:
+
+```text
+5 unique eligible SKUs have been collected
+or
+all eligible search results are exhausted
+```
+
+A fixed raw-point over-fetch such as `25`, `40`, or `limit * 8` is not, by itself, a correctness guarantee and must not define V2 shortlist completeness.
+
+Qdrant references:
 
 - https://qdrant.tech/documentation/concepts/search/#search-api
+- https://api.qdrant.tech/api-reference/search/query-points-groups
 
 ## 19. Dedicated recognition search contract
 
@@ -564,20 +665,28 @@ interface ImageRecognitionHit {
 }
 
 interface ImageRecognitionSearchPort {
-  searchCutout(
+  searchCutoutGroups(
     embedding: readonly number[],
-    limit: number,
+    uniqueProductLimit: number,
   ): Promise<readonly ImageRecognitionHit[]>;
 }
 ```
 
-Exact type names may follow repository conventions. The point-level semantics are required.
+The returned list represents at most one winning image hit per normalized `product_id`, ordered by the winning retrieval score.
+
+For the V2 realtime path:
+
+```text
+uniqueProductLimit = 5
+```
+
+Exact type names may follow repository conventions. The grouped unique-SKU semantics and point-level evidence are required.
 
 ## 20. Image-level hits → Top 5 unique SKUs
 
-Qdrant returns image points, not unique products.
+The physical collection still contains image points, not one vector per product. V2 must therefore define shortlist completeness at the SKU-group level.
 
-Example raw hits:
+Example image points:
 
 ```text
 A-front   .950
@@ -587,7 +696,7 @@ C-back    .918
 D-detail  .904
 ```
 
-V2 groups by normalized `product_id`, keeps only the highest-scoring point per product, sorts those product candidates by retrieval score, then keeps at most five unique products.
+The grouped retrieval result keeps only the highest-scoring point per normalized `product_id` and orders SKU groups by that winning score.
 
 Result:
 
@@ -598,7 +707,15 @@ C = .918 / C-back
 D = .904 / D-detail
 ```
 
-A SKU appearing in multiple top image points still occupies only one candidate slot.
+A SKU appearing in many highly ranked image points still occupies only one candidate slot.
+
+The shortlist size must be:
+
+```text
+min(5, number of eligible SKU groups available from the search result set)
+```
+
+The implementation must not stop merely because an arbitrary first batch of image points has been consumed. If five eligible SKU groups exist, the reranker must receive five unique SKU candidates unless later candidate-image preparation removes one under Section 32.
 
 ## 21. Winning point evidence
 
@@ -827,25 +944,58 @@ A Gemini-selected public `MATCHED` result uses:
 gap = null
 ```
 
-## 30. Cache isolation
+## 30. Cache isolation and catalog invalidation
 
-The current cache key based only on normalized image hash is not sufficient across a recognition-engine replacement.
+The current cache implementation already namespaces entries using the recognition pipeline version and a hash derived from a supplied `catalogVersion`; it is therefore inaccurate to describe the current key as being based only on the normalized image hash.
 
-V2 cache identity must include the recognition pipeline version, conceptually:
+The correctness gap is that a static identifier such as the collection name is not a catalog revision. It does not automatically change when V2 points are inserted, updated, or deactivated.
+
+V2 cache identity must include both:
 
 ```text
-media-recognition:<pipelineVersion>:<normalizedImageHash>
+pipelineVersion
+catalogGeneration
+normalizedImageHash
+```
+
+Conceptually:
+
+```text
+media-recognition:<pipelineVersion>:<catalogGeneration>:<normalizedImageHash>
 ```
 
 Example:
 
 ```text
-media-recognition:cutout-ge2-3072-v1:<sha256>
+media-recognition:cutout-ge2-3072-v1:gen-20260907-000123:<sha256>
 ```
+
+`catalogGeneration` is an authoritative recognition-catalog revision, not merely the collection name. It must change whenever a successfully applied V2 catalog mutation can change recognition candidates or candidate evidence, including:
+
+```text
+eligible point UPSERT
+eligible point replacement/re-embed
+ACTIVE = FALSE point DELETE
+other candidate-affecting V2 point mutation
+```
+
+After the current generation changes, entries from the previous generation must become unreachable without waiting for TTL expiration. TTL remains a resource-management mechanism only; it is not the correctness mechanism for catalog changes.
 
 V2 must not read recognition results cached by the old pipeline.
 
-The pipeline version should be bumped when candidate-affecting V2 behavior changes materially.
+The pipeline version should be bumped when candidate-affecting recognition logic changes materially. The catalog generation should change when the indexed catalog state changes while the recognition algorithm stays the same.
+
+### 30.1 Cache-hit eligibility revalidation
+
+A cached `MATCHED` result must not be returned solely because its key exists.
+
+Before returning a cached `MATCHED`, V2 must verify that the selected winning evidence point is still present in the V2 recognition collection and is still active. If that point is missing or inactive, the entry is treated as a cache miss and V2 runs the normal recognition path.
+
+This point-level revalidation is a defense against catalog-generation propagation races and misconfiguration. It does not require a second vector search; a point lookup/eligibility check is sufficient.
+
+A cached product object must also not be retained as authoritative when current product lookup says the product is inactive or unavailable. Do not preserve a stale cached `MATCHED` merely because the old serialized product still exists in Redis.
+
+For cached `AMBIGUOUS` and `NOT_FOUND` results, `catalogGeneration` is the invalidation mechanism: a candidate-affecting catalog mutation changes the generation and makes those old entries unreachable.
 
 ## 31. Telemetry
 
@@ -865,6 +1015,7 @@ V2 telemetry should include at least:
 
 ```text
 pipelineVersion
+catalogGeneration
 normalizedImageHash
 
 embeddingModel
@@ -905,6 +1056,7 @@ rerankerLatencyMs
 totalLatencyMs
 
 cacheHit
+cacheEligibilityRevalidated
 ```
 
 Do not log full embedding vectors, auth headers, service-account private keys, OAuth tokens, or Qdrant API keys.
@@ -1001,6 +1153,8 @@ When all relevant state matches:
 → NOOP
 ```
 
+A successfully applied candidate-affecting V2 mutation must also participate in the `catalogGeneration` contract in Section 30 so recognition caches cannot silently outlive the catalog state they were computed against.
+
 ## 34. Deactivation
 
 When a catalog image/product becomes inactive:
@@ -1012,6 +1166,16 @@ ACTIVE = FALSE
 V2 must delete or otherwise remove the corresponding V2 point from active recognition according to the existing deletion semantics.
 
 Inactive points must never be returned by realtime recognition.
+
+After a successful deactivation/delete is applied to the V2 recognition collection:
+
+- the catalog generation must advance as required by Section 30;
+- old-generation cache entries become unreachable;
+- a cached `MATCHED` that somehow reaches validation must fail the winning-point active check and be treated as a cache miss.
+
+Do not rely on the Redis TTL to enforce deactivation correctness.
+
+This explicit `ACTIVE = FALSE` deletion behavior is separate from the `HOLD` semantics in Section 5. A non-APPROVED but still active row is held; it is not implicitly treated as an `ACTIVE = FALSE` withdrawal.
 
 ## 35. Replacement migration
 
@@ -1058,9 +1222,11 @@ Top 5 unique SKU
 always Gemini rerank
 ```
 
-### Step 5 — Bump the cache namespace
+### Step 5 — Initialize the V2 cache namespace
 
-V2 must not reuse old recognition cache entries.
+V2 must use a new `pipelineVersion` and an authoritative initial `catalogGeneration` for the completed V2 catalog snapshot.
+
+It must not reuse old recognition cache entries, and the value supplied as `catalogGeneration` must not be a static collection name masquerading as a revision.
 
 ### Step 6 — Cut over
 
@@ -1228,13 +1394,9 @@ CUTOUT
 Gemini Embedding 2
 3072D
         ↓
-Qdrant EXACT
+Qdrant EXACT grouped by product_id
         ↓
-image hits
-        ↓
-group by SKU
-        ↓
-Top 5 unique
+Top 5 unique SKU groups
         ↓
 winning image evidence
         ↓
@@ -1253,9 +1415,14 @@ The implementation is complete only when the active runtime contract satisfies a
 - V2 catalog collection stores only the V2 `image_cutout` recognition vector;
 - embedding model is `gemini-embedding-2`;
 - embedding dimension is 3072;
+- Vertex embedding uses `:embedContent`, not the legacy `:predict` schema;
+- `location = us` uses the `https://aiplatform.us.rep.googleapis.com` multi-region endpoint family;
+- the embedding response is parsed from `embedding.values` and validated as finite 3072D;
 - catalog and customer use the same V2 preprocessing contract;
 - Qdrant recognition search explicitly uses `exact=true`;
-- Top 5 is calculated after deduplicating/grouping by SKU;
+- Top 5 is defined as unique SKU groups, not a fixed raw image-point limit;
+- when at least five eligible SKU groups exist, retrieval produces five unique SKU candidates before candidate-image preparation;
+- grouped retrieval keeps the highest-scoring point for each SKU, or an equivalent fallback continues until five unique SKUs or result exhaustion;
 - the exact winning Qdrant point is preserved as evidence;
 - the reranker receives that winning catalog image, not an unrelated representative image;
 - the reranker supports 1–5 candidates;
@@ -1265,7 +1432,12 @@ The implementation is complete only when the active runtime contract satisfies a
 - public statuses remain `MATCHED | AMBIGUOUS | NOT_FOUND | ERROR`;
 - final retrieval score belongs to the selected SKU;
 - Gemini-selected results use `gap = null`;
-- cache identity includes the V2 pipeline version;
+- current Human Gate HOLD semantics are explicit: active non-APPROVED rows do not publish new state and do not implicitly delete a previously published point;
+- `ACTIVE = FALSE` explicitly removes the V2 point from active recognition;
+- cache identity includes both the V2 pipeline version and a candidate-affecting `catalogGeneration`;
+- a static collection name is not accepted as the catalog-generation correctness mechanism;
+- cached `MATCHED` results revalidate the winning evidence point before return and cannot return an inactive/missing point;
+- cache TTL is not used as the deactivation correctness mechanism;
 - V2 publisher uses a separate collection/lock/progress namespace;
 - V2 publication state does not depend on legacy collection `PUBLISHED_HASH` ownership;
 - no automatic legacy fallback exists;
@@ -1284,13 +1456,15 @@ Gemini Embedding 2 / 3072D
 +
 Dedicated Qdrant image-recognition collection
 +
-Exact retrieval
+Exact grouped retrieval by product_id
 +
 Top 5 unique SKU
 +
 Winning image-point evidence
 +
 Always contrastive Gemini reranking
++
+Catalog-generation-aware cache invalidation
 ```
 
 This spec replaces the previous cutout-first/RAW-fallback recognition plan for future implementation work. The previous plan remains useful only as historical context for how the current implementation evolved; its RAW fallback, Top 3, threshold-gate, and dual-channel decisions are not requirements for V2.
