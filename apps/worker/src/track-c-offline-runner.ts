@@ -262,6 +262,10 @@ export function assertTrackCOfflineHumanReviewTextSafe(
   return value;
 }
 
+function redactTrackCOfflineHumanReviewContextText(value: string): string {
+  return redactCustomerUrlsForModel(redactAnalyticsMessage(value).text);
+}
+
 function humanReviewContext(
   context: readonly ShadowContextMessage[],
   caseId: string,
@@ -270,7 +274,8 @@ function humanReviewContext(
     direction: message.direction,
     senderType: message.senderType,
     messageType: message.messageType,
-    text: assertTrackCOfflineHumanReviewTextSafe(message.text, `${caseId}:context:${index}`),
+    // Display-only: the original context remains bound by the replay identity.
+    text: redactTrackCOfflineHumanReviewContextText(message.text),
     attachmentCount: message.attachmentCount,
   })));
 }
