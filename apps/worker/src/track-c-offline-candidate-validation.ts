@@ -21,6 +21,12 @@ import type {
 } from "./track-c-replay.js";
 
 const validated = new WeakSet<object>();
+const TrackCOfflineCandidateSemanticOutputSchema =
+  ContextV2CandidateOutputV2Schema.pick({
+    segments: true,
+    strategy: true,
+    cta: true,
+  });
 
 function hash(value: unknown): string {
   return createHash("sha256").update(canonicalJsonV1(value), "utf8").digest("hex");
@@ -102,16 +108,19 @@ export function validateTrackCOfflineCandidate(
   if (input.providerModelVersion !== "gemini-3.5-flash-lite") {
     throw new Error("TRACK_C_C3_OFFLINE_CANDIDATE_PROVIDER_MISMATCH");
   }
-  const parsed = ContextV2CandidateOutputV2Schema.safeParse(input.output);
+  const parsed = TrackCOfflineCandidateSemanticOutputSchema.safeParse(input.output);
   if (!parsed.success) throw new Error("TRACK_C_C3_OFFLINE_CANDIDATE_OUTPUT_INVALID");
-  const output = parsed.data;
-  if (output.contextHash !== context.contextHash ||
-      canonicalJsonV1(output.productBinding) !== canonicalJsonV1({
-        status: context.productBinding.status,
-        productIds: context.productBinding.productIds,
-      })) {
-    throw new Error("TRACK_C_C3_OFFLINE_CANDIDATE_CONTEXT_MISMATCH");
-  }
+  const semanticOutput = parsed.data;
+  const output = ContextV2CandidateOutputV2Schema.parse({
+    schemaVersion: 2,
+    contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
+    contextHash: context.contextHash,
+    productBinding: {
+      status: context.productBinding.status,
+      productIds: context.productBinding.productIds,
+    },
+    ...semanticOutput,
+  });
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []);
   if (new Set(claimHashes).size !== claimHashes.length || claimHashes.some((claimHash) =>
@@ -162,7 +171,7 @@ export function validateTrackCOfflineCandidate(
     identity: Object.freeze({
       captureContextHash: context.contextHash,
       requestEnvelopeHash: input.request.identity.requestEnvelopeHash,
-      responseOutputHash: hash(output),
+      responseOutputHash: hash(semanticOutput),
       providerModelVersion: input.providerModelVersion,
     }),
     guard: Object.freeze({ status: "PASS", sideEffects: "DISABLED", blockedReasonCodes: [] as const }),

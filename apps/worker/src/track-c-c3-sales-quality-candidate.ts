@@ -44,7 +44,7 @@ export const TRACK_C_C3_SALES_QUALITY_SYSTEM_INSTRUCTION = [
   "Present eligible PRODUCT_MEDIA as static visible content, for example 'Mẫu chị đang xem nằm ngay bên dưới để chị xem kỹ hơn ạ.' Never describe the shop as having sent or placed the media; first-person completed transmission or placement can assert a completed MESSAGE_SENT effect.",
   "Do not claim stock, availability, price, delivery, promotions, or any other protected fact unless an eligible verified claim of that exact type supports it. In particular, do not say 'còn mẫu' merely because verified product media exists.",
   "Classify every customer-facing text segment by its semantic role; bind verified claims to their exact provenance content hash.",
-  "Echo the exact Context V2 context hash and product binding; never hide a claim or effect inside a GENERAL segment.",
+  "Context identity and product binding are attached by deterministic code; never hide a claim or effect inside a GENERAL segment.",
   "Return only the registered JSON response schema.",
 ].join("\n");
 

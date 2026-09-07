@@ -91,9 +91,6 @@ function offlineCandidate(
     capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
     providerModelVersion: "gemini-3.5-flash-lite", accepted,
     output: {
-      schemaVersion: 2, contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
-      contextHash: capture.context.contextHash,
-      productBinding: { status: "NOT_REQUIRED", productIds: [] },
       segments: [{ kind: "GENERAL", text: options.reply ?? `offline-candidate-${caseId}` }],
       strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
     },
@@ -209,6 +206,44 @@ describe("Track C C2 offline replay", () => {
     });
     expect(evidence.judgeMetrics).toHaveLength(7);
     expect(JSON.stringify(evidence)).not.toContain("offline-candidate-");
+  });
+
+  it("checkpoints every completed case before a later judge failure stops the run", async () => {
+    const input = replayInput();
+    const checkpoints: unknown[] = [];
+    let callIndex = 0;
+    input.judge.judgeSalesReplyV2.mockImplementation(async () => {
+      const index = callIndex++;
+      if (index === 6) throw new Error("TRACK_C_TEST_JUDGE_FAILED");
+      return {
+        assessment: assessment(4),
+        latencyMs: index,
+        tokenUsage: { total: 10 + index },
+      };
+    });
+
+    await expect(runTrackCOfflineQuality({
+      runKind: "CANDIDATE_EVALUATION",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: input.mustPassReplay,
+      judge: input.judge,
+      cases: input.cases.map(({ caseId, accepted, candidate }) => ({
+        caseId,
+        accepted,
+        candidate,
+      })),
+      onCaseComplete: async (checkpoint) => {
+        checkpoints.push(checkpoint);
+      },
+    })).rejects.toThrow("TRACK_C_TEST_JUDGE_FAILED");
+
+    expect(checkpoints).toHaveLength(3);
+    expect(checkpoints).toMatchObject([
+      { caseId: "unsupported-protected-claim" },
+      { caseId: "pii-security" },
+      { caseId: "unauthorized-effect" },
+    ]);
+    expect(JSON.stringify(checkpoints)).not.toContain("offline-candidate-");
   });
 
   it("labels a v22-versus-v22 run as wiring-only, never as quality improvement evidence", async () => {
@@ -370,9 +405,6 @@ describe("Track C C2 offline replay", () => {
       capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
       providerModelVersion: "gemini-3.5-flash-lite", accepted,
       output: {
-        schemaVersion: 2, contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
-        contextHash: context.contextHash,
-        productBinding: { status: "NOT_REQUIRED", productIds: [] },
         segments: [{ kind: "EFFECT_CLAIM", text: "Đơn đã đặt xong.", effect: "ORDER_PLACED" }],
         strategy: "HOLD_POSITION", cta: "NONE",
       },
@@ -387,14 +419,11 @@ describe("Track C C2 offline replay", () => {
         segments: [{ kind: "GENERAL", text: "Chị cho em biết mẫu đang xem nhé." }],
         strategy: "ASK_CLARIFICATION", cta: "ASK_PRODUCT",
       },
-    })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_CONTEXT_MISMATCH");
+    })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_OUTPUT_INVALID");
     expect(() => validateTrackCOfflineCandidate({
       capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), request,
       providerModelVersion: "gemini-3.5-flash-lite", accepted,
       output: {
-        schemaVersion: 2, contractVersion: "CONTEXT_V2_CANDIDATE_OUTPUT_V2",
-        contextHash: context.contextHash,
-        productBinding: { status: "NOT_REQUIRED", productIds: [] },
         segments: [{ kind: "GENERAL", text: "Mẫu này giá 1.199.000đ nhé chị." }],
         strategy: "ANSWER_VERIFIED_FACTS", cta: "NONE",
       },

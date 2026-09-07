@@ -6,8 +6,8 @@ import type {
   ProductBindingV2,
   ProtectedClaimV1,
 } from "@lana/contracts";
-import { buildCandidateRequest } from "./context-v2-candidate.js";
 import { buildContextV2Capture } from "./context-v2.js";
+import { buildTrackCOfflineCandidateRequest } from "./track-c-offline-candidate.js";
 import {
   TRACK_C_C3_SALES_QUALITY_CANDIDATE,
   TRACK_C_C3_SALES_QUALITY_SYSTEM_INSTRUCTION,
@@ -155,9 +155,11 @@ describe("Track C C3 sales-quality candidate", () => {
       throw new Error("TEST_CAPTURE_REQUIRED");
     }
 
-    const base = buildCandidateRequest({
+    const base = buildTrackCOfflineCandidateRequest({
       modelResource,
-      context: capture.context,
+      capture,
+      evaluationAt: snapshotAt,
+      systemInstruction: "Base offline Track C candidate.",
     });
     const candidate = buildTrackCC3SalesQualityCandidateRequest({
       modelResource,

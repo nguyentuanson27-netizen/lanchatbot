@@ -39,6 +39,9 @@ export interface TrackCOfflineQualityRunInput {
     readonly accepted: TrackCB3LiveObservationEnvelope;
     readonly candidate: TrackCOfflineCandidateValidatedEnvelope;
   }[];
+  readonly onCaseComplete?: (
+    checkpoint: TrackCOfflineCaseCheckpoint,
+  ) => void | Promise<void>;
 }
 
 type JudgeMetrics = Readonly<{
@@ -46,6 +49,16 @@ type JudgeMetrics = Readonly<{
   readonly accepted: Omit<TrackCJudgeCallResult, "assessment">;
   readonly candidate: Omit<TrackCJudgeCallResult, "assessment">;
 }>;
+
+export interface TrackCOfflineCaseCheckpoint {
+  readonly contractVersion: "TRACK_C_OFFLINE_CASE_CHECKPOINT_V1";
+  readonly evaluationOnly: true;
+  readonly sideEffects: "DISABLED";
+  readonly caseId: string;
+  readonly replay: TrackCReplayResult["cases"][number];
+  /** Runtime telemetry is review-only and remains outside replay identities. */
+  readonly judgeMetrics: JudgeMetrics;
+}
 
 export interface TrackCOfflineQualityEvidence {
   readonly contractVersion: "TRACK_C_OFFLINE_RUNNER_V1";
@@ -144,6 +157,27 @@ function recordingJudge(delegate: TrackCQualityJudgePort): Readonly<{
   });
 }
 
+function metricsForCase(
+  caseId: string,
+  recorders: ReadonlyMap<string, ReturnType<typeof recordingJudge>>,
+): JudgeMetrics {
+  const calls = recorders.get(caseId)?.calls;
+  if (calls?.length !== 2 || calls[0] === undefined || calls[1] === undefined) {
+    throw new Error(`TRACK_C_OFFLINE_RUNNER_JUDGE_METRICS_MISSING:${caseId}`);
+  }
+  return Object.freeze({
+    caseId,
+    accepted: Object.freeze({
+      latencyMs: calls[0].latencyMs,
+      tokenUsage: Object.freeze({ ...calls[0].tokenUsage }),
+    }),
+    candidate: Object.freeze({
+      latencyMs: calls[1].latencyMs,
+      tokenUsage: Object.freeze({ ...calls[1].tokenUsage }),
+    }),
+  });
+}
+
 /**
  * One callable offline composition for a pre-built, independently guarded
  * candidate. It has no runtime/service/DB/effect authority; a local harness
@@ -176,24 +210,20 @@ export async function runTrackCOfflineQuality(
       recorders.set(caseId, recorder);
       return { caseId, judge: recorder.judge, accepted, candidate };
     }),
+    ...(input.onCaseComplete === undefined ? {} : {
+      onCaseComplete: async (replayCase: TrackCReplayResult["cases"][number]) =>
+        input.onCaseComplete?.(Object.freeze({
+        contractVersion: "TRACK_C_OFFLINE_CASE_CHECKPOINT_V1",
+        evaluationOnly: true,
+        sideEffects: "DISABLED",
+        caseId: replayCase.caseId,
+        replay: structuredClone(replayCase),
+        judgeMetrics: metricsForCase(replayCase.caseId, recorders),
+        })),
+    }),
   });
-  const judgeMetrics = replay.cases.map(({ caseId }) => {
-    const calls = recorders.get(caseId)?.calls;
-    if (calls?.length !== 2 || calls[0] === undefined || calls[1] === undefined) {
-      throw new Error(`TRACK_C_OFFLINE_RUNNER_JUDGE_METRICS_MISSING:${caseId}`);
-    }
-    return Object.freeze({
-      caseId,
-      accepted: Object.freeze({
-        latencyMs: calls[0].latencyMs,
-        tokenUsage: calls[0].tokenUsage,
-      }),
-      candidate: Object.freeze({
-        latencyMs: calls[1].latencyMs,
-        tokenUsage: calls[1].tokenUsage,
-      }),
-    });
-  });
+  const judgeMetrics = replay.cases.map(({ caseId }) =>
+    metricsForCase(caseId, recorders));
   return Object.freeze({
     contractVersion: "TRACK_C_OFFLINE_RUNNER_V1",
     evaluationOnly: true,

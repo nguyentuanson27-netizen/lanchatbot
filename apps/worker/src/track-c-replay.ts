@@ -76,6 +76,9 @@ export interface TrackCReplayCaseInput {
 export interface TrackCReplayInput {
   readonly mustPassReplay: TrackBLivePathReplayResult;
   readonly cases: readonly TrackCReplayCaseInput[];
+  readonly onCaseComplete?: (
+    result: TrackCReplayResult["cases"][number],
+  ) => void | Promise<void>;
 }
 
 type MaterialRegressionCluster = {
@@ -303,7 +306,7 @@ export async function runTrackCReplay(
       accepted: replayCase.accepted.quality,
       candidate: replayCase.candidate.quality,
     });
-    cases.push(Object.freeze({
+    const result = Object.freeze({
       caseId: replayCase.caseId,
       deterministic: Object.freeze({
         status: "PASS" as const,
@@ -323,7 +326,9 @@ export async function runTrackCReplay(
         rationale: qualityRationale(judged),
         identity: judged.identity,
       }),
-    }));
+    });
+    cases.push(result);
+    await input.onCaseComplete?.(result);
   }
 
   const aggregate = Object.freeze({
