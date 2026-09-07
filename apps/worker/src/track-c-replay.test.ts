@@ -425,6 +425,54 @@ describe("Track C C2 offline replay", () => {
     )).toThrow("TRACK_C_OFFLINE_HUMAN_REVIEW_TEXT_NOT_PII_SAFE:test:url");
   });
 
+  it("redacts a customer URL in human-review context without changing the frozen identity", async () => {
+    const input = replayInput([
+      [4, 4], [4, 5], [4, 5], [4, 5],
+    ]);
+    const piiCase = input.cases.find(({ caseId }) => caseId === "pii-security");
+    if (piiCase === undefined) throw new Error("TEST_PII_CASE_REQUIRED");
+    const rawContext = [{
+      ...piiCase.accepted.quality.context[0]!,
+      text: "Xem https://customer.example/external-product nhé.",
+    }];
+    const accepted = {
+      ...piiCase.accepted,
+      quality: { ...piiCase.accepted.quality, context: rawContext },
+    };
+    piiCase.accepted = accepted;
+    piiCase.candidate = offlineCandidate(piiCase.caseId, accepted.quality);
+    input.mustPassReplay = {
+      ...input.mustPassReplay,
+      cases: input.mustPassReplay.cases.map((replayCase) => replayCase.caseId === piiCase.caseId
+        ? {
+          ...replayCase,
+          qualityEnvelopeHashes: {
+            baseline: sha256(accepted.quality),
+            candidate: sha256(piiCase.candidate),
+          },
+        }
+        : replayCase),
+    };
+
+    const evidence = await runTrackCOfflineQuality({
+      runKind: "CANDIDATE_EVALUATION",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: input.mustPassReplay,
+      judge: input.judge,
+      cases: input.cases.map(({ caseId, accepted, candidate }) => ({
+        caseId, accepted, candidate,
+      })),
+    });
+
+    const review = evidence.humanReview.cases.find(({ caseId }) => caseId === "pii-security");
+    const replay = evidence.replay.cases.find(({ caseId }) => caseId === "pii-security");
+    expect(review?.context[0]?.text).toBe("Xem [CUSTOMER_URL] nhé.");
+    expect(JSON.stringify(evidence.humanReview)).not.toContain("customer.example");
+    expect(replay?.quality.status).toBe("SCORED");
+    if (replay?.quality.status !== "SCORED") throw new Error("TEST_SCORED_CASE_REQUIRED");
+    expect(replay.quality.identity.contextHash).toBe(sha256(rawContext));
+  });
+
   it("fails closed instead of emitting a human-review reply with PII", async () => {
     const accepted = assessment(4, { recommendationAction: "REWRITE" });
     const candidate = assessment(3, {
