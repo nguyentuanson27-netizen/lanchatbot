@@ -38,3 +38,13 @@ Source: `tasks/track-c-quality-loop-improvement-plan.md`
 **Closure:** implementation is complete on `main` via PR #329 / merge commit `c2125b3904f3d9b0b609715de95285a6bf61debc`. The only recorded deviation is that Slice A and Slice B landed together instead of as separately reviewable changes; no follow-up code change is required for that sequencing deviation.
 
 **Anti-bloat:** no judge benchmark, evaluator platform, dashboard, tuning agent, caching/concurrency framework, broad Vertex refactor, speculative V1↔V2 compatibility layer, metrics database, new judge-location env/config subsystem, or generator-model/location change was added.
+
+## Current follow-up
+
+- [x] Pin and enforce B3 `expectedOwner` in candidate C1.
+- [x] Fail closed for HUMAN-owned candidate replies; report correct handoff as
+  `HANDOFF_CORRECT` and exclude it from quality scoring/Judge dispatch.
+- [x] Keep Judge V2 for BOT-owned fixtures only; no runtime or authority change.
+- [x] Add the separate PII-safe 50-case `TRACK_C_QUALITY_SUITE_V1` fixture set.
+- [x] Clarify the existing ten-dimension rubric for natural Vietnamese sales
+  replies and non-arithmetic holistic `overall`, without new dimensions.

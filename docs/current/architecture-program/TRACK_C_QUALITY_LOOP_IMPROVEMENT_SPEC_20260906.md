@@ -489,3 +489,28 @@ Success criteria 1–5 and 7–15 are implemented and verified by the merged cha
 - No judge benchmark project.
 
 The specification has no remaining owner decision. Implementation is closed on `main`; provider-backed smoke remains optional future verification only.
+
+## Current C1 ownership and quality-fixture amendment
+
+This later, offline-only amendment keeps the PR #329 historical record intact
+but supersedes its active judge-model wording: the current Track C source pins
+the owner-directed `VERTEX_AI / global / gemini-3.7-flash / HIGH` judge.
+
+- C1 fixture policy pins the B3 `expectedOwner` for every frozen case. For
+  `unsupported-protected-claim`, `stale-facts`, and `missing-facts`, candidate
+  C1 requires `HUMAN`, an empty BOT reply, and a typed `HANDOFF` result.
+- A candidate that changes a HUMAN-owned case to BOT or emits a reply fails
+  before Judge dispatch. Correct handoffs are emitted as `HANDOFF_CORRECT`,
+  with quality scores and deltas `N/A`, and are excluded from quality aggregate
+  and normal automatic human-review routing.
+- Only BOT-owned B3 cases go to the existing Judge V2. Existing claim,
+  provenance, fact, effect, repair, side-effect, frozen-input, and B3 identity
+  checks remain unchanged.
+- `TRACK_C_QUALITY_SUITE_V1` is a separate, readable 50-case PII-safe
+  sales-quality fixture set. It is not a C1 corpus, creates no evaluator
+  platform or persistence, and has no runtime authority.
+- The existing ten-dimension rubric remains unchanged. Its instruction now
+  makes fact grounding a prerequisite and prioritizes direct resolution,
+  natural Vietnamese sales delivery, sales progression, and stage-fit CTA over
+  fact-only or menu-like replies. `overall` remains judge-owned and holistic;
+  it is not a deterministic average.

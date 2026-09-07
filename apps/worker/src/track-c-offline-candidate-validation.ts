@@ -18,6 +18,7 @@ import {
   assertTrackCOfflineCandidateEvaluationContext,
   contextFromFrozenTrackCCapture,
 } from "./track-c-offline-candidate.js";
+import { expectedOwnerForTrackCC1Fixture } from "./track-c-must-pass.js";
 import type {
   TrackCOfflineCandidateValidatedEnvelope,
   TrackCReplayJudgeEnvelope,
@@ -83,12 +84,21 @@ function replyFromOutput(output: ContextV2CandidateOutputV2): string {
 }
 
 export interface TrackCOfflineCandidateValidationInput {
+  readonly caseId: string;
   readonly capture: unknown;
   readonly evaluationAt: Date;
   readonly request: BuiltCandidateRequest;
   readonly providerModelVersion: string;
   readonly output: unknown;
   readonly accepted: TrackCReplayJudgeEnvelope;
+}
+
+function expectedOwnerFromGuardOutcome(value: unknown): "BOT" | "HUMAN" | null {
+  if (typeof value !== "object" || value === null) return null;
+  const expectedOwner = (value as { readonly expectedOwner?: unknown }).expectedOwner;
+  return expectedOwner === "BOT" || expectedOwner === "HUMAN"
+    ? expectedOwner
+    : null;
 }
 
 /**
@@ -114,6 +124,38 @@ export function validateTrackCOfflineCandidate(
   });
   if (input.providerModelVersion !== "gemini-3.5-flash-lite") {
     throw new Error("TRACK_C_C3_OFFLINE_CANDIDATE_PROVIDER_MISMATCH");
+  }
+  const expectedOwner = expectedOwnerForTrackCC1Fixture(input.caseId);
+  if (expectedOwnerFromGuardOutcome(input.accepted.guardOutcome) !== expectedOwner) {
+    throw new Error(`TRACK_C_C1_ACCEPTED_OWNER_MISMATCH:${input.caseId}`);
+  }
+  if (expectedOwner === "HUMAN") {
+    if (input.output !== null) {
+      throw new Error(`TRACK_C_C1_HUMAN_REPLY_FORBIDDEN:${input.caseId}`);
+    }
+    const handoff: TrackCOfflineCandidateValidatedEnvelope = Object.freeze({
+      origin: "OFFLINE_CANDIDATE_DETERMINISTICALLY_VALIDATED",
+      quality: Object.freeze({
+        context: input.accepted.context,
+        verifiedFacts: input.accepted.verifiedFacts,
+        reply: "",
+        proposalSummary: Object.freeze({ strategy: "HOLD_POSITION", cta: "NONE" }),
+        guardOutcome: Object.freeze({
+          expectedOwner: "HUMAN",
+          action: "HANDOFF",
+          blockedReasonCodes: [] as const,
+        }),
+      }),
+      identity: Object.freeze({
+        captureContextHash: context.contextHash,
+        requestEnvelopeHash: input.request.identity.requestEnvelopeHash,
+        responseOutputHash: hash(null),
+        providerModelVersion: input.providerModelVersion,
+      }),
+      guard: Object.freeze({ status: "PASS", sideEffects: "DISABLED", blockedReasonCodes: [] as const }),
+    });
+    validated.add(handoff);
+    return handoff;
   }
   const parsed = TrackCOfflineCandidateSemanticOutputSchema.safeParse(input.output);
   if (!parsed.success) throw new Error("TRACK_C_C3_OFFLINE_CANDIDATE_OUTPUT_INVALID");
@@ -173,7 +215,11 @@ export function validateTrackCOfflineCandidate(
       verifiedFacts: input.accepted.verifiedFacts,
       reply: replyFromOutput(output),
       proposalSummary: Object.freeze({ strategy: output.strategy, cta: output.cta }),
-      guardOutcome: Object.freeze({ action: "REPLY", blockedReasonCodes: [] }),
+      guardOutcome: Object.freeze({
+        expectedOwner: "BOT",
+        action: "REPLY",
+        blockedReasonCodes: [] as const,
+      }),
     }),
     identity: Object.freeze({
       captureContextHash: context.contextHash,
@@ -193,6 +239,13 @@ export function assertTrackCOfflineCandidateValidated(
   if (!validated.has(value) || value.guard.status !== "PASS" ||
       value.guard.sideEffects !== "DISABLED" || value.guard.blockedReasonCodes.length > 0) {
     throw new Error("TRACK_C_C3_OFFLINE_CANDIDATE_GUARD_FAILED");
+  }
+  const handoff = value.quality.guardOutcome.expectedOwner === "HUMAN";
+  if (
+    (handoff && (value.quality.reply !== "" || value.quality.guardOutcome.action !== "HANDOFF")) ||
+    (!handoff && (value.quality.reply.length === 0 || value.quality.guardOutcome.action !== "REPLY"))
+  ) {
+    throw new Error("TRACK_C_C3_OFFLINE_CANDIDATE_OWNER_CONTRACT_FAILED");
   }
   return value;
 }

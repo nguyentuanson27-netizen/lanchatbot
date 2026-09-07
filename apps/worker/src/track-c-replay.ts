@@ -7,6 +7,7 @@ import {
 import type { ShadowContextMessage } from "@lana/database";
 import {
   TRACK_C_C1_MUST_PASS_POLICY,
+  assertTrackCC1CandidateMustPass,
   assertTrackCC1MustPass,
 } from "./track-c-must-pass.js";
 import type { TrackBLivePathReplayResult } from "./track-b-live-path-replay.js";
@@ -44,6 +45,12 @@ export interface TrackCReplayJudgeEnvelope extends TrackCQualityReplyInput {
   readonly verifiedFacts: BusinessFactEnvelopeV1 | null;
 }
 
+export interface TrackCOfflineCandidateGuardOutcome {
+  readonly expectedOwner: "BOT" | "HUMAN";
+  readonly action: "REPLY" | "HANDOFF";
+  readonly blockedReasonCodes: readonly [];
+}
+
 export interface TrackCB3LiveObservationEnvelope {
   readonly origin: "B3_LIVE_OBSERVATION";
   readonly quality: TrackCReplayJudgeEnvelope;
@@ -51,7 +58,9 @@ export interface TrackCB3LiveObservationEnvelope {
 
 export interface TrackCOfflineCandidateValidatedEnvelope {
   readonly origin: "OFFLINE_CANDIDATE_DETERMINISTICALLY_VALIDATED";
-  readonly quality: TrackCReplayJudgeEnvelope;
+  readonly quality: Omit<TrackCReplayJudgeEnvelope, "guardOutcome"> & Readonly<{
+    readonly guardOutcome: TrackCOfflineCandidateGuardOutcome;
+  }>;
   readonly identity: Readonly<{
     readonly captureContextHash: string;
     readonly requestEnvelopeHash: string;
@@ -97,6 +106,29 @@ type QualityRationale = {
   readonly materialReasonCode: QualityReasonCode;
 };
 
+type ScoredQuality = {
+  readonly status: "SCORED";
+  readonly disposition: "BETTER" | "SAME" | "WORSE";
+  readonly overallScoreDelta: number;
+  readonly requiresHumanReview: boolean;
+  readonly reviewReasonCodes: readonly string[];
+  readonly rationale: QualityRationale;
+  readonly identity: TrackCQualityComparisonResult["identity"];
+};
+
+type HandoffCorrectQuality = {
+  /** C1-owned terminal state. It is intentionally never quality-scored. */
+  readonly status: "HANDOFF_CORRECT";
+  readonly disposition: null;
+  readonly overallScoreDelta: null;
+  readonly requiresHumanReview: false;
+  readonly reviewReasonCodes: readonly [];
+  readonly rationale: null;
+  readonly identity: null;
+};
+
+export type TrackCReplayCaseQuality = ScoredQuality | HandoffCorrectQuality;
+
 export interface TrackCReplayResult {
   readonly contractVersion: "TRACK_C_REPLAY_V1";
   /** C2 never has effect or delivery authority. */
@@ -122,19 +154,14 @@ export interface TrackCReplayResult {
       readonly acceptedOrigin: "B3_LIVE_OBSERVATION";
       readonly candidateOrigin: "OFFLINE_CANDIDATE_DETERMINISTICALLY_VALIDATED";
     };
-    readonly quality: {
-      readonly disposition: "BETTER" | "SAME" | "WORSE";
-      readonly overallScoreDelta: number;
-      readonly requiresHumanReview: boolean;
-      readonly reviewReasonCodes: readonly string[];
-      readonly rationale: QualityRationale;
-      readonly identity: TrackCQualityComparisonResult["identity"];
-    };
+    readonly quality: TrackCReplayCaseQuality;
   }[];
   readonly aggregate: {
     readonly better: number;
     readonly same: number;
     readonly worse: number;
+    readonly handoffCorrect: number;
+    readonly scoredCaseCount: number;
     readonly materialRegressionClusters: readonly MaterialRegressionCluster[];
   };
   /** Same frozen inputs and judge results produce the same value. */
@@ -254,6 +281,7 @@ function materialRegressionClusters(
     materialReasonCode: QualityReasonCode;
   }>();
   for (const item of cases) {
+    if (item.quality.status !== "SCORED") continue;
     if (item.quality.disposition !== "WORSE") continue;
     const riskClasses = [...item.deterministic.riskClasses].sort();
     const materialReasonCode = item.quality.rationale.materialReasonCode;
@@ -278,6 +306,7 @@ export async function runTrackCReplay(
   input: TrackCReplayInput,
 ): Promise<TrackCReplayResult> {
   assertTrackCC1MustPass(input.mustPassReplay);
+  assertTrackCC1CandidateMustPass(input.mustPassReplay, input.cases);
   const inputCaseIds = input.cases.map(({ caseId }) => caseId);
   const replayCaseIds = input.mustPassReplay.cases.map(({ caseId }) => caseId);
   if (!exactFrozenCaseSet(inputCaseIds) || !exactFrozenCaseSet(replayCaseIds)) {
@@ -297,15 +326,37 @@ export async function runTrackCReplay(
       deterministicCase,
       replayCase,
     );
-    const judged = await runTrackCQualityComparison({
-      mustPassReplay: input.mustPassReplay,
-      judge: replayCase.judge,
-      context: replayCase.accepted.quality.context,
-      verifiedFacts: replayCase.accepted.quality.verifiedFacts,
-      factFixtureHash: input.mustPassReplay.identity.factFixtureHash,
-      accepted: replayCase.accepted.quality,
-      candidate: replayCase.candidate.quality,
-    });
+    let quality: TrackCReplayCaseQuality;
+    if (replayCase.candidate.quality.guardOutcome.expectedOwner === "HUMAN") {
+      quality = Object.freeze({
+        status: "HANDOFF_CORRECT" as const,
+        disposition: null,
+        overallScoreDelta: null,
+        requiresHumanReview: false as const,
+        reviewReasonCodes: [] as const,
+        rationale: null,
+        identity: null,
+      });
+    } else {
+      const judged = await runTrackCQualityComparison({
+        mustPassReplay: input.mustPassReplay,
+        judge: replayCase.judge,
+        context: replayCase.accepted.quality.context,
+        verifiedFacts: replayCase.accepted.quality.verifiedFacts,
+        factFixtureHash: input.mustPassReplay.identity.factFixtureHash,
+        accepted: replayCase.accepted.quality,
+        candidate: replayCase.candidate.quality,
+      });
+      quality = Object.freeze({
+        status: "SCORED" as const,
+        disposition: judged.comparison.disposition,
+        overallScoreDelta: judged.comparison.overallScoreDelta,
+        requiresHumanReview: judged.comparison.requiresHumanReview,
+        reviewReasonCodes: Object.freeze([...judged.comparison.reviewReasonCodes]),
+        rationale: qualityRationale(judged),
+        identity: judged.identity,
+      });
+    }
     const result = Object.freeze({
       caseId: replayCase.caseId,
       deterministic: Object.freeze({
@@ -318,23 +369,18 @@ export async function runTrackCReplay(
         acceptedOrigin: replayCase.accepted.origin,
         candidateOrigin: replayCase.candidate.origin,
       }),
-      quality: Object.freeze({
-        disposition: judged.comparison.disposition,
-        overallScoreDelta: judged.comparison.overallScoreDelta,
-        requiresHumanReview: judged.comparison.requiresHumanReview,
-        reviewReasonCodes: Object.freeze([...judged.comparison.reviewReasonCodes]),
-        rationale: qualityRationale(judged),
-        identity: judged.identity,
-      }),
+      quality,
     });
     cases.push(result);
     await input.onCaseComplete?.(result);
   }
 
   const aggregate = Object.freeze({
-    better: cases.filter(({ quality }) => quality.disposition === "BETTER").length,
-    same: cases.filter(({ quality }) => quality.disposition === "SAME").length,
-    worse: cases.filter(({ quality }) => quality.disposition === "WORSE").length,
+    better: cases.filter(({ quality }) => quality.status === "SCORED" && quality.disposition === "BETTER").length,
+    same: cases.filter(({ quality }) => quality.status === "SCORED" && quality.disposition === "SAME").length,
+    worse: cases.filter(({ quality }) => quality.status === "SCORED" && quality.disposition === "WORSE").length,
+    handoffCorrect: cases.filter(({ quality }) => quality.status === "HANDOFF_CORRECT").length,
+    scoredCaseCount: cases.filter(({ quality }) => quality.status === "SCORED").length,
     materialRegressionClusters: materialRegressionClusters(cases),
   });
   const result = {

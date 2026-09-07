@@ -995,7 +995,7 @@ describe("Vertex shadow client", () => {
     }) as unknown as typeof fetch;
     const judgeModel = modelWith(judgeFetch, {
       judgeLocation: "global",
-      judgeModelName: "gemini-3.8-flash",
+      judgeModelName: "gemini-3.7-flash",
       now: () => now,
     });
 
@@ -1010,10 +1010,10 @@ describe("Vertex shadow client", () => {
     expect(judgeModel.judgeSalesReplyV2Descriptor()).toMatchObject({
       provider: "VERTEX_AI",
       location: "global",
-      model: "gemini-3.8-flash",
+      model: "gemini-3.7-flash",
     });
     expect(judgeRequest.url).toContain(
-      "/locations/global/publishers/google/models/gemini-3.8-flash:generateContent",
+      "/locations/global/publishers/google/models/gemini-3.7-flash:generateContent",
     );
     expect(judgeRequest.url).toContain("https://aiplatform.googleapis.com/");
     expect(judgeRequest.body).toMatchObject({
@@ -1080,7 +1080,7 @@ describe("Vertex shadow client", () => {
     }) as unknown as typeof fetch;
     await modelWith(generatorFetch, {
       judgeLocation: "global",
-      judgeModelName: "gemini-3.8-flash",
+      judgeModelName: "gemini-3.7-flash",
     }).generate(context, "prompt-v1");
     expect(generatorUrl).toContain(
       "/locations/us-central1/publishers/google/models/gemini-test:generateContent",
@@ -1113,7 +1113,7 @@ describe("Vertex shadow client", () => {
 
     const request = modelWith(fetchMock, {
       judgeLocation: "global",
-      judgeModelName: "gemini-3.8-flash",
+      judgeModelName: "gemini-3.7-flash",
       logFailure: (event) => failures.push(event),
     }).judgeSalesReplyV2WithMetrics(
       context,
@@ -1159,7 +1159,7 @@ describe("Vertex shadow client", () => {
   it("clarifies only the three approved Track C rubric dimensions with common anchors", () => {
     const descriptor = modelWith(vi.fn() as unknown as typeof fetch, {
       judgeLocation: "global",
-      judgeModelName: "gemini-3.8-flash",
+      judgeModelName: "gemini-3.7-flash",
     }).judgeSalesReplyV2Descriptor();
     const promptRubric = descriptor.promptRubric as { systemInstruction: string };
 
@@ -1175,6 +1175,22 @@ describe("Vertex shadow client", () => {
     expect(promptRubric.systemInstruction).not.toContain("warmth");
   });
 
+  it("prioritizes natural Vietnamese resolution over fact-only sales scoring", () => {
+    const descriptor = modelWith(vi.fn() as unknown as typeof fetch, {
+      judgeLocation: "global",
+      judgeModelName: "gemini-3.7-flash",
+    }).judgeSalesReplyV2Descriptor();
+    const instruction = (descriptor.promptRubric as { systemInstruction: string })
+      .systemInstruction;
+
+    expect(instruction).toContain("sai ngon ngu cua khach");
+    expect(instruction).toContain("menu gia / size / ton kho / giao hang");
+    expect(instruction).toContain("hoi lai du lieu khach da cung cap");
+    expect(instruction).toContain("overall khong phai trung binh co hoc");
+    expect(instruction).toContain("factGrounding cao khong the bu lai");
+    expect(instruction).toContain("toi da mot next step");
+  });
+
   it("does not fabricate absent Track C judge token usage", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       if (String(input).includes("oauth2.googleapis.com")) {
@@ -1185,7 +1201,7 @@ describe("Vertex shadow client", () => {
 
     const result = await modelWith(fetchMock, {
       judgeLocation: "global",
-      judgeModelName: "gemini-3.8-flash",
+      judgeModelName: "gemini-3.7-flash",
     }).judgeSalesReplyV2WithMetrics(
       context,
       "Dạ mẫu này có giá 699k ạ.",

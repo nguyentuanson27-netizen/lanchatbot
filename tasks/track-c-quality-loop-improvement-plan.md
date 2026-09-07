@@ -131,3 +131,14 @@ Final review against the repository Definition of Done: correctness first, then 
 Do **not** add judge benchmarking, a leaderboard, holdout/evaluator platform, tuning agent, dashboard, context caching, accepted-score cache, concurrency framework, broad Vertex refactor, new provider interface, speculative V1↔V2 adapter, DB storage for metrics, a new judge-location env/config subsystem, or generator-model/location changes in this work.
 
 If implementation appears to require any of those, stop and surface the concrete blocker before expanding scope.
+
+## Current follow-up: candidate C1 ownership and quality fixtures
+
+The smallest contract correction is implemented at the existing C1/candidate
+composition boundary. The frozen B3 expected owner is pinned per fixture;
+HUMAN-owned cases must terminate as `HANDOFF_CORRECT` and never call Judge V2.
+BOT-only cases retain the existing judge/replay path. A separate 50-case
+readable quality fixture module supports future offline quality runs without
+expanding C1, adding a database, or creating an evaluator platform. The active
+directly owner-selected Judge source is `global / gemini-3.7-flash / HIGH`;
+the historical PR #329 record remains 3.8.
