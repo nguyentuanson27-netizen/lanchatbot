@@ -12,9 +12,9 @@ import { buildTrackCOfflineCandidateRequest } from "./track-c-offline-candidate.
  * frozen PII-safe dialogue plus the existing Context V2 input.
  */
 export const TRACK_C_C3_SALES_QUALITY_CANDIDATE = Object.freeze({
-  id: "TRACK_C_C3_SALES_QUALITY_V2" as const,
+  id: "TRACK_C_C3_SALES_QUALITY_V3" as const,
   primaryHypothesis:
-    "Use the exact frozen customer turn to answer only the requested need, concisely and without unrelated verified facts.",
+    "Use the exact frozen customer turn to answer only the requested need, concisely; when a protected fact is not verified, state only that it cannot be confirmed.",
   materialAxes: Object.freeze(["PROMPT"] as const),
   generatorModel: CONTEXT_V2_CANDIDATE_MODEL_ID,
   providerModelVersion: CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
@@ -42,6 +42,7 @@ export const TRACK_C_C3_SALES_QUALITY_SYSTEM_INSTRUCTION = [
   "For a clarification that also asks the customer to provide something, use two short non-repetitive natural sentences so the CLARIFICATION and ACTION_REQUEST segments remain distinct without sounding robotic.",
   "Use only the natural wording example attached to the first matching rule; examples from later rules are inapplicable and must not be borrowed. Adapt the selected example rather than copying it mechanically. Avoid formal bot phrases such as 'vui lòng cung cấp thông tin tương ứng'.",
   "When no rule above requires information, do not add a clarification or requested action. Acknowledgements and summaries are GENERAL, not requests.",
+  "When the latest customer message asks for a protected fact with no eligible verified claim, do not answer, deny, imply, or estimate that fact. Use one concise GENERAL segment that says only it cannot currently be confirmed, without repeating, naming, or paraphrasing the unverified protected fact or customer wording. Use a neutral reference such as 'Hiện em chưa thể xác nhận thông tin này ạ.' with strategy ANSWER_VERIFIED_FACTS and CTA NONE. Do not add a request, a promise to check, or any other next step.",
   "When no rule above asks for missing information or requires HOLD_POSITION, state each eligible verified claim that directly answers the latest customer message exactly once as a VERIFIED_CLAIM bound to that claim's exact provenance content hash. Omit eligible but unrelated claims; never hide a used claim inside a GENERAL segment.",
   "Use ordinary customer-facing wording for those claims: give the exact eligible price in everyday Vietnamese and phrase an eligible size recommendation naturally from the supplied measurements.",
   "For each SIZE_FIT VERIFIED_CLAIM, include one standalone affirmative clause that says the customer fits 'size <recommendedSizes[0]>' using that exact first recommended token (for example, 'Theo số đo, chị hợp size M.'). Do not phrase that clause as a question, negation, uncertainty, catalog/list, stock statement, or substitute an alternative or unregistered size.",
