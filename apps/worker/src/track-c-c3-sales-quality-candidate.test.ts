@@ -121,9 +121,9 @@ function validCapture() {
 describe("Track C C3 sales-quality candidate", () => {
   it("declares one bounded prompt hypothesis without changing the generator", () => {
     expect(TRACK_C_C3_SALES_QUALITY_CANDIDATE).toEqual({
-      id: "TRACK_C_C3_SALES_QUALITY_V2",
+      id: "TRACK_C_C3_SALES_QUALITY_V3",
       primaryHypothesis:
-        "Use the exact frozen customer turn to answer only the requested need, concisely and without unrelated verified facts.",
+        "Use the exact frozen customer turn to answer only the requested need, concisely; when a protected fact is not verified, state only that it cannot be confirmed.",
       materialAxes: ["PROMPT"],
       generatorModel: "gemini-3.5-flash-lite",
       providerModelVersion: "gemini-3.5-flash-lite",
@@ -155,6 +155,13 @@ describe("Track C C3 sales-quality candidate", () => {
       "A required CLARIFICATION plus its matching ACTION_REQUEST counts as one next-step objective",
     );
     expect(instruction).toContain("do not create urgency or pressure");
+    expect(instruction).toContain(
+      "When the latest customer message asks for a protected fact with no eligible verified claim",
+    );
+    expect(instruction).toContain(
+      "without repeating, naming, or paraphrasing the unverified protected fact or customer wording",
+    );
+    expect(instruction).toContain("Hiện em chưa thể xác nhận thông tin này ạ.");
     expect(instruction).not.toMatch(/objection|hesitation|actual question|actual concern/iu);
 
     expect(instruction).toContain("Use only the verified claims and canonical state in Context V2.");
