@@ -977,7 +977,7 @@ describe("Vertex shadow client", () => {
     )).rejects.toThrow("GROUNDED_SCHEMA_INVALID");
   });
 
-  it("pins the offline Track C judge to global Gemini 3.8 with HIGH thinking without moving the generator", async () => {
+  it("pins the offline Track C judge to global Gemini 3.7 with HIGH thinking without moving the generator", async () => {
     let now = 100;
     let judgeRequest: { url: string; body: unknown } = { url: "", body: {} };
     const judgeFetch = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
