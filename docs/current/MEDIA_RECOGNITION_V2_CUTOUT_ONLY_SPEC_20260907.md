@@ -663,6 +663,7 @@ candidateProductIds
 candidateRetrievalRanks
 candidateRetrievalScores
 selectedEvidencePointId
+
 rerankerModel
 rerankerPromptVersion
 rerankerDecision
@@ -902,3 +903,27 @@ The active runtime contract is complete when all of the following are true:
 - no automatic legacy fallback, A/B, shadow, or dual-recognition path exists;
 - existing URL/SSRF/MIME/size/security controls remain enforced;
 - telemetry does not expose secrets or raw vectors.
+
+## 24. Final architecture decision
+
+The new default image-recognition architecture is:
+
+```text
+CUTOUT-only
++
+Gemini Embedding 2 / 3072D
++
+Dedicated Qdrant image-recognition collection
++
+Exact grouped retrieval by product_id
++
+Top 5 unique SKUs
++
+Winning image-point evidence
++
+Always Gemini reranking
++
+No recognition-result cache in initial V2
+```
+
+This spec replaces the previous cutout-first/RAW-fallback recognition plan for future implementation work. The previous plan remains historical context only; its RAW fallback, Top 3, threshold-gate, and dual-channel decisions are not V2 requirements.
