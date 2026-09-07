@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
-import { canonicalJsonV1, type SalesRubricAssessmentV2 } from "@lana/contracts";
+import {
+  canonicalJsonV1,
+  type BusinessFactEnvelopeV1,
+  type SalesRubricAssessmentV2,
+} from "@lana/contracts";
 import type { TrackBLivePathReplayResult } from "./track-b-live-path-replay.js";
 import { buildContextV2Capture } from "./context-v2.js";
 import { buildTrackCOfflineCandidateRequest } from "./track-c-offline-candidate.js";
@@ -8,6 +12,7 @@ import { validateTrackCOfflineCandidate } from "./track-c-offline-candidate-vali
 import { TRACK_C_C1_MUST_PASS_POLICY } from "./track-c-must-pass.js";
 import {
   TRACK_C_ACCEPTED_V22_BASELINE,
+  assertTrackCOfflineHumanReviewTextSafe,
   runTrackCOfflineQuality,
 } from "./track-c-offline-runner.js";
 import {
@@ -29,11 +34,14 @@ function assessment(overall: number, options: Partial<SalesRubricAssessmentV2> =
     strengths: [], weaknesses: [], improvedReply: "", recommendationAction: "KEEP", ...options,
   };
 }
-function envelope(caseId: string): TrackCReplayJudgeEnvelope {
+function envelope(
+  caseId: string,
+  verifiedFacts: BusinessFactEnvelopeV1 | null = null,
+): TrackCReplayJudgeEnvelope {
   return {
     context: [{ direction: "INBOUND", senderType: "CUSTOMER", messageType: "TEXT",
       text: `Mẫu ${caseId} giá bao nhiêu?`, attachmentCount: 0, occurredAt: "2026-09-05T00:00:00.000Z" }],
-    verifiedFacts: null, reply: `reply-${caseId}`,
+    verifiedFacts, reply: `reply-${caseId}`,
     proposalSummary: { action: "REPLY" }, guardOutcome: { action: "REPLY", blockedReasonCodes: [] },
   };
 }
@@ -126,6 +134,7 @@ function passingReplay(): TrackBLivePathReplayResult {
 function replayInput(
   scores: readonly (readonly [number, number])[] = [],
   assessments: readonly SalesRubricAssessmentV2[] = [],
+  factsByCase: Readonly<Record<string, BusinessFactEnvelopeV1 | null>> = {},
 ) {
   let scoreIndex = 0;
   const judge = {
@@ -143,7 +152,7 @@ function replayInput(
     }),
   };
   const cases = TRACK_C_C1_MUST_PASS_POLICY.fixtures.map(({ caseId }) => {
-    const observed = envelope(caseId);
+    const observed = envelope(caseId, factsByCase[caseId] ?? null);
     return {
       caseId, judge,
       accepted: { origin: "B3_LIVE_OBSERVATION" as const, quality: observed },
@@ -162,7 +171,7 @@ function replayInput(
         return {
           ...replayCase,
           qualityEnvelopeHashes: {
-            baseline: qualityEnvelopeHashes.baseline,
+            baseline: sha256(inputCase.accepted.quality),
             candidate: sha256(inputCase.candidate),
           },
         };
@@ -206,7 +215,166 @@ describe("Track C C2 offline replay", () => {
       replay: { aggregate: { better: 0, same: 7, worse: 0 } },
     });
     expect(evidence.judgeMetrics).toHaveLength(7);
-    expect(JSON.stringify(evidence)).not.toContain("offline-candidate-");
+    expect(evidence.humanReview.cases).toHaveLength(7);
+    expect(evidence.humanReview.cases[0]).toMatchObject({
+      accepted: { reply: "reply-unsupported-protected-claim" },
+      candidate: { reply: "offline-candidate-unsupported-protected-claim" },
+    });
+  });
+
+  it("emits an exact PII-safe reply pair only for a case requiring human review", async () => {
+    const accepted = assessment(4, {
+      recommendationAction: "REWRITE",
+      strengths: ["free-form judge text must not be emitted"],
+      improvedReply: "free-form judge text must not be emitted",
+    });
+    const candidate = assessment(3, {
+      scores: { ...assessment(3).scores, factGrounding: 1 },
+      recommendationAction: "KEEP",
+    });
+    const staleFacts: BusinessFactEnvelopeV1 = {
+      schemaVersion: 1,
+      status: "STALE",
+      source: "POS_SNAPSHOT",
+      observedAt: "2026-09-04T00:00:00.000Z",
+      expiresAt: "2026-09-04T00:05:00.000Z",
+      productId: "SKU-REVIEW",
+      facts: null,
+      reasonCode: "FACTS_EXPIRED",
+    };
+    const input = replayInput([], [accepted, candidate], {
+      "unsupported-protected-claim": staleFacts,
+    });
+
+    const evidence = await runTrackCOfflineQuality({
+      runKind: "CANDIDATE_EVALUATION",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: input.mustPassReplay,
+      judge: input.judge,
+      cases: input.cases.map(({ caseId, accepted, candidate }) => ({
+        caseId,
+        accepted,
+        candidate,
+      })),
+    });
+
+    expect(evidence.humanReview.contractVersion).toBe("TRACK_C_OFFLINE_HUMAN_REVIEW_V1");
+    expect(evidence.humanReview.cases.find(({ caseId }) =>
+      caseId === "unsupported-protected-claim",
+    )).toMatchObject({
+        caseId: "unsupported-protected-claim",
+        accepted: {
+          reply: "reply-unsupported-protected-claim",
+          replyHash: sha256("reply-unsupported-protected-claim"),
+          assessment: {
+            scores: accepted.scores,
+            recommendationAction: accepted.recommendationAction,
+          },
+        },
+        candidate: {
+          reply: "offline-candidate-unsupported-protected-claim",
+          replyHash: sha256("offline-candidate-unsupported-protected-claim"),
+          assessment: {
+            scores: candidate.scores,
+            recommendationAction: candidate.recommendationAction,
+          },
+        },
+        verifiedFacts: {
+          payloadHash: sha256(staleFacts),
+          status: "STALE",
+          source: "POS_SNAPSHOT",
+          observedAt: "2026-09-04T00:00:00.000Z",
+          expiresAt: "2026-09-04T00:05:00.000Z",
+          productId: "SKU-REVIEW",
+          reasonCode: "FACTS_EXPIRED",
+          facts: null,
+          policyContext: null,
+        },
+        quality: {
+          disposition: "WORSE",
+          reviewReasonCodes: ["UNEXPECTED_REGRESSION", "JUDGE_DISAGREEMENT"],
+        },
+    });
+    expect(evidence.humanReview.cases.every(({ quality }) =>
+      quality.reviewReasonCodes.length > 0,
+    )).toBe(true);
+    expect(JSON.stringify(evidence.humanReview)).not.toContain("[PII_REDACTED_MESSAGE]");
+    expect(JSON.stringify(evidence.humanReview)).not.toContain(
+      "free-form judge text must not be emitted",
+    );
+  });
+
+  it("does not expose a reply pair for a case that does not require human review", async () => {
+    const input = replayInput([
+      [4, 3], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5],
+    ]);
+
+    const evidence = await runTrackCOfflineQuality({
+      runKind: "CANDIDATE_EVALUATION",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: input.mustPassReplay,
+      judge: input.judge,
+      cases: input.cases.map(({ caseId, accepted, candidate }) => ({
+        caseId,
+        accepted,
+        candidate,
+      })),
+    });
+
+    expect(evidence.humanReview.cases.map(({ caseId }) => caseId)).toEqual([
+      "unsupported-protected-claim",
+    ]);
+    expect(JSON.stringify(evidence.humanReview)).not.toContain(
+      "offline-candidate-pii-security",
+    );
+  });
+
+  it("rejects a customer URL before it can enter human-review evidence", () => {
+    expect(() => assertTrackCOfflineHumanReviewTextSafe(
+      "Xem https://customer.example/secret nhé.",
+      "test:url",
+    )).toThrow("TRACK_C_OFFLINE_HUMAN_REVIEW_TEXT_NOT_PII_SAFE:test:url");
+  });
+
+  it("fails closed instead of emitting a human-review reply with PII", async () => {
+    const accepted = assessment(4, { recommendationAction: "REWRITE" });
+    const candidate = assessment(3, {
+      scores: { ...assessment(3).scores, factGrounding: 1 },
+      recommendationAction: "KEEP",
+    });
+    const input = replayInput([], [accepted, candidate]);
+    const first = input.cases[0]!;
+    first.candidate = offlineCandidate(
+      first.caseId,
+      first.accepted.quality,
+      { reply: "Liên hệ em qua 0912345678 nhé." },
+    );
+    input.mustPassReplay = {
+      ...input.mustPassReplay,
+      cases: input.mustPassReplay.cases.map((replayCase, index) => index === 0
+        ? {
+          ...replayCase,
+          qualityEnvelopeHashes: {
+            baseline: replayCase.qualityEnvelopeHashes!.baseline,
+            candidate: sha256(first.candidate),
+          },
+        }
+        : replayCase),
+    };
+
+    await expect(runTrackCOfflineQuality({
+      runKind: "CANDIDATE_EVALUATION",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: input.mustPassReplay,
+      judge: input.judge,
+      cases: input.cases.map(({ caseId, accepted, candidate }) => ({
+        caseId,
+        accepted,
+        candidate,
+      })),
+    })).rejects.toThrow(
+      "TRACK_C_OFFLINE_HUMAN_REVIEW_TEXT_NOT_PII_SAFE:unsupported-protected-claim:candidate",
+    );
   });
 
   it("checkpoints every completed case before a later judge failure stops the run", async () => {
@@ -244,7 +412,61 @@ describe("Track C C2 offline replay", () => {
       { caseId: "pii-security" },
       { caseId: "unauthorized-effect" },
     ]);
-    expect(JSON.stringify(checkpoints)).not.toContain("offline-candidate-");
+    expect((checkpoints as Array<{ humanReview: unknown }>).every(
+      ({ humanReview }) => humanReview !== null,
+    )).toBe(true);
+  });
+
+  it("keeps a routed human-review pair in its checkpoint when a later judge call fails", async () => {
+    const input = replayInput([
+      [4, 3], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5],
+    ]);
+    const checkpoints: unknown[] = [];
+    let callIndex = 0;
+    input.judge.judgeSalesReplyV2.mockImplementation(async () => {
+      const index = callIndex++;
+      if (index === 4) throw new Error("TRACK_C_TEST_LATE_JUDGE_FAILED");
+      const scorePair = [
+        [4, 3], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5],
+      ][Math.floor(index / 2)]!;
+      return {
+        assessment: assessment(index % 2 === 0 ? scorePair[0]! : scorePair[1]!),
+        latencyMs: index,
+        tokenUsage: {},
+      };
+    });
+
+    await expect(runTrackCOfflineQuality({
+      runKind: "CANDIDATE_EVALUATION",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: input.mustPassReplay,
+      judge: input.judge,
+      cases: input.cases.map(({ caseId, accepted, candidate }) => ({
+        caseId,
+        accepted,
+        candidate,
+      })),
+      onCaseComplete: async (checkpoint) => {
+        checkpoints.push(checkpoint);
+      },
+    })).rejects.toThrow("TRACK_C_TEST_LATE_JUDGE_FAILED");
+
+    expect(checkpoints).toMatchObject([
+      {
+        contractVersion: "TRACK_C_OFFLINE_CASE_CHECKPOINT_V2",
+        caseId: "unsupported-protected-claim",
+        humanReview: {
+          accepted: { reply: "reply-unsupported-protected-claim" },
+          candidate: { reply: "offline-candidate-unsupported-protected-claim" },
+          verifiedFacts: { payloadHash: sha256(null), status: "NO_FACTS" },
+        },
+      },
+      {
+        contractVersion: "TRACK_C_OFFLINE_CASE_CHECKPOINT_V2",
+        caseId: "pii-security",
+        humanReview: null,
+      },
+    ]);
   });
 
   it("labels a v22-versus-v22 run as wiring-only, never as quality improvement evidence", async () => {
