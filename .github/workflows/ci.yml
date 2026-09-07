@@ -20,7 +20,7 @@ jobs:
   check:
     name: pnpm check
     runs-on: [self-hosted, Linux, X64, lana-ci]
-    timeout-minutes: 30
+    timeout-minutes: 35
     services:
       postgres:
         image: postgres:17-alpine

@@ -85,6 +85,7 @@ function offlineCandidate(
   const request = buildTrackCOfflineCandidateRequest({
     modelResource: "projects/track-c-fixture/locations/global/publishers/google/models/gemini-3.5-flash-lite",
     capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"),
+    evaluationContext: accepted.context,
     systemInstruction: "Offline-only Track C test candidate.",
   });
   return validateTrackCOfflineCandidate({
@@ -387,8 +388,27 @@ describe("Track C C2 offline replay", () => {
     const context = capture.context;
     const request = buildTrackCOfflineCandidateRequest({
       modelResource: "projects/track-c-fixture/locations/global/publishers/google/models/gemini-3.5-flash-lite",
-      capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"), systemInstruction: "candidate",
+      capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"),
+      evaluationContext: accepted.context, systemInstruction: "candidate",
     });
+    const mismatchedRequest = buildTrackCOfflineCandidateRequest({
+      modelResource: "projects/track-c-fixture/locations/global/publishers/google/models/gemini-3.5-flash-lite",
+      capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"),
+      evaluationContext: [{
+        ...accepted.context[0]!,
+        text: "Một frozen customer turn khác",
+      }],
+      systemInstruction: "candidate",
+    });
+    expect(() => validateTrackCOfflineCandidate({
+      capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"),
+      request: mismatchedRequest,
+      providerModelVersion: "gemini-3.5-flash-lite", accepted,
+      output: {
+        segments: [{ kind: "GENERAL", text: "Chị cho em biết mẫu đang xem nhé." }],
+        strategy: "ASK_CLARIFICATION", cta: "ASK_PRODUCT",
+      },
+    })).toThrow("TRACK_C_C3_OFFLINE_CANDIDATE_DIALOGUE_MISMATCH");
     expect(() => validateTrackCOfflineCandidate({
       capture, evaluationAt: new Date("2026-09-05T00:00:00.000Z"),
       request: { ...request, body: request.body.replace("candidate", "tampered") },

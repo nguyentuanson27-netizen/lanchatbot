@@ -18,6 +18,14 @@ const hash = (character: string): string => character.repeat(64);
 const snapshotAt = new Date("2026-09-05T00:00:00.000Z");
 const modelResource =
   "projects/track-c-fixture/locations/global/publishers/google/models/gemini-3.5-flash-lite";
+const evaluationContext = [{
+  direction: "INBOUND",
+  senderType: "CUSTOMER",
+  messageType: "TEXT",
+  text: "Mẫu SD398 còn hàng không?",
+  attachmentCount: 0,
+  occurredAt: snapshotAt.toISOString(),
+}] as const;
 
 function validCapture() {
   const canonicalEvidence: CanonicalDecisionEvidenceV1 = {
@@ -113,9 +121,9 @@ function validCapture() {
 describe("Track C C3 sales-quality candidate", () => {
   it("declares one bounded prompt hypothesis without changing the generator", () => {
     expect(TRACK_C_C3_SALES_QUALITY_CANDIDATE).toEqual({
-      id: "TRACK_C_C3_SALES_QUALITY_V1",
+      id: "TRACK_C_C3_SALES_QUALITY_V2",
       primaryHypothesis:
-        "Use concise natural phrasing, avoid repetition, then use only the smallest stage-fit next step.",
+        "Use the exact frozen customer turn to answer only the requested need, concisely and without unrelated verified facts.",
       materialAxes: ["PROMPT"],
       generatorModel: "gemini-3.5-flash-lite",
       providerModelVersion: "gemini-3.5-flash-lite",
@@ -133,6 +141,15 @@ describe("Track C C3 sales-quality candidate", () => {
     );
     expect(instruction).toContain(
       "use at most one smallest useful next-step objective",
+    );
+    expect(instruction).toContain(
+      "Answer only the need expressed in the latest customer message",
+    );
+    expect(instruction).toContain(
+      "do not enumerate unrelated eligible verified claims",
+    );
+    expect(instruction).toContain(
+      "unverified external link",
     );
     expect(instruction).toContain(
       "A required CLARIFICATION plus its matching ACTION_REQUEST counts as one next-step objective",
@@ -159,12 +176,14 @@ describe("Track C C3 sales-quality candidate", () => {
       modelResource,
       capture,
       evaluationAt: snapshotAt,
+      evaluationContext,
       systemInstruction: "Base offline Track C candidate.",
     });
     const candidate = buildTrackCC3SalesQualityCandidateRequest({
       modelResource,
       capture,
       evaluationAt: snapshotAt,
+      evaluationContext,
     });
     const baseBody = JSON.parse(base.body) as {
       systemInstruction: unknown;
@@ -197,6 +216,7 @@ describe("Track C C3 sales-quality candidate", () => {
       modelResource,
       capture: null,
       evaluationAt: snapshotAt,
+      evaluationContext,
     })).toThrow("TRACK_C_OFFLINE_CANDIDATE_CAPTURE_INVALID");
   });
 });

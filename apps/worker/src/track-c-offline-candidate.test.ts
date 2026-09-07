@@ -166,6 +166,14 @@ function capture(options: Readonly<{
 const modelResource =
   "projects/track-c-fixture/locations/global/publishers/google/models/gemini-3.5-flash-lite";
 const candidatePrompt = "Offline-only candidate prompt for bounded Track C evaluation.";
+const evaluationContext = [{
+  direction: "INBOUND",
+  senderType: "CUSTOMER",
+  messageType: "TEXT",
+  text: "Mẫu SD398 còn hàng không?",
+  attachmentCount: 0,
+  occurredAt: snapshotAt.toISOString(),
+}] as const;
 
 describe("Track C offline candidate boundary", () => {
   it("builds a distinct, identity-pinned request from an integrity-valid frozen capture", () => {
@@ -173,13 +181,72 @@ describe("Track C offline candidate boundary", () => {
       modelResource,
       capture: capture(),
       evaluationAt: snapshotAt,
+      evaluationContext,
       systemInstruction: candidatePrompt,
     });
 
     expect(request.identity.systemInstructionHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(request.identity.promptContentHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(request.body).toContain(candidatePrompt);
+    expect(request.body).toContain("Mẫu SD398 còn hàng không?");
     expect(request.body).not.toContain("fixture:price:SD398");
+  });
+
+  it("binds the PII-safe frozen dialogue into prompt and request identity", () => {
+    const first = buildTrackCOfflineCandidateRequest({
+      modelResource,
+      capture: capture(),
+      evaluationAt: snapshotAt,
+      evaluationContext,
+      systemInstruction: candidatePrompt,
+    });
+    const second = buildTrackCOfflineCandidateRequest({
+      modelResource,
+      capture: capture(),
+      evaluationAt: snapshotAt,
+      evaluationContext: [{
+        ...evaluationContext[0],
+        text: "Mẫu SD398 giá bao nhiêu?",
+      }],
+      systemInstruction: candidatePrompt,
+    });
+    const prompt = JSON.parse(
+      (JSON.parse(first.body) as { contents: [{ parts: [{ text: string }] }] })
+        .contents[0].parts[0].text,
+    ) as { evaluationContext: unknown };
+
+    expect(prompt.evaluationContext).toEqual(evaluationContext);
+    expect(first.identity.promptContentHash).not.toBe(second.identity.promptContentHash);
+    expect(first.identity.requestEnvelopeHash).not.toBe(second.identity.requestEnvelopeHash);
+  });
+
+  it("fails closed instead of sending non-redacted evaluation dialogue", () => {
+    expect(() => buildTrackCOfflineCandidateRequest({
+      modelResource,
+      capture: capture(),
+      evaluationAt: snapshotAt,
+      evaluationContext: [{
+        ...evaluationContext[0],
+        text: "Số điện thoại của chị là 0901234567",
+      }],
+      systemInstruction: candidatePrompt,
+    })).toThrow("TRACK_C_OFFLINE_CANDIDATE_DIALOGUE_NOT_PII_SAFE");
+  });
+
+  it("allowlists dialogue fields instead of forwarding caller extras", () => {
+    const contextWithCallerExtra = [{
+      ...evaluationContext[0],
+      hiddenSecret: "must-not-cross-the-provider-boundary",
+    }] as const;
+    const request = buildTrackCOfflineCandidateRequest({
+      modelResource,
+      capture: capture(),
+      evaluationAt: snapshotAt,
+      evaluationContext: contextWithCallerExtra,
+      systemInstruction: candidatePrompt,
+    });
+
+    expect(request.body).not.toContain("must-not-cross-the-provider-boundary");
   });
 
   it("keeps Context V2 identity out of the model-authored response", () => {
@@ -187,6 +254,7 @@ describe("Track C offline candidate boundary", () => {
       modelResource,
       capture: capture(),
       evaluationAt: snapshotAt,
+      evaluationContext,
       systemInstruction: candidatePrompt,
     });
     const body = JSON.parse(request.body) as {
@@ -220,6 +288,7 @@ describe("Track C offline candidate boundary", () => {
       modelResource,
       capture: invalidCapture,
       evaluationAt,
+      evaluationContext,
       systemInstruction: candidatePrompt,
     })).toThrow(errorCode);
   });
@@ -235,6 +304,7 @@ describe("Track C offline candidate boundary", () => {
         context: { ...valid.context!, contextHash: hash("e") },
       },
       evaluationAt: snapshotAt,
+      evaluationContext,
       systemInstruction: candidatePrompt,
     })).toThrow("TRACK_C_OFFLINE_CANDIDATE_CAPTURE_INVALID");
   });
@@ -244,6 +314,7 @@ describe("Track C offline candidate boundary", () => {
       modelResource,
       capture: capture({ claimProductId: "SD399" }),
       evaluationAt: snapshotAt,
+      evaluationContext,
       systemInstruction: candidatePrompt,
     })).toThrow("TRACK_C_OFFLINE_CANDIDATE_PRODUCT_BINDING_MISMATCH");
   });
@@ -253,6 +324,7 @@ describe("Track C offline candidate boundary", () => {
       modelResource,
       capture: capture({ readinessExpiresAt: "2026-09-05T00:00:30.000Z" }),
       evaluationAt: new Date("2026-09-05T00:00:31.000Z"),
+      evaluationContext,
       systemInstruction: candidatePrompt,
     })).toThrow("TRACK_C_OFFLINE_CANDIDATE_CAPTURE_STALE");
   });
@@ -265,6 +337,7 @@ describe("Track C offline candidate boundary", () => {
         captureAt: new Date("2026-09-05T00:06:00.000Z"),
       }),
       evaluationAt: snapshotAt,
+      evaluationContext,
       systemInstruction: candidatePrompt,
     })).toThrow("TRACK_C_OFFLINE_CANDIDATE_CAPTURE_STALE");
   });
