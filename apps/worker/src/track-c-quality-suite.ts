@@ -14,6 +14,17 @@ export interface TrackCQualityFixtureV1 {
   readonly qualityTags: readonly string[];
 }
 
+/**
+ * Fixture-local facts for offline quality comparison only. They are not
+ * runtime facts, provenance, or deterministic C1 guard authority.
+ */
+export interface TrackCQualitySuiteFactsV1 {
+  readonly contractVersion: "TRACK_C_QUALITY_SUITE_FACTS_V1";
+  readonly origin: "FIXTURE_LOCAL_EVALUATION_ONLY";
+  readonly fixtureId: string;
+  readonly facts: readonly string[];
+}
+
 function fixture(
   id: string,
   customerMessage: string,
@@ -85,3 +96,14 @@ export const TRACK_C_QUALITY_SUITE_V1 = Object.freeze([
   fixture("q49-price-slang", "xinh á mà hơi chát :))", "SD398", [], ["sale price: 699000"], ["Interpret chát as price objection", "Respond naturally without pressure"], ["VIETNAMESE_SHORTHAND", "PRICE_OBJECTION"]),
   fixture("q50-close-intent", "ok chốt e này nha", "SD398", [], ["product: SD398"], ["Interpret intent to buy", "Ask only the necessary next checkout detail"], ["VIETNAMESE_SHORTHAND", "CLOSING", "NATURAL_NEXT_STEP"]),
 ] satisfies readonly TrackCQualityFixtureV1[]);
+
+export function qualitySuiteFactsForJudge(
+  fixture: TrackCQualityFixtureV1,
+): TrackCQualitySuiteFactsV1 {
+  return Object.freeze({
+    contractVersion: "TRACK_C_QUALITY_SUITE_FACTS_V1",
+    origin: "FIXTURE_LOCAL_EVALUATION_ONLY",
+    fixtureId: fixture.id,
+    facts: Object.freeze([...fixture.verifiedFacts]),
+  });
+}

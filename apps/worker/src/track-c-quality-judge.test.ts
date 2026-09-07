@@ -236,6 +236,19 @@ describe("Track C C1.1 offline quality judge", () => {
     }
   });
 
+  it("accepts fixture-local facts only through the explicit 50-case quality source", async () => {
+    const request = input({
+      factFixtureHash: "a".repeat(64),
+      factSource: "TRACK_C_QUALITY_SUITE_V1",
+      verifiedFacts: null,
+    });
+
+    await expect(runTrackCQualityComparison(request)).rejects.toThrow(
+      "TRACK_C_C11_QUALITY_SUITE_FACTS_MISMATCH",
+    );
+    expect(request.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+  });
+
   it("routes human review only for a near tie, regression, or disagreement", async () => {
     const tie = await runTrackCQualityComparison(input({
       judge: {

@@ -514,3 +514,34 @@ in this document use that identity.
   natural Vietnamese sales delivery, sales progression, and stage-fit CTA over
   fact-only or menu-like replies. `overall` remains judge-owned and holistic;
   it is not a deterministic average.
+
+## Owner amendment — mandatory 50-case C2 quality gate
+
+The owner requires `TRACK_C_QUALITY_SUITE_V1` for every Track C
+`CANDIDATE_EVALUATION` in addition to, never instead of, frozen B3 C1.
+
+1. C1 remains the hard deterministic contract gate: all seven frozen B3 cases
+   must pass, including the existing claim, provenance, fact, effect,
+   side-effect, ownership, repair, and handoff boundaries.
+2. The exact fifty quality fixtures must then all complete through the existing
+   `TRACK_C_QUALITY_JUDGE_V2`; a partial suite fails closed. Their facts are
+   explicitly marked `FIXTURE_LOCAL_EVALUATION_ONLY`: they inform offline
+   quality scoring only and never become runtime facts, claim provenance, or
+   deterministic authority.
+3. The 50-case gate has no deterministic per-case guard. It must not pretend
+   that readable fixture strings are Context V2 or live business evidence.
+   C1 B3 remains the only deterministic guard gate for this quality loop.
+4. A candidate cannot satisfy this C2 quality gate if any of the fifty cases is
+   `WORSE`. It also needs at least one `BETTER` result under the existing V2
+   disposition threshold; otherwise the result is `NO_CLEAR_IMPROVEMENT`. Any
+   B3 BOT-quality `WORSE` remains a regression and also prevents the combined
+   result from entering the owner-approval state.
+5. Every completed quality run returns a local, PII-safe history for all fifty
+   cases: frozen fixture/context/facts, accepted and candidate replies, all ten
+   score dimensions, deltas, dispositions, review reasons, identities, and
+   non-identity judge telemetry. Normal human-review routing remains only
+   near-tie, regression, or judge disagreement; retaining history does not add
+   a fourth automatic review reason.
+6. A successful result is only `AWAITING_OWNER_APPROVAL`. Track C never
+   selects, promotes, deploys, or applies a candidate automatically; the owner
+   alone decides whether to apply any candidate after reviewing the evidence.

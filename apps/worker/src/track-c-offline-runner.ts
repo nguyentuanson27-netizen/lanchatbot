@@ -17,6 +17,11 @@ import {
   type TrackCOfflineCandidateValidatedEnvelope,
   type TrackCReplayResult,
 } from "./track-c-replay.js";
+import {
+  runTrackCQualitySuiteGate,
+  type TrackCQualitySuiteGateInput,
+  type TrackCQualitySuiteGateResult,
+} from "./track-c-quality-suite-gate.js";
 import type {
   TrackCJudgeCallResult,
   TrackCQualityJudgePort,
@@ -48,6 +53,8 @@ export interface TrackCOfflineQualityRunInput {
   readonly onCaseComplete?: (
     checkpoint: TrackCOfflineCaseCheckpoint,
   ) => void | Promise<void>;
+  /** Mandatory for a candidate evaluation; wiring smoke remains B3-only. */
+  readonly qualitySuite?: Omit<TrackCQualitySuiteGateInput, "mustPassReplay">;
 }
 
 type JudgeMetrics = Readonly<{
@@ -153,6 +160,16 @@ export interface TrackCOfflineQualityEvidence {
   readonly judgeMetrics: readonly JudgeMetrics[];
   /** PII-safe review material for only the cases the V2 contract routes to a human. */
   readonly humanReview: TrackCOfflineHumanReviewArtifact;
+  /** Required C2 quality gate for candidate evaluation; never authorizes selection. */
+  readonly qualitySuite: TrackCQualitySuiteGateResult | null;
+  /** B3 and the mandatory suite combined for owner review; never auto-selects. */
+  readonly candidateReadiness: Readonly<{
+    readonly status:
+      | "AWAITING_OWNER_APPROVAL"
+      | "NO_CLEAR_IMPROVEMENT"
+      | "REGRESSION_DETECTED";
+    readonly selectionAuthorized: false;
+  }> | null;
 }
 
 function sha256(value: unknown): string {
@@ -462,6 +479,9 @@ export async function runTrackCOfflineQuality(
   if (input.runKind === "CANDIDATE_EVALUATION" && distinctReplyCaseCount === 0) {
     throw new Error("TRACK_C_OFFLINE_RUNNER_CANDIDATE_NOT_DISTINCT");
   }
+  if (input.runKind === "CANDIDATE_EVALUATION" && input.qualitySuite === undefined) {
+    throw new Error("TRACK_C_OFFLINE_RUNNER_QUALITY_SUITE_REQUIRED");
+  }
 
   const recorders = new Map<string, ReturnType<typeof recordingJudge>>();
   const sourceCases = new Map(input.cases.map((item) => [item.caseId, item]));
@@ -503,6 +523,18 @@ export async function runTrackCOfflineQuality(
   });
   const judgeMetrics = replay.cases.flatMap(({ caseId, quality }) =>
     quality.status === "SCORED" ? [metricsForCase(caseId, recorders)] : []);
+  const qualitySuite = input.runKind === "CANDIDATE_EVALUATION"
+    ? await runTrackCQualitySuiteGate({
+      ...input.qualitySuite!,
+      mustPassReplay: input.mustPassReplay,
+    })
+    : null;
+  const candidateReadiness = qualitySuite === null ? null : Object.freeze({
+    status: replay.aggregate.worse > 0
+      ? "REGRESSION_DETECTED" as const
+      : qualitySuite.gate.status,
+    selectionAuthorized: false as const,
+  });
   return Object.freeze({
     contractVersion: "TRACK_C_OFFLINE_RUNNER_V1",
     evaluationOnly: true,
@@ -524,5 +556,7 @@ export async function runTrackCOfflineQuality(
     replay,
     judgeMetrics: Object.freeze(judgeMetrics),
     humanReview: humanReviewArtifact({ replay, cases: humanReviewCases }),
+    qualitySuite,
+    candidateReadiness,
   });
 }

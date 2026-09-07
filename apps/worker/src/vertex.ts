@@ -14,6 +14,7 @@ import {
 } from "@lana/contracts";
 import type { ShadowContextMessage } from "@lana/database";
 import type { MultimodalEmbeddingPort } from "@lana/business-tools";
+import type { TrackCQualitySuiteFactsV1 } from "./track-c-quality-suite.js";
 
 export interface VertexServiceAccount {
   readonly email: string;
@@ -267,6 +268,11 @@ export interface JudgeSalesReplyV2Descriptor {
   readonly generationConfig: unknown;
 }
 
+export type JudgeSalesReplyV2Facts =
+  | BusinessFactEnvelopeV1
+  | TrackCQualitySuiteFactsV1
+  | null;
+
 type JudgeSalesReplyV2RequestContract = Readonly<{
   systemInstruction: string;
   generationConfig: unknown;
@@ -311,7 +317,7 @@ export function judgeSalesReplyV2Descriptor(
 export function buildJudgeSalesReplyV2Request(
   context: readonly ShadowContextMessage[],
   actualReply: string,
-  verifiedFacts: BusinessFactEnvelopeV1 | null,
+  verifiedFacts: JudgeSalesReplyV2Facts,
   proposalSummary: unknown,
   guardOutcome: unknown,
   requestContract: JudgeSalesReplyV2RequestContract = judgeSalesReplyV2RequestContract(
@@ -1615,7 +1621,7 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
   async judgeSalesReplyV2WithMetrics(
     context: readonly ShadowContextMessage[],
     actualReply: string,
-    verifiedFacts: BusinessFactEnvelopeV1 | null,
+    verifiedFacts: JudgeSalesReplyV2Facts,
     proposalSummary: unknown,
     guardOutcome: unknown,
   ): Promise<VertexJudgeSalesReplyV2Result> {
@@ -1754,7 +1760,7 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
   async judgeSalesReplyV2(
     context: readonly ShadowContextMessage[],
     actualReply: string,
-    verifiedFacts: BusinessFactEnvelopeV1 | null,
+    verifiedFacts: JudgeSalesReplyV2Facts,
     proposalSummary: unknown,
     guardOutcome: unknown,
   ): Promise<SalesRubricAssessmentV2> {
