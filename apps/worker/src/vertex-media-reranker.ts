@@ -8,6 +8,28 @@ import type {
   RealtimeMediaRerankerPort,
 } from "./realtime-media-recognition.js";
 
+/** V2 shortlist bound: at most five unique SKU groups reach the reranker. */
+export const MAX_RERANK_CANDIDATES = 5;
+
+/**
+ * Await `promise`, but give up as soon as `signal` aborts. Used so a caller can
+ * stop waiting on a shared token refresh without cancelling it for everyone else.
+ */
+function raceWithSignal<T>(
+  promise: Promise<T>,
+  signal: AbortSignal,
+  code: string,
+): Promise<T> {
+  if (signal.aborted) return Promise.reject(new Error(code));
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = (): void => reject(new Error(code));
+    signal.addEventListener("abort", onAbort, { once: true });
+    promise.then(resolve, reject).finally(() => {
+      signal.removeEventListener("abort", onAbort);
+    });
+  });
+}
+
 export interface VertexMediaRerankerOptions {
   readonly projectId: string;
   readonly location: string;
@@ -87,21 +109,28 @@ export class VertexMediaReranker implements RealtimeMediaRerankerPort {
     this.now = options.now ?? Date.now;
   }
 
-  private async token(timeoutMs: number): Promise<string> {
+  private async token(timeoutMs: number, signal: AbortSignal): Promise<string> {
     if (
       this.accessToken &&
       this.accessToken.expiresAt - 60_000 > this.now()
     ) {
       return this.accessToken.value;
     }
-    if (this.tokenRefreshPromise) return this.tokenRefreshPromise;
-    const refresh = this.refreshToken(timeoutMs);
-    this.tokenRefreshPromise = refresh;
-    try {
-      return await refresh;
-    } finally {
-      if (this.tokenRefreshPromise === refresh) this.tokenRefreshPromise = null;
+    // The shared refresh owns its own lifetime so one caller's cancellation
+    // cannot abort a refresh other callers are still waiting on; each caller
+    // races it against its own budget instead.
+    if (!this.tokenRefreshPromise) {
+      const refresh = this.refreshToken(timeoutMs);
+      this.tokenRefreshPromise = refresh;
+      void refresh.catch(() => undefined).finally(() => {
+        if (this.tokenRefreshPromise === refresh) this.tokenRefreshPromise = null;
+      });
     }
+    return raceWithSignal(
+      this.tokenRefreshPromise,
+      signal,
+      "VERTEX_MEDIA_CANCELLED",
+    );
   }
 
   private async refreshToken(timeoutMs: number): Promise<string> {
@@ -158,37 +187,62 @@ export class VertexMediaReranker implements RealtimeMediaRerankerPort {
     }[];
     readonly timeoutMs: number;
     readonly maxOutputTokens: number;
+    readonly signal: AbortSignal;
   }): Promise<MediaRerankResult> {
     if (!/^[A-Za-z0-9._-]+$/u.test(input.modelName)) {
       throw new Error("VERTEX_MEDIA_MODEL_INVALID");
     }
-    const candidates = input.candidates.slice(0, 3);
-    if (candidates.length < 2) {
+    // V2 reranks every non-empty shortlist of 1-5 unique SKUs. There is no
+    // top-3 slice and no minimum-two-candidate requirement: an over-long list is
+    // rejected rather than silently truncated, so no supplied candidate is ever
+    // dropped without the caller knowing.
+    const candidates = input.candidates;
+    if (candidates.length < 1) {
       throw new Error("VERTEX_MEDIA_CANDIDATES_REQUIRED");
+    }
+    if (candidates.length > MAX_RERANK_CANDIDATES) {
+      throw new Error("VERTEX_MEDIA_CANDIDATES_INVALID");
     }
     const ids = [...new Set(candidates.map(({ productId }) =>
       productId.trim().slice(0, 128)
     ))];
-    if (ids.length !== candidates.length) {
+    if (ids.length !== candidates.length || ids.some((id) => id.length === 0)) {
       throw new Error("VERTEX_MEDIA_CANDIDATES_INVALID");
     }
+    if (input.signal.aborted) throw new Error("VERTEX_MEDIA_CANCELLED");
     const started = this.now();
     const deadlineAt = started + Math.max(250, input.timeoutMs);
-    const accessToken = await this.token(Math.max(250, deadlineAt - this.now()));
+    const accessToken = await this.token(
+      Math.max(250, deadlineAt - this.now()),
+      input.signal,
+    );
+    // The caller's budget may have run out while the token was being fetched.
+    if (input.signal.aborted) throw new Error("VERTEX_MEDIA_CANCELLED");
     const remaining = deadlineAt - this.now();
     if (remaining < 250) throw new Error("VERTEX_MEDIA_TIMEOUT");
     const controller = new AbortController();
+    // The stage cap can only shorten the call; aborting the caller's shared
+    // budget aborts this fetch immediately, whatever the stage cap still allows.
+    const onCallerAbort = (): void => controller.abort();
+    input.signal.addEventListener("abort", onCallerAbort, { once: true });
     const timer = setTimeout(() => controller.abort(), remaining);
     try {
       const parts: Record<string, unknown>[] = [
         {
           text: [
             `PROMPT_VERSION=${input.promptVersion.slice(0, 64)}`,
-            "Ảnh đầu tiên là ảnh khách gửi; các ảnh tiếp theo là ứng viên Qdrant.",
-            "Chỉ so sánh trang phục: form, cổ, tay, chất liệu, họa tiết, màu và chi tiết cắt may.",
-            "Bỏ qua khuôn mặt, người mẫu, tư thế và bối cảnh.",
+            "Ảnh đầu tiên là ảnh khách gửi; mỗi ảnh tiếp theo là ảnh catalog đúng của một ứng viên.",
+            "So sánh đối chiếu: tìm điểm khác nhau giữa các ứng viên trước,"
+              + " rồi kiểm tra từng điểm đó trên ảnh khách.",
+            "Ưu tiên chi tiết cục bộ: họa tiết, thêu, cúc, cổ áo, tay áo, viền, đường may,"
+              + " chất liệu/bề mặt, motif nhỏ, phom dáng cắt may và chi tiết màu.",
+            "Dùng cả bằng chứng ủng hộ lẫn bằng chứng mâu thuẫn; một chi tiết mâu thuẫn"
+              + " đủ để loại một ứng viên.",
+            "Bỏ qua khuôn mặt, danh tính người mẫu, tư thế, bối cảnh và góc máy"
+              + " trừ khi nó che hoặc lộ bằng chứng sản phẩm.",
             "Không tạo mã mới hoặc chọn mã ngoài danh sách.",
-            "Không có mẫu đúng thì chọn none; chưa đủ chắc chắn thì chọn ambiguous.",
+            "Không có mẫu đúng thì chọn none;"
+              + " nếu chi tiết phân biệt không nhìn thấy được thì chọn ambiguous.",
           ].join("\n"),
         },
         {
@@ -280,11 +334,14 @@ export class VertexMediaReranker implements RealtimeMediaRerankerPort {
       };
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
-        throw new Error("VERTEX_MEDIA_TIMEOUT");
+        throw new Error(
+          input.signal.aborted ? "VERTEX_MEDIA_CANCELLED" : "VERTEX_MEDIA_TIMEOUT",
+        );
       }
       throw error;
     } finally {
       clearTimeout(timer);
+      input.signal.removeEventListener("abort", onCallerAbort);
     }
   }
 }
