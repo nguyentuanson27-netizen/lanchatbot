@@ -167,7 +167,8 @@ export interface TrackCOfflineQualityEvidence {
     readonly status:
       | "AWAITING_OWNER_APPROVAL"
       | "NO_CLEAR_IMPROVEMENT"
-      | "REGRESSION_DETECTED";
+      | "REGRESSION_DETECTED"
+      | "INCOMPLETE";
     readonly selectionAuthorized: false;
   }> | null;
 }

@@ -977,7 +977,7 @@ describe("Vertex shadow client", () => {
     )).rejects.toThrow("GROUNDED_SCHEMA_INVALID");
   });
 
-  it("pins the offline Track C judge to global Gemini 3.7 with HIGH thinking without moving the generator", async () => {
+  it("pins the offline Track C judge to global Gemini 3.6 with HIGH thinking without moving the generator", async () => {
     let now = 100;
     let judgeRequest: { url: string; body: unknown } = { url: "", body: {} };
     const judgeFetch = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
@@ -995,7 +995,7 @@ describe("Vertex shadow client", () => {
     }) as unknown as typeof fetch;
     const judgeModel = modelWith(judgeFetch, {
       judgeLocation: "global",
-      judgeModelName: "gemini-3.7-flash",
+      judgeModelName: "gemini-3.6-flash",
       now: () => now,
     });
 
@@ -1010,10 +1010,10 @@ describe("Vertex shadow client", () => {
     expect(judgeModel.judgeSalesReplyV2Descriptor()).toMatchObject({
       provider: "VERTEX_AI",
       location: "global",
-      model: "gemini-3.7-flash",
+      model: "gemini-3.6-flash",
     });
     expect(judgeRequest.url).toContain(
-      "/locations/global/publishers/google/models/gemini-3.7-flash:generateContent",
+      "/locations/global/publishers/google/models/gemini-3.6-flash:generateContent",
     );
     expect(judgeRequest.url).toContain("https://aiplatform.googleapis.com/");
     expect(judgeRequest.body).toMatchObject({
@@ -1080,7 +1080,7 @@ describe("Vertex shadow client", () => {
     }) as unknown as typeof fetch;
     await modelWith(generatorFetch, {
       judgeLocation: "global",
-      judgeModelName: "gemini-3.7-flash",
+      judgeModelName: "gemini-3.6-flash",
     }).generate(context, "prompt-v1");
     expect(generatorUrl).toContain(
       "/locations/us-central1/publishers/google/models/gemini-test:generateContent",
@@ -1090,10 +1090,12 @@ describe("Vertex shadow client", () => {
   it("preserves redacted Vertex 400 details for Track C judge evidence", async () => {
     const actualReply = "Dạ mẫu này có giá 699k ạ.";
     const failures: VertexFailureEvent[] = [];
+    let judgeCalls = 0;
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       if (String(input).includes("oauth2.googleapis.com")) {
         return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
       }
+      judgeCalls += 1;
       return new Response(JSON.stringify({
         error: {
           code: 400,
@@ -1113,7 +1115,7 @@ describe("Vertex shadow client", () => {
 
     const request = modelWith(fetchMock, {
       judgeLocation: "global",
-      judgeModelName: "gemini-3.7-flash",
+      judgeModelName: "gemini-3.6-flash",
       logFailure: (event) => failures.push(event),
     }).judgeSalesReplyV2WithMetrics(
       context,
@@ -1154,12 +1156,138 @@ describe("Vertex shadow client", () => {
     expect(serializedEvidence).not.toContain("Bearer token");
     expect(serializedEvidence).not.toContain("PRIVATE KEY");
     expect(serializedEvidence).not.toContain("ignoredProviderPayload");
+    expect(judgeCalls).toBe(1);
+  });
+
+  it("fails Track C Judge V2 after one redacted 401 response", async () => {
+    let judgeCalls = 0;
+    const failures: VertexFailureEvent[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      judgeCalls += 1;
+      return new Response(JSON.stringify({
+        error: { code: 401, status: "UNAUTHENTICATED", message: "token rejected" },
+      }), { status: 401 });
+    }) as unknown as typeof fetch;
+
+    const request = modelWith(fetchMock, {
+      judgeLocation: "global",
+      judgeModelName: "gemini-3.6-flash",
+      logFailure: (event) => failures.push(event),
+    }).judgeSalesReplyV2WithMetrics(
+      context,
+      "Dạ mẫu này có giá 699k ạ.",
+      baselineFacts,
+      { action: "REPLY" },
+      { blockedReasonCodes: [] },
+    );
+
+    await expect(request).rejects.toMatchObject({
+      code: "VERTEX_JUDGE_V2_FAILED",
+      retryable: false,
+      providerError: expect.objectContaining({ status: 401 }),
+    });
+    expect(judgeCalls).toBe(1);
+    expect(failures).toEqual([
+      expect.objectContaining({
+        endpoint: "JUDGE",
+        status: 401,
+        attempt: 1,
+        retryable: false,
+        errorCode: "VERTEX_JUDGE_V2_FAILED",
+        providerError: expect.objectContaining({ status: 401 }),
+      }),
+    ]);
+  });
+
+  it("retries one retryable Track C Judge V2 response without exposing its provider payload", async () => {
+    let judgeCalls = 0;
+    const failures: VertexFailureEvent[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      judgeCalls += 1;
+      if (judgeCalls === 1) {
+        return new Response(JSON.stringify({
+          error: { code: 429, status: "RESOURCE_EXHAUSTED", message: "retry later" },
+        }), { status: 429, headers: { "retry-after": "0" } });
+      }
+      return compactTrackCRubricV2Response();
+    }) as unknown as typeof fetch;
+
+    const result = await modelWith(fetchMock, {
+      judgeLocation: "global",
+      judgeModelName: "gemini-3.6-flash",
+      logFailure: (event) => failures.push(event),
+    }).judgeSalesReplyV2WithMetrics(
+      context,
+      "Dạ mẫu này có giá 699k ạ.",
+      baselineFacts,
+      { action: "REPLY" },
+      { blockedReasonCodes: [] },
+    );
+
+    expect(result.assessment.scores.overall).toBe(5);
+    expect(judgeCalls).toBe(2);
+    expect(failures).toEqual([
+      expect.objectContaining({
+        endpoint: "JUDGE",
+        status: 429,
+        attempt: 1,
+        retryable: true,
+        errorCode: "VERTEX_JUDGE_V2_RETRYABLE",
+      }),
+    ]);
+  });
+
+  it("retries one transient Track C Judge V2 timeout before recording the case as failed", async () => {
+    let judgeCalls = 0;
+    const failures: VertexFailureEvent[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input).includes("oauth2.googleapis.com")) {
+        return new Response(JSON.stringify({ access_token: "token", expires_in: 3_600 }), { status: 200 });
+      }
+      judgeCalls += 1;
+      if (judgeCalls === 1) {
+        const timeout = new Error("request timed out");
+        timeout.name = "AbortError";
+        throw timeout;
+      }
+      return compactTrackCRubricV2Response();
+    }) as unknown as typeof fetch;
+
+    const result = await modelWith(fetchMock, {
+      judgeLocation: "global",
+      judgeModelName: "gemini-3.6-flash",
+      logFailure: (event) => failures.push(event),
+    }).judgeSalesReplyV2WithMetrics(
+      context,
+      "Dạ mẫu này có giá 699k ạ.",
+      baselineFacts,
+      { action: "REPLY" },
+      { blockedReasonCodes: [] },
+    );
+
+    expect(result.assessment.scores.overall).toBe(5);
+    expect(judgeCalls).toBe(2);
+    expect(failures).toEqual([
+      expect.objectContaining({
+        endpoint: "JUDGE",
+        status: null,
+        attempt: 1,
+        retryable: true,
+        errorCode: "VERTEX_JUDGE_V2_TIMEOUT",
+      }),
+    ]);
   });
 
   it("clarifies only the three approved Track C rubric dimensions with common anchors", () => {
     const descriptor = modelWith(vi.fn() as unknown as typeof fetch, {
       judgeLocation: "global",
-      judgeModelName: "gemini-3.7-flash",
+      judgeModelName: "gemini-3.6-flash",
     }).judgeSalesReplyV2Descriptor();
     const promptRubric = descriptor.promptRubric as { systemInstruction: string };
 
@@ -1178,7 +1306,7 @@ describe("Vertex shadow client", () => {
   it("prioritizes natural Vietnamese resolution over fact-only sales scoring", () => {
     const descriptor = modelWith(vi.fn() as unknown as typeof fetch, {
       judgeLocation: "global",
-      judgeModelName: "gemini-3.7-flash",
+      judgeModelName: "gemini-3.6-flash",
     }).judgeSalesReplyV2Descriptor();
     const instruction = (descriptor.promptRubric as { systemInstruction: string })
       .systemInstruction;
@@ -1201,7 +1329,7 @@ describe("Vertex shadow client", () => {
 
     const result = await modelWith(fetchMock, {
       judgeLocation: "global",
-      judgeModelName: "gemini-3.7-flash",
+      judgeModelName: "gemini-3.6-flash",
     }).judgeSalesReplyV2WithMetrics(
       context,
       "Dạ mẫu này có giá 699k ạ.",

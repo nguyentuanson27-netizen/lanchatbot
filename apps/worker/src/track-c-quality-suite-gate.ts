@@ -38,20 +38,28 @@ export interface TrackCQualitySuiteGateInput {
 
 type QualitySuiteDisposition = "BETTER" | "SAME" | "WORSE";
 
-export interface TrackCQualitySuiteHistoryCase {
+interface TrackCQualitySuiteHistoryReply {
+  /** PII-safe text actually supplied to Judge V2 and retained in evidence. */
+  readonly reply: string;
+  /** Hash of the PII-safe text actually supplied to Judge V2. */
+  readonly replyHash: string;
+  /** Hash-only binding to the source output before local redaction. */
+  readonly sourceReplyHash: string;
+  /** A redacted source reply makes the gate non-selectable. */
+  readonly redacted: boolean;
+}
+
+interface TrackCQualitySuiteScoredHistoryCase {
   readonly caseId: string;
+  readonly status: "SCORED";
   readonly fixture: TrackCQualityFixtureV1;
-  readonly accepted: Readonly<{
-    readonly reply: string;
-    readonly replyHash: string;
+  readonly accepted: Readonly<TrackCQualitySuiteHistoryReply & {
     readonly assessment: Pick<
       SalesRubricAssessmentV2,
       "scores" | "recommendationAction"
     >;
   }>;
-  readonly candidate: Readonly<{
-    readonly reply: string;
-    readonly replyHash: string;
+  readonly candidate: Readonly<TrackCQualitySuiteHistoryReply & {
     readonly assessment: Pick<
       SalesRubricAssessmentV2,
       "scores" | "recommendationAction"
@@ -68,6 +76,25 @@ export interface TrackCQualitySuiteHistoryCase {
   readonly identity: TrackCQualityComparisonResult["identity"];
 }
 
+interface TrackCQualitySuiteFailedHistoryCase {
+  readonly caseId: string;
+  readonly status: "FAILED";
+  readonly fixture: TrackCQualityFixtureV1;
+  /** Retain PII-safe history even when the Judge/provider case did not score. */
+  readonly replies: Readonly<{
+    readonly accepted: TrackCQualitySuiteHistoryReply;
+    readonly candidate: TrackCQualitySuiteHistoryReply;
+  }> | null;
+  /** Redacted code only; never retain an unsafe reply or provider message. */
+  readonly failure: Readonly<{
+    readonly code: string;
+  }>;
+}
+
+export type TrackCQualitySuiteHistoryCase =
+  | TrackCQualitySuiteScoredHistoryCase
+  | TrackCQualitySuiteFailedHistoryCase;
+
 export interface TrackCQualitySuiteGateResult {
   readonly contractVersion: "TRACK_C_QUALITY_SUITE_GATE_V1";
   readonly evaluationOnly: true;
@@ -79,13 +106,17 @@ export interface TrackCQualitySuiteGateResult {
     readonly better: number;
     readonly same: number;
     readonly worse: number;
+    readonly failed: number;
+    /** A redacted model output remains reviewable but cannot satisfy the gate. */
+    readonly redactedCaseCount: number;
   }>;
   /** This evaluation never selects or promotes a candidate. */
   readonly gate: Readonly<{
     readonly status:
       | "AWAITING_OWNER_APPROVAL"
       | "NO_CLEAR_IMPROVEMENT"
-      | "REGRESSION_DETECTED";
+      | "REGRESSION_DETECTED"
+      | "INCOMPLETE";
     readonly selectionAuthorized: false;
   }>;
   /** PII-safe fixture and both replies/scores for every required quality case. */
@@ -107,26 +138,44 @@ function assertExactCaseSet(cases: readonly TrackCQualitySuiteCaseInput[]): void
   }
 }
 
-function assertReply(
+function replyHash(value: string): string {
+  return createHash("sha256")
+    .update(canonicalJsonV1(value), "utf8")
+    .digest("hex");
+}
+
+interface PreparedQualitySuiteReply {
+  readonly judge: TrackCQualityReplyInput;
+  readonly history: TrackCQualitySuiteHistoryReply;
+}
+
+function prepareReply(
   caseId: string,
   side: "ACCEPTED" | "CANDIDATE",
   reply: TrackCQualityReplyInput,
-): void {
+): PreparedQualitySuiteReply {
   if (typeof reply.reply !== "string" || !reply.reply.trim()) {
     throw new Error(`TRACK_C_QUALITY_SUITE_${side}_REPLY_INVALID:${caseId}`);
   }
-  assertHistoryTextSafe(reply.reply, `${caseId}:${side.toLowerCase()}`);
+  const redacted = redactAnalyticsMessage(reply.reply);
+  const safeReply = redactCustomerUrlsForModel(redacted.text);
+  if (redacted.dlpStatus !== "PASSED" || !safeReply.trim()) {
+    throw new Error(`TRACK_C_QUALITY_SUITE_HISTORY_TEXT_QUARANTINED:${caseId}:${side.toLowerCase()}`);
+  }
+  return Object.freeze({
+    judge: Object.freeze({ ...reply, reply: safeReply }),
+    history: Object.freeze({
+      reply: safeReply,
+      replyHash: replyHash(safeReply),
+      sourceReplyHash: replyHash(reply.reply),
+      redacted: safeReply !== reply.reply,
+    }),
+  });
 }
 
-function assertHistoryTextSafe(value: string, label: string): string {
-  const redacted = redactAnalyticsMessage(value);
-  if (
-    redacted.dlpStatus !== "PASSED" ||
-    redactCustomerUrlsForModel(redacted.text) !== value
-  ) {
-    throw new Error(`TRACK_C_QUALITY_SUITE_HISTORY_TEXT_NOT_PII_SAFE:${label}`);
-  }
-  return value;
+interface PreparedQualitySuiteCase {
+  readonly accepted: PreparedQualitySuiteReply;
+  readonly candidate: PreparedQualitySuiteReply;
 }
 
 function fixtureContext(
@@ -155,26 +204,28 @@ function fixtureContext(
 
 function historyCase(
   fixture: TrackCQualityFixtureV1,
-  replies: Readonly<{
-    readonly accepted: TrackCQualityReplyInput;
-    readonly candidate: TrackCQualityReplyInput;
-  }>,
+  replies: PreparedQualitySuiteCase,
   judged: TrackCQualityComparisonResult,
-): TrackCQualitySuiteHistoryCase {
+): TrackCQualitySuiteScoredHistoryCase {
+  if (
+    judged.identity.accepted.replyHash !== replies.accepted.history.replyHash ||
+    judged.identity.candidate.replyHash !== replies.candidate.history.replyHash
+  ) {
+    throw new Error("TRACK_C_QUALITY_SUITE_JUDGE_INPUT_HASH_MISMATCH");
+  }
   return Object.freeze({
     caseId: fixture.id,
+    status: "SCORED" as const,
     fixture,
     accepted: Object.freeze({
-      reply: replies.accepted.reply,
-      replyHash: judged.identity.accepted.replyHash,
+      ...replies.accepted.history,
       assessment: Object.freeze({
         scores: judged.accepted.scores,
         recommendationAction: judged.accepted.recommendationAction,
       }),
     }),
     candidate: Object.freeze({
-      reply: replies.candidate.reply,
-      replyHash: judged.identity.candidate.replyHash,
+      ...replies.candidate.history,
       assessment: Object.freeze({
         scores: judged.candidate.scores,
         recommendationAction: judged.candidate.recommendationAction,
@@ -188,6 +239,29 @@ function historyCase(
     }),
     judgeMetrics: judged.metrics,
     identity: judged.identity,
+  });
+}
+
+function redactedFailureCode(error: unknown): string {
+  const message = error instanceof Error ? error.message : "";
+  const code = /^([A-Z0-9_]+)(?::|$)/u.exec(message)?.[1];
+  return code ?? "TRACK_C_QUALITY_SUITE_CASE_FAILED";
+}
+
+function failedHistoryCase(
+  fixture: TrackCQualityFixtureV1,
+  error: unknown,
+  replies: PreparedQualitySuiteCase | null,
+): TrackCQualitySuiteFailedHistoryCase {
+  return Object.freeze({
+    caseId: fixture.id,
+    status: "FAILED" as const,
+    fixture,
+    replies: replies === null ? null : Object.freeze({
+      accepted: replies.accepted.history,
+      candidate: replies.candidate.history,
+    }),
+    failure: Object.freeze({ code: redactedFailureCode(error) }),
   });
 }
 
@@ -209,31 +283,48 @@ export async function runTrackCQualitySuiteGate(
     if (current === undefined) {
       throw new Error(`TRACK_C_QUALITY_SUITE_CASE_MISSING:${fixture.id}`);
     }
-    assertReply(fixture.id, "ACCEPTED", current.accepted);
-    assertReply(fixture.id, "CANDIDATE", current.candidate);
-    const judged = await runTrackCQualityComparison({
-      mustPassReplay: input.mustPassReplay,
-      judge: input.judge,
-      context: fixtureContext(fixture),
-      verifiedFacts: qualitySuiteFactsForJudge(fixture),
-      factFixtureHash: QUALITY_SUITE_FIXTURE_SET_HASH,
-      factSource: "TRACK_C_QUALITY_SUITE_V1",
-      qualitySuiteFixtureId: fixture.id,
-      accepted: current.accepted,
-      candidate: current.candidate,
-    });
-    const completed = historyCase(fixture, current, judged);
+    let prepared: PreparedQualitySuiteCase | null = null;
+    let completed: TrackCQualitySuiteHistoryCase;
+    try {
+      prepared = Object.freeze({
+        accepted: prepareReply(fixture.id, "ACCEPTED", current.accepted),
+        candidate: prepareReply(fixture.id, "CANDIDATE", current.candidate),
+      });
+      const judged = await runTrackCQualityComparison({
+        mustPassReplay: input.mustPassReplay,
+        judge: input.judge,
+        context: fixtureContext(fixture),
+        verifiedFacts: qualitySuiteFactsForJudge(fixture),
+        factFixtureHash: QUALITY_SUITE_FIXTURE_SET_HASH,
+        factSource: "TRACK_C_QUALITY_SUITE_V1",
+        qualitySuiteFixtureId: fixture.id,
+        accepted: prepared.accepted.judge,
+        candidate: prepared.candidate.judge,
+      });
+      completed = historyCase(fixture, prepared, judged);
+    } catch (error) {
+      completed = failedHistoryCase(fixture, error, prepared);
+    }
     history.push(completed);
     await input.onCaseComplete?.(completed);
   }
 
+  const scored = history.filter(
+    (item): item is TrackCQualitySuiteScoredHistoryCase => item.status === "SCORED",
+  );
   const aggregate = Object.freeze({
     caseCount: history.length,
-    better: history.filter(({ quality }) => quality.disposition === "BETTER").length,
-    same: history.filter(({ quality }) => quality.disposition === "SAME").length,
-    worse: history.filter(({ quality }) => quality.disposition === "WORSE").length,
+    better: scored.filter(({ quality }) => quality.disposition === "BETTER").length,
+    same: scored.filter(({ quality }) => quality.disposition === "SAME").length,
+    worse: scored.filter(({ quality }) => quality.disposition === "WORSE").length,
+    failed: history.length - scored.length,
+    redactedCaseCount: history.filter((item) => item.status === "SCORED"
+      ? item.accepted.redacted || item.candidate.redacted
+      : item.replies?.accepted.redacted === true || item.replies?.candidate.redacted === true).length,
   });
-  const status = aggregate.worse > 0
+  const status = aggregate.failed > 0 || aggregate.redactedCaseCount > 0
+    ? "INCOMPLETE" as const
+    : aggregate.worse > 0
     ? "REGRESSION_DETECTED" as const
     : aggregate.better === 0
       ? "NO_CLEAR_IMPROVEMENT" as const
