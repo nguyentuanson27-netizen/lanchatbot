@@ -63,44 +63,44 @@ jobs:
           pnpm --version
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: time pnpm install --frozen-lockfile
 
       - name: Verify policy transactions on PostgreSQL
-        run: pnpm --filter @lana/admin-api test:postgres
+        run: time pnpm --filter @lana/admin-api test:postgres
 
       - name: Verify Track B 0037 migration operator
         run: |
-          node deploy/track-b-0037-preprod-operator.test.mjs
-          node --test deploy/track-b-0037-check-canonicalizer.test.mjs
-          bash deploy/track-b-0037-preprod-operator.behavior.test.sh
+          time node deploy/track-b-0037-preprod-operator.test.mjs
+          time node --test deploy/track-b-0037-check-canonicalizer.test.mjs
+          time bash deploy/track-b-0037-preprod-operator.behavior.test.sh
 
       - name: Verify Track B 0038 migration operator
         run: |
-          node deploy/track-b-0038-preprod-operator.test.mjs
-          bash deploy/track-b-0038-preprod-operator.behavior.test.sh
+          time node deploy/track-b-0038-preprod-operator.test.mjs
+          time bash deploy/track-b-0038-preprod-operator.behavior.test.sh
 
       - name: Verify Track B 0039 migration operator
         run: |
-          node deploy/track-b-0039-preprod-operator.test.mjs
-          bash deploy/track-b-0039-preprod-operator.behavior.test.sh
+          time node deploy/track-b-0039-preprod-operator.test.mjs
+          time bash deploy/track-b-0039-preprod-operator.behavior.test.sh
 
       - name: Verify Track B 0040 operator boundary
         run: |
-          TRACK_B_OPERATOR_ROLE_TEST_DATABASE_URL="$POLICY_STORE_TEST_DATABASE_URL" pnpm --filter @lana/database exec vitest run src/track-b-operator-role-boundary.postgres.test.ts
-          bash deploy/track-b-0040-preprod-operator.behavior.test.sh
+          time env TRACK_B_OPERATOR_ROLE_TEST_DATABASE_URL="$POLICY_STORE_TEST_DATABASE_URL" pnpm --filter @lana/database exec vitest run src/track-b-operator-role-boundary.postgres.test.ts
+          time bash deploy/track-b-0040-preprod-operator.behavior.test.sh
 
       - name: Verify Gate E release-evidence reader access
-        run: bash deploy/gate-e-release-evidence-reader-access.behavior.test.sh
+        run: time bash deploy/gate-e-release-evidence-reader-access.behavior.test.sh
 
       - name: Verify release integrity
-        run: pnpm check:release-integrity
+        run: time pnpm check:release-integrity
 
       - name: Verify CI selector logic
-        run: node --test scripts/ci/ci-scope.test.mjs
+        run: time node --test scripts/ci/ci-scope.test.mjs scripts/ci/ci-workflow.test.mjs
 
       - name: Determine CI scope
         id: ci-scope
-        run: node scripts/ci/ci-scope.mjs
+        run: time node scripts/ci/ci-scope.mjs
         env:
           EVENT_NAME: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -108,9 +108,9 @@ jobs:
       - name: Run Track C focused checks
         if: steps.ci-scope.outputs.mode == 'track-c'
         run: |
-          pnpm --filter @lana/worker lint
-          pnpm --filter @lana/worker typecheck
-          pnpm --filter @lana/worker exec vitest run \
+          time pnpm --filter @lana/worker lint
+          time pnpm --filter @lana/worker typecheck
+          time pnpm --filter @lana/worker exec vitest run \
             src/track-c-replay.test.ts \
             src/track-c-must-pass.test.ts \
             src/track-c-quality-judge.test.ts \
@@ -122,11 +122,14 @@ jobs:
         if: steps.ci-scope.outputs.mode == 'affected'
         run: |
           BASE_REF="${{ steps.ci-scope.outputs.base_ref || 'origin/main' }}"
-          pnpm --filter "...[$BASE_REF]" run --if-present build
-          pnpm --filter "...[$BASE_REF]" run --if-present typecheck
-          pnpm --filter "...[$BASE_REF]" run --if-present test
-          pnpm --filter "...[$BASE_REF]" run --if-present lint
+          time pnpm --filter "...[$BASE_REF]" run --if-present build
+          time pnpm --filter "...[$BASE_REF]" run --if-present typecheck
+          time pnpm --filter "...[$BASE_REF]" run --if-present test
+          time pnpm --filter "...[$BASE_REF]" run --if-present lint
 
       - name: Run repository checks (full regression)
         if: steps.ci-scope.outputs.mode == 'full'
-        run: pnpm check
+        run: |
+          time pnpm -r build
+          time pnpm -r typecheck
+          time pnpm -r test
