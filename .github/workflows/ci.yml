@@ -20,8 +20,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: pnpm check
+  scope:
+    name: Determine CI scope
+    runs-on: [self-hosted, Linux, X64, lana-ci]
+    timeout-minutes: 35
+    outputs:
+      mode: ${{ steps.ci-scope.outputs.mode }}
+      base_ref: ${{ steps.ci-scope.outputs.base_ref }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+
+      - name: Verify toolchain
+        run: node --version
+
+      - name: Verify CI selector logic
+        run: time node --test scripts/ci/ci-scope.test.mjs scripts/ci/ci-workflow.test.mjs
+
+      - name: Determine CI scope
+        id: ci-scope
+        run: time node scripts/ci/ci-scope.mjs
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
+  db-safety:
+    name: DB safety gates
+    needs: scope
     runs-on: [self-hosted, Linux, X64, lana-ci]
     timeout-minutes: 35
     services:
@@ -57,60 +90,99 @@ jobs:
       - name: Install pnpm
         run: npm install --global pnpm@10.12.4
 
-      - name: Verify toolchain
-        run: |
-          node --version
-          pnpm --version
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: time pnpm install --frozen-lockfile
 
       - name: Verify policy transactions on PostgreSQL
-        run: pnpm --filter @lana/admin-api test:postgres
+        run: time pnpm --filter @lana/admin-api test:postgres
 
       - name: Verify Track B 0037 migration operator
         run: |
-          node deploy/track-b-0037-preprod-operator.test.mjs
-          node --test deploy/track-b-0037-check-canonicalizer.test.mjs
-          bash deploy/track-b-0037-preprod-operator.behavior.test.sh
+          time node deploy/track-b-0037-preprod-operator.test.mjs
+          time node --test deploy/track-b-0037-check-canonicalizer.test.mjs
+          time bash deploy/track-b-0037-preprod-operator.behavior.test.sh
 
       - name: Verify Track B 0038 migration operator
         run: |
-          node deploy/track-b-0038-preprod-operator.test.mjs
-          bash deploy/track-b-0038-preprod-operator.behavior.test.sh
+          time node deploy/track-b-0038-preprod-operator.test.mjs
+          time bash deploy/track-b-0038-preprod-operator.behavior.test.sh
 
       - name: Verify Track B 0039 migration operator
         run: |
-          node deploy/track-b-0039-preprod-operator.test.mjs
-          bash deploy/track-b-0039-preprod-operator.behavior.test.sh
+          time node deploy/track-b-0039-preprod-operator.test.mjs
+          time bash deploy/track-b-0039-preprod-operator.behavior.test.sh
 
       - name: Verify Track B 0040 operator boundary
         run: |
-          TRACK_B_OPERATOR_ROLE_TEST_DATABASE_URL="$POLICY_STORE_TEST_DATABASE_URL" pnpm --filter @lana/database exec vitest run src/track-b-operator-role-boundary.postgres.test.ts
-          bash deploy/track-b-0040-preprod-operator.behavior.test.sh
+          time env TRACK_B_OPERATOR_ROLE_TEST_DATABASE_URL="$POLICY_STORE_TEST_DATABASE_URL" pnpm --filter @lana/database exec vitest run src/track-b-operator-role-boundary.postgres.test.ts
+          time bash deploy/track-b-0040-preprod-operator.behavior.test.sh
 
       - name: Verify Gate E release-evidence reader access
-        run: bash deploy/gate-e-release-evidence-reader-access.behavior.test.sh
+        run: time bash deploy/gate-e-release-evidence-reader-access.behavior.test.sh
+
+  static-safety:
+    name: Static safety gates
+    needs: scope
+    runs-on: [self-hosted, Linux, X64, lana-ci]
+    timeout-minutes: 35
+    env:
+      CI: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+
+      - name: Install pnpm
+        run: npm install --global pnpm@10.12.4
+
+      - name: Install dependencies
+        run: time pnpm install --frozen-lockfile
 
       - name: Verify release integrity
-        run: pnpm check:release-integrity
+        run: time pnpm check:release-integrity
 
-      - name: Verify CI selector logic
-        run: node --test scripts/ci/ci-scope.test.mjs
+  code-track-c:
+    name: Track C focused checks
+    needs: scope
+    if: needs.scope.outputs.mode == 'track-c'
+    runs-on: [self-hosted, Linux, X64, lana-ci]
+    timeout-minutes: 35
+    env:
+      CI: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
 
-      - name: Determine CI scope
-        id: ci-scope
-        run: node scripts/ci/ci-scope.mjs
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
 
-      - name: Run Track C focused checks
-        if: steps.ci-scope.outputs.mode == 'track-c'
+      - name: Install pnpm
+        run: npm install --global pnpm@10.12.4
+
+      - name: Install dependencies
+        run: time pnpm install --frozen-lockfile
+
+      - name: Lint worker
+        run: time pnpm --filter @lana/worker lint
+
+      - name: Typecheck worker
+        run: time pnpm --filter @lana/worker typecheck
+
+      - name: Run focused Track C tests
         run: |
-          pnpm --filter @lana/worker lint
-          pnpm --filter @lana/worker typecheck
-          pnpm --filter @lana/worker exec vitest run \
+          time pnpm --filter @lana/worker exec vitest run \
             src/track-c-replay.test.ts \
             src/track-c-must-pass.test.ts \
             src/track-c-quality-judge.test.ts \
@@ -118,15 +190,121 @@ jobs:
             src/track-c-c3-sales-quality-candidate.test.ts \
             src/track-c-quality-suite-gate.test.ts
 
-      - name: Run affected packages checks
-        if: steps.ci-scope.outputs.mode == 'affected'
-        run: |
-          BASE_REF="${{ steps.ci-scope.outputs.base_ref || 'origin/main' }}"
-          pnpm --filter "...[$BASE_REF]" run --if-present build
-          pnpm --filter "...[$BASE_REF]" run --if-present typecheck
-          pnpm --filter "...[$BASE_REF]" run --if-present test
-          pnpm --filter "...[$BASE_REF]" run --if-present lint
+  code-affected:
+    name: Affected package checks
+    needs: scope
+    if: needs.scope.outputs.mode == 'affected'
+    runs-on: [self-hosted, Linux, X64, lana-ci]
+    timeout-minutes: 35
+    env:
+      CI: true
+      BASE_REF: ${{ needs.scope.outputs.base_ref || 'origin/main' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
 
-      - name: Run repository checks (full regression)
-        if: steps.ci-scope.outputs.mode == 'full'
-        run: pnpm check
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+
+      - name: Install pnpm
+        run: npm install --global pnpm@10.12.4
+
+      - name: Install dependencies
+        run: time pnpm install --frozen-lockfile
+
+      - name: Build affected packages
+        run: time pnpm --filter "...[$BASE_REF]" run --if-present build
+
+      - name: Typecheck affected packages
+        run: time pnpm --filter "...[$BASE_REF]" run --if-present typecheck
+
+      - name: Test affected packages
+        run: time pnpm --filter "...[$BASE_REF]" run --if-present test
+
+      - name: Lint affected packages
+        run: time pnpm --filter "...[$BASE_REF]" run --if-present lint
+
+  code-full:
+    name: Full repository checks
+    needs: scope
+    if: needs.scope.outputs.mode == 'full'
+    runs-on: [self-hosted, Linux, X64, lana-ci]
+    timeout-minutes: 35
+    env:
+      CI: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+
+      - name: Install pnpm
+        run: npm install --global pnpm@10.12.4
+
+      - name: Install dependencies
+        run: time pnpm install --frozen-lockfile
+
+      # release integrity runs in static-safety; build once here before typecheck/tests.
+      - name: Build workspace
+        run: time pnpm -r build
+
+      - name: Typecheck workspace
+        run: time pnpm -r typecheck
+
+      - name: Test workspace
+        run: time pnpm -r test
+
+  check:
+    name: pnpm check
+    needs:
+      - scope
+      - db-safety
+      - static-safety
+      - code-track-c
+      - code-affected
+      - code-full
+    if: always()
+    runs-on: [self-hosted, Linux, X64, lana-ci]
+    timeout-minutes: 35
+    steps:
+      - name: Require mandatory gates
+        env:
+          MODE: ${{ needs.scope.outputs.mode }}
+          SCOPE_RESULT: ${{ needs.scope.result }}
+          DB_RESULT: ${{ needs.db-safety.result }}
+          STATIC_RESULT: ${{ needs.static-safety.result }}
+          TRACK_C_RESULT: ${{ needs.code-track-c.result }}
+          AFFECTED_RESULT: ${{ needs.code-affected.result }}
+          FULL_RESULT: ${{ needs.code-full.result }}
+        run: |
+          set -euo pipefail
+          test "$SCOPE_RESULT" = "success"
+          test "$DB_RESULT" = "success"
+          test "$STATIC_RESULT" = "success"
+
+          case "$MODE" in
+            track-c)
+              test "$TRACK_C_RESULT" = "success"
+              ;;
+            affected)
+              test "$AFFECTED_RESULT" = "success"
+              ;;
+            full)
+              test "$FULL_RESULT" = "success"
+              ;;
+            *)
+              echo "Unexpected CI mode: $MODE" >&2
+              exit 1
+              ;;
+          esac
