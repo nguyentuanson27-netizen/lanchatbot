@@ -121,7 +121,7 @@ function validCapture() {
 describe("Track C C3 sales-quality candidate", () => {
   it("declares one bounded conversational-sales prompt hypothesis without changing the generator", () => {
     expect(TRACK_C_C3_SALES_QUALITY_CANDIDATE).toEqual({
-      id: "TRACK_C_C3_SALES_CONVERSATION_V3",
+      id: "TRACK_C_C3_SALES_CONVERSATION_V4",
       primaryHypothesis:
         "Use frozen dialogue only to understand the customer's conversational need and stage, answer with eligible verified claims, then advance by one natural stage-fit step without inventing facts or effects.",
       materialAxes: ["PROMPT"],
@@ -196,6 +196,15 @@ describe("Track C C3 sales-quality candidate", () => {
     expect(instruction).toContain("MEASUREMENTS_REQUIRED");
     expect(instruction).toContain("Do not claim stock, availability, price, delivery");
     expect(instruction).toContain("Return only the registered JSON response schema.");
+    expect(instruction).toContain(
+      "Before returning JSON, make every segment exactly one of these shapes",
+    );
+    expect(instruction).toContain(
+      "CLARIFICATION: kind, text, target",
+    );
+    expect(instruction).toContain(
+      "Never omit the required field for the selected kind or include a field from another kind.",
+    );
   });
 
   it("changes only the system prompt relative to the existing offline candidate request", () => {
