@@ -192,7 +192,7 @@ describe("Track C mandatory 50-case quality gate", () => {
     });
   });
 
-  it("redacts an unsafe reply for Judge/history and still blocks owner readiness", async () => {
+  it("keeps an exact frozen fixture reply in owner-local Judge/history evidence", async () => {
     const request = input();
     request.cases[0] = {
       ...request.cases[0]!,
@@ -211,18 +211,18 @@ describe("Track C mandatory 50-case quality gate", () => {
       same: 0,
       worse: 0,
       failed: 0,
-      redactedCaseCount: 1,
+      redactedCaseCount: 0,
     });
     expect(result.gate).toEqual({
-      status: "INCOMPLETE",
+      status: "AWAITING_OWNER_APPROVAL",
       selectionAuthorized: false,
     });
     expect(result.history.cases[0]).toEqual(expect.objectContaining({
       caseId: "q01-stock",
       status: "SCORED",
       candidate: expect.objectContaining({
-        reply: "Liên hệ em qua [PHONE] nhé.",
-        redacted: true,
+        reply: "Liên hệ em qua 0912345678 nhé.",
+        redacted: false,
         replyHash: expect.any(String),
         sourceReplyHash: expect.any(String),
       }),
@@ -231,14 +231,12 @@ describe("Track C mandatory 50-case quality gate", () => {
     if (firstCandidate === undefined || firstCandidate.status !== "SCORED") {
       throw new Error("expected scored history");
     }
-    expect(firstCandidate.candidate.replyHash).not.toBe(firstCandidate.candidate.sourceReplyHash);
-    expect(JSON.stringify(result.history.cases)).not.toContain("0912345678");
+    expect(firstCandidate.candidate.replyHash).toBe(firstCandidate.candidate.sourceReplyHash);
+    expect(JSON.stringify(result.history.cases)).toContain("0912345678");
     const judgedReplies = (request.judge.judgeSalesReplyV2.mock.calls as unknown as readonly (readonly unknown[])[])
       .map((call) => call[1]);
     expect(judgedReplies)
-      .toContain("Liên hệ em qua [PHONE] nhé.");
-    expect(judgedReplies)
-      .not.toContain("Liên hệ em qua 0912345678 nhé.");
+      .toContain("Liên hệ em qua 0912345678 nhé.");
     expect(result.history.cases.at(-1)).toEqual(expect.objectContaining({
       caseId: "q50-close-intent",
       status: "SCORED",

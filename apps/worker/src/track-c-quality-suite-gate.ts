@@ -1,8 +1,7 @@
 import { createHash } from "node:crypto";
 import { canonicalJsonV1, type SalesRubricAssessmentV2 } from "@lana/contracts";
-import { redactAnalyticsMessage, type ShadowContextMessage } from "@lana/database";
+import type { ShadowContextMessage } from "@lana/database";
 import type { TrackBLivePathReplayResult } from "./track-b-live-path-replay.js";
-import { redactCustomerUrlsForModel } from "./customer-url-policy.js";
 import { assertTrackCC1MustPass } from "./track-c-must-pass.js";
 import {
   qualitySuiteFactsForJudge,
@@ -39,13 +38,13 @@ export interface TrackCQualitySuiteGateInput {
 type QualitySuiteDisposition = "BETTER" | "SAME" | "WORSE";
 
 interface TrackCQualitySuiteHistoryReply {
-  /** PII-safe text actually supplied to Judge V2 and retained in evidence. */
+  /** Exact frozen-fixture text supplied to Judge V2 and kept owner-local. */
   readonly reply: string;
-  /** Hash of the PII-safe text actually supplied to Judge V2. */
+  /** Hash of the exact text actually supplied to Judge V2. */
   readonly replyHash: string;
-  /** Hash-only binding to the source output before local redaction. */
+  /** Hash-only binding to the source output; equal to replyHash for this fixture suite. */
   readonly sourceReplyHash: string;
-  /** A redacted source reply makes the gate non-selectable. */
+  /** Frozen fixture replies are never rewritten, so this is always false. */
   readonly redacted: boolean;
 }
 
@@ -80,7 +79,7 @@ interface TrackCQualitySuiteFailedHistoryCase {
   readonly caseId: string;
   readonly status: "FAILED";
   readonly fixture: TrackCQualityFixtureV1;
-  /** Retain PII-safe history even when the Judge/provider case did not score. */
+  /** Retain owner-local frozen-fixture history even when the Judge/provider case did not score. */
   readonly replies: Readonly<{
     readonly accepted: TrackCQualitySuiteHistoryReply;
     readonly candidate: TrackCQualitySuiteHistoryReply;
@@ -119,7 +118,7 @@ export interface TrackCQualitySuiteGateResult {
       | "INCOMPLETE";
     readonly selectionAuthorized: false;
   }>;
-  /** PII-safe fixture and both replies/scores for every required quality case. */
+  /** Exact frozen-fixture replies/scores for owner-local review of every required case. */
   readonly history: Readonly<{
     readonly contractVersion: "TRACK_C_QUALITY_SUITE_HISTORY_V1";
     readonly cases: readonly TrackCQualitySuiteHistoryCase[];
@@ -157,18 +156,13 @@ function prepareReply(
   if (typeof reply.reply !== "string" || !reply.reply.trim()) {
     throw new Error(`TRACK_C_QUALITY_SUITE_${side}_REPLY_INVALID:${caseId}`);
   }
-  const redacted = redactAnalyticsMessage(reply.reply);
-  const safeReply = redactCustomerUrlsForModel(redacted.text);
-  if (redacted.dlpStatus !== "PASSED" || !safeReply.trim()) {
-    throw new Error(`TRACK_C_QUALITY_SUITE_HISTORY_TEXT_QUARANTINED:${caseId}:${side.toLowerCase()}`);
-  }
   return Object.freeze({
-    judge: Object.freeze({ ...reply, reply: safeReply }),
+    judge: Object.freeze({ ...reply }),
     history: Object.freeze({
-      reply: safeReply,
-      replyHash: replyHash(safeReply),
+      reply: reply.reply,
+      replyHash: replyHash(reply.reply),
       sourceReplyHash: replyHash(reply.reply),
-      redacted: safeReply !== reply.reply,
+      redacted: false,
     }),
   });
 }

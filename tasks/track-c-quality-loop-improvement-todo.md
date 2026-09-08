@@ -49,10 +49,12 @@ Source: `tasks/track-c-quality-loop-improvement-plan.md`
 - [x] Clarify the existing ten-dimension rubric for natural Vietnamese sales
   replies and non-arithmetic holistic `overall`, without new dimensions.
 - [x] Keep running all fifty quality fixtures after an individual fixture
-  failure. A locally redacted reply is judged and retained only in PII-safe
-  form with source/judged hashes, but still returns non-selectable
-  `INCOMPLETE`; a quarantined/provider failure retains PII-safe history when
-  available plus a redacted `FAILED` code.
+  failure. Frozen PII-safe fixture replies are judged exactly and retained in
+  owner-local history with their hashes; a provider failure retains the local
+  pair when available plus a redacted `FAILED` code.
+- [x] Retain exact frozen B3 accepted/candidate reply pairs with hashes in
+  owner-local checkpoints/evidence for all seven cases; this does not expand
+  automatic human-review routing.
 
 ## Owner-approved mandatory C2 quality gate
 
