@@ -192,7 +192,7 @@ describe("Track C mandatory 50-case quality gate", () => {
     });
   });
 
-  it("redacts an unsafe reply for Judge/history and still blocks owner readiness", async () => {
+  it("quarantines an unsafe reply before Judge and owner-local history", async () => {
     const request = input();
     request.cases[0] = {
       ...request.cases[0]!,
@@ -204,14 +204,14 @@ describe("Track C mandatory 50-case quality gate", () => {
 
     const result = await runTrackCQualitySuiteGate(request);
 
-    expect(request.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(100);
+    expect(request.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(98);
     expect(result.aggregate).toMatchObject({
       caseCount: 50,
-      better: 50,
+      better: 49,
       same: 0,
       worse: 0,
-      failed: 0,
-      redactedCaseCount: 1,
+      failed: 1,
+      redactedCaseCount: 0,
     });
     expect(result.gate).toEqual({
       status: "INCOMPLETE",
@@ -219,24 +219,13 @@ describe("Track C mandatory 50-case quality gate", () => {
     });
     expect(result.history.cases[0]).toEqual(expect.objectContaining({
       caseId: "q01-stock",
-      status: "SCORED",
-      candidate: expect.objectContaining({
-        reply: "Liên hệ em qua [PHONE] nhé.",
-        redacted: true,
-        replyHash: expect.any(String),
-        sourceReplyHash: expect.any(String),
-      }),
+      status: "FAILED",
+      replies: null,
+      failure: { code: "TRACK_C_QUALITY_SUITE_REPLY_NOT_PII_SAFE" },
     }));
-    const firstCandidate = result.history.cases[0];
-    if (firstCandidate === undefined || firstCandidate.status !== "SCORED") {
-      throw new Error("expected scored history");
-    }
-    expect(firstCandidate.candidate.replyHash).not.toBe(firstCandidate.candidate.sourceReplyHash);
     expect(JSON.stringify(result.history.cases)).not.toContain("0912345678");
     const judgedReplies = (request.judge.judgeSalesReplyV2.mock.calls as unknown as readonly (readonly unknown[])[])
       .map((call) => call[1]);
-    expect(judgedReplies)
-      .toContain("Liên hệ em qua [PHONE] nhé.");
     expect(judgedReplies)
       .not.toContain("Liên hệ em qua 0912345678 nhé.");
     expect(result.history.cases.at(-1)).toEqual(expect.objectContaining({

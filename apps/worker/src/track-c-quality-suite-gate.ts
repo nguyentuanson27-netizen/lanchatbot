@@ -39,13 +39,13 @@ export interface TrackCQualitySuiteGateInput {
 type QualitySuiteDisposition = "BETTER" | "SAME" | "WORSE";
 
 interface TrackCQualitySuiteHistoryReply {
-  /** PII-safe text actually supplied to Judge V2 and retained in evidence. */
+  /** Exact frozen-fixture text supplied to Judge V2 and kept owner-local. */
   readonly reply: string;
-  /** Hash of the PII-safe text actually supplied to Judge V2. */
+  /** Hash of the exact text actually supplied to Judge V2. */
   readonly replyHash: string;
-  /** Hash-only binding to the source output before local redaction. */
+  /** Hash-only binding to the source output; equal to replyHash for this fixture suite. */
   readonly sourceReplyHash: string;
-  /** A redacted source reply makes the gate non-selectable. */
+  /** Frozen fixture replies are never rewritten, so this is always false. */
   readonly redacted: boolean;
 }
 
@@ -80,7 +80,7 @@ interface TrackCQualitySuiteFailedHistoryCase {
   readonly caseId: string;
   readonly status: "FAILED";
   readonly fixture: TrackCQualityFixtureV1;
-  /** Retain PII-safe history even when the Judge/provider case did not score. */
+  /** Retain owner-local frozen-fixture history even when the Judge/provider case did not score. */
   readonly replies: Readonly<{
     readonly accepted: TrackCQualitySuiteHistoryReply;
     readonly candidate: TrackCQualitySuiteHistoryReply;
@@ -119,7 +119,7 @@ export interface TrackCQualitySuiteGateResult {
       | "INCOMPLETE";
     readonly selectionAuthorized: false;
   }>;
-  /** PII-safe fixture and both replies/scores for every required quality case. */
+  /** Exact frozen-fixture replies/scores for owner-local review of every required case. */
   readonly history: Readonly<{
     readonly contractVersion: "TRACK_C_QUALITY_SUITE_HISTORY_V1";
     readonly cases: readonly TrackCQualitySuiteHistoryCase[];
@@ -144,6 +144,23 @@ function replyHash(value: string): string {
     .digest("hex");
 }
 
+/**
+ * The fixture is owner-local, but reply text is still caller/model output.
+ * Exact text can cross the Vertex/history boundary only when the existing
+ * safety projection proves it needs no redaction.
+ */
+function assertTrackCQualitySuiteReplySafe(
+  value: string,
+  label: string,
+): string {
+  const redacted = redactAnalyticsMessage(value);
+  const withoutCustomerUrls = redactCustomerUrlsForModel(redacted.text);
+  if (redacted.dlpStatus !== "PASSED" || withoutCustomerUrls !== value) {
+    throw new Error(`TRACK_C_QUALITY_SUITE_REPLY_NOT_PII_SAFE:${label}`);
+  }
+  return value;
+}
+
 interface PreparedQualitySuiteReply {
   readonly judge: TrackCQualityReplyInput;
   readonly history: TrackCQualitySuiteHistoryReply;
@@ -157,18 +174,17 @@ function prepareReply(
   if (typeof reply.reply !== "string" || !reply.reply.trim()) {
     throw new Error(`TRACK_C_QUALITY_SUITE_${side}_REPLY_INVALID:${caseId}`);
   }
-  const redacted = redactAnalyticsMessage(reply.reply);
-  const safeReply = redactCustomerUrlsForModel(redacted.text);
-  if (redacted.dlpStatus !== "PASSED" || !safeReply.trim()) {
-    throw new Error(`TRACK_C_QUALITY_SUITE_HISTORY_TEXT_QUARANTINED:${caseId}:${side.toLowerCase()}`);
-  }
+  const exactReply = assertTrackCQualitySuiteReplySafe(
+    reply.reply,
+    `${caseId}:${side.toLowerCase()}`,
+  );
   return Object.freeze({
-    judge: Object.freeze({ ...reply, reply: safeReply }),
+    judge: Object.freeze({ ...reply, reply: exactReply }),
     history: Object.freeze({
-      reply: safeReply,
-      replyHash: replyHash(safeReply),
-      sourceReplyHash: replyHash(reply.reply),
-      redacted: safeReply !== reply.reply,
+      reply: exactReply,
+      replyHash: replyHash(exactReply),
+      sourceReplyHash: replyHash(exactReply),
+      redacted: false,
     }),
   });
 }

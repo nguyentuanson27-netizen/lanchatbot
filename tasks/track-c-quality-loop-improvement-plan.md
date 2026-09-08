@@ -154,8 +154,8 @@ behavior:
   leaving a `WIRING_SMOKE` B3-only;
 - reuse `TRACK_C_QUALITY_JUDGE_V2` and its existing ten dimensions, pinned
   judge identity, review routing, and non-identity telemetry;
-- record all 50 PII-safe case histories for owner review, not a new database or
-  evaluator platform;
+- record exact frozen PII-safe 50-case and B3 reply histories with hashes for
+  owner-local review, not a new database or evaluator platform;
 - fail the quality gate on any `WORSE`; require at least one existing-V2
   `BETTER` signal; and expose only `AWAITING_OWNER_APPROVAL`, never automatic
   selection, promotion, or deployment.

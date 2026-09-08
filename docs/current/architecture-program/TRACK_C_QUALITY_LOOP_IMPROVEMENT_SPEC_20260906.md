@@ -523,12 +523,15 @@ The owner requires `TRACK_C_QUALITY_SUITE_V1` for every Track C
    side-effect, ownership, repair, and handoff boundaries.
 2. The exact fifty quality fixtures must then all be attempted through the
    existing `TRACK_C_QUALITY_JUDGE_V2`; a missing fixture still fails closed.
-   A reply that can be locally redacted is supplied to Judge and retained only
-   in its PII-safe redacted form, alongside the source-output and judged-form
-   hashes; it still makes the aggregate `INCOMPLETE` and cannot authorize
-   selection. A quarantined input or judge failure is retained as a redacted
-   `FAILED` history record while the remaining fixtures continue; it also makes
-   the aggregate `INCOMPLETE`. Their facts are
+   The fixtures are frozen and PII-safe test material, but replies remain
+   caller/model output. Exact accepted and candidate reply text may cross the
+   Judge/owner-local-history boundary only after the existing DLP and
+   customer-URL checks prove the text needs no transformation. An unsafe reply
+   is quarantined, never sent to Judge or retained as raw text, and records a
+   redacted `FAILED` code while the remaining fixtures continue; it makes the
+   aggregate `INCOMPLETE`. A provider failure retains the exact local reply
+   pair only when that same check passed, plus a redacted `FAILED` code; it
+   also makes the aggregate `INCOMPLETE`. Their facts are
    explicitly marked `FIXTURE_LOCAL_EVALUATION_ONLY`: they inform offline
    quality scoring only and never become runtime facts, claim provenance, or
    deterministic authority.
@@ -540,12 +543,13 @@ The owner requires `TRACK_C_QUALITY_SUITE_V1` for every Track C
    disposition threshold; otherwise the result is `NO_CLEAR_IMPROVEMENT`. Any
    B3 BOT-quality `WORSE` remains a regression and also prevents the combined
    result from entering the owner-approval state.
-5. Every quality run returns a local, PII-safe history for all fifty cases:
-   scored cases retain frozen fixture/context/facts, accepted and candidate
-   replies, all ten score dimensions, deltas, dispositions, review reasons,
-   identities, and non-identity judge telemetry. Reply history is always
-   PII-safe: redacted replies retain source/judged hashes; failed cases retain
-   PII-safe replies when available plus a redacted failure code. Normal
+5. Every quality run returns owner-local history for all fifty cases and the
+   seven frozen B3 pairs: scored cases retain frozen fixture/context/facts,
+   accepted and candidate replies, all ten score dimensions, deltas,
+   dispositions, review reasons, identities, and non-identity judge telemetry.
+   Exact fixture reply text remains paired with its hash only after that safety
+   check passes. Credentials, secrets, unsafe replies, and non-fixture customer
+   data are never retained in that history. Normal
    human-review routing remains
    only near-tie, regression, or judge disagreement; retaining history does
    not add a fourth automatic review reason.

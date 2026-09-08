@@ -71,8 +71,34 @@ export interface TrackCOfflineCaseCheckpoint {
   readonly replay: TrackCReplayResult["cases"][number];
   /** Runtime telemetry is review-only and remains outside replay identities. */
   readonly judgeMetrics: JudgeMetrics | null;
+  /**
+   * Exact frozen-fixture replies for owner-local review. This is not a human
+   * review route, a provider payload, or an identity input.
+   */
+  readonly ownerLocalReplyPair: TrackCOfflineOwnerLocalReplyPair;
   /** Null unless this completed case is routed to human review. */
   readonly humanReview: TrackCOfflineHumanReviewCase | null;
+}
+
+export interface TrackCOfflineOwnerLocalReplyPair {
+  readonly caseId: string;
+  readonly accepted: Readonly<{
+    readonly reply: string;
+    readonly replyHash: string;
+  }>;
+  readonly candidate: Readonly<{
+    readonly reply: string;
+    readonly replyHash: string;
+  }>;
+}
+
+export interface TrackCOfflineOwnerLocalReplyHistory {
+  readonly contractVersion: "TRACK_C_OFFLINE_OWNER_LOCAL_REPLY_HISTORY_V1";
+  readonly evaluationOnly: true;
+  readonly sideEffects: "DISABLED";
+  /** Frozen PII-safe test fixtures; never emit this material outside owner-local evidence. */
+  readonly ownerLocalOnly: true;
+  readonly cases: readonly TrackCOfflineOwnerLocalReplyPair[];
 }
 
 export interface TrackCOfflineHumanReviewCase {
@@ -160,6 +186,8 @@ export interface TrackCOfflineQualityEvidence {
   readonly judgeMetrics: readonly JudgeMetrics[];
   /** PII-safe review material for only the cases the V2 contract routes to a human. */
   readonly humanReview: TrackCOfflineHumanReviewArtifact;
+  /** Exact frozen B3 reply pairs for owner-local review of every completed case. */
+  readonly ownerLocalReplyHistory: TrackCOfflineOwnerLocalReplyHistory;
   /** Required C2 quality gate for candidate evaluation; never authorizes selection. */
   readonly qualitySuite: TrackCQualitySuiteGateResult | null;
   /** B3 and the mandatory suite combined for owner review; never auto-selects. */
@@ -202,6 +230,15 @@ function assertFrozenCaseSet(
     !expected.every((caseId) => actual.includes(caseId))
   ) {
     throw new Error("TRACK_C_OFFLINE_RUNNER_CASE_SET_MISMATCH");
+  }
+}
+
+function assertOwnerLocalReplyInputsSafe(
+  cases: TrackCOfflineQualityRunInput["cases"],
+): void {
+  for (const { caseId, accepted, candidate } of cases) {
+    assertTrackCOfflineHumanReviewTextSafe(accepted.quality.reply, `${caseId}:accepted`);
+    assertTrackCOfflineHumanReviewTextSafe(candidate.quality.reply, `${caseId}:candidate`);
   }
 }
 
@@ -434,6 +471,53 @@ function humanReviewCase(input: Readonly<{
   });
 }
 
+function ownerLocalReplyPair(input: Readonly<{
+  readonly source: TrackCOfflineQualityRunInput["cases"][number];
+  readonly replay: TrackCReplayResult["cases"][number];
+}>): TrackCOfflineOwnerLocalReplyPair {
+  const acceptedReply = assertTrackCOfflineHumanReviewTextSafe(
+    input.source.accepted.quality.reply,
+    `${input.replay.caseId}:accepted`,
+  );
+  const candidateReply = assertTrackCOfflineHumanReviewTextSafe(
+    input.source.candidate.quality.reply,
+    `${input.replay.caseId}:candidate`,
+  );
+  const acceptedReplyHash = sha256(acceptedReply);
+  const candidateReplyHash = sha256(candidateReply);
+  if (input.replay.quality.status === "SCORED" && (
+    input.replay.quality.identity.accepted.replyHash !== acceptedReplyHash ||
+    input.replay.quality.identity.candidate.replyHash !== candidateReplyHash
+  )) {
+    throw new Error(`TRACK_C_OFFLINE_OWNER_LOCAL_REPLY_HASH_MISMATCH:${input.replay.caseId}`);
+  }
+  return Object.freeze({
+    caseId: input.replay.caseId,
+    accepted: Object.freeze({ reply: acceptedReply, replyHash: acceptedReplyHash }),
+    candidate: Object.freeze({ reply: candidateReply, replyHash: candidateReplyHash }),
+  });
+}
+
+function ownerLocalReplyHistory(input: Readonly<{
+  readonly replay: TrackCReplayResult;
+  readonly cases: ReadonlyMap<string, TrackCOfflineOwnerLocalReplyPair>;
+}>): TrackCOfflineOwnerLocalReplyHistory {
+  const cases = input.replay.cases.map((replayCase) => {
+    const pair = input.cases.get(replayCase.caseId);
+    if (pair === undefined) {
+      throw new Error(`TRACK_C_OFFLINE_OWNER_LOCAL_REPLY_MISSING:${replayCase.caseId}`);
+    }
+    return pair;
+  });
+  return Object.freeze({
+    contractVersion: "TRACK_C_OFFLINE_OWNER_LOCAL_REPLY_HISTORY_V1",
+    evaluationOnly: true,
+    sideEffects: "DISABLED",
+    ownerLocalOnly: true,
+    cases: Object.freeze(cases),
+  });
+}
+
 function humanReviewArtifact(input: Readonly<{
   readonly replay: TrackCReplayResult;
   readonly cases: ReadonlyMap<string, TrackCOfflineHumanReviewCase>;
@@ -458,7 +542,7 @@ function humanReviewArtifact(input: Readonly<{
 /**
  * One callable offline composition for a pre-built, independently guarded
  * candidate. It has no runtime/service/DB/effect authority; a local harness
- * may JSON-serialize its returned, redacted evidence for review.
+ * may JSON-serialize its returned owner-local fixture evidence for review.
  */
 export async function runTrackCOfflineQuality(
   input: TrackCOfflineQualityRunInput,
@@ -473,6 +557,8 @@ export async function runTrackCOfflineQuality(
     candidates.set(item.caseId, assertTrackCOfflineCandidateValidated(item.candidate));
   }
   assertTrackCC1CandidateMustPass(input.mustPassReplay, input.cases);
+  // C1 still leads; this must run before the offline Judge sees any reply.
+  assertOwnerLocalReplyInputsSafe(input.cases);
   const distinctReplyCaseCount = input.cases.filter(({ accepted, candidate }) =>
     candidate.quality.guardOutcome.expectedOwner === "BOT" &&
     accepted.quality.reply !== candidate.quality.reply
@@ -487,6 +573,7 @@ export async function runTrackCOfflineQuality(
   const recorders = new Map<string, ReturnType<typeof recordingJudge>>();
   const sourceCases = new Map(input.cases.map((item) => [item.caseId, item]));
   const humanReviewCases = new Map<string, TrackCOfflineHumanReviewCase>();
+  const ownerLocalReplyPairs = new Map<string, TrackCOfflineOwnerLocalReplyPair>();
   const replay = await runTrackCReplay({
     mustPassReplay: candidateBoundReplay(input.mustPassReplay, candidates),
     cases: input.cases.map(({ caseId, accepted, candidate }) => {
@@ -500,7 +587,7 @@ export async function runTrackCOfflineQuality(
     onCaseComplete: async (replayCase: TrackCReplayResult["cases"][number]) => {
       const source = sourceCases.get(replayCase.caseId);
       if (source === undefined) {
-        throw new Error(`TRACK_C_OFFLINE_HUMAN_REVIEW_MATERIAL_MISSING:${replayCase.caseId}`);
+        throw new Error(`TRACK_C_OFFLINE_OWNER_LOCAL_REPLY_MATERIAL_MISSING:${replayCase.caseId}`);
       }
       const humanReview = humanReviewCase({
         source,
@@ -508,6 +595,8 @@ export async function runTrackCOfflineQuality(
         recorder: recorders.get(replayCase.caseId),
       });
       if (humanReview !== null) humanReviewCases.set(replayCase.caseId, humanReview);
+      const ownerLocalReply = ownerLocalReplyPair({ source, replay: replayCase });
+      ownerLocalReplyPairs.set(replayCase.caseId, ownerLocalReply);
       const judgeMetrics = replayCase.quality.status === "SCORED"
         ? metricsForCase(replayCase.caseId, recorders)
         : null;
@@ -518,6 +607,7 @@ export async function runTrackCOfflineQuality(
           caseId: replayCase.caseId,
           replay: structuredClone(replayCase),
           judgeMetrics,
+          ownerLocalReplyPair: ownerLocalReply,
           humanReview,
       }));
     },
@@ -558,6 +648,7 @@ export async function runTrackCOfflineQuality(
     replay,
     judgeMetrics: Object.freeze(judgeMetrics),
     humanReview: humanReviewArtifact({ replay, cases: humanReviewCases }),
+    ownerLocalReplyHistory: ownerLocalReplyHistory({ replay, cases: ownerLocalReplyPairs }),
     qualitySuite,
     candidateReadiness,
   });

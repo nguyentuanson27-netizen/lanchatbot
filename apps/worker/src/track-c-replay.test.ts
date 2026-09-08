@@ -486,7 +486,7 @@ describe("Track C C2 offline replay", () => {
     );
   });
 
-  it("does not expose a reply pair for a case that does not require human review", async () => {
+  it("keeps exact frozen B3 reply pairs in owner-local evidence for every case", async () => {
     const input = replayInput([
       [4, 3], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5],
     ]);
@@ -507,9 +507,23 @@ describe("Track C C2 offline replay", () => {
     expect(evidence.humanReview.cases.map(({ caseId }) => caseId)).toEqual([
       "pii-security",
     ]);
-    expect(JSON.stringify(evidence.humanReview)).not.toContain(
-      "offline-candidate-unauthorized-effect",
-    );
+    expect(evidence.ownerLocalReplyHistory).toMatchObject({
+      ownerLocalOnly: true,
+      cases: expect.arrayContaining([
+        {
+          caseId: "unauthorized-effect",
+          accepted: {
+            reply: "reply-unauthorized-effect",
+            replyHash: sha256("reply-unauthorized-effect"),
+          },
+          candidate: {
+            reply: "offline-candidate-unauthorized-effect",
+            replyHash: sha256("offline-candidate-unauthorized-effect"),
+          },
+        },
+      ]),
+    });
+    expect(evidence.ownerLocalReplyHistory.cases).toHaveLength(7);
   });
 
   it("rejects a customer URL before it can enter human-review evidence", () => {
@@ -568,7 +582,7 @@ describe("Track C C2 offline replay", () => {
     expect(replay.quality.identity.contextHash).toBe(sha256(rawContext));
   });
 
-  it("fails closed instead of emitting a human-review reply with PII", async () => {
+  it("fails closed before Judge or owner-local evidence for an unsafe B3 reply", async () => {
     const accepted = assessment(4, { recommendationAction: "REWRITE" });
     const candidate = assessment(3, {
       scores: { ...assessment(3).scores, factGrounding: 1 },
@@ -608,6 +622,7 @@ describe("Track C C2 offline replay", () => {
     })).rejects.toThrow(
       "TRACK_C_OFFLINE_HUMAN_REVIEW_TEXT_NOT_PII_SAFE:pii-security:candidate",
     );
+    expect(input.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
   });
 
   it("checkpoints every completed case before a later judge failure stops the run", async () => {
@@ -694,11 +709,19 @@ describe("Track C C2 offline replay", () => {
         contractVersion: "TRACK_C_OFFLINE_CASE_CHECKPOINT_V2",
         caseId: "unsupported-protected-claim",
         judgeMetrics: null,
+        ownerLocalReplyPair: {
+          accepted: { reply: "reply-unsupported-protected-claim" },
+          candidate: { reply: "" },
+        },
         humanReview: null,
       },
       {
         contractVersion: "TRACK_C_OFFLINE_CASE_CHECKPOINT_V2",
         caseId: "pii-security",
+        ownerLocalReplyPair: {
+          accepted: { reply: "reply-pii-security" },
+          candidate: { reply: "offline-candidate-pii-security" },
+        },
         humanReview: {
           accepted: { reply: "reply-pii-security" },
           candidate: { reply: "offline-candidate-pii-security" },
