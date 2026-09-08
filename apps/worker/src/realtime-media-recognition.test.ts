@@ -314,11 +314,66 @@ describe("V2 realtime recognition pipeline", () => {
       test.embeddings.embedCutout.mock.calls[0]?.[1],
       test.search.searchCutoutGroups.mock.calls[0]?.[2],
       test.images.prepareFromUrl.mock.calls[1]?.[1],
+      // The reranker is a stage like any other and gets the same budget.
+      test.reranker.rerankMediaCandidates.mock.calls[0]?.[0]?.signal,
     ];
     expect(signals.every((value) => value instanceof AbortSignal)).toBe(true);
     expect(new Set(signals).size).toBe(1);
     // The budget is released once the request settles.
     expect((signals[0] as AbortSignal).aborted).toBe(true);
+  });
+
+  it("aborts the reranker when the total deadline expires during earlier stages", async () => {
+    // The earlier stages burn the whole request budget, so the reranker must
+    // never get to spend its own stage cap on top of an expired total deadline.
+    let rerankSignal: AbortSignal | undefined;
+    let rerankStarted: () => void = () => undefined;
+    const inFlight = new Promise<void>((resolve) => {
+      rerankStarted = resolve;
+    });
+    const search = {
+      searchCutoutGroups: vi.fn(async () => shortlist(2)),
+    };
+    const images = {
+      prepareFromUrl: vi.fn(async (url: string) => Buffer.from(`canonical:${url}`)),
+      prepareFromBytes: vi.fn(async () => Buffer.from("canonical")),
+      createCutoutPng: vi.fn(async () => Buffer.from("cutout")),
+    };
+    const embeddings = {
+      embedCutout: vi.fn(async () => Array.from({ length: 3_072 }, () => 0.1)),
+    };
+    const reranker = {
+      rerankMediaCandidates: vi.fn((request: { signal: AbortSignal }) => {
+        rerankSignal = request.signal;
+        return new Promise<never>((_resolve, reject) => {
+          request.signal.addEventListener("abort", () => {
+            reject(new Error("VERTEX_MEDIA_CANCELLED"));
+          });
+          rerankStarted();
+        });
+      }),
+    };
+    const service = new RealtimeMediaRecognitionService(
+      search as unknown as ImageRecognitionSearchPort,
+      images as unknown as RecognitionImagePreparationPort,
+      embeddings as unknown as RecognitionImageEmbeddingPort,
+      reranker as unknown as RealtimeMediaRerankerPort,
+      {
+        pipelineVersion: "recognition-v2-cutout-only",
+        embeddingPipelineVersion: "ge2-3072-pre1024-rembg-u2netp-v1",
+        rerankerModel: "gemini-3.5-flash-lite",
+        rerankerPromptVersion: "media-rerank-v2-cutout-only",
+        // Total budget far shorter than the reranker's own stage cap.
+        totalDeadlineMs: 1_000,
+        rerankerTimeoutMs: 60_000,
+      },
+    );
+    const pending = service.recognize(CUSTOMER_IMAGE);
+    await inFlight;
+    const result = await pending;
+    expect(rerankSignal?.aborted).toBe(true);
+    expect(result.status).toBe("ERROR");
+    expect(result.reasonCode).toBe("VERTEX_MEDIA_CANCELLED");
   });
 });
 

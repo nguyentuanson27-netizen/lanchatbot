@@ -297,10 +297,12 @@ export class QdrantImageRecognitionAdapter
     if (!payloadProductId) {
       throw new ImageRecognitionSearchError("IMAGE_RECOGNITION_PRODUCT_ID_INVALID", false);
     }
-    // The group key and the winning hit must describe the same SKU; a mismatch is
-    // an explicit error, never a silently dropped or substituted candidate.
+    // The group key and the winning hit must describe the same SKU. A mismatch —
+    // and equally a missing, empty or unparseable group key — is an explicit
+    // error, never a silently dropped or substituted candidate: without a group
+    // key there is nothing to validate the payload against.
     const groupId = normalizeProductCode(text(group.id));
-    if (groupId && groupId !== payloadProductId) {
+    if (!groupId || groupId !== payloadProductId) {
       throw new ImageRecognitionSearchError(
         "IMAGE_RECOGNITION_GROUP_IDENTITY_INVALID",
         false,

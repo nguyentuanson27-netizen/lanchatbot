@@ -56,6 +56,27 @@ function record(value: unknown): Record<string, unknown> {
 }
 
 /**
+ * Await `promise`, but give up as soon as `signal` aborts. This lets one caller
+ * stop waiting on a shared token refresh without cancelling it for the others.
+ */
+function raceWithSignal<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  if (signal.aborted) {
+    return Promise.reject(
+      new GeminiEmbedding2Error("GEMINI_EMBEDDING_CANCELLED", false),
+    );
+  }
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = (): void => reject(
+      new GeminiEmbedding2Error("GEMINI_EMBEDDING_CANCELLED", false),
+    );
+    signal.addEventListener("abort", onAbort, { once: true });
+    promise.then(resolve, reject).finally(() => {
+      signal.removeEventListener("abort", onAbort);
+    });
+  });
+}
+
+/**
  * `POST https://aiplatform.us.rep.googleapis.com/v1/projects/<id>/locations/us
  *  /publishers/google/models/gemini-embedding-2:embedContent`
  */
@@ -128,25 +149,27 @@ export class GeminiEmbedding2Client implements RecognitionImageEmbeddingPort {
     if (this.accessToken && this.accessToken.expiresAt - 60_000 > this.now()) {
       return this.accessToken.value;
     }
-    if (this.tokenRefreshPromise) return this.tokenRefreshPromise;
-    const refresh = this.refreshToken(signal);
-    this.tokenRefreshPromise = refresh;
-    try {
-      return await refresh;
-    } finally {
-      if (this.tokenRefreshPromise === refresh) this.tokenRefreshPromise = null;
+    // The shared refresh owns its own timeout instead of borrowing the signal of
+    // whichever caller happened to start it: otherwise that caller cancelling
+    // would abort the refresh for every other caller waiting on the same promise.
+    if (!this.tokenRefreshPromise) {
+      const refresh = this.refreshToken();
+      this.tokenRefreshPromise = refresh;
+      void refresh.catch(() => undefined).finally(() => {
+        if (this.tokenRefreshPromise === refresh) this.tokenRefreshPromise = null;
+      });
     }
+    // Each caller waits only as long as its own budget allows.
+    return raceWithSignal(this.tokenRefreshPromise, signal);
   }
 
-  private async refreshToken(signal: AbortSignal): Promise<string> {
+  private async refreshToken(): Promise<string> {
     const assertion = createServiceAccountAssertion(
       this.options.serviceAccount,
       this.now(),
     );
     const controller = new AbortController();
-    const abort = (): void => controller.abort();
-    signal.addEventListener("abort", abort, { once: true });
-    const timer = setTimeout(abort, this.timeoutMs);
+    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
     try {
       const response = await this.fetchImpl("https://oauth2.googleapis.com/token", {
         method: "POST",
@@ -175,17 +198,11 @@ export class GeminiEmbedding2Client implements RecognitionImageEmbeddingPort {
     } catch (error) {
       if (error instanceof GeminiEmbedding2Error) throw error;
       if (error instanceof Error && error.name === "AbortError") {
-        throw new GeminiEmbedding2Error(
-          signal.aborted
-            ? "GEMINI_EMBEDDING_CANCELLED"
-            : "GEMINI_EMBEDDING_AUTH_TIMEOUT",
-          true,
-        );
+        throw new GeminiEmbedding2Error("GEMINI_EMBEDDING_AUTH_TIMEOUT", true);
       }
       throw new GeminiEmbedding2Error("GEMINI_EMBEDDING_AUTH_FAILED", true);
     } finally {
       clearTimeout(timer);
-      signal.removeEventListener("abort", abort);
     }
   }
 
@@ -200,6 +217,10 @@ export class GeminiEmbedding2Client implements RecognitionImageEmbeddingPort {
       throw new GeminiEmbedding2Error("GEMINI_EMBEDDING_INPUT_EMPTY", false);
     }
     const accessToken = await this.token(signal);
+    // The budget may have run out while the shared token refresh was in flight.
+    if (signal.aborted) {
+      throw new GeminiEmbedding2Error("GEMINI_EMBEDDING_CANCELLED", false);
+    }
     const controller = new AbortController();
     const abort = (): void => controller.abort();
     signal.addEventListener("abort", abort, { once: true });

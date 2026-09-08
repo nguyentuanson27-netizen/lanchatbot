@@ -7,6 +7,7 @@ import {
   SecureRecognitionImageDownloader,
   assertCanonicalGeometry,
   canonicalFfmpegArguments,
+  readBoundedBody,
   readImageDimensions,
   safeRecognitionImageUrl,
   type RecognitionImageTranscoder,
@@ -208,6 +209,37 @@ describe("shared V2 image preparation", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
+  it("bounds an oversized RemBG response by streaming, not after buffering", async () => {
+    let cancelled = false;
+    let pulled = 0;
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        pulled += 1;
+        if (pulled > 50) {
+          controller.close();
+          return;
+        }
+        controller.enqueue(new Uint8Array(32 * 1024));
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    const instance = new MediaRecognitionV2ImagePipeline({
+      rembgUrl: "https://rembg.internal.example/api/remove",
+      transcoder: transcoderReturning(png(10, 10)),
+      maxBytes: 64 * 1024,
+      fetchImpl: (async () => new Response(body, {
+        status: 200,
+        headers: { "content-type": "image/png" },
+      })) as unknown as typeof fetch,
+    });
+    await expect(instance.createCutoutPng(png(10, 10), new AbortController().signal))
+      .rejects.toThrow("REMBG_RESPONSE_TOO_LARGE");
+    expect(cancelled).toBe(true);
+    expect(pulled).toBeLessThanOrEqual(4);
+  });
+
   it("propagates a RemBG failure instead of falling back", async () => {
     const fetchImpl = vi.fn(async () => new Response("", { status: 500 }));
     await expect(pipeline(
@@ -233,6 +265,15 @@ describe("shared V2 image preparation", () => {
     ).createCutoutPng(png(10, 10), controller.signal);
     controller.abort();
     await expect(pending).rejects.toThrow("MEDIA_CUTOUT_CANCELLED");
+  });
+});
+
+describe("bounded body reader", () => {
+  it("returns a body within the cap and rejects one beyond it", async () => {
+    const small = new Response(new Uint8Array(16), { status: 200 });
+    expect((await readBoundedBody(small, 1_024, "TOO_BIG")).byteLength).toBe(16);
+    const large = new Response(new Uint8Array(4_096), { status: 200 });
+    await expect(readBoundedBody(large, 1_024, "TOO_BIG")).rejects.toThrow("TOO_BIG");
   });
 });
 
@@ -325,6 +366,83 @@ describe("secure recognition image downloader", () => {
     });
     await expect(large.download("https://lanadesign.vn/a.jpg", new AbortController().signal))
       .rejects.toThrow("MEDIA_IMAGE_TOO_LARGE");
+  });
+
+  it("stops reading a chunked body the moment it exceeds the cap", async () => {
+    // Content-Length is absent here, so only the streaming ceiling can stop this.
+    let pulled = 0;
+    let cancelled = false;
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        pulled += 1;
+        if (pulled > 50) {
+          controller.close();
+          return;
+        }
+        controller.enqueue(new Uint8Array(32 * 1024));
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    const downloader = new SecureRecognitionImageDownloader({
+      allowedHostSuffixes: ["lanadesign.vn"],
+      maxBytes: 64 * 1024,
+      fetchImpl: (async () => new Response(body, {
+        status: 200,
+        headers: { "content-type": "image/png" },
+      })) as unknown as typeof fetch,
+    });
+    await expect(downloader.download(
+      "https://lanadesign.vn/a.png",
+      new AbortController().signal,
+    )).rejects.toThrow("MEDIA_IMAGE_TOO_LARGE");
+    expect(cancelled).toBe(true);
+    // Never drained the whole body: a handful of chunks, not all 50.
+    expect(pulled).toBeLessThanOrEqual(4);
+  });
+
+  it("still accepts a chunked body within the cap", async () => {
+    const chunks = [new Uint8Array(8), new Uint8Array(8)];
+    let index = 0;
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        const chunk = chunks[index++];
+        if (!chunk) {
+          controller.close();
+          return;
+        }
+        controller.enqueue(chunk);
+      },
+    });
+    const downloader = new SecureRecognitionImageDownloader({
+      allowedHostSuffixes: ["lanadesign.vn"],
+      maxBytes: 64 * 1024,
+      fetchImpl: (async () => new Response(body, {
+        status: 200,
+        headers: { "content-type": "image/png" },
+      })) as unknown as typeof fetch,
+    });
+    const bytes = await downloader.download(
+      "https://lanadesign.vn/a.png",
+      new AbortController().signal,
+    );
+    expect(bytes.byteLength).toBe(16);
+  });
+
+  it("bounds the body regardless of a lying Content-Length", async () => {
+    const downloader = new SecureRecognitionImageDownloader({
+      allowedHostSuffixes: ["lanadesign.vn"],
+      maxBytes: 64 * 1024,
+      fetchImpl: (async () => new Response(new Uint8Array(200 * 1024), {
+        status: 200,
+        headers: { "content-type": "image/png", "content-length": "16" },
+      })) as unknown as typeof fetch,
+    });
+    await expect(downloader.download(
+      "https://lanadesign.vn/a.png",
+      new AbortController().signal,
+    )).rejects.toThrow("MEDIA_IMAGE_TOO_LARGE");
   });
 
   it("requires at least one allowlisted host", () => {

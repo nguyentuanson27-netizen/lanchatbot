@@ -191,6 +191,26 @@ describe("grouped exact recognition search", () => {
     expect(hits[0]?.product.productId).toBe("SD375");
   });
 
+  it("fails explicitly on a group with a missing, empty or unusable key", async () => {
+    // Without a group key there is nothing to validate the payload against, so
+    // trusting the payload alone would accept a malformed grouped response.
+    for (const id of [undefined, null, "", "   ", {}, []]) {
+      const { instance } = adapter(() => json({
+        result: {
+          groups: [{
+            ...(id === undefined ? {} : { id }),
+            hits: [{ id: "point-sd375", score: 0.9, payload: payload("SD375") }],
+          }],
+        },
+      }));
+      await expect(instance.searchCutoutGroups(
+        embedding(),
+        5,
+        new AbortController().signal,
+      )).rejects.toThrow("IMAGE_RECOGNITION_GROUP_IDENTITY_INVALID");
+    }
+  });
+
   it("fails explicitly on a group whose key disagrees with its winning hit", async () => {
     const { instance } = adapter(() => json({
       result: {

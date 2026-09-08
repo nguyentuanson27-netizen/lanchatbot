@@ -211,6 +211,76 @@ describe("Gemini Embedding 2 wire contract", () => {
     await expect(pending).rejects.toThrow("GEMINI_EMBEDDING_CANCELLED");
   });
 
+  it("does not let one caller's cancellation break a concurrent token refresh", async () => {
+    // Both callers await the same shared refresh; cancelling the first must not
+    // abort that refresh for the second.
+    let releaseToken: (value: Response) => void = () => undefined;
+    const tokenGate = new Promise<Response>((resolve) => {
+      releaseToken = resolve;
+    });
+    const fetchImpl = vi.fn(async (input: unknown) =>
+      String(input).includes("oauth2.googleapis.com")
+        ? tokenGate
+        : embeddingResponse(vector(3_072, 0.1)));
+    const instance = new GeminiEmbedding2Client({
+      projectId: "lana-preprod",
+      serviceAccount,
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    const cancelled = new AbortController();
+    const survivor = new AbortController();
+    const a = instance.embedCutout(CUTOUT, cancelled.signal);
+    const b = instance.embedCutout(CUTOUT, survivor.signal);
+    const settledA: Promise<GeminiEmbedding2Error> = a.then(
+      () => {
+        throw new Error("expected the cancelled caller to reject");
+      },
+      (error: unknown) => error as GeminiEmbedding2Error,
+    );
+    cancelled.abort();
+    expect((await settledA).message).toBe("GEMINI_EMBEDDING_CANCELLED");
+    releaseToken(new Response(
+      JSON.stringify({ access_token: "shared-token", expires_in: 3_600 }),
+      { status: 200 },
+    ));
+    expect(await b).toHaveLength(3_072);
+  });
+
+  it("does not issue an embedding request for a caller cancelled during refresh", async () => {
+    let releaseToken: (value: Response) => void = () => undefined;
+    const tokenGate = new Promise<Response>((resolve) => {
+      releaseToken = resolve;
+    });
+    const embedCalls: string[] = [];
+    const fetchImpl = vi.fn(async (input: unknown) => {
+      if (String(input).includes("oauth2.googleapis.com")) return tokenGate;
+      embedCalls.push(String(input));
+      return embeddingResponse(vector(3_072, 0.1));
+    });
+    const instance = new GeminiEmbedding2Client({
+      projectId: "lana-preprod",
+      serviceAccount,
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+    });
+    const controller = new AbortController();
+    const pending: Promise<GeminiEmbedding2Error> = instance
+      .embedCutout(CUTOUT, controller.signal)
+      .then(
+        () => {
+          throw new Error("expected the cancelled caller to reject");
+        },
+        (error: unknown) => error as GeminiEmbedding2Error,
+      );
+    controller.abort();
+    releaseToken(new Response(
+      JSON.stringify({ access_token: "shared-token", expires_in: 3_600 }),
+      { status: 200 },
+    ));
+    expect((await pending).message).toBe("GEMINI_EMBEDDING_CANCELLED");
+    // The budget was already spent, so no embedding request may follow.
+    expect(embedCalls).toEqual([]);
+  });
+
   it("never puts the token, key or vector into an error message", async () => {
     const values = vector(3_072, 0.123456789);
     values[0] = Number.NaN;

@@ -54,6 +54,56 @@ export class RecognitionImageError extends Error {
 const ALLOWED_IMAGE_MIME = ["image/jpeg", "image/png", "image/webp"] as const;
 
 /**
+ * Read a response body with a hard byte ceiling.
+ *
+ * `response.arrayBuffer()` would buffer the whole body into the heap before any
+ * size check could reject it, so a chunked response — or one with a missing or
+ * lying `Content-Length` — could exhaust memory on untrusted input. Reading the
+ * stream and cancelling the moment the running total exceeds the cap keeps the
+ * ceiling real: at most one chunk beyond the limit is ever held.
+ *
+ * `Content-Length` stays a cheap fast-fail before this runs; it is never the
+ * security boundary.
+ */
+export async function readBoundedBody(
+  response: Response,
+  maxBytes: number,
+  overflowCode: string,
+): Promise<Buffer> {
+  const body = response.body;
+  if (!body) {
+    // No stream available (some test doubles); fall back but still bound it.
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (bytes.byteLength > maxBytes) throw new RecognitionImageError(overflowCode);
+    return bytes;
+  }
+  const reader = body.getReader();
+  const chunks: Buffer[] = [];
+  let total = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        // Stop pulling immediately; do not accumulate the offending chunk.
+        await reader.cancel().catch(() => undefined);
+        throw new RecognitionImageError(overflowCode);
+      }
+      chunks.push(Buffer.from(value));
+    }
+  } finally {
+    try {
+      reader.releaseLock();
+    } catch {
+      // A cancelled or already-released reader is fine; nothing left to free.
+    }
+  }
+  return Buffer.concat(chunks, total);
+}
+
+/**
  * Header-level dimension reader. Bounding decoded pixels before spawning the
  * decoder keeps a decompression bomb from ever reaching a child process.
  */
@@ -384,8 +434,12 @@ export class MediaRecognitionV2ImagePipeline implements RecognitionImagePipeline
       if (contentType && !contentType.startsWith("image/")) {
         throw new RecognitionImageError("REMBG_RESPONSE_INVALID");
       }
-      const bytes = Buffer.from(await response.arrayBuffer());
-      if (bytes.byteLength === 0 || bytes.byteLength > this.maxBytes) {
+      const bytes = await readBoundedBody(
+        response,
+        this.maxBytes,
+        "REMBG_RESPONSE_TOO_LARGE",
+      );
+      if (bytes.byteLength === 0) {
         throw new RecognitionImageError("REMBG_RESPONSE_INVALID");
       }
       return bytes;
@@ -513,16 +567,18 @@ export class SecureRecognitionImageDownloader implements RecognitionImageDownloa
       if (!(ALLOWED_IMAGE_MIME as readonly string[]).includes(mime)) {
         throw new RecognitionImageError("MEDIA_IMAGE_CONTENT_TYPE_INVALID");
       }
+      // Cheap fast-fail only; the streaming ceiling below is the real boundary.
       const declaredLength = Number(response.headers.get("content-length") ?? "0");
       if (Number.isFinite(declaredLength) && declaredLength > this.maxBytes) {
         throw new RecognitionImageError("MEDIA_IMAGE_TOO_LARGE");
       }
-      const bytes = new Uint8Array(await response.arrayBuffer());
+      const bytes = await readBoundedBody(
+        response,
+        this.maxBytes,
+        "MEDIA_IMAGE_TOO_LARGE",
+      );
       if (bytes.byteLength === 0) {
         throw new RecognitionImageError("MEDIA_IMAGE_EMPTY");
-      }
-      if (bytes.byteLength > this.maxBytes) {
-        throw new RecognitionImageError("MEDIA_IMAGE_TOO_LARGE");
       }
       return bytes;
     } catch (error) {

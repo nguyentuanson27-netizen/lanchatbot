@@ -11,6 +11,25 @@ import type {
 /** V2 shortlist bound: at most five unique SKU groups reach the reranker. */
 export const MAX_RERANK_CANDIDATES = 5;
 
+/**
+ * Await `promise`, but give up as soon as `signal` aborts. Used so a caller can
+ * stop waiting on a shared token refresh without cancelling it for everyone else.
+ */
+function raceWithSignal<T>(
+  promise: Promise<T>,
+  signal: AbortSignal,
+  code: string,
+): Promise<T> {
+  if (signal.aborted) return Promise.reject(new Error(code));
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = (): void => reject(new Error(code));
+    signal.addEventListener("abort", onAbort, { once: true });
+    promise.then(resolve, reject).finally(() => {
+      signal.removeEventListener("abort", onAbort);
+    });
+  });
+}
+
 export interface VertexMediaRerankerOptions {
   readonly projectId: string;
   readonly location: string;
@@ -90,21 +109,28 @@ export class VertexMediaReranker implements RealtimeMediaRerankerPort {
     this.now = options.now ?? Date.now;
   }
 
-  private async token(timeoutMs: number): Promise<string> {
+  private async token(timeoutMs: number, signal: AbortSignal): Promise<string> {
     if (
       this.accessToken &&
       this.accessToken.expiresAt - 60_000 > this.now()
     ) {
       return this.accessToken.value;
     }
-    if (this.tokenRefreshPromise) return this.tokenRefreshPromise;
-    const refresh = this.refreshToken(timeoutMs);
-    this.tokenRefreshPromise = refresh;
-    try {
-      return await refresh;
-    } finally {
-      if (this.tokenRefreshPromise === refresh) this.tokenRefreshPromise = null;
+    // The shared refresh owns its own lifetime so one caller's cancellation
+    // cannot abort a refresh other callers are still waiting on; each caller
+    // races it against its own budget instead.
+    if (!this.tokenRefreshPromise) {
+      const refresh = this.refreshToken(timeoutMs);
+      this.tokenRefreshPromise = refresh;
+      void refresh.catch(() => undefined).finally(() => {
+        if (this.tokenRefreshPromise === refresh) this.tokenRefreshPromise = null;
+      });
     }
+    return raceWithSignal(
+      this.tokenRefreshPromise,
+      signal,
+      "VERTEX_MEDIA_CANCELLED",
+    );
   }
 
   private async refreshToken(timeoutMs: number): Promise<string> {
@@ -161,6 +187,7 @@ export class VertexMediaReranker implements RealtimeMediaRerankerPort {
     }[];
     readonly timeoutMs: number;
     readonly maxOutputTokens: number;
+    readonly signal: AbortSignal;
   }): Promise<MediaRerankResult> {
     if (!/^[A-Za-z0-9._-]+$/u.test(input.modelName)) {
       throw new Error("VERTEX_MEDIA_MODEL_INVALID");
@@ -182,12 +209,22 @@ export class VertexMediaReranker implements RealtimeMediaRerankerPort {
     if (ids.length !== candidates.length || ids.some((id) => id.length === 0)) {
       throw new Error("VERTEX_MEDIA_CANDIDATES_INVALID");
     }
+    if (input.signal.aborted) throw new Error("VERTEX_MEDIA_CANCELLED");
     const started = this.now();
     const deadlineAt = started + Math.max(250, input.timeoutMs);
-    const accessToken = await this.token(Math.max(250, deadlineAt - this.now()));
+    const accessToken = await this.token(
+      Math.max(250, deadlineAt - this.now()),
+      input.signal,
+    );
+    // The caller's budget may have run out while the token was being fetched.
+    if (input.signal.aborted) throw new Error("VERTEX_MEDIA_CANCELLED");
     const remaining = deadlineAt - this.now();
     if (remaining < 250) throw new Error("VERTEX_MEDIA_TIMEOUT");
     const controller = new AbortController();
+    // The stage cap can only shorten the call; aborting the caller's shared
+    // budget aborts this fetch immediately, whatever the stage cap still allows.
+    const onCallerAbort = (): void => controller.abort();
+    input.signal.addEventListener("abort", onCallerAbort, { once: true });
     const timer = setTimeout(() => controller.abort(), remaining);
     try {
       const parts: Record<string, unknown>[] = [
@@ -297,11 +334,14 @@ export class VertexMediaReranker implements RealtimeMediaRerankerPort {
       };
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
-        throw new Error("VERTEX_MEDIA_TIMEOUT");
+        throw new Error(
+          input.signal.aborted ? "VERTEX_MEDIA_CANCELLED" : "VERTEX_MEDIA_TIMEOUT",
+        );
       }
       throw error;
     } finally {
       clearTimeout(timer);
+      input.signal.removeEventListener("abort", onCallerAbort);
     }
   }
 }

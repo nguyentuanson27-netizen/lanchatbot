@@ -43,6 +43,7 @@ function input(count: number) {
     candidates: SHORTLIST.slice(0, count).map((id, index) => candidate(id, index * 10)),
     timeoutMs: 8_000,
     maxOutputTokens: 250,
+    signal: new AbortController().signal,
   };
 }
 
@@ -186,6 +187,100 @@ describe("Gemini reranker for 1-5 candidates", () => {
       ...input(1),
       candidates: [candidate("   ", 0)],
     })).rejects.toThrow("VERTEX_MEDIA_CANDIDATES_INVALID");
+  });
+
+  it("aborts the in-flight Vertex call when the caller's budget ends", async () => {
+    // The stage cap (timeoutMs) may only shorten the call; the caller's shared
+    // request budget always wins, even with a long stage cap left to run.
+    const controller = new AbortController();
+    let started: () => void = () => undefined;
+    const inFlight = new Promise<void>((resolve) => {
+      started = resolve;
+    });
+    let observed: AbortSignal | undefined;
+    const fetchImpl = vi.fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        access_token: "token",
+        expires_in: 3_600,
+      }), { status: 200 }))
+      .mockImplementationOnce((_input, init) => {
+        observed = init?.signal ?? undefined;
+        return new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => {
+            const error = new Error("aborted");
+            error.name = "AbortError";
+            reject(error);
+          });
+          started();
+        });
+      });
+    const instance = new VertexMediaReranker({
+      projectId: "test-project",
+      location: "global",
+      serviceAccount: {
+        email: "test@example.iam.gserviceaccount.com",
+        privateKey,
+      },
+      fetchImpl,
+    });
+    const pending = instance.rerankMediaCandidates({
+      ...input(3),
+      timeoutMs: 60_000,
+      signal: controller.signal,
+    });
+    await inFlight;
+    controller.abort();
+    await expect(pending).rejects.toThrow("VERTEX_MEDIA_CANCELLED");
+    expect(observed?.aborted).toBe(true);
+  });
+
+  it("refuses to start once the caller's budget is already spent", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const { instance, fetchImpl } = reranker("SD395");
+    await expect(instance.rerankMediaCandidates({
+      ...input(2),
+      signal: controller.signal,
+    })).rejects.toThrow("VERTEX_MEDIA_CANCELLED");
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("does not let one caller's cancellation break a concurrent token refresh", async () => {
+    let releaseToken: (value: Response) => void = () => undefined;
+    const tokenGate = new Promise<Response>((resolve) => {
+      releaseToken = resolve;
+    });
+    const fetchImpl = vi.fn<typeof fetch>((input_) =>
+      String(input_).includes("oauth2.googleapis.com")
+        ? tokenGate
+        : Promise.resolve(generated("SD395")));
+    const instance = new VertexMediaReranker({
+      projectId: "test-project",
+      location: "global",
+      serviceAccount: {
+        email: "test@example.iam.gserviceaccount.com",
+        privateKey,
+      },
+      fetchImpl,
+    });
+    const cancelled = new AbortController();
+    const survivor = new AbortController();
+    const a = instance.rerankMediaCandidates({ ...input(2), signal: cancelled.signal });
+    const b = instance.rerankMediaCandidates({ ...input(2), signal: survivor.signal });
+    const settledA: Promise<Error> = a.then(
+      () => {
+        throw new Error("expected the cancelled caller to reject");
+      },
+      (error: unknown) => error as Error,
+    );
+    cancelled.abort();
+    expect((await settledA).message).toBe("VERTEX_MEDIA_CANCELLED");
+    releaseToken(new Response(JSON.stringify({
+      access_token: "token",
+      expires_in: 3_600,
+    }), { status: 200 }));
+    // B was waiting on the same shared refresh and must still succeed.
+    expect((await b).selected).toBe("SD395");
   });
 
   it("rejects more than five candidates instead of silently truncating", async () => {

@@ -137,8 +137,14 @@ export interface RealtimeMediaRerankerPort {
     readonly customerImageBytes: Uint8Array;
     readonly customerImageMimeType: "image/png" | "image/jpeg";
     readonly candidates: readonly MediaRerankCandidate[];
+    /**
+     * Reranker-stage cap. It may only shorten the call: the caller's `signal`
+     * carries the remaining total request budget and always wins.
+     */
     readonly timeoutMs: number;
     readonly maxOutputTokens: number;
+    /** The one request-wide budget shared by every stage of recognition. */
+    readonly signal: AbortSignal;
   }): Promise<MediaRerankResult>;
 }
 
@@ -294,6 +300,7 @@ export class RealtimeMediaRecognitionService {
         })),
         timeoutMs: this.options.rerankerTimeoutMs ?? 10_000,
         maxOutputTokens: this.options.rerankerMaxOutputTokens ?? 250,
+        signal,
       });
       state.latency.reranker = this.now() - rerankStarted;
       state.rerankerDecision = decision.selected;
