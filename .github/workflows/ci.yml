@@ -89,5 +89,36 @@ jobs:
       - name: Verify Gate E release-evidence reader access
         run: bash deploy/gate-e-release-evidence-reader-access.behavior.test.sh
 
-      - name: Run repository checks
+      - name: Verify release integrity
+        run: pnpm check:release-integrity
+
+      - name: Determine CI scope
+        id: ci-scope
+        run: node scripts/ci/ci-scope.mjs
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
+      - name: Run Track C focused checks
+        if: steps.ci-scope.outputs.mode == 'track-c'
+        run: |
+          pnpm --filter @lana/worker lint
+          pnpm --filter @lana/worker typecheck
+          pnpm --filter @lana/worker exec vitest run \
+            src/track-c-replay.test.ts \
+            src/track-c-must-pass.test.ts \
+            src/track-c-quality-judge.test.ts \
+            src/track-c-offline-candidate.test.ts
+
+      - name: Run affected packages checks
+        if: steps.ci-scope.outputs.mode == 'affected'
+        run: |
+          BASE_REF="${{ steps.ci-scope.outputs.base_ref || 'origin/main' }}"
+          pnpm --filter "...[$BASE_REF]" run --if-present build
+          pnpm --filter "...[$BASE_REF]" run --if-present typecheck
+          pnpm --filter "...[$BASE_REF]" run --if-present test
+          pnpm --filter "...[$BASE_REF]" run --if-present lint
+
+      - name: Run repository checks (full regression)
+        if: steps.ci-scope.outputs.mode == 'full'
         run: pnpm check
