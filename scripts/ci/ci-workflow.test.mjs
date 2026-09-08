@@ -30,11 +30,44 @@ test("CI workflow keeps a lightweight scope gate before split mandatory lanes", 
   }
 });
 
-test("CI workflow preserves one pnpm check aggregate gate", () => {
+test("CI workflow keeps a fail-closed pnpm check aggregate gate", () => {
   const aggregate = jobBlock("check");
   assert.match(aggregate, /name:\s*pnpm check/);
-  assert.match(aggregate, /needs:/);
+  assert.ok(aggregate.includes("if: ${{ !cancelled() }}"));
+  assert.doesNotMatch(aggregate, /if:\s*always\(\)/);
   assert.match(aggregate, /Require mandatory gates/);
+
+  const mandatoryNeeds = [
+    "scope",
+    "db-safety",
+    "static-safety",
+    "code-track-c",
+    "code-affected",
+    "code-full",
+  ];
+  for (const name of mandatoryNeeds) {
+    assert.ok(aggregate.includes(`      - ${name}\n`), `aggregate gate must need ${name}`);
+  }
+
+  const resultBindings = [
+    "SCOPE_RESULT: ${{ needs.scope.result }}",
+    "DB_RESULT: ${{ needs.db-safety.result }}",
+    "STATIC_RESULT: ${{ needs.static-safety.result }}",
+    "TRACK_C_RESULT: ${{ needs.code-track-c.result }}",
+    "AFFECTED_RESULT: ${{ needs.code-affected.result }}",
+    "FULL_RESULT: ${{ needs.code-full.result }}",
+  ];
+  for (const binding of resultBindings) {
+    assert.ok(aggregate.includes(binding), `aggregate gate must bind ${binding}`);
+  }
+
+  assert.ok(aggregate.includes('test "$SCOPE_RESULT" = "success"'));
+  assert.ok(aggregate.includes('test "$DB_RESULT" = "success"'));
+  assert.ok(aggregate.includes('test "$STATIC_RESULT" = "success"'));
+  assert.ok(aggregate.includes('track-c)\n              test "$TRACK_C_RESULT" = "success"'));
+  assert.ok(aggregate.includes('affected)\n              test "$AFFECTED_RESULT" = "success"'));
+  assert.ok(aggregate.includes('full)\n              test "$FULL_RESULT" = "success"'));
+  assert.ok(aggregate.includes('Unexpected CI mode'));
 });
 
 test("full regression lane deduplicates release integrity and top-level workspace build", () => {
