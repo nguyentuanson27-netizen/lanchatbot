@@ -153,7 +153,7 @@ function replayInput(
 ) {
   let scoreIndex = 0;
   const judge = {
-    judgeSalesReplyV2Descriptor: vi.fn(() => ({ provider: "VERTEX_AI" as const, location: "global", model: "gemini-3.7-flash",
+    judgeSalesReplyV2Descriptor: vi.fn(() => ({ provider: "VERTEX_AI" as const, location: "global", model: "gemini-3.6-flash",
       promptRubric: { version: "v2" }, generationConfig: { thinkingConfig: { thinkingLevel: "HIGH" } } })),
     judgeSalesReplyV2: vi.fn(async () => {
       const index = scoreIndex++;
@@ -274,7 +274,11 @@ describe("Track C C2 offline replay", () => {
     if (firstB3Quality?.status !== "SCORED") {
       throw new Error("TEST_B3_JUDGE_IDENTITY_REQUIRED");
     }
-    expect(evidence.qualitySuite?.history.cases[0]?.identity.judge).toEqual(
+    const firstSuiteHistory = evidence.qualitySuite?.history.cases[0];
+    if (firstSuiteHistory?.status !== "SCORED") {
+      throw new Error("TEST_SUITE_JUDGE_IDENTITY_REQUIRED");
+    }
+    expect(firstSuiteHistory.identity.judge).toEqual(
       firstB3Quality.identity.judge,
     );
     expect(evidence).toMatchObject({

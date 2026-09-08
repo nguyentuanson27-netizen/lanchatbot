@@ -84,7 +84,7 @@ function input(options: Readonly<{ worseCaseId?: string; allSame?: boolean }> = 
     judgeSalesReplyV2Descriptor: vi.fn(() => ({
       provider: "VERTEX_AI" as const,
       location: "global",
-      model: "gemini-3.7-flash",
+      model: "gemini-3.6-flash",
       promptRubric: { version: "v2" },
       generationConfig: { thinkingConfig: { thinkingLevel: "HIGH" } },
     })),
@@ -192,7 +192,7 @@ describe("Track C mandatory 50-case quality gate", () => {
     });
   });
 
-  it("fails closed before Judge when a reply would make the all-case history unsafe", async () => {
+  it("redacts an unsafe reply for Judge/history and still blocks owner readiness", async () => {
     const request = input();
     request.cases[0] = {
       ...request.cases[0]!,
@@ -202,9 +202,46 @@ describe("Track C mandatory 50-case quality gate", () => {
       },
     };
 
-    await expect(runTrackCQualitySuiteGate(request)).rejects.toThrow(
-      "TRACK_C_QUALITY_SUITE_HISTORY_TEXT_NOT_PII_SAFE:q01-stock:candidate",
-    );
-    expect(request.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+    const result = await runTrackCQualitySuiteGate(request);
+
+    expect(request.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(100);
+    expect(result.aggregate).toMatchObject({
+      caseCount: 50,
+      better: 50,
+      same: 0,
+      worse: 0,
+      failed: 0,
+      redactedCaseCount: 1,
+    });
+    expect(result.gate).toEqual({
+      status: "INCOMPLETE",
+      selectionAuthorized: false,
+    });
+    expect(result.history.cases[0]).toEqual(expect.objectContaining({
+      caseId: "q01-stock",
+      status: "SCORED",
+      candidate: expect.objectContaining({
+        reply: "Liên hệ em qua [PHONE] nhé.",
+        redacted: true,
+        replyHash: expect.any(String),
+        sourceReplyHash: expect.any(String),
+      }),
+    }));
+    const firstCandidate = result.history.cases[0];
+    if (firstCandidate === undefined || firstCandidate.status !== "SCORED") {
+      throw new Error("expected scored history");
+    }
+    expect(firstCandidate.candidate.replyHash).not.toBe(firstCandidate.candidate.sourceReplyHash);
+    expect(JSON.stringify(result.history.cases)).not.toContain("0912345678");
+    const judgedReplies = (request.judge.judgeSalesReplyV2.mock.calls as unknown as readonly (readonly unknown[])[])
+      .map((call) => call[1]);
+    expect(judgedReplies)
+      .toContain("Liên hệ em qua [PHONE] nhé.");
+    expect(judgedReplies)
+      .not.toContain("Liên hệ em qua 0912345678 nhé.");
+    expect(result.history.cases.at(-1)).toEqual(expect.objectContaining({
+      caseId: "q50-close-intent",
+      status: "SCORED",
+    }));
   });
 });

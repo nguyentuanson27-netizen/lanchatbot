@@ -283,7 +283,7 @@ function judgeSalesReplyV2RequestContract(
   location: string,
   model: string,
 ): JudgeSalesReplyV2RequestContract {
-  if (location === "global" && model === "gemini-3.7-flash") {
+  if (location === "global" && model === "gemini-3.6-flash") {
     return {
       systemInstruction: TRACK_C_SALES_RUBRIC_V2_SYSTEM_INSTRUCTION,
       generationConfig: TRACK_C_SALES_RUBRIC_V2_GENERATION_CONFIG,
@@ -368,6 +368,26 @@ export class VertexShadowError extends Error {
     this.retryable = retryable;
     this.providerError = providerError;
   }
+}
+
+function wait(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+/** One bounded retry for the offline Judge V2 path, honoring provider guidance. */
+function judgeRetryDelayMs(response: Response | null): number {
+  const retryAfter = response?.headers.get("retry-after")?.trim();
+  if (retryAfter !== undefined && retryAfter !== "") {
+    const seconds = Number(retryAfter);
+    if (Number.isFinite(seconds) && seconds >= 0) {
+      return Math.min(30_000, Math.round(seconds * 1_000));
+    }
+    const retryAt = Date.parse(retryAfter);
+    if (Number.isFinite(retryAt)) {
+      return Math.min(30_000, Math.max(0, retryAt - Date.now()));
+    }
+  }
+  return 1_000;
 }
 
 function base64Url(value: string | Buffer): string {
@@ -1663,16 +1683,8 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
         });
         const body = await response.json().catch(() => null);
         if (!response.ok) {
-          if (response.status === 401 && attempt === 0) {
-            this.recordFailure({
-              endpoint: "JUDGE",
-              status: 401,
-              attempt: 1,
-              retryable: true,
-              errorCode: "VERTEX_JUDGE_V2_UNAUTHORIZED",
-            });
+          if (response.status === 401) {
             this.invalidateToken(token);
-            continue;
           }
           const retryable = response.status === 429 || response.status >= 500;
           const errorCode = retryable
@@ -1697,6 +1709,10 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
             errorCode,
             providerError,
           });
+          if (retryable && attempt === 0) {
+            await wait(judgeRetryDelayMs(response));
+            continue;
+          }
           throw new VertexShadowError(errorCode, retryable, providerError);
         }
         const candidate = parseCandidateText(body);
@@ -1739,6 +1755,10 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
             retryable: true,
             errorCode: "VERTEX_JUDGE_V2_TIMEOUT",
           });
+          if (attempt === 0) {
+            await wait(judgeRetryDelayMs(null));
+            continue;
+          }
           throw new VertexShadowError("VERTEX_JUDGE_V2_TIMEOUT", true);
         }
         this.recordFailure({
@@ -1748,6 +1768,10 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
           retryable: true,
           errorCode: "VERTEX_JUDGE_V2_NETWORK_ERROR",
         });
+        if (attempt === 0) {
+          await wait(judgeRetryDelayMs(null));
+          continue;
+        }
         throw new VertexShadowError("VERTEX_JUDGE_V2_NETWORK_ERROR", true);
       } finally {
         clearTimeout(timeout);
