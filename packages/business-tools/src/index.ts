@@ -7,6 +7,7 @@ export * from "./image-selection.js";
 export * from "./fakes.js";
 export * from "./catalog-projection.js";
 export * from "./qdrant.js";
+export * from "./image-recognition-qdrant.js";
 export * from "./product-facts-v2.js";
 export * from "./product-facts-v2-projection.js";
 export * from "./policy-engine.js";
