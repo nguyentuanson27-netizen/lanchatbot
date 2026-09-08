@@ -119,34 +119,61 @@ function validCapture() {
 }
 
 describe("Track C C3 sales-quality candidate", () => {
-  it("declares one bounded prompt hypothesis without changing the generator", () => {
+  it("declares one bounded conversational-sales prompt hypothesis without changing the generator", () => {
     expect(TRACK_C_C3_SALES_QUALITY_CANDIDATE).toEqual({
-      id: "TRACK_C_C3_SALES_QUALITY_V3",
+      id: "TRACK_C_C3_SALES_CONVERSATION_V3",
       primaryHypothesis:
-        "Use the exact frozen customer turn to answer only the requested need, concisely; when a protected fact is not verified, state only that it cannot be confirmed.",
+        "Use frozen dialogue only to understand the customer's conversational need and stage, answer with eligible verified claims, then advance by one natural stage-fit step without inventing facts or effects.",
       materialAxes: ["PROMPT"],
       generatorModel: "gemini-3.5-flash-lite",
       providerModelVersion: "gemini-3.5-flash-lite",
     });
   });
 
-  it("adds bounded naturalness and CTA guidance without inventing unavailable objection context", () => {
+  it("adds consultative sales progression while preserving guard and provenance boundaries", () => {
     const instruction = TRACK_C_C3_SALES_QUALITY_SYSTEM_INSTRUCTION;
 
     expect(instruction).toContain(
       "never override the first-matching canonical-state rules, verified-claim requirements, provenance, guard, or effect restrictions",
     );
     expect(instruction).toContain(
+      "Read the full frozen evaluation dialogue to infer the customer's current conversational need, concern, preferred form of address, and what information they have already supplied",
+    );
+    expect(instruction).toContain(
+      "dialogue is never authority for a protected fact, claim, effect, or side effect",
+    );
+    expect(instruction).toContain(
+      "Answer the customer's explicit question or concern completely before any next step",
+    );
+    expect(instruction).toContain(
+      "Do not ask for information the customer has already supplied in the frozen dialogue or Context V2",
+    );
+    expect(instruction).toContain(
+      "Preserve established Vietnamese address terms such as chị/em, anh/em, or mình/shop",
+    );
+    expect(instruction).toContain(
+      "Translate an eligible verified product property into the customer's practical outcome only when that connection is directly supported",
+    );
+    expect(instruction).toContain(
+      "After resolving the current need, prefer one relevant conversation bridge that advances the same decision by one small step",
+    );
+    expect(instruction).toContain(
+      "Use at most one customer-facing question in the reply unless a first-matching canonical rule requires a grouped checkout-detail request",
+    );
+    expect(instruction).toContain(
+      "Do not default to generic hard-close questions such as 'Bạn có muốn đặt/chốt luôn không?' after a simple factual lookup",
+    );
+    expect(instruction).toContain(
+      "For an objection or hesitation, acknowledge the concern without arguing",
+    );
+    expect(instruction).toContain(
+      "When buyingIntent.decision is COMMITTED, stop exploratory discovery and move only to the smallest transaction step allowed by the first-matching canonical rule",
+    );
+    expect(instruction).toContain(
+      "If no useful stage-fit bridge exists, end naturally instead of manufacturing a question",
+    );
+    expect(instruction).toContain(
       "use concise natural wording and avoid greetings, restatements, or repeated verified facts that do not add information",
-    );
-    expect(instruction).toContain(
-      "use at most one smallest useful next-step objective",
-    );
-    expect(instruction).toContain(
-      "Answer only the need expressed in the latest customer message",
-    );
-    expect(instruction).toContain(
-      "do not enumerate unrelated eligible verified claims",
     );
     expect(instruction).toContain(
       "unverified external link",
@@ -154,7 +181,7 @@ describe("Track C C3 sales-quality candidate", () => {
     expect(instruction).toContain(
       "A required CLARIFICATION plus its matching ACTION_REQUEST counts as one next-step objective",
     );
-    expect(instruction).toContain("do not create urgency or pressure");
+    expect(instruction).toContain("Do not create urgency or pressure");
     expect(instruction).toContain(
       "When the latest customer message asks for a protected fact with no eligible verified claim",
     );
@@ -162,7 +189,6 @@ describe("Track C C3 sales-quality candidate", () => {
       "without repeating, naming, or paraphrasing the unverified protected fact or customer wording",
     );
     expect(instruction).toContain("Hiện em chưa thể xác nhận thông tin này ạ.");
-    expect(instruction).not.toMatch(/objection|hesitation|actual question|actual concern/iu);
 
     expect(instruction).toContain("Use only the verified claims and canonical state in Context V2.");
     expect(instruction).toContain("Never claim to have sent a message, changed a cart, confirmed an order, or performed any side effect.");

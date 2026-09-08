@@ -12,6 +12,8 @@ export const TRACK_C_OFFLINE_SAFE_FILES = new Set([
   "apps/worker/src/track-c-offline-candidate.ts",
   "apps/worker/src/track-c-offline-candidate.test.ts",
   "apps/worker/src/track-c-offline-candidate-validation.ts",
+  "apps/worker/src/track-c-c3-sales-quality-candidate.ts",
+  "apps/worker/src/track-c-c3-sales-quality-candidate.test.ts",
   "apps/worker/src/track-c-quality-suite-gate.ts",
   "apps/worker/src/track-c-quality-suite-gate.test.ts",
 ]);

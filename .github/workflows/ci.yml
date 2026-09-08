@@ -115,6 +115,7 @@ jobs:
             src/track-c-must-pass.test.ts \
             src/track-c-quality-judge.test.ts \
             src/track-c-offline-candidate.test.ts \
+            src/track-c-c3-sales-quality-candidate.test.ts \
             src/track-c-quality-suite-gate.test.ts
 
       - name: Run affected packages checks

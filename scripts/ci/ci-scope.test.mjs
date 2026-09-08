@@ -14,6 +14,8 @@ test("selectCiScope: Track C offline-only files select track-c mode", () => {
     ["apps/worker/src/track-c-offline-candidate.ts"],
     ["apps/worker/src/track-c-offline-candidate.test.ts"],
     ["apps/worker/src/track-c-offline-candidate-validation.ts"],
+    ["apps/worker/src/track-c-c3-sales-quality-candidate.ts"],
+    ["apps/worker/src/track-c-c3-sales-quality-candidate.test.ts"],
     ["apps/worker/src/track-c-quality-suite-gate.ts"],
     ["apps/worker/src/track-c-quality-suite-gate.test.ts"],
     [
@@ -22,6 +24,8 @@ test("selectCiScope: Track C offline-only files select track-c mode", () => {
       "apps/worker/src/track-c-must-pass.test.ts",
       "apps/worker/src/track-c-quality-judge.test.ts",
       "apps/worker/src/track-c-offline-candidate.test.ts",
+      "apps/worker/src/track-c-c3-sales-quality-candidate.ts",
+      "apps/worker/src/track-c-c3-sales-quality-candidate.test.ts",
       "apps/worker/src/track-c-quality-suite-gate.ts",
       "apps/worker/src/track-c-quality-suite-gate.test.ts",
     ],
@@ -129,15 +133,8 @@ test("selectCiScope: mixed Track C and root config must trigger full mode", () =
 });
 
 test("selectCiScope: Track C non-offline runner escalates to affected mode", () => {
-  const cases = [
-    ["apps/worker/src/track-c-offline-runner.ts"],
-    ["apps/worker/src/track-c-c3-sales-quality-candidate.ts"],
-  ];
-
-  for (const changedFiles of cases) {
-    const result = selectCiScope(changedFiles);
-    assert.equal(result.mode, "affected");
-  }
+  const result = selectCiScope(["apps/worker/src/track-c-offline-runner.ts"]);
+  assert.equal(result.mode, "affected");
 });
 
 test("selectCiScope: empty or invalid file lists fallback to full mode", () => {
