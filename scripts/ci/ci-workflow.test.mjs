@@ -67,6 +67,16 @@ test("CI preserves mandatory gates and selector-driven code lanes", () => {
   assert.match(stepBlock(check, "Run repository checks (full regression)"), /if:\s*steps\.ci-scope\.outputs\.mode == 'full'/);
 });
 
+test("Track C checks prepare workspace dependencies before linting", () => {
+  const trackC = stepBlock(jobBlock("check"), "Run Track C focused checks");
+  const typecheck = trackC.indexOf("pnpm --filter @lana/worker typecheck");
+  const lint = trackC.indexOf("pnpm --filter @lana/worker lint");
+
+  assert.notEqual(typecheck, -1);
+  assert.notEqual(lint, -1);
+  assert.ok(typecheck < lint);
+});
+
 test("full regression deduplicates release integrity and the second top-level workspace build", () => {
   const check = jobBlock("check");
   const full = stepBlock(check, "Run repository checks (full regression)");

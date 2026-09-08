@@ -108,8 +108,8 @@ jobs:
       - name: Run Track C focused checks
         if: steps.ci-scope.outputs.mode == 'track-c'
         run: |
-          time pnpm --filter @lana/worker lint
           time pnpm --filter @lana/worker typecheck
+          time pnpm --filter @lana/worker lint
           time pnpm --filter @lana/worker exec vitest run \
             src/track-c-replay.test.ts \
             src/track-c-must-pass.test.ts \
