@@ -18,73 +18,67 @@ function jobBlock(name) {
   return nextJobOffset === -1 ? rest : rest.slice(0, nextJobOffset);
 }
 
-test("CI workflow keeps a lightweight scope gate before split mandatory lanes", () => {
-  const scope = jobBlock("scope");
-  assert.doesNotMatch(scope, /services:/);
-  assert.doesNotMatch(scope, /pnpm install/);
-  assert.match(scope, /Verify CI selector logic/);
-  assert.match(scope, /Determine CI scope/);
+function stepBlock(job, stepName) {
+  const marker = `\n      - name: ${stepName}\n`;
+  const start = job.indexOf(marker);
+  assert.notEqual(start, -1, `CI job is missing step: ${stepName}`);
 
-  for (const name of ["db-safety", "static-safety", "code-track-c", "code-affected", "code-full"]) {
-    assert.match(jobBlock(name), /needs:\s*scope/);
-  }
+  const bodyStart = start + marker.length;
+  const rest = job.slice(bodyStart);
+  const nextStepOffset = rest.search(/\n      - name:/);
+  return nextStepOffset === -1 ? rest : rest.slice(0, nextStepOffset);
+}
+
+test("CI keeps one check job on the observed single lana-ci runner", () => {
+  const jobsSection = workflow.slice(workflow.indexOf("\njobs:\n") + "\njobs:\n".length);
+  const jobNames = [...jobsSection.matchAll(/^  ([A-Za-z0-9_-]+):\s*$/gm)].map((match) => match[1]);
+  assert.deepEqual(jobNames, ["check"]);
+
+  const check = jobBlock("check");
+  assert.match(check, /name:\s*pnpm check/);
+  assert.match(check, /runs-on:\s*\[self-hosted, Linux, X64, lana-ci\]/);
 });
 
-test("CI workflow keeps a fail-closed pnpm check aggregate gate", () => {
-  const aggregate = jobBlock("check");
-  assert.match(aggregate, /name:\s*pnpm check/);
-  assert.ok(aggregate.includes("if: ${{ !cancelled() }}"));
-  assert.doesNotMatch(aggregate, /if:\s*always\(\)/);
-  assert.match(aggregate, /Require mandatory gates/);
-
-  const mandatoryNeeds = [
-    "scope",
-    "db-safety",
-    "static-safety",
-    "code-track-c",
-    "code-affected",
-    "code-full",
-  ];
-  for (const name of mandatoryNeeds) {
-    assert.ok(aggregate.includes(`      - ${name}\n`), `aggregate gate must need ${name}`);
+test("CI preserves mandatory gates and selector-driven code lanes", () => {
+  const check = jobBlock("check");
+  for (const stepName of [
+    "Verify policy transactions on PostgreSQL",
+    "Verify Track B 0037 migration operator",
+    "Verify Track B 0038 migration operator",
+    "Verify Track B 0039 migration operator",
+    "Verify Track B 0040 operator boundary",
+    "Verify Gate E release-evidence reader access",
+    "Verify release integrity",
+    "Verify CI selector logic",
+    "Determine CI scope",
+    "Run Track C focused checks",
+    "Run affected packages checks",
+    "Run repository checks (full regression)",
+  ]) {
+    stepBlock(check, stepName);
   }
 
-  const resultBindings = [
-    "SCOPE_RESULT: ${{ needs.scope.result }}",
-    "DB_RESULT: ${{ needs.db-safety.result }}",
-    "STATIC_RESULT: ${{ needs.static-safety.result }}",
-    "TRACK_C_RESULT: ${{ needs.code-track-c.result }}",
-    "AFFECTED_RESULT: ${{ needs.code-affected.result }}",
-    "FULL_RESULT: ${{ needs.code-full.result }}",
-  ];
-  for (const binding of resultBindings) {
-    assert.ok(aggregate.includes(binding), `aggregate gate must bind ${binding}`);
-  }
-
-  assert.ok(aggregate.includes('test "$SCOPE_RESULT" = "success"'));
-  assert.ok(aggregate.includes('test "$DB_RESULT" = "success"'));
-  assert.ok(aggregate.includes('test "$STATIC_RESULT" = "success"'));
-  assert.ok(aggregate.includes('track-c)\n              test "$TRACK_C_RESULT" = "success"'));
-  assert.ok(aggregate.includes('affected)\n              test "$AFFECTED_RESULT" = "success"'));
-  assert.ok(aggregate.includes('full)\n              test "$FULL_RESULT" = "success"'));
-  assert.ok(aggregate.includes('Unexpected CI mode'));
+  assert.match(stepBlock(check, "Run Track C focused checks"), /if:\s*steps\.ci-scope\.outputs\.mode == 'track-c'/);
+  assert.match(stepBlock(check, "Run affected packages checks"), /if:\s*steps\.ci-scope\.outputs\.mode == 'affected'/);
+  assert.match(stepBlock(check, "Run repository checks (full regression)"), /if:\s*steps\.ci-scope\.outputs\.mode == 'full'/);
 });
 
-test("full regression lane deduplicates release integrity and top-level workspace build", () => {
-  const full = jobBlock("code-full");
-  assert.doesNotMatch(full, /run:\s*pnpm check\s*$/m);
+test("full regression deduplicates release integrity and the second top-level workspace build", () => {
+  const check = jobBlock("check");
+  const full = stepBlock(check, "Run repository checks (full regression)");
+
+  assert.doesNotMatch(full, /pnpm check(?:\s|$)/);
   assert.doesNotMatch(full, /check:release-integrity/);
   assert.equal((full.match(/pnpm -r build/g) ?? []).length, 1);
   assert.equal((full.match(/pnpm -r typecheck/g) ?? []).length, 1);
   assert.equal((full.match(/pnpm -r test/g) ?? []).length, 1);
 
   assert.equal((workflow.match(/pnpm check:release-integrity/g) ?? []).length, 1);
-  assert.match(jobBlock("static-safety"), /pnpm check:release-integrity/);
 });
 
-test("PostgreSQL service is isolated to the DB safety lane", () => {
-  assert.match(jobBlock("db-safety"), /services:\n\s+postgres:/);
-  for (const name of ["scope", "static-safety", "code-track-c", "code-affected", "code-full", "check"]) {
-    assert.doesNotMatch(jobBlock(name), /services:\n\s+postgres:/);
-  }
+test("PostgreSQL service stays attached to the mandatory check job", () => {
+  const check = jobBlock("check");
+  assert.match(check, /services:\n\s+postgres:/);
+  assert.match(check, /POLICY_STORE_TEST_DATABASE_URL:/);
+  assert.match(check, /GATE_E_STORE_TEST_DATABASE_URL:/);
 });
