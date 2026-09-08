@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { appendFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
@@ -12,6 +12,8 @@ export const TRACK_C_OFFLINE_SAFE_FILES = new Set([
   "apps/worker/src/track-c-offline-candidate.ts",
   "apps/worker/src/track-c-offline-candidate.test.ts",
   "apps/worker/src/track-c-offline-candidate-validation.ts",
+  "apps/worker/src/track-c-quality-suite-gate.ts",
+  "apps/worker/src/track-c-quality-suite-gate.test.ts",
 ]);
 
 export function normalizePath(filePath) {
@@ -106,7 +108,7 @@ export function selectCiScope(changedFiles) {
 export function getChangedFilesFromGit(baseRef, headRef = "HEAD") {
   let diffTarget = baseRef;
   try {
-    const mergeBase = execSync(`git merge-base "${baseRef}" "${headRef}"`, {
+    const mergeBase = execFileSync("git", ["merge-base", baseRef, headRef], {
       encoding: "utf-8",
       stdio: ["pipe", "pipe", "ignore"],
     }).trim();
@@ -118,7 +120,7 @@ export function getChangedFilesFromGit(baseRef, headRef = "HEAD") {
     diffTarget = baseRef;
   }
 
-  const rawOutput = execSync(`git diff --name-only "${diffTarget}" "${headRef}"`, {
+  const rawOutput = execFileSync("git", ["diff", "--name-only", diffTarget, headRef], {
     encoding: "utf-8",
   });
 
@@ -153,7 +155,7 @@ export function runCli() {
     }
   }
 
-  // Non-PR events (e.g. push to main, workflow_dispatch) always run full regression
+  // Non-PR events (e.g. push to main, workflow_dispatch, merge_group, schedule) always run full regression
   if (eventName && eventName !== "pull_request" && !explicitFiles) {
     console.log(`Event "${eventName}" detected -> full regression mode`);
     emitOutput({
@@ -172,7 +174,7 @@ export function runCli() {
     try {
       // Find merge-base if possible for accurate diff against base branch
       try {
-        const mergeBase = execSync(`git merge-base "${baseRef}" "${headRef}"`, {
+        const mergeBase = execFileSync("git", ["merge-base", baseRef, headRef], {
           encoding: "utf-8",
           stdio: ["pipe", "pipe", "ignore"],
         }).trim();

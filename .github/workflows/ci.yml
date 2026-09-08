@@ -7,6 +7,9 @@ on:
   push:
     branches:
       - main
+  merge_group:
+  schedule:
+    - cron: "0 2 * * *"
   workflow_dispatch:
 
 permissions:
@@ -92,6 +95,9 @@ jobs:
       - name: Verify release integrity
         run: pnpm check:release-integrity
 
+      - name: Verify CI selector logic
+        run: node --test scripts/ci/ci-scope.test.mjs
+
       - name: Determine CI scope
         id: ci-scope
         run: node scripts/ci/ci-scope.mjs
@@ -108,7 +114,8 @@ jobs:
             src/track-c-replay.test.ts \
             src/track-c-must-pass.test.ts \
             src/track-c-quality-judge.test.ts \
-            src/track-c-offline-candidate.test.ts
+            src/track-c-offline-candidate.test.ts \
+            src/track-c-quality-suite-gate.test.ts
 
       - name: Run affected packages checks
         if: steps.ci-scope.outputs.mode == 'affected'
