@@ -220,11 +220,19 @@ export function assertCanonicalGeometry(
   if (output.width > maxDimension || output.height > maxDimension) {
     throw new RecognitionImageError("MEDIA_PREPARE_GEOMETRY_INVALID");
   }
-  if (output.width > source.width || output.height > source.height) {
+  // An EXIF quarter-turn swaps the axes before scaling, so "no upscale" means
+  // the output fits inside the source bounds either upright or with the axes
+  // swapped. Comparing axis-by-axis against the pre-orientation source would
+  // reject a legitimately rotated image — a 400x800 source that autorotates to
+  // 800x400 upscales nothing, yet 800 > 400 on the width axis alone.
+  const fitsUpright =
+    output.width <= source.width && output.height <= source.height;
+  const fitsRotated =
+    output.width <= source.height && output.height <= source.width;
+  if (!fitsUpright && !fitsRotated) {
     throw new RecognitionImageError("MEDIA_PREPARE_GEOMETRY_INVALID");
   }
-  // An EXIF quarter-turn swaps the axes before scaling, so compare against both
-  // the upright and the rotated source ratio.
+  // The ratio check accepts the same two orientations, for the same reason.
   const outputRatio = output.width / output.height;
   const upright = source.width / source.height;
   const rotated = source.height / source.width;

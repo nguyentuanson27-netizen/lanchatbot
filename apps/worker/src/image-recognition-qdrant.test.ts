@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  IMAGE_RECOGNITION_MAX_UNIQUE_GROUPS,
   IMAGE_RECOGNITION_VECTOR_SIZE,
   ImageRecognitionSearchError,
   QdrantImageRecognitionAdapter,
@@ -88,6 +89,34 @@ describe("grouped exact recognition search", () => {
     expect(body.with_payload).toBe(true);
     expect(body.with_vector).toBe(false);
     expect(body.query).toHaveLength(IMAGE_RECOGNITION_VECTOR_SIZE);
+  });
+
+  it("hard-caps the requested group limit at five", async () => {
+    // The locked contract is at most five unique SKU groups, and the reranker
+    // only accepts 1-5, so a wrong caller/config is clamped at this boundary
+    // rather than producing an oversized shortlist that fails later.
+    expect(IMAGE_RECOGNITION_MAX_UNIQUE_GROUPS).toBe(5);
+    const { instance, calls } = adapter(() => json({
+      result: {
+        groups: [
+          group("SD375", 0.95),
+          group("CB182", 0.91),
+          group("SV921", 0.88),
+          group("DM044", 0.84),
+          group("AO113", 0.80),
+          group("XX999", 0.79),
+        ],
+      },
+    }));
+    const hits = await instance.searchCutoutGroups(
+      embedding(),
+      100,
+      new AbortController().signal,
+    );
+    expect(JSON.parse(String(calls[0]?.init.body)).limit).toBe(5);
+    // Even a server that ignores the limit cannot widen the shortlist.
+    expect(hits).toHaveLength(5);
+    expect(hits.map((hit) => hit.productId)).not.toContain("XX999");
   });
 
   it("returns up to five unique SKU groups in server score order", async () => {

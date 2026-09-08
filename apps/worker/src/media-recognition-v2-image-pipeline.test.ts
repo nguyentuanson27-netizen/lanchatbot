@@ -105,6 +105,37 @@ describe("shared V2 image preparation", () => {
     )).not.toThrow();
   });
 
+  it("accepts an EXIF quarter-turn that swaps the axes without upscaling", () => {
+    // A 400x800 source that autorotates to 800x400 upscales no pixel, even
+    // though 800 exceeds the pre-orientation width.
+    expect(() => assertCanonicalGeometry(
+      { width: 400, height: 800 },
+      { width: 800, height: 400 },
+      1_024,
+    )).not.toThrow();
+    // Same rotation on a source that also needs downscaling to fit the box.
+    expect(() => assertCanonicalGeometry(
+      { width: 1_200, height: 2_400 },
+      { width: 1_024, height: 512 },
+      1_024,
+    )).not.toThrow();
+    // And the untouched square case stays valid in both readings.
+    expect(() => assertCanonicalGeometry(
+      { width: 600, height: 600 },
+      { width: 600, height: 600 },
+      1_024,
+    )).not.toThrow();
+  });
+
+  it("still rejects an upscale that neither orientation can explain", () => {
+    // 900x400 fits neither 400x800 upright nor 800x400 rotated.
+    expect(() => assertCanonicalGeometry(
+      { width: 400, height: 800 },
+      { width: 900, height: 400 },
+      1_024,
+    )).toThrow("MEDIA_PREPARE_GEOMETRY_INVALID");
+  });
+
   it("rejects upscaled, over-bound or cropped canonical output", () => {
     expect(() => assertCanonicalGeometry(
       { width: 500, height: 300 },
@@ -132,6 +163,19 @@ describe("shared V2 image preparation", () => {
     );
     expect(readImageDimensions(output)).toEqual({ width: 1_024, height: 512 });
     expect(transcoder.calls[0]).toEqual(canonicalFfmpegArguments(1_024));
+  });
+
+  it("accepts a rotated portrait source through the whole preparation path", async () => {
+    // End-to-end through prepareCanonicalPng, not just the assert helper: a
+    // portrait JPEG whose EXIF orientation makes ffmpeg emit landscape must not
+    // be rejected by the no-upscale post-condition.
+    const transcoder = transcoderReturning(png(800, 400));
+    const output = await pipeline(transcoder).prepareCanonicalPng(
+      jpeg(400, 800),
+      new AbortController().signal,
+    );
+    expect(readImageDimensions(output)).toEqual({ width: 800, height: 400 });
+    expect(transcoder.calls[0]).toContain("-autorotate");
   });
 
   it("produces deterministic output for identical input", async () => {

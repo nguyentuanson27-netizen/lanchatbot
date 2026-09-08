@@ -39,6 +39,12 @@ export const IMAGE_RECOGNITION_VECTOR_NAME = "image_cutout";
 export const IMAGE_RECOGNITION_VECTOR_SIZE = 3_072;
 export const IMAGE_RECOGNITION_DISTANCE = "Cosine";
 export const IMAGE_RECOGNITION_GROUP_BY_FIELD = "product_id";
+/**
+ * Locked V2 shortlist bound. The reranker accepts 1-5 candidates, so the cap is
+ * enforced here at the Qdrant boundary rather than left to the caller: a wrong
+ * config can never make retrieval return more groups than the contract allows.
+ */
+export const IMAGE_RECOGNITION_MAX_UNIQUE_GROUPS = 5;
 
 /** One winning catalog image point for one unique SKU group. */
 export interface ImageRecognitionHit {
@@ -251,7 +257,10 @@ export class QdrantImageRecognitionAdapter
     uniqueProductLimit: number,
     signal: AbortSignal,
   ): Promise<readonly ImageRecognitionHit[]> {
-    const limit = Math.max(1, Math.min(100, Math.trunc(uniqueProductLimit)));
+    const limit = Math.max(
+      1,
+      Math.min(IMAGE_RECOGNITION_MAX_UNIQUE_GROUPS, Math.trunc(uniqueProductLimit)),
+    );
     const body = await this.request(
       this.path("/points/query/groups"),
       "POST",
