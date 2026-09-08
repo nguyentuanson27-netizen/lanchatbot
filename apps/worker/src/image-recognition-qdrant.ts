@@ -8,6 +8,15 @@
  * opposite — the exact winning image point per SKU, with its unmodified cosine
  * score — so it gets its own collection contract and its own adapter.
  *
+ * The adapter is worker-local rather than part of the `@lana/business-tools`
+ * public API: every consumer of it in V2 (realtime recognition and the V2
+ * catalog publisher) lives in `apps/worker`, and the package barrel
+ * `packages/business-tools/src/index.ts` is one of the frozen
+ * `GATE_E_CANDIDATE_SOURCE_PATHS_V1` blobs that must stay byte-identical for
+ * accepted Gate E v22 / Gate F evidence to remain reusable. Keeping the adapter
+ * here avoids expanding that frozen surface. It still reads the shared catalog
+ * types and helpers from `@lana/business-tools`, which the barrel already exports.
+ *
  * Retrieval is server-side grouped exact search:
  *
  *   POST /collections/<recognitionCollection>/points/query/groups
@@ -17,13 +26,13 @@
  * There is deliberately no client-side oversampling/dedupe fallback: if the
  * deployed Qdrant cannot serve this contract, V2 is not deployment-ready.
  */
-import { normalizeProductCode } from "./inventory.js";
-import { stableProductDocumentFromQdrantPayload } from "./qdrant.js";
-import type {
-  ProductImageAngle,
-  ProductImageType,
-  StableProductDocument,
-} from "./types.js";
+import {
+  normalizeProductCode,
+  stableProductDocumentFromQdrantPayload,
+  type ProductImageAngle,
+  type ProductImageType,
+  type StableProductDocument,
+} from "@lana/business-tools";
 
 /** Named vector, size and distance of the dedicated recognition collection. */
 export const IMAGE_RECOGNITION_VECTOR_NAME = "image_cutout";

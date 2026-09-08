@@ -13,7 +13,6 @@ import { readFileSync } from "node:fs";
 import { createSign } from "node:crypto";
 import { XMLParser } from "fast-xml-parser";
 import { createClient } from "redis";
-import { QdrantImageRecognitionAdapter } from "@lana/business-tools";
 import { GoogleSheetsClient } from "./google-sheets-client.js";
 import {
   buildApprovedQdrantJobs,
@@ -27,6 +26,7 @@ import {
   normalizeStructuredExtraction,
 } from "./p23c-profiles.js";
 import { GeminiEmbedding2Client } from "./gemini-embedding-2-client.js";
+import { QdrantImageRecognitionAdapter } from "./image-recognition-qdrant.js";
 import {
   MediaRecognitionV2ImagePipeline,
   MediaRecognitionV2Preparer,

@@ -16,11 +16,11 @@
  * Redis cache. There is no runtime fallback to the previous recognition engine.
  */
 import { createHash } from "node:crypto";
+import type { StableProductDocument } from "@lana/business-tools";
 import type {
   ImageRecognitionHit,
   ImageRecognitionSearchPort,
-  StableProductDocument,
-} from "@lana/business-tools";
+} from "./image-recognition-qdrant.js";
 import type { RecognitionImageEmbeddingPort } from "./gemini-embedding-2-client.js";
 import type { RecognitionImagePreparationPort } from "./media-recognition-v2-image-pipeline.js";
 import {

@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import {
   ProductSearchService,
-  QdrantImageRecognitionAdapter,
   QdrantStableCatalogSearchAdapter,
 } from "@lana/business-tools";
 import {
@@ -66,6 +65,7 @@ import {
   SecureRecognitionImageDownloader,
 } from "./realtime-media-recognition.js";
 import { GeminiEmbedding2Client } from "./gemini-embedding-2-client.js";
+import { QdrantImageRecognitionAdapter } from "./image-recognition-qdrant.js";
 import { resolveMediaRecognitionV2Config } from "./media-recognition-v2-config.js";
 import { VertexMediaReranker } from "./vertex-media-reranker.js";
 

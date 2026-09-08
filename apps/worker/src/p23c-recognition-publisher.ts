@@ -20,7 +20,7 @@
 import type {
   ImageRecognitionPointState,
   ImageRecognitionPublisherPort,
-} from "@lana/business-tools";
+} from "./image-recognition-qdrant.js";
 import type { QdrantJob } from "./p23c-jobs.js";
 import { pointBelongsToShard } from "./p23c-jobs.js";
 import type { RecognitionImageEmbeddingPort } from "./gemini-embedding-2-client.js";

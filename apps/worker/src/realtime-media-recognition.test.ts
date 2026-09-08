@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
+import type { StableProductDocument } from "@lana/business-tools";
 import type {
   ImageRecognitionHit,
   ImageRecognitionSearchPort,
-  StableProductDocument,
-} from "@lana/business-tools";
+} from "./image-recognition-qdrant.js";
 import {
   RealtimeMediaRecognitionService,
   type MediaRerankResult,

@@ -3,7 +3,7 @@ import type {
   ImageRecognitionPoint,
   ImageRecognitionPointState,
   ImageRecognitionPublisherPort,
-} from "@lana/business-tools";
+} from "./image-recognition-qdrant.js";
 import {
   P23cRecognitionPublisher,
   planRecognitionPoint,
