@@ -142,3 +142,24 @@ readable quality fixture module supports future offline quality runs without
 expanding C1, adding a database, or creating an evaluator platform. The active
 directly owner-selected Judge source is `global / gemini-3.7-flash / HIGH`;
 PR #329 historically recorded `gemini-3.8-flash`.
+
+## Owner-approved follow-up: mandatory 50-case C2 quality gate
+
+Integrate the already-versioned `TRACK_C_QUALITY_SUITE_V1` at the existing
+offline Track C composition boundary, without changing generator/runtime
+behavior:
+
+- retain B3 C1 7/7 as the only deterministic guard and safety gate;
+- require the exact 50-case suite for every `CANDIDATE_EVALUATION`, while
+  leaving a `WIRING_SMOKE` B3-only;
+- reuse `TRACK_C_QUALITY_JUDGE_V2` and its existing ten dimensions, pinned
+  judge identity, review routing, and non-identity telemetry;
+- record all 50 PII-safe case histories for owner review, not a new database or
+  evaluator platform;
+- fail the quality gate on any `WORSE`; require at least one existing-V2
+  `BETTER` signal; and expose only `AWAITING_OWNER_APPROVAL`, never automatic
+  selection, promotion, or deployment.
+
+The readable fixture facts must remain marked as fixture-local evaluation input;
+they cannot be converted into Context V2, live business facts, claim
+provenance, or deterministic guard evidence.

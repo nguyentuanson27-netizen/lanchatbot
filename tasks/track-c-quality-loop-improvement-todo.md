@@ -48,3 +48,14 @@ Source: `tasks/track-c-quality-loop-improvement-plan.md`
 - [x] Add the separate PII-safe 50-case `TRACK_C_QUALITY_SUITE_V1` fixture set.
 - [x] Clarify the existing ten-dimension rubric for natural Vietnamese sales
   replies and non-arithmetic holistic `overall`, without new dimensions.
+
+## Owner-approved mandatory C2 quality gate
+
+- [ ] Require the exact PII-safe 50-case quality suite for every offline
+  candidate evaluation after C1 B3 7/7 passes; no partial suite result.
+- [ ] Retain all fifty case histories for owner review while leaving normal
+  automatic human-review routing limited to near-tie/regression/disagreement.
+- [ ] Block the quality gate on any `WORSE`, require a `BETTER` signal, and
+  return only `AWAITING_OWNER_APPROVAL` rather than automatic selection.
+- [ ] Prove fixture-local facts cannot be mistaken for C1/runtime provenance;
+  run focused tests, typecheck, build, lint, and required review/CI.

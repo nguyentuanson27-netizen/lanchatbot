@@ -9,6 +9,10 @@ import {
   type TrackCJudgeCallResult,
   type TrackCQualityComparisonInput,
 } from "./track-c-quality-judge.js";
+import {
+  qualitySuiteFactsForJudge,
+  TRACK_C_QUALITY_SUITE_V1,
+} from "./track-c-quality-suite.js";
 
 const privateKey = generateKeyPairSync("rsa", {
   modulusLength: 2_048,
@@ -231,6 +235,62 @@ describe("Track C C1.1 offline quality judge", () => {
 
       await expect(runTrackCQualityComparison(request)).rejects.toThrow(
         "TRACK_C_C11_JUDGE_IDENTITY_MISMATCH",
+      );
+      expect(request.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+    }
+  });
+
+  it("accepts fixture-local facts only through the explicit 50-case quality source", async () => {
+    const request = input({
+      factFixtureHash: "a".repeat(64),
+      factSource: "TRACK_C_QUALITY_SUITE_V1",
+      verifiedFacts: null,
+    });
+
+    await expect(runTrackCQualityComparison(request)).rejects.toThrow(
+      "TRACK_C_C11_QUALITY_SUITE_FACTS_MISMATCH",
+    );
+    expect(request.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+  });
+
+  it("rejects fixture-local facts when a caller labels them as B3 facts", async () => {
+    for (const withExplicitB3Source of [false, true]) {
+      const request = input({
+        verifiedFacts: qualitySuiteFactsForJudge(TRACK_C_QUALITY_SUITE_V1[0]!),
+        ...(withExplicitB3Source ? { factSource: "B3_MUST_PASS" as const } : {}),
+      });
+
+      await expect(runTrackCQualityComparison(request)).rejects.toThrow(
+        "TRACK_C_C11_FACT_SOURCE_MISMATCH",
+      );
+      expect(request.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+    }
+  });
+
+  it("fails closed for a malformed or cross-fixture quality-facts envelope", async () => {
+    const firstFixture = TRACK_C_QUALITY_SUITE_V1[0]!;
+    const secondFixture = TRACK_C_QUALITY_SUITE_V1[1]!;
+    const crossFixture = input({
+      factFixtureHash: "a".repeat(64),
+      factSource: "TRACK_C_QUALITY_SUITE_V1",
+      qualitySuiteFixtureId: secondFixture.id,
+      verifiedFacts: qualitySuiteFactsForJudge(firstFixture),
+    });
+    const malformed = input({
+      factFixtureHash: "a".repeat(64),
+      factSource: "TRACK_C_QUALITY_SUITE_V1",
+      qualitySuiteFixtureId: firstFixture.id,
+      verifiedFacts: {
+        contractVersion: "TRACK_C_QUALITY_SUITE_FACTS_V1",
+        origin: "FIXTURE_LOCAL_EVALUATION_ONLY",
+        fixtureId: firstFixture.id,
+        facts: [123],
+      } as unknown as TrackCQualityComparisonInput["verifiedFacts"],
+    });
+
+    for (const request of [crossFixture, malformed]) {
+      await expect(runTrackCQualityComparison(request)).rejects.toThrow(
+        "TRACK_C_C11_QUALITY_SUITE_FACTS_MISMATCH",
       );
       expect(request.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
     }

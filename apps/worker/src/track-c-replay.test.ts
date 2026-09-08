@@ -10,6 +10,7 @@ import { buildContextV2Capture } from "./context-v2.js";
 import { buildTrackCOfflineCandidateRequest } from "./track-c-offline-candidate.js";
 import { validateTrackCOfflineCandidate } from "./track-c-offline-candidate-validation.js";
 import { TRACK_C_C1_MUST_PASS_POLICY } from "./track-c-must-pass.js";
+import { TRACK_C_QUALITY_SUITE_V1 } from "./track-c-quality-suite.js";
 import {
   TRACK_C_ACCEPTED_V22_BASELINE,
   assertTrackCOfflineHumanReviewTextSafe,
@@ -148,6 +149,7 @@ function replayInput(
   scores: readonly (readonly [number, number])[] = [],
   assessments: readonly SalesRubricAssessmentV2[] = [],
   factsByCase: Readonly<Record<string, BusinessFactEnvelopeV1 | null>> = {},
+  qualitySuiteBetter = false,
 ) {
   let scoreIndex = 0;
   const judge = {
@@ -155,6 +157,13 @@ function replayInput(
       promptRubric: { version: "v2" }, generationConfig: { thinkingConfig: { thinkingLevel: "HIGH" } } })),
     judgeSalesReplyV2: vi.fn(async () => {
       const index = scoreIndex++;
+      if (qualitySuiteBetter && index >= 8) {
+        return {
+          assessment: assessment(index % 2 === 0 ? 3 : 4),
+          latencyMs: index,
+          tokenUsage: {},
+        };
+      }
       return {
         assessment: assessments[index] ?? assessment(
           (scores[Math.floor(index / 2)] ?? [4, 4] as const)[index % 2]!,
@@ -197,6 +206,24 @@ function replayInput(
   return input;
 }
 
+function qualitySuiteInput() {
+  return {
+    cases: TRACK_C_QUALITY_SUITE_V1.map(({ id }) => ({
+      caseId: id,
+      accepted: {
+        reply: `accepted ${id}`,
+        proposalSummary: { action: "REPLY" },
+        guardOutcome: { action: "REPLY", sideEffects: "DISABLED" },
+      },
+      candidate: {
+        reply: `candidate ${id}`,
+        proposalSummary: { action: "REPLY" },
+        guardOutcome: { action: "REPLY", sideEffects: "DISABLED" },
+      },
+    })),
+  };
+}
+
 describe("Track C C2 offline replay", () => {
   it("fails C1 before Judge when a HUMAN-owned B3 candidate emits a BOT reply", async () => {
     const input = replayInput();
@@ -216,21 +243,40 @@ describe("Track C C2 offline replay", () => {
   });
 
   it("runs the frozen v22 baseline through MUST_PASS, guarded replay, and V2 judge evidence", async () => {
-    const input = replayInput();
+    const input = replayInput([], [], {}, true);
 
     const evidence = await runTrackCOfflineQuality({
       runKind: "CANDIDATE_EVALUATION",
       acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
       mustPassReplay: input.mustPassReplay,
       judge: input.judge,
+      qualitySuite: qualitySuiteInput(),
       cases: input.cases.map(({ caseId, accepted, candidate }) => ({
         caseId,
         accepted,
         candidate,
       })),
     });
+    expect(evidence.qualitySuite).toMatchObject({
+      mandatory: true,
+      aggregate: { caseCount: 50, worse: 0 },
+      gate: { status: "AWAITING_OWNER_APPROVAL", selectionAuthorized: false },
+    });
+    expect(evidence.candidateReadiness).toEqual({
+      status: "AWAITING_OWNER_APPROVAL",
+      selectionAuthorized: false,
+    });
 
-    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(8);
+    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(108);
+    const firstB3Quality = evidence.replay.cases.find(({ quality }) =>
+      quality.status === "SCORED",
+    )?.quality;
+    if (firstB3Quality?.status !== "SCORED") {
+      throw new Error("TEST_B3_JUDGE_IDENTITY_REQUIRED");
+    }
+    expect(evidence.qualitySuite?.history.cases[0]?.identity.judge).toEqual(
+      firstB3Quality.identity.judge,
+    );
     expect(evidence).toMatchObject({
       contractVersion: "TRACK_C_OFFLINE_RUNNER_V1",
       evaluationOnly: true,
@@ -253,13 +299,55 @@ describe("Track C C2 offline replay", () => {
     });
   });
 
-  it("records correct HUMAN handoffs as N/A and judges only BOT-eligible cases", async () => {
+  it("requires the mandatory 50-case quality gate for a candidate evaluation", async () => {
     const input = replayInput();
+
+    await expect(runTrackCOfflineQuality({
+      runKind: "CANDIDATE_EVALUATION",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: input.mustPassReplay,
+      judge: input.judge,
+      cases: input.cases.map(({ caseId, accepted, candidate }) => ({
+        caseId,
+        accepted,
+        candidate,
+      })),
+    })).rejects.toThrow("TRACK_C_OFFLINE_RUNNER_QUALITY_SUITE_REQUIRED");
+    expect(input.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
+  });
+
+  it("keeps a B3 quality regression out of the owner-approval state", async () => {
+    const input = replayInput([[4, 3], [4, 4], [4, 4], [4, 4]], [], {}, true);
+
     const evidence = await runTrackCOfflineQuality({
       runKind: "CANDIDATE_EVALUATION",
       acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
       mustPassReplay: input.mustPassReplay,
       judge: input.judge,
+      qualitySuite: qualitySuiteInput(),
+      cases: input.cases.map(({ caseId, accepted, candidate }) => ({
+        caseId,
+        accepted,
+        candidate,
+      })),
+    });
+
+    expect(evidence.replay.aggregate.worse).toBe(1);
+    expect(evidence.qualitySuite?.gate.status).toBe("AWAITING_OWNER_APPROVAL");
+    expect(evidence.candidateReadiness).toEqual({
+      status: "REGRESSION_DETECTED",
+      selectionAuthorized: false,
+    });
+  });
+
+  it("records correct HUMAN handoffs as N/A and judges only BOT-eligible cases", async () => {
+    const input = replayInput([], [], {}, true);
+    const evidence = await runTrackCOfflineQuality({
+      runKind: "CANDIDATE_EVALUATION",
+      acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
+      mustPassReplay: input.mustPassReplay,
+      judge: input.judge,
+      qualitySuite: qualitySuiteInput(),
       cases: input.cases.map(({ caseId, accepted, candidate }) => ({ caseId, accepted, candidate })),
     });
 
@@ -308,7 +396,7 @@ describe("Track C C2 offline replay", () => {
       "malformed-output",
       "single-repair-and-verified-fallback",
     ]);
-    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(8);
+    expect(input.judge.judgeSalesReplyV2).toHaveBeenCalledTimes(108);
   });
 
   it("emits an exact PII-safe reply pair only for a case requiring human review", async () => {
@@ -340,6 +428,7 @@ describe("Track C C2 offline replay", () => {
       acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
       mustPassReplay: input.mustPassReplay,
       judge: input.judge,
+      qualitySuite: qualitySuiteInput(),
       cases: input.cases.map(({ caseId, accepted, candidate }) => ({
         caseId,
         accepted,
@@ -403,6 +492,7 @@ describe("Track C C2 offline replay", () => {
       acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
       mustPassReplay: input.mustPassReplay,
       judge: input.judge,
+      qualitySuite: qualitySuiteInput(),
       cases: input.cases.map(({ caseId, accepted, candidate }) => ({
         caseId,
         accepted,
@@ -459,6 +549,7 @@ describe("Track C C2 offline replay", () => {
       acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
       mustPassReplay: input.mustPassReplay,
       judge: input.judge,
+      qualitySuite: qualitySuiteInput(),
       cases: input.cases.map(({ caseId, accepted, candidate }) => ({
         caseId, accepted, candidate,
       })),
@@ -504,6 +595,7 @@ describe("Track C C2 offline replay", () => {
       acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
       mustPassReplay: input.mustPassReplay,
       judge: input.judge,
+      qualitySuite: qualitySuiteInput(),
       cases: input.cases.map(({ caseId, accepted, candidate }) => ({
         caseId,
         accepted,
@@ -533,6 +625,7 @@ describe("Track C C2 offline replay", () => {
       acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
       mustPassReplay: input.mustPassReplay,
       judge: input.judge,
+      qualitySuite: qualitySuiteInput(),
       cases: input.cases.map(({ caseId, accepted, candidate }) => ({
         caseId,
         accepted,
@@ -581,6 +674,7 @@ describe("Track C C2 offline replay", () => {
       acceptedBaseline: TRACK_C_ACCEPTED_V22_BASELINE,
       mustPassReplay: input.mustPassReplay,
       judge: input.judge,
+      qualitySuite: qualitySuiteInput(),
       cases: input.cases.map(({ caseId, accepted, candidate }) => ({
         caseId,
         accepted,

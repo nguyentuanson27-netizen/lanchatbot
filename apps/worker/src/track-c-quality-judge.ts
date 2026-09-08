@@ -1,14 +1,15 @@
 import { createHash } from "node:crypto";
 import {
   canonicalJsonV1,
-  type BusinessFactEnvelopeV1,
   type SalesRubricAssessmentV2,
 } from "@lana/contracts";
 import type { ShadowContextMessage } from "@lana/database";
 import { assertTrackCC1MustPass } from "./track-c-must-pass.js";
 import type { TrackBLivePathReplayResult } from "./track-b-live-path-replay.js";
+import type { TrackCQualitySuiteFactsV1 } from "./track-c-quality-suite.js";
 import {
   VertexShadowModel,
+  type JudgeSalesReplyV2Facts,
   type JudgeSalesReplyV2Descriptor,
   type VertexShadowModelOptions,
 } from "./vertex.js";
@@ -34,7 +35,7 @@ export interface TrackCQualityJudgePort {
   judgeSalesReplyV2(
     context: readonly ShadowContextMessage[],
     actualReply: string,
-    verifiedFacts: BusinessFactEnvelopeV1 | null,
+    verifiedFacts: JudgeSalesReplyV2Facts,
     proposalSummary: unknown,
     guardOutcome: unknown,
   ): Promise<TrackCJudgeCallResult>;
@@ -57,7 +58,7 @@ export function createTrackCQualityJudge(
     judgeSalesReplyV2: (
       context: readonly ShadowContextMessage[],
       actualReply: string,
-      verifiedFacts: BusinessFactEnvelopeV1 | null,
+      verifiedFacts: JudgeSalesReplyV2Facts,
       proposalSummary: unknown,
       guardOutcome: unknown,
     ) => model.judgeSalesReplyV2WithMetrics(
@@ -81,8 +82,12 @@ export interface TrackCQualityComparisonInput {
   readonly mustPassReplay: TrackBLivePathReplayResult;
   readonly judge: TrackCQualityJudgePort;
   readonly context: readonly ShadowContextMessage[];
-  readonly verifiedFacts: BusinessFactEnvelopeV1 | null;
+  readonly verifiedFacts: JudgeSalesReplyV2Facts;
   readonly factFixtureHash: string;
+  /** B3 is default; the 50-case source is fixture-local quality evidence only. */
+  readonly factSource?: "B3_MUST_PASS" | "TRACK_C_QUALITY_SUITE_V1";
+  /** Required only for the explicit 50-case fixture-local fact source. */
+  readonly qualitySuiteFixtureId?: string;
   readonly accepted: TrackCQualityReplyInput;
   readonly candidate: TrackCQualityReplyInput;
 }
@@ -110,6 +115,7 @@ export interface TrackCQualityComparisonResult {
       readonly generationConfigHash: string;
     };
     readonly verifiedFactFixtureHash: string;
+    readonly verifiedFactSource: "B3_MUST_PASS" | "TRACK_C_QUALITY_SUITE_V1";
     readonly verifiedFactsPayloadHash: string;
     readonly contextHash: string;
     readonly accepted: {
@@ -143,6 +149,28 @@ function sha256(value: unknown): string {
   return createHash("sha256")
     .update(canonicalJsonV1(value), "utf8")
     .digest("hex");
+}
+
+function isQualitySuiteFacts(
+  value: JudgeSalesReplyV2Facts,
+): value is TrackCQualitySuiteFactsV1 {
+  return typeof value === "object" && value !== null &&
+    "contractVersion" in value &&
+    "origin" in value &&
+    "fixtureId" in value &&
+    "facts" in value &&
+    value.contractVersion === "TRACK_C_QUALITY_SUITE_FACTS_V1" &&
+    value.origin === "FIXTURE_LOCAL_EVALUATION_ONLY" &&
+    typeof value.fixtureId === "string" && value.fixtureId.trim().length > 0 &&
+    Array.isArray(value.facts) && value.facts.every((fact) => typeof fact === "string");
+}
+
+function hasQualitySuiteFactMarker(value: JudgeSalesReplyV2Facts): boolean {
+  return typeof value === "object" && value !== null && (
+    ("contractVersion" in value &&
+      value.contractVersion === "TRACK_C_QUALITY_SUITE_FACTS_V1") ||
+    ("origin" in value && value.origin === "FIXTURE_LOCAL_EVALUATION_ONLY")
+  );
 }
 
 function recommendationRank(
@@ -179,8 +207,25 @@ export async function runTrackCQualityComparison(
   if (!HASH.test(input.factFixtureHash)) {
     throw new Error("TRACK_C_C11_FACT_FIXTURE_HASH_INVALID");
   }
-  if (input.factFixtureHash !== input.mustPassReplay.identity.factFixtureHash) {
+  const factSource = input.factSource ?? "B3_MUST_PASS";
+  if (
+    factSource === "B3_MUST_PASS" &&
+    hasQualitySuiteFactMarker(input.verifiedFacts)
+  ) {
+    throw new Error("TRACK_C_C11_FACT_SOURCE_MISMATCH");
+  }
+  if (
+    factSource === "B3_MUST_PASS" &&
+    input.factFixtureHash !== input.mustPassReplay.identity.factFixtureHash
+  ) {
     throw new Error("TRACK_C_C11_FACT_FIXTURE_MISMATCH");
+  }
+  if (
+    factSource === "TRACK_C_QUALITY_SUITE_V1" &&
+    (!isQualitySuiteFacts(input.verifiedFacts) ||
+      input.qualitySuiteFixtureId !== input.verifiedFacts.fixtureId)
+  ) {
+    throw new Error("TRACK_C_C11_QUALITY_SUITE_FACTS_MISMATCH");
   }
   const judgeDescriptor = input.judge.judgeSalesReplyV2Descriptor();
   if (
@@ -239,6 +284,7 @@ export async function runTrackCQualityComparison(
         generationConfigHash: sha256(judgeDescriptor.generationConfig),
       },
       verifiedFactFixtureHash: input.factFixtureHash,
+      verifiedFactSource: factSource,
       verifiedFactsPayloadHash: sha256(input.verifiedFacts),
       contextHash: sha256(input.context),
       accepted: {

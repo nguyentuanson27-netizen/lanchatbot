@@ -344,6 +344,7 @@ export async function runTrackCReplay(
         context: replayCase.accepted.quality.context,
         verifiedFacts: replayCase.accepted.quality.verifiedFacts,
         factFixtureHash: input.mustPassReplay.identity.factFixtureHash,
+        factSource: "B3_MUST_PASS",
         accepted: replayCase.accepted.quality,
         candidate: replayCase.candidate.quality,
       });
