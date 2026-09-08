@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
 import { canonicalJsonV1, type SalesRubricAssessmentV2 } from "@lana/contracts";
-import type { ShadowContextMessage } from "@lana/database";
+import { redactAnalyticsMessage, type ShadowContextMessage } from "@lana/database";
 import type { TrackBLivePathReplayResult } from "./track-b-live-path-replay.js";
+import { redactCustomerUrlsForModel } from "./customer-url-policy.js";
 import { assertTrackCC1MustPass } from "./track-c-must-pass.js";
 import {
   qualitySuiteFactsForJudge,
@@ -143,6 +144,23 @@ function replyHash(value: string): string {
     .digest("hex");
 }
 
+/**
+ * The fixture is owner-local, but reply text is still caller/model output.
+ * Exact text can cross the Vertex/history boundary only when the existing
+ * safety projection proves it needs no redaction.
+ */
+function assertTrackCQualitySuiteReplySafe(
+  value: string,
+  label: string,
+): string {
+  const redacted = redactAnalyticsMessage(value);
+  const withoutCustomerUrls = redactCustomerUrlsForModel(redacted.text);
+  if (redacted.dlpStatus !== "PASSED" || withoutCustomerUrls !== value) {
+    throw new Error(`TRACK_C_QUALITY_SUITE_REPLY_NOT_PII_SAFE:${label}`);
+  }
+  return value;
+}
+
 interface PreparedQualitySuiteReply {
   readonly judge: TrackCQualityReplyInput;
   readonly history: TrackCQualitySuiteHistoryReply;
@@ -156,12 +174,16 @@ function prepareReply(
   if (typeof reply.reply !== "string" || !reply.reply.trim()) {
     throw new Error(`TRACK_C_QUALITY_SUITE_${side}_REPLY_INVALID:${caseId}`);
   }
+  const exactReply = assertTrackCQualitySuiteReplySafe(
+    reply.reply,
+    `${caseId}:${side.toLowerCase()}`,
+  );
   return Object.freeze({
-    judge: Object.freeze({ ...reply }),
+    judge: Object.freeze({ ...reply, reply: exactReply }),
     history: Object.freeze({
-      reply: reply.reply,
-      replyHash: replyHash(reply.reply),
-      sourceReplyHash: replyHash(reply.reply),
+      reply: exactReply,
+      replyHash: replyHash(exactReply),
+      sourceReplyHash: replyHash(exactReply),
       redacted: false,
     }),
   });

@@ -582,7 +582,7 @@ describe("Track C C2 offline replay", () => {
     expect(replay.quality.identity.contextHash).toBe(sha256(rawContext));
   });
 
-  it("fails closed instead of emitting a human-review reply with PII", async () => {
+  it("fails closed before Judge or owner-local evidence for an unsafe B3 reply", async () => {
     const accepted = assessment(4, { recommendationAction: "REWRITE" });
     const candidate = assessment(3, {
       scores: { ...assessment(3).scores, factGrounding: 1 },
@@ -622,6 +622,7 @@ describe("Track C C2 offline replay", () => {
     })).rejects.toThrow(
       "TRACK_C_OFFLINE_HUMAN_REVIEW_TEXT_NOT_PII_SAFE:pii-security:candidate",
     );
+    expect(input.judge.judgeSalesReplyV2).not.toHaveBeenCalled();
   });
 
   it("checkpoints every completed case before a later judge failure stops the run", async () => {

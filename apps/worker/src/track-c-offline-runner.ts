@@ -233,6 +233,15 @@ function assertFrozenCaseSet(
   }
 }
 
+function assertOwnerLocalReplyInputsSafe(
+  cases: TrackCOfflineQualityRunInput["cases"],
+): void {
+  for (const { caseId, accepted, candidate } of cases) {
+    assertTrackCOfflineHumanReviewTextSafe(accepted.quality.reply, `${caseId}:accepted`);
+    assertTrackCOfflineHumanReviewTextSafe(candidate.quality.reply, `${caseId}:candidate`);
+  }
+}
+
 function candidateBoundReplay(
   replay: TrackBLivePathReplayResult,
   candidates: ReadonlyMap<string, TrackCOfflineCandidateValidatedEnvelope>,
@@ -466,8 +475,14 @@ function ownerLocalReplyPair(input: Readonly<{
   readonly source: TrackCOfflineQualityRunInput["cases"][number];
   readonly replay: TrackCReplayResult["cases"][number];
 }>): TrackCOfflineOwnerLocalReplyPair {
-  const acceptedReply = input.source.accepted.quality.reply;
-  const candidateReply = input.source.candidate.quality.reply;
+  const acceptedReply = assertTrackCOfflineHumanReviewTextSafe(
+    input.source.accepted.quality.reply,
+    `${input.replay.caseId}:accepted`,
+  );
+  const candidateReply = assertTrackCOfflineHumanReviewTextSafe(
+    input.source.candidate.quality.reply,
+    `${input.replay.caseId}:candidate`,
+  );
   const acceptedReplyHash = sha256(acceptedReply);
   const candidateReplyHash = sha256(candidateReply);
   if (input.replay.quality.status === "SCORED" && (
@@ -542,6 +557,8 @@ export async function runTrackCOfflineQuality(
     candidates.set(item.caseId, assertTrackCOfflineCandidateValidated(item.candidate));
   }
   assertTrackCC1CandidateMustPass(input.mustPassReplay, input.cases);
+  // C1 still leads; this must run before the offline Judge sees any reply.
+  assertOwnerLocalReplyInputsSafe(input.cases);
   const distinctReplyCaseCount = input.cases.filter(({ accepted, candidate }) =>
     candidate.quality.guardOutcome.expectedOwner === "BOT" &&
     accepted.quality.reply !== candidate.quality.reply
