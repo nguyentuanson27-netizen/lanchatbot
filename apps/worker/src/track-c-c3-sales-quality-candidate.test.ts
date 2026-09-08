@@ -181,7 +181,7 @@ describe("Track C C3 sales-quality candidate", () => {
     expect(instruction).toContain(
       "A required CLARIFICATION plus its matching ACTION_REQUEST counts as one next-step objective",
     );
-    expect(instruction).toContain("do not create urgency or pressure");
+    expect(instruction).toContain("Do not create urgency or pressure");
     expect(instruction).toContain(
       "When the latest customer message asks for a protected fact with no eligible verified claim",
     );
