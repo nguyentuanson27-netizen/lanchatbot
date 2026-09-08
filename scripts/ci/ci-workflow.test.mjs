@@ -6,6 +6,9 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const workflow = readFileSync(resolve(repoRoot, ".github/workflows/ci.yml"), "utf-8");
+const workerPackage = JSON.parse(
+  readFileSync(resolve(repoRoot, "apps/worker/package.json"), "utf-8"),
+);
 
 function jobBlock(name) {
   const marker = `\n  ${name}:\n`;
@@ -65,6 +68,23 @@ test("CI preserves mandatory gates and selector-driven code lanes", () => {
   assert.match(stepBlock(check, "Run Track C focused checks"), /if:\s*steps\.ci-scope\.outputs\.mode == 'track-c'/);
   assert.match(stepBlock(check, "Run affected packages checks"), /if:\s*steps\.ci-scope\.outputs\.mode == 'affected'/);
   assert.match(stepBlock(check, "Run repository checks (full regression)"), /if:\s*steps\.ci-scope\.outputs\.mode == 'full'/);
+});
+
+test("Track C checks prepare workspace dependencies before linting", () => {
+  const trackC = stepBlock(jobBlock("check"), "Run Track C focused checks");
+  const typecheck = trackC.indexOf("pnpm --filter @lana/worker typecheck");
+  const lint = trackC.indexOf("pnpm --filter @lana/worker lint");
+
+  assert.notEqual(typecheck, -1);
+  assert.notEqual(lint, -1);
+  assert.ok(typecheck < lint);
+});
+
+test("worker preparation hooks build its complete dependency graph before compilation", () => {
+  const dependencyBuild = 'pnpm -r --filter "@lana/worker^..." build';
+  for (const hook of ["prebuild", "pretypecheck", "pretest"]) {
+    assert.equal(workerPackage.scripts[hook], dependencyBuild);
+  }
 });
 
 test("full regression deduplicates release integrity and the second top-level workspace build", () => {
