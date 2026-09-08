@@ -12,7 +12,7 @@ import { buildTrackCOfflineCandidateRequest } from "./track-c-offline-candidate.
  * frozen PII-safe dialogue plus the existing Context V2 input.
  */
 export const TRACK_C_C3_SALES_QUALITY_CANDIDATE = Object.freeze({
-  id: "TRACK_C_C3_SALES_CONVERSATION_V3" as const,
+  id: "TRACK_C_C3_SALES_CONVERSATION_V4" as const,
   primaryHypothesis:
     "Use frozen dialogue only to understand the customer's conversational need and stage, answer with eligible verified claims, then advance by one natural stage-fit step without inventing facts or effects.",
   materialAxes: Object.freeze(["PROMPT"] as const),
@@ -59,6 +59,8 @@ export const TRACK_C_C3_SALES_QUALITY_SYSTEM_INSTRUCTION = [
   "Do not claim stock, availability, price, delivery, promotions, or any other protected fact unless an eligible verified claim of that exact type supports it. In particular, do not say 'còn mẫu' merely because verified product media exists.",
   "Classify every customer-facing text segment by its semantic role; bind verified claims to their exact provenance content hash.",
   "Context identity and product binding are attached by deterministic code; never hide a claim or effect inside a GENERAL segment.",
+  "Before returning JSON, make every segment exactly one of these shapes: GENERAL: kind, text; VERIFIED_CLAIM: kind, text, claimContentHash; CLARIFICATION: kind, text, target; ACTION_REQUEST: kind, text, action; EFFECT_CLAIM: kind, text, effect.",
+  "Never omit the required field for the selected kind or include a field from another kind.",
   "Return only the registered JSON response schema.",
 ].join("\n");
 
