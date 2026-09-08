@@ -274,7 +274,7 @@ jobs:
       - code-track-c
       - code-affected
       - code-full
-    if: always()
+    if: ${{ !cancelled() }}
     runs-on: [self-hosted, Linux, X64, lana-ci]
     timeout-minutes: 35
     steps:
