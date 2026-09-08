@@ -533,6 +533,12 @@ describe("Track C C2 offline replay", () => {
     )).toThrow("TRACK_C_OFFLINE_HUMAN_REVIEW_TEXT_NOT_PII_SAFE:test:url");
   });
 
+  it("accepts a verified VND price unchanged in human-review evidence", () => {
+    const reply = "Dạ mẫu này giá 1.199.000 VNĐ ạ.";
+    expect(assertTrackCOfflineHumanReviewTextSafe(reply, "test:vnd-price"))
+      .toBe(reply);
+  });
+
   it("redacts a customer URL in human-review context without changing the frozen identity", async () => {
     const input = replayInput([
       [4, 4], [4, 5], [4, 5], [4, 5],

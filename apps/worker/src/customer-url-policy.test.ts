@@ -63,6 +63,34 @@ describe("BF-08 classified customer URL policy", () => {
   });
 
   it.each([
+    "Giá mẫu này là 1.199.000 VNĐ.",
+    "Giá mẫu này là 1.199.000 VNĐ?",
+    "Mẫu còn 2.450.000đ nhé.",
+    "Mẫu này giá 1.299.000₫ ạ.",
+  ])("keeps an explicit VND price out of URL handling: %s", (text) => {
+    expect(classifyCustomerUrls(text, "CLASSIFIED_ALLOWLIST_V1"))
+      .toMatchObject({ disposition: "CONTINUE", items: [] });
+    expect(redactCustomerUrlsForModel(text)).toBe(text);
+  });
+
+  it.each([
+    "1.199.000 VNĐ/path",
+    "1.199.000 VNĐ?token=raw-sentinel",
+    "1.199.000đ?token=raw-sentinel",
+    "1.199.000₫/path",
+    "1.199.000 VNĐ#fragment",
+    "1.199.000đ:443",
+    "1.199.000 VNĐ@evil.test",
+    "169.254.169.254 VNĐ",
+    "127.001 VNĐ",
+    "8.8.8.8 VNĐ",
+  ])("does not exempt a VND-looking URL continuation or numeric host: %s", (text) => {
+    expect(classifyCustomerUrls(text, "CLASSIFIED_ALLOWLIST_V1").disposition)
+      .not.toBe("CONTINUE");
+    expect(redactCustomerUrlsForModel(text)).not.toBe(text);
+  });
+
+  it.each([
     ["lanadesign.vn/sv695", "EXPLAIN_UNSUPPORTED"],
     ["example.com/a", "EXPLAIN_UNSUPPORTED"],
     ["//evil.test/path", "EXPLAIN_UNSUPPORTED"],
