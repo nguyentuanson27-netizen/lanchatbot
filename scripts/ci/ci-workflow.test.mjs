@@ -29,8 +29,12 @@ function stepBlock(job, stepName) {
   return nextStepOffset === -1 ? rest : rest.slice(0, nextStepOffset);
 }
 
-test("CI keeps one check job on the observed single lana-ci runner", () => {
-  const jobsSection = workflow.slice(workflow.indexOf("\njobs:\n") + "\njobs:\n".length);
+test("CI keeps one check job until lana-ci runner parallelism is explicitly available", () => {
+  const jobsMarker = "\njobs:\n";
+  const jobsStart = workflow.indexOf(jobsMarker);
+  assert.notEqual(jobsStart, -1, "CI workflow is missing jobs section");
+
+  const jobsSection = workflow.slice(jobsStart + jobsMarker.length);
   const jobNames = [...jobsSection.matchAll(/^  ([A-Za-z0-9_-]+):\s*$/gm)].map((match) => match[1]);
   assert.deepEqual(jobNames, ["check"]);
 
