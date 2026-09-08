@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -11,8 +10,12 @@ import {
   resolveTrackBReleaseCandidateEvidenceDatabaseUrl,
   runTrackBReleaseCandidateEvidenceCli,
 } from "./track-b-release-candidate-evidence-cli.js";
+import {
+  TRACK_B_V22_ACCEPTED_RELEASE_SOURCE_REVISION,
+  TRACK_B_V22_HISTORICAL_BLOB_READER,
+} from "./track-b-release-candidate-evidence-test-support.js";
 
-const activationReleaseRevision = "a".repeat(40);
+const activationReleaseRevision = TRACK_B_V22_ACCEPTED_RELEASE_SOURCE_REVISION;
 const sourceRoot = fileURLToPath(new URL("../../..", import.meta.url));
 
 const verifyCertification = vi.hoisted(() => vi.fn());
@@ -26,12 +29,6 @@ vi.mock("./gate-e-registration.js", async (importOriginal) => ({
 
 const evidenceStore = {} as GateEEvidenceReaderV2;
 
-function gitBlobOid(content: string): string {
-  return createHash("sha1")
-    .update(`blob ${Buffer.byteLength(content, "utf8")}\0${content}`, "utf8")
-    .digest("hex");
-}
-
 const sourceReader: TrackBReleaseCandidateSourceReader = {
   async refreshTrustedRef() {},
   async resolveRef() { return activationReleaseRevision; },
@@ -39,9 +36,7 @@ const sourceReader: TrackBReleaseCandidateSourceReader = {
   async findBlobIntroductionCommit() { return "c".repeat(40); },
   async isAncestor() { return true; },
   async commitTime() { return "2026-09-01T00:00:00.000Z"; },
-  readBlob: async (_revision, path) => readFile(resolve(sourceRoot, path), "utf8"),
-  resolveBlobOid: async (_revision, path) =>
-    gitBlobOid(await readFile(resolve(sourceRoot, path), "utf8")),
+  ...TRACK_B_V22_HISTORICAL_BLOB_READER,
 };
 
 describe("Track B release-candidate evidence CLI", () => {

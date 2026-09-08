@@ -1,7 +1,4 @@
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { canonicalJsonV1 } from "@lana/contracts";
 import { describe, expect, it } from "vitest";
 import {
@@ -16,34 +13,33 @@ import {
   TRACK_B_REQUIRED_MIGRATION_ARTIFACTS,
   type TrackBReleaseCandidateEvidence,
 } from "./track-b-release-candidate-evidence.js";
+import {
+  TRACK_B_V22_ACCEPTED_RELEASE_SOURCE_REVISION,
+  TRACK_B_V22_HISTORICAL_BLOB_READER,
+} from "./track-b-release-candidate-evidence-test-support.js";
+
+const activationReleaseRevision = TRACK_B_V22_ACCEPTED_RELEASE_SOURCE_REVISION;
 
 function hash(value: unknown): string {
   return createHash("sha256").update(canonicalJsonV1(value), "utf8").digest("hex");
 }
 
-const sourceRoot = fileURLToPath(new URL("../../..", import.meta.url));
-
 async function evidence(): Promise<TrackBReleaseCandidateEvidence> {
-  const activationReleaseRevision = "c9e8d366c3cfa05a57c5dfc051605204f1154b89";
   const candidateProjection = await deriveGateECandidateContentFingerprint({
-    candidateSourceRevision: activationReleaseRevision,
-    git: {
-      readBlob: async (_revision, path) => readFile(resolve(sourceRoot, path), "utf8"),
-      resolveBlobOid: async (_revision, path) => {
-        const content = await readFile(resolve(sourceRoot, path), "utf8");
-        return createHash("sha1")
-          .update(`blob ${Buffer.byteLength(content, "utf8")}\0${content}`, "utf8")
-          .digest("hex");
-      },
-    },
+    candidateSourceRevision: TRACK_B_V22_ACCEPTED_RELEASE_SOURCE_REVISION,
+    git: TRACK_B_V22_HISTORICAL_BLOB_READER,
   });
   const migrationArtifacts = await Promise.all(TRACK_B_REQUIRED_MIGRATION_ARTIFACTS.map(async (artifact) => {
-    const content = await readFile(resolve(sourceRoot, artifact.path), "utf8");
+    const content = await TRACK_B_V22_HISTORICAL_BLOB_READER.readBlob(
+      TRACK_B_V22_ACCEPTED_RELEASE_SOURCE_REVISION,
+      artifact.path,
+    );
     return {
       path: artifact.path,
-      blobOid: createHash("sha1")
-        .update(`blob ${Buffer.byteLength(content, "utf8")}\0${content}`, "utf8")
-        .digest("hex"),
+      blobOid: await TRACK_B_V22_HISTORICAL_BLOB_READER.resolveBlobOid(
+        TRACK_B_V22_ACCEPTED_RELEASE_SOURCE_REVISION,
+        artifact.path,
+      ),
       contentSha256: createHash("sha256").update(content, "utf8").digest("hex"),
     };
   }));
@@ -116,7 +112,7 @@ async function evidence(): Promise<TrackBReleaseCandidateEvidence> {
 describe("Track B release candidate evidence", () => {
   it("binds final v22 evidence and the exact V1-to-V2 authority mutation", async () => {
     expect(validateTrackBReleaseCandidateEvidence(await evidence(), {
-      activationReleaseRevision: "c9e8d366c3cfa05a57c5dfc051605204f1154b89",
+      activationReleaseRevision: TRACK_B_V22_ACCEPTED_RELEASE_SOURCE_REVISION,
     })).toEqual({ status: "MATCHED", reasonCodes: [] });
   });
 
