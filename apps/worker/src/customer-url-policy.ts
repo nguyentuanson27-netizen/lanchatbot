@@ -50,6 +50,12 @@ const URL_CANDIDATE = new RegExp(
   String.raw`(?<![\p{L}\p{N}@._-])(?:https?:\/{0,2}|[a-z][a-z0-9+.-]{1,15}:\/\/|(?:javascript|data|file|ftp|blob):(?:\/\/)?|\/\/|www[.\u3002\uff0e\uff61]|${BARE_AUTHORITY_LIKE})[^\s<>"']*`,
   "giu",
 );
+const VND_GROUPED_AMOUNT = /^(?:[1-9]\d{0,2})(?:\.\d{3})+$/u;
+const VND_GROUPED_AMOUNT_WITH_CURRENCY =
+  /^((?:[1-9]\d{0,2})(?:\.\d{3})+)[\p{Zs}]*(?:đ|₫|vnđ|vnd|đồng)$/iu;
+const VND_CURRENCY_SUFFIX =
+  /^[\p{Zs}]*(?:đ|₫|vnđ|vnd|đồng)(?=$|[\s),.;!\]}]|[?](?=$|[\s),.;!\]}]))/iu;
+const TOKEN_TERMINATOR = /^(?:$|[\s),.;!\]}]|[?](?=$|[\s),.;!\]}]))/u;
 const CONTROL_OR_BIDI = /[\u0000-\u001f\u007f\u200e\u200f\u202a-\u202e\u2066-\u2069]/u;
 const FIRST_PARTY_HOST = "www.lanadesign.vn";
 const ADMIN_MEDIA_HOST = "admin.lanadesign.vn";
@@ -72,10 +78,32 @@ function trimCandidate(value: string): string {
   return output;
 }
 
+function isExplicitVndPriceCandidate(
+  source: string,
+  candidate: string,
+  index: number,
+): boolean {
+  const trimmed = trimCandidate(candidate);
+  const afterCandidate = source.slice(index + candidate.length);
+  const attachedAmount = trimmed.match(VND_GROUPED_AMOUNT_WITH_CURRENCY)?.[1];
+  const amount = attachedAmount !== undefined && TOKEN_TERMINATOR.test(afterCandidate)
+    ? attachedAmount
+    : VND_GROUPED_AMOUNT.test(trimmed) && VND_CURRENCY_SUFFIX.test(afterCandidate)
+      ? trimmed
+      : null;
+  return amount !== null && !isNumericHostLikeAmount(amount);
+}
+
 function extractCandidates(value: string): readonly string[] {
-  return (value.match(URL_CANDIDATE) ?? [])
-    .map(trimCandidate)
-    .filter(Boolean);
+  const candidates: string[] = [];
+  for (const match of value.matchAll(URL_CANDIDATE)) {
+    const candidate = trimCandidate(match[0]);
+    if (
+      candidate &&
+      !(match.index !== undefined && isExplicitVndPriceCandidate(value, match[0], match.index))
+    ) candidates.push(candidate);
+  }
+  return candidates;
 }
 
 function hasEmptyAuthorityPort(raw: string): boolean {
@@ -110,6 +138,15 @@ function privateOrReservedHost(hostname: string): boolean {
     return mapped ? privateOrReservedHost(mapped) : true;
   }
   return false;
+}
+
+function isNumericHostLikeAmount(value: string): boolean {
+  if (/^(?:\d{1,3}\.){3}\d{1,3}$/u.test(value)) return true;
+  try {
+    return privateOrReservedHost(new URL(`https://${value}`).hostname);
+  } catch {
+    return false;
+  }
 }
 
 function normalizedProductCode(value: string): string | null {
@@ -356,7 +393,8 @@ export function classifyCustomerUrls(
 }
 
 export function redactCustomerUrlsForModel(value: string): string {
-  return value.replace(URL_CANDIDATE, (candidate) => {
+  return value.replace(URL_CANDIDATE, (candidate, offset: number, source: string) => {
+    if (isExplicitVndPriceCandidate(source, candidate, offset)) return candidate;
     const trimmed = trimCandidate(candidate);
     return `[CUSTOMER_URL]${candidate.slice(trimmed.length)}`;
   });
