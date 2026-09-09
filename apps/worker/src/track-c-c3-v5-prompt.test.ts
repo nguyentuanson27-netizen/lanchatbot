@@ -48,7 +48,10 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "prefer a nextMove that clarifies the customer's actual budget",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "do not merely repeat the verified price and stop",
+      "For price or budget resistance, follow conversationPlan.nextMove exactly.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "If it is NONE, resolve the supported concern and stop.",
     );
   });
 
