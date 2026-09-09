@@ -4,6 +4,7 @@ import type { SalesCycleRuntimeState } from "@lana/chat-runtime";
 import type {
   FinalTurnEvidenceV2,
   ProductBindingV2,
+  ProtectedClaimV1,
 } from "@lana/contracts";
 import { buildContextV2Capture } from "./context-v2.js";
 import type { CandidateVertexTransport } from "./context-v2-candidate.js";
@@ -11,6 +12,8 @@ import type { TrackCReplayJudgeEnvelope } from "./track-c-replay.js";
 import { buildTrackCC3SalesQualityCandidateRequest } from "./track-c-c3-sales-quality-candidate.js";
 import {
   TRACK_C_C3_TWO_PASS_CANDIDATE,
+  TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION,
+  buildTrackCC3ResponderRequest,
   buildTrackCC3StrategistRequest,
   runTrackCC3TwoPassCandidate,
 } from "./track-c-c3-two-pass-candidate.js";
@@ -28,7 +31,7 @@ const evaluationContext = [{
   occurredAt: evaluationAt.toISOString(),
 }] as const;
 
-function validCapture() {
+function validCapture(verifiedClaims: readonly ProtectedClaimV1[] = []) {
   const canonicalEvidence: CanonicalDecisionEvidenceV1 = {
     dialogueEvidence: {
       schemaVersion: 1,
@@ -94,7 +97,7 @@ function validCapture() {
   };
   return buildContextV2Capture({
     canonicalEvidence,
-    verifiedClaims: [],
+    verifiedClaims,
     finalCommerceState,
     readiness: [],
     finalTurnEvidence,
@@ -104,6 +107,35 @@ function validCapture() {
     now: evaluationAt,
     sourceOccurredAt: evaluationAt,
   });
+}
+
+function verifiedMediaClaim(): ProtectedClaimV1 {
+  return {
+    schemaVersion: 1,
+    claimId: "00000000-0000-4000-8000-000000000001",
+    type: "PRODUCT_MEDIA",
+    scope: { kind: "PRODUCT", productId: "SD398", variantId: null },
+    value: { assetId: "asset-1", assetSha256: hash("e") },
+    provenance: {
+      authority: "MEDIA_SELECTOR_V2",
+      sourceVersion: "fixture:1",
+      evidenceRef: "fixture:media:SD398",
+      contentHash: hash("d"),
+      observedAt: evaluationAt.toISOString(),
+      expiresAt: "2099-01-01T00:00:00.000Z",
+    },
+    authorization: "NONE",
+  };
+}
+
+function conversationPlan() {
+  return {
+    currentNeed: "Xem mẫu sản phẩm",
+    mustResolve: "Cho khách xem nội dung đã xác minh",
+    conversationRead: "Khách đang tìm hiểu mẫu",
+    nextMove: "Trả lời ngắn gọn",
+    avoid: "Không bịa thông tin",
+  } as const;
 }
 
 function accepted(): TrackCReplayJudgeEnvelope {
@@ -131,7 +163,7 @@ function vertexPayload(value: unknown): unknown {
 describe("Track C C3 two-pass offline candidate", () => {
   it("declares one offline-only Strategist -> Responder candidate on the unchanged generator", () => {
     expect(TRACK_C_C3_TWO_PASS_CANDIDATE).toEqual({
-      id: "TRACK_C_C3_STRATEGIST_RESPONDER_V1",
+      id: "TRACK_C_C3_STRATEGIST_RESPONDER_V2",
       primaryHypothesis:
         "A small advisory conversation plan improves need resolution and the next conversational move before the unchanged guarded response output.",
       materialAxes: ["PROMPT", "COMPOSITION", "INTERMEDIATE_SCHEMA"],
@@ -140,6 +172,148 @@ describe("Track C C3 two-pass offline candidate", () => {
       runtimeEligible: false,
       sideEffects: "DISABLED",
     });
+  });
+
+  it("gives Responder code-owned claim references instead of asking it to reproduce hashes", () => {
+    const request = buildTrackCC3ResponderRequest({
+      modelResource,
+      capture: validCapture([verifiedMediaClaim()]),
+      evaluationAt,
+      evaluationContext,
+      conversationPlan: conversationPlan(),
+    });
+    const body = JSON.parse(request.body) as {
+      contents: [{ parts: [{ text: string }] }];
+      generationConfig: {
+        responseSchema: {
+          properties: {
+            segments: { items: { properties: Record<string, unknown> } };
+          };
+        };
+      };
+    };
+    const prompt = JSON.parse(body.contents[0].parts[0].text) as {
+      verifiedClaims: Array<{ claimRef: string; provenance: { contentHash: string } }>;
+    };
+
+    expect(prompt.verifiedClaims).toEqual([
+      expect.objectContaining({
+        claimRef: "CLAIM_001",
+        provenance: expect.objectContaining({ contentHash: hash("d") }),
+      }),
+    ]);
+    expect(body.generationConfig.responseSchema.properties.segments.items.properties)
+      .toHaveProperty("claimRef", { type: "STRING" });
+    expect(body.generationConfig.responseSchema.properties.segments.items.properties)
+      .not.toHaveProperty("claimContentHash");
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
+      "claimContentHash",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "never copy, invent, or return a provenance hash",
+    );
+  });
+
+  it("resolves a verified claim reference to the exact Context V2 hash before the existing validator", async () => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Mẫu chị đang xem nằm ngay bên dưới để chị xem kỹ hơn ạ.",
+          claimRef: "CLAIM_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    const result = await runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture([verifiedMediaClaim()]),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    });
+
+    expect(result.candidate.guard).toEqual({
+      status: "PASS",
+      sideEffects: "DISABLED",
+      blockedReasonCodes: [],
+    });
+    expect(result.candidate.quality.reply).toBe(
+      "Mẫu chị đang xem nằm ngay bên dưới để chị xem kỹ hơn ạ.",
+    );
+  });
+
+  it("fails closed when Responder supplies an unknown claim reference", async () => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Mẫu chị đang xem nằm ngay bên dưới ạ.",
+          claimRef: "CLAIM_999",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture([verifiedMediaClaim()]),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    })).rejects.toThrow("TRACK_C_C3_CLAIM_REFERENCE_UNKNOWN");
+  });
+
+  it("rejects a model-authored hash instead of treating it as code-owned provenance", async () => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Mẫu chị đang xem nằm ngay bên dưới ạ.",
+          claimContentHash: hash("d"),
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture([verifiedMediaClaim()]),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    })).rejects.toThrow("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
   });
 
   it("pins the five-field plan schema while retaining the frozen dialogue and Context V2", () => {
@@ -242,7 +416,11 @@ describe("Track C C3 two-pass offline candidate", () => {
     expect(responderBody.generationConfig.responseSchema.required).toEqual([
       "segments", "strategy", "cta",
     ]);
-    expect(responderBody.generationConfig).toEqual(existingBody.generationConfig);
+    expect(responderBody.generationConfig).toMatchObject({
+      maxOutputTokens: 1_024,
+      responseMimeType: "application/json",
+    });
+    expect(responderBody.generationConfig).not.toEqual(existingBody.generationConfig);
     expect(responderBody.safetySettings).toEqual(existingBody.safetySettings);
     expect(responderPrompt.evaluationContext).toEqual(evaluationContext);
     expect(responderPrompt.conversationPlan).toEqual(result.conversationPlan);

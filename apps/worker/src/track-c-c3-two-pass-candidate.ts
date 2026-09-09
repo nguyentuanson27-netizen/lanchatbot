@@ -15,6 +15,7 @@ import { TRACK_C_C3_SALES_QUALITY_SYSTEM_INSTRUCTION } from "./track-c-c3-sales-
 import {
   assertTrackCOfflineCandidateEvaluationContext,
   buildTrackCOfflineCandidateRequest,
+  contextFromFrozenTrackCCapture,
 } from "./track-c-offline-candidate.js";
 import { validateTrackCOfflineCandidate } from "./track-c-offline-candidate-validation.js";
 import { expectedOwnerForTrackCC1Fixture } from "./track-c-must-pass.js";
@@ -52,7 +53,7 @@ export interface TrackCConversationPlanV1 {
 }
 
 export const TRACK_C_C3_TWO_PASS_CANDIDATE = Object.freeze({
-  id: "TRACK_C_C3_STRATEGIST_RESPONDER_V1" as const,
+  id: "TRACK_C_C3_STRATEGIST_RESPONDER_V2" as const,
   primaryHypothesis:
     "A small advisory conversation plan improves need resolution and the next conversational move before the unchanged guarded response output.",
   materialAxes: Object.freeze([
@@ -77,14 +78,21 @@ export const TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION = [
   "Return only the registered JSON response schema.",
 ].join("\n");
 
+const TRACK_C_C3_RESPONDER_BASE_INSTRUCTION =
+  TRACK_C_C3_SALES_QUALITY_SYSTEM_INSTRUCTION
+    .replaceAll("provenance content hash", "code-owned claimRef")
+    .replaceAll("claimContentHash", "claimRef");
+
 export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
-  TRACK_C_C3_SALES_QUALITY_SYSTEM_INSTRUCTION,
+  TRACK_C_C3_RESPONDER_BASE_INSTRUCTION,
   "A structure-validated conversationPlan is attached to this offline request.",
   "Use it only as advisory guidance for what to resolve and how to advance the conversation.",
   "Re-read the exact frozen dialogue, Context V2, verified claims, and canonical state before writing the reply.",
   "If the plan conflicts with those inputs or any existing rule, ignore the plan.",
   "The plan never authorizes a fact, protected claim, effect, side effect, or state transition.",
-  "You remain responsible only for natural customer-facing wording in the unchanged final response schema.",
+  "For each VERIFIED_CLAIM segment, copy only its exact code-owned claimRef from verifiedClaims; never copy, invent, or return a provenance hash.",
+  "The offline composer resolves claimRef to the exact provenance content hash before the unchanged final response schema and guard.",
+  "You remain responsible only for natural customer-facing wording in the registered intermediate response schema.",
 ].join("\n");
 
 function sha256(value: unknown): string {
@@ -208,10 +216,56 @@ export function buildTrackCC3ResponderRequest(
       readonly role: string;
       readonly parts: readonly [{ readonly text: string }];
     }];
+    readonly generationConfig: Readonly<{
+      readonly responseSchema: Readonly<{
+        readonly properties: Readonly<{
+          readonly segments: Readonly<{
+            readonly items: Readonly<{
+              readonly properties: Readonly<Record<string, unknown>>;
+              readonly [key: string]: unknown;
+            }>;
+            readonly [key: string]: unknown;
+          }>;
+          readonly [key: string]: unknown;
+        }>;
+        readonly [key: string]: unknown;
+      }>;
+      readonly [key: string]: unknown;
+    }>;
     readonly [key: string]: unknown;
   };
   const prompt = JSON.parse(body.contents[0].parts[0].text) as
-    Readonly<Record<string, unknown>>;
+    Readonly<Record<string, unknown>> & {
+      readonly verifiedClaims?: readonly Readonly<Record<string, unknown>>[];
+    };
+  const verifiedClaims = (prompt.verifiedClaims ?? []).map((claim, index) =>
+    Object.freeze({
+      ...claim,
+      claimRef: `CLAIM_${String(index + 1).padStart(3, "0")}`,
+    })
+  );
+  const segmentSchema = body.generationConfig.responseSchema.properties
+    .segments.items;
+  const {
+    claimContentHash: _claimContentHash,
+    ...segmentProperties
+  } = segmentSchema.properties;
+  const responseSchema = {
+    ...body.generationConfig.responseSchema,
+    properties: {
+      ...body.generationConfig.responseSchema.properties,
+      segments: {
+        ...body.generationConfig.responseSchema.properties.segments,
+        items: {
+          ...segmentSchema,
+          properties: {
+            ...segmentProperties,
+            claimRef: { type: "STRING" },
+          },
+        },
+      },
+    },
+  };
   const conversationPlanHash = sha256(conversationPlan);
   const candidateBody = JSON.stringify({
     ...body,
@@ -220,12 +274,17 @@ export function buildTrackCC3ResponderRequest(
       parts: [{
         text: canonicalJsonV1({
           ...prompt,
+          verifiedClaims,
           conversationPlanContract: "TRACK_C_CONVERSATION_PLAN_V1",
           conversationPlan,
           conversationPlanHash,
         }),
       }],
     }],
+    generationConfig: {
+      ...body.generationConfig,
+      responseSchema,
+    },
   });
   return Object.freeze({
     url: request.url,
@@ -235,6 +294,62 @@ export function buildTrackCC3ResponderRequest(
       body: candidateBody,
     }),
   });
+}
+
+function claimReferenceRegistry(
+  capture: unknown,
+  evaluationAt: Date,
+): ReadonlyMap<string, string> {
+  const context = contextFromFrozenTrackCCapture({ capture, evaluationAt });
+  return new Map(context.verifiedClaims.map((claim, index) => [
+    `CLAIM_${String(index + 1).padStart(3, "0")}`,
+    claim.provenance.contentHash,
+  ]));
+}
+
+function resolveResponderClaimReferences(
+  capture: unknown,
+  evaluationAt: Date,
+  value: unknown,
+): unknown {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
+  }
+  const output = value as Readonly<Record<string, unknown>>;
+  if (!Array.isArray(output.segments)) {
+    throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
+  }
+  const registry = claimReferenceRegistry(capture, evaluationAt);
+  const used = new Set<string>();
+  const segments = output.segments.map((segment) => {
+    if (segment === null || typeof segment !== "object" || Array.isArray(segment)) {
+      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
+    }
+    const record = segment as Readonly<Record<string, unknown>>;
+    if (Object.hasOwn(record, "claimContentHash")) {
+      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
+    }
+    if (record.kind !== "VERIFIED_CLAIM") {
+      if (Object.hasOwn(record, "claimRef")) {
+        throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
+      }
+      return record;
+    }
+    if (typeof record.claimRef !== "string") {
+      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
+    }
+    const contentHash = registry.get(record.claimRef);
+    if (contentHash === undefined) {
+      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_UNKNOWN");
+    }
+    if (used.has(record.claimRef)) {
+      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_DUPLICATE");
+    }
+    used.add(record.claimRef);
+    const { claimRef: _claimRef, ...rest } = record;
+    return Object.freeze({ ...rest, claimContentHash: contentHash });
+  });
+  return Object.freeze({ ...output, segments: Object.freeze(segments) });
 }
 
 export interface TrackCC3TwoPassCandidateResult {
@@ -302,9 +417,13 @@ export async function runTrackCC3TwoPassCandidate(
   const providerModelVersion = assertProviderIdentity(
     responderResponse.providerModelVersion,
   );
-  const output = parseVertexJson(
-    responderResponse.payload,
-    "TRACK_C_C3_RESPONDER_OUTPUT_INVALID",
+  const output = resolveResponderClaimReferences(
+    input.capture,
+    input.evaluationAt,
+    parseVertexJson(
+      responderResponse.payload,
+      "TRACK_C_C3_RESPONDER_OUTPUT_INVALID",
+    ),
   );
   const candidate = validateTrackCOfflineCandidate({
     caseId: input.caseId,

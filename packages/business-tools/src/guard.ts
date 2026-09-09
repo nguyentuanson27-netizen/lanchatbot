@@ -13,7 +13,7 @@ import type { GuardInput, GuardResult } from "./types.js";
 import { foldVietnameseForRecall } from "./vietnamese-text.js";
 
 const RAW_URL_PATTERN = /https?:\/\/\S+/iu;
-const PRICE_PATTERN = /(?:\d[\d.,]*)\s*(?:k\b|nghìn\b|vnd\b|triệu\b|đ|₫)/giu;
+const PRICE_PATTERN = /(?:\d[\d.,]*)\s*(?:k\b|nghìn\b|vnd\b|triệu\b|đồng\b|đ(?![\p{L}\p{M}])|₫)/giu;
 const PRICE_CLAIM_PATTERN = /\b(?:giá|price)\D{0,16}\d[\d.,]*/iu;
 const STOCK_PATTERN = /\b(?:còn\s+hàng|còn\s+(?:size|sz)|hết\s+hàng|hết\s+(?:size|sz)|sẵn\s+hàng|pre[- ]?order|đặt\s+trước|sắp\s+về|còn\s+(?:áo|quần|chân\s+váy|set|mẫu))\b/iu;
 const ETA_PATTERN = /\b\d+\s*(?:-|–|đến)?\s*\d*\s*(?:ngày|day)\b/iu;
@@ -21,7 +21,7 @@ const ETA_PATTERN = /\b\d+\s*(?:-|–|đến)?\s*\d*\s*(?:ngày|day)\b/iu;
 // (for example "giá"), because `\b` is based on ASCII word characters.
 const PROMOTION_PATTERN = /(?:khuyến\s*mãi|ưu\s*đãi|giảm\s*giá|giảm\s+\d|voucher|mã\s+giảm)/iu;
 const FREESHIP_PATTERN = /\b(?:freeship|free\s*ship|miễn\s+phí\s+(?:giao|ship))\b/iu;
-const SHIP_FEE_PATTERN = /(?:phí\s*(?:ship|giao)|ship)\D{0,12}(?:\d[\d.,]*)\s*(?:k\b|nghìn\b|vnd\b|đ|₫)/iu;
+const SHIP_FEE_PATTERN = /(?:phí\s*(?:ship|giao)|ship)\D{0,12}(?:\d[\d.,]*)\s*(?:k\b|nghìn\b|vnd\b|đồng\b|đ(?![\p{L}\p{M}])|₫)/iu;
 const ETA_VALUES_PATTERN = /\b(\d+)\s*(?:(?:-|–|đến)\s*(\d+))?\s*(?:ngày|day)\b/giu;
 const RECIPIENT_NAME_PATTERN = String.raw`tên(?!\s+(?:mẫu|sản\s*phẩm|sp)\b)`;
 const ORDER_INFO_REQUEST_PATTERN = new RegExp(
