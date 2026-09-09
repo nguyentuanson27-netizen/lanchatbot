@@ -27,7 +27,7 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "choose at most one concrete decision target",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "learning a target budget, required delivery date, fit preference",
+      "learning a target budget after budget is established as relevant",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "Do not use generic nextMove goals such as offer more help",
@@ -37,21 +37,21 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
   });
 
-  it("treats objections and price resistance as decision barriers", () => {
+  it("treats price resistance as budget, comparison, or value rather than defaulting to budget", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "identify the underlying decision barrier before choosing nextMove",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "price or budget barrier rather than only a promotion lookup",
+      "Distinguish three possible price barriers: a budget gap, comparison with another option or channel, or uncertainty about value.",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "prefer a nextMove that clarifies the customer's actual budget",
+      "do not default to asking for a target budget",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "For price or budget resistance, follow conversationPlan.nextMove exactly.",
+      "ask one natural contrastive question rather than immediately asking for a number",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "If it is NONE, resolve the supported concern and stop.",
+      "If nextMove is NONE, resolve the supported concern and stop.",
     );
   });
 
@@ -85,7 +85,19 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
   });
 
-  it("pins the natural shop-chat voice without turning examples into business logic", () => {
+  it("preserves resolved product identity in price quotes when useful", () => {
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "When productBinding is resolved",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "preserve that identity naturally in a price quote",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Do not downgrade a known product to a generic referent",
+    );
+  });
+
+  it("balances Vietnamese fillers and politeness markers instead of suppressing or repeating them", () => {
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "usually in one or two short sentences",
     );
@@ -93,16 +105,19 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "Use ordinary spoken shop language rather than customer-service script language.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "'Dạ' is optional, not mandatory",
+      "'Dạ' is optional, not mandatory, but do not suppress it.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Use politeness markers such as 'ạ', 'nhé', and the established address form selectively.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Avoid stacking several fillers in one short sentence",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "A customer-facing question or CTA is optional, never required.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "end cleanly without adding a closing service phrase",
-    );
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Avoid formulaic service phrases",
     );
   });
 
