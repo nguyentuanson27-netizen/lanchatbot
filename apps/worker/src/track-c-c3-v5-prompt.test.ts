@@ -75,13 +75,34 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "one coherent conversational turn, not as a factual answer followed by a mechanically appended next-step sentence",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Prefer a short, direct, context-specific question",
+      "prefer one short, direct question that names the real decision target",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Avoid generic permission-based service offers",
+      "Ask the question itself instead of wrapping it in a permission-based offer.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "Do not default to empty empathy",
+    );
+  });
+
+  it("pins the natural shop-chat voice without turning examples into business logic", () => {
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "usually in one or two short sentences",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Use ordinary spoken shop language rather than customer-service script language.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "'Dạ' is optional, not mandatory",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "A customer-facing question or CTA is optional, never required.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "end cleanly without adding a closing service phrase",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Avoid formulaic service phrases",
     );
   });
 
