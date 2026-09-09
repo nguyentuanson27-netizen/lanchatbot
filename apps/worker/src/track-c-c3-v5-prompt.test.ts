@@ -6,31 +6,58 @@ import {
 } from "./track-c-c3-two-pass-candidate.js";
 
 describe("Track C C3 V5 two-pass prompt policy", () => {
-  it("pins V5 as a Strategist -> Responder prompt policy", () => {
+  it("pins Strategist as the only conversational planner", () => {
     expect(TRACK_C_C3_TWO_PASS_PROMPT_VERSION).toBe("V5");
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "Conversation continuation is preferred only when it helps the customer make the same or next closely related decision.",
+      "Your only job is to decide what the next customer-facing reply should accomplish.",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "A transaction CTA is not the default.",
+      "Use nextMove = NONE when there is no genuinely useful continuation.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Do not include protected factual values",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).not.toContain(
       "a useful bridge is the default",
     );
   });
 
-  it("defaults customer-facing Vietnamese to chị/em and keeps continuation decision-supportive", () => {
+  it("pins Responder as constrained realization rather than a second planner", () => {
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Do not independently choose a different conversational strategy.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Do not reclassify the buying stage or substitute a different sales objective",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "If conversationPlan.nextMove is NONE, add no optional continuation, question, or sales CTA.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Do not replace it with a different optional next move.",
+    );
+  });
+
+  it("defaults customer-facing Vietnamese to chị/em without overriding an established address", () => {
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "Default Vietnamese address is chị/em",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Conversation continuation is preferred when it genuinely helps the customer make the same or next closely related decision. A purchase CTA is not the default.",
-    );
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Do not manufacture a question merely to make the conversation longer.",
+      "using the established address form, defaulting to chị/em",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
-      "a useful bridge is the default",
+      "ask which product chị means",
+    );
+  });
+
+  it("keeps factual lookups from becoming generic closes", () => {
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Do not treat a factual lookup as purchase commitment",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "do not append a generic purchase-or-close question after a factual answer",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
+      "Chị có muốn đặt luôn không?",
     );
   });
 
@@ -43,18 +70,6 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
       "claimContentHash",
-    );
-  });
-
-  it("keeps resolve-first and hard-close gating explicit", () => {
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Fully answer the customer's latest question or concern before any continuation.",
-    );
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Price, stock, shipping, size, or product-information questions alone do not establish purchase commitment.",
-    );
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "When buyingIntent.decision is COMMITTED",
     );
   });
 });
