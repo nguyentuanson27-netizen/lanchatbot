@@ -80,6 +80,19 @@ test("Track C checks prepare workspace dependencies before linting", () => {
   assert.ok(typecheck < lint);
 });
 
+test("affected-package build prepares the dependency closure of changed packages and dependents", () => {
+  const affected = stepBlock(jobBlock("check"), "Run affected packages checks");
+
+  assert.match(
+    affected,
+    /pnpm --filter "\.\.\.\[\$BASE_REF\]\.\.\." run --if-present build/,
+  );
+  assert.match(
+    affected,
+    /pnpm --filter "\.\.\.\[\$BASE_REF\]" run --if-present typecheck/,
+  );
+});
+
 test("worker preparation hooks build its complete dependency graph before compilation", () => {
   const dependencyBuild = 'pnpm -r --filter "@lana/worker^..." build';
   for (const hook of ["prebuild", "pretypecheck", "pretest"]) {

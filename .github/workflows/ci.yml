@@ -122,7 +122,7 @@ jobs:
         if: steps.ci-scope.outputs.mode == 'affected'
         run: |
           BASE_REF="${{ steps.ci-scope.outputs.base_ref || 'origin/main' }}"
-          time pnpm --filter "...[$BASE_REF]" run --if-present build
+          time pnpm --filter "...[$BASE_REF]..." run --if-present build
           time pnpm --filter "...[$BASE_REF]" run --if-present typecheck
           time pnpm --filter "...[$BASE_REF]" run --if-present test
           time pnpm --filter "...[$BASE_REF]" run --if-present lint

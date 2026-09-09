@@ -285,6 +285,68 @@ describe("facts and deterministic policy guard", () => {
     });
   });
 
+  it("does not interpret the Vietnamese range phrase '1 đến 2 ngày' as a 1đ price", () => {
+    const facts = goodFacts();
+    if (facts.status !== "OK" || facts.facts === null) {
+      throw new Error("TEST_FACTS_UNAVAILABLE");
+    }
+    const result = guardAgentProposal({
+      proposal: proposal("Dạ thời gian giao dự kiến từ 1 đến 2 ngày ạ."),
+      facts: {
+        ...facts,
+        facts: {
+          ...facts.facts,
+          deliveryEta: { minDays: 1, maxDays: 2 },
+        },
+      },
+      verifiedProductIds: new Set(["SD396"]),
+      now,
+    });
+
+    expect(result.blockedReasonCodes).toEqual([]);
+    expect(result.protectedClaimValidation).toMatchObject({
+      outcome: "VALIDATED",
+      claimTypes: ["ETA"],
+      validatedCount: 1,
+      rejectedCount: 0,
+    });
+
+    const priceResult = guardAgentProposal({
+      proposal: proposal("Dạ giá mẫu là 699000 đồng ạ."),
+      facts,
+      verifiedProductIds: new Set(["SD396"]),
+      now,
+    });
+    expect(priceResult.blockedReasonCodes).toEqual([]);
+    expect(priceResult).toMatchObject({
+      protectedClaimValidation: { claimTypes: ["PRICE"] },
+    });
+  });
+
+  it("does not interpret 'ship từ 1 đến 2 ngày' as a 1đ shipping fee", () => {
+    const facts = goodFacts();
+    if (facts.status !== "OK" || facts.facts === null) {
+      throw new Error("TEST_FACTS_UNAVAILABLE");
+    }
+    const result = guardAgentProposal({
+      proposal: proposal("Dạ ship từ 1 đến 2 ngày ạ."),
+      facts: {
+        ...facts,
+        facts: {
+          ...facts.facts,
+          deliveryEta: { minDays: 1, maxDays: 2 },
+        },
+      },
+      verifiedProductIds: new Set(["SD396"]),
+      now,
+    });
+
+    expect(result.blockedReasonCodes).toEqual([]);
+    expect(result).toMatchObject({
+      protectedClaimValidation: { claimTypes: ["ETA"] },
+    });
+  });
+
   it("uses the verified media selection instead of the legacy facts image set", () => {
     const fullLookUrl = "https://cdn.example/sd396-full-look.jpg";
     const result = guardAgentProposal({
