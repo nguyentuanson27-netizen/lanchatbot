@@ -12,13 +12,43 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "Your only job is to decide what the next customer-facing reply should accomplish.",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "Use nextMove = NONE when there is no genuinely useful continuation.",
+      "If no specific decision target is useful, use nextMove = NONE.",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "Do not include protected factual values",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).not.toContain(
       "a useful bridge is the default",
+    );
+  });
+
+  it("requires a concrete decision target instead of a generic support bridge", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "choose at most one concrete decision target",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "learning a target budget, required delivery date, fit preference",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Do not use generic nextMove goals such as offer more help",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Name the actual target, not a generic offer of help.",
+    );
+  });
+
+  it("treats objections and price resistance as decision barriers", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "identify the underlying decision barrier before choosing nextMove",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "price or budget barrier rather than only a promotion lookup",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "prefer a nextMove that clarifies the customer's actual budget",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "do not merely repeat the verified price and stop",
     );
   });
 
@@ -34,6 +64,21 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "Do not replace it with a different optional next move.",
+    );
+  });
+
+  it("requires one coherent natural turn instead of answer plus mechanical bridge", () => {
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "one coherent conversational turn, not as a factual answer followed by a mechanically appended next-step sentence",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Prefer a short, direct, context-specific question",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Avoid generic permission-based service offers",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Do not default to empty empathy",
     );
   });
 
