@@ -85,7 +85,10 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
   });
 
-  it("preserves resolved product identity in price quotes when useful", () => {
+  it("preserves resolved product identity and answers the exact question first", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Resolve vague conversational references such as 'mẫu này' against authoritative productBinding",
+    );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "When productBinding is resolved",
     );
@@ -93,7 +96,43 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "preserve that identity naturally in a price quote",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Do not downgrade a known product to a generic referent",
+      "put the direct answer to the customer's latest explicit question in the first customer-facing clause",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Do not repeat a fact, compliment, or question from recent shop turns",
+    );
+  });
+
+  it("uses a flexible high-information bundle only for explicitly marked first-contact ad leads", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "first meaningful inbound from an advertisement or referral",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Do not infer ad origin from customer wording alone.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "plan a compact verified information bundle",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "verified price plus up to two or three additional decision-useful facts",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "do not turn this into a fixed line-by-line template",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "roughly two to four short lines or clauses when useful",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Omit unavailable or low-value fields instead of leaving blanks",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Keep at most one question or next-step objective after the bundle.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
+      "output EXACTLY this structure line-by-line",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
+      "ATTACH_IMAGES",
     );
   });
 
