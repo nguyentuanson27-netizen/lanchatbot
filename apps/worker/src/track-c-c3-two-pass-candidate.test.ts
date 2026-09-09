@@ -329,23 +329,14 @@ describe("Track C C3 two-pass offline candidate", () => {
         providerModelVersion: "gemini-3.5-flash-lite",
       })),
     };
-    const humanAccepted: TrackCReplayJudgeEnvelope = {
-      ...accepted(),
-      reply: "",
-      guardOutcome: {
-        expectedOwner: "HUMAN",
-        action: "HANDOFF",
-        blockedReasonCodes: [],
-      },
-    };
-
     await expect(runTrackCC3TwoPassCandidate({
       caseId: "unsupported-protected-claim",
       modelResource,
       capture: validCapture(),
       evaluationAt,
       evaluationContext,
-      accepted: humanAccepted,
+      // Deliberately caller-authored as BOT: canonical C1 ownership must win.
+      accepted: accepted(),
       transport,
     })).rejects.toThrow("TRACK_C_C3_TWO_PASS_HUMAN_GENERATION_FORBIDDEN");
     expect(transport.send).not.toHaveBeenCalled();

@@ -17,6 +17,7 @@ import {
   buildTrackCOfflineCandidateRequest,
 } from "./track-c-offline-candidate.js";
 import { validateTrackCOfflineCandidate } from "./track-c-offline-candidate-validation.js";
+import { expectedOwnerForTrackCC1Fixture } from "./track-c-must-pass.js";
 import type {
   TrackCOfflineCandidateValidatedEnvelope,
   TrackCReplayJudgeEnvelope,
@@ -260,15 +261,16 @@ export async function runTrackCC3TwoPassCandidate(
     signal?: AbortSignal;
   }>,
 ): Promise<TrackCC3TwoPassCandidateResult> {
+  const expectedOwner = expectedOwnerForTrackCC1Fixture(input.caseId);
   const acceptedOwner = input.accepted.guardOutcome !== null &&
       typeof input.accepted.guardOutcome === "object"
     ? (input.accepted.guardOutcome as { readonly expectedOwner?: unknown })
       .expectedOwner
     : null;
-  if (acceptedOwner === "HUMAN") {
+  if (expectedOwner === "HUMAN") {
     throw new Error("TRACK_C_C3_TWO_PASS_HUMAN_GENERATION_FORBIDDEN");
   }
-  if (acceptedOwner !== "BOT") {
+  if (acceptedOwner !== expectedOwner) {
     throw new Error("TRACK_C_C3_TWO_PASS_ACCEPTED_OWNER_INVALID");
   }
   const strategistRequest = buildTrackCC3StrategistRequest(input);
