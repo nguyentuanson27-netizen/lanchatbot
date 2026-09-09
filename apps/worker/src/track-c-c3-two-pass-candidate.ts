@@ -125,7 +125,7 @@ export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
   "If phase is ORDER_CONFIRMED or sourceStage is PURCHASE_CONFIRMED: ask nothing; use HOLD_POSITION or ANSWER_VERIFIED_FACTS with CTA NONE; give only a neutral acknowledgement; do not emit an unauthorized EFFECT_CLAIM.",
   "If the latest customer message asks for a protected fact with no eligible verified claim, do not answer, deny, estimate, imply, or paraphrase an unsupported answer. Use one concise GENERAL statement such as 'Dạ hiện em chưa thể xác nhận thông tin này ạ.' with strategy ANSWER_VERIFIED_FACTS and CTA NONE. Do not add a sales continuation, factual claim, or promise to check.",
   "When no higher-priority canonical rule prevents it, use each eligible verified claim that directly answers the latest customer need exactly once as a VERIFIED_CLAIM and omit unrelated claims.",
-  "For each VERIFIED_CLAIM segment, copy only the exact code-owned claimRef attached to that verified claim in verifiedClaims; never copy, invent, derive, or return a provenance hash, and never invent a claimRef that is not present in verifiedClaims.",
+  "For each VERIFIED_CLAIM segment, copy only the exact code-owned claimRef attached to that verified claim in verifiedClaims; never copy, invent, or return a provenance hash; never derive provenance; and never invent a claimRef that is not present in verifiedClaims.",
   "The offline composer resolves claimRef to the exact provenance content hash before the unchanged final response schema and guard.",
   "Never hide a protected fact inside a GENERAL segment.",
   "For an eligible SIZE_FIT claim, state one direct affirmative recommendation using exactly recommendedSizes[0]. Do not express unsupported uncertainty, substitute another size, imply stock from the size claim, or automatically ask chị to order.",
@@ -141,7 +141,7 @@ export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
   "Before returning JSON, verify that the current need is fully resolved, every protected fact is supported, useful context is preserved, known information is not requested again, chị/em is used by default, any continuation helps a real decision, factual lookup did not jump directly to checkout, any transaction step is supported by commitment/canonical state, there is at most one next-step objective, and no unauthorized effect is claimed.",
   "If a proposed continuation does not clearly help the customer's next decision, remove it. If no useful continuation remains, end naturally.",
   "Every customer-facing segment must be exactly one of these intermediate shapes: GENERAL: kind,text; VERIFIED_CLAIM: kind,text,claimRef; CLARIFICATION: kind,text,target; ACTION_REQUEST: kind,text,action; EFFECT_CLAIM: kind,text,effect.",
-  "Never omit the required field for a segment kind, include fields from another kind, attach claimRef to a non-VERIFIED_CLAIM segment, hide a protected claim or effect inside GENERAL, or return claimContentHash.",
+  "Never omit the required field for a segment kind, include fields from another kind, attach claimRef to a non-VERIFIED_CLAIM segment, hide a protected claim or effect inside GENERAL, or return a provenance hash field.",
   "Return only the registered JSON response schema.",
 ].join("\n");
 
