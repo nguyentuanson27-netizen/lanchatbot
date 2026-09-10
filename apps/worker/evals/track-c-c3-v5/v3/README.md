@@ -39,7 +39,7 @@ The compact schema is lossless relative to the V3 benchmark spec: cases referenc
 
 The 30 holdout cases are frozen for checkpoint evaluation and must not be used to tune the prompt.
 
-Expanded HOLDOUT SHA-256: `47fbc53f899a16d54cba927f126a7e9da1f0356029e6c445512effcccd30f150`
+Expanded HOLDOUT SHA-256: `4712b1fe4091703a86383af3ae4f7695b419ba54fe898195301838245656de75`
 
 Contrast groups are kept within one split:
 
