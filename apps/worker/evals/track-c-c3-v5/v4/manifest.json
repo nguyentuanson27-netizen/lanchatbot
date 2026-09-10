@@ -1,0 +1,57 @@
+{
+  "benchmark_id": "V5_CONVERSATION_BENCHMARK_V4",
+  "benchmark_revision": "R2",
+  "status": "SPEC_READY_DUAL_ADAPTER_REQUIRED",
+  "evaluation_at": "2026-09-10T09:00:00+07:00",
+  "quality": {
+    "total": 100,
+    "dev": 70,
+    "holdout": 30,
+    "behavior_simulation": 100,
+    "production_contract_supported": 60,
+    "production_contract_blocked": 40
+  },
+  "next_step_distribution": {
+    "OPTIONAL": 28,
+    "REQUIRED": 12,
+    "NONE": 60
+  },
+  "owner_safety": {
+    "total": 15,
+    "scored_separately": true,
+    "pre_model_or_authorized_capability": true
+  },
+  "content_hashes": {
+    "dev_70_expanded_sha256": "dcb1578e80079bc31121ad4f0d296f3ebdc9c39b9bd2e4e5edcbe9b8e82b40d2",
+    "holdout_30_expanded_sha256": "a8a1feb0638b8b37c3e27d898b5798550b5172050ad04cda5cd268bf446ccb86",
+    "owner_safety_15_sha256": "cded9ca5c536c952894a6acda7d575118fb2149d6840ba48e4be6564aca20a1e"
+  },
+  "storage": {
+    "quality_chunks": "quality-01.json ... quality-10.json; 10 cases each",
+    "facts": "facts.json",
+    "rubric": "rubric.json",
+    "contract_gaps": "contract-gaps.json",
+    "owner_safety": "owner-safety.json"
+  },
+  "split_policy": {
+    "DEV": "may be run repeatedly and used to tune V5 behavior; includes the exposed Q100 checkout-completeness regression",
+    "HOLDOUT": "R2 content created after retiring the proxy-exposed V4 R1 checkpoint; no model/provider output has been run on this revision",
+    "OLD_V4_R1_HOLDOUT": "retired because its proxy outputs were inspected and informed benchmark repair",
+    "OLD_V3_HOLDOUT": "retired because its outputs were inspected during benchmark review"
+  },
+  "execution_policy": {
+    "BEHAVIOR_SIMULATION": "all 100 cases; evaluation-only adapter may expose simulation_fact_refs as authoritative hypothetical evidence while preserving canonical/effect restrictions",
+    "PRODUCTION_CONTRACT": "only cases marked SUPPORTED; materialize current runtime_claim_refs into real Context V2 claims and run the real two-pass candidate + validator",
+    "SMOKE": "select only production-supported cases after production-contract suite passes; operational effects remain disabled until a separately authorized end-to-end test"
+  },
+  "source_corpus": {
+    "conversation_count": 500,
+    "traceability": "trace_examples are pattern provenance only; historical product/policy values are never factual authority"
+  },
+  "execution_blockers": [
+    "Implement behavior-simulation adapter that exposes simulation facts only in the eval lane.",
+    "Implement production-contract adapter that materializes current runtime claim refs into real Context V2 capture/provenance.",
+    "Keep BLOCKED_BY_CONTRACT cases out of production-contract scores until listed gaps are closed.",
+    "Route owner-safety cases through owner/effect/capability gates rather than normal conversation-quality scoring."
+  ]
+}
