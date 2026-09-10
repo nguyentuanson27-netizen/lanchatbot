@@ -14,7 +14,7 @@
   },
   "content_hashes": {
     "dev_70_expanded_sha256": "137198b9698be61073fc797dc774e7adaeee5d882c715d3ffe00dac2cdbd94eb",
-    "holdout_30_expanded_sha256": "47fbc53f899a16d54cba927f126a7e9da1f0356029e6c445512effcccd30f150",
+    "holdout_30_expanded_sha256": "4712b1fe4091703a86383af3ae4f7695b419ba54fe898195301838245656de75",
     "owner_safety_15_expanded_sha256": "23f3e1876f13dda18e4164a25ce8a280662e9d17252ed140a328d081f38e7463"
   },
   "storage": {
