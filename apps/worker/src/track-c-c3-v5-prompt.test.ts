@@ -22,12 +22,27 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
   });
 
+  it("uses soft progression to reduce decision uncertainty rather than stage scripts", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Use soft conversation progression only as context",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Never turn these into a stage-to-script lookup table.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "reduce the customer's decision uncertainty, not to force forward motion on every turn",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "obtains one piece of information that materially reduces decision uncertainty",
+    );
+  });
+
   it("requires a concrete decision target instead of a generic support bridge", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "choose at most one concrete decision target",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "learning a target budget after budget is established as relevant",
+      "learning a target budget after affordability is established as relevant",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "Do not use generic nextMove goals such as offer more help",
@@ -37,21 +52,45 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
   });
 
-  it("treats price resistance as budget, comparison, or value rather than defaulting to budget", () => {
+  it("handles price resistance evidence-first instead of diagnosis-first", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "identify the underlying decision barrier before choosing nextMove",
+      "For price hesitation, use an evidence-first sequence.",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "Distinguish three possible price barriers: a budget gap, comparison with another option or channel, or uncertainty about value.",
+      "eligible verified product facts can meaningfully reduce perceived-value uncertainty",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "do not default to asking for a target budget",
+      "one or two of the strongest product facts",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "stock, size availability, colour availability, or shipping speed are usually weak value evidence",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Do not default to a classifier-like budget-versus-comparison question",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "ask one natural contrastive question rather than immediately asking for a number",
+      "do not interrogate the customer about budget or comparison as the default first reaction",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "If nextMove is NONE, resolve the supported concern and stop.",
+      "Use factual value evidence, not stronger adjectives.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Ask a contrastive diagnostic question only when the plan says that distinction is still needed",
+    );
+  });
+
+  it("keeps price-value language grounded and forbids unsupported sales claims", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Do not state or imply that a product fact justifies the price merely because the fact is true.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Never claim 'tiền nào của nấy'",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "premium quality, superior quality, durability, exclusivity, popularity, scarcity, guaranteed satisfaction",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "unless an eligible verified claim directly supports that exact proposition",
     );
   });
 
