@@ -1,0 +1,97 @@
+{
+  "schema": "V5_BENCHMARK_CONTRACT_GAPS_V1",
+  "evaluation_at": "2026-09-10T09:00:00+07:00",
+  "rule": "A case marked BLOCKED_BY_CONTRACT may run in behavior simulation but must not be counted as production-contract evidence until every listed gap is closed.",
+  "gaps": {
+    "GAP_AD_ORIGIN": {
+      "name": "Ad/referral origin marker",
+      "current_state": "UPSTREAM_EXISTS_EGRESS_MISSING",
+      "detail": "Inbound message has ads context, but sanitized Context V2 candidate input has no dedicated ad-origin / first-meaningful-inbound field.",
+      "production_owner": "Context V2 / candidate input"
+    },
+    "GAP_PRODUCT_ATTRIBUTES": {
+      "name": "Customer-facing product attributes",
+      "current_state": "PARTIAL_UPSTREAM_EGRESS_MISSING",
+      "detail": "Material, design, form, color labels, size list and display name are not registered protected claim families in the current candidate egress.",
+      "production_owner": "Product facts -> Context V2 claim registry"
+    },
+    "GAP_VARIANT_LABELS": {
+      "name": "Human-readable variant labels",
+      "current_state": "EGRESS_MISSING",
+      "detail": "STOCK scope can carry variantId, but color/size presentation metadata is not exposed as authoritative candidate data.",
+      "production_owner": "Product/variant contract"
+    },
+    "GAP_INSPECTION_POLICY": {
+      "name": "Inspection policy",
+      "current_state": "BUSINESS_SOURCE_EXISTS_EGRESS_MISSING",
+      "detail": "Policy can exist in system sources but is not a current candidate verified-claim type.",
+      "production_owner": "Policy facts -> Context V2"
+    },
+    "GAP_EXCHANGE_POLICY": {
+      "name": "Return/exchange/refund policy",
+      "current_state": "BUSINESS_SOURCE_EXISTS_EGRESS_MISSING",
+      "detail": "Return, exchange and refund rules are not in current candidate egress.",
+      "production_owner": "Policy facts / owner routing"
+    },
+    "GAP_PAYMENT_POLICY": {
+      "name": "Payment-method policy",
+      "current_state": "PARTIAL_SIGNAL_EXISTS_EGRESS_MISSING",
+      "detail": "Payment extraction exists upstream, but supported payment methods/policy are not a current candidate factual claim family.",
+      "production_owner": "Checkout/payment capability"
+    },
+    "GAP_STORE_INFO": {
+      "name": "Store address/hours/try-on",
+      "current_state": "EGRESS_MISSING",
+      "detail": "Store business data is not in current candidate egress.",
+      "production_owner": "Business facts / store capability"
+    },
+    "GAP_CUSTOMIZATION": {
+      "name": "Customization/tailoring policy",
+      "current_state": "EGRESS_MISSING",
+      "detail": "No current verified claim represents customization availability.",
+      "production_owner": "Product/service policy"
+    },
+    "GAP_RETAIL_COMBO": {
+      "name": "Retail component and combo semantics",
+      "current_state": "PARTIAL_UPSTREAM_EGRESS_MISSING",
+      "detail": "PRICE alone cannot safely explain which component/configuration an amount belongs to.",
+      "production_owner": "Offer configuration contract"
+    },
+    "GAP_CHANNEL_PRICE": {
+      "name": "Channel-specific price semantics",
+      "current_state": "EGRESS_MISSING",
+      "detail": "PRICE value crossing egress has amount/currency but no channel applicability.",
+      "production_owner": "Pricing contract"
+    },
+    "GAP_PROMO_SEMANTICS": {
+      "name": "Promotion eligibility semantics",
+      "current_state": "PARTIAL_EGRESS",
+      "detail": "PROMOTION_OFFER exposes adjustmentId/amountVnd, but not all gift/eligibility wording needed for customer explanation.",
+      "production_owner": "Cart policy / promotion contract"
+    },
+    "GAP_FULFILLMENT_STAGE": {
+      "name": "Production/dispatch fulfillment stage",
+      "current_state": "UPSTREAM_EXISTS_EGRESS_MISSING",
+      "detail": "Product facts can carry fulfillment policy, while candidate ETA does not distinguish production lead time from delivery time.",
+      "production_owner": "Fulfillment -> Context V2"
+    },
+    "GAP_ORDER_TOTAL": {
+      "name": "Trusted order/cart total",
+      "current_state": "EGRESS_MISSING",
+      "detail": "Current protected-claim set has no ORDER_TOTAL claim.",
+      "production_owner": "Cart pricing capability"
+    },
+    "GAP_PRODUCT_LIFECYCLE": {
+      "name": "Discontinued lifecycle state",
+      "current_state": "EGRESS_MISSING",
+      "detail": "STOCK statuses do not encode discontinued semantics.",
+      "production_owner": "Catalog lifecycle contract"
+    },
+    "GAP_CHECKOUT_COMPLETENESS": {
+      "name": "Checkout completeness / known delivery details",
+      "current_state": "CANONICAL_INPUT_MISSING",
+      "detail": "Current sanitized candidate canonical state can request checkout details but cannot represent that all required delivery fields are already known.",
+      "production_owner": "Context V2 / checkout canonical state"
+    }
+  }
+}
