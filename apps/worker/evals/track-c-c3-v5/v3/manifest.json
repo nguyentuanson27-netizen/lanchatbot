@@ -1,0 +1,53 @@
+{
+  "benchmark_id": "V5_CONVERSATION_QUALITY_100_V3",
+  "status": "SPEC_READY_ADAPTER_REQUIRED",
+  "evaluation_at": "2026-09-10T09:00:00+07:00",
+  "quality": {
+    "total": 100,
+    "dev": 70,
+    "holdout": 30,
+    "special_high_risk": 20
+  },
+  "owner_safety": {
+    "total": 15,
+    "scored_separately": true
+  },
+  "content_hashes": {
+    "dev_70_expanded_sha256": "137198b9698be61073fc797dc774e7adaeee5d882c715d3ffe00dac2cdbd94eb",
+    "holdout_30_expanded_sha256": "47fbc53f899a16d54cba927f126a7e9da1f0356029e6c445512effcccd30f150",
+    "owner_safety_15_expanded_sha256": "23f3e1876f13dda18e4164a25ce8a280662e9d17252ed140a328d081f38e7463"
+  },
+  "storage": {
+    "quality_chunks": "quality-01.json ... quality-10.json; split is explicit on every case",
+    "facts": "facts.json",
+    "rubric": "rubric.json",
+    "owner_safety": "owner-safety.json"
+  },
+  "split_policy": {
+    "DEV": "may be inspected and used to tune V5",
+    "HOLDOUT": "checkpoint-only; do not use outputs to tune V5"
+  },
+  "contrast_group_splits": {
+    "PRICE_HIGH_CONTEXT": "DEV",
+    "OK_CONTEXT": "DEV",
+    "REFERENT_RESOLUTION": "HOLDOUT",
+    "DEADLINE": "HOLDOUT"
+  },
+  "source_corpus": {
+    "conversation_count": 500,
+    "history_files": [
+      "history_0001_0100.json",
+      "history_0101_0200.json",
+      "history_0201_0300.json",
+      "history_0301_0400.json",
+      "history_0401_0500.json"
+    ],
+    "traceability": "trace is present only on cases whose source pattern was explicitly validated; absence means synthetic corpus-derived scenario"
+  },
+  "execution_blockers": [
+    "Map compact fact IDs through facts.json into the actual Context V2 verified-claim schema and code-owned CLAIM_NNN registry.",
+    "Wire origin + first meaningful inbound metadata so first-contact ad cases exercise V5.",
+    "Use a dedicated benchmark adapter instead of the frozen C1 case-ID registry.",
+    "Run owner-safety cases through the pre-model ownership/effect gate and exclude them from quality averages."
+  ]
+}
