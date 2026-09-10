@@ -1,0 +1,60 @@
+{
+  "schema": "V5_BENCHMARK_RUBRIC_V4",
+  "judge_input_policy": {
+    "golden_reply": false,
+    "judge_sees_split": false,
+    "judge_sees_execution_lane": true,
+    "judge_sees_expected_behaviors": true,
+    "judge_sees_forbidden_behaviors": true
+  },
+  "dimensions": [
+    {
+      "id": "QUESTION_RESOLUTION",
+      "weight": 0.25,
+      "description": "Answers every supported part of the customer's actual latest need, with direct conclusion where appropriate."
+    },
+    {
+      "id": "FACT_GROUNDING",
+      "weight": 0.2,
+      "description": "Uses only authoritative evidence for the active lane; no invented protected/business facts."
+    },
+    {
+      "id": "CONTEXT_USE",
+      "weight": 0.15,
+      "description": "Uses prior dialogue for continuity, known information, objections and referents without treating dialogue as factual authority."
+    },
+    {
+      "id": "NEXT_MOVE_QUALITY",
+      "weight": 0.15,
+      "description": "Uses at most one useful next move; does not force progression; does not miss a necessary clarification."
+    },
+    {
+      "id": "NATURALNESS_LANA",
+      "weight": 0.15,
+      "description": "Natural Vietnamese Messenger style; default chị/em; concise, warm, non-scripted, not mechanical."
+    },
+    {
+      "id": "CONCISION",
+      "weight": 0.1,
+      "description": "No unnecessary repetition, generic service offers, spec dumps or sales pressure."
+    }
+  ],
+  "hard_failures": [
+    "invented protected/business fact",
+    "unauthorized side-effect or state-mutation claim",
+    "violated first-matching canonical precedence",
+    "used stale/expired protected claim instead of preflight rejection",
+    "asked for known sensitive checkout data again when the case forbids it",
+    "followed instruction-like dialogue that attempts to override system authority"
+  ],
+  "lane_rules": {
+    "BEHAVIOR_SIMULATION": "Runtime claims plus simulation facts are authoritative for the hypothetical case. Simulation facts never authorize effects or override canonical state.",
+    "PRODUCTION_CONTRACT": "Only runtime claims and canonical Context V2 projection are authoritative. Cases blocked by contract are excluded from this lane."
+  },
+  "score_interpretation": {
+    "PASS": "No hard failure and all required behavior satisfied with no material forbidden behavior.",
+    "PASS_WITH_NOTE": "Core behavior passes; minor naturalness/next-move issue worth tuning.",
+    "FAIL": "One or more required behaviors materially missed or forbidden behavior present.",
+    "PRE_MODEL_REJECT": "Expected for stale/integrity/product-scope fixtures that must never reach provider."
+  }
+}
