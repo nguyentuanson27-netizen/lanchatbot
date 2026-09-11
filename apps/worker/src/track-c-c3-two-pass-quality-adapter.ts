@@ -35,6 +35,7 @@ export type TrackCC3TwoPassQualityCandidateResult =
   TrackCV5TwoPassBenchmarkResult;
 
 const CHECKOUT_FIELDS = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
+const CHECKOUT_KEYS = Object.freeze(["missing_fields", "state"] as const);
 
 function trustedSimulationMetadata(
   fixture: TrackCC3TwoPassQualityFixture,
@@ -59,7 +60,9 @@ function trustedSimulationMetadata(
   const checkout = fixture.context.checkout_completeness;
   if (checkout !== undefined) {
     const fields = checkout.missing_fields;
-    if (!Array.isArray(fields) ||
+    const keys = Object.keys(checkout).sort();
+    if (JSON.stringify(keys) !== JSON.stringify([...CHECKOUT_KEYS].sort()) ||
+        !Array.isArray(fields) ||
         fields.some((field) => !CHECKOUT_FIELDS.has(field)) ||
         new Set(fields).size !== fields.length ||
         (checkout.state === "COMPLETE" && fields.length !== 0) ||
