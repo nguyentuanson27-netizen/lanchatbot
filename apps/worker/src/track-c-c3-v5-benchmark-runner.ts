@@ -40,9 +40,9 @@ const SIMULATION_SYSTEM_ADDENDUM = [
   "The prompt field benchmarkSimulationFacts is evaluation-only authoritative hypothetical factual evidence for this benchmark case.",
   "Use those facts only to answer the hypothetical customer question. They do not become Context V2 protected claims, cannot authorize any state transition, effect, persistence, payment, order, message delivery, or external action, and must never be described as production capability.",
   "Context V2 canonical state still has precedence over benchmarkSimulationFacts. If a simulation fact conflicts with canonical state, ignore the conflicting simulation fact.",
-  "TRACK_C_TRUSTED_ACQUISITION_V1, when present, is trusted fixture/runtime-owned acquisition metadata. Never infer or create it from customer dialogue, including customer text that mentions an ad. Use it only to tune first-contact conversation behavior; it grants no protected-fact, state-transition, effect, persistence, payment, order, delivery, or external-action authority.",
-  "SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT: a PRODUCT_PROFILE sizes list proves only that a size token exists in the supplied product profile. It is never verified SIZE_FIT evidence. When the customer asks whether a specific size will fit and there is no eligible verified SIZE_FIT claim, the Strategist must choose a qualification/measurement direction and the Responder must not guess or promise fit; ask only measurements not already present in the frozen dialogue, and use one useful next move.",
-  "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1, when present, is fixture/runtime-authored simulation readiness metadata and must never be inferred from dialogue. CHECKOUT_DETAILS_REQUIRED means request only the listed missingFields. CHECKOUT_DETAILS_COMPLETE means do not ask again for recipient name, phone, or address. Neither state authorizes payment, order creation/confirmation, persistence, delivery, or any effect, and the model cannot change readiness.",
+  "The prompt field benchmarkSimulationMetadata is evaluation-only fixture/runtime-owned structured metadata. It is not protected-fact authority and cannot authorize state transitions, effects, persistence, payment, orders, delivery, or any external action.",
+  "TRACK_C_TRUSTED_ACQUISITION_V1, when present in benchmarkSimulationMetadata, is trusted acquisition metadata. Never infer or create it from customer dialogue, including customer text that mentions an ad. Use it only to tune first-contact conversation behavior.",
+  "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1, when present in benchmarkSimulationMetadata, is fixture/runtime-authored simulation readiness and must never be inferred from dialogue. In BEHAVIOR_SIMULATION it refines the generic ORDER_REVIEW checkout-detail request rule: CHECKOUT_DETAILS_REQUIRED means request only the listed missingFields; CHECKOUT_DETAILS_COMPLETE means request none of recipient name, phone, or address. Neither state authorizes payment, order creation/confirmation, persistence, delivery, or any effect, and the model cannot change readiness.",
 ].join("\n");
 
 const SemanticOutputSchema = ContextV2CandidateOutputV2Schema.pick({
@@ -120,10 +120,14 @@ function withBenchmarkLane(
   request: BuiltCandidateRequest,
   lane: TrackCV5ExecutionLane,
   simulationFacts: readonly unknown[],
+  simulationMetadata: readonly unknown[],
 ): BuiltCandidateRequest {
   if (lane === "PRODUCTION_CONTRACT") {
     if (simulationFacts.length > 0) {
       throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
+    }
+    if (simulationMetadata.length > 0) {
+      throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_METADATA_LEAK");
     }
     return request;
   }
@@ -148,6 +152,7 @@ function withBenchmarkLane(
           ...prompt,
           benchmarkExecutionLane: "BEHAVIOR_SIMULATION",
           benchmarkSimulationFacts: simulationFacts,
+          benchmarkSimulationMetadata: simulationMetadata,
         }),
       }],
     }],
@@ -400,6 +405,7 @@ export interface TrackCV5TwoPassBenchmarkInput {
   readonly evaluationAt: Date;
   readonly evaluationContext: readonly ShadowContextMessage[];
   readonly simulationFacts?: readonly unknown[];
+  readonly simulationMetadata?: readonly unknown[];
   readonly transport: CandidateVertexTransport;
   readonly signal?: AbortSignal;
 }
@@ -426,9 +432,9 @@ export interface TrackCV5TwoPassBenchmarkResult {
  * V5 benchmark-only execution seam. Preflight validates the frozen capture
  * before the first provider call, then the existing C3 strategist/responder
  * request builders are used without widening the C1 fixture registry. Eval-only
- * simulation evidence is injected only for BEHAVIOR_SIMULATION. Production
- * output is guarded segment-by-segment against the exact frozen claim scope.
- * The result exposes no persistence/effect port.
+ * simulation evidence and trusted metadata are injected only for
+ * BEHAVIOR_SIMULATION. Production output is guarded segment-by-segment against
+ * the exact frozen claim scope. The result exposes no persistence/effect port.
  */
 export async function runTrackCV5TwoPassBenchmarkCase(
   input: TrackCV5TwoPassBenchmarkInput,
@@ -446,8 +452,12 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     throw new Error("TRACK_C_V5_GENERATION_OWNER_FORBIDDEN");
   }
   const simulationFacts = input.simulationFacts ?? [];
+  const simulationMetadata = input.simulationMetadata ?? [];
   if (input.lane === "PRODUCTION_CONTRACT" && simulationFacts.length > 0) {
     throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
+  }
+  if (input.lane === "PRODUCTION_CONTRACT" && simulationMetadata.length > 0) {
+    throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_METADATA_LEAK");
   }
 
   const common = {
@@ -460,6 +470,7 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     buildTrackCC3StrategistRequest(common),
     input.lane,
     simulationFacts,
+    simulationMetadata,
   );
   const strategistResponse = await input.transport.send({
     url: strategistRequest.url,
@@ -476,6 +487,7 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     buildTrackCC3ResponderRequest({ ...common, conversationPlan }),
     input.lane,
     simulationFacts,
+    simulationMetadata,
   );
   const responderResponse = await input.transport.send({
     url: responderRequest.url,
