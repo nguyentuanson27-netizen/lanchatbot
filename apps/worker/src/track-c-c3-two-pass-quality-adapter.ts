@@ -85,21 +85,23 @@ function trustedSimulationMetadata(
 
 /**
  * Thin current-candidate seam for C2 simulation metadata. Fixture-authored
- * acquisition/readiness signals are projected only in BEHAVIOR_SIMULATION and
- * remain evaluation-only; production execution receives no synthetic signal.
+ * acquisition/readiness signals are validated on every lane but projected only
+ * in BEHAVIOR_SIMULATION; production execution receives no synthetic signal.
+ *
+ * Declared async so every rejection - caller-supplied metadata and malformed
+ * fixtures included - reaches callers as a rejected promise instead of a
+ * synchronous throw.
  */
-export function runTrackCC3TwoPassQualityCandidate(
+export async function runTrackCC3TwoPassQualityCandidate(
   input: TrackCC3TwoPassQualityCandidateInput,
 ): Promise<TrackCC3TwoPassQualityCandidateResult> {
   if (Object.hasOwn(input, "simulationMetadata")) {
     throw new Error("TRACK_C_C3_EXTERNAL_SIMULATION_METADATA_FORBIDDEN");
   }
-  const metadata = input.lane === "BEHAVIOR_SIMULATION"
-    ? trustedSimulationMetadata(input.fixture)
-    : [];
+  const metadata = trustedSimulationMetadata(input.fixture);
   const { fixture: _fixture, ...runnerInput } = input;
   return runTrackCV5TwoPassBenchmarkCase({
     ...runnerInput,
-    simulationMetadata: metadata,
+    simulationMetadata: input.lane === "BEHAVIOR_SIMULATION" ? metadata : [],
   });
 }

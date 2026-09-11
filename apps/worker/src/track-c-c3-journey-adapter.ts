@@ -1,4 +1,4 @@
-import type { ShadowContextMessage } from "@lana/database";
+import { redactAnalyticsMessage, type ShadowContextMessage } from "@lana/database";
 import type { CandidateVertexTransport } from "./context-v2-candidate.js";
 import {
   materializeTrackCV5CaseCapture,
@@ -101,6 +101,14 @@ function customerMessage(
   });
 }
 
+/**
+ * The frozen dialogue is PII-guarded, so a candidate reply cannot be appended
+ * verbatim: the offline builder rejects the whole capture when redaction would
+ * rewrite any message. Journey replies legitimately contain exactly what that
+ * guard removes - the prescribed checkout wording names an address, and a VND
+ * amount can reach six digits - so the reply is stored in its redacted form.
+ * The unredacted reply stays available per turn in the turn result.
+ */
 function botMessage(
   text: string,
   occurredAtValue: string,
@@ -109,7 +117,7 @@ function botMessage(
     direction: "OUTBOUND",
     senderType: "BOT",
     messageType: "TEXT",
-    text,
+    text: redactAnalyticsMessage(text).text,
     attachmentCount: 0,
     occurredAt: occurredAtValue,
   });

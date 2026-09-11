@@ -375,11 +375,20 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     expect(result.reply).toContain("cân nặng");
     expect(result.reply).not.toContain("chiều cao");
     expect(send).toHaveBeenCalledTimes(2);
+    // The rule is carried by both passes, but each pass states its own half of
+    // it: the strategist picks the missing direction, the responder owns the
+    // segment/strategy/CTA shape.
+    const [strategistCall, responderCall] = send.mock.calls;
+    const strategistPrompt = promptBody(strategistCall![0].body);
+    const responderPrompt = promptBody(responderCall![0].body);
+    expect(strategistPrompt.systemInstruction)
+      .toContain("choose one missing measurement direction");
+    expect(responderPrompt.systemInstruction)
+      .toContain("ask only that one missing measurement");
     for (const [request] of send.mock.calls) {
       const { prompt, systemInstruction } = promptBody(request.body);
       expect(prompt).toContain("Chị cao 1m60 rồi nhé.");
       expect(systemInstruction).toContain("SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT");
-      expect(systemInstruction).toContain("ask only that one missing measurement");
       expect(systemInstruction).not.toContain("Q035");
     }
   });
@@ -425,12 +434,18 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         .not.toContain("FULL_NAME");
       expect(JSON.stringify(structured.benchmarkSimulationMetadata))
         .not.toContain("ADDRESS");
-      expect(systemInstruction).toContain("CHECKOUT_DETAILS_REQUIRED");
+      // The addendum names the state it actually projects, not a symbol that
+      // never appears in benchmarkSimulationMetadata.
+      expect(systemInstruction).toContain("State REQUIRED keeps that generic rule");
+      expect(systemInstruction).toContain("ask only for the listed missingFields");
+      expect(systemInstruction).not.toContain("CHECKOUT_DETAILS_REQUIRED means");
     }
 
+    // Customer wording stays inside what the frozen-dialogue PII guard accepts
+    // verbatim, so this exercises the projection instead of the guard.
     const completeFixture = fixture({
       id: "CHECKOUT_COMPLETE",
-      message: "Tên, số điện thoại và địa chỉ chị gửi đủ rồi, chốt giúp chị nhé.",
+      message: "Tên và số điện thoại chị gửi đủ rồi, thông tin nhận hàng đủ hết nhé.",
       checkoutCompleteness: {
         state: "COMPLETE",
         missing_fields: [],
@@ -453,10 +468,17 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
           authorization: "NONE",
         }),
       ]);
-      expect(prompt).not.toContain("Benchmark User");
-      expect(prompt).not.toContain("0000000000");
-      expect(prompt).not.toContain("Benchmark Address 000");
-      expect(systemInstruction).toContain("CHECKOUT_DETAILS_COMPLETE");
+      // The readiness projection is the only place recipient data could enter
+      // this lane, so pin its exact shape rather than scanning for literals
+      // that a BEHAVIOR_SIMULATION capture never materializes.
+      const [projected] = structured.benchmarkSimulationMetadata as
+        readonly Record<string, unknown>[];
+      expect(Object.keys(projected!).sort())
+        .toEqual(["authorization", "kind", "missingFields", "state"]);
+      expect(prompt).not.toMatch(/fullName|recipient|"phone"|"address"/i);
+      expect(systemInstruction).toContain("State COMPLETE replaces that generic rule");
+      expect(systemInstruction).toContain("strategy HOLD_POSITION with CTA NONE");
+      expect(systemInstruction).not.toContain("CHECKOUT_DETAILS_COMPLETE");
     }
   });
 
@@ -484,7 +506,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
   it("does not infer checkout COMPLETE from dialogue alone", async () => {
     const caseFixture = fixture({
       id: "CHECKOUT_DIALOGUE_ONLY",
-      message: "Tên, số điện thoại và địa chỉ chị gửi đủ rồi.",
+      message: "Tên và số điện thoại chị gửi đủ rồi, thông tin nhận hàng đủ hết nhé.",
     });
     const send = successfulTransport();
 

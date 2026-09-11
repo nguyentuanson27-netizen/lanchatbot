@@ -10,6 +10,12 @@ This directory is the canonical Track C C2 quality benchmark. It replaces the pr
 
 The benchmark therefore does not belong to prompt V5/V6/V7. Candidate identity is recorded separately from benchmark identity.
 
+### Benchmark revision R2.3
+
+`benchmark_revision` is **R2.3**. R2.2 differed only in the C2-owned execution seam: `track-c-c3-v5-benchmark-runner.ts` gained the `benchmarkSimulationMetadata` prompt channel, which is part of the bundle pinned by `bundle_components_git_sha1` and therefore part of benchmark identity. Corpus, splits, rubric, scoring weights and the aggregate gate are unchanged between R2.2 and R2.3.
+
+Any change to a pinned bundle component changes the bundle fingerprint, so it must land with a revision bump rather than being repinned under the existing revision: evidence that cites `TRACK_C_C2_QUALITY_BENCHMARK_V2` plus a revision must always denote one bundle fingerprint.
+
 ## Execution lanes
 
 All 100 quality cases can run in `BEHAVIOR_SIMULATION`. `PRODUCTION_CONTRACT` uses `contract-reachability.json`; the current effective distribution is **47 supported / 53 blocked by contract**. A simulation pass is not production support.
@@ -20,7 +26,11 @@ Production materialization uses real protected-claim schemas and canonical Conte
 
 `journeys.json` contains six small authored multi-turn scenarios used to review conversation progression. They are **supplemental**: `quality_population_delta` is zero, so they do not change the frozen 100 QUALITY population, 70/30 split, rubric, scoring weights, or aggregate quality gate.
 
-Each journey turn owns its customer message, canonical/context state, required/forbidden behavior, and optional expected next move. C3's thin journey adapter materializes that authored state independently for every turn and only accumulates real dialogue; the actual Lana reply from one turn becomes history for the next turn. The adapter does not infer a sales state machine or mutate canonical state.
+They are also **manual review corpus, not regression evidence**: `evidence_class` is `MANUAL_REVIEW_ONLY`. No executable evaluator consumes `expected.required_behaviors`, `expected.forbidden_behaviors`, or `expected.next_move` yet, so a passing journey run proves only that the turns execute and stay inside the eval-only boundary - never that the replies satisfy the authored expectations. Scoring and evaluation are C2-owned: if these expectations are later meant to gate CI, they need a C2 per-turn evaluator, and the evidence class changes with it. `validate-journeys.mjs` enforces the authored contract itself - evidence scope against `product_binding`, next-move shape against the corpus action vocabulary, canonical-state agreement - so malformed expectations fail before any model runs.
+
+Each journey turn owns its customer message, canonical/context state, required/forbidden behavior, and expected next move. C3's thin journey adapter materializes that authored state independently for every turn and only accumulates real dialogue; the actual Lana reply from one turn becomes history for the next turn. The adapter does not infer a sales state machine or mutate canonical state.
+
+Accumulated dialogue stays inside the shared Track C offline-candidate bound of 15 messages, which is exactly the longest supported journey (8 customer turns plus the 7 replies between them). That dialogue is PII-guarded, so the adapter appends each reply in its redacted form; the unredacted reply stays on the turn result.
 
 Trusted acquisition metadata and checkout completeness in these fixtures are simulation/eval wiring only. `origin` / `first_meaningful_inbound` are never inferred from dialogue and grant no fact/effect authority. Checkout completeness carries only `REQUIRED`/`COMPLETE` plus missing-field names, not recipient PII. The production `GAP_AD_ORIGIN` and `GAP_CHECKOUT_COMPLETENESS` remain open until production runtime contracts provide equivalent authoritative signals; Q100 remains regression evidence rather than production-closure evidence.
 
