@@ -140,6 +140,17 @@ function promptBody(body: string) {
   };
 }
 
+function structuredPrompt(body: string) {
+  const parsed = promptBody(body);
+  return {
+    ...parsed,
+    structured: JSON.parse(parsed.prompt) as {
+      benchmarkSimulationFacts?: readonly unknown[];
+      benchmarkSimulationMetadata?: readonly unknown[];
+    },
+  };
+}
+
 async function runFixture(
   simulationFixture: SimulationFixture,
   send: ReturnType<typeof successfulTransport>,
@@ -168,7 +179,7 @@ async function runFixture(
 }
 
 describe("Track C post-PR358 C3 behavior wiring", () => {
-  it("passes trusted ad origin and first-meaningful-inbound metadata to both candidate passes", async () => {
+  it("passes trusted ad origin and first-meaningful-inbound metadata to both candidate passes without mixing it into facts", async () => {
     const caseFixture = fixture({
       id: "AD_ORIGIN",
       message: "Bộ này bao nhiêu em?",
@@ -182,10 +193,16 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
 
     expect(send).toHaveBeenCalledTimes(2);
     for (const [request] of send.mock.calls) {
-      const { prompt } = promptBody(request.body);
-      expect(prompt).toContain("TRACK_C_TRUSTED_ACQUISITION_V1");
-      expect(prompt).toContain("ADVERTISEMENT");
-      expect(prompt).toContain("firstMeaningfulInbound");
+      const { structured } = structuredPrompt(request.body);
+      expect(structured.benchmarkSimulationMetadata).toEqual([
+        expect.objectContaining({
+          kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
+          origin: "ADVERTISEMENT",
+          firstMeaningfulInbound: true,
+          authorization: "NONE",
+        }),
+      ]);
+      expect(structured.benchmarkSimulationFacts).toEqual([]);
     }
   });
 
@@ -200,9 +217,46 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     await runFixture(caseFixture, send);
 
     for (const [request] of send.mock.calls) {
-      const { prompt } = promptBody(request.body);
-      expect(prompt).not.toContain("TRACK_C_TRUSTED_ACQUISITION_V1");
+      const { structured } = structuredPrompt(request.body);
+      expect(structured.benchmarkSimulationMetadata).toEqual([]);
     }
+  });
+
+  it("rejects caller-supplied trusted simulation metadata before provider execution", async () => {
+    const caseFixture = fixture({
+      id: "AD_METADATA_SPOOF",
+      message: "Bộ này bao nhiêu em?",
+      origin: "ORGANIC",
+    });
+    const capture = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: caseFixture,
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    const send = successfulTransport();
+    const spoofedInput = {
+      lane: "BEHAVIOR_SIMULATION" as const,
+      modelResource: MODEL_RESOURCE,
+      capture,
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: dialogue(caseFixture.latest_customer_message),
+      simulationFacts: [],
+      simulationMetadata: [{
+        kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
+        origin: "ADVERTISEMENT",
+        firstMeaningfulInbound: true,
+      }],
+      transport: { send },
+      fixture: caseFixture,
+    };
+
+    await expect(runTrackCC3TwoPassQualityCandidate(
+      spoofedInput as unknown as Parameters<
+        typeof runTrackCC3TwoPassQualityCandidate
+      >[0],
+    )).rejects.toThrow("TRACK_C_C3_EXTERNAL_SIMULATION_METADATA_FORBIDDEN");
+    expect(send).not.toHaveBeenCalled();
   });
 
   it("does not let acquisition metadata authorize protected facts or effects", async () => {
@@ -308,7 +362,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION)
       .toContain("SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT");
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION)
-      .toContain("overrides only the generic unverified-protected-fact");
+      .toContain("overrides the generic unverified-protected-fact response shape only for fit qualification");
     expect(result.conversationPlan.nextMove).toBe("ASK_MEASUREMENTS");
     expect(result.reply).toContain("cân nặng");
     expect(result.reply).not.toContain("chiều cao");
@@ -317,7 +371,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       const { prompt, systemInstruction } = promptBody(request.body);
       expect(prompt).toContain("Chị cao 1m60 rồi nhé.");
       expect(systemInstruction).toContain("SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT");
-      expect(systemInstruction).toContain("ask only measurements not already present");
+      expect(systemInstruction).toContain("ask only that one missing measurement");
       expect(systemInstruction).not.toContain("Q035");
     }
   });
@@ -334,12 +388,20 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     const requiredSend = successfulTransport();
     await runFixture(requiredFixture, requiredSend);
     for (const [request] of requiredSend.mock.calls) {
-      const { prompt, systemInstruction } = promptBody(request.body);
-      expect(prompt).toContain("TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1");
-      expect(prompt).toContain("\"state\":\"REQUIRED\"");
-      expect(prompt).toContain("PHONE");
-      expect(prompt).not.toContain("FULL_NAME");
-      expect(prompt).not.toContain("ADDRESS");
+      const { systemInstruction, structured } = structuredPrompt(request.body);
+      expect(structured.benchmarkSimulationMetadata).toEqual([
+        expect.objectContaining({
+          kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1",
+          state: "REQUIRED",
+          missingFields: ["PHONE"],
+          authorization: "NONE",
+        }),
+      ]);
+      expect(structured.benchmarkSimulationFacts).toEqual([]);
+      expect(JSON.stringify(structured.benchmarkSimulationMetadata))
+        .not.toContain("FULL_NAME");
+      expect(JSON.stringify(structured.benchmarkSimulationMetadata))
+        .not.toContain("ADDRESS");
       expect(systemInstruction).toContain("CHECKOUT_DETAILS_REQUIRED");
     }
 
@@ -354,9 +416,15 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     const completeSend = successfulTransport();
     await runFixture(completeFixture, completeSend);
     for (const [request] of completeSend.mock.calls) {
-      const { prompt, systemInstruction } = promptBody(request.body);
-      expect(prompt).toContain("TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1");
-      expect(prompt).toContain("\"state\":\"COMPLETE\"");
+      const { prompt, systemInstruction, structured } = structuredPrompt(request.body);
+      expect(structured.benchmarkSimulationMetadata).toEqual([
+        expect.objectContaining({
+          kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1",
+          state: "COMPLETE",
+          missingFields: [],
+          authorization: "NONE",
+        }),
+      ]);
       expect(prompt).not.toContain("Benchmark User");
       expect(prompt).not.toContain("0000000000");
       expect(prompt).not.toContain("Benchmark Address 000");
@@ -395,8 +463,8 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     await runFixture(caseFixture, send);
 
     for (const [request] of send.mock.calls) {
-      const { prompt } = promptBody(request.body);
-      expect(prompt).not.toContain("TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1");
+      const { structured } = structuredPrompt(request.body);
+      expect(structured.benchmarkSimulationMetadata).toEqual([]);
     }
   });
 });
