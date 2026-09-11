@@ -236,18 +236,40 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     );
   });
 
-  it("gives Strategist and Responder the general size-exists-not-fit qualification rule", async () => {
+  it("handles the no-SIZE_FIT behavior class without re-asking a known measurement", async () => {
     const caseFixture = fixture({
-      id: "Q035_BEHAVIOR_CLASS",
+      id: "SIZE_FIT_WITH_KNOWN_HEIGHT",
       message: "Bình thường chị mặc XXL, mẫu này XL có vừa không?",
     });
+    const evaluationContext: readonly ShadowContextMessage[] = [{
+      direction: "INBOUND",
+      senderType: "CUSTOMER",
+      messageType: "TEXT",
+      text: "Chị cao 1m60 rồi nhé.",
+      attachmentCount: 0,
+      occurredAt: "2026-09-10T01:58:00.000Z",
+    }, {
+      direction: "OUTBOUND",
+      senderType: "BOT",
+      messageType: "TEXT",
+      text: "Em có chiều cao rồi chị.",
+      attachmentCount: 0,
+      occurredAt: "2026-09-10T01:58:30.000Z",
+    }, {
+      direction: "INBOUND",
+      senderType: "CUSTOMER",
+      messageType: "TEXT",
+      text: caseFixture.latest_customer_message,
+      attachmentCount: 0,
+      occurredAt: "2026-09-10T01:59:00.000Z",
+    }];
     const send = vi.fn<CandidateVertexTransport["send"]>()
       .mockResolvedValueOnce({
         payload: planPayload({
           currentNeed: "Determine fit without guessing from catalog size existence.",
-          mustResolve: "Ask only for the missing relevant measurements.",
+          mustResolve: "Ask only for the missing relevant measurement.",
           nextMove: "ASK_MEASUREMENTS",
-          avoid: "Do not promise XL fits and do not repeat known measurements.",
+          avoid: "Do not promise XL fits and do not repeat known height.",
         }),
         providerModelVersion: "gemini-3.5-flash-lite",
       })
@@ -255,11 +277,11 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         payload: providerPayload({
           segments: [{
             kind: "CLARIFICATION",
-            text: "XL có trong dải size nhưng chưa đủ để kết luận vừa chị nhé. Chị cho em xin chiều cao và cân nặng ạ?",
+            text: "XL có trong dải size nhưng chưa đủ để kết luận vừa chị nhé. Chị cho em xin cân nặng ạ?",
             target: "MEASUREMENTS",
           }, {
             kind: "ACTION_REQUEST",
-            text: "Em dựa đúng số đo đó để kiểm tra fit cho mình ạ.",
+            text: "Em dựa đúng số đo còn thiếu để kiểm tra fit cho mình ạ.",
             action: "PROVIDE_MEASUREMENTS",
           }],
           strategy: "ASK_CLARIFICATION",
@@ -268,17 +290,25 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         providerModelVersion: "gemini-3.5-flash-lite",
       });
 
-    await runFixture(
+    const result = await runFixture(
       caseFixture,
       send as ReturnType<typeof successfulTransport>,
       [facts.simulation_fact_catalog.SF_PRODUCT_A],
+      evaluationContext,
     );
 
+    expect(caseFixture.context.canonical_flags).toEqual([]);
+    expect(caseFixture.context.runtime_claim_refs).toEqual([]);
+    expect(result.conversationPlan.nextMove).toBe("ASK_MEASUREMENTS");
+    expect(result.reply).toContain("cân nặng");
+    expect(result.reply).not.toContain("chiều cao");
     expect(send).toHaveBeenCalledTimes(2);
     for (const [request] of send.mock.calls) {
-      const { systemInstruction } = promptBody(request.body);
+      const { prompt, systemInstruction } = promptBody(request.body);
+      expect(prompt).toContain("Chị cao 1m60 rồi nhé.");
       expect(systemInstruction).toContain("SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT");
       expect(systemInstruction).toContain("ask only measurements not already present");
+      expect(systemInstruction).not.toContain("Q035");
     }
   });
 
@@ -298,6 +328,8 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       expect(prompt).toContain("TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1");
       expect(prompt).toContain("\"state\":\"REQUIRED\"");
       expect(prompt).toContain("PHONE");
+      expect(prompt).not.toContain("FULL_NAME");
+      expect(prompt).not.toContain("ADDRESS");
       expect(systemInstruction).toContain("CHECKOUT_DETAILS_REQUIRED");
     }
 
@@ -320,6 +352,27 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
       expect(prompt).not.toContain("Benchmark Address 000");
       expect(systemInstruction).toContain("CHECKOUT_DETAILS_COMPLETE");
     }
+  });
+
+  it("rejects raw checkout PII fields instead of copying them into readiness projection", async () => {
+    const checkoutWithRawPii = {
+      state: "COMPLETE",
+      missing_fields: [],
+      fullName: "Nguyen Test",
+      phone: "0900000000",
+      address: "123 Test Street",
+    } as unknown as CheckoutCompleteness;
+    const caseFixture = fixture({
+      id: "CHECKOUT_RAW_PII_REJECT",
+      message: "Chốt giúp chị nhé.",
+      checkoutCompleteness: checkoutWithRawPii,
+    });
+    const send = successfulTransport();
+
+    await expect(runFixture(caseFixture, send)).rejects.toThrow(
+      "TRACK_C_C3_CHECKOUT_COMPLETENESS_INVALID",
+    );
+    expect(send).not.toHaveBeenCalled();
   });
 
   it("does not infer checkout COMPLETE from dialogue alone", async () => {
