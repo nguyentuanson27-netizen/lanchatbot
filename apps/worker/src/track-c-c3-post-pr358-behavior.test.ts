@@ -54,6 +54,7 @@ function fixture(input: Readonly<{
   runtimeClaimRefs?: readonly string[];
   checkoutCompleteness?: CheckoutCompleteness;
 }>): SimulationFixture {
+  const hasCheckoutState = input.checkoutCompleteness !== undefined;
   return {
     id: input.id,
     latest_customer_message: input.message,
@@ -61,15 +62,22 @@ function fixture(input: Readonly<{
       origin: input.origin ?? "ORGANIC",
       first_meaningful_inbound: input.firstMeaningfulInbound ?? false,
       product_binding: { status: "RESOLVED", product_ids: ["SQ9012"] },
-      phase: "BROWSING",
+      phase: hasCheckoutState ? "ORDER_REVIEW" : "BROWSING",
       canonical_flags: input.canonicalFlags ?? [],
-      buying_intent: {
-        decision: "NONE",
-        requested_action: "NONE",
-        quantity: null,
-        evidence: null,
-      },
-      source_stage: null,
+      buying_intent: hasCheckoutState
+        ? {
+            decision: "COMMITTED",
+            requested_action: "PROCEED_TO_PAYMENT",
+            quantity: 1,
+            evidence: "test checkout commitment",
+          }
+        : {
+            decision: "NONE",
+            requested_action: "NONE",
+            quantity: null,
+            evidence: null,
+          },
+      source_stage: hasCheckoutState ? "ORDER_PREVIEW" : null,
       runtime_claim_refs: input.runtimeClaimRefs ?? [],
       ...(input.checkoutCompleteness === undefined
         ? {}
@@ -385,8 +393,23 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         missing_fields: ["PHONE"],
       },
     });
-    const requiredSend = successfulTransport();
-    await runFixture(requiredFixture, requiredSend);
+    const requiredSend = successfulTransport(providerPayload({
+      segments: [{
+        kind: "CLARIFICATION",
+        text: "Chị cho em xin số điện thoại nhận hàng ạ?",
+        target: "CHECKOUT_DETAILS",
+      }, {
+        kind: "ACTION_REQUEST",
+        text: "Em cần đúng số điện thoại còn thiếu để tiếp tục ạ.",
+        action: "PROVIDE_CHECKOUT_DETAILS",
+      }],
+      strategy: "ASK_CLARIFICATION",
+      cta: "ASK_CHECKOUT_DETAILS",
+    }));
+    const requiredResult = await runFixture(requiredFixture, requiredSend);
+    expect(requiredResult.reply).toContain("số điện thoại");
+    expect(requiredResult.reply).not.toContain("tên người nhận");
+    expect(requiredResult.reply).not.toContain("địa chỉ");
     for (const [request] of requiredSend.mock.calls) {
       const { systemInstruction, structured } = structuredPrompt(request.body);
       expect(structured.benchmarkSimulationMetadata).toEqual([
@@ -413,8 +436,13 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         missing_fields: [],
       },
     });
-    const completeSend = successfulTransport();
-    await runFixture(completeFixture, completeSend);
+    const completeSend = successfulTransport(generalReply(
+      "Dạ em đã có đủ thông tin nhận hàng chị nhé.",
+    ));
+    const completeResult = await runFixture(completeFixture, completeSend);
+    expect(completeResult.reply).not.toContain("gửi em tên");
+    expect(completeResult.reply).not.toContain("số điện thoại?");
+    expect(completeResult.reply).not.toContain("địa chỉ?");
     for (const [request] of completeSend.mock.calls) {
       const { prompt, systemInstruction, structured } = structuredPrompt(request.body);
       expect(structured.benchmarkSimulationMetadata).toEqual([
