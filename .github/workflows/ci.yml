@@ -110,13 +110,18 @@ jobs:
         run: |
           time pnpm --filter @lana/worker typecheck
           time pnpm --filter @lana/worker lint
+          time pnpm --filter @lana/worker benchmark:v5:validate
           time pnpm --filter @lana/worker exec vitest run \
             src/track-c-replay.test.ts \
             src/track-c-must-pass.test.ts \
             src/track-c-quality-judge.test.ts \
             src/track-c-offline-candidate.test.ts \
             src/track-c-c3-sales-quality-candidate.test.ts \
-            src/track-c-quality-suite-gate.test.ts
+            src/track-c-quality-suite-gate.test.ts \
+            src/track-c-c3-v5-benchmark-runner.test.ts \
+            src/track-c-c3-v5-benchmark-scoring.test.ts \
+            src/track-c-c3-v5-benchmark-evaluator.test.ts \
+            src/track-c-c3-v5-benchmark-gate.test.ts
 
       - name: Run affected packages checks
         if: steps.ci-scope.outputs.mode == 'affected'

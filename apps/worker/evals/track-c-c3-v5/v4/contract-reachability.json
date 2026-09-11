@@ -1,0 +1,70 @@
+{
+  "schema": "V5_PRODUCTION_CONTRACT_REACHABILITY_V2",
+  "evaluation_at": "2026-09-10T02:00:00.000Z",
+  "rule": "Quality case bytes preserve the authored checkpoint. Production-contract scoring uses this reachability audit as the current effective classification; behavior simulation remains available for every case. An override may only tighten or reopen a case when the reason is explicitly proven against current producer/runtime contracts.",
+  "default": "USE_CASE_DECLARATION",
+  "derived_rules": [
+    {
+      "id": "CART_SCOPED_CLAIM_REQUIRES_CANONICAL_CART",
+      "when": {
+        "runtime_claim_scope_kind": "CART",
+        "fixture_phase": "BROWSING"
+      },
+      "production_contract": "BLOCKED_BY_CONTRACT",
+      "contract_gaps": ["GAP_CANONICAL_REACHABILITY"],
+      "reason": "Current SHIPPING_FEE/FREESHIP/PROMOTION_OFFER producers are cart-policy producers. A real cart makes Context V2 derive a cart-active/review phase, so a BROWSING fixture with a cart-scoped protected claim is schema-representable but not production-state reachable."
+    }
+  ],
+  "overrides": {
+    "V5V4Q009": {
+      "production_contract": "SUPPORTED",
+      "contract_gaps": [],
+      "reason": "The expected behavior is product clarification. PRODUCT_CONTEXT_UNREADY has canonical precedence and does not require ad-origin egress, so GAP_AD_ORIGIN is not material to this production-contract assertion."
+    },
+    "V5V4Q024": {
+      "production_contract": "BLOCKED_BY_CONTRACT",
+      "contract_gaps": ["GAP_NEGATIVE_FREESHIP_PRODUCER"],
+      "reason": "The current cart-policy producer emits FREESHIP only for eligible=true; a non-free cart is represented by SHIPPING_FEE when a fee is known, not by a negative FREESHIP claim."
+    },
+    "V5V4Q030": {
+      "production_contract": "BLOCKED_BY_CONTRACT",
+      "contract_gaps": ["GAP_PRODUCT_DISPLAY_IDENTITY"],
+      "reason": "The expected answer must bind the human-readable name Nguyệt Hà to SV9031, but current candidate egress exposes the canonical ID without an authoritative display-name mapping."
+    },
+    "V5V4Q069": {
+      "production_contract": "BLOCKED_BY_CONTRACT",
+      "contract_gaps": ["GAP_PRODUCT_DISPLAY_IDENTITY"],
+      "reason": "The comparison must associate two human-readable names with two canonical product IDs; dialogue cannot be promoted to product-identity authority."
+    },
+    "V5V4Q088": {
+      "production_contract": "BLOCKED_BY_CONTRACT",
+      "contract_gaps": ["GAP_PRODUCT_DISPLAY_IDENTITY"],
+      "reason": "Two media/price claim sets cannot be authoritatively associated with the requested human-readable names using the current sanitized candidate contract."
+    },
+    "V5V4Q090": {
+      "production_contract": "BLOCKED_BY_CONTRACT",
+      "contract_gaps": ["GAP_PRODUCT_DISPLAY_IDENTITY"],
+      "reason": "Two prices cannot be authoritatively labeled with the requested human-readable product names using only the current candidate egress."
+    },
+    "V5V4Q092": {
+      "production_contract": "BLOCKED_BY_CONTRACT",
+      "contract_gaps": ["GAP_CANONICAL_REACHABILITY"],
+      "reason": "A real ORDER_PREVIEW already contains recipient, payment and eligible revalidation. Treating that stage as missing checkout details is not reachable from the current sales-cycle contract."
+    },
+    "V5V4Q093": {
+      "production_contract": "BLOCKED_BY_CONTRACT",
+      "contract_gaps": ["GAP_CANONICAL_REACHABILITY"],
+      "reason": "The fixture requires a real ORDER_PREVIEW/cart while providing no authoritative cart product identity and simultaneously declares the current product binding unresolved. The benchmark cannot construct that production state without inventing cart scope."
+    },
+    "V5V4Q094": {
+      "production_contract": "BLOCKED_BY_CONTRACT",
+      "contract_gaps": ["GAP_CANONICAL_REACHABILITY"],
+      "reason": "Context V2 derives MEASUREMENTS_REQUIRED only from the MEASUREMENTS_REQUIRED commerce stage; it cannot coexist with sourceStage ORDER_PREVIEW in the asserted production state."
+    },
+    "V5V4Q096": {
+      "production_contract": "BLOCKED_BY_CONTRACT",
+      "contract_gaps": ["GAP_CANONICAL_REACHABILITY"],
+      "reason": "Changing a cart selection from an ORDER_PREVIEW requires canonical cart mutation/revalidation; the authored fixture skips that reachable transition while still asking the candidate to continue checkout."
+    }
+  }
+}
