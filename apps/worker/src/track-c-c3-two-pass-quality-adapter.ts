@@ -63,7 +63,8 @@ function trustedSimulationMetadata(
   if (checkout !== undefined) {
     const fields = checkout.missing_fields;
     const keys = Object.keys(checkout).sort();
-    if (JSON.stringify(keys) !== JSON.stringify([...CHECKOUT_KEYS].sort()) ||
+    if (fixture.context.source_stage !== "ORDER_PREVIEW" ||
+        JSON.stringify(keys) !== JSON.stringify([...CHECKOUT_KEYS].sort()) ||
         !Array.isArray(fields) ||
         fields.some((field) => !CHECKOUT_FIELDS.has(field)) ||
         new Set(fields).size !== fields.length ||
