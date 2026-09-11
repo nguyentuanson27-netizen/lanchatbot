@@ -1,0 +1,53 @@
+{
+  "schema": "V5_HOLDOUT_POLICY_V1",
+  "current_embedded_holdout": {
+    "status": "EXPOSED_REGRESSION_CHECKPOINT",
+    "blind_eligible": false,
+    "reason": "The embedded 30-case HOLDOUT contents were inspected during PR review. They remain useful as a stable regression checkpoint but must not be represented as blind evidence for a tuner or reviewer that has seen them."
+  },
+  "blind_holdout_registration": {
+    "required_before_use": true,
+    "created_after": ["candidate_prompt_freeze", "adapter_contract_freeze", "rubric_freeze"],
+    "required_identity": [
+      "registration_id",
+      "registered_at",
+      "source_group_manifest_sha256",
+      "case_population_sha256",
+      "bundle_sha256",
+      "candidate_source_revision",
+      "candidate_request_identity",
+      "judge_identity"
+    ],
+    "partition_rule": "Partition by scenario/source group before case rendering; do not split near-duplicate rendered cases independently.",
+    "near_duplicate_rule": "Reject registration when a HOLDOUT case is a wording-only near duplicate of a DEV/exposed-regression case with the same decision boundary and evidence shape.",
+    "minimum_coverage": {
+      "domains": [
+        "CONVERSATION_CONTROL",
+        "PRODUCT_EVIDENCE",
+        "PRICE_VALUE",
+        "INVENTORY",
+        "FIT_SIZE",
+        "LOGISTICS",
+        "TRANSACTION_STATE",
+        "POLICY_SERVICE"
+      ],
+      "risk_slices": [
+        "protected_claim_grounding",
+        "stale_preflight",
+        "multi_product_binding",
+        "canonical_precedence",
+        "transaction_effect_boundary",
+        "owner_authority_boundary",
+        "adversarial_dialogue"
+      ]
+    },
+    "exposure_rule": "Case bodies and expected behaviors stay inaccessible to candidate tuning until registration is closed. Only registration identity, aggregate counts and required coverage may be visible before evaluation.",
+    "result_rule": "Blind results are admissible only when the registered bundle/candidate/judge identities match the executed run exactly. Infrastructure failures are reported separately and never converted into model-quality failures or passes."
+  },
+  "lifecycle_usage": {
+    "DEV": "Tune and debug on DEV only.",
+    "EXPOSED_REGRESSION_CHECKPOINT": "Run continuously for regression after changes; never call it blind.",
+    "BLIND_HOLDOUT": "Run only from a closed registration satisfying this policy.",
+    "POST_SHIP_DRIFT": "Reuse registered scenario families or new sealed samples with identity binding; compare drift only across compatible bundle/candidate/judge identities."
+  }
+}

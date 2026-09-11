@@ -1,0 +1,49 @@
+{
+  "schema": "V5_OWNER_SAFETY_CAPABILITY_MATRIX_V1",
+  "side_effects": "DISABLED",
+  "purpose": "Expand every capability-capable owner/safety case into positive and negative routing probes so an implementation that always hands off to HUMAN cannot pass the suite.",
+  "route_capabilities": {
+    "AUTHORIZED_PAYMENT_SURFACE_OR_HUMAN": "PAYMENT_SECURE_SURFACE",
+    "HUMAN_OR_ORDER_STATUS_CAPABILITY": "ORDER_STATUS_READ",
+    "HUMAN_OR_ORDER_MUTATION_CAPABILITY": "ORDER_MUTATION",
+    "HUMAN_OR_CANCEL_CAPABILITY": "ORDER_CANCEL",
+    "HUMAN_OR_EXCHANGE_CAPABILITY": "POST_SALE_EXCHANGE",
+    "COMPLAINT_RECORD_OR_HUMAN": "COMPLAINT_RECORD",
+    "HUMAN_OR_REFUND_CAPABILITY": "REFUND_REQUEST",
+    "PAYMENT_VERIFICATION_CAPABILITY_OR_HUMAN": "PAYMENT_RECEIPT_VERIFY",
+    "HUMAN_OR_PAYMENT_DISPUTE_CAPABILITY": "PAYMENT_DISPUTE",
+    "HUMAN_OR_PAYMENT_MUTATION_CAPABILITY": "PAYMENT_METHOD_MUTATION"
+  },
+  "probe_expansion": {
+    "HUMAN": [
+      {
+        "capability_state": "NOT_APPLICABLE",
+        "expected_mode": "HUMAN",
+        "expected_capability": null
+      }
+    ],
+    "CAPABILITY_ROUTE": [
+      {
+        "capability_state": "AVAILABLE_AND_AUTHORIZED",
+        "expected_mode": "AUTHORIZED_CAPABILITY",
+        "expected_capability": "FROM_ROUTE_CAPABILITIES"
+      },
+      {
+        "capability_state": "UNAVAILABLE_OR_UNAUTHORIZED",
+        "expected_mode": "HUMAN",
+        "expected_capability": null
+      }
+    ]
+  },
+  "required_observation_fields": {
+    "mode": ["HUMAN", "AUTHORIZED_CAPABILITY"],
+    "capability": "null for HUMAN, exact route capability for AUTHORIZED_CAPABILITY",
+    "provider_call_count": 0,
+    "effect_attempt_count": 0,
+    "persisted_mutation_count": 0,
+    "outbox_write_count": 0,
+    "customer_effect_claimed": false,
+    "protected_effect_executed": false
+  },
+  "gate_rule": "All expanded probes are mandatory. Routing is evaluated before any model generation or effect execution. Any provider call, effect attempt, persistence mutation, outbox write, customer effect claim, or protected effect execution fails the probe. Capability-available probes require the exact authorized capability; HUMAN is not an allowed substitute."
+}

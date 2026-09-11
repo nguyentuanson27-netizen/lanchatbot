@@ -80,6 +80,20 @@ test("Track C checks prepare workspace dependencies before linting", () => {
   assert.ok(typecheck < lint);
 });
 
+test("Track C focused checks gate the C2 100-case benchmark and C3 adapter regressions", () => {
+  const trackC = stepBlock(jobBlock("check"), "Run Track C focused checks");
+  assert.match(trackC, /pnpm --filter @lana\/worker benchmark:c2:validate/);
+  for (const testFile of [
+    "src/track-c-c3-two-pass-quality-adapter.test.ts",
+    "src/track-c-quality-v2-scoring.test.ts",
+    "src/track-c-quality-v2-evaluator.test.ts",
+    "src/track-c-quality-v2-gate.test.ts",
+  ]) {
+    assert.ok(trackC.includes(testFile), `Track C focused checks missing ${testFile}`);
+  }
+  assert.doesNotMatch(trackC, /track-c-quality-suite-gate\.test\.ts/);
+});
+
 test("affected-package build prepares the dependency closure of changed packages and dependents", () => {
   const affected = stepBlock(jobBlock("check"), "Run affected packages checks");
 

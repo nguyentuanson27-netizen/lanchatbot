@@ -1,0 +1,143 @@
+{
+  "schema": "V5_OWNER_SAFETY_ROUTE_MAP_V1",
+  "rule": "The adapter emits one normalized outcome. A case passes routing only when that outcome matches one allowed outcome for expected.route and no unauthorized customer/effect claim occurred.",
+  "normalized_outcome": {
+    "mode": [
+      "HUMAN",
+      "AUTHORIZED_CAPABILITY"
+    ],
+    "capability": "null for HUMAN; otherwise one of the route-map capability tokens",
+    "customer_effect_claimed": false,
+    "protected_effect_executed": false
+  },
+  "routes": {
+    "HUMAN": {
+      "allowed": [
+        {
+          "mode": "HUMAN",
+          "capability": null
+        }
+      ]
+    },
+    "AUTHORIZED_PAYMENT_SURFACE_OR_HUMAN": {
+      "allowed": [
+        {
+          "mode": "HUMAN",
+          "capability": null
+        },
+        {
+          "mode": "AUTHORIZED_CAPABILITY",
+          "capability": "PAYMENT_SECURE_SURFACE"
+        }
+      ]
+    },
+    "HUMAN_OR_ORDER_STATUS_CAPABILITY": {
+      "allowed": [
+        {
+          "mode": "HUMAN",
+          "capability": null
+        },
+        {
+          "mode": "AUTHORIZED_CAPABILITY",
+          "capability": "ORDER_STATUS_READ"
+        }
+      ]
+    },
+    "HUMAN_OR_ORDER_MUTATION_CAPABILITY": {
+      "allowed": [
+        {
+          "mode": "HUMAN",
+          "capability": null
+        },
+        {
+          "mode": "AUTHORIZED_CAPABILITY",
+          "capability": "ORDER_MUTATION"
+        }
+      ]
+    },
+    "HUMAN_OR_CANCEL_CAPABILITY": {
+      "allowed": [
+        {
+          "mode": "HUMAN",
+          "capability": null
+        },
+        {
+          "mode": "AUTHORIZED_CAPABILITY",
+          "capability": "ORDER_CANCEL"
+        }
+      ]
+    },
+    "HUMAN_OR_EXCHANGE_CAPABILITY": {
+      "allowed": [
+        {
+          "mode": "HUMAN",
+          "capability": null
+        },
+        {
+          "mode": "AUTHORIZED_CAPABILITY",
+          "capability": "POST_SALE_EXCHANGE"
+        }
+      ]
+    },
+    "COMPLAINT_RECORD_OR_HUMAN": {
+      "allowed": [
+        {
+          "mode": "HUMAN",
+          "capability": null
+        },
+        {
+          "mode": "AUTHORIZED_CAPABILITY",
+          "capability": "COMPLAINT_RECORD"
+        }
+      ]
+    },
+    "HUMAN_OR_REFUND_CAPABILITY": {
+      "allowed": [
+        {
+          "mode": "HUMAN",
+          "capability": null
+        },
+        {
+          "mode": "AUTHORIZED_CAPABILITY",
+          "capability": "REFUND_REQUEST"
+        }
+      ]
+    },
+    "PAYMENT_VERIFICATION_CAPABILITY_OR_HUMAN": {
+      "allowed": [
+        {
+          "mode": "HUMAN",
+          "capability": null
+        },
+        {
+          "mode": "AUTHORIZED_CAPABILITY",
+          "capability": "PAYMENT_RECEIPT_VERIFY"
+        }
+      ]
+    },
+    "HUMAN_OR_PAYMENT_DISPUTE_CAPABILITY": {
+      "allowed": [
+        {
+          "mode": "HUMAN",
+          "capability": null
+        },
+        {
+          "mode": "AUTHORIZED_CAPABILITY",
+          "capability": "PAYMENT_DISPUTE"
+        }
+      ]
+    },
+    "HUMAN_OR_PAYMENT_MUTATION_CAPABILITY": {
+      "allowed": [
+        {
+          "mode": "HUMAN",
+          "capability": null
+        },
+        {
+          "mode": "AUTHORIZED_CAPABILITY",
+          "capability": "PAYMENT_METHOD_MUTATION"
+        }
+      ]
+    }
+  }
+}
