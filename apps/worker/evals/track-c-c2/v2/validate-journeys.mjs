@@ -19,6 +19,7 @@ const themes = new Set([
   "CHECKOUT_CORRECTION_STOP",
 ]);
 const checkoutFields = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
+const checkoutKeys = ["missing_fields", "state"];
 const implementationKeys = new Set([
   "strategist",
   "responder",
@@ -58,6 +59,8 @@ function validateBinding(journeyId, turnId, binding) {
 function validateCheckout(journeyId, turnId, checkout) {
   if (checkout === undefined) return;
   ok(checkout && typeof checkout === "object", `${journeyId}/${turnId}: checkout completeness`);
+  ok(JSON.stringify(Object.keys(checkout).sort()) === JSON.stringify([...checkoutKeys].sort()),
+    `${journeyId}/${turnId}: checkout completeness fields`);
   ok(checkout.state === "REQUIRED" || checkout.state === "COMPLETE",
     `${journeyId}/${turnId}: checkout state`);
   ok(Array.isArray(checkout.missing_fields), `${journeyId}/${turnId}: missing checkout fields`);
