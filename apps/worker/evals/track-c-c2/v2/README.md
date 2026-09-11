@@ -6,7 +6,7 @@ This directory is the canonical Track C C2 quality benchmark. It replaces the pr
 
 - **C1** remains the authority for hard safety, protected facts, and effect/runtime contracts.
 - **C2** owns this corpus, rubric, materialization contract, scoring, evaluation evidence, and aggregate quality gate.
-- **C3** owns candidate experiments. The current two-pass candidate is connected through `track-c-c3-two-pass-quality-adapter.ts`; later prompt revisions can use the same C2 benchmark without forking the corpus.
+- **C3** owns candidate experiments. The current two-pass candidate is connected through `track-c-c3-two-pass-quality-adapter.ts`; later prompt revisions can use the same C2 corpus without forking it.
 
 The benchmark therefore does not belong to prompt V5/V6/V7. Candidate identity is recorded separately from benchmark identity.
 
@@ -18,7 +18,7 @@ Production materialization uses real protected-claim schemas and canonical Conte
 
 ## Quality evaluation
 
-`rubric.json` defines deterministic scoring thresholds and stage diagnostics. Two-pass candidates can expose separate strategist/responder assessments, but these are candidate diagnostics rather than a requirement that every future C3 candidate use a two-pass architecture.
+`rubric.json` defines deterministic scoring thresholds and stage diagnostics. The current V2 execution/scoring harness is intentionally bound to the existing two-pass strategist/responder candidate. A future candidate with a different stage shape may reuse the same C2 corpus, but it must provide a compatible adapter/scoring contract rather than silently being treated as two-pass.
 
 The aggregate C2 gate binds an explicit expected population. Partial populations, relabeled cases, infrastructure failures, unsupported production cases executed as model calls, and unexpected pre-model rejects fail closed.
 
@@ -45,3 +45,5 @@ pnpm benchmark:c2:validate
 ## Compatibility bridge
 
 Some implementation symbols still retain the historical `TrackCV5...` names internally so this migration does not rewrite already-reviewed benchmark logic. `track-c-quality-benchmark-v2.ts` is the C2-owned public type/API surface, and `track-c-c3-two-pass-quality-adapter.ts` is the C3-owned candidate adapter. The historical eval path is only a symlink to this canonical C2 directory for existing internal tests; it is not a second corpus or authority.
+
+The historical `track-c-quality-suite*` and `track-c-quality-judge` modules are retained only to keep the existing B3 replay/offline evidence API source-compatible during this migration. Their 50-case suite is legacy comparison evidence and must not be used as C2 V2 benchmark/ship evidence or extended with new C2 cases. C2 V2 corpus validation, scoring and aggregate gate live in this 100-case benchmark surface.
