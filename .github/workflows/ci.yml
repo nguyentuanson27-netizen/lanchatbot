@@ -118,6 +118,7 @@ jobs:
             src/track-c-c3-sales-quality-candidate.test.ts \
             src/track-c-c3-two-pass-quality-adapter.test.ts \
             src/track-c-c3-post-pr358-behavior.test.ts \
+            src/track-c-c3-journey-adapter.test.ts \
             src/track-c-quality-v2-scoring.test.ts \
             src/track-c-quality-v2-evaluator.test.ts \
             src/track-c-quality-v2-gate.test.ts
