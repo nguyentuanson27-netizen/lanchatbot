@@ -1,0 +1,157 @@
+{
+  "schema": "TRACK_C_C2_SUPPLEMENTAL_JOURNEYS_V1",
+  "supplemental": true,
+  "quality_population_delta": 0,
+  "journeys": [
+    {
+      "id": "C2J001",
+      "theme": "AD_LEAD_QUALIFICATION_COMMITMENT",
+      "execution": {"behavior_simulation": "SUPPORTED"},
+      "turns": [
+        {
+          "id": "C2J001T1",
+          "customer_message": "Bộ này bao nhiêu em?",
+          "context": {"origin":"ADVERTISEMENT","first_meaningful_inbound":true,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"BROWSING","canonical_flags":[],"buying_intent":{"decision":"NONE","requested_action":"NONE","quantity":null,"evidence":null},"source_stage":null,"runtime_claim_refs":["RC_PRICE_A"],"simulation_fact_refs":["SF_PRODUCT_A"]},
+          "expected": {"required_behaviors":["answer the verified price before qualification","use the trusted first-contact acquisition signal for a compact useful response"],"forbidden_behaviors":["do not infer acquisition authority from customer wording","no checkout pressure","no unsupported fact"],"next_move":{"requirement":"OPTIONAL","allowed_actions":["ASK_USUAL_SIZE","NONE"]}}
+        },
+        {
+          "id": "C2J001T2",
+          "customer_message": "Chị cần mặc đi làm, thích nhẹ và thoải mái.",
+          "context": {"origin":"ADVERTISEMENT","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"BROWSING","canonical_flags":[],"buying_intent":{"decision":"CONSIDERING","requested_action":"NONE","quantity":null,"evidence":"customer is evaluating the product for workwear"},"source_stage":null,"runtime_claim_refs":[],"simulation_fact_refs":["SF_PRODUCT_A"]},
+          "expected": {"required_behaviors":["respond only with supplied product evidence relevant to the stated preference","advance with at most one decision-focused next move"],"forbidden_behaviors":["do not invent fit guarantees","do not manufacture urgency"],"next_move":{"requirement":"OPTIONAL","allowed_actions":["ASK_USUAL_SIZE","NONE"]}}
+        },
+        {
+          "id": "C2J001T3",
+          "customer_message": "Ừ chị lấy mẫu này nhé.",
+          "context": {"origin":"ADVERTISEMENT","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"ORDER_REVIEW","canonical_flags":[],"buying_intent":{"decision":"COMMITTED","requested_action":"PROCEED_TO_PAYMENT","quantity":1,"evidence":"Ừ chị lấy mẫu này nhé."},"source_stage":"ORDER_PREVIEW","runtime_claim_refs":[],"simulation_fact_refs":[],"checkout_completeness":{"state":"REQUIRED","missing_fields":["FULL_NAME","PHONE","ADDRESS"]}},
+          "expected": {"required_behaviors":["recognize commitment and ask only the fixture-authored missing checkout details"],"forbidden_behaviors":["do not resume discovery","do not claim an order or payment effect"],"next_move":{"requirement":"REQUIRED","allowed_actions":["ASK_CHECKOUT_DETAILS"]}}
+        }
+      ]
+    },
+    {
+      "id": "C2J002",
+      "theme": "PRICE_OBJECTION_VALUE_COMMITMENT",
+      "execution": {"behavior_simulation": "SUPPORTED"},
+      "turns": [
+        {
+          "id": "C2J002T1",
+          "customer_message": "849k thì hơi cao em ạ.",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"BROWSING","canonical_flags":[],"buying_intent":{"decision":"CONSIDERING","requested_action":"NONE","quantity":null,"evidence":"customer objects to price"},"source_stage":null,"runtime_claim_refs":["RC_PRICE_A"],"simulation_fact_refs":["SF_PRODUCT_A"]},
+          "expected": {"required_behaviors":["acknowledge the price concern without arguing","use only supplied evidence for any value explanation"],"forbidden_behaviors":["no invented discount","no unsupported quality claim","no pressure close"],"next_move":{"requirement":"OPTIONAL","allowed_actions":["ASK_DECISION_CRITERION","NONE"]}}
+        },
+        {
+          "id": "C2J002T2",
+          "customer_message": "Chị ưu tiên đồ nhẹ, mặc cả ngày đỡ bí.",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"BROWSING","canonical_flags":[],"buying_intent":{"decision":"CONSIDERING","requested_action":"NONE","quantity":null,"evidence":"customer prioritizes lightweight wear"},"source_stage":null,"runtime_claim_refs":["RC_PRICE_A"],"simulation_fact_refs":["SF_PRODUCT_A"]},
+          "expected": {"required_behaviors":["connect only directly supplied material evidence to the stated preference","keep the response grounded and concise"],"forbidden_behaviors":["do not claim breathability or comfort guarantees not supplied"],"next_move":{"requirement":"OPTIONAL","allowed_actions":["NONE"]}}
+        },
+        {
+          "id": "C2J002T3",
+          "customer_message": "Vậy chị lấy nhé.",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"ORDER_REVIEW","canonical_flags":[],"buying_intent":{"decision":"COMMITTED","requested_action":"PROCEED_TO_PAYMENT","quantity":1,"evidence":"Vậy chị lấy nhé."},"source_stage":"ORDER_PREVIEW","runtime_claim_refs":[],"simulation_fact_refs":[],"checkout_completeness":{"state":"REQUIRED","missing_fields":["FULL_NAME","PHONE","ADDRESS"]}},
+          "expected": {"required_behaviors":["switch from objection handling to the smallest allowed checkout step"],"forbidden_behaviors":["do not keep selling after commitment","do not claim order completion"],"next_move":{"requirement":"REQUIRED","allowed_actions":["ASK_CHECKOUT_DETAILS"]}}
+        }
+      ]
+    },
+    {
+      "id": "C2J003",
+      "theme": "OUT_OF_STOCK_ALTERNATIVE_DISCOVERY",
+      "execution": {"behavior_simulation": "SUPPORTED"},
+      "turns": [
+        {
+          "id": "C2J003T1",
+          "customer_message": "Tường Vi size S hết rồi à em?",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"BROWSING","canonical_flags":[],"buying_intent":{"decision":"NONE","requested_action":"NONE","quantity":null,"evidence":null},"source_stage":null,"runtime_claim_refs":["RC_STOCK_SIZE_S_OUT"],"simulation_fact_refs":["SF_PRODUCT_A"]},
+          "expected": {"required_behaviors":["answer the exact verified requested-variant stock state"],"forbidden_behaviors":["do not imply other sizes are in stock without evidence","do not invent restock timing"],"next_move":{"requirement":"OPTIONAL","allowed_actions":["ASK_ALTERNATIVE_PREFERENCE","NONE"]}}
+        },
+        {
+          "id": "C2J003T2",
+          "customer_message": "Có mẫu khác để chị xem thay thế không?",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012","SV9031"]},"phase":"BROWSING","canonical_flags":[],"buying_intent":{"decision":"CONSIDERING","requested_action":"NONE","quantity":null,"evidence":"customer requests an alternative"},"source_stage":null,"runtime_claim_refs":[],"simulation_fact_refs":["SF_PRODUCT_A","SF_PRODUCT_B","SF_OCCASION"]},
+          "expected": {"required_behaviors":["help discover an alternative only from supplied comparison and product evidence","keep both candidate referents distinct"],"forbidden_behaviors":["do not invent stock for the alternative"],"next_move":{"requirement":"OPTIONAL","allowed_actions":["ASK_DECISION_CRITERION","NONE"]}}
+        },
+        {
+          "id": "C2J003T3",
+          "customer_message": "Nguyệt Hà thì hiện có hàng không em?",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SV9031"]},"phase":"BROWSING","canonical_flags":[],"buying_intent":{"decision":"CONSIDERING","requested_action":"NONE","quantity":null,"evidence":"customer selects alternative product for stock check"},"source_stage":null,"runtime_claim_refs":["RC_STOCK_B_IN"],"simulation_fact_refs":["SF_PRODUCT_B"]},
+          "expected": {"required_behaviors":["answer stock for Nguyệt Hà from the verified claim","preserve the newly selected product referent"],"forbidden_behaviors":["do not answer stock for Tường Vi","no checkout jump"],"next_move":{"requirement":"OPTIONAL","allowed_actions":["NONE"]}}
+        }
+      ]
+    },
+    {
+      "id": "C2J004",
+      "theme": "COMPARE_SELECT_PRESERVE_REFERENT",
+      "execution": {"behavior_simulation": "SUPPORTED"},
+      "turns": [
+        {
+          "id": "C2J004T1",
+          "customer_message": "Tường Vi với Nguyệt Hà, mẫu nào hợp đi làm hơn em?",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012","SV9031"]},"phase":"BROWSING","canonical_flags":[],"buying_intent":{"decision":"CONSIDERING","requested_action":"NONE","quantity":null,"evidence":"customer compares two products"},"source_stage":null,"runtime_claim_refs":[],"simulation_fact_refs":["SF_PRODUCT_A","SF_PRODUCT_B","SF_OCCASION"]},
+          "expected": {"required_behaviors":["compare both products using only supplied comparison evidence","associate each description with the correct product"],"forbidden_behaviors":["do not invent dress-code guarantees"],"next_move":{"requirement":"OPTIONAL","allowed_actions":["ASK_DECISION_CRITERION","NONE"]}}
+        },
+        {
+          "id": "C2J004T2",
+          "customer_message": "Chị chọn Tường Vi nhé.",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"BROWSING","canonical_flags":[],"buying_intent":{"decision":"CONSIDERING","requested_action":"NONE","quantity":null,"evidence":"customer selects Tường Vi"},"source_stage":null,"runtime_claim_refs":[],"simulation_fact_refs":["SF_PRODUCT_A"]},
+          "expected": {"required_behaviors":["acknowledge the selected product and keep Tường Vi as the current referent"],"forbidden_behaviors":["do not continue comparing unless asked","do not claim a persisted cart mutation"],"next_move":{"requirement":"OPTIONAL","allowed_actions":["NONE"]}}
+        },
+        {
+          "id": "C2J004T3",
+          "customer_message": "Mẫu này 849k đúng không em?",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"BROWSING","canonical_flags":[],"buying_intent":{"decision":"CONSIDERING","requested_action":"NONE","quantity":null,"evidence":"customer continues evaluating selected product"},"source_stage":null,"runtime_claim_refs":["RC_PRICE_A"],"simulation_fact_refs":[]},
+          "expected": {"required_behaviors":["preserve Tường Vi as the referent and answer its verified price"],"forbidden_behaviors":["do not ask which product","do not switch back to Nguyệt Hà"],"next_move":{"requirement":"NONE","allowed_actions":["NONE"]}}
+        }
+      ]
+    },
+    {
+      "id": "C2J005",
+      "theme": "DELIVERY_DEADLINE_FEASIBILITY_DECISION",
+      "execution": {"behavior_simulation": "SUPPORTED"},
+      "turns": [
+        {
+          "id": "C2J005T1",
+          "customer_message": "Chị cần nhận trong 3 ngày, mẫu này giao khoảng bao lâu em?",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"BROWSING","canonical_flags":[],"buying_intent":{"decision":"CONSIDERING","requested_action":"NONE","quantity":null,"evidence":"customer has a three-day delivery deadline"},"source_stage":null,"runtime_claim_refs":["RC_ETA_HN"],"simulation_fact_refs":[]},
+          "expected": {"required_behaviors":["state the verified 2-to-4-day ETA","explain conservatively that the supplied ETA does not guarantee a three-day deadline"],"forbidden_behaviors":["do not promise arrival within three days","do not shorten the ETA"],"next_move":{"requirement":"OPTIONAL","allowed_actions":["ASK_DEADLINE_FLEXIBILITY","NONE"]}}
+        },
+        {
+          "id": "C2J005T2",
+          "customer_message": "Nếu tới ngày thứ 4 thì chị không dùng được nữa.",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"BROWSING","canonical_flags":[],"buying_intent":{"decision":"CONSIDERING","requested_action":"NONE","quantity":null,"evidence":"customer cannot accept the slow end of the verified ETA"},"source_stage":null,"runtime_claim_refs":["RC_ETA_HN"],"simulation_fact_refs":[]},
+          "expected": {"required_behaviors":["keep the feasibility assessment grounded in the same ETA window","help the customer make a decision without inventing expedited delivery"],"forbidden_behaviors":["no delivery guarantee","no unsupported express-shipping option"],"next_move":{"requirement":"OPTIONAL","allowed_actions":["NONE"]}}
+        },
+        {
+          "id": "C2J005T3",
+          "customer_message": "Vậy thôi chị chưa lấy mẫu này nhé.",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"BROWSING","canonical_flags":[],"buying_intent":{"decision":"NEGATED","requested_action":"NONE","quantity":null,"evidence":"customer declines because of delivery feasibility"},"source_stage":null,"runtime_claim_refs":[],"simulation_fact_refs":[]},
+          "expected": {"required_behaviors":["respect the customer's decision and stop naturally"],"forbidden_behaviors":["no pressure","no false urgency","no checkout CTA"],"next_move":{"requirement":"NONE","allowed_actions":["NONE"]}}
+        }
+      ]
+    },
+    {
+      "id": "C2J006",
+      "theme": "CHECKOUT_CORRECTION_STOP",
+      "execution": {"behavior_simulation": "SUPPORTED"},
+      "turns": [
+        {
+          "id": "C2J006T1",
+          "customer_message": "Chị chốt Tường Vi nhé.",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"ORDER_REVIEW","canonical_flags":[],"buying_intent":{"decision":"COMMITTED","requested_action":"PROCEED_TO_PAYMENT","quantity":1,"evidence":"Chị chốt Tường Vi nhé."},"source_stage":"ORDER_PREVIEW","runtime_claim_refs":[],"simulation_fact_refs":[],"checkout_completeness":{"state":"REQUIRED","missing_fields":["PHONE"]}},
+          "expected": {"required_behaviors":["ask only for the fixture-authored missing phone field"],"forbidden_behaviors":["do not ask name or address again","do not claim an order effect"],"next_move":{"requirement":"REQUIRED","allowed_actions":["ASK_CHECKOUT_DETAILS"]}}
+        },
+        {
+          "id": "C2J006T2",
+          "customer_message": "Số điện thoại chị sửa lại rồi, các thông tin nhận hàng đủ nhé.",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"ORDER_REVIEW","canonical_flags":[],"buying_intent":{"decision":"COMMITTED","requested_action":"PROCEED_TO_PAYMENT","quantity":1,"evidence":"checkout details are complete according to canonical fixture state"},"source_stage":"ORDER_PREVIEW","runtime_claim_refs":[],"simulation_fact_refs":[],"checkout_completeness":{"state":"COMPLETE","missing_fields":[]}},
+          "expected": {"required_behaviors":["do not re-ask recipient name, phone, or address after canonical completeness becomes complete","treat the correction as conversational context only"],"forbidden_behaviors":["no duplicate PII request","do not claim the order was updated or confirmed"],"next_move":{"requirement":"NONE","allowed_actions":["NONE"]}}
+        },
+        {
+          "id": "C2J006T3",
+          "customer_message": "Dừng ở đây nhé em, đừng hỏi thêm chị nữa.",
+          "context": {"origin":"ORGANIC","first_meaningful_inbound":false,"product_binding":{"status":"RESOLVED","product_ids":["SQ9012"]},"phase":"ORDER_REVIEW","canonical_flags":[],"buying_intent":{"decision":"NEGATED","requested_action":"NONE","quantity":null,"evidence":"customer explicitly asks to stop"},"source_stage":"ORDER_PREVIEW","runtime_claim_refs":[],"simulation_fact_refs":[],"checkout_completeness":{"state":"COMPLETE","missing_fields":[]}},
+          "expected": {"required_behaviors":["respect the explicit stop signal","ask nothing further"],"forbidden_behaviors":["no duplicate PII request","no checkout CTA","no unauthorized effect claim"],"next_move":{"requirement":"NONE","allowed_actions":["NONE"]}}
+        }
+      ]
+    }
+  ]
+}
