@@ -175,27 +175,48 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
   });
 
-  it("balances Vietnamese fillers and politeness markers instead of suppressing or repeating them", () => {
+  it("uses relationship-aware Vietnamese tone without repetitive filler", () => {
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "usually in one or two short sentences",
+      "When there is no prior shop turn, treat this as a new-contact tone moment",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Use ordinary spoken shop language rather than customer-service script language.",
+      "use one light polite softener such as 'Dạ chị,' or 'Vâng chị,'",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "'Dạ' is optional, not mandatory, but do not suppress it.",
+      "Once the conversation already has shop turns, do not open with 'Dạ' by default.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Use politeness markers such as 'ạ', 'nhé', and the established address form selectively.",
+      "Do not compress a reply so aggressively that natural Vietnamese becomes clipped or database-like.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Avoid stacking several fillers in one short sentence",
+      "Prefer commas, periods, or short line breaks over semicolons in ordinary Messenger replies.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "A customer-facing question or CTA is optional, never required.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "end cleanly without adding a closing service phrase",
+    );
+  });
+
+  it("uses natural product noun phrases and hides internal evidence jargon", () => {
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Do not use a bare display name as a grammatical product noun when an authoritative product type is available.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "If an authoritative product type is unavailable, prefer 'thiết kế' or 'mẫu' plus the display name; if only a code is available, use 'mẫu' plus the code.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "prefer 'thời gian giao dự kiến' over 'ETA'",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "'theo số đo chị gửi' over 'fit'",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "state the current fact directly instead of phrases such as 'giá được xác nhận hiện tại'",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Do not expose internal terms such as canonical, claim, claimRef, provenance, or verification status to the customer.",
     );
   });
 
