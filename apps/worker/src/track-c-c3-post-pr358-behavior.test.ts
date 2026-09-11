@@ -3,6 +3,10 @@ import { describe, expect, it, vi } from "vitest";
 import type { ShadowContextMessage } from "@lana/database";
 import type { CandidateVertexTransport } from "./context-v2-candidate.js";
 import {
+  TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION,
+  TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION,
+} from "./track-c-c3-two-pass-candidate.js";
+import {
   runTrackCC3TwoPassQualityCandidate,
 } from "./track-c-c3-two-pass-quality-adapter.js";
 import {
@@ -299,6 +303,12 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
 
     expect(caseFixture.context.canonical_flags).toEqual([]);
     expect(caseFixture.context.runtime_claim_refs).toEqual([]);
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION)
+      .toContain("SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT");
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION)
+      .toContain("SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT");
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION)
+      .toContain("overrides only the generic unverified-protected-fact");
     expect(result.conversationPlan.nextMove).toBe("ASK_MEASUREMENTS");
     expect(result.reply).toContain("cân nặng");
     expect(result.reply).not.toContain("chiều cao");
