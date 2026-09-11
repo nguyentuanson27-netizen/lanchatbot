@@ -52,7 +52,7 @@ test("CI preserves mandatory gates and selector-driven code lanes", () => {
     "Verify policy transactions on PostgreSQL",
     "Verify Track B 0037 migration operator",
     "Verify Track B 0038 migration operator",
-    "Verify Track B 0039 V2 LKG migration operator",
+    "Verify Track B 0039 migration operator",
     "Verify Track B 0040 operator boundary",
     "Verify Gate E release-evidence reader access",
     "Verify release integrity",
