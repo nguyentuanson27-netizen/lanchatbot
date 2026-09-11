@@ -11,7 +11,7 @@
     "pretypecheck": "pnpm -r --filter \"@lana/worker^...\" build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "pretest": "pnpm -r --filter \"@lana/worker^...\" build",
-    "benchmark:c2:validate": "node evals/track-c-c2/v2/validate-benchmark.mjs && node evals/track-c-c2/v2/validate-quality-harness.mjs",
+    "benchmark:c2:validate": "node evals/track-c-c2/v2/validate-benchmark.mjs && node evals/track-c-c2/v2/validate-quality-harness.mjs && node evals/track-c-c2/v2/validate-journeys.mjs",
     "test": "pnpm benchmark:c2:validate && vitest run",
     "lint": "tsc -p tsconfig.json --noEmit",
     "meta-outbox:cancel": "node dist/meta-outbox-operator.js",
