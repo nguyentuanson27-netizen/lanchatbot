@@ -14,7 +14,6 @@ function jobBlock(name) {
   const marker = `\n  ${name}:\n`;
   const start = workflow.indexOf(marker);
   assert.notEqual(start, -1, `CI workflow is missing job: ${name}`);
-
   const bodyStart = start + marker.length;
   const rest = workflow.slice(bodyStart);
   const nextJobOffset = rest.search(/\n  [A-Za-z0-9_-]+:\n/);
@@ -25,7 +24,6 @@ function stepBlock(job, stepName) {
   const marker = `\n      - name: ${stepName}\n`;
   const start = job.indexOf(marker);
   assert.notEqual(start, -1, `CI job is missing step: ${stepName}`);
-
   const bodyStart = start + marker.length;
   const rest = job.slice(bodyStart);
   const nextStepOffset = rest.search(/\n      - name:/);
@@ -36,11 +34,9 @@ test("CI keeps one check job until lana-ci runner parallelism is explicitly avai
   const jobsMarker = "\njobs:\n";
   const jobsStart = workflow.indexOf(jobsMarker);
   assert.notEqual(jobsStart, -1, "CI workflow is missing jobs section");
-
   const jobsSection = workflow.slice(jobsStart + jobsMarker.length);
   const jobNames = [...jobsSection.matchAll(/^  ([A-Za-z0-9_-]+):\s*$/gm)].map((match) => match[1]);
   assert.deepEqual(jobNames, ["check"]);
-
   const check = jobBlock("check");
   assert.match(check, /name:\s*pnpm check/);
   assert.match(check, /runs-on:\s*\[self-hosted, Linux, X64, lana-ci\]/);
@@ -61,10 +57,7 @@ test("CI preserves mandatory gates and selector-driven code lanes", () => {
     "Run Track C focused checks",
     "Run affected packages checks",
     "Run repository checks (full regression)",
-  ]) {
-    stepBlock(check, stepName);
-  }
-
+  ]) stepBlock(check, stepName);
   assert.match(stepBlock(check, "Run Track C focused checks"), /if:\s*steps\.ci-scope\.outputs\.mode == 'track-c'/);
   assert.match(stepBlock(check, "Run affected packages checks"), /if:\s*steps\.ci-scope\.outputs\.mode == 'affected'/);
   assert.match(stepBlock(check, "Run repository checks (full regression)"), /if:\s*steps\.ci-scope\.outputs\.mode == 'full'/);
@@ -74,55 +67,42 @@ test("Track C checks prepare workspace dependencies before linting", () => {
   const trackC = stepBlock(jobBlock("check"), "Run Track C focused checks");
   const typecheck = trackC.indexOf("pnpm --filter @lana/worker typecheck");
   const lint = trackC.indexOf("pnpm --filter @lana/worker lint");
-
   assert.notEqual(typecheck, -1);
   assert.notEqual(lint, -1);
   assert.ok(typecheck < lint);
 });
 
-test("Track C focused checks gate the V5 benchmark validators and regression tests", () => {
+test("Track C focused checks gate the C2 100-case benchmark and C3 adapter regressions", () => {
   const trackC = stepBlock(jobBlock("check"), "Run Track C focused checks");
-  assert.match(trackC, /pnpm --filter @lana\/worker benchmark:v5:validate/);
+  assert.match(trackC, /pnpm --filter @lana\/worker benchmark:c2:validate/);
   for (const testFile of [
-    "src/track-c-c3-v5-benchmark-runner.test.ts",
-    "src/track-c-c3-v5-benchmark-scoring.test.ts",
-    "src/track-c-c3-v5-benchmark-evaluator.test.ts",
-    "src/track-c-c3-v5-benchmark-gate.test.ts",
-  ]) {
-    assert.ok(trackC.includes(testFile), `Track C focused checks missing ${testFile}`);
-  }
+    "src/track-c-c3-two-pass-quality-adapter.test.ts",
+    "src/track-c-quality-v2-scoring.test.ts",
+    "src/track-c-quality-v2-evaluator.test.ts",
+    "src/track-c-quality-v2-gate.test.ts",
+  ]) assert.ok(trackC.includes(testFile), `Track C focused checks missing ${testFile}`);
+  assert.doesNotMatch(trackC, /track-c-quality-suite-gate\.test\.ts/);
 });
 
 test("affected-package build prepares the dependency closure of changed packages and dependents", () => {
   const affected = stepBlock(jobBlock("check"), "Run affected packages checks");
-
-  assert.match(
-    affected,
-    /pnpm --filter "\.\.\.\[\$BASE_REF\]\.\.\." run --if-present build/,
-  );
-  assert.match(
-    affected,
-    /pnpm --filter "\.\.\.\[\$BASE_REF\]" run --if-present typecheck/,
-  );
+  assert.match(affected, /pnpm --filter "\.\.\.\[\$BASE_REF\]\.\.\." run --if-present build/);
+  assert.match(affected, /pnpm --filter "\.\.\.\[\$BASE_REF\]" run --if-present typecheck/);
 });
 
 test("worker preparation hooks build its complete dependency graph before compilation", () => {
   const dependencyBuild = 'pnpm -r --filter "@lana/worker^..." build';
-  for (const hook of ["prebuild", "pretypecheck", "pretest"]) {
-    assert.equal(workerPackage.scripts[hook], dependencyBuild);
-  }
+  for (const hook of ["prebuild", "pretypecheck", "pretest"]) assert.equal(workerPackage.scripts[hook], dependencyBuild);
 });
 
 test("full regression deduplicates release integrity and the second top-level workspace build", () => {
   const check = jobBlock("check");
   const full = stepBlock(check, "Run repository checks (full regression)");
-
   assert.doesNotMatch(full, /pnpm check(?:\s|$)/);
   assert.doesNotMatch(full, /check:release-integrity/);
   assert.equal((full.match(/pnpm -r build/g) ?? []).length, 1);
   assert.equal((full.match(/pnpm -r typecheck/g) ?? []).length, 1);
   assert.equal((full.match(/pnpm -r test/g) ?? []).length, 1);
-
   assert.equal((workflow.match(/pnpm check:release-integrity/g) ?? []).length, 1);
 });
 
