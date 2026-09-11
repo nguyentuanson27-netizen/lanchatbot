@@ -124,10 +124,28 @@ function safeDialogue(
   })));
 }
 
+function assertModelSafeValue(value: unknown, errorCode: string): void {
+  if (typeof value === "string") {
+    assertModelSafeText(value, errorCode);
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) assertModelSafeValue(item, errorCode);
+    return;
+  }
+  if (value && typeof value === "object") {
+    for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+      assertModelSafeText(key, errorCode);
+      assertModelSafeValue(nested, errorCode);
+    }
+  }
+}
+
 function safeEvidence(value: unknown): unknown {
   const serialized = canonicalJsonV1(value);
-  assertModelSafeText(serialized, "TRACK_C_V5_JUDGE_EVIDENCE_NOT_PII_SAFE");
-  return JSON.parse(serialized) as unknown;
+  const parsed = JSON.parse(serialized) as unknown;
+  assertModelSafeValue(parsed, "TRACK_C_V5_JUDGE_EVIDENCE_NOT_PII_SAFE");
+  return parsed;
 }
 
 function safeExpected(input: TrackCV5BenchmarkEvaluationInput["expected"]) {
