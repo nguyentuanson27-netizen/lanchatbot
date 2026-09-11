@@ -56,8 +56,10 @@ function validateBinding(journeyId, turnId, binding) {
   ok(valid, `${journeyId}/${turnId}: binding status/id cardinality`);
 }
 
-function validateCheckout(journeyId, turnId, checkout) {
+function validateCheckout(journeyId, turnId, checkout, sourceStage) {
   if (checkout === undefined) return;
+  ok(sourceStage === "ORDER_PREVIEW",
+    `${journeyId}/${turnId}: checkout completeness requires ORDER_PREVIEW`);
   ok(checkout && typeof checkout === "object", `${journeyId}/${turnId}: checkout completeness`);
   ok(JSON.stringify(Object.keys(checkout).sort()) === JSON.stringify([...checkoutKeys].sort()),
     `${journeyId}/${turnId}: checkout completeness fields`);
@@ -117,7 +119,12 @@ for (const journey of bundle.journeys) {
     for (const ref of context.simulation_fact_refs) {
       ok(simulationRefs.has(ref), `${journey.id}/${turn.id}: unknown simulation ref ${ref}`);
     }
-    validateCheckout(journey.id, turn.id, context.checkout_completeness);
+    validateCheckout(
+      journey.id,
+      turn.id,
+      context.checkout_completeness,
+      context.source_stage,
+    );
 
     const expected = turn.expected;
     ok(expected && typeof expected === "object", `${journey.id}/${turn.id}: expected`);
