@@ -16,6 +16,14 @@ All 100 quality cases can run in `BEHAVIOR_SIMULATION`. `PRODUCTION_CONTRACT` us
 
 Production materialization uses real protected-claim schemas and canonical Context V2 construction. Producer/runtime-unreachable states fail closed instead of being fabricated. The current C3 two-pass adapter reuses the existing strategist/responder request builders and exposes no persistence, checkout, payment, delivery, or other effect port.
 
+## Supplemental conversation journeys
+
+`journeys.json` contains six small authored multi-turn scenarios used to review conversation progression. They are **supplemental**: `quality_population_delta` is zero, so they do not change the frozen 100 QUALITY population, 70/30 split, rubric, scoring weights, or aggregate quality gate.
+
+Each journey turn owns its customer message, canonical/context state, required/forbidden behavior, and optional expected next move. C3's thin journey adapter materializes that authored state independently for every turn and only accumulates real dialogue; the actual Lana reply from one turn becomes history for the next turn. The adapter does not infer a sales state machine or mutate canonical state.
+
+Trusted acquisition metadata and checkout completeness in these fixtures are simulation/eval wiring only. `origin` / `first_meaningful_inbound` are never inferred from dialogue and grant no fact/effect authority. Checkout completeness carries only `REQUIRED`/`COMPLETE` plus missing-field names, not recipient PII. The production `GAP_AD_ORIGIN` and `GAP_CHECKOUT_COMPLETENESS` remain open until production runtime contracts provide equivalent authoritative signals; Q100 remains regression evidence rather than production-closure evidence.
+
 ## Quality evaluation
 
 `rubric.json` defines deterministic scoring thresholds and stage diagnostics. The current V2 execution/scoring harness is intentionally bound to the existing two-pass strategist/responder candidate. A future candidate with a different stage shape may reuse the same C2 corpus, but it must provide a compatible adapter/scoring contract rather than silently being treated as two-pass.
