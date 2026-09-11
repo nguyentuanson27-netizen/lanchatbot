@@ -21,7 +21,7 @@ function validEvaluationTime(value: Date): boolean {
 function frozenEvaluationContext(
   value: readonly ShadowContextMessage[],
 ): readonly ShadowContextMessage[] {
-  if (!Array.isArray(value) || value.length === 0 || value.length > 10) {
+  if (!Array.isArray(value) || value.length === 0 || value.length > 15) {
     throw new Error("TRACK_C_OFFLINE_CANDIDATE_DIALOGUE_INVALID");
   }
   return Object.freeze(value.map((message) => {
