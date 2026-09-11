@@ -26,10 +26,12 @@ export type TrackCC3TwoPassQualityFixture = TrackCV5CompactCase & Readonly<{
   }>;
 }>;
 
-export interface TrackCC3TwoPassQualityCandidateInput
-  extends TrackCV5TwoPassBenchmarkInput {
+export type TrackCC3TwoPassQualityCandidateInput = Omit<
+  TrackCV5TwoPassBenchmarkInput,
+  "simulationMetadata"
+> & Readonly<{
   readonly fixture: TrackCC3TwoPassQualityFixture;
-}
+}>;
 
 export type TrackCC3TwoPassQualityCandidateResult =
   TrackCV5TwoPassBenchmarkResult;
@@ -88,15 +90,15 @@ function trustedSimulationMetadata(
 export function runTrackCC3TwoPassQualityCandidate(
   input: TrackCC3TwoPassQualityCandidateInput,
 ): Promise<TrackCC3TwoPassQualityCandidateResult> {
+  if (Object.hasOwn(input, "simulationMetadata")) {
+    throw new Error("TRACK_C_C3_EXTERNAL_SIMULATION_METADATA_FORBIDDEN");
+  }
   const metadata = input.lane === "BEHAVIOR_SIMULATION"
     ? trustedSimulationMetadata(input.fixture)
     : [];
-  const { fixture: _fixture, simulationFacts, ...runnerInput } = input;
+  const { fixture: _fixture, ...runnerInput } = input;
   return runTrackCV5TwoPassBenchmarkCase({
     ...runnerInput,
-    simulationFacts: Object.freeze([
-      ...(simulationFacts ?? []),
-      ...metadata,
-    ]),
+    simulationMetadata: metadata,
   });
 }
