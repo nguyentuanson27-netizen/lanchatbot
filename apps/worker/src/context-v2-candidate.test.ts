@@ -362,7 +362,16 @@ describe("Context V2 candidate capability", () => {
       contextWithProductPresentation(),
     );
     expect(sanitized.productPresentation).toEqual({
-      claimRef: "PRODUCT_PRESENTATION_001",
+      claims: [
+        {
+          claimRef: "PRODUCT_PRESENTATION_DISPLAY_001",
+          claimText: "Dạ mẫu này là Tường Vi ạ.",
+        },
+        {
+          claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
+          claimText: "Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.",
+        },
+      ],
       scope: { kind: "PRODUCT", productId: "SD398" },
       value: {
         displayName: "Tường Vi",

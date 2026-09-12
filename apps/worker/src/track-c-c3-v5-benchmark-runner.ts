@@ -14,6 +14,7 @@ import {
 } from "@lana/database";
 import {
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
+  candidateProductPresentationClaims,
   deriveCandidateRequestIdentity,
   type BuiltCandidateRequest,
   type CandidateVertexTransport,
@@ -170,9 +171,14 @@ function withBenchmarkLane(
   });
 }
 
+type ClaimReferenceRegistryEntry = Readonly<{
+  contentHash: string;
+  exactText: string | null;
+}>;
+
 function resolveClaimReferences(
   value: unknown,
-  registry: ReadonlyMap<string, string>,
+  registry: ReadonlyMap<string, ClaimReferenceRegistryEntry>,
 ): unknown {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     throw new Error("TRACK_C_V5_RESPONDER_OUTPUT_INVALID");
@@ -199,16 +205,23 @@ function resolveClaimReferences(
     if (typeof record.claimRef !== "string") {
       throw new Error("TRACK_C_V5_CLAIM_REFERENCE_INVALID");
     }
-    const contentHash = registry.get(record.claimRef);
-    if (contentHash === undefined) {
+    const entry = registry.get(record.claimRef);
+    if (entry === undefined) {
       throw new Error("TRACK_C_V5_CLAIM_REFERENCE_UNKNOWN");
+    }
+    if (entry.exactText !== null && record.text !== entry.exactText) {
+      throw new Error("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
     }
     if (used.has(record.claimRef)) {
       throw new Error("TRACK_C_V5_CLAIM_REFERENCE_DUPLICATE");
     }
     used.add(record.claimRef);
     const { claimRef: _claimRef, ...rest } = record;
-    return Object.freeze({ ...rest, claimContentHash: contentHash });
+    return Object.freeze({
+      ...rest,
+      text: entry.exactText ?? record.text,
+      claimContentHash: entry.contentHash,
+    });
   });
   return Object.freeze({ ...output, segments: Object.freeze(segments) });
 }
@@ -570,22 +583,34 @@ export async function runTrackCV5TwoPassBenchmarkCase(
   });
   assertProviderIdentity(responderResponse.providerModelVersion);
 
-  const registry = new Map(context.verifiedClaims.map((claim, index) => [
+  const registry = new Map<string, ClaimReferenceRegistryEntry>(
+    context.verifiedClaims.map((claim, index) => [
     `CLAIM_${String(index + 1).padStart(3, "0")}`,
-    claim.provenance.contentHash,
-  ]));
+    Object.freeze({
+      contentHash: claim.provenance.contentHash,
+      exactText: null,
+    }),
+  ]),
+  );
   if (context.productAttributes !== null && context.productAttributes !== undefined) {
     registry.set(
       "PRODUCT_ATTRIBUTES_001",
-      context.productAttributes.metadata.contentHash,
+      Object.freeze({
+        contentHash: context.productAttributes.metadata.contentHash,
+        exactText: null,
+      }),
     );
   }
   if (context.productPresentation !== null &&
       context.productPresentation !== undefined) {
-    registry.set(
-      "PRODUCT_PRESENTATION_001",
-      context.productPresentation.provenance.contentHash,
-    );
+    for (const claim of candidateProductPresentationClaims(
+      context.productPresentation,
+    )) {
+      registry.set(claim.claimRef, Object.freeze({
+        contentHash: context.productPresentation.provenance.contentHash,
+        exactText: claim.claimText,
+      }));
+    }
   }
   const resolved = resolveClaimReferences(
     parseVertexJson(

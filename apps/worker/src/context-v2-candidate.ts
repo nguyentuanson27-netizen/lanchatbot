@@ -235,11 +235,36 @@ function sanitizeCandidateProductAttributes(
   });
 }
 
+export function candidateProductPresentationClaims(
+  presentation: NonNullable<ContextV2["productPresentation"]>,
+) {
+  const displayName = presentation.displayName;
+  return Object.freeze([
+    Object.freeze({
+      claimRef: "PRODUCT_PRESENTATION_DISPLAY_001",
+      claimText: `Dạ mẫu này là ${displayName} ạ.`,
+    }),
+    ...presentation.variants.map((variant, index) => {
+      const details = [
+        variant.color === null ? null : `màu ${variant.color}`,
+        variant.size === null ? null : `size ${variant.size}`,
+      ].filter((value): value is string => value !== null).join(", ");
+      return Object.freeze({
+        claimRef:
+          `PRODUCT_PRESENTATION_VARIANT_${String(index + 1).padStart(3, "0")}`,
+        claimText: details.length === 0
+          ? `Dạ mẫu này là ${displayName} ạ.`
+          : `Dạ ${displayName} có phiên bản ${details} ạ.`,
+      });
+    }),
+  ]);
+}
+
 function sanitizeCandidateProductPresentation(
   presentation: NonNullable<ContextV2["productPresentation"]>,
 ) {
   return Object.freeze({
-    claimRef: "PRODUCT_PRESENTATION_001" as const,
+    claims: candidateProductPresentationClaims(presentation),
     scope: Object.freeze({
       kind: "PRODUCT" as const,
       productId: presentation.productId,

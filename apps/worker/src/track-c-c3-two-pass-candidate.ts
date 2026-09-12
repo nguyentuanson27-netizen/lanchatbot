@@ -7,6 +7,7 @@ import {
 import {
   CONTEXT_V2_CANDIDATE_MODEL_ID,
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
+  candidateProductPresentationClaims,
   deriveCandidateRequestIdentity,
   type BuiltCandidateRequest,
   type CandidateVertexTransport,
@@ -94,11 +95,30 @@ export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
   "SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT: if the customer asks whether a specific size will fit, there is no eligible verified SIZE_FIT claim, and supplied product evidence explicitly includes that requested size token, never turn that size existence into a fit answer. This size-specific qualification rule overrides the generic unverified-protected-fact response shape only for fit qualification. State no fit conclusion. If one relevant measurement is still missing, ask only that one missing measurement using CLARIFICATION target MEASUREMENTS plus ACTION_REQUEST PROVIDE_MEASUREMENTS, strategy ASK_CLARIFICATION, and CTA ASK_MEASUREMENTS; those two segments are one qualification objective. If no relevant measurement is missing, do not re-ask known measurements and use no fit guess or promise.",
   "The plan never authorizes a fact, protected claim, effect, side effect, or state transition.",
   "For each VERIFIED_CLAIM segment, copy only its exact code-owned claimRef from verifiedClaims; never copy, invent, or return a provenance hash.",
-  "When productAttributes is present, it is integrity-valid code-owned evidence for the exact bound product. Use only its explicit values and never infer an unstated quality or benefit. Bind any product-attribute statement to productAttributes.claimRef.",
-  "When productPresentation is present, use its exact displayName and variant color/size labels only for the bound product. A variant label does not by itself prove stock or fit. Bind any display-name or variant-label statement to productPresentation.claimRef.",
   "The offline composer resolves claimRef to the exact provenance content hash before the unchanged final response schema and guard.",
   "You remain responsible only for natural customer-facing wording in the registered intermediate response schema.",
 ].join("\n");
+
+function responderSystemInstruction(
+  context: ReturnType<typeof contextFromFrozenTrackCCapture>,
+): string {
+  const additions: string[] = [];
+  if (context.productAttributes !== null &&
+      context.productAttributes !== undefined) {
+    additions.push(
+      "When productAttributes is present, it is integrity-valid code-owned evidence for the exact bound product. Use only its explicit values and never infer an unstated quality or benefit. Bind any product-attribute statement to productAttributes.claimRef.",
+    );
+  }
+  if (context.productPresentation !== null &&
+      context.productPresentation !== undefined) {
+    additions.push(
+      "When productPresentation is present, use only one of its exact claim options. Copy that option's claimText byte-for-byte as the VERIFIED_CLAIM segment text and bind it to the same claimRef. A variant label does not by itself prove stock or fit.",
+    );
+  }
+  return additions.length === 0
+    ? TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION
+    : [TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION, ...additions].join("\n");
+}
 
 function sha256(value: unknown): string {
   return createHash("sha256")
@@ -212,9 +232,13 @@ export function buildTrackCC3ResponderRequest(
   }>,
 ): BuiltCandidateRequest {
   const conversationPlan = parseConversationPlan(input.conversationPlan);
+  const context = contextFromFrozenTrackCCapture({
+    capture: input.capture,
+    evaluationAt: input.evaluationAt,
+  });
   const request = buildTrackCOfflineCandidateRequest({
     ...input,
-    systemInstruction: TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION,
+    systemInstruction: responderSystemInstruction(context),
   });
   const body = JSON.parse(request.body) as {
     readonly contents: readonly [{
@@ -301,27 +325,44 @@ export function buildTrackCC3ResponderRequest(
   });
 }
 
+type ClaimReferenceRegistryEntry = Readonly<{
+  contentHash: string;
+  exactText: string | null;
+}>;
+
 function claimReferenceRegistry(
   capture: unknown,
   evaluationAt: Date,
-): ReadonlyMap<string, string> {
+): ReadonlyMap<string, ClaimReferenceRegistryEntry> {
   const context = contextFromFrozenTrackCCapture({ capture, evaluationAt });
-  const registry = new Map(context.verifiedClaims.map((claim, index) => [
+  const registry = new Map<string, ClaimReferenceRegistryEntry>(
+    context.verifiedClaims.map((claim, index) => [
     `CLAIM_${String(index + 1).padStart(3, "0")}`,
-    claim.provenance.contentHash,
-  ]));
+    Object.freeze({
+      contentHash: claim.provenance.contentHash,
+      exactText: null,
+    }),
+  ]),
+  );
   if (context.productAttributes !== null && context.productAttributes !== undefined) {
     registry.set(
       "PRODUCT_ATTRIBUTES_001",
-      context.productAttributes.metadata.contentHash,
+      Object.freeze({
+        contentHash: context.productAttributes.metadata.contentHash,
+        exactText: null,
+      }),
     );
   }
   if (context.productPresentation !== null &&
       context.productPresentation !== undefined) {
-    registry.set(
-      "PRODUCT_PRESENTATION_001",
-      context.productPresentation.provenance.contentHash,
-    );
+    for (const claim of candidateProductPresentationClaims(
+      context.productPresentation,
+    )) {
+      registry.set(claim.claimRef, Object.freeze({
+        contentHash: context.productPresentation.provenance.contentHash,
+        exactText: claim.claimText,
+      }));
+    }
   }
   return registry;
 }
@@ -357,16 +398,23 @@ function resolveResponderClaimReferences(
     if (typeof record.claimRef !== "string") {
       throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
     }
-    const contentHash = registry.get(record.claimRef);
-    if (contentHash === undefined) {
+    const entry = registry.get(record.claimRef);
+    if (entry === undefined) {
       throw new Error("TRACK_C_C3_CLAIM_REFERENCE_UNKNOWN");
+    }
+    if (entry.exactText !== null && record.text !== entry.exactText) {
+      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_TEXT_MISMATCH");
     }
     if (used.has(record.claimRef)) {
       throw new Error("TRACK_C_C3_CLAIM_REFERENCE_DUPLICATE");
     }
     used.add(record.claimRef);
     const { claimRef: _claimRef, ...rest } = record;
-    return Object.freeze({ ...rest, claimContentHash: contentHash });
+    return Object.freeze({
+      ...rest,
+      text: entry.exactText ?? record.text,
+      claimContentHash: entry.contentHash,
+    });
   });
   return Object.freeze({ ...output, segments: Object.freeze(segments) });
 }
