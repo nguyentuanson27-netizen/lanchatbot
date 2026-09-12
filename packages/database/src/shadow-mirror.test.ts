@@ -41,6 +41,30 @@ describe("shadow mirror privacy helpers", () => {
     }
   });
 
+  it("keeps an address keyword that carries no address content", () => {
+    // A customer asking where the shop is, or saying they already sent their
+    // details, carries no identifier: erasing the line erased the question.
+    for (const text of [
+      "Shop ở Hà Nội địa chỉ đâu em?",
+      "Tên, SĐT và địa chỉ chị gửi đủ ở trên rồi.",
+      "Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.",
+    ]) {
+      const result = redactAnalyticsMessage(text);
+      expect(result.dlpStatus).toBe("PASSED");
+      expect(result.text).toBe(text);
+    }
+  });
+
+  it("still redacts an address keyword followed by real address content", () => {
+    for (const text of [
+      "Địa chỉ: 12 Nguyễn Trãi, Tây Ninh",
+      "địa chỉ nhà em ở ngõ Văn Chương nhé",
+      "dia chi: chung cu Sunrise, quan 7",
+    ]) {
+      expect(redactAnalyticsText(text)).toBe("[ADDRESS]");
+    }
+  });
+
   it("compares internal keys without accepting different lengths", () => {
     expect(constantTimeKeyMatches("a".repeat(32), "a".repeat(32))).toBe(true);
     expect(constantTimeKeyMatches("a".repeat(32), "a".repeat(31))).toBe(false);

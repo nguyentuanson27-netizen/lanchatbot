@@ -37,22 +37,50 @@ function hmac(salt: string, ...parts: readonly string[]): string {
 }
 
 /**
- * A line naming an address component is redacted whole. Both boundaries are
- * explicit because `\b` is ASCII-word based and gets Vietnamese wrong in both
- * directions: without a leading boundary "ấp" matches inside "cung cấp" or
- * "cao cấp" and destroys ordinary sentences, and a trailing `\b` never fires
- * for a token ending in a non-ASCII letter, so "xã", "thành phố" and "số nhà"
- * silently never matched at all.
+ * Both boundaries are explicit everywhere below, because `\b` is ASCII-word
+ * based and gets Vietnamese wrong in both directions: without a leading
+ * boundary "ấp" matches inside "cung cấp" or "cao cấp" and destroys ordinary
+ * sentences, and a trailing `\b` never fires for a token ending in a
+ * non-ASCII letter, so "xã", "thành phố" and "số nhà" silently never matched.
  */
-const ADDRESS_LINE_TOKEN =
-  /(?<![\p{L}\p{M}])(?:địa chỉ|dia chi|xã|phường|huyện|quận|tỉnh|thành phố|đường|số nhà|ấp|thôn)(?![\p{L}\p{M}])/iu;
+const bounded = (alternatives: string): string =>
+  `(?<![\\p{L}\\p{M}])(?:${alternatives})(?![\\p{L}\\p{M}])`;
+
+/** Naming one of these is itself enough to treat the whole line as an address. */
+const ADDRESS_COMPONENT_TOKENS =
+  "xã|phường|huyện|quận|tỉnh|thành phố|đường|số nhà|ấp|thôn";
+
+/**
+ * Corroborating address content, only consulted after an explicit "địa chỉ"
+ * keyword. It is deliberately wider than the line tokens: short words such as
+ * "tổ" or "phố" are far too common to condemn a line on their own, but after
+ * the keyword they do indicate a real address.
+ */
+const ADDRESS_DETAIL_TOKENS =
+  `${ADDRESS_COMPONENT_TOKENS}|phố|ngõ|ngách|hẻm|tổ|khu phố|chung cư|quốc lộ|tỉnh lộ|lô|căn hộ`;
+
+const ADDRESS_LINE_TOKEN = new RegExp(bounded(ADDRESS_COMPONENT_TOKENS), "iu");
+
+/**
+ * The word "địa chỉ" alone is not an address: a customer asking where the shop
+ * is ("Shop ở Hà Nội địa chỉ đâu em?") or saying they already sent their
+ * details carries no identifier at all. Redacting on the keyword alone erased
+ * the customer's actual question before the model ever read it - and the live
+ * path persists that erased text as chat history - so the keyword must be
+ * followed by real address content: a digit, or a corroborating token.
+ */
+const ADDRESS_WITH_DETAIL = new RegExp(
+  `${bounded("địa chỉ|dia chi")}\\s*[:#-]?\\s*` +
+    `(?=[^\\n]*(?:\\d|${bounded(ADDRESS_DETAIL_TOKENS)}))[^\\n]{4,}`,
+  "giu",
+);
 
 export function redactAnalyticsText(value: string): string {
   const direct = value
     .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[EMAIL]")
     .replace(/\b(?:cccd|cmnd)\s*[:#-]?\s*\d{9,12}\b/giu, "[ID]")
     .replace(/(?:\+?84|0)(?:[ .-]?\d){8,10}/g, "[PHONE]")
-    .replace(/(?:địa chỉ|dia chi)\s*[:#-]?[^\n]{4,}/giu, "[ADDRESS]")
+    .replace(ADDRESS_WITH_DETAIL, "[ADDRESS]")
     .replace(/(?:họ tên|ho ten|tên người nhận|ten nguoi nhan)\s*[:#-]?[^\n]{2,}/giu, "[NAME]");
   return direct
     .split(/\r?\n/u)
