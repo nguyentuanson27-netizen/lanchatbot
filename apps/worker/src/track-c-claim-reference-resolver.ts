@@ -6,66 +6,72 @@ type ClaimReferenceRegistryEntry = Readonly<{
   placeholders: Readonly<Record<string, string>> | null;
 }>;
 
-const PRESENTATION_FRAMING_WORDS = new Set([
-  "ạ",
-  "bản",
-  "biến",
-  "có",
-  "cỡ",
-  "của",
-  "dạ",
-  "em",
-  "gồm",
-  "là",
-  "màu",
-  "mã",
-  "mẫu",
-  "nha",
-  "nhé",
-  "phiên",
-  "size",
-  "tên",
-  "thể",
-  "thông",
-  "thuộc",
-  "tin",
-  "và",
-  "với",
-  "chị",
-]);
-
-function hasExpectedPresentationRole(
+function hasValidPresentationProduction(
   text: string,
-  placeholder: string,
+  expected: readonly string[],
 ): boolean {
-  const semanticTokens = text.normalize("NFC")
+  const tokens = text.normalize("NFC")
     .match(/\{\{[A-Z_]+\}\}|\p{L}+/gu)
     ?.map((token) => token.startsWith("{{")
       ? token
       : token.toLocaleLowerCase("vi-VN")) ?? [];
-  const index = semanticTokens.indexOf(`{{${placeholder}}}`);
-  if (index < 0) return false;
-  const previous = semanticTokens[index - 1];
-  const next = semanticTokens[index + 1];
-  if (placeholder === "VARIANT_COLOR") return previous === "màu";
-  if (placeholder === "VARIANT_SIZE") {
-    return previous === "size" || previous === "cỡ";
+  let cursor = tokens[0] === "dạ" ? 1 : 0;
+  let displayForm: "SUBJECT" | "MODEL" | "NAME";
+  if (tokens[cursor] === "{{DISPLAY_NAME}}") {
+    displayForm = "SUBJECT";
+    cursor += 1;
+  } else if (tokens[cursor] === "mẫu" &&
+      tokens[cursor + 1] === "{{DISPLAY_NAME}}") {
+    displayForm = "MODEL";
+    cursor += 2;
+  } else if (
+    tokens[cursor] === "tên" && tokens[cursor + 1] === "mẫu" &&
+    tokens[cursor + 2] === "là" &&
+    tokens[cursor + 3] === "{{DISPLAY_NAME}}"
+  ) {
+    displayForm = "NAME";
+    cursor += 4;
+  } else {
+    return false;
   }
-  if (placeholder !== "DISPLAY_NAME") return false;
-  if (previous === "mẫu") {
-    const phraseStart = index - 1;
-    return phraseStart === 0 ||
-      (phraseStart === 1 && semanticTokens[0] === "dạ");
+
+  const requiredFacts = new Set(
+    expected.filter((placeholder) => placeholder !== "DISPLAY_NAME"),
+  );
+  if (requiredFacts.size > 0) {
+    if (tokens[cursor] !== "có") return false;
+    cursor += 1;
+    if (tokens[cursor] === "phiên" && tokens[cursor + 1] === "bản") {
+      cursor += 2;
+    }
+    const seen = new Set<string>();
+    while (cursor < tokens.length && seen.size < requiredFacts.size) {
+      const label = tokens[cursor];
+      const placeholder = tokens[cursor + 1];
+      const fact = label === "màu" && placeholder === "{{VARIANT_COLOR}}"
+        ? "VARIANT_COLOR"
+        : (label === "size" || label === "cỡ") &&
+            placeholder === "{{VARIANT_SIZE}}"
+          ? "VARIANT_SIZE"
+          : null;
+      if (fact === null || !requiredFacts.has(fact) || seen.has(fact)) {
+        return false;
+      }
+      seen.add(fact);
+      cursor += 2;
+      if (tokens[cursor] === "và") cursor += 1;
+    }
+    if (seen.size !== requiredFacts.size) return false;
+  } else if (displayForm === "SUBJECT") {
+    return false;
   }
-  if (previous === "là" &&
-      semanticTokens[index - 2] === "mẫu" &&
-      semanticTokens[index - 3] === "tên") {
-    const phraseStart = index - 3;
-    return phraseStart === 0 ||
-      (phraseStart === 1 && semanticTokens[0] === "dạ");
+
+  if (tokens[cursor] === "chị" || tokens[cursor] === "em") cursor += 1;
+  if (tokens[cursor] === "nhé" || tokens[cursor] === "nha" ||
+      tokens[cursor] === "ạ") {
+    cursor += 1;
   }
-  return next === "có" &&
-    (index === 0 || (index === 1 && previous === "dạ"));
+  return cursor === tokens.length;
 }
 
 export type ClaimReferenceErrors = Readonly<{
@@ -135,15 +141,12 @@ function resolvePlaceholders(
   if (/[{}]/u.test(framing)) throw new Error(textMismatch);
   const normalizedFraming = framing.normalize("NFC")
     .toLocaleLowerCase("vi-VN");
-  const words = normalizedFraming.match(/\p{L}+/gu) ?? [];
   const punctuationOnly = normalizedFraming.replace(
     /\p{L}+|[\s.,:;!?()\-/]/gu,
     "",
   );
   if (punctuationOnly.length > 0 ||
-      words.some((word) => !PRESENTATION_FRAMING_WORDS.has(word)) ||
-      expected.some((placeholder) =>
-        !hasExpectedPresentationRole(text, placeholder))) {
+      !hasValidPresentationProduction(text, expected)) {
     throw new Error(textMismatch);
   }
   return tokens.reduce(

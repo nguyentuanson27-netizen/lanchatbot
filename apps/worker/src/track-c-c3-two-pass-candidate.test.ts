@@ -438,6 +438,11 @@ describe("Track C C3 two-pass offline candidate", () => {
       "Dạ tên mẫu là Tường Vi ạ.",
       "PRODUCT_PRESENTATION_DISPLAY_001",
     ],
+    [
+      "Dạ mẫu {{DISPLAY_NAME}} chị nhé.",
+      "Dạ mẫu Tường Vi chị nhé.",
+      "PRODUCT_PRESENTATION_DISPLAY_001",
+    ],
   ] as const)("resolves presentation values while preserving model wording: %s", async (
     modelText,
     expectedReply,
@@ -488,6 +493,7 @@ describe("Track C C3 two-pass offline candidate", () => {
     ["display name used as customer model", "Chị là mẫu {{DISPLAY_NAME}} ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
     ["display name used as customer subject", "Chị {{DISPLAY_NAME}} có thông tin ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
     ["display name used as customer membership", "Chị thuộc mẫu {{DISPLAY_NAME}} ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
+    ["display name used as customer ownership", "Dạ mẫu {{DISPLAY_NAME}} là của chị ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
   ] as const)("rejects a wrong product-presentation %s", async (
     _name,
     text,
@@ -523,6 +529,7 @@ describe("Track C C3 two-pass offline candidate", () => {
     "Chị là mẫu {{DISPLAY_NAME}} ạ.",
     "Chị {{DISPLAY_NAME}} có thông tin ạ.",
     "Chị thuộc mẫu {{DISPLAY_NAME}} ạ.",
+    "Dạ mẫu {{DISPLAY_NAME}} là của chị ạ.",
   ])("rejects a display name bound to the customer on the V5 path: %s", async (text) => {
     const outputs = [
       conversationPlan(),
@@ -622,7 +629,7 @@ describe("Track C C3 two-pass offline candidate", () => {
     expect(result.sideEffects).toBe("DISABLED");
   });
 
-  it("rejects fit semantics even when presentation evidence provides the size label", async () => {
+  it("rejects fit semantics before presentation substitution", async () => {
     const outputs = [
       conversationPlan(),
       {
@@ -649,7 +656,7 @@ describe("Track C C3 two-pass offline candidate", () => {
       evaluationAt,
       evaluationContext,
       transport,
-    })).rejects.toThrow("TRACK_C_V5_PRODUCTION_GUARD_FAILED:SIZE_RECOMMENDATION_UNDECLARED");
+    })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
   });
 
   it("rejects extra presentation literals and unregistered placeholder syntax on the normal path", async () => {
