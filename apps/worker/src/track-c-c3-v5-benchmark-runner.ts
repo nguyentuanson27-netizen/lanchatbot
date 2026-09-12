@@ -401,6 +401,61 @@ function validateResponderOutput(
   return output;
 }
 
+/**
+ * Closed set of structured metadata the simulation lane may put in front of the
+ * model. Unlike benchmarkSimulationFacts, which are free-form authored evidence
+ * for the hypothetical question, metadata is trusted runtime/fixture signal, so
+ * the sink accepts only these exact shapes and rejects anything else.
+ */
+export type TrackCV5SimulationMetadata =
+  | Readonly<{
+    kind: "TRACK_C_TRUSTED_ACQUISITION_V1";
+    origin: "ADVERTISEMENT";
+    firstMeaningfulInbound: boolean;
+    authorization: "NONE";
+  }>
+  | Readonly<{
+    kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1";
+    state: "REQUIRED" | "COMPLETE";
+    missingFields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS")[];
+    authorization: "NONE";
+  }>;
+
+const CHECKOUT_METADATA_FIELDS = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
+
+function sameKeys(value: Readonly<Record<string, unknown>>, keys: readonly string[]): boolean {
+  return JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...keys].sort());
+}
+
+function validSimulationMetadataEntry(entry: unknown): boolean {
+  if (entry === null || typeof entry !== "object" || Array.isArray(entry)) return false;
+  const record = entry as Readonly<Record<string, unknown>>;
+  if (record.authorization !== "NONE") return false;
+  if (record.kind === "TRACK_C_TRUSTED_ACQUISITION_V1") {
+    return sameKeys(record, ["kind", "origin", "firstMeaningfulInbound", "authorization"]) &&
+      record.origin === "ADVERTISEMENT" &&
+      typeof record.firstMeaningfulInbound === "boolean";
+  }
+  if (record.kind === "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1") {
+    const fields = record.missingFields;
+    return sameKeys(record, ["kind", "state", "missingFields", "authorization"]) &&
+      (record.state === "REQUIRED" || record.state === "COMPLETE") &&
+      Array.isArray(fields) &&
+      fields.every((field) => CHECKOUT_METADATA_FIELDS.has(field as string)) &&
+      new Set(fields).size === fields.length &&
+      (record.state === "COMPLETE") === (fields.length === 0);
+  }
+  return false;
+}
+
+function assertSimulationMetadata(
+  values: readonly TrackCV5SimulationMetadata[],
+): void {
+  if (!values.every(validSimulationMetadataEntry)) {
+    throw new Error("TRACK_C_V5_SIMULATION_METADATA_INVALID");
+  }
+}
+
 export interface TrackCV5TwoPassBenchmarkInput {
   readonly lane: TrackCV5ExecutionLane;
   readonly modelResource: string;
@@ -408,7 +463,7 @@ export interface TrackCV5TwoPassBenchmarkInput {
   readonly evaluationAt: Date;
   readonly evaluationContext: readonly ShadowContextMessage[];
   readonly simulationFacts?: readonly unknown[];
-  readonly simulationMetadata?: readonly unknown[];
+  readonly simulationMetadata?: readonly TrackCV5SimulationMetadata[];
   readonly transport: CandidateVertexTransport;
   readonly signal?: AbortSignal;
 }
@@ -462,6 +517,7 @@ export async function runTrackCV5TwoPassBenchmarkCase(
   if (input.lane === "PRODUCTION_CONTRACT" && simulationMetadata.length > 0) {
     throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_METADATA_LEAK");
   }
+  assertSimulationMetadata(simulationMetadata);
 
   const common = {
     modelResource: input.modelResource,

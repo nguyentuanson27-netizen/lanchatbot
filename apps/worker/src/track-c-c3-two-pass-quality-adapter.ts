@@ -8,6 +8,7 @@
  */
 import {
   runTrackCV5TwoPassBenchmarkCase,
+  type TrackCV5SimulationMetadata,
   type TrackCV5TwoPassBenchmarkInput,
   type TrackCV5TwoPassBenchmarkResult,
 } from "./track-c-c3-v5-benchmark-runner.js";
@@ -41,7 +42,7 @@ const CHECKOUT_KEYS = Object.freeze(["missing_fields", "state"] as const);
 
 function trustedSimulationMetadata(
   fixture: TrackCC3TwoPassQualityFixture,
-): readonly unknown[] {
+): readonly TrackCV5SimulationMetadata[] {
   const { origin, first_meaningful_inbound: firstMeaningfulInbound } =
     fixture.context;
   if ((origin !== "ADVERTISEMENT" && origin !== "ORGANIC") ||
@@ -49,7 +50,7 @@ function trustedSimulationMetadata(
     throw new Error("TRACK_C_C3_ACQUISITION_METADATA_INVALID");
   }
 
-  const metadata: unknown[] = [];
+  const metadata: TrackCV5SimulationMetadata[] = [];
   if (origin === "ADVERTISEMENT") {
     metadata.push(Object.freeze({
       kind: "TRACK_C_TRUSTED_ACQUISITION_V1",

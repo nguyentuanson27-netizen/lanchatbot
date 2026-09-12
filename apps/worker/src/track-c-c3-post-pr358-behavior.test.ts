@@ -15,6 +15,10 @@ import {
   type TrackCV5MaterializationRecipe,
   type TrackCV5RuntimeClaimFixture,
 } from "./track-c-c3-v5-benchmark-materialization.js";
+import {
+  runTrackCV5TwoPassBenchmarkCase,
+  type TrackCV5SimulationMetadata,
+} from "./track-c-c3-v5-benchmark-runner.js";
 
 const MODEL_RESOURCE =
   "projects/test/locations/us-central1/publishers/google/models/gemini-3.5-flash-lite";
@@ -227,6 +231,56 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     for (const [request] of send.mock.calls) {
       const { structured } = structuredPrompt(request.body);
       expect(structured.benchmarkSimulationMetadata).toEqual([]);
+    }
+  });
+
+  it("rejects simulation metadata outside the closed kind union at the runner sink", async () => {
+    const caseFixture = fixture({
+      id: "METADATA_SINK",
+      message: "Bộ này bao nhiêu em?",
+    });
+    const capture = materializeTrackCV5CaseCapture({
+      lane: "BEHAVIOR_SIMULATION",
+      fixture: caseFixture,
+      runtimeClaimCatalog: facts.runtime_claim_catalog,
+      recipe,
+    });
+    const rejected: readonly unknown[] = [
+      { kind: "TRACK_C_UNKNOWN_METADATA_V1", authorization: "NONE" },
+      {
+        kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
+        origin: "ADVERTISEMENT",
+        firstMeaningfulInbound: true,
+        authorization: "GRANTED",
+      },
+      {
+        kind: "TRACK_C_TRUSTED_ACQUISITION_V1",
+        origin: "ADVERTISEMENT",
+        firstMeaningfulInbound: true,
+        authorization: "NONE",
+        extraField: "smuggled",
+      },
+      {
+        kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1",
+        state: "COMPLETE",
+        missingFields: ["PHONE"],
+        authorization: "NONE",
+      },
+      "TRACK_C_TRUSTED_ACQUISITION_V1",
+    ];
+
+    for (const entry of rejected) {
+      const send = successfulTransport();
+      await expect(runTrackCV5TwoPassBenchmarkCase({
+        lane: "BEHAVIOR_SIMULATION",
+        modelResource: MODEL_RESOURCE,
+        capture,
+        evaluationAt: new Date(recipe.evaluation_at),
+        evaluationContext: dialogue(caseFixture.latest_customer_message),
+        simulationMetadata: [entry as TrackCV5SimulationMetadata],
+        transport: { send },
+      })).rejects.toThrow("TRACK_C_V5_SIMULATION_METADATA_INVALID");
+      expect(send).not.toHaveBeenCalled();
     }
   });
 
