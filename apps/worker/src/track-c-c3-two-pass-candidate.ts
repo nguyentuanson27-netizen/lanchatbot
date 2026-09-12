@@ -94,6 +94,8 @@ export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
   "SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT: if the customer asks whether a specific size will fit, there is no eligible verified SIZE_FIT claim, and supplied product evidence explicitly includes that requested size token, never turn that size existence into a fit answer. This size-specific qualification rule overrides the generic unverified-protected-fact response shape only for fit qualification. State no fit conclusion. If one relevant measurement is still missing, ask only that one missing measurement using CLARIFICATION target MEASUREMENTS plus ACTION_REQUEST PROVIDE_MEASUREMENTS, strategy ASK_CLARIFICATION, and CTA ASK_MEASUREMENTS; those two segments are one qualification objective. If no relevant measurement is missing, do not re-ask known measurements and use no fit guess or promise.",
   "The plan never authorizes a fact, protected claim, effect, side effect, or state transition.",
   "For each VERIFIED_CLAIM segment, copy only its exact code-owned claimRef from verifiedClaims; never copy, invent, or return a provenance hash.",
+  "When productAttributes is present, it is integrity-valid code-owned evidence for the exact bound product. Use only its explicit values and never infer an unstated quality or benefit. Bind any product-attribute statement to productAttributes.claimRef.",
+  "When productPresentation is present, use its exact displayName and variant color/size labels only for the bound product. A variant label does not by itself prove stock or fit. Bind any display-name or variant-label statement to productPresentation.claimRef.",
   "The offline composer resolves claimRef to the exact provenance content hash before the unchanged final response schema and guard.",
   "You remain responsible only for natural customer-facing wording in the registered intermediate response schema.",
 ].join("\n");
@@ -304,10 +306,24 @@ function claimReferenceRegistry(
   evaluationAt: Date,
 ): ReadonlyMap<string, string> {
   const context = contextFromFrozenTrackCCapture({ capture, evaluationAt });
-  return new Map(context.verifiedClaims.map((claim, index) => [
+  const registry = new Map(context.verifiedClaims.map((claim, index) => [
     `CLAIM_${String(index + 1).padStart(3, "0")}`,
     claim.provenance.contentHash,
   ]));
+  if (context.productAttributes !== null && context.productAttributes !== undefined) {
+    registry.set(
+      "PRODUCT_ATTRIBUTES_001",
+      context.productAttributes.metadata.contentHash,
+    );
+  }
+  if (context.productPresentation !== null &&
+      context.productPresentation !== undefined) {
+    registry.set(
+      "PRODUCT_PRESENTATION_001",
+      context.productPresentation.provenance.contentHash,
+    );
+  }
+  return registry;
 }
 
 function resolveResponderClaimReferences(

@@ -3,6 +3,7 @@ import {
   buildCanonicalDecisionEvidenceV1,
   buildProtectedClaimsFromVerifiedFactSetV1,
   buildProtectedMediaClaimsV1,
+  buildProductPresentationEvidenceV1,
   evaluateDeterministicEffectReadinessV1,
   hashProtectedClaimSetV1,
   extractCustomerMeasurements,
@@ -5407,6 +5408,12 @@ export class RealtimeRunner {
                 ...(productFactsV2?.attributes
                   ? { productAttributes: productFactsV2.attributes }
                   : {}),
+                ...(productFactsV2 === null
+                  ? {}
+                  : {
+                      productPresentation:
+                        buildProductPresentationEvidenceV1(productFactsV2, now),
+                    }),
                 owner: nextState.conversationOwner,
                 handoffReasonCode:
                   handoffEventReasonCode ?? salesHandoffReasonCode ?? null,

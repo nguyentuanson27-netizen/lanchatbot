@@ -1,7 +1,15 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
-import { canonicalJsonV1, type ContextV2 } from "@lana/contracts";
+import {
+  canonicalJsonV1,
+  type ContextV2,
+  type ProductPresentationEvidenceV1,
+} from "@lana/contracts";
+import {
+  buildProductAttributesV1,
+  hashProductPresentationEvidenceV1,
+} from "@lana/business-tools";
 import {
   CONTEXT_V2_CANDIDATE_MODEL_ID,
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
@@ -144,6 +152,89 @@ function context(
   return { ...draft, contextHash };
 }
 
+function contextWithProductAttributes(): ContextV2 {
+  const { contextHash: _contextHash, ...base } = context();
+  const productAttributes = buildProductAttributesV1({
+    productId: "SD398",
+    observedAt: "2026-08-16T10:00:00.000Z",
+    data: {
+      materials: ["LỤA"],
+      materialComponents: { AO: ["LỤA"] },
+      colors: ["ĐEN"],
+      styles: ["THANH LỊCH"],
+      silhouettes: ["CHIẾT EO"],
+      occasions: ["ĐI LÀM"],
+      designAttributes: { waist: ["CHIẾT EO"] },
+      careInstructions: "Giặt tay nhẹ.",
+      wearProperties: null,
+      backCoverage: "FULL",
+      designComplexity: "MINIMAL",
+    },
+  });
+  const draft = { ...base, productAttributes };
+  return {
+    ...draft,
+    contextHash: createHash("sha256")
+      .update(`CONTEXT_V2\n${canonicalJsonV1(draft)}`, "utf8")
+      .digest("hex"),
+  };
+}
+
+function productPresentation(): ProductPresentationEvidenceV1 {
+  const value = {
+    productId: "SD398",
+    displayName: "Tường Vi",
+    variants: [{ variantId: "SD398-DEN-M", color: "ĐEN", size: "M" }],
+  };
+  const sources = {
+    identity: {
+      authority: "GOOGLE_SHEETS_PRODUCT_REGISTRY" as const,
+      sourceVersion: "sheet:1",
+      observedAt: "2026-08-16T10:00:00.000Z",
+      expiresAt: null,
+      freshForSeconds: null,
+      freshnessState: "FRESH" as const,
+    },
+    content: {
+      authority: "WEBSTORE_XML" as const,
+      sourceVersion: "xml:1",
+      observedAt: "2026-08-16T10:00:00.000Z",
+      expiresAt: null,
+      freshForSeconds: null,
+      freshnessState: "FRESH" as const,
+    },
+    inventory: {
+      authority: "PANCAKE_POS" as const,
+      sourceVersion: "pos:1",
+      observedAt: "2026-08-16T10:00:00.000Z",
+      expiresAt: "2026-08-18T10:00:00.000Z",
+      freshForSeconds: 172_800 as const,
+      freshnessState: "FRESH" as const,
+    },
+  };
+  const contentHash = hashProductPresentationEvidenceV1({ value, sources });
+  return {
+    schemaVersion: 1,
+    ...value,
+    provenance: {
+      ...sources,
+      freshnessState: "FRESH",
+      contentHash,
+    },
+  };
+}
+
+function contextWithProductPresentation(): ContextV2 {
+  const { contextHash: _contextHash, ...base } = context();
+  const draft = { ...base, productPresentation: productPresentation() };
+  return {
+    ...draft,
+    contextHash: createHash("sha256")
+      .update(`CONTEXT_V2\n${canonicalJsonV1(draft)}`, "utf8")
+      .digest("hex"),
+  };
+}
+
 function providerPayload() {
   return {
     candidates: [{
@@ -210,6 +301,103 @@ describe("Context V2 candidate capability", () => {
     expect(JSON.stringify(sanitized)).not.toMatch(
       /claimId|evidenceRef|sourceMessagePk|sourceMessageIdHash|customerHash|customerProfile|measurementFingerprint|phone|address/iu,
     );
+  });
+
+  it("egresses integrity-valid product attributes as one code-owned evidence reference", () => {
+    const source = contextWithProductAttributes();
+    const sanitized = sanitizeContextV2CandidateInput(source);
+
+    expect(sanitized.productAttributes).toEqual({
+      claimRef: "PRODUCT_ATTRIBUTES_001",
+      scope: { kind: "PRODUCT", productId: "SD398" },
+      value: {
+        materials: ["LỤA"],
+        materialComponents: { AO: ["LỤA"] },
+        colors: ["ĐEN"],
+        styles: ["THANH LỊCH"],
+        silhouettes: ["CHIẾT EO"],
+        occasions: ["ĐI LÀM"],
+        designAttributes: { waist: ["CHIẾT EO"] },
+        careInstructions: "Giặt tay nhẹ.",
+        wearProperties: null,
+        backCoverage: "FULL",
+        designComplexity: "MINIMAL",
+      },
+      provenance: {
+        authority: "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+        sourceVersion: source.productAttributes?.metadata.sourceVersion,
+        contentHash: source.productAttributes?.metadata.contentHash,
+        observedAt: "2026-08-16T10:00:00.000Z",
+        freshnessState: "FRESH",
+      },
+    });
+    expect(JSON.stringify(sanitized.productAttributes)).not.toMatch(
+      /schemaVersion|expiresAt|freshForSeconds/iu,
+    );
+  });
+
+  it("fails closed before candidate egress when product attribute bytes do not match their hash", () => {
+    const source = contextWithProductAttributes();
+    const { contextHash: _contextHash, ...withoutHash } = source;
+    const draft = {
+      ...withoutHash,
+      productAttributes: {
+        ...source.productAttributes!,
+        materials: ["COTTON"],
+      },
+    };
+    const tampered = {
+      ...draft,
+      contextHash: createHash("sha256")
+        .update(`CONTEXT_V2\n${canonicalJsonV1(draft)}`, "utf8")
+        .digest("hex"),
+    };
+
+    expect(() => sanitizeContextV2CandidateInput(tampered))
+      .toThrow("CONTEXT_V2_PRODUCT_ATTRIBUTES_INTEGRITY_MISMATCH");
+  });
+
+  it("egresses display identity and variant labels without stock quantities", () => {
+    const sanitized = sanitizeContextV2CandidateInput(
+      contextWithProductPresentation(),
+    );
+    expect(sanitized.productPresentation).toEqual({
+      claimRef: "PRODUCT_PRESENTATION_001",
+      scope: { kind: "PRODUCT", productId: "SD398" },
+      value: {
+        displayName: "Tường Vi",
+        variants: [{ variantId: "SD398-DEN-M", color: "ĐEN", size: "M" }],
+      },
+      provenance: {
+        contentHash: productPresentation().provenance.contentHash,
+        freshnessState: "FRESH",
+        identitySourceVersion: "sheet:1",
+        contentSourceVersion: "xml:1",
+        inventorySourceVersion: "pos:1",
+        inventoryExpiresAt: "2026-08-18T10:00:00.000Z",
+      },
+    });
+    expect(JSON.stringify(sanitized.productPresentation)).not.toMatch(
+      /sellableQuantity|remainQuantity|stockStatus/u,
+    );
+  });
+
+  it("fails closed when presentation bytes do not match their code-owned hash", () => {
+    const source = contextWithProductPresentation();
+    const { contextHash: _contextHash, ...withoutHash } = source;
+    const draft = {
+      ...withoutHash,
+      productPresentation: {
+        ...source.productPresentation!,
+        displayName: "Tên giả",
+      },
+    };
+    expect(() => sanitizeContextV2CandidateInput({
+      ...draft,
+      contextHash: createHash("sha256")
+        .update(`CONTEXT_V2\n${canonicalJsonV1(draft)}`, "utf8")
+        .digest("hex"),
+    })).toThrow("CONTEXT_V2_PRODUCT_PRESENTATION_INTEGRITY_MISMATCH");
   });
 
   it("pins every candidate-affecting field in the exact request envelope", () => {

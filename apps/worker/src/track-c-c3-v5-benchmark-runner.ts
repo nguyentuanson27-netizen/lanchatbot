@@ -322,6 +322,9 @@ function guardProductionOutput(
     ] as const),
   );
   const verifiedProductIds = new Set(context.productBinding.productIds);
+  const productAttributesHash = context.productAttributes?.metadata.contentHash ?? null;
+  const productPresentationHash =
+    context.productPresentation?.provenance.contentHash ?? null;
   for (const segment of output.segments) {
     const claim = segment.kind === "VERIFIED_CLAIM"
       ? claims.get(segment.claimContentHash) ?? null
@@ -331,7 +334,12 @@ function guardProductionOutput(
     }
     const productId = claim?.scope.kind === "PRODUCT"
       ? claim.scope.productId
-      : null;
+      : segment.kind === "VERIFIED_CLAIM" &&
+          (segment.claimContentHash === productAttributesHash ||
+           segment.claimContentHash === productPresentationHash)
+        ? context.productAttributes?.productId ??
+          context.productPresentation?.productId ?? null
+        : null;
     const sizeClaimContext = sizeGuardInputForClaim(context, claim);
     const guard = guardAgentProposal({
       proposal: {
@@ -383,9 +391,16 @@ function validateResponderOutput(
   if (output.segments.some(({ kind }) => kind === "EFFECT_CLAIM")) {
     throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
   }
-  const known = new Set(
-    context.verifiedClaims.map(({ provenance }) => provenance.contentHash),
-  );
+  const known = new Set([
+    ...context.verifiedClaims.map(({ provenance }) => provenance.contentHash),
+    ...(context.productAttributes === null || context.productAttributes === undefined
+      ? []
+      : [context.productAttributes.metadata.contentHash]),
+    ...(context.productPresentation === null ||
+        context.productPresentation === undefined
+      ? []
+      : [context.productPresentation.provenance.contentHash]),
+  ]);
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
   );
@@ -559,6 +574,19 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     `CLAIM_${String(index + 1).padStart(3, "0")}`,
     claim.provenance.contentHash,
   ]));
+  if (context.productAttributes !== null && context.productAttributes !== undefined) {
+    registry.set(
+      "PRODUCT_ATTRIBUTES_001",
+      context.productAttributes.metadata.contentHash,
+    );
+  }
+  if (context.productPresentation !== null &&
+      context.productPresentation !== undefined) {
+    registry.set(
+      "PRODUCT_PRESENTATION_001",
+      context.productPresentation.provenance.contentHash,
+    );
+  }
   const resolved = resolveClaimReferences(
     parseVertexJson(
       responderResponse.payload,

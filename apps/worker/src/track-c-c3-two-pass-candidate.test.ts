@@ -1,10 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
-import type { CanonicalDecisionEvidenceV1 } from "@lana/business-tools";
+import {
+  buildProductAttributesV1,
+  hashProductPresentationEvidenceV1,
+  type CanonicalDecisionEvidenceV1,
+} from "@lana/business-tools";
 import type { SalesCycleRuntimeState } from "@lana/chat-runtime";
-import type {
-  FinalTurnEvidenceV2,
-  ProductBindingV2,
-  ProtectedClaimV1,
+import {
+  type FinalTurnEvidenceV2,
+  type ProductAttributesV1,
+  type ProductPresentationEvidenceV1,
+  type ProductBindingV2,
+  type ProtectedClaimV1,
 } from "@lana/contracts";
 import { buildContextV2Capture } from "./context-v2.js";
 import type { CandidateVertexTransport } from "./context-v2-candidate.js";
@@ -31,7 +37,11 @@ const evaluationContext = [{
   occurredAt: evaluationAt.toISOString(),
 }] as const;
 
-function validCapture(verifiedClaims: readonly ProtectedClaimV1[] = []) {
+function validCapture(
+  verifiedClaims: readonly ProtectedClaimV1[] = [],
+  productAttributes: ProductAttributesV1 | null = null,
+  productPresentation: ProductPresentationEvidenceV1 | null = null,
+) {
   const canonicalEvidence: CanonicalDecisionEvidenceV1 = {
     dialogueEvidence: {
       schemaVersion: 1,
@@ -88,12 +98,20 @@ function validCapture(verifiedClaims: readonly ProtectedClaimV1[] = []) {
     preTransitionSalesCycleRevision: 0,
     finalSalesCycleRevision: 1,
   };
-  const productBinding: ProductBindingV2 = {
+  const presentationProductId = productAttributes?.productId ??
+    productPresentation?.productId ?? null;
+  const productBinding: ProductBindingV2 = presentationProductId === null ? {
     schemaVersion: 2,
     contractVersion: "PRODUCT_BINDING_V2",
     status: "NOT_REQUIRED",
     productIds: [],
     catalogVersion: null,
+  } : {
+    schemaVersion: 2,
+    contractVersion: "PRODUCT_BINDING_V2",
+    status: "RESOLVED",
+    productIds: [presentationProductId],
+    catalogVersion: "fixture:catalog:1",
   };
   return buildContextV2Capture({
     canonicalEvidence,
@@ -102,10 +120,61 @@ function validCapture(verifiedClaims: readonly ProtectedClaimV1[] = []) {
     readiness: [],
     finalTurnEvidence,
     productBinding,
+    productAttributes,
+    productPresentation,
     owner: "BOT",
     handoffReasonCode: null,
     now: evaluationAt,
     sourceOccurredAt: evaluationAt,
+  });
+}
+
+function verifiedProductPresentation(): ProductPresentationEvidenceV1 {
+  const value = {
+    productId: "SD398",
+    displayName: "Tường Vi",
+    variants: [{ variantId: "SD398-DEN-M", color: "ĐEN", size: "M" }],
+  };
+  const sources = {
+    identity: { authority: "GOOGLE_SHEETS_PRODUCT_REGISTRY" as const, sourceVersion: "sheet:1", observedAt: evaluationAt.toISOString(), expiresAt: null, freshForSeconds: null, freshnessState: "FRESH" as const },
+    content: { authority: "WEBSTORE_XML" as const, sourceVersion: "xml:1", observedAt: evaluationAt.toISOString(), expiresAt: null, freshForSeconds: null, freshnessState: "FRESH" as const },
+    inventory: { authority: "PANCAKE_POS" as const, sourceVersion: "pos:1", observedAt: evaluationAt.toISOString(), expiresAt: "2026-09-07T00:00:00.000Z", freshForSeconds: 172_800 as const, freshnessState: "FRESH" as const },
+  };
+  const contentHash = hashProductPresentationEvidenceV1({ value, sources });
+  return {
+    schemaVersion: 1,
+    ...value,
+    provenance: {
+      ...sources,
+      freshnessState: "FRESH",
+      contentHash,
+    },
+  };
+}
+
+function verifiedProductAttributes(): ProductAttributesV1 {
+  return buildProductAttributesV1({
+    productId: "SD398",
+    data: {
+      materials: ["LỤA"],
+      materialComponents: { AO: ["LỤA"] },
+      colors: ["ĐEN"],
+      styles: ["THANH LỊCH"],
+      silhouettes: ["CHIẾT EO"],
+      occasions: ["ĐI LÀM"],
+      designAttributes: { waist: ["CHIẾT EO"] },
+      careInstructions: "GIẶT NHẸ",
+      wearProperties: {
+        stretch: null,
+        wrinkleResistance: null,
+        opacity: null,
+        lining: null,
+        breathability: null,
+      },
+      backCoverage: "FULL",
+      designComplexity: "MINIMAL",
+    },
+    observedAt: evaluationAt.toISOString(),
   });
 }
 
@@ -212,6 +281,108 @@ describe("Track C C3 two-pass offline candidate", () => {
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "never copy, invent, or return a provenance hash",
     );
+  });
+
+  it("gives Responder one code-owned product-attribute reference", () => {
+    const attributes = verifiedProductAttributes();
+    const request = buildTrackCC3ResponderRequest({
+      modelResource,
+      capture: validCapture([], attributes),
+      evaluationAt,
+      evaluationContext,
+      conversationPlan: conversationPlan(),
+    });
+    const body = JSON.parse(request.body) as {
+      contents: [{ parts: [{ text: string }] }];
+    };
+    const prompt = JSON.parse(body.contents[0].parts[0].text) as {
+      productAttributes: {
+        claimRef: string;
+        provenance: { contentHash: string };
+      };
+    };
+
+    expect(prompt.productAttributes).toEqual(expect.objectContaining({
+      claimRef: "PRODUCT_ATTRIBUTES_001",
+      provenance: expect.objectContaining({
+        contentHash: attributes.metadata.contentHash,
+      }),
+    }));
+  });
+
+  it("resolves product-attribute claimRef to its code-owned integrity hash", async () => {
+    const attributes = verifiedProductAttributes();
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Mẫu này dùng chất liệu lụa mềm ạ.",
+          claimRef: "PRODUCT_ATTRIBUTES_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    const result = await runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture([], attributes),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    });
+
+    expect(result.candidate.quality.reply).toBe(
+      "Mẫu này dùng chất liệu lụa mềm ạ.",
+    );
+    expect(result.candidate.identity.responseOutputHash).toMatch(/^[a-f0-9]{64}$/u);
+    expect(result.candidate.guard.status).toBe("PASS");
+  });
+
+  it("resolves product-presentation claimRef to its code-owned integrity hash", async () => {
+    const presentation = verifiedProductPresentation();
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Tường Vi có màu đen size M ạ.",
+          claimRef: "PRODUCT_PRESENTATION_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    const result = await runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture([], null, presentation),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    });
+
+    expect(result.candidate.quality.reply).toBe(
+      "Tường Vi có màu đen size M ạ.",
+    );
+    expect(result.candidate.guard.status).toBe("PASS");
   });
 
   it("resolves a verified claim reference to the exact Context V2 hash before the existing validator", async () => {

@@ -119,7 +119,15 @@ export function contextFromFrozenTrackCCapture(input: Readonly<{
       Date.parse(provenance.expiresAt) <= input.evaluationAt.getTime()
     ) ||
     (context.cartReadiness !== null &&
-      Date.parse(context.cartReadiness.expiresAt) <= input.evaluationAt.getTime())
+      Date.parse(context.cartReadiness.expiresAt) <= input.evaluationAt.getTime()) ||
+    (context.productAttributes !== null &&
+      context.productAttributes !== undefined &&
+      context.productAttributes.metadata.freshnessState !== "FRESH") ||
+    (context.productPresentation !== null &&
+      context.productPresentation !== undefined &&
+      (context.productPresentation.provenance.freshnessState !== "FRESH" ||
+       Date.parse(context.productPresentation.provenance.inventory.expiresAt) <=
+         input.evaluationAt.getTime()))
   ) {
     throw new Error("TRACK_C_OFFLINE_CANDIDATE_CAPTURE_STALE");
   }
