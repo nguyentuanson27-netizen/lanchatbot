@@ -13,6 +13,7 @@ import {
   type DeterministicEffectReadinessV1,
   type FinalTurnEvidenceV2,
   type ProductBindingV2,
+  type ProductAttributesV1,
   type ProtectedClaimV1,
 } from "@lana/contracts";
 
@@ -23,6 +24,7 @@ export interface BuildContextV2Input {
   readonly readiness: readonly DeterministicEffectReadinessV1[];
   readonly finalTurnEvidence: FinalTurnEvidenceV2;
   readonly productBinding: ProductBindingV2;
+  readonly productAttributes?: ProductAttributesV1 | null;
   readonly owner: "BOT" | "HUMAN";
   readonly handoffReasonCode: string | null;
   readonly now: Date;
@@ -115,6 +117,10 @@ export function buildContextV2(input: BuildContextV2Input): ContextV2 {
     throw new Error("CONTEXT_V2_FINAL_SALES_REVISION_MISMATCH");
   }
   assertFreshClaims(input.verifiedClaims, input.now);
+  if (input.productAttributes !== null && input.productAttributes !== undefined &&
+      !input.productBinding.productIds.includes(input.productAttributes.productId)) {
+    throw new Error("CONTEXT_V2_PRODUCT_ATTRIBUTES_BINDING_MISMATCH");
+  }
   const readiness = exactReadiness(input);
   if (readiness.bindingMismatch) {
     throw new Error("CONTEXT_V2_READINESS_BINDING_MISMATCH");
@@ -161,6 +167,9 @@ export function buildContextV2(input: BuildContextV2Input): ContextV2 {
     authority: "SHADOW_ONLY",
     finalTurnEvidence: input.finalTurnEvidence,
     productBinding: input.productBinding,
+    ...(input.productAttributes === undefined
+      ? {}
+      : { productAttributes: input.productAttributes }),
     dialogueEvidence: {
       act: input.canonicalEvidence.dialogueEvidence.act,
       confidenceBand: input.canonicalEvidence.dialogueEvidence.confidenceBand,

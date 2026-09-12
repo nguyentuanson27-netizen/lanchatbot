@@ -6,6 +6,12 @@
  * extraction: 2.1.0-canonical-parent, normalizer: 2.0.1
  */
 import { createHash } from "node:crypto";
+import {
+  ProductDesignAttributesV1Schema,
+  ProductWearPropertiesV1Schema,
+  type ProductAttributesV1,
+} from "@lana/contracts";
+import { buildProductAttributesV1 } from "@lana/business-tools";
 
 export const EXTRACTION_VERSION = "2.1.0-canonical-parent";
 export const NORMALIZER_VERSION = "2.0.1";
@@ -24,6 +30,13 @@ export interface RegistryEntry {
   color_override: string[];
   style_override: string[];
   material_components_override: string;
+  silhouette_override: string[];
+  occasion_override: string[];
+  design_attributes_json: string;
+  care_instructions: string;
+  wear_properties_json: string;
+  back_coverage: string;
+  design_complexity: string;
   active: boolean;
   aliases: string[];
   search_colors: string[];
@@ -48,6 +61,9 @@ export interface XmlProfile {
   group_id: string;
   title: string;
   description_xml: string;
+  description_authority: "WEBSTORE_XML" | "GOOGLE_SHEETS_PRODUCT_REGISTRY";
+  description_source_version: string;
+  product_attributes: ProductAttributesV1 | null;
   material_xml: string;
   material_components: Record<string, string[]>;
   color_primary: string[];
@@ -78,6 +94,63 @@ export interface XmlProfile {
 }
 
 type XmlValue = unknown;
+
+type ParsedAttributeGroup<T> = Readonly<{ value: T | null; invalid: boolean }>;
+
+function verifiedTokens(values: readonly string[]): string[] {
+  return unique(values).filter((value) => value !== "UNKNOWN");
+}
+
+function parseDesignAttributes(raw: string): ParsedAttributeGroup<
+  NonNullable<ProductAttributesV1["designAttributes"]>
+> {
+  if (!raw.trim()) return { value: null, invalid: false };
+  try {
+    const value = JSON.parse(raw) as Record<string, unknown>;
+    if (value === null || Array.isArray(value) || typeof value !== "object") {
+      return { value: null, invalid: true };
+    }
+    const normalized = Object.fromEntries(Object.entries(value).flatMap(([key, entry]) => {
+      if (!Array.isArray(entry)) return [[key, entry]];
+      const tokens = verifiedTokens(entry.map(String));
+      return tokens.length ? [[key, tokens]] : [];
+    }));
+    const parsed = ProductDesignAttributesV1Schema.safeParse(normalized);
+    if (!parsed.success) return { value: null, invalid: true };
+    return { value: Object.keys(parsed.data).length ? parsed.data : null, invalid: false };
+  } catch {
+    return { value: null, invalid: true };
+  }
+}
+
+function parseWearProperties(raw: string): ParsedAttributeGroup<
+  NonNullable<ProductAttributesV1["wearProperties"]>
+> {
+  if (!raw.trim()) return { value: null, invalid: false };
+  try {
+    const value = JSON.parse(raw) as Record<string, unknown>;
+    if (value === null || Array.isArray(value) || typeof value !== "object") {
+      return { value: null, invalid: true };
+    }
+    const normalized = Object.fromEntries(Object.entries(value).map(([key, entry]) => [
+      key,
+      typeof entry === "string" && entry.trim().toUpperCase() === "UNKNOWN" ? null : entry,
+    ]));
+    const parsed = ProductWearPropertiesV1Schema.safeParse(normalized);
+    if (!parsed.success) return { value: null, invalid: true };
+    return {
+      value: Object.values(parsed.data).some((entry) => entry !== null) ? parsed.data : null,
+      invalid: false,
+    };
+  } catch {
+    return { value: null, invalid: true };
+  }
+}
+
+function nullableClassification<T extends string>(value: string, allowed: readonly T[]): T | null {
+  const normalized = value.trim().toUpperCase();
+  return allowed.includes(normalized as T) ? normalized as T : null;
+}
 
 // --- helper cơ bản (giữ đúng thứ tự phép biến đổi của n8n) ---
 
@@ -591,10 +664,14 @@ export function buildXmlProfiles(
     const styleResult = extractStyles(descriptionXml, reg.style_override);
     const silhouettesAuto = unique(matchLabels(searchable, silhouetteRules));
     const occasionsAuto = unique(matchLabels(searchable, occasionRules));
+    const designAttributes = parseDesignAttributes(reg.design_attributes_json);
+    const wearProperties = parseWearProperties(reg.wear_properties_json);
     const warnings = unique([
       ...(colorResult.primary.length ? [] : ["COLOR_NOT_FOUND"]),
       ...materialResult.warnings,
       ...(styleResult.warning ? [styleResult.warning] : []),
+      ...(designAttributes.invalid ? ["DESIGN_ATTRIBUTES_INVALID"] : []),
+      ...(wearProperties.invalid ? ["WEAR_PROPERTIES_INVALID"] : []),
     ]);
     const aliases = mergeSets(reg.aliases, parentTitles, [title, groupId]);
 
@@ -657,12 +734,55 @@ export function buildXmlProfiles(
     });
     const sourceHash = createHash("sha256").update(JSON.stringify(sourceHashInput)).digest("hex");
     const xmlUpdatedAt = reg.source_hash === sourceHash && reg.xml_updated_at ? reg.xml_updated_at : now;
+    const productAttributeData = {
+      materials: verifiedTokens(reg.material_override.split(/[|,;\n]+/u)),
+      materialComponents: reg.material_components_override.trim() || reg.material_override.trim()
+        ? materialResult.components
+        : {},
+      colors: verifiedTokens(reg.color_override),
+      styles: verifiedTokens(reg.style_override),
+      silhouettes: verifiedTokens(reg.silhouette_override),
+      occasions: verifiedTokens(reg.occasion_override),
+      designAttributes: designAttributes.value,
+      careInstructions: reg.care_instructions.trim().toUpperCase() === "UNKNOWN"
+        ? null
+        : reg.care_instructions.trim() || null,
+      wearProperties: wearProperties.value,
+      backCoverage: nullableClassification(reg.back_coverage, ["OPEN", "PARTIAL", "FULL"] as const),
+      designComplexity: nullableClassification(reg.design_complexity, ["MINIMAL", "ORNATE"] as const),
+    };
+    const hasProductAttributes =
+      productAttributeData.materials.length > 0 ||
+      Object.keys(productAttributeData.materialComponents).length > 0 ||
+      productAttributeData.colors.length > 0 ||
+      productAttributeData.styles.length > 0 ||
+      productAttributeData.silhouettes.length > 0 ||
+      productAttributeData.occasions.length > 0 ||
+      productAttributeData.designAttributes !== null ||
+      productAttributeData.careInstructions !== null ||
+      productAttributeData.wearProperties !== null ||
+      productAttributeData.backCoverage !== null ||
+      productAttributeData.designComplexity !== null;
+    const productAttributesObservedAt = [reg.source_updated_at, xmlUpdatedAt, now]
+      .find((value) => Number.isFinite(Date.parse(value))) ?? now;
+    const productAttributes = hasProductAttributes
+      ? buildProductAttributesV1({
+          productId: reg.ma_sp,
+          data: productAttributeData,
+          observedAt: new Date(productAttributesObservedAt).toISOString(),
+        })
+      : null;
 
     profiles.push({
       reg,
       group_id: groupId,
       title,
       description_xml: descriptionXml,
+      description_authority: reg.description_override.trim()
+        ? "GOOGLE_SHEETS_PRODUCT_REGISTRY"
+        : "WEBSTORE_XML",
+      description_source_version: sourceHash,
+      product_attributes: productAttributes,
       material_xml: materialResult.summary,
       material_components: materialResult.components,
       color_primary: colorResult.primary,
@@ -684,8 +804,12 @@ export function buildXmlProfiles(
       search_colors: colorResult.primary,
       search_styles: styleResult.styles,
       search_materials: materialResult.flat,
-      search_silhouettes: mergeSets(reg.search_silhouettes, silhouettesAuto),
-      search_occasions: mergeSets(reg.search_occasions, occasionsAuto),
+      search_silhouettes: reg.silhouette_override.length
+        ? reg.silhouette_override
+        : mergeSets(reg.search_silhouettes, silhouettesAuto),
+      search_occasions: reg.occasion_override.length
+        ? reg.occasion_override
+        : mergeSets(reg.search_occasions, occasionsAuto),
       auto_confidence: confidence,
       review_status: reviewStatus,
       source_hash: sourceHash,
@@ -753,6 +877,28 @@ export function normalizeStructuredExtraction(profiles: readonly XmlProfile[]): 
     const xmlUpdatedAt = profile.reg.source_hash === sourceHash && profile.reg.xml_updated_at
       ? profile.reg.xml_updated_at
       : profile.xml_updated_at;
+    const productAttributes = profile.product_attributes === null
+      ? null
+      : (() => {
+          const {
+            schemaVersion: _schemaVersion,
+            productId,
+            metadata,
+            ...data
+          } = profile.product_attributes;
+          return buildProductAttributesV1({
+            productId,
+            observedAt: metadata.observedAt,
+            data: {
+              ...data,
+              materialComponents:
+                profile.reg.material_components_override.trim() ||
+                profile.reg.material_override.trim()
+                  ? ordered
+                  : data.materialComponents,
+            },
+          });
+        })();
     return {
       ...profile,
       material_components: ordered,
@@ -762,6 +908,7 @@ export function normalizeStructuredExtraction(profiles: readonly XmlProfile[]): 
       review_status: reviewStatus,
       source_hash: sourceHash,
       xml_updated_at: xmlUpdatedAt,
+      product_attributes: productAttributes,
     };
   });
 }

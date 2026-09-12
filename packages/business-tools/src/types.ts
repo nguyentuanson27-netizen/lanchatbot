@@ -4,6 +4,7 @@ import type {
   GuardedReplyPlanV1,
   ProductFactsV1,
   SizeRecommendationProtectedClaimV1,
+  ProductAttributesV1,
 } from "@lana/contracts";
 
 export const SUPPORTED_SIZES = ["S", "M", "L", "XL"] as const;
@@ -103,9 +104,12 @@ export interface StableProductDocument {
   canonicalCode: string;
   aliases: readonly string[];
   title: string;
-  /** Mô tả webstore đã làm sạch ở bước ingestion; chỉ dùng làm ngữ cảnh diễn đạt,
+  /** Mô tả nguồn đã được ingestion xác định; chỉ dùng làm ngữ cảnh diễn đạt,
    * không phải nguồn giá, tồn, size hoặc chính sách. */
   descriptionXml?: string;
+  descriptionAuthority?: "WEBSTORE_XML" | "GOOGLE_SHEETS_PRODUCT_REGISTRY" | undefined;
+  descriptionSourceVersion?: string | undefined;
+  attributes?: ProductAttributesV1 | null | undefined;
   colors: readonly string[];
   materials: readonly string[];
   silhouettes: readonly string[];

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { ProductFactsV2Schema } from "@lana/contracts";
 import { projectProductFactsV2, type ProductFactsV2StaticSources } from "./product-facts-v2-projection.js";
+import { buildProductAttributesV1 } from "./product-attributes.js";
+import {
+  buildProductFactsV2RedisWrites,
+  reconstructProductFactsV2RedisProjection,
+} from "./product-facts-v2.js";
 
 const observedAt = "2026-07-22T00:00:00.000Z";
 const untilReplaced = <T extends "GOOGLE_SHEETS_PRODUCT_REGISTRY" | "ADMIN_POLICY">(authority: T) => ({ authority, sourceVersion: "1", observedAt, expiresAt: null, freshForSeconds: null, freshnessState: "FRESH" as const });
@@ -10,6 +16,15 @@ const staticSources: ProductFactsV2StaticSources = {
   fulfillment: { appliesToParentProductId: "CB182", policyType: "READY_STOCK" as const, canOrderWhenZero: false, etaToCustomer: { minDays: 3, maxDays: 7, validUntil: null }, metadata: { authority: "GOOGLE_SHEETS_FULFILLMENT_POLICY" as const, sourceVersion: "1", observedAt, expiresAt: "2026-07-29T00:00:00.000Z", expiryBasis: "DEFAULT_7_DAY_TTL" as const, freshForSeconds: 604_800 as const, freshnessState: "FRESH" as const } },
   sizeChart: null,
   media: { assets: [], metadata: { authority: "QDRANT_STABLE" as const, sourceVersion: "1", observedAt, expiresAt: "2026-08-21T00:00:00.000Z", freshForSeconds: 2_592_000 as const, freshnessState: "FRESH" as const } },
+  attributes: buildProductAttributesV1({
+    productId: "CB182",
+    observedAt,
+    data: {
+      materials: ["LỤA"], materialComponents: { AO: ["LỤA"] }, colors: ["KEM"],
+      styles: ["THANH LỊCH"], silhouettes: [], occasions: [], designAttributes: null,
+      careInstructions: null, wearProperties: null, backCoverage: null, designComplexity: null,
+    },
+  }),
 };
 
 function snapshot() {
@@ -51,6 +66,24 @@ describe("ProductFactsV2 POS projection", () => {
     expect(projected.inventory.variants.filter(({ offerKind }) => offerKind === "SET")).toHaveLength(1);
     expect(projected.inventory.variants.filter(({ offerKind }) => offerKind === "COMBO_3")).toHaveLength(1);
     expect(projected.inventory.variants.filter(({ offerKind }) => offerKind === "COMPONENT")).toHaveLength(2);
+    expect(projected.attributes).toMatchObject({ productId: "CB182", materials: ["LỤA"] });
+    const mismatched = ProductFactsV2Schema.safeParse({
+      ...projected,
+      attributes: { ...projected.attributes!, productId: "OTHER" },
+    });
+    expect(mismatched.success).toBe(false);
+    if (!mismatched.success) {
+      expect(mismatched.error.issues).toEqual(expect.arrayContaining([
+        expect.objectContaining({ path: ["attributes", "productId"] }),
+      ]));
+    }
+    const writes = buildProductFactsV2RedisWrites(projected);
+    expect(reconstructProductFactsV2RedisProjection({
+      manifest: writes.manifestWrite.value,
+      stable: writes.dataWrites.find(({ key }) => key.endsWith(":stable"))?.value ?? null,
+      bom: writes.dataWrites.find(({ key }) => key.endsWith(":bom"))?.value ?? null,
+      priceInventory: writes.dataWrites.find(({ key }) => key.endsWith(":price_inventory"))?.value ?? null,
+    })?.attributes).toEqual(projected.attributes);
   });
 
   it("rejects a POS snapshot for another parent product", () => {

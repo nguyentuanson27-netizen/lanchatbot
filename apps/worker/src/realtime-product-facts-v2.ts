@@ -240,8 +240,8 @@ export function buildRealtimeProductFactsV2(input: {
           description: input.product.descriptionXml?.trim() || null,
           productUrl: null,
           metadata: {
-            authority: "WEBSTORE_XML",
-            sourceVersion: input.product.catalogVersion,
+            authority: input.product.descriptionAuthority ?? "WEBSTORE_XML",
+            sourceVersion: input.product.descriptionSourceVersion ?? input.product.catalogVersion,
             observedAt: stableObservedAt,
             expiresAt: null,
             freshForSeconds: null,
@@ -300,6 +300,7 @@ export function buildRealtimeProductFactsV2(input: {
                 : "STALE",
           },
         },
+        ...(input.product.attributes ? { attributes: input.product.attributes } : {}),
       },
       now: input.now,
     });
