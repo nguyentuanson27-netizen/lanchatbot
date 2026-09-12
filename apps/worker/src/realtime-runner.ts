@@ -5404,6 +5404,9 @@ export class RealtimeRunner {
                 readiness: readinessObservations,
                 finalTurnEvidence: finalTurnEvidence.data,
                 productBinding: productBinding.data,
+                ...(productFactsV2?.attributes
+                  ? { productAttributes: productFactsV2.attributes }
+                  : {}),
                 owner: nextState.conversationOwner,
                 handoffReasonCode:
                   handoffEventReasonCode ?? salesHandoffReasonCode ?? null,

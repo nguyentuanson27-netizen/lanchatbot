@@ -62,6 +62,7 @@ export interface ProductFactsV2StaticSources {
   readonly fulfillment: ProductFactsV2["fulfillment"];
   readonly sizeChart: ProductFactsV2["sizeChart"];
   readonly media: ProductFactsV2["media"];
+  readonly attributes?: ProductFactsV2["attributes"];
 }
 
 export interface ProductFactsV2ProjectionInput {
