@@ -75,6 +75,7 @@ export const TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION = [
   "SIZE_EXISTENCE_IS_NOT_VERIFIED_FIT: if the customer asks whether a specific size will fit, there is no eligible verified SIZE_FIT claim, and supplied product evidence explicitly includes that requested size token, the token proves only that the size exists, never that it fits. Treat fit as unresolved qualification: use the frozen dialogue only to avoid re-asking measurements already supplied; if a relevant measurement is still missing, choose one missing measurement direction; if none is missing, do not re-ask known measurements. Never plan a fit promise or guess.",
   "Return exactly five concise planning strings: currentNeed, mustResolve, conversationRead, nextMove, and avoid.",
   "Use NONE when a planning field has no applicable content. Do not copy customer identifiers or contact details.",
+  "CHECKOUT_OBJECTIVE_IS_NAMED_ABSTRACTLY: when canonical state requires checkout details, name that objective as the checkout details canonical state still requires. Never write recipient-name, phone, or delivery-address wording into any planning field: the plan is PII-guarded and such wording is rejected before the Responder runs, even though the Responder must still ask the customer for those exact details.",
   "The plan is advisory only. It cannot authorize facts, claims, effects, or output delivery.",
   "Return only the registered JSON response schema.",
 ].join("\n");

@@ -36,6 +36,17 @@ function hmac(salt: string, ...parts: readonly string[]): string {
   return digest.digest("hex");
 }
 
+/**
+ * A line naming an address component is redacted whole. Both boundaries are
+ * explicit because `\b` is ASCII-word based and gets Vietnamese wrong in both
+ * directions: without a leading boundary "ấp" matches inside "cung cấp" or
+ * "cao cấp" and destroys ordinary sentences, and a trailing `\b` never fires
+ * for a token ending in a non-ASCII letter, so "xã", "thành phố" and "số nhà"
+ * silently never matched at all.
+ */
+const ADDRESS_LINE_TOKEN =
+  /(?<![\p{L}\p{M}])(?:địa chỉ|dia chi|xã|phường|huyện|quận|tỉnh|thành phố|đường|số nhà|ấp|thôn)(?![\p{L}\p{M}])/iu;
+
 export function redactAnalyticsText(value: string): string {
   const direct = value
     .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[EMAIL]")
@@ -46,7 +57,7 @@ export function redactAnalyticsText(value: string): string {
   return direct
     .split(/\r?\n/u)
     .map((line) => {
-      if (/(?:địa chỉ|dia chi|xã|phường|huyện|quận|tỉnh|thành phố|đường|số nhà|ấp|thôn)\b/iu.test(line)) {
+      if (ADDRESS_LINE_TOKEN.test(line)) {
         return "[ADDRESS]";
       }
       if (/^\s*\p{Lu}[\p{L}'-]+(?:\s+\p{Lu}[\p{L}'-]+){1,4}\s*$/u.test(line)) {
