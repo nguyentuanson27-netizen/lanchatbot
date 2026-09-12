@@ -4,6 +4,10 @@ import { canonicalJsonV1 } from "@lana/contracts";
 import { describe, expect, it, vi } from "vitest";
 import type { TrackCV5RubricConfig } from "./track-c-c3-v5-benchmark-scoring.js";
 import { createTrackCQualityV2StageJudge } from "./track-c-quality-benchmark-v2.js";
+import {
+  TRACK_C_V5_STAGE_JUDGE_SYSTEM_INSTRUCTION,
+  trackCV5StageJudgeGenerationConfig,
+} from "./vertex.js";
 
 const rubric = JSON.parse(readFileSync(
   new URL("../evals/track-c-c2/v2/rubric.json", import.meta.url),
@@ -66,6 +70,11 @@ describe("Track C V5 Vertex stage judge composition", () => {
       },
     });
 
+    const generationConfig = {
+      systemInstruction: TRACK_C_V5_STAGE_JUDGE_SYSTEM_INSTRUCTION,
+      strategist: trackCV5StageJudgeGenerationConfig(rubric, "STRATEGIST"),
+      responder: trackCV5StageJudgeGenerationConfig(rubric, "RESPONDER"),
+    };
     expect(judge.descriptor()).toEqual({
       provider: "VERTEX_AI",
       model: "gemini-3.6-flash",
@@ -73,7 +82,9 @@ describe("Track C V5 Vertex stage judge composition", () => {
       rubricHash: createHash("sha256")
         .update(canonicalJsonV1(rubric), "utf8")
         .digest("hex"),
-      generationConfigHash: expect.stringMatching(/^[a-f0-9]{64}$/u),
+      generationConfigHash: createHash("sha256")
+        .update(canonicalJsonV1(generationConfig), "utf8")
+        .digest("hex"),
     });
 
     const assessment = await judge.assess({

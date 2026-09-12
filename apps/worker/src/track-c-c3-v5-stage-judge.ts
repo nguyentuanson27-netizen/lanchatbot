@@ -7,6 +7,7 @@ import type {
 } from "./track-c-c3-v5-benchmark-evaluator.js";
 import type { TrackCV5RubricConfig } from "./track-c-c3-v5-benchmark-scoring.js";
 import {
+  TRACK_C_V5_STAGE_JUDGE_SYSTEM_INSTRUCTION,
   trackCV5StageJudgeGenerationConfig,
   VertexShadowModel,
   type VertexShadowModelOptions,
@@ -31,6 +32,7 @@ export function createTrackCV5StageJudge(input: Readonly<{
 }>): TrackCV5StageJudgePort {
   const rubric = structuredClone(input.rubric);
   const generationConfig = Object.freeze({
+    systemInstruction: TRACK_C_V5_STAGE_JUDGE_SYSTEM_INSTRUCTION,
     strategist: trackCV5StageJudgeGenerationConfig(rubric, "STRATEGIST"),
     responder: trackCV5StageJudgeGenerationConfig(rubric, "RESPONDER"),
   });
