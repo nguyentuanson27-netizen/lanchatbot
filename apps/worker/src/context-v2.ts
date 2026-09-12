@@ -218,10 +218,10 @@ export function buildContextV2(input: BuildContextV2Input): ContextV2 {
     authority: "SHADOW_ONLY",
     finalTurnEvidence: input.finalTurnEvidence,
     productBinding: input.productBinding,
-    ...(input.productAttributes === undefined
+    ...(input.productAttributes === undefined || input.productAttributes === null
       ? {}
       : { productAttributes: input.productAttributes }),
-    ...(input.productPresentation === undefined
+    ...(input.productPresentation === undefined || input.productPresentation === null
       ? {}
       : { productPresentation: input.productPresentation }),
     dialogueEvidence: {

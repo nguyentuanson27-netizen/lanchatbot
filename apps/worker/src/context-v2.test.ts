@@ -205,6 +205,19 @@ function productAttributes(): ProductAttributesV1 {
 }
 
 describe("DF09 final Context V2 capture", () => {
+  it("normalizes nullable optional evidence to the legacy omitted shape", () => {
+    const omitted = buildContextV2(input());
+    const nullable = buildContextV2({
+      ...input(),
+      productAttributes: null,
+      productPresentation: null,
+    });
+
+    expect(nullable).toEqual(omitted);
+    expect(nullable).not.toHaveProperty("productAttributes");
+    expect(nullable).not.toHaveProperty("productPresentation");
+  });
+
   it("carries one BUILT snapshot through the exact claim gate to candidate egress", async () => {
     const capture = buildContextV2Capture({
       ...input(),

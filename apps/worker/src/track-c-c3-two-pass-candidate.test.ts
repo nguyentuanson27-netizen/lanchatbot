@@ -40,8 +40,8 @@ const evaluationContext = [{
 
 function validCapture(
   verifiedClaims: readonly ProtectedClaimV1[] = [],
-  productAttributes: ProductAttributesV1 | null = null,
-  productPresentation: ProductPresentationEvidenceV1 | null = null,
+  productAttributes: ProductAttributesV1 | null | undefined = undefined,
+  productPresentation: ProductPresentationEvidenceV1 | null | undefined = undefined,
   captureAt: Date = evaluationAt,
 ) {
   const canonicalEvidence: CanonicalDecisionEvidenceV1 = {
@@ -122,8 +122,8 @@ function validCapture(
     readiness: [],
     finalTurnEvidence,
     productBinding,
-    productAttributes,
-    productPresentation,
+    ...(productAttributes === undefined ? {} : { productAttributes }),
+    ...(productPresentation === undefined ? {} : { productPresentation }),
     owner: "BOT",
     handoffReasonCode: null,
     now: captureAt,
@@ -321,8 +321,17 @@ describe("Track C C3 two-pass offline candidate", () => {
       "productPresentation",
     );
     expect(request.identity.requestEnvelopeHash).toBe(
-      "a8af80a9d4b0f7bd674a8d68747aa5d68e4822699dccfffaf96daee05613ee5b",
+      "ec03172bfbc43fd40c012b35d2348fb02c6b27f3f0339a73c64aa5b8f13c5fee",
     );
+    const nullableRequest = buildTrackCC3ResponderRequest({
+      modelResource,
+      capture: validCapture([], null, null),
+      evaluationAt,
+      evaluationContext,
+      conversationPlan: conversationPlan(),
+    });
+    expect(nullableRequest.body).toBe(request.body);
+    expect(nullableRequest.identity).toEqual(request.identity);
   });
 
   it.each([
@@ -500,6 +509,40 @@ describe("Track C C3 two-pass offline candidate", () => {
     })).rejects.toThrow("TRACK_C_C3_CLAIM_REFERENCE_TEXT_MISMATCH");
   });
 
+  it("rejects extra presentation literals and unregistered placeholder syntax on the normal path", async () => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Mẫu Hồng Nhung / {{DISPLAY_NAME}} có màu ĐỎ / {{VARIANT_COLOR}}, size L / {{VARIANT_SIZE}} {{other}}",
+          claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation({}, [
+        { variantId: "SD398-DEN-M", color: "ĐEN", size: "M" },
+        { variantId: "SD398-DO-L", color: "ĐỎ", size: "L" },
+      ])),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    })).rejects.toThrow("TRACK_C_C3_CLAIM_REFERENCE_TEXT_MISMATCH");
+  });
+
   it("rejects a cross-variant presentation statement on the V5 production-contract path", async () => {
     const presentation = verifiedProductPresentation({}, [
       { variantId: "SD398-DEN-M", color: "ĐEN", size: "M" },
@@ -528,6 +571,39 @@ describe("Track C C3 two-pass offline candidate", () => {
       lane: "PRODUCTION_CONTRACT",
       modelResource,
       capture: validCapture([], null, presentation),
+      evaluationAt,
+      evaluationContext,
+      transport,
+    })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
+  });
+
+  it("rejects extra presentation literals and malformed placeholders on the V5 path", async () => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Mẫu Hồng Nhung / {{DISPLAY_NAME}} có màu ĐỎ / {{VARIANT_COLOR}}, size L / {{VARIANT_SIZE}} {{BROKEN",
+          claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation({}, [
+        { variantId: "SD398-DEN-M", color: "ĐEN", size: "M" },
+        { variantId: "SD398-DO-L", color: "ĐỎ", size: "L" },
+      ])),
       evaluationAt,
       evaluationContext,
       transport,

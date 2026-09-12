@@ -4,6 +4,7 @@ import { candidateProductPresentationClaims } from "./context-v2-candidate.js";
 type ClaimReferenceRegistryEntry = Readonly<{
   contentHash: string;
   placeholders: Readonly<Record<string, string>> | null;
+  presentationLiterals: readonly string[];
 }>;
 
 export type ClaimReferenceErrors = Readonly<{
@@ -22,6 +23,7 @@ export function buildTrackCClaimReferenceRegistry(
       Object.freeze({
         contentHash: claim.provenance.contentHash,
         placeholders: null,
+        presentationLiterals: Object.freeze([]),
       }),
     ]),
   );
@@ -32,17 +34,27 @@ export function buildTrackCClaimReferenceRegistry(
       Object.freeze({
         contentHash: context.productAttributes.metadata.contentHash,
         placeholders: null,
+        presentationLiterals: Object.freeze([]),
       }),
     );
   }
   if (context.productPresentation !== null &&
       context.productPresentation !== undefined) {
+    const presentationLiterals = Object.freeze([
+      context.productPresentation.displayName,
+      ...context.productPresentation.variants.flatMap((variant) => [
+        variant.variantId,
+        ...(variant.color === null ? [] : [variant.color]),
+        ...(variant.size === null ? [] : [variant.size]),
+      ]),
+    ]);
     for (const claim of candidateProductPresentationClaims(
       context.productPresentation,
     )) {
       registry.set(claim.claimRef, Object.freeze({
         contentHash: context.productPresentation.provenance.contentHash,
         placeholders: claim.placeholders,
+        presentationLiterals,
       }));
     }
   }
@@ -52,16 +64,43 @@ export function buildTrackCClaimReferenceRegistry(
 function resolvePlaceholders(
   text: unknown,
   placeholders: Readonly<Record<string, string>>,
+  presentationLiterals: readonly string[],
   textMismatch: string,
 ): string {
   if (typeof text !== "string") throw new Error(textMismatch);
-  const tokens = [...text.matchAll(/\{\{([A-Z_]+)\}\}/gu)].map(
+  const rawTokens = [...text.matchAll(/\{\{([^{}]*)\}\}/gu)];
+  const tokens = rawTokens.map(
     (match) => match[1]!,
   );
   const expected = Object.keys(placeholders).sort();
   if (tokens.length !== expected.length ||
       new Set(tokens).size !== tokens.length ||
+      tokens.some((token) => !/^[A-Z_]+$/u.test(token)) ||
       [...tokens].sort().some((token, index) => token !== expected[index])) {
+    throw new Error(textMismatch);
+  }
+  const framing = tokens.reduce(
+    (remaining, token) => remaining.replace(`{{${token}}}`, ""),
+    text,
+  );
+  if (/[{}]/u.test(framing)) throw new Error(textMismatch);
+  const normalizedFraming = framing.normalize("NFC").toLocaleLowerCase("vi-VN");
+  for (const literal of presentationLiterals) {
+    const normalizedLiteral = literal.normalize("NFC")
+      .toLocaleLowerCase("vi-VN").trim();
+    if (!normalizedLiteral) continue;
+    const escaped = normalizedLiteral.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+    const pattern = normalizedLiteral.length === 1
+      ? new RegExp(`(?:^|[^\\p{L}\\p{N}])${escaped}(?:$|[^\\p{L}\\p{N}])`, "u")
+      : new RegExp(escaped, "u");
+    if (pattern.test(normalizedFraming)) throw new Error(textMismatch);
+  }
+  const framingAfterSentenceInitial = framing.replace(
+    /^(\s*)(\p{Lu})/u,
+    (_match, spacing: string, initial: string) =>
+      `${spacing}${initial.toLocaleLowerCase("vi-VN")}`,
+  );
+  if (/\p{Lu}|\p{N}/u.test(framingAfterSentenceInitial)) {
     throw new Error(textMismatch);
   }
   return tokens.reduce(
@@ -105,7 +144,12 @@ export function resolveTrackCCandidateClaimReferences(
     const { claimRef: _claimRef, ...rest } = record;
     const text = entry.placeholders === null
       ? record.text
-      : resolvePlaceholders(record.text, entry.placeholders, errors.textMismatch);
+      : resolvePlaceholders(
+          record.text,
+          entry.placeholders,
+          entry.presentationLiterals,
+          errors.textMismatch,
+        );
     return Object.freeze({
       ...rest,
       text,
