@@ -52,12 +52,11 @@ function hasExpectedPresentationRole(
     return previous === "size" || previous === "cỡ";
   }
   if (placeholder !== "DISPLAY_NAME") return false;
-  if (previous === "mẫu" || previous === "tên" || previous === "mã") {
+  if (previous === "mẫu") {
     return true;
   }
   if (previous === "là" &&
-      (semanticTokens[index - 2] === "mẫu" ||
-       semanticTokens[index - 2] === "tên")) {
+      semanticTokens[index - 2] === "mẫu") {
     return true;
   }
   return next === "có" &&

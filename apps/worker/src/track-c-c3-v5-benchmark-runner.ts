@@ -287,6 +287,10 @@ function guardProductionOutput(
   const productPresentationHash =
     context.productPresentation?.provenance.contentHash ?? null;
   for (const segment of output.segments) {
+    const usesProductPresentationEvidence =
+      segment.kind === "VERIFIED_CLAIM" &&
+      productPresentationHash !== null &&
+      segment.claimContentHash === productPresentationHash;
     const claim = segment.kind === "VERIFIED_CLAIM"
       ? claims.get(segment.claimContentHash) ?? null
       : null;
@@ -318,7 +322,9 @@ function guardProductionOutput(
       verifiedProductIds,
       buyingSignal: context.buyingIntent.decision === "COMMITTED",
       sizeClaimContext,
-      sizeClaimTextMode: "STRUCTURED_REJECT_ONLY",
+      sizeClaimTextMode: usesProductPresentationEvidence
+        ? "LEGACY_SEMANTIC"
+        : "STRUCTURED_REJECT_ONLY",
       now: evaluationAt,
     });
     if (guard.blockedReasonCodes.length > 0) {

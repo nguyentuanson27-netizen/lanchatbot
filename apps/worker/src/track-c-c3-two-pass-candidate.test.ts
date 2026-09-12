@@ -481,6 +481,7 @@ describe("Track C C3 two-pass offline candidate", () => {
     ["duplicate placeholder", "Dạ {{DISPLAY_NAME}} / {{DISPLAY_NAME}} có màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
     ["swapped color and size roles", "Màu {{VARIANT_SIZE}}, size {{VARIANT_COLOR}} thuộc mẫu {{DISPLAY_NAME}} chị nhé.", "PRODUCT_PRESENTATION_VARIANT_001"],
     ["swapped display, color, and size roles", "Tên {{VARIANT_COLOR}} là mẫu {{DISPLAY_NAME}} có màu {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
+    ["display name bound to speaker", "Em tên {{DISPLAY_NAME}}, mẫu có màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
   ] as const)("rejects a wrong product-presentation %s", async (
     _name,
     text,
@@ -515,6 +516,7 @@ describe("Track C C3 two-pass offline candidate", () => {
   it.each([
     "Màu {{VARIANT_SIZE}}, size {{VARIANT_COLOR}} thuộc mẫu {{DISPLAY_NAME}} chị nhé.",
     "Tên {{VARIANT_COLOR}} là mẫu {{DISPLAY_NAME}} có màu {{VARIANT_SIZE}} ạ.",
+    "Em tên {{DISPLAY_NAME}}, mẫu có màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.",
   ])("rejects swapped presentation roles on the V5 path: %s", async (text) => {
     const outputs = [
       conversationPlan(),
@@ -543,6 +545,71 @@ describe("Track C C3 two-pass offline candidate", () => {
       evaluationContext,
       transport,
     })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
+  });
+
+  it("accepts a catalog size label from verified presentation evidence on the V5 path", async () => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Dạ {{DISPLAY_NAME}} có phiên bản màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.",
+          claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    const result = await runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation()),
+      evaluationAt,
+      evaluationContext,
+      transport,
+    });
+
+    expect(result.reply).toBe(
+      "Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.",
+    );
+    expect(result.sideEffects).toBe("DISABLED");
+  });
+
+  it("rejects fit semantics even when presentation evidence provides the size label", async () => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Dạ {{DISPLAY_NAME}} có màu {{VARIANT_COLOR}}, chị là size {{VARIANT_SIZE}} ạ.",
+          claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation()),
+      evaluationAt,
+      evaluationContext,
+      transport,
+    })).rejects.toThrow("TRACK_C_V5_PRODUCTION_GUARD_FAILED:SIZE_RECOMMENDATION_UNDECLARED");
   });
 
   it("rejects extra presentation literals and unregistered placeholder syntax on the normal path", async () => {

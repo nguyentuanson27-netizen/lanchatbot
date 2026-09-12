@@ -10,9 +10,9 @@ This directory is the canonical Track C C2 quality benchmark. It replaces the pr
 
 The benchmark therefore does not belong to prompt V5/V6/V7. Candidate identity is recorded separately from benchmark identity.
 
-### Benchmark revision R2.4
+### Benchmark revision R2.5
 
-`benchmark_revision` is **R2.4**. Relative to R2.3, the C2-owned execution seam now accepts only integrity-valid, product-bound presentation values resolved from code-owned placeholders before the unchanged output validator and guard. It also preserves the legacy request identity when that optional evidence is absent. Corpus, splits, rubric, scoring weights and the aggregate gate are unchanged.
+`benchmark_revision` is **R2.5**. Relative to R2.4, the C2-owned execution seam distinguishes a catalog size label carried by integrity-valid product-presentation evidence from an unbound fit recommendation. The catalog-aware guard mode is scoped only to that exact presentation hash; every other segment remains reject-only. Corpus, splits, rubric, scoring weights and the aggregate gate are unchanged.
 
 Any change to a pinned bundle component changes the bundle fingerprint, so it must land with a revision bump rather than being repinned under the existing revision: evidence that cites `TRACK_C_C2_QUALITY_BENCHMARK_V2` plus a revision must always denote one bundle fingerprint.
 
