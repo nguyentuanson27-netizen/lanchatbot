@@ -22,6 +22,9 @@ export type {
 export {
   evaluateTrackCV5BenchmarkCase as evaluateTrackCQualityV2Case,
 } from "./track-c-c3-v5-benchmark-evaluator.js";
+
+export { createTrackCV5StageJudge as createTrackCQualityV2StageJudge }
+  from "./track-c-c3-v5-stage-judge.js";
 export type {
   TrackCV5JudgeDescriptor as TrackCQualityV2JudgeDescriptor,
   TrackCV5StageJudgeInput as TrackCQualityV2StageJudgeInput,
