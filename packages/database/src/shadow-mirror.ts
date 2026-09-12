@@ -37,27 +37,123 @@ function hmac(salt: string, ...parts: readonly string[]): string {
 }
 
 /**
- * A line naming an address component is redacted whole. Both boundaries are
- * explicit because `\b` is ASCII-word based and gets Vietnamese wrong in both
- * directions: without a leading boundary "ấp" matches inside "cung cấp" or
- * "cao cấp" and destroys ordinary sentences, and a trailing `\b` never fires
- * for a token ending in a non-ASCII letter, so "xã", "thành phố" and "số nhà"
- * silently never matched at all.
+ * Both boundaries are explicit everywhere below, because `\b` is ASCII-word
+ * based and gets Vietnamese wrong in both directions: without a leading
+ * boundary "ấp" matches inside "cung cấp" or "cao cấp" and destroys ordinary
+ * sentences, and a trailing `\b` never fires for a token ending in a
+ * non-ASCII letter, so "xã", "thành phố" and "số nhà" silently never matched.
  */
-const ADDRESS_LINE_TOKEN =
-  /(?<![\p{L}\p{M}])(?:địa chỉ|dia chi|xã|phường|huyện|quận|tỉnh|thành phố|đường|số nhà|ấp|thôn)(?![\p{L}\p{M}])/iu;
+const bounded = (alternatives: string): string =>
+  `(?<![\\p{L}\\p{M}])(?:${alternatives})(?![\\p{L}\\p{M}])`;
+
+/** Naming one of these is itself enough to treat the whole line as an address. */
+const ADDRESS_COMPONENT_TOKENS =
+  "xã|phường|huyện|quận|tỉnh|thành phố|đường|số nhà|ấp|thôn";
+
+/**
+ * Corroborating address content, only consulted after an explicit "địa chỉ"
+ * keyword. It is deliberately wider than the line tokens: short words such as
+ * "tổ" or "phố" are far too common to condemn a line on their own, but after
+ * the keyword they do indicate a real address.
+ */
+const ADDRESS_DETAIL_TOKENS =
+  `${ADDRESS_COMPONENT_TOKENS}|phố|ngõ|ngách|hẻm|tổ|khu phố|chung cư|quốc lộ|tỉnh lộ|lô|căn hộ`;
+
+/**
+ * An administrative token names an address - unless the sentence is asking
+ * which one ("shop ở quận nào em?"). Those uses are stripped before the line
+ * is judged, so a question survives while "Ấp Tân Lợi, quận nào" still does
+ * not: the exemption is bound to the token it follows, not to the line.
+ */
+const ADDRESS_TOKEN_QUESTION = new RegExp(
+  `${bounded(ADDRESS_COMPONENT_TOKENS)}\\s*(?:nào|mấy|gì|đâu|bao nhiêu)(?![\\p{L}\\p{M}])`,
+  "giu",
+);
+
+const ADDRESS_LINE_TOKEN = new RegExp(bounded(ADDRESS_COMPONENT_TOKENS), "iu");
+
+/**
+ * The word "địa chỉ" alone is not an address: a customer asking where the shop
+ * is ("Shop ở Hà Nội địa chỉ đâu em?") or saying they already sent their
+ * details carries no identifier at all. Redacting on the keyword alone erased
+ * the customer's actual question before the model ever read it - and the live
+ * path persists that erased text as chat history.
+ *
+ * So the keyword is judged by the clause attached to it, never by the rest of
+ * the line: "địa chỉ đâu em, shop mở 9h?" must not be condemned by a `9` that
+ * belongs to an unrelated question.
+ */
+const ADDRESS_KEYWORD = new RegExp(
+  `${bounded("địa chỉ|dia chi")}\\s*[:#-]?\\s*([^\\n]{4,})`,
+  "giu",
+);
+
+/** The keyword's clause ends at the first punctuation mark that closes it. */
+const ADDRESS_CLAUSE_END = /[,;.!?…]/u;
+
+/** A clause that asks for an address does not carry one. */
+const ADDRESS_QUESTION = new RegExp(
+  bounded("đâu|nào|gì|ra sao|sao|mấy|bao nhiêu|hả|không|ko|chưa"),
+  "iu",
+);
+
+/** "Cho em xin địa chỉ ...", "cho mình hỏi địa chỉ ..." - a request, not a value. */
+const ADDRESS_REQUEST = /(?:cho\s+(?:\p{L}+\s+)?(?:xin|hỏi)|xin)\s*$/iu;
+
+const ADDRESS_DETAIL_TOKEN = new RegExp(bounded(ADDRESS_DETAIL_TOKENS), "iu");
+
+/**
+ * The vocabulary of talking *about* the address field - pronouns, politeness
+ * particles, question words and the generic nouns of delivery. A clause built
+ * only from these names the field; any word outside it is a value.
+ *
+ * This is deliberately a vocabulary and not a casing test. An earlier revision
+ * required a proper noun, which made capitalization part of the privacy
+ * decision and let every lowercase declaration through - and Messenger input is
+ * routinely lowercase.
+ */
+const ADDRESS_NEUTRAL_WORDS = new Set([
+  "a", "ai", "anh", "ạ", "à", "ấy", "bao", "bạn", "các", "chị", "chưa", "cho",
+  "có", "cô", "của", "cửa", "dc", "dưới", "e", "em", "gì", "giao", "giúp",
+  "gửi", "hàng", "hỏi", "hả", "khách", "không", "ko", "là", "lại", "mà",
+  "mình", "mấy", "nay", "nha", "nhá", "nhé", "nhận", "nhiêu", "này", "nào",
+  "page", "rồi", "sao", "shop", "ship", "store", "t", "thì", "thế", "trên",
+  "tại", "tôi", "và", "vậy", "với", "xin", "ạk", "ở", "đâu", "đây", "được",
+  "đó", "đã", "đủ",
+]);
+
+function declaresAddress(payload: string, before: string): boolean {
+  const end = payload.search(ADDRESS_CLAUSE_END);
+  // "quận nào" asks which district; it is neither a value nor a word of its own.
+  const clause = (end === -1 ? payload : payload.slice(0, end)).replace(
+    ADDRESS_TOKEN_QUESTION,
+    " ",
+  );
+  const hasHardValue =
+    /\d/u.test(clause) || ADDRESS_DETAIL_TOKEN.test(clause);
+  if (!hasHardValue && ADDRESS_QUESTION.test(clause)) return false;
+  if (!hasHardValue && ADDRESS_REQUEST.test(before)) return false;
+  return clause
+    .toLowerCase()
+    .split(/[^\p{L}\p{M}\p{N}]+/u)
+    .some((word) => word.length > 0 && !ADDRESS_NEUTRAL_WORDS.has(word));
+}
 
 export function redactAnalyticsText(value: string): string {
   const direct = value
     .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[EMAIL]")
     .replace(/\b(?:cccd|cmnd)\s*[:#-]?\s*\d{9,12}\b/giu, "[ID]")
     .replace(/(?:\+?84|0)(?:[ .-]?\d){8,10}/g, "[PHONE]")
-    .replace(/(?:địa chỉ|dia chi)\s*[:#-]?[^\n]{4,}/giu, "[ADDRESS]")
+    .replace(
+      ADDRESS_KEYWORD,
+      (match: string, payload: string, offset: number, whole: string) =>
+        declaresAddress(payload, whole.slice(0, offset)) ? "[ADDRESS]" : match,
+    )
     .replace(/(?:họ tên|ho ten|tên người nhận|ten nguoi nhan)\s*[:#-]?[^\n]{2,}/giu, "[NAME]");
   return direct
     .split(/\r?\n/u)
     .map((line) => {
-      if (ADDRESS_LINE_TOKEN.test(line)) {
+      if (ADDRESS_LINE_TOKEN.test(line.replace(ADDRESS_TOKEN_QUESTION, " "))) {
         return "[ADDRESS]";
       }
       if (/^\s*\p{Lu}[\p{L}'-]+(?:\s+\p{Lu}[\p{L}'-]+){1,4}\s*$/u.test(line)) {

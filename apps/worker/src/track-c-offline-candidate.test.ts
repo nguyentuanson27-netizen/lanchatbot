@@ -252,6 +252,35 @@ describe("Track C offline candidate boundary", () => {
     })).toThrow("TRACK_C_OFFLINE_CANDIDATE_DIALOGUE_INVALID");
   });
 
+  it("lets a customer ask about an address without failing the whole capture", () => {
+    // These are real corpus messages: the keyword alone carries no identifier,
+    // and rejecting them loses the customer's question entirely.
+    for (const text of [
+      "Shop ở Hà Nội địa chỉ đâu em?",
+      "Tên, SĐT và địa chỉ chị gửi đủ ở trên rồi.",
+    ]) {
+      const request = buildTrackCOfflineCandidateRequest({
+        modelResource,
+        capture: capture(),
+        evaluationAt: snapshotAt,
+        evaluationContext: [{ ...evaluationContext[0], text }],
+        systemInstruction: candidatePrompt,
+      });
+      expect(request.body).toContain(text);
+    }
+
+    expect(() => buildTrackCOfflineCandidateRequest({
+      modelResource,
+      capture: capture(),
+      evaluationAt: snapshotAt,
+      evaluationContext: [{
+        ...evaluationContext[0],
+        text: "Địa chỉ nhà chị là 12 Nguyễn Trãi nhé",
+      }],
+      systemInstruction: candidatePrompt,
+    })).toThrow("TRACK_C_OFFLINE_CANDIDATE_DIALOGUE_NOT_PII_SAFE");
+  });
+
   it("fails closed instead of sending non-redacted evaluation dialogue", () => {
     expect(() => buildTrackCOfflineCandidateRequest({
       modelResource,

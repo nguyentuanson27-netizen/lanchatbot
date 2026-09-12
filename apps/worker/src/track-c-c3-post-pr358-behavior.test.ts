@@ -479,16 +479,20 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
           providerModelVersion: "gemini-3.5-flash-lite",
         });
 
-    // Spelling the contact fields into the plan is rejected before the
-    // Responder runs, even though the reply itself must ask for them.
-    const spelledOut = planTransport("Lấy tên, số điện thoại và địa chỉ nhận hàng.");
-    await expect(runFixture(caseFixture, spelledOut)).rejects.toThrow(
+    // A plan carrying the customer's actual address is still rejected before
+    // the Responder runs.
+    const realAddress = planTransport("Giao tới địa chỉ 12 Nguyễn Trãi cho khách.");
+    await expect(runFixture(caseFixture, realAddress)).rejects.toThrow(
       "TRACK_C_V5_STRATEGIST_OUTPUT_NOT_PII_SAFE",
     );
-    expect(spelledOut).toHaveBeenCalledTimes(1);
+    expect(realAddress).toHaveBeenCalledTimes(1);
 
-    // The sanctioned abstract phrasing reaches the Responder, which still asks
-    // the customer for the real fields.
+    // Naming the checkout fields carries no identifier, so the plan now reaches
+    // the Responder instead of failing the turn.
+    const spelledOut = planTransport("Lấy tên, số điện thoại và địa chỉ nhận hàng.");
+    await expect(runFixture(caseFixture, spelledOut)).resolves.toBeDefined();
+    expect(spelledOut).toHaveBeenCalledTimes(2);
+
     const abstract = planTransport("Lấy thông tin nhận hàng còn thiếu của khách.");
     const result = await runFixture(caseFixture, abstract);
 

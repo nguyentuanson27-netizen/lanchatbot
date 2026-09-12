@@ -207,19 +207,18 @@ describe("Track C C3 journey adapter", () => {
     )).toBe(true);
   });
 
-  it("keeps a checkout-shaped reply inside the PII-guarded frozen dialogue", async () => {
-    // The candidate's own prescribed ORDER_REVIEW wording names a delivery
-    // address, which the frozen-dialogue guard rewrites. Appending it verbatim
-    // aborted the whole journey on the next turn.
+  it("carries the candidate's prescribed checkout wording through the journey intact", async () => {
+    // Naming the checkout fields carries no identifier, so the reply reaches
+    // the next turn verbatim instead of aborting the journey or arriving
+    // truncated.
     const checkoutReply = "Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.";
     const candidateTransport = transportWithReply(checkoutReply);
     const result = await runTrackCC3Journey(input(journey(3), candidateTransport));
 
     expect(candidateTransport.send).toHaveBeenCalledTimes(6);
-    const redacted = "Chị gửi em tên, số điện thoại và [ADDRESS]";
     expect(result.turns[0]?.result.reply).toBe(checkoutReply);
-    expect(result.transcript[1]?.text).toBe(redacted);
-    expect(result.turns[1]?.evaluationContext[1]?.text).toBe(redacted);
+    expect(result.transcript[1]?.text).toBe(checkoutReply);
+    expect(result.turns[1]?.evaluationContext[1]?.text).toBe(checkoutReply);
   });
 
   it("keeps a six-digit price reply inside the PII-guarded frozen dialogue", async () => {
