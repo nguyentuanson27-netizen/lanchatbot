@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ProductAttributesV1Schema } from "./product-attributes.js";
 import {
   CanonicalProductIdV1Schema,
 } from "./canonical-identifiers.js";
@@ -274,6 +275,7 @@ export const ContextV2Schema = z.object({
   authority: z.literal("SHADOW_ONLY"),
   finalTurnEvidence: FinalTurnEvidenceV2Schema,
   productBinding: ProductBindingV2Schema,
+  productAttributes: ProductAttributesV1Schema.nullable().optional(),
   dialogueEvidence: z.object({
     act: z.enum([
       "QUESTION", "REQUEST", "CORRECTION", "CONFIRMATION", "REJECTION",

@@ -164,6 +164,7 @@ export function buildProductFactsV2RedisWrites(rawFacts: unknown): ProductFactsV
     fulfillment: facts.fulfillment,
     sizeChart: facts.sizeChart,
     media: facts.media,
+    ...(facts.attributes ? { attributes: facts.attributes } : {}),
   };
   const envelope = (payload: unknown) => JSON.stringify({ generation, payload });
   const manifest: ProductFactsV2RedisManifest = {

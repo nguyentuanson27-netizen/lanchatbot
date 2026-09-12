@@ -6,6 +6,7 @@ import type {
   DeterministicEffectReadinessV1,
   FinalTurnEvidenceV2,
   ProductBindingV2,
+  ProductAttributesV1,
   ProtectedClaimV1,
 } from "@lana/contracts";
 import { inspectContextV2Capture } from "@lana/database";
@@ -180,6 +181,33 @@ function input(): BuildContextV2Input {
   };
 }
 
+function productAttributes(): ProductAttributesV1 {
+  return {
+    schemaVersion: 1,
+    productId: "SD398",
+    materials: ["LỤA"],
+    materialComponents: { AO: ["LỤA"] },
+    colors: ["ĐEN"],
+    styles: ["THANH LỊCH"],
+    silhouettes: ["CHIẾT EO"],
+    occasions: ["ĐI LÀM"],
+    designAttributes: { waist: ["CHIẾT EO"] },
+    careInstructions: null,
+    wearProperties: null,
+    backCoverage: "FULL",
+    designComplexity: "MINIMAL",
+    metadata: {
+      authority: "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+      sourceVersion: `product-registry-attributes:${hash("7")}`,
+      observedAt: "2026-08-16T10:00:00.000Z",
+      expiresAt: null,
+      freshForSeconds: null,
+      freshnessState: "FRESH",
+      contentHash: hash("7"),
+    },
+  };
+}
+
 describe("DF09 final Context V2 capture", () => {
   it("carries one BUILT snapshot through the exact claim gate to candidate egress", async () => {
     const capture = buildContextV2Capture({
@@ -259,6 +287,26 @@ describe("DF09 final Context V2 capture", () => {
     expect(context.barriers.conversationRevision).toBe(5);
     expect(context.cartReadiness?.readinessHash).toBe(hash("1"));
     expect(parseContextV2WithIntegrity(context)).toEqual(context);
+  });
+
+  it("binds verified product attributes into Context V2 without changing candidate egress", () => {
+    const context = buildContextV2({ ...input(), productAttributes: productAttributes() });
+    expect(context.productAttributes).toEqual(productAttributes());
+    expect(parseContextV2WithIntegrity(context)).toEqual(context);
+    const candidateSource = readFileSync(new URL("./context-v2-candidate.ts", import.meta.url), "utf8");
+    expect(candidateSource).not.toContain("productAttributes");
+  });
+
+  it("blocks product attributes that do not match the final product binding", () => {
+    const capture = buildContextV2Capture({
+      ...input(),
+      productAttributes: { ...productAttributes(), productId: "OTHER" },
+      sourceOccurredAt: new Date("2026-08-16T10:00:00.000Z"),
+    });
+    expect(capture).toMatchObject({
+      status: "BLOCKED",
+      reasonCode: "CONTEXT_V2_PRODUCT_ATTRIBUTES_BINDING_MISMATCH",
+    });
   });
 
   it("changes integrity identity when any final-turn evidence field changes", () => {

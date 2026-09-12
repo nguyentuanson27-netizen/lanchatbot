@@ -9,6 +9,7 @@ export * from "./catalog-projection.js";
 export * from "./qdrant.js";
 export * from "./product-facts-v2.js";
 export * from "./product-facts-v2-projection.js";
+export * from "./product-attributes.js";
 export * from "./policy-engine.js";
 export * from "./customer-profile.js";
 export * from "./customer-profile-extractor.js";

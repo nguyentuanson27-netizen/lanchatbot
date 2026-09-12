@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ProductAttributesV1Schema } from "@lana/contracts";
 import type {
   ProductSearchResult,
   MediaProductSearchResult,
@@ -19,6 +20,9 @@ const StableProductDocumentSchema = z
     aliases: z.array(z.string().max(128)).max(100),
     title: z.string().min(1).max(500),
     descriptionXml: z.string().max(10_000).optional().default(""),
+    descriptionAuthority: z.enum(["WEBSTORE_XML", "GOOGLE_SHEETS_PRODUCT_REGISTRY"]).optional(),
+    descriptionSourceVersion: z.string().min(1).max(256).optional(),
+    attributes: ProductAttributesV1Schema.nullable().optional(),
     colors: z.array(z.string().max(100)).max(100),
     materials: z.array(z.string().max(100)).max(100),
     silhouettes: z.array(z.string().max(100)).max(100),
