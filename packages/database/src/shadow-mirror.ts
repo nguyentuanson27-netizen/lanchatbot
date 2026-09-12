@@ -59,6 +59,17 @@ const ADDRESS_COMPONENT_TOKENS =
 const ADDRESS_DETAIL_TOKENS =
   `${ADDRESS_COMPONENT_TOKENS}|phố|ngõ|ngách|hẻm|tổ|khu phố|chung cư|quốc lộ|tỉnh lộ|lô|căn hộ`;
 
+/**
+ * An administrative token names an address - unless the sentence is asking
+ * which one ("shop ở quận nào em?"). Those uses are stripped before the line
+ * is judged, so a question survives while "Ấp Tân Lợi, quận nào" still does
+ * not: the exemption is bound to the token it follows, not to the line.
+ */
+const ADDRESS_TOKEN_QUESTION = new RegExp(
+  `${bounded(ADDRESS_COMPONENT_TOKENS)}\\s*(?:nào|mấy|gì|đâu|bao nhiêu)(?![\\p{L}\\p{M}])`,
+  "giu",
+);
+
 const ADDRESS_LINE_TOKEN = new RegExp(bounded(ADDRESS_COMPONENT_TOKENS), "iu");
 
 /**
@@ -70,10 +81,7 @@ const ADDRESS_LINE_TOKEN = new RegExp(bounded(ADDRESS_COMPONENT_TOKENS), "iu");
  *
  * So the keyword is judged by the clause attached to it, never by the rest of
  * the line: "địa chỉ đâu em, shop mở 9h?" must not be condemned by a `9` that
- * belongs to an unrelated question. Inside that clause an address is declared
- * unless the clause asks for one, and a value is a digit, an address token or
- * a proper noun - so "Địa chỉ: Tây Ninh" stays covered with neither digit nor
- * token present.
+ * belongs to an unrelated question.
  */
 const ADDRESS_KEYWORD = new RegExp(
   `${bounded("địa chỉ|dia chi")}\\s*[:#-]?\\s*([^\\n]{4,})`,
@@ -84,21 +92,51 @@ const ADDRESS_KEYWORD = new RegExp(
 const ADDRESS_CLAUSE_END = /[,;.!?…]/u;
 
 /** A clause that asks for an address does not carry one. */
-const ADDRESS_QUESTION = new RegExp(bounded("đâu|nào|gì|ra sao"), "iu");
-
-const ADDRESS_VALUE_TOKEN = new RegExp(
-  `\\d|${bounded(ADDRESS_DETAIL_TOKENS)}`,
+const ADDRESS_QUESTION = new RegExp(
+  bounded("đâu|nào|gì|ra sao|sao|mấy|bao nhiêu|hả|không|ko|chưa"),
   "iu",
 );
 
-/** Case-sensitive on purpose: `\p{Lu}` also matches lowercase under `i`. */
-const PROPER_NOUN = /\p{Lu}\p{L}/u;
+/** "Cho em xin địa chỉ ...", "cho mình hỏi địa chỉ ..." - a request, not a value. */
+const ADDRESS_REQUEST = /(?:cho\s+(?:\p{L}+\s+)?(?:xin|hỏi)|xin)\s*$/iu;
 
-function declaresAddress(payload: string): boolean {
+const ADDRESS_DETAIL_TOKEN = new RegExp(bounded(ADDRESS_DETAIL_TOKENS), "iu");
+
+/**
+ * The vocabulary of talking *about* the address field - pronouns, politeness
+ * particles, question words and the generic nouns of delivery. A clause built
+ * only from these names the field; any word outside it is a value.
+ *
+ * This is deliberately a vocabulary and not a casing test. An earlier revision
+ * required a proper noun, which made capitalization part of the privacy
+ * decision and let every lowercase declaration through - and Messenger input is
+ * routinely lowercase.
+ */
+const ADDRESS_NEUTRAL_WORDS = new Set([
+  "a", "ai", "anh", "ạ", "à", "ấy", "bao", "bạn", "các", "chị", "chưa", "cho",
+  "có", "cô", "của", "cửa", "dc", "dưới", "e", "em", "gì", "giao", "giúp",
+  "gửi", "hàng", "hỏi", "hả", "khách", "không", "ko", "là", "lại", "mà",
+  "mình", "mấy", "nay", "nha", "nhá", "nhé", "nhận", "nhiêu", "này", "nào",
+  "page", "rồi", "sao", "shop", "ship", "store", "t", "thì", "thế", "trên",
+  "tại", "tôi", "và", "vậy", "với", "xin", "ạk", "ở", "đâu", "đây", "được",
+  "đó", "đã", "đủ",
+]);
+
+function declaresAddress(payload: string, before: string): boolean {
   const end = payload.search(ADDRESS_CLAUSE_END);
-  const clause = end === -1 ? payload : payload.slice(0, end);
-  if (ADDRESS_QUESTION.test(clause)) return false;
-  return ADDRESS_VALUE_TOKEN.test(clause) || PROPER_NOUN.test(clause);
+  // "quận nào" asks which district; it is neither a value nor a word of its own.
+  const clause = (end === -1 ? payload : payload.slice(0, end)).replace(
+    ADDRESS_TOKEN_QUESTION,
+    " ",
+  );
+  const hasHardValue =
+    /\d/u.test(clause) || ADDRESS_DETAIL_TOKEN.test(clause);
+  if (!hasHardValue && ADDRESS_QUESTION.test(clause)) return false;
+  if (!hasHardValue && ADDRESS_REQUEST.test(before)) return false;
+  return clause
+    .toLowerCase()
+    .split(/[^\p{L}\p{M}\p{N}]+/u)
+    .some((word) => word.length > 0 && !ADDRESS_NEUTRAL_WORDS.has(word));
 }
 
 export function redactAnalyticsText(value: string): string {
@@ -106,13 +144,16 @@ export function redactAnalyticsText(value: string): string {
     .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[EMAIL]")
     .replace(/\b(?:cccd|cmnd)\s*[:#-]?\s*\d{9,12}\b/giu, "[ID]")
     .replace(/(?:\+?84|0)(?:[ .-]?\d){8,10}/g, "[PHONE]")
-    .replace(ADDRESS_KEYWORD, (match: string, payload: string) =>
-      declaresAddress(payload) ? "[ADDRESS]" : match)
+    .replace(
+      ADDRESS_KEYWORD,
+      (match: string, payload: string, offset: number, whole: string) =>
+        declaresAddress(payload, whole.slice(0, offset)) ? "[ADDRESS]" : match,
+    )
     .replace(/(?:họ tên|ho ten|tên người nhận|ten nguoi nhan)\s*[:#-]?[^\n]{2,}/giu, "[NAME]");
   return direct
     .split(/\r?\n/u)
     .map((line) => {
-      if (ADDRESS_LINE_TOKEN.test(line)) {
+      if (ADDRESS_LINE_TOKEN.test(line.replace(ADDRESS_TOKEN_QUESTION, " "))) {
         return "[ADDRESS]";
       }
       if (/^\s*\p{Lu}[\p{L}'-]+(?:\s+\p{Lu}[\p{L}'-]+){1,4}\s*$/u.test(line)) {
