@@ -25,6 +25,7 @@ const PRESENTATION_FRAMING_WORDS = new Set([
   "phiên",
   "size",
   "tên",
+  "thể",
   "thông",
   "thuộc",
   "tin",
@@ -32,6 +33,39 @@ const PRESENTATION_FRAMING_WORDS = new Set([
   "với",
   "chị",
 ]);
+
+function hasExpectedPresentationRole(
+  text: string,
+  placeholder: string,
+): boolean {
+  const semanticTokens = text.normalize("NFC")
+    .match(/\{\{[A-Z_]+\}\}|\p{L}+/gu)
+    ?.map((token) => token.startsWith("{{")
+      ? token
+      : token.toLocaleLowerCase("vi-VN")) ?? [];
+  const index = semanticTokens.indexOf(`{{${placeholder}}}`);
+  if (index < 0) return false;
+  const previous = semanticTokens[index - 1];
+  const next = semanticTokens[index + 1];
+  if (placeholder === "VARIANT_COLOR") return previous === "màu";
+  if (placeholder === "VARIANT_SIZE") {
+    return previous === "size" || previous === "cỡ";
+  }
+  if (placeholder !== "DISPLAY_NAME") return false;
+  if (previous === "mẫu" || previous === "tên" || previous === "mã") {
+    return true;
+  }
+  if (previous === "là" &&
+      (semanticTokens[index - 2] === "mẫu" ||
+       semanticTokens[index - 2] === "tên")) {
+    return true;
+  }
+  return next === "có" &&
+    (previous === undefined ||
+     previous === "dạ" ||
+     previous === "em" ||
+     previous === "chị");
+}
 
 export type ClaimReferenceErrors = Readonly<{
   invalid: string;
@@ -106,7 +140,9 @@ function resolvePlaceholders(
     "",
   );
   if (punctuationOnly.length > 0 ||
-      words.some((word) => !PRESENTATION_FRAMING_WORDS.has(word))) {
+      words.some((word) => !PRESENTATION_FRAMING_WORDS.has(word)) ||
+      expected.some((placeholder) =>
+        !hasExpectedPresentationRole(text, placeholder))) {
     throw new Error(textMismatch);
   }
   return tokens.reduce(

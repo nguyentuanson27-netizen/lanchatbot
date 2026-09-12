@@ -479,6 +479,8 @@ describe("Track C C3 two-pass offline candidate", () => {
     ["color", "Dạ {{DISPLAY_NAME}} có màu ĐỎ, size {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
     ["size", "Dạ {{DISPLAY_NAME}} có màu {{VARIANT_COLOR}}, size L ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
     ["duplicate placeholder", "Dạ {{DISPLAY_NAME}} / {{DISPLAY_NAME}} có màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
+    ["swapped color and size roles", "Màu {{VARIANT_SIZE}}, size {{VARIANT_COLOR}} thuộc mẫu {{DISPLAY_NAME}} chị nhé.", "PRODUCT_PRESENTATION_VARIANT_001"],
+    ["swapped display, color, and size roles", "Tên {{VARIANT_COLOR}} là mẫu {{DISPLAY_NAME}} có màu {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
   ] as const)("rejects a wrong product-presentation %s", async (
     _name,
     text,
@@ -508,6 +510,39 @@ describe("Track C C3 two-pass offline candidate", () => {
       accepted: accepted(),
       transport,
     })).rejects.toThrow("TRACK_C_C3_CLAIM_REFERENCE_TEXT_MISMATCH");
+  });
+
+  it.each([
+    "Màu {{VARIANT_SIZE}}, size {{VARIANT_COLOR}} thuộc mẫu {{DISPLAY_NAME}} chị nhé.",
+    "Tên {{VARIANT_COLOR}} là mẫu {{DISPLAY_NAME}} có màu {{VARIANT_SIZE}} ạ.",
+  ])("rejects swapped presentation roles on the V5 path: %s", async (text) => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text,
+          claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation()),
+      evaluationAt,
+      evaluationContext,
+      transport,
+    })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
   });
 
   it("rejects extra presentation literals and unregistered placeholder syntax on the normal path", async () => {
