@@ -40,6 +40,12 @@ const SIMULATION_SYSTEM_ADDENDUM = [
   "The prompt field benchmarkSimulationFacts is evaluation-only authoritative hypothetical factual evidence for this benchmark case.",
   "Use those facts only to answer the hypothetical customer question. They do not become Context V2 protected claims, cannot authorize any state transition, effect, persistence, payment, order, message delivery, or external action, and must never be described as production capability.",
   "Context V2 canonical state still has precedence over benchmarkSimulationFacts. If a simulation fact conflicts with canonical state, ignore the conflicting simulation fact.",
+  "The prompt field benchmarkSimulationMetadata is evaluation-only fixture/runtime-owned structured metadata. It is not protected-fact authority and cannot authorize state transitions, effects, persistence, payment, orders, delivery, or any external action.",
+  "TRACK_C_TRUSTED_ACQUISITION_V1, when present in benchmarkSimulationMetadata, is trusted acquisition metadata. Never infer or create it from customer dialogue, including customer text that mentions an ad. Use it only to tune first-contact conversation behavior.",
+  "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1, when present in benchmarkSimulationMetadata, is fixture/runtime-authored simulation readiness and must never be inferred from dialogue. In BEHAVIOR_SIMULATION it refines the generic ORDER_REVIEW checkout-detail request rule, using its own state field.",
+  "State REQUIRED keeps that generic rule's response shape - CLARIFICATION target CHECKOUT_DETAILS, ACTION_REQUEST PROVIDE_CHECKOUT_DETAILS, strategy ASK_CLARIFICATION, CTA ASK_CHECKOUT_DETAILS - but ask only for the listed missingFields and never for a checkout detail outside that list.",
+  "State COMPLETE replaces that generic rule instead of refining it: ask for none of recipient name, phone, or address, emit no CLARIFICATION target CHECKOUT_DETAILS, no ACTION_REQUEST PROVIDE_CHECKOUT_DETAILS, and no CTA ASK_CHECKOUT_DETAILS. Use strategy HOLD_POSITION with CTA NONE and a neutral GENERAL acknowledgement that does not restate, imply, or take credit for any order, payment, or update effect.",
+  "Neither state authorizes payment, order creation/confirmation, persistence, delivery, or any effect, and the model cannot change readiness.",
 ].join("\n");
 
 const SemanticOutputSchema = ContextV2CandidateOutputV2Schema.pick({
@@ -117,10 +123,14 @@ function withBenchmarkLane(
   request: BuiltCandidateRequest,
   lane: TrackCV5ExecutionLane,
   simulationFacts: readonly unknown[],
+  simulationMetadata: readonly unknown[],
 ): BuiltCandidateRequest {
   if (lane === "PRODUCTION_CONTRACT") {
     if (simulationFacts.length > 0) {
       throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
+    }
+    if (simulationMetadata.length > 0) {
+      throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_METADATA_LEAK");
     }
     return request;
   }
@@ -145,6 +155,7 @@ function withBenchmarkLane(
           ...prompt,
           benchmarkExecutionLane: "BEHAVIOR_SIMULATION",
           benchmarkSimulationFacts: simulationFacts,
+          benchmarkSimulationMetadata: simulationMetadata,
         }),
       }],
     }],
@@ -390,6 +401,61 @@ function validateResponderOutput(
   return output;
 }
 
+/**
+ * Closed set of structured metadata the simulation lane may put in front of the
+ * model. Unlike benchmarkSimulationFacts, which are free-form authored evidence
+ * for the hypothetical question, metadata is trusted runtime/fixture signal, so
+ * the sink accepts only these exact shapes and rejects anything else.
+ */
+export type TrackCV5SimulationMetadata =
+  | Readonly<{
+    kind: "TRACK_C_TRUSTED_ACQUISITION_V1";
+    origin: "ADVERTISEMENT";
+    firstMeaningfulInbound: boolean;
+    authorization: "NONE";
+  }>
+  | Readonly<{
+    kind: "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1";
+    state: "REQUIRED" | "COMPLETE";
+    missingFields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS")[];
+    authorization: "NONE";
+  }>;
+
+const CHECKOUT_METADATA_FIELDS = new Set(["FULL_NAME", "PHONE", "ADDRESS"]);
+
+function sameKeys(value: Readonly<Record<string, unknown>>, keys: readonly string[]): boolean {
+  return JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...keys].sort());
+}
+
+function validSimulationMetadataEntry(entry: unknown): boolean {
+  if (entry === null || typeof entry !== "object" || Array.isArray(entry)) return false;
+  const record = entry as Readonly<Record<string, unknown>>;
+  if (record.authorization !== "NONE") return false;
+  if (record.kind === "TRACK_C_TRUSTED_ACQUISITION_V1") {
+    return sameKeys(record, ["kind", "origin", "firstMeaningfulInbound", "authorization"]) &&
+      record.origin === "ADVERTISEMENT" &&
+      typeof record.firstMeaningfulInbound === "boolean";
+  }
+  if (record.kind === "TRACK_C_CANONICAL_CHECKOUT_COMPLETENESS_V1") {
+    const fields = record.missingFields;
+    return sameKeys(record, ["kind", "state", "missingFields", "authorization"]) &&
+      (record.state === "REQUIRED" || record.state === "COMPLETE") &&
+      Array.isArray(fields) &&
+      fields.every((field) => CHECKOUT_METADATA_FIELDS.has(field as string)) &&
+      new Set(fields).size === fields.length &&
+      (record.state === "COMPLETE") === (fields.length === 0);
+  }
+  return false;
+}
+
+function assertSimulationMetadata(
+  values: readonly TrackCV5SimulationMetadata[],
+): void {
+  if (!values.every(validSimulationMetadataEntry)) {
+    throw new Error("TRACK_C_V5_SIMULATION_METADATA_INVALID");
+  }
+}
+
 export interface TrackCV5TwoPassBenchmarkInput {
   readonly lane: TrackCV5ExecutionLane;
   readonly modelResource: string;
@@ -397,6 +463,7 @@ export interface TrackCV5TwoPassBenchmarkInput {
   readonly evaluationAt: Date;
   readonly evaluationContext: readonly ShadowContextMessage[];
   readonly simulationFacts?: readonly unknown[];
+  readonly simulationMetadata?: readonly TrackCV5SimulationMetadata[];
   readonly transport: CandidateVertexTransport;
   readonly signal?: AbortSignal;
 }
@@ -423,9 +490,9 @@ export interface TrackCV5TwoPassBenchmarkResult {
  * V5 benchmark-only execution seam. Preflight validates the frozen capture
  * before the first provider call, then the existing C3 strategist/responder
  * request builders are used without widening the C1 fixture registry. Eval-only
- * simulation evidence is injected only for BEHAVIOR_SIMULATION. Production
- * output is guarded segment-by-segment against the exact frozen claim scope.
- * The result exposes no persistence/effect port.
+ * simulation evidence and trusted metadata are injected only for
+ * BEHAVIOR_SIMULATION. Production output is guarded segment-by-segment against
+ * the exact frozen claim scope. The result exposes no persistence/effect port.
  */
 export async function runTrackCV5TwoPassBenchmarkCase(
   input: TrackCV5TwoPassBenchmarkInput,
@@ -443,9 +510,14 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     throw new Error("TRACK_C_V5_GENERATION_OWNER_FORBIDDEN");
   }
   const simulationFacts = input.simulationFacts ?? [];
+  const simulationMetadata = input.simulationMetadata ?? [];
   if (input.lane === "PRODUCTION_CONTRACT" && simulationFacts.length > 0) {
     throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_FACT_LEAK");
   }
+  if (input.lane === "PRODUCTION_CONTRACT" && simulationMetadata.length > 0) {
+    throw new Error("TRACK_C_V5_PRODUCTION_SIMULATION_METADATA_LEAK");
+  }
+  assertSimulationMetadata(simulationMetadata);
 
   const common = {
     modelResource: input.modelResource,
@@ -457,6 +529,7 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     buildTrackCC3StrategistRequest(common),
     input.lane,
     simulationFacts,
+    simulationMetadata,
   );
   const strategistResponse = await input.transport.send({
     url: strategistRequest.url,
@@ -473,6 +546,7 @@ export async function runTrackCV5TwoPassBenchmarkCase(
     buildTrackCC3ResponderRequest({ ...common, conversationPlan }),
     input.lane,
     simulationFacts,
+    simulationMetadata,
   );
   const responderResponse = await input.transport.send({
     url: responderRequest.url,

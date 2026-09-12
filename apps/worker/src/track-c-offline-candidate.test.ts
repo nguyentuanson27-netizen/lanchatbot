@@ -220,6 +220,38 @@ describe("Track C offline candidate boundary", () => {
     expect(first.identity.requestEnvelopeHash).not.toBe(second.identity.requestEnvelopeHash);
   });
 
+  it("accepts the shared 15-message dialogue bound and rejects anything longer", () => {
+    const dialogue = (count: number) => Array.from({ length: count }, (_, index) => ({
+      ...evaluationContext[0],
+      direction: index % 2 === 0 ? "INBOUND" as const : "OUTBOUND" as const,
+      senderType: index % 2 === 0 ? "CUSTOMER" as const : "BOT" as const,
+      text: `bounded dialogue message ${index + 1}`,
+    }));
+    const bounded = () => buildTrackCOfflineCandidateRequest({
+      modelResource,
+      capture: capture(),
+      evaluationAt: snapshotAt,
+      evaluationContext: dialogue(15),
+      systemInstruction: candidatePrompt,
+    });
+
+    expect(bounded).not.toThrow();
+    expect(() => buildTrackCOfflineCandidateRequest({
+      modelResource,
+      capture: capture(),
+      evaluationAt: snapshotAt,
+      evaluationContext: dialogue(16),
+      systemInstruction: candidatePrompt,
+    })).toThrow("TRACK_C_OFFLINE_CANDIDATE_DIALOGUE_INVALID");
+    expect(() => buildTrackCOfflineCandidateRequest({
+      modelResource,
+      capture: capture(),
+      evaluationAt: snapshotAt,
+      evaluationContext: [],
+      systemInstruction: candidatePrompt,
+    })).toThrow("TRACK_C_OFFLINE_CANDIDATE_DIALOGUE_INVALID");
+  });
+
   it("fails closed instead of sending non-redacted evaluation dialogue", () => {
     expect(() => buildTrackCOfflineCandidateRequest({
       modelResource,

@@ -18,10 +18,20 @@ function validEvaluationTime(value: Date): boolean {
   return Number.isFinite(value.getTime());
 }
 
+/**
+ * Shared Track C offline-candidate dialogue bound: 1..15 messages for every
+ * caller, not only the journey adapter. 15 is the accumulated dialogue of the
+ * longest supported authored journey - 8 customer turns plus the 7 candidate
+ * replies between them - so a bounded multi-turn journey never needs a
+ * per-caller exception. Anything longer is rejected.
+ */
+const MAX_FROZEN_DIALOGUE_MESSAGES = 15;
+
 function frozenEvaluationContext(
   value: readonly ShadowContextMessage[],
 ): readonly ShadowContextMessage[] {
-  if (!Array.isArray(value) || value.length === 0 || value.length > 10) {
+  if (!Array.isArray(value) || value.length === 0 ||
+      value.length > MAX_FROZEN_DIALOGUE_MESSAGES) {
     throw new Error("TRACK_C_OFFLINE_CANDIDATE_DIALOGUE_INVALID");
   }
   return Object.freeze(value.map((message) => {
