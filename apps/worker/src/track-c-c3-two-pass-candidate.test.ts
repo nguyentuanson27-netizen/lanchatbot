@@ -1,10 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
-import type { CanonicalDecisionEvidenceV1 } from "@lana/business-tools";
+import {
+  buildProductAttributesV1,
+  hashProductPresentationEvidenceV1,
+  type CanonicalDecisionEvidenceV1,
+} from "@lana/business-tools";
 import type { SalesCycleRuntimeState } from "@lana/chat-runtime";
-import type {
-  FinalTurnEvidenceV2,
-  ProductBindingV2,
-  ProtectedClaimV1,
+import {
+  type FinalTurnEvidenceV2,
+  type ProductAttributesV1,
+  type ProductPresentationEvidenceV1,
+  type ProductBindingV2,
+  type ProtectedClaimV1,
 } from "@lana/contracts";
 import { buildContextV2Capture } from "./context-v2.js";
 import type { CandidateVertexTransport } from "./context-v2-candidate.js";
@@ -17,6 +23,7 @@ import {
   buildTrackCC3StrategistRequest,
   runTrackCC3TwoPassCandidate,
 } from "./track-c-c3-two-pass-candidate.js";
+import { runTrackCV5TwoPassBenchmarkCase } from "./track-c-c3-v5-benchmark-runner.js";
 
 const hash = (character: string): string => character.repeat(64);
 const evaluationAt = new Date("2026-09-05T00:00:00.000Z");
@@ -31,7 +38,12 @@ const evaluationContext = [{
   occurredAt: evaluationAt.toISOString(),
 }] as const;
 
-function validCapture(verifiedClaims: readonly ProtectedClaimV1[] = []) {
+function validCapture(
+  verifiedClaims: readonly ProtectedClaimV1[] = [],
+  productAttributes: ProductAttributesV1 | null | undefined = undefined,
+  productPresentation: ProductPresentationEvidenceV1 | null | undefined = undefined,
+  captureAt: Date = evaluationAt,
+) {
   const canonicalEvidence: CanonicalDecisionEvidenceV1 = {
     dialogueEvidence: {
       schemaVersion: 1,
@@ -88,12 +100,20 @@ function validCapture(verifiedClaims: readonly ProtectedClaimV1[] = []) {
     preTransitionSalesCycleRevision: 0,
     finalSalesCycleRevision: 1,
   };
-  const productBinding: ProductBindingV2 = {
+  const presentationProductId = productAttributes?.productId ??
+    productPresentation?.productId ?? null;
+  const productBinding: ProductBindingV2 = presentationProductId === null ? {
     schemaVersion: 2,
     contractVersion: "PRODUCT_BINDING_V2",
     status: "NOT_REQUIRED",
     productIds: [],
     catalogVersion: null,
+  } : {
+    schemaVersion: 2,
+    contractVersion: "PRODUCT_BINDING_V2",
+    status: "RESOLVED",
+    productIds: [presentationProductId],
+    catalogVersion: "fixture:catalog:1",
   };
   return buildContextV2Capture({
     canonicalEvidence,
@@ -102,10 +122,75 @@ function validCapture(verifiedClaims: readonly ProtectedClaimV1[] = []) {
     readiness: [],
     finalTurnEvidence,
     productBinding,
+    ...(productAttributes === undefined ? {} : { productAttributes }),
+    ...(productPresentation === undefined ? {} : { productPresentation }),
     owner: "BOT",
     handoffReasonCode: null,
-    now: evaluationAt,
-    sourceOccurredAt: evaluationAt,
+    now: captureAt,
+    sourceOccurredAt: captureAt,
+  });
+}
+
+function verifiedProductPresentation(
+  observedAtBySource: Partial<Record<"identity" | "content" | "inventory", string>> = {},
+  variants = [{ variantId: "SD398-DEN-M", color: "ĐEN", size: "M" }],
+): ProductPresentationEvidenceV1 {
+  const value = {
+    productId: "SD398",
+    displayName: "Tường Vi",
+    variants,
+  };
+  const sources = {
+    identity: { authority: "GOOGLE_SHEETS_PRODUCT_REGISTRY" as const, sourceVersion: "sheet:1", observedAt: observedAtBySource.identity ?? evaluationAt.toISOString(), expiresAt: null, freshForSeconds: null, freshnessState: "FRESH" as const },
+    content: { authority: "WEBSTORE_XML" as const, sourceVersion: "xml:1", observedAt: observedAtBySource.content ?? evaluationAt.toISOString(), expiresAt: null, freshForSeconds: null, freshnessState: "FRESH" as const },
+    inventory: {
+      authority: "PANCAKE_POS" as const,
+      sourceVersion: "pos:1",
+      observedAt: observedAtBySource.inventory ?? evaluationAt.toISOString(),
+      expiresAt: new Date(Date.parse(
+        observedAtBySource.inventory ?? evaluationAt.toISOString(),
+      ) + 172_800_000).toISOString(),
+      freshForSeconds: 172_800 as const,
+      freshnessState: "FRESH" as const,
+    },
+  };
+  const contentHash = hashProductPresentationEvidenceV1({ value, sources });
+  return {
+    schemaVersion: 1,
+    ...value,
+    provenance: {
+      ...sources,
+      freshnessState: "FRESH",
+      contentHash,
+    },
+  };
+}
+
+function verifiedProductAttributes(
+  observedAt = evaluationAt.toISOString(),
+): ProductAttributesV1 {
+  return buildProductAttributesV1({
+    productId: "SD398",
+    data: {
+      materials: ["LỤA"],
+      materialComponents: { AO: ["LỤA"] },
+      colors: ["ĐEN"],
+      styles: ["THANH LỊCH"],
+      silhouettes: ["CHIẾT EO"],
+      occasions: ["ĐI LÀM"],
+      designAttributes: { waist: ["CHIẾT EO"] },
+      careInstructions: "GIẶT NHẸ",
+      wearProperties: {
+        stretch: null,
+        wrinkleResistance: null,
+        opacity: null,
+        lining: null,
+        breathability: null,
+      },
+      backCoverage: "FULL",
+      designComplexity: "MINIMAL",
+    },
+    observedAt,
   });
 }
 
@@ -213,6 +298,544 @@ describe("Track C C3 two-pass offline candidate", () => {
       "never copy, invent, or return a provenance hash",
     );
   });
+
+  it("keeps the pre-egress Responder instruction byte-identical when optional evidence is absent", () => {
+    const request = buildTrackCC3ResponderRequest({
+      modelResource,
+      capture: validCapture(),
+      evaluationAt,
+      evaluationContext,
+      conversationPlan: conversationPlan(),
+    });
+    const body = JSON.parse(request.body) as {
+      systemInstruction: { parts: [{ text: string }] };
+    };
+
+    expect(body.systemInstruction.parts[0].text).toBe(
+      TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION,
+    );
+    expect(body.systemInstruction.parts[0].text).not.toContain(
+      "productAttributes",
+    );
+    expect(body.systemInstruction.parts[0].text).not.toContain(
+      "productPresentation",
+    );
+    expect(request.identity.requestEnvelopeHash).toBe(
+      "ec03172bfbc43fd40c012b35d2348fb02c6b27f3f0339a73c64aa5b8f13c5fee",
+    );
+    const nullableRequest = buildTrackCC3ResponderRequest({
+      modelResource,
+      capture: validCapture([], null, null),
+      evaluationAt,
+      evaluationContext,
+      conversationPlan: conversationPlan(),
+    });
+    expect(nullableRequest.body).toBe(request.body);
+    expect(nullableRequest.identity).toEqual(request.identity);
+  });
+
+  it.each([
+    ["attributes", verifiedProductAttributes(), null, true, false],
+    ["presentation", null, verifiedProductPresentation(), false, true],
+    ["both", verifiedProductAttributes(), verifiedProductPresentation(), true, true],
+  ] as const)("adds only the %s evidence instruction", (
+    _name,
+    attributes,
+    presentation,
+    expectsAttributes,
+    expectsPresentation,
+  ) => {
+    const request = buildTrackCC3ResponderRequest({
+      modelResource,
+      capture: validCapture([], attributes, presentation),
+      evaluationAt,
+      evaluationContext,
+      conversationPlan: conversationPlan(),
+    });
+    const text = (JSON.parse(request.body) as {
+      systemInstruction: { parts: [{ text: string }] };
+    }).systemInstruction.parts[0].text;
+
+    expect(text.includes("When productAttributes is present"))
+      .toBe(expectsAttributes);
+    expect(text.includes("When productPresentation is present"))
+      .toBe(expectsPresentation);
+  });
+
+  it("gives Responder one code-owned product-attribute reference", () => {
+    const attributes = verifiedProductAttributes();
+    const request = buildTrackCC3ResponderRequest({
+      modelResource,
+      capture: validCapture([], attributes),
+      evaluationAt,
+      evaluationContext,
+      conversationPlan: conversationPlan(),
+    });
+    const body = JSON.parse(request.body) as {
+      contents: [{ parts: [{ text: string }] }];
+    };
+    const prompt = JSON.parse(body.contents[0].parts[0].text) as {
+      productAttributes: {
+        claimRef: string;
+        provenance: { contentHash: string };
+      };
+    };
+
+    expect(prompt.productAttributes).toEqual(expect.objectContaining({
+      claimRef: "PRODUCT_ATTRIBUTES_001",
+      provenance: expect.objectContaining({
+        contentHash: attributes.metadata.contentHash,
+      }),
+    }));
+  });
+
+  it("resolves product-attribute claimRef to its code-owned integrity hash", async () => {
+    const attributes = verifiedProductAttributes();
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Mẫu này dùng chất liệu lụa mềm ạ.",
+          claimRef: "PRODUCT_ATTRIBUTES_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    const result = await runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture([], attributes),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    });
+
+    expect(result.candidate.quality.reply).toBe(
+      "Mẫu này dùng chất liệu lụa mềm ạ.",
+    );
+    expect(result.candidate.identity.responseOutputHash).toMatch(/^[a-f0-9]{64}$/u);
+    expect(result.candidate.guard.status).toBe("PASS");
+  });
+
+  it.each([
+    [
+      "Dạ {{DISPLAY_NAME}} có phiên bản màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.",
+      "Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.",
+      "PRODUCT_PRESENTATION_VARIANT_001",
+    ],
+    [
+      "Dạ tên mẫu là {{DISPLAY_NAME}} ạ.",
+      "Dạ tên mẫu là Tường Vi ạ.",
+      "PRODUCT_PRESENTATION_DISPLAY_001",
+    ],
+    [
+      "Dạ mẫu {{DISPLAY_NAME}} chị nhé.",
+      "Dạ mẫu Tường Vi chị nhé.",
+      "PRODUCT_PRESENTATION_DISPLAY_001",
+    ],
+  ] as const)("resolves presentation values while preserving model wording: %s", async (
+    modelText,
+    expectedReply,
+    claimRef,
+  ) => {
+    const presentation = verifiedProductPresentation();
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: modelText,
+          claimRef,
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    const result = await runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture([], null, presentation),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    });
+
+    expect(result.candidate.quality.reply).toBe(expectedReply);
+    expect(result.candidate.guard.status).toBe("PASS");
+  });
+
+  it.each([
+    ["display name", "Dạ mẫu này là Hồng Nhung ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
+    ["color", "Dạ {{DISPLAY_NAME}} có màu ĐỎ, size {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
+    ["size", "Dạ {{DISPLAY_NAME}} có màu {{VARIANT_COLOR}}, size L ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
+    ["duplicate placeholder", "Dạ {{DISPLAY_NAME}} / {{DISPLAY_NAME}} có màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
+    ["swapped color and size roles", "Màu {{VARIANT_SIZE}}, size {{VARIANT_COLOR}} thuộc mẫu {{DISPLAY_NAME}} chị nhé.", "PRODUCT_PRESENTATION_VARIANT_001"],
+    ["swapped display, color, and size roles", "Tên {{VARIANT_COLOR}} là mẫu {{DISPLAY_NAME}} có màu {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
+    ["display name bound to speaker", "Em tên {{DISPLAY_NAME}}, mẫu có màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
+    ["display name used as customer model", "Chị là mẫu {{DISPLAY_NAME}} ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
+    ["display name used as customer subject", "Chị {{DISPLAY_NAME}} có thông tin ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
+    ["display name used as customer membership", "Chị thuộc mẫu {{DISPLAY_NAME}} ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
+    ["display name used as customer ownership", "Dạ mẫu {{DISPLAY_NAME}} là của chị ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
+  ] as const)("rejects a wrong product-presentation %s", async (
+    _name,
+    text,
+    claimRef,
+  ) => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{ kind: "VERIFIED_CLAIM", text, claimRef }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation()),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    })).rejects.toThrow("TRACK_C_C3_CLAIM_REFERENCE_TEXT_MISMATCH");
+  });
+
+  it.each([
+    "Chị là mẫu {{DISPLAY_NAME}} ạ.",
+    "Chị {{DISPLAY_NAME}} có thông tin ạ.",
+    "Chị thuộc mẫu {{DISPLAY_NAME}} ạ.",
+    "Dạ mẫu {{DISPLAY_NAME}} là của chị ạ.",
+  ])("rejects a display name bound to the customer on the V5 path: %s", async (text) => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text,
+          claimRef: "PRODUCT_PRESENTATION_DISPLAY_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation()),
+      evaluationAt,
+      evaluationContext,
+      transport,
+    })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
+  });
+
+  it.each([
+    "Màu {{VARIANT_SIZE}}, size {{VARIANT_COLOR}} thuộc mẫu {{DISPLAY_NAME}} chị nhé.",
+    "Tên {{VARIANT_COLOR}} là mẫu {{DISPLAY_NAME}} có màu {{VARIANT_SIZE}} ạ.",
+    "Em tên {{DISPLAY_NAME}}, mẫu có màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.",
+  ])("rejects swapped presentation roles on the V5 path: %s", async (text) => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text,
+          claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation()),
+      evaluationAt,
+      evaluationContext,
+      transport,
+    })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
+  });
+
+  it("accepts a catalog size label from verified presentation evidence on the V5 path", async () => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Dạ {{DISPLAY_NAME}} có phiên bản màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.",
+          claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    const result = await runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation()),
+      evaluationAt,
+      evaluationContext,
+      transport,
+    });
+
+    expect(result.reply).toBe(
+      "Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.",
+    );
+    expect(result.sideEffects).toBe("DISABLED");
+  });
+
+  it("rejects fit semantics before presentation substitution", async () => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Dạ {{DISPLAY_NAME}} có màu {{VARIANT_COLOR}}, chị là size {{VARIANT_SIZE}} ạ.",
+          claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation()),
+      evaluationAt,
+      evaluationContext,
+      transport,
+    })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
+  });
+
+  it("rejects extra presentation literals and unregistered placeholder syntax on the normal path", async () => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "mẫu hồng nhung / {{DISPLAY_NAME}} có màu xanh / {{VARIANT_COLOR}}, size xl / {{VARIANT_SIZE}} {{other}}",
+          claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation({}, [
+        { variantId: "SD398-DEN-M", color: "ĐEN", size: "M" },
+        { variantId: "SD398-DO-L", color: "ĐỎ", size: "L" },
+      ])),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    })).rejects.toThrow("TRACK_C_C3_CLAIM_REFERENCE_TEXT_MISMATCH");
+  });
+
+  it("rejects a cross-variant presentation statement on the V5 production-contract path", async () => {
+    const presentation = verifiedProductPresentation({}, [
+      { variantId: "SD398-DEN-M", color: "ĐEN", size: "M" },
+      { variantId: "SD398-DO-L", color: "ĐỎ", size: "L" },
+    ]);
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Dạ {{DISPLAY_NAME}} có màu {{VARIANT_COLOR}}, size L ạ.",
+          claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource,
+      capture: validCapture([], null, presentation),
+      evaluationAt,
+      evaluationContext,
+      transport,
+    })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
+  });
+
+  it("rejects extra presentation literals and malformed placeholders on the V5 path", async () => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "mẫu hồng nhung / {{DISPLAY_NAME}} có màu xanh / {{VARIANT_COLOR}}, size xl / {{VARIANT_SIZE}} {{BROKEN",
+          claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    await expect(runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation({}, [
+        { variantId: "SD398-DEN-M", color: "ĐEN", size: "M" },
+        { variantId: "SD398-DO-L", color: "ĐỎ", size: "L" },
+      ])),
+      evaluationAt,
+      evaluationContext,
+      transport,
+    })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
+  });
+
+  it("preserves model wording after resolving presentation values on the V5 path", async () => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Dạ tên mẫu là {{DISPLAY_NAME}} ạ.",
+          claimRef: "PRODUCT_PRESENTATION_DISPLAY_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    const result = await runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation()),
+      evaluationAt,
+      evaluationContext,
+      transport,
+    });
+
+    expect(result.reply).toBe(
+      "Dạ tên mẫu là Tường Vi ạ.",
+    );
+  });
+
+  it("fails before the first provider call for future-dated product attributes", async () => {
+    const transport: CandidateVertexTransport = { send: vi.fn() };
+    await expect(runTrackCC3TwoPassCandidate({
+      caseId: "pii-security",
+      modelResource,
+      capture: validCapture(
+        [],
+        verifiedProductAttributes("2026-09-05T00:05:01.000Z"),
+        null,
+        new Date("2026-09-05T00:06:00.000Z"),
+      ),
+      evaluationAt,
+      evaluationContext,
+      accepted: accepted(),
+      transport,
+    })).rejects.toThrow("TRACK_C_OFFLINE_CANDIDATE_CAPTURE_STALE");
+    expect(transport.send).not.toHaveBeenCalled();
+  });
+
+  it.each(["identity", "content", "inventory"] as const)(
+    "fails before the first provider call for future-dated %s presentation metadata",
+    async (source) => {
+      const transport: CandidateVertexTransport = { send: vi.fn() };
+      await expect(runTrackCC3TwoPassCandidate({
+        caseId: "pii-security",
+        modelResource,
+        capture: validCapture(
+          [],
+          null,
+          verifiedProductPresentation({
+            [source]: "2026-09-05T00:05:01.000Z",
+          }),
+          new Date("2026-09-05T00:06:00.000Z"),
+        ),
+        evaluationAt,
+        evaluationContext,
+        accepted: accepted(),
+        transport,
+      })).rejects.toThrow("TRACK_C_OFFLINE_CANDIDATE_CAPTURE_STALE");
+      expect(transport.send).not.toHaveBeenCalled();
+    },
+  );
 
   it("resolves a verified claim reference to the exact Context V2 hash before the existing validator", async () => {
     const outputs = [

@@ -26,6 +26,10 @@ import {
 } from "./track-c-c3-two-pass-candidate.js";
 import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materialization.js";
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
+import {
+  buildTrackCClaimReferenceRegistry,
+  resolveTrackCCandidateClaimReferences,
+} from "./track-c-claim-reference-resolver.js";
 
 const PLAN_FIELDS = Object.freeze([
   "currentNeed",
@@ -170,49 +174,6 @@ function withBenchmarkLane(
   });
 }
 
-function resolveClaimReferences(
-  value: unknown,
-  registry: ReadonlyMap<string, string>,
-): unknown {
-  if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error("TRACK_C_V5_RESPONDER_OUTPUT_INVALID");
-  }
-  const output = value as Readonly<Record<string, unknown>>;
-  if (!Array.isArray(output.segments)) {
-    throw new Error("TRACK_C_V5_RESPONDER_OUTPUT_INVALID");
-  }
-  const used = new Set<string>();
-  const segments = output.segments.map((segment) => {
-    if (segment === null || typeof segment !== "object" || Array.isArray(segment)) {
-      throw new Error("TRACK_C_V5_RESPONDER_OUTPUT_INVALID");
-    }
-    const record = segment as Readonly<Record<string, unknown>>;
-    if (Object.hasOwn(record, "claimContentHash")) {
-      throw new Error("TRACK_C_V5_CLAIM_REFERENCE_INVALID");
-    }
-    if (record.kind !== "VERIFIED_CLAIM") {
-      if (Object.hasOwn(record, "claimRef")) {
-        throw new Error("TRACK_C_V5_CLAIM_REFERENCE_INVALID");
-      }
-      return record;
-    }
-    if (typeof record.claimRef !== "string") {
-      throw new Error("TRACK_C_V5_CLAIM_REFERENCE_INVALID");
-    }
-    const contentHash = registry.get(record.claimRef);
-    if (contentHash === undefined) {
-      throw new Error("TRACK_C_V5_CLAIM_REFERENCE_UNKNOWN");
-    }
-    if (used.has(record.claimRef)) {
-      throw new Error("TRACK_C_V5_CLAIM_REFERENCE_DUPLICATE");
-    }
-    used.add(record.claimRef);
-    const { claimRef: _claimRef, ...rest } = record;
-    return Object.freeze({ ...rest, claimContentHash: contentHash });
-  });
-  return Object.freeze({ ...output, segments: Object.freeze(segments) });
-}
-
 function factEnvelopeForClaim(claim: VerifiedClaim) {
   if (claim.scope.kind !== "PRODUCT") return null;
   let listPriceVnd: number | null = null;
@@ -322,7 +283,14 @@ function guardProductionOutput(
     ] as const),
   );
   const verifiedProductIds = new Set(context.productBinding.productIds);
+  const productAttributesHash = context.productAttributes?.metadata.contentHash ?? null;
+  const productPresentationHash =
+    context.productPresentation?.provenance.contentHash ?? null;
   for (const segment of output.segments) {
+    const usesProductPresentationEvidence =
+      segment.kind === "VERIFIED_CLAIM" &&
+      productPresentationHash !== null &&
+      segment.claimContentHash === productPresentationHash;
     const claim = segment.kind === "VERIFIED_CLAIM"
       ? claims.get(segment.claimContentHash) ?? null
       : null;
@@ -331,7 +299,12 @@ function guardProductionOutput(
     }
     const productId = claim?.scope.kind === "PRODUCT"
       ? claim.scope.productId
-      : null;
+      : segment.kind === "VERIFIED_CLAIM" &&
+          (segment.claimContentHash === productAttributesHash ||
+           segment.claimContentHash === productPresentationHash)
+        ? context.productAttributes?.productId ??
+          context.productPresentation?.productId ?? null
+        : null;
     const sizeClaimContext = sizeGuardInputForClaim(context, claim);
     const guard = guardAgentProposal({
       proposal: {
@@ -349,7 +322,9 @@ function guardProductionOutput(
       verifiedProductIds,
       buyingSignal: context.buyingIntent.decision === "COMMITTED",
       sizeClaimContext,
-      sizeClaimTextMode: "STRUCTURED_REJECT_ONLY",
+      sizeClaimTextMode: usesProductPresentationEvidence
+        ? "LEGACY_SEMANTIC"
+        : "STRUCTURED_REJECT_ONLY",
       now: evaluationAt,
     });
     if (guard.blockedReasonCodes.length > 0) {
@@ -383,9 +358,16 @@ function validateResponderOutput(
   if (output.segments.some(({ kind }) => kind === "EFFECT_CLAIM")) {
     throw new Error("TRACK_C_V5_EFFECT_CLAIM_FORBIDDEN");
   }
-  const known = new Set(
-    context.verifiedClaims.map(({ provenance }) => provenance.contentHash),
-  );
+  const known = new Set([
+    ...context.verifiedClaims.map(({ provenance }) => provenance.contentHash),
+    ...(context.productAttributes === null || context.productAttributes === undefined
+      ? []
+      : [context.productAttributes.metadata.contentHash]),
+    ...(context.productPresentation === null ||
+        context.productPresentation === undefined
+      ? []
+      : [context.productPresentation.provenance.contentHash]),
+  ]);
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []
   );
@@ -555,16 +537,18 @@ export async function runTrackCV5TwoPassBenchmarkCase(
   });
   assertProviderIdentity(responderResponse.providerModelVersion);
 
-  const registry = new Map(context.verifiedClaims.map((claim, index) => [
-    `CLAIM_${String(index + 1).padStart(3, "0")}`,
-    claim.provenance.contentHash,
-  ]));
-  const resolved = resolveClaimReferences(
+  const resolved = resolveTrackCCandidateClaimReferences(
     parseVertexJson(
       responderResponse.payload,
       "TRACK_C_V5_RESPONDER_OUTPUT_INVALID",
     ),
-    registry,
+    buildTrackCClaimReferenceRegistry(context),
+    {
+      invalid: "TRACK_C_V5_CLAIM_REFERENCE_INVALID",
+      unknown: "TRACK_C_V5_CLAIM_REFERENCE_UNKNOWN",
+      duplicate: "TRACK_C_V5_CLAIM_REFERENCE_DUPLICATE",
+      textMismatch: "TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH",
+    },
   );
   const output = validateResponderOutput(
     context,

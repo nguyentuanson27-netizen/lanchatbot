@@ -18,6 +18,28 @@ function validEvaluationTime(value: Date): boolean {
   return Number.isFinite(value.getTime());
 }
 
+const MAX_FUTURE_OBSERVATION_SKEW_MS = 5 * 60_000;
+
+function productEvidenceTimeInvalid(
+  metadata: Readonly<{
+    observedAt: string;
+    expiresAt?: string | null;
+    freshnessState: string;
+  }>,
+  evaluationAtMs: number,
+): boolean {
+  const observedAtMs = Date.parse(metadata.observedAt);
+  const expiresAtMs = metadata.expiresAt === null ||
+      metadata.expiresAt === undefined
+    ? null
+    : Date.parse(metadata.expiresAt);
+  return metadata.freshnessState !== "FRESH" ||
+    !Number.isFinite(observedAtMs) ||
+    observedAtMs > evaluationAtMs + MAX_FUTURE_OBSERVATION_SKEW_MS ||
+    (expiresAtMs !== null &&
+      (!Number.isFinite(expiresAtMs) || expiresAtMs <= evaluationAtMs));
+}
+
 /**
  * Shared Track C offline-candidate dialogue bound: 1..15 messages for every
  * caller, not only the journey adapter. 15 is the accumulated dialogue of the
@@ -113,13 +135,36 @@ export function contextFromFrozenTrackCCapture(input: Readonly<{
   } catch {
     throw new Error("TRACK_C_OFFLINE_CANDIDATE_CAPTURE_INTEGRITY_INVALID");
   }
+  const evaluationAtMs = input.evaluationAt.getTime();
   if (
     context.verifiedClaims.some(({ provenance }) =>
-      Date.parse(provenance.observedAt) > input.evaluationAt.getTime() + 5 * 60_000 ||
-      Date.parse(provenance.expiresAt) <= input.evaluationAt.getTime()
+      Date.parse(provenance.observedAt) >
+        evaluationAtMs + MAX_FUTURE_OBSERVATION_SKEW_MS ||
+      Date.parse(provenance.expiresAt) <= evaluationAtMs
     ) ||
     (context.cartReadiness !== null &&
-      Date.parse(context.cartReadiness.expiresAt) <= input.evaluationAt.getTime())
+      Date.parse(context.cartReadiness.expiresAt) <= evaluationAtMs) ||
+    (context.productAttributes !== null &&
+      context.productAttributes !== undefined &&
+      productEvidenceTimeInvalid(
+        context.productAttributes.metadata,
+        evaluationAtMs,
+      )) ||
+    (context.productPresentation !== null &&
+      context.productPresentation !== undefined &&
+      (context.productPresentation.provenance.freshnessState !== "FRESH" ||
+       productEvidenceTimeInvalid(
+         context.productPresentation.provenance.identity,
+         evaluationAtMs,
+       ) ||
+       productEvidenceTimeInvalid(
+         context.productPresentation.provenance.content,
+         evaluationAtMs,
+       ) ||
+       productEvidenceTimeInvalid(
+         context.productPresentation.provenance.inventory,
+         evaluationAtMs,
+       )))
   ) {
     throw new Error("TRACK_C_OFFLINE_CANDIDATE_CAPTURE_STALE");
   }

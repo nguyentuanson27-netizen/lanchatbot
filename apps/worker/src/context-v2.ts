@@ -1,5 +1,10 @@
 import { createHash } from "node:crypto";
-import { hashProtectedClaimSetV1, type CanonicalDecisionEvidenceV1 } from "@lana/business-tools";
+import {
+  hashProtectedClaimSetV1,
+  verifyProductAttributesV1,
+  verifyProductPresentationEvidenceV1,
+  type CanonicalDecisionEvidenceV1,
+} from "@lana/business-tools";
 import type { SalesCycleRuntimeState } from "@lana/chat-runtime";
 import {
   ContextV2CaptureV1Schema,
@@ -14,6 +19,7 @@ import {
   type FinalTurnEvidenceV2,
   type ProductBindingV2,
   type ProductAttributesV1,
+  type ProductPresentationEvidenceV1,
   type ProtectedClaimV1,
 } from "@lana/contracts";
 
@@ -25,6 +31,7 @@ export interface BuildContextV2Input {
   readonly finalTurnEvidence: FinalTurnEvidenceV2;
   readonly productBinding: ProductBindingV2;
   readonly productAttributes?: ProductAttributesV1 | null;
+  readonly productPresentation?: ProductPresentationEvidenceV1 | null;
   readonly owner: "BOT" | "HUMAN";
   readonly handoffReasonCode: string | null;
   readonly now: Date;
@@ -52,6 +59,30 @@ function contextHash(value: Omit<ContextV2, "contextHash">): string {
 
 export function parseContextV2WithIntegrity(value: unknown): ContextV2 {
   const parsed = ContextV2Schema.parse(value);
+  if (parsed.productAttributes !== null && parsed.productAttributes !== undefined &&
+      !parsed.productBinding.productIds.includes(parsed.productAttributes.productId)) {
+    throw new Error("CONTEXT_V2_PRODUCT_ATTRIBUTES_BINDING_MISMATCH");
+  }
+  if (parsed.productAttributes !== null && parsed.productAttributes !== undefined &&
+      verifyProductAttributesV1(
+        parsed.productAttributes,
+        parsed.productAttributes.productId,
+      ) === null) {
+    throw new Error("CONTEXT_V2_PRODUCT_ATTRIBUTES_INTEGRITY_MISMATCH");
+  }
+  if (parsed.productPresentation !== null &&
+      parsed.productPresentation !== undefined &&
+      !parsed.productBinding.productIds.includes(parsed.productPresentation.productId)) {
+    throw new Error("CONTEXT_V2_PRODUCT_PRESENTATION_BINDING_MISMATCH");
+  }
+  if (parsed.productPresentation !== null &&
+      parsed.productPresentation !== undefined &&
+      verifyProductPresentationEvidenceV1(
+        parsed.productPresentation,
+        parsed.productPresentation.productId,
+      ) === null) {
+    throw new Error("CONTEXT_V2_PRODUCT_PRESENTATION_INTEGRITY_MISMATCH");
+  }
   const { contextHash: observed, ...draft } = parsed;
   if (observed !== contextHash(draft)) {
     throw new Error("CONTEXT_V2_INTEGRITY_MISMATCH");
@@ -121,6 +152,26 @@ export function buildContextV2(input: BuildContextV2Input): ContextV2 {
       !input.productBinding.productIds.includes(input.productAttributes.productId)) {
     throw new Error("CONTEXT_V2_PRODUCT_ATTRIBUTES_BINDING_MISMATCH");
   }
+  if (input.productAttributes !== null && input.productAttributes !== undefined &&
+      verifyProductAttributesV1(
+        input.productAttributes,
+        input.productAttributes.productId,
+      ) === null) {
+    throw new Error("CONTEXT_V2_PRODUCT_ATTRIBUTES_INTEGRITY_MISMATCH");
+  }
+  if (input.productPresentation !== null &&
+      input.productPresentation !== undefined &&
+      !input.productBinding.productIds.includes(input.productPresentation.productId)) {
+    throw new Error("CONTEXT_V2_PRODUCT_PRESENTATION_BINDING_MISMATCH");
+  }
+  if (input.productPresentation !== null &&
+      input.productPresentation !== undefined &&
+      verifyProductPresentationEvidenceV1(
+        input.productPresentation,
+        input.productPresentation.productId,
+      ) === null) {
+    throw new Error("CONTEXT_V2_PRODUCT_PRESENTATION_INTEGRITY_MISMATCH");
+  }
   const readiness = exactReadiness(input);
   if (readiness.bindingMismatch) {
     throw new Error("CONTEXT_V2_READINESS_BINDING_MISMATCH");
@@ -167,9 +218,12 @@ export function buildContextV2(input: BuildContextV2Input): ContextV2 {
     authority: "SHADOW_ONLY",
     finalTurnEvidence: input.finalTurnEvidence,
     productBinding: input.productBinding,
-    ...(input.productAttributes === undefined
+    ...(input.productAttributes === undefined || input.productAttributes === null
       ? {}
       : { productAttributes: input.productAttributes }),
+    ...(input.productPresentation === undefined || input.productPresentation === null
+      ? {}
+      : { productPresentation: input.productPresentation }),
     dialogueEvidence: {
       act: input.canonicalEvidence.dialogueEvidence.act,
       confidenceBand: input.canonicalEvidence.dialogueEvidence.confidenceBand,

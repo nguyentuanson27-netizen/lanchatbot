@@ -3,6 +3,7 @@ import {
   buildCanonicalDecisionEvidenceV1,
   buildProtectedClaimsFromVerifiedFactSetV1,
   buildProtectedMediaClaimsV1,
+  buildProductPresentationEvidenceV1,
   evaluateDeterministicEffectReadinessV1,
   hashProtectedClaimSetV1,
   extractCustomerMeasurements,
@@ -5373,6 +5374,9 @@ export class RealtimeRunner {
         productIds,
         catalogVersion: resolvedProduct?.catalogVersion ?? null,
       });
+      const productPresentation = productFactsV2 === null
+        ? null
+        : buildProductPresentationEvidenceV1(productFactsV2, now);
       const capture = message.isEcho
         ? blockedContextV2Capture({
             sourceMessagePk: triggerMessagePk,
@@ -5407,6 +5411,9 @@ export class RealtimeRunner {
                 ...(productFactsV2?.attributes
                   ? { productAttributes: productFactsV2.attributes }
                   : {}),
+                ...(productPresentation === null
+                  ? {}
+                  : { productPresentation }),
                 owner: nextState.conversationOwner,
                 handoffReasonCode:
                   handoffEventReasonCode ?? salesHandoffReasonCode ?? null,

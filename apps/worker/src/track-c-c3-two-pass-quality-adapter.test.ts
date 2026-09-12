@@ -1,5 +1,8 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
+import { buildProductAttributesV1 } from "@lana/business-tools";
+import { canonicalJsonV1, type ContextV2CaptureV1 } from "@lana/contracts";
 import type { ShadowContextMessage } from "@lana/database";
 import type { CandidateVertexTransport } from "./context-v2-candidate.js";
 import {
@@ -107,6 +110,40 @@ function freshCapture(
   });
 }
 
+function captureWithProductAttributes(): ContextV2CaptureV1 {
+  const capture = freshCapture();
+  if (capture.status !== "BUILT" || capture.context === null) {
+    throw new Error("TEST_V5_BUILT_CAPTURE_REQUIRED");
+  }
+  const attributes = buildProductAttributesV1({
+    productId: "SQ9012",
+    data: {
+      materials: ["LỤA"],
+      materialComponents: { AO: ["LỤA"] },
+      colors: ["ĐEN"],
+      styles: ["THANH LỊCH"],
+      silhouettes: ["CHIẾT EO"],
+      occasions: ["ĐI LÀM"],
+      designAttributes: { waist: ["CHIẾT EO"] },
+      careInstructions: null,
+      wearProperties: null,
+      backCoverage: "FULL",
+      designComplexity: "MINIMAL",
+    },
+    observedAt: recipe.evaluation_at,
+  });
+  const { contextHash: _oldContextHash, ...oldDraft } = capture.context;
+  const draft = { ...oldDraft, productAttributes: attributes };
+  const contextHash = createHash("sha256")
+    .update(`CONTEXT_V2\n${canonicalJsonV1(draft)}`, "utf8")
+    .digest("hex");
+  return {
+    ...capture,
+    context: { ...draft, contextHash },
+    contextHash,
+  };
+}
+
 function successfulTransport() {
   return vi.fn<CandidateVertexTransport["send"]>()
     .mockResolvedValueOnce({
@@ -164,6 +201,49 @@ describe("Track C C3 V5 benchmark runner", () => {
     expect(result.identity.compositionHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(send.mock.calls.map(([request]) => request.body).join("\n"))
       .not.toContain("benchmarkSimulationFacts");
+  });
+
+  it("binds product-attribute claimRef to the integrity-valid Context V2 evidence", async () => {
+    const capture = captureWithProductAttributes();
+    if (capture.status !== "BUILT" || capture.context === null ||
+        capture.context.productAttributes === null ||
+        capture.context.productAttributes === undefined) {
+      throw new Error("TEST_V5_PRODUCT_ATTRIBUTES_REQUIRED");
+    }
+    const send = vi.fn<CandidateVertexTransport["send"]>()
+      .mockResolvedValueOnce({
+        payload: planPayload(),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })
+      .mockResolvedValueOnce({
+        payload: providerPayload({
+          segments: [{
+            kind: "VERIFIED_CLAIM",
+            text: "Mẫu này dùng chất liệu lụa ạ.",
+            claimRef: "PRODUCT_ATTRIBUTES_001",
+          }],
+          strategy: "ANSWER_VERIFIED_FACTS",
+          cta: "NONE",
+        }),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      });
+
+    const result = await runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource: MODEL_RESOURCE,
+      capture,
+      evaluationAt: new Date(recipe.evaluation_at),
+      evaluationContext: dialogue(),
+      transport: { send },
+    });
+
+    expect(result.output.segments).toEqual([{
+      kind: "VERIFIED_CLAIM",
+      text: "Mẫu này dùng chất liệu lụa ạ.",
+      claimContentHash:
+        capture.context.productAttributes.metadata.contentHash,
+    }]);
+    expect(result.sideEffects).toBe("DISABLED");
   });
 
   it("guards multi-product verified claims against each exact product scope", async () => {

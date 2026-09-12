@@ -19,6 +19,10 @@ import {
 } from "./track-c-offline-candidate.js";
 import { validateTrackCOfflineCandidate } from "./track-c-offline-candidate-validation.js";
 import { expectedOwnerForTrackCC1Fixture } from "./track-c-must-pass.js";
+import {
+  buildTrackCClaimReferenceRegistry,
+  resolveTrackCCandidateClaimReferences,
+} from "./track-c-claim-reference-resolver.js";
 import type {
   TrackCOfflineCandidateValidatedEnvelope,
   TrackCReplayJudgeEnvelope,
@@ -97,6 +101,27 @@ export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
   "The offline composer resolves claimRef to the exact provenance content hash before the unchanged final response schema and guard.",
   "You remain responsible only for natural customer-facing wording in the registered intermediate response schema.",
 ].join("\n");
+
+function responderSystemInstruction(
+  context: ReturnType<typeof contextFromFrozenTrackCCapture>,
+): string {
+  const additions: string[] = [];
+  if (context.productAttributes !== null &&
+      context.productAttributes !== undefined) {
+    additions.push(
+      "When productAttributes is present, it is integrity-valid code-owned evidence for the exact bound product. Use only its explicit values and never infer an unstated quality or benefit. Bind any product-attribute statement to productAttributes.claimRef.",
+    );
+  }
+  if (context.productPresentation !== null &&
+      context.productPresentation !== undefined) {
+    additions.push(
+      "When productPresentation is present, select one exact claimRef option when needed. In the VERIFIED_CLAIM text, use every placeholder declared by that option exactly once; code replaces those placeholders with exact verified values. Outside placeholders, use only punctuation and these non-factual framing words: dạ, mẫu, tên, là, có, gồm, phiên, bản, màu, cỡ, size, mã, thông, tin, biến, thể, của, thuộc, và, với, chị, em, nhé, nha, ạ. Never write a product name, color, or size value directly or invent a placeholder. The arrangement and natural framing remain yours. A variant label does not by itself prove stock or fit.",
+    );
+  }
+  return additions.length === 0
+    ? TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION
+    : [TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION, ...additions].join("\n");
+}
 
 function sha256(value: unknown): string {
   return createHash("sha256")
@@ -210,9 +235,13 @@ export function buildTrackCC3ResponderRequest(
   }>,
 ): BuiltCandidateRequest {
   const conversationPlan = parseConversationPlan(input.conversationPlan);
+  const context = contextFromFrozenTrackCCapture({
+    capture: input.capture,
+    evaluationAt: input.evaluationAt,
+  });
   const request = buildTrackCOfflineCandidateRequest({
     ...input,
-    systemInstruction: TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION,
+    systemInstruction: responderSystemInstruction(context),
   });
   const body = JSON.parse(request.body) as {
     readonly contents: readonly [{
@@ -299,62 +328,6 @@ export function buildTrackCC3ResponderRequest(
   });
 }
 
-function claimReferenceRegistry(
-  capture: unknown,
-  evaluationAt: Date,
-): ReadonlyMap<string, string> {
-  const context = contextFromFrozenTrackCCapture({ capture, evaluationAt });
-  return new Map(context.verifiedClaims.map((claim, index) => [
-    `CLAIM_${String(index + 1).padStart(3, "0")}`,
-    claim.provenance.contentHash,
-  ]));
-}
-
-function resolveResponderClaimReferences(
-  capture: unknown,
-  evaluationAt: Date,
-  value: unknown,
-): unknown {
-  if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-  }
-  const output = value as Readonly<Record<string, unknown>>;
-  if (!Array.isArray(output.segments)) {
-    throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-  }
-  const registry = claimReferenceRegistry(capture, evaluationAt);
-  const used = new Set<string>();
-  const segments = output.segments.map((segment) => {
-    if (segment === null || typeof segment !== "object" || Array.isArray(segment)) {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-    }
-    const record = segment as Readonly<Record<string, unknown>>;
-    if (Object.hasOwn(record, "claimContentHash")) {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-    }
-    if (record.kind !== "VERIFIED_CLAIM") {
-      if (Object.hasOwn(record, "claimRef")) {
-        throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-      }
-      return record;
-    }
-    if (typeof record.claimRef !== "string") {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-    }
-    const contentHash = registry.get(record.claimRef);
-    if (contentHash === undefined) {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_UNKNOWN");
-    }
-    if (used.has(record.claimRef)) {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_DUPLICATE");
-    }
-    used.add(record.claimRef);
-    const { claimRef: _claimRef, ...rest } = record;
-    return Object.freeze({ ...rest, claimContentHash: contentHash });
-  });
-  return Object.freeze({ ...output, segments: Object.freeze(segments) });
-}
-
 export interface TrackCC3TwoPassCandidateResult {
   readonly conversationPlan: TrackCConversationPlanV1;
   readonly candidate: TrackCOfflineCandidateValidatedEnvelope;
@@ -420,13 +393,21 @@ export async function runTrackCC3TwoPassCandidate(
   const providerModelVersion = assertProviderIdentity(
     responderResponse.providerModelVersion,
   );
-  const output = resolveResponderClaimReferences(
-    input.capture,
-    input.evaluationAt,
+  const output = resolveTrackCCandidateClaimReferences(
     parseVertexJson(
       responderResponse.payload,
       "TRACK_C_C3_RESPONDER_OUTPUT_INVALID",
     ),
+    buildTrackCClaimReferenceRegistry(contextFromFrozenTrackCCapture({
+      capture: input.capture,
+      evaluationAt: input.evaluationAt,
+    })),
+    {
+      invalid: "TRACK_C_C3_CLAIM_REFERENCE_INVALID",
+      unknown: "TRACK_C_C3_CLAIM_REFERENCE_UNKNOWN",
+      duplicate: "TRACK_C_C3_CLAIM_REFERENCE_DUPLICATE",
+      textMismatch: "TRACK_C_C3_CLAIM_REFERENCE_TEXT_MISMATCH",
+    },
   );
   const candidate = validateTrackCOfflineCandidate({
     caseId: input.caseId,
