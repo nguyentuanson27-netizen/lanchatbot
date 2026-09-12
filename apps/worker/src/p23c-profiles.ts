@@ -438,7 +438,8 @@ const parseMaterialOverride = (raw: unknown): Record<string, string[]> => {
     if (index < 0) continue;
     const key = keyMap[part.slice(0, index).trim().toUpperCase()];
     if (!key) continue;
-    result[key] = unique(part.slice(index + 1).split(/[|,]/u));
+    const values = verifiedTokens(part.slice(index + 1).split(/[|,]/u));
+    if (values.length) result[key] = values;
   }
   return result;
 };
@@ -461,12 +462,11 @@ export const extractMaterialComponents = (
     if (values.length) components[key] = mergeValues(components[key] || [], values);
   };
   const overrideMap = parseMaterialOverride(componentOverride);
+  const globalOverrideValues = verifiedTokens(String(globalOverride || "").split(/[|,;\n]+/u));
   if (Object.keys(overrideMap).length) {
     for (const [key, values] of Object.entries(overrideMap)) add(key, values);
-  } else if ((globalOverride || "").length) {
-    // n8n truyền reg.material_override (chuỗi) vào vị trí mảng; `.length` của chuỗi rỗng là 0
-    // nên nhánh này chỉ chạy khi có override, và giá trị được spread thành mảng ký tự.
-    for (const key of primaryComponents(category)) add(key, unique([globalOverride as unknown as string]));
+  } else if (globalOverrideValues.length) {
+    for (const key of primaryComponents(category)) add(key, globalOverrideValues);
   } else {
     const cleaned = unicodeText(description);
     const materialStart = cleaned.search(/chất\s*liệu\s*:/iu);
@@ -657,11 +657,19 @@ export function buildXmlProfiles(
     const ruleType = reg.rule_type || ruleAuto;
     const category = reg.category || categoryAuto;
 
-    const colorResult = parseColors(descriptionXml, sortedAttrs, title, reg.color_override);
+    const materialOverride = verifiedTokens(reg.material_override.split(/[|,;\n]+/u));
+    const hasMaterialComponentOverride = Object.keys(
+      parseMaterialOverride(reg.material_components_override),
+    ).length > 0;
+    const colorOverride = verifiedTokens(reg.color_override);
+    const styleOverride = verifiedTokens(reg.style_override);
+    const silhouetteOverride = verifiedTokens(reg.silhouette_override);
+    const occasionOverride = verifiedTokens(reg.occasion_override);
+    const colorResult = parseColors(descriptionXml, sortedAttrs, title, colorOverride);
     const materialResult = extractMaterialComponents(
-      descriptionXml, category, reg.material_override, reg.material_components_override,
+      descriptionXml, category, materialOverride.join(" | "), reg.material_components_override,
     );
-    const styleResult = extractStyles(descriptionXml, reg.style_override);
+    const styleResult = extractStyles(descriptionXml, styleOverride);
     const silhouettesAuto = unique(matchLabels(searchable, silhouetteRules));
     const occasionsAuto = unique(matchLabels(searchable, occasionRules));
     const designAttributes = parseDesignAttributes(reg.design_attributes_json);
@@ -735,14 +743,14 @@ export function buildXmlProfiles(
     const sourceHash = createHash("sha256").update(JSON.stringify(sourceHashInput)).digest("hex");
     const xmlUpdatedAt = reg.source_hash === sourceHash && reg.xml_updated_at ? reg.xml_updated_at : now;
     const productAttributeData = {
-      materials: verifiedTokens(reg.material_override.split(/[|,;\n]+/u)),
-      materialComponents: reg.material_components_override.trim() || reg.material_override.trim()
+      materials: materialOverride,
+      materialComponents: hasMaterialComponentOverride || materialOverride.length
         ? materialResult.components
         : {},
-      colors: verifiedTokens(reg.color_override),
-      styles: verifiedTokens(reg.style_override),
-      silhouettes: verifiedTokens(reg.silhouette_override),
-      occasions: verifiedTokens(reg.occasion_override),
+      colors: colorOverride,
+      styles: styleOverride,
+      silhouettes: silhouetteOverride,
+      occasions: occasionOverride,
       designAttributes: designAttributes.value,
       careInstructions: reg.care_instructions.trim().toUpperCase() === "UNKNOWN"
         ? null
@@ -804,11 +812,11 @@ export function buildXmlProfiles(
       search_colors: colorResult.primary,
       search_styles: styleResult.styles,
       search_materials: materialResult.flat,
-      search_silhouettes: reg.silhouette_override.length
-        ? reg.silhouette_override
+      search_silhouettes: silhouetteOverride.length
+        ? silhouetteOverride
         : mergeSets(reg.search_silhouettes, silhouettesAuto),
-      search_occasions: reg.occasion_override.length
-        ? reg.occasion_override
+      search_occasions: occasionOverride.length
+        ? occasionOverride
         : mergeSets(reg.search_occasions, occasionsAuto),
       auto_confidence: confidence,
       review_status: reviewStatus,
@@ -877,6 +885,9 @@ export function normalizeStructuredExtraction(profiles: readonly XmlProfile[]): 
     const xmlUpdatedAt = profile.reg.source_hash === sourceHash && profile.reg.xml_updated_at
       ? profile.reg.xml_updated_at
       : profile.xml_updated_at;
+    const hasVerifiedMaterialOverride =
+      verifiedTokens(profile.reg.material_override.split(/[|,;\n]+/u)).length > 0
+      || Object.keys(parseMaterialOverride(profile.reg.material_components_override)).length > 0;
     const productAttributes = profile.product_attributes === null
       ? null
       : (() => {
@@ -891,11 +902,9 @@ export function normalizeStructuredExtraction(profiles: readonly XmlProfile[]): 
             observedAt: metadata.observedAt,
             data: {
               ...data,
-              materialComponents:
-                profile.reg.material_components_override.trim() ||
-                profile.reg.material_override.trim()
-                  ? ordered
-                  : data.materialComponents,
+              materialComponents: hasVerifiedMaterialOverride
+                ? ordered
+                : data.materialComponents,
             },
           });
         })();

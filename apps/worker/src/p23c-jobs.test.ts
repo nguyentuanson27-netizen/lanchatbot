@@ -118,6 +118,59 @@ describe("P2.3C approved Qdrant jobs", () => {
     expect(profiles[0]?.extraction_warnings).toContain("DESIGN_ATTRIBUTES_INVALID");
   });
 
+  it("treats UNKNOWN material overrides as absent while preserving verified values", () => {
+    const groups = groupXmlItems([{
+      "g:item_group_id": "SQ149",
+      "g:title": "Set SQ149 - M",
+      "g:description": "Chất liệu: áo lụa, quần thô.",
+    }]);
+
+    const unknownOnly = normalizeStructuredExtraction(buildXmlProfiles(buildRegistryMap([{
+      MA_SP: "SQ149",
+      ACTIVE: "TRUE",
+      MATERIAL_OVERRIDE: "UNKNOWN",
+      STYLE_OVERRIDE: "THANH LỊCH",
+    }]).registry, groups, "2026-09-12T00:00:00.000Z"));
+    expect(unknownOnly).toHaveLength(1);
+    expect(unknownOnly[0]?.search_materials).not.toContain("UNKNOWN");
+    expect(unknownOnly[0]?.product_attributes).toMatchObject({
+      materials: [],
+      styles: ["THANH LỊCH"],
+    });
+    expect(unknownOnly[0]?.product_attributes?.materialComponents).toEqual({});
+
+    const partial = buildXmlProfiles(buildRegistryMap([{
+      MA_SP: "SQ149",
+      ACTIVE: "TRUE",
+      MATERIAL_OVERRIDE: "LỤA | UNKNOWN",
+      MATERIAL_COMPONENTS_OVERRIDE: "ÁO: LỤA | UNKNOWN; QUẦN: UNKNOWN",
+    }]).registry, groups, "2026-09-12T00:00:00.000Z");
+    expect(partial).toHaveLength(1);
+    expect(partial[0]?.material_components).toEqual({ AO: ["LỤA"] });
+    expect(partial[0]?.product_attributes).toMatchObject({
+      materials: ["LỤA"],
+      materialComponents: { AO: ["LỤA"] },
+    });
+  });
+
+  it("treats UNKNOWN silhouette and occasion overrides as absent and keeps XML fallback", () => {
+    const profiles = buildXmlProfiles(buildRegistryMap([{
+      MA_SP: "SQ149",
+      ACTIVE: "TRUE",
+      SILHOUETTE_OVERRIDE: "UNKNOWN",
+      OCCASION_OVERRIDE: "UNKNOWN",
+    }]).registry, groupXmlItems([{
+      "g:item_group_id": "SQ149",
+      "g:title": "Set SQ149 - M",
+      "g:description": "Thiết kế dáng suông thanh lịch để đi làm.",
+    }]), "2026-09-12T00:00:00.000Z");
+
+    expect(profiles).toHaveLength(1);
+    expect(profiles[0]?.search_silhouettes).toEqual(["SUÔNG"]);
+    expect(profiles[0]?.search_occasions).toEqual(["ĐI LÀM"]);
+    expect(profiles[0]?.product_attributes).toBeNull();
+  });
+
   it("copies the reviewed image hash and approval provenance into the payload", () => {
     const hash = "a".repeat(64);
     const jobs = buildApprovedQdrantJobs([], [{
