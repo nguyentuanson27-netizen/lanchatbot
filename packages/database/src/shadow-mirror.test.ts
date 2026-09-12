@@ -48,6 +48,20 @@ describe("shadow mirror privacy helpers", () => {
       "Shop ở Hà Nội địa chỉ đâu em?",
       "Tên, SĐT và địa chỉ chị gửi đủ ở trên rồi.",
       "Chị gửi em tên, số điện thoại và địa chỉ nhận hàng nhé.",
+      "Cho em xin địa chỉ store với ạ",
+      "shop có mấy địa chỉ vậy em?",
+    ]) {
+      const result = redactAnalyticsMessage(text);
+      expect(result.dlpStatus).toBe("PASSED");
+      expect(result.text).toBe(text);
+    }
+  });
+
+  it("judges the address keyword by its own clause, not the rest of the line", () => {
+    // A digit belonging to an unrelated question is not address evidence.
+    for (const text of [
+      "địa chỉ đâu em, shop mở 9h?",
+      "địa chỉ shop mình ở đâu ạ, em muốn qua thử đồ",
     ]) {
       const result = redactAnalyticsMessage(text);
       expect(result.dlpStatus).toBe("PASSED");
@@ -60,6 +74,19 @@ describe("shadow mirror privacy helpers", () => {
       "Địa chỉ: 12 Nguyễn Trãi, Tây Ninh",
       "địa chỉ nhà em ở ngõ Văn Chương nhé",
       "dia chi: chung cu Sunrise, quan 7",
+    ]) {
+      expect(redactAnalyticsText(text)).toBe("[ADDRESS]");
+    }
+  });
+
+  it("still redacts an address declaration that carries no digit", () => {
+    // The declaration is what matters, not the shape of the value: these carry
+    // neither a house number nor an address-component token.
+    for (const text of [
+      "Địa chỉ: Tây Ninh",
+      "địa chỉ em ở Tây Ninh",
+      "địa chỉ nhà em là Nguyễn Trãi",
+      "địa chỉ giao hàng của chị là Chung cư Sunrise",
     ]) {
       expect(redactAnalyticsText(text)).toBe("[ADDRESS]");
     }

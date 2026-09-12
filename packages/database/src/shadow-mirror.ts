@@ -66,21 +66,48 @@ const ADDRESS_LINE_TOKEN = new RegExp(bounded(ADDRESS_COMPONENT_TOKENS), "iu");
  * is ("Shop ở Hà Nội địa chỉ đâu em?") or saying they already sent their
  * details carries no identifier at all. Redacting on the keyword alone erased
  * the customer's actual question before the model ever read it - and the live
- * path persists that erased text as chat history - so the keyword must be
- * followed by real address content: a digit, or a corroborating token.
+ * path persists that erased text as chat history.
+ *
+ * So the keyword is judged by the clause attached to it, never by the rest of
+ * the line: "địa chỉ đâu em, shop mở 9h?" must not be condemned by a `9` that
+ * belongs to an unrelated question. Inside that clause an address is declared
+ * unless the clause asks for one, and a value is a digit, an address token or
+ * a proper noun - so "Địa chỉ: Tây Ninh" stays covered with neither digit nor
+ * token present.
  */
-const ADDRESS_WITH_DETAIL = new RegExp(
-  `${bounded("địa chỉ|dia chi")}\\s*[:#-]?\\s*` +
-    `(?=[^\\n]*(?:\\d|${bounded(ADDRESS_DETAIL_TOKENS)}))[^\\n]{4,}`,
+const ADDRESS_KEYWORD = new RegExp(
+  `${bounded("địa chỉ|dia chi")}\\s*[:#-]?\\s*([^\\n]{4,})`,
   "giu",
 );
+
+/** The keyword's clause ends at the first punctuation mark that closes it. */
+const ADDRESS_CLAUSE_END = /[,;.!?…]/u;
+
+/** A clause that asks for an address does not carry one. */
+const ADDRESS_QUESTION = new RegExp(bounded("đâu|nào|gì|ra sao"), "iu");
+
+const ADDRESS_VALUE_TOKEN = new RegExp(
+  `\\d|${bounded(ADDRESS_DETAIL_TOKENS)}`,
+  "iu",
+);
+
+/** Case-sensitive on purpose: `\p{Lu}` also matches lowercase under `i`. */
+const PROPER_NOUN = /\p{Lu}\p{L}/u;
+
+function declaresAddress(payload: string): boolean {
+  const end = payload.search(ADDRESS_CLAUSE_END);
+  const clause = end === -1 ? payload : payload.slice(0, end);
+  if (ADDRESS_QUESTION.test(clause)) return false;
+  return ADDRESS_VALUE_TOKEN.test(clause) || PROPER_NOUN.test(clause);
+}
 
 export function redactAnalyticsText(value: string): string {
   const direct = value
     .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[EMAIL]")
     .replace(/\b(?:cccd|cmnd)\s*[:#-]?\s*\d{9,12}\b/giu, "[ID]")
     .replace(/(?:\+?84|0)(?:[ .-]?\d){8,10}/g, "[PHONE]")
-    .replace(ADDRESS_WITH_DETAIL, "[ADDRESS]")
+    .replace(ADDRESS_KEYWORD, (match: string, payload: string) =>
+      declaresAddress(payload) ? "[ADDRESS]" : match)
     .replace(/(?:họ tên|ho ten|tên người nhận|ten nguoi nhan)\s*[:#-]?[^\n]{2,}/giu, "[NAME]");
   return direct
     .split(/\r?\n/u)
