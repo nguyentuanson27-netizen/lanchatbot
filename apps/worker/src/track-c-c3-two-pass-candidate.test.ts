@@ -431,14 +431,17 @@ describe("Track C C3 two-pass offline candidate", () => {
     [
       "Dạ {{DISPLAY_NAME}} có phiên bản màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.",
       "Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.",
+      "PRODUCT_PRESENTATION_VARIANT_001",
     ],
     [
-      "Phiên bản màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} thuộc mẫu {{DISPLAY_NAME}} chị nhé.",
-      "Phiên bản màu ĐEN, size M thuộc mẫu Tường Vi chị nhé.",
+      "Dạ tên mẫu là {{DISPLAY_NAME}} ạ.",
+      "Dạ tên mẫu là Tường Vi ạ.",
+      "PRODUCT_PRESENTATION_DISPLAY_001",
     ],
   ] as const)("resolves presentation values while preserving model wording: %s", async (
     modelText,
     expectedReply,
+    claimRef,
   ) => {
     const presentation = verifiedProductPresentation();
     const outputs = [
@@ -447,7 +450,7 @@ describe("Track C C3 two-pass offline candidate", () => {
         segments: [{
           kind: "VERIFIED_CLAIM",
           text: modelText,
-          claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
+          claimRef,
         }],
         strategy: "ANSWER_VERIFIED_FACTS",
         cta: "NONE",
@@ -484,6 +487,7 @@ describe("Track C C3 two-pass offline candidate", () => {
     ["display name bound to speaker", "Em tên {{DISPLAY_NAME}}, mẫu có màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
     ["display name used as customer model", "Chị là mẫu {{DISPLAY_NAME}} ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
     ["display name used as customer subject", "Chị {{DISPLAY_NAME}} có thông tin ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
+    ["display name used as customer membership", "Chị thuộc mẫu {{DISPLAY_NAME}} ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
   ] as const)("rejects a wrong product-presentation %s", async (
     _name,
     text,
@@ -518,6 +522,7 @@ describe("Track C C3 two-pass offline candidate", () => {
   it.each([
     "Chị là mẫu {{DISPLAY_NAME}} ạ.",
     "Chị {{DISPLAY_NAME}} có thông tin ạ.",
+    "Chị thuộc mẫu {{DISPLAY_NAME}} ạ.",
   ])("rejects a display name bound to the customer on the V5 path: %s", async (text) => {
     const outputs = [
       conversationPlan(),

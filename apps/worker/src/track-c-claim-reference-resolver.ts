@@ -55,8 +55,7 @@ function hasExpectedPresentationRole(
   if (previous === "mẫu") {
     const phraseStart = index - 1;
     return phraseStart === 0 ||
-      (phraseStart === 1 && semanticTokens[0] === "dạ") ||
-      semanticTokens[index - 2] === "thuộc";
+      (phraseStart === 1 && semanticTokens[0] === "dạ");
   }
   if (previous === "là" &&
       semanticTokens[index - 2] === "mẫu" &&
