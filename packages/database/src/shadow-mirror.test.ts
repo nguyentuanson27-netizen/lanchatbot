@@ -18,6 +18,29 @@ describe("shadow mirror privacy helpers", () => {
     expect(redacted).toContain("[ID]");
   });
 
+  it("keeps ordinary Vietnamese words that merely end in an address token", () => {
+    for (const text of [
+      "Trả lời đúng chính sách được cung cấp cho khách.",
+      "Không khẳng định chất lượng cao cấp khi chưa có bằng chứng.",
+      "Không trả lời lấp lửng về thời gian giao.",
+    ]) {
+      const result = redactAnalyticsMessage(text);
+      expect(result.dlpStatus).toBe("PASSED");
+      expect(result.text).toBe(text);
+    }
+  });
+
+  it("still redacts a line naming a real address component", () => {
+    for (const text of [
+      "Ấp Tân Lợi, Tây Ninh",
+      "Xã Tân Hưng",
+      "Nhà em ở phường 5 nhé",
+      "Giao tới thôn Đoài giúp chị",
+    ]) {
+      expect(redactAnalyticsText(text)).toBe("[ADDRESS]");
+    }
+  });
+
   it("compares internal keys without accepting different lengths", () => {
     expect(constantTimeKeyMatches("a".repeat(32), "a".repeat(32))).toBe(true);
     expect(constantTimeKeyMatches("a".repeat(32), "a".repeat(31))).toBe(false);

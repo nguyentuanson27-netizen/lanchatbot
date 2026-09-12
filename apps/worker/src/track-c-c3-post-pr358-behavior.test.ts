@@ -447,6 +447,57 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
     }
   });
 
+  it("lets the strategist name the checkout objective without tripping the plan PII guard", async () => {
+    const caseFixture = fixture({
+      id: "CHECKOUT_PLAN_GUARD",
+      message: "Ok em",
+      checkoutCompleteness: {
+        state: "REQUIRED",
+        missing_fields: ["FULL_NAME", "PHONE", "ADDRESS"],
+      },
+    });
+    const planTransport = (nextMove: string) =>
+      vi.fn<CandidateVertexTransport["send"]>()
+        .mockResolvedValueOnce({
+          payload: planPayload({ nextMove }),
+          providerModelVersion: "gemini-3.5-flash-lite",
+        })
+        .mockResolvedValueOnce({
+          payload: providerPayload({
+            segments: [{
+              kind: "CLARIFICATION",
+              text: "Dạ chị cho em xin tên, số điện thoại và địa chỉ nhận hàng nhé.",
+              target: "CHECKOUT_DETAILS",
+            }, {
+              kind: "ACTION_REQUEST",
+              text: "Em cần đủ ba thông tin này để chuẩn bị đơn cho chị ạ.",
+              action: "PROVIDE_CHECKOUT_DETAILS",
+            }],
+            strategy: "ASK_CLARIFICATION",
+            cta: "ASK_CHECKOUT_DETAILS",
+          }),
+          providerModelVersion: "gemini-3.5-flash-lite",
+        });
+
+    // Spelling the contact fields into the plan is rejected before the
+    // Responder runs, even though the reply itself must ask for them.
+    const spelledOut = planTransport("Lấy tên, số điện thoại và địa chỉ nhận hàng.");
+    await expect(runFixture(caseFixture, spelledOut)).rejects.toThrow(
+      "TRACK_C_V5_STRATEGIST_OUTPUT_NOT_PII_SAFE",
+    );
+    expect(spelledOut).toHaveBeenCalledTimes(1);
+
+    // The sanctioned abstract phrasing reaches the Responder, which still asks
+    // the customer for the real fields.
+    const abstract = planTransport("Lấy thông tin nhận hàng còn thiếu của khách.");
+    const result = await runFixture(caseFixture, abstract);
+
+    expect(abstract).toHaveBeenCalledTimes(2);
+    expect(result.reply).toContain("địa chỉ nhận hàng");
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION)
+      .toContain("CHECKOUT_OBJECTIVE_IS_NAMED_ABSTRACTLY");
+  });
+
   it("projects checkout REQUIRED missing fields and COMPLETE without raw PII", async () => {
     const requiredFixture = fixture({
       id: "CHECKOUT_REQUIRED",
