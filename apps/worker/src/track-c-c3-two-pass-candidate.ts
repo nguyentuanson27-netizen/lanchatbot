@@ -115,7 +115,7 @@ function responderSystemInstruction(
   if (context.productPresentation !== null &&
       context.productPresentation !== undefined) {
     additions.push(
-      "When productPresentation is present, select one exact claimRef option when needed. In the VERIFIED_CLAIM text, use every placeholder declared by that option exactly once; code replaces those placeholders with exact verified values. Never write a product name, color, or size value directly or invent a placeholder. The natural framing and wording remain yours. A variant label does not by itself prove stock or fit.",
+      "When productPresentation is present, select one exact claimRef option when needed. In the VERIFIED_CLAIM text, use every placeholder declared by that option exactly once; code replaces those placeholders with exact verified values. Outside placeholders, use only punctuation and these non-factual framing words: dạ, mẫu, tên, là, có, gồm, phiên, bản, màu, cỡ, size, mã, thông, tin, biến, thể, của, thuộc, và, với, chị, em, nhé, nha, ạ. Never write a product name, color, or size value directly or invent a placeholder. The arrangement and natural framing remain yours. A variant label does not by itself prove stock or fit.",
     );
   }
   return additions.length === 0

@@ -4,8 +4,34 @@ import { candidateProductPresentationClaims } from "./context-v2-candidate.js";
 type ClaimReferenceRegistryEntry = Readonly<{
   contentHash: string;
   placeholders: Readonly<Record<string, string>> | null;
-  presentationLiterals: readonly string[];
 }>;
+
+const PRESENTATION_FRAMING_WORDS = new Set([
+  "ạ",
+  "bản",
+  "biến",
+  "có",
+  "cỡ",
+  "của",
+  "dạ",
+  "em",
+  "gồm",
+  "là",
+  "màu",
+  "mã",
+  "mẫu",
+  "nha",
+  "nhé",
+  "phiên",
+  "size",
+  "tên",
+  "thông",
+  "thuộc",
+  "tin",
+  "và",
+  "với",
+  "chị",
+]);
 
 export type ClaimReferenceErrors = Readonly<{
   invalid: string;
@@ -23,7 +49,6 @@ export function buildTrackCClaimReferenceRegistry(
       Object.freeze({
         contentHash: claim.provenance.contentHash,
         placeholders: null,
-        presentationLiterals: Object.freeze([]),
       }),
     ]),
   );
@@ -34,27 +59,17 @@ export function buildTrackCClaimReferenceRegistry(
       Object.freeze({
         contentHash: context.productAttributes.metadata.contentHash,
         placeholders: null,
-        presentationLiterals: Object.freeze([]),
       }),
     );
   }
   if (context.productPresentation !== null &&
       context.productPresentation !== undefined) {
-    const presentationLiterals = Object.freeze([
-      context.productPresentation.displayName,
-      ...context.productPresentation.variants.flatMap((variant) => [
-        variant.variantId,
-        ...(variant.color === null ? [] : [variant.color]),
-        ...(variant.size === null ? [] : [variant.size]),
-      ]),
-    ]);
     for (const claim of candidateProductPresentationClaims(
       context.productPresentation,
     )) {
       registry.set(claim.claimRef, Object.freeze({
         contentHash: context.productPresentation.provenance.contentHash,
         placeholders: claim.placeholders,
-        presentationLiterals,
       }));
     }
   }
@@ -64,7 +79,6 @@ export function buildTrackCClaimReferenceRegistry(
 function resolvePlaceholders(
   text: unknown,
   placeholders: Readonly<Record<string, string>>,
-  presentationLiterals: readonly string[],
   textMismatch: string,
 ): string {
   if (typeof text !== "string") throw new Error(textMismatch);
@@ -84,23 +98,15 @@ function resolvePlaceholders(
     text,
   );
   if (/[{}]/u.test(framing)) throw new Error(textMismatch);
-  const normalizedFraming = framing.normalize("NFC").toLocaleLowerCase("vi-VN");
-  for (const literal of presentationLiterals) {
-    const normalizedLiteral = literal.normalize("NFC")
-      .toLocaleLowerCase("vi-VN").trim();
-    if (!normalizedLiteral) continue;
-    const escaped = normalizedLiteral.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-    const pattern = normalizedLiteral.length === 1
-      ? new RegExp(`(?:^|[^\\p{L}\\p{N}])${escaped}(?:$|[^\\p{L}\\p{N}])`, "u")
-      : new RegExp(escaped, "u");
-    if (pattern.test(normalizedFraming)) throw new Error(textMismatch);
-  }
-  const framingAfterSentenceInitial = framing.replace(
-    /^(\s*)(\p{Lu})/u,
-    (_match, spacing: string, initial: string) =>
-      `${spacing}${initial.toLocaleLowerCase("vi-VN")}`,
+  const normalizedFraming = framing.normalize("NFC")
+    .toLocaleLowerCase("vi-VN");
+  const words = normalizedFraming.match(/\p{L}+/gu) ?? [];
+  const punctuationOnly = normalizedFraming.replace(
+    /\p{L}+|[\s.,:;!?()\-/]/gu,
+    "",
   );
-  if (/\p{Lu}|\p{N}/u.test(framingAfterSentenceInitial)) {
+  if (punctuationOnly.length > 0 ||
+      words.some((word) => !PRESENTATION_FRAMING_WORDS.has(word))) {
     throw new Error(textMismatch);
   }
   return tokens.reduce(
@@ -147,7 +153,6 @@ export function resolveTrackCCandidateClaimReferences(
       : resolvePlaceholders(
           record.text,
           entry.placeholders,
-          entry.presentationLiterals,
           errors.textMismatch,
         );
     return Object.freeze({

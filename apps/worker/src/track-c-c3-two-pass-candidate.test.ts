@@ -433,8 +433,8 @@ describe("Track C C3 two-pass offline candidate", () => {
       "Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.",
     ],
     [
-      "Mẫu {{DISPLAY_NAME}} hiện có màu {{VARIANT_COLOR}} với size {{VARIANT_SIZE}} chị nhé.",
-      "Mẫu Tường Vi hiện có màu ĐEN với size M chị nhé.",
+      "Phiên bản màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} thuộc mẫu {{DISPLAY_NAME}} chị nhé.",
+      "Phiên bản màu ĐEN, size M thuộc mẫu Tường Vi chị nhé.",
     ],
   ] as const)("resolves presentation values while preserving model wording: %s", async (
     modelText,
@@ -478,6 +478,7 @@ describe("Track C C3 two-pass offline candidate", () => {
     ["display name", "Dạ mẫu này là Hồng Nhung ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
     ["color", "Dạ {{DISPLAY_NAME}} có màu ĐỎ, size {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
     ["size", "Dạ {{DISPLAY_NAME}} có màu {{VARIANT_COLOR}}, size L ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
+    ["duplicate placeholder", "Dạ {{DISPLAY_NAME}} / {{DISPLAY_NAME}} có màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
   ] as const)("rejects a wrong product-presentation %s", async (
     _name,
     text,
@@ -515,7 +516,7 @@ describe("Track C C3 two-pass offline candidate", () => {
       {
         segments: [{
           kind: "VERIFIED_CLAIM",
-          text: "Mẫu Hồng Nhung / {{DISPLAY_NAME}} có màu ĐỎ / {{VARIANT_COLOR}}, size L / {{VARIANT_SIZE}} {{other}}",
+          text: "mẫu hồng nhung / {{DISPLAY_NAME}} có màu xanh / {{VARIANT_COLOR}}, size xl / {{VARIANT_SIZE}} {{other}}",
           claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
         }],
         strategy: "ANSWER_VERIFIED_FACTS",
@@ -583,7 +584,7 @@ describe("Track C C3 two-pass offline candidate", () => {
       {
         segments: [{
           kind: "VERIFIED_CLAIM",
-          text: "Mẫu Hồng Nhung / {{DISPLAY_NAME}} có màu ĐỎ / {{VARIANT_COLOR}}, size L / {{VARIANT_SIZE}} {{BROKEN",
+          text: "mẫu hồng nhung / {{DISPLAY_NAME}} có màu xanh / {{VARIANT_COLOR}}, size xl / {{VARIANT_SIZE}} {{BROKEN",
           claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
         }],
         strategy: "ANSWER_VERIFIED_FACTS",
