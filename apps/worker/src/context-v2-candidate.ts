@@ -242,19 +242,19 @@ export function candidateProductPresentationClaims(
   return Object.freeze([
     Object.freeze({
       claimRef: "PRODUCT_PRESENTATION_DISPLAY_001",
-      claimText: `Dạ mẫu này là ${displayName} ạ.`,
+      placeholders: Object.freeze({ DISPLAY_NAME: displayName }),
     }),
     ...presentation.variants.map((variant, index) => {
-      const details = [
-        variant.color === null ? null : `màu ${variant.color}`,
-        variant.size === null ? null : `size ${variant.size}`,
-      ].filter((value): value is string => value !== null).join(", ");
       return Object.freeze({
         claimRef:
           `PRODUCT_PRESENTATION_VARIANT_${String(index + 1).padStart(3, "0")}`,
-        claimText: details.length === 0
-          ? `Dạ mẫu này là ${displayName} ạ.`
-          : `Dạ ${displayName} có phiên bản ${details} ạ.`,
+        placeholders: Object.freeze({
+          DISPLAY_NAME: displayName,
+          ...(variant.color === null
+            ? {} : { VARIANT_COLOR: variant.color }),
+          ...(variant.size === null
+            ? {} : { VARIANT_SIZE: variant.size }),
+        }),
       });
     }),
   ]);

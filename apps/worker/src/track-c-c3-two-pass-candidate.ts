@@ -7,7 +7,6 @@ import {
 import {
   CONTEXT_V2_CANDIDATE_MODEL_ID,
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
-  candidateProductPresentationClaims,
   deriveCandidateRequestIdentity,
   type BuiltCandidateRequest,
   type CandidateVertexTransport,
@@ -20,6 +19,10 @@ import {
 } from "./track-c-offline-candidate.js";
 import { validateTrackCOfflineCandidate } from "./track-c-offline-candidate-validation.js";
 import { expectedOwnerForTrackCC1Fixture } from "./track-c-must-pass.js";
+import {
+  buildTrackCClaimReferenceRegistry,
+  resolveTrackCCandidateClaimReferences,
+} from "./track-c-claim-reference-resolver.js";
 import type {
   TrackCOfflineCandidateValidatedEnvelope,
   TrackCReplayJudgeEnvelope,
@@ -112,7 +115,7 @@ function responderSystemInstruction(
   if (context.productPresentation !== null &&
       context.productPresentation !== undefined) {
     additions.push(
-      "When productPresentation is present, use only one of its exact claim options. Copy that option's claimText byte-for-byte as the VERIFIED_CLAIM segment text and bind it to the same claimRef. A variant label does not by itself prove stock or fit.",
+      "When productPresentation is present, select one exact claimRef option when needed. In the VERIFIED_CLAIM text, use every placeholder declared by that option exactly once; code replaces those placeholders with exact verified values. Never write a product name, color, or size value directly or invent a placeholder. The natural framing and wording remain yours. A variant label does not by itself prove stock or fit.",
     );
   }
   return additions.length === 0
@@ -325,100 +328,6 @@ export function buildTrackCC3ResponderRequest(
   });
 }
 
-type ClaimReferenceRegistryEntry = Readonly<{
-  contentHash: string;
-  exactText: string | null;
-}>;
-
-function claimReferenceRegistry(
-  capture: unknown,
-  evaluationAt: Date,
-): ReadonlyMap<string, ClaimReferenceRegistryEntry> {
-  const context = contextFromFrozenTrackCCapture({ capture, evaluationAt });
-  const registry = new Map<string, ClaimReferenceRegistryEntry>(
-    context.verifiedClaims.map((claim, index) => [
-    `CLAIM_${String(index + 1).padStart(3, "0")}`,
-    Object.freeze({
-      contentHash: claim.provenance.contentHash,
-      exactText: null,
-    }),
-  ]),
-  );
-  if (context.productAttributes !== null && context.productAttributes !== undefined) {
-    registry.set(
-      "PRODUCT_ATTRIBUTES_001",
-      Object.freeze({
-        contentHash: context.productAttributes.metadata.contentHash,
-        exactText: null,
-      }),
-    );
-  }
-  if (context.productPresentation !== null &&
-      context.productPresentation !== undefined) {
-    for (const claim of candidateProductPresentationClaims(
-      context.productPresentation,
-    )) {
-      registry.set(claim.claimRef, Object.freeze({
-        contentHash: context.productPresentation.provenance.contentHash,
-        exactText: claim.claimText,
-      }));
-    }
-  }
-  return registry;
-}
-
-function resolveResponderClaimReferences(
-  capture: unknown,
-  evaluationAt: Date,
-  value: unknown,
-): unknown {
-  if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-  }
-  const output = value as Readonly<Record<string, unknown>>;
-  if (!Array.isArray(output.segments)) {
-    throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-  }
-  const registry = claimReferenceRegistry(capture, evaluationAt);
-  const used = new Set<string>();
-  const segments = output.segments.map((segment) => {
-    if (segment === null || typeof segment !== "object" || Array.isArray(segment)) {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-    }
-    const record = segment as Readonly<Record<string, unknown>>;
-    if (Object.hasOwn(record, "claimContentHash")) {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-    }
-    if (record.kind !== "VERIFIED_CLAIM") {
-      if (Object.hasOwn(record, "claimRef")) {
-        throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-      }
-      return record;
-    }
-    if (typeof record.claimRef !== "string") {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-    }
-    const entry = registry.get(record.claimRef);
-    if (entry === undefined) {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_UNKNOWN");
-    }
-    if (entry.exactText !== null && record.text !== entry.exactText) {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_TEXT_MISMATCH");
-    }
-    if (used.has(record.claimRef)) {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_DUPLICATE");
-    }
-    used.add(record.claimRef);
-    const { claimRef: _claimRef, ...rest } = record;
-    return Object.freeze({
-      ...rest,
-      text: entry.exactText ?? record.text,
-      claimContentHash: entry.contentHash,
-    });
-  });
-  return Object.freeze({ ...output, segments: Object.freeze(segments) });
-}
-
 export interface TrackCC3TwoPassCandidateResult {
   readonly conversationPlan: TrackCConversationPlanV1;
   readonly candidate: TrackCOfflineCandidateValidatedEnvelope;
@@ -484,13 +393,21 @@ export async function runTrackCC3TwoPassCandidate(
   const providerModelVersion = assertProviderIdentity(
     responderResponse.providerModelVersion,
   );
-  const output = resolveResponderClaimReferences(
-    input.capture,
-    input.evaluationAt,
+  const output = resolveTrackCCandidateClaimReferences(
     parseVertexJson(
       responderResponse.payload,
       "TRACK_C_C3_RESPONDER_OUTPUT_INVALID",
     ),
+    buildTrackCClaimReferenceRegistry(contextFromFrozenTrackCCapture({
+      capture: input.capture,
+      evaluationAt: input.evaluationAt,
+    })),
+    {
+      invalid: "TRACK_C_C3_CLAIM_REFERENCE_INVALID",
+      unknown: "TRACK_C_C3_CLAIM_REFERENCE_UNKNOWN",
+      duplicate: "TRACK_C_C3_CLAIM_REFERENCE_DUPLICATE",
+      textMismatch: "TRACK_C_C3_CLAIM_REFERENCE_TEXT_MISMATCH",
+    },
   );
   const candidate = validateTrackCOfflineCandidate({
     caseId: input.caseId,

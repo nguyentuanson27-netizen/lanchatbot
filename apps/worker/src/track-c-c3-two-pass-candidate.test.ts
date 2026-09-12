@@ -418,14 +418,26 @@ describe("Track C C3 two-pass offline candidate", () => {
     expect(result.candidate.guard.status).toBe("PASS");
   });
 
-  it("resolves product-presentation claimRef to its code-owned integrity hash", async () => {
+  it.each([
+    [
+      "Dạ {{DISPLAY_NAME}} có phiên bản màu {{VARIANT_COLOR}}, size {{VARIANT_SIZE}} ạ.",
+      "Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.",
+    ],
+    [
+      "Mẫu {{DISPLAY_NAME}} hiện có màu {{VARIANT_COLOR}} với size {{VARIANT_SIZE}} chị nhé.",
+      "Mẫu Tường Vi hiện có màu ĐEN với size M chị nhé.",
+    ],
+  ] as const)("resolves presentation values while preserving model wording: %s", async (
+    modelText,
+    expectedReply,
+  ) => {
     const presentation = verifiedProductPresentation();
     const outputs = [
       conversationPlan(),
       {
         segments: [{
           kind: "VERIFIED_CLAIM",
-          text: "Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.",
+          text: modelText,
           claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
         }],
         strategy: "ANSWER_VERIFIED_FACTS",
@@ -449,16 +461,14 @@ describe("Track C C3 two-pass offline candidate", () => {
       transport,
     });
 
-    expect(result.candidate.quality.reply).toBe(
-      "Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.",
-    );
+    expect(result.candidate.quality.reply).toBe(expectedReply);
     expect(result.candidate.guard.status).toBe("PASS");
   });
 
   it.each([
     ["display name", "Dạ mẫu này là Hồng Nhung ạ.", "PRODUCT_PRESENTATION_DISPLAY_001"],
-    ["color", "Dạ Tường Vi có phiên bản màu ĐỎ, size M ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
-    ["size", "Dạ Tường Vi có phiên bản màu ĐEN, size L ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
+    ["color", "Dạ {{DISPLAY_NAME}} có màu ĐỎ, size {{VARIANT_SIZE}} ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
+    ["size", "Dạ {{DISPLAY_NAME}} có màu {{VARIANT_COLOR}}, size L ạ.", "PRODUCT_PRESENTATION_VARIANT_001"],
   ] as const)("rejects a wrong product-presentation %s", async (
     _name,
     text,
@@ -500,7 +510,7 @@ describe("Track C C3 two-pass offline candidate", () => {
       {
         segments: [{
           kind: "VERIFIED_CLAIM",
-          text: "Dạ Tường Vi có phiên bản màu ĐEN, size L ạ.",
+          text: "Dạ {{DISPLAY_NAME}} có màu {{VARIANT_COLOR}}, size L ạ.",
           claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
         }],
         strategy: "ANSWER_VERIFIED_FACTS",
@@ -522,6 +532,40 @@ describe("Track C C3 two-pass offline candidate", () => {
       evaluationContext,
       transport,
     })).rejects.toThrow("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
+  });
+
+  it("preserves model wording after resolving presentation values on the V5 path", async () => {
+    const outputs = [
+      conversationPlan(),
+      {
+        segments: [{
+          kind: "VERIFIED_CLAIM",
+          text: "Dạ tên mẫu là {{DISPLAY_NAME}} ạ.",
+          claimRef: "PRODUCT_PRESENTATION_DISPLAY_001",
+        }],
+        strategy: "ANSWER_VERIFIED_FACTS",
+        cta: "NONE",
+      },
+    ];
+    const transport: CandidateVertexTransport = {
+      send: vi.fn(async () => ({
+        payload: vertexPayload(outputs.shift()),
+        providerModelVersion: "gemini-3.5-flash-lite",
+      })),
+    };
+
+    const result = await runTrackCV5TwoPassBenchmarkCase({
+      lane: "PRODUCTION_CONTRACT",
+      modelResource,
+      capture: validCapture([], null, verifiedProductPresentation()),
+      evaluationAt,
+      evaluationContext,
+      transport,
+    });
+
+    expect(result.reply).toBe(
+      "Dạ tên mẫu là Tường Vi ạ.",
+    );
   });
 
   it("fails before the first provider call for future-dated product attributes", async () => {

@@ -14,7 +14,6 @@ import {
 } from "@lana/database";
 import {
   CONTEXT_V2_CANDIDATE_PROVIDER_VERSION,
-  candidateProductPresentationClaims,
   deriveCandidateRequestIdentity,
   type BuiltCandidateRequest,
   type CandidateVertexTransport,
@@ -27,6 +26,10 @@ import {
 } from "./track-c-c3-two-pass-candidate.js";
 import type { TrackCV5ExecutionLane } from "./track-c-c3-v5-benchmark-materialization.js";
 import { contextFromFrozenTrackCCapture } from "./track-c-offline-candidate.js";
+import {
+  buildTrackCClaimReferenceRegistry,
+  resolveTrackCCandidateClaimReferences,
+} from "./track-c-claim-reference-resolver.js";
 
 const PLAN_FIELDS = Object.freeze([
   "currentNeed",
@@ -169,61 +172,6 @@ function withBenchmarkLane(
       body: candidateBody,
     }),
   });
-}
-
-type ClaimReferenceRegistryEntry = Readonly<{
-  contentHash: string;
-  exactText: string | null;
-}>;
-
-function resolveClaimReferences(
-  value: unknown,
-  registry: ReadonlyMap<string, ClaimReferenceRegistryEntry>,
-): unknown {
-  if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error("TRACK_C_V5_RESPONDER_OUTPUT_INVALID");
-  }
-  const output = value as Readonly<Record<string, unknown>>;
-  if (!Array.isArray(output.segments)) {
-    throw new Error("TRACK_C_V5_RESPONDER_OUTPUT_INVALID");
-  }
-  const used = new Set<string>();
-  const segments = output.segments.map((segment) => {
-    if (segment === null || typeof segment !== "object" || Array.isArray(segment)) {
-      throw new Error("TRACK_C_V5_RESPONDER_OUTPUT_INVALID");
-    }
-    const record = segment as Readonly<Record<string, unknown>>;
-    if (Object.hasOwn(record, "claimContentHash")) {
-      throw new Error("TRACK_C_V5_CLAIM_REFERENCE_INVALID");
-    }
-    if (record.kind !== "VERIFIED_CLAIM") {
-      if (Object.hasOwn(record, "claimRef")) {
-        throw new Error("TRACK_C_V5_CLAIM_REFERENCE_INVALID");
-      }
-      return record;
-    }
-    if (typeof record.claimRef !== "string") {
-      throw new Error("TRACK_C_V5_CLAIM_REFERENCE_INVALID");
-    }
-    const entry = registry.get(record.claimRef);
-    if (entry === undefined) {
-      throw new Error("TRACK_C_V5_CLAIM_REFERENCE_UNKNOWN");
-    }
-    if (entry.exactText !== null && record.text !== entry.exactText) {
-      throw new Error("TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH");
-    }
-    if (used.has(record.claimRef)) {
-      throw new Error("TRACK_C_V5_CLAIM_REFERENCE_DUPLICATE");
-    }
-    used.add(record.claimRef);
-    const { claimRef: _claimRef, ...rest } = record;
-    return Object.freeze({
-      ...rest,
-      text: entry.exactText ?? record.text,
-      claimContentHash: entry.contentHash,
-    });
-  });
-  return Object.freeze({ ...output, segments: Object.freeze(segments) });
 }
 
 function factEnvelopeForClaim(claim: VerifiedClaim) {
@@ -583,41 +531,18 @@ export async function runTrackCV5TwoPassBenchmarkCase(
   });
   assertProviderIdentity(responderResponse.providerModelVersion);
 
-  const registry = new Map<string, ClaimReferenceRegistryEntry>(
-    context.verifiedClaims.map((claim, index) => [
-    `CLAIM_${String(index + 1).padStart(3, "0")}`,
-    Object.freeze({
-      contentHash: claim.provenance.contentHash,
-      exactText: null,
-    }),
-  ]),
-  );
-  if (context.productAttributes !== null && context.productAttributes !== undefined) {
-    registry.set(
-      "PRODUCT_ATTRIBUTES_001",
-      Object.freeze({
-        contentHash: context.productAttributes.metadata.contentHash,
-        exactText: null,
-      }),
-    );
-  }
-  if (context.productPresentation !== null &&
-      context.productPresentation !== undefined) {
-    for (const claim of candidateProductPresentationClaims(
-      context.productPresentation,
-    )) {
-      registry.set(claim.claimRef, Object.freeze({
-        contentHash: context.productPresentation.provenance.contentHash,
-        exactText: claim.claimText,
-      }));
-    }
-  }
-  const resolved = resolveClaimReferences(
+  const resolved = resolveTrackCCandidateClaimReferences(
     parseVertexJson(
       responderResponse.payload,
       "TRACK_C_V5_RESPONDER_OUTPUT_INVALID",
     ),
-    registry,
+    buildTrackCClaimReferenceRegistry(context),
+    {
+      invalid: "TRACK_C_V5_CLAIM_REFERENCE_INVALID",
+      unknown: "TRACK_C_V5_CLAIM_REFERENCE_UNKNOWN",
+      duplicate: "TRACK_C_V5_CLAIM_REFERENCE_DUPLICATE",
+      textMismatch: "TRACK_C_V5_CLAIM_REFERENCE_TEXT_MISMATCH",
+    },
   );
   const output = validateResponderOutput(
     context,

@@ -365,11 +365,15 @@ describe("Context V2 candidate capability", () => {
       claims: [
         {
           claimRef: "PRODUCT_PRESENTATION_DISPLAY_001",
-          claimText: "Dạ mẫu này là Tường Vi ạ.",
+          placeholders: { DISPLAY_NAME: "Tường Vi" },
         },
         {
           claimRef: "PRODUCT_PRESENTATION_VARIANT_001",
-          claimText: "Dạ Tường Vi có phiên bản màu ĐEN, size M ạ.",
+          placeholders: {
+            DISPLAY_NAME: "Tường Vi",
+            VARIANT_COLOR: "ĐEN",
+            VARIANT_SIZE: "M",
+          },
         },
       ],
       scope: { kind: "PRODUCT", productId: "SD398" },
