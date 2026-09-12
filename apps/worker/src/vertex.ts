@@ -254,6 +254,7 @@ export function trackCV5StageJudgeGenerationConfig(
   rubric: TrackCV5RubricConfig,
   stage: TrackCV5Stage,
 ) {
+  const stageDimensions = rubric.stage_scoring[stage].dimensions;
   return Object.freeze({
     maxOutputTokens: 2_048,
     responseMimeType: "application/json",
@@ -268,9 +269,9 @@ export function trackCV5StageJudgeGenerationConfig(
       properties: Object.freeze({
         scores: Object.freeze({
           type: "OBJECT",
-          required: [...rubric.stage_scoring[stage].dimensions],
+          required: [...stageDimensions],
           properties: Object.freeze(Object.fromEntries(
-            TRACK_C_V5_DIMENSIONS.map((dimension) => [dimension, Object.freeze({
+            stageDimensions.map((dimension) => [dimension, Object.freeze({
               type: "INTEGER",
               minimum: rubric.score_scale.min,
               maximum: rubric.score_scale.max,
@@ -1053,7 +1054,10 @@ function parseTrackCV5StageAssessment(
     throw new VertexShadowError("VERTEX_TRACK_C_V5_STAGE_SCHEMA_INVALID", false);
   }
   const rawScores = recordValue(record.scores);
-  const allowedDimensions = new Set<TrackCV5RubricDimension>(TRACK_C_V5_DIMENSIONS);
+  const requiredDimensions = rubric.stage_scoring[input.stage]?.dimensions;
+  const allowedDimensions = new Set<TrackCV5RubricDimension>(
+    requiredDimensions ?? [],
+  );
   if (Object.keys(rawScores).some((key) =>
     !allowedDimensions.has(key as TrackCV5RubricDimension)
   )) {
@@ -1072,7 +1076,6 @@ function parseTrackCV5StageAssessment(
     }
     scores[dimension] = score as number;
   }
-  const requiredDimensions = rubric.stage_scoring[input.stage]?.dimensions;
   if (!requiredDimensions?.length || requiredDimensions.some((dimension) =>
     scores[dimension] === undefined
   )) {

@@ -40,6 +40,16 @@ function providerResponse(): Response {
 }
 
 describe("Track C V5 Vertex stage judge composition", () => {
+  it("exposes only the dimensions owned by the assessed stage", () => {
+    const strategist = trackCV5StageJudgeGenerationConfig(
+      rubric,
+      "STRATEGIST",
+    );
+    expect(Object.keys(
+      strategist.responseSchema.properties.scores.properties,
+    )).toEqual(rubric.stage_scoring.STRATEGIST.dimensions);
+  });
+
   it("pins the current judge and submits the stage rubric through the existing Vertex boundary", async () => {
     const requests: Array<{ url: string; body: unknown }> = [];
     const fetchImpl = vi.fn(async (
