@@ -15,7 +15,6 @@ import {
 import type { ShadowContextMessage } from "@lana/database";
 import type { MultimodalEmbeddingPort } from "@lana/business-tools";
 import type { TrackCQualitySuiteFactsV1 } from "./track-c-quality-suite.js";
-import type { TrackCV5StageJudgeInput } from "./track-c-c3-v5-benchmark-evaluator.js";
 import type {
   TrackCV5RubricConfig,
   TrackCV5RubricDimension,
@@ -97,6 +96,16 @@ export interface VertexJudgeSalesReplyV2Result {
   readonly assessment: SalesRubricAssessmentV2;
   readonly latencyMs: number;
   readonly tokenUsage: Readonly<Record<string, number>>;
+}
+
+/**
+ * Stage-scoped judge request as seen at the Vertex boundary. The benchmark
+ * evaluator owns the full offline contract; this client only needs the stage
+ * and forwards the rest of the envelope verbatim, so the baseline model module
+ * stays free of Context V2 candidate capability.
+ */
+export interface VertexTrackCV5StageJudgeRequest {
+  readonly stage: TrackCV5Stage;
 }
 
 /** Evaluation-only result for one Track C V5 stage assessment. */
@@ -995,7 +1004,7 @@ function safeJson(text: string): unknown {
 }
 
 function trackCV5StageJudgePrompt(
-  input: TrackCV5StageJudgeInput,
+  input: VertexTrackCV5StageJudgeRequest,
   rubric: TrackCV5RubricConfig,
 ): string {
   const visibleRubric = Object.freeze({
@@ -1037,7 +1046,7 @@ function collectTrackCV5SensitiveStrings(value: unknown): readonly string[] {
 
 function parseTrackCV5StageAssessment(
   value: unknown,
-  input: TrackCV5StageJudgeInput,
+  input: VertexTrackCV5StageJudgeRequest,
   rubric: TrackCV5RubricConfig,
 ): TrackCV5StageAssessmentInput {
   const record = recordValue(value);
@@ -1994,7 +2003,7 @@ export class VertexShadowModel implements MultimodalEmbeddingPort {
 
   /** Runs one offline-only V5 stage assessment through the existing Vertex boundary. */
   async judgeTrackCV5Stage(
-    input: TrackCV5StageJudgeInput,
+    input: VertexTrackCV5StageJudgeRequest,
     rubric: TrackCV5RubricConfig,
   ): Promise<VertexTrackCV5StageJudgeResult> {
     const started = this.now();
