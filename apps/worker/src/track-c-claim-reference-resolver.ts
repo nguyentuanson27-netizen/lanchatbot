@@ -53,17 +53,20 @@ function hasExpectedPresentationRole(
   }
   if (placeholder !== "DISPLAY_NAME") return false;
   if (previous === "mẫu") {
-    return true;
+    const phraseStart = index - 1;
+    return phraseStart === 0 ||
+      (phraseStart === 1 && semanticTokens[0] === "dạ") ||
+      semanticTokens[index - 2] === "thuộc";
   }
   if (previous === "là" &&
-      semanticTokens[index - 2] === "mẫu") {
-    return true;
+      semanticTokens[index - 2] === "mẫu" &&
+      semanticTokens[index - 3] === "tên") {
+    const phraseStart = index - 3;
+    return phraseStart === 0 ||
+      (phraseStart === 1 && semanticTokens[0] === "dạ");
   }
   return next === "có" &&
-    (previous === undefined ||
-     previous === "dạ" ||
-     previous === "em" ||
-     previous === "chị");
+    (index === 0 || (index === 1 && previous === "dạ"));
 }
 
 export type ClaimReferenceErrors = Readonly<{
