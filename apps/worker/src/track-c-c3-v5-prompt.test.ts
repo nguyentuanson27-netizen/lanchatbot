@@ -52,7 +52,7 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
   });
 
-  it("handles price resistance evidence-first instead of diagnosis-first", () => {
+  it("keeps price-resistance decision policy in Strategist", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "For price hesitation, use an evidence-first sequence.",
     );
@@ -69,13 +69,16 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "Do not default to a classifier-like budget-versus-comparison question",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "do not interrogate the customer about budget or comparison as the default first reaction",
+      "Realize the plan with only the eligible verified evidence needed for its selected response.",
     );
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Use factual value evidence, not stronger adjectives.",
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
+      "For price resistance",
     );
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Ask a contrastive diagnostic question only when the plan says that distinction is still needed",
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
+      "target range naturally",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
+      "For hesitation or objections",
     );
   });
 
@@ -107,6 +110,9 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "Do not replace it with a different optional next move.",
     );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Do not make a new objection, recovery, risk-reversal, or next-move decision.",
+    );
   });
 
   it("requires one coherent natural turn instead of answer plus mechanical bridge", () => {
@@ -120,7 +126,7 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "Ask the question itself instead of wrapping it in a permission-based offer.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Do not default to empty empathy",
+      "Avoid formulaic service phrases",
     );
   });
 
@@ -175,20 +181,23 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
   });
 
-  it("uses relationship-aware Vietnamese tone without repetitive filler", () => {
+  it("expresses natural Vietnamese as one broad principle, not micro-rules", () => {
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Write natural conversational Vietnamese for Messenger, matching the established address form and context.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Avoid repetitive fillers, honorifics, sentence patterns, and stiff punctuation.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
       "When there is no prior shop turn, treat this as a new-contact tone moment",
     );
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "use one light polite softener such as 'Dạ chị,' or 'Vâng chị,'",
-    );
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
       "Once the conversation already has shop turns, do not open with 'Dạ' by default.",
     );
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Do not compress a reply so aggressively that natural Vietnamese becomes clipped or database-like.",
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
+      "Prefer 'ạ' for a direct confirmation",
     );
-    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
       "Prefer commas, periods, or short line breaks over semicolons in ordinary Messenger replies.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
@@ -196,6 +205,15 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "end cleanly without adding a closing service phrase",
+    );
+  });
+
+  it("keeps the final self-check at the contract boundary", () => {
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Before returning JSON, verify that the plan is followed, protected facts are eligible, canonical rules win, and no unauthorized effect is claimed.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
+      "objection uncertainty reduced rather than merely classified",
     );
   });
 
