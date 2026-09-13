@@ -1,0 +1,339 @@
+{
+  "contractVersion": "TRACK_C_OFFLINE_CYCLE_SIMULATION_V1",
+  "evaluationOnly": true,
+  "sideEffects": "DISABLED",
+  "admissibleAsC2Evidence": false,
+  "lane": "BEHAVIOR_SIMULATION",
+  "benchmark": {
+    "id": "TRACK_C_C2_QUALITY_BENCHMARK_V2",
+    "revision": "R2.5",
+    "bundleFingerprint": "da35300db23928512c23c44a80484f230e5db31d1d488c1d6dca23df335f7a24",
+    "population": 100
+  },
+  "candidate": "TRACK_C_C3_TWO_PASS (V5 prompt family)",
+  "executor": {
+    "runtime": "CLAUDE_CODE_SUBAGENT",
+    "model": "sonnet-4.6",
+    "role": "CANDIDATE_GENERATOR_STRATEGIST_AND_RESPONDER"
+  },
+  "judge": {
+    "provider": "CLAUDE_CODE_SUBAGENT",
+    "model": "opus-5",
+    "location": "local-subagent"
+  },
+  "sample": {
+    "size": 10,
+    "caseIds": [
+      "V5V4Q001",
+      "V5V4Q031",
+      "V5V4Q041",
+      "V5V4Q025",
+      "V5V4Q071",
+      "V5V4Q006",
+      "V5V4Q051",
+      "V5V4Q092",
+      "V5V4Q018",
+      "V5V4Q048"
+    ]
+  },
+  "harnessDeviations": [
+    "D1: the pinned provider identity gemini-3.5-flash-lite is returned to the runner so the real code path executes; the actual generator is the sonnet-4.6 subagent recorded in executor.",
+    "D2: judge-visible product displayName values are labelled (\"Tên mẫu: X\") because the analytics DLP classifies a bare capitalised two-word line as a person name.",
+    "D3: claim freshness reaches the judge as a derived FRESH/EXPIRED label because raw ISO-8601 timestamps fail the evaluator's model-safe assertion.",
+    "D4: round 1 of the judging pass ran with simulation facts only as authoritativeEvidence; it was discarded and re-judged with canonical verified claims included."
+  ],
+  "pending": {
+    "modelCalls": 0,
+    "judgeCalls": 0
+  },
+  "results": [
+    {
+      "caseId": "V5V4Q001",
+      "domain": "CONVERSATION_CONTROL",
+      "split": "DEV",
+      "status": "SCORED",
+      "outcome": "SCORED",
+      "outcomeDetail": "FAIL",
+      "strategist": {
+        "weighted": 2.667,
+        "passed": false,
+        "failedDimensions": [
+          "QUESTION_RESOLUTION"
+        ]
+      },
+      "responder": {
+        "weighted": 2.75,
+        "passed": false,
+        "failedDimensions": [
+          "QUESTION_RESOLUTION"
+        ]
+      },
+      "hardFailures": [],
+      "tuningNotes": [
+        "Plan directs only the price; it never directs the compact first-contact bundle or clear product identity from the supplied product profile.",
+        "Ad-origin metadata is read correctly but is not converted into any first-contact behavior tuning.",
+        "Price is exact and correctly hash-attributed, but no compact first-contact bundle from the supplied product profile is offered.",
+        "Customer-facing text names the product by SKU instead of the supplied model name, which reads mechanical."
+      ],
+      "error": null
+    },
+    {
+      "caseId": "V5V4Q031",
+      "domain": "FIT_SIZE",
+      "split": "DEV",
+      "status": "SCORED",
+      "outcome": "SCORED",
+      "outcomeDetail": "FAIL",
+      "strategist": {
+        "weighted": 3.667,
+        "passed": true,
+        "failedDimensions": []
+      },
+      "responder": {
+        "weighted": 3,
+        "passed": false,
+        "failedDimensions": [
+          "FACT_GROUNDING"
+        ]
+      },
+      "hardFailures": [],
+      "tuningNotes": [
+        "Both lines request the same missing measurement; the second sentence repeats the ask without adding information.",
+        "Does not acknowledge the 56kg she just supplied, which would strengthen continuity."
+      ],
+      "error": null
+    },
+    {
+      "caseId": "V5V4Q041",
+      "domain": "INVENTORY",
+      "split": "DEV",
+      "status": "SCORED",
+      "outcome": "SCORED",
+      "outcomeDetail": "PASS_WITH_NOTE",
+      "strategist": {
+        "weighted": 3.267,
+        "passed": true,
+        "failedDimensions": []
+      },
+      "responder": {
+        "weighted": 3.55,
+        "passed": true,
+        "failedDimensions": []
+      },
+      "hardFailures": [],
+      "tuningNotes": [
+        "Plan does not note that the verified claim is product-scope while the prior bot turn opened a variant thread.",
+        "Closing size question presumes a size axis that no supplied evidence establishes for SQ9012."
+      ],
+      "error": null
+    },
+    {
+      "caseId": "V5V4Q025",
+      "domain": "LOGISTICS",
+      "split": "DEV",
+      "status": "SCORED",
+      "outcome": "SCORED",
+      "outcomeDetail": "PASS_WITH_NOTE",
+      "strategist": {
+        "weighted": 3.467,
+        "passed": true,
+        "failedDimensions": []
+      },
+      "responder": {
+        "weighted": 3.45,
+        "passed": true,
+        "failedDimensions": []
+      },
+      "hardFailures": [],
+      "tuningNotes": [
+        "Delivery-deadline question mildly presumes she is ordering while she said she is still considering; an optional move rather than a needed clarification."
+      ],
+      "error": null
+    },
+    {
+      "caseId": "V5V4Q071",
+      "domain": "POLICY_SERVICE",
+      "split": "DEV",
+      "status": "SCORED",
+      "outcome": "SCORED",
+      "outcomeDetail": "FAIL",
+      "strategist": {
+        "weighted": 3.333,
+        "passed": false,
+        "failedDimensions": [
+          "FACT_GROUNDING"
+        ]
+      },
+      "responder": {
+        "weighted": 3.25,
+        "passed": false,
+        "failedDimensions": [
+          "FACT_GROUNDING"
+        ]
+      },
+      "hardFailures": [],
+      "tuningNotes": [
+        "Plan embeds the supplied policy values verbatim instead of pointing at the inspection snapshot; keep strategist output abstract.",
+        "nextMove largely restates mustResolve.",
+        "productBinding RESOLVED to SQ9012 with no product evidence in the input; binding is unsupported though the reply text stays grounded.",
+        "Closing line is a generic 'any other policy questions' offer rather than a specific next move."
+      ],
+      "error": null
+    },
+    {
+      "caseId": "V5V4Q006",
+      "domain": "PRICE_VALUE",
+      "split": "DEV",
+      "status": "SCORED",
+      "outcome": "SCORED",
+      "outcomeDetail": "FAIL",
+      "strategist": {
+        "weighted": 3.333,
+        "passed": false,
+        "failedDimensions": [
+          "FACT_GROUNDING"
+        ]
+      },
+      "responder": {
+        "weighted": 3.6,
+        "passed": true,
+        "failedDimensions": []
+      },
+      "hardFailures": [],
+      "tuningNotes": [
+        "mustResolve and nextMove restate the same direction with little added value."
+      ],
+      "error": null
+    },
+    {
+      "caseId": "V5V4Q051",
+      "domain": "PRODUCT_EVIDENCE",
+      "split": "DEV",
+      "status": "SCORED",
+      "outcome": "SCORED",
+      "outcomeDetail": "FAIL",
+      "strategist": {
+        "weighted": 2.533,
+        "passed": false,
+        "failedDimensions": [
+          "FACT_GROUNDING"
+        ]
+      },
+      "responder": {
+        "weighted": 3.55,
+        "passed": true,
+        "failedDimensions": []
+      },
+      "hardFailures": [],
+      "tuningNotes": [
+        "Plan injects the literal material value (Korean lace) instead of staying abstract direction.",
+        "nextMove bundles two moves: state material plus invite a design/fit follow-up."
+      ],
+      "error": null
+    },
+    {
+      "caseId": "V5V4Q092",
+      "domain": "TRANSACTION_STATE",
+      "split": "DEV",
+      "status": "SCORED",
+      "outcome": "SCORED",
+      "outcomeDetail": "FAIL",
+      "strategist": {
+        "weighted": 3.6,
+        "passed": true,
+        "failedDimensions": []
+      },
+      "responder": {
+        "weighted": 3,
+        "passed": false,
+        "failedDimensions": [
+          "FACT_GROUNDING"
+        ]
+      },
+      "hardFailures": [],
+      "tuningNotes": [
+        "Two segments restate the same checkout-detail request; one line would be tighter."
+      ],
+      "error": null
+    },
+    {
+      "caseId": "V5V4Q018",
+      "domain": "PRICE_VALUE",
+      "split": "HOLDOUT",
+      "status": "SCORED",
+      "outcome": "SCORED",
+      "outcomeDetail": "FAIL",
+      "strategist": {
+        "weighted": 2.533,
+        "passed": false,
+        "failedDimensions": [
+          "FACT_GROUNDING"
+        ]
+      },
+      "responder": {
+        "weighted": 3,
+        "passed": false,
+        "failedDimensions": [
+          "FACT_GROUNDING"
+        ]
+      },
+      "hardFailures": [],
+      "tuningNotes": [
+        "currentNeed copies the protected price value into the plan instead of naming the objection abstractly.",
+        "nextMove stacks three product facts, two unrelated to the stated non-fitted-waist preference, against the one-or-two-fact expectation.",
+        "Uses three supplied facts (eo suong, tay lung, luoi cotton phoi lot) where the case asked for one or two tied to her stated preference; tay lung is unrelated to the non-fitted-waist preference.",
+        "'kha thoai mai' and 'mac mat' are evaluative comfort inferences not present in the supplied product evidence."
+      ],
+      "error": null
+    },
+    {
+      "caseId": "V5V4Q048",
+      "domain": "PRODUCT_EVIDENCE",
+      "split": "HOLDOUT",
+      "status": "SCORED",
+      "outcome": "SCORED",
+      "outcomeDetail": "FAIL",
+      "strategist": {
+        "weighted": 3.6,
+        "passed": true,
+        "failedDimensions": []
+      },
+      "responder": {
+        "weighted": 3.35,
+        "passed": false,
+        "failedDimensions": [
+          "FACT_GROUNDING"
+        ]
+      },
+      "hardFailures": [],
+      "tuningNotes": [
+        "\"du size S, M, L, XL\" reads as an availability claim; catalog evidence only lists the size axis."
+      ],
+      "error": null
+    }
+  ],
+  "gate": {
+    "contractVersion": "TRACK_C_V5_QUALITY_GATE_V1",
+    "lane": "BEHAVIOR_SIMULATION",
+    "passed": false,
+    "counts": {
+      "SCORED": 10,
+      "EXPECTED_PRE_MODEL_REJECT": 0,
+      "CONTRACT_SKIP": 0,
+      "ADAPTER_ERROR": 0,
+      "PROVIDER_ERROR": 0,
+      "JUDGE_ERROR": 0
+    },
+    "modelFailures": [
+      "V5V4Q001",
+      "V5V4Q006",
+      "V5V4Q018",
+      "V5V4Q031",
+      "V5V4Q048",
+      "V5V4Q051",
+      "V5V4Q071",
+      "V5V4Q092"
+    ],
+    "infrastructureFailures": []
+  }
+}
