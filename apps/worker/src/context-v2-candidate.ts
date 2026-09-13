@@ -205,6 +205,91 @@ export function sanitizeCandidateClaimValue(
   ));
 }
 
+function sanitizeCandidateProductAttributes(
+  attributes: NonNullable<ContextV2["productAttributes"]>,
+) {
+  const { productId, metadata } = attributes;
+  return Object.freeze({
+    claimRef: "PRODUCT_ATTRIBUTES_001" as const,
+    scope: Object.freeze({ kind: "PRODUCT" as const, productId }),
+    value: Object.freeze({
+      materials: attributes.materials,
+      materialComponents: attributes.materialComponents,
+      colors: attributes.colors,
+      styles: attributes.styles,
+      silhouettes: attributes.silhouettes,
+      occasions: attributes.occasions,
+      designAttributes: attributes.designAttributes,
+      careInstructions: attributes.careInstructions,
+      wearProperties: attributes.wearProperties,
+      backCoverage: attributes.backCoverage,
+      designComplexity: attributes.designComplexity,
+    }),
+    provenance: Object.freeze({
+      authority: metadata.authority,
+      sourceVersion: metadata.sourceVersion,
+      contentHash: metadata.contentHash,
+      observedAt: metadata.observedAt,
+      freshnessState: metadata.freshnessState,
+    }),
+  });
+}
+
+export function candidateProductPresentationClaims(
+  presentation: NonNullable<ContextV2["productPresentation"]>,
+) {
+  const displayName = presentation.displayName;
+  return Object.freeze([
+    Object.freeze({
+      claimRef: "PRODUCT_PRESENTATION_DISPLAY_001",
+      placeholders: Object.freeze({ DISPLAY_NAME: displayName }),
+    }),
+    ...presentation.variants.map((variant, index) => {
+      return Object.freeze({
+        claimRef:
+          `PRODUCT_PRESENTATION_VARIANT_${String(index + 1).padStart(3, "0")}`,
+        placeholders: Object.freeze({
+          DISPLAY_NAME: displayName,
+          ...(variant.color === null
+            ? {} : { VARIANT_COLOR: variant.color }),
+          ...(variant.size === null
+            ? {} : { VARIANT_SIZE: variant.size }),
+        }),
+      });
+    }),
+  ]);
+}
+
+function sanitizeCandidateProductPresentation(
+  presentation: NonNullable<ContextV2["productPresentation"]>,
+) {
+  return Object.freeze({
+    claims: candidateProductPresentationClaims(presentation),
+    scope: Object.freeze({
+      kind: "PRODUCT" as const,
+      productId: presentation.productId,
+    }),
+    value: Object.freeze({
+      displayName: presentation.displayName,
+      variants: Object.freeze(presentation.variants.map((variant) =>
+        Object.freeze({ ...variant })
+      )),
+    }),
+    provenance: Object.freeze({
+      contentHash: presentation.provenance.contentHash,
+      freshnessState: presentation.provenance.freshnessState,
+      identitySourceVersion:
+        presentation.provenance.identity.sourceVersion,
+      contentSourceVersion:
+        presentation.provenance.content.sourceVersion,
+      inventorySourceVersion:
+        presentation.provenance.inventory.sourceVersion,
+      inventoryExpiresAt:
+        presentation.provenance.inventory.expiresAt,
+    }),
+  });
+}
+
 /** The single egress sanitizer for every Context V2 candidate request. */
 export function sanitizeContextV2CandidateInput(context: ContextV2) {
   const parsed = parseContextV2WithIntegrity(context);
@@ -213,6 +298,16 @@ export function sanitizeContextV2CandidateInput(context: ContextV2) {
     contractVersion: "CONTEXT_V2_CANDIDATE_INPUT_V1" as const,
     contextHash: parsed.contextHash,
     productBinding: parsed.productBinding,
+    ...(parsed.productAttributes === null || parsed.productAttributes === undefined
+      ? {}
+      : { productAttributes: sanitizeCandidateProductAttributes(parsed.productAttributes) }),
+    ...(parsed.productPresentation === null ||
+        parsed.productPresentation === undefined
+      ? {}
+      : {
+          productPresentation:
+            sanitizeCandidateProductPresentation(parsed.productPresentation),
+        }),
     dialogueEvidence: parsed.dialogueEvidence,
     verifiedClaims: parsed.verifiedClaims.map((claim) => ({
       type: claim.type,

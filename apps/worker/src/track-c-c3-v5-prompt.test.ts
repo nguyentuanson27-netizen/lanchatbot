@@ -256,6 +256,54 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
   });
 
+  it("recovers a negative answer only through verified evidence for the same need", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "When the direct answer is negative",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "one eligible verified route for the same customer need",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "If no eligible verified recovery route exists, stop honestly",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Use at most one verified same-need recovery route selected by conversationPlan",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Never invent a substitute, store option, delivery promise, or available variant",
+    );
+  });
+
+  it("uses verified risk reversal only when it resolves the stated barrier", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "A verified exchange, inspection, payment, or store policy is a risk-reversal option only when it directly reduces the stated barrier",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "State the exact scope and material conditions carried by the selected policy claim",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Do not generalize a policy or append it as an unrelated sales add-on",
+    );
+  });
+
+  it("distinguishes acknowledgement from commitment and performs one checkout step", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "A bare acknowledgement such as 'ok', 'ừ', or 'cảm ơn' is not purchase commitment",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "For explicit purchase commitment, plan only the smallest canonical transaction step",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Acknowledge a customer-requested product, variant, or size change before the canonical transaction step",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Ask for the required checkout-detail set exactly once",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Never repeat the same sentence or segment in one reply",
+    );
+  });
+
   it("keeps PR #356 provenance ownership code-side", () => {
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "never copy, invent, or return a provenance hash",

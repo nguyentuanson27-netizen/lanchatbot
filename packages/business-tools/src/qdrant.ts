@@ -10,6 +10,7 @@ import type {
   StableCatalogSearchPort,
   StableProductDocument,
 } from "./types.js";
+import { verifyProductAttributesV1 } from "./product-attributes.js";
 
 interface QdrantPoint {
   readonly id?: unknown;
@@ -121,6 +122,7 @@ export function stableProductDocumentFromQdrantPayload(value: unknown): StablePr
   const productId = text(payload.product_id) || text(payload.ma_sp);
   if (!productId) return null;
   const canonicalCode = text(payload.ma_sp) || productId;
+  const attributes = verifyProductAttributesV1(payload.product_attributes, productId);
   const images = validImageUrls(payload.images_array);
   const primaryImage = validImageUrls(payload.image_url);
   const classified = productImageFromPayload(payload);
@@ -134,6 +136,14 @@ export function stableProductDocumentFromQdrantPayload(value: unknown): StablePr
     descriptionXml:
       text(payload.description_xml) ||
       text(payload.description),
+    descriptionAuthority: text(payload.description_authority) === "GOOGLE_SHEETS_PRODUCT_REGISTRY"
+      ? "GOOGLE_SHEETS_PRODUCT_REGISTRY"
+      : "WEBSTORE_XML",
+    descriptionSourceVersion: text(payload.description_source_version)
+      || text(payload.catalog_version)
+      || text(payload.ingestion_version)
+      || "catalog-v2",
+    attributes,
     colors: strings(payload.search_colors ?? payload.colors),
     materials: strings(payload.search_materials ?? payload.material ?? payload.materials),
     silhouettes: strings(payload.search_silhouettes ?? payload.silhouettes),

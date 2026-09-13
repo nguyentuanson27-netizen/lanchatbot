@@ -1,11 +1,15 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
-import type { CanonicalDecisionEvidenceV1 } from "@lana/business-tools";
+import {
+  buildProductAttributesV1,
+  type CanonicalDecisionEvidenceV1,
+} from "@lana/business-tools";
 import type { SalesCycleRuntimeState } from "@lana/chat-runtime";
 import type {
   DeterministicEffectReadinessV1,
   FinalTurnEvidenceV2,
   ProductBindingV2,
+  ProductAttributesV1,
   ProtectedClaimV1,
 } from "@lana/contracts";
 import { inspectContextV2Capture } from "@lana/database";
@@ -180,7 +184,40 @@ function input(): BuildContextV2Input {
   };
 }
 
+function productAttributes(): ProductAttributesV1 {
+  return buildProductAttributesV1({
+    productId: "SD398",
+    data: {
+      materials: ["LỤA"],
+      materialComponents: { AO: ["LỤA"] },
+      colors: ["ĐEN"],
+      styles: ["THANH LỊCH"],
+      silhouettes: ["CHIẾT EO"],
+      occasions: ["ĐI LÀM"],
+      designAttributes: { waist: ["CHIẾT EO"] },
+      careInstructions: null,
+      wearProperties: null,
+      backCoverage: "FULL",
+      designComplexity: "MINIMAL",
+    },
+    observedAt: "2026-08-16T10:00:00.000Z",
+  });
+}
+
 describe("DF09 final Context V2 capture", () => {
+  it("normalizes nullable optional evidence to the legacy omitted shape", () => {
+    const omitted = buildContextV2(input());
+    const nullable = buildContextV2({
+      ...input(),
+      productAttributes: null,
+      productPresentation: null,
+    });
+
+    expect(nullable).toEqual(omitted);
+    expect(nullable).not.toHaveProperty("productAttributes");
+    expect(nullable).not.toHaveProperty("productPresentation");
+  });
+
   it("carries one BUILT snapshot through the exact claim gate to candidate egress", async () => {
     const capture = buildContextV2Capture({
       ...input(),
@@ -259,6 +296,31 @@ describe("DF09 final Context V2 capture", () => {
     expect(context.barriers.conversationRevision).toBe(5);
     expect(context.cartReadiness?.readinessHash).toBe(hash("1"));
     expect(parseContextV2WithIntegrity(context)).toEqual(context);
+  });
+
+  it("binds verified product attributes into Context V2 for the candidate egress", () => {
+    const context = buildContextV2({ ...input(), productAttributes: productAttributes() });
+    expect(context.productAttributes).toEqual(productAttributes());
+    expect(parseContextV2WithIntegrity(context)).toEqual(context);
+  });
+
+  it("rejects product attributes whose content bytes do not match their source hash", () => {
+    expect(() => buildContextV2({
+      ...input(),
+      productAttributes: { ...productAttributes(), materials: ["COTTON"] },
+    })).toThrow("CONTEXT_V2_PRODUCT_ATTRIBUTES_INTEGRITY_MISMATCH");
+  });
+
+  it("blocks product attributes that do not match the final product binding", () => {
+    const capture = buildContextV2Capture({
+      ...input(),
+      productAttributes: { ...productAttributes(), productId: "OTHER" },
+      sourceOccurredAt: new Date("2026-08-16T10:00:00.000Z"),
+    });
+    expect(capture).toMatchObject({
+      status: "BLOCKED",
+      reasonCode: "CONTEXT_V2_PRODUCT_ATTRIBUTES_BINDING_MISMATCH",
+    });
   });
 
   it("changes integrity identity when any final-turn evidence field changes", () => {

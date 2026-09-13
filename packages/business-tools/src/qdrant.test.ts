@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { ProductSearchService } from "./search.js";
-import { QdrantStableCatalogSearchAdapter } from "./qdrant.js";
+import { QdrantStableCatalogSearchAdapter, stableProductDocumentFromQdrantPayload } from "./qdrant.js";
+import { buildProductAttributesV1 } from "./product-attributes.js";
 
 const payload = {
   product_id: "SQ149",
@@ -22,6 +23,42 @@ const payload = {
 };
 
 describe("Qdrant stable catalog adapter", () => {
+  it("reads integrity-valid registry attributes and preserves the base product on invalid attributes", () => {
+    const attributes = buildProductAttributesV1({
+      productId: "SQ149",
+      observedAt: "2026-09-12T00:00:00.000Z",
+      data: {
+        materials: ["LỤA"],
+        materialComponents: { AO: ["LỤA"] },
+        colors: ["ĐEN"],
+        styles: ["THANH LỊCH"],
+        silhouettes: ["ỐNG RỘNG"],
+        occasions: ["ĐI LÀM"],
+        designAttributes: { waist: ["CẠP CAO"] },
+        careInstructions: null,
+        wearProperties: null,
+        backCoverage: "FULL",
+        designComplexity: "MINIMAL",
+      },
+    });
+    expect(stableProductDocumentFromQdrantPayload({
+      ...payload,
+      product_attributes: attributes,
+      description_authority: "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+      description_source_version: "registry-description:v1",
+    })).toMatchObject({
+      productId: "SQ149",
+      attributes: { productId: "SQ149", backCoverage: "FULL" },
+      descriptionAuthority: "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+      descriptionSourceVersion: "registry-description:v1",
+    });
+
+    expect(stableProductDocumentFromQdrantPayload({
+      ...payload,
+      product_attributes: { ...attributes, productId: "OTHER" },
+    })).toMatchObject({ productId: "SQ149", attributes: null });
+  });
+
   it("resolves an exact product code from a real Qdrant scroll response shape", async () => {
     const requests: RequestInit[] = [];
     const fetchMock = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {

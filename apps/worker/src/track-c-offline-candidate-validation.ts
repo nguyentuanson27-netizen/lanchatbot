@@ -172,8 +172,18 @@ export function validateTrackCOfflineCandidate(
   });
   const claimHashes = output.segments.flatMap((segment) =>
     segment.kind === "VERIFIED_CLAIM" ? [segment.claimContentHash] : []);
+  const knownEvidenceHashes = new Set([
+    ...context.verifiedClaims.map(({ provenance }) => provenance.contentHash),
+    ...(context.productAttributes === null || context.productAttributes === undefined
+      ? []
+      : [context.productAttributes.metadata.contentHash]),
+    ...(context.productPresentation === null ||
+        context.productPresentation === undefined
+      ? []
+      : [context.productPresentation.provenance.contentHash]),
+  ]);
   if (new Set(claimHashes).size !== claimHashes.length || claimHashes.some((claimHash) =>
-    !context.verifiedClaims.some(({ provenance }) => provenance.contentHash === claimHash)
+    !knownEvidenceHashes.has(claimHash)
   ) || output.segments.some((segment) => segment.kind === "EFFECT_CLAIM")) {
     throw new Error("TRACK_C_C3_OFFLINE_CANDIDATE_PROVENANCE_INVALID");
   }

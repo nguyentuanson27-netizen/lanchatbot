@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ProductAttributesV1Schema } from "./product-attributes.js";
 import { CanonicalProductIdV1Schema } from "./canonical-identifiers.js";
 
 export const PRICE_INVENTORY_FRESH_FOR_SECONDS = 48 * 60 * 60;
@@ -85,7 +86,7 @@ export const ProductIdentityMetadataV1Schema = z
 
 export const ProductContentMetadataV1Schema = z
   .object({
-    authority: z.literal("WEBSTORE_XML"),
+    authority: z.enum(["WEBSTORE_XML", "GOOGLE_SHEETS_PRODUCT_REGISTRY"]),
     sourceVersion: SourceVersionSchema,
     observedAt: DateTimeSchema,
     expiresAt: z.null(),
@@ -538,10 +539,19 @@ export const ProductFactsV2Schema = z
     fulfillment: ParentFulfillmentV1Schema,
     sizeChart: ProductSizeChartLinkV1Schema.nullable(),
     media: ProductMediaFactsV2Schema,
+    attributes: ProductAttributesV1Schema.nullable().optional(),
     sizeChartEligibility: ProductSizeChartEligibilityV1Schema.optional(),
   })
   .strict()
   .superRefine((value, context) => {
+    if (value.attributes !== null && value.attributes !== undefined &&
+        value.attributes.productId !== value.productId) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["attributes", "productId"],
+        message: "product attributes must bind the same canonical product",
+      });
+    }
     const parentProductId = value.identity.parentProductId;
     if (value.productId !== parentProductId) {
       context.addIssue({

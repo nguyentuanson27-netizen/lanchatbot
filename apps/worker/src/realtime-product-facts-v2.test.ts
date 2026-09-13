@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   selectProductMediaV2,
+  buildProductAttributesV1,
   type CatalogSnapshotV3,
   type StableProductDocument,
 } from "@lana/business-tools";
@@ -169,6 +170,39 @@ function buildMediaFacts(
 }
 
 describe("realtime ProductFactsV2 media projection", () => {
+  it("preserves registry-owned content and attributes in ProductFacts V2", () => {
+    const observedAt = "2026-08-10T00:00:00.000Z";
+    const product = {
+      ...mediaProduct("SD375", observedAt, []),
+      descriptionXml: "Mô tả đã duyệt.",
+      descriptionAuthority: "GOOGLE_SHEETS_PRODUCT_REGISTRY" as const,
+      descriptionSourceVersion: "registry-description:v1",
+      attributes: buildProductAttributesV1({
+        productId: "SD375",
+        observedAt,
+        data: {
+          materials: ["LỤA"], materialComponents: {}, colors: [], styles: [],
+          silhouettes: ["CHIẾT EO"], occasions: ["ĐI LÀM"], designAttributes: null,
+          careInstructions: null, wearProperties: null, backCoverage: null,
+          designComplexity: "MINIMAL",
+        },
+      }),
+    };
+    const facts = buildRealtimeProductFactsV2({
+      snapshot: mediaSnapshot("SD375", ["TOP", "SKIRT"], observedAt),
+      product,
+      policy: null,
+      now: new Date("2026-08-10T01:00:00.000Z"),
+    });
+    expect(facts).toMatchObject({
+      content: { metadata: {
+        authority: "GOOGLE_SHEETS_PRODUCT_REGISTRY",
+        sourceVersion: "registry-description:v1",
+      } },
+      attributes: { productId: "SD375", materials: ["LỤA"] },
+    });
+  });
+
   it("classifies approved front views of a full set or dress as FULL_LOOK", () => {
     expect(productMediaView(image("FRONT", ["FULL_SET"]))).toBe("FULL_LOOK");
     expect(productMediaView(image("FRONT", ["VAY"]))).toBe("FULL_LOOK");

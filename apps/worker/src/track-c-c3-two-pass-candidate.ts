@@ -18,6 +18,10 @@ import {
 } from "./track-c-offline-candidate.js";
 import { validateTrackCOfflineCandidate } from "./track-c-offline-candidate-validation.js";
 import { expectedOwnerForTrackCC1Fixture } from "./track-c-must-pass.js";
+import {
+  buildTrackCClaimReferenceRegistry,
+  resolveTrackCCandidateClaimReferences,
+} from "./track-c-claim-reference-resolver.js";
 import type {
   TrackCOfflineCandidateValidatedEnvelope,
   TrackCReplayJudgeEnvelope,
@@ -92,9 +96,13 @@ export const TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION = [
   "Good nextMove targets include learning a target budget after affordability is established as relevant, learning the comparison option or criterion, required delivery date, fit preference, relevant measurement, preferred variant, which two options need comparison, or the canonical checkout detail currently required. Name the actual target, not a generic offer of help.",
   "Do not use generic nextMove goals such as offer more help, offer more information, continue advising, ask whether the customer needs anything else, or ask whether the customer wants more details. If no specific decision target is useful, use nextMove = NONE.",
   "Do not create a question merely to keep the conversation active. Do not jump from a simple factual lookup directly to checkout. Do not infer purchase commitment merely from price, stock, shipping, size, or product-information questions.",
-  "For other objections, use relevant verified evidence first when it can directly reduce the stated uncertainty. Choose a nextMove only for the remaining barrier rather than changing topic. For clear commitment, stop exploratory discovery and plan only the smallest transaction step allowed by canonical state.",
+  "When the direct answer is negative, first resolve it plainly, then check for one eligible verified route for the same customer need, such as a verified substitute, available variant, supported configuration, or applicable store route. If no eligible verified recovery route exists, stop honestly; never invent one or use an unrelated sales bridge.",
+  "A verified exchange, inspection, payment, or store policy is a risk-reversal option only when it directly reduces the stated barrier. Plan at most one applicable policy fact and preserve its exact scope; do not append policy as a generic sales technique.",
+  "For other objections, use relevant verified evidence first when it can directly reduce the stated uncertainty. Choose a nextMove only for the remaining barrier rather than changing topic.",
+  "A bare acknowledgement such as 'ok', 'ừ', or 'cảm ơn' is not purchase commitment. For explicit purchase commitment, plan only the smallest canonical transaction step and stop exploratory discovery; never infer that an order, selection change, or payment has already been applied.",
   "avoid: name the most important turn-specific failure risk, such as skipping the direct answer, repeating known information, losing an established referent, giving a generic service-offer continuation, applying purchase pressure, inventing a protected fact, or claiming an unauthorized effect.",
   "Do not include protected factual values, claim references, provenance values, customer-facing reply wording, customer identifiers, contact details, addresses, or external links in any plan field. Describe goals, not facts or sentences to say.",
+  "CHECKOUT_OBJECTIVE_IS_NAMED_ABSTRACTLY: when canonical state requires checkout details, name that objective as the checkout details canonical state still requires. Never copy the customer's actual recipient name, phone number, or delivery address into any planning field; the Responder asks the customer for those details directly.",
   "The plan controls conversational direction only. It never authorizes facts, protected claims, effects, side effects, state transitions, checkout actions, or output delivery.",
   "Use NONE for any field with no applicable content. Return only the registered JSON response schema.",
 ].join("\n");
@@ -135,7 +143,11 @@ export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
   "Use factual value evidence, not stronger adjectives. Never claim 'tiền nào của nấy', premium quality, superior quality, durability, exclusivity, popularity, scarcity, guaranteed satisfaction, or that a feature makes the price worth it unless an eligible verified claim directly supports that exact proposition.",
   "After a value-grounded price response, follow conversationPlan.nextMove exactly. If it is NONE, stop naturally. If affordability remains the relevant barrier, ask the target range naturally; if comparison remains relevant, ask what option or criterion the customer is comparing. Ask a contrastive diagnostic question only when the plan says that distinction is still needed, not merely because the customer said the item feels expensive.",
   "When directly supported by an eligible verified claim, translate a product property into the practical concern being asked about instead of merely restating a database-like property. The practical wording must be a conservative semantic consequence of the verified claim; do not invent unsupported benefits, quality, comfort, styling, popularity, scarcity, urgency, guarantees, or value claims.",
+  "Use at most one verified same-need recovery route selected by conversationPlan after stating a negative answer plainly. Never invent a substitute, store option, delivery promise, or available variant, and do not replace a missing same-need route with an unrelated promotion or generic offer of help.",
+  "Use a selected exchange, inspection, payment, or store policy only when it directly reduces the customer's stated barrier. State the exact scope and material conditions carried by the selected policy claim. Do not generalize a policy or append it as an unrelated sales add-on.",
   "Do not treat a factual lookup as purchase commitment and do not append a generic purchase-or-close question after a factual answer. Transaction progression requires clear commitment plus canonical permission.",
+  "Acknowledge a customer-requested product, variant, or size change before the canonical transaction step, without claiming the change was persisted or applied. Ask for the required checkout-detail set exactly once, and only when the first-matching canonical rule requires it.",
+  "Never repeat the same sentence or segment in one reply.",
   "Apply the first matching canonical rule below. Canonical rules override conversationPlan progression.",
   "If PRODUCT_CONTEXT_UNREADY is active or productBinding is STALE, AMBIGUOUS, or UNRESOLVED: ask which product the customer means using the established address form, defaulting to chị/em; use CLARIFICATION target PRODUCT and ACTION_REQUEST PROVIDE_PRODUCT; strategy ASK_CLARIFICATION; CTA ASK_PRODUCT. Do not ask for checkout details until product identity is resolved.",
   "Otherwise, if MEASUREMENTS_REQUIRED is active: ask only for the missing everyday measurements using the established address form, defaulting to chị/em; use CLARIFICATION target MEASUREMENTS and ACTION_REQUEST PROVIDE_MEASUREMENTS; strategy ASK_CLARIFICATION; CTA ASK_MEASUREMENTS. Do not ask for measurements already supplied and do not recommend a size unless an eligible SIZE_FIT claim supports it.",
@@ -156,6 +168,27 @@ export const TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION = [
   "Before returning JSON, check: current need fully resolved; direct answer comes first when allowed; verified evidence used before unnecessary objection questions; objection uncertainty reduced rather than merely classified; plan direction followed; nextMove materially useful rather than generic; answer and continuation form one coherent turn; nextMove NONE respected; first-contact ad bundle used only when explicitly established; resolved product identity preserved when useful; product names use natural authoritative noun phrases rather than bare display names; new-contact politeness is light while established conversations avoid repetitive 'Dạ' openings; internal evidence jargon is translated into ordinary shop language; recent facts and questions not repeated without purpose; filler and politeness markers sound varied rather than absent or repetitive; wording sounds like a real shop chat rather than a service script; protected facts verified; known information not re-asked; address form consistent; at most one next-step objective; no unauthorized effect.",
   "Return only the registered JSON response schema.",
 ].join("\n");
+
+function responderSystemInstruction(
+  context: ReturnType<typeof contextFromFrozenTrackCCapture>,
+): string {
+  const additions: string[] = [];
+  if (context.productAttributes !== null &&
+      context.productAttributes !== undefined) {
+    additions.push(
+      "When productAttributes is present, it is integrity-valid code-owned evidence for the exact bound product. Use only its explicit values and never infer an unstated quality or benefit. Bind any product-attribute statement to productAttributes.claimRef.",
+    );
+  }
+  if (context.productPresentation !== null &&
+      context.productPresentation !== undefined) {
+    additions.push(
+      "When productPresentation is present, select one exact claimRef option when needed. In the VERIFIED_CLAIM text, use every placeholder declared by that option exactly once; code replaces those placeholders with exact verified values. Outside placeholders, use only punctuation and these non-factual framing words: dạ, mẫu, tên, là, có, gồm, phiên, bản, màu, cỡ, size, mã, thông, tin, biến, thể, của, thuộc, và, với, chị, em, nhé, nha, ạ. Never write a product name, color, or size value directly or invent a placeholder. The arrangement and natural framing remain yours. A variant label does not by itself prove stock or fit.",
+    );
+  }
+  return additions.length === 0
+    ? TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION
+    : [TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION, ...additions].join("\n");
+}
 
 function sha256(value: unknown): string {
   return createHash("sha256")
@@ -269,9 +302,13 @@ export function buildTrackCC3ResponderRequest(
   }>,
 ): BuiltCandidateRequest {
   const conversationPlan = parseConversationPlan(input.conversationPlan);
+  const context = contextFromFrozenTrackCCapture({
+    capture: input.capture,
+    evaluationAt: input.evaluationAt,
+  });
   const request = buildTrackCOfflineCandidateRequest({
     ...input,
-    systemInstruction: TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION,
+    systemInstruction: responderSystemInstruction(context),
   });
   const body = JSON.parse(request.body) as {
     readonly contents: readonly [{
@@ -358,62 +395,6 @@ export function buildTrackCC3ResponderRequest(
   });
 }
 
-function claimReferenceRegistry(
-  capture: unknown,
-  evaluationAt: Date,
-): ReadonlyMap<string, string> {
-  const context = contextFromFrozenTrackCCapture({ capture, evaluationAt });
-  return new Map(context.verifiedClaims.map((claim, index) => [
-    `CLAIM_${String(index + 1).padStart(3, "0")}`,
-    claim.provenance.contentHash,
-  ]));
-}
-
-function resolveResponderClaimReferences(
-  capture: unknown,
-  evaluationAt: Date,
-  value: unknown,
-): unknown {
-  if (value === null || typeof value !== "object" || Array.isArray(value)) {
-    throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-  }
-  const output = value as Readonly<Record<string, unknown>>;
-  if (!Array.isArray(output.segments)) {
-    throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-  }
-  const registry = claimReferenceRegistry(capture, evaluationAt);
-  const used = new Set<string>();
-  const segments = output.segments.map((segment) => {
-    if (segment === null || typeof segment !== "object" || Array.isArray(segment)) {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-    }
-    const record = segment as Readonly<Record<string, unknown>>;
-    if (Object.hasOwn(record, "claimContentHash")) {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-    }
-    if (record.kind !== "VERIFIED_CLAIM") {
-      if (Object.hasOwn(record, "claimRef")) {
-        throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-      }
-      return record;
-    }
-    if (typeof record.claimRef !== "string") {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_INVALID");
-    }
-    const contentHash = registry.get(record.claimRef);
-    if (contentHash === undefined) {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_UNKNOWN");
-    }
-    if (used.has(record.claimRef)) {
-      throw new Error("TRACK_C_C3_CLAIM_REFERENCE_DUPLICATE");
-    }
-    used.add(record.claimRef);
-    const { claimRef: _claimRef, ...rest } = record;
-    return Object.freeze({ ...rest, claimContentHash: contentHash });
-  });
-  return Object.freeze({ ...output, segments: Object.freeze(segments) });
-}
-
 export interface TrackCC3TwoPassCandidateResult {
   readonly conversationPlan: TrackCConversationPlanV1;
   readonly candidate: TrackCOfflineCandidateValidatedEnvelope;
@@ -479,13 +460,21 @@ export async function runTrackCC3TwoPassCandidate(
   const providerModelVersion = assertProviderIdentity(
     responderResponse.providerModelVersion,
   );
-  const output = resolveResponderClaimReferences(
-    input.capture,
-    input.evaluationAt,
+  const output = resolveTrackCCandidateClaimReferences(
     parseVertexJson(
       responderResponse.payload,
       "TRACK_C_C3_RESPONDER_OUTPUT_INVALID",
     ),
+    buildTrackCClaimReferenceRegistry(contextFromFrozenTrackCCapture({
+      capture: input.capture,
+      evaluationAt: input.evaluationAt,
+    })),
+    {
+      invalid: "TRACK_C_C3_CLAIM_REFERENCE_INVALID",
+      unknown: "TRACK_C_C3_CLAIM_REFERENCE_UNKNOWN",
+      duplicate: "TRACK_C_C3_CLAIM_REFERENCE_DUPLICATE",
+      textMismatch: "TRACK_C_C3_CLAIM_REFERENCE_TEXT_MISMATCH",
+    },
   );
   const candidate = validateTrackCOfflineCandidate({
     caseId: input.caseId,
