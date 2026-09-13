@@ -15,10 +15,31 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "If no specific decision target is useful, use nextMove = NONE.",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "Do not include protected factual values",
+      "Never copy or restate an exact business value or identifier",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).not.toContain(
       "a useful bridge is the default",
+    );
+  });
+
+  it("keeps every Strategist field abstract and preserves evidence meaning", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Keep every plan field abstract.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Never copy or restate an exact business value or identifier",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Refer only to the evidence category and the scope needed by the Responder.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Missing eligible evidence means unresolved, not a negative fact.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Never widen or substitute product, variant, size, channel, location, fulfillment-stage, or policy scope.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "A range, estimate, or availability window is not a guarantee.",
     );
   });
 
@@ -127,6 +148,30 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "Avoid formulaic service phrases",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "CLARIFICATION states the unresolved reason once; ACTION_REQUEST asks for the needed information once.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Never repeat the same ask in both segments.",
+    );
+  });
+
+  it("does not turn missing, scoped, or estimated evidence into stronger facts", () => {
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Missing eligible evidence is uncertainty, not proof of a negative answer.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Preserve the exact claim scope",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Never use evidence for one product, variant, size, channel, location, fulfillment stage, or policy condition as evidence for another.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Keep a range, estimate, or availability window expressed as such",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "never turn it into certainty or a guarantee",
     );
   });
 
@@ -318,7 +363,7 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "Ask for the required checkout-detail set exactly once",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Never repeat the same sentence or segment in one reply",
+      "Never repeat the same sentence, fact, or ask in one reply",
     );
   });
 

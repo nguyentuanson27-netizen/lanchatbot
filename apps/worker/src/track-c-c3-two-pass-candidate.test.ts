@@ -288,7 +288,10 @@ describe("Track C C3 two-pass offline candidate", () => {
       }),
     ]);
     expect(body.generationConfig.responseSchema.properties.segments.items.properties)
-      .toHaveProperty("claimRef", { type: "STRING" });
+      .toHaveProperty("claimRef", {
+        type: "STRING",
+        enum: ["CLAIM_001"],
+      });
     expect(body.generationConfig.responseSchema.properties.segments.items.properties)
       .not.toHaveProperty("claimContentHash");
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
@@ -321,7 +324,7 @@ describe("Track C C3 two-pass offline candidate", () => {
       "productPresentation",
     );
     expect(request.identity.requestEnvelopeHash).toBe(
-      "b1e314b60ca1ebde2f2d6f1daef815edbbd77fd43b59039c91ab9ee4284dbf1f",
+      "40781f2f7755231d8df1e8ba488f9334ee6cb5ecf153acdc3354eb6244646a49",
     );
     const nullableRequest = buildTrackCC3ResponderRequest({
       modelResource,
@@ -360,6 +363,48 @@ describe("Track C C3 two-pass offline candidate", () => {
       .toBe(expectsAttributes);
     expect(text.includes("When productPresentation is present"))
       .toBe(expectsPresentation);
+  });
+
+  it("pins claimRef to every code-owned reference available in this request", () => {
+    const request = buildTrackCC3ResponderRequest({
+      modelResource,
+      capture: validCapture(
+        [verifiedMediaClaim()],
+        verifiedProductAttributes(),
+        verifiedProductPresentation(),
+      ),
+      evaluationAt,
+      evaluationContext,
+      conversationPlan: conversationPlan(),
+    });
+    const body = JSON.parse(request.body) as {
+      generationConfig: {
+        responseSchema: {
+          properties: {
+            segments: {
+              items: {
+                properties: {
+                  claimRef: { type: string; enum: string[] };
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+
+    expect(
+      body.generationConfig.responseSchema.properties.segments.items.properties
+        .claimRef,
+    ).toEqual({
+      type: "STRING",
+      enum: [
+        "CLAIM_001",
+        "PRODUCT_ATTRIBUTES_001",
+        "PRODUCT_PRESENTATION_DISPLAY_001",
+        "PRODUCT_PRESENTATION_VARIANT_001",
+      ],
+    });
   });
 
   it("gives Responder one code-owned product-attribute reference", () => {
