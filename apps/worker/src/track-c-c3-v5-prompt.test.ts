@@ -12,7 +12,10 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "Your only job is to decide what the next customer-facing reply should accomplish.",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "If no specific decision target is useful, use nextMove = NONE.",
+      "While the conversation remains in an open sales phase",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "nextMove must not be NONE",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "Never copy or restate an exact business value or identifier",
@@ -51,7 +54,7 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "Never turn these into a stage-to-script lookup table.",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "reduce the customer's decision uncertainty, not to force forward motion on every turn",
+      "reduce the customer's decision uncertainty while maintaining an open sales conversation",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "obtains one piece of information that materially reduces decision uncertainty",
@@ -86,20 +89,38 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "Name the actual target, not a generic offer of help.",
     );
-  });
-
-  it("does not duplicate the current resolution as an optional next move", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "If obtaining a missing input is itself what mustResolve requires",
+      "choose one missing preference or qualification that would materially narrow the nearest purchase decision",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "put that input in mustResolve so the reply asks for it once",
+      "A missing verified fact or recovery route does not by itself justify nextMove = NONE.",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Exclude every preference or qualification already supplied or chosen",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "When the customer explicitly says they have not committed and no concrete unresolved factor is known, ask which purchase concern remains",
+    );
+  });
+
+  it("separates the direct resolution from one information-seeking next move", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "When a missing input is required to resolve the current need",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "put the one information request in nextMove so the reply asks it once",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "Never place the same objective in both mustResolve and nextMove.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "realize the objective once as one coherent response",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "single planned next-step objective",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
+      "single optional next-step objective",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "never ask for the same information twice",
@@ -210,7 +231,7 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "If conversationPlan.nextMove is NONE, add no optional continuation, question, or sales CTA.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "Do not replace it with a different optional next move.",
+      "Do not replace it with a different next move.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "Do not make a new objection, recovery, risk-reversal, or next-move decision.",
@@ -327,10 +348,13 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "Prefer commas, periods, or short line breaks over semicolons in ordinary Messenger replies.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "A customer-facing question or CTA is optional, never required.",
+      "When an open-sales conversationPlan has a nextMove, realize it exactly once",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
-      "end cleanly without adding a closing service phrase",
+      "before the planned next move",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Do not add a question only after a true terminal condition",
     );
   });
 
@@ -408,7 +432,7 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "one eligible verified route for the same customer need",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
-      "If no eligible verified recovery route exists, stop honestly",
+      "If no eligible verified recovery route exists, answer honestly and use one missing customer preference or constraint",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "Use at most one verified same-need recovery route selected by conversationPlan",
@@ -433,6 +457,18 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
   it("distinguishes acknowledgement from commitment and performs one checkout step", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "A bare acknowledgement such as 'ok', 'ừ', or 'cảm ơn' is not purchase commitment",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "In an otherwise open sales conversation, it is also not by itself a request to end the conversation",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Treat a canonical purchase-confirmed hold as a conversational terminal only",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "never describe it as a completed order, payment, or transaction",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Do not restate or characterize any order state in any plan field",
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "For explicit purchase commitment, plan only the smallest canonical transaction step",
