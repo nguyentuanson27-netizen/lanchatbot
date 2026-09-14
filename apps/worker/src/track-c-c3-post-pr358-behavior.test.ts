@@ -151,6 +151,7 @@ function checkoutAskOutput() {
       kind: "ACTION_REQUEST" as const,
       text: "Chị gửi em số điện thoại nhé.",
       action: "PROVIDE_CHECKOUT_DETAILS" as const,
+      requestedFields: ["PHONE"] as const,
     }],
     strategy: "ASK_CLARIFICATION" as const,
     cta: "ASK_CHECKOUT_DETAILS" as const,
@@ -501,6 +502,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
               kind: "ACTION_REQUEST",
               text: "Em cần đủ ba thông tin này để chuẩn bị đơn cho chị ạ.",
               action: "PROVIDE_CHECKOUT_DETAILS",
+              requestedFields: ["FULL_NAME", "PHONE", "ADDRESS"],
             }],
             strategy: "ASK_CLARIFICATION",
             cta: "ASK_CHECKOUT_DETAILS",
@@ -549,6 +551,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         kind: "ACTION_REQUEST",
         text: "Em cần đúng số điện thoại còn thiếu để tiếp tục ạ.",
         action: "PROVIDE_CHECKOUT_DETAILS",
+        requestedFields: ["PHONE"],
       }],
       strategy: "ASK_CLARIFICATION",
       cta: "ASK_CHECKOUT_DETAILS",
@@ -637,6 +640,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         kind: "ACTION_REQUEST",
         text: "Chị gửi em số điện thoại và địa chỉ nhận hàng nhé.",
         action: "PROVIDE_CHECKOUT_DETAILS",
+        requestedFields: ["PHONE", "ADDRESS"],
       }],
       strategy: "ASK_CLARIFICATION",
       cta: "ASK_CHECKOUT_DETAILS",
@@ -665,12 +669,71 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         kind: "ACTION_REQUEST",
         text: "Chị chọn giúp em một phương thức thanh toán nhé.",
         action: "PROVIDE_CHECKOUT_DETAILS",
+        requestedFields: ["PAYMENT_METHOD"],
       }],
       strategy: "ASK_CLARIFICATION",
       cta: "ASK_CHECKOUT_DETAILS",
     }));
 
     await expect(runFixture(requiredFixture, paymentAsk)).resolves.toBeDefined();
+  });
+
+  it("uses declared checkout fields rather than Vietnamese wording", async () => {
+    const commonRequests = [
+      ["FULL_NAME", "Chị cho em xin họ và tên chị nhé."],
+      ["PHONE", "Chị cho em xin số liên hệ nhé."],
+      ["ADDRESS", "Chị cho em nơi nhận hàng nhé."],
+      ["PAYMENT_METHOD", "Chị muốn thanh toán thế nào ạ?"],
+    ] as const;
+
+    for (const [field, text] of commonRequests) {
+      const requiredFixture = fixture({
+        id: `CHECKOUT_TYPED_${field}`,
+        message: "Chị chốt nhé.",
+        checkoutCompleteness: { state: "REQUIRED", missing_fields: [field] },
+      });
+      const response = successfulTransport(providerPayload({
+        segments: [{
+          kind: "CLARIFICATION",
+          text: "Em cần thêm một thông tin để tiếp tục ạ.",
+          target: "CHECKOUT_DETAILS",
+        }, {
+          kind: "ACTION_REQUEST",
+          text,
+          action: "PROVIDE_CHECKOUT_DETAILS",
+          requestedFields: [field],
+        }],
+        strategy: "ASK_CLARIFICATION",
+        cta: "ASK_CHECKOUT_DETAILS",
+      }));
+
+      await expect(runFixture(requiredFixture, response)).resolves.toBeDefined();
+    }
+  });
+
+  it("rejects an undeclared checkout action even when its wording names the missing field", async () => {
+    const requiredFixture = fixture({
+      id: "CHECKOUT_TYPED_FIELD_REQUIRED",
+      message: "Chị chốt nhé.",
+      checkoutCompleteness: { state: "REQUIRED", missing_fields: ["PHONE"] },
+    });
+    const undeclared = successfulTransport(providerPayload({
+      segments: [{
+        kind: "CLARIFICATION",
+        text: "Em cần thêm một thông tin để tiếp tục ạ.",
+        target: "CHECKOUT_DETAILS",
+      }, {
+        kind: "ACTION_REQUEST",
+        text: "Chị gửi em số điện thoại nhé.",
+        action: "PROVIDE_CHECKOUT_DETAILS",
+      }],
+      strategy: "ASK_CLARIFICATION",
+      cta: "ASK_CHECKOUT_DETAILS",
+    }));
+
+    await expect(runFixture(requiredFixture, undeclared)).rejects.toThrow(
+      "TRACK_C_V5_CHECKOUT_COMPLETENESS_GUARD_FAILED",
+    );
   });
 
   it("defers checkout validation to a higher-priority measurement clarification", async () => {
@@ -794,6 +857,7 @@ describe("Track C post-PR358 C3 behavior wiring", () => {
         kind: "ACTION_REQUEST",
         text: "Chị gửi em số điện thoại nhé.",
         action: "PROVIDE_CHECKOUT_DETAILS",
+        requestedFields: ["PHONE"],
       }],
       strategy: "ASK_CLARIFICATION",
       cta: "ASK_CHECKOUT_DETAILS",

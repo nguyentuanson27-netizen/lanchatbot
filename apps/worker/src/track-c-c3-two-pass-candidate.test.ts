@@ -313,6 +313,14 @@ describe("Track C C3 two-pass offline candidate", () => {
       });
     expect(body.generationConfig.responseSchema.properties.segments.items.properties)
       .not.toHaveProperty("claimContentHash");
+    expect(body.generationConfig.responseSchema.properties.segments.items.properties)
+      .toHaveProperty("requestedFields", {
+        type: "ARRAY",
+        items: {
+          type: "STRING",
+          enum: ["FULL_NAME", "PHONE", "ADDRESS", "PAYMENT_METHOD"],
+        },
+      });
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).not.toContain(
       "claimContentHash",
     );
@@ -343,7 +351,7 @@ describe("Track C C3 two-pass offline candidate", () => {
       "productPresentation",
     );
     expect(request.identity.requestEnvelopeHash).toBe(
-      "a9a1ea952c248e1678167a78ce166c78054c93cfae5d6759bc195c0363da4781",
+      "c16d065e706df55316c058f91c0fb70c3a6eaa4407ee5a5befeb4d9fb6237650",
     );
     const nullableRequest = buildTrackCC3ResponderRequest({
       modelResource,

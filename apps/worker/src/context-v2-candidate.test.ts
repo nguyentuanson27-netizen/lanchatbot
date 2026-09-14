@@ -419,7 +419,7 @@ describe("Context V2 candidate capability", () => {
       context: context(),
     });
     expect(request.identity.requestEnvelopeHash).toBe(
-      "455538368b9ac7cbd8fdc3beaa1c682b2e7928b6e56f4b6af23a24e8339244a9",
+      "feb7105b737367ce7db88b4aeea17c66e4e2a5130269ef7272e5e2e6d95ccd4a",
     );
     expect(request.body).toContain("responseSchema");
     expect(request.body).toContain("safetySettings");

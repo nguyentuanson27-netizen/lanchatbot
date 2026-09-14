@@ -156,6 +156,9 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
       "ask only for its missingFields exactly once",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "requestedFields equal to checkoutCompleteness.missingFields",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "choose COD or bank transfer when PAYMENT_METHOD is listed",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(

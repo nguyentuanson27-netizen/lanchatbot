@@ -83,34 +83,11 @@ function replyFromOutput(output: ContextV2CandidateOutputV2): string {
   return output.segments.map(({ text }) => text).join("\n");
 }
 
-const CHECKOUT_FIELD_LANGUAGE = Object.freeze({
-  FULL_NAME:
-    /họ\s*tên|tên\s+(?:người\s+)?nhận|(?:xin|gửi(?:\s+em)?|cho\s+em(?:\s+xin)?)\s+tên|tên\s*[,/&]|full\s*name/iu,
-  PHONE: /số\s*điện\s*thoại|sđt|phone/iu,
-  ADDRESS: /địa\s*chỉ(?:\s*(?:giao|nhận)\s*hàng)?|address/iu,
-  PAYMENT_METHOD:
-    /phương\s*thức\s*thanh\s*toán|thanh\s*toán\s*(?:cod|khi\s*nhận\s*hàng|chuyển\s*khoản)|\bcod\b|chuyển\s*khoản|bank\s*transfer|payment\s*method/iu,
-});
-
-function checkoutFieldsNamedInRequests(
-  output: ContextV2CandidateOutputV2,
-): readonly (keyof typeof CHECKOUT_FIELD_LANGUAGE)[] {
-  const requestText = output.segments.flatMap((segment) =>
-    segment.kind === "CLARIFICATION" || segment.kind === "ACTION_REQUEST"
-      ? [segment.text]
-      : []
-  ).join("\n");
-  return Object.entries(CHECKOUT_FIELD_LANGUAGE)
-    .flatMap(([field, pattern]) => pattern.test(requestText)
-      ? [field as keyof typeof CHECKOUT_FIELD_LANGUAGE]
-      : []);
-}
-
 /**
  * Final, side-effect-free checkout guard. Canonical Context V2 selects the
- * permitted checkout objective; bounded matching over request segments verifies
+ * permitted checkout objective; the declared checkout action fields verify
  * only that the model did not widen its field list. It never derives sales
- * intent, checkout state, or authority from reply text.
+ * intent, checkout state, or requested fields from reply text.
  */
 export function assertTrackCCheckoutCompletenessOutput(
   context: ContextV2,
@@ -146,7 +123,6 @@ export function assertTrackCCheckoutCompletenessOutput(
     (segment.kind === "ACTION_REQUEST" &&
       segment.action !== "PROVIDE_CHECKOUT_DETAILS")
   );
-  const namedRequestFields = checkoutFieldsNamedInRequests(output);
   if (completeness.state === "COMPLETE") {
     if (output.strategy !== "HOLD_POSITION" || output.cta !== "NONE" ||
         checkoutClarifications.length > 0 || checkoutActions.length > 0 ||
@@ -159,7 +135,8 @@ export function assertTrackCCheckoutCompletenessOutput(
       output.cta !== "ASK_CHECKOUT_DETAILS" ||
       checkoutClarifications.length !== 1 || checkoutActions.length !== 1 ||
       otherRequests.length > 0 ||
-      canonicalJsonV1(namedRequestFields) !==
+      checkoutActions[0]?.requestedFields === undefined ||
+      canonicalJsonV1(checkoutActions[0].requestedFields) !==
         canonicalJsonV1(completeness.missingFields)) {
     throw new Error(errorCode);
   }

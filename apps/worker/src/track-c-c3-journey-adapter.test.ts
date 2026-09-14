@@ -90,7 +90,11 @@ function replyPayload(reply: string) {
   };
 }
 
-function checkoutReplyPayload(reply: string) {
+function checkoutReplyPayload(
+  reply: string,
+  requestedFields: readonly ("FULL_NAME" | "PHONE" | "ADDRESS" | "PAYMENT_METHOD")[] =
+    ["FULL_NAME", "PHONE", "ADDRESS"],
+) {
   return {
     candidates: [{ content: { parts: [{ text: JSON.stringify({
       segments: [
@@ -99,6 +103,7 @@ function checkoutReplyPayload(reply: string) {
           kind: "ACTION_REQUEST",
           action: "PROVIDE_CHECKOUT_DETAILS",
           text: reply,
+          requestedFields,
         },
       ],
       strategy: "ASK_CLARIFICATION",
@@ -275,7 +280,7 @@ describe("Track C C3 journey adapter", () => {
             ),
           ])
         : transportWithTurnReplies([
-            checkoutReplyPayload("Chị gửi em số điện thoại nhé."),
+            checkoutReplyPayload("Chị gửi em số điện thoại nhé.", ["PHONE"]),
             replyPayload("Dạ em đã ghi nhận ạ."),
             replyPayload("Dạ, em dừng tại đây ạ."),
           ]);
