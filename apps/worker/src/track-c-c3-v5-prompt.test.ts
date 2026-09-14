@@ -85,6 +85,54 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
   });
 
+  it("does not duplicate the current resolution as an optional next move", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "If obtaining a missing input is itself what mustResolve requires",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "put that input in mustResolve so the reply asks for it once",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Never place the same objective in both mustResolve and nextMove.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "realize the objective once as one coherent response",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "never ask for the same information twice",
+    );
+  });
+
+  it("carries the exact decision barrier and conditional commitment into the reply", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "carry the exact decision barrier into the response objective",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "address the stated condition directly with eligible evidence",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "respond to the specific barrier, trade-off, prior experience, or purchase condition identified in conversationRead",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "Do not replace that response with a generic acknowledgement or a list of product facts.",
+    );
+  });
+
+  it("answers timing before follow-up and permits one material qualification", () => {
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "compare the eligible estimate with the stated requirement before planning any follow-up",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Preserve the dispatch-versus-arrival distinction",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "obtains one missing qualification that can materially change the answer",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "ask it once without promising a later check",
+    );
+  });
+
   it("keeps price-resistance decision policy in Strategist", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "For price hesitation, use an evidence-first sequence.",
@@ -100,6 +148,9 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "Do not default to a classifier-like budget-versus-comparison question",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "When the dialogue already identifies the comparison option or concrete trade-off, use it and do not ask for a more specific comparison description merely to continue the conversation.",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "Realize the plan with only the eligible verified evidence needed for its selected response.",
@@ -127,6 +178,15 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "unless an eligible verified claim directly supports that exact proposition",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "connect each selected value fact to the specific customer criterion in conversationRead",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "When the plan calls for value evidence and eligible product attributes exist, include one or two that directly bear on that criterion",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "An available fact is not useful value evidence merely because it is true.",
     );
   });
 
