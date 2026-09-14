@@ -44,6 +44,12 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
       "A range, estimate, or availability window is not a guarantee.",
     );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "mustResolve must name the eligible evidence category and exact scope that the Responder needs",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "An exact colour-and-size stock answer also requires authoritative binding from the customer labels to that stock scope",
+    );
   });
 
   it("uses soft progression to reduce decision uncertainty rather than stage scripts", () => {
@@ -100,6 +106,9 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
     expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).not.toContain(
       "ask which purchase concern remains",
+    );
+    expect(TRACK_C_C3_STRATEGIST_SYSTEM_INSTRUCTION).toContain(
+      "Never use an unspecified request for more details, concerns, or policies as a nextMove.",
     );
   });
 
@@ -286,6 +295,9 @@ describe("Track C C3 V5 two-pass prompt policy", () => {
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "If conversationPlan.nextMove is NONE, add no optional continuation, question, or sales CTA.",
+    );
+    expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
+      "When mustResolve selects complete supplied care guidance, include every applicable instruction",
     );
     expect(TRACK_C_C3_RESPONDER_SYSTEM_INSTRUCTION).toContain(
       "Do not replace it with a different next move.",
